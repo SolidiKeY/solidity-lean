@@ -1,16 +1,18 @@
 set_option autoImplicit true
 
-inductive Struct (α β γ : Type u) where
+open Sum
+
+inductive Struct (α β γ : Type) where
   | mtst : Struct α β γ
-  | var (val : α) : Struct α β γ
+  | var : Struct α β γ
   | store (st : Struct α β γ) (k : β ⊕ γ) (v : Struct α β γ) : Struct α β γ
 
 open Struct
 
-def save (st : Struct α β γ) (fields : List Nat) (v : Struct α β γ) : Struct α β γ :=
+def save (st : Struct α β γ) (fields : List (β ⊕ γ)) (v : α ⊕ Struct α β γ) : Struct α β γ :=
   match st, fields with
   | mtst, [] => sorry
-  | mtst, k :: rest => store mtst k $ inl $ save mtst rest v
+  | mtst, k :: rest => store mtst k $ save mtst rest v
   | store st k v, [] => store st k v
   | store st k (inr v'), xs@(k' :: _) =>
     if k = k' then store st k (inr v') else store (save st xs v) k (inr v')
