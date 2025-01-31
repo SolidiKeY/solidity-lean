@@ -41,5 +41,3 @@ theorem selectSave [DecidableEq β] [DecidableEq γ]
   . sorry
   . sorry
   done
-
-open Nat
