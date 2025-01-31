@@ -30,7 +30,13 @@ theorem selectSave [DecidableEq β] [DecidableEq γ]
   select (save st (k :: path) v) k' =
   (if k = k' then save (select st k') path v else select st k') := by
   induction st
-  . sorry
+  . let b := if k' = k then save mtst path v else select mtst k
+    have h : select (save mtst (k :: path) v) k' = b := by
+      unfold save select b
+      rfl
+    rw [h]
+    unfold b
+    sorry
   . sorry
   . sorry
   done
