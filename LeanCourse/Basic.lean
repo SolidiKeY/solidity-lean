@@ -23,20 +23,23 @@ def select [DecidableEq β] [DecidableEq γ] (st : Value α β γ) (k : β ⊕ �
   match st with
   | mtst => mtst
   | var _ => mtst
-  | store st k' v => if k = k' then v else select st k'
+  | store st k' v => if k' = k then v else select st k'
 
 theorem selectSave [DecidableEq β] [DecidableEq γ]
   (st : Value α β γ) (k : β ⊕ γ) (path : List (β ⊕ γ)) (v : Value α β γ) (k' : β ⊕ γ) :
   select (save st (k :: path) v) k' =
   (if k = k' then save (select st k') path v else select st k') := by
   induction st
-  . let b := if k' = k then save mtst path v else select mtst k
+  .
+    let b := if k = k' then save mtst path v else select mtst k
     have h : select (save mtst (k :: path) v) k' = b := by
       unfold save select b
       rfl
     rw [h]
-    unfold b
-    sorry
+    unfold b select
+    rfl
   . sorry
   . sorry
   done
+
+open Nat
