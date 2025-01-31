@@ -2,15 +2,15 @@ set_option autoImplicit true
 
 open Sum
 
-inductive Struct (α β γ : Type) where
-  | mtst : Struct α β γ
-  | var (val : α) : Struct α β γ
-  | store (st : Struct α β γ) (k : β ⊕ γ) (v : Struct α β γ) : Struct α β γ
+inductive Value (α β γ : Type) where
+  | mtst : Value α β γ
+  | var (val : α) : Value α β γ
+  | store (st : Value α β γ) (k : β ⊕ γ) (v : Value α β γ) : Value α β γ
 
-open Struct
+open Value
 
 def save [DecidableEq β] [DecidableEq γ]
-  (st : Struct α β γ) (fields : List (β ⊕ γ)) (v : Struct α β γ) : Struct α β γ :=
+  (st : Value α β γ) (fields : List (β ⊕ γ)) (v : Value α β γ) : Value α β γ :=
   match st, fields with
   | mtst, [] => v
   | mtst, k :: rest => store mtst k $ save mtst rest v
@@ -19,14 +19,14 @@ def save [DecidableEq β] [DecidableEq γ]
   | store st k v', xs@(k' :: ys) =>
     if k = k' then store st k (save v' ys v) else store (save st xs v) k v'
 
-def select [DecidableEq β] [DecidableEq γ] (st : Struct α β γ) (k : β ⊕ γ) : Struct α β γ :=
+def select [DecidableEq β] [DecidableEq γ] (st : Value α β γ) (k : β ⊕ γ) : Value α β γ :=
   match st with
   | mtst => mtst
   | var _ => mtst
   | store st k' v => if k = k' then v else select st k'
 
 theorem selectSave [DecidableEq β] [DecidableEq γ]
-  (st : Struct α β γ) (k : β ⊕ γ) (path : List (β ⊕ γ)) (v : Struct α β γ) (k' : β ⊕ γ) :
+  (st : Value α β γ) (k : β ⊕ γ) (path : List (β ⊕ γ)) (v : Value α β γ) (k' : β ⊕ γ) :
   select (save st (k :: path) v) k' =
   (if k = k' then save (select st k') path v else select st k') := by
   induction st
