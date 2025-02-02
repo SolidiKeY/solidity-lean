@@ -23,7 +23,7 @@ def select [DecidableEq β] [DecidableEq γ] (st : Value α β γ) (k : β ⊕ �
   match st with
   | mtst => mtst
   | var _ => mtst
-  | store st k' v => if k' = k then v else select st k'
+  | store st k' v => if k' = k then v else select st k
 
 theorem selectSave [DecidableEq β] [DecidableEq γ]
   (st : Value α β γ) (k : β ⊕ γ) (path : List (β ⊕ γ)) (v : Value α β γ) (k' : β ⊕ γ) :
