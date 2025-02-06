@@ -47,23 +47,23 @@ theorem selectSave [DecidableEq β] [DecidableEq γ]
     simp
     have h := ih (structInside wf);
     split
-    . have k'''_k : k''' = k := by assumption
+    . rename_i k'''_k
       cases k'''_k
       split
-      . have k_k' : k = k' := by assumption
+      . rename_i k_k'
         cases k_k'
         simp
-      . have k_k' : ¬k = k' := by assumption
+      . rename_i k_k'
         simp
         intro h
         contradiction
-    . have k'''_k : ¬k''' = k := by assumption
+    . rename_i k'''_k
       simp
       split
-      . have k'''__k' : k''' = k' := by assumption
+      . rename_i k'''__k'
         cases k'''__k'
         split
-        . have kk : k = k' := by assumption
+        . rename_i kk
           cases kk
           contradiction
         . trivial
