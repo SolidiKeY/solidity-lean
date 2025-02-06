@@ -33,13 +33,39 @@ open Value
   | store st _ (var _) => isStruct st
   | store st _ st2@(store _ _ _) => And (isStruct st) (isStruct st2)
 
+theorem structInside {st : Value α β γ} {k} {v} (wf : isStruct (store st k v)) : isStruct st := by
+  cases v <;> (simp at wf; try cases wf) <;> try trivial
+
 theorem selectSave [DecidableEq β] [DecidableEq γ]
   (st : Value α β γ) (k : β ⊕ γ) (path : List (β ⊕ γ)) (v : Value α β γ) (k' : β ⊕ γ) (wf : isStruct st) :
   select (save st (k :: path) v) k' =
   (if k = k' then save (select st k') path v else select st k') := by
-  induction st
-  . simp
-  . simp at wf
-  . simp
-    sorry
+  induction st with
+  | mtst => simp
+  | var => simp at wf
+  | store st k''' _ ih =>
+    simp
+    have h := ih (structInside wf);
+    split
+    . have k'''_k : k''' = k := by assumption
+      cases k'''_k
+      split
+      . have k_k' : k = k' := by assumption
+        cases k_k'
+        simp
+      . have k_k' : ¬k = k' := by assumption
+        simp
+        intro h
+        contradiction
+    . have k'''_k : ¬k''' = k := by assumption
+      simp
+      split
+      . have k'''__k' : k''' = k' := by assumption
+        cases k'''__k'
+        split
+        . have kk : k = k' := by assumption
+          cases kk
+          contradiction
+        . trivial
+      . rw [h]
   done
