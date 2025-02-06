@@ -9,7 +9,7 @@ inductive Value (α β γ : Type) where
 
 open Value
 
-def save [DecidableEq β] [DecidableEq γ]
+@[simp] def save [DecidableEq β] [DecidableEq γ]
   (st : Value α β γ) (fields : List (β ⊕ γ)) (v : Value α β γ) : Value α β γ :=
   match st, fields with
   | mtst, [] => v
@@ -19,25 +19,27 @@ def save [DecidableEq β] [DecidableEq γ]
   | store st k v', xs@(k' :: ys) =>
     if k = k' then store st k (save v' ys v) else store (save st xs v) k v'
 
-def select [DecidableEq β] [DecidableEq γ] (st : Value α β γ) (k : β ⊕ γ) : Value α β γ :=
+@[simp] def select [DecidableEq β] [DecidableEq γ] (st : Value α β γ) (k : β ⊕ γ) : Value α β γ :=
   match st with
   | mtst => mtst
   | var _ => mtst
   | store st k' v => if k' = k then v else select st k
 
+@[simp] def isStruct (st : Value α β γ) : Prop :=
+  match st with
+  | mtst => true
+  | var _ => false
+  | store st _ mtst => isStruct st
+  | store st _ (var _) => isStruct st
+  | store st _ st2@(store _ _ _) => And (isStruct st) (isStruct st2)
+
 theorem selectSave [DecidableEq β] [DecidableEq γ]
-  (st : Value α β γ) (k : β ⊕ γ) (path : List (β ⊕ γ)) (v : Value α β γ) (k' : β ⊕ γ) :
+  (st : Value α β γ) (k : β ⊕ γ) (path : List (β ⊕ γ)) (v : Value α β γ) (k' : β ⊕ γ) (wf : isStruct st) :
   select (save st (k :: path) v) k' =
   (if k = k' then save (select st k') path v else select st k') := by
   induction st
-  .
-    let b := if k = k' then save mtst path v else select mtst k
-    have h : select (save mtst (k :: path) v) k' = b := by
-      unfold save select b
-      rfl
-    rw [h]
-    unfold b select
-    rfl
-  . sorry
-  . sorry
+  . simp
+  . simp at wf
+  . simp
+    sorry
   done
