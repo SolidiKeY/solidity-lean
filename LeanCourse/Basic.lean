@@ -36,7 +36,7 @@ open Value
   | store st _ st2@(store _ _ _) => And (isStruct st) (isStruct st2)
 
 theorem structInside {st : Value α β γ} {k} {v} (wf : isStruct (store st k v)) : isStruct st := by
-  cases v <;> (simp at wf; try cases wf) <;> try trivial
+  cases v <;> aesop
 
 theorem selectSave [DecidableEq β] [DecidableEq γ]
   (st : Value α β γ) (k : β ⊕ γ) (path : List (β ⊕ γ)) (v : Value α β γ) (k' : β ⊕ γ) (wf : isStruct st) :
@@ -46,6 +46,6 @@ theorem selectSave [DecidableEq β] [DecidableEq γ]
   | mtst => simp
   | var => simp at wf
   | store st k''' _ ih =>
-    have h := ih (structInside wf);
+    have _ := ih $ structInside wf;
     aesop
   done
