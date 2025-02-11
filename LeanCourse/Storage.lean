@@ -46,6 +46,6 @@ theorem selectSave [DecidableEq β] [DecidableEq γ]
   | mtst => simp
   | var => simp at wf
   | store st k''' _ ih =>
-    have _ := ih $ structInside wf;
+    have _ := ih $ structInside wf
     aesop
   done
