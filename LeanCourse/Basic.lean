@@ -1,3 +1,5 @@
+import Aesop
+
 set_option autoImplicit true
 
 open Sum
@@ -44,28 +46,6 @@ theorem selectSave [DecidableEq β] [DecidableEq γ]
   | mtst => simp
   | var => simp at wf
   | store st k''' _ ih =>
-    simp
     have h := ih (structInside wf);
-    split
-    . rename_i k'''_k
-      cases k'''_k
-      split
-      . rename_i k_k'
-        cases k_k'
-        simp
-      . rename_i k_k'
-        simp
-        intro h
-        contradiction
-    . rename_i k'''_k
-      simp
-      split
-      . rename_i k'''__k'
-        cases k'''__k'
-        split
-        . rename_i kk
-          cases kk
-          contradiction
-        . trivial
-      . rw [h]
+    aesop
   done
