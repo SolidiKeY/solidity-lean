@@ -16,8 +16,9 @@ inductive Memory (α β γ δ : Type) where
   | write (mem : Memory α β γ δ) (id : IdT β γ δ) (fld : β ⊕ γ) (val : ValT α β γ δ)
   | add   (mem : Memory α β γ δ) (id : δ)
 
+namespace Memory
 
-def read [DecidableEq β] [DecidableEq γ] [DecidableEq δ] [Inhabited α] (mem : Memory α β γ δ) (id : IdT β γ δ) (fld : β ⊕ γ) : ValT α β γ δ :=
+@[simp] def read [DecidableEq β] [DecidableEq γ] [DecidableEq δ] [Inhabited α] (mem : Memory α β γ δ) (id : IdT β γ δ) (fld : β ⊕ γ) : ValT α β γ δ :=
   match mem, id with
   | .mtm, _ => inr default
   | .write mem idM fldM val, _ => if idM = id && fldM = fld then val else read mem id fld

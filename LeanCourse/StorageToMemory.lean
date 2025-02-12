@@ -7,7 +7,7 @@ open Sum
 open Memory
 open Value
 
-def copyStAux (mem : Memory α β γ δ) (id : IdT β γ δ) (st : Value α β γ) (wf : isStruct st) : Memory α β γ δ :=
+@[simp] def copyStAux (mem : Memory α β γ δ) (id : IdT β γ δ) (st : Value α β γ) (wf : isStruct st) : Memory α β γ δ :=
   match st with
   | mtst => mem
   | var _ => by aesop
@@ -27,11 +27,22 @@ def copySt (mem : Memory α β γ δ) (id : δ) (st : Value α β γ) (wf : isSt
   copyStAux (add mem id) ⟨id, []⟩ st wf
 
 def readSkip [DecidableEq β] [DecidableEq γ] [DecidableEq δ] [Inhabited α]
-  (mem : Memory α β γ δ) (pId : δ) (pIdR : δ) (st : Value α β γ) (fxs : List (β ⊕ γ)) (f : β)
-  (wf : isStruct st) (pIdDiff : ¬pId = pIdR ⊕' pId = pIdR ×' ¬ List.IsSuffix fxsL (fld :: fxsR))
+  (mem : Memory α β γ δ) (pId pIdR : δ) (st : Value α β γ) (fxsL fxsR : List (β ⊕ γ)) (fld : β ⊕ γ)
+  (wf : isStruct st) (pIdDiff : ¬pId = pIdR ⊕' pId = pIdR ×' ¬ fxsL <:+ (fld :: fxsR))
   : read (copyStAux mem ⟨pId, fxsL⟩ st wf) ⟨ pIdR , fxsR ⟩ fld = read mem ⟨ pIdR, fxsR⟩ fld :=
 
   match st with
-  | mtst => sorry
-  | var _ => sorry
-  | store st f v => sorry
+  | mtst => by aesop
+  | var _ => by simp at wf
+  | store st (inl f) (var x) => by
+    have h := readSkip mem pId pIdR st fxsL fxsR fld (by aesop) (by aesop)
+    -- have _ := List.suffix_cons fld fxsL
+
+    simp
+    split
+    . sorry
+    . aesop
+    done
+
+
+  | store st (inr f) v => sorry
