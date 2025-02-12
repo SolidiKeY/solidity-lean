@@ -36,13 +36,23 @@ def readSkip [DecidableEq β] [DecidableEq γ] [DecidableEq δ] [Inhabited α]
   | var _ => by simp at wf
   | store st (inl f) (var x) => by
     have h := readSkip mem pId pIdR st fxsL fxsR fld (by aesop) (by aesop)
-    -- have _ := List.suffix_cons fld fxsL
-
-    simp
-    split
-    . sorry
-    . aesop
-    done
-
-
+    induction pIdDiff
+    . unfold copyStAux
+      simp
+      rw [h]
+      simp
+      intros h2 h3
+      cases h2
+      aesop
+      done
+    . rename_i notSuff
+      unfold copyStAux
+      simp
+      rw [h]
+      simp
+      intros h1 h2
+      cases h1
+      have h3 := List.suffix_cons fld fxsL
+      have _ := notSuff.2 h3
+      contradiction
   | store st (inr f) v => sorry
