@@ -5,9 +5,9 @@ set_option autoImplicit true
 open Sum
 
 inductive Value (α β γ : Type) where
-  | mtst : Value α β γ
-  | var (val : α) : Value α β γ
-  | store (st : Value α β γ) (k : β ⊕ γ) (v : Value α β γ) : Value α β γ
+  | mtst
+  | var   (val : α)
+  | store (st : Value α β γ) (k : β ⊕ γ) (v : Value α β γ)
 
 open Value
 
@@ -44,7 +44,7 @@ theorem selectSave [DecidableEq β] [DecidableEq γ]
   (if k = k' then save (select st k') path v else select st k') := by
   induction st with
   | mtst => simp
-  | var => simp at wf
+  | var => aesop
   | store st k''' _ ih =>
     have _ := ih $ structInside wf
     aesop
