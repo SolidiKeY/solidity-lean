@@ -32,8 +32,8 @@ open Value
   | mtst => true
   | var _ => false
   | store st (inl _) (var _) => isStruct st
-  | store st (inr _) mtst => isStruct st
-  | store st (inr _) st2@(store _ _ _) => And (isStruct st) (isStruct st2)
+  | store _  (inr _) (var _) => false
+  | store st (inr _) st2 => And (isStruct st) (isStruct st2)
   | _ => false
 
 theorem structInside {st : Value α β γ} {k} {v} (wf : isStruct (store st k v)) : isStruct st := by
