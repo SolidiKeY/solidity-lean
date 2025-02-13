@@ -106,3 +106,28 @@ def readFind [DecidableEq β] [DecidableEq γ] [DecidableEq δ] [Inhabited α]
     split
     . constructor
     . apply readFindd
+
+def skipIdRead [DecidableEq β] [DecidableEq γ] [DecidableEq δ] [Inhabited α]
+  (mem : Memory α β γ δ) (idC idR : IdT β γ δ) (st : Value α β γ) (fld : γ) (wf : isStruct st)
+  : read (copyStAux mem idC st wf) idR (inr fld) = read mem idR (inr fld) :=
+  match st with
+  | mtst => by aesop
+  | var _ => by
+    unfold isStruct at wf
+    aesop
+  | store st (inl f) (var _) => by
+    have _ := skipIdRead mem idC idR st fld (structInside wf)
+    aesop
+  | store st (inr id) v => by
+    have wfIn := structInside wf
+    have _ := skipIdRead mem idC idR st fld wfIn
+    have _ := skipIdRead (copyStAux mem idC st wfIn) ⟨idC.1, inr id :: idC.2⟩ idR v fld (structInsideR wf)
+    aesop
+
+def readGetId [DecidableEq β] [DecidableEq γ] [DecidableEq δ] [Inhabited α]
+  (mem : Memory α β γ δ) (pId : δ) (st : Value α β γ) (fxs : List (β ⊕ γ)) (fld : γ) (wf : isStruct st)
+  : read (copySt mem pId st wf) ⟨pId, fxs⟩ (inr fld) = inr ⟨pId, inr fld :: fxs⟩ := by
+  have h := skipIdRead (add mem pId) ⟨pId, []⟩ ⟨pId, fxs⟩ st fld wf
+  unfold copySt
+  rw [h]
+  simp
