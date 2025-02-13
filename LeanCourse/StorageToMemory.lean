@@ -12,7 +12,7 @@ open Value
   | mtst => mem
   | var _ => by aesop
   | store st (inl k) .mtst => by aesop
-  | store st (inl k) (var x) => write (copyStAux mem id st (by aesop)) id (inl k) (inr x)
+  | store st (inl k) (var x) => write (copyStAux mem id st (by aesop)) id (inl k) (.inl x)
   | store st (inl k) (store a b c) => by aesop
   | store st x@(inr _) v =>
       let copyInt := copyStAux mem id st (by induction v <;> aesop)
@@ -89,13 +89,20 @@ def readFind [DecidableEq β] [DecidableEq γ] [DecidableEq δ] [Inhabited α]
     unfold isStruct at wf
     aesop
   | store st idS@(inr idSS) sv => by
-    have copy := readSkip (copyStAux (add mem id) ⟨id, []⟩ st (structInside wf)) id id sv [.inr idSS] [] (inl f) (structInsideR wf) (.inr sorry)
+    have copy := readSkip (copyStAux (add mem id) ⟨id, []⟩ st (structInside wf)) id id sv [.inr idSS] [] (inl f) (structInsideR wf)
+      (.inr ⟨rfl, fun x => by
+        have sub := List.IsSuffix.sublist x
+        cases sub
+        aesop
+        ⟩)
     unfold copySt
     simp
-
     rw [copy]
-    have readFindd := readFind mem id st [] f sorry
+    have readFindd := readFind mem id st [] f (structInside wf)
     apply readFindd
   | store st (inl idS) sv@(var _) => by
+    have readFindd := readFind mem id st fxs f (structInside wf)
     simp
-    done
+    split
+    . constructor
+    . apply readFindd
