@@ -26,6 +26,14 @@ open Value
 def copySt (mem : Memory α β γ δ) (id : δ) (st : Value α β γ) (wf : isStruct st) : Memory α β γ δ :=
   copyStAux (add mem id) ⟨id, []⟩ st wf
 
+def not_suff_imp_not_cons_suff (l1 l2 : List α) (x : α) :
+  ¬ (l1 <:+ l2) → ¬ (x :: l1 <:+ l2) := by
+  intro h1 h2
+  apply h1
+  apply List.IsSuffix.trans _ h2
+  aesop
+
+
 def readSkip [DecidableEq β] [DecidableEq γ] [DecidableEq δ] [Inhabited α]
   (mem : Memory α β γ δ) (pId pIdR : δ) (st : Value α β γ) (fxsL fxsR : List (β ⊕ γ)) (fld : β ⊕ γ)
   (wf : isStruct st) (pIdDiff : ¬pId = pIdR ⊕' pId = pIdR ×' ¬ fxsL <:+ (fld :: fxsR))
@@ -55,4 +63,20 @@ def readSkip [DecidableEq β] [DecidableEq γ] [DecidableEq δ] [Inhabited α]
       have h3 := List.suffix_cons fld fxsL
       have _ := notSuff.2 h3
       contradiction
-  | store st (inr f) v => sorry
+  | store st (inr f) v => by
+    have stIn := structInside wf
+    have stInR := structInsideR wf
+    have h := readSkip mem pId pIdR st fxsL fxsR fld (by aesop) (by aesop)
+    have suff_lemma := not_suff_imp_not_cons_suff fxsL (fld :: fxsR) (inr f)
+    let copyAuxVal := copyStAux mem ⟨pId, fxsL⟩ st (by aesop)
+
+    have h2 := readSkip (copyStAux mem ⟨pId, fxsL⟩ st (by aesop)) pId pIdR v (inr f :: fxsR) fxsR fld stInR
+
+    induction pIdDiff
+    . have h3 := h2 (by aesop)
+      done
+    .
+      sorry
+
+
+    done

@@ -39,6 +39,9 @@ open Value
 theorem structInside {st : Value α β γ} {k} {v} (wf : isStruct (store st k v)) : isStruct st := by
   cases v <;> aesop
 
+theorem structInsideR {st : Value α β γ} {k} {v} (wf : isStruct (store st (inr k) v)) : isStruct v := by
+  cases v <;> aesop
+
 theorem selectSave [DecidableEq β] [DecidableEq γ]
   (st : Value α β γ) (k : β ⊕ γ) (path : List (β ⊕ γ)) (v : Value α β γ) (k' : β ⊕ γ) (wf : isStruct st) :
   select (save st (k :: path) v) k' =
