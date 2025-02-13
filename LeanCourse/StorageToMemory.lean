@@ -12,7 +12,7 @@ open Value
   | mtst => mem
   | var _ => by aesop
   | store st (inl k) .mtst => by aesop
-  | store st (inl k) (var x) => write (copyStAux mem id st (by aesop)) id (by aesop) (inr x)
+  | store st (inl k) (var x) => write (copyStAux mem id st (by aesop)) id (inl k) (inr x)
   | store st (inl k) (store a b c) => by aesop
   | store st x@(inr _) v =>
       let copyInt := copyStAux mem id st (by induction v <;> aesop)
@@ -23,7 +23,7 @@ open Value
         . simp at wf
           aesop
 
-def copySt (mem : Memory α β γ δ) (id : δ) (st : Value α β γ) (wf : isStruct st) : Memory α β γ δ :=
+@[simp] def copySt (mem : Memory α β γ δ) (id : δ) (st : Value α β γ) (wf : isStruct st) : Memory α β γ δ :=
   copyStAux (add mem id) ⟨id, []⟩ st wf
 
 def not_suff_imp_not_cons_suff (l1 l2 : List α) (x : α) :
@@ -71,3 +71,31 @@ def readSkip [DecidableEq β] [DecidableEq γ] [DecidableEq δ] [Inhabited α]
     let copyAuxVal := copyStAux mem ⟨pId, fxsL⟩ st (by aesop)
     have _ := readSkip copyAuxVal pId pIdR v (inr f :: fxsL) fxsR fld stInR
     aesop
+
+inductive SameVal {α β γ δ : Type} : ValT α β γ δ → Value α β γ → Prop where
+  | mk (v1 v2 : α) : SameVal (inl v1) (var v2)
+  | mkEmpty (v1 : α) : SameVal (inl v1) mtst
+
+open SameVal
+
+def readFind [DecidableEq β] [DecidableEq γ] [DecidableEq δ] [Inhabited α]
+  (mem : Memory α β γ δ) (id : δ) (st : Value α β γ) (fxs : List (β ⊕ γ)) (f : β) (wf : isStruct st)
+  : SameVal (read (copySt mem id st wf) ⟨id, []⟩ (inl f)) (select st (inl f)) :=
+  match st with
+  | mtst => by
+    simp
+    constructor
+  | var _ => by
+    unfold isStruct at wf
+    aesop
+  | store st idS@(inr idSS) sv => by
+    have copy := readSkip (copyStAux (add mem id) ⟨id, []⟩ st (structInside wf)) id id sv [.inr idSS] [] (inl f) (structInsideR wf) (.inr sorry)
+    unfold copySt
+    simp
+
+    rw [copy]
+    have readFindd := readFind mem id st [] f sorry
+    apply readFindd
+  | store st (inl idS) sv@(var _) => by
+    simp
+    done
