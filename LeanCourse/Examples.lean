@@ -3,7 +3,7 @@ import LeanCourse.Storage
 import LeanCourse.StorageToMemory
 
 inductive IdType where
-  | idA | idB deriving DecidableEq
+  | idA | idB | idAcc deriving DecidableEq
 
 inductive ValueSelector where
   | balanceS | ageS deriving DecidableEq
@@ -51,3 +51,10 @@ theorem readIdABalance (mem : MemT) : read (memBob mem) ⟨idA, [account]⟩ bal
   contradiction
 
 theorem readIdBBalance (mem : MemT) : read (memBob mem) ⟨idB, [account]⟩ balance = inl 20  := by simp
+
+-- acc.balance = n
+@[simp] def stAcc (n : Nat) : StorageT := store mtst balance $ var n
+-- idAcc = acc
+@[simp] def memAcc (mem : MemT) (n : Nat) := copySt mem idAcc (stAcc n) $ by simp
+
+theorem readAcc (mem : MemT) (n : Nat) : read (memAcc mem n) ⟨idAcc, []⟩ balance = inl n := by simp
