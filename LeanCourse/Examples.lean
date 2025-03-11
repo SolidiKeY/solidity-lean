@@ -31,8 +31,23 @@ open Sum
 
 -- alice.account.balance = 10
 @[simp] def stAlice : StorageT := store mtst account $ store mtst balance $ var 10
+@[simp] def stBob : StorageT := store mtst account $ store mtst balance $ var 20
 -- idA = alice
 @[simp] def memAlice (mem : MemT) := copySt mem idA stAlice $ by simp
 
 theorem readCopy (mem : MemT) : Memory.read (memAlice mem) ⟨idA, [account]⟩ balance = inl 10
  := by simp
+
+@[simp] def memBob (mem : MemT) := copySt (memAlice mem) idB stBob $ by simp
+@[simp] def idAA (mem : MemT) := read (memBob mem) ⟨idA, []⟩ account
+@[simp] def idBB (mem : MemT) := read (memBob mem) ⟨idB, []⟩ account
+
+theorem readIdAA (mem : MemT) : idAA mem = inr ⟨idA, [account]⟩ := by simp
+theorem readIdBB (mem : MemT) : idBB mem = inr ⟨idB, [account]⟩ := by simp
+
+theorem readIdABalance (mem : MemT) : read (memBob mem) ⟨idA, [account]⟩ balance = inl 10  := by
+  simp
+  intro
+  contradiction
+
+theorem readIdBBalance (mem : MemT) : read (memBob mem) ⟨idB, [account]⟩ balance = inl 20  := by simp
