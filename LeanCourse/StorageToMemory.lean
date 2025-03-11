@@ -7,6 +7,10 @@ open Sum
 open Memory
 open Value
 
+structure State (α β γ δ : Type) where
+  memory  : Memory α β γ δ
+  storage : Value α β γ
+
 @[simp] def copyStAux (mem : Memory α β γ δ) (id : IdT β γ δ) (st : Value α β γ) (wf : isStruct st) : Memory α β γ δ :=
   match st with
   | mtst => mem
@@ -34,7 +38,7 @@ theorem not_suff_imp_not_cons_suff (l1 l2 : List α) (x : α) :
   aesop
 
 
-theorem readSkip [DecidableEq β] [DecidableEq γ] [DecidableEq δ] [Inhabited α]
+@[simp] theorem readSkip [DecidableEq β] [DecidableEq γ] [DecidableEq δ] [Inhabited α]
   (mem : Memory α β γ δ) (pId pIdR : δ) (st : Value α β γ) (fxsL fxsR : List (β ⊕ γ)) (fld : β ⊕ γ)
   (wf : isStruct st) (pIdDiff : ¬pId = pIdR ⊕' pId = pIdR ×' ¬ fxsL <:+ (fld :: fxsR))
   : read (copyStAux mem ⟨pId, fxsL⟩ st wf) ⟨ pIdR , fxsR ⟩ fld = read mem ⟨ pIdR, fxsR⟩ fld :=
@@ -107,7 +111,7 @@ theorem readFind [DecidableEq β] [DecidableEq γ] [DecidableEq δ] [Inhabited �
     . constructor
     . apply readFindd
 
-theorem skipIdRead [DecidableEq β] [DecidableEq γ] [DecidableEq δ] [Inhabited α]
+@[simp] theorem skipIdRead [DecidableEq β] [DecidableEq γ] [DecidableEq δ] [Inhabited α]
   (mem : Memory α β γ δ) (idC idR : IdT β γ δ) (st : Value α β γ) (fld : γ) (wf : isStruct st)
   : read (copyStAux mem idC st wf) idR (inr fld) = read mem idR (inr fld) :=
   match st with
@@ -124,7 +128,7 @@ theorem skipIdRead [DecidableEq β] [DecidableEq γ] [DecidableEq δ] [Inhabited
     have _ := skipIdRead (copyStAux mem idC st wfIn) ⟨idC.1, inr id :: idC.2⟩ idR v fld (structInsideR wf)
     aesop
 
-theorem readGetId [DecidableEq β] [DecidableEq γ] [DecidableEq δ] [Inhabited α]
+@[simp] theorem readGetId [DecidableEq β] [DecidableEq γ] [DecidableEq δ] [Inhabited α]
   (mem : Memory α β γ δ) (pId : δ) (st : Value α β γ) (fxs : List (β ⊕ γ)) (fld : γ) (wf : isStruct st)
   : read (copySt mem pId st wf) ⟨pId, fxs⟩ (inr fld) = inr ⟨pId, inr fld :: fxs⟩ := by
   have h := skipIdRead (add mem pId) ⟨pId, []⟩ ⟨pId, fxs⟩ st fld wf
