@@ -1,5 +1,6 @@
 import LeanCourse.Memory
 import LeanCourse.Storage
+import LeanCourse.Lib
 
 variable {ValType IdType ValSType IdSType : Type}
 
@@ -29,14 +30,6 @@ structure State (ValType ValSType IdSType IdType : Type) where
 
 @[simp] def copySt (mem : Memory ValType ValSType IdSType IdType) (id : IdType) (st : Value ValType ValSType IdSType) (wf : isStruct st := by simp) : Memory ValType ValSType IdSType IdType :=
   copyStAux (add mem id) ⟨id, []⟩ st wf
-
-theorem not_suff_imp_not_cons_suff (l1 l2 : List ValType) (x : ValType) :
-  ¬ (l1 <:+ l2) → ¬ (x :: l1 <:+ l2) := by
-  intro h1 h2
-  apply h1
-  apply List.IsSuffix.trans _ h2
-  aesop
-
 
 @[simp] theorem readSkip [DecidableEq ValSType] [DecidableEq IdSType] [DecidableEq IdType] [Inhabited ValType]
   (mem : Memory ValType ValSType IdSType IdType) (pId pIdR : IdType) (st : Value ValType ValSType IdSType) (fxsL fxsR : List (FieldSelector ValSType IdSType)) (fld : FieldSelector ValSType IdSType)
