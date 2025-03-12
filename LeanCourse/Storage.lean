@@ -1,6 +1,6 @@
 import Aesop
 
-import LeanCourse.Memory
+import LeanCourse.Field
 
 variable {ValType IdType ValSType IdSType : Type}
 

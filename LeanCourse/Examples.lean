@@ -1,5 +1,3 @@
-import LeanCourse.Memory
-import LeanCourse.Storage
 import LeanCourse.StorageToMemory
 
 inductive IdType where
