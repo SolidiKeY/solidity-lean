@@ -30,10 +30,27 @@ open Sum
 @[simp] def balance : Selector := .valS balanceS
 
 -- alice.account.balance = 10
+@[simp] def saveAlice : StorageT := save st [account, balance] $ var 10
+
+theorem selectSaveAlice (_ : isStruct st := by aesop) : select (select (saveAlice st) account) balance = var 10 := by
+  unfold saveAlice
+  have h := selectSave st account [balance] (var 10) account (by aesop)
+  rewrite [h]
+  simp
+  have h2 := selectSave (select st (FieldSelector.idS accountS))  balance [] (var 10) balance (by sorry)
+  simp at h2
+  rewrite [h2]
+  simp
+
+
+
+
+-- alice.account.balance = 10
 @[simp] def stAlice : StorageT := store st account $ store mtst balance $ var 10
 @[simp] def stBob   : StorageT := store st account $ store mtst balance $ var 20
 -- idA = alice
 @[simp] def memAlice (_ : isStruct st := by aesop) := copySt mem idA (stAlice st) $ by aesop
+
 
 theorem readCopy (_ : isStruct st := by aesop) : Memory.read (memAlice mem st) ⟨idA, [account]⟩ balance = .val 10
  := by simp

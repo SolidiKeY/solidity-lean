@@ -19,9 +19,14 @@ open Value
   | mtst, [] => v
   | mtst, k :: rest => store mtst k $ save mtst rest v
   | var _, _ => v
-  | store st k _, [] => store st k v
+  | store _ _ _, [] => v
   | store st k v', xs@(k' :: ys) =>
     if k = k' then store st k (save v' ys v) else store (save st xs v) k v'
+
+@[simp] theorem saveEmpty [DecidableEq ValSType] [DecidableEq IdSType]
+  (st : Value ValType ValSType IdSType) (v : Value ValType ValSType IdSType) :
+  save st [] v = v := by
+  induction st <;> simp
 
 @[simp] def select [DecidableEq ValSType] [DecidableEq IdSType] (st : Value ValType ValSType IdSType) (k : FieldSelector ValSType IdSType) : Value ValType ValSType IdSType :=
   match st with
@@ -44,8 +49,8 @@ theorem structInside {st : Value ValType ValSType IdSType} {k} {v} (wf : isStruc
 theorem structInsideR {st : Value ValType ValSType IdSType} {k} {v} (wf : isStruct (store st (.idS k) v)) : isStruct v := by
   cases v <;> aesop
 
-theorem selectSave [DecidableEq ValSType] [DecidableEq IdSType]
-  (st : Value ValType ValSType IdSType) (k : FieldSelector ValSType IdSType) (path : List (FieldSelector ValSType IdSType)) (v : Value ValType ValSType IdSType) (k' : FieldSelector ValSType IdSType) (wf : isStruct st := by simp) :
+@[simp] theorem selectSave [DecidableEq ValSType] [DecidableEq IdSType]
+  (st : Value ValType ValSType IdSType) (k : FieldSelector ValSType IdSType) (path : List (FieldSelector ValSType IdSType)) (v : Value ValType ValSType IdSType) (k' : FieldSelector ValSType IdSType) (wf : isStruct st := by aesop) :
   select (save st (k :: path) v) k' =
   (if k = k' then save (select st k') path v else select st k') := by
   induction st with
