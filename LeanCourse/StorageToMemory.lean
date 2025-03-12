@@ -1,17 +1,17 @@
 import LeanCourse.Memory
 import LeanCourse.Storage
 
-set_option autoImplicit true
+variable {ValType IdType ValSType IdSType : Type}
 
 open Sum
 open Memory
 open Value
 
-structure State (α β γ δ : Type) where
-  memory  : Memory α β γ δ
-  storage : Value α β γ
+structure State (ValType ValSType IdSType IdType : Type) where
+  memory  : Memory ValType ValSType IdSType IdType
+  storage : Value ValType ValSType IdSType
 
-@[simp] def copyStAux (mem : Memory α β γ δ) (id : IdT β γ δ) (st : Value α β γ) (wf : isStruct st := by simp) : Memory α β γ δ :=
+@[simp] def copyStAux (mem : Memory ValType ValSType IdSType IdType) (id : IdT ValSType IdSType IdType) (st : Value ValType ValSType IdSType) (wf : isStruct st := by simp) : Memory ValType ValSType IdSType IdType :=
   match st with
   | mtst => mem
   | var _ => by aesop
@@ -27,10 +27,10 @@ structure State (α β γ δ : Type) where
         . simp at wf
           aesop
 
-@[simp] def copySt (mem : Memory α β γ δ) (id : δ) (st : Value α β γ) (wf : isStruct st := by simp) : Memory α β γ δ :=
+@[simp] def copySt (mem : Memory ValType ValSType IdSType IdType) (id : IdType) (st : Value ValType ValSType IdSType) (wf : isStruct st := by simp) : Memory ValType ValSType IdSType IdType :=
   copyStAux (add mem id) ⟨id, []⟩ st wf
 
-theorem not_suff_imp_not_cons_suff (l1 l2 : List α) (x : α) :
+theorem not_suff_imp_not_cons_suff (l1 l2 : List ValType) (x : ValType) :
   ¬ (l1 <:+ l2) → ¬ (x :: l1 <:+ l2) := by
   intro h1 h2
   apply h1
@@ -38,8 +38,8 @@ theorem not_suff_imp_not_cons_suff (l1 l2 : List α) (x : α) :
   aesop
 
 
-@[simp] theorem readSkip [DecidableEq β] [DecidableEq γ] [DecidableEq δ] [Inhabited α]
-  (mem : Memory α β γ δ) (pId pIdR : δ) (st : Value α β γ) (fxsL fxsR : List (FieldSelector β γ)) (fld : FieldSelector β γ)
+@[simp] theorem readSkip [DecidableEq ValSType] [DecidableEq IdSType] [DecidableEq IdType] [Inhabited ValType]
+  (mem : Memory ValType ValSType IdSType IdType) (pId pIdR : IdType) (st : Value ValType ValSType IdSType) (fxsL fxsR : List (FieldSelector ValSType IdSType)) (fld : FieldSelector ValSType IdSType)
   (wf : isStruct st := by simp) (pIdDiff : ¬pId = pIdR ⊕' pId = pIdR ×' ¬ fxsL <:+ (fld :: fxsR))
   : read (copyStAux mem ⟨pId, fxsL⟩ st wf) ⟨ pIdR , fxsR ⟩ fld = read mem ⟨ pIdR, fxsR⟩ fld :=
 
@@ -77,14 +77,14 @@ theorem not_suff_imp_not_cons_suff (l1 l2 : List α) (x : α) :
     have _ := readSkip copyAuxVal pId pIdR v (.idS f :: fxsL) fxsR fld stInR
     aesop
 
-inductive SameVal {α β γ δ : Type} : ValT α β γ δ → Value α β γ → Prop where
-  | mk (v1 v2 : α) : SameVal (.val v1) (var v2)
-  | mkEmpty (v1 : α) : SameVal (.val v1) mtst
+inductive SameVal {ValType ValSType IdSType IdType : Type} : ValT ValType ValSType IdSType IdType → Value ValType ValSType IdSType → Prop where
+  | mk (v1 v2 : ValType) : SameVal (.val v1) (var v2)
+  | mkEmpty (v1 : ValType) : SameVal (.val v1) mtst
 
 open SameVal
 
-theorem readFind [DecidableEq β] [DecidableEq γ] [DecidableEq δ] [Inhabited α]
-  (mem : Memory α β γ δ) (id : δ) (st : Value α β γ) (fxs : List (FieldSelector β γ)) (f : β) (wf : isStruct st := by simp)
+theorem readFind [DecidableEq ValSType] [DecidableEq IdSType] [DecidableEq IdType] [Inhabited ValType]
+  (mem : Memory ValType ValSType IdSType IdType) (id : IdType) (st : Value ValType ValSType IdSType) (fxs : List (FieldSelector ValSType IdSType)) (f : ValSType) (wf : isStruct st := by simp)
   : SameVal (read (copySt mem id st wf) ⟨id, []⟩ (.valS f)) (select st (.valS f)) :=
   match st with
   | mtst => by
@@ -112,8 +112,8 @@ theorem readFind [DecidableEq β] [DecidableEq γ] [DecidableEq δ] [Inhabited �
     . constructor
     . apply readFindd
 
-@[simp] theorem skipIdRead [DecidableEq β] [DecidableEq γ] [DecidableEq δ] [Inhabited α]
-  (mem : Memory α β γ δ) (idC idR : IdT β γ δ) (st : Value α β γ) (fld : γ) (wf : isStruct st := by simp)
+@[simp] theorem skipIdRead [DecidableEq ValSType] [DecidableEq IdSType] [DecidableEq IdType] [Inhabited ValType]
+  (mem : Memory ValType ValSType IdSType IdType) (idC idR : IdT ValSType IdSType IdType) (st : Value ValType ValSType IdSType) (fld : IdSType) (wf : isStruct st := by simp)
   : read (copyStAux mem idC st wf) idR (.idS fld) = read mem idR (.idS fld) :=
   match st with
   | mtst => by aesop
@@ -129,8 +129,8 @@ theorem readFind [DecidableEq β] [DecidableEq γ] [DecidableEq δ] [Inhabited �
     have _ := skipIdRead (copyStAux mem idC st wfIn) ⟨idC.1, .idS id :: idC.2⟩ idR v fld (structInsideR wf)
     aesop
 
-@[simp] theorem readGetId [DecidableEq β] [DecidableEq γ] [DecidableEq δ] [Inhabited α]
-  (mem : Memory α β γ δ) (pId : δ) (st : Value α β γ) (fxs : List (FieldSelector β γ)) (fld : γ) (wf : isStruct st := by simp)
+@[simp] theorem readGetId [DecidableEq ValSType] [DecidableEq IdSType] [DecidableEq IdType] [Inhabited ValType]
+  (mem : Memory ValType ValSType IdSType IdType) (pId : IdType) (st : Value ValType ValSType IdSType) (fxs : List (FieldSelector ValSType IdSType)) (fld : IdSType) (wf : isStruct st := by simp)
   : read (copySt mem pId st wf) ⟨pId, fxs⟩ (.idS fld) = .id ⟨pId, .idS fld :: fxs⟩ := by
   have h := skipIdRead (add mem pId) ⟨pId, []⟩ ⟨pId, fxs⟩ st fld wf
   unfold copySt

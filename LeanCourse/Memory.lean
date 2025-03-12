@@ -1,38 +1,37 @@
 import Aesop
 
-set_option autoImplicit true
-variable {IdType : Type}
+variable {ValType IdType ValSType IdSType : Type}
 
 @[aesop safe [constructors, cases]]
-inductive FieldSelector (β γ : Type) where
-  | valS  (valS : β)
-  | idS (idS : γ)
+inductive FieldSelector (ValSType IdSType : Type) where
+  | valS  (valS : ValSType)
+  | idS   (idS : IdSType)
   deriving DecidableEq
 
-structure IdT (β γ IdType : Type) where
+structure IdT (ValSType IdSType IdType : Type) where
   pId  : IdType
-  flds : List (FieldSelector β γ)
+  flds : List (FieldSelector ValSType IdSType)
 
-inductive ValT (α β γ IdType : Type) where
-  | val (val : α)
-  | id  (id : IdT β γ IdType)
+inductive ValT (ValType ValSType IdSType IdType : Type) where
+  | val (val : ValType)
+  | id  (id : IdT ValSType IdSType IdType)
 
-instance [DecidableEq β] [DecidableEq γ] [DecidableEq IdType] : DecidableEq (IdT β γ IdType) := by
+instance [DecidableEq ValSType] [DecidableEq IdSType] [DecidableEq IdType] : DecidableEq (IdT ValSType IdSType IdType) := by
   rintro ⟨a1, b1⟩ ⟨a2, b2⟩
   simp
-  have h : Decidable ((⟨a1, b1⟩ : IdType × List (FieldSelector β γ)) = ⟨a2, b2⟩)  := by exact (inferInstanceAs _)
+  have h : Decidable ((⟨a1, b1⟩ : IdType × List (FieldSelector ValSType IdSType)) = ⟨a2, b2⟩)  := by exact (inferInstanceAs _)
   cases h
   . apply isFalse; aesop
   . apply isTrue; aesop
 
-inductive Memory (α β γ IdType : Type) where
+inductive Memory (ValType ValSType IdSType IdType : Type) where
   | mtm
-  | write (mem : Memory α β γ IdType) (id : IdT β γ IdType) (fld : FieldSelector β γ) (val : ValT α β γ IdType)
-  | add   (mem : Memory α β γ IdType) (id : IdType)
+  | write (mem : Memory ValType ValSType IdSType IdType) (id : IdT ValSType IdSType IdType) (fld : FieldSelector ValSType IdSType) (val : ValT ValType ValSType IdSType IdType)
+  | add   (mem : Memory ValType ValSType IdSType IdType) (id : IdType)
 
 namespace Memory
 
-@[simp] def read [DecidableEq β] [DecidableEq γ] [DecidableEq IdType] [Inhabited α] (mem : Memory α β γ IdType) (id : IdT β γ IdType) (fld : FieldSelector β γ) : ValT α β γ IdType :=
+@[simp] def read [DecidableEq ValSType] [DecidableEq IdSType] [DecidableEq IdType] [Inhabited ValType] (mem : Memory ValType ValSType IdSType IdType) (id : IdT ValSType IdSType IdType) (fld : FieldSelector ValSType IdSType) : ValT ValType ValSType IdSType IdType :=
   match mem, id with
   | .mtm, _ => .val default
   | .write mem idM fldM val, _ => if idM = id && fldM = fld then val else read mem id fld

@@ -20,7 +20,7 @@ def StorageT  := Value Nat ValueSelector valSelector
 def StateType := State Nat ValueSelector valSelector IdType
 def Selector  := FieldSelector ValueSelector valSelector
 def IdTyp     := IdT  ValueSelector valSelector IdType
-def ValType   := ValT Nat ValueSelector valSelector IdType
+def ValSType   := ValT Nat ValueSelector valSelector IdType
 
 open Value
 open Memory

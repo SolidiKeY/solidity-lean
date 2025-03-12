@@ -2,19 +2,19 @@ import Aesop
 
 import LeanCourse.Memory
 
-set_option autoImplicit true
+variable {ValType IdType ValSType IdSType : Type}
 
 open Sum
 
-inductive Value (α β γ : Type) where
+inductive Value (ValType ValSType IdSType : Type) where
   | mtst
-  | var   (val : α)
-  | store (st : Value α β γ) (k : FieldSelector β γ) (v : Value α β γ)
+  | var   (val : ValType)
+  | store (st : Value ValType ValSType IdSType) (k : FieldSelector ValSType IdSType) (v : Value ValType ValSType IdSType)
 
 open Value
 
-@[simp] def save [DecidableEq β] [DecidableEq γ]
-  (st : Value α β γ) (fields : List (FieldSelector β γ)) (v : Value α β γ) : Value α β γ :=
+@[simp] def save [DecidableEq ValSType] [DecidableEq IdSType]
+  (st : Value ValType ValSType IdSType) (fields : List (FieldSelector ValSType IdSType)) (v : Value ValType ValSType IdSType) : Value ValType ValSType IdSType :=
   match st, fields with
   | mtst, [] => v
   | mtst, k :: rest => store mtst k $ save mtst rest v
@@ -23,13 +23,13 @@ open Value
   | store st k v', xs@(k' :: ys) =>
     if k = k' then store st k (save v' ys v) else store (save st xs v) k v'
 
-@[simp] def select [DecidableEq β] [DecidableEq γ] (st : Value α β γ) (k : FieldSelector β γ) : Value α β γ :=
+@[simp] def select [DecidableEq ValSType] [DecidableEq IdSType] (st : Value ValType ValSType IdSType) (k : FieldSelector ValSType IdSType) : Value ValType ValSType IdSType :=
   match st with
   | mtst => mtst
   | var _ => mtst
   | store st k' v => if k' = k then v else select st k
 
-@[simp] def isStruct (st : Value α β γ) : Prop :=
+@[simp] def isStruct (st : Value ValType ValSType IdSType) : Prop :=
   match st with
   | mtst => true
   | var _ => false
@@ -38,14 +38,14 @@ open Value
   | store st (.idS _) st2 => And (isStruct st) (isStruct st2)
   | _ => false
 
-theorem structInside {st : Value α β γ} {k} {v} (wf : isStruct (store st k v)) : isStruct st := by
+theorem structInside {st : Value ValType ValSType IdSType} {k} {v} (wf : isStruct (store st k v)) : isStruct st := by
   cases v <;> aesop
 
-theorem structInsideR {st : Value α β γ} {k} {v} (wf : isStruct (store st (.idS k) v)) : isStruct v := by
+theorem structInsideR {st : Value ValType ValSType IdSType} {k} {v} (wf : isStruct (store st (.idS k) v)) : isStruct v := by
   cases v <;> aesop
 
-theorem selectSave [DecidableEq β] [DecidableEq γ]
-  (st : Value α β γ) (k : FieldSelector β γ) (path : List (FieldSelector β γ)) (v : Value α β γ) (k' : FieldSelector β γ) (wf : isStruct st := by simp) :
+theorem selectSave [DecidableEq ValSType] [DecidableEq IdSType]
+  (st : Value ValType ValSType IdSType) (k : FieldSelector ValSType IdSType) (path : List (FieldSelector ValSType IdSType)) (v : Value ValType ValSType IdSType) (k' : FieldSelector ValSType IdSType) (wf : isStruct st := by simp) :
   select (save st (k :: path) v) k' =
   (if k = k' then save (select st k') path v else select st k') := by
   induction st with
