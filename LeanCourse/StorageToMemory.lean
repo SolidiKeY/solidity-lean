@@ -77,7 +77,8 @@ inductive SameVal {ValType ValSType IdSType IdType : Type} : ValT ValType ValSTy
 open SameVal
 
 theorem readFind [DecidableEq ValSType] [DecidableEq IdSType] [DecidableEq IdType] [Inhabited ValType]
-  (mem : Memory ValType ValSType IdSType IdType) (id : IdType) (st : Value ValType ValSType IdSType) (fxs : List (FieldSelector ValSType IdSType)) (f : ValSType) (wf : isStruct st := by simp)
+  (mem : Memory ValType ValSType IdSType IdType) (id : IdType) (st : Value ValType ValSType IdSType) (fxs : List (FieldSelector ValSType IdSType))
+  (f : ValSType) (wf : isStruct st := by simp)
   : SameVal (read (copySt mem id st wf) ⟨id, []⟩ (.valS f)) (select st (.valS f)) :=
   match st with
   | mtst => by
