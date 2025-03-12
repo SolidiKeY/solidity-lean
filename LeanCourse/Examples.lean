@@ -35,23 +35,23 @@ open Sum
 -- idA = alice
 @[simp] def memAlice (mem : MemT) := copySt mem idA stAlice
 
-theorem readCopy (mem : MemT) : Memory.read (memAlice mem) ⟨idA, [account]⟩ balance = inl 10
+theorem readCopy (mem : MemT) : Memory.read (memAlice mem) ⟨idA, [account]⟩ balance = .val 10
  := by simp
 
 @[simp] def memBob (mem : MemT) := copySt (memAlice mem) idB stBob
 @[simp] def idAA (mem : MemT) := read (memBob mem) ⟨idA, []⟩ account
 @[simp] def idBB (mem : MemT) := read (memBob mem) ⟨idB, []⟩ account
 
-theorem readIdAA (mem : MemT) : idAA mem = inr ⟨idA, [account]⟩ := by simp
-theorem readIdBB (mem : MemT) : idBB mem = inr ⟨idB, [account]⟩ := by simp
+theorem readIdAA (mem : MemT) : idAA mem = .id ⟨idA, [account]⟩ := by simp
+theorem readIdBB (mem : MemT) : idBB mem = .id ⟨idB, [account]⟩ := by simp
 
-theorem readIdABalance (mem : MemT) : read (memBob mem) ⟨idA, [account]⟩ balance = inl 10  := by simp
+theorem readIdABalance (mem : MemT) : read (memBob mem) ⟨idA, [account]⟩ balance = .val 10  := by simp
 
-theorem readIdBBalance (mem : MemT) : read (memBob mem) ⟨idB, [account]⟩ balance = inl 20  := by simp
+theorem readIdBBalance (mem : MemT) : read (memBob mem) ⟨idB, [account]⟩ balance = .val 20  := by simp
 
 -- acc.balance = n
 @[simp] def stAcc (n : Nat) : StorageT := store mtst balance $ var n
 -- idAcc = acc
 @[simp] def memAcc (mem : MemT) (n : Nat) := copySt mem idAcc (stAcc n)
 
-theorem readAcc (mem : MemT) (n : Nat) : read (memAcc mem n) ⟨idAcc, []⟩ balance = inl n := by simp
+theorem readAcc (mem : MemT) (n : Nat) : read (memAcc mem n) ⟨idAcc, []⟩ balance = .val n := by simp

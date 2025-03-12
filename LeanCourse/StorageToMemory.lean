@@ -16,7 +16,7 @@ structure State (α β γ δ : Type) where
   | mtst => mem
   | var _ => by aesop
   | store st (inl k) .mtst => by aesop
-  | store st (inl k) (var x) => write (copyStAux mem id st (by aesop)) id (inl k) (.inl x)
+  | store st (inl k) (var x) => write (copyStAux mem id st (by aesop)) id (inl k) (.val x)
   | store st (inl k) (store a b c) => by aesop
   | store st x@(inr _) v =>
       let copyInt := copyStAux mem id st (by induction v <;> aesop)
@@ -78,8 +78,8 @@ theorem not_suff_imp_not_cons_suff (l1 l2 : List α) (x : α) :
     aesop
 
 inductive SameVal {α β γ δ : Type} : ValT α β γ δ → Value α β γ → Prop where
-  | mk (v1 v2 : α) : SameVal (inl v1) (var v2)
-  | mkEmpty (v1 : α) : SameVal (inl v1) mtst
+  | mk (v1 v2 : α) : SameVal (.val v1) (var v2)
+  | mkEmpty (v1 : α) : SameVal (.val v1) mtst
 
 open SameVal
 
@@ -131,7 +131,7 @@ theorem readFind [DecidableEq β] [DecidableEq γ] [DecidableEq δ] [Inhabited �
 
 @[simp] theorem readGetId [DecidableEq β] [DecidableEq γ] [DecidableEq δ] [Inhabited α]
   (mem : Memory α β γ δ) (pId : δ) (st : Value α β γ) (fxs : List (β ⊕ γ)) (fld : γ) (wf : isStruct st := by simp)
-  : read (copySt mem pId st wf) ⟨pId, fxs⟩ (inr fld) = inr ⟨pId, inr fld :: fxs⟩ := by
+  : read (copySt mem pId st wf) ⟨pId, fxs⟩ (inr fld) = .id ⟨pId, inr fld :: fxs⟩ := by
   have h := skipIdRead (add mem pId) ⟨pId, []⟩ ⟨pId, fxs⟩ st fld wf
   unfold copySt
   rw [h]
