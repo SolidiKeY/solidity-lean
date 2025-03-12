@@ -8,26 +8,26 @@ inductive IdType where
 inductive ValueSelector where
   | balanceS | ageS deriving DecidableEq
 
-inductive IdSelector where
+inductive valSelector where
   | accountS deriving DecidableEq
 
 open IdType
 open ValueSelector
-open IdSelector
+open valSelector
 
-def MemT      := Memory Nat ValueSelector IdSelector IdType
-def StorageT  := Value Nat ValueSelector IdSelector
-def StateType := State Nat ValueSelector IdSelector IdType
-def Selector  := ValueSelector ⊕ IdSelector
-def IdTyp     := IdT  ValueSelector IdSelector IdType
-def ValType   := ValT Nat ValueSelector IdSelector IdType
+def MemT      := Memory Nat ValueSelector valSelector IdType
+def StorageT  := Value Nat ValueSelector valSelector
+def StateType := State Nat ValueSelector valSelector IdType
+def Selector  := FieldSelector ValueSelector valSelector
+def IdTyp     := IdT  ValueSelector valSelector IdType
+def ValType   := ValT Nat ValueSelector valSelector IdType
 
 open Value
 open Memory
 open Sum
 
-@[simp] def account : Selector := inr accountS
-@[simp] def balance : Selector := inl balanceS
+@[simp] def account : Selector := .idS  accountS
+@[simp] def balance : Selector := .valS balanceS
 
 -- alice.account.balance = 10
 @[simp] def stAlice : StorageT := store mtst account $ store mtst balance $ var 10
