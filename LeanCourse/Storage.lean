@@ -43,7 +43,7 @@ theorem structInsideR {st : Value α β γ} {k} {v} (wf : isStruct (store st (in
   cases v <;> aesop
 
 theorem selectSave [DecidableEq β] [DecidableEq γ]
-  (st : Value α β γ) (k : β ⊕ γ) (path : List (β ⊕ γ)) (v : Value α β γ) (k' : β ⊕ γ) (wf : isStruct st) :
+  (st : Value α β γ) (k : β ⊕ γ) (path : List (β ⊕ γ)) (v : Value α β γ) (k' : β ⊕ γ) (wf : isStruct st := by simp) :
   select (save st (k :: path) v) k' =
   (if k = k' then save (select st k') path v else select st k') := by
   induction st with

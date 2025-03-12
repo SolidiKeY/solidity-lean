@@ -11,7 +11,7 @@ structure State (α β γ δ : Type) where
   memory  : Memory α β γ δ
   storage : Value α β γ
 
-@[simp] def copyStAux (mem : Memory α β γ δ) (id : IdT β γ δ) (st : Value α β γ) (wf : isStruct st) : Memory α β γ δ :=
+@[simp] def copyStAux (mem : Memory α β γ δ) (id : IdT β γ δ) (st : Value α β γ) (wf : isStruct st := by simp) : Memory α β γ δ :=
   match st with
   | mtst => mem
   | var _ => by aesop
@@ -27,7 +27,7 @@ structure State (α β γ δ : Type) where
         . simp at wf
           aesop
 
-@[simp] def copySt (mem : Memory α β γ δ) (id : δ) (st : Value α β γ) (wf : isStruct st) : Memory α β γ δ :=
+@[simp] def copySt (mem : Memory α β γ δ) (id : δ) (st : Value α β γ) (wf : isStruct st := by simp) : Memory α β γ δ :=
   copyStAux (add mem id) ⟨id, []⟩ st wf
 
 theorem not_suff_imp_not_cons_suff (l1 l2 : List α) (x : α) :
@@ -40,7 +40,7 @@ theorem not_suff_imp_not_cons_suff (l1 l2 : List α) (x : α) :
 
 @[simp] theorem readSkip [DecidableEq β] [DecidableEq γ] [DecidableEq δ] [Inhabited α]
   (mem : Memory α β γ δ) (pId pIdR : δ) (st : Value α β γ) (fxsL fxsR : List (β ⊕ γ)) (fld : β ⊕ γ)
-  (wf : isStruct st) (pIdDiff : ¬pId = pIdR ⊕' pId = pIdR ×' ¬ fxsL <:+ (fld :: fxsR))
+  (wf : isStruct st := by simp) (pIdDiff : ¬pId = pIdR ⊕' pId = pIdR ×' ¬ fxsL <:+ (fld :: fxsR))
   : read (copyStAux mem ⟨pId, fxsL⟩ st wf) ⟨ pIdR , fxsR ⟩ fld = read mem ⟨ pIdR, fxsR⟩ fld :=
 
   match st with
@@ -83,7 +83,7 @@ inductive SameVal {α β γ δ : Type} : ValT α β γ δ → Value α β γ →
 open SameVal
 
 theorem readFind [DecidableEq β] [DecidableEq γ] [DecidableEq δ] [Inhabited α]
-  (mem : Memory α β γ δ) (id : δ) (st : Value α β γ) (fxs : List (β ⊕ γ)) (f : β) (wf : isStruct st)
+  (mem : Memory α β γ δ) (id : δ) (st : Value α β γ) (fxs : List (β ⊕ γ)) (f : β) (wf : isStruct st := by simp)
   : SameVal (read (copySt mem id st wf) ⟨id, []⟩ (inl f)) (select st (inl f)) :=
   match st with
   | mtst => by
@@ -112,7 +112,7 @@ theorem readFind [DecidableEq β] [DecidableEq γ] [DecidableEq δ] [Inhabited �
     . apply readFindd
 
 @[simp] theorem skipIdRead [DecidableEq β] [DecidableEq γ] [DecidableEq δ] [Inhabited α]
-  (mem : Memory α β γ δ) (idC idR : IdT β γ δ) (st : Value α β γ) (fld : γ) (wf : isStruct st)
+  (mem : Memory α β γ δ) (idC idR : IdT β γ δ) (st : Value α β γ) (fld : γ) (wf : isStruct st := by simp)
   : read (copyStAux mem idC st wf) idR (inr fld) = read mem idR (inr fld) :=
   match st with
   | mtst => by aesop
@@ -129,7 +129,7 @@ theorem readFind [DecidableEq β] [DecidableEq γ] [DecidableEq δ] [Inhabited �
     aesop
 
 @[simp] theorem readGetId [DecidableEq β] [DecidableEq γ] [DecidableEq δ] [Inhabited α]
-  (mem : Memory α β γ δ) (pId : δ) (st : Value α β γ) (fxs : List (β ⊕ γ)) (fld : γ) (wf : isStruct st)
+  (mem : Memory α β γ δ) (pId : δ) (st : Value α β γ) (fxs : List (β ⊕ γ)) (fld : γ) (wf : isStruct st := by simp)
   : read (copySt mem pId st wf) ⟨pId, fxs⟩ (inr fld) = inr ⟨pId, inr fld :: fxs⟩ := by
   have h := skipIdRead (add mem pId) ⟨pId, []⟩ ⟨pId, fxs⟩ st fld wf
   unfold copySt

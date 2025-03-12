@@ -15,12 +15,12 @@ open IdType
 open ValueSelector
 open IdSelector
 
-def MemT := Memory Nat ValueSelector IdSelector IdType
-def StorageT := Value Nat ValueSelector IdSelector
+def MemT      := Memory Nat ValueSelector IdSelector IdType
+def StorageT  := Value Nat ValueSelector IdSelector
 def StateType := State Nat ValueSelector IdSelector IdType
-def Selector := ValueSelector ⊕ IdSelector
-def IdTyp := IdT  ValueSelector IdSelector IdType
-def ValType := ValT Nat ValueSelector IdSelector IdType
+def Selector  := ValueSelector ⊕ IdSelector
+def IdTyp     := IdT  ValueSelector IdSelector IdType
+def ValType   := ValT Nat ValueSelector IdSelector IdType
 
 open Value
 open Memory
@@ -31,14 +31,14 @@ open Sum
 
 -- alice.account.balance = 10
 @[simp] def stAlice : StorageT := store mtst account $ store mtst balance $ var 10
-@[simp] def stBob : StorageT := store mtst account $ store mtst balance $ var 20
+@[simp] def stBob   : StorageT := store mtst account $ store mtst balance $ var 20
 -- idA = alice
-@[simp] def memAlice (mem : MemT) := copySt mem idA stAlice $ by simp
+@[simp] def memAlice (mem : MemT) := copySt mem idA stAlice
 
 theorem readCopy (mem : MemT) : Memory.read (memAlice mem) ⟨idA, [account]⟩ balance = inl 10
  := by simp
 
-@[simp] def memBob (mem : MemT) := copySt (memAlice mem) idB stBob $ by simp
+@[simp] def memBob (mem : MemT) := copySt (memAlice mem) idB stBob
 @[simp] def idAA (mem : MemT) := read (memBob mem) ⟨idA, []⟩ account
 @[simp] def idBB (mem : MemT) := read (memBob mem) ⟨idB, []⟩ account
 
@@ -55,6 +55,6 @@ theorem readIdBBalance (mem : MemT) : read (memBob mem) ⟨idB, [account]⟩ bal
 -- acc.balance = n
 @[simp] def stAcc (n : Nat) : StorageT := store mtst balance $ var n
 -- idAcc = acc
-@[simp] def memAcc (mem : MemT) (n : Nat) := copySt mem idAcc (stAcc n) $ by simp
+@[simp] def memAcc (mem : MemT) (n : Nat) := copySt mem idAcc (stAcc n)
 
 theorem readAcc (mem : MemT) (n : Nat) : read (memAcc mem n) ⟨idAcc, []⟩ balance = inl n := by simp
