@@ -63,6 +63,7 @@ theorem not_suff_imp_not_cons_suff (l1 l2 : List α) (x : α) :
       rw [h]
       simp
       intros h1 h2
+      induction h2
       cases h1
       have h3 := List.suffix_cons fld fxsL
       have _ := notSuff.2 h3

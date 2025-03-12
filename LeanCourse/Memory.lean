@@ -2,14 +2,21 @@ import Aesop
 
 set_option autoImplicit true
 
-def IdT β γ δ := δ × List (β ⊕ γ)
+structure IdT (β γ δ : Type) where
+  pId  : δ
+  flds : List (β ⊕ γ)
+
 def ValT α β γ δ := α ⊕ IdT β γ δ
 
 open Sum
 
 instance [DecidableEq β] [DecidableEq γ] [DecidableEq δ] : DecidableEq (IdT β γ δ) := by
-  unfold IdT
-  exact (inferInstanceAs _)
+  rintro ⟨a1, b1⟩ ⟨a2, b2⟩
+  simp
+  have h : Decidable ((⟨a1, b1⟩ : δ × List (β ⊕ γ)) = ⟨a2, b2⟩)  := by exact (inferInstanceAs _)
+  cases h
+  . apply isFalse; aesop
+  . apply isTrue; aesop
 
 inductive Memory (α β γ δ : Type) where
   | mtm
@@ -22,7 +29,7 @@ namespace Memory
   match mem, id with
   | .mtm, _ => inl default
   | .write mem idM fldM val, _ => if idM = id && fldM = fld then val else read mem id fld
-  | .add mem pId, (idd, ids) => if pId = idd
+  | .add mem pId, ⟨idd, ids⟩ => if pId = idd
     then (match fld with
       | inl _ => inl default
       | inr _ => inr ⟨idd, fld :: ids⟩

@@ -45,10 +45,7 @@ theorem readCopy (mem : MemT) : Memory.read (memAlice mem) ⟨idA, [account]⟩ 
 theorem readIdAA (mem : MemT) : idAA mem = inr ⟨idA, [account]⟩ := by simp
 theorem readIdBB (mem : MemT) : idBB mem = inr ⟨idB, [account]⟩ := by simp
 
-theorem readIdABalance (mem : MemT) : read (memBob mem) ⟨idA, [account]⟩ balance = inl 10  := by
-  simp
-  intro
-  contradiction
+theorem readIdABalance (mem : MemT) : read (memBob mem) ⟨idA, [account]⟩ balance = inl 10  := by simp
 
 theorem readIdBBalance (mem : MemT) : read (memBob mem) ⟨idB, [account]⟩ balance = inl 20  := by simp
 
