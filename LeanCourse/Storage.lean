@@ -49,30 +49,31 @@ theorem structInside {st : Value ValType ValSType IdSType} {k} {v} (wf : isStruc
 theorem structInsideR {st : Value ValType ValSType IdSType} {k} {v} (wf : isStruct (store st (.idS k) v)) : isStruct v := by
   cases v <;> aesop
 
-theorem isStructSelect [DecidableEq ValSType] [DecidableEq IdSType] {st : Value ValType ValSType IdSType} k (wf : isStruct st)
-  : isStruct (select st (.idS k)) := by
+@[simp] theorem isStructSelect [DecidableEq ValSType] [DecidableEq IdSType] (st : Value ValType ValSType IdSType) k (wf : isStruct st := by simp)
+  : isStruct (select st (.idS k)) :=
   match st, wf with
-  | mtst, _ => simp
-  | var _, _ => simp
-  | store st (.valS _) (var _), wf =>
+  | mtst, _ => by simp
+  | var _, _ => by simp
+  | store st (.valS _) (var _), wf => by
+    apply isStructSelect st k _
     simp at wf
+    assumption
+  | store st (.idS id) (var c), wf => by simp at wf
+  | store st (.idS id) mtst, wf => by
+    simp at wf
+    simp
+    split
     simp
     apply isStructSelect
     assumption
-  | store st (.idS id) (var c), wf => simp at wf
-  | store st (.idS id) st2, wf =>
+  | store st (.idS id) (store _ _ _), wf => by
+    simp at wf
+    induction wf
     simp
     split
-    have h := isStructSelect id wf
-    simp at h
     assumption
-
-def test {st : Value ValType ValSType IdSType} (n : isStruct st) : Nat :=
-  match st, n with
-  | a, b => sorry
-
-
-
+    apply isStructSelect
+    assumption
 
 @[simp] theorem selectSave [DecidableEq ValSType] [DecidableEq IdSType]
   (st : Value ValType ValSType IdSType) (k : FieldSelector ValSType IdSType) (path : List (FieldSelector ValSType IdSType)) (v : Value ValType ValSType IdSType) (k' : FieldSelector ValSType IdSType) (wf : isStruct st := by aesop) :
