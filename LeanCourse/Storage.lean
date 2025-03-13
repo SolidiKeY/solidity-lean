@@ -49,6 +49,31 @@ theorem structInside {st : Value ValType ValSType IdSType} {k} {v} (wf : isStruc
 theorem structInsideR {st : Value ValType ValSType IdSType} {k} {v} (wf : isStruct (store st (.idS k) v)) : isStruct v := by
   cases v <;> aesop
 
+theorem isStructSelect [DecidableEq ValSType] [DecidableEq IdSType] {st : Value ValType ValSType IdSType} k (wf : isStruct st)
+  : isStruct (select st (.idS k)) := by
+  match st, wf with
+  | mtst, _ => simp
+  | var _, _ => simp
+  | store st (.valS _) (var _), wf =>
+    simp at wf
+    simp
+    apply isStructSelect
+    assumption
+  | store st (.idS id) (var c), wf => simp at wf
+  | store st (.idS id) st2, wf =>
+    simp
+    split
+    have h := isStructSelect id wf
+    simp at h
+    assumption
+
+def test {st : Value ValType ValSType IdSType} (n : isStruct st) : Nat :=
+  match st, n with
+  | a, b => sorry
+
+
+
+
 @[simp] theorem selectSave [DecidableEq ValSType] [DecidableEq IdSType]
   (st : Value ValType ValSType IdSType) (k : FieldSelector ValSType IdSType) (path : List (FieldSelector ValSType IdSType)) (v : Value ValType ValSType IdSType) (k' : FieldSelector ValSType IdSType) (wf : isStruct st := by aesop) :
   select (save st (k :: path) v) k' =

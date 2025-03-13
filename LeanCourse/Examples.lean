@@ -37,7 +37,17 @@ theorem selectSaveAlice (_ : isStruct st := by aesop) : select (select (saveAlic
   have h := selectSave st account [balance] (var 10) account (by aesop)
   rewrite [h]
   simp
-  have h2 := selectSave (select st (FieldSelector.idS accountS))  balance [] (var 10) balance (by sorry)
+  have h2 := selectSave (select st (FieldSelector.idS accountS))  balance [] (var 10) balance $ by
+    induction st
+    . aesop
+    . aesop
+    . simp
+      split
+      sorry
+    . simp
+      sorry
+
+    sorry
   simp at h2
   rewrite [h2]
   simp
