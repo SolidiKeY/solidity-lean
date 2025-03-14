@@ -35,7 +35,7 @@ structure State (ValTp ValSTp IdSTp IdTp : Type) where
 @[simp] theorem readSkipAux [DecidableEq ValSTp] [DecidableEq IdSTp] [DecidableEq IdTp] [Inhabited ValTp]
   (mem : Memory ValTp ValSTp IdSTp IdTp) (pId pIdR : IdTp) (st : Value ValTp ValSTp IdSTp)
   (fxsL fxsR : List (FieldSelector ValSTp IdSTp)) (fld : FieldSelector ValSTp IdSTp)
-  (wf : isStruct st := by simp) (pIdDiff : not (pId = pIdR) ∨ pId = pIdR ∧ not (fxsL <:+ (fld :: fxsR)) := by aesop)
+  (wf : isStruct st := by simp) (pIdDiff : not (pId = pIdR) ∨ pId = pIdR ∧ not (fxsL <:+ fld :: fxsR) := by aesop)
   : read (copyStAux mem ⟨pId, fxsL⟩ st wf) ⟨ pIdR , fxsR ⟩ fld = read mem ⟨ pIdR, fxsR⟩ fld :=
 
   match st with

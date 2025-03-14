@@ -34,6 +34,16 @@ open Value
   | var _ => mtst
   | store st k' v => if k' = k then v else select st k
 
+@[simp] def find [DecidableEq ValSTp] [DecidableEq IdSTp] (st : Value ValTp ValSTp IdSTp)
+  (flds : List $ FieldSelector ValSTp IdSTp) : Value ValTp ValSTp IdSTp :=
+  match flds with
+  | [] => st
+  | x :: xs => find (select st x) xs
+
+@[simp] def findOnEmpty [DecidableEq ValSTp] [DecidableEq IdSTp] (flds : List $ FieldSelector ValSTp IdSTp)
+  : find mtst flds = (mtst : Value ValTp ValSTp IdSTp) := by
+  induction flds <;> aesop
+
 @[simp] def isStruct (st : Value ValTp ValSTp IdSTp) : Prop :=
   match st with
   | mtst => true
