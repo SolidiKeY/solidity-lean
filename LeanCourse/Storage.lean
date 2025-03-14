@@ -43,6 +43,8 @@ open Value
   | store st (.idS _) st2 => And (isStruct st) (isStruct st2)
   | _ => false
 
+@[simp] def Struct (ValTp ValSTp IdSTp : Type) : Type := { st : Value ValTp ValSTp IdSTp // isStruct st }
+
 theorem structInside {st : Value ValTp ValSTp IdSTp} {k} {v} (wf : isStruct (store st k v)) : isStruct st := by
   cases v <;> aesop
 
