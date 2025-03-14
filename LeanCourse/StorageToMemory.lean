@@ -28,19 +28,21 @@ structure State (ValType ValSType IdSType IdType : Type) where
         . simp at wf
           aesop
 
-@[simp] def copySt (mem : Memory ValType ValSType IdSType IdType) (id : IdType) (st : Value ValType ValSType IdSType) (wf : isStruct st := by simp) : Memory ValType ValSType IdSType IdType :=
+@[simp] def copySt (mem : Memory ValType ValSType IdSType IdType) (id : IdType) (st : Value ValType ValSType IdSType)
+  (wf : isStruct st := by simp) : Memory ValType ValSType IdSType IdType :=
   copyStAux (add mem id) ⟨id, []⟩ st wf
 
-@[simp] theorem readSkip [DecidableEq ValSType] [DecidableEq IdSType] [DecidableEq IdType] [Inhabited ValType]
-  (mem : Memory ValType ValSType IdSType IdType) (pId pIdR : IdType) (st : Value ValType ValSType IdSType) (fxsL fxsR : List (FieldSelector ValSType IdSType)) (fld : FieldSelector ValSType IdSType)
-  (wf : isStruct st := by simp) (pIdDiff : ¬pId = pIdR ⊕' pId = pIdR ×' ¬ fxsL <:+ (fld :: fxsR))
+@[simp] theorem readSkipAux [DecidableEq ValSType] [DecidableEq IdSType] [DecidableEq IdType] [Inhabited ValType]
+  (mem : Memory ValType ValSType IdSType IdType) (pId pIdR : IdType) (st : Value ValType ValSType IdSType)
+  (fxsL fxsR : List (FieldSelector ValSType IdSType)) (fld : FieldSelector ValSType IdSType)
+  (wf : isStruct st := by simp) (pIdDiff : not (pId = pIdR) ∨ pId = pIdR ∧ not (fxsL <:+ (fld :: fxsR)) := by aesop)
   : read (copyStAux mem ⟨pId, fxsL⟩ st wf) ⟨ pIdR , fxsR ⟩ fld = read mem ⟨ pIdR, fxsR⟩ fld :=
 
   match st with
   | mtst => by aesop
   | var _ => by simp at wf
   | store st (.valS f) (var x) => by
-    have h := readSkip mem pId pIdR st fxsL fxsR fld (by aesop) (by aesop)
+    have h := readSkipAux mem pId pIdR st fxsL fxsR fld (by aesop) (by aesop)
     induction pIdDiff
     . unfold copyStAux
       simp
@@ -59,26 +61,33 @@ structure State (ValType ValSType IdSType IdType : Type) where
       induction h2
       cases h1
       have h3 := List.suffix_cons fld fxsL
-      have _ := notSuff.2 h3
-      contradiction
+      rcases notSuff with ⟨_, nDec⟩
+      simp at nDec
   | store st (.idS f) v => by
     have _ := structInside wf
     have stInR := structInsideR wf
-    have _ := readSkip mem pId pIdR st fxsL fxsR fld (by aesop) (by aesop)
+    have _ := readSkipAux mem pId pIdR st fxsL fxsR fld (by aesop) (by aesop)
     have _ := not_suff_imp_not_cons_suff fxsL (fld :: fxsR) (.idS f)
     let copyAuxVal := copyStAux mem ⟨pId, fxsL⟩ st (by aesop)
-    have _ := readSkip copyAuxVal pId pIdR v (.idS f :: fxsL) fxsR fld stInR
+    have _ := readSkipAux copyAuxVal pId pIdR v (.idS f :: fxsL) fxsR fld stInR
     aesop
 
-inductive SameVal {ValType ValSType IdSType IdType : Type} : ValT ValType ValSType IdSType IdType → Value ValType ValSType IdSType → Prop where
-  | mk (v1 v2 : ValType) : SameVal (.val v1) (var v2)
-  | mkEmpty (v1 : ValType) : SameVal (.val v1) mtst
+@[simp] theorem readSkip [DecidableEq ValSType] [DecidableEq IdSType] [DecidableEq IdType] [Inhabited ValType]
+  (mem : Memory ValType ValSType IdSType IdType) (pId pIdR : IdType) (st : Value ValType ValSType IdSType)
+  (fxsR : List (FieldSelector ValSType IdSType)) (fld : FieldSelector ValSType IdSType)
+  (wf : isStruct st := by aesop) (pIdDiff : not (pId = pIdR) := by aesop)
+  : read (copySt mem pId st wf) ⟨ pIdR , fxsR ⟩ fld = read mem ⟨ pIdR, fxsR⟩ fld := by aesop
+
+inductive SameVal {ValType ValSType IdSType IdType : Type} [Inhabited ValType]
+  : ValT ValType ValSType IdSType IdType → Value ValType ValSType IdSType → Prop where
+  | mk (v : ValType) : SameVal (.val v) (.var v)
+  | mkEmpty : SameVal (.val default) mtst
 
 open SameVal
 
 theorem readFind [DecidableEq ValSType] [DecidableEq IdSType] [DecidableEq IdType] [Inhabited ValType]
-  (mem : Memory ValType ValSType IdSType IdType) (id : IdType) (st : Value ValType ValSType IdSType) (fxs : List (FieldSelector ValSType IdSType))
-  (f : ValSType) (wf : isStruct st := by simp)
+  (mem : Memory ValType ValSType IdSType IdType) (id : IdType) (st : Value ValType ValSType IdSType)
+  (fxs : List (FieldSelector ValSType IdSType)) (f : ValSType) (wf : isStruct st := by simp)
   : SameVal (read (copySt mem id st wf) ⟨id, []⟩ (.valS f)) (select st (.valS f)) :=
   match st with
   | mtst => by
@@ -88,12 +97,11 @@ theorem readFind [DecidableEq ValSType] [DecidableEq IdSType] [DecidableEq IdTyp
     unfold isStruct at wf
     aesop
   | store st valS@(.idS valSS) sv => by
-    have copy := readSkip (copyStAux (add mem id) ⟨id, []⟩ st (structInside wf)) id id sv [.idS valSS] [] (.valS f) (structInsideR wf)
-      (.inr ⟨rfl, fun x => by
-        have sub := List.IsSuffix.sublist x
-        cases sub
-        aesop
-        ⟩)
+    have copy := readSkipAux (copyStAux (add mem id) ⟨id, []⟩ st (structInside wf)) id id sv [.idS valSS] [] (.valS f) (structInsideR wf) $ by
+      simp
+      intro h
+      cases List.IsSuffix.sublist h
+      aesop
     unfold copySt
     simp
     rw [copy]

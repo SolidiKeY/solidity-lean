@@ -59,19 +59,17 @@ theorem readCopy (_ : isStruct st := by aesop) : Memory.read (memAlice mem st) �
 theorem readIdAA (_ : isStruct st := by aesop) : idAA mem st = .id ⟨idA, [account]⟩ := by simp
 theorem readIdBB (_ : isStruct st := by aesop) : idBB mem st = .id ⟨idB, [account]⟩ := by simp
 
--- theorem readIdABalance (_ : isStruct st := by aesop) : read (memBob mem st) ⟨idA, [account]⟩ balance = .val 10  := by
---   unfold memBob
---   -- simp only [readSkip]
---   have h := readFind mem idB st [account] balanceS $ by aesop
-
---   cases h with
---   | mk _ _ => sorry
---   | mkEmpty _ _ => sorry
-  -- . sorry
-  -- . sorry
-  -- sorry
-  -- rewrite [ ]
-  -- simp only [readSkip, readFind, skipIdRead, readGetId]
+theorem readIdABalance (_ : isStruct st := by aesop) : read (memBob mem st) ⟨idA, [account]⟩ balance
+  = .val 10  := by
+  unfold memBob
+  have h2 := readSkip (memAlice mem st) idB idA (stBob st)
+  rewrite [h2]
+  clear h2
+  unfold memAlice
+  unfold copySt
+  unfold stAlice
+  unfold copyStAux
+  simp
 
 theorem readIdBBalance (_ : isStruct st := by aesop) : read (memBob mem st) ⟨idB, [account]⟩ balance = .val 20  := by simp
 

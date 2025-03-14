@@ -11,7 +11,8 @@ inductive Memory (ValType ValSType IdSType IdType : Type) where
 
 namespace Memory
 
-@[simp] def read [DecidableEq ValSType] [DecidableEq IdSType] [DecidableEq IdType] [Inhabited ValType] (mem : Memory ValType ValSType IdSType IdType) (id : IdT ValSType IdSType IdType) (fld : FieldSelector ValSType IdSType) : ValT ValType ValSType IdSType IdType :=
+@[simp] def read [DecidableEq ValSType] [DecidableEq IdSType] [DecidableEq IdType]
+  [Inhabited ValType] (mem : Memory ValType ValSType IdSType IdType) (id : IdT ValSType IdSType IdType) (fld : FieldSelector ValSType IdSType) : ValT ValType ValSType IdSType IdType :=
   match mem, id with
   | .mtm, _ => .val default
   | .write mem idM fldM val, _ => if idM = id && fldM = fld then val else read mem id fld
