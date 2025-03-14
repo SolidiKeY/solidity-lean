@@ -1,25 +1,25 @@
 import Aesop
 
-variable {ValType IdType ValSType IdSType : Type}
+variable {ValTp IdTp ValSTp IdSTp : Type}
 
 @[aesop safe [constructors, cases]]
-inductive FieldSelector (ValSType IdSType : Type) where
-  | valS  (valS : ValSType)
-  | idS   (idS : IdSType)
+inductive FieldSelector (ValSTp IdSTp : Type) where
+  | valS  (valS : ValSTp)
+  | idS   (idS : IdSTp)
   deriving DecidableEq
 
-structure IdT (ValSType IdSType IdType : Type) where
-  pId  : IdType
-  flds : List (FieldSelector ValSType IdSType)
+structure IdT (ValSTp IdSTp IdTp : Type) where
+  pId  : IdTp
+  flds : List (FieldSelector ValSTp IdSTp)
 
-inductive ValT (ValType ValSType IdSType IdType : Type) where
-  | val (val : ValType)
-  | id  (id : IdT ValSType IdSType IdType)
+inductive ValT (ValTp ValSTp IdSTp IdTp : Type) where
+  | val (val : ValTp)
+  | id  (id : IdT ValSTp IdSTp IdTp)
 
-instance [DecidableEq ValSType] [DecidableEq IdSType] [DecidableEq IdType] : DecidableEq (IdT ValSType IdSType IdType) := by
+instance [DecidableEq ValSTp] [DecidableEq IdSTp] [DecidableEq IdTp] : DecidableEq (IdT ValSTp IdSTp IdTp) := by
   rintro ⟨a1, b1⟩ ⟨a2, b2⟩
   simp
-  have h : Decidable ((⟨a1, b1⟩ : IdType × List (FieldSelector ValSType IdSType)) = ⟨a2, b2⟩)  := by exact (inferInstanceAs _)
+  have h : Decidable ((⟨a1, b1⟩ : IdTp × List (FieldSelector ValSTp IdSTp)) = ⟨a2, b2⟩)  := by exact (inferInstanceAs _)
   cases h
   . apply isFalse; aesop
   . apply isTrue; aesop

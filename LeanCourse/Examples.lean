@@ -1,6 +1,6 @@
 import LeanCourse.StorageToMemory
 
-inductive IdType where
+inductive IdTp where
   | idA | idB | idAcc deriving DecidableEq
 
 inductive ValueSelector where
@@ -9,16 +9,16 @@ inductive ValueSelector where
 inductive valSelector where
   | accountS deriving DecidableEq
 
-open IdType
+open IdTp
 open ValueSelector
 open valSelector
 
-def MemT      := Memory Nat ValueSelector valSelector IdType
+def MemT      := Memory Nat ValueSelector valSelector IdTp
 def StorageT  := Value Nat ValueSelector valSelector
-def StateType := State Nat ValueSelector valSelector IdType
+def StateType := State Nat ValueSelector valSelector IdTp
 def Selector  := FieldSelector ValueSelector valSelector
-def IdTyp     := IdT  ValueSelector valSelector IdType
-def ValSType  := ValT Nat ValueSelector valSelector IdType
+def IdTyp     := IdT  ValueSelector valSelector IdTp
+def ValSTp  := ValT Nat ValueSelector valSelector IdTp
 
 variable (mem : MemT) (st : StorageT)
 

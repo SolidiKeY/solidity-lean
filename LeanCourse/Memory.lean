@@ -2,17 +2,17 @@ import Aesop
 
 import LeanCourse.Field
 
-variable {ValType IdType ValSType IdSType : Type}
+variable {ValTp IdTp ValSTp IdSTp : Type}
 
-inductive Memory (ValType ValSType IdSType IdType : Type) where
+inductive Memory (ValTp ValSTp IdSTp IdTp : Type) where
   | mtm
-  | write (mem : Memory ValType ValSType IdSType IdType) (id : IdT ValSType IdSType IdType) (fld : FieldSelector ValSType IdSType) (val : ValT ValType ValSType IdSType IdType)
-  | add   (mem : Memory ValType ValSType IdSType IdType) (id : IdType)
+  | write (mem : Memory ValTp ValSTp IdSTp IdTp) (id : IdT ValSTp IdSTp IdTp) (fld : FieldSelector ValSTp IdSTp) (val : ValT ValTp ValSTp IdSTp IdTp)
+  | add   (mem : Memory ValTp ValSTp IdSTp IdTp) (id : IdTp)
 
 namespace Memory
 
-@[simp] def read [DecidableEq ValSType] [DecidableEq IdSType] [DecidableEq IdType]
-  [Inhabited ValType] (mem : Memory ValType ValSType IdSType IdType) (id : IdT ValSType IdSType IdType) (fld : FieldSelector ValSType IdSType) : ValT ValType ValSType IdSType IdType :=
+@[simp] def read [DecidableEq ValSTp] [DecidableEq IdSTp] [DecidableEq IdTp]
+  [Inhabited ValTp] (mem : Memory ValTp ValSTp IdSTp IdTp) (id : IdT ValSTp IdSTp IdTp) (fld : FieldSelector ValSTp IdSTp) : ValT ValTp ValSTp IdSTp IdTp :=
   match mem, id with
   | .mtm, _ => .val default
   | .write mem idM fldM val, _ => if idM = id && fldM = fld then val else read mem id fld
