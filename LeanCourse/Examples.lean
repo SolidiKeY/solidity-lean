@@ -44,6 +44,16 @@ theorem selectSaveAlice : select (select (saveAlice st) account) balance = var 1
   rewrite [h2]
   simp
 
+theorem findOnSave : find (saveAlice st) [account, balance] = var 10 := by
+  have := st.property
+  simp
+  have h := selectSave st.1 account [balance] (var 10) account st.2
+  simp at h
+  rewrite [h]
+  have h2 := selectSave (select st.val (FieldSelector.idS accountS)) balance [] (var 10) balance $ by aesop
+  simp at h2
+  rw [h2]
+
 -- alice.account.balance = 10
 @[simp] def stAlice : StorageT := store st.val account $ store mtst balance $ var 10
 @[simp] def stBob   : StorageT := store st.val account $ store mtst balance $ var 20

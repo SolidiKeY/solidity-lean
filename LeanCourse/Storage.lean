@@ -103,3 +103,11 @@ theorem structInsideR {st : Value ValTp ValSTp IdSTp} {k} {v} (wf : isStruct (st
     have _ := ih $ structInside wf
     aesop
   done
+
+@[simp] def pathInside (st : Value ValTp ValSTp IdSTp) (path : List $ FieldSelector ValSTp IdSTp) : Prop :=
+  match path with
+  | [] => true
+  | p :: paths => match st with
+    | mtst => false
+    | var _ => false
+    | store st k v => (p = k -> pathInside v paths) ∨ (p ≠ k -> pathInside st path)
