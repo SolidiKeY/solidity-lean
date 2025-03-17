@@ -1,0 +1,31 @@
+#+TITLE:     Lean Course
+#+AUTHOR:    Guilherme Silva
+#+EMAIL:     alvares@chalmers.se
+#+DATE:      2024-03-17 Tue
+#+DESCRIPTION:
+#+KEYWORDS:
+#+LANGUAGE:  en
+#+EXPORT_SELECT_TAGS: export
+#+EXPORT_EXCLUDE_TAGS: noexport
+#+HTML_LINK_UP:
+#+HTML_LINK_HOME:
+
+#+LaTeX_CLASS: beamer
+#+LaTeX_CLASS_OPTIONS: [bigger]
+#+OPTIONS: H:2
+
+#+BEAMER_THEME: Madrid
+#+BEAMER_HEADER: \setbeamercovered{transparent}\beamerdefaultoverlayspecification{<+(1)->}
+
+* Solidity in Lean
+** Motivation
+- Ethereum is the second-biggest cryptocurrency and the biggest smart contract platform
+- Solidity is the programming language to create contracts in this cryptocurrency
+- Code in the smart contracts domain can not be changed after deployment
+- It is totally open
+- Used for financial assets
+- There are adversary interests in the smart contracts ecosystem
+- Identity behind addresses is anonymous
+** Solidity details
+- Solidity has two kinds of memory, storage and memory
+- Storage is persistent in the blockchain while memory is erased after a transaction
