@@ -104,6 +104,32 @@ theorem structInsideR {st : Value ValTp ValSTp IdSTp} {k} {v} (wf : isStruct (st
     aesop
   done
 
+@[simp] def pathWellFormed (path : List (FieldSelector ValSTp IdSTp)) : Prop :=
+  match path with
+  | [] => true
+  | .valS _ :: path => path = []
+  | .idS _ :: path => pathWellFormed path
+
+
+@[simp] theorem findOnSave [DecidableEq ValSTp] [DecidableEq IdSTp]
+  (st : Value ValTp ValSTp IdSTp) (path : List (FieldSelector ValSTp IdSTp))
+  (v : Value ValTp ValSTp IdSTp) (pWellF : pathWellFormed path := by aesop) (wf : isStruct st := by aesop) :
+  find (save st path v) path = v := by
+  match path, st with
+  | [], _ => simp
+  | p@(.valS p') :: [], mtst => aesop
+  | p@(.valS p') :: [], var _ => aesop
+  | p@(.valS p') :: [], store st _ _ =>
+    have := findOnSave st [.valS p'] v (by aesop) (structInside wf)
+    aesop
+  | p@(.valS p') :: _ :: _, _ => aesop
+  | p@(.idS p') :: path, st =>
+    simp
+    rw [selectSave _]
+    simp
+    have h := findOnSave (select st (.idS p')) path v
+    rw [h]
+
 @[simp] def pathInside (st : Value ValTp ValSTp IdSTp) (path : List $ FieldSelector ValSTp IdSTp) : Prop :=
   match path with
   | [] => true
