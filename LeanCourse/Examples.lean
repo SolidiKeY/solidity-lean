@@ -1,7 +1,7 @@
 import LeanCourse.StorageToMemory
 
 inductive IdTp where
-  | idA | idB | idAcc deriving DecidableEq
+  | idC | idB | idAcc deriving DecidableEq
 
 inductive ValueSelector where
   | balanceS | ageS deriving DecidableEq
@@ -33,6 +33,7 @@ open Sum
 -- alice.account.balance = 10
 @[simp] def saveAlice : StorageT := save st.1 [account, balance] $ var 10
 
+-- int v = alice.account.balance
 theorem selectSaveAlice : select (select (saveAlice st) account) balance = var 10 := by
   unfold saveAlice
   have h := selectSave st.1 account [balance] (var 10) account st.2
@@ -44,6 +45,7 @@ theorem selectSaveAlice : select (select (saveAlice st) account) balance = var 1
   rewrite [h2]
   simp
 
+-- int v = alice.account.balance
 theorem findOnSave : find (saveAlice st) [account, balance] = var 10 := by
   have := st.property
   simp
@@ -56,26 +58,27 @@ theorem findOnSave : find (saveAlice st) [account, balance] = var 10 := by
 
 -- alice.account.balance = 10
 @[simp] def stAlice : StorageT := store st.val account $ store mtst balance $ var 10
+-- bob.account.balance = 10
 @[simp] def stBob   : StorageT := store st.val account $ store mtst balance $ var 20
--- idA = alice
-@[simp] def memAlice := copySt mem idA (stAlice st) $ by have _ := st.2; aesop
+-- carol = alice
+@[simp] def memAlice := copySt mem idC (stAlice st) $ by have _ := st.2; aesop
 
 
-theorem readCopy : Memory.read (memAlice mem st) ⟨idA, [account]⟩ balance = .val 10
+theorem readCopy : Memory.read (memAlice mem st) ⟨idC, [account]⟩ balance = .val 10
  := by simp
 
 @[simp] def memBob := copySt (memAlice mem st) idB (stBob st) $ by have _ := st.2; aesop
-@[simp] def idAA := read (memBob mem st) ⟨idA, []⟩ account
-@[simp] def idBB := read (memBob mem st) ⟨idB, []⟩ account
+@[simp] def idC' := read (memBob mem st) ⟨idC, []⟩ account
+@[simp] def idB' := read (memBob mem st) ⟨idB, []⟩ account
 
-theorem readIdAA : idAA mem st = .id ⟨idA, [account]⟩ := by simp
-theorem readIdBB : idBB mem st = .id ⟨idB, [account]⟩ := by simp
+theorem readidC' : idC' mem st = .id ⟨idC, [account]⟩ := by simp
+theorem readidB' : idB' mem st = .id ⟨idB, [account]⟩ := by simp
 
-theorem readIdABalance : read (memBob mem st) ⟨idA, [account]⟩ balance
+theorem readidCBalance : read (memBob mem st) ⟨idC, [account]⟩ balance
   = .val 10  := by
   unfold memBob
   have _ := st.2
-  have h2 := readSkip (memAlice mem st) idB idA (stBob st)
+  have h2 := readSkip (memAlice mem st) idB idC (stBob st)
   rewrite [h2]
   clear h2
   unfold memAlice
@@ -84,7 +87,7 @@ theorem readIdABalance : read (memBob mem st) ⟨idA, [account]⟩ balance
   unfold copyStAux
   simp
 
-theorem readIdBBalance : read (memBob mem st) ⟨idB, [account]⟩ balance = .val 20  := by simp
+theorem readidB'alance : read (memBob mem st) ⟨idB, [account]⟩ balance = .val 20  := by simp
 
 -- -- acc.balance = n
 @[simp] def stAcc (n : Nat) : StorageT := store mtst balance $ var n
