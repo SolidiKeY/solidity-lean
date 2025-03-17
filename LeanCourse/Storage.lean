@@ -14,7 +14,8 @@ inductive Value (ValTp ValSTp IdSTp : Type) where
 open Value
 
 @[simp] def save [DecidableEq ValSTp] [DecidableEq IdSTp]
-  (st : Value ValTp ValSTp IdSTp) (fields : List (FieldSelector ValSTp IdSTp)) (v : Value ValTp ValSTp IdSTp) : Value ValTp ValSTp IdSTp :=
+  (st : Value ValTp ValSTp IdSTp) (fields : List (FieldSelector ValSTp IdSTp))
+  (v : Value ValTp ValSTp IdSTp) : Value ValTp ValSTp IdSTp :=
   match st, fields with
   | mtst, [] => v
   | mtst, k :: rest => store mtst k $ save mtst rest v
@@ -28,7 +29,8 @@ open Value
   save st [] v = v := by
   induction st <;> simp
 
-@[simp] def select [DecidableEq ValSTp] [DecidableEq IdSTp] (st : Value ValTp ValSTp IdSTp) (k : FieldSelector ValSTp IdSTp) : Value ValTp ValSTp IdSTp :=
+@[simp] def select [DecidableEq ValSTp] [DecidableEq IdSTp] (st : Value ValTp ValSTp IdSTp)
+  (k : FieldSelector ValSTp IdSTp) : Value ValTp ValSTp IdSTp :=
   match st with
   | mtst => mtst
   | var _ => mtst
@@ -58,10 +60,12 @@ open Value
 theorem structInside {st : Value ValTp ValSTp IdSTp} {k} {v} (wf : isStruct (store st k v)) : isStruct st := by
   cases v <;> aesop
 
-theorem structInsideR {st : Value ValTp ValSTp IdSTp} {k} {v} (wf : isStruct (store st (.idS k) v)) : isStruct v := by
+theorem structInsideR {st : Value ValTp ValSTp IdSTp} {k} {v} (wf : isStruct (store st (.idS k) v))
+  : isStruct v := by
   cases v <;> aesop
 
-@[simp] theorem isStructSelect [DecidableEq ValSTp] [DecidableEq IdSTp] (st : Value ValTp ValSTp IdSTp) k (wf : isStruct st := by simp)
+@[simp] theorem isStructSelect [DecidableEq ValSTp] [DecidableEq IdSTp] (st : Value ValTp ValSTp IdSTp)
+  k (wf : isStruct st := by simp)
   : isStruct (select st (.idS k)) :=
   match st, wf with
   | mtst, _ => by simp
@@ -88,7 +92,8 @@ theorem structInsideR {st : Value ValTp ValSTp IdSTp} {k} {v} (wf : isStruct (st
     assumption
 
 @[simp] theorem selectSave [DecidableEq ValSTp] [DecidableEq IdSTp]
-  (st : Value ValTp ValSTp IdSTp) (k : FieldSelector ValSTp IdSTp) (path : List (FieldSelector ValSTp IdSTp)) (v : Value ValTp ValSTp IdSTp) (k' : FieldSelector ValSTp IdSTp) (wf : isStruct st := by aesop) :
+  (st : Value ValTp ValSTp IdSTp) (k : FieldSelector ValSTp IdSTp) (path : List (FieldSelector ValSTp IdSTp))
+  (v : Value ValTp ValSTp IdSTp) (k' : FieldSelector ValSTp IdSTp) (wf : isStruct st := by aesop) :
   select (save st (k :: path) v) k' =
   (if k = k' then save (select st k') path v else select st k') := by
   induction st with

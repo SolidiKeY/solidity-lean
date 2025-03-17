@@ -12,7 +12,8 @@ structure State (ValTp ValSTp IdSTp IdTp : Type) where
   memory  : Memory ValTp ValSTp IdSTp IdTp
   storage : Value ValTp ValSTp IdSTp
 
-@[simp] def copyStAux (mem : Memory ValTp ValSTp IdSTp IdTp) (id : IdT ValSTp IdSTp IdTp) (st : Value ValTp ValSTp IdSTp) (wf : isStruct st := by simp) : Memory ValTp ValSTp IdSTp IdTp :=
+@[simp] def copyStAux (mem : Memory ValTp ValSTp IdSTp IdTp) (id : IdT ValSTp IdSTp IdTp)
+  (st : Value ValTp ValSTp IdSTp) (wf : isStruct st := by simp) : Memory ValTp ValSTp IdSTp IdTp :=
   match st with
   | mtst => mem
   | var _ => by aesop
@@ -97,7 +98,8 @@ theorem readFind [DecidableEq ValSTp] [DecidableEq IdSTp] [DecidableEq IdTp] [In
     unfold isStruct at wf
     aesop
   | store st valS@(.idS valSS) sv => by
-    have copy := readSkipAux (copyStAux (add mem id) ⟨id, []⟩ st (structInside wf)) id id sv [.idS valSS] [] (.valS f) (structInsideR wf) $ by
+    have copy := readSkipAux (copyStAux (add mem id) ⟨id, []⟩ st (structInside wf)) id id sv
+      [.idS valSS] [] (.valS f) (structInsideR wf) $ by
       simp
       intro h
       cases List.IsSuffix.sublist h
@@ -115,7 +117,8 @@ theorem readFind [DecidableEq ValSTp] [DecidableEq IdSTp] [DecidableEq IdTp] [In
     . apply readFindd
 
 @[simp] theorem skipIdRead [DecidableEq ValSTp] [DecidableEq IdSTp] [DecidableEq IdTp] [Inhabited ValTp]
-  (mem : Memory ValTp ValSTp IdSTp IdTp) (idC idR : IdT ValSTp IdSTp IdTp) (st : Value ValTp ValSTp IdSTp) (fld : IdSTp) (wf : isStruct st := by simp)
+  (mem : Memory ValTp ValSTp IdSTp IdTp) (idC idR : IdT ValSTp IdSTp IdTp) (st : Value ValTp ValSTp IdSTp)
+  (fld : IdSTp) (wf : isStruct st := by simp)
   : read (copyStAux mem idC st wf) idR (.idS fld) = read mem idR (.idS fld) :=
   match st with
   | mtst => by aesop
@@ -132,7 +135,9 @@ theorem readFind [DecidableEq ValSTp] [DecidableEq IdSTp] [DecidableEq IdTp] [In
     aesop
 
 @[simp] theorem readGetId [DecidableEq ValSTp] [DecidableEq IdSTp] [DecidableEq IdTp] [Inhabited ValTp]
-  (mem : Memory ValTp ValSTp IdSTp IdTp) (pId : IdTp) (st : Value ValTp ValSTp IdSTp) (fxs : List (FieldSelector ValSTp IdSTp)) (fld : IdSTp) (wf : isStruct st := by simp)
+  (mem : Memory ValTp ValSTp IdSTp IdTp) (pId : IdTp) (st : Value ValTp ValSTp IdSTp)
+  (fxs : List (FieldSelector ValSTp IdSTp))
+  (fld : IdSTp) (wf : isStruct st := by simp)
   : read (copySt mem pId st wf) ⟨pId, fxs⟩ (.idS fld) = .id ⟨pId, .idS fld :: fxs⟩ := by
   have h := skipIdRead (add mem pId) ⟨pId, []⟩ ⟨pId, fxs⟩ st fld wf
   unfold copySt
