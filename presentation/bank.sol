@@ -12,11 +12,15 @@ contract Bank {
     Person bob;
 
     function f() public {
-        alice.account.balance = 10;
-
         Person memory carol;
-        carol.account.balance = 20;
+        bob = carol;
+        assert(bob.account.balance == 0);
+
+        alice = bob;
+        alice.account.balance = 10;
+        assert(bob.account.balance == 0);
 
         carol = alice;
+        assert(carol.account.balance == 10);
     }
 }

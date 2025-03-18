@@ -20,12 +20,12 @@
 * Solidity in Lean
 ** Motivation
 - Ethereum is the second-biggest cryptocurrency and the biggest smart contract platform
-- Solidity is the programming language to create contracts in this cryptocurrency
+- Solidity is the most used programming language to create contracts in this platform
 - Code in the smart contracts domain can not be changed after deployment
 - It is totally open
 - Used for financial assets
 - There are adversary interests in the smart contracts ecosystem
 - Identity behind addresses is anonymous
 ** Solidity details
-- Solidity has two kinds of memory, storage and memory
+- Solidity has two kinds of memory, one is called "storage" and another one is called "memory"
 - Storage is persistent in the blockchain while memory is erased after a transaction
