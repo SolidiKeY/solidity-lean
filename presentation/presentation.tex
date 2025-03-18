@@ -1,0 +1,88 @@
+% Created 2025-03-18 Tue 11:39
+% Intended LaTeX compiler: pdflatex
+\documentclass[bigger]{beamer}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{longtable}
+\usepackage{wrapfig}
+\usepackage{rotating}
+\usepackage[normalem]{ulem}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{capt-of}
+\usepackage{hyperref}
+\usetheme{Madrid}
+\author{Guilherme Silva}
+\date{2024-03-17 Tue}
+\title{Lean Course}
+\setbeamercovered{transparent}\beamerdefaultoverlayspecification{<+(1)->}
+\hypersetup{
+ pdfauthor={Guilherme Silva},
+ pdftitle={Lean Course},
+ pdfkeywords={},
+ pdfsubject={},
+ pdfcreator={Emacs 29.4 (Org mode 9.7.19)}, 
+ pdflang={English}}
+\begin{document}
+
+\maketitle
+\begin{frame}{Outline}
+\tableofcontents
+\end{frame}
+
+\section{Solidity}
+\label{sec:org7f95225}
+\begin{frame}[label={sec:orgb9338a5}]{Motivation}
+\begin{itemize}
+\item Ethereum is the second-biggest cryptocurrency and the biggest smart contract platform
+\item Solidity is the most used programming language to create contracts in this platform
+\item Code in the smart contracts domain can not be changed after deployment
+\item It is totally open
+\item Used for financial assets
+\item There are adversary interests in the smart contracts ecosystem
+\item Identity behind addresses is anonymous
+\end{itemize}
+\end{frame}
+\begin{frame}[label={sec:orge8ebc6c}]{Solidity details}
+\begin{itemize}
+\item Solidity has two kinds of memory, one is called ``storage'' and another one is called ``memory''
+\item Storage is persistent in the blockchain while memory is erased after a transaction
+\end{itemize}
+\end{frame}
+\section{My research}
+\label{sec:org280f55d}
+\begin{frame}[label={sec:org552f105}]{Building for Solidity}
+\begin{itemize}
+\item Program logic
+\item Calculus
+\item Verification system
+\end{itemize}
+\end{frame}
+\begin{frame}[label={sec:org1aabe63}]{Axiomatization of Solidity data types}
+\begin{itemize}
+\item In storage and memory
+\item Structs
+\item Maps
+\item Array
+\item I developed an algebra for writing and reading in memory and storage
+\end{itemize}
+\end{frame}
+\begin{frame}[label={sec:org6654620}]{Main issues}
+\begin{itemize}
+\item Shallow and deep copy
+\item Structured defaults
+\item ``Eager'' and ``lazy'' formalizations
+\item Eager is similar to low-level language (such as Ethereum Virtual Machine)
+\item Lazy is necessary for automatic theorem proving
+\end{itemize}
+\end{frame}
+\section{Lean Course}
+\label{sec:orge299a44}
+\begin{frame}[label={sec:org06be413}]{Lean}
+\begin{itemize}
+\item Formalization of datatypes in Lean
+\item Theorems of lazy solution by the eagle implementation
+\end{itemize}
+\end{frame}
+\end{document}
