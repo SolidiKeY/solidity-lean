@@ -1,7 +1,7 @@
 #+TITLE:     Lean Course
 #+AUTHOR:    Guilherme Silva
 #+EMAIL:     alvares@chalmers.se
-#+DATE:      2024-03-17 Tue
+#+DATE:      2024-03-18 Tue
 #+DESCRIPTION:
 #+KEYWORDS:
 #+LANGUAGE:  en
