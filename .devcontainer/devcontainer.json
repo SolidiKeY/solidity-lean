@@ -1,5 +1,5 @@
 {
-    "name": "Lean course",
+    "name": "Solidity Lean",
   
     "build": {
       "dockerfile": "Dockerfile"
