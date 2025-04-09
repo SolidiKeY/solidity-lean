@@ -1,7 +1,7 @@
 name = "lean-course"
 version = "0.1.0"
 keywords = ["math"]
-defaultTargets = ["LeanCourse"]
+defaultTargets = ["SolidityLean"]
 
 [leanOptions]
 pp.unicode.fun = true # pretty-prints `fun a ↦ b`
@@ -16,4 +16,4 @@ name = "aesop"
 scope = "leanprover-community"
 
 [[lean_lib]]
-name = "LeanCourse"
+name = "SolidityLean"

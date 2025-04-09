@@ -1,4 +1,4 @@
-import LeanCourse.StorageToMemory
+import SolidityLean.StorageToMemory
 
 inductive IdTp where
   | idC | idB | idAcc deriving DecidableEq

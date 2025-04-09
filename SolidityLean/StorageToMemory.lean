@@ -1,6 +1,6 @@
-import LeanCourse.Memory
-import LeanCourse.Storage
-import LeanCourse.Lib
+import SolidityLean.Memory
+import SolidityLean.Storage
+import SolidityLean.Lib
 
 variable {ValTp IdTp ValSTp IdSTp : Type}
 

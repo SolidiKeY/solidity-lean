@@ -1,6 +1,6 @@
 import Aesop
 
-import LeanCourse.Field
+import SolidityLean.Field
 
 variable {ValTp IdTp ValSTp IdSTp : Type}
 
