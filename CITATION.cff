@@ -1,0 +1,12 @@
+cff-version: 1.2.0
+authors:
+- family-names: "Silva"
+  given-names: "Guilherme"
+  orcid: "https://orcid.org/0009-0008-7370-3045"
+- family-names: "Ahrendt"
+  given-names: "Wolfgang"
+  orcid: "https://orcid.org/0000-0002-5671-2555"
+- family-names: "Bubel"
+  given-names: "Richard"
+title: "Solidity in Lean"
+url: "https://github.com/SolidiKeY/solidity-lean"
