@@ -1,0 +1,42 @@
+name: lean
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      # Elaboration is the test suite: there is no separate test driver, and
+      # the default library is the whole formalization.
+      #
+      # use-mathlib-cache is off because there is no Mathlib anywhere on the
+      # path — `lakefile.toml` declares no `[[require]]` at all, so nothing is
+      # cloned and the olean cache would be pure waste. Keeping it that way is
+      # a deliberate invariant (see AGENTS.md).
+      #
+      # `solkeycheck` is deliberately not run here: it cross-checks against a
+      # solkey checkout that CI does not have, and would only ever report
+      # SKIPPED.
+      - name: Build
+        uses: leanprover/lean-action@v1
+        with:
+          build-args: "Solidity"
+          use-mathlib-cache: "false"
+          test: "false"
+          lint: "false"
+          axiom-audit: "true"
+          axiom-audit-root: "Solidity"
+          axiom-audit-allow: "propext,Classical.choice,Quot.sound"

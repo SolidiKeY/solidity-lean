@@ -1,0 +1,18 @@
+# Expected output of:
+#   node out/cli.js examples/store.solj <packageDir>
+# (packageDir = the repo root containing lakefile.toml + Solidity.lean)
+#
+# Verdict lines (failure messages are indented below the failed judgment):
+
+j1 verified (source lines 5-5)
+j2 verified (source lines 8-10)
+j3 verified (source lines 13-13)
+j4 failed (source lines 16-16)
+  unsolved goals
+  ⊢ False
+3/4 verified
+
+# Exit code: 1 (ran ok, but j4 is intentionally failing).
+# Exit code semantics: 0 = ran ok & all verified; 1 = ran ok & some failed;
+# 2 = infrastructure error. With j4 removed, output ends at "3/3 verified"
+# and the exit code is 0.

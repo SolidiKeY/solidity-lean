@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+cmd="$(basename "$0")"
+script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    +*) shift ;;
+    *) break ;;
+  esac
+done
+
+if [ -f /etc/NIXOS ] && command -v nix-shell >/dev/null 2>&1; then
+    toolchain_file="$script_dir/../../../lean-toolchain"
+  if [ -f "$toolchain_file" ]; then
+    toolchain="$(cat "$toolchain_file")"
+    version="${toolchain##*:}"
+    for direct_cmd in /nix/store/*"lean4-$version"/bin/"$cmd"; do
+      if [ -x "$direct_cmd" ]; then
+        exec "$direct_cmd" "$@"
+      fi
+    done
+  fi
+
+  run_cmd="exec $cmd"
+  for arg in "$@"; do
+    printf -v quoted_arg " %q" "$arg"
+    run_cmd+="$quoted_arg"
+  done
+  exec nix-shell -p lean4 --run "$run_cmd"
+fi
+
+filtered_path=""
+IFS=:
+for entry in $PATH; do
+  entry_abs="$entry"
+  if [ -d "${entry:-.}" ]; then
+    entry_abs="$(cd "${entry:-.}" && pwd)"
+  fi
+  if [ "$entry_abs" != "$script_dir" ]; then
+    if [ -z "$filtered_path" ]; then
+      filtered_path="$entry"
+    else
+      filtered_path="$filtered_path:$entry"
+    fi
+  fi
+done
+unset IFS
+
+PATH="$filtered_path" exec "$cmd" "$@"

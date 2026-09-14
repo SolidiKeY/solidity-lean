@@ -1,0 +1,78 @@
+{
+  "name": "solloom",
+  "displayName": "SolLoom — Solidity specification & verification (Lean 4)",
+  "description": "Verify Solidity contracts against NatSpec specifications (@custom:requires / @custom:ensures / @custom:invariant, Dafny-style) and write raw dynamic-logic judgments (.solj), both proved by the Solidity Lean package.",
+  "version": "0.1.0",
+  "publisher": "solloom",
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Testing"
+  ],
+  "main": "./out/extension.js",
+  "activationEvents": [
+    "onLanguage:soljudge",
+    "onLanguage:solidity",
+    "workspaceContains:**/*.solj",
+    "workspaceContains:**/*.sol"
+  ],
+  "contributes": {
+    "languages": [
+      {
+        "id": "soljudge",
+        "aliases": [
+          "Solidity Judgment"
+        ],
+        "extensions": [
+          ".solj"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "soljudge",
+        "scopeName": "source.soljudge",
+        "path": "./syntaxes/soljudge.tmLanguage.json"
+      }
+    ],
+    "commands": [
+      {
+        "command": "solloom.verifyFile",
+        "title": "SolLoom: Verify Current File"
+      },
+      {
+        "command": "solloom.showGeneratedLean",
+        "title": "SolLoom: Show Generated Lean"
+      }
+    ],
+    "configuration": {
+      "title": "SolLoom",
+      "properties": {
+        "solloom.packageDir": {
+          "type": "string",
+          "default": "",
+          "description": "Path to the Lake package containing Solidity. Empty: auto-detect by walking the workspace folders for a lakefile.toml whose directory contains Solidity.lean."
+        },
+        "solloom.lakeCommand": {
+          "type": "string",
+          "default": "lake",
+          "description": "The lake executable used to run `lake env lean --json`. ~/.elan/bin is added to PATH automatically."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "compile": "tsc -p .",
+    "watch": "tsc -w -p .",
+    "test": "tsc -p . && node --test out/test/*.test.js"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "@types/vscode": "^1.85.0",
+    "typescript": "^5.4.0"
+  }
+}
