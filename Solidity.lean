@@ -2,6 +2,7 @@
 -- Import modules here that should be built as part of the library.
 import Solidity.KeySort
 import Solidity.AST
+import Solidity.RuleSyntax
 import Solidity.Rules
 import Solidity.RuleShapes
 import Solidity.Completeness

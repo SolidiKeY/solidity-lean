@@ -73,8 +73,23 @@ File map (`Solidity/` unless noted):
   can name its taclet without a string: a misspelling is a type error.
   Imports nothing; regenerate from the vendored `.key` with the `awk` recipe in
   its docstring when the table is re-pinned to a newer solkey revision.
-- `Rules.lean`: rule names, conditions, fresh-name conventions, helper
-  constructors, and the `stepCases` functions enumerating rewrite cases.
+- `RuleSyntax.lean`: the `sol_rule` declaration syntax and
+  `sol_assemble_rules`, which generate `RuleName`, `ruleEffect`, `ruleNames`
+  and `twinPairs` from it.  Imports `Lean` and nothing else — it generates
+  syntax, and the names it generates resolve where the generated code lands
+  — so the `SolKey` reader's dependency surface is unchanged.  Carries the
+  schema-variable table (`schemaVar`): the paper's convention that a
+  variable's *kind* is its name, made mechanical.  Two notes for anyone
+  extending the grammar: the KeY-side vocabulary is written as
+  *applications* (`save(p, t)`, `inBounds(p)`) because Lean's category
+  parser never reaches a non-reserved keyword alternative when a bare
+  `rule_expr` alternative exists, and reserving those words would change how
+  `sol!` programs lex; and Lean's lexer reads `sp.fld` as one identifier, so
+  the components are split in `exprView?`, exactly as
+  `SoliditySyntax.expandSolPathExpr` splits them for `sol!`.
+- `Rules.lean`: one `sol_rule` per rule of the calculus — conditions in the
+  calculus's schema variables, goals as KeY's guarded/obligation goals, and
+  the fresh-name conventions and helper constructors the residuals use.
   **Organised by family** — Storage (Step 1 unfold RHS / Step 2
   unfold LHS / Step 3 update, then require-assert, conditional, abrupt) ›
   Payment › Memory (same three steps) › Storage→Memory › Memory→Storage ›
@@ -578,21 +593,28 @@ File map (`Solidity/` unless noted):
   `Counterexamples/PreFixSortAnnotations.lean`.
 - `Solidity.lean`: root import file — add new modules here.
 
-When adding a rule: `RuleName` constructor (parameterized over
-`BinOp`/`UnOp`/`IncDec` where a KeY family is op-indexed), `ruleEffect`
-arm, `ruleNames` entries (every parameterized instance must be listed —
-classification requires it; give KeY-absent instances unsatisfiable guard
-conjuncts), `candidate` dispatch branch, `applicable_eq_candidate` case; if the rule has
-a non-empty residual block, also add a validation entry in
+When adding a rule: one `sol_rule` declaration, under the section the
+`Rules.lean` banners name.  Declaration order *is* the order of `RuleName`,
+`ruleEffect` and `ruleNames`, so put it where it belongs and write a box
+twin before its diamond twin (`twins` does both at once and fills
+`twinPairs`, which `CandidateStep.twins_box_first` checks; `FirstStepCase`
+takes the first applicable rule under `.both`, so the order decides which
+name a `⇝[.rule]` derivation pins).  A parameterized family
+(`(op : BinOp)` and friends) expands to every instance in `ruleNames` on its
+own — classification requires them all, so give a KeY-absent instance an
+unsatisfiable guard conjunct.  Then add the `candidate` dispatch branch and
+the `applicable_eq_candidate` case in `Uniqueness.lean`; if the rule has a
+non-empty residual block, also add a validation entry in
 `RuleValidation.lean`.
-Put the constructor, the arm and the entries under the section the
-`Rules.lean` banners name, in the same relative order in all three, and a box
-twin before its diamond twin (`CandidateStep.twins_box_first` enforces the
-last part; `FirstStepCase` takes the first applicable rule under `.both`, so
-the order decides which name a `⇝[.rule]` derivation pins).
+The condition is generated from the schema variables' *names*
+(`RuleSyntax.schemaVar`), so `sp.fld = se` already says
+`isSimple sp ∧ isSe se`; `where` appends the conjuncts no name carries and
+`where cond := …` replaces the conjunction outright.  Reach for
+`sol_rule NAME … := <term>` only where the goals consume the condition
+proof or the condition is a bespoke predicate — about ten of the rules.
 Membership proofs over the large `ruleNames` list use `decide`
 (`simp [ruleNames]` exceeds the recursion limit).
-A `ruleEffect` arm never writes a catch-all `| _ => []`: `block` is
+A generated `ruleEffect` arm never has a catch-all `| _ => []`: `block` is
 dependent on the condition proof, so pass that proof as a second match
 discriminant and list only the arms the `cond` admits — the match compiler
 refutes the rest, because the proof's type reduces to `False` there. An empty

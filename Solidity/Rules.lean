@@ -1,13 +1,20 @@
 import Solidity.AST
 import Solidity.KeyTaclets
+import Solidity.RuleSyntax
 
 /-!
 # The rules of the calculus
 
-One table, read three ways: `RuleName` names the rules, `ruleEffect`
-gives each one its condition and residual block, and `ruleNames` lists
-every instance the rule set contains.  The calculus has *only* these rules —
-there is no catch-all tier, so a statement no rule covers is stuck
+One `sol_rule` declaration per rule, from which `RuleName`, `ruleEffect` and
+`ruleNames` are *generated* (`sol_assemble_rules`, below the table).  The
+three used to be written out by hand, in the same order, with the condition
+spelled twice and a box/diamond twin duplicated verbatim except for one
+token; declaration order is now the order of all three, and it is
+load-bearing — `FirstStepCase` takes the first applicable rule under the
+block modality, so a box twin precedes its diamond twin.
+
+The calculus has *only* these rules — there is no catch-all tier, so a
+statement no rule covers is stuck
 (`Coverage.ResidueShape` enumerates those shapes, `Progress.lean` refutes
 totality).
 
@@ -47,7 +54,9 @@ checks the structure, including which of the 252 taclets the table claims.
 
 ## The organisation
 
-All three tables carry the same section banners, in this order:
+The table carries these section banners, in this order — and so, because
+they are generated from it in declaration order, do `RuleName`, `ruleEffect`
+and `ruleNames`:
 
 | Section |
 |---|
@@ -103,17 +112,55 @@ takes whichever the list reaches first, so the order decides which name a
 all twelve pairs.  It is also why `revertBox` precedes `revertDiamond` here
 even though solkey's rule file prints them the other way round.
 
+## How a rule is written
+
+The declarative form reads as the paper draws the rule — conclusion on the
+left of `⇝`, premises on the right, the sequent contexts `π`, `ω`, `φ`
+dropped because they are constant:
+
+```
+sol_rule storageFieldWriteSave from storageFieldWriteSave :
+  <[ sp.fld = se ]> ⇝ { storage := save(sp.fld, se) } <[ ]>
+```
+
+`<[ ]>` is the empty continuation `⟨[ π ω ]⟩φ`.  The *kind* of every schema
+variable is its name, which is the paper's central device and what makes the
+rules pairwise disjoint without an applicability predicate: `sp.fld = se`
+carries the condition `isSimple sp ∧ isSe se` and the pattern
+`WrappedExpr.field Kind.storage _ sp _`.  `where` adds the conjuncts no name
+can carry; `where cond := …` writes the condition out where a rule's
+spelling is irregular.  A guarded pair is two premise lines, as the paper
+stacks two sequents:
+
+```
+sol_rule storageIndexWriteArraySave twins from storageIndexWriteArraySave :
+  <[ arr[i] = se ]> ⇝
+    | inBounds(arr[i]) ⟹ { storage := save(arr[i], se) } <[ ]>
+    | else             ⟹ revert()
+  after read(se), resolve(arr[i])
+```
+
+`twins` is the box/diamond pair, box first, and it also fills `twinPairs`.
+`after` is `Guard.premises`: the operands read before the guard is decided,
+in the interpreter's order, which is why a guard evaluates to `Res Bool`.
+A family is one declaration too — `(op : BinOp)` generates the constructor
+parameter, the head conjuncts tying it to the statement's operator, and all
+fourteen `ruleNames` entries.  Inside a goal the statement's operator is
+`opS`; `op` is the family index, and the two are equal only under that
+conjunct.
+
+`sol_rule NAME … := <term>` is the opaque form, for the rules whose
+condition is a bespoke predicate or whose goals consume the condition proof.
+The grammar and the schema-variable table are `RuleSyntax.lean`.
+
 ## Adding or changing a rule
 
-Place the constructor, its `ruleEffect` arm and its `ruleNames`
-entries in the section the banners name, and in the same relative
-order in all three — a box twin before its diamond twin.  Every instance of a
-parameterized family must be listed in `ruleNames` (classification
-requires it); give a KeY-absent instance an unsatisfiable guard conjunct.
-Keep the new condition disjoint from every other, and update `candidate` and
+Write the `sol_rule` under the section the banners name — declaration order
+is `ruleNames` order, and a box twin comes before its diamond twin.  Keep
+the new condition disjoint from every other, and update `candidate` and
 `applicable_eq_candidate` in `Uniqueness.lean`.  `transferWithCallback` is
-the one rule that never appears in `ruleNames`: it is KeY's `\choice`
-alternative and lives in `ruleNamesWithCallback`.
+marked `alternative`: it is KeY's `\choice` alternative, never appears in
+`ruleNames`, and lives in `ruleNamesWithCallback`.
 -/
 
 
@@ -141,435 +188,6 @@ def applies : CaseMode -> Modality -> Bool
 
 end CaseMode
 
-inductive RuleName where
-
-  /- ## Storage Rules
-
-  Solidity evaluates the right-hand side
-  of an assignment before the left-hand side, and the rules follow that order:
-  Step 1 unfolds the right-hand side, Step 2 the left-hand side, Step 3 generates
-  an update.
-  -/
-
-  /- ### Step 1: unfolding the right-hand side
-
-  `unfold_rightFst` instances (the rule set; solkey
-  `storageFieldRead_unfold_rightFst`, `storageIndexRead_unfold_rightFst`).
-  -/
-  | storageFieldReadUnfoldRightFst
-  | storageIndexReadUnfoldRightFst
-
-  /- `unfold_rightSnd`.  The push-argument rule is
-  standalone: a push receiver is not an assignment right-hand side, but its
-  argument is evaluated before the update.
-  -/
-  | storageIndexReadUnfoldRightSndIndex
-  | storagePushValueUnfoldRightSndArgument
-
-  /- `unfold_rightSndResult` (the rule set; solkey also folds
-  `storageFieldWriteCaptureSrc` and `storageIndexWriteStorageRefRhsCapture`
-  in here).
-  -/
-  | storageFieldReadUnfoldRightSndResult
-  | storageIndexReadUnfoldRightSndResult
-
-  /- ### Step 2: unfolding the left-hand side
-
-  `unfold_leftFst` instances.  The calculus's `RootRhs` pair
-  is merged: Lean's `isSimple rhs` already admits a global root, which the
-  calculus's `SimpleExpression` excludes.
-  -/
-  | storageFieldWriteUnfoldLeftFst
-  | storageIndexWriteUnfoldLeftFst
-
-  /- Storage receiver and delete-target simplification (the calculus,
-  the rule set).  Not instances of the assignment-shaped template: their
-  active statements are `delete`, `push`, `pop` or a push-return binding.  The
-  calculus's `storageFieldDelete_unfold_leftFst` and `storageIndexDelete_unfold_leftFst`
-  are merged into one rule over both target shapes.
-  -/
-  | storageDeleteComplexTarget
-  | storagePushValueUnfoldLeftFstReceiver
-  | storagePushUnfoldLeftFstReceiver
-  | storagePopUnfoldLeftFstReceiver
-  | storageLocalRootPushUnfoldLeftFstReceiver
-
-  /- `unfold_leftSnd`.  The calculus's `Ref` instance is
-  merged: Lean's rule does not split on a reference source.
-  -/
-  | storageIndexWriteUnfoldLeftSndIndex
-
-  /- ### Step 3: generating an update
-
-  Declarations.  the calculus states the rule once
-  for storage and names its value instances here too, so the value pair sits
-  beside the storage pair.
-  -/
-  | storageLocalDeclInitDrop
-  | storageLocalDeclSkip
-  /- Value-variable declarations (KeY `localValueDeclInitDrop`/`valueDeclSkip`)
-  and simple local assignment (KeY `localValueAssign`). -/
-  | localValueDeclInitDrop
-  | valueDeclSkip
-
-  /- Simple targets.  The calculus's `storageRootDelete`,
-  `storageFieldDelete` and `storageIndexDelete` are one Lean rule over all three
-  simple target shapes.
-  -/
-  | storageFieldWriteSave
-  | storageFieldWriteCopySource
-  | storageRootWriteStore
-  | storageRootWriteCopySource
-  | storageLocalRootRebind
-  | storageFieldReadFind
-  | storageRootReadSelect
-  | storageFieldReadBindLocalRoot
-  | storageFieldReadStoreRoot
-  | storageDeleteSimpleTarget
-
-  /- Mapping targets.  Mapping selectors generate no
-  bounds branch: mappings have no length. -/
-  | storageIndexWriteMappingSave
-  | storageIndexWriteMappingCopySource
-  | storageIndexReadMappingFind
-  | storageIndexReadMappingBindLocalRoot
-  | storageIndexReadMappingStoreRoot
-
-  /- Array targets.  The calculus stacks the bounds check
-  as two sequents; Lean splits each rule into a box/diamond twin pair.  **The box
-  twin is listed first**, here and in `ruleNames` — see the `Box`/`Diamond`
-  note in the module docstring.
-  -/
-  | storageIndexWriteArraySaveBox
-  | storageIndexWriteArraySaveDiamond
-  | storageIndexWriteArrayCopySourceBox
-  | storageIndexWriteArrayCopySourceDiamond
-  | storageIndexReadArrayFindBox
-  | storageIndexReadArrayFindDiamond
-  | storageIndexReadArrayBindLocalRootBox
-  | storageIndexReadArrayBindLocalRootDiamond
-  | storageIndexReadArrayStoreRootBox
-  | storageIndexReadArrayStoreRootDiamond
-
-  /- Push and pop.  The calculus's `sizeNotNegative`
-  is a first-order side condition, not a rewrite rule; its
-  Lean counterpart is `WellFormedConsumers.lean`.
-  -/
-  | storagePushValueSave
-  | storagePushValueCopySource
-  | storagePushLengthSave
-  | storageLocalRootPushBind
-  | storagePopSaveBox
-  | storagePopSaveDiamond
-
-  /- ### Require and assert (the calculus, the rule set) -/
-  /- Require: KeY `requireConditionCapture` and `requireSimple` (the
-  Holds/Reverts split of `requireSimple` lives in the semantic layer:
-  the interpreter reverts on false, and `check` routes the revert
-  per modality — diamond `c ∧ φ`, box `c → φ`). -/
-  | requireConditionCapture
-  /- Assert: KeY `assertConditionCapture` and `assertSimple` (the sequent
-  split of `assertSimple` lives in the semantic layer). -/
-  | assertConditionCapture
-  | requireSimple
-  | assertSimple
-
-  /- ### Conditional statements (the calculus, the rule set)
-
-  The calculus's `ifElseSplit` is a sequent rule — two goals, so no `BlockStep` —
-  and lives in `JudgmentSplit.ite_split`.
-  -/
-
-  /- If-then-else (upstream `ifElseUnfold`/`ifElseTrue`/`ifElseFalse`/
-  `ifElseNegated`, the rule set): condition-directed rewrites per
-  plan D3(b).  All four now carry solkey's own program-rule names, which lift
-  the term-level `ifthenelse_true`/`ifthenelse_false`/`ifthenelse_negated`
-  to statements.  `ifElseUnfold` covers KeY's `ifUnfold` *and* `ifElseUnfold`,
-  because `Stmt.ite` always carries both branches; the calculus's `ifElseSplit`
-  is a sequent rule and lives in `JudgmentSplit.ite_split`. -/
-  | ifElseUnfold
-  | ifElseTrue
-  | ifElseFalse
-  | ifElseNegated
-
-  /- ### Abrupt termination (the calculus, the rule set)
-
-  the rule set prints the diamond rule first; here the box twin leads, as it must
-  everywhere (module docstring, `Box`/`Diamond`).
-  -/
-
-  /- Modality rules: KeY `revertBox`/`revertDiamond` consume a `revert();`
-  (the truth value of the enclosing modality lives in the semantic layer). -/
-  | revertBox
-  | revertDiamond
-
-  /- ## Payment Rules
-
-  The calculus splits the terminal
-  transfer rule into a box and a diamond rule; Lean's `transferNoCallback` is
-  modality-generic and carries both.
-  -/
-
-  /- Payments: KeY `transfer_unfold_leftFstReceiver`,
-  `transfer_unfold_rightSndArgument`, `transferNoCallback`. -/
-  | transferUnfoldLeftFstReceiver
-  | transferUnfoldRightSndArgument
-  | transferNoCallback
-  /- KeY option `transferSemantics:withCallback`: the re-entrancy-aware
-  transfer. Same syntactic condition and (empty) residual as
-  `transferNoCallback` — KeY makes the two a *choice*, not coexisting
-  rules — so it lives in the alternative rule list
-  `ruleNamesWithCallback`, never in `ruleNames`. Its semantic
-  content (the contract-invariant / havoc branch split) is
-  `CallbackSemantics.holdsC_transfer_split`. -/
-  | transferWithCallback
-
-  /- ## Memory Rules
-
-  The same three steps.
-  -/
-
-  /- ### Step 1: unfolding the right-hand side -/
-  | memoryFieldReadUnfoldRightFst
-  | memoryIndexReadUnfoldRightFst
-  | memoryIndexReadUnfoldRightSndIndex
-  | memoryWriteUnfoldRightSndResult
-  | memoryFieldReadUnfoldRightSndResult
-  | memoryIndexReadUnfoldRightSndResult
-
-  /- ### Step 2: unfolding the left-hand side
-
-  As in storage, the two delete unfolds are merged into one rule.
-  -/
-  | memoryFieldWriteUnfoldLeftFst
-  | memoryIndexWriteUnfoldLeftFst
-  | memoryDeleteComplexTarget
-  | memoryIndexWriteUnfoldLeftSndIndex
-
-  /- ### Step 3: generating an update
-
-  Declarations; `memoryArrayFreshAlloc` is merged into
-  `memoryDeclFreshAlloc`.
-  -/
-  | memoryLocalDeclInitDrop
-  | memoryDeclFreshAlloc
-
-  /- Simple targets.  The calculus's five delete rules —
-  root fresh-rebind, field primitive/reference, index primitive/reference — are
-  one Lean rule.
-  -/
-  | memoryFieldWriteStore
-  | memoryRootAlias
-  | memoryFieldReadHeap
-  | memoryFieldReadAliasRoot
-  | memoryDeleteSimpleTarget
-
-  /- Array targets, box twin first. -/
-  | memoryIndexWriteStoreBox
-  | memoryIndexWriteStoreDiamond
-  | memoryIndexReadHeapBox
-  | memoryIndexReadHeapDiamond
-  | memoryIndexReadAliasRootBox
-  | memoryIndexReadAliasRootDiamond
-
-  /- ## Storage to Memory Rules
-
-  the calculus, the rule set: a deep copy through a memory root.
-  `memoryStorageCopy` is the simple-path form (`mv = sp;`, fresh identity plus
-  `copySt`); `memoryStorageCopyUnfold` captures a complex storage path into a
-  storage alias first.  Both were once silently absorbed by `memoryRootAlias`,
-  whose condition did not restrict the right-hand side's kind.
-  -/
-  | memoryStorageCopyUnfold
-  | memoryStorageCopy
-
-  /- ## Memory to Storage Rules
-
-  The calculus's
-  `memoryToStorageFieldCopyField` is merged into `memoryToStorageFieldCopyRoot`
-  plus the unfolds; the array index rule is a box/diamond twin pair.
-  -/
-  | memoryToStorageUnfoldLeftFstTarget
-  | memoryToStorageUnfoldLeftSndTargetIndex
-  | memoryToStorageFieldCopyRoot
-  | memoryToStorageIndexMappingCopyRoot
-  | memoryToStorageIndexArrayCopyRootBox
-  | memoryToStorageIndexArrayCopyRootDiamond
-  | memoryToStorageStoreRoot
-
-  /- ## Arithmetic
-
-  the calculus; the rule set (local and storage targets) and
-  the rule set (memory targets).  Each rule of the calculus is schematic in the
-  operator or the inc/dec variant, and Lean has one instance per member.  The
-  calculus's `unaryMinusAssignment` is `unopAssignment .neg`, listed with the
-  operator tier below because its `.not` sibling is not arithmetic.
-  -/
-
-  /- Local targets (`localOpAssign`, `localDivAssign`). -/
-  /- Local compound assignment, one KeY taclet per op instance
-  (`localAddAssign` = `localCompoundAssign .add`, ...): terminal
-  `lv ⊕= se;` on a stack variable. -/
-  | localCompoundAssign (op : BinOp)
-
-  /- Storage targets: `storageRootOpAssign`, `storageFieldOpAssign`,
-  `storageIndexMappingOpAssign` / `storageIndexArrayOpAssign` — merged into one
-  Lean rule — and `storageRootIncrement`. -/
-
-  /- Storage compound assignments, one KeY taclet per op instance
-  (`storageRootAddAssign` = `storageRootCompoundAssign .add`, ...);
-  unsatisfiable for ops without a compound form (`**`, comparisons,
-  boolean connectives). -/
-  | storageRootCompoundAssign (op : BinOp)
-  | storageFieldCompoundAssign (op : BinOp)
-  | storageIndexCompoundAssign (op : BinOp)
-  | storageFieldCompoundAssignUnfoldLeftFst (op : BinOp)
-  | storageIndexCompoundAssignUnfoldLeftFst (op : BinOp)
-  /- Increment/decrement statement forms (`++age;`), one KeY taclet per
-  `IncDec` instance (`storageRootPreincrement` = `storageRootIncDec
-  .preInc`, ...), their complex-path unfolds, the assignment forms
-  (`result = ++age;`), and the local-variable assignment form
-  (`localAssignPreincrement`, ...; KeY `localDeclPreincrement` is covered
-  by `localValueDeclInitDrop` followed by `localAssignIncDec`). -/
-  | storageRootIncDec (op : IncDec)
-  | storageFieldIncDec (op : IncDec)
-  | storageIndexIncDec (op : IncDec)
-  | storageFieldIncDecUnfoldLeftFst (op : IncDec)
-  | storageIndexIncDecUnfoldLeftFst (op : IncDec)
-  | storageRootIncDecAssignment (op : IncDec)
-  | storageFieldIncDecAssignment (op : IncDec)
-  | storageIndexIncDecAssignment (op : IncDec)
-
-  /- Memory targets: `memoryFieldOpAssign`, `memoryFieldDivAssign`,
-  `memoryIndexArrayOpAssign`, `memoryFieldIncrement`. -/
-
-  /- Memory-target compound assignments, the storage terminals with the
-  heap read/write in place of `find`/`save`: the calculus's
-  `memoryFieldOpAssign` / `memoryFieldDivAssign` / `memoryIndexArrayOpAssign`
-  (the rule set, "Memory-target arithmetic"), solkey's
-  `memoryField{Add,Sub,Mul,Div,Mod}Assign` and `memoryIndexArray*Assign`
-  plus their `_unfold_leftFst` twins.  **No root form** — a memory root is
-  an identity, not a value cell — and **no mapping form**: memory has no
-  mappings. -/
-  | memoryFieldCompoundAssign (op : BinOp)
-  | memoryIndexCompoundAssign (op : BinOp)
-  | memoryFieldCompoundAssignUnfoldLeftFst (op : BinOp)
-  | memoryIndexCompoundAssignUnfoldLeftFst (op : BinOp)
-  /- The memory twins of the increment/decrement family: the calculus's
-  `memoryFieldIncrement`, solkey's `memoryField{Pre,Post}{in,de}crement`
-  and `memoryIndexArray{Pre,Post}{in,de}crement` with their `Assignment`
-  and `_unfold_leftFst` forms.  Again no root and no mapping form. -/
-  | memoryFieldIncDec (op : IncDec)
-  | memoryIndexIncDec (op : IncDec)
-  | memoryFieldIncDecUnfoldLeftFst (op : IncDec)
-  | memoryIndexIncDecUnfoldLeftFst (op : IncDec)
-  | memoryFieldIncDecAssignment (op : IncDec)
-  | memoryIndexIncDecAssignment (op : IncDec)
-
-  /- ## Rules with no counterpart upstream
-
-  solkey's finer tiers and the Lean-only rules.  Nothing checks this
-  direction: a Lean rule is deliberately allowed to be finer than the
-  presentation upstream, and requiring an upstream name for each would be a
-  claim nobody makes.
-  -/
-
-  /- solkey's expression-operator tier. -/
-  /- Binary-operator families, one KeY taclet per `op` instance:
-  `binopUnfoldLeft op` = `<op>_unfold_left` / `<op>CaptureLhs`,
-  `binopUnfoldRight op` = `<op>_unfold_right` / `<op>CaptureRhs`
-  (unsatisfiable for the short-circuiting `&&`/`||`),
-  `binopUnfoldResult op` = `<op>_unfold_result` (arithmetic ops only),
-  `binopAssignment op` = `<op>Assignment`. -/
-  | binopUnfoldLeft (op : BinOp)
-  | binopUnfoldRight (op : BinOp)
-  | binopUnfoldResult (op : BinOp)
-  | binopAssignment (op : BinOp)
-  /- Short-circuit RHS: KeY `logicalAndShortCircuitRhs` /
-  `logicalOrShortCircuitRhs`. KeY rewrites `v = se && nse;` into the
-  ternary `v = se ? nse : false;`; Lean keeps the statement-level `if`
-  residual (same meaning, and it predates `mkTernary`). The interpreter
-  itself short-circuits, so the rewrite is exact. -/
-  | logicalAndShortCircuitRhs
-  | logicalOrShortCircuitRhs
-  /- Ternary `v = c ? e1 : e2;`: KeY `ternaryCaptureCond` hoists a
-  nonsimple condition into `pv`; `ternaryToIf` lowers to the statement
-  `if` for a stack target; `ternaryToIfStorage` is the twin for a
-  storage-path target (which is not a KeY `Variable`). -/
-  | ternaryCaptureCond
-  | ternaryToIf
-  | ternaryToIfStorage
-  /- Unary operators: KeY `logicalNotCapture`/`logicalNotAssignment` and
-  `unaryMinusCapture`/`unaryMinusAssignment`. -/
-  | unopCapture (op : UnOp)
-  | unopAssignment (op : UnOp)
-
-  /- solkey's capture partition: the location-neutral value hoists.
-  -/
-
-  /- Evaluation-order RHS captures: KeY `storageRootWriteValueRhsCapture`,
-  `fieldWriteValueRhsCapture`, `indexWriteValueRhsCapture` — hoist a
-  nonsimple primitive RHS into `pv` before the storage write resolves
-  its target (RHS-before-LHS evaluation order). The Lean conditions
-  exclude the cells other rules already cover: arithmetic operators over
-  simple operands go to `binopUnfoldResult`, and the stack-lhs operator
-  families keep their own rules. -/
-  | storageRootWriteValueRhsCapture
-  | fieldWriteValueRhsCapture
-  | indexWriteValueRhsCapture
-  /- Compound-assignment RHS capture: KeY
-  `{add,sub,mul,div,mod}AssignValueRhsCapture` — location-neutral hoist
-  of a nonsimple compound-assign RHS into `pv` before the target rules
-  fire (RHS-before-LHS evaluation order, like the `*ValueRhsCapture`
-  trio for plain assignment). -/
-  | compoundAssignValueRhsCapture (op : BinOp)
-
-  /- Stack locals: solkey `localValueAssign`, `localAssign*crement` and
-  `local*crement`. -/
-  | localValueAssign
-  | localAssignIncDec (op : IncDec)
-  /- Bare increment/decrement of a stack local as a statement of its own:
-  KeY `localPreincrement`, `localPostincrement`, `localPredecrement`,
-  `localPostdecrement` (`localIncDec .preInc`, ...). -/
-  | localIncDec (op : IncDec)
-
-  /- Function calls.
-  -/
-
-  /- Function calls: `functionBodyExpand` is KeY's inlining taclet
-  (`ExpandFunctionBody`); `functionCallArgCapture` hoists the leftmost
-  complex argument first — `unfoldArgument` on solkey's own backlog
-  (`~/projects/solkey/docs/net.md` §5.1), so Lean goes beyond solkey here.
-  The name is solkey's, not the calculus's: the rule set declares no rule
-  called `unfoldArgument`, which is why nothing upstream names
-  it and `functionCallArgCapture` is one of the Lean-only rules. -/
-  | functionCallArgCapture
-  | functionBodyExpand
-
-  /- Lean-only rules: front-end normalisations and scratch bindings with no
-  taclet of their own. -/
-  | storagePlaceAlias
-  /- Lean-only coverage rules.  `exprStmtCapture` parks a bare non-incDec
-  expression statement in the scratch value alias: the residual `pv = e;`
-  declaration performs the same evaluation (same reverts, same
-  incDec/push side effects) and differs only in the scratch binding —
-  sound modulo `RuleSoundness.aliasNames` (`exprStmtCapture_sound`).
-  `pushAssignLower`/`pushFieldAssignLower` rewrite the push-assignment
-  sugar to the very `Stmt.assign` form `Semantics.execStmt` delegates
-  to, so original and residual execute definitionally alike
-  (`pushAssignLower_sound`, `pushFieldAssignLower_sound`). -/
-  | exprStmtCapture
-  | pushAssignLower
-  | pushFieldAssignLower
-  | storagePushLhsToPushValue
-  | storageToMemoryDeclUnfoldRightFst
-  | storageToMemoryDeclCopyField
-  | storageToMemoryDeclCopyRoot
-  | memoryToStorageUnfoldRightFstSource
-  | memoryFieldWriteCopy
-  | memoryIndexWriteCopyBox
-  | memoryIndexWriteCopyDiamond
-  deriving DecidableEq, Repr
 
   /-! ### The KeY side of a rule: updates, guards, goals
 
@@ -869,9 +487,6 @@ inductive RuleName where
 
   end StepEffect
 
-  structure StepCase where
-  rule : RuleName
-  effect : StepEffect
 
   namespace Rules
 
@@ -885,7 +500,7 @@ inductive RuleName where
   def valueAliasName : Name := "pv"
   def indexAliasName : Name := "idx"
   /-- The value operand of an `=` / `op=` statement, frozen by an LHS-unfold
-  rule *before* it captures any part of the target.  Distinct from `pv`: the
+  sol_rule *before* it captures any part of the target.  Distinct from `pv`: the
   `*ValueRhsCapture` family already binds `pv`, and its residual is consumed
   immediately afterwards by an LHS-unfold rule.  (solkey spells it `rv` too.) -/
   def rhsValueAliasName : Name := "rv"
@@ -1059,7 +674,7 @@ inductive RuleName where
 
   /-- RHS shapes claimed by the `*ValueRhsCapture` trio (KeY
   `NonSimpleExpression[primitive]` restricted to the cells no other Lean
-  rule covers): operator expressions, except an arithmetic operator over
+  sol_rule covers): operator expressions, except an arithmetic operator over
   simple operands, which `binopUnfoldResult` already captures. -/
   def valueRhsCaptureRhs (rhs : WrappedExpr) : Prop :=
   match rhs with
@@ -1790,9 +1405,16 @@ inductive RuleName where
     | .postInc => KeyOrigin.taclet KeyTaclet.localPostincrement
     | .postDec => KeyOrigin.taclet KeyTaclet.localPostdecrement
 
-  def ruleEffect : RuleName -> StepEffect
+  /-! ## The rules
 
-  /- ## Storage Rules
+  One `rule` declaration each, in the order the banners name, assembled
+  into `RuleName`, `ruleEffect` and `ruleNames` by `#assemble_rules`
+  below.  Declaration order is the order of all three, and it is
+  load-bearing: `FirstStepCase` takes the first applicable rule under the
+  block modality, so a box twin precedes its diamond twin. -/
+
+  /-!
+  ## Storage Rules
 
   Solidity evaluates the right-hand side
   of an assignment before the left-hand side, and the rules follow that order:
@@ -1800,12 +1422,14 @@ inductive RuleName where
   an update.
   -/
 
-  /- ### Step 1: unfolding the right-hand side
+  /-!
+  ### Step 1: unfolding the right-hand side
 
   `unfold_rightFst` instances (the rule set; solkey
   `storageFieldRead_unfold_rightFst`, `storageIndexRead_unfold_rightFst`).
   -/
-  | .storageFieldReadUnfoldRightFst => withOrigin (KeyOrigin.taclet KeyTaclet.storageFieldRead_unfold_rightFst) <|
+
+  sol_rule storageFieldReadUnfoldRightFst := withOrigin (KeyOrigin.taclet KeyTaclet.storageFieldRead_unfold_rightFst) <|
       assignEffect
         (fun lhs rhs =>
           match rhs with
@@ -1816,7 +1440,8 @@ inductive RuleName where
           match rhs, h with
           | WrappedExpr.field Kind.storage ty nsp f, _ =>
               fieldReadResolveBlock Kind.storage storagePathAliasName lhs ty nsp f)
-  | .storageIndexReadUnfoldRightFst => withOrigin (KeyOrigin.taclet KeyTaclet.storageIndexRead_unfold_rightFst) <|
+
+  sol_rule storageIndexReadUnfoldRightFst := withOrigin (KeyOrigin.taclet KeyTaclet.storageIndexRead_unfold_rightFst) <|
       assignEffect
         (fun lhs rhs =>
           match rhs with
@@ -1832,7 +1457,14 @@ inductive RuleName where
   standalone: a push receiver is not an assignment right-hand side, but its
   argument is evaluated before the update.
   -/
-  | .storageIndexReadUnfoldRightSndIndex => withOrigin (KeyOrigin.taclet KeyTaclet.storageIndexRead_unfold_rightSndIndex) <|
+
+  /-!
+  `unfold_rightSnd`.  The push-argument rule is
+  standalone: a push receiver is not an assignment right-hand side, but its
+  argument is evaluated before the update.
+  -/
+
+  sol_rule storageIndexReadUnfoldRightSndIndex := withOrigin (KeyOrigin.taclet KeyTaclet.storageIndexRead_unfold_rightSndIndex) <|
       assignEffect
         (fun lhs rhs =>
           match rhs with
@@ -1846,7 +1478,8 @@ inductive RuleName where
               [ captureIndex nse,
                 Stmt.assign lhs
                   (WrappedExpr.index Kind.storage ty sp (indexAlias nse)) ])
-  | .storagePushValueUnfoldRightSndArgument => withOrigin (KeyOrigin.taclet KeyTaclet.storagePushValue_unfold_rightSndArgument) <|
+
+  sol_rule storagePushValueUnfoldRightSndArgument := withOrigin (KeyOrigin.taclet KeyTaclet.storagePushValue_unfold_rightSndArgument) <|
       pushEffect
         (fun sp value =>
           sp.kind = Kind.storage ∧ isSimple sp ∧
@@ -1863,7 +1496,14 @@ inductive RuleName where
   `storageFieldWriteCaptureSrc` and `storageIndexWriteStorageRefRhsCapture`
   in here).
   -/
-  | .storageFieldReadUnfoldRightSndResult => withOrigin (KeyOrigin.merged [KeyTaclet.storageFieldRead_unfold_rightSndResult, KeyTaclet.storageFieldWriteCaptureSrc]) <|
+
+  /-!
+  `unfold_rightSndResult` (the rule set; solkey also folds
+  `storageFieldWriteCaptureSrc` and `storageIndexWriteStorageRefRhsCapture`
+  in here).
+  -/
+
+  sol_rule storageFieldReadUnfoldRightSndResult := withOrigin (KeyOrigin.merged [KeyTaclet.storageFieldRead_unfold_rightSndResult, KeyTaclet.storageFieldWriteCaptureSrc]) <|
       assignEffect
         (fun nlhs rhs =>
           match rhs with
@@ -1871,7 +1511,8 @@ inductive RuleName where
               isStorage nlhs ∧ isComplex nlhs ∧ isSimple sp
           | _ => False)
         (fun nlhs rhs _ => unfoldGoal <| captureAssignBlock nlhs rhs)
-  | .storageIndexReadUnfoldRightSndResult => withOrigin (KeyOrigin.merged [KeyTaclet.storageIndexRead_unfold_rightSndResult, KeyTaclet.storageIndexWriteStorageRefRhsCapture]) <|
+
+  sol_rule storageIndexReadUnfoldRightSndResult := withOrigin (KeyOrigin.merged [KeyTaclet.storageIndexRead_unfold_rightSndResult, KeyTaclet.storageIndexWriteStorageRefRhsCapture]) <|
       assignEffect
         (fun nlhs rhs =>
           match rhs with
@@ -1886,7 +1527,16 @@ inductive RuleName where
   is merged: Lean's `isSimple rhs` already admits a global root, which the
   calculus's `SimpleExpression` excludes.
   -/
-  | .storageFieldWriteUnfoldLeftFst => withOrigin (KeyOrigin.merged [KeyTaclet.storageFieldWrite_unfold_leftFst, KeyTaclet.storageFieldWriteRootRhs_unfold_leftFst]) <|
+
+  /-!
+  ### Step 2: unfolding the left-hand side
+
+  `unfold_leftFst` instances.  The calculus's `RootRhs` pair
+  is merged: Lean's `isSimple rhs` already admits a global root, which the
+  calculus's `SimpleExpression` excludes.
+  -/
+
+  sol_rule storageFieldWriteUnfoldLeftFst := withOrigin (KeyOrigin.merged [KeyTaclet.storageFieldWrite_unfold_leftFst, KeyTaclet.storageFieldWriteRootRhs_unfold_leftFst]) <|
       assignEffect
         (fun lhs rhs =>
           match (lhs : WrappedExpr) with
@@ -1897,7 +1547,8 @@ inductive RuleName where
           match lhs, h with
           | ⟨WrappedExpr.field Kind.storage ty nsp f, _⟩, _ =>
               fieldWriteResolveBlock Kind.storage storagePathAliasName ty nsp f rhs)
-  | .storageIndexWriteUnfoldLeftFst => withOrigin (KeyOrigin.merged [KeyTaclet.storageIndexWrite_unfold_leftFst, KeyTaclet.storageIndexWriteRootRhs_unfold_leftFst]) <|
+
+  sol_rule storageIndexWriteUnfoldLeftFst := withOrigin (KeyOrigin.merged [KeyTaclet.storageIndexWrite_unfold_leftFst, KeyTaclet.storageIndexWriteRootRhs_unfold_leftFst]) <|
       assignEffect
         (fun lhs rhs =>
           match (lhs : WrappedExpr) with
@@ -1915,11 +1566,21 @@ inductive RuleName where
   calculus's `storageFieldDelete_unfold_leftFst` and `storageIndexDelete_unfold_leftFst`
   are merged into one rule over both target shapes.
   -/
-  | .storageDeleteComplexTarget => withOrigin (KeyOrigin.merged [KeyTaclet.storageFieldDelete_unfold_leftFst, KeyTaclet.storageIndexDelete_unfold_leftFst, KeyTaclet.storageIndexDeleteNonSimpleIndexCapture]) <|
+
+  /-!
+  Storage receiver and delete-target simplification (the calculus,
+  the rule set).  Not instances of the assignment-shaped template: their
+  active statements are `delete`, `push`, `pop` or a push-return binding.  The
+  calculus's `storageFieldDelete_unfold_leftFst` and `storageIndexDelete_unfold_leftFst`
+  are merged into one rule over both target shapes.
+  -/
+
+  sol_rule storageDeleteComplexTarget := withOrigin (KeyOrigin.merged [KeyTaclet.storageFieldDelete_unfold_leftFst, KeyTaclet.storageIndexDelete_unfold_leftFst, KeyTaclet.storageIndexDeleteNonSimpleIndexCapture]) <|
       deleteEffect
         (fun target => isComplexStorageDeleteTarget target)
         (fun target h => unfoldGoal <| storageDeleteComplexTargetBlock (target : WrappedExpr) h)
-  | .storagePushValueUnfoldLeftFstReceiver => withOrigin (KeyOrigin.taclet KeyTaclet.storagePushValue_unfold_leftFstReceiver) <|
+
+  sol_rule storagePushValueUnfoldLeftFstReceiver := withOrigin (KeyOrigin.taclet KeyTaclet.storagePushValue_unfold_leftFstReceiver) <|
       pushEffect
         (fun nsp value => nsp.kind = Kind.storage ∧ isComplex nsp ∧ value.isSome)
         (fun nsp value h => unfoldGoal <|
@@ -1927,19 +1588,22 @@ inductive RuleName where
           | some rhs, _ =>
               [ captureStoragePath nsp,
                 Stmt.push (aliasPlace Kind.storage nsp.ty storagePathAliasName) (some rhs) ])
-  | .storagePushUnfoldLeftFstReceiver => withOrigin (KeyOrigin.taclet KeyTaclet.storagePush_unfold_leftFstReceiver) <|
+
+  sol_rule storagePushUnfoldLeftFstReceiver := withOrigin (KeyOrigin.taclet KeyTaclet.storagePush_unfold_leftFstReceiver) <|
       pushEffect
         (fun nsp value => nsp.kind = Kind.storage ∧ isComplex nsp ∧ value = none)
         (fun nsp _ _ => unfoldGoal <|
           [ captureStoragePath nsp,
             Stmt.push (aliasPlace Kind.storage nsp.ty storagePathAliasName) none ])
-  | .storagePopUnfoldLeftFstReceiver => withOrigin (KeyOrigin.taclet KeyTaclet.storagePop_unfold_leftFstReceiver) <|
+
+  sol_rule storagePopUnfoldLeftFstReceiver := withOrigin (KeyOrigin.taclet KeyTaclet.storagePop_unfold_leftFstReceiver) <|
       popEffect CaseMode.both
         (fun nsp => nsp.kind = Kind.storage ∧ isComplex nsp)
         (fun nsp _ => unfoldGoal <|
           [ captureStoragePath nsp,
             Stmt.pop (aliasPlace Kind.storage nsp.ty storagePathAliasName) ])
-  | .storageLocalRootPushUnfoldLeftFstReceiver => withOrigin (KeyOrigin.taclet KeyTaclet.storageLocalRootPush_unfold_leftFstReceiver) <|
+
+  sol_rule storageLocalRootPushUnfoldLeftFstReceiver := withOrigin (KeyOrigin.taclet KeyTaclet.storageLocalRootPush_unfold_leftFstReceiver) <|
       assignEffect
         (fun lhs rhs =>
           match rhs with
@@ -1967,7 +1631,13 @@ inductive RuleName where
   /- `unfold_leftSnd`.  The calculus's `Ref` instance is
   merged: Lean's rule does not split on a reference source.
   -/
-  | .storageIndexWriteUnfoldLeftSndIndex => withOrigin (KeyOrigin.merged [KeyTaclet.storageIndexWriteNonSimpleIndexCapture, KeyTaclet.storageIndexWriteRootRhsNonSimpleIndexCapture]) <|
+
+  /-!
+  `unfold_leftSnd`.  The calculus's `Ref` instance is
+  merged: Lean's rule does not split on a reference source.
+  -/
+
+  sol_rule storageIndexWriteUnfoldLeftSndIndex := withOrigin (KeyOrigin.merged [KeyTaclet.storageIndexWriteNonSimpleIndexCapture, KeyTaclet.storageIndexWriteRootRhsNonSimpleIndexCapture]) <|
       assignEffect
         (fun lhs rhs =>
           match (lhs : WrappedExpr) with
@@ -1985,7 +1655,16 @@ inductive RuleName where
   for storage and names its value instances here too, so the value pair sits
   beside the storage pair.
   -/
-  | .storageLocalDeclInitDrop => withOrigin (KeyOrigin.taclet KeyTaclet.storageLocalDeclInitDrop) <|
+
+  /-!
+  ### Step 3: generating an update
+
+  Declarations.  the calculus states the rule once
+  for storage and names its value instances here too, so the value pair sits
+  beside the storage pair.
+  -/
+
+  sol_rule storageLocalDeclInitDrop := withOrigin (KeyOrigin.taclet KeyTaclet.storageLocalDeclInitDrop) <|
       storageDeclEffect
         (fun _ _ init => init.isSome)
         (fun ty name init h => unfoldGoal <|
@@ -1993,12 +1672,19 @@ inductive RuleName where
           | some rhs, _ =>
               [ Stmt.storageDecl ty name none,
                 Stmt.assign (SoliditySyntax.varPlace Kind.storage ty name) rhs ])
-  | .storageLocalDeclSkip => withOrigin (KeyOrigin.taclet KeyTaclet.storageLocalDeclSkip) <|
+
+  sol_rule storageLocalDeclSkip := withOrigin (KeyOrigin.taclet KeyTaclet.storageLocalDeclSkip) <|
       storageDeclEffect
         (fun _ _ init => init = none)
         (fun _ _ _ _ =>
           terminalGoal [])
-  | .localValueDeclInitDrop => withOrigin (KeyOrigin.taclet KeyTaclet.localValueDeclInitDrop) <|
+
+  /-!
+  Value-variable declarations (KeY `localValueDeclInitDrop`/`valueDeclSkip`)
+  and simple local assignment (KeY `localValueAssign`).
+  -/
+
+  sol_rule localValueDeclInitDrop := withOrigin (KeyOrigin.taclet KeyTaclet.localValueDeclInitDrop) <|
       stackDeclEffect
         (fun _ _ init => init.isSome)
         (fun ty name init h => unfoldGoal <|
@@ -2006,7 +1692,8 @@ inductive RuleName where
           | some rhs, _ =>
               [ Stmt.stackDecl ty name none,
                 Stmt.assign (SoliditySyntax.varPlace Kind.stack ty name) rhs ])
-  | .valueDeclSkip => withOrigin (KeyOrigin.taclet KeyTaclet.valueDeclSkip) <|
+
+  sol_rule valueDeclSkip := withOrigin (KeyOrigin.taclet KeyTaclet.valueDeclSkip) <|
       stackDeclEffect
         (fun _ _ init => init = none)
         (fun ty name _ _ =>
@@ -2016,54 +1703,35 @@ inductive RuleName where
   `storageFieldDelete` and `storageIndexDelete` are one Lean rule over all three
   simple target shapes.
   -/
-  | .storageFieldWriteSave => withOrigin (KeyOrigin.taclet KeyTaclet.storageFieldWriteSave) <|
-      assignEffect
-        (fun lhs se =>
-          match (lhs : WrappedExpr) with
-          | WrappedExpr.field Kind.storage _ sp _ =>
-              isSimple sp ∧ isSe se
-          | _ => False)
-        (fun lhs se _ =>
-          terminalGoal [ .storage (.save lhs (.read se)) ])
-  | .storageFieldWriteCopySource => withOrigin (KeyOrigin.taclet KeyTaclet.storageFieldWriteCopySource) <|
-      assignEffect
-        (fun lhs sp2 =>
-          match (lhs : WrappedExpr) with
-          | WrappedExpr.field Kind.storage _ sp1 _ =>
-              isSimple sp1 ∧ isSp sp2
-          | _ => False)
-        (fun lhs sp2 _ =>
-          terminalGoal [ .storage (.copy lhs sp2) ])
-  | .storageRootWriteStore => withOrigin (KeyOrigin.taclet KeyTaclet.storageRootWriteStore) <|
-      assignEffect
-        (fun gsp se => isGlobal gsp ∧ isSe se)
-        (fun gsp se _ =>
-          terminalGoal [ .storage (.save gsp (.read se)) ])
-  | .storageRootWriteCopySource => withOrigin (KeyOrigin.taclet KeyTaclet.storageRootWriteCopySource) <|
-      assignEffect
-        (fun gsp sp => isGlobal gsp ∧ isSp sp)
-        (fun gsp sp _ =>
-          terminalGoal [ .storage (.copy gsp sp) ])
-  | .storageLocalRootRebind => withOrigin (KeyOrigin.taclet KeyTaclet.storageLocalRootRebind) <|
-      assignEffect
-        (fun lsv sp => isLocal lsv ∧ isSp sp)
-        (fun lsv sp _ =>
-          terminalGoal [ .bind (varName lsv) (.path sp) ])
-  | .storageFieldReadFind => withOrigin (KeyOrigin.taclet KeyTaclet.storageFieldReadFind) <|
-      assignEffect
-        (fun v rhs =>
-          match rhs with
-          | WrappedExpr.field Kind.storage _ sp _ =>
-              isStack v ∧ isSimple sp
-          | _ => False)
-        (fun v rhs _ =>
-          terminalGoal [ writeBack v (.read rhs) ])
-  | .storageRootReadSelect => withOrigin (KeyOrigin.taclet KeyTaclet.storageRootReadSelect) <|
-      assignEffect
-        (fun v sp => isStack v ∧ isSp sp)
-        (fun v sp _ =>
-          terminalGoal [ writeBack v (.read sp) ])
-  | .storageFieldReadBindLocalRoot => withOrigin (KeyOrigin.taclet KeyTaclet.storageFieldReadBindLocalRoot) <|
+
+  /-!
+  Simple targets.  The calculus's `storageRootDelete`,
+  `storageFieldDelete` and `storageIndexDelete` are one Lean rule over all three
+  simple target shapes.
+  -/
+
+  sol_rule storageFieldWriteSave from storageFieldWriteSave :
+    <[ sp.fld = se ]> ⇝ { storage := save(sp.fld, se) } <[ ]>
+
+  sol_rule storageFieldWriteCopySource from storageFieldWriteCopySource :
+    <[ sp1.fld = sp2 ]> ⇝ { storage := copy(sp1.fld, sp2) } <[ ]>
+
+  sol_rule storageRootWriteStore from storageRootWriteStore :
+    <[ gsp = se ]> ⇝ { storage := save(gsp, se) } <[ ]>
+
+  sol_rule storageRootWriteCopySource from storageRootWriteCopySource :
+    <[ gsp = sp ]> ⇝ { storage := copy(gsp, sp) } <[ ]>
+
+  sol_rule storageLocalRootRebind from storageLocalRootRebind :
+    <[ lsv = sp ]> ⇝ { lsv := path(sp) } <[ ]>
+
+  sol_rule storageFieldReadFind from storageFieldReadFind :
+    <[ v = sp.fld ]> ⇝ { v := sp.fld } <[ ]>
+
+  sol_rule storageRootReadSelect from storageRootReadSelect :
+    <[ v = sp ]> ⇝ { v := sp } <[ ]>
+
+  sol_rule storageFieldReadBindLocalRoot := withOrigin (KeyOrigin.taclet KeyTaclet.storageFieldReadBindLocalRoot) <|
       assignEffect
         (fun lsv rhs =>
           match rhs with
@@ -2072,7 +1740,8 @@ inductive RuleName where
           | _ => False)
         (fun lsv rhs _ =>
           terminalGoal [ .bind (varName lsv) (.path rhs) ])
-  | .storageFieldReadStoreRoot => withOrigin (KeyOrigin.taclet KeyTaclet.storageFieldReadStoreRoot) <|
+
+  sol_rule storageFieldReadStoreRoot := withOrigin (KeyOrigin.taclet KeyTaclet.storageFieldReadStoreRoot) <|
       assignEffect
         (fun gsp rhs =>
           match rhs with
@@ -2081,7 +1750,8 @@ inductive RuleName where
           | _ => False)
         (fun gsp rhs _ =>
           terminalGoal [ .storage (.copy gsp rhs) ])
-  | .storageDeleteSimpleTarget => withOrigin (KeyOrigin.merged [KeyTaclet.storageRootDelete, KeyTaclet.storageFieldDelete, KeyTaclet.storageIndexDelete]) <|
+
+  sol_rule storageDeleteSimpleTarget := withOrigin (KeyOrigin.merged [KeyTaclet.storageRootDelete, KeyTaclet.storageFieldDelete, KeyTaclet.storageIndexDelete]) <|
       deleteEffect
         (fun target => isSimpleStorageDeleteTarget target)
         (fun target _ =>
@@ -2089,17 +1759,16 @@ inductive RuleName where
 
   /- Mapping targets.  Mapping selectors generate no
   bounds branch: mappings have no length. -/
-  | .storageIndexWriteMappingSave => withOrigin (KeyOrigin.taclet KeyTaclet.storageIndexWriteMappingSave) <|
-      assignEffect
-        (fun lhs se =>
-          match (lhs : WrappedExpr) with
-          | WrappedExpr.index Kind.storage _ map i =>
-              isSimple map ∧ isSimple i ∧ isStack se ∧
-                isSimple se ∧ isMapping map
-          | _ => False)
-        (fun lhs se _ =>
-          terminalGoal [ .storage (.save lhs (.read se)) ])
-  | .storageIndexWriteMappingCopySource => withOrigin (KeyOrigin.taclet KeyTaclet.storageIndexWriteMappingCopySource) <|
+
+  /-!
+  Mapping targets.  Mapping selectors generate no
+  bounds branch: mappings have no length.
+  -/
+
+  sol_rule storageIndexWriteMappingSave from storageIndexWriteMappingSave :
+    <[ map[i] = se ]> ⇝ { storage := save(map[i], se) } <[ ]>
+
+  sol_rule storageIndexWriteMappingCopySource := withOrigin (KeyOrigin.taclet KeyTaclet.storageIndexWriteMappingCopySource) <|
       assignEffect
         (fun lhs sp =>
           match (lhs : WrappedExpr) with
@@ -2109,16 +1778,11 @@ inductive RuleName where
           | _ => False)
         (fun lhs sp _ =>
           terminalGoal [ .storage (.copy lhs sp) ])
-  | .storageIndexReadMappingFind => withOrigin (KeyOrigin.taclet KeyTaclet.storageIndexReadMappingFind) <|
-      assignEffect
-        (fun v rhs =>
-          match rhs with
-          | WrappedExpr.index Kind.storage _ map i =>
-              isStack v ∧ isSimple map ∧ isSimple i ∧ isMapping map
-          | _ => False)
-        (fun v rhs _ =>
-          terminalGoal [ writeBack v (.read rhs) ])
-  | .storageIndexReadMappingBindLocalRoot => withOrigin (KeyOrigin.taclet KeyTaclet.storageIndexReadMappingBindLocalRoot) <|
+
+  sol_rule storageIndexReadMappingFind from storageIndexReadMappingFind :
+    <[ v = map[i] ]> ⇝ { v := map[i] } <[ ]>
+
+  sol_rule storageIndexReadMappingBindLocalRoot := withOrigin (KeyOrigin.taclet KeyTaclet.storageIndexReadMappingBindLocalRoot) <|
       assignEffect
         (fun lsv rhs =>
           match rhs with
@@ -2127,7 +1791,8 @@ inductive RuleName where
           | _ => False)
         (fun lsv rhs _ =>
           terminalGoal [ .bind (varName lsv) (.path rhs) ])
-  | .storageIndexReadMappingStoreRoot => withOrigin (KeyOrigin.taclet KeyTaclet.storageIndexReadMappingStoreRoot) <|
+
+  sol_rule storageIndexReadMappingStoreRoot := withOrigin (KeyOrigin.taclet KeyTaclet.storageIndexReadMappingStoreRoot) <|
       assignEffect
         (fun gsp rhs =>
           match rhs with
@@ -2143,77 +1808,33 @@ inductive RuleName where
   twin is listed first**, here and in `ruleNames` — see the `Box`/`Diamond`
   note in the module docstring.
   -/
-  | .storageIndexWriteArraySaveBox => withOrigin (KeyOrigin.taclet KeyTaclet.storageIndexWriteArraySave) <|
-      withMode CaseMode.box <|
-        assignEffect
-          (fun lhs se =>
-            match (lhs : WrappedExpr) with
-            | WrappedExpr.index Kind.storage _ arr i =>
-                isSimple arr ∧ isSimple i ∧ isStack se ∧
-                  isSimple se ∧ isArray arr
-            | _ => False)
-          (fun lhs se _ =>
-            splitGoals (.inBounds lhs) [.read (.read se), .resolve lhs]
-            [ .storage (.save lhs (.read se)) ])
-  | .storageIndexWriteArraySaveDiamond => withOrigin (KeyOrigin.taclet KeyTaclet.storageIndexWriteArraySave) <|
-      withMode CaseMode.diamond <|
-        assignEffect
-          (fun lhs se =>
-            match (lhs : WrappedExpr) with
-            | WrappedExpr.index Kind.storage _ arr i =>
-                isSimple arr ∧ isSimple i ∧ isStack se ∧
-                  isSimple se ∧ isArray arr
-            | _ => False)
-          (fun lhs se _ =>
-            splitGoals (.inBounds lhs) [.read (.read se), .resolve lhs]
-            [ .storage (.save lhs (.read se)) ])
-  | .storageIndexWriteArrayCopySourceBox => withOrigin (KeyOrigin.taclet KeyTaclet.storageIndexWriteArrayCopySource) <|
-      withMode CaseMode.box <|
-        assignEffect
-          (fun lhs sp =>
-            match (lhs : WrappedExpr) with
-            | WrappedExpr.index Kind.storage _ arr i =>
-                isSimple arr ∧ isSimple i ∧ isStorage sp ∧
-                  isSimple sp ∧ isArray arr
-            | _ => False)
-          (fun lhs sp _ =>
-            splitGoals (.inBounds lhs) [.image sp, .resolve lhs]
-            [ .storage (.copy lhs sp) ])
-  | .storageIndexWriteArrayCopySourceDiamond => withOrigin (KeyOrigin.taclet KeyTaclet.storageIndexWriteArrayCopySource) <|
-      withMode CaseMode.diamond <|
-        assignEffect
-          (fun lhs sp =>
-            match (lhs : WrappedExpr) with
-            | WrappedExpr.index Kind.storage _ arr i =>
-                isSimple arr ∧ isSimple i ∧ isStorage sp ∧
-                  isSimple sp ∧ isArray arr
-            | _ => False)
-          (fun lhs sp _ =>
-            splitGoals (.inBounds lhs) [.image sp, .resolve lhs]
-            [ .storage (.copy lhs sp) ])
-  | .storageIndexReadArrayFindBox => withOrigin (KeyOrigin.taclet KeyTaclet.storageIndexReadArrayFind) <|
-      withMode CaseMode.box <|
-        assignEffect
-          (fun v rhs =>
-            match rhs with
-            | WrappedExpr.index Kind.storage _ arr i =>
-                isStack v ∧ isSimple arr ∧ isSimple i ∧ isArray arr
-            | _ => False)
-          (fun v rhs _ =>
-            splitGoals (.inBounds rhs) [.resolve rhs]
-            [ writeBack v (.read rhs) ])
-  | .storageIndexReadArrayFindDiamond => withOrigin (KeyOrigin.taclet KeyTaclet.storageIndexReadArrayFind) <|
-      withMode CaseMode.diamond <|
-        assignEffect
-          (fun v rhs =>
-            match rhs with
-            | WrappedExpr.index Kind.storage _ arr i =>
-                isStack v ∧ isSimple arr ∧ isSimple i ∧ isArray arr
-            | _ => False)
-          (fun v rhs _ =>
-            splitGoals (.inBounds rhs) [.resolve rhs]
-            [ writeBack v (.read rhs) ])
-  | .storageIndexReadArrayBindLocalRootBox => withOrigin (KeyOrigin.taclet KeyTaclet.storageIndexReadArrayBindLocalRoot) <|
+
+  /-!
+  Array targets.  The calculus stacks the bounds check
+  as two sequents; Lean splits each rule into a box/diamond twin pair.  **The box
+  twin is listed first**, here and in `ruleNames` — see the `Box`/`Diamond`
+  note in the module docstring.
+  -/
+
+  sol_rule storageIndexWriteArraySave twins from storageIndexWriteArraySave :
+    <[ arr[i] = se ]> ⇝
+      | inBounds(arr[i]) ⟹ { storage := save(arr[i], se) } <[ ]>
+      | else             ⟹ revert()
+    after read(se), resolve(arr[i])
+
+  sol_rule storageIndexWriteArrayCopySource twins from storageIndexWriteArrayCopySource :
+    <[ arr[i] = sp ]> ⇝
+      | inBounds(arr[i]) ⟹ { storage := copy(arr[i], sp) } <[ ]>
+      | else             ⟹ revert()
+    after image(sp), resolve(arr[i])
+
+  sol_rule storageIndexReadArrayFind twins from storageIndexReadArrayFind :
+    <[ v = arr[i] ]> ⇝
+      | inBounds(arr[i]) ⟹ { v := arr[i] } <[ ]>
+      | else             ⟹ revert()
+    after resolve(arr[i])
+
+  sol_rule storageIndexReadArrayBindLocalRootBox := withOrigin (KeyOrigin.taclet KeyTaclet.storageIndexReadArrayBindLocalRoot) <|
       withMode CaseMode.box <|
         assignEffect
           (fun lsv rhs =>
@@ -2224,7 +1845,8 @@ inductive RuleName where
           (fun lsv rhs _ =>
             splitGoals (.inBounds rhs) [.resolve rhs]
             [ .bind (varName lsv) (.path rhs) ])
-  | .storageIndexReadArrayBindLocalRootDiamond => withOrigin (KeyOrigin.taclet KeyTaclet.storageIndexReadArrayBindLocalRoot) <|
+
+  sol_rule storageIndexReadArrayBindLocalRootDiamond := withOrigin (KeyOrigin.taclet KeyTaclet.storageIndexReadArrayBindLocalRoot) <|
       withMode CaseMode.diamond <|
         assignEffect
           (fun lsv rhs =>
@@ -2235,7 +1857,8 @@ inductive RuleName where
           (fun lsv rhs _ =>
             splitGoals (.inBounds rhs) [.resolve rhs]
             [ .bind (varName lsv) (.path rhs) ])
-  | .storageIndexReadArrayStoreRootBox => withOrigin (KeyOrigin.taclet KeyTaclet.storageIndexReadArrayStoreRoot) <|
+
+  sol_rule storageIndexReadArrayStoreRootBox := withOrigin (KeyOrigin.taclet KeyTaclet.storageIndexReadArrayStoreRoot) <|
       withMode CaseMode.box <|
         assignEffect
           (fun gsp rhs =>
@@ -2247,7 +1870,8 @@ inductive RuleName where
           (fun gsp rhs _ =>
             splitGoals (.inBounds rhs) [.resolve rhs]
             [ .storage (.copy gsp rhs) ])
-  | .storageIndexReadArrayStoreRootDiamond => withOrigin (KeyOrigin.taclet KeyTaclet.storageIndexReadArrayStoreRoot) <|
+
+  sol_rule storageIndexReadArrayStoreRootDiamond := withOrigin (KeyOrigin.taclet KeyTaclet.storageIndexReadArrayStoreRoot) <|
       withMode CaseMode.diamond <|
         assignEffect
           (fun gsp rhs =>
@@ -2264,7 +1888,14 @@ inductive RuleName where
   is a first-order side condition, not a rewrite rule; its
   Lean counterpart is `WellFormedConsumers.lean`.
   -/
-  | .storagePushValueSave => withOrigin (KeyOrigin.taclet KeyTaclet.storagePushValueSave) <|
+
+  /-!
+  Push and pop.  The calculus's `sizeNotNegative`
+  is a first-order side condition, not a rewrite rule; its
+  Lean counterpart is `WellFormedConsumers.lean`.
+  -/
+
+  sol_rule storagePushValueSave := withOrigin (KeyOrigin.taclet KeyTaclet.storagePushValueSave) <|
       pushEffect
         (fun sp value =>
           sp.kind = Kind.storage ∧ isSimple sp ∧
@@ -2273,7 +1904,8 @@ inductive RuleName where
             | none => False)
         (fun sp value _ =>
           terminalGoal [ .storage (.push sp value) ])
-  | .storagePushValueCopySource => withOrigin (KeyOrigin.taclet KeyTaclet.storagePushValueCopySource) <|
+
+  sol_rule storagePushValueCopySource := withOrigin (KeyOrigin.taclet KeyTaclet.storagePushValueCopySource) <|
       pushEffect
         (fun sp value =>
           sp.kind = Kind.storage ∧ isSimple sp ∧
@@ -2282,12 +1914,14 @@ inductive RuleName where
             | none => False)
         (fun sp value _ =>
           terminalGoal [ .storage (.push sp value) ])
-  | .storagePushLengthSave => withOrigin (KeyOrigin.taclet KeyTaclet.storagePushLengthSave) <|
+
+  sol_rule storagePushLengthSave := withOrigin (KeyOrigin.taclet KeyTaclet.storagePushLengthSave) <|
       pushEffect
         (fun sp value => sp.kind = Kind.storage ∧ isSimple sp ∧ value = none)
         (fun sp value _ =>
           terminalGoal [ .storage (.push sp value) ])
-  | .storageLocalRootPushBind => withOrigin (KeyOrigin.taclet KeyTaclet.storageLocalRootPushBind) <|
+
+  sol_rule storageLocalRootPushBind := withOrigin (KeyOrigin.taclet KeyTaclet.storageLocalRootPushBind) <|
       assignEffect
         (fun lsv rhs =>
           match rhs with
@@ -2296,47 +1930,71 @@ inductive RuleName where
           | _ => False)
         (fun lsv rhs _ =>
           terminalGoal [ .storage (.pushPlace rhs), .bind (varName lsv) (.pushSlot rhs) ])
-  | .storagePopSaveBox => withOrigin (KeyOrigin.taclet KeyTaclet.storagePopSave) <|
-      popEffect CaseMode.box
-        (fun sp => sp.kind = Kind.storage ∧ isSimple sp)
-        (fun sp _ =>
-          splitGoals (.nonEmpty sp) [.resolve sp] [ .storage (.pop sp) ])
-  | .storagePopSaveDiamond => withOrigin (KeyOrigin.taclet KeyTaclet.storagePopSave) <|
-      popEffect CaseMode.diamond
-        (fun sp => sp.kind = Kind.storage ∧ isSimple sp)
-        (fun sp _ =>
-          splitGoals (.nonEmpty sp) [.resolve sp] [ .storage (.pop sp) ])
+
+  sol_rule storagePopSave twins from storagePopSave :
+    <[ sp.pop() ]> ⇝
+      | nonEmpty(sp) ⟹ { storage := pop(sp) } <[ ]>
+      | else         ⟹ revert()
+    after resolve(sp)
 
   /- ### Require and assert (the calculus, the rule set) -/
-  | .requireConditionCapture => withOrigin (KeyOrigin.taclet KeyTaclet.requireConditionCapture) <|
-      requireEffect
-        (fun nse => isComplex nse)
-        (fun nse _ => unfoldGoal <|
-          [ captureStackValue nse,
-            Stmt.requireStmt (stackValueAlias nse) ])
-  | .assertConditionCapture => withOrigin (KeyOrigin.taclet KeyTaclet.assertConditionCapture) <|
-      assertEffect
-        (fun nse => isComplex nse)
-        (fun nse _ => unfoldGoal <|
-          [ captureStackValue nse,
-            Stmt.assertStmt (stackValueAlias nse) ])
-  | .requireSimple => withOrigin (KeyOrigin.taclet KeyTaclet.requireSimple) <|
-      requireEffect
-        (fun se => isSimple se)
-        (fun c _ =>
-          splitGoals (.holds c) [] [])
-  | .assertSimple => withOrigin (KeyOrigin.taclet KeyTaclet.assertSimple) <|
-      assertEffect
-        (fun se => isSimple se)
-        (fun c _ =>
-          assertGoals c)
+
+  /-! ### Require and assert (the calculus, the rule set) -/
+
+  /-!
+  Require: KeY `requireConditionCapture` and `requireSimple` (the
+  Holds/Reverts split of `requireSimple` lives in the semantic layer:
+  the interpreter reverts on false, and `check` routes the revert
+  per modality — diamond `c ∧ φ`, box `c → φ`).
+  -/
+
+  sol_rule requireConditionCapture from requireConditionCapture :
+    <[ require(nse) ]> ⇝ <[ T pv = nse; require(pv) ]>
+
+  /-!
+  Assert: KeY `assertConditionCapture` and `assertSimple` (the sequent
+  split of `assertSimple` lives in the semantic layer).
+  -/
+
+  sol_rule assertConditionCapture from assertConditionCapture :
+    <[ assert(nse) ]> ⇝ <[ T pv = nse; assert(pv) ]>
+
+  sol_rule requireSimple from requireSimple :
+    <[ require(se) ]> ⇝
+      | se   ⟹ <[ ]>
+      | else ⟹ revert()
+    where cond := isSimple se
+
+  sol_rule assertSimple from assertSimple :
+    <[ assert(se) ]> ⇝
+      | "Holds"    : se ⟹ <[ ]>
+      | "Violated" :    ⟹ se
+    where cond := isSimple se
 
   /- ### Conditional statements (the calculus, the rule set)
 
   The calculus's `ifElseSplit` is a sequent rule — two goals, so no `BlockStep` —
   and lives in `JudgmentSplit.ite_split`.
   -/
-  | .ifElseUnfold => withOrigin (KeyOrigin.merged [KeyTaclet.ifUnfold, KeyTaclet.ifElseUnfold]) <|
+
+  /-!
+  ### Conditional statements (the calculus, the rule set)
+
+  The calculus's `ifElseSplit` is a sequent rule — two goals, so no `BlockStep` —
+  and lives in `JudgmentSplit.ite_split`.
+  -/
+
+  /-!
+  If-then-else (upstream `ifElseUnfold`/`ifElseTrue`/`ifElseFalse`/
+  `ifElseNegated`, the rule set): condition-directed rewrites per
+  plan D3(b).  All four now carry solkey's own program-rule names, which lift
+  the term-level `ifthenelse_true`/`ifthenelse_false`/`ifthenelse_negated`
+  to statements.  `ifElseUnfold` covers KeY's `ifUnfold` *and* `ifElseUnfold`,
+  because `Stmt.ite` always carries both branches; the calculus's `ifElseSplit`
+  is a sequent rule and lives in `JudgmentSplit.ite_split`.
+  -/
+
+  sol_rule ifElseUnfold := withOrigin (KeyOrigin.merged [KeyTaclet.ifUnfold, KeyTaclet.ifElseUnfold]) <|
       iteEffect
         (fun nse _ _ =>
           isComplex nse ∧
@@ -2344,21 +2002,24 @@ inductive RuleName where
         (fun nse thn els _ => unfoldGoal <|
           [ captureStackValue nse,
             Stmt.ite (stackValueAlias nse) thn els ])
-  | .ifElseTrue =>
+
+  sol_rule ifElseTrue :=
       iteEffect
         (fun c _ _ =>
           match c with
           | WrappedExpr.bool true => True
           | _ => False)
         (fun _ thn _ _ => unfoldGoal <| thn)
-  | .ifElseFalse =>
+
+  sol_rule ifElseFalse :=
       iteEffect
         (fun c _ _ =>
           match c with
           | WrappedExpr.bool false => True
           | _ => False)
         (fun _ _ els _ => unfoldGoal <| els)
-  | .ifElseNegated =>
+
+  sol_rule ifElseNegated :=
       iteEffect
         (fun c _ _ =>
           match c with
@@ -2373,8 +2034,22 @@ inductive RuleName where
   the rule set prints the diamond rule first; here the box twin leads, as it must
   everywhere (module docstring, `Box`/`Diamond`).
   -/
-  | .revertBox => revertEffect CaseMode.box
-  | .revertDiamond => revertEffect CaseMode.diamond
+
+  /-!
+  ### Abrupt termination (the calculus, the rule set)
+
+  the rule set prints the diamond rule first; here the box twin leads, as it must
+  everywhere (module docstring, `Box`/`Diamond`).
+  -/
+
+  /-!
+  Modality rules: KeY `revertBox`/`revertDiamond` consume a `revert();`
+  (the truth value of the enclosing modality lives in the semantic layer).
+  -/
+
+  sol_rule revertBox := revertEffect CaseMode.box
+
+  sol_rule revertDiamond := revertEffect CaseMode.diamond
 
   /- ## Payment Rules
 
@@ -2382,24 +2057,52 @@ inductive RuleName where
   transfer rule into a box and a diamond rule; Lean's `transferNoCallback` is
   modality-generic and carries both.
   -/
-  | .transferUnfoldLeftFstReceiver => withOrigin (KeyOrigin.taclet KeyTaclet.transfer_unfold_leftFstReceiver) <|
+
+  /-!
+  ## Payment Rules
+
+  The calculus splits the terminal
+  transfer rule into a box and a diamond rule; Lean's `transferNoCallback` is
+  modality-generic and carries both.
+  -/
+
+  /-!
+  Payments: KeY `transfer_unfold_leftFstReceiver`,
+  `transfer_unfold_rightSndArgument`, `transferNoCallback`.
+  -/
+
+  sol_rule transferUnfoldLeftFstReceiver := withOrigin (KeyOrigin.taclet KeyTaclet.transfer_unfold_leftFstReceiver) <|
       transferEffect
         (fun nadr _ => isComplex nadr)
         (fun nadr e _ => unfoldGoal <|
           [ captureStackValue nadr,
             Stmt.transfer (stackValueAlias nadr) e ])
-  | .transferUnfoldRightSndArgument => withOrigin (KeyOrigin.taclet KeyTaclet.transfer_unfold_rightSndArgument) <|
+
+  sol_rule transferUnfoldRightSndArgument := withOrigin (KeyOrigin.taclet KeyTaclet.transfer_unfold_rightSndArgument) <|
       transferEffect
         (fun sadr nse => isSimple sadr ∧ isComplex nse)
         (fun sadr nse _ => unfoldGoal <|
           [ captureStackValue nse,
             Stmt.transfer sadr (stackValueAlias nse) ])
-  | .transferNoCallback => withOrigin (KeyOrigin.merged [KeyTaclet.transferNoCallbackBox, KeyTaclet.transferNoCallbackDiamond]) <|
-      transferEffect
-        (fun sadr se => isSimple sadr ∧ isSimple se)
-        (fun sadr se _ =>
-          splitGoals (.funded se) [.read (.netOf sadr)] [ .transfer sadr se ])
-  | .transferWithCallback => withOrigin (KeyOrigin.merged [KeyTaclet.transferWithCallbackBox, KeyTaclet.transferWithCallbackDiamond]) <|
+
+  sol_rule transferNoCallback from transferNoCallbackBox, transferNoCallbackDiamond :
+    <[ sadr.transfer(se) ]> ⇝
+      | funded(se) ⟹ { transfer(sadr, se) } <[ ]>
+      | else       ⟹ revert()
+    after read(net(sadr))
+    where cond := isSimple sadr ∧ isSimple se
+
+  /-!
+  KeY option `transferSemantics:withCallback`: the re-entrancy-aware
+  transfer. Same syntactic condition and (empty) residual as
+  `transferNoCallback` — KeY makes the two a *choice*, not coexisting
+  rules — so it lives in the alternative rule list
+  `ruleNamesWithCallback`, never in `ruleNames`. Its semantic
+  content (the contract-invariant / havoc branch split) is
+  `CallbackSemantics.holdsC_transfer_split`.
+  -/
+
+  sol_rule transferWithCallback alternative := withOrigin (KeyOrigin.merged [KeyTaclet.transferWithCallbackBox, KeyTaclet.transferWithCallbackDiamond]) <|
       transferEffect
         (fun sadr se => isSimple sadr ∧ isSimple se)
         (fun sadr se _ =>
@@ -2413,7 +2116,16 @@ inductive RuleName where
   -/
 
   /- ### Step 1: unfolding the right-hand side -/
-  | .memoryFieldReadUnfoldRightFst => withOrigin (KeyOrigin.taclet KeyTaclet.memoryFieldRead_unfold_rightFst) <|
+
+  /-!
+  ## Memory Rules
+
+  The same three steps.
+  -/
+
+  /-! ### Step 1: unfolding the right-hand side -/
+
+  sol_rule memoryFieldReadUnfoldRightFst := withOrigin (KeyOrigin.taclet KeyTaclet.memoryFieldRead_unfold_rightFst) <|
       assignEffect
         (fun lhs rhs =>
           match rhs with
@@ -2424,7 +2136,8 @@ inductive RuleName where
           match rhs, h with
           | WrappedExpr.field Kind.memory ty nmp f, _ =>
               fieldReadResolveBlock Kind.memory memoryPathAliasName lhs ty nmp f)
-  | .memoryIndexReadUnfoldRightFst => withOrigin (KeyOrigin.taclet KeyTaclet.memoryIndexRead_unfold_rightFst) <|
+
+  sol_rule memoryIndexReadUnfoldRightFst := withOrigin (KeyOrigin.taclet KeyTaclet.memoryIndexRead_unfold_rightFst) <|
       assignEffect
         (fun lhs rhs =>
           match rhs with
@@ -2435,7 +2148,8 @@ inductive RuleName where
           match rhs, h with
           | WrappedExpr.index Kind.memory ty nmp index, _ =>
               indexReadResolveBlock Kind.memory memoryPathAliasName lhs ty nmp index)
-  | .memoryIndexReadUnfoldRightSndIndex => withOrigin (KeyOrigin.taclet KeyTaclet.memoryIndexRead_unfold_rightSndIndex) <|
+
+  sol_rule memoryIndexReadUnfoldRightSndIndex := withOrigin (KeyOrigin.taclet KeyTaclet.memoryIndexRead_unfold_rightSndIndex) <|
       assignEffect
         (fun lhs rhs =>
           match rhs with
@@ -2448,7 +2162,8 @@ inductive RuleName where
               [ captureIndex nse,
                 Stmt.assign lhs
                   (WrappedExpr.index Kind.memory ty mv (indexAlias nse)) ])
-  | .memoryWriteUnfoldRightSndResult => withOrigin (KeyOrigin.taclet KeyTaclet.memoryIndexWriteMemRefRhsCapture) <|
+
+  sol_rule memoryWriteUnfoldRightSndResult := withOrigin (KeyOrigin.taclet KeyTaclet.memoryIndexWriteMemRefRhsCapture) <|
       assignEffect
         (fun mst nse => mst.kind = Kind.memory ∧ isComplex mst ∧ isComplex nse ∧
           match nse with
@@ -2456,7 +2171,8 @@ inductive RuleName where
           | WrappedExpr.index Kind.memory .. => False
           | _ => True)
         (fun mst nse _ => unfoldGoal <| captureAssignBlock mst nse)
-  | .memoryFieldReadUnfoldRightSndResult => withOrigin (KeyOrigin.taclet KeyTaclet.memoryFieldRead_unfold_rightSndResult) <|
+
+  sol_rule memoryFieldReadUnfoldRightSndResult := withOrigin (KeyOrigin.taclet KeyTaclet.memoryFieldRead_unfold_rightSndResult) <|
       assignEffect
         (fun lhs rhs =>
           match rhs with
@@ -2464,7 +2180,8 @@ inductive RuleName where
               isMemory lhs ∧ isComplex lhs ∧ isSimple mv
           | _ => False)
         (fun lhs rhs _ => unfoldGoal <| captureAssignBlock lhs rhs)
-  | .memoryIndexReadUnfoldRightSndResult => withOrigin (KeyOrigin.taclet KeyTaclet.memoryIndexRead_unfold_rightSndResult) <|
+
+  sol_rule memoryIndexReadUnfoldRightSndResult := withOrigin (KeyOrigin.taclet KeyTaclet.memoryIndexRead_unfold_rightSndResult) <|
       assignEffect
         (fun lhs rhs =>
           match rhs with
@@ -2477,7 +2194,14 @@ inductive RuleName where
 
   As in storage, the two delete unfolds are merged into one rule.
   -/
-  | .memoryFieldWriteUnfoldLeftFst => withOrigin (KeyOrigin.taclet KeyTaclet.memoryFieldWrite_unfold_leftFst) <|
+
+  /-!
+  ### Step 2: unfolding the left-hand side
+
+  As in storage, the two delete unfolds are merged into one rule.
+  -/
+
+  sol_rule memoryFieldWriteUnfoldLeftFst := withOrigin (KeyOrigin.taclet KeyTaclet.memoryFieldWrite_unfold_leftFst) <|
       assignEffect
         (fun lhs rhs =>
           match (lhs : WrappedExpr) with
@@ -2488,7 +2212,8 @@ inductive RuleName where
           match lhs, h with
           | ⟨WrappedExpr.field Kind.memory ty nmp f, _⟩, _ =>
               fieldWriteResolveBlock Kind.memory memoryPathAliasName ty nmp f rhs)
-  | .memoryIndexWriteUnfoldLeftFst => withOrigin (KeyOrigin.taclet KeyTaclet.memoryIndexWrite_unfold_leftFst) <|
+
+  sol_rule memoryIndexWriteUnfoldLeftFst := withOrigin (KeyOrigin.taclet KeyTaclet.memoryIndexWrite_unfold_leftFst) <|
       assignEffect
         (fun lhs rhs =>
           match (lhs : WrappedExpr) with
@@ -2499,11 +2224,13 @@ inductive RuleName where
           match lhs, h with
           | ⟨WrappedExpr.index Kind.memory ty nmp index, _⟩, _ =>
               indexWriteResolveBlock Kind.memory memoryPathAliasName ty nmp index rhs)
-  | .memoryDeleteComplexTarget => withOrigin (KeyOrigin.merged [KeyTaclet.memoryFieldDelete_unfold_leftFst, KeyTaclet.memoryIndexDelete_unfold_leftFst, KeyTaclet.memoryIndexDeleteNonSimpleIndexCapture]) <|
+
+  sol_rule memoryDeleteComplexTarget := withOrigin (KeyOrigin.merged [KeyTaclet.memoryFieldDelete_unfold_leftFst, KeyTaclet.memoryIndexDelete_unfold_leftFst, KeyTaclet.memoryIndexDeleteNonSimpleIndexCapture]) <|
       deleteEffect
         (fun target => isComplexMemoryDeleteTarget target)
         (fun target h => unfoldGoal <| memoryDeleteComplexTargetBlock (target : WrappedExpr) h)
-  | .memoryIndexWriteUnfoldLeftSndIndex => withOrigin (KeyOrigin.taclet KeyTaclet.memoryIndexWriteNonSimpleIndexCapture) <|
+
+  sol_rule memoryIndexWriteUnfoldLeftSndIndex := withOrigin (KeyOrigin.taclet KeyTaclet.memoryIndexWriteNonSimpleIndexCapture) <|
       assignEffect
         (fun lhs rhs =>
           match (lhs : WrappedExpr) with
@@ -2520,7 +2247,15 @@ inductive RuleName where
   Declarations; `memoryArrayFreshAlloc` is merged into
   `memoryDeclFreshAlloc`.
   -/
-  | .memoryLocalDeclInitDrop => withOrigin (KeyOrigin.taclet KeyTaclet.memoryLocalDeclInitDrop) <|
+
+  /-!
+  ### Step 3: generating an update
+
+  Declarations; `memoryArrayFreshAlloc` is merged into
+  `memoryDeclFreshAlloc`.
+  -/
+
+  sol_rule memoryLocalDeclInitDrop := withOrigin (KeyOrigin.taclet KeyTaclet.memoryLocalDeclInitDrop) <|
       memoryDeclEffect
         (fun _ _ init =>
           match init with
@@ -2530,7 +2265,8 @@ inductive RuleName where
           match init, h with
           | some rhs, _ =>
               [ Stmt.assign (SoliditySyntax.varPlace Kind.memory ty name) rhs ])
-  | .memoryDeclFreshAlloc => withOrigin (KeyOrigin.merged [KeyTaclet.memoryReferenceDeclFreshAlloc, KeyTaclet.memoryArrayFreshAlloc]) <|
+
+  sol_rule memoryDeclFreshAlloc := withOrigin (KeyOrigin.merged [KeyTaclet.memoryReferenceDeclFreshAlloc, KeyTaclet.memoryArrayFreshAlloc]) <|
       memoryDeclEffect
         (fun _ _ init => init = none)
         (fun ty name init _ =>
@@ -2540,30 +2276,33 @@ inductive RuleName where
   root fresh-rebind, f primitive/reference, index primitive/reference — are
   one Lean rule.
   -/
-  | .memoryFieldWriteStore => withOrigin (KeyOrigin.taclet KeyTaclet.memoryFieldWrite) <|
-      assignEffect
-        (fun lhs se =>
-          match (lhs : WrappedExpr) with
-          | WrappedExpr.field Kind.memory _ mv _ =>
-              isSimple mv ∧ isSe se
-          | _ => False)
-        (fun lhs se _ =>
-          terminalGoal [ .heap (.write lhs (.read se)) ])
-  | .memoryRootAlias => withOrigin (KeyOrigin.taclet KeyTaclet.memoryRootRebind) <|
+
+  /-!
+  Simple targets.  The calculus's five delete rules —
+  root fresh-rebind, field primitive/reference, index primitive/reference — are
+  one Lean rule.
+  -/
+
+  /-!
+  Simple targets.  The calculus's five delete rules —
+  root fresh-rebind, f primitive/reference, index primitive/reference — are
+  one Lean rule.
+  -/
+
+  sol_rule memoryFieldWriteStore from memoryFieldWrite :
+    <[ mv.fld = se ]> ⇝ { memory := write(mv.fld, se) } <[ ]>
+
+  sol_rule memoryRootAlias := withOrigin (KeyOrigin.taclet KeyTaclet.memoryRootRebind) <|
       assignEffect
         (fun mv1 mv2 =>
           mv1.kind = Kind.memory ∧ isSimple mv1 ∧ isMv mv2)
         (fun mv1 mv2 _ =>
           terminalGoal [ .bind (varName mv1) (.mref mv2) ])
-  | .memoryFieldReadHeap => withOrigin (KeyOrigin.taclet KeyTaclet.memoryFieldRead) <|
-      assignEffect
-        (fun v rhs =>
-          match rhs with
-          | WrappedExpr.field Kind.memory _ mv _ => isStack v ∧ isSimple mv
-          | _ => False)
-        (fun v rhs _ =>
-          terminalGoal [ writeBack v (.read rhs) ])
-  | .memoryFieldReadAliasRoot => withOrigin (KeyOrigin.taclet KeyTaclet.memoryFieldRead) <|
+
+  sol_rule memoryFieldReadHeap from memoryFieldRead :
+    <[ v = mv.fld ]> ⇝ { v := mv.fld } <[ ]>
+
+  sol_rule memoryFieldReadAliasRoot := withOrigin (KeyOrigin.taclet KeyTaclet.memoryFieldRead) <|
       assignEffect
         (fun mv1 rhs =>
           match rhs with
@@ -2572,36 +2311,24 @@ inductive RuleName where
           | _ => False)
         (fun mv1 rhs _ =>
           terminalGoal [ .bind (varName mv1) (.mref rhs) ])
-  | .memoryDeleteSimpleTarget => withOrigin (KeyOrigin.merged [KeyTaclet.memoryRootDeleteFreshRebind, KeyTaclet.memoryFieldDeletePrimitive, KeyTaclet.memoryFieldDeleteReference, KeyTaclet.memoryIndexDeletePrimitive, KeyTaclet.memoryIndexDeleteReference]) <|
+
+  sol_rule memoryDeleteSimpleTarget := withOrigin (KeyOrigin.merged [KeyTaclet.memoryRootDeleteFreshRebind, KeyTaclet.memoryFieldDeletePrimitive, KeyTaclet.memoryFieldDeleteReference, KeyTaclet.memoryIndexDeletePrimitive, KeyTaclet.memoryIndexDeleteReference]) <|
       deleteEffect
         (fun target => isSimpleMemoryDeleteTarget target)
         (fun target _ =>
           terminalGoal [ .memDelete target ])
 
   /- Array targets, box twin first. -/
-  | .memoryIndexWriteStoreBox => withOrigin (KeyOrigin.taclet KeyTaclet.memoryIndexWriteArray) <|
-      withMode CaseMode.box <|
-        assignEffect
-          (fun lhs se =>
-            match (lhs : WrappedExpr) with
-            | WrappedExpr.index Kind.memory _ mv i =>
-                isSimple mv ∧ isSimple i ∧ isSe se
-            | _ => False)
-          (fun lhs se _ =>
-            splitGoals (.inBounds lhs) [.read (.read se), .resolve lhs]
-            [ .heap (.write lhs (.read se)) ])
-  | .memoryIndexWriteStoreDiamond => withOrigin (KeyOrigin.taclet KeyTaclet.memoryIndexWriteArray) <|
-      withMode CaseMode.diamond <|
-        assignEffect
-          (fun lhs se =>
-            match (lhs : WrappedExpr) with
-            | WrappedExpr.index Kind.memory _ mv i =>
-                isSimple mv ∧ isSimple i ∧ isSe se
-            | _ => False)
-          (fun lhs se _ =>
-            splitGoals (.inBounds lhs) [.read (.read se), .resolve lhs]
-            [ .heap (.write lhs (.read se)) ])
-  | .memoryIndexReadHeapBox => withOrigin (KeyOrigin.taclet KeyTaclet.memoryIndexReadArrayValue) <|
+
+  /-! Array targets, box twin first. -/
+
+  sol_rule memoryIndexWriteStore twins from memoryIndexWriteArray :
+    <[ mv[i] = se ]> ⇝
+      | inBounds(mv[i]) ⟹ { memory := write(mv[i], se) } <[ ]>
+      | else            ⟹ revert()
+    after read(se), resolve(mv[i])
+
+  sol_rule memoryIndexReadHeapBox := withOrigin (KeyOrigin.taclet KeyTaclet.memoryIndexReadArrayValue) <|
       withMode CaseMode.box <|
         assignEffect
           (fun v rhs =>
@@ -2612,7 +2339,8 @@ inductive RuleName where
           (fun v rhs _ =>
             splitGoals (.inBounds rhs) [.resolve rhs]
             [ writeBack v (.read rhs) ])
-  | .memoryIndexReadHeapDiamond => withOrigin (KeyOrigin.taclet KeyTaclet.memoryIndexReadArrayValue) <|
+
+  sol_rule memoryIndexReadHeapDiamond := withOrigin (KeyOrigin.taclet KeyTaclet.memoryIndexReadArrayValue) <|
       withMode CaseMode.diamond <|
         assignEffect
           (fun v rhs =>
@@ -2623,7 +2351,8 @@ inductive RuleName where
           (fun v rhs _ =>
             splitGoals (.inBounds rhs) [.resolve rhs]
             [ writeBack v (.read rhs) ])
-  | .memoryIndexReadAliasRootBox => withOrigin (KeyOrigin.taclet KeyTaclet.memoryIndexReadArrayMemory) <|
+
+  sol_rule memoryIndexReadAliasRootBox := withOrigin (KeyOrigin.taclet KeyTaclet.memoryIndexReadArrayMemory) <|
       withMode CaseMode.box <|
         assignEffect
           (fun mv1 rhs =>
@@ -2635,7 +2364,8 @@ inductive RuleName where
           (fun mv1 rhs _ =>
             splitGoals (.inBounds rhs) [.resolve rhs]
             [ .bind (varName mv1) (.mref rhs) ])
-  | .memoryIndexReadAliasRootDiamond => withOrigin (KeyOrigin.taclet KeyTaclet.memoryIndexReadArrayMemory) <|
+
+  sol_rule memoryIndexReadAliasRootDiamond := withOrigin (KeyOrigin.taclet KeyTaclet.memoryIndexReadArrayMemory) <|
       withMode CaseMode.diamond <|
         assignEffect
           (fun mv1 rhs =>
@@ -2656,7 +2386,28 @@ inductive RuleName where
   storage alias first.  Both were once silently absorbed by `memoryRootAlias`,
   whose condition did not restrict the right-hand side's kind.
   -/
-  | .memoryStorageCopyUnfold => withOrigin (KeyOrigin.taclet KeyTaclet.memoryStorageCopyUnfold) <|
+
+  /-!
+  ## Storage to Memory Rules
+
+  the calculus, the rule set: a deep copy through a memory root.
+  `memoryStorageCopy` is the simple-path form (`mv = sp;`, fresh identity plus
+  `copySt`); `memoryStorageCopyUnfold` captures a complex storage path into a
+  storage alias first.  Both were once silently absorbed by `memoryRootAlias`,
+  whose condition did not restrict the right-hand side's kind.
+  -/
+
+  /-!
+  ## Storage to Memory Rules
+
+  the calculus, the rule set: a deep copy through a memory root.
+  `memoryStorageCopy` is the simple-mv2 form (`mv = sp;`, fresh identity plus
+  `copySt`); `memoryStorageCopyUnfold` captures a complex storage mv2 into a
+  storage alias first.  Both were once silently absorbed by `memoryRootAlias`,
+  whose condition did not restrict the right-hand side's kind.
+  -/
+
+  sol_rule memoryStorageCopyUnfold := withOrigin (KeyOrigin.taclet KeyTaclet.memoryStorageCopyUnfold) <|
       assignEffect
         (fun mv rhs =>
           mv.kind = Kind.memory ∧ isSimple mv ∧
@@ -2668,7 +2419,8 @@ inductive RuleName where
         (fun mv rhs _ => unfoldGoal <|
           [ captureStoragePath rhs,
             Stmt.assign mv (storageAlias rhs) ])
-  | .memoryStorageCopy => withOrigin (KeyOrigin.taclet KeyTaclet.memoryStorageCopy) <|
+
+  sol_rule memoryStorageCopy := withOrigin (KeyOrigin.taclet KeyTaclet.memoryStorageCopy) <|
       assignEffect
         (fun mv sp =>
           mv.kind = Kind.memory ∧ isSimple mv ∧ isSp sp)
@@ -2681,7 +2433,16 @@ inductive RuleName where
   `memoryToStorageFieldCopyField` is merged into `memoryToStorageFieldCopyRoot`
   plus the unfolds; the array index rule is a box/diamond twin pair.
   -/
-  | .memoryToStorageUnfoldLeftFstTarget =>
+
+  /-!
+  ## Memory to Storage Rules
+
+  The calculus's
+  `memoryToStorageFieldCopyField` is merged into `memoryToStorageFieldCopyRoot`
+  plus the unfolds; the array index rule is a box/diamond twin pair.
+  -/
+
+  sol_rule memoryToStorageUnfoldLeftFstTarget :=
       assignEffect
         (fun lhs mv =>
           match (lhs : WrappedExpr) with
@@ -2692,7 +2453,8 @@ inductive RuleName where
           match lhs, h with
           | ⟨WrappedExpr.field Kind.storage ty nsp f, _⟩, _ =>
               fieldWriteResolveBlock Kind.storage storagePathAliasName ty nsp f mv)
-  | .memoryToStorageUnfoldLeftSndTargetIndex =>
+
+  sol_rule memoryToStorageUnfoldLeftSndTargetIndex :=
       assignEffect
         (fun lhs mv =>
           match (lhs : WrappedExpr) with
@@ -2703,7 +2465,8 @@ inductive RuleName where
           match lhs, h with
           | ⟨WrappedExpr.index Kind.storage ty sp nse, _⟩, _ =>
               captureIndexTargetBlock Kind.storage ty sp nse mv)
-  | .memoryToStorageFieldCopyRoot => withOrigin (KeyOrigin.merged [KeyTaclet.memoryToStorageFieldCopyRoot, KeyTaclet.memoryToStorageFieldCopyField]) <|
+
+  sol_rule memoryToStorageFieldCopyRoot := withOrigin (KeyOrigin.merged [KeyTaclet.memoryToStorageFieldCopyRoot, KeyTaclet.memoryToStorageFieldCopyField]) <|
       assignEffect
         (fun lhs mv =>
           match (lhs : WrappedExpr) with
@@ -2712,7 +2475,8 @@ inductive RuleName where
           | _ => False)
         (fun lhs mv _ =>
           terminalGoal [ .storage (.copyFromMem lhs mv) ])
-  | .memoryToStorageIndexMappingCopyRoot => withOrigin (KeyOrigin.taclet KeyTaclet.memoryToStorageIndexMappingCopyRoot) <|
+
+  sol_rule memoryToStorageIndexMappingCopyRoot := withOrigin (KeyOrigin.taclet KeyTaclet.memoryToStorageIndexMappingCopyRoot) <|
       assignEffect
         (fun lhs mv =>
           match (lhs : WrappedExpr) with
@@ -2722,7 +2486,8 @@ inductive RuleName where
           | _ => False)
         (fun lhs mv _ =>
           terminalGoal [ .storage (.copyFromMem lhs mv) ])
-  | .memoryToStorageIndexArrayCopyRootBox => withOrigin (KeyOrigin.taclet KeyTaclet.memoryToStorageIndexArrayCopyRoot) <|
+
+  sol_rule memoryToStorageIndexArrayCopyRootBox := withOrigin (KeyOrigin.taclet KeyTaclet.memoryToStorageIndexArrayCopyRoot) <|
       withMode CaseMode.box <|
         assignEffect
           (fun lhs mv =>
@@ -2734,7 +2499,8 @@ inductive RuleName where
           (fun lhs mv _ =>
             splitGoals (.inBounds lhs) [.image mv, .resolve lhs]
             [ .storage (.copyFromMem lhs mv) ])
-  | .memoryToStorageIndexArrayCopyRootDiamond => withOrigin (KeyOrigin.taclet KeyTaclet.memoryToStorageIndexArrayCopyRoot) <|
+
+  sol_rule memoryToStorageIndexArrayCopyRootDiamond := withOrigin (KeyOrigin.taclet KeyTaclet.memoryToStorageIndexArrayCopyRoot) <|
       withMode CaseMode.diamond <|
         assignEffect
           (fun lhs mv =>
@@ -2746,7 +2512,8 @@ inductive RuleName where
           (fun lhs mv _ =>
             splitGoals (.inBounds lhs) [.image mv, .resolve lhs]
             [ .storage (.copyFromMem lhs mv) ])
-  | .memoryToStorageStoreRoot => withOrigin (KeyOrigin.taclet KeyTaclet.memoryToStorageStoreRoot) <|
+
+  sol_rule memoryToStorageStoreRoot := withOrigin (KeyOrigin.taclet KeyTaclet.memoryToStorageStoreRoot) <|
       assignEffect
         (fun lhs mv => isStorage lhs ∧ isSimple lhs ∧ isMv mv)
         (fun lhs mv _ =>
@@ -2762,25 +2529,63 @@ inductive RuleName where
   -/
 
   /- Local targets (`localOpAssign`, `localDivAssign`). -/
-  | .localCompoundAssign opR => withOrigin (localCompoundOrigin opR) <|
-      compoundAssignEffect
-        (fun op v se =>
-          op = opR ∧ op.hasCompoundAssign = true ∧ isStackVar v ∧
-            isSe se)
-        (fun op v se _ =>
-          compoundGoals op v se)
+
+  /-!
+  ## Arithmetic
+
+  the calculus; the rule set (local and storage targets) and
+  the rule set (memory targets).  Each rule of the calculus is schematic in the
+  operator or the inc/dec variant, and Lean has one instance per member.  The
+  calculus's `unaryMinusAssignment` is `unopAssignment .neg`, listed with the
+  operator tier below because its `.not` sibling is not arithmetic.
+  -/
+
+  /-! Local targets (`localOpAssign`, `localDivAssign`). -/
+
+  /-!
+  Local compound assignment, one KeY taclet per op instance
+  (`localAddAssign` = `localCompoundAssign .add`, ...): terminal
+  `lv ⊕= se;` on a stack variable.
+  -/
+
+  sol_rule localCompoundAssign (op : BinOp) from (localCompoundOrigin op) :
+    <[ lv ⊕= se ]> ⇝
+      | (nonZero(se) when BinOp.needsGuard opS) ⟹ { lv := lv ⊕ se } <[ ]>
+      | else                                   ⟹ revert()
+    after read(se)
 
   /- Storage targets (`storageRootOpAssign`, `storageFieldOpAssign`,
   `storageIndex{Mapping,Array}OpAssign` — merged here — and
   `storageRootIncrement`). -/
-  | .storageRootCompoundAssign opR => withOrigin (storageRootCompoundOrigin opR) <|
+
+  /-!
+  Storage targets: `storageRootOpAssign`, `storageFieldOpAssign`,
+  `storageIndexMappingOpAssign` / `storageIndexArrayOpAssign` — merged into one
+  Lean rule — and `storageRootIncrement`.
+  -/
+
+  /-!
+  Storage compound assignments, one KeY taclet per op instance
+  (`storageRootAddAssign` = `storageRootCompoundAssign .add`, ...);
+  unsatisfiable for ops without a compound form (`**`, comparisons,
+  boolean connectives).
+  -/
+
+  /-!
+  Storage targets (`storageRootOpAssign`, `storageFieldOpAssign`,
+  `storageIndex{Mapping,Array}OpAssign` — merged here — and
+  `storageRootIncrement`).
+  -/
+
+  sol_rule storageRootCompoundAssign (opR : BinOp) := withOrigin (storageRootCompoundOrigin opR) <|
       compoundAssignEffect
         (fun op gsp se =>
           op = opR ∧ op.hasCompoundAssign = true ∧ isGlobal gsp ∧
             isSe se)
         (fun op gsp se _ =>
           compoundGoals op gsp se)
-  | .storageFieldCompoundAssign opR => withOrigin (storageFieldCompoundOrigin opR) <|
+
+  sol_rule storageFieldCompoundAssign (opR : BinOp) := withOrigin (storageFieldCompoundOrigin opR) <|
       compoundAssignEffect
         (fun op lhs se =>
           match (lhs : WrappedExpr) with
@@ -2790,7 +2595,8 @@ inductive RuleName where
           | _ => False)
         (fun op lhs se _ =>
           compoundGoals op lhs se)
-  | .storageIndexCompoundAssign opR => withOrigin (storageIndexCompoundOrigin opR) <|
+
+  sol_rule storageIndexCompoundAssign (opR : BinOp) := withOrigin (storageIndexCompoundOrigin opR) <|
       compoundAssignEffect
         (fun op lhs se =>
           match (lhs : WrappedExpr) with
@@ -2800,7 +2606,8 @@ inductive RuleName where
           | _ => False)
         (fun op lhs se _ =>
           compoundIndexGoals op lhs se)
-  | .storageFieldCompoundAssignUnfoldLeftFst opR => withOrigin (storageFieldCompoundUnfoldOrigin opR) <|
+
+  sol_rule storageFieldCompoundAssignUnfoldLeftFst (opR : BinOp) := withOrigin (storageFieldCompoundUnfoldOrigin opR) <|
       compoundAssignEffect
         (fun op lhs se =>
           match (lhs : WrappedExpr) with
@@ -2815,7 +2622,8 @@ inductive RuleName where
                 Stmt.compoundAssign op
                   (fieldFromAlias Kind.storage storagePathAliasName ty nsp f)
                   (rhsValueAlias se) ])
-  | .storageIndexCompoundAssignUnfoldLeftFst opR => withOrigin (storageIndexCompoundUnfoldOrigin opR) <|
+
+  sol_rule storageIndexCompoundAssignUnfoldLeftFst (opR : BinOp) := withOrigin (storageIndexCompoundUnfoldOrigin opR) <|
       compoundAssignEffect
         (fun op lhs se =>
           match (lhs : WrappedExpr) with
@@ -2830,15 +2638,20 @@ inductive RuleName where
                 Stmt.compoundAssign op
                   (indexFromAlias Kind.storage storagePathAliasName ty nsp i)
                   (rhsValueAlias se) ])
-  | .storageRootIncDec opR => withOrigin (storageRootIncDecOrigin opR) <|
-      exprEffect
-        (fun expr =>
-          match expr with
-          | WrappedExpr.incDec op target => op = opR ∧ isGlobal target
-          | _ => False)
-        (fun expr _ =>
-          terminalGoal [ .bumpOf expr ])
-  | .storageFieldIncDec opR => withOrigin (storageFieldIncDecOrigin opR) <|
+
+  /-!
+  Increment/decrement statement forms (`++age;`), one KeY taclet per
+  `IncDec` instance (`storageRootPreincrement` = `storageRootIncDec
+  .preInc`, ...), their complex-path unfolds, the assignment forms
+  (`result = ++age;`), and the local-variable assignment form
+  (`localAssignPreincrement`, ...; KeY `localDeclPreincrement` is covered
+  by `localValueDeclInitDrop` followed by `localAssignIncDec`).
+  -/
+
+  sol_rule storageRootIncDec (op : IncDec) from (storageRootIncDecOrigin op) :
+    <[ gsp++ ]> ⇝ { bump(gsp++) } <[ ]>
+
+  sol_rule storageFieldIncDec (opR : IncDec) := withOrigin (storageFieldIncDecOrigin opR) <|
       exprEffect
         (fun expr =>
           match expr with
@@ -2847,7 +2660,8 @@ inductive RuleName where
           | _ => False)
         (fun expr _ =>
           terminalGoal [ .bumpOf expr ])
-  | .storageIndexIncDec opR => withOrigin (storageIndexIncDecOrigin opR) <|
+
+  sol_rule storageIndexIncDec (opR : IncDec) := withOrigin (storageIndexIncDecOrigin opR) <|
       exprEffect
         (fun expr =>
           match expr with
@@ -2857,7 +2671,8 @@ inductive RuleName where
           | _ => False)
         (fun expr _ =>
           splitGoals (.inBounds expr) [.resolve expr] [ .bumpOf expr ])
-  | .storageFieldIncDecUnfoldLeftFst opR => withOrigin (storageFieldIncDecUnfoldOrigin opR) <|
+
+  sol_rule storageFieldIncDecUnfoldLeftFst (opR : IncDec) := withOrigin (storageFieldIncDecUnfoldOrigin opR) <|
       exprEffect
         (fun expr =>
           match expr with
@@ -2870,7 +2685,8 @@ inductive RuleName where
               [ captureStoragePath nsp,
                 Stmt.expr (WrappedExpr.incDec op
                   (WrappedExpr.field Kind.storage ty (storageAlias nsp) f)) ])
-  | .storageIndexIncDecUnfoldLeftFst opR => withOrigin (storageIndexIncDecUnfoldOrigin opR) <|
+
+  sol_rule storageIndexIncDecUnfoldLeftFst (opR : IncDec) := withOrigin (storageIndexIncDecUnfoldOrigin opR) <|
       exprEffect
         (fun expr =>
           match expr with
@@ -2884,7 +2700,8 @@ inductive RuleName where
               [ captureStoragePath nsp,
                 Stmt.expr (WrappedExpr.incDec op
                   (WrappedExpr.index Kind.storage ty (storageAlias nsp) i)) ])
-  | .storageRootIncDecAssignment opR => withOrigin (storageRootIncDecAssignOrigin opR) <|
+
+  sol_rule storageRootIncDecAssignment (opR : IncDec) := withOrigin (storageRootIncDecAssignOrigin opR) <|
       assignEffect
         (fun v rhs =>
           match rhs with
@@ -2893,7 +2710,8 @@ inductive RuleName where
           | _ => False)
         (fun v rhs _ =>
           incDecGoals v rhs)
-  | .storageFieldIncDecAssignment opR => withOrigin (storageFieldIncDecAssignOrigin opR) <|
+
+  sol_rule storageFieldIncDecAssignment (opR : IncDec) := withOrigin (storageFieldIncDecAssignOrigin opR) <|
       assignEffect
         (fun v rhs =>
           match rhs with
@@ -2902,7 +2720,8 @@ inductive RuleName where
           | _ => False)
         (fun v rhs _ =>
           incDecGoals v rhs)
-  | .storageIndexIncDecAssignment opR => withOrigin (storageIndexIncDecAssignOrigin opR) <|
+
+  sol_rule storageIndexIncDecAssignment (opR : IncDec) := withOrigin (storageIndexIncDecAssignOrigin opR) <|
       assignEffect
         (fun v rhs =>
           match rhs with
@@ -2916,7 +2735,29 @@ inductive RuleName where
 
   /- Memory targets (`memoryFieldOpAssign`, `memoryFieldDivAssign`,
   `memoryIndexArrayOpAssign`, `memoryFieldIncrement`). -/
-  | .memoryFieldCompoundAssign opR =>
+
+  /-!
+  Memory targets: `memoryFieldOpAssign`, `memoryFieldDivAssign`,
+  `memoryIndexArrayOpAssign`, `memoryFieldIncrement`.
+  -/
+
+  /-!
+  Memory-target compound assignments, the storage terminals with the
+  heap read/write in place of `find`/`save`: the calculus's
+  `memoryFieldOpAssign` / `memoryFieldDivAssign` / `memoryIndexArrayOpAssign`
+  (the rule set, "Memory-target arithmetic"), solkey's
+  `memoryField{Add,Sub,Mul,Div,Mod}Assign` and `memoryIndexArray*Assign`
+  plus their `_unfold_leftFst` twins.  **No root form** — a memory root is
+  an identity, not a value cell — and **no mapping form**: memory has no
+  mappings.
+  -/
+
+  /-!
+  Memory targets (`memoryFieldOpAssign`, `memoryFieldDivAssign`,
+  `memoryIndexArrayOpAssign`, `memoryFieldIncrement`).
+  -/
+
+  sol_rule memoryFieldCompoundAssign (opR : BinOp) :=
       compoundAssignEffect
         (fun op lhs se =>
           match (lhs : WrappedExpr) with
@@ -2926,7 +2767,8 @@ inductive RuleName where
           | _ => False)
         (fun op lhs se _ =>
           compoundGoals op lhs se)
-  | .memoryIndexCompoundAssign opR =>
+
+  sol_rule memoryIndexCompoundAssign (opR : BinOp) :=
       compoundAssignEffect
         (fun op lhs se =>
           match (lhs : WrappedExpr) with
@@ -2936,7 +2778,8 @@ inductive RuleName where
           | _ => False)
         (fun op lhs se _ =>
           compoundIndexGoals op lhs se)
-  | .memoryFieldCompoundAssignUnfoldLeftFst opR =>
+
+  sol_rule memoryFieldCompoundAssignUnfoldLeftFst (opR : BinOp) :=
       compoundAssignEffect
         (fun op lhs se =>
           match (lhs : WrappedExpr) with
@@ -2951,7 +2794,8 @@ inductive RuleName where
                 Stmt.compoundAssign op
                   (fieldFromAlias Kind.memory memoryPathAliasName ty nmp f)
                   (rhsValueAlias se) ])
-  | .memoryIndexCompoundAssignUnfoldLeftFst opR =>
+
+  sol_rule memoryIndexCompoundAssignUnfoldLeftFst (opR : BinOp) :=
       compoundAssignEffect
         (fun op lhs se =>
           match (lhs : WrappedExpr) with
@@ -2966,7 +2810,15 @@ inductive RuleName where
                 Stmt.compoundAssign op
                   (indexFromAlias Kind.memory memoryPathAliasName ty nmp i)
                   (rhsValueAlias se) ])
-  | .memoryFieldIncDec opR =>
+
+  /-!
+  The memory twins of the increment/decrement family: the calculus's
+  `memoryFieldIncrement`, solkey's `memoryField{Pre,Post}{in,de}crement`
+  and `memoryIndexArray{Pre,Post}{in,de}crement` with their `Assignment`
+  and `_unfold_leftFst` forms.  Again no root and no mapping form.
+  -/
+
+  sol_rule memoryFieldIncDec (opR : IncDec) :=
       exprEffect
         (fun expr =>
           match expr with
@@ -2975,7 +2827,8 @@ inductive RuleName where
           | _ => False)
         (fun expr _ =>
           terminalGoal [ .bumpOf expr ])
-  | .memoryIndexIncDec opR =>
+
+  sol_rule memoryIndexIncDec (opR : IncDec) :=
       exprEffect
         (fun expr =>
           match expr with
@@ -2985,7 +2838,8 @@ inductive RuleName where
           | _ => False)
         (fun expr _ =>
           splitGoals (.inBounds expr) [.resolve expr] [ .bumpOf expr ])
-  | .memoryFieldIncDecUnfoldLeftFst opR =>
+
+  sol_rule memoryFieldIncDecUnfoldLeftFst (opR : IncDec) :=
       exprEffect
         (fun expr =>
           match expr with
@@ -2998,7 +2852,8 @@ inductive RuleName where
               [ captureMemoryPath nmp,
                 Stmt.expr (WrappedExpr.incDec op
                   (WrappedExpr.field Kind.memory ty (memoryAlias nmp) f)) ])
-  | .memoryIndexIncDecUnfoldLeftFst opR =>
+
+  sol_rule memoryIndexIncDecUnfoldLeftFst (opR : IncDec) :=
       exprEffect
         (fun expr =>
           match expr with
@@ -3012,7 +2867,8 @@ inductive RuleName where
               [ captureMemoryPath nmp,
                 Stmt.expr (WrappedExpr.incDec op
                   (WrappedExpr.index Kind.memory ty (memoryAlias nmp) i)) ])
-  | .memoryFieldIncDecAssignment opR =>
+
+  sol_rule memoryFieldIncDecAssignment (opR : IncDec) :=
       assignEffect
         (fun v rhs =>
           match rhs with
@@ -3021,7 +2877,8 @@ inductive RuleName where
           | _ => False)
         (fun v rhs _ =>
           incDecGoals v rhs)
-  | .memoryIndexIncDecAssignment opR =>
+
+  sol_rule memoryIndexIncDecAssignment (opR : IncDec) :=
       assignEffect
         (fun v rhs =>
           match rhs with
@@ -3042,7 +2899,28 @@ inductive RuleName where
   -/
 
   /- solkey's expression-operator tier. -/
-  | .binopUnfoldLeft op => withOrigin (binopUnfoldLeftOrigin op) <|
+
+  /-!
+  ## Rules with no counterpart upstream
+
+  solkey's finer tiers and the Lean-only rules.  Nothing checks this
+  direction: a Lean rule is deliberately allowed to be finer than the
+  presentation upstream, and requiring an upstream name for each would be a
+  claim nobody makes.
+  -/
+
+  /-! solkey's expression-operator tier. -/
+
+  /-!
+  Binary-operator families, one KeY taclet per `op` instance:
+  `binopUnfoldLeft op` = `<op>_unfold_left` / `<op>CaptureLhs`,
+  `binopUnfoldRight op` = `<op>_unfold_right` / `<op>CaptureRhs`
+  (unsatisfiable for the short-circuiting `&&`/`||`),
+  `binopUnfoldResult op` = `<op>_unfold_result` (arithmetic ops only),
+  `binopAssignment op` = `<op>Assignment`.
+  -/
+
+  sol_rule binopUnfoldLeft (op : BinOp) := withOrigin (binopUnfoldLeftOrigin op) <|
       assignEffect
         (fun v rhs =>
           match rhs with
@@ -3055,7 +2933,8 @@ inductive RuleName where
               [ captureStackValue l,
                 Stmt.assign v
                   (WrappedExpr.binop op' (stackValueAlias l) r) ])
-  | .binopUnfoldRight op => withOrigin (binopUnfoldRightOrigin op) <|
+
+  sol_rule binopUnfoldRight (op : BinOp) := withOrigin (binopUnfoldRightOrigin op) <|
       assignEffect
         (fun v rhs =>
           match rhs with
@@ -3069,7 +2948,8 @@ inductive RuleName where
               [ captureStackValue r,
                 Stmt.assign v
                   (WrappedExpr.binop op' l (stackValueAlias r)) ])
-  | .binopUnfoldResult op =>
+
+  sol_rule binopUnfoldResult (op : BinOp) :=
       assignEffect
         (fun v rhs =>
           match rhs with
@@ -3084,7 +2964,8 @@ inductive RuleName where
               [ captureStackValue (WrappedExpr.binop op' l r),
                 Stmt.assign v
                   (stackValueAlias (WrappedExpr.binop op' l r)) ])
-  | .binopAssignment op => withOrigin (binopAssignmentOrigin op) <|
+
+  sol_rule binopAssignment (op : BinOp) := withOrigin (binopAssignmentOrigin op) <|
       assignEffect
         (fun v rhs =>
           match rhs with
@@ -3094,7 +2975,16 @@ inductive RuleName where
         (fun v rhs _ =>
           splitGoals (if op.needsGuard then .rhsNonZero rhs else .const true) []
             [ writeBack v (.read rhs) ])
-  | .logicalAndShortCircuitRhs => withOrigin (KeyOrigin.taclet KeyTaclet.logicalAndShortCircuitRhs) <|
+
+  /-!
+  Short-circuit RHS: KeY `logicalAndShortCircuitRhs` /
+  `logicalOrShortCircuitRhs`. KeY rewrites `v = se && nse;` into the
+  ternary `v = se ? nse : false;`; Lean keeps the statement-level `if`
+  residual (same meaning, and it predates `mkTernary`). The interpreter
+  itself short-circuits, so the rewrite is exact.
+  -/
+
+  sol_rule logicalAndShortCircuitRhs := withOrigin (KeyOrigin.taclet KeyTaclet.logicalAndShortCircuitRhs) <|
       assignEffect
         (fun v rhs =>
           match rhs with
@@ -3107,7 +2997,8 @@ inductive RuleName where
               [ Stmt.ite l
                   [Stmt.assign v r]
                   [Stmt.assign v (WrappedExpr.bool false)] ])
-  | .logicalOrShortCircuitRhs => withOrigin (KeyOrigin.taclet KeyTaclet.logicalOrShortCircuitRhs) <|
+
+  sol_rule logicalOrShortCircuitRhs := withOrigin (KeyOrigin.taclet KeyTaclet.logicalOrShortCircuitRhs) <|
       assignEffect
         (fun v rhs =>
           match rhs with
@@ -3120,7 +3011,15 @@ inductive RuleName where
               [ Stmt.ite l
                   [Stmt.assign v (WrappedExpr.bool true)]
                   [Stmt.assign v r] ])
-  | .ternaryCaptureCond => withOrigin (KeyOrigin.taclet KeyTaclet.ternaryCaptureCond) <|
+
+  /-!
+  Ternary `v = c ? e1 : e2;`: KeY `ternaryCaptureCond` hoists a
+  nonsimple condition into `pv`; `ternaryToIf` lowers to the statement
+  `if` for a stack target; `ternaryToIfStorage` is the twin for a
+  storage-path target (which is not a KeY `Variable`).
+  -/
+
+  sol_rule ternaryCaptureCond := withOrigin (KeyOrigin.taclet KeyTaclet.ternaryCaptureCond) <|
       assignEffect
         (fun lhs rhs =>
           match rhs with
@@ -3135,7 +3034,8 @@ inductive RuleName where
               [ captureStackValue c,
                 Stmt.assign lhs
                   (WrappedExpr.ternary (stackValueAlias c) t e) ])
-  | .ternaryToIf => withOrigin (KeyOrigin.taclet KeyTaclet.ternaryToIf) <|
+
+  sol_rule ternaryToIf := withOrigin (KeyOrigin.taclet KeyTaclet.ternaryToIf) <|
       assignEffect
         (fun v rhs =>
           match rhs with
@@ -3145,7 +3045,8 @@ inductive RuleName where
           match rhs, h with
           | WrappedExpr.ternary c t e, _ =>
               [ Stmt.ite c [Stmt.assign v t] [Stmt.assign v e] ])
-  | .ternaryToIfStorage => withOrigin (KeyOrigin.taclet KeyTaclet.ternaryToIfStorage) <|
+
+  sol_rule ternaryToIfStorage := withOrigin (KeyOrigin.taclet KeyTaclet.ternaryToIfStorage) <|
       assignEffect
         (fun lhs rhs =>
           match rhs with
@@ -3155,7 +3056,13 @@ inductive RuleName where
           match rhs, h with
           | WrappedExpr.ternary c t e, _ =>
               [ Stmt.ite c [Stmt.assign lhs t] [Stmt.assign lhs e] ])
-  | .unopCapture op => withOrigin (unopCaptureOrigin op) <|
+
+  /-!
+  Unary operators: KeY `logicalNotCapture`/`logicalNotAssignment` and
+  `unaryMinusCapture`/`unaryMinusAssignment`.
+  -/
+
+  sol_rule unopCapture (op : UnOp) := withOrigin (unopCaptureOrigin op) <|
       assignEffect
         (fun v rhs =>
           match rhs with
@@ -3168,7 +3075,8 @@ inductive RuleName where
               [ captureStackValue arg,
                 Stmt.assign v
                   (WrappedExpr.unop op' (stackValueAlias arg)) ])
-  | .unopAssignment op => withOrigin (unopAssignmentOrigin op) <|
+
+  sol_rule unopAssignment (op : UnOp) := withOrigin (unopAssignmentOrigin op) <|
       assignEffect
         (fun v rhs =>
           match rhs with
@@ -3179,13 +3087,27 @@ inductive RuleName where
           terminalGoal [ writeBack v (.read rhs) ])
 
   /- solkey's capture partition: the location-neutral value hoists. -/
-  | .storageRootWriteValueRhsCapture => withOrigin (KeyOrigin.taclet KeyTaclet.storageRootWriteValueRhsCapture) <|
+
+  /-! solkey's capture partition: the location-neutral value hoists. -/
+
+  /-!
+  Evaluation-order RHS captures: KeY `storageRootWriteValueRhsCapture`,
+  `fieldWriteValueRhsCapture`, `indexWriteValueRhsCapture` — hoist a
+  nonsimple primitive RHS into `pv` before the storage write resolves
+  its target (RHS-before-LHS evaluation order). The Lean conditions
+  exclude the cells other rules already cover: arithmetic operators over
+  simple operands go to `binopUnfoldResult`, and the stack-lhs operator
+  families keep their own rules.
+  -/
+
+  sol_rule storageRootWriteValueRhsCapture := withOrigin (KeyOrigin.taclet KeyTaclet.storageRootWriteValueRhsCapture) <|
       assignEffect
         (fun gsp rhs => isGlobal gsp ∧ valueRhsCaptureRhs rhs)
         (fun gsp rhs _ => unfoldGoal <|
           [ captureStackValue rhs,
             Stmt.assign gsp (stackValueAlias rhs) ])
-  | .fieldWriteValueRhsCapture => withOrigin (KeyOrigin.taclet KeyTaclet.fieldWriteValueRhsCapture) <|
+
+  sol_rule fieldWriteValueRhsCapture := withOrigin (KeyOrigin.taclet KeyTaclet.fieldWriteValueRhsCapture) <|
       assignEffect
         (fun lhs rhs =>
           match (lhs : WrappedExpr) with
@@ -3194,7 +3116,8 @@ inductive RuleName where
         (fun lhs rhs _ => unfoldGoal <|
           [ captureStackValue rhs,
             Stmt.assign lhs (stackValueAlias rhs) ])
-  | .indexWriteValueRhsCapture => withOrigin (KeyOrigin.taclet KeyTaclet.indexWriteValueRhsCapture) <|
+
+  sol_rule indexWriteValueRhsCapture := withOrigin (KeyOrigin.taclet KeyTaclet.indexWriteValueRhsCapture) <|
       assignEffect
         (fun lhs rhs =>
           match (lhs : WrappedExpr) with
@@ -3203,7 +3126,16 @@ inductive RuleName where
         (fun lhs rhs _ => unfoldGoal <|
           [ captureStackValue rhs,
             Stmt.assign lhs (stackValueAlias rhs) ])
-  | .compoundAssignValueRhsCapture opR => withOrigin (compoundRhsCaptureOrigin opR) <|
+
+  /-!
+  Compound-assignment RHS capture: KeY
+  `{add,sub,mul,div,mod}AssignValueRhsCapture` — location-neutral hoist
+  of a nonsimple compound-assign RHS into `pv` before the target rules
+  fire (RHS-before-LHS evaluation order, like the `*ValueRhsCapture`
+  trio for plain assignment).
+  -/
+
+  sol_rule compoundAssignValueRhsCapture (opR : BinOp) := withOrigin (compoundRhsCaptureOrigin opR) <|
       compoundAssignEffect
         (fun op _ se =>
           op = opR ∧ op.hasCompoundAssign = true ∧
@@ -3214,12 +3146,24 @@ inductive RuleName where
 
   /- Stack locals (solkey `localValueAssign`, `localAssign*crement`,
   `local*crement`). -/
-  | .localValueAssign => withOrigin (KeyOrigin.taclet KeyTaclet.localValueAssign) <|
+
+  /-!
+  Stack locals: solkey `localValueAssign`, `localAssign*crement` and
+  `local*crement`.
+  -/
+
+  /-!
+  Stack locals (solkey `localValueAssign`, `localAssign*crement`,
+  `local*crement`).
+  -/
+
+  sol_rule localValueAssign := withOrigin (KeyOrigin.taclet KeyTaclet.localValueAssign) <|
       assignEffect
         (fun v se => isStackVar v ∧ isSe se)
         (fun v se _ =>
           terminalGoal [ writeBack v (.read se) ])
-  | .localAssignIncDec opR => withOrigin (localAssignIncDecOrigin opR) <|
+
+  sol_rule localAssignIncDec (opR : IncDec) := withOrigin (localAssignIncDecOrigin opR) <|
       assignEffect
         (fun v rhs =>
           match rhs with
@@ -3228,7 +3172,14 @@ inductive RuleName where
           | _ => False)
         (fun v rhs _ =>
           incDecGoals v rhs)
-  | .localIncDec opR => withOrigin (localIncDecOrigin opR) <|
+
+  /-!
+  Bare increment/decrement of a stack local as a statement of its own:
+  KeY `localPreincrement`, `localPostincrement`, `localPredecrement`,
+  `localPostdecrement` (`localIncDec .preInc`, ...).
+  -/
+
+  sol_rule localIncDec (opR : IncDec) := withOrigin (localIncDecOrigin opR) <|
       exprEffect
         (fun expr =>
           match expr with
@@ -3239,7 +3190,20 @@ inductive RuleName where
           terminalGoal [ .bumpOf expr ])
 
   /- Function calls. -/
-  | .functionCallArgCapture =>
+
+  /-! Function calls. -/
+
+  /-!
+  Function calls: `functionBodyExpand` is KeY's inlining taclet
+  (`ExpandFunctionBody`); `functionCallArgCapture` hoists the leftmost
+  complex argument first — `unfoldArgument` on solkey's own backlog
+  (`~/projects/solkey/docs/net.md` §5.1), so Lean goes beyond solkey here.
+  The name is solkey's, not the calculus's: the rule set declares no rule
+  called `unfoldArgument`, which is why nothing upstream names
+  it and `functionCallArgCapture` is one of the Lean-only rules.
+  -/
+
+  sol_rule functionCallArgCapture :=
       callEffect
         (fun _ _ args => (captureFirstComplexArg args).isSome = true)
         (fun res fn args h => unfoldGoal <|
@@ -3247,7 +3211,8 @@ inductive RuleName where
           match captureFirstComplexArg args, h' with
           | some (c, args'), _ =>
               [ captureStackValue c, Stmt.callStmt res fn args' ])
-  | .functionBodyExpand => withOrigin (KeyOrigin.taclet KeyTaclet.functionBodyExpand) <|
+
+  sol_rule functionBodyExpand := withOrigin (KeyOrigin.taclet KeyTaclet.functionBodyExpand) <|
       callEffect
         (fun res fn args =>
           args.all (·.simple) = true ∧
@@ -3257,7 +3222,18 @@ inductive RuleName where
 
   /- Lean-only rules: front-end normalisation and scratch bindings with no
   taclet of their own. -/
-  | .storagePlaceAlias =>
+
+  /-!
+  Lean-only rules: front-end normalisations and scratch bindings with no
+  taclet of their own.
+  -/
+
+  /-!
+  Lean-only rules: front-end normalisation and scratch bindings with no
+  taclet of their own.
+  -/
+
+  sol_rule storagePlaceAlias :=
       { cond := fun stmt =>
           match stmt with
           | Stmt.storagePlaceAlias _ _ _ => True
@@ -3266,14 +3242,28 @@ inductive RuleName where
           cases stmt <;> simp at hcond
           case storagePlaceAlias _ name init =>
             exact terminalGoal [ .bind name (.path init) ] }
-  | .exprStmtCapture =>
+
+  /-!
+  Lean-only coverage rules.  `exprStmtCapture` parks a bare non-incDec
+  expression statement in the scratch value alias: the residual `pv = e;`
+  declaration performs the same evaluation (same reverts, same
+  incDec/push side effects) and differs only in the scratch binding —
+  sound modulo `RuleSoundness.aliasNames` (`exprStmtCapture_sound`).
+  `pushAssignLower`/`pushFieldAssignLower` rewrite the push-assignment
+  sugar to the very `Stmt.assign` form `Semantics.execStmt` delegates
+  to, so original and residual execute definitionally alike
+  (`pushAssignLower_sound`, `pushFieldAssignLower_sound`).
+  -/
+
+  sol_rule exprStmtCapture :=
       exprEffect
         (fun expr =>
           match expr with
           | WrappedExpr.incDec _ _ => False
           | _ => True)
         (fun expr _ => unfoldGoal <| [ captureStackValue expr ])
-  | .pushAssignLower =>
+
+  sol_rule pushAssignLower :=
       { cond := fun stmt =>
           match stmt with
           | Stmt.pushAssign _ _ => True
@@ -3283,7 +3273,8 @@ inductive RuleName where
             match stmt, h with
             | Stmt.pushAssign target value, _ =>
                 [ Stmt.assign (PlaceExpr.pushPlace target) value ] }
-  | .pushFieldAssignLower =>
+
+  sol_rule pushFieldAssignLower :=
       { cond := fun stmt =>
           match stmt with
           | Stmt.pushFieldAssign _ _ _ => True
@@ -3296,7 +3287,8 @@ inductive RuleName where
                     (PlaceExpr.field Kind.storage fld.ty
                       (WrappedExpr.pushPlace target) fld)
                     value ] }
-  | .storagePushLhsToPushValue =>
+
+  sol_rule storagePushLhsToPushValue :=
       assignEffect
         (fun lhs rhs =>
           match (lhs : WrappedExpr) with
@@ -3307,7 +3299,8 @@ inductive RuleName where
           match lhs, h with
           | ⟨WrappedExpr.pushPlace target, hass⟩, _ =>
               [Stmt.push ⟨target, hass⟩ (some rhs)])
-  | .storageToMemoryDeclUnfoldRightFst =>
+
+  sol_rule storageToMemoryDeclUnfoldRightFst :=
       memoryDeclEffect
         (fun _ _ init =>
           match init with
@@ -3320,7 +3313,8 @@ inductive RuleName where
                 Stmt.memoryDecl ty name
                   (some (WrappedExpr.field Kind.storage rhsTy
                     (storageAlias nsp) f)) ])
-  | .storageToMemoryDeclCopyField =>
+
+  sol_rule storageToMemoryDeclCopyField :=
       memoryDeclEffect
         (fun _ _ init =>
           match init with
@@ -3328,7 +3322,8 @@ inductive RuleName where
           | _ => False)
         (fun ty name init _ =>
           terminalGoal [ .memDecl ty name init ])
-  | .storageToMemoryDeclCopyRoot =>
+
+  sol_rule storageToMemoryDeclCopyRoot :=
       memoryDeclEffect
         (fun _ _ init =>
           match init with
@@ -3336,12 +3331,14 @@ inductive RuleName where
           | none => False)
         (fun ty name init _ =>
           terminalGoal [ .memDecl ty name init ])
-  | .memoryToStorageUnfoldRightFstSource =>
+
+  sol_rule memoryToStorageUnfoldRightFstSource :=
       assignEffect
         (fun sp nmp =>
           sp.kind = Kind.storage ∧ isNmp nmp)
         (fun sp nmp _ => unfoldGoal <| [captureValue nmp, Stmt.assign sp (valueAlias nmp)])
-  | .memoryFieldWriteCopy => withOrigin (KeyOrigin.taclet KeyTaclet.memoryFieldWriteCaptureSrc) <|
+
+  sol_rule memoryFieldWriteCopy := withOrigin (KeyOrigin.taclet KeyTaclet.memoryFieldWriteCaptureSrc) <|
       assignEffect
         (fun lhs mv2 =>
           match (lhs : WrappedExpr) with
@@ -3350,7 +3347,8 @@ inductive RuleName where
           | _ => False)
         (fun lhs mv2 _ =>
           terminalGoal [ .heap (.writeRef lhs mv2) ])
-  | .memoryIndexWriteCopyBox => withOrigin (KeyOrigin.taclet KeyTaclet.memoryIndexWriteArray) <|
+
+  sol_rule memoryIndexWriteCopyBox := withOrigin (KeyOrigin.taclet KeyTaclet.memoryIndexWriteArray) <|
       withMode CaseMode.box <|
         assignEffect
           (fun lhs mv2 =>
@@ -3361,7 +3359,8 @@ inductive RuleName where
           (fun lhs mv2 _ =>
             splitGoals (.inBounds lhs) [.image mv2, .resolve lhs]
             [ .heap (.writeRef lhs mv2) ])
-  | .memoryIndexWriteCopyDiamond => withOrigin (KeyOrigin.taclet KeyTaclet.memoryIndexWriteArray) <|
+
+  sol_rule memoryIndexWriteCopyDiamond := withOrigin (KeyOrigin.taclet KeyTaclet.memoryIndexWriteArray) <|
       withMode CaseMode.diamond <|
         assignEffect
           (fun lhs mv2 =>
@@ -3373,308 +3372,18 @@ inductive RuleName where
             splitGoals (.inBounds lhs) [.image mv2, .resolve lhs]
             [ .heap (.writeRef lhs mv2) ])
 
-def ruleNames : List RuleName := [
+  sol_assemble_rules
 
-  -- ## Storage Rules
+  end Rules
 
-  -- Step 1: unfolding the right-hand side — unfold_rightFst
-  .storageFieldReadUnfoldRightFst, .storageIndexReadUnfoldRightFst,
+  /-- A rule of the calculus paired with its effect.  Outside `Rules` so
+  that it keeps the name every consumer spells, `Solidity.StepCase`. -/
+  structure StepCase where
+  rule : RuleName
+  effect : StepEffect
 
-  -- unfold_rightSnd (+ the standalone push-argument rule)
-  .storageIndexReadUnfoldRightSndIndex,
-  .storagePushValueUnfoldRightSndArgument,
+  namespace Rules
 
-  -- unfold_rightSndResult
-  .storageFieldReadUnfoldRightSndResult,
-  .storageIndexReadUnfoldRightSndResult,
-
-  -- Step 2: unfolding the left-hand side — unfold_leftFst
-  .storageFieldWriteUnfoldLeftFst, .storageIndexWriteUnfoldLeftFst,
-
-  -- receiver and delete-target simplification
-  .storageDeleteComplexTarget, .storagePushValueUnfoldLeftFstReceiver,
-  .storagePushUnfoldLeftFstReceiver, .storagePopUnfoldLeftFstReceiver,
-  .storageLocalRootPushUnfoldLeftFstReceiver,
-
-  -- unfold_leftSnd
-  .storageIndexWriteUnfoldLeftSndIndex,
-
-  -- Step 3: generating an update — declarations
-  .storageLocalDeclInitDrop, .storageLocalDeclSkip, .localValueDeclInitDrop,
-  .valueDeclSkip,
-
-  -- simple targets
-  .storageFieldWriteSave, .storageFieldWriteCopySource,
-  .storageRootWriteStore, .storageRootWriteCopySource,
-  .storageLocalRootRebind, .storageFieldReadFind, .storageRootReadSelect,
-  .storageFieldReadBindLocalRoot, .storageFieldReadStoreRoot,
-  .storageDeleteSimpleTarget,
-
-  -- mapping targets
-  .storageIndexWriteMappingSave, .storageIndexWriteMappingCopySource,
-  .storageIndexReadMappingFind, .storageIndexReadMappingBindLocalRoot,
-  .storageIndexReadMappingStoreRoot,
-
-  -- array targets (box twin first)
-  .storageIndexWriteArraySaveBox, .storageIndexWriteArraySaveDiamond,
-  .storageIndexWriteArrayCopySourceBox,
-  .storageIndexWriteArrayCopySourceDiamond, .storageIndexReadArrayFindBox,
-  .storageIndexReadArrayFindDiamond, .storageIndexReadArrayBindLocalRootBox,
-  .storageIndexReadArrayBindLocalRootDiamond,
-  .storageIndexReadArrayStoreRootBox, .storageIndexReadArrayStoreRootDiamond,
-
-  -- push and pop
-  .storagePushValueSave, .storagePushValueCopySource, .storagePushLengthSave,
-  .storageLocalRootPushBind, .storagePopSaveBox, .storagePopSaveDiamond,
-
-  -- Require and assert
-  .requireConditionCapture, .assertConditionCapture, .requireSimple,
-  .assertSimple,
-
-  -- Conditional statements
-  .ifElseUnfold, .ifElseTrue, .ifElseFalse, .ifElseNegated,
-
-  -- Abrupt termination (box first, unlike solkey's rule file)
-  .revertBox, .revertDiamond,
-
-  -- ## Payment Rules
-  .transferUnfoldLeftFstReceiver, .transferUnfoldRightSndArgument,
-  .transferNoCallback,
-
-  -- ## Memory Rules
-
-  -- Step 1: unfolding the right-hand side
-  .memoryFieldReadUnfoldRightFst, .memoryIndexReadUnfoldRightFst,
-  .memoryIndexReadUnfoldRightSndIndex, .memoryWriteUnfoldRightSndResult,
-  .memoryFieldReadUnfoldRightSndResult, .memoryIndexReadUnfoldRightSndResult,
-
-  -- Step 2: unfolding the left-hand side
-  .memoryFieldWriteUnfoldLeftFst, .memoryIndexWriteUnfoldLeftFst,
-  .memoryDeleteComplexTarget, .memoryIndexWriteUnfoldLeftSndIndex,
-
-  -- Step 3: generating an update — declarations
-  .memoryLocalDeclInitDrop, .memoryDeclFreshAlloc,
-
-  -- simple targets
-  .memoryFieldWriteStore, .memoryRootAlias, .memoryFieldReadHeap,
-  .memoryFieldReadAliasRoot, .memoryDeleteSimpleTarget,
-
-  -- array targets (box twin first)
-  .memoryIndexWriteStoreBox, .memoryIndexWriteStoreDiamond,
-  .memoryIndexReadHeapBox, .memoryIndexReadHeapDiamond,
-  .memoryIndexReadAliasRootBox, .memoryIndexReadAliasRootDiamond,
-
-  -- ## Storage to Memory Rules
-  .memoryStorageCopyUnfold, .memoryStorageCopy,
-
-  -- ## Memory to Storage Rules
-  .memoryToStorageUnfoldLeftFstTarget,
-  .memoryToStorageUnfoldLeftSndTargetIndex, .memoryToStorageFieldCopyRoot,
-  .memoryToStorageIndexMappingCopyRoot,
-  .memoryToStorageIndexArrayCopyRootBox,
-  .memoryToStorageIndexArrayCopyRootDiamond, .memoryToStorageStoreRoot,
-
-  -- ## Arithmetic
-
-  -- local targets
-  .localCompoundAssign .add, .localCompoundAssign .sub,
-  .localCompoundAssign .mul, .localCompoundAssign .pow,
-  .localCompoundAssign .div, .localCompoundAssign .mod,
-  .localCompoundAssign .lt, .localCompoundAssign .gt,
-  .localCompoundAssign .le, .localCompoundAssign .ge,
-  .localCompoundAssign .eqB, .localCompoundAssign .neB,
-  .localCompoundAssign .and, .localCompoundAssign .or,
-
-  -- storage targets
-  .storageRootCompoundAssign .add, .storageRootCompoundAssign .sub,
-  .storageRootCompoundAssign .mul, .storageRootCompoundAssign .pow,
-  .storageRootCompoundAssign .div, .storageRootCompoundAssign .mod,
-  .storageRootCompoundAssign .lt, .storageRootCompoundAssign .gt,
-  .storageRootCompoundAssign .le, .storageRootCompoundAssign .ge,
-  .storageRootCompoundAssign .eqB, .storageRootCompoundAssign .neB,
-  .storageRootCompoundAssign .and, .storageRootCompoundAssign .or,
-  .storageFieldCompoundAssign .add, .storageFieldCompoundAssign .sub,
-  .storageFieldCompoundAssign .mul, .storageFieldCompoundAssign .pow,
-  .storageFieldCompoundAssign .div, .storageFieldCompoundAssign .mod,
-  .storageFieldCompoundAssign .lt, .storageFieldCompoundAssign .gt,
-  .storageFieldCompoundAssign .le, .storageFieldCompoundAssign .ge,
-  .storageFieldCompoundAssign .eqB, .storageFieldCompoundAssign .neB,
-  .storageFieldCompoundAssign .and, .storageFieldCompoundAssign .or,
-  .storageIndexCompoundAssign .add, .storageIndexCompoundAssign .sub,
-  .storageIndexCompoundAssign .mul, .storageIndexCompoundAssign .pow,
-  .storageIndexCompoundAssign .div, .storageIndexCompoundAssign .mod,
-  .storageIndexCompoundAssign .lt, .storageIndexCompoundAssign .gt,
-  .storageIndexCompoundAssign .le, .storageIndexCompoundAssign .ge,
-  .storageIndexCompoundAssign .eqB, .storageIndexCompoundAssign .neB,
-  .storageIndexCompoundAssign .and, .storageIndexCompoundAssign .or,
-  .storageFieldCompoundAssignUnfoldLeftFst .add,
-  .storageFieldCompoundAssignUnfoldLeftFst .sub,
-  .storageFieldCompoundAssignUnfoldLeftFst .mul,
-  .storageFieldCompoundAssignUnfoldLeftFst .pow,
-  .storageFieldCompoundAssignUnfoldLeftFst .div,
-  .storageFieldCompoundAssignUnfoldLeftFst .mod,
-  .storageFieldCompoundAssignUnfoldLeftFst .lt,
-  .storageFieldCompoundAssignUnfoldLeftFst .gt,
-  .storageFieldCompoundAssignUnfoldLeftFst .le,
-  .storageFieldCompoundAssignUnfoldLeftFst .ge,
-  .storageFieldCompoundAssignUnfoldLeftFst .eqB,
-  .storageFieldCompoundAssignUnfoldLeftFst .neB,
-  .storageFieldCompoundAssignUnfoldLeftFst .and,
-  .storageFieldCompoundAssignUnfoldLeftFst .or,
-  .storageIndexCompoundAssignUnfoldLeftFst .add,
-  .storageIndexCompoundAssignUnfoldLeftFst .sub,
-  .storageIndexCompoundAssignUnfoldLeftFst .mul,
-  .storageIndexCompoundAssignUnfoldLeftFst .pow,
-  .storageIndexCompoundAssignUnfoldLeftFst .div,
-  .storageIndexCompoundAssignUnfoldLeftFst .mod,
-  .storageIndexCompoundAssignUnfoldLeftFst .lt,
-  .storageIndexCompoundAssignUnfoldLeftFst .gt,
-  .storageIndexCompoundAssignUnfoldLeftFst .le,
-  .storageIndexCompoundAssignUnfoldLeftFst .ge,
-  .storageIndexCompoundAssignUnfoldLeftFst .eqB,
-  .storageIndexCompoundAssignUnfoldLeftFst .neB,
-  .storageIndexCompoundAssignUnfoldLeftFst .and,
-  .storageIndexCompoundAssignUnfoldLeftFst .or, .storageRootIncDec .preInc,
-  .storageRootIncDec .preDec, .storageRootIncDec .postInc,
-  .storageRootIncDec .postDec, .storageFieldIncDec .preInc,
-  .storageFieldIncDec .preDec, .storageFieldIncDec .postInc,
-  .storageFieldIncDec .postDec, .storageIndexIncDec .preInc,
-  .storageIndexIncDec .preDec, .storageIndexIncDec .postInc,
-  .storageIndexIncDec .postDec, .storageFieldIncDecUnfoldLeftFst .preInc,
-  .storageFieldIncDecUnfoldLeftFst .preDec,
-  .storageFieldIncDecUnfoldLeftFst .postInc,
-  .storageFieldIncDecUnfoldLeftFst .postDec,
-  .storageIndexIncDecUnfoldLeftFst .preInc,
-  .storageIndexIncDecUnfoldLeftFst .preDec,
-  .storageIndexIncDecUnfoldLeftFst .postInc,
-  .storageIndexIncDecUnfoldLeftFst .postDec,
-  .storageRootIncDecAssignment .preInc, .storageRootIncDecAssignment .preDec,
-  .storageRootIncDecAssignment .postInc,
-  .storageRootIncDecAssignment .postDec,
-  .storageFieldIncDecAssignment .preInc,
-  .storageFieldIncDecAssignment .preDec,
-  .storageFieldIncDecAssignment .postInc,
-  .storageFieldIncDecAssignment .postDec,
-  .storageIndexIncDecAssignment .preInc,
-  .storageIndexIncDecAssignment .preDec,
-  .storageIndexIncDecAssignment .postInc,
-  .storageIndexIncDecAssignment .postDec,
-
-  -- memory targets
-  .memoryFieldCompoundAssign .add, .memoryFieldCompoundAssign .sub,
-  .memoryFieldCompoundAssign .mul, .memoryFieldCompoundAssign .pow,
-  .memoryFieldCompoundAssign .div, .memoryFieldCompoundAssign .mod,
-  .memoryFieldCompoundAssign .lt, .memoryFieldCompoundAssign .gt,
-  .memoryFieldCompoundAssign .le, .memoryFieldCompoundAssign .ge,
-  .memoryFieldCompoundAssign .eqB, .memoryFieldCompoundAssign .neB,
-  .memoryFieldCompoundAssign .and, .memoryFieldCompoundAssign .or,
-  .memoryIndexCompoundAssign .add, .memoryIndexCompoundAssign .sub,
-  .memoryIndexCompoundAssign .mul, .memoryIndexCompoundAssign .pow,
-  .memoryIndexCompoundAssign .div, .memoryIndexCompoundAssign .mod,
-  .memoryIndexCompoundAssign .lt, .memoryIndexCompoundAssign .gt,
-  .memoryIndexCompoundAssign .le, .memoryIndexCompoundAssign .ge,
-  .memoryIndexCompoundAssign .eqB, .memoryIndexCompoundAssign .neB,
-  .memoryIndexCompoundAssign .and, .memoryIndexCompoundAssign .or,
-  .memoryFieldCompoundAssignUnfoldLeftFst .add,
-  .memoryFieldCompoundAssignUnfoldLeftFst .sub,
-  .memoryFieldCompoundAssignUnfoldLeftFst .mul,
-  .memoryFieldCompoundAssignUnfoldLeftFst .pow,
-  .memoryFieldCompoundAssignUnfoldLeftFst .div,
-  .memoryFieldCompoundAssignUnfoldLeftFst .mod,
-  .memoryFieldCompoundAssignUnfoldLeftFst .lt,
-  .memoryFieldCompoundAssignUnfoldLeftFst .gt,
-  .memoryFieldCompoundAssignUnfoldLeftFst .le,
-  .memoryFieldCompoundAssignUnfoldLeftFst .ge,
-  .memoryFieldCompoundAssignUnfoldLeftFst .eqB,
-  .memoryFieldCompoundAssignUnfoldLeftFst .neB,
-  .memoryFieldCompoundAssignUnfoldLeftFst .and,
-  .memoryFieldCompoundAssignUnfoldLeftFst .or,
-  .memoryIndexCompoundAssignUnfoldLeftFst .add,
-  .memoryIndexCompoundAssignUnfoldLeftFst .sub,
-  .memoryIndexCompoundAssignUnfoldLeftFst .mul,
-  .memoryIndexCompoundAssignUnfoldLeftFst .pow,
-  .memoryIndexCompoundAssignUnfoldLeftFst .div,
-  .memoryIndexCompoundAssignUnfoldLeftFst .mod,
-  .memoryIndexCompoundAssignUnfoldLeftFst .lt,
-  .memoryIndexCompoundAssignUnfoldLeftFst .gt,
-  .memoryIndexCompoundAssignUnfoldLeftFst .le,
-  .memoryIndexCompoundAssignUnfoldLeftFst .ge,
-  .memoryIndexCompoundAssignUnfoldLeftFst .eqB,
-  .memoryIndexCompoundAssignUnfoldLeftFst .neB,
-  .memoryIndexCompoundAssignUnfoldLeftFst .and,
-  .memoryIndexCompoundAssignUnfoldLeftFst .or, .memoryFieldIncDec .preInc,
-  .memoryFieldIncDec .preDec, .memoryFieldIncDec .postInc,
-  .memoryFieldIncDec .postDec, .memoryIndexIncDec .preInc,
-  .memoryIndexIncDec .preDec, .memoryIndexIncDec .postInc,
-  .memoryIndexIncDec .postDec, .memoryFieldIncDecUnfoldLeftFst .preInc,
-  .memoryFieldIncDecUnfoldLeftFst .preDec,
-  .memoryFieldIncDecUnfoldLeftFst .postInc,
-  .memoryFieldIncDecUnfoldLeftFst .postDec,
-  .memoryIndexIncDecUnfoldLeftFst .preInc,
-  .memoryIndexIncDecUnfoldLeftFst .preDec,
-  .memoryIndexIncDecUnfoldLeftFst .postInc,
-  .memoryIndexIncDecUnfoldLeftFst .postDec,
-  .memoryFieldIncDecAssignment .preInc, .memoryFieldIncDecAssignment .preDec,
-  .memoryFieldIncDecAssignment .postInc,
-  .memoryFieldIncDecAssignment .postDec,
-  .memoryIndexIncDecAssignment .preInc, .memoryIndexIncDecAssignment .preDec,
-  .memoryIndexIncDecAssignment .postInc,
-  .memoryIndexIncDecAssignment .postDec,
-
-  -- ## Rules with no counterpart upstream
-
-  -- solkey's expression-operator tier
-  .binopUnfoldLeft .add, .binopUnfoldLeft .sub, .binopUnfoldLeft .mul,
-  .binopUnfoldLeft .pow, .binopUnfoldLeft .div, .binopUnfoldLeft .mod,
-  .binopUnfoldLeft .lt, .binopUnfoldLeft .gt, .binopUnfoldLeft .le,
-  .binopUnfoldLeft .ge, .binopUnfoldLeft .eqB, .binopUnfoldLeft .neB,
-  .binopUnfoldLeft .and, .binopUnfoldLeft .or, .binopUnfoldRight .add,
-  .binopUnfoldRight .sub, .binopUnfoldRight .mul, .binopUnfoldRight .pow,
-  .binopUnfoldRight .div, .binopUnfoldRight .mod, .binopUnfoldRight .lt,
-  .binopUnfoldRight .gt, .binopUnfoldRight .le, .binopUnfoldRight .ge,
-  .binopUnfoldRight .eqB, .binopUnfoldRight .neB, .binopUnfoldRight .and,
-  .binopUnfoldRight .or, .binopUnfoldResult .add, .binopUnfoldResult .sub,
-  .binopUnfoldResult .mul, .binopUnfoldResult .pow, .binopUnfoldResult .div,
-  .binopUnfoldResult .mod, .binopUnfoldResult .lt, .binopUnfoldResult .gt,
-  .binopUnfoldResult .le, .binopUnfoldResult .ge, .binopUnfoldResult .eqB,
-  .binopUnfoldResult .neB, .binopUnfoldResult .and, .binopUnfoldResult .or,
-  .binopAssignment .add, .binopAssignment .sub, .binopAssignment .mul,
-  .binopAssignment .pow, .binopAssignment .div, .binopAssignment .mod,
-  .binopAssignment .lt, .binopAssignment .gt, .binopAssignment .le,
-  .binopAssignment .ge, .binopAssignment .eqB, .binopAssignment .neB,
-  .binopAssignment .and, .binopAssignment .or, .logicalAndShortCircuitRhs,
-  .logicalOrShortCircuitRhs, .ternaryCaptureCond, .ternaryToIf,
-  .ternaryToIfStorage, .unopCapture .neg, .unopCapture .not,
-  .unopAssignment .neg, .unopAssignment .not,
-
-  -- solkey's capture partition
-  .storageRootWriteValueRhsCapture, .fieldWriteValueRhsCapture,
-  .indexWriteValueRhsCapture, .compoundAssignValueRhsCapture .add,
-  .compoundAssignValueRhsCapture .sub, .compoundAssignValueRhsCapture .mul,
-  .compoundAssignValueRhsCapture .pow, .compoundAssignValueRhsCapture .div,
-  .compoundAssignValueRhsCapture .mod, .compoundAssignValueRhsCapture .lt,
-  .compoundAssignValueRhsCapture .gt, .compoundAssignValueRhsCapture .le,
-  .compoundAssignValueRhsCapture .ge, .compoundAssignValueRhsCapture .eqB,
-  .compoundAssignValueRhsCapture .neB, .compoundAssignValueRhsCapture .and,
-  .compoundAssignValueRhsCapture .or,
-
-  -- stack locals
-  .localValueAssign, .localAssignIncDec .preInc, .localAssignIncDec .preDec,
-  .localAssignIncDec .postInc, .localAssignIncDec .postDec,
-  .localIncDec .preInc, .localIncDec .preDec, .localIncDec .postInc,
-  .localIncDec .postDec,
-
-  -- function calls
-  .functionCallArgCapture, .functionBodyExpand,
-
-  -- Lean-only rules
-  .storagePlaceAlias, .exprStmtCapture, .pushAssignLower,
-  .pushFieldAssignLower, .storagePushLhsToPushValue,
-  .storageToMemoryDeclUnfoldRightFst, .storageToMemoryDeclCopyField,
-  .storageToMemoryDeclCopyRoot, .memoryToStorageUnfoldRightFstSource,
-  .memoryFieldWriteCopy, .memoryIndexWriteCopyBox,
-  .memoryIndexWriteCopyDiamond
-]
 
 /-- KeY `transferSemantics:withCallback`: the alternative rule set in
 which `transferNoCallback` is replaced by `transferWithCallback`. The
