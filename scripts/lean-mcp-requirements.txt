@@ -1,0 +1,3 @@
+# Keep the MCP protocol and tool behaviour reproducible across machines.
+lean-lsp-mcp==0.29.0
+

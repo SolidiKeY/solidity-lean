@@ -1,0 +1,16 @@
+// SolLoom example judgments over the StandardExample schema.
+// Each paragraph is one judgment; blank lines separate judgments.
+
+// j1: diamond — assignment chain terminates with result == 10.
+< age = 10; result = age > (result == 10)
+
+// j2: the same judgment written across several lines (spliced verbatim).
+< age = 10;
+  result = age
+> (result == 10)
+
+// j3: box — require(false) reverts, so the postcondition holds vacuously.
+[ require(false); result = 1 ] (result == 1)
+
+// j4: INTENTIONALLY FAILING — 1 + 1 is not 3.
+< result = 1 + 1 > (result == 3)

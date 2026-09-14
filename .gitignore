@@ -1,0 +1,6 @@
+.lake/
+.venv/
+.gen/
+vscode-extension/node_modules/
+vscode-extension/out/
+.claude/settings.local.json

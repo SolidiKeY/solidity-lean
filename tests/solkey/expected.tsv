@@ -1,0 +1,310 @@
+taclets	TestSuite	additionStorageWrite	proved	concretized: solkey proves this for all parameters; ported at x = 5, y = 7
+taclets	TestSuite	storageRootReadWrite	proved	
+taclets	TestSuite	storageFieldWriteRead	proved	
+taclets	TestSuite	storageFieldDeepAddAssign	proved	
+taclets	TestSuite	storageFieldGlobalAge	proved	
+taclets	TestSuite	storageAliasWrite	proved	
+taclets	TestSuite	storageIndexRootMapping	proved	
+taclets	TestSuite	storageIndexAddAssign	proved	
+taclets	TestSuite	storagePushValue	proved	
+taclets	TestSuite	memoryDeclDefault	proved	
+taclets	TestSuite	memoryArrayIndex	unsupported	`new T[](n)` array allocation is not in the fragment
+taclets	TestSuite	testStorageComplexReceiverEmptyPush	proved	
+taclets	TestSuite	additionBothStorage	proved	
+taclets	TestSuite	additionSimple	proved	
+taclets	TestSuite	additionStorageRead	proved	
+taclets	TestSuite	divisionSimple	proved	
+taclets	TestSuite	greaterEqualSimple	proved	
+taclets	TestSuite	greaterThanSimple	proved	
+taclets	TestSuite	lessEqualSimple	proved	
+taclets	TestSuite	lessThanSimple	proved	
+taclets	TestSuite	logicalAndSimple	proved	
+taclets	TestSuite	logicalAndShortCircuitRhs	proved	
+taclets	TestSuite	logicalNotSimple	proved	
+taclets	TestSuite	logicalOrSimple	proved	
+taclets	TestSuite	logicalOrShortCircuitRhs	proved	
+taclets	TestSuite	ternaryCaptureCond	proved	
+taclets	TestSuite	ternaryToIf	proved	
+taclets	TestSuite	ifUnfold	proved	
+taclets	TestSuite	ifElseUnfold	proved	
+taclets	TestSuite	ifSplit	proved	
+taclets	TestSuite	ifElseSplit	proved	
+taclets	TestSuite	memoryDeclFresh	proved	
+taclets	TestSuite	memoryDeepField	proved	
+taclets	TestSuite	memoryFieldAlias	proved	
+taclets	TestSuite	memoryFieldReferenceAssign	proved	
+taclets	TestSuite	memoryIndexWriteNse	unsupported	`new T[](n)` array allocation is not in the fragment
+taclets	TestSuite	memoryRootAlias	proved	
+taclets	TestSuite	memoryRootDeleteFresh	proved	
+taclets	TestSuite	memoryStructArrayIndex	unsupported	`new T[](n)` array allocation is not in the fragment
+taclets	TestSuite	memoryToStorage	proved	
+taclets	TestSuite	moduloSimple	proved	
+taclets	TestSuite	multiplicationSimple	proved	
+taclets	TestSuite	notEqualSimple	proved	
+taclets	TestSuite	powerSimple	proved	
+taclets	TestSuite	requireGuardBox	proved	concretized: solkey proves this for all parameters; ported at x = 1
+taclets	TestSuite	requireHoldsDiamond	proved	
+taclets	TestSuite	storageAliasRebindAlias	proved	
+taclets	TestSuite	storageDeepFieldPostincrement	proved	
+taclets	TestSuite	storageDeepFieldPreincrement	proved	
+taclets	TestSuite	storageFieldAddAssign	proved	
+taclets	TestSuite	storageFieldCopyStruct	proved	
+taclets	TestSuite	storageFieldCopyValueField	proved	
+taclets	TestSuite	storageFieldDeepDivAssign	proved	
+taclets	TestSuite	storageFieldDeepModAssign	proved	
+taclets	TestSuite	storageFieldDeepMulAssign	proved	
+taclets	TestSuite	storageFieldDeepSubAssign	proved	
+taclets	TestSuite	storageFieldDeepWriteRead	proved	
+taclets	TestSuite	storageFieldDelete	proved	
+taclets	TestSuite	storageFieldDivAssign	proved	
+taclets	TestSuite	storageFieldModAssign	proved	
+taclets	TestSuite	storageFieldMulAssign	proved	
+taclets	TestSuite	storageFieldPostdecrementAssign	proved	
+taclets	TestSuite	storageFieldPostdecrement	proved	
+taclets	TestSuite	storageFieldPostincrementAssign	proved	
+taclets	TestSuite	storageFieldPostincrement	proved	
+taclets	TestSuite	storageFieldPredecrementAssign	proved	
+taclets	TestSuite	storageFieldPredecrement	proved	
+taclets	TestSuite	storageFieldPreincrementAssign	proved	
+taclets	TestSuite	storageFieldPreincrement	proved	
+taclets	TestSuite	storageFieldReadBindLocal	proved	
+taclets	TestSuite	storageFieldReadStoreRoot	proved	
+taclets	TestSuite	storageFieldSubAssign	proved	
+taclets	TestSuite	storageFieldWriteCaptureSrc	proved	
+taclets	TestSuite	storageFieldWriteRhsCapture	proved	concretized: solkey proves this for all parameters; ported at x = 1, y = 2, z = 3
+taclets	TestSuite	storageIndexCopyValue	proved	concretized: solkey proves this for all parameters; ported at i = 5, j = 1
+taclets	TestSuite	storageIndexCopysourceAfterPush	open	unexpected token ']'; expected sol_expr
+taclets	TestSuite	storageIndexDecomposeAfterPush	proved	
+taclets	TestSuite	storageIndexDeleteMappingBool	proved	
+taclets	TestSuite	storageIndexDeleteMappingStruct	open	`simp` made no progress
+taclets	TestSuite	storageIndexDeleteNseIndex	proved	concretized: solkey proves this for all parameters; ported at k = 2
+taclets	TestSuite	storageIndexDelete	proved	
+taclets	TestSuite	storageIndexDivAssign	proved	
+taclets	TestSuite	storageIndexModAssign	proved	
+taclets	TestSuite	storageIndexMulAssign	proved	
+taclets	TestSuite	storageIndexMultipleWrites	open	`simp` made no progress
+taclets	TestSuite	storageIndexPostdecrementAssign	proved	
+taclets	TestSuite	storageIndexPostdecrement	proved	
+taclets	TestSuite	storageIndexPostincrementAssign	proved	
+taclets	TestSuite	storageIndexPostincrement	proved	
+taclets	TestSuite	storageIndexPredecrementAssign	proved	
+taclets	TestSuite	storageIndexPredecrement	proved	
+taclets	TestSuite	storageIndexPreincrementAssign	proved	
+taclets	TestSuite	storageIndexPreincrement	proved	
+taclets	TestSuite	storageIndexReadMappingStoreRoot	proved	concretized: solkey proves this for all parameters; ported at k = 1
+taclets	TestSuite	storageIndexReadNseIndex	proved	concretized: solkey proves this for all parameters; ported at i = 1
+taclets	TestSuite	storageIndexSubAssign	proved	
+taclets	TestSuite	storageIndexWriteNseChain	proved	concretized: solkey proves this for all parameters; ported at i = 2, x = 3, y = 4
+taclets	TestSuite	storageLocalDeclSkip	open	`simp` made no progress
+taclets	TestSuite	storageMatrixNseIndex	open	concretized: solkey proves this for all parameters; ported at i = 1, j = 2, x = 5, y = 6; `simp` made no progress
+taclets	TestSuite	storageMatrixWriteRead	open	`simp` made no progress
+taclets	TestSuite	storagePopAfterPush	proved	
+taclets	TestSuite	storagePopNonempty	proved	
+taclets	TestSuite	storagePushEmpty	proved	
+taclets	TestSuite	storagePushLocalBind	open	`simp` made no progress
+taclets	TestSuite	storagePushNonsimpleArg	proved	concretized: solkey proves this for all parameters; ported at x = 40, y = 2
+taclets	TestSuite	storagePushReturnAssign	proved	
+taclets	TestSuite	storageRootAddAssign	proved	
+taclets	TestSuite	storageRootCopySource	proved	
+taclets	TestSuite	storageRootCopyStruct	proved	
+taclets	TestSuite	storageRootDeleteStruct	proved	
+taclets	TestSuite	storageRootDelete	proved	
+taclets	TestSuite	storageRootDisjoint	proved	
+taclets	TestSuite	storageRootDivAssign	proved	
+taclets	TestSuite	storageRootModAssign	proved	
+taclets	TestSuite	storageRootMulAssign	proved	
+taclets	TestSuite	storageRootMultipleWrites	proved	
+taclets	TestSuite	storageRootPostdecrementAssign	proved	
+taclets	TestSuite	storageRootPostincrementAssign	proved	
+taclets	TestSuite	storageRootPostincrement	proved	
+taclets	TestSuite	storageRootPredecrement	proved	
+taclets	TestSuite	storageRootPreincrementAssign	proved	
+taclets	TestSuite	storageRootPreincrement	proved	
+taclets	TestSuite	storageRootSubAssign	proved	
+taclets	TestSuite	storageRootWriteRhsCapture	proved	concretized: solkey proves this for all parameters; ported at x = 1, y = 2, z = 3
+taclets	TestSuite	storageToMemory	proved	
+taclets	TestSuite	subtractionSimple	proved	
+taclets	TestSuite	subtractionStorageRead	proved	
+taclets	TestSuite	unaryMinusSimple	proved	concretized: solkey proves this for all parameters; ported at x = 5
+taclets	TestSuite	testDeepPopDoesNotResetMappingMember	open	`simp` made no progress
+taclets	TestSuite	testMemoryAliasing	proved	
+taclets	TestSuite	testMemoryDeleteAlias	proved	
+taclets	TestSuite	testMemoryDeleteIdentityFieldFreshensSlot	proved	
+taclets	TestSuite	testMemoryDeletePrimitiveField	proved	
+taclets	TestSuite	testMemoryFieldShallowCopy	proved	
+taclets	TestSuite	testMemoryRootAlias	proved	
+taclets	TestSuite	testMemoryRootDeleteRebindsOnlyLocal	proved	
+taclets	TestSuite	testMemoryToStorageCopyComplexSource	proved	
+taclets	TestSuite	testMemoryToStorageCopyComplexTarget	proved	
+taclets	TestSuite	testMemoryToStorageCopyField	proved	
+taclets	TestSuite	testMemoryToStorageCopyRoot	proved	
+taclets	TestSuite	testMemoryTokenArrayAuxiliaryCases	unsupported	`new T[](n)` array allocation is not in the fragment
+taclets	TestSuite	testMemoryUintArrayAuxiliaryCases	unsupported	`new T[](n)` array allocation is not in the fragment
+taclets	TestSuite	testMemoryUintArrayPostdecrement	unsupported	`new T[](n)` array allocation is not in the fragment
+taclets	TestSuite	testMemoryUintArrayPostincrement	unsupported	`new T[](n)` array allocation is not in the fragment
+taclets	TestSuite	testMemoryUintArrayPredecrement	unsupported	`new T[](n)` array allocation is not in the fragment
+taclets	TestSuite	testNestedStorageWrites	proved	
+taclets	TestSuite	testStorageAliases	proved	
+taclets	TestSuite	testStorageArrayReadWrite	proved	
+taclets	TestSuite	testStorageComplexReceiverPushFieldLvalue	proved	
+taclets	TestSuite	testStorageComplexReceiverPushLvalueCopy	proved	
+taclets	TestSuite	testStorageDeletePaperCase	proved	
+taclets	TestSuite	testStorageEvaluationOrder	proved	proves since the interpreter follows solc's RHS-first assignment order with single l-value resolution (KeY's reading: a[2] == 1)
+taclets	TestSuite	testStorageFieldDeepCopy	proved	
+taclets	TestSuite	testStorageMapReadWriteAndDelete	proved	
+taclets	TestSuite	testStorageMapStructCopy	open	`simp` made no progress
+taclets	TestSuite	testStorageNestedPushReturnAlias	open	elaboration function for `Solidity.«termSstmt!{_}»` has not been implemented
+taclets	TestSuite	testStoragePushFieldLvalue	proved	
+taclets	TestSuite	testStoragePushLvalueCopiesStorageSource	proved	
+taclets	TestSuite	testStoragePushLvaluePrimitive	proved	
+taclets	TestSuite	testStoragePushReturnAlias	proved	
+taclets	TestSuite	testStorageRootDeepCopy	proved	
+taclets	TestSuite	testStorageStructDeleteSkipsMappingMember	proved	
+taclets	TestSuite	testStorageToMemoryCopyComplexPath	proved	
+taclets	TestSuite	testStorageToMemoryCopyField	proved	
+taclets	TestSuite	testStorageToMemoryCopyRoot	proved	
+taclets	TestSuite	testStorageWriteAndRead	proved	
+taclets	TestSuite	storageFieldDecomposition	proved	
+taclets	TestSuite	storageFieldDeepValue	proved	
+taclets	TestSuite	storageIndexDecomposition	open	`simp` made no progress
+taclets	TestSuite	storageIndexRootArray	proved	
+taclets	TestSuite	storageFieldDisjointFields	proved	
+taclets	TestSuite	storageFieldDisjointRoots	proved	
+taclets	TestSuite	memoryAssignForms	unsupported	`new T[](n)` array allocation is not in the fragment
+taclets	TestSuite	memoryDelete	proved	
+taclets	TestSuite	storageAliasRebindOriginal	proved	
+taclets	TestSuite	testSimpleAssert	proved	
+solc	SolcExpressions	postIncrementYieldsOldValue	proved	
+solc	SolcExpressions	preIncrementYieldsNewValue	proved	
+solc	SolcExpressions	incDecChainOnLocal	proved	
+solc	SolcExpressions	incDecChainOnStateVariable	proved	
+solc	SolcExpressions	postDecrementYieldsOldValue	proved	
+solc	SolcExpressions	preDecrementYieldsNewValue	proved	
+solc	SolcExpressions	compoundAssignOnLocal	proved	
+solc	SolcExpressions	bareIncrementOnLocal	proved	
+solc	SolcExpressions	bareIncrementOnStateVariable	proved	
+solc	SolcExpressions	ternaryTrueLiteral	proved	
+solc	SolcExpressions	ternaryFalseLiteral	proved	
+solc	SolcExpressions	ternaryNestedOuterHigh	proved	concretized: solkey proves this for all parameters; ported at x = 1001
+solc	SolcExpressions	ternaryNestedOuterLow	proved	concretized: solkey proves this for all parameters; ported at x = 500
+solc	SolcExpressions	ternaryNestedInnerHigh	proved	concretized: solkey proves this for all parameters; ported at x = 80
+solc	SolcExpressions	ternaryNestedInnerLow	proved	concretized: solkey proves this for all parameters; ported at x = 40
+solc	SolcExpressions	exponentiationIsRightAssociative	proved	
+solc	SolcExpressions	exponentiationZeroBaseZeroExponent	proved	
+solc	SolcExpressions	exponentiationZeroExponent	proved	
+solc	SolcExpressions	exponentiationSignedBaseEvenExponent	proved	concretized: solkey proves this for all parameters; ported at b = minusTwo
+solc	SolcExpressions	exponentiationSignedBaseOddExponent	open	concretized: solkey proves this for all parameters; ported at b = minusTwo; open since checked arithmetic: the sol! macro types bare locals uint, so the int-typed negative base is checked at uint and reverts (macro name-typing gap, not an interpreter divergence)
+solc	SolcStructs	deleteMemberThroughStorageAlias	proved	
+solc	SolcStructs	deleteStructLeavesNeighbours	proved	
+solc	SolcStructs	deleteStructResetsArrayLength	proved	
+solc	SolcStructs	deleteStructInMapping	proved	
+solc	SolcStructs	deleteEntryKeepsOtherKeys	proved	
+solc	SolcStructs	recursiveStructThroughAliases	unsupported	field-name overloading: Depth0.recursive and Depth1.recursive have different types, and SoliditySyntax.fieldTy is one global name->type table
+solc	SolcStructs	nestedRecursiveStructSetAndCheck	unsupported	field-name overloading: as recursiveStructThroughAliases, plus Flagged.y (bool) vs Sub.y/Triple.y (uint)
+solc	SolcStructs	structCopyViaMemoryLocal	proved	
+solc	SolcStructs	structCopyFromStorageIsDeep	proved	
+solc	SolcStructs	structArrayElementCopy	proved	
+solc	SolcStructs	structArrayElementCopyMemberwise	proved	
+solc	SolcArrays	pushLvalueAssignsAndGrows	proved	
+solc	SolcArrays	pushWithArgument	proved	
+solc	SolcArrays	pushThenPopRestoresLength	proved	
+solc	SolcArrays	pushEmptyGrowsLength	proved	
+solc	SolcArrays	popThenPushSlotIsZeroed	proved	
+solc	SolcArrays	pushedSlotIsZeroed	proved	
+solc	SolcArrays	storageIndexReadWrite	proved	
+solc	SolcArrays	storageArrayAliasWritesThrough	proved	
+solc	SolcArrays	storageStructArrayAliasWritesThrough	proved	
+solc	SolcArrays	deleteArrayElementOfStructs	proved	
+solc	SolcArrays	matrixElementWriteRead	open	`simp` made no progress
+solc	SolcArrays	lengthTracksPushAndPop	proved	
+solc	SolcMemory	memoryStructDefaultsToZero	proved	
+solc	SolcMemory	memoryStructWriteRead	proved	
+solc	SolcMemory	storageArrayElementCopiedIntoMemory	proved	
+solc	SolcMemory	nestedStorageStructToMemory	proved	
+solc	SolcMemory	memoryStructToStorage	proved	
+solc	SolcMemory	storageToMemoryCopyIsDeep	proved	
+solc	SolcMemory	memoryToStorageCopyIsDeep	proved	
+solc	SolcMemory	memoryAliasIsNotACopy	proved	
+solc	SolcMemory	memoryArrayInStruct	unsupported	`new T[](n)` array allocation is not in the fragment
+solc	SolcMemory	deleteMemoryArrayElement	unsupported	`new T[](n)` array allocation is not in the fragment
+solc	SolcMemory	storageArrayCopiedIntoMemory	proved	
+solc	SolcMappings	structStorageToMappingEntry	proved	
+solc	SolcMappings	mappingEntryToStorageStruct	proved	
+solc	SolcMappings	mappingEntryCopyIsDeep	proved	
+solc	SolcMappings	copySubstructureIntoMapping	open	`simp` made no progress
+solc	SolcMappings	copySubstructureFromMapping	open	`simp` made no progress
+solc	SolcMappings	mappingKeysAreIndependent	proved	
+solc	SolcMappings	deleteStructKeepsMappingMember	proved	
+solc	SolcMappings	arrayElementsToMapping	proved	
+solc	SolcMappings	arrayElementsToMappingElementwise	proved	
+solc	SolcControlFlow	doWhileFalseRunsBodyOnce	proved	
+solc	SolcControlFlow	forLoopUnrolledOverArray	proved	
+solc	SolcControlFlow	sequentialAssignmentDoesNotSwap	proved	
+solc	SolcControlFlow	swapViaTemporary	proved	
+solc	SolcControlFlow	ternarySelectsFirstMemorySource	open	concretized: solkey proves this for all parameters; ported at cond = 1; `simp` made no progress
+solc	SolcControlFlow	ternaryIntoMemoryTarget	open	concretized: solkey proves this for all parameters; ported at cond = 1; `simp` made no progress
+solc	SolcControlFlow	ifElseSelectsMemorySource	proved	concretized: solkey proves this for all parameters; ported at cond = 0
+solc	SolcControlFlow	ternarySelectsValueByFlag	proved	concretized: solkey proves this for all parameters; ported at cond = 0
+solc	SolcControlFlow	chainedIfsSelectLastMatch	proved	
+solc	SolcControlFlow	nestedIfElseSelectsBranch	open	concretized: solkey proves this for all parameters; ported at x = 500; unexpected token '>'; expected ')'
+net	Net	auction_closeAuction_invariant	unsupported	assumes an uninterpreted CInv over a symbolic ledger and books msg.value/msg.sender before the call; sol_wp evaluates from a concrete store and the fragment has no msg.*
+net	Net	auction_makeBid_invariant	unsupported	assumes an uninterpreted CInv over a symbolic ledger and books msg.value/msg.sender before the call; sol_wp evaluates from a concrete store and the fragment has no msg.*
+net	Net	auction_makeBid_withcallback	unsupported	needs `transferWithCallback`, which CallbackSemantics.lean gives a relational meaning but the sol_stmt grammar cannot spell
+net	Net	auction_withdraw_makeBid_invariant	unsupported	assumes an uninterpreted CInv over a symbolic ledger and books msg.value/msg.sender before the call; sol_wp evaluates from a concrete store and the fragment has no msg.*
+net	Net	auction_withdraw_withdraw_invariant	unsupported	assumes an uninterpreted CInv over a symbolic ledger and books msg.value/msg.sender before the call; sol_wp evaluates from a concrete store and the fragment has no msg.*
+net	Net	casino_addToPot_invariant	unsupported	assumes an uninterpreted CInv over a symbolic ledger and books msg.value/msg.sender before the call; sol_wp evaluates from a concrete store and the fragment has no msg.*
+net	Net	casino_decideBet_invariant	unsupported	assumes an uninterpreted CInv over a symbolic ledger and books msg.value/msg.sender before the call; sol_wp evaluates from a concrete store and the fragment has no msg.*
+net	Net	casino_decideBet_withcallback	unsupported	needs `transferWithCallback`, which CallbackSemantics.lean gives a relational meaning but the sol_stmt grammar cannot spell
+net	Net	casino_placeBet_invariant	unsupported	assumes an uninterpreted CInv over a symbolic ledger and books msg.value/msg.sender before the call; sol_wp evaluates from a concrete store and the fragment has no msg.*
+net	Net	escrow_placeInEscrow_invariant	unsupported	assumes an uninterpreted CInv over a symbolic ledger and books msg.value/msg.sender before the call; sol_wp evaluates from a concrete store and the fragment has no msg.*
+net	Net	escrow_releaseEscrow_invariant	unsupported	assumes an uninterpreted CInv over a symbolic ledger and books msg.value/msg.sender before the call; sol_wp evaluates from a concrete store and the fragment has no msg.*
+net	Net	escrow_withdrawFrom_invariant	unsupported	assumes an uninterpreted CInv over a symbolic ledger and books msg.value/msg.sender before the call; sol_wp evaluates from a concrete store and the fragment has no msg.*
+net	Net	net_msg_value	unsupported	`msg.value` is not in the sol_expr grammar
+net	Net	net_transfer_capture_argument	proved	solkey net-transfer-capture-argument.key
+net	Net	net_transfer_capture_receiver	proved	solkey net-transfer-capture-receiver.key
+net	Net	net_transfer_simple	proved	solkey net-transfer-simple.key
+net	Net	net_transfer_withcallback_simple	unsupported	needs `transferWithCallback`, which CallbackSemantics.lean gives a relational meaning but the sol_stmt grammar cannot spell
+net	Net	piggybank_addMoney_invariant	unsupported	assumes an uninterpreted CInv over a symbolic ledger and books msg.value/msg.sender before the call; sol_wp evaluates from a concrete store and the fragment has no msg.*
+net	Net	piggybank_breakPiggyBank_invariant	unsupported	assumes an uninterpreted CInv over a symbolic ledger and books msg.value/msg.sender before the call; sol_wp evaluates from a concrete store and the fragment has no msg.*
+net	Net	piggybank_breakPiggyBank_withcallback	unsupported	needs `transferWithCallback`, which CallbackSemantics.lean gives a relational meaning but the sol_stmt grammar cannot spell
+rules	Rules	assignRuleExample	proved	solkey assignRuleExample.key
+rules	Rules	contextAssignTest	proved	solkey contextAssignTest.key
+rules	Rules	fieldAccessTest	proved	solkey fieldAccessTest.key
+rules	Rules	functionBodyExpandTest	unsupported	term-level: asserts a heap-algebra identity between store terms, or exercises the KeY loader/taclet machinery — not a program judgment. The rules themselves are covered by RuleValidation.lean/RuleSoundness.lean
+rules	Rules	hasSortVarcondTest	unsupported	term-level: asserts a heap-algebra identity between store terms, or exercises the KeY loader/taclet machinery — not a program judgment. The rules themselves are covered by RuleValidation.lean/RuleSoundness.lean
+rules	Rules	listTests	unsupported	term-level: asserts a heap-algebra identity between store terms, or exercises the KeY loader/taclet machinery — not a program judgment. The rules themselves are covered by RuleValidation.lean/RuleSoundness.lean
+rules	Rules	mainExamples	unsupported	term-level: asserts a heap-algebra identity between store terms, or exercises the KeY loader/taclet machinery — not a program judgment. The rules themselves are covered by RuleValidation.lean/RuleSoundness.lean
+rules	Rules	memberAccessExample	unsupported	term-level: asserts a heap-algebra identity between store terms, or exercises the KeY loader/taclet machinery — not a program judgment. The rules themselves are covered by RuleValidation.lean/RuleSoundness.lean
+rules	Rules	memoryExample1	unsupported	term-level: asserts a heap-algebra identity between store terms, or exercises the KeY loader/taclet machinery — not a program judgment. The rules themselves are covered by RuleValidation.lean/RuleSoundness.lean
+rules	Rules	memoryExample2	unsupported	term-level: asserts a heap-algebra identity between store terms, or exercises the KeY loader/taclet machinery — not a program judgment. The rules themselves are covered by RuleValidation.lean/RuleSoundness.lean
+rules	Rules	memoryExample2_2	unsupported	term-level: asserts a heap-algebra identity between store terms, or exercises the KeY loader/taclet machinery — not a program judgment. The rules themselves are covered by RuleValidation.lean/RuleSoundness.lean
+rules	Rules	memoryExample3	unsupported	term-level: asserts a heap-algebra identity between store terms, or exercises the KeY loader/taclet machinery — not a program judgment. The rules themselves are covered by RuleValidation.lean/RuleSoundness.lean
+rules	Rules	memoryExample4	unsupported	term-level: asserts a heap-algebra identity between store terms, or exercises the KeY loader/taclet machinery — not a program judgment. The rules themselves are covered by RuleValidation.lean/RuleSoundness.lean
+rules	Rules	memoryExample5	unsupported	term-level: asserts a heap-algebra identity between store terms, or exercises the KeY loader/taclet machinery — not a program judgment. The rules themselves are covered by RuleValidation.lean/RuleSoundness.lean
+rules	Rules	problem	unsupported	term-level: asserts a heap-algebra identity between store terms, or exercises the KeY loader/taclet machinery — not a program judgment. The rules themselves are covered by RuleValidation.lean/RuleSoundness.lean
+rules	Rules	problem1	unsupported	term-level: asserts a heap-algebra identity between store terms, or exercises the KeY loader/taclet machinery — not a program judgment. The rules themselves are covered by RuleValidation.lean/RuleSoundness.lean
+rules	Rules	problem2	unsupported	term-level: asserts a heap-algebra identity between store terms, or exercises the KeY loader/taclet machinery — not a program judgment. The rules themselves are covered by RuleValidation.lean/RuleSoundness.lean
+rules	Rules	programRulesTest	proved	solkey programRulesTest.key
+rules	Rules	revert	proved	solkey revert.key
+rules	Rules	schemaVarExample	proved	solkey schemaVarExample.key
+rules	Rules	simpleExample1	unsupported	term-level: asserts a heap-algebra identity between store terms, or exercises the KeY loader/taclet machinery — not a program judgment. The rules themselves are covered by RuleValidation.lean/RuleSoundness.lean
+rules	Rules	simpleExample10	unsupported	term-level: asserts a heap-algebra identity between store terms, or exercises the KeY loader/taclet machinery — not a program judgment. The rules themselves are covered by RuleValidation.lean/RuleSoundness.lean
+rules	Rules	simpleExample2	unsupported	term-level: asserts a heap-algebra identity between store terms, or exercises the KeY loader/taclet machinery — not a program judgment. The rules themselves are covered by RuleValidation.lean/RuleSoundness.lean
+rules	Rules	simpleExample3	unsupported	term-level: asserts a heap-algebra identity between store terms, or exercises the KeY loader/taclet machinery — not a program judgment. The rules themselves are covered by RuleValidation.lean/RuleSoundness.lean
+rules	Rules	simpleExample4	unsupported	term-level: asserts a heap-algebra identity between store terms, or exercises the KeY loader/taclet machinery — not a program judgment. The rules themselves are covered by RuleValidation.lean/RuleSoundness.lean
+rules	Rules	simpleExample5	unsupported	term-level: asserts a heap-algebra identity between store terms, or exercises the KeY loader/taclet machinery — not a program judgment. The rules themselves are covered by RuleValidation.lean/RuleSoundness.lean
+rules	Rules	simpleExample6	unsupported	term-level: asserts a heap-algebra identity between store terms, or exercises the KeY loader/taclet machinery — not a program judgment. The rules themselves are covered by RuleValidation.lean/RuleSoundness.lean
+rules	Rules	simpleExample7	unsupported	term-level: asserts a heap-algebra identity between store terms, or exercises the KeY loader/taclet machinery — not a program judgment. The rules themselves are covered by RuleValidation.lean/RuleSoundness.lean
+rules	Rules	simpleExample8	unsupported	term-level: asserts a heap-algebra identity between store terms, or exercises the KeY loader/taclet machinery — not a program judgment. The rules themselves are covered by RuleValidation.lean/RuleSoundness.lean
+rules	Rules	simpleExample9	unsupported	term-level: asserts a heap-algebra identity between store terms, or exercises the KeY loader/taclet machinery — not a program judgment. The rules themselves are covered by RuleValidation.lean/RuleSoundness.lean
+rules	Rules	simpleExpressionTest	proved	solkey simpleExpressionTest.key
+rules	Rules	storageExample1	unsupported	term-level: asserts a heap-algebra identity between store terms, or exercises the KeY loader/taclet machinery — not a program judgment. The rules themselves are covered by RuleValidation.lean/RuleSoundness.lean
+rules	Rules	storageExample1_2	unsupported	term-level: asserts a heap-algebra identity between store terms, or exercises the KeY loader/taclet machinery — not a program judgment. The rules themselves are covered by RuleValidation.lean/RuleSoundness.lean
+rules	Rules	storageExample2	unsupported	term-level: asserts a heap-algebra identity between store terms, or exercises the KeY loader/taclet machinery — not a program judgment. The rules themselves are covered by RuleValidation.lean/RuleSoundness.lean
+rules	Rules	storageExample2_2	unsupported	term-level: asserts a heap-algebra identity between store terms, or exercises the KeY loader/taclet machinery — not a program judgment. The rules themselves are covered by RuleValidation.lean/RuleSoundness.lean
+rules	Rules	storageExample3	unsupported	term-level: asserts a heap-algebra identity between store terms, or exercises the KeY loader/taclet machinery — not a program judgment. The rules themselves are covered by RuleValidation.lean/RuleSoundness.lean
+rules	Rules	storageExample4	unsupported	term-level: asserts a heap-algebra identity between store terms, or exercises the KeY loader/taclet machinery — not a program judgment. The rules themselves are covered by RuleValidation.lean/RuleSoundness.lean
+rules	Rules	storageExample4_2	unsupported	term-level: asserts a heap-algebra identity between store terms, or exercises the KeY loader/taclet machinery — not a program judgment. The rules themselves are covered by RuleValidation.lean/RuleSoundness.lean
+rules	Rules	storageExample5	unsupported	term-level: asserts a heap-algebra identity between store terms, or exercises the KeY loader/taclet machinery — not a program judgment. The rules themselves are covered by RuleValidation.lean/RuleSoundness.lean
+rules	Rules	storageFieldRead	unsupported	term-level: asserts a heap-algebra identity between store terms, or exercises the KeY loader/taclet machinery — not a program judgment. The rules themselves are covered by RuleValidation.lean/RuleSoundness.lean
+rules	Rules	storageFieldWrite	unsupported	term-level: asserts a heap-algebra identity between store terms, or exercises the KeY loader/taclet machinery — not a program judgment. The rules themselves are covered by RuleValidation.lean/RuleSoundness.lean

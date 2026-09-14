@@ -1,0 +1,492 @@
+# KeY taclet → Lean `RuleName` mapping
+
+Tracking checklist for `docs/plan.md`. One row per taclet in
+`solidityProgramRules.key` (plus `ifThenElseRules.key`), in file order.
+
+Re-pinned to solkey `e67a0d7c48` on 2026-09-02: that commit touches only
+`structRules.key` (the delete-default rules `delValueDefault` /
+`selectStDelNodeDefault` are now bounded `alphaPrim \extends Prim`, and a
+`Struct`-sorted `selectStDelNodeIndexStruct` reads `mtSt` — the Prim/Struct
+split is by sort), so every row below is unchanged.
+Re-synced against solkey `0f9b99ad55` on 2026-09-01 (238 program taclets;
+the sort-hierarchy changes of that sync — `RefField` for `IdField`/`PrimField`,
+the `Field[primitive]`/`Field[reference]` schema sorts replaced by
+`\hasFieldSort`/`\hasMemoryFieldSort` bounds, `transfer*` split by modality —
+are in the rows below and in the `SolKey` reader's `Decode/Sorts.lean`). The
+2026-08-29 sync (237 program taclets) found solkey had
+moved since the original sync: several decl-init taclets were renamed or
+collapsed (`*InitSplit` → `*InitDrop`), five `*_unfold_rightSnd*` rules that
+were Lean-only now exist as taclets, and new taclet families had landed
+with no Lean counterpart (`ternary*`, `local{Add,Sub,Mul,Div,Mod}Assign`,
+bare `local{Pre,Post}{in,de}crement`,
+`{add,sub,mul,div,mod}AssignValueRhsCapture`) — all of which were ported
+the same day (rows marked `done` below). Ideas flowing the other way are
+collected in `docs/solkey-feedback.md`.
+
+Status legend:
+
+- `existing` — already modeled in `Rules.lean` (possibly merged with siblings).
+- `planned(N)` — to be added in plan phase N.
+- `arch` — no direct Lean counterpart by design (architectural difference of
+  the block-rewriting model); note explains.
+- `verify` — likely covered but the correspondence must be checked against
+  the KeY taclet before being trusted.
+- `lemma` — ported as a theorem about `SolidityJudgment`/`State`, not a
+  `RuleName` (proof-level or state-level content that a single-successor
+  rewrite step cannot express).
+
+## The taclet column is now machine-checked
+
+This file is prose, and prose drifts. The **name** column is therefore no
+longer only here: every rule of `Rules.lean` carries a typed
+`KeyOrigin` — `taclet t`, `merged [t₁, …]` or `leanOnly` — over the
+`KeyTaclet` enumeration of `KeyTaclets.lean`, which is the vendored
+`solidityProgramRules.key` transcribed one constructor per taclet. Three
+consequences:
+
+- a misspelled taclet name is a type error, not a stale table row;
+- `RuleShapes.taclets_partitioned` checks the *coverage* direction — of the 252
+  taclets, 246 are claimed by some Lean rule and exactly six are excused with a
+  reason (`emptyModality`, `blockEmpty`, the two deleted
+  `index*InnerNonSimpleIndexCapture`, `ifSplit`, `ifElseSplit`);
+- `RuleShapes.leanOnlyRules` is the other direction, computed from the table
+  rather than transcribed.
+
+What stays prose here is everything the `origin` cannot say: *why* a merge is a
+merge, which upstream commit moved a rule, and the evaluation-order and
+sort-annotation notes below. Rows whose only content is "this taclet ↔ this
+rule" are now redundant with the code and are kept for their notes.
+
+## Sort annotations (machine-checked column)
+
+This table maps taclet *names*; the taclets' **read-sort annotations**
+(`find<[int]>` vs `find<[Struct]>` vs sort-free `find<[StValue]>`/`valAt`
+vs varcond-resolved `find<[alphaPrim]>`) are tracked separately and
+machine-checked from both sides:
+
+- `Solidity/TacletAnnotations.lean` — one `TacletReadAnn` row per
+  read-bearing taclet, kept in sync with the live `.key` file by
+  `lake exe solkeycheck` (`scripts/check-solkey.sh`); any upstream sort
+  drift fails the check.
+- `Solidity/SortFaithfulness.lean` — proves each row's sort claims
+  against the interpreter (`sortFaithful_all`), so updating the table to
+  match a mis-sorted taclet breaks the build. A fixed sort is a
+  `KeySort` (`Solidity/KeySort.lean`, the transcribed lattice shared with
+  the `SolKey` reader's decoder), and the claim is `(v.keySort).le s` — the
+  sort-free `find<[StValue]>` is literally `fixed .stValue`.
+
+This layer exists because a sort bug slipped through the name-level
+mapping: solkey `12e72a1b4b` fixed hard-coded `find<[int]>` reads on the
+copy rules (mis-sorting `bool` copies), which no Lean theorem could see —
+the hand-translated Lean rules were already sort-free. The pre-fix
+annotations are refuted in
+`Solidity/Counterexamples/PreFixSortAnnotations.lean`, and the two
+surviving `find<[Struct]>` reads on possibly-primitive sources
+(`storageFieldWriteCopySource`, `storagePushValueCopySource`) are
+recorded as `SortFaithfulness.openFindings` with counterexamples.
+
+## Naming drift against solkey
+
+**`lake exe solkeycheck` is currently red.** The sort-annotation table has
+drifted from upstream by 78 rows against a solkey checkout beside this
+repository (`~/projects/solkey`, 315 program taclets): solkey split the
+storage-index taclets into array/mapping forms and merged the
+`_root`/`_decompose` pairs, changed three read sorts
+(`storageFieldWriteCopySource` and `storagePushValueCopySource` now read
+`StValue` where the table says `Struct`;
+`storageIndexReadArray{BindLocalRoot,StoreRoot}` read `length` twice), and
+added the memory-arithmetic family. That re-sync is its own change: it moves
+`SortFaithfulness.lean` and `Counterexamples/PreFixSortAnnotations.lean`
+together, and it is not implied by porting the rules.
+
+One naming drift is left, and it is not a semantic difference:
+
+- `unfoldArgument` is a name from solkey's `docs/net.md` backlog. The
+  calculus declares no rule of that name, which is why
+  `functionCallArgCapture` is a Lean-only rule.
+
+The two drifts that used to sit beside it are closed: Lean now spells the
+declaration rules `storageLocalDeclInitDrop` / `memoryLocalDeclInitDrop` /
+`localValueDeclInitDrop` and the conditional rules `ifElseUnfold` /
+`ifElseTrue` / `ifElseFalse` / `ifElseNegated`, as solkey does.
+`ifElseUnfold` still merges solkey's `ifUnfold`/`ifElseUnfold` pair, because
+`Stmt.ite` always carries both branches.
+
+The box/diamond twins are a *Lean* naming decision with no upstream
+counterpart: where the calculus stacks a bounds or nonempty check as two
+sequents, Lean splits the rule by modality and names the halves with the
+rule name plus a `Box`/`Diamond` suffix — the convention already used in
+`revertBox` and `transferNoCallbackBox`.
+
+## Evaluation-order note (KeY `testStorageEvaluationOrder`)
+
+KeY evaluates an assignment's RHS *before* the target's index
+(`a[++i] = ++i` with `i = 0` ends with `a[2] == 1`), and so does the Lean
+**interpreter** (`execAssignNested`, RHS first as in solc; locked in by
+`RuleValidation.storageEvaluationOrder_interpreter_rhsFirst`). The Lean
+**rewrite layer** agrees when the RHS is complex: `assignCandidate` tests
+`rhs.simple` first, so the `*ValueRhsCapture` rules hoist the RHS before
+any path/index capture (`storageEvaluationOrder_rewrite_rhsFirst`).
+
+When the RHS is *simple* and the **path** is complex, the
+`*WriteUnfoldLeft*` rules (`storageFieldWriteUnfoldLeftFst`,
+`storageIndexWriteUnfoldLeftSndIndex`, …, mirroring KeY's
+`*_unfold_leftFst` / `*NonSimpleIndexCapture`) used to capture the path or
+index *first*, a genuine order swap against the interpreter: on
+`people[i++].age = i` the interpreter writes the old `i`, the residual the
+incremented one. **Fixed.** `Rules.freezeRhs` prepends `T rv = e;` to every
+target-capture residual on a primitive value operand, so all ten rules
+(storage and memory) are now sound on a primitive right-hand side with no
+semantic side condition — no `hstable`, no `hev`, no `pureExpr index`, only
+the syntactic `hprim` (which is about the interpreter, not the rule; see the
+upstream-state bullets below) — and `Counterexamples/EvaluationOrder.lean`
+proves agreement on the two programs it used to refute, keeping the
+refutation of the pre-fix residual beside it.
+
+The freeze is **not** conditional on the path being impure, and cannot be:
+`Counterexamples/ErrorOrder.lean` refutes the unfrozen residual on
+`people[1 / 0].age = ghost`, where both operands are pure but the two sides
+fail with different `Halt`s (stuck vs revert). Error ordering, not just
+interference, is what forces the freeze.
+
+**Upstream state (re-checked 2026-09-12).** solkey landed the fix in
+`8ba30fd742` ("i++ evaluation order", storage half) and `63c38cfaf6`
+("replace the rules to get m[i++] = i", memory half plus recursion), after
+the 2026-09-09 attempt was reverted the same day (`beeb97d2b1`). KeY binds
+the value with a second `\newTypeOf(rv, se)` and splits each affected write
+on `SimpleExpression[primitive]` versus a new `…Ref…` taclet, because
+binding a reference is aliasing rather than a read — the same split
+`freezeRhs` makes on `rhs.ty.isPrimitive`.
+
+Two things to know about the upstream state:
+
+* `63c38cfaf6` **deleted** `indexWriteInnerNonSimpleIndexCapture` and
+  `indexReadInnerNonSimpleIndexCapture` (rows below) in favour of four new
+  `{storage,memory}{Field,Index}WriteIndexedReceiver_unfold_leftFst`
+  taclets. Those four **never fire** — two red tests, `storageMatrixNseIndex`
+  and `testNestedIndexWriteImpureIndexPrimitiveRhs` — bisected upstream to
+  `\varcond(\newTypeOf(sp, nsp))`. The residual they emit is
+  character-for-character Lean's `indexWriteResolveBlock`, and Lean's version
+  works, so the bug was in taclet instantiation, not in the rule. **Now
+  fixed**: a schema variable off the plain `ProgramSVSort.VARIABLE` sort gets
+  no name proposal, so `VariableNamer`'s `previousProposals` list carried a
+  `null` and `equals` threw; these four are the only taclets minting two fresh
+  program variables at *different* data locations, which is what put a `null`
+  there. 242 -> 0 failures.
+* **Reference sources are the one place the KeY rule is right and the Lean
+  interpreter is wrong.** solc is right-hand-side-first for a primitive
+  source, but copies a *struct* source member by member after resolving the
+  target, so an impure index has already run. Confirmed on a real EVM
+  (`TestSuite.storageIndexWriteRefSourceImpureIndex` stores `1`);
+  `Semantics.execAssignNested` stores `0`. The `hprim` hypothesis on the Lean
+  `*UnfoldLeft*` soundness theorems fences this off rather than claiming the
+  rule is at fault — see `Counterexamples/RefSourceOrder.lean` and
+  `docs/solc-alignment.md`.
+* the `SolKey` reader's vendored corpus is still pinned at the revert (`beeb97d2b1`), so its
+  `AgreesModulo` theorems compare against the pre-fix taclets and must be
+  re-pinned together with this change.
+
+## Modality / sequent rules
+
+| KeY taclet | Lean rule | Status | Notes |
+| --- | --- | --- | --- |
+| `emptyModality` | — | arch | A derivation ending in the empty `Block` is the Lean analogue; DL-syntax layer (goal task) makes it explicit. |
+| `blockEmpty` | — | arch | no nested-block `Stmt` constructor: `Block = List Stmt` and branch bodies are inlined lists, so the `{} ; rest` find-shape is unrepresentable. |
+| `functionBodyExpand` | `functionBodyExpand` | done | inlining via `SoliditySyntax.expandCall` (KeY `ExpandFunctionBody`: param decls from actuals, one named return, body, result assignment); the interpreter is stuck on `Stmt.callStmt` — meaning comes from `SolidityJudgment.checkInlined` (fuel-bounded `inlineBlock`; `inlineStmt_callStmt` is the definitional soundness anchor, acyclicity locked in by the `blockCallFree` `native_decide` in `Examples/Taclets/FunctionCallOps.lean`) |
+| — | `functionCallArgCapture` | done | Lean-only (`unfoldArgument` on solkey's backlog — `docs/net.md` §5.1; the name is solkey's, and the calculus declares no such rule): hoists the leftmost complex call argument into `pv` |
+| `revertDiamond` | `revertDiamond` | done | explicit rule; the modality truth value lives in `Semantics.lean` |
+| `revertBox` | `revertBox` | done | explicit rule; the modality truth value lives in `Semantics.lean` |
+
+## Storage root/field write & read
+
+| KeY taclet | Lean rule | Status | Notes |
+| --- | --- | --- | --- |
+| `storageRootWriteStore` | `storageRootWriteStore` | existing | |
+| `storageRootWriteCopySource` | `storageRootWriteCopySource` | existing | |
+| ~~`storageRootWriteCopySource_struct`~~ | `storageRootWriteCopySource` | gone upstream | deleted by solkey `12e72a1b4b`: the int/struct rule pair collapsed into one sort-free copy (`find<[StValue]>`), which is what the merged Lean rule modeled all along — see the sort-annotations section and `Counterexamples/PreFixSortAnnotations.lean` |
+| `storageRootReadSelect` | `storageRootReadSelect` | existing | |
+| `storageFieldWriteSave` | `storageFieldWriteSave` | existing | |
+| `storageFieldWriteCopySource` | `storageFieldWriteCopySource` | existing | |
+| `storageFieldWriteCaptureSrc` | `storageFieldReadUnfoldRightSndResult` | existing | merged: the SndResult chain captures a complex storage source (`RuleValidation.storageFieldReadUnfoldRightSndResult_valid` exercises the KeY find-shape) |
+| `storageRootWriteValueRhsCapture` | `storageRootWriteValueRhsCapture` | done | nonsimple primitive RHS into a global root; Lean condition excludes `binopUnfoldResult`'s arith-simple cell |
+| `fieldWriteValueRhsCapture` | `fieldWriteValueRhsCapture` | done | storage-field lhs instance; memory-lhs instances of KeY's generic `e1.a = nse` are covered by `memoryWriteUnfoldRightSndResult` |
+| `indexWriteValueRhsCapture` | `indexWriteValueRhsCapture` | done | storage-index lhs instance; soundness is conditional on non-interference (`valueRhsCaptureAssign_sound`, `hstable`) — see the evaluation-order note below |
+| `storageFieldRead_unfold_rightFst` | `storageFieldReadUnfoldRightFst` | existing | |
+| `storageFieldReadFind` | `storageFieldReadFind` | existing | |
+| `storageFieldWrite_unfold_leftFst` | `storageFieldWriteUnfoldLeftFst` | existing | |
+| `storageFieldWriteRootRhs_unfold_leftFst` | `storageFieldWriteUnfoldLeftFst` | existing | merged: Lean's `isSimple rhs` admits a global root, which KeY's `SimpleExpression` excludes — the RootRhs twin is that slice |
+| `storageFieldReadBindLocalRoot` | `storageFieldReadBindLocalRoot` | existing | |
+| `storageFieldReadStoreRoot` | `storageFieldReadStoreRoot` | existing | |
+| `storageFieldRead_unfold_rightSndResult` | `storageFieldReadUnfoldRightSndResult` | existing | was Lean-only; solkey adopted the taclet (result capture no longer folded into the read taclets) |
+
+## Storage index (mapping)
+
+| KeY taclet | Lean rule | Status | Notes |
+| --- | --- | --- | --- |
+| `storageIndexWriteMappingSave_root` | `storageIndexWriteMappingSave` | existing | merged root/decompose |
+| `storageIndexWriteMappingSave_decompose` | `storageIndexWriteMappingSave` | existing | merged |
+| `storageIndexReadMappingFind_root` | `storageIndexReadMappingFind` | existing | merged root/decompose |
+| `storageIndexReadMappingFind_decompose` | `storageIndexReadMappingFind` | existing | merged |
+| `storageIndexReadMappingBindLocalRoot` | `storageIndexReadMappingBindLocalRoot` | existing | |
+| `storageIndexWriteMappingCopySource` | `storageIndexWriteMappingCopySource` | existing | |
+| `storageIndexWriteStorageRefRhsCapture` | `storageIndexReadUnfoldRightSndResult` / `storageFieldReadUnfoldRightSndResult` | existing | merged (the KeY taclet was renamed from `storageIndexWriteMapRefRhsCapture`); dispatch tests `rhs.simple` first, which *is* the RHS-before-index order — `RuleValidation.storageIndexWriteStorageRefRhsCapture_corresp` |
+| `storageIndexReadMappingStoreRoot` | `storageIndexReadMappingStoreRoot` | existing | was Lean-only; solkey adopted the taclet |
+
+## Storage index (array)
+
+| KeY taclet | Lean rule | Status | Notes |
+| --- | --- | --- | --- |
+| `storageIndexWriteArraySave_root` | `storageIndexWriteArraySaveBox` / `storageIndexWriteArraySaveDiamond` | existing | Lean splits by modality (bounds/revert), KeY by root/decompose |
+| `storageIndexWriteArraySave_decompose` | `storageIndexWriteArraySaveBox` / `storageIndexWriteArraySaveDiamond` | existing | merged |
+| `storageIndexReadArrayFind_root` | `storageIndexReadArrayFindBox` / `storageIndexReadArrayFindDiamond` | existing | merged |
+| `storageIndexReadArrayFind_decompose` | `storageIndexReadArrayFindBox` / `storageIndexReadArrayFindDiamond` | existing | merged |
+| `storageIndexReadArrayBindLocalRoot` | `storageIndexReadArrayBindLocalRootBox` / `…Diamond` | existing | |
+| `storageIndexReadArrayStoreRoot` | `storageIndexReadArrayStoreRootBox` / `…Diamond` | existing | |
+| `storageIndexWriteArrayCopySource` | `storageIndexWriteArrayCopySourceBox` / `…Diamond` | existing | |
+| `storageIndexWriteNonSimpleRhsCapture` | `indexWriteValueRhsCapture` (+ `binopUnfoldResult` for arith-simple) | existing | the KeY taclet was replaced by the `*ValueRhsCapture` trio; see the evaluation-order note below |
+| `storageIndexWriteNonSimpleIndexCapture` | `storageIndexWriteUnfoldLeftSndIndex` | existing | condition and residual match KeY (simple-RHS precondition included); order vs RHS capture locked in by `RuleValidation.storageEvaluationOrder_rewrite_rhsFirst` (`a[++i] = ++i`) |
+| `storageIndexWriteRootRhsNonSimpleIndexCapture` | `storageIndexWriteUnfoldLeftSndIndex` | existing | merged: the Lean condition does not distinguish stack from storage simple RHSs — `RuleValidation.storageIndexWriteRootRhsNonSimpleIndexCapture_corresp` |
+| ~~`indexWriteInnerNonSimpleIndexCapture`~~ | `storageIndexWriteUnfoldLeftFst` / `memoryIndexWriteUnfoldLeftFst` | **deleted upstream** (`63c38cfaf6`) | Lean captures the whole inner path, which is **strictly more general**, not "coarser but equivalent": the KeY `\find` was hard-coded to `e1[nse][e2]`, so `m[i++][j][k] = v` matched nothing. It also had no RHS freeze, so it wrote the incremented `i` on `matrix[i++][0] = i`. Never modelled separately in Lean; recorded as a rejected design |
+| ~~`indexReadInnerNonSimpleIndexCapture`~~ | `storageIndexReadUnfoldRightFst` / `memoryIndexReadUnfoldRightFst` | **deleted upstream** (`63c38cfaf6`) | same: depth-2 shape-keyed, replaced by the (currently non-firing) receiver capture |
+| `storageIndexWrite_unfold_leftFst` | `storageIndexWriteUnfoldLeftFst` | existing | was Lean-only; solkey adopted the taclet |
+| `storageIndexWriteRootRhs_unfold_leftFst` | `storageIndexWriteUnfoldLeftFst` | existing | merged: Lean's `isSimple rhs` admits a global root, which KeY's `SimpleExpression` excludes — the RootRhs twin is that slice |
+| `storageIndexRead_unfold_rightSndIndex` | `storageIndexReadUnfoldRightSndIndex` | existing | was Lean-only; solkey adopted the taclet |
+| `storageIndexRead_unfold_rightSndResult` | `storageIndexReadUnfoldRightSndResult` | existing | was Lean-only; solkey adopted the taclet |
+| — | `storageIndexReadUnfoldRightFst` | existing | Lean-only granularity (KeY covers the shape via `storageFieldRead_unfold_rightFst` + `indexReadInnerNonSimpleIndexCapture`) |
+
+## Storage push / pop
+
+| KeY taclet | Lean rule | Status | Notes |
+| --- | --- | --- | --- |
+| `storagePushValue_unfold_leftFstReceiver` | `storagePushValueUnfoldLeftFstReceiver` | existing | |
+| `storagePush_unfold_leftFstReceiver` | `storagePushUnfoldLeftFstReceiver` | existing | |
+| `storagePop_unfold_leftFstReceiver` | `storagePopUnfoldLeftFstReceiver` | existing | |
+| `storageLocalRootPush_unfold_leftFstReceiver` | `storageLocalRootPushUnfoldLeftFstReceiver` | existing | |
+| `storagePushValue_unfold_rightSndArgument` | `storagePushValueUnfoldRightSndArgument` | existing | |
+| `storagePushValueCopySource_unfold_leftFstReceiver` | `storagePushValueUnfoldLeftFstReceiver` | existing | merged value/copy-source receiver unfolds — `RuleValidation.storagePushValueCopySource_unfold_leftFstReceiver_corresp` |
+| `storagePushValueSave` | `storagePushValueSave` | existing | |
+| `storagePushValueCopySource` | `storagePushValueCopySource` | existing | |
+| `storagePushLengthSave` | `storagePushLengthSave` | existing | |
+| `storageLocalRootPushBind` | `storageLocalRootPushBind` | existing | |
+| `storagePopSave` | `storagePopSaveBox` / `storagePopSaveDiamond` | existing | Lean splits by modality |
+| — | `storagePushLhsToPushValue` | existing | Lean-only normalization (push-lvalue forms) |
+
+## Storage local declarations
+
+| KeY taclet | Lean rule | Status | Notes |
+| --- | --- | --- | --- |
+| `storageLocalDeclInitDrop` | `storageLocalDeclInitDrop` | existing | same name both sides (Lean was `storageLocalDeclInitSplit` until the renaming that aligned both sides) |
+| `storageLocalRootRebind` | `storageLocalRootRebind` | existing | |
+| `storageLocalDeclSkip` | `storageLocalDeclSkip` | existing | |
+
+## Storage delete
+
+| KeY taclet | Lean rule | Status | Notes |
+| --- | --- | --- | --- |
+| `storageRootDelete` | `storageDeleteSimpleTarget` | existing | merged root/field/index simple targets |
+| `storageFieldDelete` | `storageDeleteSimpleTarget` | existing | merged |
+| `storageIndexDelete` | `storageDeleteSimpleTarget` | existing | merged |
+| `storageFieldDelete_unfold_leftFst` | `storageDeleteComplexTarget` | existing | merged |
+| `storageIndexDelete_unfold_leftFst` | `storageDeleteComplexTarget` | existing | merged |
+
+**Delete semantics:** solkey's delete writes the lazy `delAt`/`delNode`
+marker whose read rules preserve mapping members of a deleted struct
+(`selectStDelNodeMap` reads through to the original — real Solidity
+semantics). Lean's `SVal.defaultOf` (`Semantics.lean`) matches: it
+resets primitives, empties arrays, recurses into struct fields, and
+leaves mappings untouched (exercised by the `wallet` examples in
+`Examples/Taclets/StorageOps.lean`). One deliberate difference from
+solkey remains: solkey's `storageIndexDelete` resets a collection
+element outright (`defVal`, mappings included), while Lean applies the
+mapping-preserving default at every path shape — the Solidity-faithful
+choice.
+
+## Memory allocation, aliasing, declarations
+
+| KeY taclet | Lean rule | Status | Notes |
+| --- | --- | --- | --- |
+| `memoryReferenceDeclFreshAlloc` | `memoryDeclFreshAlloc` | existing | merged struct/array |
+| `memoryArrayFreshAlloc` | `memoryDeclFreshAlloc` | existing | merged (solkey renamed `memoryArrayDeclFreshAlloc` → `memoryArrayFreshAlloc`) |
+| `memoryRootDeleteFreshRebind` | `memoryDeleteSimpleTarget` | existing | the interpreter rebinds a fresh default object on root delete; write-after-delete exercised in `Examples/Taclets/MemoryOps.lean` |
+| `memoryRootRebind` | `memoryRootAlias` | existing | `memoryRootAlias` is now restricted to memory RHSs, making it exactly KeY `memoryRootRebind`; the storage-RHS case it silently absorbed is `memoryStorageCopy` |
+| `memoryStorageCopy` | `memoryStorageCopy` | done | `m = sp;` deep copy (fresh identity + `copySt` in the interpreter); previously absorbed by `memoryRootAlias` |
+| `memoryStorageCopyUnfold` | `memoryStorageCopyUnfold` | done | complex storage path captured into the storage alias first; deep paths (`m = alice.account.token`) already step via `storageFieldReadUnfoldRightFst` / `storageIndexReadUnfoldRightFst` |
+| `memoryLocalDeclInitDrop` | `memoryLocalDeclInitDrop` | existing | solkey deleted the whole per-RHS decl-init family (`memoryLocalDeclInitRootAlias`, `…StorageCopy`, `…StorageCopyUnfold`, `…FieldReadValue/Memory/_unfold_rightFst`, `…IndexReadValue/Memory`) and adopted the Lean approach: one generic decl-with-init split, then the assignment rules apply |
+| — | `storageToMemoryDeclCopyRoot`, `storageToMemoryDeclCopyField`, `storageToMemoryDeclUnfoldRightFst` | existing | now Lean-only decl-specific granularity; their former KeY counterparts (`memoryLocalDeclInitStorageCopy`, `…Unfold`) were removed with the family above |
+
+## Memory field/index write & read
+
+| KeY taclet | Lean rule | Status | Notes |
+| --- | --- | --- | --- |
+| `memoryFieldWrite` | `memoryFieldWriteStore` | existing | |
+| `memoryFieldRead` | `memoryFieldReadHeap` / `memoryFieldReadAliasRoot` | existing | solkey `0f9b99ad55` merged the former `memoryFieldReadValue` (`Field[primitive]`) and `memoryFieldReadMemory` (`Field[reference]`, `read<[Identity]>`) into one rule over a bare `Field`, its result sort resolved by `\hasMemoryFieldSort(a, \sort(alpha))` — the merge Lean had made already |
+| `memoryFieldRead_unfold_rightFst` | `memoryFieldReadUnfoldRightFst` | existing | |
+| `memoryFieldWriteCaptureSrc` | `memoryFieldWriteCopy` | existing | |
+| `memoryFieldWrite_unfold_leftFst` | `memoryFieldWriteUnfoldLeftFst` | existing | |
+| `memoryIndexWriteArray` | `memoryIndexWriteStoreBox` / `memoryIndexWriteStoreDiamond` | existing | Lean splits by modality (bounds) |
+| `memoryIndexReadArrayValue` | `memoryIndexReadHeapBox` / `…Diamond` | existing | |
+| `memoryIndexReadArrayMemory` | `memoryIndexReadHeapBox` / `memoryIndexReadAliasRootBox` / `…Diamond` | existing | |
+| `memoryIndexRead_unfold_rightFst` | `memoryIndexReadUnfoldRightFst` | existing | |
+| `memoryIndexWrite_unfold_leftFst` | `memoryIndexWriteUnfoldLeftFst` | existing | |
+| `memoryIndexWriteMemRefRhsCapture` | `memoryFieldRead*`/`memoryIndexRead*` unfolds + `memoryWriteUnfoldRightSndResult` | existing | merged under the memory-complex-lhs dispatch branch |
+| `memoryIndexWriteNonSimpleIndexCapture` | `memoryIndexWriteUnfoldLeftSndIndex` | existing | condition/residual match KeY (`RuleValidation.memoryIndexWriteUnfoldLeftSndIndex_valid`); order vs RHS capture as in the storage case |
+| `memoryIndexDeleteNonSimpleIndexCapture` | `memoryDeleteComplexTarget` | existing | merged — `memoryDeleteComplexTargetBlock` captures the index exactly as KeY (`RuleValidation.memoryDeleteComplexTarget_index_valid`) |
+| `storageIndexDeleteNonSimpleIndexCapture` | `storageDeleteComplexTarget` | existing | merged — `RuleValidation.storageDeleteComplexTarget_index_valid` |
+| `memoryFieldRead_unfold_rightSndResult` | `memoryFieldReadUnfoldRightSndResult` | existing | was Lean-only; solkey adopted the taclet |
+| `memoryIndexRead_unfold_rightSndIndex` | `memoryIndexReadUnfoldRightSndIndex` | existing | was Lean-only; solkey adopted the taclet |
+| `memoryIndexRead_unfold_rightSndResult` | `memoryIndexReadUnfoldRightSndResult` | existing | was Lean-only; solkey adopted the taclet |
+| — | `memoryWriteUnfoldRightSndResult` | existing | Lean-only granularity |
+
+## Memory delete
+
+| KeY taclet | Lean rule | Status | Notes |
+| --- | --- | --- | --- |
+| `memoryFieldDeletePrimitive` | `memoryDeleteSimpleTarget` | existing | merged |
+| `memoryFieldDeleteReference` | `memoryDeleteSimpleTarget` | existing | merged |
+| `memoryIndexDeletePrimitive` | `memoryDeleteSimpleTarget` | existing | merged |
+| `memoryIndexDeleteReference` | `memoryDeleteSimpleTarget` | existing | merged |
+| `memoryFieldDelete_unfold_leftFst` | `memoryDeleteComplexTarget` | existing | merged |
+| `memoryIndexDelete_unfold_leftFst` | `memoryDeleteComplexTarget` | existing | merged |
+
+## Memory → storage copies
+
+| KeY taclet | Lean rule | Status | Notes |
+| --- | --- | --- | --- |
+| `memoryToStorageStoreRoot` | `memoryToStorageStoreRoot` | existing | |
+| `memoryToStorageFieldCopyRoot` | `memoryToStorageFieldCopyRoot` | existing | deep-copy of a memory root into a storage slot exercised in `Examples/Taclets/MemoryOps.lean` |
+| `memoryToStorageFieldCopyField` | `memoryToStorageFieldCopyRoot` | existing | granularity differs (Lean: SaveField + unfolds); `RuleValidation.memoryToStorageUnfold*` entries |
+| `memoryToStorageIndexMappingCopyRoot` | `memoryToStorageIndexMappingCopyRoot` | existing | indexed deep-copy, mapping receiver |
+| `memoryToStorageIndexArrayCopyRoot` | `memoryToStorageIndexArrayCopyRootBox` / `…Diamond` | existing | indexed deep-copy, array receiver; Lean splits by modality (bounds/revert) |
+| — | `memoryToStorageUnfoldRightFstSource`, `memoryToStorageUnfoldLeftFstTarget`, `memoryToStorageUnfoldLeftSndTargetIndex` | existing | Lean-only unfold steps |
+
+## Value declarations (phase 2)
+
+| KeY taclet | Lean rule | Status | Notes |
+| --- | --- | --- | --- |
+| `localValueDeclInitDrop` | `localValueDeclInitDrop` | done | same name both sides (Lean was `valueDeclInitSplit` until the renaming that aligned both sides) |
+| `valueDeclSkip` | `valueDeclSkip` | done | |
+| `localValueAssign` | `localValueAssign` | done | terminal `vp = se;` for simple RHS |
+
+## Binary arithmetic operators (phase 2)
+
+Family pattern per op `X ∈ {addition, subtraction, multiplication, power,
+division, modulo}`: `X_unfold_left`, `X_unfold_right`, `X_unfold_result`,
+`XAssignment`. Lean names: `XUnfoldLeft`, `XUnfoldRight`, `XUnfoldResult`,
+`XAssignment`.
+
+| KeY taclet | Lean rule | Status | Notes |
+| --- | --- | --- | --- |
+| `addition_unfold_left/right/result`, `additionAssignment` | `additionUnfoldLeft/Right/Result`, `additionAssignment` | done | |
+| `subtraction_*`, `subtractionAssignment` | `subtractionUnfoldLeft/Right/Result`, `subtractionAssignment` | done | |
+| `multiplication_*`, `multiplicationAssignment` | `multiplicationUnfoldLeft/Right/Result`, `multiplicationAssignment` | done | |
+| `power_*`, `powerAssignment` | `powerUnfoldLeft/Right/Result`, `powerAssignment` | done | |
+| `division_*`, `divisionAssignment` | `divisionUnfoldLeft/Right/Result`, `divisionAssignment` | done | zero-divisor guard per plan D2 |
+| `modulo_*`, `moduloAssignment` | `moduloUnfoldLeft/Right/Result`, `moduloAssignment` | done | zero-divisor guard per plan D2 |
+
+## Comparisons, boolean operators, unary (phase 2)
+
+| KeY taclet | Lean rule | Status | Notes |
+| --- | --- | --- | --- |
+| `boolEqualityCaptureLhs`, `boolEqualityAssignment` | `boolEqualityCaptureLhs`, `boolEqualityAssignment` | done | |
+| `boolEqualityCaptureRhs` | — | **todo** | added by solkey `0f9b99ad55` (`v = se == nse;` → `T pv = nse; v = se == pv;`); Lean reaches the same normal form through the generic binop unfolds, and has no rule of this name |
+| `boolInequalityCaptureLhs/CaptureRhs`, `boolInequalityAssignment` | same camelCase | done | |
+| `lessThanCaptureLhs/CaptureRhs`, `lessThanAssignment` | same | done | |
+| `greaterThanCaptureLhs/CaptureRhs`, `greaterThanAssignment` | same | done | |
+| `lessEqualCaptureLhs/CaptureRhs`, `lessEqualAssignment` | same | done | |
+| `greaterEqualCaptureLhs/CaptureRhs`, `greaterEqualAssignment` | same | done | |
+| `logicalAndCaptureLhs`, `logicalAndAssignment` | same (`binopUnfoldLeft .and` / `binopAssignment .and`) | done | |
+| `logicalOrCaptureLhs`, `logicalOrAssignment` | same | done | |
+| `logicalAndShortCircuitRhs` | `logicalAndShortCircuitRhs` | done | `v = se && nse;` → `if (se) { v = nse } else { v = false }` — the statement-level image of KeY's ternary residual; the interpreter itself short-circuits, so the rewrite is exact (`RuleValidation.logicalAndShortCircuitRhs_shortCircuits_valid` shows the reverting RHS is skipped) |
+| `logicalOrShortCircuitRhs` | `logicalOrShortCircuitRhs` | done | dual (`v = se ? true : nse`) |
+| `logicalNotCapture`, `logicalNotAssignment` | same | done | |
+| `unaryMinusCapture`, `unaryMinusAssignment` | same | done | |
+
+## Storage compound assignments (phase 3)
+
+Pattern per op `Op ∈ {Add, Sub, Mul, Div, Mod}`:
+
+| KeY taclet | Lean rule | Status | Notes |
+| --- | --- | --- | --- |
+| `storageRootOpAssign` | `storageRootCompoundAssign op` | done | Div/Mod: zero-divisor guard |
+| `storageFieldOpAssign` | `storageFieldCompoundAssign op` | done | |
+| `storageIndexArrayOpAssign`, `storageIndexMappingOpAssign` | `storageIndexCompoundAssign op` | done | Lean does not split the compound-assign rule by receiver kind |
+| `storageFieldOpAssign_unfold_leftFst` | `storageFieldCompoundAssignUnfoldLeftFst op` | done | |
+| `storageIndexOpAssign_unfold_leftFst` | `storageIndexCompoundAssignUnfoldLeftFst op` | done | |
+| `memoryField{Add,Sub,Mul,Div,Mod}Assign`, `memoryIndexArray*Assign` | `memoryFieldCompoundAssign op` / `memoryIndexCompoundAssign op` | done | the calculus spells these `memoryFieldOpAssign` / `memoryFieldDivAssign` / `memoryIndexArrayOpAssign`. Landed upstream in solkey `444f029579`, after the revision the sort-annotation table was written against, which is why this family was the one gap the rule audit found. No root form (a memory root binds an identity, not a value cell) and no mapping form (memory has no mappings) |
+| `memoryField*Assign_unfold_leftFst`, `memoryIndex*Assign_unfold_leftFst` | `memoryFieldCompoundAssignUnfoldLeftFst op` / `memoryIndexCompoundAssignUnfoldLeftFst op` | done | complex memory path, with the same `rv` freeze as the storage twins; `RuleValidation.memory{Field,Index}CompoundAssignUnfoldLeftFst_*_valid` |
+| `localOpAssign` (`localAddAssign`, …) | `localCompoundAssign op` | done | terminal `lv ⊕= se;`; the Div/Mod zero-divisor revert lives in the interpreter's `applyBinOp`; update theorem `localCompoundAssign_update` (Wp/Terminal/UpdateCompound.lean) |
+| `{add,sub,mul,div,mod}AssignValueRhsCapture` | `compoundAssignValueRhsCapture op` | done | location-neutral capture of a nonsimple compound-assign RHS into `pv`; soundness `compoundAssignValueRhsCapture_sound` is conditional on the target's old value surviving the RHS's effects (`hstableOld`) — the compound image of the evaluation-order note |
+
+## Increment / decrement (phase 3)
+
+Pattern per `V ∈ {Preincrement, Postincrement, Predecrement, Postdecrement}`:
+
+| KeY taclet | Lean rule | Status | Notes |
+| --- | --- | --- | --- |
+| `storageRootV` / `storageRootVAssignment` | `storageRootIncDec v` / `storageRootIncDecAssignment v` | done | the calculus calls the family `storageRootIncrement` |
+| `storageFieldV` / `storageFieldVAssignment` | `storageFieldIncDec v` / `storageFieldIncDecAssignment v` | done | |
+| `storageIndexV` / `storageIndexVAssignment` | `storageIndexIncDec v` / `storageIndexIncDecAssignment v` | done | |
+| `storageFieldV_unfold_leftFst` | `storageFieldIncDecUnfoldLeftFst v` | done | |
+| `storageIndexV_unfold_leftFst` | `storageIndexIncDecUnfoldLeftFst v` | done | |
+| `memoryField{Pre,Post}{in,de}crement[Assignment]`, `memoryIndexArray*` | `memoryFieldIncDec v` / `memoryIndexIncDec v` (+ `…Assignment`, `…UnfoldLeftFst`) | done | the calculus spells this `memoryFieldIncrement`; same upstream commit as the compound-assign family above |
+| `localDeclV` (`localDeclPreincrement`, ...) | same | done | `T vp = ++lv;` |
+| `localAssignV` (`localAssignPreincrement`, ...) | same | done | `vp = ++lv;` |
+| `localV` (`localPreincrement`, ...) | `localIncDec op` | done | bare statement `++lv;` on a stack local; update theorem `localIncDec_update` (Wp/Terminal/UpdateCompound.lean) (`--` cannot be a `sol!` token — decrement instances are exercised via `incDecExpr`) |
+
+## Assert, if-then-else (phase 4)
+
+| KeY taclet | Lean rule | Status | Notes |
+| --- | --- | --- | --- |
+| `assertConditionCapture` | `assertConditionCapture` | done | |
+| `assertSimple` | `assertSimple` | done | terminal in the rewrite layer; the Holds/Violated split is the revert semantics in `Semantics.lean` |
+| `requireConditionCapture` | `requireConditionCapture` | done | clone of the assert capture over `Stmt.requireStmt` |
+| `requireSimple` | `requireSimple` | done | terminal; the interpreter reverts on false — box `c → φ`, diamond `c ∧ φ` fall out of `check` (solkey `docs/require-assert.md`); the KeY assert/require difference (⊥ vs revert) lives entirely in that layer |
+| `ifUnfold` / `ifElseUnfold` | `ifElseUnfold` | done | solkey's statement-level nonsimple-condition capture (`solidityProgramRules.key`); Lean merges the if/if-else pair since `Stmt.ite` always carries both branches (else = `[]`) |
+| `ifSplit` / `ifElseSplit` | `SolidityJudgment.ite_split` | lemma | solkey's sequent-level two-goal split on a simple condition (`\add(se = TRUE/FALSE ==>)`); a `BlockStep` cannot produce two goals, so the rewrite layer is intentionally stuck there and the split is the lemma (`JudgmentSplit.lean`; `ite_split_pure` is the exact KeY shape for pure conditions) |
+| `ternaryCaptureCond` | `ternaryCaptureCond` | done | `WrappedExpr.mkTernary` + `c ? t : e` in `sol!`; the interpreter short-circuits like `&&`/`||`; the cond excludes the memory-complex-lhs dispatch branch (`memoryWriteUnfoldRightSndResult` claims the whole rhs there); soundness has the trio's `hstable` non-interference condition |
+| `ternaryToIf` | `ternaryToIf` | done | `v = se ? e1 : e2;` ⇝ `if (se) v = e1; else v = e2;` — both sides evaluate the same branch in the same state (`ternaryToIf_sound` is an equality up to defeq) |
+| `ternaryToIfStorage` | `ternaryToIfStorage` | done | twin for a storage-path target; soundness pinned to the primitive-write dispatch (branch types agree) |
+| `ifthenelse_true` (`ifThenElseRules.key`, term-level `\if`) | `ifElseTrue` | done | Lean lifts it to a program rule firing on the literal condition `true` (plan D3b); solkey has no program-rule counterpart — a candidate taclet for solkey (`docs/solkey-feedback.md`) |
+| `ifthenelse_false` | `ifElseFalse` | done | same, literal `false` |
+| `ifthenelse_negated` | `ifElseNegated` | done | Lean swaps branches for `!se` conditions at the program level; term-level only in KeY |
+| `ifthenelse_same_branches` | `SolidityJudgment.ite_same_branches` | lemma | corollary of `ite_split`; a `RuleName` port would overlap `ifElseTrue`/`ifElseFalse` on literal conditions and need `DecidableEq Block` in a guard. |
+| `ifthenelse_concrete`–`_concrete4` | — | arch | term-level `\if(φ)\then(true)\else(false)` simplification; `WrappedExpr` has no conditional-expression constructor, and on the meta level Lean's own `if`/`Bool.cond` simp set covers it. |
+| `ifExthenelse1_*` (all) | — | arch | commented-out dead code in the KeY source (`\ifEx` deprecated since 2014). |
+| `ifthenelse_*_for` (all `_for` variants) | — | arch | formula-sort duplicates of the term-level rules (same `\displayname`, schema vars of sort `\formula`), an artifact of KeY's term/formula distinction; Lean's `Prop`/`Bool` need no such split. (The earlier "loops are outside the fragment" note was wrong — these are not loop rules.) |
+
+## Payments (phase 5)
+
+| KeY taclet | Lean rule | Status | Notes |
+| --- | --- | --- | --- |
+| `transfer_unfold_leftFstReceiver` | `transferUnfoldLeftFstReceiver` | done | |
+| `transfer_unfold_rightSndArgument` | `transferUnfoldRightSndArgument` | done | |
+| `transferNoCallbackBox`, `transferNoCallbackDiamond` | `transferNoCallback` | done | solkey `333cc7b353` split the rule by modality; both now debit `selfBalance` (`084de89677`), and the diamond rule owes `0 <= se & se <= selfBalance` as a "sufficient funds" goal — the interpreter's revert condition (`docs/solc-alignment.md`), so the transfer delta is resolved |
+| `transferWithCallbackBox`, `transferWithCallbackDiamond` | `transferWithCallback` | done | same split and balance debit; the callback havoc also quantifies over `selfBalance`. KeY's `transferSemantics` *choice*: lives in the alternative rule list `ruleNamesWithCallback` (never coexists with `transferNoCallback` — `candidateWithCallback` / `applicable_eq_candidateWithCallback`; coverage unchanged by `ruleApplies_withCallback_iff`). The rule is terminal; its meaning is the relational layer `CallbackSemantics.ExecC`/`HoldsC`: `holdsC_transfer_split` is the KeY branch split (invariant-on-exit ∧ resume-under-havoc, both storage and net havocked per solkey net.md), `holds_of_holdsC` shows it soundly over-approximates the executable semantics. Examples incl. the negative (trivial-invariant) case: `Examples/Taclets/CallbackOps.lean`. |
+
+## Terminal rules as updates
+
+Every terminal rule (empty residual) has a state update in
+`Wp/TerminalUpdate.lean` (`terminalUpdate?`, written in state vocabulary,
+not through the interpreter) and a theorem `<rule>_update` in
+`Wp/Terminal/Update*.lean` proving `execStmt s stmt = terminalUpdate r
+stmt s` under the rule's guard; `Wp/TerminalRules.lean` dispatches them
+(`terminalUpdate_sound`, `terminal_step_sound`). The KeY `\replacewith`
+update of a terminal taclet is therefore matched by a Lean function, and
+"taclet ⇒ update" is a theorem per rule.
+
+## Update algebra (`updateRules.key`)
+
+The Lean model has no update syntax — state change is function
+application — so KeY's update calculus splits into (a) point-of-
+application laws with real semantic content, ported as `State` lemmas in
+`SemanticsProperties.lean`, and (b) the update-monoid normal-form
+machinery, which is definitional function composition in Lean.
+
+| KeY rule | Lean analogue | Status | Notes |
+| --- | --- | --- | --- |
+| `applyOnPV` / `applyOnPVLastInParallel` | `State.getEnv_setEnv_self`, `State.getNet_setNet_self`; storage: `State.findStorage_saveStorage_same` (existing) | lemma | read after write at the point of application |
+| `applyOnDifferentPV` / `applyOnDifferentPVLastInParallel` | `State.getEnv_setEnv_ne`, `State.getNet_setNet_ne`; storage: `State.saveStorage_frame` (existing) | lemma | frame under a distinct location |
+| `simplifyUpdate1`–`3` | `State.setEnv_setEnv_absorb`, `State.setNet_setNet_absorb` (core: `setBy_setBy_self`) | lemma | the syntactic `\dropEffectlessElementaries` procedure is meaningless without update terms; its semantic law is overwrite absorption |
+| `sequentialToParallel1-3`, `applyOnParallel`, `applyOnElementary`, `applyOnSkip`, `applySkip1-3`, `parallelWithSkip1-2` | — | arch | the update monoid normal form; in Lean sequential update is `Function.comp`, `skip` is `id` — the laws are `comp_assoc`/`comp_id`, definitional |
+| `simplifyIfThenElseUpdate1-4`, `commuteSimpleUpdates`, `elimSelfUpdate*` | — | arch | commented-out dead code in the KeY source; `commuteSimpleUpdates` is additionally false as *State equality* on the assoc-list representation (only true pointwise) |
+

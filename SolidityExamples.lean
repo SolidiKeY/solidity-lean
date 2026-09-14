@@ -1,0 +1,16 @@
+-- Root of the `SolidityExamples` library: one `sol_derivation` chain per
+-- construct of the calculus.
+--
+-- Deliberately not imported by `Solidity.lean`, for the same
+-- reason `SoliditySpec` and `SolidityCorpus` are not: it is ~45
+-- derivations over ~240 rule applications, each one a pinned
+-- `find_pinned_step` paying its own `simp`+`decide`, which costs about 30
+-- minutes of CPU (1m25s wall on 32 cores). The whole default build is about
+-- 24, so folding this in would roughly double it. Build this target with
+-- `./scripts/check-examples.sh`.
+--
+-- The derivations here are a *rendering* of the rule set, not new results:
+-- the same rules are already exercised by `Examples/Derivations/` and
+-- `Examples/Taclets/`, which are in the default build. What this target
+-- adds is the end-to-end chain for each construct, written out in full.
+import Solidity.Examples.Derivations.WorkedExamples

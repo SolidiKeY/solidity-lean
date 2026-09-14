@@ -1,0 +1,19 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "Solidity Judgment",
+  "scopeName": "source.soljudge",
+  "patterns": [
+    {
+      "name": "comment.line.double-slash.soljudge",
+      "match": "//.*$"
+    },
+    {
+      "name": "keyword.control.soljudge",
+      "match": "\\b(require|assert|revert|transfer|delete|if|else|storage|memory|uint|int|bool)\\b"
+    },
+    {
+      "name": "constant.numeric.soljudge",
+      "match": "\\b[0-9]+\\b"
+    }
+  ]
+}
