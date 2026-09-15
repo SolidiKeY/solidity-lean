@@ -40,7 +40,12 @@ theorem lookupBy_setBy_ne [DecidableEq κ] {k k' : κ} (h : k ≠ k')
 /-! ## Storage read-after-write -/
 
 /-- A successful tree update is observable by reading the same path.  This
-includes insertion at a previously absent mapping key. -/
+includes insertion at a previously absent mapping key.
+
+The general form — the read at, below, above and *off* the written path — is
+`Theory/Storage.lean`'s `find_save_extends`/`_same`/`_prefix`/`_frame`, over
+solkey's own `save` term, and needs no hypothesis that the write succeeded.
+This one is kept because the whole typing layer is stated against it. -/
 theorem SVal.find_save_same {old new updated : SVal} {path : List Seg}
     (h : old.save path new = .ok updated) :
     updated.find path = .ok new := by

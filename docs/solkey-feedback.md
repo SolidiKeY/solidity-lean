@@ -537,3 +537,33 @@ The "Still open there" note at the end of the delete-family section below is
 closed by `delValueStValueCast`; see ranked item 9 for the fix and for why the
 `selectSt<[StValue]>(delNode(…), f)` half of the prediction was dropped as
 unreachable.
+
+## `selectOnSaveEmpty` rewrites to a term its `\find` does not bind (2026-09-15)
+
+`structRules.key`:
+
+```
+selectOnSaveEmpty {
+    \find(selectSt<[alpha]>(save(st,nil,v), a))
+    \replacewith(selectSt<[alpha]>(save(st,flds,v), a))
+    \heuristics(simplify)
+};
+```
+
+The `\find` binds `st`, `v` and `a`. It does not bind `flds` — that schema
+variable is declared at the top of the file and left free by this taclet, so
+the `\replacewith` names a list the match never determined. Read literally the
+rule rewrites a closed term to one with an unconstrained subterm.
+
+The intended reading is presumably `selectSt<[alpha]>(v, a)`: `saveOnEmpty`
+already gives `save(st, nil, v) ⇝ v`, so the rule is subsumed by it and the
+`flds` looks like an editing residue from `selectOnSaveCons` just below.
+
+Lean's `Theory/Storage.lean` states the intended form
+(`StValue.selectOnSaveEmpty : selectSt (save st [] v) a = selectSt v a`) and
+records the difference in `docs/lean-key-rule-map.md`.
+
+**Worth checking upstream** whether KeY's schema-variable well-formedness
+check should reject a `\replacewith` that mentions a variable the `\find` does
+not bind. If it should, this taclet is the witness; if it should not, the rule
+is unsound as written rather than merely redundant.

@@ -29,6 +29,19 @@ go in `Solidity.lean`.
 | `RuleSoundness.lean` | `<rule>_sound` per unfold rule: residual agrees with the original modulo scratch aliases. **OPEN**: `functionCallArgCapture_sound_inlined`, and one case each of `storagePushValueUnfoldRightSndArgument_sound` / `memoryWriteUnfoldRightSndResult_sound`. |
 | `RewriteSoundness.lean` | Lifts local soundness through untouched block suffixes and `⇝*`. |
 
+## The data-structure theories
+
+solkey's `find`/`save`/`read`/`write` are uninterpreted symbols whose meaning
+is a taclet set. These modules are that theory as terms, with each taclet a
+theorem and a denotation into the interpreter.
+
+| Module | What it is |
+|---|---|
+| `Theory/Storage.lean` | `structRules.key` as a term algebra: `StValue`, `selectSt`, `save`, `find`, the delete family. Every taclet a theorem; `selectOnSaveCons` with no well-formedness hypothesis. The four `find`-over-`save` laws (`find_save_extends`/`_same`/`_prefix`/`_frame`) — `Semantics` had only the first. Paths are `Seg`; `size` is `Seg.field "length"`. |
+| `Theory/Memory.lean` | `memoryRules.key` as a term algebra: `Memory`, `readIn`, `new`. Identities are the interpreter's resolved `Nat`, so KeY's path-identity layer (`readR`, `idCCDef`, `defaultDefIdentity`) has no counterpart — see the module docstring and `docs/lean-key-rule-map.md`. **Not** modelled: `structMemoryRules.key`'s `copySt`/`copyMem`. |
+| `Theory/Denote.lean` | What a storage term means: `slotOf`/`putAt` (one step of `SVal.save`, split), `denoteSt`, and `denote_save` — the theory's `save` on the pre-state tree *is* `SVal.save`, errors included. `denote_find`, `denote_delAt`. No type parameter and no well-formedness predicate; the reasons are in the docstring. |
+| `Update/Theory.lean` | A rule's stated update read as a KeY term: `storageRhs_eq_theory`, `heapRhs_eq_theory`. This is what makes every taclet above a fact about the wp semantics rather than about a private model. Push/pop and the copy rules deviate from KeY's spelling; the docstring says how and why. |
+
 ## Updates and the sequent layer
 
 | Module | What it is |
