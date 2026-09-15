@@ -312,7 +312,42 @@ File map (`Solidity/` unless noted):
 - `Update/Examples.lean`: the headline chain's last two lines
   — the sequential `{sp := …}{storage := save(…)}`, the
   merge into the parallel form, and a `native_decide` that the merged update
-  is what the interpreter does to `State.exampleStore`.
+  is what the interpreter does to `State.exampleStore`.  Written out of
+  `Upd.Elem` functions, which is what it took before there was a notation;
+  the same two lines are now one `⇝≡` step of `Derivations/Sequents.lean`.
+- `Update/Step.lean`: the **derivation line** the calculus actually writes —
+  `Γ ⟹ {U₁}…{Uₙ} goal`, where `goal` is a program under a modality
+  (`SeqGoal.prog`) or a bare formula (`SeqGoal.obl`, the `⊤`/`⊥` a `revert`
+  branch closes with).  A `Frontier` is a list of them, because a guarded rule
+  leaves several open at once, and `NamedFrontierStep r` rewrites the first
+  *open* one into the sequents its goals name (`Update.goalSequents`, which is
+  `Update/Wp.lean`'s reading of a taclet as a relation: a guard becomes an
+  antecedent, an update is pushed onto the stack).  The split is *computed*
+  (`Frontier.firstOpen?`) and the successor a free index pinned by an equation,
+  as in `NamedBlockStep`, so both checks are `rfl`.  `Sequent.check` is the
+  semantics, in `SolidityJudgment.check`'s verdict shape.  `Frontier.Equiv` is
+  the **merge line**: same lines, the accumulated update respelled, which is an
+  equality of `Upd`s and therefore not a step of the rule set.
+  Arrows `⇝ᵘ`, `⇝ᵘ*`, `⇝ᵘ[r]`, `≡ᵘ` (ASCII `~>u`, `~>u*`, `~>u[r]`).
+- `Update/SequentSyntax.lean`: `seq!{ Γ ⟹ {U₁}{U₂} <[ stmts ]> ‹φ› }`, the
+  surface notation for one such line.  Statements are `sol_stmt`, update
+  operands are `sol_expr`, the postcondition is a `sol_post` — and the KeY
+  vocabulary (`save(p, t)`, `path(sp)`, `transfer(a, se)`, `inBounds(e)`) is
+  written as an **application** and read off its head, exactly as `sol_rule`
+  does and for the same reason: a bare atom would make `storage` a global
+  token and `Account storage sp = …;` would stop lexing inside `sol_stmt`.
+  Two tokens are the exception: `‖` separates a parallel update (not `||`,
+  which `sol_expr` already owns as disjunction) and `⟹` is `sol_rule`'s.  An
+  antecedent may carry the stack it is read under (`{U} φ`), because a guard is
+  read *outside* the update its own goal installs.  Ends in a `#check` section
+  covering every production.
+- `Update/Merge.lean`: the reader lemmas a merge line needs — reading the name
+  that was just bound (`varPath_setEnv_alias`, `stackVal_setEnv_self`) and
+  reading *past* a binding of another name (`placePath_setEnv_fresh` and
+  friends, with freshness as `RuleSoundness.usesVar`, decidable on a concrete
+  line).  All `@[upd_merge_set]`, which is what the `upd_merge` tactic runs.
+  Kept out of `Update/Step.lean` so the notation does not drag in
+  `RuleSoundness`.
 - `EvalBattery.lean`: `sol_eval_battery` / `sol_exec_eval`, the tactics
   that normalize a concrete interpreter term. Split out of
   `Wp/Verifier.lean` because they depend on the interpreter alone —
@@ -351,6 +386,15 @@ File map (`Solidity/` unless noted):
   storage-to-memory copy-frame theorems.
 - `RewriteSoundness.lean`: lifts local rule soundness through untouched block
   suffixes and reflexive-transitive derivations modulo scratch aliases.
+- `Examples/Derivations/Sequents.lean`: the calculus's *own* derivations —
+  one `sol_derivation` over `seq!` lines per worked example, so the
+  accumulated update is on the page beside the shrinking program and each
+  chain ends where upstream ends: at one parallel update, or at a list of
+  sequents for a guarded rule.  Includes the headline
+  `alice.account.balance = 10` with its merge, the read twin, the array
+  branches under both modalities, push/pop, delete, `require`, and the two
+  transfer shapes; each chain is checked end to end against the interpreter by
+  `Sequent.check` and `native_decide`.  In the default build.
 - `Examples/Derivations/WorkedExamples.lean`: one `sol_derivation` chain per
   construct of the calculus, grouped by family — the end-to-end reading of the
   rule set, each chain starting at a Solidity program and ending at
@@ -673,6 +717,8 @@ whose type is not fixed, not as a general substitute for the notation.
 | `b ⇝[.rule] b'` | one step, by that named rule | `NamedBlockStep` | `rule_step` |
 | `b ⇝* b'` | zero or more steps | `BlockReflMultiStep` | `steps [.r₁, .r₂, …]` when the rules are worth reading, `steps!` when they are not |
 | `j ⇝ᵈ[.rule] j'`, `j ⇝ᵈ* j'` | the same, on a full judgment | `NamedJudgmentStep` / `JudgmentMultiStep` | `dl_rule_step` / `dl_steps […]` |
+| `f ⇝ᵘ[.rule] f'`, `f ⇝ᵘ* f'` | the same, on a frontier of *updated sequents* | `NamedFrontierStep` / `FrontierMultiStep` | `seq_rule_step` / `seq_steps […]` / `seq_steps!` |
+| `f ⇝≡ f'` (in `sol_derivation`) | the **merge line**: not a rule, the update respelled | `Frontier.Equiv` | `upd_merge`, or `⇝≡[h]` by hand |
 
 Four consequences for how derivations are written:
 
@@ -735,9 +781,9 @@ Four consequences for how derivations are written:
    separation parses, but postfix `++` and the call form `ident(…)` reach
    across a line break, and the resulting misparse is *silent* — the merged
    program still reduces to the empty block, so the theorem would be true and
-   about a different program. There is no judgment-level
-   counterpart yet: `Derivations/DynamicLogic.lean` writes its `⇝ᵈ` chains as
-   plain `calc` with `dl_rule_step`/`dl_steps`.
+   about a different program. `sol_derivation` itself serves all three
+   layers, picked from the first line's notation: `sol!` is the judgment
+   layer, `seq!` the sequent layer, anything else the block layer.
 
 Two scratch-name notes, because both used to force raw constructors:
 

@@ -57,6 +57,9 @@ import Solidity.Update.Eval
 import Solidity.Update.Wp
 import Solidity.Update.TacletTable
 import Solidity.Update.Examples
+import Solidity.Update.Step
+import Solidity.Update.Merge
+import Solidity.Update.SequentSyntax
 import Solidity.Wp.StepSoundness
 import Solidity.Wp.Verifier
 import Solidity.Wp.ExamplesWP
@@ -75,6 +78,7 @@ import Solidity.Examples.Derivations.ValueCapture
 import Solidity.Examples.Derivations.ControlFlow
 import Solidity.Examples.Derivations.Walkthroughs
 import Solidity.Examples.Derivations.DynamicLogic
+import Solidity.Examples.Derivations.Sequents
 import Solidity.Examples.Taclets.ValueOps
 import Solidity.Examples.Taclets.StorageOps
 import Solidity.Examples.Taclets.MemoryOps
