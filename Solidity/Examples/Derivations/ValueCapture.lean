@@ -17,7 +17,7 @@ The `pv` these rules produce is a *stack* variable, spelled `pv@uint` /
 `SoliditySyntax.aliasKind` cannot see the type, so the kind is decided at
 the use site (`SoliditySyntax.isStackScratchAlias`).  Before that existed
 these derivations had to be written as raw `Stmt` constructors, which is
-the one thing `AGENTS.md` forbids.
+the one thing `.claude/rules/derivations.md` forbids.
 
 Each administrative run (`localValueDeclInitDrop` → `valueDeclSkip`, plus the
 operator step that fills `pv`) is elided into a single `⇝*` line with its

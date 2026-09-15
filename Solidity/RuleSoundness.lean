@@ -9,35 +9,15 @@ states: executing an unfold rule's residual block agrees with executing
 the original statement, up to the scratch alias bindings the captures
 introduce (`EnvAgreeExcept aliasNames`). This is the formal sense in
 which the rewrite rules are derivable from the executable semantics.
-Every rule of `ruleNames` with a non-empty residual block has a
-`<rule>_sound` theorem below.
+**Every rule of `ruleNames` with a non-empty residual block has a
+`<rule>_sound` theorem below** — adding an unfold rule without one
+silently weakens that claim.
 
-The file is layered:
-
-1. **Agreement relations and monadic combinators** — `ResultsAgree`,
-   `ResAgree`, and `bind`-style combinators that let proofs follow the
-   interpreter's `do`-structure.
-2. **The interpreter congruence kit** — `resolveS_agree`,
-   `resolveMBase_agree`, `readM_agree`, `resolveLoc_agree`,
-   `evalValue_agree`, `evalInt_agree`, `writeValue_agree`, and the
-   statement-level `execAssign_agree`/`execStmt_agree`/`execBlock_agree`:
-   states that agree off a set of names evaluate to agreeing results,
-   provided the program does not mention those names (`usesVar`,
-   `stmtUsesVar`).
-3. **The purity kit** — `pureExpr` and `*_pure`: successful evaluation
-   of operator-free expressions (no `push`-lvalues, no `++`/`--`, no
-   calls) leaves the state unchanged.
-4. **Capture read-backs** — after a capture statement binds a scratch
-   alias, reading through the alias (`resolveS_alias`, `readM_alias`,
-   `resolveMBase_alias`, `evalValue_alias`, `evalInt_alias`) returns
-   the captured resolution from an unchanged state.
-5. **Workhorse lemmas** — `execAssign_locAgree`,
-   `execAssign_pureLocSim`, `execAssign_pureLocSimPrim`, the
-   `resolveS`/`resolveLoc`/`evalValue`/`evalInt` transports, the
-   `resolveMBase`/`readM` bridge (`resolveMBase_eq_readM`), and the
-   storage-tree save composition (`save_extend_then_set`).
-6. **Per-rule theorems** — one `<rule>_sound` per unfold rule, stated
-   directly against `(ruleEffect r).cond`/`.block`.
+The file is layered: agreement relations and monadic combinators; the
+interpreter congruence kit (states agreeing off a set of names evaluate
+to agreeing results, provided the program does not mention them); the
+purity kit; capture read-backs; workhorse lemmas; then one `<rule>_sound`
+per unfold rule, stated against `(ruleEffect r).cond`/`.block`.
 
 Hypothesis conventions. Every theorem assumes the alias names are fresh
 for the statement (`stmtUsesVar … = false`; they are reserved for the
@@ -58,29 +38,29 @@ The theorems fall into four shapes:
   a semantic restriction, and could be weakened.
 * **Value frozen ahead of the capture** (`*WriteUnfoldLeft*`,
   `*SndIndex`): only `hcond`, `hprim : rhs.ty.isPrimitive = true` and
-  freshness.  These residuals capture the *target path*, which used to be
-  the one genuine order swap in the calculus; `Rules.freezeRhs` now binds
-  the value into `rv` first, so the order matches `execAssignNested` and
-  the old `hev`/`hstable`/`pureExpr index` hypotheses are gone from all
-  ten rules.  The four templates are
-  `fieldWriteResolve{Storage,Memory}_sound` and
-  `indexWriteResolve{Storage,Memory}_sound`; `people[i++].age = i` and
-  `values[i++] = i` are inside them
+  freshness.  `Rules.freezeRhs` binds the value into `rv` before any
+  target capture, so the order matches `execAssignNested`; the templates
+  are `fieldWriteResolve{Storage,Memory}_sound` and
+  `indexWriteResolve{Storage,Memory}_sound`, and `people[i++].age = i`
+  and `values[i++] = i` are inside them
   (`Counterexamples/EvaluationOrder.lean`).
 
-  Two reasons the freeze cannot be made conditional.  *Interference* is the
-  obvious one.  *Error ordering* is the other, and it bites even on a pure
-  path: the interpreter evaluates the value first, so a failing right-hand
-  side decides the outcome, while an unfrozen residual resolves the path
-  first — and a simple right-hand side can only get stuck whereas a pure
-  path can revert.  `Counterexamples/ErrorOrder.lean` refutes the unfrozen
-  residual on `people[1 / 0].age = ghost`.  That is what `hev` was hiding:
-  assuming the right-hand side *succeeds* removes exactly those states.
+  The freeze cannot be made conditional on the path being impure.
+  *Interference* is the obvious reason.  *Error ordering* is the other,
+  and it bites even on a pure path: the interpreter evaluates the value
+  first, so a failing right-hand side decides the outcome, while an
+  unfrozen residual resolves the path first — and a simple right-hand
+  side can only get stuck whereas a pure path can revert.
+  `Counterexamples/ErrorOrder.lean` refutes the unfrozen residual on
+  `people[1 / 0].age = ghost`.  That is what the old `hev` hypothesis was
+  hiding: assuming the right-hand side *succeeds* removes exactly those
+  states.
 
   The reference-typed value operand keeps its side conditions, because
   `freezeRhs` only freezes primitives — binding a reference is aliasing,
   not a read (`fieldWriteResolveStorage_ref_sound`, witness
-  `alice.accounts[mv.x++] = mv`).
+  `alice.accounts[mv.x++] = mv`).  `hprim` itself is about the
+  *interpreter*, not the rule: see `Counterexamples/RefSourceOrder.lean`.
 * **Operand pre-evaluates** (`binopUnfoldRight`, compound-assign
   captures, `storagePushLhsToPushValue`): `evalValue s l = .ok (s, lv)`
   and similar; a residual re-reads an operand after a capture, so the
@@ -875,14 +855,6 @@ theorem writeLoc_agree {ns : List Name} {s₁ s₂ : State} {loc : Loc}
             exact setObj_agree h id _
           · simp only [if_neg hb]
             exact rfl
-
-/-! ## The interpreter congruence
-
-The heart of the soundness bridge: every function of the mutual
-evaluation block in `Semantics.lean` sends states that agree off `ns`
-to results that agree off `ns`, provided the evaluated expression does
-not mention the names in `ns`. The recursion mirrors the interpreter's
-own (same measure `4 * size + rank`). -/
 
 /-! ## The interpreter congruence
 

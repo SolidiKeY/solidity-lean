@@ -1,6 +1,6 @@
 # KeY taclet → Lean `RuleName` mapping
 
-Tracking checklist for `docs/plan.md`. One row per taclet in
+Tracking checklist for the port. One row per taclet in
 `solidityProgramRules.key` (plus `ifThenElseRules.key`), in file order.
 
 Re-pinned to solkey `e67a0d7c48` on 2026-09-02: that commit touches only

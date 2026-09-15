@@ -8,11 +8,9 @@ set_option maxHeartbeats 8000000
 
 /-! # The worked derivations
 
-One `sol_derivation` (or `sol_runs`) per construct of the calculus, grouped by
-family: storage fields and roots, storage arrays, storage delete, arithmetic,
-memory, the storage↔memory copies, and payment. Together they are the
-end-to-end reading of the rule set — each chain starts at a Solidity program
-and ends at `solbox!{}`, with every intermediate block spelled out.
+One `sol_derivation` (or `sol_runs`) per construct, grouped by family (the
+banners below). Each chain starts at a Solidity program and ends at
+`solbox!{}`, with every intermediate block spelled out.
 
 **What the derivations assume.**
 
@@ -49,17 +47,10 @@ and ends at `solbox!{}`, with every intermediate block spelled out.
   so those programs appear twice, once per modality.
 
 **The rule sequences are not written down.** `sol_runs` proves its theorem
-with `steps!`, which asks `UniquenessAux.candidate` for the rule at each step
-and then discharges it by the ordinary pinned route. So a rule rename or a
-changed residual is a build failure here, not 35 stale lists to re-derive. To
-see what fired:
-
-```
-set_option trace.solidity.steps true in
-sol_runs deeperFieldWrite { alice.account.token.value = 5 }
-```
-
-or write `steps?` in a proof for a pasteable `steps [...]`.
+with `steps!`, so a rule rename or a changed residual is a build failure here,
+not 35 stale lists to re-derive. To see what fired, use
+`set_option trace.solidity.steps true in …`, or write `steps?` for a pasteable
+`steps [...]`.
 
 Two kinds of derivation keep their rules on the page, because there the rule
 name is the content rather than bookkeeping: the single-step examples whose
@@ -76,8 +67,6 @@ A single step, `storageFieldWriteSave`. -/
 sol_derivation fieldWriteSimplePath :
     solbox!{ alice.age = ageVal }
   ⇝[.storageFieldWriteSave] solbox!{}
-
-/-! ### `Account storage acc = bob.account; alice.account = acc;` -/
 
 sol_runs fieldWriteFromAlias
   { Account storage acc = bob.account; alice.account = acc }
@@ -273,8 +262,6 @@ the alias declaration and the write remain. -/
 sol_runs memoryAliasWrite
   { Account memory mv = carol.account; mv@Account.balance = 10 }
 
-/-! ### `carol.account = david.account;` -/
-
 sol_runs memoryFieldCopy { carol.account = david.account }
 
 /-! ### `carol.account.balance = 10;` — the memory twin of the storage case -/
@@ -297,8 +284,6 @@ sol_runs memoryDeclDeepAlias { Token memory mv3 = carol.account.token }
 
 sol_derivation memoryRootRead :
     solbox!{ mv2@Person = carol } ⇝[.memoryRootAlias] solbox!{}
-
-/-! ### `carol = david;` -/
 
 sol_derivation memoryRootAssign :
     solbox!{ carol = david } ⇝[.memoryRootAlias] solbox!{}
@@ -389,8 +374,6 @@ sol_runs memoryToStorageBothNonsimple
     v = alice.account.token.value }
 
 /-! ## 6 · Payments -/
-
-/-! ### `to.transfer(5);` -/
 
 sol_derivation transferSimple :
     solbox!{ to.transfer(5) } ⇝[.transferNoCallback] solbox!{}

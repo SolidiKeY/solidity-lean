@@ -5,68 +5,44 @@ import Solidity.RuleSyntax
 /-!
 # The rules of the calculus
 
-One `sol_rule` declaration per rule, from which `RuleName`, `ruleEffect` and
-`ruleNames` are *generated* (`sol_assemble_rules`, below the table).  The
-three used to be written out by hand, in the same order, with the condition
-spelled twice and a box/diamond twin duplicated verbatim except for one
-token; declaration order is now the order of all three, and it is
-load-bearing — `FirstStepCase` takes the first applicable rule under the
-block modality, so a box twin precedes its diamond twin.
+One `sol_rule` declaration per rule, from which `RuleName`, `ruleEffect`,
+`ruleNames` and `twinPairs` are *generated* (`sol_assemble_rules`, below the
+table).  **Declaration order is the order of all four, and it is
+load-bearing**: `FirstStepCase` takes the first applicable rule under the
+block modality, so a box twin must precede its diamond twin
+(`CandidateStep.twins_box_first` checks all twelve pairs).  It is why
+`revertBox` precedes `revertDiamond` here even though solkey's rule file
+prints them the other way round.
 
 The calculus has *only* these rules — there is no catch-all tier, so a
-statement no rule covers is stuck
-(`Coverage.ResidueShape` enumerates those shapes, `Progress.lean` refutes
-totality).
+statement no rule covers is stuck (`Coverage.ResidueShape` enumerates those
+shapes, `Progress.lean` refutes totality).
 
 ## A rule is a taclet
 
 `StepEffect` carries **goals**, not a residual block: a list of `RuleGoal`s,
 each of which may be guarded, may install an **update** ahead of the residual,
-and may be a bare formula with no program left.  That is what a KeY taclet is,
-and reading a goal is reading KeY's weakest precondition — for
-`⟨stmt; rest⟩post`, each goal contributes
+and may be a bare formula with no program left.  Reading a goal is reading
+KeY's weakest precondition — for `⟨stmt; rest⟩post`, each goal contributes
 
     guard  →  {update} ⟨residual ++ rest⟩ post
 
-and the rule means the conjunction over the goals whose `mode` applies.  So the
-table can now state the four things a bare `block` could not:
-
-| KeY | here |
-|---|---|
-| `{storage := save(storage, gp, se)}…` | `terminalGoal [.storage (.save gp (.read se))]` |
-| `"inBounds"` / `"outOfBounds"`, `\if(se2 != 0) \then … \else revert()` | `splitGoals` |
-| `\replacewith(true)` / `\replacewith(se = TRUE)` | `RuleResidual.obligation` |
-| the taclet's name and `\heuristics` | `origin`, `heuristics` (`KeyTaclets.lean`) |
+and the rule means the conjunction over the goals whose `mode` applies.
 
 The update language is **syntax only** — no `State`, no `Res`, nothing from
-`Semantics.lean`.  That is load-bearing twice over: the `SolKey` reader's decoder
-imports this file to compare a parsed taclet with a Lean rule and needs it
-cheap to elaborate, and a table that could call the interpreter could define
-its updates *as* the interpreter, which would make the bridge theorems vacuous.
-Evaluation is `Update/Eval.lean`, the wp reading `Update/Wp.lean`, and each
-rule's update is proved against `Wp.terminalUpdate?` in
-`Update/TacletTable.lean`.
-
-`StepEffect.block` survives as a *def*, `mainBlock (goals stmt h)`, and is
-definitionally what the old field held — which is why every `rfl` about a
-residual elsewhere in the development still goes through.  `RuleShapes.lean`
-checks the structure, including which of the 252 taclets the table claims.
+`Semantics.lean`.  That is load-bearing twice over: the `SolKey` reader's
+decoder imports this file to compare a parsed taclet with a Lean rule and
+needs it cheap to elaborate, and a table that could call the interpreter
+could define its updates *as* the interpreter, which would make the bridge
+theorems vacuous.  Evaluation is `Update/Eval.lean`, the wp reading
+`Update/Wp.lean`, and each rule's update is proved against
+`Wp.terminalUpdate?` in `Update/TacletTable.lean`.
 
 ## The organisation
 
-The table carries these section banners, in this order — and so, because
-they are generated from it in declaration order, do `RuleName`, `ruleEffect`
-and `ruleNames`:
-
-| Section |
-|---|
-| Storage Rules (Steps 1-3) |
-| Require/assert, conditional, abrupt |
-| Payment Rules |
-| Memory Rules (same three steps) |
-| Storage↔Memory copies |
-| Arithmetic (local/storage/memory) |
-| Rules with no counterpart upstream |
+Sections run: Storage (Steps 1-3) › require/assert, conditional, abrupt ›
+Payment › Memory (same three steps) › Storage↔Memory copies › Arithmetic
+(local/storage/memory) › rules with no counterpart upstream.
 
 The three-step split is Solidity's evaluation order: the right-hand side of
 an assignment is evaluated before the left-hand side, so Step 1 unfolds the
@@ -75,92 +51,35 @@ into an update.
 
 `docs/lean-key-rule-map.md` is the authority on how these names line up with
 solkey's taclets, and `lake exe solkeycheck` checks the sort annotations
-against solkey's own rule file.  The banners here quote those verdicts but do
-not restate them.
+against solkey's own rule file.  The banners here do not restate either.
 
-The last section has no upstream counterpart by design.  It holds solkey's finer
-tiers — the expression-operator rules, the capture partition, the stack-local
-inc/dec rules — and the genuinely Lean-only rules: front-end normalisations
-(`pushAssignLower`, `pushFieldAssignLower`, `storagePushLhsToPushValue`),
-scratch bindings (`storagePlaceAlias`, `exprStmtCapture`) and the call rules.
-Nothing checks this direction: a Lean rule is deliberately allowed to be
-finer than the presentation upstream.
+The last section has no upstream counterpart by design: solkey's finer tiers
+and the genuinely Lean-only rules (front-end normalisations, scratch
+bindings, the call rules).  **Nothing checks this direction** — a Lean rule is
+deliberately allowed to be finer than the presentation upstream.
 
-## Schema-variable kinds, and binder names
+## Writing a rule
 
-The conditions are written in the calculus's schema variables — `se`, `nse`,
-`sp`, `nsp`, `gsp`, `lsv`, `mv`, `nmp`, `arr`, `map`, `i`, `f`, `sadr` — both
-as binder names and, where the kind is a conjunction, as the reducible
-`abbrev`s `isSe`/`isSp`/`isMv`/`isNmp`.  See "Schema-variable kinds" below
-for what folds, what deliberately does not, and the one consequence for
-proofs.
-
-## `Box` and `Diamond` suffixes
-
-Where the calculus stacks a bounds or nonempty check as two sequents — the
-storage and memory array rules, `storagePopSave`,
-`memoryToStorageIndexArrayCopyRoot` — Lean splits the rule into a twin pair,
-one per modality, named with the calculus's rule name plus a `Box`/`Diamond`
-suffix.  The suffix is the calculus's own convention, from `revertBox` and
-`transferNoCallbackBox`.  The twins are effect-identical up to mode
-(`CandidateStep.twinEffects`).
-
-**The box twin is listed first in `ruleNames`, and that is load-bearing.**
-Under the block modality `.both` both twins apply at once, and `FirstStepCase`
-takes whichever the list reaches first, so the order decides which name a
-`⇝[.rule]` derivation must pin.  `CandidateStep.twins_box_first` checks it for
-all twelve pairs.  It is also why `revertBox` precedes `revertDiamond` here
-even though solkey's rule file prints them the other way round.
-
-## How a rule is written
-
-The declarative form reads as the paper draws the rule — conclusion on the
-left of `⇝`, premises on the right, the sequent contexts `π`, `ω`, `φ`
-dropped because they are constant:
+The declarative form reads as the paper draws the rule, conclusion left of
+`⇝`, premises right, the constant sequent contexts dropped:
 
 ```
 sol_rule storageFieldWriteSave from storageFieldWriteSave :
   <[ sp.fld = se ]> ⇝ { storage := save(sp.fld, se) } <[ ]>
 ```
 
-`<[ ]>` is the empty continuation `⟨[ π ω ]⟩φ`.  The *kind* of every schema
-variable is its name, which is the paper's central device and what makes the
-rules pairwise disjoint without an applicability predicate: `sp.fld = se`
-carries the condition `isSimple sp ∧ isSe se` and the pattern
-`WrappedExpr.field Kind.storage _ sp _`.  `where` adds the conjuncts no name
-can carry; `where cond := …` writes the condition out where a rule's
-spelling is irregular.  A guarded pair is two premise lines, as the paper
-stacks two sequents:
+The *kind* of every schema variable is its name, which is the paper's central
+device and **what makes the rules pairwise disjoint without an applicability
+predicate**: `sp.fld = se` carries `isSimple sp ∧ isSe se` and the pattern
+`WrappedExpr.field Kind.storage _ sp _`.  Inside a goal the statement's
+operator is `opS`; `op` is the family index, and the two are equal only under
+the family's own conjunct.  The grammar, the `where`/`twins`/`after` clauses
+and the schema-variable table are `RuleSyntax.lean`; the checklist for adding
+a rule is `.claude/rules/rule-table.md`.
 
-```
-sol_rule storageIndexWriteArraySave twins from storageIndexWriteArraySave :
-  <[ arr[i] = se ]> ⇝
-    | inBounds(arr[i]) ⟹ { storage := save(arr[i], se) } <[ ]>
-    | else             ⟹ revert()
-  after read(se), resolve(arr[i])
-```
-
-`twins` is the box/diamond pair, box first, and it also fills `twinPairs`.
-`after` is `Guard.premises`: the operands read before the guard is decided,
-in the interpreter's order, which is why a guard evaluates to `Res Bool`.
-A family is one declaration too — `(op : BinOp)` generates the constructor
-parameter, the head conjuncts tying it to the statement's operator, and all
-fourteen `ruleNames` entries.  Inside a goal the statement's operator is
-`opS`; `op` is the family index, and the two are equal only under that
-conjunct.
-
-`sol_rule NAME … := <term>` is the opaque form, for the rules whose
-condition is a bespoke predicate or whose goals consume the condition proof.
-The grammar and the schema-variable table are `RuleSyntax.lean`.
-
-## Adding or changing a rule
-
-Write the `sol_rule` under the section the banners name — declaration order
-is `ruleNames` order, and a box twin comes before its diamond twin.  Keep
-the new condition disjoint from every other, and update `candidate` and
-`applicable_eq_candidate` in `Uniqueness.lean`.  `transferWithCallback` is
-marked `alternative`: it is KeY's `\choice` alternative, never appears in
-`ruleNames`, and lives in `ruleNamesWithCallback`.
+One exception worth knowing: `transferWithCallback` is marked `alternative`.
+It is KeY's `\choice` alternative, never appears in `ruleNames`, and lives in
+`ruleNamesWithCallback`.
 -/
 
 
@@ -1453,11 +1372,6 @@ end CaseMode
           | WrappedExpr.index Kind.storage ty nsp index, _ =>
               indexReadResolveBlock Kind.storage storagePathAliasName lhs ty nsp index)
 
-  /- `unfold_rightSnd`.  The push-argument rule is
-  standalone: a push receiver is not an assignment right-hand side, but its
-  argument is evaluated before the update.
-  -/
-
   /-!
   `unfold_rightSnd`.  The push-argument rule is
   standalone: a push receiver is not an assignment right-hand side, but its
@@ -1492,11 +1406,6 @@ end CaseMode
               [ captureValue nse,
                 Stmt.push sp (some (valueAlias nse)) ])
 
-  /- `unfold_rightSndResult` (the rule set; solkey also folds
-  `storageFieldWriteCaptureSrc` and `storageIndexWriteStorageRefRhsCapture`
-  in here).
-  -/
-
   /-!
   `unfold_rightSndResult` (the rule set; solkey also folds
   `storageFieldWriteCaptureSrc` and `storageIndexWriteStorageRefRhsCapture`
@@ -1520,13 +1429,6 @@ end CaseMode
               isStorage nlhs ∧ isComplex nlhs ∧ isSimple sp ∧ isSimple i
           | _ => False)
         (fun nlhs rhs _ => unfoldGoal <| captureAssignBlock nlhs rhs)
-
-  /- ### Step 2: unfolding the left-hand side
-
-  `unfold_leftFst` instances.  The calculus's `RootRhs` pair
-  is merged: Lean's `isSimple rhs` already admits a global root, which the
-  calculus's `SimpleExpression` excludes.
-  -/
 
   /-!
   ### Step 2: unfolding the left-hand side
@@ -1559,13 +1461,6 @@ end CaseMode
           match lhs, h with
           | ⟨WrappedExpr.index Kind.storage ty nsp index, _⟩, _ =>
               indexWriteResolveBlock Kind.storage storagePathAliasName ty nsp index rhs)
-
-  /- Storage receiver and delete-target simplification (the calculus,
-  the rule set).  Not instances of the assignment-shaped template: their
-  active statements are `delete`, `push`, `pop` or a push-return binding.  The
-  calculus's `storageFieldDelete_unfold_leftFst` and `storageIndexDelete_unfold_leftFst`
-  are merged into one rule over both target shapes.
-  -/
 
   /-!
   Storage receiver and delete-target simplification (the calculus,
@@ -1628,10 +1523,6 @@ end CaseMode
                         (aliasExpr Kind.storage nsp.ty storagePathAliasName)) ]
               | none => [])
 
-  /- `unfold_leftSnd`.  The calculus's `Ref` instance is
-  merged: Lean's rule does not split on a reference source.
-  -/
-
   /-!
   `unfold_leftSnd`.  The calculus's `Ref` instance is
   merged: Lean's rule does not split on a reference source.
@@ -1648,13 +1539,6 @@ end CaseMode
           match lhs, h with
           | ⟨WrappedExpr.index Kind.storage ty sp nse, _⟩, _ =>
               captureIndexTargetBlock Kind.storage ty sp nse rhs)
-
-  /- ### Step 3: generating an update
-
-  Declarations.  the calculus states the rule once
-  for storage and names its value instances here too, so the value pair sits
-  beside the storage pair.
-  -/
 
   /-!
   ### Step 3: generating an update
@@ -1698,11 +1582,6 @@ end CaseMode
         (fun _ _ init => init = none)
         (fun ty name _ _ =>
           terminalGoal [ .bind name (.val (.deflt ty)) ])
-
-  /- Simple targets.  The calculus's `storageRootDelete`,
-  `storageFieldDelete` and `storageIndexDelete` are one Lean rule over all three
-  simple target shapes.
-  -/
 
   /-!
   Simple targets.  The calculus's `storageRootDelete`,
@@ -1757,9 +1636,6 @@ end CaseMode
         (fun target _ =>
           terminalGoal [ .storage (.clear target) ])
 
-  /- Mapping targets.  Mapping selectors generate no
-  bounds branch: mappings have no length. -/
-
   /-!
   Mapping targets.  Mapping selectors generate no
   bounds branch: mappings have no length.
@@ -1802,12 +1678,6 @@ end CaseMode
           | _ => False)
         (fun gsp rhs _ =>
           terminalGoal [ .storage (.copy gsp rhs) ])
-
-  /- Array targets.  The calculus stacks the bounds check
-  as two sequents; Lean splits each rule into a box/diamond twin pair.  **The box
-  twin is listed first**, here and in `ruleNames` — see the `Box`/`Diamond`
-  note in the module docstring.
-  -/
 
   /-!
   Array targets.  The calculus stacks the bounds check
@@ -1884,11 +1754,6 @@ end CaseMode
             splitGoals (.inBounds rhs) [.resolve rhs]
             [ .storage (.copy gsp rhs) ])
 
-  /- Push and pop.  The calculus's `sizeNotNegative`
-  is a first-order side condition, not a rewrite rule; its
-  Lean counterpart is `WellFormedConsumers.lean`.
-  -/
-
   /-!
   Push and pop.  The calculus's `sizeNotNegative`
   is a first-order side condition, not a rewrite rule; its
@@ -1937,8 +1802,6 @@ end CaseMode
       | else         ⟹ revert()
     after resolve(sp)
 
-  /- ### Require and assert (the calculus, the rule set) -/
-
   /-! ### Require and assert (the calculus, the rule set) -/
 
   /-!
@@ -1970,12 +1833,6 @@ end CaseMode
       | "Holds"    : se ⟹ <[ ]>
       | "Violated" :    ⟹ se
     where cond := isSimple se
-
-  /- ### Conditional statements (the calculus, the rule set)
-
-  The calculus's `ifElseSplit` is a sequent rule — two goals, so no `BlockStep` —
-  and lives in `JudgmentSplit.ite_split`.
-  -/
 
   /-!
   ### Conditional statements (the calculus, the rule set)
@@ -2029,12 +1886,6 @@ end CaseMode
           match c, h with
           | WrappedExpr.unop UnOp.not inner, _ => [Stmt.ite inner els thn])
 
-  /- ### Abrupt termination (the calculus, the rule set)
-
-  the rule set prints the diamond rule first; here the box twin leads, as it must
-  everywhere (module docstring, `Box`/`Diamond`).
-  -/
-
   /-!
   ### Abrupt termination (the calculus, the rule set)
 
@@ -2050,13 +1901,6 @@ end CaseMode
   sol_rule revertBox := revertEffect CaseMode.box
 
   sol_rule revertDiamond := revertEffect CaseMode.diamond
-
-  /- ## Payment Rules
-
-  The calculus splits the terminal
-  transfer rule into a box and a diamond rule; Lean's `transferNoCallback` is
-  modality-generic and carries both.
-  -/
 
   /-!
   ## Payment Rules
@@ -2190,11 +2034,6 @@ end CaseMode
           | _ => False)
         (fun lhs rhs _ => unfoldGoal <| captureAssignBlock lhs rhs)
 
-  /- ### Step 2: unfolding the left-hand side
-
-  As in storage, the two delete unfolds are merged into one rule.
-  -/
-
   /-!
   ### Step 2: unfolding the left-hand side
 
@@ -2242,12 +2081,6 @@ end CaseMode
           | ⟨WrappedExpr.index Kind.memory ty mv nse, _⟩, _ =>
               captureIndexTargetBlock Kind.memory ty mv nse rhs)
 
-  /- ### Step 3: generating an update
-
-  Declarations; `memoryArrayFreshAlloc` is merged into
-  `memoryDeclFreshAlloc`.
-  -/
-
   /-!
   ### Step 3: generating an update
 
@@ -2283,12 +2116,6 @@ end CaseMode
   one Lean rule.
   -/
 
-  /-!
-  Simple targets.  The calculus's five delete rules —
-  root fresh-rebind, f primitive/reference, index primitive/reference — are
-  one Lean rule.
-  -/
-
   sol_rule memoryFieldWriteStore from memoryFieldWrite :
     <[ mv.fld = se ]> ⇝ { memory := write(mv.fld, se) } <[ ]>
 
@@ -2317,8 +2144,6 @@ end CaseMode
         (fun target => isSimpleMemoryDeleteTarget target)
         (fun target _ =>
           terminalGoal [ .memDelete target ])
-
-  /- Array targets, box twin first. -/
 
   /-! Array targets, box twin first. -/
 
@@ -2390,21 +2215,9 @@ end CaseMode
   /-!
   ## Storage to Memory Rules
 
-  the calculus, the rule set: a deep copy through a memory root.
-  `memoryStorageCopy` is the simple-path form (`mv = sp;`, fresh identity plus
-  `copySt`); `memoryStorageCopyUnfold` captures a complex storage path into a
-  storage alias first.  Both were once silently absorbed by `memoryRootAlias`,
-  whose condition did not restrict the right-hand side's kind.
-  -/
-
-  /-!
-  ## Storage to Memory Rules
-
-  the calculus, the rule set: a deep copy through a memory root.
-  `memoryStorageCopy` is the simple-mv2 form (`mv = sp;`, fresh identity plus
-  `copySt`); `memoryStorageCopyUnfold` captures a complex storage mv2 into a
-  storage alias first.  Both were once silently absorbed by `memoryRootAlias`,
-  whose condition did not restrict the right-hand side's kind.
+  A deep copy through a memory root.  `memoryStorageCopy` is the simple-path
+  form (`mv = sp;`, fresh identity plus `copySt`); `memoryStorageCopyUnfold`
+  captures a complex storage path into a storage alias first.
   -/
 
   sol_rule memoryStorageCopyUnfold := withOrigin (KeyOrigin.taclet KeyTaclet.memoryStorageCopyUnfold) <|
@@ -2426,13 +2239,6 @@ end CaseMode
           mv.kind = Kind.memory ∧ isSimple mv ∧ isSp sp)
         (fun mv sp _ =>
           terminalGoal [ .memDecl mv.ty (varName mv) (some sp) ])
-
-  /- ## Memory to Storage Rules
-
-  The calculus's
-  `memoryToStorageFieldCopyField` is merged into `memoryToStorageFieldCopyRoot`
-  plus the unfolds; the array index rule is a box/diamond twin pair.
-  -/
 
   /-!
   ## Memory to Storage Rules
@@ -2553,10 +2359,6 @@ end CaseMode
       | (nonZero(se) when BinOp.needsGuard opS) ⟹ { lv := lv ⊕ se } <[ ]>
       | else                                   ⟹ revert()
     after read(se)
-
-  /- Storage targets (`storageRootOpAssign`, `storageFieldOpAssign`,
-  `storageIndex{Mapping,Array}OpAssign` — merged here — and
-  `storageRootIncrement`). -/
 
   /-!
   Storage targets: `storageRootOpAssign`, `storageFieldOpAssign`,
@@ -2732,9 +2534,6 @@ end CaseMode
         (fun v rhs _ =>
           splitGoals (.inBounds rhs) [.resolve rhs]
             [ .bumpOf rhs, writeBack v (.read rhs) ])
-
-  /- Memory targets (`memoryFieldOpAssign`, `memoryFieldDivAssign`,
-  `memoryIndexArrayOpAssign`, `memoryFieldIncrement`). -/
 
   /-!
   Memory targets: `memoryFieldOpAssign`, `memoryFieldDivAssign`,
@@ -3086,8 +2885,6 @@ end CaseMode
         (fun v rhs _ =>
           terminalGoal [ writeBack v (.read rhs) ])
 
-  /- solkey's capture partition: the location-neutral value hoists. -/
-
   /-! solkey's capture partition: the location-neutral value hoists. -/
 
   /-!
@@ -3144,18 +2941,8 @@ end CaseMode
           [ captureStackValue se,
             Stmt.compoundAssign op lhs (stackValueAlias se) ])
 
-  /- Stack locals (solkey `localValueAssign`, `localAssign*crement`,
-  `local*crement`). -/
-
-  /-!
-  Stack locals: solkey `localValueAssign`, `localAssign*crement` and
-  `local*crement`.
-  -/
-
-  /-!
-  Stack locals (solkey `localValueAssign`, `localAssign*crement`,
-  `local*crement`).
-  -/
+  /-! Stack locals: solkey `localValueAssign`, `localAssign*crement` and
+  `local*crement`. -/
 
   sol_rule localValueAssign := withOrigin (KeyOrigin.taclet KeyTaclet.localValueAssign) <|
       assignEffect
@@ -3189,8 +2976,6 @@ end CaseMode
         (fun expr _ =>
           terminalGoal [ .bumpOf expr ])
 
-  /- Function calls. -/
-
   /-! Function calls. -/
 
   /-!
@@ -3220,18 +3005,8 @@ end CaseMode
         (fun res fn args _ => unfoldGoal <|
           (SoliditySyntax.expandCall res fn args).getD [])
 
-  /- Lean-only rules: front-end normalisation and scratch bindings with no
+  /-! Lean-only rules: front-end normalisations and scratch bindings with no
   taclet of their own. -/
-
-  /-!
-  Lean-only rules: front-end normalisations and scratch bindings with no
-  taclet of their own.
-  -/
-
-  /-!
-  Lean-only rules: front-end normalisation and scratch bindings with no
-  taclet of their own.
-  -/
 
   sol_rule storagePlaceAlias :=
       { cond := fun stmt =>
