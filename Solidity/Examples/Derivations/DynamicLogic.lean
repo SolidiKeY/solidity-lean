@@ -52,7 +52,7 @@ empty program, and the state update of each terminal rule lives in
 `Wp/TerminalUpdate.lean`.
 
 The calculus's chain is also one line shorter than this one, for the reason
-`Examples/Derivations/WorkedExamples.lean`'s header gives: the calculus freezes
+`Examples/Derivations/Paper.lean`'s header gives: the calculus freezes
 the value operand into `rv` before it captures any part of the target
 (`Counterexamples/ErrorOrder.lean` is why), which costs three administrative
 steps.  They are elided into the `⇝*` line, as the calculus elides with

@@ -74,12 +74,17 @@ Several files are enormous — `RuleSoundness.lean` is 10,864 lines,
 | new import or new module | `lean_build` (restarts the LSP) |
 | touched `Spec/Assertion` or `Spec/Tactic` | `./scripts/check-spec.sh --tactic` |
 | touched anything else under `Spec/` | `./scripts/check-spec.sh` |
-| touched `Examples/Derivations/WorkedExamples.lean` | `./scripts/check-examples.sh` (~30 min) |
+| touched `Examples/Derivations/Paper.lean` | `./scripts/check-examples.sh` (~30 min) |
 | touched `TacletAnnotations.lean` | `lake exe solkeycheck` (already failing on 78 rows — compare against that baseline, do not try to reach zero) |
 | final confirmation | `./run-lean.sh` (~24 min) |
 
 Run the long ones with `run_in_background`, then `grep -n "error"` the log.
 Do not read a build log back in full.
+
+Checking a single file outside a target — `lake env lean <file>` — needs
+`--tstack=131072`. The lakefile sets it per `lean_lib`, so a bare `lake env
+lean` aborts the process on "deep recursion" rather than reporting an error,
+and the failure looks nothing like the missing flag.
 
 ## Before you call it done
 

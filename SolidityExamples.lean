@@ -1,5 +1,5 @@
 -- Root of the `SolidityExamples` library: one `sol_derivation` chain per
--- construct of the calculus.
+-- worked example of the calculus, written the way the calculus writes it.
 --
 -- Deliberately not imported by `Solidity.lean`, for the same
 -- reason `SoliditySpec` and `SolidityCorpus` are not: it is ~45
@@ -12,5 +12,6 @@
 -- The derivations here are a *rendering* of the rule set, not new results:
 -- the same rules are already exercised by `Examples/Derivations/` and
 -- `Examples/Taclets/`, which are in the default build. What this target
--- adds is the end-to-end chain for each construct, written out in full.
-import Solidity.Examples.Derivations.WorkedExamples
+-- adds is the calculus's own chains, program and accumulated update
+-- together, one per worked example of the paper.
+import Solidity.Examples.Derivations.Paper

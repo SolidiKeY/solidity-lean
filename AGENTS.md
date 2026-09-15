@@ -57,7 +57,7 @@ import changes and final confirmation. The `lean-verify` skill in
 | `./run-lean.sh` | ~24 min CPU | `lake build` (default targets) then the solkey sort check |
 | `./scripts/check-spec.sh --tactic` | short | `Spec/Assertion` + `Spec/Tactic` only |
 | `./scripts/check-spec.sh` | medium | the whole `SoliditySpec` target |
-| `./scripts/check-examples.sh` | ~30 min CPU | `SolidityExamples` (`WorkedExamples.lean`) |
+| `./scripts/check-examples.sh` | ~30 min CPU | `SolidityExamples` (`Examples/Derivations/Paper.lean`) |
 | `./scripts/check-solkey-parity.sh` | medium | the ported corpus against `tests/solkey/expected.tsv` |
 | `lake exe solkeycheck` | seconds | sort annotations against solkey's `.key` |
 

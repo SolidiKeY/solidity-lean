@@ -28,7 +28,7 @@ When a step stops elaborating, the cause is almost never the notation:
    failure looks like a parse problem and is not. Add the name to the
    explicit-arms list in `AST.lean` beside `"rv"`, `"idx"`, `"result"`.
    **But not for the worked-example identifiers**: giving those explicit arms
-   overflowed Lean's stack (see the `WorkedExamples.lean` docstring). Explicit
+   overflowed Lean's stack (see the `Paper.lean` docstring). Explicit
    arms are for scratch names that appear in *residuals*.
 3. **The grammar genuinely lacks a form.** Check `syntax … : sol_stmt` in
    `AST.lean` first — it covers bare declarations, plain and compound
@@ -46,6 +46,17 @@ When a step stops elaborating, the cause is almost never the notation:
 | `j ⇝ᵈ[.rule] j'`, `j ⇝ᵈ* j'` | the same, on a judgment | `dl_rule_step` / `dl_steps […]` |
 | `f ⇝ᵘ[.rule] f'`, `f ⇝ᵘ* f'` | the same, on a frontier of updated sequents | `seq_rule_step` / `seq_steps […]` / `seq_steps!` |
 | `f ⇝≡ f'` | the **merge line**: not a rule, the update respelled | `upd_merge` |
+
+ASCII twins: `~>`, `~>[.r]`, `~>*[…]`, `~>*`, `~>=`, and `~*>` for `⇝*` —
+the spelling the paper's chains are written in.
+
+**At the sequent layer `⇝`/`~>` and `⇝*`/`~*>` may absorb a trailing merge.**
+`seq_steps!` stops as soon as the frontier reaches the stated target *or*
+agrees with it on every antecedent and goal, at which point the only thing
+left between them is the spelling of the update and `upd_merge` closes it.
+That is what lets a chain land on the calculus's parallel form mid-derivation,
+with the program still open. `⇝≡` is still how a line that takes **no** step
+is written.
 
 **The rule goes on the arrow, not in the proof.** `⇝[.storageFieldWriteSave]`
 is a claim Lean checks; do not re-list the rules in a docstring above the
@@ -70,9 +81,30 @@ splice means `[…] ++ name`. Write the suffix out again once it becomes active.
 `sol_derivation` is the chain and nothing else — no `calc`, no per-line
 `:= by …`, and a `where` clause for the abbreviations. It states
 `theorem <name> : <first> ⇝* <last>`, so each derivation is a reusable fact.
-It serves all three layers, picked from the first line's notation: `sol!` is
-the judgment layer, `seq!` the sequent layer, anything else the block layer.
-Single steps stay as `example : A ⇝[.r] B := by rule_step`.
+It serves all three layers, picked from the first line's notation: a `=>` line
+or `seq!` is the sequent layer, `sol!` the judgment layer, anything else the
+block layer. Single steps stay as `example : A ⇝[.r] B := by rule_step`.
+
+**A sequent line is written with the turnstile in front**, the way
+`Examples/Derivations/Paper.lean` writes the calculus's own chains:
+
+```
+sol_derivation deepFieldWrite :
+    => <[ alice.account.balance = 10 ]>(φ)
+  ~> => <[ uint rv = 10; … ]>(φ)
+  ~*> => { rv@uint := 10 ‖ sp@Account := path(alice.account) } <[ … ]>(φ)
+  ~> => { … ‖ storage := save(alice.account.balance, 10) } (φ)
+```
+
+Three things about that shape. A **bare `(φ)` goal** is the paper's last line,
+where no program is left and the modality is no longer drawn: it is the one
+the chain's *first* line wrote, so a chain agrees with itself by construction.
+A **bare, atomic identifier in parentheses is a Lean term**; `(alice.age)` and
+`(result == 10)` are programs, as everywhere else. A parenthesised *goal* is
+always a postcondition over the empty program, so obligations — `⊤`, `⊥`,
+`funded(se)`, `CInv` — are written without parentheses. And a **branching line
+is a bracketed list** of such lines, which is what a guarded rule leaves open:
+`[ inBounds(values[i]) => { v := values[i] } [ ](φ), ¬inBounds(values[i]) => ⊤ ]`.
 
 `sol_runs name { stmt; stmt }` when the point is only *that* a program runs to
 the empty block. **Statements are `;`-separated, deliberately**: newline

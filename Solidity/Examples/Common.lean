@@ -6,7 +6,7 @@ import Solidity.Examples.SimpAttr
 
 namespace Solidity.Examples
 
-open Rules StandardExample SoliditySyntax
+open Rules StandardExample SoliditySyntax SequentSyntax
 
 /-! ### Alias helpers
 
@@ -608,8 +608,29 @@ private def autoStepsRound (acc : Array Lean.Expr) : TacticM (Option Lean.Expr) 
     return some r
 
 open Lean Elab Tactic Meta in
+/-- Close a `⇝*` goal by reflexivity when the stated target is already the
+block we are at.  The twin of `autoSeqStepsClose`, which has a merge line to
+try as well. -/
+private def autoStepsClose : TacticM Bool := do
+  let g ← getMainGoal
+  g.withContext do
+    let ty ← whnf (← g.getType)
+    unless ty.isAppOfArity ``BlockReflMultiStep 2 do
+      throwError "steps!: expected a `⇝*` goal, got{indentExpr ty}"
+    let before := ty.appFn!.appArg!
+    if ← isDefEq before ty.appArg! then
+      g.assign (← mkAppOptM ``BlockReflMultiStep.refl #[some before])
+      replaceMainGoal []
+      return true
+    return false
+
+open Lean Elab Tactic Meta in
 private partial def autoStepsLoop (fuel : Nat) (acc : Array Lean.Expr) :
     TacticM (Array Lean.Expr) := do
+  -- The stated target may be the block we are already at, so reflexivity is
+  -- checked *before* the fuel: `fuel` counts steps taken, not rounds entered,
+  -- and `steps! 1` proves a genuine one-step line.
+  if ← autoStepsClose then return acc
   match fuel with
   | 0 =>
       throwError "steps!: gave up after {acc.size} steps without reaching the \
@@ -742,7 +763,7 @@ elab_rules : command
 
 /-! ### The sequent layer
 
-`Examples/Derivations/Sequents.lean` writes the calculus's own lines --
+`Examples/Derivations/Paper.lean` writes the calculus's own lines --
 `Γ ⟹ {U} ⟨[ p ]⟩ φ` -- so each of the block tactics above has a twin here.
 Two things are new, and both are about the update the block layer throws away.
 
@@ -838,11 +859,35 @@ macro "seq_steps " "[" rs:term,* "]" : tactic => do
   `(tactic| set_option maxRecDepth 32768 in $seq)
 
 open Lean Elab Tactic Meta in
-/-- One round of `seq_steps!`.  Same three outcomes as `autoStepsRound`, and
-the same oracle; what differs is where the head statement is found (inside the
-first *open* sequent) and that the target may be reached by a merge rather than
-by reflexivity. -/
-private def autoSeqStepsRound (acc : Array Lean.Expr) : TacticM (Option Lean.Expr) := do
+/-- Do two literal frontiers agree, line by line, on antecedent and goal?
+
+Then they can differ only in *how their updates are spelled*, and the line
+between them is the calculus's merge rather than a rule application: every
+rule rewrites the head statement, so a step always changes a goal.  This is
+what lets `⇝ᵘ*` land on the parallel form while the program is still open,
+which is where the calculus writes it. -/
+private partial def sameShape (a b : Lean.Expr) : MetaM Bool := do
+  let a ← whnf a
+  let b ← whnf b
+  if a.isAppOfArity ``List.nil 1 then return b.isAppOfArity ``List.nil 1
+  unless a.isAppOfArity ``List.cons 3 && b.isAppOfArity ``List.cons 3 do
+    return false
+  let qa ← whnf a.getAppArgs[1]!
+  let qb ← whnf b.getAppArgs[1]!
+  unless qa.isAppOfArity ``Sequent.mk 3 && qb.isAppOfArity ``Sequent.mk 3 do
+    return false
+  unless ← isDefEq qa.getAppArgs[0]! qb.getAppArgs[0]! do return false
+  unless ← isDefEq qa.getAppArgs[2]! qb.getAppArgs[2]! do return false
+  sameShape a.getAppArgs[2]! b.getAppArgs[2]!
+
+open Lean Elab Tactic Meta in
+/-- Try to *close* a `⇝ᵘ*` goal without taking a step: by reflexivity, or by
+the merge line when the two frontiers differ only in how their update is
+spelled.  `true` means the goal is gone.
+
+Run before every step and again when the fuel is spent, which is what makes
+`seq_steps! 1` mean "at most one step, then close". -/
+private def autoSeqStepsClose (acc : Array Lean.Expr) : TacticM Bool := do
   let g ← getMainGoal
   g.withContext do
     let ty ← whnf (← g.getType)
@@ -853,29 +898,49 @@ private def autoSeqStepsRound (acc : Array Lean.Expr) : TacticM (Option Lean.Exp
     if ← isDefEq before after then
       g.assign (← mkAppOptM ``FrontierMultiStep.refl #[some before])
       replaceMainGoal []
-      return none
+      return true
     let src ← whnf before
     let opened ← whnf (mkAppN (mkConst ``Frontier.firstOpen?) #[src])
-    if opened.isAppOfArity ``Option.none 1 then
-      -- Nothing left to execute, and the target is not this frontier: then it
-      -- differs only in how the accumulated update is spelled, which is the
-      -- calculus's merge line and ends the chain.  Tried here rather than
-      -- every round because it is the expensive tactic in this file.
-      let st ← saveState
-      let merged ←
-        try
-          evalTactic (← `(tactic|
-            refine FrontierMultiStep.equiv ?_ FrontierMultiStep.refl))
-          evalTactic (← `(tactic| upd_merge))
-          pure (← getGoals).isEmpty
-        catch _ => pure false
-      if merged then return none
-      st.restore
-      throwError "seq_steps!: no open sequent left after {acc.size} step(s), \
-        and the stated target{indentExpr after}\nis not this frontier up to \
-        the spelling of its update (`upd_merge` did not close it). Write the \
-        merge as its own `⇝≡` line, or supply it with `⇝≡[h]`.\n\
-        {← rulesText acc}"
+    let noneLeft := opened.isAppOfArity ``Option.none 1
+    -- The merge is the expensive tactic in this file, so it is tried only
+    -- where it can be the answer: nothing left to execute, or the two lines
+    -- already agree on everything but the spelling of the update.
+    unless noneLeft || (← sameShape src after) do return false
+    let st ← saveState
+    let merged ←
+      try
+        evalTactic (← `(tactic|
+          refine FrontierMultiStep.equiv ?_ FrontierMultiStep.refl))
+        evalTactic (← `(tactic| upd_merge))
+        pure (← getGoals).isEmpty
+      catch _ => pure false
+    if merged then return true
+    st.restore
+    if noneLeft then
+      throwError "seq_steps!: no open sequent left after {acc.size} step(s). \
+        The frontier reached is{indentExpr src}\nand the stated target is\
+        {indentExpr after}\nwhich is not the same line up to the spelling of \
+        its update (`upd_merge` did not close it). Write the merge as its own \
+        `⇝≡` line, or supply it with `⇝≡[h]`.\n{← rulesText acc}"
+    throwError "seq_steps!: after {acc.size} step(s) the frontier reached\
+      {indentExpr src}\nand the stated target{indentExpr after}\nagree on \
+      every antecedent and goal, so the line between them is the merge -- but \
+      `upd_merge` did not close it. Write the two updates the way the calculus \
+      stacks them, or supply the equality with `⇝≡[h]`.\n{← rulesText acc}"
+
+open Lean Elab Tactic Meta in
+/-- One step of `seq_steps!`.  Same oracle as the block loop's
+`autoStepsRound`; what differs is where the head statement is found (inside
+the first *open* sequent).  Closing is `autoSeqStepsClose`'s job, and has
+already been tried when this runs. -/
+private def autoSeqStepsStep (acc : Array Lean.Expr) : TacticM Lean.Expr := do
+  let g ← getMainGoal
+  g.withContext do
+    let ty ← whnf (← g.getType)
+    let before := ty.appFn!.appArg!
+    let after := ty.appArg!
+    let src ← whnf before
+    let opened ← whnf (mkAppN (mkConst ``Frontier.firstOpen?) #[src])
     unless opened.isAppOfArity ``Option.some 2 do
       throwError "seq_steps!: cannot split the frontier{indentExpr src}\n\
         `Frontier.firstOpen?` got stuck at{indentExpr opened}"
@@ -911,26 +976,27 @@ private def autoSeqStepsRound (acc : Array Lean.Expr) : TacticM (Option Lean.Exp
         not apply; pin the step with `⇝ᵘ[.rule]` / `seq_steps [...]`.\n\
         {← rulesText acc}\nunderlying error: {e.toMessageData}"
     evalTactic (← `(tactic| try dsimp only [rule_simp_set]))
-    return some r
+    return r
 
 open Lean Elab Tactic Meta in
 private partial def autoSeqStepsLoop (fuel : Nat) (acc : Array Lean.Expr) :
     TacticM (Array Lean.Expr) := do
+  -- Closure is checked *before* the fuel, so `fuel` counts steps taken rather
+  -- than rounds entered: `seq_steps! 1` proves a genuine one-step line.
+  if ← autoSeqStepsClose acc then return acc
   match fuel with
   | 0 =>
-      throwError "seq_steps!: gave up after {acc.size} steps without reaching \
+      throwError "seq_steps!: gave up after {acc.size} step(s) without reaching \
         the stated target.\n{← rulesText acc}"
   | fuel + 1 => do
       let before? := (← getGoals).head?
-      match ← autoSeqStepsRound acc with
-      | none => return acc
-      | some r =>
-          trace[solidity.steps] "step {acc.size + 1}: {← ruleNameText r}"
-          if let (some g₀, some g₁) := (before?, (← getGoals).head?) then
-            if ← isDefEq (← g₀.getType) (← g₁.getType) then
-              throwError "seq_steps!: rule `{← ruleNameText r}` left the \
-                frontier unchanged.\n{← rulesText (acc.push r)}"
-          autoSeqStepsLoop fuel (acc.push r)
+      let r ← autoSeqStepsStep acc
+      trace[solidity.steps] "step {acc.size + 1}: {← ruleNameText r}"
+      if let (some g₀, some g₁) := (before?, (← getGoals).head?) then
+        if ← isDefEq (← g₀.getType) (← g₁.getType) then
+          throwError "seq_steps!: rule `{← ruleNameText r}` left the \
+            frontier unchanged.\n{← rulesText (acc.push r)}"
+      autoSeqStepsLoop fuel (acc.push r)
 
 open Lean Elab Tactic Meta in
 /-- Run a `⇝ᵘ*` goal to its stated target, computing the rule at each step. -/
@@ -940,9 +1006,9 @@ elab "seq_steps!" fuelStx:(num)? : tactic =>
     let used ← autoSeqStepsLoop fuel #[]
     trace[solidity.steps] "{← rulesText used}"
 
-/-- One step of a `⇝ᵘ*` line with the rule inferred. -/
-macro "seq_block_step" : tactic => `(tactic|
-  first | exact FrontierMultiStep.refl | seq_steps! 1)
+/-- One step of a `⇝ᵘ*` line with the rule inferred.  `seq_steps! 1` is
+"at most one step, then close", so a line that only merges is covered too. -/
+macro "seq_block_step" : tactic => `(tactic| seq_steps! 1)
 
 /-! ### The `sol_derivation` command
 
@@ -978,6 +1044,9 @@ syntax " ~>[" term "] " : sol_arrow
 syntax " ~>*[" term,* "] " : sol_arrow
 /-- ASCII twin of `⇝*`. -/
 syntax " ~>* " : sol_arrow
+/-- The paper's many-step arrow, `~*>`: the same tactic as `⇝*`/`~>*`, in the
+spelling the paper's chains are written in. -/
+syntax " ~*> " : sol_arrow
 /-! The merge arrow.  Not a step of the rule set: the calculus's last line is
 usually the update calculus collapsing `{u}{v}` into `{u ‖ {u}v}`, and writing
 it with `⇝` would claim a taclet fired.  `⇝≡` is that line, discharged by
@@ -993,8 +1062,28 @@ syntax " ~>= " : sol_arrow
 declare_syntax_cat sol_where_bind
 syntax ident " := " term : sol_where_bind
 
+/-! A line of a chain is one of three things: a term (`solbox!{…}`, `sol!{…}`,
+a bare name -- every layer), a `=>` line written the way the calculus draws it
+(`Update/SequentSyntax.lean`), or a bracketed frontier of such lines, which is
+what a guarded rule leaves open.
+
+The three alternatives cannot be confused.  No term begins with `=>`, and a
+line that *starts* like one (`flag => …`, `¬inBounds(values[i]) => …`) parses
+as a term only up to the turnstile, so the `sol_line` reading is longer and
+wins; `[ g => … ]` fails as a Lean list literal at the `=>`; and `seq!{…}`
+fails as a `sol_line` at the `!`.  A chain may therefore mix the spellings,
+which is what makes an old derivation migrate one line at a time. -/
+declare_syntax_cat sol_deriv_line
+/-- Any layer's line, written as a term. -/
+syntax term:51 : sol_deriv_line
+/-- The sequent layer's line, written as the calculus draws it. -/
+syntax sol_line : sol_deriv_line
+/-- The sequents a guarded rule leaves open at once. -/
+syntax "[" sepBy1(sol_line, ", ") "]" : sol_deriv_line
+
 syntax (docComment)? "sol_derivation " ident (" let " sol_where_bind,+)?
-  " : " term:51 (sol_arrow term:51)+ (" where " sol_where_bind,+)? : command
+  " : " sol_deriv_line (sol_arrow sol_deriv_line)+
+  (" where " sol_where_bind,+)? : command
 
 /-- Which layer is this derivation written at?
 
@@ -1029,11 +1118,44 @@ private partial def isJudgmentSyntax : Lean.Syntax → Bool
   | .node _ _ args => args.any isJudgmentSyntax
   | _ => false
 
+/-- The modality a chain is written in, read off its first line.  Only the
+paper's bare `(φ)` goal needs it -- every other goal writes its own -- and
+reading it here is what makes the last line of a chain agree with the first by
+construction, which `upd_merge` then closes by `rfl`.
+
+A chain whose first line is a term (`seq!{…}`, `solbox!{…}`) has none to
+offer, so a bare `(φ)` after it is the combined modality, the default of every
+worked example. -/
+private def chainMode : Lean.TSyntax `sol_deriv_line → Option Lean.Ident
+  | `(sol_deriv_line| $l:sol_line) => lineMode? l
+  | `(sol_deriv_line| [ $ls:sol_line,* ]) => ls.getElems[0]?.bind lineMode?
+  | _ => none
+
+open Lean Elab Command in
+/-- A chain line as the term it denotes.  A `=>` line and a bracketed frontier
+go through `Update/SequentSyntax.lean`'s expander with the chain's modality;
+a term is already one. -/
+private def derivLineTerm (mode : Lean.Ident) :
+    Lean.TSyntax `sol_deriv_line → CommandElabM Term
+  | `(sol_deriv_line| $t:term) => pure t
+  | `(sol_deriv_line| $l:sol_line) => liftMacroM (expandLine mode l)
+  | `(sol_deriv_line| [ $ls:sol_line,* ]) => do
+      let ts ← ls.getElems.mapM fun l => liftMacroM (expandLine mode l)
+      `(([$ts,*] : Frontier))
+  | stx => throwErrorAt stx "malformed `sol_derivation` line"
+
+/-- Is this line written in the calculus's own notation?  Then the derivation
+is at the sequent layer, whatever the rest of the chain looks like. -/
+private def isSeqLine : Lean.TSyntax `sol_deriv_line → Bool
+  | `(sol_deriv_line| $_:sol_line) => true
+  | `(sol_deriv_line| [ $_:sol_line,* ]) => true
+  | _ => false
+
 open Lean Elab Command in
 elab_rules : command
   | `(command| $[$doc:docComment]? sol_derivation $name:ident
-        $[let $lets:sol_where_bind,*]? : $first:term
-        $[$arrows:sol_arrow $targets:term]*
+        $[let $lets:sol_where_bind,*]? : $firstLine:sol_deriv_line
+        $[$arrows:sol_arrow $targetLines:sol_deriv_line]*
         $[where $binds:sol_where_bind,*]?) => do
       -- The named abbreviations first, in source order, since the chain may
       -- mention them: the calculus's "Let l = find(storage, values.length)" is
@@ -1048,11 +1170,13 @@ elab_rules : command
       -- Block layer or judgment layer?  The source is the same either way --
       -- one arrow glyph, as the calculus draws it -- and only the tactics and the
       -- transitivity lemma differ.
+      let mode := chainMode firstLine |>.getD (mkIdent ``SolidityModality.both)
+      let first ← derivLineTerm mode firstLine
+      let targets ← targetLines.mapM (derivLineTerm mode)
       let layer : DerivLayer :=
-        if hasAtom "seq!" first then .sequent
+        if isSeqLine firstLine || hasAtom "seq!" first then .sequent
         else if isJudgmentSyntax first then .judgment
         else .block
-      let judgment := layer == .judgment
       -- One `⇝*`/`⇝ᵈ*` proof per line, then fold them with transitivity.  Each
       -- line is `show`-ascribed, so a failure points at that line's block.
       let mut prev := first
@@ -1081,7 +1205,7 @@ elab_rules : command
               | .sequent => `(show $prev ⇝ᵘ* $target from by seq_steps [$rules,*])
               | .judgment => `(show $prev ⇝ᵈ* $target from by dl_steps [$rules,*])
               | .block => `(show $prev ⇝* $target from by steps [$rules,*])
-          | `(sol_arrow| ⇝*) | `(sol_arrow| ~>*) =>
+          | `(sol_arrow| ⇝*) | `(sol_arrow| ~>*) | `(sol_arrow| ~*>) =>
               match layer with
               | .sequent => `(show $prev ⇝ᵘ* $target from by seq_steps!)
               | .judgment => `(show $prev ⇝ᵈ* $target from by dl_steps!)

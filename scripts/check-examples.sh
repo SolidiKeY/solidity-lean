@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Press button for the worked derivations: elaborate every worked example of
 # the calculus as a `sol_derivation` chain
-# (`Solidity/Examples/Derivations/WorkedExamples.lean`).
+# (`Solidity/Examples/Derivations/Paper.lean`).
 #
 #   ./scripts/check-examples.sh
 #

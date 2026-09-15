@@ -18,19 +18,22 @@ readable as KeY.
 ## The shape
 
 ```
-seq!{ Γ ⟹ {U₁} {U₂} <[ stmts ]> ‹φ› }      -- a program goal
+seq!{ Γ => {U₁} {U₂} <[ stmts ]>(φ) }      -- a program goal
+seq!{ Γ => {U} (φ) }                       -- the paper's last line
 seq!{ Γ ⟹ {U} ⊤ }                          -- an obligation goal
 ```
 
-* `Γ` is a comma-separated list of side formulas, possibly empty; `⟹` is
-  always written, as the calculus writes it.
+* `Γ` is a comma-separated list of side formulas, possibly empty; the
+  turnstile is always written, as the calculus writes it.  `=>` and `⟹` are
+  the same line: the paper draws no turnstile on an unbranched line at all,
+  and writing one on every line is what makes a chain uniform.
 * Each `{…}` is one *parallel* update, `‖`-separated; several in a row are the
-  *sequential* stack `{U₁}{U₂}`, and the `⇝≡` line of a derivation is what
+  *sequential* stack `{U₁}{U₂}`, and the merge line of a derivation is what
   collapses them.
-* The goal is a modality (`<[ ]>`, `[ ]`, `< >`) with a postcondition, or a
-  bare formula.
+* The goal is a modality (`<[ ]>`, `[ ]`, `< >`) with a postcondition, the
+  paper's bare `(φ)` once no program is left, or a formula.
 
-## Three token notes
+## Four token notes
 
 `‖` (U+2016) separates the elements of a parallel update, **not** `||`:
 `sol_expr` already has `" || "` as Boolean disjunction (`AST.lean`), so
@@ -40,6 +43,14 @@ And `storage`/`memory`/`havoc`/`CInv` are written `&"..."`, non-reserved
 keywords: as plain atoms they would become global tokens and
 `Account storage sp = alice.account;` would stop lexing inside `sol_stmt`,
 which is the hazard `RuleSyntax.lean`'s header records for `sol_rule`.
+And `(φ)` is read as a Lean term only when it is a **bare, atomic**
+identifier.  That the parenthesised identifier wins at all is parser priority,
+because `"(" sol_expr ")"` is itself a `sol_expr` and two alternatives that
+stop at the same position with the same priority build a `choice` node no
+quotation pattern can read.  That `(alice.age)` is still a program is decided
+*after* parsing (`expandIdentPost`), because the lexer reads a dotted name as
+one identifier token and the grammar cannot see the difference.
+`(result == 10)` never reaches that production at all.
 
 ## Why not in `Rules.lean`
 
@@ -128,6 +139,16 @@ declare_syntax_cat sol_upd
 `path(sp)`, `ref(m)`, `slot(arr.push())`, `default(T)`, `length(arr)`,
 `net(a)`, `current(p)` for a name; anything else is the value itself. -/
 syntax sol_expr " := " sol_expr : sol_upd
+/-- `t ⊕= se` -- the write-back a compound assignment performs, `t op se`
+computed at the *target's* type.  Spelled as the program's own compound
+assignment because that is what it is: `Sym.combined` carries the target
+twice, so the calculus's `{storage := save(p, alice·age + 1)}` and this line
+are the same element.  The tokens are `sol_stmt`'s already. -/
+syntax sol_expr " += " sol_expr : sol_upd
+syntax sol_expr " -= " sol_expr : sol_upd
+syntax sol_expr " *= " sol_expr : sol_upd
+syntax sol_expr " /= " sol_expr : sol_upd
+syntax sol_expr " %= " sol_expr : sol_upd
 /-- An update with no left-hand side: `transfer(a, se)` and `bump(t++)` write
 two things at once, `alloc(T, m)` / `alloc(T, m, sp)` is a memory declaration,
 `clear(m)` a memory delete, and `havoc` the callback re-binding. -/
@@ -135,6 +156,11 @@ syntax sol_expr : sol_upd
 
 def expandUpd (stx : TSyntax `sol_upd) : MacroM (TSyntax `term) := do
   match stx with
+  | `(sol_upd| $t:sol_expr += $v:sol_expr) => compound ``BinOp.add t v
+  | `(sol_upd| $t:sol_expr -= $v:sol_expr) => compound ``BinOp.sub t v
+  | `(sol_upd| $t:sol_expr *= $v:sol_expr) => compound ``BinOp.mul t v
+  | `(sol_upd| $t:sol_expr /= $v:sol_expr) => compound ``BinOp.div t v
+  | `(sol_upd| $t:sol_expr %= $v:sol_expr) => compound ``BinOp.mod t v
   | `(sol_upd| $lhs:sol_expr := $rhs:sol_expr) =>
       let comp := identName? lhs
       match comp, callHead? rhs with
@@ -184,6 +210,12 @@ def expandUpd (stx : TSyntax `sol_upd) : MacroM (TSyntax `term) := do
           else Macro.throwErrorAt e "unexpected elementary update"
   | stx => Macro.throwErrorAt stx "unexpected elementary update"
 where
+  /-- `t ⊕= se`: one write-back of `Sym.combined`, at whichever data location
+  the target lives in.  The same term `Rules.compoundGoals` builds. -/
+  compound (op : Lean.Name) (t v : TSyntax `sol_expr) : MacroM (TSyntax `term) := do
+    let tTerm ← expandSolExpr t
+    `($(gen ``Rules.writeBack) $tTerm
+        (.combined $(gen op) $tTerm $(← expandSolExpr v)))
   /-- `x := …` for a name: a binding, or -- when the right-hand side is a
   plain term -- a write-back at whichever data location `x` lives in. -/
   expandNamed (lhs rhs : TSyntax `sol_expr) : MacroM (TSyntax `term) := do
@@ -211,24 +243,86 @@ where
 
 /-! ## The line -/
 
+/-! ### The postcondition position
+
+A goal written the way the paper draws it ends in `(φ)`, and that text is
+ambiguous: `"(" sol_expr ")"` is itself a `sol_expr` (`AST.lean`), so `(φ)`
+would silently become a Solidity variable *named* `φ`.  The rule here is that
+a **bare identifier** in parentheses is a Lean term -- the calculus's opaque
+postcondition -- and anything else is the ordinary expression grammar.
+
+That is a parser *priority*, not a declaration order: two alternatives that
+stop at the same position with the same priority produce a `choice` node, and
+a quotation pattern cannot read one.  `(alice.age)` is not ambiguous at all --
+the identifier alternative fails at the `.` -- and `‹t›` is unchanged. -/
+declare_syntax_cat sol_seq_post
+/-- `(φ)` -- the opaque postcondition, any Lean term of that name. -/
+syntax (priority := high) "(" ident ")" : sol_seq_post
+/-- A concrete postcondition, or the explicit `‹t›` escape. -/
+syntax sol_post : sol_seq_post
+
+/-- `(x)` for an identifier: the calculus's opaque postcondition when the name
+is *atomic*, the program's own expression when it is dotted.  The split is
+here rather than in the grammar because the lexer reads `alice.age` as **one**
+identifier token, so the parser cannot tell the two apart. -/
+def expandIdentPost (x : Ident) : MacroM (TSyntax `term) :=
+  if x.getId.isAtomic then pure x
+  else expandSolPathExpr (x.getId.components.map Lean.Name.toString)
+
+def expandSeqPost : TSyntax `sol_seq_post → MacroM (TSyntax `term)
+  | `(sol_seq_post| ($x:ident)) => expandIdentPost x
+  | `(sol_seq_post| $p:sol_post) => expandSolPost p
+  | stx => Macro.throwErrorAt stx "unexpected postcondition"
+
 declare_syntax_cat sol_seq_goal
 /-- The combined modality, the default of every worked example. -/
-syntax "<[" sepBy(sol_stmt, ";", ";") "]>" sol_post : sol_seq_goal
-syntax "[" sepBy(sol_stmt, ";", ";") "]" sol_post : sol_seq_goal
-syntax "<" sepBy(sol_stmt, ";", ";") ">" sol_post : sol_seq_goal
+syntax "<[" sepBy(sol_stmt, ";", ";") "]>" sol_seq_post : sol_seq_goal
+syntax "[" sepBy(sol_stmt, ";", ";") "]" sol_seq_post : sol_seq_goal
+syntax "<" sepBy(sol_stmt, ";", ";") ">" sol_seq_post : sol_seq_goal
+/-- The paper's last line: `{U} φ`, with the modality no longer drawn because
+no program is left.  The modality is still *there* -- it is the one the chain
+started in -- so the caller supplies it, and a chain's last line agrees with
+its first by construction.
+
+A parenthesised goal is a **postcondition over the empty program**, never an
+obligation: `⊤`, `⊥`, `funded(se)` and the rest are written without
+parentheses, which is how the calculus writes them anyway.
+
+One thing this form cannot say: a *comparison* postcondition.  `(x == 10)` is
+one `sol_expr` whose parentheses belong to the comparison, so it is not
+`"(" sol_expr ")"` and falls through to the formula reading.  Write the
+modality out — `<[ ]>(x == 10)` — which is what a concrete postcondition wants
+anyway; the bare line is for the calculus's opaque `φ`. -/
+syntax (priority := high) "(" sol_expr ")" : sol_seq_goal
 /-- No program left: KeY's `\replacewith(φ)`. -/
 syntax sol_formula : sol_seq_goal
 
-def expandSeqGoal : TSyntax `sol_seq_goal → MacroM (TSyntax `term)
-  | `(sol_seq_goal| <[ $stmts;* ]> $post:sol_post) => do
+/-- The modality a goal writes, if it writes one.  Read off the syntax, not
+the elaborated term, for the reason `Examples/Common.lean` gives for the layer
+sniff: a line typically mentions a section `variable (φ : WrappedExpr)`. -/
+def goalMode? : TSyntax `sol_seq_goal → Option Ident
+  | `(sol_seq_goal| <[ $_;* ]> $_:sol_seq_post) => some (gen ``SolidityModality.both)
+  | `(sol_seq_goal| [ $_;* ] $_:sol_seq_post) => some (gen ``SolidityModality.box)
+  | `(sol_seq_goal| < $_;* > $_:sol_seq_post) => some (gen ``SolidityModality.diamond)
+  | _ => none
+
+/-- `mode` is used only by the bare `(φ)` form, whose modality is not written. -/
+def expandSeqGoal (mode : TSyntax `term) : TSyntax `sol_seq_goal → MacroM (TSyntax `term)
+  | `(sol_seq_goal| <[ $stmts;* ]> $post:sol_seq_post) => do
       `($(gen ``SeqGoal.prog) ($(gen ``SolidityBlock.mk) .both $(← expandSolBlock stmts.getElems))
-          $(← expandSolPost post))
-  | `(sol_seq_goal| [ $stmts;* ] $post:sol_post) => do
+          $(← expandSeqPost post))
+  | `(sol_seq_goal| [ $stmts;* ] $post:sol_seq_post) => do
       `($(gen ``SeqGoal.prog) ($(gen ``SolidityBlock.mk) .box $(← expandSolBlock stmts.getElems))
-          $(← expandSolPost post))
-  | `(sol_seq_goal| < $stmts;* > $post:sol_post) => do
+          $(← expandSeqPost post))
+  | `(sol_seq_goal| < $stmts;* > $post:sol_seq_post) => do
       `($(gen ``SeqGoal.prog) ($(gen ``SolidityBlock.mk) .diamond $(← expandSolBlock stmts.getElems))
-          $(← expandSolPost post))
+          $(← expandSeqPost post))
+  | `(sol_seq_goal| ($e:sol_expr)) => do
+      let post ← match e with
+        | `(sol_expr| $x:ident) => expandIdentPost x
+        | _ => expandSolExpr e
+      `($(gen ``SeqGoal.prog) ($(gen ``SolidityBlock.mk) $mode (([] : $(gen ``Block))))
+          $post)
   | `(sol_seq_goal| $f:sol_formula) => do
       `($(gen ``SeqGoal.obl) $(← expandFormula f))
   | stx => Macro.throwErrorAt stx "unexpected sequent goal"
@@ -261,18 +355,44 @@ def expandAnte : TSyntax `sol_ante → MacroM (TSyntax `term)
   | `(sol_ante| $upds:sol_par_upd* $f:sol_formula) => do
       let updTerms ← upds.mapM expandParUpd
       `((([$updTerms,*] : List $(gen ``UpdTerm)), $(← expandFormula f)))
-  | stx => Macro.throwErrorAt stx "unexpected antecedent" 
+  | stx => Macro.throwErrorAt stx "unexpected antecedent"
 
-/-- One derivation line, as the calculus draws it. -/
-syntax "seq!" "{" sepBy(sol_ante, ", ") " ⟹ " (sol_par_upd)*
-  sol_seq_goal "}" : term
+/-! ### The line
 
-macro_rules
-  | `(seq!{ $ante,* ⟹ $upds:sol_par_upd* $goal:sol_seq_goal }) => do
+`Γ ⟹ {U₁}…{Uₙ} goal`, with `=>` as the ASCII turnstile.  The paper draws no
+turnstile on an unbranched line at all; writing one on every line is what
+makes a chain uniform, and `=>` is what a reader can type.  Two productions
+rather than one with an alternation, so that each has a plain quotation
+pattern; `=>` is already a token (`fun x => …`), so no new token enters the
+global table. -/
+declare_syntax_cat sol_line
+syntax sepBy(sol_ante, ", ") " ⟹ " (sol_par_upd)* sol_seq_goal : sol_line
+/-- The ASCII turnstile, the spelling a derivation is written in. -/
+syntax sepBy(sol_ante, ", ") " => " (sol_par_upd)* sol_seq_goal : sol_line
+
+/-- The modality a line writes, if any: the caller of a chain reads it off the
+*first* line and hands it to every bare `(φ)` line after it. -/
+def lineMode? : TSyntax `sol_line → Option Ident
+  | `(sol_line| $_ante:sol_ante,* ⟹ $_upds:sol_par_upd* $goal:sol_seq_goal) => goalMode? goal
+  | `(sol_line| $_ante:sol_ante,* => $_upds:sol_par_upd* $goal:sol_seq_goal) => goalMode? goal
+  | _ => none
+
+def expandLine (mode : TSyntax `term) : TSyntax `sol_line → MacroM (TSyntax `term)
+  | `(sol_line| $ante:sol_ante,* ⟹ $upds:sol_par_upd* $goal:sol_seq_goal)
+  | `(sol_line| $ante:sol_ante,* => $upds:sol_par_upd* $goal:sol_seq_goal) => do
       let anteTerms ← ante.getElems.mapM expandAnte
       let updTerms ← upds.mapM expandParUpd
-      `($(gen ``Sequent.mk) [$anteTerms,*] [$updTerms,*] $(← expandSeqGoal goal))
+      `($(gen ``Sequent.mk) [$anteTerms,*] [$updTerms,*] $(← expandSeqGoal mode goal))
+  | stx => Macro.throwErrorAt stx "unexpected derivation line"
 
+/-- One derivation line, as the calculus draws it.  A standalone line has no
+chain to inherit a modality from, so a bare `(φ)` goal is read as the combined
+one -- the default of every worked example. -/
+syntax "seq!" "{" sol_line "}" : term
+
+macro_rules
+  | `(seq!{ $l:sol_line }) => do
+      expandLine (← `($(gen ``SolidityModality.both))) l
 /-! ## Smoke tests
 
 Grammar only -- every production of `sol_upd`, `sol_formula`, `sol_ante` and
@@ -324,6 +444,10 @@ variable (φ : WrappedExpr)
 #check seq!{ ⟹ { v := current(alice.age) } <[ ]> ‹φ› }
 #check seq!{ ⟹ { result := alice.age } <[ ]> ‹φ› }
 
+-- the compound write-back
+#check seq!{ ⟹ { alice.age += 1 } <[ ]> ‹φ› }
+#check seq!{ ⟹ { values[i] *= amount } <[ ]> ‹φ› }
+
 -- the pairs, and the parallel form
 #check seq!{ ⟹ { transfer(to, amount) } <[ ]> ‹φ› }
 #check seq!{ ⟹ { bump(age++) } <[ ]> ‹φ› }
@@ -339,10 +463,31 @@ variable (φ : WrappedExpr)
 #check (seq!{ ⟹ <[ ]> ‹φ› } : Frontier)
 #check ([ seq!{ inBounds(values[i]) ⟹ { v := values[i] } [ ] ‹φ› },
           seq!{ ¬inBounds(values[i]) ⟹ ⊤ } ] : Frontier)
+
+-- the ASCII turnstile, and `(φ)` in each of the three modalities
+#check seq!{ => <[ alice.account.balance = 10 ]>(φ) }
+#check seq!{ => [ v = values[i] ](φ) }
+#check seq!{ => < v = values[i] >(φ) }
+#check seq!{ inBounds(values[i]) => { v := values[i] } [ ](φ) }
+#check seq!{ => ⊤ }
+
+-- the paper's last line: no modality drawn, the chain's own supplied.  A
+-- concrete postcondition reads the same way; an obligation is unparenthesised.
+#check seq!{ => { rv@uint := 10 ‖ storage := save(alice.account.balance, 10) } (φ) }
+#check seq!{ => { storage := save(alice.age, 10) } (alice.age) }
+#check seq!{ => { storage := save(alice.age, 10) } <[ ]>(alice.age == 10) }
+#check seq!{ => { rv@uint := 10 } funded(rv@uint) }
+
+-- …and the same text read as a program, which is what settles the priority:
+-- a bare identifier is the Lean term, anything else the expression grammar.
+#check seq!{ => <[ ]>(alice.age) }
+#check seq!{ => <[ ]>(result == 10) }
+#check seq!{ => <[ ]> ‹φ› }
 end
 
 end SequentSyntax
 
-export SequentSyntax (expandFormula expandUpd expandParUpd expandAnte expandSeqGoal)
+export SequentSyntax (expandFormula expandUpd expandParUpd expandAnte expandSeqPost
+  expandSeqGoal expandLine goalMode? lineMode?)
 
 end Solidity
