@@ -93,7 +93,7 @@ inductive ConfigStep : Config -> Config -> Prop where
   (`terminalUpdate`, `Wp/TerminalUpdate.lean`).  The interpreter is
   not mentioned: that the update is what `execStmt` computes is the
   bridge theorem `terminal_step_sound`, applied in `holds_iff`.  This is
-  the state-carrying step relation of `docs/plan.md`. -/
+  the state-carrying step relation the port set out to build. -/
   | exec {sm : SolidityModality} {lhs : Stmt} {r : RuleName} {cond : Prop}
       {rest : Block} {post : WrappedExpr} {s s' : Semantics.State}
       (hrule : TerminalRuleStep sm lhs r cond)

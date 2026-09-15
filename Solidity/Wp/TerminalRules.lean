@@ -24,7 +24,7 @@ This module assembles them:
 * `TerminalRuleStep` / `terminal_step_sound` — a first step of a named
   terminal rule (the rule name is an index, so the bridge needs no
   existential) yields the update at every state: the "taclet ⇒ update"
-  statement of `docs/plan.md`.
+  statement the port set out to prove.
 * `IsTerminal` / `isTerminal_of_hasUpdate` — every rule in the table has an
   empty residual, checked against `ruleEffect` itself.
 

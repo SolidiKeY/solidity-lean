@@ -10,15 +10,10 @@ open Rules StandardExample SoliditySyntax
 
 /-! ### Alias helpers
 
-The `sstmt!`/`splace!` macros map `"sp"` → `accountTy` and `"pp"` → `personTy` via `localStorageTyFor`.
-Rules produce aliases typed to the *actual* path type.
-These abbreviations let us build correctly-typed alias terms.
-
-**New syntax available (defined in AST.lean):**
-- `sp@Account` → typed storage alias expression
-- `sp@Account.balance` → typed alias field access (dot-separated type.field)
-- `sp@PersonArray[i]` → typed alias index access
-- `Account storage sp = expr` → storage place alias declaration statement -/
+The `sstmt!`/`splace!` macros map `"sp"` → `accountTy` and `"pp"` → `personTy`
+via `localStorageTyFor`, but rules produce aliases typed to the *actual* path
+type.  These abbreviations build correctly-typed alias terms; the `name@Type`
+syntax they use is declared in `AST.lean`. -/
 
 abbrev spExpr (ty : Ty) : WrappedExpr :=
   Rules.aliasExpr Kind.storage ty Rules.storagePathAliasName
@@ -467,18 +462,14 @@ macro "steps_search!" : tactic => `(tactic|
 
 /-! ### `steps!` — the rule sequence, computed instead of written
 
-`steps [...]` makes you name every rule. For a derivation whose point is
-*that* a program reduces rather than *how*, that is noise: 86 of the 557 lines
-of `Examples/Derivations/WorkedExamples.lean` were rule names.
-
-`steps!` computes them. `UniquenessAux.candidate : Modality -> Stmt ->
-Option RuleName` (`Uniqueness.lean`) is a total computable dispatch mirroring
-every rule condition, and it reduces in the kernel -- `decide` already closes
-closed applications of it (`Counterexamples/CoverageResidue.lean`). So one
-`whnf` per step names the rule, and the step is then discharged by the *same*
-pinned route `steps [...]` uses. The emitted tactic text is identical, so this
-is not a new trust assumption and not a new cost model: only the typing of the
-name moves from the source file to elaboration.
+`UniquenessAux.candidate : Modality -> Stmt -> Option RuleName`
+(`Uniqueness.lean`) is a total computable dispatch mirroring every rule
+condition, and it reduces in the kernel -- `decide` already closes closed
+applications of it (`Counterexamples/CoverageResidue.lean`). So one `whnf` per
+step names the rule, and the step is then discharged by the *same* pinned
+route `steps [...]` uses. The emitted tactic text is identical, so this is not
+a new trust assumption and not a new cost model: only the typing of the name
+moves from the source file to elaboration.
 
 `candidate` is an **oracle, not an authority**. `find_pinned_step` still proves
 the rule applies, so the one case where `candidate` overreaches
@@ -695,16 +686,9 @@ macro "dl_steps!" : tactic =>
 
 /-! ### `sol_runs` — a whole program, once
 
-The shortest honest statement about a program is "it runs to the empty block".
-Written with the pieces above that is still three lines of scaffolding:
-
-```
-sol_derivation deepFieldWrite :
-    solbox!{ alice.account.balance = amount } ⇝* solbox!{}
-```
-
-`sol_runs` is that and nothing else -- the modality named once instead of per
-block, the empty target implied, the rules computed:
+The shortest honest statement about a program is "it runs to the empty block":
+the modality named once instead of per block, the empty target implied, the
+rules computed.
 
 ```
 sol_runs deepFieldWrite { alice.account.balance = amount }
@@ -962,28 +946,13 @@ macro "seq_block_step" : tactic => `(tactic|
 
 /-! ### The `sol_derivation` command
 
-The calculus writes a derivation as a chain of `⇝` lines and
-nothing else -- no per-line justification, because the rule is named on the
-line.  Now that every step's proof is the same three characters, the `calc`
-plus `:= by rule_step` scaffolding is pure noise, so this command writes it:
-
-```
-sol_derivation deepWrite :
-    solbox!{ alice.account.balance = 34; .. readBack }
-  ⇝[.storageFieldWriteUnfoldLeftFst]
-    solbox!{ uint rv = 34; Account storage sp = alice.account;
-             sp@Account.balance = rv; .. readBack }
-  ⇝*[.localValueDeclInitDrop, .valueDeclSkip, .localValueAssign]
-    solbox!{ Account storage sp = alice.account;
-             sp@Account.balance = rv; .. readBack }
-  ⇝[.storagePlaceAlias]
-    solbox!{ sp@Account.balance = rv; .. readBack }
-where readBack := sblock!{ result = alice.account.balance }
-```
-
-elaborating to `theorem deepWrite : <first> ⇝* <last>` with each line
-discharged by the tactic its arrow selects, and each `where` binding to an
-`abbrev` in the enclosing namespace -- the calculus's "Let ℓ = ...".
+The calculus writes a derivation as a chain of `⇝` lines and nothing else --
+no per-line justification, because the rule is named on the line.  This
+command writes the `calc` plus `:= by rule_step` scaffolding, elaborating to
+`theorem <name> : <first> ⇝* <last>` with each line discharged by the tactic
+its arrow selects, and each `where` binding to an `abbrev` in the enclosing
+namespace -- the calculus's "Let ℓ = ...".  Worked chains:
+`Examples/Derivations/`.
 
 The blocks are parsed at precedence 51, above the `⇝` infixes, so the chain
 does not collapse into a single term. -/
