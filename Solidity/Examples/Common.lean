@@ -1,5 +1,7 @@
 import Solidity.MultiStep
 import Solidity.CandidateStep
+import Solidity.Update.Merge
+import Solidity.Update.SequentSyntax
 import Solidity.Examples.SimpAttr
 
 namespace Solidity.Examples
@@ -224,6 +226,18 @@ attribute [rule_simp_set]
   SoliditySyntax.binopExpr SoliditySyntax.unopExpr SoliditySyntax.incDecExpr
   SoliditySyntax.intLitExpr SoliditySyntax.aliasExpr SoliditySyntax.aliasPlace
   SoliditySyntax.aliasKind SoliditySyntax.declTy SoliditySyntax.typedVarTy
+
+-- The sequent layer's own reduction: a successor frontier is
+-- `goalSequents ... (goals lhs h) ++ after`, and it has to come back as a
+-- literal list of `Sequent`s before the next step's `firstOpen?` can whnf
+-- through it. Indexed by head symbol, so this costs the block layer nothing.
+attribute [rule_simp_set]
+  Update.goalSequents Update.addGuard Update.pushUpd
+  Frontier.firstOpen? Sequent.isOpen
+  -- The guard of an operator family is `if op.needsGuard then … else ⊤`, and
+  -- only the sequent layer ever looks at it: `StepEffect.mainBlock` drops
+  -- guards, so the block layer never had to reduce this.
+  BinOp.needsGuard
 
 macro "rule_simp" : tactic => `(tactic| simp only [rule_simp_set])
 
@@ -496,6 +510,57 @@ private def rulesText (rs : Array Lean.Expr) : MetaM String := do
   return "steps [" ++ String.intercalate ", " parts.toList ++ "]"
 
 open Lean Elab Tactic Meta in
+/-- **The oracle**, shared by the block loop (`steps!`) and the sequent loop
+(`seq_steps!`): given the modality of a block and its head statement, the rule
+`UniquenessAux.candidate` names for it, reduced to a closed constructor
+application.
+
+Extracted so that the two loops cannot drift in *which* rule they pick or in
+what they say when there is none; the `before`/`after` arguments appear only in
+the error messages. -/
+private def candidateRule (sm head before after : Lean.Expr)
+    (acc : Array Lean.Expr) : TacticM Lean.Expr := do
+  -- `candidate` is indexed by `Modality` (box/diamond), the block by
+  -- `SolidityModality` (box/diamond/both). Under `.both` a box/diamond twin
+  -- pair applies simultaneously and `FirstStepCase` takes the box twin
+  -- (`CandidateStep.twinEffects`), so `.box` is the right oracle there too.
+  let m ←
+    if sm.isConstOf ``SolidityModality.box then pure (mkConst ``Modality.box)
+    else if sm.isConstOf ``SolidityModality.diamond then
+      pure (mkConst ``Modality.diamond)
+    else if sm.isConstOf ``SolidityModality.both then
+      pure (mkConst ``Modality.box)
+    else throwError "steps!: the block's modality is not a literal{indentExpr sm}"
+  -- Ask the oracle. Default transparency suffices (`candidate` is a plain
+  -- non-recursive `def`); the wider fallbacks cost nothing on success.
+  let app := mkAppN (mkConst ``UniquenessAux.candidate) #[m, head]
+  let mut res ← whnf app
+  unless res.isAppOfArity ``Option.some 2 || res.isAppOfArity ``Option.none 1 do
+    res ← withTransparency .all (whnf app)
+  if res.isAppOfArity ``Option.none 1 then
+    throwError "steps!: stuck after {acc.size} step(s).\n\
+      head statement:{indentExpr head}\n\
+      remaining block:{indentExpr before}\n\
+      stated target:{indentExpr after}\n\
+      `UniquenessAux.candidate` names no rule for this statement: either the \
+      program is outside the calculus (see `Coverage.lean`'s residue \
+      census) or a previous residual failed to normalise.\n{← rulesText acc}"
+  unless res.isAppOfArity ``Option.some 2 do
+    throwError "steps!: could not reduce `UniquenessAux.candidate` on\
+      {indentExpr head}\nit got stuck at{indentExpr res}"
+  -- `whnf` stops at head-normal form, so the *payload* of the `some` can
+  -- still be unreduced: the modality-twin families come back as
+  -- `UniquenessAux.pick m .fooBox .fooDiamond`, which `Rules.stepCase` then
+  -- cannot reduce through and `find_pinned_step`'s `decide` chokes on.
+  -- Normalize it to a constructor application -- these terms are a
+  -- constructor plus at most an operator, so `reduce` is cheap here.
+  let r ← Meta.reduce (← instantiateMVars res.getAppArgs[1]!)
+  if r.hasExprMVar then
+    throwError "steps!: the rule for{indentExpr head}\nis not a closed term: \
+      {r}. The block is probably not a literal."
+  return r
+
+open Lean Elab Tactic Meta in
 /-- One round of `steps!`: returns `none` when the goal is closed by
 reflexivity, `some r` when rule `r` was applied and a goal remains. -/
 private def autoStepsRound (acc : Array Lean.Expr) : TacticM (Option Lean.Expr) := do
@@ -524,44 +589,7 @@ private def autoStepsRound (acc : Array Lean.Expr) : TacticM (Option Lean.Expr) 
     unless stmts.isAppOfArity ``List.cons 3 do
       throwError "steps!: source block has no head statement{indentExpr stmts}"
     let head := stmts.getAppArgs[1]!
-    -- `candidate` is indexed by `Modality` (box/diamond), the block by
-    -- `SolidityModality` (box/diamond/both). Under `.both` a box/diamond twin
-    -- pair applies simultaneously and `FirstStepCase` takes the box twin
-    -- (`CandidateStep.twinEffects`), so `.box` is the right oracle there too.
-    let m ←
-      if sm.isConstOf ``SolidityModality.box then pure (mkConst ``Modality.box)
-      else if sm.isConstOf ``SolidityModality.diamond then
-        pure (mkConst ``Modality.diamond)
-      else if sm.isConstOf ``SolidityModality.both then
-        pure (mkConst ``Modality.box)
-      else throwError "steps!: the block's modality is not a literal{indentExpr sm}"
-    -- Ask the oracle. Default transparency suffices (`candidate` is a plain
-    -- non-recursive `def`); the wider fallbacks cost nothing on success.
-    let app := mkAppN (mkConst ``UniquenessAux.candidate) #[m, head]
-    let mut res ← whnf app
-    unless res.isAppOfArity ``Option.some 2 || res.isAppOfArity ``Option.none 1 do
-      res ← withTransparency .all (whnf app)
-    if res.isAppOfArity ``Option.none 1 then
-      throwError "steps!: stuck after {acc.size} step(s).\n\
-        head statement:{indentExpr head}\n\
-        remaining block:{indentExpr before}\n\
-        stated target:{indentExpr after}\n\
-        `UniquenessAux.candidate` names no rule for this statement: either the \
-        program is outside the calculus (see `Coverage.lean`'s residue \
-        census) or a previous residual failed to normalise.\n{← rulesText acc}"
-    unless res.isAppOfArity ``Option.some 2 do
-      throwError "steps!: could not reduce `UniquenessAux.candidate` on\
-        {indentExpr head}\nit got stuck at{indentExpr res}"
-    -- `whnf` stops at head-normal form, so the *payload* of the `some` can
-    -- still be unreduced: the modality-twin families come back as
-    -- `UniquenessAux.pick m .fooBox .fooDiamond`, which `Rules.stepCase` then
-    -- cannot reduce through and `find_pinned_step`'s `decide` chokes on.
-    -- Normalize it to a constructor application -- these terms are a
-    -- constructor plus at most an operator, so `reduce` is cheap here.
-    let r ← Meta.reduce (← instantiateMVars res.getAppArgs[1]!)
-    if r.hasExprMVar then
-      throwError "steps!: the rule for{indentExpr head}\nis not a closed term: \
-        {r}. The block is probably not a literal."
+    let r ← candidateRule sm head before after acc
     -- One pinned step, emitted as the *same* tactic text `steps [...]` uses.
     let rStx ← Term.exprToSyntax r
     try
@@ -728,6 +756,210 @@ elab_rules : command
             SolidityBlock.mk $mTerm (sblock!{ $stmts;* })
               ⇝* SolidityBlock.mk $mTerm (([] : Block)) := by steps!))
 
+/-! ### The sequent layer
+
+`Examples/Derivations/Sequents.lean` writes the calculus's own lines --
+`Γ ⟹ {U} ⟨[ p ]⟩ φ` -- so each of the block tactics above has a twin here.
+Two things are new, and both are about the update the block layer throws away.
+
+`upd_merge` closes the **merge line**: the derivation's last step is usually
+not a rule application at all but the update calculus collapsing `{u}{v}` into
+`{u ‖ {u}v}`, and its content is an equality of two `Upd`s as state functions.
+`upd_case` is what makes that provable by simp: the two spellings reach the
+same interpreter reader through *different* bindings, so a proof has to case on
+that reader once and let both sides reduce together -- which `split` cannot do,
+because it cases the two sides independently.
+
+`seq_steps!` reuses the block loop's oracle (`candidateRule`) on the head
+statement of the first open sequent, so the two loops cannot drift in which
+rule they pick. -/
+
+open Lean Elab Tactic Meta in
+/-- Case on the first interpreter reader in the goal that both spellings of an
+update have to agree on.  The list is the readers a merged update can get
+stuck at: each looks at the *incoming* state, which is what the merge moved. -/
+elab "upd_case" : tactic => do
+  let g ← getMainGoal
+  g.withContext do
+    let ty ← instantiateMVars (← g.getType)
+    let heads : List (Lean.Name × Nat) :=
+      [ (``Wp.varPath, 2), (``Wp.stackVal, 2), (``Wp.memRef, 2),
+        (``Wp.simpleVal, 2), (``Semantics.State.saveStorage, 4),
+        (``Semantics.State.findStorage, 3), (``Semantics.State.getObj, 2),
+        -- The coercions a read ends in: a storage cell holding a struct has
+        -- no `Value`, so these can fail and both spellings reach them.
+        (``Semantics.SVal.asValue, 1), (``Semantics.MVal.asValue, 1) ]
+    let some t := ty.find? (fun e =>
+        heads.any (fun (h, n) => e.isAppOfArity h n) &&
+          !e.hasLooseBVars && !e.hasExprMVar)
+      | throwError "upd_case: no shared interpreter reader left in{indentExpr ty}"
+    evalTactic (← `(tactic| cases hcase : $(← Term.exprToSyntax t)))
+
+/-- Normalize an update to the interpreter readers it is made of, without
+unfolding the readers themselves: `upd_merge_set` rewrites *through* a binding
+and only fires while `varPath`/`stackVal`/`readMem` are still folded. -/
+macro "upd_norm" : tactic => `(tactic|
+  simp +decide (disch := decide) only [upd_merge_set, rule_simp_set,
+    Sequent.upd, stackUpd, List.foldr, Upd.seq, Upd.id, Update.UpdTerm.toUpd, Update.UpdTerm.toPar,
+    Update.elemPar, Upd.Par.toUpd, Upd.Par.apply, Upd.Par.writers,
+    Upd.Elem.eval, Update.bindRhs, Update.Sym.eval, Update.readTerm,
+    Update.storageRhs, Update.heapRhs, Update.storageSave, Update.memWrite,
+    Wp.locPath, Upd.saveSt, Wp.placePath, Wp.readVal, Wp.defaultValue,
+    RuleSoundness.usesVar, SoliditySyntax.fieldFor, Field.primitive,
+    Field.identity, Field.name, List.flatMap, List.flatten, List.map,
+    List.foldl, List.append, List.append_nil, List.nil_append,
+    List.cons_append, List.append_assoc, bind, Except.bind, Except.map,
+    pure, Except.pure])
+
+/-- Close a `≡ᵘ` goal: the two lines carry the same update, spelled
+sequentially on one side and as one parallel update on the other.  Structural
+components go by `rfl`; the updates go by `upd_norm`, then one `upd_case` per
+reader the two spellings reach differently. -/
+macro "upd_merge" : tactic => `(tactic|
+  (first
+    | exact Frontier.Equiv.refl _
+    | (refine ⟨⟨rfl, rfl, ?_⟩, ?_⟩ <;>
+        first
+          | trivial
+          | exact Frontier.Equiv.refl _
+          | (funext s
+             try upd_norm
+             repeat (first | rfl | (upd_case <;> (try upd_norm)))
+             all_goals (try rfl)))))
+
+/-- Discharge a `⇝ᵘ[.rule]` step.  `firstOpen?` computes the split, so the
+first hypothesis is `rfl`; the successor is checked definitionally once
+`find_pinned_step` has determined the rule's goals. -/
+macro "seq_rule_step" : tactic => `(tactic|
+  set_option maxRecDepth 32768 in
+    (refine NamedFrontierStep.head rfl (by find_pinned_step) ?_) <;> rfl)
+
+open Lean in
+/-- Discharge a `⇝ᵘ*` line by applying the listed rules in order.  A trailing
+merge is allowed, so an elided run may end on the calculus's parallel form. -/
+macro "seq_steps " "[" rs:term,* "]" : tactic => do
+  let mut tacs : Array (TSyntax `tactic) := #[]
+  for r in rs.getElems do
+    tacs := tacs.push (← `(tactic|
+      refine FrontierMultiStep.step
+        ⟨_, NamedFrontierStep.head rfl
+          (show FirstStepCase _ _ Rules.stepCases (Rules.stepCase $r) _ _ from
+            by find_pinned_step) rfl⟩ ?_))
+    tacs := tacs.push (← `(tactic| try dsimp only [rule_simp_set]))
+  tacs := tacs.push (← `(tactic| first
+    | exact FrontierMultiStep.refl
+    | (refine FrontierMultiStep.equiv ?_ FrontierMultiStep.refl
+       upd_merge)))
+  let seq ← `(tacticSeq| $[$tacs]*)
+  `(tactic| set_option maxRecDepth 32768 in $seq)
+
+open Lean Elab Tactic Meta in
+/-- One round of `seq_steps!`.  Same three outcomes as `autoStepsRound`, and
+the same oracle; what differs is where the head statement is found (inside the
+first *open* sequent) and that the target may be reached by a merge rather than
+by reflexivity. -/
+private def autoSeqStepsRound (acc : Array Lean.Expr) : TacticM (Option Lean.Expr) := do
+  let g ← getMainGoal
+  g.withContext do
+    let ty ← whnf (← g.getType)
+    unless ty.isAppOfArity ``FrontierMultiStep 2 do
+      throwError "seq_steps!: expected a `⇝ᵘ*` goal, got{indentExpr ty}"
+    let before := ty.appFn!.appArg!
+    let after := ty.appArg!
+    if ← isDefEq before after then
+      g.assign (← mkAppOptM ``FrontierMultiStep.refl #[some before])
+      replaceMainGoal []
+      return none
+    let src ← whnf before
+    let opened ← whnf (mkAppN (mkConst ``Frontier.firstOpen?) #[src])
+    if opened.isAppOfArity ``Option.none 1 then
+      -- Nothing left to execute, and the target is not this frontier: then it
+      -- differs only in how the accumulated update is spelled, which is the
+      -- calculus's merge line and ends the chain.  Tried here rather than
+      -- every round because it is the expensive tactic in this file.
+      let st ← saveState
+      let merged ←
+        try
+          evalTactic (← `(tactic|
+            refine FrontierMultiStep.equiv ?_ FrontierMultiStep.refl))
+          evalTactic (← `(tactic| upd_merge))
+          pure (← getGoals).isEmpty
+        catch _ => pure false
+      if merged then return none
+      st.restore
+      throwError "seq_steps!: no open sequent left after {acc.size} step(s), \
+        and the stated target{indentExpr after}\nis not this frontier up to \
+        the spelling of its update (`upd_merge` did not close it). Write the \
+        merge as its own `⇝≡` line, or supply it with `⇝≡[h]`.\n\
+        {← rulesText acc}"
+    unless opened.isAppOfArity ``Option.some 2 do
+      throwError "seq_steps!: cannot split the frontier{indentExpr src}\n\
+        `Frontier.firstOpen?` got stuck at{indentExpr opened}"
+    -- `some (before, q, after)`: the open sequent is the second component.
+    let triple ← whnf opened.getAppArgs[1]!
+    let pair ← whnf triple.getAppArgs[3]!
+    let q ← whnf pair.getAppArgs[2]!
+    unless q.isAppOfArity ``Sequent.mk 3 do
+      throwError "seq_steps!: the open sequent is not a literal{indentExpr q}"
+    let goal ← whnf q.getAppArgs[2]!
+    unless goal.isAppOfArity ``SeqGoal.prog 2 do
+      throwError "seq_steps!: the open sequent has no program{indentExpr goal}"
+    let blk ← whnf goal.getAppArgs[0]!
+    unless blk.isAppOfArity ``SolidityBlock.mk 2 do
+      throwError "seq_steps!: cannot destructure the block{indentExpr blk}"
+    let sm ← whnf blk.getAppArgs[0]!
+    let stmts ← whnf blk.getAppArgs[1]!
+    unless stmts.isAppOfArity ``List.cons 3 do
+      throwError "seq_steps!: the open sequent's block has no head statement\
+        {indentExpr stmts}"
+    let head := stmts.getAppArgs[1]!
+    let r ← candidateRule sm head before after acc
+    let rStx ← Term.exprToSyntax r
+    try
+      evalTactic (← `(tactic|
+        refine FrontierMultiStep.step
+          ⟨_, NamedFrontierStep.head rfl
+            (show FirstStepCase _ _ Rules.stepCases (Rules.stepCase $rStx) _ _ from
+              by find_pinned_step) rfl⟩ ?_))
+    catch e =>
+      throwError "seq_steps!: step {acc.size + 1}: `{← ruleNameText r}` is the \
+        rule `UniquenessAux.candidate` names for{indentExpr head}\nbut it does \
+        not apply; pin the step with `⇝ᵘ[.rule]` / `seq_steps [...]`.\n\
+        {← rulesText acc}\nunderlying error: {e.toMessageData}"
+    evalTactic (← `(tactic| try dsimp only [rule_simp_set]))
+    return some r
+
+open Lean Elab Tactic Meta in
+private partial def autoSeqStepsLoop (fuel : Nat) (acc : Array Lean.Expr) :
+    TacticM (Array Lean.Expr) := do
+  match fuel with
+  | 0 =>
+      throwError "seq_steps!: gave up after {acc.size} steps without reaching \
+        the stated target.\n{← rulesText acc}"
+  | fuel + 1 => do
+      let before? := (← getGoals).head?
+      match ← autoSeqStepsRound acc with
+      | none => return acc
+      | some r =>
+          trace[solidity.steps] "step {acc.size + 1}: {← ruleNameText r}"
+          if let (some g₀, some g₁) := (before?, (← getGoals).head?) then
+            if ← isDefEq (← g₀.getType) (← g₁.getType) then
+              throwError "seq_steps!: rule `{← ruleNameText r}` left the \
+                frontier unchanged.\n{← rulesText (acc.push r)}"
+          autoSeqStepsLoop fuel (acc.push r)
+
+open Lean Elab Tactic Meta in
+/-- Run a `⇝ᵘ*` goal to its stated target, computing the rule at each step. -/
+elab "seq_steps!" fuelStx:(num)? : tactic =>
+  withOptions (fun o => maxRecDepth.set o 32768) do
+    let fuel := (fuelStx.map (·.getNat)).getD 128
+    let used ← autoSeqStepsLoop fuel #[]
+    trace[solidity.steps] "{← rulesText used}"
+
+/-- One step of a `⇝ᵘ*` line with the rule inferred. -/
+macro "seq_block_step" : tactic => `(tactic|
+  first | exact FrontierMultiStep.refl | seq_steps! 1)
+
 /-! ### The `sol_derivation` command
 
 The calculus writes a derivation as a chain of `⇝` lines and
@@ -777,12 +1009,39 @@ syntax " ~>[" term "] " : sol_arrow
 syntax " ~>*[" term,* "] " : sol_arrow
 /-- ASCII twin of `⇝*`. -/
 syntax " ~>* " : sol_arrow
+/-! The merge arrow.  Not a step of the rule set: the calculus's last line is
+usually the update calculus collapsing `{u}{v}` into `{u ‖ {u}v}`, and writing
+it with `⇝` would claim a taclet fired.  `⇝≡` is that line, discharged by
+`upd_merge`; `⇝≡[h]` takes the update equality by hand, for a merge the
+automation cannot close. -/
+/-- A merge line: same derivation line, the update respelled. -/
+syntax " ⇝≡ " : sol_arrow
+/-- A merge line with the update equality supplied. -/
+syntax " ⇝≡[" term "] " : sol_arrow
+/-- ASCII twin of `⇝≡`. -/
+syntax " ~>= " : sol_arrow
 
 declare_syntax_cat sol_where_bind
 syntax ident " := " term : sol_where_bind
 
 syntax (docComment)? "sol_derivation " ident (" let " sol_where_bind,+)?
   " : " term:51 (sol_arrow term:51)+ (" where " sol_where_bind,+)? : command
+
+/-- Which layer is this derivation written at?
+
+Sniffed from the syntax, not from the elaborated type, for the reason
+`isJudgmentSyntax` gives below: a first line typically mentions a section
+`variable (φ : WrappedExpr)`, which a command-level `liftTermElabM` cannot
+see.  `seq!` and `sol!` are the only notations that build a `Sequent` and a
+`SolidityJudgment` respectively, so their atoms are sound tests. -/
+inductive DerivLayer where
+  | block | judgment | sequent
+  deriving DecidableEq
+
+private partial def hasAtom (a : String) : Lean.Syntax → Bool
+  | .atom _ v => v == a
+  | .node _ _ args => args.any (hasAtom a)
+  | _ => false
 
 /-- Does this term denote a *judgment* rather than a bare block?
 
@@ -820,7 +1079,11 @@ elab_rules : command
       -- Block layer or judgment layer?  The source is the same either way --
       -- one arrow glyph, as the calculus draws it -- and only the tactics and the
       -- transitivity lemma differ.
-      let judgment := isJudgmentSyntax first
+      let layer : DerivLayer :=
+        if hasAtom "seq!" first then .sequent
+        else if isJudgmentSyntax first then .judgment
+        else .block
+      let judgment := layer == .judgment
       -- One `⇝*`/`⇝ᵈ*` proof per line, then fold them with transitivity.  Each
       -- line is `show`-ascribed, so a failure points at that line's block.
       let mut prev := first
@@ -829,21 +1092,46 @@ elab_rules : command
         let proof ←
           match arrow with
           | `(sol_arrow| ⇝) | `(sol_arrow| ~>) =>
-              if judgment then `(show $prev ⇝ᵈ* $target from by dl_block_step)
-              else `(show $prev ⇝* $target from by block_step)
+              match layer with
+              | .sequent => `(show $prev ⇝ᵘ* $target from by seq_block_step)
+              | .judgment => `(show $prev ⇝ᵈ* $target from by dl_block_step)
+              | .block => `(show $prev ⇝* $target from by block_step)
           | `(sol_arrow| ⇝[$rule:term]) | `(sol_arrow| ~>[$rule:term]) =>
-              if judgment then
-                `(NamedJudgmentStep.toMultiStep
-                    (show $prev ⇝ᵈ[$rule] $target from by dl_rule_step))
-              else
-                `(NamedBlockStep.toReflMultiStep
-                    (show $prev ⇝[$rule] $target from by rule_step))
+              match layer with
+              | .sequent =>
+                  `(NamedFrontierStep.toMultiStep
+                      (show $prev ⇝ᵘ[$rule] $target from by seq_rule_step))
+              | .judgment =>
+                  `(NamedJudgmentStep.toMultiStep
+                      (show $prev ⇝ᵈ[$rule] $target from by dl_rule_step))
+              | .block =>
+                  `(NamedBlockStep.toReflMultiStep
+                      (show $prev ⇝[$rule] $target from by rule_step))
           | `(sol_arrow| ⇝*[$rules:term,*]) | `(sol_arrow| ~>*[$rules:term,*]) =>
-              if judgment then `(show $prev ⇝ᵈ* $target from by dl_steps [$rules,*])
-              else `(show $prev ⇝* $target from by steps [$rules,*])
+              match layer with
+              | .sequent => `(show $prev ⇝ᵘ* $target from by seq_steps [$rules,*])
+              | .judgment => `(show $prev ⇝ᵈ* $target from by dl_steps [$rules,*])
+              | .block => `(show $prev ⇝* $target from by steps [$rules,*])
           | `(sol_arrow| ⇝*) | `(sol_arrow| ~>*) =>
-              if judgment then `(show $prev ⇝ᵈ* $target from by dl_steps!)
-              else `(show $prev ⇝* $target from by steps!)
+              match layer with
+              | .sequent => `(show $prev ⇝ᵘ* $target from by seq_steps!)
+              | .judgment => `(show $prev ⇝ᵈ* $target from by dl_steps!)
+              | .block => `(show $prev ⇝* $target from by steps!)
+          | `(sol_arrow| ⇝≡) | `(sol_arrow| ~>=) =>
+              if layer == .sequent then
+                `(show $prev ⇝ᵘ* $target from
+                    FrontierMultiStep.equiv (by upd_merge) FrontierMultiStep.refl)
+              else throwErrorAt arrow
+                "`⇝≡` is a merge line: it needs a `seq!` derivation, where the \
+                 update is written"
+          | `(sol_arrow| ⇝≡[$h:term]) =>
+              if layer == .sequent then
+                `(show $prev ⇝ᵘ* $target from
+                    FrontierMultiStep.equiv ⟨⟨rfl, rfl, $h⟩, trivial⟩
+                      FrontierMultiStep.refl)
+              else throwErrorAt arrow
+                "`⇝≡` is a merge line: it needs a `seq!` derivation, where the \
+                 update is written"
           | _ => throwErrorAt arrow "unknown `sol_derivation` arrow"
         proofs := proofs.push proof
         prev := target
@@ -851,9 +1139,14 @@ elab_rules : command
         "`sol_derivation` needs at least one step"
       let mut folded := proof
       for p in proofs.pop.reverse do
-        folded ← if judgment then `(JudgmentMultiStep.trans $p $folded)
-                 else `(BlockReflMultiStep.trans $p $folded)
-      let stmt ← if judgment then `($first ⇝ᵈ* $prev) else `($first ⇝* $prev)
+        folded ← match layer with
+          | .sequent => `(FrontierMultiStep.trans $p $folded)
+          | .judgment => `(JudgmentMultiStep.trans $p $folded)
+          | .block => `(BlockReflMultiStep.trans $p $folded)
+      let stmt ← match layer with
+        | .sequent => `($first ⇝ᵘ* $prev)
+        | .judgment => `($first ⇝ᵈ* $prev)
+        | .block => `($first ⇝* $prev)
       elabCommand (←
         `(command| $[$doc:docComment]? theorem $name : $stmt := $folded))
 

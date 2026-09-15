@@ -54,7 +54,10 @@ The algebra, and nothing about any particular rule:
   judgment back to `SolidityJudgment.Holds`.
 
 The per-rule bridges (`Par.toUpd [...] = <family> args`) live in
-`Update/Bridges.lean`, and the step relation in `Update/Step.lean`.
+`Update/Bridges.lean`.  The *derivation* layer these updates are written in is
+`Update/Step.lean` -- sequents, frontiers and the rule-indexed step relation --
+with its surface notation in `Update/SequentSyntax.lean` (`seq!`) and the
+reader lemmas that make a merge line provable in `Update/Merge.lean`.
 -/
 
 namespace Solidity

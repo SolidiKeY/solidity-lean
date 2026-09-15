@@ -86,14 +86,24 @@ def simpleVal (s : State) : WrappedExpr -> Res Value
 def simpleInt (s : State) (e : WrappedExpr) : Res Int :=
   simpleVal s e >>= Value.asInt
 
-/-- The path of a simple storage place `p`, `p.f`, `p[se]` (env-first
-root, as `resolveS`). -/
+/-- The path of a storage place: the root through `varPath` (env-first, as
+`resolveS`), then one segment per `.f` / `[se]` step.
+
+**Recursive in the base**, so a *deep* path (`alice.account.balance`) has a
+value and not just the one-level shapes a terminal rule's guard admits.  On
+those shapes -- `simplePathB`, `Wp/Terminal/Vocab.lean` -- the unfolding is
+unchanged, which is why every `_update` and bridge theorem keeps its
+statement.  What the recursion buys is the *merged* update of a derivation:
+the calculus writes `{storage := save(storage, alice·account·balance, 10)}`
+after composing `{sp := alice·account}` into the write, and a reader stuck on
+that path would make the merged line the always-stuck update rather than the
+composite it claims to be (`Update/Step.lean`). -/
 def placePath (s : State) : WrappedExpr -> Res (Name × List Seg)
   | WrappedExpr.var _ _ fld => varPath s fld
-  | WrappedExpr.field _ _ (WrappedExpr.var _ _ fld) f =>
-      varPath s fld >>= fun p => .ok (p.1, p.2 ++ [Seg.field f.name])
-  | WrappedExpr.index _ _ (WrappedExpr.var _ _ fld) ix =>
-      varPath s fld >>= fun p =>
+  | WrappedExpr.field _ _ base f =>
+      placePath s base >>= fun p => .ok (p.1, p.2 ++ [Seg.field f.name])
+  | WrappedExpr.index _ _ base ix =>
+      placePath s base >>= fun p =>
         simpleInt s ix >>= fun i => .ok (p.1, p.2 ++ [Seg.at i])
   | _ => .error .stuck
 
