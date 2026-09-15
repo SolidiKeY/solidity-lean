@@ -28,6 +28,9 @@ import Solidity.Termination
 import Solidity.Semantics
 import Solidity.EvalBattery
 import Solidity.SemanticsProperties
+import Solidity.Theory.Storage
+import Solidity.Theory.Memory
+import Solidity.Theory.Denote
 import Solidity.StuckShape
 import Solidity.Counterexamples.EvaluationOrder
 import Solidity.Counterexamples.ErrorOrder
@@ -54,6 +57,7 @@ import Solidity.Wp.TerminalRules
 import Solidity.Update
 import Solidity.Update.Bridges
 import Solidity.Update.Eval
+import Solidity.Update.Theory
 import Solidity.Update.Wp
 import Solidity.Update.TacletTable
 import Solidity.Update.Examples

@@ -490,3 +490,99 @@ machinery, which is definitional function composition in Lean.
 | `sequentialToParallel1-3`, `applyOnParallel`, `applyOnElementary`, `applyOnSkip`, `applySkip1-3`, `parallelWithSkip1-2` | — | arch | the update monoid normal form. The monoid laws are `Upd.seq_assoc`/`Upd.id_seq`/`Upd.seq_id` (`Update.lean`), definitional; the sequential-to-parallel step proper is `Upd.Par.seq_single`, `{u}{x := t} = {u ‖ x := {u}t}`, and a derivation writes it as a `⇝≡` line whose obligation is `Frontier.Equiv` (`Update/Step.lean`, discharged by `upd_merge` over `Update/Merge.lean`'s reader lemmas) |
 | `simplifyIfThenElseUpdate1-4`, `commuteSimpleUpdates`, `elimSelfUpdate*` | — | arch | commented-out dead code in the KeY source; `commuteSimpleUpdates` is additionally false as *State equality* on the assoc-list representation (only true pointwise) |
 
+
+## The data-structure theories
+
+The rows above are `solidityProgramRules.key`, the *program* calculus. Its
+updates are written over symbols — `find`, `save`, `selectSt`, `read`,
+`write`, `addM` — that solkey declares in `structHeader.key`/`memoryHeader.key`
+and defines nowhere: their whole meaning is the taclet sets of
+`structRules.key`, `memoryRules.key` and `structMemoryRules.key`.
+`Solidity/Theory/` is that meaning, as a term algebra with one theorem per
+taclet, and `Solidity/Update/Theory.lean` proves a rule's stated update
+denotes the interpreter's (`storageRhs_eq_theory`, `heapRhs_eq_theory`).
+
+Paths are `Semantics.Seg` on both sides: a member constant is `Seg.field n`,
+`at(i)` is `Seg.at i`, `size` is `Seg.field "length"`, `consr(p, a)` is
+`p ++ [a]`. `listRules.key` therefore needs no module — it is `List`.
+
+### `structRules.key` → `Theory/Storage.lean` (`StValue`)
+
+| KeY taclet | Lean theorem | Status |
+| --- | --- | --- |
+| `defaultValueStruct` | `defaultValueStruct` | done |
+| `selectOnStore` | `selectOnStore` | done |
+| `selectOnEmptyStorage` | `selectOnEmptyStorage` | done |
+| `saveOnEmptyStorageEmpty` | `saveOnEmptyStorageEmpty` | done |
+| `saveOnEmptyStorage` | `saveOnEmptyStorage` | done |
+| `saveOnStoreEmpty` | `saveOnStoreEmpty` | done |
+| `saveOnStoreCons` | `saveOnStoreCons` | done (KeY's inner `isEmpty(flds)` split is `saveOnEmpty`, so the definition drops it and the theorem restores it) |
+| `findDefinitionEmpty` | `findDefinitionEmpty` | done |
+| `findDefinitionCons` | `findDefinitionCons` | done |
+| `saveOnEmpty` | `saveOnEmpty` | done |
+| `selectOnSaveEmpty` | `selectOnSaveEmpty` | done, **restated**: upstream's `\replacewith` mentions an `flds` its `\find` does not bind (`docs/solkey-feedback.md`) |
+| `selectOnSaveCons` | `selectOnSaveCons` | done, and **unconditional** — the fundamentals repository's analogue (`selectSave`) needs `isStruct`; total definitions do not |
+| `delValueStruct` | `delValueStruct` | done |
+| `delValueDefault` | `delValueDefault` | done |
+| `selectStDelNodeMap` | `selectStDelNodeMap` | done |
+| `selectStDelNodeRef` | `selectSt_delValue` | done (one theorem covers `Ref` and `Default`: off a mapping and an array, delete commutes with every selector) |
+| `selectStDelNodeIndexStruct` | `selectStDelNodeIndexStruct` | done |
+| `selectStDelNodeDefault` | `selectSt_delValue` | done |
+| `delAtEmpty` | `delAtEmpty` | done |
+| `selectOnDelAtCons` | — | **arch**: `delAt` is eager here (`save st p (delValue (find st p))`), so there is no marker for a read to push through; `Theory.denote_delAt` is the statement that this is `Semantics.storageDeleteUpd` |
+| `findStValueCast`, `delValueStValueCast` | `selectSt_asStruct`, `save_asStruct`, `find_asStruct` | done as *invisibility* of the cast rather than as its deletion |
+| `sizeNotNegative` | — | **arch**: an `\add` of a reachability fact, not a rewrite; its Lean form is `WellFormedConsumers` row C1 (`length_read_nonneg`) |
+
+**Beyond the taclets.** solkey has no `find(save(…), …)` rule at all: a read of
+a write is reached by `findDefinitionCons` then `selectOnSaveCons`, one
+selector at a time. `Theory/Storage.lean` packages the four cases —
+`find_save_extends` (at or below the write), `find_save_same`,
+`find_save_prefix` (above it) and `find_save_frame` (off it, over
+`diverges`). `Semantics` had only the first, and only in the form that
+presupposes the write succeeded (`SemanticsProperties.SVal.find_save_same`).
+
+### `memoryRules.key` → `Theory/Memory.lean`
+
+Identities here are the interpreter's resolved `Nat`, not KeY's path identity
+`idC(idp, flds)`; the five rows whose job is to walk a path to an object
+therefore have no counterpart. See the module docstring.
+
+| KeY taclet | Lean theorem | Status |
+| --- | --- | --- |
+| `readOnWrite` | `readOnWrite` | done |
+| `readFromEmptyMemory` | `readFromEmptyMemory` | done |
+| `readOnAddM` | `readOnAddM` | done (the `idp1 = idp2` branch is the pre-state leaf: `allocDefault` materializes the object, so a read of a fresh one is already its default) |
+| `newFromEmptyMemory` | `newFromEmptyMemory` | done |
+| `newFromWrite` | `newFromWrite` | done |
+| `newFromAdd` | `newFromAdd` | done, **weakened**: the identity `addM` mints is `nextId`, read at denotation time rather than carried in the term, so the recursion is unconditional |
+| `defaultValueInt`, `defaultValueBool`, `defaultDef`, `defValResolve` | `Memory.asPrim` / `StValue.asInt` / `StValue.asBool` and `defaultDefInt` | done as casts |
+| `defaultDefIdentity`, `idCCDef`, `readREmpty`, `readRCons` | — | **arch**: resolved identities (above) |
+
+### `structMemoryRules.key` → not modelled
+
+`copySt`/`copyMem` and their three taclets (`findOnCopy`,
+`readFromCopyToStorage`, `readFromCopyToStorageIdentity`) have no Lean
+counterpart yet. The interpreter's `copyStToM`/`copyMem` do the work
+(`Semantics.lean`), and the cross-domain rules are bridged at the *update*
+level or not at all (`Update/TacletTable.openBridges`). The fundamentals
+repository's `readSkip`/`readFind`/`readGetId` are the shape to port.
+
+### Deviations, collected
+
+Two places where a term carries something KeY's does not, both because KeY is
+lazy and the interpreter is eager:
+
+* `Theory.Memory.addM` carries the allocated `RefTy`. KeY's `readOnAddM`
+  resolves a never-written slot of a fresh object to `default<[α]>` at the
+  reader's sort; `Semantics.allocDefault` materializes the object at
+  allocation, so the term has to know its type to denote.
+* `Theory.StValue.dflt` stands for the sort-free default
+  (`memoryRules.key`'s own `defVal`) and is resolved by a cast at the point of
+  use, rather than by the sort the read asks for.
+
+And one where the *update* is spelled differently: KeY writes `arr.push(se)`
+as two saves in one parallel update, the new slot `at(n)` and the new length
+`size`, both reading the pre-state. The slot index is the array's old length,
+which `SVal.save` reverts on, so `Update/Theory.lean` writes the extended
+array at the array's own path instead — the shape `Rules.StorageUpd.push` and
+`Update.pushStorage` already use. Same for `pop`.
