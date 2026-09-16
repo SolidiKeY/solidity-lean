@@ -36,9 +36,9 @@ ones about `newFromAdd` and `defaultDefIdentity`; none is itself a solkey PO,
 so none is counted.)
 
 `storage/copyKeepsMapping.key` is the same kind of problem and is proved the
-same way (`Theory/Storage.lean`'s copy family); solkey added it in
-`c80a54494c`, with the caveat `docs/solkey-feedback.md` records about two of
-its four conjuncts.
+same way (`Theory/Storage.lean`'s leaf of a write); solkey added it in
+`c80a54494c`, and the `copyAt`→`save` fold restated its last two conjuncts
+against the pre-state (`docs/solkey-feedback.md`).
 
 **What this number does *not* say.** `sol_wp` is symbolic execution *by the
 interpreter* (`Wp/Verifier.lean`); it never reads `Rules.lean`. So the table

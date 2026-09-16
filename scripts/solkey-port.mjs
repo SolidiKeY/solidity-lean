@@ -311,7 +311,7 @@ const KEY_SUITES = [
     ported: { copyKeepsMapping: "copyKeepsMapping" },
     reason: () =>
       "storage-theory problem with no Lean statement yet — see " +
-      "`Theory/Storage.lean`'s copy family",
+      "`Theory/Storage.lean`'s leaf of a write",
   },
 ];
 
