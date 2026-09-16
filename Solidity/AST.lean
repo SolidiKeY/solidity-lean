@@ -1061,6 +1061,9 @@ def fieldTy (name : Name) : Ty :=
   | "value" => Ty.uint
   | "friends" => Ty.ref (RefTy.array StandardExample.personTy)
   | "stash" => Ty.ref (RefTy.mapping Ty.uint Ty.uint)
+  -- `Ledger.balances`, the mapping member the calculus's struct-delete
+  -- example turns on: `delete` resets the struct and keeps the mapping.
+  | "balances" => Ty.ref (RefTy.mapping Ty.uint Ty.uint)
   | "length" => Ty.uint
   -- Reference-typed members of the ported solkey contracts' structs. The
   -- `uint` members (`a`, `b`, `c`, `x`, `y`, `z`, `n`, `nonce`, `value`)
