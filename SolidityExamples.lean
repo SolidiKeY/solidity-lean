@@ -2,7 +2,7 @@
 -- worked example of the calculus, written the way the calculus writes it.
 --
 -- Deliberately not imported by `Solidity.lean`, for the same
--- reason `SoliditySpec` and `SolidityCorpus` are not: it is ~45
+-- reason `SolidityCorpus` is not: it is ~45
 -- derivations over ~240 rule applications, each one a pinned
 -- `find_pinned_step` paying its own `simp`+`decide`, which costs about 30
 -- minutes of CPU (1m25s wall on 32 cores). The whole default build is about

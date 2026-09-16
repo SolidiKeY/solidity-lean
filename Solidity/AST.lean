@@ -1299,7 +1299,7 @@ syntax "(" sol_expr " != " sol_expr ")" : sol_expr
 -- Unary operators. `--` cannot be a token (it opens a Lean comment), so
 -- decrements are spelled `predec(e)` / `postdec(e)`, standing for `--e`
 -- and `e--`; without them the whole `{pre,post}decrement` taclet family
--- is unwritable in surface syntax and so unreachable from `.solj`.
+-- is unwritable in surface syntax and so unreachable from a port.
 syntax:80 "!" sol_expr:80 : sol_expr
 syntax:80 "-" sol_expr:80 : sol_expr
 syntax:80 "++" sol_expr:80 : sol_expr

@@ -26,18 +26,6 @@ weakLeanArgs = ["--tstack=131072"]
 name = "SolidityCalculus"
 weakLeanArgs = ["--tstack=131072"]
 
-# The SolSpec specification layer (`Solidity/Spec/`): the assertion
-# vocabulary, the `sol_spec` tactic, and the worked obligations of
-# `docs/spec-language.md`. Its own target, and deliberately not imported
-# by Solidity.lean: the examples are symbolic executions with a large simp
-# normalization each, so folding them into the default build would make
-# every ordinary `./run-lean.sh` pay for them. Built by
-# scripts/check-spec.sh, and by the VS Code extension before it elaborates
-# generated obligations.
-[[lean_lib]]
-name = "SoliditySpec"
-weakLeanArgs = ["--tstack=131072"]
-
 # The worked derivations, one `sol_derivation` per worked example of the
 # calculus (`Solidity/Examples/Derivations/Paper.lean`). Its own
 # target, and deliberately not imported by Solidity.lean: ~240 pinned rule

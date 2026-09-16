@@ -43,7 +43,7 @@ read them by path.
 Other prose: `docs/lean-key-rule-map.md` is the authority for the name-by-name
 map to solkey's taclets (do not restate it in module docstrings);
 `docs/solc-alignment.md` for where the interpreter follows solc over KeY;
-`docs/compiler-verification.md`; `docs/spec-language.md`.
+`docs/compiler-verification.md`.
 
 `docs/solkey-parity.md` is what the *interpreter* proves of solkey's suites,
 `docs/calculus-parity.md` what the *rule table* does. `sol_wp` never reads
@@ -59,8 +59,6 @@ import changes and final confirmation. The `lean-verify` skill in
 | Command | Cost | What it covers |
 |---|---|---|
 | `./run-lean.sh` | ~24 min CPU | `lake build` (default targets) then the solkey sort check |
-| `./scripts/check-spec.sh --tactic` | short | `Spec/Assertion` + `Spec/Tactic` only |
-| `./scripts/check-spec.sh` | medium | the whole `SoliditySpec` target |
 | `./scripts/check-examples.sh` | ~30 min CPU | `SolidityExamples` (`Examples/Derivations/Paper.lean`) |
 | `./scripts/check-solkey-parity.sh` | medium | the ported corpus against `tests/solkey/expected.tsv` |
 | `./scripts/check-calculus-parity.sh` | long | the same corpus proved from `Rules.lean` alone, against `tests/solkey/expected-calculus.tsv` |

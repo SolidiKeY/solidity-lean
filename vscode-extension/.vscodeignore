@@ -1,9 +1,0 @@
-.vscode/**
-src/**
-node_modules/**
-out/**/*.map
-tsconfig.json
-package-lock.json
-examples/expected.txt
-out/test/**
-**/*.vsix

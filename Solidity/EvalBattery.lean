@@ -4,22 +4,20 @@ import Solidity.Semantics
 # The interpreter-evaluation battery
 
 `sol_eval_battery` and `sol_exec_eval`, the two tactics that normalize a
-concrete interpreter term. They live here rather than beside their first
-user (`Wp/Verifier.lean`) because they depend on nothing but the
-interpreter: `Semantics`, the `SoliditySyntax` smart constructors, and
-the type-level helpers those compute with.
+concrete interpreter term. They depend on nothing but the interpreter:
+`Semantics`, the `SoliditySyntax` smart constructors, and the type-level
+helpers those compute with — no wp layer, no rule table.
 
 Both take an optional `location`, so the *same* list serves the goal
 (`sol_eval_battery`) and the hypotheses (`sol_eval_battery at *`). A
-`solspec!` precondition arrives as a stalled `evalValue` in the context,
-and reducing it there is the difference between `omega` seeing an
-arithmetic fact and seeing an opaque `match`; writing the list twice to
-get that would be the obvious way and the wrong one.
+hypothesis can carry a stalled `evalValue`, and reducing it there is the
+difference between `omega` seeing an arithmetic fact and seeing an opaque
+`match`; writing the list twice to get that would be the obvious way and
+the wrong one.
 
-That matters for what imports them. `Wp/Verifier.lean` reaches them
-through the wp algebra; `Spec/Tactic.lean` reaches them without it, so
-the whole SolSpec layer — and therefore the build the VS Code extension
-runs before every verification — never elaborates the wp layer at all.
+Their only reader is now `Wp/Verifier.lean`, which reaches them through
+the wp algebra. The separate module survives because the dependency is
+genuinely one-directional, not because a second client needs it.
 -/
 
 namespace Solidity

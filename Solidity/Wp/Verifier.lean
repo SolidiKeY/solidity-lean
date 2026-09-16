@@ -101,9 +101,8 @@ end Dia
 /-! ## The evaluation battery
 
 `sol_eval_battery` and `sol_exec_eval` live in
-`Solidity/EvalBattery.lean`: they depend on the
-interpreter alone, which is what lets `Spec/Tactic.lean` reuse them
-without importing the wp layer. -/
+`Solidity/EvalBattery.lean`: they depend on the interpreter alone, with no
+reference to the wp algebra below. -/
 
 /-- Peel one statement off a wp-over-block goal via the total `cons_eval`
 lemmas: the modality is dispatched by unification (`Dia.wpD` and
