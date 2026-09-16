@@ -18,6 +18,17 @@ and `4599dd6d91` add, delete and re-shape taclets in
 pin below still reads `e67a0d7c48` and the taclet counts are still that
 commit's.
 
+**The example corpus and the rule table are now pinned to different
+commits, deliberately.** `scripts/solkey-port.mjs` was re-run against
+`c80a54494c` on 2026-09-16, so `Solidity/Examples/Solkey/`,
+`Solidity/Examples/Derivations/Solkey/` and `tests/solkey/` are that commit's
+278 `TestSuite.sol` functions; this file and `TacletAnnotations.lean` are
+still `e67a0d7c48`'s 238 taclets. That is why `lake exe solkeycheck` still
+reports its 78 rows and why the 92 taclets added upstream since the pin have
+no rows below: re-syncing the table is its own change (`AGENTS.md`), and a
+corpus that lags the examples it is meant to check is worth less than one
+that leads the table.
+
 Re-pinned to solkey `e67a0d7c48` on 2026-09-02: that commit touches only
 `structRules.key` (the delete-default rules `delValueDefault` /
 `selectStDelNodeDefault` are now bounded `alphaPrim \extends Prim`, and a

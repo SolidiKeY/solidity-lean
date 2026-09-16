@@ -173,6 +173,7 @@ def structDef : Name -> List (Name × Ty)
   | "LedgerUse" => [("ledger", Ty.ref (RefTy.struct "Ledger"))]
   | "TokenBucket" =>
       [("tokens", Ty.ref (RefTy.array (Ty.ref (RefTy.struct "Token"))))]
+  | "Toggle" => [("on", Ty.bool), ("n", Ty.uint)]
   -- solc/SolcArrays.sol, SolcControlFlow.sol, SolcStructs.sol (agree).
   | "Pair" => [("a", Ty.uint), ("b", Ty.uint)]
   -- solc/SolcMappings.sol.
@@ -225,6 +226,7 @@ def structRank : Name -> Nat
   | "Ledger" => 1
   | "LedgerUse" => 2
   | "TokenBucket" => 2
+  | "Toggle" => 1
   | "Pair" => 1
   | "S" => 1
   | "Sub" => 1
@@ -1469,7 +1471,18 @@ def State.testSuiteStore : State :=
         ("ledger", defaultForRef (RefTy.struct "Ledger")),
         ("tokens", SVal.array []),
         ("bucket", defaultForRef (RefTy.struct "TokenBucket")),
-        ("ledgerUses", SVal.array []) ] }
+        ("ledgerUses", SVal.array []),
+        -- Added by the re-port at solkey `c80a54494c`: the bool tier, the
+        -- `Toggle` struct, the standalone `tok`, and the array/basket
+        -- state the copy group writes through.
+        ("flag", SVal.bool false),
+        ("flag2", SVal.bool false),
+        ("boolFlags", SVal.array []),
+        ("toggle", defaultForRef (RefTy.struct "Toggle")),
+        ("tok", defaultForRef (RefTy.struct "Token")),
+        ("buckets", SVal.array []),
+        ("basketA", defaultForRef (RefTy.struct "Basket")),
+        ("basketB", defaultForRef (RefTy.struct "Basket")) ] }
 
 /-- `solc/SolcExpressions.sol`. `v` ports to `counter`: `v` is a local
 `uint` in twelve functions across the suites. -/

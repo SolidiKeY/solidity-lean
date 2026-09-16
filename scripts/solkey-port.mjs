@@ -11,11 +11,24 @@
  * `sol!{ < body > (true) }`: a failing `assert` halts with `.revert`,
  * which refutes a diamond exactly as it leaves KeY's diamond open.
  *
- * Two outputs per contract, from one pass so they cannot drift:
+ * Three outputs per contract, from one pass so they cannot drift:
  *   - `tests/solkey/<Contract>.solj`  (verified by the SolLoom CLI)
  *   - `Solidity/Examples/Solkey/<Contract>.lean`
  *     (one `theorem … := by sol_wp`, kernel-checked in `lake build`)
- * plus a row per function in `tests/solkey/expected.tsv`.
+ *   - `Solidity/Examples/Derivations/Solkey/<Contract>/PartNN.lean`, for
+ *     the contracts in `CALCULUS_CONTRACTS`: the *same* obligation proved by
+ *     the rule table alone (`sol_calculus`), which is the artefact that
+ *     corresponds to a KeY proof. `sol_wp` never reads `Rules.lean`, so
+ *     the corpus above says the interpreter is right and says nothing
+ *     about the calculus.
+ * plus a row per function in `tests/solkey/expected.tsv` and, for the
+ * calculus contracts, in `tests/solkey/expected-calculus.tsv`. Six
+ * tab-separated columns: suite, contract, function, status, note, reason.
+ * The *note* is this script's and says what the translation did; the
+ * *reason* is the checker's and says why a verdict is what it is. They are
+ * separate columns so that re-pinning is idempotent — with one column, a
+ * second `--update` appends the checker's reason to the reason it wrote the
+ * first time.
  *
  * ## Translation rules
  *
@@ -93,6 +106,26 @@ const CONTRACTS = [
 ];
 
 /**
+ * The contracts that also get a rule-table corpus. TestSuite is the one the
+ * question was asked about; adding a name here is all it takes to extend the
+ * exercise, at the cost of that contract's elaboration time in
+ * `scripts/check-calculus-parity.sh`.
+ */
+const CALCULUS_CONTRACTS = new Set(["TestSuite"]);
+
+/**
+ * Obligations per rule-table module. One module of a whole contract's
+ * `sol_calculus` commands is a single-threaded elaboration of tens of
+ * thousands of pinned taclet applications; split into parts it is
+ * a handful of independent
+ * files over the same cached dependencies, which
+ * `scripts/check-calculus-parity.sh` elaborates concurrently. The parts
+ * reopen one namespace, so nothing about the corpus is split but its
+ * elaboration.
+ */
+const CALCULUS_PART_SIZE = 24;
+
+/**
  * The state variables `SoliditySyntax.rootExpr` already resolves. Anything
  * else is emitted as `name@@Type`, which carries the type at the use site
  * and so keeps the ported contracts out of that table — see
@@ -114,6 +147,12 @@ const GLOBAL_TYPES = {
     aux: "UintArray", valuesMap: "UintMap", accountMap: "AccountMap",
     ledger: "Ledger", tokens: "TokenArray", bucket: "TokenBucket",
     ledgerUses: "LedgerUseArray",
+    // `flag` is a *stack* bool in `rootExpr` (the calculus's own examples
+    // use it as one), so TestSuite's storage `flag` needs the `@@` form
+    // like every other name that table does not already resolve.
+    flag: "bool", flag2: "bool", boolFlags: "BoolArray",
+    toggle: "Toggle", tok: "Token", buckets: "TokenBucketArray",
+    basketA: "Basket", basketB: "Basket",
   },
   SolcExpressions: { counter: "uint" },
   SolcStructs: {
@@ -620,10 +659,23 @@ function applyGlobals(text, globals) {
  * `x@@T.push(42)` does not parse: Lean lexes `T.push` as a single dotted
  * identifier, so the type path of the `@@` form swallows the method name.
  * Parenthesizing the global makes the receiver a complete `sol_expr`.
+ *
+ * The receiver may be indexed on the way to the method — solkey's
+ * receiver-and-index-both-impure group writes
+ * `buckets[1].tokens.push()` — so the path alternates field selectors and
+ * index brackets, not field selectors alone.
+ *
+ * The lookbehind is what keeps this from parenthesizing more than it has
+ * to. The problem is the *lexer*, not the grammar: a dot after an
+ * identifier glues into a dotted identifier, so `tokens.push` and
+ * `TokenBucketArray.push` are one token and the `(` after them has nothing
+ * to attach to. A dot after `]` does not glue, and `rows@@M[0].push()`
+ * parses as written — parenthesizing it too would be a gratuitous
+ * difference from the solkey source.
  */
 function parenthesizeCallReceivers(text) {
   return text.replace(
-    /([A-Za-z_]\w*@@[A-Za-z_]\w*(?:\.[A-Za-z_]\w*)*?)(\.(?:push|pop|transfer)\()/g,
+    /([A-Za-z_]\w*@@[A-Za-z_]\w*(?:\[[^\][]*\]|\.[A-Za-z_]\w*)*?)(?<=[A-Za-z0-9_])(\.(?:push|pop|transfer)\()/g,
     "($1)$2",
   );
 }
@@ -727,7 +779,31 @@ function dischargeRequire(condition, params, declared, pushes) {
  */
 class Unsupported extends Error {}
 
+/**
+ * An assertion no state satisfies: `assert(false)`, or `assert(e != e)`.
+ *
+ * solkey writes one only after a statement it expects to *revert* — an
+ * out-of-bounds index, a `require(false)` — and tags the function
+ * `@custom:key box`, under which the reverting execution discharges the
+ * obligation vacuously. That is precisely what this port cannot express:
+ * rule 1 makes every judgment a diamond, so the program must also not
+ * revert, and the whole content of such a function is that it does. It is
+ * not a gap in the calculus and it is not a proof that failed, so it is not
+ * `open` — recording it as one would put four rows in the scoreboard that
+ * no amount of work on the rules could ever move.
+ */
+function assertsUnsatisfiable(body) {
+  return /\bassert\s*\(\s*false\s*\)/.test(body) ||
+    /\bassert\s*\(\s*([A-Za-z_]\w*)\s*!=\s*\1\s*\)/.test(body);
+}
+
 function translateFunction(fn, contract) {
+  if (fn.boxed && assertsUnsatisfiable(fn.body)) {
+    throw new Unsupported(
+      "the function asserts that the program reverts (a box-only obligation): " +
+        "every judgment here is a diamond, which proves the opposite",
+    );
+  }
   const renames = RENAMES[contract] || {};
   const globals = GLOBAL_TYPES[contract] || {};
   const params = new Map(fn.params.map((p) => [p.name, p.ty]));
@@ -906,11 +982,15 @@ function leanName(contract, fn) {
 function main() {
   const soljDir = join(REPO, "tests/solkey");
   const leanDir = join(REPO, "Solidity/Examples/Solkey");
+  const calculusDir = join(REPO, "Solidity/Examples/Derivations/Solkey");
   mkdirSync(soljDir, { recursive: true });
   mkdirSync(leanDir, { recursive: true });
+  mkdirSync(calculusDir, { recursive: true });
 
   const expected = [];
+  const expectedCalculus = [];
   const modules = [];
+  const calculusModules = [];
 
   for (const { file, suite, store } of CONTRACTS) {
     const contract = basename(file, ".sol");
@@ -923,11 +1003,17 @@ function main() {
       "",
     ];
     const theorems = [];
+    const calculusTheorems = [];
+    const wantsCalculus = CALCULUS_CONTRACTS.has(contract);
 
     for (const fn of functions) {
       const key = `${contract}.${fn.name}`;
       if (UNSUPPORTED[key]) {
-        expected.push([suite, contract, fn.name, "unsupported", UNSUPPORTED[key]]);
+        expected.push([suite, contract, fn.name, "unsupported", UNSUPPORTED[key], ""]);
+        if (wantsCalculus) {
+          expectedCalculus.push([suite, contract, fn.name, "unsupported",
+                                 UNSUPPORTED[key], ""]);
+        }
         continue;
       }
 
@@ -936,7 +1022,11 @@ function main() {
         translated = translateFunction(fn, contract);
       } catch (error) {
         if (!(error instanceof Unsupported)) throw error;
-        expected.push([suite, contract, fn.name, "unsupported", error.message]);
+        expected.push([suite, contract, fn.name, "unsupported", error.message, ""]);
+        if (wantsCalculus) {
+          expectedCalculus.push([suite, contract, fn.name, "unsupported",
+                                 error.message, ""]);
+        }
         continue;
       }
 
@@ -949,7 +1039,7 @@ function main() {
       // The verdict is not the translator's to decide: `pending` is
       // replaced by the observed `proved`/`open` by
       // scripts/check-solkey-parity.sh --update.
-      expected.push([suite, contract, fn.name, "pending", note]);
+      expected.push([suite, contract, fn.name, "pending", note, ""]);
 
       soljParagraphs.push(`// ${key}${note ? ` — ${note}` : ""}`);
       soljParagraphs.push(judgment, "");
@@ -967,6 +1057,15 @@ function main() {
           `    (sol!{ ${judgment.replace(/\n  /g, "\n             ")} }).Holds\n` +
           `      State.${store} := by\n  sol_wp`,
       );
+
+      if (wantsCalculus) {
+        expectedCalculus.push([suite, contract, fn.name, "pending", note, ""]);
+        calculusTheorems.push(
+          `/-- ${docLines.join("\n")} -/\n` +
+            `sol_calculus ${leanName(contract, fn.name)} from State.${store}\n` +
+            `  { ${statements.join(";\n    ")} }`,
+        );
+      }
     }
 
     writeFileSync(join(soljDir, `${contract}.solj`), soljParagraphs.join("\n"));
@@ -1003,6 +1102,75 @@ function main() {
         "",
       ].join("\n"),
     );
+    if (wantsCalculus) {
+      const parts = [];
+      for (let i = 0; i < calculusTheorems.length; i += CALCULUS_PART_SIZE) {
+        parts.push(calculusTheorems.slice(i, i + CALCULUS_PART_SIZE));
+      }
+      const partDir = join(calculusDir, contract);
+      mkdirSync(partDir, { recursive: true });
+      parts.forEach((part, index) => {
+        const partName = `Part${String(index + 1).padStart(2, "0")}`;
+        calculusModules.push(
+          `Solidity.Examples.Derivations.Solkey.${contract}.${partName}`,
+        );
+        writeFileSync(
+          join(partDir, `${partName}.lean`),
+          [
+            "import Solidity.Examples.Common",
+            "import Solidity.Semantics",
+            "",
+            "/-!",
+            `# solkey \`${file}\`, by the rule table alone — ${partName}`,
+            "",
+            `Obligations ${index * CALCULUS_PART_SIZE + 1}-${index * CALCULUS_PART_SIZE + part.length} of ${calculusTheorems.length}.`,
+            "",
+            "The same obligations as `Solidity/Examples/Solkey/" + contract +
+              ".lean`,",
+            "proved without the interpreter doing the symbolic execution:",
+            "`sol_calculus` drives each program with the taclets of `Rules.lean`",
+            "until no line of the frontier has a statement left, and decides the",
+            "frontier reached.",
+            "",
+            "That is the difference worth the second corpus. `sol_wp` never reads",
+            "the rule table, so the corpus beside this one says the *interpreter*",
+            "agrees with solkey; a chain here says the *calculus* does, which is",
+            "the artefact that corresponds to a KeY proof.",
+            "",
+            "What is left at the end is first-order: the accumulated update",
+            "applied to the store, and one obligation line per `assert` — KeY's",
+            "own shape, since `Rules.assertGoals` leaves the violated branch as",
+            "an obligation rather than a revert.",
+            "",
+            "The split into parts is an elaboration cost, nothing else: they",
+            "reopen one namespace and are independent files over the same cached",
+            "dependencies, so `scripts/check-calculus-parity.sh` runs them",
+            "concurrently.",
+            "",
+            "Generated by `scripts/solkey-port.mjs` from the solkey source of",
+            "truth; do not edit by hand. Verdicts are pinned in",
+            "`tests/solkey/expected-calculus.tsv`, and `docs/calculus-parity.md`",
+            "is the scoreboard.",
+            "-/",
+            "",
+            "namespace Solidity",
+            "namespace Calculus",
+            `namespace ${contract}`,
+            "",
+            "open Semantics SoliditySyntax StandardExample Rules",
+            "",
+            "set_option maxHeartbeats 8000000",
+            "",
+            part.join("\n\n"),
+            "",
+            `end ${contract}`,
+            "end Calculus",
+            "end Solidity",
+            "",
+          ].join("\n"),
+        );
+      });
+    }
   }
 
   // The `.key` suites: hand-written modules, but every obligation is
@@ -1019,8 +1187,8 @@ function main() {
     for (const name of problems) {
       expected.push(
         ported[name]
-          ? [suite, contract, ported[name], "pending", `solkey ${name}.key`]
-          : [suite, contract, name.replace(/-/g, "_"), "unsupported", reason(name)],
+          ? [suite, contract, ported[name], "pending", `solkey ${name}.key`, ""]
+          : [suite, contract, name.replace(/-/g, "_"), "unsupported", reason(name), ""],
       );
     }
     const module = `Solidity.Examples.Solkey.${contract}`;
@@ -1037,11 +1205,22 @@ function main() {
     expected.map((row) => row.join("\t")).join("\n") + "\n",
   );
 
+  writeFileSync(
+    join(REPO, "SolidityCalculus.lean"),
+    calculusModules.map((m) => `import ${m}`).join("\n") + "\n",
+  );
+
+  writeFileSync(
+    join(soljDir, "expected-calculus.tsv"),
+    expectedCalculus.map((row) => row.join("\t")).join("\n") + "\n",
+  );
+
   const tally = expected.reduce((acc, [, , , status]) => {
     acc[status] = (acc[status] || 0) + 1;
     return acc;
   }, {});
   console.log(`${expected.length} obligations:`, tally);
+  console.log(`${expectedCalculus.length} of them also as rule-table chains`);
 }
 
 main();

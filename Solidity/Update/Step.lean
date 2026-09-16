@@ -195,6 +195,18 @@ def Holds (f : Frontier) (s0 : State := State.exampleStore) : Prop :=
 instance (f : Frontier) (s0 : State) : Decidable (f.Holds s0) :=
   inferInstanceAs (Decidable (f.check s0 = true))
 
+/-- No line has a statement left to execute.  This is the frontier a KeY
+proof ends at: every line is either a formula under the accumulated update or
+an empty program under it, and nothing the rule set can fire on remains.
+
+It is what makes "the rules drove this program" a claim rather than a
+tautology: `⇝ᵘ*` is reflexive, so a target that is merely *reachable* can be
+the start itself. -/
+def isClosed (f : Frontier) : Bool :=
+  f.all (fun q => !q.isOpen)
+
+@[simp] theorem isClosed_nil : isClosed [] = true := rfl
+
 /-- Split at the first open line: the closed lines before it, that line, and
 the rest.  Computed rather than guessed, so a step's `hsq` is `rfl`. -/
 def firstOpen? : Frontier -> Option (Frontier × Sequent × Frontier)
@@ -204,6 +216,29 @@ def firstOpen? : Frontier -> Option (Frontier × Sequent × Frontier)
       else match firstOpen? rest with
         | some (before, open_, after) => some (q :: before, open_, after)
         | none => none
+
+/-- Closure is exactly "no first open line", which is the form the step
+relation and the tactics test. -/
+theorem firstOpen?_eq_none_iff (f : Frontier) :
+    firstOpen? f = none <-> isClosed f = true := by
+  induction f with
+  | nil => simp [firstOpen?, isClosed]
+  | cons q rest ih =>
+      -- Unfold `isClosed` at the head only: unfolding it on the tail as well
+      -- replaces the induction hypothesis' right-hand side by a membership
+      -- statement `ih` no longer matches.
+      rw [show isClosed (q :: rest) = (!q.isOpen && isClosed rest) from rfl]
+      cases hq : q.isOpen
+      · cases h : firstOpen? rest
+        · simpa [firstOpen?, hq, h] using ih.mp h
+        · have hne : isClosed rest ≠ true := by
+            intro hc
+            rw [ih.mpr hc] at h
+            exact Option.noConfusion h
+          refine iff_of_false ?_ ?_
+          · simp [firstOpen?, hq, h]
+          · simpa [hq] using hne
+      · simp [firstOpen?, hq]
 
 end Frontier
 
@@ -388,5 +423,35 @@ instance : Trans FrontierMultiStep FrontierStep FrontierMultiStep :=
 `seq!{ … }` on a line and a bracketed list only where a rule actually
 branched. -/
 instance : CoeTail Sequent Frontier := ⟨fun q => [q]⟩
+
+/-! ## What a proof by the rule table alone is -/
+
+/-- The rule table drives `⟨sm, b⟩post` to a frontier with no statement left,
+and that frontier holds at `s0`.
+
+This is KeY's own proof shape, and the reason it is worth stating separately
+from `SolidityJudgment.Holds`: the symbolic-execution half is the taclets and
+nothing else — no interpreter, no weakest precondition.  What is left at the
+end is first-order: the accumulated update applied to `s0`, and one obligation
+line per `assert` (`Rules.assertGoals` leaves the violated branch as an
+obligation, not a revert).
+
+`isClosed` is what makes it a claim about the rules.  `⇝ᵘ*` is reflexive, so
+without that conjunct the start frontier is its own witness and the statement
+collapses back to `Frontier.Holds` — the interpreter again, which is exactly
+what this is meant to avoid.
+
+**What it is not.**  It does not yet *imply* `SolidityJudgment.Holds`.  That
+needs `FrontierStep a b → (a.Holds s ↔ b.Holds s)`, which needs the per-rule
+bridges of `Update/TacletTable.lean` (21 of the 83 rules with an update), and
+`Rules.assertGoals` is deliberately not exhaustive (`Update/Wp.lean`).  The
+two are proved of the same programs side by side instead:
+`Examples/Derivations/Solkey/` and `Examples/Solkey/`, from one pass of the
+porter so they cannot drift. -/
+def CalculusHolds (sm : SolidityModality) (b : Block) (post : WrappedExpr)
+    (s0 : State) : Prop :=
+  ∃ f : Frontier,
+    FrontierMultiStep [{ goal := SeqGoal.prog ⟨sm, b⟩ post }] f ∧
+      Frontier.isClosed f = true ∧ f.Holds s0
 
 end Solidity

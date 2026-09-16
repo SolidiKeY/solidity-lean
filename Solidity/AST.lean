@@ -1078,6 +1078,9 @@ def fieldTy (name : Name) : Ty :=
   | "tokens" => Ty.ref (RefTy.array StandardExample.tokenTy)
   | "sub" => Ty.ref (RefTy.struct "Sub")
   | "inner" => Ty.ref (RefTy.struct "Inner")
+  -- `Toggle.on`; its `n` member takes the `uint` default, as `WithArray.n`
+  -- already does.
+  | "on" => Ty.bool
   | _ => Ty.uint
 
 def fieldForName (name : Name) : Field :=
@@ -1157,12 +1160,15 @@ def typedVarTy (name : Name) : Ty :=
   | "PersonArray" => Ty.ref (RefTy.array StandardExample.personTy)
   | "UintMatrix" => Ty.ref (RefTy.array (Ty.ref (RefTy.array Ty.uint)))
   -- Struct types of the ported solkey contracts.
-  | "Basket" | "Ledger" | "LedgerUse" | "TokenBucket" | "Pair" | "S"
-  | "Sub" | "WithSub" | "Inner" | "Outer" | "Simple" | "WithArray"
+  | "Basket" | "Ledger" | "LedgerUse" | "TokenBucket" | "Toggle" | "Pair"
+  | "S" | "Sub" | "WithSub" | "Inner" | "Outer" | "Simple" | "WithArray"
   | "Triple" => Ty.ref (RefTy.struct name)
   -- Reference types with no single-ident Solidity spelling.
   | "UintArray" => Ty.ref (RefTy.array Ty.uint)
+  | "BoolArray" => Ty.ref (RefTy.array Ty.bool)
   | "TokenArray" => Ty.ref (RefTy.array StandardExample.tokenTy)
+  | "TokenBucketArray" =>
+      Ty.ref (RefTy.array (Ty.ref (RefTy.struct "TokenBucket")))
   | "PairArray" => Ty.ref (RefTy.array (Ty.ref (RefTy.struct "Pair")))
   | "InnerArray" => Ty.ref (RefTy.array (Ty.ref (RefTy.struct "Inner")))
   | "LedgerUseArray" =>

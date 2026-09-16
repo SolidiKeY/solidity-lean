@@ -10,24 +10,26 @@ hand-written for the two `.key` suites; verdicts are produced by
 
 ## Result
 
+Ported from solkey `c80a54494c` (2026-09-16).
+
 | suite | obligations | proved | open | unsupported |
 |---|---:|---:|---:|---:|
-| `TestSuite.sol` (taclet suite) | 176 | 156 | 11 | 9 |
+| `TestSuite.sol` (taclet suite) | 278 | 225 | 20 | 33 |
 | `solc/SolcExpressions.sol` | 20 | 19 | 1 | 0 |
 | `solc/SolcStructs.sol` | 11 | 9 | 0 | 2 |
 | `solc/SolcArrays.sol` | 12 | 11 | 1 | 0 |
 | `solc/SolcMemory.sol` | 11 | 9 | 0 | 2 |
 | `solc/SolcMappings.sol` | 9 | 7 | 2 | 0 |
 | `solc/SolcControlFlow.sol` | 10 | 7 | 3 | 0 |
-| `net/*.key` | 20 | 3 | 0 | 17 |
+| `net/*.key` | 23 | 3 | 0 | 20 |
 | core `RulesTest` `*.key` | 41 | 34 | 0 | 7 |
 | `storage/*.key` | 1 | 1 | 0 | 0 |
-| **total** | **311** | **256** | **18** | **37** |
+| **total** | **416** | **325** | **27** | **64** |
 
-**256 of the 274 obligations that are expressible in this fragment are
+**325 of the 352 obligations that are expressible in this fragment are
 proved**, kernel-checked, with no `native_decide` — including every ported
 obligation of `SolcStructs` and `SolcMemory`, the `net` machinery, every
-`RulesTest` problem that states an identity or a judgment, and 156 of the 167
+`RulesTest` problem that states an identity or a judgment, and 225 of the 245
 ported taclet tests. (`Examples/Solkey/Net.lean` carries a fourth
 theorem, an iterated transfer, and `Examples/Solkey/Rules.lean` two auxiliary
 ones about `newFromAdd` and `defaultDefIdentity`; none is itself a solkey PO,
@@ -38,13 +40,20 @@ same way (`Theory/Storage.lean`'s copy family); solkey added it in
 `c80a54494c`, with the caveat `docs/solkey-feedback.md` records about two of
 its four conjuncts.
 
-**Behind upstream.** These counts are against a `TestSuite.sol` well before
-solkey HEAD. A dry run of `scripts/solkey-port.mjs` against `c80a54494c` emits
-278 `TestSuite` rows where `expected.tsv` holds 176, so a re-port adds 102
-obligations — nine of them that commit's own `testCopy*` group — and 416 in
-total. That re-port is deliberately its own change: it also wants
-`basketA`/`basketB` in the porter's `GLOBAL_TYPES` and in
-`Semantics.State.testSuiteStore`, and every new row has to be elaborated.
+**What this number does *not* say.** `sol_wp` is symbolic execution *by the
+interpreter* (`Wp/Verifier.lean`); it never reads `Rules.lean`. So the table
+above says the interpreter agrees with solkey and says nothing about the
+calculus — which is the artefact solkey's taclets correspond to.
+`docs/calculus-parity.md` is the other half: the same obligations driven by
+the rule table alone.
+
+**The pin.** The corpus is `c80a54494c`; the *rule table* and
+`TacletAnnotations.lean` are still `e67a0d7c48`, which is why
+`lake exe solkeycheck` still reports its 78 rows
+(`docs/lean-key-rule-map.md` records the split and why). The re-port from 176
+`TestSuite` rows to 278 added the bool tier, the `Toggle` struct, the
+standalone `tok`, `buckets`, `basketA`/`basketB` and `boolFlags` to
+`Semantics.State.testSuiteStore` and the porter's `GLOBAL_TYPES`.
 
 The 27 `RulesTest` problems with no modality — the heap-algebra identities of
 `simpleExample*.key` and the update sequences of `storageExample*.key` and
@@ -82,38 +91,63 @@ apply to obligations counted as *proved*:
    `require`s (`require(1 < values.length)`) are therefore discharged by
    emitting the `push`es that establish them.
 
-## The 37 unsupported obligations
+## The 64 unsupported obligations
 
 | reason | count |
 |---|---:|
+| `new T[](n)` memory-array allocation is not in the fragment | 30 |
+| `net` invariant POs: uninterpreted `CInv` over a symbolic ledger, booked against `msg.value`/`msg.sender` | 14 |
 | core `RulesTest`: KeY loader/taclet tests — ad-hoc taclets over `\problem { true }`, a sort condition, a list declaration, an empty problem | 7 |
-| `net` invariant POs: uninterpreted `CInv` over a symbolic ledger, booked against `msg.value`/`msg.sender` | 12 |
-| `new T[](n)` memory-array allocation is not in the fragment | 11 |
-| `transferWithCallback` has a relational meaning (`CallbackSemantics.lean`) but no surface syntax | 4 |
+| `transferWithCallback` has a relational meaning (`CallbackSemantics.lean`) but no surface syntax | 5 |
+| **the function asserts that the program reverts** — see below | 4 |
 | field-name overloading: `Depth0.recursive` and `Depth1.recursive` differ in type, and `SoliditySyntax.fieldTy` is one global name→type table | 2 |
+| a parameter no `require` pins, so no concrete witness is derivable | 1 |
 | `msg.value` is not in the `sol_expr` grammar | 1 |
 
-The 7 remaining `RulesTest` entries state nothing to prove: they load a rule
-set against `\problem { true }` (`storageFieldRead`, `storageFieldWrite`,
+The 7 `RulesTest` entries state nothing to prove: they load a rule set against
+`\problem { true }` (`storageFieldRead`, `storageFieldWrite`,
 `memberAccessExample`, `functionBodyExpandTest`, `hasSortVarcondTest`),
 declare a list (`listTests`), or are the empty problem (`problem`).
 
-## The 18 open obligations
+### The four box-only obligations
+
+`requireFalseLiteral`, `storageIndexArrayAddAssignOutOfBoundsReverts`,
+`storageIndexArrayReadOutOfBoundsReverts` and
+`memoryToStorageIndexArrayCopyRootOutOfBoundsReverts` each end in an assertion
+no state satisfies — `assert(false)`, or `assert(r != r)` — after a statement
+that reverts. That assertion is the specification: solkey tags the function
+`@custom:key box`, under which the reverting execution discharges the
+obligation vacuously, and the whole content of the test is *that the program
+reverts*.
+
+Rule 1 below makes every judgment here a diamond, which demands the opposite.
+So these are not proofs that failed and not a gap in the calculus; no amount
+of work on the rules could move them, and carrying them as `open` would put
+four rows in the scoreboard that are permanently misleading. The porter
+detects them (`assertsUnsatisfiable`) and records the reason.
+
+## The 27 open obligations
 
 | family | count | members |
 |---|---:|---|
+| impure receiver, index or operand | 8 | `addition{RightImpure,LeftImpureRightReadFirst}`, `subtractionLeftImpureRightReadFirst`, `lessThanLeftImpureRightReadFirst`, `storageFieldWrite{RefSource,RootRef,StorageRef}ImpureReceiver`, `storageIndexWriteRefSourceImpureIndex` |
 | mapping-valued struct copy / delete | 4 | `testStorageMapStructCopy`, `storageIndexDeleteMappingStruct`, `copySubstructure{Into,From}Mapping` |
 | two-dimensional arrays | 3 | `storageMatrix{WriteRead,NseIndex}`, `matrixElementWriteRead` |
 | storage index decomposition | 3 | `storageIndex{Decomposition,MultipleWrites,CopysourceAfterPush}` |
 | local storage-alias binding | 3 | `storageLocalDeclSkip`, `storagePushLocalBind`, `testStorageNestedPushReturnAlias` |
 | ternary into a memory target | 2 | `ternarySelectsFirstMemorySource`, `ternaryIntoMemoryTarget` |
-| other | 3 | `testDeepPopDoesNotResetMappingMember`, `testStorageEvaluationOrder`, `nestedIfElseSelectsBranch` |
+| other | 4 | `testDeepPopDoesNotResetMappingMember`, `testStorageIndexWriteImpureIndexRefRhs`, `nestedIfElseSelectsBranch`, `exponentiationSignedBaseOddExponent` |
 
-All but two report `` `simp` made no progress ``, which is the signature of a
+The impure-operand family is new: it arrived with the upstream commits after
+the previous pin, and it is where solkey's evaluation order is most visible
+(`i++` as a receiver, an index and an operand at once).
+
+All but three report `` `simp` made no progress ``, which is the signature of a
 *missing entry in the evaluation battery* rather than of a calculus gap: the
 verdict metavariable cannot be assigned, so `sol_wp_step` stops peeling. Each
 of the fixed families below had exactly that shape, so these are likely to
-fall to the same treatment.
+fall to the same treatment. The three that do not are grammar gaps, and say
+so in their note.
 
 ## What the exercise found
 
@@ -136,6 +170,22 @@ suite did not, all now fixed:
    `(e).push(…)` parsed but had no elaboration function.
 8. **The `{pre,post}decrement` taclet family was unwritable** in surface
    syntax: `--` cannot be a Lean token. Added as `predec(e)`/`postdec(e)`.
+
+### What the re-port to `c80a54494c` found
+
+Two more, both in the porter rather than the model:
+
+1. **A method call on an indexed receiver did not parse.** solkey's new
+   receiver-and-index-both-impure group writes `buckets[1].tokens.push()`;
+   `parenthesizeCallReceivers` allowed only field selectors on the path to
+   the method, so five obligations came back as parse errors. The condition
+   is lexical, not grammatical — a dot after an *identifier* glues into a
+   dotted identifier and the `(` has nothing to attach to, a dot after `]`
+   does not — so the fix is a lookbehind, and `rows[0].push()` is still
+   emitted as solkey writes it.
+2. **Four obligations were being carried as `open` that can never close.**
+   They assert that the program reverts; see "The four box-only obligations"
+   above. A scoreboard row that no work could move is worse than no row.
 
 Two further findings are about the *cost model* rather than correctness, and
 matter for anyone extending the fragment:
@@ -160,12 +210,27 @@ node scripts/solkey-port.mjs        # regenerate the corpus from solkey
 ./scripts/check-solkey-parity.sh    # verdicts vs tests/solkey/expected.tsv
 ./scripts/check-solkey-parity.sh --only 'Solc*'    # iterate on a subset
 ./scripts/check-solkey-parity.sh --update          # re-pin expected.tsv
+./scripts/check-calculus-parity.sh --update        # the rule-table twin
 ```
+
+**The porter writes `pending` in every verdict column**, so a run of it
+followed by no `--update` leaves both tables saying nothing. Regenerate and
+re-pin together, and do not regenerate while a check is in flight: the
+elaboration reads the files it is halfway through.
+
+The tables have six columns — suite, contract, function, status, **note**,
+**reason**. The note is the porter's (what the translation did: a
+concretization witness, why a row is unsupported); the reason is the
+checker's (why the verdict is what it is). They are separate so that
+`--update` is idempotent: when they shared a column, a second re-pin appended
+the checker's reason to the one it had written the first time, and the table
+degraded on every run.
 
 The corpus is its own Lake target (`SolidityCorpus`) and is deliberately
 not imported by `Solidity.lean`: it is a few hundred `sol_wp`
 proofs, and folding it into the default build would make every ordinary
-`./run-lean.sh` pay for the whole parity suite.
+`./run-lean.sh` pay for the whole parity suite. The rule-table corpus is
+`SolidityCalculus`, for the same reason and more so.
 
 A caution learned the hard way: the harness treats any `lean` exit code other
 than 0 or 1 as fatal. An OOM-killed module emits no diagnostics, and "no
