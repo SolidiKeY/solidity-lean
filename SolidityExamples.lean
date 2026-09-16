@@ -9,6 +9,11 @@
 -- 24, so folding this in would roughly double it. Build this target with
 -- `./scripts/check-examples.sh`.
 --
+-- `Examples/Derivations/Paper.lean` is the conventions and the imports; the
+-- chains are in `Examples/Derivations/Paper/`, one module per group of the
+-- calculus's sections. `docs/paper-parity.md` maps them to the paper's
+-- worked examples one row each.
+--
 -- The derivations here are a *rendering* of the rule set, not new results:
 -- the same rules are already exercised by `Examples/Derivations/` and
 -- `Examples/Taclets/`, which are in the default build. What this target

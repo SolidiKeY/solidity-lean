@@ -27,7 +27,7 @@ name = "SolidityCalculus"
 weakLeanArgs = ["--tstack=131072"]
 
 # The worked derivations, one `sol_derivation` per worked example of the
-# calculus (`Solidity/Examples/Derivations/Paper.lean`). Its own
+# calculus (`Solidity/Examples/Derivations/Paper/`). Its own
 # target, and deliberately not imported by Solidity.lean: ~240 pinned rule
 # applications, each paying its own simp+decide, cost about 30 minutes of
 # CPU, against 24 for the whole default build. The rules themselves are
