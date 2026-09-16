@@ -75,26 +75,44 @@ Four kinds of program the calculus draws cannot be written in the surface
 notation, and the reason is informative in each case.
 
 1. **Call-valued operands** — `values.push(makeValue());`,
-   `choosePersonMem().account = makeAccount();`.  `Stmt.callStmt` has no
-   surface syntax at all (`Examples/Taclets/FunctionCallOps.lean` drops to
-   constructors for the same reason).  The rules exist
-   (`functionCallArgCapture`, `functionBodyExpand`); the notation does not.
-2. **Bare memory declarations** — `Person memory carol;`.  `carol` is already
-   a memory root in `SoliditySyntax.rootExpr`, so the chains here start after
-   the declaration.  `memoryDeclFreshAlloc` is exercised in
-   `Examples/MemoryBasic.lean`.
+   `values.push() = makeValue();`, `carolValues[i] = makeValue();`,
+   `carolValues[++i] = makeValue();`, `choosePersonMem().account =
+   makeAccount();`.  `Stmt.callStmt` has no surface syntax at all
+   (`Examples/Taclets/FunctionCallOps.lean` drops to constructors for the same
+   reason).  The rules exist (`functionCallArgCapture`, `functionBodyExpand`);
+   the notation does not.
+2. **A declaration of one of the worked-example roots** — `Person memory
+   carol;`.  `carol` is already a memory root in `SoliditySyntax.rootExpr`,
+   which is what the other chains read it as, so the chains here start after
+   the declaration.  The declaration *rule* is not missing: `memoryArrayAlloc`
+   below runs it on the scratch array, and `Examples/MemoryBasic.lean` runs it
+   on a struct.  What cannot be written is a declaration of a *fresh* name,
+   because `rootExpr` reads any name it does not know as a stack `uint`.
 3. **First-order side conditions** — `sizeNotNegative`, which the pop-after-push
    example needs.  It adds `0 ≤ find(storage, sp·length)` to the antecedent
    rather than rewriting a program, so it has no `RuleName`; its content is
    `WellFormedConsumers.lean`'s row for `pop`.
 4. **The memory identity layer** — the calculus's `new(mem, r) →` freshness
-   prefix, `idC`/`add`, and the lazy `copySt`/`copyMem` views.  Those have no
-   first-order spelling here (`Update/Eval.lean`); the cross-domain chains
-   below end at the `alloc`/`copyMem` element the Lean rule states instead.
+   prefix, `idC`/`add`, and the lazy `copySt`/`copyMem` views.  The first two
+   are terms in `Theory/Memory.lean` and the freshness premise is *discharged*
+   there (`Update/Theory.lean`, `denoteMem_new`), but a rule's update is not
+   written in them: the chains below end at the `alloc`/`copyMem` element the
+   Lean rule states.  `copySt`/`copyMem` have no term-level spelling at all.
 
 Also not a chain: **the unfunded transfer**.  It is `to.transfer(5);` again and
 what differs is the *state*, not the derivation — the semantic layer covers it
-(`Evm/Examples.lean`, `Examples/Taclets/NetOps.lean`).
+(`Evm/Examples.lean`, `Examples/Taclets/NetOps.lean`).  Nor are the
+evaluation-order programs the calculus lists as *not* implemented: `m[i++] = i;`
+and `persons[p.age++] = p;` are refutations, and they live as such in
+`Counterexamples/EvaluationOrder.lean` and `Counterexamples/RefSourceOrder.lean`.
+
+## The calculus's names, and this file's
+
+The calculus's auxiliary memory arrays and its bucket are scratch aliases here,
+because a fresh name would fall to `rootExpr`'s stack default (point 2 above):
+`carolValues` is `mv@UintArray`, `carolTokens`/`davidTokens` are
+`mv2@TokenArray`, `carolToken` is `mv3@Token`, and `bucket` is a state variable
+`bucket@@TokenBucket`.
 -/
 
 namespace Solidity.Examples.Paper
@@ -314,6 +332,18 @@ sol_derivation pushSlotWrite :
           { sp@Token := path((tokens@@TokenArray).push()) }
           { storage := save(sp@Token.value, rv@uint) } (φ)
 
+/-! ### `tokens.push(); uint i = tokens.push().value;`
+The read twin of the line above, and the calculus's point about the slot a
+bare `push` returns: it is a path like any other, so *reading* through it is
+the same alias binding that writing through it was. -/
+
+sol_derivation pushThenPushSlotRead :
+    => <[ (tokens@@TokenArray).push();
+          uint i = (tokens@@TokenArray).push().value ]>(φ)
+  ~*> => { storage := push((tokens@@TokenArray)) } { i := default(uint) }
+          { sp@Token := path((tokens@@TokenArray).push()) }
+          { i := sp@Token.value } (φ)
+
 /-! ### `values.push(); values.pop();` — pop after push
 The smallest program whose *diamond* proof needs the calculus's
 `sizeNotNegative`, a first-order side condition with no `RuleName` here (see
@@ -344,6 +374,26 @@ sol_derivation deleteField :
     => <[ delete alice.account ]>(φ)
   ~> => { storage := clear(alice.account) } (φ)
 
+/-! ### `delete alice.account;` between writes and reads
+The calculus's longer delete program: two members written, the struct above
+them cleared, and both read back.  Nothing merges — the merge law has no
+reader for a `find` over a `clear` — so the chain is the five updates the
+derivation accumulated, in order. -/
+
+sol_derivation deleteAccountThenReadLeaves :
+    => <[ alice.account.balance = 100; alice.account.token.value = 7;
+          delete alice.account; b = alice.account.balance;
+          v = alice.account.token.value ]>(φ)
+  ~*> => { rv@uint := default(uint) } { rv@uint := 100 }
+          { sp@Account := path(alice.account) }
+          { storage := save(sp@Account.balance, rv@uint) }
+          { rv@uint := default(uint) } { rv@uint := 7 }
+          { sp@Token := path(alice.account.token) }
+          { storage := save(sp@Token.value, rv@uint) }
+          { storage := clear(alice.account) }
+          { sp@Account := path(alice.account) } { b := sp@Account.balance }
+          { sp@Token := path(alice.account.token) } { v := sp@Token.value } (φ)
+
 /-! ### `ledger.nonce = 42; delete ledger; v = ledger.nonce;`
 The calculus's struct-reset program: `delete` on a struct keeps its mapping
 members and resets the rest, so the read afterwards succeeds — and the three
@@ -356,6 +406,30 @@ sol_derivation deleteStructThenRead :
   ~*> => { storage := save((ledger@@Ledger).nonce, 42) }
           { storage := clear((ledger@@Ledger)) }
           { v := (ledger@@Ledger).nonce } (φ)
+
+/-! ### the whole of the calculus's `delete ledger;` program
+`delete` on a struct resets its members and *keeps* its mappings, so the read
+after it still finds what was put there; deleting the mapping entry itself is
+what clears it.  Both halves in one chain, and it stays stacked for the same
+reason as the shorter one above. -/
+
+sol_derivation deleteLedgerMappingSurvives :
+    => <[ (ledger@@Ledger).nonce = 5; (ledger@@Ledger).balances[1] = 10;
+          delete (ledger@@Ledger); kept = (ledger@@Ledger).balances[1];
+          delete (ledger@@Ledger).balances[1]; nonce = (ledger@@Ledger).nonce;
+          gone = (ledger@@Ledger).balances[1] ]>(φ)
+  ~*> => { storage := save((ledger@@Ledger).nonce, 5) }
+          { rv@uint := default(uint) } { rv@uint := 10 }
+          { sp@UintMap := path((ledger@@Ledger).balances) }
+          { storage := save(sp@UintMap[1], rv@uint) }
+          { storage := clear((ledger@@Ledger)) }
+          { sp@UintMap := path((ledger@@Ledger).balances) }
+          { kept := sp@UintMap[1] }
+          { sp@UintMap := path((ledger@@Ledger).balances) }
+          { storage := clear(sp@UintMap[1]) }
+          { nonce := (ledger@@Ledger).nonce }
+          { sp@UintMap := path((ledger@@Ledger).balances) }
+          { gone := sp@UintMap[1] } (φ)
 
 /-! ## 4 · Compound assignment
 
@@ -448,6 +522,19 @@ sol_derivation memoryRootAssign :
     => <[ carol = david ]>(φ)
   ~> => { carol := ref(david) } (φ)
 
+/-! ### `carol.age = a + b;` — a computed value into a memory field
+The operand is frozen into `pv` before the write, exactly as a storage field
+write freezes it.  The two vacuous lines are `binopAssignment`'s `\else`
+branch, which every operator produces and `+` cannot take (see
+`fieldCompoundAssign`). -/
+
+sol_derivation memoryFieldWriteCapturedRhs :
+    => <[ carol.age = a + b ]>(φ)
+  ~*> [ => { pv@uint := default(uint) } { pv@uint := (a + b) }
+          { memory := write(carol.age, pv@uint) } (φ),
+        { pv@uint := default(uint) } ¬⊤ => { pv@uint := default(uint) } ⊤,
+        { pv@uint := default(uint) } ¬⊤ => { pv@uint := default(uint) } ⊥ ]
+
 /-! ## 6 · Memory delete
 
 The calculus's point: `delete carol` resets the *identity's* members, so an
@@ -467,10 +554,23 @@ sol_derivation memoryDeleteField :
           { memory := write(mv@Account.balance, 34) }
           { clear(carol.account) } { v := mv@Account.balance } (φ)
 
-/-! ## 7 · Memory arrays
+/-! ## 7 · Memory arrays and allocation
 
 A memory index access is bounds-guarded exactly as a storage one is, and a
-nested path is two `ref` bindings before the write. -/
+nested path is two `ref` bindings before the write.  The calculus's auxiliary
+arrays are the scratch aliases named in the header. -/
+
+/-! ### `UintArray memory mv;` — the allocation the other chains start after
+One rule, one element, and no heap write to a member: `addM` adds the root and
+every member of it is manufactured on read (`Theory/Memory.lean`'s
+`readOnAddM` and `defaultDefIdentity`).  The calculus writes the same line with
+its freshness premise `new(mem, r) →` in front; here the root a rule invents
+really is fresh, and that is `Update/Theory.lean`'s `denoteMem_new` rather than
+an assumption carried along. -/
+
+sol_derivation memoryArrayAlloc :
+    => <[ UintArray memory mv ]>(φ)
+  ~> => { alloc(UintArray, mv) } (φ)
 
 sol_derivation memoryArrayReadBox :
     => [ v = mv@UintArray[i] ](φ)
@@ -501,6 +601,65 @@ sol_derivation memoryNestedArrayWrite :
           { mv@Account := ref(carol.account) }
           { mv@UintArray := ref(mv@Account.values) } ⊤ ]
 
+/-! ### `v = carolValues[++i];` — an impure index
+The index is frozen into `idx` before the bounds goal is read, which is what
+the `{…}` prefix on the antecedent says; the increment itself is the pair
+`bump` names. -/
+
+sol_derivation memoryArrayIncIndexRead :
+    => [ v = mv@UintArray[++i] ](φ)
+  ~*> [ { idx@uint := default(uint) } { bump(++i) ‖ idx@uint := ++i }
+          inBounds(mv@UintArray[idx@uint]) =>
+          { idx@uint := default(uint) } { bump(++i) ‖ idx@uint := ++i }
+          { v := mv@UintArray[idx@uint] } [ ](φ),
+        { idx@uint := default(uint) } { bump(++i) ‖ idx@uint := ++i }
+          ¬inBounds(mv@UintArray[idx@uint]) =>
+          { idx@uint := default(uint) } { bump(++i) ‖ idx@uint := ++i } ⊤ ]
+
+/-! ### `carolTokens[i] = david.account.token;`
+A reference-valued element written from a memory path: the source is read to
+an identity and that identity is stored, so this is `writeRef` and the two
+slots alias. -/
+
+sol_derivation memoryArrayWriteRefSource :
+    => [ mv2@TokenArray[i] = david.account.token ](φ)
+  ~*> [ { mv@Account := ref(david.account) } { pv@Token := ref(mv@Account.token) }
+          inBounds(mv2@TokenArray[i]) =>
+          { mv@Account := ref(david.account) } { pv@Token := ref(mv@Account.token) }
+          { memory := writeRef(mv2@TokenArray[i], pv@Token) } [ ](φ),
+        { mv@Account := ref(david.account) } { pv@Token := ref(mv@Account.token) }
+          ¬inBounds(mv2@TokenArray[i]) =>
+          { mv@Account := ref(david.account) }
+          { pv@Token := ref(mv@Account.token) } ⊤ ]
+
+/-! ### `carol.account.token = davidTokens[i];` — the other direction
+The element is read first, so the bounds goal is the *first* thing the line
+carries and the capture that follows it is under no prefix at all. -/
+
+sol_derivation memoryFieldWriteFromArrayElem :
+    => [ carol.account.token = mv2@TokenArray[i] ](φ)
+  ~*> [ inBounds(mv2@TokenArray[i]) =>
+          { pv@Token := ref(mv2@TokenArray[i]) } { mv@Account := ref(carol.account) }
+          { memory := writeRef(mv@Account.token, pv@Token) } [ ](φ),
+        ¬inBounds(mv2@TokenArray[i]) => ⊤ ]
+
+/-! ### `Token memory tok = carol.account.tokens[i];`
+A declaration from an array element under a nested path: two `ref` bindings to
+reach the array, then a third to bind the element — and still no heap write,
+because a memory declaration from a memory source aliases. -/
+
+sol_derivation memoryDeclFromNestedArrayElem :
+    => [ Token memory mv3 = carol.account.tokens[i] ](φ)
+  ~*> [ { mv@Account := ref(carol.account) }
+          { mv@TokenArray := ref(mv@Account.tokens) } inBounds(mv@TokenArray[i]) =>
+          { mv@Account := ref(carol.account) }
+          { mv@TokenArray := ref(mv@Account.tokens) }
+          { mv3@Token := ref(mv@TokenArray[i]) } [ ](φ),
+        { mv@Account := ref(carol.account) }
+          { mv@TokenArray := ref(mv@Account.tokens) } ¬inBounds(mv@TokenArray[i]) =>
+          { mv@Account := ref(carol.account) }
+          { mv@TokenArray := ref(mv@Account.tokens) } ⊤ ]
+
 /-! ## 8 · Cross-domain copies
 
 Where the calculus needs its identity layer — a freshness premise
@@ -508,7 +667,9 @@ Where the calculus needs its identity layer — a freshness premise
 Lean's rule states one `alloc` element: a memory declaration initialised from
 a storage path.  The chains below therefore end one line earlier than the
 calculus's, and the difference is the header's point 4, not a disagreement
-about the program. -/
+about the program.  The premise itself is not an assumption here: the term
+algebra has `new` and `idC` (`Theory/Memory.lean`) and `denoteMem_new` proves
+the root a rule invents really is fresh. -/
 
 /-! ### `Token memory t = alice.account.token;` — storage to memory
 The source path is captured into a storage alias first, exactly as the
@@ -556,6 +717,33 @@ sol_derivation memoryToStorageFromAlias :
   ~*> => { memory := write(mv@Account.balance, 10) }
           { storage := copyMem(alice.account, mv@Account) }
           { sp@Account := path(alice.account) } { v := sp@Account.balance } (φ)
+
+/-! ### `carol.account.balance = 50; alice.account = carol.account; v = …`
+A memory *member* as the source of a storage write.  The calculus says no
+alias is introduced; Lean captures the member into `pv` first, and the copy
+then reads that identity — the same `copyMem` view, one binding earlier. -/
+
+sol_derivation memoryToStorageFromMemberSource :
+    => <[ carol.account.balance = 50; alice.account = carol.account;
+          v = alice.account.balance ]>(φ)
+  ~*> => { rv@uint := default(uint) } { rv@uint := 50 }
+          { mv@Account := ref(carol.account) }
+          { memory := write(mv@Account.balance, rv@uint) }
+          { pv@Account := ref(carol.account) }
+          { storage := copyMem(alice.account, pv@Account) }
+          { sp@Account := path(alice.account) } { v := sp@Account.balance } (φ)
+
+/-! ### `carolToken.value = 99; alice.account.token = carolToken; v = …`
+The target is the nonsimple path this time, so it is the *target* that needs
+the storage alias; the memory source is already simple and needs none. -/
+
+sol_derivation memoryToStorageNonsimplePath :
+    => <[ mv3@Token.value = 99; alice.account.token = mv3@Token;
+          v = alice.account.token.value ]>(φ)
+  ~*> => { memory := write(mv3@Token.value, 99) }
+          { sp@Account := path(alice.account) }
+          { storage := copyMem(sp@Account.token, mv3@Token) }
+          { sp@Token := path(alice.account.token) } { v := sp@Token.value } (φ)
 
 /-! ## 9 · Payment
 
@@ -676,6 +864,45 @@ example :
         seq!{ ¬inBounds(values[i]) => ⊤ } ]
       (State.exampleStore.setEnv "i" (Semantics.Binding.val
         (Semantics.PrimVal.int 3)))) = true := by
+  native_decide
+
+/-- The store the array and delete chains are read in: the calculus's store
+with the index bound, so a branching line has a verdict. -/
+def storeI0 : Semantics.State :=
+  State.exampleStore.setEnv "i" (Semantics.Binding.val (Semantics.PrimVal.int 0))
+
+/-- **Allocation, run.** A freshly allocated memory array is empty, so the
+in-bounds goal of a write into it is vacuous and the box line holds.  That `⊤`
+is the whole reason the calculus's `memoryArrayFreshAlloc` writes a length:
+`memoryArrayAlloc` above allocates, and without a size nothing can be stored. -/
+example :
+    (Frontier.check
+      [ seq!{ { alloc(UintArray, mv) } inBounds(mv@UintArray[i]) =>
+                { alloc(UintArray, mv) }
+                { memory := write(mv@UintArray[i], 100) } [ ](i == 0) },
+        seq!{ { alloc(UintArray, mv) } ¬inBounds(mv@UintArray[i]) =>
+                { alloc(UintArray, mv) } ⊤ } ]
+      storeI0) = true := by
+  native_decide
+
+/-- The delete chain, first line against last, on the calculus's store: the
+member read after `delete alice.account;` is the type's default. -/
+example :
+    (seq!{ => <[ alice.account.balance = 100; alice.account.token.value = 7;
+                 delete alice.account; b = alice.account.balance;
+                 v = alice.account.token.value ]>(v == 0) }).check
+        State.exampleStore
+      = (seq!{ => { rv@uint := default(uint) } { rv@uint := 100 }
+                  { sp@Account := path(alice.account) }
+                  { storage := save(sp@Account.balance, rv@uint) }
+                  { rv@uint := default(uint) } { rv@uint := 7 }
+                  { sp@Token := path(alice.account.token) }
+                  { storage := save(sp@Token.value, rv@uint) }
+                  { storage := clear(alice.account) }
+                  { sp@Account := path(alice.account) } { b := sp@Account.balance }
+                  { sp@Token := path(alice.account.token) }
+                  { v := sp@Token.value } <[ ]>(v == 0) }).check
+          State.exampleStore := by
   native_decide
 
 end Solidity.Examples.Paper
