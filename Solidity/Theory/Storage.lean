@@ -44,6 +44,10 @@ cast at the point of use (`asInt`, `asBool`), and `asStruct` sends a
 non-`Struct` to `mtSt`.  Nothing observable depends on that choice:
 `selectSt` of a non-`Struct` is `dflt` either way (`selectSt_asStruct`).
 
+The one lazy symbol is `merge`, the copied-location marker of the copy family:
+its per-member decision needs a value from each of two trees, which no single
+`SVal` leaf can hold.  Its section says why.
+
 Reads here are **total**, as KeY's are: an out-of-bounds `find` is `dflt`, not
 a revert.  The bounds test is a *guard* on the taclet (`Rules.SideFormula.inBounds`),
 not part of the read, and it reappears as a hypothesis in `Denote.lean`.
@@ -67,6 +71,9 @@ inductive StValue where
   | storeSt (st : StValue) (a : Seg) (v : StValue)
   /-- An interpreter value as an opaque leaf — see the module docstring. -/
   | sval (v : SVal)
+  /-- `merge<[alpha]>(old, new)`: a copied location as a read sees it.  The one
+  **lazy** marker here — see "The copy family". -/
+  | merge (old new : StValue)
   deriving Repr, DecidableEq
 
 namespace StValue
@@ -81,22 +88,67 @@ deletes a cast on a well-sorted argument (`castDel`); these are total, so the
 ill-sorted cases get the sort's default, which is `defaultValueInt` /
 `defaultValueBool` / `defaultValueStruct` read as functions. -/
 
-/-- `(Struct) t`. -/
+/-- `(Struct) t`.  A `merge` marker is `Struct`-sorted, so the cast is
+`castDel` on it: dropping it here would drop the copied value. -/
 def asStruct : StValue -> StValue
   | storeSt st a v => storeSt st a v
   | sval v => sval v
+  | merge o n => merge o n
   | _ => mtSt
 
-/-- `(int) t` — `defValResolve` at `int`, then `defaultValueInt`. -/
+/-- `(int) t` — `defValResolve` at `int`, then `defaultValueInt`.  The `merge`
+arm *is* `mergePrim`: at a primitive sort a copied location is the copy. -/
 def asInt : StValue -> Int
   | prim (PrimVal.int v) => v
   | sval (SVal.int v) => v
+  | merge _ n => asInt n
   | _ => 0
 
-/-- `(bool) t` — `defValResolve` at `bool`, then `defaultValueBool`. -/
+/-- `(bool) t` — `defValResolve` at `bool`, then `defaultValueBool`;
+`mergePrim` at `bool`. -/
 def asBool : StValue -> Bool
   | prim (PrimVal.bool b) => b
   | sval (SVal.bool b) => b
+  | merge _ n => asBool n
+  | _ => false
+
+/-! ## The shape dispatch
+
+KeY discriminates a struct's members by the *field's* sort — `MapField`,
+`RefField`, or a value member under `alphaPrim` — and both the delete family and
+the copy family below read that sort off the segment.  A `Seg` does not carry
+it, so both dispatch on the **value's** shape instead, which is what the
+interpreter does (`SVal.defaultOf`) and what `docs/lean-key-rule-map.md` records
+as the same semantics. -/
+
+/-- The value a store chain is built over. -/
+def base : StValue -> StValue
+  | storeSt st _ _ => base st
+  | merge _ n => base n
+  | t => t
+
+/-- The chain denotes a mapping: `delete` leaves it alone, a copy keeps the
+target's own. -/
+def isMapping (t : StValue) : Bool :=
+  match base t with
+  | sval (SVal.map _ _) => true
+  | _ => false
+
+/-- The chain denotes an array: `delete` empties it, writes and all. -/
+def isArray (t : StValue) : Bool :=
+  match base t with
+  | sval (SVal.array _) => true
+  | _ => false
+
+/-- The chain denotes a struct node: a copy merges it member by member, since a
+nested struct may carry a mapping.  This is KeY's `RefField`, read off the
+value.  An array member needs no marker even though its field is a `RefField`:
+every read of a merged array goes to the copied side anyway
+(`selectStMergeIndexStruct` for `at(i)`, `selectStMergeDefault` for `size`). -/
+def isNode (t : StValue) : Bool :=
+  match base t with
+  | sval (SVal.struct _) => true
+  | mtSt => true
   | _ => false
 
 /-! ## `selectSt` -/
@@ -121,11 +173,20 @@ def svalSelect (v : SVal) (a : Seg) : StValue :=
       | none => sval d
   | _, _ => dflt
 
-/-- `selectSt<[α]>(st, a)`. -/
+/-- `selectSt<[α]>(st, a)`.  The `merge` arms are the four `selectStMerge*`
+taclets, with KeY's field sort replaced by the shape dispatch above: a mapping
+member is the target's own, a struct member stays merged, everything else — an
+element and every value member — is the copied value's. -/
 def selectSt : StValue -> Seg -> StValue
   | mtSt, _ => dflt
   | storeSt st a1 v, a2 => if a1 = a2 then v else selectSt st a2
   | sval v, a => svalSelect v a
+  | merge _ n, Seg.at i => selectSt n (Seg.at i)
+  | merge o n, Seg.field f =>
+      if isMapping (selectSt o (Seg.field f)) then selectSt o (Seg.field f)
+      else if isNode (selectSt o (Seg.field f)) then
+        merge (selectSt o (Seg.field f)) (selectSt n (Seg.field f))
+      else selectSt n (Seg.field f)
   | prim _, _ => dflt
   | dflt, _ => dflt
 
@@ -144,6 +205,8 @@ def save : StValue -> List Seg -> StValue -> StValue
       else storeSt (save st (a2 :: flds) v1) a1 v0
   | sval sv, a :: flds, v =>
       storeSt (sval sv) a (save (asStruct (svalSelect sv a)) flds v)
+  | merge o n, a :: flds, v =>
+      storeSt (merge o n) a (save (asStruct (selectSt (merge o n) a)) flds v)
   | mtSt, a :: flds, v => storeSt mtSt a (save mtSt flds v)
   | prim _, a :: flds, v => storeSt mtSt a (save mtSt flds v)
   | dflt, a :: flds, v => storeSt mtSt a (save mtSt flds v)
@@ -220,9 +283,10 @@ theorem findDefinitionCons (st : StValue) (a : Seg) (flds : List Seg) :
 
 /-- `selectSt<[α]>(save(st, nil, v), a)`, in the shape its `\find` binds.
 
-Upstream's `\replacewith` is `selectSt(save(st, flds, v), a)` with an `flds`
-its `\find` never binds — the intended statement is this one
-(`docs/solkey-feedback.md`). -/
+Upstream used to rewrite to `selectSt(save(st, flds, v), a)`, with an `flds`
+its `\find` never binds; solkey `c80a54494c` adopted this statement
+(`selectSt<[alpha]>((Struct) v, a)`, the cast absorbed by `selectSt_asStruct`).
+The history is in `docs/solkey-feedback.md`. -/
 @[simp] theorem selectOnSaveEmpty (st : StValue) (v : StValue) (a : Seg) :
     selectSt (save st [] v) a = selectSt v a := by rw [saveOnEmpty]
 
@@ -364,26 +428,18 @@ interpreter implements it eagerly as `SVal.defaultOf` — which
 
 Eager here too, so the four read-through rules become theorems rather than
 definitions.  The one place the shape matters is a *chain*: `delValue` has to
-dispatch on what the chain is built over, because `defaultOf` empties an
-array, keeps a mapping and recurses into a struct, and a chain's own
-constructors do not say which it is. -/
+dispatch on what the chain is built over — `isMapping`/`isArray` above — because
+`defaultOf` empties an array, keeps a mapping and recurses into a struct, and a
+chain's own constructors do not say which it is. -/
 
-/-- The value a store chain is built over. -/
-def base : StValue -> StValue
-  | storeSt st _ _ => base st
-  | t => t
-
-/-- The chain denotes a mapping: `delete` leaves it alone. -/
-def isMapping (t : StValue) : Bool :=
-  match base t with
-  | sval (SVal.map _ _) => true
-  | _ => false
-
-/-- The chain denotes an array: `delete` empties it, writes and all. -/
-def isArray (t : StValue) : Bool :=
-  match base t with
-  | sval (SVal.array _) => true
-  | _ => false
+/-- No copy marker on the chain's spine.  `delValue` pushes through a store
+chain member by member; a `merge` is not a chain step, and on one the push is
+only sound when the two sides agree on what is a mapping — which a well-sorted
+copy guarantees and this predicate assumes away. -/
+def mergeFree : StValue -> Bool
+  | merge _ _ => false
+  | storeSt st _ _ => mergeFree st
+  | _ => true
 
 /-- `delValue<[α]>(v)` and `delNode(st)` at once — KeY keeps them apart by
 sort (`delValueStruct` is the bridge between them), which a total function
@@ -397,6 +453,10 @@ def delValue : StValue -> StValue
       if isMapping (storeSt st a v) then storeSt st a v
       else if isArray (storeSt st a v) then sval (SVal.array [])
       else storeSt (delValue st) a (delValue v)
+  | merge o n =>
+      if isMapping (merge o n) then merge o n
+      else if isArray (merge o n) then sval (SVal.array [])
+      else merge (delValue o) (delValue n)
 
 /-- `delNode(st)`: `delValue` at sort `Struct`. -/
 abbrev delNode : StValue -> StValue := delValue
@@ -426,6 +486,7 @@ theorem selectStDelNodeMap {t : StValue} (h : isMapping t = true) (a : Seg) :
   | sval v =>
       cases v <;> simp only [isMapping, base] at h <;> simp_all [delValue, SVal.defaultOf]
   | storeSt st b w => rw [delValue, if_pos h]
+  | merge o n => rw [delValue, if_pos h]
   | _ => simp [isMapping, base] at h
 
 /-- `selectStDelNodeIndexStruct`: an index into a deleted collection is the
@@ -438,6 +499,12 @@ theorem selectStDelNodeIndexStruct {t : StValue} (h : isArray t = true) (i : Int
         simp_all [delValue, SVal.defaultOf, selectSt, svalSelect]
   | storeSt st b w =>
       have hm : isMapping (storeSt st b w) = false := by
+        simp only [isMapping, isArray, base] at h ⊢
+        split at h <;> simp_all
+      rw [delValue, if_neg (by simp [hm]), if_pos h]
+      simp [selectSt, svalSelect]
+  | merge o n =>
+      have hm : isMapping (merge o n) = false := by
         simp only [isMapping, isArray, base] at h ⊢
         split at h <;> simp_all
       rw [delValue, if_neg (by simp [hm]), if_pos h]
@@ -459,9 +526,14 @@ theorem lookupBy_defaultOfFields (n : Name) :
 
 /-- `selectStDelNodeRef` and `selectStDelNodeDefault` in one: off a mapping
 and an array, a delete commutes with every selector — a reference member is
-deleted recursively, a value member reads its default. -/
+deleted recursively, a value member reads its default.
+
+`mergeFree` is what a chain of `storeSt` over an `sval` leaf satisfies, i.e.
+every term a rule's update builds; on a copy marker the push through is only
+sound when the two sides agree on what is a mapping, and nothing here needs
+it. -/
 theorem selectSt_delValue {t : StValue} (hm : isMapping t = false)
-    (ha : isArray t = false) (a : Seg) :
+    (ha : isArray t = false) (hmf : mergeFree t = true) (a : Seg) :
     selectSt (delValue t) a = delValue (selectSt t a) := by
   induction t with
   | sval v =>
@@ -479,12 +551,116 @@ theorem selectSt_delValue {t : StValue} (hm : isMapping t = false)
   | storeSt st b w ih _ =>
       have hm' : isMapping st = false := by simpa [isMapping, base] using hm
       have ha' : isArray st = false := by simpa [isArray, base] using ha
+      have hmf' : mergeFree st = true := by simpa [mergeFree] using hmf
       rw [delValue, if_neg (by simp [hm]), if_neg (by simp [ha]), selectOnStore,
         selectOnStore]
       by_cases h : b = a
       · simp [h]
-      · simp [h, ih hm' ha']
+      · simp [h, ih hm' ha' hmf']
+  | merge o n _ _ => simp [mergeFree] at hmf
   | _ => cases a <;> rfl
+
+/-! ## The copy family
+
+A storage-to-storage copy overwrites a location, *except* that mapping members
+keep what the target held: Solidity never copies a mapping.  solkey
+(`c80a54494c`) gives that meaning with a second lazy pair — `copyAt` writes the
+copied value and `merge` is the copied location as a read sees it — and every
+`*CopySource` / `…StoreRoot` rule now emits `copyAt` where it used to emit
+`save`.
+
+`copyAt` is eager on the outside and lazy on the inside, which is the one place
+this file departs from the delete family above.  `delValue`'s decision is on a
+single value and can be taken inside an `SVal` leaf; `merge`'s is on a *pair*
+drawn from two different trees, and rebuilding a struct whose members come from
+both cannot stay inside one leaf.  So the marker survives into the term and the
+four `selectStMerge*` taclets are the arms of `selectSt` rather than theorems
+over a definition.  Keeping `save` on the outside is what lets `copyAt` inherit
+the `find`-over-`save` laws above unchanged.
+
+One divergence from upstream, and it is the field sort again: KeY fires
+`selectStMergeRef` on a `RefField` whatever the target holds there, so a target
+member that is *absent* still recurses, and the nested mapping read lands on an
+empty mapping.  The shape dispatch sees `dflt`, takes the copied side, and so
+copies the source's mapping.  The two differ exactly when the target's member is
+absent while the source's carries a mapping — unreachable through the
+interpreter, which materialises every member (`defaultForTy`) and refuses a
+mapping-typed source outright (`Wp/TerminalUpdate.rhsSVal`). -/
+
+/-- `copyAt(st, p, v)`: the storage with the location at `p` overwritten by
+`v`, mapping members excepted.  Upstream writes the marker and lets reads push
+it down; here the `save` is eager and only the merge is deferred. -/
+def copyAt (st : StValue) (p : List Seg) (v : StValue) : StValue :=
+  save st p (merge (find st p) (asStruct v))
+
+/-- `copyAt(st, nil, v) ⇝ merge<[Struct]>(st, (Struct) v)`. -/
+@[simp] theorem copyAtEmpty (st v : StValue) :
+    copyAt st [] v = merge st (asStruct v) := by simp [copyAt]
+
+/-- `selectOnCopyAtCons`: reading one selector out of a copy — `selectOnSaveCons`
+with the copied value in place of the written one. -/
+theorem selectOnCopyAtCons (st : StValue) (a1 a2 : Seg) (flds : List Seg)
+    (v : StValue) :
+    selectSt (copyAt st (a1 :: flds) v) a2 =
+      (if a1 = a2 then
+        (if flds.isEmpty then merge (selectSt st a1) (asStruct v)
+         else copyAt (selectSt st a1) flds v)
+      else selectSt st a2) := by
+  rw [copyAt, selectOnSaveCons]
+  by_cases h : a1 = a2
+  · rw [if_pos h, if_pos h]
+    cases flds with
+    | nil => simp [find]
+    | cons b rest =>
+        rw [if_neg (by simp), copyAt, save_asStruct, findDefinitionCons,
+          if_neg (by simp)]
+  · rw [if_neg h, if_neg h]
+
+/-- `mergePrim` at `int`: at a primitive sort a copied location *is* the copy. -/
+@[simp] theorem mergePrimInt (o n : StValue) : asInt (merge o n) = asInt n := rfl
+
+/-- `mergePrim` at `bool`. -/
+@[simp] theorem mergePrimBool (o n : StValue) : asBool (merge o n) = asBool n := rfl
+
+/-- `selectStMergeMap`: a mapping member of a copied location is the target's
+own.  This is the half of the change no `.sol` example can state — both front
+ends reject a copy whose type carries a mapping — so
+`keyext.solidity.examples/storage/copyKeepsMapping.key` pins it upstream and
+`Examples/Solkey/Rules.lean` here. -/
+theorem selectStMergeMap {o n : StValue} {f : Name}
+    (h : isMapping (selectSt o (Seg.field f)) = true) :
+    selectSt (merge o n) (Seg.field f) = selectSt o (Seg.field f) := by
+  simp [selectSt, h]
+
+/-- `selectStMergeRef`: a struct member stays merged, because a nested struct
+may itself carry a mapping. -/
+theorem selectStMergeRef {o n : StValue} {f : Name}
+    (hm : isMapping (selectSt o (Seg.field f)) = false)
+    (h : isNode (selectSt o (Seg.field f)) = true) :
+    selectSt (merge o n) (Seg.field f) =
+      merge (selectSt o (Seg.field f)) (selectSt n (Seg.field f)) := by
+  simp [selectSt, hm, h]
+
+/-- `selectStMergeIndexStruct`: an element of a copied collection is the
+copy's, with no shape test — upstream's `Struct` and `alphaPrim` instances
+agree here. -/
+@[simp] theorem selectStMergeIndexStruct (o n : StValue) (i : Int) :
+    selectSt (merge o n) (Seg.at i) = selectSt n (Seg.at i) := rfl
+
+/-- `selectStMergeDefault`: a value member of a copied location is the copy's. -/
+theorem selectStMergeDefault {o n : StValue} {f : Name}
+    (hm : isMapping (selectSt o (Seg.field f)) = false)
+    (hn : isNode (selectSt o (Seg.field f)) = false) :
+    selectSt (merge o n) (Seg.field f) = selectSt n (Seg.field f) := by
+  simp [selectSt, hm, hn]
+
+/-- `mergeStValueCast`: pushing a reader's cast into a sort-free `merge` is
+invisible to the read, the treatment `findStValueCast` and
+`delValueStValueCast` already get (`selectSt_asStruct` on both sides).
+`selectStValueCast` is `selectSt_asStruct` itself. -/
+@[simp] theorem merge_asStruct (o n : StValue) (a : Seg) :
+    selectSt (merge (asStruct o) (asStruct n)) a = selectSt (merge o n) a := by
+  cases a <;> simp only [selectSt, selectSt_asStruct]
 
 /-! ## Sanity
 
@@ -532,6 +708,43 @@ example :
         [("owner", SVal.int 3), ("stash", SVal.map [(1, SVal.int 5)] (SVal.int 0))]))
       = sval (SVal.struct
         [("owner", SVal.int 0), ("stash", SVal.map [(1, SVal.int 5)] (SVal.int 0))]) := by
+  native_decide
+
+private def ledgerSeg : Seg := Seg.field "ledger"
+private def ledger2Seg : Seg := Seg.field "ledger2"
+private def nonceSeg : Seg := Seg.field "nonce"
+private def balancesSeg : Seg := Seg.field "balances"
+
+/-- Two ledgers, each a nonce beside a mapping. -/
+private def twoLedgers : StValue :=
+  sval (SVal.struct
+    [("ledger", SVal.struct
+        [("nonce", SVal.int 1), ("balances", SVal.map [(1, SVal.int 11)] (SVal.int 0))]),
+     ("ledger2", SVal.struct
+        [("nonce", SVal.int 2), ("balances", SVal.map [(1, SVal.int 22)] (SVal.int 0))])])
+
+/-- `ledger2 = ledger`, the copy of `copyKeepsMapping.key`. -/
+private def copiedLedgers : StValue :=
+  copyAt twoLedgers [ledger2Seg] (find twoLedgers [ledgerSeg])
+
+/-- A copy takes every value member from the source (`selectStMergeDefault`)
+and keeps the target's own mapping (`selectStMergeMap`). -/
+example :
+    asInt (find copiedLedgers [ledger2Seg, nonceSeg]) = 1
+      ∧ asInt (find copiedLedgers [ledger2Seg, balancesSeg, Seg.at 1]) = 22 := by
+  native_decide
+
+/-- …and the mapping is *not* the source's: this is the refutation an inverted
+`isMapping` branch would fail. -/
+example : asInt (find copiedLedgers [ledger2Seg, balancesSeg, Seg.at 1]) ≠ 11 := by
+  native_decide
+
+/-- `delete` *after* a copy — `delValue`'s `merge` arm, which is what upstream's
+`testPushCopyThenDeleteTarget` walks into: the copied value's members reset and
+the target's own mapping is still there, both at once. -/
+example :
+    asInt (find (delValue copiedLedgers) [ledger2Seg, nonceSeg]) = 0
+      ∧ asInt (find (delValue copiedLedgers) [ledger2Seg, balancesSeg, Seg.at 1]) = 22 := by
   native_decide
 
 end Sanity

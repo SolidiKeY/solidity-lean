@@ -65,11 +65,18 @@ rather than a change of model.  `docs/lean-key-rule-map.md` records it.
   `SVal.save` — see `Theory/Denote.lean`.  The term here writes the extended
   array at the array's own path, the shape both `Rules.StorageUpd.push`
   (already a merge of KeY's three push taclets) and `Update.pushStorage` use.
-* **the copy rules.** KeY writes `save(storage, p, find<[StValue]>(storage,
-  src))`; the source here is the `SVal` that `rhsSVal` read, as a `sval` leaf,
-  because `rhsSVal` also covers the primitive and memory sources that one
-  `Rules` constructor merges.  `Theory.denote_find` is the statement that the
-  storage case of that read is KeY's `find`.
+* **the copy rules.** KeY writes `copyAt(storage, p, find<[StValue]>(storage,
+  src))` — `save` until solkey `c80a54494c` made a copy keep the target's
+  mapping members; the source here is the `SVal` that `rhsSVal` read, as a
+  `sval` leaf, because `rhsSVal` also covers the primitive and memory sources
+  that one `Rules` constructor merges.  `Theory.denote_find` is the statement
+  that the storage case of that read is KeY's `find`.
+
+  `theoryCopy` below is upstream's spelling and
+  `theoryCopy_eq_theoryWrite` is why `storageRhsT` may go on reading a copy as
+  a write: the interpreter is stuck on a mapping-carrying copy
+  (`Semantics.tyHasMapping` — solc ≥ 0.7 rejects the program), and off that
+  case the two terms denote the same write.
 -/
 
 namespace Solidity
@@ -94,6 +101,37 @@ def theoryWrite (s : State) (root : Name) (segs : List Seg) (w : SVal) :
     (denoteSt (StValue.save (StValue.sval v0) segs (StValue.sval w))).map
       fun v => setBy root v s.storage
 
+/-- `{storage := copyAt(storage, p, w)}`: what upstream's copy term denotes, a
+mapping member of the target kept. -/
+def theoryCopy (s : State) (root : Name) (segs : List Seg) (w : SVal) :
+    Res (List (Name × SVal)) :=
+  (rootTree s root) >>= fun v0 =>
+    (denoteSt (StValue.copyAt (StValue.sval v0) segs (StValue.sval w))).map
+      fun v => setBy root v s.storage
+
+/-- **The collapse.** Where the target's current value carries no mapping — the
+whole fragment the interpreter admits — upstream's copy term denotes the write
+the rule table already reads. -/
+theorem theoryCopy_eq_theoryWrite (s : State) (root : Name) (segs : List Seg)
+    (w cur v0 : SVal) (hroot : rootTree s root = .ok v0)
+    (hcur : StValue.find (StValue.sval v0) segs = StValue.sval cur)
+    (hnm : svalHasMapping cur = false) :
+    theoryCopy s root segs w = theoryWrite s root segs w := by
+  unfold theoryCopy theoryWrite
+  rw [hroot]
+  simp only [bind, Except.bind]
+  rw [denote_copyAt hcur hnm, denote_save]
+
+/-- The same at a fresh slot, with no side condition: what `push` writes. -/
+theorem theoryCopy_eq_theoryWrite_absent (s : State) (root : Name) (segs : List Seg)
+    (w v0 : SVal) (hroot : rootTree s root = .ok v0)
+    (habs : StValue.find (StValue.sval v0) segs = StValue.dflt) :
+    theoryCopy s root segs w = theoryWrite s root segs w := by
+  unfold theoryCopy theoryWrite
+  rw [hroot]
+  simp only [bind, Except.bind]
+  rw [denote_copyAt_absent habs, denote_save]
+
 /-- **The bridge, once.** Every storage update the rule table states ends in
 one `Upd.saveSt`, and that write *is* KeY's `save` term denoted. -/
 theorem saveSt_eq_theory (s : State) (root : Name) (segs : List Seg) (w : SVal) :
@@ -117,6 +155,26 @@ theorem saveStorage_map_eq_theory (s : State) (root : Name) (segs : List Seg)
 def storageSaveT (s : State) (target : WrappedExpr) (v : SVal) :
     Res (List (Name × SVal)) :=
   locPath s target >>= fun p => theoryWrite s p.1 p.2 v
+
+/-- `Update.storageSave` with the write read as upstream's *copy* term, which
+is what the seven `*CopySource` / `…StoreRoot` rules state. -/
+def storageCopyT (s : State) (target : WrappedExpr) (v : SVal) :
+    Res (List (Name × SVal)) :=
+  locPath s target >>= fun p => theoryCopy s p.1 p.2 v
+
+/-- The collapse at the update level: `storageRhsT`'s `.copy` arm may read the
+copy as `storageSaveT`. -/
+theorem storageCopyT_eq_storageSaveT {s : State} {target : WrappedExpr} {v : SVal}
+    {root : Name} {segs : List Seg} {v0 cur : SVal}
+    (hloc : locPath s target = .ok (root, segs))
+    (hroot : rootTree s root = .ok v0)
+    (hcur : StValue.find (StValue.sval v0) segs = StValue.sval cur)
+    (hnm : svalHasMapping cur = false) :
+    storageCopyT s target v = storageSaveT s target v := by
+  unfold storageCopyT storageSaveT
+  rw [hloc]
+  simp only [bind, Except.bind]
+  exact theoryCopy_eq_theoryWrite s root segs v cur v0 hroot hcur hnm
 
 /-- `Update.pushStorage` with the write read as a term. -/
 def pushStorageT (arr : WrappedExpr) (value : Option WrappedExpr) (s : State) :

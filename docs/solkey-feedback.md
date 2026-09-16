@@ -540,7 +540,13 @@ unreachable.
 
 ## `selectOnSaveEmpty` rewrites to a term its `\find` does not bind (2026-09-15)
 
-`structRules.key`:
+~~Open~~ **Fixed upstream in `c80a54494c`** (2026-09-16): the `\replacewith`
+is now `selectSt<[alpha]>((Struct) v, a)`, the restatement below, with the cast
+absorbed by `castDel`. The open question at the end of this section — whether
+KeY's schema-variable check should have rejected the old form — still stands,
+and it is now a question about the checker rather than about this taclet.
+
+`structRules.key` as it read before the fix:
 
 ```
 selectOnSaveEmpty {
@@ -567,3 +573,47 @@ records the difference in `docs/lean-key-rule-map.md`.
 check should reject a `\replacewith` that mentions a variable the `\find` does
 not bind. If it should, this taclet is the witness; if it should not, the rule
 is unsound as written rather than merely redundant.
+
+## `copyKeepsMapping.key`'s last two conjuncts are reflexive (2026-09-16)
+
+`keyext.solidity.examples/storage/copyKeepsMapping.key`, added in
+`c80a54494c`, is the only obligation that pins the mapping-preserving half of
+the new `copyAt`: no `.sol` example can state it, since both front ends reject
+a copy whose type carries a mapping. Its first two conjuncts do their job —
+the value members `nonce` and `inner·nonce` come from the source. The last two
+compare
+
+```
+find<[int]>(storage, cons(ledger2, cons(balances, cons(at(1), nil))))
+  = find<[int]>(storage, cons(ledger2, cons(balances, cons(at(1), nil))))
+```
+
+against *themselves*: both sides read `ledger2`, so each conjunct is an
+instance of reflexivity and closes without exercising `selectStMergeMap` at
+all. The problem therefore proves nothing about mappings, which is the one
+thing it exists to prove.
+
+The claim they presumably meant is that the target keeps its **own** entries —
+`find(storage, ledger2·balances·at(1))` after the update equals what it was
+before, and is *not* `find(storage, ledger·balances·at(1))`. Lean states the
+file as written (`Examples/Solkey/Rules.solkey_Rules_copyKeepsMapping`, the
+reflexive conjuncts included and flagged) and the intended claim beside it,
+with a `native_decide` refutation of the source-wins reading — which is what
+would catch an inverted `isMapping` branch.
+
+## The ported corpus is 102 `TestSuite.sol` obligations behind (2026-09-16)
+
+Not feedback to solkey but the standing gap on this side, recorded where the
+other cross-repository facts are. `tests/solkey/expected.tsv` holds 176
+`TestSuite` rows; the porter run against `c80a54494c` emits 278, so a plain
+re-run adds 102 rows — its own change, since it also wants
+`basketA`/`basketB` in the porter's `GLOBAL_TYPES` and in
+`Semantics.State.testSuiteStore`. Nine of those 102 are `c80a54494c`'s own
+`testCopy*` group, which pins the mapping-*free* half of every `merge` rule.
+`copyKeepsMapping.key` is ported now (the porter learned the upstream
+`storage/` directory); the `.sol` group is not.
+
+Also in `c80a54494c`: upstream dropped the **`mapfree` PathSVSort flag** idea
+from `docs/taclet-ideas.md`, which `copyAt` makes unnecessary — the calculus
+now gives the mapping-carrying copy a meaning instead of hardening the taclets
+against it.

@@ -308,3 +308,4 @@ rules	Rules	storageExample4_2	proved	solkey storageExample4-2.key, term-level
 rules	Rules	storageExample5	proved	solkey storageExample5.key, term-level
 rules	Rules	storageFieldRead	unsupported	KeY loader/taclet machinery: ad-hoc taclets over `\problem { true }`, a sort condition, a list declaration or an empty problem — there is no identity and no judgment to state
 rules	Rules	storageFieldWrite	unsupported	KeY loader/taclet machinery: ad-hoc taclets over `\problem { true }`, a sort condition, a list declaration or an empty problem — there is no identity and no judgment to state
+storage	Rules	copyKeepsMapping	proved	solkey copyKeepsMapping.key, term-level

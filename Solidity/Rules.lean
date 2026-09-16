@@ -211,7 +211,11 @@ end CaseMode
   inductive StorageUpd where
     /-- `save(storage, p, t)`. -/
     | save (target : WrappedExpr) (t : Sym)
-    /-- `save(storage, p, find<[StValue]>(storage, src))` — a storage source. -/
+    /-- `copyAt(storage, p, find<[StValue]>(storage, src))` — a storage
+    source.  `copyAt` rather than `save` since solkey `c80a54494c`: a copy
+    keeps the target's mapping members, and `Theory.copyAt` collapses to the
+    `save` this constructor evaluates to wherever the interpreter is not stuck
+    on the copy anyway (`Update/Theory.theoryCopy_eq_theoryWrite`). -/
     | copy (target : WrappedExpr) (src : WrappedExpr)
     /-- `save(storage, p, copyMem(mtSt, memory, src))` — a memory source. -/
     | copyFromMem (target : WrappedExpr) (src : WrappedExpr)
@@ -219,7 +223,10 @@ end CaseMode
     `storagePushValueSave`, `…CopySource` and `storagePushLengthSave`, which
     differ only in the *sort* of what is appended — the element, a copied
     source, or the element type's default (`value = none`).  Each writes the
-    same two-`save` term, the new slot and the new length. -/
+    new slot and the new length, the value copy through `copyAt` since solkey
+    `c80a54494c`; the slot is at the array's *old* length, so there is nothing
+    for the copy to keep and the three terms still agree
+    (`Theory.denote_copyAt_absent`). -/
     | push (arr : WrappedExpr) (value : Option WrappedExpr)
     /-- The same extension, named through a push *place* (`p = arr.push()`):
     `place` is the whole `arr.push()` node. -/
