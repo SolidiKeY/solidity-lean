@@ -43,7 +43,13 @@ irregular.
 **A residual is a program, not a list of constructors.** `T rv = e` is the
 value freeze, `T storage sp = nsp` the path capture, and a later `sp.fld`
 is the alias read-back — the three statements the paper writes as
-`T_e se = e; T_nsp storage sp = nsp; sp.fld = se;`.
+`T_e se = e; T_nsp storage sp = nsp; sp.fld = se;`.  Four spellings say
+which capture is meant, because the alias name alone cannot: `T pv = e`
+freezes on the stack, `_ pv = e` at the expression's own location, `T rv = e`
+into the value temporary, and `T rv ?= e` only *if* there is a value to
+freeze — a reference is aliased, not read, so the residual below a `?=`
+is written twice, once per branch.  `T idx ?= e` is the same split for an
+index.
 
 **Twins are one declaration.** `twins` generates the `Box` and `Diamond`
 constructors, box first, and the entry in `twinPairs` that
@@ -51,7 +57,22 @@ constructors, box first, and the entry in `twinPairs` that
 
 **A family is one declaration.** `(op : BinOp)` generates the constructor
 parameter, the `op = opR ∧ …` head conjuncts, and all fourteen `ruleNames`
-entries.
+entries.  `(op : BinOp | g)` restricts it to the instances `g` admits, as a
+conjunct right behind the operator equation.
+
+## The two escapes
+
+Every rule of the table is written this way, and two clauses carry the ones
+the schema-variable convention cannot reach on its own.
+
+`where cond := P` replaces the generated condition by `P`, for the handful
+whose applicability is a bespoke predicate (`isSimpleStorageDeleteTarget`) or
+a shape the pattern language does not have.
+
+`⟦ b ⟧` in place of a residual gives the block as a Lean term, with the
+condition proof in scope as `h`, for the handful whose residual is *computed*
+from that proof rather than written out.  Both keep the conclusion
+declarative: what the rule matches is still read off the statement.
 
 ## How it is assembled
 
@@ -160,6 +181,21 @@ guard — a raw Lean term, so it is not translated — has to spell it.  The
 distinction is not cosmetic: `Rules.compoundGoals` is handed the statement's
 operator, and the two are equal only under that conjunct. -/
 syntax:65 (name := exprCombine) rule_expr:65 " ⊕ " rule_expr:66 : rule_expr
+/-- `⊖ se` — the schematic unary operator, indexed by the rule's `UnOp`
+parameter exactly as `⊕` is by its `BinOp` one. -/
+syntax:75 (name := exprUnop) "⊖" rule_expr:75 : rule_expr
+/-- `! se` — logical negation, the one unary operator a rule names outright
+(`ifElseNegated` matches on it). -/
+syntax:75 (name := exprNot) "!" rule_expr:75 : rule_expr
+/-- `se && nse` / `se || nse` — the short-circuiting connectives, named
+outright because the rules that match them are about the short circuit.
+
+Both sit *below* the precedence an update's right-hand side accepts, so a
+parallel update `{ a := t || b := u }` still splits on its own `||`. -/
+syntax:35 (name := exprAnd) rule_expr:36 " && " rule_expr:36 : rule_expr
+syntax:30 (name := exprOr) rule_expr:31 " || " rule_expr:31 : rule_expr
+/-- `c ? e1 : e2`. -/
+syntax:20 (name := exprTernary) rule_expr:21 " ? " rule_expr:21 " : " rule_expr:21 : rule_expr
 /-- Escape to a Lean term. -/
 syntax:max (name := exprEscape) "‹" term "›" : rule_expr
 
@@ -173,6 +209,27 @@ syntax (name := stCompound) rule_expr " ⊕= " rule_expr : rule_stmt
 /-- `T v` / `T v = e` — a stack declaration. -/
 syntax (name := stStackDecl) ident ident : rule_stmt
 syntax (name := stStackDeclInit) ident ident " = " rule_expr : rule_stmt
+/-- `_ pv = e` — the capture whose declaration kind is the *expression's*
+(`Rules.captureValue`), where `T pv = e` forces the stack
+(`Rules.captureStackValue`).  The underscore is the point: the rule does not
+name the location, the expression does. -/
+syntax (name := stValueDecl) "_ " ident " = " rule_expr : rule_stmt
+/-- `T rv ?= e` — a *conditional* capture, and which one the alias name says.
+
+`T rv ?= e` is the freeze of a value operand (`Rules.freezeRhs`): a primitive
+`e` is snapshotted into `rv` and the rest of the residual reads `rv`, a
+reference `e` is left in place and `rv` *is* `e` — binding a reference is
+aliasing, not a read, so there is nothing to freeze.
+
+`T idx ?= e` is the index capture (`Rules.indexWriteResolveBlock`): a complex
+index is hoisted and the rest reads `idx`, a simple one is left in place.
+
+Either way the *whole* residual below it is written twice, once per branch,
+because that is what the block it stands for does. -/
+syntax (name := stFreezeDecl) ident ident " ?= " rule_expr : rule_stmt
+/-- `T alias sp = e` — KeY's storage *place* alias
+(`Stmt.storagePlaceAlias`): a declaration that binds a path, not a value. -/
+syntax (name := stAliasDecl) ident &" alias " ident " = " rule_expr : rule_stmt
 /-- `T storage sp` / `T storage sp = nsp` -/
 syntax (name := stStorageDecl) ident &" storage " ident : rule_stmt
 syntax (name := stStorageDeclInit) ident &" storage " ident " = " rule_expr : rule_stmt
@@ -186,12 +243,19 @@ bare-expression form. -/
 syntax (name := stRequire) "require" "(" rule_expr ")" : rule_stmt
 syntax (name := stAssert) "assert" "(" rule_expr ")" : rule_stmt
 syntax (name := stRevert) "revert" "(" ")" : rule_stmt
+/-- `delete(p)` — reserved for the same reason, and the one statement whose
+argument is a place. -/
+syntax (name := stDelete) "delete" "(" rule_expr ")" : rule_stmt
 syntax (name := stPushValue) rule_expr noWs ".push(" rule_expr ")" : rule_stmt
 syntax (name := stPushEmpty) rule_expr noWs ".push()" : rule_stmt
 syntax (name := stPop) rule_expr noWs ".pop()" : rule_stmt
 syntax (name := stTransfer) rule_expr noWs ".transfer(" rule_expr ")" : rule_stmt
 /-- `if (nse) thn else els` — the branches are schematic blocks. -/
 syntax (name := stIte) "if" " (" rule_expr ") " ident " else " ident : rule_stmt
+/-- `if (se) { … } else { … }` — the branches written out, for the rules whose
+residual *builds* a conditional rather than passing one through. -/
+syntax (name := stIteWrite) "if" " (" rule_expr ") " "{" sepBy(rule_stmt, "; ", "; ", allowTrailingSep) "}"
+  " else " "{" sepBy(rule_stmt, "; ", "; ", allowTrailingSep) "}" : rule_stmt
 /-- A bare expression statement, and — through the application form — the
 statements that read as calls: `require(se)`, `assert(se)`, `revert()`,
 `delete(sp.fld)`. -/
@@ -203,10 +267,13 @@ syntax (name := stEscape) "‹" term "›" : rule_stmt
 update's `:=` and the formula's connectives need syntax of their own. -/
 
 declare_syntax_cat rule_upd
-/-- `storage := save(storage, p, t)`, `v := se`, `lsv := path(sp)`. -/
-syntax (name := updAssign) rule_expr " := " rule_expr : rule_upd
-/-- `havoc`, `bump(e)`, `transfer(sadr, se)`, `alloc(T, mv)`. -/
-syntax (name := updBare) rule_expr : rule_upd
+/-! An update's operands are parsed above the precedence of `||`, so that the
+parallel update's own `||` separator still splits the list. -/
+
+/-- `storage := save(p, t)`, `v := se`, `lsv := path(sp)`, `mv := alloc(sp)`. -/
+syntax (name := updAssign) rule_expr:36 " := " rule_expr:36 : rule_upd
+/-- `havoc`, `bump(e)`, `transfer(sadr, se)`, `clear(mv)`. -/
+syntax (name := updBare) rule_expr:36 : rule_upd
 
 declare_syntax_cat rule_formula
 syntax (name := fmTop) "⊤" : rule_formula
@@ -232,6 +299,11 @@ syntax (name := resObl) rule_formula : rule_result
 /-- `revert()` — the `\else` half of a guarded split
 (`RuleResidual.reverting`). -/
 syntax (name := resRevert) "revert" "(" ")" : rule_result
+/-- `⟦ b ⟧` — the residual as a Lean `Block`, for the handful of rules whose
+residual is *computed* from the condition proof (which is in scope as `h`)
+rather than written out.  The conclusion and the condition stay declarative;
+only the block is a term. -/
+syntax (name := resEscape) "⟦" term "⟧" : rule_result
 
 declare_syntax_cat rule_guard
 /-- The negation of the preceding goal's guard. -/
@@ -259,16 +331,15 @@ variables generate; `where cond := P` replaces it. -/
 syntax ruleWhere := " where " ((&"cond" " := " term) <|> term,+)
 
 /-- One rule of the calculus. -/
+syntax ruleBinder := " (" ident " : " ident (" | " term)? ")"
+
+/-- One rule of the calculus — the only way to write one.  `(op : BinOp | g)`
+restricts the family to the instances `g` admits, as a conjunct right behind
+the operator equation, which is where KeY's own sort restriction sits. -/
 syntax (name := ruleDecl) (docComment)? "sol_rule " ident (&" twins")? (&" alternative")?
-  (" (" ident " : " ident ")")? (ruleFrom)? " : "
+  (ruleBinder)? (ruleFrom)? " : "
   "<[" rule_stmt "]>" " ⇝ " rule_goals
   (&"after" rule_expr,+)? (ruleWhere)? : command
-
-/-- The opaque form: the effect is given as a term.  For the rules whose
-condition is a bespoke predicate, or whose goals consume the condition proof
-— the handful the schema-variable convention cannot reach. -/
-syntax (name := ruleOpaque) (docComment)? "sol_rule " ident (&" twins")? (&" alternative")?
-  (" (" ident " : " ident ")")? (ruleFrom)? " := " term : command
 
 /-! ## Schema variables
 
@@ -293,6 +364,12 @@ structure Schema where
   free : Array Name := #[]
   base : Array Name := #[]
   trail : Array Name := #[]
+  /-- Spell the kind as `PlaceExpr.kind x = Kind.k ∧ isSimple x` when the
+  variable stands alone as an assignment *target*, rather than as the `free`
+  conjuncts.  `Rules.lean` keeps the two spellings distinct for the memory
+  roots ("Where the conditions do not fold, and why"), and `Uniqueness.lean`
+  bridges them. -/
+  placeKind : Bool := false
   deriving Inhabited
 
 /-- A name with its disambiguating digits dropped: `sp1` and `sp2` are both
@@ -308,7 +385,7 @@ this is where the correspondence is written down. -/
 def schemaVar (name : String) : Schema :=
   match stemOf name with
   | "se" => { free := #[`isSe] }
-  | "nse" => { free := #[`isComplex] }
+  | "nse" => { free := #[`isComplex], base := #[`isComplex] }
   | "v" => { free := #[`isStack] }
   | "lv" => { free := #[`isStackVar] }
   | "sp" => { kind := some `storage, free := #[`isSp], base := #[`isSimple] }
@@ -319,12 +396,21 @@ def schemaVar (name : String) : Schema :=
   | "arr" => { kind := some `storage, base := #[`isSimple], trail := #[`isArray] }
   | "map" => { kind := some `storage, base := #[`isSimple], trail := #[`isMapping] }
   | "i" => { free := #[`isSimple], base := #[`isSimple] }
-  | "mv" => { kind := some `memory, free := #[`isMv], base := #[`isSimple] }
+  | "mv" => { kind := some `memory, free := #[`isMv], base := #[`isSimple],
+              placeKind := true }
   | "nmp" => { kind := some `memory, free := #[`isMemory, `isComplex],
                base := #[`isComplex] }
   | "sadr" => { free := #[`isSimple] }
   | "nadr" => { free := #[`isComplex] }
   | "nlhs" => { free := #[`isStorage, `isComplex] }
+  -- `path`/`mpath`: a target whose *location* is fixed and whose shape the
+  -- rule does not look at, the paper's unconstrained path.
+  | "path" => { kind := some `storage }
+  | "mpath" => { kind := some `memory, free := #[`isMemory] }
+  -- `s`: simple at whatever location it lives in, weaker than `se`, which
+  -- also says "stack".  `x`: constrained by the rule's `where` alone.
+  | "s" => { free := #[`isSimple], base := #[`isSimple] }
+  | "x" => {}
   | _ => {}
 
 /-! ## Translation -/
@@ -350,8 +436,21 @@ inductive Binding where
   /-- A scratch alias a capture statement introduced: the `Rules` name
   constant, the data location, and the expression captured from. -/
   | scratch (constName : Name) (kind : Name) (source : Term)
-  /-- A value the conditional freeze bound (`Rules.freezeRhs`'s lambda). -/
-  | frozen (v : Ident)
+  /-- A value the conditional freeze bound (`Rules.freezeRhs`'s lambda), or
+  the conditional index capture: the term the rest of the residual reads. -/
+  | frozen (v : Term)
+  /-- The name a declaration in the *conclusion* binds, with the data location
+  and type it was declared at: as an expression it is that variable. -/
+  | declared (kind : Name) (ty : Ident)
+  /-- A `PlaceExpr` taken apart by the conclusion's pattern: the expression is
+  its first component and `proof` its assignability witness, so writing the
+  name back in a place position rebuilds the pair. -/
+  | placeOf (proof : Ident)
+  /-- The alias `_ pv = e` binds: read back at the *expression's* location
+  (`Rules.valueAlias`), where `T pv = e` forces the stack. -/
+  | valueScratch (source : Term)
+  /-- A branch of the conclusion's `if`, which is a whole `Block`. -/
+  | blockParam
   deriving Inhabited
 
 /-- The names in scope while a goal is translated. -/
@@ -365,6 +464,13 @@ structure Scope where
   tyName : Ident
   /-- The family binder, when the rule has one. -/
   opName : Option Ident := none
+  /-- The conjunct the family binder's guard contributes, right behind the
+  operator equation. -/
+  opGuard : Option Term := none
+  /-- The `Option` parameter a declaration's initialiser or a push's value is:
+  a rule that mentions it writes the *parameter*, not `some e`, exactly as the
+  hand-written arms did — the condition has already pinned which it is. -/
+  optionParam : Option Ident := none
 
 def Scope.find? (sc : Scope) (n : Name) : Option Binding :=
   (sc.binds.find? (fun p => p.1 == n)).map (·.2)
@@ -410,6 +516,12 @@ inductive ExprView where
   /-- An application: the KeY-side vocabulary, read off the head name. -/
   | call (fn : Ident) (as : Array Syntax)
   | combine (lhs rhs : Syntax)
+  /-- `⊖ e`: the schematic unary operator. -/
+  | unop (arg : Syntax)
+  /-- A named operator the rule matches outright. -/
+  | fixedUnop (op : Name) (arg : Syntax)
+  | fixedBinop (op : Name) (lhs rhs : Syntax)
+  | ternary (c t e : Syntax)
   | escape (t : Term)
 
 /-- Split a dotted identifier.  Lean's lexer reads `sp.fld` as **one**
@@ -418,6 +530,9 @@ recovered here instead, exactly as `SoliditySyntax.expandSolPathExpr` does
 for the `sol!` grammar. -/
 def dottedParts (x : Ident) : List String :=
   x.getId.components.map (·.toString)
+
+/-- A `rule_expr` node for a bare schema variable. -/
+def varNode (x : Ident) : Syntax := mkNode ``exprVar #[x]
 
 def exprView? (stx : Syntax) : Option ExprView :=
   let a := args stx
@@ -434,16 +549,56 @@ def exprView? (stx : Syntax) : Option ExprView :=
   else if stx.isOfKind ``exprIndex then some (.index a[0]! a[1]!)
   else if stx.isOfKind ``exprPushPlace then some (.pushPlace a[0]!)
   else if stx.isOfKind ``exprIncDec then some (.incDec a[0]!)
-  else if stx.isOfKind ``exprCall then some (.call ⟨a[0]!⟩ a[1]!.getSepArgs)
+  else if stx.isOfKind ``exprCall then
+    -- `nsp.push()` is one identifier to the lexer, so the postfix production
+    -- never fires on it; the receiver is recovered here.
+    let f : Ident := ⟨a[0]!⟩
+    let as := a[1]!.getSepArgs
+    match f.getId.components.reverse, as.isEmpty with
+    | last :: base :: [], true =>
+        if last.toString == "push" then
+          some (.pushPlace (varNode (mkIdentFrom f base)))
+        else some (.call f as)
+    | _, _ => some (.call f as)
   else if stx.isOfKind ``exprCombine then some (.combine a[0]! a[1]!)
+  else if stx.isOfKind ``exprUnop then some (.unop a[0]!)
+  else if stx.isOfKind ``exprNot then some (.fixedUnop `not a[0]!)
+  else if stx.isOfKind ``exprAnd then some (.fixedBinop `and a[0]! a[1]!)
+  else if stx.isOfKind ``exprOr then some (.fixedBinop `or a[0]! a[1]!)
+  else if stx.isOfKind ``exprTernary then some (.ternary a[0]! a[1]! a[2]!)
   else if stx.isOfKind ``exprEscape then some (.escape ⟨a[0]!⟩)
   else none
+
+/-- Is this expression a bare schema variable? -/
+def isPlainVar (stx : Syntax) : Option Ident :=
+  match exprView? stx with
+  | some (.var x) => some x
+  | _ => none
+
+/-- The Boolean literal a bare `true`/`false` denotes. -/
+def boolLit? (stx : Syntax) : Option Bool :=
+  match exprView? stx with
+  | some (.var x) =>
+      match x.getId.toString with
+      | "true" => some true
+      | "false" => some false
+      | _ => none
+  | _ => none
 
 /-- The head of an application, if the expression is one. -/
 def callHead? (stx : Syntax) : Option (String × Array Syntax) :=
   match exprView? stx with
   | some (.call f as) => some (f.getId.toString, as)
   | _ => none
+
+/-- The head of an application read off the *node*, before `exprView?` gets to
+reinterpret it.  `sp.push()` is a push place in an expression and a push
+statement on its own, and only the position tells them apart. -/
+def rawCallHead? (stx : Syntax) : Option (String × Array Syntax) :=
+  if stx.isOfKind ``exprCall then
+    let a := args stx
+    some ((⟨a[0]!⟩ : Ident).getId.toString, a[1]!.getSepArgs)
+  else none
 
 /-- The head identifier of a path expression: the schema variable the whole
 path hangs off, and so the name that decides its kind. -/
@@ -453,6 +608,13 @@ partial def headName (stx : Syntax) : Name :=
   | some (.field b _) | some (.index b _) | some (.pushPlace b)
   | some (.incDec b) => headName b
   | _ => Name.anonymous
+
+/-- The schema variable a path hangs off, reaching through an `incDec`
+wrapper: `sp.fld++` is a rule about `sp`. -/
+partial def targetOf (stx : Syntax) : Syntax :=
+  match exprView? stx with
+  | some (.incDec b) => targetOf b
+  | _ => stx
 
 /-- `Kind.storage` / `Kind.memory` / `Kind.stack` as a term. -/
 def kindTerm (k : Name) : CommandElabM Term := do
@@ -497,10 +659,40 @@ partial def transExpr (sc : Scope) (asPlace : Bool) (stx : Syntax) :
   match view with
   | .escape t => return t
   | .call f _ => throwErrorAt stx s!"`{f.getId}` is a term, not a program expression"
-  | .combine _ _ => throwErrorAt stx "`⊕` is a term, not a program expression"
+  | .combine a b =>
+      let some op := sc.opName
+        | throwErrorAt stx "`⊕` needs the rule to declare a `BinOp` parameter"
+      `($(gen `WrappedExpr.binop) $op $(← transExpr sc false a) $(← transExpr sc false b))
+  | .unop a =>
+      let some op := sc.opName
+        | throwErrorAt stx "`⊖` needs the rule to declare a `UnOp` parameter"
+      `($(gen `WrappedExpr.unop) $op $(← transExpr sc false a))
+  | .fixedUnop op a =>
+      let oi := mkIdent (`UnOp ++ op)
+      `($(gen `WrappedExpr.unop) $oi $(← transExpr sc false a))
+  | .fixedBinop op a b =>
+      let oi := mkIdent (`BinOp ++ op)
+      `($(gen `WrappedExpr.binop) $oi $(← transExpr sc false a) $(← transExpr sc false b))
+  | .ternary c t e =>
+      `($(gen `WrappedExpr.ternary) $(← transExpr sc false c) $(← transExpr sc false t)
+          $(← transExpr sc false e))
   | .var x =>
+      if let some b := boolLit? stx then
+        let bt := mkIdent (if b then `Bool.true else `Bool.false)
+        return (← `($(gen `WrappedExpr.bool) $bt))
       match sc.find? x.getId with
       | some (.frozen v) => return v
+      | some (.blockParam) => return x
+      | some (.valueScratch src) =>
+          if asPlace then throwErrorAt stx "a value capture is not a place"
+          else `($(gen `Rules.valueAlias) $src)
+      | some (.declared k ty) =>
+          -- A declared name is a `Name`, not an expression; it reaches a goal
+          -- only as an assignment target or as an update's binder.
+          if asPlace then `($(gen `SoliditySyntax.varPlace) $(← kindTerm k) $ty $x)
+          else throwErrorAt stx s!"`{x.getId}` is a declared name, not an expression"
+      | some (.placeOf hass) =>
+          if asPlace then `((⟨$x, $hass⟩ : $(gen `PlaceExpr))) else return x
       | some (.scratch c k src) =>
           let kt ← kindTerm k
           let ci := mkIdent (`Rules ++ c)
@@ -521,7 +713,11 @@ partial def transExpr (sc : Scope) (asPlace : Bool) (stx : Syntax) :
           else `(($(gen `Rules.fieldFromAlias) $kt $ci $ty $src $f : $(gen `WrappedExpr)))
       | none =>
           let bt ← transExpr sc false b
-          let kt ← kindTerm (kindOfName (headName b))
+          -- A push place is a storage slot, and the field's own type is the
+          -- one the access has: `sp.push().fld` names the slot's member.
+          let isPush := match exprView? b with | some (.pushPlace _) => true | _ => false
+          let kt ← kindTerm (if isPush then `storage else kindOfName (headName b))
+          let ty : Term ← if isPush then `(($f).ty) else pure ty
           if asPlace then `($(gen `PlaceExpr.field) $kt $ty $bt $f)
           else `($(gen `WrappedExpr.field) $kt $ty $bt $f)
   | .index b i =>
@@ -552,8 +748,15 @@ partial def transExpr (sc : Scope) (asPlace : Bool) (stx : Syntax) :
 `Sym`, `SideFormula`, `UpdElem` and `Premise` are all written as
 applications, and each is read off its head name. -/
 
-/-- A `rule_expr` as a `Rules.Sym`. -/
+/-- A `rule_expr` as a `Rules.Sym`.
+
+An expression that *is* the conclusion's parameter denotes the parameter, and
+is read whole: `{ lv := se1 ⊕ se2 }` on a conclusion that matched the operator
+node is `read rhs`, not `combined` of its pieces, which is what
+`binopAssignment` writes. -/
 def transSym (sc : Scope) (stx : Syntax) : CommandElabM Term := do
+  if let some p := sc.asParam? stx then
+    return (← `($(gen `Sym.read) $p))
   match callHead? stx with
   | some ("current", #[p]) => `($(gen `Sym.current) $(← transExpr sc false p))
   | some ("length", #[a]) => `($(gen `Sym.length) $(← transExpr sc false a))
@@ -613,12 +816,6 @@ def transUpd (sc : Scope) (stx : Syntax) : CommandElabM Term := do
     | some ("transfer", #[r, v]) =>
         `($(gen `UpdElem.transfer) $(← transExpr sc false r) $(← transExpr sc false v))
     | some ("clear", #[t]) => `($(gen `UpdElem.memDelete) $(← transExpr sc false t))
-    | some ("alloc", as) =>
-        let some (.var nm) := exprView? as[1]!
-          | throwErrorAt e "`alloc` takes a type and a name"
-        if h : as.size = 3 then
-          `($(gen `UpdElem.memDecl) $(sc.tyName) $nm (some $(← transExpr sc false as[2])))
-        else `($(gen `UpdElem.memDecl) $(sc.tyName) $nm none)
     | _ =>
         match exprView? e with
         | some (.var x) =>
@@ -634,6 +831,24 @@ def transUpd (sc : Scope) (stx : Syntax) : CommandElabM Term := do
           let n := x.getId.toString
           if n == "storage" || n == "memory" then some n else none
       | _ => none
+    -- A declaration's own name on the left: the update binds the *name*, and
+    -- `alloc`/`default` are the two right-hand sides that reach it.
+    if let some (.var x) := exprView? lhs then
+      if let some (.declared _ ty) := sc.find? x.getId then
+        let bind (r : Term) : CommandElabM Term := `($(gen `UpdElem.bind) $x $r)
+        match callHead? rhs with
+        | some ("alloc", _) =>
+            let init := sc.optionParam.getD (mkIdent `init)
+            return (← `($(gen `UpdElem.memDecl) $ty $x $init))
+        | some ("default", _) =>
+            return (← bind (← `($(gen `BindRhs.val) ($(gen `Sym.deflt) $ty))))
+        | some ("path", #[t]) =>
+            return (← bind (← `($(gen `BindRhs.path) $(← transExpr sc false t))))
+        | some ("ref", #[t]) =>
+            return (← bind (← `($(gen `BindRhs.mref) $(← transExpr sc false t))))
+        | some ("slot", #[t]) =>
+            return (← bind (← `($(gen `BindRhs.pushSlot) $(← transExpr sc false t))))
+        | _ => return (← bind (← `($(gen `BindRhs.val) $(← transSym sc rhs))))
     match component, callHead? rhs with
     | some "storage", some ("save", #[p, t]) =>
         `($(gen `UpdElem.storage) ($(gen `StorageUpd.save) $(← transExpr sc false p) $(← transSym sc t)))
@@ -643,9 +858,15 @@ def transUpd (sc : Scope) (stx : Syntax) : CommandElabM Term := do
         `($(gen `UpdElem.storage) ($(gen `StorageUpd.copyFromMem) $(← transExpr sc false p) $(← transExpr sc false s)))
     | some "storage", some ("push", as) =>
         let arr ← transExpr sc false as[0]!
-        if h : as.size = 2 then
-          `($(gen `UpdElem.storage) ($(gen `StorageUpd.push) $arr (some $(← transExpr sc false as[1]))))
-        else `($(gen `UpdElem.storage) ($(gen `StorageUpd.push) $arr none))
+        -- `push(sp, se)` and `push(sp)` are the same update at different
+        -- sorts; which it is the condition has already said, so the element
+        -- written is the `Option` parameter itself.
+        match sc.optionParam with
+        | some v => `($(gen `UpdElem.storage) ($(gen `StorageUpd.push) $arr $v))
+        | none =>
+            if h : as.size = 2 then
+              `($(gen `UpdElem.storage) ($(gen `StorageUpd.push) $arr (some $(← transExpr sc false as[1]))))
+            else `($(gen `UpdElem.storage) ($(gen `StorageUpd.push) $arr none))
     | some "storage", some ("pushSlot", #[p]) =>
         `($(gen `UpdElem.storage) ($(gen `StorageUpd.pushPlace) $(← transExpr sc false p)))
     | some "storage", some ("pop", #[p]) =>
@@ -656,6 +877,12 @@ def transUpd (sc : Scope) (stx : Syntax) : CommandElabM Term := do
         `($(gen `UpdElem.heap) ($(gen `HeapUpd.write) $(← transExpr sc false p) $(← transSym sc t)))
     | some "memory", some ("writeRef", #[p, s]) =>
         `($(gen `UpdElem.heap) ($(gen `HeapUpd.writeRef) $(← transExpr sc false p) $(← transExpr sc false s)))
+    | none, some ("alloc", as) =>
+        let t ← transExpr sc false lhs
+        if h : as.size = 1 then
+          `($(gen `UpdElem.memDecl) ($t).ty ($(gen `Rules.varName) $t)
+              (some $(← transExpr sc false as[0])))
+        else `($(gen `UpdElem.memDecl) ($t).ty ($(gen `Rules.varName) $t) none)
     | none, some ("path", #[s]) =>
         `($(gen `UpdElem.bind) ($(gen `Rules.varName) $(← transExpr sc false lhs))
             ($(gen `BindRhs.path) $(← transExpr sc false s)))
@@ -695,12 +922,19 @@ inductive StmtView where
   | pop (target : Syntax)
   | transfer (recipient amount : Syntax)
   | ite (cond : Syntax) (thn els : Ident)
+  /-- `if (se) { … } else { … }` — the branches written out. -/
+  | iteWrite (cond : Syntax) (thn els : Array Syntax)
+  /-- `_ pv = e` — the capture at the *expression's* location. -/
+  | valueDecl (name : Ident) (src : Syntax)
+  /-- `T rv ?= e` — a conditional capture; which one the name says. -/
+  | freezeDecl (name : Ident) (src : Syntax)
+  /-- `T alias sp = e` — a storage *place* alias. -/
+  | aliasDecl (ty name : Ident) (src : Syntax)
+  /-- `delete(p)`. -/
+  | delete (target : Syntax)
   | expr (e : Syntax)
   | escape (t : Term)
   deriving Inhabited
-
-/-- A `rule_expr` node for a bare schema variable. -/
-def varNode (x : Ident) : Syntax := mkNode ``exprVar #[x]
 
 /-- The receiver of a dotted call head (`sp.pop`, `alice.account.push`): the
 components before the method name, rebuilt as a path. -/
@@ -720,6 +954,7 @@ def stmtView? (stx : Syntax) : Option StmtView :=
   else if k == ``stRequire then some (.require a[0]!)
   else if k == ``stAssert then some (.assert a[0]!)
   else if k == ``stRevert then some .revert
+  else if k == ``stDelete then some (.delete a[0]!)
   else if k == ``stCompound then some (.compound a[0]! a[1]!)
   else if k == ``stStackDecl then some (.decl `stack ⟨a[0]!⟩ ⟨a[1]!⟩ none)
   else if k == ``stStackDeclInit then some (.decl `stack ⟨a[0]!⟩ ⟨a[1]!⟩ (some a[2]!))
@@ -732,10 +967,15 @@ def stmtView? (stx : Syntax) : Option StmtView :=
   else if k == ``stPop then some (.pop a[0]!)
   else if k == ``stTransfer then some (.transfer a[0]! a[1]!)
   else if k == ``stIte then some (.ite a[0]! ⟨a[1]!⟩ ⟨a[2]!⟩)
+  else if k == ``stIteWrite then
+    some (.iteWrite a[0]! a[1]!.getSepArgs a[2]!.getSepArgs)
+  else if k == ``stValueDecl then some (.valueDecl ⟨a[0]!⟩ a[1]!)
+  else if k == ``stFreezeDecl then some (.freezeDecl ⟨a[1]!⟩ a[2]!)
+  else if k == ``stAliasDecl then some (.aliasDecl ⟨a[0]!⟩ ⟨a[1]!⟩ a[2]!)
   else if k == ``stExpr then
     -- `sp.pop()`, `arr.push(se)`, `sadr.transfer(se)`: one identifier to the
     -- lexer, a method call here.
-    match callHead? a[0]! with
+    match rawCallHead? a[0]! with
     | some (fn, as) =>
         let parts := fn.splitOn "."
         match parts.reverse with
@@ -756,21 +996,40 @@ def stmtView? (stx : Syntax) : Option StmtView :=
   else if k == ``stEscape then some (.escape ⟨a[0]!⟩)
   else none
 
+/-! A residual is a program, and two of its statements are not statements at
+all but *splits*: a conditional capture stands for the whole block below it,
+written twice.  `transBlock` is therefore where the shape is decided and
+`transStmt` only ever sees an ordinary statement. -/
+
+mutual
+
 /-- One residual statement, and the scope it leaves behind: a capture binds
 its scratch alias for the statements that follow. -/
-def transStmt (sc : Scope) (stx : Syntax) : CommandElabM (Term × Scope) := do
+partial def transStmt (sc : Scope) (stx : Syntax) : CommandElabM (Term × Scope) := do
   let some view := stmtView? stx
     | throwErrorAt stx "unsupported rule statement"
   match view with
   | .escape t => return (t, sc)
-  | .decl kind _ty name init =>
+  | .freezeDecl _ _ =>
+      throwErrorAt stx "a `?=` capture stands for the whole residual below it, \
+        so it may not appear inside one"
+  | .valueDecl name src =>
+      let t ← transExpr sc false src
+      return (← `($(gen `Rules.captureValue) $t), sc.withBind name.getId (.valueScratch t))
+  | .aliasDecl ty name src =>
+      return (← `($(gen `Stmt.storagePlaceAlias) $ty $name $(← transExpr sc false src)), sc)
+  | .decl kind ty name init =>
       let ctor := match kind with
         | `storage => mkIdent `Stmt.storageDecl
         | `memory => mkIdent `Stmt.memoryDecl
         | _ => mkIdent `Stmt.stackDecl
       let some initStx := init
-        | return (← `($ctor $(sc.tyName) $name none), sc)
+        | return (← `($ctor $ty $name none), sc)
       let src ← transExpr sc false initStx
+      -- The conclusion's own declared variable, re-declared: not a capture,
+      -- even where its name is spelled like a scratch alias (`mv`).
+      if let some (.declared ..) := sc.find? name.getId then
+        return (← `($ctor $ty $name (some $src)), sc)
       -- The capture idioms, named by the scratch alias the declaration binds.
       match scratchOf name.getId, kind with
       | some (`storagePathAliasName, _), `storage =>
@@ -786,7 +1045,7 @@ def transStmt (sc : Scope) (stx : Syntax) : CommandElabM (Term × Scope) := do
             | _ => `Rules.captureStackValue
           let h := mkIdent helper
           return (← `($h $src), sc.withBind name.getId (.scratch c k src))
-      | _, _ => return (← `($ctor $(sc.tyName) $name (some $src)), sc)
+      | _, _ => return (← `($ctor $ty $name (some $src)), sc)
   | .assign lhs rhs =>
       return (← `($(gen `Stmt.assign) $(← transExpr sc true lhs) $(← transExpr sc false rhs)), sc)
   | .compound lhs rhs =>
@@ -804,25 +1063,76 @@ def transStmt (sc : Scope) (stx : Syntax) : CommandElabM (Term × Scope) := do
       return (← `($(gen `Stmt.transfer) $(← transExpr sc false r) $(← transExpr sc false a)), sc)
   | .ite c thn els =>
       return (← `($(gen `Stmt.ite) $(← transExpr sc false c) $thn $els), sc)
+  | .iteWrite c thn els =>
+      return (← `($(gen `Stmt.ite) $(← transExpr sc false c)
+                    $(← transBlock sc thn) $(← transBlock sc els)), sc)
   | .require c => return (← `($(gen `Stmt.requireStmt) $(← transExpr sc false c)), sc)
   | .assert c => return (← `($(gen `Stmt.assertStmt) $(← transExpr sc false c)), sc)
   | .revert => return (← `($(gen `Stmt.revert) none), sc)
+  | .delete t => return (← `($(gen `Stmt.delete) $(← transExpr sc true t)), sc)
   | .expr e =>
       match callHead? e with
       | some ("delete", #[t]) =>
           return (← `($(gen `Stmt.delete) $(← transExpr sc true t)), sc)
       | _ => return (← `($(gen `Stmt.expr) $(← transExpr sc false e)), sc)
 
-/-- A residual program: statements folded left to right, each capture
-extending the scope the rest is read in. -/
-def transBlock (sc : Scope) (stmts : Array Syntax) : CommandElabM Term := do
+/-- A list of ordinary statements, folded left to right. -/
+partial def transStmts (sc : Scope) (stmts : Array Syntax) : CommandElabM Term := do
   let mut sc := sc
   let mut out : Array Term := #[]
-  for s in stmts do
-    let (t, sc') ← transStmt sc s
+  for st in stmts do
+    let (t, sc') ← transStmt sc st
     out := out.push t
     sc := sc'
   `([$out,*])
+
+/-- A residual program.
+
+Three shapes, in the order they are recognised.  A lone block parameter is
+that block (`ifElseTrue`'s residual is its own `then` branch).  A `?=` capture
+is a *split*: the freeze wraps everything below it in `Rules.freezeRhs`, and
+the index capture writes the whole list twice, once with the hoist and once
+without — which is what `Rules.indexWriteResolveBlock` does by hand, and why
+the two are written as one statement rather than an `if` the rule spells out.
+Anything else is the statements themselves. -/
+partial def transBlock (sc : Scope) (stmts : Array Syntax) : CommandElabM Term := do
+  -- A branch of the conclusion's own `if`, passed through whole.
+  if h : stmts.size = 1 then
+    if let some (.expr e) := stmtView? stmts[0] then
+      if let some x := isPlainVar e then
+        if let some .blockParam := sc.find? x.getId then
+          return x
+  -- A conditional capture: the freeze leads, the index capture may not.
+  for h : i in [0:stmts.size] do
+    if let some (.freezeDecl name src) := stmtView? stmts[i] then
+      let t ← transExpr sc false src
+      if stemOf name.getId.toString == "idx" then
+        let rest := stmts[0:i].toArray ++ stmts[i+1:stmts.size].toArray
+        let hoisted := stmts[0:i].toArray ++ #[stmts[i]] ++ stmts[i+1:stmts.size].toArray
+        let scC := sc.withBind name.getId (.frozen (← `($(gen `Rules.indexAlias) $t)))
+        -- The capture itself, in the branch that performs it.
+        let mut out : Array Term := #[]
+        let mut scc := scC
+        for st in hoisted do
+          if let some (.freezeDecl _ _) := stmtView? st then
+            out := out.push (← `($(gen `Rules.captureIndex) $t))
+          else
+            let (tm, sc') ← transStmt scc st
+            out := out.push tm
+            scc := sc'
+        let thenB : Term ← `([$out,*])
+        let elseB ← transStmts (sc.withBind name.getId (.frozen t)) rest
+        return (← `(if ($t).complex then $thenB else $elseB))
+      else
+        if i != 0 then
+          throwErrorAt stmts[i] "a value freeze wraps the residual below it, \
+            so it has to come first"
+        let rest := stmts[1:stmts.size].toArray
+        let body ← transBlock (sc.withBind name.getId (.frozen name)) rest
+        return (← `($(gen `Rules.freezeRhs) $t (fun $name => $body)))
+  transStmts sc stmts
+
+end
 
 /-! ### Goals -/
 
@@ -845,8 +1155,13 @@ def group? (stx : Syntax) : Option Syntax :=
 def goalView? (stx : Syntax) : Option GoalView :=
   if stx.getKind != ``goalLine then none else
   let label := (group? stx[1]).bind fun g => g[0].isStrLit?
+  -- The marker is a non-reserved keyword inside an optional group, so it is
+  -- found rather than indexed: the group also carries its `:` separator, and
+  -- the alternation may or may not wrap it in a node.
+  let hasAtom (g : Syntax) (v : String) : Bool :=
+    g.getArgs.any fun a => a.getAtomVal == v || a.getArgs.any (·.getAtomVal == v)
   let mode := (group? stx[2]).map fun g =>
-    if g[0].getAtomVal == "box" then `box else `diamond
+    if hasAtom g "box" then `box else `diamond
   let g := (group? stx[3]).map fun gg => gg[0]
   let isElse := match g with | some gg => gg.getKind == ``guardElse | none => false
   let guardStx := match g with
@@ -860,11 +1175,14 @@ inductive ResultView where
   | prog (upds : Array Syntax) (stmts : Array Syntax)
   | obligation (upds : Array Syntax) (φ : Syntax)
   | reverting
+  /-- `⟦ b ⟧` — the residual as a term. -/
+  | escape (b : Term)
 
 def resultView? (stx : Syntax) : Option ResultView :=
   let k := stx.getKind
   let a := args stx
   if isRevertResult stx then some .reverting
+  else if k == ``resEscape then some (.escape ⟨a[0]!⟩)
   else if k == ``resUpdProg then some (.prog a[0]!.getSepArgs a[1]!.getSepArgs)
   else if k == ``resProg then some (.prog #[] a[0]!.getSepArgs)
   else if k == ``resUpdObl then some (.obligation a[0]!.getSepArgs a[1]!)
@@ -930,14 +1248,39 @@ def renderConds (cs : Array Cond) : CommandElabM Term := do
 def freeConds (x : Ident) : Array Cond :=
   (schemaVar x.getId.toString).free.map (Cond.pred · x)
 
-/-- The pattern a matched expression is destructured by, and the conjuncts
-its schema variables contribute.  `holes` writes `_` where the condition
-does not look — the static type, and a field the rule does not name. -/
-def analyzePat (holes : Bool) (sc : Scope) (stx : Syntax) :
-    CommandElabM (Option (Term × Array Cond × Array Cond)) := do
+/-- What a matched expression contributes: the pattern it is destructured by,
+the conjuncts that must lead the whole condition (an operator equation, which
+ties the statement's operator to the family index), the conjuncts its schema
+variables contribute, and the ones that must trail them.
+
+`holes` writes `_` where the condition does not look — the static type, and a
+field the rule does not name.
+
+The `base`/`free` split is the paper's: a variable *under* a path pattern has
+already had its location said by the pattern's `Kind`, a variable standing
+under an operator has not. -/
+partial def analyzePat (holes : Bool) (sc : Scope) (stx : Syntax) :
+    CommandElabM (Option (Term × Array Cond × Array Cond × Array Cond)) := do
   let some view := exprView? stx | return none
   let ty := sc.tyName
   let tyPat : Term ← if holes then `(_) else `($ty)
+  -- An operand of an operator pattern: a variable contributes its `free`
+  -- conjuncts, anything else is matched in turn.
+  let operand (e : Syntax) : CommandElabM (Term × Array Cond) := do
+    match isPlainVar e with
+    | some x => return (x, freeConds x)
+    | none =>
+        match ← analyzePat holes sc e with
+        | some (p, lead, cs, tr) => return (p, lead ++ cs ++ tr)
+        | none => throwErrorAt e "unsupported pattern"
+  let opEq : CommandElabM (Ident × Array Cond) := do
+    let some op := sc.opName
+      | throwErrorAt stx "this conclusion needs the rule to declare an operator parameter"
+    let opS := mkIdent `opS
+    let guard : Array Cond := match sc.opGuard with
+      | some g => #[Cond.raw g]
+      | none => #[]
+    return (opS, #[Cond.raw (← `($opS = $op))] ++ guard)
   match view with
   | .field b f =>
       let some (.var bx) := exprView? b | return none
@@ -945,7 +1288,7 @@ def analyzePat (holes : Bool) (sc : Scope) (stx : Syntax) :
       let fPat : Term ← if holes then `(_) else `($f)
       let pat ← `($(gen `WrappedExpr.field) $kt $tyPat $bx $fPat)
       let sch := schemaVar bx.getId.toString
-      return some (pat, sch.base.map (Cond.pred · bx), sch.trail.map (Cond.pred · bx))
+      return some (pat, #[], sch.base.map (Cond.pred · bx), sch.trail.map (Cond.pred · bx))
   | .index b i =>
       let some (.var bx) := exprView? b | return none
       let some (.var ix) := exprView? i | return none
@@ -953,21 +1296,59 @@ def analyzePat (holes : Bool) (sc : Scope) (stx : Syntax) :
       let pat ← `($(gen `WrappedExpr.index) $kt $tyPat $bx $ix)
       let sb := schemaVar bx.getId.toString
       let si := schemaVar ix.getId.toString
-      return some (pat, sb.base.map (Cond.pred · bx) ++ si.base.map (Cond.pred · ix),
+      return some (pat, #[],
+                   sb.base.map (Cond.pred · bx) ++ si.base.map (Cond.pred · ix),
                    sb.trail.map (Cond.pred · bx) ++ si.trail.map (Cond.pred · ix))
   | .pushPlace b =>
       let some (.var bx) := exprView? b | return none
       let pat ← `($(gen `WrappedExpr.pushPlace) $bx)
       let sch := schemaVar bx.getId.toString
-      return some (pat, sch.base.map (Cond.pred · bx), #[])
+      -- A push place carries no `Kind` of its own, so the receiver's location
+      -- is a conjunct rather than part of the pattern.
+      let kindCond : Array Cond ← match sch.kind with
+        | some k => pure #[Cond.raw (← `(($bx).kind = $(← kindTerm k)))]
+        | none => pure #[]
+      return some (pat, #[], kindCond ++ sch.base.map (Cond.pred · bx), #[])
   | .incDec b =>
-      let some (.var bx) := exprView? b | return none
-      let some op := sc.opName
-        | throwErrorAt stx "`++` needs the rule to declare an `IncDec` parameter"
+      let (opS, lead) ← opEq
+      match isPlainVar b with
+      | some bx =>
+          let pat ← `($(gen `WrappedExpr.incDec) $opS $bx)
+          return some (pat, lead, freeConds bx, #[])
+      | none =>
+          let some (inner, _, cs, tr) ← analyzePat holes sc b
+            | throwErrorAt b "unsupported `++` target"
+          return some (← `($(gen `WrappedExpr.incDec) $opS $inner), lead, cs, tr)
+  | .combine a b =>
+      let (opS, lead) ← opEq
+      let (pa, ca) ← operand a
+      let (pb, cb) ← operand b
+      return some (← `($(gen `WrappedExpr.binop) $opS $pa $pb), lead, ca ++ cb, #[])
+  | .fixedBinop op a b =>
       let opS := mkIdent `opS
-      let pat ← `($(gen `WrappedExpr.incDec) $opS $bx)
-      let sch := schemaVar bx.getId.toString
-      return some (pat, #[Cond.raw (← `($opS = $op))] ++ sch.free.map (Cond.pred · bx), #[])
+      let oi := mkIdent (`BinOp ++ op)
+      let (pa, ca) ← operand a
+      let (pb, cb) ← operand b
+      return some (← `($(gen `WrappedExpr.binop) $opS $pa $pb),
+                   #[Cond.raw (← `($opS = $oi))], ca ++ cb, #[])
+  | .unop a =>
+      let (opS, lead) ← opEq
+      let (pa, ca) ← operand a
+      return some (← `($(gen `WrappedExpr.unop) $opS $pa), lead, ca, #[])
+  | .fixedUnop op a =>
+      let oi := mkIdent (`UnOp ++ op)
+      let (pa, ca) ← operand a
+      return some (← `($(gen `WrappedExpr.unop) $oi $pa), #[], ca, #[])
+  | .ternary c t e =>
+      let (pc, cc) ← operand c
+      let (pt, _) ← operand t
+      let (pe, _) ← operand e
+      return some (← `($(gen `WrappedExpr.ternary) $pc $pt $pe), #[], cc, #[])
+  | .var _ =>
+      -- A Boolean literal is a pattern with nothing to say.
+      let some b := boolLit? stx | return none
+      let bt := mkIdent (if b then `Bool.true else `Bool.false)
+      return some (← `($(gen `WrappedExpr.bool) $bt), #[], #[], #[])
   | _ => return none
 
 /-! ## Assembly
@@ -1083,31 +1464,6 @@ def withOriginOf (o : Option Term) (e : Term) : CommandElabM Term := do
   | none => return e
   | some o => `($(gen `Rules.withOrigin) $o <| $e)
 
-/-- The opaque form: the effect is given as a term.  For the rules whose
-condition is a bespoke predicate, or whose goals consume the condition proof
-(`storageDeleteComplexTarget`, `functionCallArgCapture`, …) — the handful
-the schema-variable convention cannot reach. -/
-@[command_elab Solidity.RuleSyntax.ruleOpaque]
-def elabRuleOpaque : CommandElab := fun stx => do
-  match stx with
-  | `(command| $[$doc:docComment]? sol_rule $name:ident $[twins%$tw]? $[alternative%$alt]?
-        $[($b:ident : $bty:ident)]? $[$fr:ruleFrom]? := $e:term) => do
-      let o ← originOf? (fr.map (·.raw))
-      let effect ← withOriginOf o e
-      pushRule { ref := stx, name := name, doc := doc
-                 binder := match b, bty with
-                   | some b, some t => some { name := b, type := t }
-                   | _, _ => none
-                 effect := effect, twins := tw.isSome, alternative := alt.isSome }
-  | _ => throwUnsupportedSyntax
-
-/-! ### The declarative form -/
-
-/-- Is this expression a bare schema variable? -/
-def isPlainVar (stx : Syntax) : Option Ident :=
-  match exprView? stx with
-  | some (.var x) => some x
-  | _ => none
 
 /-- The analysis of a conclusion: which builder carries it, what its
 parameters are called, which one is destructured, and what the schema
@@ -1119,71 +1475,145 @@ structure Concl where
   and whether the scrutinee is the place coercion `(lhs : $(gen `WrappedExpr))` —
   the case where the `goals` match has to take the `PlaceExpr` apart as
   `⟨PAT, _⟩`, because the condition reaches it as an unreduced beta-redex
-  (`StepEffect`'s docstring, "two wrinkles"). -/
-  destruct : Option (Nat × Term × Term × Bool) := none
+  (`StepEffect`'s docstring, "two wrinkles").
+
+  The `cond` pattern is absent where the condition already matches on its own:
+  an `Option` parameter's conjunct *is* a match, and wrapping it in a second
+  one would say the same thing twice. -/
+  destruct : Option (Nat × Option Term × Term × Bool) := none
   conds : Array Cond := #[]
   paramPats : Array (Ident × Option Syntax) := #[]
   /-- An extra leading `CaseMode` argument, as `popEffect` takes. -/
   modeFirst : Bool := false
+  /-- The receiver of a matched push *place*.  `WrappedExpr.pushPlace` carries
+  no assignability invariant of its own, so a goal that pushes through it has
+  to reuse the witness the matched `PlaceExpr` came with. -/
+  placeBase : Option Ident := none
   /-- The *statement's* operator, where the conclusion binds one.  A goal
   must use this and not the family index: the two are equal only under the
   condition's first conjunct, so `compoundGoals` is handed the operator the
   statement carries, exactly as the hand-written arms did. -/
   stmtOp : Option Ident := none
 
-/-- One side of a two-sided conclusion: its parameter name, the conjuncts it
-contributes, and — when it is a path — the pattern it is matched by. -/
+/-- One side of a two-sided conclusion: its parameter name, the conjuncts that
+must lead the condition, the conjuncts it contributes, and — when it is a path
+or an operator node — the pattern it is matched by.
+
+`kindSpelling` asks for the *target* spelling of a variable's location,
+`PlaceExpr.kind x = Kind.k ∧ <base>`, rather than its `free` conjuncts.  A
+push or pop receiver always wants it; an assignment target wants it only where
+the schema says so, because `Rules.lean` keeps `isMemory mv` and
+`mv.kind = Kind.memory` as distinct terms. -/
 private def side (sc : Scope) (fallback : Name) (stx : Syntax)
-    (isPlace : Bool := false) :
-    CommandElabM (Ident × Array Cond × Option (Term × Term × Array Cond)) := do
-  match isPlainVar stx with
+    (isPlace : Bool := false) (forceKindSpelling : Bool := false) :
+    CommandElabM (Ident × Array Cond × Array Cond ×
+      Option (Term × Term × Array Cond)) := do
+  match (if (boolLit? stx).isSome then none else isPlainVar stx) with
   | some x =>
-      match isPlace, (schemaVar x.getId.toString).kind with
+      let sch := schemaVar x.getId.toString
+      match isPlace && (forceKindSpelling || sch.placeKind), sch.kind with
       | true, some k =>
           let kt ← kindTerm k
-          return (x, #[Cond.raw (← `($(gen `PlaceExpr.kind) $x = $kt)),
-                       Cond.pred `isSimple x], none)
-      | _, _ => return (x, freeConds x, none)
+          return (x, #[], #[Cond.raw (← `($(gen `PlaceExpr.kind) $x = $kt))] ++
+                       sch.base.map (Cond.pred · x), none)
+      | _, _ => return (x, #[], freeConds x, none)
   | none =>
-      let some (condPat, cs, trail) ← analyzePat true sc stx
+      let some (condPat, lead, cs, trail) ← analyzePat true sc stx
         | throwErrorAt stx "unsupported conclusion shape"
-      let some (goalPat, _, _) ← analyzePat false sc stx
+      let some (goalPat, _, _, _) ← analyzePat false sc stx
         | throwErrorAt stx "unsupported conclusion shape"
-      return (mkIdent fallback, cs, some (condPat, goalPat, trail))
+      return (mkIdent fallback, lead, cs, some (condPat, goalPat, trail))
+
+/-- Does this expression bind an operator the goals must read?  A conclusion
+that matched `⊕`, `⊖` or `++` carries the *statement's* operator, and a goal
+has to use that and not the family index. -/
+def bindsStmtOp (stx : Syntax) : Bool :=
+  match exprView? stx with
+  | some (.combine _ _) | some (.unop _) | some (.incDec _) => true
+  | some (.fixedBinop _ _ _) => true
+  | _ => false
+
+/-- The `Option` parameter of a declaration's initialiser or a push's value,
+and the conjuncts it contributes.  The condition names the parameter, not the
+expression under it: which shape it is is exactly what the condition says. -/
+private def optionCond (sc : Scope) (vp : Ident) (arg : Option Syntax) :
+    CommandElabM (Array Cond × Option (Term × Term × Array Cond)) := do
+  let some e := arg
+    | return (#[Cond.raw (← `($vp = none))], none)
+  match isPlainVar e with
+  | some x =>
+      let cs := freeConds x
+      if cs.isEmpty then
+        return (#[Cond.raw (← `(Option.isSome $vp))],
+                some (← `(some _), ← `(some $x), #[]))
+      let inner ← renderConds cs
+      return (#[Cond.raw (← `(match $vp:ident with | some $x:ident => $inner | none => False))],
+              some (← `(some _), ← `(some $x), #[]))
+  | none =>
+      let some (condPat, lead, cs, trail) ← analyzePat true sc e
+        | throwErrorAt e "unsupported initialiser"
+      let some (goalPat, _, _, _) ← analyzePat false sc e
+        | throwErrorAt e "unsupported initialiser"
+      let inner ← renderConds (lead ++ cs ++ trail)
+      return (#[Cond.raw (← `(match $vp:ident with | some $condPat => $inner | _ => False))],
+              some (← `(some $condPat), ← `(some $goalPat), #[]))
 
 /-- The conclusion of a rule. -/
 def analyzeConcl (sc : Scope) (stx : Syntax) : CommandElabM Concl := do
   let some view := stmtView? stx
     | throwErrorAt stx s!"unsupported conclusion (kind {stx.getKind})"
   let two (builder : Name) (a b : Syntax) (aPlace bPlace : Bool)
-      (lead : Array Cond := #[]) (leadParams : Array Ident := #[]) :
+      (extraLead : Array Cond := #[]) (leadParams : Array Ident := #[]) :
       CommandElabM Concl := do
-    let (ap, ac, apat) ← side sc `lhs a
-    let (bp, bc, bpat) ← side sc `rhs b
+    let (ap, alead, ac, apat) ← side sc `lhs a (isPlace := aPlace)
+    let (bp, blead, bc, bpat) ← side sc `rhs b (isPlace := bPlace)
     if apat.isSome && bpat.isSome then
       throwErrorAt stx "a rule matches at most one side of its conclusion"
     let n := leadParams.size
     let params := leadParams ++ #[ap, bp]
     let trail := (apat.map (·.2.2)).getD ((bpat.map (·.2.2)).getD #[])
-    let destruct : Option (Nat × Term × Term × Bool) :=
+    let destruct : Option (Nat × Option Term × Term × Bool) :=
       match apat, bpat with
-      | some (c, g, _), _ => some (n, c, g, aPlace)
-      | _, some (c, g, _) => some (n + 1, c, g, bPlace)
+      | some (c, g, _), _ => some (n, some c, g, aPlace)
+      | _, some (c, g, _) => some (n + 1, some c, g, bPlace)
       | _, _ => none
+    let opS := mkIdent `opS
+    let placeBase : Option Ident :=
+      if aPlace && apat.isSome then
+        match exprView? a with
+        | some (.pushPlace b) => isPlainVar b
+        | _ => none
+      else none
     return { builder := builder, params := params
-             destruct := destruct
-             conds := lead ++ ac ++ bc ++ trail
+             destruct := destruct, placeBase := placeBase
+             conds := alead ++ blead ++ extraLead ++ ac ++ bc ++ trail
              paramPats := #[(ap, if apat.isSome then some a else none),
-                            (bp, if bpat.isSome then some b else none)] }
+                            (bp, if bpat.isSome then some b else none)]
+             stmtOp := if bindsStmtOp a || bindsStmtOp b then some opS else none }
   let one (builder : Name) (a : Syntax) (aPlace : Bool)
       (placeKind : Bool := false) : CommandElabM Concl := do
-    let (ap, ac, apat) ← side sc `target a placeKind
+    let (ap, alead, ac, apat) ← side sc `target a (isPlace := aPlace)
+      (forceKindSpelling := placeKind)
+    let opS := mkIdent `opS
     return { builder := builder, params := #[ap]
-             destruct := apat.map fun (c, g, _) => (0, c, g, aPlace)
-             conds := ac ++ (apat.map (·.2.2)).getD #[]
-             paramPats := #[(ap, if apat.isSome then some a else none)] }
+             destruct := apat.map fun (c, g, _) => (0, some c, g, aPlace)
+             conds := alead ++ ac ++ (apat.map (·.2.2)).getD #[]
+             paramPats := #[(ap, if apat.isSome then some a else none)]
+             stmtOp := if bindsStmtOp a then some opS else none }
   match view with
-  | .assign lhs rhs => two `assignEffect lhs rhs true false
+  | .delete t => one `deleteEffect t true
+  | .assign lhs rhs =>
+      -- `res = fn(args)`: the one conclusion whose right-hand side is a call
+      -- to a *parameter*, which is how a call statement is written.
+      match isPlainVar lhs, callHead? rhs with
+      | some res, some (_, as) =>
+          if h : as.size = 1 then
+            if let some argv := isPlainVar as[0] then
+              if let some (.call fnI _) := exprView? rhs then
+                return { builder := `callEffect, params := #[res, fnI, argv]
+                         paramPats := #[(res, none), (fnI, none), (argv, none)] }
+      | _, _ => pure ()
+      two `assignEffect lhs rhs true false
   | .compound lhs rhs => do
       let some op := sc.opName
         | throwErrorAt stx "`⊕=` needs the rule to declare a `BinOp` parameter"
@@ -1195,51 +1625,56 @@ def analyzeConcl (sc : Scope) (stx : Syntax) : CommandElabM Concl := do
   | .expr e =>
       match callHead? e with
       | some ("delete", #[t]) => one `deleteEffect t true
+      | some ("pushAssign", #[t, v]) => do
+          let some tp := isPlainVar t | throwErrorAt t "a push-assign target is a variable"
+          let some vp := isPlainVar v | throwErrorAt v "a push-assign value is a variable"
+          return { builder := `pushAssignEffect, params := #[tp, vp]
+                   paramPats := #[(tp, none), (vp, none)] }
+      | some ("pushFieldAssign", #[t, f, v]) => do
+          let some tp := isPlainVar t | throwErrorAt t "a push-assign target is a variable"
+          let some fp := isPlainVar f | throwErrorAt f "a push-assign field is a variable"
+          let some vp := isPlainVar v | throwErrorAt v "a push-assign value is a variable"
+          return { builder := `pushFieldAssignEffect, params := #[tp, fp, vp]
+                   paramPats := #[(tp, none), (fp, none), (vp, none)] }
       | _ => one `exprEffect e false
   | .require c => one `requireEffect c false
   | .assert c => one `assertEffect c false
   | .revert => return { builder := `revertEffect, params := #[], conds := #[] }
   | .pop t => one `popEffect t true (placeKind := true)
   | .transfer r a => two `transferEffect r a false false
+  | .aliasDecl ty name src => do
+      let some sp := isPlainVar src | throwErrorAt src "an alias source is a variable"
+      return { builder := `storagePlaceAliasEffect, params := #[ty, name, sp]
+               paramPats := #[(ty, none), (name, none), (sp, none)] }
   | .push target value => do
-      let (tp, tc, tpat) ← side sc `target target true
+      let (tp, tlead, tc, tpat) ← side sc `target target (isPlace := true)
+        (forceKindSpelling := true)
       let vp := mkIdent `value
-      let vc ← match value with
-        | none => pure #[Cond.raw (← `($vp = none))]
-        | some v =>
-            match isPlainVar v with
-            | some x =>
-                let inner ← renderConds (freeConds x)
-                pure #[Cond.raw (← `(match $vp:ident with | some $x:ident => $inner | none => False))]
-            | none => throwErrorAt v "a push argument must be a schema variable"
+      let (vc, vpat) ← optionCond sc vp value
       return { builder := `pushEffect, params := #[tp, vp]
-               destruct := tpat.map fun (c, g, _) => (0, c, g, true)
-               conds := tc ++ vc
-               paramPats := #[(tp, if tpat.isSome then some target else none)] }
+               destruct := (tpat.map fun (c, g, _) => (0, some c, g, true)) <|>
+                 (vpat.map fun (_, g, _) => (1, none, g, false))
+               conds := tlead ++ tc ++ vc
+               paramPats := #[(tp, if tpat.isSome then some target else none),
+                              (vp, none)] }
   | .decl kind ty name init => do
       let builder := match kind with
         | `storage => `storageDeclEffect
         | `memory => `memoryDeclEffect
         | _ => `stackDeclEffect
       let initP := mkIdent `init
-      let cs ← match init with
-        | none => pure #[Cond.raw (← `($initP = none))]
-        | some _ => pure #[Cond.raw (← `(Option.isSome $initP))]
-      let destruct ← match init with
-        | none => pure none
-        | some e =>
-            let some x := isPlainVar e
-              | throwErrorAt e "a declaration's initialiser must be a schema variable"
-            let c ← `(some _)
-            let g ← `(some $x)
-            pure (some (2, c, g, false))
+      let (cs, ipat) ← optionCond sc initP init
       return { builder := builder, params := #[ty, name, initP]
-               destruct := destruct, conds := cs
+               destruct := ipat.map fun (_, g, _) => (2, none, g, false)
+               conds := cs
                paramPats := #[(ty, none), (name, none), (initP, none)] }
   | .ite c thn els => do
-      let (cp, cc, _) ← side sc `cond c
-      return { builder := `iteEffect, params := #[cp, thn, els], conds := cc
-               paramPats := #[(cp, none), (thn, none), (els, none)] }
+      let (cp, clead, cc, cpat) ← side sc `cond c
+      return { builder := `iteEffect, params := #[cp, thn, els]
+               destruct := cpat.map fun (cc', g, _) => (0, some cc', g, false)
+               conds := clead ++ cc ++ (cpat.map (·.2.2)).getD #[]
+               paramPats := #[(cp, if cpat.isSome then some c else none),
+                              (thn, none), (els, none)] }
   | _ => throwErrorAt stx "unsupported conclusion"
 
 /-! ### Goals
@@ -1260,6 +1695,7 @@ def modeTerm (m : Name) : CommandElabM Term := do
 def transResult (sc : Scope) (r : ResultView) : CommandElabM Term := do
   match r with
   | .reverting => `($(gen `RuleResidual.reverting))
+  | .escape b => `($(gen `RuleResidual.prog) [] $b)
   | .prog upds stmts =>
       let us ← upds.mapM (transUpd sc)
       let b ← transBlock sc stmts
@@ -1345,6 +1781,61 @@ def transGoals (sc : Scope) (goals : Array GoalView) (premStx : Array Syntax) :
     if g.guardStx.isSome then prev := g.guardStx
   `([$out,*])
 
+/-- The scope a rule's goals are read in.
+
+Beyond the condition's parameters a goal may name three things the conclusion
+introduced: a declaration's `Option` initialiser or a push's value — written as
+the *parameter*, because the condition has already said which shape it is —
+the branches of a matched `if`, which are whole blocks, and the receiver of a
+matched push place, which comes with the assignability witness the matched
+`PlaceExpr` was built from. -/
+def goalScope (concl : Concl) (tyName : Ident) (familyOp : Option Ident)
+    (hass : Ident) : Scope := Id.run do
+  let params := concl.params
+  let declKind : Option Name := match concl.builder with
+    | `storageDeclEffect | `storagePlaceAliasEffect => some `storage
+    | `memoryDeclEffect => some `memory
+    | `stackDeclEffect => some `stack
+    | _ => none
+  let mut binds : Array (Name × Binding) := #[]
+  if concl.builder == `iteEffect then
+    binds := binds.push (params[1]!.getId, .blockParam)
+    binds := binds.push (params[2]!.getId, .blockParam)
+  if let some b := concl.placeBase then
+    binds := binds.push (b.getId, .placeOf hass)
+  if let some kind := declKind then
+    binds := binds.push (params[1]!.getId, .declared kind params[0]!)
+  -- The place alias's initialiser is not optional, so it has no such parameter.
+  let optionParam : Option Ident :=
+    if concl.builder == `pushEffect then some params[1]!
+    else if declKind.isSome && concl.builder != `storagePlaceAliasEffect then
+      some params[2]!
+    else none
+  return { params := concl.paramPats, tyName := tyName, binds := binds
+           opName := concl.stmtOp <|> familyOp, optionParam := optionParam }
+
+/-- Every identifier a term mentions. -/
+partial def identsOf (stx : Syntax) : Array Name :=
+  match stx with
+  | .ident _ _ n _ => #[n]
+  | .node _ _ as => as.foldl (fun acc a => acc ++ identsOf a) #[]
+  | _ => #[]
+
+/-- The names the conclusion's *pattern* binds and nothing else does: the
+schema variables under the matched expression, the fields it names, and the
+type binder — minus the parameters, which are in scope either way.
+
+Lean's lexer reads `sp.fld` as one identifier, so a dotted name stands for its
+components here as it does everywhere else in this module. -/
+def patternBinders (conclStx : Syntax) (tyName : Ident) (params : Array Ident) :
+    Array Name :=
+  let raw := (identsOf conclStx).flatMap fun n =>
+    (n.components.map (Name.mkSimple ·.toString)).toArray
+  (raw.push tyName.getId).filter fun n => !params.any (·.getId == n)
+
+def mentionsAny (t : Syntax) (names : Array Name) : Bool :=
+  (identsOf t).any (names.contains ·)
+
 /-- The declarative form: the conclusion, the goals, and the conditions the
 schema variables do not carry. -/
 @[command_elab Solidity.RuleSyntax.ruleDecl]
@@ -1358,10 +1849,12 @@ def elabRuleDecl : CommandElab := fun stx => do
   let name : Ident := ⟨a[1]!⟩
   let twins := (group? a[2]!).isSome
   let alternative := (group? a[3]!).isSome
+  let binderStx := (group? a[4]!).map fun g => (args g[0])
   let binder : Option RuleBinder :=
-    (group? a[4]!).map fun g =>
-      let ga := args g
-      { name := ⟨ga[0]!⟩, type := ⟨ga[1]!⟩ }
+    binderStx.map fun ga => { name := ⟨ga[0]!⟩, type := ⟨ga[1]!⟩ }
+  -- `(op : BinOp | g)`: the guard is a conjunct, not a binder.
+  let opGuard : Option Term :=
+    binderStx.bind fun ga => (group? ga[2]!).map fun g => ⟨(args g)[0]!⟩
   let origin ← originOf? ((group? a[5]!).map fun g => g[0])
   let conclStx := a[6]!
   let goalsStx := a[7]!
@@ -1372,7 +1865,8 @@ def elabRuleDecl : CommandElab := fun stx => do
   let whereStx := (group? a[9]!).map fun g => g[0]
   -- The scope the conclusion is read in.
   let tyName := mkIdent `ty
-  let sc0 : Scope := { tyName := tyName, opName := binder.map (·.name) }
+  let sc0 : Scope := { tyName := tyName, opName := binder.map (·.name)
+                       opGuard := opGuard }
   let concl ← analyzeConcl sc0 conclStx
   -- The condition: the schema variables, then whatever `where` adds — or,
   -- when the spelling is irregular, whatever `where cond :=` says outright.
@@ -1392,7 +1886,7 @@ def elabRuleDecl : CommandElab := fun stx => do
   -- and falls through to `False`: the arm the match compiler keeps is what
   -- makes a `goals` arm's proof reduce to `False` everywhere else.
   let condBody ← match concl.destruct, condOverride with
-    | some (idx, condPat, _, placeCoerced), none =>
+    | some (idx, some condPat, _, placeCoerced), none =>
         let p := concl.params[idx]!
         let scrut : Term ←
           if placeCoerced then `(($p : $(gen `WrappedExpr))) else `($p)
@@ -1401,9 +1895,8 @@ def elabRuleDecl : CommandElab := fun stx => do
   let params := concl.params
   -- The goals read the *statement's* operator where the conclusion binds
   -- one; the condition's first conjunct is what ties it to the family index.
-  let scope : Scope :=
-    { params := concl.paramPats, tyName := tyName
-      opName := concl.stmtOp <|> binder.map (·.name) }
+  let hass := mkIdent `hass
+  let scope := goalScope concl tyName (binder.map (·.name)) hass
   -- The goals.
   let goalViews : Array GoalView ←
     if goalsStx.getKind == ``goalsOne then
@@ -1418,31 +1911,52 @@ def elabRuleDecl : CommandElab := fun stx => do
   let isUnfold := goalViews.any fun g =>
     match resultView? g.result with
     | some (.prog _ stmts) => !stmts.isEmpty
+    | some (.escape _) => true
     | _ => false
+  -- A rule whose residual is a term reads the condition proof, so the proof
+  -- is bound rather than dropped.
+  let readsProof := goalViews.any fun g =>
+    match resultView? g.result with | some (.escape _) => true | _ => false
   -- `cond`, and — where the rule rewrites — `goals` re-matching the same
   -- scrutinee with the condition proof as a second discriminant.
   let condFn ← `(fun $params:ident* => $condBody)
   let hName := mkIdent `h
+  let unfoldBody : CommandElabM Term := do
+    if goalsStx.getKind == ``goalsOne || goalViews.size == 1 then
+      match resultView? goalViews[0]!.result with
+      | some (.prog _ stmts) => transBlock scope stmts
+      | some (.escape b) => pure b
+      | _ => transGoals scope goalViews premStx
+    else transGoals scope goalViews premStx
   let goalsFn ←
     match concl.destruct, isUnfold with
     | some (idx, _, goalPat, placeCoerced), true =>
         let p := params[idx]!
-        let inner ←
-          if goalsStx.getKind == ``goalsOne || goalViews.size == 1 then
-            match resultView? goalViews[0]!.result with
-            | some (.prog _ stmts) => transBlock scope stmts
-            | _ => transGoals scope goalViews premStx
-          else transGoals scope goalViews premStx
+        let inner ← unfoldBody
+        -- The match is there to *name* the pattern's binders.  Where the
+        -- residual never reaches for one — because it writes the matched
+        -- expression whole, which denotes the parameter — there is nothing to
+        -- name, and the hand-written arm did not match either.
+        let bound := patternBinders conclStx tyName params
+        if !readsProof && !(mentionsAny inner bound) then
+          `(fun $params:ident* _ => $(gen `Rules.unfoldGoal) <| $inner)
+        else
         let alt ←
           if placeCoerced then
-            `(Lean.Parser.Term.matchAltExpr| | ⟨$goalPat, _⟩, _ => $inner)
+            `(Lean.Parser.Term.matchAltExpr| | ⟨$goalPat, $hass⟩, _ => $inner)
           else
             `(Lean.Parser.Term.matchAltExpr| | $goalPat, _ => $inner)
         `(fun $params:ident* $hName:ident => $(gen `Rules.unfoldGoal) <|
             match $p:ident, $hName:ident with $alt:matchAlt)
+    | _, true =>
+        let inner ← unfoldBody
+        if readsProof then
+          `(fun $params:ident* $hName:ident => $(gen `Rules.unfoldGoal) <| $inner)
+        else `(fun $params:ident* _ => $(gen `Rules.unfoldGoal) <| $inner)
     | _, _ =>
         let body ← transGoals scope goalViews premStx
-        `(fun $params:ident* _ => $body)
+        if readsProof then `(fun $params:ident* $hName:ident => $body)
+        else `(fun $params:ident* _ => $body)
   let builder := mkIdent (`Rules ++ concl.builder)
   -- Where the modality is an argument of the builder it is passed; elsewhere
   -- a twin is the same effect under `withMode`, which is how `Rules.lean`
@@ -1450,7 +1964,8 @@ def elabRuleDecl : CommandElab := fun stx => do
   let mkEffect (mode : Option Name) : CommandElabM Term := do
     let m ← modeTerm (mode.getD `both)
     let base ←
-      if concl.builder == `revertEffect then `($builder $m)
+      if concl.builder == `revertEffect then
+        `($builder $m $(← transGoals scope goalViews premStx))
       else if concl.builder == `popEffect then `($builder $m $condFn $goalsFn)
       else
         let e ← `($builder $condFn $goalsFn)

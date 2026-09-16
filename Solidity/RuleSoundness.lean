@@ -6540,8 +6540,8 @@ theorem binopUnfoldResult_sound (op : BinOp)
   match rhs, hcond, hfresh with
   | .mkBinop op' l r, hcond, hfresh =>
       intro hprim
-      have hpl : pureExpr l = true := pure_of_simple hcond.2.2.2.2.1
-      have hpr : pureExpr r = true := pure_of_simple hcond.2.2.2.2.2
+      have hpl : pureExpr l = true := pure_of_simple hcond.2.2.1
+      have hpr : pureExpr r = true := pure_of_simple hcond.2.2.2.1
       have hpfull : pureExpr (WrappedExpr.binop op' l r) = true := by
         simp [pureExpr, hpl, hpr]
       have hfl : ∀ n ∈ aliasNames, usesVar lhs.expr n = false := fun n hn => by

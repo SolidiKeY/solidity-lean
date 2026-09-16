@@ -652,9 +652,9 @@ theorem assignComplexCandidate_applies {m : Modality} {le rhs : WrappedExpr}
                               · split at h
                                 · next hglob =>
                                     cases Option.some.inj h
-                                    exact ⟨by decide, rfl,
-                                      simple_of_not_complex hnlc, hglob,
-                                      simple_of_not_complex hnpc⟩
+                                    exact ⟨by decide, rfl, hglob,
+                                      simple_of_not_complex hnpc,
+                                      simple_of_not_complex hnlc⟩
                                 · exact nomatch h
                       · next hnsto =>
                           split at h
@@ -791,21 +791,19 @@ theorem assignComplexCandidate_applies {m : Modality} {le rhs : WrappedExpr}
                                         · next harr =>
                                             cases m <;>
                                               (cases Option.some.inj h
-                                               exact ⟨by decide, rfl,
-                                                 simple_of_not_complex hnlc,
-                                                 hglob,
+                                               exact ⟨by decide, rfl, hglob,
                                                  simple_of_not_complex hnpc,
                                                  simple_of_not_complex hnic,
-                                                 isArray_of_arrayTyB harr⟩)
+                                                 isArray_of_arrayTyB harr,
+                                                 simple_of_not_complex hnlc⟩)
                                         · split at h
                                           · next hmap =>
                                               cases Option.some.inj h
-                                              exact ⟨by decide, rfl,
-                                                simple_of_not_complex hnlc,
-                                                hglob,
+                                              exact ⟨by decide, rfl, hglob,
                                                 simple_of_not_complex hnpc,
                                                 simple_of_not_complex hnic,
-                                                isMapping_of_mappingTyB hmap⟩
+                                                isMapping_of_mappingTyB hmap,
+                                                simple_of_not_complex hnlc⟩
                                           · exact nomatch h
                                     · exact nomatch h
                           · split at h
@@ -919,9 +917,8 @@ theorem assignComplexCandidate_applies {m : Modality} {le rhs : WrappedExpr}
                       simp only [Bool.and_eq_true] at hb
                       obtain ⟨⟨hop, hl⟩, hr2⟩ := hb
                       cases Option.some.inj h
-                      exact ⟨mem_binopUnfoldResult op, rfl, rfl, hop,
-                        fun ⟨ha, hb2⟩ => hnsv (and_true_of ha hb2),
-                        hn1, hl, hr2⟩
+                      exact ⟨mem_binopUnfoldResult op, rfl, rfl, hop, hl, hr2,
+                        fun ⟨ha, hb2⟩ => hnsv (and_true_of ha hb2), hn1⟩
                   · next hnb =>
                       exact valueRhsCaptureCandidate_applies hass
                         (fun ⟨ha, hb2, hc2⟩ => hnb (and_true_of (and_true_of ha hb2) hc2)) h

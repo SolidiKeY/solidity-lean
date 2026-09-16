@@ -416,9 +416,9 @@ theorem storageFieldReadStoreRoot_update (s : State) (lhs : PlaceExpr)
   show execStmt s (Stmt.assign lhs rhs) = storageAssignUpd lhs rhs s
   match rhs, hcond with
   | WrappedExpr.field Kind.storage t path f, hc =>
-      have hc' : isSimple lhs ∧ isGlobal lhs ∧ isSimple path := hc
-      exact execStmt_assign_storage s lhs _ (storageTargetB_of_global hc'.2.1)
-        (terminalRhsB_storageField hc'.2.2)
+      have hc' : isGlobal lhs ∧ isSimple path ∧ isSimple lhs := hc
+      exact execStmt_assign_storage s lhs _ (storageTargetB_of_global hc'.1)
+        (terminalRhsB_storageField hc'.2.1)
 
 theorem storageIndexReadArrayStoreRootBox_update (s : State) (lhs : PlaceExpr)
     (rhs : WrappedExpr)
@@ -429,10 +429,10 @@ theorem storageIndexReadArrayStoreRootBox_update (s : State) (lhs : PlaceExpr)
   show execStmt s (Stmt.assign lhs rhs) = storageAssignUpd lhs rhs s
   match rhs, hcond with
   | WrappedExpr.index Kind.storage t path ix, hc =>
-      have hc' : isSimple lhs ∧ isGlobal lhs ∧ isSimple path ∧ isSimple ix ∧
-          isArray path := hc
-      exact execStmt_assign_storage s lhs _ (storageTargetB_of_global hc'.2.1)
-        (terminalRhsB_storageIndex hc'.2.2.1 hc'.2.2.2.1)
+      have hc' : isGlobal lhs ∧ isSimple path ∧ isSimple ix ∧ isArray path ∧
+          isSimple lhs := hc
+      exact execStmt_assign_storage s lhs _ (storageTargetB_of_global hc'.1)
+        (terminalRhsB_storageIndex hc'.2.1 hc'.2.2.1)
 
 theorem storageIndexReadArrayStoreRootDiamond_update (s : State) (lhs : PlaceExpr)
     (rhs : WrappedExpr)
@@ -451,10 +451,10 @@ theorem storageIndexReadMappingStoreRoot_update (s : State) (lhs : PlaceExpr)
   show execStmt s (Stmt.assign lhs rhs) = storageAssignUpd lhs rhs s
   match rhs, hcond with
   | WrappedExpr.index Kind.storage t path ix, hc =>
-      have hc' : isSimple lhs ∧ isGlobal lhs ∧ isSimple path ∧ isSimple ix ∧
-          isMapping path := hc
-      exact execStmt_assign_storage s lhs _ (storageTargetB_of_global hc'.2.1)
-        (terminalRhsB_storageIndex hc'.2.2.1 hc'.2.2.2.1)
+      have hc' : isGlobal lhs ∧ isSimple path ∧ isSimple ix ∧ isMapping path ∧
+          isSimple lhs := hc
+      exact execStmt_assign_storage s lhs _ (storageTargetB_of_global hc'.1)
+        (terminalRhsB_storageIndex hc'.2.1 hc'.2.2.1)
 
 end Wp
 end Solidity

@@ -553,8 +553,8 @@ theorem binopUnfoldResult_add_valid :
       sblock!{ uint amount = 7 }
       sstmt!{ total = amount + amount }
       sexpr!{ (total == 14) }
-      (by change _ = _ ∧ _ = true ∧ ¬ (_ = true ∧ _ = true) ∧
-            ¬ (_ = Kind.memory ∧ _ = true) ∧ _ = true ∧ _ = true
+      (by change _ = _ ∧ _ = true ∧ _ = true ∧ _ = true ∧
+            ¬ (_ = true ∧ _ = true) ∧ ¬ (_ = Kind.memory ∧ _ = true)
           decide) := by
   native_decide
 
@@ -563,16 +563,16 @@ theorem binopUnfoldResult_pow_valid :
       sblock!{ uint amount = 7 }
       sstmt!{ total = amount ** 2 }
       sexpr!{ (total == 49) }
-      (by change _ = _ ∧ _ = true ∧ ¬ (_ = true ∧ _ = true) ∧
-            ¬ (_ = Kind.memory ∧ _ = true) ∧ _ = true ∧ _ = true
+      (by change _ = _ ∧ _ = true ∧ _ = true ∧ _ = true ∧
+            ¬ (_ = true ∧ _ = true) ∧ ¬ (_ = Kind.memory ∧ _ = true)
           decide) := by
   native_decide
 
 theorem binopUnfoldResult_div_revert_cond :
     (ruleEffect (.binopUnfoldResult .div)).cond
       sstmt!{ total = amount / zero } := by
-  change _ = _ ∧ _ = true ∧ ¬ (_ = true ∧ _ = true) ∧
-    ¬ (_ = Kind.memory ∧ _ = true) ∧ _ = true ∧ _ = true
+  change _ = _ ∧ _ = true ∧ _ = true ∧ _ = true ∧
+    ¬ (_ = true ∧ _ = true) ∧ ¬ (_ = Kind.memory ∧ _ = true)
   decide
 
 /-- Revert agreement: a zero divisor makes both the original statement

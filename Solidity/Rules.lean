@@ -77,6 +77,13 @@ the family's own conjunct.  The grammar, the `where`/`twins`/`after` clauses
 and the schema-variable table are `RuleSyntax.lean`; the checklist for adding
 a rule is `.claude/rules/rule-table.md`.
 
+Every rule of the table is written this way; there is no second form.  Two
+clauses carry what a schema variable cannot say: `where cond := P` replaces
+the generated condition for the handful whose applicability is a bespoke
+predicate, and `⟦ b ⟧` in place of a residual gives the block as a term, with
+the condition proof in scope as `h`, for the handful whose residual is
+computed from that proof.  Both keep the conclusion declarative.
+
 One exception worth knowing: `transferWithCallback` is marked `alternative`.
 It is KeY's `\choice` alternative, never appears in `ruleNames`, and lives in
 `ruleNamesWithCallback`.
@@ -419,7 +426,7 @@ end CaseMode
   def valueAliasName : Name := "pv"
   def indexAliasName : Name := "idx"
   /-- The value operand of an `=` / `op=` statement, frozen by an LHS-unfold
-  sol_rule *before* it captures any part of the target.  Distinct from `pv`: the
+  rule *before* it captures any part of the target.  Distinct from `pv`: the
   `*ValueRhsCapture` family already binds `pv`, and its residual is consumed
   immediately afterwards by an LHS-unfold rule.  (solkey spells it `rv` too.) -/
   def rhsValueAliasName : Name := "rv"
@@ -593,7 +600,7 @@ end CaseMode
 
   /-- RHS shapes claimed by the `*ValueRhsCapture` trio (KeY
   `NonSimpleExpression[primitive]` restricted to the cells no other Lean
-  sol_rule covers): operator expressions, except an arithmetic operator over
+  rule covers): operator expressions, except an arithmetic operator over
   simple operands, which `binopUnfoldResult` already captures. -/
   def valueRhsCaptureRhs (rhs : WrappedExpr) : Prop :=
   match rhs with
@@ -910,14 +917,16 @@ end CaseMode
       cases stmt <;> simp at hcond
       case transfer recipient amount => exact goals recipient amount hcond }
 
-  def revertEffect (mode : CaseMode) : StepEffect :=
+  /-- `revert();` — the one rule with no schema variables at all, so its goals
+  are a list rather than a function of the statement it matched. -/
+  def revertEffect (mode : CaseMode) (goals : List RuleGoal) : StepEffect :=
   withOrigin (KeyOrigin.merged [KeyTaclet.revertBox, KeyTaclet.revertDiamond])
   { mode := fun _ => mode
     cond := fun stmt =>
       match stmt with
       | Stmt.revert _ => True
       | _ => False
-    goals := fun _ _ => revertGoals }
+    goals := fun _ _ => goals }
 
   def deleteEffect
     (cond : PlaceExpr -> Prop)
@@ -941,6 +950,46 @@ end CaseMode
     goals := fun stmt hcond => by
       cases stmt <;> simp at hcond
       case push target value => exact goals target value hcond }
+
+  /-- `p = e;` where `p` is a push *place*: the sugar `Stmt.pushAssign`, whose
+  only rule lowers it to the `Stmt.assign` the interpreter delegates to. -/
+  def pushAssignEffect
+    (cond : PlaceExpr -> WrappedExpr -> Prop)
+    (goals : (target : PlaceExpr) -> (value : WrappedExpr) ->
+      cond target value -> List RuleGoal) : StepEffect :=
+  { cond := fun stmt =>
+      match stmt with
+      | Stmt.pushAssign target value => cond target value
+      | _ => False
+    goals := fun stmt hcond => by
+      cases stmt <;> simp at hcond
+      case pushAssign target value => exact goals target value hcond }
+
+  def pushFieldAssignEffect
+    (cond : PlaceExpr -> Field -> WrappedExpr -> Prop)
+    (goals : (target : PlaceExpr) -> (field : Field) -> (value : WrappedExpr) ->
+      cond target field value -> List RuleGoal) : StepEffect :=
+  { cond := fun stmt =>
+      match stmt with
+      | Stmt.pushFieldAssign target field value => cond target field value
+      | _ => False
+    goals := fun stmt hcond => by
+      cases stmt <;> simp at hcond
+      case pushFieldAssign target field value => exact goals target field value hcond }
+
+  /-- `T storage sp = p;` — the scratch *path* binding a capture leaves behind,
+  which is a declaration of an alias rather than of a variable. -/
+  def storagePlaceAliasEffect
+    (cond : Ty -> Name -> WrappedExpr -> Prop)
+    (goals : (ty : Ty) -> (name : Name) -> (init : WrappedExpr) ->
+      cond ty name init -> List RuleGoal) : StepEffect :=
+  { cond := fun stmt =>
+      match stmt with
+      | Stmt.storagePlaceAlias ty name init => cond ty name init
+      | _ => False
+    goals := fun stmt hcond => by
+      cases stmt <;> simp at hcond
+      case storagePlaceAlias ty name init => exact goals ty name init hcond }
 
   def popEffect
     (mode : CaseMode)
@@ -1348,29 +1397,13 @@ end CaseMode
   `storageFieldRead_unfold_rightFst`, `storageIndexRead_unfold_rightFst`).
   -/
 
-  sol_rule storageFieldReadUnfoldRightFst := withOrigin (KeyOrigin.taclet KeyTaclet.storageFieldRead_unfold_rightFst) <|
-      assignEffect
-        (fun lhs rhs =>
-          match rhs with
-          | WrappedExpr.field Kind.storage _ nsp _ =>
-              isComplex nsp ∧ ¬ (lhs.kind = Kind.memory ∧ isComplex lhs)
-          | _ => False)
-        (fun lhs rhs h => unfoldGoal <|
-          match rhs, h with
-          | WrappedExpr.field Kind.storage ty nsp f, _ =>
-              fieldReadResolveBlock Kind.storage storagePathAliasName lhs ty nsp f)
+  sol_rule storageFieldReadUnfoldRightFst from storageFieldRead_unfold_rightFst :
+    <[ lhs = nsp.fld ]> ⇝ <[ T storage sp = nsp; lhs = sp.fld ]>
+    where ¬ (lhs.kind = Kind.memory ∧ isComplex lhs)
 
-  sol_rule storageIndexReadUnfoldRightFst := withOrigin (KeyOrigin.taclet KeyTaclet.storageIndexRead_unfold_rightFst) <|
-      assignEffect
-        (fun lhs rhs =>
-          match rhs with
-          | WrappedExpr.index Kind.storage _ nsp _ =>
-              isComplex nsp ∧ ¬ (lhs.kind = Kind.memory ∧ isComplex lhs)
-          | _ => False)
-        (fun lhs rhs h => unfoldGoal <|
-          match rhs, h with
-          | WrappedExpr.index Kind.storage ty nsp index, _ =>
-              indexReadResolveBlock Kind.storage storagePathAliasName lhs ty nsp index)
+  sol_rule storageIndexReadUnfoldRightFst from storageIndexRead_unfold_rightFst :
+    <[ lhs = nsp[e] ]> ⇝ <[ T storage sp = nsp; lhs = sp[e] ]>
+    where ¬ (lhs.kind = Kind.memory ∧ isComplex lhs)
 
   /-!
   `unfold_rightSnd`.  The push-argument rule is
@@ -1378,33 +1411,12 @@ end CaseMode
   argument is evaluated before the update.
   -/
 
-  sol_rule storageIndexReadUnfoldRightSndIndex := withOrigin (KeyOrigin.taclet KeyTaclet.storageIndexRead_unfold_rightSndIndex) <|
-      assignEffect
-        (fun lhs rhs =>
-          match rhs with
-          | WrappedExpr.index Kind.storage _ sp nse =>
-              isSimple sp ∧ isComplex nse ∧
-                ¬ (lhs.kind = Kind.memory ∧ isComplex lhs)
-          | _ => False)
-        (fun lhs rhs h => unfoldGoal <|
-          match rhs, h with
-          | WrappedExpr.index Kind.storage ty sp nse, _ =>
-              [ captureIndex nse,
-                Stmt.assign lhs
-                  (WrappedExpr.index Kind.storage ty sp (indexAlias nse)) ])
+  sol_rule storageIndexReadUnfoldRightSndIndex from storageIndexRead_unfold_rightSndIndex :
+    <[ lhs = sp[nse] ]> ⇝ <[ T idx = nse; lhs = sp[idx] ]>
+    where ¬ (lhs.kind = Kind.memory ∧ isComplex lhs)
 
-  sol_rule storagePushValueUnfoldRightSndArgument := withOrigin (KeyOrigin.taclet KeyTaclet.storagePushValue_unfold_rightSndArgument) <|
-      pushEffect
-        (fun sp value =>
-          sp.kind = Kind.storage ∧ isSimple sp ∧
-            match value with
-            | some nse => isComplex nse
-            | none => False)
-        (fun sp value h => unfoldGoal <|
-          match value, h with
-          | some nse, _ =>
-              [ captureValue nse,
-                Stmt.push sp (some (valueAlias nse)) ])
+  sol_rule storagePushValueUnfoldRightSndArgument from storagePushValue_unfold_rightSndArgument :
+    <[ sp.push(nse) ]> ⇝ <[ _ pv = nse; sp.push(pv) ]>
 
   /-!
   `unfold_rightSndResult` (the rule set; solkey also folds
@@ -1412,23 +1424,11 @@ end CaseMode
   in here).
   -/
 
-  sol_rule storageFieldReadUnfoldRightSndResult := withOrigin (KeyOrigin.merged [KeyTaclet.storageFieldRead_unfold_rightSndResult, KeyTaclet.storageFieldWriteCaptureSrc]) <|
-      assignEffect
-        (fun nlhs rhs =>
-          match rhs with
-          | WrappedExpr.field Kind.storage _ sp _ =>
-              isStorage nlhs ∧ isComplex nlhs ∧ isSimple sp
-          | _ => False)
-        (fun nlhs rhs _ => unfoldGoal <| captureAssignBlock nlhs rhs)
+  sol_rule storageFieldReadUnfoldRightSndResult from storageFieldRead_unfold_rightSndResult, storageFieldWriteCaptureSrc :
+    <[ nlhs = sp.fld ]> ⇝ <[ _ pv = sp.fld; nlhs = pv ]>
 
-  sol_rule storageIndexReadUnfoldRightSndResult := withOrigin (KeyOrigin.merged [KeyTaclet.storageIndexRead_unfold_rightSndResult, KeyTaclet.storageIndexWriteStorageRefRhsCapture]) <|
-      assignEffect
-        (fun nlhs rhs =>
-          match rhs with
-          | WrappedExpr.index Kind.storage _ sp i =>
-              isStorage nlhs ∧ isComplex nlhs ∧ isSimple sp ∧ isSimple i
-          | _ => False)
-        (fun nlhs rhs _ => unfoldGoal <| captureAssignBlock nlhs rhs)
+  sol_rule storageIndexReadUnfoldRightSndResult from storageIndexRead_unfold_rightSndResult, storageIndexWriteStorageRefRhsCapture :
+    <[ nlhs = sp[i] ]> ⇝ <[ _ pv = sp[i]; nlhs = pv ]>
 
   /-!
   ### Step 2: unfolding the left-hand side
@@ -1438,29 +1438,13 @@ end CaseMode
   calculus's `SimpleExpression` excludes.
   -/
 
-  sol_rule storageFieldWriteUnfoldLeftFst := withOrigin (KeyOrigin.merged [KeyTaclet.storageFieldWrite_unfold_leftFst, KeyTaclet.storageFieldWriteRootRhs_unfold_leftFst]) <|
-      assignEffect
-        (fun lhs rhs =>
-          match (lhs : WrappedExpr) with
-          | WrappedExpr.field Kind.storage _ nsp _ =>
-              isComplex nsp ∧ isSimple rhs ∧ ¬ isMemory rhs
-          | _ => False)
-        (fun lhs rhs h => unfoldGoal <|
-          match lhs, h with
-          | ⟨WrappedExpr.field Kind.storage ty nsp f, _⟩, _ =>
-              fieldWriteResolveBlock Kind.storage storagePathAliasName ty nsp f rhs)
+  sol_rule storageFieldWriteUnfoldLeftFst from storageFieldWrite_unfold_leftFst, storageFieldWriteRootRhs_unfold_leftFst :
+    <[ nsp.fld = e ]> ⇝ <[ T rv ?= e; T storage sp = nsp; sp.fld = rv ]>
+    where isSimple e, ¬ isMemory e
 
-  sol_rule storageIndexWriteUnfoldLeftFst := withOrigin (KeyOrigin.merged [KeyTaclet.storageIndexWrite_unfold_leftFst, KeyTaclet.storageIndexWriteRootRhs_unfold_leftFst]) <|
-      assignEffect
-        (fun lhs rhs =>
-          match (lhs : WrappedExpr) with
-          | WrappedExpr.index Kind.storage _ nsp _ =>
-              isComplex nsp ∧ isSimple rhs
-          | _ => False)
-        (fun lhs rhs h => unfoldGoal <|
-          match lhs, h with
-          | ⟨WrappedExpr.index Kind.storage ty nsp index, _⟩, _ =>
-              indexWriteResolveBlock Kind.storage storagePathAliasName ty nsp index rhs)
+  sol_rule storageIndexWriteUnfoldLeftFst from storageIndexWrite_unfold_leftFst, storageIndexWriteRootRhs_unfold_leftFst :
+    <[ nsp[e1] = e2 ]> ⇝ <[ T rv ?= e2; T storage sp = nsp; T idx ?= e1; sp[idx] = rv ]>
+    where isSimple e2
 
   /-!
   Storage receiver and delete-target simplification (the calculus,
@@ -1470,75 +1454,43 @@ end CaseMode
   are merged into one rule over both target shapes.
   -/
 
-  sol_rule storageDeleteComplexTarget := withOrigin (KeyOrigin.merged [KeyTaclet.storageFieldDelete_unfold_leftFst, KeyTaclet.storageIndexDelete_unfold_leftFst, KeyTaclet.storageIndexDeleteNonSimpleIndexCapture]) <|
-      deleteEffect
-        (fun target => isComplexStorageDeleteTarget target)
-        (fun target h => unfoldGoal <| storageDeleteComplexTargetBlock (target : WrappedExpr) h)
+  sol_rule storageDeleteComplexTarget from storageFieldDelete_unfold_leftFst, storageIndexDelete_unfold_leftFst, storageIndexDeleteNonSimpleIndexCapture :
+    <[ delete(target) ]> ⇝ ⟦ storageDeleteComplexTargetBlock (target : WrappedExpr) h ⟧
+    where cond := isComplexStorageDeleteTarget target
 
-  sol_rule storagePushValueUnfoldLeftFstReceiver := withOrigin (KeyOrigin.taclet KeyTaclet.storagePushValue_unfold_leftFstReceiver) <|
-      pushEffect
-        (fun nsp value => nsp.kind = Kind.storage ∧ isComplex nsp ∧ value.isSome)
-        (fun nsp value h => unfoldGoal <|
-          match value, h with
-          | some rhs, _ =>
-              [ captureStoragePath nsp,
-                Stmt.push (aliasPlace Kind.storage nsp.ty storagePathAliasName) (some rhs) ])
+  sol_rule storagePushValueUnfoldLeftFstReceiver from storagePushValue_unfold_leftFstReceiver :
+    <[ nsp.push(e) ]> ⇝ <[ T storage sp = nsp; sp.push(e) ]>
 
-  sol_rule storagePushUnfoldLeftFstReceiver := withOrigin (KeyOrigin.taclet KeyTaclet.storagePush_unfold_leftFstReceiver) <|
-      pushEffect
-        (fun nsp value => nsp.kind = Kind.storage ∧ isComplex nsp ∧ value = none)
-        (fun nsp _ _ => unfoldGoal <|
-          [ captureStoragePath nsp,
-            Stmt.push (aliasPlace Kind.storage nsp.ty storagePathAliasName) none ])
+  sol_rule storagePushUnfoldLeftFstReceiver from storagePush_unfold_leftFstReceiver :
+    <[ nsp.push() ]> ⇝ <[ T storage sp = nsp; sp.push() ]>
 
-  sol_rule storagePopUnfoldLeftFstReceiver := withOrigin (KeyOrigin.taclet KeyTaclet.storagePop_unfold_leftFstReceiver) <|
-      popEffect CaseMode.both
-        (fun nsp => nsp.kind = Kind.storage ∧ isComplex nsp)
-        (fun nsp _ => unfoldGoal <|
-          [ captureStoragePath nsp,
-            Stmt.pop (aliasPlace Kind.storage nsp.ty storagePathAliasName) ])
+  sol_rule storagePopUnfoldLeftFstReceiver from storagePop_unfold_leftFstReceiver :
+    <[ nsp.pop() ]> ⇝ <[ T storage sp = nsp; sp.pop() ]>
 
-  sol_rule storageLocalRootPushUnfoldLeftFstReceiver := withOrigin (KeyOrigin.taclet KeyTaclet.storageLocalRootPush_unfold_leftFstReceiver) <|
-      assignEffect
-        (fun lhs rhs =>
-          match rhs with
-          | WrappedExpr.pushPlace nsp =>
-              nsp.kind = Kind.storage ∧ isComplex nsp ∧
-                ¬ (lhs.kind = Kind.memory ∧ isComplex lhs)
-          | _ => False)
-        (fun lhs rhs h => unfoldGoal <|
-          match rhs, h with
-          | WrappedExpr.pushPlace nsp, _ =>
-              -- Unlike `storagePushLhsToPushValue` above, `nsp` here comes out
-              -- of `rhs : WrappedExpr`, and `WrappedExpr.pushPlace` carries no
-              -- assignability invariant, so there is no witness to appeal to:
-              -- `asPlace?` really can return `none`.  That is why
-              -- `storageLocalRootPushUnfoldLeftFstReceiver_sound` has to assume
-              -- `hasgn`.  The `none` arm below is a real guard, not a dead one.
-              match asPlace? nsp with
-              | some _ =>
-                  [ captureStoragePath nsp,
-                    Stmt.assign lhs
-                      (WrappedExpr.pushPlace
-                        (aliasExpr Kind.storage nsp.ty storagePathAliasName)) ]
-              | none => [])
+  sol_rule storageLocalRootPushUnfoldLeftFstReceiver from storageLocalRootPush_unfold_leftFstReceiver :
+    <[ lhs = nsp.push() ]> ⇝
+      -- Unlike `storagePushLhsToPushValue`, `nsp` here comes out of a
+      -- `WrappedExpr`, and `WrappedExpr.pushPlace` carries no assignability
+      -- invariant, so there is no witness to appeal to: `asPlace?` really can
+      -- return `none`, which is why `…_sound` has to assume `hasgn`.  The
+      -- `none` arm is a real guard, not a dead one.
+      ⟦ match asPlace? nsp with
+        | some _ =>
+            [ captureStoragePath nsp,
+              Stmt.assign lhs
+                (WrappedExpr.pushPlace
+                  (aliasExpr Kind.storage nsp.ty storagePathAliasName)) ]
+        | none => [] ⟧
+    where ¬ (lhs.kind = Kind.memory ∧ isComplex lhs)
 
   /-!
   `unfold_leftSnd`.  The calculus's `Ref` instance is
   merged: Lean's rule does not split on a reference source.
   -/
 
-  sol_rule storageIndexWriteUnfoldLeftSndIndex := withOrigin (KeyOrigin.merged [KeyTaclet.storageIndexWriteNonSimpleIndexCapture, KeyTaclet.storageIndexWriteRootRhsNonSimpleIndexCapture]) <|
-      assignEffect
-        (fun lhs rhs =>
-          match (lhs : WrappedExpr) with
-          | WrappedExpr.index Kind.storage _ sp nse =>
-              isSimple sp ∧ isComplex nse ∧ isSimple rhs ∧ ¬ isMemory rhs
-          | _ => False)
-        (fun lhs rhs h => unfoldGoal <|
-          match lhs, h with
-          | ⟨WrappedExpr.index Kind.storage ty sp nse, _⟩, _ =>
-              captureIndexTargetBlock Kind.storage ty sp nse rhs)
+  sol_rule storageIndexWriteUnfoldLeftSndIndex from storageIndexWriteNonSimpleIndexCapture, storageIndexWriteRootRhsNonSimpleIndexCapture :
+    <[ sp1[nse] = s ]> ⇝ <[ T rv ?= s; T storage sp = sp1; T idx ?= nse; sp[idx] = rv ]>
+    where ¬ isMemory s
 
   /-!
   ### Step 3: generating an update
@@ -1548,40 +1500,22 @@ end CaseMode
   beside the storage pair.
   -/
 
-  sol_rule storageLocalDeclInitDrop := withOrigin (KeyOrigin.taclet KeyTaclet.storageLocalDeclInitDrop) <|
-      storageDeclEffect
-        (fun _ _ init => init.isSome)
-        (fun ty name init h => unfoldGoal <|
-          match init, h with
-          | some rhs, _ =>
-              [ Stmt.storageDecl ty name none,
-                Stmt.assign (SoliditySyntax.varPlace Kind.storage ty name) rhs ])
+  sol_rule storageLocalDeclInitDrop from storageLocalDeclInitDrop :
+    <[ T storage lsv = path ]> ⇝ <[ T storage lsv; lsv = path ]>
 
-  sol_rule storageLocalDeclSkip := withOrigin (KeyOrigin.taclet KeyTaclet.storageLocalDeclSkip) <|
-      storageDeclEffect
-        (fun _ _ init => init = none)
-        (fun _ _ _ _ =>
-          terminalGoal [])
+  sol_rule storageLocalDeclSkip from storageLocalDeclSkip :
+    <[ T storage lsv ]> ⇝ <[ ]>
 
   /-!
   Value-variable declarations (KeY `localValueDeclInitDrop`/`valueDeclSkip`)
   and simple local assignment (KeY `localValueAssign`).
   -/
 
-  sol_rule localValueDeclInitDrop := withOrigin (KeyOrigin.taclet KeyTaclet.localValueDeclInitDrop) <|
-      stackDeclEffect
-        (fun _ _ init => init.isSome)
-        (fun ty name init h => unfoldGoal <|
-          match init, h with
-          | some rhs, _ =>
-              [ Stmt.stackDecl ty name none,
-                Stmt.assign (SoliditySyntax.varPlace Kind.stack ty name) rhs ])
+  sol_rule localValueDeclInitDrop from localValueDeclInitDrop :
+    <[ T v = e ]> ⇝ <[ T v; v = e ]>
 
-  sol_rule valueDeclSkip := withOrigin (KeyOrigin.taclet KeyTaclet.valueDeclSkip) <|
-      stackDeclEffect
-        (fun _ _ init => init = none)
-        (fun ty name _ _ =>
-          terminalGoal [ .bind name (.val (.deflt ty)) ])
+  sol_rule valueDeclSkip from valueDeclSkip :
+    <[ T v ]> ⇝ { v := default(T) } <[ ]>
 
   /-!
   Simple targets.  The calculus's `storageRootDelete`,
@@ -1610,31 +1544,16 @@ end CaseMode
   sol_rule storageRootReadSelect from storageRootReadSelect :
     <[ v = sp ]> ⇝ { v := sp } <[ ]>
 
-  sol_rule storageFieldReadBindLocalRoot := withOrigin (KeyOrigin.taclet KeyTaclet.storageFieldReadBindLocalRoot) <|
-      assignEffect
-        (fun lsv rhs =>
-          match rhs with
-          | WrappedExpr.field Kind.storage _ sp _ =>
-              isLocal lsv ∧ isSimple sp
-          | _ => False)
-        (fun lsv rhs _ =>
-          terminalGoal [ .bind (varName lsv) (.path rhs) ])
+  sol_rule storageFieldReadBindLocalRoot from storageFieldReadBindLocalRoot :
+    <[ lsv = sp.fr ]> ⇝ { lsv := path(sp.fr) } <[ ]>
 
-  sol_rule storageFieldReadStoreRoot := withOrigin (KeyOrigin.taclet KeyTaclet.storageFieldReadStoreRoot) <|
-      assignEffect
-        (fun gsp rhs =>
-          match rhs with
-          | WrappedExpr.field Kind.storage _ sp _ =>
-              isSimple gsp ∧ isGlobal gsp ∧ isSimple sp
-          | _ => False)
-        (fun gsp rhs _ =>
-          terminalGoal [ .storage (.copy gsp rhs) ])
+  sol_rule storageFieldReadStoreRoot from storageFieldReadStoreRoot :
+    <[ gsp = sp.fr ]> ⇝ { storage := copy(gsp, sp.fr) } <[ ]>
+    where isSimple gsp
 
-  sol_rule storageDeleteSimpleTarget := withOrigin (KeyOrigin.merged [KeyTaclet.storageRootDelete, KeyTaclet.storageFieldDelete, KeyTaclet.storageIndexDelete]) <|
-      deleteEffect
-        (fun target => isSimpleStorageDeleteTarget target)
-        (fun target _ =>
-          terminalGoal [ .storage (.clear target) ])
+  sol_rule storageDeleteSimpleTarget from storageRootDelete, storageFieldDelete, storageIndexDelete :
+    <[ delete(target) ]> ⇝ { storage := clear(target) } <[ ]>
+    where cond := isSimpleStorageDeleteTarget target
 
   /-!
   Mapping targets.  Mapping selectors generate no
@@ -1644,40 +1563,18 @@ end CaseMode
   sol_rule storageIndexWriteMappingSave from storageIndexWriteMappingSave :
     <[ map[i] = se ]> ⇝ { storage := save(map[i], se) } <[ ]>
 
-  sol_rule storageIndexWriteMappingCopySource := withOrigin (KeyOrigin.taclet KeyTaclet.storageIndexWriteMappingCopySource) <|
-      assignEffect
-        (fun lhs sp =>
-          match (lhs : WrappedExpr) with
-          | WrappedExpr.index Kind.storage _ map i =>
-              isSimple map ∧ isSimple i ∧ isStorage sp ∧
-                isSimple sp ∧ isMapping map
-          | _ => False)
-        (fun lhs sp _ =>
-          terminalGoal [ .storage (.copy lhs sp) ])
+  sol_rule storageIndexWriteMappingCopySource from storageIndexWriteMappingCopySource :
+    <[ map[i] = sp ]> ⇝ { storage := copy(map[i], sp) } <[ ]>
 
   sol_rule storageIndexReadMappingFind from storageIndexReadMappingFind :
     <[ v = map[i] ]> ⇝ { v := map[i] } <[ ]>
 
-  sol_rule storageIndexReadMappingBindLocalRoot := withOrigin (KeyOrigin.taclet KeyTaclet.storageIndexReadMappingBindLocalRoot) <|
-      assignEffect
-        (fun lsv rhs =>
-          match rhs with
-          | WrappedExpr.index Kind.storage _ map i =>
-              isLocal lsv ∧ isSimple map ∧ isSimple i ∧ isMapping map
-          | _ => False)
-        (fun lsv rhs _ =>
-          terminalGoal [ .bind (varName lsv) (.path rhs) ])
+  sol_rule storageIndexReadMappingBindLocalRoot from storageIndexReadMappingBindLocalRoot :
+    <[ lsv = map[i] ]> ⇝ { lsv := path(map[i]) } <[ ]>
 
-  sol_rule storageIndexReadMappingStoreRoot := withOrigin (KeyOrigin.taclet KeyTaclet.storageIndexReadMappingStoreRoot) <|
-      assignEffect
-        (fun gsp rhs =>
-          match rhs with
-          | WrappedExpr.index Kind.storage _ map i =>
-              isSimple gsp ∧ isGlobal gsp ∧ isSimple map ∧
-                isSimple i ∧ isMapping map
-          | _ => False)
-        (fun gsp rhs _ =>
-          terminalGoal [ .storage (.copy gsp rhs) ])
+  sol_rule storageIndexReadMappingStoreRoot from storageIndexReadMappingStoreRoot :
+    <[ gsp = map[i] ]> ⇝ { storage := copy(gsp, map[i]) } <[ ]>
+    where isSimple gsp
 
   /-!
   Array targets.  The calculus stacks the bounds check
@@ -1704,55 +1601,18 @@ end CaseMode
       | else             ⟹ revert()
     after resolve(arr[i])
 
-  sol_rule storageIndexReadArrayBindLocalRootBox := withOrigin (KeyOrigin.taclet KeyTaclet.storageIndexReadArrayBindLocalRoot) <|
-      withMode CaseMode.box <|
-        assignEffect
-          (fun lsv rhs =>
-            match rhs with
-            | WrappedExpr.index Kind.storage _ arr i =>
-                isLocal lsv ∧ isSimple arr ∧ isSimple i ∧ isArray arr
-            | _ => False)
-          (fun lsv rhs _ =>
-            splitGoals (.inBounds rhs) [.resolve rhs]
-            [ .bind (varName lsv) (.path rhs) ])
+  sol_rule storageIndexReadArrayBindLocalRoot twins from storageIndexReadArrayBindLocalRoot :
+    <[ lsv = arr[i] ]> ⇝
+      | inBounds(arr[i]) ⟹ { lsv := path(arr[i]) } <[ ]>
+      | else             ⟹ revert()
+    after resolve(arr[i])
 
-  sol_rule storageIndexReadArrayBindLocalRootDiamond := withOrigin (KeyOrigin.taclet KeyTaclet.storageIndexReadArrayBindLocalRoot) <|
-      withMode CaseMode.diamond <|
-        assignEffect
-          (fun lsv rhs =>
-            match rhs with
-            | WrappedExpr.index Kind.storage _ arr i =>
-                isLocal lsv ∧ isSimple arr ∧ isSimple i ∧ isArray arr
-            | _ => False)
-          (fun lsv rhs _ =>
-            splitGoals (.inBounds rhs) [.resolve rhs]
-            [ .bind (varName lsv) (.path rhs) ])
-
-  sol_rule storageIndexReadArrayStoreRootBox := withOrigin (KeyOrigin.taclet KeyTaclet.storageIndexReadArrayStoreRoot) <|
-      withMode CaseMode.box <|
-        assignEffect
-          (fun gsp rhs =>
-            match rhs with
-            | WrappedExpr.index Kind.storage _ arr i =>
-                isSimple gsp ∧ isGlobal gsp ∧ isSimple arr ∧
-                  isSimple i ∧ isArray arr
-            | _ => False)
-          (fun gsp rhs _ =>
-            splitGoals (.inBounds rhs) [.resolve rhs]
-            [ .storage (.copy gsp rhs) ])
-
-  sol_rule storageIndexReadArrayStoreRootDiamond := withOrigin (KeyOrigin.taclet KeyTaclet.storageIndexReadArrayStoreRoot) <|
-      withMode CaseMode.diamond <|
-        assignEffect
-          (fun gsp rhs =>
-            match rhs with
-            | WrappedExpr.index Kind.storage _ arr i =>
-                isSimple gsp ∧ isGlobal gsp ∧ isSimple arr ∧
-                  isSimple i ∧ isArray arr
-            | _ => False)
-          (fun gsp rhs _ =>
-            splitGoals (.inBounds rhs) [.resolve rhs]
-            [ .storage (.copy gsp rhs) ])
+  sol_rule storageIndexReadArrayStoreRoot twins from storageIndexReadArrayStoreRoot :
+    <[ gsp = arr[i] ]> ⇝
+      | inBounds(arr[i]) ⟹ { storage := copy(gsp, arr[i]) } <[ ]>
+      | else             ⟹ revert()
+    after resolve(arr[i])
+    where isSimple gsp
 
   /-!
   Push and pop.  The calculus's `sizeNotNegative`
@@ -1760,41 +1620,18 @@ end CaseMode
   Lean counterpart is `WellFormedConsumers.lean`.
   -/
 
-  sol_rule storagePushValueSave := withOrigin (KeyOrigin.taclet KeyTaclet.storagePushValueSave) <|
-      pushEffect
-        (fun sp value =>
-          sp.kind = Kind.storage ∧ isSimple sp ∧
-            match value with
-            | some se => isSe se
-            | none => False)
-        (fun sp value _ =>
-          terminalGoal [ .storage (.push sp value) ])
+  sol_rule storagePushValueSave from storagePushValueSave :
+    <[ sp.push(se) ]> ⇝ { storage := push(sp, se) } <[ ]>
 
-  sol_rule storagePushValueCopySource := withOrigin (KeyOrigin.taclet KeyTaclet.storagePushValueCopySource) <|
-      pushEffect
-        (fun sp value =>
-          sp.kind = Kind.storage ∧ isSimple sp ∧
-            match value with
-            | some sp => isSp sp
-            | none => False)
-        (fun sp value _ =>
-          terminalGoal [ .storage (.push sp value) ])
+  sol_rule storagePushValueCopySource from storagePushValueCopySource :
+    <[ sp1.push(sp2) ]> ⇝ { storage := push(sp1, sp2) } <[ ]>
 
-  sol_rule storagePushLengthSave := withOrigin (KeyOrigin.taclet KeyTaclet.storagePushLengthSave) <|
-      pushEffect
-        (fun sp value => sp.kind = Kind.storage ∧ isSimple sp ∧ value = none)
-        (fun sp value _ =>
-          terminalGoal [ .storage (.push sp value) ])
+  sol_rule storagePushLengthSave from storagePushLengthSave :
+    <[ sp.push() ]> ⇝ { storage := push(sp) } <[ ]>
 
-  sol_rule storageLocalRootPushBind := withOrigin (KeyOrigin.taclet KeyTaclet.storageLocalRootPushBind) <|
-      assignEffect
-        (fun lsv rhs =>
-          match rhs with
-          | WrappedExpr.pushPlace sp =>
-              isLocal lsv ∧ sp.kind = Kind.storage ∧ isSimple sp
-          | _ => False)
-        (fun lsv rhs _ =>
-          terminalGoal [ .storage (.pushPlace rhs), .bind (varName lsv) (.pushSlot rhs) ])
+  sol_rule storageLocalRootPushBind from storageLocalRootPushBind :
+    <[ lsv = sp.push() ]> ⇝
+      { storage := pushSlot(sp.push()) || lsv := slot(sp.push()) } <[ ]>
 
   sol_rule storagePopSave twins from storagePopSave :
     <[ sp.pop() ]> ⇝
@@ -1851,40 +1688,18 @@ end CaseMode
   is a sequent rule and lives in `JudgmentSplit.ite_split`.
   -/
 
-  sol_rule ifElseUnfold := withOrigin (KeyOrigin.merged [KeyTaclet.ifUnfold, KeyTaclet.ifElseUnfold]) <|
-      iteEffect
-        (fun nse _ _ =>
-          isComplex nse ∧
-            ∀ inner, nse = WrappedExpr.unop UnOp.not inner -> isComplex inner)
-        (fun nse thn els _ => unfoldGoal <|
-          [ captureStackValue nse,
-            Stmt.ite (stackValueAlias nse) thn els ])
+  sol_rule ifElseUnfold from ifUnfold, ifElseUnfold :
+    <[ if (nse) thn else els ]> ⇝ <[ T pv = nse; if (pv) thn else els ]>
+    where ∀ inner, nse = WrappedExpr.unop UnOp.not inner -> isComplex inner
 
-  sol_rule ifElseTrue :=
-      iteEffect
-        (fun c _ _ =>
-          match c with
-          | WrappedExpr.bool true => True
-          | _ => False)
-        (fun _ thn _ _ => unfoldGoal <| thn)
+  sol_rule ifElseTrue :
+    <[ if (true) thn else els ]> ⇝ <[ thn ]>
 
-  sol_rule ifElseFalse :=
-      iteEffect
-        (fun c _ _ =>
-          match c with
-          | WrappedExpr.bool false => True
-          | _ => False)
-        (fun _ _ els _ => unfoldGoal <| els)
+  sol_rule ifElseFalse :
+    <[ if (false) thn else els ]> ⇝ <[ els ]>
 
-  sol_rule ifElseNegated :=
-      iteEffect
-        (fun c _ _ =>
-          match c with
-          | WrappedExpr.unop UnOp.not inner => isSimple inner
-          | _ => False)
-        (fun c thn els h => unfoldGoal <|
-          match c, h with
-          | WrappedExpr.unop UnOp.not inner, _ => [Stmt.ite inner els thn])
+  sol_rule ifElseNegated :
+    <[ if (!s) thn else els ]> ⇝ <[ if (s) els else thn ]>
 
   /-!
   ### Abrupt termination (the calculus, the rule set)
@@ -1898,9 +1713,10 @@ end CaseMode
   (the truth value of the enclosing modality lives in the semantic layer).
   -/
 
-  sol_rule revertBox := revertEffect CaseMode.box
-
-  sol_rule revertDiamond := revertEffect CaseMode.diamond
+  sol_rule «revert» twins :
+    <[ revert() ]> ⇝
+      | "box"     : box     : ⟹ ⊤
+      | "diamond" : diamond : ⟹ ⊥
 
   /-!
   ## Payment Rules
@@ -1915,19 +1731,11 @@ end CaseMode
   `transfer_unfold_rightSndArgument`, `transferNoCallback`.
   -/
 
-  sol_rule transferUnfoldLeftFstReceiver := withOrigin (KeyOrigin.taclet KeyTaclet.transfer_unfold_leftFstReceiver) <|
-      transferEffect
-        (fun nadr _ => isComplex nadr)
-        (fun nadr e _ => unfoldGoal <|
-          [ captureStackValue nadr,
-            Stmt.transfer (stackValueAlias nadr) e ])
+  sol_rule transferUnfoldLeftFstReceiver from transfer_unfold_leftFstReceiver :
+    <[ nadr.transfer(e) ]> ⇝ <[ T pv = nadr; pv.transfer(e) ]>
 
-  sol_rule transferUnfoldRightSndArgument := withOrigin (KeyOrigin.taclet KeyTaclet.transfer_unfold_rightSndArgument) <|
-      transferEffect
-        (fun sadr nse => isSimple sadr ∧ isComplex nse)
-        (fun sadr nse _ => unfoldGoal <|
-          [ captureStackValue nse,
-            Stmt.transfer sadr (stackValueAlias nse) ])
+  sol_rule transferUnfoldRightSndArgument from transfer_unfold_rightSndArgument :
+    <[ sadr.transfer(nse) ]> ⇝ <[ T pv = nse; sadr.transfer(pv) ]>
 
   sol_rule transferNoCallback from transferNoCallbackBox, transferNoCallbackDiamond :
     <[ sadr.transfer(se) ]> ⇝
@@ -1946,13 +1754,10 @@ end CaseMode
   `CallbackSemantics.holdsC_transfer_split`.
   -/
 
-  sol_rule transferWithCallback alternative := withOrigin (KeyOrigin.merged [KeyTaclet.transferWithCallbackBox, KeyTaclet.transferWithCallbackDiamond]) <|
-      transferEffect
-        (fun sadr se => isSimple sadr ∧ isSimple se)
-        (fun sadr se _ =>
-          [ obligation "invariant on exit" CaseMode.both [ .transfer sadr se ] .cinv,
-          { label := "resume after callback", guard := { formula := .cinv }
-            residual := .prog [ .havoc ] [] } ])
+  sol_rule transferWithCallback alternative from transferWithCallbackBox, transferWithCallbackDiamond :
+    <[ sadr.transfer(s) ]> ⇝
+      | "invariant on exit"     :      ⟹ { transfer(sadr, s) } CInv
+      | "resume after callback" : CInv ⟹ { havoc } <[ ]>
 
   /- ## Memory Rules
 
@@ -1969,70 +1774,32 @@ end CaseMode
 
   /-! ### Step 1: unfolding the right-hand side -/
 
-  sol_rule memoryFieldReadUnfoldRightFst := withOrigin (KeyOrigin.taclet KeyTaclet.memoryFieldRead_unfold_rightFst) <|
-      assignEffect
-        (fun lhs rhs =>
-          match rhs with
-          | WrappedExpr.field Kind.memory _ nmp _ =>
-              isComplex nmp ∧ ¬ isStorage lhs
-          | _ => False)
-        (fun lhs rhs h => unfoldGoal <|
-          match rhs, h with
-          | WrappedExpr.field Kind.memory ty nmp f, _ =>
-              fieldReadResolveBlock Kind.memory memoryPathAliasName lhs ty nmp f)
+  sol_rule memoryFieldReadUnfoldRightFst from memoryFieldRead_unfold_rightFst :
+    <[ lhs = nmp.fld ]> ⇝ <[ T memory mv = nmp; lhs = mv.fld ]>
+    where ¬ isStorage lhs
 
-  sol_rule memoryIndexReadUnfoldRightFst := withOrigin (KeyOrigin.taclet KeyTaclet.memoryIndexRead_unfold_rightFst) <|
-      assignEffect
-        (fun lhs rhs =>
-          match rhs with
-          | WrappedExpr.index Kind.memory _ nmp _ =>
-              isComplex nmp ∧ ¬ isStorage lhs
-          | _ => False)
-        (fun lhs rhs h => unfoldGoal <|
-          match rhs, h with
-          | WrappedExpr.index Kind.memory ty nmp index, _ =>
-              indexReadResolveBlock Kind.memory memoryPathAliasName lhs ty nmp index)
+  sol_rule memoryIndexReadUnfoldRightFst from memoryIndexRead_unfold_rightFst :
+    <[ lhs = nmp[e] ]> ⇝ <[ T memory mv = nmp; lhs = mv[e] ]>
+    where ¬ isStorage lhs
 
-  sol_rule memoryIndexReadUnfoldRightSndIndex := withOrigin (KeyOrigin.taclet KeyTaclet.memoryIndexRead_unfold_rightSndIndex) <|
-      assignEffect
-        (fun lhs rhs =>
-          match rhs with
-          | WrappedExpr.index Kind.memory _ mv nse =>
-              isSimple mv ∧ isComplex nse ∧ ¬ isStorage lhs
-          | _ => False)
-        (fun lhs rhs h => unfoldGoal <|
-          match rhs, h with
-          | WrappedExpr.index Kind.memory ty mv nse, _ =>
-              [ captureIndex nse,
-                Stmt.assign lhs
-                  (WrappedExpr.index Kind.memory ty mv (indexAlias nse)) ])
+  sol_rule memoryIndexReadUnfoldRightSndIndex from memoryIndexRead_unfold_rightSndIndex :
+    <[ lhs = mv[nse] ]> ⇝ <[ T idx = nse; lhs = mv[idx] ]>
+    where ¬ isStorage lhs
 
-  sol_rule memoryWriteUnfoldRightSndResult := withOrigin (KeyOrigin.taclet KeyTaclet.memoryIndexWriteMemRefRhsCapture) <|
-      assignEffect
-        (fun mst nse => mst.kind = Kind.memory ∧ isComplex mst ∧ isComplex nse ∧
-          match nse with
-          | WrappedExpr.field Kind.memory .. => False
-          | WrappedExpr.index Kind.memory .. => False
-          | _ => True)
-        (fun mst nse _ => unfoldGoal <| captureAssignBlock mst nse)
+  sol_rule memoryWriteUnfoldRightSndResult from memoryIndexWriteMemRefRhsCapture :
+    <[ nmp = nse ]> ⇝ <[ _ pv = nse; nmp = pv ]>
+    where cond :=
+      nmp.kind = Kind.memory ∧ isComplex nmp ∧ isComplex nse ∧
+        match nse with
+        | WrappedExpr.field Kind.memory .. => False
+        | WrappedExpr.index Kind.memory .. => False
+        | _ => True
 
-  sol_rule memoryFieldReadUnfoldRightSndResult := withOrigin (KeyOrigin.taclet KeyTaclet.memoryFieldRead_unfold_rightSndResult) <|
-      assignEffect
-        (fun lhs rhs =>
-          match rhs with
-          | WrappedExpr.field Kind.memory _ mv _ =>
-              isMemory lhs ∧ isComplex lhs ∧ isSimple mv
-          | _ => False)
-        (fun lhs rhs _ => unfoldGoal <| captureAssignBlock lhs rhs)
+  sol_rule memoryFieldReadUnfoldRightSndResult from memoryFieldRead_unfold_rightSndResult :
+    <[ nmp = mv.fld ]> ⇝ <[ _ pv = mv.fld; nmp = pv ]>
 
-  sol_rule memoryIndexReadUnfoldRightSndResult := withOrigin (KeyOrigin.taclet KeyTaclet.memoryIndexRead_unfold_rightSndResult) <|
-      assignEffect
-        (fun lhs rhs =>
-          match rhs with
-          | WrappedExpr.index Kind.memory _ mv i =>
-              isMemory lhs ∧ isComplex lhs ∧ isSimple mv ∧ isSimple i
-          | _ => False)
-        (fun lhs rhs _ => unfoldGoal <| captureAssignBlock lhs rhs)
+  sol_rule memoryIndexReadUnfoldRightSndResult from memoryIndexRead_unfold_rightSndResult :
+    <[ nmp = mv[i] ]> ⇝ <[ _ pv = mv[i]; nmp = pv ]>
 
   /-!
   ### Step 2: unfolding the left-hand side
@@ -2040,46 +1807,20 @@ end CaseMode
   As in storage, the two delete unfolds are merged into one rule.
   -/
 
-  sol_rule memoryFieldWriteUnfoldLeftFst := withOrigin (KeyOrigin.taclet KeyTaclet.memoryFieldWrite_unfold_leftFst) <|
-      assignEffect
-        (fun lhs rhs =>
-          match (lhs : WrappedExpr) with
-          | WrappedExpr.field Kind.memory _ nmp _ =>
-              isComplex nmp ∧ isSimple rhs
-          | _ => False)
-        (fun lhs rhs h => unfoldGoal <|
-          match lhs, h with
-          | ⟨WrappedExpr.field Kind.memory ty nmp f, _⟩, _ =>
-              fieldWriteResolveBlock Kind.memory memoryPathAliasName ty nmp f rhs)
+  sol_rule memoryFieldWriteUnfoldLeftFst from memoryFieldWrite_unfold_leftFst :
+    <[ nmp.fld = e ]> ⇝ <[ T rv ?= e; T memory mv = nmp; mv.fld = rv ]>
+    where isSimple e
 
-  sol_rule memoryIndexWriteUnfoldLeftFst := withOrigin (KeyOrigin.taclet KeyTaclet.memoryIndexWrite_unfold_leftFst) <|
-      assignEffect
-        (fun lhs rhs =>
-          match (lhs : WrappedExpr) with
-          | WrappedExpr.index Kind.memory _ nmp _ =>
-              isComplex nmp ∧ isSimple rhs
-          | _ => False)
-        (fun lhs rhs h => unfoldGoal <|
-          match lhs, h with
-          | ⟨WrappedExpr.index Kind.memory ty nmp index, _⟩, _ =>
-              indexWriteResolveBlock Kind.memory memoryPathAliasName ty nmp index rhs)
+  sol_rule memoryIndexWriteUnfoldLeftFst from memoryIndexWrite_unfold_leftFst :
+    <[ nmp[e1] = e2 ]> ⇝ <[ T rv ?= e2; T memory mv = nmp; T idx ?= e1; mv[idx] = rv ]>
+    where isSimple e2
 
-  sol_rule memoryDeleteComplexTarget := withOrigin (KeyOrigin.merged [KeyTaclet.memoryFieldDelete_unfold_leftFst, KeyTaclet.memoryIndexDelete_unfold_leftFst, KeyTaclet.memoryIndexDeleteNonSimpleIndexCapture]) <|
-      deleteEffect
-        (fun target => isComplexMemoryDeleteTarget target)
-        (fun target h => unfoldGoal <| memoryDeleteComplexTargetBlock (target : WrappedExpr) h)
+  sol_rule memoryDeleteComplexTarget from memoryFieldDelete_unfold_leftFst, memoryIndexDelete_unfold_leftFst, memoryIndexDeleteNonSimpleIndexCapture :
+    <[ delete(target) ]> ⇝ ⟦ memoryDeleteComplexTargetBlock (target : WrappedExpr) h ⟧
+    where cond := isComplexMemoryDeleteTarget target
 
-  sol_rule memoryIndexWriteUnfoldLeftSndIndex := withOrigin (KeyOrigin.taclet KeyTaclet.memoryIndexWriteNonSimpleIndexCapture) <|
-      assignEffect
-        (fun lhs rhs =>
-          match (lhs : WrappedExpr) with
-          | WrappedExpr.index Kind.memory _ mv nse =>
-              isSimple mv ∧ isComplex nse ∧ isSimple rhs
-          | _ => False)
-        (fun lhs rhs h => unfoldGoal <|
-          match lhs, h with
-          | ⟨WrappedExpr.index Kind.memory ty mv nse, _⟩, _ =>
-              captureIndexTargetBlock Kind.memory ty mv nse rhs)
+  sol_rule memoryIndexWriteUnfoldLeftSndIndex from memoryIndexWriteNonSimpleIndexCapture :
+    <[ mv1[nse] = s ]> ⇝ <[ T rv ?= s; T memory mv = mv1; T idx ?= nse; mv[idx] = rv ]>
 
   /-!
   ### Step 3: generating an update
@@ -2088,22 +1829,11 @@ end CaseMode
   `memoryDeclFreshAlloc`.
   -/
 
-  sol_rule memoryLocalDeclInitDrop := withOrigin (KeyOrigin.taclet KeyTaclet.memoryLocalDeclInitDrop) <|
-      memoryDeclEffect
-        (fun _ _ init =>
-          match init with
-          | some rhs => isMemory rhs
-          | none => False)
-        (fun ty name init h => unfoldGoal <|
-          match init, h with
-          | some rhs, _ =>
-              [ Stmt.assign (SoliditySyntax.varPlace Kind.memory ty name) rhs ])
+  sol_rule memoryLocalDeclInitDrop from memoryLocalDeclInitDrop :
+    <[ T memory mv = mpath ]> ⇝ <[ mv = mpath ]>
 
-  sol_rule memoryDeclFreshAlloc := withOrigin (KeyOrigin.merged [KeyTaclet.memoryReferenceDeclFreshAlloc, KeyTaclet.memoryArrayFreshAlloc]) <|
-      memoryDeclEffect
-        (fun _ _ init => init = none)
-        (fun ty name init _ =>
-          terminalGoal [ .memDecl ty name init ])
+  sol_rule memoryDeclFreshAlloc from memoryReferenceDeclFreshAlloc, memoryArrayFreshAlloc :
+    <[ T memory mv ]> ⇝ { mv := alloc() } <[ ]>
 
   /- Simple targets.  The calculus's five delete rules —
   root fresh-rebind, f primitive/reference, index primitive/reference — are
@@ -2119,31 +1849,18 @@ end CaseMode
   sol_rule memoryFieldWriteStore from memoryFieldWrite :
     <[ mv.fld = se ]> ⇝ { memory := write(mv.fld, se) } <[ ]>
 
-  sol_rule memoryRootAlias := withOrigin (KeyOrigin.taclet KeyTaclet.memoryRootRebind) <|
-      assignEffect
-        (fun mv1 mv2 =>
-          mv1.kind = Kind.memory ∧ isSimple mv1 ∧ isMv mv2)
-        (fun mv1 mv2 _ =>
-          terminalGoal [ .bind (varName mv1) (.mref mv2) ])
+  sol_rule memoryRootAlias from memoryRootRebind :
+    <[ mv1 = mv2 ]> ⇝ { mv1 := ref(mv2) } <[ ]>
 
   sol_rule memoryFieldReadHeap from memoryFieldRead :
     <[ v = mv.fld ]> ⇝ { v := mv.fld } <[ ]>
 
-  sol_rule memoryFieldReadAliasRoot := withOrigin (KeyOrigin.taclet KeyTaclet.memoryFieldRead) <|
-      assignEffect
-        (fun mv1 rhs =>
-          match rhs with
-          | WrappedExpr.field Kind.memory _ mv2 _ =>
-              mv1.kind = Kind.memory ∧ isSimple mv1 ∧ isSimple mv2
-          | _ => False)
-        (fun mv1 rhs _ =>
-          terminalGoal [ .bind (varName mv1) (.mref rhs) ])
+  sol_rule memoryFieldReadAliasRoot from memoryFieldRead :
+    <[ mv1 = mv2.fr ]> ⇝ { mv1 := ref(mv2.fr) } <[ ]>
 
-  sol_rule memoryDeleteSimpleTarget := withOrigin (KeyOrigin.merged [KeyTaclet.memoryRootDeleteFreshRebind, KeyTaclet.memoryFieldDeletePrimitive, KeyTaclet.memoryFieldDeleteReference, KeyTaclet.memoryIndexDeletePrimitive, KeyTaclet.memoryIndexDeleteReference]) <|
-      deleteEffect
-        (fun target => isSimpleMemoryDeleteTarget target)
-        (fun target _ =>
-          terminalGoal [ .memDelete target ])
+  sol_rule memoryDeleteSimpleTarget from memoryRootDeleteFreshRebind, memoryFieldDeletePrimitive, memoryFieldDeleteReference, memoryIndexDeletePrimitive, memoryIndexDeleteReference :
+    <[ delete(target) ]> ⇝ { clear(target) } <[ ]>
+    where cond := isSimpleMemoryDeleteTarget target
 
   /-! Array targets, box twin first. -/
 
@@ -2153,55 +1870,17 @@ end CaseMode
       | else            ⟹ revert()
     after read(se), resolve(mv[i])
 
-  sol_rule memoryIndexReadHeapBox := withOrigin (KeyOrigin.taclet KeyTaclet.memoryIndexReadArrayValue) <|
-      withMode CaseMode.box <|
-        assignEffect
-          (fun v rhs =>
-            match rhs with
-            | WrappedExpr.index Kind.memory _ mv i =>
-                isStack v ∧ isSimple mv ∧ isSimple i
-            | _ => False)
-          (fun v rhs _ =>
-            splitGoals (.inBounds rhs) [.resolve rhs]
-            [ writeBack v (.read rhs) ])
+  sol_rule memoryIndexReadHeap twins from memoryIndexReadArrayValue :
+    <[ v = mv[i] ]> ⇝
+      | inBounds(mv[i]) ⟹ { v := mv[i] } <[ ]>
+      | else            ⟹ revert()
+    after resolve(mv[i])
 
-  sol_rule memoryIndexReadHeapDiamond := withOrigin (KeyOrigin.taclet KeyTaclet.memoryIndexReadArrayValue) <|
-      withMode CaseMode.diamond <|
-        assignEffect
-          (fun v rhs =>
-            match rhs with
-            | WrappedExpr.index Kind.memory _ mv i =>
-                isStack v ∧ isSimple mv ∧ isSimple i
-            | _ => False)
-          (fun v rhs _ =>
-            splitGoals (.inBounds rhs) [.resolve rhs]
-            [ writeBack v (.read rhs) ])
-
-  sol_rule memoryIndexReadAliasRootBox := withOrigin (KeyOrigin.taclet KeyTaclet.memoryIndexReadArrayMemory) <|
-      withMode CaseMode.box <|
-        assignEffect
-          (fun mv1 rhs =>
-            match rhs with
-            | WrappedExpr.index Kind.memory _ mv2 i =>
-                mv1.kind = Kind.memory ∧ isSimple mv1 ∧
-                  isSimple mv2 ∧ isSimple i
-            | _ => False)
-          (fun mv1 rhs _ =>
-            splitGoals (.inBounds rhs) [.resolve rhs]
-            [ .bind (varName mv1) (.mref rhs) ])
-
-  sol_rule memoryIndexReadAliasRootDiamond := withOrigin (KeyOrigin.taclet KeyTaclet.memoryIndexReadArrayMemory) <|
-      withMode CaseMode.diamond <|
-        assignEffect
-          (fun mv1 rhs =>
-            match rhs with
-            | WrappedExpr.index Kind.memory _ mv2 i =>
-                mv1.kind = Kind.memory ∧ isSimple mv1 ∧
-                  isSimple mv2 ∧ isSimple i
-            | _ => False)
-          (fun mv1 rhs _ =>
-            splitGoals (.inBounds rhs) [.resolve rhs]
-            [ .bind (varName mv1) (.mref rhs) ])
+  sol_rule memoryIndexReadAliasRoot twins from memoryIndexReadArrayMemory :
+    <[ mv1 = mv2[i] ]> ⇝
+      | inBounds(mv2[i]) ⟹ { mv1 := ref(mv2[i]) } <[ ]>
+      | else             ⟹ revert()
+    after resolve(mv2[i])
 
   /- ## Storage to Memory Rules
 
@@ -2220,25 +1899,18 @@ end CaseMode
   captures a complex storage path into a storage alias first.
   -/
 
-  sol_rule memoryStorageCopyUnfold := withOrigin (KeyOrigin.taclet KeyTaclet.memoryStorageCopyUnfold) <|
-      assignEffect
-        (fun mv rhs =>
-          mv.kind = Kind.memory ∧ isSimple mv ∧
-            match rhs with
-            | WrappedExpr.field Kind.storage _ base _ => isSimple base
-            | WrappedExpr.index Kind.storage _ base i =>
-                isSimple base ∧ isSimple i
-            | _ => False)
-        (fun mv rhs _ => unfoldGoal <|
-          [ captureStoragePath rhs,
-            Stmt.assign mv (storageAlias rhs) ])
+  sol_rule memoryStorageCopyUnfold from memoryStorageCopyUnfold :
+    <[ mv = path ]> ⇝ <[ T storage sp = path; mv = sp ]>
+    where cond :=
+      mv.kind = Kind.memory ∧ isSimple mv ∧
+        match path with
+        | WrappedExpr.field Kind.storage _ base _ => isSimple base
+        | WrappedExpr.index Kind.storage _ base i =>
+            isSimple base ∧ isSimple i
+        | _ => False
 
-  sol_rule memoryStorageCopy := withOrigin (KeyOrigin.taclet KeyTaclet.memoryStorageCopy) <|
-      assignEffect
-        (fun mv sp =>
-          mv.kind = Kind.memory ∧ isSimple mv ∧ isSp sp)
-        (fun mv sp _ =>
-          terminalGoal [ .memDecl mv.ty (varName mv) (some sp) ])
+  sol_rule memoryStorageCopy from memoryStorageCopy :
+    <[ mv = sp ]> ⇝ { mv := alloc(sp) } <[ ]>
 
   /-!
   ## Memory to Storage Rules
@@ -2248,82 +1920,26 @@ end CaseMode
   plus the unfolds; the array index rule is a box/diamond twin pair.
   -/
 
-  sol_rule memoryToStorageUnfoldLeftFstTarget :=
-      assignEffect
-        (fun lhs mv =>
-          match (lhs : WrappedExpr) with
-          | WrappedExpr.field Kind.storage _ nsp _ =>
-              isComplex nsp ∧ isMv mv
-          | _ => False)
-        (fun lhs mv h => unfoldGoal <|
-          match lhs, h with
-          | ⟨WrappedExpr.field Kind.storage ty nsp f, _⟩, _ =>
-              fieldWriteResolveBlock Kind.storage storagePathAliasName ty nsp f mv)
+  sol_rule memoryToStorageUnfoldLeftFstTarget :
+    <[ nsp.fld = mv ]> ⇝ <[ T rv ?= mv; T storage sp = nsp; sp.fld = rv ]>
 
-  sol_rule memoryToStorageUnfoldLeftSndTargetIndex :=
-      assignEffect
-        (fun lhs mv =>
-          match (lhs : WrappedExpr) with
-          | WrappedExpr.index Kind.storage _ sp nse =>
-              isSimple sp ∧ isComplex nse ∧ isMv mv
-          | _ => False)
-        (fun lhs mv h => unfoldGoal <|
-          match lhs, h with
-          | ⟨WrappedExpr.index Kind.storage ty sp nse, _⟩, _ =>
-              captureIndexTargetBlock Kind.storage ty sp nse mv)
+  sol_rule memoryToStorageUnfoldLeftSndTargetIndex :
+    <[ sp1[nse] = mv ]> ⇝ <[ T rv ?= mv; T storage sp = sp1; T idx ?= nse; sp[idx] = rv ]>
 
-  sol_rule memoryToStorageFieldCopyRoot := withOrigin (KeyOrigin.merged [KeyTaclet.memoryToStorageFieldCopyRoot, KeyTaclet.memoryToStorageFieldCopyField]) <|
-      assignEffect
-        (fun lhs mv =>
-          match (lhs : WrappedExpr) with
-          | WrappedExpr.field Kind.storage _ sp _ =>
-              isSimple sp ∧ isMv mv
-          | _ => False)
-        (fun lhs mv _ =>
-          terminalGoal [ .storage (.copyFromMem lhs mv) ])
+  sol_rule memoryToStorageFieldCopyRoot from memoryToStorageFieldCopyRoot, memoryToStorageFieldCopyField :
+    <[ sp.fld = mv ]> ⇝ { storage := copyMem(sp.fld, mv) } <[ ]>
 
-  sol_rule memoryToStorageIndexMappingCopyRoot := withOrigin (KeyOrigin.taclet KeyTaclet.memoryToStorageIndexMappingCopyRoot) <|
-      assignEffect
-        (fun lhs mv =>
-          match (lhs : WrappedExpr) with
-          | WrappedExpr.index Kind.storage _ map i =>
-              isSimple map ∧ isSimple i ∧ isMemory mv ∧
-                isSimple mv ∧ isMapping map
-          | _ => False)
-        (fun lhs mv _ =>
-          terminalGoal [ .storage (.copyFromMem lhs mv) ])
+  sol_rule memoryToStorageIndexMappingCopyRoot from memoryToStorageIndexMappingCopyRoot :
+    <[ map[i] = mv ]> ⇝ { storage := copyMem(map[i], mv) } <[ ]>
 
-  sol_rule memoryToStorageIndexArrayCopyRootBox := withOrigin (KeyOrigin.taclet KeyTaclet.memoryToStorageIndexArrayCopyRoot) <|
-      withMode CaseMode.box <|
-        assignEffect
-          (fun lhs mv =>
-            match (lhs : WrappedExpr) with
-            | WrappedExpr.index Kind.storage _ arr i =>
-                isSimple arr ∧ isSimple i ∧ isMemory mv ∧
-                  isSimple mv ∧ isArray arr
-            | _ => False)
-          (fun lhs mv _ =>
-            splitGoals (.inBounds lhs) [.image mv, .resolve lhs]
-            [ .storage (.copyFromMem lhs mv) ])
+  sol_rule memoryToStorageIndexArrayCopyRoot twins from memoryToStorageIndexArrayCopyRoot :
+    <[ arr[i] = mv ]> ⇝
+      | inBounds(arr[i]) ⟹ { storage := copyMem(arr[i], mv) } <[ ]>
+      | else             ⟹ revert()
+    after image(mv), resolve(arr[i])
 
-  sol_rule memoryToStorageIndexArrayCopyRootDiamond := withOrigin (KeyOrigin.taclet KeyTaclet.memoryToStorageIndexArrayCopyRoot) <|
-      withMode CaseMode.diamond <|
-        assignEffect
-          (fun lhs mv =>
-            match (lhs : WrappedExpr) with
-            | WrappedExpr.index Kind.storage _ arr i =>
-                isSimple arr ∧ isSimple i ∧ isMemory mv ∧
-                  isSimple mv ∧ isArray arr
-            | _ => False)
-          (fun lhs mv _ =>
-            splitGoals (.inBounds lhs) [.image mv, .resolve lhs]
-            [ .storage (.copyFromMem lhs mv) ])
-
-  sol_rule memoryToStorageStoreRoot := withOrigin (KeyOrigin.taclet KeyTaclet.memoryToStorageStoreRoot) <|
-      assignEffect
-        (fun lhs mv => isStorage lhs ∧ isSimple lhs ∧ isMv mv)
-        (fun lhs mv _ =>
-          terminalGoal [ .storage (.copyFromMem lhs mv) ])
+  sol_rule memoryToStorageStoreRoot from memoryToStorageStoreRoot :
+    <[ sp = mv ]> ⇝ { storage := copyMem(sp, mv) } <[ ]>
 
   /- ## Arithmetic
 
@@ -2357,7 +1973,7 @@ end CaseMode
   sol_rule localCompoundAssign (op : BinOp) from (localCompoundOrigin op) :
     <[ lv ⊕= se ]> ⇝
       | (nonZero(se) when BinOp.needsGuard opS) ⟹ { lv := lv ⊕ se } <[ ]>
-      | else                                   ⟹ revert()
+      | else                                    ⟹ revert()
     after read(se)
 
   /-!
@@ -2379,67 +1995,29 @@ end CaseMode
   `storageRootIncrement`).
   -/
 
-  sol_rule storageRootCompoundAssign (opR : BinOp) := withOrigin (storageRootCompoundOrigin opR) <|
-      compoundAssignEffect
-        (fun op gsp se =>
-          op = opR ∧ op.hasCompoundAssign = true ∧ isGlobal gsp ∧
-            isSe se)
-        (fun op gsp se _ =>
-          compoundGoals op gsp se)
+  sol_rule storageRootCompoundAssign (op : BinOp) from (storageRootCompoundOrigin op) :
+    <[ gsp ⊕= se ]> ⇝
+      | (nonZero(se) when BinOp.needsGuard opS) ⟹ { gsp := gsp ⊕ se } <[ ]>
+      | else                                    ⟹ revert()
+    after read(se)
 
-  sol_rule storageFieldCompoundAssign (opR : BinOp) := withOrigin (storageFieldCompoundOrigin opR) <|
-      compoundAssignEffect
-        (fun op lhs se =>
-          match (lhs : WrappedExpr) with
-          | WrappedExpr.field Kind.storage _ sp _ =>
-              op = opR ∧ op.hasCompoundAssign = true ∧ isSimple sp ∧
-                isSe se
-          | _ => False)
-        (fun op lhs se _ =>
-          compoundGoals op lhs se)
+  sol_rule storageFieldCompoundAssign (op : BinOp) from (storageFieldCompoundOrigin op) :
+    <[ sp.fld ⊕= se ]> ⇝
+      | (nonZero(se) when BinOp.needsGuard opS) ⟹ { sp.fld := sp.fld ⊕ se } <[ ]>
+      | else                                    ⟹ revert()
+    after read(se)
 
-  sol_rule storageIndexCompoundAssign (opR : BinOp) := withOrigin (storageIndexCompoundOrigin opR) <|
-      compoundAssignEffect
-        (fun op lhs se =>
-          match (lhs : WrappedExpr) with
-          | WrappedExpr.index Kind.storage _ sp i =>
-              op = opR ∧ op.hasCompoundAssign = true ∧ isSimple sp ∧
-                isSimple i ∧ isSe se
-          | _ => False)
-        (fun op lhs se _ =>
-          compoundIndexGoals op lhs se)
+  sol_rule storageIndexCompoundAssign (op : BinOp) from (storageIndexCompoundOrigin op) :
+    <[ sp[i] ⊕= se ]> ⇝
+      | inBounds(sp[i]) ⟹ { sp[i] := sp[i] ⊕ se } <[ ]>
+      | else            ⟹ revert()
+    after read(se), resolve(sp[i])
 
-  sol_rule storageFieldCompoundAssignUnfoldLeftFst (opR : BinOp) := withOrigin (storageFieldCompoundUnfoldOrigin opR) <|
-      compoundAssignEffect
-        (fun op lhs se =>
-          match (lhs : WrappedExpr) with
-          | WrappedExpr.field Kind.storage _ nsp _ =>
-              op = opR ∧ op.hasCompoundAssign = true ∧ isComplex nsp ∧
-                isSe se
-          | _ => False)
-        (fun op lhs se h => unfoldGoal <|
-          match lhs, h with
-          | ⟨WrappedExpr.field Kind.storage ty nsp f, _⟩, _ =>
-              [ captureRhsValue se, captureStoragePath nsp,
-                Stmt.compoundAssign op
-                  (fieldFromAlias Kind.storage storagePathAliasName ty nsp f)
-                  (rhsValueAlias se) ])
+  sol_rule storageFieldCompoundAssignUnfoldLeftFst (op : BinOp) from (storageFieldCompoundUnfoldOrigin op) :
+    <[ nsp.fld ⊕= se ]> ⇝ <[ T rv = se; T storage sp = nsp; sp.fld ⊕= rv ]>
 
-  sol_rule storageIndexCompoundAssignUnfoldLeftFst (opR : BinOp) := withOrigin (storageIndexCompoundUnfoldOrigin opR) <|
-      compoundAssignEffect
-        (fun op lhs se =>
-          match (lhs : WrappedExpr) with
-          | WrappedExpr.index Kind.storage _ nsp i =>
-              op = opR ∧ op.hasCompoundAssign = true ∧ isComplex nsp ∧
-                isSimple i ∧ isSe se
-          | _ => False)
-        (fun op lhs se h => unfoldGoal <|
-          match lhs, h with
-          | ⟨WrappedExpr.index Kind.storage ty nsp i, _⟩, _ =>
-              [ captureRhsValue se, captureStoragePath nsp,
-                Stmt.compoundAssign op
-                  (indexFromAlias Kind.storage storagePathAliasName ty nsp i)
-                  (rhsValueAlias se) ])
+  sol_rule storageIndexCompoundAssignUnfoldLeftFst (op : BinOp) from (storageIndexCompoundUnfoldOrigin op) :
+    <[ nsp[i] ⊕= se ]> ⇝ <[ T rv = se; T storage sp = nsp; sp[i] ⊕= rv ]>
 
   /-!
   Increment/decrement statement forms (`++age;`), one KeY taclet per
@@ -2453,87 +2031,32 @@ end CaseMode
   sol_rule storageRootIncDec (op : IncDec) from (storageRootIncDecOrigin op) :
     <[ gsp++ ]> ⇝ { bump(gsp++) } <[ ]>
 
-  sol_rule storageFieldIncDec (opR : IncDec) := withOrigin (storageFieldIncDecOrigin opR) <|
-      exprEffect
-        (fun expr =>
-          match expr with
-          | WrappedExpr.incDec op (WrappedExpr.field Kind.storage _ sp _) =>
-              op = opR ∧ isSimple sp
-          | _ => False)
-        (fun expr _ =>
-          terminalGoal [ .bumpOf expr ])
+  sol_rule storageFieldIncDec (op : IncDec) from (storageFieldIncDecOrigin op) :
+    <[ sp.fld++ ]> ⇝ { bump(sp.fld++) } <[ ]>
 
-  sol_rule storageIndexIncDec (opR : IncDec) := withOrigin (storageIndexIncDecOrigin opR) <|
-      exprEffect
-        (fun expr =>
-          match expr with
-          | WrappedExpr.incDec op
-              (WrappedExpr.index Kind.storage _ sp i) =>
-              op = opR ∧ isSimple sp ∧ isSimple i
-          | _ => False)
-        (fun expr _ =>
-          splitGoals (.inBounds expr) [.resolve expr] [ .bumpOf expr ])
+  sol_rule storageIndexIncDec (op : IncDec) from (storageIndexIncDecOrigin op) :
+    <[ sp[i]++ ]> ⇝
+      | inBounds(sp[i]++) ⟹ { bump(sp[i]++) } <[ ]>
+      | else              ⟹ revert()
+    after resolve(sp[i]++)
 
-  sol_rule storageFieldIncDecUnfoldLeftFst (opR : IncDec) := withOrigin (storageFieldIncDecUnfoldOrigin opR) <|
-      exprEffect
-        (fun expr =>
-          match expr with
-          | WrappedExpr.incDec op (WrappedExpr.field Kind.storage _ nsp _) =>
-              op = opR ∧ isComplex nsp
-          | _ => False)
-        (fun expr h => unfoldGoal <|
-          match expr, h with
-          | WrappedExpr.incDec op (WrappedExpr.field Kind.storage ty nsp f), _ =>
-              [ captureStoragePath nsp,
-                Stmt.expr (WrappedExpr.incDec op
-                  (WrappedExpr.field Kind.storage ty (storageAlias nsp) f)) ])
+  sol_rule storageFieldIncDecUnfoldLeftFst (op : IncDec) from (storageFieldIncDecUnfoldOrigin op) :
+    <[ nsp.fld++ ]> ⇝ <[ T storage sp = nsp; sp.fld++ ]>
 
-  sol_rule storageIndexIncDecUnfoldLeftFst (opR : IncDec) := withOrigin (storageIndexIncDecUnfoldOrigin opR) <|
-      exprEffect
-        (fun expr =>
-          match expr with
-          | WrappedExpr.incDec op
-              (WrappedExpr.index Kind.storage _ nsp i) =>
-              op = opR ∧ isComplex nsp ∧ isSimple i
-          | _ => False)
-        (fun expr h => unfoldGoal <|
-          match expr, h with
-          | WrappedExpr.incDec op (WrappedExpr.index Kind.storage ty nsp i), _ =>
-              [ captureStoragePath nsp,
-                Stmt.expr (WrappedExpr.incDec op
-                  (WrappedExpr.index Kind.storage ty (storageAlias nsp) i)) ])
+  sol_rule storageIndexIncDecUnfoldLeftFst (op : IncDec) from (storageIndexIncDecUnfoldOrigin op) :
+    <[ nsp[i]++ ]> ⇝ <[ T storage sp = nsp; sp[i]++ ]>
 
-  sol_rule storageRootIncDecAssignment (opR : IncDec) := withOrigin (storageRootIncDecAssignOrigin opR) <|
-      assignEffect
-        (fun v rhs =>
-          match rhs with
-          | WrappedExpr.incDec op target =>
-              op = opR ∧ isStackVar v ∧ isGlobal target
-          | _ => False)
-        (fun v rhs _ =>
-          incDecGoals v rhs)
+  sol_rule storageRootIncDecAssignment (op : IncDec) from (storageRootIncDecAssignOrigin op) :
+    <[ lv = gsp++ ]> ⇝ { bump(gsp++) || lv := gsp++ } <[ ]>
 
-  sol_rule storageFieldIncDecAssignment (opR : IncDec) := withOrigin (storageFieldIncDecAssignOrigin opR) <|
-      assignEffect
-        (fun v rhs =>
-          match rhs with
-          | WrappedExpr.incDec op (WrappedExpr.field Kind.storage _ sp _) =>
-              op = opR ∧ isStackVar v ∧ isSimple sp
-          | _ => False)
-        (fun v rhs _ =>
-          incDecGoals v rhs)
+  sol_rule storageFieldIncDecAssignment (op : IncDec) from (storageFieldIncDecAssignOrigin op) :
+    <[ lv = sp.fld++ ]> ⇝ { bump(sp.fld++) || lv := sp.fld++ } <[ ]>
 
-  sol_rule storageIndexIncDecAssignment (opR : IncDec) := withOrigin (storageIndexIncDecAssignOrigin opR) <|
-      assignEffect
-        (fun v rhs =>
-          match rhs with
-          | WrappedExpr.incDec op
-              (WrappedExpr.index Kind.storage _ sp i) =>
-              op = opR ∧ isStackVar v ∧ isSimple sp ∧ isSimple i
-          | _ => False)
-        (fun v rhs _ =>
-          splitGoals (.inBounds rhs) [.resolve rhs]
-            [ .bumpOf rhs, writeBack v (.read rhs) ])
+  sol_rule storageIndexIncDecAssignment (op : IncDec) from (storageIndexIncDecAssignOrigin op) :
+    <[ lv = sp[i]++ ]> ⇝
+      | inBounds(sp[i]++) ⟹ { bump(sp[i]++) || lv := sp[i]++ } <[ ]>
+      | else              ⟹ revert()
+    after resolve(sp[i]++)
 
   /-!
   Memory targets: `memoryFieldOpAssign`, `memoryFieldDivAssign`,
@@ -2556,59 +2079,23 @@ end CaseMode
   `memoryIndexArrayOpAssign`, `memoryFieldIncrement`).
   -/
 
-  sol_rule memoryFieldCompoundAssign (opR : BinOp) :=
-      compoundAssignEffect
-        (fun op lhs se =>
-          match (lhs : WrappedExpr) with
-          | WrappedExpr.field Kind.memory _ mv _ =>
-              op = opR ∧ op.hasCompoundAssign = true ∧ isSimple mv ∧
-                isSe se
-          | _ => False)
-        (fun op lhs se _ =>
-          compoundGoals op lhs se)
+  sol_rule memoryFieldCompoundAssign (op : BinOp) :
+    <[ mv.fld ⊕= se ]> ⇝
+      | (nonZero(se) when BinOp.needsGuard opS) ⟹ { mv.fld := mv.fld ⊕ se } <[ ]>
+      | else                                    ⟹ revert()
+    after read(se)
 
-  sol_rule memoryIndexCompoundAssign (opR : BinOp) :=
-      compoundAssignEffect
-        (fun op lhs se =>
-          match (lhs : WrappedExpr) with
-          | WrappedExpr.index Kind.memory _ mv i =>
-              op = opR ∧ op.hasCompoundAssign = true ∧ isSimple mv ∧
-                isSimple i ∧ isSe se
-          | _ => False)
-        (fun op lhs se _ =>
-          compoundIndexGoals op lhs se)
+  sol_rule memoryIndexCompoundAssign (op : BinOp) :
+    <[ mv[i] ⊕= se ]> ⇝
+      | inBounds(mv[i]) ⟹ { mv[i] := mv[i] ⊕ se } <[ ]>
+      | else            ⟹ revert()
+    after read(se), resolve(mv[i])
 
-  sol_rule memoryFieldCompoundAssignUnfoldLeftFst (opR : BinOp) :=
-      compoundAssignEffect
-        (fun op lhs se =>
-          match (lhs : WrappedExpr) with
-          | WrappedExpr.field Kind.memory _ nmp _ =>
-              op = opR ∧ op.hasCompoundAssign = true ∧ isComplex nmp ∧
-                isSe se
-          | _ => False)
-        (fun op lhs se h => unfoldGoal <|
-          match lhs, h with
-          | ⟨WrappedExpr.field Kind.memory ty nmp f, _⟩, _ =>
-              [ captureRhsValue se, captureMemoryPath nmp,
-                Stmt.compoundAssign op
-                  (fieldFromAlias Kind.memory memoryPathAliasName ty nmp f)
-                  (rhsValueAlias se) ])
+  sol_rule memoryFieldCompoundAssignUnfoldLeftFst (op : BinOp) :
+    <[ nmp.fld ⊕= se ]> ⇝ <[ T rv = se; T memory mv = nmp; mv.fld ⊕= rv ]>
 
-  sol_rule memoryIndexCompoundAssignUnfoldLeftFst (opR : BinOp) :=
-      compoundAssignEffect
-        (fun op lhs se =>
-          match (lhs : WrappedExpr) with
-          | WrappedExpr.index Kind.memory _ nmp i =>
-              op = opR ∧ op.hasCompoundAssign = true ∧ isComplex nmp ∧
-                isSimple i ∧ isSe se
-          | _ => False)
-        (fun op lhs se h => unfoldGoal <|
-          match lhs, h with
-          | ⟨WrappedExpr.index Kind.memory ty nmp i, _⟩, _ =>
-              [ captureRhsValue se, captureMemoryPath nmp,
-                Stmt.compoundAssign op
-                  (indexFromAlias Kind.memory memoryPathAliasName ty nmp i)
-                  (rhsValueAlias se) ])
+  sol_rule memoryIndexCompoundAssignUnfoldLeftFst (op : BinOp) :
+    <[ nmp[i] ⊕= se ]> ⇝ <[ T rv = se; T memory mv = nmp; mv[i] ⊕= rv ]>
 
   /-!
   The memory twins of the increment/decrement family: the calculus's
@@ -2617,77 +2104,29 @@ end CaseMode
   and `_unfold_leftFst` forms.  Again no root and no mapping form.
   -/
 
-  sol_rule memoryFieldIncDec (opR : IncDec) :=
-      exprEffect
-        (fun expr =>
-          match expr with
-          | WrappedExpr.incDec op (WrappedExpr.field Kind.memory _ mv _) =>
-              op = opR ∧ isSimple mv
-          | _ => False)
-        (fun expr _ =>
-          terminalGoal [ .bumpOf expr ])
+  sol_rule memoryFieldIncDec (op : IncDec) :
+    <[ mv.fld++ ]> ⇝ { bump(mv.fld++) } <[ ]>
 
-  sol_rule memoryIndexIncDec (opR : IncDec) :=
-      exprEffect
-        (fun expr =>
-          match expr with
-          | WrappedExpr.incDec op
-              (WrappedExpr.index Kind.memory _ mv i) =>
-              op = opR ∧ isSimple mv ∧ isSimple i
-          | _ => False)
-        (fun expr _ =>
-          splitGoals (.inBounds expr) [.resolve expr] [ .bumpOf expr ])
+  sol_rule memoryIndexIncDec (op : IncDec) :
+    <[ mv[i]++ ]> ⇝
+      | inBounds(mv[i]++) ⟹ { bump(mv[i]++) } <[ ]>
+      | else              ⟹ revert()
+    after resolve(mv[i]++)
 
-  sol_rule memoryFieldIncDecUnfoldLeftFst (opR : IncDec) :=
-      exprEffect
-        (fun expr =>
-          match expr with
-          | WrappedExpr.incDec op (WrappedExpr.field Kind.memory _ nmp _) =>
-              op = opR ∧ isComplex nmp
-          | _ => False)
-        (fun expr h => unfoldGoal <|
-          match expr, h with
-          | WrappedExpr.incDec op (WrappedExpr.field Kind.memory ty nmp f), _ =>
-              [ captureMemoryPath nmp,
-                Stmt.expr (WrappedExpr.incDec op
-                  (WrappedExpr.field Kind.memory ty (memoryAlias nmp) f)) ])
+  sol_rule memoryFieldIncDecUnfoldLeftFst (op : IncDec) :
+    <[ nmp.fld++ ]> ⇝ <[ T memory mv = nmp; mv.fld++ ]>
 
-  sol_rule memoryIndexIncDecUnfoldLeftFst (opR : IncDec) :=
-      exprEffect
-        (fun expr =>
-          match expr with
-          | WrappedExpr.incDec op
-              (WrappedExpr.index Kind.memory _ nmp i) =>
-              op = opR ∧ isComplex nmp ∧ isSimple i
-          | _ => False)
-        (fun expr h => unfoldGoal <|
-          match expr, h with
-          | WrappedExpr.incDec op (WrappedExpr.index Kind.memory ty nmp i), _ =>
-              [ captureMemoryPath nmp,
-                Stmt.expr (WrappedExpr.incDec op
-                  (WrappedExpr.index Kind.memory ty (memoryAlias nmp) i)) ])
+  sol_rule memoryIndexIncDecUnfoldLeftFst (op : IncDec) :
+    <[ nmp[i]++ ]> ⇝ <[ T memory mv = nmp; mv[i]++ ]>
 
-  sol_rule memoryFieldIncDecAssignment (opR : IncDec) :=
-      assignEffect
-        (fun v rhs =>
-          match rhs with
-          | WrappedExpr.incDec op (WrappedExpr.field Kind.memory _ mv _) =>
-              op = opR ∧ isStackVar v ∧ isSimple mv
-          | _ => False)
-        (fun v rhs _ =>
-          incDecGoals v rhs)
+  sol_rule memoryFieldIncDecAssignment (op : IncDec) :
+    <[ lv = mv.fld++ ]> ⇝ { bump(mv.fld++) || lv := mv.fld++ } <[ ]>
 
-  sol_rule memoryIndexIncDecAssignment (opR : IncDec) :=
-      assignEffect
-        (fun v rhs =>
-          match rhs with
-          | WrappedExpr.incDec op
-              (WrappedExpr.index Kind.memory _ mv i) =>
-              op = opR ∧ isStackVar v ∧ isSimple mv ∧ isSimple i
-          | _ => False)
-        (fun v rhs _ =>
-          splitGoals (.inBounds rhs) [.resolve rhs]
-            [ .bumpOf rhs, writeBack v (.read rhs) ])
+  sol_rule memoryIndexIncDecAssignment (op : IncDec) :
+    <[ lv = mv[i]++ ]> ⇝
+      | inBounds(mv[i]++) ⟹ { bump(mv[i]++) || lv := mv[i]++ } <[ ]>
+      | else              ⟹ revert()
+    after resolve(mv[i]++)
 
   /- ## Rules with no counterpart upstream
 
@@ -2719,61 +2158,20 @@ end CaseMode
   `binopAssignment op` = `<op>Assignment`.
   -/
 
-  sol_rule binopUnfoldLeft (op : BinOp) := withOrigin (binopUnfoldLeftOrigin op) <|
-      assignEffect
-        (fun v rhs =>
-          match rhs with
-          | WrappedExpr.binop op' l _ =>
-              op' = op ∧ isStackVar v ∧ isComplex l
-          | _ => False)
-        (fun v rhs h => unfoldGoal <|
-          match rhs, h with
-          | WrappedExpr.binop op' l r, _ =>
-              [ captureStackValue l,
-                Stmt.assign v
-                  (WrappedExpr.binop op' (stackValueAlias l) r) ])
+  sol_rule binopUnfoldLeft (op : BinOp) from (binopUnfoldLeftOrigin op) :
+    <[ lv = nse ⊕ e ]> ⇝ <[ T pv = nse; lv = pv ⊕ e ]>
 
-  sol_rule binopUnfoldRight (op : BinOp) := withOrigin (binopUnfoldRightOrigin op) <|
-      assignEffect
-        (fun v rhs =>
-          match rhs with
-          | WrappedExpr.binop op' l r =>
-              op' = op ∧ op.shortCircuits = false ∧
-                isStackVar v ∧ isSimple l ∧ isComplex r
-          | _ => False)
-        (fun v rhs h => unfoldGoal <|
-          match rhs, h with
-          | WrappedExpr.binop op' l r, _ =>
-              [ captureStackValue r,
-                Stmt.assign v
-                  (WrappedExpr.binop op' l (stackValueAlias r)) ])
+  sol_rule binopUnfoldRight (op : BinOp | op.shortCircuits = false) from (binopUnfoldRightOrigin op) :
+    <[ lv = s ⊕ nse ]> ⇝ <[ T pv = nse; lv = s ⊕ pv ]>
 
-  sol_rule binopUnfoldResult (op : BinOp) :=
-      assignEffect
-        (fun v rhs =>
-          match rhs with
-          | WrappedExpr.binop op' l r =>
-              op' = op ∧ op.isArith = true ∧ ¬ isStackVar v ∧
-                ¬ (v.kind = Kind.memory ∧ isComplex v) ∧
-                isSimple l ∧ isSimple r
-          | _ => False)
-        (fun v rhs h => unfoldGoal <|
-          match rhs, h with
-          | WrappedExpr.binop op' l r, _ =>
-              [ captureStackValue (WrappedExpr.binop op' l r),
-                Stmt.assign v
-                  (stackValueAlias (WrappedExpr.binop op' l r)) ])
+  sol_rule binopUnfoldResult (op : BinOp | op.isArith = true) :
+    <[ x = s1 ⊕ s2 ]> ⇝ <[ T pv = s1 ⊕ s2; x = pv ]>
+    where ¬ isStackVar x, ¬ (x.kind = Kind.memory ∧ isComplex x)
 
-  sol_rule binopAssignment (op : BinOp) := withOrigin (binopAssignmentOrigin op) <|
-      assignEffect
-        (fun v rhs =>
-          match rhs with
-          | WrappedExpr.binop op' l r =>
-              op' = op ∧ isStackVar v ∧ isSimple l ∧ isSimple r
-          | _ => False)
-        (fun v rhs _ =>
-          splitGoals (if op.needsGuard then .rhsNonZero rhs else .const true) []
-            [ writeBack v (.read rhs) ])
+  sol_rule binopAssignment (op : BinOp) from (binopAssignmentOrigin op) :
+    <[ lv = s1 ⊕ s2 ]> ⇝
+      | (rhsNonZero(s1 ⊕ s2) when BinOp.needsGuard op) ⟹ { lv := s1 ⊕ s2 } <[ ]>
+      | else                                           ⟹ revert()
 
   /-!
   Short-circuit RHS: KeY `logicalAndShortCircuitRhs` /
@@ -2783,33 +2181,11 @@ end CaseMode
   itself short-circuits, so the rewrite is exact.
   -/
 
-  sol_rule logicalAndShortCircuitRhs := withOrigin (KeyOrigin.taclet KeyTaclet.logicalAndShortCircuitRhs) <|
-      assignEffect
-        (fun v rhs =>
-          match rhs with
-          | WrappedExpr.binop op' l r =>
-              op' = BinOp.and ∧ isStackVar v ∧ isSimple l ∧ isComplex r
-          | _ => False)
-        (fun v rhs h => unfoldGoal <|
-          match rhs, h with
-          | WrappedExpr.binop _ l r, _ =>
-              [ Stmt.ite l
-                  [Stmt.assign v r]
-                  [Stmt.assign v (WrappedExpr.bool false)] ])
+  sol_rule logicalAndShortCircuitRhs from logicalAndShortCircuitRhs :
+    <[ lv = s && nse ]> ⇝ <[ if (s) { lv = nse } else { lv = false } ]>
 
-  sol_rule logicalOrShortCircuitRhs := withOrigin (KeyOrigin.taclet KeyTaclet.logicalOrShortCircuitRhs) <|
-      assignEffect
-        (fun v rhs =>
-          match rhs with
-          | WrappedExpr.binop op' l r =>
-              op' = BinOp.or ∧ isStackVar v ∧ isSimple l ∧ isComplex r
-          | _ => False)
-        (fun v rhs h => unfoldGoal <|
-          match rhs, h with
-          | WrappedExpr.binop _ l r, _ =>
-              [ Stmt.ite l
-                  [Stmt.assign v (WrappedExpr.bool true)]
-                  [Stmt.assign v r] ])
+  sol_rule logicalOrShortCircuitRhs from logicalOrShortCircuitRhs :
+    <[ lv = s || nse ]> ⇝ <[ if (s) { lv = true } else { lv = nse } ]>
 
   /-!
   Ternary `v = c ? e1 : e2;`: KeY `ternaryCaptureCond` hoists a
@@ -2818,72 +2194,30 @@ end CaseMode
   storage-path target (which is not a KeY `Variable`).
   -/
 
-  sol_rule ternaryCaptureCond := withOrigin (KeyOrigin.taclet KeyTaclet.ternaryCaptureCond) <|
-      assignEffect
-        (fun lhs rhs =>
-          match rhs with
-          | WrappedExpr.ternary c _ _ =>
-              -- the memory-complex-lhs dispatch branch claims the whole
-              -- rhs first (`memoryWriteUnfoldRightSndResult`)
-              isComplex c ∧ ¬ (lhs.kind = Kind.memory ∧ isComplex lhs)
-          | _ => False)
-        (fun lhs rhs h => unfoldGoal <|
-          match rhs, h with
-          | WrappedExpr.ternary c t e, _ =>
-              [ captureStackValue c,
-                Stmt.assign lhs
-                  (WrappedExpr.ternary (stackValueAlias c) t e) ])
+  sol_rule ternaryCaptureCond from ternaryCaptureCond :
+    <[ lhs = nse ? e1 : e2 ]> ⇝ <[ T pv = nse; lhs = pv ? e1 : e2 ]>
+    -- the memory-complex-lhs dispatch branch claims the whole right-hand side
+    -- first (`memoryWriteUnfoldRightSndResult`)
+    where ¬ (lhs.kind = Kind.memory ∧ isComplex lhs)
 
-  sol_rule ternaryToIf := withOrigin (KeyOrigin.taclet KeyTaclet.ternaryToIf) <|
-      assignEffect
-        (fun v rhs =>
-          match rhs with
-          | WrappedExpr.ternary c _ _ => isSimple c ∧ isStackVar v
-          | _ => False)
-        (fun v rhs h => unfoldGoal <|
-          match rhs, h with
-          | WrappedExpr.ternary c t e, _ =>
-              [ Stmt.ite c [Stmt.assign v t] [Stmt.assign v e] ])
+  sol_rule ternaryToIf from ternaryToIf :
+    <[ x = s ? e1 : e2 ]> ⇝ <[ if (s) { x = e1 } else { x = e2 } ]>
+    where isStackVar x
 
-  sol_rule ternaryToIfStorage := withOrigin (KeyOrigin.taclet KeyTaclet.ternaryToIfStorage) <|
-      assignEffect
-        (fun lhs rhs =>
-          match rhs with
-          | WrappedExpr.ternary c _ _ => isSimple c ∧ isStorage lhs
-          | _ => False)
-        (fun lhs rhs h => unfoldGoal <|
-          match rhs, h with
-          | WrappedExpr.ternary c t e, _ =>
-              [ Stmt.ite c [Stmt.assign lhs t] [Stmt.assign lhs e] ])
+  sol_rule ternaryToIfStorage from ternaryToIfStorage :
+    <[ path = s ? e1 : e2 ]> ⇝ <[ if (s) { path = e1 } else { path = e2 } ]>
+    where isStorage path
 
   /-!
   Unary operators: KeY `logicalNotCapture`/`logicalNotAssignment` and
   `unaryMinusCapture`/`unaryMinusAssignment`.
   -/
 
-  sol_rule unopCapture (op : UnOp) := withOrigin (unopCaptureOrigin op) <|
-      assignEffect
-        (fun v rhs =>
-          match rhs with
-          | WrappedExpr.unop op' arg =>
-              op' = op ∧ isStackVar v ∧ isComplex arg
-          | _ => False)
-        (fun v rhs h => unfoldGoal <|
-          match rhs, h with
-          | WrappedExpr.unop op' arg, _ =>
-              [ captureStackValue arg,
-                Stmt.assign v
-                  (WrappedExpr.unop op' (stackValueAlias arg)) ])
+  sol_rule unopCapture (op : UnOp) from (unopCaptureOrigin op) :
+    <[ lv = ⊖nse ]> ⇝ <[ T pv = nse; lv = ⊖pv ]>
 
-  sol_rule unopAssignment (op : UnOp) := withOrigin (unopAssignmentOrigin op) <|
-      assignEffect
-        (fun v rhs =>
-          match rhs with
-          | WrappedExpr.unop op' arg =>
-              op' = op ∧ isStackVar v ∧ isSimple arg
-          | _ => False)
-        (fun v rhs _ =>
-          terminalGoal [ writeBack v (.read rhs) ])
+  sol_rule unopAssignment (op : UnOp) from (unopAssignmentOrigin op) :
+    <[ lv = ⊖s ]> ⇝ { lv := ⊖s } <[ ]>
 
   /-! solkey's capture partition: the location-neutral value hoists. -/
 
@@ -2897,32 +2231,17 @@ end CaseMode
   families keep their own rules.
   -/
 
-  sol_rule storageRootWriteValueRhsCapture := withOrigin (KeyOrigin.taclet KeyTaclet.storageRootWriteValueRhsCapture) <|
-      assignEffect
-        (fun gsp rhs => isGlobal gsp ∧ valueRhsCaptureRhs rhs)
-        (fun gsp rhs _ => unfoldGoal <|
-          [ captureStackValue rhs,
-            Stmt.assign gsp (stackValueAlias rhs) ])
+  sol_rule storageRootWriteValueRhsCapture from storageRootWriteValueRhsCapture :
+    <[ gsp = e ]> ⇝ <[ T pv = e; gsp = pv ]>
+    where valueRhsCaptureRhs e
 
-  sol_rule fieldWriteValueRhsCapture := withOrigin (KeyOrigin.taclet KeyTaclet.fieldWriteValueRhsCapture) <|
-      assignEffect
-        (fun lhs rhs =>
-          match (lhs : WrappedExpr) with
-          | WrappedExpr.field Kind.storage _ _ _ => valueRhsCaptureRhs rhs
-          | _ => False)
-        (fun lhs rhs _ => unfoldGoal <|
-          [ captureStackValue rhs,
-            Stmt.assign lhs (stackValueAlias rhs) ])
+  sol_rule fieldWriteValueRhsCapture from fieldWriteValueRhsCapture :
+    <[ path.fld = e ]> ⇝ <[ T pv = e; path.fld = pv ]>
+    where valueRhsCaptureRhs e
 
-  sol_rule indexWriteValueRhsCapture := withOrigin (KeyOrigin.taclet KeyTaclet.indexWriteValueRhsCapture) <|
-      assignEffect
-        (fun lhs rhs =>
-          match (lhs : WrappedExpr) with
-          | WrappedExpr.index Kind.storage _ _ _ => valueRhsCaptureRhs rhs
-          | _ => False)
-        (fun lhs rhs _ => unfoldGoal <|
-          [ captureStackValue rhs,
-            Stmt.assign lhs (stackValueAlias rhs) ])
+  sol_rule indexWriteValueRhsCapture from indexWriteValueRhsCapture :
+    <[ path[x] = e ]> ⇝ <[ T pv = e; path[x] = pv ]>
+    where valueRhsCaptureRhs e
 
   /-!
   Compound-assignment RHS capture: KeY
@@ -2932,33 +2251,18 @@ end CaseMode
   trio for plain assignment).
   -/
 
-  sol_rule compoundAssignValueRhsCapture (opR : BinOp) := withOrigin (compoundRhsCaptureOrigin opR) <|
-      compoundAssignEffect
-        (fun op _ se =>
-          op = opR ∧ op.hasCompoundAssign = true ∧
-            ¬ (isSe se))
-        (fun op lhs se _ => unfoldGoal <|
-          [ captureStackValue se,
-            Stmt.compoundAssign op lhs (stackValueAlias se) ])
+  sol_rule compoundAssignValueRhsCapture (op : BinOp) from (compoundRhsCaptureOrigin op) :
+    <[ lhs ⊕= e ]> ⇝ <[ T pv = e; lhs ⊕= pv ]>
+    where ¬ (isSe e)
 
   /-! Stack locals: solkey `localValueAssign`, `localAssign*crement` and
   `local*crement`. -/
 
-  sol_rule localValueAssign := withOrigin (KeyOrigin.taclet KeyTaclet.localValueAssign) <|
-      assignEffect
-        (fun v se => isStackVar v ∧ isSe se)
-        (fun v se _ =>
-          terminalGoal [ writeBack v (.read se) ])
+  sol_rule localValueAssign from localValueAssign :
+    <[ lv = se ]> ⇝ { lv := se } <[ ]>
 
-  sol_rule localAssignIncDec (opR : IncDec) := withOrigin (localAssignIncDecOrigin opR) <|
-      assignEffect
-        (fun v rhs =>
-          match rhs with
-          | WrappedExpr.incDec op target =>
-              op = opR ∧ isStackVar v ∧ isSe target
-          | _ => False)
-        (fun v rhs _ =>
-          incDecGoals v rhs)
+  sol_rule localAssignIncDec (op : IncDec) from (localAssignIncDecOrigin op) :
+    <[ lv = se++ ]> ⇝ { bump(se++) || lv := se++ } <[ ]>
 
   /-!
   Bare increment/decrement of a stack local as a statement of its own:
@@ -2966,15 +2270,8 @@ end CaseMode
   `localPostdecrement` (`localIncDec .preInc`, ...).
   -/
 
-  sol_rule localIncDec (opR : IncDec) := withOrigin (localIncDecOrigin opR) <|
-      exprEffect
-        (fun expr =>
-          match expr with
-          | WrappedExpr.incDec op target =>
-              op = opR ∧ isSe target
-          | _ => False)
-        (fun expr _ =>
-          terminalGoal [ .bumpOf expr ])
+  sol_rule localIncDec (op : IncDec) from (localIncDecOrigin op) :
+    <[ se++ ]> ⇝ { bump(se++) } <[ ]>
 
   /-! Function calls. -/
 
@@ -2988,35 +2285,25 @@ end CaseMode
   it and `functionCallArgCapture` is one of the Lean-only rules.
   -/
 
-  sol_rule functionCallArgCapture :=
-      callEffect
-        (fun _ _ args => (captureFirstComplexArg args).isSome = true)
-        (fun res fn args h => unfoldGoal <|
-          have h' : (captureFirstComplexArg args).isSome = true := h
-          match captureFirstComplexArg args, h' with
-          | some (c, args'), _ =>
-              [ captureStackValue c, Stmt.callStmt res fn args' ])
+  sol_rule functionCallArgCapture :
+    <[ res = fn(args) ]> ⇝
+      ⟦ have h' : (captureFirstComplexArg args).isSome = true := h
+        match captureFirstComplexArg args, h' with
+        | some (c, args'), _ =>
+            [ captureStackValue c, Stmt.callStmt res fn args' ] ⟧
+    where cond := (captureFirstComplexArg args).isSome = true
 
-  sol_rule functionBodyExpand := withOrigin (KeyOrigin.taclet KeyTaclet.functionBodyExpand) <|
-      callEffect
-        (fun res fn args =>
-          args.all (·.simple) = true ∧
-            (SoliditySyntax.expandCall res fn args).isSome = true)
-        (fun res fn args _ => unfoldGoal <|
-          (SoliditySyntax.expandCall res fn args).getD [])
+  sol_rule functionBodyExpand from functionBodyExpand :
+    <[ res = fn(args) ]> ⇝ ⟦ (SoliditySyntax.expandCall res fn args).getD [] ⟧
+    where cond :=
+      args.all (·.simple) = true ∧
+        (SoliditySyntax.expandCall res fn args).isSome = true
 
   /-! Lean-only rules: front-end normalisations and scratch bindings with no
   taclet of their own. -/
 
-  sol_rule storagePlaceAlias :=
-      { cond := fun stmt =>
-          match stmt with
-          | Stmt.storagePlaceAlias _ _ _ => True
-          | _ => False
-        goals := fun stmt hcond => by
-          cases stmt <;> simp at hcond
-          case storagePlaceAlias _ name init =>
-            exact terminalGoal [ .bind name (.path init) ] }
+  sol_rule storagePlaceAlias :
+    <[ T alias sp = e ]> ⇝ { sp := path(e) } <[ ]>
 
   /-!
   Lean-only coverage rules.  `exprStmtCapture` parks a bare non-incDec
@@ -3030,122 +2317,43 @@ end CaseMode
   (`pushAssignLower_sound`, `pushFieldAssignLower_sound`).
   -/
 
-  sol_rule exprStmtCapture :=
-      exprEffect
-        (fun expr =>
-          match expr with
-          | WrappedExpr.incDec _ _ => False
-          | _ => True)
-        (fun expr _ => unfoldGoal <| [ captureStackValue expr ])
+  sol_rule exprStmtCapture :
+    <[ e ]> ⇝ <[ T pv = e ]>
+    where cond :=
+      match e with
+      | WrappedExpr.incDec _ _ => False
+      | _ => True
 
-  sol_rule pushAssignLower :=
-      { cond := fun stmt =>
-          match stmt with
-          | Stmt.pushAssign _ _ => True
-          | _ => False
-        goals := fun stmt h =>
-          unfoldGoal <|
-            match stmt, h with
-            | Stmt.pushAssign target value, _ =>
-                [ Stmt.assign (PlaceExpr.pushPlace target) value ] }
+  sol_rule pushAssignLower :
+    <[ pushAssign(target, value) ]> ⇝ <[ target.push() = value ]>
 
-  sol_rule pushFieldAssignLower :=
-      { cond := fun stmt =>
-          match stmt with
-          | Stmt.pushFieldAssign _ _ _ => True
-          | _ => False
-        goals := fun stmt h =>
-          unfoldGoal <|
-            match stmt, h with
-            | Stmt.pushFieldAssign target fld value, _ =>
-                [ Stmt.assign
-                    (PlaceExpr.field Kind.storage fld.ty
-                      (WrappedExpr.pushPlace target) fld)
-                    value ] }
+  sol_rule pushFieldAssignLower :
+    <[ pushFieldAssign(target, fld, value) ]> ⇝ <[ target.push().fld = value ]>
 
-  sol_rule storagePushLhsToPushValue :=
-      assignEffect
-        (fun lhs rhs =>
-          match (lhs : WrappedExpr) with
-          | WrappedExpr.pushPlace target =>
-              target.kind = Kind.storage ∧ isSimple rhs
-          | _ => False)
-        (fun lhs rhs h => unfoldGoal <|
-          match lhs, h with
-          | ⟨WrappedExpr.pushPlace target, hass⟩, _ =>
-              [Stmt.push ⟨target, hass⟩ (some rhs)])
+  sol_rule storagePushLhsToPushValue :
+    <[ path.push() = s ]> ⇝ <[ path.push(s) ]>
 
-  sol_rule storageToMemoryDeclUnfoldRightFst :=
-      memoryDeclEffect
-        (fun _ _ init =>
-          match init with
-          | some (WrappedExpr.field Kind.storage _ nsp _) => isComplex nsp
-          | _ => False)
-        (fun ty name init h => unfoldGoal <|
-          match init, h with
-          | some (WrappedExpr.field Kind.storage rhsTy nsp f), _ =>
-              [ captureStoragePath nsp,
-                Stmt.memoryDecl ty name
-                  (some (WrappedExpr.field Kind.storage rhsTy
-                    (storageAlias nsp) f)) ])
+  sol_rule storageToMemoryDeclUnfoldRightFst :
+    <[ T memory mv = nsp.fld ]> ⇝ <[ T storage sp = nsp; T memory mv = sp.fld ]>
 
-  sol_rule storageToMemoryDeclCopyField :=
-      memoryDeclEffect
-        (fun _ _ init =>
-          match init with
-          | some (WrappedExpr.field Kind.storage _ sp _) => isSimple sp
-          | _ => False)
-        (fun ty name init _ =>
-          terminalGoal [ .memDecl ty name init ])
+  sol_rule storageToMemoryDeclCopyField :
+    <[ T memory mv = sp.fld ]> ⇝ { mv := alloc(sp.fld) } <[ ]>
 
-  sol_rule storageToMemoryDeclCopyRoot :=
-      memoryDeclEffect
-        (fun _ _ init =>
-          match init with
-          | some sp => isSp sp
-          | none => False)
-        (fun ty name init _ =>
-          terminalGoal [ .memDecl ty name init ])
+  sol_rule storageToMemoryDeclCopyRoot :
+    <[ T memory mv = sp ]> ⇝ { mv := alloc(sp) } <[ ]>
 
-  sol_rule memoryToStorageUnfoldRightFstSource :=
-      assignEffect
-        (fun sp nmp =>
-          sp.kind = Kind.storage ∧ isNmp nmp)
-        (fun sp nmp _ => unfoldGoal <| [captureValue nmp, Stmt.assign sp (valueAlias nmp)])
+  sol_rule memoryToStorageUnfoldRightFstSource :
+    <[ path = nmp ]> ⇝ <[ _ pv = nmp; path = pv ]>
+    where cond := path.kind = Kind.storage ∧ isNmp nmp
 
-  sol_rule memoryFieldWriteCopy := withOrigin (KeyOrigin.taclet KeyTaclet.memoryFieldWriteCaptureSrc) <|
-      assignEffect
-        (fun lhs mv2 =>
-          match (lhs : WrappedExpr) with
-          | WrappedExpr.field Kind.memory _ mv1 _ =>
-              isSimple mv1 ∧ isMv mv2
-          | _ => False)
-        (fun lhs mv2 _ =>
-          terminalGoal [ .heap (.writeRef lhs mv2) ])
+  sol_rule memoryFieldWriteCopy from memoryFieldWriteCaptureSrc :
+    <[ mv1.fld = mv2 ]> ⇝ { memory := writeRef(mv1.fld, mv2) } <[ ]>
 
-  sol_rule memoryIndexWriteCopyBox := withOrigin (KeyOrigin.taclet KeyTaclet.memoryIndexWriteArray) <|
-      withMode CaseMode.box <|
-        assignEffect
-          (fun lhs mv2 =>
-            match (lhs : WrappedExpr) with
-            | WrappedExpr.index Kind.memory _ mv1 i =>
-                isSimple mv1 ∧ isSimple i ∧ isMv mv2
-            | _ => False)
-          (fun lhs mv2 _ =>
-            splitGoals (.inBounds lhs) [.image mv2, .resolve lhs]
-            [ .heap (.writeRef lhs mv2) ])
-
-  sol_rule memoryIndexWriteCopyDiamond := withOrigin (KeyOrigin.taclet KeyTaclet.memoryIndexWriteArray) <|
-      withMode CaseMode.diamond <|
-        assignEffect
-          (fun lhs mv2 =>
-            match (lhs : WrappedExpr) with
-            | WrappedExpr.index Kind.memory _ mv1 i =>
-                isSimple mv1 ∧ isSimple i ∧ isMv mv2
-            | _ => False)
-          (fun lhs mv2 _ =>
-            splitGoals (.inBounds lhs) [.image mv2, .resolve lhs]
-            [ .heap (.writeRef lhs mv2) ])
+  sol_rule memoryIndexWriteCopy twins from memoryIndexWriteArray :
+    <[ mv1[i] = mv2 ]> ⇝
+      | inBounds(mv1[i]) ⟹ { memory := writeRef(mv1[i], mv2) } <[ ]>
+      | else             ⟹ revert()
+    after image(mv2), resolve(mv1[i])
 
   sol_assemble_rules
 
