@@ -576,6 +576,10 @@ is unsound as written rather than merely redundant.
 
 ## `copyKeepsMapping.key`'s last two conjuncts are reflexive (2026-09-16)
 
+~~Open~~ **Fixed upstream with the `copyAt`→`save` fold** (2026-09-16): the
+last two conjuncts now compare the post-state read, under the update, with the
+pre-state read outside it, which is the claim below.
+
 `keyext.solidity.examples/storage/copyKeepsMapping.key`, added in
 `c80a54494c`, is the only obligation that pins the mapping-preserving half of
 the new `copyAt`: no `.sol` example can state it, since both front ends reject
@@ -617,3 +621,34 @@ Also in `c80a54494c`: upstream dropped the **`mapfree` PathSVSort flag** idea
 from `docs/taclet-ideas.md`, which `copyAt` makes unnecessary — the calculus
 now gives the mapping-carrying copy a meaning instead of hardening the taclets
 against it.
+
+## `copyAt` folded into `save` (2026-09-16)
+
+Done upstream the same day `c80a54494c` landed, on the observation that
+`copyAt(st, p, v)` and `save(st, p, v)` differ only at the leaf —
+`merge(st, v)` against `v` — and every `merge` read rule is a rule about that
+leaf. So `save(st, nil, v)` is now the irreducible node itself: the eight copy
+rules write `save(…)` again, `copyAt`/`merge` and their eleven taclets are
+gone, and what replaces them is `selectOnSaveEmpty{Map,Ref,IndexStruct,
+Default}` (the old `selectStMerge*` over `save(st, nil, v)`), `saveOnEmptyPrim`
+(the old `mergePrim`, as a cast rule), and the deletion of the three eager
+leaf collapses `saveOnEmpty`/`saveOnEmptyStorageEmpty`/`saveOnStoreEmpty` and
+of `selectOnSaveEmpty`; `saveOnStoreCons` lost its `isEmpty(flds)` branch.
+Three things followed, and two of them are worth recording here:
+
+- **`delete sp[ie]` is mapping-preserving now.** `storageIndexDelete` wrote
+  `save(storage, sp·at(ie), defVal)`; with a lazy leaf an eager
+  `save(st, nil, defVal) ⇝ defVal` beside `selectOnSaveEmptyMap` would have
+  been non-confluent, so it writes `delAt(storage, consr(sp, at(ie)))` like
+  the root and field deletes. That closes the one deliberate divergence
+  `docs/lean-key-rule-map.md` recorded.
+- **The `(Struct) v` cast syntax is a no-op in solkey's taclets.** The
+  Solidity DL grammar imports KeY's parser but its `ExpressionBuilder` has no
+  `visitCast_term`, so a parenthesised cast is dropped, and the rewrite
+  executor inserts a `cast` only where the argument sort of the rewritten
+  position demands one (`equals` takes `any`, so a leaf under `=` sits bare).
+  The leaf rules therefore write `cast<[Struct]>(v)` / `cast<[alpha]>(…)` out
+  in full, as `selectOnStore` always did; `saveOnStoreCons`'s `(Struct) v0`
+  is still the dropped form. Worth a grammar-level fix upstream, or a lint.
+- Memory-to-storage copies sit under the same leaf, so `structMemoryRules.key`
+  gained `selectOnCopyMemPrim`/`selectOnCopyMemRef` beside `findOnCopy`.

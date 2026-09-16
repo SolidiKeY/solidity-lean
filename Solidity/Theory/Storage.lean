@@ -44,9 +44,12 @@ cast at the point of use (`asInt`, `asBool`), and `asStruct` sends a
 non-`Struct` to `mtSt`.  Nothing observable depends on that choice:
 `selectSt` of a non-`Struct` is `dflt` either way (`selectSt_asStruct`).
 
-The one lazy symbol is `merge`, the copied-location marker of the copy family:
-its per-member decision needs a value from each of two trees, which no single
-`SVal` leaf can hold.  Its section says why.
+The one lazy constructor is `merge`: KeY's `save(st, nil, v)`, which since
+solkey's fold of `copyAt` into `save` is never collapsed but read through by
+member sort, so that a struct written over a location keeps the location's
+mapping members.  Its per-member decision needs a value from each of two
+trees, which no single `SVal` leaf can hold.  The `save` section says why the
+walk and the leaf are two definitions here.
 
 Reads here are **total**, as KeY's are: an out-of-bounds `find` is `dflt`, not
 a revert.  The bounds test is a *guard* on the taclet (`Rules.SideFormula.inBounds`),
@@ -71,8 +74,9 @@ inductive StValue where
   | storeSt (st : StValue) (a : Seg) (v : StValue)
   /-- An interpreter value as an opaque leaf — see the module docstring. -/
   | sval (v : SVal)
-  /-- `merge<[alpha]>(old, new)`: a copied location as a read sees it.  The one
-  **lazy** marker here — see "The copy family". -/
+  /-- `save(st, nil, v)`, the leaf of a write, left as a term: the location's
+  old value beside the written one, read through by member sort.  The one
+  **lazy** constructor here — see "The leaf of a write". -/
   | merge (old new : StValue)
   deriving Repr, DecidableEq
 
@@ -88,8 +92,8 @@ deletes a cast on a well-sorted argument (`castDel`); these are total, so the
 ill-sorted cases get the sort's default, which is `defaultValueInt` /
 `defaultValueBool` / `defaultValueStruct` read as functions. -/
 
-/-- `(Struct) t`.  A `merge` marker is `Struct`-sorted, so the cast is
-`castDel` on it: dropping it here would drop the copied value. -/
+/-- `(Struct) t`.  A `save(st, nil, v)` leaf is `Struct`-sorted, so the cast is
+`castDel` on it: dropping it here would drop the written value. -/
 def asStruct : StValue -> StValue
   | storeSt st a v => storeSt st a v
   | sval v => sval v
@@ -97,7 +101,8 @@ def asStruct : StValue -> StValue
   | _ => mtSt
 
 /-- `(int) t` — `defValResolve` at `int`, then `defaultValueInt`.  The `merge`
-arm *is* `mergePrim`: at a primitive sort a copied location is the copy. -/
+arm *is* `saveOnEmptyPrim`: at a primitive sort a written location is the
+written value. -/
 def asInt : StValue -> Int
   | prim (PrimVal.int v) => v
   | sval (SVal.int v) => v
@@ -105,7 +110,7 @@ def asInt : StValue -> Int
   | _ => 0
 
 /-- `(bool) t` — `defValResolve` at `bool`, then `defaultValueBool`;
-`mergePrim` at `bool`. -/
+`saveOnEmptyPrim` at `bool`. -/
 def asBool : StValue -> Bool
   | prim (PrimVal.bool b) => b
   | sval (SVal.bool b) => b
@@ -116,7 +121,7 @@ def asBool : StValue -> Bool
 
 KeY discriminates a struct's members by the *field's* sort — `MapField`,
 `RefField`, or a value member under `alphaPrim` — and both the delete family and
-the copy family below read that sort off the segment.  A `Seg` does not carry
+the leaf rules below read that sort off the segment.  A `Seg` does not carry
 it, so both dispatch on the **value's** shape instead, which is what the
 interpreter does (`SVal.defaultOf`) and what `docs/lean-key-rule-map.md` records
 as the same semantics. -/
@@ -127,8 +132,8 @@ def base : StValue -> StValue
   | merge _ n => base n
   | t => t
 
-/-- The chain denotes a mapping: `delete` leaves it alone, a copy keeps the
-target's own. -/
+/-- The chain denotes a mapping: `delete` leaves it alone, a write keeps the
+location's own. -/
 def isMapping (t : StValue) : Bool :=
   match base t with
   | sval (SVal.map _ _) => true
@@ -140,11 +145,12 @@ def isArray (t : StValue) : Bool :=
   | sval (SVal.array _) => true
   | _ => false
 
-/-- The chain denotes a struct node: a copy merges it member by member, since a
-nested struct may carry a mapping.  This is KeY's `RefField`, read off the
-value.  An array member needs no marker even though its field is a `RefField`:
-every read of a merged array goes to the copied side anyway
-(`selectStMergeIndexStruct` for `at(i)`, `selectStMergeDefault` for `size`). -/
+/-- The chain denotes a struct node: a write over it stays a leaf member by
+member, since a nested struct may carry a mapping.  This is KeY's `RefField`,
+read off the value.  An array member needs no marker even though its field is
+a `RefField`: every read of a written array goes to the written side anyway
+(`selectOnSaveEmptyIndexStruct` for `at(i)`, `selectOnSaveEmptyDefault` for
+`size`). -/
 def isNode (t : StValue) : Bool :=
   match base t with
   | sval (SVal.struct _) => true
@@ -173,10 +179,10 @@ def svalSelect (v : SVal) (a : Seg) : StValue :=
       | none => sval d
   | _, _ => dflt
 
-/-- `selectSt<[α]>(st, a)`.  The `merge` arms are the four `selectStMerge*`
+/-- `selectSt<[α]>(st, a)`.  The `merge` arms are the four `selectOnSaveEmpty*`
 taclets, with KeY's field sort replaced by the shape dispatch above: a mapping
-member is the target's own, a struct member stays merged, everything else — an
-element and every value member — is the copied value's. -/
+member is the location's own, a struct member stays a leaf, everything else —
+an element and every value member — is the written value's. -/
 def selectSt : StValue -> Seg -> StValue
   | mtSt, _ => dflt
   | storeSt st a1 v, a2 => if a1 = a2 then v else selectSt st a2
@@ -190,29 +196,39 @@ def selectSt : StValue -> Seg -> StValue
   | prim _, _ => dflt
   | dflt, _ => dflt
 
-/-! ## `save`
+/-! ## `write`, `find`, and `save`
 
 KeY's `save` walks the *store chain*, which is why its taclets split on
 `mtSt` versus `storeSt`: the result is a chain in which the written path is
-outermost-visible.  The `sval` arm has no KeY counterpart because KeY's
-`storage` is a program variable, not a value; it expands the leaf one level,
-which is the same shape `saveOnStoreCons` produces. -/
+outermost-visible.  And it never collapses its leaf: `save(st, nil, v)` stays
+as a term and the `selectOnSaveEmpty*` taclets read through it by member sort,
+so that a struct written over a location keeps the location's mapping members
+— Solidity never copies a mapping.  (Until solkey folded `copyAt` into `save`
+that leaf was a separate `merge` symbol and `save(st, nil, v) ⇝ v` was a rule;
+the fold is what makes every write a possible copy.)
 
-def save : StValue -> List Seg -> StValue -> StValue
+Two definitions carry that here.  `write` is the walk without the leaf.  It
+is not upstream's symbol: it is what the delete family and `Denote.lean` stay
+eager over, and every `find`-over-`write` law below is exact.  `save` is
+`write` with the leaf put back, `merge (asStruct (find st p)) v` — the
+location's old value, at `Struct` as KeY's `st` is, beside the written one.
+The `sval` arm of `write` has no KeY counterpart because KeY's `storage` is a
+program variable, not a value; it expands the leaf one level, which is the
+same shape `saveOnStoreCons` produces. -/
+
+def write : StValue -> List Seg -> StValue -> StValue
   | _, [], v => v
   | storeSt st a1 v0, a2 :: flds, v1 =>
-      if a1 = a2 then storeSt st a1 (save (asStruct v0) flds v1)
-      else storeSt (save st (a2 :: flds) v1) a1 v0
+      if a1 = a2 then storeSt st a1 (write (asStruct v0) flds v1)
+      else storeSt (write st (a2 :: flds) v1) a1 v0
   | sval sv, a :: flds, v =>
-      storeSt (sval sv) a (save (asStruct (svalSelect sv a)) flds v)
+      storeSt (sval sv) a (write (asStruct (svalSelect sv a)) flds v)
   | merge o n, a :: flds, v =>
-      storeSt (merge o n) a (save (asStruct (selectSt (merge o n) a)) flds v)
-  | mtSt, a :: flds, v => storeSt mtSt a (save mtSt flds v)
-  | prim _, a :: flds, v => storeSt mtSt a (save mtSt flds v)
-  | dflt, a :: flds, v => storeSt mtSt a (save mtSt flds v)
+      storeSt (merge o n) a (write (asStruct (selectSt (merge o n) a)) flds v)
+  | mtSt, a :: flds, v => storeSt mtSt a (write mtSt flds v)
+  | prim _, a :: flds, v => storeSt mtSt a (write mtSt flds v)
+  | dflt, a :: flds, v => storeSt mtSt a (write mtSt flds v)
 termination_by st flds _ => (flds.length, st)
-
-/-! ## `find` -/
 
 /-- `find<[α]>(st, flds)`.  The one-segment arm is KeY's `isEmpty(flds)`
 branch, and it is not the same as recursing: the last step reads at the
@@ -222,16 +238,39 @@ def find : StValue -> List Seg -> StValue
   | st, [a] => selectSt st a
   | st, a :: b :: flds => find (selectSt st a) (b :: flds)
 
+/-- `save(st, p, v)`: the walk, with the leaf left as a term. -/
+def save (st : StValue) (p : List Seg) (v : StValue) : StValue :=
+  write st p (merge (asStruct (find st p)) v)
+
+/-- A cast to `Struct` is idempotent. -/
+@[simp] theorem asStruct_asStruct (t : StValue) : asStruct (asStruct t) = asStruct t := by
+  cases t <;> rfl
+
+/-- One step of a read, in the form that does not split on the tail. -/
+theorem find_cons (st : StValue) (a : Seg) (flds : List Seg) :
+    find st (a :: flds) = find (selectSt st a) flds := by
+  cases flds <;> rfl
+
+/-- Reads compose along `++`. -/
+theorem find_append (st : StValue) (p q : List Seg) :
+    find st (p ++ q) = find (find st p) q := by
+  induction p generalizing st with
+  | nil => rfl
+  | cons a rest ih => rw [List.cons_append, find_cons, ih, find_cons]
+
 /-! ## The taclets of `structRules.key`
 
-One theorem per taclet, in the file's order.  Those that are the defining
-equations are `rfl`; the two that are not are `saveOnStoreCons` and
-`findDefinitionCons`, whose KeY form carries an `isEmpty(flds)` split that
-`saveOnEmpty` already accounts for, and `selectOnSaveCons`, which is the
-real content. -/
+One theorem per taclet, in the file's order (the five that read the leaf are
+in "The leaf of a write" below, after the `merge`-level facts they rest on).
+Those that are the defining equations are `rfl`; `saveOnStoreCons` and
+`findDefinitionCons` carry KeY's own shape, and `selectOnSaveCons` is the real
+content. -/
 
 /-- `defaultValue<[Struct]> ⇝ mtSt`. -/
 @[simp] theorem defaultValueStruct : asStruct dflt = mtSt := rfl
+
+/-- A primitive cast to `Struct` is the empty struct, the ill-sorted default. -/
+@[simp] theorem asStruct_prim (q : PrimVal) : asStruct (prim q) = mtSt := rfl
 
 /-- `selectSt<[α]>(storeSt(st, a1, v), a2)`. -/
 @[simp] theorem selectOnStore (st : StValue) (a1 a2 : Seg) (v : StValue) :
@@ -241,34 +280,115 @@ real content. -/
 /-- `selectSt<[α]>(mtSt, a) ⇝ defaultValue<[α]>`. -/
 @[simp] theorem selectOnEmptyStorage (a : Seg) : selectSt mtSt a = dflt := rfl
 
-/-- `save(mtSt, nil, v) ⇝ v`. -/
-@[simp] theorem saveOnEmptyStorageEmpty (v : StValue) : save mtSt [] v = v := by
-  simp [save]
+/-- A cast to `Struct` is invisible to a selector. -/
+@[simp] theorem selectSt_asStruct (t : StValue) (a : Seg) :
+    selectSt (asStruct t) a = selectSt t a := by
+  cases t <;> rfl
+
+/-- …to a non-empty read. -/
+theorem find_asStruct (t : StValue) {q : List Seg} (hq : q ≠ []) :
+    find (asStruct t) q = find t q := by
+  cases q with
+  | nil => exact absurd rfl hq
+  | cons a rest => rw [find_cons, find_cons, selectSt_asStruct]
+
+/-- …and, under a cast, to any read. -/
+theorem asStruct_find_asStruct (t : StValue) (q : List Seg) :
+    asStruct (find (asStruct t) q) = asStruct (find t q) := by
+  cases q with
+  | nil => simp [find]
+  | cons a rest => rw [find_asStruct _ (by simp)]
+
+/-- …and to the walk. -/
+@[simp] theorem write_asStruct (t : StValue) (p : List Seg) (v : StValue) :
+    write (asStruct t) p v = write t p v := by
+  cases t <;> cases p <;> simp [write, asStruct]
+
+/-- …and therefore to a write. -/
+@[simp] theorem save_asStruct (t : StValue) (p : List Seg) (v : StValue) :
+    save (asStruct t) p v = save t p v := by
+  unfold save
+  rw [write_asStruct, asStruct_find_asStruct]
+
+/-- Reading into nothing is nothing. -/
+@[simp] theorem find_dflt (q : List Seg) : find dflt q = dflt := by
+  induction q with
+  | nil => rfl
+  | cons a rest ih => rw [find_cons]; exact ih
+
+/-- …and so is reading a member of `mtSt`. -/
+theorem find_mtSt {q : List Seg} (hq : q ≠ []) : find mtSt q = dflt := by
+  cases q with
+  | nil => exact absurd rfl hq
+  | cons a rest => rw [find_cons]; exact find_dflt rest
+
+/-- …or of a primitive. -/
+theorem find_prim (x : PrimVal) {q : List Seg} (hq : q ≠ []) : find (prim x) q = dflt := by
+  cases q with
+  | nil => exact absurd rfl hq
+  | cons a rest => rw [find_cons]; exact find_dflt rest
+
+/-- One selector into an interpreter leaf: another leaf, nothing, or a
+primitive (an array's `length`). -/
+theorem svalSelect_shape (v : SVal) (a : Seg) :
+    (∃ x, svalSelect v a = sval x) ∨ svalSelect v a = dflt ∨
+      ∃ q, svalSelect v a = prim q := by
+  match v, a with
+  | SVal.struct fields, Seg.field n =>
+      simp only [svalSelect]; cases lookupBy n fields <;> simp
+  | SVal.array elems, Seg.field n =>
+      by_cases hn : n = "length"
+      · subst hn; simp [svalSelect]
+      · simp [svalSelect, hn]
+  | SVal.array elems, Seg.at i => simp only [svalSelect]; split <;> simp
+  | SVal.map entries d, Seg.at i =>
+      simp only [svalSelect]; cases lookupBy i entries <;> simp
+  | SVal.prim _, Seg.field _ => simp [svalSelect]
+  | SVal.prim _, Seg.at _ => simp [svalSelect]
+  | SVal.struct _, Seg.at _ => simp [svalSelect]
+  | SVal.map _ _, Seg.field _ => simp [svalSelect]
+
+/-- What a read out of an interpreter leaf can be: another leaf, nothing, or
+a primitive (an array's `length`).  Never a chain and never a `merge`, which
+is what lets `Denote.lean` denote the leaf of a write over a pre-state tree. -/
+theorem find_sval_shape (v : SVal) (p : List Seg) :
+    (∃ x, find (sval v) p = sval x) ∨ find (sval v) p = dflt ∨
+      ∃ q, find (sval v) p = prim q := by
+  induction p generalizing v with
+  | nil => exact Or.inl ⟨v, rfl⟩
+  | cons a rest ih =>
+      rw [find_cons]
+      simp only [selectSt]
+      rcases svalSelect_shape v a with ⟨x, hx⟩ | hd | ⟨q, hq⟩
+      · rw [hx]; exact ih x
+      · rw [hd, find_dflt]; exact Or.inr (Or.inl rfl)
+      · rw [hq]
+        cases rest with
+        | nil => exact Or.inr (Or.inr ⟨q, rfl⟩)
+        | cons b rest' => rw [find_prim _ (by simp)]; exact Or.inr (Or.inl rfl)
 
 /-- `save(mtSt, cons(a, flds), v)`. -/
 @[simp] theorem saveOnEmptyStorage (a : Seg) (flds : List Seg) (v : StValue) :
     save mtSt (a :: flds) v = storeSt mtSt a (save mtSt flds v) := by
-  simp [save]
+  unfold save
+  rw [write]
+  cases flds with
+  | nil => rfl
+  | cons b rest => rw [find_mtSt (by simp), find_mtSt (by simp)]
 
-/-- `save(storeSt(st, a, v0), nil, v1) ⇝ v1`. -/
-@[simp] theorem saveOnStoreEmpty (st : StValue) (a : Seg) (v0 v1 : StValue) :
-    save (storeSt st a v0) [] v1 = v1 := by
-  simp [save]
-
-/-- `save(st, nil, v) ⇝ v` — the lazy rule, and the one the two above are
-instances of. -/
-@[simp] theorem saveOnEmpty (st : StValue) (v : StValue) : save st [] v = v := by
-  cases st <;> simp [save]
-
-/-- `save(storeSt(st, a1, v0), cons(a2, flds), v1)`, in KeY's own shape: the
-inner `isEmpty(flds)` split is `saveOnEmpty`, so the definition drops it. -/
+/-- `save(storeSt(st, a1, v0), cons(a2, flds), v1)`, in KeY's own shape — no
+`isEmpty(flds)` split any more, since the leaf is never collapsed. -/
 theorem saveOnStoreCons (st : StValue) (a1 a2 : Seg) (flds : List Seg)
     (v0 v1 : StValue) :
     save (storeSt st a1 v0) (a2 :: flds) v1 =
-      (if a1 = a2 then
-        storeSt st a1 (if flds.isEmpty then v1 else save (asStruct v0) flds v1)
-      else storeSt (save st (a2 :: flds) v1) a1 v0) := by
-  cases flds <;> simp [save]
+      (if a1 = a2 then storeSt st a1 (save (asStruct v0) flds v1)
+       else storeSt (save st (a2 :: flds) v1) a1 v0) := by
+  unfold save
+  by_cases h : a1 = a2
+  · subst h
+    rw [if_pos rfl, write, if_pos rfl, find_cons, selectOnStore, if_pos rfl,
+      asStruct_find_asStruct]
+  · rw [if_neg h, write, if_neg h, find_cons, selectOnStore, if_neg h, ← find_cons]
 
 /-- `find<[α]>(st, nil) ⇝ (α) st`. -/
 @[simp] theorem findDefinitionEmpty (st : StValue) : find st [] = st := rfl
@@ -281,31 +401,30 @@ theorem findDefinitionCons (st : StValue) (a : Seg) (flds : List Seg) :
       if flds.isEmpty then selectSt st a else find (selectSt st a) flds := by
   cases flds <;> rfl
 
-/-- `selectSt<[α]>(save(st, nil, v), a)`, in the shape its `\find` binds.
-
-Upstream used to rewrite to `selectSt(save(st, flds, v), a)`, with an `flds`
-its `\find` never binds; solkey `c80a54494c` adopted this statement
-(`selectSt<[alpha]>((Struct) v, a)`, the cast absorbed by `selectSt_asStruct`).
-The history is in `docs/solkey-feedback.md`. -/
-@[simp] theorem selectOnSaveEmpty (st : StValue) (v : StValue) (a : Seg) :
-    selectSt (save st [] v) a = selectSt v a := by rw [saveOnEmpty]
-
 /-! ### `selectOnSaveCons`
 
 The taclet that does the work, and the reason this module exists: reading one
 selector out of a write.  The fundamentals repository proves its analogue
 (`selectSave`) under an `isStruct` well-formedness hypothesis; here the
-definitions are total, so there is none. -/
+definitions are total, so there is none.  Proved for the walk first, then
+lifted to `save`: the leaf is the same term on both sides. -/
 
-/-- A cast to `Struct` is invisible to a selector. -/
-@[simp] theorem selectSt_asStruct (t : StValue) (a : Seg) :
-    selectSt (asStruct t) a = selectSt t a := by
-  cases t <;> rfl
-
-/-- …and therefore to a write. -/
-@[simp] theorem save_asStruct (t : StValue) (p : List Seg) (v : StValue) :
-    save (asStruct t) p v = save t p v := by
-  cases t <;> cases p <;> simp [save, asStruct]
+/-- `selectOnSaveCons` for `write`. -/
+theorem selectOnWriteCons (st : StValue) (a1 a2 : Seg) (flds : List Seg)
+    (v : StValue) :
+    selectSt (write st (a1 :: flds) v) a2 =
+      if a1 = a2 then write (asStruct (selectSt st a1)) flds v
+      else selectSt st a2 := by
+  induction st with
+  | storeSt st' b w ih =>
+      by_cases hb : b = a1
+      · subst hb
+        by_cases h : b = a2 <;> simp [write, selectSt, h]
+      · by_cases h : b = a2
+        · subst h
+          simp [write, selectSt, hb, Ne.symm hb]
+        · simp only [write, if_neg hb, selectSt, if_neg h, ih]
+  | _ => by_cases h : a1 = a2 <;> simp [write, selectSt, h]
 
 /-- `selectSt<[α]>(save(st, cons(a1, flds), v), a2)`. -/
 theorem selectOnSaveCons (st : StValue) (a1 a2 : Seg) (flds : List Seg)
@@ -313,67 +432,57 @@ theorem selectOnSaveCons (st : StValue) (a1 a2 : Seg) (flds : List Seg)
     selectSt (save st (a1 :: flds) v) a2 =
       if a1 = a2 then save (asStruct (selectSt st a1)) flds v
       else selectSt st a2 := by
-  induction st with
-  | storeSt st' b w ih =>
-      by_cases hb : b = a1
-      · subst hb
-        by_cases h : b = a2 <;> simp [save, selectSt, h]
-      · by_cases h : b = a2
-        · subst h
-          simp [save, selectSt, hb, Ne.symm hb]
-        · simp only [save, if_neg hb, selectSt, if_neg h, ih]
-  | _ => by_cases h : a1 = a2 <;> simp [save, selectSt, h]
+  unfold save
+  rw [selectOnWriteCons]
+  by_cases h : a1 = a2
+  · rw [if_pos h, if_pos h, find_cons, asStruct_find_asStruct]
+  · rw [if_neg h, if_neg h]
 
-/-! ## `find` over `save`
+/-! ## `find` over `write`, and over `save`
 
 solkey has no `find(save(…), …)` taclet: a read of a write is reached by
 `findDefinitionCons` unfolding `find` into `selectSt` and `selectOnSaveCons`
 then commuting one selector past the write.  Those four steps are what the
 laws below package, one per way a read path can lie against a written one —
-the same path, below it, above it, or off it.  `Semantics` has only the first
+the same path, below it, above it, or off it.  For `write` they are exact;
+for `save` the same path reads the leaf, and everything under it reads
+through the leaf.  `Semantics` has only the first
 (`SemanticsProperties.SVal.find_save_same`), and only in the form that
 presupposes the write succeeded. -/
 
-/-- A cast to `Struct` is invisible to a non-empty read. -/
-theorem find_asStruct (t : StValue) {q : List Seg} (hq : q ≠ []) :
-    find (asStruct t) q = find t q := by
-  cases q with
-  | nil => exact absurd rfl hq
-  | cons a rest => cases rest <;> simp [findDefinitionCons]
-
-/-- **Reading below the write.** Everything at or under the written path comes
+/-- **Reading below the walk.** Everything at or under the written path comes
 out of the written value. -/
-theorem find_save_extends (st : StValue) (p q : List Seg) (v : StValue) :
-    find (save st p v) (p ++ q) = find v q := by
+theorem find_write_extends (st : StValue) (p q : List Seg) (v : StValue) :
+    find (write st p v) (p ++ q) = find v q := by
   induction p generalizing st with
-  | nil => simp
+  | nil => simp [write]
   | cons a rest ih =>
-      rw [List.cons_append, findDefinitionCons, selectOnSaveCons, if_pos rfl,
-        save_asStruct]
+      rw [List.cons_append, findDefinitionCons, selectOnWriteCons, if_pos rfl,
+        write_asStruct]
       cases hrq : rest ++ q with
       | nil =>
           have hr : rest = [] := List.eq_nil_of_append_eq_nil hrq |>.1
           have hq : q = [] := List.eq_nil_of_append_eq_nil hrq |>.2
-          subst hr; subst hq; simp_all
+          subst hr; subst hq; simp_all [write]
       | cons _ _ => rw [if_neg (by simp), ← hrq, ih]
 
-/-- **Reading exactly the write** — `find(save(st, p, v), p) = v`, with no
-side condition at all.  The fundamentals repository's `findOnSave` needs a
-well-formed path and a well-formed store; totality buys both away. -/
-theorem find_save_same (st : StValue) (p : List Seg) (v : StValue) :
-    find (save st p v) p = v := by
-  have := find_save_extends st p [] v
+/-- **Reading exactly the walk** — with no side condition at all.  The
+fundamentals repository's `findOnSave` needs a well-formed path and a
+well-formed store; totality buys both away. -/
+theorem find_write_same (st : StValue) (p : List Seg) (v : StValue) :
+    find (write st p v) p = v := by
+  have := find_write_extends st p [] v
   simpa using this
 
-/-- **Reading above the write.** A prefix of the written path reads the
+/-- **Reading above the walk.** A prefix of the written path reads the
 written subtree, i.e. the write pushed down to what is left of it. -/
-theorem find_save_prefix (st : StValue) (q r : List Seg) (v : StValue) :
-    find (save st (q ++ r) v) q = save (find st q) r v := by
+theorem find_write_prefix (st : StValue) (q r : List Seg) (v : StValue) :
+    find (write st (q ++ r) v) q = write (find st q) r v := by
   induction q generalizing st with
   | nil => simp
   | cons a q' ih =>
-      rw [List.cons_append, findDefinitionCons, selectOnSaveCons, if_pos rfl,
-        save_asStruct]
+      rw [List.cons_append, findDefinitionCons, selectOnWriteCons, if_pos rfl,
+        write_asStruct]
       cases q' with
       | nil => simp [findDefinitionCons]
       | cons b q'' => rw [if_neg (by simp), ih]; rfl
@@ -389,8 +498,8 @@ def diverges : List Seg -> List Seg -> Bool
 /-- **The frame.** A read off the written path does not see the write — the
 `\else` branch of `selectOnSaveCons`, lifted from one selector to a whole
 path.  This is the law `Semantics` was missing entirely. -/
-theorem find_save_frame (st : StValue) (v : StValue) :
-    ∀ p q : List Seg, diverges p q = true -> find (save st p v) q = find st q := by
+theorem find_write_frame (st : StValue) (v : StValue) :
+    ∀ p q : List Seg, diverges p q = true -> find (write st p v) q = find st q := by
   intro p
   induction p generalizing st with
   | nil => intro q h; simp [diverges] at h
@@ -408,13 +517,39 @@ theorem find_save_frame (st : StValue) (v : StValue) :
               cases q' with
               | nil => cases p' <;> simp [diverges] at h
               | cons _ _ => simp
-            rw [findDefinitionCons, findDefinitionCons, selectOnSaveCons,
-              if_pos rfl, save_asStruct,
+            rw [findDefinitionCons, findDefinitionCons, selectOnWriteCons,
+              if_pos rfl, write_asStruct,
               if_neg (by simpa using hq'), if_neg (by simpa using hq'), ih _ _ h]
           · -- Off the path at the very first segment: `selectOnSaveCons`'s
             -- `\else` branch makes the two sides the same term.
-            rw [findDefinitionCons, findDefinitionCons, selectOnSaveCons,
+            rw [findDefinitionCons, findDefinitionCons, selectOnWriteCons,
               if_neg hab]
+
+/-- Below a write: the leaf, read on. -/
+theorem find_save_extends (st : StValue) (p q : List Seg) (v : StValue) :
+    find (save st p v) (p ++ q) = find (merge (asStruct (find st p)) v) q :=
+  find_write_extends st p q _
+
+/-- Exactly a write: the leaf. -/
+theorem find_save_same (st : StValue) (p : List Seg) (v : StValue) :
+    find (save st p v) p = merge (asStruct (find st p)) v :=
+  find_write_same st p _
+
+/-- …which at a primitive sort is the written value (`saveOnEmptyPrim`). -/
+theorem find_save_same_asInt (st : StValue) (p : List Seg) (v : StValue) :
+    asInt (find (save st p v) p) = asInt v := by
+  rw [find_save_same]; rfl
+
+/-- Above a write: the write pushed down. -/
+theorem find_save_prefix (st : StValue) (q r : List Seg) (v : StValue) :
+    find (save st (q ++ r) v) q = save (find st q) r v := by
+  unfold save
+  rw [find_write_prefix, find_append]
+
+/-- Off a write: the frame. -/
+theorem find_save_frame (st : StValue) (v : StValue) (p q : List Seg)
+    (h : diverges p q = true) : find (save st p v) q = find st q :=
+  find_write_frame st _ p q h
 
 /-! ## The delete family
 
@@ -432,10 +567,10 @@ dispatch on what the chain is built over — `isMapping`/`isArray` above — bec
 `defaultOf` empties an array, keeps a mapping and recurses into a struct, and a
 chain's own constructors do not say which it is. -/
 
-/-- No copy marker on the chain's spine.  `delValue` pushes through a store
-chain member by member; a `merge` is not a chain step, and on one the push is
-only sound when the two sides agree on what is a mapping — which a well-sorted
-copy guarantees and this predicate assumes away. -/
+/-- No leaf on the chain's spine.  `delValue` pushes through a store chain
+member by member; a `merge` is not a chain step, and on one the push is only
+sound when the two sides agree on what is a mapping — which a well-sorted
+write guarantees and this predicate assumes away. -/
 def mergeFree : StValue -> Bool
   | merge _ _ => false
   | storeSt st _ _ => mergeFree st
@@ -462,10 +597,12 @@ def delValue : StValue -> StValue
 abbrev delNode : StValue -> StValue := delValue
 
 /-- `delAt(st, p)`: the value at `p`, deleted in place.  KeY writes the
-marker and lets reads push it down; the eager reading is the write of the
-deleted subtree, which is `Semantics.storageDeleteUpd`'s shape exactly. -/
+marker and lets reads push it down; the eager reading is the walk with the
+deleted subtree, which is `Semantics.storageDeleteUpd`'s shape exactly.  Over
+`write`, not `save`: a delete is the one write whose leaf has nothing to keep
+that `delValue` did not already keep. -/
 def delAt (st : StValue) (p : List Seg) : StValue :=
-  save st p (delValue (find st p))
+  write st p (delValue (find st p))
 
 /-- `delValue<[Struct]>(st) ⇝ delNode(st)`. -/
 theorem delValueStruct (st : StValue) : delValue st = delNode st := rfl
@@ -475,7 +612,7 @@ theorem delValueStruct (st : StValue) : delValue st = delNode st := rfl
 
 /-- `delAt(st, nil) ⇝ delNode(st)`. -/
 @[simp] theorem delAtEmpty (st : StValue) : delAt st [] = delNode st := by
-  simp [delAt]
+  simp [delAt, write]
 
 /-- `selectStDelNodeMap`: a mapping member reads through a delete
 untouched — real Solidity semantics, and why `SVal.defaultOf` has a `map`
@@ -560,80 +697,70 @@ theorem selectSt_delValue {t : StValue} (hm : isMapping t = false)
   | merge o n _ _ => simp [mergeFree] at hmf
   | _ => cases a <;> rfl
 
-/-! ## The copy family
+/-! ## The leaf of a write
 
-A storage-to-storage copy overwrites a location, *except* that mapping members
-keep what the target held: Solidity never copies a mapping.  solkey
-(`c80a54494c`) gives that meaning with a second lazy pair — `copyAt` writes the
-copied value and `merge` is the copied location as a read sees it — and every
-`*CopySource` / `…StoreRoot` rule now emits `copyAt` where it used to emit
-`save`.
+A struct written over a location overwrites it, *except* that mapping members
+keep what the location held: Solidity never copies a mapping.  solkey gives
+that meaning to `save` itself — `save(st, nil, v)` is never collapsed, and
+five taclets read through it by the member's sort (`selectOnSaveEmpty{Map,
+Ref,IndexStruct,Default}` and `saveOnEmptyPrim`).  Until the fold that leaf
+was a separate `merge` symbol written only by a `copyAt` the eight copy rules
+used; now every write carries it, and every `*CopySource` / `…StoreRoot` rule
+writes plain `save`.
 
-`copyAt` is eager on the outside and lazy on the inside, which is the one place
-this file departs from the delete family above.  `delValue`'s decision is on a
-single value and can be taken inside an `SVal` leaf; `merge`'s is on a *pair*
-drawn from two different trees, and rebuilding a struct whose members come from
-both cannot stay inside one leaf.  So the marker survives into the term and the
-four `selectStMerge*` taclets are the arms of `selectSt` rather than theorems
-over a definition.  Keeping `save` on the outside is what lets `copyAt` inherit
-the `find`-over-`save` laws above unchanged.
+The leaf is the one place this file is lazy, which is what departs from the
+delete family above.  `delValue`'s decision is on a single value and can be
+taken inside an `SVal` leaf; the leaf's is on a *pair* drawn from two
+different trees, and rebuilding a struct whose members come from both cannot
+stay inside one leaf.  So `merge` survives into the term and the read rules
+are the arms of `selectSt` rather than theorems over a definition.  Keeping
+`write` underneath is what lets `save` inherit the `find`-over-`write` laws.
 
 One divergence from upstream, and it is the field sort again: KeY fires
-`selectStMergeRef` on a `RefField` whatever the target holds there, so a target
-member that is *absent* still recurses, and the nested mapping read lands on an
-empty mapping.  The shape dispatch sees `dflt`, takes the copied side, and so
-copies the source's mapping.  The two differ exactly when the target's member is
-absent while the source's carries a mapping — unreachable through the
-interpreter, which materialises every member (`defaultForTy`) and refuses a
-mapping-typed source outright (`Wp/TerminalUpdate.rhsSVal`). -/
+`selectOnSaveEmptyRef` on a `RefField` whatever the location holds there, so a
+member that is *absent* still recurses, and the nested mapping read lands on
+an empty mapping.  The shape dispatch sees `dflt`, takes the written side, and
+so copies the source's mapping.  The two differ exactly when the location's
+member is absent while the source's carries a mapping — unreachable through
+the interpreter, which materialises every member (`defaultForTy`) and refuses
+a mapping-typed source outright (`Wp/TerminalUpdate.rhsSVal`). -/
 
-/-- `copyAt(st, p, v)`: the storage with the location at `p` overwritten by
-`v`, mapping members excepted.  Upstream writes the marker and lets reads push
-it down; here the `save` is eager and only the merge is deferred. -/
-def copyAt (st : StValue) (p : List Seg) (v : StValue) : StValue :=
-  save st p (merge (find st p) (asStruct v))
+/-- `save(st, nil, v)` is the leaf. -/
+@[simp] theorem save_nil (st v : StValue) : save st [] v = merge (asStruct st) v := by
+  simp [save, write]
 
-/-- `copyAt(st, nil, v) ⇝ merge<[Struct]>(st, (Struct) v)`. -/
-@[simp] theorem copyAtEmpty (st v : StValue) :
-    copyAt st [] v = merge st (asStruct v) := by simp [copyAt]
+/-- A struct node is already at `Struct`. -/
+theorem asStruct_of_isNode {t : StValue} (h : isNode t = true) : asStruct t = t := by
+  cases t <;> simp_all [isNode, base, asStruct]
 
-/-- `selectOnCopyAtCons`: reading one selector out of a copy — `selectOnSaveCons`
-with the copied value in place of the written one. -/
-theorem selectOnCopyAtCons (st : StValue) (a1 a2 : Seg) (flds : List Seg)
-    (v : StValue) :
-    selectSt (copyAt st (a1 :: flds) v) a2 =
-      (if a1 = a2 then
-        (if flds.isEmpty then merge (selectSt st a1) (asStruct v)
-         else copyAt (selectSt st a1) flds v)
-      else selectSt st a2) := by
-  rw [copyAt, selectOnSaveCons]
-  by_cases h : a1 = a2
-  · rw [if_pos h, if_pos h]
-    cases flds with
-    | nil => simp [find]
-    | cons b rest =>
-        rw [if_neg (by simp), copyAt, save_asStruct, findDefinitionCons,
-          if_neg (by simp)]
-  · rw [if_neg h, if_neg h]
-
-/-- `mergePrim` at `int`: at a primitive sort a copied location *is* the copy. -/
+/-- `saveOnEmptyPrim` at `int`: at a primitive sort a written location *is* the
+written value.  Stated at the `merge` level too, since that is how `asInt`
+computes. -/
 @[simp] theorem mergePrimInt (o n : StValue) : asInt (merge o n) = asInt n := rfl
 
-/-- `mergePrim` at `bool`. -/
+/-- `saveOnEmptyPrim` at `bool`. -/
 @[simp] theorem mergePrimBool (o n : StValue) : asBool (merge o n) = asBool n := rfl
 
-/-- `selectStMergeMap`: a mapping member of a copied location is the target's
-own.  This is the half of the change no `.sol` example can state — both front
-ends reject a copy whose type carries a mapping — so
-`keyext.solidity.examples/storage/copyKeepsMapping.key` pins it upstream and
-`Examples/Solkey/Rules.lean` here. -/
+/-- `saveOnEmptyPrim`, for `save`: `(int) save(st, nil, v) ⇝ (int) v`. -/
+@[simp] theorem saveOnEmptyPrimInt (st v : StValue) : asInt (save st [] v) = asInt v := by
+  rw [save_nil]; rfl
+
+/-- …and at `bool`. -/
+@[simp] theorem saveOnEmptyPrimBool (st v : StValue) : asBool (save st [] v) = asBool v := by
+  rw [save_nil]; rfl
+
+/-- `selectOnSaveEmptyMap` at the `merge` level: a mapping member of a written
+location is the location's own.  This is the half of the change no `.sol`
+example can state — both front ends reject a copy whose type carries a
+mapping — so `keyext.solidity.examples/storage/copyKeepsMapping.key` pins it
+upstream and `Examples/Solkey/Rules.lean` here. -/
 theorem selectStMergeMap {o n : StValue} {f : Name}
     (h : isMapping (selectSt o (Seg.field f)) = true) :
     selectSt (merge o n) (Seg.field f) = selectSt o (Seg.field f) := by
   simp [selectSt, h]
 
-/-- `selectStMergeRef`: a struct member stays merged, because a nested struct
-may itself carry a mapping. -/
+/-- `selectOnSaveEmptyRef` at the `merge` level: a struct member stays a leaf,
+because a nested struct may itself carry a mapping. -/
 theorem selectStMergeRef {o n : StValue} {f : Name}
     (hm : isMapping (selectSt o (Seg.field f)) = false)
     (h : isNode (selectSt o (Seg.field f)) = true) :
@@ -641,26 +768,74 @@ theorem selectStMergeRef {o n : StValue} {f : Name}
       merge (selectSt o (Seg.field f)) (selectSt n (Seg.field f)) := by
   simp [selectSt, hm, h]
 
-/-- `selectStMergeIndexStruct`: an element of a copied collection is the
-copy's, with no shape test — upstream's `Struct` and `alphaPrim` instances
-agree here. -/
+/-- `selectOnSaveEmptyIndexStruct` at the `merge` level: an element of a
+written collection is the written one, with no shape test — upstream's
+`Struct` and `alphaPrim` instances agree here. -/
 @[simp] theorem selectStMergeIndexStruct (o n : StValue) (i : Int) :
     selectSt (merge o n) (Seg.at i) = selectSt n (Seg.at i) := rfl
 
-/-- `selectStMergeDefault`: a value member of a copied location is the copy's. -/
+/-- `selectOnSaveEmptyDefault` at the `merge` level: a value member of a
+written location is the written one. -/
 theorem selectStMergeDefault {o n : StValue} {f : Name}
     (hm : isMapping (selectSt o (Seg.field f)) = false)
     (hn : isNode (selectSt o (Seg.field f)) = false) :
     selectSt (merge o n) (Seg.field f) = selectSt n (Seg.field f) := by
   simp [selectSt, hm, hn]
 
-/-- `mergeStValueCast`: pushing a reader's cast into a sort-free `merge` is
-invisible to the read, the treatment `findStValueCast` and
-`delValueStValueCast` already get (`selectSt_asStruct` on both sides).
-`selectStValueCast` is `selectSt_asStruct` itself. -/
+/-- `selectStValueCast` and the cast a sort-free write leaves on either side of
+the leaf: invisible to the read (`selectSt_asStruct` on both sides). -/
 @[simp] theorem merge_asStruct (o n : StValue) (a : Seg) :
     selectSt (merge (asStruct o) (asStruct n)) a = selectSt (merge o n) a := by
   cases a <;> simp only [selectSt, selectSt_asStruct]
+
+/-- The old side of the leaf is at `Struct`, which a read does not see. -/
+@[simp] theorem selectSt_merge_asStruct_left (o n : StValue) (a : Seg) :
+    selectSt (merge (asStruct o) n) a = selectSt (merge o n) a := by
+  cases a <;> simp only [selectSt, selectSt_asStruct]
+
+/-- `selectOnSaveEmptyMap`: `selectSt<[Struct]>(save(st, nil, v), mf) ⇝
+selectSt<[Struct]>(st, mf)`, keyed on `isMapping` of the location's member
+rather than on a `MapField` segment. -/
+theorem selectOnSaveEmptyMap {st v : StValue} {f : Name}
+    (h : isMapping (selectSt st (Seg.field f)) = true) :
+    selectSt (save st [] v) (Seg.field f) = selectSt st (Seg.field f) := by
+  rw [save_nil, selectSt_merge_asStruct_left, selectStMergeMap h]
+
+/-- `selectOnSaveEmptyRef`: `selectSt<[Struct]>(save(st, nil, v), rf) ⇝
+save(selectSt<[Struct]>(st, rf), nil, selectSt<[Struct]>((Struct) v, rf))`,
+keyed on `isNode`. -/
+theorem selectOnSaveEmptyRef {st v : StValue} {f : Name}
+    (hm : isMapping (selectSt st (Seg.field f)) = false)
+    (h : isNode (selectSt st (Seg.field f)) = true) :
+    selectSt (save st [] v) (Seg.field f) =
+      save (selectSt st (Seg.field f)) [] (selectSt (asStruct v) (Seg.field f)) := by
+  rw [save_nil, selectSt_merge_asStruct_left, selectStMergeRef hm h, save_nil,
+    asStruct_of_isNode h, selectSt_asStruct]
+
+/-- `selectOnSaveEmptyIndexStruct`: `selectSt<[Struct]>(save(st, nil, v), at(iv))
+⇝ selectSt<[Struct]>((Struct) v, at(iv))`. -/
+@[simp] theorem selectOnSaveEmptyIndexStruct (st v : StValue) (i : Int) :
+    selectSt (save st [] v) (Seg.at i) = selectSt v (Seg.at i) := by
+  rw [save_nil]; rfl
+
+/-- `selectOnSaveEmptyDefault`: `selectSt<[alphaPrim]>(save(st, nil, v), a) ⇝
+selectSt<[alphaPrim]>((Struct) v, a)`. -/
+theorem selectOnSaveEmptyDefault {st v : StValue} {f : Name}
+    (hm : isMapping (selectSt st (Seg.field f)) = false)
+    (hn : isNode (selectSt st (Seg.field f)) = false) :
+    selectSt (save st [] v) (Seg.field f) = selectSt v (Seg.field f) := by
+  rw [save_nil, selectSt_merge_asStruct_left, selectStMergeDefault hm hn]
+
+/-- A value member read one step below a write is the written value's — the
+`selectOnSaveEmptyDefault` step of a read, with the shape dispatch's side of
+KeY's read-sort discipline as hypotheses: the location holds neither a
+mapping nor a struct at that member.  (Over an arbitrary store the theorem
+is false without them, and KeY's `find<[int]>` is what decides it there.) -/
+theorem find_save_extends_field (st v : StValue) (p : List Seg) (f : Name)
+    (hm : isMapping (selectSt (find st p) (Seg.field f)) = false)
+    (hn : isNode (selectSt (find st p) (Seg.field f)) = false) :
+    find (save st p v) (p ++ [Seg.field f]) = selectSt v (Seg.field f) := by
+  rw [find_save_extends, find, selectSt_merge_asStruct_left, selectStMergeDefault hm hn]
 
 /-! ## Sanity
 
@@ -677,10 +852,11 @@ private def age : Seg := Seg.field "age"
 
 /-- `alice.account.balance = 10; result = alice.account.balance` — the
 fundamentals' `findOnSaveEx`, over an arbitrary store rather than a
-`isStruct`-constrained one. -/
+`isStruct`-constrained one.  The read lands on the leaf, and at `int` the
+leaf is the written value. -/
 example (st : StValue) :
-    find (save st [acct, bal] (int 10)) [acct, bal] = int 10 :=
-  find_save_same st [acct, bal] (int 10)
+    asInt (find (save st [acct, bal] (int 10)) [acct, bal]) = 10 :=
+  find_save_same_asInt st [acct, bal] (int 10)
 
 /-- `alice.account.balance = 1; alice.age` — `storage-field-disjoint-fields.key`:
 the write is invisible to the other member. -/
@@ -725,10 +901,10 @@ private def twoLedgers : StValue :=
 
 /-- `ledger2 = ledger`, the copy of `copyKeepsMapping.key`. -/
 private def copiedLedgers : StValue :=
-  copyAt twoLedgers [ledger2Seg] (find twoLedgers [ledgerSeg])
+  save twoLedgers [ledger2Seg] (find twoLedgers [ledgerSeg])
 
-/-- A copy takes every value member from the source (`selectStMergeDefault`)
-and keeps the target's own mapping (`selectStMergeMap`). -/
+/-- A copy takes every value member from the source (`selectOnSaveEmptyDefault`)
+and keeps the target's own mapping (`selectOnSaveEmptyMap`). -/
 example :
     asInt (find copiedLedgers [ledger2Seg, nonceSeg]) = 1
       ∧ asInt (find copiedLedgers [ledger2Seg, balancesSeg, Seg.at 1]) = 22 := by

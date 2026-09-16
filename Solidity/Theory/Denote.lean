@@ -39,11 +39,11 @@ taclets, and `Update/Eval.lean`'s `pushStorage` already computes the extended
 array in one go, so `Update/Theory.lean` writes the extended array at the
 array's own path.  The same holds for `pop`.
 
-solkey `c80a54494c` made the three push taclets' *inner* terms differ — the
-value copy writes `copyAt` where the other two write `save` — and the merged
-constructor survives it for the reason the slot index gives: at the old length
-there is nothing to keep, so `denote_copyAt_absent` below collapses the copy to
-the plain write.
+Every `save` upstream carries the leaf that keeps a location's mapping members
+(`Theory/Storage.lean`, "The leaf of a write"), the value copy of a `push`
+included — and the merged constructor survives it for the reason the slot
+index gives: at the old length there is nothing to keep, so
+`denote_save_absent` below collapses the write to the plain one.
 -/
 
 namespace Solidity
@@ -89,23 +89,23 @@ def putAt : SVal -> Seg -> SVal -> Res SVal
   | SVal.array _, Seg.field _, _ => .error .stuck
   | SVal.map _ _, Seg.field _, _ => .error .stuck
 
-/-! ## The copied location, eagerly
+/-! ## The leaf of a write, eagerly
 
-`StValue.merge` is the one lazy marker of the theory, so this is where its
-meaning is fixed: a copied struct member by member, with a mapping member taken
-from the *target's* old value.  The recursion is on the copied value, which is
-why `mergeFields` walks `fn` and only looks `fo` up: a member the target does
-not have is copied outright. -/
+`StValue.merge` — KeY's `save(st, nil, v)` — is the one lazy constructor of
+the theory, so this is where its meaning is fixed: a written struct member by
+member, with a mapping member taken from the *location's* old value.  The
+recursion is on the written value, which is why `mergeFields` walks `fn` and
+only looks `fo` up: a member the location does not have is written outright. -/
 
 mutual
-/-- `merge<[Struct]>(old, new)`, evaluated. -/
+/-- The leaf `save(old, nil, new)`, evaluated. -/
 def mergeKeepMaps : SVal -> SVal -> SVal
   | SVal.struct fo, SVal.struct fn => SVal.struct (mergeFields fo fn)
   | _, n => n
 
-/-- One member of a copied struct: `selectStMergeMap` on a mapping member,
-`selectStMergeRef` on any other member the target has, and the copied value
-where the target has none. -/
+/-- One member of a written struct: `selectOnSaveEmptyMap` on a mapping
+member, `selectOnSaveEmptyRef` on any other member the location has, and the
+written value where the location has none. -/
 def mergeMember : Option SVal -> SVal -> SVal
   | some (SVal.map es d), _ => SVal.map es d
   | some o, v => mergeKeepMaps o v
@@ -120,8 +120,8 @@ end
 
 mutual
 /-- Does this *value* carry a mapping anywhere?  The value-level twin of
-`Semantics.tyHasMapping`, and the side condition under which a copy is the
-plain write the interpreter performs. -/
+`Semantics.tyHasMapping`, and the side condition under which a write of a
+struct is the plain write the interpreter performs. -/
 def svalHasMapping : SVal -> Bool
   | SVal.map _ _ => true
   | SVal.struct fs => fieldsHaveMappingV fs
@@ -137,9 +137,9 @@ def elemsHaveMapping : List SVal -> Bool
   | v :: rest => svalHasMapping v || elemsHaveMapping rest
 end
 
-/-- A copied location, once both sides are denoted.  A target with no value at
-all — `dflt` and `mtSt`, i.e. a *fresh* slot, which is what `push` writes —
-keeps nothing, so the copy is the copied value; a revert propagates. -/
+/-- A written location, once both sides are denoted.  A location with no value
+at all — `dflt` and `mtSt`, i.e. a *fresh* slot, which is what `push` writes —
+keeps nothing, so the leaf is the written value; a revert propagates. -/
 def mergeDen : Res SVal -> Res SVal -> Res SVal
   | .ok a, .ok b => .ok (mergeKeepMaps a b)
   | .ok _, .error e => .error e
@@ -224,25 +224,25 @@ theorem find_cons (v : SVal) (a : Seg) (rest : List Seg) :
 
 /-! ## The agreement, writing -/
 
-/-- **The storage half of the bridge.** The theory's `save` on the pre-state
-tree, denoted, *is* the interpreter's `SVal.save` — errors and all, with no
-side condition.
+/-- **The storage half of the bridge.** The theory's walk (`write`) on the
+pre-state tree, denoted, *is* the interpreter's `SVal.save` — errors and all,
+with no side condition.
 
 This is what turns every taclet of `Theory/Storage.lean` into a statement
 about `Semantics.lean`: `SemanticsProperties.SVal.find_save_same` is
-`StValue.find_save_extends` read through here, and the frame law the
-interpreter never had is `StValue.find_save_frame` read through here.
+`StValue.find_write_extends` read through here, and the frame law the
+interpreter never had is `StValue.find_write_frame` read through here.
 
-Stated over an arbitrary payload *term*, because the copy family's payload is a
-`merge` marker rather than an `sval` leaf; `denote_save` just below is the leaf
-instance, and it is the one every other theorem here uses. -/
-theorem denote_save_of {t : StValue} {w : SVal} (ht : denoteSt t = .ok w) :
-    ∀ (v : SVal) (p : List Seg), denoteSt (StValue.save (StValue.sval v) p t) = v.save p w := by
+Stated over an arbitrary payload *term*, because KeY's `save` puts a `merge`
+leaf under the walk rather than an `sval`; `denote_write` just below is the
+leaf instance, and `denote_save` in the last section is KeY's term. -/
+theorem denote_write_of {t : StValue} {w : SVal} (ht : denoteSt t = .ok w) :
+    ∀ (v : SVal) (p : List Seg), denoteSt (StValue.write (StValue.sval v) p t) = v.save p w := by
   intro v p
   induction p generalizing v with
-  | nil => simpa [SVal.save] using ht
+  | nil => simpa [SVal.save, StValue.write] using ht
   | cons a rest ih =>
-      rw [StValue.save, denoteSt, save_cons]
+      rw [StValue.write, denoteSt, save_cons]
       simp only [denoteSt_sval, bind, Except.bind]
       cases hslot : slotOf v a with
       | error e => rfl
@@ -254,9 +254,9 @@ theorem denote_save_of {t : StValue} {w : SVal} (ht : denoteSt t = .ok w) :
           rw [hsel, StValue.asStruct, ih]
 
 /-- The leaf instance: a written `sval` leaf denotes the value it holds. -/
-theorem denote_save (v : SVal) (p : List Seg) (w : SVal) :
-    denoteSt (StValue.save (StValue.sval v) p (StValue.sval w)) = v.save p w :=
-  denote_save_of rfl v p
+theorem denote_write (v : SVal) (p : List Seg) (w : SVal) :
+    denoteSt (StValue.write (StValue.sval v) p (StValue.sval w)) = v.save p w :=
+  denote_write_of rfl v p
 
 /-! ## The agreement, reading
 
@@ -377,29 +377,37 @@ theorem denote_delAt {v cur : SVal} {p : List Seg}
     (h : StValue.find (StValue.sval v) p = StValue.sval cur) :
     denoteSt (StValue.delAt (StValue.sval v) p) = v.save p cur.defaultOf := by
   rw [StValue.delAt, h]
-  exact denote_save v p cur.defaultOf
+  exact denote_write v p cur.defaultOf
 
-/-! ## Copy
+/-! ## KeY's `save`, collapsed
 
-**Upstream's `copyAt`, collapsed.**  solkey `c80a54494c` spells every
-storage-to-storage copy `copyAt(storage, p, find<[StValue]>(storage, src))`
-where it used to spell it `save(…)`, so that a mapping member of the target
-survives.  The interpreter never performs such a copy — solc ≥ 0.7 rejects the
-program and `Semantics.tyHasMapping` makes it stuck — and on the fragment it
-does perform, the two terms denote the same write.  That is what the theorems
-below say, and why every bridge in `Update/Theory.lean` may keep reading a copy
-as a `save`.
+**Upstream's `save`, collapsed.**  Every `save(storage, p, v)` upstream keeps
+the leaf, so that a mapping member of the written location survives a struct
+written over it.  The interpreter never performs such a copy — solc ≥ 0.7
+rejects the program and `Semantics.tyHasMapping` makes it stuck — and on the
+fragment it does perform, KeY's term and the walk denote the same write.  That
+is what the theorems below say, and why every bridge in `Update/Theory.lean`
+may keep reading a `save` as `write`.
 
-The side condition is on the **target's current value**, not on the source:
-`mergeFields` walks the copied value's members and keeps the old one exactly
-where the old one is a mapping, so a mapping-free source is not enough. -/
+The side condition is on the **location's current value**, not on the written
+one: `mergeFields` walks the written value's members and keeps the old one
+exactly where the old one is a mapping, so a mapping-free source is not enough.
+For a payload that is not a struct at all — every primitive write, and the
+`length` a `push`/`pop` writes — there is no condition (`denote_save_prim`). -/
 
-/-- A non-struct target keeps nothing: the common case, with no hypothesis. -/
+/-- A non-struct location keeps nothing: the common case, with no hypothesis. -/
 theorem mergeKeepMaps_of_not_struct {cur w : SVal} (h : ∀ fs, cur ≠ SVal.struct fs) :
     mergeKeepMaps cur w = w := by
   cases cur with
   | struct fs => exact absurd rfl (h fs)
   | _ => cases w <;> simp [mergeKeepMaps]
+
+/-- …and a non-struct payload has nothing to keep it from. -/
+theorem mergeKeepMaps_of_not_struct_payload {cur w : SVal} (h : ∀ fs, w ≠ SVal.struct fs) :
+    mergeKeepMaps cur w = w := by
+  cases w with
+  | struct fs => exact absurd rfl (h fs)
+  | _ => cases cur <;> simp [mergeKeepMaps]
 
 /-- A member of a struct body is smaller than the body: what the recursion on
 the *target* below needs, since `mergeFields` reaches a member through
@@ -412,9 +420,9 @@ theorem lookupBy_sizeOf_lt : ∀ (fs : List (Name × SVal)) (n : Name) (o : SVal
       · injection h with h; subst h; simp; omega
       · have := lookupBy_sizeOf_lt rest n o h; simp; omega
 
-/-- A mapping-free target keeps nothing either: `selectStMergeRef` bottoms out
-at the copied value everywhere.  The recursion is on the target, because that
-is what the hypothesis shrinks along. -/
+/-- A mapping-free location keeps nothing either: `selectOnSaveEmptyRef`
+bottoms out at the written value everywhere.  The recursion is on the
+location, because that is what the hypothesis shrinks along. -/
 theorem lookupBy_no_mapping : ∀ (fs : List (Name × SVal)) (n : Name) (o : SVal),
     lookupBy n fs = some o -> fieldsHaveMappingV fs = false -> svalHasMapping o = false
   | (m, u) :: rest, n, o, hl, h => by
@@ -424,7 +432,7 @@ theorem lookupBy_no_mapping : ∀ (fs : List (Name × SVal)) (n : Name) (o : SVa
       · injection hl with hl; subst hl; exact h.1
       · exact lookupBy_no_mapping rest n o hl h.2
 
-/-- A member the target holds and that is not itself a mapping contributes
+/-- A member the location holds and that is not itself a mapping contributes
 nothing, given that its own merge is trivial. -/
 theorem mergeMember_of_no_mapping {o v : SVal} (h : svalHasMapping o = false)
     (hrec : mergeKeepMaps o v = v) : mergeMember (some o) v = v := by
@@ -432,9 +440,9 @@ theorem mergeMember_of_no_mapping {o v : SVal} (h : svalHasMapping o = false)
   | map _ _ => simp [svalHasMapping] at h
   | _ => simp only [mergeMember]; exact hrec
 
-/-- A mapping-free target keeps nothing either: `selectStMergeRef` bottoms out
-at the copied value everywhere.  The recursion is on the target, because that
-is what the hypothesis shrinks along. -/
+/-- A mapping-free location keeps nothing either: `selectOnSaveEmptyRef`
+bottoms out at the written value everywhere.  The recursion is on the
+location, because that is what the hypothesis shrinks along. -/
 theorem mergeKeepMaps_of_no_mapping : ∀ (cur w : SVal), svalHasMapping cur = false ->
     mergeKeepMaps cur w = w
   | SVal.struct fo, SVal.struct fn, h => by
@@ -462,31 +470,44 @@ theorem mergeKeepMaps_of_no_mapping : ∀ (cur w : SVal), svalHasMapping cur = f
   termination_by cur _ _ => sizeOf cur
   decreasing_by simp; omega
 
-/-- A non-struct target, or a mapping-free one: the two ways a copy is just
+/-- A non-struct location, or a mapping-free one: the two ways a write is just
 its own value. -/
 theorem mergeDen_ok_of_no_mapping {cur w : SVal} (h : svalHasMapping cur = false) :
     mergeDen (.ok cur) (.ok w) = .ok w := by
   rw [mergeDen, mergeKeepMaps_of_no_mapping cur w h]
 
-/-- `copyAt` at a target whose current value carries no mapping denotes the
+/-- `save` at a location whose current value carries no mapping denotes the
 plain write — the collapse. -/
-theorem denote_copyAt {v cur w : SVal} {p : List Seg}
+theorem denote_save {v cur w : SVal} {p : List Seg}
     (hcur : StValue.find (StValue.sval v) p = StValue.sval cur)
     (hnm : svalHasMapping cur = false) :
-    denoteSt (StValue.copyAt (StValue.sval v) p (StValue.sval w)) = v.save p w := by
-  rw [StValue.copyAt, hcur, StValue.asStruct]
-  exact denote_save_of (by rw [denoteSt, denoteSt_sval, denoteSt_sval,
+    denoteSt (StValue.save (StValue.sval v) p (StValue.sval w)) = v.save p w := by
+  rw [StValue.save, hcur, StValue.asStruct]
+  exact denote_write_of (by rw [denoteSt, denoteSt_sval, denoteSt_sval,
     mergeDen_ok_of_no_mapping hnm]) v p
 
 /-- The fresh-slot case, which needs no side condition at all: nothing was
 there to keep.  This is the shape `push` writes — the appended element sits at
-the *old* length — and the reason the three push taclets still share one
-constructor after `c80a54494c` split their inner terms. -/
-theorem denote_copyAt_absent {v w : SVal} {p : List Seg}
+the *old* length — and the reason the three push taclets share one
+constructor although their inner terms differ. -/
+theorem denote_save_absent {v w : SVal} {p : List Seg}
     (h : StValue.find (StValue.sval v) p = StValue.dflt) :
-    denoteSt (StValue.copyAt (StValue.sval v) p (StValue.sval w)) = v.save p w := by
-  rw [StValue.copyAt, h, StValue.asStruct]
-  exact denote_save_of (by rw [denoteSt]; rfl) v p
+    denoteSt (StValue.save (StValue.sval v) p (StValue.sval w)) = v.save p w := by
+  rw [StValue.save, h, StValue.defaultValueStruct]
+  exact denote_write_of (by rw [denoteSt]; rfl) v p
+
+/-- A payload that is not a struct — every primitive write, and the `length`
+of a `push`/`pop` — needs no side condition either: whatever the location
+holds, there is nothing in the payload to keep it from. -/
+theorem denote_save_prim {v w : SVal} (hw : ∀ fs, w ≠ SVal.struct fs) (p : List Seg) :
+    denoteSt (StValue.save (StValue.sval v) p (StValue.sval w)) = v.save p w := by
+  rw [StValue.save]
+  refine denote_write_of ?_ v p
+  rcases StValue.find_sval_shape v p with ⟨x, hx⟩ | hd | ⟨q, hq⟩
+  · rw [hx, StValue.asStruct, denoteSt, denoteSt_sval, denoteSt_sval, mergeDen,
+      mergeKeepMaps_of_not_struct_payload hw]
+  · rw [hd, StValue.defaultValueStruct, denoteSt]; rfl
+  · rw [hq, StValue.asStruct_prim, denoteSt]; rfl
 
 /-! ## Sanity
 
@@ -509,7 +530,7 @@ example :
     denoteSt (StValue.save (StValue.sval alice)
         [Seg.field "account", Seg.field "balance"] (StValue.sval (SVal.int 10)))
       = alice.save [Seg.field "account", Seg.field "balance"] (SVal.int 10) :=
-  denote_save _ _ _
+  denote_save_prim (by intro fs h; cases h) _
 
 /-- …and computes the value one would write by hand. -/
 example :
@@ -527,23 +548,23 @@ example :
       = .error .revert := by
   native_decide
 
-/-- A mapping-carrying target: the copy keeps the target's mapping and takes
-the value member from the source, so it is *not* the plain write. -/
+/-- A mapping-carrying location: the write keeps the location's mapping and
+takes the value member from the source, so it is *not* the plain write. -/
 example :
-    denoteSt (StValue.copyAt (StValue.sval ledgers) [Seg.field "b"]
+    denoteSt (StValue.save (StValue.sval ledgers) [Seg.field "b"]
         (StValue.find (StValue.sval ledgers) [Seg.field "a"]))
       = .ok (SVal.struct
           [("a", SVal.struct [("n", SVal.int 1), ("m", SVal.map [(1, SVal.int 11)] (SVal.int 0))]),
            ("b", SVal.struct [("n", SVal.int 1), ("m", SVal.map [(1, SVal.int 22)] (SVal.int 0))])]) := by
   native_decide
 
-/-- …and on a mapping-free target it *is* the plain write — the collapse,
+/-- …and on a mapping-free location it *is* the plain write — the collapse,
 on one store. -/
 example :
-    denoteSt (StValue.copyAt (StValue.sval alice) [Seg.field "account"]
+    denoteSt (StValue.save (StValue.sval alice) [Seg.field "account"]
         (StValue.sval (SVal.struct [("balance", SVal.int 9)])))
       = alice.save [Seg.field "account"] (SVal.struct [("balance", SVal.int 9)]) :=
-  denote_copyAt (cur := SVal.struct [("balance", SVal.int 1)]) rfl (by native_decide)
+  denote_save (cur := SVal.struct [("balance", SVal.int 1)]) rfl (by native_decide)
 
 end Sanity
 
