@@ -32,11 +32,14 @@ sol_derivation fieldWriteSimple :
 
 /-! ### `Account storage acc = bob.account; alice.account = acc;`
 The write stores the value found at the alias path, not the alias path itself
-— which is why the second update is a `copy` and not a `save` of `acc`. -/
+— which is why the second update is a `copy` and not a `save` of `acc`.  Two
+lines, because the declaration dropping into an update is a step of its own
+and seeing it is how one sees that `acc` is a *path*, not a value. -/
 
 sol_derivation fieldWriteFromAlias :
     => <[ Account storage acc = bob.account; alice.account = acc ]>(φ)
-  ~*> => { acc := path(bob.account) } { storage := copy(alice.account, acc) } (φ)
+  ~> => { acc := path(bob.account) } <[ alice.account = acc ]>(φ)
+  ~> => { acc := path(bob.account) } { storage := copy(alice.account, acc) } (φ)
 
 /-! ### `alice.account.balance = 10;` — **the headline**
 The value is frozen into `rv`, the path captured into `sp`, the write
@@ -64,14 +67,22 @@ sol_derivation deepFieldRead :
   ~> => { sp@Account := path(alice.account) ‖ v := alice.account.balance } (φ)
 
 /-! ### `alice.account.token.value = 5;`
-One selector deeper, and yet the *same* chain: the unfold rule hoists the whole
-path prefix in one step, so depth costs nothing.  The calculus takes seven
-lines here because it unfolds one selector at a time. -/
+One selector deeper, and yet the *same* chain — which is the claim, so the
+chain is written out at the same length as `deepFieldWrite` above rather than
+collapsed into one arrow.  Line for line the two are identical up to the
+selector: the unfold rule hoists the whole path prefix in one step, so depth
+costs nothing.  The calculus takes seven lines here because it unfolds one
+selector at a time. -/
 
 sol_derivation deeperFieldWrite :
     => <[ alice.account.token.value = 5 ]>(φ)
-  ~*> => { rv@uint := 5 ‖ sp@Token := path(alice.account.token)
-           ‖ storage := save(alice.account.token.value, 5) } (φ)
+  ~> => <[ uint rv = 5;
+           Token storage sp = alice.account.token;
+           sp@Token.value = rv ]>(φ)
+  ~*> => { rv@uint := 5 ‖ sp@Token := path(alice.account.token) }
+          <[ sp@Token.value = rv@uint ]>(φ)
+  ~> => { rv@uint := 5 ‖ sp@Token := path(alice.account.token)
+          ‖ storage := save(alice.account.token.value, 5) } (φ)
 
 /-! ### `uint v = total;` — reading a storage root -/
 

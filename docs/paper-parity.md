@@ -269,6 +269,20 @@ the *state*, not the derivation. The semantic layer covers it
 and the guarded `intRules` expansion, which this package does not model; the
 paper lists it under "Not Implemented Yet" for the same reason.
 
+## Where a chain is written long
+
+Most chains elide the administrative steps into one `~*>`, because the rules
+they hide are bookkeeping. Three do not, and the reason is the same in each:
+the paper's argument *is* the intermediate line.
+
+- `deeperFieldWrite` is written at the same length as `deepFieldWrite`, so
+  that "one selector deeper costs nothing" can be read off the two chains
+  being line-for-line the same.
+- `fieldWriteFromAlias` shows the declaration dropping into an update on its
+  own line, which is where one sees that `acc` binds a *path*.
+- `memoryDeepFieldWrite` keeps the middle line its storage twin has, so the
+  two can be read side by side and the only difference is the last element.
+
 ## The lines, run
 
 `Paper/Checks.lean` is the semantic half: `Sequent.check` applies a line's

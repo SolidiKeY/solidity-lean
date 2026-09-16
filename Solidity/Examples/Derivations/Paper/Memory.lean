@@ -46,10 +46,17 @@ sol_derivation memoryFieldCopy :
   ~*> => { pv@Account := ref(david.account) }
           { memory := writeRef(carol.account, pv@Account) } (φ)
 
-/-! ### `carol.account.balance = 10;` — the memory twin of the headline -/
+/-! ### `carol.account.balance = 10;` — the memory twin of the headline
+Written with the middle line the storage chain has, so the two can be read
+side by side: the same freeze, the same capture, and only the last element
+differs — `memory := write` at an identity where storage has `storage := save`
+at a path. -/
 
 sol_derivation memoryDeepFieldWrite :
     => <[ carol.account.balance = 10 ]>(φ)
+  ~*> => { rv@uint := default(uint) } { rv@uint := 10 }
+          <[ Account memory mv = carol.account;
+             mv@Account.balance = rv@uint ]>(φ)
   ~*> => { rv@uint := default(uint) } { rv@uint := 10 }
           { mv@Account := ref(carol.account) }
           { memory := write(mv@Account.balance, rv@uint) } (φ)
