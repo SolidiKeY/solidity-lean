@@ -186,12 +186,16 @@ const UNSUPPORTED = {
 };
 
 /**
- * The two `.key` suites. They are KeY problem files, not annotated
+ * The `.key` suites. They are KeY problem files, not annotated
  * Solidity, so there is nothing here to translate: the obligations that
  * *are* expressible are hand-written in `Examples/Solkey/Net.lean` and
  * `Examples/Solkey/Rules.lean`, and this table records which, so that
  * every one of solkey's obligations appears in `expected.tsv` — the
  * unported ones with the reason.
+ *
+ * Two entries may share a `contract`, and so a module: `storage` and
+ * `rules` are different upstream directories whose obligations are both
+ * term-level and both live in `Examples/Solkey/Rules.lean`.
  */
 const KEY_SUITES = [
   {
@@ -260,6 +264,15 @@ const KEY_SUITES = [
       "KeY loader/taclet machinery: ad-hoc taclets over `\\problem { true }`, " +
       "a sort condition, a list declaration or an empty problem — there is no " +
       "identity and no judgment to state",
+  },
+  {
+    contract: "Rules",
+    suite: "storage",
+    dir: "storage",
+    ported: { copyKeepsMapping: "copyKeepsMapping" },
+    reason: () =>
+      "storage-theory problem with no Lean statement yet — see " +
+      "`Theory/Storage.lean`'s copy family",
   },
 ];
 
@@ -992,7 +1005,7 @@ function main() {
     );
   }
 
-  // The two `.key` suites: hand-written modules, but every obligation is
+  // The `.key` suites: hand-written modules, but every obligation is
   // accounted for in expected.tsv.
   for (const { contract, suite, dir, ported, reason } of KEY_SUITES) {
     const problems = readdirSync(join(SOLKEY, dir))
@@ -1010,7 +1023,8 @@ function main() {
           : [suite, contract, name.replace(/-/g, "_"), "unsupported", reason(name)],
       );
     }
-    modules.push(`Solidity.Examples.Solkey.${contract}`);
+    const module = `Solidity.Examples.Solkey.${contract}`;
+    if (!modules.includes(module)) modules.push(module);
   }
 
   writeFileSync(

@@ -28,6 +28,12 @@ name `selectOnStore`, `find_save_frame`, `readOnWrite`, `readOnAddM` and
 The `.key` files' own Solidity comments are reproduced in the docstrings:
 these are the worked memory and storage examples of the paper's first draft.
 
+One more problem lives here from a different upstream directory:
+`keyext.solidity.examples/storage/copyKeepsMapping.key`, added by solkey
+`c80a54494c`. It is term-level for the same reason, so it belongs with these
+rather than in a module of its own — `scripts/solkey-port.mjs` gives it its own
+`storage` suite over the same contract.
+
 The remaining seven exercise the KeY loader and taclet machinery
 (`hasSortVarcondTest`, `listTests`, `storageFieldRead`/`storageFieldWrite`
 and `memberAccessExample`'s ad-hoc taclets over `\problem { true }`,
@@ -604,6 +610,109 @@ example : ∀ (h : List (Nat × MObj)) (mem : Memory) (id1 id2 : Identity),
   by_cases hid : id1 = id2
   · subst hid; simp [Memory.readId, MemValue.asIdentity]
   · simp [Memory.readId, MemValue.asIdentity, hid, Ne.symm hid]
+
+/-! ### `keyext.solidity.examples/storage/copyKeepsMapping.key`
+
+The one obligation of solkey `c80a54494c` that no `.sol` example can state:
+both front ends reject a copy whose type carries a mapping, so the
+mapping-preserving half of `copyAt` is pinned by a `.key` problem instead.
+
+The `\unique MapField balances` / `\unique RefField inner` of the `.key`
+file are *sorts*, which `Semantics.Seg` does not carry (`Theory/Storage.lean`
+dispatches on the value's shape instead), so the shape is fixed here and every
+payload is left universally quantified. -/
+
+private abbrev nonce : Seg := .field "nonce"
+private abbrev balances : Seg := .field "balances"
+private abbrev inner : Seg := .field "inner"
+private abbrev ledger : Seg := .field "ledger"
+private abbrev ledger2 : Seg := .field "ledger2"
+
+/-- A `ledger`: a `Field nonce`, a `MapField balances`, and a `RefField inner`
+holding the same two. -/
+private def ledgerVal (n : Int) (bal : List (Int × SVal)) (d : SVal)
+    (inN : Int) (inBal : List (Int × SVal)) (inD : SVal) : SVal :=
+  SVal.struct
+    [("nonce", SVal.int n), ("balances", SVal.map bal d),
+     ("inner", SVal.struct
+        [("nonce", SVal.int inN), ("balances", SVal.map inBal inD)])]
+
+/-- solkey `copyKeepsMapping.key`:
+```
+{storage := copyAt(storage, cons(ledger2, nil), find<[StValue]>(storage, cons(ledger, nil)))}
+```
+`ledger2 = ledger`, read back four ways.  The first two conjuncts are the
+value members — `nonce` at the top and through the `RefField` — which the copy
+takes from the source.  The last two are the `.key` file's own, and they are
+*reflexive* as written (each side reads `ledger2`): they assert nothing about
+mappings, which `docs/solkey-feedback.md` records.  The mapping claim the
+commit is actually about is the example below, kept an `example` so that a
+break in it is reported against this row rather than silently. -/
+theorem solkey_Rules_copyKeepsMapping :
+    ∀ (n1 n2 : Int) (b1 b2 : List (Int × SVal)) (d1 d2 : SVal)
+      (i1 i2 : Int) (ib1 ib2 : List (Int × SVal)) (id1 id2 : SVal),
+      let st : StValue := .sval (SVal.struct
+        [("ledger", ledgerVal n1 b1 d1 i1 ib1 id1),
+         ("ledger2", ledgerVal n2 b2 d2 i2 ib2 id2)])
+      let upd : StValue := StValue.copyAt st [ledger2] (StValue.find st [ledger])
+      (StValue.find upd [ledger2, nonce]).asInt
+          = (StValue.find upd [ledger, nonce]).asInt
+        ∧ (StValue.find upd [ledger2, inner, nonce]).asInt
+          = (StValue.find upd [ledger, inner, nonce]).asInt
+        ∧ (StValue.find upd [ledger2, balances, .at 1]).asInt
+          = (StValue.find upd [ledger2, balances, .at 1]).asInt
+        ∧ (StValue.find upd [ledger2, inner, balances, .at 1]).asInt
+          = (StValue.find upd [ledger2, inner, balances, .at 1]).asInt := by
+  intro n1 n2 b1 b2 d1 d2 i1 i2 ib1 ib2 id1 id2
+  simp only [StValue.copyAt]
+  refine ⟨?_, ?_, trivial, trivial⟩
+  · rw [show ([ledger2, nonce] : List Seg) = [ledger2] ++ [nonce] from rfl,
+      StValue.find_save_extends, StValue.find_save_frame _ _ _ _ (by decide)]
+    simp [ledgerVal, StValue.find, StValue.selectSt, StValue.svalSelect, lookupBy,
+      StValue.asStruct, StValue.isMapping, StValue.isNode, StValue.base]
+  · rw [show ([ledger2, inner, nonce] : List Seg) = [ledger2] ++ [inner, nonce] from rfl,
+      StValue.find_save_extends, StValue.find_save_frame _ _ _ _ (by decide)]
+    simp [ledgerVal, StValue.find, StValue.selectSt, StValue.svalSelect, lookupBy,
+      StValue.asStruct, StValue.isMapping, StValue.isNode, StValue.base]
+
+/-- What the commit is about, and what the `.key` file's last two conjuncts
+meant to say: the target keeps **its own** mapping entries, at the top and one
+level down through the `RefField` — `selectStMergeMap` firing at depth 1 and,
+after `selectStMergeRef`, at depth 2. -/
+example :
+    ∀ (n1 n2 : Int) (b1 b2 : List (Int × SVal)) (d1 d2 : SVal)
+      (i1 i2 : Int) (ib1 ib2 : List (Int × SVal)) (id1 id2 : SVal),
+      let st : StValue := .sval (SVal.struct
+        [("ledger", ledgerVal n1 b1 d1 i1 ib1 id1),
+         ("ledger2", ledgerVal n2 b2 d2 i2 ib2 id2)])
+      let upd : StValue := StValue.copyAt st [ledger2] (StValue.find st [ledger])
+      StValue.find upd [ledger2, balances, .at 1]
+          = StValue.find st [ledger2, balances, .at 1]
+        ∧ StValue.find upd [ledger2, inner, balances, .at 1]
+          = StValue.find st [ledger2, inner, balances, .at 1] := by
+  intro n1 n2 b1 b2 d1 d2 i1 i2 ib1 ib2 id1 id2
+  simp only [StValue.copyAt]
+  refine ⟨?_, ?_⟩
+  · rw [show ([ledger2, balances, .at 1] : List Seg) = [ledger2] ++ [balances, .at 1] from rfl,
+      StValue.find_save_extends]
+    simp [ledgerVal, StValue.find, StValue.selectSt, StValue.svalSelect, lookupBy,
+      StValue.isMapping, StValue.base]
+  · rw [show ([ledger2, inner, balances, .at 1] : List Seg)
+        = [ledger2] ++ [inner, balances, .at 1] from rfl,
+      StValue.find_save_extends]
+    simp [ledgerVal, StValue.find, StValue.selectSt, StValue.svalSelect, lookupBy,
+      StValue.asStruct, StValue.isMapping, StValue.isNode, StValue.base]
+
+/-- …and it is *not* the source's: the refutation an inverted `isMapping`
+branch would fail. -/
+example :
+    let st : StValue := .sval (SVal.struct
+      [("ledger", ledgerVal 1 [(1, SVal.int 11)] (SVal.int 0) 3 [(1, SVal.int 33)] (SVal.int 0)),
+       ("ledger2", ledgerVal 2 [(1, SVal.int 22)] (SVal.int 0) 4 [(1, SVal.int 44)] (SVal.int 0))])
+    let upd : StValue := StValue.copyAt st [ledger2] (StValue.find st [ledger])
+    (StValue.find upd [ledger2, balances, .at 1]).asInt = 22
+      ∧ (StValue.find upd [ledger2, inner, balances, .at 1]).asInt = 44 := by
+  native_decide
 
 end Rules
 end Solkey

@@ -290,7 +290,10 @@ def conforms (anns : List TacletReadAnn) (parsed : List ParsedTaclet) :
 Miniature taclet texts pinning the scanner's behavior, including the
 pre-fix `storageRootWriteCopySource` (must produce a `READ DRIFT`
 against the current table) and a commented-out read (must be
-ignored). -/
+ignored).  The current text writes `copyAt` since solkey `c80a54494c`;
+the scanner sees only the reads, so the write's name is immaterial to
+it and the snippet tracks upstream for readers rather than for the
+test. -/
 
 private def currentRootCopySnippet : String :=
 "\\rules {
@@ -298,7 +301,7 @@ private def currentRootCopySnippet : String :=
         \\schemaVar \\formula post;
 
         \\find(\\modality{#mod}{c# s#gp = s#sp; #c}\\endmodality(post))
-        \\replacewith({storage := save(storage, gp, find<[StValue]>(storage, sp))}
+        \\replacewith({storage := copyAt(storage, gp, find<[StValue]>(storage, sp))}
             \\modality{#mod}{c# #c}\\endmodality(post))
         \\heuristics(simplify_prog)
     };
