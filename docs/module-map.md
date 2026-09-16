@@ -128,17 +128,6 @@ Each is a refutation that pins down why a hypothesis or conjunct is there.
 | `Evm/Correctness.lean` | Leroy-style forward simulation: `compile_preserves_ok`/`_revert`, verified inlining, judgment transfer. See `docs/compiler-verification.md`. |
 | `Evm/Examples.lean` | `native_decide` differential tests and concrete instantiations. |
 
-## SolSpec (own Lake target, `scripts/check-spec.sh`)
-
-`Spec/Assertion.lean` (readers, `Ann`, `vc`/`totalVC`/`partialVC`/`revertsVC`),
-`Spec/Tactic.lean` (`sol_spec`, over a *symbolic* initial state),
-`Spec/Syntax.lean` (the `solspec!` notation),
-`Spec/Metatheory.lean` (the two modality results),
-`Spec/Examples.lean` (the reference for the code generator in
-`vscode-extension/src/spec/emitLean.ts`),
-`Spec/SyntaxExamples.lean` (grammar smoke tests then proved specs).
-Root: `SoliditySpec.lean`, deliberately not imported by `Solidity.lean`.
-
 ## Examples
 
 - `Examples/Derivations/Solkey/` — **the solkey corpus proved from `Rules.lean`

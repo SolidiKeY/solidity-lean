@@ -397,8 +397,8 @@ macro_rules
 
 Grammar only -- every production of `sol_upd`, `sol_formula`, `sol_ante` and
 `sol_seq_goal` once, so that a parser problem and a proof problem are
-distinguishable (the same reason `AST.lean` and `Spec/SyntaxExamples.lean`
-keep their `#check` sections). -/
+distinguishable (the same reason `AST.lean` keeps its `#check`
+section). -/
 
 section
 open StandardExample

@@ -9,28 +9,6 @@ with a machine-checked proof that compilation — including solc-style
 `uint` overflow guards and the balance-checked `transfer` — preserves
 the executable semantics — see `docs/compiler-verification.md`.
 
-## Specifying contracts
-
-`docs/spec-language.md` describes **SolSpec**, a Dafny-style contract
-specification language written in Solidity NatSpec `@custom:` tags
-(`@custom:requires`, `@custom:ensures`, `@custom:invariant`, `old(e)`,
-bounded quantifiers). A specified `.sol` file still compiles with
-`solc`; the VS Code extension in `vscode-extension/` turns each clause
-into a Lean theorem over `Semantics.execStmt` and proves it with
-`sol_spec`. Unlike the `.solj` judgment language, which runs from one
-fixed store, a SolSpec obligation quantifies over every state satisfying
-the precondition.
-
-The same language is also a Lean notation, so a specification can be
-written and proved directly: `solspec!{ requires (…) ensures (…) modifies …
-< body > }` elaborates to a `State -> Prop` you apply to a symbolic
-store. It reuses the `sol!` grammar — `sol_stmt` for the body,
-`sol_expr` for the clause expressions — and adds only what a
-specification needs and a program cannot express.
-
-The Lean side is `Solidity/Spec/` in its own Lake
-target, checked by `./scripts/check-spec.sh`.
-
 ## Build
 
 ```sh
@@ -43,11 +21,10 @@ The package declares no dependencies at all — no Mathlib, nothing — so
 NixOS, `run-lean.sh` uses the wrappers in `scripts/lean-vscode/bin` to select
 a compatible Lean and Lake installation.
 
-Four further Lake targets are deliberately outside the default build, because
+Three further Lake targets are deliberately outside the default build, because
 each is a large batch of symbolic executions that would multiply the cost of an
 ordinary build: `SolidityExamples` (`./scripts/check-examples.sh`),
-`SoliditySpec` (`./scripts/check-spec.sh`), `SolidityCorpus`
-(`./scripts/check-solkey-parity.sh`) and `SolidityCalculus`
+`SolidityCorpus` (`./scripts/check-solkey-parity.sh`) and `SolidityCalculus`
 (`./scripts/check-calculus-parity.sh`).
 
 ## Relationship to solkey
