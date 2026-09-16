@@ -12,23 +12,33 @@ hand-written for the two `.key` suites; verdicts are produced by
 
 | suite | obligations | proved | open | unsupported |
 |---|---:|---:|---:|---:|
-| `TestSuite.sol` (taclet suite) | 176 | 155 | 12 | 9 |
-| `solc/SolcExpressions.sol` | 20 | 20 | 0 | 0 |
+| `TestSuite.sol` (taclet suite) | 176 | 156 | 11 | 9 |
+| `solc/SolcExpressions.sol` | 20 | 19 | 1 | 0 |
 | `solc/SolcStructs.sol` | 11 | 9 | 0 | 2 |
 | `solc/SolcArrays.sol` | 12 | 11 | 1 | 0 |
 | `solc/SolcMemory.sol` | 11 | 9 | 0 | 2 |
 | `solc/SolcMappings.sol` | 9 | 7 | 2 | 0 |
 | `solc/SolcControlFlow.sol` | 10 | 7 | 3 | 0 |
 | `net/*.key` | 20 | 3 | 0 | 17 |
-| core `RulesTest` `*.key` | 41 | 7 | 0 | 34 |
-| **total** | **310** | **228** | **18** | **64** |
+| core `RulesTest` `*.key` | 41 | 34 | 0 | 7 |
+| **total** | **310** | **255** | **18** | **37** |
 
-**228 of the 246 obligations that are expressible in this fragment are
-proved**, kernel-checked, with no `native_decide` — including the whole of
-`SolcExpressions`, `SolcStructs`, `SolcMemory`, the `net` machinery, and
-155 of the 167 ported taclet tests. (`Examples/Solkey/Net.lean` carries a
-fourth theorem, an iterated transfer, that is not itself a solkey PO and so
-is not counted.)
+**255 of the 273 obligations that are expressible in this fragment are
+proved**, kernel-checked, with no `native_decide` — including every ported
+obligation of `SolcStructs` and `SolcMemory`, the `net` machinery, every
+`RulesTest` problem that states an identity or a judgment, and 156 of the 167
+ported taclet tests. (`Examples/Solkey/Net.lean` carries a fourth
+theorem, an iterated transfer, and `Examples/Solkey/Rules.lean` two auxiliary
+ones about `newFromAdd` and `defaultDefIdentity`; none is itself a solkey PO,
+so none is counted.)
+
+The 27 `RulesTest` problems with no modality — the heap-algebra identities of
+`simpleExample*.key` and the update sequences of `storageExample*.key` and
+`memoryExample*.key` — are proved over the term algebras
+(`Theory/Storage.lean`, `Theory/Memory.lean`) rather than by `sol_wp`, which
+is what those problems actually assert. The memory ones need KeY's path
+identities `idC(idp, flds)` and the branching `readOnAddM`/`newFromAdd`, which
+is what `Theory/Memory.lean` carries.
 
 ## How to read the three verdicts
 
@@ -58,20 +68,21 @@ apply to obligations counted as *proved*:
    `require`s (`require(1 < values.length)`) are therefore discharged by
    emitting the `push`es that establish them.
 
-## The 64 unsupported obligations
+## The 37 unsupported obligations
 
 | reason | count |
 |---|---:|
-| core `RulesTest`: term-level heap-algebra identities and KeY loader/taclet tests, not program judgments | 34 |
+| core `RulesTest`: KeY loader/taclet tests — ad-hoc taclets over `\problem { true }`, a sort condition, a list declaration, an empty problem | 7 |
 | `net` invariant POs: uninterpreted `CInv` over a symbolic ledger, booked against `msg.value`/`msg.sender` | 12 |
 | `new T[](n)` memory-array allocation is not in the fragment | 11 |
 | `transferWithCallback` has a relational meaning (`CallbackSemantics.lean`) but no surface syntax | 4 |
 | field-name overloading: `Depth0.recursive` and `Depth1.recursive` differ in type, and `SoliditySyntax.fieldTy` is one global name→type table | 2 |
 | `msg.value` is not in the `sol_expr` grammar | 1 |
 
-The 34 `RulesTest` entries are not a coverage hole in the calculus: they
-assert things like `selectSt(storeSt(mtSt, balance, 10), balance) = 10`,
-which `RuleValidation.lean` and `RuleSoundness.lean` cover directly.
+The 7 remaining `RulesTest` entries state nothing to prove: they load a rule
+set against `\problem { true }` (`storageFieldRead`, `storageFieldWrite`,
+`memberAccessExample`, `functionBodyExpandTest`, `hasSortVarcondTest`),
+declare a list (`listTests`), or are the empty problem (`problem`).
 
 ## The 18 open obligations
 

@@ -270,41 +270,41 @@ net	Net	piggybank_breakPiggyBank_withcallback	unsupported	needs `transferWithCal
 rules	Rules	assignRuleExample	proved	solkey assignRuleExample.key
 rules	Rules	contextAssignTest	proved	solkey contextAssignTest.key
 rules	Rules	fieldAccessTest	proved	solkey fieldAccessTest.key
-rules	Rules	functionBodyExpandTest	unsupported	term-level: asserts a heap-algebra identity between store terms, or exercises the KeY loader/taclet machinery — not a program judgment. The rules themselves are covered by RuleValidation.lean/RuleSoundness.lean
-rules	Rules	hasSortVarcondTest	unsupported	term-level: asserts a heap-algebra identity between store terms, or exercises the KeY loader/taclet machinery — not a program judgment. The rules themselves are covered by RuleValidation.lean/RuleSoundness.lean
-rules	Rules	listTests	unsupported	term-level: asserts a heap-algebra identity between store terms, or exercises the KeY loader/taclet machinery — not a program judgment. The rules themselves are covered by RuleValidation.lean/RuleSoundness.lean
-rules	Rules	mainExamples	unsupported	term-level: asserts a heap-algebra identity between store terms, or exercises the KeY loader/taclet machinery — not a program judgment. The rules themselves are covered by RuleValidation.lean/RuleSoundness.lean
-rules	Rules	memberAccessExample	unsupported	term-level: asserts a heap-algebra identity between store terms, or exercises the KeY loader/taclet machinery — not a program judgment. The rules themselves are covered by RuleValidation.lean/RuleSoundness.lean
-rules	Rules	memoryExample1	unsupported	term-level: asserts a heap-algebra identity between store terms, or exercises the KeY loader/taclet machinery — not a program judgment. The rules themselves are covered by RuleValidation.lean/RuleSoundness.lean
-rules	Rules	memoryExample2	unsupported	term-level: asserts a heap-algebra identity between store terms, or exercises the KeY loader/taclet machinery — not a program judgment. The rules themselves are covered by RuleValidation.lean/RuleSoundness.lean
-rules	Rules	memoryExample2_2	unsupported	term-level: asserts a heap-algebra identity between store terms, or exercises the KeY loader/taclet machinery — not a program judgment. The rules themselves are covered by RuleValidation.lean/RuleSoundness.lean
-rules	Rules	memoryExample3	unsupported	term-level: asserts a heap-algebra identity between store terms, or exercises the KeY loader/taclet machinery — not a program judgment. The rules themselves are covered by RuleValidation.lean/RuleSoundness.lean
-rules	Rules	memoryExample4	unsupported	term-level: asserts a heap-algebra identity between store terms, or exercises the KeY loader/taclet machinery — not a program judgment. The rules themselves are covered by RuleValidation.lean/RuleSoundness.lean
-rules	Rules	memoryExample5	unsupported	term-level: asserts a heap-algebra identity between store terms, or exercises the KeY loader/taclet machinery — not a program judgment. The rules themselves are covered by RuleValidation.lean/RuleSoundness.lean
-rules	Rules	problem	unsupported	term-level: asserts a heap-algebra identity between store terms, or exercises the KeY loader/taclet machinery — not a program judgment. The rules themselves are covered by RuleValidation.lean/RuleSoundness.lean
-rules	Rules	problem1	unsupported	term-level: asserts a heap-algebra identity between store terms, or exercises the KeY loader/taclet machinery — not a program judgment. The rules themselves are covered by RuleValidation.lean/RuleSoundness.lean
-rules	Rules	problem2	unsupported	term-level: asserts a heap-algebra identity between store terms, or exercises the KeY loader/taclet machinery — not a program judgment. The rules themselves are covered by RuleValidation.lean/RuleSoundness.lean
+rules	Rules	functionBodyExpandTest	unsupported	KeY loader/taclet machinery: ad-hoc taclets over `\problem { true }`, a sort condition, a list declaration or an empty problem — there is no identity and no judgment to state
+rules	Rules	hasSortVarcondTest	unsupported	KeY loader/taclet machinery: ad-hoc taclets over `\problem { true }`, a sort condition, a list declaration or an empty problem — there is no identity and no judgment to state
+rules	Rules	listTests	unsupported	KeY loader/taclet machinery: ad-hoc taclets over `\problem { true }`, a sort condition, a list declaration or an empty problem — there is no identity and no judgment to state
+rules	Rules	mainExamples	proved	solkey mainExamples.key, term-level
+rules	Rules	memberAccessExample	unsupported	KeY loader/taclet machinery: ad-hoc taclets over `\problem { true }`, a sort condition, a list declaration or an empty problem — there is no identity and no judgment to state
+rules	Rules	memoryExample1	proved	solkey memoryExample1.key, term-level
+rules	Rules	memoryExample2	proved	solkey memoryExample2.key, term-level
+rules	Rules	memoryExample2_2	proved	solkey memoryExample2-2.key, term-level
+rules	Rules	memoryExample3	proved	solkey memoryExample3.key, term-level
+rules	Rules	memoryExample4	proved	solkey memoryExample4.key, term-level
+rules	Rules	memoryExample5	proved	solkey memoryExample5.key, term-level
+rules	Rules	problem	unsupported	KeY loader/taclet machinery: ad-hoc taclets over `\problem { true }`, a sort condition, a list declaration or an empty problem — there is no identity and no judgment to state
+rules	Rules	problem1	proved	solkey problem1.key, term-level
+rules	Rules	problem2	proved	solkey problem2.key, term-level
 rules	Rules	programRulesTest	proved	solkey programRulesTest.key
 rules	Rules	revert	proved	solkey revert.key
 rules	Rules	schemaVarExample	proved	solkey schemaVarExample.key
-rules	Rules	simpleExample1	unsupported	term-level: asserts a heap-algebra identity between store terms, or exercises the KeY loader/taclet machinery — not a program judgment. The rules themselves are covered by RuleValidation.lean/RuleSoundness.lean
-rules	Rules	simpleExample10	unsupported	term-level: asserts a heap-algebra identity between store terms, or exercises the KeY loader/taclet machinery — not a program judgment. The rules themselves are covered by RuleValidation.lean/RuleSoundness.lean
-rules	Rules	simpleExample2	unsupported	term-level: asserts a heap-algebra identity between store terms, or exercises the KeY loader/taclet machinery — not a program judgment. The rules themselves are covered by RuleValidation.lean/RuleSoundness.lean
-rules	Rules	simpleExample3	unsupported	term-level: asserts a heap-algebra identity between store terms, or exercises the KeY loader/taclet machinery — not a program judgment. The rules themselves are covered by RuleValidation.lean/RuleSoundness.lean
-rules	Rules	simpleExample4	unsupported	term-level: asserts a heap-algebra identity between store terms, or exercises the KeY loader/taclet machinery — not a program judgment. The rules themselves are covered by RuleValidation.lean/RuleSoundness.lean
-rules	Rules	simpleExample5	unsupported	term-level: asserts a heap-algebra identity between store terms, or exercises the KeY loader/taclet machinery — not a program judgment. The rules themselves are covered by RuleValidation.lean/RuleSoundness.lean
-rules	Rules	simpleExample6	unsupported	term-level: asserts a heap-algebra identity between store terms, or exercises the KeY loader/taclet machinery — not a program judgment. The rules themselves are covered by RuleValidation.lean/RuleSoundness.lean
-rules	Rules	simpleExample7	unsupported	term-level: asserts a heap-algebra identity between store terms, or exercises the KeY loader/taclet machinery — not a program judgment. The rules themselves are covered by RuleValidation.lean/RuleSoundness.lean
-rules	Rules	simpleExample8	unsupported	term-level: asserts a heap-algebra identity between store terms, or exercises the KeY loader/taclet machinery — not a program judgment. The rules themselves are covered by RuleValidation.lean/RuleSoundness.lean
-rules	Rules	simpleExample9	unsupported	term-level: asserts a heap-algebra identity between store terms, or exercises the KeY loader/taclet machinery — not a program judgment. The rules themselves are covered by RuleValidation.lean/RuleSoundness.lean
+rules	Rules	simpleExample1	proved	solkey simpleExample1.key, term-level
+rules	Rules	simpleExample10	proved	solkey simpleExample10.key, term-level
+rules	Rules	simpleExample2	proved	solkey simpleExample2.key, term-level
+rules	Rules	simpleExample3	proved	solkey simpleExample3.key, term-level
+rules	Rules	simpleExample4	proved	solkey simpleExample4.key, term-level
+rules	Rules	simpleExample5	proved	solkey simpleExample5.key, term-level
+rules	Rules	simpleExample6	proved	solkey simpleExample6.key, term-level
+rules	Rules	simpleExample7	proved	solkey simpleExample7.key, term-level
+rules	Rules	simpleExample8	proved	solkey simpleExample8.key, term-level
+rules	Rules	simpleExample9	proved	solkey simpleExample9.key, term-level
 rules	Rules	simpleExpressionTest	proved	solkey simpleExpressionTest.key
-rules	Rules	storageExample1	unsupported	term-level: asserts a heap-algebra identity between store terms, or exercises the KeY loader/taclet machinery — not a program judgment. The rules themselves are covered by RuleValidation.lean/RuleSoundness.lean
-rules	Rules	storageExample1_2	unsupported	term-level: asserts a heap-algebra identity between store terms, or exercises the KeY loader/taclet machinery — not a program judgment. The rules themselves are covered by RuleValidation.lean/RuleSoundness.lean
-rules	Rules	storageExample2	unsupported	term-level: asserts a heap-algebra identity between store terms, or exercises the KeY loader/taclet machinery — not a program judgment. The rules themselves are covered by RuleValidation.lean/RuleSoundness.lean
-rules	Rules	storageExample2_2	unsupported	term-level: asserts a heap-algebra identity between store terms, or exercises the KeY loader/taclet machinery — not a program judgment. The rules themselves are covered by RuleValidation.lean/RuleSoundness.lean
-rules	Rules	storageExample3	unsupported	term-level: asserts a heap-algebra identity between store terms, or exercises the KeY loader/taclet machinery — not a program judgment. The rules themselves are covered by RuleValidation.lean/RuleSoundness.lean
-rules	Rules	storageExample4	unsupported	term-level: asserts a heap-algebra identity between store terms, or exercises the KeY loader/taclet machinery — not a program judgment. The rules themselves are covered by RuleValidation.lean/RuleSoundness.lean
-rules	Rules	storageExample4_2	unsupported	term-level: asserts a heap-algebra identity between store terms, or exercises the KeY loader/taclet machinery — not a program judgment. The rules themselves are covered by RuleValidation.lean/RuleSoundness.lean
-rules	Rules	storageExample5	unsupported	term-level: asserts a heap-algebra identity between store terms, or exercises the KeY loader/taclet machinery — not a program judgment. The rules themselves are covered by RuleValidation.lean/RuleSoundness.lean
-rules	Rules	storageFieldRead	unsupported	term-level: asserts a heap-algebra identity between store terms, or exercises the KeY loader/taclet machinery — not a program judgment. The rules themselves are covered by RuleValidation.lean/RuleSoundness.lean
-rules	Rules	storageFieldWrite	unsupported	term-level: asserts a heap-algebra identity between store terms, or exercises the KeY loader/taclet machinery — not a program judgment. The rules themselves are covered by RuleValidation.lean/RuleSoundness.lean
+rules	Rules	storageExample1	proved	solkey storageExample1.key, term-level
+rules	Rules	storageExample1_2	proved	solkey storageExample1-2.key, term-level
+rules	Rules	storageExample2	proved	solkey storageExample2.key, term-level
+rules	Rules	storageExample2_2	proved	solkey storageExample2-2.key, term-level
+rules	Rules	storageExample3	proved	solkey storageExample3.key, term-level
+rules	Rules	storageExample4	proved	solkey storageExample4.key, term-level
+rules	Rules	storageExample4_2	proved	solkey storageExample4-2.key, term-level
+rules	Rules	storageExample5	proved	solkey storageExample5.key, term-level
+rules	Rules	storageFieldRead	unsupported	KeY loader/taclet machinery: ad-hoc taclets over `\problem { true }`, a sort condition, a list declaration or an empty problem — there is no identity and no judgment to state
+rules	Rules	storageFieldWrite	unsupported	KeY loader/taclet machinery: ad-hoc taclets over `\problem { true }`, a sort condition, a list declaration or an empty problem — there is no identity and no judgment to state

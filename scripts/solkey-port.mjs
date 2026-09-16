@@ -225,11 +225,41 @@ const KEY_SUITES = [
       revert: "revert",
       schemaVarExample: "schemaVarExample",
       simpleExpressionTest: "simpleExpressionTest",
+      // Term-level: proved over `Theory/Storage.lean` and `Theory/Memory.lean`
+      // rather than by `sol_wp`, since a heap-algebra identity is not a
+      // dynamic logic judgment. Hand-written in the same module.
+      mainExamples: "mainExamples",
+      problem1: "problem1",
+      problem2: "problem2",
+      simpleExample1: "simpleExample1",
+      simpleExample2: "simpleExample2",
+      simpleExample3: "simpleExample3",
+      simpleExample4: "simpleExample4",
+      simpleExample5: "simpleExample5",
+      simpleExample6: "simpleExample6",
+      simpleExample7: "simpleExample7",
+      simpleExample8: "simpleExample8",
+      simpleExample9: "simpleExample9",
+      simpleExample10: "simpleExample10",
+      storageExample1: "storageExample1",
+      "storageExample1-2": "storageExample1_2",
+      storageExample2: "storageExample2",
+      "storageExample2-2": "storageExample2_2",
+      storageExample3: "storageExample3",
+      storageExample4: "storageExample4",
+      "storageExample4-2": "storageExample4_2",
+      storageExample5: "storageExample5",
+      memoryExample1: "memoryExample1",
+      memoryExample2: "memoryExample2",
+      "memoryExample2-2": "memoryExample2_2",
+      memoryExample3: "memoryExample3",
+      memoryExample4: "memoryExample4",
+      memoryExample5: "memoryExample5",
     },
     reason: () =>
-      "term-level: asserts a heap-algebra identity between store terms, or " +
-      "exercises the KeY loader/taclet machinery — not a program judgment. " +
-      "The rules themselves are covered by RuleValidation.lean/RuleSoundness.lean",
+      "KeY loader/taclet machinery: ad-hoc taclets over `\\problem { true }`, " +
+      "a sort condition, a list declaration or an empty problem — there is no " +
+      "identity and no judgment to state",
   },
 ];
 
