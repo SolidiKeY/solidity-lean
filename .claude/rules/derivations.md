@@ -46,9 +46,17 @@ When a step stops elaborating, the cause is almost never the notation:
 | `j ⇝ᵈ[.rule] j'`, `j ⇝ᵈ* j'` | the same, on a judgment | `dl_rule_step` / `dl_steps […]` |
 | `f ⇝ᵘ[.rule] f'`, `f ⇝ᵘ* f'` | the same, on a frontier of updated sequents | `seq_rule_step` / `seq_steps […]` / `seq_steps!` |
 | `f ⇝≡ f'` | the **merge line**: not a rule, the update respelled | `upd_merge` |
+| (no arrow) | run to closure, endpoint computed | `seq_closes` |
 
 ASCII twins: `~>`, `~>[.r]`, `~>*[…]`, `~>*`, `~>=`, and `~*>` for `⇝*` —
 the spelling the paper's chains are written in.
+
+`seq_closes` is the one loop that does not run toward a stated target: it
+steps while `Frontier.firstOpen?` finds a line with a statement and then
+assigns the target to whatever the rules produced. `seq_steps!` cannot be
+pointed at a metavariable — its first move is `isDefEq` against the target,
+which a metavariable satisfies at once, so the chain would close having taken
+no step.
 
 **At the sequent layer `⇝`/`~>` and `⇝*`/`~*>` may absorb a trailing merge.**
 `seq_steps!` stops as soon as the frontier reaches the stated target *or*
@@ -105,6 +113,25 @@ always a postcondition over the empty program, so obligations — `⊤`, `⊥`,
 `funded(se)`, `CInv` — are written without parentheses. And a **branching line
 is a bracketed list** of such lines, which is what a guarded rule leaves open:
 `[ inBounds(values[i]) => { v := values[i] } [ ](φ), ¬inBounds(values[i]) => ⊤ ]`.
+
+`sol_calculus name from <store> { stmt; stmt }` when the point is that the
+**rule table proves the obligation**: it states `CalculusHolds`, runs the
+taclets with `seq_closes` until no line of the frontier has a statement left,
+and decides the frontier reached. Use it for a whole solkey function, where
+the accumulated update is not something to write out; use a `sol_derivation`
+chain where the update *is* what the example shows.
+
+Two things about writing a command that generates one of these. The endpoint
+is `native_decide` and has to be: `Frontier.Holds` runs the accumulated update
+through the interpreter's readers and the WF-recursive interpreter does not
+kernel-reduce, so `decide` fails on it. And **an identifier inside the
+generating macro's own quotation is not the Solidity variable of that name**:
+it carries the macro's hygiene scopes, and `sol_expr`'s ident production reads
+the mangled name as a variable. `sexpr!{ true }` written inside a macro
+elaborates to a seven-deep chain of stack field accesses named after the macro
+scope, and the obligation is then about that. Write the term
+(`Typed.WrappedExpr.bool true`); spliced user syntax is fine, because it
+carries the user's scopes.
 
 `sol_runs name { stmt; stmt }` when the point is only *that* a program runs to
 the empty block. **Statements are `;`-separated, deliberately**: newline

@@ -99,6 +99,60 @@ theorem solkey_TestSuite_storageIndexAddAssign :
       State.testSuiteStore := by
   sol_wp
 
+/-- solkey `TestSuite.storageIndexMappingAddAssign` (TestSuite.sol). -/
+theorem solkey_TestSuite_storageIndexMappingAddAssign :
+    (sol!{ < balances[1] = 40;
+             balances[1] += 2;
+             uint r = balances[1];
+             assert((r == 42)) > (true) }).Holds
+      State.testSuiteStore := by
+  sol_wp
+
+/-- solkey `TestSuite.storageIndexReadComplexReceiverBindLocalRoot` (TestSuite.sol).
+
+solkey tags this `@custom:key box`; the port makes the assumptions
+true instead, so the diamond also proves that it does not revert. -/
+theorem solkey_TestSuite_storageIndexReadComplexReceiverBindLocalRoot :
+    (sol!{ < (bucket@@TokenBucket.tokens).push();
+             bucket@@TokenBucket.tokens[0].value = 9;
+             Token storage t = bucket@@TokenBucket.tokens[0];
+             uint r = t@Token.value;
+             assert((r == 9)) > (true) }).Holds
+      State.testSuiteStore := by
+  sol_wp
+
+/-- solkey `TestSuite.storageIndexWriteComplexReceiverCopySource` (TestSuite.sol).
+
+solkey tags this `@custom:key box`; the port makes the assumptions
+true instead, so the diamond also proves that it does not revert. -/
+theorem solkey_TestSuite_storageIndexWriteComplexReceiverCopySource :
+    (sol!{ < (bucket@@TokenBucket.tokens).push();
+             alice.account.token.value = 7;
+             Token storage tokRef = alice.account.token;
+             bucket@@TokenBucket.tokens[0] = tokRef@Token;
+             uint r = bucket@@TokenBucket.tokens[0].value;
+             assert((r == 7)) > (true) }).Holds
+      State.testSuiteStore := by
+  sol_wp
+
+/-- solkey `TestSuite.storageFieldWriteRootRhsComplexReceiver` (TestSuite.sol). -/
+theorem solkey_TestSuite_storageFieldWriteRootRhsComplexReceiver :
+    (sol!{ < tok@@Token.value = 7;
+             alice.account.token = tok@@Token;
+             uint r = alice.account.token.value;
+             assert((r == 7)) > (true) }).Holds
+      State.testSuiteStore := by
+  sol_wp
+
+/-- solkey `TestSuite.storageIndexWriteRootRhsComplexReceiver` (TestSuite.sol). -/
+theorem solkey_TestSuite_storageIndexWriteRootRhsComplexReceiver :
+    (sol!{ < total = 9;
+             ledger@@Ledger.balances[3] = total;
+             uint r = ledger@@Ledger.balances[3];
+             assert((r == 9)) > (true) }).Holds
+      State.testSuiteStore := by
+  sol_wp
+
 /-- solkey `TestSuite.storagePushValue` (TestSuite.sol).
 
 solkey tags this `@custom:key box`; the port makes the assumptions
@@ -109,6 +163,94 @@ theorem solkey_TestSuite_storagePushValue :
              values.push(42);
              assert((values[2] == 42));
              assert((values.length == 3)) > (true) }).Holds
+      State.testSuiteStore := by
+  sol_wp
+
+/-- solkey `TestSuite.storagePushComplexReceiverNonsimpleArg` (TestSuite.sol).
+
+concretized: solkey proves this for all parameters; ported at x = 40, y = 2.
+
+solkey tags this `@custom:key box`; the port makes the assumptions
+true instead, so the diamond also proves that it does not revert. -/
+theorem solkey_TestSuite_storagePushComplexReceiverNonsimpleArg :
+    (sol!{ < matrix.push();
+             uint x = 40;
+             uint y = 2;
+             matrix[0].push(x + y);
+             uint r = matrix[0][0];
+             assert((r == 42)) > (true) }).Holds
+      State.testSuiteStore := by
+  sol_wp
+
+/-- solkey `TestSuite.storagePushValueCopySource` (TestSuite.sol).
+
+solkey tags this `@custom:key box`; the port makes the assumptions
+true instead, so the diamond also proves that it does not revert. -/
+theorem solkey_TestSuite_storagePushValueCopySource :
+    (sol!{ < tok@@Token.value = 7;
+             (tokens@@TokenArray).push(tok@@Token);
+             assert((tokens@@TokenArray[0].value == 7)) > (true) }).Holds
+      State.testSuiteStore := by
+  sol_wp
+
+/-- solkey `TestSuite.requireTrueLiteral` (TestSuite.sol). -/
+theorem solkey_TestSuite_requireTrueLiteral :
+    (sol!{ < require(true);
+             assert(true) > (true) }).Holds
+      State.testSuiteStore := by
+  sol_wp
+
+/-- solkey `TestSuite.storageBoolRootReadWrite` (TestSuite.sol). -/
+theorem solkey_TestSuite_storageBoolRootReadWrite :
+    (sol!{ < flag@@bool = true;
+             bool r = flag@@bool;
+             assert(r) > (true) }).Holds
+      State.testSuiteStore := by
+  sol_wp
+
+/-- solkey `TestSuite.storageBoolRootCopy` (TestSuite.sol). -/
+theorem solkey_TestSuite_storageBoolRootCopy :
+    (sol!{ < flag@@bool = true;
+             flag2@@bool = flag@@bool;
+             bool r = flag2@@bool;
+             assert(r) > (true) }).Holds
+      State.testSuiteStore := by
+  sol_wp
+
+/-- solkey `TestSuite.storageBoolFieldRead` (TestSuite.sol). -/
+theorem solkey_TestSuite_storageBoolFieldRead :
+    (sol!{ < toggle@@Toggle.on = true;
+             bool r = toggle@@Toggle.on;
+             assert(r) > (true) }).Holds
+      State.testSuiteStore := by
+  sol_wp
+
+/-- solkey `TestSuite.storageBoolMappingRead` (TestSuite.sol). -/
+theorem solkey_TestSuite_storageBoolMappingRead :
+    (sol!{ < flags[2] = true;
+             bool r = flags[2];
+             assert(r) > (true) }).Holds
+      State.testSuiteStore := by
+  sol_wp
+
+/-- solkey `TestSuite.storageBoolArrayRead` (TestSuite.sol).
+
+solkey tags this `@custom:key box`; the port makes the assumptions
+true instead, so the diamond also proves that it does not revert. -/
+theorem solkey_TestSuite_storageBoolArrayRead :
+    (sol!{ < (boolFlags@@BoolArray).push();
+             boolFlags@@BoolArray[0] = true;
+             bool r = boolFlags@@BoolArray[0];
+             assert(r) > (true) }).Holds
+      State.testSuiteStore := by
+  sol_wp
+
+/-- solkey `TestSuite.storageBoolFieldStoreRoot` (TestSuite.sol). -/
+theorem solkey_TestSuite_storageBoolFieldStoreRoot :
+    (sol!{ < toggle@@Toggle.on = true;
+             flag@@bool = toggle@@Toggle.on;
+             bool r = flag@@bool;
+             assert(r) > (true) }).Holds
       State.testSuiteStore := by
   sol_wp
 
@@ -279,6 +421,47 @@ theorem solkey_TestSuite_ifElseSplit :
       State.testSuiteStore := by
   sol_wp
 
+/-- solkey `TestSuite.ifTrue` (TestSuite.sol). -/
+theorem solkey_TestSuite_ifTrue :
+    (sol!{ < uint r = 0;
+             if (true) { r = 1 };
+             assert((r == 1)) > (true) }).Holds
+      State.testSuiteStore := by
+  sol_wp
+
+/-- solkey `TestSuite.ifFalse` (TestSuite.sol). -/
+theorem solkey_TestSuite_ifFalse :
+    (sol!{ < uint r = 0;
+             if (false) { r = 1 };
+             assert((r == 0)) > (true) }).Holds
+      State.testSuiteStore := by
+  sol_wp
+
+/-- solkey `TestSuite.ifElseTrue` (TestSuite.sol). -/
+theorem solkey_TestSuite_ifElseTrue :
+    (sol!{ < uint r = 0;
+             if (true) { r = 1 } else { r = 2 };
+             assert((r == 1)) > (true) }).Holds
+      State.testSuiteStore := by
+  sol_wp
+
+/-- solkey `TestSuite.ifElseFalse` (TestSuite.sol). -/
+theorem solkey_TestSuite_ifElseFalse :
+    (sol!{ < uint r = 0;
+             if (false) { r = 1 } else { r = 2 };
+             assert((r == 2)) > (true) }).Holds
+      State.testSuiteStore := by
+  sol_wp
+
+/-- solkey `TestSuite.ifElseNegated` (TestSuite.sol). -/
+theorem solkey_TestSuite_ifElseNegated :
+    (sol!{ < bool b = false;
+             uint r = 0;
+             if (!b) { r = 1 } else { r = 2 };
+             assert((r == 1)) > (true) }).Holds
+      State.testSuiteStore := by
+  sol_wp
+
 /-- solkey `TestSuite.memoryDeclFresh` (TestSuite.sol). -/
 theorem solkey_TestSuite_memoryDeclFresh :
     (sol!{ < Person memory mv > (true) }).Holds
@@ -291,6 +474,166 @@ theorem solkey_TestSuite_memoryDeepField :
              mv@Person.account.balance = 10;
              uint r = mv@Person.account.balance;
              assert((r == 10)) > (true) }).Holds
+      State.testSuiteStore := by
+  sol_wp
+
+/-- solkey `TestSuite.memoryFieldAddAssign` (TestSuite.sol). -/
+theorem solkey_TestSuite_memoryFieldAddAssign :
+    (sol!{ < Person memory mv;
+             mv@Person.age = 30;
+             mv@Person.age += 4;
+             uint r = mv@Person.age;
+             assert((r == 34)) > (true) }).Holds
+      State.testSuiteStore := by
+  sol_wp
+
+/-- solkey `TestSuite.memoryFieldSubAssign` (TestSuite.sol). -/
+theorem solkey_TestSuite_memoryFieldSubAssign :
+    (sol!{ < Person memory mv;
+             mv@Person.age = 30;
+             mv@Person.age -= 4;
+             uint r = mv@Person.age;
+             assert((r == 26)) > (true) }).Holds
+      State.testSuiteStore := by
+  sol_wp
+
+/-- solkey `TestSuite.memoryFieldMulAssign` (TestSuite.sol). -/
+theorem solkey_TestSuite_memoryFieldMulAssign :
+    (sol!{ < Person memory mv;
+             mv@Person.age = 7;
+             mv@Person.age *= 4;
+             uint r = mv@Person.age;
+             assert((r == 28)) > (true) }).Holds
+      State.testSuiteStore := by
+  sol_wp
+
+/-- solkey `TestSuite.memoryFieldDivAssign` (TestSuite.sol). -/
+theorem solkey_TestSuite_memoryFieldDivAssign :
+    (sol!{ < Person memory mv;
+             mv@Person.age = 30;
+             mv@Person.age /= 5;
+             uint r = mv@Person.age;
+             assert((r == 6)) > (true) }).Holds
+      State.testSuiteStore := by
+  sol_wp
+
+/-- solkey `TestSuite.memoryFieldModAssign` (TestSuite.sol). -/
+theorem solkey_TestSuite_memoryFieldModAssign :
+    (sol!{ < Person memory mv;
+             mv@Person.age = 30;
+             mv@Person.age %= 7;
+             uint r = mv@Person.age;
+             assert((r == 2)) > (true) }).Holds
+      State.testSuiteStore := by
+  sol_wp
+
+/-- solkey `TestSuite.memoryFieldAddAssignUnfold` (TestSuite.sol). -/
+theorem solkey_TestSuite_memoryFieldAddAssignUnfold :
+    (sol!{ < Person memory mv;
+             mv@Person.account.balance = 20;
+             mv@Person.account.balance += 4;
+             uint r = mv@Person.account.balance;
+             assert((r == 24)) > (true) }).Holds
+      State.testSuiteStore := by
+  sol_wp
+
+/-- solkey `TestSuite.memoryFieldAddAssignNse` (TestSuite.sol). -/
+theorem solkey_TestSuite_memoryFieldAddAssignNse :
+    (sol!{ < Person memory mv;
+             mv@Person.age = 30;
+             mv@Person.age += 2 * 3;
+             uint r = mv@Person.age;
+             assert((r == 36)) > (true) }).Holds
+      State.testSuiteStore := by
+  sol_wp
+
+/-- solkey `TestSuite.memoryFieldPreincrement` (TestSuite.sol). -/
+theorem solkey_TestSuite_memoryFieldPreincrement :
+    (sol!{ < Person memory mv;
+             mv@Person.age = 30;
+             ++mv@Person.age;
+             uint r = mv@Person.age;
+             assert((r == 31)) > (true) }).Holds
+      State.testSuiteStore := by
+  sol_wp
+
+/-- solkey `TestSuite.memoryFieldPostincrement` (TestSuite.sol). -/
+theorem solkey_TestSuite_memoryFieldPostincrement :
+    (sol!{ < Person memory mv;
+             mv@Person.age = 30;
+             mv@Person.age++;
+             uint r = mv@Person.age;
+             assert((r == 31)) > (true) }).Holds
+      State.testSuiteStore := by
+  sol_wp
+
+/-- solkey `TestSuite.memoryFieldPredecrement` (TestSuite.sol). -/
+theorem solkey_TestSuite_memoryFieldPredecrement :
+    (sol!{ < Person memory mv;
+             mv@Person.age = 30;
+             predec(mv@Person.age);
+             uint r = mv@Person.age;
+             assert((r == 29)) > (true) }).Holds
+      State.testSuiteStore := by
+  sol_wp
+
+/-- solkey `TestSuite.memoryFieldPostdecrement` (TestSuite.sol). -/
+theorem solkey_TestSuite_memoryFieldPostdecrement :
+    (sol!{ < Person memory mv;
+             mv@Person.age = 30;
+             postdec(mv@Person.age);
+             uint r = mv@Person.age;
+             assert((r == 29)) > (true) }).Holds
+      State.testSuiteStore := by
+  sol_wp
+
+/-- solkey `TestSuite.memoryFieldPreincrementAssignment` (TestSuite.sol). -/
+theorem solkey_TestSuite_memoryFieldPreincrementAssignment :
+    (sol!{ < Person memory mv;
+             mv@Person.age = 30;
+             uint r = ++mv@Person.age;
+             assert((r == 31));
+             assert((mv@Person.age == 31)) > (true) }).Holds
+      State.testSuiteStore := by
+  sol_wp
+
+/-- solkey `TestSuite.memoryFieldPostincrementAssignment` (TestSuite.sol). -/
+theorem solkey_TestSuite_memoryFieldPostincrementAssignment :
+    (sol!{ < Person memory mv;
+             mv@Person.age = 30;
+             uint r = mv@Person.age++;
+             assert((r == 30));
+             assert((mv@Person.age == 31)) > (true) }).Holds
+      State.testSuiteStore := by
+  sol_wp
+
+/-- solkey `TestSuite.memoryFieldPredecrementAssignment` (TestSuite.sol). -/
+theorem solkey_TestSuite_memoryFieldPredecrementAssignment :
+    (sol!{ < Person memory mv;
+             mv@Person.age = 30;
+             uint r = predec(mv@Person.age);
+             assert((r == 29));
+             assert((mv@Person.age == 29)) > (true) }).Holds
+      State.testSuiteStore := by
+  sol_wp
+
+/-- solkey `TestSuite.memoryFieldPostdecrementAssignment` (TestSuite.sol). -/
+theorem solkey_TestSuite_memoryFieldPostdecrementAssignment :
+    (sol!{ < Person memory mv;
+             mv@Person.age = 30;
+             uint r = postdec(mv@Person.age);
+             assert((r == 30));
+             assert((mv@Person.age == 29)) > (true) }).Holds
+      State.testSuiteStore := by
+  sol_wp
+
+/-- solkey `TestSuite.memoryFieldPreincrementUnfold` (TestSuite.sol). -/
+theorem solkey_TestSuite_memoryFieldPreincrementUnfold :
+    (sol!{ < Person memory mv;
+             mv@Person.account.balance = 20;
+             ++mv@Person.account.balance;
+             uint r = mv@Person.account.balance;
+             assert((r == 21)) > (true) }).Holds
       State.testSuiteStore := by
   sol_wp
 
@@ -342,6 +685,30 @@ theorem solkey_TestSuite_memoryToStorage :
              alice = mv@Person;
              uint r = alice.age;
              assert((r == 44)) > (true) }).Holds
+      State.testSuiteStore := by
+  sol_wp
+
+/-- solkey `TestSuite.memoryToStorageIndexMappingCopyRootExample` (TestSuite.sol). -/
+theorem solkey_TestSuite_memoryToStorageIndexMappingCopyRootExample :
+    (sol!{ < Person memory mv;
+             mv@Person.age = 6;
+             folks[1] = mv@Person;
+             uint r = folks[1].age;
+             assert((r == 6)) > (true) }).Holds
+      State.testSuiteStore := by
+  sol_wp
+
+/-- solkey `TestSuite.memoryToStorageIndexArrayCopyRootExample` (TestSuite.sol).
+
+solkey tags this `@custom:key box`; the port makes the assumptions
+true instead, so the diamond also proves that it does not revert. -/
+theorem solkey_TestSuite_memoryToStorageIndexArrayCopyRootExample :
+    (sol!{ < persons.push();
+             Person memory mv;
+             mv@Person.age = 6;
+             persons[0] = mv@Person;
+             uint r = persons[0].age;
+             assert((r == 6)) > (true) }).Holds
       State.testSuiteStore := by
   sol_wp
 
@@ -502,6 +869,26 @@ theorem solkey_TestSuite_storageFieldDelete :
     (sol!{ < alice.age = 30;
              delete alice.age;
              uint r = alice.age;
+             assert((r == 0)) > (true) }).Holds
+      State.testSuiteStore := by
+  sol_wp
+
+/-- solkey `TestSuite.storageFieldDeleteThenCopy` (TestSuite.sol). -/
+theorem solkey_TestSuite_storageFieldDeleteThenCopy :
+    (sol!{ < bob.account.balance = 10;
+             delete bob.account;
+             alice.account = bob.account;
+             uint r = alice.account.balance;
+             assert((r == 0)) > (true) }).Holds
+      State.testSuiteStore := by
+  sol_wp
+
+/-- solkey `TestSuite.storageFieldDeleteThenCopyDeep` (TestSuite.sol). -/
+theorem solkey_TestSuite_storageFieldDeleteThenCopyDeep :
+    (sol!{ < bob.account.token.value = 7;
+             delete bob.account;
+             alice.account = bob.account;
+             uint r = alice.account.token.value;
              assert((r == 0)) > (true) }).Holds
       State.testSuiteStore := by
   sol_wp
@@ -1046,6 +1433,13 @@ theorem solkey_TestSuite_storagePopNonempty :
       State.testSuiteStore := by
   sol_wp
 
+/-- solkey `TestSuite.storagePopUnknownLength` (TestSuite.sol). -/
+theorem solkey_TestSuite_storagePopUnknownLength :
+    (sol!{ < values.push();
+             values.pop() > (true) }).Holds
+      State.testSuiteStore := by
+  sol_wp
+
 /-- solkey `TestSuite.storagePushEmpty` (TestSuite.sol).
 
 solkey tags this `@custom:key box`; the port makes the assumptions
@@ -1055,6 +1449,13 @@ theorem solkey_TestSuite_storagePushEmpty :
              values.push();
              values.push();
              assert((values.length == 3)) > (true) }).Holds
+      State.testSuiteStore := by
+  sol_wp
+
+/-- solkey `TestSuite.storagePushLengthPositive` (TestSuite.sol). -/
+theorem solkey_TestSuite_storagePushLengthPositive :
+    (sol!{ < values.push();
+             assert((values.length > 0)) > (true) }).Holds
       State.testSuiteStore := by
   sol_wp
 
@@ -1085,6 +1486,14 @@ theorem solkey_TestSuite_storagePushNonsimpleArg :
              values.push(x + y);
              assert((values[2] == 42));
              assert((values.length == 3)) > (true) }).Holds
+      State.testSuiteStore := by
+  sol_wp
+
+/-- solkey `TestSuite.storagePushReadBack` (TestSuite.sol). -/
+theorem solkey_TestSuite_storagePushReadBack :
+    (sol!{ < values.push(42);
+             uint r = values[values.length - 1];
+             assert((r == 42)) > (true) }).Holds
       State.testSuiteStore := by
   sol_wp
 
@@ -1132,6 +1541,16 @@ theorem solkey_TestSuite_storageRootCopyStruct :
 theorem solkey_TestSuite_storageRootDeleteStruct :
     (sol!{ < alice.age = 30;
              delete alice;
+             uint r = alice.age;
+             assert((r == 0)) > (true) }).Holds
+      State.testSuiteStore := by
+  sol_wp
+
+/-- solkey `TestSuite.storageRootDeleteThenCopy` (TestSuite.sol). -/
+theorem solkey_TestSuite_storageRootDeleteThenCopy :
+    (sol!{ < bob.age = 30;
+             delete bob;
+             alice = bob;
              uint r = alice.age;
              assert((r == 0)) > (true) }).Holds
       State.testSuiteStore := by
@@ -1434,6 +1853,149 @@ theorem solkey_TestSuite_testMemoryToStorageCopyRoot :
       State.testSuiteStore := by
   sol_wp
 
+/-- solkey `TestSuite.testMemoryToStorageIndexCopyImpureIndex` (TestSuite.sol).
+
+solkey tags this `@custom:key box`; the port makes the assumptions
+true instead, so the diamond also proves that it does not revert. -/
+theorem solkey_TestSuite_testMemoryToStorageIndexCopyImpureIndex :
+    (sol!{ < persons.push();
+             persons.push();
+             Person memory mv;
+             mv@Person.age = 7;
+             uint i = 0;
+             persons[i++] = mv@Person;
+             assert((i == 1));
+             assert((persons[0].age == 7)) > (true) }).Holds
+      State.testSuiteStore := by
+  sol_wp
+
+/-- solkey `TestSuite.testNestedIndexWriteImpureIndexPrimitiveRhs` (TestSuite.sol).
+
+solkey tags this `@custom:key box`; the port makes the assumptions
+true instead, so the diamond also proves that it does not revert. -/
+theorem solkey_TestSuite_testNestedIndexWriteImpureIndexPrimitiveRhs :
+    (sol!{ < matrix.push();
+             matrix.push();
+             matrix[1].push(100);
+             uint i = 1;
+             matrix[i++][0] = i;
+             assert((i == 2));
+             assert((matrix[1][0] == 1)) > (true) }).Holds
+      State.testSuiteStore := by
+  sol_wp
+
+/-- solkey `TestSuite.testNestedIndexReadImpureIndex` (TestSuite.sol).
+
+solkey tags this `@custom:key box`; the port makes the assumptions
+true instead, so the diamond also proves that it does not revert. -/
+theorem solkey_TestSuite_testNestedIndexReadImpureIndex :
+    (sol!{ < matrix.push();
+             matrix.push();
+             matrix[1].push(100);
+             uint i = 1;
+             uint v = matrix[i++][0];
+             assert((i == 2));
+             assert((v == 100)) > (true) }).Holds
+      State.testSuiteStore := by
+  sol_wp
+
+/-- solkey `TestSuite.testNestedIndexWriteImpureReceiverAndIndex` (TestSuite.sol).
+
+solkey tags this `@custom:key box`; the port makes the assumptions
+true instead, so the diamond also proves that it does not revert. -/
+theorem solkey_TestSuite_testNestedIndexWriteImpureReceiverAndIndex :
+    (sol!{ < matrix.push();
+             matrix.push();
+             matrix[0].push(0);
+             matrix[0].push(0);
+             matrix[1].push(0);
+             matrix[1].push(0);
+             uint i = 0;
+             matrix[i++][i++] = 77;
+             assert((i == 2));
+             assert((matrix[0][1] == 77));
+             assert((matrix[1][0] == 0)) > (true) }).Holds
+      State.testSuiteStore := by
+  sol_wp
+
+/-- solkey `TestSuite.testNestedIndexReadImpureReceiverAndIndex` (TestSuite.sol).
+
+solkey tags this `@custom:key box`; the port makes the assumptions
+true instead, so the diamond also proves that it does not revert. -/
+theorem solkey_TestSuite_testNestedIndexReadImpureReceiverAndIndex :
+    (sol!{ < matrix.push();
+             matrix.push();
+             matrix[0].push(0);
+             matrix[0].push(11);
+             matrix[1].push(22);
+             uint i = 0;
+             uint v = matrix[i++][i++];
+             assert((i == 2));
+             assert((v == 11)) > (true) }).Holds
+      State.testSuiteStore := by
+  sol_wp
+
+/-- solkey `TestSuite.testStorageDeleteImpureReceiver` (TestSuite.sol).
+
+solkey tags this `@custom:key box`; the port makes the assumptions
+true instead, so the diamond also proves that it does not revert. -/
+theorem solkey_TestSuite_testStorageDeleteImpureReceiver :
+    (sol!{ < matrix.push();
+             matrix.push();
+             matrix[0].push(9);
+             uint i = 0;
+             delete matrix[i++][0];
+             assert((i == 1));
+             assert((matrix[0][0] == 0)) > (true) }).Holds
+      State.testSuiteStore := by
+  sol_wp
+
+/-- solkey `TestSuite.testStoragePushImpureReceiver` (TestSuite.sol).
+
+solkey tags this `@custom:key box`; the port makes the assumptions
+true instead, so the diamond also proves that it does not revert. -/
+theorem solkey_TestSuite_testStoragePushImpureReceiver :
+    (sol!{ < matrix.push();
+             matrix.push();
+             uint i = 0;
+             matrix[i++].push(i);
+             assert((i == 1));
+             assert((matrix[0][0] == 1)) > (true) }).Holds
+      State.testSuiteStore := by
+  sol_wp
+
+/-- solkey `TestSuite.testCompoundAssignImpureReceiver` (TestSuite.sol).
+
+solkey tags this `@custom:key box`; the port makes the assumptions
+true instead, so the diamond also proves that it does not revert. -/
+theorem solkey_TestSuite_testCompoundAssignImpureReceiver :
+    (sol!{ < persons.push();
+             persons.push();
+             persons[0].age = 5;
+             uint i = 0;
+             persons[i++].age += i;
+             assert((i == 1));
+             assert((persons[0].age == 5)) > (true) }).Holds
+      State.testSuiteStore := by
+  sol_wp
+
+/-- solkey `TestSuite.testIndexWriteReceiverReadsMutatedVar` (TestSuite.sol).
+
+solkey tags this `@custom:key box`; the port makes the assumptions
+true instead, so the diamond also proves that it does not revert. -/
+theorem solkey_TestSuite_testIndexWriteReceiverReadsMutatedVar :
+    (sol!{ < matrix.push();
+             matrix.push();
+             matrix[0].push(0);
+             matrix[1].push(0);
+             uint k = 0;
+             matrix[k][k++] = 77;
+             assert((k == 1));
+             assert((matrix[0][0] == 77));
+             assert((matrix[1][0] == 0)) > (true) }).Holds
+      State.testSuiteStore := by
+  sol_wp
+
 /-- solkey `TestSuite.testNestedStorageWrites` (TestSuite.sol). -/
 theorem solkey_TestSuite_testNestedStorageWrites :
     (sol!{ < alice.account.balance = 10;
@@ -1503,6 +2065,34 @@ theorem solkey_TestSuite_testStorageDeletePaperCase :
              uint v = alice.account.token.value;
              assert((b == 0));
              assert((v == 0)) > (true) }).Holds
+      State.testSuiteStore := by
+  sol_wp
+
+/-- solkey `TestSuite.testStorageIndexWriteImpureIndexPrimitiveRhs` (TestSuite.sol).
+
+solkey tags this `@custom:key box`; the port makes the assumptions
+true instead, so the diamond also proves that it does not revert. -/
+theorem solkey_TestSuite_testStorageIndexWriteImpureIndexPrimitiveRhs :
+    (sol!{ < uint i = 0;
+             (aux@@UintArray).push(100);
+             (aux@@UintArray).push(100);
+             aux@@UintArray[i++] = i;
+             assert((i == 1));
+             assert((aux@@UintArray[0] == 0)) > (true) }).Holds
+      State.testSuiteStore := by
+  sol_wp
+
+/-- solkey `TestSuite.testStorageIndexWriteImpureIndexRefRhs` (TestSuite.sol).
+
+solkey tags this `@custom:key box`; the port makes the assumptions
+true instead, so the diamond also proves that it does not revert. -/
+theorem solkey_TestSuite_testStorageIndexWriteImpureIndexRefRhs :
+    (sol!{ < persons.push();
+             persons.push();
+             bob.age = 0;
+             persons[bob.age++] = bob;
+             assert((bob.age == 1));
+             assert((persons[0].age == 1)) > (true) }).Holds
       State.testSuiteStore := by
   sol_wp
 
@@ -1785,6 +2375,315 @@ theorem solkey_TestSuite_testSimpleAssert :
     (sol!{ < age = 42;
              uint v = age;
              assert((v == 42)) > (true) }).Holds
+      State.testSuiteStore := by
+  sol_wp
+
+/-- solkey `TestSuite.signedUnaryMinusInRange` (TestSuite.sol).
+
+concretized: solkey proves this for all parameters; ported at x = 5.
+
+solkey tags this `@custom:key box`; the port makes the assumptions
+true instead, so the diamond also proves that it does not revert. -/
+theorem solkey_TestSuite_signedUnaryMinusInRange :
+    (sol!{ < int8 x = 5;
+             int8 r;
+             int8 expected;
+             r = -x;
+             expected = -5;
+             assert((r == expected)) > (true) }).Holds
+      State.testSuiteStore := by
+  sol_wp
+
+/-- solkey `TestSuite.storageIndexWriteRefSourceImpureIndex` (TestSuite.sol).
+
+solkey tags this `@custom:key box`; the port makes the assumptions
+true instead, so the diamond also proves that it does not revert. -/
+theorem solkey_TestSuite_storageIndexWriteRefSourceImpureIndex :
+    (sol!{ < persons.push();
+             Person memory mv;
+             persons[mv@Person.age++] = mv@Person;
+             assert((persons[0].age == 1)) > (true) }).Holds
+      State.testSuiteStore := by
+  sol_wp
+
+/-- solkey `TestSuite.storageFieldWriteRefSourceImpureReceiver` (TestSuite.sol).
+
+solkey tags this `@custom:key box`; the port makes the assumptions
+true instead, so the diamond also proves that it does not revert. -/
+theorem solkey_TestSuite_storageFieldWriteRefSourceImpureReceiver :
+    (sol!{ < persons.push();
+             Account memory mv;
+             persons[mv@Account.balance++].account = mv@Account;
+             assert((persons[0].account.balance == 1)) > (true) }).Holds
+      State.testSuiteStore := by
+  sol_wp
+
+/-- solkey `TestSuite.storageFieldWriteStorageRefImpureReceiver` (TestSuite.sol).
+
+solkey tags this `@custom:key box`; the port makes the assumptions
+true instead, so the diamond also proves that it does not revert. -/
+theorem solkey_TestSuite_storageFieldWriteStorageRefImpureReceiver :
+    (sol!{ < persons.push();
+             persons.push();
+             alice.account.balance = 9;
+             Account storage src = alice.account;
+             uint i = 0;
+             persons[i++].account = src@Account;
+             assert((i == 1));
+             assert((persons[0].account.balance == 9)) > (true) }).Holds
+      State.testSuiteStore := by
+  sol_wp
+
+/-- solkey `TestSuite.storageFieldWriteRootRefImpureReceiver` (TestSuite.sol).
+
+solkey tags this `@custom:key box`; the port makes the assumptions
+true instead, so the diamond also proves that it does not revert. -/
+theorem solkey_TestSuite_storageFieldWriteRootRefImpureReceiver :
+    (sol!{ < persons.push();
+             persons.push();
+             tok@@Token.value = 4;
+             uint i = 0;
+             persons[i++].account.token = tok@@Token;
+             assert((i == 1));
+             assert((persons[0].account.token.value == 4)) > (true) }).Holds
+      State.testSuiteStore := by
+  sol_wp
+
+/-- solkey `TestSuite.storageIndexWriteRootRefImpureReceiver` (TestSuite.sol).
+
+solkey tags this `@custom:key box`; the port makes the assumptions
+true instead, so the diamond also proves that it does not revert. -/
+theorem solkey_TestSuite_storageIndexWriteRootRefImpureReceiver :
+    (sol!{ < (buckets@@TokenBucketArray).push();
+             (buckets@@TokenBucketArray).push();
+             (buckets@@TokenBucketArray[1].tokens).push();
+             tok@@Token.value = 3;
+             uint i = 1;
+             buckets@@TokenBucketArray[i++].tokens[0] = tok@@Token;
+             assert((i == 2));
+             assert((buckets@@TokenBucketArray[1].tokens[0].value == 3)) > (true) }).Holds
+      State.testSuiteStore := by
+  sol_wp
+
+/-- solkey `TestSuite.storageIndexWriteStorageRefImpureReceiver` (TestSuite.sol).
+
+solkey tags this `@custom:key box`; the port makes the assumptions
+true instead, so the diamond also proves that it does not revert. -/
+theorem solkey_TestSuite_storageIndexWriteStorageRefImpureReceiver :
+    (sol!{ < (buckets@@TokenBucketArray).push();
+             (buckets@@TokenBucketArray).push();
+             (buckets@@TokenBucketArray[1].tokens).push();
+             tok@@Token.value = 8;
+             Token storage src = tok@@Token;
+             uint i = 1;
+             buckets@@TokenBucketArray[i++].tokens[0] = src@Token;
+             assert((i == 2));
+             assert((buckets@@TokenBucketArray[1].tokens[0].value == 8)) > (true) }).Holds
+      State.testSuiteStore := by
+  sol_wp
+
+/-- solkey `TestSuite.memoryToStorageIndexImpureReceiver` (TestSuite.sol).
+
+solkey tags this `@custom:key box`; the port makes the assumptions
+true instead, so the diamond also proves that it does not revert. -/
+theorem solkey_TestSuite_memoryToStorageIndexImpureReceiver :
+    (sol!{ < (buckets@@TokenBucketArray).push();
+             (buckets@@TokenBucketArray).push();
+             (buckets@@TokenBucketArray[1].tokens).push();
+             Token memory mv;
+             mv@Token.value = 5;
+             uint i = 1;
+             buckets@@TokenBucketArray[i++].tokens[0] = mv@Token;
+             assert((i == 2));
+             assert((buckets@@TokenBucketArray[1].tokens[0].value == 5)) > (true) }).Holds
+      State.testSuiteStore := by
+  sol_wp
+
+/-- solkey `TestSuite.additionLeftImpureRightReadFirst` (TestSuite.sol). -/
+theorem solkey_TestSuite_additionLeftImpureRightReadFirst :
+    (sol!{ < uint i = 1;
+             uint x = i++ + i;
+             assert((x == 2));
+             assert((i == 2)) > (true) }).Holds
+      State.testSuiteStore := by
+  sol_wp
+
+/-- solkey `TestSuite.additionRightImpure` (TestSuite.sol). -/
+theorem solkey_TestSuite_additionRightImpure :
+    (sol!{ < uint i = 1;
+             uint x = i + i++;
+             assert((x == 3));
+             assert((i == 2)) > (true) }).Holds
+      State.testSuiteStore := by
+  sol_wp
+
+/-- solkey `TestSuite.additionBothOperandsImpure` (TestSuite.sol). -/
+theorem solkey_TestSuite_additionBothOperandsImpure :
+    (sol!{ < uint i = 1;
+             uint x = i++ + i++;
+             assert((x == 3));
+             assert((i == 3)) > (true) }).Holds
+      State.testSuiteStore := by
+  sol_wp
+
+/-- solkey `TestSuite.subtractionLeftImpureRightReadFirst` (TestSuite.sol). -/
+theorem solkey_TestSuite_subtractionLeftImpureRightReadFirst :
+    (sol!{ < uint i = 5;
+             uint x = i++ - i;
+             assert((x == 0));
+             assert((i == 6)) > (true) }).Holds
+      State.testSuiteStore := by
+  sol_wp
+
+/-- solkey `TestSuite.lessThanLeftImpureRightReadFirst` (TestSuite.sol). -/
+theorem solkey_TestSuite_lessThanLeftImpureRightReadFirst :
+    (sol!{ < uint i = 1;
+             bool b = (i++ < i);
+             assert(!b);
+             assert((i == 2)) > (true) }).Holds
+      State.testSuiteStore := by
+  sol_wp
+
+/-- solkey `TestSuite.testCopyRootKeepsValueMembers` (TestSuite.sol). -/
+theorem solkey_TestSuite_testCopyRootKeepsValueMembers :
+    (sol!{ < bob.age = 7;
+             bob.account.balance = 3;
+             alice = bob;
+             bob.age = 8;
+             assert((alice.age == 7));
+             assert((alice.account.balance == 3)) > (true) }).Holds
+      State.testSuiteStore := by
+  sol_wp
+
+/-- solkey `TestSuite.testCopyFieldNested` (TestSuite.sol). -/
+theorem solkey_TestSuite_testCopyFieldNested :
+    (sol!{ < Account storage acc = bob.account;
+             acc@Account.token.value = 5;
+             alice.account = acc@Account;
+             acc@Account.token.value = 6;
+             assert((alice.account.token.value == 5)) > (true) }).Holds
+      State.testSuiteStore := by
+  sol_wp
+
+/-- solkey `TestSuite.testCopyOfCopy` (TestSuite.sol).
+
+solkey tags this `@custom:key box`; the port makes the assumptions
+true instead, so the diamond also proves that it does not revert. -/
+theorem solkey_TestSuite_testCopyOfCopy :
+    (sol!{ < bob.age = 4;
+             alice = bob;
+             persons.push();
+             persons[0] = alice;
+             assert((persons[0].age == 4)) > (true) }).Holds
+      State.testSuiteStore := by
+  sol_wp
+
+/-- solkey `TestSuite.testCopyIntoMappingEntry` (TestSuite.sol).
+
+concretized: solkey proves this for all parameters; ported at k = 3.
+
+solkey tags this `@custom:key box`; the port makes the assumptions
+true instead, so the diamond also proves that it does not revert. -/
+theorem solkey_TestSuite_testCopyIntoMappingEntry :
+    (sol!{ < uint k = 3;
+             alice.age = 6;
+             folks[k] = alice;
+             alice.age = 7;
+             assert((folks[k].age == 6)) > (true) }).Holds
+      State.testSuiteStore := by
+  sol_wp
+
+/-- solkey `TestSuite.testCopyArrayMemberElements` (TestSuite.sol).
+
+solkey tags this `@custom:key box`; the port makes the assumptions
+true instead, so the diamond also proves that it does not revert. -/
+theorem solkey_TestSuite_testCopyArrayMemberElements :
+    (sol!{ < (basketA@@Basket.items).push(9);
+             basketB@@Basket = basketA@@Basket;
+             basketA@@Basket.items[0] = 1;
+             assert((basketB@@Basket.items.length == 1));
+             assert((basketB@@Basket.items[0] == 9)) > (true) }).Holds
+      State.testSuiteStore := by
+  sol_wp
+
+/-- solkey `TestSuite.testCopyPrimitiveRoot` (TestSuite.sol). -/
+theorem solkey_TestSuite_testCopyPrimitiveRoot :
+    (sol!{ < age = 3;
+             balance = age;
+             age = 4;
+             assert((balance == 3)) > (true) }).Holds
+      State.testSuiteStore := by
+  sol_wp
+
+/-- solkey `TestSuite.testCopyStoreRootFromField` (TestSuite.sol). -/
+theorem solkey_TestSuite_testCopyStoreRootFromField :
+    (sol!{ < alice.account.token.value = 2;
+             tok@@Token = alice.account.token;
+             alice.account.token.value = 1;
+             assert((tok@@Token.value == 2)) > (true) }).Holds
+      State.testSuiteStore := by
+  sol_wp
+
+/-- solkey `TestSuite.testCopyStoreRootFromIndex` (TestSuite.sol). -/
+theorem solkey_TestSuite_testCopyStoreRootFromIndex :
+    (sol!{ < folks[1].age = 2;
+             alice = folks[1];
+             folks[1].age = 3;
+             assert((alice.age == 2)) > (true) }).Holds
+      State.testSuiteStore := by
+  sol_wp
+
+/-- solkey `TestSuite.testPushCopyThenDeleteTarget` (TestSuite.sol).
+
+solkey tags this `@custom:key box`; the port makes the assumptions
+true instead, so the diamond also proves that it does not revert. -/
+theorem solkey_TestSuite_testPushCopyThenDeleteTarget :
+    (sol!{ < tok@@Token.value = 4;
+             Token storage src = tok@@Token;
+             (tokens@@TokenArray).push() = src@Token;
+             delete tokens@@TokenArray[0];
+             assert((tokens@@TokenArray[0].value == 0));
+             assert((tok@@Token.value == 4)) > (true) }).Holds
+      State.testSuiteStore := by
+  sol_wp
+
+/-- solkey `TestSuite.indexWriteBothImpureStorageRef` (TestSuite.sol).
+
+solkey tags this `@custom:key box`; the port makes the assumptions
+true instead, so the diamond also proves that it does not revert. -/
+theorem solkey_TestSuite_indexWriteBothImpureStorageRef :
+    (sol!{ < (buckets@@TokenBucketArray).push();
+             (buckets@@TokenBucketArray).push();
+             (buckets@@TokenBucketArray[1].tokens).push();
+             (buckets@@TokenBucketArray[1].tokens).push();
+             tok@@Token.value = 8;
+             Token storage src = tok@@Token;
+             uint i = 1;
+             uint j = 0;
+             buckets@@TokenBucketArray[i++].tokens[j++] = src@Token;
+             assert((i == 2));
+             assert((j == 1));
+             assert((buckets@@TokenBucketArray[1].tokens[0].value == 8)) > (true) }).Holds
+      State.testSuiteStore := by
+  sol_wp
+
+/-- solkey `TestSuite.indexWriteBothImpureMemToStorage` (TestSuite.sol).
+
+solkey tags this `@custom:key box`; the port makes the assumptions
+true instead, so the diamond also proves that it does not revert. -/
+theorem solkey_TestSuite_indexWriteBothImpureMemToStorage :
+    (sol!{ < (buckets@@TokenBucketArray).push();
+             (buckets@@TokenBucketArray).push();
+             (buckets@@TokenBucketArray[1].tokens).push();
+             (buckets@@TokenBucketArray[1].tokens).push();
+             Token memory mv;
+             mv@Token.value = 5;
+             uint i = 1;
+             uint j = 0;
+             buckets@@TokenBucketArray[i++].tokens[j++] = mv@Token;
+             assert((i == 2));
+             assert((j == 1));
+             assert((buckets@@TokenBucketArray[1].tokens[0].value == 5)) > (true) }).Holds
       State.testSuiteStore := by
   sol_wp
 

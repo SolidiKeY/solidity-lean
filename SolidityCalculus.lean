@@ -1,0 +1,11 @@
+import Solidity.Examples.Derivations.Solkey.TestSuite.Part01
+import Solidity.Examples.Derivations.Solkey.TestSuite.Part02
+import Solidity.Examples.Derivations.Solkey.TestSuite.Part03
+import Solidity.Examples.Derivations.Solkey.TestSuite.Part04
+import Solidity.Examples.Derivations.Solkey.TestSuite.Part05
+import Solidity.Examples.Derivations.Solkey.TestSuite.Part06
+import Solidity.Examples.Derivations.Solkey.TestSuite.Part07
+import Solidity.Examples.Derivations.Solkey.TestSuite.Part08
+import Solidity.Examples.Derivations.Solkey.TestSuite.Part09
+import Solidity.Examples.Derivations.Solkey.TestSuite.Part10
+import Solidity.Examples.Derivations.Solkey.TestSuite.Part11

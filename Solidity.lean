@@ -82,6 +82,7 @@ import Solidity.Examples.Derivations.ValueCapture
 import Solidity.Examples.Derivations.ControlFlow
 import Solidity.Examples.Derivations.Walkthroughs
 import Solidity.Examples.Derivations.DynamicLogic
+import Solidity.Counterexamples.BinopOperandCapture
 import Solidity.Examples.Taclets.ValueOps
 import Solidity.Examples.Taclets.StorageOps
 import Solidity.Examples.Taclets.MemoryOps

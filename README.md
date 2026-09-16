@@ -43,11 +43,12 @@ The package declares no dependencies at all — no Mathlib, nothing — so
 NixOS, `run-lean.sh` uses the wrappers in `scripts/lean-vscode/bin` to select
 a compatible Lean and Lake installation.
 
-Three further Lake targets are deliberately outside the default build, because
+Four further Lake targets are deliberately outside the default build, because
 each is a large batch of symbolic executions that would multiply the cost of an
 ordinary build: `SolidityExamples` (`./scripts/check-examples.sh`),
-`SoliditySpec` (`./scripts/check-spec.sh`) and `SolidityCorpus`
-(`./scripts/check-solkey-parity.sh`).
+`SoliditySpec` (`./scripts/check-spec.sh`), `SolidityCorpus`
+(`./scripts/check-solkey-parity.sh`) and `SolidityCalculus`
+(`./scripts/check-calculus-parity.sh`).
 
 ## Relationship to solkey
 
@@ -64,6 +65,13 @@ honest, and both expect a solkey checkout beside this repository
 - `scripts/solkey-port.mjs` regenerates `Solidity/Examples/Solkey/` from
   solkey's `.sol` example suites; `./scripts/check-solkey-parity.sh` diffs the
   verdicts against `tests/solkey/expected.tsv`.
+- The same pass also regenerates `Solidity/Examples/Derivations/Solkey/`,
+  which proves the *same* obligations from `Rules.lean` alone —
+  `./scripts/check-calculus-parity.sh`, table in
+  `tests/solkey/expected-calculus.tsv`, scoreboard in
+  `docs/calculus-parity.md`. The distinction is the point: `sol_wp` never
+  reads the rule table, so the first check says the interpreter agrees with
+  solkey and the second says the calculus does.
 
 `docs/lean-key-rule-map.md` is the name-by-name map between the two rule
 sets.

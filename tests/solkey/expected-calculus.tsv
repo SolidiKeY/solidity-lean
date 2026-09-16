@@ -1,0 +1,278 @@
+taclets	TestSuite	additionStorageWrite	proved	concretized: solkey proves this for all parameters; ported at x = 5, y = 7	
+taclets	TestSuite	storageRootReadWrite	proved		
+taclets	TestSuite	storageFieldWriteRead	proved		
+taclets	TestSuite	storageFieldDeepAddAssign	proved		
+taclets	TestSuite	storageFieldGlobalAge	proved		
+taclets	TestSuite	storageAliasWrite	proved		
+taclets	TestSuite	storageIndexRootMapping	proved		
+taclets	TestSuite	storageIndexAddAssign	proved		
+taclets	TestSuite	storageIndexMappingAddAssign	proved		
+taclets	TestSuite	storageIndexArrayAddAssignOutOfBoundsReverts	unsupported	the function asserts that the program reverts (a box-only obligation): every judgment here is a diamond, which proves the opposite	
+taclets	TestSuite	storageIndexArrayReadOutOfBoundsReverts	unsupported	the function asserts that the program reverts (a box-only obligation): every judgment here is a diamond, which proves the opposite	
+taclets	TestSuite	storageIndexReadComplexReceiverBindLocalRoot	proved		
+taclets	TestSuite	storageIndexWriteComplexReceiverCopySource	proved		
+taclets	TestSuite	storageFieldWriteRootRhsComplexReceiver	proved		
+taclets	TestSuite	storageIndexWriteRootRhsComplexReceiver	proved		
+taclets	TestSuite	storagePushValue	proved		
+taclets	TestSuite	storagePushComplexReceiverNonsimpleArg	proved	concretized: solkey proves this for all parameters; ported at x = 40, y = 2	
+taclets	TestSuite	storagePushValueCopySource	proved		
+taclets	TestSuite	requireTrueLiteral	proved		
+taclets	TestSuite	requireFalseLiteral	unsupported	the function asserts that the program reverts (a box-only obligation): every judgment here is a diamond, which proves the opposite	
+taclets	TestSuite	storageBoolRootReadWrite	proved		
+taclets	TestSuite	storageBoolRootCopy	proved		
+taclets	TestSuite	storageBoolFieldRead	proved		
+taclets	TestSuite	storageBoolMappingRead	proved		
+taclets	TestSuite	storageBoolArrayRead	proved		
+taclets	TestSuite	storageBoolFieldStoreRoot	proved		
+taclets	TestSuite	memoryDeclDefault	proved		
+taclets	TestSuite	memoryArrayIndex	unsupported	`new T[](n)` array allocation is not in the fragment	
+taclets	TestSuite	testStorageComplexReceiverEmptyPush	proved		
+taclets	TestSuite	additionBothStorage	open		Tactic `native_decide` evaluated that the proposition
+taclets	TestSuite	additionSimple	proved		
+taclets	TestSuite	additionStorageRead	proved		
+taclets	TestSuite	divisionSimple	proved		
+taclets	TestSuite	greaterEqualSimple	proved		
+taclets	TestSuite	greaterThanSimple	proved		
+taclets	TestSuite	lessEqualSimple	proved		
+taclets	TestSuite	lessThanSimple	proved		
+taclets	TestSuite	logicalAndSimple	proved		
+taclets	TestSuite	logicalAndShortCircuitRhs	open		steps!: stuck after 10 step(s).
+taclets	TestSuite	logicalNotSimple	proved		
+taclets	TestSuite	logicalOrSimple	proved		
+taclets	TestSuite	logicalOrShortCircuitRhs	open		steps!: stuck after 10 step(s).
+taclets	TestSuite	ternaryCaptureCond	open		steps!: stuck after 10 step(s).
+taclets	TestSuite	ternaryToIf	open		steps!: stuck after 6 step(s).
+taclets	TestSuite	ifUnfold	open		steps!: stuck after 10 step(s).
+taclets	TestSuite	ifElseUnfold	open		steps!: stuck after 10 step(s).
+taclets	TestSuite	ifSplit	open		steps!: stuck after 6 step(s).
+taclets	TestSuite	ifElseSplit	open		steps!: stuck after 6 step(s).
+taclets	TestSuite	ifTrue	proved		
+taclets	TestSuite	ifFalse	proved		
+taclets	TestSuite	ifElseTrue	proved		
+taclets	TestSuite	ifElseFalse	proved		
+taclets	TestSuite	ifElseNegated	open		steps!: stuck after 7 step(s).
+taclets	TestSuite	memoryDeclFresh	proved		
+taclets	TestSuite	memoryDeepField	open		Tactic `native_decide` evaluated that the proposition
+taclets	TestSuite	memoryFieldAddAssign	proved		
+taclets	TestSuite	memoryFieldSubAssign	proved		
+taclets	TestSuite	memoryFieldMulAssign	proved		
+taclets	TestSuite	memoryFieldDivAssign	proved		
+taclets	TestSuite	memoryFieldModAssign	proved		
+taclets	TestSuite	memoryFieldAddAssignUnfold	open		Tactic `native_decide` evaluated that the proposition
+taclets	TestSuite	memoryFieldAddAssignNse	proved		
+taclets	TestSuite	memoryFieldPreincrement	proved		
+taclets	TestSuite	memoryFieldPostincrement	proved		
+taclets	TestSuite	memoryFieldPredecrement	proved		
+taclets	TestSuite	memoryFieldPostdecrement	proved		
+taclets	TestSuite	memoryFieldPreincrementAssignment	proved		
+taclets	TestSuite	memoryFieldPostincrementAssignment	proved		
+taclets	TestSuite	memoryFieldPredecrementAssignment	proved		
+taclets	TestSuite	memoryFieldPostdecrementAssignment	proved		
+taclets	TestSuite	memoryFieldPreincrementUnfold	open		Tactic `native_decide` evaluated that the proposition
+taclets	TestSuite	memoryFieldAlias	proved		
+taclets	TestSuite	memoryFieldReferenceAssign	proved		
+taclets	TestSuite	memoryIndexArrayAddAssign	unsupported	`new T[](n)` array allocation is not in the fragment	
+taclets	TestSuite	memoryIndexArraySubAssign	unsupported	`new T[](n)` array allocation is not in the fragment	
+taclets	TestSuite	memoryIndexArrayMulAssign	unsupported	`new T[](n)` array allocation is not in the fragment	
+taclets	TestSuite	memoryIndexArrayDivAssign	unsupported	`new T[](n)` array allocation is not in the fragment	
+taclets	TestSuite	memoryIndexArrayModAssign	unsupported	`new T[](n)` array allocation is not in the fragment	
+taclets	TestSuite	memoryIndexArrayAddAssignUnfold	unsupported	`new T[](n)` array allocation is not in the fragment	
+taclets	TestSuite	memoryIndexArrayPreincrementUnfold	unsupported	`new T[](n)` array allocation is not in the fragment	
+taclets	TestSuite	memoryIndexArrayPreincrement	unsupported	`new T[](n)` array allocation is not in the fragment	
+taclets	TestSuite	memoryIndexArrayPostdecrement	unsupported	`new T[](n)` array allocation is not in the fragment	
+taclets	TestSuite	memoryIndexArrayPostincrementAssignment	unsupported	`new T[](n)` array allocation is not in the fragment	
+taclets	TestSuite	memoryIndexArrayPredecrementAssignment	unsupported	`new T[](n)` array allocation is not in the fragment	
+taclets	TestSuite	memoryIndexWriteNse	unsupported	`new T[](n)` array allocation is not in the fragment	
+taclets	TestSuite	memoryRootAlias	proved		
+taclets	TestSuite	memoryRootDeleteFresh	proved		
+taclets	TestSuite	memoryStructArrayIndex	unsupported	`new T[](n)` array allocation is not in the fragment	
+taclets	TestSuite	memoryToStorage	proved		
+taclets	TestSuite	memoryToStorageIndexMappingCopyRootExample	proved		
+taclets	TestSuite	memoryToStorageIndexArrayCopyRootExample	proved		
+taclets	TestSuite	memoryToStorageIndexArrayCopyRootOutOfBoundsReverts	unsupported	the function asserts that the program reverts (a box-only obligation): every judgment here is a diamond, which proves the opposite	
+taclets	TestSuite	moduloSimple	proved		
+taclets	TestSuite	multiplicationSimple	proved		
+taclets	TestSuite	notEqualSimple	proved		
+taclets	TestSuite	powerSimple	proved		
+taclets	TestSuite	requireGuardBox	proved	concretized: solkey proves this for all parameters; ported at x = 1	
+taclets	TestSuite	requireHoldsDiamond	proved		
+taclets	TestSuite	storageAliasRebindAlias	proved		
+taclets	TestSuite	storageDeepFieldPostincrement	proved		
+taclets	TestSuite	storageDeepFieldPreincrement	proved		
+taclets	TestSuite	storageFieldAddAssign	proved		
+taclets	TestSuite	storageFieldCopyStruct	proved		
+taclets	TestSuite	storageFieldCopyValueField	proved		
+taclets	TestSuite	storageFieldDeepDivAssign	proved		
+taclets	TestSuite	storageFieldDeepModAssign	proved		
+taclets	TestSuite	storageFieldDeepMulAssign	proved		
+taclets	TestSuite	storageFieldDeepSubAssign	proved		
+taclets	TestSuite	storageFieldDeepWriteRead	proved		
+taclets	TestSuite	storageFieldDelete	proved		
+taclets	TestSuite	storageFieldDeleteThenCopy	proved		
+taclets	TestSuite	storageFieldDeleteThenCopyDeep	proved		
+taclets	TestSuite	storageFieldDivAssign	proved		
+taclets	TestSuite	storageFieldModAssign	proved		
+taclets	TestSuite	storageFieldMulAssign	proved		
+taclets	TestSuite	storageFieldPostdecrementAssign	proved		
+taclets	TestSuite	storageFieldPostdecrement	proved		
+taclets	TestSuite	storageFieldPostincrementAssign	proved		
+taclets	TestSuite	storageFieldPostincrement	proved		
+taclets	TestSuite	storageFieldPredecrementAssign	proved		
+taclets	TestSuite	storageFieldPredecrement	proved		
+taclets	TestSuite	storageFieldPreincrementAssign	proved		
+taclets	TestSuite	storageFieldPreincrement	proved		
+taclets	TestSuite	storageFieldReadBindLocal	proved		
+taclets	TestSuite	storageFieldReadStoreRoot	proved		
+taclets	TestSuite	storageFieldSubAssign	proved		
+taclets	TestSuite	storageFieldWriteCaptureSrc	proved		
+taclets	TestSuite	storageFieldWriteRhsCapture	proved	concretized: solkey proves this for all parameters; ported at x = 1, y = 2, z = 3	
+taclets	TestSuite	storageIndexCopyValue	proved	concretized: solkey proves this for all parameters; ported at i = 5, j = 1	
+taclets	TestSuite	storageIndexCopysourceAfterPush	open		unexpected token ']'; expected sol_expr
+taclets	TestSuite	storageIndexDecomposeAfterPush	proved		
+taclets	TestSuite	storageIndexDeleteMappingBool	proved		
+taclets	TestSuite	storageIndexDeleteMappingStruct	open		Tactic `native_decide` evaluated that the proposition
+taclets	TestSuite	storageIndexDeleteNseIndex	proved	concretized: solkey proves this for all parameters; ported at k = 2	
+taclets	TestSuite	storageIndexDelete	proved		
+taclets	TestSuite	storageIndexDivAssign	proved		
+taclets	TestSuite	storageIndexModAssign	proved		
+taclets	TestSuite	storageIndexMulAssign	proved		
+taclets	TestSuite	storageIndexMultipleWrites	proved		
+taclets	TestSuite	storageIndexPostdecrementAssign	proved		
+taclets	TestSuite	storageIndexPostdecrement	proved		
+taclets	TestSuite	storageIndexPostincrementAssign	proved		
+taclets	TestSuite	storageIndexPostincrement	proved		
+taclets	TestSuite	storageIndexPredecrementAssign	proved		
+taclets	TestSuite	storageIndexPredecrement	proved		
+taclets	TestSuite	storageIndexPreincrementAssign	proved		
+taclets	TestSuite	storageIndexPreincrement	proved		
+taclets	TestSuite	storageIndexReadMappingStoreRoot	proved	concretized: solkey proves this for all parameters; ported at k = 1	
+taclets	TestSuite	storageIndexReadNseIndex	proved	concretized: solkey proves this for all parameters; ported at i = 1	
+taclets	TestSuite	storageIndexSubAssign	proved		
+taclets	TestSuite	storageIndexWriteNseChain	proved	concretized: solkey proves this for all parameters; ported at i = 2, x = 3, y = 4	
+taclets	TestSuite	storageLocalDeclSkip	open		Tactic `native_decide` evaluated that the proposition
+taclets	TestSuite	storageMatrixNseIndex	open	concretized: solkey proves this for all parameters; ported at i = 1, j = 2, x = 5, y = 6	Tactic `native_decide` evaluated that the proposition
+taclets	TestSuite	storageMatrixWriteRead	proved		
+taclets	TestSuite	storagePopAfterPush	proved		
+taclets	TestSuite	storagePopNonempty	proved		
+taclets	TestSuite	storagePopUnknownLength	proved		
+taclets	TestSuite	storagePushEmpty	proved		
+taclets	TestSuite	storagePushLengthPositive	proved		
+taclets	TestSuite	storagePushLocalBind	open		Tactic `native_decide` evaluated that the proposition
+taclets	TestSuite	storagePushNonsimpleArg	proved	concretized: solkey proves this for all parameters; ported at x = 40, y = 2	
+taclets	TestSuite	storagePushReadBack	proved		
+taclets	TestSuite	storagePushReturnAssign	proved		
+taclets	TestSuite	storageRootAddAssign	proved		
+taclets	TestSuite	storageRootCopySource	proved		
+taclets	TestSuite	storageRootCopyStruct	proved		
+taclets	TestSuite	storageRootDeleteStruct	proved		
+taclets	TestSuite	storageRootDeleteThenCopy	proved		
+taclets	TestSuite	storageRootDelete	proved		
+taclets	TestSuite	storageRootDisjoint	proved		
+taclets	TestSuite	storageRootDivAssign	proved		
+taclets	TestSuite	storageRootModAssign	proved		
+taclets	TestSuite	storageRootMulAssign	proved		
+taclets	TestSuite	storageRootMultipleWrites	proved		
+taclets	TestSuite	storageRootPostdecrementAssign	proved		
+taclets	TestSuite	storageRootPostincrementAssign	proved		
+taclets	TestSuite	storageRootPostincrement	proved		
+taclets	TestSuite	storageRootPredecrement	proved		
+taclets	TestSuite	storageRootPreincrementAssign	proved		
+taclets	TestSuite	storageRootPreincrement	proved		
+taclets	TestSuite	storageRootSubAssign	proved		
+taclets	TestSuite	storageRootWriteRhsCapture	proved	concretized: solkey proves this for all parameters; ported at x = 1, y = 2, z = 3	
+taclets	TestSuite	storageToMemory	proved		
+taclets	TestSuite	subtractionSimple	proved		
+taclets	TestSuite	subtractionStorageRead	proved		
+taclets	TestSuite	unaryMinusSimple	proved	concretized: solkey proves this for all parameters; ported at x = 5	
+taclets	TestSuite	testDeepPopDoesNotResetMappingMember	open		steps!: stuck after 6 step(s).
+taclets	TestSuite	testMemoryAliasing	proved		
+taclets	TestSuite	testMemoryDeleteAlias	proved		
+taclets	TestSuite	testMemoryDeleteIdentityFieldFreshensSlot	proved		
+taclets	TestSuite	testMemoryDeletePrimitiveField	proved		
+taclets	TestSuite	testMemoryEvaluationOrder	unsupported	`new T[](n)` array allocation is not in the fragment	
+taclets	TestSuite	testMemoryFieldShallowCopy	proved		
+taclets	TestSuite	testMemoryIndexWriteImpureIndexPrimitiveRhs	unsupported	`new T[](n)` array allocation is not in the fragment	
+taclets	TestSuite	testMemoryIndexWriteImpureIndexRefRhs	unsupported	`new T[](n)` array allocation is not in the fragment	
+taclets	TestSuite	testMemoryRootAlias	proved		
+taclets	TestSuite	testMemoryRootDeleteRebindsOnlyLocal	proved		
+taclets	TestSuite	testMemoryToStorageCopyComplexSource	open		Tactic `native_decide` evaluated that the proposition
+taclets	TestSuite	testMemoryToStorageCopyComplexTarget	proved		
+taclets	TestSuite	testMemoryToStorageCopyField	proved		
+taclets	TestSuite	testMemoryToStorageCopyRoot	proved		
+taclets	TestSuite	testMemoryToStorageIndexCopyImpureIndex	proved		
+taclets	TestSuite	testMemoryTokenArrayAuxiliaryCases	unsupported	`new T[](n)` array allocation is not in the fragment	
+taclets	TestSuite	testMemoryUintArrayAuxiliaryCases	unsupported	`new T[](n)` array allocation is not in the fragment	
+taclets	TestSuite	testMemoryUintArrayPostdecrement	unsupported	`new T[](n)` array allocation is not in the fragment	
+taclets	TestSuite	testMemoryUintArrayPostincrement	unsupported	`new T[](n)` array allocation is not in the fragment	
+taclets	TestSuite	testMemoryUintArrayPredecrement	unsupported	`new T[](n)` array allocation is not in the fragment	
+taclets	TestSuite	testNestedIndexWriteImpureIndexPrimitiveRhs	open		Tactic `native_decide` evaluated that the proposition
+taclets	TestSuite	testNestedIndexReadImpureIndex	open		Tactic `native_decide` evaluated that the proposition
+taclets	TestSuite	testNestedIndexWriteImpureReceiverAndIndex	open		Tactic `native_decide` evaluated that the proposition
+taclets	TestSuite	testNestedIndexReadImpureReceiverAndIndex	open		Tactic `native_decide` evaluated that the proposition
+taclets	TestSuite	testStorageDeleteImpureReceiver	open		Tactic `native_decide` evaluated that the proposition
+taclets	TestSuite	testStoragePushImpureReceiver	open		Tactic `native_decide` evaluated that the proposition
+taclets	TestSuite	testCompoundAssignImpureReceiver	open		Tactic `native_decide` evaluated that the proposition
+taclets	TestSuite	testMemoryFieldWriteImpureReceiver	unsupported	`new T[](n)` array allocation is not in the fragment	
+taclets	TestSuite	testIndexWriteReceiverReadsMutatedVar	proved		
+taclets	TestSuite	testNestedStorageWrites	proved		
+taclets	TestSuite	testStorageAliases	proved		
+taclets	TestSuite	testStorageArrayReadWrite	proved		
+taclets	TestSuite	testStorageComplexReceiverPushFieldLvalue	open		Tactic `native_decide` evaluated that the proposition
+taclets	TestSuite	testStorageComplexReceiverPushLvalueCopy	proved		
+taclets	TestSuite	testStorageDeletePaperCase	proved		
+taclets	TestSuite	testStorageIndexWriteImpureIndexPrimitiveRhs	proved		
+taclets	TestSuite	testStorageIndexWriteImpureIndexRefRhs	proved		
+taclets	TestSuite	testStorageEvaluationOrder	proved		
+taclets	TestSuite	testStorageFieldDeepCopy	proved		
+taclets	TestSuite	testStorageMapReadWriteAndDelete	proved		
+taclets	TestSuite	testStorageMapStructCopy	open		Tactic `native_decide` evaluated that the proposition
+taclets	TestSuite	testStorageNestedPushReturnAlias	open		elaboration function for `Solidity.«termSstmt!{_}»` has not been implemented
+taclets	TestSuite	testStoragePushFieldLvalue	open		Tactic `native_decide` evaluated that the proposition
+taclets	TestSuite	testStoragePushLvalueCopiesStorageSource	proved		
+taclets	TestSuite	testStoragePushLvaluePrimitive	proved		
+taclets	TestSuite	testStoragePushReturnAlias	open		Tactic `native_decide` evaluated that the proposition
+taclets	TestSuite	testStorageRootDeepCopy	proved		
+taclets	TestSuite	testStorageStructDeleteSkipsMappingMember	proved		
+taclets	TestSuite	testStorageToMemoryCopyComplexPath	proved		
+taclets	TestSuite	testStorageToMemoryCopyField	proved		
+taclets	TestSuite	testStorageToMemoryCopyRoot	proved		
+taclets	TestSuite	testStorageWriteAndRead	proved		
+taclets	TestSuite	storageFieldDecomposition	proved		
+taclets	TestSuite	storageFieldDeepValue	proved		
+taclets	TestSuite	storageIndexDecomposition	proved		
+taclets	TestSuite	storageIndexRootArray	proved		
+taclets	TestSuite	storageFieldDisjointFields	proved		
+taclets	TestSuite	storageFieldDisjointRoots	proved		
+taclets	TestSuite	memoryAssignForms	unsupported	`new T[](n)` array allocation is not in the fragment	
+taclets	TestSuite	memoryDelete	proved		
+taclets	TestSuite	storageAliasRebindOriginal	proved		
+taclets	TestSuite	testSimpleAssert	proved		
+taclets	TestSuite	localArithmeticInRange	unsupported	parameter(s) x are not pinned by any require, so no concrete witness is derivable	
+taclets	TestSuite	signedUnaryMinusInRange	proved	concretized: solkey proves this for all parameters; ported at x = 5	
+taclets	TestSuite	storageIndexWriteRefSourceImpureIndex	proved		
+taclets	TestSuite	storageFieldWriteRefSourceImpureReceiver	open		Tactic `native_decide` evaluated that the proposition
+taclets	TestSuite	storageFieldWriteStorageRefImpureReceiver	open		Tactic `native_decide` evaluated that the proposition
+taclets	TestSuite	storageFieldWriteRootRefImpureReceiver	open		Tactic `native_decide` evaluated that the proposition
+taclets	TestSuite	memoryFieldWriteMemRefImpureReceiver	unsupported	`new T[](n)` array allocation is not in the fragment	
+taclets	TestSuite	storageIndexWriteRootRefImpureReceiver	open		Tactic `native_decide` evaluated that the proposition
+taclets	TestSuite	storageIndexWriteStorageRefImpureReceiver	open		Tactic `native_decide` evaluated that the proposition
+taclets	TestSuite	memoryToStorageIndexImpureReceiver	open		Tactic `native_decide` evaluated that the proposition
+taclets	TestSuite	memoryIndexWriteMemRefImpureReceiver	unsupported	`new T[](n)` array allocation is not in the fragment	
+taclets	TestSuite	additionLeftImpureRightReadFirst	open		Tactic `native_decide` evaluated that the proposition
+taclets	TestSuite	additionRightImpure	proved		
+taclets	TestSuite	additionBothOperandsImpure	open		Tactic `native_decide` evaluated that the proposition
+taclets	TestSuite	subtractionLeftImpureRightReadFirst	open		Tactic `native_decide` evaluated that the proposition
+taclets	TestSuite	lessThanLeftImpureRightReadFirst	open		Tactic `native_decide` evaluated that the proposition
+taclets	TestSuite	testCopyRootKeepsValueMembers	proved		
+taclets	TestSuite	testCopyFieldNested	proved		
+taclets	TestSuite	testCopyOfCopy	proved		
+taclets	TestSuite	testCopyIntoMappingEntry	proved	concretized: solkey proves this for all parameters; ported at k = 3	
+taclets	TestSuite	testCopyArrayMemberElements	proved		
+taclets	TestSuite	testCopyPrimitiveRoot	proved		
+taclets	TestSuite	testCopyStoreRootFromField	proved		
+taclets	TestSuite	testCopyStoreRootFromIndex	proved		
+taclets	TestSuite	testPushCopyThenDeleteTarget	proved		
+taclets	TestSuite	indexWriteBothImpureStorageRef	open		Tactic `native_decide` evaluated that the proposition
+taclets	TestSuite	indexWriteBothImpureMemToStorage	open		Tactic `native_decide` evaluated that the proposition
+taclets	TestSuite	indexWriteBothImpureMemoryValue	unsupported	`new T[](n)` array allocation is not in the fragment	
+taclets	TestSuite	indexWriteBothImpureMemRef	unsupported	`new T[](n)` array allocation is not in the fragment	

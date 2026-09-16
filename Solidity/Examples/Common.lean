@@ -138,6 +138,7 @@ attribute [reducible]
   Ty.indexElemTy Ty.isReference PlaceExpr.index
   -- Operator and alias smart constructors (value-capture rules)
   SoliditySyntax.binopExpr SoliditySyntax.unopExpr SoliditySyntax.incDecExpr
+  SoliditySyntax.ternaryExpr
   SoliditySyntax.intLitExpr SoliditySyntax.aliasExpr SoliditySyntax.aliasPlace
   SoliditySyntax.aliasKind SoliditySyntax.declTy SoliditySyntax.typedVarTy
 
@@ -221,6 +222,7 @@ attribute [rule_simp_set]
   SoliditySyntax.indexExpr SoliditySyntax.indexPlace SoliditySyntax.indexElemTy
   Ty.indexElemTy Ty.isReference PlaceExpr.index
   SoliditySyntax.binopExpr SoliditySyntax.unopExpr SoliditySyntax.incDecExpr
+  SoliditySyntax.ternaryExpr
   SoliditySyntax.intLitExpr SoliditySyntax.aliasExpr SoliditySyntax.aliasPlace
   SoliditySyntax.aliasKind SoliditySyntax.declTy SoliditySyntax.typedVarTy
 
@@ -290,6 +292,7 @@ macro "rule_simp_literal" : tactic => `(tactic|
     Ty.indexElemTy, Ty.isReference, PlaceExpr.index,
     -- Operator and alias smart constructors (value-capture rules)
     SoliditySyntax.binopExpr, SoliditySyntax.unopExpr, SoliditySyntax.incDecExpr,
+    SoliditySyntax.ternaryExpr,
     SoliditySyntax.intLitExpr, SoliditySyntax.aliasExpr, SoliditySyntax.aliasPlace,
     SoliditySyntax.aliasKind, SoliditySyntax.declTy, SoliditySyntax.typedVarTy])
 
@@ -1011,6 +1014,145 @@ elab "seq_steps!" fuelStx:(num)? : tactic =>
 /-- One step of a `⇝ᵘ*` line with the rule inferred.  `seq_steps! 1` is
 "at most one step, then close", so a line that only merges is covered too. -/
 macro "seq_block_step" : tactic => `(tactic| seq_steps! 1)
+
+/-! ### `seq_closes` — run to closure, with the endpoint unwritten
+
+`seq_steps!` runs toward a *stated* target.  For a whole solkey obligation
+there is nothing to state: the accumulated update of a fifteen-statement body
+is not something to type out, and typing it out would not be checking
+anything the chain does not already check.
+
+`seq_steps!` also cannot simply be pointed at a metavariable.  Its first move
+is `isDefEq before after`, which against a metavariable succeeds at once by
+assigning it — the goal would close having taken no step, and the theorem
+would say nothing about the rules.  So the loop below tests
+`Frontier.firstOpen?` instead: it steps while a line still has a statement,
+and only then assigns the target.  `Frontier.isClosed` is the same condition
+as a Boolean, and `CalculusHolds` carries it as a conjunct for exactly this
+reason. -/
+
+open Lean Elab Tactic Meta in
+/-- Step while the frontier has an open line; assign the target to the
+frontier reached.  Returns the rules fired, for the trace. -/
+private partial def seqClosesLoop (fuel : Nat) (acc : Array Lean.Expr) :
+    TacticM (Array Lean.Expr) := do
+  let g ← getMainGoal
+  let done ← g.withContext do
+    let ty ← whnf (← g.getType)
+    unless ty.isAppOfArity ``FrontierMultiStep 2 do
+      throwError "seq_closes: expected a `⇝ᵘ*` goal, got{indentExpr ty}"
+    let src ← whnf ty.appFn!.appArg!
+    let opened ← whnf (mkAppN (mkConst ``Frontier.firstOpen?) #[src])
+    unless opened.isAppOfArity ``Option.none 1 do
+      unless opened.isAppOfArity ``Option.some 2 do
+        throwError "seq_closes: `Frontier.firstOpen?` got stuck at\
+          {indentExpr opened}\non the frontier{indentExpr src}"
+      return false
+    -- The target is normally a goal metavariable (`refine ⟨?f, …⟩`), and a
+    -- *named* goal is synthetic opaque, which `isDefEq` refuses to assign.
+    -- Assign it outright: where a run-to-closure ends is computed, not
+    -- something unification should be asked to guess.
+    let tgt ← instantiateMVars ty.appArg!
+    if tgt.isMVar then
+      tgt.mvarId!.assign src
+    else
+      unless ← isDefEq src tgt do
+        throwError "seq_closes: after {acc.size} step(s) the frontier\
+          {indentExpr src}\nhas no open line, but does not match the stated \
+          target{indentExpr tgt}\n{← rulesText acc}"
+    g.assign (← mkAppOptM ``FrontierMultiStep.refl #[some src])
+    return true
+  if done then
+    replaceMainGoal []
+    return acc
+  match fuel with
+  | 0 =>
+      throwError "seq_closes: gave up after {acc.size} step(s) with an open \
+        line left.\n{← rulesText acc}"
+  | fuel + 1 =>
+      let before? := (← getGoals).head?
+      let r ← autoSeqStepsStep acc
+      trace[solidity.steps] "step {acc.size + 1}: {← ruleNameText r}"
+      if let (some g₀, some g₁) := (before?, (← getGoals).head?) then
+        if ← isDefEq (← g₀.getType) (← g₁.getType) then
+          throwError "seq_closes: rule `{← ruleNameText r}` left the frontier \
+            unchanged.\n{← rulesText (acc.push r)}"
+      seqClosesLoop fuel (acc.push r)
+
+open Lean Elab Tactic Meta in
+/-- Drive a `⇝ᵘ*` goal with the rule table until no line has a statement
+left, and let the endpoint be whatever the rules produce.  The fuel counts
+steps, and the default is generous because a solkey body of twenty
+statements costs several hundred of them. -/
+elab "seq_closes" fuelStx:(num)? : tactic =>
+  withOptions (fun o => maxRecDepth.set o 32768) do
+    let fuel := (fuelStx.map (·.getNat)).getD 1024
+    let used ← seqClosesLoop fuel #[]
+    trace[solidity.steps] "{← rulesText used}"
+
+/-! ### `sol_calculus` — a whole obligation, by the rule table alone
+
+```
+sol_calculus storageRootReadWrite from State.testSuiteStore
+  { age = 34; uint r = age; assert((r == 34)) }
+```
+
+It states `CalculusHolds <modality> <program> (true) <store>` and proves it
+with `seq_closes` and a decided endpoint, which is the whole of the claim:
+the taclets drove the program to a frontier with nothing left to execute, and
+that frontier -- the accumulated update, plus one obligation line per
+`assert` -- holds at the store.
+
+The modality is `diamond` by default, as the ported corpus is: KeY's
+obligation is `\<{ f(); }\>(true)`, and a diamond additionally proves the
+program does not revert.
+
+**The endpoint is `native_decide`, deliberately.**  `Frontier.Holds` runs the
+accumulated update through the interpreter's readers, and the WF-recursive
+interpreter does not kernel-reduce -- `decide` fails on it, which is the same
+reason `Examples/Derivations/Paper.lean` checks its chains' endpoints that
+way.  The *derivation* adds no axiom; the endpoint does.
+
+**Statements are `;`-separated, inside braces**, for the reason `sol_runs`
+gives: newline separation parses, and the misparse is silent. -/
+
+open Lean Elab Tactic in
+/-- The proof `sol_calculus` writes: run to closure, then decide the two
+Boolean facts about the frontier reached. -/
+macro "calculus_proof" : tactic => `(tactic| (
+  refine ⟨?f, ?hs, ?hc, ?hh⟩
+  case hs => seq_closes
+  case hc => decide
+  case hh => native_decide))
+
+syntax (docComment)? "sol_calculus " ident (sol_modality)? " from " ident
+  " {" sepBy(sol_stmt, "; ", "; ", allowTrailingSep) "}" : command
+
+open Lean Elab Command in
+elab_rules : command
+  | `(command| $[$doc:docComment]? sol_calculus $name:ident $[$m:sol_modality]?
+        from $store:ident { $stmts;* }) => do
+      let mTerm : Term ←
+        match m with
+        | none => `(SolidityModality.diamond)
+        | some mm =>
+            match mm with
+            | `(sol_modality| box) => `(SolidityModality.box)
+            | `(sol_modality| both) => `(SolidityModality.both)
+            | _ => `(SolidityModality.diamond)
+      -- The postcondition is written as the term, not as `sexpr!{ true }`.
+      -- An identifier inside a macro's own quotation carries that macro's
+      -- hygiene scopes, and `sol_expr`'s ident production reads the name
+      -- *as a Solidity variable*: `true` would come back as a seven-deep
+      -- chain of stack field accesses named after the macro scope, and the
+      -- obligation would be about that instead of about `true`. The spliced
+      -- `$stmts` are the user's syntax and carry the user's scopes, so the
+      -- program is unaffected.
+      elabCommand (← `(command|
+        $[$doc:docComment]? theorem $name :
+            CalculusHolds $mTerm (sblock!{ $stmts;* })
+              (Solidity.Typed.WrappedExpr.bool true) $store := by
+          calculus_proof))
 
 /-! ### The `sol_derivation` command
 

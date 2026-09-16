@@ -45,6 +45,10 @@ map to solkey's taclets (do not restate it in module docstrings);
 `docs/solc-alignment.md` for where the interpreter follows solc over KeY;
 `docs/compiler-verification.md`; `docs/spec-language.md`.
 
+`docs/solkey-parity.md` is what the *interpreter* proves of solkey's suites,
+`docs/calculus-parity.md` what the *rule table* does. `sol_wp` never reads
+`Rules.lean`, so a number from the first says nothing about the calculus.
+
 ## Checking your work
 
 Prefer the Lean MCP server (diagnostics, goals, hover, outline) over the
@@ -59,6 +63,7 @@ import changes and final confirmation. The `lean-verify` skill in
 | `./scripts/check-spec.sh` | medium | the whole `SoliditySpec` target |
 | `./scripts/check-examples.sh` | ~30 min CPU | `SolidityExamples` (`Examples/Derivations/Paper.lean`) |
 | `./scripts/check-solkey-parity.sh` | medium | the ported corpus against `tests/solkey/expected.tsv` |
+| `./scripts/check-calculus-parity.sh` | long | the same corpus proved from `Rules.lean` alone, against `tests/solkey/expected-calculus.tsv` |
 | `lake exe solkeycheck` | seconds | sort annotations against solkey's `.key` |
 
 `solkeycheck` **currently fails**: the annotation table has drifted 78 rows
