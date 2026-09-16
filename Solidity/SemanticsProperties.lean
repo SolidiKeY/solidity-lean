@@ -329,6 +329,157 @@ theorem copyStElems_frame (s : State) (elems : List SVal) :
 
 end
 
+/-! ## The fresh-ID counter only grows
+
+A copy allocates; it never frees, so every identity at or above the *final*
+`nextId` was already absent before the copy.  That is what makes
+`Theory.Memory.new` a consequence of a denotation rather than an assumption
+about one (`Update/Theory.lean`, `denoteMem_new`). -/
+
+/-- A state computation only advances the fresh-ID counter. -/
+def NextIdGrows (s : State) (r : Res (State × α)) : Prop :=
+  ∀ t a, r = .ok (t, a) → s.nextId ≤ t.nextId
+
+namespace NextIdGrows
+
+theorem pure (s : State) (a : α) : NextIdGrows s (.ok (s, a)) := by
+  intro t b h; cases h; exact Nat.le_refl _
+
+theorem bind {s : State} {x : Res (State × α)}
+    {f : State × α → Res (State × β)}
+    (hx : NextIdGrows s x)
+    (hf : ∀ t a, NextIdGrows t (f (t, a))) :
+    NextIdGrows s (x >>= f) := by
+  intro u b h
+  cases hxv : x with
+  | error e => rw [hxv] at h; contradiction
+  | ok ta =>
+      obtain ⟨t, a⟩ := ta
+      have hfu : f (t, a) = .ok (u, b) := by simpa [hxv] using h
+      exact Nat.le_trans (hx t a hxv) (hf t a u b hfu)
+
+theorem alloc_ref (s : State) (obj : MObj) :
+    NextIdGrows s
+      (let (t, id) := s.alloc obj
+       .ok (t, MVal.ref id)) := by
+  simp only [NextIdGrows, State.alloc]
+  intro t mv h; cases h; exact Nat.le_succ _
+
+end NextIdGrows
+
+mutual
+
+/-- A storage-to-memory copy only advances `nextId`. -/
+theorem copyStToM_nextId (s : State) (v : SVal) :
+    NextIdGrows s (copyStToM s v) := by
+  cases v with
+  | prim p =>
+      cases p with
+      | int v => exact NextIdGrows.pure s (MVal.int v)
+      | bool b => exact NextIdGrows.pure s (MVal.bool b)
+  | map entries dflt => intro t mv h; simp [copyStToM] at h
+  | struct fields =>
+      rw [copyStToM]
+      apply NextIdGrows.bind (copyStFields_nextId s fields)
+      intro t mfields
+      exact NextIdGrows.alloc_ref t (.struct mfields)
+  | array elems =>
+      rw [copyStToM]
+      apply NextIdGrows.bind (copyStElems_nextId s elems)
+      intro t melems
+      exact NextIdGrows.alloc_ref t (.array melems)
+
+theorem copyStFields_nextId (s : State) (fields : List (Name × SVal)) :
+    NextIdGrows s (copyStFields s fields) := by
+  cases fields with
+  | nil => exact NextIdGrows.pure s []
+  | cons field rest =>
+      obtain ⟨name, v⟩ := field
+      rw [copyStFields]
+      apply NextIdGrows.bind (copyStToM_nextId s v)
+      intro t mv
+      apply NextIdGrows.bind (copyStFields_nextId t rest)
+      intro u mrest
+      exact NextIdGrows.pure u ((name, mv) :: mrest)
+
+theorem copyStElems_nextId (s : State) (elems : List SVal) :
+    NextIdGrows s (copyStElems s elems) := by
+  cases elems with
+  | nil => exact NextIdGrows.pure s []
+  | cons v rest =>
+      rw [copyStElems]
+      apply NextIdGrows.bind (copyStToM_nextId s v)
+      intro t mv
+      apply NextIdGrows.bind (copyStElems_nextId t rest)
+      intro u mrest
+      exact NextIdGrows.pure u (mv :: mrest)
+
+end
+
+/-- A fresh default allocation only advances `nextId`, and by at least one:
+the object it mints is `nextId` itself. -/
+theorem allocDefault_nextId {s t : State} {ref : RefTy} {n : Nat}
+    (h : allocDefault s ref = .ok (t, n)) : s.nextId ≤ t.nextId := by
+  unfold allocDefault at h
+  cases hc : copyStToM s (defaultForRef ref) with
+  | error e => rw [hc] at h; exact absurd h (by simp)
+  | ok tv =>
+      obtain ⟨t', mv⟩ := tv
+      rw [hc] at h
+      cases mv with
+      | prim p => exact absurd h (by simp)
+      | ref m =>
+          simp only [Except.ok.injEq, Prod.mk.injEq] at h
+          exact h.1 ▸ copyStToM_nextId s _ t' _ hc
+
+/-- A copy that yields a *reference* allocated at least one object, so it
+advanced the counter strictly.  This is what makes the root `addM` mints
+genuinely below the counter afterwards, and hence not fresh
+(`Update/Theory.lean`, `denoteMem_new`). -/
+theorem copyStToM_nextId_lt {s t : State} {v : SVal} {n : Nat}
+    (h : copyStToM s v = .ok (t, .ref n)) : s.nextId < t.nextId := by
+  cases v with
+  | prim p => cases p <;> exact absurd h (by simp)
+  | map entries dflt => exact absurd h (by simp)
+  | struct fields =>
+      rw [copyStToM] at h
+      cases hf : copyStFields s fields with
+      | error e => rw [hf] at h; exact absurd h (by simp [bind, Except.bind])
+      | ok tf =>
+          obtain ⟨t', mfields⟩ := tf
+          rw [hf] at h
+          simp only [bind, Except.bind, Except.ok.injEq, Prod.mk.injEq] at h
+          have hle : s.nextId ≤ t'.nextId := copyStFields_nextId s fields t' _ hf
+          have : t.nextId = t'.nextId + 1 := by rw [← h.1]; rfl
+          omega
+  | array elems =>
+      rw [copyStToM] at h
+      cases he : copyStElems s elems with
+      | error e => rw [he] at h; exact absurd h (by simp [bind, Except.bind])
+      | ok te =>
+          obtain ⟨t', melems⟩ := te
+          rw [he] at h
+          simp only [bind, Except.bind, Except.ok.injEq, Prod.mk.injEq] at h
+          have hle : s.nextId ≤ t'.nextId := copyStElems_nextId s elems t' _ he
+          have : t.nextId = t'.nextId + 1 := by rw [← h.1]; rfl
+          omega
+
+/-- …hence a fresh default allocation advances the counter strictly. -/
+theorem allocDefault_nextId_lt {s t : State} {ref : RefTy} {n : Nat}
+    (h : allocDefault s ref = .ok (t, n)) : s.nextId < t.nextId := by
+  unfold allocDefault at h
+  cases hc : copyStToM s (defaultForRef ref) with
+  | error e => rw [hc] at h; exact absurd h (by simp)
+  | ok tv =>
+      obtain ⟨t', mv⟩ := tv
+      rw [hc] at h
+      cases mv with
+      | prim p => exact absurd h (by simp)
+      | ref m =>
+          simp only [Except.ok.injEq, Prod.mk.injEq] at h
+          exact h.1 ▸ copyStToM_nextId_lt hc
+
+
 /-! ## State-update algebra (`updateRules.key` analogues)
 
 KeY's update calculus applies parallel updates at the point of use

@@ -543,20 +543,29 @@ presupposes the write succeeded (`SemanticsProperties.SVal.find_save_same`).
 
 ### `memoryRules.key` → `Theory/Memory.lean`
 
-Identities here are the interpreter's resolved `Nat`, not KeY's path identity
-`idC(idp, flds)`; the five rows whose job is to walk a path to an object
-therefore have no counterpart. See the module docstring.
+Identities are KeY's path identities `idC(idp, flds)`, so the chain-walking
+rows have counterparts and `addM` carries the root it allocates. Resolving a
+path identity against the interpreter's heap happens in the *denotation*
+(`Update/Theory.lean`, `Memory.resolve`), not in the algebra.
 
 | KeY taclet | Lean theorem | Status |
 | --- | --- | --- |
 | `readOnWrite` | `readOnWrite` | done |
 | `readFromEmptyMemory` | `readFromEmptyMemory` | done |
-| `readOnAddM` | `readOnAddM` | done (the `idp1 = idp2` branch is the pre-state leaf: `allocDefault` materializes the object, so a read of a fresh one is already its default) |
+| `readOnAddM` | `readOnAddM` (`readAddEqual`/`readAddDifferent` are the paper's split form) | done |
 | `newFromEmptyMemory` | `newFromEmptyMemory` | done |
 | `newFromWrite` | `newFromWrite` | done |
-| `newFromAdd` | `newFromAdd` | done, **weakened**: the identity `addM` mints is `nextId`, read at denotation time rather than carried in the term, so the recursion is unconditional |
-| `defaultValueInt`, `defaultValueBool`, `defaultDef`, `defValResolve` | `Memory.asPrim` / `StValue.asInt` / `StValue.asBool` and `defaultDefInt` | done as casts |
-| `defaultDefIdentity`, `idCCDef`, `readREmpty`, `readRCons` | — | **arch**: resolved identities (above) |
+| `newFromAdd` | `newFromAdd` (`newAddSame`/`newAddDifferent` split) | done |
+| `defaultValueInt`, `defaultValueBool`, `defaultDef`, `defValResolve` | `MemValue.asPrim` / `StValue.asInt` / `StValue.asBool` and `defaultDefInt` | done as casts |
+| `defaultDefIdentity` | `defaultDefIdentity` (`MemValue.asIdentity`) | done |
+| `idCCDef` | `idCCDef` | done |
+| `readREmpty`, `readRCons` | `readREmpty`, `readRCons` (`Memory.readR`, `readRId`) | done |
+
+The freshness predicate is not only transcribed but *discharged*:
+`Update/Theory.lean`'s `denoteMem_new` proves that a denoted memory term is
+`new` at every identity its counter has not reached, so KeY's `\add(new(memory,
+freshIdp) ==>)` is a consequence of the denotation here rather than an
+assumption about it.
 
 ### `structMemoryRules.key` → not modelled
 
@@ -564,18 +573,21 @@ therefore have no counterpart. See the module docstring.
 `readFromCopyToStorage`, `readFromCopyToStorageIdentity`) have no Lean
 counterpart yet. The interpreter's `copyStToM`/`copyMem` do the work
 (`Semantics.lean`), and the cross-domain rules are bridged at the *update*
-level or not at all (`Update/TacletTable.openBridges`). The fundamentals
-repository's `readSkip`/`readFind`/`readGetId` are the shape to port.
+level or not at all (`Update/TacletTable.openBridges`). The path identities
+`Theory/Memory.lean` now carries are what KeY's `copySt` is pure over, so this
+row is the next one to port rather than an architectural gap; the fundamentals
+repository's `readSkip`/`readFind`/`readGetId` are the shape.
 
 ### Deviations, collected
 
 Two places where a term carries something KeY's does not, both because KeY is
 lazy and the interpreter is eager:
 
-* `Theory.Memory.addM` carries the allocated `RefTy`. KeY's `readOnAddM`
-  resolves a never-written slot of a fresh object to `default<[α]>` at the
-  reader's sort; `Semantics.allocDefault` materializes the object at
-  allocation, so the term has to know its type to denote.
+* `Theory.Memory.addM` carries the allocated `RefTy` beside its root. KeY's
+  `readOnAddM` resolves a never-written slot of a fresh object to
+  `default<[α]>` at the reader's sort; `Semantics.allocDefault` materializes
+  the object at allocation, so the term has to know its type to denote. The
+  root is KeY's own and is what makes `readOnAddM`/`newFromAdd` the taclets.
 * `Theory.StValue.dflt` stands for the sort-free default
   (`memoryRules.key`'s own `defVal`) and is resolved by a cast at the point of
   use, rather than by the sort the read asks for.
