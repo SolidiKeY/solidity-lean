@@ -94,7 +94,9 @@ or `seq!` is the sequent layer, `sol!` the judgment layer, anything else the
 block layer. Single steps stay as `example : A ⇝[.r] B := by rule_step`.
 
 **A sequent line is written with the turnstile in front**, the way
-`Examples/Derivations/Traces.lean` writes the calculus's own chains:
+`Examples/Derivations/Traces/` writes the calculus's own chains
+(`Traces.lean` itself is the conventions and the imports, and
+of the worked examples):
 
 ```
 sol_derivation deepFieldWrite :
