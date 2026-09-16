@@ -647,8 +647,7 @@ end CaseMode
       by_cases h : a.complex = true
       · simp [captureFirstComplexArg, h]
       · simp only [Bool.not_eq_true] at h
-        simp only [captureFirstComplexArg, h, List.any_cons,
-          Bool.false_or, if_false]
+        simp only [captureFirstComplexArg, h, List.any_cons, Bool.false_or]
         cases hr : captureFirstComplexArg rest with
         | none => simpa [hr] using ih
         | some x => simpa [hr] using ih
