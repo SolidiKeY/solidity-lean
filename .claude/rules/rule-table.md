@@ -28,9 +28,11 @@ the order decides which name a `⇝[.rule]` derivation pins.
 2. The condition is generated from the schema variables' *names*
    (`RuleSyntax.schemaVar`): `sp.fld = se` already says
    `isSimple sp ∧ isSe se`. `where` appends conjuncts no name carries;
-   `where cond := …` replaces the conjunction outright. Reach for
-   `sol_rule NAME … := <term>` only when the goals consume the condition
-   proof or the condition is bespoke — about ten rules.
+   `where cond := …` replaces the conjunction outright, for the handful
+   whose applicability is a bespoke predicate. A residual that has to be
+   *computed* from the condition proof is written `⟦ b ⟧`, with the proof in
+   scope as `h` — five rules. There is no other form: the declaration is how
+   a rule is written.
 3. **Keep the condition disjoint from every other rule.** Then add the
    `candidate` dispatch branch and the `applicable_eq_candidate` case in
    `Uniqueness.lean`. A failing uniqueness build signals an overlap.
@@ -41,20 +43,27 @@ the order decides which name a `⇝[.rule]` derivation pins.
    `ruleNumericTarget`/`ruleRefTarget` for new `fixed`-sorted value reads),
    then run `lake exe solkeycheck`.
 
-## Two traps
+## Three traps
 
 **A generated `ruleEffect` arm never has a catch-all `| _ => []`.** `block` is
-dependent on the condition proof, so pass that proof as a second match
-discriminant and list only the arms the `cond` admits — the match compiler
-refutes the rest, because the proof's type reduces to `False` there. An empty
-residual therefore means *terminal rule* and nothing else. A `(lhs :
-WrappedExpr)` scrutinee has to destructure the place,
+dependent on the condition proof, so the generator passes that proof as a
+second match discriminant and lists only the arms the `cond` admits — the
+match compiler refutes the rest, because the proof's type reduces to `False`
+there. An empty residual therefore means *terminal rule* and nothing else. A
+`(lhs : WrappedExpr)` scrutinee is destructured as
 `match lhs, h with | ⟨PAT, _⟩, _ => …`, because the condition reaches `block`
 as an unreduced beta-redex.
 
 **A parameterized family** (`(op : BinOp)` and friends) expands to every
 instance in `ruleNames` on its own — classification requires them all, so
-give a KeY-absent instance an unsatisfiable guard conjunct.
+give a KeY-absent instance an unsatisfiable conjunct, which is what the
+binder guard `(op : BinOp | op.isArith = true)` writes.
+
+**A new `*Effect` builder has to be declared twice more.** `Examples/Common.lean`
+lists every builder under `attribute [reducible]` and under
+`attribute [rule_simp_set]`; a builder missing from either makes `single_step`
+fail to synthesise `Decidable` for that rule's condition, with no hint that
+the list is where to look.
 
 ## Facts about the table
 

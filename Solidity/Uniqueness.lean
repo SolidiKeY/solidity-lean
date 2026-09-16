@@ -644,11 +644,13 @@ theorem applicable_eq_candidate {mode : Modality} {stmt : Stmt}
     next e =>
       cases e <;> simp_all [candidate, exprCandidate]
   case pushAssignLower =>
-    cases stmt <;> simp only [Rules.ruleEffect] at hcond
+    cases stmt <;>
+      simp only [Rules.ruleEffect, Rules.pushAssignEffect] at hcond
     next target value =>
       simp [candidate]
   case pushFieldAssignLower =>
-    cases stmt <;> simp only [Rules.ruleEffect] at hcond
+    cases stmt <;>
+      simp only [Rules.ruleEffect, Rules.pushFieldAssignEffect] at hcond
     next target fld value =>
       simp [candidate]
   case storageLocalDeclInitDrop =>
@@ -663,7 +665,7 @@ theorem applicable_eq_candidate {mode : Modality} {stmt : Stmt}
       simp [candidate, hcond]
   case storagePlaceAlias =>
     cases stmt <;>
-      simp only [Rules.ruleEffect] at hcond
+      simp only [Rules.ruleEffect, Rules.storagePlaceAliasEffect] at hcond
     simp [candidate]
   case memoryLocalDeclInitDrop =>
     cases stmt <;>
@@ -1335,7 +1337,7 @@ theorem applicable_eq_candidate {mode : Modality} {stmt : Stmt}
     next lhs rhs =>
       split at hcond
       · next ty path fld =>
-          obtain ⟨h1, h2, h3⟩ := hcond
+          obtain ⟨h2, h3, h1⟩ := hcond
           simp only [Rules.isSimple, Rules.isGlobal, coe_eq_expr] at h1 h2 h3
           obtain ⟨ty', fld', heqL, horig⟩ := isGlobal_shape h2
           simp [candidate, assignCandidate, assignComplexCandidate, coe_eq_expr,
@@ -1500,7 +1502,7 @@ theorem applicable_eq_candidate {mode : Modality} {stmt : Stmt}
       next lhs rhs =>
         split at hcond
         · next ty path idx =>
-            obtain ⟨h1, h2, h3, h4, h5⟩ := hcond
+            obtain ⟨h2, h3, h4, h5, h1⟩ := hcond
             simp only [Rules.isSimple, Rules.isGlobal, coe_eq_expr]
               at h1 h2 h3 h4
             obtain ⟨ty', fld', heqL, horig⟩ := isGlobal_shape h2
@@ -1521,7 +1523,7 @@ theorem applicable_eq_candidate {mode : Modality} {stmt : Stmt}
       next lhs rhs =>
         split at hcond
         · next ty path idx =>
-            obtain ⟨h1, h2, h3, h4, h5⟩ := hcond
+            obtain ⟨h2, h3, h4, h5, h1⟩ := hcond
             simp only [Rules.isSimple, Rules.isGlobal, coe_eq_expr]
               at h1 h2 h3 h4
             obtain ⟨ty', fld', heqL, horig⟩ := isGlobal_shape h2
@@ -1537,7 +1539,7 @@ theorem applicable_eq_candidate {mode : Modality} {stmt : Stmt}
     next lhs rhs =>
       split at hcond
       · next ty path idx =>
-          obtain ⟨h1, h2, h3, h4, h5⟩ := hcond
+          obtain ⟨h2, h3, h4, h5, h1⟩ := hcond
           simp only [Rules.isSimple, Rules.isGlobal, coe_eq_expr] at h1 h2 h3 h4
           obtain ⟨ty', fld', heqL, horig⟩ := isGlobal_shape h2
           simp [candidate, assignCandidate, assignComplexCandidate, coe_eq_expr,
@@ -2100,7 +2102,7 @@ theorem applicable_eq_candidate {mode : Modality} {stmt : Stmt}
     next lhs rhs =>
       split at hcond
       · next op' l r =>
-          obtain ⟨rfl, harith, hnsv, hnmem, h3, h4⟩ := hcond
+          obtain ⟨rfl, harith, h3, h4, hnsv, hnmem⟩ := hcond
           simp only [Rules.isStackVar, Rules.isStack, Rules.isSimple,
             Rules.isComplex, PlaceExpr.kind, coe_eq_expr] at hnsv hnmem h3 h4
           simp [candidate, assignCandidate, assignComplexCandidate,

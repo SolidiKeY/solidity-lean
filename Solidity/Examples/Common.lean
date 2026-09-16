@@ -73,6 +73,7 @@ attribute [reducible]
   assignEffect deleteEffect storageDeclEffect memoryDeclEffect pushEffect popEffect
   stackDeclEffect compoundAssignEffect exprEffect assertEffect requireEffect
   iteEffect transferEffect revertEffect callEffect
+  pushAssignEffect pushFieldAssignEffect storagePlaceAliasEffect
   Rules.captureFirstComplexArg SoliditySyntax.expandCall
   SoliditySyntax.funDef SoliditySyntax.paramDecls SoliditySyntax.retDecl
   -- Mode checking
@@ -176,7 +177,8 @@ attribute [rule_simp_set]
   Rules.revertGoals Rules.withOrigin Rules.writeBack Rules.compoundGoals
   Rules.compoundIndexGoals Rules.incDecGoals Rules.assertGoals Rules.varName
   assignEffect deleteEffect storageDeclEffect memoryDeclEffect
-  pushEffect popEffect
+  pushEffect popEffect pushAssignEffect pushFieldAssignEffect
+  storagePlaceAliasEffect
   stackDeclEffect compoundAssignEffect exprEffect assertEffect
   requireEffect iteEffect transferEffect revertEffect callEffect
   Rules.captureFirstComplexArg SoliditySyntax.expandCall
