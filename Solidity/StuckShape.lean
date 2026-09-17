@@ -149,7 +149,7 @@ theorem copyStToM_never_reverts (s : State) (v : SVal) :
       cases h : copyStFields s fields with
       | error e => rw [h] at ih; simpa using ih
       | ok x => simp
-  | case4 s elems ih =>
+  | case4 s elems shadow ih =>
       simp only [copyStToM, bind, Except.bind]
       cases h : copyStElems s elems with
       | error e => rw [h] at ih; simpa using ih
@@ -257,11 +257,11 @@ inductive FindStuck : SVal -> List Seg -> StuckCause -> Prop where
   it has no constructor here. -/
   | arrayStep {elems i rest c} (h : 0 ≤ i ∧ i.toNat < elems.length)
       (hrec : FindStuck (elems.get ⟨i.toNat, h.2⟩) rest c) :
-      FindStuck (SVal.array elems) (Seg.at i :: rest) c
+      FindStuck (SVal.array elems sh) (Seg.at i :: rest) c
   /-- `a.length` continues into the length as a primitive. -/
   | arrayLengthStep {elems rest c}
       (hrec : FindStuck (SVal.int elems.length) rest c) :
-      FindStuck (SVal.array elems) (Seg.field "length" :: rest) c
+      FindStuck (SVal.array elems sh) (Seg.field "length" :: rest) c
   /-- A mapping key that is present. -/
   | mapStep {entries dflt i rest v c}
       (h : lookupBy i entries = some v) (hrec : FindStuck v rest c) :
@@ -280,8 +280,8 @@ inductive FindStuck : SVal -> List Seg -> StuckCause -> Prop where
         (.segmentShapeMismatch (SVal.struct fields) (Seg.at i))
   /-- An array under a field other than `length`. -/
   | arrayField {elems name rest} (h : name ≠ "length") :
-      FindStuck (SVal.array elems) (Seg.field name :: rest)
-        (.segmentShapeMismatch (SVal.array elems) (Seg.field name))
+      FindStuck (SVal.array elems sh) (Seg.field name :: rest)
+        (.segmentShapeMismatch (SVal.array elems sh) (Seg.field name))
   /-- A mapping under a field. -/
   | mapField {entries dflt name rest} :
       FindStuck (SVal.map entries dflt) (Seg.field name :: rest)
@@ -313,11 +313,11 @@ theorem find_stuck_of {v : SVal} {segs : List Seg}
       rw [SVal.find, hlook] at h
       exact (ih h).imp fun _ hc => .structStep hlook hc
   | case3 fields name rest hlook => exact ⟨_, .structMissing hlook⟩
-  | case4 elems i rest hr ih =>
+  | case4 elems shadow i rest hr ih =>
       rw [SVal.find, dif_pos hr] at h
       exact (ih h).imp fun _ hc => .arrayStep hr hc
-  | case5 elems i rest hr => rw [SVal.find, dif_neg hr] at h; simp at h
-  | case6 elems rest ih =>
+  | case5 elems shadow i rest hr => rw [SVal.find, dif_neg hr] at h; simp at h
+  | case6 elems shadow rest ih =>
       rw [SVal.find] at h
       exact (ih h).imp fun _ hc => .arrayLengthStep hc
   | case7 entries dflt i rest v hlook ih =>
@@ -328,7 +328,7 @@ theorem find_stuck_of {v : SVal} {segs : List Seg}
       exact (ih h).imp fun _ hc => .mapDefaultStep hlook hc
   | case9 p head tail => exact ⟨_, .primSelector⟩
   | case10 fields i tail => exact ⟨_, .structAt⟩
-  | case11 elems name tail hname => exact ⟨_, .arrayField hname⟩
+  | case11 elems shadow name tail hname => exact ⟨_, .arrayField hname⟩
   | case12 entries dflt name tail => exact ⟨_, .mapField⟩
 
 /-- **The leaf characterization.** `find` is stuck exactly on the listed

@@ -72,12 +72,13 @@ rather than a change of model.  `docs/lean-key-rule-map.md` records it.
 * **the leaf.** Every `save(storage, p, v)` upstream keeps its leaf — a struct
   written over a location keeps the location's mapping members — and
   `theoryWrite` reads the walk without it.  `theorySave` below is upstream's
-  spelling, and the three `theorySave_eq_theoryWrite*` theorems are why
+  spelling, and the `theorySave_eq_theoryWrite*` theorems are why
   `storageRhsT` may read every write as the walk: for a primitive payload
   there is nothing to keep (every `.save` arm, and the `length` a push or pop
-  writes); at a fresh slot there is nothing to keep it from (`push`); and on a
-  struct copy the interpreter is stuck wherever the two would differ
-  (`Semantics.tyHasMapping` — solc ≥ 0.7 rejects the program).
+  writes); and on a struct copy the interpreter is stuck wherever the two
+  would differ (`Semantics.tyHasMapping` — solc ≥ 0.7 rejects the program).
+  The slot a `push` lands on is *not* fresh — it is the one a `pop` cleared
+  and gave back, mapping members included (`Semantics.pushSlot`).
 * **the copy rules.** The source is the `SVal` that `rhsSVal` read, as a
   `sval` leaf, because `rhsSVal` also covers the primitive and memory sources
   that one `Rules` constructor merges.  `Theory.denote_find` is the statement
@@ -129,16 +130,6 @@ theorem theorySave_eq_theoryWrite (s : State) (root : Name) (segs : List Seg)
   rw [hroot]
   simp only [bind, Except.bind]
   rw [denote_save hcur hnm, denote_write]
-
-/-- The same at a fresh slot, with no side condition: what `push` writes. -/
-theorem theorySave_eq_theoryWrite_absent (s : State) (root : Name) (segs : List Seg)
-    (w v0 : SVal) (hroot : rootTree s root = .ok v0)
-    (habs : StValue.find (StValue.sval v0) segs = StValue.dflt) :
-    theorySave s root segs w = theoryWrite s root segs w := by
-  unfold theorySave theoryWrite
-  rw [hroot]
-  simp only [bind, Except.bind]
-  rw [denote_save_absent habs, denote_write]
 
 /-- And for a payload that is not a struct, with no side condition at all:
 every primitive write, and the `length` a push or pop writes. -/
@@ -201,11 +192,12 @@ def pushStorageT (arr : WrappedExpr) (value : Option WrappedExpr) (s : State) :
     Res (List (Name × SVal)) :=
   placePath s arr >>= fun p => s.findStorage p.1 p.2 >>= fun cur =>
     match cur, arr.ty with
-    | SVal.array elems, Ty.ref (RefTy.array elemTy) =>
+    | SVal.array elems shadow, Ty.ref (RefTy.array elemTy) =>
         (match value with
-          | none => .ok (defaultForTy elemTy)
+          | none => .ok (pushSlot elemTy shadow).1
           | some rhs => rhsSVal s rhs) >>= fun newElem =>
-          theoryWrite s p.1 p.2 (SVal.array (elems ++ [newElem]))
+          theoryWrite s p.1 p.2
+            (SVal.array (elems ++ [newElem]) (pushSlot elemTy shadow).2)
     | _, _ => .error .stuck
 
 /-- `Update.storageRhs` with the write read as a term.  Compare arm by arm
@@ -223,10 +215,12 @@ def storageRhsT (u : StorageUpd) (s : State) : Res (List (Name × SVal)) :=
   | .pop arr =>
       placePath s arr >>= fun p => s.findStorage p.1 p.2 >>= fun cur =>
         match cur with
-        | SVal.array elems =>
+        | SVal.array elems shadow =>
             match elems.reverse with
             | [] => .error .revert
-            | _ :: restRev => theoryWrite s p.1 p.2 (SVal.array restRev.reverse)
+            | last :: restRev =>
+                theoryWrite s p.1 p.2
+                  (SVal.array restRev.reverse (last.defaultOf :: shadow))
         | _ => .error .stuck
   | .clear target =>
       deletePath s target >>= fun x =>

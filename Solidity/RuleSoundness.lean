@@ -457,7 +457,7 @@ theorem copyStToM_agree {ns : List Name} {s₁ s₂ : State}
       exact ⟨by simp [ht.nextId],
         ht.storage, by simp [ht.heap, ht.nextId],
         by simp [ht.nextId], ht.net, ht.env, ht.selfBalance⟩
-  | .array elems =>
+  | .array elems _ =>
       rw [copyStToM, copyStToM]
       refine ResAgree.bind (copyStElems_agree h elems) ?_
       intro t₁ t₂ melems ht
@@ -908,12 +908,13 @@ theorem resolveS_agree {ns : List Name} {s₁ s₂ : State}
       simp only [findStorage_congr ht]
       refine bindPureRes_agree _ fun arr => ?_
       cases arr with
-      | array elems =>
+      | array elems shadow =>
           match hty : target.ty with
           | Ty.ref (RefTy.array elemTy) =>
               refine ResultsAgree.bindRes
                 (saveStorage_agree ht root segs
-                  (SVal.array (elems ++ [defaultForTy elemTy]))) ?_
+                  (SVal.array (elems ++ [(pushSlot elemTy shadow).1])
+                          (pushSlot elemTy shadow).2)) ?_
               intro u₁ u₂ hu
               exact ⟨rfl, hu⟩
           | Ty.bool => exact rfl
@@ -7756,7 +7757,7 @@ theorem storageDeleteComplexTarget_sound
           refine ResAgree.bindState ?_ ?_
           · refine bindPureRes_agree _ fun arr => ?_
             cases arr with
-            | array elems =>
+            | array elems shadow =>
                 have htyP : (aliasExpr Kind.storage tgt.ty
                     storagePathAliasName).ty = tgt.ty := rfl
                 rw [htyP]
@@ -7764,7 +7765,8 @@ theorem storageDeleteComplexTarget_sound
                 | Ty.ref (RefTy.array elemTy) =>
                     refine ResultsAgree.bindRes
                       (saveStorage_agree ht' root segs
-                        (SVal.array (elems ++ [defaultForTy elemTy]))) ?_
+                        (SVal.array (elems ++ [(pushSlot elemTy shadow).1])
+                          (pushSlot elemTy shadow).2)) ?_
                     intro u₁ u₂ hu
                     exact ⟨rfl, hu⟩
                 | Ty.bool => exact rfl
@@ -9167,7 +9169,7 @@ theorem storageLocalRootPushUnfoldLeftFstReceiver_sound
             simp only [resOk_bind, findStorage_congr ht']
             refine bindPureRes_agree _ fun arr => ?_
             cases arr with
-            | array elems =>
+            | array elems shadow =>
                 have htyP : (aliasExpr Kind.storage target.ty
                     storagePathAliasName).ty = target.ty := rfl
                 rw [htyP]
@@ -9175,7 +9177,8 @@ theorem storageLocalRootPushUnfoldLeftFstReceiver_sound
                 | Ty.ref (RefTy.array elemTy) =>
                     refine ResultsAgree.bindRes
                       (saveStorage_agree ht' root segs
-                        (SVal.array (elems ++ [defaultForTy elemTy]))) ?_
+                        (SVal.array (elems ++ [(pushSlot elemTy shadow).1])
+                          (pushSlot elemTy shadow).2)) ?_
                     intro u₁ u₂ hu
                     exact ⟨rfl, hu⟩
                 | Ty.bool => exact rfl
@@ -9956,13 +9959,19 @@ capture is a stack temporary (`valueCaptureKind rhs = Kind.stack`:
 operators and primitive-typed memory reads). -/
 theorem storagePushValueUnfoldRightSndArgument_stack_sound
     (s : State) (target : PlaceExpr) (value : Option WrappedExpr)
-    (root : Name) (segs : List Seg) (elems : List SVal) (elemTy : Ty)
+    (root : Name) (segs : List Seg) (elems shadow : List SVal) (elemTy : Ty)
     (hcond : (ruleEffect .storagePushValueUnfoldRightSndArgument).cond
       (Stmt.push target value))
     (hfresh : ∀ n ∈ aliasNames,
       stmtUsesVar (Stmt.push target value) n = false)
     (hbase : resolveS s target.expr = .ok (s, root, segs))
-    (harr : s.findStorage root segs = .ok (SVal.array elems))
+    -- `harr`/`htyE` are load-bearing, not scaffolding: `execStmt`'s push arm
+    -- checks the receiver's shape *before* it reads the pushed value, while
+    -- the residual's `captureValue` reads the value first.  Off an array the
+    -- original is stuck where the residual can revert — the guard-halt /
+    -- capture-halt split of `Counterexamples/MappingSideConditions.lean`'s
+    -- M3 and M4, one statement form over.
+    (harr : s.findStorage root segs = .ok (SVal.array elems shadow))
     (htyE : target.expr.ty = Ty.ref (RefTy.array elemTy))
     (hvck : ∀ {rhs}, value = some rhs -> valueCaptureKind rhs = Kind.stack)
     (hprim : ∀ {rhs}, value = some rhs -> rhs.ty.isPrimitive = true)
@@ -9989,7 +9998,7 @@ theorem storagePushValueUnfoldRightSndArgument_stack_sound
           (evalValue s rhs) >>= fun x =>
             ((Except.ok (x.1, x.2.toSVal) : Res (State × SVal)) >>= fun y =>
               y.1.saveStorage root segs
-                (SVal.array (elems ++ [y.2]))) := by
+                (SVal.array (elems ++ [y.2]) (pushSlot elemTy shadow).2)) := by
         rw [execStmt, hbase]
         simp only [resOk_bind]
         rw [harr]
@@ -10031,7 +10040,7 @@ theorem storagePushValueUnfoldRightSndArgument_stack_sound
             resolveS_transport ht' hft hpt hbase
           have harr' : (t.setEnv valueAliasName
               (Binding.val v)).findStorage root segs =
-              .ok (SVal.array elems) := by
+              .ok (SVal.array elems shadow) := by
             rw [← findStorage_congr ht']
             exact harr
           have hReq : execStmt (t.setEnv valueAliasName (Binding.val v))
@@ -10041,7 +10050,7 @@ theorem storagePushValueUnfoldRightSndArgument_stack_sound
                   (aliasExpr Kind.stack rhs.ty valueAliasName)) >>= fun x =>
                 ((Except.ok (x.1, x.2.toSVal) : Res (State × SVal)) >>=
                   fun y => y.1.saveStorage root segs
-                    (SVal.array (elems ++ [y.2]))) := by
+                    (SVal.array (elems ++ [y.2]) (pushSlot elemTy shadow).2)) := by
             rw [execStmt, hbase']
             simp only [resOk_bind]
             rw [harr']
@@ -10061,7 +10070,7 @@ theorem storagePushValueUnfoldRightSndArgument_stack_sound
               (lookupBy_setBy_self valueAliasName (Binding.val v) t.env)]
           simp only [resOk_bind]
           exact saveStorage_agree ht' root segs
-            (SVal.array (elems ++ [v.toSVal]))
+            (SVal.array (elems ++ [v.toSVal]) (pushSlot elemTy shadow).2)
 
 theorem memoryDeleteComplexTarget_sound
     (s : State) (target : PlaceExpr) (mid : Nat)
@@ -10443,21 +10452,28 @@ theorem list_get_set_self (elems : List α) (i : Nat) (a : α)
       | zero => rfl
       | succ n => exact ih n (by simpa using h)
 
-/-- Extending an array with a default and then saving into the new slot
-is the same as appending the value directly. -/
+/-- Extending an array with a slot and then saving into that slot is the
+same as appending the value directly.  The recycled slots are untouched
+either way: `SVal.save` writes inside the live elements and carries them
+through, so `arr.push() = v` and `arr.push(v)` land on the same array —
+which is what `storagePushLhsToPushValue` needs.  They agree on the *value*
+only because `SVal.save` overwrites the slot; KeY's `save` would keep its
+mapping members, and `hprim` on that rule's soundness theorem is what keeps
+the two readings apart (`Counterexamples/MappingSideConditions.lean` M6). -/
 theorem save_extend_then_set (sv : SVal) (segs : List Seg)
-    (elems : List SVal) (d v : SVal) :
-    ((sv.save segs (SVal.array (elems ++ [d]))) >>= fun sv' =>
+    (elems shadow : List SVal) (d v : SVal) :
+    ((sv.save segs (SVal.array (elems ++ [d]) shadow)) >>= fun sv' =>
       sv'.save (segs ++ [Seg.at (elems.length : Int)]) v) =
-    sv.save segs (SVal.array (elems ++ [v])) := by
+    sv.save segs (SVal.array (elems ++ [v]) shadow) := by
   induction segs generalizing sv with
   | nil =>
       have hnil : ∀ x y : SVal, SVal.save x [] y = .ok y := by
         intro x y; simp [SVal.save]
       simp only [List.nil_append]
       rw [hnil, hnil]
-      show (SVal.array (elems ++ [d])).save [Seg.at (elems.length : Int)] v =
-        Except.ok (SVal.array (elems ++ [v]))
+      show (SVal.array (elems ++ [d]) shadow).save
+          [Seg.at (elems.length : Int)] v =
+        Except.ok (SVal.array (elems ++ [v]) shadow)
       rw [SVal.save]
       have hb : 0 ≤ (elems.length : Int) ∧
           (elems.length : Int).toNat < (elems ++ [d]).length := by
@@ -10471,7 +10487,7 @@ theorem save_extend_then_set (sv : SVal) (segs : List Seg)
         simp [List.get_eq_getElem, this]
       rw [hget, hnil]
       show Except.ok (SVal.array ((elems ++ [d]).set
-        (elems.length : Int).toNat v)) = _
+        (elems.length : Int).toNat v) shadow) = _
       have : (elems.length : Int).toNat = elems.length := by simp
       rw [this, list_set_append_last]
   | cons seg rest ih =>
@@ -10487,7 +10503,7 @@ theorem save_extend_then_set (sv : SVal) (segs : List Seg)
               | some old =>
                   simp only []
                   rw [← ih old]
-                  cases hs1 : old.save rest (SVal.array (elems ++ [d])) with
+                  cases hs1 : old.save rest (SVal.array (elems ++ [d]) shadow) with
                   | error err => rfl
                   | ok mid =>
                       show (SVal.struct (setBy name mid fields)).save
@@ -10505,7 +10521,7 @@ theorem save_extend_then_set (sv : SVal) (segs : List Seg)
                           rw [setBy_setBy]
                           rfl
           | «at» i => rw [SVal.save.eq_def]; rfl
-      | array arr =>
+      | array arr ash =>
           cases seg with
           | field name => rw [SVal.save.eq_def]; rfl
           | «at» i =>
@@ -10514,10 +10530,10 @@ theorem save_extend_then_set (sv : SVal) (segs : List Seg)
               · rw [dif_pos hb, dif_pos hb]
                 rw [← ih (arr.get ⟨i.toNat, hb.2⟩)]
                 cases hs1 : (arr.get ⟨i.toNat, hb.2⟩).save rest
-                    (SVal.array (elems ++ [d])) with
+                    (SVal.array (elems ++ [d]) shadow) with
                 | error err => rfl
                 | ok mid =>
-                    show (SVal.array (arr.set i.toNat mid)).save
+                    show (SVal.array (arr.set i.toNat mid) ash).save
                         (Seg.at i ::
                           (rest ++ [Seg.at (elems.length : Int)])) v = _
                     rw [SVal.save]
@@ -10535,7 +10551,7 @@ theorem save_extend_then_set (sv : SVal) (segs : List Seg)
                     | error err => rfl
                     | ok fin =>
                         show Except.ok (SVal.array ((arr.set i.toNat
-                          mid).set i.toNat fin)) = _
+                          mid).set i.toNat fin) ash) = _
                         rw [list_set_set]
                         rfl
               · rw [dif_neg hb, dif_neg hb]
@@ -10549,7 +10565,7 @@ theorem save_extend_then_set (sv : SVal) (segs : List Seg)
               | none =>
                   simp only []
                   rw [← ih dflt]
-                  cases hs1 : dflt.save rest (SVal.array (elems ++ [d])) with
+                  cases hs1 : dflt.save rest (SVal.array (elems ++ [d]) shadow) with
                   | error err => rfl
                   | ok mid =>
                       show (SVal.map (setBy i mid entries) dflt).save
@@ -10569,7 +10585,7 @@ theorem save_extend_then_set (sv : SVal) (segs : List Seg)
               | some old =>
                   simp only []
                   rw [← ih old]
-                  cases hs1 : old.save rest (SVal.array (elems ++ [d])) with
+                  cases hs1 : old.save rest (SVal.array (elems ++ [d]) shadow) with
                   | error err => rfl
                   | ok mid =>
                       show (SVal.map (setBy i mid entries) dflt).save
@@ -10590,17 +10606,17 @@ theorem save_extend_then_set (sv : SVal) (segs : List Seg)
 /-- State-level composition: extending an array and then writing the
 new slot equals appending the value. -/
 theorem stateSave_extend_then_set (t : State) (root : Name)
-    (segs : List Seg) (elems : List SVal) (d w : SVal) :
-    ((t.saveStorage root segs (SVal.array (elems ++ [d]))) >>= fun t' =>
+    (segs : List Seg) (elems shadow : List SVal) (d w : SVal) :
+    ((t.saveStorage root segs (SVal.array (elems ++ [d]) shadow)) >>= fun t' =>
       t'.saveStorage root (segs ++ [Seg.at (elems.length : Int)]) w) =
-    t.saveStorage root segs (SVal.array (elems ++ [w])) := by
+    t.saveStorage root segs (SVal.array (elems ++ [w]) shadow) := by
   unfold State.saveStorage
   cases hlk : lookupBy root t.storage with
   | none => rfl
   | some sv =>
       simp only []
-      rw [← save_extend_then_set sv segs elems d w]
-      cases hs1 : sv.save segs (SVal.array (elems ++ [d])) with
+      rw [← save_extend_then_set sv segs elems shadow d w]
+      cases hs1 : sv.save segs (SVal.array (elems ++ [d]) shadow) with
       | error err => rfl
       | ok mid =>
           simp only [resOk_bind, lookupBy_setBy_self]
@@ -10671,7 +10687,7 @@ theorem storagePushLhsToPushValue_sound
               | prim p => cases p <;> exact rfl
               | struct fields => exact rfl
               | map entries dflt => exact rfl
-              | array elems =>
+              | array elems shadow =>
                   match hty : tgt.ty with
                   | Ty.bool => exact rfl
                   | Ty.uint => exact rfl
@@ -10688,7 +10704,8 @@ theorem storagePushLhsToPushValue_sound
                       rw [resBind_assoc]
                       simp only [resOk_bind]
                       rw [stateSave_extend_then_set t root segs elems
-                        (defaultForTy elemTy) v.toSVal]
+                        (pushSlot elemTy shadow).2 (pushSlot elemTy shadow).1
+                        v.toSVal]
                       exact ResultsAgree.refl _ _
 
 /-! ## Coverage rules: `exprStmtCapture`, `pushAssignLower`,
@@ -10837,13 +10854,13 @@ the stack case minus the capture-kind restriction; `sorry` rather than a
 narrower claim under the rule's name. -/
 theorem storagePushValueUnfoldRightSndArgument_sound
     (s : State) (target : PlaceExpr) (value : Option WrappedExpr)
-    (root : Name) (segs : List Seg) (elems : List SVal) (elemTy : Ty)
+    (root : Name) (segs : List Seg) (elems shadow : List SVal) (elemTy : Ty)
     (hcond : (ruleEffect .storagePushValueUnfoldRightSndArgument).cond
       (Stmt.push target value))
     (hfresh : ∀ n ∈ aliasNames,
       stmtUsesVar (Stmt.push target value) n = false)
     (hbase : resolveS s target.expr = .ok (s, root, segs))
-    (harr : s.findStorage root segs = .ok (SVal.array elems))
+    (harr : s.findStorage root segs = .ok (SVal.array elems shadow))
     (htyE : target.expr.ty = Ty.ref (RefTy.array elemTy))
     (hprhs : ∀ {rhs}, value = some rhs -> pureExpr rhs = true) :
     ResultsAgree aliasNames
@@ -10854,7 +10871,7 @@ theorem storagePushValueUnfoldRightSndArgument_sound
   by_cases hstack : ∀ {rhs}, value = some rhs ->
       valueCaptureKind rhs = Kind.stack ∧ rhs.ty.isPrimitive = true
   · exact storagePushValueUnfoldRightSndArgument_stack_sound s target value
-      root segs elems elemTy hcond hfresh hbase harr htyE
+      root segs elems shadow elemTy hcond hfresh hbase harr htyE
       (fun h => (hstack h).1) (fun h => (hstack h).2) hprhs
   · sorry
 

@@ -222,15 +222,17 @@ end CaseMode
     /-- `arr.push(se)` / `arr.push(sp)` / `arr.push()`: KeY's
     `storagePushValueSave`, `…CopySource` and `storagePushLengthSave`, which
     differ only in the *sort* of what is appended — the element, a copied
-    source, or the element type's default (`value = none`).  Each writes the
-    new slot and the new length; the slot is at the array's *old* length, so
-    there is nothing for `save`'s leaf to keep and the three terms agree
-    (`Theory.denote_save_absent`). -/
+    source, or the slot a `pop` gave back (`value = none`).  Each writes the
+    new slot and the new length.  The bare push is `delAt` at that slot, so it
+    keeps the mapping members `delete` never clears (`Semantics.pushSlot`);
+    the two valued forms overwrite it, and the leaf they would keep is
+    invisible because the interpreter is stuck on a mapping-carrying source. -/
     | push (arr : WrappedExpr) (value : Option WrappedExpr)
     /-- The same extension, named through a push *place* (`p = arr.push()`):
     `place` is the whole `arr.push()` node. -/
     | pushPlace (place : WrappedExpr)
-    /-- `arr.pop()`: `delAt` the last slot and decrement the length. -/
+    /-- `arr.pop()`: `delAt` the last slot — which keeps its mapping members
+    and hands the slot back for the next `push` — and decrement the length. -/
     | pop (arr : WrappedExpr)
     /-- `delete p`: the current value's default (`SVal.defaultOf`, which leaves
     mapping members alone — KeY's lazy `delAt`/`delNode`). -/

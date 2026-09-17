@@ -165,7 +165,7 @@ def xsFld : Field :=
 
 def xsPlace : PlaceExpr := PlaceExpr.var Kind.storage dupArrayTy xsFld
 
-def dupState : State := { storage := [("xs", SVal.array [])] }
+def dupState : State := { storage := [("xs", SVal.array [] [])] }
 
 /-- Push preservation with the `defaultOk` side condition dropped
 (`wtExpr` on the target is kept — the condition lives in `stmtWt`'s push
@@ -582,7 +582,7 @@ def demoLayout : Layout :=
   ⟨[("total", Ty.uint), ("values", Ty.ref (RefTy.array Ty.uint))]⟩
 
 def demoState : State :=
-  { storage := [("total", SVal.int 40), ("values", SVal.array [])] }
+  { storage := [("total", SVal.int 40), ("values", SVal.array [] [])] }
 
 def valuesPlace : PlaceExpr :=
   PlaceExpr.var Kind.storage (Ty.ref (RefTy.array Ty.uint))
@@ -613,7 +613,7 @@ example :
     execBlock demoState demoProg =
       Except.ok { storage :=
         [("total", SVal.int 42),
-         ("values", SVal.array [SVal.int 42])] } := by
+         ("values", SVal.array [SVal.int 42] [])] } := by
   native_decide
 
 end PreservationNecessity

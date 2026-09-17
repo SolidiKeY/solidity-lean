@@ -132,7 +132,7 @@ theorem SVal.defaultOf_hasTy {v : SVal} {ty : Ty}
                 defaultOfFields_hasTy h
           | array elem => simp [SVal.hasTy] at h
           | mapping key value => simp [SVal.hasTy] at h
-  | array elems =>
+  | array elems shadow =>
       cases ty with
       | prim pt => simp [SVal.hasTy] at h
       | ref r =>
@@ -347,7 +347,7 @@ theorem save_hasTy {segs : List Seg} :
                       simp only [segTy] at hseg
                       cases hseg
                       cases v <;> simp [SVal.hasTy] at hty
-                      case array elems =>
+                      case array elems shadow =>
                         simp only [SVal.save] at hsave
                         split at hsave
                         case isTrue hbound =>
@@ -355,10 +355,10 @@ theorem save_hasTy {segs : List Seg} :
                             RuleSoundness.bind_ok_inv hsave
                           simp at hw
                           subst hw
-                          simp only [SVal.hasTy]
-                          exact hasTyElems_set hty
-                            (ih (hasTyElems_mem hty (elems.get_mem _))
-                              hsegs hnew hup)
+                          simp only [SVal.hasTy, Bool.and_eq_true]
+                          exact ⟨hasTyElems_set hty.1
+                            (ih (hasTyElems_mem hty.1 (elems.get_mem _))
+                              hsegs hnew hup), hty.2⟩
                         case isFalse => simp at hsave
                   | mapping key value =>
                       simp only [segTy] at hseg
@@ -501,6 +501,58 @@ theorem writeLoc_storage_frame {s s' : State} {loc : Loc} {v : Value}
       all_goals first
         | (cases Except.ok.inj h; rfl)
         | exact nomatch h
+
+/-! ## The recycled slot a `push` lands on
+
+`Semantics.pushSlot` either hands back a slot a `pop` cleared — still an
+element of the array, so still of the element type — or materialises the
+type's default.  Both inhabit the element type, and the slots that are left
+still do, which is what the `push` case of type soundness needs. -/
+
+/-- The `isPrimitive` branch of `pushSlot` is redundant where the recycled
+slot inhabits the element type: clearing a primitive gives the type's own
+default.  So the two readings of "the slot a `push` lands on" agree on every
+well-typed storage, and the branch buys the EVM layer its typing-free view. -/
+theorem pushSlot_prim {elemTy : Ty} {c : SVal} {rest : List SVal}
+    (hp : elemTy.isPrimitive = true) (hc : c.hasTy elemTy = true) :
+    (pushSlot elemTy (c :: rest)).1 = c.defaultOf := by
+  cases elemTy with
+  | ref r => simp [Ty.isPrimitive] at hp
+  | prim pt =>
+      cases c with
+      | prim p =>
+          cases pt <;> cases p <;>
+            simp_all [pushSlot, SVal.defaultOf, defaultForTy, SVal.hasTy,
+              Ty.isPrimitive]
+      | struct _ => cases pt <;> simp [SVal.hasTy] at hc
+      | array _ _ => cases pt <;> simp [SVal.hasTy] at hc
+      | map _ _ => cases pt <;> simp [SVal.hasTy] at hc
+
+/-- The slots that are left after a `push` still inhabit the element type —
+they are a tail of the ones that were there, so this needs no `defaultOk`. -/
+theorem pushSlot_rest_hasTy {elemTy : Ty} {shadow : List SVal}
+    (hsh : SVal.hasTy.hasTyElems elemTy shadow = true) :
+    SVal.hasTy.hasTyElems elemTy (pushSlot elemTy shadow).2 = true := by
+  cases shadow with
+  | nil => rfl
+  | cons c rest =>
+      simp only [SVal.hasTy.hasTyElems, Bool.and_eq_true] at hsh
+      exact hsh.2
+
+theorem pushSlot_hasTy {elemTy : Ty} {shadow : List SVal}
+    (hsh : SVal.hasTy.hasTyElems elemTy shadow = true)
+    (hok : defaultOk elemTy = true) :
+    (pushSlot elemTy shadow).1.hasTy elemTy = true ∧
+      SVal.hasTy.hasTyElems elemTy (pushSlot elemTy shadow).2 = true := by
+  cases shadow with
+  | nil => exact ⟨defaultForTy_hasTy hok, rfl⟩
+  | cons c rest =>
+      simp only [SVal.hasTy.hasTyElems, Bool.and_eq_true] at hsh
+      refine ⟨?_, hsh.2⟩
+      simp only [pushSlot]
+      split
+      · exact defaultForTy_hasTy hok
+      · exact SVal.defaultOf_hasTy hsh.1
 
 end Semantics
 end Solidity

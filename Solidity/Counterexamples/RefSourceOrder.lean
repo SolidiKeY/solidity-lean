@@ -93,7 +93,7 @@ def store : State :=
   let s : State :=
     { State.exampleStore with
         storage :=
-          setBy "people" (SVal.array [defaultForRef (RefTy.struct "Person")])
+          setBy "people" (SVal.array [defaultForRef (RefTy.struct "Person")] [])
             State.exampleStore.storage,
         env := [] }
   match execStmt s sstmt!{ Person memory carol } with

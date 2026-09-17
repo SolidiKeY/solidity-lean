@@ -116,9 +116,11 @@ macro_rules
           StandardExample.valueField,
           -- `PlaceExpr.expr` is how `Stmt.push`/`Stmt.pop` reach the
           -- receiver, and `pushPlace` is the place a `push` assigns to;
-          -- without them every push/pop statement is opaque.
+          -- without them every push/pop statement is opaque.  `pushSlot`
+          -- is the slot a bare `push` lands on — the one a `pop` cleared
+          -- and gave back — so a push stalls without it.
           PlaceExpr.var, PlaceExpr.field, PlaceExpr.index,
-          PlaceExpr.expr, PlaceExpr.pushPlace,
+          PlaceExpr.expr, PlaceExpr.pushPlace, Semantics.pushSlot,
           WrappedExpr.kind, WrappedExpr.ty,
           Typed.WrappedExpr.kind, Typed.WrappedExpr.ty,
           Ty.isPrimitive, Field.name, Field.primitive, Field.identity,

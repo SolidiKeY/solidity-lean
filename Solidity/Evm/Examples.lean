@@ -45,7 +45,7 @@ def exampleEvmStore : State :=
         ("balance", SVal.int 0),
         ("balances", SVal.map [] (SVal.int 0)),
         ("flags", SVal.map [] (SVal.bool false)),
-        ("values", SVal.array []),
+        ("values", SVal.array [] []),
         ("alice", SVal.struct
           [ ("account", SVal.struct
               [ ("balance", SVal.int 0),
@@ -108,7 +108,7 @@ def storageAgrees (L : List Name) (s : State) (st : Store) : Bool :=
     | some name =>
         match lookupBy name s.storage with
         | some (SVal.map entries dflt) => mapAgrees i entries dflt st
-        | some (SVal.array elems) => arrayAgrees i elems st
+        | some (SVal.array elems _) => arrayAgrees i elems st
         | some (SVal.struct sfields) => structAgrees i sfields st
         | some sv => svalMatches sv (st.read (slotWord i))
         | none => false
@@ -549,7 +549,7 @@ theorem reprState_exampleEvm :
         · intro k _ _
           simp [ReprSVal, Store.read, lookupBy, emptyStore, wBool]
     | 6 =>
-        refine ⟨SVal.array [], ?_, ?_⟩
+        refine ⟨SVal.array [] [], ?_, ?_⟩
         · have hn : n = "values" := by
             simpa [exampleLayout] using h.symm
           subst hn; rfl

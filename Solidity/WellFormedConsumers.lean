@@ -73,12 +73,12 @@ theorem SVal.find_append_typed {segs : List Seg} :
                       simp only [segTy] at hseg
                       cases hseg
                       cases v <;> simp [SVal.hasTy] at hty
-                      case array elems =>
+                      case array elems shadow =>
                         simp only [List.cons_append, SVal.find] at hfind ⊢
                         split at hfind
                         · rename_i hb
                           rw [dif_pos hb]
-                          exact ih q (hasTyElems_mem hty (elems.get_mem _))
+                          exact ih q (hasTyElems_mem hty.1 (elems.get_mem _))
                             hsegs hfind
                         · simp at hfind
                   | mapping key value =>
@@ -122,7 +122,7 @@ theorem length_read_nonneg {L : Layout} {s : State} {r : Name} {p : List Seg}
     {elem : Ty} {es : List SVal}
     (hst : wellTypedStorageB L s.storage = true)
     (hty : L.tyAt r p = some (Ty.ref (RefTy.array elem)))
-    (hfind : s.findStorage r p = Except.ok (SVal.array es)) :
+    (hfind : s.findStorage r p = Except.ok (SVal.array es sh)) :
     s.findStorage r (p ++ [Seg.field "length"]) =
         Except.ok (SVal.int es.length) ∧ (0 : Int) ≤ es.length := by
   refine ⟨?_, by omega⟩
@@ -133,20 +133,20 @@ theorem index_read_in_bounds {L : Layout} {s : State} {r : Name} {p : List Seg}
     {elem : Ty} {es : List SVal} {i : Int}
     (hst : wellTypedStorageB L s.storage = true)
     (hty : L.tyAt r p = some (Ty.ref (RefTy.array elem)))
-    (hfind : s.findStorage r p = Except.ok (SVal.array es))
+    (hfind : s.findStorage r p = Except.ok (SVal.array es sh))
     (hb : 0 ≤ i ∧ i.toNat < es.length) :
     ∃ v, s.findStorage r (p ++ [Seg.at i]) = Except.ok v ∧ v.hasTy elem = true := by
   have hval := findStorage_hasTy hst hty hfind
-  simp only [SVal.hasTy] at hval
+  simp only [SVal.hasTy, Bool.and_eq_true] at hval
   rw [State.findStorage_append_typed hst hty hfind]
-  refine ⟨es.get ⟨i.toNat, hb.2⟩, ?_, hasTyElems_mem hval (es.get_mem _)⟩
+  refine ⟨es.get ⟨i.toNat, hb.2⟩, ?_, hasTyElems_mem hval.1 (es.get_mem _)⟩
   simp [SVal.find, hb]
 
 theorem index_read_out_of_bounds {L : Layout} {s : State} {r : Name}
     {p : List Seg} {elem : Ty} {es : List SVal} {i : Int}
     (hst : wellTypedStorageB L s.storage = true)
     (hty : L.tyAt r p = some (Ty.ref (RefTy.array elem)))
-    (hfind : s.findStorage r p = Except.ok (SVal.array es))
+    (hfind : s.findStorage r p = Except.ok (SVal.array es sh))
     (hb : ¬ (0 ≤ i ∧ i.toNat < es.length)) :
     s.findStorage r (p ++ [Seg.at i]) = Except.error Halt.revert := by
   rw [State.findStorage_append_typed hst hty hfind]
@@ -259,11 +259,11 @@ theorem SVal.find_canonical {segs : List Seg} :
                       | prim p => cases p <;> simp [SVal.canonical] at hty
                       | struct _ => simp [SVal.canonical] at hty
                       | map _ _ => simp [SVal.canonical] at hty
-                      | array elems =>
-                        simp only [SVal.canonical] at hfind hty
+                      | array elems shadow =>
+                        simp only [SVal.canonical, Bool.and_eq_true] at hfind hty
                         simp only [SVal.find] at hfind
                         split at hfind
-                        · exact ih (canonicalElems_mem hty (elems.get_mem _))
+                        · exact ih (canonicalElems_mem hty.1 (elems.get_mem _))
                             hsegs hfind
                         · simp at hfind
                   | mapping key value =>

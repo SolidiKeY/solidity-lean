@@ -312,7 +312,7 @@ def evalW (s : State) : WrappedExpr → Res Value
                 if isArrayTy tyM then
                   if 0 ≤ k then
                     match lookupBy fld.name s.storage with
-                    | some (SVal.array elems) =>
+                    | some (SVal.array elems _) =>
                         if k.toNat < elems.length then
                           (elems.getD k.toNat (SVal.int 0)).asValue
                         else .error .revert
@@ -368,7 +368,7 @@ def evalW (s : State) : WrappedExpr → Res Value
           if fld.origin = some StorageOrigin.global ∧
               lfld.name = "length" ∧ isArrayTy tyA then
             match lookupBy fld.name s.storage with
-            | some (SVal.array elems) => .ok (Value.int elems.length)
+            | some (SVal.array elems _) => .ok (Value.int elems.length)
             | _ => .error .stuck
           else if fld.origin = some StorageOrigin.global ∧
               isStructTy tyA then
@@ -410,9 +410,9 @@ def writeW (s : State) (lhs : WrappedExpr) (v : Value) : Res State :=
                 if isArrayTy tyM then
                   if 0 ≤ k then
                     match lookupBy fld.name s.storage with
-                    | some (SVal.array elems) =>
+                    | some (SVal.array elems shadow) =>
                         if k.toNat < elems.length then
-                          .ok { s with storage := (setBy fld.name (SVal.array (elems.set k.toNat v.toSVal)) s.storage) }
+                          .ok { s with storage := (setBy fld.name (SVal.array (elems.set k.toNat v.toSVal) shadow) s.storage) }
                         else .error .revert
                     | _ => .error .stuck
                   else .error .stuck
@@ -480,10 +480,10 @@ def assignW (s : State) (lhs rhs : WrappedExpr) : Res State :=
                       if isArrayTy tyM then
                         if 0 ≤ k then
                           match lookupBy fld.name s.storage with
-                          | some (SVal.array elems) => do
+                          | some (SVal.array elems shadow) => do
                               let v ← evalW s rhs
                               if k.toNat < elems.length then
-                                .ok { s with storage := (setBy fld.name (SVal.array (elems.set k.toNat v.toSVal)) s.storage) }
+                                .ok { s with storage := (setBy fld.name (SVal.array (elems.set k.toNat v.toSVal) shadow) s.storage) }
                               else .error .revert
                           | _ => .error .stuck
                         else .error .stuck
@@ -606,9 +606,10 @@ def execW (s : State) : Stmt → Res State
       | _ => .error .stuck
   | .push target value =>
       -- `a.push(e)` / `a.push()` on a global array root: append the
-      -- element (the default for a valueless push). Arrays longer than
-      -- `keyBound` are out of the fragment (their element slots would
-      -- leave the injective region).
+      -- element (the slot a `pop` gave back, cleared, for a valueless
+      -- push — `Semantics.pushSlot`). Arrays longer than `keyBound` are
+      -- out of the fragment (their element slots would leave the
+      -- injective region).
       (match target.expr with
       | .var .storage tyA fld =>
           (match lookupBy fld.name s.env with
@@ -618,16 +619,17 @@ def execW (s : State) : Stmt → Res State
                   if fld.origin = some StorageOrigin.global ∧
                       elemTy.isPrimitive then
                     match lookupBy fld.name s.storage with
-                    | some (SVal.array elems) => do
+                    | some (SVal.array elems shadow) => do
                         let sv ← (match value with
-                          | none => .ok (defaultForTy elemTy)
+                          | none => .ok (pushSlot elemTy shadow).1
                           | some rhs =>
                               if rhs.ty.isPrimitive then do
                                 let v ← evalW s rhs
                                 .ok v.toSVal
                               else .error .stuck)
                         if elems.length + 1 ≤ keyBound then
-                          .ok { s with storage := (setBy fld.name (SVal.array (elems ++ [sv])) s.storage) }
+                          .ok { s with storage := (setBy fld.name
+                            (SVal.array (elems ++ [sv]) (pushSlot elemTy shadow).2) s.storage) }
                         else .error .stuck
                     | _ => .error .stuck
                   else .error .stuck
@@ -645,11 +647,13 @@ def execW (s : State) : Stmt → Res State
               | Ty.ref (RefTy.array _) =>
                   if fld.origin = some StorageOrigin.global then
                     match lookupBy fld.name s.storage with
-                    | some (SVal.array elems) =>
+                    | some (SVal.array elems shadow) =>
                         (match elems.reverse with
                         | [] => .error .revert
-                        | _ :: restRev =>
-                            .ok { s with storage := (setBy fld.name (SVal.array restRev.reverse) s.storage) })
+                        | last :: restRev =>
+                            .ok { s with storage := (setBy fld.name
+                              (SVal.array restRev.reverse (last.defaultOf :: shadow))
+                              s.storage) })
                     | _ => .error .stuck
                   else .error .stuck
               | _ => .error .stuck)

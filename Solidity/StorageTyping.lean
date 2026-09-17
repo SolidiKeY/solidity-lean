@@ -74,7 +74,8 @@ def SVal.hasTy : SVal -> Ty -> Bool
   | SVal.int _, Ty.uint => true
   | SVal.bool _, Ty.bool => true
   | SVal.struct fields, Ty.ref (RefTy.struct s) => hasTyFields s fields
-  | SVal.array elems, Ty.ref (RefTy.array elem) => hasTyElems elem elems
+  | SVal.array elems shadow, Ty.ref (RefTy.array elem) =>
+      hasTyElems elem elems && hasTyElems elem shadow
   | SVal.map entries dflt, Ty.ref (RefTy.mapping _ value) =>
       hasTyEntries value entries && dflt.hasTy value
   | _, _ => false
@@ -97,7 +98,7 @@ denotes (arrays and mappings are `Struct` nodes with `at`/`MapField`
 fields in `structHeader.key`). -/
 def SVal.isRefVal : SVal -> Bool
   | SVal.struct _ => true
-  | SVal.array _ => true
+  | SVal.array _ _ => true
   | SVal.map _ _ => true
   | _ => false
 
@@ -121,7 +122,7 @@ def PrimVal.keySort : PrimVal -> KeySort
 def SVal.keySort : SVal -> KeySort
   | SVal.prim p => p.keySort
   | SVal.struct _ => KeySort.struct
-  | SVal.array _ => KeySort.struct
+  | SVal.array _ _ => KeySort.struct
   | SVal.map _ _ => KeySort.struct
 
 /-- The sort of a memory slot value: `Prim` subsorts inline, `Identity`
@@ -358,11 +359,11 @@ theorem find_hasTy {segs : List Seg} :
                       simp only [segTy] at hseg
                       cases hseg
                       cases v <;> simp [SVal.hasTy] at hty
-                      case array elems =>
+                      case array elems shadow =>
                         simp only [SVal.find] at hfind
                         split at hfind
                         · exact ih
-                            (hasTyElems_mem hty (elems.get_mem _))
+                            (hasTyElems_mem hty.1 (elems.get_mem _))
                             hsegs hfind
                         · simp at hfind
                   | mapping key value =>

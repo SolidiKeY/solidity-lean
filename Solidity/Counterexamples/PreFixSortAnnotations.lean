@@ -139,7 +139,7 @@ def findingLayout : Layout :=
 def findingState : State :=
   { storage :=
       [("alice", SVal.struct []), ("total", SVal.int 42),
-        ("values", SVal.array [])] }
+        ("values", SVal.array [] [])] }
 
 def aliceExpr : WrappedExpr :=
   WrappedExpr.var Kind.storage (Ty.ref (RefTy.struct "Person"))
