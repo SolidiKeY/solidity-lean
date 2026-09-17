@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+# `lake` with a bigger thread stack for `lake serve`, and nothing else.
+#
+# The MCP server's client (`leanclient`) spawns the language server as a
+# hardcoded `lake serve -- -Dserver.reportDelayMs=0`, so there is no
+# configuration hook to pass `--tstack` through. This shim is that hook: the
+# only thing it changes is appending the flag to a `serve`, and it does so for
+# the same reason `.vscode/settings.json` sets `lean4.serverArgs` -- a
+# `sol_derivation` chain elaborates through a deeply recursive `rule_simp`,
+# and a file worker on the default stack dies with "deep recursion was
+# detected at 'interpreter'". The watchdog forwards the flag to its workers.
+#
+# `scripts/run-lean-mcp.sh` puts this directory ahead of elan on `PATH`. It
+# holds *only* `lake`, so `lean` still resolves to the elan toolchain that
+# honours `lean-toolchain`.
+set -euo pipefail
+
+script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# Resolve the real `lake` by looking past this directory.
+filtered_path=""
+IFS=:
+for entry in $PATH; do
+  entry_abs="$entry"
+  if [ -d "${entry:-.}" ]; then
+    entry_abs="$(cd "${entry:-.}" && pwd)"
+  fi
+  if [ "$entry_abs" != "$script_dir" ]; then
+    if [ -z "$filtered_path" ]; then
+      filtered_path="$entry"
+    else
+      filtered_path="$filtered_path:$entry"
+    fi
+  fi
+done
+unset IFS
+
+# Only `serve` gets the flag, and only after the `--` that separates lake's
+# own arguments from the server's.
+for arg in "$@"; do
+  case "$arg" in
+    +*) continue ;;
+    serve) PATH="$filtered_path" exec lake "$@" --tstack=131072 ;;
+    *) break ;;
+  esac
+done
+
+PATH="$filtered_path" exec lake "$@"

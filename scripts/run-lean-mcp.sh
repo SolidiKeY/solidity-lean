@@ -27,6 +27,12 @@ export LEAN_PROJECT_PATH="$PROJECT_ROOT"
 # lean-toolchain (v4.24.0), while the shims only resolve nix-store toolchains.
 EXTRA_PATH="$PROJECT_ROOT/scripts/lean-vscode/bin"
 [ -d "$HOME/.elan/bin" ] && EXTRA_PATH="$HOME/.elan/bin:$EXTRA_PATH"
+# Ahead of both: a `lake` that adds `--tstack` to `serve`. The client spawns
+# the server as a hardcoded `lake serve --`, so this shim is the only place
+# the flag can be added, and without it a file worker on one of the worked
+# derivations dies of deep recursion. It holds only `lake`, so `lean` still
+# comes from elan.
+EXTRA_PATH="$PROJECT_ROOT/scripts/lean-mcp/bin:$EXTRA_PATH"
 export PATH="$EXTRA_PATH:$PATH"
 
 # Run from the project root so paths reported by Git and Lean resolve alike.
