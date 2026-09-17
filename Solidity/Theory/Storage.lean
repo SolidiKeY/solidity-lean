@@ -567,18 +567,16 @@ dispatch on what the chain is built over — `isMapping`/`isArray` above — bec
 `defaultOf` empties an array, keeps a mapping and recurses into a struct, and a
 chain's own constructors do not say which it is. -/
 
-/-- No leaf on the chain's spine.  `delValue` pushes through a store chain
-member by member; a `merge` is not a chain step, and on one the push is only
-sound when the two sides agree on what is a mapping — which a well-sorted
-write guarantees and this predicate assumes away. -/
-def mergeFree : StValue -> Bool
-  | merge _ _ => false
-  | storeSt st _ _ => mergeFree st
-  | _ => true
-
 /-- `delValue<[α]>(v)` and `delNode(st)` at once — KeY keeps them apart by
 sort (`delValueStruct` is the bridge between them), which a total function
-does not need to. -/
+does not need to.
+
+The `merge` arm is member-wise, as upstream's is: `delNode` over a copy leaf
+is only ever *read*, member by member (`selectStDelNode{Map,Ref,Default}`),
+and the Maude model's `delNode(ovr(o, n))` is the same.  A leaf whose written
+side is a mapping is left alone (`delValue(mp) = mp` there too); no shape of
+the *pair* is consulted otherwise, which is what lets `selectSt_delValue`
+push through a copy. -/
 def delValue : StValue -> StValue
   | sval v => sval v.defaultOf
   | prim _ => dflt
@@ -590,8 +588,23 @@ def delValue : StValue -> StValue
       else storeSt (delValue st) a (delValue v)
   | merge o n =>
       if isMapping (merge o n) then merge o n
-      else if isArray (merge o n) then sval (SVal.array [])
       else merge (delValue o) (delValue n)
+
+/-- The two sides of a copy leaf agree on what is a mapping and what is an
+array — at the leaf and one selector down, which is all a delete pushed
+through the leaf consults.  Every leaf a well-sorted `save` builds satisfies
+it: a location and the value written over it inhabit one type. -/
+def sidesAgree (o n : StValue) : Prop :=
+  isMapping o = isMapping n ∧ isArray o = isArray n ∧
+    ∀ a, isMapping (selectSt o a) = isMapping (selectSt n a)
+
+/-- Every copy leaf on the chain's spine has agreeing sides.  A chain of
+`storeSt` over an `sval` leaf — every term a rule's update builds — satisfies
+it vacuously; the leaf a copy leaves behind satisfies it by well-sortedness. -/
+def WellMerged : StValue -> Prop
+  | merge o n => sidesAgree o n ∧ WellMerged o ∧ WellMerged n
+  | storeSt st _ _ => WellMerged st
+  | _ => True
 
 /-- `delNode(st)`: `delValue` at sort `Struct`. -/
 abbrev delNode : StValue -> StValue := delValue
@@ -644,8 +657,8 @@ theorem selectStDelNodeIndexStruct {t : StValue} (h : isArray t = true) (i : Int
       have hm : isMapping (merge o n) = false := by
         simp only [isMapping, isArray, base] at h ⊢
         split at h <;> simp_all
-      rw [delValue, if_neg (by simp [hm]), if_pos h]
-      simp [selectSt, svalSelect]
+      rw [delValue, if_neg (by simp [hm])]
+      exact selectStDelNodeIndexStruct (by simpa [isArray, base] using h) i
   | _ => simp [isArray, base] at h
 
 /-- Keys survive `defaultOf` on a struct body, so a member lookup commutes
@@ -661,21 +674,65 @@ theorem lookupBy_defaultOfFields (n : Name) :
       · simp [h]
       · simp [h, lookupBy_defaultOfFields n rest]
 
+/-- A delete does not change what a term is: `defaultOf` keeps every
+constructor, and the chain arms keep the base. -/
+theorem isMapping_delValue : ∀ (t : StValue), isMapping (delValue t) = isMapping t
+  | sval v => by
+      cases v with
+      | prim p => cases p <;> rfl
+      | _ => rfl
+  | prim _ | dflt | mtSt => rfl
+  | storeSt st a v => by
+      rw [delValue]
+      split
+      · rfl
+      · split
+        · rename_i h
+          simp only [isMapping, isArray, base] at h ⊢
+          split at h <;> simp_all
+        · simp only [isMapping, base]; rw [← isMapping, isMapping_delValue st]; rfl
+  | merge o n => by
+      rw [delValue]
+      split
+      · rfl
+      · simp only [isMapping, base]; rw [← isMapping, isMapping_delValue n]; rfl
+
+/-- …nor whether it is a struct node. -/
+theorem isNode_delValue : ∀ (t : StValue), isNode (delValue t) = isNode t
+  | sval v => by
+      cases v with
+      | prim p => cases p <;> rfl
+      | _ => rfl
+  | prim _ | dflt | mtSt => rfl
+  | storeSt st a v => by
+      rw [delValue]
+      split
+      · rfl
+      · split
+        · rename_i h
+          simp only [isNode, isArray, base] at h ⊢
+          split at h <;> simp_all
+        · simp only [isNode, base]; rw [← isNode, isNode_delValue st]; rfl
+  | merge o n => by
+      rw [delValue]
+      split
+      · rfl
+      · simp only [isNode, base]; rw [← isNode, isNode_delValue n]; rfl
+
 /-- `selectStDelNodeRef` and `selectStDelNodeDefault` in one: off a mapping
 and an array, a delete commutes with every selector — a reference member is
 deleted recursively, a value member reads its default.
 
-`mergeFree` is what a chain of `storeSt` over an `sval` leaf satisfies, i.e.
-every term a rule's update builds.  It cannot be dropped, and the reason is
-not the one the leaf's own rules give: the two sides of the equation dispatch
-on *different trees* — `delValue` reads the new side's shape, since `base` of
-a `merge` is `base` of its right argument, and `selectSt` reads the old
-side's.  `Counterexamples/MappingSideConditions.lean`'s M1 is a witness where
-neither side is a mapping and the array collapse separates them.  Weakening it
-would mean a predicate saying the two sides *agree* member by member, which is
-what a well-sorted write guarantees; nothing here needs one. -/
+`WellMerged` is the one hypothesis that is not the taclet's own: through a
+copy leaf, the equation's two sides dispatch on *different trees* — `delValue`
+reads the written side's shape (`base` of a `merge` is `base` of its right
+argument) and `selectSt` reads the location's — so the push is sound exactly
+when the two agree, which a well-sorted write guarantees and an ill-sorted
+one does not (`Counterexamples/MappingSideConditions.lean`'s M1: an array
+written over by a struct).  The delete-after-copy of upstream's
+`testPushCopyThenDeleteTarget` is inside the theorem. -/
 theorem selectSt_delValue {t : StValue} (hm : isMapping t = false)
-    (ha : isArray t = false) (hmf : mergeFree t = true) (a : Seg) :
+    (ha : isArray t = false) (hw : WellMerged t) (a : Seg) :
     selectSt (delValue t) a = delValue (selectSt t a) := by
   induction t with
   | sval v =>
@@ -693,13 +750,34 @@ theorem selectSt_delValue {t : StValue} (hm : isMapping t = false)
   | storeSt st b w ih _ =>
       have hm' : isMapping st = false := by simpa [isMapping, base] using hm
       have ha' : isArray st = false := by simpa [isArray, base] using ha
-      have hmf' : mergeFree st = true := by simpa [mergeFree] using hmf
+      have hw' : WellMerged st := hw
       rw [delValue, if_neg (by simp [hm]), if_neg (by simp [ha]), selectOnStore,
         selectOnStore]
       by_cases h : b = a
       · simp [h]
-      · simp [h, ih hm' ha' hmf']
-  | merge o n _ _ => simp [mergeFree] at hmf
+      · simp [h, ih hm' ha' hw']
+  | merge o n iho ihn =>
+      obtain ⟨⟨hmo, hao, hsel⟩, hwo, hwn⟩ := hw
+      have hmn : isMapping n = false := by simpa [isMapping, base] using hm
+      have han : isArray n = false := by simpa [isArray, base] using ha
+      rw [delValue, if_neg (by simp [hm])]
+      cases a with
+      | «at» i => exact ihn hmn han hwn
+      | field f =>
+          simp only [selectSt]
+          rw [iho (hmo.trans hmn) (hao.trans han) hwo, ihn hmn han hwn,
+            isMapping_delValue, isNode_delValue]
+          have h1' := hsel (Seg.field f)
+          by_cases h1 : isMapping (selectSt o (Seg.field f)) = true
+          · simp [h1]
+          · simp only [Bool.not_eq_true] at h1
+            by_cases h2 : isNode (selectSt o (Seg.field f)) = true
+            · simp only [h1, h2, Bool.false_eq_true, if_false, if_true]
+              rw [delValue, if_neg (by
+                show ¬ isMapping (selectSt n (Seg.field f)) = true
+                rw [← h1', h1]; decide)]
+            · simp only [Bool.not_eq_true] at h2
+              simp only [h1, h2, Bool.false_eq_true, if_false]
   | _ => cases a <;> rfl
 
 /-! ## The leaf of a write
