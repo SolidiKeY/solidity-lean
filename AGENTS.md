@@ -82,6 +82,16 @@ reading it back whole.
   (`scripts/lean-vscode/bin` wrappers exist only so the VS Code extension
   finds the Nix-provided `lean`/`lake` on NixOS; elan must come first on
   `PATH`, since it honours `lean-toolchain`.)
+- **The language server needs `--tstack=131072`**, the number `lakefile.toml`
+  already gives `lake build`. Without it a file worker on one of the worked
+  derivations dies with "deep recursion was detected at 'interpreter'" before
+  it reports a diagnostic, because a `sol_derivation` chain elaborates through
+  a deeply recursive `rule_simp`. The server does not read `weakLeanArgs`, so
+  the flag is set twice more: `.vscode/settings.json`'s `lean4.serverArgs` for
+  the editor, and `scripts/lean-mcp/bin/lake` for the MCP, whose client spawns
+  a hardcoded `lake serve` with no hook for arguments. The watchdog forwards
+  the flag to each worker as `-s`; `ps -eo args | grep -- --worker` is how to
+  check a running one has it.
 - `grind` is built in on this toolchain. Try `grind` or `grind [lemmas]`
   before a long manual script. Tag safe reusable lemmas `@[grind]` when they
   do not blow up the search space. For Boolean/bitvector goals prefer

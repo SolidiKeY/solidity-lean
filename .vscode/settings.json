@@ -1,5 +1,15 @@
 {
   "lean4.envPathExtensions": [
     "scripts/lean-vscode/bin"
+  ],
+  // The worked derivations need a bigger thread stack than the default: a
+  // `sol_derivation` chain elaborates through a deeply recursive `rule_simp`,
+  // and a file worker without this dies with "deep recursion was detected at
+  // 'interpreter'" before it reports a single diagnostic. `lakefile.toml`
+  // gives the same number to `lake build` as `weakLeanArgs`; the language
+  // server does not read that, so it is repeated here. The watchdog forwards
+  // the flag to each file worker (as `-s`), which is where the crash is.
+  "lean4.serverArgs": [
+    "--tstack=131072"
   ]
 }
