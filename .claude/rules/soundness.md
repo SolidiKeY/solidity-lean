@@ -50,7 +50,10 @@ hypothesis shape. What to know before adding or weakening one:
   `storageFieldReadUnfoldRightSndResult_sound` has no mapping hypothesis. On a
   merely *pure* path it cannot be: `Counterexamples/MappingSideConditions.lean`
   M3 reverts on the path while the guard has already made the assignment
-  stuck.
+  stuck. Nor on a simple *index*: resolving `sp[i]` evaluates `i`, and a
+  storage-kind `i` reads the store, which reverts on an out-of-bounds alias
+  (M4). So the `hnm` of every index rule stays; only `isSimple` narrowed to
+  KeY's `SimpleExpression` (a stack variable or literal) would free them.
 - Some side conditions are **proof-technique residue, not semantic
   restriction**, and the docstring says which. Those are the ones worth
   weakening.
