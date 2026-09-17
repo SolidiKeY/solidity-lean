@@ -477,7 +477,9 @@ theorem mergeDen_ok_of_no_mapping {cur w : SVal} (h : svalHasMapping cur = false
   rw [mergeDen, mergeKeepMaps_of_no_mapping cur w h]
 
 /-- `save` at a location whose current value carries no mapping denotes the
-plain write — the collapse. -/
+plain write — the collapse.  The hypothesis is the theorem's content, not
+residue: `Counterexamples/MappingSideConditions.lean`'s M2 is a location whose
+mapping member the term keeps and the interpreter's write overwrites. -/
 theorem denote_save {v cur w : SVal} {p : List Seg}
     (hcur : StValue.find (StValue.sval v) p = StValue.sval cur)
     (hnm : svalHasMapping cur = false) :

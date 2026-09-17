@@ -4627,15 +4627,60 @@ theorem execAssign_pureLocSimPrim {ns : List Name} {s₁ s₂ : State}
   | .mkTernary c t el =>
       rw [hsh, resolveLoc.eq_def] at h₁; exact nomatch h₁
 
+/-- A simple path resolves or is stuck: `resolveS` on a variable, a
+literal or a Boolean evaluates nothing, so it has no way to revert.  This
+is what lets a rule whose right-hand side sits on a `SimpleExpression`
+path do without `tyHasMapping` below — where the interpreter's
+mapping guard fires, the two sides are stuck together.  -/
+theorem resolveS_simple_err_stuck {s : State} {e : WrappedExpr} {err : Halt}
+    (h : e.simple = true) (heq : resolveS s e = .error err) :
+    err = Halt.stuck := by
+  match e with
+  | .var kind ty fld =>
+      rw [resolveS] at heq
+      split at heq
+      · exact nomatch heq
+      · injection heq with h'; exact h'.symm
+      · injection heq with h'; exact h'.symm
+      · split at heq
+        · exact nomatch heq
+        · injection heq with h'; exact h'.symm
+  | .bool b => rw [resolveS] at heq; injection heq with h'; exact h'.symm
+  | .intLit ty v => rw [resolveS] at heq; injection heq with h'; exact h'.symm
+
+/-- The same one selector up: a field adds a segment and cannot fail on its
+own, so a field over a simple path is stuck or nothing. -/
+theorem resolveS_fieldSimple_err_stuck {s : State} {kind : Kind} {ty : Ty}
+    {base : WrappedExpr} {fld : Field} {err : Halt}
+    (h : base.simple = true)
+    (heq : resolveS s (WrappedExpr.field kind ty base fld) = .error err) :
+    err = Halt.stuck := by
+  rw [resolveS] at heq
+  cases hb : resolveS s base with
+  | ok x => rw [hb] at heq; exact nomatch heq
+  | error e =>
+      rw [hb] at heq
+      injection heq with h'
+      exact h' ▸ resolveS_simple_err_stuck h hb
+
 /-- A storage-kind right-hand side whose resolution fails makes the
 assignment fail: solc's RHS-first order runs the reader before the
-target resolves. -/
+target resolves.
+
+`hsafe` is what the interpreter's mapping guard costs.  On a
+storage-kind target `rhsToSVal` is stuck on a mapping-carrying type
+*before* it resolves anything (solc ≥ 0.7 rejects the program), so the
+resolution's own halt only decides the outcome where the guard does not
+fire, or where the two coincide.  It used to read `tyHasMapping rhs.ty =
+false`, which asserts the guard never fires; the weaker form also holds
+of every right-hand side whose resolution cannot revert, and
+`resolveS_simple_err_stuck` is how a rule discharges it. -/
 theorem execAssignNested_storageRhsErr {s : State} {e rhs : WrappedExpr}
     {loc : Loc} {err : Halt}
     (hlhs : resolveLoc s e = .ok (s, loc))
     (hnv : ∀ kind ty fld, e ≠ WrappedExpr.var kind ty fld)
     (hkind : rhs.kind = Kind.storage)
-    (hnm : tyHasMapping rhs.ty = false)
+    (hsafe : tyHasMapping rhs.ty = true -> err = Halt.stuck)
     (hevalEq : ∀ u : State, evalValue u rhs =
       (resolveS u rhs) >>= fun x =>
         (x.1.findStorage x.2.1 x.2.2) >>= fun v =>
@@ -4650,9 +4695,12 @@ theorem execAssignNested_storageRhsErr {s : State} {e rhs : WrappedExpr}
       by_cases hp : rhs.ty.isPrimitive = true
       · rw [if_pos hp, hevalEq s, hcap]
         rfl
-      · rw [if_neg hp, hkind,
-          if_neg (show ¬ tyHasMapping rhs.ty = true by simp [hnm]), hcap]
-        rfl
+      · rw [if_neg hp, hkind]
+        by_cases hm : tyHasMapping rhs.ty = true
+        · rw [if_pos hm, hsafe hm]
+          rfl
+        · rw [if_neg hm, hcap]
+          rfl
   | memory =>
       rw [rhsToMVal]
       by_cases hp : rhs.ty.isPrimitive = true
@@ -4677,7 +4725,7 @@ theorem execAssign_storageRhsErr {s : State} {lhs : PlaceExpr}
     {rhs : WrappedExpr} {loc : Loc} {err : Halt}
     (hlhs : resolveLoc s lhs.expr = .ok (s, loc))
     (hkind : rhs.kind = Kind.storage)
-    (hnm : tyHasMapping rhs.ty = false)
+    (hsafe : tyHasMapping rhs.ty = true -> err = Halt.stuck)
     (hevalEq : ∀ u : State, evalValue u rhs =
       (resolveS u rhs) >>= fun x =>
         (x.1.findStorage x.2.1 x.2.2) >>= fun v =>
@@ -4697,10 +4745,12 @@ theorem execAssign_storageRhsErr {s : State} {lhs : PlaceExpr}
             by_cases hp : rhs.ty.isPrimitive = true
             · rw [if_pos hp, hevalEq s, hcap]
               rfl
-            · rw [if_neg hp, hkind,
-                if_neg (show ¬ tyHasMapping rhs.ty = true by simp [hnm]),
-                hcap]
-              rfl
+            · rw [if_neg hp, hkind]
+              by_cases hm : tyHasMapping rhs.ty = true
+              · rw [if_pos hm, hsafe hm]
+                rfl
+              · rw [if_neg hm, hcap]
+                rfl
           · simp only [if_neg ho]
             rw [hcap]
             rfl
@@ -4710,21 +4760,21 @@ theorem execAssign_storageRhsErr {s : State} {lhs : PlaceExpr}
   | .field kindE tyE base fldE =>
       rw [hsh] at hlhs
       exact execAssignNested_storageRhsErr hlhs (fun _ _ _ h => nomatch h)
-        hkind hnm hevalEq hcap
+        hkind hsafe hevalEq hcap
   | .index kindE tyE base index =>
       rw [hsh] at hlhs
       exact execAssignNested_storageRhsErr hlhs (fun _ _ _ h => nomatch h)
-        hkind hnm hevalEq hcap
+        hkind hsafe hevalEq hcap
   | .pushPlace target =>
       rw [hsh] at hlhs
       exact execAssignNested_storageRhsErr hlhs (fun _ _ _ h => nomatch h)
-        hkind hnm hevalEq hcap
+        hkind hsafe hevalEq hcap
   | .bool b => rw [hsh, resolveLoc.eq_def] at hlhs; exact nomatch hlhs
   | .intLit tyI v => rw [hsh, resolveLoc.eq_def] at hlhs; exact nomatch hlhs
   | .mkCall kindE tyE nm args =>
       rw [hsh] at hlhs
       exact execAssignNested_storageRhsErr hlhs (fun _ _ _ h => nomatch h)
-        hkind hnm hevalEq hcap
+        hkind hsafe hevalEq hcap
   | .mkBinop op l r => rw [hsh, resolveLoc.eq_def] at hlhs; exact nomatch hlhs
   | .mkUnop op arg => rw [hsh, resolveLoc.eq_def] at hlhs; exact nomatch hlhs
   | .mkIncDec op target =>
@@ -4735,14 +4785,15 @@ theorem execAssign_storageRhsErr {s : State} {lhs : PlaceExpr}
 /-- `execAssignNested_storageRhsErr` for a *non-primitive* storage
 right-hand side: no `hevalEq` bridge is needed because the
 `evalValue` path is only taken at primitive types. Serves right-hand
-sides `evalValue` cannot read at all (a `pushPlace`). -/
+sides `evalValue` cannot read at all (a `pushPlace`).
+`hsafe` as in `execAssignNested_storageRhsErr` above. -/
 theorem execAssignNested_storageRhsErrNonPrim {s : State}
     {e : WrappedExpr} {rhs : WrappedExpr} {loc : Loc} {err : Halt}
     (hlhs : resolveLoc s e = .ok (s, loc))
     (hnv : ∀ kind ty fld, e ≠ WrappedExpr.var kind ty fld)
     (hkind : rhs.kind = Kind.storage)
     (hprim : rhs.ty.isPrimitive = false)
-    (hnm : tyHasMapping rhs.ty = false)
+    (hsafe : tyHasMapping rhs.ty = true -> err = Halt.stuck)
     (hcap : resolveS s rhs = .error err) :
     execAssignNested s e rhs = .error err := by
   rw [execAssignNested]
@@ -4750,9 +4801,12 @@ theorem execAssignNested_storageRhsErrNonPrim {s : State}
   have hp : ¬ rhs.ty.isPrimitive = true := by simp [hprim]
   cases hk : e.kind with
   | storage =>
-      rw [rhsToSVal, if_neg hp, hkind,
-        if_neg (show ¬ tyHasMapping rhs.ty = true by simp [hnm]), hcap]
-      rfl
+      rw [rhsToSVal, if_neg hp, hkind]
+      by_cases hm : tyHasMapping rhs.ty = true
+      · rw [if_pos hm, hsafe hm]
+        rfl
+      · rw [if_neg hm, hcap]
+        rfl
   | memory =>
       rw [rhsToMVal, if_neg hp, hkind, hcap]
       rfl
@@ -4773,13 +4827,14 @@ theorem execAssignNested_storageRhsErrNonPrim {s : State}
 side (a `pushPlace`, say, which `evalValue` cannot read): instead of
 the `hevalEq` bridge it needs the target not to be a stack variable —
 the one arm that reads the right-hand side with `evalValue`
-unconditionally. -/
+unconditionally.
+`hsafe` as in `execAssignNested_storageRhsErr` above. -/
 theorem execAssign_storageRhsErrNonPrim {s : State} {lhs : PlaceExpr}
     {rhs : WrappedExpr} {loc : Loc} {err : Halt}
     (hlhs : resolveLoc s lhs.expr = .ok (s, loc))
     (hkind : rhs.kind = Kind.storage)
     (hprim : rhs.ty.isPrimitive = false)
-    (hnm : tyHasMapping rhs.ty = false)
+    (hsafe : tyHasMapping rhs.ty = true -> err = Halt.stuck)
     (hnst : ∀ nm, loc ≠ Loc.stack nm)
     (hcap : resolveS s rhs = .error err) :
     execAssign s lhs rhs = .error err := by
@@ -4796,10 +4851,12 @@ theorem execAssign_storageRhsErrNonPrim {s : State} {lhs : PlaceExpr}
       | storage =>
           by_cases ho : fld.origin = some StorageOrigin.global
           · simp only [if_pos ho]
-            rw [rhsToSVal, if_neg hp, hkind,
-              if_neg (show ¬ tyHasMapping rhs.ty = true by simp [hnm]),
-              hcap]
-            rfl
+            rw [rhsToSVal, if_neg hp, hkind]
+            by_cases hm : tyHasMapping rhs.ty = true
+            · rw [if_pos hm, hsafe hm]
+              rfl
+            · rw [if_neg hm, hcap]
+              rfl
           · simp only [if_neg ho]
             rw [hcap]
             rfl
@@ -4809,21 +4866,21 @@ theorem execAssign_storageRhsErrNonPrim {s : State} {lhs : PlaceExpr}
   | .field kindE tyE base fldE =>
       rw [hsh] at hlhs
       exact execAssignNested_storageRhsErrNonPrim hlhs
-        (fun _ _ _ h => nomatch h) hkind hprim hnm hcap
+        (fun _ _ _ h => nomatch h) hkind hprim hsafe hcap
   | .index kindE tyE base index =>
       rw [hsh] at hlhs
       exact execAssignNested_storageRhsErrNonPrim hlhs
-        (fun _ _ _ h => nomatch h) hkind hprim hnm hcap
+        (fun _ _ _ h => nomatch h) hkind hprim hsafe hcap
   | .pushPlace target =>
       rw [hsh] at hlhs
       exact execAssignNested_storageRhsErrNonPrim hlhs
-        (fun _ _ _ h => nomatch h) hkind hprim hnm hcap
+        (fun _ _ _ h => nomatch h) hkind hprim hsafe hcap
   | .bool b => rw [hsh, resolveLoc.eq_def] at hlhs; exact nomatch hlhs
   | .intLit tyI v => rw [hsh, resolveLoc.eq_def] at hlhs; exact nomatch hlhs
   | .mkCall kindE tyE nm args =>
       rw [hsh] at hlhs
       exact execAssignNested_storageRhsErrNonPrim hlhs
-        (fun _ _ _ h => nomatch h) hkind hprim hnm hcap
+        (fun _ _ _ h => nomatch h) hkind hprim hsafe hcap
   | .mkBinop op l r => rw [hsh, resolveLoc.eq_def] at hlhs; exact nomatch hlhs
   | .mkUnop op arg => rw [hsh, resolveLoc.eq_def] at hlhs; exact nomatch hlhs
   | .mkIncDec op target =>
@@ -4924,7 +4981,17 @@ side (`captureAssignBlock` with `valueCaptureKind rhs = Kind.storage`).
 The rule hoists the right-hand side in front of the target; both the
 right-hand side and the target are pure, so the two orders coincide.
 Shared by `storageFieldReadUnfoldRightSndResult` and
-`storageIndexReadUnfoldRightSndResult`. -/
+`storageIndexReadUnfoldRightSndResult`.
+
+`hsafe` is the only trace the interpreter's mapping guard leaves here,
+and it is the weakest form the proof needs: the guard fires ahead of the
+resolution, so the two sides can only disagree where the resolution
+itself fails with something other than `.stuck`.  A right-hand side on a
+`SimpleExpression` path discharges it outright — that is
+`storageFieldReadUnfoldRightSndResult_sound` below, which carries no
+mapping hypothesis at all.  On a merely *pure* path it cannot be
+discharged: `Counterexamples/MappingSideConditions.lean`'s M3 reverts on
+`people[1 / 0]` while the guard has already made the assignment stuck. -/
 theorem captureAssignStorageRhs_sound (s : State) (lhs : PlaceExpr)
     (rhs : WrappedExpr) {loc : Loc}
     (hlhs : resolveLoc s lhs.expr = .ok (s, loc))
@@ -4932,7 +4999,8 @@ theorem captureAssignStorageRhs_sound (s : State) (lhs : PlaceExpr)
     (hfl : ∀ n ∈ aliasNames, usesVar lhs.expr n = false)
     (hprhs : pureExpr rhs = true)
     (hkind : rhs.kind = Kind.storage)
-    (hnm : tyHasMapping rhs.ty = false)
+    (hsafe : ∀ err, resolveS s rhs = .error err ->
+      tyHasMapping rhs.ty = true -> err = Halt.stuck)
     (hevalEq : ∀ u : State, evalValue u rhs =
       (resolveS u rhs) >>= fun x =>
         (x.1.findStorage x.2.1 x.2.2) >>= fun v =>
@@ -4945,7 +5013,7 @@ theorem captureAssignStorageRhs_sound (s : State) (lhs : PlaceExpr)
   cases hcap : resolveS s rhs with
   | error err =>
       have hL : execAssign s lhs rhs = .error err :=
-        execAssign_storageRhsErr hlhs hkind hnm hevalEq hcap
+        execAssign_storageRhsErr hlhs hkind (hsafe err hcap) hevalEq hcap
       have hR : execStmt s
           (Stmt.storagePlaceAlias rhs.ty valueAliasName rhs) =
           .error err := by
@@ -5004,18 +5072,18 @@ theorem storageFieldReadUnfoldRightSndResult_sound
     (hfresh : ∀ n ∈ aliasNames,
       stmtUsesVar (Stmt.assign lhs rhs) n = false)
     (hlhs : resolveLoc s lhs.expr = .ok (s, loc))
-    (hplhs : pureExpr lhs.expr = true)
-    (hnm : tyHasMapping rhs.ty = false) :
+    (hplhs : pureExpr lhs.expr = true) :
     ResultsAgree aliasNames
       (execStmt s (Stmt.assign lhs rhs))
       (execBlock s
         ((ruleEffect .storageFieldReadUnfoldRightSndResult).block
           (Stmt.assign lhs rhs) hcond)) := by
-  match rhs, hcond, hfresh, hnm with
-  | WrappedExpr.field Kind.storage tyR pathR fldR, hcond, hfresh, hnm =>
+  match rhs, hcond, hfresh with
+  | WrappedExpr.field Kind.storage tyR pathR fldR, hcond, hfresh =>
       refine captureAssignStorageRhs_sound s lhs
         (WrappedExpr.field Kind.storage tyR pathR fldR) hlhs hplhs ?_
-        (pure_of_simple (e := pathR) hcond.2.2) rfl hnm
+        (pure_of_simple (e := pathR) hcond.2.2) rfl
+        (fun _ herr _ => resolveS_fieldSimple_err_stuck hcond.2.2 herr)
         (fun u => by rw [evalValue])
       intro n hn
       have := hfresh n hn
@@ -5044,7 +5112,7 @@ theorem storageIndexReadUnfoldRightSndResult_sound
           have h1 := pure_of_simple (e := pathR) hcond.2.2.1
           have h2 := pure_of_simple (e := idxR) hcond.2.2.2
           simp [pureExpr, h1, h2])
-        rfl hnm (fun u => by rw [evalValue])
+        rfl (fun _ _ h => by simp [hnm] at h) (fun u => by rw [evalValue])
       intro n hn
       have := hfresh n hn
       simp [stmtUsesVar] at this
@@ -5090,7 +5158,7 @@ theorem storageFieldReadUnfoldRightFst_sound
             rfl
           have hL : execAssign s lhs
               (WrappedExpr.field Kind.storage tyR path fldR) = .error err :=
-            execAssign_storageRhsErr hlhs rfl hnm
+            execAssign_storageRhsErr hlhs rfl (fun h => by simp [hnm] at h)
               (fun u => by rw [evalValue]) hcap'
           have hR : execStmt s
               (Stmt.storagePlaceAlias path.ty storagePathAliasName path) =
@@ -5189,7 +5257,7 @@ theorem storageIndexReadUnfoldRightFst_sound
             rfl
           have hL : execAssign s lhs
               (WrappedExpr.index Kind.storage tyR path idxR) = .error err :=
-            execAssign_storageRhsErr hlhs rfl hnm
+            execAssign_storageRhsErr hlhs rfl (fun h => by simp [hnm] at h)
               (fun u => by rw [evalValue]) hcap'
           have hR : execStmt s
               (Stmt.storagePlaceAlias path.ty storagePathAliasName path) =
@@ -6139,7 +6207,7 @@ theorem storageIndexReadUnfoldRightSndIndex_sound
           have hL : execAssign s lhs
               (WrappedExpr.index Kind.storage tyR pathR idxR) =
               .error err :=
-            execAssign_storageRhsErr hlhs rfl hnm
+            execAssign_storageRhsErr hlhs rfl (fun h => by simp [hnm] at h)
               (fun u => by rw [evalValue]) hcap'
           have hR : execStmt s
               (Stmt.stackDecl idxR.ty indexAliasName (some idxR)) =
@@ -9061,7 +9129,7 @@ theorem storageLocalRootPushUnfoldLeftFstReceiver_sound
                 .error err := by
               rw [resolveS, hcap]
               rfl
-            exact execAssign_storageRhsErrNonPrim hlhs hkpp hpF hnmP hnst
+            exact execAssign_storageRhsErrNonPrim hlhs hkpp hpF (fun h => by simp [hnmP] at h) hnst
               hcapP
           have hR : execStmt s
               (Stmt.storagePlaceAlias target.ty storagePathAliasName
@@ -9801,7 +9869,7 @@ theorem memoryWriteUnfoldRightSndResult_storage_sound
     (execBlock s [captureValue rhs, Stmt.assign lhs (valueAlias rhs)])
   rw [captureValue, valueAlias, hvck, capture]
   exact captureAssignStorageRhs_sound s lhs rhs hlhs hplhs hfl hprhs hkS
-    hnm hevalEq
+    (fun _ _ h => by simp [hnm] at h) hevalEq
 
 /-- `memoryWriteUnfoldRightSndResult`, stack-kind right-hand side
 (operators): the capture is a typed value temporary. -/

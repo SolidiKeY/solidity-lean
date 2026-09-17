@@ -39,6 +39,18 @@ hypothesis shape. What to know before adding or weakening one:
   is the refutation, and shows what `hev` was hiding — assuming the
   right-hand side *succeeds* deletes exactly the states where the unfrozen
   residual is wrong.
+- **`hnm : tyHasMapping rhs.ty = false` is the interpreter's guard**, not the
+  rule's: `rhsToSVal` is stuck on a storage-to-storage copy of a
+  mapping-carrying type (solc ≥ 0.7 rejects it) *before* it resolves
+  anything. In the four `execAssign*_storageRhsErr` helpers it is weakened to
+  `hsafe : tyHasMapping rhs.ty = true -> err = Halt.stuck` — the guard's halt
+  and the resolution's halt only have to coincide. A rule whose right-hand
+  side sits on a `SimpleExpression` path discharges that outright
+  (`resolveS_simple_err_stuck`), which is why
+  `storageFieldReadUnfoldRightSndResult_sound` has no mapping hypothesis. On a
+  merely *pure* path it cannot be: `Counterexamples/MappingSideConditions.lean`
+  M3 reverts on the path while the guard has already made the assignment
+  stuck.
 - Some side conditions are **proof-technique residue, not semantic
   restriction**, and the docstring says which. Those are the ones worth
   weakening.

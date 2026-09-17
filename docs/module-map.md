@@ -117,6 +117,7 @@ Each is a refutation that pins down why a hypothesis or conjunct is there.
   is why it does not have this. **OPEN**: the rule-table fix.
 - `DeleteFamilyGenericOverlap.lean` — first-order inconsistency proofs for the `0f9b99ad55` delete fallthroughs; records the surviving gap.
 - `WellTypedNecessity.lean` — `SortFaithful` minus `wellTypedStorageB` is false; well-typedness is exactly the boundary.
+- `MappingSideConditions.lean` — the three mapping-shaped side conditions of the write and the delete, each refuted if dropped: M1 `mergeFree` in `selectSt_delValue`, M2 `svalHasMapping` in `denote_save` (the fold's own content), M3 `tyHasMapping` in the storage capture template. M3 is what the *simple*-path rules do not need.
 
 ## The EVM compiler
 
