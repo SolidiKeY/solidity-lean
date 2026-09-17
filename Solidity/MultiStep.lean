@@ -114,6 +114,92 @@ theorem single {a b : SolidityBlock} (h : a ⇝ b) : a ⇝* b :=
 
 end BlockReflMultiStep
 
+/-! ## Framing: a rule inside a larger program
+
+A taclet of `Rules.lean` is stated on one statement, and `BlockStep.head`
+already hands it an arbitrary `rest`: the suffix lives in the relation, not in
+the rule.  What was missing is the same fact one level up, for a whole chain --
+`⇝*` proved of `xs` alone is `⇝*` of `xs ++ c`, because every step of it fires
+at the head and appending does not move the head.
+
+There is deliberately no prefix twin.  `BlockStep.head` matches `lhs :: rest`,
+so `⟨sm, pre ++ xs⟩` steps inside `pre` and nowhere else: a prefix is
+*consumed*, never carried along, which is what `inContext` says and why it
+asks for `⟨sm, pre⟩ ⇝* ⟨sm, []⟩` rather than reproducing `pre` on the right.
+That is KeY's `<x; ω>` shape and not an artefact of this encoding.  The
+congruence that does keep a prefix is one layer down, where the relation
+quantifies over the start state: `BlockExecAgree.append_left`
+(`RewriteSoundness.lean`) needs no side condition at all, while its suffix twin
+needs the freshness that `⇝` gets for free.
+
+The lemmas are stated through `SolidityBlock.appendStmts` rather than a literal
+`⟨sm, xs ++ c⟩`, so that the relation's indices stay variables and the `⇝*`
+induction goes through without inverting them; the `⟨sm, _⟩` spellings a
+derivation actually writes are the corollaries below it. -/
+
+/-- Append statements after a block's program, keeping the modality. -/
+def SolidityBlock.appendStmts (b : SolidityBlock) (c : Block) : SolidityBlock :=
+  ⟨b.modality, b.stmts ++ c⟩
+
+theorem BlockStep.appendStmts {a b : SolidityBlock} (c : Block) (h : a ⇝ b) :
+    a.appendStmts c ⇝ b.appendStmts c := by
+  cases h with
+  | @head sm lhs cond rhs rest hrule =>
+      show BlockStep ⟨sm, (lhs :: rest) ++ c⟩ ⟨sm, (rhs ++ rest) ++ c⟩
+      rw [List.cons_append, List.append_assoc]
+      exact BlockStep.head hrule
+
+theorem NamedBlockStep.appendStmts {r : RuleName} {a b : SolidityBlock}
+    (c : Block) (h : a ⇝[r] b) : a.appendStmts c ⇝[r] b.appendStmts c := by
+  cases h with
+  | @head sm lhs cond rhs rest after hfirst heq =>
+      subst heq
+      refine NamedBlockStep.head (rest := rest ++ c) hfirst ?_
+      show (SolidityBlock.mk sm ((rhs ++ rest) ++ c)) = ⟨sm, rhs ++ (rest ++ c)⟩
+      rw [List.append_assoc]
+
+theorem BlockReflMultiStep.appendStmts {a b : SolidityBlock} (c : Block)
+    (h : a ⇝* b) : a.appendStmts c ⇝* b.appendStmts c := by
+  induction h with
+  | refl => exact .refl
+  | step hstep _ ih => exact .step (hstep.appendStmts c) ih
+
+/-- A chain proved of `xs` alone is a chain of the program that continues
+with `c`. -/
+theorem BlockReflMultiStep.append_suffix {sm : SolidityModality} {xs ys c : Block}
+    (h : (⟨sm, xs⟩ : SolidityBlock) ⇝* ⟨sm, ys⟩) :
+    (⟨sm, xs ++ c⟩ : SolidityBlock) ⇝* ⟨sm, ys ++ c⟩ :=
+  BlockReflMultiStep.appendStmts c h
+
+/-- The same chain in a full context `pre … c`, once the prefix has been
+executed away. -/
+theorem BlockReflMultiStep.inContext {sm : SolidityModality} {pre xs ys c : Block}
+    (hpre : (⟨sm, pre⟩ : SolidityBlock) ⇝* ⟨sm, []⟩)
+    (h : (⟨sm, xs⟩ : SolidityBlock) ⇝* ⟨sm, ys⟩) :
+    (⟨sm, pre ++ (xs ++ c)⟩ : SolidityBlock) ⇝* ⟨sm, ys ++ c⟩ := by
+  have h1 : (⟨sm, pre ++ (xs ++ c)⟩ : SolidityBlock) ⇝* ⟨sm, [] ++ (xs ++ c)⟩ :=
+    BlockReflMultiStep.append_suffix hpre
+  exact h1.trans (BlockReflMultiStep.append_suffix h)
+
+/-- A named taclet fires at the head of whatever program is left: the rule
+table's entry point into the lemmas above. -/
+theorem NamedBlockStep.inSuffix {r : RuleName} {sm : SolidityModality}
+    {lhs : Stmt} {cond : Prop} {rhs c : Block}
+    (hfirst : FirstStepCase sm lhs Rules.stepCases (Rules.stepCase r) cond rhs) :
+    (⟨sm, lhs :: c⟩ : SolidityBlock) ⇝[r] ⟨sm, rhs ++ c⟩ :=
+  NamedBlockStep.head hfirst rfl
+
+/-- …and inside a context `pre … c` whose prefix the calculus has consumed. -/
+theorem NamedBlockStep.inContext {r : RuleName} {sm : SolidityModality}
+    {lhs : Stmt} {cond : Prop} {rhs pre c : Block}
+    (hfirst : FirstStepCase sm lhs Rules.stepCases (Rules.stepCase r) cond rhs)
+    (hpre : (⟨sm, pre⟩ : SolidityBlock) ⇝* ⟨sm, []⟩) :
+    (⟨sm, pre ++ lhs :: c⟩ : SolidityBlock) ⇝* ⟨sm, rhs ++ c⟩ := by
+  have h1 : (⟨sm, pre ++ (lhs :: c)⟩ : SolidityBlock) ⇝* ⟨sm, [] ++ (lhs :: c)⟩ :=
+    BlockReflMultiStep.append_suffix hpre
+  refine h1.trans (BlockReflMultiStep.single ?_)
+  show BlockStep ⟨sm, lhs :: c⟩ ⟨sm, rhs ++ c⟩
+  exact BlockStep.head (RuleStep.ofStepCase hfirst)
 instance : Trans BlockStep BlockReflMultiStep BlockReflMultiStep :=
   ⟨BlockReflMultiStep.step⟩
 
@@ -235,6 +321,30 @@ theorem JudgmentMultiStep.ofBlock {before after : SolidityBlock}
   induction h with
   | refl => exact .refl
   | step hstep _ ih => exact .step (.prog hstep) ih
+
+/-! The judgment twins of the framing lemmas above: appending to the program
+leaves the postcondition where it is, exactly as `ofBlock` does. -/
+
+/-- Append statements after a judgment's program. -/
+def SolidityJudgment.appendStmts (j : SolidityJudgment) (c : Block) :
+    SolidityJudgment :=
+  ⟨j.block.appendStmts c, j.post⟩
+
+theorem JudgmentStep.appendStmts {a b : SolidityJudgment} (c : Block)
+    (h : a ⇝ᵈ b) : a.appendStmts c ⇝ᵈ b.appendStmts c := by
+  cases h with
+  | prog hstep => exact .prog (hstep.appendStmts c)
+
+theorem NamedJudgmentStep.appendStmts {r : RuleName} {a b : SolidityJudgment}
+    (c : Block) (h : a ⇝ᵈ[r] b) : a.appendStmts c ⇝ᵈ[r] b.appendStmts c := by
+  cases h with
+  | prog hstep => exact .prog (hstep.appendStmts c)
+
+theorem JudgmentMultiStep.appendStmts {a b : SolidityJudgment} (c : Block)
+    (h : a ⇝ᵈ* b) : a.appendStmts c ⇝ᵈ* b.appendStmts c := by
+  induction h with
+  | refl => exact .refl
+  | step hstep _ ih => exact .step (hstep.appendStmts c) ih
 
 namespace NamedJudgmentStep
 

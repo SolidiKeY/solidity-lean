@@ -96,6 +96,40 @@ theorem trans {ns : List Name} {a b c : SolidityBlock}
 
 end BlockExecAgree
 
+/-! The context congruence the rewrite layer cannot have.  `⇝` fires at the
+head statement, so `MultiStep.lean`'s framing lemmas carry a suffix and
+*consume* a prefix.  Here the relation quantifies over the start state, so both
+sides are available -- and the side conditions come out the other way round:
+a prefix needs none, because both sides bind the very same prefix result,
+whereas a suffix needs the freshness that `head_execAgree` already asks for. -/
+
+namespace BlockExecAgree
+
+/-- Prefix congruence: unconditional. -/
+theorem append_left {ns : List Name} {sm₁ sm₂ : SolidityModality}
+    {pre a b : Block} (h : BlockExecAgree ns ⟨sm₁, a⟩ ⟨sm₂, b⟩) :
+    BlockExecAgree ns ⟨sm₁, pre ++ a⟩ ⟨sm₂, pre ++ b⟩ := by
+  intro s
+  show ResultsAgree ns (execBlock s (pre ++ a)) (execBlock s (pre ++ b))
+  rw [Semantics.execBlock_append, Semantics.execBlock_append]
+  cases execBlock s pre with
+  | error e => exact ResultsAgree.refl _ _
+  | ok t => exact h t
+
+/-- Suffix congruence: the suffix must not read a scratch alias the two sides
+are allowed to disagree on, which is `head_execAgree`'s hypothesis. -/
+theorem append_right {ns : List Name} {sm₁ sm₂ : SolidityModality}
+    {a b suffix : Block} (h : BlockExecAgree ns ⟨sm₁, a⟩ ⟨sm₂, b⟩)
+    (hfresh : ∀ n ∈ ns, blockUsesVar suffix n = false) :
+    BlockExecAgree ns ⟨sm₁, a ++ suffix⟩ ⟨sm₂, b ++ suffix⟩ := by
+  intro s
+  show ResultsAgree ns (execBlock s (a ++ suffix)) (execBlock s (b ++ suffix))
+  rw [Semantics.execBlock_append, Semantics.execBlock_append]
+  exact ResultsAgree.bind (h s)
+    (fun _ _ hagree => execBlock_agree hagree suffix hfresh)
+
+end BlockExecAgree
+
 /-- Any reflexive-transitive derivation made exclusively of semantically
 sound steps is semantically sound. -/
 theorem BlockReflMultiStep.execAgree {ns : List Name}
