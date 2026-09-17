@@ -113,6 +113,27 @@ solc permits `delete` on structs with mapping members (mappings are left
 in place), and the semantics keeps that mapping-preserving behavior.
 Memory types cannot contain mappings, so `rhsToMVal` needs no guard.
 
+`pop`/`push` keep it too, and that is what `SVal.array`'s second field is
+for. `arr.pop()` implicitly `delete`s the removed element and `arr.push()`
+lands on the same storage slot, so a mapping nested in a popped struct
+element is visible again after the push — solc's behaviour, and solkey's
+(`storagePopSave` and `storagePushLengthSave` both write
+`save(delAt(storage, at(n)), size, n ± 1)`). `Semantics.pushSlot` is that
+`delAt` read eagerly: the cleared slot stays addressable beyond the new
+length and the next `push` recycles it.
+
+- **`delete arr` on a whole array.** On the EVM the mapping entries nested
+  in a deleted element live at hashed slots that no clearing reaches, so
+  `delete arr; arr.push();` sees them again. Here `SVal.defaultOf` empties
+  the array outright, which is **KeY's** reading
+  (`selectStDelNodeIndexStruct` reads every index of a deleted node as
+  `mtSt`) and not solc's. Matching solc means handing the cleared elements
+  back as recycled slots, which takes the value out of
+  `Reachability.SVal.canonical` — the shadow-free fragment `writeProg`
+  builds — and so costs `WellFormedConsumers` row C6 its value-level
+  proof. Recorded here rather than made silently; `pop`/`push` are not
+  affected.
+
 ## `transfer` checks and debits the sender's balance
 
 `a.transfer(v)` in the old semantics only booked `net(a) += v` — it could

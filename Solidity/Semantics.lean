@@ -73,7 +73,15 @@ default value for absent keys. -/
 inductive SVal where
   | prim (p : PrimVal)
   | struct (fields : List (Name × SVal))
-  | array (elems : List SVal)
+  /-- A storage array: the live `elems` — `elems.length` is the array's
+  length — beside the slots a `pop` has cleared and given back.  `shadow k` is
+  the content of slot `elems.length + k`, so the stack is LIFO exactly as the
+  slots are recycled.  This is KeY's `save(delAt(storage, at(n)), size, n±1)`
+  (`storagePopSave`, `storagePushLengthSave`) read eagerly: `delete` never
+  clears a mapping member, so a mapping nested in a popped element survives
+  and the next `push` sees it again — solc's own behaviour, and the reason
+  `pop` cannot just drop the element. -/
+  | array (elems : List SVal) (shadow : List SVal)
   | map (entries : List (Int × SVal)) (dflt : SVal)
   deriving Repr
 
@@ -282,7 +290,7 @@ def defaultForTy : Ty -> SVal
   | Ty.uint => SVal.int 0
   | Ty.int => SVal.int 0
   | Ty.ref (RefTy.struct name) => SVal.struct (defaultForFields (structDef name))
-  | Ty.ref (RefTy.array _) => SVal.array []
+  | Ty.ref (RefTy.array _) => SVal.array [] []
   | Ty.ref (RefTy.mapping _ value) => SVal.map [] (defaultForTy value)
 termination_by ty => (tyRank ty, sizeOf ty)
 decreasing_by
@@ -333,16 +341,61 @@ fields — but leaves mappings untouched (entries and default), the
 Solidity `delete` semantics solkey implements with the lazy `delNode`
 marker (`selectStDelNodeMap` reads mapping members through to the
 original). A direct `delete` on a mapping is a solc compile error, so
-the no-op `map` arm is unreachable from real programs. -/
+the no-op `map` arm is unreachable from real programs.
+
+An array is emptied outright — recycled slots and all. On the EVM the
+mapping entries nested in a deleted element survive at their hashed
+slots, so `delete arr; arr.push();` would see them again; KeY says
+otherwise (`selectStDelNodeIndexStruct` reads every index of a deleted
+node as `mtSt`) and the model follows KeY here. Matching solc would mean
+`array [] (defaultOfElems elems ++ shadow)`, which takes the value out of
+`Reachability.SVal.canonical` and so costs row C6 of
+`WellFormedConsumers` its proof; `docs/solc-alignment.md` records the
+divergence. `pop`/`push` are *not* affected — there the slot is recycled
+(`pushSlot`), which is the mapping-preserving behaviour solc and KeY
+agree on. -/
 def SVal.defaultOf : SVal -> SVal
   | SVal.int _ => SVal.int 0
   | SVal.bool _ => SVal.bool false
   | SVal.struct fields => SVal.struct (defaultOfFields fields)
-  | SVal.array _ => SVal.array []
+  | SVal.array _ _ => SVal.array [] []
   | SVal.map entries dflt => SVal.map entries dflt
-where defaultOfFields : List (Name × SVal) -> List (Name × SVal)
+where
+  defaultOfFields : List (Name × SVal) -> List (Name × SVal)
   | [] => []
   | (name, v) :: rest => (name, v.defaultOf) :: defaultOfFields rest
+/-- The slot `arr.push()` lands on, and the recycled slots that are left:
+the one a `pop` cleared and handed back, or a fresh default where the array
+has never been that long. KeY writes `delAt(storage, at(n))` in both cases
+(`storagePushLengthSave`), which is the clear this performs — `defaultOf` is
+idempotent, so clearing an already-cleared slot again is exactly that write,
+and a mapping member of a recycled struct slot survives it.
+
+`push(se)` and `push(sp)` overwrite the slot instead (KeY's
+`storagePushValueSave` / `…CopySource` write a plain `save`, whose leaf would
+keep the slot's mapping members). They still *consume* the slot, since it
+becomes live again. The leaf is invisible there: a pushed value has the
+element's type, and `rhsToSVal` is stuck on a storage source of a
+mapping-carrying type while a stack source forces a primitive element, so no
+push-with-value in the admitted fragment lands on a slot with a mapping.
+
+The `isPrimitive` branch is **redundant on any well-typed storage**, where a
+cleared primitive slot *is* the type's default (`pushSlot_prim`, proved in
+`StoragePreservation.lean`); it is written out so that a consumer holding a
+value *representation* but no typing — `Evm/Correctness.lean`, whose fragment
+is primitive-element arrays — sees the pushed value without a typing
+hypothesis. -/
+def pushSlot (elemTy : Ty) : List SVal -> SVal × List SVal
+  | [] => (defaultForTy elemTy, [])
+  | c :: rest =>
+      (if elemTy.isPrimitive then defaultForTy elemTy else c.defaultOf, rest)
+
+/-- At a primitive element type the slot a `push` lands on is the type's
+default, recycled or not — what `Evm/Correctness.lean` reads off it. -/
+theorem pushSlot_isPrim {elemTy : Ty} {shadow : List SVal}
+    (hp : elemTy.isPrimitive = true) :
+    (pushSlot elemTy shadow).1 = defaultForTy elemTy := by
+  cases shadow <;> simp [pushSlot, hp]
 
 /-! ## Association-list helpers -/
 
@@ -363,7 +416,7 @@ def SVal.find : SVal -> List Seg -> Res SVal
       match lookupBy name fields with
       | some v => v.find rest
       | none => .error .stuck
-  | SVal.array elems, Seg.at i :: rest =>
+  | SVal.array elems _, Seg.at i :: rest =>
       if h : 0 ≤ i ∧ i.toNat < elems.length then
         (elems.get ⟨i.toNat, h.2⟩).find rest
       else .error .revert
@@ -371,7 +424,7 @@ def SVal.find : SVal -> List Seg -> Res SVal
   -- (`assert(values.length == 3)`), and the parser gives `.length` a
   -- `Seg.field`, so it has to be answered here rather than by the struct
   -- arm above — an array is not a struct with a `length` member.
-  | SVal.array elems, Seg.field "length" :: rest =>
+  | SVal.array elems _, Seg.field "length" :: rest =>
       (SVal.int elems.length).find rest
   | SVal.map entries dflt, Seg.at i :: rest =>
       match lookupBy i entries with
@@ -382,7 +435,7 @@ def SVal.find : SVal -> List Seg -> Res SVal
   -- field other than the `length` arm above, a mapping under a field.
   | SVal.prim _, _ :: _ => .error .stuck
   | SVal.struct _, Seg.at _ :: _ => .error .stuck
-  | SVal.array _, Seg.field _ :: _ => .error .stuck
+  | SVal.array _ _, Seg.field _ :: _ => .error .stuck
   | SVal.map _ _, Seg.field _ :: _ => .error .stuck
 
 def SVal.save : SVal -> List Seg -> SVal -> Res SVal
@@ -393,10 +446,10 @@ def SVal.save : SVal -> List Seg -> SVal -> Res SVal
           let updated ← old.save rest new
           .ok (SVal.struct (setBy name updated fields))
       | none => .error .stuck
-  | SVal.array elems, Seg.at i :: rest, new =>
+  | SVal.array elems shadow, Seg.at i :: rest, new =>
       if h : 0 ≤ i ∧ i.toNat < elems.length then do
         let updated ← (elems.get ⟨i.toNat, h.2⟩).save rest new
-        .ok (SVal.array (elems.set i.toNat updated))
+        .ok (SVal.array (elems.set i.toNat updated) shadow)
       else .error .revert
   | SVal.map entries dflt, Seg.at i :: rest, new =>
       match lookupBy i entries with
@@ -411,7 +464,7 @@ def SVal.save : SVal -> List Seg -> SVal -> Res SVal
   -- solc compile error since 0.6.
   | SVal.prim _, _ :: _, _ => .error .stuck
   | SVal.struct _, Seg.at _ :: _, _ => .error .stuck
-  | SVal.array _, Seg.field _ :: _, _ => .error .stuck
+  | SVal.array _ _, Seg.field _ :: _, _ => .error .stuck
   | SVal.map _ _, Seg.field _ :: _, _ => .error .stuck
 
 namespace State
@@ -469,7 +522,7 @@ def copyStToM (s : State) : SVal -> Res (State × MVal)
       let (s, mfields) ← copyStFields s fields
       let (s, id) := s.alloc (MObj.struct mfields)
       .ok (s, MVal.ref id)
-  | SVal.array elems => do
+  | SVal.array elems _ => do
       let (s, melems) ← copyStElems s elems
       let (s, id) := s.alloc (MObj.array melems)
       .ok (s, MVal.ref id)
@@ -527,7 +580,7 @@ def copyMToSt (s : State) (rem : List Nat) : MVal -> Res SVal
             .ok (SVal.struct sfields)
         | .ok (MObj.array elems) => do
             let selems ← copyMElems s (rem.erase id) elems
-            .ok (SVal.array selems)
+            .ok (SVal.array selems [])
         | .error e => .error e
       else .error .stuck
 termination_by (rem.length, 0)
@@ -574,7 +627,7 @@ def SVal.asValue : SVal -> Res Value
   | SVal.int v => .ok (Value.int v)
   | SVal.bool b => .ok (Value.bool b)
   | SVal.struct _ => .error .stuck
-  | SVal.array _ => .error .stuck
+  | SVal.array _ _ => .error .stuck
   | SVal.map _ _ => .error .stuck
 
 def MVal.asValue : MVal -> Res Value
@@ -790,8 +843,9 @@ def resolveS (s : State) : WrappedExpr -> Res (State × Name × List Seg)
       let (s, root, segs) ← resolveS s target
       let arr ← s.findStorage root segs
       match arr, target.ty with
-      | SVal.array elems, Ty.ref (RefTy.array elemTy) => do
-          let extended := SVal.array (elems ++ [defaultForTy elemTy])
+      | SVal.array elems shadow, Ty.ref (RefTy.array elemTy) => do
+          let (slot, shadow') := pushSlot elemTy shadow
+          let extended := SVal.array (elems ++ [slot]) shadow'
           let s ← s.saveStorage root segs extended
           .ok (s, root, segs ++ [Seg.at elems.length])
       -- The two mismatches kept apart rather than answered by one joint
@@ -800,9 +854,9 @@ def resolveS (s : State) : WrappedExpr -> Res (State × Name × List Seg)
       | SVal.prim _, _ => .error .stuck
       | SVal.struct _, _ => .error .stuck
       | SVal.map _ _, _ => .error .stuck
-      | SVal.array _, Ty.prim _ => .error .stuck
-      | SVal.array _, Ty.ref (RefTy.struct _) => .error .stuck
-      | SVal.array _, Ty.ref (RefTy.mapping _ _) => .error .stuck
+      | SVal.array _ _, Ty.prim _ => .error .stuck
+      | SVal.array _ _, Ty.ref (RefTy.struct _) => .error .stuck
+      | SVal.array _ _, Ty.ref (RefTy.mapping _ _) => .error .stuck
   -- The seven constructors that are not places. Listed rather than left
   -- to a wildcard, so a new `WrappedExpr` constructor is a compile error
   -- here instead of silently becoming stuck; the same seven arms close
@@ -1305,26 +1359,28 @@ def execStmt (s : State) : Stmt -> Res State
       let (s, root, segs) ← resolveS s target.expr
       let arr ← s.findStorage root segs
       match arr, target.expr.ty with
-      | SVal.array elems, Ty.ref (RefTy.array elemTy) => do
+      | SVal.array elems shadow, Ty.ref (RefTy.array elemTy) => do
           -- The pushed value goes through the same right-hand-side
           -- reading as a storage assignment (`rhsToSVal`), including
           -- the solc rejection of storage sources with (nested)
           -- mapping types. A valueless `push()` extends with the
-          -- default and stays legal even for mapping-carrying element
-          -- types, as in solc.
+          -- recycled slot — cleared, mapping members and all, which is
+          -- KeY's `delAt` — and stays legal even for mapping-carrying
+          -- element types, as in solc.
+          let (slot, shadow') := pushSlot elemTy shadow
           let (s, newElem) ←
             match value with
-            | none => pure (s, defaultForTy elemTy)
+            | none => pure (s, slot)
             | some rhs => rhsToSVal s rhs
-          s.saveStorage root segs (SVal.array (elems ++ [newElem]))
+          s.saveStorage root segs (SVal.array (elems ++ [newElem]) shadow')
       -- As in `resolveS`'s push-lvalue arm: a node that is not an array,
       -- and a target whose type is not an array reference, kept apart.
       | SVal.prim _, _ => .error .stuck
       | SVal.struct _, _ => .error .stuck
       | SVal.map _ _, _ => .error .stuck
-      | SVal.array _, Ty.prim _ => .error .stuck
-      | SVal.array _, Ty.ref (RefTy.struct _) => .error .stuck
-      | SVal.array _, Ty.ref (RefTy.mapping _ _) => .error .stuck
+      | SVal.array _ _, Ty.prim _ => .error .stuck
+      | SVal.array _ _, Ty.ref (RefTy.struct _) => .error .stuck
+      | SVal.array _ _, Ty.ref (RefTy.mapping _ _) => .error .stuck
   | Stmt.pushAssign target value =>
       execAssign s (PlaceExpr.pushPlace target) value
   | Stmt.pushFieldAssign target fld value =>
@@ -1336,11 +1392,15 @@ def execStmt (s : State) : Stmt -> Res State
       let (s, root, segs) ← resolveS s target.expr
       let arr ← s.findStorage root segs
       match arr with
-      | SVal.array elems =>
+      | SVal.array elems shadow =>
           match elems.reverse with
           | [] => .error .revert
-          | _ :: restRev =>
-              s.saveStorage root segs (SVal.array restRev.reverse)
+          | last :: restRev =>
+              -- KeY's `storagePopSave`: `delAt` the last slot, then shorten.
+              -- The cleared slot stays addressable beyond the new length, so
+              -- a mapping nested in it survives into the next `push`.
+              s.saveStorage root segs
+                (SVal.array restRev.reverse (last.defaultOf :: shadow))
       | SVal.prim _ => .error .stuck
       | SVal.struct _ => .error .stuck
       | SVal.map _ _ => .error .stuck
@@ -1419,13 +1479,13 @@ def State.exampleStore : State :=
         ("age", SVal.int 0),
         ("owner", SVal.int 0),
         ("balance", SVal.int 0),
-        ("values", SVal.array []),
+        ("values", SVal.array [] []),
         ("balances", SVal.map [] (SVal.int 0)),
         ("flags", SVal.map [] (SVal.bool false)),
         ("folks", SVal.map [] (defaultForRef (RefTy.struct "Person"))),
-        ("matrix", SVal.array []),
-        ("persons", SVal.array []),
-        ("people", SVal.array []),
+        ("matrix", SVal.array [] []),
+        ("persons", SVal.array [] []),
+        ("people", SVal.array [] []),
         ("alice", defaultForRef (RefTy.struct "Person")),
         ("bob", defaultForRef (RefTy.struct "Person")),
         ("wallet", defaultForRef (RefTy.struct "Wallet")) ] }
@@ -1453,11 +1513,11 @@ def State.testSuiteStore : State :=
         ("age", SVal.int 0),
         ("owner", SVal.int 0),
         ("balance", SVal.int 0),
-        ("values", SVal.array []),
+        ("values", SVal.array [] []),
         -- `TestSuite.a : uint[]` ports to `aux`: `a` is a local `uint`
         -- in seven `SolcExpressions` functions.
-        ("aux", SVal.array []),
-        ("matrix", SVal.array []),
+        ("aux", SVal.array [] []),
+        ("matrix", SVal.array [] []),
         ("balances", SVal.map [] (SVal.int 0)),
         -- `TestSuite.people : mapping(uint => Person)` ports to `folks`;
         -- `people` is already the `Person[]` of the calculus examples.
@@ -1465,22 +1525,22 @@ def State.testSuiteStore : State :=
         ("flags", SVal.map [] (SVal.bool false)),
         ("valuesMap", SVal.map [] (SVal.int 0)),
         ("accountMap", SVal.map [] (defaultForRef (RefTy.struct "Account"))),
-        ("persons", SVal.array []),
+        ("persons", SVal.array [] []),
         ("alice", defaultForRef (RefTy.struct "Person")),
         ("bob", defaultForRef (RefTy.struct "Person")),
         ("ledger", defaultForRef (RefTy.struct "Ledger")),
-        ("tokens", SVal.array []),
+        ("tokens", SVal.array [] []),
         ("bucket", defaultForRef (RefTy.struct "TokenBucket")),
-        ("ledgerUses", SVal.array []),
+        ("ledgerUses", SVal.array [] []),
         -- Added by the re-port at solkey `c80a54494c`: the bool tier, the
         -- `Toggle` struct, the standalone `tok`, and the array/basket
         -- state the copy group writes through.
         ("flag", SVal.bool false),
         ("flag2", SVal.bool false),
-        ("boolFlags", SVal.array []),
+        ("boolFlags", SVal.array [] []),
         ("toggle", defaultForRef (RefTy.struct "Toggle")),
         ("tok", defaultForRef (RefTy.struct "Token")),
-        ("buckets", SVal.array []),
+        ("buckets", SVal.array [] []),
         ("basketA", defaultForRef (RefTy.struct "Basket")),
         ("basketB", defaultForRef (RefTy.struct "Basket")) ] }
 
@@ -1500,16 +1560,16 @@ def State.solcStructsStore : State :=
         ("neighbourAfter", SVal.int 0),
         ("source", defaultForRef (RefTy.struct "Pair")),
         ("target", defaultForRef (RefTy.struct "Pair")),
-        ("pairs1", SVal.array []),
-        ("pairs2", SVal.array []),
+        ("pairs1", SVal.array [] []),
+        ("pairs2", SVal.array [] []),
         ("campaigns", SVal.map [] (defaultForRef (RefTy.struct "Simple"))) ] }
 
 /-- `solc/SolcArrays.sol`. -/
 def State.solcArraysStore : State :=
   { storage :=
-      [ ("storageArray", SVal.array []),
-        ("matrix", SVal.array []),
-        ("structs", SVal.array []) ] }
+      [ ("storageArray", SVal.array [] []),
+        ("matrix", SVal.array [] []),
+        ("structs", SVal.array [] []) ] }
 
 /-- `solc/SolcMemory.sol`. `x` ports to `outerX` (`x` is the stack `uint`
 root), `inner` to `innerS` (`inner` is a local storage alias in
@@ -1519,8 +1579,8 @@ def State.solcMemoryStore : State :=
   { storage :=
       [ ("outerX", defaultForRef (RefTy.struct "Outer")),
         ("innerS", defaultForRef (RefTy.struct "Inner")),
-        ("inners", SVal.array []),
-        ("prims", SVal.array []) ] }
+        ("inners", SVal.array [] []),
+        ("prims", SVal.array [] []) ] }
 
 /-- `solc/SolcMappings.sol`. `s` ports to `sBox` (`s` is a local
 `Inner memory` in `SolcMemory`) and `m` to `sMap` (`m` is an existing
@@ -1532,8 +1592,8 @@ def State.solcMappingsStore : State :=
         ("sMap", SVal.map [] (defaultForRef (RefTy.struct "S"))),
         ("withSubMap", SVal.map [] (defaultForRef (RefTy.struct "WithSub"))),
         ("balances", SVal.map [] (SVal.int 0)),
-        ("arrayMap", SVal.map [] (SVal.array [])),
-        ("rows", SVal.array []),
+        ("arrayMap", SVal.map [] (SVal.array [] [])),
+        ("rows", SVal.array [] []),
         ("ledger", defaultForRef (RefTy.struct "Ledger")) ] }
 
 /-- `solc/SolcControlFlow.sol`. -/
@@ -1542,7 +1602,7 @@ def State.solcControlFlowStore : State :=
       [ ("sx", defaultForRef (RefTy.struct "Pair")),
         ("sy", defaultForRef (RefTy.struct "Pair")),
         ("target", defaultForRef (RefTy.struct "Pair")),
-        ("values", SVal.array []) ] }
+        ("values", SVal.array [] []) ] }
 
 end Semantics
 

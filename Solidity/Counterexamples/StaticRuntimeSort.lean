@@ -36,7 +36,7 @@ open Semantics
 theorem array_runtime_not_le_static :
     ∃ (v : SVal) (ty : Ty), v.hasTy ty = true ∧
       (v.keySort).le (ty.keySort false) = false :=
-  ⟨SVal.array [], Ty.ref (RefTy.array Ty.uint), by decide, by decide⟩
+  ⟨SVal.array [] [], Ty.ref (RefTy.array Ty.uint), by decide, by decide⟩
 
 /-- The same for a mapping: a `Struct` node whose static sort is
 `mapping(int => int)`. -/

@@ -588,12 +588,13 @@ can be taken inside an `SVal` leaf, while the leaf's is on a member of the
 location *and* a member of the written value, drawn from two different trees,
 which no single leaf can hold. So the leaf taclets are the arms of `selectSt`
 rather than theorems over a definition, and `Theory/Denote.mergeKeepMaps` is
-the eager reading the denotation needs. `Theory/Denote.denote_save`,
-`denote_save_absent` and `denote_save_prim` are the collapse: at a
-mapping-free location, at a fresh slot, and for every non-struct payload,
-upstream's `save` denotes the plain write — which is why the `*CopySource` /
-`…StoreRoot` program rows below are untouched, and why
-`Rules.StorageUpd.push` still merges KeY's three push taclets.
+the eager reading the denotation needs. `Theory/Denote.denote_save`
+and `denote_save_prim` are the collapse: at a mapping-free location and for
+every non-struct payload, upstream's `save` denotes the plain write — which
+is why the `*CopySource` / `…StoreRoot` program rows below are untouched,
+and why `Rules.StorageUpd.push` still merges KeY's three push taclets. (The
+fresh-slot arm, `denote_save_absent`, is gone: the slot a `push` lands on is
+the one a `pop` cleared, not a fresh one.)
 
 ### `memoryRules.key` → `Theory/Memory.lean`
 
@@ -652,3 +653,10 @@ as two saves in one parallel update, the new slot `at(n)` and the new length
 which `SVal.save` reverts on, so `Update/Theory.lean` writes the extended
 array at the array's own path instead — the shape `Rules.StorageUpd.push` and
 `Update.pushStorage` already use. Same for `pop`.
+
+What that whole-array write now *carries* is upstream's `delAt`: both
+`storagePopSave` and `storagePushLengthSave` clear the slot at `n` rather
+than dropping it, so a mapping nested in a popped element survives into the
+next `push`. `SVal.array` holds those recycled slots in a second field and
+`Semantics.pushSlot` is the eager `delAt`; `testDeepPopDoesNotResetMappingMember`
+is the obligation that turns on it.

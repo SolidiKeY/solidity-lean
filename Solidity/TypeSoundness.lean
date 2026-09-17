@@ -660,11 +660,12 @@ theorem resolveS_wt {Γ : Ctx} {H : HeapTy} {L : Layout} {s : State}
               -- The interpreter matches on `arr, target.ty` together.
               split at hres
               case h_2 | h_3 | h_4 | h_5 | h_6 | h_7 => exact nomatch hres
-              case h_1 elems elemTy₀ heq =>
+              case h_1 elems shadow elemTy₀ heq =>
                 have htty := heq
                 try simp only [bind, Except.bind] at hres
                 cases hsave : s₁.saveStorage root₁ segs₁
-                    (SVal.array (elems ++ [defaultForTy elemTy₀])) with
+                    (SVal.array (elems ++ [(pushSlot elemTy₀ shadow).1])
+                      (pushSlot elemTy₀ shadow).2) with
                 | error e => rw [hsave] at hres; exact nomatch hres
                 | ok s₂ =>
                     rw [hsave] at hres
@@ -675,12 +676,13 @@ theorem resolveS_wt {Γ : Ctx} {H : HeapTy} {L : Layout} {s : State}
                     rw [htty] at hexpr harrty hty₁
                     have hok : defaultOk elemTy₀ = true := hexpr.2
                     have hext : (SVal.array
-                        (elems ++ [defaultForTy elemTy₀])).hasTy
+                        (elems ++ [(pushSlot elemTy₀ shadow).1])
+                        (pushSlot elemTy₀ shadow).2).hasTy
                         (Ty.ref (RefTy.array elemTy₀)) = true := by
-                      simp only [SVal.hasTy] at harrty ⊢
-                      exact hasTyElems_append harrty
-                        (by simpa [SVal.hasTy.hasTyElems] using
-                          defaultForTy_hasTy hok)
+                      simp only [SVal.hasTy, Bool.and_eq_true] at harrty ⊢
+                      obtain ⟨hslot, hrest⟩ := pushSlot_hasTy harrty.2 hok
+                      exact ⟨hasTyElems_append harrty.1
+                        (by simpa [SVal.hasTy.hasTyElems] using hslot), hrest⟩
                     have hst₂ := State.saveStorage_wellTyped
                       hwt₁.layoutNodup hwt₁.storage hty₁ hext hsave
                     obtain ⟨hheap, hnext, henv, _⟩ :=
@@ -2842,10 +2844,10 @@ theorem execStmt_sound {Γ Γ' : Ctx} {H : HeapTy} {L : Layout}
                     have hok : defaultOk elem₀ = true := hcond.2
                     refine ⟨H, HeapTy.Extends.refl H,
                       hwt₁.ofSaveStorage hty₁ ?_ hexec⟩
-                    simp only [SVal.hasTy] at harrty ⊢
-                    exact hasTyElems_append harrty
-                      (by simpa [SVal.hasTy.hasTyElems] using
-                        defaultForTy_hasTy hok)
+                    simp only [SVal.hasTy, Bool.and_eq_true] at harrty ⊢
+                    obtain ⟨hslot, hrest⟩ := pushSlot_hasTy harrty.2 hok
+                    exact ⟨hasTyElems_append harrty.1
+                      (by simpa [SVal.hasTy.hasTyElems] using hslot), hrest⟩
           | some rhs =>
               simp only [stmtWt] at hstmt
               split at hstmt
@@ -2882,11 +2884,12 @@ theorem execStmt_sound {Γ Γ' : Ctx} {H : HeapTy} {L : Layout}
                           hcond.1.2 hsv
                         refine ⟨H, HeapTy.Extends.refl H,
                           hwt₂.ofSaveStorage hty₁ ?_ hexec⟩
-                        simp only [SVal.hasTy] at harrty ⊢
-                        exact hasTyElems_append harrty
+                        simp only [SVal.hasTy, Bool.and_eq_true] at harrty ⊢
+                        refine ⟨hasTyElems_append harrty.1
                           (by
                             rw [helem]
-                            simpa [SVal.hasTy.hasTyElems] using hsvty)
+                            simpa [SVal.hasTy.hasTyElems] using hsvty), ?_⟩
+                        exact pushSlot_rest_hasTy harrty.2
   | pushAssign target value =>
       simp only [stmtWt] at hstmt
       split at hstmt
@@ -2959,15 +2962,22 @@ theorem execStmt_sound {Γ Γ' : Ctx} {H : HeapTy} {L : Layout}
                               rw [hbt] at harrty hty₁
                               refine ⟨H, HeapTy.Extends.refl H,
                                 hwt₁.ofSaveStorage hty₁ ?_ hexec⟩
-                              simp only [SVal.hasTy] at harrty ⊢
-                              refine hasTyElems_of_forall_mem
-                                fun v hv => ?_
-                              refine hasTyElems_mem harrty ?_
-                              have : v ∈ elems.reverse := by
-                                rw [hrev]
-                                exact List.Mem.tail _
-                                  (List.mem_reverse.mp hv)
-                              exact List.mem_reverse.mp this
+                              simp only [SVal.hasTy, Bool.and_eq_true] at harrty ⊢
+                              refine ⟨hasTyElems_of_forall_mem
+                                fun v hv => ?_, ?_⟩
+                              · refine hasTyElems_mem harrty.1 ?_
+                                have : v ∈ elems.reverse := by
+                                  rw [hrev]
+                                  exact List.Mem.tail _
+                                    (List.mem_reverse.mp hv)
+                                exact List.mem_reverse.mp this
+                              · simp only [SVal.hasTy.hasTyElems,
+                                  Bool.and_eq_true]
+                                refine ⟨SVal.defaultOf_hasTy ?_, harrty.2⟩
+                                refine hasTyElems_mem harrty.1 ?_
+                                have : x ∈ elems.reverse := by
+                                  rw [hrev]; exact List.Mem.head _
+                                exact List.mem_reverse.mp this
   | «revert» msg => rw [execStmt.eq_def] at hexec; exact nomatch hexec
   | compoundAssign op lhs rhs =>
       simp only [stmtWt] at hstmt

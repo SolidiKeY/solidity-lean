@@ -663,7 +663,8 @@ theorem copyMToSt_hasTy {H : HeapTy} {s : State}
                         | ok selems =>
                             rw [hes] at hcopy
                             try dsimp only at hcopy
-                            simp only [<- Except.ok.inj hcopy, SVal.hasTy]
+                            simp only [<- Except.ok.inj hcopy, SVal.hasTy,
+                              SVal.hasTy.hasTyElems, Bool.and_true]
                             exact copyMElems_hasTy
                               (fun hv hc => copyMToSt_hasTy hheap hv hc)
                               (by simpa [MObj.hasTyH] using hrow) hes
@@ -816,7 +817,8 @@ theorem copyStToM_typed {H : HeapTy} {s s' : State} {v : SVal}
                   rw [hes] at hcopy
                   try dsimp only at hcopy
                   obtain ⟨H₁, hout, hels⟩ :=
-                    copyStElems_typed hnd hheap hwf hty hes
+                    copyStElems_typed hnd hheap hwf
+                      (by simpa using (Bool.and_eq_true _ _ ▸ hty : _ ∧ _).1) hes
                   simp only [Except.ok.injEq, Prod.mk.injEq] at hcopy
                   obtain ⟨hs', hmv⟩ := hcopy
                   subst hs' hmv

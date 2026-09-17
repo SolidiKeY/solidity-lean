@@ -47,9 +47,9 @@ bounds check and agree.) -/
 def store : State :=
   { State.exampleStore with
       storage :=
-        setBy "values" (SVal.array [SVal.int 0])
+        setBy "values" (SVal.array [SVal.int 0] [])
           (setBy "people"
-            (SVal.array [defaultForRef (RefTy.struct "Person")])
+            (SVal.array [defaultForRef (RefTy.struct "Person")] [])
             State.exampleStore.storage),
       env := [("i", Binding.val (Value.int 0))] }
 

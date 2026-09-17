@@ -44,7 +44,7 @@ open Semantics Wp Rules
 
 /-- The length of a storage array value. -/
 def arrayLength : SVal -> Res Value
-  | SVal.array elems => .ok (Value.int elems.length)
+  | SVal.array elems _ => .ok (Value.int elems.length)
   | _ => .error .stuck
 
 /-- The value at an *l-value*, as `compoundAssignUpd` and `incDecUpd` read it:
@@ -119,7 +119,7 @@ def bindRhs (r : BindRhs) (s : State) : Res Binding :=
       | WrappedExpr.pushPlace arr =>
           placePath s arr >>= fun p => s.findStorage p.1 p.2 >>= fun cur =>
             match cur with
-            | SVal.array elems => .ok (Binding.spath p.1 (p.2 ++ [Seg.at elems.length]))
+            | SVal.array elems _ => .ok (Binding.spath p.1 (p.2 ++ [Seg.at elems.length]))
             | _ => .error .stuck
       | _ => .error .stuck
   | .mref src =>
@@ -129,16 +129,19 @@ def bindRhs (r : BindRhs) (s : State) : Res Binding :=
         | _ => .error .stuck
 
 /-- `arr.push(…)`: the element is read first, then appended.  `none` is
-`arr.push()`, which appends the element type's default. -/
+`arr.push()`, which appends the slot a `pop` gave back (`Semantics.pushSlot`),
+cleared — KeY's `delAt(storage, at(n))` — or the element type's default where
+the array has never been that long. -/
 def pushStorage (arr : WrappedExpr) (value : Option WrappedExpr) (s : State) :
     Res (List (Name × SVal)) :=
   placePath s arr >>= fun p => s.findStorage p.1 p.2 >>= fun cur =>
     match cur, arr.ty with
-    | SVal.array elems, Ty.ref (RefTy.array elemTy) =>
+    | SVal.array elems shadow, Ty.ref (RefTy.array elemTy) =>
         (match value with
-          | none => .ok (defaultForTy elemTy)
+          | none => .ok (pushSlot elemTy shadow).1
           | some rhs => rhsSVal s rhs) >>= fun newElem =>
-          Upd.saveSt s p.1 p.2 (SVal.array (elems ++ [newElem]))
+          Upd.saveSt s p.1 p.2
+            (SVal.array (elems ++ [newElem]) (pushSlot elemTy shadow).2)
     | _, _ => .error .stuck
 
 /-- `storage := …`. -/
@@ -155,10 +158,12 @@ def storageRhs (u : StorageUpd) (s : State) : Res (List (Name × SVal)) :=
   | .pop arr =>
       placePath s arr >>= fun p => s.findStorage p.1 p.2 >>= fun cur =>
         match cur with
-        | SVal.array elems =>
+        | SVal.array elems shadow =>
             match elems.reverse with
             | [] => .error .revert
-            | _ :: restRev => Upd.saveSt s p.1 p.2 (SVal.array restRev.reverse)
+            | last :: restRev =>
+                Upd.saveSt s p.1 p.2
+                  (SVal.array restRev.reverse (last.defaultOf :: shadow))
         | _ => .error .stuck
   | .clear target =>
       deletePath s target >>= fun x =>
@@ -329,7 +334,7 @@ def inBoundsOf (s : State) : WrappedExpr -> Res Bool
       simpleInt s ix >>= fun i =>
         placePath s arr >>= fun p => s.findStorage p.1 p.2 >>= fun cur =>
           match cur with
-          | SVal.array elems => .ok (decide (0 ≤ i ∧ i.toNat < elems.length))
+          | SVal.array elems _ => .ok (decide (0 ≤ i ∧ i.toNat < elems.length))
           | SVal.map _ _ => .ok true
           | _ => .error .stuck
   | WrappedExpr.index Kind.memory _ base ix =>
@@ -353,7 +358,7 @@ def SideFormula.eval (s : State) : SideFormula -> Res Bool
   | .nonEmpty arr =>
       placePath s arr >>= fun p => s.findStorage p.1 p.2 >>= fun cur =>
         match cur with
-        | SVal.array elems => .ok (decide (0 < elems.length))
+        | SVal.array elems _ => .ok (decide (0 < elems.length))
         | _ => .error .stuck
   | .nonZero e => (readVal s e >>= Value.asInt).map fun i => decide (i ≠ 0)
   | .rhsNonZero e =>

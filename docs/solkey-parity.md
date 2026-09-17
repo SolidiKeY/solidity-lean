@@ -136,7 +136,7 @@ detects them (`assertsUnsatisfiable`) and records the reason.
 | storage index decomposition | 3 | `storageIndex{Decomposition,MultipleWrites,CopysourceAfterPush}` |
 | local storage-alias binding | 3 | `storageLocalDeclSkip`, `storagePushLocalBind`, `testStorageNestedPushReturnAlias` |
 | ternary into a memory target | 2 | `ternarySelectsFirstMemorySource`, `ternaryIntoMemoryTarget` |
-| other | 4 | `testDeepPopDoesNotResetMappingMember`, `testStorageIndexWriteImpureIndexRefRhs`, `nestedIfElseSelectsBranch`, `exponentiationSignedBaseOddExponent` |
+| other | 4 | `testDeepPopDoesNotResetMappingMember` (the *parser* glues `[0].ledger.balances` into one dotted field; the semantics is there — `Examples/Taclets/StorageOps.lean` closes the same program with the two hops split), `testStorageIndexWriteImpureIndexRefRhs`, `nestedIfElseSelectsBranch`, `exponentiationSignedBaseOddExponent` |
 
 The impure-operand family is new: it arrived with the upstream commits after
 the previous pin, and it is where solkey's evaluation order is most visible

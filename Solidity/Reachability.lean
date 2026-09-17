@@ -46,6 +46,15 @@ reachability of the non-canonical witnesses below) is a second
 `TypeSoundness`-sized traversal of the interpreter and is left open,
 like `BlockStep.wellFounded`; env/heap tightness (up to renaming of
 identities) is likewise future work.
+
+It is open in a second sense since `pop` became faithful: a popped array
+carries the slot it cleared (`SVal.array`'s second field, `Semantics.pushSlot`),
+and `canonical` is the **shadow-free** fragment — the one `writeProg`
+can build, since it builds with assignments and pushes and never a `pop`.
+So `arr.push(); arr.pop();` is reachable and not canonical. Closing the
+converse means either teaching `fill` to pop or carrying the recycled
+slots in `canonical` and scoping `storage_tight` to the shadow-free part;
+either is its own change.
 -/
 
 namespace Solidity
@@ -210,7 +219,7 @@ def SVal.isDefault : SVal -> Ty -> Bool
   | SVal.struct fields, Ty.ref (RefTy.struct s) =>
       (fields.map Prod.fst == (structDef s).map Prod.fst) &&
         isDefaultFields s fields
-  | SVal.array elems, Ty.ref (RefTy.array _) => elems.isEmpty
+  | SVal.array elems shadow, Ty.ref (RefTy.array _) => elems.isEmpty && shadow.isEmpty
   | SVal.map entries dflt, Ty.ref (RefTy.mapping _ value) =>
       entries.isEmpty && dflt.isDefault value
   | _, _ => false
@@ -232,7 +241,13 @@ def SVal.canonical : SVal -> Ty -> Bool
   | SVal.struct fields, Ty.ref (RefTy.struct s) =>
       (fields.map Prod.fst == (structDef s).map Prod.fst) &&
         canonicalFields s fields
-  | SVal.array elems, Ty.ref (RefTy.array elem) => canonicalElems elem elems
+  -- No recycled slots: `writeProg` builds a storage by assignments and
+  -- pushes, and rebuilding a slot a `pop` gave back would need the `pop`
+  -- too.  So `canonical` is the *shadow-free* fragment — which keeps
+  -- `storage_tight` (canonical ⇒ reachable) true and narrows only the
+  -- converse, which is open anyway.
+  | SVal.array elems shadow, Ty.ref (RefTy.array elem) =>
+      canonicalElems elem elems && shadow.isEmpty
   | SVal.map entries dflt, Ty.ref (RefTy.mapping _ value) =>
       nodupKeysB entries && canonicalEntries value entries &&
         dflt.isDefault value
@@ -294,7 +309,11 @@ theorem SVal.isDefault_hasTy {v : SVal} {ty : Ty}
           | struct sname => simp [SVal.isDefault] at h
           | array elem =>
               cases elems with
-              | nil => rfl
+              | nil =>
+                  rename_i shadow
+                  cases shadow with
+                  | nil => rfl
+                  | cons c cs => simp [SVal.isDefault] at h
               | cons x xs => simp [SVal.isDefault] at h
           | mapping key value => simp [SVal.isDefault] at h
   | map entries dflt =>
@@ -363,8 +382,12 @@ theorem SVal.canonical_hasTy {v : SVal} {ty : Ty}
           cases r with
           | struct sname => simp [SVal.canonical] at h
           | array elem =>
-              simp only [SVal.canonical] at h
-              simpa only [SVal.hasTy] using SVal.canonicalElems_hasTy h
+              simp only [SVal.canonical, Bool.and_eq_true] at h
+              obtain ⟨hlive, hsh⟩ := h
+              rw [List.isEmpty_iff] at hsh
+              subst hsh
+              simpa only [SVal.hasTy, Bool.and_eq_true, SVal.hasTy.hasTyElems,
+                Bool.and_true] using SVal.canonicalElems_hasTy hlive
           | mapping key value => simp [SVal.canonical] at h
   | map entries dflt =>
       cases ty with
@@ -465,7 +488,11 @@ theorem SVal.isDefault_canonical {v : SVal} {ty : Ty}
           | struct sname => simp [SVal.isDefault] at h
           | array elem =>
               cases elems with
-              | nil => rfl
+              | nil =>
+                  rename_i shadow
+                  cases shadow with
+                  | nil => rfl
+                  | cons c cs => simp [SVal.isDefault] at h
               | cons x xs => simp [SVal.isDefault] at h
           | mapping key value => simp [SVal.isDefault] at h
   | map entries dflt =>
@@ -576,7 +603,11 @@ theorem SVal.defaultOf_of_isDefault {v : SVal} {ty : Ty}
           | struct sname => simp [SVal.isDefault] at h
           | array elem =>
               cases elems with
-              | nil => rfl
+              | nil =>
+                  rename_i shadow
+                  cases shadow with
+                  | nil => rfl
+                  | cons c cs => simp [SVal.isDefault] at h
               | cons x xs => simp [SVal.isDefault] at h
           | mapping key value => simp [SVal.isDefault] at h
   | map entries dflt => rfl
@@ -645,13 +676,20 @@ theorem SVal.isDefault_unique {v w : SVal} {ty : Ty}
           | struct sname => simp [SVal.isDefault] at hv
           | array elem =>
               cases w with
-              | array ws =>
+              | array ws wsh =>
                   cases elems with
                   | cons x xs => simp [SVal.isDefault] at hv
                   | nil =>
                       cases ws with
                       | cons y ys => simp [SVal.isDefault] at hw
-                      | nil => rfl
+                      | nil =>
+                          rename_i shadow
+                          cases shadow with
+                          | cons c cs => simp [SVal.isDefault] at hv
+                          | nil =>
+                              cases wsh with
+                              | cons c cs => simp [SVal.isDefault] at hw
+                              | nil => rfl
               | _ => simp [SVal.isDefault] at hw
           | mapping key value => simp [SVal.isDefault] at hv
   | map entries dflt =>
@@ -714,7 +752,7 @@ def SVal.get : SVal -> List Seg -> Option SVal
       match lookupBy name fields with
       | some v => v.get rest
       | none => none
-  | SVal.array elems, Seg.at i :: rest =>
+  | SVal.array elems _, Seg.at i :: rest =>
       if h : 0 ≤ i ∧ i.toNat < elems.length then
         (elems.get ⟨i.toNat, h.2⟩).get rest
       else none
@@ -730,10 +768,10 @@ def SVal.put : SVal -> List Seg -> SVal -> SVal
       match lookupBy name fields with
       | some old => SVal.struct (setBy name (old.put rest new) fields)
       | none => SVal.struct fields
-  | SVal.array elems, Seg.at i :: rest, new =>
+  | SVal.array elems shadow, Seg.at i :: rest, new =>
       if h : 0 ≤ i ∧ i.toNat < elems.length then
-        SVal.array (elems.set i.toNat ((elems.get ⟨i.toNat, h.2⟩).put rest new))
-      else SVal.array elems
+        SVal.array (elems.set i.toNat ((elems.get ⟨i.toNat, h.2⟩).put rest new)) shadow
+      else SVal.array elems shadow
   | SVal.map entries dflt, Seg.at i :: rest, new =>
       match lookupBy i entries with
       | some old => SVal.map (setBy i (old.put rest new) entries) dflt
@@ -965,17 +1003,17 @@ theorem SVal.put_field {fs : List (Name × SVal)} {n : Name} {old : SVal}
     (SVal.struct fs).put [Seg.field n] x = SVal.struct (setBy n x fs) := by
   simp [SVal.put, hl]
 
-theorem SVal.get_at_array_last (es : List SVal) (d : SVal) :
-    (SVal.array (es ++ [d])).get [Seg.at (es.length : Int)] = some d := by
+theorem SVal.get_at_array_last (es sh : List SVal) (d : SVal) :
+    (SVal.array (es ++ [d]) sh).get [Seg.at (es.length : Int)] = some d := by
   have hb : 0 ≤ (es.length : Int) ∧
       (es.length : Int).toNat < (es ++ [d]).length := by
     simp
   simp only [SVal.get, List.get_eq_getElem, Int.toNat_natCast]
   simp
 
-theorem SVal.put_at_array_last (es : List SVal) (d x : SVal) :
-    (SVal.array (es ++ [d])).put [Seg.at (es.length : Int)] x =
-      SVal.array (es ++ [x]) := by
+theorem SVal.put_at_array_last (es sh : List SVal) (d x : SVal) :
+    (SVal.array (es ++ [d]) sh).put [Seg.at (es.length : Int)] x =
+      SVal.array (es ++ [x]) sh := by
   have hb : 0 ≤ (es.length : Int) ∧
       (es.length : Int).toNat < (es ++ [d]).length := by
     simp
@@ -1142,10 +1180,11 @@ theorem exec_delete {ty : Ty} (h : LitPlace L pl.expr r p ty) (hs : s.env = [])
 
 theorem exec_push_none {ety : Ty}
     (h : LitPlace L pl.expr r p (Ty.ref (RefTy.array ety))) (hs : s.env = [])
-    (hroot : lookupBy r s.storage = some v0) {es : List SVal}
-    (hget : v0.get p = some (SVal.array es)) :
+    (hroot : lookupBy r s.storage = some v0) {es sh : List SVal}
+    (hget : v0.get p = some (SVal.array es sh)) :
     execStmt s (Stmt.push pl none) =
-      Except.ok { s with storage := setBy r (v0.put p (SVal.array (es ++ [defaultForTy ety]))) s.storage } := by
+      Except.ok { s with storage := setBy r (v0.put p
+        (SVal.array (es ++ [(pushSlot ety sh).1]) (pushSlot ety sh).2)) s.storage } := by
   rw [execStmt.eq_def]
   dsimp only
   simp [h.resolveS_eq s hs, State.findStorage_of_get hroot hget, h.ty,
@@ -1447,7 +1486,7 @@ def fill (pl : PlaceExpr) (ty : Ty) : SVal -> List Stmt
       match ty with
       | Ty.ref (RefTy.struct sname) => fillFields pl sname fields
       | _ => []
-  | SVal.array elems =>
+  | SVal.array elems _ =>
       match ty with
       | Ty.ref (RefTy.array ety) => fillElems pl ety 0 elems
       | _ => []
@@ -1538,7 +1577,7 @@ theorem fill_wt {L : Layout} : ∀ (v : SVal) (ty : Ty) (m : Nat), m ≤ 8 ->
                   exact fillFields_wt fields (by omega) hok.2 hpl hcan.2
           | array elem => simp [SVal.canonical] at hcan
           | mapping key value => simp [SVal.canonical] at hcan
-  | SVal.array elems, ty, m, hm, hok, hcan, pl, r, p, hpl => by
+  | SVal.array elems shadow, ty, m, hm, hok, hcan, pl, r, p, hpl => by
       cases ty with
       | prim pt => simp [SVal.canonical] at hcan
       | ref rf =>
@@ -1549,9 +1588,9 @@ theorem fill_wt {L : Layout} : ∀ (v : SVal) (ty : Ty) (m : Nat), m ≤ 8 ->
               | zero => exact Bool.noConfusion hok
               | succ m =>
                   simp only [tyOkFuel] at hok
-                  simp only [SVal.canonical] at hcan
+                  simp only [SVal.canonical, Bool.and_eq_true] at hcan
                   simp only [fill]
-                  exact fillElems_wt elems 0 (by omega) hok hpl hcan
+                  exact fillElems_wt elems 0 (by omega) hok hpl hcan.1
           | mapping key value => simp [SVal.canonical] at hcan
   | SVal.map entries dflt, ty, m, hm, hok, hcan, pl, r, p, hpl => by
       cases ty with
@@ -1682,7 +1721,7 @@ theorem fill_exec {L : Layout} : ∀ (v : SVal) (ty : Ty) (m : Nat), m ≤ 8 ->
                   | _ => simp [SVal.isDefault] at hcur
           | array elem => simp [SVal.canonical] at hcan
           | mapping key value => simp [SVal.canonical] at hcan
-  | SVal.array elems, ty, m, hm, hok, hcan, pl, r, p, s, v0, cur, hpl, hs,
+  | SVal.array elems shadow, ty, m, hm, hok, hcan, pl, r, p, s, v0, cur, hpl, hs,
       hroot, hget, hcur => by
       cases ty with
       | prim pt => simp [SVal.canonical] at hcan
@@ -1696,13 +1735,24 @@ theorem fill_exec {L : Layout} : ∀ (v : SVal) (ty : Ty) (m : Nat), m ≤ 8 ->
                   simp only [tyOkFuel] at hok
                   simp only [SVal.canonical] at hcan
                   cases cur with
-                  | array ce =>
+                  | array ce csh =>
                       cases ce with
                       | cons x xs => simp [SVal.isDefault] at hcur
                       | nil =>
+                          simp only [Bool.and_eq_true] at hcan
+                          obtain ⟨hlive, hsh⟩ := hcan
+                          rw [List.isEmpty_iff] at hsh
+                          subst hsh
+                          -- the target slot is the type's default, so it has
+                          -- no recycled slots either
+                          have hcsh : csh = [] := by
+                            simp only [SVal.isDefault, List.isEmpty_nil,
+                              Bool.true_and, List.isEmpty_iff] at hcur
+                            exact hcur
+                          subst hcsh
                           simp only [fill]
                           exact fillElems_exec elems (by omega) hok hpl [] s v0 hs
-                            hroot hget hcan
+                            hroot hget hlive
                   | _ => simp [SVal.isDefault] at hcur
           | mapping key value => simp [SVal.canonical] at hcan
   | SVal.map entries d, ty, m, hm, hok, hcan, pl, r, p, s, v0, cur, hpl, hs,
@@ -1803,10 +1853,10 @@ theorem fillElems_exec {L : Layout} {ety : Ty} {pl : PlaceExpr} {r : Name}
       LitPlace L pl.expr r p (Ty.ref (RefTy.array ety)) ->
       ∀ (done : List SVal) (s : State) (v0 : SVal),
         s.env = [] -> lookupBy r s.storage = some v0 ->
-        v0.get p = some (SVal.array done) ->
+        v0.get p = some (SVal.array done []) ->
         SVal.canonical.canonicalElems ety todo = true ->
         execBlock s (fillElems pl ety done.length todo) =
-          Except.ok { s with storage := setBy r (v0.put p (SVal.array (done ++ todo))) s.storage }
+          Except.ok { s with storage := setBy r (v0.put p (SVal.array (done ++ todo) [])) s.storage }
   | [], hm, hok, hpl, done, s, v0, hs, hroot, hget, hcan => by
       simp only [fillElems, execBlock_nil, List.append_nil]
       rw [SVal.put_get_self hget, setBy_lookup_self hroot]
@@ -1815,7 +1865,8 @@ theorem fillElems_exec {L : Layout} {ety : Ty} {pl : PlaceExpr} {r : Name}
       have hdok : defaultOk ety = true := tyOkFuel_defaultOk hok
       have hpl' := LitPlace.index (L := L) (done.length : Int) ety hpl rfl
       have h0 := exec_push_none hpl hs hroot hget
-      have hget₁ : (v0.put p (SVal.array (done ++ [defaultForTy ety]))).get
+      simp only [pushSlot] at h0
+      have hget₁ : (v0.put p (SVal.array (done ++ [defaultForTy ety]) [])).get
           (p ++ [Seg.at (done.length : Int)]) = some (defaultForTy ety) := by
         simp only [SVal.get_snoc, SVal.get_put_self hget, Option.bind_some,
           SVal.get_at_array_last]
@@ -1824,16 +1875,16 @@ theorem fillElems_exec {L : Layout} {ety : Ty} {pl : PlaceExpr} {r : Name}
           (WrappedExpr.intLit Ty.uint (done.length : Int)))
         r (p ++ [Seg.at (done.length : Int)])
         { s with storage :=
-            setBy r (v0.put p (SVal.array (done ++ [defaultForTy ety]))) s.storage }
-        (v0.put p (SVal.array (done ++ [defaultForTy ety]))) (defaultForTy ety)
+            setBy r (v0.put p (SVal.array (done ++ [defaultForTy ety]) [])) s.storage }
+        (v0.put p (SVal.array (done ++ [defaultForTy ety]) [])) (defaultForTy ety)
         hpl' hs (lookupBy_setBy_self _ _ _) hget₁ (defaultForTy_isDefault hdok)
       simp only [SVal.put_snoc _ w (SVal.get_put_self hget), SVal.put_at_array_last,
         SVal.put_put_same hget, setBy_setBy_same] at h1
-      have hget₂ : (v0.put p (SVal.array (done ++ [w]))).get p =
-          some (SVal.array (done ++ [w])) := SVal.get_put_self hget
+      have hget₂ : (v0.put p (SVal.array (done ++ [w]) [])).get p =
+          some (SVal.array (done ++ [w]) []) := SVal.get_put_self hget
       have h2 := fillElems_exec rest hm hok hpl (done ++ [w])
-        { s with storage := setBy r (v0.put p (SVal.array (done ++ [w]))) s.storage }
-        (v0.put p (SVal.array (done ++ [w]))) hs (lookupBy_setBy_self _ _ _) hget₂
+        { s with storage := setBy r (v0.put p (SVal.array (done ++ [w]) [])) s.storage }
+        (v0.put p (SVal.array (done ++ [w]) [])) hs (lookupBy_setBy_self _ _ _) hget₂
         hcan.2
       rw [List.length_append, List.length_singleton] at h2
       simp only [fillElems, execBlock_cons, h0, bind, Except.bind, execBlock_append,
@@ -2143,7 +2194,7 @@ def demoStorage : List (Name × SVal) :=
   [("w", SVal.struct
       [("owner", SVal.int 9),
        ("stash", SVal.map [(3, SVal.int 30), (1, SVal.int 10)] (SVal.int 0))]),
-   ("xs", SVal.array [SVal.int 5, SVal.int 6])]
+   ("xs", SVal.array [SVal.int 5, SVal.int 6] [])]
 
 example : layoutOkB demoLayout = true := by native_decide
 example : canonicalStorageB demoLayout demoStorage = true := by native_decide

@@ -39,11 +39,13 @@ taclets, and `Update/Eval.lean`'s `pushStorage` already computes the extended
 array in one go, so `Update/Theory.lean` writes the extended array at the
 array's own path.  The same holds for `pop`.
 
-Every `save` upstream carries the leaf that keeps a location's mapping members
-(`Theory/Storage.lean`, "The leaf of a write"), the value copy of a `push`
-included — and the merged constructor survives it for the reason the slot
-index gives: at the old length there is nothing to keep, so
-`denote_save_absent` below collapses the write to the plain one.
+The slot a `push` lands on is **not** fresh, and that is the content of
+`Semantics.pushSlot`: upstream's `storagePushLengthSave` writes
+`delAt(storage, at(n))` there, so a slot a `pop` gave back keeps the mapping
+members `delete` never clears.  The whole-array write carries them in
+`SVal.array`'s second field, which is why a mapping nested in a popped
+element is still there after the next `push` — solc's behaviour, and what
+`testDeepPopDoesNotResetMappingMember` asserts.
 -/
 
 namespace Solidity
@@ -61,7 +63,7 @@ def slotOf : SVal -> Seg -> Res SVal
       match lookupBy name fields with
       | some old => .ok old
       | none => .error .stuck
-  | SVal.array elems, Seg.at i =>
+  | SVal.array elems _, Seg.at i =>
       if h : 0 ≤ i ∧ i.toNat < elems.length then .ok (elems.get ⟨i.toNat, h.2⟩)
       else .error .revert
   | SVal.map entries d, Seg.at i =>
@@ -70,7 +72,7 @@ def slotOf : SVal -> Seg -> Res SVal
       | none => .ok d
   | SVal.prim _, _ => .error .stuck
   | SVal.struct _, Seg.at _ => .error .stuck
-  | SVal.array _, Seg.field _ => .error .stuck
+  | SVal.array _ _, Seg.field _ => .error .stuck
   | SVal.map _ _, Seg.field _ => .error .stuck
 
 /-- Write a slot.  The shape dispatch is `slotOf`'s, so the two agree on which
@@ -80,13 +82,13 @@ def putAt : SVal -> Seg -> SVal -> Res SVal
       match lookupBy name fields with
       | some _ => .ok (SVal.struct (setBy name w fields))
       | none => .error .stuck
-  | SVal.array elems, Seg.at i, w =>
-      if 0 ≤ i ∧ i.toNat < elems.length then .ok (SVal.array (elems.set i.toNat w))
+  | SVal.array elems shadow, Seg.at i, w =>
+      if 0 ≤ i ∧ i.toNat < elems.length then .ok (SVal.array (elems.set i.toNat w) shadow)
       else .error .revert
   | SVal.map entries d, Seg.at i, w => .ok (SVal.map (setBy i w entries) d)
   | SVal.prim _, _, _ => .error .stuck
   | SVal.struct _, Seg.at _, _ => .error .stuck
-  | SVal.array _, Seg.field _, _ => .error .stuck
+  | SVal.array _ _, Seg.field _, _ => .error .stuck
   | SVal.map _ _, Seg.field _, _ => .error .stuck
 
 /-! ## The leaf of a write, eagerly
@@ -142,7 +144,7 @@ struct is the plain write the interpreter performs. -/
 def svalHasMapping : SVal -> Bool
   | SVal.map _ _ => true
   | SVal.struct fs => fieldsHaveMappingV fs
-  | SVal.array es => elemsHaveMapping es
+  | SVal.array es sh => elemsHaveMapping es || elemsHaveMapping sh
   | SVal.prim _ => false
 
 def fieldsHaveMappingV : List (Name × SVal) -> Bool
@@ -155,8 +157,8 @@ def elemsHaveMapping : List SVal -> Bool
 end
 
 /-- A written location, once both sides are denoted.  A location with no value
-at all — `dflt` and `mtSt`, i.e. a *fresh* slot, which is what `push` writes —
-keeps nothing, so the leaf is the written value; a revert propagates. -/
+at all — `dflt` and `mtSt` — keeps nothing, so the leaf is the written value;
+a revert propagates. -/
 def mergeDen : Res SVal -> Res SVal -> Res SVal
   | .ok a, .ok b => .ok (mergeKeepMaps a b)
   | .ok _, .error e => .error e
@@ -204,8 +206,8 @@ def selOf : SVal -> Seg -> Res SVal
       match lookupBy name fields with
       | some v => .ok v
       | none => .error .stuck
-  | SVal.array elems, Seg.field "length" => .ok (SVal.int elems.length)
-  | SVal.array elems, Seg.at i =>
+  | SVal.array elems _, Seg.field "length" => .ok (SVal.int elems.length)
+  | SVal.array elems _, Seg.at i =>
       if h : 0 ≤ i ∧ i.toNat < elems.length then .ok (elems.get ⟨i.toNat, h.2⟩)
       else .error .revert
   | SVal.map entries d, Seg.at i =>
@@ -214,7 +216,7 @@ def selOf : SVal -> Seg -> Res SVal
       | none => .ok d
   | SVal.prim _, _ => .error .stuck
   | SVal.struct _, Seg.at _ => .error .stuck
-  | SVal.array _, Seg.field _ => .error .stuck
+  | SVal.array _ _, Seg.field _ => .error .stuck
   | SVal.map _ _, Seg.field _ => .error .stuck
 
 /-- One step of `SVal.find`. -/
@@ -227,11 +229,11 @@ theorem find_cons (v : SVal) (a : Seg) (rest : List Seg) :
       simp only [SVal.find, selOf, bind, Except.bind]
       cases lookupBy n fields <;> rfl
   | SVal.struct _, Seg.at _ => rfl
-  | SVal.array elems, Seg.field n =>
+  | SVal.array elems _, Seg.field n =>
       by_cases hn : n = "length"
       · subst hn; rfl
       · simp [SVal.find, selOf, bind, Except.bind, hn]
-  | SVal.array elems, Seg.at i =>
+  | SVal.array elems _, Seg.at i =>
       simp only [SVal.find, selOf, bind, Except.bind]
       split <;> rfl
   | SVal.map _ _, Seg.field _ => rfl
@@ -385,7 +387,7 @@ theorem Denotes.ofSval_aux : ∀ (k : Nat) (v : SVal), sizeOf v ≤ k -> Denotes
                   have := lookupBy_sizeOf_lt fields n w hl
                   exact Denotes.ofSval_aux k w (by simp at hk; omega)
           | SVal.struct _, Seg.at _ => exact Except.noConfusion h
-          | SVal.array elems, Seg.field n =>
+          | SVal.array elems _, Seg.field n =>
               by_cases hn : n = "length"
               · subst hn
                 simp only [selOf] at h
@@ -393,7 +395,7 @@ theorem Denotes.ofSval_aux : ∀ (k : Nat) (v : SVal), sizeOf v ≤ k -> Denotes
                 subst h'
                 exact Denotes.ofPrim (PrimVal.int elems.length)
               · simp [selOf] at h
-          | SVal.array elems, Seg.at i =>
+          | SVal.array elems _, Seg.at i =>
               simp only [selOf] at h
               split at h
               · injection h with h'
@@ -553,10 +555,10 @@ theorem mergeKeepMaps_of_no_mapping : ∀ (cur w : SVal), svalHasMapping cur = f
                 lookupBy_no_mapping fo name o hl (by simpa [svalHasMapping] using h)
               exact mergeMember_of_no_mapping ho (mergeKeepMaps_of_no_mapping o v ho)
   | SVal.struct _, SVal.prim _, _ => by simp [mergeKeepMaps]
-  | SVal.struct _, SVal.array _, _ => by simp [mergeKeepMaps]
+  | SVal.struct _, SVal.array _ _, _ => by simp [mergeKeepMaps]
   | SVal.struct _, SVal.map _ _, _ => by simp [mergeKeepMaps]
   | SVal.prim _, w, _ => by cases w <;> simp [mergeKeepMaps]
-  | SVal.array _, w, _ => by cases w <;> simp [mergeKeepMaps]
+  | SVal.array _ _, w, _ => by cases w <;> simp [mergeKeepMaps]
   | SVal.map _ _, _, h => by simp [svalHasMapping] at h
   termination_by cur _ _ => sizeOf cur
   decreasing_by simp; omega
@@ -578,16 +580,6 @@ theorem denote_save {v cur w : SVal} {p : List Seg}
   rw [StValue.save, hcur, StValue.asStruct]
   exact denote_write_of (by rw [denoteSt, denoteSt_sval, denoteSt_sval,
     mergeDen_ok_of_no_mapping hnm]) v p
-
-/-- The fresh-slot case, which needs no side condition at all: nothing was
-there to keep.  This is the shape `push` writes — the appended element sits at
-the *old* length — and the reason the three push taclets share one
-constructor although their inner terms differ. -/
-theorem denote_save_absent {v w : SVal} {p : List Seg}
-    (h : StValue.find (StValue.sval v) p = StValue.dflt) :
-    denoteSt (StValue.save (StValue.sval v) p (StValue.sval w)) = v.save p w := by
-  rw [StValue.save, h, StValue.defaultValueStruct]
-  exact denote_write_of (by rw [denoteSt]; rfl) v p
 
 /-- A payload that is not a struct — every primitive write, and the `length`
 of a `push`/`pop` — needs no side condition either: whatever the location
@@ -712,7 +704,7 @@ theorem Denotes.merge_of_not_struct {o n : StValue} {vo vn : SVal} (ho : Denotes
 /-- Two values of one kind at every path: what two values of one type are. -/
 def sameKind : SVal -> SVal -> Bool
   | SVal.struct _, SVal.struct _ => true
-  | SVal.array _, SVal.array _ => true
+  | SVal.array _ _, SVal.array _ _ => true
   | SVal.map _ _, SVal.map _ _ => true
   | SVal.prim _, SVal.prim _ => true
   | _, _ => false
@@ -916,7 +908,7 @@ example :
 /-- An out-of-bounds write reverts on both sides, rather than being stuck on
 one of them — the halt has to agree, not just the success. -/
 example :
-    denoteSt (StValue.save (StValue.sval (SVal.array [SVal.int 1]))
+    denoteSt (StValue.save (StValue.sval (SVal.array [SVal.int 1] []))
         [Seg.at 5] (StValue.sval (SVal.int 0)))
       = .error .revert := by
   native_decide

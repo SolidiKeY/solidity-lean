@@ -607,6 +607,45 @@ example :
            (false == true) }).Holds := by
   native_decide
 
+/-! ### A popped slot keeps its mappings
+
+solkey's `TestSuite.testDeepPopDoesNotResetMappingMember`. `pop()`
+implicitly `delete`s the removed element and `delete` never clears a
+mapping member, so the slot the next `push()` recycles still holds the
+entries — solc's behaviour, and upstream's `storagePopSave` /
+`storagePushLengthSave`, both of which write `delAt` at that slot.
+`Semantics.pushSlot` is that `delAt`.
+
+The ported obligation (`Examples/Solkey/TestSuite.lean`) is `open` for a
+reason that has nothing to do with this: the `sol!` grammar reads
+`ledgerUses[0].ledger.balances` as one dotted field name, so the port's
+spelling never reaches the mapping. Splitting the two hops with a
+storage alias is the same program, and it closes. -/
+example :
+    (sol!{ < (ledgerUses@@LedgerUseArray).push();
+             Ledger storage l = ledgerUses@@LedgerUseArray[0].ledger;
+             l@@Ledger.balances[1] = 10;
+             (ledgerUses@@LedgerUseArray).pop();
+             (ledgerUses@@LedgerUseArray).push();
+             Ledger storage l2 = ledgerUses@@LedgerUseArray[0].ledger;
+             result = l2@@Ledger.balances[1] > (result == 10) }).Holds
+      Semantics.State.testSuiteStore := by
+  native_decide
+
+/-- …while the value members of the recycled slot *are* reset, which is
+what keeps `storage-push-empty.key` above true: the slot is cleared, not
+kept. -/
+example :
+    (sol!{ < (ledgerUses@@LedgerUseArray).push();
+             Ledger storage l = ledgerUses@@LedgerUseArray[0].ledger;
+             l@@Ledger.nonce = 7;
+             (ledgerUses@@LedgerUseArray).pop();
+             (ledgerUses@@LedgerUseArray).push();
+             Ledger storage l2 = ledgerUses@@LedgerUseArray[0].ledger;
+             result = l2@@Ledger.nonce > (result == 0) }).Holds
+      Semantics.State.testSuiteStore := by
+  native_decide
+
 /-- `storage-index-delete-mapping-bool.key` flavor on `flags`. -/
 example :
     (sol!{ < flags[3] = true; delete flags[3]; result = flags[3] >

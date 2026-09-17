@@ -142,7 +142,7 @@ def isMapping (t : StValue) : Bool :=
 /-- The chain denotes an array: `delete` empties it, writes and all. -/
 def isArray (t : StValue) : Bool :=
   match base t with
-  | sval (SVal.array _) => true
+  | sval (SVal.array _ _) => true
   | _ => false
 
 /-- The chain denotes a struct node: a write over it stays a leaf member by
@@ -169,8 +169,8 @@ def svalSelect (v : SVal) (a : Seg) : StValue :=
       match lookupBy n fields with
       | some w => sval w
       | none => dflt
-  | SVal.array elems, Seg.field "length" => prim (PrimVal.int elems.length)
-  | SVal.array elems, Seg.at i =>
+  | SVal.array elems _, Seg.field "length" => prim (PrimVal.int elems.length)
+  | SVal.array elems _, Seg.at i =>
       if h : 0 ≤ i ∧ i.toNat < elems.length then sval (elems.get ⟨i.toNat, h.2⟩)
       else dflt
   | SVal.map entries d, Seg.at i =>
@@ -336,11 +336,11 @@ theorem svalSelect_shape (v : SVal) (a : Seg) :
   match v, a with
   | SVal.struct fields, Seg.field n =>
       simp only [svalSelect]; cases lookupBy n fields <;> simp
-  | SVal.array elems, Seg.field n =>
+  | SVal.array elems _, Seg.field n =>
       by_cases hn : n = "length"
       · subst hn; simp [svalSelect]
       · simp [svalSelect, hn]
-  | SVal.array elems, Seg.at i => simp only [svalSelect]; split <;> simp
+  | SVal.array elems _, Seg.at i => simp only [svalSelect]; split <;> simp
   | SVal.map entries d, Seg.at i =>
       simp only [svalSelect]; cases lookupBy i entries <;> simp
   | SVal.prim _, Seg.field _ => simp [svalSelect]
@@ -584,7 +584,7 @@ def delValue : StValue -> StValue
   | mtSt => mtSt
   | storeSt st a v =>
       if isMapping (storeSt st a v) then storeSt st a v
-      else if isArray (storeSt st a v) then sval (SVal.array [])
+      else if isArray (storeSt st a v) then sval (SVal.array [] [])
       else storeSt (delValue st) a (delValue v)
   | merge o n =>
       if isMapping (merge o n) then merge o n

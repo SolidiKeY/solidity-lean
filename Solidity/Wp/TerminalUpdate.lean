@@ -232,15 +232,17 @@ def writeMemIndex (s : State) (id : Nat) (i : Int) (mv : MVal) : Res State :=
     | MObj.struct _ => .error .stuck
 
 /-- The path a push place `arr.push()` denotes: extend the array by the
-element type's default *now* (this is a state change) and address the
-new last slot (`resolveS`'s `pushPlace` arm). -/
+recycled slot *now* (this is a state change) and address the new last slot
+(`resolveS`'s `pushPlace` arm). -/
 def pushPath (s : State) (target : WrappedExpr) :
     Res (State × Name × List Seg) :=
   placePath s target >>= fun p =>
     s.findStorage p.1 p.2 >>= fun arr =>
       match arr, target.ty with
-      | SVal.array elems, Ty.ref (RefTy.array elemTy) =>
-          s.saveStorage p.1 p.2 (SVal.array (elems ++ [defaultForTy elemTy]))
+      | SVal.array elems shadow, Ty.ref (RefTy.array elemTy) =>
+          s.saveStorage p.1 p.2
+              (SVal.array (elems ++ [(pushSlot elemTy shadow).1])
+                (pushSlot elemTy shadow).2)
             >>= fun s' => .ok (s', p.1, p.2 ++ [Seg.at elems.length])
       | _, _ => .error .stuck
 
@@ -514,29 +516,33 @@ def memoryDeleteUpd (target : PlaceExpr) (s : State) : Res State :=
               writeMemIndex x.1 id i (MVal.ref x.2)
   | _ => .error .stuck
 
-/-- `arr.push()` / `arr.push(se)`: extend the array by the default or by
-the right-hand side's storage image. -/
+/-- `arr.push()` / `arr.push(se)`: extend the array by the recycled slot or
+by the right-hand side's storage image. -/
 def pushUpd (target : PlaceExpr) (value : Option WrappedExpr) (s : State) :
     Res State :=
   placePath s target.expr >>= fun p =>
     s.findStorage p.1 p.2 >>= fun arr =>
       match arr, target.expr.ty with
-      | SVal.array elems, Ty.ref (RefTy.array elemTy) =>
+      | SVal.array elems shadow, Ty.ref (RefTy.array elemTy) =>
           (match value with
-            | none => .ok (defaultForTy elemTy)
+            | none => .ok (pushSlot elemTy shadow).1
             | some rhs => rhsSVal s rhs) >>= fun newElem =>
-            s.saveStorage p.1 p.2 (SVal.array (elems ++ [newElem]))
+            s.saveStorage p.1 p.2
+              (SVal.array (elems ++ [newElem]) (pushSlot elemTy shadow).2)
       | _, _ => .error .stuck
 
-/-- `arr.pop()`: drop the last element; an empty array reverts. -/
+/-- `arr.pop()`: clear the last slot and give it back, then shorten; an
+empty array reverts. -/
 def popUpd (target : PlaceExpr) (s : State) : Res State :=
   placePath s target.expr >>= fun p =>
     s.findStorage p.1 p.2 >>= fun arr =>
       match arr with
-      | SVal.array elems =>
+      | SVal.array elems shadow =>
           match elems.reverse with
           | [] => .error .revert
-          | _ :: restRev => s.saveStorage p.1 p.2 (SVal.array restRev.reverse)
+          | last :: restRev =>
+              s.saveStorage p.1 p.2
+                (SVal.array restRev.reverse (last.defaultOf :: shadow))
       | _ => .error .stuck
 
 /-- `p = arr.push()` for a storage-local root `p`: extend the array with

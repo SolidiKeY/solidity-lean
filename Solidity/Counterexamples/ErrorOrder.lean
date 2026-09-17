@@ -40,7 +40,7 @@ open Rules RuleSoundness Semantics
 def store : State :=
   { State.exampleStore with
       storage :=
-        setBy "people" (SVal.array [defaultForRef (RefTy.struct "Person")])
+        setBy "people" (SVal.array [defaultForRef (RefTy.struct "Person")] [])
           State.exampleStore.storage,
       env := [] }
 

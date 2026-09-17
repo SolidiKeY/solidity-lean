@@ -114,7 +114,11 @@ def ReprRoot (i : Nat) (sv : SVal) (st : Store) : Prop :=
       ∀ k : Int, 0 ≤ k → k < keyBoundI →
         ReprSVal ((lookupBy k entries).getD dflt)
           (st.read (mapSlotW (slotWord i) (BitVec.ofNat 256 k.toNat)))
-  | SVal.array elems =>
+  -- The slots a `pop` gave back carry no representation: the compiled `pop`
+  -- leaves them stale and every read bounds-checks first.  On this fragment
+  -- (primitive elements) the slot a `push` recycles is the element type's
+  -- default anyway — `Semantics.pushSlot_isPrim`.
+  | SVal.array elems _ =>
       elems.length ≤ keyBound ∧
       st.read (slotWord i) = BitVec.ofNat 256 elems.length ∧
       ∀ j : Nat, j < elems.length →
@@ -776,14 +780,14 @@ representation. -/
 theorem ReprState.setArrayElem {L Γ : List Name} {s : State}
     {σ : List Word} {st : Store} (h : ReprState L Γ s σ st) {i : Nat}
     {name : Name} (hidx : L[i]? = some name)
-    {elems : List SVal}
-    (hst : lookupBy name s.storage = some (SVal.array elems))
+    {elems shadow shadow' : List SVal}
+    (hst : lookupBy name s.storage = some (SVal.array elems shadow))
     {k : Int} (hk0 : 0 ≤ k) (hlt : k.toNat < elems.length)
     {v : Value} {w kw : Word} (hvw : ReprVal v w)
     (hkw : k = (kw.toNat : Int)) :
     ReprState L Γ
       { s with storage :=
-          (setBy name (SVal.array (elems.set k.toNat v.toSVal))
+          (setBy name (SVal.array (elems.set k.toNat v.toSVal) shadow')
             s.storage) } σ
       (st.write (mapSlotW (slotWord i) kw) w) where
   len := h.len
@@ -821,7 +825,7 @@ theorem ReprState.setArrayElem {L Γ : List Name} {s : State}
         rw [hidx] at hj
         exact Option.some.inj hj
       subst hn
-      refine ⟨SVal.array (elems.set k.toNat v.toSVal), by simp, ?_⟩
+      refine ⟨SVal.array (elems.set k.toNat v.toSVal) shadow', by simp, ?_⟩
       simp only [ReprRoot, List.length_set]
       refine ⟨hlen, ?_, ?_⟩
       · rw [store_read_write_ne st
@@ -963,13 +967,13 @@ element at the derived slot of index `length`, then `SSTORE`
 theorem ReprState.pushArray {L Γ : List Name} {s : State}
     {σ : List Word} {st : Store} (h : ReprState L Γ s σ st) {i : Nat}
     {name : Name} (hidx : L[i]? = some name)
-    {elems : List SVal}
-    (hst : lookupBy name s.storage = some (SVal.array elems))
+    {elems shadow shadow' : List SVal}
+    (hst : lookupBy name s.storage = some (SVal.array elems shadow))
     (hlen1 : elems.length + 1 ≤ keyBound)
     {sv : SVal} {w : Word} (hsw : ReprSVal sv w) :
     ReprState L Γ
       { s with storage :=
-          (setBy name (SVal.array (elems ++ [sv])) s.storage) } σ
+          (setBy name (SVal.array (elems ++ [sv]) shadow') s.storage) } σ
       ((st.write (mapSlotW (slotWord i) (BitVec.ofNat 256 elems.length))
           w).write (slotWord i) (1 + BitVec.ofNat 256 elems.length))
     where
@@ -1010,7 +1014,7 @@ theorem ReprState.pushArray {L Γ : List Name} {s : State}
         rw [hidx] at hj
         exact Option.some.inj hj
       subst hn
-      refine ⟨SVal.array (elems ++ [sv]), by simp, ?_⟩
+      refine ⟨SVal.array (elems ++ [sv]) shadow', by simp, ?_⟩
       simp only [ReprRoot, List.length_append, List.length_cons,
         List.length_nil]
       refine ⟨by omega, ?_, ?_⟩
@@ -1169,12 +1173,12 @@ because reads bounds-check first) preserves the representation. -/
 theorem ReprState.popArray {L Γ : List Name} {s : State}
     {σ : List Word} {st : Store} (h : ReprState L Γ s σ st) {i : Nat}
     {name : Name} (hidx : L[i]? = some name)
-    {elems : List SVal} {x : SVal} {restRev : List SVal}
-    (hst : lookupBy name s.storage = some (SVal.array elems))
+    {elems shadow shadow' : List SVal} {x : SVal} {restRev : List SVal}
+    (hst : lookupBy name s.storage = some (SVal.array elems shadow))
     (hrev : elems.reverse = x :: restRev) :
     ReprState L Γ
       { s with storage :=
-          (setBy name (SVal.array restRev.reverse) s.storage) } σ
+          (setBy name (SVal.array restRev.reverse shadow') s.storage) } σ
       (st.write (slotWord i) (BitVec.ofNat 256 elems.length - 1)) where
   len := h.len
   nodup := h.nodup
@@ -1212,7 +1216,7 @@ theorem ReprState.popArray {L Γ : List Name} {s : State}
       have hlenrr : elems.length = restRev.reverse.length + 1 := by
         rw [helems_eq]
         simp
-      refine ⟨SVal.array restRev.reverse, by simp, ?_⟩
+      refine ⟨SVal.array restRev.reverse shadow', by simp, ?_⟩
       simp only [ReprRoot]
       refine ⟨by omega, ?_, ?_⟩
       · rw [store_read_write_self]
@@ -5547,7 +5551,8 @@ theorem compileStmt_sim (L Γ : List Name) (stmt : Stmt)
                           List.length_cons,
                           List.length_nil] <;> omega)
                     · exact hrepr.pushArray hLidx hst hlen1
-                        (reprSVal_default hcond.2)
+                        (by rw [pushSlot_isPrim hcond.2]
+                            exact reprSVal_default hcond.2)
                 | some rhs =>
                   by_cases hprim : rhs.ty.isPrimitive = true
                   case neg =>

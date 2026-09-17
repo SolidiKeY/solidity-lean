@@ -58,7 +58,7 @@ open Semantics Theory Theory.StValue Rules RuleSoundness
 /-- The old side of the leaf: an array chain that still answers a field
 selector, which is what makes the two dispatches disagree. -/
 def oldSide : StValue :=
-  StValue.storeSt (StValue.sval (SVal.array [])) (Seg.field "x")
+  StValue.storeSt (StValue.sval (SVal.array [] [])) (Seg.field "x")
     (StValue.sval (SVal.struct [("g", SVal.int 1)]))
 
 /-- The new side: an ordinary struct leaf. -/

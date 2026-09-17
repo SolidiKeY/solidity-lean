@@ -73,7 +73,7 @@ theorem SVal.find_save_same {old new updated : SVal} {path : List Seg}
                   simp [SVal.find, lookupBy_setBy_self, ih hs]
       | «at» i =>
           cases old <;> try { simp [SVal.save] at h }
-          · rename_i elems
+          · rename_i elems shadow
             simp only [SVal.save] at h
             split at h
             next hb =>
