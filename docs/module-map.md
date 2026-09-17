@@ -23,11 +23,11 @@ go in `Solidity.lean`.
 | `Coverage.lean` | `candidate_applies`, the syntactic `ResidueShape` (24 shapes no rule covers), and `RuleStep.complete_of_wellTyped` over the rule-independent fragment. |
 | `Uniqueness.lean` | Rule mutual exclusion via the total dispatch `candidate` (`applicable_eq_candidate`). `RuleSetDisciplined` carries exactly three facts. A failing uniqueness build signals a condition overlap. |
 | `Progress.lean` | Progress is **false** here and this proves it (`symbolicIte`, `not_progress`), plus the judgment-layer split that handles it. **OPEN**: `BlockStep.wellFounded` is a documented `sorry`. |
-| `MultiStep.lean` | `BlockStep` (`⇝`), `BlockReflMultiStep` (`⇝*`), `NamedBlockStep` (`⇝[.rule]`) and the `Trans` instances. |
+| `MultiStep.lean` | `BlockStep` (`⇝`), `BlockReflMultiStep` (`⇝*`), `NamedBlockStep` (`⇝[.rule]`) and the `Trans` instances. Framing (`appendStmts`, `append_suffix`, `inContext`, and the rule-level `NamedBlockStep.inSuffix`): a chain carries a *suffix*, and a prefix is consumed rather than carried, because `⇝` fires at the head. |
 | `Termination.lean` | Termination-certificate interface. **OPEN**: the concrete all-rules certificate. |
 | `RuleValidation.lean` | Per-rule `native_decide` validation of unfold rules against the executable semantics. |
 | `RuleSoundness.lean` | `<rule>_sound` per unfold rule: residual agrees with the original modulo scratch aliases. **OPEN**: `functionCallArgCapture_sound_inlined`, and one case each of `storagePushValueUnfoldRightSndArgument_sound` / `memoryWriteUnfoldRightSndResult_sound`. |
-| `RewriteSoundness.lean` | Lifts local soundness through untouched block suffixes and `⇝*`. |
+| `RewriteSoundness.lean` | Lifts local soundness through untouched block suffixes and `⇝*`. `BlockExecAgree.append_left`/`append_right` are the context congruence the rewrite layer cannot have — unconditional on a prefix, freshness-guarded on a suffix. |
 
 ## The data-structure theories
 
