@@ -117,7 +117,9 @@ def theorySave (s : State) (root : Name) (segs : List Seg) (w : SVal) :
 
 /-- **The collapse.** Where the location's current value carries no mapping —
 the whole fragment the interpreter admits — upstream's term denotes the write
-the rule table already reads. -/
+the rule table already reads.  Off that fragment it does not, and the fold did
+not change this: `Counterexamples/MappingSideConditions.lean`'s M2 is the
+witness. -/
 theorem theorySave_eq_theoryWrite (s : State) (root : Name) (segs : List Seg)
     (w cur v0 : SVal) (hroot : rootTree s root = .ok v0)
     (hcur : StValue.find (StValue.sval v0) segs = StValue.sval cur)

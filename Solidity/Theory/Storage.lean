@@ -666,9 +666,14 @@ and an array, a delete commutes with every selector — a reference member is
 deleted recursively, a value member reads its default.
 
 `mergeFree` is what a chain of `storeSt` over an `sval` leaf satisfies, i.e.
-every term a rule's update builds; on a copy marker the push through is only
-sound when the two sides agree on what is a mapping, and nothing here needs
-it. -/
+every term a rule's update builds.  It cannot be dropped, and the reason is
+not the one the leaf's own rules give: the two sides of the equation dispatch
+on *different trees* — `delValue` reads the new side's shape, since `base` of
+a `merge` is `base` of its right argument, and `selectSt` reads the old
+side's.  `Counterexamples/MappingSideConditions.lean`'s M1 is a witness where
+neither side is a mapping and the array collapse separates them.  Weakening it
+would mean a predicate saying the two sides *agree* member by member, which is
+what a well-sorted write guarantees; nothing here needs one. -/
 theorem selectSt_delValue {t : StValue} (hm : isMapping t = false)
     (ha : isArray t = false) (hmf : mergeFree t = true) (a : Seg) :
     selectSt (delValue t) a = delValue (selectSt t a) := by
