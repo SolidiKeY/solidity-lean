@@ -30,7 +30,6 @@ import Solidity.EvalBattery
 import Solidity.SemanticsProperties
 import Solidity.Theory.Storage
 import Solidity.Theory.Memory
-import Solidity.Theory.Denote
 import Solidity.StuckShape
 import Solidity.Counterexamples.EvaluationOrder
 import Solidity.Counterexamples.ErrorOrder

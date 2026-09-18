@@ -35,10 +35,12 @@ theorem, an iterated transfer, and `Examples/Solkey/Rules.lean` two auxiliary
 ones about `newFromAdd` and `defaultDefIdentity`; none is itself a solkey PO,
 so none is counted.)
 
-`storage/copyKeepsMapping.key` is the same kind of problem and is proved the
-same way (`Theory/Storage.lean`'s leaf of a write); solkey added it in
-`c80a54494c`, and the `copyAt`→`save` fold restated its last two conjuncts
-against the pre-state (`docs/solkey-feedback.md`).
+`storage/copyKeepsMapping.key` (solkey `c80a54494c`) is recorded
+`unsupported`: it states the mapping-keeping leaf of a storage copy over a
+`\unique MapField`, which no `.sol` program can reach (both front ends reject
+a copy whose type carries a mapping) and which `Theory/Storage.lean`
+deliberately does not model — its leaf collapses, as solkey's did before
+`c80a54494c`.
 
 **What this number does *not* say.** `sol_wp` is symbolic execution *by the
 interpreter* (`Wp/Verifier.lean`); it never reads `Rules.lean`. So the table

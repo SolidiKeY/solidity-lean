@@ -113,6 +113,16 @@ solc permits `delete` on structs with mapping members (mappings are left
 in place), and the semantics keeps that mapping-preserving behavior.
 Memory types cannot contain mappings, so `rhsToMVal` needs no guard.
 
+The same fact is in the syntax. `TypedStmt.Assign.mk` carries a `mapFree`
+obligation, so the typed AST cannot express the copy at all — solkey's
+`ParserUtils.parseAssignmentMaybe` at the type level — and `stmtTypingOk`
+states the predicate for the untyped `Stmt.assign` the calculus works on.
+That is what lets `Theory/Storage.lean`, solkey's storage theory as a term
+algebra, collapse the leaf of a write (`save(st, nil, v) ⇝ v`) instead of
+carrying solkey's mapping-preserving one. Its `delete`, on the other hand,
+resets mapping members: a `Seg` carries no `MapField` sort, so the
+mapping-preserving `delete` below is the interpreter's alone.
+
 `pop`/`push` keep it too, and that is what `SVal.array`'s second field is
 for. `arr.pop()` implicitly `delete`s the removed element and `arr.push()`
 lands on the same storage slot, so a mapping nested in a popped struct
