@@ -413,4 +413,4 @@ rules	Rules	storageExample4_2	proved	solkey storageExample4-2.key
 rules	Rules	storageExample5	proved	solkey storageExample5.key	
 rules	Rules	storageFieldRead	unsupported	KeY loader/taclet machinery: ad-hoc taclets over `\problem { true }`, a sort condition, a list declaration or an empty problem — there is no identity and no judgment to state	
 rules	Rules	storageFieldWrite	unsupported	KeY loader/taclet machinery: ad-hoc taclets over `\problem { true }`, a sort condition, a list declaration or an empty problem — there is no identity and no judgment to state	
-storage	Rules	copyKeepsMapping	proved	solkey copyKeepsMapping.key	
+storage	Rules	copyKeepsMapping	unsupported	storage-theory problem over a `MapField`: the mapping-preserving copy is unreachable (solc ≥ 0.7 and solkey's parser reject a copy of a mapping-carrying type) and `Theory/Storage.lean` does not model it	

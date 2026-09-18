@@ -1,6 +1,6 @@
 import Solidity.Wp.Verifier
 import Solidity.Theory.Memory
-import Solidity.Theory.Denote
+import Solidity.Theory.Storage
 
 /-!
 # solkey `keyext.solidity.core/src/test/resources/.../examples/*.key`, ported
@@ -28,11 +28,12 @@ name `selectOnStore`, `find_save_frame`, `readOnWrite`, `readOnAddM` and
 The `.key` files' own Solidity comments are reproduced in the docstrings:
 these are the worked memory and storage examples of the paper's first draft.
 
-One more problem lives here from a different upstream directory:
-`keyext.solidity.examples/storage/copyKeepsMapping.key`, added by solkey
-`c80a54494c`. It is term-level for the same reason, so it belongs with these
-rather than in a module of its own — `scripts/solkey-port.mjs` gives it its own
-`storage` suite over the same contract.
+One more problem from a different upstream directory,
+`keyext.solidity.examples/storage/copyKeepsMapping.key` (solkey `c80a54494c`),
+is `unsupported`: it states the mapping-keeping leaf of a storage copy over a
+`\unique MapField`, which `Theory/Storage.lean` deliberately does not model —
+solc ≥ 0.7 and solkey's own parser reject a copy of a mapping-carrying type,
+and this package refuses it at `TypedStmt.Assign.mk`.
 
 The remaining seven exercise the KeY loader and taclet machinery
 (`hasSortVarcondTest`, `listTests`, `storageFieldRead`/`storageFieldWrite`
@@ -119,28 +120,28 @@ sub-sort of both `StValue` and `MemValue`, which is what `simpleExample10`
 turns on; this is that sub-sorting, written down. -/
 private def stOf : MVal -> StValue
   | .prim p => .prim p
-  | .ref _ => .dflt
+  | .ref _ => .st .mtSt
 
 /-! ### `structRules.key` identities -/
 
 /-- solkey `simpleExample1.key`:
 `selectSt<[int]>(storeSt(mtSt, balance, 10), balance) = 10`. -/
 theorem solkey_Rules_simpleExample1 :
-    (StValue.selectSt (StValue.storeSt .mtSt balance (.prim (.int 10)))
+    (StValue.selectSt (Struct.storeSt .mtSt balance (.prim (.int 10)))
       balance).asInt = 10 := by
   decide
 
 /-- solkey `simpleExample2.key`: the later store wins. -/
 theorem solkey_Rules_simpleExample2 :
     (StValue.selectSt
-      (StValue.storeSt (StValue.storeSt .mtSt balance (.prim (.int 10)))
+      (Struct.storeSt (Struct.storeSt .mtSt balance (.prim (.int 10)))
         balance (.prim (.int 11))) balance).asInt = 11 := by
   decide
 
 /-- solkey `simpleExample3.key`: a store at another field is invisible. -/
 theorem solkey_Rules_simpleExample3 :
     (StValue.selectSt
-      (StValue.storeSt (StValue.storeSt .mtSt balance (.prim (.int 10)))
+      (Struct.storeSt (Struct.storeSt .mtSt balance (.prim (.int 10)))
         age (.prim (.int 30))) balance).asInt = 10 := by
   decide
 
@@ -149,13 +150,13 @@ theorem solkey_Rules_simpleExample3 :
 theorem solkey_Rules_simpleExample7 :
     (StValue.find (StValue.save .mtSt [age] (.prim (.int 20))) [age]).asInt
       = 20 := by
-  rw [StValue.find_save_same_asInt]; rfl
+  rw [StValue.find_save_same_asInt _ (by simp)]; rfl
 
 /-- solkey `simpleExample8.key`: the same, two selectors deep. -/
 theorem solkey_Rules_simpleExample8 :
     (StValue.find (StValue.save .mtSt [account, age] (.prim (.int 20)))
       [account, age]).asInt = 20 := by
-  rw [StValue.find_save_same_asInt]; rfl
+  rw [StValue.find_save_same_asInt _ (by simp)]; rfl
 
 /-- solkey `simpleExample9.key`: a sibling write does not disturb the read —
 `find_save_frame` over `diverges [account, balance] [account, age]`. -/
@@ -164,7 +165,7 @@ theorem solkey_Rules_simpleExample9 :
       (StValue.save (StValue.save .mtSt [account, age] (.prim (.int 20)))
         [account, balance] (.prim (.int 30))) [account, age]).asInt = 20 := by
   rw [StValue.find_save_frame _ _ _ _ (by decide),
-    StValue.find_save_same_asInt]
+    StValue.find_save_same_asInt _ (by simp)]
   rfl
 
 /-! ### `memoryRules.key` identities -/
@@ -208,46 +209,40 @@ theorem solkey_Rules_simpleExample10 :
           (stOf (Memory.readIn h (.write mem bob age (.prim (.int 20))) bob
             age).asPrim)) [balance]).asInt = 20 := by
   intro h mem bob
-  rw [StValue.find_save_same_asInt]
+  rw [StValue.find_save_same_asInt _ (by simp)]
   simp [MemValue.asPrim, stOf, StValue.asInt]
 
 /-! ### `storageExample*.key` — the update sequences of the draft's storage
 examples.  Each is the `\problem`'s nested `{st := …}` updates with the final
 `find` read where the `.key` file puts it.
 
-The copies read a value member through the leaf of a `save`.  KeY resolves
-that by the read's sort (`find<[int]>` takes the written value's member);
-the shape dispatch of `Theory/Storage.lean` looks at what the location held
-instead, so over an arbitrary `st` the `.key` claim needs its well-sortedness
-spelled out: the member the copy lands on holds neither a mapping nor a
-struct (`Theory.StValue.find_save_extends_field`).  Rooted at `mtSt` (the
-`-2` files) it holds outright. -/
+The copies read a value member out of a written struct: `find_save_extends`
+below the copy, then `find_append` folding the source's path back together.
+KeY's copy source is `find<[Struct]>(st, …)`, which is the cast `asStruct`
+under the injection `st`.  Rooted at `mtSt` (the `-2` files) each is the
+general theorem instantiated. -/
 
 /-- solkey `storageExample1.key`: a deep copy taken between two writes to the
 source sees the *first* — `find_save_frame` off the second, then
 `find_save_prefix`/`find_save_same` through the copy. -/
 theorem solkey_Rules_storageExample1 :
-    ∀ st : StValue,
-      StValue.isMapping (StValue.selectSt (StValue.find st [carolAcc, owner]) age) = false ->
-      StValue.isNode (StValue.selectSt (StValue.find st [carolAcc, owner]) age) = false ->
+    ∀ st : Struct,
       (StValue.find
         (StValue.save
           (StValue.save (StValue.save st [carol, age] (.prim (.int 20)))
             [carolAcc, owner]
-            (StValue.asStruct
+            (.st (StValue.asStruct
               (StValue.find (StValue.save st [carol, age] (.prim (.int 20)))
-                [carol])))
+                [carol]))))
           [carol, age] (.prim (.int 21)))
         [carolAcc, owner, age]).asInt = 20 := by
-  intro st hm hn
-  rw [StValue.find_save_frame _ _ _ _ (by decide)]
-  rw [show [carolAcc, owner, age] = [carolAcc, owner] ++ [age] from rfl,
-    StValue.find_save_extends_field _ _ _ _
-      (by rwa [StValue.find_save_frame _ _ _ _ (by decide)])
-      (by rwa [StValue.find_save_frame _ _ _ _ (by decide)]),
-    StValue.selectSt_asStruct]
-  change (StValue.find _ [carol, age]).asInt = 20
-  rw [StValue.find_save_same_asInt]
+  intro st
+  rw [StValue.find_save_frame _ _ _ _ (by decide),
+    show [carolAcc, owner, age] = [carolAcc, owner] ++ [age] from rfl,
+    StValue.find_save_extends _ (p := [carolAcc, owner]) (q := [age]) (by simp) (by simp),
+    StValue.asStruct_st, ← StValue.find_append _ [carol] (q := [age]) (by simp),
+    show ([carol] ++ [age] : List Seg) = [carol, age] from rfl,
+    StValue.find_save_same_asInt _ (p := [carol, age]) (by simp)]
   rfl
 
 /-- solkey `storageExample2.key`:
@@ -258,24 +253,20 @@ return eve.age;
 ```
 A whole-root copy is a deep copy: the value follows. -/
 theorem solkey_Rules_storageExample2 :
-    ∀ st : StValue,
-      StValue.isMapping (StValue.selectSt (StValue.find st [eve]) age) = false ->
-      StValue.isNode (StValue.selectSt (StValue.find st [eve]) age) = false ->
+    ∀ st : Struct,
       (StValue.find
         (StValue.save (StValue.save st [carol, age] (.prim (.int 20)))
           [eve]
-          (StValue.asStruct
+          (.st (StValue.asStruct
             (StValue.find (StValue.save st [carol, age] (.prim (.int 20)))
-              [carol])))
+              [carol]))))
         [eve, age]).asInt = 20 := by
-  intro st hm hn
+  intro st
   rw [show [eve, age] = [eve] ++ [age] from rfl,
-    StValue.find_save_extends_field _ _ _ _
-      (by rwa [StValue.find_save_frame _ _ _ _ (by decide)])
-      (by rwa [StValue.find_save_frame _ _ _ _ (by decide)]),
-    StValue.selectSt_asStruct]
-  change (StValue.find _ [carol, age]).asInt = 20
-  rw [StValue.find_save_same_asInt]
+    StValue.find_save_extends _ (p := [eve]) (q := [age]) (by simp) (by simp),
+    StValue.asStruct_st, ← StValue.find_append _ [carol] (q := [age]) (by simp),
+    show ([carol] ++ [age] : List Seg) = [carol, age] from rfl,
+    StValue.find_save_same_asInt _ (p := [carol, age]) (by simp)]
   rfl
 
 /-- solkey `storageExample3.key`:
@@ -287,7 +278,8 @@ A read off the written path gets the default from the empty storage. -/
 theorem solkey_Rules_storageExample3 :
     (StValue.find (StValue.save .mtSt [carol, age] (.prim (.int 20)))
       [eve, age]).asInt = 0 := by
-  simp [StValue.find, StValue.asInt, StValue.selectSt]
+  rw [StValue.find_save_frame _ _ _ _ (by decide)]
+  rfl
 
 /-- solkey `storageExample4.key`:
 ```
@@ -299,27 +291,23 @@ return eve.age;
 There is no sharing in a deep copy: writing the source afterwards leaves the
 copy alone. -/
 theorem solkey_Rules_storageExample4 :
-    ∀ st : StValue,
-      StValue.isMapping (StValue.selectSt (StValue.find st [eve]) age) = false ->
-      StValue.isNode (StValue.selectSt (StValue.find st [eve]) age) = false ->
+    ∀ st : Struct,
       (StValue.find
         (StValue.save
           (StValue.save (StValue.save st [carol, age] (.prim (.int 20)))
             [eve]
-            (StValue.asStruct
+            (.st (StValue.asStruct
               (StValue.find (StValue.save st [carol, age] (.prim (.int 20)))
-                [carol])))
+                [carol]))))
           [carol, age] (.prim (.int 30)))
         [eve, age]).asInt = 20 := by
-  intro st hm hn
-  rw [StValue.find_save_frame _ _ _ _ (by decide)]
-  rw [show [eve, age] = [eve] ++ [age] from rfl,
-    StValue.find_save_extends_field _ _ _ _
-      (by rwa [StValue.find_save_frame _ _ _ _ (by decide)])
-      (by rwa [StValue.find_save_frame _ _ _ _ (by decide)]),
-    StValue.selectSt_asStruct]
-  change (StValue.find _ [carol, age]).asInt = 20
-  rw [StValue.find_save_same_asInt]
+  intro st
+  rw [StValue.find_save_frame _ _ _ _ (by decide),
+    show [eve, age] = [eve] ++ [age] from rfl,
+    StValue.find_save_extends _ (p := [eve]) (q := [age]) (by simp) (by simp),
+    StValue.asStruct_st, ← StValue.find_append _ [carol] (q := [age]) (by simp),
+    show ([carol] ++ [age] : List Seg) = [carol, age] from rfl,
+    StValue.find_save_same_asInt _ (p := [carol, age]) (by simp)]
   rfl
 
 /-- solkey `storageExample1-2.key`: `storageExample1` rooted at `mtSt`. -/
@@ -328,38 +316,23 @@ theorem solkey_Rules_storageExample1_2 :
       (StValue.save
         (StValue.save (StValue.save .mtSt [carol, age] (.prim (.int 20)))
           [carolAcc, owner]
-          (StValue.asStruct
+          (.st (StValue.asStruct
             (StValue.find (StValue.save .mtSt [carol, age] (.prim (.int 20)))
-              [carol])))
+              [carol]))))
         [carol, age] (.prim (.int 21)))
-      [carolAcc, owner, age]).asInt = 20 := by
-  rw [StValue.find_save_frame _ _ _ _ (by decide)]
-  rw [show [carolAcc, owner, age] = [carolAcc, owner] ++ [age] from rfl,
-    StValue.find_save_extends_field _ _ _ _
-      (by rw [StValue.find_save_frame _ _ _ _ (by decide)]; decide)
-      (by rw [StValue.find_save_frame _ _ _ _ (by decide)]; decide),
-    StValue.selectSt_asStruct]
-  change (StValue.find _ [carol, age]).asInt = 20
-  rw [StValue.find_save_same_asInt]
-  rfl
+      [carolAcc, owner, age]).asInt = 20 :=
+  solkey_Rules_storageExample1 .mtSt
 
 /-- solkey `storageExample2-2.key`: `storageExample2` rooted at `mtSt`. -/
 theorem solkey_Rules_storageExample2_2 :
     (StValue.find
       (StValue.save (StValue.save .mtSt [carol, age] (.prim (.int 20)))
         [eve]
-        (StValue.asStruct
+        (.st (StValue.asStruct
           (StValue.find (StValue.save .mtSt [carol, age] (.prim (.int 20)))
-            [carol])))
-      [eve, age]).asInt = 20 := by
-  rw [show [eve, age] = [eve] ++ [age] from rfl,
-    StValue.find_save_extends_field _ _ _ _
-      (by rw [StValue.find_save_frame _ _ _ _ (by decide)]; decide)
-      (by rw [StValue.find_save_frame _ _ _ _ (by decide)]; decide),
-    StValue.selectSt_asStruct]
-  change (StValue.find _ [carol, age]).asInt = 20
-  rw [StValue.find_save_same_asInt]
-  rfl
+            [carol]))))
+      [eve, age]).asInt = 20 :=
+  solkey_Rules_storageExample2 .mtSt
 
 /-- solkey `storageExample4-2.key`: `storageExample4` rooted at `mtSt`. -/
 theorem solkey_Rules_storageExample4_2 :
@@ -367,20 +340,12 @@ theorem solkey_Rules_storageExample4_2 :
       (StValue.save
         (StValue.save (StValue.save .mtSt [carol, age] (.prim (.int 20)))
           [eve]
-          (StValue.asStruct
+          (.st (StValue.asStruct
             (StValue.find (StValue.save .mtSt [carol, age] (.prim (.int 20)))
-              [carol])))
+              [carol]))))
         [carol, age] (.prim (.int 30)))
-      [eve, age]).asInt = 20 := by
-  rw [StValue.find_save_frame _ _ _ _ (by decide)]
-  rw [show [eve, age] = [eve] ++ [age] from rfl,
-    StValue.find_save_extends_field _ _ _ _
-      (by rw [StValue.find_save_frame _ _ _ _ (by decide)]; decide)
-      (by rw [StValue.find_save_frame _ _ _ _ (by decide)]; decide),
-    StValue.selectSt_asStruct]
-  change (StValue.find _ [carol, age]).asInt = 20
-  rw [StValue.find_save_same_asInt]
-  rfl
+      [eve, age]).asInt = 20 :=
+  solkey_Rules_storageExample4 .mtSt
 
 /-- solkey `storageExample5.key`:
 ```
@@ -410,7 +375,7 @@ theorem solkey_Rules_storageExample5 :
             .field "f6"] (.prim (.int 2)))
         [.field "f7"] (.prim (.int 3)))
       [.field "f7"]).asInt = 3 := by
-  rw [StValue.find_save_same]
+  rw [StValue.find_save_same_asInt _ (by simp)]
   rfl
 
 /-! ### `memoryExample*.key` — the draft's memory examples
@@ -569,16 +534,16 @@ theorem solkey_Rules_memoryExample5_owner :
 /-- solkey `problem1.key`: `selectSt<[int]>(storeSt(s, balance, 10), balance)`
 over an arbitrary `s`. -/
 theorem solkey_Rules_problem1 :
-    ∀ s : StValue,
-      (StValue.selectSt (StValue.storeSt s balance (.prim (.int 10)))
+    ∀ s : Struct,
+      (StValue.selectSt (Struct.storeSt s balance (.prim (.int 10)))
         balance).asInt = 10 := by
   intro s
   simp [StValue.asInt]
 
 /-- solkey `problem2.key`: the same problem, declared twice upstream. -/
 theorem solkey_Rules_problem2 :
-    ∀ s : StValue,
-      (StValue.selectSt (StValue.storeSt s balance (.prim (.int 10)))
+    ∀ s : Struct,
+      (StValue.selectSt (Struct.storeSt s balance (.prim (.int 10)))
         balance).asInt = 10 := by
   intro s
   simp [StValue.asInt]
@@ -612,10 +577,10 @@ example : ∀ (h : List (Nat × MObj)) (mem : Memory) (id1 : Identity)
       (Memory.readR h (.write mem id1 f1 (.prim (.int 0))) id1 [f1]).asPrim
         = MVal.int 0 ∧
       -- `selectSt<[int]>(storeSt(mtSt, f1, 0), f1) = 0`
-      (StValue.selectSt (StValue.storeSt .mtSt f1 (.prim (.int 0)))
+      (StValue.selectSt (Struct.storeSt .mtSt f1 (.prim (.int 0)))
         f1).asInt = 0 ∧
       -- `selectSt<[int]>(storeSt(mtSt, f1, 0), f2) = selectSt<[int]>(mtSt, f2)`
-      StValue.selectSt (StValue.storeSt .mtSt f1 (.prim (.int 0))) f2
+      StValue.selectSt (Struct.storeSt .mtSt f1 (.prim (.int 0))) f2
         = StValue.selectSt .mtSt f2 ∧
       -- `find<[int]>(save(st, flds12, 0), flds12) = 0`
       (StValue.find (StValue.save .mtSt [f1, f2] (.prim (.int 0)))
@@ -623,7 +588,7 @@ example : ∀ (h : List (Nat × MObj)) (mem : Memory) (id1 : Identity)
   intro h mem id1 idp1 idp2 ty flds
   refine ⟨by simp [MemValue.asPrim], rfl, by simp, fun hn => by simpa using hn,
     rfl, by simp [MemValue.asPrim], by decide, by decide, ?_⟩
-  rw [StValue.find_save_same]; rfl
+  rw [StValue.find_save_same_asInt _ (by simp)]; rfl
 
 /-- `read<[int]>(addM(mem, idp1), idC(idp2, flds), f1)` skips the add when the
 roots differ — `readAddDifferent`, the `\else` branch of `readOnAddM`. -/
@@ -642,116 +607,6 @@ example : ∀ (h : List (Nat × MObj)) (mem : Memory) (id1 id2 : Identity),
   by_cases hid : id1 = id2
   · subst hid; simp [Memory.readId, MemValue.asIdentity]
   · simp [Memory.readId, MemValue.asIdentity, hid, Ne.symm hid]
-
-/-! ### `keyext.solidity.examples/storage/copyKeepsMapping.key`
-
-The one obligation of the mapping-preserving copy that no `.sol` example can
-state: both front ends reject a copy whose type carries a mapping, so the
-mapping-preserving half of `save`'s leaf is pinned by a `.key` problem
-instead.
-
-The `\unique MapField balances` / `\unique RefField inner` of the `.key`
-file are *sorts*, which `Semantics.Seg` does not carry (`Theory/Storage.lean`
-dispatches on the value's shape instead), so the shape is fixed here and every
-payload is left universally quantified. -/
-
-private abbrev nonce : Seg := .field "nonce"
-private abbrev balances : Seg := .field "balances"
-private abbrev inner : Seg := .field "inner"
-private abbrev ledger : Seg := .field "ledger"
-private abbrev ledger2 : Seg := .field "ledger2"
-
-/-- A `ledger`: a `Field nonce`, a `MapField balances`, and a `RefField inner`
-holding the same two. -/
-private def ledgerVal (n : Int) (bal : List (Int × SVal)) (d : SVal)
-    (inN : Int) (inBal : List (Int × SVal)) (inD : SVal) : SVal :=
-  SVal.struct
-    [("nonce", SVal.int n), ("balances", SVal.map bal d),
-     ("inner", SVal.struct
-        [("nonce", SVal.int inN), ("balances", SVal.map inBal inD)])]
-
-/-- solkey `copyKeepsMapping.key`:
-```
-{storage := save(storage, cons(ledger2, nil), find<[StValue]>(storage, cons(ledger, nil)))}
-```
-`ledger2 = ledger`, read back four ways.  The first two conjuncts are the
-value members — `nonce` at the top and through the `RefField` — which the copy
-takes from the source.  The last two compare the post-state read, under the
-update, with the pre-state read outside it: the target keeps **its own**
-mapping entries, at the top and one level down through the `RefField` —
-`selectOnSaveEmptyMap` firing at depth 1 and, after `selectOnSaveEmptyRef`,
-at depth 2.  (Until the fold of `copyAt` into `save` the file compared the
-two post-state reads with themselves; `docs/solkey-feedback.md` records it.) -/
-theorem solkey_Rules_copyKeepsMapping :
-    ∀ (n1 n2 : Int) (b1 b2 : List (Int × SVal)) (d1 d2 : SVal)
-      (i1 i2 : Int) (ib1 ib2 : List (Int × SVal)) (id1 id2 : SVal),
-      let st : StValue := .sval (SVal.struct
-        [("ledger", ledgerVal n1 b1 d1 i1 ib1 id1),
-         ("ledger2", ledgerVal n2 b2 d2 i2 ib2 id2)])
-      let upd : StValue := StValue.save st [ledger2] (StValue.find st [ledger])
-      (StValue.find upd [ledger2, nonce]).asInt
-          = (StValue.find upd [ledger, nonce]).asInt
-        ∧ (StValue.find upd [ledger2, inner, nonce]).asInt
-          = (StValue.find upd [ledger, inner, nonce]).asInt
-        ∧ StValue.find upd [ledger2, balances, .at 1]
-          = StValue.find st [ledger2, balances, .at 1]
-        ∧ StValue.find upd [ledger2, inner, balances, .at 1]
-          = StValue.find st [ledger2, inner, balances, .at 1] := by
-  intro n1 n2 b1 b2 d1 d2 i1 i2 ib1 ib2 id1 id2
-  refine ⟨?_, ?_, ?_, ?_⟩
-  · rw [show ([ledger2, nonce] : List Seg) = [ledger2] ++ [nonce] from rfl,
-      StValue.find_save_extends, StValue.find_save_frame _ _ _ _ (by decide)]
-    simp [ledgerVal, StValue.find, StValue.selectSt, StValue.svalSelect, lookupBy,
-      StValue.asStruct, StValue.isMapping, StValue.isNode, StValue.base]
-  · rw [show ([ledger2, inner, nonce] : List Seg) = [ledger2] ++ [inner, nonce] from rfl,
-      StValue.find_save_extends, StValue.find_save_frame _ _ _ _ (by decide)]
-    simp [ledgerVal, StValue.find, StValue.selectSt, StValue.svalSelect, lookupBy,
-      StValue.asStruct, StValue.isMapping, StValue.isNode, StValue.base]
-  · rw [show ([ledger2, balances, .at 1] : List Seg) = [ledger2] ++ [balances, .at 1] from rfl,
-      StValue.find_save_extends]
-    simp [ledgerVal, StValue.find, StValue.selectSt, StValue.svalSelect, lookupBy,
-      StValue.asStruct, StValue.isMapping, StValue.base]
-  · rw [show ([ledger2, inner, balances, .at 1] : List Seg)
-        = [ledger2] ++ [inner, balances, .at 1] from rfl,
-      StValue.find_save_extends]
-    simp [ledgerVal, StValue.find, StValue.selectSt, StValue.svalSelect, lookupBy,
-      StValue.asStruct, StValue.isMapping, StValue.isNode, StValue.base]
-
-/-- The same, as the four members of one `.key` problem read: written value
-members from the source, the target's own mappings kept. -/
-example :
-    ∀ (n1 n2 : Int) (b1 b2 : List (Int × SVal)) (d1 d2 : SVal)
-      (i1 i2 : Int) (ib1 ib2 : List (Int × SVal)) (id1 id2 : SVal),
-      let st : StValue := .sval (SVal.struct
-        [("ledger", ledgerVal n1 b1 d1 i1 ib1 id1),
-         ("ledger2", ledgerVal n2 b2 d2 i2 ib2 id2)])
-      let upd : StValue := StValue.save st [ledger2] (StValue.find st [ledger])
-      StValue.find upd [ledger2, balances, .at 1]
-          = StValue.find st [ledger2, balances, .at 1]
-        ∧ StValue.find upd [ledger2, inner, balances, .at 1]
-          = StValue.find st [ledger2, inner, balances, .at 1] := by
-  intro n1 n2 b1 b2 d1 d2 i1 i2 ib1 ib2 id1 id2
-  refine ⟨?_, ?_⟩
-  · rw [show ([ledger2, balances, .at 1] : List Seg) = [ledger2] ++ [balances, .at 1] from rfl,
-      StValue.find_save_extends]
-    simp [ledgerVal, StValue.find, StValue.selectSt, StValue.svalSelect, lookupBy,
-      StValue.isMapping, StValue.base]
-  · rw [show ([ledger2, inner, balances, .at 1] : List Seg)
-        = [ledger2] ++ [inner, balances, .at 1] from rfl,
-      StValue.find_save_extends]
-    simp [ledgerVal, StValue.find, StValue.selectSt, StValue.svalSelect, lookupBy,
-      StValue.asStruct, StValue.isMapping, StValue.isNode, StValue.base]
-
-/-- …and it is *not* the source's: the refutation an inverted `isMapping`
-branch would fail. -/
-example :
-    let st : StValue := .sval (SVal.struct
-      [("ledger", ledgerVal 1 [(1, SVal.int 11)] (SVal.int 0) 3 [(1, SVal.int 33)] (SVal.int 0)),
-       ("ledger2", ledgerVal 2 [(1, SVal.int 22)] (SVal.int 0) 4 [(1, SVal.int 44)] (SVal.int 0))])
-    let upd : StValue := StValue.save st [ledger2] (StValue.find st [ledger])
-    (StValue.find upd [ledger2, balances, .at 1]).asInt = 22
-      ∧ (StValue.find upd [ledger2, inner, balances, .at 1]).asInt = 44 := by
-  native_decide
 
 end Rules
 end Solkey

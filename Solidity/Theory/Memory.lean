@@ -132,8 +132,8 @@ end MemValue
 inductive Memory where
   /-- `\unique Memory mtMem`. -/
   | mtMem
-  /-- The pre-state heap as an opaque leaf — the `StValue.sval` role, and the
-  reason the algebra is a theory of terms *over a concrete state*. -/
+  /-- The pre-state heap as an opaque leaf — the reason this algebra, unlike
+  `Theory/Storage.lean`'s, is a theory of terms *over a concrete state*. -/
   | pre
   /-- `write(mem, id, a, v)`. -/
   | write (mem : Memory) (id : Identity) (a : Seg) (v : MemValue)

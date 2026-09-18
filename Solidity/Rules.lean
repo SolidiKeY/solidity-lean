@@ -212,10 +212,10 @@ end CaseMode
     /-- `save(storage, p, t)`. -/
     | save (target : WrappedExpr) (t : Sym)
     /-- `save(storage, p, find<[StValue]>(storage, src))` — a storage source.
-    Upstream's `save` keeps the target's mapping members under a struct
-    written over it (the leaf of `Theory/Storage.lean`), and collapses to the
-    plain write this constructor evaluates to wherever the interpreter is not
-    stuck on the copy anyway (`Update/Theory.theorySave_eq_theoryWrite`). -/
+    The source's type is mapping-free: solc ≥ 0.7 and solkey's parser reject
+    the copy otherwise, `TypedStmt.Assign.mk` cannot be built for it, and
+    `stmtTypingOk` states the same predicate; so the write is the plain write
+    this constructor evaluates to (`Theory/Storage.lean`'s collapsing leaf). -/
     | copy (target : WrappedExpr) (src : WrappedExpr)
     /-- `save(storage, p, copyMem(mtSt, memory, src))` — a memory source. -/
     | copyFromMem (target : WrappedExpr) (src : WrappedExpr)

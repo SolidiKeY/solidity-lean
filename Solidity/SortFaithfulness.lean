@@ -223,7 +223,7 @@ theorem refTarget_sound {rule : RuleName}
       obtain ⟨hmemk, _, hsto, _⟩ := hcond
       cases valueExpr?_assign_storage hsto hexpr
       simp only [stmtTypingOk, Bool.and_eq_true] at hty
-      obtain ⟨⟨hteq, href⟩, _⟩ := hty
+      obtain ⟨⟨⟨hteq, href⟩, _⟩, _⟩ := hty
       have hmemb : lhs.expr.isMemory = true := by
         simp [WrappedExpr.isMemory, Typed.WrappedExpr.isMemory]
         exact hmemk

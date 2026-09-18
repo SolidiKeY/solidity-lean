@@ -3,20 +3,25 @@
 Tracking checklist for the port. One row per taclet in
 `solidityProgramRules.key` (plus `ifThenElseRules.key`), in file order.
 
-Ported the mapping-preserving storage copy on 2026-09-16 — **without moving
-the pin** — first as solkey `c80a54494c`, which added `copyAt`/`merge` to
-`structRules.key` and respelled all eight copy rules' updates
-`copyAt(storage, p, find<[StValue]>(storage, src))`, then as its fold back
-into `save` the same day: the eight copy rules write `save(…)` again,
-`copyAt`/`merge` and their taclets are gone, and `save(st, nil, v)` is the
-leaf every write leaves, read through by member sort by the five
-`selectOnSaveEmpty*`/`saveOnEmptyPrim` taclets. The same fold moved
-`storageIndexDelete` to `delAt` and gave `structMemoryRules.key` two
-`selectOnCopyMem*` reads. The program rows are unchanged, since
-`Rules.StorageUpd.copy` is the whole term in one constructor;
-`Theory/Denote.denote_save` is why they may stay: off a mapping-carrying
-location, which the interpreter refuses anyway, upstream's `save` denotes the
-write they already describe. The nine upstream commits between `e67a0d7c48` and
+solkey's storage copy changed twice on 2026-09-16 — **without moving the
+pin**: `c80a54494c` added `copyAt`/`merge` to `structRules.key` and respelled
+all eight copy rules' updates `copyAt(storage, p, find<[StValue]>(storage, src))`,
+and `8c5c69ca25` folded that back into `save`: the eight copy rules write
+`save(…)` again, `copyAt`/`merge` and their taclets are gone, and
+`save(st, nil, v)` is a leaf every write leaves, never collapsed, read through
+by member sort by the five `selectOnSaveEmpty*`/`saveOnEmptyPrim` taclets so
+that a struct written over a location keeps the location's mapping members.
+The same fold moved `storageIndexDelete` to `delAt` and gave
+`structMemoryRules.key` two `selectOnCopyMem*` reads. The program rows are
+unchanged, since `Rules.StorageUpd.copy` is the whole term in one constructor.
+`Theory/Storage.lean` does **not** follow the fold: the non-collapsing leaf
+differs from the plain write only on a storage-to-storage copy of a
+mapping-carrying type, which solc ≥ 0.7 and solkey's own parser
+(`ParserUtils.parseAssignmentMaybe`) reject and `TypedStmt.Assign.mk` cannot
+build, so the algebra keeps the pre-fold rules (`saveOnEmpty`,
+`saveOnStoreCons` with its `isEmpty(flds)` split, `selectOnSaveEmpty`) over
+solkey's two sorts, and the storage half of the denotation went with the leaf.
+The nine upstream commits between `e67a0d7c48` and
 `c80a54494c` are **unreviewed** — `efc047a470`, `4635f8a530`, `c095c5c602`
 and `4599dd6d91` add, delete and re-shape taclets in
 `solidityProgramRules.key`, and `293b81c31d` re-spells every modality — so the
@@ -530,71 +535,65 @@ updates are written over symbols — `find`, `save`, `selectSt`, `read`,
 and defines nowhere: their whole meaning is the taclet sets of
 `structRules.key`, `memoryRules.key` and `structMemoryRules.key`.
 `Solidity/Theory/` is that meaning, as a term algebra with one theorem per
-taclet, and `Solidity/Update/Theory.lean` proves a rule's stated update
-denotes the interpreter's (`storageRhs_eq_theory`, `heapRhs_eq_theory`).
+taclet; `Solidity/Update/Theory.lean` proves a rule's stated *memory* update
+denotes the interpreter's (`heapRhs_eq_theory`). The storage algebra has no
+denotation: it is a theory over free terms, and the one place its terms would
+differ from the interpreter — a copy of a mapping-carrying type — is not a
+statement (`TypedStmt.Assign.mk`).
 
 Paths are `Semantics.Seg` on both sides: a member constant is `Seg.field n`,
 `at(i)` is `Seg.at i`, `size` is `Seg.field "length"`, `consr(p, a)` is
 `p ++ [a]`. `listRules.key` therefore needs no module — it is `List`.
 
-### `structRules.key` → `Theory/Storage.lean` (`StValue`)
+### `structRules.key` → `Theory/Storage.lean` (`Struct`, `StValue`)
 
 | KeY taclet | Lean theorem | Status |
 | --- | --- | --- |
-| `defaultValueStruct` | `defaultValueStruct` | done |
+| `defaultValueStruct` | `defaultValueStruct`, with `defaultValueInt`/`defaultValueBool` | done: `defaultValue<[α]>` is `st mtSt`, the `Struct` default, read through the caller's cast |
 | `selectOnStore` | `selectOnStore` | done |
 | `selectOnEmptyStorage` | `selectOnEmptyStorage` | done |
-| `saveOnEmptyStorage` | `saveOnEmptyStorage` | done |
-| `saveOnStoreCons` | `saveOnStoreCons` | done, in KeY's shape: no `isEmpty(flds)` split any more, since the leaf is never collapsed |
+| `saveOnEmptyStorage` | `saveOnEmptyStorage` | done, in the pre-fold shape (an `isEmpty(flds)` split) |
+| `saveOnStoreCons` | `saveOnStoreCons` | done, in the pre-fold shape: the `isEmpty(flds)` split is back, since the leaf collapses; `(Struct) v0` is `asStruct v0` |
 | `findDefinitionEmpty` | `findDefinitionEmpty` | done |
 | `findDefinitionCons` | `findDefinitionCons` | done |
-| ~~`saveOnEmptyStorageEmpty`~~, ~~`saveOnStoreEmpty`~~, ~~`saveOnEmpty`~~, ~~`selectOnSaveEmpty`~~ | — | gone upstream with the `copyAt`→`save` fold: `save(st, nil, v)` is never collapsed, so no taclet rewrites it to `v`. (`selectOnSaveEmpty`'s history — the unbound `flds`, the restatement `c80a54494c` adopted — is in `docs/solkey-feedback.md`) |
-| `saveOnEmptyPrim` | `saveOnEmptyPrimInt`, `saveOnEmptyPrimBool` | done, as the two cast readings: `asInt`/`asBool` of the leaf is the written value |
-| `selectOnSaveEmptyMap` | `selectOnSaveEmptyMap` | done, keyed on `isMapping` of the location's member rather than on a `MapField` segment (the `Seg` substitution the delete family already makes) |
-| `selectOnSaveEmptyRef` | `selectOnSaveEmptyRef` | done, keyed on `isNode`. **arch** in one case: upstream fires on a `RefField` whatever the location holds, so an *absent* member still recurses and its nested mapping reads empty, where the shape dispatch takes the written side. Unreachable through the interpreter, which materialises every member (`defaultForTy`) and refuses a mapping-typed source (`Wp/TerminalUpdate.rhsSVal`) |
-| `selectOnSaveEmptyIndexStruct` | `selectOnSaveEmptyIndexStruct` | done, and unconditional — upstream's `Struct` and `alphaPrim` instances agree at `at(i)`, so no shape test is needed |
-| `selectOnSaveEmptyDefault` | `selectOnSaveEmptyDefault` | done |
-| `selectOnSaveCons` | `selectOnSaveCons` | done, and **unconditional** — the fundamentals repository's analogue (`selectSave`) needs `isStruct`; total definitions do not. Proved for the walk (`selectOnWriteCons`) and lifted |
+| ~~`saveOnEmpty`~~ (pre-fold) | `saveOnEmpty` | done — gone upstream with the `copyAt`→`save` fold and kept here: `save(st, nil, v) ⇝ v`, the collapsing leaf (see the opening note) |
+| ~~`selectOnSaveEmpty`~~ (pre-fold); `selectOnSaveEmptyRef`, `selectOnSaveEmptyIndexStruct`, `selectOnSaveEmptyDefault` | `selectOnSaveEmpty` | done as the pre-fold rule — a member of `save(st, nil, v)` is a member of `(Struct) v`; the three post-fold instances are it at one sort each |
+| `saveOnEmptyPrim` | `saveOnEmptyPrimInt`, `saveOnEmptyPrimBool` | done, as the two cast readings at the end of a walk: `storeSt`'s third argument is the supersort, so the primitive leaf is stored verbatim |
+| `selectOnSaveEmptyMap` | — | **arch**: upstream a mapping member of a written location stays the location's own; here the leaf collapses and a mapping member is a subtree like any other. Unreachable — solc ≥ 0.7 and solkey's parser reject the copy, `TypedStmt.Assign.mk` cannot build it, `Semantics.rhsToSVal` is stuck on it |
+| `selectOnSaveCons` | `selectOnSaveCons` | done, and **unconditional** — the fundamentals repository's analogue (`selectSave`) needs `isStruct`; total definitions do not. Proved for the one-segment walk (`selectSt_storeAt`) and lifted; KeY's `cast<[α]>(save(…, flds, v))` is the `isEmpty(flds)` split |
 | `delValueStruct` | `delValueStruct` | done |
-| `delValueDefault` | `delValueDefault` | done |
-| `selectStDelNodeMap` | `selectStDelNodeMap` | done |
-| `selectStDelNodeRef` | `selectSt_delValue` | done (one theorem covers `Ref` and `Default`: off a mapping and an array, delete commutes with every selector) |
+| `delValueDefault` | `delValueDefault` (`primDefault`, keyed on the value's own sort) | done |
+| `selectStDelNodeMap` | — | **arch**: a `Seg` carries no `MapField`, so a mapping member of a deleted node is reset here; the mapping-preserving `delete` is the interpreter's `SVal.defaultOf` |
+| `selectStDelNodeRef` | `selectStDelNodeRef` | done, unconditional: one theorem covers `Ref`, `Default` and an absent member |
 | `selectStDelNodeIndexStruct` | `selectStDelNodeIndexStruct` | done |
-| `selectStDelNodeDefault` | `selectSt_delValue` | done |
+| `selectStDelNodeDefault` | `selectStDelNodeRef`, `selectStDelNodeDefault` | done |
 | `delAtEmpty` | `delAtEmpty` | done |
-| `selectOnDelAtCons` | — | **arch**: `delAt` is eager here (`save st p (delValue (find st p))`), so there is no marker for a read to push through; `Theory.denote_delAt` is the statement that this is `Semantics.storageDeleteUpd` |
-| ~~`copyAtEmpty`~~, ~~`selectOnCopyAtCons`~~, ~~`mergePrim`~~, ~~`selectStMerge{Map,Ref,IndexStruct,Default}`~~, ~~`mergeStValueCast`~~ | (`mergePrimInt`/`Bool`, `selectStMerge*`, `merge_asStruct` survive as the `merge`-level facts the leaf taclets are proved from) | gone upstream with the fold: `copyAt` *was* `save`, and `merge<[Struct]>(o, n)` *is* `save(o, nil, n)` |
-| `findStValueCast`, `delValueStValueCast`, `selectStValueCast` | `selectSt_asStruct`, `save_asStruct`, `find_asStruct`, `merge_asStruct` | done as *invisibility* of the cast rather than as its deletion |
+| `selectOnDelAtCons` | `selectOnDelAtCons` | done, through `selectOnSaveCons`: `delAt` is eager, `save st p (delValue (find st p))` |
+| ~~`copyAtEmpty`~~, ~~`selectOnCopyAtCons`~~, ~~`mergePrim`~~, ~~`selectStMerge{Map,Ref,IndexStruct,Default}`~~, ~~`mergeStValueCast`~~ | — | gone upstream with the fold; not modelled here for the reason `selectOnSaveEmptyMap` is not |
+| `findStValueCast`, `delValueStValueCast`, `selectStValueCast` | `asStruct_st`, `asStruct_prim`, `find_append` | done as the cast being the inverse of the injection `st` |
 | `sizeNotNegative` | — | **arch**: an `\add` of a reachability fact, not a rewrite; its Lean form is `WellFormedConsumers` row C1 (`length_read_nonneg`) |
 
 **Beyond the taclets.** solkey has no `find(save(…), …)` rule at all: a read of
 a write is reached by `findDefinitionCons` then `selectOnSaveCons`, one
-selector at a time. `Theory/Storage.lean` packages the four cases over the
-walk — `find_write_extends` (at or below the write), `find_write_same`,
-`find_write_prefix` (above it) and `find_write_frame` (off it, over
-`diverges`) — and restates them for `save`, where the same path reads the
-leaf (`find_save_same`) and a value member one step below it reads the
-written value under the shape dispatch's side of KeY's read-sort discipline
-(`find_save_extends_field`). `Semantics` had only the first, and only in the
-form that presupposes the write succeeded
-(`SemanticsProperties.SVal.find_save_same`).
+selector at a time. `Theory/Storage.lean` packages the four cases over
+`save` — `find_save_same`, `find_save_extends` (below the write, through the
+cast `find<[Struct]>` makes), `find_save_prefix` (above it) and
+`find_save_frame` (off it, over `diverges`) — and `find_append` composes reads
+along `++`. `Semantics` had only the first, and only in the form that
+presupposes the write succeeded (`SemanticsProperties.SVal.find_save_same`).
 
-**`write` and the one lazy constructor.** `save` is not a definition by
-recursion here but `write st p (merge (asStruct (find st p)) v)`: the walk
-(`write`, not an upstream symbol) with KeY's irreducible `save(st, nil, v)` as
-its leaf, the constructor `merge`. `delAt`/`delValue` are eager over `write`.
-The reason is the pair: `delValue`'s per-member decision is on one value and
-can be taken inside an `SVal` leaf, while the leaf's is on a member of the
-location *and* a member of the written value, drawn from two different trees,
-which no single leaf can hold. So the leaf taclets are the arms of `selectSt`
-rather than theorems over a definition, and `Theory/Denote.mergeKeepMaps` is
-the eager reading the denotation needs. `Theory/Denote.denote_save`
-and `denote_save_prim` are the collapse: at a mapping-free location and for
-every non-struct payload, upstream's `save` denotes the plain write — which
-is why the `*CopySource` / `…StoreRoot` program rows below are untouched,
-and why `Rules.StorageUpd.push` still merges KeY's three push taclets. (The
-fresh-slot arm, `denote_save_absent`, is gone: the slot a `push` lands on is
-the one a `pop` cleared, not a fresh one.)
+**`storeAt` and the two sorts.** `save` is a recursion on the path over
+`storeAt`, the one-segment walk (not an upstream symbol, but the shape
+`saveOnStoreCons` produces). It returns `Struct`, as KeY's does, and stores
+the written value verbatim at the last segment: `storeSt`'s third argument is
+the supersort `StValue`, so a primitive leaf is kept as itself and `find`
+reads it back at the caller's sort — which is what `saveOnEmptyPrim` does in
+KeY, and why `find`'s one-segment arm (`isEmpty(flds)`) is not decoration.
+`delAt`/`delNode` are eager over the same walk. There is no pre-state leaf
+and no denotation for storage: the `*CopySource` / `…StoreRoot` program rows
+below are untouched because the copy they state is mapping-free by
+construction (`TypedStmt.Assign.mk`, `stmtTypingOk`), and
+`Rules.StorageUpd.push` still merges KeY's three push taclets.
 
 ### `memoryRules.key` → `Theory/Memory.lean`
 
@@ -643,16 +642,15 @@ lazy and the interpreter is eager:
   `default<[α]>` at the reader's sort; `Semantics.allocDefault` materializes
   the object at allocation, so the term has to know its type to denote. The
   root is KeY's own and is what makes `readOnAddM`/`newFromAdd` the taclets.
-* `Theory.StValue.dflt` stands for the sort-free default
-  (`memoryRules.key`'s own `defVal`) and is resolved by a cast at the point of
-  use, rather than by the sort the read asks for.
+* `Theory/Storage.lean` renders `defaultValue<[α]>` as `st mtSt`, the `Struct`
+  default, resolved by the caller's cast (`asInt (st mtSt) = 0`) rather than
+  by the sort the read asks for.
 
 And one where the *update* is spelled differently: KeY writes `arr.push(se)`
 as two saves in one parallel update, the new slot `at(n)` and the new length
 `size`, both reading the pre-state. The slot index is the array's old length,
-which `SVal.save` reverts on, so `Update/Theory.lean` writes the extended
-array at the array's own path instead — the shape `Rules.StorageUpd.push` and
-`Update.pushStorage` already use. Same for `pop`.
+which `SVal.save` reverts on; `Rules.StorageUpd.push` and `Update.pushStorage`
+write the extended array at the array's own path instead. Same for `pop`.
 
 What that whole-array write now *carries* is upstream's `delAt`: both
 `storagePopSave` and `storagePushLengthSave` clear the slot at `n` rather

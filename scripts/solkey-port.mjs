@@ -307,10 +307,11 @@ const KEY_SUITES = [
     contract: "Rules",
     suite: "storage",
     dir: "storage",
-    ported: { copyKeepsMapping: "copyKeepsMapping" },
+    ported: {},
     reason: () =>
-      "storage-theory problem with no Lean statement yet — see " +
-      "`Theory/Storage.lean`'s leaf of a write",
+      "storage-theory problem over a `MapField`: the mapping-preserving copy " +
+      "is unreachable (solc ≥ 0.7 and solkey's parser reject a copy of a " +
+      "mapping-carrying type) and `Theory/Storage.lean` does not model it",
   },
 ];
 

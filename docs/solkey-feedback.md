@@ -604,6 +604,12 @@ reflexive conjuncts included and flagged) and the intended claim beside it,
 with a `native_decide` refutation of the source-wins reading — which is what
 would catch an inverted `isMapping` branch.
 
+**On this side (2026-09-18):** the Lean port no longer states the file.
+`Theory/Storage.lean` is now solkey's two-sorted algebra with the *pre-fold*
+leaf (`save(st, nil, v) ⇝ v`), since the post-fold leaf differs only on a copy
+no front end admits, and `copyKeepsMapping` is `unsupported` in
+`tests/solkey/expected.tsv`.
+
 ## The ported corpus is 102 `TestSuite.sol` obligations behind (2026-09-16)
 
 Not feedback to solkey but the standing gap on this side, recorded where the

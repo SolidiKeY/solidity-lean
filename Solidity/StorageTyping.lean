@@ -199,13 +199,16 @@ def wtStorageExpr (L : Layout) (env : List (Name × Binding)) :
 
 /-- The fragment of Solidity's static typing that sort-faithfulness
 leans on, per statement shape: assignment sides agree in type, memory
-places are reference-typed (`bool memory` is not Solidity), compound
-assignment and `++`/`--` targets are numeric, pushed values have the
-array's element type. -/
+places are reference-typed (`bool memory` is not Solidity), a
+storage-to-storage copy is of a mapping-free type (solc ≥ 0.7; solkey's
+`ParserUtils.parseAssignmentMaybe`; `TypedStmt.Assign.mk`'s `mapFree`),
+compound assignment and `++`/`--` targets are numeric, pushed values have
+the array's element type. -/
 def stmtTypingOk : Stmt -> Bool
   | Stmt.assign lhs rhs =>
       lhs.expr.ty == rhs.ty &&
         (!lhs.expr.isMemory || lhs.expr.ty.isReference) &&
+        (!(lhs.expr.isStorage && rhs.isStorage) || !tyHasMapping rhs.ty) &&
         (match rhs with
          | WrappedExpr.incDec _ target => isNumericTy target.ty
          | _ => true)

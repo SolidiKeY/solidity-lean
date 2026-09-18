@@ -1,259 +1,43 @@
 import Solidity.SemanticsProperties
 import Solidity.Update.Eval
-import Solidity.Theory.Denote
 import Solidity.Theory.Memory
 
 /-!
-# A rule's update, read as a KeY term
+# A rule's memory update, read as a KeY term
 
 `Rules.lean` states each terminal rule's update as first-order syntax —
-`{storage := save(storage, p, se)}` — and `Update/Eval.lean` gives that syntax
-its meaning by running the interpreter: `StorageUpd.save` becomes
-`State.saveStorage`.  That is a perfectly good semantics and it is *not* the
-one the taclet has.  KeY's `save` is an uninterpreted symbol constrained by
-`structRules.key`, and until `Theory/Storage.lean` there was nothing in this
-package that could tell the two apart, because there was no `save`.  (And
-they *do* differ: KeY's `save` keeps a location's mapping members under a
-struct written over it; the interpreter refuses that program.  The last
-section says where the two meet.)
+`{memory := write(memory, id, a, v)}` — and `Update/Eval.lean` gives that
+syntax its meaning by running the interpreter.  KeY's `write`, `addM` and
+`read` are uninterpreted symbols constrained by `memoryRules.key`, and
+`Theory/Memory.lean` is that theory as terms.  This module reads a rule's
+`memory := …` as a term of it over the pre-state heap (`Memory.pre`) and
+proves that denoting the term gives back exactly what `Update/Eval.lean`
+computes:
 
-This module reads a rule's storage update as a **term** of that theory over
-the pre-state and proves that denoting the term gives back exactly what
-`Update/Eval.lean` computes:
+    heapRhs u s = heapRhsT u s
 
-    storageRhs u s = storageRhsT u s
+`heapRhsT` is `Update.heapRhs` with its one write, `Update.memWrite`,
+replaced by `memWriteT` — the same write read as `denoteMem (write …)`.
+Everything else, the path readers and the value readers, is shared verbatim,
+so the theorem is about the one thing that differs: whether the *update
+shape* a rule states denotes the interpreter's write.
 
-Composed with `Update/TacletTable.lean`'s bridges and `Wp.terminalUpdate_sound`,
-that reads: the taclet's own term is what `execStmt` does.  Every taclet of
-`Theory/Storage.lean` is therefore a fact about this package's wp semantics
-rather than about a private model — in particular the frame law
-`StValue.find_save_frame`, which `Semantics` never had.
+`denoteMem_new` is the other export: KeY's freshness premise `new(memory, r)`
+on `memoryDeclNew` is discharged by the denotation, since the interpreter's
+allocator never reuses a root.
 
-## Why `storageRhsT` is a copy
-
-`storageRhsT` is `Update.storageRhs` with its one write, `Upd.saveSt`,
-replaced by `theoryWrite` — the same write read as `denoteSt (write …)`, the
-walk of `Theory/Storage.lean` that KeY's `save` puts its leaf under.
-Everything else, the path readers and the value readers, is shared verbatim.
-That is deliberate, and the same discipline `Update/Eval.lean` sets for
-itself: if the term reading had its own arithmetic and its own path
-resolution, the theorem below would be comparing two of my own definitions.
-Sharing the readers means it is about the one thing that differs — whether the
-*update shape* a rule states denotes the interpreter's write.
-
-The duplication is the point rather than an accident: `storageRhsT` is the
-KeY reading, `storageRhs` is the interpreter's, and `storageRhs_eq_theory` is
-the claim that they agree.
-
-## What is covered, exactly
-
-Two of `Rules.UpdElem`'s constructors: `.storage` (every `StorageUpd`) and
-`.heap` (both `HeapUpd`s).  Those are the elements whose right-hand side *is*
-a data-structure term, and together they are every `{storage := …}` and
-`{memory := write(…)}` the rule table writes.
-
-The rest of `UpdElem` is **not** covered here and does not claim to be.
-`.bind`, `.bumpOf`, `.transfer` and `.havoc` carry no term of either theory.
-`.memDecl` and `.memDelete` do — KeY writes them
-`{memory := copySt(addM(memory, r), r, find(storage, sp))}` — but `copySt`
-lives in `structMemoryRules.key`, which `Solidity/Theory/` does not model.
-The path identities that make KeY's `copySt` a pure operation on terms are in
-`Theory/Memory.lean`, so what that row needs is the three taclets themselves
-rather than a change of model.  `docs/lean-key-rule-map.md` records it.
-
-## Where the term is not KeY's, spelled out
-
-* **push and pop.** KeY writes two saves in one parallel update, the new slot
-  and the new length.  The slot index is the array's *old* length, which is
-  outside it, so that term cannot denote through a `putAt` that mirrors
-  `SVal.save` — see `Theory/Denote.lean`.  The term here writes the extended
-  array at the array's own path, the shape both `Rules.StorageUpd.push`
-  (already a merge of KeY's three push taclets) and `Update.pushStorage` use.
-* **the leaf.** Every `save(storage, p, v)` upstream keeps its leaf — a struct
-  written over a location keeps the location's mapping members — and
-  `theoryWrite` reads the walk without it.  `theorySave` below is upstream's
-  spelling, and the `theorySave_eq_theoryWrite*` theorems are why
-  `storageRhsT` may read every write as the walk: for a primitive payload
-  there is nothing to keep (every `.save` arm, and the `length` a push or pop
-  writes); and on a struct copy the interpreter is stuck wherever the two
-  would differ (`Semantics.tyHasMapping` — solc ≥ 0.7 rejects the program).
-  The slot a `push` lands on is *not* fresh — it is the one a `pop` cleared
-  and gave back, mapping members included (`Semantics.pushSlot`).
-* **the copy rules.** The source is the `SVal` that `rhsSVal` read, as a
-  `sval` leaf, because `rhsSVal` also covers the primitive and memory sources
-  that one `Rules` constructor merges.  `Theory.denote_find` is the statement
-  that the storage case of that read is KeY's `find`.
+There is no storage half any more.  `Theory/Storage.lean` is a theory over
+free terms, as `structRules.key` is, and the fragment of programs its
+collapsing leaf describes is exactly the fragment the AST admits
+(`TypedStmt.Assign.mk`, `stmtTypingOk`): a storage-to-storage copy of a type
+that carries a mapping is not a statement, so there is nothing left for a
+denotation to reconcile.
 -/
 
 namespace Solidity
 namespace Update
 
 open Semantics Wp Rules Theory
-
-/-! ## One write, read as a term -/
-
-/-- The tree a storage root holds, failing where `State.saveStorage` fails on
-an unknown root. -/
-def rootTree (s : State) (root : Name) : Res SVal :=
-  match lookupBy root s.storage with
-  | some v => .ok v
-  | none => .error .stuck
-
-/-- `{storage := save(storage, p, w)}` read as the walk: the storage component
-the term denotes with its leaf collapsed.  This is the only place the two
-readings differ. -/
-def theoryWrite (s : State) (root : Name) (segs : List Seg) (w : SVal) :
-    Res (List (Name × SVal)) :=
-  (rootTree s root) >>= fun v0 =>
-    (denoteSt (StValue.write (StValue.sval v0) segs (StValue.sval w))).map
-      fun v => setBy root v s.storage
-
-/-- `{storage := save(storage, p, w)}` as upstream spells it, leaf included: a
-mapping member of the location kept under a struct written over it. -/
-def theorySave (s : State) (root : Name) (segs : List Seg) (w : SVal) :
-    Res (List (Name × SVal)) :=
-  (rootTree s root) >>= fun v0 =>
-    (denoteSt (StValue.save (StValue.sval v0) segs (StValue.sval w))).map
-      fun v => setBy root v s.storage
-
-/-- **The collapse.** Where the location's current value carries no mapping —
-the whole fragment the interpreter admits — upstream's term denotes the write
-the rule table already reads.  Off that fragment it does not, and the fold did
-not change this: `Counterexamples/MappingSideConditions.lean`'s M2 is the
-witness. -/
-theorem theorySave_eq_theoryWrite (s : State) (root : Name) (segs : List Seg)
-    (w cur v0 : SVal) (hroot : rootTree s root = .ok v0)
-    (hcur : StValue.find (StValue.sval v0) segs = StValue.sval cur)
-    (hnm : svalHasMapping cur = false) :
-    theorySave s root segs w = theoryWrite s root segs w := by
-  unfold theorySave theoryWrite
-  rw [hroot]
-  simp only [bind, Except.bind]
-  rw [denote_save hcur hnm, denote_write]
-
-/-- And for a payload that is not a struct, with no side condition at all:
-every primitive write, and the `length` a push or pop writes. -/
-theorem theorySave_eq_theoryWrite_prim (s : State) (root : Name) (segs : List Seg)
-    (w : SVal) (hw : ∀ fs, w ≠ SVal.struct fs) :
-    theorySave s root segs w = theoryWrite s root segs w := by
-  unfold theorySave theoryWrite
-  cases rootTree s root with
-  | error e => rfl
-  | ok v0 =>
-      simp only [bind, Except.bind]
-      rw [denote_save_prim hw, denote_write]
-
-/-- **The bridge, once.** Every storage update the rule table states ends in
-one `Upd.saveSt`, and that write *is* the walk of KeY's `save` term denoted. -/
-theorem saveSt_eq_theory (s : State) (root : Name) (segs : List Seg) (w : SVal) :
-    Upd.saveSt s root segs w = theoryWrite s root segs w := by
-  unfold Upd.saveSt State.saveStorage theoryWrite rootTree
-  cases lookupBy root s.storage with
-  | none => rfl
-  | some v0 =>
-      simp only [bind, Except.bind, denote_write, Except.map]
-      cases v0.save segs w <;> rfl
-
-/-- The same write where `Rules.StorageUpd.clear` spells it out. -/
-theorem saveStorage_map_eq_theory (s : State) (root : Name) (segs : List Seg)
-    (w : SVal) :
-    (s.saveStorage root segs w).map State.storage = theoryWrite s root segs w :=
-  saveSt_eq_theory s root segs w
-
-/-! ## The rule's `storage := …`, read as a term -/
-
-/-- `Update.storageSave` with the write read as a term. -/
-def storageSaveT (s : State) (target : WrappedExpr) (v : SVal) :
-    Res (List (Name × SVal)) :=
-  locPath s target >>= fun p => theoryWrite s p.1 p.2 v
-
-/-- `Update.storageSave` with the write read as upstream's term, leaf included
-— what the seven `*CopySource` / `…StoreRoot` rules state. -/
-def storageKeySaveT (s : State) (target : WrappedExpr) (v : SVal) :
-    Res (List (Name × SVal)) :=
-  locPath s target >>= fun p => theorySave s p.1 p.2 v
-
-/-- The collapse at the update level: `storageRhsT`'s `.copy` arm may read the
-copy as `storageSaveT`. -/
-theorem storageKeySaveT_eq_storageSaveT {s : State} {target : WrappedExpr} {v : SVal}
-    {root : Name} {segs : List Seg} {v0 cur : SVal}
-    (hloc : locPath s target = .ok (root, segs))
-    (hroot : rootTree s root = .ok v0)
-    (hcur : StValue.find (StValue.sval v0) segs = StValue.sval cur)
-    (hnm : svalHasMapping cur = false) :
-    storageKeySaveT s target v = storageSaveT s target v := by
-  unfold storageKeySaveT storageSaveT
-  rw [hloc]
-  simp only [bind, Except.bind]
-  exact theorySave_eq_theoryWrite s root segs v cur v0 hroot hcur hnm
-
-/-- `Update.pushStorage` with the write read as a term. -/
-def pushStorageT (arr : WrappedExpr) (value : Option WrappedExpr) (s : State) :
-    Res (List (Name × SVal)) :=
-  placePath s arr >>= fun p => s.findStorage p.1 p.2 >>= fun cur =>
-    match cur, arr.ty with
-    | SVal.array elems shadow, Ty.ref (RefTy.array elemTy) =>
-        (match value with
-          | none => .ok (pushSlot elemTy shadow).1
-          | some rhs => rhsSVal s rhs) >>= fun newElem =>
-          theoryWrite s p.1 p.2
-            (SVal.array (elems ++ [newElem]) (pushSlot elemTy shadow).2)
-    | _, _ => .error .stuck
-
-/-- `Update.storageRhs` with the write read as a term.  Compare arm by arm
-with `Update/Eval.lean`: only `Upd.saveSt` has moved. -/
-def storageRhsT (u : StorageUpd) (s : State) : Res (List (Name × SVal)) :=
-  match u with
-  | .save target t => Sym.eval s t >>= fun v => storageSaveT s target v.toSVal
-  | .copy target src => rhsSVal s src >>= fun v => storageSaveT s target v
-  | .copyFromMem target src => rhsSVal s src >>= fun v => storageSaveT s target v
-  | .push arr value => pushStorageT arr value s
-  | .pushPlace place =>
-      match place with
-      | WrappedExpr.pushPlace arr => pushStorageT arr none s
-      | _ => .error .stuck
-  | .pop arr =>
-      placePath s arr >>= fun p => s.findStorage p.1 p.2 >>= fun cur =>
-        match cur with
-        | SVal.array elems shadow =>
-            match elems.reverse with
-            | [] => .error .revert
-            | last :: restRev =>
-                theoryWrite s p.1 p.2
-                  (SVal.array restRev.reverse (last.defaultOf :: shadow))
-        | _ => .error .stuck
-  | .clear target =>
-      deletePath s target >>= fun x =>
-        x.1.findStorage x.2.1 x.2.2 >>= fun cur =>
-          theoryWrite x.1 x.2.1 x.2.2 cur.defaultOf
-
-/-- **The storage half of the headline.** A rule's stated `storage := …`,
-read as a term of `structRules.key`'s theory and denoted, is exactly the
-update `Update/Eval.lean` computes by running the interpreter. -/
-theorem storageRhs_eq_theory (u : StorageUpd) (s : State) :
-    storageRhs u s = storageRhsT u s := by
-  cases u <;>
-    simp only [storageRhs, storageRhsT, storageSave, storageSaveT, pushStorage,
-      pushStorageT, saveSt_eq_theory, saveStorage_map_eq_theory] <;>
-    rfl
-
-/-- …as an equality of readers, which is the form every consumer needs: it
-rewrites under `elemPar`, `UpdTerm.toUpd`, `goalsExec` and `StepEffect.wp`
-alike, so the whole wp reading of a rule can be taken over KeY's terms. -/
-theorem storageRhs_eq_theory' : storageRhs = storageRhsT := by
-  funext u s
-  exact storageRhs_eq_theory u s
-
-/-- The same claim where a rule writes it: a `{storage := …}` element of a
-`\replacewith`, evaluated, is the KeY term denoted. -/
-theorem toUpd_storage_eq_theory (u : StorageUpd) (s : State) :
-    UpdTerm.toUpd [UpdElem.storage u] s =
-      (storageRhsT u s).map fun g => { s with storage := g } := by
-  have h : UpdTerm.toUpd [UpdElem.storage u] s =
-      (storageRhs u s).map fun g => { s with storage := g } := by
-    simp only [UpdTerm.toUpd, UpdTerm.toPar, List.flatMap]
-    exact Upd.toUpd_storage _ s
-  rw [h, storageRhs_eq_theory]
 
 /-! ## The rule's `memory := …`, read as a term
 
@@ -265,7 +49,7 @@ where it is used. -/
 it names, which is where the two models are brought together: KeY's
 `idC(idp, flds)` is a *name*, the interpreter's `Nat` is the object, and
 `Theory.Memory.resolve` walks the one to the other.  `dflt` carries no sort
-and so no value, exactly as `StValue.dflt` does. -/
+and so no value; it is resolved by the sort of the read. -/
 def denoteMV (h : List (Nat × MObj)) : Theory.MemValue -> Res MVal
   | .prim p => .ok (.prim p)
   | .ident i =>
@@ -483,17 +267,6 @@ theorem heapRhs_eq_theory (u : HeapUpd) (s : State) :
 theorem heapRhs_eq_theory' : heapRhs = heapRhsT := by
   funext u s
   exact heapRhs_eq_theory u s
-
-/-! ## Sanity
-
-`storageRootWriteStore`'s update on a concrete store, computed both ways. -/
-
-example :
-    storageRhs (.save (SoliditySyntax.rootExpr "age") (.read (WrappedExpr.intLit Ty.uint 42)))
-        State.exampleStore
-      = storageRhsT (.save (SoliditySyntax.rootExpr "age")
-          (.read (WrappedExpr.intLit Ty.uint 42))) State.exampleStore :=
-  storageRhs_eq_theory _ _
 
 end Update
 end Solidity

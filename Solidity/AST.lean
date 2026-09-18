@@ -89,6 +89,183 @@ reference-typed locations as well, unlike in memory". -/
 def Ty.isStorageReferenceType (ty : Ty) : Bool :=
   ty.isReference
 
+/-! ### The struct schema and `containsMapping`
+
+The struct table and the type predicate that reads it live here rather than
+in `Semantics.lean` because they are facts about *static types*, and the
+typed AST needs one of them: `TypedStmt.Assign.mk` refuses a storage-to-storage
+copy whose type carries a mapping, which is solkey's
+`StorageReferenceTypes.containsMapping` behind `ParserUtils.parseAssignmentMaybe`
+and solc's own rule since 0.7.  They keep the `Semantics` namespace, since
+that is where every consumer names them. -/
+
+namespace Semantics
+
+/-! ## Struct schema
+
+The union of the struct declarations of the ported solkey contracts:
+`StandardExample.sol` / the standard example, `TestSuite.sol`, and the six
+`solc/Solc*.sol` semantic-test ports. Names that recur across those
+contracts (`Basket`, `Ledger`, `Pair`) agree on their members, so one
+table serves all of them; the two that did not agree are renamed in the
+port and noted at their arm. -/
+
+/-- Struct definitions of the ported contracts.
+
+The trailing catch-all is forced — the key is a `Name`, so the match
+cannot be closed — and it is the one silent default left in this file: an
+unknown struct name has zero fields, so `defaultForTy` builds an empty
+node for it instead of being stuck.  Harmless while the contract corpus
+is closed; making it loud would mean an `Option` result threaded through
+`defaultForTy`, `tyHasMapping`, `Reachability` and `WellFormedConsumers`. -/
+def structDef : Name -> List (Name × Ty)
+  | "Token" => [("value", Ty.uint)]
+  | "Account" =>
+      [("balance", Ty.uint), ("token", Ty.ref (RefTy.struct "Token"))]
+  | "Person" =>
+      [("account", Ty.ref (RefTy.struct "Account")), ("age", Ty.uint)]
+  -- A struct with a mapping member, exercising the delete/`delNode`
+  -- semantics (mapping members survive `delete` on the struct).
+  | "Wallet" =>
+      [("owner", Ty.uint),
+       ("stash", Ty.ref (RefTy.mapping Ty.uint Ty.uint))]
+  -- TestSuite.sol (`keyext.solidity.examples/TestSuite.sol`); `Basket`
+  -- is shared verbatim with `solc/SolcMemory.sol`.
+  | "Basket" => [("items", Ty.ref (RefTy.array Ty.uint))]
+  | "Ledger" =>
+      [("nonce", Ty.uint),
+       ("balances", Ty.ref (RefTy.mapping Ty.uint Ty.uint))]
+  | "LedgerUse" => [("ledger", Ty.ref (RefTy.struct "Ledger"))]
+  | "TokenBucket" =>
+      [("tokens", Ty.ref (RefTy.array (Ty.ref (RefTy.struct "Token"))))]
+  | "Toggle" => [("on", Ty.bool), ("n", Ty.uint)]
+  -- solc/SolcArrays.sol, SolcControlFlow.sol, SolcStructs.sol (agree).
+  | "Pair" => [("a", Ty.uint), ("b", Ty.uint)]
+  -- solc/SolcMappings.sol.
+  | "S" => [("a", Ty.uint)]
+  | "Sub" => [("x", Ty.uint), ("y", Ty.uint)]
+  | "WithSub" =>
+      [("a", Ty.uint), ("sub", Ty.ref (RefTy.struct "Sub"))]
+  -- solc/SolcMemory.sol.
+  | "Inner" => [("a", Ty.uint), ("b", Ty.uint), ("c", Ty.uint)]
+  | "Outer" => [("a", Ty.uint), ("s", Ty.ref (RefTy.struct "Inner"))]
+  -- solc/SolcStructs.sol. Its `Flagged`/`Depth0`/`Depth1`/`Depth2`
+  -- family is *not* here: `Depth0.recursive` and `Depth1.recursive` have
+  -- different types, as do `Flagged.y` (bool) and `Sub.y`/`Triple.y`
+  -- (uint), and field names resolve through the single global
+  -- `SoliditySyntax.fieldTy` table, which has no room for an overload.
+  -- The two functions that use them (`recursiveStructThroughAliases`,
+  -- `nestedRecursiveStructSetAndCheck`) are recorded `unsupported`.
+  | "Simple" => [("value", Ty.uint)]
+  | "WithArray" =>
+      [("n", Ty.uint), ("items", Ty.ref (RefTy.array Ty.uint))]
+  | "Triple" => [("x", Ty.uint), ("y", Ty.uint), ("z", Ty.uint)]
+  -- Not a ported contract: two rows for one field name, which no solc
+  -- program can declare. It exists so `Counterexamples/`'s R3 can show
+  -- that `defaultOk`'s no-duplicate-row condition is load-bearing —
+  -- `defaultForTy` builds both rows, and the second has the wrong type
+  -- for what the field name looks up to.
+  | "BadDup" => [("a", Ty.uint), ("a", Ty.bool)]
+  | _ => []
+
+/-! ### The `structDef` termination certificate
+
+`defaultForTy` and `tyHasMapping` expand a struct through the `structDef`
+table, not into a structurally smaller `Ty`, so neither is structural.
+They used to be fuelled at a hardcoded `8`, and fuel exhaustion was a
+*silent wrong answer* — `SVal.int 0` for a struct, `false` for "contains
+a mapping" — rather than an error.
+
+`structRank` replaces that magic number with a certificate: a strict
+upper bound on the rank of every field type of a struct.  A new struct
+whose fields outrank it fails `structDef_rank_lt`, so table drift is a
+build error instead of a wrong answer at depth 9. -/
+
+/-- Strict upper bound on the rank of a struct's field types. -/
+def structRank : Name -> Nat
+  | "Token" => 1
+  | "Account" => 2
+  | "Person" => 3
+  | "Wallet" => 1
+  | "Basket" => 1
+  | "Ledger" => 1
+  | "LedgerUse" => 2
+  | "TokenBucket" => 2
+  | "Toggle" => 1
+  | "Pair" => 1
+  | "S" => 1
+  | "Sub" => 1
+  | "WithSub" => 2
+  | "Inner" => 1
+  | "Outer" => 2
+  | "Simple" => 1
+  | "WithArray" => 1
+  | "Triple" => 1
+  | "BadDup" => 1
+  | _ => 1
+
+/-- A type's rank: primitives 0, a struct its `structRank`, an array and
+a mapping the rank of the type they expand into. -/
+def tyRank : Ty -> Nat
+  | Ty.prim _ => 0
+  | Ty.ref (RefTy.struct n) => structRank n
+  | Ty.ref (RefTy.array e) => tyRank e
+  | Ty.ref (RefTy.mapping _ v) => tyRank v
+
+def fieldsRank : List (Name × Ty) -> Nat
+  | [] => 0
+  | (_, t) :: rest => max (tyRank t) (fieldsRank rest)
+
+theorem structRank_pos (n : Name) : 0 < structRank n := by
+  unfold structRank; split <;> omega
+
+/-- **The certificate.** Every field of a struct outranks nothing: its
+rank is strictly below the struct's own.  Checked by `decide` against the
+concrete table, so adding a struct whose fields are too deep for its
+`structRank` row fails here. -/
+theorem structDef_rank_lt (n : Name) :
+    fieldsRank (structDef n) < structRank n := by
+  unfold structDef
+  split
+  all_goals first
+    | decide
+    | simpa [fieldsRank] using structRank_pos _
+
+/-- Lexicographic step when the first component may stay equal. -/
+theorem lex_le_lt {a b x y : Nat} (hab : a ≤ b) (hxy : x < y) :
+    Prod.Lex (· < ·) (· < ·) (a, x) (b, y) := by
+  rcases Nat.lt_or_ge a b with h | h
+  · exact Prod.Lex.left _ _ h
+  · have he : a = b := Nat.le_antisymm hab h
+    subst he; exact Prod.Lex.right _ hxy
+
+mutual
+/-- Does a type contain a (nested) mapping? solc ≥ 0.7 refuses to
+compile a storage-to-storage assignment of such a type ("Types in
+storage containing (nested) mappings cannot be assigned to"), so the
+interpreter is stuck on one — the program does not exist. -/
+def tyHasMapping : Ty -> Bool
+  | Ty.prim _ => false
+  | Ty.ref (RefTy.mapping _ _) => true
+  | Ty.ref (RefTy.struct name) => fieldsHaveMapping (structDef name)
+  | Ty.ref (RefTy.array elem) => tyHasMapping elem
+termination_by ty => (tyRank ty, sizeOf ty)
+decreasing_by
+  · exact Prod.Lex.left _ _ (structDef_rank_lt _)
+  · apply Prod.Lex.right; simp; omega
+
+def fieldsHaveMapping : List (Name × Ty) -> Bool
+  | [] => false
+  | (_, t) :: rest => tyHasMapping t || fieldsHaveMapping rest
+termination_by l => (fieldsRank l, sizeOf l)
+decreasing_by
+  all_goals (apply lex_le_lt
+             · simp only [fieldsRank]; omega
+             · simp; omega)
+end
+
+end Semantics
+
 mutual
   /-- The KeY sort of a static type, as `SolidityInfo.registerPredefinedTypes`
   (`bool ↦ bool`; every `intN`/`uintN`, `address`, `string` ↦ `int`) and
@@ -1848,8 +2025,16 @@ inductive StackDecl where
       (value : Expr Kind.stack ty)
 
 inductive Assign where
+  /-- `target = value`.  A storage-to-storage copy of a type that carries a
+  mapping is not a statement: solc ≥ 0.7 rejects it and so does solkey's
+  parser (`ParserUtils.parseAssignmentMaybe`), so `mapFree` is the obligation
+  that makes it unconstructible here.  Discharged by evaluation on closed
+  types; the kind-mismatch cases close by `simp` on the kinds. -/
   | mk {targetKind valueKind ty : _}
       (target : Place targetKind ty) (value : Expr valueKind ty)
+      (mapFree : targetKind = Kind.storage -> valueKind = Kind.storage ->
+          Semantics.tyHasMapping ty = false := by
+        simp [Semantics.tyHasMapping, Semantics.fieldsHaveMapping, Semantics.structDef])
   | storageFromMemory {ref : RefTy}
       (target : Place Kind.storage (Ty.ref ref))
       (value : Expr Kind.memory (Ty.ref ref))
@@ -1936,6 +2121,15 @@ def storageAlias : TypedStmt.StorageDecl :=
 /- The invalid Solidity line `Account storage v = carol` is unconstructible:
    `carol` has type `Place Kind.memory personTy`, while storage aliases require
    `Place Kind.storage personTy`. -/
+
+/- The invalid Solidity line `ledger2 = ledger` is unconstructible as well:
+   `Ledger` carries `balances : mapping(uint => uint)`, so `Assign.mk`'s
+   `mapFree` obligation for a storage-to-storage copy at that type is false —
+   the auto-param fails exactly where solc ≥ 0.7 and solkey's parser do. -/
+example :
+    ¬ (Kind.storage = Kind.storage -> Kind.storage = Kind.storage ->
+        Semantics.tyHasMapping (Ty.ref (RefTy.struct "Ledger")) = false) := by
+  simp [Semantics.tyHasMapping, Semantics.fieldsHaveMapping, Semantics.structDef]
 
 #check storageFieldAssignment
 #check storageAlias
