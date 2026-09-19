@@ -833,6 +833,7 @@ elab "upd_case" : tactic => do
     let ty ← instantiateMVars (← g.getType)
     let heads : List (Lean.Name × Nat) :=
       [ (``Wp.varPath, 2), (``Wp.stackVal, 2), (``Wp.memRef, 2),
+        (``Wp.readMem, 2), (``Wp.writeMemField, 4), (``Wp.writeMemIndex, 4),
         (``Wp.simpleVal, 2), (``Semantics.State.saveStorage, 4),
         (``Semantics.State.findStorage, 3), (``Semantics.State.getObj, 2),
         -- The coercions a read ends in: a storage cell holding a struct has
@@ -843,6 +844,30 @@ elab "upd_case" : tactic => do
           !e.hasLooseBVars && !e.hasExprMVar)
       | throwError "upd_case: no shared interpreter reader left in{indentExpr ty}"
     evalTactic (← `(tactic| cases hcase : $(← Term.exprToSyntax t)))
+
+open Lean Elab Tactic Meta in
+/-- Case on a *value* the two spellings both got stuck on.
+
+`upd_case` opens a reader; what is left is often the reader's `Res` payload —
+an `MVal`, an `SVal`, a `Binding` — that a following `match` discriminates on
+and that is now a bare local.  A memory merge always reaches one: `mv := ref(…)`
+binds whatever `readMem` returned, and the write through `mv` has to know it
+was a `ref`.  This is that split, and it is separate from `upd_case` because
+the target is a hypothesis rather than an application in the goal. -/
+elab "upd_case_val" : tactic => do
+  let g <- getMainGoal
+  g.withContext do
+    let ty <- instantiateMVars (<- g.getType)
+    let sorts : List Lean.Name :=
+      [ ``Semantics.MVal, ``Semantics.SVal, ``Semantics.Value,
+        ``Semantics.Binding, ``Semantics.MObj ]
+    for decl in (<- getLCtx) do
+      if decl.isImplementationDetail then continue
+      let dty <- instantiateMVars decl.type
+      if sorts.any (fun n => dty.isConstOf n) && ty.containsFVar decl.fvarId then
+        evalTactic (<- `(tactic| cases $(mkIdent decl.userName):ident))
+        return
+    throwError "upd_case_val: no stuck interpreter value left in{indentExpr ty}"
 
 /-- Normalize an update to the interpreter readers it is made of, without
 unfolding the readers themselves: `upd_merge_set` rewrites *through* a binding
@@ -877,8 +902,12 @@ macro "upd_merge" : tactic => `(tactic|
           | exact Frontier.Equiv.refl _
           | (funext s
              try upd_norm
-             repeat (first | rfl | (upd_case <;> (try upd_norm)))
-             all_goals (try rfl)))))
+             repeat (first
+                       | rfl
+                       | (upd_case <;> (try upd_norm))
+                       | (upd_case_val <;> (try upd_norm)))
+             all_goals (try rfl)
+             all_goals (try (upd_case_val <;> (try upd_norm) <;> (try rfl)))))))
 
 /-- Discharge a `⇝ᵘ[.rule]` step.  `firstOpen?` computes the split, so the
 first hypothesis is `rfl`; the successor is checked definitionally once
@@ -1234,16 +1263,46 @@ syntax " ~>* " : sol_arrow
 /-- The paper's many-step arrow, `~*>`: the same tactic as `⇝*`/`~>*`, in the
 spelling the paper's chains are written in. -/
 syntax " ~*> " : sol_arrow
-/-! The merge arrow.  Not a step of the rule set: the calculus's last line is
-usually the update calculus collapsing `{u}{v}` into `{u ‖ {u}v}`, and writing
-it with `⇝` would claim a taclet fired.  `⇝≡` is that line, discharged by
-`upd_merge`; `⇝≡[h]` takes the update equality by hand, for a merge the
-automation cannot close. -/
-/-- A merge line: same derivation line, the update respelled. -/
+/-! ### The equality arrows
+
+A chain has two kinds of line that are *not* a rule application, and the paper
+draws both of them.  One is the **merge**: the update calculus collapsing
+`{u}{v}` into `{u ‖ {u}v}`, which is a respelling of the accumulated update and
+not a taclet, so writing it with `⇝` would claim one fired.  The other is the
+paper's terminal **evaluation** -- `find(save(s, p, v), p) ⇝ v` and the rest of
+the theory's rewrite rules -- which is an equation between *terms*, not between
+derivation lines, and so belongs to `sol_rewrite` below rather than here.
+
+Both are written `=`, because both are equalities, and the layer says which one
+is meant: in a `sol_derivation` `=` is the merge, in a `sol_rewrite` it is a
+theory rule.  `≡` is the glyph twin, on the file's usual terms -- the glyph
+prints, the ASCII is typeable.  `⇝≡`/`~>=` are the older spellings of `≡`/`=`
+and still parse.
+
+The bracket carries whatever the layer needs to justify the line: an update
+equality (or a whole `Frontier.Equiv`) in a `sol_derivation`, a `TheoryRule` in
+a `sol_rewrite`. -/
+/-- An equality line: the merge here, a theory rewrite in `sol_rewrite`. -/
+syntax " ≡ " : sol_arrow
+/-- An equality line with its justification supplied. -/
+syntax " ≡[" term "] " : sol_arrow
+/-- Several equality lines at once. -/
+syntax " ≡* " : sol_arrow
+/-- Several equality lines, justifications listed. -/
+syntax " ≡*[" term,* "] " : sol_arrow
+/-- ASCII twin of `≡`. -/
+syntax " = " : sol_arrow
+/-- ASCII twin of `≡[h]`. -/
+syntax " =[" term "] " : sol_arrow
+/-- ASCII twin of `≡*`. -/
+syntax " =* " : sol_arrow
+/-- ASCII twin of `≡*[hs]`. -/
+syntax " =*[" term,* "] " : sol_arrow
+/-- The older spelling of `≡`. -/
 syntax " ⇝≡ " : sol_arrow
-/-- A merge line with the update equality supplied. -/
+/-- The older spelling of `≡[h]`. -/
 syntax " ⇝≡[" term "] " : sol_arrow
-/-- ASCII twin of `⇝≡`. -/
+/-- The older spelling of `=`. -/
 syntax " ~>= " : sol_arrow
 
 declare_syntax_cat sol_where_bind
@@ -1397,21 +1456,38 @@ elab_rules : command
               | .sequent => `(show $prev ⇝ᵘ* $target from by seq_steps!)
               | .judgment => `(show $prev ⇝ᵈ* $target from by dl_steps!)
               | .block => `(show $prev ⇝* $target from by steps!)
-          | `(sol_arrow| ⇝≡) | `(sol_arrow| ~>=) =>
+          -- The merge line.  `Frontier.Equiv` is already transitive, so a
+          -- starred merge is the plain one: there is no intermediate frontier
+          -- for it to pass through.
+          | `(sol_arrow| ≡) | `(sol_arrow| =) | `(sol_arrow| ⇝≡)
+          | `(sol_arrow| ~>=) | `(sol_arrow| ≡*) | `(sol_arrow| =*) =>
               if layer == .sequent then
                 `(show $prev ⇝ᵘ* $target from
                     FrontierMultiStep.equiv (by upd_merge) FrontierMultiStep.refl)
               else throwErrorAt arrow
-                "`⇝≡` is a merge line: it needs a `seq!` derivation, where the \
-                 update is written"
+                "`=` is a merge line: it needs a `seq!` derivation, where the \
+                 update is written.  A theory rewrite is a `sol_rewrite` chain, \
+                 not a line of this one"
+          -- `h` is either the whole `Frontier.Equiv` or, for the one-line
+          -- frontier a merge almost always is, just the update equality.
+          | `(sol_arrow| ≡[$h:term]) | `(sol_arrow| =[$h:term])
           | `(sol_arrow| ⇝≡[$h:term]) =>
               if layer == .sequent then
                 `(show $prev ⇝ᵘ* $target from
-                    FrontierMultiStep.equiv ⟨⟨rfl, rfl, $h⟩, trivial⟩
+                    FrontierMultiStep.equiv
+                      (by first
+                            | exact $h
+                            | exact ⟨⟨rfl, rfl, $h⟩, trivial⟩)
                       FrontierMultiStep.refl)
               else throwErrorAt arrow
-                "`⇝≡` is a merge line: it needs a `seq!` derivation, where the \
-                 update is written"
+                "`=` is a merge line: it needs a `seq!` derivation, where the \
+                 update is written.  A theory rewrite is a `sol_rewrite` chain, \
+                 not a line of this one"
+          | `(sol_arrow| ≡*[$_:term,*]) | `(sol_arrow| =*[$_:term,*]) =>
+              throwErrorAt arrow
+                "a merge has no intermediate line to list justifications for; \
+                 write `=` or supply the one equality as `=[h]`.  A chain of \
+                 named theory rewrites is a `sol_rewrite`"
           | _ => throwErrorAt arrow "unknown `sol_derivation` arrow"
         proofs := proofs.push proof
         prev := target

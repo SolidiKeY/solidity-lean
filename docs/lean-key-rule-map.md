@@ -621,16 +621,33 @@ The freshness predicate is not only transcribed but *discharged*:
 freshIdp) ==>)` is a consequence of the denotation here rather than an
 assumption about it.
 
-### `structMemoryRules.key` → not modelled
+### `structMemoryRules.key` → Theory/CrossDomain.lean
 
-`copySt`/`copyMem` and their three taclets (`findOnCopy`,
-`readFromCopyToStorage`, `readFromCopyToStorageIdentity`) have no Lean
-counterpart yet. The interpreter's `copyStToM`/`copyMem` do the work
-(`Semantics.lean`), and the cross-domain rules are bridged at the *update*
-level or not at all (`Update/TacletTable.openBridges`). The path identities
-`Theory/Memory.lean` now carries are what KeY's `copySt` is pure over, so this
-row is the next one to port rather than an architectural gap; the fundamentals
-repository's `readSkip`/`readFind`/`readGetId` are the shape.
+| taclet | Lean | state |
+|---|---|---|
+| `findOnCopy` | `XStruct.findCopyMem` | done |
+| `readFromCopyToStorage` | `XMemory.readCopySt` | done |
+| `readFromCopyToStorageIdentity` | `XMemory.readCopyStIdentity` | done |
+| — | `XMemory.readCopyStOther` | the paper's split form of the frame |
+
+The views are their own sorts rather than constructors of `Struct`/`Memory`:
+putting them in would make the two algebras mutually recursive, and so the two
+files one file, for a symbol that upstream loads on top of both. `XStruct` is
+`Struct` with a `copyMem` leaf and `XMemory` is `Memory` with a `copySt` node,
+with `of` the embedding of the plain algebra.
+
+What this does not model is a view nested in a view. No worked example nests
+one and no taclet rewrites under one, so it is a limit of the encoding rather
+than a gap in the port. The interpreter's `copyStToM`/`copyMem`
+(`Semantics.lean`) remain the *update*-level bridge
+(`Update/TacletTable.openBridges`); this is the term-level one.
+
+### The paper's names for these rules
+
+`Theory/Rewrite.lean` is the enumeration of the theory's rules under the names
+the paper's `sections/signature.tex` gives them, with `lemmaNames` mapping each
+to the theorem(s) above. The theorems keep their upstream names — that is what
+makes this file a map — and the join is checked rather than prose.
 
 ### Deviations, collected
 

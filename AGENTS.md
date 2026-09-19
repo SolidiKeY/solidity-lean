@@ -38,6 +38,7 @@ read them by path.
 | `Rules.lean`, `RuleSyntax.lean`, `Uniqueness.lean`, `RuleValidation.lean`, `RuleShapes.lean`, `TacletAnnotations.lean` | `.claude/rules/rule-table.md` |
 | `Examples/**`, `Update/**` (derivations and notation) | `.claude/rules/derivations.md` |
 | `RuleSoundness.lean`, `Wp/**`, `Counterexamples/**` | `.claude/rules/soundness.md` |
+| `Theory/**` (the term algebras and their rule names) | `.claude/rules/derivations.md` |
 | `StorageTyping.lean`, `StateTyping.lean`, `TypeSoundness.lean`, `Reachability.lean`, `WellFormedConsumers.lean` | `.claude/rules/typing.md` |
 
 Other prose: `docs/lean-key-rule-map.md` is the authority for the name-by-name
@@ -64,6 +65,7 @@ import changes and final confirmation. The `lean-verify` skill in
 | `./run-lean.sh` | ~24 min CPU | `lake build` (default targets) then the solkey sort check |
 | `./scripts/check-examples.sh` | ~7 min CPU | `SolidityExamples` (`Examples/Derivations/Paper/`) |
 | `./scripts/check-paper-parity.sh` | seconds | `docs/paper-parity.md` names only chains that exist |
+| `node scripts/check-theory-rules.mjs` | seconds | `Theory/Rewrite.lean` has a constructor per paper rewrite rule |
 | `./scripts/check-solkey-parity.sh` | medium | the ported corpus against `tests/solkey/expected.tsv` |
 | `./scripts/check-calculus-parity.sh` | long | the same corpus proved from `Rules.lean` alone, against `tests/solkey/expected-calculus.tsv` |
 | `lake exe solkeycheck` | seconds | sort annotations against solkey's `.key` |

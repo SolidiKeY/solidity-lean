@@ -484,6 +484,26 @@ theorem selectOnDelAtCons (s : Struct) (a1 a2 : Seg) (flds : List Seg) :
   rw [selectOnSaveCons]
   cases flds <;> simp [find]
 
+/-! ### `find` over `delAt`
+
+`delAt` *is* a `save` of the deleted value (its definition), so the two path
+laws the paper states for it are the corresponding `find`-over-`save` laws with
+that value substituted.  They are stated rather than left to the reader because
+they are the two rules `sections/signature.tex` names, and a chain writes a
+rule on its arrow. -/
+
+/-- **`findDelAt`** — reading exactly the deleted path gives the deleted
+value. -/
+theorem find_delAt_same (s : Struct) {p : List Seg} (hp : p ≠ []) :
+    find (delAt s p) p = delValue (find s p) :=
+  find_save_same s hp _
+
+/-- **`findDelAtOutside`** — a read that leaves the deleted path does not see
+the delete, the frame of `find_save_frame`. -/
+theorem find_delAt_frame (s : Struct) {p q : List Seg} (h : diverges p q = true) :
+    find (delAt s p) q = find s q :=
+  find_save_frame s _ p q h
+
 /-! ## Sanity
 
 The worked examples of the fundamentals repository, in this vocabulary.

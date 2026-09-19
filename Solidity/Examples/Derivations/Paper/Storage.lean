@@ -53,7 +53,9 @@ sol_derivation deepFieldWrite :
            sp@Account.balance = rv ]>(φ)
   ~*> => { rv@uint := 10 ‖ sp@Account := path(alice.account) }
           <[ sp@Account.balance = rv@uint ]>(φ)
-  ~> => { rv@uint := 10 ‖ sp@Account := path(alice.account)
+  ~> => { rv@uint := 10 ‖ sp@Account := path(alice.account) }
+         { storage := save(sp@Account.balance, rv@uint) } (φ)
+   = => { rv@uint := 10 ‖ sp@Account := path(alice.account)
           ‖ storage := save(alice.account.balance, 10) } (φ)
 
 /-! ### `v = alice.account.balance;`
@@ -64,7 +66,8 @@ sol_derivation deepFieldRead :
     => <[ v = alice.account.balance ]>(φ)
   ~> => <[ Account storage sp = alice.account; v = sp@Account.balance ]>(φ)
   ~> => { sp@Account := path(alice.account) } <[ v = sp@Account.balance ]>(φ)
-  ~> => { sp@Account := path(alice.account) ‖ v := alice.account.balance } (φ)
+  ~> => { sp@Account := path(alice.account) } { v := sp@Account.balance } (φ)
+   = => { sp@Account := path(alice.account) ‖ v := alice.account.balance } (φ)
 
 /-! ### `alice.account.token.value = 5;`
 One selector deeper, and yet the *same* chain — which is the claim, so the
@@ -81,7 +84,9 @@ sol_derivation deeperFieldWrite :
            sp@Token.value = rv ]>(φ)
   ~*> => { rv@uint := 5 ‖ sp@Token := path(alice.account.token) }
           <[ sp@Token.value = rv@uint ]>(φ)
-  ~> => { rv@uint := 5 ‖ sp@Token := path(alice.account.token)
+  ~> => { rv@uint := 5 ‖ sp@Token := path(alice.account.token) }
+         { storage := save(sp@Token.value, rv@uint) } (φ)
+   = => { rv@uint := 5 ‖ sp@Token := path(alice.account.token)
           ‖ storage := save(alice.account.token.value, 5) } (φ)
 
 /-! ### `uint v = total;` — reading a storage root -/
@@ -114,6 +119,8 @@ sol_derivation localRebindThenWrite :
           acc.balance = 10 ]>(φ)
   ~*> => { acc := path(alice.account) } { acc := path(bob.account) }
           { storage := save(acc.balance, 10) } (φ)
+    = => { acc := path(alice.account) }
+          { acc := path(bob.account) ‖ storage := save(bob.account.balance, 10) } (φ)
 
 sol_derivation globalRootCopy :
     => <[ account@@Account = bob.account ]>(φ)

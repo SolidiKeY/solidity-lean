@@ -3,6 +3,7 @@ import Solidity.Examples.Derivations.Paper.Memory
 import Solidity.Examples.Derivations.Paper.CrossDomain
 import Solidity.Examples.Derivations.Paper.Control
 import Solidity.Examples.Derivations.Paper.Checks
+import Solidity.Examples.Derivations.Paper.Theory
 
 /-!
 # The calculus's worked examples

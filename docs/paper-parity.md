@@ -6,6 +6,11 @@ chains as `sol_derivation`s. This file is the map between them: **one row per
 worked example**, naming either the theorem that *is* that example or the
 reason there is none.
 
+An example's display does not stop when the program is gone: the paper keeps
+rewriting the accumulated update's terms by the theories' rules, down to the
+value. Those lines are a second chain, a `sol_rewrite` in
+`Paper/Theory.lean`, and a row names it too. The pair is the example.
+
 It exists so that "this example has no chain" is a claim in one place with an
 argument attached, rather than a prose list in a module docstring that drifts
 from the file below it. `./scripts/check-paper-parity.sh` fails when a row
@@ -189,6 +194,34 @@ rules, not with an example file.
 | `carol.account.balance = 50; alice.account = carol.account; v = …;` | `memoryToStorageFromMemberSource` |
 | `carolToken.value = 99; alice.account.token = carolToken; v = …;` | `memoryToStorageNonsimplePath` |
 
+## 8b · The lines after the program — `Paper/Theory.lean`
+
+Where the paper keeps rewriting once the program is gone. One row per
+`sol_rewrite` chain; the "Picks up from" column names the `sol_derivation`
+whose last line it continues, or the paper passage when there is no chain
+before it.
+
+| Picks up from | Chain |
+|---|---|
+| `deepFieldWrite`, read back (`storage-examples.tex`) | `deepFieldWriteValue` |
+| the same write, read off the path (the frame) | `deepFieldWriteFrame` |
+| the same write, read above it | `deepFieldWritePrefix` |
+| the push/pop `S₁`/`S₂`/`S₃` argument (`storage-examples.tex`) | `pushPopSlotValue` |
+| `delete`, the marker (`storage-examples-delete.tex`) | `deleteLeafValue` |
+| `delete`, the leaf's default | `deleteLeafDefault` |
+| the aliasing example's last line (`memory-examples.tex`) | `memoryAliasIdentity` |
+| a memory field, read back | `memoryFieldValue` |
+| `storageToMemoryRootCopy` (`storage-to-memory.tex`) | `storageToMemoryRootCopyValue` |
+| the same read below another root (the frame) | `storageToMemoryOtherRoot` |
+| `memoryToStorageRootCopy` (`memory-to-storage.tex`) | `memoryToStorageRootCopyValue` |
+| `memoryToStorageFromAlias` | `memoryToStorageFromAliasValue` |
+| `memoryToStorageNonsimplePath` | `memoryToStorageNonsimplePathValue` |
+
+`memoryToStorageFromMemberSource` has no row: its terminal read is the same
+`findCopyMem`/`readWriteEqual` pair as `memoryToStorageFromAliasValue`, one
+binding earlier, so a chain for it would restate that one rather than say
+anything.
+
 ## 9 · Payment — `sections/payment.tex`
 
 | Program | Chain |
@@ -253,13 +286,24 @@ condition-directed rewrites that *are* rules (`ifElseUnfold`, `ifElseTrue`,
 `ifElseFalse`, `ifElseNegated`) have chains in
 `Examples/Derivations/ControlFlow.lean`.
 
-**The memory identity layer.** The calculus's `new(mem, r) →` freshness
-prefix, `idC`/`add`, and the lazy `copySt`/`copyMem` views. The first two are
-terms in `Theory/Memory.lean` and the freshness premise is *discharged* there
-(`Update/Theory.lean`, `denoteMem_new`), but a rule's update is not written in
-them: the cross-domain chains end at the `alloc`/`copyMem` element the Lean
-rule states, one line before the calculus's. `copySt`/`copyMem` have no
-term-level spelling at all.
+**A memory merge line.** The paper draws the merge — `{u}{x := t}` collapsing
+into `{u ‖ x := {u}t}` — on most of its memory examples, and none of them can
+be written here. Not for want of automation: the merged spelling does not
+exist. `Wp.memBase` addresses a *simple* place only, so
+`{mv := ref(carol.account)}{memory := write(mv.balance, 100)}` has no one-line
+twin — `write(carol.account.balance, 100)` is stuck where the stacked pair
+reads, and so is `v := carol.account.balance`. The storage merges *are*
+writable and four of them are now lines of their chains (`deepFieldWrite`,
+`deepFieldRead`, `deeperFieldWrite`, `localRebindThenWrite`), which is what
+makes the difference a fact about the memory readers rather than about the
+merge.
+
+The same reason keeps the cross-domain chains one line short of the
+calculus's: their last element is the `alloc`/`copyMem` the Lean rule states,
+and the read through it is a memory read. What that costs is *not* the
+terminal evaluation, which `Paper/Theory.lean` now writes
+(`memoryToStorageRootCopyValue` and the rest): `copySt`/`copyMem` have a
+term-level spelling since `Theory/CrossDomain.lean`.
 
 **The unfunded transfer.** It is `to.transfer(5);` again, and what differs is
 the *state*, not the derivation. The semantic layer covers it

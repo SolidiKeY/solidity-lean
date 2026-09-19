@@ -51,11 +51,21 @@ When a step stops elaborating, the cause is almost never the notation:
 | `b ⇝* b'` | zero or more steps | `steps [.r₁, …]`, or `steps!` |
 | `j ⇝ᵈ[.rule] j'`, `j ⇝ᵈ* j'` | the same, on a judgment | `dl_rule_step` / `dl_steps […]` |
 | `f ⇝ᵘ[.rule] f'`, `f ⇝ᵘ* f'` | the same, on a frontier of updated sequents | `seq_rule_step` / `seq_steps […]` / `seq_steps!` |
-| `f ⇝≡ f'` | the **merge line**: not a rule, the update respelled | `upd_merge` |
+| `f ≡ f'` | the **merge line**: not a rule, the update respelled | `upd_merge` |
+| `t = t'`, `t =[.rule] t'` | a **theory rewrite**, in a `sol_rewrite` | the rule's theorem |
 | (no arrow) | run to closure, endpoint computed | `seq_closes` |
 
-ASCII twins: `~>`, `~>[.r]`, `~>*[…]`, `~>*`, `~>=`, and `~*>` for `⇝*` —
-the spelling the paper's chains are written in.
+ASCII twins: `~>`, `~>[.r]`, `~>*[…]`, `~>*`, `~*>` for `⇝*`, and `=`, `=[h]`,
+`=*` for the `≡` family — the spellings the paper's chains are written in.
+`⇝≡`/`~>=` are the older names of `≡`/`=` and still parse.
+
+**`=` means two different things, and the layer says which.** In a
+`sol_derivation` it is the merge — a `Frontier.Equiv`, an equality of *state
+functions*. In a `sol_rewrite` it is a rule of the theories — an equality of
+*terms*. They cannot be one chain: `{u}{v := alice.age}` and `{u ‖ v := 34}`
+are not equal as state functions, because at a pre-state where the memory
+variable is unbound the first errors and the second does not. The paper has
+the same split, between its calculus and its signature.
 
 `seq_closes` is the one loop that does not run toward a stated target: it
 steps while `Frontier.firstOpen?` finds a line with a statement and then
@@ -69,8 +79,17 @@ no step.
 agrees with it on every antecedent and goal, at which point the only thing
 left between them is the spelling of the update and `upd_merge` closes it.
 That is what lets a chain land on the calculus's parallel form mid-derivation,
-with the program still open. `⇝≡` is still how a line that takes **no** step
-is written.
+with the program still open. `=`/`≡` is still how a line that takes **no** step
+is written, and the paper draws that line — so write it where the paper does,
+rather than letting the preceding `~>` swallow it.
+
+**A memory merge is usually not writable, and that is a fact about the
+readers.** `Wp.memBase` addresses a *simple* place only, so the one-line twin
+of `{mv := ref(carol.account)}{memory := write(mv.balance, 100)}` does not
+exist: `write(carol.account.balance, 100)` is stuck where the stacked pair
+reads. Do not spend time on `upd_merge` when a merge line fails on a memory
+chain — check first whether the merged spelling means anything.
+`docs/paper-parity.md` records this under section 8.
 
 **The rule goes on the arrow, not in the proof.** `⇝[.storageFieldWriteSave]`
 is a claim Lean checks; do not re-list the rules in a docstring above the
@@ -121,6 +140,28 @@ always a postcondition over the empty program, so obligations — `⊤`, `⊥`,
 `funded(se)`, `CInv` — are written without parentheses. And a **branching line
 is a bracketed list** of such lines, which is what a guarded rule leaves open:
 `[ inBounds(values[i]) => { v := values[i] } [ ](φ), ¬inBounds(values[i]) => ⊤ ]`.
+
+`sol_rewrite` is the same chain one layer down: the paper's lines *after* the
+program is gone, where the accumulated update's terms are rewritten by the
+theories. Lines are plain terms of `Theory/Storage.lean`, `Theory/Memory.lean`
+and `Theory/CrossDomain.lean`, arrows are the `=` family only, and the
+statement is an `Eq`:
+
+```
+sol_rewrite memoryToStorageRootCopyValue (r : Nat) :
+    XStruct.find [] (.storeSt (.of Struct.mtSt) alice (.st (.copyMem M (.idC r [])))) [alice, age]
+  =[.findPath]       XStruct.find [] (.copyMem M (.idC r [])) [age]
+  =[.findCopyMem]    XValue.ofMem M (Memory.readR [] M (.idC r []) [age])
+  =[.readWriteEqual] XValue.prim (PrimVal.int 34)
+```
+
+The name on the arrow is a `TheoryRule` (`Theory/Rewrite.lean`) under **the
+paper's** name, not KeY's — `findPath`, not `findDefinitionCons`. It is
+resolved to the theorem(s) it is and *those* discharge the line, so a wrong
+name does not elaborate. `#theory_rules` prints the table when you need to know
+whether a rule exists before writing it. Binders go after the name, a `let`
+prefix writes the paper's `Let S₁ = …`, and a chain goes in
+`Paper/Theory.lean` with a row in `docs/paper-parity.md` § 8b.
 
 `sol_calculus name from <store> { stmt; stmt }` when the point is that the
 **rule table proves the obligation**: it states `CalculusHolds`, runs the
