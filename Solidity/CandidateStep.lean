@@ -15,6 +15,13 @@ side conditions (membership of the rule name, mode applicability, the rule's
 own condition) yield the full `FirstStepCase` in one application, independent
 of the rule's position in the list.
 
+`firstStepCase_both` is the same claim for the block modality `.both`, where
+the mode check says nothing and exclusivity genuinely fails -- a twin pair
+applies at one statement. What replaces it there is the box and the diamond
+oracle *agreeing* on the pinned rule, which a twin pair is exactly the case
+that cannot. The worked derivations are all written `<[ … ]>`, so until this
+existed every step of every one of them walked the list.
+
 (Added during the Lean 4.24 migration: per-skip `simp` slowed ~60× versus
 4.29, so the O(#rules) search became the build bottleneck. This module is also
 the dispatch core reused by `Wp/StepSoundness.lean`.)
@@ -105,6 +112,72 @@ theorem firstStepCase_diamond {stmt : Stmt} {r : RuleName}
       ((Rules.stepCase r).effect.block stmt hcond) :=
   firstStepCase_of_applicable_aux (m := Modality.diamond) (fun _ => rfl)
     hmode hcond (stepCase_mem_stepCases hmem) Rules.stepCases
+    (stepCase_mem_stepCases hmem) (fun _ hx => hx)
+
+/-- Every case mode admits at least one modality. -/
+theorem applies_box_or_diamond (cm : CaseMode) :
+    cm.applies Modality.box = true ∨ cm.applies Modality.diamond = true := by
+  cases cm <;> decide
+
+/-- Core induction for the block modality `.both`.  `appliesCaseMode .both` is
+constantly `true`, so the mode half of `StepApplicable` says nothing there and
+the exclusivity `firstStepCase_box` rests on is *false*: a box twin and its
+diamond twin apply at the same statement.
+
+What survives is that every case mode admits box or diamond
+(`applies_box_or_diamond`), so an applicable rule is the box candidate or the
+diamond candidate.  A rule that is both is therefore the only applicable one,
+and the skips follow abstractly again. -/
+theorem firstStepCase_both_aux {stmt : Stmt} {r : RuleName}
+    (hbox : candidate Modality.box stmt = some r)
+    (hdia : candidate Modality.diamond stmt = some r)
+    (hcond : (Rules.stepCase r).effect.cond stmt) :
+    ∀ cases : List StepCase, Rules.stepCase r ∈ cases ->
+      (∀ x ∈ cases, x ∈ Rules.stepCases) ->
+      FirstStepCase SolidityModality.both stmt cases (Rules.stepCase r)
+        ((Rules.stepCase r).effect.cond stmt)
+        ((Rules.stepCase r).effect.block stmt hcond)
+  | [], hmem, _ => nomatch hmem
+  | hd :: tl, hmem, hsub => by
+      by_cases happ :
+          SolidityModality.both.appliesCaseMode (hd.effect.mode stmt) = true ∧
+            hd.effect.cond stmt
+      · obtain ⟨y, hy, rfl⟩ :=
+          Rules.mem_stepCases_iff.mp (hsub hd List.mem_cons_self)
+        have hyr : y = r := by
+          rcases applies_box_or_diamond ((Rules.stepCase y).effect.mode stmt)
+            with h | h
+          · exact Option.some.inj
+              ((applicable_eq_candidate hy h happ.2).symm.trans hbox)
+          · exact Option.some.inj
+              ((applicable_eq_candidate hy h happ.2).symm.trans hdia)
+        subst hyr
+        exact FirstStepCase.here happ.1 happ.2
+      · rcases List.mem_cons.mp hmem with heq | htl
+        · subst heq
+          exact absurd ⟨rfl, hcond⟩ happ
+        · exact FirstStepCase.there happ
+            (firstStepCase_both_aux hbox hdia hcond tl htl
+              (fun x hx => hsub x (List.mem_cons_of_mem hd hx)))
+
+/-- `FirstStepCase` for a pinned rule under the **block** modality `.both`,
+the one the worked derivations are written in (`<[ … ]>`): the two oracle
+queries and the rule's own condition, and no per-rule skip proof.
+
+Both queries are one `decide`: `candidate` is a total structural dispatch, not
+a search.  They are what fails for the twelve box twins -- their diamond
+partner is the diamond candidate, so a statement covered by a twin pair still
+takes the positional walk, which is what picks the box twin. -/
+theorem firstStepCase_both {stmt : Stmt} {r : RuleName}
+    (hmem : r ∈ Rules.ruleNames)
+    (hbox : candidate Modality.box stmt = some r)
+    (hdia : candidate Modality.diamond stmt = some r)
+    (hcond : (Rules.stepCase r).effect.cond stmt) :
+    FirstStepCase SolidityModality.both stmt Rules.stepCases
+      (Rules.stepCase r)
+      ((Rules.stepCase r).effect.cond stmt)
+      ((Rules.stepCase r).effect.block stmt hcond) :=
+  firstStepCase_both_aux hbox hdia hcond Rules.stepCases
     (stepCase_mem_stepCases hmem) (fun _ hx => hx)
 
 /-! ### Box/diamond twins are effect-identical up to mode
