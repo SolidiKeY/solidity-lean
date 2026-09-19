@@ -29,7 +29,13 @@ When a step stops elaborating, the cause is almost never the notation:
    explicit-arms list in `AST.lean` beside `"rv"`, `"idx"`, `"result"`.
    **But not for the worked-example identifiers**: giving those explicit arms
    overflowed Lean's stack (see the `Paper.lean` docstring). Explicit
-   arms are for scratch names that appear in *residuals*.
+   arms are for scratch names that appear in *residuals*; a worked example's
+   own identifiers go in `name_table_arms` in `Examples/Common.lean`, which
+   states the default arm's instance as a lemma instead of growing the match.
+   That list is also **where a slow derivation is fixed**: a name missing from
+   it still elaborates — `rule_cond` falls back to `rule_simp_tables`, which
+   unfolds the tables — but every rule condition then re-reduces a match on a
+   string literal, which is a second a step rather than a hundredth.
 3. **The grammar genuinely lacks a form.** Check `syntax … : sol_stmt` in
    `AST.lean` first — it covers bare declarations, plain and compound
    assignment, `push`/`pop`/`delete`, `predec`/`postdec`, and the `.. name`

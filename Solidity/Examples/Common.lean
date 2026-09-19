@@ -183,13 +183,11 @@ attribute [rule_simp_set]
   stackDeclEffect compoundAssignEffect exprEffect assertEffect
   requireEffect iteEffect transferEffect revertEffect callEffect
   Rules.captureFirstComplexArg SoliditySyntax.expandCall
-  SoliditySyntax.funDef SoliditySyntax.paramDecls SoliditySyntax.retDecl
+  SoliditySyntax.paramDecls SoliditySyntax.retDecl
   withMode CaseMode.applies
   SolidityModality.appliesCaseMode
   SoliditySyntax.varExpr SoliditySyntax.varPlace
-  SoliditySyntax.rootPlace SoliditySyntax.rootExpr
   SoliditySyntax.fieldExpr SoliditySyntax.fieldPlace
-  SoliditySyntax.fieldTy SoliditySyntax.fieldForName
   SoliditySyntax.globalExpr SoliditySyntax.globalPlace
   SoliditySyntax.pushPlace SoliditySyntax.pushPlaceExpr
   StandardExample.personTy StandardExample.accountTy StandardExample.tokenTy
@@ -238,7 +236,48 @@ attribute [rule_simp_set]
   -- guards, so the block layer never had to reduce this.
   BinOp.needsGuard
 
+-- The name-keyed tables of `AST.lean` go in one arm at a time, never as the
+-- def: see `name_table_simp` in `SimpAttr.lean` for why the def in the set
+-- costs a second a call and the arm equations cost nothing.
+name_table_simp SoliditySyntax.rootExpr, SoliditySyntax.rootPlace,
+  SoliditySyntax.fieldTy, SoliditySyntax.fieldForName, SoliditySyntax.funDef
+
+-- The identifiers the worked examples introduce, which the tables reach
+-- through their `_` default: one arm equation each, so a derivation over them
+-- costs what a derivation over `alice` costs.  A name missing here still
+-- works -- `rule_cond` falls back to `rule_simp_tables` -- it is just slow,
+-- so this list is a performance record, not a grammar.
+name_table_arms SoliditySyntax.rootExpr, SoliditySyntax.rootPlace
+  for "a", "account", "addr", "ageVal", "aliasBalance", "b", "before",
+    "bucket", "clear", "e", "gone", "l", "l2", "ledger", "len", "mv2", "mv3",
+    "n", "net", "newAge", "newBal", "newBalance", "nonce", "oldAge", "oldBal",
+    "r", "readBack", "ref", "size", "stash", "tokens", "u", "used", "v",
+    "value", "writeRef"
+
+name_table_arms SoliditySyntax.fieldTy, SoliditySyntax.fieldForName
+  for "balances", "ledger", "length", "nonce", "owner", "size", "stash",
+    "tokens", "values", "people", "persons", "flags", "folks", "matrix",
+    "wallet", "total"
+
 macro "rule_simp" : tactic => `(tactic| simp only [rule_simp_set])
+
+/-- `rule_simp` plus the name-keyed tables themselves, for a name whose table
+has no arm of its own.  This is the string-match reduction the arm equations
+exist to avoid, so it is an alternative and never the first thing tried; a
+derivation whose identifiers all have arms never runs it. -/
+macro "rule_simp_tables" : tactic => `(tactic|
+  simp only [rule_simp_set, SoliditySyntax.rootExpr, SoliditySyntax.rootPlace,
+    SoliditySyntax.fieldTy, SoliditySyntax.fieldForName, SoliditySyntax.funDef])
+
+/-- `rule_simp`, falling back to the tables. -/
+macro "rule_simp!" : tactic => `(tactic| first | rule_simp | rule_simp_tables)
+
+/-- The proof of a rule's condition or of a skip: normalize, then decide.
+The fallback is what keeps an unlisted name working rather than fast. -/
+macro "rule_cond" : tactic => `(tactic|
+  first
+    | (rule_simp <;> (try simp) <;> decide)
+    | (rule_simp_tables <;> (try simp) <;> decide))
 
 /-- The former literal spelling of `rule_simp`, kept for reference and for any
 site that needs the list without the attribute. -/
@@ -313,11 +352,8 @@ macro_rules
 macro_rules
   | `(tactic| find_first_step_aux) => `(tactic|
     first
-    | exact FirstStepCase.here (by rule_simp)
-        (by rule_simp <;> (try simp) <;> decide)
-    | exact FirstStepCase.there
-        (by rule_simp <;> (try simp) <;> decide)
-        (by find_first_step_aux))
+    | exact FirstStepCase.here (by rule_simp!) (by rule_cond)
+    | exact FirstStepCase.there (by rule_cond) (by find_first_step_aux))
 
 /-- Like `find_first_step`, but for goals whose step case (and block) are
 already pinned: wrong rules fail on index unification before any tactic
@@ -335,10 +371,16 @@ macro_rules
     -- the mode check are `decide`-fast; only the rule's own condition needs
     -- the simp+decide treatment.
     | exact UniquenessAux.firstStepCase_box (by decide) (by decide)
-        (by rule_simp <;> (try simp) <;> decide)
+        (by rule_cond)
     | exact UniquenessAux.firstStepCase_diamond (by decide) (by decide)
-        (by rule_simp <;> (try simp) <;> decide)
-    -- Legacy positional walk, kept as a fallback (e.g. `.both` blocks).
+        (by rule_cond)
+    -- The same, for the block modality `.both` the worked derivations are
+    -- written in: there the mode check says nothing, so what stands in for it
+    -- is the two oracles agreeing (`firstStepCase_both`). A twin pair is the
+    -- case they cannot agree on, and it falls through to the walk below.
+    | exact UniquenessAux.firstStepCase_both (by decide) (by decide) (by decide)
+        (by rule_cond)
+    -- Legacy positional walk, kept as a fallback (a twin pair under `.both`).
     | (dsimp only [Rules.stepCases, Rules.rules, Rules.ruleCases,
          Rules.ruleNames, List.map]
        find_pinned_step_aux))
@@ -346,11 +388,8 @@ macro_rules
 macro_rules
   | `(tactic| find_pinned_step_aux) => `(tactic|
     first
-    | exact FirstStepCase.here (by rule_simp)
-        (by rule_simp <;> (try simp) <;> decide)
-    | exact FirstStepCase.there
-        (by rule_simp <;> (try simp) <;> decide)
-        (by find_pinned_step_aux))
+    | exact FirstStepCase.here (by rule_simp!) (by rule_cond)
+    | exact FirstStepCase.there (by rule_cond) (by find_pinned_step_aux))
 
 /-- Solve a single `BlockReflMultiStep` calc step.
     Handles rule-backed steps (via `find_first_step`) and reflexivity. -/
@@ -810,6 +849,10 @@ unfolding the readers themselves: `upd_merge_set` rewrites *through* a binding
 and only fires while `varPath`/`stackVal`/`readMem` are still folded. -/
 macro "upd_norm" : tactic => `(tactic|
   simp +decide (disch := decide) only [upd_merge_set, rule_simp_set,
+    -- The tables themselves, unlike in `rule_simp`: a merge line runs once a
+    -- chain, so it can afford the arm a name has no equation for.
+    SoliditySyntax.rootExpr, SoliditySyntax.rootPlace, SoliditySyntax.fieldTy,
+    SoliditySyntax.fieldForName, SoliditySyntax.funDef,
     Sequent.upd, stackUpd, List.foldr, Upd.seq, Upd.id, Update.UpdTerm.toUpd, Update.UpdTerm.toPar,
     Update.elemPar, Upd.Par.toUpd, Upd.Par.apply, Upd.Par.writers,
     Upd.Elem.eval, Update.bindRhs, Update.Sym.eval, Update.readTerm,

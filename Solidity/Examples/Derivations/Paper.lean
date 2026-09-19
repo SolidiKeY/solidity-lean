@@ -91,8 +91,10 @@ accumulated, which is equally what the calculus writes before it merges.
 all of them: `Sequent.check` runs a line against the interpreter, and the
 checks take the first and the last line of one chain per section and run both
 on a concrete store.  The chains themselves add no axiom: a pinned step goes
-through `UniquenessAux.firstStepCase_box`, whose exclusivity theorem is decided
-by `native_decide` in `Uniqueness.lean`, which is the block layer's proof
+through `UniquenessAux.firstStepCase_both` -- these chains are written in the
+block modality, and what stands in for the mode check there is the box and
+diamond oracles agreeing -- whose exclusivity theorem is decided by
+`native_decide` in `Uniqueness.lean`, which is the block layer's proof
 route.  The checks are the only `native_decide` written here, and
 `docs/paper-parity.md` says which sections have one.
 

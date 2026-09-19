@@ -62,7 +62,7 @@ import changes and final confirmation. The `lean-verify` skill in
 | Command | Cost | What it covers |
 |---|---|---|
 | `./run-lean.sh` | ~24 min CPU | `lake build` (default targets) then the solkey sort check |
-| `./scripts/check-examples.sh` | ~30 min CPU | `SolidityExamples` (`Examples/Derivations/Paper/`) |
+| `./scripts/check-examples.sh` | ~7 min CPU | `SolidityExamples` (`Examples/Derivations/Paper/`) |
 | `./scripts/check-paper-parity.sh` | seconds | `docs/paper-parity.md` names only chains that exist |
 | `./scripts/check-solkey-parity.sh` | medium | the ported corpus against `tests/solkey/expected.tsv` |
 | `./scripts/check-calculus-parity.sh` | long | the same corpus proved from `Rules.lean` alone, against `tests/solkey/expected-calculus.tsv` |
