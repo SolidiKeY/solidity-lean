@@ -121,6 +121,32 @@ projection of a metavariable. -/
     stackVal (s.setEnv n b) m = stackVal s m := by
   simp [stackVal, State.setEnv, lookupBy_setBy_ne h]
 
+/-- A memory write does not read the environment either, so a binding in front
+of it comes back out -- the heap twin of `saveStorage_setEnv`, and what a
+memory merge line reaches once `mv := ref(…)` has been opened. -/
+@[upd_merge_set] theorem writeMemField_setEnv (s : State) (n : Name) (b : Binding)
+    (id : Nat) (f : Name) (mv : MVal) :
+    writeMemField (s.setEnv n b) id f mv =
+      (writeMemField s id f mv).map (fun t => t.setEnv n b) := by
+  simp only [writeMemField, getObj_setEnv, Except.map, bind, Except.bind]
+  cases s.getObj id with
+  | error _ => rfl
+  | ok obj => cases obj <;> rfl
+
+@[upd_merge_set] theorem writeMemIndex_setEnv (s : State) (n : Name) (b : Binding)
+    (id : Nat) (i : Int) (mv : MVal) :
+    writeMemIndex (s.setEnv n b) id i mv =
+      (writeMemIndex s id i mv).map (fun t => t.setEnv n b) := by
+  simp only [writeMemIndex, getObj_setEnv, Except.map, bind, Except.bind]
+  cases s.getObj id with
+  | error _ => rfl
+  | ok obj =>
+      cases obj with
+      | struct _ => rfl
+      | array elems =>
+          by_cases hb : 0 ≤ i ∧ i.toNat < elems.length <;>
+            simp [hb, State.setObj, State.setEnv]
+
 @[upd_merge_set] theorem memRef_setEnv_ne {m n : Name} (h : m ≠ n)
     (s : State) (b : Binding) :
     memRef (s.setEnv n b) m = memRef s m := by

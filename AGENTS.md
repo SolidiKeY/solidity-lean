@@ -38,6 +38,7 @@ read them by path.
 | `Rules.lean`, `RuleSyntax.lean`, `Uniqueness.lean`, `RuleValidation.lean`, `RuleShapes.lean`, `TacletAnnotations.lean` | `.claude/rules/rule-table.md` |
 | `Examples/**`, `Update/**` (derivations and notation) | `.claude/rules/derivations.md` |
 | `RuleSoundness.lean`, `Wp/**`, `Counterexamples/**` | `.claude/rules/soundness.md` |
+| `Theory/**` (the term algebras and their rule names) | `.claude/rules/derivations.md` |
 | `StorageTyping.lean`, `StateTyping.lean`, `TypeSoundness.lean`, `Reachability.lean`, `WellFormedConsumers.lean` | `.claude/rules/typing.md` |
 
 Other prose: `docs/lean-key-rule-map.md` is the authority for the name-by-name

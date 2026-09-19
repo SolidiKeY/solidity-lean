@@ -30,6 +30,8 @@ import Solidity.EvalBattery
 import Solidity.SemanticsProperties
 import Solidity.Theory.Storage
 import Solidity.Theory.Memory
+import Solidity.Theory.CrossDomain
+import Solidity.Theory.Rewrite
 import Solidity.StuckShape
 import Solidity.Counterexamples.EvaluationOrder
 import Solidity.Counterexamples.ErrorOrder
@@ -68,6 +70,7 @@ import Solidity.Wp.StepSoundness
 import Solidity.Wp.Verifier
 import Solidity.Wp.ExamplesWP
 import Solidity.Examples.Common
+import Solidity.Examples.Rewrite
 import Solidity.Examples.StorageFieldWriteRead
 import Solidity.Examples.StorageRootOps
 import Solidity.Examples.StorageArrayOps
