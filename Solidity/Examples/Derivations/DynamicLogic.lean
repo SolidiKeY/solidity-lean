@@ -49,7 +49,7 @@ modality `⟨[ … ]⟩` is `<[ … ]>`, the opaque postcondition `φ` is `‹φ
 `variable`, and the rule sits on the arrow rather than in surrounding prose.
 What is still missing is the update lines -- the rewrite layer ends at the
 empty program, and the state update of each terminal rule lives in
-`Wp/TerminalUpdate.lean`.
+`Wp/Terminal/Table.lean`.
 
 The calculus's chain is also one line shorter than this one, for the reason
 `Examples/Derivations/Paper.lean`'s header gives: the calculus freezes

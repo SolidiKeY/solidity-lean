@@ -55,7 +55,7 @@ import Solidity.Wp.Monad
 import Solidity.Wp.Judgment
 import Solidity.Wp.Step
 import Solidity.Wp.Verdict
-import Solidity.Wp.TerminalRules
+import Solidity.Wp.Terminal.Soundness
 import Solidity.Update
 import Solidity.Update.Bridges
 import Solidity.Update.Eval
@@ -69,7 +69,7 @@ import Solidity.Update.Merge
 import Solidity.Update.SequentSyntax
 import Solidity.Wp.StepSoundness
 import Solidity.Wp.Verifier
-import Solidity.Wp.ExamplesWP
+import Solidity.Wp.Examples
 import Solidity.Examples.Common
 import Solidity.Examples.Rewrite
 import Solidity.Examples.StorageFieldWriteRead

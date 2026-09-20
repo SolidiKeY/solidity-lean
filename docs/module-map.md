@@ -50,7 +50,7 @@ theorem and, for the memory algebra, a denotation into the interpreter
 | Module | What it is |
 |---|---|
 | `Update.lean` | The symbolic-update algebra: `Elem`, `Par`, `Upd.seq`, and the merge law `Par.seq_single`. |
-| `Update/Eval.lean` | What an `UpdTerm` means; every reader is one of `Wp/TerminalUpdate.lean`'s. |
+| `Update/Eval.lean` | What an `UpdTerm` means; every reader is one of `Wp/Terminal/Table.lean`'s. |
 | `Update/Wp.lean` | The wp reading, `guard → {update}⟨residual ++ rest⟩post` per goal. |
 | `Update/TacletTable.lean` | `goalsExec … = terminalUpdate r …` per rule. 21 bridged; the rest listed in `openBridges` with a reason. |
 | `Update/Bridges.lean` | `Par.toUpd [...] = <family> args`, built on frame facts. Coverage list in its docstring. |
@@ -72,10 +72,10 @@ witness.
 |---|---|
 | `Wp/Monad.lean` | The interpreter as `SolM`, and the two modalities as one wp each (`Box.wpB`, `Dia.wpD`). Both *defined* by the shape their `_run` lemma states. |
 | `Wp/Verdict.lean` | `checkResult` and `check_eq_checkResult`. |
-| `Wp/TerminalUpdate.lean` | The state update of every terminal rule in the interpreter's state vocabulary, never through its evaluators. `terminalUpdate?` is `some` for exactly the 83 terminal arms. |
+| `Wp/Terminal/Table.lean` | The state update of every terminal rule in the interpreter's state vocabulary, never through its evaluators. `terminalUpdate?` is `some` for exactly the 83 terminal arms. |
 | `Wp/Terminal/Vocab.lean` | Bridges from each interpreter evaluator to the vocabulary readers. |
 | `Wp/Terminal/Update*.lean` | One `<rule>_update` theorem per terminal rule, **under the rule's guard**. |
-| `Wp/TerminalRules.lean` | `terminalUpdate_sound`, `TerminalRuleStep`, `terminal_step_sound`. Not proved: no unfold rule is accidentally terminal. |
+| `Wp/Terminal/Soundness.lean` | `terminalUpdate_sound`, `TerminalRuleStep`, `terminal_step_sound`. Not proved: no unfold rule is accidentally terminal. |
 | `EvalBattery.lean` | `sol_eval_battery` / `sol_exec_eval`; depend on the interpreter alone. |
 
 ## Semantics and typing

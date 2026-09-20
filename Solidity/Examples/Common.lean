@@ -519,7 +519,7 @@ moves from the source file to elaboration.
 the rule applies, so the one case where `candidate` overreaches
 (`Coverage.lean`'s `pushRhsStorageB`: `x = mv.push()` on a memory array) fails
 loudly rather than proving anything false. Nothing here adds an axiom -- in
-particular no `native_decide`, which `Wp/ExamplesWP.lean` is careful to
+particular no `native_decide`, which `Wp/Examples.lean` is careful to
 avoid.
 
 There is no termination measure to appeal to (`Termination.lean` states that

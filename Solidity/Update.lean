@@ -1,4 +1,4 @@
-import Solidity.Wp.TerminalUpdate
+import Solidity.Wp.Terminal.Table
 
 /-!
 # Symbolic updates
@@ -13,7 +13,7 @@ but the *composition* of the accumulated updates into one parallel update,
 
     {acc := alice·account ‖ storage := save(storage, alice·account·balance, 10)} φ
 
-`Wp/TerminalUpdate.lean` already has the content of those updates — one
+`Wp/Terminal/Table.lean` already has the content of those updates — one
 `State -> Res State` function per terminal rule family, written in the
 interpreter's state vocabulary.  What it does not have is an *algebra*: the
 updates are Lean functions, so `{u}{v}` is `Function.comp` and there is

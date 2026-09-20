@@ -4,7 +4,7 @@ import Solidity.Wp.Terminal.UpdateDecl
 /-!
 # From the terminal table to the update algebra
 
-`Wp/TerminalUpdate.lean` gives every terminal rule a
+`Wp/Terminal/Table.lean` gives every terminal rule a
 `State -> Res State`.  `Update.lean` gives updates a first-order spelling.
 This module connects them: for each family of the terminal table, and each
 target shape its guard admits, a theorem

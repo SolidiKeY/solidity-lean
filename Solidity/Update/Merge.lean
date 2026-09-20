@@ -1,5 +1,5 @@
 import Solidity.Update.Step
-import Solidity.Update.SimpAttr
+import Solidity.Update.MergeAttr
 import Solidity.RuleSoundness
 import Solidity.SemanticsProperties
 

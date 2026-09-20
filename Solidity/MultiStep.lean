@@ -14,7 +14,7 @@ inductive BlockStep : SolidityBlock → SolidityBlock → Prop where
 `BlockStep` goes through `RuleStep`, which hides the `StepCase` behind an
 existential (`Completeness.lean`), so the rule that fired is not visible in the
 type.  Here the rule name is an index, exactly as in `TerminalRuleStep`
-(`Wp/TerminalRules.lean`) -- generalized to a nonempty residual.  That is
+(`Wp/Terminal/Soundness.lean`) -- generalized to a nonempty residual.  That is
 what lets a derivation write the rule on the arrow (`b ⇝[.rule] b'`) and have
 Lean check the claim.
 

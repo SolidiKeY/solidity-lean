@@ -1,11 +1,11 @@
-import Solidity.Wp.TerminalUpdate
+import Solidity.Wp.Terminal.Table
 
 /-!
 # Vocabulary bridges
 
 Each lemma equates one interpreter evaluator, on the syntactic shapes the
 terminal rules admit, with the state-vocabulary reader of
-`TerminalUpdate.lean`.  They are the only place the two sides meet; the
+`Table.lean`.  They are the only place the two sides meet; the
 per-rule `_update` theorems in the sibling files are unfold-then-bridge.
 -/
 

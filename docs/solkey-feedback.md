@@ -281,7 +281,7 @@ cheaper to maintain:
   reaches a proof.
 - **Terminal rules as updates.** Every terminal taclet (empty residual)
   now has an explicit state update in the interpreter's vocabulary
-  (`Wp/TerminalUpdate.lean`) with `execStmt s stmt = terminalUpdate
+  (`Wp/Terminal/Table.lean`) with `execStmt s stmt = terminalUpdate
   r stmt s` under the taclet's guard. Those updates are the KeY update
   algebra; the equations are a per-taclet test oracle solkey could run
   on its own `.key` examples.
