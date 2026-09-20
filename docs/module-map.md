@@ -83,15 +83,15 @@ witness.
 | Module | What it is |
 |---|---|
 | `Semantics.lean` | Run-time values and the executable state semantics; `SolidityJudgment.check`/`Holds`. Total, no `partial` — Lean checks termination. Follows solc where KeY was more liberal (`docs/solc-alignment.md`). The struct schema and `tyHasMapping` live in `AST.lean`. `SVal.array` carries the slots a `pop` cleared and gave back beside the live elements, and `pushSlot` is upstream's `delAt` at the pushed slot: a mapping nested in a popped element survives into the next `push`. |
-| `SemanticsProperties.lean` | Association-list, read-after-write, frame, allocation-freshness, copy-frame theorems. |
-| `StuckShape.lean` | `StuckCause`, the halt taxonomy, and `find_stuck_iff`. Deliberately no Boolean mirror. |
+| `Semantics/Properties.lean` | Association-list, read-after-write, frame, allocation-freshness, copy-frame theorems. |
+| `Semantics/StuckShape.lean` | `StuckCause`, the halt taxonomy, and `find_stuck_iff`. Deliberately no Boolean mirror. |
 | `StorageTyping.lean` | `Layout`, `SVal.hasTy`, read-typing lemmas, and the runtime sorts `SVal.keySort`/`MVal.keySort`. |
 | `StoragePreservation.lean` | The write-side twin: `save_hasTy`, `State.saveStorage_wellTyped`, `defaultForTy_hasTy`. |
 | `StateTyping.lean` | The full-soundness invariants: `Ctx`, `HeapTy`, `StateWT`, weakening, `wtExpr`, cross-domain copy typing. |
 | `TypeSoundness.lean` | Type soundness: the expression block preserves `StateWT`, then `execStmt_sound`/`execBlock_sound` — storage well-typedness is an inductive invariant. v1 scope notes in the docstrings. |
 | `Reachability.lean` | Tightness of `wellFormed(storage)`: `Reachable`, `SVal.canonical`, `storage_tight`, `no_hidden_invariant`. All take `layoutOkB L`. `canonical` is the **shadow-free** fragment — what `writeProg` can build, since it builds with assignments and pushes and never a `pop`. **OPEN**: `reachable ⇒ canonical` (two `sorry`s), now also because a popped array carries a recycled slot. |
 | `WellFormedConsumers.lean` | The table of facts the taclets consume from a symbolic storage. **OPEN**: row C6's state-level form `saveStorage_canonical`. |
-| `DecEq.lean` | The hand-written `DecidableEq SVal` and derived instances; shared by every `native_decide`. |
+| `Semantics/DecEq.lean` | The hand-written `DecidableEq SVal` and derived instances; shared by every `native_decide`. |
 
 ## Sort faithfulness (the solkey cross-check)
 

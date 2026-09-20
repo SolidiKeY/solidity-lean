@@ -1,4 +1,4 @@
-import Solidity.SemanticsProperties
+import Solidity.Semantics.Properties
 import Solidity.Update.Eval
 import Solidity.Theory.Memory
 

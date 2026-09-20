@@ -1,6 +1,6 @@
 import Solidity.TypeSoundness
 import Solidity.RewriteSoundness
-import Solidity.DecEq
+import Solidity.Semantics.DecEq
 
 /-!
 # Tightness of `wellFormed(storage)`: every canonical storage is reachable

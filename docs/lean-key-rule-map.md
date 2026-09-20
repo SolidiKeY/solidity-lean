@@ -515,7 +515,7 @@ update of a terminal taclet is therefore matched by a Lean function, and
 The Lean model has no update syntax — state change is function
 application — so KeY's update calculus splits into (a) point-of-
 application laws with real semantic content, ported as `State` lemmas in
-`SemanticsProperties.lean`, and (b) the update-monoid normal-form
+`Semantics/Properties.lean`, and (b) the update-monoid normal-form
 machinery, which is definitional function composition in Lean.
 
 | KeY rule | Lean analogue | Status | Notes |

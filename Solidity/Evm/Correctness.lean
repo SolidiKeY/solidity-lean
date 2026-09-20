@@ -1,5 +1,5 @@
 import Solidity.Evm.BoundedSemantics
-import Solidity.SemanticsProperties
+import Solidity.Semantics.Properties
 
 /-!
 # Semantic preservation of the Solidity → EVM compiler

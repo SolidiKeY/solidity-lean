@@ -1,5 +1,5 @@
 import Solidity.RuleSoundness
-import Solidity.DecEq
+import Solidity.Semantics.DecEq
 
 /-!
 # The value freeze is needed for *error ordering*, not only for interference

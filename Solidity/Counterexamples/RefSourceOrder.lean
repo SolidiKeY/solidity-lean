@@ -1,5 +1,5 @@
 import Solidity.RuleSoundness
-import Solidity.DecEq
+import Solidity.Semantics.DecEq
 
 /-!
 # What `hprim` carves out: the interpreter, not the rule

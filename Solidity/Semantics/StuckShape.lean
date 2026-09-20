@@ -1,4 +1,4 @@
-import Solidity.SemanticsProperties
+import Solidity.Semantics.Properties
 
 /-!
 # `StuckShape` — the interpreter's "no case is left", as a theorem

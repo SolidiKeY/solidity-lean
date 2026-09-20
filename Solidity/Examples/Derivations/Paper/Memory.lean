@@ -1,5 +1,5 @@
 import Solidity.Examples.Common
-import Solidity.DecEq
+import Solidity.Semantics.DecEq
 
 /-!
 # The calculus's worked examples — memory

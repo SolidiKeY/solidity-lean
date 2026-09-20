@@ -13,7 +13,7 @@ import Solidity.StoragePreservation
 import Solidity.StateTyping
 import Solidity.TypeSoundness
 import Solidity.Counterexamples.PreservationNecessity
-import Solidity.DecEq
+import Solidity.Semantics.DecEq
 import Solidity.Reachability
 import Solidity.WellFormedConsumers
 import Solidity.TacletAnnotations
@@ -27,13 +27,13 @@ import Solidity.Progress
 import Solidity.Termination
 import Solidity.Semantics
 import Solidity.EvalBattery
-import Solidity.SemanticsProperties
+import Solidity.Semantics.Properties
 import Solidity.Theory.Terms
 import Solidity.Theory.Storage
 import Solidity.Theory.Memory
 import Solidity.Theory.CrossDomain
 import Solidity.Theory.Rewrite
-import Solidity.StuckShape
+import Solidity.Semantics.StuckShape
 import Solidity.Counterexamples.EvaluationOrder
 import Solidity.Counterexamples.ErrorOrder
 import Solidity.Counterexamples.RefSourceOrder
@@ -41,7 +41,7 @@ import Solidity.RuleValidation
 import Solidity.RuleSoundness
 import Solidity.RewriteSoundness
 import Solidity.JudgmentSplit
-import Solidity.CallbackSemantics
+import Solidity.Semantics.Callback
 import Solidity.Uniqueness
 import Solidity.Coverage
 import Solidity.Counterexamples.CoverageResidue

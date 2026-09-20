@@ -1,5 +1,5 @@
 import Solidity.TypeSoundness
-import Solidity.DecEq
+import Solidity.Semantics.DecEq
 
 /-!
 # "You can only prove these cases with wellformed"
