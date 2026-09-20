@@ -51,7 +51,7 @@ done
 # the corpus modules are elaborated one by one below, so that a failing
 # theorem does not abort the run.
 if [ "$MODE" = calculus ]; then
-  lake build Solidity.Examples.Common Solidity.Semantics >/dev/null
+  lake build Solidity.Tactics.Derivation Solidity.Semantics >/dev/null
 else
   lake build Solidity.Wp.Verifier >/dev/null
 fi

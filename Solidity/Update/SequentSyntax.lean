@@ -318,7 +318,7 @@ syntax (priority := high) "(" sol_expr ")" : sol_seq_goal
 syntax sol_formula : sol_seq_goal
 
 /-- The modality a goal writes, if it writes one.  Read off the syntax, not
-the elaborated term, for the reason `Examples/Common.lean` gives for the layer
+the elaborated term, for the reason `Tactics/Derivation.lean` gives for the layer
 sniff: a line typically mentions a section `variable (φ : WrappedExpr)`. -/
 def goalMode? : TSyntax `sol_seq_goal → Option Ident
   | `(sol_seq_goal| <[ $_;* ]> $_:sol_seq_post) => some (gen ``SolidityModality.both)

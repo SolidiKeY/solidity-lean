@@ -26,7 +26,7 @@ import Solidity.Calculus.MultiStep
 import Solidity.Calculus.Progress
 import Solidity.Calculus.Termination
 import Solidity.Semantics
-import Solidity.EvalBattery
+import Solidity.Tactics.EvalBattery
 import Solidity.Semantics.Properties
 import Solidity.Theory.Terms
 import Solidity.Theory.Storage
@@ -70,8 +70,8 @@ import Solidity.Update.SequentSyntax
 import Solidity.Wp.StepSoundness
 import Solidity.Wp.Verifier
 import Solidity.Wp.Examples
-import Solidity.Examples.Common
-import Solidity.Examples.Rewrite
+import Solidity.Tactics.Derivation
+import Solidity.Tactics.Rewrite
 import Solidity.Examples.StorageFieldWriteRead
 import Solidity.Examples.StorageRootOps
 import Solidity.Examples.StorageArrayOps

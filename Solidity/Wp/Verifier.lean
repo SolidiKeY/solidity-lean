@@ -1,4 +1,4 @@
-import Solidity.EvalBattery
+import Solidity.Tactics.EvalBattery
 import Solidity.Wp.Step
 import Solidity.Wp.StepSoundness
 
@@ -101,7 +101,7 @@ end Dia
 /-! ## The evaluation battery
 
 `sol_eval_battery` and `sol_exec_eval` live in
-`Solidity/EvalBattery.lean`: they depend on the interpreter alone, with no
+`Solidity/Tactics/EvalBattery.lean`: they depend on the interpreter alone, with no
 reference to the wp algebra below. -/
 
 /-- Peel one statement off a wp-over-block goal via the total `cons_eval`

@@ -1,4 +1,4 @@
-import Solidity.Examples.Common
+import Solidity.Tactics.Derivation
 import Solidity.Semantics
 import Solidity.Calculus.JudgmentSplit
 
@@ -28,7 +28,7 @@ verified by `native_decide` against the interpreter — live in
 `JudgmentMultiStep`, the `⇝ᵈ` arrows and their `Trans` instances) live in
 `Calculus/MultiStep.lean`, beside their block-level twins: they depend on nothing but
 the AST and the rules, and `sol_derivation` builds either layer from the same
-source syntax.  The `dl_*` tactics live in `Examples/Common.lean`, beside the
+source syntax.  The `dl_*` tactics live in `Tactics/Derivation.lean`, beside the
 block tactics they lift.  What stays here is the examples. -/
 
 

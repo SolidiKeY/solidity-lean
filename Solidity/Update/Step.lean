@@ -57,7 +57,7 @@ so it is not a `FrontierStep`; it is `FrontierMultiStep.equiv` over
 `Frontier.Equiv`, whose content is `Sequent.upd a = Sequent.upd b` -- an
 equality of state functions, proved from `Upd.Par.seq_single` and the reader
 lemmas at the end of this file (the `upd_merge` tactic of
-`Examples/Common.lean` is that proof, automated).
+`Tactics/Derivation.lean` is that proof, automated).
 
 What is *not* here: soundness.  `Sequent.check` is the semantics, and each
 worked derivation checks its own endpoints against it

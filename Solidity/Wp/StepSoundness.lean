@@ -3,7 +3,7 @@ import Solidity.Wp.Verdict
 import Solidity.Calculus.Completeness
 import Solidity.Wp.Step
 import Solidity.Wp.Terminal.Soundness
-import Solidity.Examples.Common
+import Solidity.Tactics.Derivation
 
 /-!
 # Configuration-level step soundness

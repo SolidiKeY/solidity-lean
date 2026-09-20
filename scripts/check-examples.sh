@@ -13,7 +13,7 @@
 #
 # It was 8x that until the two costs a pinned step used to pay went away:
 # `rule_simp` reducing `AST.lean`'s string-keyed tables (`name_table_simp`,
-# `Examples/SimpAttr.lean`) and the positional walk over `ruleNames` that
+# `Tactics/RuleSimpAttr.lean`) and the positional walk over `ruleNames` that
 # every `.both` step took (`UniquenessAux.firstStepCase_both`). A chain that
 # is slow again is one of those two: an identifier with no table arm, or a
 # statement a twin pair covers.
