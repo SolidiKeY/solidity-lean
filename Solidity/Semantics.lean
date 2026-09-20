@@ -1458,7 +1458,7 @@ def SolidityJudgment.check (j : SolidityJudgment)
   | .ok s =>
       -- A default, not a hidden stuck case: a postcondition that does
       -- not evaluate to a boolean validates nothing, whatever went wrong.
-      -- Left as a wildcard deliberately — `CallbackSemantics.lean` and
+      -- Left as a wildcard deliberately — `Semantics/Callback.lean` and
       -- the `Wp` bridge restate this body, and they restate it in
       -- this shape.
       match Semantics.evalValue s j.post with

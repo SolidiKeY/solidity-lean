@@ -6,8 +6,7 @@ paths:
   - "Solidity/TypeSoundness.lean"
   - "Solidity/Reachability.lean"
   - "Solidity/WellFormedConsumers.lean"
-  - "Solidity/SemanticsProperties.lean"
-  - "Solidity/StuckShape.lean"
+  - "Solidity/Semantics/*.lean"
 ---
 
 # Typing and well-formedness
@@ -48,7 +47,7 @@ no coinduction. `envTypedB` also forbids stray `spath`/`mref` bindings.
 
 ## Stuckness
 
-`StuckShape.lean` is the interpreter's counterpart of `Coverage.lean`'s
+`Semantics/StuckShape.lean` is the interpreter's counterpart of `Coverage.lean`'s
 `ResidueShape`, and deliberately has **no** Boolean mirror: unlike residue,
 stuckness already has a decision procedure — the interpreter. It leans on the
 wildcard expansion in `Semantics.lean`, which is what makes `SVal.find.induct`

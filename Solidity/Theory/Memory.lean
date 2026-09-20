@@ -1,5 +1,5 @@
 import Solidity.Theory.Terms
-import Solidity.DecEq
+import Solidity.Semantics.DecEq
 
 /-!
 # `memoryRules.key` as a term algebra

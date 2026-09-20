@@ -1,5 +1,5 @@
 import Solidity.Examples.Common
-import Solidity.CallbackSemantics
+import Solidity.Semantics.Callback
 
 /-!
 # `transferWithCallback` examples (KeY `transferSemantics:withCallback`)

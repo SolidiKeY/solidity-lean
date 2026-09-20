@@ -100,7 +100,7 @@ apply to obligations counted as *proved*:
 | `new T[](n)` memory-array allocation is not in the fragment | 30 |
 | `net` invariant POs: uninterpreted `CInv` over a symbolic ledger, booked against `msg.value`/`msg.sender` | 14 |
 | core `RulesTest`: KeY loader/taclet tests — ad-hoc taclets over `\problem { true }`, a sort condition, a list declaration, an empty problem | 7 |
-| `transferWithCallback` has a relational meaning (`CallbackSemantics.lean`) but no surface syntax | 5 |
+| `transferWithCallback` has a relational meaning (`Semantics/Callback.lean`) but no surface syntax | 5 |
 | **the function asserts that the program reverts** — see below | 4 |
 | field-name overloading: `Depth0.recursive` and `Depth1.recursive` differ in type, and `SoliditySyntax.fieldTy` is one global name→type table | 2 |
 | a parameter no `require` pins, so no concrete witness is derivable | 1 |

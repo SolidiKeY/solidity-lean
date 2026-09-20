@@ -1,5 +1,5 @@
 import Solidity.StorageTyping
-import Solidity.SemanticsProperties
+import Solidity.Semantics.Properties
 
 /-!
 # Storage write core: `save` preserves typing

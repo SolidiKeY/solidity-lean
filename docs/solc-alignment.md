@@ -161,7 +161,7 @@ funds). `Stmt.transfer`:
 
 The example stores (`exampleStore`, `testSuiteStore`) fund the contract with
 a large balance so the ported KeY tests keep their meaning;
-`CallbackSemantics.lean`'s havoc quantifies over the balance like it does
+`Semantics/Callback.lean`'s havoc quantifies over the balance like it does
 over storage and the ledger, so the callback boxes remain sound.
 
 solkey has since adopted the same check: `084de89677` adds `selfBalance`

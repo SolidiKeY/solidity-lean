@@ -1,5 +1,5 @@
 import Solidity.Update.Bridges
-import Solidity.DecEq
+import Solidity.Semantics.DecEq
 
 /-!
 # The update algebra, on the headline example

@@ -1,5 +1,5 @@
 import Solidity.RuleSoundness
-import Solidity.DecEq
+import Solidity.Semantics.DecEq
 
 /-!
 # Evaluation order: the `*WriteUnfoldLeft*` rules, before and after the fix

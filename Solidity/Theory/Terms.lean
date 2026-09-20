@@ -1,5 +1,5 @@
 import Solidity.Semantics
-import Solidity.DecEq
+import Solidity.Semantics.DecEq
 
 /-!
 # The term sorts of solkey's data-structure theories

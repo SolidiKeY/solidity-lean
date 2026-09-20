@@ -1,5 +1,5 @@
 import Solidity.RuleSoundness
-import Solidity.DecEq
+import Solidity.Semantics.DecEq
 
 /-!
 # The mapping side conditions of the storage copy are necessary

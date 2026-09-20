@@ -1,7 +1,7 @@
 import Solidity.Update.Step
 import Solidity.Update.MergeAttr
 import Solidity.RuleSoundness
-import Solidity.SemanticsProperties
+import Solidity.Semantics.Properties
 
 /-!
 # The merge kit: reading through a binding

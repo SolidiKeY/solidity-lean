@@ -29,7 +29,7 @@ heap, local bindings, and the abstract `net` transfer ledger.  The
 | Coverage/completeness | `Completeness.lean` | A statement has a first step iff an actual rule of the calculus applies; the completeness theorem is restricted to exactly those covered statements. |
 | Multi-step rewriting | `MultiStep.lean` | One-step and reflexive/transitive block rewrite relations and their lifting lemmas. |
 | Executable semantics | `Semantics.lean` | A total interpreter. Lean checks termination structurally on statements and with the `4 * WrappedExpr.size + rank` measure for mutually recursive expression evaluation. |
-| Semantic state algebra | `SemanticsProperties.lean` | Storage read-after-write, update frames, allocation freshness, heap well-formedness, and recursive storage-to-memory copy frame preservation. |
+| Semantic state algebra | `Semantics/Properties.lean` | Storage read-after-write, update frames, allocation freshness, heap well-formedness, and recursive storage-to-memory copy frame preservation. |
 | Concrete rule checks | `RuleValidation.lean` | `native_decide` validations comparing a rule's original statement and non-empty residual block on discriminating concrete states. |
 | Symbolic soundness | `RuleSoundness.lean` | A `<rule>_sound` theorem per unfold rule with a non-empty residual block, relating the original statement and residual block under the interpreter; the two call rules are stated relative to inlining, and three statements carry a documented `sorry` (see `docs/module-map.md`). |
 | Compositional soundness | `RewriteSoundness.lean` | Local rule soundness lifts through fresh suffixes and through reflexive-transitive derivations, modulo scratch aliases. |

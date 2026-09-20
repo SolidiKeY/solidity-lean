@@ -31,7 +31,7 @@ fragment rather than about the calculus:
   there is no "assume `CInv`" to make.
 
 `net-transfer-withcallback-simple.key` and the two `*-withcallback` POs
-need `transferWithCallback`, which `CallbackSemantics.lean` gives a
+need `transferWithCallback`, which `Semantics/Callback.lean` gives a
 relational meaning but which the surface `sol_stmt` grammar cannot spell.
 -/
 
