@@ -118,11 +118,11 @@ the sections further down carry the details.
 
 5. **The calculus's real boundary, written down.** Progress is false
    for the conditional rules: `if (flag) …` with a symbolic stack boolean has
-   no rule under any modality (`Progress.lean`, `not_progress`,
+   no rule under any modality (`Calculus/Progress.lean`, `not_progress`,
    `not_normalizing`); the split belongs to the judgment layer
    (`symbolicIte_judgment_split`; solkey's `ifSplit`). Completeness holds
    only over a rule-independent fragment: well-typed (`stmtWt`) and not
-   one of the 24 syntactic `ResidueShape` families of `Coverage.lean`
+   one of the 24 syntactic `ResidueShape` families of `Calculus/Coverage.lean`
    (`RuleStep.complete_of_wellTyped`). That list — symbolic `if`
    conditions, `**=`, inc/dec on memory or storage-local targets,
    stack values into storage-local roots, `delete` on storage-local
@@ -140,7 +140,7 @@ the sections further down carry the details.
    calculus rule rather than a user-side rewrite.
 
 7. **Determinism under the block modality.** solkey's rule set is
-   mutually exclusive per modality (`Uniqueness.lean`,
+   mutually exclusive per modality (`Calculus/Uniqueness.lean`,
    `stepCases_exclusive`), but under the block modality a box/diamond
    twin pair applies at once. The twelve twin pairs are effect-identical
    up to mode (`CandidateStep.twinEffects`); KeY's strategy should

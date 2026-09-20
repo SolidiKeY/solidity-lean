@@ -66,7 +66,7 @@ Now:
 - `Stmt.compoundAssign` follows the same single-resolution read/write
   path, with `checkArith` at the target type.
 
-`RuleValidation.lean`'s evaluation-order section
+`Calculus/RuleValidation.lean`'s evaluation-order section
 (`storageEvaluationOrder_interpreter_rhsFirst`) pins the interpreter to
 the KeY/solc order on the `a[++i] = ++i` witness.
 
@@ -93,7 +93,7 @@ assert(persons[0].age == 1);   // holds on chain; KeY closes it
 `Counterexamples/RefSourceOrder.lean` shows this interpreter storing `0`
 instead. The calculus is right here and the interpreter is wrong; the
 `hprim : rhs.ty.isPrimitive = true` hypothesis on the `*UnfoldLeft*`
-soundness theorems (`RuleSoundness.lean`) is what keeps them from
+soundness theorems (`Calculus/RuleSoundness.lean`) is what keeps them from
 asserting the interpreter's answer. **Open:** make `execAssignNested`
 target-first when the source is reference-typed, then drop `hprim`.
 
@@ -175,7 +175,7 @@ resolved).
 
 ## Taclet updates, and where the rule table is stricter than the interpreter
 
-Since `Rules.lean` became a taclet table, each terminal rule *states* its KeY
+Since `Calculus/Rules.lean` became a taclet table, each terminal rule *states* its KeY
 update and guard rather than deferring the whole state change to
 `Semantics.execStmt`. That makes a second class of divergence visible: not
 "KeY vs solc" but "the taclet's guard vs the interpreter's fault order". The

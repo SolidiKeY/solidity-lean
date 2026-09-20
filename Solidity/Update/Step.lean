@@ -1,10 +1,10 @@
 import Solidity.Update.Eval
-import Solidity.MultiStep
+import Solidity.Calculus.MultiStep
 
 /-!
 # Sequents: a derivation line as the calculus writes it
 
-`MultiStep.lean` rewrites *programs*: `solbox!{ … } ⇝ solbox!{ … }`, every
+`Calculus/MultiStep.lean` rewrites *programs*: `solbox!{ … } ⇝ solbox!{ … }`, every
 chain ending at the empty block.  That is one half of a derivation.  The
 calculus writes the other half on the same line -- the accumulated update --
 and its chains end not at an empty program but at a formula under an update:
@@ -28,7 +28,7 @@ produces a list: the calculus draws the last line of an array access as two
 stacked sequents, the in-bounds goal and `⊤`.
 
 The update stack is a `List UpdTerm` and not an `Upd`, deliberately.  A rule
-*states* its update as first-order syntax (`Rules.lean`), and keeping the
+*states* its update as first-order syntax (`Calculus/Rules.lean`), and keeping the
 syntax is what lets two spellings of the same update be compared -- which is
 what the calculus's last line does.  `Sequent.upd` is the meaning, and
 `Sequent.Equiv` the comparison.
@@ -294,7 +294,7 @@ end Update
 /-- One step of a derivation by a **named** rule: rewrite the first open line
 into the lines its goals name.
 
-The shape is `NamedBlockStep`'s (`MultiStep.lean`), for the same reason: the
+The shape is `NamedBlockStep`'s (`Calculus/MultiStep.lean`), for the same reason: the
 successor is a free index constrained by an equation, so against a
 written-out successor the check is `rfl` *after* the `FirstStepCase` proof has
 determined the rule's goals -- the unifier cannot invert
@@ -388,7 +388,7 @@ theorem NamedFrontierStep.toMultiStep {r : RuleName} {a b : Frontier}
 
 /-! ## Notation
 
-`⇝ᵘ` is `⇝` with an update riding along, beside `MultiStep.lean`'s `⇝ᵈ` for a
+`⇝ᵘ` is `⇝` with an update riding along, beside `Calculus/MultiStep.lean`'s `⇝ᵈ` for a
 judgment.  As there, the ASCII twins are input-only `macro_rules`, never a
 second `infix`: goals print the glyph the calculus draws. -/
 

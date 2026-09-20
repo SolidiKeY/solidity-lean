@@ -1,6 +1,6 @@
-import Solidity.RewriteSoundness
+import Solidity.Calculus.RewriteSoundness
 import Solidity.Wp.Verdict
-import Solidity.Completeness
+import Solidity.Calculus.Completeness
 import Solidity.Wp.Step
 import Solidity.Wp.Terminal.Soundness
 import Solidity.Examples.Common
@@ -8,7 +8,7 @@ import Solidity.Examples.Common
 /-!
 # Configuration-level step soundness
 
-`RewriteSoundness.lean` lifts per-rule interpreter agreement through block
+`Calculus/RewriteSoundness.lean` lifts per-rule interpreter agreement through block
 suffixes and rewrite derivations, but its top theorem
 (`BlockReflMultiStep.execAgree`) *assumes* a global per-step soundness
 premise, and the block-level relation cannot express terminal rules: an
@@ -33,7 +33,7 @@ This module closes both gaps:
    of `BlockStep`/`BlockReflMultiStep`; `SoundBlockReflMultiStep.execAgree`
    discharges the premise `BlockReflMultiStep.execAgree` had to assume —
    each step brings its own certificate (supplied in practice by the
-   `_sound` theorems of `RuleSoundness.lean`).
+   `_sound` theorems of `Calculus/RuleSoundness.lean`).
 -/
 
 namespace Solidity
@@ -212,7 +212,7 @@ theorem SoundBlockStep.execAgree {a b : SolidityBlock}
 does not discharge `BlockReflMultiStep.execAgree`'s premise for free: a
 `SoundBlockStep` must be *built* with a state-universal certificate
 `∀ s, ResultsAgree …`, and only the unconditional `_sound` theorems of
-`RuleSoundness.lean` (its "Unconditional" shape — `ifElseTrue_sound`, the
+`Calculus/RuleSoundness.lean` (its "Unconditional" shape — `ifElseTrue_sound`, the
 declaration splits, the left-operand captures, `exprStmtCapture_sound`,
 …) supply one.  The state-dependent theorems (those with `hlhs`, `hev`,
 `hstable`, … hypotheses) cannot; a derivation using such a rule goes

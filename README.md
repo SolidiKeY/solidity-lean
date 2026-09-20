@@ -43,7 +43,7 @@ honest, and both expect a solkey checkout beside this repository
   solkey's `.sol` example suites; `./scripts/check-solkey-parity.sh` diffs the
   verdicts against `tests/solkey/expected.tsv`.
 - The same pass also regenerates `Solidity/Examples/Derivations/Solkey/`,
-  which proves the *same* obligations from `Rules.lean` alone —
+  which proves the *same* obligations from `Calculus/Rules.lean` alone —
   `./scripts/check-calculus-parity.sh`, table in
   `tests/solkey/expected-calculus.tsv`, scoreboard in
   `docs/calculus-parity.md`. The distinction is the point: `sol_wp` never

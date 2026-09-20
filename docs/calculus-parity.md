@@ -1,4 +1,4 @@
-# Calculus parity: what `Rules.lean` alone proves of `TestSuite.sol`
+# Calculus parity: what `Calculus/Rules.lean` alone proves of `TestSuite.sol`
 
 Can solkey's taclet suite be proved by the rule table, with no weakest
 precondition?
@@ -7,7 +7,7 @@ precondition?
 
 That file reports 325 of 416 obligations proved by `sol_wp`. But `sol_wp`
 (`Wp/Verifier.lean`) is symbolic execution *by the interpreter*; it never
-reads `Rules.lean`. So it says the interpreter agrees with solkey, and says
+reads `Calculus/Rules.lean`. So it says the interpreter agrees with solkey, and says
 nothing about the calculus — which is the artefact solkey's taclets
 correspond to. The two corpora are generated from one pass of
 `scripts/solkey-port.mjs` so they cannot drift, and this is the other half.

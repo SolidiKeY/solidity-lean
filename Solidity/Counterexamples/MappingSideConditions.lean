@@ -1,4 +1,4 @@
-import Solidity.RuleSoundness
+import Solidity.Calculus.RuleSoundness
 import Solidity.Semantics.DecEq
 
 /-!

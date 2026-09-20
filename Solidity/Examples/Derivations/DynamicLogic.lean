@@ -1,6 +1,6 @@
 import Solidity.Examples.Common
 import Solidity.Semantics
-import Solidity.JudgmentSplit
+import Solidity.Calculus.JudgmentSplit
 
 namespace Solidity.Examples
 
@@ -26,7 +26,7 @@ verified by `native_decide` against the interpreter — live in
 
 /-! The step relations themselves (`JudgmentStep`, `NamedJudgmentStep`,
 `JudgmentMultiStep`, the `⇝ᵈ` arrows and their `Trans` instances) live in
-`MultiStep.lean`, beside their block-level twins: they depend on nothing but
+`Calculus/MultiStep.lean`, beside their block-level twins: they depend on nothing but
 the AST and the rules, and `sol_derivation` builds either layer from the same
 source syntax.  The `dl_*` tactics live in `Examples/Common.lean`, beside the
 block tactics they lift.  What stays here is the examples. -/

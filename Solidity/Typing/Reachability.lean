@@ -1,5 +1,5 @@
 import Solidity.Typing.Soundness
-import Solidity.RewriteSoundness
+import Solidity.Calculus.RewriteSoundness
 import Solidity.Semantics.DecEq
 
 /-!

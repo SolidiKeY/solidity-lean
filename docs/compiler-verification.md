@@ -25,16 +25,16 @@ heap, local bindings, and the abstract `net` transfer ledger.  The
 | Component | Location | Verification provided |
 | --- | --- | --- |
 | Syntax and measures | `AST.lean` | Solidity expression, statement, and block model; measures used by the executable definitions. |
-| Rule enumeration | `Rules.lean` | Rule names, applicability conditions, residual-block constructors, fresh scratch names, and the `stepCases` inventory. |
-| Coverage/completeness | `Completeness.lean` | A statement has a first step iff an actual rule of the calculus applies; the completeness theorem is restricted to exactly those covered statements. |
-| Multi-step rewriting | `MultiStep.lean` | One-step and reflexive/transitive block rewrite relations and their lifting lemmas. |
+| Rule enumeration | `Calculus/Rules.lean` | Rule names, applicability conditions, residual-block constructors, fresh scratch names, and the `stepCases` inventory. |
+| Coverage/completeness | `Calculus/Completeness.lean` | A statement has a first step iff an actual rule of the calculus applies; the completeness theorem is restricted to exactly those covered statements. |
+| Multi-step rewriting | `Calculus/MultiStep.lean` | One-step and reflexive/transitive block rewrite relations and their lifting lemmas. |
 | Executable semantics | `Semantics.lean` | A total interpreter. Lean checks termination structurally on statements and with the `4 * WrappedExpr.size + rank` measure for mutually recursive expression evaluation. |
 | Semantic state algebra | `Semantics/Properties.lean` | Storage read-after-write, update frames, allocation freshness, heap well-formedness, and recursive storage-to-memory copy frame preservation. |
-| Concrete rule checks | `RuleValidation.lean` | `native_decide` validations comparing a rule's original statement and non-empty residual block on discriminating concrete states. |
-| Symbolic soundness | `RuleSoundness.lean` | A `<rule>_sound` theorem per unfold rule with a non-empty residual block, relating the original statement and residual block under the interpreter; the two call rules are stated relative to inlining, and three statements carry a documented `sorry` (see `docs/module-map.md`). |
-| Compositional soundness | `RewriteSoundness.lean` | Local rule soundness lifts through fresh suffixes and through reflexive-transitive derivations, modulo scratch aliases. |
-| Rule uniqueness | `Uniqueness.lean` | Mutual exclusion through the total `candidate` dispatcher and `applicable_eq_candidate`. |
-| Rewrite termination interface | `Termination.lean` | A decreasing block measure produces a well-founded rewrite relation and a non-increase theorem for finite derivations. |
+| Concrete rule checks | `Calculus/RuleValidation.lean` | `native_decide` validations comparing a rule's original statement and non-empty residual block on discriminating concrete states. |
+| Symbolic soundness | `Calculus/RuleSoundness.lean` | A `<rule>_sound` theorem per unfold rule with a non-empty residual block, relating the original statement and residual block under the interpreter; the two call rules are stated relative to inlining, and three statements carry a documented `sorry` (see `docs/module-map.md`). |
+| Compositional soundness | `Calculus/RewriteSoundness.lean` | Local rule soundness lifts through fresh suffixes and through reflexive-transitive derivations, modulo scratch aliases. |
+| Rule uniqueness | `Calculus/Uniqueness.lean` | Mutual exclusion through the total `candidate` dispatcher and `applicable_eq_candidate`. |
+| Rewrite termination interface | `Calculus/Termination.lean` | A decreasing block measure produces a well-founded rewrite relation and a non-increase theorem for finite derivations. |
 | Regression examples | `Examples/Taclets/` | Ports of KeY taclet examples, checked against the executable semantics with `native_decide`. |
 
 The symbolic soundness theorems account for capture-introduced scratch aliases
@@ -242,7 +242,7 @@ and the contract balance is that storage word rather than
 - The generated rule set contains no catch-all fallback. Uncovered statements
   have no `RuleStep`; they are not silently deleted.
 - The interpreter's termination is Lean-checked. The rewrite calculus's
-  generic well-foundedness implication is Lean-checked in `Termination.lean`,
+  generic well-foundedness implication is Lean-checked in `Calculus/Termination.lean`,
   but the concrete all-rules decreasing-measure certificate is still open.
 - The rewrite-calculus work proves properties of the formal AST, rewrite
   rules, and interpreter; the `Evm/` work proves preservation from that
@@ -252,10 +252,10 @@ and the contract balance is that storage word rather than
 
 ## Maintenance checklist
 
-When adding or changing a rule, update `Rules.lean` consistently: the
+When adding or changing a rule, update `Calculus/Rules.lean` consistently: the
 `RuleName` constructor, `ruleEffect`, every required `ruleNames`
 entry, `candidate`, and its `applicable_eq_candidate` case.  Add a
-`RuleValidation.lean` entry for a non-empty residual block, keep the
+`Calculus/RuleValidation.lean` entry for a non-empty residual block, keep the
 corresponding symbolic soundness theorem current, and import any new module
 from `Solidity.lean`.
 

@@ -5,7 +5,7 @@ import Solidity.Theory.Memory
 /-!
 # A rule's memory update, read as a KeY term
 
-`Rules.lean` states each terminal rule's update as first-order syntax —
+`Calculus/Rules.lean` states each terminal rule's update as first-order syntax —
 `{memory := write(memory, id, a, v)}` — and `Update/Eval.lean` gives that
 syntax its meaning by running the interpreter.  KeY's `write`, `addM` and
 `read` are uninterpreted symbols constrained by `memoryRules.key`, and

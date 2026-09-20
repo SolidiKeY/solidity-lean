@@ -1,14 +1,14 @@
 ---
 paths:
-  - "Solidity/Rules.lean"
-  - "Solidity/RuleSyntax.lean"
-  - "Solidity/Uniqueness.lean"
-  - "Solidity/RuleValidation.lean"
-  - "Solidity/RuleShapes.lean"
+  - "Solidity/Calculus/Rules.lean"
+  - "Solidity/Calculus/RuleSyntax.lean"
+  - "Solidity/Calculus/RuleShapes.lean"
+  - "Solidity/Calculus/RuleValidation.lean"
+  - "Solidity/Calculus/Uniqueness.lean"
+  - "Solidity/Calculus/Coverage.lean"
+  - "Solidity/Calculus/Completeness.lean"
+  - "Solidity/Calculus/KeyTaclets.lean"
   - "Solidity/SortCheck/*.lean"
-  - "Solidity/KeyTaclets.lean"
-  - "Solidity/Coverage.lean"
-  - "Solidity/Completeness.lean"
 ---
 
 # The rule table
@@ -35,8 +35,8 @@ the order decides which name a `⇝[.rule]` derivation pins.
    a rule is written.
 3. **Keep the condition disjoint from every other rule.** Then add the
    `candidate` dispatch branch and the `applicable_eq_candidate` case in
-   `Uniqueness.lean`. A failing uniqueness build signals an overlap.
-4. Non-empty residual ⇒ add a `RuleValidation.lean` entry.
+   `Calculus/Uniqueness.lean`. A failing uniqueness build signals an overlap.
+4. Non-empty residual ⇒ add a `Calculus/RuleValidation.lean` entry.
 5. The taclet reads storage/memory (`find`/`read`/`selectSt`/`valAt`/
    `defaultValue`) ⇒ add or extend its `TacletReadAnn` row in
    `SortCheck/Annotations.lean`, keep `sortFaithful_all` closing (extend
@@ -68,7 +68,7 @@ the list is where to look.
 ## Facts about the table
 
 There is no catch-all tier: a statement no rule matches is stuck, and
-`Coverage.lean` proves the stuck set is exactly the documented `ResidueShape`s.
+`Calculus/Coverage.lean` proves the stuck set is exactly the documented `ResidueShape`s.
 Membership proofs over `ruleNames` use `decide` (`simp [ruleNames]` exceeds
 the recursion limit).
 

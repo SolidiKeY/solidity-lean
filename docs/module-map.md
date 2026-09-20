@@ -6,7 +6,7 @@ them. Modules not listed here are examples or small helpers whose name says
 what they are.
 
 Open problems are flagged **OPEN** inline. Layering: syntax in `AST.lean`,
-rule enumeration in `Rules.lean`, proof relations in later files. New modules
+rule enumeration in `Calculus/Rules.lean`, proof relations in later files. New modules
 go in `Solidity.lean`.
 
 ## The calculus
@@ -15,19 +15,19 @@ go in `Solidity.lean`.
 |---|---|
 | `KeySort.lean` | solkey's sort lattice as one Lean type: `parents`, `ancestors`, `KeySort.le`, KeY spellings. The *only* model of the lattice. Array/mapping sorts sit directly below `StValue`, siblings of `Struct` (not below it). Imports nothing. |
 | `AST.lean` | Solidity syntax; the `sol!` notation and its `sol_stmt`/`sol_expr` grammars. `Ty.keySort` mirrors the KeY hierarchy structurally; `Field.sort = ty.fieldSort` is *computed*, so a field cannot be classified against its own type. Old constructor names survive as `@[match_pattern]` abbrevs. Holds the struct table `Semantics.structDef`, its rank certificate and `Semantics.tyHasMapping` (solkey's `StorageReferenceTypes.containsMapping`), so `TypedStmt.Assign.mk` can refuse a storage-to-storage copy of a mapping-carrying type (`mapFree`), as solc ≥ 0.7 and `ParserUtils.parseAssignmentMaybe` do. |
-| `KeyTaclets.lean` | The 252 taclets of `solidityProgramRules.key` as one type, plus `\heuristics` sets and `KeyOrigin`. Regenerate with the `awk` recipe in its docstring. Imports nothing. |
-| `RuleSyntax.lean` | The `sol_rule` declaration syntax and `sol_assemble_rules`; carries the schema-variable table (`schemaVar`). Imports `Lean` only. |
-| `Rules.lean` | One `sol_rule` per rule, organised by family. A rule is a taclet, not a rewrite: `StepEffect` carries `goals` (guard, update, residual), read as KeY's weakest precondition. Update syntax here is AST-only. |
-| `RuleShapes.lean` | Structural checks: `mainBlock` reduction, `goals_nonempty`, `taclets_partitioned` (246 of 252 claimed, six listed with a reason), `twins_origin_eq`, `heuristics_eq_origin`. |
-| `Completeness.lean` | `FirstStepCase`/`RuleStep` and the bridge `RuleStep.step_of_ruleApplies` with its converse. |
-| `Coverage.lean` | `candidate_applies`, the syntactic `ResidueShape` (24 shapes no rule covers), and `RuleStep.complete_of_wellTyped` over the rule-independent fragment. |
-| `Uniqueness.lean` | Rule mutual exclusion via the total dispatch `candidate` (`applicable_eq_candidate`). `RuleSetDisciplined` carries exactly three facts. A failing uniqueness build signals a condition overlap. |
-| `Progress.lean` | Progress is **false** here and this proves it (`symbolicIte`, `not_progress`), plus the judgment-layer split that handles it. **OPEN**: `BlockStep.wellFounded` is a documented `sorry`. |
-| `MultiStep.lean` | `BlockStep` (`⇝`), `BlockReflMultiStep` (`⇝*`), `NamedBlockStep` (`⇝[.rule]`) and the `Trans` instances. Framing (`appendStmts`, `append_suffix`, `inContext`, and the rule-level `NamedBlockStep.inSuffix`): a chain carries a *suffix*, and a prefix is consumed rather than carried, because `⇝` fires at the head. |
-| `Termination.lean` | Termination-certificate interface. **OPEN**: the concrete all-rules certificate. |
-| `RuleValidation.lean` | Per-rule `native_decide` validation of unfold rules against the executable semantics. |
-| `RuleSoundness.lean` | `<rule>_sound` per unfold rule: residual agrees with the original modulo scratch aliases. **OPEN**: `functionCallArgCapture_sound_inlined`, and one case each of `storagePushValueUnfoldRightSndArgument_sound` / `memoryWriteUnfoldRightSndResult_sound`. |
-| `RewriteSoundness.lean` | Lifts local soundness through untouched block suffixes and `⇝*`. `BlockExecAgree.append_left`/`append_right` are the context congruence the rewrite layer cannot have — unconditional on a prefix, freshness-guarded on a suffix. |
+| `Calculus/KeyTaclets.lean` | The 252 taclets of `solidityProgramRules.key` as one type, plus `\heuristics` sets and `KeyOrigin`. Regenerate with the `awk` recipe in its docstring. Imports nothing. |
+| `Calculus/RuleSyntax.lean` | The `sol_rule` declaration syntax and `sol_assemble_rules`; carries the schema-variable table (`schemaVar`). Imports `Lean` only. |
+| `Calculus/Rules.lean` | One `sol_rule` per rule, organised by family. A rule is a taclet, not a rewrite: `StepEffect` carries `goals` (guard, update, residual), read as KeY's weakest precondition. Update syntax here is AST-only. |
+| `Calculus/RuleShapes.lean` | Structural checks: `mainBlock` reduction, `goals_nonempty`, `taclets_partitioned` (246 of 252 claimed, six listed with a reason), `twins_origin_eq`, `heuristics_eq_origin`. |
+| `Calculus/Completeness.lean` | `FirstStepCase`/`RuleStep` and the bridge `RuleStep.step_of_ruleApplies` with its converse. |
+| `Calculus/Coverage.lean` | `candidate_applies`, the syntactic `ResidueShape` (24 shapes no rule covers), and `RuleStep.complete_of_wellTyped` over the rule-independent fragment. |
+| `Calculus/Uniqueness.lean` | Rule mutual exclusion via the total dispatch `candidate` (`applicable_eq_candidate`). `RuleSetDisciplined` carries exactly three facts. A failing uniqueness build signals a condition overlap. |
+| `Calculus/Progress.lean` | Progress is **false** here and this proves it (`symbolicIte`, `not_progress`), plus the judgment-layer split that handles it. **OPEN**: `BlockStep.wellFounded` is a documented `sorry`. |
+| `Calculus/MultiStep.lean` | `BlockStep` (`⇝`), `BlockReflMultiStep` (`⇝*`), `NamedBlockStep` (`⇝[.rule]`) and the `Trans` instances. Framing (`appendStmts`, `append_suffix`, `inContext`, and the rule-level `NamedBlockStep.inSuffix`): a chain carries a *suffix*, and a prefix is consumed rather than carried, because `⇝` fires at the head. |
+| `Calculus/Termination.lean` | Termination-certificate interface. **OPEN**: the concrete all-rules certificate. |
+| `Calculus/RuleValidation.lean` | Per-rule `native_decide` validation of unfold rules against the executable semantics. |
+| `Calculus/RuleSoundness.lean` | `<rule>_sound` per unfold rule: residual agrees with the original modulo scratch aliases. **OPEN**: `functionCallArgCapture_sound_inlined`, and one case each of `storagePushValueUnfoldRightSndArgument_sound` / `memoryWriteUnfoldRightSndResult_sound`. |
+| `Calculus/RewriteSoundness.lean` | Lifts local soundness through untouched block suffixes and `⇝*`. `BlockExecAgree.append_left`/`append_right` are the context congruence the rewrite layer cannot have — unconditional on a prefix, freshness-guarded on a suffix. |
 
 ## The data-structure theories
 
@@ -42,7 +42,7 @@ theorem and, for the memory algebra, a denotation into the interpreter
 | `Theory/Memory.lean` | `memoryRules.key`'s taclets, over `Theory/Terms.lean`'s sorts, plus the `new` predicate. Every taclet a theorem, including the chain-walking family (`readREmpty`, `readRCons`, `idCCDef`, `defaultDefIdentity`) and `newFromAdd`/`readOnAddM` in KeY's branching form. Resolving a path identity against a heap is the denotation's job (`Update/Theory.lean`). `copySt`/`copyMem` are `Theory/CrossDomain.lean`. |
 | `Theory/Terms.lean` | The sorts, because `structMemoryRules.key` ties the other two files together: `copyMem` is a `Struct` constructor and `copySt` a `Memory` one, as KeY declares them, so `Struct`/`StValue`/`Memory` are one mutual inductive. With them the readers that are mutual for the same reason — `selectSt`, `findSt` (the storage read that stops at a view), `find` (the one that crosses into `readR`), `readIn`/`readId`/`readR`/`readRId`, and the path-identity resolver. All structural: the cycle is cut by `readIn` reading its copied struct with `findSt`, so every equation stays `rfl` and a closed term reduces in the kernel, which is how half the taclets are checked. `Struct.inductionOn`/`Memory.inductionOn` are the one-sort recursors a mutual inductive does not give. |
 | `Theory/CrossDomain.lean` | `structMemoryRules.key`'s four taclets on those sorts: `findCopyMem`, `readCopySt`, `readCopyStIdentity`, `readCopyStOther`. `readCopyStIdentity` falls out of `defaultDefIdentity` because a copied struct member reads as `dflt`. Not modelled: a view nested in a view — `StValue.find_eq_findSt` is where that is stated, and no worked example nests one. |
-| `Theory/Rewrite.lean` | The theory layer's answer to `Rules.lean`: `TheoryRule`, one constructor per rewrite rule of the paper's signature, under **the paper's** name rather than KeY's, and `lemmaNames` saying which theorem each one is at each sort. What lets a `sol_rewrite` line write `=[.findOnSave]` and have it checked. `#theory_rules` prints the table; `./scripts/check-theory-rules.mjs` checks it against the paper's `\namedRwRule` declarations. |
+| `Theory/Rewrite.lean` | The theory layer's answer to `Calculus/Rules.lean`: `TheoryRule`, one constructor per rewrite rule of the paper's signature, under **the paper's** name rather than KeY's, and `lemmaNames` saying which theorem each one is at each sort. What lets a `sol_rewrite` line write `=[.findOnSave]` and have it checked. `#theory_rules` prints the table; `./scripts/check-theory-rules.mjs` checks it against the paper's `\namedRwRule` declarations. |
 | `Update/Theory.lean` | A rule's stated *memory* update read as a KeY term: `heapRhs_eq_theory` over `Rules.MemTerm`, covering a `write` on the `memory` variable — `addM`/`copySt` are not read back, because denoting them means reconciling KeY's lazy allocation with `Semantics.allocDefault`'s eager one; `denoteMem`/`denoteMV` resolve a path identity against the heap, and `denoteMem_new` discharges KeY's freshness premise. The storage half is gone with `Theory/Storage.lean`'s pre-state leaf: what it reconciled — solkey's mapping-keeping leaf against the interpreter's plain write — differs only on a copy the AST cannot express. |
 
 ## Updates and the sequent layer
@@ -134,7 +134,7 @@ Each is a refutation that pins down why a hypothesis or conjunct is there.
 
 ## Examples
 
-- `Examples/Derivations/Solkey/` — **the solkey corpus proved from `Rules.lean`
+- `Examples/Derivations/Solkey/` — **the solkey corpus proved from `Calculus/Rules.lean`
   alone** (`SolidityCalculus` target, generated by the same pass of
   `scripts/solkey-port.mjs` as `Examples/Solkey/`). One `sol_calculus` per
   obligation: `seq_closes` runs the taclets to a closed frontier and the

@@ -1,4 +1,4 @@
-import Solidity.MultiStep
+import Solidity.Calculus.MultiStep
 
 /-!
 # Rewrite-termination certificates

@@ -64,7 +64,7 @@ out-of-bounds branch appears twice — closed with `⊤` for the box reading and
 
 **The scratch names are Lean's.**  The calculus writes `pv` for a frozen value
 operand and `acc` for a storage alias; the rules here bind `rv` and `sp`, and
-`Rules.lean` records why the calculus's own examples are inconsistent about
+`Calculus/Rules.lean` records why the calculus's own examples are inconsistent about
 it.  A stack scratch name carries its type — `rv@uint`, `pv@bool`,
 `sp@UintArray` — because `SoliditySyntax.aliasKind` is a name-only table that
 cannot see it.  The calculus's auxiliary arrays and its bucket are scratch
@@ -95,7 +95,7 @@ on a concrete store.  The chains themselves add no axiom: a pinned step goes
 through `UniquenessAux.firstStepCase_both` -- these chains are written in the
 block modality, and what stands in for the mode check there is the box and
 diamond oracles agreeing -- whose exclusivity theorem is decided by
-`native_decide` in `Uniqueness.lean`, which is the block layer's proof
+`native_decide` in `Calculus/Uniqueness.lean`, which is the block layer's proof
 route.  The checks are the only `native_decide` written here, and
 `docs/paper-parity.md` says which sections have one.
 

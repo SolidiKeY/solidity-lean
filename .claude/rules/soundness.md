@@ -1,7 +1,7 @@
 ---
 paths:
-  - "Solidity/RuleSoundness.lean"
-  - "Solidity/RewriteSoundness.lean"
+  - "Solidity/Calculus/RuleSoundness.lean"
+  - "Solidity/Calculus/RewriteSoundness.lean"
   - "Solidity/Wp/**/*.lean"
   - "Solidity/Counterexamples/*.lean"
 ---
@@ -15,7 +15,7 @@ without one silently weakens the file's claim.
 
 ## Hypothesis shapes
 
-The module docstring of `RuleSoundness.lean` classifies the theorems by
+The module docstring of `Calculus/RuleSoundness.lean` classifies the theorems by
 hypothesis shape. What to know before adding or weakening one:
 
 - **Alias freshness** is stated as `RuleSoundness.usesVar` /

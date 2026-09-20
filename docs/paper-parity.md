@@ -179,7 +179,7 @@ rules, not with an example file.
 | `carol.account.token = davidTokens[i];` | `memoryFieldWriteFromArrayElem` |
 | `Token memory tok = carol.account.tokens[i];` | `memoryDeclFromNestedArrayElem` |
 | `Token memory tok = carolTokens[++i];` | `memoryDeclFromIncIndexElem` |
-| `xs = new uint[](n);` | — `memoryArrayFreshAlloc` is merged into `memoryDeclFreshAlloc` in `Rules.lean`, which `memoryArrayAlloc` is the chain of. There is no second rule to draw. |
+| `xs = new uint[](n);` | — `memoryArrayFreshAlloc` is merged into `memoryDeclFreshAlloc` in `Calculus/Rules.lean`, which `memoryArrayAlloc` is the chain of. There is no second rule to draw. |
 | `carolValues[i] = makeValue();`, `carolValues[++i] = makeValue();` | — call-valued operand, below |
 
 ## 8 · Cross-domain copies — `sections/storage-to-memory.tex`, `sections/memory-to-storage.tex`

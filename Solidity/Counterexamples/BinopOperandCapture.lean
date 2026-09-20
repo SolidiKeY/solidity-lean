@@ -6,7 +6,7 @@ import Solidity.Semantics
 
 `binopUnfoldLeft` and `binopUnfoldRight` both bind `Rules.valueAliasName`,
 which is the single name `pv`.  One of them firing is sound — that is what
-`RuleSoundness.lean` proves, a rule at a time.  Both firing on the *same*
+`Calculus/RuleSoundness.lean` proves, a rule at a time.  Both firing on the *same*
 binary operation is not: the second binding captures the first, and the
 operation is computed from the right operand twice.
 
@@ -23,7 +23,7 @@ interpreter disagrees with the second, which is the content of this file.
 
 ## Why it is the rule and not the model
 
-KeY does not write these two taclets the way `Rules.lean` does.
+KeY does not write these two taclets the way `Calculus/Rules.lean` does.
 `lessThanCaptureLhs` (`solidityProgramRules.key`) is
 
 ```
@@ -48,7 +48,7 @@ correspondence proofs are pinned to (`AGENTS.md`).  So it is its own change,
 and this file is the refutation that says why it is needed.
 
 Found by `Examples/Derivations/Solkey/`: `sol_wp` proves the same programs and
-cannot see this, because it never reads `Rules.lean`.
+cannot see this, because it never reads `Calculus/Rules.lean`.
 -/
 
 namespace Solidity

@@ -5,7 +5,7 @@ import Solidity.Theory.CrossDomain
 /-!
 # The theory's rewrite rules, under the paper's names
 
-The calculus layer has `Rules.lean`: an enumeration of rule names, a table of
+The calculus layer has `Calculus/Rules.lean`: an enumeration of rule names, a table of
 effects, and chains that write the rule on the arrow.  The theory layer had
 none of that.  `Theory/Storage.lean`, `Theory/Memory.lean` and
 `Theory/CrossDomain.lean` are the three algebras, each taclet a theorem named

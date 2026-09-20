@@ -61,7 +61,7 @@ collected in `docs/solkey-feedback.md`.
 
 Status legend:
 
-- `existing` — already modeled in `Rules.lean` (possibly merged with siblings).
+- `existing` — already modeled in `Calculus/Rules.lean` (possibly merged with siblings).
 - `planned(N)` — to be added in plan phase N.
 - `arch` — no direct Lean counterpart by design (architectural difference of
   the block-rewriting model); note explains.
@@ -74,9 +74,9 @@ Status legend:
 ## The taclet column is now machine-checked
 
 This file is prose, and prose drifts. The **name** column is therefore no
-longer only here: every rule of `Rules.lean` carries a typed
+longer only here: every rule of `Calculus/Rules.lean` carries a typed
 `KeyOrigin` — `taclet t`, `merged [t₁, …]` or `leanOnly` — over the
-`KeyTaclet` enumeration of `KeyTaclets.lean`, which is the vendored
+`KeyTaclet` enumeration of `Calculus/KeyTaclets.lean`, which is the vendored
 `solidityProgramRules.key` transcribed one constructor per taclet. Three
 consequences:
 
@@ -478,7 +478,7 @@ Pattern per `V ∈ {Preincrement, Postincrement, Predecrement, Postdecrement}`:
 | `requireConditionCapture` | `requireConditionCapture` | done | clone of the assert capture over `Stmt.requireStmt` |
 | `requireSimple` | `requireSimple` | done | terminal; the interpreter reverts on false — box `c → φ`, diamond `c ∧ φ` fall out of `check` (solkey `docs/require-assert.md`); the KeY assert/require difference (⊥ vs revert) lives entirely in that layer |
 | `ifUnfold` / `ifElseUnfold` | `ifElseUnfold` | done | solkey's statement-level nonsimple-condition capture (`solidityProgramRules.key`); Lean merges the if/if-else pair since `Stmt.ite` always carries both branches (else = `[]`) |
-| `ifSplit` / `ifElseSplit` | `SolidityJudgment.ite_split` | lemma | solkey's sequent-level two-goal split on a simple condition (`\add(se = TRUE/FALSE ==>)`); a `BlockStep` cannot produce two goals, so the rewrite layer is intentionally stuck there and the split is the lemma (`JudgmentSplit.lean`; `ite_split_pure` is the exact KeY shape for pure conditions) |
+| `ifSplit` / `ifElseSplit` | `SolidityJudgment.ite_split` | lemma | solkey's sequent-level two-goal split on a simple condition (`\add(se = TRUE/FALSE ==>)`); a `BlockStep` cannot produce two goals, so the rewrite layer is intentionally stuck there and the split is the lemma (`Calculus/JudgmentSplit.lean`; `ite_split_pure` is the exact KeY shape for pure conditions) |
 | `ternaryCaptureCond` | `ternaryCaptureCond` | done | `WrappedExpr.mkTernary` + `c ? t : e` in `sol!`; the interpreter short-circuits like `&&`/`||`; the cond excludes the memory-complex-lhs dispatch branch (`memoryWriteUnfoldRightSndResult` claims the whole rhs there); soundness has the trio's `hstable` non-interference condition |
 | `ternaryToIf` | `ternaryToIf` | done | `v = se ? e1 : e2;` ⇝ `if (se) v = e1; else v = e2;` — both sides evaluate the same branch in the same state (`ternaryToIf_sound` is an equality up to defeq) |
 | `ternaryToIfStorage` | `ternaryToIfStorage` | done | twin for a storage-path target; soundness pinned to the primitive-write dispatch (branch types agree) |

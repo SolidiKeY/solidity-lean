@@ -1,5 +1,5 @@
-import Solidity.MultiStep
-import Solidity.CandidateStep
+import Solidity.Calculus.MultiStep
+import Solidity.Calculus.CandidateStep
 import Solidity.Update.Merge
 import Solidity.Update.SequentSyntax
 import Solidity.Examples.SimpAttr
@@ -455,7 +455,7 @@ macro "single_step " ruleName:ident : tactic =>
 `rule_step` closes a `b ⇝[.rule] b'` goal and `steps [...]` a `b ⇝* b'` goal
 whose intermediate blocks are elided -- the two shapes the calculus's
 `⇝` and `⇝*` lines take.  Both go through
-`find_pinned_step`, whose exclusivity route (`CandidateStep.lean`) is what keeps
+`find_pinned_step`, whose exclusivity route (`Calculus/CandidateStep.lean`) is what keeps
 them affordable; the rule name is what pins the step case. -/
 
 /-- Discharge a `⇝[.rule]` step.  Unlike `named_step`, no elaborator is needed:
@@ -507,7 +507,7 @@ macro "steps_search!" : tactic => `(tactic|
 /-! ### `steps!` — the rule sequence, computed instead of written
 
 `UniquenessAux.candidate : Modality -> Stmt -> Option RuleName`
-(`Uniqueness.lean`) is a total computable dispatch mirroring every rule
+(`Calculus/Uniqueness.lean`) is a total computable dispatch mirroring every rule
 condition, and it reduces in the kernel -- `decide` already closes closed
 applications of it (`Counterexamples/CoverageResidue.lean`). So one `whnf` per
 step names the rule, and the step is then discharged by the *same* pinned
@@ -517,12 +517,12 @@ moves from the source file to elaboration.
 
 `candidate` is an **oracle, not an authority**. `find_pinned_step` still proves
 the rule applies, so the one case where `candidate` overreaches
-(`Coverage.lean`'s `pushRhsStorageB`: `x = mv.push()` on a memory array) fails
+(`Calculus/Coverage.lean`'s `pushRhsStorageB`: `x = mv.push()` on a memory array) fails
 loudly rather than proving anything false. Nothing here adds an axiom -- in
 particular no `native_decide`, which `Wp/Examples.lean` is careful to
 avoid.
 
-There is no termination measure to appeal to (`Termination.lean` states that
+There is no termination measure to appeal to (`Calculus/Termination.lean` states that
 obligation and leaves it open -- `functionBodyExpand` *grows* the block), so
 the loop is fuel-bounded by construction, and it also stops if a step leaves
 the block unchanged. -/
@@ -578,7 +578,7 @@ private def candidateRule (sm head before after : Lean.Expr)
       remaining block:{indentExpr before}\n\
       stated target:{indentExpr after}\n\
       `UniquenessAux.candidate` names no rule for this statement: either the \
-      program is outside the calculus (see `Coverage.lean`'s residue \
+      program is outside the calculus (see `Calculus/Coverage.lean`'s residue \
       census) or a previous residual failed to normalise.\n{← rulesText acc}"
   unless res.isAppOfArity ``Option.some 2 do
     throwError "steps!: could not reduce `UniquenessAux.candidate` on\
@@ -641,7 +641,7 @@ private def autoStepsRound (acc : Array Lean.Expr) : TacticM (Option Lean.Expr) 
         else ""
       throwError "steps!: step {acc.size + 1}: `{← ruleNameText r}` is the rule \
         `UniquenessAux.candidate` names for{indentExpr head}\nbut it does not \
-        apply. Either this is the known `candidate` overreach (`Coverage.lean`'s \
+        apply. Either this is the known `candidate` overreach (`Calculus/Coverage.lean`'s \
         `pushRhsStorageB`) or the condition needs more than \
         `rule_simp <;> decide`; pin the step with `⇝[.rule]` / \
         `steps [...]`.{hint}\n{← rulesText acc}\nunderlying error: \
@@ -781,7 +781,7 @@ syntax "box" : sol_modality
 /-- Diamond modality. -/
 syntax "diamond" : sol_modality
 /-- The combined modality. No fast pinned path exists for it
-(`CandidateStep.lean` has no `firstStepCase_both`), so it falls back to the
+(`Calculus/CandidateStep.lean` has no `firstStepCase_both`), so it falls back to the
 positional walk. -/
 syntax "both" : sol_modality
 
@@ -1250,7 +1250,7 @@ syntax " ⇝*[" term,* "] " : sol_arrow
 /-- Several steps, rules computed and not shown (`steps!`). Costs the same as
 the listed form; use it when the rules are bookkeeping rather than content. -/
 syntax " ⇝* " : sol_arrow
-/-! The ASCII twins of the four arrows, for the same reason as `MultiStep.lean`'s
+/-! The ASCII twins of the four arrows, for the same reason as `Calculus/MultiStep.lean`'s
 `~>` family: the glyph is what the calculus draws and what goals print, but a
 derivation has to be typeable without an input method. -/
 /-- ASCII twin of `⇝`. -/

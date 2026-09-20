@@ -1,5 +1,5 @@
 import Solidity.Semantics
-import Solidity.Rules
+import Solidity.Calculus.Rules
 
 /-!
 # The state update of each terminal rule

@@ -1,4 +1,4 @@
-import Solidity.Rules
+import Solidity.Calculus.Rules
 import Solidity.Semantics
 
 /-!

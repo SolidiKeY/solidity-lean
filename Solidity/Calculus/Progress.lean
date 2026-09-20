@@ -1,6 +1,6 @@
-import Solidity.MultiStep
-import Solidity.Coverage
-import Solidity.JudgmentSplit
+import Solidity.Calculus.MultiStep
+import Solidity.Calculus.Coverage
+import Solidity.Calculus.JudgmentSplit
 
 /-!
 # Progress fails, and exactly where

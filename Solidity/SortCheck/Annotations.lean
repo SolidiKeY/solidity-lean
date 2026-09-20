@@ -1,4 +1,4 @@
-import Solidity.Rules
+import Solidity.Calculus.Rules
 
 /-!
 # Sort annotations of the solkey taclets

@@ -1,4 +1,4 @@
-import Solidity.Rules
+import Solidity.Calculus.Rules
 
 /-!
 # First steps, and what "the calculus covers this statement" means

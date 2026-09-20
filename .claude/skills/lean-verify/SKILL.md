@@ -55,8 +55,8 @@ Mathlib.
 
 ## Reading files
 
-Several files are enormous — `RuleSoundness.lean` is 10,864 lines,
-`Evm/Correctness.lean` 6,436, `Coverage.lean` 4,094, `Rules.lean` 3,486.
+Several files are enormous — `Calculus/RuleSoundness.lean` is 10,864 lines,
+`Evm/Correctness.lean` 6,436, `Calculus/Coverage.lean` 4,094, `Calculus/Rules.lean` 3,486.
 
 - `lean_file_outline` first, then `Read` with `offset`/`limit` on the one
   declaration you need.
