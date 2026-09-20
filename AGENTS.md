@@ -11,8 +11,9 @@ signature: `write`/`addM`/`copySt` nest, an allocation is the two parallel
 elements KeY writes, and `docs/lean-key-rule-map.md` is the symbol table.
 
 A second consumer is **the `SolKey` reader**, a Lean reader for KeY `.key`
-files in a separate repository. It imports only `Solidity.Rules` (and through
-it `Solidity.AST` and `Solidity.KeySort`). That is its whole dependency
+files in a separate repository. It imports only `Solidity.Calculus.Rules` and
+`Solidity.Calculus.KeyTaclets` (and through them `Solidity.AST` and
+`Solidity.KeySort`). That is its whole dependency
 surface: renaming a `RuleName` or changing a `ruleEffect` arm breaks its
 correspondence proofs, which is the point of it.
 
@@ -39,13 +40,12 @@ read them by path.
 
 | Editing | Read first |
 |---|---|
-| `Calculus/Rules.lean`, `Calculus/RuleSyntax.lean`, `Calculus/Uniqueness.lean`, `Calculus/RuleValidation.lean`, `Calculus/RuleShapes.lean`, `SortCheck/Annotations.lean` | `.claude/rules/rule-table.md` |
-| `Examples/**`, `Update/**` (derivations and notation) | `.claude/rules/derivations.md` |
-| `Calculus/RuleSoundness.lean`, `Wp/**`, `Counterexamples/**` | `.claude/rules/soundness.md` |
-| `Theory/**` (the term algebras and their rule names) | `.claude/rules/derivations.md` |
-| `Typing/Storage.lean`, `Typing/State.lean`, `Typing/Soundness.lean`, `Typing/Reachability.lean`, `Typing/WellFormedConsumers.lean` | `.claude/rules/typing.md` |
+| the rule table: `Calculus/{Rules,RuleSyntax,RuleShapes,RuleValidation,Uniqueness,Coverage,Completeness,KeyTaclets}.lean`, `SortCheck/**` | `.claude/rules/rule-table.md` |
+| `Examples/**`, `Paper/**`, `Tactics/**`, `Update/**`, `Theory/**` (derivations and notation) | `.claude/rules/derivations.md` |
+| `Calculus/RuleSoundness.lean`, `Calculus/RewriteSoundness.lean`, `Wp/**`, `Counterexamples/**` | `.claude/rules/soundness.md` |
+| `Typing/**`, `Semantics/**` | `.claude/rules/typing.md` |
 
-Other prose: `docs/lean-key-rule-map.md` is the authority for the name-by-name
+`docs/README.md` indexes the documents. `docs/lean-key-rule-map.md` is the authority for the name-by-name
 map to solkey's taclets (do not restate it in module docstrings);
 `docs/solc-alignment.md` for where the interpreter follows solc over KeY;
 `docs/compiler-verification.md`.
@@ -68,6 +68,7 @@ import changes and final confirmation. The `lean-verify` skill in
 |---|---|---|
 | `./run-lean.sh` | ~24 min CPU | `lake build` (default targets) then the solkey sort check |
 | `./scripts/check-paper.sh` | ~7 min CPU | `SolidityPaper` (`Solidity/Paper/`) |
+| `./scripts/check-doc-paths.sh` | seconds | every backticked `*.lean` in the prose names a file that exists |
 | `./scripts/check-paper-parity.sh` | seconds | `docs/paper-parity.md` names only chains that exist |
 | `node scripts/check-theory-rules.mjs` | seconds | `Theory/Rewrite.lean` has a constructor per paper rewrite rule |
 | `./scripts/check-solkey-parity.sh` | medium | the ported corpus against `tests/solkey/expected.tsv` |

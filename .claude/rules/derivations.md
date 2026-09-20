@@ -1,6 +1,8 @@
 ---
 paths:
   - "Solidity/Examples/**/*.lean"
+  - "Solidity/Paper/*.lean"
+  - "Solidity/Corpus/**/*.lean"
   - "Solidity/Tactics/*.lean"
   - "Solidity/Update/**/*.lean"
   - "Solidity/Update.lean"

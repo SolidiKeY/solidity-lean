@@ -3,11 +3,34 @@
 One line per module: what it defines and why it exists. Open the module's
 own `/-!` docstring for the detail; this file is the index, not a summary of
 them. Modules not listed here are examples or small helpers whose name says
-what they are.
+what they are. Open problems are flagged **OPEN** inline.
 
-Open problems are flagged **OPEN** inline. Layering: syntax in `AST.lean`,
-rule enumeration in `Calculus/Rules.lean`, proof relations in later files. New modules
-go in `Solidity.lean`.
+```
+Solidity/  KeySort.lean  AST.lean  Semantics.lean   the three that stay at the root
+           Semantics/   the interpreter's satellites: properties, stuck shapes,
+                        DecidableEq, the callback relation
+           Calculus/    the rule table and everything proved about it
+           Theory/      the data-structure theories as free-term algebras
+           Typing/      storage typing, state typing, type soundness, reachability
+           SortCheck/   the annotation table, the `.key` scanner, faithfulness
+           Tactics/     the derivation engine: `sol_derivation`, `sol_rewrite`,
+                        `sol_runs`, `sol_calculus`, and the simp sets they need
+           Update/      the symbolic-update algebra and the sequent layer
+           Wp/          the weakest-precondition verifier and `sol_wp`
+           Evm/         the EVM compiler and its correctness proof
+           Counterexamples/  one refutation per hypothesis that carries weight
+           Examples/    worked examples in the default build
+           Paper/       the paper's chains (`SolidityPaper`, its own target)
+           Corpus/      the ported solkey corpus (two targets, two routes)
+```
+
+**Directories group by topic, not by dependency order.** `Calculus/` does not
+sit below `Typing/`: `Calculus/Coverage.lean` imports `Typing/Soundness.lean`,
+while `Typing/Storage.lean` imports `Calculus/RuleSoundness.lean`. Lean is
+content — there is no module cycle — but a reader who takes a directory for a
+layer will be wrong. The layering that does hold is the small one: syntax in
+`AST.lean`, rule enumeration in `Calculus/Rules.lean`, proof relations after
+both. New modules go in `Solidity.lean`.
 
 ## The calculus
 
@@ -20,6 +43,7 @@ go in `Solidity.lean`.
 | `Calculus/Rules.lean` | One `sol_rule` per rule, organised by family. A rule is a taclet, not a rewrite: `StepEffect` carries `goals` (guard, update, residual), read as KeY's weakest precondition. Update syntax here is AST-only. |
 | `Calculus/RuleShapes.lean` | Structural checks: `mainBlock` reduction, `goals_nonempty`, `taclets_partitioned` (246 of 252 claimed, six listed with a reason), `twins_origin_eq`, `heuristics_eq_origin`. |
 | `Calculus/Completeness.lean` | `FirstStepCase`/`RuleStep` and the bridge `RuleStep.step_of_ruleApplies` with its converse. |
+| `Calculus/CandidateStep.lean` | `FirstStepCase` built from mutual exclusion instead of a ~190-entry list walk (`firstStepCase_box`/`_diamond`/`_both`). What makes a pinned step cheap. |
 | `Calculus/Coverage.lean` | `candidate_applies`, the syntactic `ResidueShape` (24 shapes no rule covers), and `RuleStep.complete_of_wellTyped` over the rule-independent fragment. |
 | `Calculus/Uniqueness.lean` | Rule mutual exclusion via the total dispatch `candidate` (`applicable_eq_candidate`). `RuleSetDisciplined` carries exactly three facts. A failing uniqueness build signals a condition overlap. |
 | `Calculus/Progress.lean` | Progress is **false** here and this proves it (`symbolicIte`, `not_progress`), plus the judgment-layer split that handles it. **OPEN**: `BlockStep.wellFounded` is a documented `sorry`. |
@@ -27,6 +51,7 @@ go in `Solidity.lean`.
 | `Calculus/Termination.lean` | Termination-certificate interface. **OPEN**: the concrete all-rules certificate. |
 | `Calculus/RuleValidation.lean` | Per-rule `native_decide` validation of unfold rules against the executable semantics. |
 | `Calculus/RuleSoundness.lean` | `<rule>_sound` per unfold rule: residual agrees with the original modulo scratch aliases. **OPEN**: `functionCallArgCapture_sound_inlined`, and one case each of `storagePushValueUnfoldRightSndArgument_sound` / `memoryWriteUnfoldRightSndResult_sound`. |
+| `Calculus/JudgmentSplit.lean` | KeY `ifthenelse_split` as a theorem about `SolidityJudgment.Holds`, not a rule: a single-successor `BlockStep` cannot yield two goals. |
 | `Calculus/RewriteSoundness.lean` | Lifts local soundness through untouched block suffixes and `⇝*`. `BlockExecAgree.append_left`/`append_right` are the context congruence the rewrite layer cannot have — unconditional on a prefix, freshness-guarded on a suffix. |
 
 ## The data-structure theories
@@ -76,7 +101,6 @@ witness.
 | `Wp/Terminal/Vocab.lean` | Bridges from each interpreter evaluator to the vocabulary readers. |
 | `Wp/Terminal/Update*.lean` | One `<rule>_update` theorem per terminal rule, **under the rule's guard**. |
 | `Wp/Terminal/Soundness.lean` | `terminalUpdate_sound`, `TerminalRuleStep`, `terminal_step_sound`. Not proved: no unfold rule is accidentally terminal. |
-| `Tactics/EvalBattery.lean` | `sol_eval_battery` / `sol_exec_eval`; depend on the interpreter alone. |
 
 ## Semantics and typing
 
@@ -92,6 +116,20 @@ witness.
 | `Typing/Reachability.lean` | Tightness of `wellFormed(storage)`: `Reachable`, `SVal.canonical`, `storage_tight`, `no_hidden_invariant`. All take `layoutOkB L`. `canonical` is the **shadow-free** fragment — what `writeProg` can build, since it builds with assignments and pushes and never a `pop`. **OPEN**: `reachable ⇒ canonical` (two `sorry`s), now also because a popped array carries a recycled slot. |
 | `Typing/WellFormedConsumers.lean` | The table of facts the taclets consume from a symbolic storage. **OPEN**: row C6's state-level form `saveStorage_canonical`. |
 | `Semantics/DecEq.lean` | The hand-written `DecidableEq SVal` and derived instances; shared by every `native_decide`. |
+| `Semantics/Callback.lean` | KeY `transferSemantics:withCallback` as a *relational* layer over `execStmt` (`ExecC`, `HoldsC`): a havoc branch is nondeterministic, so it cannot live in the total interpreter. |
+
+## The derivation engine
+
+The tactics and command elaborators every worked example is written with.
+They are infrastructure, not examples, which is why they are not under
+`Examples/`.
+
+| Module | What it is |
+|---|---|
+| `Tactics/Derivation.lean` | `sol_derivation`, `sol_runs`, `sol_calculus`, the `steps`/`steps!` navigation, `upd_norm`/`upd_merge`, and the alias helpers. The single largest shared dependency in the package. |
+| `Tactics/Rewrite.lean` | `sol_rewrite` and the `theory_step` family: the equality-arrow sibling of `sol_derivation`, resolving a rule name through `Theory/Rewrite.lean`'s `theoryRuleLemma`. |
+| `Tactics/RuleSimpAttr.lean` | `register_simp_attr rule_simp_set`, the `solidity.steps` trace class, and the `sol_rule` command that tags rules into the set. Its own module because a simp attribute must be initialized in a module imported by its users. |
+| `Tactics/EvalBattery.lean` | `sol_eval_battery` / `sol_exec_eval`; depend on the interpreter alone. |
 
 ## Sort faithfulness (the solkey cross-check)
 
@@ -132,15 +170,44 @@ Each is a refutation that pins down why a hypothesis or conjunct is there.
 | `Evm/Correctness.lean` | Leroy-style forward simulation: `compile_preserves_ok`/`_revert`, verified inlining, judgment transfer. See `docs/compiler-verification.md`. |
 | `Evm/Examples.lean` | `native_decide` differential tests and concrete instantiations. |
 
-## Examples
+## Examples, chains and corpora
 
-- `Corpus/Calculus/` — **the solkey corpus proved from `Calculus/Rules.lean`
-  alone** (`SolidityCalculus` target, generated by the same pass of
-  `scripts/solkey-port.mjs` as `Corpus/Wp/`). One `sol_calculus` per
+Three trees, told apart by the *proof route*, not by the subject:
+
+| Tree | Target | Route |
+|---|---|---|
+| `Examples/` | `Solidity` (default) | the rule table, through `Tactics/Derivation.lean` |
+| `Paper/` | `SolidityPaper` | the same, written as the calculus writes it |
+| `Corpus/Wp/` | `SolidityCorpus` | `sol_wp` — the interpreter, never the rule table |
+| `Corpus/Calculus/` | `SolidityCalculus` | `sol_calculus` — the rule table, never the interpreter |
+
+- `Examples/` — the block-rewriting examples (`—→`/`—↠`, anonymous, numbered
+  1–37 across the eight files) and `Examples/Derivations/` (named
+  `sol_derivation` theorems in `⇝[.rule]`, so a rule rename is a build
+  failure). `Examples/Taclets/` ports the KeY taclet tests and checks them
+  against the semantics with `native_decide`.
+- `SolidityPaper.lean` and `Paper/` — **the calculus's worked examples**: the
+  root carries the conventions and the imports, `Paper/` the chains, written
+  as the calculus writes them (`=> {U} <[ p ]>(φ) ~*> …`), update beside the
+  shrinking program; rule sequences are computed, not written.
+  `Paper/Storage.lean` (sections 1–4), `Paper/Memory.lean` (5–7),
+  `Paper/CrossDomain.lean` (8), `Paper/Control.lean` (9–10),
+  `Paper/Checks.lean` (the lines run against the interpreter). Not in the
+  default build (~30 min CPU); run `./scripts/check-paper.sh`. Which paper
+  example each chain is, and which have none, is `docs/paper-parity.md`,
+  checked by `./scripts/check-paper-parity.sh`.
+- `Corpus/Wp/` — the ported solkey corpus, nine contracts, generated by
+  `scripts/solkey-port.mjs` (except `Corpus/Wp/Net.lean` and
+  `Corpus/Wp/Rules.lean`, which are hand-written because there is no `.sol`
+  to port). Verdicts in `tests/solkey/expected.tsv`, scoreboard in
+  `docs/solkey-parity.md`.
+- `Corpus/Calculus/` — **the same obligations proved from `Calculus/Rules.lean`
+  alone**, from the same pass of the same generator. One `sol_calculus` per
   obligation: `seq_closes` runs the taclets to a closed frontier and the
   endpoint is decided. Verdicts in `tests/solkey/expected-calculus.tsv`,
-  scoreboard in `docs/calculus-parity.md`. Not in the default build.
-- `SolidityPaper.lean` — **the calculus's worked examples**: the conventions, and the imports of the five modules that hold the chains. Root of the `SolidityPaper` target, **not** in the default build (~30 min CPU); run `./scripts/check-paper.sh`.
-- `Solidity/Paper/` — the chains themselves, written as the calculus writes them (`=> {U} <[ p ]>(φ) ~*> …`), update beside the shrinking program; rule sequences are computed, not written. `Storage.lean` (sections 1–4), `Memory.lean` (5–7), `CrossDomain.lean` (8), `Control.lean` (9–10), `Checks.lean` (the lines run against the interpreter). Which paper example each chain is, and which have none, is `docs/paper-parity.md`, checked by `./scripts/check-paper-parity.sh`.
-- `Examples/Taclets/` — ports of the KeY taclet tests, verified against the semantics.
-- `Corpus/Wp/` — the ported solkey corpus (`SolidityCorpus` target, generated by `scripts/solkey-port.mjs`).
+  scoreboard in `docs/calculus-parity.md`.
+
+The two halves of `Corpus/` are **not** the same size: `Corpus/Wp/` covers
+nine contracts, `Corpus/Calculus/` only `TestSuite`. That gap is the real
+state of the calculus, not a gap in the layout — `docs/calculus-parity.md` is
+where it is accounted for. Keeping them as siblings is what makes it visible.
