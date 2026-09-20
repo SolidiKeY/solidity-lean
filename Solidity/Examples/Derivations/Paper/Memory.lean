@@ -35,7 +35,7 @@ after the declaration. -/
 sol_derivation memoryAliasWrite :
     => <[ Account memory mv = carol.account; mv@Account.balance = 100 ]>(φ)
   ~*> => { mv@Account := ref(carol.account) }
-          { memory := write(mv@Account.balance, 100) } (φ)
+          { memory := write(memory, mv@Account.balance, 100) } (φ)
 
 /-! ### `carol.account = david.account;`
 A reference-valued field assignment: the source is *aliased*, not snapshotted,
@@ -44,7 +44,7 @@ so both fields end up at one identity.  `writeRef`, not `write`. -/
 sol_derivation memoryFieldCopy :
     => <[ carol.account = david.account ]>(φ)
   ~*> => { pv@Account := ref(david.account) }
-          { memory := writeRef(carol.account, pv@Account) } (φ)
+          { memory := write(memory, carol.account, image(pv@Account)) } (φ)
 
 /-! ### `carol.account.balance = 10;` — the memory twin of the headline
 Written with the middle line the storage chain has, so the two can be read
@@ -59,7 +59,7 @@ sol_derivation memoryDeepFieldWrite :
              mv@Account.balance = rv@uint ]>(φ)
   ~*> => { rv@uint := default(uint) } { rv@uint := 10 }
           { mv@Account := ref(carol.account) }
-          { memory := write(mv@Account.balance, rv@uint) } (φ)
+          { memory := write(memory, mv@Account.balance, rv@uint) } (φ)
 
 /-! ### `v = carol.account.balance;` — the memory twin of the read -/
 
@@ -112,7 +112,7 @@ branch, which every operator produces and `+` cannot take (see
 sol_derivation memoryFieldWriteCapturedRhs :
     => <[ carol.age = a + b ]>(φ)
   ~*> [ => { pv@uint := default(uint) } { pv@uint := (a + b) }
-          { memory := write(carol.age, pv@uint) } (φ),
+          { memory := write(memory, carol.age, pv@uint) } (φ),
         { pv@uint := default(uint) } ¬⊤ => { pv@uint := default(uint) } ⊤,
         { pv@uint := default(uint) } ¬⊤ => { pv@uint := default(uint) } ⊥ ]
 
@@ -128,7 +128,7 @@ a `clear`. -/
 sol_derivation memoryDeleteRoot :
     => <[ Person memory mv2 = carol; carol.age = 33; delete carol;
           oldAge = mv2@Person.age; newAge = carol.age ]>(φ)
-  ~*> => { mv2@Person := ref(carol) } { memory := write(carol.age, 33) }
+  ~*> => { mv2@Person := ref(carol) } { memory := write(memory, carol.age, 33) }
           { clear(carol) } { oldAge := mv2@Person.age }
           { newAge := carol.age } (φ)
 
@@ -137,7 +137,7 @@ sol_derivation memoryDeleteField :
           delete carol.account; oldBal = mv@Account.balance;
           newBal = carol.account.balance ]>(φ)
   ~*> => { mv@Account := ref(carol.account) }
-          { memory := write(mv@Account.balance, 100) }
+          { memory := write(memory, mv@Account.balance, 100) }
           { clear(carol.account) } { oldBal := mv@Account.balance }
           { mv@Account := ref(carol.account) }
           { newBal := mv@Account.balance } (φ)
@@ -181,7 +181,7 @@ an assumption carried along. -/
 
 sol_derivation memoryArrayAlloc :
     => <[ UintArray memory mv ]>(φ)
-  ~> => { alloc(UintArray, mv) } (φ)
+  ~> => { mv := freshId(alloc(UintArray)) ‖ memory := alloc(UintArray) } (φ)
 
 sol_derivation memoryArrayReadBox :
     => [ v = mv@UintArray[i] ](φ)
@@ -191,7 +191,7 @@ sol_derivation memoryArrayReadBox :
 sol_derivation memoryArrayWriteBox :
     => [ mv@UintArray[i] = 100 ](φ)
   ~*> [ inBounds(mv@UintArray[i]) =>
-          { memory := write(mv@UintArray[i], 100) } [ ](φ),
+          { memory := write(memory, mv@UintArray[i], 100) } [ ](φ),
         ¬inBounds(mv@UintArray[i]) => ⊤ ]
 
 /-! ### `carol.account.values[i] = 42;` — a nested memory path under an index -/
@@ -204,7 +204,7 @@ sol_derivation memoryNestedArrayWrite :
           { rv@uint := default(uint) } { rv@uint := 42 }
           { mv@Account := ref(carol.account) }
           { mv@UintArray := ref(mv@Account.values) }
-          { memory := write(mv@UintArray[i], rv@uint) } [ ](φ),
+          { memory := write(memory, mv@UintArray[i], rv@uint) } [ ](φ),
         { rv@uint := default(uint) } { rv@uint := 42 }
           { mv@Account := ref(carol.account) }
           { mv@UintArray := ref(mv@Account.values) } ¬inBounds(mv@UintArray[i]) =>
@@ -241,7 +241,7 @@ sol_derivation memoryArrayIncIndexWrite :
           { rv@uint := default(uint) } { rv@uint := amount }
           { mv@UintArray := ref(mv@UintArray) }
           { idx@uint := default(uint) } { bump(++i) ‖ idx@uint := ++i }
-          { memory := write(mv@UintArray[idx@uint], rv@uint) } [ ](φ),
+          { memory := write(memory, mv@UintArray[idx@uint], rv@uint) } [ ](φ),
         { rv@uint := default(uint) } { rv@uint := amount }
           { mv@UintArray := ref(mv@UintArray) }
           { idx@uint := default(uint) } { bump(++i) ‖ idx@uint := ++i }
@@ -260,7 +260,7 @@ sol_derivation memoryArrayWriteRefSource :
   ~*> [ { mv@Account := ref(david.account) } { pv@Token := ref(mv@Account.token) }
           inBounds(mv2@TokenArray[i]) =>
           { mv@Account := ref(david.account) } { pv@Token := ref(mv@Account.token) }
-          { memory := writeRef(mv2@TokenArray[i], pv@Token) } [ ](φ),
+          { memory := write(memory, mv2@TokenArray[i], image(pv@Token)) } [ ](φ),
         { mv@Account := ref(david.account) } { pv@Token := ref(mv@Account.token) }
           ¬inBounds(mv2@TokenArray[i]) =>
           { mv@Account := ref(david.account) }
@@ -274,7 +274,7 @@ sol_derivation memoryFieldWriteFromArrayElem :
     => [ carol.account.token = mv2@TokenArray[i] ](φ)
   ~*> [ inBounds(mv2@TokenArray[i]) =>
           { pv@Token := ref(mv2@TokenArray[i]) } { mv@Account := ref(carol.account) }
-          { memory := writeRef(mv@Account.token, pv@Token) } [ ](φ),
+          { memory := write(memory, mv@Account.token, image(pv@Token)) } [ ](φ),
         ¬inBounds(mv2@TokenArray[i]) => ⊤ ]
 
 /-! ### `Token memory tok = carol.account.tokens[i];`

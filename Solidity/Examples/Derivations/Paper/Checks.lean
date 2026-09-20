@@ -80,11 +80,11 @@ is the whole reason the calculus's `memoryArrayFreshAlloc` writes a length:
 `memoryArrayAlloc` above allocates, and without a size nothing can be stored. -/
 example :
     (Frontier.check
-      [ seq!{ { alloc(UintArray, mv) } inBounds(mv@UintArray[i]) =>
-                { alloc(UintArray, mv) }
-                { memory := write(mv@UintArray[i], 100) } [ ](i == 0) },
-        seq!{ { alloc(UintArray, mv) } ¬inBounds(mv@UintArray[i]) =>
-                { alloc(UintArray, mv) } ⊤ } ]
+      [ seq!{ { mv := freshId(alloc(UintArray)) ‖ memory := alloc(UintArray) } inBounds(mv@UintArray[i]) =>
+                { mv := freshId(alloc(UintArray)) ‖ memory := alloc(UintArray) }
+                { memory := write(memory, mv@UintArray[i], 100) } [ ](i == 0) },
+        seq!{ { mv := freshId(alloc(UintArray)) ‖ memory := alloc(UintArray) } ¬inBounds(mv@UintArray[i]) =>
+                { mv := freshId(alloc(UintArray)) ‖ memory := alloc(UintArray) } ⊤ } ]
       storeI0) = true := by
   native_decide
 
@@ -95,7 +95,7 @@ example :
                  mv@Account.balance = 100 ]>(carol.account.balance == 100) }).check
         State.exampleStore
       = (seq!{ => { mv@Account := ref(carol.account) }
-                  { memory := write(mv@Account.balance, 100) }
+                  { memory := write(memory, mv@Account.balance, 100) }
                   <[ ]>(carol.account.balance == 100) }).check
           State.exampleStore := by
   native_decide
@@ -106,7 +106,7 @@ put there. -/
 example :
     (seq!{ => <[ alice.age = 34; Person memory mv2 = alice;
                  v = mv2@Person.age ]>(v == 34) }).check State.exampleStore
-      = (seq!{ => { storage := save(alice.age, 34) } { alloc(Person, mv2, alice) }
+      = (seq!{ => { storage := save(alice.age, 34) } { mv2 := freshId(alloc(Person, alice)) ‖ memory := alloc(Person, alice) }
                   { v := mv2@Person.age } <[ ]>(v == 34) }).check
           State.exampleStore := by
   native_decide

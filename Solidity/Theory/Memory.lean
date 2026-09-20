@@ -1,3 +1,4 @@
+import Solidity.Theory.Terms
 import Solidity.DecEq
 
 /-!
@@ -51,241 +52,48 @@ namespace Theory
 
 open Semantics
 
-/-- `\unique Identity idC(IdentityPrim, List)` (`memoryRules.key`): the
-identity reached from a root along a path of fields.  `\unique` is
-injectivity, which `DecidableEq` supplies — `memoryExample2` closes on
-exactly that. -/
-inductive Identity where
-  | idC (root : Nat) (path : List Seg)
-  deriving Repr, DecidableEq
+/-! ## What is here and what is one module down
 
-namespace Identity
-
-/-- `idCC(idp)` — the root itself, as an identity. -/
-@[match_pattern] abbrev idCC (r : Nat) : Identity := .idC r []
-
-/-- `idC(idp, consr(flds, a))`: the identity one field further down. -/
-def extend : Identity -> Seg -> Identity
-  | .idC r p, a => .idC r (p ++ [a])
-
-/-- The root a path identity hangs from. -/
-def root : Identity -> Nat
-  | .idC r _ => r
-
-@[simp] theorem root_idC (r : Nat) (p : List Seg) : (Identity.idC r p).root = r := rfl
-
-/-- The path from the root. -/
-def path : Identity -> List Seg
-  | .idC _ p => p
-
-@[simp] theorem path_idC (r : Nat) (p : List Seg) : (Identity.idC r p).path = p := rfl
-
-@[simp] theorem extend_idC (r : Nat) (p : List Seg) (a : Seg) :
-    (Identity.idC r p).extend a = .idC r (p ++ [a]) := rfl
-
-end Identity
-
-/-- A memory slot's contents (`memoryHeader.key`: `Prim, Identity ⊑ MemValue`).
-`dflt` is `defaultValue<[α]>`/`defVal`, resolved on read. -/
-inductive MemValue where
-  | prim (p : PrimVal)
-  | ident (i : Identity)
-  | dflt
-  deriving Repr, DecidableEq
-
-/-- An interpreter slot value as a `MemValue`: the interpreter's resolved
-`Nat` names the root of a path identity with an empty path, which is what
-`Update/Theory.lean` writes and what `resolve` inverts. -/
-def MVal.toMemValue : MVal -> MemValue
-  | .prim p => .prim p
-  | .ref n => .ident (.idCC n)
-
-namespace MemValue
-
-/-! ## Casts
-
-`default<[α]>(idC(idp, flds), a)` is resolved by the sort the read is taken
-at, and the two sorts answer differently: a primitive member of a fresh root
-reads as the primitive default, a *reference* member reads as the identity one
-field further down.  That second one is the whole of the paper's "a reference
-member of a fresh root reads as the identity reached by extending the path, so
-the struct it points to exists as soon as its parent does". -/
-
-/-- `default<[prim]>(idC(idp, flds), a) ⇝ defaultValue<[prim]>` — the cast
-that resolves a sort-free default at a primitive sort. -/
-def asPrim : MemValue -> MVal
-  | prim p => .prim p
-  | ident _ => MVal.int 0
-  | dflt => MVal.int 0
-
-/-- `default<[Identity]>(idC(idp, flds), a) ⇝ idC(idp, consr(flds, a))` — the
-cast at the `Identity` sort, which needs the location the read was taken at
-and is why it takes `loc` and `a`. -/
-def asIdentity : MemValue -> Identity -> Seg -> Identity
-  | ident i, _, _ => i
-  | prim _, loc, a => loc.extend a
-  | dflt, loc, a => loc.extend a
-
-end MemValue
-
-/-- A term of solkey's memory theory. -/
-inductive Memory where
-  /-- `\unique Memory mtMem`. -/
-  | mtMem
-  /-- The pre-state heap as an opaque leaf — the reason this algebra, unlike
-  `Theory/Storage.lean`'s, is a theory of terms *over a concrete state*. -/
-  | pre
-  /-- `write(mem, id, a, v)`. -/
-  | write (mem : Memory) (id : Identity) (a : Seg) (v : MemValue)
-  /-- `addM(mem, idp)`, carrying the allocated type beside the root — see the
-  docstring. -/
-  | addM (mem : Memory) (idp : Nat) (ty : RefTy)
-  deriving Repr
+The sorts, the path-identity resolver and the readers are
+`Theory/Terms.lean`: `read` on a `copySt` view is a `find` into storage, so
+they have to be declared in the same block as the storage reader.  What is
+here is `memoryRules.key`'s taclets and the `new` predicate. -/
 
 namespace Memory
 
 open MemValue
 
-/-! ## Resolving a path identity
-
-KeY never does this: `idC(idp, flds)` *is* the name of the location and the
-taclets index `read` by it.  The interpreter gives every object its own `Nat`,
-so reading the pre-state leaf means following the path through the heap first.
-That is the one place the two models have to be brought together, and it is
-here rather than inside `readIn` so that everything below it is the algebra. -/
-
-/-- One step of a path, in the interpreter's heap. -/
-def step (h : List (Nat × MObj)) (n : Nat) : Seg -> Option Nat
-  | Seg.field f =>
-      match lookupBy n h with
-      | some (MObj.struct fields) =>
-          match lookupBy f fields with
-          | some (MVal.ref m) => some m
-          | _ => none
-      | _ => none
-  | Seg.at i =>
-      match lookupBy n h with
-      | some (MObj.array elems) =>
-          if hb : 0 ≤ i ∧ i.toNat < elems.length then
-            match elems.get ⟨i.toNat, hb.2⟩ with
-            | MVal.ref m => some m
-            | _ => none
-          else none
-      | _ => none
-
-/-- The object a path identity names, in the interpreter's heap.  `none` where
-the path leaves the heap — an unallocated root, a primitive link, an
-out-of-bounds index — which is where a read falls back to `dflt`. -/
-def resolveFrom (h : List (Nat × MObj)) (n : Nat) : List Seg -> Option Nat
-  | [] => some n
-  | a :: rest =>
-      match step h n a with
-      | some m => resolveFrom h m rest
-      | none => none
-
-/-- `resolveFrom` at a path identity. -/
-def resolve (h : List (Nat × MObj)) : Identity -> Option Nat
-  | .idC r p => resolveFrom h r p
-
-/-- A root identity resolves to its root.  The equation `Update/Theory.lean`
-needs to keep its bridges `rfl`. -/
-@[simp] theorem resolve_idCC (h : List (Nat × MObj)) (n : Nat) :
-    resolve h (.idCC n) = some n := rfl
-
-/-! ## `read`
-
-KeY's read is total and sort-indexed; here it is total and sort-free, with
-`dflt` standing for `default<[α]>(id, a)` until a cast resolves it.  On the
-`pre` leaf the read is the interpreter's own, which is what makes a taclet
-theorem below a statement about a real heap. -/
-
-/-- A slot of the pre-state heap at a resolved object, `Semantics.readM` at
-one segment with its halts read as `dflt` (KeY's reads do not fault; the
-bounds test is the taclet's guard). -/
-def preRead (h : List (Nat × MObj)) (n : Nat) (a : Seg) : MemValue :=
-  match lookupBy n h, a with
-  | some (MObj.struct fields), Seg.field f =>
-      match lookupBy f fields with
-      | some v => MVal.toMemValue v
-      | none => dflt
-  | some (MObj.array elems), Seg.at i =>
-      if hb : 0 ≤ i ∧ i.toNat < elems.length then
-        MVal.toMemValue (elems.get ⟨i.toNat, hb.2⟩)
-      else dflt
-  | _, _ => dflt
-
-/-- …at a path identity, resolved first. -/
-def preReadId (h : List (Nat × MObj)) (id : Identity) (a : Seg) : MemValue :=
-  match resolve h id with
-  | some n => preRead h n a
-  | none => dflt
-
-/-- `read<[α]>(mem, id, a)`, against a concrete pre-state heap. -/
-def readIn (h : List (Nat × MObj)) : Memory -> Identity -> Seg -> MemValue
-  | mtMem, _, _ => dflt
-  | pre, id, a => preReadId h id a
-  | write mem id1 a1 v, id2, a2 =>
-      if id1 = id2 ∧ a1 = a2 then v else readIn h mem id2 a2
-  | addM mem idp _, id, a =>
-      if idp = id.root then dflt else readIn h mem id a
-
-/-- `read<[Identity]>(mem, id, a)`. -/
-def readId (h : List (Nat × MObj)) (mem : Memory) (id : Identity) (a : Seg) :
-    Identity :=
-  (readIn h mem id a).asIdentity id a
-
-/-! ## `readR`
-
-`readR<[α]>(mem, id, flds)` follows a whole path from an identity, resolving
-each field to the identity it names before reading the next.  KeY states it
-with `firsts`/`last`; the same recursion from the front is `readRId` composed
-with one final `read`, and `readRCons` below is that equality. -/
-
-/-- The identity a whole path names: `readR<[Identity]>`. -/
-def readRId (h : List (Nat × MObj)) (mem : Memory) : Identity -> List Seg -> Identity
-  | id, [] => id
-  | id, a :: rest => readRId h mem (readId h mem id a) rest
-
-/-- `readR<[α]>(mem, id, flds)`.  The empty path reads the identity itself
-(the paper's `readREmptyPath`); a non-empty one resolves all but the last
-field and reads there. -/
-def readR (h : List (Nat × MObj)) (mem : Memory) (id : Identity) :
-    List Seg -> MemValue
-  | [] => MemValue.ident id
-  | [a] => readIn h mem id a
-  | a :: b :: rest => readR h mem (readId h mem id a) (b :: rest)
-
 /-! ## The taclets of `memoryRules.key` -/
 
 /-- `read<[α]>(write(mem, id1, a1, v), id2, a2)`. -/
-@[simp] theorem readOnWrite (h : List (Nat × MObj)) (mem : Memory)
+@[simp] theorem readOnWrite (mem : Memory)
     (id1 id2 : Identity) (a1 a2 : Seg) (v : MemValue) :
-    readIn h (write mem id1 a1 v) id2 a2 =
-      if id1 = id2 ∧ a1 = a2 then v else readIn h mem id2 a2 := rfl
+    readIn (write mem id1 a1 v) id2 a2 =
+      if id1 = id2 ∧ a1 = a2 then v else readIn mem id2 a2 := rfl
 
 /-- `read<[α]>(mtMem, id, a) ⇝ default<[α]>(id, a)`. -/
-@[simp] theorem readFromEmptyMemory (h : List (Nat × MObj)) (id : Identity)
-    (a : Seg) : readIn h mtMem id a = dflt := rfl
+@[simp] theorem readFromEmptyMemory (id : Identity)
+    (a : Seg) : readIn mtMem id a = dflt := rfl
 
 /-- `read<[α]>(addM(mem, idp1), idC(idp2, flds), a)`: KeY splits on
 `idp1 = idp2` and answers `default<[α]>` on the fresh root, reading through
 otherwise.  This is that taclet. -/
-@[simp] theorem readOnAddM (h : List (Nat × MObj)) (mem : Memory) (idp : Nat)
+@[simp] theorem readOnAddM (mem : Memory) (idp : IdentityPrim)
     (ty : RefTy) (id : Identity) (a : Seg) :
-    readIn h (addM mem idp ty) id a =
-      if idp = id.root then dflt else readIn h mem id a := rfl
+    readIn (addM mem idp ty) id a =
+      if idp = id.root then dflt else readIn mem id a := rfl
 
 /-- `readAddEqual`: a read of the root just added is its default. -/
-@[simp] theorem readAddEqual (h : List (Nat × MObj)) (mem : Memory) (r : Nat)
+@[simp] theorem readAddEqual (mem : Memory) (r : IdentityPrim)
     (ty : RefTy) (flds : List Seg) (a : Seg) :
-    readIn h (addM mem r ty) (.idC r flds) a = dflt := by
+    readIn (addM mem r ty) (.idC r flds) a = dflt := by
   simp [readOnAddM, Identity.root]
 
 /-- `readAddDifferent`: a read below any other root passes through. -/
-theorem readAddDifferent (h : List (Nat × MObj)) (mem : Memory) (r1 r2 : Nat)
+theorem readAddDifferent (mem : Memory) (r1 r2 : IdentityPrim)
     (ty : RefTy) (flds : List Seg) (a : Seg) (hne : r1 ≠ r2) :
-    readIn h (addM mem r1 ty) (.idC r2 flds) a =
-      readIn h mem (.idC r2 flds) a := by
+    readIn (addM mem r1 ty) (.idC r2 flds) a =
+      readIn mem (.idC r2 flds) a := by
   simp [readOnAddM, Identity.root, hne]
 
 /-- `defaultValueInt` / `defaultDef`: a primitive default is `0`. -/
@@ -293,26 +101,74 @@ theorem readAddDifferent (h : List (Nat × MObj)) (mem : Memory) (r1 r2 : Nat)
 
 /-- **`defaultDefIdentity`** — `default<[Identity]>(idC(idp, flds), a)` is
 `idC(idp, consr(flds, a))`.  The taclet that gives a fresh root its members. -/
-@[simp] theorem defaultDefIdentity (r : Nat) (flds : List Seg) (a : Seg) :
+@[simp] theorem defaultDefIdentity (r : IdentityPrim) (flds : List Seg) (a : Seg) :
     MemValue.asIdentity dflt (.idC r flds) a = .idC r (flds ++ [a]) := rfl
 
 /-- `idCCDef`: `idCC(idp) ⇝ idC(idp, nil)`. -/
-@[simp] theorem idCCDef (r : Nat) : Identity.idCC r = Identity.idC r [] := rfl
+@[simp] theorem idCCDef (r : IdentityPrim) : Identity.idCC r = Identity.idC r [] := rfl
 
 /-- `readREmpty`: a one-field path is one read. -/
-@[simp] theorem readREmpty (h : List (Nat × MObj)) (mem : Memory)
-    (id : Identity) (a : Seg) : readR h mem id [a] = readIn h mem id a := rfl
+@[simp] theorem readREmpty (mem : Memory)
+    (id : Identity) (a : Seg) : readR mem id [a] = readIn mem id a := rfl
 
 /-- `readRCons`: a longer path resolves its first field to an identity and
 continues from there.  KeY writes the same step as `firsts`/`last`. -/
-@[simp] theorem readRCons (h : List (Nat × MObj)) (mem : Memory)
+@[simp] theorem readRCons (mem : Memory)
     (id : Identity) (a1 a2 : Seg) (flds : List Seg) :
-    readR h mem id (a1 :: a2 :: flds) =
-      readR h mem (readId h mem id a1) (a2 :: flds) := rfl
+    readR mem id (a1 :: a2 :: flds) =
+      readR mem (readId mem id a1) (a2 :: flds) := rfl
 
 /-- The paper's `readREmptyPath`: the empty path reads the identity itself. -/
-@[simp] theorem readREmptyPath (h : List (Nat × MObj)) (mem : Memory)
-    (id : Identity) : readR h mem id [] = MemValue.ident id := rfl
+@[simp] theorem readREmptyPath (mem : Memory)
+    (id : Identity) : readR mem id [] = MemValue.ident id := rfl
+
+/-! ## `defVal`, `defaultValue<[α]>` and `isPrimitive`
+
+Three symbols of `memoryRules.key` that were implicit here.  `defVal` is the
+sort-free reset constant a delete writes, resolved on read by `defValResolve`;
+`defaultValue<[α]>` is the sorted one the casts already produce; `isPrimitive`
+is the predicate the sort-directed delete taclets branch on.
+
+They are *names* rather than new notions: `MemValue.dflt` already is the
+sort-free default, and `Ty.isPrimitive` already is the test the interpreter
+uses.  Naming them is what lets a chain and a rule cite the taclet KeY
+cites. -/
+
+/-- `\unique Prim defVal` — a location reset outright, sorted so it serves
+storage and memory alike.  `defValResolve` is the cast that reads it. -/
+def defVal : MemValue := .dflt
+
+/-- `defaultValue<[prim]>` — `defVal` at a primitive sort, which is
+`defaultDefInt`'s right-hand side. -/
+@[simp] theorem defValResolvePrim : MemValue.asPrim defVal = MVal.int 0 := rfl
+
+/-- `defaultValue<[Identity]>(idC(idp, flds), a)` — `defVal` at the identity
+sort is the identity one field further down. -/
+@[simp] theorem defValResolveIdentity (r : IdentityPrim) (flds : List Seg) (a : Seg) :
+    MemValue.asIdentity defVal (.idC r flds) a = .idC r (flds ++ [a]) := rfl
+
+/-- `isPrimitive(f)` — the predicate the delete taclets branch on.  A `Seg`
+carries no type here, so the test is the field's declared one, which is the
+same test `Semantics` makes. -/
+def isPrimitive (t : Ty) : Bool := t.isPrimitive
+
+/-! ## `readR` in KeY's own shape
+
+`readRCons` is stated upstream with `firsts`/`last`: resolve all but the last
+field, then read there.  The definition here recurses from the front, because
+that is what keeps it structural and every chain in `Paper/Theory.lean` steps
+through `readREmpty`/`readRCons` by `rfl`.  This is the same rule in KeY's
+spelling, as a theorem. -/
+
+theorem readR_eq_firsts_last (mem : Memory) (id : Identity) :
+    forall (flds : List Seg) (h : flds ≠ []),
+      readR mem id flds = readIn mem (readRId mem id flds.dropLast) (flds.getLast h)
+  | [], h => absurd rfl h
+  | [_], _ => rfl
+  | a :: b :: rest, _ => by
+      show readR mem (readId mem id a) (b :: rest) = _
+      rw [readR_eq_firsts_last mem (readId mem id a) (b :: rest) (by simp)]
+      rfl
 
 /-! ## `new`
 
@@ -321,38 +177,42 @@ theory: it is what a freshly allocated identity's `\add` clause asserts.  Its
 three taclets are the three ways a memory term can be built. -/
 
 /-- `new(mem, idp)` against a concrete pre-state heap: `idp` is unallocated. -/
-def new (h : List (Nat × MObj)) : Memory -> Nat -> Bool
+def new : Memory -> IdentityPrim -> Bool
   | mtMem, _ => true
-  | pre, idp => (lookupBy idp h).isNone
-  | write mem _ _ _, idp => new h mem idp
-  | addM mem idp1 _, idp2 => if idp1 = idp2 then false else new h mem idp2
+  | pre h, idp => (lookupBy idp.toNat h).isNone
+  | write mem _ _ _, idp => new mem idp
+  | addM mem idp1 _, idp2 => if idp1 = idp2 then false else new mem idp2
+  -- `structMemoryRules.key` states no `new` taclet for `copySt`: the copy
+  -- goes under a root its own `addM` already minted, so freshness is whatever
+  -- the term below it says.
+  | copySt mem _ _, idp => new mem idp
 
 /-- `new(mtMem, idp) ⇝ true`. -/
-@[simp] theorem newFromEmptyMemory (h : List (Nat × MObj)) (idp : Nat) :
-    new h mtMem idp = true := rfl
+@[simp] theorem newFromEmptyMemory (idp : IdentityPrim) :
+    new mtMem idp = true := rfl
 
 /-- `new(write(mem, id1, a1, v), idp) ⇝ new(mem, idp)` — writing a slot
 allocates nothing. -/
-@[simp] theorem newFromWrite (h : List (Nat × MObj)) (mem : Memory)
-    (id : Identity) (a : Seg) (v : MemValue) (idp : Nat) :
-    new h (write mem id a v) idp = new h mem idp := rfl
+@[simp] theorem newFromWrite (mem : Memory)
+    (id : Identity) (a : Seg) (v : MemValue) (idp : IdentityPrim) :
+    new (write mem id a v) idp = new mem idp := rfl
 
 /-- **`newFromAdd`** — `new(addM(mem, idp1), idp2)` is `false` when the two
 agree and recurses otherwise.  The taclet, not an approximation of it: the
 root `addM` allocates is carried in the term. -/
-@[simp] theorem newFromAdd (h : List (Nat × MObj)) (mem : Memory)
-    (idp1 : Nat) (ty : RefTy) (idp2 : Nat) :
-    new h (addM mem idp1 ty) idp2 =
-      if idp1 = idp2 then false else new h mem idp2 := rfl
+@[simp] theorem newFromAdd (mem : Memory)
+    (idp1 : IdentityPrim) (ty : RefTy) (idp2 : IdentityPrim) :
+    new (addM mem idp1 ty) idp2 =
+      if idp1 = idp2 then false else new mem idp2 := rfl
 
 /-- `newAddSame`: the root just added is not fresh. -/
-@[simp] theorem newAddSame (h : List (Nat × MObj)) (mem : Memory) (r : Nat)
-    (ty : RefTy) : new h (addM mem r ty) r = false := by simp
+@[simp] theorem newAddSame (mem : Memory) (r : IdentityPrim)
+    (ty : RefTy) : new (addM mem r ty) r = false := by simp
 
 /-- `newAddDifferent`: any other root is as fresh as it was. -/
-theorem newAddDifferent (h : List (Nat × MObj)) (mem : Memory) (r1 r2 : Nat)
+theorem newAddDifferent (mem : Memory) (r1 r2 : IdentityPrim)
     (ty : RefTy) (hne : r1 ≠ r2) :
-    new h (addM mem r1 ty) r2 = new h mem r2 := by simp [hne]
+    new (addM mem r1 ty) r2 = new mem r2 := by simp [hne]
 
 end Memory
 end Theory

@@ -119,21 +119,21 @@ namespace TheoryRule
 /-- The theorems a rule is — one per sort it is stated at.
 
 A paper rule is one rule, but this package states it once per algebra: `findPath`
-is `StValue.find_cons` over a plain `Struct` and `XStruct.findPath` over one that
-may hold a copy view, and a chain applies whichever its line is written in.  So
+is `StValue.find_cons` over `findSt`, the reader that stops at a memory view,
+and `StValue.find_cons_view` over `find`, the one that crosses into it.  So
 the table is a list, tried in order, and not a single name.
 
 A total match, so the table cannot fall behind the enumeration; double-backtick
 names, so it cannot fall behind the theories. -/
 def lemmaNames : TheoryRule -> List Lean.Name
-  | selectStoreEqual      => [``StValue.selectOnStore, ``XStruct.selectOnStore]
-  | selectStoreDifferent  => [``StValue.selectOnStore, ``XStruct.selectOnStore]
+  | selectStoreEqual      => [``StValue.selectOnStore]
+  | selectStoreDifferent  => [``StValue.selectOnStore]
   | selectEmptyStruct     => [``StValue.selectOnEmptyStorage]
-  | findEmptyPath         => [``StValue.findDefinitionEmpty, ``XStruct.findEmptyPath]
-  | findPath              => [``XStruct.findPath, ``StValue.find_cons]
+  | findEmptyPath         => [``StValue.findDefinitionEmpty]
+  | findPath              => [``StValue.find_cons, ``StValue.find_cons_view]
   | saveEmptyPath         => [``StValue.saveOnEmpty]
   | savePath              => [``StValue.save_cons]
-  | findSingleton         => [``XStruct.findSingleton, ``StValue.findDefinitionCons]
+  | findSingleton         => [``StValue.findDefinitionCons]
   | saveSingleton         => [``StValue.save_single]
   | findOnSave            => [``StValue.find_save_same]
   | findOnSaveDifferent   => [``StValue.find_save_frame]
@@ -164,10 +164,10 @@ def lemmaNames : TheoryRule -> List Lean.Name
   | newAddDifferent       => [``Memory.newAddDifferent]
   | newWrite              => [``Memory.newFromWrite]
   | newEmptyMem           => [``Memory.newFromEmptyMemory]
-  | readCopySt            => [``XMemory.readCopySt]
-  | readCopyStIdentity    => [``XMemory.readCopyStIdentity]
-  | readCopyStOther       => [``XMemory.readCopyStOther]
-  | findCopyMem           => [``XStruct.findCopyMem]
+  | readCopySt            => [``Memory.readCopySt]
+  | readCopyStIdentity    => [``Memory.readCopyStIdentity]
+  | readCopyStOther       => [``Memory.readCopyStOther]
+  | findCopyMem           => [``StValue.findCopyMem]
 
 /-- Every rule of the enumeration, for the parity check and for `#theory_rules`. -/
 def all : List TheoryRule :=

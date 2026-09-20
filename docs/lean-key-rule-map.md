@@ -625,22 +625,39 @@ assumption about it.
 
 | taclet | Lean | state |
 |---|---|---|
-| `findOnCopy` | `XStruct.findCopyMem` | done |
-| `readFromCopyToStorage` | `XMemory.readCopySt` | done |
-| `readFromCopyToStorageIdentity` | `XMemory.readCopyStIdentity` | done |
-| — | `XMemory.readCopyStOther` | the paper's split form of the frame |
+| `findOnCopy` | `StValue.findCopyMem` | done |
+| `readFromCopyToStorage` | `Memory.readCopySt` | done |
+| `readFromCopyToStorageIdentity` | `Memory.readCopyStIdentity` | done |
+| — | `Memory.readCopyStOther` | the paper's split form of the frame |
 
-The views are their own sorts rather than constructors of `Struct`/`Memory`:
-putting them in would make the two algebras mutually recursive, and so the two
-files one file, for a symbol that upstream loads on top of both. `XStruct` is
-`Struct` with a `copyMem` leaf and `XMemory` is `Memory` with a `copySt` node,
-with `of` the embedding of the plain algebra.
+The views are constructors of the two sorts, as KeY declares them
+(`Struct copyMem(Struct, Memory, Identity)`,
+`Memory copySt(Memory, IdentityPrim, Struct)`), which makes `Struct`,
+`StValue` and `Memory` one mutual inductive — `Theory/Terms.lean`.
 
-What this does not model is a view nested in a view. No worked example nests
-one and no taclet rewrites under one, so it is a limit of the encoding rather
-than a gap in the port. The interpreter's `copyStToM`/`copyMem`
+Three functions gain an arm upstream has no taclet for, each chosen so the rule
+that *does* exist subsumes it: `selectSt` on a view pushes the view down and
+reads nothing; `storeAt` puts a `storeSt` shadow node over it (replacing it
+would make `find_save_frame` false); `delNode` answers `mtSt`, since it is
+eager here and cannot walk a view whose members it does not know.
+
+What this does not model is a view nested in a view. `readIn` reads its copied
+struct with `findSt`, the reader that stops at a view, which is what keeps every
+definition structural and so kernel-reducible; `StValue.find_eq_findSt` states
+where the two readers agree. No worked example nests one and no taclet rewrites
+under one. The interpreter's `copyStToM`/`copyMem`
 (`Semantics.lean`) remain the *update*-level bridge
 (`Update/TacletTable.openBridges`); this is the term-level one.
+
+### Where the copy nests
+
+KeY writes a storage-to-memory declaration as
+`copySt(addM(memory, freshIdp), freshIdp, find<[Struct]>(storage, sp))` — the
+allocation *inside* the copy's first argument. `Rules.allocTerm` writes
+`copySt(memory, T, sp)` instead, because `Semantics.copyStToM` allocates the
+object it copies into: nesting an `addM` beside it would mint one object too
+many and leave `nextId` too high. The term is one symbol shorter than KeY's and
+means the same thing.
 
 ### The paper's names for these rules
 
@@ -648,6 +665,38 @@ than a gap in the port. The interpreter's `copyStToM`/`copyMem`
 the paper's `sections/signature.tex` gives them, with `lemmaNames` mapping each
 to the theorem(s) above. The theorems keep their upstream names — that is what
 makes this file a map — and the join is checked rather than prose.
+
+### `memoryRules.key` → the update vocabulary
+
+`Rules.MemTerm` is the signature, not an enumeration of update shapes:
+`{memory := write(memory, mv.fld, se)}`, `{memory := addM(memory)}` and their
+nestings are terms, as KeY's `\replacewith` updates are. That is what lets
+`memoryFieldDeleteReference`'s `write(addM(memory, freshIdp), mv, fld,
+idC(freshIdp, nil))` be written at all — its value is the root the enclosing
+allocation minted, which no `Sym` can name and which `Rules.MemVal.fresh` does.
+
+An allocation is the **two parallel elements** KeY writes,
+`{mv := freshId(alloc(T)) || memory := alloc(T)}`, not one fused constructor.
+The two agree on which root was minted because they name the same subterm:
+KeY shares the schema variable `freshIdp`, this shares the term, and
+`Update.memEval` returns the root beside the state so both are projections of
+one evaluation. Note the root is *not* the pre-state counter —
+`Semantics.copyStToM` allocates a struct's members before the struct.
+
+| KeY | here |
+|---|---|
+| `write(Memory, Identity, Field, MemValue)` | `MemTerm.write (m) (target) (v : MemVal)`; the place `target` is the `(Identity, Field)` pair, named by its kind |
+| `addM(Memory, IdentityPrim)` | `MemTerm.addM (m) (ty)` — eager, so the type rides along |
+| `copySt(Memory, IdentityPrim, Struct)` | `MemTerm.copySt (m) (ty) (src)`, with the allocation inside (row above) |
+| `idC(freshIdp, nil)` as a value | `MemVal.fresh` |
+| `idC(freshIdp, nil)` as a binding | `BindRhs.freshId (m)` |
+| `defVal` | `MemVal.defVal (ty)` |
+| `read<[alpha]>(memory, mv, fld)` | `Sym.read` of a `WrappedExpr.field Kind.memory`, and `BindRhs.mref` where the sort is `Identity` — Lean's sorts are not generic, so KeY's one `memoryFieldRead` is two rules here |
+
+`delete` is the one memory update still given by an evaluator rather than a
+term: KeY has five delete taclets whose `MemTerm`s differ by the target's shape
+and sort, Lean has one rule, and the rule grammar builds a literal list of
+elements — so a rule cannot state an update whose shape depends on its target.
 
 ### Deviations, collected
 

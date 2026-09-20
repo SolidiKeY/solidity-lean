@@ -90,7 +90,7 @@ theorem toUpd_netElem (recipient amount : WrappedExpr) (s : State) :
   simp only [UpdTerm.toUpd, UpdTerm.toPar, List.flatMap]
   exact Upd.toUpd_net _ s
 
-theorem toUpd_heapElem (u : HeapUpd) (s : State) :
+theorem toUpd_heapElem (u : MemTerm) (s : State) :
     UpdTerm.toUpd [UpdElem.heap u] s =
       (heapRhs u s).map fun x => { s with heap := x.1, nextId := x.2 } := by
   simp only [UpdTerm.toUpd, UpdTerm.toPar, List.flatMap]

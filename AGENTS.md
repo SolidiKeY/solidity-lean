@@ -6,6 +6,10 @@ A Lean 4 model of solkey, the KeY-based Solidity prover:
 (`../solkey`); both take an explicit path (`--key`/`SOLKEY_RULES`,
 `--solkey`) when it lives elsewhere.
 
+**Memory updates are terms** (`Rules.MemTerm`), at `memoryRules.key`'s
+signature: `write`/`addM`/`copySt` nest, an allocation is the two parallel
+elements KeY writes, and `docs/lean-key-rule-map.md` is the symbol table.
+
 A second consumer is **the `SolKey` reader**, a Lean reader for KeY `.key`
 files in a separate repository. It imports only `Solidity.Rules` (and through
 it `Solidity.AST` and `Solidity.KeySort`). That is its whole dependency

@@ -97,17 +97,71 @@ def storageSave (s : State) (target : WrappedExpr) (v : SVal) :
     Res (List (Name × SVal)) :=
   locPath s target >>= fun p => Upd.saveSt s p.1 p.2 v
 
-/-- `write(memory, mp, f, v)` / `write(memory, mp, at(i), v)`: the heap and
-counter the write installs, at a state that may already have allocated. -/
-def memWrite (s : State) (target : WrappedExpr) (mv : MVal) :
-    Res (List (Nat × MObj) × Nat) :=
+/-- `write(memory, mp, f, v)` / `write(memory, mp, at(i), v)`, as a state. -/
+def memWriteIn (s : State) (target : WrappedExpr) (mv : MVal) : Res State :=
   match target with
   | WrappedExpr.field Kind.memory _ base f =>
-      memBase s base >>= fun id => Upd.heapOf (writeMemField s id f.name mv)
+      memBase s base >>= fun id => writeMemField s id f.name mv
   | WrappedExpr.index Kind.memory _ base ix =>
       memBase s base >>= fun id => simpleInt s ix >>= fun i =>
-        Upd.heapOf (writeMemIndex s id i mv)
+        writeMemIndex s id i mv
   | _ => .error .stuck
+
+/-! ## `memory := …`
+
+A memory update is a *term* (`Rules.MemTerm`), so evaluating it is one
+recursion rather than one function per shape.  `memEval` returns the state the
+term leaves **and** the root its allocator minted, if it has one: that pair is
+what lets `{mv := freshId(m)}` and `{memory := m}` agree on which root without
+either re-deriving it, because they are two projections of one evaluation of
+one term.  KeY shares the schema variable `freshIdp`; this shares the subterm.
+
+Note that the root is *not* the pre-state counter.  `Semantics.copyStToM`
+copies a struct's fields before allocating the struct itself, so a `Person`
+declaration mints its members first and the root last. -/
+
+/-- The state a memory term leaves, and the root it allocated. -/
+def memEval (s : State) : MemTerm -> Res (State × Option Nat)
+  | .cur => .ok (s, none)
+  | .addM m ty =>
+      memEval s m >>= fun x =>
+        match ty with
+        | Ty.ref ref => (allocDefault x.1 ref).map fun y => (y.1, some y.2)
+        | _ => .error .stuck
+  -- `copySt` allocates the object it copies into (see `Rules.allocTerm`), and
+  -- a *memory* source allocates nothing at all: an alias shares the identity.
+  | .copySt m _ src =>
+      memEval s m >>= fun x =>
+        match src.kind with
+        | Kind.memory =>
+            readMem x.1 src >>= fun mv =>
+              match mv with
+              | MVal.ref id => .ok (x.1, some id)
+              | _ => .error .stuck
+        | Kind.storage =>
+            placePath x.1 src >>= fun p =>
+              x.1.findStorage p.1 p.2 >>= fun sv =>
+                copyStToM x.1 sv >>= fun y =>
+                  match y.2 with
+                  | MVal.ref id => .ok (y.1, some id)
+                  | _ => .error .stuck
+        | Kind.stack => .error .stuck
+  | .write m target v =>
+      memEval s m >>= fun x =>
+        (match v with
+          | .sym t => (Sym.eval x.1 t).map fun w => (x.1, w.toMVal)
+          | .image src => rhsMVal x.1 src
+          | .fresh =>
+              match x.2 with
+              | some id => .ok (x.1, MVal.ref id)
+              | none => .error .stuck
+          | .defVal ty =>
+              match ty with
+              | Ty.prim PrimTy.bool => .ok (x.1, MVal.bool false)
+              | Ty.prim PrimTy.uint => .ok (x.1, MVal.int 0)
+              | Ty.prim PrimTy.int => .ok (x.1, MVal.int 0)
+              | Ty.ref _ => .error .stuck) >>= fun y =>
+          (memWriteIn y.1 target y.2).map fun t => (t, x.2)
 
 /-- `x := t`. -/
 def bindRhs (r : BindRhs) (s : State) : Res Binding :=
@@ -127,6 +181,11 @@ def bindRhs (r : BindRhs) (s : State) : Res Binding :=
         match mv with
         | MVal.ref id => .ok (Binding.mref id)
         | _ => .error .stuck
+  | .freshId m =>
+      memEval s m >>= fun x =>
+        match x.2 with
+        | some id => .ok (Binding.mref id)
+        | none => .error .stuck
 
 /-- `arr.push(…)`: the element is read first, then appended.  `none` is
 `arr.push()`, which appends the slot a `pop` gave back (`Semantics.pushSlot`),
@@ -170,53 +229,10 @@ def storageRhs (u : StorageUpd) (s : State) : Res (List (Name × SVal)) :=
         x.1.findStorage x.2.1 x.2.2 >>= fun cur =>
           (x.1.saveStorage x.2.1 x.2.2 cur.defaultOf).map State.storage
 
-/-- `memory := …`. -/
-def heapRhs (u : HeapUpd) (s : State) : Res (List (Nat × MObj) × Nat) :=
-  match u with
-  | .write target t => Sym.eval s t >>= fun v => memWrite s target v.toMVal
-  | .writeRef target src => rhsMVal s src >>= fun x => memWrite x.1 target x.2
-
-/-- `T memory m;` / `T memory m = sp;` — the heap half of the pair. -/
-def memDeclHeap (ty : Ty) (init : Option WrappedExpr) (s : State) :
-    Res (List (Nat × MObj) × Nat) :=
-  match init with
-  | none =>
-      match ty with
-      | Ty.ref ref => (allocDefault s ref).map fun x => (x.1.heap, x.1.nextId)
-      | _ => .error .stuck
-  | some rhs =>
-      match rhs.kind with
-      | Kind.memory => .ok (s.heap, s.nextId)
-      | Kind.storage =>
-          placePath s rhs >>= fun p =>
-            s.findStorage p.1 p.2 >>= fun sv =>
-              (copyStToM s sv).map fun x => (x.1.heap, x.1.nextId)
-      | Kind.stack => .error .stuck
-
-/-- …and the identity half, which reads the same pre-state and therefore
-agrees with it on which identity was minted. -/
-def memDeclBind (ty : Ty) (init : Option WrappedExpr) (s : State) :
-    Res Binding :=
-  match init with
-  | none =>
-      match ty with
-      | Ty.ref ref => (allocDefault s ref).map fun x => Binding.mref x.2
-      | _ => .error .stuck
-  | some rhs =>
-      match rhs.kind with
-      | Kind.memory =>
-          readMem s rhs >>= fun mv =>
-            match mv with
-            | MVal.ref id => .ok (Binding.mref id)
-            | _ => .error .stuck
-      | Kind.storage =>
-          placePath s rhs >>= fun p =>
-            s.findStorage p.1 p.2 >>= fun sv =>
-              copyStToM s sv >>= fun x =>
-                match x.2 with
-                | MVal.ref id => .ok (Binding.mref id)
-                | _ => .error .stuck
-      | Kind.stack => .error .stuck
+/-- `memory := …`: the heap-and-counter pair the calculus writes as one
+(`Upd.Elem.heap`), because an allocation moves both. -/
+def heapRhs (t : MemTerm) (s : State) : Res (List (Nat × MObj) × Nat) :=
+  (memEval s t).map fun x => (x.1.heap, x.1.nextId)
 
 /-- `delete m.f` / `delete m[se]` (and the heap half of a root delete). -/
 def memDeleteHeap (target : WrappedExpr) (s : State) :
@@ -268,7 +284,7 @@ def writeBackPar (target : WrappedExpr) (t : Sym) : Upd.Par :=
   match target.kind with
   | Kind.stack => [Upd.Elem.env (varName target) (bindRhs (.val t))]
   | Kind.storage => [Upd.Elem.storage (storageRhs (.save target t))]
-  | Kind.memory => [Upd.Elem.heap (heapRhs (.write target t))]
+  | Kind.memory => [Upd.Elem.heap (heapRhs (.write .cur target (.sym t)))]
 
 /-- An elementary update as the parallel update it names.  Three constructors
 expand to a *pair*, because KeY writes them as one: allocating and binding a
@@ -277,9 +293,7 @@ memory declaration or a root delete writes `memory` and the name together, and
 def elemPar : UpdElem -> Upd.Par
   | .bind n rhs => [Upd.Elem.env n (bindRhs rhs)]
   | .storage u => [Upd.Elem.storage (storageRhs u)]
-  | .heap u => [Upd.Elem.heap (heapRhs u)]
-  | .memDecl ty name init =>
-      [Upd.Elem.heap (memDeclHeap ty init), Upd.Elem.env name (memDeclBind ty init)]
+  | .heap t => [Upd.Elem.heap (heapRhs t)]
   | .memDelete target =>
       match target with
       | WrappedExpr.var _ _ fld =>

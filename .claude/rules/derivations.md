@@ -91,6 +91,21 @@ reads. Do not spend time on `upd_merge` when a merge line fails on a memory
 chain — check first whether the merged spelling means anything.
 `docs/paper-parity.md` records this under section 8.
 
+**Memory updates are terms, and an allocation is two elements.**
+`memoryRules.key`'s signature is what `Rules.MemTerm` spells, so a memory
+update nests: `{ memory := write(memory, mv@Account.balance, 100) }`,
+`{ memory := write(alloc(Person), mv@Person.account, fresh) }`. A declaration
+or a root delete writes the pair KeY writes —
+
+```
+{ mv@Person := freshId(alloc(Person)) ‖ memory := alloc(Person) }
+```
+
+— and the two agree on the root because they name the same term, not because
+either re-derives it. `image(src)` is a reference source's value; `fresh` is
+the root the enclosing `alloc` minted; `defVal(T)` is KeY's reset constant.
+`docs/lean-key-rule-map.md` has the symbol-by-symbol table.
+
 **The rule goes on the arrow, not in the proof.** `⇝[.storageFieldWriteSave]`
 is a claim Lean checks; do not re-list the rules in a docstring above the
 derivation.
@@ -143,16 +158,16 @@ is a bracketed list** of such lines, which is what a guarded rule leaves open:
 
 `sol_rewrite` is the same chain one layer down: the paper's lines *after* the
 program is gone, where the accumulated update's terms are rewritten by the
-theories. Lines are plain terms of `Theory/Storage.lean`, `Theory/Memory.lean`
-and `Theory/CrossDomain.lean`, arrows are the `=` family only, and the
+theories. Lines are plain terms of `Theory/Terms.lean`, `Theory/Storage.lean`,
+`Theory/Memory.lean` and `Theory/CrossDomain.lean`, arrows are the `=` family only, and the
 statement is an `Eq`:
 
 ```
 sol_rewrite memoryToStorageRootCopyValue (r : Nat) :
-    XStruct.find [] (.storeSt (.of Struct.mtSt) alice (.st (.copyMem M (.idC r [])))) [alice, age]
-  =[.findPath]       XStruct.find [] (.copyMem M (.idC r [])) [age]
-  =[.findCopyMem]    XValue.ofMem M (Memory.readR [] M (.idC r []) [age])
-  =[.readWriteEqual] XValue.prim (PrimVal.int 34)
+    StValue.find (.storeSt Struct.mtSt alice (.st (.copyMem M (.idC r [])))) [alice, age]
+  =[.findPath]       StValue.find (.copyMem M (.idC r [])) [age]
+  =[.findCopyMem]    MemValue.ofView M (Memory.readR M (.idC r []) [age])
+  =[.readWriteEqual] StValue.prim (PrimVal.int 34)
 ```
 
 The name on the arrow is a `TheoryRule` (`Theory/Rewrite.lean`) under **the

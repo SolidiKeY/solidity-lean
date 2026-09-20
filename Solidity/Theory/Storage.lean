@@ -1,9 +1,9 @@
-import Solidity.Semantics
+import Solidity.Theory.Terms
 
 /-!
 # `structRules.key` as a term algebra
 
-solkey gives `find`, `save`, `selectSt`, `storeSt` and `mtSt` no definition:
+solkey gives `findSt`, `save`, `selectSt`, `storeSt` and `mtSt` no definition:
 they are uninterpreted function symbols (`structHeader.key`, `structRules.key`),
 and their whole meaning is the taclet set.  A rule's
 `{storage := save(storage, p, se)}` is therefore a *term*, and what the rule
@@ -18,7 +18,7 @@ every taclet is a theorem named after it, so the file can be read against
 `solidityDLHeader.key` declares `Prim ⊑ StValue` and `structHeader.key`
 `Struct ⊑ StValue`; the symbols are typed on those sorts —
 `storeSt(Struct, Field, StValue)`, `selectSt<[α]>(Struct, Field)`,
-`find<[α]>(Struct, List)`, `save(Struct, List, StValue)`.  Lean has no
+`findSt<[α]>(Struct, List)`, `save(Struct, List, StValue)`.  Lean has no
 subsorting, so the two sorts are a mutual inductive pair with `StValue.st` as
 the injection `Struct ⊑ StValue` and `asStruct` as the cast `(Struct) v`
 (`castDel` on a `Struct`, `defaultValueStruct` on a `Prim`).  The third
@@ -72,90 +72,26 @@ namespace Theory
 
 open Semantics
 
-mutual
-  /-- `structHeader.key`: `Struct ⊑ StValue`, `\unique Struct mtSt`,
-  `Struct storeSt(Struct, Field, StValue)`. -/
-  inductive Struct where
-    | mtSt
-    | storeSt (st : Struct) (a : Seg) (v : StValue)
-    deriving DecidableEq, Repr
-
-  /-- `solidityDLHeader.key`: `Prim ⊑ StValue`; `st` is the injection
-  `Struct ⊑ StValue`. -/
-  inductive StValue where
-    | prim (p : PrimVal)
-    | st (s : Struct)
-    deriving DecidableEq, Repr
-end
-
-namespace Struct
-
-/-- `induction` does not support a mutual inductive; this is the one-sort
-recursor the `Struct`-recursive proofs below use. -/
-theorem inductionOn {motive : Struct -> Prop} (h0 : motive mtSt)
-    (h1 : ∀ s a v, motive s -> motive (storeSt s a v)) : ∀ s, motive s
-  | mtSt => h0
-  | storeSt s a v => h1 s a v (inductionOn h0 h1 s)
-
-end Struct
-
 namespace StValue
 
 open Struct
 
-@[match_pattern] abbrev int (v : Int) : StValue := .prim (.int v)
-@[match_pattern] abbrev bool (b : Bool) : StValue := .prim (.bool b)
+/-! ## What is here and what is one module down
 
-/-! ## Casts
+The sorts, the casts, `selectSt` and `findSt` are `Theory/Terms.lean`: `findSt` on
+a `copyMem` view is a `readR` into memory, so it has to be declared in the same
+mutual block as the memory readers.  What is here is the rest of
+`structRules.key` — the walk a write takes, the taclets, and the four
+`findSt`-over-`save` laws that solkey has no rule for. -/
 
-`cast<[Struct]>` and the `Prim` casts of `cast.key`/`memoryRules.key`.  KeY
-deletes a cast on a well-sorted argument (`castDel`); these are total, so the
-ill-sorted cases get the sort's default — `defaultValueStruct`,
-`defaultValueInt`, `defaultValueBool` read as functions. -/
+/-! ## The read taclets
 
-/-- `(Struct) v`. -/
-def asStruct : StValue -> Struct
-  | st s => s
-  | prim _ => mtSt
-
-/-- `(int) v`. -/
-def asInt : StValue -> Int
-  | prim (PrimVal.int v) => v
-  | _ => 0
-
-/-- `(bool) v`. -/
-def asBool : StValue -> Bool
-  | prim (PrimVal.bool b) => b
-  | _ => false
-
-@[simp] theorem asStruct_st (s : Struct) : asStruct (st s) = s := rfl
-
-/-- A primitive cast to `Struct` is the empty struct, the ill-sorted default. -/
-@[simp] theorem asStruct_prim (q : PrimVal) : asStruct (prim q) = mtSt := rfl
-
-/-- `defaultValue<[Struct]> ⇝ mtSt`. -/
-@[simp] theorem defaultValueStruct : asStruct (st mtSt) = mtSt := rfl
-
-/-- `defaultValueInt`: the `Struct` default read at `int`. -/
-@[simp] theorem defaultValueInt : asInt (st mtSt) = 0 := rfl
-
-/-- `defaultValueBool`. -/
-@[simp] theorem defaultValueBool : asBool (st mtSt) = false := rfl
-
-/-! ## `selectSt` and `find` -/
-
-/-- `selectSt<[α]>(st, a)`: the outermost store at `a`, or the default. -/
-def selectSt : Struct -> Seg -> StValue
-  | mtSt, _ => st mtSt
-  | storeSt s a1 v, a2 => if a1 = a2 then v else selectSt s a2
-
-/-- `find<[α]>(st, flds)`.  The one-segment arm is KeY's `isEmpty(flds)`
-branch, and it is not the same as recursing: the last step reads at the
-*caller's* sort, so a primitive leaf survives it where `(Struct)` would not. -/
-def find : Struct -> List Seg -> StValue
-  | s, [] => st s
-  | s, [a] => selectSt s a
-  | s, a :: b :: flds => find (asStruct (selectSt s a)) (b :: flds)
+`selectSt` and the readers are `Theory/Terms.lean`; these are their `.key`
+rules.  They are stated about **`findSt`**, the reader that does not cross into
+memory, because that is the one `structRules.key` has: `copyMem` is declared in
+`structMemoryRules.key`, and its `findOnCopy` taclet is
+`Theory/CrossDomain.lean`'s.  `Struct.find_eq_findSt` is the bridge, and
+`Struct.viewFree` its hypothesis. -/
 
 /-- `selectSt<[α]>(storeSt(st, a1, v), a2)`. -/
 @[simp] theorem selectOnStore (s : Struct) (a1 a2 : Seg) (v : StValue) :
@@ -164,25 +100,25 @@ def find : Struct -> List Seg -> StValue
 /-- `selectSt<[α]>(mtSt, a) ⇝ defaultValue<[α]>`. -/
 @[simp] theorem selectOnEmptyStorage (a : Seg) : selectSt mtSt a = st mtSt := rfl
 
-/-- `find<[α]>(st, nil) ⇝ (α) st`. -/
-@[simp] theorem findDefinitionEmpty (s : Struct) : find s [] = st s := rfl
+/-- `findSt<[α]>(st, nil) ⇝ (α) st`. -/
+@[simp] theorem findDefinitionEmpty (s : Struct) : findSt s [] = st s := rfl
 
-/-- `find<[α]>(st, cons(a, flds))`, in KeY's own shape. -/
+/-- `findSt<[α]>(st, cons(a, flds))`, in KeY's own shape. -/
 theorem findDefinitionCons (s : Struct) (a : Seg) (flds : List Seg) :
-    find s (a :: flds) =
-      if flds.isEmpty then selectSt s a else find (asStruct (selectSt s a)) flds := by
+    findSt s (a :: flds) =
+      if flds.isEmpty then selectSt s a else findSt (asStruct (selectSt s a)) flds := by
   cases flds <;> rfl
 
 /-- One step of a read, in the form that does not split on the tail. -/
 theorem find_cons (s : Struct) (a : Seg) {flds : List Seg} (h : flds ≠ []) :
-    find s (a :: flds) = find (asStruct (selectSt s a)) flds := by
+    findSt s (a :: flds) = findSt (asStruct (selectSt s a)) flds := by
   cases flds with
   | nil => exact absurd rfl h
   | cons b rest => rfl
 
-/-- Reads compose along `++`, through the cast KeY's `find<[Struct]>` makes. -/
+/-- Reads compose along `++`, through the cast KeY's `findSt<[Struct]>` makes. -/
 theorem find_append (s : Struct) (p : List Seg) {q : List Seg} (hq : q ≠ []) :
-    find s (p ++ q) = find (asStruct (find s p)) q := by
+    findSt s (p ++ q) = findSt (asStruct (findSt s p)) q := by
   induction p generalizing s with
   | nil => simp
   | cons a rest ih =>
@@ -192,7 +128,7 @@ theorem find_append (s : Struct) (p : List Seg) {q : List Seg} (hq : q ≠ []) :
       | cons b rest' => rfl
 
 /-- Reading a member of `mtSt` is nothing. -/
-theorem find_mtSt {q : List Seg} (hq : q ≠ []) : find mtSt q = st mtSt := by
+theorem find_mtSt {q : List Seg} (hq : q ≠ []) : findSt mtSt q = st mtSt := by
   induction q with
   | nil => exact absurd rfl hq
   | cons a rest ih =>
@@ -215,6 +151,24 @@ def storeAt : Struct -> Seg -> StValue -> Struct
   | mtSt, a, w => storeSt mtSt a w
   | storeSt s b v0, a, w =>
       if b = a then storeSt s b w else storeSt (storeAt s a w) b v0
+  -- No taclet upstream: a write over a `copyMem` view puts a shadow node
+  -- *over* it rather than replacing it, so a read off the written path still
+  -- falls through into the view.  Replacing it would make `findSt_save_frame`
+  -- false.
+  | Struct.copyMem mem id, a, w => storeSt (Struct.copyMem mem id) a w
+
+/-- The walk never produces a view, which is what lets the laws below use the
+read taclets on its result. -/
+theorem storeAt_ne_copyMem (s : Struct) (a : Seg) (w : StValue) :
+    forall mem id, storeAt s a w ≠ Struct.copyMem mem id := by
+  intro mem id h
+  cases s with
+  | mtSt => simp only [storeAt] at h; cases h
+  | copyMem _ _ => simp only [storeAt] at h; cases h
+  | storeSt s0 b v0 =>
+      by_cases hb : b = a
+      · rw [storeAt, if_pos hb] at h; cases h
+      · rw [storeAt, if_neg hb] at h; cases h
 
 /-- `save(st, p, v)`. -/
 def save : Struct -> List Seg -> StValue -> Struct
@@ -267,6 +221,8 @@ theorem selectSt_storeAt (s : Struct) (a1 a2 : Seg) (w : StValue) :
         · subst h
           simp [storeAt, selectSt, hb, Ne.symm hb]
         · simp only [storeAt, if_neg hb, selectSt, if_neg h, ih]
+  -- Over a view the walk is a shadow `storeSt`, so this is `selectOnStore`.
+  | h2 mem id => by_cases h : a1 = a2 <;> simp [storeAt, selectSt, h]
 
 /-! ### `selectOnSaveCons`
 
@@ -298,10 +254,10 @@ theorem selectOnSaveEmpty (s : Struct) (v : StValue) (a : Seg) :
     asBool (selectSt (save s [a] v) a) = asBool v := by
   simp [save, selectSt_storeAt]
 
-/-! ## `find` over `save`
+/-! ## `findSt` over `save`
 
-solkey has no `find(save(…), …)` taclet: a read of a write is reached by
-`findDefinitionCons` unfolding `find` into `selectSt` and `selectOnSaveCons`
+solkey has no `findSt(save(…), …)` taclet: a read of a write is reached by
+`findDefinitionCons` unfolding `findSt` into `selectSt` and `selectOnSaveCons`
 then commuting one selector past the write.  The four laws below package
 those steps, one per way a read path can lie against a written one — the
 same path, below it, above it, or off it.  `Semantics` has only the first
@@ -311,26 +267,26 @@ presupposes the write succeeded. -/
 /-- **Reading exactly the write.**  No well-formedness of the store or the
 path: totality buys both away. -/
 theorem find_save_same (s : Struct) {p : List Seg} (hp : p ≠ []) (v : StValue) :
-    find (save s p v) p = v := by
+    findSt (save s p v) p = v := by
   induction p generalizing s with
   | nil => exact absurd rfl hp
   | cons a rest ih =>
       cases rest with
-      | nil => simp [save, find, selectSt_storeAt]
+      | nil => simp [save, findSt, selectSt_storeAt]
       | cons b rest' =>
           rw [save_cons_cons, find_cons _ _ (by simp), selectSt_storeAt, if_pos rfl, asStruct_st]
           exact ih _ (by simp)
 
 /-- …which at `int` is `saveOnEmptyPrim` at the end of a walk. -/
 theorem find_save_same_asInt (s : Struct) {p : List Seg} (hp : p ≠ []) (v : StValue) :
-    asInt (find (save s p v) p) = asInt v := by
+    asInt (findSt (save s p v) p) = asInt v := by
   rw [find_save_same s hp]
 
 /-- **Reading below the write.**  Everything under the written path comes out
-of the written value, cast to `Struct` as KeY's `find<[Struct]>` does. -/
+of the written value, cast to `Struct` as KeY's `findSt<[Struct]>` does. -/
 theorem find_save_extends (s : Struct) {p q : List Seg} (hp : p ≠ []) (hq : q ≠ [])
     (v : StValue) :
-    find (save s p v) (p ++ q) = find (asStruct v) q := by
+    findSt (save s p v) (p ++ q) = findSt (asStruct v) q := by
   induction p generalizing s with
   | nil => exact absurd rfl hp
   | cons a rest ih =>
@@ -346,14 +302,14 @@ theorem find_save_extends (s : Struct) {p q : List Seg} (hp : p ≠ []) (hq : q 
 write pushed down to what is left of it. -/
 theorem find_save_prefix (s : Struct) (q : List Seg) {r : List Seg} (hr : r ≠ [])
     (v : StValue) :
-    find (save s (q ++ r) v) q = st (save (asStruct (find s q)) r v) := by
+    findSt (save s (q ++ r) v) q = st (save (asStruct (findSt s q)) r v) := by
   induction q generalizing s with
   | nil => rfl
   | cons a q' ih =>
       cases q' with
       | nil =>
           rw [List.singleton_append, save_cons _ _ hr]
-          simp [find, selectSt_storeAt]
+          simp [findSt, selectSt_storeAt]
       | cons b q'' =>
           rw [List.cons_append, save_cons _ _ (by simp), find_cons _ _ (by simp), selectSt_storeAt,
             if_pos rfl, asStruct_st, ih]
@@ -370,7 +326,7 @@ def diverges : List Seg -> List Seg -> Bool
 /-- **The frame.**  A read off the written path does not see the write — the
 `\else` branch of `selectOnSaveCons`, lifted from one selector to a path. -/
 theorem find_save_frame (s : Struct) (v : StValue) :
-    ∀ p q : List Seg, diverges p q = true -> find (save s p v) q = find s q := by
+    ∀ p q : List Seg, diverges p q = true -> findSt (save s p v) q = findSt s q := by
   intro p
   induction p generalizing s with
   | nil => intro q h; simp [diverges] at h
@@ -418,6 +374,10 @@ mutual
     | mtSt => mtSt
     | storeSt s (Seg.field f) v => storeSt (delNode s) (Seg.field f) (delValue v)
     | storeSt s (Seg.at _) _ => delNode s
+    -- No taclet upstream.  `delNode` is eager here, so it cannot walk a view
+    -- whose members it does not know; every member of a deleted node reads
+    -- its default, which is what `mtSt` says.
+    | Struct.copyMem _ _ => mtSt
 
   /-- `delValue<[α]>(v)`: `delValueStruct` on a `Struct`, `delValueDefault` on a `Prim`. -/
   def delValue : StValue -> StValue
@@ -427,7 +387,7 @@ end
 
 /-- `delAt(st, p)`: the value at `p`, deleted in place. -/
 def delAt (s : Struct) (p : List Seg) : Struct :=
-  save s p (delValue (find s p))
+  save s p (delValue (findSt s p))
 
 /-- `delValue<[Struct]>(st) ⇝ delNode(st)`. -/
 theorem delValueStruct (s : Struct) : delValue (st s) = st (delNode s) := rfl
@@ -454,6 +414,9 @@ theorem selectStDelNodeRef (s : Struct) (f : Name) :
       cases b with
       | field g => by_cases h : g = f <;> simp [delNode, selectSt, h, ih]
       | «at» i => simp [delNode, selectSt, ih]
+  -- Both sides are `st mtSt`: the delete flattens the view, and a member of
+  -- the flattened view is deleted to the same default.
+  | h2 mem id => rfl
 
 /-- `selectStDelNodeDefault` at `int`. -/
 theorem selectStDelNodeDefault (s : Struct) (f : Name) :
@@ -472,6 +435,7 @@ theorem selectStDelNodeIndexStruct (s : Struct) (i : Int) :
       cases b with
       | field g => simp [delNode, ih]
       | «at» j => simp [delNode, ih]
+  | h2 mem id => rfl
 
 /-- `selectOnDelAtCons`: one selector out of a delete, through `selectOnSaveCons`. -/
 theorem selectOnDelAtCons (s : Struct) (a1 a2 : Seg) (flds : List Seg) :
@@ -482,12 +446,12 @@ theorem selectOnDelAtCons (s : Struct) (a1 a2 : Seg) (flds : List Seg) :
       else selectSt s a2 := by
   unfold delAt
   rw [selectOnSaveCons]
-  cases flds <;> simp [find]
+  cases flds <;> simp [findSt]
 
-/-! ### `find` over `delAt`
+/-! ### `findSt` over `delAt`
 
 `delAt` *is* a `save` of the deleted value (its definition), so the two path
-laws the paper states for it are the corresponding `find`-over-`save` laws with
+laws the paper states for it are the corresponding `findSt`-over-`save` laws with
 that value substituted.  They are stated rather than left to the reader because
 they are the two rules `sections/signature.tex` names, and a chain writes a
 rule on its arrow. -/
@@ -495,13 +459,13 @@ rule on its arrow. -/
 /-- **`findDelAt`** — reading exactly the deleted path gives the deleted
 value. -/
 theorem find_delAt_same (s : Struct) {p : List Seg} (hp : p ≠ []) :
-    find (delAt s p) p = delValue (find s p) :=
+    findSt (delAt s p) p = delValue (findSt s p) :=
   find_save_same s hp _
 
 /-- **`findDelAtOutside`** — a read that leaves the deleted path does not see
 the delete, the frame of `find_save_frame`. -/
 theorem find_delAt_frame (s : Struct) {p q : List Seg} (h : diverges p q = true) :
-    find (delAt s p) q = find s q :=
+    findSt (delAt s p) q = findSt s q :=
   find_save_frame s _ p q h
 
 /-! ## Sanity
@@ -521,27 +485,27 @@ private def bob : Seg := Seg.field "bob"
 /-- `alice.account.balance = 10; result = alice.account.balance` — the
 fundamentals' `findOnSaveEx`, over an arbitrary store. -/
 example (s : Struct) :
-    asInt (find (save s [acct, bal] (int 10)) [acct, bal]) = 10 := by
+    asInt (findSt (save s [acct, bal] (int 10)) [acct, bal]) = 10 := by
   rw [find_save_same_asInt s (by simp)]; rfl
 
 /-- `alice.account.balance = 1; alice.age` — `storage-field-disjoint-fields.key`:
 the write is invisible to the other member. -/
 example (s : Struct) :
-    find (save s [acct, bal] (int 1)) [age] = find s [age] :=
+    findSt (save s [acct, bal] (int 1)) [age] = findSt s [age] :=
   find_save_frame s (int 1) [acct, bal] [age] (by decide)
 
 /-- Reading *above* a write sees the write pushed down into the subtree. -/
 example (s : Struct) :
-    find (save s [acct, bal] (int 7)) [acct]
-      = st (save (asStruct (find s [acct])) [bal] (int 7)) :=
+    findSt (save s [acct, bal] (int 7)) [acct]
+      = st (save (asStruct (findSt s [acct])) [bal] (int 7)) :=
   find_save_prefix s [acct] (by simp) (int 7)
 
 /-- A concrete store: `bob.age = 7; alice = bob; bob.age = 9` leaves
-`alice.age = 7` — a copy is by value, `find<[Struct]>` being the cast. -/
+`alice.age = 7` — a copy is by value, `findSt<[Struct]>` being the cast. -/
 example :
     let s1 := save mtSt [bob, age] (int 7)
-    let s2 := save s1 [alice] (st (asStruct (find s1 [bob])))
-    find (save s2 [bob, age] (int 9)) [alice, age] = int 7 := by
+    let s2 := save s1 [alice] (st (asStruct (findSt s1 [bob])))
+    findSt (save s2 [bob, age] (int 9)) [alice, age] = int 7 := by
   decide
 
 /-- `delete` on a struct resets its members at every depth. -/
