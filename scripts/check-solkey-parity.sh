@@ -2,7 +2,7 @@
 # Parity press button: elaborate the ported solkey corpus and compare the
 # per-obligation verdicts against tests/solkey/expected.tsv.
 #
-# The corpus (Solidity/Examples/Solkey/*.lean, generated
+# The corpus (Solidity/Corpus/Wp/*.lean, generated
 # by scripts/solkey-port.mjs) is one `theorem … := by sol_wp` per solkey
 # function. Each module is elaborated once with `lake env lean --json`,
 # and every diagnostic is attributed to the theorem whose span contains
@@ -17,7 +17,7 @@
 #   ./scripts/check-solkey-parity.sh --calculus   the same, against the
 #                                                 rule-table corpus
 #
-# `--calculus` swaps the corpus for Solidity/Examples/Derivations/Solkey/*,
+# `--calculus` swaps the corpus for Solidity/Corpus/Calculus/*,
 # whose declarations are `sol_calculus` commands rather than `theorem`s, and
 # the table for tests/solkey/expected-calculus.tsv. One runner rather than
 # two: the attribution logic and the exit-code caution below are the part
@@ -63,10 +63,10 @@ from concurrent.futures import ThreadPoolExecutor
 mode = os.environ.get("MODE", "wp")
 if mode == "calculus":
     EXPECTED = "tests/solkey/expected-calculus.tsv"
-    CORPUS = "Solidity/Examples/Derivations/Solkey"
+    CORPUS = "Solidity/Corpus/Calculus"
 else:
     EXPECTED = "tests/solkey/expected.tsv"
-    CORPUS = "Solidity/Examples/Solkey"
+    CORPUS = "Solidity/Corpus/Wp"
 update = os.environ["UPDATE"] == "1"
 only = os.environ.get("ONLY") or ""
 

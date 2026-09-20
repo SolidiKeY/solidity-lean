@@ -30,8 +30,8 @@ commit's.
 
 **The example corpus and the rule table are now pinned to different
 commits, deliberately.** `scripts/solkey-port.mjs` was re-run against
-`c80a54494c` on 2026-09-16, so `Solidity/Examples/Solkey/`,
-`Solidity/Examples/Derivations/Solkey/` and `tests/solkey/` are that commit's
+`c80a54494c` on 2026-09-16, so `Solidity/Corpus/Wp/`,
+`Solidity/Corpus/Calculus/` and `tests/solkey/` are that commit's
 278 `TestSuite.sol` functions; this file and `SortCheck/Annotations.lean` are
 still `e67a0d7c48`'s 238 taclets. That is why `lake exe solkeycheck` still
 reports its 78 rows and why the 92 taclets added upstream since the pin have

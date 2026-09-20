@@ -599,7 +599,7 @@ thing it exists to prove.
 The claim they presumably meant is that the target keeps its **own** entries —
 `find(storage, ledger2·balances·at(1))` after the update equals what it was
 before, and is *not* `find(storage, ledger·balances·at(1))`. Lean states the
-file as written (`Examples/Solkey/Rules.solkey_Rules_copyKeepsMapping`, the
+file as written (`Corpus/Wp/Rules.solkey_Rules_copyKeepsMapping`, the
 reflexive conjuncts included and flagged) and the intended claim beside it,
 with a `native_decide` refutation of the source-wins reading — which is what
 would catch an inverted `isMapping` branch.

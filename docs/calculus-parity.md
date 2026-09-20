@@ -171,7 +171,7 @@ node scripts/solkey-port.mjs                   # regenerate both corpora
 ./scripts/check-calculus-parity.sh --update    # re-pin it
 ```
 
-The corpus is `Solidity/Examples/Derivations/Solkey/TestSuite/PartNN.lean`,
+The corpus is `Solidity/Corpus/Calculus/TestSuite/PartNN.lean`,
 its own Lake target (`SolidityCalculus`), split into parts only so the parts
 elaborate concurrently — one module of a whole contract is a single-threaded
 run of tens of thousands of pinned taclet applications. Extend it to another

@@ -47,7 +47,7 @@ moves a `ruleEffect` arm, which is what the external `SolKey` reader's
 correspondence proofs are pinned to (`AGENTS.md`).  So it is its own change,
 and this file is the refutation that says why it is needed.
 
-Found by `Examples/Derivations/Solkey/`: `sol_wp` proves the same programs and
+Found by `Corpus/Calculus/`: `sol_wp` proves the same programs and
 cannot see this, because it never reads `Calculus/Rules.lean`.
 -/
 

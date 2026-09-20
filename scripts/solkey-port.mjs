@@ -12,9 +12,9 @@
  * which refutes a diamond exactly as it leaves KeY's diamond open.
  *
  * Two outputs per contract, from one pass so they cannot drift:
- *   - `Solidity/Examples/Solkey/<Contract>.lean`
+ *   - `Solidity/Corpus/Wp/<Contract>.lean`
  *     (one `theorem … := by sol_wp`, kernel-checked in `lake build`)
- *   - `Solidity/Examples/Derivations/Solkey/<Contract>/PartNN.lean`, for
+ *   - `Solidity/Corpus/Calculus/<Contract>/PartNN.lean`, for
  *     the contracts in `CALCULUS_CONTRACTS`: the *same* obligation proved by
  *     the rule table alone (`sol_calculus`), which is the artefact that
  *     corresponds to a KeY proof. `sol_wp` never reads `Calculus/Rules.lean`, so
@@ -226,14 +226,14 @@ const UNSUPPORTED = {
 /**
  * The `.key` suites. They are KeY problem files, not annotated
  * Solidity, so there is nothing here to translate: the obligations that
- * *are* expressible are hand-written in `Examples/Solkey/Net.lean` and
- * `Examples/Solkey/Rules.lean`, and this table records which, so that
+ * *are* expressible are hand-written in `Corpus/Wp/Net.lean` and
+ * `Corpus/Wp/Rules.lean`, and this table records which, so that
  * every one of solkey's obligations appears in `expected.tsv` — the
  * unported ones with the reason.
  *
  * Two entries may share a `contract`, and so a module: `storage` and
  * `rules` are different upstream directories whose obligations are both
- * term-level and both live in `Examples/Solkey/Rules.lean`.
+ * term-level and both live in `Corpus/Wp/Rules.lean`.
  */
 const KEY_SUITES = [
   {
@@ -981,8 +981,8 @@ function leanName(contract, fn) {
 
 function main() {
   const tsvDir = join(REPO, "tests/solkey");
-  const leanDir = join(REPO, "Solidity/Examples/Solkey");
-  const calculusDir = join(REPO, "Solidity/Examples/Derivations/Solkey");
+  const leanDir = join(REPO, "Solidity/Corpus/Wp");
+  const calculusDir = join(REPO, "Solidity/Corpus/Calculus");
   mkdirSync(tsvDir, { recursive: true });
   mkdirSync(leanDir, { recursive: true });
   mkdirSync(calculusDir, { recursive: true });
@@ -1060,7 +1060,7 @@ function main() {
       }
     }
 
-    const moduleName = `Solidity.Examples.Solkey.${contract}`;
+    const moduleName = `Solidity.Corpus.Wp.${contract}`;
     modules.push(moduleName);
     writeFileSync(
       join(leanDir, `${contract}.lean`),
@@ -1102,7 +1102,7 @@ function main() {
       parts.forEach((part, index) => {
         const partName = `Part${String(index + 1).padStart(2, "0")}`;
         calculusModules.push(
-          `Solidity.Examples.Derivations.Solkey.${contract}.${partName}`,
+          `Solidity.Corpus.Calculus.${contract}.${partName}`,
         );
         writeFileSync(
           join(partDir, `${partName}.lean`),
@@ -1115,7 +1115,7 @@ function main() {
             "",
             `Obligations ${index * CALCULUS_PART_SIZE + 1}-${index * CALCULUS_PART_SIZE + part.length} of ${calculusTheorems.length}.`,
             "",
-            "The same obligations as `Solidity/Examples/Solkey/" + contract +
+            "The same obligations as `Solidity/Corpus/Wp/" + contract +
               ".lean`,",
             "proved without the interpreter doing the symbolic execution:",
             "`sol_calculus` drives each program with the taclets of `Calculus/Rules.lean`",
@@ -1181,7 +1181,7 @@ function main() {
           : [suite, contract, name.replace(/-/g, "_"), "unsupported", reason(name), ""],
       );
     }
-    const module = `Solidity.Examples.Solkey.${contract}`;
+    const module = `Solidity.Corpus.Wp.${contract}`;
     if (!modules.includes(module)) modules.push(module);
   }
 

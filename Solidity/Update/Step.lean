@@ -446,7 +446,7 @@ needs `FrontierStep a b → (a.Holds s ↔ b.Holds s)`, which needs the per-rule
 bridges of `Update/TacletTable.lean` (21 of the 83 rules with an update), and
 `Rules.assertGoals` is deliberately not exhaustive (`Update/Wp.lean`).  The
 two are proved of the same programs side by side instead:
-`Examples/Derivations/Solkey/` and `Examples/Solkey/`, from one pass of the
+`Corpus/Calculus/` and `Corpus/Wp/`, from one pass of the
 porter so they cannot drift. -/
 def CalculusHolds (sm : SolidityModality) (b : Block) (post : WrappedExpr)
     (s0 : State) : Prop :=
