@@ -1677,7 +1677,7 @@ end CaseMode
   /-!
   Push and pop.  The calculus's `sizeNotNegative`
   is a first-order side condition, not a rewrite rule; its
-  Lean counterpart is `WellFormedConsumers.lean`.
+  Lean counterpart is `Typing/WellFormedConsumers.lean`.
   -/
 
   sol_rule storagePushValueSave from storagePushValueSave :

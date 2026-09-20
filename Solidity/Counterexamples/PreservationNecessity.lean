@@ -1,4 +1,4 @@
-import Solidity.TypeSoundness
+import Solidity.Typing.Soundness
 import Solidity.Semantics.DecEq
 
 /-!

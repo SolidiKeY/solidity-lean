@@ -1,4 +1,4 @@
-import Solidity.StoragePreservation
+import Solidity.Typing.StoragePreservation
 
 /-!
 # State typing: contexts, heap/env invariants, copy typing

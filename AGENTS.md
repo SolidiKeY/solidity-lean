@@ -39,11 +39,11 @@ read them by path.
 
 | Editing | Read first |
 |---|---|
-| `Rules.lean`, `RuleSyntax.lean`, `Uniqueness.lean`, `RuleValidation.lean`, `RuleShapes.lean`, `TacletAnnotations.lean` | `.claude/rules/rule-table.md` |
+| `Rules.lean`, `RuleSyntax.lean`, `Uniqueness.lean`, `RuleValidation.lean`, `RuleShapes.lean`, `SortCheck/Annotations.lean` | `.claude/rules/rule-table.md` |
 | `Examples/**`, `Update/**` (derivations and notation) | `.claude/rules/derivations.md` |
 | `RuleSoundness.lean`, `Wp/**`, `Counterexamples/**` | `.claude/rules/soundness.md` |
 | `Theory/**` (the term algebras and their rule names) | `.claude/rules/derivations.md` |
-| `StorageTyping.lean`, `StateTyping.lean`, `TypeSoundness.lean`, `Reachability.lean`, `WellFormedConsumers.lean` | `.claude/rules/typing.md` |
+| `Typing/Storage.lean`, `Typing/State.lean`, `Typing/Soundness.lean`, `Typing/Reachability.lean`, `Typing/WellFormedConsumers.lean` | `.claude/rules/typing.md` |
 
 Other prose: `docs/lean-key-rule-map.md` is the authority for the name-by-name
 map to solkey's taclets (do not restate it in module docstrings);
@@ -76,7 +76,7 @@ import changes and final confirmation. The `lean-verify` skill in
 
 `solkeycheck` **currently fails**: the annotation table has drifted 78 rows
 from upstream. It is pre-existing and re-syncing it is its own change,
-because it also moves `SortFaithfulness.lean` and
+because it also moves `SortCheck/Faithfulness.lean` and
 `Counterexamples/PreFixSortAnnotations.lean`. Do not try to fix it in passing.
 
 Run long builds in the background and grep the log for `error` rather than

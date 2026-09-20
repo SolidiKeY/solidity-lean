@@ -275,7 +275,7 @@ know as a stack `uint`.
 **First-order side conditions.** `sizeNotNegative`, which the pop-after-push
 example needs, adds `0 ≤ find(storage, sp·length)` to the antecedent rather
 than rewriting a program, so it has no `RuleName`. Its content is
-`WellFormedConsumers.lean`'s row for `pop`. `popAfterPush` therefore ends with
+`Typing/WellFormedConsumers.lean`'s row for `pop`. `popAfterPush` therefore ends with
 the empty-array branch still open in the diamond; the paper closes it with
 this rule, and the difference is exactly the rule.
 

@@ -223,7 +223,7 @@ push-with-value in the admitted fragment lands on a slot with a mapping.
 
 The `isPrimitive` branch is **redundant on any well-typed storage**, where a
 cleared primitive slot *is* the type's default (`pushSlot_prim`, proved in
-`StoragePreservation.lean`); it is written out so that a consumer holding a
+`Typing/StoragePreservation.lean`); it is written out so that a consumer holding a
 value *representation* but no typing — `Evm/Correctness.lean`, whose fragment
 is primitive-element arrays — sees the pushed value without a typing
 hypothesis. -/

@@ -22,7 +22,7 @@ Two consumers keep this table honest from both sides:
   cross-checks it against `tacletReadAnns` — the **text ↔ table** edge.
   Any upstream drift (say, a reintroduced `find<[int]>` on a copy rule)
   fails the check.
-- `SortFaithfulness.lean` proves the table's sort claims against the
+- `Faithfulness.lean` proves the table's sort claims against the
   Lean interpreter — the **table ↔ semantics** edge. Updating the table
   to match a buggy taclet makes `sortFaithful_all` unprovable (see
   `Counterexamples/PreFixSortAnnotations.lean` for the exact bug the
@@ -209,7 +209,7 @@ def tacletReadAnns : List TacletReadAnn :=
       leanRule := some .storageFieldWriteCopySource
       -- `find<[Struct]>(storage, sp2)` on a `Path[storage,simple]`
       -- source: NOT sort-faithful for primitive-typed sources — an
-      -- `openFindings` entry, see `SortFaithfulness.lean`.
+      -- `openFindings` entry, see `Faithfulness.lean`.
       reads := [sread .value (.fixed .struct)] },
     { keyName := "storageFieldReadFind"
       leanRule := some .storageFieldReadFind

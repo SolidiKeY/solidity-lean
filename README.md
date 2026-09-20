@@ -35,7 +35,7 @@ honest, and both expect a solkey checkout beside this repository
 (`../solkey`; override with `--key`/`SOLKEY_RULES` and `--solkey`):
 
 - `lake exe solkeycheck` (`./scripts/check-solkey.sh`, run by `run-lean.sh`)
-  cross-checks the sort annotations in `Solidity/TacletAnnotations.lean`
+  cross-checks the sort annotations in `Solidity/SortCheck/Annotations.lean`
   against solkey's `solidityProgramRules.key`. **It currently reports 78 rows
   of drift** — a known, pre-existing gap described in `AGENTS.md`; re-syncing
   it is its own change. Without a checkout it prints `SKIPPED` and exits 0.

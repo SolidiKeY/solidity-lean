@@ -100,8 +100,8 @@ the sections further down carry the details.
    consume facts the symbolic storage does not provide: `size ≥ 0` for
    `pop`, an in-bounds `at(i)` read succeeds, an unwritten mapping key
    reads `defaultValue`, a declared struct member is never stuck.
-   `WellFormedConsumers.lean` proves every such row from
-   `wellTypedStorageB`/`canonicalStorageB`, and `Reachability.lean`
+   `Typing/WellFormedConsumers.lean` proves every such row from
+   `wellTypedStorageB`/`canonicalStorageB`, and `Typing/Reachability.lean`
    shows the canonical form is exactly what execution from the initial
    state reaches. In solkey these facts come from nowhere. Shape it
    like `heapRules.key`'s `wellFormed(heap)`: proving taclets per store
@@ -229,7 +229,7 @@ the sections further down carry the details.
     items were stale in *this file*, not in solkey.**
     - `memoryToStorageIndexArrayCopyRoot` **does** exist upstream, at
       `solidityProgramRules.key:1014`, with exactly the `[slen, slen]`
-      reads `TacletAnnotations.lean` records. It was neither renamed nor
+      reads `SortCheck/Annotations.lean` records. It was neither renamed nor
       unmerged: it arrived in `4c486907c8`, and the `SolKey` reader's
       vendored pin was 12 commits behind at `e67a0d7c48`, so
       `check-solkey.sh` was reading a vendored corpus that predated it.
@@ -260,7 +260,7 @@ the sections further down carry the details.
 
     **Still open on the Lean side** (unrelated to the above, surfaced by
     re-running the check against the current corpus): 19 `MISSING TACLET`
-    rows where `TacletAnnotations.lean` still names taclets upstream has
+    rows where `SortCheck/Annotations.lean` still names taclets upstream has
     since split or renamed — `storageIndex{Add,Sub,Mul,Div,Mod}Assign` and
     `storageIndex{Pre,Post}{in,de}crement*` are now `…Mapping…`/`…Array…`
     pairs, and the `*_root` / `*_decompose` suffixes are now
@@ -433,7 +433,7 @@ Asked how to guarantee nothing is *missing* from the invariant — whether
 question has a formal reading: "everything inferable" is exactly what
 holds on every *reachable* storage, so the invariant is complete iff it
 coincides with reachability from the contract's initial state. Both
-directions are now machine-checked in `Reachability.lean`:
+directions are now machine-checked in `Typing/Reachability.lean`:
 
 - `reachable_wellTyped` — reachable ⇒ well-typed (preservation from
   `initialState L`, whose `StateWT` proof `initialState_wt` is the
@@ -476,7 +476,7 @@ say what such a predicate must contain and how to keep it complete:
 - shape it like `heapRules.key`'s two families — *proving* taclets, one
   per store constructor (`save`, `delAt`, the push/pop `save`s),
   mirroring `save_hasTy`/`save_canonical`, and *using* taclets, one per
-  consumer row of `WellFormedConsumers.lean` (`size ≥ 0`; `0 ≤ i < size`
+  consumer row of `Typing/WellFormedConsumers.lean` (`size ≥ 0`; `0 ≤ i < size`
   ⇒ the `at(i)` read is typed; unwritten key ⇒ `defaultValue`; declared
   member ⇒ `selectSt` is defined);
 - state explicitly what Lean's `SVal` datatype gives for free:

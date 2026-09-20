@@ -1,4 +1,4 @@
-import Solidity.KeyTacletParser
+import Solidity.SortCheck.Parser
 
 /-!
 # `lake exe solkeycheck` — taclet-text conformance checker
@@ -15,7 +15,7 @@ relative location of a solkey checkout beside this repository
 exit 2; any conformance mismatch is exit 1.
 
 `--list` prints the parsed reads per read-bearing taclet — use it to
-update `TacletAnnotations.lean` after a legitimate upstream change.
+update `SortCheck/Annotations.lean` after a legitimate upstream change.
 -/
 
 open Solidity

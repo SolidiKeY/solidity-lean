@@ -1,12 +1,12 @@
-import Solidity.StorageTyping
+import Solidity.Typing.Storage
 import Solidity.Semantics.Properties
 
 /-!
 # Storage write core: `save` preserves typing
 
 The write-side twin of `StorageTyping`'s read lemmas, and the first
-layer of the type-soundness development (`StateTyping.lean`,
-`TypeSoundness.lean`): saving a value of the path's layout type keeps
+layer of the type-soundness development (`State.lean`,
+`Soundness.lean`): saving a value of the path's layout type keeps
 the whole storage well-typed.
 
 - `save_hasTy` mirrors `find_hasTy` arm for arm: a `ty`-typed tree

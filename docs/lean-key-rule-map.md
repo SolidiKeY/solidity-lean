@@ -32,7 +32,7 @@ commit's.
 commits, deliberately.** `scripts/solkey-port.mjs` was re-run against
 `c80a54494c` on 2026-09-16, so `Solidity/Examples/Solkey/`,
 `Solidity/Examples/Derivations/Solkey/` and `tests/solkey/` are that commit's
-278 `TestSuite.sol` functions; this file and `TacletAnnotations.lean` are
+278 `TestSuite.sol` functions; this file and `SortCheck/Annotations.lean` are
 still `e67a0d7c48`'s 238 taclets. That is why `lake exe solkeycheck` still
 reports its 78 rows and why the 92 taclets added upstream since the pin have
 no rows below: re-syncing the table is its own change (`AGENTS.md`), and a
@@ -100,11 +100,11 @@ This table maps taclet *names*; the taclets' **read-sort annotations**
 vs varcond-resolved `find<[alphaPrim]>`) are tracked separately and
 machine-checked from both sides:
 
-- `Solidity/TacletAnnotations.lean` — one `TacletReadAnn` row per
+- `Solidity/SortCheck/Annotations.lean` — one `TacletReadAnn` row per
   read-bearing taclet, kept in sync with the live `.key` file by
   `lake exe solkeycheck` (`scripts/check-solkey.sh`); any upstream sort
   drift fails the check.
-- `Solidity/SortFaithfulness.lean` — proves each row's sort claims
+- `Solidity/SortCheck/Faithfulness.lean` — proves each row's sort claims
   against the interpreter (`sortFaithful_all`), so updating the table to
   match a mis-sorted taclet breaks the build. A fixed sort is a
   `KeySort` (`Solidity/KeySort.lean`, the transcribed lattice shared with
@@ -132,7 +132,7 @@ storage-index taclets into array/mapping forms and merged the
 `StValue` where the table says `Struct`;
 `storageIndexReadArray{BindLocalRoot,StoreRoot}` read `length` twice), and
 added the memory-arithmetic family. That re-sync is its own change: it moves
-`SortFaithfulness.lean` and `Counterexamples/PreFixSortAnnotations.lean`
+`SortCheck/Faithfulness.lean` and `Counterexamples/PreFixSortAnnotations.lean`
 together, and it is not implied by porting the rules.
 
 One naming drift is left, and it is not a semantic difference:
