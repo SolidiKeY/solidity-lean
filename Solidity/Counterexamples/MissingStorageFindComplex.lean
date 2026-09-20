@@ -1,5 +1,21 @@
 import Solidity.Uniqueness
 
+/-!
+# Dropping `storageFieldReadUnfoldRightFst` loses a first step
+
+Why the read-unfold family needs its *complex-path* member, and not only the
+simple-field one.  `reducedStepCases` is `Rules.stepCases` with
+`storageFieldReadUnfoldRightFst` removed, and `stmt` is a deep field read
+(`alice.account.balance`) that the full table covers (`stmt_covered`,
+`original_first_step`).
+
+Against that reduced table the statement has no first step at all
+(`reduced_no_first_step`), hence no `ReducedRuleStep` (`reduced_no_rule_step`),
+hence the completeness statement of `Completeness.lean` fails outright
+(`reduced_not_complete_against_original_first_step`).  So the rule is not
+redundant with the simple-field read: a path that must itself be unfolded
+before the read has no other rule to fall through to.
+-/
 
 namespace Solidity
 

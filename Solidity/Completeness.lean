@@ -1,5 +1,26 @@
 import Solidity.Rules
 
+/-!
+# First steps, and what "the calculus covers this statement" means
+
+`FirstStepCase sm stmt cases step cond block` is the evidence that `step` is
+the *first* rule of `cases` whose condition holds at `stmt` — the pinned rule,
+plus the obligation that every rule before it does not apply.  `RuleStep` is
+that evidence with the rule existentially closed, and it is the relation
+`MultiStep.lean`'s arrows are built from.
+
+The pair `step_of_ruleApplies` / `ruleApplies_of_ruleStep` is a definitional
+equivalence, not a completeness result: `ruleApplies` *means* "some rule's
+condition holds", so a first step characterizes rule coverage in both
+directions.  Completeness proper is `RuleStep.complete_of_wellTyped` in
+`Coverage.lean`, which is a statement about the *typed* fragment and so needs
+the typing layer; the two are deliberately separate files for that reason.
+
+What makes the list walk avoidable is mutual exclusion — see
+`CandidateStep.lean`, which rebuilds a `FirstStepCase` from three decidable
+side conditions instead of ~190 skip proofs.
+-/
+
 set_option maxHeartbeats 2000000
 
 namespace Solidity
