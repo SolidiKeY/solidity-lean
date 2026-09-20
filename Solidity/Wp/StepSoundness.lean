@@ -2,7 +2,7 @@ import Solidity.RewriteSoundness
 import Solidity.Wp.Verdict
 import Solidity.Completeness
 import Solidity.Wp.Step
-import Solidity.Wp.TerminalRules
+import Solidity.Wp.Terminal.Soundness
 import Solidity.Examples.Common
 
 /-!
@@ -22,9 +22,9 @@ This module closes both gaps:
    the calculus' scratch aliases, plus freshness of the untouched suffix and
    postcondition); an `exec` step consumes a *named* terminal rule's
    statement and advances the state by that rule's own update
-   (`terminalUpdate`, `Wp/TerminalUpdate.lean`) — exactly what the
+   (`terminalUpdate`, `Wp/Terminal/Table.lean`) — exactly what the
    block-level relation cannot say. That the update is what the interpreter
-   computes is `terminal_step_sound` (`Wp/TerminalRules.lean`), used
+   computes is `terminal_step_sound` (`Wp/Terminal/Soundness.lean`), used
    inside `holds_iff`.
    `ConfigStep.holds_iff` proves every step preserves judgment validity, and
    `ConfigMultiStep.holds_iff` chains it.
@@ -90,7 +90,7 @@ inductive ConfigStep : Config -> Config -> Prop where
       ConfigStep (⟨⟨sm, lhs :: rest⟩, post⟩, s) (⟨⟨sm, rhs ++ rest⟩, post⟩, s)
   /-- A terminal (exec) step of the *named* terminal rule `r`: the head
   statement is consumed and the state advances by `r`'s own update
-  (`terminalUpdate`, `Wp/TerminalUpdate.lean`).  The interpreter is
+  (`terminalUpdate`, `Wp/Terminal/Table.lean`).  The interpreter is
   not mentioned: that the update is what `execStmt` computes is the
   bridge theorem `terminal_step_sound`, applied in `holds_iff`.  This is
   the state-carrying step relation the port set out to build. -/

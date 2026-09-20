@@ -5,7 +5,7 @@
 # Docstrings here cite modules by four different conventions, so a reference
 # is resolved in this order and the first hit wins:
 #
-#   1. relative to the citing file's own directory  (`Step.lean` in `Wp/`)
+#   1. relative to the citing file's own directory  (`Vocab.lean` in `Wp/Terminal/`)
 #   2. relative to `Solidity/`                      (`Theory/Storage.lean`)
 #   3. relative to the repository root              (`Solidity/AST.lean`)
 #   4. by unique basename anywhere in the package   (`DynamicLogic.lean`)

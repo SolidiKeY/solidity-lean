@@ -11,7 +11,7 @@ parallel.
 
 ## The readers are the interpreter's
 
-Every reader here is one of `Wp/TerminalUpdate.lean`'s — `readVal`,
+Every reader here is one of `Wp/Terminal/Table.lean`'s — `readVal`,
 `placePath`, `locPath`, `readMem`, `rhsSVal`, `rhsMVal`, `binopVal`,
 `incDecUpd`, `allocDefault` — or a component projection of one of the
 `State` writers (`Upd.saveSt`, `Upd.heapOf`).  Nothing is re-derived.

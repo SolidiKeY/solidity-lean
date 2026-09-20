@@ -63,7 +63,7 @@ hypothesis shape. What to know before adding or weakening one:
 `Wp/Terminal/*`'s `<rule>_update` theorems state
 `execStmt s stmt = terminalUpdate r stmt s` **under the rule's guard**. The
 guard is what fixes the shapes; a theorem that did not use it would be an
-interpreter fact, not a rule fact. `Wp/TerminalUpdate.lean` writes updates in
+interpreter fact, not a rule fact. `Wp/Terminal/Table.lean` writes updates in
 the interpreter's *state* vocabulary and never through its evaluators — the
 one exception is `storagePlaceAliasUpd`.
 

@@ -11,7 +11,7 @@ import Solidity.Wp.Terminal.UpdatePushPop
 # Terminal rules: the state-carrying bridge
 
 Every *terminal* rule of the calculus (empty residual block in `Rules.ruleEffect`)
-has a state update in `Wp/TerminalUpdate.lean` (`terminalUpdate?`), and
+has a state update in `Wp/Terminal/Table.lean` (`terminalUpdate?`), and
 a theorem `<rule>_update` in `Wp/Terminal/Update*.lean` proving, under
 the rule's guard,
 

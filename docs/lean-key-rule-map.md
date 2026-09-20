@@ -502,10 +502,10 @@ Pattern per `V ∈ {Preincrement, Postincrement, Predecrement, Postdecrement}`:
 ## Terminal rules as updates
 
 Every terminal rule (empty residual) has a state update in
-`Wp/TerminalUpdate.lean` (`terminalUpdate?`, written in state vocabulary,
+`Wp/Terminal/Table.lean` (`terminalUpdate?`, written in state vocabulary,
 not through the interpreter) and a theorem `<rule>_update` in
 `Wp/Terminal/Update*.lean` proving `execStmt s stmt = terminalUpdate r
-stmt s` under the rule's guard; `Wp/TerminalRules.lean` dispatches them
+stmt s` under the rule's guard; `Wp/Terminal/Soundness.lean` dispatches them
 (`terminalUpdate_sound`, `terminal_step_sound`). The KeY `\replacewith`
 update of a terminal taclet is therefore matched by a Lean function, and
 "taclet ⇒ update" is a theorem per rule.

@@ -235,9 +235,9 @@ and the contract balance is that storage word rather than
 ## Boundaries
 
 - Terminal rules have an empty residual block. Each has a state update
-  (`Wp/TerminalUpdate.lean`) with a theorem `execStmt s stmt =
+  (`Wp/Terminal/Table.lean`) with a theorem `execStmt s stmt =
   terminalUpdate r stmt s` under the rule's guard
-  (`Wp/Terminal/Update*.lean`, dispatched in `Wp/TerminalRules.lean`);
+  (`Wp/Terminal/Update*.lean`, dispatched in `Wp/Terminal/Soundness.lean`);
   their behavior is also exercised concretely by `Examples/Taclets/`.
 - The generated rule set contains no catch-all fallback. Uncovered statements
   have no `RuleStep`; they are not silently deleted.
