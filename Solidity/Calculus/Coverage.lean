@@ -20,7 +20,13 @@ turns Progress.lean's informal residue claim into a theorem:
   copy holes, `**=`, a memory *root* compound assignment — a root binds an
   identity, not a value cell — …).  Memory *field* and *index* arithmetic
   used to be residue too; it is covered since the memory-target arithmetic
-  family was ported (`Rules.memory{Field,Index}CompoundAssign`).
+  family was ported (`Rules.memory{Field,Index}OpAssign`).  A storage
+  source into a memory field or index is residue whatever the receiver's
+  shape and whether the source is a root or a path read (`nmp.f = sp`,
+  `mv.f = alice.age`): the memory write rules read memory and values only,
+  and the one cell they do take — a complex receiver with a *value*
+  source, frozen into `se` by `memory{Field,Index}WriteUnfoldLeftFst` —
+  is exactly the exception the constructor states.
 * `coverage_residue`: every `stmtWt`-well-typed statement is either
   covered (`Rules.ruleApplies`) or has a `ResidueShape`; with
   `residue_not_covered` the two cases are exclusive
@@ -126,10 +132,6 @@ theorem mem_binopUnfoldRight (op : BinOp) :
     RuleName.binopUnfoldRight op ∈ Rules.ruleNames := by
   cases op <;> decide
 
-theorem mem_binopUnfoldResult (op : BinOp) :
-    RuleName.binopUnfoldResult op ∈ Rules.ruleNames := by
-  cases op <;> decide
-
 theorem mem_binopAssignment (op : BinOp) :
     RuleName.binopAssignment op ∈ Rules.ruleNames := by
   cases op <;> decide
@@ -150,8 +152,12 @@ theorem mem_storageFieldCompoundAssign (op : BinOp) :
     RuleName.storageFieldOpAssign op ∈ Rules.ruleNames := by
   cases op <;> decide
 
-theorem mem_storageIndexCompoundAssign (op : BinOp) :
-    RuleName.storageIndexCompoundAssign op ∈ Rules.ruleNames := by
+theorem mem_storageIndexArrayOpAssign (op : BinOp) :
+    RuleName.storageIndexArrayOpAssign op ∈ Rules.ruleNames := by
+  cases op <;> decide
+
+theorem mem_storageIndexMappingOpAssign (op : BinOp) :
+    RuleName.storageIndexMappingOpAssign op ∈ Rules.ruleNames := by
   cases op <;> decide
 
 theorem mem_storageFieldCompoundAssignUnfoldLeftFst (op : BinOp) :
@@ -267,34 +273,71 @@ private def AppliesTo (m : Modality) (stmt : Stmt) (r : RuleName) : Prop :=
     ((Rules.ruleEffect r).mode stmt).applies m = true ∧
     (Rules.ruleEffect r).cond stmt
 
-theorem valueRhsCaptureCandidate_applies {m : Modality} {le rhs : WrappedExpr}
+theorem unfoldSourceCandidate_applies {m : Modality} {le rhs : WrappedExpr}
     (hass : le.assignable = true) {r : RuleName}
-    (hrhs : Rules.valueRhsCaptureRhs rhs)
-    (h : valueRhsCaptureCandidate le = some r) :
+    (hv : valueSourceB rhs = true) (hcx : rhs.complex = true)
+    (h : unfoldSourceCandidate le = some r) :
     AppliesTo m (Stmt.assign ⟨le, hass⟩ rhs) r := by
+  have hv' := valueSourceB_iff.1 hv
   cases le with
   | var k ty fld =>
       cases k with
       | storage =>
-          simp only [valueRhsCaptureCandidate] at h
+          simp only [unfoldSourceCandidate] at h
           split at h
           · next hglob =>
               cases Option.some.inj h
               exact ⟨by decide, rfl,
                 by simp [Rules.isGlobal, Typed.WrappedExpr.isGlobal, hglob],
-                hrhs⟩
+                hcx, hv'⟩
           · exact nomatch h
       | memory => exact nomatch h
       | stack => exact nomatch h
-  | field k ty base fld =>
+  | field k ty path fld =>
       cases k with
-      | storage => cases Option.some.inj h; exact ⟨by decide, rfl, hrhs⟩
-      | memory => exact nomatch h
+      | storage =>
+          simp only [unfoldSourceCandidate] at h
+          split at h
+          · next hpc => cases Option.some.inj h; exact ⟨by decide, rfl, hpc, hv'⟩
+          · next hnpc =>
+              cases Option.some.inj h
+              exact ⟨by decide, rfl, simple_of_not_complex hnpc, hcx, hv'⟩
+      | memory =>
+          simp only [unfoldSourceCandidate] at h
+          split at h
+          · next hpc => cases Option.some.inj h; exact ⟨by decide, rfl, hpc, hv'⟩
+          · next hnpc =>
+              cases Option.some.inj h
+              exact ⟨by decide, rfl, simple_of_not_complex hnpc, hcx, hv'⟩
       | stack => exact nomatch h
-  | index k ty base idx =>
+  | index k ty path idx =>
       cases k with
-      | storage => cases Option.some.inj h; exact ⟨by decide, rfl, hrhs⟩
-      | memory => exact nomatch h
+      | storage =>
+          simp only [unfoldSourceCandidate] at h
+          split at h
+          · next hpc => cases Option.some.inj h; exact ⟨by decide, rfl, hpc, hv'⟩
+          · next hnpc =>
+              split at h
+              · next hic =>
+                  cases Option.some.inj h
+                  exact ⟨by decide, rfl, simple_of_not_complex hnpc, hic, hv'⟩
+              · next hnic =>
+                  cases Option.some.inj h
+                  exact ⟨by decide, rfl, simple_of_not_complex hnpc,
+                    simple_of_not_complex hnic, hcx, hv'⟩
+      | memory =>
+          simp only [unfoldSourceCandidate] at h
+          split at h
+          · next hpc => cases Option.some.inj h; exact ⟨by decide, rfl, hpc, hv'⟩
+          · next hnpc =>
+              split at h
+              · next hic =>
+                  cases Option.some.inj h
+                  exact ⟨by decide, rfl, simple_of_not_complex hnpc, hic, hv'⟩
+              · next hnic =>
+                  cases Option.some.inj h
+                  exact ⟨by decide, rfl, simple_of_not_complex hnpc,
+                    simple_of_not_complex hnic, hcx, hv'⟩
       | stack => exact nomatch h
   | pushPlace t => exact nomatch h
   | bool b => exact Bool.noConfusion hass
@@ -391,9 +434,16 @@ theorem assignSimpleCandidate_applies {m : Modality} {le rhs : WrappedExpr}
               · next hmem =>
                   cases Option.some.inj h
                   exact ⟨by decide, rfl, hpc, hmem, hs⟩
-              · next hnmem =>
-                  cases Option.some.inj h
-                  exact ⟨by decide, rfl, hpc, hs, hnmem⟩
+              · split at h
+                · next href =>
+                    simp only [Bool.and_eq_true] at href
+                    cases Option.some.inj h
+                    exact ⟨by decide, rfl, hpc, href.1, hs, href.2⟩
+                · split at h
+                  · next hv =>
+                      cases Option.some.inj h
+                      exact ⟨by decide, rfl, hpc, valueSourceB_iff.1 hv⟩
+                  · exact nomatch h
           · next hnpc =>
               split at h
               · next hsto =>
@@ -412,8 +462,15 @@ theorem assignSimpleCandidate_applies {m : Modality} {le rhs : WrappedExpr}
           simp only [assignSimpleCandidate] at h
           split at h
           · next hpc =>
-              cases Option.some.inj h
-              exact ⟨by decide, rfl, hpc, hs⟩
+              split at h
+              · next hmem =>
+                  cases Option.some.inj h
+                  exact ⟨by decide, rfl, hpc, hmem, hs⟩
+              · split at h
+                · next hv =>
+                    cases Option.some.inj h
+                    exact ⟨by decide, rfl, hpc, valueSourceB_iff.1 hv⟩
+                · exact nomatch h
           · next hnpc =>
               split at h
               · next hmem =>
@@ -445,8 +502,20 @@ theorem assignSimpleCandidate_applies {m : Modality} {le rhs : WrappedExpr}
           simp only [assignSimpleCandidate] at h
           split at h
           · next hpc =>
-              cases Option.some.inj h
-              exact ⟨by decide, rfl, hpc, hs⟩
+              split at h
+              · next hmem =>
+                  cases Option.some.inj h
+                  exact ⟨by decide, rfl, hpc, hmem, hs⟩
+              · split at h
+                · next href =>
+                    simp only [Bool.and_eq_true] at href
+                    cases Option.some.inj h
+                    exact ⟨by decide, rfl, hpc, href.1, hs, href.2⟩
+                · split at h
+                  · next hv =>
+                      cases Option.some.inj h
+                      exact ⟨by decide, rfl, hpc, valueSourceB_iff.1 hv⟩
+                  · exact nomatch h
           · next hnpc =>
               split at h
               · next hic =>
@@ -455,10 +524,18 @@ theorem assignSimpleCandidate_applies {m : Modality} {le rhs : WrappedExpr}
                       cases Option.some.inj h
                       exact ⟨by decide, rfl, simple_of_not_complex hnpc, hic,
                         hmem, hs⟩
-                  · next hnmem =>
-                      cases Option.some.inj h
-                      exact ⟨by decide, rfl, simple_of_not_complex hnpc, hic,
-                        hs, hnmem⟩
+                  · split at h
+                    · next href =>
+                        simp only [Bool.and_eq_true] at href
+                        cases Option.some.inj h
+                        exact ⟨by decide, rfl, simple_of_not_complex hnpc, hic,
+                          href.1, hs, href.2⟩
+                    · split at h
+                      · next hv =>
+                          cases Option.some.inj h
+                          exact ⟨by decide, rfl, simple_of_not_complex hnpc, hic,
+                            valueSourceB_iff.1 hv⟩
+                      · exact nomatch h
               · next hnic =>
                   split at h
                   · next hsto =>
@@ -519,13 +596,29 @@ theorem assignSimpleCandidate_applies {m : Modality} {le rhs : WrappedExpr}
           simp only [assignSimpleCandidate] at h
           split at h
           · next hpc =>
-              cases Option.some.inj h
-              exact ⟨by decide, rfl, hpc, hs⟩
+              split at h
+              · next hmem =>
+                  cases Option.some.inj h
+                  exact ⟨by decide, rfl, hpc, hmem, hs⟩
+              · split at h
+                · next hv =>
+                    cases Option.some.inj h
+                    exact ⟨by decide, rfl, hpc, valueSourceB_iff.1 hv⟩
+                · exact nomatch h
           · next hnpc =>
               split at h
               · next hic =>
-                  cases Option.some.inj h
-                  exact ⟨by decide, rfl, simple_of_not_complex hnpc, hic, hs⟩
+                  split at h
+                  · next hmem =>
+                      cases Option.some.inj h
+                      exact ⟨by decide, rfl, simple_of_not_complex hnpc, hic,
+                        hmem, hs⟩
+                  · split at h
+                    · next hv =>
+                        cases Option.some.inj h
+                        exact ⟨by decide, rfl, simple_of_not_complex hnpc, hic,
+                          valueSourceB_iff.1 hv⟩
+                    · exact nomatch h
               · next hnic =>
                   split at h
                   · next hmem =>
@@ -572,12 +665,74 @@ theorem assignSimpleCandidate_applies {m : Modality} {le rhs : WrappedExpr}
   | mkIncDec op t => exact Bool.noConfusion hass
   | mkTernary c t e => exact Bool.noConfusion hass
 
+/-- The complex dispatch on a memory source into a storage target: the
+`sp.fld = mv.fr` copy or the `_ se = nmp` capture, both of which apply. -/
+theorem assignComplexCandidate_memSource_applies {m : Modality}
+    {le rhs : WrappedExpr} (hass : le.assignable = true) {r : RuleName}
+    (hk : le.kind = Kind.storage) (hm : rhs.isMemory = true)
+    (hcx : rhs.complex = true)
+    (h : assignComplexCandidate m le rhs = some r) :
+    AppliesTo m (Stmt.assign ⟨le, hass⟩ rhs) r := by
+  by_cases hf : Rules.isFieldCopySource le rhs
+  · cases le with
+    | field k ty sp fld =>
+        cases k with
+        | storage =>
+            obtain ⟨hsp, hms⟩ := hf
+            have hcand : assignComplexCandidate m
+                (WrappedExpr.field Kind.storage ty sp fld) rhs =
+                  some .memoryToStorageFieldCopyField := by
+              rw [Rules.isMemberSource.eq_def] at hms
+              split at hms
+              · next _ ty2 mv f =>
+                  obtain ⟨h3, h4⟩ := hms
+                  simp only [Rules.isSimple] at hsp h3
+                  simp [assignComplexCandidate, memberSourceB, hsp, h3, h4,
+                    Typed.WrappedExpr.isMemory, Typed.WrappedExpr.kind]
+              · exact hms.elim
+            rw [hcand] at h
+            cases Option.some.inj h
+            exact ⟨by decide, rfl, hsp, hms⟩
+        | memory => exact hf.elim
+        | stack => exact hf.elim
+    | var k ty fld => exact hf.elim
+    | index k ty base idx => exact hf.elim
+    | pushPlace t => exact hf.elim
+    | bool b => exact hf.elim
+    | intLit t v => exact hf.elim
+    | mkCall k t n args => exact hf.elim
+    | mkBinop op l rr => exact hf.elim
+    | mkUnop op a => exact hf.elim
+    | mkIncDec op t => exact hf.elim
+    | mkTernary c t e => exact hf.elim
+  · rw [assignComplexCandidate_memSource hk hm hf] at h
+    cases Option.some.inj h
+    exact ⟨by decide, rfl, hk, ⟨hm, hcx⟩, hf⟩
+
+theorem valueSourceB_field (k : Kind) (ty : Ty) (base : WrappedExpr)
+    (fld : Field) : valueSourceB (WrappedExpr.field k ty base fld) = false := by
+  simp [valueSourceB]
+
+theorem valueSourceB_index (k : Kind) (ty : Ty) (base idx : WrappedExpr) :
+    valueSourceB (WrappedExpr.index k ty base idx) = false := by
+  simp [valueSourceB]
+
+theorem valueSourceB_pushPlace (t : WrappedExpr) :
+    valueSourceB (WrappedExpr.pushPlace t) = false := by
+  simp [valueSourceB]
+
+theorem valueSourceB_mkCall (k : Kind) (ty : Ty) (fn : Name)
+    (args : List WrappedExpr) :
+    valueSourceB (Typed.WrappedExpr.mkCall k ty fn args) = false := by
+  simp [valueSourceB]
+
 theorem assignComplexCandidate_applies {m : Modality} {le rhs : WrappedExpr}
     (hass : le.assignable = true) {r : RuleName}
     (hcx : rhs.complex = true)
     (hpush : ∀ t, rhs = WrappedExpr.pushPlace t -> t.kind = Kind.storage)
     (h : assignComplexCandidate m le rhs = some r) :
     AppliesTo m (Stmt.assign ⟨le, hass⟩ rhs) r := by
+  have h0 := h
   cases rhs with
   | var k ty fld => exact Bool.noConfusion hcx
   | bool b => exact Bool.noConfusion hcx
@@ -601,8 +756,8 @@ theorem assignComplexCandidate_applies {m : Modality} {le rhs : WrappedExpr}
           · next hn1 =>
               split at h
               · next h2 =>
-                  cases Option.some.inj h
-                  exact ⟨by decide, rfl, h2.1, h2.2, hcx⟩
+                  exact assignComplexCandidate_memSource_applies hass h2.1 h2.2
+                    hcx h0
               · next hn2 =>
                   split at h
                   · next hpc =>
@@ -624,9 +779,7 @@ theorem assignComplexCandidate_applies {m : Modality} {le rhs : WrappedExpr}
       | storage =>
           simp only [assignComplexCandidate] at h
           split at h
-          · next hmc =>
-              cases Option.some.inj h
-              exact ⟨by decide, rfl, hmc.1, hmc.2, hcx, trivial⟩
+          · next hmc => simp [valueSourceB] at h
           · next hn1 =>
               split at h
               · next h2 => exact Bool.noConfusion h2.2
@@ -672,9 +825,7 @@ theorem assignComplexCandidate_applies {m : Modality} {le rhs : WrappedExpr}
       | stack =>
           simp only [assignComplexCandidate] at h
           split at h
-          · next hmc =>
-              cases Option.some.inj h
-              exact ⟨by decide, rfl, hmc.1, hmc.2, hcx, trivial⟩
+          · next hmc => simp [valueSourceB] at h
           · next hn1 =>
               split at h
               · next h2 => exact Bool.noConfusion h2.2
@@ -705,8 +856,8 @@ theorem assignComplexCandidate_applies {m : Modality} {le rhs : WrappedExpr}
           · next hn1 =>
               split at h
               · next h2 =>
-                  cases Option.some.inj h
-                  exact ⟨by decide, rfl, h2.1, h2.2, hcx⟩
+                  exact assignComplexCandidate_memSource_applies hass h2.1 h2.2
+                    hcx h0
               · next hn2 =>
                   split at h
                   · next hpc =>
@@ -740,9 +891,7 @@ theorem assignComplexCandidate_applies {m : Modality} {le rhs : WrappedExpr}
       | storage =>
           simp only [assignComplexCandidate] at h
           split at h
-          · next hmc =>
-              cases Option.some.inj h
-              exact ⟨by decide, rfl, hmc.1, hmc.2, hcx, trivial⟩
+          · next hmc => simp [valueSourceB] at h
           · next hn1 =>
               split at h
               · next h2 => exact Bool.noConfusion h2.2
@@ -836,9 +985,7 @@ theorem assignComplexCandidate_applies {m : Modality} {le rhs : WrappedExpr}
       | stack =>
           simp only [assignComplexCandidate] at h
           split at h
-          · next hmc =>
-              cases Option.some.inj h
-              exact ⟨by decide, rfl, hmc.1, hmc.2, hcx, trivial⟩
+          · next hmc => simp [valueSourceB] at h
           · next hn1 =>
               split at h
               · next h2 => exact Bool.noConfusion h2.2
@@ -847,9 +994,7 @@ theorem assignComplexCandidate_applies {m : Modality} {le rhs : WrappedExpr}
       have hk := hpush target rfl
       simp only [assignComplexCandidate] at h
       split at h
-      · next hmc =>
-          cases Option.some.inj h
-          exact ⟨by decide, rfl, hmc.1, hmc.2, hcx, trivial⟩
+      · next hmc => simp [valueSourceB] at h
       · next hn1 =>
           split at h
           · next h2 => exact Bool.noConfusion h2.2
@@ -868,21 +1013,20 @@ theorem assignComplexCandidate_applies {m : Modality} {le rhs : WrappedExpr}
   | mkCall k ty fn args =>
       simp only [assignComplexCandidate] at h
       split at h
-      · next hmc =>
-          cases Option.some.inj h
-          exact ⟨by decide, rfl, hmc.1, hmc.2, hcx, trivial⟩
+      · next hmc => simp [valueSourceB] at h
       · next hn1 =>
           split at h
           · next h2 =>
-              cases Option.some.inj h
-              exact ⟨by decide, rfl, h2.1, h2.2, hcx⟩
+              exact assignComplexCandidate_memSource_applies hass h2.1 h2.2
+                hcx h0
           · exact nomatch h
   | mkBinop op l rr =>
       simp only [assignComplexCandidate] at h
       split at h
       · next hmc =>
-          cases Option.some.inj h
-          exact ⟨by decide, rfl, hmc.1, hmc.2, hcx, trivial⟩
+          split at h
+          · next hv => exact unfoldSourceCandidate_applies hass hv hcx h
+          · exact nomatch h
       · next hn1 =>
           split at h
           · next h2 => exact Bool.noConfusion h2.2
@@ -913,21 +1057,15 @@ theorem assignComplexCandidate_applies {m : Modality} {le rhs : WrappedExpr}
                             simple_of_not_complex hnrc⟩
               · next hnsv =>
                   split at h
-                  · next hb =>
-                      simp only [Bool.and_eq_true] at hb
-                      obtain ⟨⟨hop, hl⟩, hr2⟩ := hb
-                      cases Option.some.inj h
-                      exact ⟨mem_binopUnfoldResult op, rfl, rfl, hop, hl, hr2,
-                        fun ⟨ha, hb2⟩ => hnsv (and_true_of ha hb2), hn1⟩
-                  · next hnb =>
-                      exact valueRhsCaptureCandidate_applies hass
-                        (fun ⟨ha, hb2, hc2⟩ => hnb (and_true_of (and_true_of ha hb2) hc2)) h
+                  · next hv => exact unfoldSourceCandidate_applies hass hv hcx h
+                  · exact nomatch h
   | mkUnop op arg =>
       simp only [assignComplexCandidate] at h
       split at h
       · next hmc =>
-          cases Option.some.inj h
-          exact ⟨by decide, rfl, hmc.1, hmc.2, hcx, trivial⟩
+          split at h
+          · next hv => exact unfoldSourceCandidate_applies hass hv hcx h
+          · exact nomatch h
       · next hn1 =>
           split at h
           · next h2 => exact Bool.noConfusion h2.2
@@ -944,13 +1082,17 @@ theorem assignComplexCandidate_applies {m : Modality} {le rhs : WrappedExpr}
                       cases Option.some.inj h
                       exact ⟨mem_unopAssignment op, rfl, rfl, ⟨hstk, hsimp⟩,
                         simple_of_not_complex hnac⟩
-              · exact valueRhsCaptureCandidate_applies hass trivial h
+              · next hnsv =>
+                  split at h
+                  · next hv => exact unfoldSourceCandidate_applies hass hv hcx h
+                  · exact nomatch h
   | mkIncDec op target =>
       simp only [assignComplexCandidate] at h
       split at h
       · next hmc =>
-          cases Option.some.inj h
-          exact ⟨by decide, rfl, hmc.1, hmc.2, hcx, trivial⟩
+          split at h
+          · next hv => exact unfoldSourceCandidate_applies hass hv hcx h
+          · exact nomatch h
       · next hn1 =>
           split at h
           · next h2 => exact Bool.noConfusion h2.2
@@ -1016,34 +1158,34 @@ theorem assignComplexCandidate_applies {m : Modality} {le rhs : WrappedExpr}
                                 simple_of_not_complex hnp,
                                 simple_of_not_complex hni⟩
                       · exact nomatch h
-              · exact valueRhsCaptureCandidate_applies hass trivial h
+              · next hnsv =>
+                  split at h
+                  · next hv => exact unfoldSourceCandidate_applies hass hv hcx h
+                  · exact nomatch h
   | mkTernary c thn els =>
       simp only [assignComplexCandidate] at h
       split at h
-      · next hmc =>
+      · next hcc =>
           cases Option.some.inj h
-          exact ⟨by decide, rfl, hmc.1, hmc.2, hcx, trivial⟩
-      · next hn1 =>
+          exact ⟨by decide, rfl, hcc⟩
+      · next hncc =>
           split at h
-          · next h2 => exact Bool.noConfusion h2.2
-          · next hn2 =>
-              split at h
-              · next hcc =>
+          · next hsv =>
+              simp only [Bool.and_eq_true] at hsv
+              cases Option.some.inj h
+              exact ⟨by decide, rfl, simple_of_not_complex hncc,
+                hsv.1, hsv.2⟩
+          · split at h
+            · next hsto =>
+                cases Option.some.inj h
+                exact ⟨by decide, rfl, simple_of_not_complex hncc, hsto⟩
+            · split at h
+              · next hmem =>
                   cases Option.some.inj h
-                  exact ⟨by decide, rfl, hcc, hn1⟩
-              · next hncc =>
-                  split at h
-                  · next hsv =>
-                      simp only [Bool.and_eq_true] at hsv
-                      cases Option.some.inj h
-                      exact ⟨by decide, rfl, simple_of_not_complex hncc,
-                        hsv.1, hsv.2⟩
-                  · split at h
-                    · next hsto =>
-                        cases Option.some.inj h
-                        exact ⟨by decide, rfl, simple_of_not_complex hncc,
-                          hsto⟩
-                    · exact nomatch h
+                  exact ⟨by decide, rfl,
+                    by simp [Rules.isMemory, Typed.WrappedExpr.isMemory, hmem],
+                    simple_of_not_complex hncc⟩
+              · exact nomatch h
 
 theorem assignCandidate_applies {m : Modality} {le rhs : WrappedExpr}
     (hass : le.assignable = true) {r : RuleName}
@@ -1098,7 +1240,7 @@ theorem memoryDeclCandidate_applies {m : Modality} {ty : Ty} {name : Name}
 
 theorem deleteCandidate_applies {m : Modality} {te : WrappedExpr}
     (hass : te.assignable = true) {r : RuleName}
-    (h : deleteCandidate te = some r) :
+    (h : deleteCandidate m te = some r) :
     AppliesTo m (Stmt.delete ⟨te, hass⟩) r := by
   cases te with
   | var k ty fld =>
@@ -1114,7 +1256,7 @@ theorem deleteCandidate_applies {m : Modality} {te : WrappedExpr}
           · exact nomatch h
       | memory =>
           cases Option.some.inj h
-          exact ⟨by decide, rfl, rfl⟩
+          exact ⟨by decide, rfl, rfl, rfl⟩
       | stack => exact nomatch h
   | field k ty path fld =>
       cases k with
@@ -1130,24 +1272,31 @@ theorem deleteCandidate_applies {m : Modality} {te : WrappedExpr}
           split at h
           · next hpc => cases Option.some.inj h; exact ⟨by decide, rfl, hpc⟩
           · next hnpc =>
-              cases Option.some.inj h
-              exact ⟨by decide, rfl, simple_of_not_complex hnpc,
-                field_prim_or_identity fld⟩
+              split at h
+              · next hprim =>
+                  cases Option.some.inj h
+                  exact ⟨by decide, rfl, simple_of_not_complex hnpc, hprim⟩
+              · next hnprim =>
+                  split at h
+                  · next hid =>
+                      cases Option.some.inj h
+                      exact ⟨by decide, rfl, simple_of_not_complex hnpc, hid⟩
+                  · next hnid =>
+                      rcases field_prim_or_identity fld with hx | hx
+                      · exact absurd hx hnprim
+                      · exact absurd hx hnid
       | stack => exact nomatch h
   | index k ty path idx =>
       cases k with
       | storage =>
           simp only [deleteCandidate] at h
           split at h
-          · next hpc =>
-              cases Option.some.inj h
-              exact ⟨by decide, rfl, Or.inl hpc⟩
+          · next hpc => cases Option.some.inj h; exact ⟨by decide, rfl, hpc⟩
           · next hnpc =>
               split at h
               · next hic =>
                   cases Option.some.inj h
-                  exact ⟨by decide, rfl,
-                    Or.inr ⟨simple_of_not_complex hnpc, hic⟩⟩
+                  exact ⟨by decide, rfl, simple_of_not_complex hnpc, hic⟩
               · next hnic =>
                   split at h
                   · next hcont =>
@@ -1163,19 +1312,26 @@ theorem deleteCandidate_applies {m : Modality} {te : WrappedExpr}
       | memory =>
           simp only [deleteCandidate] at h
           split at h
-          · next hpc =>
-              cases Option.some.inj h
-              exact ⟨by decide, rfl, Or.inl hpc⟩
+          · next hpc => cases Option.some.inj h; exact ⟨by decide, rfl, hpc⟩
           · next hnpc =>
               split at h
               · next hic =>
                   cases Option.some.inj h
-                  exact ⟨by decide, rfl,
-                    Or.inr ⟨simple_of_not_complex hnpc, hic⟩⟩
+                  exact ⟨by decide, rfl, simple_of_not_complex hnpc, hic⟩
               · next hnic =>
-                  cases Option.some.inj h
-                  exact ⟨by decide, rfl, simple_of_not_complex hnpc,
-                    simple_of_not_complex hnic, ty_prim_or_ref ty⟩
+                  split at h
+                  · next hprim =>
+                      cases m <;>
+                        (cases Option.some.inj h
+                         exact ⟨by decide, rfl, simple_of_not_complex hnpc,
+                           simple_of_not_complex hnic, primArrayB_iff.1 hprim⟩)
+                  · split at h
+                    · next href =>
+                        cases m <;>
+                          (cases Option.some.inj h
+                           exact ⟨by decide, rfl, simple_of_not_complex hnpc,
+                             simple_of_not_complex hnic, refArrayB_iff.1 href⟩)
+                    · exact nomatch h
       | stack => exact nomatch h
   | pushPlace p =>
       simp only [deleteCandidate] at h
@@ -1309,10 +1465,21 @@ theorem compoundAssignCandidate_applies {m : Modality} {op : BinOp}
                             rfl, rfl, hca, hpc, simple_of_not_complex hnic,
                             hr1, hr2⟩
                       · next hnpc =>
-                          cases Option.some.inj h
-                          exact ⟨mem_storageIndexCompoundAssign op, rfl, rfl,
-                            hca, simple_of_not_complex hnpc,
-                            simple_of_not_complex hnic, hr1, hr2⟩
+                          split at h
+                          · next harr =>
+                              cases Option.some.inj h
+                              exact ⟨mem_storageIndexArrayOpAssign op, rfl, rfl,
+                                hca, simple_of_not_complex hnpc,
+                                simple_of_not_complex hnic, hr1, hr2,
+                                isArray_of_arrayTyB harr⟩
+                          · split at h
+                            · next hmap =>
+                                cases Option.some.inj h
+                                exact ⟨mem_storageIndexMappingOpAssign op, rfl,
+                                  rfl, hca, simple_of_not_complex hnpc,
+                                  simple_of_not_complex hnic, hr1, hr2,
+                                  isMapping_of_mappingTyB hmap⟩
+                            · exact nomatch h
               · next ty path fld =>
                   split at h
                   · next hpc =>
@@ -1529,7 +1696,7 @@ theorem iteCandidate_applies {m : Modality} {c : WrappedExpr}
 
 theorem transferCandidate_applies {m : Modality}
     {recipient amount : WrappedExpr} {r : RuleName}
-    (h : transferCandidate recipient amount = some r) :
+    (h : transferCandidate m recipient amount = some r) :
     AppliesTo m (Stmt.transfer recipient amount) r := by
   simp only [transferCandidate] at h
   split at h
@@ -1540,9 +1707,10 @@ theorem transferCandidate_applies {m : Modality}
           cases Option.some.inj h
           exact ⟨by decide, rfl, simple_of_not_complex hnrc, hac⟩
       · next hnac =>
-          cases Option.some.inj h
-          exact ⟨by decide, rfl, simple_of_not_complex hnrc,
-            simple_of_not_complex hnac⟩
+          cases m <;>
+            (cases Option.some.inj h
+             exact ⟨by decide, rfl, simple_of_not_complex hnrc,
+               simple_of_not_complex hnac⟩)
 
 /-- The syntactic fragment on which `candidate`'s `some` answers are
 trustworthy: the inner target of a `pushPlace` assignment right-hand
@@ -1721,23 +1889,43 @@ def incDecAssignTargetOkB (t : WrappedExpr) : Bool :=
          !(path.complex || index.complex)
      | _ => false)
 
-/-- Left-hand sides the `*ValueRhsCapture` trio covers: a global storage
-root, a storage field, or a storage index. -/
-def valueCaptureLhsOkB : WrappedExpr -> Bool
+/-- Left-hand sides `unfoldSourceCandidate` dispatches — the targets the
+Step 2 `*UnfoldSource`/`*UnfoldLeftFst`/`*UnfoldLeftSndIndex` rules
+take a complex value source into: a global storage root, a storage
+field or index, a memory field or index. -/
+def unfoldSourceLhsOkB : WrappedExpr -> Bool
   | WrappedExpr.var Kind.storage _ fld =>
       fld.origin == some StorageOrigin.global
   | WrappedExpr.field Kind.storage _ _ _ => true
   | WrappedExpr.index Kind.storage _ _ _ => true
+  | WrappedExpr.field Kind.memory _ _ _ => true
+  | WrappedExpr.index Kind.memory _ _ _ => true
   | _ => false
 
-/-- Boolean mirror of `Rules.valueRhsCaptureRhs`: operator right-hand
-sides the capture trio claims (an arithmetic operator over simple
-operands is excluded — `binopUnfoldResult` owns that cell). -/
-def valueRhsCaptureRhsB : WrappedExpr -> Bool
-  | WrappedExpr.binop op l r => !(op.isArith && l.simple && r.simple)
+/-- An operator right-hand side: `binop`, `unop` or `incDec` — the complex
+value sources (`Rules.isValueSource`) that are not literals. -/
+def operatorRhsB : WrappedExpr -> Bool
+  | WrappedExpr.binop _ _ _ => true
   | WrappedExpr.unop _ _ => true
   | WrappedExpr.incDec _ _ => true
   | _ => false
+
+/-- A field or index target whose receiver or index is still complex —
+the targets only an `unfold_leftFst`/`unfold_leftSnd` rule reaches, and
+those admit a simple source only when it is a value (`isValueSource`) or
+a reference of the target's own location. -/
+def unfoldTargetB : WrappedExpr -> Bool
+  | WrappedExpr.field Kind.storage _ path _ => path.complex
+  | WrappedExpr.index Kind.storage _ path idx => path.complex || idx.complex
+  | WrappedExpr.field Kind.memory _ path _ => path.complex
+  | WrappedExpr.index Kind.memory _ path idx => path.complex || idx.complex
+  | _ => false
+
+/-- A simple stack source of reference type (`x` bound at a struct or
+array type by Γ — `wtExpr` admits it): neither a value nor a reference of
+any rule's location. -/
+def stackRefB (rhs : WrappedExpr) : Bool :=
+  rhs.isStack && rhs.ty.isReference
 
 /-- Initializers `T memory x = rhs;` has a rule for: a memory rhs, a
 storage field read, or a simple storage root read. -/
@@ -1747,55 +1935,58 @@ def memoryDeclInitOkB (rhs : WrappedExpr) : Bool :=
      | WrappedExpr.field Kind.storage _ _ _ => true
      | _ => rhs.isStorage && rhs.simple)
 
+/-- Boolean mirror of the storage-into-memory residue: a memory field or
+index target with a storage-kinded source (a storage root, a storage
+path read, a push place), stuck unless the receiver is complex and the
+source is a value — then `memory{Field,Index}WriteUnfoldLeftFst` freezes
+it into `se` first. -/
+def memFromStorageResidueB (le rhs : WrappedExpr) : Bool :=
+  match le with
+  | WrappedExpr.field Kind.memory _ path _ =>
+      rhs.isStorage && (!path.complex || !valueSourceB rhs)
+  | WrappedExpr.index Kind.memory _ path idx =>
+      rhs.isStorage && (!(path.complex || idx.complex) || !valueSourceB rhs)
+  | _ => false
+
 /-- Boolean mirror of the assignment residue, simple-rhs tier (see the
 `ResidueShape` constructors for the reading of each arm). -/
 def assignSimpleResidueB (le rhs : WrappedExpr) : Bool :=
-  match le with
-  | WrappedExpr.field Kind.memory _ path _ =>
-      !path.complex && rhs.isStorage
-  | WrappedExpr.index Kind.memory _ path index =>
-      !path.complex && !index.complex && rhs.isStorage
-  | WrappedExpr.pushPlace t => !(t.kind == Kind.storage)
-  | WrappedExpr.var Kind.storage _ fld =>
-      (fld.origin == some StorageOrigin.local) && rhs.isStack
-  | WrappedExpr.var Kind.memory _ _ => rhs.isStack
-  | WrappedExpr.var Kind.stack _ _ => rhs.isMemory
-  | WrappedExpr.field Kind.stack _ _ _ => !rhs.isStorage
-  | WrappedExpr.index Kind.stack _ _ _ => !rhs.isStorage
-  | _ => false
+  (unfoldTargetB le && stackRefB rhs) ||
+    (match le with
+     | WrappedExpr.pushPlace t => !(t.kind == Kind.storage)
+     | WrappedExpr.var Kind.storage _ fld =>
+         (fld.origin == some StorageOrigin.local) && rhs.isStack
+     | WrappedExpr.var Kind.memory _ _ => rhs.isStack
+     | WrappedExpr.var Kind.stack _ _ => rhs.isMemory
+     | WrappedExpr.field Kind.stack _ _ _ => !rhs.isStorage
+     | WrappedExpr.index Kind.stack _ _ _ => !rhs.isStorage
+     | _ => false)
 
-/-- Boolean mirror of the assignment residue, complex-rhs tier, past
-the memory-complex-lhs gate. -/
-def assignComplexResidueRhsB (le rhs : WrappedExpr) : Bool :=
+/-- Boolean mirror of the assignment residue, complex-rhs tier. -/
+def assignComplexResidueB (le rhs : WrappedExpr) : Bool :=
   match rhs with
   | WrappedExpr.pushPlace t =>
       !(t.kind == Kind.storage) || (!t.complex && !le.isLocal)
   | WrappedExpr.binop _ _ _ =>
-      valueRhsCaptureRhsB rhs && !(le.isStack && le.simple) &&
-        !valueCaptureLhsOkB le
+      !(le.isStack && le.simple) && !(valueSourceB rhs && unfoldSourceLhsOkB le)
   | WrappedExpr.unop _ _ =>
-      !(le.isStack && le.simple) && !valueCaptureLhsOkB le
+      !(le.isStack && le.simple) && !(valueSourceB rhs && unfoldSourceLhsOkB le)
   | WrappedExpr.incDec _ t =>
       if le.isStack && le.simple then !incDecAssignTargetOkB t
-      else !valueCaptureLhsOkB le
+      else !(valueSourceB rhs && unfoldSourceLhsOkB le)
   | WrappedExpr.ternary c _ _ =>
-      !c.complex && !(le.isStack && le.simple) && !le.isStorage
+      !c.complex && !(le.isStack && le.simple) && !le.isStorage && !le.isMemory
   | Typed.WrappedExpr.mkCall k _ _ _ =>
       !((le.kind == Kind.storage) && (k == Kind.memory))
   | WrappedExpr.field Kind.stack _ _ _ => true
   | WrappedExpr.index Kind.stack _ _ _ => true
   | _ => false
 
-/-- Complex-rhs tier: a memory-complex lhs is always covered
-(`memoryWriteUnfoldRightSndResult` and friends). -/
-def assignComplexResidueB (le rhs : WrappedExpr) : Bool :=
-  if (le.kind == Kind.memory) && le.complex then false
-  else assignComplexResidueRhsB le rhs
-
 /-- Boolean mirror of the assignment residue. -/
 def assignResidueB (le rhs : WrappedExpr) : Bool :=
-  if rhs.simple then assignSimpleResidueB le rhs
-  else assignComplexResidueB le rhs
+  memFromStorageResidueB le rhs ||
+    (if rhs.simple then assignSimpleResidueB le rhs
+     else assignComplexResidueB le rhs)
 
 def deleteResidueB : WrappedExpr -> Bool
   | WrappedExpr.var Kind.storage _ fld =>
@@ -1823,37 +2014,46 @@ Families (constructors in order):
 1. symbolic `if` conditions;
 2. bare `++`/`--` statements on unsupported targets (memory places,
    storage *local* roots, complex storage indices, operator artifacts);
-3.–4. storage-value writes into memory field/index places
-   (`mv.f = se;`, `mv[i] = se;` with a storage rhs);
-5. push-place *assignment target* with a non-storage receiver
+3.–4. storage-kinded sources into memory field/index places
+   (`mv.f = sp;`, `mv[i] = sp;`, `nmp.f = alice.age;`, `nmp[e] = arr.push()`):
+   no memory write rule reads storage, and the memory `Ref`/value
+   `unfold_leftFst` rules admit only a memory reference or a value — so
+   the one covered cell is a complex receiver with a *value* source
+   (`nmp.f = total;`, frozen into `se` first);
+5. a reference-typed *stack* source into a target with a complex
+   receiver or index (`nsp.f = x;` with `x : Person` in Γ — `wtExpr`
+   admits a stack binding at a reference type): neither a value nor a
+   reference of the target's location;
+6. push-place *assignment target* with a non-storage receiver
    (`mv.push() = e;` artifact);
-6. stack value into a storage local root (`sp = x;`);
-7. stack value into a memory root (`mv = x;`);
-8. memory value into a stack variable (`x = mv;`);
-9. simple non-storage value into a stack-kind field/index place
-   (wt artifact — `wtExpr` does not pin a field's kind);
-10. `… = t.push()` with a non-storage receiver (the `candidate`
+7. stack value into a storage local root (`sp = x;`);
+8. stack value into a memory root (`mv = x;`);
+9. memory value into a stack variable (`x = mv;`);
+10. simple non-storage value into a stack-kind field/index place
+    (wt artifact — `wtExpr` does not pin a field's kind);
+11. `… = t.push()` with a non-storage receiver (the `candidate`
     overshoot cell, see the module docstring);
-11. `… = arr.push()` whose lhs is not a storage-local root;
-12. operator rhs whose lhs no capture rule reaches (memory root,
+12. `… = arr.push()` whose lhs is not a storage-local root;
+13. operator rhs whose lhs no `unfold_source` rule reaches (memory root,
     storage local root, stack place, push place);
-13. `v = ++t;` with an unsupported inc/dec target;
-14. ternary with simple condition into an unsupported lhs
-    (memory root, stack place);
-15. call rhs (`v = net(a);`) outside the memory-copy cells;
-16. a stack-kind field/index place as rhs (wt artifact, the read twin
-    of 9);
-17. `**=` (pow has no compound-assignment taclet);
-18. compound assignment onto an unsupported target;
-19. `T memory x = rhs;` with an unsupported initializer
+14. operator rhs of reference type (`x = alice + 1` — `wtExpr` does not
+    type operator operands), which is no value source;
+15. `v = ++t;` with an unsupported inc/dec target;
+16. ternary with simple condition into a stack *place*;
+17. call rhs (`v = net(a);`) outside the memory-copy cells;
+18. a stack-kind field/index place as rhs (wt artifact, the read twin
+    of 10);
+19. `**=` (pow has no compound-assignment taclet);
+20. compound assignment onto an unsupported target;
+21. `T memory x = rhs;` with an unsupported initializer
     (notably a storage *index* read: `Person memory p = people[i];`);
-20. `delete` on a storage *local* root;
-21. `delete` on a push place with non-storage receiver (artifact;
+22. `delete` on a storage *local* root;
+23. `delete` on a push place with non-storage receiver (artifact;
     unreachable under `stmtWt`, which requires a storage-kind target);
-22. `push` on a non-storage receiver (memory arrays; likewise
+24. `push` on a non-storage receiver (memory arrays; likewise
     unreachable under `stmtWt`);
-23. `arr.push(mv)` — pushing a memory value into a storage array;
-24. `pop` on a non-storage receiver. -/
+25. `arr.push(mv)` — pushing a memory value into a storage array;
+26. `pop` on a non-storage receiver. -/
 inductive ResidueShape : Stmt -> Prop where
   | iteSymbolicCond (cond : WrappedExpr) (thn els : List Stmt)
       (hsimple : cond.simple = true) (hlit : boolLitB cond = false) :
@@ -1864,14 +2064,19 @@ inductive ResidueShape : Stmt -> Prop where
   | assignMemFieldFromStorage (lhs : PlaceExpr) (rhs : WrappedExpr)
       (ty : Ty) (path : WrappedExpr) (fld : Field)
       (hl : lhs.expr = WrappedExpr.field Kind.memory ty path fld)
-      (hpath : path.complex = false)
-      (hr : rhs.simple = true) (hk : rhs.isStorage = true) :
+      (hk : rhs.isStorage = true)
+      (hv : path.complex = false ∨ valueSourceB rhs = false) :
       ResidueShape (Stmt.assign lhs rhs)
   | assignMemIndexFromStorage (lhs : PlaceExpr) (rhs : WrappedExpr)
       (ty : Ty) (path idx : WrappedExpr)
       (hl : lhs.expr = WrappedExpr.index Kind.memory ty path idx)
-      (hpath : path.complex = false) (hidx : idx.complex = false)
-      (hr : rhs.simple = true) (hk : rhs.isStorage = true) :
+      (hk : rhs.isStorage = true)
+      (hv : (path.complex || idx.complex) = false ∨ valueSourceB rhs = false) :
+      ResidueShape (Stmt.assign lhs rhs)
+  | assignStackRefUnfoldTarget (lhs : PlaceExpr) (rhs : WrappedExpr)
+      (hu : unfoldTargetB lhs.expr = true)
+      (hr : rhs.simple = true) (hk : rhs.isStack = true)
+      (href : rhs.ty.isReference = true) :
       ResidueShape (Stmt.assign lhs rhs)
   | assignPushPlaceLhsNonStorage (lhs : PlaceExpr) (rhs : WrappedExpr)
       (t : WrappedExpr)
@@ -1903,19 +2108,21 @@ inductive ResidueShape : Stmt -> Prop where
       (hr : rhs.simple = true) (hk : rhs.isStorage = false) :
       ResidueShape (Stmt.assign lhs rhs)
   | assignPushRhsNonStorage (lhs : PlaceExpr) (t : WrappedExpr)
-      (hk : ¬ t.kind = Kind.storage)
-      (hnm : ¬ (lhs.expr.kind = Kind.memory ∧ lhs.expr.complex = true)) :
+      (hk : ¬ t.kind = Kind.storage) :
       ResidueShape (Stmt.assign lhs (WrappedExpr.pushPlace t))
   | assignPushRhsNonLocalLhs (lhs : PlaceExpr) (t : WrappedExpr)
       (hk : t.kind = Kind.storage) (htc : t.complex = false)
-      (hloc : lhs.expr.isLocal = false)
-      (hnm : ¬ (lhs.expr.kind = Kind.memory ∧ lhs.expr.complex = true)) :
+      (hloc : lhs.expr.isLocal = false) :
       ResidueShape (Stmt.assign lhs (WrappedExpr.pushPlace t))
   | assignOperatorRhsBadLhs (lhs : PlaceExpr) (rhs : WrappedExpr)
-      (hrhs : valueRhsCaptureRhsB rhs = true)
+      (hrhs : operatorRhsB rhs = true)
       (hnsv : (lhs.expr.isStack && lhs.expr.simple) = false)
-      (hbad : valueCaptureLhsOkB lhs.expr = false)
-      (hnm : ¬ (lhs.expr.kind = Kind.memory ∧ lhs.expr.complex = true)) :
+      (hbad : unfoldSourceLhsOkB lhs.expr = false) :
+      ResidueShape (Stmt.assign lhs rhs)
+  | assignOperatorRhsRefTyped (lhs : PlaceExpr) (rhs : WrappedExpr)
+      (hrhs : operatorRhsB rhs = true)
+      (hnsv : (lhs.expr.isStack && lhs.expr.simple) = false)
+      (hty : rhs.ty.isPrimitive = false) :
       ResidueShape (Stmt.assign lhs rhs)
   | assignIncDecBadTarget (lhs : PlaceExpr) (op : IncDec)
       (t : WrappedExpr)
@@ -1926,11 +2133,10 @@ inductive ResidueShape : Stmt -> Prop where
       (hcs : c.complex = false)
       (hnsv : (lhs.expr.isStack && lhs.expr.simple) = false)
       (hnsto : lhs.expr.isStorage = false)
-      (hnm : ¬ (lhs.expr.kind = Kind.memory ∧ lhs.expr.complex = true)) :
+      (hnmem : lhs.expr.isMemory = false) :
       ResidueShape (Stmt.assign lhs (WrappedExpr.ternary c thn els))
   | assignCallRhs (lhs : PlaceExpr) (k : Kind) (ty : Ty) (fn : Name)
       (args : List WrappedExpr)
-      (hnm : ¬ (lhs.expr.kind = Kind.memory ∧ lhs.expr.complex = true))
       (hns : ¬ (lhs.expr.kind = Kind.storage ∧ k = Kind.memory)) :
       ResidueShape (Stmt.assign lhs (Typed.WrappedExpr.mkCall k ty fn args))
   | assignStackPlaceRhs (lhs : PlaceExpr) (rhs : WrappedExpr)
@@ -1938,8 +2144,7 @@ inductive ResidueShape : Stmt -> Prop where
         (∃ ty base fld,
           rhs = WrappedExpr.field Kind.stack ty base fld) ∨
         (∃ ty base idx,
-          rhs = WrappedExpr.index Kind.stack ty base idx))
-      (hnm : ¬ (lhs.expr.kind = Kind.memory ∧ lhs.expr.complex = true)) :
+          rhs = WrappedExpr.index Kind.stack ty base idx)) :
       ResidueShape (Stmt.assign lhs rhs)
   | compoundAssignPow (lhs : PlaceExpr) (rhs : WrappedExpr) :
       ResidueShape (Stmt.compoundAssign BinOp.pow lhs rhs)
@@ -2039,6 +2244,29 @@ theorem kindPairB_eq_false {e : WrappedExpr} {k : Kind}
       | false => rfl
       | true => exact absurd ⟨eq_of_beq h1, eq_of_beq h2⟩ h
 
+theorem and_eq_false_cases {a b : Bool} (h : (a && b) = false) :
+    a = false ∨ b = false := by
+  cases a with
+  | false => exact Or.inl rfl
+  | true => exact Or.inr h
+
+theorem or_eq_true_cases {a b : Bool} (h : (a || b) = true) :
+    a = true ∨ b = true := by
+  cases a with
+  | true => exact Or.inl rfl
+  | false => exact Or.inr h
+
+theorem and_eq_true_split {a b : Bool} (h : (a && b) = true) :
+    a = true ∧ b = true := by simpa using h
+
+/-- An operator source is a value source exactly when its type is
+primitive (its location is always the stack). -/
+theorem valueSourceB_operator {rhs : WrappedExpr}
+    (hop : operatorRhsB rhs = true) :
+    valueSourceB rhs = rhs.ty.isPrimitive := by
+  cases rhs <;> simp_all [operatorRhsB, valueSourceB, Typed.WrappedExpr.isMemory,
+    Typed.WrappedExpr.kind]
+
 theorem residueShapeB_of_residueShape {stmt : Stmt}
     (h : ResidueShape stmt) : residueShapeB stmt = true := by
   cases h with
@@ -2046,51 +2274,68 @@ theorem residueShapeB_of_residueShape {stmt : Stmt}
       simp [residueShapeB, hsimple, hlit]
   | incDecStmt op target hbad =>
       simp [residueShapeB, hbad]
-  | assignMemFieldFromStorage lhs rhs ty path fld hl hpath hr hk =>
-      simp [residueShapeB, assignResidueB, assignSimpleResidueB, hl, hr,
-        hpath, hk]
-  | assignMemIndexFromStorage lhs rhs ty path idx hl hpath hidx hr hk =>
-      simp [residueShapeB, assignResidueB, assignSimpleResidueB, hl, hr,
-        hpath, hidx, hk]
+  | assignMemFieldFromStorage lhs rhs ty path fld hl hk hv =>
+      rcases hv with hv | hv <;>
+        simp [residueShapeB, assignResidueB, memFromStorageResidueB, hl, hk, hv]
+  | assignMemIndexFromStorage lhs rhs ty path idx hl hk hv =>
+      rcases hv with hv | hv <;>
+        simp [residueShapeB, assignResidueB, memFromStorageResidueB, hl, hk, hv]
+  | assignStackRefUnfoldTarget lhs rhs hu hr hk href =>
+      simp [residueShapeB, assignResidueB, assignSimpleResidueB, stackRefB, hu,
+        hr, hk, href]
   | assignPushPlaceLhsNonStorage lhs rhs t hl hk hr =>
-      simp [residueShapeB, assignResidueB, assignSimpleResidueB, hl, hr,
-        beq_eq_false_of_ne hk]
+      simp [residueShapeB, assignResidueB, assignSimpleResidueB,
+        memFromStorageResidueB, hl, hr, hk, beq_eq_false_of_ne hk]
   | assignStorageLocalRootFromStack lhs rhs ty fld hl horigin hr hk =>
-      simp [residueShapeB, assignResidueB, assignSimpleResidueB, hl, hr,
-        horigin, hk]
+      simp [residueShapeB, assignResidueB, assignSimpleResidueB,
+        memFromStorageResidueB, hl, hr, horigin, hk]
   | assignMemoryRootFromStack lhs rhs ty fld hl hr hk =>
-      simp [residueShapeB, assignResidueB, assignSimpleResidueB, hl, hr, hk]
+      simp [residueShapeB, assignResidueB, assignSimpleResidueB,
+        memFromStorageResidueB, hl, hr, hk]
   | assignStackVarFromMemory lhs rhs ty fld hl hr hk =>
-      simp [residueShapeB, assignResidueB, assignSimpleResidueB, hl, hr, hk]
+      simp [residueShapeB, assignResidueB, assignSimpleResidueB,
+        memFromStorageResidueB, hl, hr, hk]
   | assignStackPlace lhs rhs hshape hr hk =>
       cases hshape with
       | inl hex =>
           obtain ⟨ty, base, fld, hl⟩ := hex
-          simp [residueShapeB, assignResidueB, assignSimpleResidueB, hl, hr,
-            hk]
+          simp [residueShapeB, assignResidueB, assignSimpleResidueB,
+            memFromStorageResidueB, hl, hr, hk]
       | inr hex =>
           obtain ⟨ty, base, idx, hl⟩ := hex
-          simp [residueShapeB, assignResidueB, assignSimpleResidueB, hl, hr,
-            hk]
-  | assignPushRhsNonStorage lhs t hk hnm =>
-      simp [residueShapeB, assignResidueB, assignComplexResidueB,
-        assignComplexResidueRhsB, memComplexB_eq_false hnm,
+          simp [residueShapeB, assignResidueB, assignSimpleResidueB,
+            memFromStorageResidueB, hl, hr, hk]
+  | assignPushRhsNonStorage lhs t hk =>
+      simp [residueShapeB, assignResidueB, assignComplexResidueB, hk,
         beq_eq_false_of_ne hk]
-  | assignPushRhsNonLocalLhs lhs t hk htc hloc hnm =>
-      simp [residueShapeB, assignResidueB, assignComplexResidueB,
-        assignComplexResidueRhsB, memComplexB_eq_false hnm, htc, hloc]
-  | assignOperatorRhsBadLhs lhs rhs hrhs hnsv hbad hnm =>
+  | assignPushRhsNonLocalLhs lhs t hk htc hloc =>
+      simp [residueShapeB, assignResidueB, assignComplexResidueB, htc, hloc]
+  | assignOperatorRhsBadLhs lhs rhs hrhs hnsv hbad =>
       cases rhs with
       | mkBinop op l r =>
-          simp [residueShapeB, assignResidueB, assignComplexResidueB,
-            assignComplexResidueRhsB, memComplexB_eq_false hnm, hrhs, hnsv,
-            hbad]
+          simp [residueShapeB, assignResidueB, assignComplexResidueB, hnsv, hbad]
       | mkUnop op arg =>
-          simp [residueShapeB, assignResidueB, assignComplexResidueB,
-            assignComplexResidueRhsB, memComplexB_eq_false hnm, hnsv, hbad]
+          simp [residueShapeB, assignResidueB, assignComplexResidueB, hnsv, hbad]
       | mkIncDec op t =>
-          simp [residueShapeB, assignResidueB, assignComplexResidueB,
-            assignComplexResidueRhsB, memComplexB_eq_false hnm, hnsv, hbad]
+          simp [residueShapeB, assignResidueB, assignComplexResidueB, hnsv, hbad]
+      | var k ty fld => exact Bool.noConfusion hrhs
+      | field k ty base fld => exact Bool.noConfusion hrhs
+      | index k ty base idx => exact Bool.noConfusion hrhs
+      | pushPlace t => exact Bool.noConfusion hrhs
+      | bool b => exact Bool.noConfusion hrhs
+      | intLit ty v => exact Bool.noConfusion hrhs
+      | mkCall k ty fn args => exact Bool.noConfusion hrhs
+      | mkTernary c t e => exact Bool.noConfusion hrhs
+  | assignOperatorRhsRefTyped lhs rhs hrhs hnsv hty =>
+      have hv : valueSourceB rhs = false := by
+        rw [valueSourceB_operator hrhs]; exact hty
+      cases rhs with
+      | mkBinop op l r =>
+          simp [residueShapeB, assignResidueB, assignComplexResidueB, hnsv, hv]
+      | mkUnop op arg =>
+          simp [residueShapeB, assignResidueB, assignComplexResidueB, hnsv, hv]
+      | mkIncDec op t =>
+          simp [residueShapeB, assignResidueB, assignComplexResidueB, hnsv, hv]
       | var k ty fld => exact Bool.noConfusion hrhs
       | field k ty base fld => exact Bool.noConfusion hrhs
       | index k ty base idx => exact Bool.noConfusion hrhs
@@ -2100,27 +2345,21 @@ theorem residueShapeB_of_residueShape {stmt : Stmt}
       | mkCall k ty fn args => exact Bool.noConfusion hrhs
       | mkTernary c t e => exact Bool.noConfusion hrhs
   | assignIncDecBadTarget lhs op t hsv hbad =>
+      simp [residueShapeB, assignResidueB, assignComplexResidueB, hsv, hbad]
+  | assignTernaryBadLhs lhs c thn els hcs hnsv hnsto hnmem =>
+      simp [residueShapeB, assignResidueB, assignComplexResidueB, hcs, hnsv,
+        hnsto, hnmem]
+  | assignCallRhs lhs k ty fn args hns =>
       simp [residueShapeB, assignResidueB, assignComplexResidueB,
-        assignComplexResidueRhsB, memComplexB_eq_false_of_stackvar hsv, hsv,
-        hbad]
-  | assignTernaryBadLhs lhs c thn els hcs hnsv hnsto hnm =>
-      simp [residueShapeB, assignResidueB, assignComplexResidueB,
-        assignComplexResidueRhsB, memComplexB_eq_false hnm, hcs, hnsv,
-        hnsto]
-  | assignCallRhs lhs k ty fn args hnm hns =>
-      simp [residueShapeB, assignResidueB, assignComplexResidueB,
-        assignComplexResidueRhsB, memComplexB_eq_false hnm,
         kindPairB_eq_false hns]
-  | assignStackPlaceRhs lhs rhs hshape hnm =>
+  | assignStackPlaceRhs lhs rhs hshape =>
       cases hshape with
       | inl hex =>
           obtain ⟨ty, base, fld, hrx⟩ := hex
-          simp [residueShapeB, assignResidueB, assignComplexResidueB,
-            assignComplexResidueRhsB, hrx, memComplexB_eq_false hnm]
+          simp [residueShapeB, assignResidueB, assignComplexResidueB, hrx]
       | inr hex =>
           obtain ⟨ty, base, idx, hrx⟩ := hex
-          simp [residueShapeB, assignResidueB, assignComplexResidueB,
-            assignComplexResidueRhsB, hrx, memComplexB_eq_false hnm]
+          simp [residueShapeB, assignResidueB, assignComplexResidueB, hrx]
   | compoundAssignPow lhs rhs =>
       simp [residueShapeB]
   | compoundAssignBadTarget op lhs rhs hca hr hbad =>
@@ -2159,20 +2398,37 @@ theorem residueShape_of_residueShapeB {stmt : Stmt}
       | mkTernary c t e => exact Bool.noConfusion hb
   | assign lhs rhs =>
       have hb' : assignResidueB lhs.expr rhs = true := hb
-      rw [assignResidueB.eq_def] at hb'
-      split at hb'
+      clear hb
+      unfold assignResidueB at hb'
+      rcases or_eq_true_cases hb' with hm | hb2
+      · clear hb'
+        rw [memFromStorageResidueB.eq_def] at hm
+        split at hm
+        · next ty path fld heq =>
+            obtain ⟨hk, hv⟩ := and_eq_true_split hm
+            refine ResidueShape.assignMemFieldFromStorage _ rhs ty path fld
+              heq hk ?_
+            rcases or_eq_true_cases hv with h1 | h1
+            · exact Or.inl (eq_false_of_bnot h1)
+            · exact Or.inr (eq_false_of_bnot h1)
+        · next ty path idx heq =>
+            obtain ⟨hk, hv⟩ := and_eq_true_split hm
+            refine ResidueShape.assignMemIndexFromStorage _ rhs ty path idx
+              heq hk ?_
+            rcases or_eq_true_cases hv with h1 | h1
+            · exact Or.inl (eq_false_of_bnot h1)
+            · exact Or.inr (eq_false_of_bnot h1)
+        · exact Bool.noConfusion hm
+      clear hb'
+      split at hb2
       · next hs =>
-          rw [assignSimpleResidueB.eq_def] at hb'
+          unfold assignSimpleResidueB at hb2
+          rcases or_eq_true_cases hb2 with hu | hb'
+          · obtain ⟨hu, hsr⟩ := and_eq_true_split hu
+            obtain ⟨hk, href⟩ := and_eq_true_split hsr
+            exact ResidueShape.assignStackRefUnfoldTarget _ rhs hu hs hk href
+          clear hb2
           split at hb'
-          · next ty path fld heq =>
-              simp only [Bool.and_eq_true] at hb'
-              exact ResidueShape.assignMemFieldFromStorage _ rhs ty path fld
-                heq (eq_false_of_bnot hb'.1) hs hb'.2
-          · next ty path idx heq =>
-              simp only [Bool.and_eq_true] at hb'
-              exact ResidueShape.assignMemIndexFromStorage _ rhs ty path idx
-                heq (eq_false_of_bnot hb'.1.1) (eq_false_of_bnot hb'.1.2)
-                hs hb'.2
           · next t heq =>
               exact ResidueShape.assignPushPlaceLhsNonStorage _ rhs t heq
                 (ne_of_beqB_eq_false (eq_false_of_bnot hb')) hs
@@ -2194,59 +2450,65 @@ theorem residueShape_of_residueShapeB {stmt : Stmt}
                 (Or.inr ⟨ty, base, idx, heq⟩) hs (eq_false_of_bnot hb')
           · exact Bool.noConfusion hb'
       · next hns =>
-          rw [assignComplexResidueB.eq_def] at hb'
+          rw [assignComplexResidueB.eq_def] at hb2
+          have hb' := hb2
+          clear hb2
           split at hb'
-          · exact Bool.noConfusion hb'
-          · next hnmB =>
-              have hnm := not_memComplex_of_B_eq_false hnmB
-              rw [assignComplexResidueRhsB.eq_def] at hb'
+          · next t =>
+              cases hkb : t.kind == Kind.storage with
+              | false =>
+                  exact ResidueShape.assignPushRhsNonStorage _ t
+                    (ne_of_beqB_eq_false hkb)
+              | true =>
+                  rw [hkb] at hb'
+                  simp only [Bool.not_true, Bool.false_or,
+                    Bool.and_eq_true] at hb'
+                  exact ResidueShape.assignPushRhsNonLocalLhs _ t
+                    (eq_of_beq hkb) (eq_false_of_bnot hb'.1)
+                    (eq_false_of_bnot hb'.2)
+          · next op l r =>
+              obtain ⟨h1, h2⟩ := and_eq_true_split hb'
+              rcases and_eq_false_cases (eq_false_of_bnot h2) with hv | hu
+              · refine ResidueShape.assignOperatorRhsRefTyped _ _ rfl
+                  (eq_false_of_bnot h1) ?_
+                rw [<- valueSourceB_operator rfl]; exact hv
+              · exact ResidueShape.assignOperatorRhsBadLhs _ _ rfl
+                  (eq_false_of_bnot h1) hu
+          · next op arg =>
+              obtain ⟨h1, h2⟩ := and_eq_true_split hb'
+              rcases and_eq_false_cases (eq_false_of_bnot h2) with hv | hu
+              · refine ResidueShape.assignOperatorRhsRefTyped _ _ rfl
+                  (eq_false_of_bnot h1) ?_
+                rw [<- valueSourceB_operator rfl]; exact hv
+              · exact ResidueShape.assignOperatorRhsBadLhs _ _ rfl
+                  (eq_false_of_bnot h1) hu
+          · next op t =>
               split at hb'
-              · next t =>
-                  cases hkb : t.kind == Kind.storage with
-                  | false =>
-                      exact ResidueShape.assignPushRhsNonStorage _ t
-                        (ne_of_beqB_eq_false hkb) hnm
-                  | true =>
-                      rw [hkb] at hb'
-                      simp only [Bool.not_true, Bool.false_or,
-                        Bool.and_eq_true] at hb'
-                      exact ResidueShape.assignPushRhsNonLocalLhs _ t
-                        (eq_of_beq hkb) (eq_false_of_bnot hb'.1)
-                        (eq_false_of_bnot hb'.2) hnm
-              · next op l r =>
-                  simp only [Bool.and_eq_true] at hb'
-                  exact ResidueShape.assignOperatorRhsBadLhs _ _
-                    hb'.1.1 (eq_false_of_bnot hb'.1.2)
-                    (eq_false_of_bnot hb'.2) hnm
-              · next op arg =>
-                  simp only [Bool.and_eq_true] at hb'
-                  exact ResidueShape.assignOperatorRhsBadLhs _ _
-                    rfl (eq_false_of_bnot hb'.1) (eq_false_of_bnot hb'.2)
-                    hnm
-              · next op t =>
-                  split at hb'
-                  · next hsv =>
-                      exact ResidueShape.assignIncDecBadTarget _ op t hsv
-                        (eq_false_of_bnot hb')
-                  · next hnsv =>
-                      exact ResidueShape.assignOperatorRhsBadLhs _ _
-                        rfl (eq_false_of_not_eq_true hnsv)
-                        (eq_false_of_bnot hb') hnm
-              · next c thn els =>
-                  simp only [Bool.and_eq_true] at hb'
-                  exact ResidueShape.assignTernaryBadLhs _ c thn els
-                    (eq_false_of_bnot hb'.1.1) (eq_false_of_bnot hb'.1.2)
-                    (eq_false_of_bnot hb'.2) hnm
-              · next k ty fn args =>
-                  exact ResidueShape.assignCallRhs _ k ty fn args hnm
-                    (not_and_of_andB_eq_false (eq_false_of_bnot hb'))
-              · next ty base fld =>
-                  exact ResidueShape.assignStackPlaceRhs _ _
-                    (Or.inl ⟨ty, base, fld, rfl⟩) hnm
-              · next ty base idx =>
-                  exact ResidueShape.assignStackPlaceRhs _ _
-                    (Or.inr ⟨ty, base, idx, rfl⟩) hnm
-              · exact Bool.noConfusion hb'
+              · next hsv =>
+                  exact ResidueShape.assignIncDecBadTarget _ op t hsv
+                    (eq_false_of_bnot hb')
+              · next hnsv =>
+                  rcases and_eq_false_cases (eq_false_of_bnot hb') with hv | hu
+                  · refine ResidueShape.assignOperatorRhsRefTyped _ _ rfl
+                      (eq_false_of_not_eq_true hnsv) ?_
+                    rw [<- valueSourceB_operator rfl]; exact hv
+                  · exact ResidueShape.assignOperatorRhsBadLhs _ _ rfl
+                      (eq_false_of_not_eq_true hnsv) hu
+          · next c thn els =>
+              simp only [Bool.and_eq_true] at hb'
+              exact ResidueShape.assignTernaryBadLhs _ c thn els
+                (eq_false_of_bnot hb'.1.1.1) (eq_false_of_bnot hb'.1.1.2)
+                (eq_false_of_bnot hb'.1.2) (eq_false_of_bnot hb'.2)
+          · next k ty fn args =>
+              exact ResidueShape.assignCallRhs _ k ty fn args
+                (not_and_of_andB_eq_false (eq_false_of_bnot hb'))
+          · next ty base fld =>
+              exact ResidueShape.assignStackPlaceRhs _ _
+                (Or.inl ⟨ty, base, fld, rfl⟩)
+          · next ty base idx =>
+              exact ResidueShape.assignStackPlaceRhs _ _
+                (Or.inr ⟨ty, base, idx, rfl⟩)
+          · exact Bool.noConfusion hb'
   | compoundAssign op lhs rhs =>
       have hb' : ((op == BinOp.pow) ||
           (op.hasCompoundAssign && (rhs.isStack && rhs.simple) &&
@@ -2347,30 +2609,30 @@ theorem not_memComplex_of_stackvar {e : WrappedExpr}
   rw [kind_of_isStack h.1] at hx
   exact Kind.noConfusion hx.1
 
-theorem simple_eq_false_of_captureRhs {rhs : WrappedExpr}
-    (h : valueRhsCaptureRhsB rhs = true) : rhs.simple = false := by
+theorem simple_eq_false_of_operatorRhs {rhs : WrappedExpr}
+    (h : operatorRhsB rhs = true) : rhs.simple = false := by
   cases rhs <;> first | rfl | exact Bool.noConfusion h
 
-theorem valueRhsCaptureCandidate_none {le : WrappedExpr}
-    (h : valueCaptureLhsOkB le = false) :
-    valueRhsCaptureCandidate le = none := by
+theorem unfoldSourceCandidate_none {le : WrappedExpr}
+    (h : unfoldSourceLhsOkB le = false) :
+    unfoldSourceCandidate le = none := by
   cases le with
   | var k ty fld =>
       cases k with
       | storage =>
           have h' : (fld.origin == some StorageOrigin.global) = false := h
-          simp [valueRhsCaptureCandidate, ne_of_beqB_eq_false h']
+          simp [unfoldSourceCandidate, ne_of_beqB_eq_false h']
       | memory => rfl
       | stack => rfl
   | field k ty base fld =>
       cases k with
       | storage => exact Bool.noConfusion h
-      | memory => rfl
+      | memory => exact Bool.noConfusion h
       | stack => rfl
   | index k ty base idx =>
       cases k with
       | storage => exact Bool.noConfusion h
-      | memory => rfl
+      | memory => exact Bool.noConfusion h
       | stack => rfl
   | pushPlace t => rfl
   | bool b => rfl
@@ -2383,21 +2645,29 @@ theorem valueRhsCaptureCandidate_none {le : WrappedExpr}
 
 theorem assignComplexCandidate_operator_none {m : Modality}
     {le rhs : WrappedExpr}
-    (hrhs : valueRhsCaptureRhsB rhs = true)
+    (hrhs : operatorRhsB rhs = true)
     (hnsv : (le.isStack && le.simple) = false)
-    (hbad : valueCaptureLhsOkB le = false)
-    (hnm : ¬ (le.kind = Kind.memory ∧ le.complex = true)) :
+    (hbad : (valueSourceB rhs && unfoldSourceLhsOkB le) = false) :
     assignComplexCandidate m le rhs = none := by
   cases rhs with
   | mkBinop op l r =>
-      simp [assignComplexCandidate, hnm, hnsv, Typed.WrappedExpr.isMemory,
-        eq_false_of_bnot hrhs, valueRhsCaptureCandidate_none hbad]
+      rcases and_eq_false_cases hbad with hv | hu
+      · simp [assignComplexCandidate, hnsv, hv, Typed.WrappedExpr.isMemory,
+          Typed.WrappedExpr.kind]
+      · simp [assignComplexCandidate, hnsv, unfoldSourceCandidate_none hu,
+          Typed.WrappedExpr.isMemory, Typed.WrappedExpr.kind]
   | mkUnop op arg =>
-      simp [assignComplexCandidate, hnm, hnsv, Typed.WrappedExpr.isMemory,
-        valueRhsCaptureCandidate_none hbad]
+      rcases and_eq_false_cases hbad with hv | hu
+      · simp [assignComplexCandidate, hnsv, hv, Typed.WrappedExpr.isMemory,
+          Typed.WrappedExpr.kind]
+      · simp [assignComplexCandidate, hnsv, unfoldSourceCandidate_none hu,
+          Typed.WrappedExpr.isMemory, Typed.WrappedExpr.kind]
   | mkIncDec op t =>
-      simp [assignComplexCandidate, hnm, hnsv, Typed.WrappedExpr.isMemory,
-        valueRhsCaptureCandidate_none hbad]
+      rcases and_eq_false_cases hbad with hv | hu
+      · simp [assignComplexCandidate, hnsv, hv, Typed.WrappedExpr.isMemory,
+          Typed.WrappedExpr.kind]
+      · simp [assignComplexCandidate, hnsv, unfoldSourceCandidate_none hu,
+          Typed.WrappedExpr.isMemory, Typed.WrappedExpr.kind]
   | var k ty fld => exact Bool.noConfusion hrhs
   | field k ty base fld => exact Bool.noConfusion hrhs
   | index k ty base idx => exact Bool.noConfusion hrhs
@@ -2406,6 +2676,43 @@ theorem assignComplexCandidate_operator_none {m : Modality}
   | intLit ty v => exact Bool.noConfusion hrhs
   | mkCall k ty fn args => exact Bool.noConfusion hrhs
   | mkTernary c t e => exact Bool.noConfusion hrhs
+
+/-- A complex storage-kinded source (a storage path read, a push place, a
+storage-kind call) into a complex memory place: the memory-target
+dispatch admits only memory reads and value sources there. -/
+theorem assignComplexCandidate_memTarget_storageSource_none {m : Modality}
+    {le rhs : WrappedExpr}
+    (hmc : le.kind = Kind.memory ∧ le.complex = true)
+    (hk : rhs.isStorage = true) (hc : rhs.simple = false) :
+    assignComplexCandidate m le rhs = none := by
+  cases rhs with
+  | var k ty fld => exact Bool.noConfusion hc
+  | bool b => exact Bool.noConfusion hc
+  | intLit ty v => exact Bool.noConfusion hc
+  | mkTernary c t e => exact Bool.noConfusion hk
+  | mkBinop op l r => exact Bool.noConfusion hk
+  | mkUnop op arg => exact Bool.noConfusion hk
+  | mkIncDec op t => exact Bool.noConfusion hk
+  | field k ty base fld =>
+      cases k with
+      | storage => simp [assignComplexCandidate, hmc, valueSourceB]
+      | memory => exact Bool.noConfusion hk
+      | stack => exact Bool.noConfusion hk
+  | index k ty base idx =>
+      cases k with
+      | storage => simp [assignComplexCandidate, hmc, valueSourceB]
+      | memory => exact Bool.noConfusion hk
+      | stack => exact Bool.noConfusion hk
+  | pushPlace t => simp [assignComplexCandidate, hmc, valueSourceB]
+  | mkCall k ty fn args =>
+      cases k with
+      | storage => simp [assignComplexCandidate, hmc, valueSourceB]
+      | memory => exact Bool.noConfusion hk
+      | stack => exact Bool.noConfusion hk
+
+theorem prim_eq_false_of_ref {ty : Ty} (h : ty.isReference = true) :
+    ty.isPrimitive = false := by
+  simpa [Ty.isReference] using h
 
 theorem assignComplexCandidate_incDec_none {m : Modality}
     {le : WrappedExpr} {op : IncDec} {t : WrappedExpr}
@@ -2655,8 +2962,12 @@ theorem residue_dispatch {m : Modality} {stmt : Stmt}
           ¬ t.kind = Kind.storage ∧
           ¬ (lhs.expr.kind = Kind.memory ∧ lhs.expr.complex = true) := by
   cases h with
-  | assignPushRhsNonStorage lhs t hk hnm =>
-      exact Or.inr ⟨lhs, t, rfl, hk, hnm⟩
+  | assignPushRhsNonStorage lhs t hk =>
+      by_cases hmc : lhs.expr.kind = Kind.memory ∧ lhs.expr.complex = true
+      · refine Or.inl ?_
+        simp [UniquenessAux.candidate, UniquenessAux.coe_eq_expr,
+          assignCandidate, assignComplexCandidate, hmc, valueSourceB]
+      · exact Or.inr ⟨lhs, t, rfl, hk, hmc⟩
   | iteSymbolicCond cond thn els hsimple hlit =>
       exact Or.inl (by
         simpa [UniquenessAux.candidate] using iteCandidate_none hsimple hlit)
@@ -2664,16 +2975,67 @@ theorem residue_dispatch {m : Modality} {stmt : Stmt}
       exact Or.inl (by
         simpa [UniquenessAux.candidate, exprCandidate] using
           incDecStmtCandidate_none (op := op) hbad)
-  | assignMemFieldFromStorage lhs rhs ty path fld hl hpath hr hk =>
+  | assignMemFieldFromStorage lhs rhs ty path fld hl hk hv =>
       refine Or.inl ?_
-      simp [UniquenessAux.candidate, UniquenessAux.coe_eq_expr, hl,
-        assignCandidate, assignSimpleCandidate, hr, hpath,
-        isMemory_eq_false_of_isStorage hk, isStack_eq_false_of_isStorage hk]
-  | assignMemIndexFromStorage lhs rhs ty path idx hl hpath hidx hr hk =>
+      have hnm := isMemory_eq_false_of_isStorage hk
+      have hns := isStack_eq_false_of_isStorage hk
+      cases hs : rhs.simple with
+      | true =>
+          rcases hv with hv | hv <;>
+            simp [UniquenessAux.candidate, UniquenessAux.coe_eq_expr, hl,
+              assignCandidate, hs, assignSimpleCandidate, hnm, hns, hv]
+      | false =>
+          have hmc : lhs.expr.kind = Kind.memory ∧ lhs.expr.complex = true := by
+            simp [hl]
+          simp only [UniquenessAux.candidate, UniquenessAux.coe_eq_expr,
+            assignCandidate, hs, Bool.false_eq_true, ↓reduceIte]
+          exact assignComplexCandidate_memTarget_storageSource_none hmc hk hs
+  | assignMemIndexFromStorage lhs rhs ty path idx hl hk hv =>
       refine Or.inl ?_
-      simp [UniquenessAux.candidate, UniquenessAux.coe_eq_expr, hl,
-        assignCandidate, assignSimpleCandidate, hr, hpath, hidx,
-        isMemory_eq_false_of_isStorage hk, isStack_eq_false_of_isStorage hk]
+      have hnm := isMemory_eq_false_of_isStorage hk
+      have hns := isStack_eq_false_of_isStorage hk
+      cases hs : rhs.simple with
+      | true =>
+          rcases hv with hv | hv
+          · have hpc := or_false_left hv
+            have hic := or_false_right hv
+            simp [UniquenessAux.candidate, UniquenessAux.coe_eq_expr, hl,
+              assignCandidate, hs, assignSimpleCandidate, hnm, hns, hpc, hic]
+          · simp [UniquenessAux.candidate, UniquenessAux.coe_eq_expr, hl,
+              assignCandidate, hs, assignSimpleCandidate, hnm, hns, hv]
+      | false =>
+          have hmc : lhs.expr.kind = Kind.memory ∧ lhs.expr.complex = true := by
+            simp [hl]
+          simp only [UniquenessAux.candidate, UniquenessAux.coe_eq_expr,
+            assignCandidate, hs, Bool.false_eq_true, ↓reduceIte]
+          exact assignComplexCandidate_memTarget_storageSource_none hmc hk hs
+  | assignStackRefUnfoldTarget lhs rhs hu hr hk href =>
+      refine Or.inl ?_
+      have hnm := isMemory_eq_false_of_isStack hk
+      have hnsto := isStorage_eq_false_of_isStack hk
+      have hv : valueSourceB rhs = false := by
+        simp [valueSourceB, prim_eq_false_of_ref href]
+      unfold unfoldTargetB at hu
+      split at hu
+      · next ty path fld heq =>
+          simp [UniquenessAux.candidate, UniquenessAux.coe_eq_expr, heq,
+            assignCandidate, hr, assignSimpleCandidate, hu, hnm, hnsto, hv]
+      · next ty path idx heq =>
+          rcases or_eq_true_cases hu with hpc | hic
+          · simp [UniquenessAux.candidate, UniquenessAux.coe_eq_expr, heq,
+              assignCandidate, hr, assignSimpleCandidate, hpc, hnm, hnsto, hv]
+          · simp [UniquenessAux.candidate, UniquenessAux.coe_eq_expr, heq,
+              assignCandidate, hr, assignSimpleCandidate, hic, hnm, hnsto, hv]
+      · next ty path fld heq =>
+          simp [UniquenessAux.candidate, UniquenessAux.coe_eq_expr, heq,
+            assignCandidate, hr, assignSimpleCandidate, hu, hnm, hnsto, hv]
+      · next ty path idx heq =>
+          rcases or_eq_true_cases hu with hpc | hic
+          · simp [UniquenessAux.candidate, UniquenessAux.coe_eq_expr, heq,
+              assignCandidate, hr, assignSimpleCandidate, hpc, hnm, hnsto, hv]
+          · simp [UniquenessAux.candidate, UniquenessAux.coe_eq_expr, heq,
+              assignCandidate, hr, assignSimpleCandidate, hic, hnm, hnsto, hv]
+      · exact Bool.noConfusion hu
   | assignPushPlaceLhsNonStorage lhs rhs t hl hk hr =>
       refine Or.inl ?_
       simp [UniquenessAux.candidate, UniquenessAux.coe_eq_expr, hl,
@@ -2706,27 +3068,37 @@ theorem residue_dispatch {m : Modality} {stmt : Stmt}
           simp [UniquenessAux.candidate, UniquenessAux.coe_eq_expr, hl,
             assignCandidate, assignSimpleCandidate, hr, hk,
             Typed.WrappedExpr.isStack]
-  | assignPushRhsNonLocalLhs lhs t hk htc hloc hnm =>
+  | assignPushRhsNonLocalLhs lhs t hk htc hloc =>
       refine Or.inl ?_
       simp [UniquenessAux.candidate, UniquenessAux.coe_eq_expr,
-        assignCandidate, assignComplexCandidate, hnm, htc, hloc,
+        assignCandidate, assignComplexCandidate, htc, hloc, valueSourceB,
         Typed.WrappedExpr.isMemory]
-  | assignOperatorRhsBadLhs lhs rhs hrhs hnsv hbad hnm =>
+  | assignOperatorRhsBadLhs lhs rhs hrhs hnsv hbad =>
       exact Or.inl (by
         simpa [UniquenessAux.candidate, UniquenessAux.coe_eq_expr,
-          assignCandidate, simple_eq_false_of_captureRhs hrhs] using
-          assignComplexCandidate_operator_none (m := m) hrhs hnsv hbad hnm)
+          assignCandidate, simple_eq_false_of_operatorRhs hrhs] using
+          assignComplexCandidate_operator_none (m := m) hrhs hnsv
+            (by simp [hbad]))
+  | assignOperatorRhsRefTyped lhs rhs hrhs hnsv hty =>
+      have hv : valueSourceB rhs = false := by
+        rw [valueSourceB_operator hrhs]; exact hty
+      exact Or.inl (by
+        simpa [UniquenessAux.candidate, UniquenessAux.coe_eq_expr,
+          assignCandidate, simple_eq_false_of_operatorRhs hrhs] using
+          assignComplexCandidate_operator_none (m := m) hrhs hnsv
+            (by simp [hv]))
   | assignIncDecBadTarget lhs op t hsv hbad =>
       exact Or.inl (by
         simpa [UniquenessAux.candidate, UniquenessAux.coe_eq_expr,
           assignCandidate] using
           assignComplexCandidate_incDec_none (m := m) (op := op) hsv hbad)
-  | assignTernaryBadLhs lhs c thn els hcs hnsv hnsto hnm =>
+  | assignTernaryBadLhs lhs c thn els hcs hnsv hnsto hnmem =>
       refine Or.inl ?_
+      have hk : ¬ lhs.expr.kind = Kind.memory := by
+        simpa [Typed.WrappedExpr.isMemory] using hnmem
       simp [UniquenessAux.candidate, UniquenessAux.coe_eq_expr,
-        assignCandidate, assignComplexCandidate, hnm, hcs, hnsv, hnsto,
-        Typed.WrappedExpr.isMemory]
-  | assignCallRhs lhs k ty fn args hnm hns =>
+        assignCandidate, assignComplexCandidate, hcs, hnsv, hnsto, hk]
+  | assignCallRhs lhs k ty fn args hns =>
       refine Or.inl ?_
       have hcond : ¬ (lhs.expr.kind = Kind.storage ∧
           (Typed.WrappedExpr.mkCall k ty fn args).isMemory = true) := by
@@ -2735,19 +3107,19 @@ theorem residue_dispatch {m : Modality} {stmt : Stmt}
         have h2 := hx.2
         simpa [Typed.WrappedExpr.isMemory, kind_mkCall] using h2
       simp [UniquenessAux.candidate, UniquenessAux.coe_eq_expr,
-        assignCandidate, assignComplexCandidate, hnm, hcond]
-  | assignStackPlaceRhs lhs rhs hshape hnm =>
+        assignCandidate, assignComplexCandidate, hcond, valueSourceB]
+  | assignStackPlaceRhs lhs rhs hshape =>
       refine Or.inl ?_
       cases hshape with
       | inl hex =>
           obtain ⟨ty, base, fld, hrx⟩ := hex
           simp [UniquenessAux.candidate, UniquenessAux.coe_eq_expr, hrx,
-            assignCandidate, assignComplexCandidate, hnm,
+            assignCandidate, assignComplexCandidate, valueSourceB,
             Typed.WrappedExpr.isMemory]
       | inr hex =>
           obtain ⟨ty, base, idx, hrx⟩ := hex
           simp [UniquenessAux.candidate, UniquenessAux.coe_eq_expr, hrx,
-            assignCandidate, assignComplexCandidate, hnm,
+            assignCandidate, assignComplexCandidate, valueSourceB,
             Typed.WrappedExpr.isMemory]
   | compoundAssignPow lhs rhs =>
       refine Or.inl ?_
@@ -2928,29 +3300,41 @@ theorem memoryDeclInitOkB_eq_false {rhs : WrappedExpr}
   | mkIncDec op t => exact or_eq_false hnm' hns'
   | mkTernary c t e => exact or_eq_false hnm' hns'
 
-theorem valueCaptureLhsOkB_eq_false_of_none {le : WrappedExpr}
-    (h : valueRhsCaptureCandidate le = none) :
-    valueCaptureLhsOkB le = false := by
+theorem unfoldSourceLhsOkB_eq_false_of_none {le : WrappedExpr}
+    (h : unfoldSourceCandidate le = none) :
+    unfoldSourceLhsOkB le = false := by
   cases le with
   | var k ty fld =>
       cases k with
       | storage =>
-          simp only [valueRhsCaptureCandidate] at h
+          simp only [unfoldSourceCandidate] at h
           split at h
           · exact nomatch h
           · next hng =>
-              simp [valueCaptureLhsOkB, beq_eq_false_of_ne hng]
+              simp [unfoldSourceLhsOkB, beq_eq_false_of_ne hng]
       | memory => rfl
       | stack => rfl
   | field k ty base fld =>
       cases k with
-      | storage => exact nomatch h
-      | memory => rfl
+      | storage =>
+          simp only [unfoldSourceCandidate] at h
+          split at h <;> exact nomatch h
+      | memory =>
+          simp only [unfoldSourceCandidate] at h
+          split at h <;> exact nomatch h
       | stack => rfl
   | index k ty base idx =>
       cases k with
-      | storage => exact nomatch h
-      | memory => rfl
+      | storage =>
+          simp only [unfoldSourceCandidate] at h
+          split at h
+          · exact nomatch h
+          · split at h <;> exact nomatch h
+      | memory =>
+          simp only [unfoldSourceCandidate] at h
+          split at h
+          · exact nomatch h
+          · split at h <;> exact nomatch h
       | stack => rfl
   | pushPlace t => rfl
   | bool b => rfl
@@ -2960,6 +3344,90 @@ theorem valueCaptureLhsOkB_eq_false_of_none {le : WrappedExpr}
   | mkUnop op a => rfl
   | mkIncDec op t => rfl
   | mkTernary c t e => rfl
+
+/-- A simple source is a value source exactly when it is primitive and
+not in memory (the shape test passes on `var`/`bool`/`intLit`). -/
+theorem valueSourceB_simple {rhs : WrappedExpr} (hs : rhs.simple = true) :
+    valueSourceB rhs = (rhs.ty.isPrimitive && !rhs.isMemory) := by
+  cases rhs <;> simp_all [valueSourceB, Typed.WrappedExpr.simple]
+
+/-- A simple source that is not in memory, not a storage reference and
+not a value: a reference-typed stack value. -/
+theorem stackRef_of_simple_none {rhs : WrappedExpr} (hs : rhs.simple = true)
+    (hnmem : ¬ rhs.isMemory = true)
+    (hnref : ¬ (rhs.isStorage && rhs.ty.isReference) = true)
+    (hnv : ¬ valueSourceB rhs = true) :
+    rhs.isStack = true ∧ rhs.ty.isReference = true := by
+  have hnm := eq_false_of_not_eq_true hnmem
+  rcases ty_prim_or_ref rhs.ty with hp | hr
+  · exact absurd (by rw [valueSourceB_simple hs]; simp [hp, hnm]) hnv
+  · rcases kind_trichotomy rhs with hk | hk | hk
+    · exact absurd (by simp [hk, hr]) hnref
+    · exact absurd hk hnmem
+    · exact ⟨hk, hr⟩
+
+/-- A simple source that is not in memory and not a value: a storage
+root (of reference type, necessarily) or a reference-typed stack value. -/
+theorem storageOrStackRef_of_simple_none {rhs : WrappedExpr}
+    (hs : rhs.simple = true) (hnmem : ¬ rhs.isMemory = true)
+    (hnv : ¬ valueSourceB rhs = true) :
+    rhs.isStorage = true ∨ (rhs.isStack = true ∧ rhs.ty.isReference = true) := by
+  have hnm := eq_false_of_not_eq_true hnmem
+  rcases ty_prim_or_ref rhs.ty with hp | hr
+  · exact absurd (by rw [valueSourceB_simple hs]; simp [hp, hnm]) hnv
+  · rcases kind_trichotomy rhs with hk | hk | hk
+    · exact Or.inl hk
+    · exact absurd hk hnmem
+    · exact Or.inr ⟨hk, hr⟩
+
+theorem nsv_of_memComplex {le : WrappedExpr}
+    (hmc : le.kind = Kind.memory ∧ le.complex = true) :
+    (le.isStack && le.simple) = false := by
+  simp [Typed.WrappedExpr.isStack, hmc.1]
+
+/-- An assignable complex memory place is a memory field or index. -/
+theorem memComplex_shape {le : WrappedExpr} (hass : le.assignable = true)
+    (hmc : le.kind = Kind.memory ∧ le.complex = true) :
+    (∃ ty path fld, le = WrappedExpr.field Kind.memory ty path fld) ∨
+      (∃ ty path idx, le = WrappedExpr.index Kind.memory ty path idx) := by
+  cases le with
+  | var k ty fld => exact absurd hmc.2 (by simp)
+  | field k ty path fld =>
+      cases k with
+      | memory => exact Or.inl ⟨ty, path, fld, rfl⟩
+      | storage => exact absurd hmc.1 (by simp)
+      | stack => exact absurd hmc.1 (by simp)
+  | index k ty path idx =>
+      cases k with
+      | memory => exact Or.inr ⟨ty, path, idx, rfl⟩
+      | storage => exact absurd hmc.1 (by simp)
+      | stack => exact absurd hmc.1 (by simp)
+  | pushPlace t => exact absurd hmc.1 (by simp)
+  | bool b => exact Bool.noConfusion hass
+  | intLit t v => exact Bool.noConfusion hass
+  | mkCall k t n args => exact Bool.noConfusion hass
+  | mkBinop op l r => exact Bool.noConfusion hass
+  | mkUnop op a => exact Bool.noConfusion hass
+  | mkIncDec op t => exact Bool.noConfusion hass
+  | mkTernary c t e => exact Bool.noConfusion hass
+
+/-- The operator-source leaf of the complex dispatch: `none` there means
+the target is outside `unfoldSourceCandidate` or the operator's type is
+not primitive. -/
+theorem operator_residue {le rhs : WrappedExpr} (hass : le.assignable = true)
+    (hop : operatorRhsB rhs = true)
+    (hnsv : (le.isStack && le.simple) = false)
+    (h : (if valueSourceB rhs = true then unfoldSourceCandidate le else none) =
+      none) :
+    ResidueShape (Stmt.assign ⟨le, hass⟩ rhs) := by
+  split at h
+  · next hv =>
+      exact ResidueShape.assignOperatorRhsBadLhs _ _ hop hnsv
+        (unfoldSourceLhsOkB_eq_false_of_none h)
+  · next hnv =>
+      refine ResidueShape.assignOperatorRhsRefTyped _ _ hop hnsv ?_
+      rw [<- valueSourceB_operator hop]
+      exact eq_false_of_not_eq_true hnv
 
 /-- **The hard direction of the dichotomy**: on a well-typed statement,
 every `none` answer of the dispatch function is one of the explicitly
@@ -2994,7 +3462,7 @@ theorem residue_of_candidate_none {m : Modality} {Γ Γ' : Semantics.Ctx}
       simp only [requireCandidate] at h
       split at h <;> exact nomatch h
   | transfer recipient amount =>
-      replace h : transferCandidate recipient amount = none := h
+      replace h : transferCandidate m recipient amount = none := h
       simp only [transferCandidate] at h
       split at h
       · exact nomatch h
@@ -3110,7 +3578,7 @@ theorem residue_of_candidate_none {m : Modality} {Γ Γ' : Semantics.Ctx}
       case isTrue hc =>
       simp only [Bool.and_eq_true] at hc
       obtain ⟨hwte, hks⟩ := hc
-      replace h : deleteCandidate te = none := h
+      replace h : deleteCandidate m te = none := h
       cases te with
       | var k ty fld =>
           cases k with
@@ -3121,16 +3589,14 @@ theorem residue_of_candidate_none {m : Modality} {Γ Γ' : Semantics.Ctx}
               · next hng =>
                   exact ResidueShape.deleteStorageLocalRoot _ ty fld rfl
                     (beq_eq_false_of_ne hng)
-          | memory => exact nomatch h
+          | memory => exact absurd (eq_of_beq hks) (by simp)
           | stack => exact absurd (eq_of_beq hks) (by simp)
       | field k ty path fld =>
           cases k with
           | storage =>
               simp only [deleteCandidate] at h
               split at h <;> exact nomatch h
-          | memory =>
-              simp only [deleteCandidate] at h
-              split at h <;> exact nomatch h
+          | memory => exact absurd (eq_of_beq hks) (by simp)
           | stack => exact absurd (eq_of_beq hks) (by simp)
       | index k ty path idx =>
           cases k with
@@ -3148,11 +3614,7 @@ theorem residue_of_candidate_none {m : Modality} {Γ Γ' : Semantics.Ctx}
                           rcases wt_index_container hwte with hcont | hcont
                           · exact absurd (by simp [hcont]) hncont
                           · exact absurd (by simp [hcont]) hncont
-          | memory =>
-              simp only [deleteCandidate] at h
-              split at h
-              · exact nomatch h
-              · split at h <;> exact nomatch h
+          | memory => exact absurd (eq_of_beq hks) (by simp)
           | stack => exact absurd (eq_of_beq hks) (by simp)
       | pushPlace p =>
           simp only [deleteCandidate] at h
@@ -3236,7 +3698,7 @@ theorem residue_of_candidate_none {m : Modality} {Γ Γ' : Semantics.Ctx}
       case isFalse => exact nomatch hwt
       case isTrue hc =>
       simp only [Bool.and_eq_true] at hc
-      obtain ⟨⟨hArith, -⟩, -⟩ := hc
+      obtain ⟨⟨hArith, hwl⟩, -⟩ := hc
       replace h : compoundAssignCandidate op le rhs = none := h
       simp only [compoundAssignCandidate] at h
       split at h
@@ -3267,7 +3729,18 @@ theorem residue_of_candidate_none {m : Modality} {Γ Γ' : Semantics.Ctx}
                           simp [compoundTargetOkB,
                             Typed.WrappedExpr.isStack,
                             Typed.WrappedExpr.kind, hic]
-                      · split at h <;> exact nomatch h
+                      · split at h
+                        · exact nomatch h
+                        · split at h
+                          · exact nomatch h
+                          · next hna =>
+                              split at h
+                              · exact nomatch h
+                              · next hnmap =>
+                                  rcases wt_index_container hwl with
+                                    hcont | hcont
+                                  · exact absurd hcont hna
+                                  · exact absurd hcont hnmap
                   · next ty path fld =>
                       split at h <;> exact nomatch h
                   · next ty path idx =>
@@ -3381,7 +3854,21 @@ theorem residue_of_candidate_none {m : Modality} {Γ Γ' : Semantics.Ctx}
               | storage =>
                   simp only [assignSimpleCandidate] at h
                   split at h
-                  · split at h <;> exact nomatch h
+                  · next hpc =>
+                      split at h
+                      · exact nomatch h
+                      · next hnmem =>
+                          split at h
+                          · exact nomatch h
+                          · next hnref =>
+                              split at h
+                              · exact nomatch h
+                              · next hnv =>
+                                  obtain ⟨hk, href⟩ :=
+                                    stackRef_of_simple_none hsimp hnmem hnref hnv
+                                  exact ResidueShape.assignStackRefUnfoldTarget
+                                    _ rhs (by simp [unfoldTargetB, hpc]) hsimp
+                                    hk href
                   · next hnpc =>
                       split at h
                       · exact nomatch h
@@ -3399,7 +3886,21 @@ theorem residue_of_candidate_none {m : Modality} {Γ Γ' : Semantics.Ctx}
               | memory =>
                   simp only [assignSimpleCandidate] at h
                   split at h
-                  · exact nomatch h
+                  · next hpc =>
+                      split at h
+                      · exact nomatch h
+                      · next hnmem =>
+                          split at h
+                          · exact nomatch h
+                          · next hnv =>
+                              rcases storageOrStackRef_of_simple_none hsimp
+                                  hnmem hnv with hk | ⟨hk, href⟩
+                              · exact ResidueShape.assignMemFieldFromStorage
+                                  _ rhs ty path fld rfl hk
+                                  (Or.inr (eq_false_of_not_eq_true hnv))
+                              · exact ResidueShape.assignStackRefUnfoldTarget
+                                  _ rhs (by simp [unfoldTargetB, hpc]) hsimp
+                                  hk href
                   · next hnpc =>
                       split at h
                       · exact nomatch h
@@ -3409,8 +3910,8 @@ theorem residue_of_candidate_none {m : Modality} {Γ Γ' : Semantics.Ctx}
                           · next hnstk =>
                               rcases kind_trichotomy rhs with hk | hk | hk
                               · exact ResidueShape.assignMemFieldFromStorage
-                                  _ rhs ty path fld rfl
-                                  (eq_false_of_not_eq_true hnpc) hsimp hk
+                                  _ rhs ty path fld rfl hk
+                                  (Or.inl (eq_false_of_not_eq_true hnpc))
                               · exact absurd hk hnmem
                               · exact absurd hk hnstk
               | stack =>
@@ -3430,10 +3931,40 @@ theorem residue_of_candidate_none {m : Modality} {Γ Γ' : Semantics.Ctx}
               | storage =>
                   simp only [assignSimpleCandidate] at h
                   split at h
-                  · exact nomatch h
+                  · next hpc =>
+                      split at h
+                      · exact nomatch h
+                      · next hnmem =>
+                          split at h
+                          · exact nomatch h
+                          · next hnref =>
+                              split at h
+                              · exact nomatch h
+                              · next hnv =>
+                                  obtain ⟨hk, href⟩ :=
+                                    stackRef_of_simple_none hsimp hnmem hnref hnv
+                                  exact ResidueShape.assignStackRefUnfoldTarget
+                                    _ rhs (by simp [unfoldTargetB, hpc]) hsimp
+                                    hk href
                   · next hnpc =>
                       split at h
-                      · split at h <;> exact nomatch h
+                      · next hic =>
+                          split at h
+                          · exact nomatch h
+                          · next hnmem =>
+                              split at h
+                              · exact nomatch h
+                              · next hnref =>
+                                  split at h
+                                  · exact nomatch h
+                                  · next hnv =>
+                                      obtain ⟨hk, href⟩ :=
+                                        stackRef_of_simple_none hsimp hnmem
+                                          hnref hnv
+                                      exact
+                                        ResidueShape.assignStackRefUnfoldTarget
+                                          _ rhs (by simp [unfoldTargetB, hic])
+                                          hsimp hk href
                       · next hnic =>
                           split at h
                           · next hsto =>
@@ -3482,10 +4013,40 @@ theorem residue_of_candidate_none {m : Modality} {Γ Γ' : Semantics.Ctx}
               | memory =>
                   simp only [assignSimpleCandidate] at h
                   split at h
-                  · exact nomatch h
-                  · next hnpc =>
+                  · next hpc =>
                       split at h
                       · exact nomatch h
+                      · next hnmem =>
+                          split at h
+                          · exact nomatch h
+                          · next hnv =>
+                              rcases storageOrStackRef_of_simple_none hsimp
+                                  hnmem hnv with hk | ⟨hk, href⟩
+                              · exact ResidueShape.assignMemIndexFromStorage
+                                  _ rhs ty path idx rfl hk
+                                  (Or.inr (eq_false_of_not_eq_true hnv))
+                              · exact ResidueShape.assignStackRefUnfoldTarget
+                                  _ rhs (by simp [unfoldTargetB, hpc]) hsimp
+                                  hk href
+                  · next hnpc =>
+                      split at h
+                      · next hic =>
+                          split at h
+                          · exact nomatch h
+                          · next hnmem =>
+                              split at h
+                              · exact nomatch h
+                              · next hnv =>
+                                  rcases storageOrStackRef_of_simple_none hsimp
+                                      hnmem hnv with hk | ⟨hk, href⟩
+                                  · exact
+                                      ResidueShape.assignMemIndexFromStorage
+                                        _ rhs ty path idx rfl hk
+                                        (Or.inr (eq_false_of_not_eq_true hnv))
+                                  · exact
+                                      ResidueShape.assignStackRefUnfoldTarget
+                                        _ rhs (by simp [unfoldTargetB, hic])
+                                        hsimp hk href
                       · next hnic =>
                           split at h
                           · cases m <;> exact nomatch h
@@ -3496,10 +4057,10 @@ theorem residue_of_candidate_none {m : Modality} {Γ Γ' : Semantics.Ctx}
                                   rcases kind_trichotomy rhs with hk | hk | hk
                                   · exact
                                       ResidueShape.assignMemIndexFromStorage
-                                        _ rhs ty path idx rfl
-                                        (eq_false_of_not_eq_true hnpc)
-                                        (eq_false_of_not_eq_true hnic)
-                                        hsimp hk
+                                        _ rhs ty path idx rfl hk
+                                        (Or.inl (by
+                                          simp [eq_false_of_not_eq_true hnpc,
+                                            eq_false_of_not_eq_true hnic]))
                                   · exact absurd hk hnmem
                                   · exact absurd hk hnstk
               | stack =>
@@ -3539,10 +4100,16 @@ theorem residue_of_candidate_none {m : Modality} {Γ Γ' : Semantics.Ctx}
               | storage =>
                   simp only [assignComplexCandidate] at h
                   split at h
-                  · exact nomatch h
+                  · next hmc =>
+                      rcases memComplex_shape hass hmc with
+                        ⟨ty3, p3, f3, hl⟩ | ⟨ty3, p3, i3, hl⟩
+                      · exact ResidueShape.assignMemFieldFromStorage _ _
+                          ty3 p3 f3 hl rfl (Or.inr (valueSourceB_field _ _ _ _))
+                      · exact ResidueShape.assignMemIndexFromStorage _ _
+                          ty3 p3 i3 hl rfl (Or.inr (valueSourceB_field _ _ _ _))
                   · next hn1 =>
                       split at h
-                      · exact nomatch h
+                      · next h2 => exact Bool.noConfusion h2.2
                       · next hn2 =>
                           split at h
                           · exact nomatch h
@@ -3592,7 +4159,8 @@ theorem residue_of_candidate_none {m : Modality} {Γ Γ' : Semantics.Ctx}
                   · split at h <;> exact nomatch h
                   · next hn1 =>
                       split at h
-                      · exact nomatch h
+                      · cases le <;> (try split at h) <;> (try split at h) <;>
+                        exact Option.noConfusion h
                       · next hn2 =>
                           split at h
                           · exact nomatch h
@@ -3611,24 +4179,23 @@ theorem residue_of_candidate_none {m : Modality} {Γ Γ' : Semantics.Ctx}
                                           hnmem
                                       · exact absurd hk hnstk
               | stack =>
-                  simp only [assignComplexCandidate] at h
-                  split at h
-                  · exact nomatch h
-                  · next hn1 =>
-                      split at h
-                      · exact nomatch h
-                      · next hn2 =>
-                          exact ResidueShape.assignStackPlaceRhs _ _
-                            (Or.inl ⟨ty2, path, fld2, rfl⟩) hn1
+                  exact ResidueShape.assignStackPlaceRhs _ _
+                    (Or.inl ⟨ty2, path, fld2, rfl⟩)
           | index k2 ty2 path idx =>
               cases k2 with
               | storage =>
                   simp only [assignComplexCandidate] at h
                   split at h
-                  · exact nomatch h
+                  · next hmc =>
+                      rcases memComplex_shape hass hmc with
+                        ⟨ty3, p3, f3, hl⟩ | ⟨ty3, p3, i3, hl⟩
+                      · exact ResidueShape.assignMemFieldFromStorage _ _
+                          ty3 p3 f3 hl rfl (Or.inr (valueSourceB_index _ _ _ _))
+                      · exact ResidueShape.assignMemIndexFromStorage _ _
+                          ty3 p3 i3 hl rfl (Or.inr (valueSourceB_index _ _ _ _))
                   · next hn1 =>
                       split at h
-                      · exact nomatch h
+                      · next h2 => exact Bool.noConfusion h2.2
                       · next hn2 =>
                           split at h
                           · exact nomatch h
@@ -3723,7 +4290,8 @@ theorem residue_of_candidate_none {m : Modality} {Γ Γ' : Semantics.Ctx}
                     · split at h <;> exact nomatch h
                   · next hn1 =>
                       split at h
-                      · exact nomatch h
+                      · cases le <;> (try split at h) <;> (try split at h) <;>
+                        exact Option.noConfusion h
                       · next hn2 =>
                           split at h
                           · exact nomatch h
@@ -3745,22 +4313,21 @@ theorem residue_of_candidate_none {m : Modality} {Γ Γ' : Semantics.Ctx}
                                               (kind_of_isMemory hk) hnmem
                                           · exact absurd hk hnstk
               | stack =>
-                  simp only [assignComplexCandidate] at h
-                  split at h
-                  · exact nomatch h
-                  · next hn1 =>
-                      split at h
-                      · exact nomatch h
-                      · next hn2 =>
-                          exact ResidueShape.assignStackPlaceRhs _ _
-                            (Or.inr ⟨ty2, path, idx, rfl⟩) hn1
+                  exact ResidueShape.assignStackPlaceRhs _ _
+                    (Or.inr ⟨ty2, path, idx, rfl⟩)
           | pushPlace t =>
               simp only [assignComplexCandidate] at h
               split at h
-              · exact nomatch h
+              · next hmc =>
+                  rcases memComplex_shape hass hmc with
+                    ⟨ty3, p3, f3, hl⟩ | ⟨ty3, p3, i3, hl⟩
+                  · exact ResidueShape.assignMemFieldFromStorage _ _
+                      ty3 p3 f3 hl rfl (Or.inr (valueSourceB_pushPlace _))
+                  · exact ResidueShape.assignMemIndexFromStorage _ _
+                      ty3 p3 i3 hl rfl (Or.inr (valueSourceB_pushPlace _))
               · next hn1 =>
                   split at h
-                  · exact nomatch h
+                  · next h2 => exact Bool.noConfusion h2.2
                   · next hn2 =>
                       split at h
                       · exact nomatch h
@@ -3772,17 +4339,16 @@ theorem residue_of_candidate_none {m : Modality} {Γ Γ' : Semantics.Ctx}
                               · exact
                                   ResidueShape.assignPushRhsNonLocalLhs _ t
                                     hkt (eq_false_of_not_eq_true hntc)
-                                    (eq_false_of_not_eq_true hnloc) hn1
+                                    (eq_false_of_not_eq_true hnloc)
                               · exact
-                                  ResidueShape.assignPushRhsNonStorage _ t
-                                    hkt hn1
+                                  ResidueShape.assignPushRhsNonStorage _ t hkt
           | mkBinop op2 l r =>
               simp only [assignComplexCandidate] at h
               split at h
-              · exact nomatch h
+              · next hmc => exact operator_residue hass rfl (nsv_of_memComplex hmc) h
               · next hn1 =>
                   split at h
-                  · exact nomatch h
+                  · next h2 => exact Bool.noConfusion h2.2
                   · next hn2 =>
                       split at h
                       · next hsv =>
@@ -3793,38 +4359,29 @@ theorem residue_of_candidate_none {m : Modality} {Γ Γ' : Semantics.Ctx}
                               · split at h <;> exact nomatch h
                               · exact nomatch h
                       · next hnsv =>
-                          split at h
-                          · exact nomatch h
-                          · next hnb =>
-                              refine
-                                ResidueShape.assignOperatorRhsBadLhs _ _
-                                  (bnot_eq_true_of_eq_false
-                                    (eq_false_of_not_eq_true hnb))
-                                  (eq_false_of_not_eq_true hnsv)
-                                  (valueCaptureLhsOkB_eq_false_of_none h)
-                                  hn1
+                          exact operator_residue hass rfl
+                            (eq_false_of_not_eq_true hnsv) h
           | mkUnop op2 arg =>
               simp only [assignComplexCandidate] at h
               split at h
-              · exact nomatch h
+              · next hmc => exact operator_residue hass rfl (nsv_of_memComplex hmc) h
               · next hn1 =>
                   split at h
-                  · exact nomatch h
+                  · next h2 => exact Bool.noConfusion h2.2
                   · next hn2 =>
                       split at h
                       · next hsv =>
                           split at h <;> exact nomatch h
                       · next hnsv =>
-                          exact ResidueShape.assignOperatorRhsBadLhs _ _
-                            rfl (eq_false_of_not_eq_true hnsv)
-                            (valueCaptureLhsOkB_eq_false_of_none h) hn1
+                          exact operator_residue hass rfl
+                            (eq_false_of_not_eq_true hnsv) h
           | mkIncDec op2 t =>
               simp only [assignComplexCandidate] at h
               split at h
-              · exact nomatch h
+              · next hmc => exact operator_residue hass rfl (nsv_of_memComplex hmc) h
               · next hn1 =>
                   split at h
-                  · exact nomatch h
+                  · next h2 => exact Bool.noConfusion h2.2
                   · next hn2 =>
                       split at h
                       · next hsv =>
@@ -3890,41 +4447,42 @@ theorem residue_of_candidate_none {m : Modality} {Γ Γ' : Semantics.Ctx}
                                       (incDecAssignTargetOkB_eq_false_default
                                         hnt hx1 hx2 hx3 hx4 hx5)
                       · next hnsv =>
-                          exact ResidueShape.assignOperatorRhsBadLhs _ _
-                            rfl (eq_false_of_not_eq_true hnsv)
-                            (valueCaptureLhsOkB_eq_false_of_none h) hn1
+                          exact operator_residue hass rfl
+                            (eq_false_of_not_eq_true hnsv) h
           | mkTernary c thn els =>
               simp only [assignComplexCandidate] at h
               split at h
               · exact nomatch h
-              · next hn1 =>
+              · next hncc =>
                   split at h
                   · exact nomatch h
-                  · next hn2 =>
+                  · next hnsv =>
                       split at h
                       · exact nomatch h
-                      · next hncc =>
+                      · next hnsto =>
                           split at h
                           · exact nomatch h
-                          · next hnsv =>
-                              split at h
-                              · exact nomatch h
-                              · next hnsto =>
-                                  exact ResidueShape.assignTernaryBadLhs
-                                    _ c thn els
-                                    (eq_false_of_not_eq_true hncc)
-                                    (eq_false_of_not_eq_true hnsv)
-                                    (eq_false_of_not_eq_true hnsto) hn1
+                          · next hnmem =>
+                              exact ResidueShape.assignTernaryBadLhs
+                                _ c thn els
+                                (eq_false_of_not_eq_true hncc)
+                                (eq_false_of_not_eq_true hnsv)
+                                (eq_false_of_not_eq_true hnsto)
+                                (by simpa [Typed.WrappedExpr.isMemory] using hnmem)
           | mkCall k2 ty2 fn args =>
               simp only [assignComplexCandidate] at h
               split at h
-              · exact nomatch h
+              · next hmc =>
+                  refine ResidueShape.assignCallRhs _ k2 ty2 fn args ?_
+                  intro hx
+                  rw [hx.1] at hmc
+                  exact Kind.noConfusion hmc.1
               · next hn1 =>
                   split at h
-                  · exact nomatch h
+                  · cases le <;> (try split at h) <;> (try split at h) <;>
+                        exact Option.noConfusion h
                   · next hn2 =>
-                      refine ResidueShape.assignCallRhs _ k2 ty2 fn args
-                        hn1 ?_
+                      refine ResidueShape.assignCallRhs _ k2 ty2 fn args ?_
                       intro hx
                       refine hn2 ⟨hx.1, ?_⟩
                       simp [Typed.WrappedExpr.isMemory, kind_mkCall, hx.2]
@@ -4026,11 +4584,10 @@ theorem coverage_residue (m : Modality) {Γ Γ' : Semantics.Ctx}
               exact hp (by simp [pushRhsStorageB, he])
             by_cases hmc :
                 lhs.expr.kind = Kind.memory ∧ lhs.expr.complex = true
-            · refine Or.inl
-                ⟨.memoryWriteUnfoldRightSndResult, by decide, rfl, ?_⟩
-              exact ⟨hmc.1, hmc.2, rfl, trivial⟩
-            · exact Or.inr
-                (ResidueShape.assignPushRhsNonStorage lhs t hk hmc)
+            · refine Or.inr (residue_of_candidate_none (m := m) hwt ?_)
+              simp [UniquenessAux.candidate, UniquenessAux.coe_eq_expr,
+                assignCandidate, assignComplexCandidate, hmc, valueSourceB]
+            · exact Or.inr (ResidueShape.assignPushRhsNonStorage lhs t hk)
         | var k ty fld => exact absurd rfl hp
         | field k ty base fld => exact absurd rfl hp
         | index k ty base idx => exact absurd rfl hp
@@ -4079,7 +4636,7 @@ statement that is not one of the explicitly listed residue shapes has a
 first step under either modality.  Unlike `RuleStep.step_of_ruleApplies`
 (whose hypothesis *is* "some rule's condition holds"), the hypotheses here
 never mention the rules: the fragment is the type checker's language minus
-the 24 syntactic `ResidueShape` constructors. -/
+the 26 syntactic `ResidueShape` constructors. -/
 theorem RuleStep.complete_of_wellTyped (m : Modality) {Γ Γ' : Semantics.Ctx}
     {L : Semantics.Layout} {stmt : Stmt}
     (hwt : Semantics.stmtWt Γ L stmt = some Γ')

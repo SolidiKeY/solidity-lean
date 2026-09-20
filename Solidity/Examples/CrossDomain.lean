@@ -43,21 +43,13 @@ example : solbox!{ alice = carol } —→ solbox!{} := by single_step memoryToSt
 example : solbox!{ alice.account = david } —→ solbox!{} := by single_step memoryToStorageFieldCopyRoot
 
 /-! ### Example 36: `alice.account = carol.account`
-  — memory-to-storage with complex source
-1. `memoryToStorageUnfoldRightFstSource`
-2. `memoryLocalDeclInitDrop`
-3. `memoryFieldReadAliasRoot`
-4. `memoryToStorageFieldCopyRoot` -/
+  — memory-to-storage from a member source
+`memoryToStorageFieldCopyField`: a reference member of a simple memory root is
+read directly, without the `_ se = carol.account` capture that
+`memoryToStorageUnfoldRightFstSource` gives every other nonsimple memory
+source. -/
 
-example : solbox!{ alice.account = carol.account } —↠ solbox!{} :=
-  calc
-    solbox!{ alice.account = carol.account }
-        —→ solbox!{ Account memory se = carol.account;
-              alice.account = se@Account } := by single_step memoryToStorageUnfoldRightFstSource
-    _ —→ solbox!{ se@Account = carol.account;
-              alice.account = se@Account } := by single_step memoryLocalDeclInitDrop
-    _ —→ solbox!{ alice.account = se@Account } := by single_step memoryFieldReadAliasRoot
-    _ —→ solbox!{} := by single_step memoryToStorageFieldCopyRoot
+example : solbox!{ alice.account = carol.account } —→ solbox!{} := by single_step memoryToStorageFieldCopyField
 
 /-! ### Example 37: `alice.account.token = carol`
   — memory-to-storage with complex target path

@@ -45,7 +45,7 @@ both. New modules go in `Solidity.lean`.
 | `Calculus/RuleShapes.lean` | Structural checks: `mainBlock` reduction, `goals_nonempty`, `taclets_partitioned` (306 of 310 claimed, four listed with a reason), `twins_origin_eq`, `heuristics_eq_origin`. |
 | `Calculus/Completeness.lean` | `FirstStepCase`/`RuleStep` and the bridge `RuleStep.step_of_ruleApplies` with its converse. |
 | `Calculus/CandidateStep.lean` | `FirstStepCase` built from mutual exclusion instead of a ~190-entry list walk (`firstStepCase_box`/`_diamond`/`_both`). What makes a pinned step cheap. |
-| `Calculus/Coverage.lean` | `candidate_applies`, the syntactic `ResidueShape` (24 shapes no rule covers), and `RuleStep.complete_of_wellTyped` over the rule-independent fragment. |
+| `Calculus/Coverage.lean` | `candidate_applies`, the syntactic `ResidueShape` (26 shapes no rule covers), and `RuleStep.complete_of_wellTyped` over the rule-independent fragment. |
 | `Calculus/Uniqueness.lean` | Rule mutual exclusion via the total dispatch `candidate` (`applicable_eq_candidate`). `RuleSetDisciplined` carries exactly three facts. A failing uniqueness build signals a condition overlap. |
 | `Calculus/Progress.lean` | Progress is **false** here and this proves it (`symbolicIte`, `not_progress`), plus the judgment-layer split that handles it. **OPEN**: `BlockStep.wellFounded` is a documented `sorry`. |
 | `Calculus/MultiStep.lean` | `BlockStep` (`⇝`), `BlockReflMultiStep` (`⇝*`), `NamedBlockStep` (`⇝[.rule]`) and the `Trans` instances. Framing (`appendStmts`, `append_suffix`, `inContext`, and the rule-level `NamedBlockStep.inSuffix`): a chain carries a *suffix*, and a prefix is consumed rather than carried, because `⇝` fires at the head. |

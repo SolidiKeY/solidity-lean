@@ -18,7 +18,7 @@ There is no catch-all tier.  An earlier version of this file "proved"
 strong progress by adding two fallback rules whose residual deleted any
 uncovered statement; that made progress and normalization true and
 meaningless.  What *is* true is the characterization in `Coverage.lean`:
-a well-typed statement is either covered or one of the 24 listed
+a well-typed statement is either covered or one of the 26 listed
 `ResidueShape`s (`Coverage.coverage_residue`,
 `Coverage.not_covered_iff_residue`), and the completeness theorem is
 stated over that fragment (`RuleStep.complete_of_wellTyped`).

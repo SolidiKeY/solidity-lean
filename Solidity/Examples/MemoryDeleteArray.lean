@@ -8,30 +8,31 @@ set_option maxHeartbeats 3200000
 
 /-! ## Memory delete and array operations -/
 
-/-! ### Example 28: `delete carol` — memory delete simple target
-`memoryDeleteSimpleTarget` -/
+/-! ### Example 28: `delete carol` — memory delete of a root
+`memoryRootDeleteFreshRebind` -/
 
-example : solbox!{ delete carol } —→ solbox!{} := by single_step memoryDeleteSimpleTarget
+example : solbox!{ delete carol } —→ solbox!{} := by single_step memoryRootDeleteFreshRebind
 
-/-! ### Example 29: `delete carol.account` — memory delete simple field target
-`memoryDeleteSimpleTarget` -/
+/-! ### Example 29: `delete carol.account` — memory delete of a reference member
+`memoryFieldDeleteReference` (`account` is a struct; a primitive member would
+be `memoryFieldDeletePrimitive`) -/
 
-example : solbox!{ delete carol.account } —→ solbox!{} := by single_step memoryDeleteSimpleTarget
+example : solbox!{ delete carol.account } —→ solbox!{} := by single_step memoryFieldDeleteReference
 
 /-! ### Example 30: `delete carol.account.token` — memory delete complex target
-1. `memoryDeleteComplexTarget`
+1. `memoryFieldDeleteUnfoldLeftFst`
 2. `memoryLocalDeclInitDrop`
 3. `memoryFieldReadAliasRoot`
-4. `memoryDeleteSimpleTarget` -/
+4. `memoryFieldDeleteReference` -/
 
 example : solbox!{ delete carol.account.token } —↠ solbox!{} :=
   calc
     solbox!{ delete carol.account.token }
         —→ solbox!{ Account memory mv = carol.account;
-              delete mv@Account.token } := by single_step memoryDeleteComplexTarget
+              delete mv@Account.token } := by single_step memoryFieldDeleteUnfoldLeftFst
     _ —→ solbox!{ mv = carol.account;
               delete mv@Account.token } := by single_step memoryLocalDeclInitDrop
     _ —→ solbox!{ delete mv@Account.token } := by single_step memoryFieldReadAliasRoot
-    _ —→ solbox!{} := by single_step memoryDeleteSimpleTarget
+    _ —→ solbox!{} := by single_step memoryFieldDeleteReference
 
 end Solidity.Examples

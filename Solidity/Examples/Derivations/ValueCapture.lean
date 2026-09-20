@@ -10,7 +10,8 @@ set_option maxHeartbeats 8000000
 
 Binary operators only compute once both operands are simple stack
 values; complex operands are first hoisted into the fresh value variable
-`se` (KeY `<op>CaptureLhs`/`<op>CaptureRhs`/`<op>_unfold_result`).
+`se` (KeY `<op>CaptureLhs`/`<op>CaptureRhs`); a complex value written to storage
+is frozen by the write's own `*UnfoldSource` rule.
 
 The `se` these rules produce is a *stack* variable, spelled `se@uint` /
 `se@bool` in the surface notation: a bare `se` is a storage alias and
@@ -46,11 +47,11 @@ sol_derivation addFieldOperandCaptured :
   ⇝[.binopAssignment .add]
     solbox!{}
 
-/-! ### `alice.age = x + y` — result into storage captured via `se` -/
+/-! ### `alice.age = x + y` — the value source frozen into `se` by the write -/
 
 sol_derivation addResultCaptured :
     solbox!{ alice.age = x + y }
-  ⇝[.binopUnfoldResult BinOp.add]
+  ⇝[.storageFieldWriteUnfoldSource]
     solbox!{ uint se = x + y; alice.age = se@uint }
   ⇝*[.localValueDeclInitDrop, .valueDeclSkip, .binopAssignment .add]
     solbox!{ alice.age = se@uint }
@@ -73,15 +74,16 @@ sol_derivation assertConditionCaptured :
     solbox!{}
 
 /-! ### `to.transfer(amount)` / `owner.transfer(amount)` — simple operands
-`transferNoCallback` books the payment on the `net` ledger in one step;
+`transferNoCallbackBox` books the payment on the `net` ledger in one step
+(the diamond twin adds the "sufficient funds" obligation);
 the storage root `owner` is an atom, so it needs no capture either. -/
 
 example :
-    solbox!{ to.transfer(amount) } ⇝[.transferNoCallback] solbox!{} := by
+    solbox!{ to.transfer(amount) } ⇝[.transferNoCallbackBox] solbox!{} := by
   rule_step
 
 example :
-    solbox!{ owner.transfer(amount) } ⇝[.transferNoCallback] solbox!{} := by
+    solbox!{ owner.transfer(amount) } ⇝[.transferNoCallbackBox] solbox!{} := by
   rule_step
 
 /-! ### `to.transfer(x + 2)` — complex amount captured first
@@ -93,7 +95,7 @@ sol_derivation transferAmountCaptured :
     solbox!{ uint se = x + 2; to.transfer(se@uint) }
   ⇝*[.localValueDeclInitDrop, .valueDeclSkip, .binopAssignment .add]
     solbox!{ to.transfer(se@uint) }
-  ⇝[.transferNoCallback]
+  ⇝[.transferNoCallbackBox]
     solbox!{}
 
 end Solidity.Examples
