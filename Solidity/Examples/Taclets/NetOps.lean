@@ -4,7 +4,7 @@ import Solidity.Semantics
 # Ports of `keyext.solidity.examples/taclets`: payments (`net` ledger)
 
 `a.transfer(v)` books `net(a) := net(a) - v` with no callback
-(`transferNoCallback`, `netHeader.key`). In postconditions `net(a)`
+(`transferNoCallbackBox`/`transferNoCallbackDiamond`, `netHeader.key`). In postconditions `net(a)`
 reads the ledger, mirroring `selectSt<[int]>(net, at(a))`.
 
 `net-manual-update.key` (a raw update formula, no program) and

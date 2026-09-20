@@ -18,6 +18,15 @@ Instantiates the coverage dichotomy of `Calculus/Coverage.lean` on concrete,
   rules cover storage roots and storage *fields* only, so the index
   shape is residue (`memoryDeclBadInit`).
 
+* **Witness C** — `carol.age = people[i].age;`: a storage *path read*
+  written into a memory field.  No memory write rule reads storage — the
+  memory `Ref`/value `unfold_leftFst` rules admit a memory reference or a
+  value source only — so the statement is residue
+  (`assignMemFieldFromStorage`, with a complex source).  It was covered
+  before the 2026-09-20 rule-table rewrite, by the since-removed
+  `memoryWriteUnfoldRightSndResult` (`nmp = nse ⇝ _ pv = nse; nmp = pv`,
+  which solkey never had): the calculus now stops one step earlier.
+
 * **Negative control** — `people[k] = carol;`: a memory value written
   through a storage mapping index.  Covered by
   `memoryToStorageIndexMappingCopyRoot` — this statement *was* residue
@@ -147,6 +156,41 @@ example : Rules.ruleApplies .box memoryDeclFromIndex ∨
     ResidueShape memoryDeclFromIndex := by
   obtain ⟨Γ', hwt⟩ := Option.isSome_iff_exists.mp memoryDeclFromIndex_wt
   exact coverage_residue .box hwt
+
+/-! ## Witness C: `carol.age = people[i].age;` -/
+
+def memFieldFromStoragePath : Stmt :=
+  Stmt.assign
+    (PlaceExpr.field Kind.memory Ty.uint carolExpr StandardExample.ageField)
+    (WrappedExpr.field Kind.storage Ty.uint
+      (WrappedExpr.index Kind.storage StandardExample.personTy peopleExpr iExpr)
+      StandardExample.ageField)
+
+/-- (i) The statement typechecks. -/
+theorem memFieldFromStoragePath_wt :
+    Semantics.stmtWt gamma layout memFieldFromStoragePath = some gamma := by
+  decide
+
+/-- (ii) It has a residue shape: a storage source into a memory field. -/
+theorem memFieldFromStoragePath_residue :
+    ResidueShape memFieldFromStoragePath :=
+  residueShape_iff_residueShapeB.mpr (by decide)
+
+/-- (iii) No rule of the calculus claims it, in either modality. -/
+theorem memFieldFromStoragePath_not_covered_box :
+    ¬ Rules.ruleApplies .box memFieldFromStoragePath :=
+  residue_not_covered memFieldFromStoragePath_residue
+
+theorem memFieldFromStoragePath_not_covered_diamond :
+    ¬ Rules.ruleApplies .diamond memFieldFromStoragePath :=
+  residue_not_covered memFieldFromStoragePath_residue
+
+/-- (iv) The rewrite calculus is stuck on it. -/
+theorem memFieldFromStoragePath_no_step (sm : SolidityModality) :
+    ¬ ∃ cond rhs, RuleStep sm memFieldFromStoragePath cond rhs :=
+  fun ⟨_, _, h⟩ =>
+    let ⟨_, hm⟩ := RuleStep.ruleApplies_of_ruleStep h
+    residue_not_covered memFieldFromStoragePath_residue hm
 
 /-! ## Negative control: `people[k] = carol;` is covered
 

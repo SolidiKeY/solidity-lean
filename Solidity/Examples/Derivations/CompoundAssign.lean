@@ -30,7 +30,7 @@ example :
 
 example :
     solbox!{ values[i] *= amount }
-      ⇝[.storageIndexCompoundAssign .mul] solbox!{} := by rule_step
+      ⇝[.storageIndexArrayOpAssign .mul] solbox!{} := by rule_step
 
 /-! ### `alice.account.balance += amount` — complex path unfolds first
 

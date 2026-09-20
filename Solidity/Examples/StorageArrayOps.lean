@@ -36,7 +36,7 @@ example : solbox!{ people.push(bob) } —→ solbox!{} := by single_step storage
 example : solbox!{ people.pop() } —→ solbox!{} := by single_step storagePopSaveBox
 
 /-! ### Example 14: `alice.friends[i] = bob` — nonsimple path index write
-1. `storageIndexWriteUnfoldLeftFst`
+1. `storageIndexWriteRefUnfoldLeftFst` (`bob` is a reference, so no `se` freeze)
 2. `storagePlaceAlias`
 3. `storageIndexWriteArrayCopySourceBox` -/
 
@@ -44,7 +44,7 @@ example : solbox!{ alice.friends[i] = bob } —↠ solbox!{} :=
   calc
     solbox!{ alice.friends[i] = bob }
         —→ solbox!{ PersonArray storage sp = alice.friends;
-              sp@PersonArray[i] = bob } := by single_step storageIndexWriteUnfoldLeftFst
+              sp@PersonArray[i] = bob } := by single_step storageIndexWriteRefUnfoldLeftFst
     _ —→ solbox!{ sp@PersonArray[i] = bob } := by single_step storagePlaceAlias
     _ —→ solbox!{} := by single_step storageIndexWriteArrayCopySourceBox
 

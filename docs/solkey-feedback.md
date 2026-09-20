@@ -122,7 +122,7 @@ the sections further down carry the details.
    `not_normalizing`); the split belongs to the judgment layer
    (`symbolicIte_judgment_split`; solkey's `ifSplit`). Completeness holds
    only over a rule-independent fragment: well-typed (`stmtWt`) and not
-   one of the 24 syntactic `ResidueShape` families of `Calculus/Coverage.lean`
+   one of the 26 syntactic `ResidueShape` families of `Calculus/Coverage.lean`
    (`RuleStep.complete_of_wellTyped`). That list — symbolic `if`
    conditions, `**=`, inc/dec on memory or storage-local targets,
    stack values into storage-local roots, `delete` on storage-local

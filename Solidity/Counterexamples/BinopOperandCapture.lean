@@ -5,15 +5,15 @@ import Solidity.Semantics
 # Two nonsimple operands share one scratch name
 
 `binopUnfoldLeft` and `binopUnfoldRight` both bind `Rules.valueAliasName`,
-which is the single name `pv`.  One of them firing is sound — that is what
+which is the single name `se`.  One of them firing is sound — that is what
 `Calculus/RuleSoundness.lean` proves, a rule at a time.  Both firing on the *same*
 binary operation is not: the second binding captures the first, and the
 operation is computed from the right operand twice.
 
 ```
   r = alice.age + bob.age
-⇝ uint pv = alice.age; r = pv + bob.age      -- binopUnfoldLeft
-⇝ uint pv = bob.age;   r = pv + pv           -- binopUnfoldRight, and `pv`
+⇝ uint se = alice.age; r = se + bob.age      -- binopUnfoldLeft
+⇝ uint se = bob.age;   r = se + se           -- binopUnfoldRight, and `se`
                                              -- on the left is now bob.age
 ```
 
