@@ -15,8 +15,6 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 
 doc=docs/paper-parity.md
-src=(Solidity/Examples/Derivations/Paper/*.lean Solidity/Examples/Derivations/*.lean
-     Solidity/Examples/Counterexamples/*.lean)
 
 # A named chain is written `Module:name` (elsewhere) or `name` (in `Paper/`),
 # inside backticks, in the last column of a table row.
@@ -29,7 +27,7 @@ for entry in $named; do
     *:*) file="${entry%%:*}"; name="${entry##*:}";
          if ! grep -rqE "(sol_derivation|sol_rewrite|sol_calculus|sol_runs|theorem|example|def) +$name\b" \
               Solidity/Examples/Derivations/"$file".lean \
-              Solidity/Examples/Counterexamples/"$file".lean 2>/dev/null; then
+              Solidity/Counterexamples/"$file".lean 2>/dev/null; then
            echo "missing: $name (expected in $file.lean)"; missing=1
          fi ;;
     *)   if ! grep -rqE "(sol_derivation|sol_rewrite|sol_calculus|sol_runs|theorem|def) +$entry\b" \
