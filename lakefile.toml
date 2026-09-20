@@ -27,14 +27,14 @@ name = "SolidityCalculus"
 weakLeanArgs = ["--tstack=131072"]
 
 # The worked derivations, one `sol_derivation` per worked example of the
-# calculus (`Solidity/Examples/Derivations/Paper/`). Its own
+# calculus (`Solidity/Paper/`). Its own
 # target, and deliberately not imported by Solidity.lean: ~240 pinned rule
 # applications, each paying its own simp+decide, cost about 7 minutes of
 # CPU, against 24 for the whole default build. The rules themselves are
 # already covered by `Examples/Derivations/`, which is in the default
-# build. Built by scripts/check-examples.sh.
+# build. Built by scripts/check-paper.sh.
 [[lean_lib]]
-name = "SolidityExamples"
+name = "SolidityPaper"
 weakLeanArgs = ["--tstack=131072"]
 
 # Taclet-text conformance against solkey's `solidityProgramRules.key`.

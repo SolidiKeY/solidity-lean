@@ -31,15 +31,15 @@ for entry in $named; do
            echo "missing: $name (expected in $file.lean)"; missing=1
          fi ;;
     *)   if ! grep -rqE "(sol_derivation|sol_rewrite|sol_calculus|sol_runs|theorem|def) +$entry\b" \
-              Solidity/Examples/Derivations/Paper/*.lean; then
-           echo "missing: $entry (expected in Solidity/Examples/Derivations/Paper/)"; missing=1
+              Solidity/Paper/*.lean; then
+           echo "missing: $entry (expected in Solidity/Paper/)"; missing=1
          fi ;;
   esac
 done
 
 # The other direction, as a warning.
 for name in $(grep -hoE '^(sol_derivation|sol_rewrite|sol_calculus) +[A-Za-z0-9_]+' \
-                Solidity/Examples/Derivations/Paper/*.lean | awk '{print $2}'); do
+                Solidity/Paper/*.lean | awk '{print $2}'); do
   grep -q "\`$name\`" "$doc" || echo "warning: chain \`$name\` is in no row of $doc"
 done
 

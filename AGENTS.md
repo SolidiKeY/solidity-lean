@@ -54,7 +54,7 @@ map to solkey's taclets (do not restate it in module docstrings);
 `docs/calculus-parity.md` what the *rule table* does. `sol_wp` never reads
 `Calculus/Rules.lean`, so a number from the first says nothing about the calculus.
 `docs/paper-parity.md` is the third: one row per worked example of the paper,
-naming the chain in `Examples/Derivations/Paper/` that is it, or the reason
+naming the chain in `Solidity/Paper/` that is it, or the reason
 there is none. Add a row there before adding a chain.
 
 ## Checking your work
@@ -67,7 +67,7 @@ import changes and final confirmation. The `lean-verify` skill in
 | Command | Cost | What it covers |
 |---|---|---|
 | `./run-lean.sh` | ~24 min CPU | `lake build` (default targets) then the solkey sort check |
-| `./scripts/check-examples.sh` | ~7 min CPU | `SolidityExamples` (`Examples/Derivations/Paper/`) |
+| `./scripts/check-paper.sh` | ~7 min CPU | `SolidityPaper` (`Solidity/Paper/`) |
 | `./scripts/check-paper-parity.sh` | seconds | `docs/paper-parity.md` names only chains that exist |
 | `node scripts/check-theory-rules.mjs` | seconds | `Theory/Rewrite.lean` has a constructor per paper rewrite rule |
 | `./scripts/check-solkey-parity.sh` | medium | the ported corpus against `tests/solkey/expected.tsv` |

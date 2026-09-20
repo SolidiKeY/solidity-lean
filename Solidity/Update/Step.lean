@@ -61,7 +61,7 @@ lemmas at the end of this file (the `upd_merge` tactic of
 
 What is *not* here: soundness.  `Sequent.check` is the semantics, and each
 worked derivation checks its own endpoints against it
-(`Examples/Derivations/Paper.lean`); the general
+(`SolidityPaper.lean`); the general
 `FrontierStep a b → (a.Holds s ↔ b.Holds s)` needs the per-rule bridges of
 `Update/TacletTable.lean` (21 of the 83 rules with an update) and
 `Rules.assertGoals` is deliberately not exhaustive (`Update/Wp.lean`), so it

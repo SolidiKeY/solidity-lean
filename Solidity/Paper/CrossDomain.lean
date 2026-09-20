@@ -4,7 +4,7 @@ import Solidity.Semantics.DecEq
 /-!
 # The calculus's worked examples — cross-domain copies
 
-Section 8 of `Examples/Derivations/Paper.lean`: the storage-to-memory and
+Section 8 of `SolidityPaper.lean`: the storage-to-memory and
 memory-to-storage copies, where the calculus needs its identity layer and the
 Lean rule states one `alloc`/`copyMem` element.  The conventions are that
 file's docstring; the example-by-example map is `docs/paper-parity.md`.

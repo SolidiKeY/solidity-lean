@@ -1,9 +1,24 @@
-import Solidity.Examples.Derivations.Paper.Storage
-import Solidity.Examples.Derivations.Paper.Memory
-import Solidity.Examples.Derivations.Paper.CrossDomain
-import Solidity.Examples.Derivations.Paper.Control
-import Solidity.Examples.Derivations.Paper.Checks
-import Solidity.Examples.Derivations.Paper.Theory
+-- Root of the `SolidityPaper` library: one `sol_derivation` chain per worked
+-- example of the calculus, written the way the calculus writes it.
+--
+-- Deliberately not imported by `Solidity.lean`, for the same reason
+-- `SolidityCorpus` is not: it is ~45 derivations over ~240 rule applications,
+-- each one a pinned `find_pinned_step` paying its own `simp`+`decide`, which
+-- costs about 30 minutes of CPU (1m25s wall on 32 cores). The whole default
+-- build is about 24, so folding this in would roughly double it. Build this
+-- target with `./scripts/check-paper.sh`.
+--
+-- The derivations here are a *rendering* of the rule set, not new results:
+-- the same rules are already exercised by `Solidity/Examples/Derivations/`
+-- and `Solidity/Examples/Taclets/`, which are in the default build. What this
+-- target adds is the calculus's own chains, program and accumulated update
+-- together, one per worked example of the paper.
+import Solidity.Paper.Storage
+import Solidity.Paper.Memory
+import Solidity.Paper.CrossDomain
+import Solidity.Paper.Control
+import Solidity.Paper.Checks
+import Solidity.Paper.Theory
 
 /-!
 # The calculus's worked examples
@@ -27,16 +42,16 @@ each step, so a rule rename or a changed residual is a build failure here, not
 a stale list to re-derive.  To see what fired, put
 `set_option trace.solidity.steps true in` above a chain.
 
-This file is the conventions and the imports.  The chains are in five modules,
-one per group of the calculus's sections:
+This file is the target root, the conventions and the imports.  The chains
+are in five modules, one per group of the calculus's sections:
 
 | Module | Sections |
 |---|---|
-| `Paper/Storage.lean` | 1 storage fields and roots · 2 storage arrays · 3 delete · 4 compound assignment |
-| `Paper/Memory.lean` | 5 memory · 6 memory delete · 7 memory arrays and allocation |
-| `Paper/CrossDomain.lean` | 8 cross-domain copies |
-| `Paper/Control.lean` | 9 payment · 10 require, assert and if/else |
-| `Paper/Checks.lean` | the lines, run against the interpreter |
+| `Solidity/Paper/Storage.lean` | 1 storage fields and roots · 2 storage arrays · 3 delete · 4 compound assignment |
+| `Solidity/Paper/Memory.lean` | 5 memory · 6 memory delete · 7 memory arrays and allocation |
+| `Solidity/Paper/CrossDomain.lean` | 8 cross-domain copies |
+| `Solidity/Paper/Control.lean` | 9 payment · 10 require, assert and if/else |
+| `Solidity/Paper/Checks.lean` | the lines, run against the interpreter |
 
 **`docs/paper-parity.md` is the map**: one row per worked example of the
 paper, naming either the theorem that is it or the reason there is no chain.
@@ -88,7 +103,7 @@ lemmas do not reach — an earlier `storage`/`memory` write, a `push`, an
 `alloc` — the line stays in the stacked `{U₁}{U₂}` form the derivation
 accumulated, which is equally what the calculus writes before it merges.
 
-**The chains that have a semantic twin have it in `Paper/Checks.lean`**, not
+**The chains that have a semantic twin have it in `Solidity/Paper/Checks.lean`**, not
 all of them: `Sequent.check` runs a line against the interpreter, and the
 checks take the first and the last line of one chain per section and run both
 on a concrete store.  The chains themselves add no axiom: a pinned step goes

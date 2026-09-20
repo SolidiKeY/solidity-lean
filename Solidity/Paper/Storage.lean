@@ -4,7 +4,7 @@ import Solidity.Semantics.DecEq
 /-!
 # The calculus's worked examples — storage
 
-Sections 1–4 of `Examples/Derivations/Paper.lean`: storage fields and roots,
+Sections 1–4 of `SolidityPaper.lean`: storage fields and roots,
 storage arrays, `delete`, and compound assignment.  The conventions the chains
 are written in are that file's docstring; which paper example each chain is,
 and which ones have no chain, is `docs/paper-parity.md`.

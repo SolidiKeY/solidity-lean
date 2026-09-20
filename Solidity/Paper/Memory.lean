@@ -4,7 +4,7 @@ import Solidity.Semantics.DecEq
 /-!
 # The calculus's worked examples — memory
 
-Sections 5–7 of `Examples/Derivations/Paper.lean`: memory aliasing and
+Sections 5–7 of `SolidityPaper.lean`: memory aliasing and
 writes, memory `delete`, and memory arrays and allocation.  The conventions
 the chains are written in are that file's docstring; which paper example each
 chain is, and which ones have no chain, is `docs/paper-parity.md`.

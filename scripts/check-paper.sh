@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
 # Press button for the worked derivations: elaborate every worked example of
 # the calculus as a `sol_derivation` chain
-# (`Solidity/Examples/Derivations/Paper.lean`).
+# (`SolidityPaper.lean`).
 #
-#   ./scripts/check-examples.sh
+#   ./scripts/check-paper.sh
 #
 # About 7 minutes of CPU: ~65 derivations over ~390 pinned rule
 # applications, each paying its own `simp`+`decide`. That
 # is why the module has its own target rather than sitting in
 # `Solidity.lean` -- see the comment in
-# `SolidityExamples.lean`.
+# `SolidityPaper.lean`.
 #
 # It was 8x that until the two costs a pinned step used to pay went away:
 # `rule_simp` reducing `AST.lean`'s string-keyed tables (`name_table_simp`,
@@ -29,4 +29,4 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 export PATH="$HOME/.elan/bin:$PWD/scripts/lean-vscode/bin:$PATH"
 
-exec lake build SolidityExamples
+exec lake build SolidityPaper

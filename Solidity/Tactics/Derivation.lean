@@ -807,7 +807,7 @@ elab_rules : command
 
 /-! ### The sequent layer
 
-`Examples/Derivations/Paper.lean` writes the calculus's own lines --
+`SolidityPaper.lean` writes the calculus's own lines --
 `Γ ⟹ {U} ⟨[ p ]⟩ φ` -- so each of the block tactics above has a twin here.
 Two things are new, and both are about the update the block layer throws away.
 
@@ -1183,7 +1183,7 @@ program does not revert.
 **The endpoint is `native_decide`, deliberately.**  `Frontier.Holds` runs the
 accumulated update through the interpreter's readers, and the WF-recursive
 interpreter does not kernel-reduce -- `decide` fails on it, which is the same
-reason `Examples/Derivations/Paper.lean` checks its chains' endpoints that
+reason `SolidityPaper.lean` checks its chains' endpoints that
 way.  The *derivation* adds no axiom; the endpoint does.
 
 **Statements are `;`-separated, inside braces**, for the reason `sol_runs`

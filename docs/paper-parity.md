@@ -1,7 +1,7 @@
 # Paper parity: the calculus's worked examples, one row each
 
 The paper (`../Pre-licenciate-paper`) draws a symbolic execution for each of
-its worked examples. `Solidity/Examples/Derivations/Paper/` writes the same
+its worked examples. `Solidity/Paper/` writes the same
 chains as `sol_derivation`s. This file is the map between them: **one row per
 worked example**, naming either the theorem that *is* that example or the
 reason there is none.
@@ -21,11 +21,11 @@ names a theorem no source file declares.
 | Column | Meaning |
 |---|---|
 | Program | the paper's own listing, abbreviated to its first statement where the program is long |
-| Chain | `` `name` `` — a `sol_derivation` or `sol_calculus` in `Examples/Derivations/Paper/`; `` `Module:name` `` — one elsewhere in `Examples/Derivations/`; `— …` — no chain, and why |
+| Chain | `` `name` `` — a `sol_derivation` or `sol_calculus` in `Solidity/Paper/`; `` `Module:name` `` — one elsewhere in `Examples/Derivations/`; `— …` — no chain, and why |
 
 The scratch names differ from the paper's, because a fresh name would fall to
 `SoliditySyntax.rootExpr`'s stack default and be read as a `uint`. The
-translation, which is the same one the umbrella `Paper.lean` docstring states:
+translation, which is the same one the `SolidityPaper.lean` docstring states:
 
 | Paper | Here |
 |---|---|

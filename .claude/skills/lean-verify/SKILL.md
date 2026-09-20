@@ -72,7 +72,7 @@ Several files are enormous — `Calculus/RuleSoundness.lean` is 10,864 lines,
 |---|---|
 | ordinary edit inside one file | `lean_diagnostic_messages`, nothing else |
 | new import or new module | `lean_build` (restarts the LSP) |
-| touched `Examples/Derivations/Paper.lean` | `./scripts/check-examples.sh` (~30 min) |
+| touched `SolidityPaper.lean` | `./scripts/check-paper.sh` (~30 min) |
 | touched `SortCheck/Annotations.lean` | `lake exe solkeycheck` (already failing on 78 rows — compare against that baseline, do not try to reach zero) |
 | final confirmation | `./run-lean.sh` (~24 min) |
 

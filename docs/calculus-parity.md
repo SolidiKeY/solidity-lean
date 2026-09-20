@@ -157,7 +157,7 @@ Two limits, both deliberate and both worth knowing before quoting the number.
 2. **The endpoint is `native_decide`.** `Frontier.Holds` runs the accumulated
    update through the interpreter's readers, and the WF-recursive interpreter
    does not kernel-reduce, so `decide` fails on it — the same reason
-   `Examples/Derivations/Paper.lean` checks its chains' endpoints that way.
+   `SolidityPaper.lean` checks its chains' endpoints that way.
    The *derivation* adds no axiom; the endpoint adds `Lean.ofReduceBool` and
    `Lean.trustCompiler`. So the symbolic execution is by the rules and the
    arithmetic at the end is by the interpreter, which is exactly the division

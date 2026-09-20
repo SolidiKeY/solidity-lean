@@ -30,7 +30,7 @@ When a step stops elaborating, the cause is almost never the notation:
    failure looks like a parse problem and is not. Add the name to the
    explicit-arms list in `AST.lean` beside `"rv"`, `"idx"`, `"result"`.
    **But not for the worked-example identifiers**: giving those explicit arms
-   overflowed Lean's stack (see the `Paper.lean` docstring). Explicit
+   overflowed Lean's stack (see the `SolidityPaper.lean` docstring). Explicit
    arms are for scratch names that appear in *residuals*; a worked example's
    own identifiers go in `name_table_arms` in `Tactics/Derivation.lean`, which
    states the default arm's instance as a lemma instead of growing the match.
@@ -136,8 +136,8 @@ or `seq!` is the sequent layer, `sol!` the judgment layer, anything else the
 block layer. Single steps stay as `example : A ⇝[.r] B := by rule_step`.
 
 **A sequent line is written with the turnstile in front**, the way
-`Examples/Derivations/Paper/` writes the calculus's own chains
-(`Paper.lean` itself is the conventions and the imports; `docs/paper-parity.md`
+`Solidity/Paper/` writes the calculus's own chains
+(`SolidityPaper.lean` is the target root, the conventions and the imports; `docs/paper-parity.md`
 maps the chains to the paper's worked examples):
 
 ```
