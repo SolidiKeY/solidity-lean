@@ -61,5 +61,5 @@ MCP configuration), then check `/mcp` for
 use that format. The launcher creates `.venv` on first use and installs the
 version pinned in `scripts/lean-mcp-requirements.txt`.
 
-See `docs/module-map.md` for the module map and `AGENTS.md` for the working
-conventions.
+See `docs/module-map.md` for the module map, `docs/README.md` for the rest of
+the documents, and `AGENTS.md` for the working conventions.
