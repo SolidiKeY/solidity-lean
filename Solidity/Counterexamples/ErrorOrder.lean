@@ -48,11 +48,10 @@ def store : State :=
 right-hand side that is stuck. -/
 def prog : Stmt := sstmt!{ people[1 / 0].age = ghost }
 
-/-- The rule does apply: complex path, simple non-memory right-hand side. -/
+/-- The rule does apply: complex path, a value right-hand side. -/
 theorem prog_cond :
     (ruleEffect .storageFieldWriteUnfoldLeftFst).cond prog := by
-  change _ = true ∧ _ = true ∧ ¬ (_ = true)
-  decide
+  exact ⟨rfl, rfl, rfl, trivial⟩
 
 /-- Value operand first: the interpreter is **stuck** on `ghost`. -/
 theorem prog_original : execStmt store prog = .error .stuck := by

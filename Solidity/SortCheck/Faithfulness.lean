@@ -19,12 +19,14 @@ finds at the read path (`SortFaithful`). The claims per `ReadSort`:
 - `generic vc` claims the value inhabits the read expression's static
   type (the varcond resolves the schema sort to exactly that type).
 
-`sortFaithful_all` discharges every row except the two `openFindings` —
-the surviving `find<[Struct]>` reads on possibly-primitive sources
-(`storageFieldWriteCopySource`, `storagePushValueCopySource`), the same
-family as the fixed bug. `Counterexamples/PreFixSortAnnotations.lean`
-proves the pre-fix annotations are *not* faithful (the caught bug) and
-exhibits the open findings' failure.
+`sortFaithful_all` discharges every row; `openFindings` is empty since
+solkey `29c44e225b` replaced the last two `find<[Struct]>` reads on
+possibly-primitive sources (`storageFieldWriteCopySource`,
+`storagePushValueCopySource`) — the same family as the fixed bug, and
+this table's two open findings until then — by sort-free
+`find<[StValue]>`. `Counterexamples/PreFixSortAnnotations.lean` proves
+the pre-fix annotations are *not* faithful (the caught bug) and keeps
+the refutation of the two former findings' `find<[Struct]>` rows.
 
 Scope: storage-domain `value`-site reads carry the semantic content;
 `length`/`net`/`dflt` sites and memory-domain reads have no Lean-model
@@ -95,15 +97,16 @@ reference-typed memory target's type. -/
 /-- Rules whose `value` read is a numeric-typed target: the
 compound-assignment and inc/dec taclet families. -/
 def ruleNumericTarget : RuleName -> Bool
-  | .storageRootCompoundAssign _ => true
-  | .storageFieldCompoundAssign _ => true
-  | .storageIndexCompoundAssign _ => true
-  | .storageRootIncDec _ => true
-  | .storageFieldIncDec _ => true
-  | .storageIndexIncDec _ => true
-  | .storageRootIncDecAssignment _ => true
-  | .storageFieldIncDecAssignment _ => true
-  | .storageIndexIncDecAssignment _ => true
+  | .storageRootOpAssign _ => true
+  | .storageFieldOpAssign _ => true
+  | .storageIndexMappingOpAssign _ => true
+  | .storageIndexArrayOpAssign _ => true
+  | .storageRootIncrement _ => true
+  | .storageFieldIncrement _ => true
+  | .storageIndexIncrement _ => true
+  | .storageRootIncrementAssignment _ => true
+  | .storageFieldIncrementAssignment _ => true
+  | .storageIndexIncrementAssignment _ => true
   | _ => false
 
 /-- Rules whose `value` read is a reference-typed source:
@@ -119,21 +122,28 @@ theorem numericTarget_sound {rule : RuleName}
       ∀ e, valueExpr? stmt = some e -> isNumericTy e.ty = true := by
   cases rule <;> try exact Bool.noConfusion hcls
   -- Compound assignments: the read target is the (numeric) LHS.
-  case storageRootCompoundAssign op =>
+  case storageRootOpAssign op =>
     intro stmt hcond hty e hexpr
     cases stmt <;> try exact hcond.elim
     case compoundAssign op' lhs rhs =>
       simp only [valueExpr?] at hexpr
       cases hexpr
       simpa [stmtTypingOk] using hty
-  case storageFieldCompoundAssign op =>
+  case storageFieldOpAssign op =>
     intro stmt hcond hty e hexpr
     cases stmt <;> try exact hcond.elim
     case compoundAssign op' lhs rhs =>
       simp only [valueExpr?] at hexpr
       cases hexpr
       simpa [stmtTypingOk] using hty
-  case storageIndexCompoundAssign op =>
+  case storageIndexMappingOpAssign op =>
+    intro stmt hcond hty e hexpr
+    cases stmt <;> try exact hcond.elim
+    case compoundAssign op' lhs rhs =>
+      simp only [valueExpr?] at hexpr
+      cases hexpr
+      simpa [stmtTypingOk] using hty
+  case storageIndexArrayOpAssign op =>
     intro stmt hcond hty e hexpr
     cases stmt <;> try exact hcond.elim
     case compoundAssign op' lhs rhs =>
@@ -141,7 +151,7 @@ theorem numericTarget_sound {rule : RuleName}
       cases hexpr
       simpa [stmtTypingOk] using hty
   -- Statement-form `++`/`--`: the read target is the (numeric) operand.
-  case storageRootIncDec op =>
+  case storageRootIncrement op =>
     intro stmt hcond hty e hexpr
     cases stmt <;> try exact hcond.elim
     case expr e0 =>
@@ -150,7 +160,7 @@ theorem numericTarget_sound {rule : RuleName}
         simp only [valueExpr?] at hexpr
         cases hexpr
         simpa [stmtTypingOk] using hty
-  case storageFieldIncDec op =>
+  case storageFieldIncrement op =>
     intro stmt hcond hty e hexpr
     cases stmt <;> try exact hcond.elim
     case expr e0 =>
@@ -159,7 +169,7 @@ theorem numericTarget_sound {rule : RuleName}
         simp only [valueExpr?] at hexpr
         cases hexpr
         simpa [stmtTypingOk] using hty
-  case storageIndexIncDec op =>
+  case storageIndexIncrement op =>
     intro stmt hcond hty e hexpr
     cases stmt <;> try exact hcond.elim
     case expr e0 =>
@@ -169,7 +179,7 @@ theorem numericTarget_sound {rule : RuleName}
         cases hexpr
         simpa [stmtTypingOk] using hty
   -- Assignment-form `v = x++`: the read target is the inc/dec operand.
-  case storageRootIncDecAssignment op =>
+  case storageRootIncrementAssignment op =>
     intro stmt hcond hty e hexpr
     cases stmt <;> try exact hcond.elim
     case assign lhs rhs =>
@@ -179,7 +189,7 @@ theorem numericTarget_sound {rule : RuleName}
         cases hexpr
         simp only [stmtTypingOk, Bool.and_eq_true] at hty
         exact hty.2
-  case storageFieldIncDecAssignment op =>
+  case storageFieldIncrementAssignment op =>
     intro stmt hcond hty e hexpr
     cases stmt <;> try exact hcond.elim
     case assign lhs rhs =>
@@ -189,7 +199,7 @@ theorem numericTarget_sound {rule : RuleName}
         cases hexpr
         simp only [stmtTypingOk, Bool.and_eq_true] at hty
         exact hty.2
-  case storageIndexIncDecAssignment op =>
+  case storageIndexIncrementAssignment op =>
     intro stmt hcond hty e hexpr
     cases stmt <;> try exact hcond.elim
     case assign lhs rhs =>
@@ -294,15 +304,16 @@ theorem sortFaithful_of_annOkB (ann : TacletReadAnn)
 
 /-! ## The aggregate theorem -/
 
-/-- Annotation rows whose faithfulness FAILS in the Lean model: the
-surviving `find<[Struct]>` reads on `Path[storage,simple]` sources that
-may be primitive-typed — the same bug family as the `find<[int]>` copy
-reads that solkey `12e72a1b4b` fixed. Kept in the table so
-`solkeycheck` still pins their taclet text; their failure is exhibited
-in `Counterexamples/PreFixSortAnnotations.lean`. Confirm against KeY's
-schema-sort dispatch before filing upstream. -/
-def openFindings : List String :=
-  ["storageFieldWriteCopySource", "storagePushValueCopySource"]
+/-- Annotation rows whose faithfulness FAILS in the Lean model. Empty at
+solkey `8c5c69ca25`: the two entries this list carried —
+`storageFieldWriteCopySource` and `storagePushValueCopySource`, whose
+`find<[Struct]>` read of a `Path[storage,simple]` source failed on a
+primitive-typed source, the bug family of `12e72a1b4b` — were fixed
+upstream by `29c44e225b` (sort-free `find<[StValue]>`).
+`Counterexamples/PreFixSortAnnotations.lean` keeps their refutations. A
+row lands here when an upstream taclet declares a sort the interpreter
+contradicts; it stays in the table so `solkeycheck` pins the text. -/
+def openFindings : List String := []
 
 def tacletReadAnnsProven : List TacletReadAnn :=
   tacletReadAnns.filter fun ann => !openFindings.contains ann.keyName
@@ -320,13 +331,15 @@ example :
       annOkB ann || openFindings.contains ann.keyName) = true := by
   native_decide
 
--- The open findings are genuinely outside the proved fragment (their
--- `fixed Struct` value reads are not `valueReadOkB`), not accidental
--- listings.
+-- The two former open findings are now in the proved fragment: their
+-- storage value read is the claim-free `find<[StValue]>`.
 example :
-    (tacletReadAnns.filter
-        (fun ann => openFindings.contains ann.keyName)).all
-      (fun ann => !annOkB ann) = true := by
+    (tacletReadAnns.filter (fun ann =>
+        ann.keyName == "storageFieldWriteCopySource" ||
+        ann.keyName == "storagePushValueCopySource")).map
+      (fun ann => (ann.reads.filter (·.site == ReadSite.value), annOkB ann)) =
+      [([⟨.storage, .value, .fixed .stValue⟩], true),
+        ([⟨.storage, .value, .fixed .stValue⟩], true)] := by
   native_decide
 
 -- The pre-fix annotations of the five changed taclets all fall outside
@@ -341,11 +354,12 @@ example : preFixTacletReadAnns.all (fun ann => !annOkB ann) = true := by
 (`ReadSite.expr?` is `none` elsewhere), and a `fixed .stValue` read claims
 nothing (`StValue` is every storage value's supersort).  The counts below
 are decided against the table, so the headline's real content is
-visible: of the 74 rows, 20 are vacuous for `SortFaithful` (memory,
-`net`, `length`/`dflt`-only rows — token-checked by `solkeycheck` only),
-6 carry only claim-free `find<[StValue]>` reads, and 48 carry a
-content-bearing sort claim (`fixed .int`/`.struct`/… or a
-varcond-generic sort). -/
+visible: of the 110 rows, 45 are vacuous for `SortFaithful` (memory,
+`net`, `length`/`dflt`-only rows — token-checked by `solkeycheck` only;
+26 of them the memory arithmetic families), 8 carry only claim-free
+`find<[StValue]>` reads, and 57 carry a content-bearing sort claim
+(`fixed .int`/`.struct`/… or a varcond-generic sort; 52 of them the
+storage arithmetic families' `find<[int]>` target reads). -/
 
 /-- A storage-domain `value`-site read. -/
 def storageValueRead (r : TacletRead) : Bool :=
@@ -366,10 +380,10 @@ def vacuousRow (ann : TacletReadAnn) : Bool :=
   !ann.reads.any storageValueRead
 
 theorem rows_accounting :
-    tacletReadAnns.length = 74 ∧
-    (tacletReadAnns.filter contentBearing).length = 48 ∧
-    (tacletReadAnns.filter claimFree).length = 6 ∧
-    (tacletReadAnns.filter vacuousRow).length = 20 := by
+    tacletReadAnns.length = 110 ∧
+    (tacletReadAnns.filter contentBearing).length = 57 ∧
+    (tacletReadAnns.filter claimFree).length = 8 ∧
+    (tacletReadAnns.filter vacuousRow).length = 45 := by
   refine ⟨?_, ?_, ?_, ?_⟩ <;> decide
 
 end SortFaithfulness

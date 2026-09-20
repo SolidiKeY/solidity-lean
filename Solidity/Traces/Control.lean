@@ -18,63 +18,85 @@ set_option maxHeartbeats 8000000
 section
 variable (φ : WrappedExpr)
 
+/-- The calculus's `⊤` as a postcondition: the unfunded transfer is drawn with
+it, so that the booking goal is trivial and the funds obligation is all that
+is left.  A bare identifier in the postcondition position is a Lean term, so
+this is how `⊤` is written there. -/
+def truePost : WrappedExpr := Typed.WrappedExpr.bool true
+
 /-! ## 9 · Payment
 
-Upstream states the transfer rule as a box taclet with a single update and a
-diamond taclet that splits off a funds *obligation*.  Lean merges the two into
-one guarded pair, so the diamond line branches into the booking and a revert
-rather than into a booking and an obligation — the difference is recorded in
-`docs/lean-key-rule-map.md`, and it is the interpreter's reading: an unfunded
-`transfer` reverts.  The calculus writes the booking as the pair
+The calculus states the transfer rule twice, and the modalities part company
+at it: the box books the debit unconditionally — an unfunded transfer reverts
+on chain, and a reverting run is vacuously correct under partial correctness —
+while the diamond owes a *sufficient funds* obligation beside the booking, as
+a goal with no program left in it.  Neither draws a revert branch.  The
+calculus writes the booking as the pair
 `{selfBalance := selfBalance − se ‖ net := store(net, at(to), … − se)}`; here
 it is the one element `transfer(to, se)`, which is that pair named. -/
 
 sol_derivation transferBox :
     => [ to.transfer(5) ](φ)
-  ~*> [ funded(5) => { transfer(to, 5) } [ ](φ),
-        ¬funded(5) => ⊤ ]
+  ~> => { transfer(to, 5) } [ ](φ)
 
 sol_derivation transferDiamond :
     => < to.transfer(5) >(φ)
-  ~*> [ funded(5) => { transfer(to, 5) } < >(φ),
-        ¬funded(5) => ⊥ ]
+  ~> [ => funded(5),
+       => { transfer(to, 5) } < >(φ) ]
 
 /-! ### `owner.transfer(5);` — a storage receiver
 The calculus cites `transfer_unfold_leftFstReceiver` because a storage root is
 not a stack word.  In Lean `owner` is an atom (`WrappedExpr.simple`), so the
 receiver needs no capture and the transfer rule fires directly — a genuine
-difference in where the "simple operand" line is drawn. -/
+difference in where the "simple operand" line is drawn, and one step where
+the calculus draws three. -/
 
 sol_derivation transferStorageReceiverBox :
     => [ owner.transfer(5) ](φ)
-  ~*> [ funded(5) => { transfer(owner, 5) } [ ](φ),
-        ¬funded(5) => ⊤ ]
+  ~> => { transfer(owner, 5) } [ ](φ)
 
 sol_derivation transferStorageReceiverDiamond :
     => < owner.transfer(5) >(φ)
-  ~*> [ funded(5) => { transfer(owner, 5) } < >(φ),
-        ¬funded(5) => ⊥ ]
+  ~> [ => funded(5),
+       => { transfer(owner, 5) } < >(φ) ]
 
 /-! ### `to.transfer(x + 2);` — a nonsimple amount
-The amount is captured into `pv` first, exactly as upstream's
-`transferUnfoldRightSndArgument` does, and the funds guard is then read *under*
-that capture — which is what the `{…}` prefix on the antecedent says.  The
-calculus abbreviates the same thing by substituting: it writes
+The amount is captured into `se` first, exactly as the calculus's
+`transferUnfoldRightSndArgument` does, and the box trace then ends in the
+booking under that capture.  The diamond trace splits instead, and the funds
+obligation is read *under* the capture — which is what the `{…}` prefix says;
+the calculus abbreviates the same thing by substituting, and writes
 `0 ≤ x + 2 ≤ selfBalance`.
 
-The third line is what KeY's guarded pair costs on an operator that does not
-need a guard: `binopAssignment` is stated as `\if(se2 != 0)` for every operator
-and specialises the condition, so `+` still produces a `\else` branch — with
-the antecedent `¬⊤`, which is what makes it vacuous. -/
+The last line of each is what KeY's guarded pair costs on an operator that
+does not need a guard: `binopAssignment` is stated as `\if(se2 != 0)` for
+every operator and specialises the condition, so `+` still produces a `\else`
+branch — with the antecedent `¬⊤`, which is what makes it vacuous. -/
 
 sol_derivation transferCapturedAmount :
     => [ to.transfer(x + 2) ](φ)
-  ~*> [ { pv@uint := default(uint) } { pv@uint := (x + 2) } funded(pv@uint) =>
-          { pv@uint := default(uint) } { pv@uint := (x + 2) }
-          { transfer(to, pv@uint) } [ ](φ),
-        { pv@uint := default(uint) } { pv@uint := (x + 2) } ¬funded(pv@uint) =>
-          { pv@uint := default(uint) } { pv@uint := (x + 2) } ⊤,
-        { pv@uint := default(uint) } ¬⊤ => { pv@uint := default(uint) } ⊤ ]
+  ~*> [ => { se@uint := default(uint) } { se@uint := (x + 2) }
+          { transfer(to, se@uint) } [ ](φ),
+        { se@uint := default(uint) } ¬⊤ => { se@uint := default(uint) } ⊤ ]
+
+sol_derivation transferCapturedAmountDiamond :
+    => < to.transfer(x + 2) >(φ)
+  ~*> [ => { se@uint := default(uint) } { se@uint := (x + 2) } funded(se@uint),
+        => { se@uint := default(uint) } { se@uint := (x + 2) }
+          { transfer(to, se@uint) } < >(φ),
+        { se@uint := default(uint) } ¬⊤ => { se@uint := default(uint) } ⊥ ]
+
+/-! ### an unfunded `to.transfer(5);`
+The calculus's last payment example, and the point of the split: nothing is
+known about the contract's balance.  The box is `transferBox` again — it never
+has to establish funding.  The diamond, with `⊤` as the postcondition, leaves
+the funds obligation as the only content of the proof: the second goal closes
+and the first is one no rule of the calculus can close. -/
+
+sol_derivation transferUnfundedDiamond :
+    => < to.transfer(5) >(truePost)
+  ~> [ => funded(5),
+       => { transfer(to, 5) } < >(truePost) ]
 
 /-! ## 10 · Require, assert and control flow
 

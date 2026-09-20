@@ -36,19 +36,19 @@ abbrev pvPlaceK (kind : Kind) (ty : Ty) : PlaceExpr :=
 abbrev idxExpr (ty : Ty) : WrappedExpr :=
   Rules.aliasExpr Kind.stack ty Rules.indexAliasName
 
-/-- The frozen value operand `rv` that `Rules.freezeRhs` binds ahead of every
+/-- The frozen value operand `se` that `Rules.freezeRhs` binds ahead of every
 target capture (`Counterexamples/EvaluationOrder.lean`,
 `Counterexamples/ErrorOrder.lean`).
 
-**Prefer the notation.** `rv` has explicit `rootExpr`/`rootPlace` arms, so a
-derivation writes `solbox!{ uint rv = e; ...; p = rv }` and never needs these.
+**Prefer the notation.** `se` has explicit `rootExpr`/`rootPlace` arms, so a
+derivation writes `solbox!{ uint se = e; ...; p = se }` and never needs these.
 They are here for the same reason as `idxExpr` and `spExpr`: stating a residual
 whose type is not fixed to `uint`. -/
 abbrev rvExpr (ty : Ty) : WrappedExpr :=
-  Rules.aliasExpr Kind.stack ty Rules.rhsValueAliasName
+  Rules.aliasExpr Kind.stack ty Rules.valueAliasName
 
 abbrev rvPlace (ty : Ty) : PlaceExpr :=
-  Rules.aliasPlace Kind.stack ty Rules.rhsValueAliasName
+  Rules.aliasPlace Kind.stack ty Rules.valueAliasName
 
 abbrev rvUint : WrappedExpr := rvExpr Ty.uint
 
@@ -122,8 +122,11 @@ attribute [reducible]
   Rules.captureStoragePath
   Rules.captureMemoryPath Rules.captureIndex
   Rules.isStackVar Rules.captureStackValue Rules.stackValueAlias
-  Rules.captureRhsValue Rules.rhsValueAlias
-  Rules.valueRhsCaptureRhs
+  Rules.isValueAlias Rules.freezeRhs Rules.isValueSource Rules.isReference
+  Rules.isPrimArray Rules.isRefArray Rules.isMemberSource
+  Rules.isFieldCopySource Rules.isPrimitiveMember Rules.isReferenceMember
+  Rules.isSimplePushPlaceDeleteTarget Rules.isComplexPushPlaceDeleteTarget
+  Rules.storagePushPlaceDeleteUnfoldBlock
   Rules.fieldFromAlias Rules.indexFromAlias Rules.asPlace?
   -- Block builders (for effect type matching)
   Rules.fieldWriteResolveBlock Rules.indexWriteResolveBlock
@@ -207,8 +210,11 @@ attribute [rule_simp_set]
   Rules.captureStoragePath
   Rules.captureMemoryPath Rules.captureIndex
   Rules.isStackVar Rules.captureStackValue Rules.stackValueAlias
-  Rules.captureRhsValue Rules.rhsValueAlias
-  Rules.valueRhsCaptureRhs
+  Rules.isValueAlias Rules.freezeRhs Rules.isValueSource Rules.isReference
+  Rules.isPrimArray Rules.isRefArray Rules.isMemberSource
+  Rules.isFieldCopySource Rules.isPrimitiveMember Rules.isReferenceMember
+  Rules.isSimplePushPlaceDeleteTarget Rules.isComplexPushPlaceDeleteTarget
+  Rules.storagePushPlaceDeleteUnfoldBlock
   Rules.fieldFromAlias Rules.indexFromAlias Rules.asPlace?
   Rules.fieldWriteResolveBlock Rules.indexWriteResolveBlock
   Rules.fieldReadResolveBlock Rules.indexReadResolveBlock
@@ -529,7 +535,7 @@ the block unchanged. -/
 
 open Lean Elab Tactic Meta in
 /-- Render a `RuleName` value as the source text a reader would paste:
-`.storagePlaceAlias`, `.localAssignIncDec .preInc`. -/
+`.storagePlaceAlias`, `.localAssignIncrement .preInc`. -/
 private partial def ruleNameText (e : Lean.Expr) : MetaM String := do
   match (← instantiateMVars e) with
   | .const c _ => return "." ++ c.componentsRev.head!.toString

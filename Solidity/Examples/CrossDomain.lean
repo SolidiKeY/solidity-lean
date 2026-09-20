@@ -52,16 +52,16 @@ example : solbox!{ alice.account = david } —→ solbox!{} := by single_step me
 example : solbox!{ alice.account = carol.account } —↠ solbox!{} :=
   calc
     solbox!{ alice.account = carol.account }
-        —→ solbox!{ Account memory pv = carol.account;
-              alice.account = pv@Account } := by single_step memoryToStorageUnfoldRightFstSource
-    _ —→ solbox!{ pv@Account = carol.account;
-              alice.account = pv@Account } := by single_step memoryLocalDeclInitDrop
-    _ —→ solbox!{ alice.account = pv@Account } := by single_step memoryFieldReadAliasRoot
+        —→ solbox!{ Account memory se = carol.account;
+              alice.account = se@Account } := by single_step memoryToStorageUnfoldRightFstSource
+    _ —→ solbox!{ se@Account = carol.account;
+              alice.account = se@Account } := by single_step memoryLocalDeclInitDrop
+    _ —→ solbox!{ alice.account = se@Account } := by single_step memoryFieldReadAliasRoot
     _ —→ solbox!{} := by single_step memoryToStorageFieldCopyRoot
 
 /-! ### Example 37: `alice.account.token = carol`
   — memory-to-storage with complex target path
-1. `memoryToStorageUnfoldLeftFstTarget`
+1. `memoryToStorageFieldUnfoldLeftFst`
 2. `storagePlaceAlias`
 3. `memoryToStorageFieldCopyRoot` -/
 
@@ -69,7 +69,7 @@ example : solbox!{ alice.account.token = carol } —↠ solbox!{} :=
   calc
     solbox!{ alice.account.token = carol }
         —→ solbox!{ Account storage sp = alice.account;
-              sp@Account.token = carol } := by single_step memoryToStorageUnfoldLeftFstTarget
+              sp@Account.token = carol } := by single_step memoryToStorageFieldUnfoldLeftFst
     _ —→ solbox!{ sp@Account.token = carol } := by single_step storagePlaceAlias
     _ —→ solbox!{} := by single_step memoryToStorageFieldCopyRoot
 

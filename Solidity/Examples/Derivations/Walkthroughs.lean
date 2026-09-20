@@ -22,22 +22,22 @@ calculus would collapse into one `⇝*` line. -/
 `alice.account.balance = 34; result = alice.account.balance`
 
 The write unfolds its path into the storage alias `sp`, having first frozen
-the value operand into `rv` (`Counterexamples/ErrorOrder.lean`); the read
+the value operand into `se` (`Counterexamples/ErrorOrder.lean`); the read
 then unfolds through the same alias. -/
 
 sol_derivation storageFieldDeepWriteRead :
     solbox!{ alice.account.balance = 34; .. readBack }
   ⇝[.storageFieldWriteUnfoldLeftFst]
-    solbox!{ uint rv = 34;
+    solbox!{ uint se = 34;
              Account storage sp = alice.account;
-             sp@Account.balance = rv;
+             sp@Account.balance = se;
              .. readBack }
   ⇝*[.localValueDeclInitDrop, .valueDeclSkip, .localValueAssign]
     solbox!{ Account storage sp = alice.account;
-             sp@Account.balance = rv;
+             sp@Account.balance = se;
              .. readBack }
   ⇝[.storagePlaceAlias]
-    solbox!{ sp@Account.balance = rv; .. readBack }
+    solbox!{ sp@Account.balance = se; .. readBack }
   -- The suffix is now the active statement, so it is written out again.
   ⇝[.storageFieldWriteSave]
     solbox!{ result = alice.account.balance }
@@ -60,7 +60,7 @@ sol_derivation storageIndexPostincrementAssign :
     solbox!{ values[i] = 40; result = values[i]++ }
   ⇝[.storageIndexWriteArraySaveBox]
     solbox!{ result = values[i]++ }
-  ⇝[.storageIndexIncDecAssignment .postInc]
+  ⇝[.storageIndexIncrementAssignment .postInc]
     solbox!{}
 
 end Solidity.Examples

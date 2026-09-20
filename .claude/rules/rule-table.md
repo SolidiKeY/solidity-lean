@@ -8,6 +8,7 @@ paths:
   - "Solidity/Calculus/Coverage.lean"
   - "Solidity/Calculus/Completeness.lean"
   - "Solidity/Calculus/KeyTaclets.lean"
+  - "Solidity/Calculus/PrintedRules.lean"
   - "Solidity/SortCheck/*.lean"
 ---
 
@@ -42,6 +43,20 @@ the order decides which name a `⇝[.rule]` derivation pins.
    `SortCheck/Annotations.lean`, keep `sortFaithful_all` closing (extend
    `ruleNumericTarget`/`ruleRefTarget` for new `fixed`-sorted value reads),
    then run `lake exe solkeycheck`.
+6. Give the rule its printed origin in `Calculus/PrintedRules.lean`
+   (`printedOrigin`): the printed rule it is, the rules it merges, or
+   `leanOnly` with its reason (`keyTier` — solkey has it, the printed rules do not;
+   `plumbing` — this syntax's own normalisation; `calculus` — theory the
+   printed rules are to gain).  `printed_rules_partitioned` and the count theorems
+   move with it.
+
+**Names are the printed names.** A rule is spelled as it is printed where it
+is printed (`storageFieldWrite_unfold_leftFst` → `storageFieldWriteUnfoldLeftFst`),
+and as solkey spells it otherwise.  A residual binds four fixed scratch names,
+the kind-names: `se` (a value), `ie` (an index), `sp` (a storage
+path), `mv` (a memory path).  KeY mints fresh names instead, so a capture
+whose source already is `se` is not repeated (`Rules.freezeRhs`); write the
+matched value `se1` and the generated one `se`.
 
 ## Three traps
 

@@ -54,22 +54,22 @@ example : solbox!{ david = carol.account } —→ solbox!{} := by single_step me
 example : solbox!{ carol.account.balance = amount } —↠ solbox!{} :=
   calc
     solbox!{ carol.account.balance = amount }
-        —→ solbox!{ uint rv = amount;
+        —→ solbox!{ uint se = amount;
               Account memory mv = carol.account;
-              mv.balance = rv } := by
+              mv.balance = se } := by
           single_step memoryFieldWriteUnfoldLeftFst
-    _ —→ solbox!{ uint rv;
-              rv = amount;
+    _ —→ solbox!{ uint se;
+              se = amount;
               Account memory mv = carol.account;
-              mv.balance = rv } := by single_step localValueDeclInitDrop
-    _ —→ solbox!{ rv = amount;
+              mv.balance = se } := by single_step localValueDeclInitDrop
+    _ —→ solbox!{ se = amount;
               Account memory mv = carol.account;
-              mv.balance = rv } := by single_step valueDeclSkip
+              mv.balance = se } := by single_step valueDeclSkip
     _ —→ solbox!{ Account memory mv = carol.account;
-              mv.balance = rv } := by single_step localValueAssign
+              mv.balance = se } := by single_step localValueAssign
     _ —→ solbox!{ mv = carol.account;
-              mv.balance = rv } := by single_step memoryLocalDeclInitDrop
-    _ —→ solbox!{ mv.balance = rv } := by
+              mv.balance = se } := by single_step memoryLocalDeclInitDrop
+    _ —→ solbox!{ mv.balance = se } := by
           single_step memoryFieldReadAliasRoot
     _ —→ solbox!{} := by single_step memoryFieldWriteStore
 
@@ -98,11 +98,11 @@ example : solbox!{ amount = carol.account.balance } —↠ solbox!{} :=
 example : solbox!{ carol.account = david.account } —↠ solbox!{} :=
   calc
     solbox!{ carol.account = david.account }
-        —→ solbox!{ Account memory pv = david.account;
-              carol.account = pv@Account } := by single_step memoryFieldReadUnfoldRightSndResult
-    _ —→ solbox!{ pv@Account = david.account;
-              carol.account = pv@Account } := by single_step memoryLocalDeclInitDrop
-    _ —→ solbox!{ carol.account = pv@Account } := by single_step memoryFieldReadAliasRoot
+        —→ solbox!{ Account memory se = david.account;
+              carol.account = se@Account } := by single_step memoryFieldReadUnfoldRightSndResult
+    _ —→ solbox!{ se@Account = david.account;
+              carol.account = se@Account } := by single_step memoryLocalDeclInitDrop
+    _ —→ solbox!{ carol.account = se@Account } := by single_step memoryFieldReadAliasRoot
     _ —→ solbox!{} := by single_step memoryFieldWriteCopy
 
 end Solidity.Examples

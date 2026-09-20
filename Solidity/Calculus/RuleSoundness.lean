@@ -31,14 +31,14 @@ The theorems fall into four shapes:
   left-operand captures, `exprStmtCapture_sound`, …): quantified over
   every state, only `hcond` and freshness.
 * **Target pre-resolves** (`*ReadUnfoldRight*`, `*SndResult`, the
-  `*ValueRhsCapture` trio): `hlhs : resolveLoc s lhs.expr = .ok (s, loc)`
+  `*UnfoldSource` five): `hlhs : resolveLoc s lhs.expr = .ok (s, loc)`
   and `pureExpr lhs.expr`.  These residuals hoist the right-hand side,
   which the interpreter evaluates first anyway, so no order is swapped;
   the hypotheses are proof-technique residue of the congruence kit, not
   a semantic restriction, and could be weakened.
 * **Value frozen ahead of the capture** (`*WriteUnfoldLeft*`,
   `*SndIndex`): only `hcond`, `hprim : rhs.ty.isPrimitive = true` and
-  freshness.  `Rules.freezeRhs` binds the value into `rv` before any
+  freshness.  `Rules.freezeRhs` binds the value into `se` before any
   target capture, so the order matches `execAssignNested`; the templates
   are `fieldWriteResolve{Storage,Memory}_sound` and
   `indexWriteResolve{Storage,Memory}_sound`, and `people[i++].age = i`
@@ -58,8 +58,13 @@ The theorems fall into four shapes:
 
   The reference-typed value operand keeps its side conditions, because
   `freezeRhs` only freezes primitives — binding a reference is aliasing,
-  not a read (`fieldWriteResolveStorage_ref_sound`, witness
-  `alice.accounts[mv.x++] = mv`).  `hprim` itself is about the
+  not a read (`fieldWriteResolveStorage_ref_sound`,
+  `indexWriteResolveStorage_ref_sound`, witness
+  `alice.accounts[mv.x++] = mv`); the `*WriteRefUnfoldLeft*` rules are
+  those templates, and their memory twins
+  (`fieldWriteResolveMemory_ref_sound`, `indexWriteResolveMemory_ref_sound`)
+  the same for a memory-kinded simple source, which the memory `Ref`
+  rules leave unfrozen whatever its type.  `hprim` itself is about the
   *interpreter*, not the rule: see `Counterexamples/RefSourceOrder.lean`.
 * **Operand pre-evaluates** (`binopUnfoldRight`, compound-assign
   captures, `storagePushLhsToPushValue`): `evalValue s l = .ok (s, lv)`
@@ -83,8 +88,7 @@ open Rules Semantics
 
 /-- The fresh names reserved by the rule captures. -/
 def aliasNames : List Name :=
-  [valueAliasName, storagePathAliasName, memoryPathAliasName,
-    indexAliasName, rhsValueAliasName]
+  [valueAliasName, storagePathAliasName, memoryPathAliasName, indexAliasName]
 
 /-! ## Variable occurrence -/
 
@@ -1371,7 +1375,7 @@ The congruence kit above runs the *same* expression from two different
 states.  The LHS-unfold rules need the orthogonal fact: running an
 expression that mentions none of `ns` leaves those bindings alone.
 
-That is what lets the value frozen into `rv` (`Rules.freezeRhs`) survive
+That is what lets the value frozen into `se` (`Rules.freezeRhs`) survive
 the target capture that runs next, and it is what the `pureExpr index`
 side conditions used to stand in for.  Purity is far stronger than
 non-interference with a reserved name — strong enough to exclude
@@ -3132,10 +3136,10 @@ theorem mp_mem : memoryPathAliasName ∈ aliasNames :=
 theorem idx_mem : indexAliasName ∈ aliasNames :=
   List.mem_cons_of_mem _
     (List.mem_cons_of_mem _ (List.mem_cons_of_mem _ (List.mem_cons_self ..)))
-theorem rv_mem : rhsValueAliasName ∈ aliasNames :=
-  List.mem_cons_of_mem _
-    (List.mem_cons_of_mem _
-      (List.mem_cons_of_mem _ (List.mem_cons_of_mem _ (List.mem_cons_self ..))))
+/-- The value operand's freeze and the value capture bind the same name
+now (`se`); the older proofs still say `rv_mem` where they mean the
+frozen operand. -/
+theorem rv_mem : valueAliasName ∈ aliasNames := pv_mem
 
 theorem placeVar_expr (kind : Kind) (ty : Ty) (fld : Field) :
     (PlaceExpr.var kind ty fld).expr = WrappedExpr.var kind ty fld := rfl
@@ -3309,7 +3313,7 @@ theorem pure_of_simple {e : WrappedExpr} (h : e.simple = true) :
   | .bool _ => rfl
   | .intLit .. => rfl
 
-/-- Reading the frozen value operand back: `rv` holds a primitive, so
+/-- Reading the frozen value operand back: `se` holds a primitive, so
 `rhsToSVal` on the alias is a pure environment lookup. -/
 theorem rhsToSVal_stackAlias {s : State} {ty : Ty} {v : Value} {n : Name}
     (hprim : ty.isPrimitive = true)
@@ -3330,11 +3334,65 @@ theorem rhsToMVal_stackAlias {s : State} {ty : Ty} {v : Value} {n : Name}
   simp only [if_pos, evalValue_alias ty hb]
   rfl
 
-theorem sp_ne_rv : storagePathAliasName ≠ rhsValueAliasName := by decide
-theorem mp_ne_rv : memoryPathAliasName ≠ rhsValueAliasName := by decide
-theorem idx_ne_rv : indexAliasName ≠ rhsValueAliasName := by decide
+theorem sp_ne_rv : storagePathAliasName ≠ valueAliasName := by decide
+theorem mp_ne_rv : memoryPathAliasName ≠ valueAliasName := by decide
+theorem idx_ne_rv : indexAliasName ≠ valueAliasName := by decide
 theorem idx_ne_sp : indexAliasName ≠ storagePathAliasName := by decide
 theorem idx_ne_mp : indexAliasName ≠ memoryPathAliasName := by decide
+
+/-! ### The freeze's guard
+
+`Rules.freezeRhs` freezes a primitive operand unless it already *is* the
+stack value alias `se` (`Rules.isValueAlias`).  Every theorem here assumes
+the alias names are fresh for the statement, which rules that operand out,
+so the guard collapses to primitivity.  The alias case is not merely
+unreached but unprovable unconditionally: an unbound `se` is stuck before
+the target resolves, while the unfrozen residual resolves the target first
+and can revert. -/
+
+theorem isValueAlias_eq_false {rhs : WrappedExpr}
+    (hfr : usesVar rhs valueAliasName = false) : isValueAlias rhs = false := by
+  cases rhs with
+  | var kind ty fld =>
+      cases kind <;> simp only [isValueAlias]
+      simp only [usesVar] at hfr
+      simpa using hfr
+  | _ => rfl
+
+theorem freezeRhs_freeze {rhs : WrappedExpr} {body : WrappedExpr -> Block}
+    (hprim : rhs.ty.isPrimitive = true)
+    (hfr : usesVar rhs valueAliasName = false) :
+    freezeRhs rhs body = captureStackValue rhs :: body (stackValueAlias rhs) := by
+  rw [freezeRhs, if_pos]
+  simp [hprim, isValueAlias_eq_false hfr]
+
+theorem freezeRhs_plain {rhs : WrappedExpr} {body : WrappedExpr -> Block}
+    (hnp : rhs.ty.isPrimitive = false) : freezeRhs rhs body = body rhs := by
+  rw [freezeRhs, if_neg]
+  simp [hnp]
+
+/-- A reference-typed operand is not primitive (`Ty.isReference` is the
+negation). -/
+theorem isPrimitive_eq_false_of_isReference {e : WrappedExpr}
+    (h : isReference e) : e.ty.isPrimitive = false := by
+  unfold isReference Ty.isReference at h
+  simpa using h
+
+/-- `indexWriteResolveBlock` at a complex index is the hoisting branch,
+which is how the `*UnfoldLeftSndIndex` rules spell their residual. -/
+theorem indexWriteResolveBlock_complex (kind : Kind) (aliasName : Name)
+    (ty : Ty) {path index rhs : WrappedExpr} (hc : index.complex = true) :
+    indexWriteResolveBlock kind aliasName ty path index rhs =
+      freezeRhs rhs fun v =>
+        [ (match kind with
+            | Kind.storage => captureStoragePath path
+            | Kind.memory => captureMemoryPath path
+            | Kind.stack => capture Kind.stack aliasName path),
+          captureIndex index,
+          Stmt.assign (indexFromAlias kind aliasName ty path (indexAlias index)) v ] := by
+  unfold indexWriteResolveBlock
+  simp only [hc, if_true]
+  rfl
 
 /-- Template: the storage field-write unfold on a **reference-typed**
 value operand.  `Rules.freezeRhs` deliberately does not freeze one:
@@ -3446,7 +3504,7 @@ theorem fieldWriteResolveStorage_ref_sound (s : State) (ty : Ty)
 /-- Template: the storage field-write unfold (`fieldWriteResolveBlock`
 at `Kind.storage`) on a **primitive** value operand.
 
-`Rules.freezeRhs` binds the value into `rv` before the path capture runs,
+`Rules.freezeRhs` binds the value into `se` before the path capture runs,
 so the two sides agree with nothing assumed about interference: the old
 `hev`/`hstable` — which `people[i++].age = i` violates, see
 `Counterexamples/EvaluationOrder.lean` — are gone, and so is purity of
@@ -3457,10 +3515,11 @@ The frozen binding survives the path capture by `resolveS_keep`; that is
 the fact the old side conditions were standing in for.
 
 Shared by `storageFieldWriteUnfoldLeftFst` and
-`memoryToStorageUnfoldLeftFstTarget`. -/
+`memoryToStorageFieldUnfoldLeftFst`. -/
 theorem fieldWriteResolveStorage_sound (s : State) (ty : Ty)
     (path : WrappedExpr) (fld : Field) (rhs : WrappedExpr)
     (hprim : rhs.ty.isPrimitive = true)
+    (hfr : usesVar rhs valueAliasName = false)
     (hfp : ∀ n ∈ aliasNames, usesVar path n = false) :
     ResultsAgree aliasNames
       (execStmt s (Stmt.assign (PlaceExpr.field Kind.storage ty path fld) rhs))
@@ -3472,7 +3531,7 @@ theorem fieldWriteResolveStorage_sound (s : State) (ty : Ty)
       [captureStoragePath path,
         Stmt.assign
           (fieldFromAlias Kind.storage storagePathAliasName ty path fld) v]))
-  rw [freezeRhs, if_pos hprim, execStmt, execBlock_triple, captureRhsValue,
+  rw [freezeRhs_freeze hprim hfr, execStmt, execBlock_triple, captureStackValue,
     capture, execStmt]
   cases hevR : evalValue s rhs with
   | error err =>
@@ -3488,11 +3547,11 @@ theorem fieldWriteResolveStorage_sound (s : State) (ty : Ty)
   | ok x =>
       obtain ⟨s₁, v⟩ := x
       simp only [hevR, resOk_bind]
-      have hrv₁ : lookupBy rhsValueAliasName
-          (s₁.setEnv rhsValueAliasName (Binding.val v)).env =
+      have hrv₁ : lookupBy valueAliasName
+          (s₁.setEnv valueAliasName (Binding.val v)).env =
             some (Binding.val v) := lookupBy_setBy_self ..
       have hagree₁ : EnvAgreeExcept aliasNames s₁
-          (s₁.setEnv rhsValueAliasName (Binding.val v)) :=
+          (s₁.setEnv valueAliasName (Binding.val v)) :=
         (EnvAgreeExcept.refl _ s₁).setEnv_right rv_mem _
       have hL : execAssign s (PlaceExpr.field Kind.storage ty path fld) rhs =
           (resolveS s₁ path) >>= fun x =>
@@ -3507,12 +3566,12 @@ theorem fieldWriteResolveStorage_sound (s : State) (ty : Ty)
         cases resolveS s₁ path with
         | error e => rfl
         | ok y => obtain ⟨s₂, root, segs⟩ := y; rfl
-      have hR : execBlock (s₁.setEnv rhsValueAliasName (Binding.val v))
+      have hR : execBlock (s₁.setEnv valueAliasName (Binding.val v))
           [captureStoragePath path,
             Stmt.assign
               (fieldFromAlias Kind.storage storagePathAliasName ty path fld)
-              (rhsValueAlias rhs)] =
-          (resolveS (s₁.setEnv rhsValueAliasName (Binding.val v)) path) >>=
+              (stackValueAlias rhs)] =
+          (resolveS (s₁.setEnv valueAliasName (Binding.val v)) path) >>=
             fun x =>
               match x with
               | (t₂, root, segs) =>
@@ -3521,20 +3580,20 @@ theorem fieldWriteResolveStorage_sound (s : State) (ty : Ty)
                     (Stmt.assign
                       (fieldFromAlias Kind.storage storagePathAliasName ty path
                         fld)
-                      (rhsValueAlias rhs)) := by
+                      (stackValueAlias rhs)) := by
         rw [execBlock_pair, captureStoragePath, capture, execStmt]
-        cases resolveS (s₁.setEnv rhsValueAliasName (Binding.val v)) path with
+        cases resolveS (s₁.setEnv valueAliasName (Binding.val v)) path with
         | error e => rfl
         | ok y => obtain ⟨t₂, root, segs⟩ := y; rfl
       rw [hL, hR]
       refine ResAgree.bindStateWith (resolveS_agree hagree₁ path hfp) ?_
       intro s₂ t₂ a _ hres₂ hagree₂
       obtain ⟨root, segs⟩ := a
-      have hrv₃ : lookupBy rhsValueAliasName
+      have hrv₃ : lookupBy valueAliasName
           (t₂.setEnv storagePathAliasName (Binding.spath root segs)).env =
             some (Binding.val v) := by
         rw [State.setEnv, lookupBy_setBy_ne (Ne.symm sp_ne_rv)]
-        rw [resolveS_keep (s₁.setEnv rhsValueAliasName (Binding.val v)) path hfp
+        rw [resolveS_keep (s₁.setEnv valueAliasName (Binding.val v)) path hfp
           t₂ (root, segs) hres₂ _ rv_mem]
         exact hrv₁
       have hsp₃ : lookupBy storagePathAliasName
@@ -3544,7 +3603,7 @@ theorem fieldWriteResolveStorage_sound (s : State) (ty : Ty)
           (t₂.setEnv storagePathAliasName (Binding.spath root segs))
           (Stmt.assign
             (fieldFromAlias Kind.storage storagePathAliasName ty path fld)
-            (rhsValueAlias rhs)) =
+            (stackValueAlias rhs)) =
           (t₂.setEnv storagePathAliasName
             (Binding.spath root segs)).saveStorage root
               (segs ++ [Seg.field fld.name]) v.toSVal := by
@@ -3553,8 +3612,8 @@ theorem fieldWriteResolveStorage_sound (s : State) (ty : Ty)
           (t₂.setEnv storagePathAliasName (Binding.spath root segs))
           (WrappedExpr.field Kind.storage ty
             (aliasExpr Kind.storage path.ty storagePathAliasName) fld)
-          (rhsValueAlias rhs) = _
-        rw [execAssignNested, rhsValueAlias, rhsToSVal_stackAlias hprim hrv₃]
+          (stackValueAlias rhs) = _
+        rw [execAssignNested, stackValueAlias, rhsToSVal_stackAlias hprim hrv₃]
         simp only [Typed.WrappedExpr.kind, resOk_bind]
         rw [resolveLoc, resolveS, resolveS_alias path.ty hsp₃]
         rfl
@@ -3566,7 +3625,7 @@ theorem fieldWriteResolveStorage_sound (s : State) (ty : Ty)
 /-! ### Tails of the storage index-write residual
 
 Both are stated from the state right after the path capture; they differ
-only in whether a complex index was captured into `idx` or left in place.
+only in whether a complex index was captured into `ie` or left in place.
 Together they are what makes `pureExpr index` unnecessary. -/
 
 /-- Tail with the index captured (`index.complex`).  The frozen value and
@@ -3576,7 +3635,7 @@ theorem indexWriteTailCapture_agree {ty : Ty} {path index rhs : WrappedExpr}
     {s₂ t₂ : State} {v : Value} {root : Name} {segs : List Seg}
     (hprim : rhs.ty.isPrimitive = true)
     (hfi : ∀ n ∈ aliasNames, usesVar index n = false)
-    (hrv₂ : lookupBy rhsValueAliasName t₂.env = some (Binding.val v))
+    (hrv₂ : lookupBy valueAliasName t₂.env = some (Binding.val v))
     (hagree₂ : EnvAgreeExcept aliasNames s₂ t₂) :
     ResultsAgree aliasNames
       ((evalInt s₂ index) >>= fun y =>
@@ -3587,8 +3646,8 @@ theorem indexWriteTailCapture_agree {ty : Ty} {path index rhs : WrappedExpr}
           Stmt.assign
             (indexFromAlias Kind.storage storagePathAliasName ty path
               (indexAlias index))
-            (rhsValueAlias rhs)]) := by
-  have hrv₃ : lookupBy rhsValueAliasName
+            (stackValueAlias rhs)]) := by
+  have hrv₃ : lookupBy valueAliasName
       (t₂.setEnv storagePathAliasName (Binding.spath root segs)).env =
         some (Binding.val v) := by
     rw [State.setEnv, lookupBy_setBy_ne (Ne.symm sp_ne_rv)]
@@ -3620,7 +3679,7 @@ theorem indexWriteTailCapture_agree {ty : Ty} {path index rhs : WrappedExpr}
           Stmt.assign
             (indexFromAlias Kind.storage storagePathAliasName ty path
               (indexAlias index))
-            (rhsValueAlias rhs)] =
+            (stackValueAlias rhs)] =
       (evalValue (t₂.setEnv storagePathAliasName (Binding.spath root segs))
         index) >>= fun y =>
         match y with
@@ -3629,7 +3688,7 @@ theorem indexWriteTailCapture_agree {ty : Ty} {path index rhs : WrappedExpr}
               (Stmt.assign
                 (indexFromAlias Kind.storage storagePathAliasName ty path
                   (indexAlias index))
-                (rhsValueAlias rhs)) := by
+                (stackValueAlias rhs)) := by
     rw [execBlock_pair, captureIndex, capture, execStmt]
     cases evalValue (t₂.setEnv storagePathAliasName (Binding.spath root segs))
         index with
@@ -3640,10 +3699,10 @@ theorem indexWriteTailCapture_agree {ty : Ty} {path index rhs : WrappedExpr}
   intro s₃ t₄ w _ hev₄ hagree₄
   have hkeep := evalValue_keep
     (t₂.setEnv storagePathAliasName (Binding.spath root segs)) index hfi t₄ w hev₄
-  have hrv₅ : lookupBy rhsValueAliasName
+  have hrv₅ : lookupBy valueAliasName
       (t₄.setEnv indexAliasName (Binding.val w)).env = some (Binding.val v) := by
     rw [State.setEnv, lookupBy_setBy_ne (Ne.symm idx_ne_rv),
-      hkeep rhsValueAliasName rv_mem]
+      hkeep valueAliasName rv_mem]
     exact hrv₃
   have hsp₅ : lookupBy storagePathAliasName
       (t₄.setEnv indexAliasName (Binding.val w)).env =
@@ -3658,7 +3717,7 @@ theorem indexWriteTailCapture_agree {ty : Ty} {path index rhs : WrappedExpr}
       (Stmt.assign
         (indexFromAlias Kind.storage storagePathAliasName ty path
           (indexAlias index))
-        (rhsValueAlias rhs)) =
+        (stackValueAlias rhs)) =
       w.asInt >>= fun i =>
         (t₄.setEnv indexAliasName (Binding.val w)).saveStorage root
           (segs ++ [Seg.at i]) v.toSVal := by
@@ -3667,8 +3726,8 @@ theorem indexWriteTailCapture_agree {ty : Ty} {path index rhs : WrappedExpr}
       (WrappedExpr.index Kind.storage ty
         (aliasExpr Kind.storage path.ty storagePathAliasName)
         (indexAlias index))
-      (rhsValueAlias rhs) = _
-    rw [execAssignNested, rhsValueAlias, rhsToSVal_stackAlias hprim hrv₅]
+      (stackValueAlias rhs) = _
+    rw [execAssignNested, stackValueAlias, rhsToSVal_stackAlias hprim hrv₅]
     simp only [Typed.WrappedExpr.kind, resOk_bind]
     rw [resolveLoc, resolveS_alias path.ty hsp₅]
     simp only [resOk_bind]
@@ -3689,7 +3748,7 @@ theorem indexWriteTailPlain_agree {ty : Ty} {path index rhs : WrappedExpr}
     {s₂ t₂ : State} {v : Value} {root : Name} {segs : List Seg}
     (hprim : rhs.ty.isPrimitive = true)
     (hfi : ∀ n ∈ aliasNames, usesVar index n = false)
-    (hrv₂ : lookupBy rhsValueAliasName t₂.env = some (Binding.val v))
+    (hrv₂ : lookupBy valueAliasName t₂.env = some (Binding.val v))
     (hagree₂ : EnvAgreeExcept aliasNames s₂ t₂) :
     ResultsAgree aliasNames
       ((evalInt s₂ index) >>= fun y =>
@@ -3698,8 +3757,8 @@ theorem indexWriteTailPlain_agree {ty : Ty} {path index rhs : WrappedExpr}
       (execBlock (t₂.setEnv storagePathAliasName (Binding.spath root segs))
         [Stmt.assign
           (indexFromAlias Kind.storage storagePathAliasName ty path index)
-          (rhsValueAlias rhs)]) := by
-  have hrv₃ : lookupBy rhsValueAliasName
+          (stackValueAlias rhs)]) := by
+  have hrv₃ : lookupBy valueAliasName
       (t₂.setEnv storagePathAliasName (Binding.spath root segs)).env =
         some (Binding.val v) := by
     rw [State.setEnv, lookupBy_setBy_ne (Ne.symm sp_ne_rv)]
@@ -3713,7 +3772,7 @@ theorem indexWriteTailPlain_agree {ty : Ty} {path index rhs : WrappedExpr}
   have hR : execBlock (t₂.setEnv storagePathAliasName (Binding.spath root segs))
       [Stmt.assign
         (indexFromAlias Kind.storage storagePathAliasName ty path index)
-        (rhsValueAlias rhs)] =
+        (stackValueAlias rhs)] =
       (evalInt (t₂.setEnv storagePathAliasName (Binding.spath root segs))
         index) >>= fun y =>
         match y with
@@ -3724,8 +3783,8 @@ theorem indexWriteTailPlain_agree {ty : Ty} {path index rhs : WrappedExpr}
       (t₂.setEnv storagePathAliasName (Binding.spath root segs))
       (WrappedExpr.index Kind.storage ty
         (aliasExpr Kind.storage path.ty storagePathAliasName) index)
-      (rhsValueAlias rhs) = _
-    rw [execAssignNested, rhsValueAlias, rhsToSVal_stackAlias hprim hrv₃]
+      (stackValueAlias rhs) = _
+    rw [execAssignNested, stackValueAlias, rhsToSVal_stackAlias hprim hrv₃]
     simp only [Typed.WrappedExpr.kind, resOk_bind]
     rw [resolveLoc, resolveS_alias path.ty hsp₃]
     simp only [resOk_bind]
@@ -3752,10 +3811,11 @@ index evaluation by `evalValue_keep`, and the path capture by
 
 Shared by `storageIndexWriteUnfoldLeftFst`,
 `storageIndexWriteUnfoldLeftSndIndex` and
-`memoryToStorageUnfoldLeftSndTargetIndex`. -/
+`memoryToStorageIndexUnfoldLeftSndIndex`. -/
 theorem indexWriteResolveStorage_sound (s : State) (ty : Ty)
     (path index rhs : WrappedExpr)
     (hprim : rhs.ty.isPrimitive = true)
+    (hfr : usesVar rhs valueAliasName = false)
     (hfp : ∀ n ∈ aliasNames, usesVar path n = false)
     (hfi : ∀ n ∈ aliasNames, usesVar index n = false) :
     ResultsAgree aliasNames
@@ -3774,7 +3834,7 @@ theorem indexWriteResolveStorage_sound (s : State) (ty : Ty)
         [captureStoragePath path,
           Stmt.assign
             (indexFromAlias Kind.storage storagePathAliasName ty path index) v]))
-  rw [freezeRhs, if_pos hprim, execStmt]
+  rw [freezeRhs_freeze hprim hfr, execStmt]
   cases hevR : evalValue s rhs with
   | error err =>
       have hL : execAssign s (PlaceExpr.index Kind.storage ty path index) rhs =
@@ -3785,9 +3845,9 @@ theorem indexWriteResolveStorage_sound (s : State) (ty : Ty)
         simp only [if_pos, hevR]
         rfl
       have hR : ∀ b : Block,
-          execBlock s (captureRhsValue rhs :: b) = .error err := by
+          execBlock s (captureStackValue rhs :: b) = .error err := by
         intro b
-        rw [execBlock.eq_def, captureRhsValue, capture]
+        rw [execBlock.eq_def, captureStackValue, capture]
         simp only [execStmt, hevR]
         rfl
       by_cases hc : index.complex
@@ -3795,11 +3855,11 @@ theorem indexWriteResolveStorage_sound (s : State) (ty : Ty)
       · rw [if_neg hc, hL, hR]; rfl
   | ok x =>
       obtain ⟨s₁, v⟩ := x
-      have hrv₁ : lookupBy rhsValueAliasName
-          (s₁.setEnv rhsValueAliasName (Binding.val v)).env =
+      have hrv₁ : lookupBy valueAliasName
+          (s₁.setEnv valueAliasName (Binding.val v)).env =
             some (Binding.val v) := lookupBy_setBy_self ..
       have hagree₁ : EnvAgreeExcept aliasNames s₁
-          (s₁.setEnv rhsValueAliasName (Binding.val v)) :=
+          (s₁.setEnv valueAliasName (Binding.val v)) :=
         (EnvAgreeExcept.refl _ s₁).setEnv_right rv_mem _
       have hL : execAssign s (PlaceExpr.index Kind.storage ty path index) rhs =
           (resolveS s₁ path) >>= fun x =>
@@ -3824,19 +3884,19 @@ theorem indexWriteResolveStorage_sound (s : State) (ty : Ty)
             | ok z => obtain ⟨s₃, i⟩ := z; rfl
       -- the shared prefix: freeze, then capture the path
       have hRpre : ∀ tail : Block,
-          execBlock s (captureRhsValue rhs :: captureStoragePath path :: tail) =
-            (resolveS (s₁.setEnv rhsValueAliasName (Binding.val v)) path) >>=
+          execBlock s (captureStackValue rhs :: captureStoragePath path :: tail) =
+            (resolveS (s₁.setEnv valueAliasName (Binding.val v)) path) >>=
               fun x =>
                 match x with
                 | (t₂, root, segs) =>
                     execBlock (t₂.setEnv storagePathAliasName
                       (Binding.spath root segs)) tail := by
         intro tail
-        rw [execBlock.eq_def, captureRhsValue, capture]
+        rw [execBlock.eq_def, captureStackValue, capture]
         simp only [execStmt, hevR, resOk_bind]
         rw [execBlock.eq_def, captureStoragePath, capture]
         simp only [execStmt]
-        cases resolveS (s₁.setEnv rhsValueAliasName (Binding.val v)) path with
+        cases resolveS (s₁.setEnv valueAliasName (Binding.val v)) path with
         | error e => rfl
         | ok y => obtain ⟨t₂, root, segs⟩ := y; rfl
       rw [hL]
@@ -3847,7 +3907,7 @@ theorem indexWriteResolveStorage_sound (s : State) (ty : Ty)
         obtain ⟨root, segs⟩ := a
         simp only []
         refine indexWriteTailCapture_agree hprim hfi ?_ hagree₂
-        rw [resolveS_keep (s₁.setEnv rhsValueAliasName (Binding.val v)) path hfp
+        rw [resolveS_keep (s₁.setEnv valueAliasName (Binding.val v)) path hfp
           t₂ (root, segs) hres₂ _ rv_mem]
         exact hrv₁
       · rw [if_neg hc, hRpre]
@@ -3856,17 +3916,27 @@ theorem indexWriteResolveStorage_sound (s : State) (ty : Ty)
         obtain ⟨root, segs⟩ := a
         simp only []
         refine indexWriteTailPlain_agree hprim hfi ?_ hagree₂
-        rw [resolveS_keep (s₁.setEnv rhsValueAliasName (Binding.val v)) path hfp
+        rw [resolveS_keep (s₁.setEnv valueAliasName (Binding.val v)) path hfp
           t₂ (root, segs) hres₂ _ rv_mem]
         exact hrv₁
 
-/-- `people[i++].age = i` is in scope now: no `hev`, no `hstable`. -/
+/-- The freshness of `se` for the source, as the templates want it. -/
+theorem fresh_rhs_of_assign {lhs : PlaceExpr} {rhs : WrappedExpr}
+    (hfresh : ∀ n ∈ aliasNames, stmtUsesVar (Stmt.assign lhs rhs) n = false) :
+    usesVar rhs valueAliasName = false := by
+  have := hfresh _ pv_mem
+  simp [stmtUsesVar] at this
+  exact this.2
+
+/-- `people[i++].age = i` is in scope now: no `hev`, no `hstable`.  The
+source may be any value expression (`isValueSource`, so `a + b` and `i++`
+too): the residual's leading `T se = e` evaluates it first, exactly as
+`execAssignNested` does, so the template needs nothing of its shape. -/
 theorem storageFieldWriteUnfoldLeftFst_sound
     (s : State) (ty : Ty) (path : WrappedExpr) (fld : Field)
     (rhs : WrappedExpr)
     (hcond : (ruleEffect .storageFieldWriteUnfoldLeftFst).cond
       (Stmt.assign (PlaceExpr.field Kind.storage ty path fld) rhs))
-    (hprim : rhs.ty.isPrimitive = true)
     (hfresh : ∀ n ∈ aliasNames,
       stmtUsesVar
         (Stmt.assign (PlaceExpr.field Kind.storage ty path fld) rhs) n =
@@ -3878,24 +3948,390 @@ theorem storageFieldWriteUnfoldLeftFst_sound
         ((ruleEffect .storageFieldWriteUnfoldLeftFst).block
           (Stmt.assign (PlaceExpr.field Kind.storage ty path fld) rhs)
           hcond)) := by
-  exact fieldWriteResolveStorage_sound s ty path fld rhs hprim
+  exact fieldWriteResolveStorage_sound s ty path fld rhs hcond.2.1
+    (fresh_rhs_of_assign hfresh)
     (fun n hn => by
       have := hfresh n hn
       simp [stmtUsesVar] at this
       exact this.1)
 
-/-- `memoryToStorageUnfoldLeftFstTarget` on a **primitive**-typed memory
-source.  The rule's condition (`isComplex path ∧ isMemory rhs ∧ isSimple rhs`)
-admits one, and `freezeRhs` freezes it, so the residual is the ordinary frozen
-template and this is unconditional — no `hev`, no `hstable`.
+/-- `storageFieldWriteRefUnfoldLeftFst`: the value operand is a simple
+storage path of reference type, which `freezeRhs` leaves in place, so this
+is `fieldWriteResolveStorage_ref_sound` and keeps its side conditions —
+the source still reads the same value after the path capture.  See that
+template for why the hypothesis cannot be removed. -/
+theorem storageFieldWriteRefUnfoldLeftFst_sound
+    (s : State) (ty : Ty) (path : WrappedExpr) (fld : Field)
+    (rhs : WrappedExpr) {sv : SVal}
+    (hcond : (ruleEffect .storageFieldWriteRefUnfoldLeftFst).cond
+      (Stmt.assign (PlaceExpr.field Kind.storage ty path fld) rhs))
+    (hfresh : ∀ n ∈ aliasNames,
+      stmtUsesVar
+        (Stmt.assign (PlaceExpr.field Kind.storage ty path fld) rhs) n =
+        false)
+    (hev : rhsToSVal s rhs = .ok (s, sv))
+    (hstable : ∀ {t : State} {root : Name} {segs : List Seg},
+      resolveS s path = .ok (t, root, segs) ->
+        rhsToSVal t rhs = .ok (t, sv)) :
+    ResultsAgree aliasNames
+      (execStmt s
+        (Stmt.assign (PlaceExpr.field Kind.storage ty path fld) rhs))
+      (execBlock s
+        ((ruleEffect .storageFieldWriteRefUnfoldLeftFst).block
+          (Stmt.assign (PlaceExpr.field Kind.storage ty path fld) rhs)
+          hcond)) := by
+  have hnp := isPrimitive_eq_false_of_isReference hcond.2.2.2
+  have h := fieldWriteResolveStorage_ref_sound s ty path fld rhs hnp
+    (fun n hn => by
+      have := hfresh n hn
+      simp [stmtUsesVar] at this
+      exact this.2)
+    (pure_of_simple hcond.2.2.1) hev hstable
+  rw [fieldWriteResolveBlock, freezeRhs_plain hnp] at h
+  exact h
+
+/-- Tail of the storage index-write unfold with a **captured** complex index
+on an unfrozen operand — `indexWriteTailCapture_agree` without the freeze.
+The right-hand side is read back only after the index has been evaluated,
+so its stability is assumed after that evaluation. -/
+theorem indexWriteTailCapture_ref_agree {ty : Ty} {path index rhs : WrappedExpr}
+    {t : State} {sv : SVal} {root : Name} {segs : List Seg}
+    (hfr : ∀ n ∈ aliasNames, usesVar rhs n = false)
+    (hpr : pureExpr rhs = true)
+    (hfi : ∀ n ∈ aliasNames, usesVar index n = false)
+    (hstableI : ∀ {u : State} {w : Value}, evalValue t index = .ok (u, w) ->
+      rhsToSVal u rhs = .ok (u, sv)) :
+    ResultsAgree aliasNames
+      ((evalInt t index) >>= fun y =>
+        match y with
+        | (u, i) => u.saveStorage root (segs ++ [Seg.at i]) sv)
+      (execBlock (t.setEnv storagePathAliasName (Binding.spath root segs))
+        [captureIndex index,
+          Stmt.assign
+            (indexFromAlias Kind.storage storagePathAliasName ty path
+              (indexAlias index))
+            rhs]) := by
+  have hsp₃ : lookupBy storagePathAliasName
+      (t.setEnv storagePathAliasName (Binding.spath root segs)).env =
+        some (Binding.spath root segs) := lookupBy_setBy_self ..
+  have hagree₃ : EnvAgreeExcept aliasNames t
+      (t.setEnv storagePathAliasName (Binding.spath root segs)) :=
+    (EnvAgreeExcept.refl _ t).setEnv_right sp_mem _
+  have hLn : ((evalInt t index) >>= fun y =>
+        match y with
+        | (u, i) => u.saveStorage root (segs ++ [Seg.at i]) sv) =
+      (evalValue t index) >>= fun y =>
+        match y with
+        | (u, w) => w.asInt >>= fun i =>
+            u.saveStorage root (segs ++ [Seg.at i]) sv := by
+    rw [evalInt]
+    cases evalValue t index with
+    | error e => rfl
+    | ok z =>
+        obtain ⟨u, w⟩ := z
+        simp only [resOk_bind]
+        cases w.asInt with
+        | error e => rfl
+        | ok i => rfl
+  have hRn : execBlock (t.setEnv storagePathAliasName (Binding.spath root segs))
+        [captureIndex index,
+          Stmt.assign
+            (indexFromAlias Kind.storage storagePathAliasName ty path
+              (indexAlias index))
+            rhs] =
+      (evalValue (t.setEnv storagePathAliasName (Binding.spath root segs))
+        index) >>= fun y =>
+        match y with
+        | (t₄, w) =>
+            execStmt (t₄.setEnv indexAliasName (Binding.val w))
+              (Stmt.assign
+                (indexFromAlias Kind.storage storagePathAliasName ty path
+                  (indexAlias index))
+                rhs) := by
+    rw [execBlock_pair, captureIndex, capture, execStmt]
+    cases evalValue (t.setEnv storagePathAliasName (Binding.spath root segs))
+        index with
+    | error e => rfl
+    | ok z => obtain ⟨t₄, w⟩ := z; rfl
+  rw [hLn, hRn]
+  refine ResAgree.bindStateWith (evalValue_agree hagree₃ index hfi) ?_
+  intro u t₄ w hev₃ hev₄ hagree₄
+  have hkeep := evalValue_keep
+    (t.setEnv storagePathAliasName (Binding.spath root segs)) index hfi t₄ w hev₄
+  have hsp₅ : lookupBy storagePathAliasName
+      (t₄.setEnv indexAliasName (Binding.val w)).env =
+        some (Binding.spath root segs) := by
+    rw [State.setEnv, lookupBy_setBy_ne (Ne.symm idx_ne_sp),
+      hkeep storagePathAliasName sp_mem]
+    exact hsp₃
+  have hidx₅ : lookupBy indexAliasName
+      (t₄.setEnv indexAliasName (Binding.val w)).env = some (Binding.val w) :=
+    lookupBy_setBy_self ..
+  have hagree₅ : EnvAgreeExcept aliasNames u
+      (t₄.setEnv indexAliasName (Binding.val w)) :=
+    hagree₄.setEnv_right idx_mem _
+  have hRhs' : rhsToSVal (t₄.setEnv indexAliasName (Binding.val w)) rhs =
+      .ok (t₄.setEnv indexAliasName (Binding.val w), sv) :=
+    rhsToSVal_transportOk hagree₅ hfr hpr (hstableI hev₃)
+  have hR : execStmt (t₄.setEnv indexAliasName (Binding.val w))
+      (Stmt.assign
+        (indexFromAlias Kind.storage storagePathAliasName ty path
+          (indexAlias index))
+        rhs) =
+      w.asInt >>= fun i =>
+        (t₄.setEnv indexAliasName (Binding.val w)).saveStorage root
+          (segs ++ [Seg.at i]) sv := by
+    rw [execStmt]
+    show execAssignNested (t₄.setEnv indexAliasName (Binding.val w))
+      (WrappedExpr.index Kind.storage ty
+        (aliasExpr Kind.storage path.ty storagePathAliasName)
+        (indexAlias index))
+      rhs = _
+    rw [execAssignNested, hRhs']
+    simp only [Typed.WrappedExpr.kind, resOk_bind]
+    rw [resolveLoc, resolveS_alias path.ty hsp₅]
+    simp only [resOk_bind]
+    rw [evalInt, indexAlias, evalValue_alias index.ty hidx₅]
+    simp only [resOk_bind]
+    cases w.asInt with
+    | error e => rfl
+    | ok i => rfl
+  simp only []
+  rw [hR]
+  refine bindPureResults_agree _ fun i => ?_
+  exact saveStorage_agree hagree₅ root (segs ++ [Seg.at i]) sv
+
+/-- Tail with a simple index left in place, on an unfrozen operand —
+`indexWriteTailPlain_agree` without the freeze.  The right-hand side is
+read back before the index runs, so stability after the path capture is all
+that is needed. -/
+theorem indexWriteTailPlain_ref_agree {ty : Ty} {path index rhs : WrappedExpr}
+    {t : State} {sv : SVal} {root : Name} {segs : List Seg}
+    (hfr : ∀ n ∈ aliasNames, usesVar rhs n = false)
+    (hpr : pureExpr rhs = true)
+    (hfi : ∀ n ∈ aliasNames, usesVar index n = false)
+    (hstable : rhsToSVal t rhs = .ok (t, sv)) :
+    ResultsAgree aliasNames
+      ((evalInt t index) >>= fun y =>
+        match y with
+        | (u, i) => u.saveStorage root (segs ++ [Seg.at i]) sv)
+      (execBlock (t.setEnv storagePathAliasName (Binding.spath root segs))
+        [Stmt.assign
+          (indexFromAlias Kind.storage storagePathAliasName ty path index)
+          rhs]) := by
+  have hsp₃ : lookupBy storagePathAliasName
+      (t.setEnv storagePathAliasName (Binding.spath root segs)).env =
+        some (Binding.spath root segs) := lookupBy_setBy_self ..
+  have hagree₃ : EnvAgreeExcept aliasNames t
+      (t.setEnv storagePathAliasName (Binding.spath root segs)) :=
+    (EnvAgreeExcept.refl _ t).setEnv_right sp_mem _
+  have hRhs' : rhsToSVal
+      (t.setEnv storagePathAliasName (Binding.spath root segs)) rhs =
+      .ok (t.setEnv storagePathAliasName (Binding.spath root segs), sv) :=
+    rhsToSVal_transportOk hagree₃ hfr hpr hstable
+  have hR : execBlock (t.setEnv storagePathAliasName (Binding.spath root segs))
+      [Stmt.assign
+        (indexFromAlias Kind.storage storagePathAliasName ty path index)
+        rhs] =
+      (evalInt (t.setEnv storagePathAliasName (Binding.spath root segs))
+        index) >>= fun y =>
+        match y with
+        | (u, i) => u.saveStorage root (segs ++ [Seg.at i]) sv := by
+    rw [execBlock_single, execStmt]
+    show execAssignNested
+      (t.setEnv storagePathAliasName (Binding.spath root segs))
+      (WrappedExpr.index Kind.storage ty
+        (aliasExpr Kind.storage path.ty storagePathAliasName) index)
+      rhs = _
+    rw [execAssignNested, hRhs']
+    simp only [Typed.WrappedExpr.kind, resOk_bind]
+    rw [resolveLoc, resolveS_alias path.ty hsp₃]
+    simp only [resOk_bind]
+    cases evalInt (t.setEnv storagePathAliasName (Binding.spath root segs))
+        index with
+    | error e => rfl
+    | ok z => obtain ⟨u, i⟩ := z; rfl
+  rw [hR]
+  refine ResAgree.bindStateWith (evalInt_agree hagree₃ index hfi) ?_
+  intro u u' i _ _ hagree₄
+  exact saveStorage_agree hagree₄ root (segs ++ [Seg.at i]) sv
+
+/-- Template: the storage index-write unfold on a **reference-typed** value
+operand, the index twin of `fieldWriteResolveStorage_ref_sound`.
+`Rules.freezeRhs` leaves a reference in place, so the residual reads the
+source after the target captures and the rule stays conditional: `hstable`
+says the source still reads the same value after the path capture — where a
+simple index reads it back — and `hstableI` after the index too, where a
+captured complex index reads it back.  As for the field twin the hypotheses
+cannot be removed: on `people[mv.x++] = mv` the index mutates the very
+object the source copies.  Stated over the unfrozen residual outright, which
+is `indexWriteResolveBlock` under `freezeRhs_plain`. -/
+theorem indexWriteResolveStorage_ref_sound (s : State) (ty : Ty)
+    (path index rhs : WrappedExpr) {sv : SVal}
+    (hfr : ∀ n ∈ aliasNames, usesVar rhs n = false)
+    (hpr : pureExpr rhs = true)
+    (hfi : ∀ n ∈ aliasNames, usesVar index n = false)
+    (hev : rhsToSVal s rhs = .ok (s, sv))
+    (hstable : ∀ {t : State} {root : Name} {segs : List Seg},
+      resolveS s path = .ok (t, root, segs) -> rhsToSVal t rhs = .ok (t, sv))
+    (hstableI : ∀ {t : State} {root : Name} {segs : List Seg} {u : State}
+      {w : Value},
+      resolveS s path = .ok (t, root, segs) -> evalValue t index = .ok (u, w) ->
+        rhsToSVal u rhs = .ok (u, sv)) :
+    ResultsAgree aliasNames
+      (execStmt s (Stmt.assign (PlaceExpr.index Kind.storage ty path index) rhs))
+      (execBlock s
+        (if index.complex then
+          [captureStoragePath path, captureIndex index,
+            Stmt.assign
+              (indexFromAlias Kind.storage storagePathAliasName ty path
+                (indexAlias index)) rhs]
+        else
+          [captureStoragePath path,
+            Stmt.assign
+              (indexFromAlias Kind.storage storagePathAliasName ty path index)
+              rhs])) := by
+  rw [execStmt]
+  have hL : execAssign s (PlaceExpr.index Kind.storage ty path index) rhs =
+      (resolveS s path) >>= fun x =>
+        match x with
+        | (t, root, segs) =>
+            (evalInt t index) >>= fun y =>
+              match y with
+              | (u, i) => u.saveStorage root (segs ++ [Seg.at i]) sv := by
+    show execAssignNested s
+      (WrappedExpr.index Kind.storage ty path index) rhs = _
+    rw [execAssignNested, hev]
+    simp only [Typed.WrappedExpr.kind, resOk_bind]
+    rw [resolveLoc]
+    cases resolveS s path with
+    | error e => rfl
+    | ok y =>
+        obtain ⟨t, root, segs⟩ := y
+        simp only [resOk_bind]
+        cases evalInt t index with
+        | error e => rfl
+        | ok z => obtain ⟨u, i⟩ := z; rfl
+  have hRpre : ∀ tail : Block,
+      execBlock s (captureStoragePath path :: tail) =
+        (resolveS s path) >>= fun x =>
+          match x with
+          | (t, root, segs) =>
+              execBlock (t.setEnv storagePathAliasName
+                (Binding.spath root segs)) tail := by
+    intro tail
+    rw [execBlock.eq_def, captureStoragePath, capture]
+    simp only [execStmt]
+    cases resolveS s path with
+    | error e => rfl
+    | ok y => obtain ⟨t, root, segs⟩ := y; rfl
+  rw [hL]
+  by_cases hc : index.complex
+  · rw [if_pos hc, hRpre]
+    cases hres : resolveS s path with
+    | error err => exact rfl
+    | ok x =>
+        obtain ⟨t, root, segs⟩ := x
+        exact indexWriteTailCapture_ref_agree hfr hpr hfi (hstableI hres)
+  · rw [if_neg hc, hRpre]
+    cases hres : resolveS s path with
+    | error err => exact rfl
+    | ok x =>
+        obtain ⟨t, root, segs⟩ := x
+        exact indexWriteTailPlain_ref_agree hfr hpr hfi (hstable hres)
+
+/-- `storageIndexWriteRefUnfoldLeftFst`: the value operand is a simple
+storage path of reference type, which `freezeRhs` leaves in place, so this
+is `indexWriteResolveStorage_ref_sound` and keeps its side conditions. -/
+theorem storageIndexWriteRefUnfoldLeftFst_sound
+    (s : State) (ty : Ty) (path index rhs : WrappedExpr) {sv : SVal}
+    (hcond : (ruleEffect .storageIndexWriteRefUnfoldLeftFst).cond
+      (Stmt.assign (PlaceExpr.index Kind.storage ty path index) rhs))
+    (hfresh : ∀ n ∈ aliasNames,
+      stmtUsesVar
+        (Stmt.assign (PlaceExpr.index Kind.storage ty path index) rhs) n =
+        false)
+    (hev : rhsToSVal s rhs = .ok (s, sv))
+    (hstable : ∀ {t : State} {root : Name} {segs : List Seg},
+      resolveS s path = .ok (t, root, segs) -> rhsToSVal t rhs = .ok (t, sv))
+    (hstableI : ∀ {t : State} {root : Name} {segs : List Seg} {u : State}
+      {w : Value},
+      resolveS s path = .ok (t, root, segs) -> evalValue t index = .ok (u, w) ->
+        rhsToSVal u rhs = .ok (u, sv)) :
+    ResultsAgree aliasNames
+      (execStmt s
+        (Stmt.assign (PlaceExpr.index Kind.storage ty path index) rhs))
+      (execBlock s
+        ((ruleEffect .storageIndexWriteRefUnfoldLeftFst).block
+          (Stmt.assign (PlaceExpr.index Kind.storage ty path index) rhs)
+          hcond)) :=
+  indexWriteResolveStorage_ref_sound s ty path index rhs
+    (fun n hn => by
+      have := hfresh n hn
+      simp [stmtUsesVar] at this
+      exact this.2)
+    (pure_of_simple hcond.2.2.1)
+    (fun n hn => by
+      have := hfresh n hn
+      simp [stmtUsesVar, placeIndex_expr, usesVar] at this
+      exact this.1.2)
+    hev hstable hstableI
+
+/-- `storageIndexWriteRefUnfoldLeftSndIndex`: the receiver is simple, so
+its capture is pure and stability after it is `hev` itself; only the
+captured complex index can disturb the source (`hstableI`). -/
+theorem storageIndexWriteRefUnfoldLeftSndIndex_sound
+    (s : State) (ty : Ty) (path index rhs : WrappedExpr) {sv : SVal}
+    (hcond : (ruleEffect .storageIndexWriteRefUnfoldLeftSndIndex).cond
+      (Stmt.assign (PlaceExpr.index Kind.storage ty path index) rhs))
+    (hfresh : ∀ n ∈ aliasNames,
+      stmtUsesVar
+        (Stmt.assign (PlaceExpr.index Kind.storage ty path index) rhs) n =
+        false)
+    (hev : rhsToSVal s rhs = .ok (s, sv))
+    (hstableI : ∀ {u : State} {w : Value},
+      evalValue s index = .ok (u, w) -> rhsToSVal u rhs = .ok (u, sv)) :
+    ResultsAgree aliasNames
+      (execStmt s
+        (Stmt.assign (PlaceExpr.index Kind.storage ty path index) rhs))
+      (execBlock s
+        ((ruleEffect .storageIndexWriteRefUnfoldLeftSndIndex).block
+          (Stmt.assign (PlaceExpr.index Kind.storage ty path index) rhs)
+          hcond)) := by
+  have hpp : pureExpr path = true := pure_of_simple hcond.1
+  have hc : index.complex = true := hcond.2.1
+  have h := indexWriteResolveStorage_ref_sound s ty path index rhs
+    (fun n hn => by
+      have := hfresh n hn
+      simp [stmtUsesVar] at this
+      exact this.2)
+    (pure_of_simple hcond.2.2.2.1)
+    (fun n hn => by
+      have := hfresh n hn
+      simp [stmtUsesVar, placeIndex_expr, usesVar] at this
+      exact this.1.2)
+    hev
+    (fun hres => by
+      rw [resolveS_pure hpp hres]
+      exact hev)
+    (fun hres hev' => by
+      rw [resolveS_pure hpp hres] at hev'
+      exact hstableI hev')
+  rw [if_pos hc] at h
+  exact h
+
+/-- `memoryToStorageFieldUnfoldLeftFst` on a **primitive**-typed memory
+source.  The rule's condition (`isComplex path ∧ isMv rhs`) admits one, and
+`freezeRhs` freezes it, so the residual is the ordinary frozen template and
+this is unconditional — no `hev`, no `hstable`.
 
 Stated because the reference-case theorem below requires
 `hnp : rhs.ty.isPrimitive = false`, which left this half of the rule's own
 condition with no theorem at all. -/
-theorem memoryToStorageUnfoldLeftFstTarget_prim_sound
+theorem memoryToStorageFieldUnfoldLeftFst_prim_sound
     (s : State) (ty : Ty) (path : WrappedExpr) (fld : Field)
     (rhs : WrappedExpr)
-    (hcond : (ruleEffect .memoryToStorageUnfoldLeftFstTarget).cond
+    (hcond : (ruleEffect .memoryToStorageFieldUnfoldLeftFst).cond
       (Stmt.assign (PlaceExpr.field Kind.storage ty path fld) rhs))
     (hprim : rhs.ty.isPrimitive = true)
     (hfresh : ∀ n ∈ aliasNames,
@@ -3906,10 +4342,11 @@ theorem memoryToStorageUnfoldLeftFstTarget_prim_sound
       (execStmt s
         (Stmt.assign (PlaceExpr.field Kind.storage ty path fld) rhs))
       (execBlock s
-        ((ruleEffect .memoryToStorageUnfoldLeftFstTarget).block
+        ((ruleEffect .memoryToStorageFieldUnfoldLeftFst).block
           (Stmt.assign (PlaceExpr.field Kind.storage ty path fld) rhs)
           hcond)) := by
-  refine fieldWriteResolveStorage_sound s ty path fld rhs hprim ?_
+  refine fieldWriteResolveStorage_sound s ty path fld rhs hprim
+    (fresh_rhs_of_assign hfresh) ?_
   intro n hn
   have := hfresh n hn
   simp [stmtUsesVar, placeField_expr, usesVar] at this
@@ -3917,10 +4354,10 @@ theorem memoryToStorageUnfoldLeftFstTarget_prim_sound
 
 /-- The memory source is a reference, so this one keeps its side
 condition; see `fieldWriteResolveStorage_ref_sound`. -/
-theorem memoryToStorageUnfoldLeftFstTarget_sound
+theorem memoryToStorageFieldUnfoldLeftFst_sound
     (s : State) (ty : Ty) (path : WrappedExpr) (fld : Field)
     (rhs : WrappedExpr) {sv : SVal}
-    (hcond : (ruleEffect .memoryToStorageUnfoldLeftFstTarget).cond
+    (hcond : (ruleEffect .memoryToStorageFieldUnfoldLeftFst).cond
       (Stmt.assign (PlaceExpr.field Kind.storage ty path fld) rhs))
     (hnp : rhs.ty.isPrimitive = false)
     (hfresh : ∀ n ∈ aliasNames,
@@ -3935,7 +4372,7 @@ theorem memoryToStorageUnfoldLeftFstTarget_sound
       (execStmt s
         (Stmt.assign (PlaceExpr.field Kind.storage ty path fld) rhs))
       (execBlock s
-        ((ruleEffect .memoryToStorageUnfoldLeftFstTarget).block
+        ((ruleEffect .memoryToStorageFieldUnfoldLeftFst).block
           (Stmt.assign (PlaceExpr.field Kind.storage ty path fld) rhs)
           hcond)) := by
   exact fieldWriteResolveStorage_ref_sound s ty path fld rhs hnp
@@ -3946,13 +4383,12 @@ theorem memoryToStorageUnfoldLeftFstTarget_sound
     (pure_of_simple hcond.2.2) hev hstable
 
 /-- `values[i++] = i` under the left-fst rule: no `hev`, no `hstable`,
-no `pureExpr index`. -/
+no `pureExpr index`; and, as for the field rule, any value source. -/
 theorem storageIndexWriteUnfoldLeftFst_sound
     (s : State) (ty : Ty) (path index : WrappedExpr)
     (rhs : WrappedExpr)
     (hcond : (ruleEffect .storageIndexWriteUnfoldLeftFst).cond
       (Stmt.assign (PlaceExpr.index Kind.storage ty path index) rhs))
-    (hprim : rhs.ty.isPrimitive = true)
     (hfresh : ∀ n ∈ aliasNames,
       stmtUsesVar
         (Stmt.assign (PlaceExpr.index Kind.storage ty path index) rhs) n =
@@ -3964,21 +4400,51 @@ theorem storageIndexWriteUnfoldLeftFst_sound
         ((ruleEffect .storageIndexWriteUnfoldLeftFst).block
           (Stmt.assign (PlaceExpr.index Kind.storage ty path index) rhs)
           hcond)) := by
-  refine indexWriteResolveStorage_sound s ty path index rhs hprim ?_ ?_ <;>
+  refine indexWriteResolveStorage_sound s ty path index rhs hcond.2.1
+    (fresh_rhs_of_assign hfresh) ?_ ?_ <;>
     intro n hn <;> have := hfresh n hn <;>
     simp [stmtUsesVar, placeIndex_expr, usesVar] at this
   · exact this.1.1
   · exact this.1.2
 
-/-- **`values[i++] = i` is sound now.**  `captureIndexTargetBlock` is
-`indexWriteResolveBlock`, so this is the same template; the hypothesis
-`pureExpr index`, which is exactly what excluded the counterexample, is
-gone. -/
+/-- `memoryToStorageIndexUnfoldLeftFst`: a complex storage index target
+and a memory source.  The residual is `indexWriteResolveBlock`, so on a
+**primitive**-typed memory source this is the frozen template.  `hprim`
+is the same carve-out as in `memoryToStorageIndexUnfoldLeftSndIndex_sound`
+below, and for the same reason: on a reference source the interpreter is
+value-first where solc is target-first (`Counterexamples/RefSourceOrder.lean`). -/
+theorem memoryToStorageIndexUnfoldLeftFst_sound
+    (s : State) (ty : Ty) (path index : WrappedExpr)
+    (rhs : WrappedExpr)
+    (hcond : (ruleEffect .memoryToStorageIndexUnfoldLeftFst).cond
+      (Stmt.assign (PlaceExpr.index Kind.storage ty path index) rhs))
+    (hprim : rhs.ty.isPrimitive = true)
+    (hfresh : ∀ n ∈ aliasNames,
+      stmtUsesVar
+        (Stmt.assign (PlaceExpr.index Kind.storage ty path index) rhs) n =
+        false) :
+    ResultsAgree aliasNames
+      (execStmt s
+        (Stmt.assign (PlaceExpr.index Kind.storage ty path index) rhs))
+      (execBlock s
+        ((ruleEffect .memoryToStorageIndexUnfoldLeftFst).block
+          (Stmt.assign (PlaceExpr.index Kind.storage ty path index) rhs)
+          hcond)) := by
+  refine indexWriteResolveStorage_sound s ty path index rhs hprim
+    (fresh_rhs_of_assign hfresh) ?_ ?_ <;>
+    intro n hn <;> have := hfresh n hn <;>
+    simp [stmtUsesVar, placeIndex_expr, usesVar] at this
+  · exact this.1.1
+  · exact this.1.2
+
+/-- **`values[i++] = i` is sound now.**  The residual is the hoisting branch
+of `indexWriteResolveBlock` (`indexWriteResolveBlock_complex`), so this is
+the same template; the hypothesis `pureExpr index`, which is exactly what
+excluded the counterexample, is gone. -/
 theorem storageIndexWriteUnfoldLeftSndIndex_sound
     (s : State) (ty : Ty) (path index rhs : WrappedExpr)
     (hcond : (ruleEffect .storageIndexWriteUnfoldLeftSndIndex).cond
       (Stmt.assign (PlaceExpr.index Kind.storage ty path index) rhs))
-    (hprim : rhs.ty.isPrimitive = true)
     (hfresh : ∀ n ∈ aliasNames,
       stmtUsesVar
         (Stmt.assign (PlaceExpr.index Kind.storage ty path index) rhs) n =
@@ -3990,24 +4456,32 @@ theorem storageIndexWriteUnfoldLeftSndIndex_sound
         ((ruleEffect .storageIndexWriteUnfoldLeftSndIndex).block
           (Stmt.assign (PlaceExpr.index Kind.storage ty path index) rhs)
           hcond)) := by
-  refine indexWriteResolveStorage_sound s ty path index rhs hprim ?_ ?_ <;>
-    intro n hn <;> have := hfresh n hn <;>
-    simp [stmtUsesVar, placeIndex_expr, usesVar] at this
-  · exact this.1.1
-  · exact this.1.2
+  have h := indexWriteResolveStorage_sound s ty path index rhs hcond.2.2.1
+    (fresh_rhs_of_assign hfresh)
+    (fun n hn => by
+      have := hfresh n hn
+      simp [stmtUsesVar, placeIndex_expr, usesVar] at this
+      exact this.1.1)
+    (fun n hn => by
+      have := hfresh n hn
+      simp [stmtUsesVar, placeIndex_expr, usesVar] at this
+      exact this.1.2)
+  rw [indexWriteResolveBlock_complex Kind.storage storagePathAliasName ty
+    hcond.2.1] at h
+  exact h
 
-/-- `memoryToStorageUnfoldLeftSndTargetIndex`: a storage index target with a
+/-- `memoryToStorageIndexUnfoldLeftSndIndex`: a storage index target with a
 complex index and a *memory* right-hand side.
 
-The residual is `captureIndexTargetBlock`, which is `indexWriteResolveBlock`, so
-on a **primitive**-typed memory source this is the same statement as
+The residual is the hoisting branch of `indexWriteResolveBlock`, so on a
+**primitive**-typed memory source this is the same statement as
 `storageIndexWriteUnfoldLeftSndIndex_sound` and dispatches to the same template:
-`freezeRhs` binds the value into `rv` before the path and index captures run, so
+`freezeRhs` binds the value into `se` before the path and index captures run, so
 no non-interference hypothesis is needed.
 
 **`hprim` is a carve-out, and what it carves out is the interpreter.**  The
-rule's own condition is `isSimple path ∧ isComplex index ∧ isMemory rhs ∧
-isSimple rhs` — it says nothing about primitivity — so the rule also fires on a
+rule's own condition is `isSimple path ∧ isComplex index ∧ isMv rhs` — it
+says nothing about primitivity — so the rule also fires on a
 *reference*-typed memory source, and on that instance this theorem says
 nothing.  It is not merely unproved there: as stated against this interpreter
 it is false.  `Counterexamples/RefSourceOrder.lean` refutes it on
@@ -4030,9 +4504,9 @@ for reference sources, then restate this theorem without `hprim`.  Not done;
 `Rules.freezeRhs` correctly stays out of it either way, since a reference
 snapshot would have to be a `Stmt.memoryDecl` and that binds `Binding.mref`,
 an alias rather than a copy. -/
-theorem memoryToStorageUnfoldLeftSndTargetIndex_sound
+theorem memoryToStorageIndexUnfoldLeftSndIndex_sound
     (s : State) (ty : Ty) (path index rhs : WrappedExpr)
-    (hcond : (ruleEffect .memoryToStorageUnfoldLeftSndTargetIndex).cond
+    (hcond : (ruleEffect .memoryToStorageIndexUnfoldLeftSndIndex).cond
       (Stmt.assign (PlaceExpr.index Kind.storage ty path index) rhs))
     (hprim : rhs.ty.isPrimitive = true)
     (hfresh : ∀ n ∈ aliasNames,
@@ -4043,14 +4517,22 @@ theorem memoryToStorageUnfoldLeftSndTargetIndex_sound
       (execStmt s
         (Stmt.assign (PlaceExpr.index Kind.storage ty path index) rhs))
       (execBlock s
-        ((ruleEffect .memoryToStorageUnfoldLeftSndTargetIndex).block
+        ((ruleEffect .memoryToStorageIndexUnfoldLeftSndIndex).block
           (Stmt.assign (PlaceExpr.index Kind.storage ty path index) rhs)
           hcond)) := by
-  refine indexWriteResolveStorage_sound s ty path index rhs hprim ?_ ?_ <;>
-    intro n hn <;> have := hfresh n hn <;>
-    simp [stmtUsesVar, placeIndex_expr, usesVar] at this
-  · exact this.1.1
-  · exact this.1.2
+  have h := indexWriteResolveStorage_sound s ty path index rhs hprim
+    (fresh_rhs_of_assign hfresh)
+    (fun n hn => by
+      have := hfresh n hn
+      simp [stmtUsesVar, placeIndex_expr, usesVar] at this
+      exact this.1.1)
+    (fun n hn => by
+      have := hfresh n hn
+      simp [stmtUsesVar, placeIndex_expr, usesVar] at this
+      exact this.1.2)
+  rw [indexWriteResolveBlock_complex Kind.storage storagePathAliasName ty
+    hcond.2.1] at h
+  exact h
 
 /-- Transport a pure, fresh place resolution along an env-agreement. -/
 theorem resolveLoc_transport {ns : List Name} {s t' : State}
@@ -4977,7 +5459,7 @@ theorem execAssign_memoryRhsErr {s : State} {lhs : PlaceExpr}
   | .mkTernary c t el =>
       rw [hsh, resolveLoc.eq_def] at hlhs; exact nomatch hlhs
 
-/-- Template: the `pv` value-capture for a storage-kind right-hand
+/-- Template: the `se` value-capture for a storage-kind right-hand
 side (`captureAssignBlock` with `valueCaptureKind rhs = Kind.storage`).
 The rule hoists the right-hand side in front of the target; both the
 right-hand side and the target are pure, so the two orders coincide.
@@ -5993,6 +6475,77 @@ theorem ternaryToIfStorage_sound
                   simp only [resOk_bind]
                   exact ResAgree.refl _ _
 
+/-- The memory twin of `ternaryToIfStorage_sound`, hypothesis for
+hypothesis.  `hnmr` is what keeps a memory *root* target out: there the
+interpreter's `execAssign` reads the ternary's kind, which is `stack`, and is
+stuck, while the lowered branches assign the arms at their own kinds. -/
+theorem ternaryToIfMemory_sound
+    (s : State) (lhs : PlaceExpr) (rhs : WrappedExpr) {loc : Loc}
+    (hcond : (ruleEffect .ternaryToIfMemory).cond
+      (Stmt.assign lhs rhs))
+    (hlhs : resolveLoc s lhs.expr = .ok (s, loc))
+    (hfl : ∀ n ∈ aliasNames, usesVar lhs.expr n = false)
+    (hprim : rhs.ty.isPrimitive = true)
+    (htye : ∀ {c t e}, rhs = WrappedExpr.ternary c t e -> e.ty = t.ty)
+    (hnsl : ∀ nm, loc ≠ Loc.storageLocal nm)
+    (hnmr : ∀ nm, loc ≠ Loc.memoryRoot nm) :
+    ResultsAgree aliasNames
+      (execStmt s (Stmt.assign lhs rhs))
+      (execBlock s ((ruleEffect .ternaryToIfMemory).block
+        (Stmt.assign lhs rhs) hcond)) := by
+  revert hprim htye
+  match rhs, hcond with
+  | .mkTernary c t e, hcond =>
+      intro hprim htye
+      obtain ⟨_, hsc⟩ := hcond
+      simp only [Rules.isSimple] at hsc
+      show ResultsAgree aliasNames
+        (execStmt s (Stmt.assign lhs (WrappedExpr.ternary c t e)))
+        (execBlock s [Stmt.ite c [Stmt.assign lhs t] [Stmt.assign lhs e]])
+      rw [execBlock_single, execStmt, execStmt]
+      cases hev : evalValue s c with
+      | error err =>
+          have hev' : evalValue s (WrappedExpr.ternary c t e) =
+              .error err := by
+            rw [evalValue, hev]
+            rfl
+          rw [execAssign_evalErr hlhs hprim hnsl hnmr hev']
+          exact rfl
+      | ok x =>
+          obtain ⟨u, cv⟩ := x
+          have hu : u = s := evalValue_pure (pure_of_simple hsc) hev
+          subst hu
+          simp only [resOk_bind]
+          cases cv with
+          | int v =>
+              have hev' : evalValue u (WrappedExpr.ternary c t e) =
+                  .error .stuck := by
+                rw [evalValue, hev]
+                rfl
+              rw [execAssign_evalErr hlhs hprim hnsl hnmr hev']
+              exact rfl
+          | bool b =>
+              cases b with
+              | true =>
+                  show ResultsAgree aliasNames _
+                    (execBlock u [Stmt.assign lhs t])
+                  rw [execBlock_single, execStmt]
+                  refine execAssign_pureLocSimPrim hlhs hfl rfl hprim ?_
+                    hnsl hnmr
+                  rw [evalValue, hev]
+                  simp only [resOk_bind]
+                  exact ResAgree.refl _ _
+              | false =>
+                  show ResultsAgree aliasNames _
+                    (execBlock u [Stmt.assign lhs e])
+                  rw [execBlock_single, execStmt]
+                  refine execAssign_pureLocSimPrim hlhs hfl
+                    (show e.ty = (WrappedExpr.ternary c t e).ty from
+                      @htye c t e rfl) hprim ?_ hnsl hnmr
+                  rw [evalValue, hev]
+                  simp only [resOk_bind]
+                  exact ResAgree.refl _ _
+
 theorem ternaryCaptureCond_sound
     (s : State) (lhs : PlaceExpr) (rhs : WrappedExpr) {loc : Loc}
     (hcond : (ruleEffect .ternaryCaptureCond).cond
@@ -6590,91 +7143,6 @@ theorem logicalOrShortCircuitRhs_sound
                 Bool.false_or, checkArith, BinOp.retTy, BinOp.isArith]
               exact EnvAgreeExcept.refl _ _
 
-theorem binopUnfoldResult_sound (op : BinOp)
-    (s : State) (lhs : PlaceExpr) (rhs : WrappedExpr) {loc : Loc}
-    (hcond : (ruleEffect (.binopUnfoldResult op)).cond
-      (Stmt.assign lhs rhs))
-    (hfresh : ∀ n ∈ aliasNames,
-      stmtUsesVar (Stmt.assign lhs rhs) n = false)
-    (hlhs : resolveLoc s lhs.expr = .ok (s, loc))
-    (hplhs : pureExpr lhs.expr = true)
-    (hprim : rhs.ty.isPrimitive = true)
-    (hnsl : ∀ nm, loc ≠ Loc.storageLocal nm)
-    (hnmr : ∀ nm, loc ≠ Loc.memoryRoot nm) :
-    ResultsAgree aliasNames
-      (execStmt s (Stmt.assign lhs rhs))
-      (execBlock s ((ruleEffect (.binopUnfoldResult op)).block
-        (Stmt.assign lhs rhs) hcond)) := by
-  revert hprim
-  match rhs, hcond, hfresh with
-  | .mkBinop op' l r, hcond, hfresh =>
-      intro hprim
-      have hpl : pureExpr l = true := pure_of_simple hcond.2.2.1
-      have hpr : pureExpr r = true := pure_of_simple hcond.2.2.2.1
-      have hpfull : pureExpr (WrappedExpr.binop op' l r) = true := by
-        simp [pureExpr, hpl, hpr]
-      have hfl : ∀ n ∈ aliasNames, usesVar lhs.expr n = false := fun n hn => by
-        have := hfresh n hn
-        simp [stmtUsesVar] at this
-        exact this.1
-      show ResultsAgree aliasNames
-        (execStmt s (Stmt.assign lhs (WrappedExpr.binop op' l r)))
-        (execBlock s
-          [Stmt.stackDecl (WrappedExpr.binop op' l r).ty valueAliasName
-            (some (WrappedExpr.binop op' l r)),
-          Stmt.assign lhs
-            (stackValueAlias (WrappedExpr.binop op' l r))])
-      rw [execStmt, execBlock_pair]
-      cases hev : evalValue s (WrappedExpr.binop op' l r) with
-      | error err =>
-          have hL : execAssign s lhs (WrappedExpr.binop op' l r) =
-              .error err := execAssign_evalErr hlhs hprim hnsl hnmr hev
-          have hR : execStmt s
-              (Stmt.stackDecl (WrappedExpr.binop op' l r).ty valueAliasName
-                (some (WrappedExpr.binop op' l r))) = .error err := by
-            rw [execStmt, hev]
-            rfl
-          rw [hL, hR]
-          exact rfl
-      | ok x =>
-          obtain ⟨t, v⟩ := x
-          have hts : t = s := evalValue_pure hpfull hev
-          subst hts
-          have hR : execStmt t
-              (Stmt.stackDecl (WrappedExpr.binop op' l r).ty valueAliasName
-                (some (WrappedExpr.binop op' l r))) =
-              .ok (t.setEnv valueAliasName (Binding.val v)) := by
-            rw [execStmt, hev]
-            rfl
-          rw [hR]
-          have ht' : EnvAgreeExcept aliasNames t
-              (t.setEnv valueAliasName (Binding.val v)) :=
-            (EnvAgreeExcept.refl _ t).setEnv_right pv_mem _
-          show ResultsAgree aliasNames
-            (execAssign t lhs (WrappedExpr.binop op' l r))
-            (execStmt (t.setEnv valueAliasName (Binding.val v))
-              (Stmt.assign lhs
-                (stackValueAlias (WrappedExpr.binop op' l r))))
-          rw [execStmt]
-          refine execAssign_pureLocSim hlhs hfl rfl rfl ?_ ?_ ?_
-          · rw [hev, stackValueAlias,
-              evalValue_alias (WrappedExpr.binop op' l r).ty
-                (lookupBy_setBy_self valueAliasName (Binding.val v) t.env)]
-            exact ⟨rfl, ht'⟩
-          · intro _
-            have h1 : resolveS t (WrappedExpr.binop op' l r) =
-                .error .stuck := by
-              rw [resolveS.eq_def]
-            have h2 : resolveS (t.setEnv valueAliasName (Binding.val v))
-                (stackValueAlias (WrappedExpr.binop op' l r)) =
-                .error .stuck := by
-              rw [stackValueAlias, aliasExpr, resolveS, aliasField_name]
-              simp [State.setEnv, lookupBy_setBy_self]
-            rw [h1, h2]
-            exact rfl
-          · intro hm
-            exact nomatch hm
-
 /-! ## Compound-assignment and inc/dec unfolds -/
 
 theorem evalValue_transportErr {ns : List Name} {s t' : State}
@@ -6719,7 +7187,7 @@ theorem compoundTail_agree {ns : List Name} {s₂ t₃ : State} {op' : BinOp}
   exact writeLoc_agree hag new'
 
 /-- `compoundAssignValueRhsCapture op` (KeY `addAssignValueRhsCapture`,
-...): hoisting a nonsimple compound-assignment RHS into `pv` preserves
+...): hoisting a nonsimple compound-assignment RHS into `se` preserves
 the statement's meaning. The interpreter reads the target's old value
 *before* the RHS runs while the residual reads it *after* the capture,
 so `hstableOld` demands the target's value survive the RHS's effects —
@@ -6794,20 +7262,27 @@ theorem compoundAssignValueRhsCapture_sound (op : BinOp)
       exact writeLoc_agree hu new'
 
 /-- `a[i++].x += i` is in scope now.  `compoundAssign` is value-first
-like plain assignment (`Semantics.execStmt`), and the residual now freezes
-the value into `rv` before capturing the path — so the old `hppath` and
-`hrsOk` are both gone, and only freshness of the path remains. -/
-theorem storageFieldCompoundAssignUnfoldLeftFst_sound (op : BinOp)
+like plain assignment (`Semantics.execStmt`), and the residual freezes
+the value into `se` before capturing the path — so the old `hppath` and
+`hrsOk` are both gone, and only freshness of the path remains.
+
+`hprim` is what makes `freezeRhs` freeze: the rule's `se` is a simple stack
+operand of any declared type, and on a reference-typed one the residual
+reads the operand *after* the path capture, which the interpreter does not
+(`people[x++].age += x` with `x` declared at a reference type).  Every
+well-typed compound assignment has a primitive operand. -/
+theorem storageFieldOpAssignUnfoldLeftFst_sound (op : BinOp)
     (s : State) (op' : BinOp) (lhs : PlaceExpr) (rhs : WrappedExpr)
     (hcond : (ruleEffect
-      (.storageFieldCompoundAssignUnfoldLeftFst op)).cond
+      (.storageFieldOpAssignUnfoldLeftFst op)).cond
       (Stmt.compoundAssign op' lhs rhs))
+    (hprim : rhs.ty.isPrimitive = true)
     (hfresh : ∀ n ∈ aliasNames,
       stmtUsesVar (Stmt.compoundAssign op' lhs rhs) n = false) :
     ResultsAgree aliasNames
       (execStmt s (Stmt.compoundAssign op' lhs rhs))
       (execBlock s
-        ((ruleEffect (.storageFieldCompoundAssignUnfoldLeftFst op)).block
+        ((ruleEffect (.storageFieldOpAssignUnfoldLeftFst op)).block
           (Stmt.compoundAssign op' lhs rhs) hcond)) := by
   obtain ⟨e, hass⟩ := lhs
   match e, hass, hcond, hfresh with
@@ -6816,25 +7291,28 @@ theorem storageFieldCompoundAssignUnfoldLeftFst_sound (op : BinOp)
         have := hfresh n hn
         simp [stmtUsesVar] at this
         exact this.1
+      have hfr : usesVar rhs valueAliasName = false := by
+        have := hfresh _ pv_mem
+        simp [stmtUsesVar] at this
+        exact this.2
       show ResultsAgree aliasNames
         (execStmt s (Stmt.compoundAssign op'
           (PlaceExpr.field Kind.storage ty path fld) rhs))
-        (execBlock s [captureRhsValue rhs, captureStoragePath path,
+        (execBlock s (freezeRhs rhs fun v => [captureStoragePath path,
           Stmt.compoundAssign op'
-            (fieldFromAlias Kind.storage storagePathAliasName ty path fld)
-            (rhsValueAlias rhs)])
-      rw [execStmt, execBlock_triple, captureRhsValue, capture, execStmt,
-        placeField_expr]
+            (fieldFromAlias Kind.storage storagePathAliasName ty path fld) v]))
+      rw [freezeRhs_freeze hprim hfr, execStmt, execBlock_triple,
+        captureStackValue, capture, execStmt, placeField_expr]
       cases hevR : evalValue s rhs with
       | error err => simp only [hevR]; rfl
       | ok x =>
           obtain ⟨s₁, v⟩ := x
           simp only [hevR, resOk_bind]
-          have hrv₁ : lookupBy rhsValueAliasName
-              (s₁.setEnv rhsValueAliasName (Binding.val v)).env =
+          have hrv₁ : lookupBy valueAliasName
+              (s₁.setEnv valueAliasName (Binding.val v)).env =
                 some (Binding.val v) := lookupBy_setBy_self ..
           have hagree₁ : EnvAgreeExcept aliasNames s₁
-              (s₁.setEnv rhsValueAliasName (Binding.val v)) :=
+              (s₁.setEnv valueAliasName (Binding.val v)) :=
             (EnvAgreeExcept.refl _ s₁).setEnv_right rv_mem _
           have hL : ((resolveLoc s₁ (WrappedExpr.field Kind.storage ty path fld))
                 >>= fun d =>
@@ -6854,12 +7332,12 @@ theorem storageFieldCompoundAssignUnfoldLeftFst_sound (op : BinOp)
             cases resolveS s₁ path with
             | error e => rfl
             | ok y => obtain ⟨s₂, root, segs⟩ := y; rfl
-          have hR : execBlock (s₁.setEnv rhsValueAliasName (Binding.val v))
+          have hR : execBlock (s₁.setEnv valueAliasName (Binding.val v))
               [captureStoragePath path,
                 Stmt.compoundAssign op'
                   (fieldFromAlias Kind.storage storagePathAliasName ty path fld)
-                  (rhsValueAlias rhs)] =
-              (resolveS (s₁.setEnv rhsValueAliasName (Binding.val v)) path) >>=
+                  (stackValueAlias rhs)] =
+              (resolveS (s₁.setEnv valueAliasName (Binding.val v)) path) >>=
                 fun y => match y with
                   | (t₂, root, segs) =>
                       execStmt (t₂.setEnv storagePathAliasName
@@ -6867,9 +7345,9 @@ theorem storageFieldCompoundAssignUnfoldLeftFst_sound (op : BinOp)
                         (Stmt.compoundAssign op'
                           (fieldFromAlias Kind.storage storagePathAliasName ty
                             path fld)
-                          (rhsValueAlias rhs)) := by
+                          (stackValueAlias rhs)) := by
             rw [execBlock_pair, captureStoragePath, capture, execStmt]
-            cases resolveS (s₁.setEnv rhsValueAliasName (Binding.val v)) path with
+            cases resolveS (s₁.setEnv valueAliasName (Binding.val v)) path with
             | error e => rfl
             | ok y => obtain ⟨t₂, root, segs⟩ := y; rfl
           rw [hL, hR]
@@ -6877,11 +7355,11 @@ theorem storageFieldCompoundAssignUnfoldLeftFst_sound (op : BinOp)
           intro s₂ t₂ a _ hres₂ hagree₂
           obtain ⟨root, segs⟩ := a
           simp only []
-          have hrv₃ : lookupBy rhsValueAliasName
+          have hrv₃ : lookupBy valueAliasName
               (t₂.setEnv storagePathAliasName (Binding.spath root segs)).env =
                 some (Binding.val v) := by
             rw [State.setEnv, lookupBy_setBy_ne (Ne.symm sp_ne_rv),
-              resolveS_keep (s₁.setEnv rhsValueAliasName (Binding.val v)) path
+              resolveS_keep (s₁.setEnv valueAliasName (Binding.val v)) path
                 hfp t₂ (root, segs) hres₂ _ rv_mem]
             exact hrv₁
           have hsp₃ : lookupBy storagePathAliasName
@@ -6891,7 +7369,7 @@ theorem storageFieldCompoundAssignUnfoldLeftFst_sound (op : BinOp)
               (t₂.setEnv storagePathAliasName (Binding.spath root segs))
               (Stmt.compoundAssign op'
                 (fieldFromAlias Kind.storage storagePathAliasName ty path fld)
-                (rhsValueAlias rhs)) =
+                (stackValueAlias rhs)) =
               (readLoc (t₂.setEnv storagePathAliasName (Binding.spath root segs))
                 (Loc.storage root (segs ++ [Seg.field fld.name]))) >>= fun old =>
                 (applyBinOp op' old v) >>= fun new =>
@@ -6899,7 +7377,7 @@ theorem storageFieldCompoundAssignUnfoldLeftFst_sound (op : BinOp)
                     writeLoc (t₂.setEnv storagePathAliasName
                       (Binding.spath root segs))
                       (Loc.storage root (segs ++ [Seg.field fld.name])) new' := by
-            rw [execStmt, fieldFromAlias, placeField_expr, rhsValueAlias,
+            rw [execStmt, fieldFromAlias, placeField_expr, stackValueAlias,
               evalValue_alias rhs.ty hrv₃]
             simp only [resOk_bind]
             rw [resolveLoc, resolveS, resolveS_alias path.ty hsp₃]
@@ -6907,9 +7385,9 @@ theorem storageFieldCompoundAssignUnfoldLeftFst_sound (op : BinOp)
           rw [hRA]
           exact compoundTail_agree (hagree₂.setEnv_right sp_mem _) trivial
 
-theorem storageFieldIncDecUnfoldLeftFst_sound (op : IncDec)
+theorem storageFieldIncrementUnfoldLeftFst_sound (op : IncDec)
     (s : State) (expr : WrappedExpr)
-    (hcond : (ruleEffect (.storageFieldIncDecUnfoldLeftFst op)).cond
+    (hcond : (ruleEffect (.storageFieldIncrementUnfoldLeftFst op)).cond
       (Stmt.expr expr))
     (hppath : ∀ {op'' kind ty path fld},
       expr = WrappedExpr.incDec op''
@@ -6917,7 +7395,7 @@ theorem storageFieldIncDecUnfoldLeftFst_sound (op : IncDec)
     ResultsAgree aliasNames
       (execStmt s (Stmt.expr expr))
       (execBlock s
-        ((ruleEffect (.storageFieldIncDecUnfoldLeftFst op)).block
+        ((ruleEffect (.storageFieldIncrementUnfoldLeftFst op)).block
           (Stmt.expr expr) hcond)) := by
   revert hppath
   match expr, hcond with
@@ -7016,18 +7494,19 @@ theorem evalInt_transportOk {ns : List Name} {s t' : State}
     rw [h2, hu2, ha]
 
 /-- The index twin.  Same story: the value is frozen before the path
-capture, so `hppath`/`hrsOk` are gone. -/
-theorem storageIndexCompoundAssignUnfoldLeftFst_sound (op : BinOp)
+capture, so `hppath`/`hrsOk` are gone; `hprim` as in the field rule. -/
+theorem storageIndexOpAssignUnfoldLeftFst_sound (op : BinOp)
     (s : State) (op' : BinOp) (lhs : PlaceExpr) (rhs : WrappedExpr)
     (hcond : (ruleEffect
-      (.storageIndexCompoundAssignUnfoldLeftFst op)).cond
+      (.storageIndexOpAssignUnfoldLeftFst op)).cond
       (Stmt.compoundAssign op' lhs rhs))
+    (hprim : rhs.ty.isPrimitive = true)
     (hfresh : ∀ n ∈ aliasNames,
       stmtUsesVar (Stmt.compoundAssign op' lhs rhs) n = false) :
     ResultsAgree aliasNames
       (execStmt s (Stmt.compoundAssign op' lhs rhs))
       (execBlock s
-        ((ruleEffect (.storageIndexCompoundAssignUnfoldLeftFst op)).block
+        ((ruleEffect (.storageIndexOpAssignUnfoldLeftFst op)).block
           (Stmt.compoundAssign op' lhs rhs) hcond)) := by
   obtain ⟨e, hass⟩ := lhs
   match e, hass, hcond, hfresh with
@@ -7040,25 +7519,28 @@ theorem storageIndexCompoundAssignUnfoldLeftFst_sound (op : BinOp)
         have := hfresh n hn
         simp [stmtUsesVar, usesVar] at this
         exact this.1.2
+      have hfr : usesVar rhs valueAliasName = false := by
+        have := hfresh _ pv_mem
+        simp [stmtUsesVar] at this
+        exact this.2
       show ResultsAgree aliasNames
         (execStmt s (Stmt.compoundAssign op'
           (PlaceExpr.index Kind.storage ty path idxE) rhs))
-        (execBlock s [captureRhsValue rhs, captureStoragePath path,
+        (execBlock s (freezeRhs rhs fun v => [captureStoragePath path,
           Stmt.compoundAssign op'
-            (indexFromAlias Kind.storage storagePathAliasName ty path idxE)
-            (rhsValueAlias rhs)])
-      rw [execStmt, execBlock_triple, captureRhsValue, capture, execStmt,
-        placeIndex_expr]
+            (indexFromAlias Kind.storage storagePathAliasName ty path idxE) v]))
+      rw [freezeRhs_freeze hprim hfr, execStmt, execBlock_triple,
+        captureStackValue, capture, execStmt, placeIndex_expr]
       cases hevR : evalValue s rhs with
       | error err => simp only [hevR]; rfl
       | ok x =>
           obtain ⟨s₁, v⟩ := x
           simp only [hevR, resOk_bind]
-          have hrv₁ : lookupBy rhsValueAliasName
-              (s₁.setEnv rhsValueAliasName (Binding.val v)).env =
+          have hrv₁ : lookupBy valueAliasName
+              (s₁.setEnv valueAliasName (Binding.val v)).env =
                 some (Binding.val v) := lookupBy_setBy_self ..
           have hagree₁ : EnvAgreeExcept aliasNames s₁
-              (s₁.setEnv rhsValueAliasName (Binding.val v)) :=
+              (s₁.setEnv valueAliasName (Binding.val v)) :=
             (EnvAgreeExcept.refl _ s₁).setEnv_right rv_mem _
           have hL : ((resolveLoc s₁ (WrappedExpr.index Kind.storage ty path idxE))
                 >>= fun d =>
@@ -7085,12 +7567,12 @@ theorem storageIndexCompoundAssignUnfoldLeftFst_sound (op : BinOp)
                 cases evalInt s₂ idxE with
                 | error e => rfl
                 | ok z => obtain ⟨s₃, i⟩ := z; rfl
-          have hR : execBlock (s₁.setEnv rhsValueAliasName (Binding.val v))
+          have hR : execBlock (s₁.setEnv valueAliasName (Binding.val v))
               [captureStoragePath path,
                 Stmt.compoundAssign op'
                   (indexFromAlias Kind.storage storagePathAliasName ty path idxE)
-                  (rhsValueAlias rhs)] =
-              (resolveS (s₁.setEnv rhsValueAliasName (Binding.val v)) path) >>=
+                  (stackValueAlias rhs)] =
+              (resolveS (s₁.setEnv valueAliasName (Binding.val v)) path) >>=
                 fun y => match y with
                   | (t₂, root, segs) =>
                       execStmt (t₂.setEnv storagePathAliasName
@@ -7098,9 +7580,9 @@ theorem storageIndexCompoundAssignUnfoldLeftFst_sound (op : BinOp)
                         (Stmt.compoundAssign op'
                           (indexFromAlias Kind.storage storagePathAliasName ty
                             path idxE)
-                          (rhsValueAlias rhs)) := by
+                          (stackValueAlias rhs)) := by
             rw [execBlock_pair, captureStoragePath, capture, execStmt]
-            cases resolveS (s₁.setEnv rhsValueAliasName (Binding.val v)) path with
+            cases resolveS (s₁.setEnv valueAliasName (Binding.val v)) path with
             | error e => rfl
             | ok y => obtain ⟨t₂, root, segs⟩ := y; rfl
           rw [hL, hR]
@@ -7108,11 +7590,11 @@ theorem storageIndexCompoundAssignUnfoldLeftFst_sound (op : BinOp)
           intro s₂ t₂ a _ hres₂ hagree₂
           obtain ⟨root, segs⟩ := a
           simp only []
-          have hrv₃ : lookupBy rhsValueAliasName
+          have hrv₃ : lookupBy valueAliasName
               (t₂.setEnv storagePathAliasName (Binding.spath root segs)).env =
                 some (Binding.val v) := by
             rw [State.setEnv, lookupBy_setBy_ne (Ne.symm sp_ne_rv),
-              resolveS_keep (s₁.setEnv rhsValueAliasName (Binding.val v)) path
+              resolveS_keep (s₁.setEnv valueAliasName (Binding.val v)) path
                 hfp t₂ (root, segs) hres₂ _ rv_mem]
             exact hrv₁
           have hsp₃ : lookupBy storagePathAliasName
@@ -7122,7 +7604,7 @@ theorem storageIndexCompoundAssignUnfoldLeftFst_sound (op : BinOp)
               (t₂.setEnv storagePathAliasName (Binding.spath root segs))
               (Stmt.compoundAssign op'
                 (indexFromAlias Kind.storage storagePathAliasName ty path idxE)
-                (rhsValueAlias rhs)) =
+                (stackValueAlias rhs)) =
               (evalInt (t₂.setEnv storagePathAliasName (Binding.spath root segs))
                 idxE) >>= fun z => match z with
                 | (t₃, i) =>
@@ -7131,7 +7613,7 @@ theorem storageIndexCompoundAssignUnfoldLeftFst_sound (op : BinOp)
                         (checkArith ty new) >>= fun new' =>
                           writeLoc t₃ (Loc.storage root (segs ++ [Seg.at i]))
                             new' := by
-            rw [execStmt, indexFromAlias, placeIndex_expr, rhsValueAlias,
+            rw [execStmt, indexFromAlias, placeIndex_expr, stackValueAlias,
               evalValue_alias rhs.ty hrv₃]
             simp only [resOk_bind]
             rw [resolveLoc, resolveS_alias path.ty hsp₃]
@@ -7146,9 +7628,9 @@ theorem storageIndexCompoundAssignUnfoldLeftFst_sound (op : BinOp)
           intro s₃ t₃ i _ _ hagree₄
           exact compoundTail_agree hagree₄ trivial
 
-theorem storageIndexIncDecUnfoldLeftFst_sound (op : IncDec)
+theorem storageIndexIncrementUnfoldLeftFst_sound (op : IncDec)
     (s : State) (expr : WrappedExpr)
-    (hcond : (ruleEffect (.storageIndexIncDecUnfoldLeftFst op)).cond
+    (hcond : (ruleEffect (.storageIndexIncrementUnfoldLeftFst op)).cond
       (Stmt.expr expr))
     (hfresh : ∀ n ∈ aliasNames, stmtUsesVar (Stmt.expr expr) n = false)
     (hppath : ∀ {op'' kind ty path index},
@@ -7157,7 +7639,7 @@ theorem storageIndexIncDecUnfoldLeftFst_sound (op : IncDec)
     ResultsAgree aliasNames
       (execStmt s (Stmt.expr expr))
       (execBlock s
-        ((ruleEffect (.storageIndexIncDecUnfoldLeftFst op)).block
+        ((ruleEffect (.storageIndexIncrementUnfoldLeftFst op)).block
           (Stmt.expr expr) hcond)) := by
   revert hppath
   match expr, hcond, hfresh with
@@ -7445,29 +7927,27 @@ theorem storagePopUnfoldLeftFstReceiver_sound
       | struct fields => exact rfl
       | map entries dflt => exact rfl
 
-/-! ## Storage delete unfold -/
+/-! ## Storage delete unfolds
 
-theorem storageDeleteComplexTarget_sound
+Four rules, one per receiver shape, and none needs a freeze: `delete` has
+no value operand.  The field, complex-index and push-place receivers are
+captured whole, so the residual re-resolves the same expression in the
+same state and freshness is not even needed; the simple-receiver /
+complex-index rule captures the *index* first, and there the receiver's
+resolution must survive it (`hb`, `hpi`). -/
+
+theorem storageFieldDeleteUnfoldLeftFst_sound
     (s : State) (target : PlaceExpr)
-    (hcond : (ruleEffect .storageDeleteComplexTarget).cond
-      (Stmt.delete target))
-    (hfresh : ∀ n ∈ aliasNames,
-      stmtUsesVar (Stmt.delete target) n = false)
-    (hbase : ∀ {kind ty path index},
-      target.expr = WrappedExpr.index kind ty path index ->
-        path.complex = false ->
-        (pureExpr index = true ∧
-          ∃ root segs, resolveS s path = .ok (s, root, segs))) :
+    (hcond : (ruleEffect .storageFieldDeleteUnfoldLeftFst).cond
+      (Stmt.delete target)) :
     ResultsAgree aliasNames
       (execStmt s (Stmt.delete target))
       (execBlock s
-        ((ruleEffect .storageDeleteComplexTarget).block
+        ((ruleEffect .storageFieldDeleteUnfoldLeftFst).block
           (Stmt.delete target) hcond)) := by
   obtain ⟨e, hass⟩ := target
-  revert hbase
-  match e, hass, hcond, hfresh with
-  | WrappedExpr.field Kind.storage ty path fld, hass, hcond, hfresh =>
-      intro _
+  match e, hass, hcond with
+  | WrappedExpr.field Kind.storage ty path fld, hass, hcond =>
       show ResultsAgree aliasNames
         (execStmt s (Stmt.delete (PlaceExpr.field Kind.storage ty path fld)))
         (execBlock s [captureStoragePath path,
@@ -7526,180 +8006,218 @@ theorem storageDeleteComplexTarget_sound
           refine bindPureResults_agree _ fun cur => ?_
           exact saveStorage_agree ht' root (segs ++ [Seg.field fld.name])
             cur.defaultOf
+
+/-- The index is left in place and re-evaluated after the path capture,
+so it must not mention the alias names. -/
+theorem storageIndexDeleteUnfoldLeftFst_sound
+    (s : State) (target : PlaceExpr)
+    (hcond : (ruleEffect .storageIndexDeleteUnfoldLeftFst).cond
+      (Stmt.delete target))
+    (hfresh : ∀ n ∈ aliasNames,
+      stmtUsesVar (Stmt.delete target) n = false) :
+    ResultsAgree aliasNames
+      (execStmt s (Stmt.delete target))
+      (execBlock s
+        ((ruleEffect .storageIndexDeleteUnfoldLeftFst).block
+          (Stmt.delete target) hcond)) := by
+  obtain ⟨e, hass⟩ := target
+  match e, hass, hcond, hfresh with
   | WrappedExpr.index Kind.storage ty path idxE, hass, hcond, hfresh =>
-      intro hbase
       have hfi : ∀ n ∈ aliasNames, usesVar idxE n = false := fun n hn => by
         have := hfresh n hn
         simp [stmtUsesVar, usesVar] at this
         exact this.2
       show ResultsAgree aliasNames
         (execStmt s (Stmt.delete (PlaceExpr.index Kind.storage ty path idxE)))
-        (execBlock s (storageDeleteComplexTargetBlock
-          (WrappedExpr.index Kind.storage ty path idxE) hcond))
-      cases hpc : path.complex with
-      | true =>
-          have hbl : storageDeleteComplexTargetBlock
-              (WrappedExpr.index Kind.storage ty path idxE) hcond =
-              [captureStoragePath path,
-                Stmt.delete (indexFromAlias Kind.storage storagePathAliasName
-                  ty path idxE)] := by
-            rw [storageDeleteComplexTargetBlock]
-            simp [hpc]
-          rw [hbl, execBlock_pair, captureStoragePath, capture]
-          cases hres : resolveS s path with
-          | error err =>
-              have hL : execStmt s
-                  (Stmt.delete (PlaceExpr.index Kind.storage ty path idxE)) =
-                  .error err := by
-                rw [execStmt, placeIndex_expr, resolveS, hres]
-                rfl
-              have hR : execStmt s
-                  (Stmt.storagePlaceAlias path.ty storagePathAliasName path) =
-                  .error err := by
-                rw [execStmt, hres]
-                rfl
-              rw [hL, hR]
-              exact rfl
-          | ok x =>
-              obtain ⟨t, root, segs⟩ := x
-              have hR : execStmt s
-                  (Stmt.storagePlaceAlias path.ty storagePathAliasName path) =
-                  .ok (t.setEnv storagePathAliasName
-                    (Binding.spath root segs)) := by
-                rw [execStmt, hres]
-                rfl
-              rw [hR]
-              have ht' : EnvAgreeExcept aliasNames t
-                  (t.setEnv storagePathAliasName (Binding.spath root segs)) :=
-                (EnvAgreeExcept.refl _ t).setEnv_right sp_mem _
-              have hLeq : execStmt s
-                  (Stmt.delete (PlaceExpr.index Kind.storage ty path idxE)) =
-                  ((evalInt t idxE) >>= fun y =>
-                    Except.ok (y.1, root, segs ++ [Seg.at y.2])) >>= fun x =>
-                    (x.1.findStorage x.2.1 x.2.2) >>= fun cur =>
-                      x.1.saveStorage x.2.1 x.2.2 cur.defaultOf := by
-                rw [execStmt, placeIndex_expr, resolveS, hres]
-                rfl
-              have hReq : execStmt
-                  (t.setEnv storagePathAliasName (Binding.spath root segs))
-                  (Stmt.delete (indexFromAlias Kind.storage
-                    storagePathAliasName ty path idxE)) =
-                  ((evalInt (t.setEnv storagePathAliasName
-                      (Binding.spath root segs)) idxE) >>= fun y =>
-                    Except.ok (y.1, root, segs ++ [Seg.at y.2])) >>= fun x =>
-                    (x.1.findStorage x.2.1 x.2.2) >>= fun cur =>
-                      x.1.saveStorage x.2.1 x.2.2 cur.defaultOf := by
-                rw [execStmt, indexFromAlias, placeIndex_expr, resolveS,
-                  resolveS_alias (s := t.setEnv storagePathAliasName
-                      (Binding.spath root segs)) path.ty
-                    (lookupBy_setBy_self storagePathAliasName
-                      (Binding.spath root segs) t.env)]
-                rfl
-              show ResultsAgree aliasNames _
-                (execStmt (t.setEnv storagePathAliasName
-                    (Binding.spath root segs))
-                  (Stmt.delete (indexFromAlias Kind.storage
-                    storagePathAliasName ty path idxE)))
-              rw [hLeq, hReq]
-              refine ResAgree.bindState ?_ ?_
-              · refine ResAgree.bind (evalInt_agree ht' idxE hfi) ?_
-                intro u₁ u₂ i hu
-                exact ⟨rfl, hu⟩
-              · intro u₁ u₂ a hu
-                obtain ⟨r2, s2⟩ := a
-                simp only [findStorage_congr hu]
-                refine bindPureResults_agree _ fun cur => ?_
-                exact saveStorage_agree hu r2 s2 cur.defaultOf
-      | false =>
-          obtain ⟨hpi, root, segs, hb⟩ := hbase rfl hpc
-          have hps : path.simple = true := by
-            rcases hcond with hc | hc
-            · have hcc : path.complex = true := hc
-              rw [hpc] at hcc
-              exact nomatch hcc
-            · exact hc.1
-          have hbl : storageDeleteComplexTargetBlock
-              (WrappedExpr.index Kind.storage ty path idxE) hcond =
-              [captureIndex idxE,
-                Stmt.delete (PlaceExpr.index Kind.storage ty path
-                  (indexAlias idxE))] := by
-            rw [storageDeleteComplexTargetBlock]
-            simp [hpc]
-          rw [hbl, execBlock_pair, captureIndex, capture]
-          cases hev : evalValue s idxE with
-          | error err =>
-              have hL : execStmt s
-                  (Stmt.delete (PlaceExpr.index Kind.storage ty path idxE)) =
-                  .error err := by
-                rw [execStmt, placeIndex_expr, resolveS, hb]
-                simp only [resOk_bind]
-                rw [evalInt, hev]
-                rfl
-              have hR : execStmt s
-                  (Stmt.stackDecl idxE.ty indexAliasName (some idxE)) =
-                  .error err := by
-                rw [execStmt, hev]
-                rfl
-              rw [hL, hR]
-              exact rfl
-          | ok y =>
-              obtain ⟨t, v⟩ := y
-              have hts : t = s := evalValue_pure hpi hev
-              subst hts
-              have hR : execStmt t
-                  (Stmt.stackDecl idxE.ty indexAliasName (some idxE)) =
-                  .ok (t.setEnv indexAliasName (Binding.val v)) := by
-                rw [execStmt, hev]
-                rfl
-              rw [hR]
-              have ht' : EnvAgreeExcept aliasNames t
-                  (t.setEnv indexAliasName (Binding.val v)) :=
-                (EnvAgreeExcept.refl _ t).setEnv_right idx_mem _
-              have hLeq : execStmt t
-                  (Stmt.delete (PlaceExpr.index Kind.storage ty path idxE)) =
-                  (((v.asInt) >>= fun i => Except.ok (t, i)) >>= fun y =>
-                    Except.ok (y.1, root, segs ++ [Seg.at y.2])) >>= fun x =>
-                    (x.1.findStorage x.2.1 x.2.2) >>= fun cur =>
-                      x.1.saveStorage x.2.1 x.2.2 cur.defaultOf := by
-                rw [execStmt, placeIndex_expr, resolveS, hb]
-                simp only [resOk_bind]
-                rw [evalInt, hev]
-                rfl
-              have hReq : execStmt (t.setEnv indexAliasName (Binding.val v))
-                  (Stmt.delete (PlaceExpr.index Kind.storage ty path
-                    (indexAlias idxE))) =
-                  (((v.asInt) >>= fun i =>
-                      Except.ok (t.setEnv indexAliasName (Binding.val v),
-                        i)) >>= fun y =>
-                    Except.ok (y.1, root, segs ++ [Seg.at y.2])) >>= fun x =>
-                    (x.1.findStorage x.2.1 x.2.2) >>= fun cur =>
-                      x.1.saveStorage x.2.1 x.2.2 cur.defaultOf := by
-                rw [execStmt, placeIndex_expr, resolveS,
-                  resolveS_transport ht'
-                    (fun n hn => by
-                      have := hfresh n hn
-                      simp [stmtUsesVar, usesVar] at this
-                      exact this.1) (pure_of_simple hps) hb]
-                simp only [resOk_bind]
-                rw [evalInt, indexAlias,
-                  evalValue_alias idxE.ty
-                    (lookupBy_setBy_self indexAliasName (Binding.val v)
-                      t.env)]
-                rfl
-              show ResultsAgree aliasNames _
-                (execStmt (t.setEnv indexAliasName (Binding.val v))
-                  (Stmt.delete (PlaceExpr.index Kind.storage ty path
-                    (indexAlias idxE))))
-              rw [hLeq, hReq]
-              cases hi : v.asInt with
-              | error err => exact rfl
-              | ok i =>
-                  simp only [resOk_bind, findStorage_congr ht']
-                  refine bindPureResults_agree _ fun cur => ?_
-                  exact saveStorage_agree ht' root (segs ++ [Seg.at i])
-                    cur.defaultOf
-  | WrappedExpr.pushPlace tgt, hass, hcond, hfresh =>
-      intro _
+        (execBlock s [captureStoragePath path,
+          Stmt.delete (indexFromAlias Kind.storage storagePathAliasName
+            ty path idxE)])
+      rw [execBlock_pair, captureStoragePath, capture]
+      cases hres : resolveS s path with
+      | error err =>
+          have hL : execStmt s
+              (Stmt.delete (PlaceExpr.index Kind.storage ty path idxE)) =
+              .error err := by
+            rw [execStmt, placeIndex_expr, resolveS, hres]
+            rfl
+          have hR : execStmt s
+              (Stmt.storagePlaceAlias path.ty storagePathAliasName path) =
+              .error err := by
+            rw [execStmt, hres]
+            rfl
+          rw [hL, hR]
+          exact rfl
+      | ok x =>
+          obtain ⟨t, root, segs⟩ := x
+          have hR : execStmt s
+              (Stmt.storagePlaceAlias path.ty storagePathAliasName path) =
+              .ok (t.setEnv storagePathAliasName
+                (Binding.spath root segs)) := by
+            rw [execStmt, hres]
+            rfl
+          rw [hR]
+          have ht' : EnvAgreeExcept aliasNames t
+              (t.setEnv storagePathAliasName (Binding.spath root segs)) :=
+            (EnvAgreeExcept.refl _ t).setEnv_right sp_mem _
+          have hLeq : execStmt s
+              (Stmt.delete (PlaceExpr.index Kind.storage ty path idxE)) =
+              ((evalInt t idxE) >>= fun y =>
+                Except.ok (y.1, root, segs ++ [Seg.at y.2])) >>= fun x =>
+                (x.1.findStorage x.2.1 x.2.2) >>= fun cur =>
+                  x.1.saveStorage x.2.1 x.2.2 cur.defaultOf := by
+            rw [execStmt, placeIndex_expr, resolveS, hres]
+            rfl
+          have hReq : execStmt
+              (t.setEnv storagePathAliasName (Binding.spath root segs))
+              (Stmt.delete (indexFromAlias Kind.storage
+                storagePathAliasName ty path idxE)) =
+              ((evalInt (t.setEnv storagePathAliasName
+                  (Binding.spath root segs)) idxE) >>= fun y =>
+                Except.ok (y.1, root, segs ++ [Seg.at y.2])) >>= fun x =>
+                (x.1.findStorage x.2.1 x.2.2) >>= fun cur =>
+                  x.1.saveStorage x.2.1 x.2.2 cur.defaultOf := by
+            rw [execStmt, indexFromAlias, placeIndex_expr, resolveS,
+              resolveS_alias (s := t.setEnv storagePathAliasName
+                  (Binding.spath root segs)) path.ty
+                (lookupBy_setBy_self storagePathAliasName
+                  (Binding.spath root segs) t.env)]
+            rfl
+          show ResultsAgree aliasNames _
+            (execStmt (t.setEnv storagePathAliasName
+                (Binding.spath root segs))
+              (Stmt.delete (indexFromAlias Kind.storage
+                storagePathAliasName ty path idxE)))
+          rw [hLeq, hReq]
+          refine ResAgree.bindState ?_ ?_
+          · refine ResAgree.bind (evalInt_agree ht' idxE hfi) ?_
+            intro u₁ u₂ i hu
+            exact ⟨rfl, hu⟩
+          · intro u₁ u₂ a hu
+            obtain ⟨r2, s2⟩ := a
+            simp only [findStorage_congr hu]
+            refine bindPureResults_agree _ fun cur => ?_
+            exact saveStorage_agree hu r2 s2 cur.defaultOf
+
+/-- The residual hoists the index ahead of the (simple) receiver, where the
+interpreter resolves the receiver first.  `hb` says the receiver resolves
+in the initial state — it cannot be dropped, since an unbound alias is
+stuck where the hoisted index may revert — and `hpi` that the index does
+not change the state the receiver is then re-resolved in.  The latter is
+proof-technique residue: an expression cannot rebind a storage path
+alias, so a simple receiver would resolve the same after any index. -/
+theorem storageIndexDeleteNonSimpleIndexCapture_sound
+    (s : State) (target : PlaceExpr)
+    (hcond : (ruleEffect .storageIndexDeleteNonSimpleIndexCapture).cond
+      (Stmt.delete target))
+    (hfresh : ∀ n ∈ aliasNames,
+      stmtUsesVar (Stmt.delete target) n = false)
+    (hbase : ∀ {kind ty path index},
+      target.expr = WrappedExpr.index kind ty path index ->
+        (pureExpr index = true ∧
+          ∃ root segs, resolveS s path = .ok (s, root, segs))) :
+    ResultsAgree aliasNames
+      (execStmt s (Stmt.delete target))
+      (execBlock s
+        ((ruleEffect .storageIndexDeleteNonSimpleIndexCapture).block
+          (Stmt.delete target) hcond)) := by
+  obtain ⟨e, hass⟩ := target
+  revert hbase
+  match e, hass, hcond, hfresh with
+  | WrappedExpr.index Kind.storage ty path idxE, hass, hcond, hfresh =>
+      intro hbase
+      obtain ⟨hpi, root, segs, hb⟩ := hbase rfl
+      have hps : path.simple = true := hcond.1
+      show ResultsAgree aliasNames
+        (execStmt s (Stmt.delete (PlaceExpr.index Kind.storage ty path idxE)))
+        (execBlock s [captureIndex idxE,
+          Stmt.delete (PlaceExpr.index Kind.storage ty path
+            (indexAlias idxE))])
+      rw [execBlock_pair, captureIndex, capture]
+      cases hev : evalValue s idxE with
+      | error err =>
+          have hL : execStmt s
+              (Stmt.delete (PlaceExpr.index Kind.storage ty path idxE)) =
+              .error err := by
+            rw [execStmt, placeIndex_expr, resolveS, hb]
+            simp only [resOk_bind]
+            rw [evalInt, hev]
+            rfl
+          have hR : execStmt s
+              (Stmt.stackDecl idxE.ty indexAliasName (some idxE)) =
+              .error err := by
+            rw [execStmt, hev]
+            rfl
+          rw [hL, hR]
+          exact rfl
+      | ok y =>
+          obtain ⟨t, v⟩ := y
+          have hts : t = s := evalValue_pure hpi hev
+          subst hts
+          have hR : execStmt t
+              (Stmt.stackDecl idxE.ty indexAliasName (some idxE)) =
+              .ok (t.setEnv indexAliasName (Binding.val v)) := by
+            rw [execStmt, hev]
+            rfl
+          rw [hR]
+          have ht' : EnvAgreeExcept aliasNames t
+              (t.setEnv indexAliasName (Binding.val v)) :=
+            (EnvAgreeExcept.refl _ t).setEnv_right idx_mem _
+          have hLeq : execStmt t
+              (Stmt.delete (PlaceExpr.index Kind.storage ty path idxE)) =
+              (((v.asInt) >>= fun i => Except.ok (t, i)) >>= fun y =>
+                Except.ok (y.1, root, segs ++ [Seg.at y.2])) >>= fun x =>
+                (x.1.findStorage x.2.1 x.2.2) >>= fun cur =>
+                  x.1.saveStorage x.2.1 x.2.2 cur.defaultOf := by
+            rw [execStmt, placeIndex_expr, resolveS, hb]
+            simp only [resOk_bind]
+            rw [evalInt, hev]
+            rfl
+          have hReq : execStmt (t.setEnv indexAliasName (Binding.val v))
+              (Stmt.delete (PlaceExpr.index Kind.storage ty path
+                (indexAlias idxE))) =
+              (((v.asInt) >>= fun i =>
+                  Except.ok (t.setEnv indexAliasName (Binding.val v),
+                    i)) >>= fun y =>
+                Except.ok (y.1, root, segs ++ [Seg.at y.2])) >>= fun x =>
+                (x.1.findStorage x.2.1 x.2.2) >>= fun cur =>
+                  x.1.saveStorage x.2.1 x.2.2 cur.defaultOf := by
+            rw [execStmt, placeIndex_expr, resolveS,
+              resolveS_transport ht'
+                (fun n hn => by
+                  have := hfresh n hn
+                  simp [stmtUsesVar, usesVar] at this
+                  exact this.1) (pure_of_simple hps) hb]
+            simp only [resOk_bind]
+            rw [evalInt, indexAlias,
+              evalValue_alias idxE.ty
+                (lookupBy_setBy_self indexAliasName (Binding.val v)
+                  t.env)]
+            rfl
+          show ResultsAgree aliasNames _
+            (execStmt (t.setEnv indexAliasName (Binding.val v))
+              (Stmt.delete (PlaceExpr.index Kind.storage ty path
+                (indexAlias idxE))))
+          rw [hLeq, hReq]
+          cases hi : v.asInt with
+          | error err => exact rfl
+          | ok i =>
+              simp only [resOk_bind, findStorage_congr ht']
+              refine bindPureResults_agree _ fun cur => ?_
+              exact saveStorage_agree ht' root (segs ++ [Seg.at i])
+                cur.defaultOf
+
+theorem storagePushPlaceDeleteUnfoldLeftFst_sound
+    (s : State) (target : PlaceExpr)
+    (hcond : (ruleEffect .storagePushPlaceDeleteUnfoldLeftFst).cond
+      (Stmt.delete target)) :
+    ResultsAgree aliasNames
+      (execStmt s (Stmt.delete target))
+      (execBlock s
+        ((ruleEffect .storagePushPlaceDeleteUnfoldLeftFst).block
+          (Stmt.delete target) hcond)) := by
+  obtain ⟨e, hass⟩ := target
+  match e, hass, hcond with
+  | WrappedExpr.pushPlace tgt, hass, hcond =>
       show ResultsAgree aliasNames
         (execStmt s (Stmt.delete ⟨WrappedExpr.pushPlace tgt, hass⟩))
         (execBlock s [captureStoragePath tgt,
@@ -7860,7 +8378,7 @@ theorem resolveMBase_eq_readM (s : State) (e : WrappedExpr) :
 `Kind.memory`) on a **primitive** value operand — the memory twin of
 `fieldWriteResolveStorage_sound`.
 
-`Rules.freezeRhs` binds the value into `rv` before the path capture runs, so
+`Rules.freezeRhs` binds the value into `se` before the path capture runs, so
 the two sides agree with nothing assumed about interference: the old
 `hev`/`hstable` hypotheses are gone, and so is purity of the right-hand side.
 All that is left is that the path does not mention the reserved alias names.
@@ -7870,6 +8388,7 @@ the old side conditions were standing in for. -/
 theorem fieldWriteResolveMemory_sound (s : State) (ty : Ty)
     (path : WrappedExpr) (fld : Field) (rhs : WrappedExpr)
     (hprim : rhs.ty.isPrimitive = true)
+    (hfr : usesVar rhs valueAliasName = false)
     (hkpm : path.kind = Kind.memory)
     (hfp : ∀ n ∈ aliasNames, usesVar path n = false) :
     ResultsAgree aliasNames
@@ -7882,7 +8401,7 @@ theorem fieldWriteResolveMemory_sound (s : State) (ty : Ty)
       [captureMemoryPath path,
         Stmt.assign
           (fieldFromAlias Kind.memory memoryPathAliasName ty path fld) v]))
-  rw [freezeRhs, if_pos hprim, execStmt, execBlock_triple, captureRhsValue,
+  rw [freezeRhs_freeze hprim hfr, execStmt, execBlock_triple, captureStackValue,
     capture, execStmt]
   cases hevR : evalValue s rhs with
   | error err =>
@@ -7898,11 +8417,11 @@ theorem fieldWriteResolveMemory_sound (s : State) (ty : Ty)
   | ok x =>
       obtain ⟨s₁, v⟩ := x
       simp only [hevR, resOk_bind]
-      have hrv₁ : lookupBy rhsValueAliasName
-          (s₁.setEnv rhsValueAliasName (Binding.val v)).env =
+      have hrv₁ : lookupBy valueAliasName
+          (s₁.setEnv valueAliasName (Binding.val v)).env =
             some (Binding.val v) := lookupBy_setBy_self ..
       have hagree₁ : EnvAgreeExcept aliasNames s₁
-          (s₁.setEnv rhsValueAliasName (Binding.val v)) :=
+          (s₁.setEnv valueAliasName (Binding.val v)) :=
         (EnvAgreeExcept.refl _ s₁).setEnv_right rv_mem _
       have hL : execAssign s (PlaceExpr.field Kind.memory ty path fld) rhs =
           (readM s₁ path) >>= fun y =>
@@ -7922,12 +8441,12 @@ theorem fieldWriteResolveMemory_sound (s : State) (ty : Ty)
             cases mv with
             | prim p => cases p <;> rfl
             | ref id => rfl
-      have hR : execBlock (s₁.setEnv rhsValueAliasName (Binding.val v))
+      have hR : execBlock (s₁.setEnv valueAliasName (Binding.val v))
           [captureMemoryPath path,
             Stmt.assign
               (fieldFromAlias Kind.memory memoryPathAliasName ty path fld)
-              (rhsValueAlias rhs)] =
-          (readM (s₁.setEnv rhsValueAliasName (Binding.val v)) path) >>=
+              (stackValueAlias rhs)] =
+          (readM (s₁.setEnv valueAliasName (Binding.val v)) path) >>=
             fun y =>
               match y.2 with
               | MVal.ref id =>
@@ -7935,7 +8454,7 @@ theorem fieldWriteResolveMemory_sound (s : State) (ty : Ty)
                     (Stmt.assign
                       (fieldFromAlias Kind.memory memoryPathAliasName ty path
                         fld)
-                      (rhsValueAlias rhs))
+                      (stackValueAlias rhs))
               | _ => .error .stuck := by
         have hRdecl : ∀ w : State, execStmt w
             (Stmt.memoryDecl path.ty memoryPathAliasName (some path)) =
@@ -7949,7 +8468,7 @@ theorem fieldWriteResolveMemory_sound (s : State) (ty : Ty)
           rw [hkpm]
           rfl
         rw [execBlock_pair, captureMemoryPath, capture, hRdecl]
-        cases readM (s₁.setEnv rhsValueAliasName (Binding.val v)) path with
+        cases readM (s₁.setEnv valueAliasName (Binding.val v)) path with
         | error e => rfl
         | ok y =>
             obtain ⟨t, mv⟩ := y
@@ -7967,12 +8486,12 @@ theorem fieldWriteResolveMemory_sound (s : State) (ty : Ty)
             (execStmt (t₂.setEnv memoryPathAliasName (Binding.mref id))
               (Stmt.assign
                 (fieldFromAlias Kind.memory memoryPathAliasName ty path fld)
-                (rhsValueAlias rhs)))
-          have hrv₃ : lookupBy rhsValueAliasName
+                (stackValueAlias rhs)))
+          have hrv₃ : lookupBy valueAliasName
               (t₂.setEnv memoryPathAliasName (Binding.mref id)).env =
                 some (Binding.val v) := by
             rw [State.setEnv, lookupBy_setBy_ne (Ne.symm mp_ne_rv)]
-            rw [readM_keep (s₁.setEnv rhsValueAliasName (Binding.val v)) path
+            rw [readM_keep (s₁.setEnv valueAliasName (Binding.val v)) path
               hfp t₂ (MVal.ref id) hres₂ _ rv_mem]
             exact hrv₁
           have hmp₃ : lookupBy memoryPathAliasName
@@ -7980,14 +8499,14 @@ theorem fieldWriteResolveMemory_sound (s : State) (ty : Ty)
                 some (Binding.mref id) := lookupBy_setBy_self ..
           have hevAlias : rhsToMVal
               (t₂.setEnv memoryPathAliasName (Binding.mref id))
-              (rhsValueAlias rhs) =
+              (stackValueAlias rhs) =
               .ok (t₂.setEnv memoryPathAliasName (Binding.mref id), v.toMVal) :=
             rhsToMVal_stackAlias hprim hrv₃
           have hRA : execStmt
               (t₂.setEnv memoryPathAliasName (Binding.mref id))
               (Stmt.assign
                 (fieldFromAlias Kind.memory memoryPathAliasName ty path fld)
-                (rhsValueAlias rhs)) =
+                (stackValueAlias rhs)) =
               writeMSlot (t₂.setEnv memoryPathAliasName (Binding.mref id))
                 (Loc.memoryField id fld.name) v.toMVal := by
             rw [execStmt]
@@ -7995,7 +8514,7 @@ theorem fieldWriteResolveMemory_sound (s : State) (ty : Ty)
               (t₂.setEnv memoryPathAliasName (Binding.mref id))
               (WrappedExpr.field Kind.memory ty
                 (aliasExpr Kind.memory path.ty memoryPathAliasName) fld)
-              (rhsValueAlias rhs) = _
+              (stackValueAlias rhs) = _
             rw [execAssignNested, hevAlias]
             simp only [Typed.WrappedExpr.kind, resOk_bind]
             rw [resolveLoc, resolveMBase_alias path.ty hmp₃]
@@ -8009,7 +8528,7 @@ theorem indexWriteTailCaptureMemory_agree {ty : Ty}
     {path index rhs : WrappedExpr} {s₂ t₂ : State} {v : Value} {id : Nat}
     (hprim : rhs.ty.isPrimitive = true)
     (hfi : ∀ n ∈ aliasNames, usesVar index n = false)
-    (hrv₂ : lookupBy rhsValueAliasName t₂.env = some (Binding.val v))
+    (hrv₂ : lookupBy valueAliasName t₂.env = some (Binding.val v))
     (hagree₂ : EnvAgreeExcept aliasNames s₂ t₂) :
     ResultsAgree aliasNames
       ((evalInt s₂ index) >>= fun y =>
@@ -8020,8 +8539,8 @@ theorem indexWriteTailCaptureMemory_agree {ty : Ty}
           Stmt.assign
             (indexFromAlias Kind.memory memoryPathAliasName ty path
               (indexAlias index))
-            (rhsValueAlias rhs)]) := by
-  have hrv₃ : lookupBy rhsValueAliasName
+            (stackValueAlias rhs)]) := by
+  have hrv₃ : lookupBy valueAliasName
       (t₂.setEnv memoryPathAliasName (Binding.mref id)).env =
         some (Binding.val v) := by
     rw [State.setEnv, lookupBy_setBy_ne (Ne.symm mp_ne_rv)]
@@ -8053,7 +8572,7 @@ theorem indexWriteTailCaptureMemory_agree {ty : Ty}
           Stmt.assign
             (indexFromAlias Kind.memory memoryPathAliasName ty path
               (indexAlias index))
-            (rhsValueAlias rhs)] =
+            (stackValueAlias rhs)] =
       (evalValue (t₂.setEnv memoryPathAliasName (Binding.mref id))
         index) >>= fun y =>
         match y with
@@ -8062,7 +8581,7 @@ theorem indexWriteTailCaptureMemory_agree {ty : Ty}
               (Stmt.assign
                 (indexFromAlias Kind.memory memoryPathAliasName ty path
                   (indexAlias index))
-                (rhsValueAlias rhs)) := by
+                (stackValueAlias rhs)) := by
     rw [execBlock_pair, captureIndex, capture, execStmt]
     cases evalValue (t₂.setEnv memoryPathAliasName (Binding.mref id))
         index with
@@ -8073,11 +8592,11 @@ theorem indexWriteTailCaptureMemory_agree {ty : Ty}
   intro s₃ t₄ w _ hev₄ hagree₄
   have hkeep := evalValue_keep
     (t₂.setEnv memoryPathAliasName (Binding.mref id)) index hfi t₄ w hev₄
-  have hrv₅ : lookupBy rhsValueAliasName
+  have hrv₅ : lookupBy valueAliasName
       (t₄.setEnv indexAliasName (Binding.val w)).env =
         some (Binding.val v) := by
     rw [State.setEnv, lookupBy_setBy_ne (Ne.symm idx_ne_rv),
-      hkeep rhsValueAliasName rv_mem]
+      hkeep valueAliasName rv_mem]
     exact hrv₃
   have hmp₅ : lookupBy memoryPathAliasName
       (t₄.setEnv indexAliasName (Binding.val w)).env =
@@ -8089,14 +8608,14 @@ theorem indexWriteTailCaptureMemory_agree {ty : Ty}
       (t₄.setEnv indexAliasName (Binding.val w)).env = some (Binding.val w) :=
     lookupBy_setBy_self ..
   have hevAlias : rhsToMVal (t₄.setEnv indexAliasName (Binding.val w))
-      (rhsValueAlias rhs) =
+      (stackValueAlias rhs) =
       .ok (t₄.setEnv indexAliasName (Binding.val w), v.toMVal) :=
     rhsToMVal_stackAlias hprim hrv₅
   have hR : execStmt (t₄.setEnv indexAliasName (Binding.val w))
       (Stmt.assign
         (indexFromAlias Kind.memory memoryPathAliasName ty path
           (indexAlias index))
-        (rhsValueAlias rhs)) =
+        (stackValueAlias rhs)) =
       w.asInt >>= fun i =>
         writeMSlot (t₄.setEnv indexAliasName (Binding.val w))
           (Loc.memoryIndex id i) v.toMVal := by
@@ -8105,7 +8624,7 @@ theorem indexWriteTailCaptureMemory_agree {ty : Ty}
       (WrappedExpr.index Kind.memory ty
         (aliasExpr Kind.memory path.ty memoryPathAliasName)
         (indexAlias index))
-      (rhsValueAlias rhs) = _
+      (stackValueAlias rhs) = _
     rw [execAssignNested, hevAlias]
     simp only [Typed.WrappedExpr.kind, resOk_bind]
     rw [resolveLoc, resolveMBase_alias path.ty hmp₅]
@@ -8126,7 +8645,7 @@ theorem indexWriteTailPlainMemory_agree {ty : Ty}
     {path index rhs : WrappedExpr} {s₂ t₂ : State} {v : Value} {id : Nat}
     (hprim : rhs.ty.isPrimitive = true)
     (hfi : ∀ n ∈ aliasNames, usesVar index n = false)
-    (hrv₂ : lookupBy rhsValueAliasName t₂.env = some (Binding.val v))
+    (hrv₂ : lookupBy valueAliasName t₂.env = some (Binding.val v))
     (hagree₂ : EnvAgreeExcept aliasNames s₂ t₂) :
     ResultsAgree aliasNames
       ((evalInt s₂ index) >>= fun y =>
@@ -8135,8 +8654,8 @@ theorem indexWriteTailPlainMemory_agree {ty : Ty}
       (execBlock (t₂.setEnv memoryPathAliasName (Binding.mref id))
         [Stmt.assign
           (indexFromAlias Kind.memory memoryPathAliasName ty path index)
-          (rhsValueAlias rhs)]) := by
-  have hrv₃ : lookupBy rhsValueAliasName
+          (stackValueAlias rhs)]) := by
+  have hrv₃ : lookupBy valueAliasName
       (t₂.setEnv memoryPathAliasName (Binding.mref id)).env =
         some (Binding.val v) := by
     rw [State.setEnv, lookupBy_setBy_ne (Ne.symm mp_ne_rv)]
@@ -8148,13 +8667,13 @@ theorem indexWriteTailPlainMemory_agree {ty : Ty}
       (t₂.setEnv memoryPathAliasName (Binding.mref id)) :=
     hagree₂.setEnv_right mp_mem _
   have hevAlias : rhsToMVal (t₂.setEnv memoryPathAliasName (Binding.mref id))
-      (rhsValueAlias rhs) =
+      (stackValueAlias rhs) =
       .ok (t₂.setEnv memoryPathAliasName (Binding.mref id), v.toMVal) :=
     rhsToMVal_stackAlias hprim hrv₃
   have hR : execBlock (t₂.setEnv memoryPathAliasName (Binding.mref id))
       [Stmt.assign
         (indexFromAlias Kind.memory memoryPathAliasName ty path index)
-        (rhsValueAlias rhs)] =
+        (stackValueAlias rhs)] =
       (evalInt (t₂.setEnv memoryPathAliasName (Binding.mref id))
         index) >>= fun y =>
         match y with
@@ -8164,7 +8683,7 @@ theorem indexWriteTailPlainMemory_agree {ty : Ty}
       (t₂.setEnv memoryPathAliasName (Binding.mref id))
       (WrappedExpr.index Kind.memory ty
         (aliasExpr Kind.memory path.ty memoryPathAliasName) index)
-      (rhsValueAlias rhs) = _
+      (stackValueAlias rhs) = _
     rw [execAssignNested, hevAlias]
     simp only [Typed.WrappedExpr.kind, resOk_bind]
     rw [resolveLoc, resolveMBase_alias path.ty hmp₃]
@@ -8190,6 +8709,7 @@ path capture by `readM_keep`. -/
 theorem indexWriteResolveMemory_sound (s : State) (ty : Ty)
     (path index rhs : WrappedExpr)
     (hprim : rhs.ty.isPrimitive = true)
+    (hfr : usesVar rhs valueAliasName = false)
     (hkpm : path.kind = Kind.memory)
     (hfp : ∀ n ∈ aliasNames, usesVar path n = false)
     (hfi : ∀ n ∈ aliasNames, usesVar index n = false) :
@@ -8209,7 +8729,7 @@ theorem indexWriteResolveMemory_sound (s : State) (ty : Ty)
         [captureMemoryPath path,
           Stmt.assign
             (indexFromAlias Kind.memory memoryPathAliasName ty path index) v]))
-  rw [freezeRhs, if_pos hprim, execStmt]
+  rw [freezeRhs_freeze hprim hfr, execStmt]
   cases hevR : evalValue s rhs with
   | error err =>
       have hL : execAssign s (PlaceExpr.index Kind.memory ty path index) rhs =
@@ -8220,9 +8740,9 @@ theorem indexWriteResolveMemory_sound (s : State) (ty : Ty)
         simp only [if_pos, hevR]
         rfl
       have hR : ∀ b : Block,
-          execBlock s (captureRhsValue rhs :: b) = .error err := by
+          execBlock s (captureStackValue rhs :: b) = .error err := by
         intro b
-        rw [execBlock.eq_def, captureRhsValue, capture]
+        rw [execBlock.eq_def, captureStackValue, capture]
         simp only [execStmt, hevR]
         rfl
       by_cases hc : index.complex
@@ -8230,11 +8750,11 @@ theorem indexWriteResolveMemory_sound (s : State) (ty : Ty)
       · rw [if_neg hc, hL, hR]; rfl
   | ok x =>
       obtain ⟨s₁, v⟩ := x
-      have hrv₁ : lookupBy rhsValueAliasName
-          (s₁.setEnv rhsValueAliasName (Binding.val v)).env =
+      have hrv₁ : lookupBy valueAliasName
+          (s₁.setEnv valueAliasName (Binding.val v)).env =
             some (Binding.val v) := lookupBy_setBy_self ..
       have hagree₁ : EnvAgreeExcept aliasNames s₁
-          (s₁.setEnv rhsValueAliasName (Binding.val v)) :=
+          (s₁.setEnv valueAliasName (Binding.val v)) :=
         (EnvAgreeExcept.refl _ s₁).setEnv_right rv_mem _
       have hL : execAssign s (PlaceExpr.index Kind.memory ty path index) rhs =
           (readM s₁ path) >>= fun y =>
@@ -8261,8 +8781,8 @@ theorem indexWriteResolveMemory_sound (s : State) (ty : Ty)
                 | error e => rfl
                 | ok z => obtain ⟨s₃, i⟩ := z; rfl
       have hRpre : ∀ tail : Block,
-          execBlock s (captureRhsValue rhs :: captureMemoryPath path :: tail) =
-            (readM (s₁.setEnv rhsValueAliasName (Binding.val v)) path) >>=
+          execBlock s (captureStackValue rhs :: captureMemoryPath path :: tail) =
+            (readM (s₁.setEnv valueAliasName (Binding.val v)) path) >>=
               fun y =>
                 match y.2 with
                 | MVal.ref id =>
@@ -8270,11 +8790,11 @@ theorem indexWriteResolveMemory_sound (s : State) (ty : Ty)
                       (Binding.mref id)) tail
                 | MVal.prim _ => .error .stuck := by
         intro tail
-        rw [execBlock.eq_def, captureRhsValue, capture]
+        rw [execBlock.eq_def, captureStackValue, capture]
         simp only [execStmt, hevR, resOk_bind]
         rw [execBlock.eq_def, captureMemoryPath, capture]
         simp only [execStmt, hkpm]
-        cases readM (s₁.setEnv rhsValueAliasName (Binding.val v)) path with
+        cases readM (s₁.setEnv valueAliasName (Binding.val v)) path with
         | error e => rfl
         | ok y =>
             obtain ⟨t, mv⟩ := y
@@ -8298,9 +8818,9 @@ theorem indexWriteResolveMemory_sound (s : State) (ty : Ty)
                   Stmt.assign
                     (indexFromAlias Kind.memory memoryPathAliasName ty path
                       (indexAlias index))
-                    (rhsValueAlias rhs)])
+                    (stackValueAlias rhs)])
             refine indexWriteTailCaptureMemory_agree hprim hfi ?_ hagree₂
-            rw [readM_keep (s₁.setEnv rhsValueAliasName (Binding.val v)) path
+            rw [readM_keep (s₁.setEnv valueAliasName (Binding.val v)) path
               hfp t₂ (MVal.ref id) hres₂ _ rv_mem]
             exact hrv₁
       · rw [if_neg hc, hRpre]
@@ -8316,22 +8836,22 @@ theorem indexWriteResolveMemory_sound (s : State) (ty : Ty)
               (execBlock (t₂.setEnv memoryPathAliasName (Binding.mref id))
                 [Stmt.assign
                   (indexFromAlias Kind.memory memoryPathAliasName ty path index)
-                  (rhsValueAlias rhs)])
+                  (stackValueAlias rhs)])
             refine indexWriteTailPlainMemory_agree hprim hfi ?_ hagree₂
-            rw [readM_keep (s₁.setEnv rhsValueAliasName (Binding.val v)) path
+            rw [readM_keep (s₁.setEnv valueAliasName (Binding.val v)) path
               hfp t₂ (MVal.ref id) hres₂ _ rv_mem]
             exact hrv₁
-/-- `memoryFieldWriteUnfoldLeftFst` on a **primitive** value operand.
+/-- `memoryFieldWriteUnfoldLeftFst`: any value source (`isValueSource`, so
+primitive), frozen ahead of the path capture.
 
-Dispatches to `fieldWriteResolveMemory_sound`.  The reference-typed case is not
-covered: `Stmt.memoryDecl` from a memory source aliases rather than copying,
-while `rhsToMVal` reads the reference out, so no residual can snapshot it — the
-combination is excluded by the rule's condition, not by a hypothesis here. -/
+Dispatches to `fieldWriteResolveMemory_sound`.  A reference source goes to
+`memoryFieldWriteRefUnfoldLeftFst` instead, whose theorem keeps the
+non-interference side condition: `Stmt.memoryDecl` from a memory source
+aliases rather than copying, so no residual can snapshot it. -/
 theorem memoryFieldWriteUnfoldLeftFst_sound
     (s : State) (lhs : PlaceExpr) (rhs : WrappedExpr)
     (hcond : (ruleEffect .memoryFieldWriteUnfoldLeftFst).cond
       (Stmt.assign lhs rhs))
-    (hprim : rhs.ty.isPrimitive = true)
     (hfresh : ∀ n ∈ aliasNames,
       stmtUsesVar (Stmt.assign lhs rhs) n = false)
     (hkp : ∀ {kind ty path fld},
@@ -8347,23 +8867,23 @@ theorem memoryFieldWriteUnfoldLeftFst_sound
   match e, hass, hcond, hfresh with
   | WrappedExpr.field Kind.memory ty path fld, hass, hcond, hfresh =>
       intro hkp
-      refine fieldWriteResolveMemory_sound s ty path fld rhs hprim (hkp rfl) ?_
+      refine fieldWriteResolveMemory_sound s ty path fld rhs hcond.2.1
+        (fresh_rhs_of_assign hfresh) (hkp rfl) ?_
       intro n hn
       have := hfresh n hn
       simp [stmtUsesVar, placeField_expr, usesVar] at this
       exact this.1
 
-/-- `memoryIndexWriteUnfoldLeftFst` on a **primitive** value operand.
+/-- `memoryIndexWriteUnfoldLeftFst`: any value source, frozen first.
 
 Dispatches to `indexWriteResolveMemory_sound`.  `hkp` is the AST
 well-formedness fact that a memory index node has a memory-kinded base — not a
-non-interference assumption; the reference-typed value case is excluded by the
-rule's condition, not by a hypothesis here. -/
+non-interference assumption; a reference source is
+`memoryIndexWriteRefUnfoldLeftFst`'s. -/
 theorem memoryIndexWriteUnfoldLeftFst_sound
     (s : State) (lhs : PlaceExpr) (rhs : WrappedExpr)
     (hcond : (ruleEffect .memoryIndexWriteUnfoldLeftFst).cond
       (Stmt.assign lhs rhs))
-    (hprim : rhs.ty.isPrimitive = true)
     (hfresh : ∀ n ∈ aliasNames,
       stmtUsesVar (Stmt.assign lhs rhs) n = false)
     (hkp : ∀ {kind ty path index},
@@ -8379,12 +8899,490 @@ theorem memoryIndexWriteUnfoldLeftFst_sound
   match e, hass, hcond, hfresh with
   | WrappedExpr.index Kind.memory ty path idxE, hass, hcond, hfresh =>
       intro hkp
-      refine indexWriteResolveMemory_sound s ty path idxE rhs hprim (hkp rfl)
-        ?_ ?_ <;>
+      refine indexWriteResolveMemory_sound s ty path idxE rhs hcond.2.1
+        (fresh_rhs_of_assign hfresh) (hkp rfl) ?_ ?_ <;>
         intro n hn <;> have := hfresh n hn <;>
         simp [stmtUsesVar, placeIndex_expr, usesVar] at this
       · exact this.1.1
       · exact this.1.2
+
+/-- A memory-kinded operand, as the interpreter wants it. -/
+theorem kind_eq_memory_of_isMemory {e : WrappedExpr} (h : isMemory e) :
+    e.kind = Kind.memory := by
+  unfold isMemory Typed.WrappedExpr.isMemory at h
+  simpa using h
+
+/-- Template: the memory field-write unfold on a memory-kinded *simple*
+source (`nmp.fld = mv2`), the memory twin of
+`fieldWriteResolveStorage_ref_sound`.  `Rules.freezeRhs` leaves a reference
+alone — `Stmt.memoryDecl` from a memory source aliases rather than copying,
+so no residual can snapshot it — and the residual therefore reads the source
+after the path capture.  The rule stays conditional: `hstable` says the
+source still reads the same slot value then.  Stated over the unfrozen
+residual outright, so it asks nothing of the source's type: a primitive
+memory-kinded source is unfrozen by the rule just the same. -/
+theorem fieldWriteResolveMemory_ref_sound (s : State) (ty : Ty)
+    (path : WrappedExpr) (fld : Field) (rhs : WrappedExpr) {mv : MVal}
+    (hkr : rhs.kind = Kind.memory)
+    (hfr : ∀ n ∈ aliasNames, usesVar rhs n = false)
+    (hpr : pureExpr rhs = true)
+    (hkpm : path.kind = Kind.memory)
+    (hev : rhsToMVal s rhs = .ok (s, mv))
+    (hstable : ∀ {t : State} {id : Nat},
+      readM s path = .ok (t, MVal.ref id) -> rhsToMVal t rhs = .ok (t, mv)) :
+    ResultsAgree aliasNames
+      (execStmt s (Stmt.assign (PlaceExpr.field Kind.memory ty path fld) rhs))
+      (execBlock s [captureMemoryPath path,
+        Stmt.assign
+          (fieldFromAlias Kind.memory memoryPathAliasName ty path fld)
+          rhs]) := by
+  have hRdecl : ∀ w : State, execStmt w
+      (Stmt.memoryDecl path.ty memoryPathAliasName (some path)) =
+      (readM w path) >>= fun y =>
+        match y.2 with
+        | MVal.ref id =>
+            .ok (y.1.setEnv memoryPathAliasName (Binding.mref id))
+        | MVal.prim _ => .error .stuck := by
+    intro w
+    rw [execStmt]
+    rw [hkpm]
+    rfl
+  have hL : execAssign s (PlaceExpr.field Kind.memory ty path fld) rhs =
+      (readM s path) >>= fun y =>
+        match y.2 with
+        | MVal.ref id => writeMSlot y.1 (Loc.memoryField id fld.name) mv
+        | _ => .error .stuck := by
+    show execAssignNested s
+      (WrappedExpr.field Kind.memory ty path fld) rhs = _
+    rw [execAssignNested, hev]
+    simp only [Typed.WrappedExpr.kind, resOk_bind]
+    rw [resolveLoc, resolveMBase_eq_readM]
+    cases readM s path with
+    | error e => rfl
+    | ok y =>
+        obtain ⟨t, mv'⟩ := y
+        cases mv' with
+        | prim p => cases p <;> rfl
+        | ref id => rfl
+  rw [execStmt, execBlock_pair, captureMemoryPath, capture, hRdecl, hL]
+  cases hres : readM s path with
+  | error err => exact rfl
+  | ok y =>
+      obtain ⟨t, mv'⟩ := y
+      cases mv' with
+      | prim p => cases p <;> exact rfl
+      | ref id =>
+          have ht' : EnvAgreeExcept aliasNames t
+              (t.setEnv memoryPathAliasName (Binding.mref id)) :=
+            (EnvAgreeExcept.refl _ t).setEnv_right mp_mem _
+          have hRhs' : rhsToMVal
+              (t.setEnv memoryPathAliasName (Binding.mref id)) rhs =
+              .ok (t.setEnv memoryPathAliasName (Binding.mref id), mv) :=
+            rhsToMVal_transportOk ht' hfr hpr (Or.inl hkr) (hstable hres)
+          have hRA : execStmt
+              (t.setEnv memoryPathAliasName (Binding.mref id))
+              (Stmt.assign
+                (fieldFromAlias Kind.memory memoryPathAliasName ty path fld)
+                rhs) =
+              writeMSlot (t.setEnv memoryPathAliasName (Binding.mref id))
+                (Loc.memoryField id fld.name) mv := by
+            rw [execStmt]
+            show execAssignNested
+              (t.setEnv memoryPathAliasName (Binding.mref id))
+              (WrappedExpr.field Kind.memory ty
+                (aliasExpr Kind.memory path.ty memoryPathAliasName) fld)
+              rhs = _
+            rw [execAssignNested, hRhs']
+            simp only [Typed.WrappedExpr.kind, resOk_bind]
+            rw [resolveLoc,
+              resolveMBase_alias path.ty
+                (lookupBy_setBy_self memoryPathAliasName (Binding.mref id)
+                  t.env)]
+            simp only [resOk_bind]
+            rfl
+          show ResultsAgree aliasNames
+            (writeMSlot t (Loc.memoryField id fld.name) mv)
+            (execStmt (t.setEnv memoryPathAliasName (Binding.mref id))
+              (Stmt.assign
+                (fieldFromAlias Kind.memory memoryPathAliasName ty path fld)
+                rhs))
+          rw [hRA]
+          exact writeMSlot_agree ht' _ mv
+
+/-- Tail of the memory index-write unfold with a **captured** complex index
+on an unfrozen operand, the memory twin of
+`indexWriteTailCapture_ref_agree`. -/
+theorem indexWriteTailCaptureMemory_ref_agree {ty : Ty}
+    {path index rhs : WrappedExpr} {t : State} {mv : MVal} {id : Nat}
+    (hkr : rhs.kind = Kind.memory)
+    (hfr : ∀ n ∈ aliasNames, usesVar rhs n = false)
+    (hpr : pureExpr rhs = true)
+    (hfi : ∀ n ∈ aliasNames, usesVar index n = false)
+    (hstableI : ∀ {u : State} {w : Value}, evalValue t index = .ok (u, w) ->
+      rhsToMVal u rhs = .ok (u, mv)) :
+    ResultsAgree aliasNames
+      ((evalInt t index) >>= fun y =>
+        match y with
+        | (u, i) => writeMSlot u (Loc.memoryIndex id i) mv)
+      (execBlock (t.setEnv memoryPathAliasName (Binding.mref id))
+        [captureIndex index,
+          Stmt.assign
+            (indexFromAlias Kind.memory memoryPathAliasName ty path
+              (indexAlias index))
+            rhs]) := by
+  have hmp₃ : lookupBy memoryPathAliasName
+      (t.setEnv memoryPathAliasName (Binding.mref id)).env =
+        some (Binding.mref id) := lookupBy_setBy_self ..
+  have hagree₃ : EnvAgreeExcept aliasNames t
+      (t.setEnv memoryPathAliasName (Binding.mref id)) :=
+    (EnvAgreeExcept.refl _ t).setEnv_right mp_mem _
+  have hLn : ((evalInt t index) >>= fun y =>
+        match y with
+        | (u, i) => writeMSlot u (Loc.memoryIndex id i) mv) =
+      (evalValue t index) >>= fun y =>
+        match y with
+        | (u, w) => w.asInt >>= fun i =>
+            writeMSlot u (Loc.memoryIndex id i) mv := by
+    rw [evalInt]
+    cases evalValue t index with
+    | error e => rfl
+    | ok z =>
+        obtain ⟨u, w⟩ := z
+        simp only [resOk_bind]
+        cases w.asInt with
+        | error e => rfl
+        | ok i => rfl
+  have hRn : execBlock (t.setEnv memoryPathAliasName (Binding.mref id))
+        [captureIndex index,
+          Stmt.assign
+            (indexFromAlias Kind.memory memoryPathAliasName ty path
+              (indexAlias index))
+            rhs] =
+      (evalValue (t.setEnv memoryPathAliasName (Binding.mref id)) index) >>=
+        fun y =>
+        match y with
+        | (t₄, w) =>
+            execStmt (t₄.setEnv indexAliasName (Binding.val w))
+              (Stmt.assign
+                (indexFromAlias Kind.memory memoryPathAliasName ty path
+                  (indexAlias index))
+                rhs) := by
+    rw [execBlock_pair, captureIndex, capture, execStmt]
+    cases evalValue (t.setEnv memoryPathAliasName (Binding.mref id)) index with
+    | error e => rfl
+    | ok z => obtain ⟨t₄, w⟩ := z; rfl
+  rw [hLn, hRn]
+  refine ResAgree.bindStateWith (evalValue_agree hagree₃ index hfi) ?_
+  intro u t₄ w hev₃ hev₄ hagree₄
+  have hkeep := evalValue_keep
+    (t.setEnv memoryPathAliasName (Binding.mref id)) index hfi t₄ w hev₄
+  have hmp₅ : lookupBy memoryPathAliasName
+      (t₄.setEnv indexAliasName (Binding.val w)).env =
+        some (Binding.mref id) := by
+    rw [State.setEnv, lookupBy_setBy_ne (Ne.symm idx_ne_mp),
+      hkeep memoryPathAliasName mp_mem]
+    exact hmp₃
+  have hidx₅ : lookupBy indexAliasName
+      (t₄.setEnv indexAliasName (Binding.val w)).env = some (Binding.val w) :=
+    lookupBy_setBy_self ..
+  have hagree₅ : EnvAgreeExcept aliasNames u
+      (t₄.setEnv indexAliasName (Binding.val w)) :=
+    hagree₄.setEnv_right idx_mem _
+  have hRhs' : rhsToMVal (t₄.setEnv indexAliasName (Binding.val w)) rhs =
+      .ok (t₄.setEnv indexAliasName (Binding.val w), mv) :=
+    rhsToMVal_transportOk hagree₅ hfr hpr (Or.inl hkr) (hstableI hev₃)
+  have hR : execStmt (t₄.setEnv indexAliasName (Binding.val w))
+      (Stmt.assign
+        (indexFromAlias Kind.memory memoryPathAliasName ty path
+          (indexAlias index))
+        rhs) =
+      w.asInt >>= fun i =>
+        writeMSlot (t₄.setEnv indexAliasName (Binding.val w))
+          (Loc.memoryIndex id i) mv := by
+    rw [execStmt]
+    show execAssignNested (t₄.setEnv indexAliasName (Binding.val w))
+      (WrappedExpr.index Kind.memory ty
+        (aliasExpr Kind.memory path.ty memoryPathAliasName)
+        (indexAlias index))
+      rhs = _
+    rw [execAssignNested, hRhs']
+    simp only [Typed.WrappedExpr.kind, resOk_bind]
+    rw [resolveLoc, resolveMBase_alias path.ty hmp₅]
+    simp only [resOk_bind]
+    rw [evalInt, indexAlias, evalValue_alias index.ty hidx₅]
+    simp only [resOk_bind]
+    cases w.asInt with
+    | error e => rfl
+    | ok i => rfl
+  simp only []
+  rw [hR]
+  refine bindPureResults_agree _ fun i => ?_
+  exact writeMSlot_agree hagree₅ _ mv
+
+/-- Tail with a simple index left in place, on an unfrozen operand — the
+memory twin of `indexWriteTailPlain_ref_agree`. -/
+theorem indexWriteTailPlainMemory_ref_agree {ty : Ty}
+    {path index rhs : WrappedExpr} {t : State} {mv : MVal} {id : Nat}
+    (hkr : rhs.kind = Kind.memory)
+    (hfr : ∀ n ∈ aliasNames, usesVar rhs n = false)
+    (hpr : pureExpr rhs = true)
+    (hfi : ∀ n ∈ aliasNames, usesVar index n = false)
+    (hstable : rhsToMVal t rhs = .ok (t, mv)) :
+    ResultsAgree aliasNames
+      ((evalInt t index) >>= fun y =>
+        match y with
+        | (u, i) => writeMSlot u (Loc.memoryIndex id i) mv)
+      (execBlock (t.setEnv memoryPathAliasName (Binding.mref id))
+        [Stmt.assign
+          (indexFromAlias Kind.memory memoryPathAliasName ty path index)
+          rhs]) := by
+  have hmp₃ : lookupBy memoryPathAliasName
+      (t.setEnv memoryPathAliasName (Binding.mref id)).env =
+        some (Binding.mref id) := lookupBy_setBy_self ..
+  have hagree₃ : EnvAgreeExcept aliasNames t
+      (t.setEnv memoryPathAliasName (Binding.mref id)) :=
+    (EnvAgreeExcept.refl _ t).setEnv_right mp_mem _
+  have hRhs' : rhsToMVal (t.setEnv memoryPathAliasName (Binding.mref id)) rhs =
+      .ok (t.setEnv memoryPathAliasName (Binding.mref id), mv) :=
+    rhsToMVal_transportOk hagree₃ hfr hpr (Or.inl hkr) hstable
+  have hR : execBlock (t.setEnv memoryPathAliasName (Binding.mref id))
+      [Stmt.assign
+        (indexFromAlias Kind.memory memoryPathAliasName ty path index)
+        rhs] =
+      (evalInt (t.setEnv memoryPathAliasName (Binding.mref id)) index) >>=
+        fun y =>
+        match y with
+        | (u, i) => writeMSlot u (Loc.memoryIndex id i) mv := by
+    rw [execBlock_single, execStmt]
+    show execAssignNested (t.setEnv memoryPathAliasName (Binding.mref id))
+      (WrappedExpr.index Kind.memory ty
+        (aliasExpr Kind.memory path.ty memoryPathAliasName) index)
+      rhs = _
+    rw [execAssignNested, hRhs']
+    simp only [Typed.WrappedExpr.kind, resOk_bind]
+    rw [resolveLoc, resolveMBase_alias path.ty hmp₃]
+    simp only [resOk_bind]
+    cases evalInt (t.setEnv memoryPathAliasName (Binding.mref id)) index with
+    | error e => rfl
+    | ok z => obtain ⟨u, i⟩ := z; rfl
+  rw [hR]
+  refine ResAgree.bindStateWith (evalInt_agree hagree₃ index hfi) ?_
+  intro u u' i _ _ hagree₄
+  exact writeMSlot_agree hagree₄ _ mv
+
+/-- Template: the memory index-write unfold on a memory-kinded simple
+source, the index twin of `fieldWriteResolveMemory_ref_sound` and the
+memory twin of `indexWriteResolveStorage_ref_sound`: `hstable` after the
+path capture, where a simple index reads the source back, `hstableI` after
+the index too, where a captured complex index does. -/
+theorem indexWriteResolveMemory_ref_sound (s : State) (ty : Ty)
+    (path index rhs : WrappedExpr) {mv : MVal}
+    (hkr : rhs.kind = Kind.memory)
+    (hfr : ∀ n ∈ aliasNames, usesVar rhs n = false)
+    (hpr : pureExpr rhs = true)
+    (hkpm : path.kind = Kind.memory)
+    (hfi : ∀ n ∈ aliasNames, usesVar index n = false)
+    (hev : rhsToMVal s rhs = .ok (s, mv))
+    (hstable : ∀ {t : State} {id : Nat},
+      readM s path = .ok (t, MVal.ref id) -> rhsToMVal t rhs = .ok (t, mv))
+    (hstableI : ∀ {t : State} {id : Nat} {u : State} {w : Value},
+      readM s path = .ok (t, MVal.ref id) -> evalValue t index = .ok (u, w) ->
+        rhsToMVal u rhs = .ok (u, mv)) :
+    ResultsAgree aliasNames
+      (execStmt s (Stmt.assign (PlaceExpr.index Kind.memory ty path index) rhs))
+      (execBlock s
+        (if index.complex then
+          [captureMemoryPath path, captureIndex index,
+            Stmt.assign
+              (indexFromAlias Kind.memory memoryPathAliasName ty path
+                (indexAlias index)) rhs]
+        else
+          [captureMemoryPath path,
+            Stmt.assign
+              (indexFromAlias Kind.memory memoryPathAliasName ty path index)
+              rhs])) := by
+  rw [execStmt]
+  have hL : execAssign s (PlaceExpr.index Kind.memory ty path index) rhs =
+      (readM s path) >>= fun y =>
+        match y.2 with
+        | MVal.ref id =>
+            (evalInt y.1 index) >>= fun z =>
+              match z with
+              | (u, i) => writeMSlot u (Loc.memoryIndex id i) mv
+        | _ => .error .stuck := by
+    show execAssignNested s
+      (WrappedExpr.index Kind.memory ty path index) rhs = _
+    rw [execAssignNested, hev]
+    simp only [Typed.WrappedExpr.kind, resOk_bind]
+    rw [resolveLoc, resolveMBase_eq_readM]
+    cases readM s path with
+    | error e => rfl
+    | ok y =>
+        obtain ⟨t, mv'⟩ := y
+        cases mv' with
+        | prim p => cases p <;> rfl
+        | ref id =>
+            simp only [resOk_bind]
+            cases evalInt t index with
+            | error e => rfl
+            | ok z => obtain ⟨u, i⟩ := z; rfl
+  have hRpre : ∀ tail : Block,
+      execBlock s (captureMemoryPath path :: tail) =
+        (readM s path) >>= fun y =>
+          match y.2 with
+          | MVal.ref id =>
+              execBlock (y.1.setEnv memoryPathAliasName (Binding.mref id)) tail
+          | MVal.prim _ => .error .stuck := by
+    intro tail
+    rw [execBlock.eq_def, captureMemoryPath, capture]
+    simp only [execStmt, hkpm]
+    cases readM s path with
+    | error e => rfl
+    | ok y =>
+        obtain ⟨t, mv'⟩ := y
+        cases mv' with
+        | prim p => cases p <;> rfl
+        | ref id => rfl
+  rw [hL]
+  by_cases hc : index.complex
+  · rw [if_pos hc, hRpre]
+    cases hres : readM s path with
+    | error err => exact rfl
+    | ok y =>
+        obtain ⟨t, mv'⟩ := y
+        cases mv' with
+        | prim p => cases p <;> exact rfl
+        | ref id =>
+            exact indexWriteTailCaptureMemory_ref_agree hkr hfr hpr hfi
+              (hstableI hres)
+  · rw [if_neg hc, hRpre]
+    cases hres : readM s path with
+    | error err => exact rfl
+    | ok y =>
+        obtain ⟨t, mv'⟩ := y
+        cases mv' with
+        | prim p => cases p <;> exact rfl
+        | ref id =>
+            exact indexWriteTailPlainMemory_ref_agree hkr hfr hpr hfi
+              (hstable hres)
+
+/-- `memoryFieldWriteRefUnfoldLeftFst`: a memory-kinded simple source,
+which `freezeRhs` leaves in place whatever its type, so this is
+`fieldWriteResolveMemory_ref_sound` and keeps its side condition.  `hkpm`
+is the AST well-formedness fact that a memory field node has a
+memory-kinded base. -/
+theorem memoryFieldWriteRefUnfoldLeftFst_sound
+    (s : State) (ty : Ty) (path : WrappedExpr) (fld : Field)
+    (rhs : WrappedExpr) {mv : MVal}
+    (hcond : (ruleEffect .memoryFieldWriteRefUnfoldLeftFst).cond
+      (Stmt.assign (PlaceExpr.field Kind.memory ty path fld) rhs))
+    (hfresh : ∀ n ∈ aliasNames,
+      stmtUsesVar
+        (Stmt.assign (PlaceExpr.field Kind.memory ty path fld) rhs) n =
+        false)
+    (hkpm : path.kind = Kind.memory)
+    (hev : rhsToMVal s rhs = .ok (s, mv))
+    (hstable : ∀ {t : State} {id : Nat},
+      readM s path = .ok (t, MVal.ref id) -> rhsToMVal t rhs = .ok (t, mv)) :
+    ResultsAgree aliasNames
+      (execStmt s
+        (Stmt.assign (PlaceExpr.field Kind.memory ty path fld) rhs))
+      (execBlock s
+        ((ruleEffect .memoryFieldWriteRefUnfoldLeftFst).block
+          (Stmt.assign (PlaceExpr.field Kind.memory ty path fld) rhs)
+          hcond)) :=
+  fieldWriteResolveMemory_ref_sound s ty path fld rhs
+    (kind_eq_memory_of_isMemory hcond.2.1)
+    (fun n hn => by
+      have := hfresh n hn
+      simp [stmtUsesVar] at this
+      exact this.2)
+    (pure_of_simple hcond.2.2)
+    hkpm hev hstable
+
+/-- `memoryIndexWriteRefUnfoldLeftFst`: the index twin, on
+`indexWriteResolveMemory_ref_sound`. -/
+theorem memoryIndexWriteRefUnfoldLeftFst_sound
+    (s : State) (ty : Ty) (path index rhs : WrappedExpr) {mv : MVal}
+    (hcond : (ruleEffect .memoryIndexWriteRefUnfoldLeftFst).cond
+      (Stmt.assign (PlaceExpr.index Kind.memory ty path index) rhs))
+    (hfresh : ∀ n ∈ aliasNames,
+      stmtUsesVar
+        (Stmt.assign (PlaceExpr.index Kind.memory ty path index) rhs) n =
+        false)
+    (hkpm : path.kind = Kind.memory)
+    (hev : rhsToMVal s rhs = .ok (s, mv))
+    (hstable : ∀ {t : State} {id : Nat},
+      readM s path = .ok (t, MVal.ref id) -> rhsToMVal t rhs = .ok (t, mv))
+    (hstableI : ∀ {t : State} {id : Nat} {u : State} {w : Value},
+      readM s path = .ok (t, MVal.ref id) -> evalValue t index = .ok (u, w) ->
+        rhsToMVal u rhs = .ok (u, mv)) :
+    ResultsAgree aliasNames
+      (execStmt s
+        (Stmt.assign (PlaceExpr.index Kind.memory ty path index) rhs))
+      (execBlock s
+        ((ruleEffect .memoryIndexWriteRefUnfoldLeftFst).block
+          (Stmt.assign (PlaceExpr.index Kind.memory ty path index) rhs)
+          hcond)) :=
+  indexWriteResolveMemory_ref_sound s ty path index rhs
+    (kind_eq_memory_of_isMemory hcond.2.1)
+    (fun n hn => by
+      have := hfresh n hn
+      simp [stmtUsesVar] at this
+      exact this.2)
+    (pure_of_simple hcond.2.2)
+    hkpm
+    (fun n hn => by
+      have := hfresh n hn
+      simp [stmtUsesVar, placeIndex_expr, usesVar] at this
+      exact this.1.2)
+    hev hstable hstableI
+
+/-- `memoryIndexWriteRefUnfoldLeftSndIndex`: the receiver is simple, so
+its capture is pure and stability after it is `hev` itself; only the
+captured complex index can disturb the source (`hstableI`). -/
+theorem memoryIndexWriteRefUnfoldLeftSndIndex_sound
+    (s : State) (ty : Ty) (path index rhs : WrappedExpr) {mv : MVal}
+    (hcond : (ruleEffect .memoryIndexWriteRefUnfoldLeftSndIndex).cond
+      (Stmt.assign (PlaceExpr.index Kind.memory ty path index) rhs))
+    (hfresh : ∀ n ∈ aliasNames,
+      stmtUsesVar
+        (Stmt.assign (PlaceExpr.index Kind.memory ty path index) rhs) n =
+        false)
+    (hkpm : path.kind = Kind.memory)
+    (hev : rhsToMVal s rhs = .ok (s, mv))
+    (hstableI : ∀ {u : State} {w : Value},
+      evalValue s index = .ok (u, w) -> rhsToMVal u rhs = .ok (u, mv)) :
+    ResultsAgree aliasNames
+      (execStmt s
+        (Stmt.assign (PlaceExpr.index Kind.memory ty path index) rhs))
+      (execBlock s
+        ((ruleEffect .memoryIndexWriteRefUnfoldLeftSndIndex).block
+          (Stmt.assign (PlaceExpr.index Kind.memory ty path index) rhs)
+          hcond)) := by
+  have hpp : pureExpr path = true := pure_of_simple hcond.1
+  have hc : index.complex = true := hcond.2.1
+  have h := indexWriteResolveMemory_ref_sound s ty path index rhs
+    (kind_eq_memory_of_isMemory hcond.2.2.1)
+    (fun n hn => by
+      have := hfresh n hn
+      simp [stmtUsesVar] at this
+      exact this.2)
+    (pure_of_simple hcond.2.2.2)
+    hkpm
+    (fun n hn => by
+      have := hfresh n hn
+      simp [stmtUsesVar, placeIndex_expr, usesVar] at this
+      exact this.1.2)
+    hev
+    (fun hres => by
+      rw [readM_pure hpp hres]
+      exact hev)
+    (fun hres hev' => by
+      rw [readM_pure hpp hres] at hev'
+      exact hstableI hev')
+  rw [if_pos hc] at h
+  exact h
 
 theorem memoryFieldReadUnfoldRightFst_sound
     (s : State) (lhs : PlaceExpr) (rhs : WrappedExpr) {loc : Loc}
@@ -8884,7 +9882,8 @@ theorem memoryStorageCopyUnfold_sound
         | prim p => cases p <;> exact rfl
 
 /-- **`m[i++] = i` on a memory target is sound now.**
-`captureIndexTargetBlock` is `indexWriteResolveBlock`, so this dispatches to
+The residual is the hoisting branch of `indexWriteResolveBlock`
+(`indexWriteResolveBlock_complex`), so this dispatches to
 `indexWriteResolveMemory_sound` exactly as the left-fst twin does: no `hpi`, no
 `hbase`, no `hrsOk`.  `hkp` is the AST well-formedness fact that a memory index
 node has a memory-kinded base. -/
@@ -8892,7 +9891,6 @@ theorem memoryIndexWriteUnfoldLeftSndIndex_sound
     (s : State) (lhs : PlaceExpr) (rhs : WrappedExpr)
     (hcond : (ruleEffect .memoryIndexWriteUnfoldLeftSndIndex).cond
       (Stmt.assign lhs rhs))
-    (hprim : rhs.ty.isPrimitive = true)
     (hfresh : ∀ n ∈ aliasNames,
       stmtUsesVar (Stmt.assign lhs rhs) n = false)
     (hkp : ∀ {kind ty path index},
@@ -8908,12 +9906,19 @@ theorem memoryIndexWriteUnfoldLeftSndIndex_sound
   match e, hass, hcond, hfresh with
   | WrappedExpr.index Kind.memory ty path idxE, hass, hcond, hfresh =>
       intro hkp
-      refine indexWriteResolveMemory_sound s ty path idxE rhs hprim (hkp rfl)
-        ?_ ?_ <;>
-        intro n hn <;> have := hfresh n hn <;>
-        simp [stmtUsesVar, placeIndex_expr, usesVar] at this
-      · exact this.1.1
-      · exact this.1.2
+      have h := indexWriteResolveMemory_sound s ty path idxE rhs hcond.2.2.1
+        (fresh_rhs_of_assign hfresh) (hkp rfl)
+        (fun n hn => by
+          have := hfresh n hn
+          simp [stmtUsesVar, placeIndex_expr, usesVar] at this
+          exact this.1.1)
+        (fun n hn => by
+          have := hfresh n hn
+          simp [stmtUsesVar, placeIndex_expr, usesVar] at this
+          exact this.1.2)
+      rw [indexWriteResolveBlock_complex Kind.memory memoryPathAliasName ty
+        hcond.2.1] at h
+      exact h
 
 theorem memoryIndexReadUnfoldRightSndIndex_sound
     (s : State) (lhs : PlaceExpr) (rhs : WrappedExpr) {loc : Loc} (id : Nat)
@@ -9268,65 +10273,128 @@ theorem valueRhsCaptureAssign_sound
         execAssign_evalOkPrim htrans htrans hprimA hnsl hnmr hevAlias]
       exact writeLoc_agree ht' v
 
-theorem storageRootWriteValueRhsCapture_sound
-    (s : State) (lhs : PlaceExpr) (rhs : WrappedExpr) {loc : Loc}
-    (hcond : (ruleEffect .storageRootWriteValueRhsCapture).cond
-      (Stmt.assign lhs rhs))
-    (hfresh : ∀ n ∈ aliasNames,
-      stmtUsesVar (Stmt.assign lhs rhs) n = false)
-    (hlhs : resolveLoc s lhs.expr = .ok (s, loc))
-    (hplhs : pureExpr lhs.expr = true)
-    (hprim : rhs.ty.isPrimitive = true)
-    (hnsl : ∀ nm, loc ≠ Loc.storageLocal nm)
-    (hnmr : ∀ nm, loc ≠ Loc.memoryRoot nm)
-    (hstable : ∀ t v, evalValue s rhs = .ok (t, v) ->
-      resolveLoc t lhs.expr = .ok (t, loc)) :
-    ResultsAgree aliasNames
-      (execStmt s (Stmt.assign lhs rhs))
-      (execBlock s ((ruleEffect .storageRootWriteValueRhsCapture).block
-        (Stmt.assign lhs rhs) hcond)) :=
-  valueRhsCaptureAssign_sound s lhs rhs hfresh hlhs hplhs hprim hnsl hnmr
-    hstable
+/-! ### `unfold_source`
 
-theorem fieldWriteValueRhsCapture_sound
-    (s : State) (lhs : PlaceExpr) (rhs : WrappedExpr) {loc : Loc}
-    (hcond : (ruleEffect .fieldWriteValueRhsCapture).cond
-      (Stmt.assign lhs rhs))
-    (hfresh : ∀ n ∈ aliasNames,
-      stmtUsesVar (Stmt.assign lhs rhs) n = false)
-    (hlhs : resolveLoc s lhs.expr = .ok (s, loc))
-    (hplhs : pureExpr lhs.expr = true)
-    (hprim : rhs.ty.isPrimitive = true)
-    (hnsl : ∀ nm, loc ≠ Loc.storageLocal nm)
-    (hnmr : ∀ nm, loc ≠ Loc.memoryRoot nm)
-    (hstable : ∀ t v, evalValue s rhs = .ok (t, v) ->
-      resolveLoc t lhs.expr = .ok (t, loc)) :
-    ResultsAgree aliasNames
-      (execStmt s (Stmt.assign lhs rhs))
-      (execBlock s ((ruleEffect .fieldWriteValueRhsCapture).block
-        (Stmt.assign lhs rhs) hcond)) :=
-  valueRhsCaptureAssign_sound s lhs rhs hfresh hlhs hplhs hprim hnsl hnmr
-    hstable
+The five instances of the value-source capture, one per receiver shape
+(`storageRootWriteUnfoldSource`, `storageFieldWriteUnfoldSource`,
+`storageIndexWriteUnfoldSource`, `memoryFieldWriteUnfoldSource`,
+`memoryIndexWriteUnfoldSource`), all `valueRhsCaptureAssign_sound`: the
+template is location-neutral, and `isValueSource` supplies primitivity. -/
 
-theorem indexWriteValueRhsCapture_sound
+theorem storageRootWriteUnfoldSource_sound
     (s : State) (lhs : PlaceExpr) (rhs : WrappedExpr) {loc : Loc}
-    (hcond : (ruleEffect .indexWriteValueRhsCapture).cond
+    (hcond : (ruleEffect .storageRootWriteUnfoldSource).cond
       (Stmt.assign lhs rhs))
     (hfresh : ∀ n ∈ aliasNames,
       stmtUsesVar (Stmt.assign lhs rhs) n = false)
     (hlhs : resolveLoc s lhs.expr = .ok (s, loc))
     (hplhs : pureExpr lhs.expr = true)
-    (hprim : rhs.ty.isPrimitive = true)
     (hnsl : ∀ nm, loc ≠ Loc.storageLocal nm)
     (hnmr : ∀ nm, loc ≠ Loc.memoryRoot nm)
     (hstable : ∀ t v, evalValue s rhs = .ok (t, v) ->
       resolveLoc t lhs.expr = .ok (t, loc)) :
     ResultsAgree aliasNames
       (execStmt s (Stmt.assign lhs rhs))
-      (execBlock s ((ruleEffect .indexWriteValueRhsCapture).block
+      (execBlock s ((ruleEffect .storageRootWriteUnfoldSource).block
         (Stmt.assign lhs rhs) hcond)) :=
-  valueRhsCaptureAssign_sound s lhs rhs hfresh hlhs hplhs hprim hnsl hnmr
-    hstable
+  valueRhsCaptureAssign_sound s lhs rhs hfresh hlhs hplhs hcond.2.2.1 hnsl
+    hnmr hstable
+
+theorem storageFieldWriteUnfoldSource_sound
+    (s : State) (lhs : PlaceExpr) (rhs : WrappedExpr) {loc : Loc}
+    (hcond : (ruleEffect .storageFieldWriteUnfoldSource).cond
+      (Stmt.assign lhs rhs))
+    (hfresh : ∀ n ∈ aliasNames,
+      stmtUsesVar (Stmt.assign lhs rhs) n = false)
+    (hlhs : resolveLoc s lhs.expr = .ok (s, loc))
+    (hplhs : pureExpr lhs.expr = true)
+    (hnsl : ∀ nm, loc ≠ Loc.storageLocal nm)
+    (hnmr : ∀ nm, loc ≠ Loc.memoryRoot nm)
+    (hstable : ∀ t v, evalValue s rhs = .ok (t, v) ->
+      resolveLoc t lhs.expr = .ok (t, loc)) :
+    ResultsAgree aliasNames
+      (execStmt s (Stmt.assign lhs rhs))
+      (execBlock s ((ruleEffect .storageFieldWriteUnfoldSource).block
+        (Stmt.assign lhs rhs) hcond)) := by
+  have hprim : rhs.ty.isPrimitive = true := by
+    obtain ⟨e, hass⟩ := lhs
+    clear hfresh hlhs hplhs hstable
+    match e, hass, hcond with
+    | WrappedExpr.field Kind.storage _ _ _, _, hcond => exact hcond.2.2.1
+  exact valueRhsCaptureAssign_sound s lhs rhs hfresh hlhs hplhs hprim hnsl
+    hnmr hstable
+
+theorem storageIndexWriteUnfoldSource_sound
+    (s : State) (lhs : PlaceExpr) (rhs : WrappedExpr) {loc : Loc}
+    (hcond : (ruleEffect .storageIndexWriteUnfoldSource).cond
+      (Stmt.assign lhs rhs))
+    (hfresh : ∀ n ∈ aliasNames,
+      stmtUsesVar (Stmt.assign lhs rhs) n = false)
+    (hlhs : resolveLoc s lhs.expr = .ok (s, loc))
+    (hplhs : pureExpr lhs.expr = true)
+    (hnsl : ∀ nm, loc ≠ Loc.storageLocal nm)
+    (hnmr : ∀ nm, loc ≠ Loc.memoryRoot nm)
+    (hstable : ∀ t v, evalValue s rhs = .ok (t, v) ->
+      resolveLoc t lhs.expr = .ok (t, loc)) :
+    ResultsAgree aliasNames
+      (execStmt s (Stmt.assign lhs rhs))
+      (execBlock s ((ruleEffect .storageIndexWriteUnfoldSource).block
+        (Stmt.assign lhs rhs) hcond)) := by
+  have hprim : rhs.ty.isPrimitive = true := by
+    obtain ⟨e, hass⟩ := lhs
+    clear hfresh hlhs hplhs hstable
+    match e, hass, hcond with
+    | WrappedExpr.index Kind.storage _ _ _, _, hcond => exact hcond.2.2.2.1
+  exact valueRhsCaptureAssign_sound s lhs rhs hfresh hlhs hplhs hprim hnsl
+    hnmr hstable
+
+theorem memoryFieldWriteUnfoldSource_sound
+    (s : State) (lhs : PlaceExpr) (rhs : WrappedExpr) {loc : Loc}
+    (hcond : (ruleEffect .memoryFieldWriteUnfoldSource).cond
+      (Stmt.assign lhs rhs))
+    (hfresh : ∀ n ∈ aliasNames,
+      stmtUsesVar (Stmt.assign lhs rhs) n = false)
+    (hlhs : resolveLoc s lhs.expr = .ok (s, loc))
+    (hplhs : pureExpr lhs.expr = true)
+    (hnsl : ∀ nm, loc ≠ Loc.storageLocal nm)
+    (hnmr : ∀ nm, loc ≠ Loc.memoryRoot nm)
+    (hstable : ∀ t v, evalValue s rhs = .ok (t, v) ->
+      resolveLoc t lhs.expr = .ok (t, loc)) :
+    ResultsAgree aliasNames
+      (execStmt s (Stmt.assign lhs rhs))
+      (execBlock s ((ruleEffect .memoryFieldWriteUnfoldSource).block
+        (Stmt.assign lhs rhs) hcond)) := by
+  have hprim : rhs.ty.isPrimitive = true := by
+    obtain ⟨e, hass⟩ := lhs
+    clear hfresh hlhs hplhs hstable
+    match e, hass, hcond with
+    | WrappedExpr.field Kind.memory _ _ _, _, hcond => exact hcond.2.2.1
+  exact valueRhsCaptureAssign_sound s lhs rhs hfresh hlhs hplhs hprim hnsl
+    hnmr hstable
+
+theorem memoryIndexWriteUnfoldSource_sound
+    (s : State) (lhs : PlaceExpr) (rhs : WrappedExpr) {loc : Loc}
+    (hcond : (ruleEffect .memoryIndexWriteUnfoldSource).cond
+      (Stmt.assign lhs rhs))
+    (hfresh : ∀ n ∈ aliasNames,
+      stmtUsesVar (Stmt.assign lhs rhs) n = false)
+    (hlhs : resolveLoc s lhs.expr = .ok (s, loc))
+    (hplhs : pureExpr lhs.expr = true)
+    (hnsl : ∀ nm, loc ≠ Loc.storageLocal nm)
+    (hnmr : ∀ nm, loc ≠ Loc.memoryRoot nm)
+    (hstable : ∀ t v, evalValue s rhs = .ok (t, v) ->
+      resolveLoc t lhs.expr = .ok (t, loc)) :
+    ResultsAgree aliasNames
+      (execStmt s (Stmt.assign lhs rhs))
+      (execBlock s ((ruleEffect .memoryIndexWriteUnfoldSource).block
+        (Stmt.assign lhs rhs) hcond)) := by
+  have hprim : rhs.ty.isPrimitive = true := by
+    obtain ⟨e, hass⟩ := lhs
+    clear hfresh hlhs hplhs hstable
+    match e, hass, hcond with
+    | WrappedExpr.index Kind.memory _ _ _, _, hcond => exact hcond.2.2.2.1
+  exact valueRhsCaptureAssign_sound s lhs rhs hfresh hlhs hplhs hprim hnsl
+    hnmr hstable
 
 theorem memoryFieldReadUnfoldRightSndResult_sound
     (s : State) (lhs : PlaceExpr) (rhs : WrappedExpr) {loc : Loc}
@@ -9835,125 +10903,6 @@ theorem memoryToStorageUnfoldRightFstSource_sound
             rw [hcap, hrdR]
             exact ⟨rfl, ht'⟩
 
-/-- `memoryWriteUnfoldRightSndResult`, storage-kind right-hand side:
-the capture is a storage-path alias, so the storage `pv`-capture
-template applies. -/
-theorem memoryWriteUnfoldRightSndResult_storage_sound
-    (s : State) (lhs : PlaceExpr) (rhs : WrappedExpr) {loc : Loc}
-    (hcond : (ruleEffect .memoryWriteUnfoldRightSndResult).cond
-      (Stmt.assign lhs rhs))
-    (hfresh : ∀ n ∈ aliasNames,
-      stmtUsesVar (Stmt.assign lhs rhs) n = false)
-    (hlhs : resolveLoc s lhs.expr = .ok (s, loc))
-    (hplhs : pureExpr lhs.expr = true)
-    (hkS : rhs.kind = Kind.storage)
-    (hprhs : pureExpr rhs = true)
-    (hnm : tyHasMapping rhs.ty = false)
-    (hevalEq : ∀ u : State, evalValue u rhs =
-      (resolveS u rhs) >>= fun x =>
-        (x.1.findStorage x.2.1 x.2.2) >>= fun v =>
-          v.asValue >>= fun val => Except.ok (x.1, val)) :
-    ResultsAgree aliasNames
-      (execStmt s (Stmt.assign lhs rhs))
-      (execBlock s
-        ((ruleEffect .memoryWriteUnfoldRightSndResult).block
-          (Stmt.assign lhs rhs) hcond)) := by
-  have hfl : ∀ n ∈ aliasNames, usesVar lhs.expr n = false := fun n hn => by
-    have := hfresh n hn
-    simp [stmtUsesVar] at this
-    exact this.1
-  have hmem : rhs.isMemory = false := by
-    simp [Typed.WrappedExpr.isMemory, hkS]
-  have hvck : valueCaptureKind rhs = Kind.storage := by
-    rw [valueCaptureKind]
-    simp [hmem, hkS]
-  show ResultsAgree aliasNames
-    (execStmt s (Stmt.assign lhs rhs))
-    (execBlock s [captureValue rhs, Stmt.assign lhs (valueAlias rhs)])
-  rw [captureValue, valueAlias, hvck, capture]
-  exact captureAssignStorageRhs_sound s lhs rhs hlhs hplhs hfl hprhs hkS
-    (fun _ _ h => by simp [hnm] at h) hevalEq
-
-/-- `memoryWriteUnfoldRightSndResult`, stack-kind right-hand side
-(operators): the capture is a typed value temporary. -/
-theorem memoryWriteUnfoldRightSndResult_stack_sound
-    (s : State) (lhs : PlaceExpr) (rhs : WrappedExpr) {loc : Loc}
-    (hcond : (ruleEffect .memoryWriteUnfoldRightSndResult).cond
-      (Stmt.assign lhs rhs))
-    (hfresh : ∀ n ∈ aliasNames,
-      stmtUsesVar (Stmt.assign lhs rhs) n = false)
-    (hlhs : resolveLoc s lhs.expr = .ok (s, loc))
-    (hplhs : pureExpr lhs.expr = true)
-    (hml : (∃ id fld, loc = Loc.memoryField id fld) ∨
-      (∃ id i, loc = Loc.memoryIndex id i))
-    (hkS : rhs.kind = Kind.stack)
-    (hprhs : pureExpr rhs = true)
-    (hprim : rhs.ty.isPrimitive = true) :
-    ResultsAgree aliasNames
-      (execStmt s (Stmt.assign lhs rhs))
-      (execBlock s
-        ((ruleEffect .memoryWriteUnfoldRightSndResult).block
-          (Stmt.assign lhs rhs) hcond)) := by
-  have hnsl : ∀ nm, loc ≠ Loc.storageLocal nm := fun nm h => by
-    rcases hml with ⟨_, _, h2⟩ | ⟨_, _, h2⟩ <;> rw [h2] at h <;>
-      exact nomatch h
-  have hnmr : ∀ nm, loc ≠ Loc.memoryRoot nm := fun nm h => by
-    rcases hml with ⟨_, _, h2⟩ | ⟨_, _, h2⟩ <;> rw [h2] at h <;>
-      exact nomatch h
-  have hnst : ∀ nm, loc ≠ Loc.stack nm := fun nm h => by
-    rcases hml with ⟨_, _, h2⟩ | ⟨_, _, h2⟩ <;> rw [h2] at h <;>
-      exact nomatch h
-  have hnsg : ∀ root segs, loc ≠ Loc.storage root segs := fun r sg h => by
-    rcases hml with ⟨_, _, h2⟩ | ⟨_, _, h2⟩ <;> rw [h2] at h <;>
-      exact nomatch h
-  have hfl : ∀ n ∈ aliasNames, usesVar lhs.expr n = false := fun n hn => by
-    have := hfresh n hn
-    simp [stmtUsesVar] at this
-    exact this.1
-  have hmem : rhs.isMemory = false := by
-    simp [Typed.WrappedExpr.isMemory, hkS]
-  have hvck : valueCaptureKind rhs = Kind.stack := by
-    rw [valueCaptureKind]
-    simp [hmem, hkS]
-  show ResultsAgree aliasNames
-    (execStmt s (Stmt.assign lhs rhs))
-    (execBlock s [captureValue rhs, Stmt.assign lhs (valueAlias rhs)])
-  rw [execStmt, execBlock_pair, captureValue, valueAlias, hvck, capture]
-  cases hev : evalValue s rhs with
-  | error err =>
-      have hL : execAssign s lhs rhs = .error err :=
-        execAssign_evalErr hlhs hprim hnsl hnmr hev
-      have hR : execStmt s
-          (Stmt.stackDecl rhs.ty valueAliasName (some rhs)) =
-          .error err := by
-        rw [execStmt, hev]
-        rfl
-      rw [hL, hR]
-      exact rfl
-  | ok x =>
-      obtain ⟨t, v⟩ := x
-      have hts : t = s := evalValue_pure hprhs hev
-      subst hts
-      have hR : execStmt t
-          (Stmt.stackDecl rhs.ty valueAliasName (some rhs)) =
-          .ok (t.setEnv valueAliasName (Binding.val v)) := by
-        rw [execStmt, hev]
-        rfl
-      rw [hR]
-      have ht' : EnvAgreeExcept aliasNames t
-          (t.setEnv valueAliasName (Binding.val v)) :=
-        (EnvAgreeExcept.refl _ t).setEnv_right pv_mem _
-      show ResultsAgree aliasNames
-        (execAssign t lhs rhs)
-        (execStmt (t.setEnv valueAliasName (Binding.val v))
-          (Stmt.assign lhs (aliasExpr Kind.stack rhs.ty valueAliasName)))
-      rw [execStmt]
-      refine execAssign_pureLocSimPrim hlhs hfl rfl hprim ?_ hnsl hnmr
-      rw [hev,
-        evalValue_alias rhs.ty
-          (lookupBy_setBy_self valueAliasName (Binding.val v) t.env)]
-      exact ⟨rfl, ht'⟩
-
 /-- `storagePushValueUnfoldRightSndArgument` for arguments whose value
 capture is a stack temporary (`valueCaptureKind rhs = Kind.stack`:
 operators and primitive-typed memory reads). -/
@@ -10072,35 +11021,32 @@ theorem storagePushValueUnfoldRightSndArgument_stack_sound
           exact saveStorage_agree ht' root segs
             (SVal.array (elems ++ [v.toSVal]) (pushSlot elemTy shadow).2)
 
-theorem memoryDeleteComplexTarget_sound
-    (s : State) (target : PlaceExpr) (mid : Nat)
-    (hcond : (ruleEffect .memoryDeleteComplexTarget).cond
+/-! ## Memory delete unfolds
+
+The memory twins of the storage delete unfolds: the field and complex-index
+receivers are captured whole (`hkp`: a memory node has a memory-kinded base,
+which is what makes the `memoryDecl` capture read it with `readM`), and the
+simple-receiver / complex-index rule hoists the index, so the receiver must
+resolve in the initial state and survive the hoist (`hbase`). -/
+
+theorem memoryFieldDeleteUnfoldLeftFst_sound
+    (s : State) (target : PlaceExpr)
+    (hcond : (ruleEffect .memoryFieldDeleteUnfoldLeftFst).cond
       (Stmt.delete target))
-    (hfresh : ∀ n ∈ aliasNames,
-      stmtUsesVar (Stmt.delete target) n = false)
     (hkp : ∀ {kind ty path fld},
       target.expr = WrappedExpr.field kind ty path fld ->
-        path.kind = Kind.memory ∧ pureExpr path = true)
-    (hkpi : ∀ {kind ty path index},
-      target.expr = WrappedExpr.index kind ty path index ->
-        path.complex = true ->
-        path.kind = Kind.memory ∧ pureExpr path = true)
-    (hbase : ∀ {kind ty path index},
-      target.expr = WrappedExpr.index kind ty path index ->
-        path.complex = false ->
-        (pureExpr index = true ∧
-          resolveMBase s path = .ok (s, mid))) :
+        path.kind = Kind.memory) :
     ResultsAgree aliasNames
       (execStmt s (Stmt.delete target))
       (execBlock s
-        ((ruleEffect .memoryDeleteComplexTarget).block
+        ((ruleEffect .memoryFieldDeleteUnfoldLeftFst).block
           (Stmt.delete target) hcond)) := by
   obtain ⟨e, hass⟩ := target
-  revert hkp hkpi hbase
-  match e, hass, hcond, hfresh with
-  | WrappedExpr.field Kind.memory ty path fld, hass, hcond, hfresh =>
-      intro hkp _ _
-      obtain ⟨hkpm, hpp⟩ := hkp rfl
+  revert hkp
+  match e, hass, hcond with
+  | WrappedExpr.field Kind.memory ty path fld, hass, hcond =>
+      intro hkp
+      have hkpm : path.kind = Kind.memory := hkp rfl
       show ResultsAgree aliasNames
         (execStmt s (Stmt.delete (PlaceExpr.field Kind.memory ty path fld)))
         (execBlock s [Stmt.memoryDecl path.ty memoryPathAliasName (some path),
@@ -10151,8 +11097,6 @@ theorem memoryDeleteComplexTarget_sound
           exact rfl
       | ok x =>
           obtain ⟨t, mv⟩ := x
-          have hts : t = s := readM_pure hpp hcap
-          subst hts
           cases mv with
           | prim p =>
               cases p <;>
@@ -10163,7 +11107,7 @@ theorem memoryDeleteComplexTarget_sound
               have ht' : EnvAgreeExcept aliasNames t
                   (t.setEnv memoryPathAliasName (Binding.mref id)) :=
                 (EnvAgreeExcept.refl _ t).setEnv_right mp_mem _
-              have hLloc : resolveLoc t
+              have hLloc : resolveLoc s
                   (WrappedExpr.field Kind.memory ty path fld) =
                   .ok (t, Loc.memoryField id fld.name) := by
                 rw [resolveLoc, resolveMBase_eq_readM, hcap]
@@ -10195,8 +11139,27 @@ theorem memoryDeleteComplexTarget_sound
                   refine ResAgree.bindState (allocDefault_agree ht' r) ?_
                   intro w₁ w₂ id2 hw
                   exact writeMSlot_agree hw _ (MVal.ref id2)
+
+theorem memoryIndexDeleteUnfoldLeftFst_sound
+    (s : State) (target : PlaceExpr)
+    (hcond : (ruleEffect .memoryIndexDeleteUnfoldLeftFst).cond
+      (Stmt.delete target))
+    (hfresh : ∀ n ∈ aliasNames,
+      stmtUsesVar (Stmt.delete target) n = false)
+    (hkp : ∀ {kind ty path index},
+      target.expr = WrappedExpr.index kind ty path index ->
+        path.kind = Kind.memory) :
+    ResultsAgree aliasNames
+      (execStmt s (Stmt.delete target))
+      (execBlock s
+        ((ruleEffect .memoryIndexDeleteUnfoldLeftFst).block
+          (Stmt.delete target) hcond)) := by
+  obtain ⟨e, hass⟩ := target
+  revert hkp
+  match e, hass, hcond, hfresh with
   | WrappedExpr.index Kind.memory ty path idxE, hass, hcond, hfresh =>
-      intro _ hkpi hbase
+      intro hkp
+      have hkpm : path.kind = Kind.memory := hkp rfl
       have hfi : ∀ n ∈ aliasNames, usesVar idxE n = false := fun n hn => by
         have := hfresh n hn
         simp [stmtUsesVar, usesVar] at this
@@ -10216,190 +11179,73 @@ theorem memoryDeleteComplexTarget_sound
         rfl
       show ResultsAgree aliasNames
         (execStmt s (Stmt.delete (PlaceExpr.index Kind.memory ty path idxE)))
-        (execBlock s (memoryDeleteComplexTargetBlock
-          (WrappedExpr.index Kind.memory ty path idxE) hcond))
-      cases hpc : path.complex with
-      | true =>
-          obtain ⟨hkpm, hpp⟩ := hkpi rfl hpc
-          have hbl : memoryDeleteComplexTargetBlock
-              (WrappedExpr.index Kind.memory ty path idxE) hcond =
-              [Stmt.memoryDecl path.ty memoryPathAliasName (some path),
-                Stmt.delete (indexFromAlias Kind.memory memoryPathAliasName
-                  ty path idxE)] := by
-            rw [memoryDeleteComplexTargetBlock]
-            simp [hpc, captureMemoryPath, capture]
-          rw [hbl, hLeq, execBlock_pair]
-          have hRdecl : execStmt s
-              (Stmt.memoryDecl path.ty memoryPathAliasName (some path)) =
-              (readM s path) >>= fun x =>
-                match x.2 with
-                | MVal.ref id =>
-                    .ok (x.1.setEnv memoryPathAliasName (Binding.mref id))
-                | MVal.prim _ => .error .stuck := by
-            rw [execStmt]
-            rw [hkpm]
-            rfl
-          have hReq : ∀ (u : State), execStmt u
-              (Stmt.delete (indexFromAlias Kind.memory memoryPathAliasName
-                ty path idxE)) =
-              (resolveLoc u (WrappedExpr.index Kind.memory ty
-                (aliasExpr Kind.memory path.ty memoryPathAliasName)
-                idxE)) >>= fun x =>
-                match ty with
-                | Ty.bool => writeMSlot x.1 x.2 (MVal.bool false)
-                | Ty.uint => writeMSlot x.1 x.2 (MVal.int 0)
-                | Ty.int => writeMSlot x.1 x.2 (MVal.int 0)
-                | Ty.ref r =>
-                    (allocDefault x.1 r) >>= fun y =>
-                      writeMSlot y.1 x.2 (MVal.ref y.2) := fun u => by
-            rw [execStmt]
-            rfl
-          cases hcap : readM s path with
-          | error err =>
-              rw [hRdecl, hcap, resolveLoc, resolveMBase_eq_readM, hcap]
-              exact rfl
-          | ok x =>
-              obtain ⟨t, mv⟩ := x
-              have hts : t = s := readM_pure hpp hcap
-              subst hts
-              cases mv with
-              | prim p =>
-                  cases p <;>
-                    (rw [hRdecl, hcap, resolveLoc, resolveMBase_eq_readM,
-                       hcap]
-                     exact rfl)
-              | ref id =>
-                  rw [hRdecl, hcap]
-                  have ht' : EnvAgreeExcept aliasNames t
-                      (t.setEnv memoryPathAliasName (Binding.mref id)) :=
-                    (EnvAgreeExcept.refl _ t).setEnv_right mp_mem _
-                  have hlocSim : ResAgree aliasNames
-                      (resolveLoc t
-                        (WrappedExpr.index Kind.memory ty path idxE))
-                      (resolveLoc
-                        (t.setEnv memoryPathAliasName (Binding.mref id))
-                        (WrappedExpr.index Kind.memory ty
-                          (aliasExpr Kind.memory path.ty
-                            memoryPathAliasName) idxE)) := by
-                    rw [resolveLoc, resolveLoc, resolveMBase_eq_readM, hcap,
-                      resolveMBase_alias (s := t.setEnv memoryPathAliasName
-                          (Binding.mref id)) path.ty
-                        (lookupBy_setBy_self memoryPathAliasName
-                          (Binding.mref id) t.env)]
-                    simp only [resOk_bind]
-                    refine ResAgree.bind (evalInt_agree ht' idxE hfi) ?_
-                    intro u₁ u₂ i hu
-                    exact ⟨rfl, hu⟩
-                  show ResultsAgree aliasNames _
-                    (execStmt (t.setEnv memoryPathAliasName (Binding.mref id))
-                      (Stmt.delete (indexFromAlias Kind.memory
-                        memoryPathAliasName ty path idxE)))
-                  rw [hReq]
-                  refine ResAgree.bindState hlocSim ?_
-                  intro u₁ u₂ loc2 hu
-                  match hty : ty with
-                  | Ty.bool => exact writeMSlot_agree hu _ (MVal.bool false)
-                  | Ty.uint => exact writeMSlot_agree hu _ (MVal.int 0)
-                  | Ty.int => exact writeMSlot_agree hu _ (MVal.int 0)
-                  | Ty.ref r =>
-                      refine ResAgree.bindState (allocDefault_agree hu r) ?_
-                      intro w₁ w₂ id2 hw
-                      exact writeMSlot_agree hw _ (MVal.ref id2)
-      | false =>
-          obtain ⟨hpi, hb⟩ := hbase rfl hpc
-          have hps : path.simple = true := by
-            rcases hcond with hc | hc
-            · have hcc : path.complex = true := hc
-              rw [hpc] at hcc
-              exact nomatch hcc
-            · exact hc.1
-          have hpp : pureExpr path = true := pure_of_simple hps
-          have hfp : ∀ n ∈ aliasNames, usesVar path n = false := fun n hn => by
-            have := hfresh n hn
-            simp [stmtUsesVar, usesVar] at this
-            exact this.1
-          have hbl : memoryDeleteComplexTargetBlock
-              (WrappedExpr.index Kind.memory ty path idxE) hcond =
-              [Stmt.stackDecl idxE.ty indexAliasName (some idxE),
-                Stmt.delete (PlaceExpr.index Kind.memory ty path
-                  (indexAlias idxE))] := by
-            rw [memoryDeleteComplexTargetBlock]
-            simp [hpc, captureIndex, capture]
-          rw [hbl, hLeq, execBlock_pair]
-          cases hev : evalValue s idxE with
-          | error err =>
-              have hL2 : (resolveLoc s
-                  (WrappedExpr.index Kind.memory ty path idxE)) =
-                  .error err := by
-                rw [resolveLoc, hb]
-                simp only [resOk_bind]
-                rw [evalInt, hev]
-                rfl
-              have hR : execStmt s
-                  (Stmt.stackDecl idxE.ty indexAliasName (some idxE)) =
-                  .error err := by
-                rw [execStmt, hev]
-                rfl
-              rw [hL2, hR]
-              exact rfl
-          | ok y =>
-              obtain ⟨t, v⟩ := y
-              have hts : t = s := evalValue_pure hpi hev
-              subst hts
-              have hR : execStmt t
-                  (Stmt.stackDecl idxE.ty indexAliasName (some idxE)) =
-                  .ok (t.setEnv indexAliasName (Binding.val v)) := by
-                rw [execStmt, hev]
-                rfl
-              rw [hR]
+        (execBlock s [Stmt.memoryDecl path.ty memoryPathAliasName (some path),
+          Stmt.delete (indexFromAlias Kind.memory memoryPathAliasName
+            ty path idxE)])
+      rw [hLeq, execBlock_pair]
+      have hRdecl : execStmt s
+          (Stmt.memoryDecl path.ty memoryPathAliasName (some path)) =
+          (readM s path) >>= fun x =>
+            match x.2 with
+            | MVal.ref id =>
+                .ok (x.1.setEnv memoryPathAliasName (Binding.mref id))
+            | MVal.prim _ => .error .stuck := by
+        rw [execStmt]
+        rw [hkpm]
+        rfl
+      have hReq : ∀ (u : State), execStmt u
+          (Stmt.delete (indexFromAlias Kind.memory memoryPathAliasName
+            ty path idxE)) =
+          (resolveLoc u (WrappedExpr.index Kind.memory ty
+            (aliasExpr Kind.memory path.ty memoryPathAliasName)
+            idxE)) >>= fun x =>
+            match ty with
+            | Ty.bool => writeMSlot x.1 x.2 (MVal.bool false)
+            | Ty.uint => writeMSlot x.1 x.2 (MVal.int 0)
+            | Ty.int => writeMSlot x.1 x.2 (MVal.int 0)
+            | Ty.ref r =>
+                (allocDefault x.1 r) >>= fun y =>
+                  writeMSlot y.1 x.2 (MVal.ref y.2) := fun u => by
+        rw [execStmt]
+        rfl
+      cases hcap : readM s path with
+      | error err =>
+          rw [hRdecl, hcap, resolveLoc, resolveMBase_eq_readM, hcap]
+          exact rfl
+      | ok x =>
+          obtain ⟨t, mv⟩ := x
+          cases mv with
+          | prim p =>
+              cases p <;>
+                (rw [hRdecl, hcap, resolveLoc, resolveMBase_eq_readM,
+                   hcap]
+                 exact rfl)
+          | ref id =>
+              rw [hRdecl, hcap]
               have ht' : EnvAgreeExcept aliasNames t
-                  (t.setEnv indexAliasName (Binding.val v)) :=
-                (EnvAgreeExcept.refl _ t).setEnv_right idx_mem _
-              have hb' : resolveMBase
-                  (t.setEnv indexAliasName (Binding.val v)) path =
-                  .ok (t.setEnv indexAliasName (Binding.val v), mid) := by
-                have h := resolveMBase_agree ht' path hfp
-                rw [hb] at h
-                rcases h.cases with ⟨err, h1, h2⟩ | ⟨u₁, u₂, a, h1, h2, hu⟩
-                · exact nomatch h1
-                · have ha : a = mid :=
-                    (congrArg Prod.snd (Except.ok.inj h1)).symm
-                  have hu2 : u₂ = t.setEnv indexAliasName (Binding.val v) :=
-                    resolveMBase_pure hpp h2
-                  rw [h2, hu2, ha]
-              have hReq : ∀ (u : State), execStmt u
-                  (Stmt.delete (PlaceExpr.index Kind.memory ty path
-                    (indexAlias idxE))) =
-                  (resolveLoc u (WrappedExpr.index Kind.memory ty path
-                    (indexAlias idxE))) >>= fun x =>
-                    match ty with
-                    | Ty.bool => writeMSlot x.1 x.2 (MVal.bool false)
-                    | Ty.uint => writeMSlot x.1 x.2 (MVal.int 0)
-                    | Ty.int => writeMSlot x.1 x.2 (MVal.int 0)
-                    | Ty.ref r =>
-                        (allocDefault x.1 r) >>= fun y =>
-                          writeMSlot y.1 x.2 (MVal.ref y.2) := fun u => by
-                rw [execStmt]
-                rfl
+                  (t.setEnv memoryPathAliasName (Binding.mref id)) :=
+                (EnvAgreeExcept.refl _ t).setEnv_right mp_mem _
               have hlocSim : ResAgree aliasNames
-                  (resolveLoc t (WrappedExpr.index Kind.memory ty path idxE))
-                  (resolveLoc (t.setEnv indexAliasName (Binding.val v))
-                    (WrappedExpr.index Kind.memory ty path
-                      (indexAlias idxE))) := by
-                rw [resolveLoc, resolveLoc, hb, hb']
+                  (resolveLoc s
+                    (WrappedExpr.index Kind.memory ty path idxE))
+                  (resolveLoc
+                    (t.setEnv memoryPathAliasName (Binding.mref id))
+                    (WrappedExpr.index Kind.memory ty
+                      (aliasExpr Kind.memory path.ty
+                        memoryPathAliasName) idxE)) := by
+                rw [resolveLoc, resolveLoc, resolveMBase_eq_readM, hcap,
+                  resolveMBase_alias (s := t.setEnv memoryPathAliasName
+                      (Binding.mref id)) path.ty
+                    (lookupBy_setBy_self memoryPathAliasName
+                      (Binding.mref id) t.env)]
                 simp only [resOk_bind]
-                rw [evalInt, evalInt, hev, indexAlias,
-                  evalValue_alias idxE.ty
-                    (lookupBy_setBy_self indexAliasName (Binding.val v)
-                      t.env)]
-                simp only [resOk_bind]
-                cases v.asInt with
-                | error err => exact rfl
-                | ok i => exact ⟨rfl, ht'⟩
+                refine ResAgree.bind (evalInt_agree ht' idxE hfi) ?_
+                intro u₁ u₂ i hu
+                exact ⟨rfl, hu⟩
               show ResultsAgree aliasNames _
-                (execStmt (t.setEnv indexAliasName (Binding.val v))
-                  (Stmt.delete (PlaceExpr.index Kind.memory ty path
-                    (indexAlias idxE))))
+                (execStmt (t.setEnv memoryPathAliasName (Binding.mref id))
+                  (Stmt.delete (indexFromAlias Kind.memory
+                    memoryPathAliasName ty path idxE)))
               rw [hReq]
               refine ResAgree.bindState hlocSim ?_
               intro u₁ u₂ loc2 hu
@@ -10411,6 +11257,141 @@ theorem memoryDeleteComplexTarget_sound
                   refine ResAgree.bindState (allocDefault_agree hu r) ?_
                   intro w₁ w₂ id2 hw
                   exact writeMSlot_agree hw _ (MVal.ref id2)
+
+/-- As for `storageIndexDeleteNonSimpleIndexCapture_sound`: the receiver
+must resolve in the initial state (`hbase`), and the index's purity is
+proof-technique residue. -/
+theorem memoryIndexDeleteNonSimpleIndexCapture_sound
+    (s : State) (target : PlaceExpr)
+    (hcond : (ruleEffect .memoryIndexDeleteNonSimpleIndexCapture).cond
+      (Stmt.delete target))
+    (hfresh : ∀ n ∈ aliasNames,
+      stmtUsesVar (Stmt.delete target) n = false)
+    (hbase : ∀ {kind ty path index},
+      target.expr = WrappedExpr.index kind ty path index ->
+        (pureExpr index = true ∧
+          ∃ mid, resolveMBase s path = .ok (s, mid))) :
+    ResultsAgree aliasNames
+      (execStmt s (Stmt.delete target))
+      (execBlock s
+        ((ruleEffect .memoryIndexDeleteNonSimpleIndexCapture).block
+          (Stmt.delete target) hcond)) := by
+  obtain ⟨e, hass⟩ := target
+  revert hbase
+  match e, hass, hcond, hfresh with
+  | WrappedExpr.index Kind.memory ty path idxE, hass, hcond, hfresh =>
+      intro hbase
+      obtain ⟨hpi, mid, hb⟩ := hbase rfl
+      have hps : path.simple = true := hcond.1
+      have hpp : pureExpr path = true := pure_of_simple hps
+      have hfp : ∀ n ∈ aliasNames, usesVar path n = false := fun n hn => by
+        have := hfresh n hn
+        simp [stmtUsesVar, usesVar] at this
+        exact this.1
+      have hLeq : execStmt s
+          (Stmt.delete (PlaceExpr.index Kind.memory ty path idxE)) =
+          (resolveLoc s (WrappedExpr.index Kind.memory ty path idxE)) >>=
+            fun x =>
+              match ty with
+              | Ty.bool => writeMSlot x.1 x.2 (MVal.bool false)
+              | Ty.uint => writeMSlot x.1 x.2 (MVal.int 0)
+              | Ty.int => writeMSlot x.1 x.2 (MVal.int 0)
+              | Ty.ref r =>
+                  (allocDefault x.1 r) >>= fun y =>
+                    writeMSlot y.1 x.2 (MVal.ref y.2) := by
+        rw [execStmt]
+        rfl
+      show ResultsAgree aliasNames
+        (execStmt s (Stmt.delete (PlaceExpr.index Kind.memory ty path idxE)))
+        (execBlock s [Stmt.stackDecl idxE.ty indexAliasName (some idxE),
+          Stmt.delete (PlaceExpr.index Kind.memory ty path
+            (indexAlias idxE))])
+      rw [hLeq, execBlock_pair]
+      cases hev : evalValue s idxE with
+      | error err =>
+          have hL2 : (resolveLoc s
+              (WrappedExpr.index Kind.memory ty path idxE)) =
+              .error err := by
+            rw [resolveLoc, hb]
+            simp only [resOk_bind]
+            rw [evalInt, hev]
+            rfl
+          have hR : execStmt s
+              (Stmt.stackDecl idxE.ty indexAliasName (some idxE)) =
+              .error err := by
+            rw [execStmt, hev]
+            rfl
+          rw [hL2, hR]
+          exact rfl
+      | ok y =>
+          obtain ⟨t, v⟩ := y
+          have hts : t = s := evalValue_pure hpi hev
+          subst hts
+          have hR : execStmt t
+              (Stmt.stackDecl idxE.ty indexAliasName (some idxE)) =
+              .ok (t.setEnv indexAliasName (Binding.val v)) := by
+            rw [execStmt, hev]
+            rfl
+          rw [hR]
+          have ht' : EnvAgreeExcept aliasNames t
+              (t.setEnv indexAliasName (Binding.val v)) :=
+            (EnvAgreeExcept.refl _ t).setEnv_right idx_mem _
+          have hb' : resolveMBase
+              (t.setEnv indexAliasName (Binding.val v)) path =
+              .ok (t.setEnv indexAliasName (Binding.val v), mid) := by
+            have h := resolveMBase_agree ht' path hfp
+            rw [hb] at h
+            rcases h.cases with ⟨err, h1, h2⟩ | ⟨u₁, u₂, a, h1, h2, hu⟩
+            · exact nomatch h1
+            · have ha : a = mid :=
+                (congrArg Prod.snd (Except.ok.inj h1)).symm
+              have hu2 : u₂ = t.setEnv indexAliasName (Binding.val v) :=
+                resolveMBase_pure hpp h2
+              rw [h2, hu2, ha]
+          have hReq : ∀ (u : State), execStmt u
+              (Stmt.delete (PlaceExpr.index Kind.memory ty path
+                (indexAlias idxE))) =
+              (resolveLoc u (WrappedExpr.index Kind.memory ty path
+                (indexAlias idxE))) >>= fun x =>
+                match ty with
+                | Ty.bool => writeMSlot x.1 x.2 (MVal.bool false)
+                | Ty.uint => writeMSlot x.1 x.2 (MVal.int 0)
+                | Ty.int => writeMSlot x.1 x.2 (MVal.int 0)
+                | Ty.ref r =>
+                    (allocDefault x.1 r) >>= fun y =>
+                      writeMSlot y.1 x.2 (MVal.ref y.2) := fun u => by
+            rw [execStmt]
+            rfl
+          have hlocSim : ResAgree aliasNames
+              (resolveLoc t (WrappedExpr.index Kind.memory ty path idxE))
+              (resolveLoc (t.setEnv indexAliasName (Binding.val v))
+                (WrappedExpr.index Kind.memory ty path
+                  (indexAlias idxE))) := by
+            rw [resolveLoc, resolveLoc, hb, hb']
+            simp only [resOk_bind]
+            rw [evalInt, evalInt, hev, indexAlias,
+              evalValue_alias idxE.ty
+                (lookupBy_setBy_self indexAliasName (Binding.val v)
+                  t.env)]
+            simp only [resOk_bind]
+            cases v.asInt with
+            | error err => exact rfl
+            | ok i => exact ⟨rfl, ht'⟩
+          show ResultsAgree aliasNames _
+            (execStmt (t.setEnv indexAliasName (Binding.val v))
+              (Stmt.delete (PlaceExpr.index Kind.memory ty path
+                (indexAlias idxE))))
+          rw [hReq]
+          refine ResAgree.bindState hlocSim ?_
+          intro u₁ u₂ loc2 hu
+          match hty : ty with
+          | Ty.bool => exact writeMSlot_agree hu _ (MVal.bool false)
+          | Ty.uint => exact writeMSlot_agree hu _ (MVal.int 0)
+          | Ty.int => exact writeMSlot_agree hu _ (MVal.int 0)
+          | Ty.ref r =>
+              refine ResAgree.bindState (allocDefault_agree hu r) ?_
+              intro w₁ w₂ id2 hw
+              exact writeMSlot_agree hw _ (MVal.ref id2)
 
 /-! ## `push`-lvalue assignment
 
@@ -10713,7 +11694,7 @@ theorem storagePushLhsToPushValue_sound
 
 The three Lean-only coverage rules (Rules.lean, `RuleName` docstring).
 All three are unconditional: the residual performs the very evaluation
-the original performs, differing only in the scratch `pv` binding
+the original performs, differing only in the scratch `se` binding
 (`exprStmtCapture`) or not at all (the two lowerings, whose residual is
 literally the `Stmt.assign` form `execStmt` delegates to). -/
 
@@ -10805,7 +11786,7 @@ theorem functionBodyExpand_sound_inlined (d : Nat) (s : State)
 
 /-- `functionCallArgCapture`, relative to inlining, **open**.
 
-The residual hoists the leftmost complex argument `c` into `pv` ahead of
+The residual hoists the leftmost complex argument `c` into `se` ahead of
 the (simple) arguments before it and ahead of the callee's parameter
 declarations.  Agreement therefore needs, beyond alias freshness for the
 statement: `c` pure (an impure `c` — `f(i, i++)` — is evaluated before
@@ -10813,7 +11794,7 @@ the earlier simple argument `i` in the residual but after it in the
 inlined original, so the rule is unsound on that program, exactly as the
 `*WriteUnfoldLeft*` family on `a[i++].x = i`); the callee body, result
 place and remaining arguments free of the scratch name (the inlined
-body runs after the capture and must not read `pv`); and `c` free of the
+body runs after the capture and must not read `se`); and `c` free of the
 callee's parameter names (the residual evaluates `c` before the
 parameter declarations shadow them).  With those hypotheses the proof is
 a congruence argument through `paramDecls` using `evalValue_agree`
@@ -10874,47 +11855,6 @@ theorem storagePushValueUnfoldRightSndArgument_sound
       root segs elems shadow elemTy hcond hfresh hbase harr htyE
       (fun h => (hstack h).1) (fun h => (hstack h).2) hprhs
   · sorry
-
-/-- `memoryWriteUnfoldRightSndResult`, all right-hand-side kinds.  The
-storage and stack kinds dispatch to the two proved lemmas above (each
-with the side conditions that kind needs).  The rule's condition also
-admits a *memory*-kind complex right-hand side that is not a memory
-field/index read (a memory-typed call or ternary), whose capture is a
-memory alias declaration; that case is **open** — `sorry` rather than a
-statement restricted to two of the three kinds under the rule's name. -/
-theorem memoryWriteUnfoldRightSndResult_sound
-    (s : State) (lhs : PlaceExpr) (rhs : WrappedExpr) {loc : Loc}
-    (hcond : (ruleEffect .memoryWriteUnfoldRightSndResult).cond
-      (Stmt.assign lhs rhs))
-    (hfresh : ∀ n ∈ aliasNames,
-      stmtUsesVar (Stmt.assign lhs rhs) n = false)
-    (hlhs : resolveLoc s lhs.expr = .ok (s, loc))
-    (hplhs : pureExpr lhs.expr = true)
-    (hprhs : pureExpr rhs = true)
-    (hS : rhs.kind = Kind.storage ->
-      tyHasMapping rhs.ty = false ∧
-        ∀ u : State, evalValue u rhs =
-          (resolveS u rhs) >>= fun x =>
-            (x.1.findStorage x.2.1 x.2.2) >>= fun v =>
-              v.asValue >>= fun val => Except.ok (x.1, val))
-    (hK : rhs.kind = Kind.stack ->
-      ((∃ id fld, loc = Loc.memoryField id fld) ∨
-        (∃ id i, loc = Loc.memoryIndex id i)) ∧
-        rhs.ty.isPrimitive = true) :
-    ResultsAgree aliasNames
-      (execStmt s (Stmt.assign lhs rhs))
-      (execBlock s
-        ((ruleEffect .memoryWriteUnfoldRightSndResult).block
-          (Stmt.assign lhs rhs) hcond)) := by
-  cases hk : rhs.kind with
-  | storage =>
-      exact memoryWriteUnfoldRightSndResult_storage_sound s lhs rhs hcond
-        hfresh hlhs hplhs hk hprhs (hS hk).1 (hS hk).2
-  | stack =>
-      exact memoryWriteUnfoldRightSndResult_stack_sound s lhs rhs hcond
-        hfresh hlhs hplhs (hK hk).1 hk hprhs (hK hk).2
-  | memory =>
-      sorry
 
 end RuleSoundness
 

@@ -54,9 +54,9 @@ sol_derivation storageToMemoryRootCopy :
 sol_derivation storageToMemoryMemberCopy :
     => <[ alice.account.balance = 10; Account memory mv = alice.account;
           v = mv@Account.balance ]>(φ)
-  ~*> => { rv@uint := default(uint) } { rv@uint := 10 }
+  ~*> => { se@uint := default(uint) } { se@uint := 10 }
           { sp@Account := path(alice.account) }
-          { storage := save(sp@Account.balance, rv@uint) }
+          { storage := save(sp@Account.balance, se@uint) }
           { mv := freshId(alloc(Account, alice.account)) ‖ memory := alloc(Account, alice.account) } { v := mv@Account.balance } (φ)
 
 /-! ### `carol.age = 42; alice = carol; v = alice.age;` — memory to storage
@@ -78,18 +78,17 @@ sol_derivation memoryToStorageFromAlias :
           { sp@Account := path(alice.account) } { v := sp@Account.balance } (φ)
 
 /-! ### `carol.account.balance = 50; alice.account = carol.account; v = …`
-A memory *member* as the source of a storage write.  The calculus says no
-alias is introduced; Lean captures the member into `pv` first, and the copy
-then reads that identity — the same `copyMem` view, one binding earlier. -/
+A memory *member* as the source of a storage write.  No alias is introduced,
+exactly as the calculus says: `memoryToStorageFieldCopyField` reads the
+member's identity and installs the `copyMem` view directly. -/
 
 sol_derivation memoryToStorageFromMemberSource :
     => <[ carol.account.balance = 50; alice.account = carol.account;
           v = alice.account.balance ]>(φ)
-  ~*> => { rv@uint := default(uint) } { rv@uint := 50 }
+  ~*> => { se@uint := default(uint) } { se@uint := 50 }
           { mv@Account := ref(carol.account) }
-          { memory := write(memory, mv@Account.balance, rv@uint) }
-          { pv@Account := ref(carol.account) }
-          { storage := copyMem(alice.account, pv@Account) }
+          { memory := write(memory, mv@Account.balance, se@uint) }
+          { storage := copyMem(alice.account, carol.account) }
           { sp@Account := path(alice.account) } { v := sp@Account.balance } (φ)
 
 /-! ### `carolToken.value = 99; alice.account.token = carolToken; v = …`

@@ -10,17 +10,17 @@ set_option maxHeartbeats 8000000
 
 Binary operators only compute once both operands are simple stack
 values; complex operands are first hoisted into the fresh value variable
-`pv` (KeY `<op>CaptureLhs`/`<op>CaptureRhs`/`<op>_unfold_result`).
+`se` (KeY `<op>CaptureLhs`/`<op>CaptureRhs`/`<op>_unfold_result`).
 
-The `pv` these rules produce is a *stack* variable, spelled `pv@uint` /
-`pv@bool` in the surface notation: a bare `pv` is a storage alias and
+The `se` these rules produce is a *stack* variable, spelled `se@uint` /
+`se@bool` in the surface notation: a bare `se` is a storage alias and
 `SoliditySyntax.aliasKind` cannot see the type, so the kind is decided at
 the use site (`SoliditySyntax.isStackScratchAlias`).  Before that existed
 these derivations had to be written as raw `Stmt` constructors, which is
 the one thing `.claude/rules/derivations.md` forbids.
 
 Each administrative run (`localValueDeclInitDrop` → `valueDeclSkip`, plus the
-operator step that fills `pv`) is elided into a single `⇝*` line with its
+operator step that fills `se`) is elided into a single `⇝*` line with its
 rules listed, the way the calculus collapses such runs. -/
 
 /-! ### `result = i + amount` — both operands already simple
@@ -40,20 +40,20 @@ example :
 sol_derivation addFieldOperandCaptured :
     solbox!{ result = alice.age + amount }
   ⇝[.binopUnfoldLeft BinOp.add]
-    solbox!{ uint pv = alice.age; result = pv@uint + amount }
+    solbox!{ uint se = alice.age; result = se@uint + amount }
   ⇝*[.localValueDeclInitDrop, .valueDeclSkip, .storageFieldReadFind]
-    solbox!{ result = pv@uint + amount }
+    solbox!{ result = se@uint + amount }
   ⇝[.binopAssignment .add]
     solbox!{}
 
-/-! ### `alice.age = x + y` — result into storage captured via `pv` -/
+/-! ### `alice.age = x + y` — result into storage captured via `se` -/
 
 sol_derivation addResultCaptured :
     solbox!{ alice.age = x + y }
   ⇝[.binopUnfoldResult BinOp.add]
-    solbox!{ uint pv = x + y; alice.age = pv@uint }
+    solbox!{ uint se = x + y; alice.age = se@uint }
   ⇝*[.localValueDeclInitDrop, .valueDeclSkip, .binopAssignment .add]
-    solbox!{ alice.age = pv@uint }
+    solbox!{ alice.age = se@uint }
   ⇝[.storageFieldWriteSave]
     solbox!{}
 
@@ -66,9 +66,9 @@ example : solbox!{ assert(flag) } ⇝[.assertSimple] solbox!{} := by rule_step
 sol_derivation assertConditionCaptured :
     solbox!{ assert((i < amount)) }
   ⇝[.assertConditionCapture]
-    solbox!{ bool pv = (i < amount); assert(pv@bool) }
+    solbox!{ bool se = (i < amount); assert(se@bool) }
   ⇝*[.localValueDeclInitDrop, .valueDeclSkip, .binopAssignment .lt]
-    solbox!{ assert(pv@bool) }
+    solbox!{ assert(se@bool) }
   ⇝[.assertSimple]
     solbox!{}
 
@@ -90,9 +90,9 @@ Mirrors `net-transfer-capture-argument.key`. -/
 sol_derivation transferAmountCaptured :
     solbox!{ to.transfer(x + 2) }
   ⇝[.transferUnfoldRightSndArgument]
-    solbox!{ uint pv = x + 2; to.transfer(pv@uint) }
+    solbox!{ uint se = x + 2; to.transfer(se@uint) }
   ⇝*[.localValueDeclInitDrop, .valueDeclSkip, .binopAssignment .add]
-    solbox!{ to.transfer(pv@uint) }
+    solbox!{ to.transfer(se@uint) }
   ⇝[.transferNoCallback]
     solbox!{}
 

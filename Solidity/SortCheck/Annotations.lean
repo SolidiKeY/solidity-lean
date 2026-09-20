@@ -5,14 +5,20 @@ import Solidity.Calculus.Rules
 
 A machine-checked transcription of the *read-sort annotations* carried
 by the read-bearing taclets of solkey's `solidityProgramRules.key`
-(transcribed at solkey commit `0f9b99ad55` and unchanged at `e67a0d7c48` —
-that commit touches
-only `structRules.key`; the sort-relevant history is
+(transcribed at solkey commit `8c5c69ca25`: 310 taclets, 110 of them
+read-bearing, one row each). The sort-relevant history is
 `12e72a1b4b` "removed find<int> to be more generic", `52c9c2477a`
-"removed valAt", and `0f9b99ad55` "removed different fields", which
+"removed valAt", `0f9b99ad55` "removed different fields" (which
 dropped the `Field[primitive]`/`Field[reference]` schema sorts in favour
-of `\hasFieldSort`/`\hasMemoryFieldSort` bounds). Each `TacletReadAnn`
-row records, per KeY taclet, the
+of `\hasFieldSort`/`\hasMemoryFieldSort` bounds), `444f029579` (the
+memory arithmetic families `memoryField*`/`memoryIndexArray*`) and
+`29c44e225b` "fixed some rules", which merged the `_root`/`_decompose`
+twins into one taclet each, split `storageIndex{Op}Assign` and
+`storageIndex{Pre,Post}{in,de}crement[Assignment]` into a `Mapping` and
+an `Array` taclet, and replaced the last two `find<[Struct]>` copy reads
+(`storageFieldWriteCopySource`, `storagePushValueCopySource`) by the
+sort-free `find<[StValue]>` — closing the two open findings this table
+used to carry. Each `TacletReadAnn` row records, per KeY taclet, the
 multiset of read operations its `\replacewith`/`\add` skeleton performs
 and the KeY sort each read declares.
 
@@ -120,6 +126,20 @@ private def mread (site : ReadSite) (sort : ReadSort) : TacletRead :=
 private def slen : TacletRead := sread .length (.fixed .int)
 private def mlen : TacletRead := mread .length (.fixed .int)
 
+/-- The int-sorted read of an arithmetic target cell:
+`find<[int]>(storage, ..)` / `read<[int]>(memory, ..)`. -/
+private def sint : TacletRead := sread .value (.fixed .int)
+private def mint : TacletRead := mread .value (.fixed .int)
+
+/-! ### Compound assignment (`+=` .. `%=`)
+
+Every arithmetic taclet reads its target cell int-sorted in the
+`save`/`write`; the array forms bracket it with the bounds check's two
+`size` reads (`\replacewith` and the `\add`ed "in bounds" premise, or
+the memory `\add`s), in the order the taclet text has them. The former
+`#inBounds*` premise, which re-read the cell, is gone with
+`InBoundsTacletGenerator`. -/
+
 /-- KeY compound-assignment taclet name fragment per operator. -/
 def compoundOpName : BinOp -> String
   | .add => "Add"
@@ -132,23 +152,35 @@ def compoundOpName : BinOp -> String
 /-- The compound-assignment ops with KeY taclets (`+=` .. `%=`). -/
 def compoundOps : List BinOp := [.add, .sub, .mul, .div, .mod]
 
-/-- `storage{Root,Field,Index}{Add..Mod}Assign` read the target cell
-int-sorted in the `save` (the former `#inBounds*` premise, which
-re-read the cell, was dropped together with `InBoundsTacletGenerator`). -/
-private def compoundReads (_op : BinOp) : List TacletRead :=
-  [sread .value (.fixed .int)]
-
 private def compoundRows : List TacletReadAnn :=
   compoundOps.flatMap fun op =>
     [ { keyName := s!"storageRoot{compoundOpName op}Assign"
-        leanRule := some (.storageRootCompoundAssign op)
-        reads := compoundReads op },
+        leanRule := some (.storageRootOpAssign op)
+        reads := [sint] },
       { keyName := s!"storageField{compoundOpName op}Assign"
-        leanRule := some (.storageFieldCompoundAssign op)
-        reads := compoundReads op },
-      { keyName := s!"storageIndex{compoundOpName op}Assign"
-        leanRule := some (.storageIndexCompoundAssign op)
-        reads := compoundReads op } ]
+        leanRule := some (.storageFieldOpAssign op)
+        reads := [sint] },
+      { keyName := s!"storageIndexMapping{compoundOpName op}Assign"
+        leanRule := some (.storageIndexMappingOpAssign op)
+        reads := [sint] },
+      { keyName := s!"storageIndexArray{compoundOpName op}Assign"
+        leanRule := some (.storageIndexArrayOpAssign op)
+        reads := [slen, sint, slen] },
+      { keyName := s!"memoryField{compoundOpName op}Assign"
+        leanRule := some (.memoryFieldOpAssign op)
+        reads := [mint] },
+      { keyName := s!"memoryIndexArray{compoundOpName op}Assign"
+        leanRule := some (.memoryIndexArrayOpAssign op)
+        reads := [mint, mlen, mlen] } ]
+
+/-! ### Increment / decrement
+
+Statement forms (`sp.fld++;`) read the target cell once; the
+`..Assignment` forms (`v = sp.fld++;`) read it a second time for the
+captured old/new value. The storage index forms are split by receiver
+kind upstream (`storageIndexMapping*` / `storageIndexArray*`), both
+mapped to the one Lean `storageIndexIncrement[Assignment]`, whose
+`KeyOrigin` is the merge of the two. -/
 
 /-- KeY `Pre/Post` × `in/de` taclet name fragment per `IncDec` op. -/
 def incDecOpName : IncDec -> String
@@ -159,36 +191,44 @@ def incDecOpName : IncDec -> String
 
 def incDecOps : List IncDec := [.preInc, .preDec, .postInc, .postDec]
 
-/-- Statement-form `storage{Root,Field,Index}{Pre,Post}{in,de}crement`:
-one int read of the target cell in the `save`. -/
-private def incDecReads : List TacletRead :=
-  [sread .value (.fixed .int)]
-
-/-- Assignment-form `..Assignment` variants additionally read the cell
-for the captured old/new value. -/
-private def incDecAssignReads : List TacletRead :=
-  [sread .value (.fixed .int), sread .value (.fixed .int)]
-
 private def incDecRows : List TacletReadAnn :=
   incDecOps.flatMap fun op =>
     [ { keyName := s!"storageRoot{incDecOpName op}"
-        leanRule := some (.storageRootIncDec op)
-        reads := incDecReads },
+        leanRule := some (.storageRootIncrement op)
+        reads := [sint] },
       { keyName := s!"storageField{incDecOpName op}"
-        leanRule := some (.storageFieldIncDec op)
-        reads := incDecReads },
-      { keyName := s!"storageIndex{incDecOpName op}"
-        leanRule := some (.storageIndexIncDec op)
-        reads := incDecReads },
+        leanRule := some (.storageFieldIncrement op)
+        reads := [sint] },
+      { keyName := s!"storageIndexMapping{incDecOpName op}"
+        leanRule := some (.storageIndexIncrement op)
+        reads := [sint] },
+      { keyName := s!"storageIndexArray{incDecOpName op}"
+        leanRule := some (.storageIndexIncrement op)
+        reads := [slen, sint, slen] },
       { keyName := s!"storageRoot{incDecOpName op}Assignment"
-        leanRule := some (.storageRootIncDecAssignment op)
-        reads := incDecAssignReads },
+        leanRule := some (.storageRootIncrementAssignment op)
+        reads := [sint, sint] },
       { keyName := s!"storageField{incDecOpName op}Assignment"
-        leanRule := some (.storageFieldIncDecAssignment op)
-        reads := incDecAssignReads },
-      { keyName := s!"storageIndex{incDecOpName op}Assignment"
-        leanRule := some (.storageIndexIncDecAssignment op)
-        reads := incDecAssignReads } ]
+        leanRule := some (.storageFieldIncrementAssignment op)
+        reads := [sint, sint] },
+      { keyName := s!"storageIndexMapping{incDecOpName op}Assignment"
+        leanRule := some (.storageIndexIncrementAssignment op)
+        reads := [sint, sint] },
+      { keyName := s!"storageIndexArray{incDecOpName op}Assignment"
+        leanRule := some (.storageIndexIncrementAssignment op)
+        reads := [slen, sint, sint, slen] },
+      { keyName := s!"memoryField{incDecOpName op}"
+        leanRule := some (.memoryFieldIncrement op)
+        reads := [mint] },
+      { keyName := s!"memoryIndexArray{incDecOpName op}"
+        leanRule := some (.memoryIndexArrayIncrement op)
+        reads := [mint, mlen, mlen] },
+      { keyName := s!"memoryField{incDecOpName op}Assignment"
+        leanRule := some (.memoryFieldIncrementAssignment op)
+        reads := [mint, mint] },
+      { keyName := s!"memoryIndexArray{incDecOpName op}Assignment"
+        leanRule := some (.memoryIndexArrayIncrementAssignment op)
+        reads := [mint, mint, mlen, mlen] } ]
 
 /-! ## The table -/
 
@@ -207,10 +247,10 @@ def tacletReadAnns : List TacletReadAnn :=
     -- Field copies and reads.
     { keyName := "storageFieldWriteCopySource"
       leanRule := some .storageFieldWriteCopySource
-      -- `find<[Struct]>(storage, sp2)` on a `Path[storage,simple]`
-      -- source: NOT sort-faithful for primitive-typed sources — an
-      -- `openFindings` entry, see `Faithfulness.lean`.
-      reads := [sread .value (.fixed .struct)] },
+      -- Sort-free since `29c44e225b`; was `find<[Struct]>` on a
+      -- `Path[storage,simple]` source that may be primitive-typed — the
+      -- open finding `Counterexamples/PreFixSortAnnotations.lean` refutes.
+      reads := [sread .value (.fixed .stValue)] },
     { keyName := "storageFieldReadFind"
       leanRule := some .storageFieldReadFind
       reads := [sread .value (.generic .hasFieldSort)] },
@@ -218,10 +258,7 @@ def tacletReadAnns : List TacletReadAnn :=
       leanRule := some .storageFieldReadStoreRoot
       reads := [sread .value (.fixed .stValue)] },
     -- Mapping index rules.
-    { keyName := "storageIndexReadMappingFind_root"
-      leanRule := some .storageIndexReadMappingFind
-      reads := [sread .value (.generic .hasElementSort)] },
-    { keyName := "storageIndexReadMappingFind_decompose"
+    { keyName := "storageIndexReadMappingFind"
       leanRule := some .storageIndexReadMappingFind
       reads := [sread .value (.generic .hasElementSort)] },
     { keyName := "storageIndexReadMappingStoreRoot"
@@ -231,25 +268,20 @@ def tacletReadAnns : List TacletReadAnn :=
       leanRule := some .storageIndexWriteMappingCopySource
       reads := [sread .value (.fixed .stValue)] },
     -- Array index rules (Lean splits by modality; the box rule is the
-    -- representative).
-    { keyName := "storageIndexWriteArraySave_root"
+    -- representative). The bounds check reads `size` twice: once in
+    -- the in-bounds `\replacewith`, once in the out-of-bounds one.
+    { keyName := "storageIndexWriteArraySave"
       leanRule := some .storageIndexWriteArraySaveBox
       reads := [slen, slen] },
-    { keyName := "storageIndexWriteArraySave_decompose"
-      leanRule := some .storageIndexWriteArraySaveBox
-      reads := [slen, slen] },
-    { keyName := "storageIndexReadArrayFind_root"
+    { keyName := "storageIndexReadArrayFind"
       leanRule := some .storageIndexReadArrayFindBox
-      reads := [slen, sread .value (.generic .hasElementSort)] },
-    { keyName := "storageIndexReadArrayFind_decompose"
-      leanRule := some .storageIndexReadArrayFindBox
-      reads := [slen, sread .value (.generic .hasElementSort)] },
+      reads := [slen, sread .value (.generic .hasElementSort), slen] },
     { keyName := "storageIndexReadArrayBindLocalRoot"
       leanRule := some .storageIndexReadArrayBindLocalRootBox
-      reads := [slen] },
+      reads := [slen, slen] },
     { keyName := "storageIndexReadArrayStoreRoot"
       leanRule := some .storageIndexReadArrayStoreRootBox
-      reads := [slen, sread .value (.fixed .stValue)] },
+      reads := [slen, sread .value (.fixed .stValue), slen] },
     { keyName := "storageIndexWriteArrayCopySource"
       leanRule := some .storageIndexWriteArrayCopySourceBox
       reads := [slen, sread .value (.fixed .stValue), slen] },
@@ -262,9 +294,9 @@ def tacletReadAnns : List TacletReadAnn :=
       reads := [slen, slen] },
     { keyName := "storagePushValueCopySource"
       leanRule := some .storagePushValueCopySource
-      -- `find<[Struct]>(storage, sp2)` on the pushed source: NOT
-      -- sort-faithful for primitive element types — `openFindings`.
-      reads := [slen, sread .value (.fixed .struct), slen] },
+      -- Sort-free since `29c44e225b`; the second former `find<[Struct]>`
+      -- open finding (see `storageFieldWriteCopySource`).
+      reads := [slen, sread .value (.fixed .stValue), slen] },
     { keyName := "storagePushLengthSave"
       leanRule := some .storagePushLengthSave
       reads := [slen, slen] },
@@ -277,8 +309,9 @@ def tacletReadAnns : List TacletReadAnn :=
     -- Cross-domain copies.
     { keyName := "memoryStorageCopy"
       leanRule := some .memoryStorageCopy
-      -- `find<[Struct]>` too, but the target is `Variable[memory]`,
-      -- which Solidity types as a reference — provably faithful.
+      -- The one surviving `find<[Struct]>`: its target is
+      -- `Variable[memory]`, which Solidity types as a reference —
+      -- provably faithful (`ruleRefTarget`).
       reads := [sread .value (.fixed .struct)] },
     { keyName := "memoryToStorageFieldCopyField"
       leanRule := some .memoryToStorageFieldCopyRoot
@@ -303,23 +336,23 @@ def tacletReadAnns : List TacletReadAnn :=
       reads := [mread .value (.fixed .identity), mlen, mlen] },
     -- Memory deletes.
     { keyName := "memoryFieldDeletePrimitive"
-      leanRule := some .memoryDeleteSimpleTarget
+      leanRule := some .memoryFieldDeletePrimitive
       reads := [mread .dflt (.generic .hasMemoryFieldSort)] },
     { keyName := "memoryIndexDeletePrimitive"
-      leanRule := some .memoryDeleteSimpleTarget
+      leanRule := some .memoryIndexDeletePrimitiveBox
       reads := [mlen, mlen] },
     { keyName := "memoryIndexDeleteReference"
-      leanRule := some .memoryDeleteSimpleTarget
+      leanRule := some .memoryIndexDeleteReferenceBox
       reads := [mlen, mlen] },
     -- Payments. solkey `333cc7b353` split each rule by modality: the box
     -- rule books the debit unconditionally, the diamond rule additionally
     -- owes the EVM funding check as a "sufficient funds" goal. The ledger
     -- read is the same `selectSt<[int]>(net, at(a))` in all four.
     { keyName := "transferNoCallbackBox"
-      leanRule := some .transferNoCallback
+      leanRule := some .transferNoCallbackBox
       reads := [⟨.net, .net, .fixed .int⟩] },
     { keyName := "transferNoCallbackDiamond"
-      leanRule := some .transferNoCallback
+      leanRule := some .transferNoCallbackDiamond
       reads := [⟨.net, .net, .fixed .int⟩] },
     { keyName := "transferWithCallbackBox"
       leanRule := some .transferWithCallback
@@ -334,7 +367,8 @@ def tacletReadAnns : List TacletReadAnn :=
 The annotations the fixed commit removed, kept as data so
 `Counterexamples/PreFixSortAnnotations.lean` can prove they are *not*
 sort-faithful — i.e. that this layer catches the bug that slipped
-through. -/
+through. The `_root` taclets of that era are the merged taclets of
+today; the rows keep the names of their day. -/
 
 /-- Pre-fix `storageRootWriteCopySource`: `find<[int]>(storage, sp)` on
 a `Path[storage,simple]` source — mis-sorts `flag = flag2` on bools. -/
@@ -386,9 +420,10 @@ def preFixTacletReadAnns : List TacletReadAnn :=
       leanRule := some .storageIndexReadArrayStoreRootBox
       reads := [slen, sread .value (.fixed .int)] } ]
 
--- Taclet names must be unique (`_root`/`_decompose` variants are
--- distinct taclets).
+-- Taclet names must be unique, and the table has one row per
+-- read-bearing taclet of the pinned file.
 #guard (tacletReadAnns.map (·.keyName)).Nodup
+#guard tacletReadAnns.length = 110
 
 end TacletAnnotations
 end Solidity

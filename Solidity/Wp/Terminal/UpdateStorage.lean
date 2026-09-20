@@ -230,6 +230,29 @@ theorem memoryToStorageFieldCopyRoot_update (s : State) (lhs : PlaceExpr)
       exact execStmt_assign_storage s ⟨_, hass⟩ rhs (by simp [storageTargetB, hp'])
         (terminalRhsB_of_simple hc'.2.2)
 
+/-- `sp.fld = mv.fr`: the source is a reference *member* of a simple memory
+root, read directly (`readMem` on the member, then `copyMem`) rather than
+through a fresh root alias — the one memory source `terminalRhsB` admits
+that is not a root. -/
+theorem memoryToStorageFieldCopyField_update (s : State) (lhs : PlaceExpr)
+    (rhs : WrappedExpr)
+    (hcond : (ruleEffect .memoryToStorageFieldCopyField).cond
+      (Stmt.assign lhs rhs)) :
+    execStmt s (Stmt.assign lhs rhs) =
+      terminalUpdate .memoryToStorageFieldCopyField (Stmt.assign lhs rhs) s := by
+  show execStmt s (Stmt.assign lhs rhs) = storageAssignUpd lhs rhs s
+  obtain ⟨e, hass⟩ := lhs
+  match e, hass, hcond with
+  | WrappedExpr.field Kind.storage ty path f, hass, hc =>
+      have hc' : isSimple path ∧ isMemberSource rhs := hc
+      have hp' : path.simple = true := hc'.1
+      have hr : terminalRhsB rhs = true := by
+        match rhs, hc'.2 with
+        | WrappedExpr.field Kind.memory _ mv g, hm =>
+            have hmv : mv.simple = true := hm.1
+            simp [terminalRhsB, simplePathB, hmv]
+      exact execStmt_assign_storage s ⟨_, hass⟩ rhs (by simp [storageTargetB, hp']) hr
+
 /-! ## Index targets (box/diamond/mapping twins) -/
 
 /-- Shared proof for every index-target write: simple path and index,

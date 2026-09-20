@@ -117,7 +117,7 @@ example :
            (result == false) }).Holds := by
   native_decide
 
-/-- `localAddAssign`/`localSubAssign` (Lean `localCompoundAssign`):
+/-- `localAddAssign`/`localSubAssign` (Lean `localOpAssign`):
 compound assignment on a stack local. -/
 example :
     (sol!{ < uint x = 10; x += 5; x -= 3; result = x >
@@ -138,7 +138,7 @@ example :
              (result == 0) }).Holds := by
   native_decide
 
-/-- `localPreincrement`/`localPostincrement` (Lean `localIncDec`): bare
+/-- `localPreincrement`/`localPostincrement` (Lean `localIncrement`): bare
 `++x;`/`x++;` statements on a stack local (`--` cannot be a token in the
 `sol!` grammar — it opens a Lean comment — so the decrement twins are
 exercised through `incDecExpr` in `RuleValidation`-style tests). -/
@@ -147,7 +147,7 @@ example :
            (result == 7) }).Holds := by
   native_decide
 
-/-- `localPredecrement` (Lean `localIncDec .preDec`), via `incDecExpr`. -/
+/-- `localPredecrement` (Lean `localIncrement .preDec`), via `incDecExpr`. -/
 example :
     (SolidityJudgment.mk
       ⟨.diamond,

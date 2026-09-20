@@ -5,6 +5,7 @@ import Solidity.AST
 import Solidity.Calculus.RuleSyntax
 import Solidity.Calculus.Rules
 import Solidity.Calculus.RuleShapes
+import Solidity.Calculus.PrintedRules
 import Solidity.Calculus.Completeness
 import Solidity.Counterexamples.DeleteFamilyGenericOverlap
 import Solidity.Counterexamples.MissingStorageFindComplex

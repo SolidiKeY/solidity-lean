@@ -104,7 +104,7 @@ def prog : Stmt := sstmt!{ people[carol.age++] = carol }
 
 /-- The rule applies: simple path, complex index, memory simple source. -/
 theorem prog_cond :
-    (ruleEffect .memoryToStorageUnfoldLeftSndTargetIndex).cond prog := by
+    (ruleEffect .memoryToStorageIndexUnfoldLeftSndIndex).cond prog := by
   change _ = true ∧ _ = true ∧ _ = true ∧ _ = true
   decide
 
@@ -113,7 +113,7 @@ theorem prog_not_prim :
     (sexpr!{ carol }).ty.isPrimitive = false := by decide
 
 def residual : Block :=
-  (ruleEffect .memoryToStorageUnfoldLeftSndTargetIndex).block prog prog_cond
+  (ruleEffect .memoryToStorageIndexUnfoldLeftSndIndex).block prog prog_cond
 
 /-- Value first: this interpreter copies `carol` while `age = 0`, then the index
 increments it, so `people[0].age` is `0`.  A real EVM stores `1`. -/

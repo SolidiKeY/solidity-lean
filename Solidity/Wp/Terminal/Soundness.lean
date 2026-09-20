@@ -37,21 +37,21 @@ path), with the pure form `storagePlaceAliasUpd_pure`.
 Coverage by family (rule names as in `RuleName`):
 
 * `Terminal/UpdateControl.lean` — revert{Box,Diamond}, assertSimple,
-  requireSimple, transferNoCallback.
+  requireSimple, transferNoCallback{Box,Diamond}.
 * `Terminal/UpdateStack.lean` — storageRootReadSelect, storageFieldReadFind,
   storageIndexRead{ArrayFind{Box,Diamond},MappingFind}, memoryFieldReadHeap,
   memoryIndexReadHeap{Box,Diamond}, localValueAssign, binopAssignment op,
-  unopAssignment op, localAssignIncDec op,
-  storage{Root,Field,Index}IncDecAssignment op,
-  memory{Field,Index}IncDecAssignment op.
-* `Terminal/UpdateCompound.lean` — localCompoundAssign op,
-  storage{Root,Field,Index}CompoundAssign op, localIncDec op,
-  storage{Root,Field,Index}IncDec op, and the memory-target arithmetic
-  twins memory{Field,Index}CompoundAssign op, memory{Field,Index}IncDec op
+  unopAssignment op, localAssignIncrement op,
+  storage{Root,Field,Index}IncrementAssignment op,
+  memory{Field,IndexArray}IncrementAssignment op.
+* `Terminal/UpdateCompound.lean` — localOpAssign op,
+  storage{Root,Field,IndexMapping,IndexArray}OpAssign op, localIncrement op,
+  storage{Root,Field,Index}Increment op, and the memory-target arithmetic
+  twins memory{Field,IndexArray}OpAssign op, memory{Field,IndexArray}Increment op
   (no root form: a memory root binds an identity, not a value cell).
 * `Terminal/UpdateStorage.lean` — storageRootWrite{Store,CopySource},
   memoryToStorageStoreRoot, storageLocalRootRebind,
-  storageFieldWrite{Save,CopySource}, memoryToStorageFieldCopyRoot,
+  storageFieldWrite{Save,CopySource}, memoryToStorageFieldCopy{Root,Field},
   storageIndexWrite{Array{Save,CopySource}{Box,Diamond},Mapping{Save,CopySource}},
   memoryToStorageIndex{Mapping,ArrayBox,ArrayDiamond}CopyRoot,
   storage{Field,IndexBox,IndexDiamond,IndexMapping}Read{BindLocalRoot,StoreRoot}.
@@ -60,7 +60,9 @@ Coverage by family (rule names as in `RuleName`):
   memoryFieldReadAliasRoot, memoryIndexReadAliasRoot{Box,Diamond}.
 * `Terminal/UpdateDecl.lean` — valueDeclSkip, storageLocalDeclSkip,
   storagePlaceAlias, memoryDeclFreshAlloc, storageToMemoryDeclCopy{Field,Root},
-  storageDeleteSimpleTarget, memoryDeleteSimpleTarget (all sub-shapes).
+  storage{Root,Field,Index,PushPlace}Delete, memoryRootDeleteFreshRebind,
+  memoryFieldDelete{Primitive,Reference},
+  memoryIndexDelete{Primitive,Reference}{Box,Diamond}.
 * `Terminal/UpdatePushPop.lean` — storagePushValue{Save,CopySource},
   storagePushLengthSave, storagePopSave{Box,Diamond}, storageLocalRootPushBind.
 
@@ -176,6 +178,10 @@ theorem terminalUpdate_sound (r : RuleName) (hr : hasUpdate r = true)
       cases stmt <;> first
         | exact (hcond : False).elim
         | exact memoryToStorageFieldCopyRoot_update s _ _ hcond
+  case memoryToStorageFieldCopyField =>
+      cases stmt <;> first
+        | exact (hcond : False).elim
+        | exact memoryToStorageFieldCopyField_update s _ _ hcond
   case storageIndexWriteArraySaveBox =>
       cases stmt <;> first
         | exact (hcond : False).elim
@@ -268,78 +274,82 @@ theorem terminalUpdate_sound (r : RuleName) (hr : hasUpdate r = true)
       cases stmt <;> first
         | exact (hcond : False).elim
         | exact unopAssignment_update op s _ _ hcond
-  case localAssignIncDec op =>
+  case localAssignIncrement op =>
       cases stmt <;> first
         | exact (hcond : False).elim
-        | exact localAssignIncDec_update op s _ _ hcond
-  case storageRootIncDecAssignment op =>
+        | exact localAssignIncrement_update op s _ _ hcond
+  case storageRootIncrementAssignment op =>
       cases stmt <;> first
         | exact (hcond : False).elim
-        | exact storageRootIncDecAssignment_update op s _ _ hcond
-  case storageFieldIncDecAssignment op =>
+        | exact storageRootIncrementAssignment_update op s _ _ hcond
+  case storageFieldIncrementAssignment op =>
       cases stmt <;> first
         | exact (hcond : False).elim
-        | exact storageFieldIncDecAssignment_update op s _ _ hcond
-  case storageIndexIncDecAssignment op =>
+        | exact storageFieldIncrementAssignment_update op s _ _ hcond
+  case storageIndexIncrementAssignment op =>
       cases stmt <;> first
         | exact (hcond : False).elim
-        | exact storageIndexIncDecAssignment_update op s _ _ hcond
-  case memoryFieldIncDecAssignment op =>
+        | exact storageIndexIncrementAssignment_update op s _ _ hcond
+  case memoryFieldIncrementAssignment op =>
       cases stmt <;> first
         | exact (hcond : False).elim
-        | exact memoryFieldIncDecAssignment_update op s _ _ hcond
-  case memoryIndexIncDecAssignment op =>
+        | exact memoryFieldIncrementAssignment_update op s _ _ hcond
+  case memoryIndexArrayIncrementAssignment op =>
       cases stmt <;> first
         | exact (hcond : False).elim
-        | exact memoryIndexIncDecAssignment_update op s _ _ hcond
-  case localCompoundAssign op =>
+        | exact memoryIndexArrayIncrementAssignment_update op s _ _ hcond
+  case localOpAssign op =>
       cases stmt <;> first
         | exact (hcond : False).elim
-        | exact localCompoundAssign_update op _ s _ _ hcond
-  case storageRootCompoundAssign op =>
+        | exact localOpAssign_update op _ s _ _ hcond
+  case storageRootOpAssign op =>
       cases stmt <;> first
         | exact (hcond : False).elim
-        | exact storageRootCompoundAssign_update op _ s _ _ hcond
-  case storageFieldCompoundAssign op =>
+        | exact storageRootOpAssign_update op _ s _ _ hcond
+  case storageFieldOpAssign op =>
       cases stmt <;> first
         | exact (hcond : False).elim
-        | exact storageFieldCompoundAssign_update op _ s _ _ hcond
-  case storageIndexCompoundAssign op =>
+        | exact storageFieldOpAssign_update op _ s _ _ hcond
+  case storageIndexMappingOpAssign op =>
       cases stmt <;> first
         | exact (hcond : False).elim
-        | exact storageIndexCompoundAssign_update op _ s _ _ hcond
-  case memoryFieldCompoundAssign op =>
+        | exact storageIndexMappingOpAssign_update op _ s _ _ hcond
+  case storageIndexArrayOpAssign op =>
       cases stmt <;> first
         | exact (hcond : False).elim
-        | exact memoryFieldCompoundAssign_update op _ s _ _ hcond
-  case memoryIndexCompoundAssign op =>
+        | exact storageIndexArrayOpAssign_update op _ s _ _ hcond
+  case memoryFieldOpAssign op =>
       cases stmt <;> first
         | exact (hcond : False).elim
-        | exact memoryIndexCompoundAssign_update op _ s _ _ hcond
-  case localIncDec op =>
+        | exact memoryFieldOpAssign_update op _ s _ _ hcond
+  case memoryIndexArrayOpAssign op =>
       cases stmt <;> first
         | exact (hcond : False).elim
-        | exact localIncDec_update op s _ hcond
-  case storageRootIncDec op =>
+        | exact memoryIndexArrayOpAssign_update op _ s _ _ hcond
+  case localIncrement op =>
       cases stmt <;> first
         | exact (hcond : False).elim
-        | exact storageRootIncDec_update op s _ hcond
-  case storageFieldIncDec op =>
+        | exact localIncrement_update op s _ hcond
+  case storageRootIncrement op =>
       cases stmt <;> first
         | exact (hcond : False).elim
-        | exact storageFieldIncDec_update op s _ hcond
-  case storageIndexIncDec op =>
+        | exact storageRootIncrement_update op s _ hcond
+  case storageFieldIncrement op =>
       cases stmt <;> first
         | exact (hcond : False).elim
-        | exact storageIndexIncDec_update op s _ hcond
-  case memoryFieldIncDec op =>
+        | exact storageFieldIncrement_update op s _ hcond
+  case storageIndexIncrement op =>
       cases stmt <;> first
         | exact (hcond : False).elim
-        | exact memoryFieldIncDec_update op s _ hcond
-  case memoryIndexIncDec op =>
+        | exact storageIndexIncrement_update op s _ hcond
+  case memoryFieldIncrement op =>
       cases stmt <;> first
         | exact (hcond : False).elim
-        | exact memoryIndexIncDec_update op s _ hcond
+        | exact memoryFieldIncrement_update op s _ hcond
+  case memoryIndexArrayIncrement op =>
+      cases stmt <;> first
+        | exact (hcond : False).elim
+        | exact memoryIndexArrayIncrement_update op s _ hcond
   case valueDeclSkip =>
       cases stmt <;> first
         | exact (hcond : False).elim
@@ -364,14 +374,50 @@ theorem terminalUpdate_sound (r : RuleName) (hr : hasUpdate r = true)
       cases stmt <;> first
         | exact (hcond : False).elim
         | exact storageToMemoryDeclCopyRoot_update s _ _ _ hcond
-  case storageDeleteSimpleTarget =>
+  case storageRootDelete =>
       cases stmt <;> first
         | exact (hcond : False).elim
-        | exact storageDeleteSimpleTarget_update s _ hcond
-  case memoryDeleteSimpleTarget =>
+        | exact storageRootDelete_update s _ hcond
+  case storageFieldDelete =>
       cases stmt <;> first
         | exact (hcond : False).elim
-        | exact memoryDeleteSimpleTarget_update s _ hcond
+        | exact storageFieldDelete_update s _ hcond
+  case storageIndexDelete =>
+      cases stmt <;> first
+        | exact (hcond : False).elim
+        | exact storageIndexDelete_update s _ hcond
+  case storagePushPlaceDelete =>
+      cases stmt <;> first
+        | exact (hcond : False).elim
+        | exact storagePushPlaceDelete_update s _ hcond
+  case memoryRootDeleteFreshRebind =>
+      cases stmt <;> first
+        | exact (hcond : False).elim
+        | exact memoryRootDeleteFreshRebind_update s _ hcond
+  case memoryFieldDeletePrimitive =>
+      cases stmt <;> first
+        | exact (hcond : False).elim
+        | exact memoryFieldDeletePrimitive_update s _ hcond
+  case memoryFieldDeleteReference =>
+      cases stmt <;> first
+        | exact (hcond : False).elim
+        | exact memoryFieldDeleteReference_update s _ hcond
+  case memoryIndexDeletePrimitiveBox =>
+      cases stmt <;> first
+        | exact (hcond : False).elim
+        | exact memoryIndexDeletePrimitiveBox_update s _ hcond
+  case memoryIndexDeletePrimitiveDiamond =>
+      cases stmt <;> first
+        | exact (hcond : False).elim
+        | exact memoryIndexDeletePrimitiveDiamond_update s _ hcond
+  case memoryIndexDeleteReferenceBox =>
+      cases stmt <;> first
+        | exact (hcond : False).elim
+        | exact memoryIndexDeleteReferenceBox_update s _ hcond
+  case memoryIndexDeleteReferenceDiamond =>
+      cases stmt <;> first
+        | exact (hcond : False).elim
+        | exact memoryIndexDeleteReferenceDiamond_update s _ hcond
   case storagePushValueSave =>
       cases stmt <;> first
         | exact (hcond : False).elim
@@ -408,10 +454,14 @@ theorem terminalUpdate_sound (r : RuleName) (hr : hasUpdate r = true)
       cases stmt <;> first
         | exact (hcond : False).elim
         | exact requireSimple_update s _ hcond
-  case transferNoCallback =>
+  case transferNoCallbackBox =>
       cases stmt <;> first
         | exact (hcond : False).elim
-        | exact transferNoCallback_update s _ _ hcond
+        | exact transferNoCallbackBox_update s _ _ hcond
+  case transferNoCallbackDiamond =>
+      cases stmt <;> first
+        | exact (hcond : False).elim
+        | exact transferNoCallbackDiamond_update s _ _ hcond
   all_goals exact Bool.noConfusion hr
 
 /-- A first step of a *named* terminal rule.  `FirstStepCase` carries the

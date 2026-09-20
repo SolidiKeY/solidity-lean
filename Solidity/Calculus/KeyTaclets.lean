@@ -1,7 +1,7 @@
 /-!
 # The KeY taclets, as a Lean type
 
-`solidityProgramRules.key` is the calculus solkey actually runs: 252 named
+`solidityProgramRules.key` is the calculus solkey actually runs: 310 named
 taclets.  This module is that list of names, one constructor each, plus the
 `\heuristics` annotation each one carries.  It exists so that a rule in
 `Rules.lean` can say *which* KeY taclet it transcribes with a typed
@@ -34,8 +34,9 @@ a `native_decide` over 252 strings, and a lookup would make it quadratic.
 
 ## `\heuristics` is documentary
 
-Only two values occur in the corpus — `simplify_prog` (193 taclets) and
-`simplify_expression` (59).  They are KeY's *strategy* annotations: which
+Three values occur in the corpus — `simplify_prog` (220 taclets),
+`simplify_expression` (85) and `concrete_solidity` (5, the literal-condition
+`if` rules).  They are KeY's *strategy* annotations: which
 automatic rule set may apply the taclet, not what it means.  Lean's rule table
 has no automatic strategy (a derivation pins each step by name, and
 `Uniqueness.lean` shows at most one rule applies anyway), so nothing here
@@ -47,12 +48,16 @@ re-runs eagerly.
 
 namespace Solidity
 
-/-- A KeY `\heuristics(...)` rule set.  The corpus uses exactly these two. -/
+/-- A KeY `\heuristics(...)` rule set.  The corpus uses exactly these three. -/
 inductive Heuristic where
-  /-- `simplify_prog`: the program-rewriting rule set (193 taclets). -/
+  /-- `simplify_prog`: the program-rewriting rule set (220 taclets). -/
   | simplifyProg
-  /-- `simplify_expression`: the eager expression rule set (59 taclets). -/
+  /-- `simplify_expression`: the eager expression rule set (85 taclets). -/
   | simplifyExpression
+  /-- `concrete_solidity`: the five `if` rules on a literal or negated
+  condition (`ifTrue`, `ifFalse`, `ifElseTrue`, `ifElseFalse`,
+  `ifElseNegated`), which KeY applies as concrete simplifications. -/
+  | concreteSolidity
   deriving DecidableEq, Repr
 
 /-- One taclet of `solidityProgramRules.key`, named as the file names it. -/
@@ -72,9 +77,8 @@ inductive KeyTaclet where
   | storageIndexRead_unfold_rightFst
   | storageFieldReadFind
   | storageFieldWrite_unfold_leftFst
-  | storageIndexWrite_unfold_leftFst
-  | storageFieldWriteRootRhs_unfold_leftFst
-  | storageIndexWriteRootRhs_unfold_leftFst
+  | storageFieldWriteStorageRef_unfold_leftFst
+  | memoryToStorageField_unfold_leftFst
   | storageIndexWriteMappingSave
   | storageIndexReadMappingFind
   | storageIndexReadMappingBindLocalRoot
@@ -111,11 +115,11 @@ inductive KeyTaclet where
   | memoryFieldRead_unfold_rightFst
   | memoryFieldWriteCaptureSrc
   | memoryFieldWrite_unfold_leftFst
+  | memoryFieldWriteMemRef_unfold_leftFst
   | memoryIndexWriteArray
   | memoryIndexReadArrayValue
   | memoryIndexReadArrayMemory
   | memoryIndexRead_unfold_rightFst
-  | memoryIndexWrite_unfold_leftFst
   | memoryFieldDeletePrimitive
   | memoryFieldDeleteReference
   | memoryIndexDeletePrimitive
@@ -225,6 +229,50 @@ inductive KeyTaclet where
   | storageIndexPostincrement_unfold_leftFst
   | storageIndexPredecrement_unfold_leftFst
   | storageIndexPostdecrement_unfold_leftFst
+  | memoryFieldAddAssign
+  | memoryFieldSubAssign
+  | memoryFieldMulAssign
+  | memoryFieldDivAssign
+  | memoryFieldModAssign
+  | memoryIndexArrayAddAssign
+  | memoryIndexArraySubAssign
+  | memoryIndexArrayMulAssign
+  | memoryIndexArrayDivAssign
+  | memoryIndexArrayModAssign
+  | memoryFieldAddAssign_unfold_leftFst
+  | memoryFieldSubAssign_unfold_leftFst
+  | memoryFieldMulAssign_unfold_leftFst
+  | memoryFieldDivAssign_unfold_leftFst
+  | memoryFieldModAssign_unfold_leftFst
+  | memoryIndexAddAssign_unfold_leftFst
+  | memoryIndexSubAssign_unfold_leftFst
+  | memoryIndexMulAssign_unfold_leftFst
+  | memoryIndexDivAssign_unfold_leftFst
+  | memoryIndexModAssign_unfold_leftFst
+  | memoryFieldPreincrement
+  | memoryFieldPostincrement
+  | memoryFieldPredecrement
+  | memoryFieldPostdecrement
+  | memoryFieldPreincrementAssignment
+  | memoryFieldPostincrementAssignment
+  | memoryFieldPredecrementAssignment
+  | memoryFieldPostdecrementAssignment
+  | memoryIndexArrayPreincrement
+  | memoryIndexArrayPostincrement
+  | memoryIndexArrayPredecrement
+  | memoryIndexArrayPostdecrement
+  | memoryIndexArrayPreincrementAssignment
+  | memoryIndexArrayPostincrementAssignment
+  | memoryIndexArrayPredecrementAssignment
+  | memoryIndexArrayPostdecrementAssignment
+  | memoryFieldPreincrement_unfold_leftFst
+  | memoryFieldPostincrement_unfold_leftFst
+  | memoryFieldPredecrement_unfold_leftFst
+  | memoryFieldPostdecrement_unfold_leftFst
+  | memoryIndexPreincrement_unfold_leftFst
+  | memoryIndexPostincrement_unfold_leftFst
+  | memoryIndexPredecrement_unfold_leftFst
+  | memoryIndexPostdecrement_unfold_leftFst
   | localDeclPreincrement
   | localAssignPreincrement
   | localDeclPredecrement
@@ -251,15 +299,10 @@ inductive KeyTaclet where
   | fieldWriteValueRhsCapture
   | indexWriteValueRhsCapture
   | memoryIndexWriteMemRefRhsCapture
-  | storageIndexWriteNonSimpleIndexCapture
-  | memoryIndexWriteNonSimpleIndexCapture
-  | storageIndexWriteRootRhsNonSimpleIndexCapture
   | storageIndexRead_unfold_rightSndIndex
   | memoryIndexRead_unfold_rightSndIndex
   | storageIndexDeleteNonSimpleIndexCapture
   | memoryIndexDeleteNonSimpleIndexCapture
-  | indexWriteInnerNonSimpleIndexCapture
-  | indexReadInnerNonSimpleIndexCapture
   | storageFieldRead_unfold_rightSndResult
   | storageIndexRead_unfold_rightSndResult
   | memoryFieldRead_unfold_rightSndResult
@@ -296,6 +339,11 @@ inductive KeyTaclet where
   | ternaryToIfStorage
   | ifUnfold
   | ifElseUnfold
+  | ifTrue
+  | ifFalse
+  | ifElseTrue
+  | ifElseFalse
+  | ifElseNegated
   | ifSplit
   | ifElseSplit
   | unaryMinusCapture
@@ -309,6 +357,21 @@ inductive KeyTaclet where
   | transferNoCallbackDiamond
   | transferWithCallbackBox
   | transferWithCallbackDiamond
+  | storageIndexWrite_unfold_leftFst
+  | storageIndexWriteStorageRef_unfold_leftFst
+  | memoryToStorageIndex_unfold_leftFst
+  | memoryIndexWrite_unfold_leftFst
+  | memoryIndexWriteMemRef_unfold_leftFst
+  | storageIndexWriteNonSimpleIndexCapture
+  | storageIndexWriteStorageRefNonSimpleIndexCapture
+  | memoryToStorageIndexNonSimpleIndexCapture
+  | memoryIndexWriteNonSimpleIndexCapture
+  | memoryIndexWriteMemRefNonSimpleIndexCapture
+  | storageIndexWriteCaptureAll
+  | storageIndexWriteStorageRefCaptureAll
+  | memoryToStorageIndexCaptureAll
+  | memoryIndexWriteCaptureAll
+  | memoryIndexWriteMemRefCaptureAll
   deriving DecidableEq, Repr
 
 namespace KeyTaclet
@@ -330,9 +393,8 @@ def name : KeyTaclet -> String
   | storageIndexRead_unfold_rightFst => "storageIndexRead_unfold_rightFst"
   | storageFieldReadFind => "storageFieldReadFind"
   | storageFieldWrite_unfold_leftFst => "storageFieldWrite_unfold_leftFst"
-  | storageIndexWrite_unfold_leftFst => "storageIndexWrite_unfold_leftFst"
-  | storageFieldWriteRootRhs_unfold_leftFst => "storageFieldWriteRootRhs_unfold_leftFst"
-  | storageIndexWriteRootRhs_unfold_leftFst => "storageIndexWriteRootRhs_unfold_leftFst"
+  | storageFieldWriteStorageRef_unfold_leftFst => "storageFieldWriteStorageRef_unfold_leftFst"
+  | memoryToStorageField_unfold_leftFst => "memoryToStorageField_unfold_leftFst"
   | storageIndexWriteMappingSave => "storageIndexWriteMappingSave"
   | storageIndexReadMappingFind => "storageIndexReadMappingFind"
   | storageIndexReadMappingBindLocalRoot => "storageIndexReadMappingBindLocalRoot"
@@ -369,11 +431,11 @@ def name : KeyTaclet -> String
   | memoryFieldRead_unfold_rightFst => "memoryFieldRead_unfold_rightFst"
   | memoryFieldWriteCaptureSrc => "memoryFieldWriteCaptureSrc"
   | memoryFieldWrite_unfold_leftFst => "memoryFieldWrite_unfold_leftFst"
+  | memoryFieldWriteMemRef_unfold_leftFst => "memoryFieldWriteMemRef_unfold_leftFst"
   | memoryIndexWriteArray => "memoryIndexWriteArray"
   | memoryIndexReadArrayValue => "memoryIndexReadArrayValue"
   | memoryIndexReadArrayMemory => "memoryIndexReadArrayMemory"
   | memoryIndexRead_unfold_rightFst => "memoryIndexRead_unfold_rightFst"
-  | memoryIndexWrite_unfold_leftFst => "memoryIndexWrite_unfold_leftFst"
   | memoryFieldDeletePrimitive => "memoryFieldDeletePrimitive"
   | memoryFieldDeleteReference => "memoryFieldDeleteReference"
   | memoryIndexDeletePrimitive => "memoryIndexDeletePrimitive"
@@ -483,6 +545,50 @@ def name : KeyTaclet -> String
   | storageIndexPostincrement_unfold_leftFst => "storageIndexPostincrement_unfold_leftFst"
   | storageIndexPredecrement_unfold_leftFst => "storageIndexPredecrement_unfold_leftFst"
   | storageIndexPostdecrement_unfold_leftFst => "storageIndexPostdecrement_unfold_leftFst"
+  | memoryFieldAddAssign => "memoryFieldAddAssign"
+  | memoryFieldSubAssign => "memoryFieldSubAssign"
+  | memoryFieldMulAssign => "memoryFieldMulAssign"
+  | memoryFieldDivAssign => "memoryFieldDivAssign"
+  | memoryFieldModAssign => "memoryFieldModAssign"
+  | memoryIndexArrayAddAssign => "memoryIndexArrayAddAssign"
+  | memoryIndexArraySubAssign => "memoryIndexArraySubAssign"
+  | memoryIndexArrayMulAssign => "memoryIndexArrayMulAssign"
+  | memoryIndexArrayDivAssign => "memoryIndexArrayDivAssign"
+  | memoryIndexArrayModAssign => "memoryIndexArrayModAssign"
+  | memoryFieldAddAssign_unfold_leftFst => "memoryFieldAddAssign_unfold_leftFst"
+  | memoryFieldSubAssign_unfold_leftFst => "memoryFieldSubAssign_unfold_leftFst"
+  | memoryFieldMulAssign_unfold_leftFst => "memoryFieldMulAssign_unfold_leftFst"
+  | memoryFieldDivAssign_unfold_leftFst => "memoryFieldDivAssign_unfold_leftFst"
+  | memoryFieldModAssign_unfold_leftFst => "memoryFieldModAssign_unfold_leftFst"
+  | memoryIndexAddAssign_unfold_leftFst => "memoryIndexAddAssign_unfold_leftFst"
+  | memoryIndexSubAssign_unfold_leftFst => "memoryIndexSubAssign_unfold_leftFst"
+  | memoryIndexMulAssign_unfold_leftFst => "memoryIndexMulAssign_unfold_leftFst"
+  | memoryIndexDivAssign_unfold_leftFst => "memoryIndexDivAssign_unfold_leftFst"
+  | memoryIndexModAssign_unfold_leftFst => "memoryIndexModAssign_unfold_leftFst"
+  | memoryFieldPreincrement => "memoryFieldPreincrement"
+  | memoryFieldPostincrement => "memoryFieldPostincrement"
+  | memoryFieldPredecrement => "memoryFieldPredecrement"
+  | memoryFieldPostdecrement => "memoryFieldPostdecrement"
+  | memoryFieldPreincrementAssignment => "memoryFieldPreincrementAssignment"
+  | memoryFieldPostincrementAssignment => "memoryFieldPostincrementAssignment"
+  | memoryFieldPredecrementAssignment => "memoryFieldPredecrementAssignment"
+  | memoryFieldPostdecrementAssignment => "memoryFieldPostdecrementAssignment"
+  | memoryIndexArrayPreincrement => "memoryIndexArrayPreincrement"
+  | memoryIndexArrayPostincrement => "memoryIndexArrayPostincrement"
+  | memoryIndexArrayPredecrement => "memoryIndexArrayPredecrement"
+  | memoryIndexArrayPostdecrement => "memoryIndexArrayPostdecrement"
+  | memoryIndexArrayPreincrementAssignment => "memoryIndexArrayPreincrementAssignment"
+  | memoryIndexArrayPostincrementAssignment => "memoryIndexArrayPostincrementAssignment"
+  | memoryIndexArrayPredecrementAssignment => "memoryIndexArrayPredecrementAssignment"
+  | memoryIndexArrayPostdecrementAssignment => "memoryIndexArrayPostdecrementAssignment"
+  | memoryFieldPreincrement_unfold_leftFst => "memoryFieldPreincrement_unfold_leftFst"
+  | memoryFieldPostincrement_unfold_leftFst => "memoryFieldPostincrement_unfold_leftFst"
+  | memoryFieldPredecrement_unfold_leftFst => "memoryFieldPredecrement_unfold_leftFst"
+  | memoryFieldPostdecrement_unfold_leftFst => "memoryFieldPostdecrement_unfold_leftFst"
+  | memoryIndexPreincrement_unfold_leftFst => "memoryIndexPreincrement_unfold_leftFst"
+  | memoryIndexPostincrement_unfold_leftFst => "memoryIndexPostincrement_unfold_leftFst"
+  | memoryIndexPredecrement_unfold_leftFst => "memoryIndexPredecrement_unfold_leftFst"
+  | memoryIndexPostdecrement_unfold_leftFst => "memoryIndexPostdecrement_unfold_leftFst"
   | localDeclPreincrement => "localDeclPreincrement"
   | localAssignPreincrement => "localAssignPreincrement"
   | localDeclPredecrement => "localDeclPredecrement"
@@ -509,15 +615,10 @@ def name : KeyTaclet -> String
   | fieldWriteValueRhsCapture => "fieldWriteValueRhsCapture"
   | indexWriteValueRhsCapture => "indexWriteValueRhsCapture"
   | memoryIndexWriteMemRefRhsCapture => "memoryIndexWriteMemRefRhsCapture"
-  | storageIndexWriteNonSimpleIndexCapture => "storageIndexWriteNonSimpleIndexCapture"
-  | memoryIndexWriteNonSimpleIndexCapture => "memoryIndexWriteNonSimpleIndexCapture"
-  | storageIndexWriteRootRhsNonSimpleIndexCapture => "storageIndexWriteRootRhsNonSimpleIndexCapture"
   | storageIndexRead_unfold_rightSndIndex => "storageIndexRead_unfold_rightSndIndex"
   | memoryIndexRead_unfold_rightSndIndex => "memoryIndexRead_unfold_rightSndIndex"
   | storageIndexDeleteNonSimpleIndexCapture => "storageIndexDeleteNonSimpleIndexCapture"
   | memoryIndexDeleteNonSimpleIndexCapture => "memoryIndexDeleteNonSimpleIndexCapture"
-  | indexWriteInnerNonSimpleIndexCapture => "indexWriteInnerNonSimpleIndexCapture"
-  | indexReadInnerNonSimpleIndexCapture => "indexReadInnerNonSimpleIndexCapture"
   | storageFieldRead_unfold_rightSndResult => "storageFieldRead_unfold_rightSndResult"
   | storageIndexRead_unfold_rightSndResult => "storageIndexRead_unfold_rightSndResult"
   | memoryFieldRead_unfold_rightSndResult => "memoryFieldRead_unfold_rightSndResult"
@@ -554,6 +655,11 @@ def name : KeyTaclet -> String
   | ternaryToIfStorage => "ternaryToIfStorage"
   | ifUnfold => "ifUnfold"
   | ifElseUnfold => "ifElseUnfold"
+  | ifTrue => "ifTrue"
+  | ifFalse => "ifFalse"
+  | ifElseTrue => "ifElseTrue"
+  | ifElseFalse => "ifElseFalse"
+  | ifElseNegated => "ifElseNegated"
   | ifSplit => "ifSplit"
   | ifElseSplit => "ifElseSplit"
   | unaryMinusCapture => "unaryMinusCapture"
@@ -567,6 +673,21 @@ def name : KeyTaclet -> String
   | transferNoCallbackDiamond => "transferNoCallbackDiamond"
   | transferWithCallbackBox => "transferWithCallbackBox"
   | transferWithCallbackDiamond => "transferWithCallbackDiamond"
+  | storageIndexWrite_unfold_leftFst => "storageIndexWrite_unfold_leftFst"
+  | storageIndexWriteStorageRef_unfold_leftFst => "storageIndexWriteStorageRef_unfold_leftFst"
+  | memoryToStorageIndex_unfold_leftFst => "memoryToStorageIndex_unfold_leftFst"
+  | memoryIndexWrite_unfold_leftFst => "memoryIndexWrite_unfold_leftFst"
+  | memoryIndexWriteMemRef_unfold_leftFst => "memoryIndexWriteMemRef_unfold_leftFst"
+  | storageIndexWriteNonSimpleIndexCapture => "storageIndexWriteNonSimpleIndexCapture"
+  | storageIndexWriteStorageRefNonSimpleIndexCapture => "storageIndexWriteStorageRefNonSimpleIndexCapture"
+  | memoryToStorageIndexNonSimpleIndexCapture => "memoryToStorageIndexNonSimpleIndexCapture"
+  | memoryIndexWriteNonSimpleIndexCapture => "memoryIndexWriteNonSimpleIndexCapture"
+  | memoryIndexWriteMemRefNonSimpleIndexCapture => "memoryIndexWriteMemRefNonSimpleIndexCapture"
+  | storageIndexWriteCaptureAll => "storageIndexWriteCaptureAll"
+  | storageIndexWriteStorageRefCaptureAll => "storageIndexWriteStorageRefCaptureAll"
+  | memoryToStorageIndexCaptureAll => "memoryToStorageIndexCaptureAll"
+  | memoryIndexWriteCaptureAll => "memoryIndexWriteCaptureAll"
+  | memoryIndexWriteMemRefCaptureAll => "memoryIndexWriteMemRefCaptureAll"
 
 /-- The `\heuristics` rule set the taclet is filed under. -/
 def heuristic : KeyTaclet -> Heuristic
@@ -585,9 +706,8 @@ def heuristic : KeyTaclet -> Heuristic
   | storageIndexRead_unfold_rightFst => Heuristic.simplifyProg
   | storageFieldReadFind => Heuristic.simplifyProg
   | storageFieldWrite_unfold_leftFst => Heuristic.simplifyProg
-  | storageIndexWrite_unfold_leftFst => Heuristic.simplifyProg
-  | storageFieldWriteRootRhs_unfold_leftFst => Heuristic.simplifyProg
-  | storageIndexWriteRootRhs_unfold_leftFst => Heuristic.simplifyProg
+  | storageFieldWriteStorageRef_unfold_leftFst => Heuristic.simplifyProg
+  | memoryToStorageField_unfold_leftFst => Heuristic.simplifyProg
   | storageIndexWriteMappingSave => Heuristic.simplifyProg
   | storageIndexReadMappingFind => Heuristic.simplifyProg
   | storageIndexReadMappingBindLocalRoot => Heuristic.simplifyProg
@@ -624,11 +744,11 @@ def heuristic : KeyTaclet -> Heuristic
   | memoryFieldRead_unfold_rightFst => Heuristic.simplifyProg
   | memoryFieldWriteCaptureSrc => Heuristic.simplifyProg
   | memoryFieldWrite_unfold_leftFst => Heuristic.simplifyProg
+  | memoryFieldWriteMemRef_unfold_leftFst => Heuristic.simplifyProg
   | memoryIndexWriteArray => Heuristic.simplifyProg
   | memoryIndexReadArrayValue => Heuristic.simplifyProg
   | memoryIndexReadArrayMemory => Heuristic.simplifyProg
   | memoryIndexRead_unfold_rightFst => Heuristic.simplifyProg
-  | memoryIndexWrite_unfold_leftFst => Heuristic.simplifyProg
   | memoryFieldDeletePrimitive => Heuristic.simplifyProg
   | memoryFieldDeleteReference => Heuristic.simplifyProg
   | memoryIndexDeletePrimitive => Heuristic.simplifyProg
@@ -738,6 +858,50 @@ def heuristic : KeyTaclet -> Heuristic
   | storageIndexPostincrement_unfold_leftFst => Heuristic.simplifyProg
   | storageIndexPredecrement_unfold_leftFst => Heuristic.simplifyProg
   | storageIndexPostdecrement_unfold_leftFst => Heuristic.simplifyProg
+  | memoryFieldAddAssign => Heuristic.simplifyExpression
+  | memoryFieldSubAssign => Heuristic.simplifyExpression
+  | memoryFieldMulAssign => Heuristic.simplifyExpression
+  | memoryFieldDivAssign => Heuristic.simplifyExpression
+  | memoryFieldModAssign => Heuristic.simplifyExpression
+  | memoryIndexArrayAddAssign => Heuristic.simplifyExpression
+  | memoryIndexArraySubAssign => Heuristic.simplifyExpression
+  | memoryIndexArrayMulAssign => Heuristic.simplifyExpression
+  | memoryIndexArrayDivAssign => Heuristic.simplifyExpression
+  | memoryIndexArrayModAssign => Heuristic.simplifyExpression
+  | memoryFieldAddAssign_unfold_leftFst => Heuristic.simplifyProg
+  | memoryFieldSubAssign_unfold_leftFst => Heuristic.simplifyProg
+  | memoryFieldMulAssign_unfold_leftFst => Heuristic.simplifyProg
+  | memoryFieldDivAssign_unfold_leftFst => Heuristic.simplifyProg
+  | memoryFieldModAssign_unfold_leftFst => Heuristic.simplifyProg
+  | memoryIndexAddAssign_unfold_leftFst => Heuristic.simplifyProg
+  | memoryIndexSubAssign_unfold_leftFst => Heuristic.simplifyProg
+  | memoryIndexMulAssign_unfold_leftFst => Heuristic.simplifyProg
+  | memoryIndexDivAssign_unfold_leftFst => Heuristic.simplifyProg
+  | memoryIndexModAssign_unfold_leftFst => Heuristic.simplifyProg
+  | memoryFieldPreincrement => Heuristic.simplifyExpression
+  | memoryFieldPostincrement => Heuristic.simplifyExpression
+  | memoryFieldPredecrement => Heuristic.simplifyExpression
+  | memoryFieldPostdecrement => Heuristic.simplifyExpression
+  | memoryFieldPreincrementAssignment => Heuristic.simplifyExpression
+  | memoryFieldPostincrementAssignment => Heuristic.simplifyExpression
+  | memoryFieldPredecrementAssignment => Heuristic.simplifyExpression
+  | memoryFieldPostdecrementAssignment => Heuristic.simplifyExpression
+  | memoryIndexArrayPreincrement => Heuristic.simplifyExpression
+  | memoryIndexArrayPostincrement => Heuristic.simplifyExpression
+  | memoryIndexArrayPredecrement => Heuristic.simplifyExpression
+  | memoryIndexArrayPostdecrement => Heuristic.simplifyExpression
+  | memoryIndexArrayPreincrementAssignment => Heuristic.simplifyExpression
+  | memoryIndexArrayPostincrementAssignment => Heuristic.simplifyExpression
+  | memoryIndexArrayPredecrementAssignment => Heuristic.simplifyExpression
+  | memoryIndexArrayPostdecrementAssignment => Heuristic.simplifyExpression
+  | memoryFieldPreincrement_unfold_leftFst => Heuristic.simplifyProg
+  | memoryFieldPostincrement_unfold_leftFst => Heuristic.simplifyProg
+  | memoryFieldPredecrement_unfold_leftFst => Heuristic.simplifyProg
+  | memoryFieldPostdecrement_unfold_leftFst => Heuristic.simplifyProg
+  | memoryIndexPreincrement_unfold_leftFst => Heuristic.simplifyProg
+  | memoryIndexPostincrement_unfold_leftFst => Heuristic.simplifyProg
+  | memoryIndexPredecrement_unfold_leftFst => Heuristic.simplifyProg
+  | memoryIndexPostdecrement_unfold_leftFst => Heuristic.simplifyProg
   | localDeclPreincrement => Heuristic.simplifyProg
   | localAssignPreincrement => Heuristic.simplifyProg
   | localDeclPredecrement => Heuristic.simplifyProg
@@ -764,15 +928,10 @@ def heuristic : KeyTaclet -> Heuristic
   | fieldWriteValueRhsCapture => Heuristic.simplifyProg
   | indexWriteValueRhsCapture => Heuristic.simplifyProg
   | memoryIndexWriteMemRefRhsCapture => Heuristic.simplifyProg
-  | storageIndexWriteNonSimpleIndexCapture => Heuristic.simplifyProg
-  | memoryIndexWriteNonSimpleIndexCapture => Heuristic.simplifyProg
-  | storageIndexWriteRootRhsNonSimpleIndexCapture => Heuristic.simplifyProg
   | storageIndexRead_unfold_rightSndIndex => Heuristic.simplifyProg
   | memoryIndexRead_unfold_rightSndIndex => Heuristic.simplifyProg
   | storageIndexDeleteNonSimpleIndexCapture => Heuristic.simplifyProg
   | memoryIndexDeleteNonSimpleIndexCapture => Heuristic.simplifyProg
-  | indexWriteInnerNonSimpleIndexCapture => Heuristic.simplifyProg
-  | indexReadInnerNonSimpleIndexCapture => Heuristic.simplifyProg
   | storageFieldRead_unfold_rightSndResult => Heuristic.simplifyProg
   | storageIndexRead_unfold_rightSndResult => Heuristic.simplifyProg
   | memoryFieldRead_unfold_rightSndResult => Heuristic.simplifyProg
@@ -809,6 +968,11 @@ def heuristic : KeyTaclet -> Heuristic
   | ternaryToIfStorage => Heuristic.simplifyProg
   | ifUnfold => Heuristic.simplifyProg
   | ifElseUnfold => Heuristic.simplifyProg
+  | ifTrue => Heuristic.concreteSolidity
+  | ifFalse => Heuristic.concreteSolidity
+  | ifElseTrue => Heuristic.concreteSolidity
+  | ifElseFalse => Heuristic.concreteSolidity
+  | ifElseNegated => Heuristic.concreteSolidity
   | ifSplit => Heuristic.simplifyProg
   | ifElseSplit => Heuristic.simplifyProg
   | unaryMinusCapture => Heuristic.simplifyProg
@@ -822,6 +986,21 @@ def heuristic : KeyTaclet -> Heuristic
   | transferNoCallbackDiamond => Heuristic.simplifyProg
   | transferWithCallbackBox => Heuristic.simplifyProg
   | transferWithCallbackDiamond => Heuristic.simplifyProg
+  | storageIndexWrite_unfold_leftFst => Heuristic.simplifyProg
+  | storageIndexWriteStorageRef_unfold_leftFst => Heuristic.simplifyProg
+  | memoryToStorageIndex_unfold_leftFst => Heuristic.simplifyProg
+  | memoryIndexWrite_unfold_leftFst => Heuristic.simplifyProg
+  | memoryIndexWriteMemRef_unfold_leftFst => Heuristic.simplifyProg
+  | storageIndexWriteNonSimpleIndexCapture => Heuristic.simplifyProg
+  | storageIndexWriteStorageRefNonSimpleIndexCapture => Heuristic.simplifyProg
+  | memoryToStorageIndexNonSimpleIndexCapture => Heuristic.simplifyProg
+  | memoryIndexWriteNonSimpleIndexCapture => Heuristic.simplifyProg
+  | memoryIndexWriteMemRefNonSimpleIndexCapture => Heuristic.simplifyProg
+  | storageIndexWriteCaptureAll => Heuristic.simplifyProg
+  | storageIndexWriteStorageRefCaptureAll => Heuristic.simplifyProg
+  | memoryToStorageIndexCaptureAll => Heuristic.simplifyProg
+  | memoryIndexWriteCaptureAll => Heuristic.simplifyProg
+  | memoryIndexWriteMemRefCaptureAll => Heuristic.simplifyProg
 
 /-- Every taclet, in the order `solidityProgramRules.key` declares them. -/
 def all : List KeyTaclet := [
@@ -840,9 +1019,8 @@ def all : List KeyTaclet := [
   KeyTaclet.storageIndexRead_unfold_rightFst,
   KeyTaclet.storageFieldReadFind,
   KeyTaclet.storageFieldWrite_unfold_leftFst,
-  KeyTaclet.storageIndexWrite_unfold_leftFst,
-  KeyTaclet.storageFieldWriteRootRhs_unfold_leftFst,
-  KeyTaclet.storageIndexWriteRootRhs_unfold_leftFst,
+  KeyTaclet.storageFieldWriteStorageRef_unfold_leftFst,
+  KeyTaclet.memoryToStorageField_unfold_leftFst,
   KeyTaclet.storageIndexWriteMappingSave,
   KeyTaclet.storageIndexReadMappingFind,
   KeyTaclet.storageIndexReadMappingBindLocalRoot,
@@ -879,11 +1057,11 @@ def all : List KeyTaclet := [
   KeyTaclet.memoryFieldRead_unfold_rightFst,
   KeyTaclet.memoryFieldWriteCaptureSrc,
   KeyTaclet.memoryFieldWrite_unfold_leftFst,
+  KeyTaclet.memoryFieldWriteMemRef_unfold_leftFst,
   KeyTaclet.memoryIndexWriteArray,
   KeyTaclet.memoryIndexReadArrayValue,
   KeyTaclet.memoryIndexReadArrayMemory,
   KeyTaclet.memoryIndexRead_unfold_rightFst,
-  KeyTaclet.memoryIndexWrite_unfold_leftFst,
   KeyTaclet.memoryFieldDeletePrimitive,
   KeyTaclet.memoryFieldDeleteReference,
   KeyTaclet.memoryIndexDeletePrimitive,
@@ -993,6 +1171,50 @@ def all : List KeyTaclet := [
   KeyTaclet.storageIndexPostincrement_unfold_leftFst,
   KeyTaclet.storageIndexPredecrement_unfold_leftFst,
   KeyTaclet.storageIndexPostdecrement_unfold_leftFst,
+  KeyTaclet.memoryFieldAddAssign,
+  KeyTaclet.memoryFieldSubAssign,
+  KeyTaclet.memoryFieldMulAssign,
+  KeyTaclet.memoryFieldDivAssign,
+  KeyTaclet.memoryFieldModAssign,
+  KeyTaclet.memoryIndexArrayAddAssign,
+  KeyTaclet.memoryIndexArraySubAssign,
+  KeyTaclet.memoryIndexArrayMulAssign,
+  KeyTaclet.memoryIndexArrayDivAssign,
+  KeyTaclet.memoryIndexArrayModAssign,
+  KeyTaclet.memoryFieldAddAssign_unfold_leftFst,
+  KeyTaclet.memoryFieldSubAssign_unfold_leftFst,
+  KeyTaclet.memoryFieldMulAssign_unfold_leftFst,
+  KeyTaclet.memoryFieldDivAssign_unfold_leftFst,
+  KeyTaclet.memoryFieldModAssign_unfold_leftFst,
+  KeyTaclet.memoryIndexAddAssign_unfold_leftFst,
+  KeyTaclet.memoryIndexSubAssign_unfold_leftFst,
+  KeyTaclet.memoryIndexMulAssign_unfold_leftFst,
+  KeyTaclet.memoryIndexDivAssign_unfold_leftFst,
+  KeyTaclet.memoryIndexModAssign_unfold_leftFst,
+  KeyTaclet.memoryFieldPreincrement,
+  KeyTaclet.memoryFieldPostincrement,
+  KeyTaclet.memoryFieldPredecrement,
+  KeyTaclet.memoryFieldPostdecrement,
+  KeyTaclet.memoryFieldPreincrementAssignment,
+  KeyTaclet.memoryFieldPostincrementAssignment,
+  KeyTaclet.memoryFieldPredecrementAssignment,
+  KeyTaclet.memoryFieldPostdecrementAssignment,
+  KeyTaclet.memoryIndexArrayPreincrement,
+  KeyTaclet.memoryIndexArrayPostincrement,
+  KeyTaclet.memoryIndexArrayPredecrement,
+  KeyTaclet.memoryIndexArrayPostdecrement,
+  KeyTaclet.memoryIndexArrayPreincrementAssignment,
+  KeyTaclet.memoryIndexArrayPostincrementAssignment,
+  KeyTaclet.memoryIndexArrayPredecrementAssignment,
+  KeyTaclet.memoryIndexArrayPostdecrementAssignment,
+  KeyTaclet.memoryFieldPreincrement_unfold_leftFst,
+  KeyTaclet.memoryFieldPostincrement_unfold_leftFst,
+  KeyTaclet.memoryFieldPredecrement_unfold_leftFst,
+  KeyTaclet.memoryFieldPostdecrement_unfold_leftFst,
+  KeyTaclet.memoryIndexPreincrement_unfold_leftFst,
+  KeyTaclet.memoryIndexPostincrement_unfold_leftFst,
+  KeyTaclet.memoryIndexPredecrement_unfold_leftFst,
+  KeyTaclet.memoryIndexPostdecrement_unfold_leftFst,
   KeyTaclet.localDeclPreincrement,
   KeyTaclet.localAssignPreincrement,
   KeyTaclet.localDeclPredecrement,
@@ -1019,15 +1241,10 @@ def all : List KeyTaclet := [
   KeyTaclet.fieldWriteValueRhsCapture,
   KeyTaclet.indexWriteValueRhsCapture,
   KeyTaclet.memoryIndexWriteMemRefRhsCapture,
-  KeyTaclet.storageIndexWriteNonSimpleIndexCapture,
-  KeyTaclet.memoryIndexWriteNonSimpleIndexCapture,
-  KeyTaclet.storageIndexWriteRootRhsNonSimpleIndexCapture,
   KeyTaclet.storageIndexRead_unfold_rightSndIndex,
   KeyTaclet.memoryIndexRead_unfold_rightSndIndex,
   KeyTaclet.storageIndexDeleteNonSimpleIndexCapture,
   KeyTaclet.memoryIndexDeleteNonSimpleIndexCapture,
-  KeyTaclet.indexWriteInnerNonSimpleIndexCapture,
-  KeyTaclet.indexReadInnerNonSimpleIndexCapture,
   KeyTaclet.storageFieldRead_unfold_rightSndResult,
   KeyTaclet.storageIndexRead_unfold_rightSndResult,
   KeyTaclet.memoryFieldRead_unfold_rightSndResult,
@@ -1064,6 +1281,11 @@ def all : List KeyTaclet := [
   KeyTaclet.ternaryToIfStorage,
   KeyTaclet.ifUnfold,
   KeyTaclet.ifElseUnfold,
+  KeyTaclet.ifTrue,
+  KeyTaclet.ifFalse,
+  KeyTaclet.ifElseTrue,
+  KeyTaclet.ifElseFalse,
+  KeyTaclet.ifElseNegated,
   KeyTaclet.ifSplit,
   KeyTaclet.ifElseSplit,
   KeyTaclet.unaryMinusCapture,
@@ -1076,7 +1298,22 @@ def all : List KeyTaclet := [
   KeyTaclet.transferNoCallbackBox,
   KeyTaclet.transferNoCallbackDiamond,
   KeyTaclet.transferWithCallbackBox,
-  KeyTaclet.transferWithCallbackDiamond
+  KeyTaclet.transferWithCallbackDiamond,
+  KeyTaclet.storageIndexWrite_unfold_leftFst,
+  KeyTaclet.storageIndexWriteStorageRef_unfold_leftFst,
+  KeyTaclet.memoryToStorageIndex_unfold_leftFst,
+  KeyTaclet.memoryIndexWrite_unfold_leftFst,
+  KeyTaclet.memoryIndexWriteMemRef_unfold_leftFst,
+  KeyTaclet.storageIndexWriteNonSimpleIndexCapture,
+  KeyTaclet.storageIndexWriteStorageRefNonSimpleIndexCapture,
+  KeyTaclet.memoryToStorageIndexNonSimpleIndexCapture,
+  KeyTaclet.memoryIndexWriteNonSimpleIndexCapture,
+  KeyTaclet.memoryIndexWriteMemRefNonSimpleIndexCapture,
+  KeyTaclet.storageIndexWriteCaptureAll,
+  KeyTaclet.storageIndexWriteStorageRefCaptureAll,
+  KeyTaclet.memoryToStorageIndexCaptureAll,
+  KeyTaclet.memoryIndexWriteCaptureAll,
+  KeyTaclet.memoryIndexWriteMemRefCaptureAll
 ]
 
 end KeyTaclet

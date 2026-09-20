@@ -19,12 +19,15 @@ layer existed:
   `find<[StValue]>`) is faithful, as `sortFaithful_all` already
   implies.
 
-And the **open findings**: the same failure shape reproduced against
-two `find<[Struct]>` reads still in the current taclet file
-(`storageFieldWriteCopySource`, `storagePushValueCopySource`), whose
-`Path[storage,simple]` sources can be primitive-typed. These are
-Lean-model results — confirm against KeY's schema-sort dispatch before
-filing upstream.
+And the **former open findings**: the same failure shape reproduced
+against the two `find<[Struct]>` reads that survived the fix until
+solkey `29c44e225b` (`storageFieldWriteCopySource`,
+`storagePushValueCopySource`), whose `Path[storage,simple]` sources can
+be primitive-typed. That commit replaced both by the sort-free
+`find<[StValue]>`, so `SortFaithfulness.openFindings` is empty; the
+refutations stay as the record of what the table's rows claimed, and
+the closing `example` checks the table's current rows for the two
+taclets are the fixed shape.
 -/
 
 namespace Solidity
@@ -127,7 +130,7 @@ theorem current_rootCopy_sortFaithful :
         reads := [⟨.storage, .value, .fixed .stValue⟩] } :=
   sortFaithful_of_annOkB _ (by native_decide)
 
-/-! ## Open findings: the surviving `find<[Struct]>` reads
+/-! ## Former open findings: the `find<[Struct]>` reads `29c44e225b` removed
 
 Witness layout: `alice : Person` (struct), `total : uint`,
 `values : uint[]` — all contract-level storage roots. -/
@@ -163,12 +166,12 @@ theorem resolveS_total :
   rw [resolveS]
   rfl
 
-/-- **Open finding.** `storageFieldWriteCopySource` reads its
-`Path[storage,simple]` source with `find<[Struct]>` — but on
-`alice.age = total` (a legal Solidity statement matching the taclet's
-schema) the source is a `uint` root and the interpreter finds
-`SVal.int 42`, not a tree node. The same bug family `12e72a1b4b`
-fixed for the root-copy rules survives here. -/
+/-- **Former open finding** (fixed upstream by `29c44e225b`).
+`storageFieldWriteCopySource` read its `Path[storage,simple]` source
+with `find<[Struct]>` — but on `alice.age = total` (a legal Solidity
+statement matching the taclet's schema) the source is a `uint` root and
+the interpreter finds `SVal.int 42`, not a tree node. The same bug
+family `12e72a1b4b` fixed for the root-copy rules survived here. -/
 theorem fieldWriteCopySource_not_sortFaithful :
     ¬ SortFaithful
         { keyName := "storageFieldWriteCopySource"
@@ -190,10 +193,10 @@ def valuesPlace : PlaceExpr :=
     (Field.identity "values" (RefTy.array Ty.uint)
       (some StorageOrigin.global))
 
-/-- **Open finding.** `storagePushValueCopySource` reads the pushed
-`Path[storage,simple]` source with `find<[Struct]>` — but on
-`values.push(total)` with `values : uint[]` the source is a `uint`
-root. Same failure shape. -/
+/-- **Former open finding** (fixed upstream by `29c44e225b`).
+`storagePushValueCopySource` read the pushed `Path[storage,simple]`
+source with `find<[Struct]>` — but on `values.push(total)` with
+`values : uint[]` the source is a `uint` root. Same failure shape. -/
 theorem pushValueCopySource_not_sortFaithful :
     ¬ SortFaithful
         { keyName := "storagePushValueCopySource"
@@ -213,21 +216,24 @@ theorem pushValueCopySource_not_sortFaithful :
     findingState "total" [] (SVal.int 42) resolveS_total rfl
   exact Bool.noConfusion hclaim
 
--- The two counterexample rows above are literally the table's rows for
--- these taclets (the refutations target what `solkeycheck` pins, not a
--- strawman).
+-- The two counterexample rows above were literally the table's rows for
+-- these taclets until `29c44e225b`; the table's current rows (what
+-- `solkeycheck` pins) differ from them exactly in the value read, now
+-- the sort-free `find<[StValue]>` — and nothing is left open.
 example :
     tacletReadAnns.filter
-        (fun ann => SortFaithfulness.openFindings.contains ann.keyName) =
+        (fun ann => ann.keyName == "storageFieldWriteCopySource" ||
+          ann.keyName == "storagePushValueCopySource") =
       [ { keyName := "storageFieldWriteCopySource"
           leanRule := some .storageFieldWriteCopySource
-          reads := [⟨.storage, .value, .fixed .struct⟩] },
+          reads := [⟨.storage, .value, .fixed .stValue⟩] },
         { keyName := "storagePushValueCopySource"
           leanRule := some .storagePushValueCopySource
           reads := [⟨.storage, .length, .fixed .int⟩,
-            ⟨.storage, .value, .fixed .struct⟩,
-            ⟨.storage, .length, .fixed .int⟩] } ] := by
-  native_decide
+            ⟨.storage, .value, .fixed .stValue⟩,
+            ⟨.storage, .length, .fixed .int⟩] } ] ∧
+    SortFaithfulness.openFindings = [] := by
+  constructor <;> native_decide
 
 end PreFixSortAnnotations
 end Counterexamples

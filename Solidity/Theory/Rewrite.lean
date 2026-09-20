@@ -37,12 +37,27 @@ failure, and every right-hand side is a double-backtick name, so a lemma that
 does not exist is one too.  What neither catches is a *printed* rule with no
 constructor.
 
-Four rules of the signature have no constructor, deliberately:
-`selectDelNodeMap` and `selectOnSaveEmptyMap` are the architectural gap
-`docs/lean-key-rule-map.md` records (a `Seg` carries no `MapField`), and the
-two `expandInUintN`/`expandInIntN` families are the arithmetic the
-"not implemented" section lists.  `delValueCast` is subsumed by `asStruct`, and `singletonPath` by paths being
-`List Seg` -- `⟨f⟩` is `[f]`, so the rule is `rfl`.
+Every rule of the signature and the two cross-domain theories has
+a constructor, with five exceptions, each deliberate.  `selectDelNodeMap` is
+architectural: `Semantics.Seg` carries no `MapField` classification, so "a
+mapping member survives `delete`" has no statement in this algebra (the
+`Theory/Storage.lean` docstring, and `docs/lean-key-rule-map.md`, which files
+solkey's `selectOnSaveEmptyMap` under the same gap).  The four
+`expandInUintN`/`expandInIntN` rules are the arithmetic the
+"not implemented" section lists.  `singletonPath` (`⟨f⟩ = ∅·f`) and
+`delValueCast` (the cast pushed through the reset) *are* present: the first is
+definitional, since a path is a `List Seg`, and the second is
+`StValue.delValueCast` with its `int`/`bool` twins.
+
+The other direction — a constructor that is not printed — is
+`printedAbsent`: six rules this package states and the printed rules are to gain, since
+this repository is the source of truth they are ported from.  The script
+reads that list too, and reports the six rather than failing on them.
+
+One spelling note.  The array length field is `Seg.field "length"` here where
+solkey writes `size`; `findLength`/`saveLength` are abbreviations
+of `find`/`save` on that field, as they are here, and `Sym.length` in the
+calculus is the same abbreviation.
 -/
 
 namespace Solidity
@@ -61,6 +76,7 @@ inductive TheoryRule where
   | saveEmptyPath
   | savePath
   -- ### Storage: singleton paths
+  | singletonPath
   | findSingleton
   | saveSingleton
   -- ### Storage: `find` over `save`
@@ -82,6 +98,7 @@ inductive TheoryRule where
   | defValResolve
   | delValueStruct
   | delValueDefault
+  | delValueCast
   | selectDelNodeRef
   | selectDelNodeDefault
   | selectDelNodeIndex
@@ -130,6 +147,7 @@ def lemmaNames : TheoryRule -> List Lean.Name
   | findPath              => [``StValue.find_cons, ``StValue.find_cons_view]
   | saveEmptyPath         => [``StValue.saveOnEmpty]
   | savePath              => [``StValue.save_cons]
+  | singletonPath         => [``StValue.singletonPath]
   | findSingleton         => [``StValue.findDefinitionCons]
   | saveSingleton         => [``StValue.save_single]
   | findOnSave            => [``StValue.find_save_same]
@@ -143,6 +161,8 @@ def lemmaNames : TheoryRule -> List Lean.Name
                               ``StValue.defaultValueBool]
   | delValueStruct        => [``StValue.delValueStruct]
   | delValueDefault       => [``StValue.delValueDefault]
+  | delValueCast          => [``StValue.delValueCast, ``StValue.delValueCast_asInt,
+                              ``StValue.delValueCast_asBool]
   | selectDelNodeRef      => [``StValue.selectStDelNodeRef]
   | selectDelNodeDefault  => [``StValue.selectStDelNodeDefault]
   | selectDelNodeIndex    => [``StValue.selectStDelNodeIndexStruct]
@@ -170,16 +190,30 @@ def lemmaNames : TheoryRule -> List Lean.Name
 def all : List TheoryRule :=
   [ .selectStoreEqual, .selectStoreDifferent, .selectEmptyStruct,
     .findEmptyPath, .findPath, .saveEmptyPath, .savePath,
-    .findSingleton, .saveSingleton,
+    .singletonPath, .findSingleton, .saveSingleton,
     .findOnSave, .findOnSaveDifferent, .findOnSavePrefix, .findOnSaveExtends,
     .delAtEmpty, .findDelAt, .findDelAtOutside, .defValResolve,
-    .delValueStruct, .delValueDefault,
+    .delValueStruct, .delValueDefault, .delValueCast,
     .selectDelNodeRef, .selectDelNodeDefault, .selectDelNodeIndex, .selectOnDelAt,
     .readWriteEqual, .readWriteDifferent, .readAddEqual, .readAddDifferent,
     .readEmptyMem, .defaultPrim, .defaultIdentity,
     .readREmptyPath, .readRSingleton, .readRPath,
     .newAddSame, .newAddDifferent, .newWrite, .newEmptyMem,
     .readCopySt, .readCopyStIdentity, .readCopyStOther, .findCopyMem ]
+
+/-- The rules this package states that are not printed — Lean's
+additions, which they are to gain: this repository is the source of truth
+and the printed rules are ported from it.  A checker that reads the
+list and reports these as "Lean-only: …" instead of
+failing on them.  The four `findOnSave*` are the read-of-a-write shortcuts the
+signature reaches by unfolding, `selectOnDelAt` is one selector out of a delete,
+and `readRSingleton` the one-segment `readR`. -/
+def printedAbsent : List TheoryRule :=
+  [ .findOnSave, .findOnSaveDifferent, .findOnSavePrefix, .findOnSaveExtends,
+    .selectOnDelAt, .readRSingleton ]
+
+/-- Every Lean-only rule is a rule of the enumeration. -/
+theorem printedAbsent_sub : printedAbsent.all (all.contains ·) = true := by decide
 
 /-- The printed spelling of a rule name, which is the constructor's. -/
 def printedName (r : TheoryRule) : String :=
