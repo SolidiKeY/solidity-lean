@@ -1,4 +1,4 @@
-import Solidity.Examples.Common
+import Solidity.Tactics.Derivation
 import Solidity.Semantics.DecEq
 
 /-!
@@ -185,7 +185,7 @@ bounds goal read — under everything accumulated before it, which is what the
 
 Written **unmerged**, which is also what a branching line has to be: the merge
 closes the first sequent of a frontier and the rest of the list has to be the
-line the derivation actually accumulated (`upd_merge` in `Examples/Common.lean`
+line the derivation actually accumulated (`upd_merge` in `Tactics/Derivation.lean`
 opens one update equality, and `Frontier.Equiv` on the tail is reflexivity).
 The calculus merges the in-bounds line only after it has dropped the other. -/
 

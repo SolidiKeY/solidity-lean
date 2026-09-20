@@ -2,7 +2,7 @@ import Lean
 
 /-!
 Registers the `rule_simp_set` simp attribute used by the step-case navigation
-tactics in `Examples/Common.lean`. Lives in its own module because a simp
+tactics in `Tactics/Derivation.lean`. Lives in its own module because a simp
 attribute must be initialized in a module imported by its users.
 
 (4.24 note: the former `rule_simp` macro passed ~100 lemmas literally to

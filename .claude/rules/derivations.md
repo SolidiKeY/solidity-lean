@@ -1,9 +1,11 @@
 ---
 paths:
   - "Solidity/Examples/**/*.lean"
+  - "Solidity/Tactics/*.lean"
   - "Solidity/Update/**/*.lean"
   - "Solidity/Update.lean"
-  - "Solidity/MultiStep.lean"
+  - "Solidity/Theory/*.lean"
+  - "Solidity/Calculus/MultiStep.lean"
 ---
 
 # Derivations and the `sol!` notation
@@ -30,7 +32,7 @@ When a step stops elaborating, the cause is almost never the notation:
    **But not for the worked-example identifiers**: giving those explicit arms
    overflowed Lean's stack (see the `Paper.lean` docstring). Explicit
    arms are for scratch names that appear in *residuals*; a worked example's
-   own identifiers go in `name_table_arms` in `Examples/Common.lean`, which
+   own identifiers go in `name_table_arms` in `Tactics/Derivation.lean`, which
    states the default arm's instance as a lemma instead of growing the match.
    That list is also **where a slow derivation is fixed**: a name missing from
    it still elaborates — `rule_cond` falls back to `rule_simp_tables`, which
@@ -212,6 +214,6 @@ to the empty block, so the theorem would be true and about a different program.
 - **`--` cannot be a Lean token** (it starts a comment), so a decrement is
   `predec(e)` / `postdec(e)`. That is surface notation, not an escape hatch.
 
-`Examples/Common.lean`'s `rvExpr`/`idxExpr`/`spExpr` family exists for
+`Tactics/Derivation.lean`'s `rvExpr`/`idxExpr`/`spExpr` family exists for
 residuals whose type is not fixed, not as a general substitute for the
 notation.

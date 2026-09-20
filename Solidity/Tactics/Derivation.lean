@@ -2,7 +2,7 @@ import Solidity.Calculus.MultiStep
 import Solidity.Calculus.CandidateStep
 import Solidity.Update.Merge
 import Solidity.Update.SequentSyntax
-import Solidity.Examples.SimpAttr
+import Solidity.Tactics.RuleSimpAttr
 
 namespace Solidity.Examples
 
@@ -168,7 +168,7 @@ instance (c : WrappedExpr) :
   | .mkTernary .. => .isTrue fun _ hi => nomatch hi
 
 -- Shared simp set for reducing rule effects and AST constructors, registered
--- once under the `rule_simp_set` attribute (see `SimpAttr.lean`) so that each
+-- once under the `rule_simp_set` attribute (see `RuleSimpAttr.lean`) so that each
 -- `rule_simp` invocation reuses the prebuilt discrimination tree instead of
 -- re-elaborating the ~100-lemma list.
 attribute [rule_simp_set]
@@ -237,7 +237,7 @@ attribute [rule_simp_set]
   BinOp.needsGuard
 
 -- The name-keyed tables of `AST.lean` go in one arm at a time, never as the
--- def: see `name_table_simp` in `SimpAttr.lean` for why the def in the set
+-- def: see `name_table_simp` in `RuleSimpAttr.lean` for why the def in the set
 -- costs a second a call and the arm equations cost nothing.
 name_table_simp SoliditySyntax.rootExpr, SoliditySyntax.rootPlace,
   SoliditySyntax.fieldTy, SoliditySyntax.fieldForName, SoliditySyntax.funDef

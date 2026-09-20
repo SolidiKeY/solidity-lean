@@ -1,4 +1,4 @@
-import Solidity.Examples.Rewrite
+import Solidity.Tactics.Rewrite
 
 /-!
 # The calculus's worked examples — the lines after the program
@@ -20,7 +20,7 @@ applied.  This module is them — one `sol_rewrite` chain per example that has
 any, picking up where that example's `sol_derivation` stops.
 
 `docs/paper-parity.md` names both chains of such an example, and the pair is
-the example.  Why the two cannot be one chain is `Examples/Rewrite.lean`'s
+the example.  Why the two cannot be one chain is `Tactics/Rewrite.lean`'s
 docstring: `Sequent.upd` is a state function, and the terminal line is false
 of one — at a pre-state where the memory variable is unbound the read errors
 where the literal does not.  It is true of the *terms*, which is what the

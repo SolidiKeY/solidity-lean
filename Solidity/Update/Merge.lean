@@ -24,7 +24,7 @@ way.
 
 This module is those two facts, one lemma per interpreter reader, and nothing
 else.  Every lemma is tagged `@[upd_merge_set]`, which is the simp set the
-`upd_merge` tactic runs (`Examples/Common.lean`).
+`upd_merge` tactic runs (`Tactics/Derivation.lean`).
 
 The freshness side is stated with `RuleSoundness.usesVar`, the same *syntactic*
 notion the rewrite-soundness theorems use: on a concrete derivation line it is

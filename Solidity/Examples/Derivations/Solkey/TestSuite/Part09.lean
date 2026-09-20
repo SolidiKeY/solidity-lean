@@ -1,4 +1,4 @@
-import Solidity.Examples.Common
+import Solidity.Tactics.Derivation
 import Solidity.Semantics
 
 /-!

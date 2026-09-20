@@ -59,7 +59,7 @@ instance in `ruleNames` on its own — classification requires them all, so
 give a KeY-absent instance an unsatisfiable conjunct, which is what the
 binder guard `(op : BinOp | op.isArith = true)` writes.
 
-**A new `*Effect` builder has to be declared twice more.** `Examples/Common.lean`
+**A new `*Effect` builder has to be declared twice more.** `Tactics/Derivation.lean`
 lists every builder under `attribute [reducible]` and under
 `attribute [rule_simp_set]`; a builder missing from either makes `single_step`
 fail to synthesise `Decidable` for that rule's condition, with no hint that

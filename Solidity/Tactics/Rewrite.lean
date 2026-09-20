@@ -1,5 +1,5 @@
 import Solidity.Theory.Rewrite
-import Solidity.Examples.Common
+import Solidity.Tactics.Derivation
 
 /-!
 # `sol_rewrite`: the paper's term-evaluation lines
@@ -12,7 +12,7 @@ lines are `sol_derivation`'s missing tail, and they are not `⇝` lines: no
 taclet fires, an equation between terms is applied.
 
 `sol_rewrite` is the chain of those lines.  It is `sol_derivation`'s sibling,
-sharing its arrow category (`Examples/Common.lean`) and using only the equality
+sharing its arrow category (`Tactics/Derivation.lean`) and using only the equality
 arrows of it:
 
 ```

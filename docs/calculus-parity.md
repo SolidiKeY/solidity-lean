@@ -14,7 +14,7 @@ correspond to. The two corpora are generated from one pass of
 
 ## What a row here claims
 
-A `proved` row is one `sol_calculus` (`Examples/Common.lean`):
+A `proved` row is one `sol_calculus` (`Tactics/Derivation.lean`):
 
 ```
 sol_calculus solkey_TestSuite_storageRootReadWrite from State.testSuiteStore
@@ -76,7 +76,7 @@ Closing these needs a frontier-level case split, not a rule.
 
 The two ternary rows reach the same place by a longer road, and getting them
 there fixed a real gap: `SoliditySyntax.ternaryExpr` was missing from the
-`attribute [reducible]` and `[rule_simp_set]` lists of `Examples/Common.lean`
+`attribute [reducible]` and `[rule_simp_set]` lists of `Tactics/Derivation.lean`
 while `binopExpr`, `unopExpr` and `incDecExpr` were all present, so the
 `Decidable` instance for the ternary condition could not be synthesised and
 the derivation died before it started. `.claude/rules/rule-table.md` names
