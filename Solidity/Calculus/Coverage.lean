@@ -1,4 +1,4 @@
-import Solidity.Uniqueness
+import Solidity.Calculus.Uniqueness
 import Solidity.Typing.Soundness
 
 /-!

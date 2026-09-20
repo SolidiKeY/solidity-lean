@@ -8,7 +8,7 @@ Obligations 169-192 of 245.
 
 The same obligations as `Solidity/Examples/Solkey/TestSuite.lean`,
 proved without the interpreter doing the symbolic execution:
-`sol_calculus` drives each program with the taclets of `Rules.lean`
+`sol_calculus` drives each program with the taclets of `Calculus/Rules.lean`
 until no line of the frontier has a statement left, and decides the
 frontier reached.
 

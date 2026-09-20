@@ -1,4 +1,4 @@
-import Solidity.Uniqueness
+import Solidity.Calculus.Uniqueness
 
 /-!
 # Dropping `storageFieldReadUnfoldRightFst` loses a first step
@@ -11,7 +11,7 @@ simple-field one.  `reducedStepCases` is `Rules.stepCases` with
 
 Against that reduced table the statement has no first step at all
 (`reduced_no_first_step`), hence no `ReducedRuleStep` (`reduced_no_rule_step`),
-hence the completeness statement of `Completeness.lean` fails outright
+hence the completeness statement of `Calculus/Completeness.lean` fails outright
 (`reduced_not_complete_against_original_first_step`).  So the rule is not
 redundant with the simple-field read: a path that must itself be unfolded
 before the read has no other rule to fall through to.

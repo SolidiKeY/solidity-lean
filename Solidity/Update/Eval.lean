@@ -3,7 +3,7 @@ import Solidity.Update.Bridges
 /-!
 # Evaluating a taclet's update
 
-`Rules.lean` writes each terminal rule's `\replacewith` as a first-order
+`Calculus/Rules.lean` writes each terminal rule's `\replacewith` as a first-order
 `UpdTerm` — syntax with no `State` in it.  This module gives that syntax its
 meaning, as a `Upd.Par`: one elementary update per component the taclet writes,
 each with a *pre-state* reader, which is what makes a KeY parallel update

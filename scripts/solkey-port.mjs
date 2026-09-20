@@ -17,7 +17,7 @@
  *   - `Solidity/Examples/Derivations/Solkey/<Contract>/PartNN.lean`, for
  *     the contracts in `CALCULUS_CONTRACTS`: the *same* obligation proved by
  *     the rule table alone (`sol_calculus`), which is the artefact that
- *     corresponds to a KeY proof. `sol_wp` never reads `Rules.lean`, so
+ *     corresponds to a KeY proof. `sol_wp` never reads `Calculus/Rules.lean`, so
  *     the corpus above says the interpreter is right and says nothing
  *     about the calculus.
  * plus a row per function in `tests/solkey/expected.tsv` and, for the
@@ -1118,7 +1118,7 @@ function main() {
             "The same obligations as `Solidity/Examples/Solkey/" + contract +
               ".lean`,",
             "proved without the interpreter doing the symbolic execution:",
-            "`sol_calculus` drives each program with the taclets of `Rules.lean`",
+            "`sol_calculus` drives each program with the taclets of `Calculus/Rules.lean`",
             "until no line of the frontier has a statement left, and decides the",
             "frontier reached.",
             "",

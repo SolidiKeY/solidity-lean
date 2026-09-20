@@ -1,6 +1,6 @@
 import Solidity.AST
-import Solidity.KeyTaclets
-import Solidity.RuleSyntax
+import Solidity.Calculus.KeyTaclets
+import Solidity.Calculus.RuleSyntax
 
 /-!
 # The rules of the calculus

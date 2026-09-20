@@ -1,4 +1,4 @@
-import Solidity.Rules
+import Solidity.Calculus.Rules
 
 /-!
 # The shape of the rule table

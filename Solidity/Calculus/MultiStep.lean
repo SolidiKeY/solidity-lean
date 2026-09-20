@@ -1,4 +1,4 @@
-import Solidity.Completeness
+import Solidity.Calculus.Completeness
 
 namespace Solidity
 

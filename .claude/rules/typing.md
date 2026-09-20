@@ -42,7 +42,7 @@ no coinduction. `envTypedB` also forbids stray `spath`/`mref` bindings.
 
 ## Stuckness
 
-`Semantics/StuckShape.lean` is the interpreter's counterpart of `Coverage.lean`'s
+`Semantics/StuckShape.lean` is the interpreter's counterpart of `Calculus/Coverage.lean`'s
 `ResidueShape`, and deliberately has **no** Boolean mirror: unlike residue,
 stuckness already has a decision procedure — the interpreter. It leans on the
 wildcard expansion in `Semantics.lean`, which is what makes `SVal.find.induct`

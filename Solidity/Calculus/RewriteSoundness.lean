@@ -1,5 +1,5 @@
-import Solidity.MultiStep
-import Solidity.RuleSoundness
+import Solidity.Calculus.MultiStep
+import Solidity.Calculus.RuleSoundness
 
 /-!
 # Compositional soundness for block rewriting

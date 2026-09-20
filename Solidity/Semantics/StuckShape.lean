@@ -3,13 +3,13 @@ import Solidity.Semantics.Properties
 /-!
 # `StuckShape` — the interpreter's "no case is left", as a theorem
 
-`Coverage.lean` does this for the *rules*: `ResidueShape` lists, one
+`Calculus/Coverage.lean` does this for the *rules*: `ResidueShape` lists, one
 documented constructor per family, exactly the statements no rule of the calculus
 covers, and `coverage_residue` proves the list is complete. This module
 is the interpreter's counterpart.
 
 There is one honest difference, and it decides the design. Residue is a
-property of *syntax*, so `Coverage.lean` has to hand-write a Boolean
+property of *syntax*, so `Calculus/Coverage.lean` has to hand-write a Boolean
 mirror (`residueShapeB`) to decide it. Stuckness depends on the **state**
 and already has a decision procedure — the interpreter itself. So there
 is deliberately **no** `stuckShapeB` here: nothing would be gained by

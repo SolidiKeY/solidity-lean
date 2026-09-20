@@ -1,5 +1,5 @@
-import Solidity.Completeness
-import Solidity.Uniqueness
+import Solidity.Calculus.Completeness
+import Solidity.Calculus.Uniqueness
 
 /-!
 # Exclusivity-based construction of `FirstStepCase`

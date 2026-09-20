@@ -43,7 +43,7 @@ deliberately does not model — its leaf collapses, as solkey's did before
 `c80a54494c`.
 
 **What this number does *not* say.** `sol_wp` is symbolic execution *by the
-interpreter* (`Wp/Verifier.lean`); it never reads `Rules.lean`. So the table
+interpreter* (`Wp/Verifier.lean`); it never reads `Calculus/Rules.lean`. So the table
 above says the interpreter agrees with solkey and says nothing about the
 calculus — which is the artefact solkey's taclets correspond to.
 `docs/calculus-parity.md` is the other half: the same obligations driven by

@@ -23,7 +23,7 @@ The bridge to the interpreter is `checkResult sm post (goalsExec … >>= execBlo
 conjunction into that requires knowing that the goals are *exhaustive*: that
 whenever no goal's update fires, some goal has already accounted for the revert.
 That is not true of an arbitrary goal list — `[guard false → prog]` says nothing
-and reverts — but it is true of every shape `Rules.lean` actually builds, and
+and reverts — but it is true of every shape `Calculus/Rules.lean` actually builds, and
 those are four.  So the lemmas below are stated per combinator rather than by
 induction on goals, which is both provable and more informative: they say
 exactly which shapes are exhaustive.

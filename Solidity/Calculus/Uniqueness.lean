@@ -1,5 +1,5 @@
-import Solidity.Rules
-import Solidity.Completeness
+import Solidity.Calculus.Rules
+import Solidity.Calculus.Completeness
 
 set_option maxHeartbeats 4000000
 -- The big dispatch proof `applicable_eq_candidate` shares simp argument lists

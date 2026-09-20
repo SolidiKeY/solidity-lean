@@ -38,11 +38,11 @@ seq!{ Γ ⟹ {U} ⊤ }                          -- an obligation goal
 `‖` (U+2016) separates the elements of a parallel update, **not** `||`:
 `sol_expr` already has `" || "` as Boolean disjunction (`AST.lean`), so
 `x := a || y := b` would parse the `||` as part of `a`.  `⟹` is the token
-`sol_rule` already declares for a goal line (`RuleSyntax.lean`), reused here.
+`sol_rule` already declares for a goal line (`Calculus/RuleSyntax.lean`), reused here.
 And `storage`/`memory`/`havoc`/`CInv` are written `&"..."`, non-reserved
 keywords: as plain atoms they would become global tokens and
 `Account storage sp = alice.account;` would stop lexing inside `sol_stmt`,
-which is the hazard `RuleSyntax.lean`'s header records for `sol_rule`.
+which is the hazard `Calculus/RuleSyntax.lean`'s header records for `sol_rule`.
 And `(φ)` is read as a Lean term only when it is a **bare, atomic**
 identifier.  That the parenthesised identifier wins at all is parser priority,
 because `"(" sol_expr ")"` is itself a `sol_expr` and two alternatives that
@@ -52,13 +52,13 @@ quotation pattern can read.  That `(alice.age)` is still a program is decided
 one identifier token and the grammar cannot see the difference.
 `(result == 10)` never reaches that production at all.
 
-## Why not in `Rules.lean`
+## Why not in `Calculus/Rules.lean`
 
 The vocabulary an update is written in is `Rules.UpdElem` and this module only
-gives it surface syntax.  `Rules.lean` is the `SolKey` reader's dependency
+gives it surface syntax.  `Calculus/Rules.lean` is the `SolKey` reader's dependency
 surface and has to stay cheap to elaborate, so the notation lives here — the
-same split as `sol_rule`, whose grammar is `RuleSyntax.lean` and whose
-vocabulary is `Rules.lean`.
+same split as `sol_rule`, whose grammar is `Calculus/RuleSyntax.lean` and whose
+vocabulary is `Calculus/Rules.lean`.
 -/
 
 namespace Solidity
@@ -66,8 +66,8 @@ namespace SequentSyntax
 
 open Lean SoliditySyntax
 
-/-- A name the *expanded* code refers to.  As in `RuleSyntax.lean`: these
-constants are `Rules.lean`'s, so writing them as plain identifiers inside a
+/-- A name the *expanded* code refers to.  As in `Calculus/RuleSyntax.lean`: these
+constants are `Calculus/Rules.lean`'s, so writing them as plain identifiers inside a
 quotation would tag them with this module's macro scope and they would not
 resolve at the use site. -/
 private def gen (x : Lean.Name) : Ident := mkIdent x
@@ -77,7 +77,7 @@ private def gen (x : Lean.Name) : Ident := mkIdent x
 The KeY-side vocabulary of an update -- `save(p, t)`, `path(sp)`,
 `transfer(a, v)` -- is written as an **application** and read off its head,
 which is what `sol_rule` does for a schema-variable rule
-(`RuleSyntax.lean`, `callHead?`).  The reason is the same and it is not
+(`Calculus/RuleSyntax.lean`, `callHead?`).  The reason is the same and it is not
 cosmetic: a production spelled with a bare atom (`"storage" " := " "save(" …`)
 makes those words *global tokens*, and `Account storage sp = alice.account;`
 then stops lexing inside `sol_stmt`.  `sol_expr` already has an `ident(args)`
@@ -366,7 +366,7 @@ syntax (sol_par_upd)* sol_formula : sol_ante
 
 /-- Read at the raw-`Syntax` level: `‖` is not a separator a quotation
 pattern can splice, so the elements come off the `sepBy` node directly --
-the same way `RuleSyntax.lean` reads its own `||`-separated updates. -/
+the same way `Calculus/RuleSyntax.lean` reads its own `||`-separated updates. -/
 def expandParUpd (stx : TSyntax `sol_par_upd) : MacroM (TSyntax `term) := do
   let elems ← stx.raw[1].getSepArgs.mapM fun u => expandUpd ⟨u⟩
   `(([$elems,*] : $(gen ``UpdTerm)))

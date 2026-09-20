@@ -1,4 +1,4 @@
-import Solidity.RewriteSoundness
+import Solidity.Calculus.RewriteSoundness
 
 /-!
 # Proof-level if-then-else split (KeY `ifthenelse_split`)

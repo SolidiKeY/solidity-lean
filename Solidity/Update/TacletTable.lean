@@ -3,7 +3,7 @@ import Solidity.Update.Wp
 /-!
 # Each rule's update, proved
 
-`Rules.lean` now *states* a terminal rule's KeY update.  A statement is not a
+`Calculus/Rules.lean` now *states* a terminal rule's KeY update.  A statement is not a
 theorem: what makes the table worth reading is that its updates are the ones
 `Semantics.execStmt` performs, and that is what this module proves, one rule at
 a time,
@@ -23,7 +23,7 @@ Some Lean conditions are weaker than the KeY schema-variable sorts they model.
 reference type, which the typed `Place` constructor does not, so nothing rules
 it out at this level.  Where that matters the bridge carries the missing
 condition as a hypothesis, spelled `hprim`, exactly as the evaluation-order
-theorems of `RuleSoundness.lean` do.  It is a statement about the *syntax*, not
+theorems of `Calculus/RuleSoundness.lean` do.  It is a statement about the *syntax*, not
 an assumption about the state.
 
 ## Coverage
@@ -646,7 +646,7 @@ def bridgedRules : List RuleName :=
     .revertBox, .revertDiamond, .requireSimple, .storagePlaceAlias,
     .transferNoCallback ]
 
-/-- The rules whose update is *stated* in `Rules.lean` but not yet proved here.
+/-- The rules whose update is *stated* in `Calculus/Rules.lean` but not yet proved here.
 They are not unchecked in every sense — each still has its `<rule>_update`
 theorem in `Wp/Terminal/`, so the *interpreter* side is pinned; what is
 missing is the step from that to the first-order `{…}` term the rule now

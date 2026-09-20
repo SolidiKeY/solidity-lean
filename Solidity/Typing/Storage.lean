@@ -1,5 +1,5 @@
 import Solidity.Semantics
-import Solidity.RuleSoundness
+import Solidity.Calculus.RuleSoundness
 
 /-!
 # Storage layout typing

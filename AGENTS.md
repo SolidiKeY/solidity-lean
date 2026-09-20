@@ -29,7 +29,7 @@ locally.
 `docs/module-map.md` — one line per module, with the open problems flagged.
 Read it instead of searching when you need to know where something lives.
 
-Layering: syntax in `AST.lean`, rule enumeration in `Rules.lean`, proof
+Layering: syntax in `AST.lean`, rule enumeration in `Calculus/Rules.lean`, proof
 relations in later files. Keep imports acyclic and local. Add new modules to
 `Solidity.lean`.
 
@@ -39,9 +39,9 @@ read them by path.
 
 | Editing | Read first |
 |---|---|
-| `Rules.lean`, `RuleSyntax.lean`, `Uniqueness.lean`, `RuleValidation.lean`, `RuleShapes.lean`, `SortCheck/Annotations.lean` | `.claude/rules/rule-table.md` |
+| `Calculus/Rules.lean`, `Calculus/RuleSyntax.lean`, `Calculus/Uniqueness.lean`, `Calculus/RuleValidation.lean`, `Calculus/RuleShapes.lean`, `SortCheck/Annotations.lean` | `.claude/rules/rule-table.md` |
 | `Examples/**`, `Update/**` (derivations and notation) | `.claude/rules/derivations.md` |
-| `RuleSoundness.lean`, `Wp/**`, `Counterexamples/**` | `.claude/rules/soundness.md` |
+| `Calculus/RuleSoundness.lean`, `Wp/**`, `Counterexamples/**` | `.claude/rules/soundness.md` |
 | `Theory/**` (the term algebras and their rule names) | `.claude/rules/derivations.md` |
 | `Typing/Storage.lean`, `Typing/State.lean`, `Typing/Soundness.lean`, `Typing/Reachability.lean`, `Typing/WellFormedConsumers.lean` | `.claude/rules/typing.md` |
 
@@ -52,7 +52,7 @@ map to solkey's taclets (do not restate it in module docstrings);
 
 `docs/solkey-parity.md` is what the *interpreter* proves of solkey's suites,
 `docs/calculus-parity.md` what the *rule table* does. `sol_wp` never reads
-`Rules.lean`, so a number from the first says nothing about the calculus.
+`Calculus/Rules.lean`, so a number from the first says nothing about the calculus.
 `SolidityTraces.lean` is the third: one entry per worked example of the calculus,
 naming the chain in `Examples/Derivations/Traces/` that is it, or the reason
 there is none. Add a row there before adding a chain.
@@ -69,7 +69,7 @@ import changes and final confirmation. The `lean-verify` skill in
 | `./run-lean.sh` | ~24 min CPU | `lake build` (default targets) then the solkey sort check |
 | `./scripts/check-examples.sh` | ~7 min CPU | `SolidityExamples` (`Examples/Derivations/Traces/`) |
 | `./scripts/check-solkey-parity.sh` | medium | the ported corpus against `tests/solkey/expected.tsv` |
-| `./scripts/check-calculus-parity.sh` | long | the same corpus proved from `Rules.lean` alone, against `tests/solkey/expected-calculus.tsv` |
+| `./scripts/check-calculus-parity.sh` | long | the same corpus proved from `Calculus/Rules.lean` alone, against `tests/solkey/expected-calculus.tsv` |
 | `lake exe solkeycheck` | seconds | sort annotations against solkey's `.key` |
 
 `solkeycheck` **currently fails**: the annotation table has drifted 78 rows
@@ -102,7 +102,7 @@ reading it back whole.
   `bv_decide`/`omega`.
 - Membership proofs over the large `ruleNames` list use `decide`;
   `simp [ruleNames]` exceeds the recursion limit.
-- Several files are very large (`RuleSoundness.lean` is 10k lines). Use the
+- Several files are very large (`Calculus/RuleSoundness.lean` is 10k lines). Use the
   MCP outline and ranged reads; never read one whole. Use `rg`, which honours
   `.gitignore` and so skips the 541 MB `.lake/`.
 

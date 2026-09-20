@@ -405,7 +405,7 @@ theorem isPrimitive_eq_keySort_le_prim (field : Field) :
   | ref r => cases r <;> rfl
 
 /-- Non-primitive member (`RefField ∪ MapField`) — the delete-target and
-alias classifications in `Rules.lean` bipartition on this, so it keeps
+alias classifications in `Calculus/Rules.lean` bipartition on this, so it keeps
 the pre-`FieldSort` meaning rather than `RefField` alone. -/
 def isIdentity (field : Field) : Bool :=
   !field.isPrimitive

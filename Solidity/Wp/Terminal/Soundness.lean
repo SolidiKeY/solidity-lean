@@ -1,4 +1,4 @@
-import Solidity.Completeness
+import Solidity.Calculus.Completeness
 import Solidity.Wp.Terminal.UpdateControl
 import Solidity.Wp.Terminal.UpdateStack
 import Solidity.Wp.Terminal.UpdateCompound

@@ -1052,7 +1052,7 @@ its `expr` projection would bring the `assignable` proof along and let the
 match compiler refute the seven non-place constructors — the discipline
 `Rules.ruleEffect` gets from its condition proof — but that match is
 dependent, and Lean then generates no equation lemmas for `execAssign` and
-no `execStmt.eq_def`, which `RuleSoundness.lean` and
+no `execStmt.eq_def`, which `Calculus/RuleSoundness.lean` and
 `Wp/Terminal/UpdateDecl.lean` rewrite with in some fifty places. -/
 def execAssign (s : State) (lhs : PlaceExpr) (rhs : WrappedExpr) :
     Res State :=

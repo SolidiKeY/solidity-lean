@@ -1,9 +1,9 @@
-import Solidity.Coverage
+import Solidity.Calculus.Coverage
 
 /-!
 # Concrete residue witnesses and a covered negative control
 
-Instantiates the coverage dichotomy of `Coverage.lean` on concrete,
+Instantiates the coverage dichotomy of `Calculus/Coverage.lean` on concrete,
 `stmtWt`-well-typed statements:
 
 * **Witness A** — `v = net(a);`: a stack variable bound from the `net`
