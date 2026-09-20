@@ -16,10 +16,10 @@ which ports to a declaration.
 Twenty-seven more are **term-level**: they assert heap-algebra identities
 such as `selectSt(storeSt(mtSt, balance, 10), balance) = 10`
 (`simpleExample1.key`), or they run a program's *updates* — the sequential
-`{st := save(…)}{v := find(…)}(v = 20)` of `storageExample1.key` — with no
+`{st := save(…)}{v := findSt(…)}(v = 20)` of `storageExample1.key` — with no
 modality to execute at all.  `sol_wp` proves dynamic logic judgments and a
 bare equation between store terms is not one, so those are proved directly
-over the theories: `Theory/Storage.lean` for `selectSt`/`storeSt`/`save`/`find`
+over the theories: `Theory/Storage.lean` for `selectSt`/`storeSt`/`save`/`findSt`
 and `Theory/Memory.lean` for `write`/`addM`/`read`/`new`/`idC`.  Each one is
 the taclets applied in the order KeY applies them, which is why the proofs
 name `selectOnStore`, `find_save_frame`, `readOnWrite`, `readOnAddM` and
@@ -101,7 +101,7 @@ theorem solkey_Rules_programRulesTest :
 /-! ## The term-level problems
 
 `commonFields.key`'s vocabulary, once.  Its `\unique Field`s are `Seg.field`s
-and its `\unique IdentityPrim ca, cb` are two `Nat`s a hypothesis keeps
+and its `\unique IdentityPrim ca, cb` are two roots a hypothesis keeps
 apart — `\unique` is exactly that hypothesis, and `idC`'s own uniqueness is
 `Identity`'s `DecidableEq`. -/
 
@@ -146,22 +146,22 @@ theorem solkey_Rules_simpleExample3 :
   decide
 
 /-- solkey `simpleExample7.key`:
-`find<[int]>(save(mtSt, cons1(age), 20), cons1(age)) = 20`. -/
+`findSt<[int]>(save(mtSt, cons1(age), 20), cons1(age)) = 20`. -/
 theorem solkey_Rules_simpleExample7 :
-    (StValue.find (StValue.save .mtSt [age] (.prim (.int 20))) [age]).asInt
+    (StValue.findSt (StValue.save .mtSt [age] (.prim (.int 20))) [age]).asInt
       = 20 := by
   rw [StValue.find_save_same_asInt _ (by simp)]; rfl
 
 /-- solkey `simpleExample8.key`: the same, two selectors deep. -/
 theorem solkey_Rules_simpleExample8 :
-    (StValue.find (StValue.save .mtSt [account, age] (.prim (.int 20)))
+    (StValue.findSt (StValue.save .mtSt [account, age] (.prim (.int 20)))
       [account, age]).asInt = 20 := by
   rw [StValue.find_save_same_asInt _ (by simp)]; rfl
 
 /-- solkey `simpleExample9.key`: a sibling write does not disturb the read —
 `find_save_frame` over `diverges [account, balance] [account, age]`. -/
 theorem solkey_Rules_simpleExample9 :
-    (StValue.find
+    (StValue.findSt
       (StValue.save (StValue.save .mtSt [account, age] (.prim (.int 20)))
         [account, balance] (.prim (.int 30))) [account, age]).asInt = 20 := by
   rw [StValue.find_save_frame _ _ _ _ (by decide),
@@ -173,52 +173,52 @@ theorem solkey_Rules_simpleExample9 :
 /-- solkey `simpleExample4.key`:
 `read<[int]>(write(mem, bob, age, 20), bob, age) = 20`. -/
 theorem solkey_Rules_simpleExample4 :
-    ∀ (h : List (Nat × MObj)) (mem : Memory) (bob : Identity),
-      (Memory.readIn h (.write mem bob age (.prim (.int 20))) bob
+    ∀ (mem : Memory) (bob : Identity),
+      (Memory.readIn (.write mem bob age (.prim (.int 20))) bob
         age).asPrim = MVal.int 20 := by
-  intro h mem bob
+  intro mem bob
   simp [MemValue.asPrim]
 
 /-- solkey `simpleExample5.key`: the later write wins, in memory. -/
 theorem solkey_Rules_simpleExample5 :
-    ∀ (h : List (Nat × MObj)) (mem : Memory) (bob : Identity),
-      (Memory.readIn h
+    ∀ (mem : Memory) (bob : Identity),
+      (Memory.readIn
         (.write (.write mem bob age (.prim (.int 19))) bob age
           (.prim (.int 20))) bob age).asPrim = MVal.int 20 := by
-  intro h mem bob
+  intro mem bob
   simp [MemValue.asPrim]
 
 /-- solkey `simpleExample6.key`: a reference read names the identity a later
 write then reaches — `read<[Identity]>` feeding `read<[int]>`. -/
 theorem solkey_Rules_simpleExample6 :
-    ∀ (h : List (Nat × MObj)) (mem : Memory) (bob bobAcc : Identity),
-      (Memory.readIn h
+    ∀ (mem : Memory) (bob bobAcc : Identity),
+      (Memory.readIn
         (.write (.write mem bobAcc owner (.ident bob)) bob age
           (.prim (.int 20)))
-        (Memory.readId h (.write mem bobAcc owner (.ident bob)) bobAcc owner)
+        (Memory.readId (.write mem bobAcc owner (.ident bob)) bobAcc owner)
         age).asPrim = MVal.int 20 := by
-  intro h mem bob bobAcc
+  intro mem bob bobAcc
   simp [Memory.readId, MemValue.asIdentity, MemValue.asPrim]
 
 /-- solkey `simpleExample10.key`: a memory read feeding a storage save —
 the two theories meet at `Prim`. -/
 theorem solkey_Rules_simpleExample10 :
-    ∀ (h : List (Nat × MObj)) (mem : Memory) (bob : Identity),
-      (StValue.find
+    ∀ (mem : Memory) (bob : Identity),
+      (StValue.findSt
         (StValue.save .mtSt [balance]
-          (stOf (Memory.readIn h (.write mem bob age (.prim (.int 20))) bob
+          (stOf (Memory.readIn (.write mem bob age (.prim (.int 20))) bob
             age).asPrim)) [balance]).asInt = 20 := by
-  intro h mem bob
+  intro mem bob
   rw [StValue.find_save_same_asInt _ (by simp)]
   simp [MemValue.asPrim, stOf, StValue.asInt]
 
 /-! ### `storageExample*.key` — the update sequences of the draft's storage
 examples.  Each is the `\problem`'s nested `{st := …}` updates with the final
-`find` read where the `.key` file puts it.
+`findSt` read where the `.key` file puts it.
 
 The copies read a value member out of a written struct: `find_save_extends`
 below the copy, then `find_append` folding the source's path back together.
-KeY's copy source is `find<[Struct]>(st, …)`, which is the cast `asStruct`
+KeY's copy source is `findSt<[Struct]>(st, …)`, which is the cast `asStruct`
 under the injection `st`.  Rooted at `mtSt` (the `-2` files) each is the
 general theorem instantiated. -/
 
@@ -227,12 +227,12 @@ source sees the *first* — `find_save_frame` off the second, then
 `find_save_prefix`/`find_save_same` through the copy. -/
 theorem solkey_Rules_storageExample1 :
     ∀ st : Struct,
-      (StValue.find
+      (StValue.findSt
         (StValue.save
           (StValue.save (StValue.save st [carol, age] (.prim (.int 20)))
             [carolAcc, owner]
             (.st (StValue.asStruct
-              (StValue.find (StValue.save st [carol, age] (.prim (.int 20)))
+              (StValue.findSt (StValue.save st [carol, age] (.prim (.int 20)))
                 [carol]))))
           [carol, age] (.prim (.int 21)))
         [carolAcc, owner, age]).asInt = 20 := by
@@ -254,11 +254,11 @@ return eve.age;
 A whole-root copy is a deep copy: the value follows. -/
 theorem solkey_Rules_storageExample2 :
     ∀ st : Struct,
-      (StValue.find
+      (StValue.findSt
         (StValue.save (StValue.save st [carol, age] (.prim (.int 20)))
           [eve]
           (.st (StValue.asStruct
-            (StValue.find (StValue.save st [carol, age] (.prim (.int 20)))
+            (StValue.findSt (StValue.save st [carol, age] (.prim (.int 20)))
               [carol]))))
         [eve, age]).asInt = 20 := by
   intro st
@@ -276,7 +276,7 @@ return eve.age;
 ```
 A read off the written path gets the default from the empty storage. -/
 theorem solkey_Rules_storageExample3 :
-    (StValue.find (StValue.save .mtSt [carol, age] (.prim (.int 20)))
+    (StValue.findSt (StValue.save .mtSt [carol, age] (.prim (.int 20)))
       [eve, age]).asInt = 0 := by
   rw [StValue.find_save_frame _ _ _ _ (by decide)]
   rfl
@@ -292,12 +292,12 @@ There is no sharing in a deep copy: writing the source afterwards leaves the
 copy alone. -/
 theorem solkey_Rules_storageExample4 :
     ∀ st : Struct,
-      (StValue.find
+      (StValue.findSt
         (StValue.save
           (StValue.save (StValue.save st [carol, age] (.prim (.int 20)))
             [eve]
             (.st (StValue.asStruct
-              (StValue.find (StValue.save st [carol, age] (.prim (.int 20)))
+              (StValue.findSt (StValue.save st [carol, age] (.prim (.int 20)))
                 [carol]))))
           [carol, age] (.prim (.int 30)))
         [eve, age]).asInt = 20 := by
@@ -312,12 +312,12 @@ theorem solkey_Rules_storageExample4 :
 
 /-- solkey `storageExample1-2.key`: `storageExample1` rooted at `mtSt`. -/
 theorem solkey_Rules_storageExample1_2 :
-    (StValue.find
+    (StValue.findSt
       (StValue.save
         (StValue.save (StValue.save .mtSt [carol, age] (.prim (.int 20)))
           [carolAcc, owner]
           (.st (StValue.asStruct
-            (StValue.find (StValue.save .mtSt [carol, age] (.prim (.int 20)))
+            (StValue.findSt (StValue.save .mtSt [carol, age] (.prim (.int 20)))
               [carol]))))
         [carol, age] (.prim (.int 21)))
       [carolAcc, owner, age]).asInt = 20 :=
@@ -325,23 +325,23 @@ theorem solkey_Rules_storageExample1_2 :
 
 /-- solkey `storageExample2-2.key`: `storageExample2` rooted at `mtSt`. -/
 theorem solkey_Rules_storageExample2_2 :
-    (StValue.find
+    (StValue.findSt
       (StValue.save (StValue.save .mtSt [carol, age] (.prim (.int 20)))
         [eve]
         (.st (StValue.asStruct
-          (StValue.find (StValue.save .mtSt [carol, age] (.prim (.int 20)))
+          (StValue.findSt (StValue.save .mtSt [carol, age] (.prim (.int 20)))
             [carol]))))
       [eve, age]).asInt = 20 :=
   solkey_Rules_storageExample2 .mtSt
 
 /-- solkey `storageExample4-2.key`: `storageExample4` rooted at `mtSt`. -/
 theorem solkey_Rules_storageExample4_2 :
-    (StValue.find
+    (StValue.findSt
       (StValue.save
         (StValue.save (StValue.save .mtSt [carol, age] (.prim (.int 20)))
           [eve]
           (.st (StValue.asStruct
-            (StValue.find (StValue.save .mtSt [carol, age] (.prim (.int 20)))
+            (StValue.findSt (StValue.save .mtSt [carol, age] (.prim (.int 20)))
               [carol]))))
         [carol, age] (.prim (.int 30)))
       [eve, age]).asInt = 20 :=
@@ -356,7 +356,7 @@ return carol.f1.f2.f3.f4.f5;
 A five-deep path written beside a sibling, then a shallow write at `f7` read
 back: `find_save_frame` five segments down, four times over. -/
 theorem solkey_Rules_storageExample5 :
-    (StValue.find
+    (StValue.findSt
       (StValue.save
         (StValue.save
           (StValue.save
@@ -390,17 +390,17 @@ injectivity, which is where the `.key` proofs spend their steps. -/
 through — the memory twin of `storageExample1`, and an *alias* rather than a
 copy, so the later write is the one observed. -/
 theorem solkey_Rules_memoryExample1 :
-    ∀ (h : List (Nat × MObj)) (mem : Memory) (bob bobAcc : Identity),
+    ∀ (mem : Memory) (bob bobAcc : Identity),
       bob ≠ bobAcc →
-      (Memory.readIn h
+      (Memory.readIn
         (.write (.write (.write mem bob age (.prim (.int 19)))
           bobAcc owner (.ident bob)) bob age (.prim (.int 20)))
-        (Memory.readId h
+        (Memory.readId
           (.write (.write (.write mem bob age (.prim (.int 19)))
             bobAcc owner (.ident bob)) bob age (.prim (.int 20)))
           bobAcc owner)
         age).asPrim = MVal.int 20 := by
-  intro h mem bob bobAcc hne
+  intro mem bob bobAcc hne
   simp [Memory.readId, MemValue.asIdentity, MemValue.asPrim, hne,
     Ne.symm hne]
 
@@ -413,20 +413,20 @@ The shortest thing the `new` family says: a primitive member of a root that
 was only *added* reads as `0`, with nothing written for it.  `readOnAddM`
 then `defaultDef`. -/
 theorem solkey_Rules_memoryExample4 :
-    ∀ (h : List (Nat × MObj)) (mem : Memory) (ca : Nat) (ty : RefTy),
-      (Memory.readIn h (.addM mem ca ty) (.idCC ca) age).asPrim
+    ∀ (mem : Memory) (ca : IdentityPrim) (ty : RefTy),
+      (Memory.readIn (.addM mem ca ty) (.idCC ca) age).asPrim
         = MVal.int 0 := by
-  intro h mem ca ty
+  intro mem ca ty
   simp [MemValue.asPrim]
 
 /-- …and the freshness premise that licenses it: `new(addM(mem, ca), ca)` is
 `false`, and `new` at any other root is untouched (`newFromAdd`). -/
 theorem solkey_Rules_memoryExample4_new :
-    ∀ (h : List (Nat × MObj)) (mem : Memory) (ca cb : Nat) (ty : RefTy),
+    ∀ (mem : Memory) (ca cb : IdentityPrim) (ty : RefTy),
       ca ≠ cb →
-      Memory.new h (.addM mem ca ty) ca = false ∧
-        Memory.new h (.addM mem ca ty) cb = Memory.new h mem cb := by
-  intro h mem ca cb ty hne
+      Memory.new (.addM mem ca ty) ca = false ∧
+        Memory.new (.addM mem ca ty) cb = Memory.new mem cb := by
+  intro mem ca cb ty hne
   exact ⟨by simp, by simp [hne]⟩
 
 /-- solkey `memoryExample2.key`:
@@ -441,33 +441,33 @@ return alice.balance;
 through that identity is *elsewhere* than `alice` — which is `idC`'s
 injectivity, the step the `.key` proof spends itself on. -/
 theorem solkey_Rules_memoryExample2 :
-    ∀ (h : List (Nat × MObj)) (mem : Memory) (ca : Nat) (ty : RefTy),
-      (Memory.readIn h
+    ∀ (mem : Memory) (ca : IdentityPrim) (ty : RefTy),
+      (Memory.readIn
         (.write
           (.write (.addM mem ca ty) (.idCC ca) balance (.prim (.int 20)))
-          (Memory.readId h
+          (Memory.readId
             (.write (.addM mem ca ty) (.idCC ca) balance (.prim (.int 20)))
             (.idCC ca) account)
           balance (.prim (.int 10)))
         (.idCC ca) balance).asPrim = MVal.int 20 := by
-  intro h mem ca ty
+  intro mem ca ty
   simp [Memory.readId, MemValue.asIdentity, MemValue.asPrim]
 
 /-- solkey `memoryExample2-2.key`: the same program with `alice` bound to the
 *member* identity `idC(ca, [account])` instead of the root. -/
 theorem solkey_Rules_memoryExample2_2 :
-    ∀ (h : List (Nat × MObj)) (mem : Memory) (ca : Nat) (ty : RefTy),
-      (Memory.readIn h
+    ∀ (mem : Memory) (ca : IdentityPrim) (ty : RefTy),
+      (Memory.readIn
         (.write
           (.write (.addM mem ca ty) (.idC ca [account]) balance
             (.prim (.int 20)))
-          (Memory.readId h
+          (Memory.readId
             (.write (.addM mem ca ty) (.idC ca [account]) balance
               (.prim (.int 20)))
             (.idC ca [account]) account)
           balance (.prim (.int 10)))
         (.idC ca [account]) balance).asPrim = MVal.int 20 := by
-  intro h mem ca ty
+  intro mem ca ty
   simp [Memory.readId, MemValue.asIdentity, MemValue.asPrim]
 
 /-- solkey `memoryExample3.key`:
@@ -482,17 +482,17 @@ Two roots do not interfere.  The `.key` proof reaches
 `idC(cb, nil) = idC(ca, nil)` and discharges it from `\unique`; here that is
 `idC`'s injectivity applied to `ca ≠ cb`. -/
 theorem solkey_Rules_memoryExample3 :
-    ∀ (h : List (Nat × MObj)) (mem : Memory) (ca cb : Nat) (ty : RefTy),
+    ∀ (mem : Memory) (ca cb : IdentityPrim) (ty : RefTy),
       ca ≠ cb →
-      (Memory.readIn h
+      (Memory.readIn
           (.write (.write (.addM (.addM mem ca ty) cb ty)
             (.idCC ca) age (.prim (.int 20))) (.idCC cb) age
             (.prim (.int 30))) (.idCC ca) age).asPrim = MVal.int 20 ∧
-        (Memory.readIn h
+        (Memory.readIn
           (.write (.write (.addM (.addM mem ca ty) cb ty)
             (.idCC ca) age (.prim (.int 20))) (.idCC cb) age
             (.prim (.int 30))) (.idCC cb) age).asPrim = MVal.int 30 := by
-  intro h mem ca cb ty hne
+  intro mem ca cb ty hne
   exact ⟨by simp [MemValue.asPrim, hne, Ne.symm hne],
     by simp [MemValue.asPrim]⟩
 
@@ -508,25 +508,25 @@ The shallow embedding: assigning a reference member *aliases*, so writing
 through Alice's owner is writing through Bob's.  Both sides name the same
 manufactured identity `idC(cb, [owner])`. -/
 theorem solkey_Rules_memoryExample5 :
-    ∀ (h : List (Nat × MObj)) (mem : Memory) (ca cb : Nat) (ty : RefTy),
+    ∀ (mem : Memory) (ca cb : IdentityPrim) (ty : RefTy),
       ca ≠ cb →
-      (Memory.readIn h
+      (Memory.readIn
         (.write
           (.write (.addM (.addM mem ca ty) cb ty) (.idCC ca) owner
             (.ident (.idC cb [owner])))
           (.idC cb [owner]) age (.prim (.int 20)))
         (.idC cb [owner]) age).asPrim = MVal.int 20 := by
-  intro h mem ca cb ty hne
+  intro mem ca cb ty hne
   simp [MemValue.asPrim]
 
 /-- …and the read that produces that identity on both sides:
 `read<[Identity]>(addM(addM(mem, ca), cb), idC(cb, nil), owner)` is
 `idC(cb, [owner])` by `readOnAddM` and `defaultDefIdentity`. -/
 theorem solkey_Rules_memoryExample5_owner :
-    ∀ (h : List (Nat × MObj)) (mem : Memory) (ca cb : Nat) (ty : RefTy),
-      Memory.readId h (.addM (.addM mem ca ty) cb ty) (.idCC cb) owner
+    ∀ (mem : Memory) (ca cb : IdentityPrim) (ty : RefTy),
+      Memory.readId (.addM (.addM mem ca ty) cb ty) (.idCC cb) owner
         = .idC cb [owner] := by
-  intro h mem ca cb ty
+  intro mem ca cb ty
   simp [Memory.readId, MemValue.asIdentity]
 
 /-! ### `problem*.key` and `mainExamples.key` -/
@@ -552,29 +552,29 @@ theorem solkey_Rules_problem2 :
 commented out — `idC(idp1, [f1, f2]) != idC(idp1, [f2, f1])`, the injectivity
 of `idC` on which every aliasing step above rests. -/
 theorem solkey_Rules_mainExamples :
-    ∀ idp1 : Nat, Identity.idC idp1 [f1, f2] ≠ Identity.idC idp1 [f2, f1] := by
+    ∀ idp1 : IdentityPrim, Identity.idC idp1 [f1, f2] ≠ Identity.idC idp1 [f2, f1] := by
   intro idp1
   simp
 
 /-- The commented lines of `mainExamples.key`, as far as the theories reach.
 `copySt`/`copyMem` are not modelled (`docs/lean-key-rule-map.md`), so the
 three lines over them have no counterpart; every other one is here. -/
-example : ∀ (h : List (Nat × MObj)) (mem : Memory) (id1 : Identity)
-    (idp1 idp2 : Nat) (ty : RefTy) (flds : List Seg),
+example : ∀ (mem : Memory) (id1 : Identity)
+    (idp1 idp2 : IdentityPrim) (ty : RefTy) (flds : List Seg),
     -- `read<[int]>(write(mem, id1, f1, 0), id1, f1) = 0`
-    (Memory.readIn h (.write mem id1 f1 (.prim (.int 0))) id1 f1).asPrim
+    (Memory.readIn (.write mem id1 f1 (.prim (.int 0))) id1 f1).asPrim
         = MVal.int 0 ∧
       -- `read<[int]>(mtMem, id1, f1) = default(id1, f1)`
-      Memory.readIn h .mtMem id1 f1 = .dflt ∧
+      Memory.readIn .mtMem id1 f1 = .dflt ∧
       -- `! new(addM(mem, idp1), idp1)`
-      Memory.new h (.addM mem idp1 ty) idp1 = false ∧
+      Memory.new (.addM mem idp1 ty) idp1 = false ∧
       -- `new(mem, idp2) -> new(write(mem, id1, f1, 0), idp2)`
-      (Memory.new h mem idp2 = true →
-        Memory.new h (.write mem id1 f1 (.prim (.int 0))) idp2 = true) ∧
+      (Memory.new mem idp2 = true →
+        Memory.new (.write mem id1 f1 (.prim (.int 0))) idp2 = true) ∧
       -- `new(mtMem, idp1)`
-      Memory.new h .mtMem idp1 = true ∧
+      Memory.new .mtMem idp1 = true ∧
       -- `readR<[int]>(write(mem, id1, f1, 0), id1, cons(f1, nil)) = 0`
-      (Memory.readR h (.write mem id1 f1 (.prim (.int 0))) id1 [f1]).asPrim
+      (Memory.readR (.write mem id1 f1 (.prim (.int 0))) id1 [f1]).asPrim
         = MVal.int 0 ∧
       -- `selectSt<[int]>(storeSt(mtSt, f1, 0), f1) = 0`
       (StValue.selectSt (Struct.storeSt .mtSt f1 (.prim (.int 0)))
@@ -582,28 +582,28 @@ example : ∀ (h : List (Nat × MObj)) (mem : Memory) (id1 : Identity)
       -- `selectSt<[int]>(storeSt(mtSt, f1, 0), f2) = selectSt<[int]>(mtSt, f2)`
       StValue.selectSt (Struct.storeSt .mtSt f1 (.prim (.int 0))) f2
         = StValue.selectSt .mtSt f2 ∧
-      -- `find<[int]>(save(st, flds12, 0), flds12) = 0`
-      (StValue.find (StValue.save .mtSt [f1, f2] (.prim (.int 0)))
+      -- `findSt<[int]>(save(st, flds12, 0), flds12) = 0`
+      (StValue.findSt (StValue.save .mtSt [f1, f2] (.prim (.int 0)))
         [f1, f2]).asInt = 0 := by
-  intro h mem id1 idp1 idp2 ty flds
+  intro mem id1 idp1 idp2 ty flds
   refine ⟨by simp [MemValue.asPrim], rfl, by simp, fun hn => by simpa using hn,
     rfl, by simp [MemValue.asPrim], by decide, by decide, ?_⟩
   rw [StValue.find_save_same_asInt _ (by simp)]; rfl
 
 /-- `read<[int]>(addM(mem, idp1), idC(idp2, flds), f1)` skips the add when the
 roots differ — `readAddDifferent`, the `\else` branch of `readOnAddM`. -/
-example : ∀ (h : List (Nat × MObj)) (mem : Memory) (idp1 idp2 : Nat)
+example : ∀ (mem : Memory) (idp1 idp2 : IdentityPrim)
     (ty : RefTy) (flds : List Seg), idp1 ≠ idp2 →
-    Memory.readIn h (.addM mem idp1 ty) (.idC idp2 flds) f1
-      = Memory.readIn h mem (.idC idp2 flds) f1 := by
-  intro h mem idp1 idp2 ty flds hne
-  exact Memory.readAddDifferent h mem idp1 idp2 ty flds f1 hne
+    Memory.readIn (.addM mem idp1 ty) (.idC idp2 flds) f1
+      = Memory.readIn mem (.idC idp2 flds) f1 := by
+  intro mem idp1 idp2 ty flds hne
+  exact Memory.readAddDifferent mem idp1 idp2 ty flds f1 hne
 
 /-- `readR` over a two-field path: `readRCons`, then `readREmpty`. -/
-example : ∀ (h : List (Nat × MObj)) (mem : Memory) (id1 id2 : Identity),
-    Memory.readR h (.write (.write mem id2 f2 (.prim (.int 0))) id1 f1
+example : ∀ (mem : Memory) (id1 id2 : Identity),
+    Memory.readR (.write (.write mem id2 f2 (.prim (.int 0))) id1 f1
       (.ident id2)) id1 [f1, f2] = .prim (.int 0) := by
-  intro h mem id1 id2
+  intro mem id1 id2
   by_cases hid : id1 = id2
   · subst hid; simp [Memory.readId, MemValue.asIdentity]
   · simp [Memory.readId, MemValue.asIdentity, hid, Ne.symm hid]

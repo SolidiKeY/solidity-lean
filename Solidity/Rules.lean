@@ -192,6 +192,51 @@ end CaseMode
     | deflt (ty : Ty)
     deriving Repr
 
+  /-- The value slot of a `write`: `memoryRules.key`'s
+  `write(Memory, Identity, Field, MemValue)` takes a `MemValue`, and that is
+  wider than a `Sym`.  `fresh` in particular is the root the *enclosing*
+  `addM` minted, which is what the reference-delete taclet writes and what no
+  `Sym` can name. -/
+  inductive MemVal where
+    /-- `write(…, se)` — a term read in the pre-state. -/
+    | sym (t : Sym)
+    /-- `write(…, <memory image of src>)` — a reference source, which
+    deep-copies (and so allocates) from storage. -/
+    | image (src : WrappedExpr)
+    /-- `idC(freshIdp, nil)` — the root my enclosing `addM` minted.  KeY's
+    shared schema variable, as a shared subterm. -/
+    | fresh
+    /-- `\unique Prim defVal` — a location reset outright, resolved on read at
+    the field's sort. -/
+    | defVal (ty : Ty)
+    deriving Repr
+
+  /-- `memory := …`, as a term of `memoryRules.key`.
+
+  KeY's memory updates are terms over the `memory` program variable, not a
+  fixed set of shapes: `addM(memory, freshIdp)` allocates, `write(mem, id, f,
+  v)` stores, and the two nest — `write(addM(memory, freshIdp), mv, fld,
+  idC(freshIdp, nil))` is the whole of `memoryFieldDeleteReference`.  So this
+  is a term language and not an enumeration of updates.
+
+  The *place* `target` stands for KeY's `(Identity, Field)` pair: a
+  `WrappedExpr.field Kind.memory _ base f` is exactly `(mv, fld)` with the
+  component named by the kind, which is why it is one argument here and three
+  there. -/
+  inductive MemTerm where
+    /-- The `memory` program variable. -/
+    | cur
+    /-- `addM(memory, freshIdp)`, carrying the allocated type: the one place
+    this is eager where KeY is lazy, because `Semantics.allocDefault`
+    materializes the object rather than leaving it to the reader. -/
+    | addM (m : MemTerm) (ty : Ty)
+    /-- `copySt(mem, freshIdp, find<[Struct]>(storage, sp))` — the
+    storage-to-memory view, under the root the enclosing `addM` minted. -/
+    | copySt (m : MemTerm) (ty : Ty) (src : WrappedExpr)
+    /-- `write(mem, mp, f, v)` / `write(mem, mp, at(i), v)`. -/
+    | write (m : MemTerm) (target : WrappedExpr) (v : MemVal)
+    deriving Repr
+
   /-- What `x := …` binds a name to.  KeY writes all of these the same way; the
   right-hand sides differ in which `Binding` they produce. -/
   inductive BindRhs where
@@ -203,8 +248,14 @@ end CaseMode
     `arr.push()` appends, addressed in the pre-state.  `place` is the whole
     push place `arr.push()`; it pairs with `StorageUpd.pushPlace`. -/
     | pushSlot (place : WrappedExpr)
-    /-- `mv := <identity of src>` — a memory alias (`Binding.mref`). -/
+    /-- `mv := <identity of src>` — a memory alias (`Binding.mref`), KeY's
+    `read<[Identity]>(memory, mv, fld)`. -/
     | mref (src : WrappedExpr)
+    /-- `mv := idC(freshIdp, nil)` — the root the allocator at the head of `m`
+    minted.  The memory term is shared with the `{memory := m}` element beside
+    it, which is how the two agree on *which* root without either re-deriving
+    it: KeY shares the schema variable, this shares the subterm. -/
+    | freshId (m : MemTerm)
     deriving Repr
 
   /-- `storage := …`. -/
@@ -239,39 +290,25 @@ end CaseMode
     | clear (target : WrappedExpr)
     deriving Repr
 
-  /-- `memory := …`.  The heap and the allocation counter move together, so one
-  constructor writes both. -/
-  inductive HeapUpd where
-    /-- `write(memory, mp, f, t)` / `write(memory, mp, at(i), t)`. -/
-    | write (target : WrappedExpr) (t : Sym)
-    /-- `write(memory, mp, …, <memory image of src>)` — a reference source,
-    which deep-copies (and so allocates) from storage. -/
-    | writeRef (target : WrappedExpr) (src : WrappedExpr)
-    deriving Repr
-
   /-- One elementary update of a `\replacewith`; a taclet's update is a list of
   them, read in parallel (`Upd.Par`).
 
-  Three constructors stand for a *pair* of KeY elements, because the pair is
-  what KeY itself writes and neither half is meaningful alone:
-  `memDecl`/`memDelete` are `{mp := idC(freshIdp, nil)}{memory := addM(…)}`,
-  and `transfer` is `{selfBalance := … || net := …}`.  `Update/Eval.lean`
-  expands each into the `Upd.Elem`s it names. -/
+  `transfer` is the one constructor that still stands for a *pair* of KeY
+  elements (`{selfBalance := … || net := …}`), because KeY writes that pair and
+  neither half is meaningful alone.  An allocation used to be fused the same
+  way; it is not any more — a rule writes the two elements KeY writes,
+  `{mv := freshId(addM(memory)) ‖ memory := addM(memory)}`, and the shared
+  memory subterm is KeY's shared schema variable `freshIdp`. -/
   inductive UpdElem where
     | bind (n : Name) (rhs : BindRhs)
     | storage (u : StorageUpd)
-    | heap (u : HeapUpd)
-    /-- `T memory m;` / `T memory m = sp;` — KeY
-    `memoryReferenceDeclFreshAlloc` / `memoryArrayFreshAlloc` for `init = none`
-    (`{mp := idC(freshIdp, nil)}{memory := addM(memory, freshIdp)}`), and the
-    storage-copy declaration for `init = some sp` (`{mp := idC(freshIdp, nil)}
-    {memory := copySt(addM(memory, freshIdp), freshIdp, find(storage, sp))}`,
-    KeY `memoryStorageCopy`'s shape). -/
-    | memDecl (ty : Ty) (name : Name) (init : Option WrappedExpr)
-    /-- `delete m` / `delete m.f` / `delete m[se]`: KeY
-    `memoryRootDeleteFreshRebind` rebinds the root to a fresh object, the field
-    and index rules write the slot's default (allocating for a reference
-    element). -/
+    | heap (t : MemTerm)
+    /-- `delete m` / `delete m.f` / `delete m[se]`.  One Lean rule for KeY's
+    five delete taclets, whose `MemTerm`s differ by the target's shape and
+    sort.  It is the one memory update still given by an evaluator rather than
+    a term (`Update/Eval.lean`): the rule grammar builds a literal list of
+    elements, so a rule cannot state an update whose *shape* depends on its
+    target. -/
     | memDelete (target : WrappedExpr)
     /-- The write-back of `++t` / `t--`, where `e` is the whole `incDec`
     expression: `{t := t + 1}` at whichever data location `t` lives in. -/
@@ -748,6 +785,22 @@ end CaseMode
     | WrappedExpr.var _ _ fld => fld.name
     | _ => ""
 
+  /-- The memory term a declaration or a root delete allocates: KeY's
+  `addM(memory, freshIdp)`, and `copySt(addM(memory, freshIdp), freshIdp,
+  find<[Struct]>(storage, sp))` when the declaration copies from storage.
+
+  A rule names it *twice* — once in `{mv := freshId(…)}` and once in
+  `{memory := …}` — and the two agree because they are the same term, which is
+  KeY's shared schema variable `freshIdp` made into a shared subterm. -/
+  def allocTerm (ty : Ty) (init : Option WrappedExpr) : MemTerm :=
+    match init with
+    | none => MemTerm.addM MemTerm.cur ty
+    -- KeY nests the allocation inside the copy, `copySt(addM(memory, r), r,
+    -- …)`.  Here the copy allocates the object it copies into, so the `addM`
+    -- is *inside* `copySt` rather than beside it; the row is
+    -- `docs/lean-key-rule-map.md`'s.
+    | some src => MemTerm.copySt MemTerm.cur ty src
+
   /-- Write a value to a target, wherever it lives.  KeY picks between
   `v := …`, `storage := save(…)` and `memory := write(…)` by the schema
   variable's sort; here the target's `kind` says it. -/
@@ -755,7 +808,7 @@ end CaseMode
     match target.kind with
     | Kind.stack => UpdElem.bind (varName target) (BindRhs.val t)
     | Kind.storage => UpdElem.storage (StorageUpd.save target t)
-    | Kind.memory => UpdElem.heap (HeapUpd.write target t)
+    | Kind.memory => UpdElem.heap (MemTerm.write .cur target (MemVal.sym t))
 
   /-- `t op= se;` — one write-back of `t op se`, computed at the target's type
   (KeY `storage{Root,Field,Index}{Add,…}Assign` and their local and memory
@@ -1840,7 +1893,7 @@ end CaseMode
     <[ T memory mv = mpath ]> ⇝ <[ mv = mpath ]>
 
   sol_rule memoryDeclFreshAlloc from memoryReferenceDeclFreshAlloc, memoryArrayFreshAlloc :
-    <[ T memory mv ]> ⇝ { mv := alloc() } <[ ]>
+    <[ T memory mv ]> ⇝ { mv := freshId(alloc(mv)) || memory := alloc(mv) } <[ ]>
 
   /- Simple targets.  The calculus's five delete rules —
   root fresh-rebind, f primitive/reference, index primitive/reference — are
@@ -1854,7 +1907,7 @@ end CaseMode
   -/
 
   sol_rule memoryFieldWriteStore from memoryFieldWrite :
-    <[ mv.fld = se ]> ⇝ { memory := write(mv.fld, se) } <[ ]>
+    <[ mv.fld = se ]> ⇝ { memory := write(memory, mv.fld, se) } <[ ]>
 
   sol_rule memoryRootAlias from memoryRootRebind :
     <[ mv1 = mv2 ]> ⇝ { mv1 := ref(mv2) } <[ ]>
@@ -1873,7 +1926,7 @@ end CaseMode
 
   sol_rule memoryIndexWriteStore twins from memoryIndexWriteArray :
     <[ mv[i] = se ]> ⇝
-      | inBounds(mv[i]) ⟹ { memory := write(mv[i], se) } <[ ]>
+      | inBounds(mv[i]) ⟹ { memory := write(memory, mv[i], se) } <[ ]>
       | else            ⟹ revert()
     after read(se), resolve(mv[i])
 
@@ -1917,7 +1970,7 @@ end CaseMode
         | _ => False
 
   sol_rule memoryStorageCopy from memoryStorageCopy :
-    <[ mv = sp ]> ⇝ { mv := alloc(sp) } <[ ]>
+    <[ mv = sp ]> ⇝ { mv := freshId(alloc(mv, sp)) || memory := alloc(mv, sp) } <[ ]>
 
   /-!
   ## Memory to Storage Rules
@@ -2344,21 +2397,21 @@ end CaseMode
     <[ T memory mv = nsp.fld ]> ⇝ <[ T storage sp = nsp; T memory mv = sp.fld ]>
 
   sol_rule storageToMemoryDeclCopyField :
-    <[ T memory mv = sp.fld ]> ⇝ { mv := alloc(sp.fld) } <[ ]>
+    <[ T memory mv = sp.fld ]> ⇝ { mv := freshId(alloc(mv)) || memory := alloc(mv) } <[ ]>
 
   sol_rule storageToMemoryDeclCopyRoot :
-    <[ T memory mv = sp ]> ⇝ { mv := alloc(sp) } <[ ]>
+    <[ T memory mv = sp ]> ⇝ { mv := freshId(alloc(mv)) || memory := alloc(mv) } <[ ]>
 
   sol_rule memoryToStorageUnfoldRightFstSource :
     <[ path = nmp ]> ⇝ <[ _ pv = nmp; path = pv ]>
     where cond := path.kind = Kind.storage ∧ isNmp nmp
 
   sol_rule memoryFieldWriteCopy from memoryFieldWriteCaptureSrc :
-    <[ mv1.fld = mv2 ]> ⇝ { memory := writeRef(mv1.fld, mv2) } <[ ]>
+    <[ mv1.fld = mv2 ]> ⇝ { memory := write(memory, mv1.fld, image(mv2)) } <[ ]>
 
   sol_rule memoryIndexWriteCopy twins from memoryIndexWriteArray :
     <[ mv1[i] = mv2 ]> ⇝
-      | inBounds(mv1[i]) ⟹ { memory := writeRef(mv1[i], mv2) } <[ ]>
+      | inBounds(mv1[i]) ⟹ { memory := write(memory, mv1[i], image(mv2)) } <[ ]>
       | else             ⟹ revert()
     after image(mv2), resolve(mv1[i])
 

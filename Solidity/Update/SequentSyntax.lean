@@ -135,8 +135,9 @@ so the grammar itself is just "an assignment, or a bare application". -/
 declare_syntax_cat sol_upd
 /-- `x := t`: the right-hand side names the KeY term -- `save(p, t)`,
 `copy(p, sp)`, `copyMem(p, mv)`, `push(arr)`, `push(arr, v)`, `pop(arr)`,
-`clear(p)` under `storage`; `write(p, t)`, `writeRef(p, src)` under `memory`;
-`path(sp)`, `ref(m)`, `slot(arr.push())`, `default(T)`, `length(arr)`,
+`clear(p)` under `storage`; a `MemTerm` -- `write(m, p, v)`, `alloc(T)`,
+`alloc(T, sp)`, `memory` -- under `memory`;
+`path(sp)`, `ref(m)`, `freshId(m)`, `slot(arr.push())`, `default(T)`, `length(arr)`,
 `net(a)`, `current(p)` for a name; anything else is the value itself. -/
 syntax sol_expr " := " sol_expr : sol_upd
 /-- `t ⊕= se` -- the write-back a compound assignment performs, `t op se`
@@ -154,7 +155,7 @@ two things at once, `alloc(T, m)` / `alloc(T, m, sp)` is a memory declaration,
 `clear(m)` a memory delete, and `havoc` the callback re-binding. -/
 syntax sol_expr : sol_upd
 
-def expandUpd (stx : TSyntax `sol_upd) : MacroM (TSyntax `term) := do
+partial def expandUpd (stx : TSyntax `sol_upd) : MacroM (TSyntax `term) := do
   match stx with
   | `(sol_upd| $t:sol_expr += $v:sol_expr) => compound ``BinOp.add t v
   | `(sol_upd| $t:sol_expr -= $v:sol_expr) => compound ``BinOp.sub t v
@@ -180,10 +181,7 @@ def expandUpd (stx : TSyntax `sol_upd) : MacroM (TSyntax `term) := do
           `($(gen ``UpdElem.storage) (.pop $(← expandSolExpr a)))
       | some "storage", some ("clear", #[p]) =>
           `($(gen ``UpdElem.storage) (.clear $(← expandSolExpr p)))
-      | some "memory", some ("write", #[p, t]) =>
-          `($(gen ``UpdElem.heap) (.write $(← expandSolExpr p) (.read $(← expandSolExpr t))))
-      | some "memory", some ("writeRef", #[p, q]) =>
-          `($(gen ``UpdElem.heap) (.writeRef $(← expandSolExpr p) $(← expandSolExpr q)))
+      | some "memory", _ => `($(gen ``UpdElem.heap) $(← expandMemTerm rhs))
       | some c, some (f, _) =>
           if c == "storage" || c == "memory" then
             Macro.throwErrorAt rhs s!"`{c} := {f}(…)` is not an update of the calculus"
@@ -195,16 +193,7 @@ def expandUpd (stx : TSyntax `sol_upd) : MacroM (TSyntax `term) := do
           `($(gen ``UpdElem.transfer) $(← expandSolExpr a) $(← expandSolExpr v))
       | some ("bump", #[t]) => `($(gen ``UpdElem.bumpOf) $(← expandSolExpr t))
       | some ("clear", #[m]) => `($(gen ``UpdElem.memDelete) $(← expandSolExpr m))
-      | some ("alloc", #[t, m]) =>
-          let some ty := identName? t | Macro.throwErrorAt t "`alloc` takes a type"
-          let some nm := identName? m | Macro.throwErrorAt m "`alloc` takes a name"
-          `($(gen ``UpdElem.memDecl) ($(gen ``SoliditySyntax.declTy) $(Syntax.mkStrLit ty))
-              $(Syntax.mkStrLit nm) none)
-      | some ("alloc", #[t, m, p]) =>
-          let some ty := identName? t | Macro.throwErrorAt t "`alloc` takes a type"
-          let some nm := identName? m | Macro.throwErrorAt m "`alloc` takes a name"
-          `($(gen ``UpdElem.memDecl) ($(gen ``SoliditySyntax.declTy) $(Syntax.mkStrLit ty))
-              $(Syntax.mkStrLit nm) (some $(← expandSolExpr p)))
+
       | _ =>
           if identName? e == some "havoc" then `($(gen ``UpdElem.havoc))
           else Macro.throwErrorAt e "unexpected elementary update"
@@ -216,6 +205,34 @@ where
     let tTerm ← expandSolExpr t
     `($(gen ``Rules.writeBack) $tTerm
         (.combined $(gen op) $tTerm $(← expandSolExpr v)))
+  /-- A memory term: `memoryRules.key`'s `write`/`addM`/`copySt` over the
+  `memory` program variable, nesting as KeY's do. -/
+  expandMemTerm (e : TSyntax `sol_expr) : MacroM (TSyntax `term) := do
+    match callHead? e with
+    | some ("alloc", #[t]) =>
+        let some ty := identName? t | Macro.throwErrorAt t "`alloc` takes a type"
+        `($(gen ``Rules.allocTerm)
+            ($(gen ``SoliditySyntax.declTy) $(Syntax.mkStrLit ty)) none)
+    | some ("alloc", #[t, p]) =>
+        let some ty := identName? t | Macro.throwErrorAt t "`alloc` takes a type"
+        `($(gen ``Rules.allocTerm)
+            ($(gen ``SoliditySyntax.declTy) $(Syntax.mkStrLit ty))
+            (some $(← expandSolExpr p)))
+    | some ("write", #[m, p, v]) =>
+        `($(gen ``MemTerm.write) $(← expandMemTerm m) $(← expandSolExpr p)
+            $(← expandMemVal v))
+    | _ =>
+        if identName? e == some "memory" then `($(gen ``MemTerm.cur))
+        else Macro.throwErrorAt e "not a memory term"
+
+  /-- A `write`'s value slot. -/
+  expandMemVal (e : TSyntax `sol_expr) : MacroM (TSyntax `term) := do
+    match callHead? e with
+    | some ("image", #[src]) => `($(gen ``MemVal.image) $(← expandSolExpr src))
+    | _ =>
+        if identName? e == some "fresh" then `($(gen ``MemVal.fresh))
+        else `($(gen ``MemVal.sym) (.read $(← expandSolExpr e)))
+
   /-- `x := …` for a name: a binding, or -- when the right-hand side is a
   plain term -- a write-back at whichever data location `x` lives in. -/
   expandNamed (lhs rhs : TSyntax `sol_expr) : MacroM (TSyntax `term) := do
@@ -226,6 +243,9 @@ where
     | some ("ref", #[p]) =>
         `($(gen ``UpdElem.bind) ($(gen ``Rules.varName) $(← expandSolExpr lhs))
             (.mref $(← expandSolExpr p)))
+    | some ("freshId", #[m]) =>
+        `($(gen ``UpdElem.bind) ($(gen ``Rules.varName) $(← expandSolExpr lhs))
+            (.freshId $(← expandMemTerm m)))
     | some ("slot", #[p]) =>
         `($(gen ``UpdElem.bind) ($(gen ``Rules.varName) $(← expandSolExpr lhs))
             (.pushSlot $(← expandSolExpr p)))
@@ -431,8 +451,10 @@ variable (φ : WrappedExpr)
 #check seq!{ ⟹ { storage := clear(alice.account) } <[ ]> ‹φ› }
 
 -- the memory component
-#check seq!{ ⟹ { memory := write(mv@Account.balance, 7) } <[ ]> ‹φ› }
-#check seq!{ ⟹ { memory := writeRef(mv@Person.account, alice.account) } <[ ]> ‹φ› }
+#check seq!{ ⟹ { memory := write(memory, mv@Account.balance, 7) } <[ ]> ‹φ› }
+#check seq!{ ⟹ { memory := write(memory, mv@Person.account, image(alice.account)) }
+             <[ ]> ‹φ› }
+#check seq!{ ⟹ { memory := write(alloc(Person), mv@Person.account, fresh) } <[ ]> ‹φ› }
 
 -- names
 #check seq!{ ⟹ { sp@Account := path(alice.account) } <[ ]> ‹φ› }
@@ -451,8 +473,10 @@ variable (φ : WrappedExpr)
 -- the pairs, and the parallel form
 #check seq!{ ⟹ { transfer(to, amount) } <[ ]> ‹φ› }
 #check seq!{ ⟹ { bump(age++) } <[ ]> ‹φ› }
-#check seq!{ ⟹ { alloc(Person, mv) } <[ ]> ‹φ› }
-#check seq!{ ⟹ { alloc(Person, mv, alice) } <[ ]> ‹φ› }
+#check seq!{ ⟹ { mv@Person := freshId(alloc(Person)) ‖ memory := alloc(Person) }
+             <[ ]> ‹φ› }
+#check seq!{ ⟹ { mv@Person := freshId(alloc(Person, alice)) ‖ memory := alloc(Person, alice) }
+             <[ ]> ‹φ› }
 #check seq!{ ⟹ { clear(mv@Person) } <[ ]> ‹φ› }
 #check seq!{ ⟹ { havoc } <[ ]> ‹φ› }
 #check seq!{ ⟹ { rv@uint := 10 ‖ sp@Account := path(alice.account)

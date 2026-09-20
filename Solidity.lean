@@ -28,6 +28,7 @@ import Solidity.Termination
 import Solidity.Semantics
 import Solidity.EvalBattery
 import Solidity.SemanticsProperties
+import Solidity.Theory.Terms
 import Solidity.Theory.Storage
 import Solidity.Theory.Memory
 import Solidity.Theory.CrossDomain

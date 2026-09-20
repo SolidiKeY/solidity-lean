@@ -69,7 +69,9 @@ below stay equations rather than equations under a side condition. -/
 as one (`Upd.Elem.heap`), because an allocation moves both. -/
 def denoteMem (s : State) : Theory.Memory -> Res (List (Nat × MObj) × Nat)
   | .mtMem => .ok ([], 0)
-  | .pre => .ok (s.heap, s.nextId)
+  -- The leaf carries its heap (`Theory/Terms.lean`), so a term denotes only
+  -- against the state it is a term *about*.
+  | .pre h => if h = s.heap then .ok (h, s.nextId) else .error .stuck
   | .write mem id a v =>
       denoteMem s mem >>= fun hn =>
         (match Theory.Memory.resolve hn.1 id with
@@ -81,19 +83,27 @@ def denoteMem (s : State) : Theory.Memory -> Res (List (Nat × MObj) × Nat)
             | Seg.at i => Upd.heapOf (writeMemIndex { s with heap := hn.1, nextId := hn.2 } n i mv)
   | .addM mem idp ty =>
       denoteMem s mem >>= fun hn =>
-        if idp = hn.2 then
+        if idp.toNat = hn.2 then
           (allocDefault { s with heap := hn.1, nextId := hn.2 } ty).map
             fun x => (x.1.heap, x.1.nextId)
         else .error .stuck
+  -- `copySt` has no denotation yet: the interpreter's copy allocates the
+  -- object it copies into, so a `copySt` over an `addM` would denote to one
+  -- object too many.  Nothing builds one — `memWriteT` below only ever writes
+  -- on the `pre` leaf — and giving it the composite reading the calculus needs
+  -- is `Update/Theory.lean`'s next row, not this one's.
+  | .copySt _ _ _ => .error .stuck
 
 /-- One write on the pre-state leaf is the interpreter's slot write.  The
 identity is the root one, `idC(n, nil)`, which resolves to `n` itself. -/
 theorem denoteMem_write_pre (s : State) (id : Nat) (a : Seg) (mv : MVal) :
-    denoteMem s (.write .pre (.idCC id) a (Theory.MVal.toMemValue mv)) =
+    denoteMem s (.write (.pre s.heap) (.idCC (.ofNat id)) a (Theory.MVal.toMemValue mv)) =
       (match a with
        | Seg.field f => Upd.heapOf (writeMemField s id f mv)
        | Seg.at i => Upd.heapOf (writeMemIndex s id i mv)) := by
-  cases a <;> cases mv <;> rfl
+  cases a <;> cases mv <;>
+    simp only [denoteMem, if_pos rfl, Theory.Memory.resolve_idCC, denoteMV,
+      denoteMV_toMemValue, bind, Except.bind] <;> rfl
 
 /-! ## What `new` means
 
@@ -180,10 +190,11 @@ theorem denoteMem_write_counter {s : State} {mem : Theory.Memory}
               exact ⟨hn.1, rfl⟩
 
 /-- An `addM` denotes only at the counter it names, and leaves it behind. -/
-theorem denoteMem_addM_counter {s : State} {mem : Theory.Memory} {idp : Nat}
+theorem denoteMem_addM_counter {s : State} {mem : Theory.Memory}
+    {idp : Theory.IdentityPrim}
     {ty : RefTy} {h' : List (Nat × MObj)} {n' : Nat}
     (hd : denoteMem s (.addM mem idp ty) = .ok (h', n')) :
-    ∃ g, denoteMem s mem = .ok (g, idp) ∧ idp < n' := by
+    ∃ g, denoteMem s mem = .ok (g, idp.toNat) ∧ idp.toNat < n' := by
   rw [denoteMem] at hd
   cases hm0 : denoteMem s mem with
   | error e => rw [hm0] at hd; exact absurd hd (by simp [bind, Except.bind])
@@ -211,25 +222,33 @@ theorem denoteMem_new {s : State}
     (hwf : SemanticsProperties.HeapWellFormed s) :
     ∀ (mem : Theory.Memory) (h' : List (Nat × MObj)) (n' : Nat),
       denoteMem s mem = .ok (h', n') ->
-        ∀ m, n' ≤ m -> Theory.Memory.new s.heap mem m = true := by
+        ∀ m, n' ≤ m -> Theory.Memory.new mem (.ofNat m) = true := by
   intro mem
-  induction mem with
-  | mtMem => intro h' n' _ m _; rfl
-  | pre =>
+  induction mem using Theory.Memory.inductionOn with
+  | h0 => intro h' n' _ m _; rfl
+  | h1 hp =>
       intro h' n' hd m hm
-      simp only [denoteMem, Except.ok.injEq, Prod.mk.injEq] at hd
-      simp only [Theory.Memory.new, Option.isNone_iff_eq_none]
-      exact hwf m (hd.2 ▸ hm)
-  | write mem id a v ih =>
+      by_cases hs : hp = s.heap
+      · subst hs
+        simp only [denoteMem, if_true, Except.ok.injEq, Prod.mk.injEq,
+          reduceIte] at hd
+        simp only [Theory.Memory.new, Option.isNone_iff_eq_none]
+        exact hwf m (hd.2 ▸ hm)
+      · simp only [denoteMem, if_neg hs] at hd
+        cases hd
+  | h2 mem id a v ih =>
       intro h' n' hd m hm
       obtain ⟨g, hg⟩ := denoteMem_write_counter hd
       simpa only [Theory.Memory.new] using ih g n' hg m hm
-  | addM mem idp ty ih =>
+  | h3 mem idp ty ih =>
       intro h' n' hd m hm
       obtain ⟨g, hg, hlt⟩ := denoteMem_addM_counter hd
-      have hne : idp ≠ m := by omega
+      have hne : idp ≠ Theory.IdentityPrim.ofNat m := by
+        intro he
+        exact absurd (congrArg Theory.IdentityPrim.toNat he) (by simp; omega)
       simp only [Theory.Memory.new, if_neg hne]
-      exact ih g idp hg m (by omega)
+      exact ih g idp.toNat hg m (by omega)
+  | h4 mem idp st _ => intro h' n' hd m hm; simp [denoteMem] at hd
 
 /-- `Update.memWrite` with the write read as a term. -/
 def memWriteT (s : State) (target : WrappedExpr) (mv : MVal) :
@@ -237,32 +256,66 @@ def memWriteT (s : State) (target : WrappedExpr) (mv : MVal) :
   match target with
   | WrappedExpr.field Kind.memory _ base f =>
       memBase s base >>= fun id =>
-        denoteMem s (.write .pre (.idCC id) (Seg.field f.name)
+        denoteMem s (.write (.pre s.heap) (.idCC (.ofNat id)) (Seg.field f.name)
           (Theory.MVal.toMemValue mv))
   | WrappedExpr.index Kind.memory _ base ix =>
       memBase s base >>= fun id => simpleInt s ix >>= fun i =>
-        denoteMem s (.write .pre (.idCC id) (Seg.at i)
+        denoteMem s (.write (.pre s.heap) (.idCC (.ofNat id)) (Seg.at i)
           (Theory.MVal.toMemValue mv))
   | _ => .error .stuck
 
 theorem memWrite_eq_theory (s : State) (target : WrappedExpr) (mv : MVal) :
-    memWrite s target mv = memWriteT s target mv := by
-  cases target <;>
-    simp only [memWrite, memWriteT, denoteMem_write_pre] <;>
-    rename_i k _ _ _ <;> cases k <;> rfl
+    (memWriteIn s target mv).map (fun t => (t.heap, t.nextId))
+      = memWriteT s target mv := by
+  cases target with
+  | field k _ base f =>
+      cases k <;> try rfl
+      simp only [memWriteIn, memWriteT, denoteMem_write_pre, bind, Except.bind]
+      cases memBase s base <;> rfl
+  | index k _ base ix =>
+      cases k <;> try rfl
+      simp only [memWriteIn, memWriteT, denoteMem_write_pre, bind, Except.bind]
+      cases memBase s base <;> try rfl
+      cases simpleInt s ix <;> rfl
+  | _ => rfl
 
-/-- `Update.heapRhs` with the write read as a term. -/
-def heapRhsT (u : HeapUpd) (s : State) : Res (List (Nat × MObj) × Nat) :=
-  match u with
-  | .write target t => Sym.eval s t >>= fun v => memWriteT s target v.toMVal
-  | .writeRef target src => rhsMVal s src >>= fun x => memWriteT x.1 target x.2
+/-- `Update.heapRhs` with the write read as a term.
+
+The reading covers a `write` on the `memory` variable, which is what it covered
+before `Rules.MemTerm` existed.  `addM` and `copySt` are not here: denoting
+them means reconciling KeY's lazy allocation with `Semantics.allocDefault`'s
+eager one, and the two disagree about *which* root a nested type gets — the
+row is `docs/lean-key-rule-map.md`'s, not this file's. -/
+def heapRhsT (t : MemTerm) (s : State) : Res (List (Nat × MObj) × Nat) :=
+  match t with
+  | .write .cur target (.sym v) => Sym.eval s v >>= fun w => memWriteT s target w.toMVal
+  | .write .cur target (.image src) => rhsMVal s src >>= fun x => memWriteT x.1 target x.2
+  | _ => heapRhs t s
 
 /-- **The memory half of the headline.** A rule's stated `memory := …`, read
 as a term of `memoryRules.key`'s theory and denoted, is the update
 `Update/Eval.lean` computes. -/
-theorem heapRhs_eq_theory (u : HeapUpd) (s : State) :
-    heapRhs u s = heapRhsT u s := by
-  cases u <;> simp only [heapRhs, heapRhsT, memWrite_eq_theory]
+theorem heapRhs_eq_theory (t : MemTerm) (s : State) :
+    heapRhs t s = heapRhsT t s := by
+  match t with
+  | .write .cur target (.sym v) =>
+      simp only [heapRhs, heapRhsT, memEval, Except.map, bind, Except.bind]
+      cases Sym.eval s v <;>
+        simp only [Except.map, bind, Except.bind, <- memWrite_eq_theory] <;>
+        (try rfl) <;> (rename_i w; cases memWriteIn s target w.toMVal <;> rfl)
+  | .write .cur target (.image src) =>
+      simp only [heapRhs, heapRhsT, memEval, Except.map, bind, Except.bind]
+      cases rhsMVal s src <;>
+        simp only [Except.map, bind, Except.bind, <- memWrite_eq_theory] <;>
+        (try rfl) <;> (rename_i x; cases memWriteIn x.1 target x.2 <;> rfl)
+  | .cur => rfl
+  | .addM _ _ => rfl
+  | .copySt _ _ _ => rfl
+  | .write (.addM _ _) _ _ => rfl
+  | .write (.copySt _ _ _) _ _ => rfl
+  | .write (.write _ _ _) _ _ => rfl
+  | .write .cur _ .fresh => rfl
+  | .write .cur _ (.defVal _) => rfl
 
 theorem heapRhs_eq_theory' : heapRhs = heapRhsT := by
   funext u s

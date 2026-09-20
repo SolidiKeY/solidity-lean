@@ -806,6 +806,54 @@ partial def transFormula (sc : Scope) (stx : Syntax) : CommandElabM Term := do
 def isRevertResult (stx : Syntax) : Bool :=
   stx.getKind == ``resRevert
 
+mutual
+/-- A `rule_upd`'s memory term.  `memory` is the program variable, and the
+allocating and writing forms nest as KeY's do -- `write(addM(memory), mv.fld,
+fresh)` is `memoryFieldDeleteReference` verbatim. -/
+partial def transMemTerm (sc : Scope) (stx : Syntax) : CommandElabM Term := do
+  match callHead? stx with
+  | some ("alloc", as) =>
+      -- `alloc(mv)` allocates for `mv`'s type, taking the source from the
+      -- rule's `Option` parameter; `alloc(mv, sp)` names the source outright.
+      let ty : Term <-
+        match exprView? as[0]! with
+        | some (.var x) =>
+            match sc.find? x.getId with
+            | some (.declared _ t) => (pure t : CommandElabM Term)
+            | _ => do let t <- transExpr sc false as[0]!; `(($t).ty)
+        | _ => do let t <- transExpr sc false as[0]!; `(($t).ty)
+      if h : as.size = 2 then
+        `($(gen `Rules.allocTerm) $ty (some $(<- transExpr sc false as[1])))
+      else
+        `($(gen `Rules.allocTerm) $ty $(sc.optionParam.getD (mkIdent `init)))
+  | some ("addM", #[m, x]) =>
+      let t <- transExpr sc false x
+      `($(gen `MemTerm.addM) $(<- transMemTerm sc m) ($t).ty)
+  | some ("write", #[m, p, v]) =>
+      `($(gen `MemTerm.write) $(<- transMemTerm sc m) $(<- transExpr sc false p)
+          $(<- transMemVal sc v))
+  | _ =>
+      match exprView? stx with
+      | some (.var x) =>
+          if x.getId.toString == "memory" then `($(gen `MemTerm.cur))
+          else throwErrorAt stx "not a memory term"
+      | _ => throwErrorAt stx "not a memory term"
+
+/-- A `write`'s value slot. -/
+partial def transMemVal (sc : Scope) (stx : Syntax) : CommandElabM Term := do
+  match callHead? stx with
+  | some ("image", #[src]) => `($(gen `MemVal.image) $(<- transExpr sc false src))
+  | some ("defVal", #[x]) =>
+      let t <- transExpr sc false x
+      `($(gen `MemVal.defVal) ($t).ty)
+  | _ =>
+      match exprView? stx with
+      | some (.var x) =>
+          if x.getId.toString == "fresh" then `($(gen `MemVal.fresh))
+          else `($(gen `MemVal.sym) $(<- transSym sc stx))
+      | _ => `($(gen `MemVal.sym) $(<- transSym sc stx))
+end
+
 /-- A `rule_upd` as a `Rules.UpdElem`. -/
 def transUpd (sc : Scope) (stx : Syntax) : CommandElabM Term := do
   let a := args stx
@@ -837,9 +885,8 @@ def transUpd (sc : Scope) (stx : Syntax) : CommandElabM Term := do
       if let some (.declared _ ty) := sc.find? x.getId then
         let bind (r : Term) : CommandElabM Term := `($(gen `UpdElem.bind) $x $r)
         match callHead? rhs with
-        | some ("alloc", _) =>
-            let init := sc.optionParam.getD (mkIdent `init)
-            return (← `($(gen `UpdElem.memDecl) $ty $x $init))
+        | some ("freshId", #[m]) =>
+            return (← bind (← `($(gen `BindRhs.freshId) $(← transMemTerm sc m))))
         | some ("default", _) =>
             return (← bind (← `($(gen `BindRhs.val) ($(gen `Sym.deflt) $ty))))
         | some ("path", #[t]) =>
@@ -873,16 +920,10 @@ def transUpd (sc : Scope) (stx : Syntax) : CommandElabM Term := do
         `($(gen `UpdElem.storage) ($(gen `StorageUpd.pop) $(← transExpr sc false p)))
     | some "storage", some ("clear", #[p]) =>
         `($(gen `UpdElem.storage) ($(gen `StorageUpd.clear) $(← transExpr sc false p)))
-    | some "memory", some ("write", #[p, t]) =>
-        `($(gen `UpdElem.heap) ($(gen `HeapUpd.write) $(← transExpr sc false p) $(← transSym sc t)))
-    | some "memory", some ("writeRef", #[p, s]) =>
-        `($(gen `UpdElem.heap) ($(gen `HeapUpd.writeRef) $(← transExpr sc false p) $(← transExpr sc false s)))
-    | none, some ("alloc", as) =>
-        let t ← transExpr sc false lhs
-        if h : as.size = 1 then
-          `($(gen `UpdElem.memDecl) ($t).ty ($(gen `Rules.varName) $t)
-              (some $(← transExpr sc false as[0])))
-        else `($(gen `UpdElem.memDecl) ($t).ty ($(gen `Rules.varName) $t) none)
+    | some "memory", _ => `($(gen `UpdElem.heap) $(← transMemTerm sc rhs))
+    | none, some ("freshId", #[m]) =>
+        `($(gen `UpdElem.bind) ($(gen `Rules.varName) $(← transExpr sc false lhs))
+            ($(gen `BindRhs.freshId) $(← transMemTerm sc m)))
     | none, some ("path", #[s]) =>
         `($(gen `UpdElem.bind) ($(gen `Rules.varName) $(← transExpr sc false lhs))
             ($(gen `BindRhs.path) $(← transExpr sc false s)))
