@@ -23,7 +23,7 @@ a compatible Lean and Lake installation.
 
 Three further Lake targets are deliberately outside the default build, because
 each is a large batch of symbolic executions that would multiply the cost of an
-ordinary build: `SolidityExamples` (`./scripts/check-examples.sh`),
+ordinary build: `SolidityTraces` (`./scripts/check-traces.sh`),
 `SolidityCorpus` (`./scripts/check-solkey-parity.sh`) and `SolidityCalculus`
 (`./scripts/check-calculus-parity.sh`).
 

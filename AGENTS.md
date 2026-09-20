@@ -54,7 +54,7 @@ map to solkey's taclets (do not restate it in module docstrings);
 `docs/calculus-parity.md` what the *rule table* does. `sol_wp` never reads
 `Calculus/Rules.lean`, so a number from the first says nothing about the calculus.
 `SolidityTraces.lean` is the third: one entry per worked example of the calculus,
-naming the chain in `Examples/Derivations/Traces/` that is it, or the reason
+naming the chain in `Solidity/Traces/` that is it, or the reason
 there is none. Add a row there before adding a chain.
 
 ## Checking your work
@@ -67,7 +67,7 @@ import changes and final confirmation. The `lean-verify` skill in
 | Command | Cost | What it covers |
 |---|---|---|
 | `./run-lean.sh` | ~24 min CPU | `lake build` (default targets) then the solkey sort check |
-| `./scripts/check-examples.sh` | ~7 min CPU | `SolidityExamples` (`Examples/Derivations/Traces/`) |
+| `./scripts/check-traces.sh` | ~7 min CPU | `SolidityTraces` (`Solidity/Traces/`) |
 | `./scripts/check-solkey-parity.sh` | medium | the ported corpus against `tests/solkey/expected.tsv` |
 | `./scripts/check-calculus-parity.sh` | long | the same corpus proved from `Calculus/Rules.lean` alone, against `tests/solkey/expected-calculus.tsv` |
 | `lake exe solkeycheck` | seconds | sort annotations against solkey's `.key` |

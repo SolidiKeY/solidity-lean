@@ -4,7 +4,7 @@ import Solidity.Semantics.DecEq
 /-!
 # The calculus's worked examples — payment and control flow
 
-Sections 9–10 of `Examples/Derivations/Traces.lean`: `transfer`, and the
+Sections 9–10 of `SolidityTraces.lean`: `transfer`, and the
 guarded statements `require`/`assert` and `if`/`else`.  The conventions are
 that file's docstring.
 -/

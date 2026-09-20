@@ -1,7 +1,7 @@
-import Solidity.Examples.Derivations.Traces.Storage
-import Solidity.Examples.Derivations.Traces.Memory
-import Solidity.Examples.Derivations.Traces.CrossDomain
-import Solidity.Examples.Derivations.Traces.Control
+import Solidity.Traces.Storage
+import Solidity.Traces.Memory
+import Solidity.Traces.CrossDomain
+import Solidity.Traces.Control
 
 /-!
 # The calculus's worked examples — the lines, run
