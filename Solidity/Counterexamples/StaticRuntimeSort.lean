@@ -1,4 +1,4 @@
-import Solidity.StorageTyping
+import Solidity.Typing.Storage
 
 /-!
 # Static array and mapping sorts are not their runtime nodes

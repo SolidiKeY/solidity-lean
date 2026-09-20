@@ -1,4 +1,4 @@
-import Solidity.Reachability
+import Solidity.Typing.Reachability
 
 /-!
 # What the taclets consume from `wellFormed(storage)`

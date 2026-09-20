@@ -5,7 +5,7 @@ paths:
   - "Solidity/Uniqueness.lean"
   - "Solidity/RuleValidation.lean"
   - "Solidity/RuleShapes.lean"
-  - "Solidity/TacletAnnotations.lean"
+  - "Solidity/SortCheck/*.lean"
   - "Solidity/KeyTaclets.lean"
   - "Solidity/Coverage.lean"
   - "Solidity/Completeness.lean"
@@ -39,7 +39,7 @@ the order decides which name a `⇝[.rule]` derivation pins.
 4. Non-empty residual ⇒ add a `RuleValidation.lean` entry.
 5. The taclet reads storage/memory (`find`/`read`/`selectSt`/`valAt`/
    `defaultValue`) ⇒ add or extend its `TacletReadAnn` row in
-   `TacletAnnotations.lean`, keep `sortFaithful_all` closing (extend
+   `SortCheck/Annotations.lean`, keep `sortFaithful_all` closing (extend
    `ruleNumericTarget`/`ruleRefTarget` for new `fixed`-sorted value reads),
    then run `lake exe solkeycheck`.
 

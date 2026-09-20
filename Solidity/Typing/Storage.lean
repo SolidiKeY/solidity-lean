@@ -5,7 +5,7 @@ import Solidity.RuleSoundness
 # Storage layout typing
 
 The typing layer the sort-faithfulness theorems
-(`SortFaithfulness.lean`) run on. The interpreter's storage
+(`../SortCheck/Faithfulness.lean`) run on. The interpreter's storage
 (`State.storage`) is untyped; a `Layout` declares the static types of
 the global storage roots (the per-contract layout), with struct bodies
 coming from `Semantics.structDef`. `SVal.hasTy` says a storage value

@@ -1,5 +1,5 @@
 import Solidity.Uniqueness
-import Solidity.TypeSoundness
+import Solidity.Typing.Soundness
 
 /-!
 # Coverage: every well-typed statement is claimed by a rule of the calculus or is

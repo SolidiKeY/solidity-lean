@@ -50,7 +50,7 @@ calculus — which is the artefact solkey's taclets correspond to.
 the rule table alone.
 
 **The pin.** The corpus is `c80a54494c`; the *rule table* and
-`TacletAnnotations.lean` are still `e67a0d7c48`, which is why
+`SortCheck/Annotations.lean` are still `e67a0d7c48`, which is why
 `lake exe solkeycheck` still reports its 78 rows
 (`docs/lean-key-rule-map.md` records the split and why). The re-port from 176
 `TestSuite` rows to 278 added the bool tier, the `Toggle` struct, the

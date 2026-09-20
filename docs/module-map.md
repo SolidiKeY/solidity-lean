@@ -85,22 +85,22 @@ witness.
 | `Semantics.lean` | Run-time values and the executable state semantics; `SolidityJudgment.check`/`Holds`. Total, no `partial` — Lean checks termination. Follows solc where KeY was more liberal (`docs/solc-alignment.md`). The struct schema and `tyHasMapping` live in `AST.lean`. `SVal.array` carries the slots a `pop` cleared and gave back beside the live elements, and `pushSlot` is upstream's `delAt` at the pushed slot: a mapping nested in a popped element survives into the next `push`. |
 | `Semantics/Properties.lean` | Association-list, read-after-write, frame, allocation-freshness, copy-frame theorems. |
 | `Semantics/StuckShape.lean` | `StuckCause`, the halt taxonomy, and `find_stuck_iff`. Deliberately no Boolean mirror. |
-| `StorageTyping.lean` | `Layout`, `SVal.hasTy`, read-typing lemmas, and the runtime sorts `SVal.keySort`/`MVal.keySort`. |
-| `StoragePreservation.lean` | The write-side twin: `save_hasTy`, `State.saveStorage_wellTyped`, `defaultForTy_hasTy`. |
-| `StateTyping.lean` | The full-soundness invariants: `Ctx`, `HeapTy`, `StateWT`, weakening, `wtExpr`, cross-domain copy typing. |
-| `TypeSoundness.lean` | Type soundness: the expression block preserves `StateWT`, then `execStmt_sound`/`execBlock_sound` — storage well-typedness is an inductive invariant. v1 scope notes in the docstrings. |
-| `Reachability.lean` | Tightness of `wellFormed(storage)`: `Reachable`, `SVal.canonical`, `storage_tight`, `no_hidden_invariant`. All take `layoutOkB L`. `canonical` is the **shadow-free** fragment — what `writeProg` can build, since it builds with assignments and pushes and never a `pop`. **OPEN**: `reachable ⇒ canonical` (two `sorry`s), now also because a popped array carries a recycled slot. |
-| `WellFormedConsumers.lean` | The table of facts the taclets consume from a symbolic storage. **OPEN**: row C6's state-level form `saveStorage_canonical`. |
+| `Typing/Storage.lean` | `Layout`, `SVal.hasTy`, read-typing lemmas, and the runtime sorts `SVal.keySort`/`MVal.keySort`. |
+| `Typing/StoragePreservation.lean` | The write-side twin: `save_hasTy`, `State.saveStorage_wellTyped`, `defaultForTy_hasTy`. |
+| `Typing/State.lean` | The full-soundness invariants: `Ctx`, `HeapTy`, `StateWT`, weakening, `wtExpr`, cross-domain copy typing. |
+| `Typing/Soundness.lean` | Type soundness: the expression block preserves `StateWT`, then `execStmt_sound`/`execBlock_sound` — storage well-typedness is an inductive invariant. v1 scope notes in the docstrings. |
+| `Typing/Reachability.lean` | Tightness of `wellFormed(storage)`: `Reachable`, `SVal.canonical`, `storage_tight`, `no_hidden_invariant`. All take `layoutOkB L`. `canonical` is the **shadow-free** fragment — what `writeProg` can build, since it builds with assignments and pushes and never a `pop`. **OPEN**: `reachable ⇒ canonical` (two `sorry`s), now also because a popped array carries a recycled slot. |
+| `Typing/WellFormedConsumers.lean` | The table of facts the taclets consume from a symbolic storage. **OPEN**: row C6's state-level form `saveStorage_canonical`. |
 | `Semantics/DecEq.lean` | The hand-written `DecidableEq SVal` and derived instances; shared by every `native_decide`. |
 
 ## Sort faithfulness (the solkey cross-check)
 
 | Module | What it is |
 |---|---|
-| `TacletAnnotations.lean` | Proof-free table of the taclets' read-sort annotations, transcribed from the `.key` file. |
-| `KeyTacletParser.lean` | Token-level `.key` scanner plus the `conforms` cross-check. |
-| `SortFaithfulness.lean` | `sortFaithful_all`: every annotation row's sort claim proved against the interpreter, except the listed `openFindings`. `rows_accounting` records what the headline really covers. |
-| `SolkeyCheck.lean` (root) | `lake exe solkeycheck`. **Known failing, pre-existing**: 78 rows of drift against the live checkout. Re-syncing is its own change — it also moves `SortFaithfulness.lean` and `Counterexamples/PreFixSortAnnotations.lean`. |
+| `SortCheck/Annotations.lean` | Proof-free table of the taclets' read-sort annotations, transcribed from the `.key` file. |
+| `SortCheck/Parser.lean` | Token-level `.key` scanner plus the `conforms` cross-check. |
+| `SortCheck/Faithfulness.lean` | `sortFaithful_all`: every annotation row's sort claim proved against the interpreter, except the listed `openFindings`. `rows_accounting` records what the headline really covers. |
+| `SolkeyCheck.lean` (root) | `lake exe solkeycheck`. **Known failing, pre-existing**: 78 rows of drift against the live checkout. Re-syncing is its own change — it also moves `SortCheck/Faithfulness.lean` and `Counterexamples/PreFixSortAnnotations.lean`. |
 
 ## Counterexamples
 

@@ -1,5 +1,5 @@
-import Solidity.StorageTyping
-import Solidity.TacletAnnotations
+import Solidity.Typing.Storage
+import Solidity.SortCheck.Annotations
 
 /-!
 # Sort-faithfulness of the taclet annotations
@@ -29,7 +29,7 @@ exhibits the open findings' failure.
 Scope: storage-domain `value`-site reads carry the semantic content;
 `length`/`net`/`dflt` sites and memory-domain reads have no Lean-model
 counterpart here and are token-checked by `solkeycheck` only (see the
-module docstring of `TacletAnnotations.lean`).
+module docstring of `Annotations.lean`).
 -/
 
 namespace Solidity

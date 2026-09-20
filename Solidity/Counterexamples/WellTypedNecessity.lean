@@ -1,4 +1,4 @@
-import Solidity.SortFaithfulness
+import Solidity.SortCheck.Faithfulness
 
 /-!
 # Storage well-typedness is exactly what the sort claims stand on

@@ -1,4 +1,4 @@
-import Solidity.TacletAnnotations
+import Solidity.SortCheck.Annotations
 
 /-!
 # Token-level parser for `solidityProgramRules.key`

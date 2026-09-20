@@ -1,4 +1,4 @@
-import Solidity.SortFaithfulness
+import Solidity.SortCheck.Faithfulness
 
 /-!
 # The `12e72a1b4b` sort bug, caught

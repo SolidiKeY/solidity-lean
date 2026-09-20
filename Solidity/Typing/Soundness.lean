@@ -1,4 +1,4 @@
-import Solidity.StateTyping
+import Solidity.Typing.State
 
 /-!
 # Type soundness: the interpreter preserves `StateWT`
