@@ -65,8 +65,8 @@ The 44 open rows, by cause.
 `logicalAndShortCircuitRhs`, `logicalOrShortCircuitRhs`, `ternaryToIf`,
 `ternaryCaptureCond`.
 
-`ifElseUnfold` hoists a complex condition into `pv@bool`, and the resulting
-`if (pv@bool) …` matches **no rewrite rule, deliberately**. KeY stops in the
+`ifElseUnfold` hoists a complex condition into `se@bool`, and the resulting
+`if (se@bool) …` matches **no rewrite rule, deliberately**. KeY stops in the
 same place: its program rules end and the sequent rule `ifthenelse_split`
 takes over. The Lean counterpart is `SolidityJudgment.ite_split`
 (`Examples/Derivations/DynamicLogic.lean`), which is a theorem and not a
@@ -93,7 +93,7 @@ stops at `if (b) …`, a symbolic condition, which is §1's stop.
 has **two** nonsimple operands, and no other.
 
 `binopUnfoldLeft` and `binopUnfoldRight` both bind the single scratch name
-`pv`, so the second capture takes the first, and the operation is computed
+`se`, so the second capture takes the first, and the operation is computed
 from the right operand twice.
 `Counterexamples/BinopOperandCapture.lean` pins it: the rule table proves
 `r == 10` of a program that computes `10 + 5`, and the interpreter refutes
@@ -150,7 +150,7 @@ Two limits, both deliberate and both worth knowing before quoting the number.
 
 1. **`CalculusHolds` does not imply `SolidityJudgment.Holds`.** That needs
    `FrontierStep a b → (a.Holds s ↔ b.Holds s)`, which needs the per-rule
-   bridges of `Update/TacletTable.lean` — 21 of the 83 rules with an update —
+   bridges of `Update/TacletTable.lean` — 21 of the 95 rules with an update —
    and `Rules.assertGoals` is deliberately not exhaustive
    (`Update/Wp.lean`). The two corpora are proved of the same programs side
    by side instead of one being derived from the other.

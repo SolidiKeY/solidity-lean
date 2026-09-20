@@ -29,9 +29,11 @@ hypothesis shape. What to know before adding or weakening one:
   `Counterexamples/RefSourceOrder.lean` and `docs/solc-alignment.md`
   § "Known divergence". Dropping it needs assignment to become target-first
   for reference sources.
-- **`hev`/`hstable` are gone.** `freezeRhs` binds the value into `rv` before
-  any target capture, so the whole `*WriteUnfoldLeft*` family needs no
-  semantic side condition on a primitive value operand. The programs those
+- **`hev`/`hstable` are gone for value sources.** `freezeRhs` binds the value
+  into `se` before any target capture (and leaves a source that already is
+  `se` alone), so the `*WriteUnfoldLeft*` family needs no semantic side
+  condition on a value operand; the `*Ref*` instances, which alias rather
+  than freeze, still carry them. The programs those
   hypotheses used to exclude are now *inside* the theorems.
 - **The freeze cannot be made conditional** on the path being impure: a simple
   right-hand side can get stuck while a pure path can revert, so the two
@@ -76,6 +78,7 @@ the rules with an update, so moving a rule between them is checked.
 ## Open `sorry`s here
 
 `functionCallArgCapture_sound_inlined`; the storage/memory-alias argument case
-of `storagePushValueUnfoldRightSndArgument_sound`; the memory-kind right-hand
-side of `memoryWriteUnfoldRightSndResult_sound`. Each is documented at the
-site. Do not add an undocumented one.
+of `storagePushValueUnfoldRightSndArgument_sound`. Each is documented at the
+site. Do not add an undocumented one. The four memory `*OpAssignUnfoldLeftFst`
+/ `*IncrementUnfoldLeftFst` rules have no `_sound` theorem yet (a
+pre-existing gap, not a `sorry`).

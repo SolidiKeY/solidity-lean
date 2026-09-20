@@ -4,7 +4,7 @@ import Solidity.Wp.Terminal.Vocab
 # Terminal-rule updates: control
 
 `revertBox`/`revertDiamond`, `assertSimple`, `requireSimple`,
-`transferNoCallback`.  Each theorem is `execStmt s stmt = terminalUpdate r
+`transferNoCallbackBox`/`transferNoCallbackDiamond`.  Each theorem is `execStmt s stmt = terminalUpdate r
 stmt s` under the rule's guard.
 -/
 
@@ -56,13 +56,14 @@ theorem requireSimple_update (s : State) (c : WrappedExpr)
       | int n => rfl
       | bool b => cases b <;> rfl
 
-theorem transferNoCallback_update (s : State) (recipient amount : WrappedExpr)
-    (hcond : (ruleEffect .transferNoCallback).cond
-      (Stmt.transfer recipient amount)) :
+/-- The interpreter's transfer under the twins' shared guard (`isSimple
+sadr ∧ isSimple se`): a negative amount is stuck, an uncovered one reverts,
+otherwise the payment is booked. -/
+theorem transfer_execStmt_eq_transferUpd (s : State)
+    (recipient amount : WrappedExpr)
+    (hc : isSimple recipient ∧ isSimple amount) :
     execStmt s (Stmt.transfer recipient amount) =
-      terminalUpdate .transferNoCallback (Stmt.transfer recipient amount) s := by
-  have hc : isSimple recipient ∧ isSimple amount := hcond
-  show execStmt s (Stmt.transfer recipient amount) = transferUpd recipient amount s
+      transferUpd recipient amount s := by
   rw [execStmt, evalInt_simple s recipient hc.1]
   simp only [transferUpd, bind, Except.bind, Except.map]
   cases simpleInt s recipient with
@@ -72,6 +73,28 @@ theorem transferNoCallback_update (s : State) (recipient amount : WrappedExpr)
       cases simpleInt s amount with
       | error e => rfl
       | ok amt => rfl
+
+/-- The box twin.  KeY's box rule books the payment *unconditionally* — a
+strengthening of the interpreter, which reverts when the balance does not
+cover the amount.  This theorem is about the interpreter's behaviour
+(`terminalUpdate` is the guarded `transferUpd`), not about the rule's stated
+update; the gap is what keeps the rule out of `Update/TacletTable`'s bridges. -/
+theorem transferNoCallbackBox_update (s : State) (recipient amount : WrappedExpr)
+    (hcond : (ruleEffect .transferNoCallbackBox).cond
+      (Stmt.transfer recipient amount)) :
+    execStmt s (Stmt.transfer recipient amount) =
+      terminalUpdate .transferNoCallbackBox (Stmt.transfer recipient amount) s :=
+  transfer_execStmt_eq_transferUpd s recipient amount hcond
+
+/-- The diamond twin: KeY owes the funds check as a separate obligation
+(`funded(se)`) and books the payment on the other goal; the interpreter's
+guarded update is the two together. -/
+theorem transferNoCallbackDiamond_update (s : State) (recipient amount : WrappedExpr)
+    (hcond : (ruleEffect .transferNoCallbackDiamond).cond
+      (Stmt.transfer recipient amount)) :
+    execStmt s (Stmt.transfer recipient amount) =
+      terminalUpdate .transferNoCallbackDiamond (Stmt.transfer recipient amount) s :=
+  transfer_execStmt_eq_transferUpd s recipient amount hcond
 
 end Wp
 end Solidity

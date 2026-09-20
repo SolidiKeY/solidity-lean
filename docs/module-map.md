@@ -38,10 +38,11 @@ both. New modules go in `Solidity.lean`.
 |---|---|
 | `KeySort.lean` | solkey's sort lattice as one Lean type: `parents`, `ancestors`, `KeySort.le`, KeY spellings. The *only* model of the lattice. Array/mapping sorts sit directly below `StValue`, siblings of `Struct` (not below it). Imports nothing. |
 | `AST.lean` | Solidity syntax; the `sol!` notation and its `sol_stmt`/`sol_expr` grammars. `Ty.keySort` mirrors the KeY hierarchy structurally; `Field.sort = ty.fieldSort` is *computed*, so a field cannot be classified against its own type. Old constructor names survive as `@[match_pattern]` abbrevs. Holds the struct table `Semantics.structDef`, its rank certificate and `Semantics.tyHasMapping` (solkey's `StorageReferenceTypes.containsMapping`), so `TypedStmt.Assign.mk` can refuse a storage-to-storage copy of a mapping-carrying type (`mapFree`), as solc ≥ 0.7 and `ParserUtils.parseAssignmentMaybe` do. |
-| `Calculus/KeyTaclets.lean` | The 252 taclets of `solidityProgramRules.key` as one type, plus `\heuristics` sets and `KeyOrigin`. Regenerate with the `awk` recipe in its docstring. Imports nothing. |
+| `Calculus/KeyTaclets.lean` | The 310 taclets of `solidityProgramRules.key` (solkey `8c5c69ca25`) as one type, plus the three `\heuristics` sets and `KeyOrigin`. Regenerate with the `awk` recipe in its docstring. Imports nothing. |
+| `Calculus/PaperRules.lean` | The paper's rule tables (`rules/*.tex`) as one type, `paperOrigin` per `RuleName`, and `paper_rules_partitioned`: every rule of the paper is claimed but `ifElseSplit`, and each Lean rule the paper lacks is filed under a reason (`keyTier`, `plumbing`, `calculus`). `./scripts/check-paper-rules.mjs` checks the enumeration against the paper. The port checklist in the other direction. |
 | `Calculus/RuleSyntax.lean` | The `sol_rule` declaration syntax and `sol_assemble_rules`; carries the schema-variable table (`schemaVar`). Imports `Lean` only. |
 | `Calculus/Rules.lean` | One `sol_rule` per rule, organised by family. A rule is a taclet, not a rewrite: `StepEffect` carries `goals` (guard, update, residual), read as KeY's weakest precondition. Update syntax here is AST-only. |
-| `Calculus/RuleShapes.lean` | Structural checks: `mainBlock` reduction, `goals_nonempty`, `taclets_partitioned` (246 of 252 claimed, six listed with a reason), `twins_origin_eq`, `heuristics_eq_origin`. |
+| `Calculus/RuleShapes.lean` | Structural checks: `mainBlock` reduction, `goals_nonempty`, `taclets_partitioned` (306 of 310 claimed, four listed with a reason), `twins_origin_eq`, `heuristics_eq_origin`. |
 | `Calculus/Completeness.lean` | `FirstStepCase`/`RuleStep` and the bridge `RuleStep.step_of_ruleApplies` with its converse. |
 | `Calculus/CandidateStep.lean` | `FirstStepCase` built from mutual exclusion instead of a ~190-entry list walk (`firstStepCase_box`/`_diamond`/`_both`). What makes a pinned step cheap. |
 | `Calculus/Coverage.lean` | `candidate_applies`, the syntactic `ResidueShape` (24 shapes no rule covers), and `RuleStep.complete_of_wellTyped` over the rule-independent fragment. |
@@ -50,7 +51,7 @@ both. New modules go in `Solidity.lean`.
 | `Calculus/MultiStep.lean` | `BlockStep` (`⇝`), `BlockReflMultiStep` (`⇝*`), `NamedBlockStep` (`⇝[.rule]`) and the `Trans` instances. Framing (`appendStmts`, `append_suffix`, `inContext`, and the rule-level `NamedBlockStep.inSuffix`): a chain carries a *suffix*, and a prefix is consumed rather than carried, because `⇝` fires at the head. |
 | `Calculus/Termination.lean` | Termination-certificate interface. **OPEN**: the concrete all-rules certificate. |
 | `Calculus/RuleValidation.lean` | Per-rule `native_decide` validation of unfold rules against the executable semantics. |
-| `Calculus/RuleSoundness.lean` | `<rule>_sound` per unfold rule: residual agrees with the original modulo scratch aliases. **OPEN**: `functionCallArgCapture_sound_inlined`, and one case each of `storagePushValueUnfoldRightSndArgument_sound` / `memoryWriteUnfoldRightSndResult_sound`. |
+| `Calculus/RuleSoundness.lean` | `<rule>_sound` per unfold rule: residual agrees with the original modulo scratch aliases. **OPEN**: `functionCallArgCapture_sound_inlined`, one case of `storagePushValueUnfoldRightSndArgument_sound`, and no theorem yet for the four memory `*OpAssignUnfoldLeftFst`/`*IncrementUnfoldLeftFst` rules. |
 | `Calculus/JudgmentSplit.lean` | KeY `ifthenelse_split` as a theorem about `SolidityJudgment.Holds`, not a rule: a single-successor `BlockStep` cannot yield two goals. |
 | `Calculus/RewriteSoundness.lean` | Lifts local soundness through untouched block suffixes and `⇝*`. `BlockExecAgree.append_left`/`append_right` are the context congruence the rewrite layer cannot have — unconditional on a prefix, freshness-guarded on a suffix. |
 
@@ -97,7 +98,7 @@ witness.
 |---|---|
 | `Wp/Monad.lean` | The interpreter as `SolM`, and the two modalities as one wp each (`Box.wpB`, `Dia.wpD`). Both *defined* by the shape their `_run` lemma states. |
 | `Wp/Verdict.lean` | `checkResult` and `check_eq_checkResult`. |
-| `Wp/Terminal/Table.lean` | The state update of every terminal rule in the interpreter's state vocabulary, never through its evaluators. `terminalUpdate?` is `some` for exactly the 83 terminal arms. |
+| `Wp/Terminal/Table.lean` | The state update of every terminal rule in the interpreter's state vocabulary, never through its evaluators. `terminalUpdate?` is `some` for exactly the 95 terminal arms. |
 | `Wp/Terminal/Vocab.lean` | Bridges from each interpreter evaluator to the vocabulary readers. |
 | `Wp/Terminal/Update*.lean` | One `<rule>_update` theorem per terminal rule, **under the rule's guard**. |
 | `Wp/Terminal/Soundness.lean` | `terminalUpdate_sound`, `TerminalRuleStep`, `terminal_step_sound`. Not proved: no unfold rule is accidentally terminal. |
@@ -138,7 +139,7 @@ They are infrastructure, not examples, which is why they are not under
 | `SortCheck/Annotations.lean` | Proof-free table of the taclets' read-sort annotations, transcribed from the `.key` file. |
 | `SortCheck/Parser.lean` | Token-level `.key` scanner plus the `conforms` cross-check. |
 | `SortCheck/Faithfulness.lean` | `sortFaithful_all`: every annotation row's sort claim proved against the interpreter, except the listed `openFindings`. `rows_accounting` records what the headline really covers. |
-| `SolkeyCheck.lean` (root) | `lake exe solkeycheck`. **Known failing, pre-existing**: 78 rows of drift against the live checkout. Re-syncing is its own change — it also moves `SortCheck/Faithfulness.lean` and `Counterexamples/PreFixSortAnnotations.lean`. |
+| `SolkeyCheck.lean` (root) | `lake exe solkeycheck`. At zero against solkey `8c5c69ca25`: 110 read-bearing taclets, 110 rows, `openFindings` empty. |
 
 ## Counterexamples
 

@@ -31,23 +31,23 @@ modality, because its parentheses belong to the comparison
 (`Update/SequentSyntax.lean`).  The bare line is for the calculus's `φ`. -/
 
 /-- The store the calculus's examples are read in, with the frozen value
-operand bound: `rv` is what the freeze introduces, and a line written *after*
+operand bound: `se` is what the freeze introduces, and a line written *after*
 the freeze mentions it. -/
 def store : Semantics.State :=
-  State.exampleStore.setEnv "rv" (Semantics.Binding.val (Semantics.PrimVal.int 10))
+  State.exampleStore.setEnv "se" (Semantics.Binding.val (Semantics.PrimVal.int 10))
 
 /-- The headline: the merged parallel update produces the same verdict as the
 program it came from. -/
 example :
     (seq!{ => <[ alice.account.balance = 10 ]>(alice.account.balance == 10) }).check store
-      = (seq!{ => { rv@uint := 10 ‖ sp@Account := path(alice.account)
+      = (seq!{ => { se@uint := 10 ‖ sp@Account := path(alice.account)
                     ‖ storage := save(alice.account.balance, 10) }
                <[ ]>(alice.account.balance == 10) }).check store := by
   native_decide
 
 /-- …and both of them hold. -/
 example :
-    (seq!{ => { rv@uint := 10 ‖ sp@Account := path(alice.account)
+    (seq!{ => { se@uint := 10 ‖ sp@Account := path(alice.account)
                 ‖ storage := save(alice.account.balance, 10) }
             <[ ]>(alice.account.balance == 10) }).Holds store := by
   native_decide
@@ -129,13 +129,13 @@ theorem pushPopSlotCleared :
       State.testSuiteStore) = true := by
   native_decide
 
-/-- **Payment, run.** The guarded pair against the program it came from: the
-transfer books, and the unfunded branch is the `⊤`. -/
+/-- **Payment, run.** The unconditional booking against the program it came
+from: the box rule carries no funds check, and on a store where the transfer
+is covered the two agree. -/
 example :
     (Frontier.check [ seq!{ => [ to.transfer(5) ](i == 0) } ] storeI0)
       = (Frontier.check
-          [ seq!{ funded(5) => { transfer(to, 5) } [ ](i == 0) },
-            seq!{ ¬funded(5) => ⊤ } ] storeI0) := by
+          [ seq!{ => { transfer(to, 5) } [ ](i == 0) } ] storeI0) := by
   native_decide
 
 /-- The delete chain, first line against last, on the calculus's store: the
@@ -145,12 +145,12 @@ example :
                  delete alice.account; b = alice.account.balance;
                  v = alice.account.token.value ]>(v == 0) }).check
         State.exampleStore
-      = (seq!{ => { rv@uint := default(uint) } { rv@uint := 100 }
+      = (seq!{ => { se@uint := default(uint) } { se@uint := 100 }
                   { sp@Account := path(alice.account) }
-                  { storage := save(sp@Account.balance, rv@uint) }
-                  { rv@uint := default(uint) } { rv@uint := 7 }
+                  { storage := save(sp@Account.balance, se@uint) }
+                  { se@uint := default(uint) } { se@uint := 7 }
                   { sp@Token := path(alice.account.token) }
-                  { storage := save(sp@Token.value, rv@uint) }
+                  { storage := save(sp@Token.value, se@uint) }
                   { storage := clear(alice.account) }
                   { sp@Account := path(alice.account) } { b := sp@Account.balance }
                   { sp@Token := path(alice.account.token) }

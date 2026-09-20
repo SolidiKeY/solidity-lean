@@ -3,9 +3,10 @@ import Solidity.Wp.Terminal.UpdateStack
 /-!
 # Terminal-rule updates: compound assignment and inc/dec statements
 
-`localCompoundAssign op`, `storage{Root,Field,Index}CompoundAssign op`
-(`t op= se`), and `localIncDec op`, `storage{Root,Field,Index}IncDec op`
-(`++t;`).
+`localOpAssign op`, `storage{Root,Field,IndexMapping,IndexArray}OpAssign op`
+(`t op= se`), and `localIncrement op`, `storage{Root,Field,Index}Increment op`
+(`++t;`); the memory twins `memory{Field,IndexArray}OpAssign op`,
+`memory{Field,IndexArray}Increment op`.
 -/
 
 namespace Solidity
@@ -22,9 +23,9 @@ theorem execStmt_expr_incDec (s : State) (op : IncDec) (t : WrappedExpr)
   rw [execStmt, evalValue_incDec s op t ht]
   simp only [incDecStmtUpd, bind, Except.bind, Except.map]
 
-theorem localIncDec_update (op : IncDec) (s : State) (e : WrappedExpr)
-    (hcond : (ruleEffect (.localIncDec op)).cond (Stmt.expr e)) :
-    execStmt s (Stmt.expr e) = terminalUpdate (.localIncDec op) (Stmt.expr e) s := by
+theorem localIncrement_update (op : IncDec) (s : State) (e : WrappedExpr)
+    (hcond : (ruleEffect (.localIncrement op)).cond (Stmt.expr e)) :
+    execStmt s (Stmt.expr e) = terminalUpdate (.localIncrement op) (Stmt.expr e) s := by
   show execStmt s (Stmt.expr e) = incDecStmtUpd op e s
   match e, hcond with
   | WrappedExpr.incDec op' t, hc =>
@@ -32,10 +33,10 @@ theorem localIncDec_update (op : IncDec) (s : State) (e : WrappedExpr)
       obtain ⟨rfl, hk, hs⟩ := hc'
       exact execStmt_expr_incDec s op' t (incDecTargetB_of_stackSimple hk hs)
 
-theorem storageRootIncDec_update (op : IncDec) (s : State) (e : WrappedExpr)
-    (hcond : (ruleEffect (.storageRootIncDec op)).cond (Stmt.expr e)) :
+theorem storageRootIncrement_update (op : IncDec) (s : State) (e : WrappedExpr)
+    (hcond : (ruleEffect (.storageRootIncrement op)).cond (Stmt.expr e)) :
     execStmt s (Stmt.expr e) =
-      terminalUpdate (.storageRootIncDec op) (Stmt.expr e) s := by
+      terminalUpdate (.storageRootIncrement op) (Stmt.expr e) s := by
   show execStmt s (Stmt.expr e) = incDecStmtUpd op e s
   match e, hcond with
   | WrappedExpr.incDec op' t, hc =>
@@ -43,10 +44,10 @@ theorem storageRootIncDec_update (op : IncDec) (s : State) (e : WrappedExpr)
       obtain ⟨rfl, hg⟩ := hc'
       exact execStmt_expr_incDec s op' t (incDecTargetB_of_global hg)
 
-theorem storageFieldIncDec_update (op : IncDec) (s : State) (e : WrappedExpr)
-    (hcond : (ruleEffect (.storageFieldIncDec op)).cond (Stmt.expr e)) :
+theorem storageFieldIncrement_update (op : IncDec) (s : State) (e : WrappedExpr)
+    (hcond : (ruleEffect (.storageFieldIncrement op)).cond (Stmt.expr e)) :
     execStmt s (Stmt.expr e) =
-      terminalUpdate (.storageFieldIncDec op) (Stmt.expr e) s := by
+      terminalUpdate (.storageFieldIncrement op) (Stmt.expr e) s := by
   show execStmt s (Stmt.expr e) = incDecStmtUpd op e s
   match e, hcond with
   | WrappedExpr.incDec op' (WrappedExpr.field Kind.storage ty path f), hc =>
@@ -55,10 +56,10 @@ theorem storageFieldIncDec_update (op : IncDec) (s : State) (e : WrappedExpr)
       have hp' : path.simple = true := hp
       exact execStmt_expr_incDec s op' _ (by simp [incDecTargetB, hp'])
 
-theorem storageIndexIncDec_update (op : IncDec) (s : State) (e : WrappedExpr)
-    (hcond : (ruleEffect (.storageIndexIncDec op)).cond (Stmt.expr e)) :
+theorem storageIndexIncrement_update (op : IncDec) (s : State) (e : WrappedExpr)
+    (hcond : (ruleEffect (.storageIndexIncrement op)).cond (Stmt.expr e)) :
     execStmt s (Stmt.expr e) =
-      terminalUpdate (.storageIndexIncDec op) (Stmt.expr e) s := by
+      terminalUpdate (.storageIndexIncrement op) (Stmt.expr e) s := by
   show execStmt s (Stmt.expr e) = incDecStmtUpd op e s
   match e, hcond with
   | WrappedExpr.incDec op' (WrappedExpr.index Kind.storage ty path ix), hc =>
@@ -212,12 +213,12 @@ theorem execStmt_compound (s : State) (op : BinOp) (lhs : PlaceExpr)
       | pushPlace target => exact absurd ht (by simp [incDecTargetB])
       | _ => exact absurd hass (by simp [Typed.WrappedExpr.assignable])
 
-theorem localCompoundAssign_update (op op' : BinOp) (s : State) (lhs : PlaceExpr)
+theorem localOpAssign_update (op op' : BinOp) (s : State) (lhs : PlaceExpr)
     (rhs : WrappedExpr)
-    (hcond : (ruleEffect (.localCompoundAssign op)).cond
+    (hcond : (ruleEffect (.localOpAssign op)).cond
       (Stmt.compoundAssign op' lhs rhs)) :
     execStmt s (Stmt.compoundAssign op' lhs rhs) =
-      terminalUpdate (.localCompoundAssign op) (Stmt.compoundAssign op' lhs rhs) s := by
+      terminalUpdate (.localOpAssign op) (Stmt.compoundAssign op' lhs rhs) s := by
   have hc : op' = op ∧ op'.hasCompoundAssign = true ∧ isStackVar lhs ∧
       isStack rhs ∧ isSimple rhs := hcond
   obtain ⟨rfl, hc⟩ := hc
@@ -226,12 +227,12 @@ theorem localCompoundAssign_update (op op' : BinOp) (s : State) (lhs : PlaceExpr
     (incDecTargetB_of_stackSimple hc.2.1.1 hc.2.1.2)
     (terminalRhsB_of_simple hc.2.2.2)
 
-theorem storageRootCompoundAssign_update (op op' : BinOp) (s : State)
+theorem storageRootOpAssign_update (op op' : BinOp) (s : State)
     (lhs : PlaceExpr) (rhs : WrappedExpr)
-    (hcond : (ruleEffect (.storageRootCompoundAssign op)).cond
+    (hcond : (ruleEffect (.storageRootOpAssign op)).cond
       (Stmt.compoundAssign op' lhs rhs)) :
     execStmt s (Stmt.compoundAssign op' lhs rhs) =
-      terminalUpdate (.storageRootCompoundAssign op)
+      terminalUpdate (.storageRootOpAssign op)
         (Stmt.compoundAssign op' lhs rhs) s := by
   have hc : op' = op ∧ op'.hasCompoundAssign = true ∧ isGlobal lhs ∧
       isStack rhs ∧ isSimple rhs := hcond
@@ -240,12 +241,12 @@ theorem storageRootCompoundAssign_update (op op' : BinOp) (s : State)
   exact execStmt_compound s op' lhs rhs (incDecTargetB_of_global hc.2.1)
     (terminalRhsB_of_simple hc.2.2.2)
 
-theorem storageFieldCompoundAssign_update (op op' : BinOp) (s : State)
+theorem storageFieldOpAssign_update (op op' : BinOp) (s : State)
     (lhs : PlaceExpr) (rhs : WrappedExpr)
-    (hcond : (ruleEffect (.storageFieldCompoundAssign op)).cond
+    (hcond : (ruleEffect (.storageFieldOpAssign op)).cond
       (Stmt.compoundAssign op' lhs rhs)) :
     execStmt s (Stmt.compoundAssign op' lhs rhs) =
-      terminalUpdate (.storageFieldCompoundAssign op)
+      terminalUpdate (.storageFieldOpAssign op)
         (Stmt.compoundAssign op' lhs rhs) s := by
   obtain ⟨e, hass⟩ := lhs
   match e, hass, hcond with
@@ -257,24 +258,47 @@ theorem storageFieldCompoundAssign_update (op op' : BinOp) (s : State)
       exact execStmt_compound s op' ⟨_, hass⟩ rhs (by simp [incDecTargetB, hp'])
         (terminalRhsB_of_simple hc'.2.2.2)
 
-theorem storageIndexCompoundAssign_update (op op' : BinOp) (s : State)
+/-- `map[ie] ⊕= se`: the mapping twin of the index rule — no bounds branch,
+the trailing `isMapping` is what separates it from the array rule. -/
+theorem storageIndexMappingOpAssign_update (op op' : BinOp) (s : State)
     (lhs : PlaceExpr) (rhs : WrappedExpr)
-    (hcond : (ruleEffect (.storageIndexCompoundAssign op)).cond
+    (hcond : (ruleEffect (.storageIndexMappingOpAssign op)).cond
       (Stmt.compoundAssign op' lhs rhs)) :
     execStmt s (Stmt.compoundAssign op' lhs rhs) =
-      terminalUpdate (.storageIndexCompoundAssign op)
+      terminalUpdate (.storageIndexMappingOpAssign op)
         (Stmt.compoundAssign op' lhs rhs) s := by
   obtain ⟨e, hass⟩ := lhs
   match e, hass, hcond with
   | WrappedExpr.index Kind.storage ty path ix, hass, hc =>
       have hc' : op' = op ∧ op'.hasCompoundAssign = true ∧ isSimple path ∧
-          isSimple ix ∧ isStack rhs ∧ isSimple rhs := hc
+          isSimple ix ∧ isStack rhs ∧ isSimple rhs ∧ isMapping path := hc
       obtain ⟨rfl, hc'⟩ := hc'
       have hp' : path.simple = true := hc'.2.1
       have hi' : ix.simple = true := hc'.2.2.1
       exact execStmt_compound s op' ⟨_, hass⟩ rhs
         (by simp [incDecTargetB, hp', hi'])
-        (terminalRhsB_of_simple hc'.2.2.2.2)
+        (terminalRhsB_of_simple hc'.2.2.2.2.1)
+
+/-- `arr[ie] ⊕= se`: the array twin; the bounds split the rule carries is
+`SVal.find`/`SVal.save`'s revert inside `compoundAssignUpd`. -/
+theorem storageIndexArrayOpAssign_update (op op' : BinOp) (s : State)
+    (lhs : PlaceExpr) (rhs : WrappedExpr)
+    (hcond : (ruleEffect (.storageIndexArrayOpAssign op)).cond
+      (Stmt.compoundAssign op' lhs rhs)) :
+    execStmt s (Stmt.compoundAssign op' lhs rhs) =
+      terminalUpdate (.storageIndexArrayOpAssign op)
+        (Stmt.compoundAssign op' lhs rhs) s := by
+  obtain ⟨e, hass⟩ := lhs
+  match e, hass, hcond with
+  | WrappedExpr.index Kind.storage ty path ix, hass, hc =>
+      have hc' : op' = op ∧ op'.hasCompoundAssign = true ∧ isSimple path ∧
+          isSimple ix ∧ isStack rhs ∧ isSimple rhs ∧ isArray path := hc
+      obtain ⟨rfl, hc'⟩ := hc'
+      have hp' : path.simple = true := hc'.2.1
+      have hi' : ix.simple = true := hc'.2.2.1
+      exact execStmt_compound s op' ⟨_, hass⟩ rhs
+        (by simp [incDecTargetB, hp', hi'])
+        (terminalRhsB_of_simple hc'.2.2.2.2.1)
 
 /-! ## Memory-target arithmetic
 
@@ -285,12 +309,12 @@ the shared hubs `execStmt_compound` and `evalValue_incDec` do the work, and
 what makes them apply is that `incDecTargetB` now admits a simple-path memory
 field and a simple-path, simple-index memory slot. -/
 
-theorem memoryFieldCompoundAssign_update (op op' : BinOp) (s : State)
+theorem memoryFieldOpAssign_update (op op' : BinOp) (s : State)
     (lhs : PlaceExpr) (rhs : WrappedExpr)
-    (hcond : (ruleEffect (.memoryFieldCompoundAssign op)).cond
+    (hcond : (ruleEffect (.memoryFieldOpAssign op)).cond
       (Stmt.compoundAssign op' lhs rhs)) :
     execStmt s (Stmt.compoundAssign op' lhs rhs) =
-      terminalUpdate (.memoryFieldCompoundAssign op)
+      terminalUpdate (.memoryFieldOpAssign op)
         (Stmt.compoundAssign op' lhs rhs) s := by
   obtain ⟨e, hass⟩ := lhs
   match e, hass, hcond with
@@ -302,12 +326,12 @@ theorem memoryFieldCompoundAssign_update (op op' : BinOp) (s : State)
       exact execStmt_compound s op' ⟨_, hass⟩ rhs (by simp [incDecTargetB, hp'])
         (terminalRhsB_of_simple hc'.2.2.2)
 
-theorem memoryIndexCompoundAssign_update (op op' : BinOp) (s : State)
+theorem memoryIndexArrayOpAssign_update (op op' : BinOp) (s : State)
     (lhs : PlaceExpr) (rhs : WrappedExpr)
-    (hcond : (ruleEffect (.memoryIndexCompoundAssign op)).cond
+    (hcond : (ruleEffect (.memoryIndexArrayOpAssign op)).cond
       (Stmt.compoundAssign op' lhs rhs)) :
     execStmt s (Stmt.compoundAssign op' lhs rhs) =
-      terminalUpdate (.memoryIndexCompoundAssign op)
+      terminalUpdate (.memoryIndexArrayOpAssign op)
         (Stmt.compoundAssign op' lhs rhs) s := by
   obtain ⟨e, hass⟩ := lhs
   match e, hass, hcond with
@@ -321,10 +345,10 @@ theorem memoryIndexCompoundAssign_update (op op' : BinOp) (s : State)
         (by simp [incDecTargetB, hp', hi'])
         (terminalRhsB_of_simple hc'.2.2.2.2)
 
-theorem memoryFieldIncDec_update (op : IncDec) (s : State) (e : WrappedExpr)
-    (hcond : (ruleEffect (.memoryFieldIncDec op)).cond (Stmt.expr e)) :
+theorem memoryFieldIncrement_update (op : IncDec) (s : State) (e : WrappedExpr)
+    (hcond : (ruleEffect (.memoryFieldIncrement op)).cond (Stmt.expr e)) :
     execStmt s (Stmt.expr e) =
-      terminalUpdate (.memoryFieldIncDec op) (Stmt.expr e) s := by
+      terminalUpdate (.memoryFieldIncrement op) (Stmt.expr e) s := by
   show execStmt s (Stmt.expr e) = incDecStmtUpd op e s
   match e, hcond with
   | WrappedExpr.incDec op' (WrappedExpr.field Kind.memory ty path f), hc =>
@@ -333,10 +357,10 @@ theorem memoryFieldIncDec_update (op : IncDec) (s : State) (e : WrappedExpr)
       have hp' : path.simple = true := hp
       exact execStmt_expr_incDec s op' _ (by simp [incDecTargetB, hp'])
 
-theorem memoryIndexIncDec_update (op : IncDec) (s : State) (e : WrappedExpr)
-    (hcond : (ruleEffect (.memoryIndexIncDec op)).cond (Stmt.expr e)) :
+theorem memoryIndexArrayIncrement_update (op : IncDec) (s : State) (e : WrappedExpr)
+    (hcond : (ruleEffect (.memoryIndexArrayIncrement op)).cond (Stmt.expr e)) :
     execStmt s (Stmt.expr e) =
-      terminalUpdate (.memoryIndexIncDec op) (Stmt.expr e) s := by
+      terminalUpdate (.memoryIndexArrayIncrement op) (Stmt.expr e) s := by
   show execStmt s (Stmt.expr e) = incDecStmtUpd op e s
   match e, hcond with
   | WrappedExpr.incDec op' (WrappedExpr.index Kind.memory ty path ix), hc =>

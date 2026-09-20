@@ -24,20 +24,20 @@ example : solbox!{ alice.age = amount } —→ solbox!{} := by single_step stora
 example : solbox!{ alice.account.balance = amount } —↠ solbox!{} :=
   calc
     solbox!{ alice.account.balance = amount }
-        —→ solbox!{ uint rv = amount;
+        —→ solbox!{ uint se = amount;
               Account storage sp = alice.account;
-              sp@Account.balance = rv } := by
+              sp@Account.balance = se } := by
           single_step storageFieldWriteUnfoldLeftFst
-    _ —→ solbox!{ uint rv;
-              rv = amount;
+    _ —→ solbox!{ uint se;
+              se = amount;
               Account storage sp = alice.account;
-              sp@Account.balance = rv } := by single_step localValueDeclInitDrop
-    _ —→ solbox!{ rv = amount;
+              sp@Account.balance = se } := by single_step localValueDeclInitDrop
+    _ —→ solbox!{ se = amount;
               Account storage sp = alice.account;
-              sp@Account.balance = rv } := by single_step valueDeclSkip
+              sp@Account.balance = se } := by single_step valueDeclSkip
     _ —→ solbox!{ Account storage sp = alice.account;
-              sp@Account.balance = rv } := by single_step localValueAssign
-    _ —→ solbox!{ sp@Account.balance = rv } := by single_step storagePlaceAlias
+              sp@Account.balance = se } := by single_step localValueAssign
+    _ —→ solbox!{ sp@Account.balance = se } := by single_step storagePlaceAlias
     _ —→ solbox!{} := by single_step storageFieldWriteSave
 
 /-! ### Example 3: `alice.account.token.value = amount`
@@ -48,20 +48,20 @@ example : solbox!{ alice.account.balance = amount } —↠ solbox!{} :=
 example : solbox!{ alice.account.token.value = amount } —↠ solbox!{} :=
   calc
     solbox!{ alice.account.token.value = amount }
-        —→ solbox!{ uint rv = amount;
+        —→ solbox!{ uint se = amount;
               Token storage sp = alice.account.token;
-              sp@Token.value = rv } := by
+              sp@Token.value = se } := by
           single_step storageFieldWriteUnfoldLeftFst
-    _ —→ solbox!{ uint rv;
-              rv = amount;
+    _ —→ solbox!{ uint se;
+              se = amount;
               Token storage sp = alice.account.token;
-              sp@Token.value = rv } := by single_step localValueDeclInitDrop
-    _ —→ solbox!{ rv = amount;
+              sp@Token.value = se } := by single_step localValueDeclInitDrop
+    _ —→ solbox!{ se = amount;
               Token storage sp = alice.account.token;
-              sp@Token.value = rv } := by single_step valueDeclSkip
+              sp@Token.value = se } := by single_step valueDeclSkip
     _ —→ solbox!{ Token storage sp = alice.account.token;
-              sp@Token.value = rv } := by single_step localValueAssign
-    _ —→ solbox!{ sp@Token.value = rv } := by single_step storagePlaceAlias
+              sp@Token.value = se } := by single_step localValueAssign
+    _ —→ solbox!{ sp@Token.value = se } := by single_step storagePlaceAlias
     _ —→ solbox!{} := by single_step storageFieldWriteSave
 
 /-! ### Example 4: `amount = alice.age`

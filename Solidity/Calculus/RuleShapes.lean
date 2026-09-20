@@ -19,8 +19,8 @@ It holds three kinds of fact, and nothing else:
   second hand-written table.
 * **Origin facts**: which KeY taclets the table claims, which it does not, and
   that box/diamond twins claim the same ones.  `taclets_partitioned` is the
-  load-bearing one: of the 252 taclets in `solidityProgramRules.key`, 246 are
-  claimed by a Lean rule and the remaining six are listed here with a reason.
+  load-bearing one: of the 310 taclets in `solidityProgramRules.key`, 306 are
+  claimed by a Lean rule and the remaining four are listed here with a reason.
 
 What this module does *not* do is say whether a rule's update is *right*; that
 is `Update/TacletTable.lean`, which proves each one against
@@ -82,18 +82,12 @@ def claimedTaclets : List KeyTaclet :=
     fun r => (ruleEffect r).origin.taclets).eraseDups
 
 /-- The taclets of `solidityProgramRules.key` that **no** Lean rule claims, and
-why.  Six, in three pairs:
+why.  Four, in two pairs:
 
 * `emptyModality`, `blockEmpty` — architectural.  `Block = List Stmt` with
   branch bodies inlined, so there is no nested-block statement to erase and no
   `{} ; rest` find-shape; a derivation that ends in the empty block *is* the
   Lean analogue of `emptyModality` (`docs/lean-key-rule-map.md`).
-* `indexWriteInnerNonSimpleIndexCapture`, `indexReadInnerNonSimpleIndexCapture`
-  — deleted upstream by solkey `63c38cfaf6`, and a rejected design besides:
-  their `\find` was hard-coded to the depth-2 shape `e1[nse][e2]`, so
-  `m[i++][j][k] = v` matched nothing, and they had no right-hand-side freeze.
-  Lean's `*UnfoldLeftFst` rules capture the whole inner path instead, which is
-  strictly more general.
 * `ifSplit`, `ifElseSplit` — ported as a theorem, not a rule.  They are
   sequent-level two-goal splits on a simple condition (`\add(se = TRUE ==>)`),
   and a single-successor `BlockStep` cannot produce two goals; the rewrite
@@ -101,8 +95,6 @@ why.  Six, in three pairs:
   (`JudgmentSplit.lean`) is the split. -/
 def unclaimedTaclets : List KeyTaclet :=
   [ KeyTaclet.emptyModality, KeyTaclet.blockEmpty,
-    KeyTaclet.indexWriteInnerNonSimpleIndexCapture,
-    KeyTaclet.indexReadInnerNonSimpleIndexCapture,
     KeyTaclet.ifSplit, KeyTaclet.ifElseSplit ]
 
 /-- **The coverage fact**: the corpus splits into what the table claims and
@@ -114,9 +106,9 @@ theorem taclets_partitioned :
       (fun t => claimedTaclets.contains t != unclaimedTaclets.contains t) = true := by
   native_decide
 
-theorem claimedTaclets_count : claimedTaclets.length = 246 := by native_decide
+theorem claimedTaclets_count : claimedTaclets.length = 306 := by native_decide
 
-theorem unclaimedTaclets_count : unclaimedTaclets.length = 6 := by native_decide
+theorem unclaimedTaclets_count : unclaimedTaclets.length = 4 := by native_decide
 
 /-! ## Box/diamond twins claim the same taclets
 
@@ -149,9 +141,15 @@ theorem twins_origin_eq :
       (ruleEffect .memoryIndexReadAliasRootBox).origin) ∧
     ((ruleEffect .memoryToStorageIndexArrayCopyRootDiamond).origin =
       (ruleEffect .memoryToStorageIndexArrayCopyRootBox).origin) ∧
+    ((ruleEffect .memoryIndexDeletePrimitiveDiamond).origin =
+      (ruleEffect .memoryIndexDeletePrimitiveBox).origin) ∧
+    ((ruleEffect .memoryIndexDeleteReferenceDiamond).origin =
+      (ruleEffect .memoryIndexDeleteReferenceBox).origin) ∧
+    ((ruleEffect .transferNoCallbackDiamond).origin =
+      (ruleEffect .transferNoCallbackBox).origin) ∧
     ((ruleEffect .revertDiamond).origin =
       (ruleEffect .revertBox).origin) := by
-  refine ⟨rfl, rfl, rfl, rfl, rfl, rfl, rfl, rfl, rfl, rfl, rfl, rfl⟩
+  refine ⟨rfl, rfl, rfl, rfl, rfl, rfl, rfl, rfl, rfl, rfl, rfl, rfl, rfl, rfl, rfl⟩
 
 /-! ## `\heuristics` is derived, not repeated
 
@@ -169,42 +167,41 @@ theorem heuristics_eq_origin :
 /-! ## The rules with no taclet
 
 A `leanOnly` origin is a claim that upstream has no counterpart, and there are
-five reasons for one in this table:
+four reasons for one in this table:
 
 * **front-end normalisation** — `pushAssignLower`, `pushFieldAssignLower`,
   `storagePushLhsToPushValue` rewrite Solidity's push sugar to the `Stmt.assign`
-  form the interpreter already handles;
+  form the interpreter already handles, and the two `storagePushPlaceDelete*`
+  rules cover `delete` of a push place, a shape only this syntax has;
 * **scratch bindings** — `storagePlaceAlias`, `exprStmtCapture`, and the
-  `storageToMemoryDecl*` / `memoryToStorageUnfold*` steps, finer tiers than
-  KeY's;
+  `storageToMemoryDecl*` / `memoryToStorageUnfoldRightFstSource` steps, finer
+  tiers than KeY's;
 * **the call rule** — `functionCallArgCapture` (solkey has it only as a backlog
   item, `unfoldArgument`);
-* **term-level rules lifted to program rules** — `ifElseTrue`, `ifElseFalse`,
-  `ifElseNegated` come from `ifThenElseRules.key`, which `KeyTaclet` does not
-  enumerate;
 * **operator instances KeY does not have** — `**=` throughout the compound
   families, `&&`/`||` in `binopUnfoldRight` (they short-circuit, so KeY defers
-  to the `if` rules), the whole `binopUnfoldResult` tier, and the memory
-  arithmetic family, which landed upstream in solkey `444f029579` — *after* the
-  revision this table was transcribed from (`e67a0d7c48`).
+  to the `if` rules), and the comparison and boolean operators in the
+  compound-assignment and compound-capture families, which have no `op=`
+  form at all.
 
-The list is computed rather than transcribed, so adding a rule without an
-origin moves the count and fails the theorem below. -/
+`Calculus/PaperRules.lean` draws the same line against the paper.  The list
+is computed rather than transcribed, so adding a rule without an origin
+moves the count and fails the theorem below. -/
 def leanOnlyRules : List RuleName :=
   ruleNames.filter fun r => (ruleEffect r).origin == KeyOrigin.leanOnly
 
-theorem leanOnlyRules_count : leanOnlyRules.length = 174 := by native_decide
+theorem leanOnlyRules_count : leanOnlyRules.length = 123 := by native_decide
 
-/-- And the complement: 221 of the 395 rule *instances* name a taclet.  The
+/-- And the complement: 297 of the 420 rule *instances* name a taclet.  The
 `leanOnly` share is large because `ruleNames` lists every instance of a
 parameterized family, including the ones whose condition is unsatisfiable —
-`localCompoundAssign .lt` is a listed rule that can never fire, and KeY of
+`localOpAssign .lt` is a listed rule that can never fire, and KeY of
 course has no `<=` taclet for it.  Counting rule *names* instead would hide
 exactly the thing the count is for: a family with one instance annotated and
 the rest forgotten. -/
 theorem rules_with_origin_count :
     (ruleNames.filter fun r =>
-      (ruleEffect r).origin != KeyOrigin.leanOnly).length = 221 := by
+      (ruleEffect r).origin != KeyOrigin.leanOnly).length = 297 := by
   native_decide
 
 end RuleShapes

@@ -38,14 +38,29 @@ does not exist is one too.  What neither catches is a *paper* rule with no
 constructor; `./scripts/check-theory-rules.mjs` is that check, reading the
 `\namedRwRule` declarations out of the paper's sources.
 
-Four rules of `sections/signature.tex` have no constructor, deliberately:
-`selectDelNodeMap` and `selectOnSaveEmptyMap` are the architectural gap
-`docs/lean-key-rule-map.md` records (a `Seg` carries no `MapField`), and the
-two `expandInUintN`/`expandInIntN` families are the arithmetic the paper's own
-"not implemented" section lists.  `delValueCast` is subsumed by `asStruct`, and `singletonPath` by paths being
-`List Seg` -- the paper's `⟨f⟩` is `[f]`, so the rule is `rfl`.
-`./scripts/check-theory-rules.mjs` carries each of those arguments beside the
-name it excuses.
+Every rule of `sections/signature.tex` and the two cross-domain sections has
+a constructor, with five exceptions, each deliberate.  `selectDelNodeMap` is
+architectural: `Semantics.Seg` carries no `MapField` classification, so "a
+mapping member survives `delete`" has no statement in this algebra (the
+`Theory/Storage.lean` docstring, and `docs/lean-key-rule-map.md`, which files
+solkey's `selectOnSaveEmptyMap` under the same gap).  The four
+`expandInUintN`/`expandInIntN` rules are the arithmetic the paper's own
+"not implemented" section lists.  `singletonPath` (`⟨f⟩ = ∅·f`) and
+`delValueCast` (the cast pushed through the reset) *are* present: the first is
+definitional, since a path is a `List Seg`, and the second is
+`StValue.delValueCast` with its `int`/`bool` twins.
+`./scripts/check-theory-rules.mjs` carries each of the five arguments beside
+the name it excuses.
+
+The other direction — a constructor the paper does not declare — is
+`paperAbsent`: six rules this package states and the paper is to gain, since
+this repository is the source of truth the paper is ported from.  The script
+reads that list too, and reports the six rather than failing on them.
+
+One spelling note.  The array length field is `Seg.field "length"` here where
+solkey writes `size`; the paper's `findLength`/`saveLength` are abbreviations
+of `find`/`save` on that field, as they are here, and `Sym.length` in the
+calculus is the same abbreviation.
 -/
 
 namespace Solidity
@@ -64,6 +79,7 @@ inductive TheoryRule where
   | saveEmptyPath
   | savePath
   -- ### Storage: singleton paths
+  | singletonPath
   | findSingleton
   | saveSingleton
   -- ### Storage: `find` over `save`
@@ -85,6 +101,7 @@ inductive TheoryRule where
   | defValResolve
   | delValueStruct
   | delValueDefault
+  | delValueCast
   | selectDelNodeRef
   | selectDelNodeDefault
   | selectDelNodeIndex
@@ -133,6 +150,7 @@ def lemmaNames : TheoryRule -> List Lean.Name
   | findPath              => [``StValue.find_cons, ``StValue.find_cons_view]
   | saveEmptyPath         => [``StValue.saveOnEmpty]
   | savePath              => [``StValue.save_cons]
+  | singletonPath         => [``StValue.singletonPath]
   | findSingleton         => [``StValue.findDefinitionCons]
   | saveSingleton         => [``StValue.save_single]
   | findOnSave            => [``StValue.find_save_same]
@@ -146,6 +164,8 @@ def lemmaNames : TheoryRule -> List Lean.Name
                               ``StValue.defaultValueBool]
   | delValueStruct        => [``StValue.delValueStruct]
   | delValueDefault       => [``StValue.delValueDefault]
+  | delValueCast          => [``StValue.delValueCast, ``StValue.delValueCast_asInt,
+                              ``StValue.delValueCast_asBool]
   | selectDelNodeRef      => [``StValue.selectStDelNodeRef]
   | selectDelNodeDefault  => [``StValue.selectStDelNodeDefault]
   | selectDelNodeIndex    => [``StValue.selectStDelNodeIndexStruct]
@@ -173,16 +193,30 @@ def lemmaNames : TheoryRule -> List Lean.Name
 def all : List TheoryRule :=
   [ .selectStoreEqual, .selectStoreDifferent, .selectEmptyStruct,
     .findEmptyPath, .findPath, .saveEmptyPath, .savePath,
-    .findSingleton, .saveSingleton,
+    .singletonPath, .findSingleton, .saveSingleton,
     .findOnSave, .findOnSaveDifferent, .findOnSavePrefix, .findOnSaveExtends,
     .delAtEmpty, .findDelAt, .findDelAtOutside, .defValResolve,
-    .delValueStruct, .delValueDefault,
+    .delValueStruct, .delValueDefault, .delValueCast,
     .selectDelNodeRef, .selectDelNodeDefault, .selectDelNodeIndex, .selectOnDelAt,
     .readWriteEqual, .readWriteDifferent, .readAddEqual, .readAddDifferent,
     .readEmptyMem, .defaultPrim, .defaultIdentity,
     .readREmptyPath, .readRSingleton, .readRPath,
     .newAddSame, .newAddDifferent, .newWrite, .newEmptyMem,
     .readCopySt, .readCopyStIdentity, .readCopyStOther, .findCopyMem ]
+
+/-- The rules this package states that the paper does not declare — Lean's
+additions, which the paper is to gain: this repository is the source of truth
+and the paper is ported from it.  `./scripts/check-theory-rules.mjs` reads the
+list and reports these as "Lean-only (to add to the paper)" instead of
+failing on them.  The four `findOnSave*` are the read-of-a-write shortcuts the
+paper reaches by unfolding, `selectOnDelAt` is one selector out of a delete,
+and `readRSingleton` the one-segment `readR`. -/
+def paperAbsent : List TheoryRule :=
+  [ .findOnSave, .findOnSaveDifferent, .findOnSavePrefix, .findOnSaveExtends,
+    .selectOnDelAt, .readRSingleton ]
+
+/-- Every Lean-only rule is a rule of the enumeration. -/
+theorem paperAbsent_sub : paperAbsent.all (all.contains ·) = true := by decide
 
 /-- The paper's own spelling of a rule name, which is the constructor's. -/
 def paperName (r : TheoryRule) : String :=

@@ -6,7 +6,10 @@
 // `lemmaNames` is a total match over double-backtick names, so a constructor
 // without a theorem, or a theorem that does not exist, is a build failure.
 // This script checks the other direction: a rule the *paper* declares and the
-// enumeration has no constructor for.
+// enumeration has no constructor for.  And the reverse of that: a constructor
+// the paper does not declare must be in `TheoryRule.paperAbsent`, the list of
+// Lean's additions the paper is to gain (this repository is the source of
+// truth; the paper is ported from it).  Those are printed, not failed on.
 //
 //   node scripts/check-theory-rules.mjs [--paper ../Pre-licenciate-paper]
 //
@@ -24,11 +27,8 @@ const leanFile = 'Solidity/Theory/Rewrite.lean'
 
 /** Paper rules with no constructor, and why. */
 const KNOWN_ABSENT = {
-  singletonPath:
-    'paths are `List Seg`, so the paper\'s ⟨f⟩ is [f] and the rule is `rfl`',
   selectDelNodeMap:
     'architectural: a `Seg` carries no `MapField` (docs/lean-key-rule-map.md)',
-  delValueCast: 'subsumed by `asStruct`, which is total',
   expandInUintNTrue: 'the paper lists the arithmetic expansions as not implemented',
   expandInIntNTrue: 'the paper lists the arithmetic expansions as not implemented',
   expandInUintN: 'the paper lists the arithmetic expansions as not implemented',
@@ -67,8 +67,18 @@ function leanRules(file) {
   return new Set([...body.matchAll(/^\s*\|\s*([A-Za-z][A-Za-z0-9]*)\s*$/gm)].map((m) => m[1]))
 }
 
+/** The constructors `TheoryRule.paperAbsent` lists: Lean's additions. */
+function leanOnlyRules(file) {
+  const text = readFileSync(file, 'utf8')
+  const start = text.indexOf('def paperAbsent : List TheoryRule :=')
+  if (start < 0) throw new Error(`${file}: no \`def paperAbsent\``)
+  const body = text.slice(start, text.indexOf(']', start))
+  return new Set([...body.matchAll(/\.([A-Za-z][A-Za-z0-9]*)/g)].map((m) => m[1]))
+}
+
 const paper = paperRules(paperDir)
 const lean = leanRules(leanFile)
+const leanOnly = leanOnlyRules(leanFile)
 
 let failed = 0
 for (const [name, where] of paper) {
@@ -81,14 +91,31 @@ for (const [name, where] of paper) {
   failed = 1
 }
 
-// The other direction is a warning: `findOnSave*` are the slides' shortcuts and
-// the paper proper reaches them by unfolding, so they are in no `sections/` file.
+// The other direction: every constructor is a paper rule or in `paperAbsent`.
 for (const name of lean) {
-  if (!paper.has(name)) console.log(`warning: TheoryRule.${name} is in no paper rule block`)
+  if (paper.has(name)) continue
+  if (leanOnly.has(name)) {
+    console.log(`Lean-only (to add to the paper): ${name}`)
+    continue
+  }
+  console.error(`unlisted: TheoryRule.${name} is in no paper rule block and not in paperAbsent`)
+  failed = 1
+}
+for (const name of leanOnly) {
+  if (!lean.has(name)) {
+    console.error(`stale: paperAbsent lists ${name}, which is not a constructor`)
+    failed = 1
+  } else if (paper.has(name)) {
+    console.error(`stale: paperAbsent lists ${name}, which the paper now declares`)
+    failed = 1
+  }
 }
 
 if (failed) {
-  console.error('theory-rules: the paper declares rules the enumeration does not have.')
+  console.error('theory-rules: the paper and the enumeration disagree.')
   process.exit(1)
 }
-console.log(`theory-rules: ${paper.size} paper rules, ${lean.size} constructors, none unaccounted for.`)
+console.log(
+  `theory-rules: ${paper.size} paper rules, ${lean.size} constructors, ` +
+    `${leanOnly.size} Lean-only, none unaccounted for.`,
+)

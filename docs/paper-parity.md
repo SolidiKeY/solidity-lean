@@ -23,18 +23,21 @@ names a theorem no source file declares.
 | Program | the paper's own listing, abbreviated to its first statement where the program is long |
 | Chain | `` `name` `` — a `sol_derivation` or `sol_calculus` in `Solidity/Paper/`; `` `Module:name` `` — one elsewhere in `Examples/Derivations/`; `— …` — no chain, and why |
 
-The scratch names differ from the paper's, because a fresh name would fall to
-`SoliditySyntax.rootExpr`'s stack default and be read as a `uint`. The
-translation, which is the same one the `SolidityPaper.lean` docstring states:
+The scratch names are the paper's *rule* names — a residual binds `se`, `ie`,
+`sp`, `mv`, the kind-names of the paper's schema tables — where the paper's
+worked examples instantiate them with concrete names (`pv`, `idx`, `acc`, …),
+which would fall to `SoliditySyntax.rootExpr`'s stack default here and be
+read as a `uint`. The translation, which is the same one the
+`SolidityPaper.lean` docstring states:
 
 | Paper | Here |
 |---|---|
-| `pv` (frozen value operand) | `rv@uint` |
+| `pv` (frozen value operand) | `se@uint` |
 | `acc`, `aliceAcc`, `aliceTok`, `sp` (storage alias) | `sp@Account`, `sp@Token`, `sp@UintArray`, … |
 | `carolAcc`, `carolValues` | `mv@Account`, `mv@UintArray` |
 | `carolAlias`, `carolTokens`, `davidTokens` | `mv2@Person`, `mv2@TokenArray` |
 | `carolToken`, `tok` | `mv3@Token` |
-| `idx`, `idx1`, `idx2` | `idx@uint` |
+| `idx`, `idx1`, `idx2` | `ie@uint` |
 | `bucket`, `ledger`, `tokens` (auxiliary globals) | `bucket@@TokenBucket`, `ledger@@Ledger`, `tokens@@TokenArray` |
 
 ## 1 · Storage fields and roots — `sections/storage-examples.tex`
@@ -161,9 +164,15 @@ rules, not with an example file.
 |---|---|
 | `Person memory carolAlias = carol; carol.age = 33; delete carol; oldAge = …; newAge = …;` | `memoryDeleteRoot` |
 | `Account memory carolAcc = carol.account; … delete carol.account; oldBal = …; newBal = …;` | `memoryDeleteField` |
-| `delete carolValues[i];` | `memoryIndexDeletePrimitive` |
-| `delete carolTokens[i];` | `memoryIndexDeleteReference` |
-| `delete carol.account.tokens[i];` | `memoryIndexDeleteNonsimplePath` |
+| `delete carolValues[i];` (box) | `memoryIndexDeletePrimitive` |
+| `delete carolTokens[i];` (box) | `memoryIndexDeleteReference` |
+| `delete carol.account.tokens[i];` (box) | `memoryIndexDeleteNonsimplePath` |
+
+A memory index delete is bounds-guarded, one rule per element sort
+(`memoryIndexDeletePrimitive`/`memoryIndexDeleteReference` in
+`Calculus/Rules.lean`), so its line branches exactly as a memory index write
+does; the three chains are written in the box, where the out-of-bounds branch
+is the `⊤`.
 
 ## 7 · Memory arrays and allocation — `sections/memory-examples-arrays.tex`
 
@@ -201,6 +210,13 @@ Where the paper keeps rewriting once the program is gone. One row per
 whose last line it continues, or the paper passage when there is no chain
 before it.
 
+Six rewrite rules the chains may name are Lean's and not yet the paper's:
+`findOnSave`, `findOnSaveDifferent`, `findOnSavePrefix`, `findOnSaveExtends`,
+`selectOnDelAt` and `readRSingleton`. They are additions the paper should
+gain — this repository is the source of truth — and `TheoryRule.paperAbsent`
+(`Solidity/Theory/Rewrite.lean`) is the list, which
+`scripts/check-theory-rules.mjs` reads.
+
 | Picks up from | Chain |
 |---|---|
 | `deepFieldWrite`, read back (`storage-examples.tex`) | `deepFieldWriteValue` |
@@ -218,9 +234,10 @@ before it.
 | `memoryToStorageNonsimplePath` | `memoryToStorageNonsimplePathValue` |
 
 `memoryToStorageFromMemberSource` has no row: its terminal read is the same
-`findCopyMem`/`readWriteEqual` pair as `memoryToStorageFromAliasValue`, one
-binding earlier, so a chain for it would restate that one rather than say
-anything.
+`findCopyMem`/`readWriteEqual` pair as `memoryToStorageFromAliasValue`, with
+the member path `carol.account` where that one has the alias — the calculus's
+`memoryToStorageFieldCopyField` reads the member directly and introduces no
+alias — so a chain for it would restate that one rather than say anything.
 
 ## 9 · Payment — `sections/payment.tex`
 
@@ -230,8 +247,18 @@ anything.
 | `to.transfer(5);` (diamond) | `transferDiamond` |
 | `owner.transfer(5);` (box) | `transferStorageReceiverBox` |
 | `owner.transfer(5);` (diamond) | `transferStorageReceiverDiamond` |
-| `to.transfer(x + 2);` | `transferCapturedAmount` |
-| an unfunded `to.transfer(5);` | — the same derivation, below |
+| `to.transfer(x + 2);` (box) | `transferCapturedAmount` |
+| `to.transfer(x + 2);` (diamond) | `transferCapturedAmountDiamond` |
+| an unfunded `to.transfer(5);` (box) | `transferBox` — the box never establishes funding, so it is the same chain |
+| an unfunded `to.transfer(5);` (diamond) | `transferUnfundedDiamond` |
+
+The modalities part company at the transfer, as the paper says they do: the
+box books the debit unconditionally and draws no branch, the diamond splits
+into the *sufficient funds* obligation and the booking. Neither has a revert
+branch, so a box chain over a transfer is one line where it used to be a
+guarded pair. `transferUnfundedDiamond` is `transferDiamond` with `⊤` as the
+postcondition: the booking goal is trivial and the funds obligation is the
+only content of the proof, and it is a goal no rule of the calculus can close.
 
 ## 10 · Require, assert and control flow — `sections/storage-rules.tex`
 
@@ -304,10 +331,6 @@ and the read through it is a memory read. What that costs is *not* the
 terminal evaluation, which `Paper/Theory.lean` now writes
 (`memoryToStorageRootCopyValue` and the rest): `copySt`/`copyMem` have a
 term-level spelling since `Theory/CrossDomain.lean`.
-
-**The unfunded transfer.** It is `to.transfer(5);` again, and what differs is
-the *state*, not the derivation. The semantic layer covers it
-(`Evm/Examples.lean`, `Examples/Taclets/NetOps.lean`).
 
 **Checked arithmetic.** `uint8 x = 250; x += 10;` needs the range predicates
 and the guarded `intRules` expansion, which this package does not model; the

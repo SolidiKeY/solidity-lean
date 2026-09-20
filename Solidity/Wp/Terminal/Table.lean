@@ -702,7 +702,7 @@ def terminalUpdate? : RuleName -> Option (Stmt -> State -> Res State)
   | .storageRootWriteStore | .storageRootWriteCopySource
   | .memoryToStorageStoreRoot
   | .storageFieldWriteSave | .storageFieldWriteCopySource
-  | .memoryToStorageFieldCopyRoot
+  | .memoryToStorageFieldCopyRoot | .memoryToStorageFieldCopyField
   | .storageIndexWriteArraySaveBox | .storageIndexWriteArraySaveDiamond
   | .storageIndexWriteMappingSave
   | .storageIndexWriteArrayCopySourceBox | .storageIndexWriteArrayCopySourceDiamond
@@ -714,18 +714,19 @@ def terminalUpdate? : RuleName -> Option (Stmt -> State -> Res State)
   -- stack value rules
   | .binopAssignment op => some (onAssign (binopAssignUpd op))
   | .unopAssignment op => some (onAssign (unopAssignUpd op))
-  | .localAssignIncDec op | .storageRootIncDecAssignment op
-  | .storageFieldIncDecAssignment op | .storageIndexIncDecAssignment op
-  | .memoryFieldIncDecAssignment op | .memoryIndexIncDecAssignment op =>
+  | .localAssignIncrement op | .storageRootIncrementAssignment op
+  | .storageFieldIncrementAssignment op | .storageIndexIncrementAssignment op
+  | .memoryFieldIncrementAssignment op | .memoryIndexArrayIncrementAssignment op =>
       some (onAssign (incDecAssignUpd op))
   -- compound assignment and inc/dec statements
-  | .localCompoundAssign op | .storageRootCompoundAssign op
-  | .storageFieldCompoundAssign op | .storageIndexCompoundAssign op
-  | .memoryFieldCompoundAssign op | .memoryIndexCompoundAssign op =>
+  | .localOpAssign op | .storageRootOpAssign op
+  | .storageFieldOpAssign op | .storageIndexMappingOpAssign op
+  | .storageIndexArrayOpAssign op
+  | .memoryFieldOpAssign op | .memoryIndexArrayOpAssign op =>
       some (onCompound (compoundAssignUpd op))
-  | .localIncDec op | .storageRootIncDec op | .storageFieldIncDec op
-  | .storageIndexIncDec op | .memoryFieldIncDec op
-  | .memoryIndexIncDec op => some (onExpr (incDecStmtUpd op))
+  | .localIncrement op | .storageRootIncrement op | .storageFieldIncrement op
+  | .storageIndexIncrement op | .memoryFieldIncrement op
+  | .memoryIndexArrayIncrement op => some (onExpr (incDecStmtUpd op))
   -- declarations
   | .valueDeclSkip => some (onStackDecl stackDeclSkipUpd)
   | .storageLocalDeclSkip => some (onStorageDecl storageDeclSkipUpd)
@@ -733,8 +734,13 @@ def terminalUpdate? : RuleName -> Option (Stmt -> State -> Res State)
   | .memoryDeclFreshAlloc | .storageToMemoryDeclCopyField
   | .storageToMemoryDeclCopyRoot => some (onMemoryDecl memoryDeclUpd)
   -- delete
-  | .storageDeleteSimpleTarget => some (onDelete storageDeleteUpd)
-  | .memoryDeleteSimpleTarget => some (onDelete memoryDeleteUpd)
+  | .storageRootDelete | .storageFieldDelete | .storageIndexDelete
+  | .storagePushPlaceDelete => some (onDelete storageDeleteUpd)
+  | .memoryRootDeleteFreshRebind
+  | .memoryFieldDeletePrimitive | .memoryFieldDeleteReference
+  | .memoryIndexDeletePrimitiveBox | .memoryIndexDeletePrimitiveDiamond
+  | .memoryIndexDeleteReferenceBox | .memoryIndexDeleteReferenceDiamond =>
+      some (onDelete memoryDeleteUpd)
   -- push / pop
   | .storagePushValueSave | .storagePushValueCopySource
   | .storagePushLengthSave => some (onPush pushUpd)
@@ -751,7 +757,8 @@ def terminalUpdate? : RuleName -> Option (Stmt -> State -> Res State)
   | .revertBox | .revertDiamond => some (onRevert revertUpd)
   | .assertSimple => some (onAssert assertUpd)
   | .requireSimple => some (onRequire assertUpd)
-  | .transferNoCallback => some (onTransfer transferUpd)
+  | .transferNoCallbackBox | .transferNoCallbackDiamond =>
+      some (onTransfer transferUpd)
   | _ => none
 
 /-- A rule is in the terminal table. -/

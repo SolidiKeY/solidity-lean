@@ -40,23 +40,29 @@ theorems vacuous.  Evaluation is `Update/Eval.lean`, the wp reading
 
 ## The organisation
 
-Sections run: Storage (Steps 1-3) › require/assert, conditional, abrupt ›
-Payment › Memory (same three steps) › Storage↔Memory copies › Arithmetic
-(local/storage/memory) › rules with no counterpart upstream.
+Sections run as the paper's rule tables do (`rules/{storage,control,payment,
+memory,copy,arith}.tex`): Storage (Steps 1-3) › require/assert, conditional,
+abrupt › Payment › Memory (same three steps) › Storage↔Memory copies ›
+Arithmetic (local/storage/memory) › solkey's expression tier › Lean-only
+normalisations.  A rule carries the paper's name where the paper has one
+(`Calculus/PaperRules.lean` is that map, and checks it), and KeY's otherwise.
 
 The three-step split is Solidity's evaluation order: the right-hand side of
 an assignment is evaluated before the left-hand side, so Step 1 unfolds the
 right-hand side, Step 2 the left, and Step 3 turns a fully simple statement
-into an update.
+into an update.  Step 2 is partitioned as the paper partitions it — by which
+constituent of the write is still nonsimple, with a `Ref` instance per
+reference source — and the four scratch names a residual binds are the
+paper's kind-names (`se`, `ie`, `sp`, `mv`; see `Rules.storagePathAliasName`).
 
 `docs/lean-key-rule-map.md` is the authority on how these names line up with
 solkey's taclets, and `lake exe solkeycheck` checks the sort annotations
 against solkey's own rule file.  The banners here do not restate either.
 
-The last section has no upstream counterpart by design: solkey's finer tiers
-and the genuinely Lean-only rules (front-end normalisations, scratch
-bindings, the call rules).  **Nothing checks this direction** — a Lean rule is
-deliberately allowed to be finer than the presentation upstream.
+The last two sections have no paper counterpart: solkey's finer tiers, and
+the genuinely Lean-only rules (front-end normalisations, scratch bindings,
+the call rules).  `PaperRules.leanOnlyRules` files each under its reason, so
+that "the paper lacks this" is a checked claim rather than a silence.
 
 ## Writing a rule
 
@@ -461,20 +467,19 @@ end CaseMode
 
   namespace Rules
 
+  /-- The four scratch names a residual binds, spelled as the paper names a
+  generated temporary after the kind it becomes: `sp` for a storage path,
+  `mv` for a memory path, `se` for a value and `ie` for an index.  KeY mints
+  a fresh variable at each application (`\newTypeOf(rv, e)`, `pv`, `sp`);
+  this table has four fixed names instead, so a capture whose source already
+  *is* the scratch value is not repeated (`freezeRhs`), where the paper
+  would write `se2 = se1`.  The one place a role has no paper name of its own
+  is a captured *reference* source — the paper's `sp2`/`mv2` — which the
+  kind-neutral `_ se = e` capture spells `se` at the source's own location. -/
   def storagePathAliasName : Name := "sp"
-  /-- The calculus's own naming policy spells a memory path
-  alias `mv`, beside the storage `sp`, the value `pv` and the index `idx`.
-  (The examples of the calculus also use ad-hoc names — `acc`, `aliceAcc`,
-  `tokRef` — which contradict that policy; that is an upstream matter, not
-  something the Lean port chases.) -/
   def memoryPathAliasName : Name := "mv"
-  def valueAliasName : Name := "pv"
-  def indexAliasName : Name := "idx"
-  /-- The value operand of an `=` / `op=` statement, frozen by an LHS-unfold
-  rule *before* it captures any part of the target.  Distinct from `pv`: the
-  `*ValueRhsCapture` family already binds `pv`, and its residual is consumed
-  immediately afterwards by an LHS-unfold rule.  (solkey spells it `rv` too.) -/
-  def rhsValueAliasName : Name := "rv"
+  def valueAliasName : Name := "se"
+  def indexAliasName : Name := "ie"
 
   def isSimple (expr : WrappedExpr) : Prop := expr.simple = true
   def isComplex (expr : WrappedExpr) : Prop := expr.complex = true
@@ -601,9 +606,9 @@ end CaseMode
   def aliasPlace (kind : Kind) (ty : Ty) (name : Name) : PlaceExpr :=
   PlaceExpr.var kind ty (aliasField kind ty name)
 
-  /-- The declaration kind of the `pv` value capture. A primitive-typed
+  /-- The declaration kind of the `_ se = e` value capture. A primitive-typed
   memory read is captured into a typed value temporary (KeY
-  `\newTypeOf(pv, nse)` gives `pv` the primitive type, so `T pv = nse;`
+  `\newTypeOf(pv, nse)` gives `pv` the primitive type, so `T se = nse;`
   is a value declaration): a memory declaration can only bind an object
   identity. Identity-typed captures keep the expression's own kind. -/
   def valueCaptureKind (expr : WrappedExpr) : Kind :=
@@ -638,41 +643,94 @@ end CaseMode
   def isStackVar (expr : WrappedExpr) : Prop :=
   isStack expr ∧ isSimple expr
 
-  /-- Hoist an operand into the fresh value variable `pv` as a stack
-  declaration (KeY `\newTypeOf(pv, ...)` capture step). -/
+  /-- Hoist an operand into the value variable `se` as a stack declaration
+  (KeY's `\newTypeOf(pv, ...)` / `\newTypeOf(rv, ...)` capture step). -/
   def captureStackValue (expr : WrappedExpr) : Stmt :=
   capture Kind.stack valueAliasName expr
 
-  /-- RHS shapes claimed by the `*ValueRhsCapture` trio (KeY
-  `NonSimpleExpression[primitive]` restricted to the cells no other Lean
-  rule covers): operator expressions, except an arithmetic operator over
-  simple operands, which `binopUnfoldResult` already captures. -/
-  def valueRhsCaptureRhs (rhs : WrappedExpr) : Prop :=
-  match rhs with
-  | WrappedExpr.binop op l r =>
-      ¬ (op.isArith = true ∧ isSimple l ∧ isSimple r)
-  | WrappedExpr.unop _ _ => True
-  | WrappedExpr.incDec _ _ => True
+  /-- Schema variable `e` as the *source* of a Step 2 write — the paper's "a
+  value expression that is not a path read": primitive-typed, not in memory,
+  and neither a storage or memory path read (a Step 1 read), a push place, a
+  call, nor a conditional (which `ternaryToIf*` lowers first). -/
+  def isValueSource (e : WrappedExpr) : Prop :=
+  e.ty.isPrimitive = true ∧ e.isMemory = false ∧
+    match e with
+    | WrappedExpr.field .. => False
+    | WrappedExpr.index .. => False
+    | WrappedExpr.pushPlace _ => False
+    | WrappedExpr.call .. => False
+    | WrappedExpr.ternary .. => False
+    | _ => True
+
+  /-- A reference-typed expression: the source a `Ref` instance aliases. -/
+  def isReference (e : WrappedExpr) : Prop := e.ty.isReference = true
+
+  /-- Schema variables `ap`/`ar`: a memory array whose elements are
+  primitive, resp. references (`Path[memory,simple,array,primitiveElement]`
+  and `…referenceElement`). -/
+  def isPrimArray (e : WrappedExpr) : Prop :=
+  match e.ty with
+  | Ty.ref (RefTy.array elem) => elem.isPrimitive = true
   | _ => False
 
+  def isRefArray (e : WrappedExpr) : Prop :=
+  match e.ty with
+  | Ty.ref (RefTy.array elem) => elem.isPrimitive = false
+  | _ => False
+
+  /-- `mv.fr` — a reference member of a simple memory root, the one memory
+  source `memoryToStorageFieldCopyField` reads directly rather than through
+  the `_ se = nmp` capture. -/
+  def isMemberSource (rhs : WrappedExpr) : Prop :=
+  match rhs with
+  | WrappedExpr.field Kind.memory _ mv f => isSimple mv ∧ f.isIdentity = true
+  | _ => False
+
+  def isFieldCopySource (lhs rhs : WrappedExpr) : Prop :=
+  match lhs with
+  | WrappedExpr.field Kind.storage _ sp _ => isSimple sp ∧ isMemberSource rhs
+  | _ => False
+
+  /-- Schema variables `fp`/`fr` on a `delete` target: the member is
+  primitive, resp. a reference. -/
+  def isPrimitiveMember : WrappedExpr -> Prop
+  | WrappedExpr.field _ _ _ f => f.isPrimitive = true
+  | _ => False
+
+  def isReferenceMember : WrappedExpr -> Prop
+  | WrappedExpr.field _ _ _ f => f.isIdentity = true
+  | _ => False
+
+  /-- `delete` of a push place, `delete arr.push()`: a shape of this syntax
+  with no rule upstream and none in the paper. -/
+  def isSimplePushPlaceDeleteTarget : WrappedExpr -> Prop
+  | WrappedExpr.pushPlace path => path.kind = Kind.storage ∧ isSimple path
+  | _ => False
+
+  def isComplexPushPlaceDeleteTarget : WrappedExpr -> Prop
+  | WrappedExpr.pushPlace path => path.kind = Kind.storage ∧ isComplex path
+  | _ => False
+
+  /-- The stack value alias `se`.  Forced to `Kind.stack`: `valueCaptureKind`
+  would classify a primitive *storage* root such as `total` as
+  `Kind.storage`, and the resulting `storagePlaceAlias` binds a *path*, so a
+  later read would see the new value and a freeze through it would be a
+  no-op. -/
   def stackValueAlias (expr : WrappedExpr) : WrappedExpr :=
   aliasExpr Kind.stack expr.ty valueAliasName
 
-  /-- Read back the frozen value operand.  Forced to `Kind.stack`, like
-  `stackValueAlias`: `valueCaptureKind` would classify a primitive *storage*
-  root such as `total` as `Kind.storage`, and the resulting
-  `storagePlaceAlias` binds a *path*, so a later read would see the new value
-  and the freeze would be a no-op. -/
-  def rhsValueAlias (expr : WrappedExpr) : WrappedExpr :=
-  aliasExpr Kind.stack expr.ty rhsValueAliasName
-
-  /-- Freeze the value operand into `rv` as a stack declaration
-  (`T rv = e;`), snapshotting it before any target capture runs. -/
-  def captureRhsValue (expr : WrappedExpr) : Stmt :=
-  capture Kind.stack rhsValueAliasName expr
+  /-- Is this expression the stack value alias itself?  A source that is
+  already the scratch value is not frozen again (`freezeRhs`): KeY would mint
+  a second fresh variable, the paper writes `se2 = se1`, and this table's
+  fixed name has nothing to gain from `se = se` — which `localValueDeclInitDrop`
+  would then split into a re-declaration that reads the default. -/
+  def isValueAlias (expr : WrappedExpr) : Bool :=
+  match expr with
+  | WrappedExpr.var Kind.stack _ fld => fld.name == valueAliasName
+  | _ => false
 
   /-- Find the leftmost complex call argument; return it together with
-  the argument list where it is replaced by the `pv` alias (the
+  the argument list where it is replaced by the `se` alias (the
   `functionCallArgCapture` residual data). -/
   def captureFirstComplexArg :
     List WrappedExpr -> Option (WrappedExpr × List WrappedExpr)
@@ -1080,7 +1138,8 @@ end CaseMode
   its non-interference side condition.  KeY splits the same way, on
   `SimpleExpression[primitive]` versus `[reference]`. -/
   def freezeRhs (rhs : WrappedExpr) (body : WrappedExpr -> Block) : Block :=
-  if rhs.ty.isPrimitive then captureRhsValue rhs :: body (rhsValueAlias rhs)
+  if rhs.ty.isPrimitive && !isValueAlias rhs then
+    captureStackValue rhs :: body (stackValueAlias rhs)
   else body rhs
 
   def fieldWriteResolveBlock
@@ -1181,6 +1240,15 @@ end CaseMode
           (PlaceExpr.pushPlace
             (aliasPlace Kind.storage path.ty storagePathAliasName)) ]
 
+  def storagePushPlaceDeleteUnfoldBlock (target : WrappedExpr)
+    (h : isComplexPushPlaceDeleteTarget target) : Block :=
+  match target, h with
+  | WrappedExpr.pushPlace path, _ =>
+      [ captureStoragePath path,
+        Stmt.delete
+          (PlaceExpr.pushPlace
+            (aliasPlace Kind.storage path.ty storagePathAliasName)) ]
+
   def memoryDeleteComplexTargetBlock (target : WrappedExpr)
     (h : isComplexMemoryDeleteTarget target) : Block :=
   match target, h with
@@ -1253,13 +1321,29 @@ end CaseMode
     | .and => KeyOrigin.leanOnly
     | .or => KeyOrigin.leanOnly
 
-  def storageIndexCompoundOrigin : BinOp -> KeyOrigin
-    | .add => KeyOrigin.merged [KeyTaclet.storageIndexMappingAddAssign, KeyTaclet.storageIndexArrayAddAssign]
-    | .sub => KeyOrigin.merged [KeyTaclet.storageIndexMappingSubAssign, KeyTaclet.storageIndexArraySubAssign]
-    | .mul => KeyOrigin.merged [KeyTaclet.storageIndexMappingMulAssign, KeyTaclet.storageIndexArrayMulAssign]
+  def storageIndexMappingCompoundOrigin : BinOp -> KeyOrigin
+    | .add => KeyOrigin.taclet KeyTaclet.storageIndexMappingAddAssign
+    | .sub => KeyOrigin.taclet KeyTaclet.storageIndexMappingSubAssign
+    | .mul => KeyOrigin.taclet KeyTaclet.storageIndexMappingMulAssign
     | .pow => KeyOrigin.leanOnly
-    | .div => KeyOrigin.merged [KeyTaclet.storageIndexMappingDivAssign, KeyTaclet.storageIndexArrayDivAssign]
-    | .mod => KeyOrigin.merged [KeyTaclet.storageIndexMappingModAssign, KeyTaclet.storageIndexArrayModAssign]
+    | .div => KeyOrigin.taclet KeyTaclet.storageIndexMappingDivAssign
+    | .mod => KeyOrigin.taclet KeyTaclet.storageIndexMappingModAssign
+    | .lt => KeyOrigin.leanOnly
+    | .gt => KeyOrigin.leanOnly
+    | .le => KeyOrigin.leanOnly
+    | .ge => KeyOrigin.leanOnly
+    | .eqB => KeyOrigin.leanOnly
+    | .neB => KeyOrigin.leanOnly
+    | .and => KeyOrigin.leanOnly
+    | .or => KeyOrigin.leanOnly
+
+  def storageIndexArrayCompoundOrigin : BinOp -> KeyOrigin
+    | .add => KeyOrigin.taclet KeyTaclet.storageIndexArrayAddAssign
+    | .sub => KeyOrigin.taclet KeyTaclet.storageIndexArraySubAssign
+    | .mul => KeyOrigin.taclet KeyTaclet.storageIndexArrayMulAssign
+    | .pow => KeyOrigin.leanOnly
+    | .div => KeyOrigin.taclet KeyTaclet.storageIndexArrayDivAssign
+    | .mod => KeyOrigin.taclet KeyTaclet.storageIndexArrayModAssign
     | .lt => KeyOrigin.leanOnly
     | .gt => KeyOrigin.leanOnly
     | .le => KeyOrigin.leanOnly
@@ -1348,6 +1432,106 @@ end CaseMode
     | .preDec => KeyOrigin.merged [KeyTaclet.storageIndexMappingPredecrementAssignment, KeyTaclet.storageIndexArrayPredecrementAssignment]
     | .postInc => KeyOrigin.merged [KeyTaclet.storageIndexMappingPostincrementAssignment, KeyTaclet.storageIndexArrayPostincrementAssignment]
     | .postDec => KeyOrigin.merged [KeyTaclet.storageIndexMappingPostdecrementAssignment, KeyTaclet.storageIndexArrayPostdecrementAssignment]
+
+  def memoryFieldCompoundOrigin : BinOp -> KeyOrigin
+    | .add => KeyOrigin.taclet KeyTaclet.memoryFieldAddAssign
+    | .sub => KeyOrigin.taclet KeyTaclet.memoryFieldSubAssign
+    | .mul => KeyOrigin.taclet KeyTaclet.memoryFieldMulAssign
+    | .pow => KeyOrigin.leanOnly
+    | .div => KeyOrigin.taclet KeyTaclet.memoryFieldDivAssign
+    | .mod => KeyOrigin.taclet KeyTaclet.memoryFieldModAssign
+    | .lt => KeyOrigin.leanOnly
+    | .gt => KeyOrigin.leanOnly
+    | .le => KeyOrigin.leanOnly
+    | .ge => KeyOrigin.leanOnly
+    | .eqB => KeyOrigin.leanOnly
+    | .neB => KeyOrigin.leanOnly
+    | .and => KeyOrigin.leanOnly
+    | .or => KeyOrigin.leanOnly
+
+  def memoryIndexArrayCompoundOrigin : BinOp -> KeyOrigin
+    | .add => KeyOrigin.taclet KeyTaclet.memoryIndexArrayAddAssign
+    | .sub => KeyOrigin.taclet KeyTaclet.memoryIndexArraySubAssign
+    | .mul => KeyOrigin.taclet KeyTaclet.memoryIndexArrayMulAssign
+    | .pow => KeyOrigin.leanOnly
+    | .div => KeyOrigin.taclet KeyTaclet.memoryIndexArrayDivAssign
+    | .mod => KeyOrigin.taclet KeyTaclet.memoryIndexArrayModAssign
+    | .lt => KeyOrigin.leanOnly
+    | .gt => KeyOrigin.leanOnly
+    | .le => KeyOrigin.leanOnly
+    | .ge => KeyOrigin.leanOnly
+    | .eqB => KeyOrigin.leanOnly
+    | .neB => KeyOrigin.leanOnly
+    | .and => KeyOrigin.leanOnly
+    | .or => KeyOrigin.leanOnly
+
+  def memoryFieldCompoundUnfoldOrigin : BinOp -> KeyOrigin
+    | .add => KeyOrigin.taclet KeyTaclet.memoryFieldAddAssign_unfold_leftFst
+    | .sub => KeyOrigin.taclet KeyTaclet.memoryFieldSubAssign_unfold_leftFst
+    | .mul => KeyOrigin.taclet KeyTaclet.memoryFieldMulAssign_unfold_leftFst
+    | .pow => KeyOrigin.leanOnly
+    | .div => KeyOrigin.taclet KeyTaclet.memoryFieldDivAssign_unfold_leftFst
+    | .mod => KeyOrigin.taclet KeyTaclet.memoryFieldModAssign_unfold_leftFst
+    | .lt => KeyOrigin.leanOnly
+    | .gt => KeyOrigin.leanOnly
+    | .le => KeyOrigin.leanOnly
+    | .ge => KeyOrigin.leanOnly
+    | .eqB => KeyOrigin.leanOnly
+    | .neB => KeyOrigin.leanOnly
+    | .and => KeyOrigin.leanOnly
+    | .or => KeyOrigin.leanOnly
+
+  def memoryIndexCompoundUnfoldOrigin : BinOp -> KeyOrigin
+    | .add => KeyOrigin.taclet KeyTaclet.memoryIndexAddAssign_unfold_leftFst
+    | .sub => KeyOrigin.taclet KeyTaclet.memoryIndexSubAssign_unfold_leftFst
+    | .mul => KeyOrigin.taclet KeyTaclet.memoryIndexMulAssign_unfold_leftFst
+    | .pow => KeyOrigin.leanOnly
+    | .div => KeyOrigin.taclet KeyTaclet.memoryIndexDivAssign_unfold_leftFst
+    | .mod => KeyOrigin.taclet KeyTaclet.memoryIndexModAssign_unfold_leftFst
+    | .lt => KeyOrigin.leanOnly
+    | .gt => KeyOrigin.leanOnly
+    | .le => KeyOrigin.leanOnly
+    | .ge => KeyOrigin.leanOnly
+    | .eqB => KeyOrigin.leanOnly
+    | .neB => KeyOrigin.leanOnly
+    | .and => KeyOrigin.leanOnly
+    | .or => KeyOrigin.leanOnly
+
+  def memoryFieldIncDecOrigin : IncDec -> KeyOrigin
+    | .preInc => KeyOrigin.taclet KeyTaclet.memoryFieldPreincrement
+    | .preDec => KeyOrigin.taclet KeyTaclet.memoryFieldPredecrement
+    | .postInc => KeyOrigin.taclet KeyTaclet.memoryFieldPostincrement
+    | .postDec => KeyOrigin.taclet KeyTaclet.memoryFieldPostdecrement
+
+  def memoryIndexArrayIncDecOrigin : IncDec -> KeyOrigin
+    | .preInc => KeyOrigin.taclet KeyTaclet.memoryIndexArrayPreincrement
+    | .preDec => KeyOrigin.taclet KeyTaclet.memoryIndexArrayPredecrement
+    | .postInc => KeyOrigin.taclet KeyTaclet.memoryIndexArrayPostincrement
+    | .postDec => KeyOrigin.taclet KeyTaclet.memoryIndexArrayPostdecrement
+
+  def memoryFieldIncDecUnfoldOrigin : IncDec -> KeyOrigin
+    | .preInc => KeyOrigin.taclet KeyTaclet.memoryFieldPreincrement_unfold_leftFst
+    | .preDec => KeyOrigin.taclet KeyTaclet.memoryFieldPredecrement_unfold_leftFst
+    | .postInc => KeyOrigin.taclet KeyTaclet.memoryFieldPostincrement_unfold_leftFst
+    | .postDec => KeyOrigin.taclet KeyTaclet.memoryFieldPostdecrement_unfold_leftFst
+
+  def memoryIndexIncDecUnfoldOrigin : IncDec -> KeyOrigin
+    | .preInc => KeyOrigin.taclet KeyTaclet.memoryIndexPreincrement_unfold_leftFst
+    | .preDec => KeyOrigin.taclet KeyTaclet.memoryIndexPredecrement_unfold_leftFst
+    | .postInc => KeyOrigin.taclet KeyTaclet.memoryIndexPostincrement_unfold_leftFst
+    | .postDec => KeyOrigin.taclet KeyTaclet.memoryIndexPostdecrement_unfold_leftFst
+
+  def memoryFieldIncDecAssignOrigin : IncDec -> KeyOrigin
+    | .preInc => KeyOrigin.taclet KeyTaclet.memoryFieldPreincrementAssignment
+    | .preDec => KeyOrigin.taclet KeyTaclet.memoryFieldPredecrementAssignment
+    | .postInc => KeyOrigin.taclet KeyTaclet.memoryFieldPostincrementAssignment
+    | .postDec => KeyOrigin.taclet KeyTaclet.memoryFieldPostdecrementAssignment
+
+  def memoryIndexArrayIncDecAssignOrigin : IncDec -> KeyOrigin
+    | .preInc => KeyOrigin.taclet KeyTaclet.memoryIndexArrayPreincrementAssignment
+    | .preDec => KeyOrigin.taclet KeyTaclet.memoryIndexArrayPredecrementAssignment
+    | .postInc => KeyOrigin.taclet KeyTaclet.memoryIndexArrayPostincrementAssignment
+    | .postDec => KeyOrigin.taclet KeyTaclet.memoryIndexArrayPostdecrementAssignment
 
   def binopUnfoldLeftOrigin : BinOp -> KeyOrigin
     | .add => KeyOrigin.taclet KeyTaclet.addition_unfold_left
@@ -1444,18 +1628,17 @@ end CaseMode
   /-!
   ## Storage Rules
 
-  Solidity evaluates the right-hand side
-  of an assignment before the left-hand side, and the rules follow that order:
-  Step 1 unfolds the right-hand side, Step 2 the left-hand side, Step 3 generates
-  an update.
+  Solidity evaluates the right-hand side of an assignment before the
+  left-hand side, and the rules follow that order: Step 1 unfolds the
+  right-hand side, Step 2 the left-hand side, Step 3 generates an update.
+  The partition of Step 2 is the paper's (`sections/storage-rules.tex`): a
+  write is decomposed by which constituent is still nonsimple — the receiver
+  (`unfold_leftFst`), the index (`unfold_leftSnd`) or the source
+  (`unfold_source`) — and each of the three has a `Ref` instance for a
+  reference source, which is aliased rather than read.
   -/
 
-  /-!
-  ### Step 1: unfolding the right-hand side
-
-  `unfold_rightFst` instances (the rule set; solkey
-  `storageFieldRead_unfold_rightFst`, `storageIndexRead_unfold_rightFst`).
-  -/
+  /-! ### Step 1: unfolding the right-hand side -/
 
   sol_rule storageFieldReadUnfoldRightFst from storageFieldRead_unfold_rightFst :
     <[ lhs = nsp.fld ]> ⇝ <[ T storage sp = nsp; lhs = sp.fld ]>
@@ -1466,57 +1649,72 @@ end CaseMode
     where ¬ (lhs.kind = Kind.memory ∧ isComplex lhs)
 
   /-!
-  `unfold_rightSnd`.  The push-argument rule is
-  standalone: a push receiver is not an assignment right-hand side, but its
-  argument is evaluated before the update.
+  `unfold_rightSnd`.  The push-argument rule is standalone: a push receiver
+  is not an assignment right-hand side, but its argument is evaluated before
+  the update.
   -/
 
   sol_rule storageIndexReadUnfoldRightSndIndex from storageIndexRead_unfold_rightSndIndex :
-    <[ lhs = sp[nse] ]> ⇝ <[ T idx = nse; lhs = sp[idx] ]>
+    <[ lhs = sp[nse] ]> ⇝ <[ T ie = nse; lhs = sp[ie] ]>
     where ¬ (lhs.kind = Kind.memory ∧ isComplex lhs)
 
   sol_rule storagePushValueUnfoldRightSndArgument from storagePushValue_unfold_rightSndArgument :
-    <[ sp.push(nse) ]> ⇝ <[ _ pv = nse; sp.push(pv) ]>
+    <[ sp.push(nse) ]> ⇝ <[ _ se = nse; sp.push(se) ]>
 
   /-!
-  `unfold_rightSndResult` (the rule set; solkey also folds
-  `storageFieldWriteCaptureSrc` and `storageIndexWriteStorageRefRhsCapture`
-  in here).
+  `unfold_rightSndResult`.  At a reference type these two are the paper's
+  `storage{Field,Index}WriteRef_unfold_source` (solkey
+  `storageFieldWriteCaptureSrc`, `storageIndexWriteStorageRefRhsCapture`):
+  the source alias the paper names `sp2` is the kind-neutral capture `se`,
+  because this table's alias names are fixed where KeY's are fresh.
   -/
 
   sol_rule storageFieldReadUnfoldRightSndResult from storageFieldRead_unfold_rightSndResult, storageFieldWriteCaptureSrc :
-    <[ nlhs = sp.fld ]> ⇝ <[ _ pv = sp.fld; nlhs = pv ]>
+    <[ nlhs = sp.fld ]> ⇝ <[ _ se = sp.fld; nlhs = se ]>
 
   sol_rule storageIndexReadUnfoldRightSndResult from storageIndexRead_unfold_rightSndResult, storageIndexWriteStorageRefRhsCapture :
-    <[ nlhs = sp[i] ]> ⇝ <[ _ pv = sp[i]; nlhs = pv ]>
+    <[ nlhs = sp[ie] ]> ⇝ <[ _ se = sp[ie]; nlhs = se ]>
 
   /-!
-  ### Step 2: unfolding the left-hand side
+  ### Step 2: decomposing a write
 
-  `unfold_leftFst` instances.  The calculus's `RootRhs` pair
-  is merged: Lean's `isSimple rhs` already admits a global root, which the
-  calculus's `SimpleExpression` excludes.
+  `unfold_leftFst`: the receiver is still nonsimple.  The value source is
+  frozen first — `T se ?= e` snapshots a primitive `e` before the receiver's
+  side effects run, and leaves a source that already *is* the scratch value
+  alone — then the receiver is aliased.  A reference source is aliased, not
+  read, so the `Ref` instances carry no freeze.
   -/
 
-  sol_rule storageFieldWriteUnfoldLeftFst from storageFieldWrite_unfold_leftFst, storageFieldWriteRootRhs_unfold_leftFst :
-    <[ nsp.fld = e ]> ⇝ <[ T rv ?= e; T storage sp = nsp; sp.fld = rv ]>
-    where isSimple e, ¬ isMemory e
+  sol_rule storageFieldWriteUnfoldLeftFst from storageFieldWrite_unfold_leftFst :
+    <[ nsp.fld = e ]> ⇝ <[ T se ?= e; T storage sp = nsp; sp.fld = se ]>
+    where isValueSource e
 
-  sol_rule storageIndexWriteUnfoldLeftFst from storageIndexWrite_unfold_leftFst, storageIndexWriteRootRhs_unfold_leftFst :
-    <[ nsp[e1] = e2 ]> ⇝ <[ T rv ?= e2; T storage sp = nsp; T idx ?= e1; sp[idx] = rv ]>
-    where isSimple e2
+  sol_rule storageIndexWriteUnfoldLeftFst from storageIndexWrite_unfold_leftFst, storageIndexWriteCaptureAll :
+    <[ nsp[e1] = e2 ]> ⇝ <[ T se ?= e2; T storage sp = nsp; T ie ?= e1; sp[ie] = se ]>
+    where isValueSource e2
+
+  sol_rule storageFieldWriteRefUnfoldLeftFst from storageFieldWriteStorageRef_unfold_leftFst :
+    <[ nsp.fld = sp2 ]> ⇝ <[ T storage sp = nsp; sp.fld = sp2 ]>
+    where isReference sp2
+
+  sol_rule storageIndexWriteRefUnfoldLeftFst from storageIndexWriteStorageRef_unfold_leftFst, storageIndexWriteStorageRefCaptureAll :
+    <[ nsp[e] = sp2 ]> ⇝ <[ T storage sp = nsp; T ie ?= e; sp[ie] = sp2 ]>
+    where isReference sp2
 
   /-!
-  Storage receiver and delete-target simplification (the calculus,
-  the rule set).  Not instances of the assignment-shaped template: their
-  active statements are `delete`, `push`, `pop` or a push-return binding.  The
-  calculus's `storageFieldDelete_unfold_leftFst` and `storageIndexDelete_unfold_leftFst`
-  are merged into one rule over both target shapes.
+  Receiver simplification outside the assignment template: `delete`,
+  `push`, `pop` and the push-return binding.
   -/
 
-  sol_rule storageDeleteComplexTarget from storageFieldDelete_unfold_leftFst, storageIndexDelete_unfold_leftFst, storageIndexDeleteNonSimpleIndexCapture :
-    <[ delete(target) ]> ⇝ ⟦ storageDeleteComplexTargetBlock (target : WrappedExpr) h ⟧
-    where cond := isComplexStorageDeleteTarget target
+  sol_rule storageFieldDeleteUnfoldLeftFst from storageFieldDelete_unfold_leftFst :
+    <[ delete(nsp.fld) ]> ⇝ <[ T storage sp = nsp; delete(sp.fld) ]>
+
+  sol_rule storageIndexDeleteUnfoldLeftFst from storageIndexDelete_unfold_leftFst :
+    <[ delete(nsp[e]) ]> ⇝ <[ T storage sp = nsp; delete(sp[e]) ]>
+
+  sol_rule storagePushPlaceDeleteUnfoldLeftFst :
+    <[ delete(target) ]> ⇝ ⟦ storagePushPlaceDeleteUnfoldBlock (target : WrappedExpr) h ⟧
+    where cond := isComplexPushPlaceDeleteTarget target
 
   sol_rule storagePushValueUnfoldLeftFstReceiver from storagePushValue_unfold_leftFstReceiver :
     <[ nsp.push(e) ]> ⇝ <[ T storage sp = nsp; sp.push(e) ]>
@@ -1544,20 +1742,47 @@ end CaseMode
     where ¬ (lhs.kind = Kind.memory ∧ isComplex lhs)
 
   /-!
-  `unfold_leftSnd`.  The calculus's `Ref` instance is
-  merged: Lean's rule does not split on a reference source.
+  `unfold_leftSnd`: the receiver is simple and the index is not.  The simple
+  receiver is re-aliased as well (`T storage sp = sp1`), which the paper does
+  not write: `resolveLoc` resolves the base before the index, and pinning the
+  base is what lets the soundness theorem drop a purity hypothesis on the
+  index.
   -/
 
-  sol_rule storageIndexWriteUnfoldLeftSndIndex from storageIndexWriteNonSimpleIndexCapture, storageIndexWriteRootRhsNonSimpleIndexCapture :
-    <[ sp1[nse] = s ]> ⇝ <[ T rv ?= s; T storage sp = sp1; T idx ?= nse; sp[idx] = rv ]>
-    where ¬ isMemory s
+  sol_rule storageIndexWriteUnfoldLeftSndIndex from storageIndexWriteNonSimpleIndexCapture, storageIndexWriteCaptureAll :
+    <[ sp1[nse] = e ]> ⇝ <[ T se ?= e; T storage sp = sp1; T ie = nse; sp[ie] = se ]>
+    where isValueSource e
+
+  sol_rule storageIndexWriteRefUnfoldLeftSndIndex from storageIndexWriteStorageRefNonSimpleIndexCapture, storageIndexWriteStorageRefCaptureAll :
+    <[ sp1[nse] = sp2 ]> ⇝ <[ T storage sp = sp1; T ie = nse; sp[ie] = sp2 ]>
+    where isReference sp2
+
+  sol_rule storageIndexDeleteNonSimpleIndexCapture from storageIndexDeleteNonSimpleIndexCapture :
+    <[ delete(sp[nse]) ]> ⇝ <[ T ie = nse; delete(sp[ie]) ]>
+
+  /-!
+  `unfold_source`: receiver and index simple, the source not.  solkey's
+  `*ValueRhsCapture` taclets are location-neutral; the paper states one
+  instance per receiver shape, and so does this table.
+  -/
+
+  sol_rule storageRootWriteUnfoldSource from storageRootWriteValueRhsCapture :
+    <[ gsp = nse ]> ⇝ <[ T se = nse; gsp = se ]>
+    where isValueSource nse
+
+  sol_rule storageFieldWriteUnfoldSource from fieldWriteValueRhsCapture :
+    <[ sp.fld = nse ]> ⇝ <[ T se = nse; sp.fld = se ]>
+    where isValueSource nse
+
+  sol_rule storageIndexWriteUnfoldSource from indexWriteValueRhsCapture :
+    <[ sp[ie] = nse ]> ⇝ <[ T se = nse; sp[ie] = se ]>
+    where isValueSource nse
 
   /-!
   ### Step 3: generating an update
 
-  Declarations.  the calculus states the rule once
-  for storage and names its value instances here too, so the value pair sits
-  beside the storage pair.
+  Declarations.  The paper states the rule once for storage and names its
+  value instances here too, so the value pair sits beside the storage pair.
   -/
 
   sol_rule storageLocalDeclInitDrop from storageLocalDeclInitDrop :
@@ -1577,11 +1802,7 @@ end CaseMode
   sol_rule valueDeclSkip from valueDeclSkip :
     <[ T v ]> ⇝ { v := default(T) } <[ ]>
 
-  /-!
-  Simple targets.  The calculus's `storageRootDelete`,
-  `storageFieldDelete` and `storageIndexDelete` are one Lean rule over all three
-  simple target shapes.
-  -/
+  /-! Simple targets. -/
 
   sol_rule storageFieldWriteSave from storageFieldWriteSave :
     <[ sp.fld = se ]> ⇝ { storage := save(sp.fld, se) } <[ ]>
@@ -1611,73 +1832,89 @@ end CaseMode
     <[ gsp = sp.fr ]> ⇝ { storage := copy(gsp, sp.fr) } <[ ]>
     where isSimple gsp
 
-  sol_rule storageDeleteSimpleTarget from storageRootDelete, storageFieldDelete, storageIndexDelete :
+  /-!
+  Delete.  The update is `delAt` (`StorageUpd.clear`): the location's value
+  members reset, its mapping members kept.  `delete` of a push place is
+  Lean's own shape and has no rule upstream.
+  -/
+
+  sol_rule storageRootDelete from storageRootDelete :
+    <[ delete(gsp) ]> ⇝ { storage := clear(gsp) } <[ ]>
+
+  sol_rule storageFieldDelete from storageFieldDelete :
+    <[ delete(sp.fld) ]> ⇝ { storage := clear(sp.fld) } <[ ]>
+
+  sol_rule storageIndexDelete from storageIndexDelete :
+    <[ delete(sp[ie]) ]> ⇝ { storage := clear(sp[ie]) } <[ ]>
+    where isArray sp ∨ isMapping sp
+
+  sol_rule storagePushPlaceDelete :
     <[ delete(target) ]> ⇝ { storage := clear(target) } <[ ]>
-    where cond := isSimpleStorageDeleteTarget target
+    where cond := isSimplePushPlaceDeleteTarget target
 
   /-!
-  Mapping targets.  Mapping selectors generate no
-  bounds branch: mappings have no length.
+  Mapping targets.  Mapping selectors generate no bounds branch: mappings
+  have no length.
   -/
 
   sol_rule storageIndexWriteMappingSave from storageIndexWriteMappingSave :
-    <[ map[i] = se ]> ⇝ { storage := save(map[i], se) } <[ ]>
+    <[ map[ie] = se ]> ⇝ { storage := save(map[ie], se) } <[ ]>
 
   sol_rule storageIndexWriteMappingCopySource from storageIndexWriteMappingCopySource :
-    <[ map[i] = sp ]> ⇝ { storage := copy(map[i], sp) } <[ ]>
+    <[ map[ie] = sp ]> ⇝ { storage := copy(map[ie], sp) } <[ ]>
 
   sol_rule storageIndexReadMappingFind from storageIndexReadMappingFind :
-    <[ v = map[i] ]> ⇝ { v := map[i] } <[ ]>
+    <[ v = map[ie] ]> ⇝ { v := map[ie] } <[ ]>
 
   sol_rule storageIndexReadMappingBindLocalRoot from storageIndexReadMappingBindLocalRoot :
-    <[ lsv = map[i] ]> ⇝ { lsv := path(map[i]) } <[ ]>
+    <[ lsv = map[ie] ]> ⇝ { lsv := path(map[ie]) } <[ ]>
 
   sol_rule storageIndexReadMappingStoreRoot from storageIndexReadMappingStoreRoot :
-    <[ gsp = map[i] ]> ⇝ { storage := copy(gsp, map[i]) } <[ ]>
+    <[ gsp = map[ie] ]> ⇝ { storage := copy(gsp, map[ie]) } <[ ]>
     where isSimple gsp
 
   /-!
-  Array targets.  The calculus stacks the bounds check
-  as two sequents; Lean splits each rule into a box/diamond twin pair.  **The box
-  twin is listed first**, here and in `ruleNames` — see the `Box`/`Diamond`
-  note in the module docstring.
+  Array targets.  The paper stacks the bounds check as two sequents; Lean
+  splits each rule into a box/diamond twin pair.  **The box twin is listed
+  first**, here and in `ruleNames` — see the `Box`/`Diamond` note in the
+  module docstring.
   -/
 
   sol_rule storageIndexWriteArraySave twins from storageIndexWriteArraySave :
-    <[ arr[i] = se ]> ⇝
-      | inBounds(arr[i]) ⟹ { storage := save(arr[i], se) } <[ ]>
-      | else             ⟹ revert()
-    after read(se), resolve(arr[i])
+    <[ arr[ie] = se ]> ⇝
+      | inBounds(arr[ie]) ⟹ { storage := save(arr[ie], se) } <[ ]>
+      | else              ⟹ revert()
+    after read(se), resolve(arr[ie])
 
   sol_rule storageIndexWriteArrayCopySource twins from storageIndexWriteArrayCopySource :
-    <[ arr[i] = sp ]> ⇝
-      | inBounds(arr[i]) ⟹ { storage := copy(arr[i], sp) } <[ ]>
-      | else             ⟹ revert()
-    after image(sp), resolve(arr[i])
+    <[ arr[ie] = sp ]> ⇝
+      | inBounds(arr[ie]) ⟹ { storage := copy(arr[ie], sp) } <[ ]>
+      | else              ⟹ revert()
+    after image(sp), resolve(arr[ie])
 
   sol_rule storageIndexReadArrayFind twins from storageIndexReadArrayFind :
-    <[ v = arr[i] ]> ⇝
-      | inBounds(arr[i]) ⟹ { v := arr[i] } <[ ]>
-      | else             ⟹ revert()
-    after resolve(arr[i])
+    <[ v = arr[ie] ]> ⇝
+      | inBounds(arr[ie]) ⟹ { v := arr[ie] } <[ ]>
+      | else              ⟹ revert()
+    after resolve(arr[ie])
 
   sol_rule storageIndexReadArrayBindLocalRoot twins from storageIndexReadArrayBindLocalRoot :
-    <[ lsv = arr[i] ]> ⇝
-      | inBounds(arr[i]) ⟹ { lsv := path(arr[i]) } <[ ]>
-      | else             ⟹ revert()
-    after resolve(arr[i])
+    <[ lsv = arr[ie] ]> ⇝
+      | inBounds(arr[ie]) ⟹ { lsv := path(arr[ie]) } <[ ]>
+      | else              ⟹ revert()
+    after resolve(arr[ie])
 
   sol_rule storageIndexReadArrayStoreRoot twins from storageIndexReadArrayStoreRoot :
-    <[ gsp = arr[i] ]> ⇝
-      | inBounds(arr[i]) ⟹ { storage := copy(gsp, arr[i]) } <[ ]>
-      | else             ⟹ revert()
-    after resolve(arr[i])
+    <[ gsp = arr[ie] ]> ⇝
+      | inBounds(arr[ie]) ⟹ { storage := copy(gsp, arr[ie]) } <[ ]>
+      | else              ⟹ revert()
+    after resolve(arr[ie])
     where isSimple gsp
 
   /-!
-  Push and pop.  The calculus's `sizeNotNegative`
-  is a first-order side condition, not a rewrite rule; its
-  Lean counterpart is `Typing/WellFormedConsumers.lean`.
+  Push and pop.  The paper's `sizeNotNegative` is a first-order rule on the
+  sequent, not a program rule; its Lean counterpart is
+  `Typing/WellFormedConsumers.lean`.
   -/
 
   sol_rule storagePushValueSave from storagePushValueSave :
@@ -1699,7 +1936,7 @@ end CaseMode
       | else         ⟹ revert()
     after resolve(sp)
 
-  /-! ### Require and assert (the calculus, the rule set) -/
+  /-! ### Require and assert -/
 
   /-!
   Require: KeY `requireConditionCapture` and `requireSimple` (the
@@ -1709,7 +1946,7 @@ end CaseMode
   -/
 
   sol_rule requireConditionCapture from requireConditionCapture :
-    <[ require(nse) ]> ⇝ <[ T pv = nse; require(pv) ]>
+    <[ require(nse) ]> ⇝ <[ T se = nse; require(se) ]>
 
   /-!
   Assert: KeY `assertConditionCapture` and `assertSimple` (the sequent
@@ -1717,7 +1954,7 @@ end CaseMode
   -/
 
   sol_rule assertConditionCapture from assertConditionCapture :
-    <[ assert(nse) ]> ⇝ <[ T pv = nse; assert(pv) ]>
+    <[ assert(nse) ]> ⇝ <[ T se = nse; assert(se) ]>
 
   sol_rule requireSimple from requireSimple :
     <[ require(se) ]> ⇝
@@ -1732,45 +1969,35 @@ end CaseMode
     where cond := isSimple se
 
   /-!
-  ### Conditional statements (the calculus, the rule set)
+  ### Conditional statements
 
-  The calculus's `ifElseSplit` is a sequent rule — two goals, so no `BlockStep` —
-  and lives in `JudgmentSplit.ite_split`.
-  -/
-
-  /-!
-  If-then-else (upstream `ifElseUnfold`/`ifElseTrue`/`ifElseFalse`/
-  `ifElseNegated`, the rule set): condition-directed rewrites per
-  plan D3(b).  All four now carry solkey's own program-rule names, which lift
-  the term-level `ifthenelse_true`/`ifthenelse_false`/`ifthenelse_negated`
-  to statements.  `ifElseUnfold` covers KeY's `ifUnfold` *and* `ifElseUnfold`,
-  because `Stmt.ite` always carries both branches; the calculus's `ifElseSplit`
-  is a sequent rule and lives in `JudgmentSplit.ite_split`.
+  The paper's `ifElseSplit` is a sequent rule — two program goals on a simple
+  condition — and the block layer cannot take it (`StepEffect.mainBlock`
+  reads one residual); it lives in `JudgmentSplit.ite_split`.  The other
+  four are solkey's `concrete_solidity` rules, which lift the term-level
+  `ifthenelse_*` rewrites to statements.  `ifElseUnfold` covers KeY's
+  `ifUnfold` *and* `ifElseUnfold`, and `ifElseTrue`/`ifElseFalse` cover
+  `ifTrue`/`ifFalse` too, because `Stmt.ite` always carries both branches.
   -/
 
   sol_rule ifElseUnfold from ifUnfold, ifElseUnfold :
-    <[ if (nse) thn else els ]> ⇝ <[ T pv = nse; if (pv) thn else els ]>
+    <[ if (nse) thn else els ]> ⇝ <[ T se = nse; if (se) thn else els ]>
     where ∀ inner, nse = WrappedExpr.unop UnOp.not inner -> isComplex inner
 
-  sol_rule ifElseTrue :
+  sol_rule ifElseTrue from ifTrue, ifElseTrue :
     <[ if (true) thn else els ]> ⇝ <[ thn ]>
 
-  sol_rule ifElseFalse :
+  sol_rule ifElseFalse from ifFalse, ifElseFalse :
     <[ if (false) thn else els ]> ⇝ <[ els ]>
 
-  sol_rule ifElseNegated :
+  sol_rule ifElseNegated from ifElseNegated :
     <[ if (!s) thn else els ]> ⇝ <[ if (s) els else thn ]>
 
   /-!
-  ### Abrupt termination (the calculus, the rule set)
+  ### Abrupt termination
 
-  the rule set prints the diamond rule first; here the box twin leads, as it must
+  solkey prints the diamond rule first; here the box twin leads, as it must
   everywhere (module docstring, `Box`/`Diamond`).
-  -/
-
-  /-!
-  Modality rules: KeY `revertBox`/`revertDiamond` consume a `revert();`
-  (the truth value of the enclosing modality lives in the semantic layer).
   -/
 
   sol_rule «revert» twins :
@@ -1781,27 +2008,25 @@ end CaseMode
   /-!
   ## Payment Rules
 
-  The calculus splits the terminal
-  transfer rule into a box and a diamond rule; Lean's `transferNoCallback` is
-  modality-generic and carries both.
-  -/
-
-  /-!
-  Payments: KeY `transfer_unfold_leftFstReceiver`,
-  `transfer_unfold_rightSndArgument`, `transferNoCallback`.
+  The terminal transfer is split by modality, as the paper and solkey split
+  it: the box rule books the debit unconditionally — a reverting run is
+  trivially correct, so the guard is dropped and the rule is a strengthening
+  of the interpreter, which reverts an unfunded transfer — and the diamond
+  rule owes the EVM check `0 ≤ se ≤ selfBalance` as its own "sufficient
+  funds" goal beside the booked update.
   -/
 
   sol_rule transferUnfoldLeftFstReceiver from transfer_unfold_leftFstReceiver :
-    <[ nadr.transfer(e) ]> ⇝ <[ T pv = nadr; pv.transfer(e) ]>
+    <[ nadr.transfer(e) ]> ⇝ <[ T se = nadr; se.transfer(e) ]>
 
   sol_rule transferUnfoldRightSndArgument from transfer_unfold_rightSndArgument :
-    <[ sadr.transfer(nse) ]> ⇝ <[ T pv = nse; sadr.transfer(pv) ]>
+    <[ sadr.transfer(nse) ]> ⇝ <[ T se = nse; sadr.transfer(se) ]>
 
-  sol_rule transferNoCallback from transferNoCallbackBox, transferNoCallbackDiamond :
+  sol_rule transferNoCallback twins from transferNoCallbackBox, transferNoCallbackDiamond :
     <[ sadr.transfer(se) ]> ⇝
-      | funded(se) ⟹ { transfer(sadr, se) } <[ ]>
-      | else       ⟹ revert()
-    after read(net(sadr))
+      | "transfer booked"  : box     : ⟹ { transfer(sadr, se) } <[ ]>
+      | "sufficient funds" : diamond : ⟹ funded(se)
+      | "transfer booked"  : diamond : ⟹ { transfer(sadr, se) } <[ ]>
     where cond := isSimple sadr ∧ isSimple se
 
   /-!
@@ -1819,17 +2044,10 @@ end CaseMode
       | "invariant on exit"     :      ⟹ { transfer(sadr, s) } CInv
       | "resume after callback" : CInv ⟹ { havoc } <[ ]>
 
-  /- ## Memory Rules
-
-  The same three steps.
-  -/
-
-  /- ### Step 1: unfolding the right-hand side -/
-
   /-!
   ## Memory Rules
 
-  The same three steps.
+  The same three steps, with the heap read/write in place of `find`/`save`.
   -/
 
   /-! ### Step 1: unfolding the right-hand side -/
@@ -1843,50 +2061,68 @@ end CaseMode
     where ¬ isStorage lhs
 
   sol_rule memoryIndexReadUnfoldRightSndIndex from memoryIndexRead_unfold_rightSndIndex :
-    <[ lhs = mv[nse] ]> ⇝ <[ T idx = nse; lhs = mv[idx] ]>
+    <[ lhs = mv[nse] ]> ⇝ <[ T ie = nse; lhs = mv[ie] ]>
     where ¬ isStorage lhs
 
-  sol_rule memoryWriteUnfoldRightSndResult from memoryIndexWriteMemRefRhsCapture :
-    <[ nmp = nse ]> ⇝ <[ _ pv = nse; nmp = pv ]>
-    where cond :=
-      nmp.kind = Kind.memory ∧ isComplex nmp ∧ isComplex nse ∧
-        match nse with
-        | WrappedExpr.field Kind.memory .. => False
-        | WrappedExpr.index Kind.memory .. => False
-        | _ => True
-
-  sol_rule memoryFieldReadUnfoldRightSndResult from memoryFieldRead_unfold_rightSndResult :
-    <[ nmp = mv.fld ]> ⇝ <[ _ pv = mv.fld; nmp = pv ]>
-
-  sol_rule memoryIndexReadUnfoldRightSndResult from memoryIndexRead_unfold_rightSndResult :
-    <[ nmp = mv[i] ]> ⇝ <[ _ pv = mv[i]; nmp = pv ]>
-
   /-!
-  ### Step 2: unfolding the left-hand side
-
-  As in storage, the two delete unfolds are merged into one rule.
+  `unfold_rightSndResult`; at a reference type the paper's
+  `memory{Field,Index}WriteRef_unfold_source` (solkey
+  `memoryFieldWriteCaptureSrc`, `memoryIndexWriteMemRefRhsCapture`), with
+  the source alias `mv2` spelled `se` as in storage.
   -/
 
+  sol_rule memoryFieldReadUnfoldRightSndResult from memoryFieldRead_unfold_rightSndResult, memoryFieldWriteCaptureSrc :
+    <[ nmp = mv.fld ]> ⇝ <[ _ se = mv.fld; nmp = se ]>
+
+  sol_rule memoryIndexReadUnfoldRightSndResult from memoryIndexRead_unfold_rightSndResult, memoryIndexWriteMemRefRhsCapture :
+    <[ nmp = mv[ie] ]> ⇝ <[ _ se = mv[ie]; nmp = se ]>
+
+  /-! ### Step 2: decomposing a write -/
+
   sol_rule memoryFieldWriteUnfoldLeftFst from memoryFieldWrite_unfold_leftFst :
-    <[ nmp.fld = e ]> ⇝ <[ T rv ?= e; T memory mv = nmp; mv.fld = rv ]>
-    where isSimple e
+    <[ nmp.fld = e ]> ⇝ <[ T se ?= e; T memory mv = nmp; mv.fld = se ]>
+    where isValueSource e
 
-  sol_rule memoryIndexWriteUnfoldLeftFst from memoryIndexWrite_unfold_leftFst :
-    <[ nmp[e1] = e2 ]> ⇝ <[ T rv ?= e2; T memory mv = nmp; T idx ?= e1; mv[idx] = rv ]>
-    where isSimple e2
+  sol_rule memoryIndexWriteUnfoldLeftFst from memoryIndexWrite_unfold_leftFst, memoryIndexWriteCaptureAll :
+    <[ nmp[e1] = e2 ]> ⇝ <[ T se ?= e2; T memory mv = nmp; T ie ?= e1; mv[ie] = se ]>
+    where isValueSource e2
 
-  sol_rule memoryDeleteComplexTarget from memoryFieldDelete_unfold_leftFst, memoryIndexDelete_unfold_leftFst, memoryIndexDeleteNonSimpleIndexCapture :
-    <[ delete(target) ]> ⇝ ⟦ memoryDeleteComplexTargetBlock (target : WrappedExpr) h ⟧
-    where cond := isComplexMemoryDeleteTarget target
+  sol_rule memoryFieldWriteRefUnfoldLeftFst from memoryFieldWriteMemRef_unfold_leftFst :
+    <[ nmp.fld = mv2 ]> ⇝ <[ T memory mv = nmp; mv.fld = mv2 ]>
 
-  sol_rule memoryIndexWriteUnfoldLeftSndIndex from memoryIndexWriteNonSimpleIndexCapture :
-    <[ mv1[nse] = s ]> ⇝ <[ T rv ?= s; T memory mv = mv1; T idx ?= nse; mv[idx] = rv ]>
+  sol_rule memoryIndexWriteRefUnfoldLeftFst from memoryIndexWriteMemRef_unfold_leftFst, memoryIndexWriteMemRefCaptureAll :
+    <[ nmp[e] = mv2 ]> ⇝ <[ T memory mv = nmp; T ie ?= e; mv[ie] = mv2 ]>
+
+  sol_rule memoryFieldDeleteUnfoldLeftFst from memoryFieldDelete_unfold_leftFst :
+    <[ delete(nmp.fld) ]> ⇝ <[ T memory mv = nmp; delete(mv.fld) ]>
+
+  sol_rule memoryIndexDeleteUnfoldLeftFst from memoryIndexDelete_unfold_leftFst :
+    <[ delete(nmp[e]) ]> ⇝ <[ T memory mv = nmp; delete(mv[e]) ]>
+
+  sol_rule memoryIndexWriteUnfoldLeftSndIndex from memoryIndexWriteNonSimpleIndexCapture, memoryIndexWriteCaptureAll :
+    <[ mv1[nse] = e ]> ⇝ <[ T se ?= e; T memory mv = mv1; T ie = nse; mv[ie] = se ]>
+    where isValueSource e
+
+  sol_rule memoryIndexWriteRefUnfoldLeftSndIndex from memoryIndexWriteMemRefNonSimpleIndexCapture, memoryIndexWriteMemRefCaptureAll :
+    <[ mv1[nse] = mv2 ]> ⇝ <[ T memory mv = mv1; T ie = nse; mv[ie] = mv2 ]>
+
+  sol_rule memoryIndexDeleteNonSimpleIndexCapture from memoryIndexDeleteNonSimpleIndexCapture :
+    <[ delete(mv[nse]) ]> ⇝ <[ T ie = nse; delete(mv[ie]) ]>
+
+  sol_rule memoryFieldWriteUnfoldSource from fieldWriteValueRhsCapture :
+    <[ mv.fld = nse ]> ⇝ <[ T se = nse; mv.fld = se ]>
+    where isValueSource nse
+
+  sol_rule memoryIndexWriteUnfoldSource from indexWriteValueRhsCapture :
+    <[ mv[ie] = nse ]> ⇝ <[ T se = nse; mv[ie] = se ]>
+    where isValueSource nse
 
   /-!
   ### Step 3: generating an update
 
-  Declarations; `memoryArrayFreshAlloc` is merged into
-  `memoryDeclFreshAlloc`.
+  Declarations.  `memoryArrayFreshAlloc` is the paper's `mv = new T(se)`,
+  which this syntax has no expression for; a bare array declaration
+  allocates the empty array and claims both taclets.
   -/
 
   sol_rule memoryLocalDeclInitDrop from memoryLocalDeclInitDrop :
@@ -1895,16 +2131,7 @@ end CaseMode
   sol_rule memoryDeclFreshAlloc from memoryReferenceDeclFreshAlloc, memoryArrayFreshAlloc :
     <[ T memory mv ]> ⇝ { mv := freshId(alloc(mv)) || memory := alloc(mv) } <[ ]>
 
-  /- Simple targets.  The calculus's five delete rules —
-  root fresh-rebind, f primitive/reference, index primitive/reference — are
-  one Lean rule.
-  -/
-
-  /-!
-  Simple targets.  The calculus's five delete rules —
-  root fresh-rebind, field primitive/reference, index primitive/reference — are
-  one Lean rule.
-  -/
+  /-! Simple targets. -/
 
   sol_rule memoryFieldWriteStore from memoryFieldWrite :
     <[ mv.fld = se ]> ⇝ { memory := write(memory, mv.fld, se) } <[ ]>
@@ -1918,38 +2145,56 @@ end CaseMode
   sol_rule memoryFieldReadAliasRoot from memoryFieldRead :
     <[ mv1 = mv2.fr ]> ⇝ { mv1 := ref(mv2.fr) } <[ ]>
 
-  sol_rule memoryDeleteSimpleTarget from memoryRootDeleteFreshRebind, memoryFieldDeletePrimitive, memoryFieldDeleteReference, memoryIndexDeletePrimitive, memoryIndexDeleteReference :
-    <[ delete(target) ]> ⇝ { clear(target) } <[ ]>
-    where cond := isSimpleMemoryDeleteTarget target
+  /-!
+  Delete.  `clear(p)` (`UpdElem.memDelete`) is the one memory update still
+  given by an evaluator rather than a term: KeY writes `write(mv, fp,
+  defVal)` for a primitive member and `write(addM(memory, r), mv, fr,
+  idC(r, nil))` for a reference one, and the evaluator picks by the target's
+  sort exactly as the five taclets do.
+  -/
+
+  sol_rule memoryRootDeleteFreshRebind from memoryRootDeleteFreshRebind :
+    <[ delete(mv) ]> ⇝ { clear(mv) } <[ ]>
+
+  sol_rule memoryFieldDeletePrimitive from memoryFieldDeletePrimitive :
+    <[ delete(mv.fp) ]> ⇝ { clear(mv.fp) } <[ ]>
+    where isPrimitiveMember target
+
+  sol_rule memoryFieldDeleteReference from memoryFieldDeleteReference :
+    <[ delete(mv.fr) ]> ⇝ { clear(mv.fr) } <[ ]>
+    where isReferenceMember target
 
   /-! Array targets, box twin first. -/
 
   sol_rule memoryIndexWriteStore twins from memoryIndexWriteArray :
-    <[ mv[i] = se ]> ⇝
-      | inBounds(mv[i]) ⟹ { memory := write(memory, mv[i], se) } <[ ]>
-      | else            ⟹ revert()
-    after read(se), resolve(mv[i])
+    <[ mv[ie] = se ]> ⇝
+      | inBounds(mv[ie]) ⟹ { memory := write(memory, mv[ie], se) } <[ ]>
+      | else             ⟹ revert()
+    after read(se), resolve(mv[ie])
 
   sol_rule memoryIndexReadHeap twins from memoryIndexReadArrayValue :
-    <[ v = mv[i] ]> ⇝
-      | inBounds(mv[i]) ⟹ { v := mv[i] } <[ ]>
-      | else            ⟹ revert()
-    after resolve(mv[i])
+    <[ v = mv[ie] ]> ⇝
+      | inBounds(mv[ie]) ⟹ { v := mv[ie] } <[ ]>
+      | else             ⟹ revert()
+    after resolve(mv[ie])
 
   sol_rule memoryIndexReadAliasRoot twins from memoryIndexReadArrayMemory :
-    <[ mv1 = mv2[i] ]> ⇝
-      | inBounds(mv2[i]) ⟹ { mv1 := ref(mv2[i]) } <[ ]>
+    <[ mv1 = mv2[ie] ]> ⇝
+      | inBounds(mv2[ie]) ⟹ { mv1 := ref(mv2[ie]) } <[ ]>
+      | else              ⟹ revert()
+    after resolve(mv2[ie])
+
+  sol_rule memoryIndexDeletePrimitive twins from memoryIndexDeletePrimitive :
+    <[ delete(ap[ie]) ]> ⇝
+      | inBounds(ap[ie]) ⟹ { clear(ap[ie]) } <[ ]>
       | else             ⟹ revert()
-    after resolve(mv2[i])
+    after resolve(ap[ie])
 
-  /- ## Storage to Memory Rules
-
-  the calculus, the rule set: a deep copy through a memory root.
-  `memoryStorageCopy` is the simple-mv2 form (`mv = sp;`, fresh identity plus
-  `copySt`); `memoryStorageCopyUnfold` captures a complex storage mv2 into a
-  storage alias first.  Both were once silently absorbed by `memoryRootAlias`,
-  whose condition did not restrict the right-hand side's kind.
-  -/
+  sol_rule memoryIndexDeleteReference twins from memoryIndexDeleteReference :
+    <[ delete(ar[ie]) ]> ⇝
+      | inBounds(ar[ie]) ⟹ { clear(ar[ie]) } <[ ]>
+      | else             ⟹ revert()
+    after resolve(ar[ie])
 
   /-!
   ## Storage to Memory Rules
@@ -1975,258 +2220,206 @@ end CaseMode
   /-!
   ## Memory to Storage Rules
 
-  The calculus's
-  `memoryToStorageFieldCopyField` is merged into `memoryToStorageFieldCopyRoot`
-  plus the unfolds; the array index rule is a box/diamond twin pair.
+  The paper's three unfolds and five copy terminals; the array index rule is
+  a box/diamond twin pair.
   -/
 
-  sol_rule memoryToStorageUnfoldLeftFstTarget :
-    <[ nsp.fld = mv ]> ⇝ <[ T rv ?= mv; T storage sp = nsp; sp.fld = rv ]>
+  sol_rule memoryToStorageFieldUnfoldLeftFst from memoryToStorageField_unfold_leftFst :
+    <[ nsp.fld = mv ]> ⇝ <[ T se ?= mv; T storage sp = nsp; sp.fld = se ]>
 
-  sol_rule memoryToStorageUnfoldLeftSndTargetIndex :
-    <[ sp1[nse] = mv ]> ⇝ <[ T rv ?= mv; T storage sp = sp1; T idx ?= nse; sp[idx] = rv ]>
+  sol_rule memoryToStorageIndexUnfoldLeftFst from memoryToStorageIndex_unfold_leftFst, memoryToStorageIndexCaptureAll :
+    <[ nsp[e] = mv ]> ⇝ <[ T se ?= mv; T storage sp = nsp; T ie ?= e; sp[ie] = se ]>
 
-  sol_rule memoryToStorageFieldCopyRoot from memoryToStorageFieldCopyRoot, memoryToStorageFieldCopyField :
+  sol_rule memoryToStorageIndexUnfoldLeftSndIndex from memoryToStorageIndexNonSimpleIndexCapture, memoryToStorageIndexCaptureAll :
+    <[ sp1[nse] = mv ]> ⇝ <[ T se ?= mv; T storage sp = sp1; T ie = nse; sp[ie] = se ]>
+
+  sol_rule memoryToStorageFieldCopyRoot from memoryToStorageFieldCopyRoot :
     <[ sp.fld = mv ]> ⇝ { storage := copyMem(sp.fld, mv) } <[ ]>
 
+  sol_rule memoryToStorageFieldCopyField from memoryToStorageFieldCopyField :
+    <[ sp.fld = rhs ]> ⇝ { storage := copyMem(sp.fld, rhs) } <[ ]>
+    -- the paper writes the source `mv.fr`; one side of a conclusion is a
+    -- pattern here, so the member shape is the condition
+    where isMemberSource rhs
+
   sol_rule memoryToStorageIndexMappingCopyRoot from memoryToStorageIndexMappingCopyRoot :
-    <[ map[i] = mv ]> ⇝ { storage := copyMem(map[i], mv) } <[ ]>
+    <[ map[ie] = mv ]> ⇝ { storage := copyMem(map[ie], mv) } <[ ]>
 
   sol_rule memoryToStorageIndexArrayCopyRoot twins from memoryToStorageIndexArrayCopyRoot :
-    <[ arr[i] = mv ]> ⇝
-      | inBounds(arr[i]) ⟹ { storage := copyMem(arr[i], mv) } <[ ]>
-      | else             ⟹ revert()
-    after image(mv), resolve(arr[i])
+    <[ arr[ie] = mv ]> ⇝
+      | inBounds(arr[ie]) ⟹ { storage := copyMem(arr[ie], mv) } <[ ]>
+      | else              ⟹ revert()
+    after image(mv), resolve(arr[ie])
 
   sol_rule memoryToStorageStoreRoot from memoryToStorageStoreRoot :
     <[ sp = mv ]> ⇝ { storage := copyMem(sp, mv) } <[ ]>
 
-  /- ## Arithmetic
-
-  the calculus; the rule set (local and storage targets) and
-  the rule set (memory targets).  Each rule of the calculus is schematic in the
-  operator or the inc/dec variant, and Lean has one instance per member.  The
-  calculus's `unaryMinusAssignment` is `unopAssignment .neg`, listed with the
-  operator tier below because its `.not` sibling is not arithmetic.
-  -/
-
-  /- Local targets (`localOpAssign`, `localDivAssign`). -/
-
   /-!
   ## Arithmetic
 
-  the calculus; the rule set (local and storage targets) and
-  the rule set (memory targets).  Each rule of the calculus is schematic in the
-  operator or the inc/dec variant, and Lean has one instance per member.  The
-  calculus's `unaryMinusAssignment` is `unopAssignment .neg`, listed with the
+  Each rule of the paper is schematic in the operator or the inc/dec variant,
+  and Lean has one instance per member: the paper's `localOpAssign` with
+  `⊕ ∈ {+,−,*}` and its `localDivAssign` twin are `localOpAssign .add` and
+  `localOpAssign .div` of one family, whose guard `nonZero(se)` is live for
+  the operators that need it and `⊤` elsewhere.  `storageRootIncrement` and
+  `memoryFieldIncrement` are likewise one family each over `IncDec`.  The
+  paper's `unaryMinusAssignment` is `unopAssignment .neg`, listed with the
   operator tier below because its `.not` sibling is not arithmetic.
   -/
 
-  /-! Local targets (`localOpAssign`, `localDivAssign`). -/
+  /-! Local targets. -/
 
-  /-!
-  Local compound assignment, one KeY taclet per op instance
-  (`localAddAssign` = `localCompoundAssign .add`, ...): terminal
-  `lv ⊕= se;` on a stack variable.
-  -/
-
-  sol_rule localCompoundAssign (op : BinOp) from (localCompoundOrigin op) :
+  sol_rule localOpAssign (op : BinOp) from (localCompoundOrigin op) :
     <[ lv ⊕= se ]> ⇝
       | (nonZero(se) when BinOp.needsGuard opS) ⟹ { lv := lv ⊕ se } <[ ]>
       | else                                    ⟹ revert()
     after read(se)
 
-  /-!
-  Storage targets: `storageRootOpAssign`, `storageFieldOpAssign`,
-  `storageIndexMappingOpAssign` / `storageIndexArrayOpAssign` — merged into one
-  Lean rule — and `storageRootIncrement`.
-  -/
+  /-! Storage targets. -/
 
-  /-!
-  Storage compound assignments, one KeY taclet per op instance
-  (`storageRootAddAssign` = `storageRootCompoundAssign .add`, ...);
-  unsatisfiable for ops without a compound form (`**`, comparisons,
-  boolean connectives).
-  -/
-
-  /-!
-  Storage targets (`storageRootOpAssign`, `storageFieldOpAssign`,
-  `storageIndex{Mapping,Array}OpAssign` — merged here — and
-  `storageRootIncrement`).
-  -/
-
-  sol_rule storageRootCompoundAssign (op : BinOp) from (storageRootCompoundOrigin op) :
+  sol_rule storageRootOpAssign (op : BinOp) from (storageRootCompoundOrigin op) :
     <[ gsp ⊕= se ]> ⇝
       | (nonZero(se) when BinOp.needsGuard opS) ⟹ { gsp := gsp ⊕ se } <[ ]>
       | else                                    ⟹ revert()
     after read(se)
 
-  sol_rule storageFieldCompoundAssign (op : BinOp) from (storageFieldCompoundOrigin op) :
+  sol_rule storageFieldOpAssign (op : BinOp) from (storageFieldCompoundOrigin op) :
     <[ sp.fld ⊕= se ]> ⇝
       | (nonZero(se) when BinOp.needsGuard opS) ⟹ { sp.fld := sp.fld ⊕ se } <[ ]>
       | else                                    ⟹ revert()
     after read(se)
 
-  sol_rule storageIndexCompoundAssign (op : BinOp) from (storageIndexCompoundOrigin op) :
-    <[ sp[i] ⊕= se ]> ⇝
-      | inBounds(sp[i]) ⟹ { sp[i] := sp[i] ⊕ se } <[ ]>
-      | else            ⟹ revert()
-    after read(se), resolve(sp[i])
+  sol_rule storageIndexMappingOpAssign (op : BinOp) from (storageIndexMappingCompoundOrigin op) :
+    <[ map[ie] ⊕= se ]> ⇝
+      | (nonZero(se) when BinOp.needsGuard opS) ⟹ { map[ie] := map[ie] ⊕ se } <[ ]>
+      | else                                    ⟹ revert()
+    after read(se)
 
-  sol_rule storageFieldCompoundAssignUnfoldLeftFst (op : BinOp) from (storageFieldCompoundUnfoldOrigin op) :
-    <[ nsp.fld ⊕= se ]> ⇝ <[ T rv = se; T storage sp = nsp; sp.fld ⊕= rv ]>
+  sol_rule storageIndexArrayOpAssign (op : BinOp) from (storageIndexArrayCompoundOrigin op) :
+    <[ arr[ie] ⊕= se ]> ⇝
+      | inBounds(arr[ie]) ⟹ { arr[ie] := arr[ie] ⊕ se } <[ ]>
+      | else              ⟹ revert()
+    after read(se), resolve(arr[ie])
 
-  sol_rule storageIndexCompoundAssignUnfoldLeftFst (op : BinOp) from (storageIndexCompoundUnfoldOrigin op) :
-    <[ nsp[i] ⊕= se ]> ⇝ <[ T rv = se; T storage sp = nsp; sp[i] ⊕= rv ]>
+  sol_rule storageFieldOpAssignUnfoldLeftFst (op : BinOp) from (storageFieldCompoundUnfoldOrigin op) :
+    <[ nsp.fld ⊕= se1 ]> ⇝ <[ T se ?= se1; T storage sp = nsp; sp.fld ⊕= se ]>
+
+  sol_rule storageIndexOpAssignUnfoldLeftFst (op : BinOp) from (storageIndexCompoundUnfoldOrigin op) :
+    <[ nsp[ie] ⊕= se1 ]> ⇝ <[ T se ?= se1; T storage sp = nsp; sp[ie] ⊕= se ]>
 
   /-!
   Increment/decrement statement forms (`++age;`), one KeY taclet per
-  `IncDec` instance (`storageRootPreincrement` = `storageRootIncDec
+  `IncDec` instance (`storageRootPreincrement` = `storageRootIncrement
   .preInc`, ...), their complex-path unfolds, the assignment forms
   (`result = ++age;`), and the local-variable assignment form
   (`localAssignPreincrement`, ...; KeY `localDeclPreincrement` is covered
-  by `localValueDeclInitDrop` followed by `localAssignIncDec`).
+  by `localValueDeclInitDrop` followed by `localAssignIncrement`).
   -/
 
-  sol_rule storageRootIncDec (op : IncDec) from (storageRootIncDecOrigin op) :
+  sol_rule storageRootIncrement (op : IncDec) from (storageRootIncDecOrigin op) :
     <[ gsp++ ]> ⇝ { bump(gsp++) } <[ ]>
 
-  sol_rule storageFieldIncDec (op : IncDec) from (storageFieldIncDecOrigin op) :
+  sol_rule storageFieldIncrement (op : IncDec) from (storageFieldIncDecOrigin op) :
     <[ sp.fld++ ]> ⇝ { bump(sp.fld++) } <[ ]>
 
-  sol_rule storageIndexIncDec (op : IncDec) from (storageIndexIncDecOrigin op) :
-    <[ sp[i]++ ]> ⇝
-      | inBounds(sp[i]++) ⟹ { bump(sp[i]++) } <[ ]>
-      | else              ⟹ revert()
-    after resolve(sp[i]++)
+  sol_rule storageIndexIncrement (op : IncDec) from (storageIndexIncDecOrigin op) :
+    <[ sp[ie]++ ]> ⇝
+      | inBounds(sp[ie]++) ⟹ { bump(sp[ie]++) } <[ ]>
+      | else               ⟹ revert()
+    after resolve(sp[ie]++)
 
-  sol_rule storageFieldIncDecUnfoldLeftFst (op : IncDec) from (storageFieldIncDecUnfoldOrigin op) :
+  sol_rule storageFieldIncrementUnfoldLeftFst (op : IncDec) from (storageFieldIncDecUnfoldOrigin op) :
     <[ nsp.fld++ ]> ⇝ <[ T storage sp = nsp; sp.fld++ ]>
 
-  sol_rule storageIndexIncDecUnfoldLeftFst (op : IncDec) from (storageIndexIncDecUnfoldOrigin op) :
-    <[ nsp[i]++ ]> ⇝ <[ T storage sp = nsp; sp[i]++ ]>
+  sol_rule storageIndexIncrementUnfoldLeftFst (op : IncDec) from (storageIndexIncDecUnfoldOrigin op) :
+    <[ nsp[ie]++ ]> ⇝ <[ T storage sp = nsp; sp[ie]++ ]>
 
-  sol_rule storageRootIncDecAssignment (op : IncDec) from (storageRootIncDecAssignOrigin op) :
+  sol_rule storageRootIncrementAssignment (op : IncDec) from (storageRootIncDecAssignOrigin op) :
     <[ lv = gsp++ ]> ⇝ { bump(gsp++) || lv := gsp++ } <[ ]>
 
-  sol_rule storageFieldIncDecAssignment (op : IncDec) from (storageFieldIncDecAssignOrigin op) :
+  sol_rule storageFieldIncrementAssignment (op : IncDec) from (storageFieldIncDecAssignOrigin op) :
     <[ lv = sp.fld++ ]> ⇝ { bump(sp.fld++) || lv := sp.fld++ } <[ ]>
 
-  sol_rule storageIndexIncDecAssignment (op : IncDec) from (storageIndexIncDecAssignOrigin op) :
-    <[ lv = sp[i]++ ]> ⇝
-      | inBounds(sp[i]++) ⟹ { bump(sp[i]++) || lv := sp[i]++ } <[ ]>
-      | else              ⟹ revert()
-    after resolve(sp[i]++)
+  sol_rule storageIndexIncrementAssignment (op : IncDec) from (storageIndexIncDecAssignOrigin op) :
+    <[ lv = sp[ie]++ ]> ⇝
+      | inBounds(sp[ie]++) ⟹ { bump(sp[ie]++) || lv := sp[ie]++ } <[ ]>
+      | else               ⟹ revert()
+    after resolve(sp[ie]++)
 
   /-!
-  Memory targets: `memoryFieldOpAssign`, `memoryFieldDivAssign`,
-  `memoryIndexArrayOpAssign`, `memoryFieldIncrement`.
+  Memory targets: the storage terminals with the heap read/write in place
+  of `find`/`save` (the paper's `memoryFieldOpAssign`,
+  `memoryFieldDivAssign`, `memoryIndexArrayOpAssign`,
+  `memoryFieldIncrement`; solkey's `memoryField{Add,…}Assign`,
+  `memoryIndexArray{Add,…}Assign` and their `_unfold_leftFst` twins).
+  **No root form** — a memory root is an identity, not a value cell — and
+  **no mapping form**: memory has no mappings.
   -/
 
-  /-!
-  Memory-target compound assignments, the storage terminals with the
-  heap read/write in place of `find`/`save`: the calculus's
-  `memoryFieldOpAssign` / `memoryFieldDivAssign` / `memoryIndexArrayOpAssign`
-  (the rule set, "Memory-target arithmetic"), solkey's
-  `memoryField{Add,Sub,Mul,Div,Mod}Assign` and `memoryIndexArray*Assign`
-  plus their `_unfold_leftFst` twins.  **No root form** — a memory root is
-  an identity, not a value cell — and **no mapping form**: memory has no
-  mappings.
-  -/
-
-  /-!
-  Memory targets (`memoryFieldOpAssign`, `memoryFieldDivAssign`,
-  `memoryIndexArrayOpAssign`, `memoryFieldIncrement`).
-  -/
-
-  sol_rule memoryFieldCompoundAssign (op : BinOp) :
+  sol_rule memoryFieldOpAssign (op : BinOp) from (memoryFieldCompoundOrigin op) :
     <[ mv.fld ⊕= se ]> ⇝
       | (nonZero(se) when BinOp.needsGuard opS) ⟹ { mv.fld := mv.fld ⊕ se } <[ ]>
       | else                                    ⟹ revert()
     after read(se)
 
-  sol_rule memoryIndexCompoundAssign (op : BinOp) :
-    <[ mv[i] ⊕= se ]> ⇝
-      | inBounds(mv[i]) ⟹ { mv[i] := mv[i] ⊕ se } <[ ]>
-      | else            ⟹ revert()
-    after read(se), resolve(mv[i])
+  sol_rule memoryIndexArrayOpAssign (op : BinOp) from (memoryIndexArrayCompoundOrigin op) :
+    <[ mv[ie] ⊕= se ]> ⇝
+      | inBounds(mv[ie]) ⟹ { mv[ie] := mv[ie] ⊕ se } <[ ]>
+      | else             ⟹ revert()
+    after read(se), resolve(mv[ie])
 
-  sol_rule memoryFieldCompoundAssignUnfoldLeftFst (op : BinOp) :
-    <[ nmp.fld ⊕= se ]> ⇝ <[ T rv = se; T memory mv = nmp; mv.fld ⊕= rv ]>
+  sol_rule memoryFieldOpAssignUnfoldLeftFst (op : BinOp) from (memoryFieldCompoundUnfoldOrigin op) :
+    <[ nmp.fld ⊕= se1 ]> ⇝ <[ T se ?= se1; T memory mv = nmp; mv.fld ⊕= se ]>
 
-  sol_rule memoryIndexCompoundAssignUnfoldLeftFst (op : BinOp) :
-    <[ nmp[i] ⊕= se ]> ⇝ <[ T rv = se; T memory mv = nmp; mv[i] ⊕= rv ]>
+  sol_rule memoryIndexOpAssignUnfoldLeftFst (op : BinOp) from (memoryIndexCompoundUnfoldOrigin op) :
+    <[ nmp[ie] ⊕= se1 ]> ⇝ <[ T se ?= se1; T memory mv = nmp; mv[ie] ⊕= se ]>
 
-  /-!
-  The memory twins of the increment/decrement family: the calculus's
-  `memoryFieldIncrement`, solkey's `memoryField{Pre,Post}{in,de}crement`
-  and `memoryIndexArray{Pre,Post}{in,de}crement` with their `Assignment`
-  and `_unfold_leftFst` forms.  Again no root and no mapping form.
-  -/
-
-  sol_rule memoryFieldIncDec (op : IncDec) :
+  sol_rule memoryFieldIncrement (op : IncDec) from (memoryFieldIncDecOrigin op) :
     <[ mv.fld++ ]> ⇝ { bump(mv.fld++) } <[ ]>
 
-  sol_rule memoryIndexIncDec (op : IncDec) :
-    <[ mv[i]++ ]> ⇝
-      | inBounds(mv[i]++) ⟹ { bump(mv[i]++) } <[ ]>
-      | else              ⟹ revert()
-    after resolve(mv[i]++)
+  sol_rule memoryIndexArrayIncrement (op : IncDec) from (memoryIndexArrayIncDecOrigin op) :
+    <[ mv[ie]++ ]> ⇝
+      | inBounds(mv[ie]++) ⟹ { bump(mv[ie]++) } <[ ]>
+      | else               ⟹ revert()
+    after resolve(mv[ie]++)
 
-  sol_rule memoryFieldIncDecUnfoldLeftFst (op : IncDec) :
+  sol_rule memoryFieldIncrementUnfoldLeftFst (op : IncDec) from (memoryFieldIncDecUnfoldOrigin op) :
     <[ nmp.fld++ ]> ⇝ <[ T memory mv = nmp; mv.fld++ ]>
 
-  sol_rule memoryIndexIncDecUnfoldLeftFst (op : IncDec) :
-    <[ nmp[i]++ ]> ⇝ <[ T memory mv = nmp; mv[i]++ ]>
+  sol_rule memoryIndexIncrementUnfoldLeftFst (op : IncDec) from (memoryIndexIncDecUnfoldOrigin op) :
+    <[ nmp[ie]++ ]> ⇝ <[ T memory mv = nmp; mv[ie]++ ]>
 
-  sol_rule memoryFieldIncDecAssignment (op : IncDec) :
+  sol_rule memoryFieldIncrementAssignment (op : IncDec) from (memoryFieldIncDecAssignOrigin op) :
     <[ lv = mv.fld++ ]> ⇝ { bump(mv.fld++) || lv := mv.fld++ } <[ ]>
 
-  sol_rule memoryIndexIncDecAssignment (op : IncDec) :
-    <[ lv = mv[i]++ ]> ⇝
-      | inBounds(mv[i]++) ⟹ { bump(mv[i]++) || lv := mv[i]++ } <[ ]>
-      | else              ⟹ revert()
-    after resolve(mv[i]++)
-
-  /- ## Rules with no counterpart upstream
-
-  solkey's finer tiers and the Lean-only rules.  Nothing checks this
-  direction: a Lean rule is deliberately allowed to be finer than the
-  presentation upstream, and requiring an upstream name for each would be a
-  claim nobody makes.
-  -/
-
-  /- solkey's expression-operator tier. -/
+  sol_rule memoryIndexArrayIncrementAssignment (op : IncDec) from (memoryIndexArrayIncDecAssignOrigin op) :
+    <[ lv = mv[ie]++ ]> ⇝
+      | inBounds(mv[ie]++) ⟹ { bump(mv[ie]++) || lv := mv[ie]++ } <[ ]>
+      | else               ⟹ revert()
+    after resolve(mv[ie]++)
 
   /-!
-  ## Rules with no counterpart upstream
+  ## solkey's expression tier
 
-  solkey's finer tiers and the Lean-only rules.  Nothing checks this
-  direction: a Lean rule is deliberately allowed to be finer than the
-  presentation upstream, and requiring an upstream name for each would be a
-  claim nobody makes.
+  Rules with a taclet and no paper counterpart: the operator families on a
+  stack target, the short-circuit and ternary lowerings, the stack-local
+  forms and the compound-assignment source capture.  `Calculus/PaperRules.lean`
+  lists them as the calculus's additions to the paper.
   -/
-
-  /-! solkey's expression-operator tier. -/
 
   /-!
   Binary-operator families, one KeY taclet per `op` instance:
   `binopUnfoldLeft op` = `<op>_unfold_left` / `<op>CaptureLhs`,
   `binopUnfoldRight op` = `<op>_unfold_right` / `<op>CaptureRhs`
   (unsatisfiable for the short-circuiting `&&`/`||`),
-  `binopUnfoldResult op` = `<op>_unfold_result` (arithmetic ops only),
   `binopAssignment op` = `<op>Assignment`.
   -/
 
   sol_rule binopUnfoldLeft (op : BinOp) from (binopUnfoldLeftOrigin op) :
-    <[ lv = nse ⊕ e ]> ⇝ <[ T pv = nse; lv = pv ⊕ e ]>
+    <[ lv = nse ⊕ e ]> ⇝ <[ T se = nse; lv = se ⊕ e ]>
 
   sol_rule binopUnfoldRight (op : BinOp | op.shortCircuits = false) from (binopUnfoldRightOrigin op) :
-    <[ lv = s ⊕ nse ]> ⇝ <[ T pv = nse; lv = s ⊕ pv ]>
-
-  sol_rule binopUnfoldResult (op : BinOp | op.isArith = true) :
-    <[ x = s1 ⊕ s2 ]> ⇝ <[ T pv = s1 ⊕ s2; x = pv ]>
-    where ¬ isStackVar x, ¬ (x.kind = Kind.memory ∧ isComplex x)
+    <[ lv = s ⊕ nse ]> ⇝ <[ T se = nse; lv = s ⊕ se ]>
 
   sol_rule binopAssignment (op : BinOp) from (binopAssignmentOrigin op) :
     <[ lv = s1 ⊕ s2 ]> ⇝
@@ -2249,16 +2442,15 @@ end CaseMode
 
   /-!
   Ternary `v = c ? e1 : e2;`: KeY `ternaryCaptureCond` hoists a
-  nonsimple condition into `pv`; `ternaryToIf` lowers to the statement
-  `if` for a stack target; `ternaryToIfStorage` is the twin for a
-  storage-path target (which is not a KeY `Variable`).
+  nonsimple condition into `se`; `ternaryToIf` lowers to the statement
+  `if` for a stack target, `ternaryToIfStorage` for a storage-path target
+  (which is not a KeY `Variable`), and `ternaryToIfMemory` — Lean's own,
+  KeY has no memory twin — for a memory-path target.  A conditional is
+  therefore never a write's *source* (`isValueSource`): it is lowered first.
   -/
 
   sol_rule ternaryCaptureCond from ternaryCaptureCond :
-    <[ lhs = nse ? e1 : e2 ]> ⇝ <[ T pv = nse; lhs = pv ? e1 : e2 ]>
-    -- the memory-complex-lhs dispatch branch claims the whole right-hand side
-    -- first (`memoryWriteUnfoldRightSndResult`)
-    where ¬ (lhs.kind = Kind.memory ∧ isComplex lhs)
+    <[ lhs = nse ? e1 : e2 ]> ⇝ <[ T se = nse; lhs = se ? e1 : e2 ]>
 
   sol_rule ternaryToIf from ternaryToIf :
     <[ x = s ? e1 : e2 ]> ⇝ <[ if (s) { x = e1 } else { x = e2 } ]>
@@ -2268,51 +2460,30 @@ end CaseMode
     <[ path = s ? e1 : e2 ]> ⇝ <[ if (s) { path = e1 } else { path = e2 } ]>
     where isStorage path
 
+  sol_rule ternaryToIfMemory :
+    <[ mpath = s ? e1 : e2 ]> ⇝ <[ if (s) { mpath = e1 } else { mpath = e2 } ]>
+
   /-!
   Unary operators: KeY `logicalNotCapture`/`logicalNotAssignment` and
-  `unaryMinusCapture`/`unaryMinusAssignment`.
+  `unaryMinusCapture`/`unaryMinusAssignment`; the paper displays the
+  latter.
   -/
 
   sol_rule unopCapture (op : UnOp) from (unopCaptureOrigin op) :
-    <[ lv = ⊖nse ]> ⇝ <[ T pv = nse; lv = ⊖pv ]>
+    <[ lv = ⊖nse ]> ⇝ <[ T se = nse; lv = ⊖se ]>
 
   sol_rule unopAssignment (op : UnOp) from (unopAssignmentOrigin op) :
     <[ lv = ⊖s ]> ⇝ { lv := ⊖s } <[ ]>
 
-  /-! solkey's capture partition: the location-neutral value hoists. -/
-
   /-!
-  Evaluation-order RHS captures: KeY `storageRootWriteValueRhsCapture`,
-  `fieldWriteValueRhsCapture`, `indexWriteValueRhsCapture` — hoist a
-  nonsimple primitive RHS into `pv` before the storage write resolves
-  its target (RHS-before-LHS evaluation order). The Lean conditions
-  exclude the cells other rules already cover: arithmetic operators over
-  simple operands go to `binopUnfoldResult`, and the stack-lhs operator
-  families keep their own rules.
-  -/
-
-  sol_rule storageRootWriteValueRhsCapture from storageRootWriteValueRhsCapture :
-    <[ gsp = e ]> ⇝ <[ T pv = e; gsp = pv ]>
-    where valueRhsCaptureRhs e
-
-  sol_rule fieldWriteValueRhsCapture from fieldWriteValueRhsCapture :
-    <[ path.fld = e ]> ⇝ <[ T pv = e; path.fld = pv ]>
-    where valueRhsCaptureRhs e
-
-  sol_rule indexWriteValueRhsCapture from indexWriteValueRhsCapture :
-    <[ path[x] = e ]> ⇝ <[ T pv = e; path[x] = pv ]>
-    where valueRhsCaptureRhs e
-
-  /-!
-  Compound-assignment RHS capture: KeY
+  Compound-assignment source capture: KeY
   `{add,sub,mul,div,mod}AssignValueRhsCapture` — location-neutral hoist
-  of a nonsimple compound-assign RHS into `pv` before the target rules
-  fire (RHS-before-LHS evaluation order, like the `*ValueRhsCapture`
-  trio for plain assignment).
+  of a nonsimple compound-assign source into `se` before the target rules
+  fire (source before target, like `unfold_source` for plain assignment).
   -/
 
   sol_rule compoundAssignValueRhsCapture (op : BinOp) from (compoundRhsCaptureOrigin op) :
-    <[ lhs ⊕= e ]> ⇝ <[ T pv = e; lhs ⊕= pv ]>
+    <[ lhs ⊕= e ]> ⇝ <[ T se = e; lhs ⊕= se ]>
     where ¬ (isSe e)
 
   /-! Stack locals: solkey `localValueAssign`, `localAssign*crement` and
@@ -2321,16 +2492,16 @@ end CaseMode
   sol_rule localValueAssign from localValueAssign :
     <[ lv = se ]> ⇝ { lv := se } <[ ]>
 
-  sol_rule localAssignIncDec (op : IncDec) from (localAssignIncDecOrigin op) :
+  sol_rule localAssignIncrement (op : IncDec) from (localAssignIncDecOrigin op) :
     <[ lv = se++ ]> ⇝ { bump(se++) || lv := se++ } <[ ]>
 
   /-!
   Bare increment/decrement of a stack local as a statement of its own:
   KeY `localPreincrement`, `localPostincrement`, `localPredecrement`,
-  `localPostdecrement` (`localIncDec .preInc`, ...).
+  `localPostdecrement` (`localIncrement .preInc`, ...).
   -/
 
-  sol_rule localIncDec (op : IncDec) from (localIncDecOrigin op) :
+  sol_rule localIncrement (op : IncDec) from (localIncDecOrigin op) :
     <[ se++ ]> ⇝ { bump(se++) } <[ ]>
 
   /-! Function calls. -/
@@ -2359,26 +2530,31 @@ end CaseMode
       args.all (·.simple) = true ∧
         (SoliditySyntax.expandCall res fn args).isSome = true
 
-  /-! Lean-only rules: front-end normalisations and scratch bindings with no
-  taclet of their own. -/
+  /-!
+  ## Lean-only rules
+
+  Front-end normalisations and scratch bindings with no rule upstream and
+  none in the paper: they rewrite this syntax's own sugar into the forms the
+  rules above read, and `Calculus/PaperRules.lean` files them as plumbing
+  rather than as calculus.
+  -/
 
   sol_rule storagePlaceAlias :
     <[ T alias sp = e ]> ⇝ { sp := path(e) } <[ ]>
 
   /-!
-  Lean-only coverage rules.  `exprStmtCapture` parks a bare non-incDec
-  expression statement in the scratch value alias: the residual `pv = e;`
-  declaration performs the same evaluation (same reverts, same
-  incDec/push side effects) and differs only in the scratch binding —
-  sound modulo `RuleSoundness.aliasNames` (`exprStmtCapture_sound`).
-  `pushAssignLower`/`pushFieldAssignLower` rewrite the push-assignment
-  sugar to the very `Stmt.assign` form `Semantics.execStmt` delegates
-  to, so original and residual execute definitionally alike
-  (`pushAssignLower_sound`, `pushFieldAssignLower_sound`).
+  `exprStmtCapture` parks a bare non-incDec expression statement in the
+  scratch value alias: the residual `se = e;` declaration performs the same
+  evaluation (same reverts, same incDec/push side effects) and differs only
+  in the scratch binding — sound modulo `RuleSoundness.aliasNames`
+  (`exprStmtCapture_sound`).  `pushAssignLower`/`pushFieldAssignLower`
+  rewrite the push-assignment sugar to the very `Stmt.assign` form
+  `Semantics.execStmt` delegates to, so original and residual execute
+  definitionally alike (`pushAssignLower_sound`, `pushFieldAssignLower_sound`).
   -/
 
   sol_rule exprStmtCapture :
-    <[ e ]> ⇝ <[ T pv = e ]>
+    <[ e ]> ⇝ <[ T se = e ]>
     where cond :=
       match e with
       | WrappedExpr.incDec _ _ => False
@@ -2393,6 +2569,12 @@ end CaseMode
   sol_rule storagePushLhsToPushValue :
     <[ path.push() = s ]> ⇝ <[ path.push(s) ]>
 
+  /-!
+  Storage-to-memory *declarations* and the memory-to-storage source unfold:
+  calculus the paper does not yet display.  `memoryToStorageUnfoldRightFstSource`
+  excludes the one shape `memoryToStorageFieldCopyField` reads directly.
+  -/
+
   sol_rule storageToMemoryDeclUnfoldRightFst :
     <[ T memory mv = nsp.fld ]> ⇝ <[ T storage sp = nsp; T memory mv = sp.fld ]>
 
@@ -2403,18 +2585,19 @@ end CaseMode
     <[ T memory mv = sp ]> ⇝ { mv := freshId(alloc(mv)) || memory := alloc(mv) } <[ ]>
 
   sol_rule memoryToStorageUnfoldRightFstSource :
-    <[ path = nmp ]> ⇝ <[ _ pv = nmp; path = pv ]>
-    where cond := path.kind = Kind.storage ∧ isNmp nmp
+    <[ path = nmp ]> ⇝ <[ _ se = nmp; path = se ]>
+    where cond := path.kind = Kind.storage ∧ isNmp nmp ∧ ¬ isFieldCopySource path nmp
 
-  sol_rule memoryFieldWriteCopy from memoryFieldWriteCaptureSrc :
+  sol_rule memoryFieldWriteCopy from memoryFieldWrite :
     <[ mv1.fld = mv2 ]> ⇝ { memory := write(memory, mv1.fld, image(mv2)) } <[ ]>
 
   sol_rule memoryIndexWriteCopy twins from memoryIndexWriteArray :
-    <[ mv1[i] = mv2 ]> ⇝
-      | inBounds(mv1[i]) ⟹ { memory := write(memory, mv1[i], image(mv2)) } <[ ]>
-      | else             ⟹ revert()
-    after image(mv2), resolve(mv1[i])
+    <[ mv1[ie] = mv2 ]> ⇝
+      | inBounds(mv1[ie]) ⟹ { memory := write(memory, mv1[ie], image(mv2)) } <[ ]>
+      | else              ⟹ revert()
+    after image(mv2), resolve(mv1[ie])
 
+  set_option maxHeartbeats 1000000 in
   sol_assemble_rules
 
   end Rules
@@ -2429,25 +2612,36 @@ end CaseMode
 
 
 /-- KeY `transferSemantics:withCallback`: the alternative rule set in
-which `transferNoCallback` is replaced by `transferWithCallback`. The
-two lists are otherwise identical, mirroring KeY's `\choice`. -/
+which the two `transferNoCallback` twins are replaced by
+`transferWithCallback`. The lists are otherwise identical, mirroring KeY's
+`\choice`. -/
 def ruleNamesWithCallback : List RuleName :=
-  (ruleNames.erase .transferNoCallback) ++ [.transferWithCallback]
+  ((ruleNames.erase .transferNoCallbackBox).erase .transferNoCallbackDiamond)
+    ++ [.transferWithCallback]
 
-/-- The two transfer rules fire on exactly the same statements, in the same
-modalities.  Their *goals* differ, and that is the whole content of KeY's
-`transferSemantics` choice: `transferNoCallback` books the payment and
-continues, `transferWithCallback` owes the contract invariant on exit and
-resumes under a havoc (`CallbackSemantics.ExecC`).  Before the goals carried
-the updates, the two effects were literally equal and this was one `rfl`; the
-pair below is what survives, and it is all the coverage argument ever used. -/
+/-- The transfer rules fire on exactly the same statements.  Their *goals*
+differ, and that is the whole content of KeY's `transferSemantics` choice:
+`transferNoCallback` books the payment and continues, `transferWithCallback`
+owes the contract invariant on exit and resumes under a havoc
+(`CallbackSemantics.ExecC`).  The twins split the modalities between them
+where the alternative covers both; the pair below is what the coverage
+argument uses. -/
 theorem transferWithCallback_cond_eq :
     (ruleEffect .transferWithCallback).cond =
-      (ruleEffect .transferNoCallback).cond := rfl
+      (ruleEffect .transferNoCallbackBox).cond := rfl
 
-theorem transferWithCallback_mode_eq :
-    (ruleEffect .transferWithCallback).mode =
-      (ruleEffect .transferNoCallback).mode := rfl
+theorem transferNoCallbackDiamond_cond_eq :
+    (ruleEffect .transferNoCallbackDiamond).cond =
+      (ruleEffect .transferNoCallbackBox).cond := rfl
+
+theorem transferWithCallback_mode_both (stmt : Stmt) :
+    (ruleEffect .transferWithCallback).mode stmt = CaseMode.both := rfl
+
+theorem transferNoCallbackBox_mode (stmt : Stmt) :
+    (ruleEffect .transferNoCallbackBox).mode stmt = CaseMode.box := rfl
+
+theorem transferNoCallbackDiamond_mode (stmt : Stmt) :
+    (ruleEffect .transferNoCallbackDiamond).mode stmt = CaseMode.diamond := rfl
 
 def ruleApplies (mode : Modality) (stmt : Stmt) : Prop :=
   ∃ rule, rule ∈ ruleNames ∧
@@ -2466,24 +2660,38 @@ theorem ruleApplies_withCallback_iff (mode : Modality) (stmt : Stmt) :
     rw [ruleNamesWithCallback, List.mem_append] at hmem
     cases hmem with
     | inl h =>
-        exact ⟨rule, List.mem_of_mem_erase h, hmode, hcond⟩
+        exact ⟨rule, List.mem_of_mem_erase (List.mem_of_mem_erase h), hmode, hcond⟩
     | inr h =>
         simp only [List.mem_singleton] at h
         subst h
-        rw [transferWithCallback_mode_eq] at hmode
         rw [transferWithCallback_cond_eq] at hcond
-        exact ⟨.transferNoCallback, by decide, hmode, hcond⟩
+        cases mode with
+        | box =>
+            exact ⟨.transferNoCallbackBox, by decide,
+              by rw [transferNoCallbackBox_mode]; rfl, hcond⟩
+        | diamond =>
+            exact ⟨.transferNoCallbackDiamond, by decide,
+              by rw [transferNoCallbackDiamond_mode]; rfl,
+              by rw [transferNoCallbackDiamond_cond_eq]; exact hcond⟩
   · rintro ⟨rule, hmem, hmode, hcond⟩
-    by_cases hr : rule = .transferNoCallback
-    · subst hr
+    by_cases hb : rule = .transferNoCallbackBox
+    · subst hb
       refine ⟨.transferWithCallback, ?_, ?_, ?_⟩
       · rw [ruleNamesWithCallback, List.mem_append]
         exact Or.inr (List.mem_singleton.mpr rfl)
-      · rw [transferWithCallback_mode_eq]; exact hmode
+      · rw [transferWithCallback_mode_both]; rfl
       · rw [transferWithCallback_cond_eq]; exact hcond
-    · refine ⟨rule, ?_, hmode, hcond⟩
-      rw [ruleNamesWithCallback, List.mem_append]
-      exact Or.inl ((List.mem_erase_of_ne hr).mpr hmem)
+    · by_cases hd : rule = .transferNoCallbackDiamond
+      · subst hd
+        refine ⟨.transferWithCallback, ?_, ?_, ?_⟩
+        · rw [ruleNamesWithCallback, List.mem_append]
+          exact Or.inr (List.mem_singleton.mpr rfl)
+        · rw [transferWithCallback_mode_both]; rfl
+        · rw [transferWithCallback_cond_eq, ← transferNoCallbackDiamond_cond_eq]
+          exact hcond
+      · refine ⟨rule, ?_, hmode, hcond⟩
+        rw [ruleNamesWithCallback, List.mem_append]
+        exact Or.inl ((List.mem_erase_of_ne hd).mpr ((List.mem_erase_of_ne hb).mpr hmem))
 
 /-- The step case of a rule: its name paired with its effect.  The calculus
 has *only* these rules — there is no catch-all tier.  A statement no rule

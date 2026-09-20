@@ -40,16 +40,16 @@ is in `schemaVar` below; `where` adds the conjuncts no name can carry, and
 `where cond := …` writes the condition out when a rule's spelling is
 irregular.
 
-**A residual is a program, not a list of constructors.** `T rv = e` is the
+**A residual is a program, not a list of constructors.** `T se = e` is the
 value freeze, `T storage sp = nsp` the path capture, and a later `sp.fld`
 is the alias read-back — the three statements the paper writes as
-`T_e se = e; T_nsp storage sp = nsp; sp.fld = se;`.  Four spellings say
-which capture is meant, because the alias name alone cannot: `T pv = e`
-freezes on the stack, `_ pv = e` at the expression's own location, `T rv = e`
-into the value temporary, and `T rv ?= e` only *if* there is a value to
-freeze — a reference is aliased, not read, so the residual below a `?=`
-is written twice, once per branch.  `T idx ?= e` is the same split for an
-index.
+`T_e se = e; T_nsp storage sp = nsp; sp.fld = se;`.  Three spellings say
+which capture is meant, because the alias name alone cannot: `T se = e`
+freezes on the stack, `_ se = e` at the expression's own location, and
+`T se ?= e` only *if* there is a value to freeze — a reference is aliased,
+not read, and a source that already is the scratch value is left alone, so
+the residual below a `?=` is written twice, once per branch.  `T ie ?= e`
+is the same split for an index.
 
 **Twins are one declaration.** `twins` generates the `Box` and `Diamond`
 constructors, box first, and the entry in `twinPairs` that
@@ -209,20 +209,21 @@ syntax (name := stCompound) rule_expr " ⊕= " rule_expr : rule_stmt
 /-- `T v` / `T v = e` — a stack declaration. -/
 syntax (name := stStackDecl) ident ident : rule_stmt
 syntax (name := stStackDeclInit) ident ident " = " rule_expr : rule_stmt
-/-- `_ pv = e` — the capture whose declaration kind is the *expression's*
-(`Rules.captureValue`), where `T pv = e` forces the stack
+/-- `_ se = e` — the capture whose declaration kind is the *expression's*
+(`Rules.captureValue`), where `T se = e` forces the stack
 (`Rules.captureStackValue`).  The underscore is the point: the rule does not
 name the location, the expression does. -/
 syntax (name := stValueDecl) "_ " ident " = " rule_expr : rule_stmt
-/-- `T rv ?= e` — a *conditional* capture, and which one the alias name says.
+/-- `T se ?= e` — a *conditional* capture, and which one the alias name says.
 
-`T rv ?= e` is the freeze of a value operand (`Rules.freezeRhs`): a primitive
-`e` is snapshotted into `rv` and the rest of the residual reads `rv`, a
-reference `e` is left in place and `rv` *is* `e` — binding a reference is
-aliasing, not a read, so there is nothing to freeze.
+`T se ?= e` is the freeze of a value operand (`Rules.freezeRhs`): a primitive
+`e` is snapshotted into `se` and the rest of the residual reads `se`, while a
+reference `e`, or an `e` that already is the scratch value, is left in place
+and `se` *is* `e` — binding a reference is aliasing, not a read, so there is
+nothing to freeze.
 
-`T idx ?= e` is the index capture (`Rules.indexWriteResolveBlock`): a complex
-index is hoisted and the rest reads `idx`, a simple one is left in place.
+`T ie ?= e` is the index capture (`Rules.indexWriteResolveBlock`): a complex
+index is hoisted and the rest reads `ie`, a simple one is left in place.
 
 Either way the *whole* residual below it is written twice, once per branch,
 because that is what the block it stands for does. -/
@@ -395,9 +396,16 @@ def schemaVar (name : String) : Schema :=
   | "lsv" => { kind := some `storage, free := #[`isLocal] }
   | "arr" => { kind := some `storage, base := #[`isSimple], trail := #[`isArray] }
   | "map" => { kind := some `storage, base := #[`isSimple], trail := #[`isMapping] }
-  | "i" => { free := #[`isSimple], base := #[`isSimple] }
+  | "ie" => { free := #[`isSimple], base := #[`isSimple] }
   | "mv" => { kind := some `memory, free := #[`isMv], base := #[`isSimple],
               placeKind := true }
+  -- `ap`/`ar`: a memory array variable whose elements are primitive, resp.
+  -- references — the paper's memory `delete` targets, which fix the element
+  -- kind by name rather than by a side condition.
+  | "ap" => { kind := some `memory, free := #[`isMv], base := #[`isSimple],
+              trail := #[`isPrimArray], placeKind := true }
+  | "ar" => { kind := some `memory, free := #[`isMv], base := #[`isSimple],
+              trail := #[`isRefArray], placeKind := true }
   | "nmp" => { kind := some `memory, free := #[`isMemory, `isComplex],
                base := #[`isComplex] }
   | "sadr" => { free := #[`isSimple] }
@@ -626,15 +634,14 @@ def kindOfName (n : Name) : Name :=
   (schemaVar n.toString).kind.getD `stack
 
 /-- The `Rules` constant naming the scratch alias a capture binds, and where
-it lives.  Five fixed names, where KeY generates fresh ones — see
-`Rules.lean`'s fresh-name conventions. -/
+it lives.  Four fixed names, the paper's kind-names, where KeY generates
+fresh ones — see `Rules.lean`'s fresh-name conventions. -/
 def scratchOf (n : Name) : Option (Name × Name) :=
   match stemOf n.toString with
   | "sp" => some (`storagePathAliasName, `storage)
   | "mv" => some (`memoryPathAliasName, `memory)
-  | "pv" => some (`valueAliasName, `stack)
-  | "rv" => some (`rhsValueAliasName, `stack)
-  | "idx" => some (`indexAliasName, `stack)
+  | "se" => some (`valueAliasName, `stack)
+  | "ie" => some (`indexAliasName, `stack)
   | _ => none
 
 /-- When a path's base is a scratch alias, its constant, kind and source. -/
@@ -698,9 +705,8 @@ partial def transExpr (sc : Scope) (asPlace : Bool) (stx : Syntax) :
           let ci := mkIdent (`Rules ++ c)
           if asPlace then `($(gen `Rules.aliasPlace) $kt ($src).ty $ci)
           else match stemOf x.getId.toString with
-            | "pv" => `($(gen `Rules.stackValueAlias) $src)
-            | "rv" => `($(gen `Rules.rhsValueAlias) $src)
-            | "idx" => `($(gen `Rules.indexAlias) $src)
+            | "se" => `($(gen `Rules.stackValueAlias) $src)
+            | "ie" => `($(gen `Rules.indexAlias) $src)
             | _ => `($(gen `Rules.aliasExpr) $kt ($src).ty $ci)
       | _ => return x
   | .field b f =>
@@ -965,9 +971,9 @@ inductive StmtView where
   | ite (cond : Syntax) (thn els : Ident)
   /-- `if (se) { … } else { … }` — the branches written out. -/
   | iteWrite (cond : Syntax) (thn els : Array Syntax)
-  /-- `_ pv = e` — the capture at the *expression's* location. -/
+  /-- `_ se = e` — the capture at the *expression's* location. -/
   | valueDecl (name : Ident) (src : Syntax)
-  /-- `T rv ?= e` — a conditional capture; which one the name says. -/
+  /-- `T se ?= e` — a conditional capture; which one the name says. -/
   | freezeDecl (name : Ident) (src : Syntax)
   /-- `T alias sp = e` — a storage *place* alias. -/
   | aliasDecl (ty name : Ident) (src : Syntax)
@@ -1081,7 +1087,6 @@ partial def transStmt (sc : Scope) (stx : Syntax) : CommandElabM (Term × Scope)
                   sc.withBind name.getId (.scratch `memoryPathAliasName `memory src))
       | some (c, k), `stack =>
           let helper := match c with
-            | `rhsValueAliasName => `Rules.captureRhsValue
             | `indexAliasName => `Rules.captureIndex
             | _ => `Rules.captureStackValue
           let h := mkIdent helper
@@ -1147,7 +1152,7 @@ partial def transBlock (sc : Scope) (stmts : Array Syntax) : CommandElabM Term :
   for h : i in [0:stmts.size] do
     if let some (.freezeDecl name src) := stmtView? stmts[i] then
       let t ← transExpr sc false src
-      if stemOf name.getId.toString == "idx" then
+      if stemOf name.getId.toString == "ie" then
         let rest := stmts[0:i].toArray ++ stmts[i+1:stmts.size].toArray
         let hoisted := stmts[0:i].toArray ++ #[stmts[i]] ++ stmts[i+1:stmts.size].toArray
         let scC := sc.withBind name.getId (.frozen (← `($(gen `Rules.indexAlias) $t)))

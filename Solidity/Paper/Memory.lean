@@ -43,8 +43,8 @@ so both fields end up at one identity.  `writeRef`, not `write`. -/
 
 sol_derivation memoryFieldCopy :
     => <[ carol.account = david.account ]>(φ)
-  ~*> => { pv@Account := ref(david.account) }
-          { memory := write(memory, carol.account, image(pv@Account)) } (φ)
+  ~*> => { se@Account := ref(david.account) }
+          { memory := write(memory, carol.account, image(se@Account)) } (φ)
 
 /-! ### `carol.account.balance = 10;` — the memory twin of the headline
 Written with the middle line the storage chain has, so the two can be read
@@ -54,12 +54,12 @@ at a path. -/
 
 sol_derivation memoryDeepFieldWrite :
     => <[ carol.account.balance = 10 ]>(φ)
-  ~*> => { rv@uint := default(uint) } { rv@uint := 10 }
+  ~*> => { se@uint := default(uint) } { se@uint := 10 }
           <[ Account memory mv = carol.account;
-             mv@Account.balance = rv@uint ]>(φ)
-  ~*> => { rv@uint := default(uint) } { rv@uint := 10 }
+             mv@Account.balance = se@uint ]>(φ)
+  ~*> => { se@uint := default(uint) } { se@uint := 10 }
           { mv@Account := ref(carol.account) }
-          { memory := write(memory, mv@Account.balance, rv@uint) } (φ)
+          { memory := write(memory, mv@Account.balance, se@uint) } (φ)
 
 /-! ### `v = carol.account.balance;` — the memory twin of the read -/
 
@@ -104,17 +104,17 @@ sol_derivation memoryRootAssign :
   ~> => { carol := ref(david) } (φ)
 
 /-! ### `carol.age = a + b;` — a computed value into a memory field
-The operand is frozen into `pv` before the write, exactly as a storage field
+The operand is frozen into `se` before the write, exactly as a storage field
 write freezes it.  The two vacuous lines are `binopAssignment`'s `\else`
 branch, which every operator produces and `+` cannot take (see
 `fieldCompoundAssign`). -/
 
 sol_derivation memoryFieldWriteCapturedRhs :
     => <[ carol.age = a + b ]>(φ)
-  ~*> [ => { pv@uint := default(uint) } { pv@uint := (a + b) }
-          { memory := write(memory, carol.age, pv@uint) } (φ),
-        { pv@uint := default(uint) } ¬⊤ => { pv@uint := default(uint) } ⊤,
-        { pv@uint := default(uint) } ¬⊤ => { pv@uint := default(uint) } ⊥ ]
+  ~*> [ => { se@uint := default(uint) } { se@uint := (a + b) }
+          { memory := write(memory, carol.age, se@uint) } (φ),
+        { se@uint := default(uint) } ¬⊤ => { se@uint := default(uint) } ⊤,
+        { se@uint := default(uint) } ¬⊤ => { se@uint := default(uint) } ⊥ ]
 
 /-! ## 6 · Memory delete
 
@@ -143,27 +143,36 @@ sol_derivation memoryDeleteField :
           { newBal := mv@Account.balance } (φ)
 
 /-! ### `delete carolValues[i];` and `delete carolTokens[i];`
-A memory index delete is **not** bounds-guarded: one rule, one `clear` element,
-whatever the index.  The element default is manufactured on the next read,
-which is what makes the guard unnecessary (`Theory/Memory.lean`'s
-`readOnAddM`). -/
+A memory index delete is bounds-guarded exactly as a memory index write is:
+one rule per element sort, and each is the guarded pair — the `clear` element
+in bounds, the generated `revert();` out of bounds, which the box closes with
+`⊤`.  Written in the box, as the array chains of section 7 are. -/
 
 sol_derivation memoryIndexDeletePrimitive :
-    => <[ delete mv@UintArray[i] ]>(φ)
-  ~> => { clear(mv@UintArray[i]) } (φ)
+    => [ delete mv@UintArray[i] ](φ)
+  ~*> [ inBounds(mv@UintArray[i]) => { clear(mv@UintArray[i]) } [ ](φ),
+        ¬inBounds(mv@UintArray[i]) => ⊤ ]
 
 sol_derivation memoryIndexDeleteReference :
-    => <[ delete mv2@TokenArray[i] ]>(φ)
-  ~> => { clear(mv2@TokenArray[i]) } (φ)
+    => [ delete mv2@TokenArray[i] ](φ)
+  ~*> [ inBounds(mv2@TokenArray[i]) => { clear(mv2@TokenArray[i]) } [ ](φ),
+        ¬inBounds(mv2@TokenArray[i]) => ⊤ ]
 
 /-! ### `delete carol.account.tokens[i];` — under a nested path
-Two `ref` bindings to reach the array, and then the same single `clear`. -/
+Two `ref` bindings to reach the array, and then the same guarded `clear`,
+with the bounds goal read under both bindings. -/
 
 sol_derivation memoryIndexDeleteNonsimplePath :
-    => <[ delete carol.account.tokens[i] ]>(φ)
-  ~*> => { mv@Account := ref(carol.account) }
+    => [ delete carol.account.tokens[i] ](φ)
+  ~*> [ { mv@Account := ref(carol.account) }
+          { mv@TokenArray := ref(mv@Account.tokens) } inBounds(mv@TokenArray[i]) =>
+          { mv@Account := ref(carol.account) }
           { mv@TokenArray := ref(mv@Account.tokens) }
-          { clear(mv@TokenArray[i]) } (φ)
+          { clear(mv@TokenArray[i]) } [ ](φ),
+        { mv@Account := ref(carol.account) }
+          { mv@TokenArray := ref(mv@Account.tokens) } ¬inBounds(mv@TokenArray[i]) =>
+          { mv@Account := ref(carol.account) }
+          { mv@TokenArray := ref(mv@Account.tokens) } ⊤ ]
 
 /-! ## 7 · Memory arrays and allocation
 
@@ -198,34 +207,34 @@ sol_derivation memoryArrayWriteBox :
 
 sol_derivation memoryNestedArrayWrite :
     => [ carol.account.values[i] = 42 ](φ)
-  ~*> [ { rv@uint := default(uint) } { rv@uint := 42 }
+  ~*> [ { se@uint := default(uint) } { se@uint := 42 }
           { mv@Account := ref(carol.account) }
           { mv@UintArray := ref(mv@Account.values) } inBounds(mv@UintArray[i]) =>
-          { rv@uint := default(uint) } { rv@uint := 42 }
+          { se@uint := default(uint) } { se@uint := 42 }
           { mv@Account := ref(carol.account) }
           { mv@UintArray := ref(mv@Account.values) }
-          { memory := write(memory, mv@UintArray[i], rv@uint) } [ ](φ),
-        { rv@uint := default(uint) } { rv@uint := 42 }
+          { memory := write(memory, mv@UintArray[i], se@uint) } [ ](φ),
+        { se@uint := default(uint) } { se@uint := 42 }
           { mv@Account := ref(carol.account) }
           { mv@UintArray := ref(mv@Account.values) } ¬inBounds(mv@UintArray[i]) =>
-          { rv@uint := default(uint) } { rv@uint := 42 }
+          { se@uint := default(uint) } { se@uint := 42 }
           { mv@Account := ref(carol.account) }
           { mv@UintArray := ref(mv@Account.values) } ⊤ ]
 
 /-! ### `v = carolValues[++i];` — an impure index
-The index is frozen into `idx` before the bounds goal is read, which is what
+The index is frozen into `ie` before the bounds goal is read, which is what
 the `{…}` prefix on the antecedent says; the increment itself is the pair
 `bump` names. -/
 
 sol_derivation memoryArrayIncIndexRead :
     => [ v = mv@UintArray[++i] ](φ)
-  ~*> [ { idx@uint := default(uint) } { bump(++i) ‖ idx@uint := ++i }
-          inBounds(mv@UintArray[idx@uint]) =>
-          { idx@uint := default(uint) } { bump(++i) ‖ idx@uint := ++i }
-          { v := mv@UintArray[idx@uint] } [ ](φ),
-        { idx@uint := default(uint) } { bump(++i) ‖ idx@uint := ++i }
-          ¬inBounds(mv@UintArray[idx@uint]) =>
-          { idx@uint := default(uint) } { bump(++i) ‖ idx@uint := ++i } ⊤ ]
+  ~*> [ { ie@uint := default(uint) } { bump(++i) ‖ ie@uint := ++i }
+          inBounds(mv@UintArray[ie@uint]) =>
+          { ie@uint := default(uint) } { bump(++i) ‖ ie@uint := ++i }
+          { v := mv@UintArray[ie@uint] } [ ](φ),
+        { ie@uint := default(uint) } { bump(++i) ‖ ie@uint := ++i }
+          ¬inBounds(mv@UintArray[ie@uint]) =>
+          { ie@uint := default(uint) } { bump(++i) ‖ ie@uint := ++i } ⊤ ]
 
 /-! ### `carolValues[++i] = val;` — the write twin of the impure index
 The value is frozen *before* the index is captured, and the receiver is bound
@@ -234,21 +243,21 @@ alias, which is what makes the capture order the same for every receiver. -/
 
 sol_derivation memoryArrayIncIndexWrite :
     => [ mv@UintArray[++i] = amount ](φ)
-  ~*> [ { rv@uint := default(uint) } { rv@uint := amount }
+  ~*> [ { se@uint := default(uint) } { se@uint := amount }
           { mv@UintArray := ref(mv@UintArray) }
-          { idx@uint := default(uint) } { bump(++i) ‖ idx@uint := ++i }
-          inBounds(mv@UintArray[idx@uint]) =>
-          { rv@uint := default(uint) } { rv@uint := amount }
+          { ie@uint := default(uint) } { bump(++i) ‖ ie@uint := ++i }
+          inBounds(mv@UintArray[ie@uint]) =>
+          { se@uint := default(uint) } { se@uint := amount }
           { mv@UintArray := ref(mv@UintArray) }
-          { idx@uint := default(uint) } { bump(++i) ‖ idx@uint := ++i }
-          { memory := write(memory, mv@UintArray[idx@uint], rv@uint) } [ ](φ),
-        { rv@uint := default(uint) } { rv@uint := amount }
+          { ie@uint := default(uint) } { bump(++i) ‖ ie@uint := ++i }
+          { memory := write(memory, mv@UintArray[ie@uint], se@uint) } [ ](φ),
+        { se@uint := default(uint) } { se@uint := amount }
           { mv@UintArray := ref(mv@UintArray) }
-          { idx@uint := default(uint) } { bump(++i) ‖ idx@uint := ++i }
-          ¬inBounds(mv@UintArray[idx@uint]) =>
-          { rv@uint := default(uint) } { rv@uint := amount }
+          { ie@uint := default(uint) } { bump(++i) ‖ ie@uint := ++i }
+          ¬inBounds(mv@UintArray[ie@uint]) =>
+          { se@uint := default(uint) } { se@uint := amount }
           { mv@UintArray := ref(mv@UintArray) }
-          { idx@uint := default(uint) } { bump(++i) ‖ idx@uint := ++i } ⊤ ]
+          { ie@uint := default(uint) } { bump(++i) ‖ ie@uint := ++i } ⊤ ]
 
 /-! ### `carolTokens[i] = david.account.token;`
 A reference-valued element written from a memory path: the source is read to
@@ -257,14 +266,14 @@ slots alias. -/
 
 sol_derivation memoryArrayWriteRefSource :
     => [ mv2@TokenArray[i] = david.account.token ](φ)
-  ~*> [ { mv@Account := ref(david.account) } { pv@Token := ref(mv@Account.token) }
+  ~*> [ { mv@Account := ref(david.account) } { se@Token := ref(mv@Account.token) }
           inBounds(mv2@TokenArray[i]) =>
-          { mv@Account := ref(david.account) } { pv@Token := ref(mv@Account.token) }
-          { memory := write(memory, mv2@TokenArray[i], image(pv@Token)) } [ ](φ),
-        { mv@Account := ref(david.account) } { pv@Token := ref(mv@Account.token) }
+          { mv@Account := ref(david.account) } { se@Token := ref(mv@Account.token) }
+          { memory := write(memory, mv2@TokenArray[i], image(se@Token)) } [ ](φ),
+        { mv@Account := ref(david.account) } { se@Token := ref(mv@Account.token) }
           ¬inBounds(mv2@TokenArray[i]) =>
           { mv@Account := ref(david.account) }
-          { pv@Token := ref(mv@Account.token) } ⊤ ]
+          { se@Token := ref(mv@Account.token) } ⊤ ]
 
 /-! ### `carol.account.token = davidTokens[i];` — the other direction
 The element is read first, so the bounds goal is the *first* thing the line
@@ -273,8 +282,8 @@ carries and the capture that follows it is under no prefix at all. -/
 sol_derivation memoryFieldWriteFromArrayElem :
     => [ carol.account.token = mv2@TokenArray[i] ](φ)
   ~*> [ inBounds(mv2@TokenArray[i]) =>
-          { pv@Token := ref(mv2@TokenArray[i]) } { mv@Account := ref(carol.account) }
-          { memory := write(memory, mv@Account.token, image(pv@Token)) } [ ](φ),
+          { se@Token := ref(mv2@TokenArray[i]) } { mv@Account := ref(carol.account) }
+          { memory := write(memory, mv@Account.token, image(se@Token)) } [ ](φ),
         ¬inBounds(mv2@TokenArray[i]) => ⊤ ]
 
 /-! ### `Token memory tok = carol.account.tokens[i];`
@@ -295,19 +304,19 @@ sol_derivation memoryDeclFromNestedArrayElem :
           { mv@TokenArray := ref(mv@Account.tokens) } ⊤ ]
 
 /-! ### `Token memory tok = carolTokens[++i];`
-The same declaration with an impure index: the index is frozen into `idx`
+The same declaration with an impure index: the index is frozen into `ie`
 before the bounds goal is read, and the element the alias binds is the one
 that index named. -/
 
 sol_derivation memoryDeclFromIncIndexElem :
     => [ Token memory mv3 = mv2@TokenArray[++i] ](φ)
-  ~*> [ { idx@uint := default(uint) } { bump(++i) ‖ idx@uint := ++i }
-          inBounds(mv2@TokenArray[idx@uint]) =>
-          { idx@uint := default(uint) } { bump(++i) ‖ idx@uint := ++i }
-          { mv3@Token := ref(mv2@TokenArray[idx@uint]) } [ ](φ),
-        { idx@uint := default(uint) } { bump(++i) ‖ idx@uint := ++i }
-          ¬inBounds(mv2@TokenArray[idx@uint]) =>
-          { idx@uint := default(uint) } { bump(++i) ‖ idx@uint := ++i } ⊤ ]
+  ~*> [ { ie@uint := default(uint) } { bump(++i) ‖ ie@uint := ++i }
+          inBounds(mv2@TokenArray[ie@uint]) =>
+          { ie@uint := default(uint) } { bump(++i) ‖ ie@uint := ++i }
+          { mv3@Token := ref(mv2@TokenArray[ie@uint]) } [ ](φ),
+        { ie@uint := default(uint) } { bump(++i) ‖ ie@uint := ++i }
+          ¬inBounds(mv2@TokenArray[ie@uint]) =>
+          { ie@uint := default(uint) } { bump(++i) ‖ ie@uint := ++i } ⊤ ]
 
 end
 

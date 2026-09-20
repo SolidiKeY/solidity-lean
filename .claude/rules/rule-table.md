@@ -8,6 +8,7 @@ paths:
   - "Solidity/Calculus/Coverage.lean"
   - "Solidity/Calculus/Completeness.lean"
   - "Solidity/Calculus/KeyTaclets.lean"
+  - "Solidity/Calculus/PaperRules.lean"
   - "Solidity/SortCheck/*.lean"
 ---
 
@@ -42,6 +43,21 @@ the order decides which name a `⇝[.rule]` derivation pins.
    `SortCheck/Annotations.lean`, keep `sortFaithful_all` closing (extend
    `ruleNumericTarget`/`ruleRefTarget` for new `fixed`-sorted value reads),
    then run `lake exe solkeycheck`.
+6. Give the rule its paper origin in `Calculus/PaperRules.lean`
+   (`paperOrigin`): the paper rule it is, the rules it merges, or
+   `leanOnly` with its reason (`keyTier` — solkey has it, the paper does not;
+   `plumbing` — this syntax's own normalisation; `calculus` — theory the
+   paper is to gain).  `paper_rules_partitioned` and the count theorems
+   move with it; `./scripts/check-paper-rules.mjs` checks the enumeration
+   against `rules/*.tex`.
+
+**Names are the paper's.** A rule is spelled as the paper spells it where the
+paper has it (`storageFieldWrite_unfold_leftFst` → `storageFieldWriteUnfoldLeftFst`),
+and as solkey spells it otherwise.  A residual binds four fixed scratch names,
+the paper's kind-names: `se` (a value), `ie` (an index), `sp` (a storage
+path), `mv` (a memory path).  KeY mints fresh names instead, so a capture
+whose source already is `se` is not repeated (`Rules.freezeRhs`); write the
+matched value `se1` and the generated one `se`, as the paper numbers them.
 
 ## Three traps
 

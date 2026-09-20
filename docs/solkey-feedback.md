@@ -301,7 +301,10 @@ cheaper to maintain:
   rule set, so it outranks `ifElseUnfold`'s capture of the negation.
 - **Memory compound assignment**: ✅ implemented in solkey 2026-09-10 as
   `memoryCompoundAssign` + `memoryIncDec` over `{field, indexArray}` (ranked
-  item 10). Still absent on the Lean side.
+  item 10). Ported on the Lean side as `memoryFieldOpAssign` /
+  `memoryIndexArrayOpAssign` / `memoryFieldIncrement` /
+  `memoryIndexArrayIncrement` and their `UnfoldLeftFst` twins, each
+  instance's `from` clause naming its taclet.
 
 ## Semantics observations from the Lean proofs
 
@@ -318,7 +321,7 @@ cheaper to maintain:
   *before* the simple RHS was read, but solc — and the Lean interpreter —
   read the RHS first. On `values[i++] = i` with `i = 0` the program writes
   `0` and the residual wrote `1`. Lean-checked in
-  `Counterexamples/EvaluationOrder.lean` (`indexWrite_not_sound`).
+  `Counterexamples/EvaluationOrder.lean` (`indexWrite_preFix_not_sound`).
   **Fixed upstream 2026-09-09** by the `*ValueRhsCapture` order: bind the
   RHS first, then capture the index; see ranked item 1 for the full
   account, including why the `*_unfold_leftFst` family was never affected
@@ -626,6 +629,22 @@ Also in `c80a54494c`: upstream dropped the **`mapfree` PathSVSort flag** idea
 from `docs/taclet-ideas.md`, which `copyAt` makes unnecessary — the calculus
 now gives the mapping-carrying copy a meaning instead of hardening the taclets
 against it.
+
+## The `save` leaf should collapse again (2026-09-20)
+
+`8c5c69ca25` made `save(st, nil, v)` a leaf every write leaves, read through
+by member sort by the five `selectOnSaveEmpty*`/`saveOnEmptyPrim` taclets, so
+that a struct written over a location keeps the location's mapping members.
+That is the one case neither side can reach: a storage-to-storage copy of a
+mapping-carrying type is rejected by solc ≥ 0.7, by
+`ParserUtils.parseAssignmentMaybe` (`MAPPING_COPY_ERROR`), and cannot be built
+here (`TypedStmt.Assign.mk`'s `mapFree`).  On every program the two theories
+agree, and the non-collapsing leaf costs a term that grows with every write
+and five read-through taclets where the paper's signature has one rule,
+`saveEmptyPath` (`save(st, ∅, v) = (Struct) v`).  `Theory/Storage.lean` keeps
+the collapsing leaf (`saveOnEmpty`) as the source of truth for both the paper
+and solkey; the request is that solkey revert to it, or state the program on
+which the fold is observable.
 
 ## `copyAt` folded into `save` (2026-09-16)
 

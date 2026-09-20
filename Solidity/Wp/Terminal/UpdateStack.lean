@@ -7,8 +7,9 @@ Reads into a stack variable (`storageRootReadSelect`,
 `storageFieldReadFind`, `storageIndexRead{ArrayFind{Box,Diamond},MappingFind}`,
 `memoryFieldReadHeap`, `memoryIndexReadHeap{Box,Diamond}`,
 `localValueAssign`), the operator rules (`binopAssignment op`,
-`unopAssignment op`) and the inc/dec assignments (`localAssignIncDec op`,
-`storage{Root,Field,Index}IncDecAssignment op`).
+`unopAssignment op`) and the inc/dec assignments (`localAssignIncrement op`,
+`storage{Root,Field,Index}IncrementAssignment op`,
+`memory{Field,IndexArray}IncrementAssignment op`).
 -/
 
 namespace Solidity
@@ -264,12 +265,12 @@ theorem incDecTargetB_of_global {t : WrappedExpr} (hg : isGlobal t) :
   | var k ty fld => cases k <;> simp_all [incDecTargetB, isGlobal, Typed.WrappedExpr.isGlobal]
   | _ => simp_all [incDecTargetB, isGlobal, Typed.WrappedExpr.isGlobal]
 
-theorem localAssignIncDec_update (op : IncDec) (s : State) (lhs : PlaceExpr)
+theorem localAssignIncrement_update (op : IncDec) (s : State) (lhs : PlaceExpr)
     (rhs : WrappedExpr)
-    (hcond : (ruleEffect (.localAssignIncDec op)).cond
+    (hcond : (ruleEffect (.localAssignIncrement op)).cond
       (Stmt.assign lhs rhs)) :
     execStmt s (Stmt.assign lhs rhs) =
-      terminalUpdate (.localAssignIncDec op) (Stmt.assign lhs rhs) s := by
+      terminalUpdate (.localAssignIncrement op) (Stmt.assign lhs rhs) s := by
   show execStmt s (Stmt.assign lhs rhs) = incDecAssignUpd op lhs rhs s
   match rhs, hcond with
   | WrappedExpr.incDec op' t, hc =>
@@ -279,12 +280,12 @@ theorem localAssignIncDec_update (op : IncDec) (s : State) (lhs : PlaceExpr)
       exact execAssign_stack s lhs _ hlhs.1 _
         (evalValue_incDec s op' t (incDecTargetB_of_stackSimple hk hs))
 
-theorem storageRootIncDecAssignment_update (op : IncDec) (s : State)
+theorem storageRootIncrementAssignment_update (op : IncDec) (s : State)
     (lhs : PlaceExpr) (rhs : WrappedExpr)
-    (hcond : (ruleEffect (.storageRootIncDecAssignment op)).cond
+    (hcond : (ruleEffect (.storageRootIncrementAssignment op)).cond
       (Stmt.assign lhs rhs)) :
     execStmt s (Stmt.assign lhs rhs) =
-      terminalUpdate (.storageRootIncDecAssignment op) (Stmt.assign lhs rhs) s := by
+      terminalUpdate (.storageRootIncrementAssignment op) (Stmt.assign lhs rhs) s := by
   show execStmt s (Stmt.assign lhs rhs) = incDecAssignUpd op lhs rhs s
   match rhs, hcond with
   | WrappedExpr.incDec op' t, hc =>
@@ -294,12 +295,12 @@ theorem storageRootIncDecAssignment_update (op : IncDec) (s : State)
       exact execAssign_stack s lhs _ hlhs.1 _
         (evalValue_incDec s op' t (incDecTargetB_of_global hg))
 
-theorem storageFieldIncDecAssignment_update (op : IncDec) (s : State)
+theorem storageFieldIncrementAssignment_update (op : IncDec) (s : State)
     (lhs : PlaceExpr) (rhs : WrappedExpr)
-    (hcond : (ruleEffect (.storageFieldIncDecAssignment op)).cond
+    (hcond : (ruleEffect (.storageFieldIncrementAssignment op)).cond
       (Stmt.assign lhs rhs)) :
     execStmt s (Stmt.assign lhs rhs) =
-      terminalUpdate (.storageFieldIncDecAssignment op) (Stmt.assign lhs rhs) s := by
+      terminalUpdate (.storageFieldIncrementAssignment op) (Stmt.assign lhs rhs) s := by
   show execStmt s (Stmt.assign lhs rhs) = incDecAssignUpd op lhs rhs s
   match rhs, hcond with
   | WrappedExpr.incDec op' (WrappedExpr.field Kind.storage ty path f), hc =>
@@ -311,12 +312,12 @@ theorem storageFieldIncDecAssignment_update (op : IncDec) (s : State)
           have hp' : path.simple = true := hp
           simp [incDecTargetB, hp']))
 
-theorem storageIndexIncDecAssignment_update (op : IncDec) (s : State)
+theorem storageIndexIncrementAssignment_update (op : IncDec) (s : State)
     (lhs : PlaceExpr) (rhs : WrappedExpr)
-    (hcond : (ruleEffect (.storageIndexIncDecAssignment op)).cond
+    (hcond : (ruleEffect (.storageIndexIncrementAssignment op)).cond
       (Stmt.assign lhs rhs)) :
     execStmt s (Stmt.assign lhs rhs) =
-      terminalUpdate (.storageIndexIncDecAssignment op) (Stmt.assign lhs rhs) s := by
+      terminalUpdate (.storageIndexIncrementAssignment op) (Stmt.assign lhs rhs) s := by
   show execStmt s (Stmt.assign lhs rhs) = incDecAssignUpd op lhs rhs s
   match rhs, hcond with
   | WrappedExpr.incDec op' (WrappedExpr.index Kind.storage ty path ix), hc =>
@@ -336,12 +337,12 @@ inc/dec target changes kind.  `evalValue_incDec` already covers the memory
 slots (`incDecTargetB`), so these are the storage proofs verbatim with
 `Kind.memory`. -/
 
-theorem memoryFieldIncDecAssignment_update (op : IncDec) (s : State)
+theorem memoryFieldIncrementAssignment_update (op : IncDec) (s : State)
     (lhs : PlaceExpr) (rhs : WrappedExpr)
-    (hcond : (ruleEffect (.memoryFieldIncDecAssignment op)).cond
+    (hcond : (ruleEffect (.memoryFieldIncrementAssignment op)).cond
       (Stmt.assign lhs rhs)) :
     execStmt s (Stmt.assign lhs rhs) =
-      terminalUpdate (.memoryFieldIncDecAssignment op) (Stmt.assign lhs rhs) s := by
+      terminalUpdate (.memoryFieldIncrementAssignment op) (Stmt.assign lhs rhs) s := by
   show execStmt s (Stmt.assign lhs rhs) = incDecAssignUpd op lhs rhs s
   match rhs, hcond with
   | WrappedExpr.incDec op' (WrappedExpr.field Kind.memory ty path f), hc =>
@@ -353,12 +354,12 @@ theorem memoryFieldIncDecAssignment_update (op : IncDec) (s : State)
           have hp' : path.simple = true := hp
           simp [incDecTargetB, hp']))
 
-theorem memoryIndexIncDecAssignment_update (op : IncDec) (s : State)
+theorem memoryIndexArrayIncrementAssignment_update (op : IncDec) (s : State)
     (lhs : PlaceExpr) (rhs : WrappedExpr)
-    (hcond : (ruleEffect (.memoryIndexIncDecAssignment op)).cond
+    (hcond : (ruleEffect (.memoryIndexArrayIncrementAssignment op)).cond
       (Stmt.assign lhs rhs)) :
     execStmt s (Stmt.assign lhs rhs) =
-      terminalUpdate (.memoryIndexIncDecAssignment op) (Stmt.assign lhs rhs) s := by
+      terminalUpdate (.memoryIndexArrayIncrementAssignment op) (Stmt.assign lhs rhs) s := by
   show execStmt s (Stmt.assign lhs rhs) = incDecAssignUpd op lhs rhs s
   match rhs, hcond with
   | WrappedExpr.incDec op' (WrappedExpr.index Kind.memory ty path ix), hc =>

@@ -11,7 +11,7 @@ target shape its guard admits, a theorem
 
     Par.toUpd [ …elementary updates… ] = <family> args
 
-so a derivation can write the calculus's `{storage := save(sp·balance, rv)}`
+so a derivation can write the calculus's `{storage := save(sp·balance, se)}`
 and have Lean check that it *is* the rule's update.
 
 ## The kit

@@ -30,9 +30,9 @@ under one update.
 
 ```
     => <[ alice.account.balance = 10 ]>(φ)
-~>  => <[ uint rv = 10; Account storage sp = alice.account; sp.balance = rv ]>(φ)
-~*> => { rv := 10 ‖ sp := alice·account } <[ sp.balance = rv ]>(φ)
-~>  => { rv := 10 ‖ sp := alice·account ‖ storage := save(alice·account·balance, 10) } (φ)
+~>  => <[ uint se = 10; Account storage sp = alice.account; sp.balance = se ]>(φ)
+~*> => { se := 10 ‖ sp := alice·account } <[ sp.balance = se ]>(φ)
+~>  => { se := 10 ‖ sp := alice·account ‖ storage := save(alice·account·balance, 10) } (φ)
 ```
 
 Each is one `sol_derivation` and each is a named theorem about `⇝ᵘ*`, so a
@@ -77,22 +77,30 @@ out-of-bounds branch appears twice — closed with `⊤` for the box reading and
 
 ## Where this differs from the calculus, and why
 
-**The scratch names are Lean's.**  The calculus writes `pv` for a frozen value
-operand and `acc` for a storage alias; the rules here bind `rv` and `sp`, and
-`Calculus/Rules.lean` records why the calculus's own examples are inconsistent about
-it.  A stack scratch name carries its type — `rv@uint`, `pv@bool`,
-`sp@UintArray` — because `SoliditySyntax.aliasKind` is a name-only table that
-cannot see it.  The calculus's auxiliary arrays and its bucket are scratch
+**The scratch names are the paper's rule names.**  A residual binds `se`,
+`ie`, `sp`, `mv` — the kind-names of the paper's schema-variable tables —
+where the paper's worked examples instantiate them with concrete names
+(`pv`, `idx`, `acc`), and `Calculus/Rules.lean` records why the names are
+fixed rather than fresh.  A stack scratch name carries its type — `se@uint`,
+`se@bool`, `sp@UintArray` — because `SoliditySyntax.aliasKind` is a name-only
+table that cannot see it.  The calculus's auxiliary arrays and its bucket are scratch
 aliases here, because a fresh name would fall to `rootExpr`'s stack default:
 `carolValues` is `mv@UintArray`, `carolTokens`/`davidTokens` are
 `mv2@TokenArray`, `carolToken` is `mv3@Token`, and `bucket` is a state
 variable `bucket@@TokenBucket`.  `docs/paper-parity.md` carries the whole
 table.
 
-**The freeze costs three steps the calculus does not draw.**  A value operand
-is frozen before the target is captured (`Counterexamples/ErrorOrder.lean` is
-why), which is `localValueDeclInitDrop` → `valueDeclSkip` → `localValueAssign`.
-They are inside a `~*>`, as the calculus elides them.
+**The freeze is the calculus's own step; the declaration it leaves costs
+three the calculus does not draw.**  A complex value source is hoisted into
+`se` by the same step that aliases the receiver — `nsp.fld = e ⇝ T se ?= e;
+T storage sp = nsp; sp.fld = se`, the calculus's partition, with the value
+frozen before the target is captured (`Counterexamples/ErrorOrder.lean` is
+why) and a source that already *is* `se` left alone — so a chain's first
+`~>` lands on exactly the line the calculus draws.  What the calculus then
+elides inside its `~*>` is the stack declaration running down:
+`localValueDeclInitDrop` → `valueDeclSkip` → `localValueAssign`, which is
+where the `{ se := default(uint) } { se := 10 }` pair of an unmerged line
+comes from.  They are inside a `~*>` here too.
 
 **The merge is part of an arrow, not a line of its own.**  The calculus's last
 line is usually not a rule application but the update calculus collapsing
@@ -119,8 +127,8 @@ route.  The checks are the only `native_decide` written here, and
 Some programs the calculus draws cannot be written as a chain, and the reason
 is informative in each case: call-valued operands, a declaration of one of the
 worked-example roots, the first-order side condition `sizeNotNegative`, the
-sequent rule `ifElseSplit`, the memory identity layer, the unfunded transfer,
-and checked arithmetic.  Each is argued in **`docs/paper-parity.md`**, beside
+sequent rule `ifElseSplit`, the memory identity layer, and checked
+arithmetic.  Each is argued in **`docs/paper-parity.md`**, beside
 the row of the example it belongs to; they are not restated here, because an
 argument in two places drifts in one of them.
 -/

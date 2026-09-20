@@ -75,10 +75,11 @@ import changes and final confirmation. The `lean-verify` skill in
 | `./scripts/check-calculus-parity.sh` | long | the same corpus proved from `Calculus/Rules.lean` alone, against `tests/solkey/expected-calculus.tsv` |
 | `lake exe solkeycheck` | seconds | sort annotations against solkey's `.key` |
 
-`solkeycheck` **currently fails**: the annotation table has drifted 78 rows
-from upstream. It is pre-existing and re-syncing it is its own change,
-because it also moves `SortCheck/Faithfulness.lean` and
-`Counterexamples/PreFixSortAnnotations.lean`. Do not try to fix it in passing.
+`solkeycheck` is at zero against solkey `8c5c69ca25` (2026-09-20), with
+`openFindings` empty. Re-pinning to a newer solkey is its own change: it
+regenerates `Calculus/KeyTaclets.lean`, moves `SortCheck/Annotations.lean`,
+`SortCheck/Faithfulness.lean` and `Counterexamples/PreFixSortAnnotations.lean`,
+and re-partitions `RuleShapes.taclets_partitioned`.
 
 Run long builds in the background and grep the log for `error` rather than
 reading it back whole.

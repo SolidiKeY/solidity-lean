@@ -110,7 +110,7 @@ theorem storageSave_eq (s : State) (target : WrappedExpr) (v : SVal) :
       | ok t => exact congrArg Except.ok (Upd.saveStorage_frame hsv).symm
 
 /-- Look the rule up in the terminal table once, rather than unfolding the
-83-way match inside every proof. -/
+95-way match inside every proof. -/
 theorem tu_eq {r : RuleName} {f : Stmt -> State -> Res State}
     (h : terminalUpdate? r = some f) (stmt : Stmt) (s : State) :
     terminalUpdate r stmt s = f stmt s := by
@@ -353,6 +353,22 @@ theorem memoryToStorageFieldCopyRoot_taclet (sm : SolidityModality) (stmt : Stmt
         tu_eq (r := .memoryToStorageFieldCopyRoot) (f := onAssign storageAssignUpd) rfl]
       exact storageCopy_field ty sp f hass rhs s
 
+/-- `sp.fld = mv.fr`: the same `copyMem` write, with a member source. -/
+theorem memoryToStorageFieldCopyField_taclet (sm : SolidityModality) (stmt : Stmt)
+    (hcond : (ruleEffect .memoryToStorageFieldCopyField).cond stmt) (s : State) :
+    goalsExec sm ((ruleEffect .memoryToStorageFieldCopyField).goals stmt hcond) s
+      = terminalUpdate .memoryToStorageFieldCopyField stmt s := by
+  cases stmt <;> first | exact (hcond : False).elim | skip
+  rename_i lhs rhs
+  obtain ⟨e, hass⟩ := lhs
+  match e, hass, hcond with
+  | WrappedExpr.field Kind.storage ty sp f, hass, hcond =>
+      show goalsExec sm (terminalGoal [UpdElem.storage
+          (StorageUpd.copyFromMem (WrappedExpr.field Kind.storage ty sp f) rhs)]) s = _
+      rw [goalsExec_terminalGoal, toUpd_storageElem,
+        tu_eq (r := .memoryToStorageFieldCopyField) (f := onAssign storageAssignUpd) rfl]
+      exact storageCopy_field ty sp f hass rhs s
+
 theorem memoryToStorageIndexMappingCopyRoot_taclet (sm : SolidityModality) (stmt : Stmt)
     (hcond : (ruleEffect .memoryToStorageIndexMappingCopyRoot).cond stmt) (s : State) :
     goalsExec sm ((ruleEffect .memoryToStorageIndexMappingCopyRoot).goals stmt hcond) s
@@ -579,25 +595,44 @@ theorem readVal_eq_simpleVal {s : State} {e : WrappedExpr} (hs : e.simple = true
   rename_i kind ty fld
   cases kind <;> simp_all [readVal, simpleVal, placePath]
 
-/-- `a.transfer(se);` — the diamond taclet's "sufficient funds" guard is the
-interpreter's revert condition, so the Lean rule carries it for both
-modalities and the two agree.  Under **box** that is a *strengthening* of KeY,
-whose box rule books the payment unconditionally; see
-`docs/solc-alignment.md`. -/
-theorem transferNoCallback_taclet (sm : SolidityModality) (stmt : Stmt)
-    (hcond : (ruleEffect .transferNoCallback).cond stmt) (s : State) :
-    goalsExec sm ((ruleEffect .transferNoCallback).goals stmt hcond) s
-      = terminalUpdate .transferNoCallback stmt s := by
+/-- `a.transfer(se);`, the diamond twin, **under its obligation**.  KeY's box
+rule books the payment unconditionally and the diamond rule owes the funds
+check as a separate obligation goal, which `goalsExec` skips — so on either
+twin `goalsExec` is the unguarded `{transfer(sadr, se)}`, while the
+interpreter (`transferUpd`) reverts when the balance does not cover the
+amount.  Neither twin's update is therefore *equal* to the interpreter's, and
+both are in `openBridges`; what does hold is this: once the diamond
+obligation `funded(se)` is discharged, the booked update is the
+interpreter's step.  The box twin has no such obligation to discharge, so
+nothing analogous is stated for it — it is a strengthening of the
+interpreter (`docs/solc-alignment.md`). -/
+theorem transferNoCallbackDiamond_taclet_funded (sm : SolidityModality) (stmt : Stmt)
+    (hcond : (ruleEffect .transferNoCallbackDiamond).cond stmt) (s : State)
+    (hfunded : ∀ sadr se, stmt = Stmt.transfer sadr se ->
+      SideFormula.eval s (SideFormula.funded se) = .ok true) :
+    goalsExec sm ((ruleEffect .transferNoCallbackDiamond).goals stmt hcond) s
+      = terminalUpdate .transferNoCallbackDiamond stmt s := by
   cases stmt <;> first | exact (hcond : False).elim | skip
   rename_i sadr se
+  have hf := hfunded sadr se rfl
   obtain ⟨ha, hv⟩ := hcond
-  show goalsExec sm (splitGoals (SideFormula.funded se)
-      [Premise.read (Sym.netOf sadr)] [UpdElem.transfer sadr se]) s = _
-  rw [goalsExec_splitGoals,
-    tu_eq (r := .transferNoCallback) (f := onTransfer transferUpd) rfl]
-  simp only [Guard.eval, runPremises, Premise.run, Sym.eval,
-    readVal_eq_simpleVal ha, readVal_eq_simpleVal hv, SideFormula.eval,
-    Wp.onTransfer, transferUpd, simpleInt, bind, Except.bind, Except.map]
+  have hgoals : goalsExec sm ((ruleEffect .transferNoCallbackDiamond).goals
+      (Stmt.transfer sadr se) ⟨ha, hv⟩) s = UpdTerm.toUpd [UpdElem.transfer sadr se] s := by
+    show goalsExec sm
+      [ { label := "transfer booked", mode := CaseMode.box,
+          residual := RuleResidual.prog [UpdElem.transfer sadr se] [] },
+        { label := "sufficient funds", mode := CaseMode.diamond,
+          residual := RuleResidual.obligation [] (SideFormula.funded se) },
+        { label := "transfer booked", mode := CaseMode.diamond,
+          residual := RuleResidual.prog [UpdElem.transfer sadr se] [] } ] s = _
+    cases sm <;>
+      simp [goalsExec, Guard.eval, runPremises, SideFormula.eval,
+        SolidityModality.appliesCaseMode, CaseMode.applies, bind, Except.bind]
+  rw [hgoals, toUpd_netElem,
+    tu_eq (r := .transferNoCallbackDiamond) (f := onTransfer transferUpd) rfl]
+  simp only [SideFormula.eval, readVal_eq_simpleVal hv, bind, Except.bind] at hf
+  simp only [Wp.onTransfer, transferUpd, transferRhs, simpleInt,
+    readVal_eq_simpleVal hv, bind, Except.bind, Except.map]
   cases ha' : simpleVal s sadr with
   | error e => simp only [ha']
   | ok av =>
@@ -605,27 +640,21 @@ theorem transferNoCallback_taclet (sm : SolidityModality) (stmt : Stmt)
       | error e => simp only [ha', hav]
       | ok addr =>
           cases hse : simpleVal s se with
-          | error e => simp only [ha', hav, hse]
+          | error e => simp [hse] at hf
           | ok vv =>
               cases hvv : Value.asInt vv with
-              | error e => simp only [ha', hav, hse, hvv]
+              | error e => simp [hse, hvv] at hf
               | ok amt =>
+                  simp only [hse, hvv] at hf
                   by_cases hneg : amt < 0
-                  · simp only [ha', hav, hse, hvv, hneg, if_pos]
-                  · by_cases hb : amt ≤ s.selfBalance
-                    · have hlt : ¬ s.selfBalance < amt := by omega
-                      simp only [ha', hav, hse, hvv, hneg, if_neg,
-                        not_false_eq_true, hb, decide_true, if_pos, hlt]
-                      rw [toUpd_netElem]
-                      simp only [transferRhs, simpleInt, bind, Except.bind, ha',
-                        hav, hse, hvv, hneg, if_neg, not_false_eq_true,
-                        Except.map]
-                      rfl
-                    · have hlt : s.selfBalance < amt := by omega
-                      simp only [ha', hav, hse, hvv, hneg, if_neg,
-                        not_false_eq_true, hb, decide_false, hlt, if_pos]
-                      rfl
-
+                  · simp [hneg] at hf
+                  · have hb : amt ≤ s.selfBalance := by
+                      simp only [hneg, if_neg, not_false_eq_true] at hf
+                      exact of_decide_eq_true (Except.ok.inj hf)
+                    have hlt : ¬ s.selfBalance < amt := by omega
+                    simp only [ha', hav, hse, hvv, hneg, if_neg, not_false_eq_true,
+                      hlt]
+                    rfl
 
 /-! ## Coverage
 
@@ -639,12 +668,12 @@ def bridgedRules : List RuleName :=
   [ .storageRootWriteStore, .storageRootWriteCopySource, .storageLocalRootRebind,
     .storageFieldWriteSave, .storageFieldWriteCopySource,
     .storageIndexWriteMappingSave, .storageIndexWriteMappingCopySource,
-    .memoryToStorageFieldCopyRoot, .memoryToStorageIndexMappingCopyRoot,
+    .memoryToStorageFieldCopyRoot, .memoryToStorageFieldCopyField,
+    .memoryToStorageIndexMappingCopyRoot,
     .storageRootReadSelect, .localValueAssign, .storageFieldReadFind,
     .storageIndexReadMappingFind, .memoryFieldReadHeap,
     .storageLocalDeclSkip, .valueDeclSkip,
-    .revertBox, .revertDiamond, .requireSimple, .storagePlaceAlias,
-    .transferNoCallback ]
+    .revertBox, .revertDiamond, .requireSimple, .storagePlaceAlias ]
 
 /-- The rules whose update is *stated* in `Calculus/Rules.lean` but not yet proved here.
 They are not unchecked in every sense — each still has its `<rule>_update`
@@ -660,7 +689,13 @@ carries.  The families, in the order they are least to most work:
   matched against `applyBinOp`/`checkArith` at the target's type;
 * the memory-target family, where an allocating right-hand side makes the
   update a two-element parallel one;
-* the cross-domain declarations and `memoryStorageCopy`, same reason. -/
+* the cross-domain declarations and `memoryStorageCopy`, same reason;
+* the `transfer` twins, which are open for a different reason: KeY's box
+  rule books the payment unconditionally and the diamond rule owes the funds
+  check as a separate obligation — neither is the interpreter's *guarded*
+  update, so no equality can be proved.  What can be is
+  `transferNoCallbackDiamond_taclet_funded`: the diamond update under its
+  discharged obligation. -/
 def openBridges : List RuleName :=
   (ruleNames.filter fun r =>
     hasUpdate r && !(bridgedRules.contains r)).eraseDups

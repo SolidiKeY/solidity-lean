@@ -49,10 +49,11 @@ calculus — which is the artefact solkey's taclets correspond to.
 `docs/calculus-parity.md` is the other half: the same obligations driven by
 the rule table alone.
 
-**The pin.** The corpus is `c80a54494c`; the *rule table* and
-`SortCheck/Annotations.lean` are still `e67a0d7c48`, which is why
-`lake exe solkeycheck` still reports its 78 rows
-(`docs/lean-key-rule-map.md` records the split and why). The re-port from 176
+**The pin.** The corpus is `c80a54494c`; the *rule table*
+(`Calculus/KeyTaclets.lean`, 310 taclets) and `SortCheck/Annotations.lean`
+are one commit later, `8c5c69ca25`, which touches no program taclet
+(`docs/lean-key-rule-map.md` records the pin and the storage-copy fold it
+declines to follow). The re-port from 176
 `TestSuite` rows to 278 added the bool tier, the `Toggle` struct, the
 standalone `tok`, `buckets`, `basketA`/`basketB` and `boolFlags` to
 `Semantics.State.testSuiteStore` and the porter's `GLOBAL_TYPES`.

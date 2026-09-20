@@ -24,13 +24,13 @@ the deletion of the artefact.
 When a step stops elaborating, the cause is almost never the notation:
 
 1. **The residual really is different** — more steps, not different syntax. A
-   frozen value operand adds `uint rv = e;`, which costs three steps
+   frozen value operand adds `uint se = e;`, which costs three steps
    (`localValueDeclInitDrop` → `valueDeclSkip` → `localValueAssign`). Write
    them, or collapse them into one `⇝*` line.
 2. **A scratch name has no explicit `rootExpr`/`rootPlace` arm.** The default
    arm gives the right term but leaves `decide` goals unreduced, so the
    failure looks like a parse problem and is not. Add the name to the
-   explicit-arms list in `AST.lean` beside `"rv"`, `"idx"`, `"result"`.
+   explicit-arms list in `AST.lean` beside `"se"`, `"ie"`, `"result"`.
    **But not for the worked-example identifiers**: giving those explicit arms
    overflowed Lean's stack (see the `SolidityPaper.lean` docstring). Explicit
    arms are for scratch names that appear in *residuals*; a worked example's
@@ -145,8 +145,8 @@ maps the chains to the paper's worked examples):
 ```
 sol_derivation deepFieldWrite :
     => <[ alice.account.balance = 10 ]>(φ)
-  ~> => <[ uint rv = 10; … ]>(φ)
-  ~*> => { rv@uint := 10 ‖ sp@Account := path(alice.account) } <[ … ]>(φ)
+  ~> => <[ uint se = 10; … ]>(φ)
+  ~*> => { se@uint := 10 ‖ sp@Account := path(alice.account) } <[ … ]>(φ)
   ~> => { … ‖ storage := save(alice.account.balance, 10) } (φ)
 ```
 
@@ -209,10 +209,11 @@ to the empty block, so the theorem would be true and about a different program.
 
 ## Two scratch-name notes
 
-- The capture rules' `pv` is a *stack* variable: spell it `pv@uint` / `pv@bool`
-  (likewise `rv@uint`, `idx@uint`). A bare `pv` is a storage alias, and
-  `SoliditySyntax.aliasKind` is a name-only table that cannot see the type. A
-  *reference*-typed `pv@Account` is still a memory path alias.
+- The scratch names are the paper's kind-names: `se` (value), `ie` (index),
+  `sp`, `mv`. A primitive `se` is a *stack* variable: spell it `se@uint` /
+  `se@bool` (likewise `ie@uint`), because `SoliditySyntax.aliasKind` is a
+  name-only table that cannot see the type; a *reference*-typed `se@Account`
+  is a memory path alias (the `_ se = e` capture at a reference source).
 - **`--` cannot be a Lean token** (it starts a comment), so a decrement is
   `predec(e)` / `postdec(e)`. That is surface notation, not an escape hatch.
 

@@ -1159,7 +1159,7 @@ def rootExpr (name : Name) : WrappedExpr :=
   | "amount" => StandardExample.stackUint "amount"
   -- Explicit arms for common stack names: same value as the default arm,
   -- but the listed arm keeps skip-condition goals reducible for `decide`.
-  | "result" | "x" | "y" | "to" | "rv" | "idx" => StandardExample.stackUint name
+  | "result" | "x" | "y" | "to" | "se" | "ie" => StandardExample.stackUint name
   | "people" =>
       varExpr Kind.storage (Ty.ref (RefTy.array StandardExample.personTy))
         "people"
@@ -1199,7 +1199,7 @@ def rootPlace (name : Name) : PlaceExpr :=
   | "i" => StandardExample.stackUintPlace "i"
   | "amount" => StandardExample.stackUintPlace "amount"
   -- Explicit arms for common stack names (see `rootExpr`).
-  | "result" | "x" | "y" | "to" | "rv" | "idx" =>
+  | "result" | "x" | "y" | "to" | "se" | "ie" =>
       StandardExample.stackUintPlace name
   | "people" =>
       varPlace Kind.storage (Ty.ref (RefTy.array StandardExample.personTy))
@@ -1378,18 +1378,19 @@ def declTy (name : Name) : Ty :=
 /-- Infer the Kind from an alias variable name.
     - "sp" → Kind.storage (storage path alias)
     - "mv" → Kind.memory (memory path alias)
-    - "pv" → Kind.memory (value alias, typically memory)
-    - "idx" → Kind.stack (index alias)
+    - "se" → Kind.memory (the kind-neutral value alias, at a reference type
+      a memory one in every worked example)
+    - "ie" → Kind.stack (index alias)
 
-    This is a name-only table; a `pv`/`rv`/`idx` alias at a *primitive* type is
+    This is a name-only table; a `se`/`ie` alias at a *primitive* type is
     a stack value, which the `sol_expr` expanders handle through
     `isStackScratchAlias` rather than here. -/
 def aliasKind (name : Name) : Kind :=
   match name with
   | "sp" => Kind.storage
   | "mv" => Kind.memory
-  | "pv" => Kind.memory
-  | "idx" => Kind.stack
+  | "se" => Kind.memory
+  | "ie" => Kind.stack
   -- The same solkey name is a `storage` alias in one function and a
   -- `memory` alias in another (`Account storage acc` in
   -- `storageAliasWrite`, `Account memory acc` in `memoryFieldAlias`), so
@@ -1551,11 +1552,11 @@ partial def expandSolPathPlace (parts : List String) : MacroM (TSyntax `term) :=
           `(SoliditySyntax.fieldPlace $acc $(quote field))
 
 /-- The scratch value aliases that the capture rules bind on the **stack**
-(`Rules.valueAliasName` `pv`, `rhsValueAliasName` `rv`, `indexAliasName`
+(`Rules.valueAliasName` `pv`, `valueAliasName` `rv`, `indexAliasName`
 `idx`), as opposed to the storage/memory *path* aliases `sp`/`mv`.
 
 `SoliditySyntax.aliasKind` maps a name to a kind without seeing the type, so
-`pv@uint` would come out as a `memory` variable while
+`se@uint` would come out as a `memory` variable while
 `Rules.captureStackValue`/`stackValueAlias` bind it on the stack (and
 `Rules.valueCaptureKind` promotes a primitive memory capture to the stack).
 The `sol_expr` expanders consult this table instead, deciding the kind at the
@@ -1563,7 +1564,7 @@ use site -- the same reasoning as the `name@@Type` globals, and for the same
 reason: widening `aliasKind` itself would put an `if ty.isPrimitive` in front
 of every `sp@...` occurrence in the corpus. -/
 def isStackScratchAlias (name ty : String) : Bool :=
-  (name == "pv" || name == "rv" || name == "idx") &&
+  (name == "se" || name == "ie") &&
     (ty == "uint" || ty == "int" || ty == "bool")
 
 mutual
@@ -1689,7 +1690,7 @@ partial def expandSolExpr : TSyntax `sol_expr -> MacroM (TSyntax `term)
           pure acc
       | [] => Macro.throwError "empty global path"
   -- Typed alias: sp@Account (simple), sp@Account.balance (field), sp@Account.token.value (nested).
-  -- `pv@uint`/`rv@int`/`idx@uint` are stack values, not path aliases; see
+  -- `se@uint`/`se@int`/`ie@uint` are stack values, not path aliases; see
   -- `isStackScratchAlias`.
   | `(sol_expr| $aliasName:ident @ $path:ident) => do
       let parts := path.getId.components.map Lean.Name.toString
@@ -2456,11 +2457,11 @@ variable (φ : WrappedExpr)
 end
 
 /-! The scratch value aliases the capture rules bind on the stack
-(`isStackScratchAlias`).  `pv@uint` has to work as a binop operand, as an
+(`isStackScratchAlias`).  `se@uint` has to work as a binop operand, as an
 assignment target, inside `assert(...)`/`transfer(...)` and as a branch
 condition -- those are the shapes that used to force raw `Stmt` constructors in
 `Examples/Derivations/ValueCapture.lean`. -/
-#check sexpr!{ pv@uint + amount }
+#check sexpr!{ se@uint + amount }
 #check sexpr!{ pv@bool }
 #check splace!{ pv@uint }
 #check sstmt!{ pv@uint = x + y }

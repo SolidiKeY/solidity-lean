@@ -103,6 +103,10 @@ memory, because that is the one `structRules.key` has: `copyMem` is declared in
 /-- `findSt<[α]>(st, nil) ⇝ (α) st`. -/
 @[simp] theorem findDefinitionEmpty (s : Struct) : findSt s [] = st s := rfl
 
+/-- The paper's `singletonPath`: `⟨f⟩ = ∅·f`.  A path is a `List Seg`, so the
+one-element path is `[f]` and the rule is definitional. -/
+theorem singletonPath (f : Seg) : ([f] : List Seg) = [] ++ [f] := rfl
+
 /-- `findSt<[α]>(st, cons(a, flds))`, in KeY's own shape. -/
 theorem findDefinitionCons (s : Struct) (a : Seg) (flds : List Seg) :
     findSt s (a :: flds) =
@@ -398,6 +402,25 @@ theorem delValueDefault (q : PrimVal) : delValue (prim q) = prim (primDefault q)
 /-- …at `int`. -/
 @[simp] theorem delValueDefault_asInt (q : PrimVal) : asInt (delValue (prim q)) = 0 := by
   cases q <;> rfl
+
+/-- The paper's `delValueCast` at `Struct`: `(Struct) delValue<[StValue]>(v) ⇝
+delValue<[Struct]>((Struct) v)`.  The cast a later read carries is pushed
+through the reset, so the sort the reader supplies reaches it. -/
+theorem delValueCast (v : StValue) : asStruct (delValue v) = delNode (asStruct v) := by
+  cases v <;> rfl
+
+/-- …at `int`: `(int) delValue<[StValue]>(v) ⇝ delValue<[int]>((int) v)`, and the
+right-hand side is `delValueDefault`. -/
+theorem delValueCast_asInt (v : StValue) : asInt (delValue v) = 0 := by
+  cases v with
+  | prim q => cases q <;> rfl
+  | st _ => rfl
+
+/-- …at `bool`. -/
+theorem delValueCast_asBool (v : StValue) : asBool (delValue v) = false := by
+  cases v with
+  | prim q => cases q <;> rfl
+  | st _ => rfl
 
 /-- `delAt(st, nil) ⇝ delNode(st)`. -/
 @[simp] theorem delAtEmpty (s : Struct) : delAt s [] = delNode s := rfl

@@ -32,10 +32,10 @@ def accAlias : Elem :=
     (fun s => (placePath s sexpr!{ alice.account }).map fun p =>
       Binding.spath p.1 p.2)
 
-/-- `storage := save(storage, sp·balance, rv)` — the terminal write. -/
+/-- `storage := save(storage, sp·balance, se)` — the terminal write. -/
 def balanceSave : Elem :=
   Elem.storage (fun s =>
-    (storageAssignUpd (splace!{ sp@Account.balance }) sexpr!{ rv@uint } s).map
+    (storageAssignUpd (splace!{ sp@Account.balance }) sexpr!{ se@uint } s).map
       State.storage)
 
 /-- Each of them really is the rule's update: the alias element is
@@ -47,7 +47,7 @@ theorem accAlias_is_rule :
 
 theorem balanceSave_is_rule :
     Par.toUpd [balanceSave] =
-      storageAssignUpd (splace!{ sp@Account.balance }) sexpr!{ rv@uint } :=
+      storageAssignUpd (splace!{ sp@Account.balance }) sexpr!{ se@uint } :=
   storageAssignUpd_field _ _ _ _ _
 
 /-! ## The merge
@@ -75,15 +75,15 @@ example :
   rw [headline_merge]
 
 /-- And the accumulated update is what the program does: running
-`Account storage sp = alice.account; sp.balance = rv;` from a state that
-binds `rv` reaches exactly `{sp := alice·account ‖ storage := save(…)}` of
-it.  The `rv` binding is the freeze the calculus performs first
+`Account storage sp = alice.account; sp.balance = se;` from a state that
+binds `se` reaches exactly `{sp := alice·account ‖ storage := save(…)}` of
+it.  The `se` binding is the freeze the calculus performs first
 (`Counterexamples/ErrorOrder.lean`). -/
 example :
-    execBlock (State.exampleStore.setEnv "rv" (Binding.val (Value.int 10)))
-        sblock!{ Account storage sp = alice.account; sp@Account.balance = rv }
+    execBlock (State.exampleStore.setEnv "se" (Binding.val (Value.int 10)))
+        sblock!{ Account storage sp = alice.account; sp@Account.balance = se }
       = Par.toUpd [accAlias, balanceSave.after [accAlias]]
-          (State.exampleStore.setEnv "rv" (Binding.val (Value.int 10))) := by
+          (State.exampleStore.setEnv "se" (Binding.val (Value.int 10))) := by
   native_decide
 
 end Solidity.UpdExamples

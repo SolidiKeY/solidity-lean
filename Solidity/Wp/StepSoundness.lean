@@ -256,8 +256,7 @@ redex. -/
 theorem exUnfoldCond :
     (Rules.ruleEffect .storageFieldWriteUnfoldLeftFst).cond
       sstmt!{ alice.account.balance = amount } := by
-  change _ = true ∧ _ = true ∧ ¬ (_ = true)
-  decide
+  exact ⟨rfl, rfl, rfl, trivial⟩
 
 /-- Wiring check for the unfold family: `storageFieldWriteUnfoldLeftFst_sound`
 is state-universal, so it is exactly what `SoundBlockStep.head` consumes. -/
@@ -274,7 +273,7 @@ example (rest : Block)
         (r := .storageFieldWriteUnfoldLeftFst) (by decide) rfl exUnfoldCond))
     (fun s =>
       RuleSoundness.storageFieldWriteUnfoldLeftFst_sound s _ _ _ _
-        exUnfoldCond (by decide) (by decide))
+        exUnfoldCond (by decide))
     hfresh
 
 /-! ## Wiring sanity example

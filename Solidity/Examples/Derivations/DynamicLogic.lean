@@ -17,9 +17,9 @@ untouched, e.g.
 
 `< alice.account.balance = 10 > φ`
 `⇝ᵈ[.storageFieldWriteUnfoldLeftFst]`
-`< uint rv = 10; Account storage sp = alice.account; sp@Account.balance = rv > φ`
+`< uint se = 10; Account storage sp = alice.account; sp@Account.balance = se > φ`
 
-(the aliases the unfold rules introduce are the fixed names `rv` and
+(the aliases the unfold rules introduce are the fixed names `se` and
 `sp`). The semantic counterparts of these judgments — with `.Holds`
 verified by `native_decide` against the interpreter — live in
 `Examples/Taclets/`. -/
@@ -53,7 +53,7 @@ empty program, and the state update of each terminal rule lives in
 
 The calculus's chain is also one line shorter than this one, for the reason
 `SolidityPaper.lean`'s header gives: the calculus freezes
-the value operand into `rv` before it captures any part of the target
+the value operand into `se` before it captures any part of the target
 (`Counterexamples/ErrorOrder.lean` is why), which costs three administrative
 steps.  They are elided into the `⇝*` line, as the calculus elides with
 `⇝*`. -/
@@ -64,13 +64,13 @@ variable (φ : WrappedExpr)
 sol_derivation deepFieldWriteJudgment :
     sol!{ <[ alice.account.balance = 10 ]> ‹φ› }
   ⇝[.storageFieldWriteUnfoldLeftFst]
-    sol!{ <[ uint rv = 10;
+    sol!{ <[ uint se = 10;
              Account storage sp = alice.account;
-             sp@Account.balance = rv ]> ‹φ› }
+             sp@Account.balance = se ]> ‹φ› }
   ⇝* sol!{ <[ Account storage sp = alice.account;
-              sp@Account.balance = rv ]> ‹φ› }
+              sp@Account.balance = se ]> ‹φ› }
   ⇝[.storagePlaceAlias]
-    sol!{ <[ sp@Account.balance = rv ]> ‹φ› }
+    sol!{ <[ sp@Account.balance = se ]> ‹φ› }
   ⇝[.storageFieldWriteSave]
     sol!{ <[ ]> ‹φ› }
 
@@ -93,13 +93,13 @@ after the chain. -/
 sol_derivation deepFieldWriteInContext let omega := sblock!{ result = alice.account.balance } :
     sol!{ <[ alice.account.balance = 10; .. omega ]> ‹φ› }
   ⇝[.storageFieldWriteUnfoldLeftFst]
-    sol!{ <[ uint rv = 10;
+    sol!{ <[ uint se = 10;
              Account storage sp = alice.account;
-             sp@Account.balance = rv; .. omega ]> ‹φ› }
+             sp@Account.balance = se; .. omega ]> ‹φ› }
   ⇝* sol!{ <[ Account storage sp = alice.account;
-              sp@Account.balance = rv; .. omega ]> ‹φ› }
+              sp@Account.balance = se; .. omega ]> ‹φ› }
   ⇝[.storagePlaceAlias]
-    sol!{ <[ sp@Account.balance = rv; .. omega ]> ‹φ› }
+    sol!{ <[ sp@Account.balance = se; .. omega ]> ‹φ› }
   ⇝[.storageFieldWriteSave]
     sol!{ <[ result = alice.account.balance ]> ‹φ› }
 
@@ -114,9 +114,9 @@ nothing evaluates it. -/
 example :
     sol!{ < alice.account.balance = 10 > (alice.account.balance == 10) }
       ⇝ᵈ[.storageFieldWriteUnfoldLeftFst]
-    sol!{ < uint rv = 10;
+    sol!{ < uint se = 10;
            Account storage sp = alice.account;
-           sp@Account.balance = rv > (alice.account.balance == 10) } := by
+           sp@Account.balance = se > (alice.account.balance == 10) } := by
   dl_rule_step
 
 /-! ### The same judgment, reduced to the empty program
@@ -131,16 +131,16 @@ example :
   calc
     sol!{ < alice.account.balance = 10 > (alice.account.balance == 10) }
       ⇝ᵈ[.storageFieldWriteUnfoldLeftFst]
-          sol!{ < uint rv = 10;
+          sol!{ < uint se = 10;
                  Account storage sp = alice.account;
-                 sp@Account.balance = rv >
+                 sp@Account.balance = se >
                  (alice.account.balance == 10) }        := by dl_rule_step
     _ ⇝ᵈ* sol!{ < Account storage sp = alice.account;
-                 sp@Account.balance = rv >
+                 sp@Account.balance = se >
                  (alice.account.balance == 10) }        := by
           dl_steps [.localValueDeclInitDrop, .valueDeclSkip, .localValueAssign]
     _ ⇝ᵈ[.storagePlaceAlias]
-          sol!{ < sp@Account.balance = rv >
+          sol!{ < sp@Account.balance = se >
                  (alice.account.balance == 10) }        := by dl_rule_step
     _ ⇝ᵈ[.storageFieldWriteSave]
           sol!{ < > (alice.account.balance == 10) }     := by dl_rule_step
@@ -154,7 +154,7 @@ example :
     sol!{ < age = 10; age++; result = age > (result == 11) }
       ⇝ᵈ[.storageRootWriteStore]
           sol!{ < age++; result = age > (result == 11) } := by dl_rule_step
-    _ ⇝ᵈ[.storageRootIncDec .postInc]
+    _ ⇝ᵈ[.storageRootIncrement .postInc]
           sol!{ < result = age > (result == 11) }        := by dl_rule_step
     _ ⇝ᵈ[.storageRootReadSelect]
           sol!{ < > (result == 11) }                     := by dl_rule_step
@@ -178,7 +178,7 @@ example :
 /-! ### Symbolic condition: capture, then the proof-level split
 
 `ifElseUnfold` hoists a complex condition into the stack value
-`pv`. The resulting `if (pv@bool) …` matches no rewrite rule *by design*
+`se`. The resulting `if (se@bool) …` matches no rewrite rule *by design*
 (mirroring KeY, where the program rules stop and the sequent rule
 `ifthenelse_split` takes over): the derivation continues with the
 proof-level `SolidityJudgment.ite_split`. -/
@@ -187,17 +187,17 @@ example :
     sol!{ < if ((alice.age == 4)) { total = 1 } else { total = 2 } >
           (total == 1) }
       ⇝ᵈ[.ifElseUnfold]
-    sol!{ < bool pv = ((alice.age == 4));
-           if (pv@bool) { total = 1 } else { total = 2 } > (total == 1) } := by
+    sol!{ < bool se = ((alice.age == 4));
+           if (se@bool) { total = 1 } else { total = 2 } > (total == 1) } := by
   dl_rule_step
 
 /-- At the stuck point the derivation continues with
 `SolidityJudgment.ite_split` — a *universally quantified* split over any
-state binding `pv`, which `native_decide` cannot express. -/
+state binding `se`, which `native_decide` cannot express. -/
 example (s : Semantics.State) (b : Bool)
     (thn els rest : Block) (post : WrappedExpr)
-    (h : Semantics.evalValue s sexpr!{ pv@bool } = .ok (s, .bool b)) :
-    (SolidityJudgment.mk ⟨.diamond, Stmt.ite sexpr!{ pv@bool } thn els :: rest⟩
+    (h : Semantics.evalValue s sexpr!{ se@bool } = .ok (s, .bool b)) :
+    (SolidityJudgment.mk ⟨.diamond, Stmt.ite sexpr!{ se@bool } thn els :: rest⟩
         post).Holds s ↔
       ((b = true ->
           (SolidityJudgment.mk ⟨.diamond, thn ++ rest⟩ post).Holds s) ∧

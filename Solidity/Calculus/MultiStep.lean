@@ -58,7 +58,7 @@ rule -- where the calculus attributes the rule in prose, Lean puts it in the typ
 @[inherit_doc] scoped infix:50 " ⇝* " => BlockReflMultiStep
 -- `notation` placeholders carry a precedence, not a syntax category, so the
 -- rule sits at precedence 0: the closing `]` is what terminates it, which is
--- what lets an applied constructor (`⇝[.storageRootIncDec .postInc]`) be
+-- what lets an applied constructor (`⇝[.storageRootIncrement .postInc]`) be
 -- written without parentheses.
 @[inherit_doc] scoped notation:50 before:51 " ⇝[" rule:0 "] " after:51 =>
   NamedBlockStep rule before after

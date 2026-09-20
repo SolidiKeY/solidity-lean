@@ -63,7 +63,7 @@ What is *not* here: soundness.  `Sequent.check` is the semantics, and each
 worked derivation checks its own endpoints against it
 (`SolidityPaper.lean`); the general
 `FrontierStep a b → (a.Holds s ↔ b.Holds s)` needs the per-rule bridges of
-`Update/TacletTable.lean` (21 of the 83 rules with an update) and
+`Update/TacletTable.lean` (21 of the 95 rules with an update) and
 `Rules.assertGoals` is deliberately not exhaustive (`Update/Wp.lean`), so it
 is a separate result.
 -/
@@ -443,7 +443,7 @@ what this is meant to avoid.
 
 **What it is not.**  It does not yet *imply* `SolidityJudgment.Holds`.  That
 needs `FrontierStep a b → (a.Holds s ↔ b.Holds s)`, which needs the per-rule
-bridges of `Update/TacletTable.lean` (21 of the 83 rules with an update), and
+bridges of `Update/TacletTable.lean` (21 of the 95 rules with an update), and
 `Rules.assertGoals` is deliberately not exhaustive (`Update/Wp.lean`).  The
 two are proved of the same programs side by side instead:
 `Corpus/Calculus/` and `Corpus/Wp/`, from one pass of the

@@ -42,20 +42,20 @@ sol_derivation fieldWriteFromAlias :
   ~> => { acc := path(bob.account) } { storage := copy(alice.account, acc) } (φ)
 
 /-! ### `alice.account.balance = 10;` — **the headline**
-The value is frozen into `rv`, the path captured into `sp`, the write
+The value is frozen into `se`, the path captured into `sp`, the write
 performed, and the accumulated updates merged into the one parallel update the
 calculus writes. -/
 
 sol_derivation deepFieldWrite :
     => <[ alice.account.balance = 10 ]>(φ)
-  ~> => <[ uint rv = 10;
+  ~> => <[ uint se = 10;
            Account storage sp = alice.account;
-           sp@Account.balance = rv ]>(φ)
-  ~*> => { rv@uint := 10 ‖ sp@Account := path(alice.account) }
-          <[ sp@Account.balance = rv@uint ]>(φ)
-  ~> => { rv@uint := 10 ‖ sp@Account := path(alice.account) }
-         { storage := save(sp@Account.balance, rv@uint) } (φ)
-   = => { rv@uint := 10 ‖ sp@Account := path(alice.account)
+           sp@Account.balance = se ]>(φ)
+  ~*> => { se@uint := 10 ‖ sp@Account := path(alice.account) }
+          <[ sp@Account.balance = se@uint ]>(φ)
+  ~> => { se@uint := 10 ‖ sp@Account := path(alice.account) }
+         { storage := save(sp@Account.balance, se@uint) } (φ)
+   = => { se@uint := 10 ‖ sp@Account := path(alice.account)
           ‖ storage := save(alice.account.balance, 10) } (φ)
 
 /-! ### `v = alice.account.balance;`
@@ -79,14 +79,14 @@ selector at a time. -/
 
 sol_derivation deeperFieldWrite :
     => <[ alice.account.token.value = 5 ]>(φ)
-  ~> => <[ uint rv = 5;
+  ~> => <[ uint se = 5;
            Token storage sp = alice.account.token;
-           sp@Token.value = rv ]>(φ)
-  ~*> => { rv@uint := 5 ‖ sp@Token := path(alice.account.token) }
-          <[ sp@Token.value = rv@uint ]>(φ)
-  ~> => { rv@uint := 5 ‖ sp@Token := path(alice.account.token) }
-         { storage := save(sp@Token.value, rv@uint) } (φ)
-   = => { rv@uint := 5 ‖ sp@Token := path(alice.account.token)
+           sp@Token.value = se ]>(φ)
+  ~*> => { se@uint := 5 ‖ sp@Token := path(alice.account.token) }
+          <[ sp@Token.value = se@uint ]>(φ)
+  ~> => { se@uint := 5 ‖ sp@Token := path(alice.account.token) }
+         { storage := save(sp@Token.value, se@uint) } (φ)
+   = => { se@uint := 5 ‖ sp@Token := path(alice.account.token)
           ‖ storage := save(alice.account.token.value, 5) } (φ)
 
 /-! ### `uint v = total;` — reading a storage root -/
@@ -191,14 +191,14 @@ The calculus merges the in-bounds line only after it has dropped the other. -/
 
 sol_derivation nonsimplePathIndexWrite :
     => [ alice.accounts[i] = 100 ](φ)
-  ~*> [ { rv@uint := default(uint) } { rv@uint := 100 }
+  ~*> [ { se@uint := default(uint) } { se@uint := 100 }
           { sp@UintArray := path(alice.accounts) } inBounds(sp@UintArray[i]) =>
-          { rv@uint := default(uint) } { rv@uint := 100 }
+          { se@uint := default(uint) } { se@uint := 100 }
           { sp@UintArray := path(alice.accounts) }
-          { storage := save(sp@UintArray[i], rv@uint) } [ ](φ),
-        { rv@uint := default(uint) } { rv@uint := 100 }
+          { storage := save(sp@UintArray[i], se@uint) } [ ](φ),
+        { se@uint := default(uint) } { se@uint := 100 }
           { sp@UintArray := path(alice.accounts) } ¬inBounds(sp@UintArray[i]) =>
-          { rv@uint := default(uint) } { rv@uint := 100 }
+          { se@uint := default(uint) } { se@uint := 100 }
           { sp@UintArray := path(alice.accounts) } ⊤ ]
 
 /-! ### `alice.accounts[++i] = valueVal;` — the index is nonsimple too
@@ -210,21 +210,21 @@ prefix. -/
 
 sol_derivation nonsimplePathIncIndexWrite :
     => [ alice.accounts[++i] = amount ](φ)
-  ~*> [ { rv@uint := default(uint) } { rv@uint := amount }
+  ~*> [ { se@uint := default(uint) } { se@uint := amount }
           { sp@UintArray := path(alice.accounts) }
-          { idx@uint := default(uint) } { bump(++i) ‖ idx@uint := ++i }
-          inBounds(sp@UintArray[idx@uint]) =>
-          { rv@uint := default(uint) } { rv@uint := amount }
+          { ie@uint := default(uint) } { bump(++i) ‖ ie@uint := ++i }
+          inBounds(sp@UintArray[ie@uint]) =>
+          { se@uint := default(uint) } { se@uint := amount }
           { sp@UintArray := path(alice.accounts) }
-          { idx@uint := default(uint) } { bump(++i) ‖ idx@uint := ++i }
-          { storage := save(sp@UintArray[idx@uint], rv@uint) } [ ](φ),
-        { rv@uint := default(uint) } { rv@uint := amount }
+          { ie@uint := default(uint) } { bump(++i) ‖ ie@uint := ++i }
+          { storage := save(sp@UintArray[ie@uint], se@uint) } [ ](φ),
+        { se@uint := default(uint) } { se@uint := amount }
           { sp@UintArray := path(alice.accounts) }
-          { idx@uint := default(uint) } { bump(++i) ‖ idx@uint := ++i }
-          ¬inBounds(sp@UintArray[idx@uint]) =>
-          { rv@uint := default(uint) } { rv@uint := amount }
+          { ie@uint := default(uint) } { bump(++i) ‖ ie@uint := ++i }
+          ¬inBounds(sp@UintArray[ie@uint]) =>
+          { se@uint := default(uint) } { se@uint := amount }
           { sp@UintArray := path(alice.accounts) }
-          { idx@uint := default(uint) } { bump(++i) ‖ idx@uint := ++i } ⊤ ]
+          { ie@uint := default(uint) } { bump(++i) ‖ ie@uint := ++i } ⊤ ]
 
 /-! ### `matrix[i++][i++] = 77;` — a side effect in the receiver *and* in the
 index.  Solidity runs the receiver's increment first, so the write lands at
@@ -239,10 +239,10 @@ alias *before* capturing the receiver's own index, which is not the order
 
 sol_derivation receiverAndIndexSideEffects :
     => [ matrix[i++][i++] = 77 ](φ)
-  ~> => [ uint rv = 77;
+  ~> => [ uint se = 77;
           UintArray storage sp = matrix[i++];
-          uint idx = i++;
-          sp@UintArray[idx@uint] = rv@uint ](φ)
+          uint ie = i++;
+          sp@UintArray[ie@uint] = se@uint ](φ)
 
 /-! ### `values.push(42);` and `tokens.pop();`
 `push` is unguarded; `pop` is guarded on the array being non-empty, so it
@@ -296,9 +296,9 @@ sol_derivation pushBare :
 
 sol_derivation pushSlotWrite :
     => <[ (tokens@@TokenArray).push().value = 11 ]>(φ)
-  ~*> => { rv@uint := default(uint) } { rv@uint := 11 }
+  ~*> => { se@uint := default(uint) } { se@uint := 11 }
           { sp@Token := path((tokens@@TokenArray).push()) }
-          { storage := save(sp@Token.value, rv@uint) } (φ)
+          { storage := save(sp@Token.value, se@uint) } (φ)
 
 /-! ### `tokens.push(); uint i = tokens.push().value;`
 The read twin of the line above, and the calculus's point about the slot a
@@ -352,12 +352,12 @@ sol_derivation deleteAccountThenReadLeaves :
     => <[ alice.account.balance = 100; alice.account.token.value = 7;
           delete alice.account; b = alice.account.balance;
           v = alice.account.token.value ]>(φ)
-  ~*> => { rv@uint := default(uint) } { rv@uint := 100 }
+  ~*> => { se@uint := default(uint) } { se@uint := 100 }
           { sp@Account := path(alice.account) }
-          { storage := save(sp@Account.balance, rv@uint) }
-          { rv@uint := default(uint) } { rv@uint := 7 }
+          { storage := save(sp@Account.balance, se@uint) }
+          { se@uint := default(uint) } { se@uint := 7 }
           { sp@Token := path(alice.account.token) }
-          { storage := save(sp@Token.value, rv@uint) }
+          { storage := save(sp@Token.value, se@uint) }
           { storage := clear(alice.account) }
           { sp@Account := path(alice.account) } { b := sp@Account.balance }
           { sp@Token := path(alice.account.token) } { v := sp@Token.value } (φ)
@@ -372,8 +372,8 @@ sol_derivation deleteIncIndexThenLength :
     => <[ delete alice.account.tokens[++i];
           len = alice.account.tokens.length ]>(φ)
   ~*> => { sp@TokenArray := path(alice.account.tokens) }
-          { idx@uint := default(uint) } { bump(++i) ‖ idx@uint := ++i }
-          { storage := clear(sp@TokenArray[idx@uint]) }
+          { ie@uint := default(uint) } { bump(++i) ‖ ie@uint := ++i }
+          { storage := clear(sp@TokenArray[ie@uint]) }
           { sp@TokenArray := path(alice.account.tokens) }
           { len := sp@TokenArray.length } (φ)
 
@@ -402,9 +402,9 @@ sol_derivation deleteLedgerMappingSurvives :
           delete (ledger@@Ledger).balances[1]; nonce = (ledger@@Ledger).nonce;
           gone = (ledger@@Ledger).balances[1] ]>(φ)
   ~*> => { storage := save((ledger@@Ledger).nonce, 5) }
-          { rv@uint := default(uint) } { rv@uint := 10 }
+          { se@uint := default(uint) } { se@uint := 10 }
           { sp@UintMap := path((ledger@@Ledger).balances) }
-          { storage := save(sp@UintMap[1], rv@uint) }
+          { storage := save(sp@UintMap[1], se@uint) }
           { storage := clear((ledger@@Ledger)) }
           { sp@UintMap := path((ledger@@Ledger).balances) }
           { kept := sp@UintMap[1] }

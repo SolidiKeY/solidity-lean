@@ -329,8 +329,10 @@ private def readSelectSnippet : String :=
 private def boundsSnippet : String :=
 "\\rules {
     storageIndexReadArrayBindLocalRoot {
-        \\replacewith(0 <= i & i < find<[int]>(storage, consr(sp, size))
-                & {lp := consr(sp, at(i))} post)
+        \\replacewith(0 <= ie & ie < find<[int]>(storage, consr(sp, size))
+                -> {lsv := consr(sp, at(ie))} post);
+        \\replacewith(!(0 <= ie & ie < find<[int]>(storage, consr(sp, size)))
+                -> post)
     };
 }"
 
@@ -362,7 +364,7 @@ example :
       (parseKeyFile readSelectSnippet) = [] := by
   native_decide
 
--- A `.. size` read classifies as a length site.
+-- A `.. size` read classifies as a length site (one per bounds branch).
 example :
     conforms
       (tacletReadAnns.filter

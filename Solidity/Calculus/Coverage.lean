@@ -143,11 +143,11 @@ theorem mem_unopAssignment (op : UnOp) :
   cases op <;> decide
 
 theorem mem_storageRootCompoundAssign (op : BinOp) :
-    RuleName.storageRootCompoundAssign op ∈ Rules.ruleNames := by
+    RuleName.storageRootOpAssign op ∈ Rules.ruleNames := by
   cases op <;> decide
 
 theorem mem_storageFieldCompoundAssign (op : BinOp) :
-    RuleName.storageFieldCompoundAssign op ∈ Rules.ruleNames := by
+    RuleName.storageFieldOpAssign op ∈ Rules.ruleNames := by
   cases op <;> decide
 
 theorem mem_storageIndexCompoundAssign (op : BinOp) :
@@ -155,35 +155,35 @@ theorem mem_storageIndexCompoundAssign (op : BinOp) :
   cases op <;> decide
 
 theorem mem_storageFieldCompoundAssignUnfoldLeftFst (op : BinOp) :
-    RuleName.storageFieldCompoundAssignUnfoldLeftFst op ∈
+    RuleName.storageFieldOpAssignUnfoldLeftFst op ∈
       Rules.ruleNames := by
   cases op <;> decide
 
 theorem mem_storageIndexCompoundAssignUnfoldLeftFst (op : BinOp) :
-    RuleName.storageIndexCompoundAssignUnfoldLeftFst op ∈
+    RuleName.storageIndexOpAssignUnfoldLeftFst op ∈
       Rules.ruleNames := by
   cases op <;> decide
 
 theorem mem_memoryFieldCompoundAssign (op : BinOp) :
-    RuleName.memoryFieldCompoundAssign op ∈ Rules.ruleNames := by
+    RuleName.memoryFieldOpAssign op ∈ Rules.ruleNames := by
   cases op <;> decide
 
 theorem mem_memoryIndexCompoundAssign (op : BinOp) :
-    RuleName.memoryIndexCompoundAssign op ∈ Rules.ruleNames := by
+    RuleName.memoryIndexArrayOpAssign op ∈ Rules.ruleNames := by
   cases op <;> decide
 
 theorem mem_memoryFieldCompoundAssignUnfoldLeftFst (op : BinOp) :
-    RuleName.memoryFieldCompoundAssignUnfoldLeftFst op ∈
+    RuleName.memoryFieldOpAssignUnfoldLeftFst op ∈
       Rules.ruleNames := by
   cases op <;> decide
 
 theorem mem_memoryIndexCompoundAssignUnfoldLeftFst (op : BinOp) :
-    RuleName.memoryIndexCompoundAssignUnfoldLeftFst op ∈
+    RuleName.memoryIndexOpAssignUnfoldLeftFst op ∈
       Rules.ruleNames := by
   cases op <;> decide
 
 theorem mem_localCompoundAssign (op : BinOp) :
-    RuleName.localCompoundAssign op ∈ Rules.ruleNames := by
+    RuleName.localOpAssign op ∈ Rules.ruleNames := by
   cases op <;> decide
 
 theorem mem_compoundAssignValueRhsCapture (op : BinOp) :
@@ -191,67 +191,67 @@ theorem mem_compoundAssignValueRhsCapture (op : BinOp) :
   cases op <;> decide
 
 theorem mem_storageRootIncDec (op : IncDec) :
-    RuleName.storageRootIncDec op ∈ Rules.ruleNames := by
+    RuleName.storageRootIncrement op ∈ Rules.ruleNames := by
   cases op <;> decide
 
 theorem mem_storageFieldIncDec (op : IncDec) :
-    RuleName.storageFieldIncDec op ∈ Rules.ruleNames := by
+    RuleName.storageFieldIncrement op ∈ Rules.ruleNames := by
   cases op <;> decide
 
 theorem mem_storageIndexIncDec (op : IncDec) :
-    RuleName.storageIndexIncDec op ∈ Rules.ruleNames := by
+    RuleName.storageIndexIncrement op ∈ Rules.ruleNames := by
   cases op <;> decide
 
 theorem mem_storageFieldIncDecUnfoldLeftFst (op : IncDec) :
-    RuleName.storageFieldIncDecUnfoldLeftFst op ∈ Rules.ruleNames := by
+    RuleName.storageFieldIncrementUnfoldLeftFst op ∈ Rules.ruleNames := by
   cases op <;> decide
 
 theorem mem_storageIndexIncDecUnfoldLeftFst (op : IncDec) :
-    RuleName.storageIndexIncDecUnfoldLeftFst op ∈ Rules.ruleNames := by
+    RuleName.storageIndexIncrementUnfoldLeftFst op ∈ Rules.ruleNames := by
   cases op <;> decide
 
 theorem mem_storageRootIncDecAssignment (op : IncDec) :
-    RuleName.storageRootIncDecAssignment op ∈ Rules.ruleNames := by
+    RuleName.storageRootIncrementAssignment op ∈ Rules.ruleNames := by
   cases op <;> decide
 
 theorem mem_storageFieldIncDecAssignment (op : IncDec) :
-    RuleName.storageFieldIncDecAssignment op ∈ Rules.ruleNames := by
+    RuleName.storageFieldIncrementAssignment op ∈ Rules.ruleNames := by
   cases op <;> decide
 
 theorem mem_storageIndexIncDecAssignment (op : IncDec) :
-    RuleName.storageIndexIncDecAssignment op ∈ Rules.ruleNames := by
+    RuleName.storageIndexIncrementAssignment op ∈ Rules.ruleNames := by
   cases op <;> decide
 
 theorem mem_memoryFieldIncDec (op : IncDec) :
-    RuleName.memoryFieldIncDec op ∈ Rules.ruleNames := by
+    RuleName.memoryFieldIncrement op ∈ Rules.ruleNames := by
   cases op <;> decide
 
 theorem mem_memoryIndexIncDec (op : IncDec) :
-    RuleName.memoryIndexIncDec op ∈ Rules.ruleNames := by
+    RuleName.memoryIndexArrayIncrement op ∈ Rules.ruleNames := by
   cases op <;> decide
 
 theorem mem_memoryFieldIncDecUnfoldLeftFst (op : IncDec) :
-    RuleName.memoryFieldIncDecUnfoldLeftFst op ∈ Rules.ruleNames := by
+    RuleName.memoryFieldIncrementUnfoldLeftFst op ∈ Rules.ruleNames := by
   cases op <;> decide
 
 theorem mem_memoryIndexIncDecUnfoldLeftFst (op : IncDec) :
-    RuleName.memoryIndexIncDecUnfoldLeftFst op ∈ Rules.ruleNames := by
+    RuleName.memoryIndexIncrementUnfoldLeftFst op ∈ Rules.ruleNames := by
   cases op <;> decide
 
 theorem mem_memoryFieldIncDecAssignment (op : IncDec) :
-    RuleName.memoryFieldIncDecAssignment op ∈ Rules.ruleNames := by
+    RuleName.memoryFieldIncrementAssignment op ∈ Rules.ruleNames := by
   cases op <;> decide
 
 theorem mem_memoryIndexIncDecAssignment (op : IncDec) :
-    RuleName.memoryIndexIncDecAssignment op ∈ Rules.ruleNames := by
+    RuleName.memoryIndexArrayIncrementAssignment op ∈ Rules.ruleNames := by
   cases op <;> decide
 
 theorem mem_localAssignIncDec (op : IncDec) :
-    RuleName.localAssignIncDec op ∈ Rules.ruleNames := by
+    RuleName.localAssignIncrement op ∈ Rules.ruleNames := by
   cases op <;> decide
 
 theorem mem_localIncDec (op : IncDec) :
-    RuleName.localIncDec op ∈ Rules.ruleNames := by
+    RuleName.localIncrement op ∈ Rules.ruleNames := by
   cases op <;> decide
 
 /-! ## `candidate` never bluffs: per-helper forward lemmas

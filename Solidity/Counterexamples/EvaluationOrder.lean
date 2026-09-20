@@ -23,7 +23,7 @@ rather than computed from `ruleEffect`, so they stay true as the
 historical record of what was wrong.
 
 *The positive results* instantiate the general soundness theorems at the same
-two programs: with `Rules.freezeRhs` binding the value into `rv` ahead of the
+two programs: with `Rules.freezeRhs` binding the value into `se` ahead of the
 capture, rule and interpreter agree — on exactly the programs that used to be
 excluded by the `hev`/`hstable`/`pureExpr index` side conditions.
 
@@ -74,8 +74,7 @@ def fieldWrite : Stmt := sstmt!{ people[i++].age = i }
 
 theorem fieldWrite_cond :
     (ruleEffect .storageFieldWriteUnfoldLeftFst).cond fieldWrite := by
-  change _ = true ∧ _ = true ∧ ¬ (_ = true)
-  decide
+  exact ⟨rfl, rfl, rfl, trivial⟩
 
 /-- The rule's residual: capture the path `people[i++]` into `sp`, then
 `sp.age = i`. -/
@@ -105,12 +104,12 @@ theorem fieldWrite_agrees :
     ResultsAgree aliasNames
       (execStmt store fieldWrite) (execBlock store fieldWriteResidual) :=
   storageFieldWriteUnfoldLeftFst_sound store _ _ _ _ fieldWrite_cond
-    (by decide) (by decide)
+    (by decide)
 
 /-! ### The pre-fix residual, kept as the historical refutation
 
 Spelled out literally: capture the path `people[i++]` into `sp`, then
-`sp@Person.age = i`, with no `rv` freeze. -/
+`sp@Person.age = i`, with no `se` freeze. -/
 
 def fieldWritePreFixResidual : Block :=
   [ captureStoragePath (sexpr!{ people[i++] }),
@@ -142,8 +141,7 @@ def indexWrite : Stmt := sstmt!{ values[i++] = i }
 
 theorem indexWrite_cond :
     (ruleEffect .storageIndexWriteUnfoldLeftSndIndex).cond indexWrite := by
-  change _ = true ∧ _ = true ∧ _ = true ∧ ¬ (_ = true)
-  decide
+  exact ⟨rfl, rfl, rfl, rfl, trivial⟩
 
 def indexWriteResidual : Block :=
   (ruleEffect .storageIndexWriteUnfoldLeftSndIndex).block indexWrite
@@ -169,7 +167,7 @@ theorem indexWrite_agrees :
     ResultsAgree aliasNames
       (execStmt store indexWrite) (execBlock store indexWriteResidual) :=
   storageIndexWriteUnfoldLeftSndIndex_sound store _ _ _ _ indexWrite_cond
-    (by decide) (by decide)
+    (by decide)
 
 /-! ### The pre-fix residual, kept as the historical refutation -/
 

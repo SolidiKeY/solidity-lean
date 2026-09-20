@@ -108,27 +108,69 @@ theorem isGlobal_shape : ∀ {e : WrappedExpr}, e.isGlobal = true ->
   | .var Kind.storage ty fld, h =>
       ⟨ty, fld, rfl, by simpa [Typed.WrappedExpr.isGlobal] using h⟩
 
+/-- Bool twin of `Rules.isValueSource`: a value expression that is not a
+path read, the source of a Step 2 write. -/
+def valueSourceB (e : WrappedExpr) : Bool :=
+  e.ty.isPrimitive && !e.isMemory &&
+    match e with
+    | .field .. => false
+    | .index .. => false
+    | .pushPlace _ => false
+    | .mkCall .. => false
+    | .mkTernary .. => false
+    | _ => true
+
+/-- Bool twin of `Rules.isMemberSource`: `mv.fr` on a simple memory root. -/
+def memberSourceB (rhs : WrappedExpr) : Bool :=
+  match rhs with
+  | .field Kind.memory _ mv f => mv.simple && f.isIdentity
+  | _ => false
+
+/-- Bool twins of `Rules.isPrimArray`/`Rules.isRefArray`. -/
+def primArrayB (e : WrappedExpr) : Bool :=
+  match e.ty with
+  | Ty.ref (RefTy.array elem) => elem.isPrimitive
+  | _ => false
+
+def refArrayB (e : WrappedExpr) : Bool :=
+  match e.ty with
+  | Ty.ref (RefTy.array elem) => !elem.isPrimitive
+  | _ => false
+
 /--
 Dispatch for assignments under a *simple* right-hand side: mirrors the
-(now mutually disjoint) write-rule conditions.
+(mutually disjoint) write-rule conditions.  A simple source is a value
+(`valueSourceB`), a storage reference (the `Ref` instances) or a memory
+root (the cross-domain rules).
 -/
 def assignSimpleCandidate
     (mode : Modality) (lexpr rhs : WrappedExpr) : Option RuleName :=
   match lexpr with
   | .field Kind.storage _ path _ =>
       if path.complex then
-        if rhs.isMemory then some .memoryToStorageUnfoldLeftFstTarget
-        else some .storageFieldWriteUnfoldLeftFst
+        if rhs.isMemory then some .memoryToStorageFieldUnfoldLeftFst
+        else if rhs.isStorage && rhs.ty.isReference then
+          some .storageFieldWriteRefUnfoldLeftFst
+        else if valueSourceB rhs then some .storageFieldWriteUnfoldLeftFst
+        else none
       else
         if rhs.isStorage then some .storageFieldWriteCopySource
         else if rhs.isStack then some .storageFieldWriteSave
         else if rhs.isMemory then some .memoryToStorageFieldCopyRoot
         else none
   | .index Kind.storage _ path index =>
-      if path.complex then some .storageIndexWriteUnfoldLeftFst
+      if path.complex then
+        if rhs.isMemory then some .memoryToStorageIndexUnfoldLeftFst
+        else if rhs.isStorage && rhs.ty.isReference then
+          some .storageIndexWriteRefUnfoldLeftFst
+        else if valueSourceB rhs then some .storageIndexWriteUnfoldLeftFst
+        else none
       else if index.complex then
-        if rhs.isMemory then some .memoryToStorageUnfoldLeftSndTargetIndex
-        else some .storageIndexWriteUnfoldLeftSndIndex
+        if rhs.isMemory then some .memoryToStorageIndexUnfoldLeftSndIndex
+        else if rhs.isStorage && rhs.ty.isReference then
+          some .storageIndexWriteRefUnfoldLeftSndIndex
+        else if valueSourceB rhs then some .storageIndexWriteUnfoldLeftSndIndex
+        else none
       else
         if rhs.isStorage then
           if arrayTyB path then
@@ -150,13 +192,22 @@ def assignSimpleCandidate
           else none
         else none
   | .field Kind.memory _ path _ =>
-      if path.complex then some .memoryFieldWriteUnfoldLeftFst
+      if path.complex then
+        if rhs.isMemory then some .memoryFieldWriteRefUnfoldLeftFst
+        else if valueSourceB rhs then some .memoryFieldWriteUnfoldLeftFst
+        else none
       else if rhs.isMemory then some .memoryFieldWriteCopy
       else if rhs.isStack then some .memoryFieldWriteStore
       else none
   | .index Kind.memory _ path index =>
-      if path.complex then some .memoryIndexWriteUnfoldLeftFst
-      else if index.complex then some .memoryIndexWriteUnfoldLeftSndIndex
+      if path.complex then
+        if rhs.isMemory then some .memoryIndexWriteRefUnfoldLeftFst
+        else if valueSourceB rhs then some .memoryIndexWriteUnfoldLeftFst
+        else none
+      else if index.complex then
+        if rhs.isMemory then some .memoryIndexWriteRefUnfoldLeftSndIndex
+        else if valueSourceB rhs then some .memoryIndexWriteUnfoldLeftSndIndex
+        else none
       else if rhs.isMemory then
         some (pick mode .memoryIndexWriteCopyBox .memoryIndexWriteCopyDiamond)
       else if rhs.isStack then
@@ -188,25 +239,48 @@ def assignSimpleCandidate
         some .localValueAssign
       else none
 
-/-- Dispatch for the `*ValueRhsCapture` trio: a storage-write target whose
-nonsimple primitive RHS must be hoisted first (KeY RHS-before-LHS
-evaluation order). -/
-def valueRhsCaptureCandidate (lexpr : WrappedExpr) : Option RuleName :=
+/-- Dispatch for a *complex value* source (`valueSourceB`, nonsimple): the
+paper's Step 2 partition by which constituent of the write is still
+nonsimple — receiver (`unfold_leftFst`), index (`unfold_leftSnd`), or only
+the source (`unfold_source`). -/
+def unfoldSourceCandidate (lexpr : WrappedExpr) : Option RuleName :=
   match lexpr with
   | .var Kind.storage _ fld =>
       if fld.origin = some StorageOrigin.global then
-        some .storageRootWriteValueRhsCapture
+        some .storageRootWriteUnfoldSource
       else none
-  | .field Kind.storage _ _ _ => some .fieldWriteValueRhsCapture
-  | .index Kind.storage _ _ _ => some .indexWriteValueRhsCapture
+  | .field Kind.storage _ path _ =>
+      if path.complex then some .storageFieldWriteUnfoldLeftFst
+      else some .storageFieldWriteUnfoldSource
+  | .index Kind.storage _ path index =>
+      if path.complex then some .storageIndexWriteUnfoldLeftFst
+      else if index.complex then some .storageIndexWriteUnfoldLeftSndIndex
+      else some .storageIndexWriteUnfoldSource
+  | .field Kind.memory _ path _ =>
+      if path.complex then some .memoryFieldWriteUnfoldLeftFst
+      else some .memoryFieldWriteUnfoldSource
+  | .index Kind.memory _ path index =>
+      if path.complex then some .memoryIndexWriteUnfoldLeftFst
+      else if index.complex then some .memoryIndexWriteUnfoldLeftSndIndex
+      else some .memoryIndexWriteUnfoldSource
   | _ => none
 
 /--
-Dispatch for assignments under a *complex* right-hand side: mirrors the
-(now mutually disjoint) read-rule conditions.
+Dispatch for assignments under a *complex* right-hand side: a conditional
+is lowered first; a path read is a Step 1 read, by the source's shape; a
+memory source into storage is captured or copied; and a complex value goes
+to the Step 2 rule the target's shape selects.
 -/
 def assignComplexCandidate
     (mode : Modality) (lexpr rhs : WrappedExpr) : Option RuleName :=
+  match rhs with
+  | .mkTernary c _ _ =>
+      if c.complex then some .ternaryCaptureCond
+      else if lexpr.isStack && lexpr.simple then some .ternaryToIf
+      else if lexpr.isStorage then some .ternaryToIfStorage
+      else if lexpr.kind = Kind.memory then some .ternaryToIfMemory
+      else none
+  | _ =>
   if lexpr.kind = Kind.memory ∧ lexpr.complex = true then
     match rhs with
     | .field Kind.memory _ path _ =>
@@ -216,9 +290,13 @@ def assignComplexCandidate
         if path.complex then some .memoryIndexReadUnfoldRightFst
         else if index.complex then some .memoryIndexReadUnfoldRightSndIndex
         else some .memoryIndexReadUnfoldRightSndResult
-    | _ => some .memoryWriteUnfoldRightSndResult
+    | _ => if valueSourceB rhs then unfoldSourceCandidate lexpr else none
   else if lexpr.kind = Kind.storage ∧ rhs.isMemory = true then
-    some .memoryToStorageUnfoldRightFstSource
+    match lexpr with
+    | .field Kind.storage _ sp _ =>
+        if sp.simple && memberSourceB rhs then some .memoryToStorageFieldCopyField
+        else some .memoryToStorageUnfoldRightFstSource
+    | _ => some .memoryToStorageUnfoldRightFstSource
   else
     match rhs with
     | .field Kind.storage _ path _ =>
@@ -290,42 +368,38 @@ def assignComplexCandidate
             | .or => some .logicalOrShortCircuitRhs
             | _ => some (.binopUnfoldRight op)
           else some (.binopAssignment op)
-        else if op.isArith && l.simple && r.simple then
-          some (.binopUnfoldResult op)
-        else valueRhsCaptureCandidate lexpr
+        else if valueSourceB rhs then unfoldSourceCandidate lexpr
+        else none
     | .mkUnop op arg =>
         if lexpr.isStack && lexpr.simple then
           if arg.complex then some (.unopCapture op)
           else some (.unopAssignment op)
-        else valueRhsCaptureCandidate lexpr
+        else if valueSourceB rhs then unfoldSourceCandidate lexpr
+        else none
     | .mkIncDec op target =>
         if lexpr.isStack && lexpr.simple then
           if target.isStack && target.simple then
-            some (.localAssignIncDec op)
+            some (.localAssignIncrement op)
           else
             match target with
             | .var Kind.storage _ fld =>
                 if fld.origin = some StorageOrigin.global then
-                  some (.storageRootIncDecAssignment op)
+                  some (.storageRootIncrementAssignment op)
                 else none
             | .field Kind.storage _ path _ =>
                 if path.complex then none
-                else some (.storageFieldIncDecAssignment op)
+                else some (.storageFieldIncrementAssignment op)
             | .index Kind.storage _ path index =>
                 if path.complex || index.complex then none
-                else some (.storageIndexIncDecAssignment op)
+                else some (.storageIndexIncrementAssignment op)
             | .field Kind.memory _ path _ =>
                 if path.complex then none
-                else some (.memoryFieldIncDecAssignment op)
+                else some (.memoryFieldIncrementAssignment op)
             | .index Kind.memory _ path index =>
                 if path.complex || index.complex then none
-                else some (.memoryIndexIncDecAssignment op)
+                else some (.memoryIndexArrayIncrementAssignment op)
             | _ => none
-        else valueRhsCaptureCandidate lexpr
-    | .mkTernary c _ _ =>
-        if c.complex then some .ternaryCaptureCond
-        else if lexpr.isStack && lexpr.simple then some .ternaryToIf
-        else if lexpr.isStorage then some .ternaryToIfStorage
+        else if valueSourceB rhs then unfoldSourceCandidate lexpr
         else none
     | _ => none
 
@@ -349,34 +423,38 @@ def memoryDeclCandidate (init : Option WrappedExpr) : Option RuleName :=
               some .storageToMemoryDeclCopyRoot
             else none
 
-def deleteCandidate (target : WrappedExpr) : Option RuleName :=
+def deleteCandidate (mode : Modality) (target : WrappedExpr) : Option RuleName :=
   match target with
   | .var Kind.storage _ fld =>
-      if fld.origin = some StorageOrigin.global then
-        some .storageDeleteSimpleTarget
+      if fld.origin = some StorageOrigin.global then some .storageRootDelete
       else none
   | .field Kind.storage _ path _ =>
-      if path.complex then some .storageDeleteComplexTarget
-      else some .storageDeleteSimpleTarget
+      if path.complex then some .storageFieldDeleteUnfoldLeftFst
+      else some .storageFieldDelete
   | .index Kind.storage _ path index =>
-      if path.complex then some .storageDeleteComplexTarget
-      else if index.complex then some .storageDeleteComplexTarget
-      else if arrayTyB path || mappingTyB path then
-        some .storageDeleteSimpleTarget
+      if path.complex then some .storageIndexDeleteUnfoldLeftFst
+      else if index.complex then some .storageIndexDeleteNonSimpleIndexCapture
+      else if arrayTyB path || mappingTyB path then some .storageIndexDelete
       else none
   | .pushPlace path =>
       if path.kind = Kind.storage then
-        if path.complex then some .storageDeleteComplexTarget
-        else some .storageDeleteSimpleTarget
+        if path.complex then some .storagePushPlaceDeleteUnfoldLeftFst
+        else some .storagePushPlaceDelete
       else none
-  | .var Kind.memory _ _ => some .memoryDeleteSimpleTarget
-  | .field Kind.memory _ path _ =>
-      if path.complex then some .memoryDeleteComplexTarget
-      else some .memoryDeleteSimpleTarget
+  | .var Kind.memory _ _ => some .memoryRootDeleteFreshRebind
+  | .field Kind.memory _ path f =>
+      if path.complex then some .memoryFieldDeleteUnfoldLeftFst
+      else if f.isPrimitive then some .memoryFieldDeletePrimitive
+      else if f.isIdentity then some .memoryFieldDeleteReference
+      else none
   | .index Kind.memory _ path index =>
-      if path.complex then some .memoryDeleteComplexTarget
-      else if index.complex then some .memoryDeleteComplexTarget
-      else some .memoryDeleteSimpleTarget
+      if path.complex then some .memoryIndexDeleteUnfoldLeftFst
+      else if index.complex then some .memoryIndexDeleteNonSimpleIndexCapture
+      else if primArrayB path then
+        some (pick mode .memoryIndexDeletePrimitiveBox .memoryIndexDeletePrimitiveDiamond)
+      else if refArrayB path then
+        some (pick mode .memoryIndexDeleteReferenceBox .memoryIndexDeleteReferenceDiamond)
+      else none
   | _ => none
 
 def pushCandidate (target : WrappedExpr) (value : Option WrappedExpr) :
@@ -406,56 +484,58 @@ def compoundAssignCandidate (op : BinOp) (lexpr rhs : WrappedExpr) :
     Option RuleName :=
   if op.hasCompoundAssign then
     if rhs.isStack && rhs.simple then
-      if lexpr.isStack && lexpr.simple then some (.localCompoundAssign op)
+      if lexpr.isStack && lexpr.simple then some (.localOpAssign op)
       else
         match lexpr with
         | .var Kind.storage _ fld =>
             if fld.origin = some StorageOrigin.global then
-              some (.storageRootCompoundAssign op)
+              some (.storageRootOpAssign op)
             else none
         | .field Kind.storage _ path _ =>
-            if path.complex then some (.storageFieldCompoundAssignUnfoldLeftFst op)
-            else some (.storageFieldCompoundAssign op)
+            if path.complex then some (.storageFieldOpAssignUnfoldLeftFst op)
+            else some (.storageFieldOpAssign op)
         | .index Kind.storage _ path index =>
             if index.complex then none
             else if path.complex then
-              some (.storageIndexCompoundAssignUnfoldLeftFst op)
-            else some (.storageIndexCompoundAssign op)
+              some (.storageIndexOpAssignUnfoldLeftFst op)
+            else if arrayTyB path then some (.storageIndexArrayOpAssign op)
+            else if mappingTyB path then some (.storageIndexMappingOpAssign op)
+            else none
         | .field Kind.memory _ path _ =>
-            if path.complex then some (.memoryFieldCompoundAssignUnfoldLeftFst op)
-            else some (.memoryFieldCompoundAssign op)
+            if path.complex then some (.memoryFieldOpAssignUnfoldLeftFst op)
+            else some (.memoryFieldOpAssign op)
         | .index Kind.memory _ path index =>
             if index.complex then none
             else if path.complex then
-              some (.memoryIndexCompoundAssignUnfoldLeftFst op)
-            else some (.memoryIndexCompoundAssign op)
+              some (.memoryIndexOpAssignUnfoldLeftFst op)
+            else some (.memoryIndexArrayOpAssign op)
         | _ => none
     else some (.compoundAssignValueRhsCapture op)
   else none
 
 def incDecStmtCandidate (op : IncDec) (target : WrappedExpr) :
     Option RuleName :=
-  if target.isStack && target.simple then some (.localIncDec op)
+  if target.isStack && target.simple then some (.localIncrement op)
   else
     match target with
     | .var Kind.storage _ fld =>
         if fld.origin = some StorageOrigin.global then
-          some (.storageRootIncDec op)
+          some (.storageRootIncrement op)
         else none
     | .field Kind.storage _ path _ =>
-        if path.complex then some (.storageFieldIncDecUnfoldLeftFst op)
-        else some (.storageFieldIncDec op)
+        if path.complex then some (.storageFieldIncrementUnfoldLeftFst op)
+        else some (.storageFieldIncrement op)
     | .index Kind.storage _ path index =>
         if index.complex then none
-        else if path.complex then some (.storageIndexIncDecUnfoldLeftFst op)
-        else some (.storageIndexIncDec op)
+        else if path.complex then some (.storageIndexIncrementUnfoldLeftFst op)
+        else some (.storageIndexIncrement op)
     | .field Kind.memory _ path _ =>
-        if path.complex then some (.memoryFieldIncDecUnfoldLeftFst op)
-        else some (.memoryFieldIncDec op)
+        if path.complex then some (.memoryFieldIncrementUnfoldLeftFst op)
+        else some (.memoryFieldIncrement op)
     | .index Kind.memory _ path index =>
         if index.complex then none
-        else if path.complex then some (.memoryIndexIncDecUnfoldLeftFst op)
-        else some (.memoryIndexIncDec op)
+        else if path.complex then some (.memoryIndexIncrementUnfoldLeftFst op)
+        else some (.memoryIndexArrayIncrement op)
     | _ => none
 
 def exprCandidate (expr : WrappedExpr) : Option RuleName :=
@@ -482,10 +562,11 @@ def iteCandidate (cond : WrappedExpr) : Option RuleName :=
       if cond.complex then some .ifElseUnfold
       else none
 
-def transferCandidate (recipient amount : WrappedExpr) : Option RuleName :=
+def transferCandidate (mode : Modality) (recipient amount : WrappedExpr) :
+    Option RuleName :=
   if recipient.complex then some .transferUnfoldLeftFstReceiver
   else if amount.complex then some .transferUnfoldRightSndArgument
-  else some .transferNoCallback
+  else some (pick mode .transferNoCallbackBox .transferNoCallbackDiamond)
 
 /--
 Total dispatch: returns the unique rule of the calculus that can apply to a statement
@@ -504,14 +585,14 @@ def candidate (mode : Modality) : Stmt -> Option RuleName
       if init.isSome then some .localValueDeclInitDrop
       else some .valueDeclSkip
   | Stmt.memoryDecl _ _ init => memoryDeclCandidate init
-  | Stmt.delete target => deleteCandidate (target : WrappedExpr)
+  | Stmt.delete target => deleteCandidate mode (target : WrappedExpr)
   | Stmt.push target value => pushCandidate (target : WrappedExpr) value
   | Stmt.pop target => popCandidate mode (target : WrappedExpr)
   | Stmt.revert _ => some (pick mode .revertBox .revertDiamond)
   | Stmt.assertStmt cond => assertCandidate cond
   | Stmt.requireStmt cond => requireCandidate cond
   | Stmt.ite cond _ _ => iteCandidate cond
-  | Stmt.transfer recipient amount => transferCandidate recipient amount
+  | Stmt.transfer recipient amount => transferCandidate mode recipient amount
   | Stmt.callStmt res fn args =>
       if (Rules.captureFirstComplexArg args).isSome then
         some .functionCallArgCapture
@@ -526,7 +607,8 @@ default dispatch with the transfer rule swapped. -/
 def candidateWithCallback (mode : Modality) (stmt : Stmt) :
     Option RuleName :=
   match candidate mode stmt with
-  | some .transferNoCallback => some .transferWithCallback
+  | some .transferNoCallbackBox => some .transferWithCallback
+  | some .transferNoCallbackDiamond => some .transferWithCallback
   | r => r
 
 theorem coe_eq_expr (p : PlaceExpr) : (p : WrappedExpr) = p.expr := rfl
@@ -627,6 +709,104 @@ theorem simple_memory_shape : ∀ {e : WrappedExpr}, e.simple = true ->
   | .var Kind.stack _ _, _, hk => by simp [Typed.WrappedExpr.kind] at hk
   | .bool _, _, hk => by simp [Typed.WrappedExpr.kind] at hk
 
+/-! ### Bool twins of the `Rules` predicates
+
+The generated conditions speak `Rules.isValueSource` and friends, which are
+`Prop`s (some by `match`); `candidate` tests their Bool twins.  These are
+the bridges, one direction each as the dispatch proof needs them. -/
+
+theorem valueSourceB_iff {e : WrappedExpr} :
+    valueSourceB e = true ↔ Rules.isValueSource e := by
+  cases e <;> simp [valueSourceB, Rules.isValueSource]
+
+theorem valueSourceB_of_isValueSource {e : WrappedExpr}
+    (h : Rules.isValueSource e) : valueSourceB e = true :=
+  valueSourceB_iff.2 h
+
+theorem isMemory_eq_false_of_isValueSource {e : WrappedExpr}
+    (h : Rules.isValueSource e) : e.isMemory = false := h.2.1
+
+theorem isReference_eq_false_of_isValueSource {e : WrappedExpr}
+    (h : Rules.isValueSource e) : e.ty.isReference = false := by
+  simp [Ty.isReference, h.1]
+
+theorem memberSourceB_iff {rhs : WrappedExpr} :
+    memberSourceB rhs = true ↔ Rules.isMemberSource rhs := by
+  cases rhs with
+  | field k ty mv f => cases k <;> simp [memberSourceB, Rules.isMemberSource, Rules.isSimple]
+  | _ => simp [memberSourceB, Rules.isMemberSource]
+
+theorem primArrayB_iff {e : WrappedExpr} :
+    primArrayB e = true ↔ Rules.isPrimArray e := by
+  unfold primArrayB Rules.isPrimArray
+  generalize e.ty = t
+  cases t with
+  | prim p => simp
+  | ref r => cases r <;> simp
+
+theorem refArrayB_iff {e : WrappedExpr} :
+    refArrayB e = true ↔ Rules.isRefArray e := by
+  unfold refArrayB Rules.isRefArray
+  generalize e.ty = t
+  cases t with
+  | prim p => simp
+  | ref r => cases r <;> simp
+
+theorem primArrayB_eq_false_of_isRefArray {e : WrappedExpr}
+    (h : Rules.isRefArray e) : primArrayB e = false := by
+  unfold primArrayB
+  unfold Rules.isRefArray at h
+  revert h
+  generalize e.ty = t
+  cases t with
+  | prim p => simp
+  | ref r => cases r <;> simp_all
+
+theorem isReference_of_isReference {e : WrappedExpr}
+    (h : Rules.isReference e) : e.ty.isReference = true := h
+
+/-- A complex value source is a `binop`, `unop` or `incDec`, and on a target
+that is not a stack variable the complex dispatch sends it to the Step 2
+partition by the target's shape. -/
+theorem assignComplexCandidate_valueSource {mode : Modality}
+    {lexpr rhs : WrappedExpr} (hv : Rules.isValueSource rhs)
+    (hc : rhs.simple = false) (hns : lexpr.isStack = false) :
+    assignComplexCandidate mode lexpr rhs = unfoldSourceCandidate lexpr := by
+  have hb := valueSourceB_of_isValueSource hv
+  cases rhs with
+  | mkBinop op l r =>
+      simp [assignComplexCandidate, hb, hns, Typed.WrappedExpr.isMemory,
+        Typed.WrappedExpr.kind]
+  | mkUnop op arg =>
+      simp [assignComplexCandidate, hb, hns, Typed.WrappedExpr.isMemory,
+        Typed.WrappedExpr.kind]
+  | mkIncDec op target =>
+      simp [assignComplexCandidate, hb, hns, Typed.WrappedExpr.isMemory,
+        Typed.WrappedExpr.kind]
+  | var k ty fld => simp [Typed.WrappedExpr.simple] at hc
+  | bool b => simp [Typed.WrappedExpr.simple] at hc
+  | intLit ty v => simp [Typed.WrappedExpr.simple] at hc
+  | field k ty base fld => simp [Rules.isValueSource] at hv
+  | index k ty base idx => simp [Rules.isValueSource] at hv
+  | pushPlace target => simp [Rules.isValueSource] at hv
+  | mkCall k ty name args => simp [Rules.isValueSource] at hv
+  | mkTernary c t e => simp [Rules.isValueSource] at hv
+
+/-- A memory source into a storage target that is not the `sp.fld = mv.fr`
+copy: the complex dispatch captures it, whatever the target's shape. -/
+theorem assignComplexCandidate_memSource {mode : Modality}
+    {lexpr rhs : WrappedExpr} (hk : lexpr.kind = Kind.storage)
+    (hm : rhs.isMemory = true) (hnc : ¬ Rules.isFieldCopySource lexpr rhs) :
+    assignComplexCandidate mode lexpr rhs =
+      some .memoryToStorageUnfoldRightFstSource := by
+  cases rhs
+  case mkTernary c t e =>
+    simp [Typed.WrappedExpr.isMemory, Typed.WrappedExpr.kind] at hm
+  all_goals
+    cases lexpr <;>
+      simp_all [assignComplexCandidate, Rules.isFieldCopySource, Rules.isSimple,
+        memberSourceB_iff]
+
 /--
 Whenever a rule of the calculus is applicable to a statement under a modality, the
 dispatch function `candidate` selects exactly that rule.
@@ -716,41 +896,28 @@ theorem applicable_eq_candidate {mode : Modality} {stmt : Stmt}
           simp [candidate, memoryDeclCandidate, Typed.WrappedExpr.isMemory,
             Typed.WrappedExpr.kind, h1, h2]
       · exact hcond.elim
-  case storageDeleteComplexTarget =>
+  case storageRootDelete =>
     cases stmt <;>
       simp only [Rules.ruleEffect, Rules.deleteEffect] at hcond
     next target =>
-      rw [Rules.isComplexStorageDeleteTarget.eq_def] at hcond
-      split at hcond
-      · next ty path fld heq =>
-          simp only [Rules.isComplex] at hcond
-          simp [candidate, deleteCandidate, coe_eq_expr, heq, hcond]
-      · next ty path idx heq =>
-          rcases hcond with h | ⟨h1, h2⟩
-          · simp only [Rules.isComplex] at h
-            simp [candidate, deleteCandidate, coe_eq_expr, heq, h]
-          · simp only [Rules.isSimple, Rules.isComplex] at h1 h2
-            simp [candidate, deleteCandidate, coe_eq_expr, heq, h2,
-              complex_eq_false_of_simple h1]
-      · next path heq =>
-          obtain ⟨h1, h2⟩ := hcond
-          simp only [Rules.isComplex] at h2
-          simp [candidate, deleteCandidate, coe_eq_expr, heq, h1, h2]
-      · exact hcond.elim
-  case storageDeleteSimpleTarget =>
+      simp only [Rules.isGlobal, coe_eq_expr] at hcond
+      obtain ⟨ty', fld', heqL, horig⟩ := isGlobal_shape hcond
+      simp [candidate, deleteCandidate, coe_eq_expr, heqL, horig]
+  case storageFieldDelete =>
     cases stmt <;>
       simp only [Rules.ruleEffect, Rules.deleteEffect] at hcond
     next target =>
-      rw [Rules.isSimpleStorageDeleteTarget.eq_def] at hcond
       split at hcond
-      · next ty fld heq =>
-          simp only [Rules.isGlobal, Typed.WrappedExpr.isGlobal,
-            decide_eq_true_eq] at hcond
-          simp [candidate, deleteCandidate, coe_eq_expr, heq, hcond]
       · next ty path fld heq =>
           simp only [Rules.isSimple] at hcond
           simp [candidate, deleteCandidate, coe_eq_expr, heq,
             complex_eq_false_of_simple hcond]
+      · exact hcond.elim
+  case storageIndexDelete =>
+    cases stmt <;>
+      simp only [Rules.ruleEffect, Rules.deleteEffect] at hcond
+    next target =>
+      split at hcond
       · next ty path idx heq =>
           obtain ⟨h1, h2, h3⟩ := hcond
           simp only [Rules.isSimple] at h1 h2
@@ -761,47 +928,187 @@ theorem applicable_eq_candidate {mode : Modality} {stmt : Stmt}
           · simp [candidate, deleteCandidate, coe_eq_expr, heq,
               complex_eq_false_of_simple h1, complex_eq_false_of_simple h2,
               mappingTyB_of_isMapping hmap]
+      · exact hcond.elim
+  case storagePushPlaceDelete =>
+    cases stmt <;>
+      simp only [Rules.ruleEffect, Rules.deleteEffect] at hcond
+    next target =>
+      rw [Rules.isSimplePushPlaceDeleteTarget.eq_def] at hcond
+      split at hcond
       · next path heq =>
           obtain ⟨h1, h2⟩ := hcond
           simp only [Rules.isSimple] at h2
           simp [candidate, deleteCandidate, coe_eq_expr, heq, h1,
             complex_eq_false_of_simple h2]
       · exact hcond.elim
-  case memoryDeleteComplexTarget =>
+  case storageFieldDeleteUnfoldLeftFst =>
     cases stmt <;>
       simp only [Rules.ruleEffect, Rules.deleteEffect] at hcond
     next target =>
-      rw [Rules.isComplexMemoryDeleteTarget.eq_def] at hcond
       split at hcond
       · next ty path fld heq =>
           simp only [Rules.isComplex] at hcond
           simp [candidate, deleteCandidate, coe_eq_expr, heq, hcond]
-      · next ty path idx heq =>
-          rcases hcond with h | ⟨h1, h2⟩
-          · simp only [Rules.isComplex] at h
-            simp [candidate, deleteCandidate, coe_eq_expr, heq, h]
-          · simp only [Rules.isSimple, Rules.isComplex] at h1 h2
-            simp [candidate, deleteCandidate, coe_eq_expr, heq, h2,
-              complex_eq_false_of_simple h1]
       · exact hcond.elim
-  case memoryDeleteSimpleTarget =>
+  case storageIndexDeleteUnfoldLeftFst =>
     cases stmt <;>
       simp only [Rules.ruleEffect, Rules.deleteEffect] at hcond
     next target =>
-      rw [Rules.isSimpleMemoryDeleteTarget.eq_def] at hcond
       split at hcond
-      · next ty fld heq =>
-          simp [candidate, deleteCandidate, coe_eq_expr, heq]
-      · next ty path fld heq =>
-          obtain ⟨h1, _⟩ := hcond
-          simp only [Rules.isSimple] at h1
-          simp [candidate, deleteCandidate, coe_eq_expr, heq,
-            complex_eq_false_of_simple h1]
       · next ty path idx heq =>
-          obtain ⟨h1, h2, _⟩ := hcond
-          simp only [Rules.isSimple] at h1 h2
-          simp [candidate, deleteCandidate, coe_eq_expr, heq,
-            complex_eq_false_of_simple h1, complex_eq_false_of_simple h2]
+          simp only [Rules.isComplex] at hcond
+          simp [candidate, deleteCandidate, coe_eq_expr, heq, hcond]
+      · exact hcond.elim
+  case storageIndexDeleteNonSimpleIndexCapture =>
+    cases stmt <;>
+      simp only [Rules.ruleEffect, Rules.deleteEffect] at hcond
+    next target =>
+      split at hcond
+      · next ty path idx heq =>
+          obtain ⟨h1, h2⟩ := hcond
+          simp only [Rules.isSimple, Rules.isComplex] at h1 h2
+          simp [candidate, deleteCandidate, coe_eq_expr, heq, h2,
+            complex_eq_false_of_simple h1]
+      · exact hcond.elim
+  case storagePushPlaceDeleteUnfoldLeftFst =>
+    cases stmt <;>
+      simp only [Rules.ruleEffect, Rules.deleteEffect] at hcond
+    next target =>
+      rw [Rules.isComplexPushPlaceDeleteTarget.eq_def] at hcond
+      split at hcond
+      · next path heq =>
+          obtain ⟨h1, h2⟩ := hcond
+          simp only [Rules.isComplex] at h2
+          simp [candidate, deleteCandidate, coe_eq_expr, heq, h1, h2]
+      · exact hcond.elim
+  case memoryRootDeleteFreshRebind =>
+    cases stmt <;>
+      simp only [Rules.ruleEffect, Rules.deleteEffect] at hcond
+    next target =>
+      obtain ⟨h1, h2⟩ := hcond
+      simp only [Rules.isSimple, PlaceExpr.kind, coe_eq_expr] at h1 h2
+      obtain ⟨ty', fld', heqM⟩ := simple_memory_shape h2 h1
+      simp [candidate, deleteCandidate, coe_eq_expr, heqM]
+  case memoryFieldDeletePrimitive =>
+    cases stmt <;>
+      simp only [Rules.ruleEffect, Rules.deleteEffect] at hcond
+    next target =>
+      split at hcond
+      · next ty path fld heq =>
+          obtain ⟨h1, h2⟩ := hcond
+          simp only [Rules.isSimple] at h1
+          simp only [heq, Rules.isPrimitiveMember] at h2
+          simp [candidate, deleteCandidate, coe_eq_expr, heq, h2,
+            complex_eq_false_of_simple h1]
+      · exact hcond.elim
+  case memoryFieldDeleteReference =>
+    cases stmt <;>
+      simp only [Rules.ruleEffect, Rules.deleteEffect] at hcond
+    next target =>
+      split at hcond
+      · next ty path fld heq =>
+          obtain ⟨h1, h2⟩ := hcond
+          simp only [Rules.isSimple] at h1
+          simp only [heq, Rules.isReferenceMember] at h2
+          have h2' : fld.isPrimitive = false := by
+            simpa [Field.isIdentity] using h2
+          simp [candidate, deleteCandidate, coe_eq_expr, heq, h2',
+            Field.isIdentity, complex_eq_false_of_simple h1]
+      · exact hcond.elim
+  case memoryIndexDeletePrimitiveBox =>
+    cases mode
+    case diamond =>
+      simp [Rules.ruleEffect, Rules.withMode, CaseMode.applies] at hmode
+    case box =>
+      cases stmt <;>
+        simp only [Rules.ruleEffect, Rules.withMode, Rules.deleteEffect] at hcond
+      next target =>
+        split at hcond
+        · next ty path idx heq =>
+            obtain ⟨h1, h2, h3⟩ := hcond
+            simp only [Rules.isSimple] at h1 h2
+            simp [candidate, deleteCandidate, pick, coe_eq_expr, heq,
+              complex_eq_false_of_simple h1, complex_eq_false_of_simple h2,
+              primArrayB_iff.2 h3]
+        · exact hcond.elim
+  case memoryIndexDeletePrimitiveDiamond =>
+    cases mode
+    case box =>
+      simp [Rules.ruleEffect, Rules.withMode, CaseMode.applies] at hmode
+    case diamond =>
+      cases stmt <;>
+        simp only [Rules.ruleEffect, Rules.withMode, Rules.deleteEffect] at hcond
+      next target =>
+        split at hcond
+        · next ty path idx heq =>
+            obtain ⟨h1, h2, h3⟩ := hcond
+            simp only [Rules.isSimple] at h1 h2
+            simp [candidate, deleteCandidate, pick, coe_eq_expr, heq,
+              complex_eq_false_of_simple h1, complex_eq_false_of_simple h2,
+              primArrayB_iff.2 h3]
+        · exact hcond.elim
+  case memoryIndexDeleteReferenceBox =>
+    cases mode
+    case diamond =>
+      simp [Rules.ruleEffect, Rules.withMode, CaseMode.applies] at hmode
+    case box =>
+      cases stmt <;>
+        simp only [Rules.ruleEffect, Rules.withMode, Rules.deleteEffect] at hcond
+      next target =>
+        split at hcond
+        · next ty path idx heq =>
+            obtain ⟨h1, h2, h3⟩ := hcond
+            simp only [Rules.isSimple] at h1 h2
+            simp [candidate, deleteCandidate, pick, coe_eq_expr, heq,
+              complex_eq_false_of_simple h1, complex_eq_false_of_simple h2,
+              refArrayB_iff.2 h3,
+              primArrayB_eq_false_of_isRefArray h3]
+        · exact hcond.elim
+  case memoryIndexDeleteReferenceDiamond =>
+    cases mode
+    case box =>
+      simp [Rules.ruleEffect, Rules.withMode, CaseMode.applies] at hmode
+    case diamond =>
+      cases stmt <;>
+        simp only [Rules.ruleEffect, Rules.withMode, Rules.deleteEffect] at hcond
+      next target =>
+        split at hcond
+        · next ty path idx heq =>
+            obtain ⟨h1, h2, h3⟩ := hcond
+            simp only [Rules.isSimple] at h1 h2
+            simp [candidate, deleteCandidate, pick, coe_eq_expr, heq,
+              complex_eq_false_of_simple h1, complex_eq_false_of_simple h2,
+              refArrayB_iff.2 h3,
+              primArrayB_eq_false_of_isRefArray h3]
+        · exact hcond.elim
+  case memoryFieldDeleteUnfoldLeftFst =>
+    cases stmt <;>
+      simp only [Rules.ruleEffect, Rules.deleteEffect] at hcond
+    next target =>
+      split at hcond
+      · next ty path fld heq =>
+          simp only [Rules.isComplex] at hcond
+          simp [candidate, deleteCandidate, coe_eq_expr, heq, hcond]
+      · exact hcond.elim
+  case memoryIndexDeleteUnfoldLeftFst =>
+    cases stmt <;>
+      simp only [Rules.ruleEffect, Rules.deleteEffect] at hcond
+    next target =>
+      split at hcond
+      · next ty path idx heq =>
+          simp only [Rules.isComplex] at hcond
+          simp [candidate, deleteCandidate, coe_eq_expr, heq, hcond]
+      · exact hcond.elim
+  case memoryIndexDeleteNonSimpleIndexCapture =>
+    cases stmt <;>
+      simp only [Rules.ruleEffect, Rules.deleteEffect] at hcond
+    next target =>
+      split at hcond
+      · next ty path idx heq =>
+          obtain ⟨h1, h2⟩ := hcond
+          simp only [Rules.isSimple, Rules.isComplex] at h1 h2
+          simp [candidate, deleteCandidate, coe_eq_expr, heq, h2,
+            complex_eq_false_of_simple h1]
       · exact hcond.elim
   case storagePushValueUnfoldLeftFstReceiver =>
     cases stmt <;>
@@ -905,12 +1212,29 @@ theorem applicable_eq_candidate {mode : Modality} {stmt : Stmt}
     next lhs rhs =>
       split at hcond
       · next ty path fld heq =>
-          obtain ⟨h1, h2, h3⟩ := hcond
-          simp only [Rules.isComplex, Rules.isSimple, Rules.isMemory]
-            at h1 h2 h3
-          rw [Bool.not_eq_true] at h3
+          obtain ⟨h1, h2⟩ := hcond
+          simp only [Rules.isComplex] at h1
+          simp only [candidate, assignCandidate, coe_eq_expr, heq]
+          cases hs : rhs.simple
+          · simp only [Bool.false_eq_true, ↓reduceIte]
+            rw [assignComplexCandidate_valueSource h2 hs rfl]
+            simp [unfoldSourceCandidate, h1]
+          · simp [assignSimpleCandidate, h1,
+              isMemory_eq_false_of_isValueSource h2,
+              isReference_eq_false_of_isValueSource h2,
+              valueSourceB_of_isValueSource h2]
+      · exact hcond.elim
+  case storageFieldWriteRefUnfoldLeftFst =>
+    cases stmt <;>
+      simp only [Rules.ruleEffect, Rules.assignEffect] at hcond
+    next lhs rhs =>
+      split at hcond
+      · next ty path fld heq =>
+          obtain ⟨h1, h2, h3, h4⟩ := hcond
+          simp only [Rules.isComplex, Rules.isStorage, Rules.isSimple,
+            Rules.isReference] at h1 h2 h3 h4
           simp [candidate, assignCandidate, assignSimpleCandidate, coe_eq_expr,
-            heq, h1, h2, h3]
+            heq, h1, h2, h3, h4, isMemory_eq_false_of_isStorage h2]
       · exact hcond.elim
   case storageFieldWriteCopySource =>
     cases stmt <;>
@@ -935,7 +1259,7 @@ theorem applicable_eq_candidate {mode : Modality} {stmt : Stmt}
             heq, h2, h3, complex_eq_false_of_simple h1,
             isStorage_eq_false_of_isStack h2]
       · exact hcond.elim
-  case memoryToStorageUnfoldLeftFstTarget =>
+  case memoryToStorageFieldUnfoldLeftFst =>
     cases stmt <;>
       simp only [Rules.ruleEffect, Rules.assignEffect] at hcond
     next lhs rhs =>
@@ -959,6 +1283,25 @@ theorem applicable_eq_candidate {mode : Modality} {stmt : Stmt}
             heq, h2, h3, complex_eq_false_of_simple h1,
             isStorage_eq_false_of_isMemory h2, isStack_eq_false_of_isMemory h2]
       · exact hcond.elim
+  case memoryToStorageFieldCopyField =>
+    cases stmt <;>
+      simp only [Rules.ruleEffect, Rules.assignEffect] at hcond
+    next lhs rhs =>
+      split at hcond
+      · next ty path fld heq =>
+          obtain ⟨h1, h2⟩ := hcond
+          simp only [Rules.isSimple] at h1
+          rw [Rules.isMemberSource.eq_def] at h2
+          split at h2
+          · next _ ty2 mv f =>
+              obtain ⟨h3, h4⟩ := h2
+              simp only [Rules.isSimple] at h3
+              simp [candidate, assignCandidate, assignComplexCandidate,
+                memberSourceB, coe_eq_expr, heq, h1, h3, h4,
+                complex_eq_false_of_simple h1, Typed.WrappedExpr.isMemory,
+                Typed.WrappedExpr.kind]
+          · exact h2.elim
+      · exact hcond.elim
   case storageIndexWriteUnfoldLeftFst =>
     cases stmt <;>
       simp only [Rules.ruleEffect, Rules.assignEffect] at hcond
@@ -966,9 +1309,40 @@ theorem applicable_eq_candidate {mode : Modality} {stmt : Stmt}
       split at hcond
       · next ty path idx heq =>
           obtain ⟨h1, h2⟩ := hcond
-          simp only [Rules.isComplex, Rules.isSimple] at h1 h2
+          simp only [Rules.isComplex] at h1
+          simp only [candidate, assignCandidate, coe_eq_expr, heq]
+          cases hs : rhs.simple
+          · simp only [Bool.false_eq_true, ↓reduceIte]
+            rw [assignComplexCandidate_valueSource h2 hs rfl]
+            simp [unfoldSourceCandidate, h1]
+          · simp [assignSimpleCandidate, h1,
+              isMemory_eq_false_of_isValueSource h2,
+              isReference_eq_false_of_isValueSource h2,
+              valueSourceB_of_isValueSource h2]
+      · exact hcond.elim
+  case storageIndexWriteRefUnfoldLeftFst =>
+    cases stmt <;>
+      simp only [Rules.ruleEffect, Rules.assignEffect] at hcond
+    next lhs rhs =>
+      split at hcond
+      · next ty path idx heq =>
+          obtain ⟨h1, h2, h3, h4⟩ := hcond
+          simp only [Rules.isComplex, Rules.isStorage, Rules.isSimple,
+            Rules.isReference] at h1 h2 h3 h4
           simp [candidate, assignCandidate, assignSimpleCandidate, coe_eq_expr,
-            heq, h1, h2]
+            heq, h1, h2, h3, h4, isMemory_eq_false_of_isStorage h2]
+      · exact hcond.elim
+  case memoryToStorageIndexUnfoldLeftFst =>
+    cases stmt <;>
+      simp only [Rules.ruleEffect, Rules.assignEffect] at hcond
+    next lhs rhs =>
+      split at hcond
+      · next ty path idx heq =>
+          obtain ⟨h1, h2, h3⟩ := hcond
+          simp only [Rules.isComplex, Rules.isMemory, Rules.isSimple]
+            at h1 h2 h3
+          simp [candidate, assignCandidate, assignSimpleCandidate, coe_eq_expr,
+            heq, h1, h2, h3]
       · exact hcond.elim
   case storageIndexWriteUnfoldLeftSndIndex =>
     cases stmt <;>
@@ -976,14 +1350,32 @@ theorem applicable_eq_candidate {mode : Modality} {stmt : Stmt}
     next lhs rhs =>
       split at hcond
       · next ty path idx heq =>
-          obtain ⟨h1, h2, h3, h4⟩ := hcond
-          simp only [Rules.isSimple, Rules.isComplex, Rules.isMemory]
-            at h1 h2 h3 h4
-          rw [Bool.not_eq_true] at h4
-          simp [candidate, assignCandidate, assignSimpleCandidate, coe_eq_expr,
-            heq, h2, h3, h4, complex_eq_false_of_simple h1]
+          obtain ⟨h1, h2, h3⟩ := hcond
+          simp only [Rules.isSimple, Rules.isComplex] at h1 h2
+          simp only [candidate, assignCandidate, coe_eq_expr, heq]
+          cases hs : rhs.simple
+          · simp only [Bool.false_eq_true, ↓reduceIte]
+            rw [assignComplexCandidate_valueSource h3 hs rfl]
+            simp [unfoldSourceCandidate, h2, complex_eq_false_of_simple h1]
+          · simp [assignSimpleCandidate, h2, complex_eq_false_of_simple h1,
+              isMemory_eq_false_of_isValueSource h3,
+              isReference_eq_false_of_isValueSource h3,
+              valueSourceB_of_isValueSource h3]
       · exact hcond.elim
-  case memoryToStorageUnfoldLeftSndTargetIndex =>
+  case storageIndexWriteRefUnfoldLeftSndIndex =>
+    cases stmt <;>
+      simp only [Rules.ruleEffect, Rules.assignEffect] at hcond
+    next lhs rhs =>
+      split at hcond
+      · next ty path idx heq =>
+          obtain ⟨h1, h2, h3, h4, h5⟩ := hcond
+          simp only [Rules.isSimple, Rules.isComplex, Rules.isStorage,
+            Rules.isReference] at h1 h2 h3 h4 h5
+          simp [candidate, assignCandidate, assignSimpleCandidate, coe_eq_expr,
+            heq, h2, h3, h4, h5, complex_eq_false_of_simple h1,
+            isMemory_eq_false_of_isStorage h3]
+      · exact hcond.elim
+  case memoryToStorageIndexUnfoldLeftSndIndex =>
     cases stmt <;>
       simp only [Rules.ruleEffect, Rules.assignEffect] at hcond
     next lhs rhs =>
@@ -1151,9 +1543,27 @@ theorem applicable_eq_candidate {mode : Modality} {stmt : Stmt}
       split at hcond
       · next ty path fld heq =>
           obtain ⟨h1, h2⟩ := hcond
-          simp only [Rules.isComplex, Rules.isSimple] at h1 h2
+          simp only [Rules.isComplex] at h1
+          simp only [candidate, assignCandidate, coe_eq_expr, heq]
+          cases hs : rhs.simple
+          · simp only [Bool.false_eq_true, ↓reduceIte]
+            rw [assignComplexCandidate_valueSource h2 hs rfl]
+            simp [unfoldSourceCandidate, h1]
+          · simp [assignSimpleCandidate, h1,
+              isMemory_eq_false_of_isValueSource h2,
+              valueSourceB_of_isValueSource h2]
+      · exact hcond.elim
+  case memoryFieldWriteRefUnfoldLeftFst =>
+    cases stmt <;>
+      simp only [Rules.ruleEffect, Rules.assignEffect] at hcond
+    next lhs rhs =>
+      split at hcond
+      · next ty path fld heq =>
+          obtain ⟨h1, h2, h3⟩ := hcond
+          simp only [Rules.isComplex, Rules.isMemory, Rules.isSimple]
+            at h1 h2 h3
           simp [candidate, assignCandidate, assignSimpleCandidate, coe_eq_expr,
-            heq, h1, h2]
+            heq, h1, h2, h3]
       · exact hcond.elim
   case memoryFieldWriteCopy =>
     cases stmt <;>
@@ -1185,9 +1595,27 @@ theorem applicable_eq_candidate {mode : Modality} {stmt : Stmt}
       split at hcond
       · next ty path idx heq =>
           obtain ⟨h1, h2⟩ := hcond
-          simp only [Rules.isComplex, Rules.isSimple] at h1 h2
+          simp only [Rules.isComplex] at h1
+          simp only [candidate, assignCandidate, coe_eq_expr, heq]
+          cases hs : rhs.simple
+          · simp only [Bool.false_eq_true, ↓reduceIte]
+            rw [assignComplexCandidate_valueSource h2 hs rfl]
+            simp [unfoldSourceCandidate, h1]
+          · simp [assignSimpleCandidate, h1,
+              isMemory_eq_false_of_isValueSource h2,
+              valueSourceB_of_isValueSource h2]
+      · exact hcond.elim
+  case memoryIndexWriteRefUnfoldLeftFst =>
+    cases stmt <;>
+      simp only [Rules.ruleEffect, Rules.assignEffect] at hcond
+    next lhs rhs =>
+      split at hcond
+      · next ty path idx heq =>
+          obtain ⟨h1, h2, h3⟩ := hcond
+          simp only [Rules.isComplex, Rules.isMemory, Rules.isSimple]
+            at h1 h2 h3
           simp [candidate, assignCandidate, assignSimpleCandidate, coe_eq_expr,
-            heq, h1, h2]
+            heq, h1, h2, h3]
       · exact hcond.elim
   case memoryIndexWriteUnfoldLeftSndIndex =>
     cases stmt <;>
@@ -1196,9 +1624,27 @@ theorem applicable_eq_candidate {mode : Modality} {stmt : Stmt}
       split at hcond
       · next ty path idx heq =>
           obtain ⟨h1, h2, h3⟩ := hcond
-          simp only [Rules.isSimple, Rules.isComplex] at h1 h2 h3
+          simp only [Rules.isSimple, Rules.isComplex] at h1 h2
+          simp only [candidate, assignCandidate, coe_eq_expr, heq]
+          cases hs : rhs.simple
+          · simp only [Bool.false_eq_true, ↓reduceIte]
+            rw [assignComplexCandidate_valueSource h3 hs rfl]
+            simp [unfoldSourceCandidate, h2, complex_eq_false_of_simple h1]
+          · simp [assignSimpleCandidate, h2, complex_eq_false_of_simple h1,
+              isMemory_eq_false_of_isValueSource h3,
+              valueSourceB_of_isValueSource h3]
+      · exact hcond.elim
+  case memoryIndexWriteRefUnfoldLeftSndIndex =>
+    cases stmt <;>
+      simp only [Rules.ruleEffect, Rules.assignEffect] at hcond
+    next lhs rhs =>
+      split at hcond
+      · next ty path idx heq =>
+          obtain ⟨h1, h2, h3, h4⟩ := hcond
+          simp only [Rules.isSimple, Rules.isComplex, Rules.isMemory]
+            at h1 h2 h3 h4
           simp [candidate, assignCandidate, assignSimpleCandidate, coe_eq_expr,
-            heq, h2, h3, complex_eq_false_of_simple h1]
+            heq, h2, h3, h4, complex_eq_false_of_simple h1]
       · exact hcond.elim
   case memoryIndexWriteCopyBox =>
     cases mode
@@ -1767,161 +2213,46 @@ theorem applicable_eq_candidate {mode : Modality} {stmt : Stmt}
       obtain ⟨ty', fld', heqL, horig⟩ := isGlobal_shape h1
       simp [candidate, assignCandidate, assignSimpleCandidate, coe_eq_expr,
         heqL, horig, h2, h3, isStorage_eq_false_of_isStack h2]
-  case storageRootWriteValueRhsCapture =>
+  case storageRootWriteUnfoldSource =>
     cases stmt <;>
       simp only [Rules.ruleEffect, Rules.assignEffect] at hcond
     next lhs rhs =>
-      obtain ⟨h1, h2⟩ := hcond
-      simp only [Rules.isGlobal, coe_eq_expr] at h1
+      obtain ⟨h1, h2, h3⟩ := hcond
+      simp only [Rules.isGlobal, Rules.isComplex, coe_eq_expr] at h1 h2
       obtain ⟨ty', fld', heqL, horig⟩ := isGlobal_shape h1
-      cases rhs with
-      | mkBinop op l r =>
-          simp only [Rules.valueRhsCaptureRhs] at h2
-          have hb : (op.isArith && l.simple && r.simple) = false := by
-            simp only [Rules.isSimple] at h2
-            cases hia : op.isArith <;> cases hls : l.simple <;>
-              cases hrs : r.simple <;> simp_all
-          simp [candidate, assignCandidate, assignComplexCandidate,
-            valueRhsCaptureCandidate, coe_eq_expr, heqL, horig, hb,
-            Typed.WrappedExpr.simple, Typed.WrappedExpr.kind,
-            Typed.WrappedExpr.isStack, Typed.WrappedExpr.isMemory,
-            Typed.WrappedExpr.complex]
-          intro hia hls
-          show Typed.WrappedExpr.simple r = false
-          cases hrs : Typed.WrappedExpr.simple r
-          · rfl
-          · exact absurd
-              ⟨hia, (show Typed.WrappedExpr.simple l = true from hls), hrs⟩ h2
-      | mkUnop op arg =>
-          simp [candidate, assignCandidate, assignComplexCandidate,
-            valueRhsCaptureCandidate, coe_eq_expr, heqL, horig,
-            Typed.WrappedExpr.simple, Typed.WrappedExpr.kind,
-            Typed.WrappedExpr.isStack, Typed.WrappedExpr.isMemory,
-            Typed.WrappedExpr.complex]
-      | mkIncDec op target =>
-          simp [candidate, assignCandidate, assignComplexCandidate,
-            valueRhsCaptureCandidate, coe_eq_expr, heqL, horig,
-            Typed.WrappedExpr.simple, Typed.WrappedExpr.kind,
-            Typed.WrappedExpr.isStack, Typed.WrappedExpr.isMemory,
-            Typed.WrappedExpr.complex]
-      | var kind ty fld => simp [Rules.valueRhsCaptureRhs] at h2
-      | field kind ty base fld =>
-          simp [Rules.valueRhsCaptureRhs] at h2
-      | index kind ty base index =>
-          simp [Rules.valueRhsCaptureRhs] at h2
-      | pushPlace target =>
-          simp [Rules.valueRhsCaptureRhs] at h2
-      | bool b => simp [Rules.valueRhsCaptureRhs] at h2
-      | intLit ty v => simp [Rules.valueRhsCaptureRhs] at h2
-      | mkCall kind ty name args =>
-          simp [Rules.valueRhsCaptureRhs] at h2
-      | mkTernary c t e =>
-          simp [Rules.valueRhsCaptureRhs] at h2
-  case fieldWriteValueRhsCapture =>
+      have hs := simple_eq_false_of_complex h2
+      simp only [candidate, assignCandidate, coe_eq_expr, heqL, hs,
+        Bool.false_eq_true, ↓reduceIte]
+      rw [assignComplexCandidate_valueSource h3 hs rfl]
+      simp [unfoldSourceCandidate, horig]
+  case storageFieldWriteUnfoldSource =>
     cases stmt <;>
       simp only [Rules.ruleEffect, Rules.assignEffect] at hcond
     next lhs rhs =>
       split at hcond
       · next ty path fld heq =>
-          cases rhs with
-          | mkBinop op l r =>
-              simp only [Rules.valueRhsCaptureRhs] at hcond
-              have hb : (op.isArith && l.simple && r.simple) = false := by
-                simp only [Rules.isSimple] at hcond
-                cases hia : op.isArith <;> cases hls : l.simple <;>
-                  cases hrs : r.simple <;> simp_all
-              simp [candidate, assignCandidate, assignComplexCandidate,
-                valueRhsCaptureCandidate, coe_eq_expr, heq, hb,
-                Typed.WrappedExpr.simple, Typed.WrappedExpr.kind,
-                Typed.WrappedExpr.isStack, Typed.WrappedExpr.isMemory,
-                Typed.WrappedExpr.complex]
-              intro hia hls
-              show Typed.WrappedExpr.simple r = false
-              cases hrs : Typed.WrappedExpr.simple r
-              · rfl
-              · exact absurd
-                  ⟨hia, (show Typed.WrappedExpr.simple l = true from hls),
-                    hrs⟩ hcond
-          | mkUnop op arg =>
-              simp [candidate, assignCandidate, assignComplexCandidate,
-                valueRhsCaptureCandidate, coe_eq_expr, heq,
-                Typed.WrappedExpr.simple, Typed.WrappedExpr.kind,
-                Typed.WrappedExpr.isStack, Typed.WrappedExpr.isMemory,
-                Typed.WrappedExpr.complex]
-          | mkIncDec op target =>
-              simp [candidate, assignCandidate, assignComplexCandidate,
-                valueRhsCaptureCandidate, coe_eq_expr, heq,
-                Typed.WrappedExpr.simple, Typed.WrappedExpr.kind,
-                Typed.WrappedExpr.isStack, Typed.WrappedExpr.isMemory,
-                Typed.WrappedExpr.complex]
-          | var kind ty fld =>
-              simp [Rules.valueRhsCaptureRhs] at hcond
-          | field kind ty base fld =>
-              simp [Rules.valueRhsCaptureRhs] at hcond
-          | index kind ty base index =>
-              simp [Rules.valueRhsCaptureRhs] at hcond
-          | pushPlace target =>
-              simp [Rules.valueRhsCaptureRhs] at hcond
-          | bool b => simp [Rules.valueRhsCaptureRhs] at hcond
-          | intLit ty v =>
-              simp [Rules.valueRhsCaptureRhs] at hcond
-          | mkCall kind ty name args =>
-              simp [Rules.valueRhsCaptureRhs] at hcond
-          | mkTernary c t e =>
-              simp [Rules.valueRhsCaptureRhs] at hcond
+          obtain ⟨h1, h2, h3⟩ := hcond
+          simp only [Rules.isSimple, Rules.isComplex] at h1 h2
+          have hs := simple_eq_false_of_complex h2
+          simp only [candidate, assignCandidate, coe_eq_expr, heq, hs,
+            Bool.false_eq_true, ↓reduceIte]
+          rw [assignComplexCandidate_valueSource h3 hs rfl]
+          simp [unfoldSourceCandidate, complex_eq_false_of_simple h1]
       · exact hcond.elim
-  case indexWriteValueRhsCapture =>
+  case storageIndexWriteUnfoldSource =>
     cases stmt <;>
       simp only [Rules.ruleEffect, Rules.assignEffect] at hcond
     next lhs rhs =>
       split at hcond
       · next ty path index heq =>
-          cases rhs with
-          | mkBinop op l r =>
-              simp only [Rules.valueRhsCaptureRhs] at hcond
-              have hb : (op.isArith && l.simple && r.simple) = false := by
-                simp only [Rules.isSimple] at hcond
-                cases hia : op.isArith <;> cases hls : l.simple <;>
-                  cases hrs : r.simple <;> simp_all
-              simp [candidate, assignCandidate, assignComplexCandidate,
-                valueRhsCaptureCandidate, coe_eq_expr, heq, hb,
-                Typed.WrappedExpr.simple, Typed.WrappedExpr.kind,
-                Typed.WrappedExpr.isStack, Typed.WrappedExpr.isMemory,
-                Typed.WrappedExpr.complex]
-              intro hia hls
-              show Typed.WrappedExpr.simple r = false
-              cases hrs : Typed.WrappedExpr.simple r
-              · rfl
-              · exact absurd
-                  ⟨hia, (show Typed.WrappedExpr.simple l = true from hls),
-                    hrs⟩ hcond
-          | mkUnop op arg =>
-              simp [candidate, assignCandidate, assignComplexCandidate,
-                valueRhsCaptureCandidate, coe_eq_expr, heq,
-                Typed.WrappedExpr.simple, Typed.WrappedExpr.kind,
-                Typed.WrappedExpr.isStack, Typed.WrappedExpr.isMemory,
-                Typed.WrappedExpr.complex]
-          | mkIncDec op target =>
-              simp [candidate, assignCandidate, assignComplexCandidate,
-                valueRhsCaptureCandidate, coe_eq_expr, heq,
-                Typed.WrappedExpr.simple, Typed.WrappedExpr.kind,
-                Typed.WrappedExpr.isStack, Typed.WrappedExpr.isMemory,
-                Typed.WrappedExpr.complex]
-          | var kind ty fld =>
-              simp [Rules.valueRhsCaptureRhs] at hcond
-          | field kind ty base fld =>
-              simp [Rules.valueRhsCaptureRhs] at hcond
-          | index kind ty base index =>
-              simp [Rules.valueRhsCaptureRhs] at hcond
-          | pushPlace target =>
-              simp [Rules.valueRhsCaptureRhs] at hcond
-          | bool b => simp [Rules.valueRhsCaptureRhs] at hcond
-          | intLit ty v =>
-              simp [Rules.valueRhsCaptureRhs] at hcond
-          | mkCall kind ty name args =>
-              simp [Rules.valueRhsCaptureRhs] at hcond
-          | mkTernary c t e =>
-              simp [Rules.valueRhsCaptureRhs] at hcond
+          obtain ⟨h1, h2, h3, h4⟩ := hcond
+          simp only [Rules.isSimple, Rules.isComplex] at h1 h2 h3
+          have hs := simple_eq_false_of_complex h3
+          simp only [candidate, assignCandidate, coe_eq_expr, heq, hs,
+            Bool.false_eq_true, ↓reduceIte]
+          rw [assignComplexCandidate_valueSource h4 hs rfl]
+          simp [unfoldSourceCandidate, complex_eq_false_of_simple h1,
+            complex_eq_false_of_simple h2]
       · exact hcond.elim
   case storageRootReadSelect =>
     cases stmt <;>
@@ -1935,16 +2266,35 @@ theorem applicable_eq_candidate {mode : Modality} {stmt : Stmt}
         simp_all [candidate, assignCandidate, assignSimpleCandidate,
           coe_eq_expr, Typed.WrappedExpr.isStack, Typed.WrappedExpr.isStorage,
           PlaceExpr.expr]
-  case memoryWriteUnfoldRightSndResult =>
+  case memoryFieldWriteUnfoldSource =>
     cases stmt <;>
       simp only [Rules.ruleEffect, Rules.assignEffect] at hcond
     next lhs rhs =>
-      obtain ⟨h1, h2, h3, h4⟩ := hcond
-      simp only [Rules.isComplex, PlaceExpr.kind, coe_eq_expr] at h1 h2 h3
-      simp only [candidate, assignCandidate, assignComplexCandidate, coe_eq_expr,
-        h1, h2, simple_eq_false_of_complex h3, ite_true, Bool.true_and]
-      split <;> simp_all
-      split <;> simp_all
+      split at hcond
+      · next ty path fld heq =>
+          obtain ⟨h1, h2, h3⟩ := hcond
+          simp only [Rules.isSimple, Rules.isComplex] at h1 h2
+          have hs := simple_eq_false_of_complex h2
+          simp only [candidate, assignCandidate, coe_eq_expr, heq, hs,
+            Bool.false_eq_true, ↓reduceIte]
+          rw [assignComplexCandidate_valueSource h3 hs rfl]
+          simp [unfoldSourceCandidate, complex_eq_false_of_simple h1]
+      · exact hcond.elim
+  case memoryIndexWriteUnfoldSource =>
+    cases stmt <;>
+      simp only [Rules.ruleEffect, Rules.assignEffect] at hcond
+    next lhs rhs =>
+      split at hcond
+      · next ty path index heq =>
+          obtain ⟨h1, h2, h3, h4⟩ := hcond
+          simp only [Rules.isSimple, Rules.isComplex] at h1 h2 h3
+          have hs := simple_eq_false_of_complex h3
+          simp only [candidate, assignCandidate, coe_eq_expr, heq, hs,
+            Bool.false_eq_true, ↓reduceIte]
+          rw [assignComplexCandidate_valueSource h4 hs rfl]
+          simp [unfoldSourceCandidate, complex_eq_false_of_simple h1,
+            complex_eq_false_of_simple h2]
+      · exact hcond.elim
   case memoryRootAlias =>
     cases stmt <;>
       simp only [Rules.ruleEffect, Rules.assignEffect] at hcond
@@ -2007,11 +2357,12 @@ theorem applicable_eq_candidate {mode : Modality} {stmt : Stmt}
     cases stmt <;>
       simp only [Rules.ruleEffect, Rules.assignEffect] at hcond
     next lhs rhs =>
-      obtain ⟨h1, h2, h3⟩ := hcond
+      obtain ⟨h1, ⟨h2, h3⟩, h4⟩ := hcond
       simp only [Rules.isMemory, Rules.isComplex, PlaceExpr.kind,
-        coe_eq_expr] at h1 h2 h3
-      simp [candidate, assignCandidate, assignComplexCandidate, coe_eq_expr,
-        h1, h2, simple_eq_false_of_complex h3]
+        coe_eq_expr] at h1 h2 h3 h4
+      simp only [candidate, assignCandidate, coe_eq_expr,
+        simple_eq_false_of_complex h3, Bool.false_eq_true, ↓reduceIte]
+      exact assignComplexCandidate_memSource h1 h2 h4
   case memoryToStorageStoreRoot =>
     cases stmt <;>
       simp only [Rules.ruleEffect, Rules.assignEffect] at hcond
@@ -2096,20 +2447,6 @@ theorem applicable_eq_candidate {mode : Modality} {stmt : Stmt}
             coe_eq_expr, h1, h2, h4, kind_of_isStack h1,
             complex_eq_false_of_simple h3]
       · exact hcond.elim
-  case binopUnfoldResult op =>
-    cases stmt <;>
-      simp only [Rules.ruleEffect, Rules.assignEffect] at hcond
-    next lhs rhs =>
-      split at hcond
-      · next op' l r =>
-          obtain ⟨rfl, harith, h3, h4, hnsv, hnmem⟩ := hcond
-          simp only [Rules.isStackVar, Rules.isStack, Rules.isSimple,
-            Rules.isComplex, PlaceExpr.kind, coe_eq_expr] at hnsv hnmem h3 h4
-          simp [candidate, assignCandidate, assignComplexCandidate,
-            coe_eq_expr, Typed.WrappedExpr.isMemory, harith, h3, h4,
-            hnsv, hnmem, complex_eq_false_of_simple h3,
-            complex_eq_false_of_simple h4]
-      · exact hcond.elim
   case binopAssignment op =>
     cases stmt <;>
       simp only [Rules.ruleEffect, Rules.assignEffect] at hcond
@@ -2152,11 +2489,9 @@ theorem applicable_eq_candidate {mode : Modality} {stmt : Stmt}
     next lhs rhs =>
       split at hcond
       · next c t e =>
-          obtain ⟨h1, hnm⟩ := hcond
-          simp only [Rules.isComplex, PlaceExpr.kind, coe_eq_expr]
-            at h1 hnm
+          simp only [Rules.isComplex] at hcond
           simp [candidate, assignCandidate, assignComplexCandidate,
-            coe_eq_expr, h1, hnm, Typed.WrappedExpr.isMemory]
+            coe_eq_expr, hcond]
       · exact hcond.elim
   case ternaryToIf =>
     cases stmt <;>
@@ -2183,7 +2518,20 @@ theorem applicable_eq_candidate {mode : Modality} {stmt : Stmt}
             isStack_eq_false_of_isStorage h2, Typed.WrappedExpr.isMemory,
             complex_eq_false_of_simple h1]
       · exact hcond.elim
-  case storageRootCompoundAssign op =>
+  case ternaryToIfMemory =>
+    cases stmt <;>
+      simp only [Rules.ruleEffect, Rules.assignEffect] at hcond
+    next lhs rhs =>
+      split at hcond
+      · next c t e =>
+          obtain ⟨h1, h2⟩ := hcond
+          simp only [Rules.isSimple, Rules.isMemory, coe_eq_expr] at h1 h2
+          simp [candidate, assignCandidate, assignComplexCandidate,
+            coe_eq_expr, h1, kind_of_isMemory h1,
+            isStack_eq_false_of_isMemory h1, isStorage_eq_false_of_isMemory h1,
+            complex_eq_false_of_simple h2]
+      · exact hcond.elim
+  case storageRootOpAssign op =>
     cases stmt <;>
       simp only [Rules.ruleEffect, Rules.compoundAssignEffect] at hcond
     next opS lhs rhs =>
@@ -2195,7 +2543,7 @@ theorem applicable_eq_candidate {mode : Modality} {stmt : Stmt}
           WrappedExpr).isStack = false := rfl
       simp [candidate, compoundAssignCandidate, coe_eq_expr, heqL, horig,
         hca, h3, h4, hLs]
-  case storageFieldCompoundAssign op =>
+  case storageFieldOpAssign op =>
     cases stmt <;>
       simp only [Rules.ruleEffect, Rules.compoundAssignEffect] at hcond
     next opS lhs rhs =>
@@ -2206,19 +2554,32 @@ theorem applicable_eq_candidate {mode : Modality} {stmt : Stmt}
           simp [candidate, compoundAssignCandidate, coe_eq_expr, heq, hca,
             h3, h4, complex_eq_false_of_simple h2]
       · exact hcond.elim
-  case storageIndexCompoundAssign op =>
+  case storageIndexMappingOpAssign op =>
     cases stmt <;>
       simp only [Rules.ruleEffect, Rules.compoundAssignEffect] at hcond
     next opS lhs rhs =>
       split at hcond
       · next ty path index heq =>
-          obtain ⟨rfl, hca, h2, h3, h4, h5⟩ := hcond
+          obtain ⟨rfl, hca, h2, h3, h4, h5, h6⟩ := hcond
           simp only [Rules.isSimple, Rules.isStack, coe_eq_expr] at h2 h3 h4 h5
           simp [candidate, compoundAssignCandidate, coe_eq_expr, heq, hca,
             h4, h5, complex_eq_false_of_simple h2,
-            complex_eq_false_of_simple h3]
+            complex_eq_false_of_simple h3, mappingTyB_of_isMapping h6,
+            arrayTyB_eq_false_of_isMapping h6]
       · exact hcond.elim
-  case storageFieldCompoundAssignUnfoldLeftFst op =>
+  case storageIndexArrayOpAssign op =>
+    cases stmt <;>
+      simp only [Rules.ruleEffect, Rules.compoundAssignEffect] at hcond
+    next opS lhs rhs =>
+      split at hcond
+      · next ty path index heq =>
+          obtain ⟨rfl, hca, h2, h3, h4, h5, h6⟩ := hcond
+          simp only [Rules.isSimple, Rules.isStack, coe_eq_expr] at h2 h3 h4 h5
+          simp [candidate, compoundAssignCandidate, coe_eq_expr, heq, hca,
+            h4, h5, complex_eq_false_of_simple h2,
+            complex_eq_false_of_simple h3, arrayTyB_of_isArray h6]
+      · exact hcond.elim
+  case storageFieldOpAssignUnfoldLeftFst op =>
     cases stmt <;>
       simp only [Rules.ruleEffect, Rules.compoundAssignEffect] at hcond
     next opS lhs rhs =>
@@ -2230,7 +2591,7 @@ theorem applicable_eq_candidate {mode : Modality} {stmt : Stmt}
           simp [candidate, compoundAssignCandidate, coe_eq_expr, heq, hca,
             h2, h3, h4]
       · exact hcond.elim
-  case storageIndexCompoundAssignUnfoldLeftFst op =>
+  case storageIndexOpAssignUnfoldLeftFst op =>
     cases stmt <;>
       simp only [Rules.ruleEffect, Rules.compoundAssignEffect] at hcond
     next opS lhs rhs =>
@@ -2242,7 +2603,7 @@ theorem applicable_eq_candidate {mode : Modality} {stmt : Stmt}
           simp [candidate, compoundAssignCandidate, coe_eq_expr, heq, hca,
             h2, h4, h5, complex_eq_false_of_simple h3]
       · exact hcond.elim
-  case memoryFieldCompoundAssign op =>
+  case memoryFieldOpAssign op =>
     cases stmt <;>
       simp only [Rules.ruleEffect, Rules.compoundAssignEffect] at hcond
     next opS lhs rhs =>
@@ -2253,7 +2614,7 @@ theorem applicable_eq_candidate {mode : Modality} {stmt : Stmt}
           simp [candidate, compoundAssignCandidate, coe_eq_expr, heq, hca,
             h3, h4, complex_eq_false_of_simple h2]
       · exact hcond.elim
-  case memoryIndexCompoundAssign op =>
+  case memoryIndexArrayOpAssign op =>
     cases stmt <;>
       simp only [Rules.ruleEffect, Rules.compoundAssignEffect] at hcond
     next opS lhs rhs =>
@@ -2265,7 +2626,7 @@ theorem applicable_eq_candidate {mode : Modality} {stmt : Stmt}
             h4, h5, complex_eq_false_of_simple h2,
             complex_eq_false_of_simple h3]
       · exact hcond.elim
-  case memoryFieldCompoundAssignUnfoldLeftFst op =>
+  case memoryFieldOpAssignUnfoldLeftFst op =>
     cases stmt <;>
       simp only [Rules.ruleEffect, Rules.compoundAssignEffect] at hcond
     next opS lhs rhs =>
@@ -2277,7 +2638,7 @@ theorem applicable_eq_candidate {mode : Modality} {stmt : Stmt}
           simp [candidate, compoundAssignCandidate, coe_eq_expr, heq, hca,
             h2, h3, h4]
       · exact hcond.elim
-  case memoryIndexCompoundAssignUnfoldLeftFst op =>
+  case memoryIndexOpAssignUnfoldLeftFst op =>
     cases stmt <;>
       simp only [Rules.ruleEffect, Rules.compoundAssignEffect] at hcond
     next opS lhs rhs =>
@@ -2289,7 +2650,7 @@ theorem applicable_eq_candidate {mode : Modality} {stmt : Stmt}
           simp [candidate, compoundAssignCandidate, coe_eq_expr, heq, hca,
             h2, h4, h5, complex_eq_false_of_simple h3]
       · exact hcond.elim
-  case localCompoundAssign op =>
+  case localOpAssign op =>
     cases stmt <;>
       simp only [Rules.ruleEffect, Rules.compoundAssignEffect] at hcond
     next opS lhs rhs =>
@@ -2306,7 +2667,7 @@ theorem applicable_eq_candidate {mode : Modality} {stmt : Stmt}
       have hb : (rhs.isStack && rhs.simple) = false := by
         cases hs : rhs.isStack <;> cases hp : rhs.simple <;> simp_all
       simp [candidate, compoundAssignCandidate, coe_eq_expr, hca, hb]
-  case storageRootIncDec op =>
+  case storageRootIncrement op =>
     cases stmt <;>
       simp only [Rules.ruleEffect, Rules.exprEffect] at hcond
     next expr =>
@@ -2318,7 +2679,7 @@ theorem applicable_eq_candidate {mode : Modality} {stmt : Stmt}
           simp [candidate, exprCandidate, incDecStmtCandidate, heqT, horig,
             Typed.WrappedExpr.isStack, Typed.WrappedExpr.kind]
       · exact hcond.elim
-  case storageFieldIncDec op =>
+  case storageFieldIncrement op =>
     cases stmt <;>
       simp only [Rules.ruleEffect, Rules.exprEffect] at hcond
     next expr =>
@@ -2329,7 +2690,7 @@ theorem applicable_eq_candidate {mode : Modality} {stmt : Stmt}
           simp [candidate, exprCandidate, incDecStmtCandidate,
             complex_eq_false_of_simple h2]
       · exact hcond.elim
-  case storageIndexIncDec op =>
+  case storageIndexIncrement op =>
     cases stmt <;>
       simp only [Rules.ruleEffect, Rules.exprEffect] at hcond
     next expr =>
@@ -2340,7 +2701,7 @@ theorem applicable_eq_candidate {mode : Modality} {stmt : Stmt}
           simp [candidate, exprCandidate, incDecStmtCandidate,
             complex_eq_false_of_simple h2, complex_eq_false_of_simple h3]
       · exact hcond.elim
-  case storageFieldIncDecUnfoldLeftFst op =>
+  case storageFieldIncrementUnfoldLeftFst op =>
     cases stmt <;>
       simp only [Rules.ruleEffect, Rules.exprEffect] at hcond
     next expr =>
@@ -2350,7 +2711,7 @@ theorem applicable_eq_candidate {mode : Modality} {stmt : Stmt}
           simp only [Rules.isComplex] at h2
           simp [candidate, exprCandidate, incDecStmtCandidate, h2]
       · exact hcond.elim
-  case storageIndexIncDecUnfoldLeftFst op =>
+  case storageIndexIncrementUnfoldLeftFst op =>
     cases stmt <;>
       simp only [Rules.ruleEffect, Rules.exprEffect] at hcond
     next expr =>
@@ -2361,7 +2722,7 @@ theorem applicable_eq_candidate {mode : Modality} {stmt : Stmt}
           simp [candidate, exprCandidate, incDecStmtCandidate, h2,
             complex_eq_false_of_simple h3]
       · exact hcond.elim
-  case memoryFieldIncDec op =>
+  case memoryFieldIncrement op =>
     cases stmt <;>
       simp only [Rules.ruleEffect, Rules.exprEffect] at hcond
     next expr =>
@@ -2372,7 +2733,7 @@ theorem applicable_eq_candidate {mode : Modality} {stmt : Stmt}
           simp [candidate, exprCandidate, incDecStmtCandidate,
             complex_eq_false_of_simple h2]
       · exact hcond.elim
-  case memoryIndexIncDec op =>
+  case memoryIndexArrayIncrement op =>
     cases stmt <;>
       simp only [Rules.ruleEffect, Rules.exprEffect] at hcond
     next expr =>
@@ -2383,7 +2744,7 @@ theorem applicable_eq_candidate {mode : Modality} {stmt : Stmt}
           simp [candidate, exprCandidate, incDecStmtCandidate,
             complex_eq_false_of_simple h2, complex_eq_false_of_simple h3]
       · exact hcond.elim
-  case memoryFieldIncDecUnfoldLeftFst op =>
+  case memoryFieldIncrementUnfoldLeftFst op =>
     cases stmt <;>
       simp only [Rules.ruleEffect, Rules.exprEffect] at hcond
     next expr =>
@@ -2393,7 +2754,7 @@ theorem applicable_eq_candidate {mode : Modality} {stmt : Stmt}
           simp only [Rules.isComplex] at h2
           simp [candidate, exprCandidate, incDecStmtCandidate, h2]
       · exact hcond.elim
-  case memoryIndexIncDecUnfoldLeftFst op =>
+  case memoryIndexIncrementUnfoldLeftFst op =>
     cases stmt <;>
       simp only [Rules.ruleEffect, Rules.exprEffect] at hcond
     next expr =>
@@ -2404,7 +2765,7 @@ theorem applicable_eq_candidate {mode : Modality} {stmt : Stmt}
           simp [candidate, exprCandidate, incDecStmtCandidate, h2,
             complex_eq_false_of_simple h3]
       · exact hcond.elim
-  case storageRootIncDecAssignment op =>
+  case storageRootIncrementAssignment op =>
     cases stmt <;>
       simp only [Rules.ruleEffect, Rules.assignEffect] at hcond
     next lhs rhs =>
@@ -2418,7 +2779,7 @@ theorem applicable_eq_candidate {mode : Modality} {stmt : Stmt}
             coe_eq_expr, h1, h2, kind_of_isStack h1, heqT, horig,
             Typed.WrappedExpr.isStack]
       · exact hcond.elim
-  case storageFieldIncDecAssignment op =>
+  case storageFieldIncrementAssignment op =>
     cases stmt <;>
       simp only [Rules.ruleEffect, Rules.assignEffect] at hcond
     next lhs rhs =>
@@ -2430,7 +2791,7 @@ theorem applicable_eq_candidate {mode : Modality} {stmt : Stmt}
             coe_eq_expr, h1, h2, kind_of_isStack h1,
             Typed.WrappedExpr.isStack, complex_eq_false_of_simple h3]
       · exact hcond.elim
-  case storageIndexIncDecAssignment op =>
+  case storageIndexIncrementAssignment op =>
     cases stmt <;>
       simp only [Rules.ruleEffect, Rules.assignEffect] at hcond
     next lhs rhs =>
@@ -2443,7 +2804,7 @@ theorem applicable_eq_candidate {mode : Modality} {stmt : Stmt}
             Typed.WrappedExpr.isStack, complex_eq_false_of_simple h3,
             complex_eq_false_of_simple h4]
       · exact hcond.elim
-  case memoryFieldIncDecAssignment op =>
+  case memoryFieldIncrementAssignment op =>
     cases stmt <;>
       simp only [Rules.ruleEffect, Rules.assignEffect] at hcond
     next lhs rhs =>
@@ -2455,7 +2816,7 @@ theorem applicable_eq_candidate {mode : Modality} {stmt : Stmt}
             coe_eq_expr, h1, h2, kind_of_isStack h1,
             Typed.WrappedExpr.isStack, complex_eq_false_of_simple h3]
       · exact hcond.elim
-  case memoryIndexIncDecAssignment op =>
+  case memoryIndexArrayIncrementAssignment op =>
     cases stmt <;>
       simp only [Rules.ruleEffect, Rules.assignEffect] at hcond
     next lhs rhs =>
@@ -2468,7 +2829,7 @@ theorem applicable_eq_candidate {mode : Modality} {stmt : Stmt}
             Typed.WrappedExpr.isStack, complex_eq_false_of_simple h3,
             complex_eq_false_of_simple h4]
       · exact hcond.elim
-  case localAssignIncDec op =>
+  case localAssignIncrement op =>
     cases stmt <;>
       simp only [Rules.ruleEffect, Rules.assignEffect] at hcond
     next lhs rhs =>
@@ -2479,7 +2840,7 @@ theorem applicable_eq_candidate {mode : Modality} {stmt : Stmt}
           simp [candidate, assignCandidate, assignComplexCandidate,
             coe_eq_expr, h1, h2, h3, h4, kind_of_isStack h1]
       · exact hcond.elim
-  case localIncDec op =>
+  case localIncrement op =>
     cases stmt <;>
       simp only [Rules.ruleEffect, Rules.exprEffect] at hcond
     next expr =>
@@ -2603,14 +2964,32 @@ theorem applicable_eq_candidate {mode : Modality} {stmt : Stmt}
       simp only [Rules.isSimple, Rules.isComplex] at h1 h2
       simp [candidate, transferCandidate, h2,
         complex_eq_false_of_simple h1]
-  case transferNoCallback =>
-    cases stmt <;>
-      simp only [Rules.ruleEffect, Rules.transferEffect] at hcond
-    next recipient amount =>
-      obtain ⟨h1, h2⟩ := hcond
-      simp only [Rules.isSimple] at h1 h2
-      simp [candidate, transferCandidate,
-        complex_eq_false_of_simple h1, complex_eq_false_of_simple h2]
+  case transferNoCallbackBox =>
+    cases mode
+    case diamond =>
+      simp [Rules.transferNoCallbackBox_mode, CaseMode.applies] at hmode
+    case box =>
+      cases stmt <;>
+        simp only [Rules.ruleEffect, Rules.withMode, Rules.transferEffect]
+          at hcond
+      next recipient amount =>
+        obtain ⟨h1, h2⟩ := hcond
+        simp only [Rules.isSimple] at h1 h2
+        simp [candidate, transferCandidate, pick,
+          complex_eq_false_of_simple h1, complex_eq_false_of_simple h2]
+  case transferNoCallbackDiamond =>
+    cases mode
+    case box =>
+      simp [Rules.transferNoCallbackDiamond_mode, CaseMode.applies] at hmode
+    case diamond =>
+      cases stmt <;>
+        simp only [Rules.ruleEffect, Rules.withMode, Rules.transferEffect]
+          at hcond
+      next recipient amount =>
+        obtain ⟨h1, h2⟩ := hcond
+        simp only [Rules.isSimple] at h1 h2
+        simp [candidate, transferCandidate, pick,
+          complex_eq_false_of_simple h1, complex_eq_false_of_simple h2]
 
 /-- `applicable_eq_candidate` for the withCallback rule set: dispatch
 under `candidateWithCallback` is still a total function of the
@@ -2625,19 +3004,32 @@ theorem applicable_eq_candidateWithCallback {mode : Modality} {stmt : Stmt}
   | inr h =>
       simp only [List.mem_singleton] at h
       subst h
-      rw [Rules.transferWithCallback_mode_eq] at hmode
       rw [Rules.transferWithCallback_cond_eq] at hcond
-      have := applicable_eq_candidate (rule := .transferNoCallback)
-        (by decide) hmode hcond
-      rw [candidateWithCallback, this]
+      cases mode
+      · have := applicable_eq_candidate (mode := .box)
+          (rule := .transferNoCallbackBox) (by decide)
+          (by simp [Rules.transferNoCallbackBox_mode, CaseMode.applies]) hcond
+        rw [candidateWithCallback, this]
+      · rw [← Rules.transferNoCallbackDiamond_cond_eq] at hcond
+        have := applicable_eq_candidate (mode := .diamond)
+          (rule := .transferNoCallbackDiamond) (by decide)
+          (by simp [Rules.transferNoCallbackDiamond_mode, CaseMode.applies])
+          hcond
+        rw [candidateWithCallback, this]
   | inl h =>
-      have hne : rule ≠ .transferNoCallback := by
+      have hneBox : rule ≠ .transferNoCallbackBox := by
         intro hr
         subst hr
         exact absurd h (by decide)
-      have := applicable_eq_candidate (List.mem_of_mem_erase h) hmode hcond
+      have hneDiamond : rule ≠ .transferNoCallbackDiamond := by
+        intro hr
+        subst hr
+        exact absurd h (by decide)
+      have := applicable_eq_candidate
+        (List.mem_of_mem_erase (List.mem_of_mem_erase h)) hmode hcond
       rw [candidateWithCallback, this]
-      cases rule <;> first | exact absurd rfl hne | rfl
+      cases rule <;>
+        first | exact absurd rfl hneBox | exact absurd rfl hneDiamond | rfl
 
 /-! ### Mutual exclusion of rules
 

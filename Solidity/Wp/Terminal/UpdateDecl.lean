@@ -5,7 +5,9 @@ import Solidity.Wp.Terminal.UpdateStorage
 
 `valueDeclSkip`, `storageLocalDeclSkip`, `storagePlaceAlias`,
 `memoryDeclFreshAlloc`, `storageToMemoryDeclCopy{Field,Root}`,
-`storageDeleteSimpleTarget`, `memoryDeleteSimpleTarget`.
+`storage{Root,Field,Index,PushPlace}Delete`, `memoryRootDeleteFreshRebind`,
+`memoryFieldDelete{Primitive,Reference}`,
+`memoryIndexDelete{Primitive,Reference}{Box,Diamond}`.
 -/
 
 namespace Solidity
@@ -139,150 +141,233 @@ theorem execStmt_delete_storage (s : State) (target : PlaceExpr)
   rw [execStmt, hk, hres]
   simp only [storageDeleteUpd, bind, Except.bind]
 
-theorem storageDeleteSimpleTarget_update (s : State) (target : PlaceExpr)
-    (hcond : (ruleEffect .storageDeleteSimpleTarget).cond
-      (Stmt.delete target)) :
+/-- `delete(gsp)`: a global storage root; the path is the root itself. -/
+theorem storageRootDelete_update (s : State) (target : PlaceExpr)
+    (hcond : (ruleEffect .storageRootDelete).cond (Stmt.delete target)) :
     execStmt s (Stmt.delete target) =
-      terminalUpdate .storageDeleteSimpleTarget (Stmt.delete target) s := by
-  have hc : isSimpleStorageDeleteTarget target := hcond
+      terminalUpdate .storageRootDelete (Stmt.delete target) s := by
   show execStmt s (Stmt.delete target) = storageDeleteUpd target s
-  apply execStmt_delete_storage
-  all_goals
-    obtain ⟨e, hass⟩ := target
-    simp only at hc ⊢
-  all_goals
-    cases e with
-    | var k t fld =>
-        cases k with
-        | storage =>
-            first
-            | rfl
-            | (rw [resolveS_var]; rfl)
-        | _ => exact absurd hc (by simp [isSimpleStorageDeleteTarget])
-    | field k t base f =>
-        cases k with
-        | storage =>
-            have hp : isSimple base := hc
-            have hp' : base.simple = true := hp
-            first
-            | rfl
-            | (rw [resolveS_placePath s _ (by simp [simplePathB, hp'])]; rfl)
-        | _ => exact absurd hc (by simp [isSimpleStorageDeleteTarget])
-    | index k t base ix =>
-        cases k with
-        | storage =>
-            have hc' : isSimple base ∧ isSimple ix ∧
-                (isArray base ∨ isMapping base) := hc
-            have hp' : base.simple = true := hc'.1
-            have hi' : ix.simple = true := hc'.2.1
-            first
-            | rfl
-            | (rw [resolveS_placePath s _ (by simp [simplePathB, hp', hi'])]; rfl)
-        | _ => exact absurd hc (by simp [isSimpleStorageDeleteTarget])
-    | pushPlace path =>
-        have hc' : path.kind = Kind.storage ∧ isSimple path := hc
-        have hp' : path.simple = true := hc'.2
-        first
-        | rfl
-        | exact resolveS_pushPlace s path (by simp [hp'])
-    | _ => exact absurd hass (by simp [Typed.WrappedExpr.assignable])
+  obtain ⟨e, hass⟩ := target
+  match e, hass, hcond with
+  | WrappedExpr.var Kind.storage t fld, hass, _ =>
+      apply execStmt_delete_storage _ _ rfl
+      simp only
+      first
+      | rfl
+      | (rw [resolveS_var]; rfl)
 
-/-- The interpreter's memory `delete` on a nested place, by the slot's type. -/
-theorem memoryDeleteSimpleTarget_update (s : State) (target : PlaceExpr)
-    (hcond : (ruleEffect .memoryDeleteSimpleTarget).cond
-      (Stmt.delete target)) :
+/-- `delete(sp.fld)`: a member of a simple storage path. -/
+theorem storageFieldDelete_update (s : State) (target : PlaceExpr)
+    (hcond : (ruleEffect .storageFieldDelete).cond (Stmt.delete target)) :
     execStmt s (Stmt.delete target) =
-      terminalUpdate .memoryDeleteSimpleTarget (Stmt.delete target) s := by
-  have hc : isSimpleMemoryDeleteTarget target := hcond
+      terminalUpdate .storageFieldDelete (Stmt.delete target) s := by
+  show execStmt s (Stmt.delete target) = storageDeleteUpd target s
+  obtain ⟨e, hass⟩ := target
+  match e, hass, hcond with
+  | WrappedExpr.field Kind.storage t base f, hass, hc =>
+      have hp : isSimple base := hc
+      have hp' : base.simple = true := hp
+      apply execStmt_delete_storage _ _ rfl
+      simp only
+      first
+      | rfl
+      | (rw [resolveS_placePath s _ (by simp [simplePathB, hp'])]; rfl)
+
+/-- `delete(sp[ie])` on an array or a mapping: the two are one shape to the
+interpreter, which dispatches on the runtime node. -/
+theorem storageIndexDelete_update (s : State) (target : PlaceExpr)
+    (hcond : (ruleEffect .storageIndexDelete).cond (Stmt.delete target)) :
+    execStmt s (Stmt.delete target) =
+      terminalUpdate .storageIndexDelete (Stmt.delete target) s := by
+  show execStmt s (Stmt.delete target) = storageDeleteUpd target s
+  obtain ⟨e, hass⟩ := target
+  match e, hass, hcond with
+  | WrappedExpr.index Kind.storage t base ix, hass, hc =>
+      have hc' : isSimple base ∧ isSimple ix ∧ (isArray base ∨ isMapping base) := hc
+      have hp' : base.simple = true := hc'.1
+      have hi' : ix.simple = true := hc'.2.1
+      apply execStmt_delete_storage _ _ rfl
+      simp only
+      first
+      | rfl
+      | (rw [resolveS_placePath s _ (by simp [simplePathB, hp', hi'])]; rfl)
+
+/-- `delete(arr.push())`: Lean's own shape; the push place resolves by
+extending the array first. -/
+theorem storagePushPlaceDelete_update (s : State) (target : PlaceExpr)
+    (hcond : (ruleEffect .storagePushPlaceDelete).cond (Stmt.delete target)) :
+    execStmt s (Stmt.delete target) =
+      terminalUpdate .storagePushPlaceDelete (Stmt.delete target) s := by
+  have hc : isSimplePushPlaceDeleteTarget target.expr := hcond
+  show execStmt s (Stmt.delete target) = storageDeleteUpd target s
+  obtain ⟨e, hass⟩ := target
+  match e, hass, hc with
+  | WrappedExpr.pushPlace path, hass, hc =>
+      have hc' : path.kind = Kind.storage ∧ isSimple path := hc
+      have hp' : path.simple = true := hc'.2
+      apply execStmt_delete_storage _ _ (by simp [Typed.WrappedExpr.kind])
+      simp only
+      first
+      | rfl
+      | exact resolveS_pushPlace s path (by simp [hp'])
+
+/-! ### Memory `delete`
+
+One theorem per shape of the paper's rules: the root (fresh default
+identity), a primitive or a reference member, and the array slot twins,
+whose `inBounds` guard is `writeMemIndex`'s revert. -/
+
+/-- `delete(mv)`: rebind the root to a fresh default identity. -/
+theorem memoryRootDeleteFreshRebind_update (s : State) (target : PlaceExpr)
+    (hcond : (ruleEffect .memoryRootDeleteFreshRebind).cond (Stmt.delete target)) :
+    execStmt s (Stmt.delete target) =
+      terminalUpdate .memoryRootDeleteFreshRebind (Stmt.delete target) s := by
   show execStmt s (Stmt.delete target) = memoryDeleteUpd target s
   obtain ⟨e, hass⟩ := target
-  simp only at hc ⊢
-  cases e with
-  | var k t fld =>
-      cases k with
-      | memory =>
-          rw [execStmt]
-          simp only [Typed.WrappedExpr.kind, memoryDeleteUpd]
-          cases t with
-          | prim pt => rfl
-          | ref r =>
-              simp only [bind, Except.bind]
-      | _ => exact absurd hc (by simp [isSimpleMemoryDeleteTarget])
-  | field k t base f =>
-      cases k with
-      | memory =>
-          have hc' : isSimple base ∧ (f.isPrimitive = true ∨ f.isIdentity = true) := hc
-          have hb : base.simple = true := hc'.1
-          rw [execStmt]
-          simp only [Typed.WrappedExpr.kind, memoryDeleteUpd, WrappedExpr.ty,
-            Typed.WrappedExpr.ty]
-          rw [resolveLoc_memoryField s t base f hb]
-          simp only [bind, Except.bind, Except.map]
-          cases memBase s base with
+  match e, hass, hcond with
+  | WrappedExpr.var Kind.memory t fld, hass, _ =>
+      rw [execStmt]
+      simp only [Typed.WrappedExpr.kind, memoryDeleteUpd]
+      cases t with
+      | prim pt => rfl
+      | ref r => simp only [bind, Except.bind]
+
+/-- The interpreter's memory `delete` on a member, by the slot's type. -/
+theorem execStmt_delete_memoryField (s : State) (t : Ty) (base : WrappedExpr)
+    (f : Field) (hass : (WrappedExpr.field Kind.memory t base f).assignable = true)
+    (hb : base.simple = true) :
+    execStmt s (Stmt.delete ⟨WrappedExpr.field Kind.memory t base f, hass⟩) =
+      memoryDeleteUpd ⟨WrappedExpr.field Kind.memory t base f, hass⟩ s := by
+  rw [execStmt]
+  simp only [Typed.WrappedExpr.kind, memoryDeleteUpd, WrappedExpr.ty,
+    Typed.WrappedExpr.ty]
+  rw [resolveLoc_memoryField s t base f hb]
+  simp only [bind, Except.bind, Except.map]
+  cases memBase s base with
+  | error e => rfl
+  | ok id =>
+      simp only [writeMemField, bind, Except.bind]
+      cases t with
+      | prim pt =>
+          cases pt <;> (cases s.getObj id with
+            | error e => rfl
+            | ok obj => cases obj <;> rfl)
+      | ref r =>
+          cases allocDefault s r with
           | error e => rfl
-          | ok id =>
-              simp only [writeMemField, bind, Except.bind]
-              cases t with
-              | prim pt =>
-                  cases pt <;> (cases s.getObj id with
-                    | error e => rfl
-                    | ok obj => cases obj <;> rfl)
-              | ref r =>
-                  cases allocDefault s r with
-                  | error e => rfl
-                  | ok x =>
-                      obtain ⟨s', id'⟩ := x
-                      simp only []
-                      cases s'.getObj id with
-                      | error e => rfl
-                      | ok obj => cases obj <;> rfl
-      | _ => exact absurd hc (by simp [isSimpleMemoryDeleteTarget])
-  | index k t base ix =>
-      cases k with
-      | memory =>
-          have hc' : isSimple base ∧ isSimple ix ∧
-              (isPrimitive (WrappedExpr.index Kind.memory t base ix) ∨
-                isIdentity (WrappedExpr.index Kind.memory t base ix)) := hc
-          have hb : base.simple = true := hc'.1
-          have hi : ix.simple = true := hc'.2.1
-          rw [execStmt]
-          simp only [Typed.WrappedExpr.kind, memoryDeleteUpd, WrappedExpr.ty,
-            Typed.WrappedExpr.ty]
-          rw [resolveLoc_memoryIndex s t base ix hb hi]
-          simp only [bind, Except.bind, Except.map]
-          cases memBase s base with
-          | error e => rfl
-          | ok id =>
+          | ok x =>
+              obtain ⟨s', id'⟩ := x
               simp only []
-              cases simpleInt s ix with
+              cases s'.getObj id with
               | error e => rfl
-              | ok i =>
-                  simp only [writeMemIndex, bind, Except.bind]
-                  cases t with
-                  | prim pt =>
-                      cases pt <;> (cases s.getObj id with
-                        | error e => rfl
-                        | ok obj =>
-                            cases obj with
-                            | struct fields => rfl
-                            | array elems =>
-                                first | (simp only []; done) | (split <;> rfl))
-                  | ref r =>
-                      cases allocDefault s r with
-                      | error e => rfl
-                      | ok x =>
-                          obtain ⟨s', id'⟩ := x
-                          simp only []
-                          cases s'.getObj id with
-                          | error e => rfl
-                          | ok obj =>
-                              cases obj with
-                              | struct fields => rfl
-                              | array elems =>
-                                first | (simp only []; done) | (split <;> rfl)
-      | _ => exact absurd hc (by simp [isSimpleMemoryDeleteTarget])
-  | pushPlace path => exact absurd hc (by simp [isSimpleMemoryDeleteTarget])
-  | _ => exact absurd hass (by simp [Typed.WrappedExpr.assignable])
+              | ok obj => cases obj <;> rfl
+
+/-- `delete(mv.fp)`: a primitive member resets to its type's default. -/
+theorem memoryFieldDeletePrimitive_update (s : State) (target : PlaceExpr)
+    (hcond : (ruleEffect .memoryFieldDeletePrimitive).cond (Stmt.delete target)) :
+    execStmt s (Stmt.delete target) =
+      terminalUpdate .memoryFieldDeletePrimitive (Stmt.delete target) s := by
+  show execStmt s (Stmt.delete target) = memoryDeleteUpd target s
+  obtain ⟨e, hass⟩ := target
+  match e, hass, hcond with
+  | WrappedExpr.field Kind.memory t base f, hass, hc =>
+      have hc' : isSimple base ∧ isPrimitiveMember (WrappedExpr.field Kind.memory t base f) := hc
+      exact execStmt_delete_memoryField s t base f hass hc'.1
+
+/-- `delete(mv.fr)`: a reference member is re-pointed at a fresh default. -/
+theorem memoryFieldDeleteReference_update (s : State) (target : PlaceExpr)
+    (hcond : (ruleEffect .memoryFieldDeleteReference).cond (Stmt.delete target)) :
+    execStmt s (Stmt.delete target) =
+      terminalUpdate .memoryFieldDeleteReference (Stmt.delete target) s := by
+  show execStmt s (Stmt.delete target) = memoryDeleteUpd target s
+  obtain ⟨e, hass⟩ := target
+  match e, hass, hcond with
+  | WrappedExpr.field Kind.memory t base f, hass, hc =>
+      have hc' : isSimple base ∧ isReferenceMember (WrappedExpr.field Kind.memory t base f) := hc
+      exact execStmt_delete_memoryField s t base f hass hc'.1
+
+/-- The interpreter's memory `delete` on an array slot, by the slot's type;
+out of bounds reverts (`writeMemIndex`). -/
+theorem execStmt_delete_memoryIndex (s : State) (t : Ty) (base ix : WrappedExpr)
+    (hass : (WrappedExpr.index Kind.memory t base ix).assignable = true)
+    (hb : base.simple = true) (hi : ix.simple = true) :
+    execStmt s (Stmt.delete ⟨WrappedExpr.index Kind.memory t base ix, hass⟩) =
+      memoryDeleteUpd ⟨WrappedExpr.index Kind.memory t base ix, hass⟩ s := by
+  rw [execStmt]
+  simp only [Typed.WrappedExpr.kind, memoryDeleteUpd, WrappedExpr.ty,
+    Typed.WrappedExpr.ty]
+  rw [resolveLoc_memoryIndex s t base ix hb hi]
+  simp only [bind, Except.bind, Except.map]
+  cases memBase s base with
+  | error e => rfl
+  | ok id =>
+      simp only []
+      cases simpleInt s ix with
+      | error e => rfl
+      | ok i =>
+          simp only [writeMemIndex, bind, Except.bind]
+          cases t with
+          | prim pt =>
+              cases pt <;> (cases s.getObj id with
+                | error e => rfl
+                | ok obj =>
+                    cases obj with
+                    | struct fields => rfl
+                    | array elems =>
+                        first | (simp only []; done) | (split <;> rfl))
+          | ref r =>
+              cases allocDefault s r with
+              | error e => rfl
+              | ok x =>
+                  obtain ⟨s', id'⟩ := x
+                  simp only []
+                  cases s'.getObj id with
+                  | error e => rfl
+                  | ok obj =>
+                      cases obj with
+                      | struct fields => rfl
+                      | array elems =>
+                        first | (simp only []; done) | (split <;> rfl)
+
+/-- `delete(ap[ie])`, box twin: a primitive slot resets to its default; the
+rule's `inBounds` split is the update's revert. -/
+theorem memoryIndexDeletePrimitiveBox_update (s : State) (target : PlaceExpr)
+    (hcond : (ruleEffect .memoryIndexDeletePrimitiveBox).cond (Stmt.delete target)) :
+    execStmt s (Stmt.delete target) =
+      terminalUpdate .memoryIndexDeletePrimitiveBox (Stmt.delete target) s := by
+  show execStmt s (Stmt.delete target) = memoryDeleteUpd target s
+  obtain ⟨e, hass⟩ := target
+  match e, hass, hcond with
+  | WrappedExpr.index Kind.memory t base ix, hass, hc =>
+      have hc' : isSimple base ∧ isSimple ix ∧ isPrimArray base := hc
+      exact execStmt_delete_memoryIndex s t base ix hass hc'.1 hc'.2.1
+
+theorem memoryIndexDeletePrimitiveDiamond_update (s : State) (target : PlaceExpr)
+    (hcond : (ruleEffect .memoryIndexDeletePrimitiveDiamond).cond
+      (Stmt.delete target)) :
+    execStmt s (Stmt.delete target) =
+      terminalUpdate .memoryIndexDeletePrimitiveDiamond (Stmt.delete target) s :=
+  memoryIndexDeletePrimitiveBox_update s target hcond
+
+/-- `delete(ar[ie])`, box twin: a reference slot is re-pointed at a fresh
+default. -/
+theorem memoryIndexDeleteReferenceBox_update (s : State) (target : PlaceExpr)
+    (hcond : (ruleEffect .memoryIndexDeleteReferenceBox).cond (Stmt.delete target)) :
+    execStmt s (Stmt.delete target) =
+      terminalUpdate .memoryIndexDeleteReferenceBox (Stmt.delete target) s := by
+  show execStmt s (Stmt.delete target) = memoryDeleteUpd target s
+  obtain ⟨e, hass⟩ := target
+  match e, hass, hcond with
+  | WrappedExpr.index Kind.memory t base ix, hass, hc =>
+      have hc' : isSimple base ∧ isSimple ix ∧ isRefArray base := hc
+      exact execStmt_delete_memoryIndex s t base ix hass hc'.1 hc'.2.1
+
+theorem memoryIndexDeleteReferenceDiamond_update (s : State) (target : PlaceExpr)
+    (hcond : (ruleEffect .memoryIndexDeleteReferenceDiamond).cond
+      (Stmt.delete target)) :
+    execStmt s (Stmt.delete target) =
+      terminalUpdate .memoryIndexDeleteReferenceDiamond (Stmt.delete target) s :=
+  memoryIndexDeleteReferenceBox_update s target hcond
 
 end Wp
 end Solidity
