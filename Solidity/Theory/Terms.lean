@@ -62,7 +62,7 @@ Each is chosen so that the rule which *does* exist subsumes it:
 structurally, because the path *grows* on the way in (`readCopySt` reads
 `flds ++ [a]`).  A lexicographic measure closes it, but well-founded recursion
 gives up definitional unfolding, and `decide` on a closed term is how half the
-taclets here are checked (`Sanity` below, `Examples/Solkey/Rules.lean`).
+taclets here are checked (`Sanity` below, `Corpus/Wp/Rules.lean`).
 
 So the cycle is cut instead: `readIn` reads its copied struct with **`findSt`**,
 the read that does not cross back into memory, and everything stays structural.

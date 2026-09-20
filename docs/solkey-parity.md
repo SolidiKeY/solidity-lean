@@ -30,8 +30,8 @@ Ported from solkey `c80a54494c` (2026-09-16).
 proved**, kernel-checked, with no `native_decide` — including every ported
 obligation of `SolcStructs` and `SolcMemory`, the `net` machinery, every
 `RulesTest` problem that states an identity or a judgment, and 225 of the 245
-ported taclet tests. (`Examples/Solkey/Net.lean` carries a fourth
-theorem, an iterated transfer, and `Examples/Solkey/Rules.lean` two auxiliary
+ported taclet tests. (`Corpus/Wp/Net.lean` carries a fourth
+theorem, an iterated transfer, and `Corpus/Wp/Rules.lean` two auxiliary
 ones about `newFromAdd` and `defaultDefIdentity`; none is itself a solkey PO,
 so none is counted.)
 

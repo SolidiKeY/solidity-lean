@@ -6,7 +6,7 @@ import Solidity.Semantics
 
 Obligations 121-144 of 245.
 
-The same obligations as `Solidity/Examples/Solkey/TestSuite.lean`,
+The same obligations as `Solidity/Corpus/Wp/TestSuite.lean`,
 proved without the interpreter doing the symbolic execution:
 `sol_calculus` drives each program with the taclets of `Calculus/Rules.lean`
 until no line of the frontier has a statement left, and decides the

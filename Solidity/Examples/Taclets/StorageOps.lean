@@ -616,7 +616,7 @@ entries — solc's behaviour, and upstream's `storagePopSave` /
 `storagePushLengthSave`, both of which write `delAt` at that slot.
 `Semantics.pushSlot` is that `delAt`.
 
-The ported obligation (`Examples/Solkey/TestSuite.lean`) is `open` for a
+The ported obligation (`Corpus/Wp/TestSuite.lean`) is `open` for a
 reason that has nothing to do with this: the `sol!` grammar reads
 `ledgerUses[0].ledger.balances` as one dotted field name, so the port's
 spelling never reaches the mapping. Splitting the two hops with a

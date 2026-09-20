@@ -471,7 +471,7 @@ theorem find_delAt_frame (s : Struct) {p q : List Seg} (h : diverges p q = true)
 /-! ## Sanity
 
 The worked examples of the fundamentals repository, in this vocabulary.
-They are here to catch a wrong definition before `Examples/Solkey/Rules.lean`
+They are here to catch a wrong definition before `Corpus/Wp/Rules.lean`
 builds on one. -/
 
 section Sanity

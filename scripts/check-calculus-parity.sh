@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Calculus parity press button: elaborate the rule-table corpus
-# (Solidity/Examples/Derivations/Solkey/*.lean) and compare the
+# (Solidity/Corpus/Calculus/*.lean) and compare the
 # per-obligation verdicts against tests/solkey/expected-calculus.tsv.
 #
 # This is the answer to "can the solkey tests be proved from Rules.lean

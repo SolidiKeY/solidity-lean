@@ -39,10 +39,10 @@ honest, and both expect a solkey checkout beside this repository
   against solkey's `solidityProgramRules.key`. **It currently reports 78 rows
   of drift** — a known, pre-existing gap described in `AGENTS.md`; re-syncing
   it is its own change. Without a checkout it prints `SKIPPED` and exits 0.
-- `scripts/solkey-port.mjs` regenerates `Solidity/Examples/Solkey/` from
+- `scripts/solkey-port.mjs` regenerates `Solidity/Corpus/Wp/` from
   solkey's `.sol` example suites; `./scripts/check-solkey-parity.sh` diffs the
   verdicts against `tests/solkey/expected.tsv`.
-- The same pass also regenerates `Solidity/Examples/Derivations/Solkey/`,
+- The same pass also regenerates `Solidity/Corpus/Calculus/`,
   which proves the *same* obligations from `Calculus/Rules.lean` alone —
   `./scripts/check-calculus-parity.sh`, table in
   `tests/solkey/expected-calculus.tsv`, scoreboard in
