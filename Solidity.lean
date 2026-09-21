@@ -68,6 +68,7 @@ import Solidity.Update.Examples
 import Solidity.Update.Step
 import Solidity.Update.Merge
 import Solidity.Update.SequentSyntax
+import Solidity.Update.SequentPP
 import Solidity.Wp.StepSoundness
 import Solidity.Wp.Verifier
 import Solidity.Wp.Examples
@@ -87,6 +88,7 @@ import Solidity.Examples.Derivations.ValueCapture
 import Solidity.Examples.Derivations.ControlFlow
 import Solidity.Examples.Derivations.Walkthroughs
 import Solidity.Examples.Derivations.DynamicLogic
+import Solidity.Examples.Derivations.StorageSteps
 import Solidity.Counterexamples.BinopOperandCapture
 import Solidity.Examples.Taclets.ValueOps
 import Solidity.Examples.Taclets.StorageOps

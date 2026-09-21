@@ -59,6 +59,35 @@ When a step stops elaborating, the cause is almost never the notation:
 | `t = t'`, `t =[.rule] t'` | a **theory rewrite**, in a `sol_rewrite` | the rule's theorem |
 | (no arrow) | run to closure, endpoint computed | `seq_closes` |
 
+A chain written as a `sol_derivation` states its intermediate lines and Lean
+checks them. **The other presentation states only the endpoints and puts the
+rules in the proof** — `theorem first ⇝ᵘ* last := by seq_step .r₁; …;
+seq_done`, one rule per line, with the frontier in between left to the goal
+rather than the page. Reach for it when what you want is to *step through* a
+derivation; keep `sol_derivation` when the intermediate lines are the artefact,
+which in `Paper/` they always are. `Examples/Derivations/StorageSteps.lean` is
+the worked example, and holds both spellings of one chain.
+
+| Tactic | On a `⇝ᵘ*` goal |
+|---|---|
+| `seq_step .rule` | take one step; the successor the rule computes becomes the goal |
+| `seq_done` | close: reflexivity, or the trailing merge |
+| `seq_steps [.a, .b]` | the same run on one line; each rule name carries its own info node, so the cursor on `.b` shows that frontier, as inside `rw [a, b]` |
+| `seq_steps?` | run it and report a pasteable `seq_steps [...]` — how a chain gets written |
+| `seq_norm` | reduce both frontiers to literal constructor applications |
+
+`seq_step` and `seq_rule_step` are different shapes and the table above says
+which: the first *advances* a `⇝ᵘ*` goal with the successor unwritten, the
+second *closes* a `⇝ᵘ[.rule]` line whose successor is written out.
+
+**Goals print in the `seq!` notation** (`Update/SequentPP.lean`), so a frontier
+between two steps reads as the line the calculus draws rather than as
+constructor applications. It is a printer for the *data*, not an inverse of the
+parser — an annotation the term does not carry cannot come back, so `se@uint`
+prints as `se` — and whatever it cannot fully account for falls back to Lean's
+own printing for that line. Whitespace is the auto-derived formatter's, not the
+house style's. `set_option pp.solidity.seq false` turns it off.
+
 ASCII twins: `~>`, `~>[.r]`, `~>*[…]`, `~>*`, `~*>` for `⇝*`, and `=`, `=[h]`,
 `=*` for the `≡` family — the spellings the paper's chains are written in.
 `⇝≡`/`~>=` are the older names of `≡`/`=` and still parse.

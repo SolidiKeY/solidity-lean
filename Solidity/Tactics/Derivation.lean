@@ -2,6 +2,7 @@ import Solidity.Calculus.MultiStep
 import Solidity.Calculus.CandidateStep
 import Solidity.Update.Merge
 import Solidity.Update.SequentSyntax
+import Solidity.Update.SequentPP
 import Solidity.Tactics.RuleSimpAttr
 
 namespace Solidity.Examples
@@ -923,24 +924,86 @@ macro "seq_rule_step" : tactic => `(tactic|
   set_option maxRecDepth 32768 in
     (refine NamedFrontierStep.head rfl (by find_pinned_step) ?_) <;> rfl)
 
+open Lean Elab Tactic Meta in
+/-- Reduce both frontiers of a `⇝ᵘ*` goal to literal constructor applications.
+
+A step leaves its successor as the *equation* the rule's effect satisfies --
+`[] ++ Update.goalSequents … ++ []`, with the name tables of `AST.lean` still
+standing as `match "uint" with …` and a rule's guard still standing as an
+`if _ = true then _ else _`.  `dsimp only [rule_simp_set]` renormalises enough
+of that for the next step's `decide` goals, but it works by *unfolding* the
+tables, so what is left is bigger than what it started from and is not a
+frontier anyone can read.
+
+So reduce it properly.  `Meta.reduce` is `#reduce`'s engine: everything here is
+closed except the postcondition, which is an fvar and so is already a normal
+form, and the result is definitionally the goal -- `change` is the whole proof
+obligation.  The step that follows is unaffected, since it `whnf`s the frontier
+anyway; what changes is that the goal in between is a literal frontier, which
+is the thing `Update/SequentPP.lean` can print and a reader can check. -/
+elab "seq_norm" : tactic => do
+  let g ← getMainGoal
+  g.withContext do
+    let ty ← whnf (← g.getType)
+    unless ty.isAppOfArity ``FrontierMultiStep 2 do
+      throwError "seq_norm: expected a `⇝ᵘ*` goal, got{indentExpr ty}"
+    let before ← reduce ty.appFn!.appArg!
+    let after ← reduce ty.appArg!
+    let g' ← g.change (mkAppN (mkConst ``FrontierMultiStep) #[before, after])
+    replaceMainGoal [g']
+
 open Lean in
-/-- Discharge a `⇝ᵘ*` line by applying the listed rules in order.  A trailing
-merge is allowed, so an elided run may end on the calculus's parallel form. -/
-macro "seq_steps " "[" rs:term,* "]" : tactic => do
-  let mut tacs : Array (TSyntax `tactic) := #[]
-  for r in rs.getElems do
-    tacs := tacs.push (← `(tactic|
-      refine FrontierMultiStep.step
-        ⟨_, NamedFrontierStep.head rfl
-          (show FirstStepCase _ _ Rules.stepCases (Rules.stepCase $r) _ _ from
-            by find_pinned_step) rfl⟩ ?_))
-    tacs := tacs.push (← `(tactic| try dsimp only [rule_simp_set]))
-  tacs := tacs.push (← `(tactic| first
+/-- Advance a `⇝ᵘ*` goal **one step**, by the named rule, leaving the
+successor the rule computes as the new goal.
+
+Its neighbour `seq_rule_step` is a different shape: that one *closes* a
+`f ⇝ᵘ[.rule] f'` line, whose successor is written out.  This one is for a
+chain whose intermediate frontiers are not written at all -- what stands after
+it is what the rule produced, which is what lets a derivation be read one line
+at a time rather than checked all at once.
+
+Two tactics follow the step and neither is optional.  `dsimp only
+[rule_simp_set]` renormalises the inferred residual far enough that the *next*
+step's `decide` goals reduce; `seq_norm` then takes the frontier the rest of
+the way to a literal, which is what makes the goal in between something to
+read.  Both are `try`, so a shape neither handles still leaves a provable
+goal. -/
+macro "seq_step " r:term : tactic => do
+  let seq ← `(tacticSeq|
+    refine FrontierMultiStep.step
+      ⟨_, NamedFrontierStep.head rfl
+        (show FirstStepCase _ _ Rules.stepCases (Rules.stepCase $r) _ _ from
+          by find_pinned_step) rfl⟩ ?_
+    try dsimp only [rule_simp_set]
+    try seq_norm)
+  `(tactic| set_option maxRecDepth 32768 in $seq)
+
+/-- Close a `⇝ᵘ*` goal that has reached its target: by reflexivity, or -- when
+the two lines differ only in how the accumulated update is spelled -- by the
+merge.  That second branch is what lets one `⇝ᵘ*` absorb the trailing `≡` line
+the paper draws separately. -/
+macro "seq_done" : tactic => `(tactic|
+  first
     | exact FrontierMultiStep.refl
     | (refine FrontierMultiStep.equiv ?_ FrontierMultiStep.refl
-       upd_merge)))
-  let seq ← `(tacticSeq| $[$tacs]*)
-  `(tactic| set_option maxRecDepth 32768 in $seq)
+       upd_merge))
+
+open Lean Elab Tactic in
+/-- Discharge a `⇝ᵘ*` line by applying the listed rules in order.  A trailing
+merge is allowed, so an elided run may end on the calculus's parallel form.
+
+`seq_step` per element and `seq_done` at the end -- the same proof term the
+older macro built, folded here by an elaborator instead so that each rule name
+can carry its **own** tactic-info node.  That is what makes the cursor on `.b`
+in `seq_steps [.a, .b, .c]` show the frontier at that point, the way it does
+inside `rw [a, b, c]` (`Lean.Elab.Tactic.withRWRulesSeq` does the same thing
+for the same reason).  A chain that wants those frontiers on the page instead
+writes one `seq_step` per line. -/
+elab "seq_steps " "[" rs:term,* "]" : tactic => do
+  for r in rs.getElems do
+    withTacticInfoContext r do
+      evalTactic (← `(tactic| seq_step $r))
+  evalTactic (← `(tactic| seq_done))
 
 open Lean Elab Tactic Meta in
 /-- Do two literal frontiers agree, line by line, on antecedent and goal?
@@ -1089,6 +1152,22 @@ elab "seq_steps!" fuelStx:(num)? : tactic =>
     let fuel := (fuelStx.map (·.getNat)).getD 128
     let used ← autoSeqStepsLoop fuel #[]
     trace[solidity.steps] "{← rulesText used}"
+
+open Lean Elab Tactic Meta in
+/-- `seq_steps!`, and report the sequence it found as a pasteable
+`seq_steps [...]` -- the sequent twin of `steps?`.  The names come from the
+proof that was actually built, so this cannot drift from what was checked.
+
+This is how a chain gets written in the tactic form: state the two endpoints,
+prove them with `seq_steps?`, paste the list back, and split it into one
+`seq_step` per line where the frontiers in between are the point. -/
+elab tk:"seq_steps?" fuelStx:(num)? : tactic =>
+  withOptions (fun o => maxRecDepth.set o 32768) do
+    let fuel := (fuelStx.map (·.getNat)).getD 128
+    let used ← autoSeqStepsLoop fuel #[]
+    let parts ← (used.mapM ruleNameText : MetaM (Array String))
+    Lean.Meta.Tactic.TryThis.addSuggestion tk
+      ("seq_steps [" ++ String.intercalate ", " parts.toList ++ "]")
 
 /-- One step of a `⇝ᵘ*` line with the rule inferred.  `seq_steps! 1` is
 "at most one step, then close", so a line that only merges is covered too. -/

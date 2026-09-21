@@ -82,6 +82,7 @@ theorem and, for the memory algebra, a denotation into the interpreter
 | `Update/Bridges.lean` | `Par.toUpd [...] = <family> args`, built on frame facts. Coverage list in its docstring. |
 | `Update/Step.lean` | The derivation line `Γ ⟹ {U₁}…{Uₙ} goal`, `Frontier`, `NamedFrontierStep`, `Frontier.Equiv` (the merge line). Arrows `⇝ᵘ`, `⇝ᵘ*`, `⇝ᵘ[r]`, `≡ᵘ`. |
 | `Update/SequentSyntax.lean` | The `seq!{ … }` surface notation and the `=>` derivation line (`sol_line`), including the paper's bare `(φ)` goal. |
+| `Update/SequentPP.lean` | The other direction: a delaborator printing a `Sequent` back as its `seq!` line, so a goal between two steps reads as the calculus draws it. Falls back per line on anything it cannot account for; `pp.solidity.seq` switches it off. |
 | `Update/Merge.lean` | Reader lemmas a merge line needs, all `@[upd_merge_set]`. |
 | `Update/Examples.lean` | The headline chain's last two lines, written out of `Upd.Elem` functions. |
 
@@ -127,7 +128,7 @@ They are infrastructure, not examples, which is why they are not under
 
 | Module | What it is |
 |---|---|
-| `Tactics/Derivation.lean` | `sol_derivation`, `sol_runs`, `sol_calculus`, the `steps`/`steps!` navigation, `upd_norm`/`upd_merge`, and the alias helpers. The single largest shared dependency in the package. |
+| `Tactics/Derivation.lean` | `sol_derivation`, `sol_runs`, `sol_calculus`, the `steps`/`steps!` navigation, the sequent layer's `seq_step`/`seq_done`/`seq_steps?`/`seq_norm`, `upd_norm`/`upd_merge`, and the alias helpers. The single largest shared dependency in the package. |
 | `Tactics/Rewrite.lean` | `sol_rewrite` and the `theory_step` family: the equality-arrow sibling of `sol_derivation`, resolving a rule name through `Theory/Rewrite.lean`'s `theoryRuleLemma`. |
 | `Tactics/RuleSimpAttr.lean` | `register_simp_attr rule_simp_set`, the `solidity.steps` trace class, and the `sol_rule` command that tags rules into the set. Its own module because a simp attribute must be initialized in a module imported by its users. |
 | `Tactics/EvalBattery.lean` | `sol_eval_battery` / `sol_exec_eval`; depend on the interpreter alone. |
@@ -185,8 +186,10 @@ Three trees, told apart by the *proof route*, not by the subject:
 - `Examples/` — the block-rewriting examples (`—→`/`—↠`, anonymous, numbered
   1–37 across the eight files) and `Examples/Derivations/` (named
   `sol_derivation` theorems in `⇝[.rule]`, so a rule rename is a build
-  failure). `Examples/Taclets/` ports the KeY taclet tests and checks them
-  against the semantics with `native_decide`.
+  failure). `Examples/Derivations/StorageSteps.lean` is the one chain written
+  the other way round — endpoints in the statement, rules in the proof — which
+  is what `seq_step` is for. `Examples/Taclets/` ports the KeY taclet tests and
+  checks them against the semantics with `native_decide`.
 - `SolidityPaper.lean` and `Paper/` — **the calculus's worked examples**: the
   root carries the conventions and the imports, `Paper/` the chains, written
   as the calculus writes them (`=> {U} <[ p ]>(φ) ~*> …`), update beside the
