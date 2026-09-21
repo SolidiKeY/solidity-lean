@@ -1,9 +1,9 @@
-# Project-scoped Codex configuration. Codex loads this file after the
-# repository has been trusted.
-
 [mcp_servers.lean_lsp]
 command = "scripts/run-lean-mcp.sh"
 cwd = "."
 startup_timeout_sec = 90
 tool_timeout_sec = 300
 enabled = true
+
+[mcp_servers.lean-lsp]
+command = "scripts/run-lean-mcp.sh"
