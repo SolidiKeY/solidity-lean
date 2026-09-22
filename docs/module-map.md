@@ -186,9 +186,10 @@ Three trees, told apart by the *proof route*, not by the subject:
 - `Examples/` — the block-rewriting examples (`—→`/`—↠`, anonymous, numbered
   1–37 across the eight files) and `Examples/Derivations/` (named
   `sol_derivation` theorems in `⇝[.rule]`, so a rule rename is a build
-  failure). `Examples/Derivations/StorageSteps.lean` is the one chain written
-  the other way round — endpoints in the statement, rules in the proof — which
-  is what `seq_step` is for. `Examples/Taclets/` ports the KeY taclet tests and
+  failure). `Examples/Derivations/StorageSteps.lean` is `Paper/Storage.lean`
+  written the other way round — endpoints in the statement, rules in the proof
+  — which is what `seq_step` is for, and which puts the storage chains in the
+  default build. `Examples/Taclets/` ports the KeY taclet tests and
   checks them against the semantics with `native_decide`.
 - `SolidityPaper.lean` and `Paper/` — **the calculus's worked examples**: the
   root carries the conventions and the imports, `Paper/` the chains, written

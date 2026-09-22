@@ -66,7 +66,8 @@ seq_done`, one rule per line, with the frontier in between left to the goal
 rather than the page. Reach for it when what you want is to *step through* a
 derivation; keep `sol_derivation` when the intermediate lines are the artefact,
 which in `Paper/` they always are. `Examples/Derivations/StorageSteps.lean` is
-the worked example, and holds both spellings of one chain.
+the worked example: every chain of `Paper/Storage.lean` in that presentation,
+under the same names, and the headline one in both spellings side by side.
 
 | Tactic | On a `⇝ᵘ*` goal |
 |---|---|
