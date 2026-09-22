@@ -998,10 +998,29 @@ can carry its **own** tactic-info node.  That is what makes the cursor on `.b`
 in `seq_steps [.a, .b, .c]` show the frontier at that point, the way it does
 inside `rw [a, b, c]` (`Lean.Elab.Tactic.withRWRulesSeq` does the same thing
 for the same reason).  A chain that wants those frontiers on the page instead
-writes one `seq_step` per line. -/
+writes one `seq_step` per line.
+
+Each node is widened to reach the *next* element's first character, so the
+comma and the line break after a rule belong to that rule.  `goalsAt?` takes
+the innermost node containing the cursor and shows its state after the tactic
+once the cursor is past the node's start; on the bare name that made the whole
+gap between two rules nobody's, and a cursor there fell through to the
+`seq_steps` node itself -- which, with elements still to come after the cursor,
+reports the goals *before the entire tactic*, i.e. the line as stated.  It is a
+correct answer to a question nobody asked, and it reads as a derivation that
+has not started.  Widened, the end of a line carries what the rules up to there
+have reached, which is what the one-`seq_step`-per-line spelling shows. -/
 elab "seq_steps " "[" rs:term,* "]" : tactic => do
-  for r in rs.getElems do
-    withTacticInfoContext r do
+  let elems := rs.getElems
+  -- `Info.pos?` reads canonical positions only, so a `seq_steps` built by a
+  -- macro (`sol_derivation`) has none to widen with and keeps the bare refs.
+  let starts := elems.map (·.raw.getPos? (canonicalOnly := true))
+  for i in [0:elems.size] do
+    let r := elems[i]!
+    let ref := match starts[i]!, (if i + 1 < elems.size then starts[i + 1]! else none) with
+      | some pos, some next => if pos < next then Syntax.ofRange ⟨pos, next⟩ else r.raw
+      | _, _ => r.raw
+    withTacticInfoContext ref do
       evalTactic (← `(tactic| seq_step $r))
   evalTactic (← `(tactic| seq_done))
 
