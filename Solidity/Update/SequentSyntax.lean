@@ -74,7 +74,7 @@ private def gen (x : Lean.Name) : Ident := mkIdent x
 
 /-! ## Views on a `sol_expr`
 
-The KeY-side vocabulary of an update -- `save(p, t)`, `path(sp)`,
+The KeY-side vocabulary of an update -- `save(storage, p, t)`, `delAt(storage, p)`,
 `transfer(a, v)` -- is written as an **application** and read off its head,
 which is what `sol_rule` does for a schema-variable rule
 (`Calculus/RuleSyntax.lean`, `callHead?`).  The reason is the same and it is not
@@ -92,6 +92,28 @@ def identName? : TSyntax `sol_expr → Option String
 def callHead? : TSyntax `sol_expr → Option (String × Array (TSyntax `sol_expr))
   | `(sol_expr| $f:ident($args,*)) => some (f.getId.toString, args.getElems)
   | _ => none
+
+/-- Does this `sol_expr` name an array's *extent* -- `arr.length`?
+
+Three spellings reach it.  The field production fires only when the receiver
+is not an identifier; `values.length` is one dotted identifier to the lexer;
+and in `sp@TokenArray.length` the `@` production's type identifier swallows
+the `.length` (`AST.lean` splits it again).  All three have to be recognised,
+because the write to that location is a `Rules.StTerm.setSize` and not a
+`save`. -/
+def isLengthTarget : TSyntax `sol_expr → Bool
+  | `(sol_expr| $_:sol_expr . $f:ident) => f.getId.toString == "length"
+  | `(sol_expr| $x:ident) => x.getId.toString.endsWith ".length"
+  | `(sol_expr| $_:ident@$t:ident) => t.getId.toString.endsWith ".length"
+  | `(sol_expr| $_:ident@@$t:ident) => t.getId.toString.endsWith ".length"
+  | _ => false
+
+/-- Does this `sol_expr` name the slot a push appends -- `arr[arr.length]` or
+`arr.push()`? -/
+def isPushSlot : TSyntax `sol_expr → Bool
+  | `(sol_expr| $_:sol_expr[$i:sol_expr]) => isLengthTarget i
+  | `(sol_expr| $_:sol_expr .push()) => true
+  | _ => false
 
 /-! ## Side formulas -/
 
@@ -128,7 +150,7 @@ partial def expandFormula : TSyntax `sol_formula → MacroM (TSyntax `term)
 /-! ## Elementary updates
 
 One production per `UpdElem`, named as the taclet names it: `storage := save(p, t)`,
-`sp := path(alice.account)`, `memory := write(p, t)`, `transfer(a, se)`,
+`sp := alice.account`, `memory := write(p, t)`, `transfer(a, se)`,
 `bump(t++)`.  The component and the KeY function are read off the two sides,
 so the grammar itself is just "an assignment, or a bare application". -/
 
@@ -137,7 +159,7 @@ declare_syntax_cat sol_upd
 `copy(p, sp)`, `copyMem(p, mv)`, `push(arr)`, `push(arr, v)`, `pop(arr)`,
 `clear(p)` under `storage`; a `MemTerm` -- `write(m, p, v)`, `alloc(T)`,
 `alloc(T, sp)`, `memory` -- under `memory`;
-`path(sp)`, `ref(m)`, `freshId(m)`, `slot(arr.push())`, `default(T)`, `length(arr)`,
+`find(storage, p)`, `select(storage, gsp)`, `ref(m)`, `freshId(m)`, `defVal(T)`, `length(arr)`,
 `net(a)`, `current(p)` for a name; anything else is the value itself. -/
 syntax sol_expr " := " sol_expr : sol_upd
 /-- `t ⊕= se` -- the write-back a compound assignment performs, `t op se`
@@ -165,22 +187,8 @@ partial def expandUpd (stx : TSyntax `sol_upd) : MacroM (TSyntax `term) := do
   | `(sol_upd| $lhs:sol_expr := $rhs:sol_expr) =>
       let comp := identName? lhs
       match comp, callHead? rhs with
-      | some "storage", some ("save", #[p, t]) =>
-          `($(gen ``UpdElem.storage) (.save $(← expandSolExpr p) (.read $(← expandSolExpr t))))
-      | some "storage", some ("copy", #[p, q]) =>
-          `($(gen ``UpdElem.storage) (.copy $(← expandSolExpr p) $(← expandSolExpr q)))
-      | some "storage", some ("copyMem", #[p, q]) =>
-          `($(gen ``UpdElem.storage) (.copyFromMem $(← expandSolExpr p) $(← expandSolExpr q)))
-      | some "storage", some ("push", #[a]) =>
-          `($(gen ``UpdElem.storage) (.push $(← expandSolExpr a) none))
-      | some "storage", some ("push", #[a, v]) =>
-          `($(gen ``UpdElem.storage) (.push $(← expandSolExpr a) (some $(← expandSolExpr v))))
-      | some "storage", some ("pushSlot", #[p]) =>
-          `($(gen ``UpdElem.storage) (.pushPlace $(← expandSolExpr p)))
-      | some "storage", some ("pop", #[a]) =>
-          `($(gen ``UpdElem.storage) (.pop $(← expandSolExpr a)))
-      | some "storage", some ("clear", #[p]) =>
-          `($(gen ``UpdElem.storage) (.clear $(← expandSolExpr p)))
+      | some "storage", _ =>
+          `($(gen ``UpdElem.storage) $(← expandStTerm rhs))
       | some "memory", _ => `($(gen ``UpdElem.heap) $(← expandMemTerm rhs))
       | some c, some (f, _) =>
           if c == "storage" || c == "memory" then
@@ -233,24 +241,61 @@ where
         if identName? e == some "fresh" then `($(gen ``MemVal.fresh))
         else `($(gen ``MemVal.sym) (.read $(← expandSolExpr e)))
 
+  /-- A `{storage := …}` right-hand side as a `Rules.StTerm`: `storage` is the
+  program variable, and `save`/`store`/`delAt` nest as KeY's do. -/
+  expandStTerm (e : TSyntax `sol_expr) : MacroM (TSyntax `term) := do
+    match callHead? e with
+    | some ("save", #[t, p, v]) =>
+        -- The extent and slot writes of a push or a pop, in the paper's own
+        -- spelling; `Rules.StTerm` says why they are not plain `save`s.
+        match isLengthTarget p, isPushSlot p with
+        | true, _ =>
+            `($(gen ``StTerm.setSize) $(← expandStTerm t) $(← expandSolExpr p)
+                (.read $(← expandSolExpr v)))
+        | _, true =>
+            -- The element a push appends is read by `rhsSVal` whatever its
+            -- sort -- `storagePushValueSave` and `…CopySource` are one rule --
+            -- so the value slot is a `find` even for a primitive.
+            `($(gen ``StTerm.pushAt) $(← expandStTerm t) $(← expandSolExpr p)
+                (some (.find $(← expandSolExpr v))))
+        | _, _ =>
+            `($(gen ``StTerm.save) $(← expandStTerm t) $(← expandSolExpr p)
+                $(← expandStVal v))
+    -- `store(st, f, v)` is `save` at the root's empty path.
+    | some ("store", #[t, p, v]) =>
+        `($(gen ``StTerm.save) $(← expandStTerm t) $(← expandSolExpr p)
+            $(← expandStVal v))
+    | some ("delAt", #[t, p]) =>
+        match isPushSlot p with
+        | true =>
+            `($(gen ``StTerm.pushAt) $(← expandStTerm t) $(← expandSolExpr p) none)
+        | false =>
+            `($(gen ``StTerm.delAt) $(← expandStTerm t) $(← expandSolExpr p))
+    | _ =>
+        if identName? e == some "storage" then `($(gen ``StTerm.cur))
+        else Macro.throwErrorAt e "not a storage term"
+
+  /-- A `save`'s value slot. -/
+  expandStVal (e : TSyntax `sol_expr) : MacroM (TSyntax `term) := do
+    match callHead? e with
+    | some ("find", #[_, q]) | some ("select", #[_, q]) =>
+        `($(gen ``StVal.find) $(← expandSolExpr q))
+    | some ("copyMem", #[_, _, q]) =>
+        `($(gen ``StVal.copyMem) $(← expandSolExpr q))
+    | _ => `($(gen ``StVal.sym) (.read $(← expandSolExpr e)))
+
   /-- `x := …` for a name: a binding, or -- when the right-hand side is a
   plain term -- a write-back at whichever data location `x` lives in. -/
   expandNamed (lhs rhs : TSyntax `sol_expr) : MacroM (TSyntax `term) := do
     match callHead? rhs with
-    | some ("path", #[p]) =>
-        `($(gen ``UpdElem.bind) ($(gen ``Rules.varName) $(← expandSolExpr lhs))
-            (.path $(← expandSolExpr p)))
     | some ("ref", #[p]) =>
         `($(gen ``UpdElem.bind) ($(gen ``Rules.varName) $(← expandSolExpr lhs))
             (.mref $(← expandSolExpr p)))
     | some ("freshId", #[m]) =>
         `($(gen ``UpdElem.bind) ($(gen ``Rules.varName) $(← expandSolExpr lhs))
             (.freshId $(← expandMemTerm m)))
-    | some ("slot", #[p]) =>
-        `($(gen ``UpdElem.bind) ($(gen ``Rules.varName) $(← expandSolExpr lhs))
-            (.pushSlot $(← expandSolExpr p)))
-    | some ("default", #[t]) =>
-        let some ty := identName? t | Macro.throwErrorAt t "`default` takes a type"
+    | some ("defVal", #[t]) =>
+        let some ty := identName? t | Macro.throwErrorAt t "`defVal` takes a sort"
         `($(gen ``UpdElem.bind) ($(gen ``Rules.varName) $(← expandSolExpr lhs))
             (.val (.deflt ($(gen ``SoliditySyntax.declTy) $(Syntax.mkStrLit ty)))))
     | some ("length", #[a]) =>
@@ -259,7 +304,12 @@ where
         `($(gen ``Rules.writeBack) $(← expandSolExpr lhs) (.netOf $(← expandSolExpr a)))
     | some ("current", #[p]) =>
         `($(gen ``Rules.writeBack) $(← expandSolExpr lhs) (.current $(← expandSolExpr p)))
-    | _ => `($(gen ``Rules.writeBack) $(← expandSolExpr lhs) (.read $(← expandSolExpr rhs)))
+    | some ("find", #[_, p]) | some ("select", #[_, p]) =>
+        `($(gen ``Rules.writeBack) $(← expandSolExpr lhs) (.read $(← expandSolExpr p)))
+    -- A bare right-hand side binds by its *sort*: a storage or memory place is
+    -- an alias, anything else a value.  The paper marks the value side, so
+    -- there is no `path(·)` here to tell them apart.
+    | _ => `($(gen ``Rules.bindOrWrite) $(← expandSolExpr lhs) $(← expandSolExpr rhs))
 
 /-! ## The line -/
 
@@ -442,13 +492,13 @@ variable (φ : WrappedExpr)
 #check seq!{ nonZero(i), rhsNonZero((i + 1)), CInv ⟹ <[ ]> ‹φ› }
 
 -- the storage component
-#check seq!{ ⟹ { storage := save(alice.age, ageVal) } <[ ]> ‹φ› }
-#check seq!{ ⟹ { storage := copy(alice.account, bob.account) } <[ ]> ‹φ› }
-#check seq!{ ⟹ { storage := copyMem(alice.account, mv@Account) } <[ ]> ‹φ› }
-#check seq!{ ⟹ { storage := push(values) } <[ ]> ‹φ› }
-#check seq!{ ⟹ { storage := push(values, 42) } <[ ]> ‹φ› }
-#check seq!{ ⟹ { storage := pop(values) } <[ ]> ‹φ› }
-#check seq!{ ⟹ { storage := clear(alice.account) } <[ ]> ‹φ› }
+#check seq!{ ⟹ { storage := save(storage, alice.age, ageVal) } <[ ]> ‹φ› }
+#check seq!{ ⟹ { storage := save(storage, alice.account, find(storage, bob.account)) } <[ ]> ‹φ› }
+#check seq!{ ⟹ { storage := save(storage, alice.account, copyMem(mtSt, memory, mv@Account)) } <[ ]> ‹φ› }
+#check seq!{ ⟹ { storage := save(delAt(storage, values[values.length]), values.length, values.length + 1) } <[ ]> ‹φ› }
+#check seq!{ ⟹ { storage := save(save(storage, values[values.length], 42), values.length, values.length + 1) } <[ ]> ‹φ› }
+#check seq!{ ⟹ { storage := save(delAt(storage, values[values.length - 1]), values.length, values.length - 1) } <[ ]> ‹φ› }
+#check seq!{ ⟹ { storage := delAt(storage, alice.account) } <[ ]> ‹φ› }
 
 -- the memory component
 #check seq!{ ⟹ { memory := write(memory, mv@Account.balance, 7) } <[ ]> ‹φ› }
@@ -457,10 +507,10 @@ variable (φ : WrappedExpr)
 #check seq!{ ⟹ { memory := write(alloc(Person), mv@Person.account, fresh) } <[ ]> ‹φ› }
 
 -- names
-#check seq!{ ⟹ { sp@Account := path(alice.account) } <[ ]> ‹φ› }
+#check seq!{ ⟹ { sp@Account := alice.account } <[ ]> ‹φ› }
 #check seq!{ ⟹ { mv@Person := ref(carol) } <[ ]> ‹φ› }
-#check seq!{ ⟹ { sp@UintArray := slot(values.push()) } <[ ]> ‹φ› }
-#check seq!{ ⟹ { rv@uint := default(uint) } <[ ]> ‹φ› }
+#check seq!{ ⟹ { sp@UintArray := values.push() } <[ ]> ‹φ› }
+#check seq!{ ⟹ { rv@uint := defVal(uint) } <[ ]> ‹φ› }
 #check seq!{ ⟹ { v := length(values) } <[ ]> ‹φ› }
 #check seq!{ ⟹ { v := net(to) } <[ ]> ‹φ› }
 #check seq!{ ⟹ { v := current(alice.age) } <[ ]> ‹φ› }
@@ -479,27 +529,27 @@ variable (φ : WrappedExpr)
              <[ ]> ‹φ› }
 #check seq!{ ⟹ { clear(mv@Person) } <[ ]> ‹φ› }
 #check seq!{ ⟹ { havoc } <[ ]> ‹φ› }
-#check seq!{ ⟹ { rv@uint := 10 ‖ sp@Account := path(alice.account)
-                 ‖ storage := save(alice.account.balance, 10) } <[ ]> ‹φ› }
+#check seq!{ ⟹ { rv@uint := 10 ‖ sp@Account := alice.account
+                 ‖ storage := save(storage, alice.account.balance, 10) } <[ ]> ‹φ› }
 
 -- a sequential stack, and a branching line
-#check seq!{ ⟹ { rv@uint := 10 } { sp@Account := path(alice.account) } <[ ]> ‹φ› }
+#check seq!{ ⟹ { rv@uint := 10 } { sp@Account := alice.account } <[ ]> ‹φ› }
 #check (seq!{ ⟹ <[ ]> ‹φ› } : Frontier)
-#check ([ seq!{ inBounds(values[i]) ⟹ { v := values[i] } [ ] ‹φ› },
+#check ([ seq!{ inBounds(values[i]) ⟹ { v := find(storage, values[i]) } [ ] ‹φ› },
           seq!{ ¬inBounds(values[i]) ⟹ ⊤ } ] : Frontier)
 
 -- the ASCII turnstile, and `(φ)` in each of the three modalities
 #check seq!{ => <[ alice.account.balance = 10 ]>(φ) }
 #check seq!{ => [ v = values[i] ](φ) }
 #check seq!{ => < v = values[i] >(φ) }
-#check seq!{ inBounds(values[i]) => { v := values[i] } [ ](φ) }
+#check seq!{ inBounds(values[i]) => { v := find(storage, values[i]) } [ ](φ) }
 #check seq!{ => ⊤ }
 
 -- the paper's last line: no modality drawn, the chain's own supplied.  A
 -- concrete postcondition reads the same way; an obligation is unparenthesised.
-#check seq!{ => { rv@uint := 10 ‖ storage := save(alice.account.balance, 10) } (φ) }
-#check seq!{ => { storage := save(alice.age, 10) } (alice.age) }
-#check seq!{ => { storage := save(alice.age, 10) } <[ ]>(alice.age == 10) }
+#check seq!{ => { rv@uint := 10 ‖ storage := save(storage, alice.account.balance, 10) } (φ) }
+#check seq!{ => { storage := save(storage, alice.age, 10) } (alice.age) }
+#check seq!{ => { storage := save(storage, alice.age, 10) } <[ ]>(alice.age == 10) }
 #check seq!{ => { rv@uint := 10 } funded(rv@uint) }
 
 -- …and the same text read as a program, which is what settles the priority:

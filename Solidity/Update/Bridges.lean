@@ -33,7 +33,7 @@ Proved here, as `Par.toUpd [...] = <family>`:
   (`{storage := save(…)}`) and storage-*local* root (`{p := q}`, a rebinding
   and not a storage write at all);
 * `storagePlaceAliasUpd` on a **pure** path (`{sp := path}`);
-* `stackDeclSkipUpd` (`{x := default(T)}`), `storageDeclSkipUpd` (the empty
+* `stackDeclSkipUpd` (`{x := defVal(T)}`), `storageDeclSkipUpd` (the empty
   update);
 * `compoundAssignUpd` — stack variable (`{x := x ⊕ se}`), storage field
   (`{storage := save(…)}`), memory field and memory index
@@ -111,6 +111,13 @@ writers, read off one component. -/
 def saveSt (s : State) (root : Name) (segs : List Seg) (v : SVal) :
     Res (List (Name × SVal)) :=
   (s.saveStorage root segs v).map State.storage
+
+/-- The same through `SVal.saveExt`, the writer a storage *term* uses: one
+past the end appends, and `size` is a location.  `Semantics.lean` says why
+the two differ. -/
+def saveStExt (s : State) (root : Name) (segs : List Seg) (v : SVal) :
+    Res (List (Name × SVal)) :=
+  (s.saveStorageExt root segs v).map State.storage
 
 /-- The heap-and-counter pair a memory write installs. -/
 def heapOf (r : Res State) : Res (List (Nat × MObj) × Nat) :=
@@ -485,7 +492,7 @@ theorem storagePlaceAliasUpd_bridge (name : Name) (init : WrappedExpr)
   | error h => rfl
   | ok p => obtain ⟨r, sg⟩ := p; rfl
 
-/-- `T x;`: `x := default(T)`. -/
+/-- `T x;`: `x := defVal(T)`. -/
 theorem stackDeclSkipUpd_bridge (ty : Ty) (name : Name) :
     Par.toUpd [Elem.env name (fun _ => .ok (Binding.val (defaultValue ty)))] =
       stackDeclSkipUpd ty name := by

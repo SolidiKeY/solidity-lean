@@ -18,7 +18,7 @@ that prints such a term as the line the calculus draws.
 
 ## It is not an inverse of the parser, and it does not pretend to be
 
-`expandUpd` is lossy: `x := path(p)` builds a `UpdElem.bind`, but `x := e` goes
+`expandUpd` is lossy: `x := p` on a place builds a `UpdElem.bind`, but `x := e` goes
 through `Rules.writeBack`, a *function* that dispatches on the data location,
 so there is no constructor left to match on the way back.  Several surface
 forms also build the same term -- `alice`, `alice@Person` and `alice@@Person`
@@ -360,42 +360,72 @@ private def ppSym (e : Lean.Expr) : MetaM (Option (TSyntax `sol_expr)) := do
     return some (← `(sol_expr| $(ident! "net"):ident($a)))
   if let some #[ty] := appOf? e ``Sym.deflt 1 then
     let some tn ← tyName? ty | return none
-    return some (← `(sol_expr| $(ident! "default"):ident($(ident! tn):ident)))
+    return some (← `(sol_expr| $(ident! "defVal"):ident($(ident! tn):ident)))
   return none
 
-private def ppStorageUpd (e : Lean.Expr) : MetaM (Option (TSyntax `sol_upd)) := do
+/-- A `save`'s value slot.  A storage source prints as the paper's
+`find(storage, q)`, a memory one as `copyMem(mtSt, memory, q)` -- the sorts
+KeY's two copy taclets differ in. -/
+private def ppStVal (e : Lean.Expr) : MetaM (Option (TSyntax `sol_expr)) := do
   let e ← whnf e
   let st : TSyntax `sol_expr := ← `(sol_expr| $(ident! "storage"):ident)
-  if let some #[p, v] := appOf? e ``StorageUpd.save 2 then
-    let some pe ← ppExpr p | return none
-    let some ve ← ppSym v | return none
-    return some (← `(sol_upd| $st:sol_expr := $(ident! "save"):ident($pe, $ve)))
-  if let some #[p, q] := appOf? e ``StorageUpd.copy 2 then
-    let some pe ← ppExpr p | return none
+  let mem : TSyntax `sol_expr := ← `(sol_expr| $(ident! "memory"):ident)
+  let mt : TSyntax `sol_expr := ← `(sol_expr| $(ident! "mtSt"):ident)
+  if let some #[q] := appOf? e ``StVal.find 1 then
     let some qe ← ppExpr q | return none
-    return some (← `(sol_upd| $st:sol_expr := $(ident! "copy"):ident($pe, $qe)))
-  if let some #[p, q] := appOf? e ``StorageUpd.copyFromMem 2 then
-    let some pe ← ppExpr p | return none
+    return some (← `(sol_expr| $(ident! "find"):ident($st, $qe)))
+  if let some #[q] := appOf? e ``StVal.copyMem 1 then
     let some qe ← ppExpr q | return none
-    return some (← `(sol_upd| $st:sol_expr := $(ident! "copyMem"):ident($pe, $qe)))
-  if let some #[p] := appOf? e ``StorageUpd.pop 1 then
+    return some (← `(sol_expr| $(ident! "copyMem"):ident($mt, $mem, $qe)))
+  if let some #[v] := appOf? e ``StVal.sym 1 then
+    return (← ppSym v)
+  if let some #[v] := appOf? e ``StVal.pushed 1 then
+    let v ← whnf v
+    let some #[_, x] := appOf? v ``Option.some 2 | return none
+    return (← ppExpr x)
+  return none
+
+/-- A `Rules.StTerm`, printed as the nested writes it is. -/
+private partial def ppStTerm (e : Lean.Expr) : MetaM (Option (TSyntax `sol_expr)) := do
+  let e ← whnf e
+  if e.isConstOf ``StTerm.cur then
+    return some (← `(sol_expr| $(ident! "storage"):ident))
+  if let some #[t, p, v] := appOf? e ``StTerm.save 3 then
+    let some te ← ppStTerm t | return none
     let some pe ← ppExpr p | return none
-    return some (← `(sol_upd| $st:sol_expr := $(ident! "pop"):ident($pe)))
-  if let some #[p] := appOf? e ``StorageUpd.clear 1 then
+    let some ve ← ppStVal v | return none
+    -- The paper's two names for one write: `store` at a root, `save` at a
+    -- path.  A save target that is a *variable* is a global root -- a local
+    -- alias is stuck in `locPath` -- so the shape decides it.
+    let isRoot := (appOf? (← whnf p) ``Typed.WrappedExpr.var 3).isSome
+    if isRoot then
+      return some (← `(sol_expr| $(ident! "store"):ident($te, $pe, $ve)))
+    return some (← `(sol_expr| $(ident! "save"):ident($te, $pe, $ve)))
+  if let some #[t, p] := appOf? e ``StTerm.delAt 2 then
+    let some te ← ppStTerm t | return none
     let some pe ← ppExpr p | return none
-    return some (← `(sol_upd| $st:sol_expr := $(ident! "clear"):ident($pe)))
-  if let some #[p] := appOf? e ``StorageUpd.pushPlace 1 then
-    let some pe ← ppExpr p | return none
-    return some (← `(sol_upd| $st:sol_expr := $(ident! "pushSlot"):ident($pe)))
-  if let some #[a, v] := appOf? e ``StorageUpd.push 2 then
+    return some (← `(sol_expr| $(ident! "delAt"):ident($te, $pe)))
+  -- The push and pop writes print in the paper's spelling they were read in.
+  if let some #[t, a, n] := appOf? e ``StTerm.setSize 3 then
+    let some te ← ppStTerm t | return none
+    let some ae ← ppExpr a | return none
+    let some ne ← ppSym n | return none
+    return some (← `(sol_expr| $(ident! "save"):ident($te, $ae, $ne)))
+  if let some #[t, a, v] := appOf? e ``StTerm.pushAt 3 then
+    let some te ← ppStTerm t | return none
     let some ae ← ppExpr a | return none
     let v ← whnf v
     if v.isAppOfArity ``Option.none 1 then
-      return some (← `(sol_upd| $st:sol_expr := $(ident! "push"):ident($ae)))
+      return some (← `(sol_expr| $(ident! "delAt"):ident($te, $ae)))
     let some #[_, x] := appOf? v ``Option.some 2 | return none
-    let some xe ← ppExpr x | return none
-    return some (← `(sol_upd| $st:sol_expr := $(ident! "push"):ident($ae, $xe)))
+    let some xe ← ppStVal x | return none
+    return some (← `(sol_expr| $(ident! "save"):ident($te, $ae, $xe)))
   return none
+
+private def ppStorageUpd (e : Lean.Expr) : MetaM (Option (TSyntax `sol_upd)) := do
+  let st : TSyntax `sol_expr := ← `(sol_expr| $(ident! "storage"):ident)
+  let some te ← ppStTerm e | return none
+  return some (← `(sol_upd| $st:sol_expr := $te:sol_expr))
 
 private def ppUpdElem (e : Lean.Expr) : MetaM (Option (TSyntax `sol_upd)) := do
   let e ← whnf e
@@ -419,15 +449,16 @@ private def ppUpdElem (e : Lean.Expr) : MetaM (Option (TSyntax `sol_upd)) := do
   -- The named right-hand sides keep their spelling, so only the name is
   -- needed; `Rules.varName` of any expression called `n` is `n`.
   let bare : TSyntax `sol_expr := ← `(sol_expr| $(ident! n):ident)
+  -- A path alias prints bare: the paper marks the *value* side instead.
   if let some #[p] := appOf? rhs ``BindRhs.path 1 then
     let some pe ← ppExpr p | return none
-    return some (← `(sol_upd| $bare:sol_expr := $(ident! "path"):ident($pe)))
+    return some (← `(sol_upd| $bare:sol_expr := $pe:sol_expr))
   if let some #[p] := appOf? rhs ``BindRhs.mref 1 then
     let some pe ← ppExpr p | return none
     return some (← `(sol_upd| $bare:sol_expr := $(ident! "ref"):ident($pe)))
   if let some #[p] := appOf? rhs ``BindRhs.pushSlot 1 then
     let some pe ← ppExpr p | return none
-    return some (← `(sol_upd| $bare:sol_expr := $(ident! "slot"):ident($pe)))
+    return some (← `(sol_upd| $bare:sol_expr := $pe:sol_expr))
   -- A value binding came from `Rules.writeBack`, which ate the left-hand
   -- side's type annotation.  Find the spelling that rebuilds this update.
   let some #[v] := appOf? rhs ``BindRhs.val 1 | return none
@@ -581,13 +612,13 @@ open Solidity.Examples StandardExample SoliditySyntax
 variable (φ : WrappedExpr)
 
 example :
-    seq!{ => {se := 10 ‖ sp := path(alice.account)
-              ‖ storage := save(alice.account.balance, 10)} (φ) }
-      = seq!{ => { se@uint := 10 ‖ sp@Account := path(alice.account)
-                   ‖ storage := save(alice.account.balance, 10) } (φ) } := rfl
+    seq!{ => {se := 10 ‖ sp := alice.account
+              ‖ storage := save(storage, alice.account.balance, 10)} (φ) }
+      = seq!{ => { se@uint := 10 ‖ sp@Account := alice.account
+                   ‖ storage := save(storage, alice.account.balance, 10) } (φ) } := rfl
 
-example : seq!{ => {se := default(uint)} <[ alice.age = 10 ]>(φ) }
-    = seq!{ => { se@uint := default(uint) } <[ alice.age = 10 ]>(φ) } := rfl
+example : seq!{ => {se := defVal(uint)} <[ alice.age = 10 ]>(φ) }
+    = seq!{ => { se@uint := defVal(uint) } <[ alice.age = 10 ]>(φ) } := rfl
 
 /-- A line with nothing left to execute prints without its modality, the way
 the paper draws it; a standalone line reads that back as the combined one. -/
@@ -598,8 +629,8 @@ under. -/
 example : seq!{ inBounds(values[i]), ¬nonEmpty(values) => (φ) }
     = seq!{ inBounds(values[i]), ¬nonEmpty(values) => <[ ]> ‹φ› } := rfl
 
-example : seq!{ {storage := save(pv@uint, 3)} funded(pv@uint)
-                => {storage := save(pv@uint, 3)} (φ) }
+example : seq!{ {storage := save(storage, pv@uint, 3)} funded(pv@uint)
+                => {storage := save(storage, pv@uint, 3)} (φ) }
     = seq!{ { pv@uint := 3 } funded(pv@uint) => { pv@uint := 3 } <[ ]> ‹φ› } := rfl
 
 /-- The box and diamond modalities keep their brackets, since a program is
@@ -610,24 +641,24 @@ example : seq!{ => [ alice.age = ageVal ](φ) }
 example : seq!{ => < result = alice.age >(result == 0) }
     = seq!{ ⟹ < result = alice.age > (result == 0) } := rfl
 
-example : seq!{ => {storage := copy(alice.account, bob.account)} (φ) }
-    = seq!{ ⟹ { storage := copy(alice.account, bob.account) } <[ ]> ‹φ› } := rfl
+example : seq!{ => {storage := save(storage, alice.account, find(storage, bob.account))} (φ) }
+    = seq!{ ⟹ { storage := save(storage, alice.account, find(storage, bob.account)) } <[ ]> ‹φ› } := rfl
 
-example : seq!{ => {storage := push(values, 42)} (φ) }
-    = seq!{ ⟹ { storage := push(values, 42) } <[ ]> ‹φ› } := rfl
+example : seq!{ => {storage := save(save(storage, values[values.length], 42), values.length, values.length + 1)} (φ) }
+    = seq!{ ⟹ { storage := save(save(storage, values[values.length], 42), values.length, values.length + 1) } <[ ]> ‹φ› } := rfl
 
-example : seq!{ => {sp := slot(values.push())} (φ) }
-    = seq!{ ⟹ { sp@UintArray := slot(values.push()) } <[ ]> ‹φ› } := rfl
+example : seq!{ => {sp := values.push()} (φ) }
+    = seq!{ ⟹ { sp@UintArray := values.push() } <[ ]> ‹φ› } := rfl
 
 example : seq!{ => {v := length(values)} (φ) }
     = seq!{ ⟹ { v := length(values) } <[ ]> ‹φ› } := rfl
 
 /-- And the derivation this was written for: the frontier `deepFieldWrite`
 stands at after two steps (`Examples/Derivations/StorageSteps.lean`). -/
-example : seq!{ => {se := default(uint)}
+example : seq!{ => {se := defVal(uint)}
                    <[ se@uint = 10; Account storage sp = alice.account;
                       sp@Account.balance = se@uint ]>(φ) }
-    = seq!{ => { se@uint := default(uint) }
+    = seq!{ => { se@uint := defVal(uint) }
               <[ se@uint = 10; Account storage sp = alice.account;
                  sp@Account.balance = se@uint ]>(φ) } := rfl
 

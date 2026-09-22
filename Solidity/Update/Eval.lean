@@ -187,47 +187,132 @@ def bindRhs (r : BindRhs) (s : State) : Res Binding :=
         | some id => .ok (Binding.mref id)
         | none => .error .stuck
 
-/-- `arr.push(…)`: the element is read first, then appended.  `none` is
-`arr.push()`, which appends the slot a `pop` gave back (`Semantics.pushSlot`),
-cleared — KeY's `delAt(storage, at(n))` — or the element type's default where
-the array has never been that long. -/
-def pushStorage (arr : WrappedExpr) (value : Option WrappedExpr) (s : State) :
+/-! ## `storage := …`
+
+A storage update is a *term* (`Rules.StTerm`), so evaluating it is one
+recursion rather than one function per shape — the same shape `memEval` has
+on the memory side.  Every subterm is read in the state the update is
+*applied* in, as KeY reads them: only the writes compose, so the recursion
+threads the storage component and hands each target and value the pre-state.
+
+`push` and `pop` have no arm here.  They are nested writes —
+`save(save(storage, consr(arr, at(ℓ)), se), consr(arr, size), ℓ + 1)` and
+`save(delAt(storage, consr(arr, at(ℓ - 1))), consr(arr, size), ℓ - 1)` — and
+`Semantics.SVal.save` is what makes them denote: a write one past the end
+appends, and a `size` write truncates, handing the cleared tail back as the
+recycled slots `Semantics.pushSlot` deals out. -/
+
+/-- The storage image of a `save`'s value slot. -/
+def stVal (s : State) : StVal -> Res SVal
+  | .sym t => (Sym.eval s t).map Value.toSVal
+  -- `find(storage, src)` and `copyMem(mtSt, memory, src)` are one function
+  -- here: `rhsSVal` picks between them by the source's kind, which is the
+  -- sort the two KeY terms differ in.
+  | .find src => rhsSVal s src
+  | .copyMem src => rhsSVal s src
+  | .pushed (some src) => rhsSVal s src
+  | .pushed none => .error .stuck
+
+/-- `save(st, p, v)` / `store(st, f, v)`, with the path and the value read in
+`pre` and the write applied to the storage `g` the inner term left. -/
+def storageSaveOn (pre : State) (g : List (Name × SVal)) (target : WrappedExpr)
+    (v : SVal) : Res (List (Name × SVal)) :=
+  locPath pre target >>= fun p => Upd.saveSt { pre with storage := g } p.1 p.2 v
+
+/-- `storageSave` through the calculus's writer: the shape a terminal rule's
+update has. -/
+def storageSaveExt (s : State) (target : WrappedExpr) (v : SVal) :
     Res (List (Name × SVal)) :=
-  placePath s arr >>= fun p => s.findStorage p.1 p.2 >>= fun cur =>
-    match cur, arr.ty with
-    | SVal.array elems shadow, Ty.ref (RefTy.array elemTy) =>
-        (match value with
-          | none => .ok (pushSlot elemTy shadow).1
-          | some rhs => rhsSVal s rhs) >>= fun newElem =>
-          Upd.saveSt s p.1 p.2
-            (SVal.array (elems ++ [newElem]) (pushSlot elemTy shadow).2)
-    | _, _ => .error .stuck
+  locPath s target >>= fun p => Upd.saveSt s p.1 p.2 v
+
+/-- `delAt(st, p)`: the value at `p` cleared in place, or — at an array index
+one past the end — the recycled slot a bare `arr.push()` appends.  KeY writes
+`delAt(storage, consr(arr, at(n)))` for both, and they are the same write:
+`defaultOf` is idempotent, so clearing the slot a `pop` handed back is what
+makes its mapping members survive into the next `push`. -/
+def delAtOn (pre : State) (g : List (Name × SVal)) (target : WrappedExpr) :
+    Res (List (Name × SVal)) :=
+  -- An update's index is a *term*, not a program expression: `pop` clears
+  -- `consr(arr, at(ℓ - 1))`, and `ℓ - 1` is arithmetic on the extent that
+  -- `simpleInt` -- which answers for `sp[ie]`, where the rules have already
+  -- frozen the index into a variable -- is stuck on.  So the index is read
+  -- with `readTerm`, the reader a `Sym` uses; on a frozen index the two agree.
+  let resolved : Res (State × Name × List Seg) :=
+    match target with
+    | WrappedExpr.index _ _ base ix =>
+        placePath pre base >>= fun p =>
+          readTerm pre ix >>= Value.asInt >>= fun i =>
+            .ok (pre, p.1, p.2 ++ [Seg.at i])
+    | _ => deletePath pre target
+  resolved >>= fun x =>
+    let s' := { x.1 with storage := g }
+    s'.findStorage x.2.1 x.2.2 >>= fun cur =>
+      (s'.saveStorage x.2.1 x.2.2 cur.defaultOf).map State.storage
+
+/-- `save(st, consr(arr, size), n)`: the extent write of a push or a pop.
+`lenTarget` is the `arr.length` the rule wrote, so its path already ends in
+the `size` segment.  Growing is already done -- `pushAt` appended -- so it is
+a no-op; shrinking truncates, and the cleared tail becomes the recycled
+slots.  This is the write `SVal.saveExt` has and `SVal.save` does not. -/
+def setSizeOn (pre : State) (g : List (Name × SVal)) (lenTarget : WrappedExpr)
+    (n : Sym) : Res (List (Name × SVal)) :=
+  Sym.eval pre n >>= fun v =>
+    locPath pre lenTarget >>= fun p =>
+      Upd.saveStExt { pre with storage := g } p.1 p.2 v.toSVal
+
+/-- `save(st, consr(arr, at(ℓ)), v)` at `ℓ = size`: the slot a push appends.
+`slot` is the `arr[arr.length]` or `arr.push()` the rule wrote; `deletePath`
+resolves both, and the array is its path less the last segment.  `none` is the
+bare push, whose slot is the one a `pop` cleared and gave back
+(`Semantics.pushSlot`) -- KeY's `delAt` there, and the clear that lets a
+mapping member survive into the next push. -/
+def pushAtOn (pre : State) (g : List (Name × SVal)) (slot : WrappedExpr)
+    (v : Option StVal) : Res (List (Name × SVal)) :=
+  -- The array, not the slot: the written index is `arr.length` by
+  -- construction, so it is *the extent* and never evaluated as an index --
+  -- `simpleInt` would be stuck on it, and KeY does not read it either.
+  let arr := match slot with
+    | WrappedExpr.index _ _ base _ => base
+    | WrappedExpr.pushPlace base => base
+    | e => e
+  let s' := { pre with storage := g }
+  placePath pre arr >>= fun p => s'.findStorage p.1 p.2 >>= fun cur =>
+    match cur with
+    | SVal.array elems shadow =>
+        (match v with
+          | none => .ok (pushSlot slot.ty shadow).1
+          | some y => stVal pre y) >>= fun newElem =>
+          Upd.saveStExt s' p.1 (p.2 ++ [Seg.at elems.length]) newElem
+    | _ => .error .stuck
 
 /-- `storage := …`. -/
-def storageRhs (u : StorageUpd) (s : State) : Res (List (Name × SVal)) :=
-  match u with
-  | .save target t => Sym.eval s t >>= fun v => storageSave s target v.toSVal
-  | .copy target src => rhsSVal s src >>= fun v => storageSave s target v
-  | .copyFromMem target src => rhsSVal s src >>= fun v => storageSave s target v
-  | .push arr value => pushStorage arr value s
-  | .pushPlace place =>
-      match place with
-      | WrappedExpr.pushPlace arr => pushStorage arr none s
-      | _ => .error .stuck
-  | .pop arr =>
-      placePath s arr >>= fun p => s.findStorage p.1 p.2 >>= fun cur =>
-        match cur with
-        | SVal.array elems shadow =>
-            match elems.reverse with
-            | [] => .error .revert
-            | last :: restRev =>
-                Upd.saveSt s p.1 p.2
-                  (SVal.array restRev.reverse (last.defaultOf :: shadow))
-        | _ => .error .stuck
-  | .clear target =>
-      deletePath s target >>= fun x =>
-        x.1.findStorage x.2.1 x.2.2 >>= fun cur =>
-          (x.1.saveStorage x.2.1 x.2.2 cur.defaultOf).map State.storage
+def storageRhs (t : StTerm) (s : State) : Res (List (Name × SVal)) :=
+  match t with
+  | .cur => .ok s.storage
+  | .save u target v =>
+      storageRhs u s >>= fun g => stVal s v >>= storageSaveOn s g target
+  | .delAt u target =>
+      storageRhs u s >>= fun g => delAtOn s g target
+  | .setSize u lenTarget n =>
+      storageRhs u s >>= fun g => setSizeOn s g lenTarget n
+  | .pushAt u slot v =>
+      storageRhs u s >>= fun g => pushAtOn s g slot v
+
+/-- The recursion's base case writes into the state it was handed, so the
+record update it introduces is the identity.  The merge tactics unfold
+`storageSaveOn`, so they need this to get back to the plain writer. -/
+@[simp] theorem storageSaveOn_self (s : State) (target : WrappedExpr) (v : SVal) :
+    storageSaveOn s s.storage target v = storageSave s target v := rfl
+
+/-- A write on the program variable itself is the plain write: the
+recursion's base case hands back the pre-state's storage, and the target and
+value were being read there anyway.  This is the shape every terminal rule's
+update has, so it is what the soundness proofs unfold. -/
+@[simp] theorem storageRhs_save_cur (s : State) (target : WrappedExpr) (v : StVal) :
+    storageRhs (.save .cur target v) s = stVal s v >>= storageSave s target := rfl
+
+@[simp] theorem storageRhs_delAt_cur (s : State) (target : WrappedExpr) :
+    storageRhs (.delAt .cur target) s = delAtOn s s.storage target := rfl
 
 /-- `memory := …`: the heap-and-counter pair the calculus writes as one
 (`Upd.Elem.heap`), because an allocation moves both. -/
@@ -283,7 +368,7 @@ lives: the semantic twin of `Rules.writeBack`. -/
 def writeBackPar (target : WrappedExpr) (t : Sym) : Upd.Par :=
   match target.kind with
   | Kind.stack => [Upd.Elem.env (varName target) (bindRhs (.val t))]
-  | Kind.storage => [Upd.Elem.storage (storageRhs (.save target t))]
+  | Kind.storage => [Upd.Elem.storage (storageRhs (.save .cur target (.sym t)))]
   | Kind.memory => [Upd.Elem.heap (heapRhs (.write .cur target (.sym t)))]
 
 /-- An elementary update as the parallel update it names.  Three constructors

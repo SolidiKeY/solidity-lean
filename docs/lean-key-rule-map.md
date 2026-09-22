@@ -27,7 +27,7 @@ every write leaves, never collapsed, read through by member sort by the five
 a location keeps the location's mapping members.  The same fold moved
 `storageIndexDelete` to `delAt` and gave `structMemoryRules.key` two
 `selectOnCopyMem*` reads.  The program rows are unchanged, since
-`Rules.StorageUpd.copy` is the whole term in one constructor.
+`Rules.StVal.find` is the whole term in one value slot.
 `Theory/Storage.lean` keeps the **pre-fold** algebra — `saveOnEmpty`,
 `saveOnStoreCons` with its `isEmpty(flds)` split, `selectOnSaveEmpty` over
 solkey's two sorts — because that is the paper's signature (`saveEmptyPath`:
@@ -347,7 +347,7 @@ Two things to know about the upstream state:
 
 | KeY taclet | Lean rule | Status | Notes |
 | --- | --- | --- | --- |
-| `storageRootDelete` | `storageRootDelete` | done | `delete(gsp) ⇝ {storage := clear(gsp)}`; the three simple targets were one Lean rule (`storageDeleteSimpleTarget`) until the paper's split gave each its own |
+| `storageRootDelete` | `storageRootDelete` | done | `delete(gsp) ⇝ {storage := delAt(storage, gsp)}`; the three simple targets were one Lean rule (`storageDeleteSimpleTarget`) until the paper's split gave each its own |
 | `storageFieldDelete` | `storageFieldDelete` | done | |
 | `storageIndexDelete` | `storageIndexDelete` | done | `isArray sp ∨ isMapping sp`; writes `delAt` upstream since the `copyAt`→`save` fold (delete-semantics note below) |
 | `storageFieldDelete_unfold_leftFst` | `storageFieldDeleteUnfoldLeftFst` | done | was one third of `storageDeleteComplexTarget` |
@@ -636,7 +636,7 @@ KeY, and why `find`'s one-segment arm (`isEmpty(flds)`) is not decoration.
 and no denotation for storage: the `*CopySource` / `…StoreRoot` program rows
 below are untouched because the copy they state is mapping-free by
 construction (`TypedStmt.Assign.mk`, `stmtTypingOk`), and
-`Rules.StorageUpd.push` still merges KeY's three push taclets.
+`Rules.StTerm.pushAt` still merges KeY's three push taclets.
 
 ### `memoryRules.key` → `Theory/Memory.lean`
 
@@ -762,8 +762,13 @@ lazy and the interpreter is eager:
 And one where the *update* is spelled differently: KeY writes `arr.push(se)`
 as two saves in one parallel update, the new slot `at(n)` and the new length
 `size`, both reading the pre-state. The slot index is the array's old length,
-which `SVal.save` reverts on; `Rules.StorageUpd.push` and `Update.pushStorage`
-write the extended array at the array's own path instead. Same for `pop`.
+which `SVal.save` reverts on — so the two writes are `Rules.StTerm.pushAt`
+and `Rules.StTerm.setSize`, which go through `SVal.saveExt`, where a write one
+past the end appends and `size` is a location.  They are written as KeY writes
+them, `save(save(storage, arr[arr.length], se), arr.length, arr.length + 1)`,
+and only the data tells them from a plain `save`: a *program* can perform
+neither, so the soundness bridges keep comparing rules with `SVal.save`.
+Same for `pop`.
 
 What that whole-array write now *carries* is upstream's `delAt`: both
 `storagePopSave` and `storagePushLengthSave` clear the slot at `n` rather

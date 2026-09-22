@@ -71,7 +71,7 @@ The declarative form reads as the paper draws the rule, conclusion left of
 
 ```
 sol_rule storageFieldWriteSave from storageFieldWriteSave :
-  <[ sp.fld = se ]> ⇝ { storage := save(sp.fld, se) } <[ ]>
+  <[ sp.fld = se ]> ⇝ { storage := save(storage, sp.fld, se) } <[ ]>
 ```
 
 The *kind* of every schema variable is its name, which is the paper's central
@@ -252,7 +252,8 @@ end CaseMode
     | path (src : WrappedExpr)
     /-- `lp := consr(arr, at(find(storage, consr(arr, size))))` — the slot
     `arr.push()` appends, addressed in the pre-state.  `place` is the whole
-    push place `arr.push()`; it pairs with `StorageUpd.pushPlace`. -/
+    push place `arr.push()`; the `{storage := …}` element beside it is the
+    `delAt`-and-`size` pair the same push writes. -/
     | pushSlot (place : WrappedExpr)
     /-- `mv := <identity of src>` — a memory alias (`Binding.mref`), KeY's
     `read<[Identity]>(memory, mv, fld)`. -/
@@ -264,36 +265,82 @@ end CaseMode
     | freshId (m : MemTerm)
     deriving Repr
 
-  /-- `storage := …`. -/
-  inductive StorageUpd where
-    /-- `save(storage, p, t)`. -/
-    | save (target : WrappedExpr) (t : Sym)
-    /-- `save(storage, p, find<[StValue]>(storage, src))` — a storage source.
+  /-- The value slot of a storage `save`: `structRules.key`'s
+  `save(Struct, Path, StValue)` takes an `StValue`, and that is wider than a
+  `Sym`.  A whole subtree copied out of storage or out of memory is not a term
+  any `Sym` can name, so it gets a constructor here — the twin of `MemVal` on
+  the other side. -/
+  inductive StVal where
+    /-- `save(…, se)` — a term read in the pre-state. -/
+    | sym (t : Sym)
+    /-- `find<[StValue]>(storage, src)` — a storage source.
     The source's type is mapping-free: solc ≥ 0.7 and solkey's parser reject
     the copy otherwise, `TypedStmt.Assign.mk` cannot be built for it, and
     `stmtTypingOk` states the same predicate; so the write is the plain write
-    this constructor evaluates to (`Theory/Storage.lean`'s collapsing leaf). -/
-    | copy (target : WrappedExpr) (src : WrappedExpr)
-    /-- `save(storage, p, copyMem(mtSt, memory, src))` — a memory source. -/
-    | copyFromMem (target : WrappedExpr) (src : WrappedExpr)
-    /-- `arr.push(se)` / `arr.push(sp)` / `arr.push()`: KeY's
-    `storagePushValueSave`, `…CopySource` and `storagePushLengthSave`, which
-    differ only in the *sort* of what is appended — the element, a copied
-    source, or the slot a `pop` gave back (`value = none`).  Each writes the
-    new slot and the new length.  The bare push is `delAt` at that slot, so it
-    keeps the mapping members `delete` never clears (`Semantics.pushSlot`);
-    the two valued forms overwrite it, and the leaf they would keep is
-    invisible because the interpreter is stuck on a mapping-carrying source. -/
-    | push (arr : WrappedExpr) (value : Option WrappedExpr)
-    /-- The same extension, named through a push *place* (`p = arr.push()`):
-    `place` is the whole `arr.push()` node. -/
-    | pushPlace (place : WrappedExpr)
-    /-- `arr.pop()`: `delAt` the last slot — which keeps its mapping members
-    and hands the slot back for the next `push` — and decrement the length. -/
-    | pop (arr : WrappedExpr)
-    /-- `delete p`: the current value's default (`SVal.defaultOf`, which leaves
-    mapping members alone — KeY's lazy `delAt`/`delNode`). -/
-    | clear (target : WrappedExpr)
+    this evaluates to (`Theory/Storage.lean`'s collapsing leaf). -/
+    | find (src : WrappedExpr)
+    /-- `copyMem(mtSt, memory, src)` — a memory source. -/
+    | copyMem (src : WrappedExpr)
+    /-- The element a `push` appends, which the rule carries as its `Option`
+    parameter rather than as an expression: `storagePushValueSave` and
+    `…CopySource` are one rule at two sorts, and the `Option` is which.  It is
+    always `some` where a rule writes it — the bare push is a `delAt` and does
+    not come through here — and `rhsSVal` reads it at either sort, so this is
+    a `find` that has not been unwrapped yet. -/
+    | pushed (v : Option WrappedExpr)
+    deriving Repr
+
+  /-- `storage := …`, as a term of `structRules.key`.
+
+  KeY's storage updates are terms over the `storage` program variable, not a
+  fixed set of shapes: `save(st, p, v)` writes, `store(st, f, v)` writes a
+  root, `delAt(st, p)` clears, and they nest —
+  `save(delAt(storage, consr(arr, at(ℓ))), consr(arr, size), ℓ - 1)` is the
+  whole of `storagePopSave`.  So this is a term language and not an
+  enumeration of updates, which is what `Rules.MemTerm` already is on the
+  memory side; `push` and `pop` are spellings of it rather than constructors
+  of their own.
+
+  `Semantics.SVal.array` is that nesting read *eagerly*: `elems` is the
+  extent, so the slot write appends and the `size` write beside it truncates
+  or is a no-op (`Semantics.lean`'s `SVal.save`). -/
+  inductive StTerm where
+    /-- The `storage` program variable. -/
+    | cur
+    /-- `save(st, p, v)`.  The paper's `store(st, f, v)` is this at the empty
+    path -- `locPath` resolves a global root to `(f, [])` and a nested place
+    to a path, so one constructor covers both, exactly as the theory's
+    `save s [a] v = storeAt s a v` makes `store` a restriction of `save`
+    (`Theory/Storage.lean`).  The two names still print apart. -/
+    | save (s : StTerm) (target : WrappedExpr) (v : StVal)
+    /-- `delAt(st, p)`: the value at `p`, deleted in place — the current
+    value's default (`SVal.defaultOf`), which leaves mapping members alone,
+    KeY's lazy `delAt`/`delNode`.
+
+    At an array index *one past the end* it is instead the slot `arr.push()`
+    appends: the one a `pop` cleared and gave back, or the element type's
+    default where the array has never been that long (`Semantics.pushSlot`).
+    That is the same write — `defaultOf` is idempotent — and it is why a bare
+    `push` keeps the mapping members `delete` never clears. -/
+    | delAt (s : StTerm) (target : WrappedExpr)
+    /-- `save(st, consr(arr, size), n)` -- the *extent* write of a push or a
+    pop.  KeY's storage is a total map and `size` a location like any other;
+    here `Semantics.SVal.array`'s `elems` is the extent, so this truncates,
+    handing the cleared tail back as the recycled slots `pushSlot` deals out.
+
+    It is a constructor and not a `save` because a program cannot perform it
+    -- `a.length = n` has been a solc compile error since 0.6 -- and the
+    soundness bridges compare a rule's update with the *interpreter's*
+    assignment, which is `SVal.save`.  Written `save(storage, arr.length, n)`
+    and read back the same way; only the data tells them apart. -/
+    | setSize (s : StTerm) (lenTarget : WrappedExpr) (n : Sym)
+    /-- `save(st, consr(arr, at(ℓ)), v)` at `ℓ = size` -- the slot a push
+    appends, `none` for the bare push KeY writes as `delAt` there.  A program
+    write one past the end reverts (solc, `Evm/BoundedSemantics.lean`); this
+    one appends, which is the same reason `setSize` is a constructor.
+    Written `save(storage, arr[arr.length], v)` / `delAt(storage,
+    arr[arr.length])`, the paper's own spelling. -/
+    | pushAt (s : StTerm) (slot : WrappedExpr) (v : Option StVal)
     deriving Repr
 
   /-- One elementary update of a `\replacewith`; a taclet's update is a list of
@@ -307,7 +354,7 @@ end CaseMode
   memory subterm is KeY's shared schema variable `freshIdp`. -/
   inductive UpdElem where
     | bind (n : Name) (rhs : BindRhs)
-    | storage (u : StorageUpd)
+    | storage (t : StTerm)
     | heap (t : MemTerm)
     /-- `delete m` / `delete m.f` / `delete m[se]`.  One Lean rule for KeY's
     five delete taclets, whose `MemTerm`s differ by the target's shape and
@@ -859,14 +906,47 @@ end CaseMode
     -- `docs/lean-key-rule-map.md`'s.
     | some src => MemTerm.copySt MemTerm.cur ty src
 
+  /-- `x := <a place>` keyed on the *place*: what `Rules.bindOrWrite` falls
+  back to where the bound variable's own sort does not settle it. -/
+  def bindPlace (e : WrappedExpr) : BindRhs :=
+    match e with
+    | WrappedExpr.pushPlace _ => BindRhs.path e
+    | _ =>
+    match e.kind with
+    | Kind.storage => BindRhs.path e
+    | Kind.memory => BindRhs.mref e
+    | Kind.stack => BindRhs.val (Sym.read e)
+
   /-- Write a value to a target, wherever it lives.  KeY picks between
   `v := …`, `storage := save(…)` and `memory := write(…)` by the schema
   variable's sort; here the target's `kind` says it. -/
   def writeBack (target : WrappedExpr) (t : Sym) : UpdElem :=
     match target.kind with
     | Kind.stack => UpdElem.bind (varName target) (BindRhs.val t)
-    | Kind.storage => UpdElem.storage (StorageUpd.save target t)
+    | Kind.storage => UpdElem.storage (StTerm.save .cur target (StVal.sym t))
     | Kind.memory => UpdElem.heap (MemTerm.write .cur target (MemVal.sym t))
+
+  /-- `x := <rhs>` with the right-hand side written bare.  Which binding it
+  is, is the sort of the *variable being bound* -- the paper's rule, where
+  `lsv` is a Path-sorted variable and `v` a value one -- and not the sort of
+  what is on the right: `{ v := mv.fp }` reads a memory field into a stack
+  variable, `{ mv := carol }` aliases one.  A *read* is marked on the value
+  side (`find(storage, p)`, `select(storage, gsp)`, `read(memory, mv, f)`), so
+  there is no `path(·)` wrapper to tell them apart.  `RuleSyntax.bareBind` is
+  the same decision, taken at macro time. -/
+  def bindOrWrite (lhs rhs : WrappedExpr) : UpdElem :=
+    match rhs with
+    -- Only a *place* can be aliased.  A literal or an operator node is a
+    -- value whatever the bound variable's sort is, which is what keeps
+    -- `{ se := 10 }` a stack write even though `se` names a memory alias
+    -- (`SoliditySyntax.aliasKind`).
+    | WrappedExpr.var _ _ _ | WrappedExpr.field _ _ _ _
+    | WrappedExpr.index _ _ _ _ | WrappedExpr.pushPlace _ =>
+        match lhs.kind with
+        | Kind.storage => UpdElem.bind (varName lhs) (BindRhs.path rhs)
+        | Kind.memory => UpdElem.bind (varName lhs) (BindRhs.mref rhs)
+        | Kind.stack => writeBack lhs (Sym.read rhs)
+    | _ => writeBack lhs (Sym.read rhs)
 
   /-- `t op= se;` — one write-back of `t op se`, computed at the target's type
   (KeY `storage{Root,Field,Index}{Add,…}Assign` and their local and memory
@@ -1800,56 +1880,56 @@ end CaseMode
     <[ T v = e ]> ⇝ <[ T v; v = e ]>
 
   sol_rule valueDeclSkip from valueDeclSkip :
-    <[ T v ]> ⇝ { v := default(T) } <[ ]>
+    <[ T v ]> ⇝ { v := defVal(T) } <[ ]>
 
   /-! Simple targets. -/
 
   sol_rule storageFieldWriteSave from storageFieldWriteSave :
-    <[ sp.fld = se ]> ⇝ { storage := save(sp.fld, se) } <[ ]>
+    <[ sp.fld = se ]> ⇝ { storage := save(storage, sp.fld, se) } <[ ]>
 
   sol_rule storageFieldWriteCopySource from storageFieldWriteCopySource :
-    <[ sp1.fld = sp2 ]> ⇝ { storage := copy(sp1.fld, sp2) } <[ ]>
+    <[ sp1.fld = sp2 ]> ⇝ { storage := save(storage, sp1.fld, find(storage, sp2)) } <[ ]>
 
   sol_rule storageRootWriteStore from storageRootWriteStore :
-    <[ gsp = se ]> ⇝ { storage := save(gsp, se) } <[ ]>
+    <[ gsp = se ]> ⇝ { storage := store(storage, gsp, se) } <[ ]>
 
   sol_rule storageRootWriteCopySource from storageRootWriteCopySource :
-    <[ gsp = sp ]> ⇝ { storage := copy(gsp, sp) } <[ ]>
+    <[ gsp = sp ]> ⇝ { storage := store(storage, gsp, select(storage, sp)) } <[ ]>
 
   sol_rule storageLocalRootRebind from storageLocalRootRebind :
-    <[ lsv = sp ]> ⇝ { lsv := path(sp) } <[ ]>
+    <[ lsv = sp ]> ⇝ { lsv := sp } <[ ]>
 
   sol_rule storageFieldReadFind from storageFieldReadFind :
-    <[ v = sp.fld ]> ⇝ { v := sp.fld } <[ ]>
+    <[ v = sp.fld ]> ⇝ { v := find(storage, sp.fld) } <[ ]>
 
   sol_rule storageRootReadSelect from storageRootReadSelect :
-    <[ v = sp ]> ⇝ { v := sp } <[ ]>
+    <[ v = sp ]> ⇝ { v := select(storage, sp) } <[ ]>
 
   sol_rule storageFieldReadBindLocalRoot from storageFieldReadBindLocalRoot :
-    <[ lsv = sp.fr ]> ⇝ { lsv := path(sp.fr) } <[ ]>
+    <[ lsv = sp.fr ]> ⇝ { lsv := sp.fr } <[ ]>
 
   sol_rule storageFieldReadStoreRoot from storageFieldReadStoreRoot :
-    <[ gsp = sp.fr ]> ⇝ { storage := copy(gsp, sp.fr) } <[ ]>
+    <[ gsp = sp.fr ]> ⇝ { storage := store(storage, gsp, find(storage, sp.fr)) } <[ ]>
     where isSimple gsp
 
   /-!
-  Delete.  The update is `delAt` (`StorageUpd.clear`): the location's value
+  Delete.  The update is `delAt` (`StTerm.delAt`): the location's value
   members reset, its mapping members kept.  `delete` of a push place is
   Lean's own shape and has no rule upstream.
   -/
 
   sol_rule storageRootDelete from storageRootDelete :
-    <[ delete(gsp) ]> ⇝ { storage := clear(gsp) } <[ ]>
+    <[ delete(gsp) ]> ⇝ { storage := delAt(storage, gsp) } <[ ]>
 
   sol_rule storageFieldDelete from storageFieldDelete :
-    <[ delete(sp.fld) ]> ⇝ { storage := clear(sp.fld) } <[ ]>
+    <[ delete(sp.fld) ]> ⇝ { storage := delAt(storage, sp.fld) } <[ ]>
 
   sol_rule storageIndexDelete from storageIndexDelete :
-    <[ delete(sp[ie]) ]> ⇝ { storage := clear(sp[ie]) } <[ ]>
+    <[ delete(sp[ie]) ]> ⇝ { storage := delAt(storage, sp[ie]) } <[ ]>
     where isArray sp ∨ isMapping sp
 
   sol_rule storagePushPlaceDelete :
-    <[ delete(target) ]> ⇝ { storage := clear(target) } <[ ]>
+    <[ delete(target) ]> ⇝ { storage := delAt(storage, target) } <[ ]>
     where cond := isSimplePushPlaceDeleteTarget target
 
   /-!
@@ -1858,19 +1938,19 @@ end CaseMode
   -/
 
   sol_rule storageIndexWriteMappingSave from storageIndexWriteMappingSave :
-    <[ map[ie] = se ]> ⇝ { storage := save(map[ie], se) } <[ ]>
+    <[ map[ie] = se ]> ⇝ { storage := save(storage, map[ie], se) } <[ ]>
 
   sol_rule storageIndexWriteMappingCopySource from storageIndexWriteMappingCopySource :
-    <[ map[ie] = sp ]> ⇝ { storage := copy(map[ie], sp) } <[ ]>
+    <[ map[ie] = sp ]> ⇝ { storage := save(storage, map[ie], find(storage, sp)) } <[ ]>
 
   sol_rule storageIndexReadMappingFind from storageIndexReadMappingFind :
-    <[ v = map[ie] ]> ⇝ { v := map[ie] } <[ ]>
+    <[ v = map[ie] ]> ⇝ { v := find(storage, map[ie]) } <[ ]>
 
   sol_rule storageIndexReadMappingBindLocalRoot from storageIndexReadMappingBindLocalRoot :
-    <[ lsv = map[ie] ]> ⇝ { lsv := path(map[ie]) } <[ ]>
+    <[ lsv = map[ie] ]> ⇝ { lsv := map[ie] } <[ ]>
 
   sol_rule storageIndexReadMappingStoreRoot from storageIndexReadMappingStoreRoot :
-    <[ gsp = map[ie] ]> ⇝ { storage := copy(gsp, map[ie]) } <[ ]>
+    <[ gsp = map[ie] ]> ⇝ { storage := store(storage, gsp, find(storage, map[ie])) } <[ ]>
     where isSimple gsp
 
   /-!
@@ -1882,31 +1962,31 @@ end CaseMode
 
   sol_rule storageIndexWriteArraySave twins from storageIndexWriteArraySave :
     <[ arr[ie] = se ]> ⇝
-      | inBounds(arr[ie]) ⟹ { storage := save(arr[ie], se) } <[ ]>
+      | inBounds(arr[ie]) ⟹ { storage := save(storage, arr[ie], se) } <[ ]>
       | else              ⟹ revert()
     after read(se), resolve(arr[ie])
 
   sol_rule storageIndexWriteArrayCopySource twins from storageIndexWriteArrayCopySource :
     <[ arr[ie] = sp ]> ⇝
-      | inBounds(arr[ie]) ⟹ { storage := copy(arr[ie], sp) } <[ ]>
+      | inBounds(arr[ie]) ⟹ { storage := save(storage, arr[ie], find(storage, sp)) } <[ ]>
       | else              ⟹ revert()
     after image(sp), resolve(arr[ie])
 
   sol_rule storageIndexReadArrayFind twins from storageIndexReadArrayFind :
     <[ v = arr[ie] ]> ⇝
-      | inBounds(arr[ie]) ⟹ { v := arr[ie] } <[ ]>
+      | inBounds(arr[ie]) ⟹ { v := find(storage, arr[ie]) } <[ ]>
       | else              ⟹ revert()
     after resolve(arr[ie])
 
   sol_rule storageIndexReadArrayBindLocalRoot twins from storageIndexReadArrayBindLocalRoot :
     <[ lsv = arr[ie] ]> ⇝
-      | inBounds(arr[ie]) ⟹ { lsv := path(arr[ie]) } <[ ]>
+      | inBounds(arr[ie]) ⟹ { lsv := arr[ie] } <[ ]>
       | else              ⟹ revert()
     after resolve(arr[ie])
 
   sol_rule storageIndexReadArrayStoreRoot twins from storageIndexReadArrayStoreRoot :
     <[ gsp = arr[ie] ]> ⇝
-      | inBounds(arr[ie]) ⟹ { storage := copy(gsp, arr[ie]) } <[ ]>
+      | inBounds(arr[ie]) ⟹ { storage := store(storage, gsp, find(storage, arr[ie])) } <[ ]>
       | else              ⟹ revert()
     after resolve(arr[ie])
     where isSimple gsp
@@ -1918,21 +1998,21 @@ end CaseMode
   -/
 
   sol_rule storagePushValueSave from storagePushValueSave :
-    <[ sp.push(se) ]> ⇝ { storage := push(sp, se) } <[ ]>
+    <[ sp.push(se) ]> ⇝ { storage := save(save(storage, sp[sp.length], se), sp.length, sp.length + 1) } <[ ]>
 
   sol_rule storagePushValueCopySource from storagePushValueCopySource :
-    <[ sp1.push(sp2) ]> ⇝ { storage := push(sp1, sp2) } <[ ]>
+    <[ sp1.push(sp2) ]> ⇝ { storage := save(save(storage, sp1[sp1.length], find(storage, sp2)), sp1.length, sp1.length + 1) } <[ ]>
 
   sol_rule storagePushLengthSave from storagePushLengthSave :
-    <[ sp.push() ]> ⇝ { storage := push(sp) } <[ ]>
+    <[ sp.push() ]> ⇝ { storage := save(delAt(storage, sp[sp.length]), sp.length, sp.length + 1) } <[ ]>
 
   sol_rule storageLocalRootPushBind from storageLocalRootPushBind :
     <[ lsv = sp.push() ]> ⇝
-      { storage := pushSlot(sp.push()) || lsv := slot(sp.push()) } <[ ]>
+      { storage := delAt(storage, sp.push()) || lsv := sp.push() } <[ ]>
 
   sol_rule storagePopSave twins from storagePopSave :
     <[ sp.pop() ]> ⇝
-      | nonEmpty(sp) ⟹ { storage := pop(sp) } <[ ]>
+      | nonEmpty(sp) ⟹ { storage := save(delAt(storage, sp[sp.length - 1]), sp.length, sp.length - 1) } <[ ]>
       | else         ⟹ revert()
     after resolve(sp)
 
@@ -2234,25 +2314,25 @@ end CaseMode
     <[ sp1[nse] = mv ]> ⇝ <[ T se ?= mv; T storage sp = sp1; T ie = nse; sp[ie] = se ]>
 
   sol_rule memoryToStorageFieldCopyRoot from memoryToStorageFieldCopyRoot :
-    <[ sp.fld = mv ]> ⇝ { storage := copyMem(sp.fld, mv) } <[ ]>
+    <[ sp.fld = mv ]> ⇝ { storage := save(storage, sp.fld, copyMem(mtSt, memory, mv)) } <[ ]>
 
   sol_rule memoryToStorageFieldCopyField from memoryToStorageFieldCopyField :
-    <[ sp.fld = rhs ]> ⇝ { storage := copyMem(sp.fld, rhs) } <[ ]>
+    <[ sp.fld = rhs ]> ⇝ { storage := save(storage, sp.fld, copyMem(mtSt, memory, rhs)) } <[ ]>
     -- the paper writes the source `mv.fr`; one side of a conclusion is a
     -- pattern here, so the member shape is the condition
     where isMemberSource rhs
 
   sol_rule memoryToStorageIndexMappingCopyRoot from memoryToStorageIndexMappingCopyRoot :
-    <[ map[ie] = mv ]> ⇝ { storage := copyMem(map[ie], mv) } <[ ]>
+    <[ map[ie] = mv ]> ⇝ { storage := save(storage, map[ie], copyMem(mtSt, memory, mv)) } <[ ]>
 
   sol_rule memoryToStorageIndexArrayCopyRoot twins from memoryToStorageIndexArrayCopyRoot :
     <[ arr[ie] = mv ]> ⇝
-      | inBounds(arr[ie]) ⟹ { storage := copyMem(arr[ie], mv) } <[ ]>
+      | inBounds(arr[ie]) ⟹ { storage := save(storage, arr[ie], copyMem(mtSt, memory, mv)) } <[ ]>
       | else              ⟹ revert()
     after image(mv), resolve(arr[ie])
 
   sol_rule memoryToStorageStoreRoot from memoryToStorageStoreRoot :
-    <[ sp = mv ]> ⇝ { storage := copyMem(sp, mv) } <[ ]>
+    <[ sp = mv ]> ⇝ { storage := store(storage, sp, copyMem(mtSt, memory, mv)) } <[ ]>
 
   /-!
   ## Arithmetic
@@ -2540,7 +2620,7 @@ end CaseMode
   -/
 
   sol_rule storagePlaceAlias :
-    <[ T alias sp = e ]> ⇝ { sp := path(e) } <[ ]>
+    <[ T alias sp = e ]> ⇝ { sp := e } <[ ]>
 
   /-!
   `exprStmtCapture` parks a bare non-incDec expression statement in the

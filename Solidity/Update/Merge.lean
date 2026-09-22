@@ -81,7 +81,7 @@ against the *original* state, reaches the same tree. -/
 
 /-- KeY `simplifyUpdate1-3`: the later binding of a name absorbs the earlier,
 which is what collapses the declaration-then-assignment pair a value capture
-leaves behind (`{rv := default(T)}{rv := e}`). -/
+leaves behind (`{rv := defVal(T)}{rv := e}`). -/
 @[upd_merge_set] theorem setEnv_setEnv_absorb' (s : State) (n : Name)
     (b b' : Binding) : (s.setEnv n b).setEnv n b' = s.setEnv n b' :=
   SemanticsProperties.State.setEnv_setEnv_absorb s n b b'

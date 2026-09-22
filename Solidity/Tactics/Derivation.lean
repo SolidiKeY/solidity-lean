@@ -179,7 +179,8 @@ attribute [rule_simp_set]
   Rules.stepCase Rules.ruleEffect
   StepEffect.block StepEffect.mainBlock
   Rules.unfoldGoal Rules.terminalGoal Rules.splitGoals Rules.obligation
-  Rules.revertGoals Rules.withOrigin Rules.writeBack Rules.compoundGoals
+  Rules.revertGoals Rules.withOrigin Rules.writeBack Rules.bindOrWrite
+  Rules.bindPlace Rules.compoundGoals
   Rules.compoundIndexGoals Rules.incDecGoals Rules.assertGoals Rules.varName
   assignEffect deleteEffect storageDeclEffect memoryDeclEffect
   pushEffect popEffect pushAssignEffect pushFieldAssignEffect
@@ -292,7 +293,8 @@ macro "rule_simp_literal" : tactic => `(tactic|
   simp only [Rules.stepCase, Rules.ruleEffect,
     StepEffect.block, StepEffect.mainBlock,
     Rules.unfoldGoal, Rules.terminalGoal, Rules.splitGoals, Rules.obligation,
-    Rules.revertGoals, Rules.withOrigin, Rules.writeBack, Rules.compoundGoals,
+    Rules.revertGoals, Rules.withOrigin, Rules.writeBack, Rules.bindOrWrite,
+    Rules.bindPlace, Rules.compoundGoals,
     Rules.compoundIndexGoals, Rules.incDecGoals, Rules.assertGoals, Rules.varName,
     assignEffect, deleteEffect, storageDeclEffect, memoryDeclEffect,
     pushEffect, popEffect,
@@ -842,6 +844,9 @@ elab "upd_case" : tactic => do
       [ (``Wp.varPath, 2), (``Wp.stackVal, 2), (``Wp.memRef, 2),
         (``Wp.readMem, 2), (``Wp.writeMemField, 4), (``Wp.writeMemIndex, 4),
         (``Wp.simpleVal, 2), (``Semantics.State.saveStorage, 4),
+        (``Semantics.State.saveStorageExt, 4),
+        -- The readers a push's slot resolves through.
+        (``Wp.deletePath, 2), (``Wp.pushPath, 2),
         (``Semantics.State.findStorage, 3), (``Semantics.State.getObj, 2),
         -- The coercions a read ends in: a storage cell holding a struct has
         -- no `Value`, so these can fail and both spellings reach them.
@@ -889,8 +894,10 @@ macro "upd_norm" : tactic => `(tactic|
     Update.elemPar, Upd.Par.toUpd, Upd.Par.apply, Upd.Par.writers,
     Upd.Elem.eval, Update.bindRhs, Update.Sym.eval, Update.readTerm,
     Update.storageRhs, Update.heapRhs, Update.storageSave, Update.memWriteIn,
-    Update.memEval,
-    Wp.locPath, Upd.saveSt, Wp.placePath, Wp.readVal, Wp.defaultValue,
+    Update.memEval, Update.stVal, Update.storageSaveOn_self, Update.storageSave,
+    Update.delAtOn, Update.setSizeOn, Update.pushAtOn,
+    Wp.locPath, Upd.saveSt, Upd.saveStExt, Wp.placePath, Wp.readVal,
+    Wp.defaultValue,
     RuleSoundness.usesVar, SoliditySyntax.fieldFor, Field.primitive,
     Field.identity, Field.name, List.flatMap, List.flatten, List.map,
     List.foldl, List.append, List.append_nil, List.nil_append,

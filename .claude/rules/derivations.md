@@ -125,9 +125,12 @@ reads. Do not spend time on `upd_merge` when a merge line fails on a memory
 chain — check first whether the merged spelling means anything.
 `docs/paper-parity.md` records this under section 8.
 
-**Memory updates are terms, and an allocation is two elements.**
-`memoryRules.key`'s signature is what `Rules.MemTerm` spells, so a memory
-update nests: `{ memory := write(memory, mv@Account.balance, 100) }`,
+**Updates are terms, and an allocation is two elements.**
+`memoryRules.key`'s signature is what `Rules.MemTerm` spells and
+`structRules.key`'s what `Rules.StTerm` does, so an update nests:
+`{ storage := save(storage, alice.account.balance, 10) }`,
+`{ storage := delAt(storage, alice.account) }`,
+`{ memory := write(memory, mv@Account.balance, 100) }`,
 `{ memory := write(alloc(Person), mv@Person.account, fresh) }`. A declaration
 or a root delete writes the pair KeY writes —
 
@@ -139,6 +142,20 @@ or a root delete writes the pair KeY writes —
 either re-derives it. `image(src)` is a reference source's value; `fresh` is
 the root the enclosing `alloc` minted; `defVal(T)` is KeY's reset constant.
 `docs/lean-key-rule-map.md` has the symbol-by-symbol table.
+
+A **push** and a **pop** are nested writes over the array's extent, as the
+paper draws them — `{ storage := save(save(storage, values[values.length],
+42), values.length, values.length + 1) }`, and `delAt` in place of the slot
+write for the bare `push()`.  `Rules.StTerm` says why the two positions are
+constructors of their own rather than plain `save`s: a *program* cannot write
+one past the end or assign `a.length`, so the soundness bridges compare a
+rule's update with `SVal.save` while these two need `SVal.saveExt`.
+
+There is **no `path(·)` wrapper**.  A bare right-hand side binds by its sort —
+`{ sp := alice.account }` is an alias, `{ mv := carol }` an identity — and a
+*read* is marked instead, the way the paper marks it: `{ v := find(storage,
+alice.account.balance) }`, `{ v := select(storage, total) }`.  `defVal(T)` is
+what a declaration without initialiser binds.
 
 **The rule goes on the arrow, not in the proof.** `⇝[.storageFieldWriteSave]`
 is a claim Lean checks; do not re-list the rules in a docstring above the
@@ -176,8 +193,8 @@ maps the chains to the paper's worked examples):
 sol_derivation deepFieldWrite :
     => <[ alice.account.balance = 10 ]>(φ)
   ~> => <[ uint se = 10; … ]>(φ)
-  ~*> => { se@uint := 10 ‖ sp@Account := path(alice.account) } <[ … ]>(φ)
-  ~> => { … ‖ storage := save(alice.account.balance, 10) } (φ)
+  ~*> => { se@uint := 10 ‖ sp@Account := alice.account } <[ … ]>(φ)
+  ~> => { … ‖ storage := save(storage, alice.account.balance, 10) } (φ)
 ```
 
 Three things about that shape. A **bare `(φ)` goal** is the paper's last line,

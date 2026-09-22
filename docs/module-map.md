@@ -41,7 +41,7 @@ both. New modules go in `Solidity.lean`.
 | `Calculus/KeyTaclets.lean` | The 310 taclets of `solidityProgramRules.key` (solkey `8c5c69ca25`) as one type, plus the three `\heuristics` sets and `KeyOrigin`. Regenerate with the `awk` recipe in its docstring. Imports nothing. |
 | `Calculus/PaperRules.lean` | The paper's rule tables (`rules/*.tex`) as one type, `paperOrigin` per `RuleName`, and `paper_rules_partitioned`: every rule of the paper is claimed but `ifElseSplit`, and each Lean rule the paper lacks is filed under a reason (`keyTier`, `plumbing`, `calculus`). `./scripts/check-paper-rules.mjs` checks the enumeration against the paper. The port checklist in the other direction. |
 | `Calculus/RuleSyntax.lean` | The `sol_rule` declaration syntax and `sol_assemble_rules`; carries the schema-variable table (`schemaVar`). Imports `Lean` only. |
-| `Calculus/Rules.lean` | One `sol_rule` per rule, organised by family. A rule is a taclet, not a rewrite: `StepEffect` carries `goals` (guard, update, residual), read as KeY's weakest precondition. Update syntax here is AST-only. |
+| `Calculus/Rules.lean` | One `sol_rule` per rule, organised by family. A rule is a taclet, not a rewrite: `StepEffect` carries `goals` (guard, update, residual), read as KeY's weakest precondition. Update syntax here is AST-only, and updates are *terms*: `StTerm` at `structRules.key`'s signature, `MemTerm` at `memoryRules.key`'s. |
 | `Calculus/RuleShapes.lean` | Structural checks: `mainBlock` reduction, `goals_nonempty`, `taclets_partitioned` (306 of 310 claimed, four listed with a reason), `twins_origin_eq`, `heuristics_eq_origin`. |
 | `Calculus/Completeness.lean` | `FirstStepCase`/`RuleStep` and the bridge `RuleStep.step_of_ruleApplies` with its converse. |
 | `Calculus/CandidateStep.lean` | `FirstStepCase` built from mutual exclusion instead of a ~190-entry list walk (`firstStepCase_box`/`_diamond`/`_both`). What makes a pinned step cheap. |
@@ -76,7 +76,7 @@ theorem and, for the memory algebra, a denotation into the interpreter
 | Module | What it is |
 |---|---|
 | `Update.lean` | The symbolic-update algebra: `Elem`, `Par`, `Upd.seq`, and the merge law `Par.seq_single`. |
-| `Update/Eval.lean` | What an `UpdTerm` means; every reader is one of `Wp/Terminal/Table.lean`'s. |
+| `Update/Eval.lean` | What an `UpdTerm` means; every reader is one of `Wp/Terminal/Table.lean`'s. `storageRhs` and `memEval` are recursions over `Rules.StTerm` and `Rules.MemTerm`. `setSizeOn`/`pushAtOn` are the two writes a *program* cannot make — assigning `a.length`, and writing one past the end — and are the only users of `SVal.saveExt`. |
 | `Update/Wp.lean` | The wp reading, `guard → {update}⟨residual ++ rest⟩post` per goal. |
 | `Update/TacletTable.lean` | `goalsExec … = terminalUpdate r …` per rule. 21 bridged; the rest listed in `openBridges` with a reason. |
 | `Update/Bridges.lean` | `Par.toUpd [...] = <family> args`, built on frame facts. Coverage list in its docstring. |

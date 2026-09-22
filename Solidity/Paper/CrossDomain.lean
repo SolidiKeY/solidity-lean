@@ -36,7 +36,7 @@ calculus does, and the declaration then allocates from it. -/
 
 sol_derivation storageToMemoryNonsimplePath :
     => <[ Token memory mv3 = alice.account.token ]>(φ)
-  ~*> => { sp@Account := path(alice.account) }
+  ~*> => { sp@Account := alice.account }
           { mv3 := freshId(alloc(Token, sp@Account.token)) ‖ memory := alloc(Token, sp@Account.token) } (φ)
 
 /-! ### `alice.age = 25; Person memory carol = alice; v = carol.age;`
@@ -46,7 +46,7 @@ performs. -/
 
 sol_derivation storageToMemoryRootCopy :
     => <[ alice.age = 34; Person memory mv2 = alice; v = mv2@Person.age ]>(φ)
-  ~*> => { storage := save(alice.age, 34) } { mv2 := freshId(alloc(Person, alice)) ‖ memory := alloc(Person, alice) }
+  ~*> => { storage := save(storage, alice.age, 34) } { mv2 := freshId(alloc(Person, alice)) ‖ memory := alloc(Person, alice) }
           { v := mv2@Person.age } (φ)
 
 /-! ### the same at a *member* source, which needs the storage alias first -/
@@ -54,9 +54,9 @@ sol_derivation storageToMemoryRootCopy :
 sol_derivation storageToMemoryMemberCopy :
     => <[ alice.account.balance = 10; Account memory mv = alice.account;
           v = mv@Account.balance ]>(φ)
-  ~*> => { se@uint := default(uint) } { se@uint := 10 }
-          { sp@Account := path(alice.account) }
-          { storage := save(sp@Account.balance, se@uint) }
+  ~*> => { se@uint := defVal(uint) } { se@uint := 10 }
+          { sp@Account := alice.account }
+          { storage := save(storage, sp@Account.balance, se@uint) }
           { mv := freshId(alloc(Account, alice.account)) ‖ memory := alloc(Account, alice.account) } { v := mv@Account.balance } (φ)
 
 /-! ### `carol.age = 42; alice = carol; v = alice.age;` — memory to storage
@@ -65,7 +65,7 @@ here. -/
 
 sol_derivation memoryToStorageRootCopy :
     => <[ carol.age = 34; alice = carol; v = alice.age ]>(φ)
-  ~*> => { memory := write(memory, carol.age, 34) } { storage := copyMem(alice, carol) }
+  ~*> => { memory := write(memory, carol.age, 34) } { storage := save(storage, alice, copyMem(mtSt, memory, carol)) }
           { v := alice.age } (φ)
 
 /-! ### the same from an alias, at a storage *field* target -/
@@ -74,8 +74,8 @@ sol_derivation memoryToStorageFromAlias :
     => <[ mv@Account.balance = 10; alice.account = mv@Account;
           v = alice.account.balance ]>(φ)
   ~*> => { memory := write(memory, mv@Account.balance, 10) }
-          { storage := copyMem(alice.account, mv@Account) }
-          { sp@Account := path(alice.account) } { v := sp@Account.balance } (φ)
+          { storage := save(storage, alice.account, copyMem(mtSt, memory, mv@Account)) }
+          { sp@Account := alice.account } { v := sp@Account.balance } (φ)
 
 /-! ### `carol.account.balance = 50; alice.account = carol.account; v = …`
 A memory *member* as the source of a storage write.  No alias is introduced,
@@ -85,11 +85,11 @@ member's identity and installs the `copyMem` view directly. -/
 sol_derivation memoryToStorageFromMemberSource :
     => <[ carol.account.balance = 50; alice.account = carol.account;
           v = alice.account.balance ]>(φ)
-  ~*> => { se@uint := default(uint) } { se@uint := 50 }
+  ~*> => { se@uint := defVal(uint) } { se@uint := 50 }
           { mv@Account := ref(carol.account) }
           { memory := write(memory, mv@Account.balance, se@uint) }
-          { storage := copyMem(alice.account, carol.account) }
-          { sp@Account := path(alice.account) } { v := sp@Account.balance } (φ)
+          { storage := save(storage, alice.account, copyMem(mtSt, memory, carol.account)) }
+          { sp@Account := alice.account } { v := sp@Account.balance } (φ)
 
 /-! ### `carolToken.value = 99; alice.account.token = carolToken; v = …`
 The target is the nonsimple path this time, so it is the *target* that needs
@@ -99,9 +99,9 @@ sol_derivation memoryToStorageNonsimplePath :
     => <[ mv3@Token.value = 99; alice.account.token = mv3@Token;
           v = alice.account.token.value ]>(φ)
   ~*> => { memory := write(memory, mv3@Token.value, 99) }
-          { sp@Account := path(alice.account) }
-          { storage := copyMem(sp@Account.token, mv3@Token) }
-          { sp@Token := path(alice.account.token) } { v := sp@Token.value } (φ)
+          { sp@Account := alice.account }
+          { storage := save(storage, sp@Account.token, copyMem(mtSt, memory, mv3@Token)) }
+          { sp@Token := alice.account.token } { v := sp@Token.value } (φ)
 
 end
 

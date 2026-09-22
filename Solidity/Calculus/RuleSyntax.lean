@@ -187,6 +187,13 @@ syntax:75 (name := exprUnop) "⊖" rule_expr:75 : rule_expr
 /-- `! se` — logical negation, the one unary operator a rule names outright
 (`ifElseNegated` matches on it). -/
 syntax:75 (name := exprNot) "!" rule_expr:75 : rule_expr
+/-- `ℓ + 1` / `ℓ - 1` — the arithmetic the push and pop updates need on an
+array's length, and the only arithmetic a rule names outright.  Everything
+else an operator does is schematic (`⊕`). -/
+syntax:65 (name := exprAdd) rule_expr:65 " + " rule_expr:66 : rule_expr
+syntax:65 (name := exprSub) rule_expr:65 " - " rule_expr:66 : rule_expr
+/-- A numeric literal, for the same reason. -/
+syntax:max (name := exprNum) num : rule_expr
 /-- `se && nse` / `se || nse` — the short-circuiting connectives, named
 outright because the rules that match them are about the short circuit.
 
@@ -529,6 +536,8 @@ inductive ExprView where
   /-- A named operator the rule matches outright. -/
   | fixedUnop (op : Name) (arg : Syntax)
   | fixedBinop (op : Name) (lhs rhs : Syntax)
+  /-- A numeric literal. -/
+  | num (n : Syntax)
   | ternary (c t e : Syntax)
   | escape (t : Term)
 
@@ -571,6 +580,9 @@ def exprView? (stx : Syntax) : Option ExprView :=
   else if stx.isOfKind ``exprCombine then some (.combine a[0]! a[1]!)
   else if stx.isOfKind ``exprUnop then some (.unop a[0]!)
   else if stx.isOfKind ``exprNot then some (.fixedUnop `not a[0]!)
+  else if stx.isOfKind ``exprAdd then some (.fixedBinop `add a[0]! a[1]!)
+  else if stx.isOfKind ``exprSub then some (.fixedBinop `sub a[0]! a[1]!)
+  else if stx.isOfKind ``exprNum then some (.num a[0]!)
   else if stx.isOfKind ``exprAnd then some (.fixedBinop `and a[0]! a[1]!)
   else if stx.isOfKind ``exprOr then some (.fixedBinop `or a[0]! a[1]!)
   else if stx.isOfKind ``exprTernary then some (.ternary a[0]! a[1]! a[2]!)
@@ -665,6 +677,9 @@ partial def transExpr (sc : Scope) (asPlace : Bool) (stx : Syntax) :
     | throwErrorAt stx "unsupported rule expression"
   match view with
   | .escape t => return t
+  | .num n => do
+      let nt : Term := ⟨n⟩
+      `($(gen `SoliditySyntax.intLitExpr) $nt)
   | .call f _ => throwErrorAt stx s!"`{f.getId}` is a term, not a program expression"
   | .combine a b =>
       let some op := sc.opName
@@ -719,6 +734,14 @@ partial def transExpr (sc : Scope) (asPlace : Bool) (stx : Syntax) :
           else `(($(gen `Rules.fieldFromAlias) $kt $ci $ty $src $f : $(gen `WrappedExpr)))
       | none =>
           let bt ← transExpr sc false b
+          -- A *literal* field name -- `arr.length`, the paper's `size`, which
+          -- the push and pop updates address -- carries its own type, so it
+          -- does not need the rule to have bound one.  A schematic field
+          -- (`fld`, `fr`, `fp`) does, and takes the pattern's `ty`.
+          if f.getId.toString == "length" then
+            if asPlace then `($(gen `SoliditySyntax.fieldPlace) $bt "length")
+            else `($(gen `SoliditySyntax.fieldExpr) $bt "length")
+          else
           -- A push place is a storage slot, and the field's own type is the
           -- one the access has: `sp.push().fld` names the slot's member.
           let isPush := match exprView? b with | some (.pushPlace _) => true | _ => false
@@ -737,6 +760,16 @@ partial def transExpr (sc : Scope) (asPlace : Bool) (stx : Syntax) :
           else `(($(gen `Rules.indexFromAlias) $kt $ci $ty $src $it : $(gen `WrappedExpr)))
       | none =>
           let bt ← transExpr sc false b
+          -- As for a field: an index that is not a schema variable -- the
+          -- `ℓ` of a push or pop -- gives the element type away, so the rule
+          -- need not have bound one.
+          let schematic := match exprView? i with
+            | some (.var x) => (sc.find? x.getId).isSome
+            | _ => false
+          if !schematic then
+            if asPlace then `($(gen `SoliditySyntax.indexPlace) $bt $it)
+            else `($(gen `SoliditySyntax.indexExpr) $bt $it)
+          else
           let kt ← kindTerm (kindOfName (headName b))
           if asPlace then `($(gen `PlaceExpr.index) $kt $ty $bt $it)
           else `($(gen `WrappedExpr.index) $kt $ty $bt $it)
@@ -807,6 +840,28 @@ partial def transFormula (sc : Scope) (stx : Syntax) : CommandElabM Term := do
         | _ => `($(gen `SideFormula.holds) $(← transExpr sc false e))
   else throwErrorAt stx "unsupported side formula"
 
+/-- The rule's `Option` parameter, when `stx` is the name the conclusion gave
+it: an identifier the scope does not bind, in a rule that has one. -/
+def pushOperand? (sc : Scope) (stx : Syntax) : Option Ident :=
+  match exprView? stx with
+  | some (.var x) => if (sc.find? x.getId).isNone then sc.optionParam else none
+  | _ => none
+
+/-- `arr.length` — the array whose extent it names. -/
+def lengthBase? (stx : Syntax) : Option Syntax :=
+  match exprView? stx with
+  | some (.field b f) => if f.getId.toString == "length" then some b else none
+  | _ => none
+
+/-- `arr[arr.length]` or `arr.push()` — the slot a push appends. -/
+def pushSlotBase? (stx : Syntax) : Option Syntax :=
+  match exprView? stx with
+  | some (.index b i) => if (lengthBase? i).isSome then some b else none
+  -- The place itself, not its receiver: a rule that matched `sp.push()` binds
+  -- the whole place and not the `sp` under it.  `Eval.pushAtOn` unwraps.
+  | some (.pushPlace _) => some stx
+  | _ => none
+
 /-- Is this result the `\else` half of a guarded split — KeY's bare
 `revert()`? -/
 def isRevertResult (stx : Syntax) : Bool :=
@@ -858,7 +913,95 @@ partial def transMemVal (sc : Scope) (stx : Syntax) : CommandElabM Term := do
           if x.getId.toString == "fresh" then `($(gen `MemVal.fresh))
           else `($(gen `MemVal.sym) $(<- transSym sc stx))
       | _ => `($(gen `MemVal.sym) $(<- transSym sc stx))
+
+/-- A `rule_upd`'s storage term.  `storage` is the program variable, and the
+writing and clearing forms nest as KeY's do -- `save(delAt(storage,
+consr(arr, at(ℓ - 1))), consr(arr, size), ℓ - 1)` is `storagePopSave`
+verbatim. -/
+partial def transStTerm (sc : Scope) (stx : Syntax) : CommandElabM Term := do
+  match callHead? stx with
+  | some ("save", #[t, p, v]) =>
+      -- `save(st, arr.length, n)` and `save(st, arr[arr.length], v)` are the
+      -- extent and slot writes of a push or a pop.  The spelling is the
+      -- paper's; the data tells them from an ordinary `save` because a
+      -- program cannot perform either (`Rules.StTerm`).
+      match (lengthBase? p).isSome, (pushSlotBase? p).isSome with
+      | true, _ =>
+          `($(gen `StTerm.setSize) $(<- transStTerm sc t)
+              $(<- transExpr sc false p) $(<- transSym sc v))
+      | _, true =>
+          `($(gen `StTerm.pushAt) $(<- transStTerm sc t)
+              $(<- transExpr sc false p) (some $(<- transStVal sc v)))
+      | _, _ =>
+          `($(gen `StTerm.save) $(<- transStTerm sc t) $(<- transExpr sc false p)
+              $(<- transStVal sc v))
+  -- `store(st, f, v)` is `save` at the root's empty path.
+  | some ("store", #[t, p, v]) =>
+      `($(gen `StTerm.save) $(<- transStTerm sc t) $(<- transExpr sc false p)
+          $(<- transStVal sc v))
+  | some ("delAt", #[t, p]) =>
+      match pushSlotBase? p with
+      | some _ =>
+          `($(gen `StTerm.pushAt) $(<- transStTerm sc t)
+              $(<- transExpr sc false p) none)
+      | none =>
+          `($(gen `StTerm.delAt) $(<- transStTerm sc t) $(<- transExpr sc false p))
+  | _ =>
+      match exprView? stx with
+      | some (.var x) =>
+          if x.getId.toString == "storage" then `($(gen `StTerm.cur))
+          else throwErrorAt stx "not a storage term"
+      | _ => throwErrorAt stx "not a storage term"
+
+/-- A `save`'s value slot: a subtree copied out of storage or out of memory,
+or a term read in the pre-state.
+
+The element a `push` writes is the rule's `Option` parameter, whatever name
+the conclusion gave it -- `push(se)` and `push(sp)` are one update at two
+sorts, and which it is the condition has already said.  `rhsSVal` is the
+reader either way, so the value slot is a `find` in both. -/
+partial def transStVal (sc : Scope) (stx : Syntax) : CommandElabM Term := do
+  match callHead? stx with
+  | some ("find", #[_, src]) =>
+      match pushOperand? sc src with
+      | some vp => `($(gen `StVal.pushed) $vp)
+      | none => `($(gen `StVal.find) $(<- transExpr sc false src))
+  | some ("select", #[_, src]) => `($(gen `StVal.find) $(<- transExpr sc false src))
+  | some ("copyMem", #[_, _, src]) =>
+      `($(gen `StVal.copyMem) $(<- transExpr sc false src))
+  | _ =>
+      match pushOperand? sc stx with
+      | some vp => `($(gen `StVal.pushed) $vp)
+      | none => `($(gen `StVal.sym) $(<- transSym sc stx))
 end
+
+/-- Is this `rule_expr` a *place* -- a variable, a field or index of one, or
+the slot a bare `push()` appends?  Those are the right-hand sides that bind by
+their sort (`Rules.bindPlace`); everything else is a term, read in the
+pre-state. -/
+def isPlaceSyntax (stx : Syntax) : Bool :=
+  match exprView? stx with
+  | some (.var _) | some (.field _ _) | some (.index _ _)
+  | some (.pushPlace _) => true
+  | _ => false
+
+/-- `x := <rhs>` with a bare right-hand side.  Which binding it is, is the
+*sort of the variable being bound* -- the paper's rule, where `lsv` is a
+Path-sorted variable and `v` a value one -- and the schema variable's name
+already says it (`schemaVar`), so it is settled here rather than left to
+`Rules.bindPlace` at elaboration.  That keeps a rule's update the literal
+constructor the soundness proofs match on. -/
+def bareBind (kind : Name) (sc : Scope) (rhs : Syntax) : CommandElabM Term := do
+  if !(isPlaceSyntax rhs) then
+    return (← `($(gen `BindRhs.val) $(← transSym sc rhs)))
+  match exprView? rhs with
+  | some (.pushPlace _) =>
+      `($(gen `BindRhs.pushSlot) $(← transExpr sc false rhs))
+  | _ =>
+    match kind with
+    | `storage => `($(gen `BindRhs.path) $(← transExpr sc false rhs))
+    | `memory => `($(gen `BindRhs.mref) $(← transExpr sc false rhs))
+    | _ => `($(gen `BindRhs.val) $(← transSym sc rhs))
 
 /-- A `rule_upd` as a `Rules.UpdElem`. -/
 def transUpd (sc : Scope) (stx : Syntax) : CommandElabM Term := do
@@ -888,58 +1031,35 @@ def transUpd (sc : Scope) (stx : Syntax) : CommandElabM Term := do
     -- A declaration's own name on the left: the update binds the *name*, and
     -- `alloc`/`default` are the two right-hand sides that reach it.
     if let some (.var x) := exprView? lhs then
-      if let some (.declared _ ty) := sc.find? x.getId then
+      if let some (.declared k ty) := sc.find? x.getId then
         let bind (r : Term) : CommandElabM Term := `($(gen `UpdElem.bind) $x $r)
         match callHead? rhs with
         | some ("freshId", #[m]) =>
             return (← bind (← `($(gen `BindRhs.freshId) $(← transMemTerm sc m))))
-        | some ("default", _) =>
+        | some ("defVal", _) =>
             return (← bind (← `($(gen `BindRhs.val) ($(gen `Sym.deflt) $ty))))
-        | some ("path", #[t]) =>
-            return (← bind (← `($(gen `BindRhs.path) $(← transExpr sc false t))))
+        | some ("find", #[_, t]) | some ("select", #[_, t]) =>
+            return (← bind (← `($(gen `BindRhs.val) ($(gen `Sym.read) $(← transExpr sc false t)))))
         | some ("ref", #[t]) =>
             return (← bind (← `($(gen `BindRhs.mref) $(← transExpr sc false t))))
-        | some ("slot", #[t]) =>
-            return (← bind (← `($(gen `BindRhs.pushSlot) $(← transExpr sc false t))))
-        | _ => return (← bind (← `($(gen `BindRhs.val) $(← transSym sc rhs))))
+        | _ => return (← bind (← bareBind k sc rhs))
     match component, callHead? rhs with
-    | some "storage", some ("save", #[p, t]) =>
-        `($(gen `UpdElem.storage) ($(gen `StorageUpd.save) $(← transExpr sc false p) $(← transSym sc t)))
-    | some "storage", some ("copy", #[p, s]) =>
-        `($(gen `UpdElem.storage) ($(gen `StorageUpd.copy) $(← transExpr sc false p) $(← transExpr sc false s)))
-    | some "storage", some ("copyMem", #[p, s]) =>
-        `($(gen `UpdElem.storage) ($(gen `StorageUpd.copyFromMem) $(← transExpr sc false p) $(← transExpr sc false s)))
-    | some "storage", some ("push", as) =>
-        let arr ← transExpr sc false as[0]!
-        -- `push(sp, se)` and `push(sp)` are the same update at different
-        -- sorts; which it is the condition has already said, so the element
-        -- written is the `Option` parameter itself.
-        match sc.optionParam with
-        | some v => `($(gen `UpdElem.storage) ($(gen `StorageUpd.push) $arr $v))
-        | none =>
-            if h : as.size = 2 then
-              `($(gen `UpdElem.storage) ($(gen `StorageUpd.push) $arr (some $(← transExpr sc false as[1]))))
-            else `($(gen `UpdElem.storage) ($(gen `StorageUpd.push) $arr none))
-    | some "storage", some ("pushSlot", #[p]) =>
-        `($(gen `UpdElem.storage) ($(gen `StorageUpd.pushPlace) $(← transExpr sc false p)))
-    | some "storage", some ("pop", #[p]) =>
-        `($(gen `UpdElem.storage) ($(gen `StorageUpd.pop) $(← transExpr sc false p)))
-    | some "storage", some ("clear", #[p]) =>
-        `($(gen `UpdElem.storage) ($(gen `StorageUpd.clear) $(← transExpr sc false p)))
+    | some "storage", _ => `($(gen `UpdElem.storage) $(← transStTerm sc rhs))
     | some "memory", _ => `($(gen `UpdElem.heap) $(← transMemTerm sc rhs))
     | none, some ("freshId", #[m]) =>
         `($(gen `UpdElem.bind) ($(gen `Rules.varName) $(← transExpr sc false lhs))
             ($(gen `BindRhs.freshId) $(← transMemTerm sc m)))
-    | none, some ("path", #[s]) =>
-        `($(gen `UpdElem.bind) ($(gen `Rules.varName) $(← transExpr sc false lhs))
-            ($(gen `BindRhs.path) $(← transExpr sc false s)))
     | none, some ("ref", #[s]) =>
         `($(gen `UpdElem.bind) ($(gen `Rules.varName) $(← transExpr sc false lhs))
             ($(gen `BindRhs.mref) $(← transExpr sc false s)))
-    | none, some ("slot", #[s]) =>
-        `($(gen `UpdElem.bind) ($(gen `Rules.varName) $(← transExpr sc false lhs))
-            ($(gen `BindRhs.pushSlot) $(← transExpr sc false s)))
-    | none, _ => `($(gen `Rules.writeBack) $(← transExpr sc true lhs) $(← transSym sc rhs))
+    | none, some ("find", #[_, s]) | none, some ("select", #[_, s]) =>
+        `($(gen `Rules.writeBack) $(← transExpr sc true lhs)
+            ($(gen `Sym.read) $(← transExpr sc false s)))
+    | none, _ =>
+        if isPlaceSyntax rhs then
+          `($(gen `UpdElem.bind) ($(gen `Rules.varName) $(← transExpr sc false lhs))
+              $(← bareBind (kindOfName (headName lhs)) sc rhs))
+        else `($(gen `Rules.writeBack) $(← transExpr sc true lhs) $(← transSym sc rhs))
     | _, _ => throwErrorAt stx "unsupported update"
 
 /-- An `after` entry as a `Rules.Premise`. -/

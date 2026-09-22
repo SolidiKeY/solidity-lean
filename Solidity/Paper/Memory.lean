@@ -54,10 +54,10 @@ at a path. -/
 
 sol_derivation memoryDeepFieldWrite :
     => <[ carol.account.balance = 10 ]>(φ)
-  ~*> => { se@uint := default(uint) } { se@uint := 10 }
+  ~*> => { se@uint := defVal(uint) } { se@uint := 10 }
           <[ Account memory mv = carol.account;
              mv@Account.balance = se@uint ]>(φ)
-  ~*> => { se@uint := default(uint) } { se@uint := 10 }
+  ~*> => { se@uint := defVal(uint) } { se@uint := 10 }
           { mv@Account := ref(carol.account) }
           { memory := write(memory, mv@Account.balance, se@uint) } (φ)
 
@@ -111,10 +111,10 @@ branch, which every operator produces and `+` cannot take (see
 
 sol_derivation memoryFieldWriteCapturedRhs :
     => <[ carol.age = a + b ]>(φ)
-  ~*> [ => { se@uint := default(uint) } { se@uint := (a + b) }
+  ~*> [ => { se@uint := defVal(uint) } { se@uint := (a + b) }
           { memory := write(memory, carol.age, se@uint) } (φ),
-        { se@uint := default(uint) } ¬⊤ => { se@uint := default(uint) } ⊤,
-        { se@uint := default(uint) } ¬⊤ => { se@uint := default(uint) } ⊥ ]
+        { se@uint := defVal(uint) } ¬⊤ => { se@uint := defVal(uint) } ⊤,
+        { se@uint := defVal(uint) } ¬⊤ => { se@uint := defVal(uint) } ⊥ ]
 
 /-! ## 6 · Memory delete
 
@@ -207,17 +207,17 @@ sol_derivation memoryArrayWriteBox :
 
 sol_derivation memoryNestedArrayWrite :
     => [ carol.account.values[i] = 42 ](φ)
-  ~*> [ { se@uint := default(uint) } { se@uint := 42 }
+  ~*> [ { se@uint := defVal(uint) } { se@uint := 42 }
           { mv@Account := ref(carol.account) }
           { mv@UintArray := ref(mv@Account.values) } inBounds(mv@UintArray[i]) =>
-          { se@uint := default(uint) } { se@uint := 42 }
+          { se@uint := defVal(uint) } { se@uint := 42 }
           { mv@Account := ref(carol.account) }
           { mv@UintArray := ref(mv@Account.values) }
           { memory := write(memory, mv@UintArray[i], se@uint) } [ ](φ),
-        { se@uint := default(uint) } { se@uint := 42 }
+        { se@uint := defVal(uint) } { se@uint := 42 }
           { mv@Account := ref(carol.account) }
           { mv@UintArray := ref(mv@Account.values) } ¬inBounds(mv@UintArray[i]) =>
-          { se@uint := default(uint) } { se@uint := 42 }
+          { se@uint := defVal(uint) } { se@uint := 42 }
           { mv@Account := ref(carol.account) }
           { mv@UintArray := ref(mv@Account.values) } ⊤ ]
 
@@ -228,13 +228,13 @@ the `{…}` prefix on the antecedent says; the increment itself is the pair
 
 sol_derivation memoryArrayIncIndexRead :
     => [ v = mv@UintArray[++i] ](φ)
-  ~*> [ { ie@uint := default(uint) } { bump(++i) ‖ ie@uint := ++i }
+  ~*> [ { ie@uint := defVal(uint) } { bump(++i) ‖ ie@uint := ++i }
           inBounds(mv@UintArray[ie@uint]) =>
-          { ie@uint := default(uint) } { bump(++i) ‖ ie@uint := ++i }
+          { ie@uint := defVal(uint) } { bump(++i) ‖ ie@uint := ++i }
           { v := mv@UintArray[ie@uint] } [ ](φ),
-        { ie@uint := default(uint) } { bump(++i) ‖ ie@uint := ++i }
+        { ie@uint := defVal(uint) } { bump(++i) ‖ ie@uint := ++i }
           ¬inBounds(mv@UintArray[ie@uint]) =>
-          { ie@uint := default(uint) } { bump(++i) ‖ ie@uint := ++i } ⊤ ]
+          { ie@uint := defVal(uint) } { bump(++i) ‖ ie@uint := ++i } ⊤ ]
 
 /-! ### `carolValues[++i] = val;` — the write twin of the impure index
 The value is frozen *before* the index is captured, and the receiver is bound
@@ -243,21 +243,21 @@ alias, which is what makes the capture order the same for every receiver. -/
 
 sol_derivation memoryArrayIncIndexWrite :
     => [ mv@UintArray[++i] = amount ](φ)
-  ~*> [ { se@uint := default(uint) } { se@uint := amount }
+  ~*> [ { se@uint := defVal(uint) } { se@uint := amount }
           { mv@UintArray := ref(mv@UintArray) }
-          { ie@uint := default(uint) } { bump(++i) ‖ ie@uint := ++i }
+          { ie@uint := defVal(uint) } { bump(++i) ‖ ie@uint := ++i }
           inBounds(mv@UintArray[ie@uint]) =>
-          { se@uint := default(uint) } { se@uint := amount }
+          { se@uint := defVal(uint) } { se@uint := amount }
           { mv@UintArray := ref(mv@UintArray) }
-          { ie@uint := default(uint) } { bump(++i) ‖ ie@uint := ++i }
+          { ie@uint := defVal(uint) } { bump(++i) ‖ ie@uint := ++i }
           { memory := write(memory, mv@UintArray[ie@uint], se@uint) } [ ](φ),
-        { se@uint := default(uint) } { se@uint := amount }
+        { se@uint := defVal(uint) } { se@uint := amount }
           { mv@UintArray := ref(mv@UintArray) }
-          { ie@uint := default(uint) } { bump(++i) ‖ ie@uint := ++i }
+          { ie@uint := defVal(uint) } { bump(++i) ‖ ie@uint := ++i }
           ¬inBounds(mv@UintArray[ie@uint]) =>
-          { se@uint := default(uint) } { se@uint := amount }
+          { se@uint := defVal(uint) } { se@uint := amount }
           { mv@UintArray := ref(mv@UintArray) }
-          { ie@uint := default(uint) } { bump(++i) ‖ ie@uint := ++i } ⊤ ]
+          { ie@uint := defVal(uint) } { bump(++i) ‖ ie@uint := ++i } ⊤ ]
 
 /-! ### `carolTokens[i] = david.account.token;`
 A reference-valued element written from a memory path: the source is read to
@@ -310,13 +310,13 @@ that index named. -/
 
 sol_derivation memoryDeclFromIncIndexElem :
     => [ Token memory mv3 = mv2@TokenArray[++i] ](φ)
-  ~*> [ { ie@uint := default(uint) } { bump(++i) ‖ ie@uint := ++i }
+  ~*> [ { ie@uint := defVal(uint) } { bump(++i) ‖ ie@uint := ++i }
           inBounds(mv2@TokenArray[ie@uint]) =>
-          { ie@uint := default(uint) } { bump(++i) ‖ ie@uint := ++i }
+          { ie@uint := defVal(uint) } { bump(++i) ‖ ie@uint := ++i }
           { mv3@Token := ref(mv2@TokenArray[ie@uint]) } [ ](φ),
-        { ie@uint := default(uint) } { bump(++i) ‖ ie@uint := ++i }
+        { ie@uint := defVal(uint) } { bump(++i) ‖ ie@uint := ++i }
           ¬inBounds(mv2@TokenArray[ie@uint]) =>
-          { ie@uint := default(uint) } { bump(++i) ‖ ie@uint := ++i } ⊤ ]
+          { ie@uint := defVal(uint) } { bump(++i) ‖ ie@uint := ++i } ⊤ ]
 
 end
 
