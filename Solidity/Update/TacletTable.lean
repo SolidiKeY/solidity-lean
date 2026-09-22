@@ -72,7 +72,7 @@ theorem goalsExec_splitGoals (sm : SolidityModality) (φ : SideFormula)
   | error e => rfl
   | ok b => cases b <;> simp
 
-theorem toUpd_storageElem (u : StorageUpd) (s : State) :
+theorem toUpd_storageElem (u : StTerm) (s : State) :
     UpdTerm.toUpd [UpdElem.storage u] s =
       (storageRhs u s).map fun g => { s with storage := g } := by
   simp only [UpdTerm.toUpd, UpdTerm.toPar, List.flatMap]
@@ -134,11 +134,11 @@ theorem storageRootWriteStore_taclet (sm : SolidityModality) (stmt : Stmt)
       have hs : rhs.simple = true := hse.2
       have hp : rhs.ty.isPrimitive = true := hprim _ _ rfl
       show goalsExec sm (terminalGoal
-          [UpdElem.storage (StorageUpd.save
-            (WrappedExpr.var Kind.storage ty fld) (Sym.read rhs))]) s = _
+          [UpdElem.storage (StTerm.save .cur
+            (WrappedExpr.var Kind.storage ty fld) (StVal.sym (Sym.read rhs)))]) s = _
       rw [goalsExec_terminalGoal, toUpd_storageElem]
       rw [tu_eq (r := .storageRootWriteStore) (f := onAssign storageAssignUpd) rfl]
-      simp only [storageRhs, Sym.eval, readTerm_eq_readVal hs, bind, Except.bind,
+      simp only [storageRhs_save_cur, storageRhs_delAt_cur, stVal, storageSave, Sym.eval, readTerm_eq_readVal hs, bind, Except.bind,
         Except.map, Wp.onAssign, storageAssignUpd, rhsSVal, hp, if_pos, hgo]
       cases readVal s rhs with
       | error e => rfl
@@ -154,19 +154,19 @@ storage image: `rhsSVal`'s primitive branch *is* `readVal` composed with
 storage write below can be proved in the `copy` shape. -/
 theorem storageRhs_save_eq_copy (target rhs : WrappedExpr) (s : State)
     (hs : rhs.simple = true) (hp : rhs.ty.isPrimitive = true) :
-    storageRhs (.save target (.read rhs)) s = storageRhs (.copy target rhs) s := by
-  simp only [storageRhs, Sym.eval, readTerm_eq_readVal hs, rhsSVal, hp, if_pos,
-    bind, Except.bind, Except.map]
-  cases readVal s rhs <;> rfl
+    storageRhs (.save .cur target (.sym (.read rhs))) s
+      = storageRhs (.save .cur target (.find rhs)) s := by
+  simp only [storageRhs_save_cur, stVal, Sym.eval, readTerm_eq_readVal hs,
+    rhsSVal, hp, if_pos, bind, Except.bind, Except.map]
 
 /-- `gsp = <source>` on a **global** storage root. -/
 theorem storageCopy_globalRoot (ty : Ty) (fld : Field) (hass : _)
     (rhs : WrappedExpr) (s : State)
     (hg : fld.origin = some StorageOrigin.global) :
-    (storageRhs (.copy (WrappedExpr.var Kind.storage ty fld) rhs) s).map
+    (storageRhs (.save .cur (WrappedExpr.var Kind.storage ty fld) (.find rhs)) s).map
         (fun g => { s with storage := g })
       = storageAssignUpd ⟨WrappedExpr.var Kind.storage ty fld, hass⟩ rhs s := by
-  simp only [storageRhs, storageAssignUpd, hg, if_pos, bind, Except.bind,
+  simp only [storageRhs_save_cur, storageRhs_delAt_cur, stVal, storageSave, storageAssignUpd, hg, if_pos, bind, Except.bind,
     Except.map]
   cases rhsSVal s rhs with
   | error e => rfl
@@ -178,10 +178,10 @@ theorem storageCopy_globalRoot (ty : Ty) (fld : Field) (hass : _)
 /-- `sp.f = <source>`. -/
 theorem storageCopy_field (ty : Ty) (base : WrappedExpr) (f : Field) (hass : _)
     (rhs : WrappedExpr) (s : State) :
-    (storageRhs (.copy (WrappedExpr.field Kind.storage ty base f) rhs) s).map
+    (storageRhs (.save .cur (WrappedExpr.field Kind.storage ty base f) (.find rhs)) s).map
         (fun g => { s with storage := g })
       = storageAssignUpd ⟨WrappedExpr.field Kind.storage ty base f, hass⟩ rhs s := by
-  simp only [storageRhs, storageAssignUpd, bind, Except.bind, Except.map]
+  simp only [storageRhs_save_cur, storageRhs_delAt_cur, stVal, storageSave, storageAssignUpd, bind, Except.bind, Except.map]
   cases rhsSVal s rhs with
   | error e => rfl
   | ok v =>
@@ -192,10 +192,10 @@ theorem storageCopy_field (ty : Ty) (base : WrappedExpr) (f : Field) (hass : _)
 /-- `sp[i] = <source>`. -/
 theorem storageCopy_index (ty : Ty) (base ix : WrappedExpr) (hass : _)
     (rhs : WrappedExpr) (s : State) :
-    (storageRhs (.copy (WrappedExpr.index Kind.storage ty base ix) rhs) s).map
+    (storageRhs (.save .cur (WrappedExpr.index Kind.storage ty base ix) (.find rhs)) s).map
         (fun g => { s with storage := g })
       = storageAssignUpd ⟨WrappedExpr.index Kind.storage ty base ix, hass⟩ rhs s := by
-  simp only [storageRhs, storageAssignUpd, bind, Except.bind, Except.map]
+  simp only [storageRhs_save_cur, storageRhs_delAt_cur, stVal, storageSave, storageAssignUpd, bind, Except.bind, Except.map]
   cases rhsSVal s rhs with
   | error e => rfl
   | ok v =>
@@ -250,7 +250,7 @@ theorem storageRootWriteCopySource_taclet (sm : SolidityModality) (stmt : Stmt)
   obtain ⟨e, hass⟩ := lhs
   obtain ⟨ty, fld, rfl, hg⟩ := isGlobal_shape hcond.1
   show goalsExec sm (terminalGoal [UpdElem.storage
-      (StorageUpd.copy (WrappedExpr.var Kind.storage ty fld) rhs)]) s = _
+      (StTerm.save .cur (WrappedExpr.var Kind.storage ty fld) (.find rhs))]) s = _
   rw [goalsExec_terminalGoal, toUpd_storageElem,
     tu_eq (r := .storageRootWriteCopySource) (f := onAssign storageAssignUpd) rfl]
   exact storageCopy_globalRoot ty fld hass rhs s hg
@@ -283,8 +283,8 @@ theorem storageFieldWriteSave_taclet (sm : SolidityModality) (stmt : Stmt)
   match e, hass, hcond with
   | WrappedExpr.field Kind.storage ty sp f, hass, hcond =>
       show goalsExec sm (terminalGoal [UpdElem.storage
-          (StorageUpd.save (WrappedExpr.field Kind.storage ty sp f)
-            (Sym.read rhs))]) s = _
+          (StTerm.save .cur (WrappedExpr.field Kind.storage ty sp f)
+            (StVal.sym (Sym.read rhs)))]) s = _
       rw [goalsExec_terminalGoal, toUpd_storageElem,
         tu_eq (r := .storageFieldWriteSave) (f := onAssign storageAssignUpd) rfl]
       rw [storageRhs_save_eq_copy _ _ _ (hcond.2).2 (hprim _ _ rfl)]
@@ -300,7 +300,7 @@ theorem storageFieldWriteCopySource_taclet (sm : SolidityModality) (stmt : Stmt)
   match e, hass, hcond with
   | WrappedExpr.field Kind.storage ty sp f, hass, hcond =>
       show goalsExec sm (terminalGoal [UpdElem.storage
-          (StorageUpd.copy (WrappedExpr.field Kind.storage ty sp f) rhs)]) s = _
+          (StTerm.save .cur (WrappedExpr.field Kind.storage ty sp f) (.find rhs))]) s = _
       rw [goalsExec_terminalGoal, toUpd_storageElem,
         tu_eq (r := .storageFieldWriteCopySource) (f := onAssign storageAssignUpd) rfl]
       exact storageCopy_field ty sp f hass rhs s
@@ -316,8 +316,8 @@ theorem storageIndexWriteMappingSave_taclet (sm : SolidityModality) (stmt : Stmt
   match e, hass, hcond with
   | WrappedExpr.index Kind.storage ty mp ix, hass, hcond =>
       show goalsExec sm (terminalGoal [UpdElem.storage
-          (StorageUpd.save (WrappedExpr.index Kind.storage ty mp ix)
-            (Sym.read rhs))]) s = _
+          (StTerm.save .cur (WrappedExpr.index Kind.storage ty mp ix)
+            (StVal.sym (Sym.read rhs)))]) s = _
       rw [goalsExec_terminalGoal, toUpd_storageElem,
         tu_eq (r := .storageIndexWriteMappingSave) (f := onAssign storageAssignUpd) rfl]
       rw [storageRhs_save_eq_copy _ _ _ hcond.2.2.2.1 (hprim _ _ rfl)]
@@ -333,7 +333,7 @@ theorem storageIndexWriteMappingCopySource_taclet (sm : SolidityModality) (stmt 
   match e, hass, hcond with
   | WrappedExpr.index Kind.storage ty mp ix, hass, hcond =>
       show goalsExec sm (terminalGoal [UpdElem.storage
-          (StorageUpd.copy (WrappedExpr.index Kind.storage ty mp ix) rhs)]) s = _
+          (StTerm.save .cur (WrappedExpr.index Kind.storage ty mp ix) (.find rhs))]) s = _
       rw [goalsExec_terminalGoal, toUpd_storageElem,
         tu_eq (r := .storageIndexWriteMappingCopySource) (f := onAssign storageAssignUpd) rfl]
       exact storageCopy_index ty mp ix hass rhs s
@@ -348,7 +348,7 @@ theorem memoryToStorageFieldCopyRoot_taclet (sm : SolidityModality) (stmt : Stmt
   match e, hass, hcond with
   | WrappedExpr.field Kind.storage ty sp f, hass, hcond =>
       show goalsExec sm (terminalGoal [UpdElem.storage
-          (StorageUpd.copyFromMem (WrappedExpr.field Kind.storage ty sp f) rhs)]) s = _
+          (StTerm.save .cur (WrappedExpr.field Kind.storage ty sp f) (.copyMem rhs))]) s = _
       rw [goalsExec_terminalGoal, toUpd_storageElem,
         tu_eq (r := .memoryToStorageFieldCopyRoot) (f := onAssign storageAssignUpd) rfl]
       exact storageCopy_field ty sp f hass rhs s
@@ -364,7 +364,7 @@ theorem memoryToStorageFieldCopyField_taclet (sm : SolidityModality) (stmt : Stm
   match e, hass, hcond with
   | WrappedExpr.field Kind.storage ty sp f, hass, hcond =>
       show goalsExec sm (terminalGoal [UpdElem.storage
-          (StorageUpd.copyFromMem (WrappedExpr.field Kind.storage ty sp f) rhs)]) s = _
+          (StTerm.save .cur (WrappedExpr.field Kind.storage ty sp f) (.copyMem rhs))]) s = _
       rw [goalsExec_terminalGoal, toUpd_storageElem,
         tu_eq (r := .memoryToStorageFieldCopyField) (f := onAssign storageAssignUpd) rfl]
       exact storageCopy_field ty sp f hass rhs s
@@ -379,7 +379,7 @@ theorem memoryToStorageIndexMappingCopyRoot_taclet (sm : SolidityModality) (stmt
   match e, hass, hcond with
   | WrappedExpr.index Kind.storage ty mp ix, hass, hcond =>
       show goalsExec sm (terminalGoal [UpdElem.storage
-          (StorageUpd.copyFromMem (WrappedExpr.index Kind.storage ty mp ix) rhs)]) s = _
+          (StTerm.save .cur (WrappedExpr.index Kind.storage ty mp ix) (.copyMem rhs))]) s = _
       rw [goalsExec_terminalGoal, toUpd_storageElem,
         tu_eq (r := .memoryToStorageIndexMappingCopyRoot) (f := onAssign storageAssignUpd) rfl]
       exact storageCopy_index ty mp ix hass rhs s

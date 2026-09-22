@@ -107,6 +107,84 @@ theorem SVal.find_save_same {old new updated : SVal} {path : List Seg}
                     subst updated
                     simp [SVal.find, lookupBy_setBy_self, ih hs]
 
+/-- The calculus's writer extends the program's: wherever `SVal.save`
+succeeds, `SVal.saveExt` does the same thing.  The two extra arms are reached
+only where `save` fails, so a write both can perform is one write.  This is
+what lets a rule's `{storage := save(storage, p, v)}` be compared with the
+interpreter's assignment without a case split. -/
+theorem SVal.saveExt_of_save {old new updated : SVal} {path : List Seg}
+    (h : old.save path new = .ok updated) :
+    old.saveExt path new = .ok updated := by
+  induction path generalizing old updated with
+  | nil => simpa [SVal.save, SVal.saveExt] using h
+  | cons seg rest ih =>
+      cases seg with
+      | field name =>
+          cases old <;> try { simp [SVal.save] at h }
+          rename_i fields
+          cases hv : lookupBy name fields with
+          | none => simp [SVal.save, hv] at h
+          | some old =>
+              simp only [SVal.save, hv] at h
+              cases hs : old.save rest new with
+              | error e => rw [hs] at h; contradiction
+              | ok child =>
+                  rw [hs] at h
+                  injection h with h'
+                  subst updated
+                  simp [SVal.saveExt, hv, ih hs, bind, Except.bind]
+      | «at» i =>
+          cases old <;> try { simp [SVal.save] at h }
+          · rename_i elems shadow
+            simp only [SVal.save] at h
+            split at h
+            next hb =>
+              cases hs : (elems.get ⟨i.toNat, hb.2⟩).save rest new with
+              | error e => rw [hs] at h; contradiction
+              | ok child =>
+                  rw [hs] at h
+                  injection h with h'
+                  subst updated
+                  simp only [SVal.saveExt, dif_pos hb, ih hs, bind, Except.bind]
+            next hb => contradiction
+          · rename_i entries dflt
+            cases hv : lookupBy i entries with
+            | none =>
+                simp only [SVal.save, hv] at h
+                cases hs : dflt.save rest new with
+                | error e => rw [hs] at h; contradiction
+                | ok child =>
+                    rw [hs] at h
+                    injection h with h'
+                    subst updated
+                    simp [SVal.saveExt, hv, ih hs, bind, Except.bind]
+            | some old =>
+                simp only [SVal.save, hv] at h
+                cases hs : old.save rest new with
+                | error e => rw [hs] at h; contradiction
+                | ok child =>
+                    rw [hs] at h
+                    injection h with h'
+                    subst updated
+                    simp [SVal.saveExt, hv, ih hs, bind, Except.bind]
+
+/-- The same at the state level. -/
+theorem State.saveStorageExt_of_saveStorage {s t : State} {root : Name}
+    {path : List Seg} {new : SVal} (h : s.saveStorage root path new = .ok t) :
+    s.saveStorageExt root path new = .ok t := by
+  unfold State.saveStorage at h
+  unfold State.saveStorageExt
+  cases hv : lookupBy root s.storage with
+  | none => simp [hv] at h
+  | some old =>
+      simp only [hv] at h
+      cases hs : old.save path new with
+      | error e => rw [hs] at h; simp [bind, Except.bind] at h
+      | ok child =>
+          rw [hs] at h
+          simp only [bind, Except.bind, SVal.saveExt_of_save hs]
+          exact h
+
 /-- State-level read-after-write, lifted through the storage-root map. -/
 theorem State.findStorage_saveStorage_same {s s' : State} {root : Name}
     {path : List Seg} {new : SVal}

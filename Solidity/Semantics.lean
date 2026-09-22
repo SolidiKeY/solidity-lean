@@ -301,12 +301,76 @@ def SVal.save : SVal -> List Seg -> SVal -> Res SVal
       | none => do
           let updated ← dflt.save rest new
           .ok (SVal.map (setBy i updated entries) dflt)
+  -- `a.length = n` is not a program assignment -- solc has rejected that
+  -- since 0.6 -- but it is the calculus's own write: `push` and `pop` are
+  -- `save(storage, consr(arr, size), n ± 1)` over the slot write beside it
+  -- (`storagePushLengthSave`, `storagePopSave`), and this is that write read
+  -- eagerly.  Growing is already done, because the `Seg.at` arm above
+  -- appended; shrinking hands the cleared tail back as recycled slots, which
+  -- is what makes a mapping nested in a popped element survive.
   -- The same four mismatches as `find`, with one asymmetry: there is no
   -- `Seg.field "length"` arm, because assigning `a.length` has been a
   -- solc compile error since 0.6.
   | SVal.prim _, _ :: _, _ => .error .stuck
   | SVal.struct _, Seg.at _ :: _, _ => .error .stuck
   | SVal.array _ _, Seg.field _ :: _, _ => .error .stuck
+  | SVal.map _ _, Seg.field _ :: _, _ => .error .stuck
+
+/-- `SVal.save` as the **calculus** writes it, where storage is KeY's total
+map and `size` is a location like any other.
+
+Two arms a program cannot reach, and `SVal.save` therefore does not have:
+a write one past the end *appends* -- `save(storage, consr(arr, at(n)), v)`
+at `n = size` is an ordinary write there, and only the companion `size` write
+makes the slot visible, while here `elems` is the extent -- and a write to
+`size` itself truncates, handing the cleared tail back as the recycled slots
+`pushSlot` deals out.  Together they are `storagePushValueSave`,
+`storagePushLengthSave` and `storagePopSave`.
+
+A program's `a[k] = v` still reverts at `k = size` (solc, and
+`Evm/BoundedSemantics.lean`), and `a.length = n` is still a compile error:
+those go through `SVal.save`.  The calculus reaches this one only under an
+`inBounds` guard or from a push or pop, so the two never disagree on a write
+both can perform. -/
+def SVal.saveExt : SVal -> List Seg -> SVal -> Res SVal
+  | _, [], new => .ok new
+  | SVal.struct fields, Seg.field name :: rest, new =>
+      match lookupBy name fields with
+      | some old => do
+          let updated ← old.saveExt rest new
+          .ok (SVal.struct (setBy name updated fields))
+      | none => .error .stuck
+  | SVal.array elems shadow, Seg.at i :: rest, new =>
+      if h : 0 ≤ i ∧ i.toNat < elems.length then do
+        let updated ← (elems.get ⟨i.toNat, h.2⟩).saveExt rest new
+        .ok (SVal.array (elems.set i.toNat updated) shadow)
+      else if 0 ≤ i ∧ i.toNat = elems.length ∧ rest = [] then
+        -- The recycled slot is consumed either way: `push(se)` overwrites the
+        -- value a `pop` handed back but still takes it out of the stack,
+        -- which is `pushSlot`'s second component.
+        .ok (SVal.array (elems ++ [new]) (shadow.drop 1))
+      else .error .revert
+  | SVal.array elems shadow, Seg.field name :: rest, new =>
+      if name = "length" ∧ rest = [] then
+        match new with
+        | SVal.int n =>
+            if n = elems.length then .ok (SVal.array elems shadow)
+            else if 0 ≤ n ∧ n < elems.length then
+              .ok (SVal.array (elems.take n.toNat)
+                ((elems.drop n.toNat).reverse.map SVal.defaultOf ++ shadow))
+            else .error .revert
+        | _ => .error .stuck
+      else .error .stuck
+  | SVal.map entries dflt, Seg.at i :: rest, new =>
+      match lookupBy i entries with
+      | some old => do
+          let updated ← old.saveExt rest new
+          .ok (SVal.map (setBy i updated entries) dflt)
+      | none => do
+          let updated ← dflt.saveExt rest new
+          .ok (SVal.map (setBy i updated entries) dflt)
+  | SVal.prim _, _ :: _, _ => .error .stuck
+  | SVal.struct _, Seg.at _ :: _, _ => .error .stuck
   | SVal.map _ _, Seg.field _ :: _, _ => .error .stuck
 
 namespace State
@@ -321,6 +385,15 @@ def saveStorage (s : State) (root : Name) (segs : List Seg) (new : SVal) :
   match lookupBy root s.storage with
   | some v => do
       let updated ← v.save segs new
+      .ok { s with storage := setBy root updated s.storage }
+  | none => .error .stuck
+
+/-- `saveStorage` through `SVal.saveExt`: the calculus's writer. -/
+def saveStorageExt (s : State) (root : Name) (segs : List Seg) (new : SVal) :
+    Res State :=
+  match lookupBy root s.storage with
+  | some v => do
+      let updated ← v.saveExt segs new
       .ok { s with storage := setBy root updated s.storage }
   | none => .error .stuck
 

@@ -75,16 +75,16 @@ branch — with the antecedent `¬⊤`, which is what makes it vacuous. -/
 
 sol_derivation transferCapturedAmount :
     => [ to.transfer(x + 2) ](φ)
-  ~*> [ => { se@uint := default(uint) } { se@uint := (x + 2) }
+  ~*> [ => { se@uint := defVal(uint) } { se@uint := (x + 2) }
           { transfer(to, se@uint) } [ ](φ),
-        { se@uint := default(uint) } ¬⊤ => { se@uint := default(uint) } ⊤ ]
+        { se@uint := defVal(uint) } ¬⊤ => { se@uint := defVal(uint) } ⊤ ]
 
 sol_derivation transferCapturedAmountDiamond :
     => < to.transfer(x + 2) >(φ)
-  ~*> [ => { se@uint := default(uint) } { se@uint := (x + 2) } funded(se@uint),
-        => { se@uint := default(uint) } { se@uint := (x + 2) }
+  ~*> [ => { se@uint := defVal(uint) } { se@uint := (x + 2) } funded(se@uint),
+        => { se@uint := defVal(uint) } { se@uint := (x + 2) }
           { transfer(to, se@uint) } < >(φ),
-        { se@uint := default(uint) } ¬⊤ => { se@uint := default(uint) } ⊥ ]
+        { se@uint := defVal(uint) } ¬⊤ => { se@uint := defVal(uint) } ⊥ ]
 
 /-! ### an unfunded `to.transfer(5);`
 The calculus's last payment example, and the point of the split: nothing is

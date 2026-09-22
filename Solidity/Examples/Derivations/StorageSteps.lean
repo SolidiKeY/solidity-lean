@@ -66,8 +66,8 @@ per line.  Put the cursor on any `seq_step` to see the frontier the rule before
 it left. -/
 theorem deepFieldWrite :
     [ seq!{ => <[ alice.account.balance = 10 ]>(φ) } ]
-      ⇝ᵘ* [ seq!{ => { se@uint := 10 ‖ sp@Account := path(alice.account)
-                       ‖ storage := save(alice.account.balance, 10) } (φ) } ] := by
+      ⇝ᵘ* [ seq!{ => { se@uint := 10 ‖ sp@Account := alice.account
+                       ‖ storage := save(storage, alice.account.balance, 10) } (φ) } ] := by
   seq_step .storageFieldWriteUnfoldLeftFst
   seq_step .localValueDeclInitDrop
   seq_step .valueDeclSkip
@@ -80,8 +80,8 @@ theorem deepFieldWrite :
 so the frontiers are still there to look at — they are just not on the page. -/
 theorem deepFieldWriteListed :
     [ seq!{ => <[ alice.account.balance = 10 ]>(φ) } ]
-      ⇝ᵘ* [ seq!{ => { se@uint := 10 ‖ sp@Account := path(alice.account)
-                       ‖ storage := save(alice.account.balance, 10) } (φ) } ] := by
+      ⇝ᵘ* [ seq!{ => { se@uint := 10 ‖ sp@Account := alice.account
+                       ‖ storage := save(storage, alice.account.balance, 10) } (φ) } ] := by
   seq_steps [.storageFieldWriteUnfoldLeftFst, .localValueDeclInitDrop,
              .valueDeclSkip, .localValueAssign, .storagePlaceAlias,
              .storageFieldWriteSave]
@@ -91,29 +91,29 @@ theorem deepFieldWriteListed :
 /-- `alice.age = ageVal;` -/
 theorem fieldWriteSimple :
     [ seq!{ => <[ alice.age = ageVal ]>(φ) } ]
-      ⇝ᵘ* [ seq!{ => { storage := save(alice.age, ageVal) } (φ) } ] := by
+      ⇝ᵘ* [ seq!{ => { storage := save(storage, alice.age, ageVal) } (φ) } ] := by
   seq_steps [.storageFieldWriteSave]
 
 /-- `Account storage acc = bob.account; alice.account = acc;` -/
 theorem fieldWriteFromAlias :
     [ seq!{ => <[ Account storage acc = bob.account; alice.account = acc ]>(φ) } ]
-      ⇝ᵘ* [ seq!{ => { acc := path(bob.account) }
-                    { storage := copy(alice.account, acc) } (φ) } ] := by
+      ⇝ᵘ* [ seq!{ => { acc := bob.account }
+                    { storage := save(storage, alice.account, find(storage, acc)) } (φ) } ] := by
   seq_steps [.storagePlaceAlias, .storageFieldWriteCopySource]
 
 /-- `v = alice.account.balance;` -/
 theorem deepFieldRead :
     [ seq!{ => <[ v = alice.account.balance ]>(φ) } ]
-      ⇝ᵘ* [ seq!{ => { sp@Account := path(alice.account)
-                       ‖ v := alice.account.balance } (φ) } ] := by
+      ⇝ᵘ* [ seq!{ => { sp@Account := alice.account
+                       ‖ v := find(storage, alice.account.balance) } (φ) } ] := by
   seq_steps [.storageFieldReadUnfoldRightFst, .storagePlaceAlias,
              .storageFieldReadFind]
 
 /-- `alice.account.token.value = 5;` -/
 theorem deeperFieldWrite :
     [ seq!{ => <[ alice.account.token.value = 5 ]>(φ) } ]
-      ⇝ᵘ* [ seq!{ => { se@uint := 5 ‖ sp@Token := path(alice.account.token)
-                       ‖ storage := save(alice.account.token.value, 5) } (φ) } ] := by
+      ⇝ᵘ* [ seq!{ => { se@uint := 5 ‖ sp@Token := alice.account.token
+                       ‖ storage := save(storage, alice.account.token.value, 5) } (φ) } ] := by
   seq_steps [.storageFieldWriteUnfoldLeftFst, .localValueDeclInitDrop,
              .valueDeclSkip, .localValueAssign, .storagePlaceAlias,
              .storageFieldWriteSave]
@@ -121,20 +121,20 @@ theorem deeperFieldWrite :
 /-- `uint v = total;` -/
 theorem rootRead :
     [ seq!{ => <[ uint v = total ]>(φ) } ]
-      ⇝ᵘ* [ seq!{ => { v := default(uint) } { v := total } (φ) } ] := by
+      ⇝ᵘ* [ seq!{ => { v := defVal(uint) } { v := select(storage, total) } (φ) } ] := by
   seq_steps [.localValueDeclInitDrop, .valueDeclSkip,
              .storageRootReadSelect]
 
 /-- `alice = bob;` -/
 theorem rootWriteFromGlobal :
     [ seq!{ => <[ alice = bob ]>(φ) } ]
-      ⇝ᵘ* [ seq!{ => { storage := copy(alice, bob) } (φ) } ] := by
+      ⇝ᵘ* [ seq!{ => { storage := save(storage, alice, find(storage, bob)) } (φ) } ] := by
   seq_steps [.storageRootWriteCopySource]
 
 /-- `alice = pp;` -/
 theorem rootWriteFromAlias :
     [ seq!{ => <[ alice = pp ]>(φ) } ]
-      ⇝ᵘ* [ seq!{ => { storage := copy(alice, pp) } (φ) } ] := by
+      ⇝ᵘ* [ seq!{ => { storage := save(storage, alice, find(storage, pp)) } (φ) } ] := by
   seq_steps [.storageRootWriteCopySource]
 
 /-- `Account storage acc = alice.account; acc = bob.account; acc.balance = 10;`
@@ -142,16 +142,16 @@ theorem rootWriteFromAlias :
 theorem localRebindThenWrite :
     [ seq!{ => <[ Account storage acc = alice.account; acc = bob.account;
                   acc.balance = 10 ]>(φ) } ]
-      ⇝ᵘ* [ seq!{ => { acc := path(alice.account) }
-                    { acc := path(bob.account)
-                      ‖ storage := save(bob.account.balance, 10) } (φ) } ] := by
+      ⇝ᵘ* [ seq!{ => { acc := alice.account }
+                    { acc := bob.account
+                      ‖ storage := save(storage, bob.account.balance, 10) } (φ) } ] := by
   seq_steps [.storagePlaceAlias, .storageFieldReadBindLocalRoot,
              .storageFieldWriteSave]
 
 /-- `account = bob.account;` -- a global root, so a deep copy. -/
 theorem globalRootCopy :
     [ seq!{ => <[ account@@Account = bob.account ]>(φ) } ]
-      ⇝ᵘ* [ seq!{ => { storage := copy(account@@Account, bob.account) } (φ) } ] := by
+      ⇝ᵘ* [ seq!{ => { storage := save(storage, account@@Account, find(storage, bob.account)) } (φ) } ] := by
   seq_steps [.storageFieldReadStoreRoot]
 
 /-! ## 2 · Storage arrays -/
@@ -159,14 +159,14 @@ theorem globalRootCopy :
 /-- `v = values[i];`, box. -/
 theorem arrayIndexReadBox :
     [ seq!{ => [ v = values[i] ](φ) } ]
-      ⇝ᵘ* [ seq!{ inBounds(values[i]) => { v := values[i] } [ ](φ) },
+      ⇝ᵘ* [ seq!{ inBounds(values[i]) => { v := find(storage, values[i]) } [ ](φ) },
             seq!{ ¬inBounds(values[i]) => ⊤ } ] := by
   seq_steps [.storageIndexReadArrayFindBox, .revertBox]
 
 /-- `v = values[i];`, diamond. -/
 theorem arrayIndexReadDiamond :
     [ seq!{ => < v = values[i] >(φ) } ]
-      ⇝ᵘ* [ seq!{ inBounds(values[i]) => { v := values[i] } < >(φ) },
+      ⇝ᵘ* [ seq!{ inBounds(values[i]) => { v := find(storage, values[i]) } < >(φ) },
             seq!{ ¬inBounds(values[i]) => ⊥ } ] := by
   seq_steps [.storageIndexReadArrayFindDiamond, .revertDiamond]
 
@@ -174,44 +174,44 @@ theorem arrayIndexReadDiamond :
 theorem arrayIndexWrite :
     [ seq!{ => [ values[i] = 100 ](φ) } ]
       ⇝ᵘ* [ seq!{ inBounds(values[i]) =>
-                    { storage := save(values[i], 100) } [ ](φ) },
+                    { storage := save(storage, values[i], 100) } [ ](φ) },
             seq!{ ¬inBounds(values[i]) => ⊤ } ] := by
   seq_steps [.storageIndexWriteArraySaveBox, .revertBox]
 
 /-- `v = balances[i];` -- a mapping key, so no bounds goal. -/
 theorem mappingIndexRead :
     [ seq!{ => <[ v = balances[i] ]>(φ) } ]
-      ⇝ᵘ* [ seq!{ => { v := balances[i] } (φ) } ] := by
+      ⇝ᵘ* [ seq!{ => { v := find(storage, balances[i]) } (φ) } ] := by
   seq_steps [.storageIndexReadMappingFind]
 
 /-- `Token storage tokRef = bob.account.token; tokens[i] = tokRef;` -/
 theorem arrayIndexWriteRefSource :
     [ seq!{ => [ Token storage tokRef = bob.account.token;
                  (tokens@@TokenArray)[i] = tokRef ](φ) } ]
-      ⇝ᵘ* [ seq!{ { tokRef := path(bob.account.token) }
+      ⇝ᵘ* [ seq!{ { tokRef := bob.account.token }
                     inBounds((tokens@@TokenArray)[i]) =>
-                    { tokRef := path(bob.account.token) }
-                    { storage := copy((tokens@@TokenArray)[i], tokRef) } [ ](φ) },
-            seq!{ { tokRef := path(bob.account.token) }
+                    { tokRef := bob.account.token }
+                    { storage := save(storage, (tokens@@TokenArray)[i], find(storage, tokRef)) } [ ](φ) },
+            seq!{ { tokRef := bob.account.token }
                     ¬inBounds((tokens@@TokenArray)[i]) =>
-                    { tokRef := path(bob.account.token) } ⊤ } ] := by
+                    { tokRef := bob.account.token } ⊤ } ] := by
   seq_steps [.storagePlaceAlias, .storageIndexWriteArrayCopySourceBox,
              .revertBox]
 
 /-- `alice.accounts[i] = 100;` -- a nonsimple path under an index. -/
 theorem nonsimplePathIndexWrite :
     [ seq!{ => [ alice.accounts[i] = 100 ](φ) } ]
-      ⇝ᵘ* [ seq!{ { se@uint := default(uint) } { se@uint := 100 }
-                    { sp@UintArray := path(alice.accounts) }
+      ⇝ᵘ* [ seq!{ { se@uint := defVal(uint) } { se@uint := 100 }
+                    { sp@UintArray := alice.accounts }
                     inBounds(sp@UintArray[i]) =>
-                    { se@uint := default(uint) } { se@uint := 100 }
-                    { sp@UintArray := path(alice.accounts) }
-                    { storage := save(sp@UintArray[i], se@uint) } [ ](φ) },
-            seq!{ { se@uint := default(uint) } { se@uint := 100 }
-                    { sp@UintArray := path(alice.accounts) }
+                    { se@uint := defVal(uint) } { se@uint := 100 }
+                    { sp@UintArray := alice.accounts }
+                    { storage := save(storage, sp@UintArray[i], se@uint) } [ ](φ) },
+            seq!{ { se@uint := defVal(uint) } { se@uint := 100 }
+                    { sp@UintArray := alice.accounts }
                     ¬inBounds(sp@UintArray[i]) =>
-                    { se@uint := default(uint) } { se@uint := 100 }
-                    { sp@UintArray := path(alice.accounts) } ⊤ } ] := by
+                    { se@uint := defVal(uint) } { se@uint := 100 }
+                    { sp@UintArray := alice.accounts } ⊤ } ] := by
   seq_steps [.storageIndexWriteUnfoldLeftFst, .localValueDeclInitDrop,
              .valueDeclSkip, .localValueAssign, .storagePlaceAlias,
              .storageIndexWriteArraySaveBox, .revertBox]
@@ -219,21 +219,21 @@ theorem nonsimplePathIndexWrite :
 /-- `alice.accounts[++i] = amount;` -- the index is nonsimple too. -/
 theorem nonsimplePathIncIndexWrite :
     [ seq!{ => [ alice.accounts[++i] = amount ](φ) } ]
-      ⇝ᵘ* [ seq!{ { se@uint := default(uint) } { se@uint := amount }
-                    { sp@UintArray := path(alice.accounts) }
-                    { ie@uint := default(uint) } { bump(++i) ‖ ie@uint := ++i }
+      ⇝ᵘ* [ seq!{ { se@uint := defVal(uint) } { se@uint := amount }
+                    { sp@UintArray := alice.accounts }
+                    { ie@uint := defVal(uint) } { bump(++i) ‖ ie@uint := ++i }
                     inBounds(sp@UintArray[ie@uint]) =>
-                    { se@uint := default(uint) } { se@uint := amount }
-                    { sp@UintArray := path(alice.accounts) }
-                    { ie@uint := default(uint) } { bump(++i) ‖ ie@uint := ++i }
-                    { storage := save(sp@UintArray[ie@uint], se@uint) } [ ](φ) },
-            seq!{ { se@uint := default(uint) } { se@uint := amount }
-                    { sp@UintArray := path(alice.accounts) }
-                    { ie@uint := default(uint) } { bump(++i) ‖ ie@uint := ++i }
+                    { se@uint := defVal(uint) } { se@uint := amount }
+                    { sp@UintArray := alice.accounts }
+                    { ie@uint := defVal(uint) } { bump(++i) ‖ ie@uint := ++i }
+                    { storage := save(storage, sp@UintArray[ie@uint], se@uint) } [ ](φ) },
+            seq!{ { se@uint := defVal(uint) } { se@uint := amount }
+                    { sp@UintArray := alice.accounts }
+                    { ie@uint := defVal(uint) } { bump(++i) ‖ ie@uint := ++i }
                     ¬inBounds(sp@UintArray[ie@uint]) =>
-                    { se@uint := default(uint) } { se@uint := amount }
-                    { sp@UintArray := path(alice.accounts) }
-                    { ie@uint := default(uint) } { bump(++i) ‖ ie@uint := ++i } ⊤ } ] := by
+                    { se@uint := defVal(uint) } { se@uint := amount }
+                    { sp@UintArray := alice.accounts }
+                    { ie@uint := defVal(uint) } { bump(++i) ‖ ie@uint := ++i } ⊤ } ] := by
   seq_steps [.storageIndexWriteUnfoldLeftFst, .localValueDeclInitDrop,
              .valueDeclSkip, .localValueAssign, .storagePlaceAlias,
              .localValueDeclInitDrop, .valueDeclSkip,
@@ -254,14 +254,14 @@ theorem receiverAndIndexSideEffects :
 /-- `values.push(42);` -/
 theorem arrayPush :
     [ seq!{ => <[ values.push(42) ]>(φ) } ]
-      ⇝ᵘ* [ seq!{ => { storage := push(values, 42) } (φ) } ] := by
+      ⇝ᵘ* [ seq!{ => { storage := save(save(storage, values[values.length], 42), values.length, values.length + 1) } (φ) } ] := by
   seq_steps [.storagePushValueSave]
 
 /-- `tokens.pop();`, box. -/
 theorem arrayPopBox :
     [ seq!{ => [ (tokens@@TokenArray).pop() ](φ) } ]
       ⇝ᵘ* [ seq!{ nonEmpty((tokens@@TokenArray)) =>
-                    { storage := pop((tokens@@TokenArray)) } [ ](φ) },
+                    { storage := save(delAt(storage, (tokens@@TokenArray)[(tokens@@TokenArray).length - 1]), (tokens@@TokenArray).length, (tokens@@TokenArray).length - 1) } [ ](φ) },
             seq!{ ¬nonEmpty((tokens@@TokenArray)) => ⊤ } ] := by
   seq_steps [.storagePopSaveBox, .revertBox]
 
@@ -269,44 +269,44 @@ theorem arrayPopBox :
 theorem arrayPopDiamond :
     [ seq!{ => < (tokens@@TokenArray).pop() >(φ) } ]
       ⇝ᵘ* [ seq!{ nonEmpty((tokens@@TokenArray)) =>
-                    { storage := pop((tokens@@TokenArray)) } < >(φ) },
+                    { storage := save(delAt(storage, (tokens@@TokenArray)[(tokens@@TokenArray).length - 1]), (tokens@@TokenArray).length, (tokens@@TokenArray).length - 1) } < >(φ) },
             seq!{ ¬nonEmpty((tokens@@TokenArray)) => ⊥ } ] := by
   seq_steps [.storagePopSaveDiamond, .revertDiamond]
 
 /-- `tokens.push(tokRef);` -/
 theorem pushRefSource :
     [ seq!{ => <[ (tokens@@TokenArray).push(tokRef) ]>(φ) } ]
-      ⇝ᵘ* [ seq!{ => { storage := push((tokens@@TokenArray), tokRef) } (φ) } ] := by
+      ⇝ᵘ* [ seq!{ => { storage := save(save(storage, (tokens@@TokenArray)[(tokens@@TokenArray).length], tokRef), (tokens@@TokenArray).length, (tokens@@TokenArray).length + 1) } (φ) } ] := by
   seq_steps [.storagePushValueCopySource]
 
 /-- `alice.account.tokens.push(tokRef);` -- a nonsimple receiver. -/
 theorem pushNonsimpleReceiver :
     [ seq!{ => <[ alice.account.tokens.push(tokRef) ]>(φ) } ]
-      ⇝ᵘ* [ seq!{ => { sp@TokenArray := path(alice.account.tokens) }
-                    { storage := push(sp@TokenArray, tokRef) } (φ) } ] := by
+      ⇝ᵘ* [ seq!{ => { sp@TokenArray := alice.account.tokens }
+                    { storage := save(save(storage, sp@TokenArray[sp@TokenArray.length], tokRef), sp@TokenArray.length, sp@TokenArray.length + 1) } (φ) } ] := by
   seq_steps [.storagePushValueUnfoldLeftFstReceiver, .storagePlaceAlias,
              .storagePushValueCopySource]
 
 /-- `bucket.tokens.push();` -- a nonsimple receiver on a state variable. -/
 theorem bucketPushBare :
     [ seq!{ => <[ (bucket@@TokenBucket.tokens).push() ]>(φ) } ]
-      ⇝ᵘ* [ seq!{ => { sp@TokenArray := path(bucket@@TokenBucket.tokens) }
-                    { storage := push(sp@TokenArray) } (φ) } ] := by
+      ⇝ᵘ* [ seq!{ => { sp@TokenArray := bucket@@TokenBucket.tokens }
+                    { storage := save(delAt(storage, sp@TokenArray[sp@TokenArray.length]), sp@TokenArray.length, sp@TokenArray.length + 1) } (φ) } ] := by
   seq_steps [.storagePushUnfoldLeftFstReceiver, .storagePlaceAlias,
              .storagePushLengthSave]
 
 /-- `tokens.push();` -/
 theorem pushBare :
     [ seq!{ => <[ (tokens@@TokenArray).push() ]>(φ) } ]
-      ⇝ᵘ* [ seq!{ => { storage := push((tokens@@TokenArray)) } (φ) } ] := by
+      ⇝ᵘ* [ seq!{ => { storage := save(delAt(storage, (tokens@@TokenArray)[(tokens@@TokenArray).length]), (tokens@@TokenArray).length, (tokens@@TokenArray).length + 1) } (φ) } ] := by
   seq_steps [.storagePushLengthSave]
 
 /-- `tokens.push().value = 11;` -- the slot a bare push returns is a path. -/
 theorem pushSlotWrite :
     [ seq!{ => <[ (tokens@@TokenArray).push().value = 11 ]>(φ) } ]
-      ⇝ᵘ* [ seq!{ => { se@uint := default(uint) } { se@uint := 11 }
-                    { sp@Token := path((tokens@@TokenArray).push()) }
-                    { storage := save(sp@Token.value, se@uint) } (φ) } ] := by
+      ⇝ᵘ* [ seq!{ => { se@uint := defVal(uint) } { se@uint := 11 }
+                    { sp@Token := (tokens@@TokenArray).push() }
+                    { storage := save(storage, sp@Token.value, se@uint) } (φ) } ] := by
   seq_steps [.storageFieldWriteUnfoldLeftFst, .localValueDeclInitDrop,
              .valueDeclSkip, .localValueAssign, .storagePlaceAlias,
              .storageFieldWriteSave]
@@ -315,10 +315,10 @@ theorem pushSlotWrite :
 theorem pushThenPushSlotRead :
     [ seq!{ => <[ (tokens@@TokenArray).push();
                   uint i = (tokens@@TokenArray).push().value ]>(φ) } ]
-      ⇝ᵘ* [ seq!{ => { storage := push((tokens@@TokenArray)) }
-                    { i := default(uint) }
-                    { sp@Token := path((tokens@@TokenArray).push()) }
-                    { i := sp@Token.value } (φ) } ] := by
+      ⇝ᵘ* [ seq!{ => { storage := save(delAt(storage, (tokens@@TokenArray)[(tokens@@TokenArray).length]), (tokens@@TokenArray).length, (tokens@@TokenArray).length + 1) }
+                    { i := defVal(uint) }
+                    { sp@Token := (tokens@@TokenArray).push() }
+                    { i := find(storage, sp@Token.value) } (φ) } ] := by
   seq_steps [.storagePushLengthSave, .localValueDeclInitDrop,
              .valueDeclSkip, .storageFieldReadUnfoldRightFst,
              .storagePlaceAlias, .storageFieldReadFind]
@@ -326,19 +326,19 @@ theorem pushThenPushSlotRead :
 /-- `values.push(); values.pop();` -- the pop guard read under the push. -/
 theorem popAfterPush :
     [ seq!{ => <[ values.push(); values.pop() ]>(φ) } ]
-      ⇝ᵘ* [ seq!{ { storage := push(values) } nonEmpty(values) =>
-                    { storage := push(values) } { storage := pop(values) }
+      ⇝ᵘ* [ seq!{ { storage := save(delAt(storage, values[values.length]), values.length, values.length + 1) } nonEmpty(values) =>
+                    { storage := save(delAt(storage, values[values.length]), values.length, values.length + 1) } { storage := save(delAt(storage, values[values.length - 1]), values.length, values.length - 1) }
                     <[ ]>(φ) },
-            seq!{ { storage := push(values) } ¬nonEmpty(values) =>
-                    { storage := push(values) } ⊤ },
-            seq!{ { storage := push(values) } ¬nonEmpty(values) =>
-                    { storage := push(values) } ⊥ } ] := by
+            seq!{ { storage := save(delAt(storage, values[values.length]), values.length, values.length + 1) } ¬nonEmpty(values) =>
+                    { storage := save(delAt(storage, values[values.length]), values.length, values.length + 1) } ⊤ },
+            seq!{ { storage := save(delAt(storage, values[values.length]), values.length, values.length + 1) } ¬nonEmpty(values) =>
+                    { storage := save(delAt(storage, values[values.length]), values.length, values.length + 1) } ⊥ } ] := by
   seq_steps [.storagePushLengthSave, .storagePopSaveBox, .revertBox]
 
 /-- `age = 10; age++;` -/
 theorem rootWriteThenIncrement :
     [ seq!{ => <[ age = 10; age++ ]>(φ) } ]
-      ⇝ᵘ* [ seq!{ => { storage := save(age, 10) } { bump(age++) } (φ) } ] := by
+      ⇝ᵘ* [ seq!{ => { storage := save(storage, age, 10) } { bump(age++) } (φ) } ] := by
   seq_steps [.storageRootWriteStore, (.storageRootIncrement .postInc)]
 
 /-! ## 3 · Delete -/
@@ -346,7 +346,7 @@ theorem rootWriteThenIncrement :
 /-- `delete alice.account;` -/
 theorem deleteField :
     [ seq!{ => <[ delete alice.account ]>(φ) } ]
-      ⇝ᵘ* [ seq!{ => { storage := clear(alice.account) } (φ) } ] := by
+      ⇝ᵘ* [ seq!{ => { storage := delAt(storage, alice.account) } (φ) } ] := by
   seq_steps [.storageFieldDelete]
 
 /-- `delete alice.account;` between writes and reads -- nothing merges, so the
@@ -355,17 +355,17 @@ theorem deleteAccountThenReadLeaves :
     [ seq!{ => <[ alice.account.balance = 100; alice.account.token.value = 7;
                   delete alice.account; b = alice.account.balance;
                   v = alice.account.token.value ]>(φ) } ]
-      ⇝ᵘ* [ seq!{ => { se@uint := default(uint) } { se@uint := 100 }
-                    { sp@Account := path(alice.account) }
-                    { storage := save(sp@Account.balance, se@uint) }
-                    { se@uint := default(uint) } { se@uint := 7 }
-                    { sp@Token := path(alice.account.token) }
-                    { storage := save(sp@Token.value, se@uint) }
-                    { storage := clear(alice.account) }
-                    { sp@Account := path(alice.account) }
-                    { b := sp@Account.balance }
-                    { sp@Token := path(alice.account.token) }
-                    { v := sp@Token.value } (φ) } ] := by
+      ⇝ᵘ* [ seq!{ => { se@uint := defVal(uint) } { se@uint := 100 }
+                    { sp@Account := alice.account }
+                    { storage := save(storage, sp@Account.balance, se@uint) }
+                    { se@uint := defVal(uint) } { se@uint := 7 }
+                    { sp@Token := alice.account.token }
+                    { storage := save(storage, sp@Token.value, se@uint) }
+                    { storage := delAt(storage, alice.account) }
+                    { sp@Account := alice.account }
+                    { b := find(storage, sp@Account.balance) }
+                    { sp@Token := alice.account.token }
+                    { v := find(storage, sp@Token.value) } (φ) } ] := by
   seq_steps [.storageFieldWriteUnfoldLeftFst, .localValueDeclInitDrop,
              .valueDeclSkip, .localValueAssign, .storagePlaceAlias,
              .storageFieldWriteSave, .storageFieldWriteUnfoldLeftFst,
@@ -380,11 +380,11 @@ theorem deleteAccountThenReadLeaves :
 theorem deleteIncIndexThenLength :
     [ seq!{ => <[ delete alice.account.tokens[++i];
                   len = alice.account.tokens.length ]>(φ) } ]
-      ⇝ᵘ* [ seq!{ => { sp@TokenArray := path(alice.account.tokens) }
-                    { ie@uint := default(uint) } { bump(++i) ‖ ie@uint := ++i }
-                    { storage := clear(sp@TokenArray[ie@uint]) }
-                    { sp@TokenArray := path(alice.account.tokens) }
-                    { len := sp@TokenArray.length } (φ) } ] := by
+      ⇝ᵘ* [ seq!{ => { sp@TokenArray := alice.account.tokens }
+                    { ie@uint := defVal(uint) } { bump(++i) ‖ ie@uint := ++i }
+                    { storage := delAt(storage, sp@TokenArray[ie@uint]) }
+                    { sp@TokenArray := alice.account.tokens }
+                    { len := find(storage, sp@TokenArray.length) } (φ) } ] := by
   seq_steps [.storageIndexDeleteUnfoldLeftFst, .storagePlaceAlias,
              .storageIndexDeleteNonSimpleIndexCapture,
              .localValueDeclInitDrop, .valueDeclSkip,
@@ -396,9 +396,9 @@ theorem deleteIncIndexThenLength :
 theorem deleteStructThenRead :
     [ seq!{ => <[ (ledger@@Ledger).nonce = 42; delete (ledger@@Ledger);
                   v = (ledger@@Ledger).nonce ]>(φ) } ]
-      ⇝ᵘ* [ seq!{ => { storage := save((ledger@@Ledger).nonce, 42) }
-                    { storage := clear((ledger@@Ledger)) }
-                    { v := (ledger@@Ledger).nonce } (φ) } ] := by
+      ⇝ᵘ* [ seq!{ => { storage := save(storage, (ledger@@Ledger).nonce, 42) }
+                    { storage := delAt(storage, (ledger@@Ledger)) }
+                    { v := find(storage, (ledger@@Ledger).nonce) } (φ) } ] := by
   seq_steps [.storageFieldWriteSave, .storageRootDelete,
              .storageFieldReadFind]
 
@@ -410,18 +410,18 @@ theorem deleteLedgerMappingSurvives :
                   delete (ledger@@Ledger).balances[1];
                   nonce = (ledger@@Ledger).nonce;
                   gone = (ledger@@Ledger).balances[1] ]>(φ) } ]
-      ⇝ᵘ* [ seq!{ => { storage := save((ledger@@Ledger).nonce, 5) }
-                    { se@uint := default(uint) } { se@uint := 10 }
-                    { sp@UintMap := path((ledger@@Ledger).balances) }
-                    { storage := save(sp@UintMap[1], se@uint) }
-                    { storage := clear((ledger@@Ledger)) }
-                    { sp@UintMap := path((ledger@@Ledger).balances) }
-                    { kept := sp@UintMap[1] }
-                    { sp@UintMap := path((ledger@@Ledger).balances) }
-                    { storage := clear(sp@UintMap[1]) }
-                    { nonce := (ledger@@Ledger).nonce }
-                    { sp@UintMap := path((ledger@@Ledger).balances) }
-                    { gone := sp@UintMap[1] } (φ) } ] := by
+      ⇝ᵘ* [ seq!{ => { storage := save(storage, (ledger@@Ledger).nonce, 5) }
+                    { se@uint := defVal(uint) } { se@uint := 10 }
+                    { sp@UintMap := (ledger@@Ledger).balances }
+                    { storage := save(storage, sp@UintMap[1], se@uint) }
+                    { storage := delAt(storage, (ledger@@Ledger)) }
+                    { sp@UintMap := (ledger@@Ledger).balances }
+                    { kept := find(storage, sp@UintMap[1]) }
+                    { sp@UintMap := (ledger@@Ledger).balances }
+                    { storage := delAt(storage, sp@UintMap[1]) }
+                    { nonce := find(storage, (ledger@@Ledger).nonce) }
+                    { sp@UintMap := (ledger@@Ledger).balances }
+                    { gone := find(storage, sp@UintMap[1]) } (φ) } ] := by
   seq_steps [.storageFieldWriteSave, .storageIndexWriteUnfoldLeftFst,
              .localValueDeclInitDrop, .valueDeclSkip, .localValueAssign,
              .storagePlaceAlias, .storageIndexWriteMappingSave,

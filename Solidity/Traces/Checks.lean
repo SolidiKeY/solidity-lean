@@ -40,22 +40,22 @@ def store : Semantics.State :=
 program it came from. -/
 example :
     (seq!{ => <[ alice.account.balance = 10 ]>(alice.account.balance == 10) }).check store
-      = (seq!{ => { se@uint := 10 ‖ sp@Account := path(alice.account)
-                    ‖ storage := save(alice.account.balance, 10) }
+      = (seq!{ => { se@uint := 10 ‖ sp@Account := alice.account
+                    ‖ storage := save(storage, alice.account.balance, 10) }
                <[ ]>(alice.account.balance == 10) }).check store := by
   native_decide
 
 /-- …and both of them hold. -/
 example :
-    (seq!{ => { se@uint := 10 ‖ sp@Account := path(alice.account)
-                ‖ storage := save(alice.account.balance, 10) }
+    (seq!{ => { se@uint := 10 ‖ sp@Account := alice.account
+                ‖ storage := save(storage, alice.account.balance, 10) }
             <[ ]>(alice.account.balance == 10) }).Holds store := by
   native_decide
 
 /-- The root chain, first line against last. -/
 example :
     (seq!{ => <[ age = 10; age++ ]>(age == 11) }).check State.exampleStore
-      = (seq!{ => { storage := save(age, 10) } { bump(age++) }
+      = (seq!{ => { storage := save(storage, age, 10) } { bump(age++) }
                <[ ]>(age == 11) }).check State.exampleStore := by
   native_decide
 
@@ -106,7 +106,7 @@ put there. -/
 example :
     (seq!{ => <[ alice.age = 34; Person memory mv2 = alice;
                  v = mv2@Person.age ]>(v == 34) }).check State.exampleStore
-      = (seq!{ => { storage := save(alice.age, 34) } { mv2 := freshId(alloc(Person, alice)) ‖ memory := alloc(Person, alice) }
+      = (seq!{ => { storage := save(storage, alice.age, 34) } { mv2 := freshId(alloc(Person, alice)) ‖ memory := alloc(Person, alice) }
                   { v := mv2@Person.age } <[ ]>(v == 34) }).check
           State.exampleStore := by
   native_decide
@@ -145,15 +145,15 @@ example :
                  delete alice.account; b = alice.account.balance;
                  v = alice.account.token.value ]>(v == 0) }).check
         State.exampleStore
-      = (seq!{ => { se@uint := default(uint) } { se@uint := 100 }
-                  { sp@Account := path(alice.account) }
-                  { storage := save(sp@Account.balance, se@uint) }
-                  { se@uint := default(uint) } { se@uint := 7 }
-                  { sp@Token := path(alice.account.token) }
-                  { storage := save(sp@Token.value, se@uint) }
-                  { storage := clear(alice.account) }
-                  { sp@Account := path(alice.account) } { b := sp@Account.balance }
-                  { sp@Token := path(alice.account.token) }
+      = (seq!{ => { se@uint := defVal(uint) } { se@uint := 100 }
+                  { sp@Account := alice.account }
+                  { storage := save(storage, sp@Account.balance, se@uint) }
+                  { se@uint := defVal(uint) } { se@uint := 7 }
+                  { sp@Token := alice.account.token }
+                  { storage := save(storage, sp@Token.value, se@uint) }
+                  { storage := delAt(storage, alice.account) }
+                  { sp@Account := alice.account } { b := sp@Account.balance }
+                  { sp@Token := alice.account.token }
                   { v := sp@Token.value } <[ ]>(v == 0) }).check
           State.exampleStore := by
   native_decide
