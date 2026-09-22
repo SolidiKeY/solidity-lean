@@ -19,7 +19,8 @@ where the two spellings can be compared:
   the frontier the paper draws there, so the derivation can be walked with the
   cursor.
 * `deepFieldWriteListed`, the same rules as one `seq_steps [...]`.  The cursor
-  on an element shows that element's frontier, as it does inside `rw [a, b, c]`.
+  on a rule name shows the frontier that rule was applied to; at the end of a
+  line, the frontier the rules up to there have reached.
 
 Everything after it is the second spelling only.
 
