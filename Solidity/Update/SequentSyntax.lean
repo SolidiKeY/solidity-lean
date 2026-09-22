@@ -88,6 +88,18 @@ def identName? : TSyntax `sol_expr → Option String
   | `(sol_expr| $x:ident) => some x.getId.toString
   | _ => none
 
+/-- Is this `sol_expr` a *type* rather than a place?  `alloc` and `defVal`
+take either -- the rules write the target (`alloc(mv.fr)`), a derivation
+usually writes the sort (`alloc(Person)`) -- and the two have to build the
+same term, so a type name becomes `declTy` and anything else `(e).ty`. -/
+def isTyName? (e : TSyntax `sol_expr) : Option String :=
+  match e with
+  | `(sol_expr| $x:ident) =>
+      let n := x.getId.toString
+      if n == "uint" || n == "int" || n == "bool" || n == "address" then some n
+      else if (n.get 0).isUpper then some n else none
+  | _ => none
+
 /-- A `sol_expr` that is an application, as its head and arguments. -/
 def callHead? : TSyntax `sol_expr → Option (String × Array (TSyntax `sol_expr))
   | `(sol_expr| $f:ident($args,*)) => some (f.getId.toString, args.getElems)
@@ -200,7 +212,6 @@ partial def expandUpd (stx : TSyntax `sol_upd) : MacroM (TSyntax `term) := do
       | some ("transfer", #[a, v]) =>
           `($(gen ``UpdElem.transfer) $(← expandSolExpr a) $(← expandSolExpr v))
       | some ("bump", #[t]) => `($(gen ``UpdElem.bumpOf) $(← expandSolExpr t))
-      | some ("clear", #[m]) => `($(gen ``UpdElem.memDelete) $(← expandSolExpr m))
 
       | _ =>
           if identName? e == some "havoc" then `($(gen ``UpdElem.havoc))
@@ -218,14 +229,9 @@ where
   expandMemTerm (e : TSyntax `sol_expr) : MacroM (TSyntax `term) := do
     match callHead? e with
     | some ("alloc", #[t]) =>
-        let some ty := identName? t | Macro.throwErrorAt t "`alloc` takes a type"
-        `($(gen ``Rules.allocTerm)
-            ($(gen ``SoliditySyntax.declTy) $(Syntax.mkStrLit ty)) none)
+        `($(gen ``Rules.allocTerm) $(← expandTyArg t) none)
     | some ("alloc", #[t, p]) =>
-        let some ty := identName? t | Macro.throwErrorAt t "`alloc` takes a type"
-        `($(gen ``Rules.allocTerm)
-            ($(gen ``SoliditySyntax.declTy) $(Syntax.mkStrLit ty))
-            (some $(← expandSolExpr p)))
+        `($(gen ``Rules.allocTerm) $(← expandTyArg t) (some $(← expandSolExpr p)))
     | some ("write", #[m, p, v]) =>
         `($(gen ``MemTerm.write) $(← expandMemTerm m) $(← expandSolExpr p)
             $(← expandMemVal v))
@@ -233,10 +239,18 @@ where
         if identName? e == some "memory" then `($(gen ``MemTerm.cur))
         else Macro.throwErrorAt e "not a memory term"
 
+  /-- The sort argument of `alloc` / `defVal`: a type name, or the place
+  whose type it is. -/
+  expandTyArg (e : TSyntax `sol_expr) : MacroM (TSyntax `term) := do
+    match isTyName? e with
+    | some ty => `($(gen ``SoliditySyntax.declTy) $(Syntax.mkStrLit ty))
+    | none => `(($(← expandSolExpr e)).ty)
+
   /-- A `write`'s value slot. -/
   expandMemVal (e : TSyntax `sol_expr) : MacroM (TSyntax `term) := do
     match callHead? e with
     | some ("image", #[src]) => `($(gen ``MemVal.image) $(← expandSolExpr src))
+    | some ("defVal", #[t]) => `($(gen ``MemVal.defVal) $(← expandTyArg t))
     | _ =>
         if identName? e == some "fresh" then `($(gen ``MemVal.fresh))
         else `($(gen ``MemVal.sym) (.read $(← expandSolExpr e)))
@@ -527,7 +541,7 @@ variable (φ : WrappedExpr)
              <[ ]> ‹φ› }
 #check seq!{ ⟹ { mv@Person := freshId(alloc(Person, alice)) ‖ memory := alloc(Person, alice) }
              <[ ]> ‹φ› }
-#check seq!{ ⟹ { clear(mv@Person) } <[ ]> ‹φ› }
+#check seq!{ ⟹ { mv@Person := freshId(alloc(Person)) ‖ memory := alloc(Person) } <[ ]> ‹φ› }
 #check seq!{ ⟹ { havoc } <[ ]> ‹φ› }
 #check seq!{ ⟹ { rv@uint := 10 ‖ sp@Account := alice.account
                  ‖ storage := save(storage, alice.account.balance, 10) } <[ ]> ‹φ› }

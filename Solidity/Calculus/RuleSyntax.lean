@@ -886,7 +886,11 @@ partial def transMemTerm (sc : Scope) (stx : Syntax) : CommandElabM Term := do
       if h : as.size = 2 then
         `($(gen `Rules.allocTerm) $ty (some $(<- transExpr sc false as[1])))
       else
-        `($(gen `Rules.allocTerm) $ty $(sc.optionParam.getD (mkIdent `init)))
+        -- A rule with no `Option` parameter allocates without a source: the
+        -- fresh default object a root or reference *delete* rebinds.
+        match sc.optionParam with
+        | some v => `($(gen `Rules.allocTerm) $ty $v)
+        | none => `($(gen `Rules.allocTerm) $ty none)
   | some ("addM", #[m, x]) =>
       let t <- transExpr sc false x
       `($(gen `MemTerm.addM) $(<- transMemTerm sc m) ($t).ty)
@@ -1012,7 +1016,6 @@ def transUpd (sc : Scope) (stx : Syntax) : CommandElabM Term := do
     | some ("bump", #[t]) => `($(gen `UpdElem.bumpOf) $(← transExpr sc false t))
     | some ("transfer", #[r, v]) =>
         `($(gen `UpdElem.transfer) $(← transExpr sc false r) $(← transExpr sc false v))
-    | some ("clear", #[t]) => `($(gen `UpdElem.memDelete) $(← transExpr sc false t))
     | _ =>
         match exprView? e with
         | some (.var x) =>

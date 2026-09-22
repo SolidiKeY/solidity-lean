@@ -319,43 +319,6 @@ update has, so it is what the soundness proofs unfold. -/
 def heapRhs (t : MemTerm) (s : State) : Res (List (Nat × MObj) × Nat) :=
   (memEval s t).map fun x => (x.1.heap, x.1.nextId)
 
-/-- `delete m.f` / `delete m[se]` (and the heap half of a root delete). -/
-def memDeleteHeap (target : WrappedExpr) (s : State) :
-    Res (List (Nat × MObj) × Nat) :=
-  match target with
-  | WrappedExpr.var _ ty _ =>
-      match ty with
-      | Ty.ref ref => (allocDefault s ref).map fun x => (x.1.heap, x.1.nextId)
-      | _ => .error .stuck
-  | e@(WrappedExpr.field _ _ base f) =>
-      memBase s base >>= fun id =>
-        match e.ty with
-        | Ty.bool => Upd.heapOf (writeMemField s id f.name (MVal.bool false))
-        | Ty.uint => Upd.heapOf (writeMemField s id f.name (MVal.int 0))
-        | Ty.int => Upd.heapOf (writeMemField s id f.name (MVal.int 0))
-        | Ty.ref ref =>
-            allocDefault s ref >>= fun x =>
-              Upd.heapOf (writeMemField x.1 id f.name (MVal.ref x.2))
-  | e@(WrappedExpr.index _ _ base ix) =>
-      memBase s base >>= fun id => simpleInt s ix >>= fun i =>
-        match e.ty with
-        | Ty.bool => Upd.heapOf (writeMemIndex s id i (MVal.bool false))
-        | Ty.uint => Upd.heapOf (writeMemIndex s id i (MVal.int 0))
-        | Ty.int => Upd.heapOf (writeMemIndex s id i (MVal.int 0))
-        | Ty.ref ref =>
-            allocDefault s ref >>= fun x =>
-              Upd.heapOf (writeMemIndex x.1 id i (MVal.ref x.2))
-  | _ => .error .stuck
-
-/-- …and the rebinding half, for a memory *root* target only. -/
-def memDeleteBind (target : WrappedExpr) (s : State) : Res Binding :=
-  match target with
-  | WrappedExpr.var _ ty _ =>
-      match ty with
-      | Ty.ref ref => (allocDefault s ref).map fun x => Binding.mref x.2
-      | _ => .error .stuck
-  | _ => .error .stuck
-
 /-- `{selfBalance := selfBalance - se || net := storeSt(net, at(a), …)}`. -/
 def transferRhs (recipient amount : WrappedExpr) (s : State) :
     Res (List (Int × Int) × Int) :=
@@ -379,12 +342,6 @@ def elemPar : UpdElem -> Upd.Par
   | .bind n rhs => [Upd.Elem.env n (bindRhs rhs)]
   | .storage u => [Upd.Elem.storage (storageRhs u)]
   | .heap t => [Upd.Elem.heap (heapRhs t)]
-  | .memDelete target =>
-      match target with
-      | WrappedExpr.var _ _ fld =>
-          [Upd.Elem.heap (memDeleteHeap target),
-            Upd.Elem.env fld.name (memDeleteBind target)]
-      | _ => [Upd.Elem.heap (memDeleteHeap target)]
   | .bumpOf e =>
       match e with
       | WrappedExpr.incDec op t =>
