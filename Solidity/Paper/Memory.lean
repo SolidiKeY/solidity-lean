@@ -129,7 +129,7 @@ sol_derivation memoryDeleteRoot :
     => <[ Person memory mv2 = carol; carol.age = 33; delete carol;
           oldAge = mv2@Person.age; newAge = carol.age ]>(φ)
   ~*> => { mv2@Person := ref(carol) } { memory := write(memory, carol.age, 33) }
-          { clear(carol) } { oldAge := mv2@Person.age }
+          { carol := freshId(alloc(carol)) ‖ memory := alloc(carol) } { oldAge := mv2@Person.age }
           { newAge := carol.age } (φ)
 
 sol_derivation memoryDeleteField :
@@ -138,7 +138,7 @@ sol_derivation memoryDeleteField :
           newBal = carol.account.balance ]>(φ)
   ~*> => { mv@Account := ref(carol.account) }
           { memory := write(memory, mv@Account.balance, 100) }
-          { clear(carol.account) } { oldBal := mv@Account.balance }
+          { memory := write(alloc(carol.account), carol.account, fresh) } { oldBal := mv@Account.balance }
           { mv@Account := ref(carol.account) }
           { newBal := mv@Account.balance } (φ)
 
@@ -150,16 +150,16 @@ in bounds, the generated `revert();` out of bounds, which the box closes with
 
 sol_derivation memoryIndexDeletePrimitive :
     => [ delete mv@UintArray[i] ](φ)
-  ~*> [ inBounds(mv@UintArray[i]) => { clear(mv@UintArray[i]) } [ ](φ),
+  ~*> [ inBounds(mv@UintArray[i]) => { memory := write(memory, mv@UintArray[i], defVal(mv@UintArray[i])) } [ ](φ),
         ¬inBounds(mv@UintArray[i]) => ⊤ ]
 
 sol_derivation memoryIndexDeleteReference :
     => [ delete mv2@TokenArray[i] ](φ)
-  ~*> [ inBounds(mv2@TokenArray[i]) => { clear(mv2@TokenArray[i]) } [ ](φ),
+  ~*> [ inBounds(mv2@TokenArray[i]) => { memory := write(alloc(mv2@TokenArray[i]), mv2@TokenArray[i], fresh) } [ ](φ),
         ¬inBounds(mv2@TokenArray[i]) => ⊤ ]
 
 /-! ### `delete carol.account.tokens[i];` — under a nested path
-Two `ref` bindings to reach the array, and then the same guarded `clear`,
+Two `ref` bindings to reach the array, and then the same guarded write,
 with the bounds goal read under both bindings. -/
 
 sol_derivation memoryIndexDeleteNonsimplePath :
@@ -168,7 +168,7 @@ sol_derivation memoryIndexDeleteNonsimplePath :
           { mv@TokenArray := ref(mv@Account.tokens) } inBounds(mv@TokenArray[i]) =>
           { mv@Account := ref(carol.account) }
           { mv@TokenArray := ref(mv@Account.tokens) }
-          { clear(mv@TokenArray[i]) } [ ](φ),
+          { memory := write(alloc(mv@TokenArray[i]), mv@TokenArray[i], fresh) } [ ](φ),
         { mv@Account := ref(carol.account) }
           { mv@TokenArray := ref(mv@Account.tokens) } ¬inBounds(mv@TokenArray[i]) =>
           { mv@Account := ref(carol.account) }

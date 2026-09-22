@@ -440,9 +440,6 @@ private def ppUpdElem (e : Lean.Expr) : MetaM (Option (TSyntax `sol_upd)) := do
   if let some #[x] := appOf? e ``UpdElem.bumpOf 1 then
     let some a ← ppExpr x | return none
     return some (← `(sol_upd| $(ident! "bump"):ident($a)))
-  if let some #[x] := appOf? e ``UpdElem.memDelete 1 then
-    let some a ← ppExpr x | return none
-    return some (← `(sol_upd| $(ident! "clear"):ident($a)))
   let some #[nameE, rhs] := appOf? e ``UpdElem.bind 2 | return none
   let some n := strLit? (← whnf nameE) | return none
   let rhs ← whnf rhs

@@ -373,7 +373,7 @@ Solidity-faithful choice Lean had made.
 | --- | --- | --- | --- |
 | `memoryReferenceDeclFreshAlloc` | `memoryDeclFreshAlloc` | existing | merged struct/array |
 | `memoryArrayFreshAlloc` | `memoryDeclFreshAlloc` | existing | merged (solkey renamed `memoryArrayDeclFreshAlloc` → `memoryArrayFreshAlloc`) |
-| `memoryRootDeleteFreshRebind` | `memoryRootDeleteFreshRebind` | done | `delete(mv) ⇝ {clear(mv)}`: the interpreter rebinds a fresh default object on root delete; write-after-delete exercised in `Examples/Taclets/MemoryOps.lean` |
+| `memoryRootDeleteFreshRebind` | `memoryRootDeleteFreshRebind` | done | `delete(mv) ⇝ {mv := freshId(alloc(mv)) ‖ memory := alloc(mv)}`, the pair KeY writes; write-after-delete exercised in `Examples/Taclets/MemoryOps.lean` |
 | `memoryRootRebind` | `memoryRootAlias` | existing | `memoryRootAlias` is now restricted to memory RHSs, making it exactly KeY `memoryRootRebind`; the storage-RHS case it silently absorbed is `memoryStorageCopy` |
 | `memoryStorageCopy` | `memoryStorageCopy` | done | `m = sp;` deep copy (fresh identity + `copySt` in the interpreter); previously absorbed by `memoryRootAlias` |
 | `memoryStorageCopyUnfold` | `memoryStorageCopyUnfold` | done | complex storage path captured into the storage alias first; deep paths (`m = alice.account.token`) already step via `storageFieldReadUnfoldRightFst` / `storageIndexReadUnfoldRightFst` |
@@ -410,7 +410,7 @@ Solidity-faithful choice Lean had made.
 
 | KeY taclet | Lean rule | Status | Notes |
 | --- | --- | --- | --- |
-| `memoryFieldDeletePrimitive` | `memoryFieldDeletePrimitive` | done | `delete(mv.fp)`, `isPrimitiveMember`. The five memory deletes were one Lean rule (`memoryDeleteSimpleTarget`) until the paper's split; the update is still the evaluator `clear(target)` (`UpdElem.memDelete`), which picks `write(mv, fp, defVal)` or the fresh-object write by the target's sort exactly as the taclets do |
+| `memoryFieldDeletePrimitive` | `memoryFieldDeletePrimitive` | done | `delete(mv.fp)`, `isPrimitiveMember`. The five memory deletes were one Lean rule (`memoryDeleteSimpleTarget`) until the paper's split; each now states the term its target's sort selects — `write(memory, mv.fp, defVal(mv.fp))` here, `write(alloc(mv.fr), mv.fr, fresh)` for a reference member |
 | `memoryFieldDeleteReference` | `memoryFieldDeleteReference` | done | `delete(mv.fr)`, `isReferenceMember` |
 | `memoryIndexDeletePrimitive` | `memoryIndexDeletePrimitiveBox` / `…Diamond` | done | `delete(ap[ie])`, `isPrimArray ap`; now a guarded split (`inBounds`/`revert()`), Lean splitting by modality as for every array index |
 | `memoryIndexDeleteReference` | `memoryIndexDeleteReferenceBox` / `…Diamond` | done | `delete(ar[ie])`, `isRefArray ar` |
@@ -740,10 +740,11 @@ one evaluation. Note the root is *not* the pre-state counter —
 term: KeY has five delete taclets whose `MemTerm`s differ by the target's shape
 and sort, and Lean now has the five rules too (`memoryRootDeleteFreshRebind`,
 `memoryFieldDelete{Primitive,Reference}`, the `memoryIndexDelete{Primitive,
-Reference}` twins), but each still writes `clear(target)` (`UpdElem.memDelete`):
-the rule grammar builds a literal list of elements, and the reference case's
-`write(addM(memory, r), mv, fr, idC(r, nil))` names in its value the root the
-same update mints, which no literal element can.
+Reference}` twins), and each writes the `MemTerm` its sort selects.  The
+reference case's `write(addM(memory, r), mv, fr, idC(r, nil))` names in its
+value the root the same update mints; `alloc(·)` and `fresh` are how a literal
+element says that — the allocation is a shared subterm, as KeY's `freshIdp` is
+a shared schema variable.
 
 ### Deviations, collected
 

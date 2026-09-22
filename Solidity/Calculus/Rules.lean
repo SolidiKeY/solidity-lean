@@ -356,13 +356,6 @@ end CaseMode
     | bind (n : Name) (rhs : BindRhs)
     | storage (t : StTerm)
     | heap (t : MemTerm)
-    /-- `delete m` / `delete m.f` / `delete m[se]`.  One Lean rule for KeY's
-    five delete taclets, whose `MemTerm`s differ by the target's shape and
-    sort.  It is the one memory update still given by an evaluator rather than
-    a term (`Update/Eval.lean`): the rule grammar builds a literal list of
-    elements, so a rule cannot state an update whose *shape* depends on its
-    target. -/
-    | memDelete (target : WrappedExpr)
     /-- The write-back of `++t` / `t--`, where `e` is the whole `incDec`
     expression: `{t := t + 1}` at whichever data location `t` lives in. -/
     | bumpOf (e : WrappedExpr)
@@ -2226,22 +2219,21 @@ end CaseMode
     <[ mv1 = mv2.fr ]> ⇝ { mv1 := ref(mv2.fr) } <[ ]>
 
   /-!
-  Delete.  `clear(p)` (`UpdElem.memDelete`) is the one memory update still
-  given by an evaluator rather than a term: KeY writes `write(mv, fp,
-  defVal)` for a primitive member and `write(addM(memory, r), mv, fr,
-  idC(r, nil))` for a reference one, and the evaluator picks by the target's
-  sort exactly as the five taclets do.
+  Delete.  KeY writes `write(mv, fp, defVal)` for a primitive member and
+  `write(addM(memory, r), mv, fr, idC(r, nil))` for a reference one, and each
+  of the five taclets states the one its target's sort selects — which is why
+  none of them needs an evaluator to pick.
   -/
 
   sol_rule memoryRootDeleteFreshRebind from memoryRootDeleteFreshRebind :
-    <[ delete(mv) ]> ⇝ { clear(mv) } <[ ]>
+    <[ delete(mv) ]> ⇝ { mv := freshId(alloc(mv)) || memory := alloc(mv) } <[ ]>
 
   sol_rule memoryFieldDeletePrimitive from memoryFieldDeletePrimitive :
-    <[ delete(mv.fp) ]> ⇝ { clear(mv.fp) } <[ ]>
+    <[ delete(mv.fp) ]> ⇝ { memory := write(memory, mv.fp, defVal(mv.fp)) } <[ ]>
     where isPrimitiveMember target
 
   sol_rule memoryFieldDeleteReference from memoryFieldDeleteReference :
-    <[ delete(mv.fr) ]> ⇝ { clear(mv.fr) } <[ ]>
+    <[ delete(mv.fr) ]> ⇝ { memory := write(alloc(mv.fr), mv.fr, fresh) } <[ ]>
     where isReferenceMember target
 
   /-! Array targets, box twin first. -/
@@ -2266,13 +2258,13 @@ end CaseMode
 
   sol_rule memoryIndexDeletePrimitive twins from memoryIndexDeletePrimitive :
     <[ delete(ap[ie]) ]> ⇝
-      | inBounds(ap[ie]) ⟹ { clear(ap[ie]) } <[ ]>
+      | inBounds(ap[ie]) ⟹ { memory := write(memory, ap[ie], defVal(ap[ie])) } <[ ]>
       | else             ⟹ revert()
     after resolve(ap[ie])
 
   sol_rule memoryIndexDeleteReference twins from memoryIndexDeleteReference :
     <[ delete(ar[ie]) ]> ⇝
-      | inBounds(ar[ie]) ⟹ { clear(ar[ie]) } <[ ]>
+      | inBounds(ar[ie]) ⟹ { memory := write(alloc(ar[ie]), ar[ie], fresh) } <[ ]>
       | else             ⟹ revert()
     after resolve(ar[ie])
 
