@@ -183,6 +183,11 @@ mutual
     | mtSt
     | storeSt (st : Struct) (a : Seg) (v : StValue)
     | copyMem (mem : Memory) (id : Identity)
+    /-- The `storage` program variable below `p`, as the line's pre-state
+    holds it: the leaf a read over the calculus's updates is lowered onto
+    (`Update/Lower.lean`).  A view, like `copyMem`: selecting pushes it down
+    and reads nothing, so every theory law holds of it as of a free term. -/
+    | cur (p : List Seg)
     deriving Repr
 
   /-- `solidityDLHeader.key`: `Prim ⊑ StValue`; `st` is the injection
@@ -288,10 +293,12 @@ recursor, which is all the `Struct`-recursive proofs need — none of them
 descends into a stored value or into a view's memory. -/
 theorem inductionOn {motive : Struct -> Prop} (h0 : motive mtSt)
     (h1 : forall s a v, motive s -> motive (storeSt s a v))
-    (h2 : forall mem id, motive (copyMem mem id)) : forall s, motive s
+    (h2 : forall mem id, motive (copyMem mem id))
+    (h3 : forall p, motive (cur p)) : forall s, motive s
   | mtSt => h0
-  | storeSt s a v => h1 s a v (inductionOn h0 h1 h2 s)
+  | storeSt s a v => h1 s a v (inductionOn h0 h1 h2 h3 s)
   | copyMem mem id => h2 mem id
+  | cur p => h3 p
 
 end Struct
 
@@ -307,6 +314,7 @@ def selectSt : Struct -> Seg -> StValue
   | mtSt, _ => .st mtSt
   | storeSt s a1 v, a2 => if a1 = a2 then v else selectSt s a2
   | Struct.copyMem mem id, a => .st (Struct.copyMem mem (id.extend a))
+  | Struct.cur p, a => .st (Struct.cur (p ++ [a]))
 
 /-- `find<[α]>(st, flds)` on a storage term that holds no memory view: the
 read `readCopySt` takes into a copied struct.  `find` below is this one plus
@@ -478,6 +486,7 @@ theorem StValue.find_cons_view (s : Struct) (a : Seg) {flds : List Seg}
       | copyMem mem id => exact absurd rfl (hs mem id)
       | mtSt => rfl
       | storeSt _ _ _ => rfl
+      | cur _ => rfl
 
 /-! ### Where the two readers agree -/
 
@@ -487,6 +496,7 @@ mutual
     | .mtSt => true
     | .storeSt s _ v => StValue.structViewFree s && StValue.viewFree v
     | .copyMem _ _ => false
+    | .cur _ => true
   def StValue.viewFree : StValue -> Bool
     | .prim _ => true
     | .st s => StValue.structViewFree s
@@ -509,6 +519,7 @@ theorem StValue.selectSt_viewFree {s : Struct} (a : Seg)
       · simp only [selectSt, he, reduceIte]; exact h.2
       · simp only [selectSt, he, reduceIte]; exact ih h.1
   | h2 mem id => simp [StValue.structViewFree] at h
+  | h3 p => rfl
 
 /-- A term with no view in it reads the same either way, which is what makes
 `findSt` an under-approximation of `find` rather than a second reader. -/
@@ -519,11 +530,13 @@ theorem StValue.find_eq_findSt : forall (flds : List Seg) (s : Struct),
       | copyMem _ _ => simp [StValue.structViewFree] at h
       | mtSt => rfl
       | storeSt _ _ _ => rfl
+      | cur _ => rfl
   | [a], s, h => by
       cases s with
       | copyMem _ _ => simp [StValue.structViewFree] at h
       | mtSt => rfl
       | storeSt _ _ _ => rfl
+      | cur _ => rfl
   | a :: b :: rest, s, h => by
       have hnext : StValue.structViewFree ((selectSt s a).asStruct) = true :=
         StValue.asStruct_viewFree (StValue.selectSt_viewFree a h)
@@ -536,6 +549,10 @@ theorem StValue.find_eq_findSt : forall (flds : List Seg) (s : Struct),
       | storeSt s0 a1 v =>
           show find (((selectSt (Struct.storeSt s0 a1 v) a)).asStruct) (b :: rest)
             = findSt (((selectSt (Struct.storeSt s0 a1 v) a)).asStruct) (b :: rest)
+          exact StValue.find_eq_findSt (b :: rest) _ hnext
+      | cur p =>
+          show find ((selectSt (Struct.cur p) a).asStruct) (b :: rest)
+            = findSt ((selectSt (Struct.cur p) a).asStruct) (b :: rest)
           exact StValue.find_eq_findSt (b :: rest) _ hnext
 
 end Theory

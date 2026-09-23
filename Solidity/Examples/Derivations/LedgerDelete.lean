@@ -3,30 +3,32 @@ import Solidity.Tactics.Rewrite
 import Solidity.Semantics.DecEq
 
 /-!
-# A struct with a mapping, written and deleted — both layers, one rule at a time
+# A struct with a mapping, written and deleted — both layers, one proof
 
 `Ledger` is `nonce` beside the mapping `balances`.  The program writes the
-field and two entries, deletes one entry, then deletes the whole struct.  The
-calculus half runs it to the stacked `save`/`delAt` updates with `seq_steps`;
-the theory half reads the storage those updates compose to with `theory_rw`,
-whose rule list works like `rw`'s: the cursor on a rule shows the goal that
-rule receives, and the end of its line the goal it leaves.
+field and two entries, deletes one entry, reads three places, deletes the
+whole struct and reads the field again.  `ledgerWriteThenDelete` is one proof
+of all of it: `seq_steps` runs the calculus to the stacked `save`/`delAt`
+updates, and `theory_rw` turns each read into a term of the storage theory over
+the storage the line started from (`seq_lower`, `Update/Lower.lean`), then
+rewrites those terms as `rw` would, one rule at a time, until each read is a
+literal.  The cursor on a rule shows the goal it receives.
 
-The theory half starts from an arbitrary store `s`, so no read is computed:
-each one is the rules on its line.  `S1`…`S5` are the calculus's updates, one
-per `storage :=`, with the alias `sp@UintMap` resolved to its path.
+The second half states the same reads over an arbitrary store `s`, with
+`S1`…`S5` the calculus's updates written by hand, one per `storage :=`.
 
 **The read that is not here** is a `balances` entry after `delete ledger`.
 Solidity keeps it — a mapping survives the delete of its struct — but
 `delNode` drops every `at` member, because a `Seg` carries no `MapField`
-(`Theory/Rewrite.lean`, `selectDelNodeMap`).  A chain would prove `0`.
+(`Theory/Rewrite.lean`, `selectDelNodeMap`).  A chain would prove `0`, and
+`seq_lower` does not lower it: the theory's answer there is no literal.
 `StorageSteps.lean`'s `deleteLedgerMappingSurvives` leaves that read as an
 update, which is as far as the calculus goes too.
 -/
 
 namespace Solidity.Examples
 
-open Rules StandardExample SoliditySyntax Semantics
+open Rules StandardExample SoliditySyntax Semantics Theory.StValue
 
 set_option maxHeartbeats 8000000
 
@@ -34,12 +36,17 @@ section
 variable (φ : WrappedExpr)
 
 /-- `ledger.nonce = 5; ledger.balances[1] = 10; ledger.balances[2] = 20;
-delete ledger.balances[1]; delete ledger;` — nothing merges, so the endpoint is
-every update in order. -/
+delete ledger.balances[1]; gone = ledger.balances[1]; kept = ledger.balances[2];
+before = ledger.nonce; delete ledger; after = ledger.nonce;` — the calculus's
+stack, with each read taken to its value by the storage theory.  The four
+lines of the `theory_rw` are the four reads in order. -/
 theorem ledgerWriteThenDelete :
     [ seq!{ => <[ (ledger@@Ledger).nonce = 5; (ledger@@Ledger).balances[1] = 10;
                   (ledger@@Ledger).balances[2] = 20;
-                  delete (ledger@@Ledger).balances[1]; delete (ledger@@Ledger) ]>(φ) } ]
+                  delete (ledger@@Ledger).balances[1];
+                  gone = (ledger@@Ledger).balances[1]; kept = (ledger@@Ledger).balances[2];
+                  before = (ledger@@Ledger).nonce;
+                  delete (ledger@@Ledger); after = (ledger@@Ledger).nonce ]>(φ) } ]
       ⇝ᵘ* [ seq!{ => { storage := save(storage, (ledger@@Ledger).nonce, 5) }
                     { se@uint := defVal(uint) } { se@uint := 10 }
                     { sp@UintMap := (ledger@@Ledger).balances }
@@ -49,14 +56,27 @@ theorem ledgerWriteThenDelete :
                     { storage := save(storage, sp@UintMap[2], se@uint) }
                     { sp@UintMap := (ledger@@Ledger).balances }
                     { storage := delAt(storage, sp@UintMap[1]) }
-                    { storage := delAt(storage, (ledger@@Ledger)) } (φ) } ] := by
+                    { sp@UintMap := (ledger@@Ledger).balances } { gone := 0 }
+                    { sp@UintMap := (ledger@@Ledger).balances } { kept := 20 }
+                    { before := 5 }
+                    { storage := delAt(storage, (ledger@@Ledger)) }
+                    { after := 0 } (φ) } ] := by
   seq_steps [.storageFieldWriteSave, .storageIndexWriteUnfoldLeftFst,
              .localValueDeclInitDrop, .valueDeclSkip, .localValueAssign,
              .storagePlaceAlias, .storageIndexWriteMappingSave,
              .storageIndexWriteUnfoldLeftFst, .localValueDeclInitDrop,
              .valueDeclSkip, .localValueAssign, .storagePlaceAlias,
              .storageIndexWriteMappingSave, .storageIndexDeleteUnfoldLeftFst,
-             .storagePlaceAlias, .storageIndexDelete, .storageRootDelete]
+             .storagePlaceAlias, .storageIndexDelete,
+             .storageIndexReadUnfoldRightFst, .storagePlaceAlias,
+             .storageIndexReadMappingFind, .storageIndexReadUnfoldRightFst,
+             .storagePlaceAlias, .storageIndexReadMappingFind,
+             .storageFieldReadFind, .storageRootDelete, .storageFieldReadFind]
+  theory_rw [.findDelAt, .findOnSaveDifferent, .findOnSave, .delValueDefault,
+             .findDelAtOutside, .findOnSave,
+             .findDelAtOutside, .findOnSaveDifferent, .findOnSaveDifferent, .findOnSave,
+             .findDelAtFields, .findDelAtOutside, .findOnSaveDifferent,
+             .findOnSaveDifferent, .findOnSave, .delValueDefault]
 
 end
 

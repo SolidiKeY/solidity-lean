@@ -1,5 +1,6 @@
 import Solidity.Theory.Rewrite
 import Solidity.Tactics.Derivation
+import Solidity.Update.Lower
 
 /-!
 # `sol_rewrite`: the paper's term-evaluation lines
@@ -47,6 +48,12 @@ to `sol_derivation`: the endpoints in the statement and the rules in the proof,
 each rule a rewrite by its theorem, so the cursor walks the chain as it walks
 `rw [a, b]`.  Use it to find a chain, or when the intermediate terms are not
 the artefact.
+
+On a `⇝ᵘ*` goal it rewrites the frontier itself.  `seq_lower` — which
+`theory_rw` runs first when the goal needs it — puts the terms there: each
+read of a line becomes a rigid read of the storage theory (`Update/Lower.lean`),
+and `seq_raise` — `theory_rw`'s last move on such a goal — writes the literals
+the rules end at back as bindings.
 -/
 
 namespace Solidity.Examples
@@ -176,6 +183,64 @@ private def theoryRwRule (rule : Term) : TacticM Unit := do
   throwErrorAt rule "no theorem of this rule rewrites the goal (tried {lems}){indentExpr (<- goal.getType)}"
 
 open Tactic in
+/-- Normalise the left frontier of a `⇝ᵘ*` goal: the lowering and the raising
+are functions of it, and this is where they are computed.  `TTerm.read` is
+irreducible, so a rigid read survives as the data of its theory term. -/
+private def reduceLeftFrontier : TacticM Unit := do
+  let g <- getMainGoal
+  g.withContext do
+    let ty <- instantiateMVars (<- g.getType)
+    unless ty.isAppOfArity ``FrontierMultiStep 2 do
+      throwError "expected a `⇝ᵘ*` goal{indentExpr ty}"
+    let lhs <- Meta.reduce ty.appFn!.appArg! (skipTypes := true) (skipProofs := true)
+    -- `reduce` leaves an integer as `Int.ofNat 5`; put the numeral back.
+    let lhs := lhs.replace fun
+      | .app (.const ``Int.ofNat []) (.lit (.natVal n)) => some (toExpr (Int.ofNat n))
+      | .app (.const ``Int.negSucc []) (.lit (.natVal n)) => some (toExpr (Int.negSucc n))
+      | _ => none
+    let g' <- g.replaceTargetDefEq (mkApp2 ty.appFn!.appFn! lhs ty.appArg!)
+    replaceMainGoal [g']
+
+open Tactic in
+/-- **Lower the reads of every line** onto the storage theory (`Update/Lower.lean`):
+a merge line, after which each read the theory can answer is a rigid read
+`findSt (… (cur []) …) p` of the line's pre-state, for `theory_rw` to rewrite. -/
+elab "seq_lower" : tactic => do
+  evalTactic (<- `(tactic|
+    refine FrontierMultiStep.equiv (Update.lowerFrontier_equiv _) ?_))
+  reduceLeftFrontier
+  evalTactic (<- `(tactic| simp only [Update.TTerm.read, Update.TTerm.toStruct]))
+
+/-- A theory *function* still standing in a rigid read: the chain has not
+reached a literal yet.  The sorts and their constructors are how a value is
+spelled, and `primDefault` is how a reset literal is. -/
+private def theoryLeft (e : Lean.Expr) : MetaM (Option Lean.Name) := do
+  let env <- getEnv
+  let isFn (n : Lean.Name) : Bool :=
+    (`Solidity.Theory).isPrefixOf n && n != ``Solidity.Theory.StValue.primDefault &&
+      !env.isConstructor n && !((env.find? n).any (·.isInductive))
+  return (e.find? fun | .const n _ => isFn n | _ => false).bind fun
+    | .const n _ => some n
+    | _ => none
+
+open Tactic in
+/-- Write every rigid read back as an ordinary binding, once `theory_rw` has
+taken it to a literal, and close the goal if that is its right-hand side.  As
+`rw` closes only by reducible `rfl`, this does not evaluate a theory term: a
+read the rules have not finished is an error, not a computation. -/
+elab "seq_raise" : tactic => do
+  let ty <- instantiateMVars (<- getMainTarget)
+  unless ty.isAppOfArity ``FrontierMultiStep 2 do
+    throwError "seq_raise: expected a `⇝ᵘ*` goal{indentExpr ty}"
+  if let some n <- theoryLeft ty.appFn!.appArg! then
+    throwError "seq_raise: a rigid read is not a literal yet (`{n}` is left); \
+      rewrite it further with `theory_rw`"
+  evalTactic (<- `(tactic|
+    refine FrontierMultiStep.equiv (Update.raiseFrontier_equiv _) ?_))
+  reduceLeftFrontier
+  evalTactic (<- `(tactic| try exact FrontierMultiStep.refl))
+
+open Tactic in
 /-- Rewrite by the listed theory rules in order, the goal left to the page
 between them: `sol_rewrite`'s chain as `rw` spells a proof, the way
 `seq_steps` spells a `sol_derivation`.  Each element is a `TheoryRule` under the
@@ -183,11 +248,22 @@ paper's name and is resolved to its theorem, so a wrong name does not
 elaborate; each carries its own info node, widened as `seq_steps`'s are, so the
 cursor on `.b` in `theory_rw [.a, .b, .c]` shows the goal `.a` left and the end
 of `.b`'s line the goal after it.  `rfl` closes the goal at the end if it can,
-as `rw` does. -/
+as `rw` does.  On a `⇝ᵘ*` goal it runs `seq_lower` first if the reads are not
+theory terms yet, and `seq_raise` closes it at the end. -/
 elab "theory_rw " "[" rs:term,* "]" : tactic => do
   let elems := rs.getElems
+  -- A `⇝ᵘ*` goal whose reads are not yet terms of the theory is lowered first:
+  -- the one line of the chain that is a merge rather than a rewrite.
+  let ty <- instantiateMVars (<- getMainTarget)
+  if ty.isAppOfArity ``FrontierMultiStep 2 then
+    if (<- theoryLeft ty.appFn!.appArg!).isNone then
+      evalTactic (<- `(tactic| seq_lower))
   for (r, ref) in elems.zip (widenedElemRefs elems) do
     withTacticInfoContext ref (theoryRwRule r)
   evalTactic (<- `(tactic| try rfl))
+  let gs <- getGoals
+  unless gs.isEmpty do
+    if (<- instantiateMVars (<- getMainTarget)).isAppOfArity ``FrontierMultiStep 2 then
+      evalTactic (<- `(tactic| try seq_raise))
 
 end Solidity.Examples

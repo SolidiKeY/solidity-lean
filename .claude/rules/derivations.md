@@ -73,7 +73,8 @@ under the same names, and the headline one in both spellings side by side.
 |---|---|
 | `seq_step .rule` | take one step; the successor the rule computes becomes the goal |
 | `seq_done` | close: reflexivity, or the trailing merge |
-| `seq_steps [.a, .b]` | the same run on one line; each rule name carries its own info node, so the cursor on `.b` shows that frontier, as inside `rw [a, b]` |
+| `seq_steps [.a, .b]` | the same run on one line; each rule name carries its own info node, so the cursor on `.b` shows that frontier, as inside `rw [a, b]`. A target with fewer `find(storage, …)` reads than the frontier is not a merge away, so the goal is left open for `theory_rw` |
+| `seq_lower` | the merge line that makes each read a term of the storage theory, `{v := ⟦findSt (… (Struct.cur []) …) p⟧}`; `theory_rw` runs it itself, so write it only to look at the lowered line |
 | `seq_steps?` | run it and report a pasteable `seq_steps [...]` — how a chain gets written |
 | `seq_norm` | reduce both frontiers to literal constructor applications |
 
@@ -235,7 +236,17 @@ in the statement and the `TheoryRule`s in the proof, each one rewriting the goal
 by its theorem, with its side conditions closed. As inside `rw [a, b]`, the
 cursor on a rule shows the goal it receives, and the end of its line the goal it
 leaves. `rfl` closes the goal at the end if it can.
-`Examples/Derivations/LedgerDelete.lean` has both presentations side by side.
+
+It also carries a **calculus chain past its last line**: after `seq_steps`,
+`theory_rw` first runs `seq_lower` (`Update/Lower.lean`), which folds the
+writes into each read — a merge line, the one step that is not a rewrite — and the
+frontier holds `{gone := ⟦findSt (delAt (save … (Struct.cur []) …) …) p⟧}` —
+a term over the storage the line started from — which `theory_rw` rewrites
+like any other.  When every such read is a literal, `seq_raise` writes it back
+as `{gone := 0}` and closes against the stated endpoint; it does not evaluate
+a term the rules have not finished, as `rw`'s `rfl` does not.
+`ledgerWriteThenDelete` in `Examples/Derivations/LedgerDelete.lean` is the
+worked example, and the rest of that file the free-store presentation.
 
 `sol_calculus name from <store> { stmt; stmt }` when the point is that the
 **rule table proves the obligation**: it states `CalculusHolds`, runs the
