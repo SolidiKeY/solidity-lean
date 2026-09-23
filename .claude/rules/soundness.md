@@ -2,6 +2,7 @@
 paths:
   - "Solidity/Calculus/RuleSoundness.lean"
   - "Solidity/Calculus/RewriteSoundness.lean"
+  - "Solidity/Calculus/SoundnessLedger.lean"
   - "Solidity/Wp/**/*.lean"
   - "Solidity/Counterexamples/*.lean"
 ---
@@ -75,10 +76,13 @@ express carry it as a syntactic hypothesis (`hprim`, `hvar`, `hpure`).
 `bridges_account` checks `bridgedRules` and `openBridges` together are exactly
 the rules with an update, so moving a rule between them is checked.
 
-## Open `sorry`s here
+## Open items
 
-`functionCallArgCapture_sound_inlined`; the storage/memory-alias argument case
-of `storagePushValueUnfoldRightSndArgument_sound`. Each is documented at the
-site. Do not add an undocumented one. The four memory `*OpAssignUnfoldLeftFst`
-/ `*IncrementUnfoldLeftFst` rules have no `_sound` theorem yet (a
-pre-existing gap, not a `sorry`).
+`#soundness_ledger` (`Calculus/SoundnessLedger.lean`) is the list: the
+hypotheses each `<rule>_sound` still carries, the rules with no theorem, and
+the ones under a `sorry`. Its `#guard_msgs` pin fails on any change, so
+re-pin it in the same commit and read the diff. A new or renamed hypothesis
+gets a `hypKind`. `docs/soundness-hypotheses.md` records, per family, what
+would free it and the attempts made so far; add an entry for every attempt,
+failed ones too. The `discharge-hypothesis` skill is the loop. Do not add an
+undocumented `sorry`.

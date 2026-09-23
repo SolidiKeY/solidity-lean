@@ -10,6 +10,7 @@ referenced from it and from `AGENTS.md`.
 | [solkey-parity.md](solkey-parity.md) | What `sol_wp` — the *interpreter* — proves of solkey's suites. Scoreboard for `tests/solkey/expected.tsv`. |
 | [calculus-parity.md](calculus-parity.md) | What `Calculus/Rules.lean` alone proves of the same suites. Scoreboard for `tests/solkey/expected-calculus.tsv`. A number from the first says nothing about the second: `sol_wp` never reads the rule table. |
 | [paper-parity.md](paper-parity.md) | One row per worked example of the paper, naming the chain in `Solidity/Paper/` that is it, or the reason there is none. Add a row before adding a chain. |
+| [soundness-hypotheses.md](soundness-hypotheses.md) | One section per hypothesis family of the `<rule>_sound` theorems: what frees it, and the attempts so far. The counts are `#soundness_ledger`'s. |
 | [solc-alignment.md](solc-alignment.md) | Where the interpreter follows solc rather than KeY, and why. |
 | [compiler-verification.md](compiler-verification.md) | The EVM compiler and its forward-simulation proof. |
 | [solkey-feedback.md](solkey-feedback.md) | Improvement ideas flowing Lean → solkey. The only outbound document. |
