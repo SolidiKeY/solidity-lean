@@ -51,7 +51,8 @@ both. New modules go in `Solidity.lean`.
 | `Calculus/MultiStep.lean` | `BlockStep` (`⇝`), `BlockReflMultiStep` (`⇝*`), `NamedBlockStep` (`⇝[.rule]`) and the `Trans` instances. Framing (`appendStmts`, `append_suffix`, `inContext`, and the rule-level `NamedBlockStep.inSuffix`): a chain carries a *suffix*, and a prefix is consumed rather than carried, because `⇝` fires at the head. |
 | `Calculus/Termination.lean` | Termination-certificate interface. **OPEN**: the concrete all-rules certificate. |
 | `Calculus/RuleValidation.lean` | Per-rule `native_decide` validation of unfold rules against the executable semantics. |
-| `Calculus/RuleSoundness.lean` | `<rule>_sound` per unfold rule: residual agrees with the original modulo scratch aliases. **OPEN**: `functionCallArgCapture_sound_inlined`, one case of `storagePushValueUnfoldRightSndArgument_sound`, and no theorem yet for the four memory `*OpAssignUnfoldLeftFst`/`*IncrementUnfoldLeftFst` rules. |
+| `Calculus/RuleSoundness.lean` | `<rule>_sound` per unfold rule: residual agrees with the original modulo scratch aliases. **OPEN**: what the ledger below lists. |
+| `Calculus/SoundnessLedger.lean` | `#soundness_ledger`: each `<rule>_sound`'s hypotheses beyond `hcond`/`hfresh`, missing theorems and `sorry`s, pinned by `#guard_msgs` as a ratchet. `hypKind` ties a semantic hypothesis to its refutation. Prose in `docs/soundness-hypotheses.md`. |
 | `Calculus/JudgmentSplit.lean` | KeY `ifthenelse_split` as a theorem about `SolidityJudgment.Holds`, not a rule: a single-successor `BlockStep` cannot yield two goals. |
 | `Calculus/RewriteSoundness.lean` | Lifts local soundness through untouched block suffixes and `⇝*`. `BlockExecAgree.append_left`/`append_right` are the context congruence the rewrite layer cannot have — unconditional on a prefix, freshness-guarded on a suffix. |
 

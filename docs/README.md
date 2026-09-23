@@ -9,6 +9,7 @@ referenced from it and from `AGENTS.md`.
 | [lean-key-rule-map.md](lean-key-rule-map.md) | The authority for the name-by-name map from solkey's taclets to this package's `RuleName`s. Do not restate it in a module docstring. |
 | [solkey-parity.md](solkey-parity.md) | What `sol_wp` — the *interpreter* — proves of solkey's suites. Scoreboard for `tests/solkey/expected.tsv`. |
 | [calculus-parity.md](calculus-parity.md) | What `Calculus/Rules.lean` alone proves of the same suites. Scoreboard for `tests/solkey/expected-calculus.tsv`. A number from the first says nothing about the second: `sol_wp` never reads the rule table. |
+| [soundness-hypotheses.md](soundness-hypotheses.md) | One section per hypothesis family of the `<rule>_sound` theorems: what frees it, and the attempts so far. The counts are `#soundness_ledger`'s. |
 | [solc-alignment.md](solc-alignment.md) | Where the interpreter follows solc rather than KeY, and why. |
 | [compiler-verification.md](compiler-verification.md) | The EVM compiler and its forward-simulation proof. |
 | [solkey-feedback.md](solkey-feedback.md) | Improvement ideas flowing Lean → solkey. The only outbound document. |
