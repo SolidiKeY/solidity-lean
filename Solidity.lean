@@ -67,6 +67,8 @@ import Solidity.Update.Wp
 import Solidity.Update.TacletTable
 import Solidity.Update.Examples
 import Solidity.Update.Step
+import Solidity.Update.LowerLaws
+import Solidity.Update.Lower
 import Solidity.Update.Merge
 import Solidity.Update.SequentSyntax
 import Solidity.Update.SequentPP

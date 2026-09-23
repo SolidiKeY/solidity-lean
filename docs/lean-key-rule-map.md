@@ -632,8 +632,10 @@ the written value verbatim at the last segment: `storeSt`'s third argument is
 the supersort `StValue`, so a primitive leaf is kept as itself and `find`
 reads it back at the caller's sort — which is what `saveOnEmptyPrim` does in
 KeY, and why `find`'s one-segment arm (`isEmpty(flds)`) is not decoration.
-`delAt`/`delNode` are eager over the same walk. There is no pre-state leaf
-and no denotation for storage: the `*CopySource` / `…StoreRoot` program rows
+`delAt`/`delNode` are eager over the same walk. The pre-state leaf
+`Struct.cur` (KeY's `storage` program variable, below a path) is a view with no
+upstream taclet, and there is no denotation of storage *writes*
+(`Update/Lower.lean` relates storage *reads* only): the `*CopySource` / `…StoreRoot` program rows
 below are untouched because the copy they state is mapping-free by
 construction (`TypedStmt.Assign.mk`, `stmtTypingOk`), and
 `Rules.StTerm.pushAt` still merges KeY's three push taclets.

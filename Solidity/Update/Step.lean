@@ -1,5 +1,6 @@
 import Solidity.Update.Eval
 import Solidity.Calculus.MultiStep
+import Solidity.Theory.Terms
 
 /-!
 # Sequents: a derivation line as the calculus writes it
@@ -97,6 +98,13 @@ structure Sequent where
   ante : List (List UpdTerm × SideFormula) := []
   upds : List UpdTerm := []
   goal : SeqGoal
+  /-- The **rigid reads**: `v := t` with `t` a term of the storage theory over
+  the line's *pre-state* storage (`Theory.Struct.cur`), each placed `k` updates
+  after the one before it.  Empty until `Update/Lower.lean` lowers a line's
+  reads, which is what lets `theory_rw` rewrite them by the theory's own
+  equations; the `Ty` is the read's, so a literal can be written back
+  (`Update/Lower.lean`'s `raiseLine`). -/
+  rigid : List (Nat × Name × Ty × Theory.StValue) := []
   deriving Repr
 
 /-- A derivation line: the sequents a guarded rule leaves open at once. -/
@@ -120,10 +128,50 @@ theorem stackUpd_append (us vs : List UpdTerm) :
   | nil => simp [Upd.id_seq]
   | cons u rest ih => simp only [List.cons_append, stackUpd_cons, ih, Upd.seq_assoc]
 
+/-! ### Rigid reads
+
+A read the update simplifier has made rigid: `v := t`, `t` a term of
+`Theory/Storage.lean` whose leaf `cur p` is the storage *the line started from*.
+So it is read in the pre-state `s0`, wherever in the stack it sits. -/
+
+/-- The root a lowered path starts from: a state variable, resolved as
+`Wp.varPath` resolves one — env first, then the global of that name.  The type
+is not read by `varPath`. -/
+def rootField (n : Name) : Field :=
+  { name := n, ty := Ty.prim .uint, origin := some StorageOrigin.global }
+
+/-- The storage the pre-state holds below `root` and `r`, the interpreter's
+read of `Theory.Struct.cur (.field root :: r)`. -/
+def storageAt (s : State) (root : Name) (r : List Seg) : Res SVal :=
+  Wp.varPath s (rootField root) >>= fun ρ => s.findStorage ρ.1 (ρ.2 ++ r)
+
+/-- What a rigid read denotes: a literal is itself, a view of the pre-state is
+the interpreter's read of it, and anything else -- a struct, a deleted member
+-- has no value. -/
+def rigidVal (s0 : State) : Theory.StValue -> Res Value
+  | .prim p => .ok p
+  | .st (.cur (Seg.field root :: r)) => storageAt s0 root r >>= SVal.asValue
+  | _ => .error .stuck
+
+/-- `v := t`, read in `s0` and bound in the state it is applied in. -/
+def rigidBind (s0 : State) (n : Name) (t : Theory.StValue) : Upd :=
+  fun s => (rigidVal s0 t).map fun v => s.setEnv n (Binding.val v)
+
+/-- The stack with the rigid reads woven in, each after the `k` updates its
+entry counts. -/
+def weaveUpd (s0 : State) : List UpdTerm -> List (Nat × Name × Ty × Theory.StValue) -> Upd
+  | us, [] => stackUpd us
+  | us, (k, n, _, t) :: rs =>
+      Upd.seq (stackUpd (us.take k)) (Upd.seq (rigidBind s0 n t) (weaveUpd s0 (us.drop k) rs))
+
 namespace Sequent
 
-/-- The update the line has accumulated. -/
-def upd (q : Sequent) : Upd := stackUpd q.upds
+/-- The update the line has accumulated.  With no rigid read it is the stack,
+by definition, which is what every merge proof unfolds. -/
+def upd (q : Sequent) : Upd :=
+  match q.rigid with
+  | [] => stackUpd q.upds
+  | r@(_ :: _) => fun s0 => weaveUpd s0 q.upds r s0
 
 /-- Read a formula under a stack, in the state the line starts from. -/
 def formulaUnder (U : List UpdTerm) (φ : SideFormula) (s0 : State) : Res Bool :=
@@ -178,7 +226,7 @@ instance (q : Sequent) (s0 : State) : Decidable (q.Holds s0) :=
 /-- A line is **open** when its goal still has a statement to execute: those
 are the ones a step rewrites. -/
 def isOpen : Sequent -> Bool
-  | ⟨_, _, .prog ⟨_, _ :: _⟩ _⟩ => true
+  | ⟨_, _, .prog ⟨_, _ :: _⟩ _, _⟩ => true
   | _ => false
 
 end Sequent
@@ -305,7 +353,7 @@ inductive NamedFrontierStep (r : RuleName) : Frontier -> Frontier -> Prop where
       {Γ : List (List UpdTerm × SideFormula)} {U : List UpdTerm}
       {sm : SolidityModality} {lhs : Stmt} {rest : Block} {post : WrappedExpr}
       {cond : Prop} {rhs : Block} :
-      src.firstOpen? = some (before, ⟨Γ, U, .prog ⟨sm, lhs :: rest⟩ post⟩, after) ->
+      src.firstOpen? = some (before, ⟨Γ, U, .prog ⟨sm, lhs :: rest⟩ post, []⟩, after) ->
       (hfirst : FirstStepCase sm lhs Rules.stepCases (Rules.stepCase r) cond rhs) ->
       next = before ++ Update.goalSequents sm Γ U rest post
           ((Rules.stepCase r).effect.goals lhs

@@ -257,7 +257,7 @@ name_table_simp SoliditySyntax.rootExpr, SoliditySyntax.rootPlace,
 -- so this list is a performance record, not a grammar.
 name_table_arms SoliditySyntax.rootExpr, SoliditySyntax.rootPlace
   for "a", "account", "addr", "ageVal", "aliasBalance", "b", "before",
-    "bucket", "clear", "e", "gone", "l", "l2", "ledger", "len", "mv2", "mv3",
+    "after", "bucket", "clear", "e", "gone", "kept", "l", "l2", "ledger", "len", "mv2", "mv3",
     "n", "net", "newAge", "newBal", "newBalance", "nonce", "oldAge", "oldBal",
     "r", "readBack", "ref", "size", "stash", "tokens", "u", "used", "v",
     "value", "writeRef"
@@ -1011,6 +1011,24 @@ def widenedElemRefs (elems : Array Term) : Array Syntax := Id.run do
       | _, _ => r.raw
   return refs
 
+open Lean in
+/-- How many `{v := find(storage, p)}` a frontier binds. -/
+private partial def storageReads (e : Lean.Expr) : Nat :=
+  go e 0
+where
+  isPlace (p : Lean.Expr) : Bool :=
+    (p.isAppOfArity ``Typed.WrappedExpr.var 3 || p.isAppOfArity ``Typed.WrappedExpr.field 4 ||
+      p.isAppOfArity ``Typed.WrappedExpr.index 4) &&
+      p.getAppArgs[0]!.isConstOf ``Kind.storage
+  go (e : Lean.Expr) (acc : Nat) : Nat :=
+    let acc :=
+      if e.isAppOfArity ``BindRhs.val 1 && e.appArg!.isAppOfArity ``Sym.read 1 &&
+          isPlace e.appArg!.appArg! then acc + 1 else acc
+    match e with
+    | .app f a => go a (go f acc)
+    | .mdata _ b => go b acc
+    | _ => acc
+
 open Lean Elab Tactic in
 /-- Discharge a `⇝ᵘ*` line by applying the listed rules in order.  A trailing
 merge is allowed, so an elided run may end on the calculus's parallel form.
@@ -1038,7 +1056,16 @@ elab "seq_steps " "[" rs:term,* "]" : tactic => do
   for (r, ref) in elems.zip (widenedElemRefs elems) do
     withTacticInfoContext ref do
       evalTactic (← `(tactic| seq_step $r))
-  evalTactic (← `(tactic| seq_done))
+  -- A merge re-spells a read, it never removes one, so a target with fewer
+  -- storage reads is not a merge away: it is where `seq_lower` and `theory_rw`
+  -- (`Tactics/Rewrite.lean`) carry the chain, and the goal is left open for
+  -- them, as `rw` leaves its goal.
+  let ty ← instantiateMVars (← getMainTarget)
+  if ty.isAppOfArity ``FrontierMultiStep 2 &&
+      storageReads ty.appFn!.appArg! != storageReads ty.appArg! then
+    evalTactic (← `(tactic| try exact FrontierMultiStep.refl))
+  else
+    evalTactic (← `(tactic| seq_done))
 
 open Lean Elab Tactic Meta in
 /-- Do two literal frontiers agree, line by line, on antecedent and goal?
@@ -1056,7 +1083,7 @@ private partial def sameShape (a b : Lean.Expr) : MetaM Bool := do
     return false
   let qa ← whnf a.getAppArgs[1]!
   let qb ← whnf b.getAppArgs[1]!
-  unless qa.isAppOfArity ``Sequent.mk 3 && qb.isAppOfArity ``Sequent.mk 3 do
+  unless qa.isAppOfArity ``Sequent.mk 4 && qb.isAppOfArity ``Sequent.mk 4 do
     return false
   unless ← isDefEq qa.getAppArgs[0]! qb.getAppArgs[0]! do return false
   unless ← isDefEq qa.getAppArgs[2]! qb.getAppArgs[2]! do return false
@@ -1130,7 +1157,7 @@ private def autoSeqStepsStep (acc : Array Lean.Expr) : TacticM Lean.Expr := do
     let triple ← whnf opened.getAppArgs[1]!
     let pair ← whnf triple.getAppArgs[3]!
     let q ← whnf pair.getAppArgs[2]!
-    unless q.isAppOfArity ``Sequent.mk 3 do
+    unless q.isAppOfArity ``Sequent.mk 4 do
       throwError "seq_steps!: the open sequent is not a literal{indentExpr q}"
     let goal ← whnf q.getAppArgs[2]!
     unless goal.isAppOfArity ``SeqGoal.prog 2 do

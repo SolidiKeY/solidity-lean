@@ -416,6 +416,12 @@ stack `{U₁}{U₂}`.  Its own category so that the repetition has a plain
 antiquotation in the `seq!` expander. -/
 declare_syntax_cat sol_par_upd
 syntax "{" sepBy1(sol_upd, " ‖ ") "}" : sol_par_upd
+/-- A **rigid read** (`Sequent.rigid`): `v` bound to a term `t` of the storage
+theory over the line's pre-state, which is what `seq_lower`
+(`Tactics/Rewrite.lean`) makes of `{v := find(storage, p)}`.  `t` is a Lean
+term.  The read is at `uint` unless the name says otherwise (`v@bool`). -/
+syntax "{" ident " := " "⟦" term "⟧" "}" : sol_par_upd
+syntax "{" ident "@" ident " := " "⟦" term "⟧" "}" : sol_par_upd
 
 /-- One formula of the antecedent, with the update stack it is read under.
 
@@ -465,8 +471,30 @@ def expandLine (mode : TSyntax `term) : TSyntax `sol_line → MacroM (TSyntax `t
   | `(sol_line| $ante:sol_ante,* ⟹ $upds:sol_par_upd* $goal:sol_seq_goal)
   | `(sol_line| $ante:sol_ante,* => $upds:sol_par_upd* $goal:sol_seq_goal) => do
       let anteTerms ← ante.getElems.mapM expandAnte
-      let updTerms ← upds.mapM expandParUpd
-      `($(gen ``Sequent.mk) [$anteTerms,*] [$updTerms,*] $(← expandSeqGoal mode goal))
+      -- A rigid read is not an element of the stack: it is recorded beside
+      -- it, with the number of updates since the one before it.
+      let mut updTerms : Array (TSyntax `term) := #[]
+      let mut rigid : Array (TSyntax `term) := #[]
+      let mut since := 0
+      for u in upds do
+        match u with
+        | `(sol_par_upd| { $x:ident := ⟦ $t:term ⟧ }) =>
+            rigid := rigid.push (← `(($(Lean.quote since), $(Lean.quote x.getId.toString),
+              $(gen ``Ty.uint), ($t : $(gen ``Theory.StValue)))))
+            since := 0
+        | `(sol_par_upd| { $x:ident @ $ty:ident := ⟦ $t:term ⟧ }) =>
+            let tyTerm ← match ty.getId.toString with
+              | "uint" => `($(gen ``Ty.uint))
+              | "bool" => `($(gen ``Ty.bool))
+              | _ => Macro.throwErrorAt ty "a rigid read is at `uint` or `bool`"
+            rigid := rigid.push (← `(($(Lean.quote since), $(Lean.quote x.getId.toString),
+              $tyTerm, ($t : $(gen ``Theory.StValue)))))
+            since := 0
+        | _ =>
+            updTerms := updTerms.push (← expandParUpd u)
+            since := since + 1
+      `($(gen ``Sequent.mk) [$anteTerms,*] [$updTerms,*] $(← expandSeqGoal mode goal)
+          [$rigid,*])
   | stx => Macro.throwErrorAt stx "unexpected derivation line"
 
 /-- One derivation line, as the calculus draws it.  A standalone line has no

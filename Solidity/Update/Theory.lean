@@ -31,7 +31,8 @@ free terms, as `structRules.key` is, and the fragment of programs its
 collapsing leaf describes is exactly the fragment the AST admits
 (`TypedStmt.Assign.mk`, `stmtTypingOk`): a storage-to-storage copy of a type
 that carries a mapping is not a statement, so there is nothing left for a
-denotation to reconcile.
+denotation to reconcile.  Storage *reads* meet the theory in `Update/Lower.lean`,
+over the pre-state leaf `Theory.Struct.cur`.
 -/
 
 namespace Solidity

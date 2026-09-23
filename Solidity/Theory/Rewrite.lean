@@ -50,9 +50,9 @@ definitional, since a path is a `List Seg`, and the second is
 `StValue.delValueCast` with its `int`/`bool` twins.
 
 The other direction — a constructor that is not printed — is
-`printedAbsent`: seven rules this package states and the printed rules are to gain, since
+`printedAbsent`: eight rules this package states and the printed rules are to gain, since
 this repository is the source of truth they are ported from.  The script
-reads that list too, and reports the seven rather than failing on them.
+reads that list too, and reports the eight rather than failing on them.
 
 One spelling note.  The array length field is `Seg.field "length"` here where
 solkey writes `size`; `findLength`/`saveLength` are abbreviations
@@ -97,6 +97,7 @@ inductive TheoryRule where
   | findDelAtOutside
   /-- Reading below the deleted path: out of the deleted value. -/
   | findDelAtExtends
+  | findDelAtFields
   | defValResolve
   | delValueStruct
   | delValueDefault
@@ -160,6 +161,7 @@ def lemmaNames : TheoryRule -> List Lean.Name
   | findDelAt             => [``StValue.find_delAt_same]
   | findDelAtOutside      => [``StValue.find_delAt_frame]
   | findDelAtExtends      => [``StValue.find_delAt_extends]
+  | findDelAtFields       => [``StValue.find_delAt_fields]
   | defValResolve         => [``StValue.defaultValueStruct, ``StValue.defaultValueInt,
                               ``StValue.defaultValueBool]
   | delValueStruct        => [``StValue.delValueStruct]
@@ -195,7 +197,8 @@ def all : List TheoryRule :=
     .findEmptyPath, .findPath, .saveEmptyPath, .savePath,
     .singletonPath, .findSingleton, .saveSingleton,
     .findOnSave, .findOnSaveDifferent, .findOnSavePrefix, .findOnSaveExtends,
-    .delAtEmpty, .findDelAt, .findDelAtOutside, .findDelAtExtends, .defValResolve,
+    .delAtEmpty, .findDelAt, .findDelAtOutside, .findDelAtExtends, .findDelAtFields,
+    .defValResolve,
     .delValueStruct, .delValueDefault, .delValueCast,
     .selectDelNodeRef, .selectDelNodeDefault, .selectDelNodeIndex, .selectOnDelAt,
     .readWriteEqual, .readWriteDifferent, .readAddEqual, .readAddDifferent,
@@ -210,11 +213,12 @@ and the printed rules are ported from it.  A checker that reads the
 list and reports these as "Lean-only: …" instead of
 failing on them.  The four `findOnSave*` are the read-of-a-write shortcuts the
 signature reaches by unfolding, `findDelAtExtends` is the fourth's twin over a
-delete, `selectOnDelAt` is one selector out of a delete,
+delete, `findDelAtFields` is that read carried on through the fields of the
+deleted node, `selectOnDelAt` is one selector out of a delete,
 and `readRSingleton` the one-segment `readR`. -/
 def printedAbsent : List TheoryRule :=
   [ .findOnSave, .findOnSaveDifferent, .findOnSavePrefix, .findOnSaveExtends,
-    .findDelAtExtends, .selectOnDelAt, .readRSingleton ]
+    .findDelAtExtends, .findDelAtFields, .selectOnDelAt, .readRSingleton ]
 
 /-- Every Lean-only rule is a rule of the enumeration. -/
 theorem printedAbsent_sub : printedAbsent.all (all.contains ·) = true := by decide

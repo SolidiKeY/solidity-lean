@@ -160,6 +160,8 @@ def storeAt : Struct -> Seg -> StValue -> Struct
   -- falls through into the view.  Replacing it would make `findSt_save_frame`
   -- false.
   | Struct.copyMem mem id, a, w => storeSt (Struct.copyMem mem id) a w
+  -- The pre-state leaf is a view too, and is shadowed the same way.
+  | Struct.cur p, a, w => storeSt (Struct.cur p) a w
 
 /-- The walk never produces a view, which is what lets the laws below use the
 read taclets on its result. -/
@@ -169,6 +171,7 @@ theorem storeAt_ne_copyMem (s : Struct) (a : Seg) (w : StValue) :
   cases s with
   | mtSt => simp only [storeAt] at h; cases h
   | copyMem _ _ => simp only [storeAt] at h; cases h
+  | cur _ => simp only [storeAt] at h; cases h
   | storeSt s0 b v0 =>
       by_cases hb : b = a
       · rw [storeAt, if_pos hb] at h; cases h
@@ -227,6 +230,7 @@ theorem selectSt_storeAt (s : Struct) (a1 a2 : Seg) (w : StValue) :
         · simp only [storeAt, if_neg hb, selectSt, if_neg h, ih]
   -- Over a view the walk is a shadow `storeSt`, so this is `selectOnStore`.
   | h2 mem id => by_cases h : a1 = a2 <;> simp [storeAt, selectSt, h]
+  | h3 p => by_cases h : a1 = a2 <;> simp [storeAt, selectSt, h]
 
 /-! ### `selectOnSaveCons`
 
@@ -382,6 +386,8 @@ mutual
     -- whose members it does not know; every member of a deleted node reads
     -- its default, which is what `mtSt` says.
     | Struct.copyMem _ _ => mtSt
+    -- Likewise the pre-state leaf: its members are not known here.
+    | Struct.cur _ => mtSt
 
   /-- `delValue<[α]>(v)`: `delValueStruct` on a `Struct`, `delValueDefault` on a `Prim`. -/
   def delValue : StValue -> StValue
@@ -440,6 +446,7 @@ theorem selectStDelNodeRef (s : Struct) (f : Name) :
   -- Both sides are `st mtSt`: the delete flattens the view, and a member of
   -- the flattened view is deleted to the same default.
   | h2 mem id => rfl
+  | h3 p => rfl
 
 /-- `selectStDelNodeDefault` at `int`. -/
 theorem selectStDelNodeDefault (s : Struct) (f : Name) :
@@ -459,6 +466,7 @@ theorem selectStDelNodeIndexStruct (s : Struct) (i : Int) :
       | field g => simp [delNode, ih]
       | «at» j => simp [delNode, ih]
   | h2 mem id => rfl
+  | h3 p => rfl
 
 /-- `selectOnDelAtCons`: one selector out of a delete, through `selectOnSaveCons`. -/
 theorem selectOnDelAtCons (s : Struct) (a1 a2 : Seg) (flds : List Seg) :
@@ -497,6 +505,50 @@ deleted value, the twin of `find_save_extends`. -/
 theorem find_delAt_extends (s : Struct) {p q : List Seg} (hp : p ≠ []) (hq : q ≠ []) :
     findSt (delAt s p) (p ++ q) = findSt (asStruct (delValue (findSt s p))) q :=
   find_save_extends s hp hq _
+
+/-- A path of `field` selectors only: what a `delete` resets member by member,
+where an `at` member is dropped instead (`selectStDelNodeIndexStruct`). -/
+def fieldsOnly (q : List Seg) : Bool :=
+  q.all fun | Seg.field _ => true | Seg.at _ => false
+
+/-- `selectStDelNodeRef` along a path of fields: a deleted node, read through
+its fields, is the reset of the read. -/
+theorem findSt_delNode_fields :
+    ∀ (q : List Seg) (S : Struct), q ≠ [] -> fieldsOnly q = true ->
+      findSt (delNode S) q = delValue (findSt S q)
+  | [], _, h, _ => absurd rfl h
+  | [Seg.field f], S, _, _ => selectStDelNodeRef S f
+  | [Seg.at _], _, _, hf => by simp [fieldsOnly] at hf
+  | Seg.at _ :: _ :: _, _, _, hf => by simp [fieldsOnly] at hf
+  | Seg.field f :: b :: r, S, _, hf => by
+      have hf' : fieldsOnly (b :: r) = true := by simpa [fieldsOnly] using hf
+      show findSt (asStruct (selectSt (delNode S) (Seg.field f))) (b :: r)
+        = delValue (findSt (asStruct (selectSt S (Seg.field f))) (b :: r))
+      rw [selectStDelNodeRef]
+      cases selectSt S (Seg.field f) with
+      | prim l =>
+          rw [show asStruct (delValue (prim l)) = mtSt from rfl, asStruct_prim,
+            find_mtSt (by simp)]
+          rfl
+      | st T =>
+          rw [show asStruct (delValue (st T)) = delNode T from rfl, asStruct_st]
+          exact findSt_delNode_fields (b :: r) T (by simp) hf'
+
+/-- **`findDelAtFields`** — a read through fields below a deleted path is the
+reset of the read before the delete: `findDelAtExtends` and
+`selectDelNodeRef` in one, so a chain goes on reading the store the delete was
+applied to. -/
+theorem find_delAt_fields (s : Struct) {p q : List Seg} (hp : p ≠ []) (hq : q ≠ [])
+    (hf : fieldsOnly q = true) :
+    findSt (delAt s p) (p ++ q) = delValue (findSt s (p ++ q)) := by
+  rw [find_delAt_extends s hp hq, find_append s p hq]
+  cases findSt s p with
+  | prim l =>
+      rw [show asStruct (delValue (prim l)) = mtSt from rfl, asStruct_prim, find_mtSt hq]
+      rfl
+  | st S =>
+      rw [show asStruct (delValue (st S)) = delNode S from rfl, asStruct_st]
+      exact findSt_delNode_fields q S hq hf
 
 /-! ## Sanity
 

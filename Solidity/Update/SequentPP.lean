@@ -566,16 +566,39 @@ private def ppAnte (e : Lean.Expr) : MetaM (Option (TSyntax `sol_ante)) := do
   let some g ← ppFormula f | return none
   return some (← `(sol_ante| $[$us]* $g:sol_formula))
 
+/-- The stack with the line's rigid reads woven in where they sit, each
+`{v := ⟦t⟧}` with `t` printed as the Lean term it is. -/
+private def weaveRigid (us : Array (TSyntax `sol_par_upd)) (rigidE : Lean.Expr) :
+    MetaM (Option (Array (TSyntax `sol_par_upd))) := do
+  let some rs ← listElems? rigidE | return none
+  let mut out := #[]
+  let mut rest := us.toList
+  for r in rs do
+    let some #[_, _, kE, r1] := appOf? (← whnf r) ``Prod.mk 4 | return none
+    let some #[_, _, nE, r2] := appOf? (← whnf r1) ``Prod.mk 4 | return none
+    let some #[_, _, tyE, tE] := appOf? (← whnf r2) ``Prod.mk 4 | return none
+    let some k := (← whnf kE).rawNatLit? <|> (← instantiateMVars kE).nat? | return none
+    let some n := strLit? (← whnf nE) | return none
+    out := out ++ (rest.take k).toArray
+    rest := rest.drop k
+    let t ← Lean.PrettyPrinter.delab tE
+    let x := mkIdent (Lean.Name.mkSimple n)
+    let isBool ← isDefEq tyE (mkConst ``Ty.bool)
+    out := out.push (← if isBool then `(sol_par_upd| { $x:ident @ bool := ⟦ $t ⟧ })
+      else `(sol_par_upd| { $x:ident := ⟦ $t ⟧ }))
+  return some (out ++ rest.toArray)
+
 /-- `Γ => {U₁}…{Uₙ} goal` -- the whole line. -/
 def ppLine (e : Lean.Expr) : MetaM (Option (TSyntax `sol_line)) := do
   let e ← whnf e
-  let some #[anteE, updsE, goalE] := appOf? e ``Sequent.mk 3 | return none
+  let some #[anteE, updsE, goalE, rigidE] := appOf? e ``Sequent.mk 4 | return none
   let some as ← listElems? anteE | return none
   let mut ante : Array (TSyntax `sol_ante) := #[]
   for a in as do
     let some x ← ppAnte a | return none
     ante := ante.push x
   let some us ← ppUpdStack updsE | return none
+  let some us ← weaveRigid us rigidE | return none
   let some g ← ppSeqGoal goalE | return none
   `(sol_line| $[$ante],* => $[$us]* $g:sol_seq_goal)
 
