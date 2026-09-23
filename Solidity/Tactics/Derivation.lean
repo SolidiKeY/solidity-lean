@@ -995,6 +995,22 @@ macro "seq_done" : tactic => `(tactic|
     | (refine FrontierMultiStep.equiv ?_ FrontierMultiStep.refl
        upd_merge))
 
+open Lean in
+/-- The info-node range of each element of a rule list: from its first
+character to the next element's, so the separator after a rule belongs to it
+(`seq_steps` below says why).  `Info.pos?` reads canonical positions only, so a
+list built by a macro (`sol_derivation`) has none to widen with and keeps the
+bare refs. -/
+def widenedElemRefs (elems : Array Term) : Array Syntax := Id.run do
+  let starts := elems.map (·.raw.getPos? (canonicalOnly := true))
+  let mut refs := #[]
+  for i in [0:elems.size] do
+    let r := elems[i]!
+    refs := refs.push <| match starts[i]!, (if i + 1 < elems.size then starts[i + 1]! else none) with
+      | some pos, some next => if pos < next then Syntax.ofRange ⟨pos, next⟩ else r.raw
+      | _, _ => r.raw
+  return refs
+
 open Lean Elab Tactic in
 /-- Discharge a `⇝ᵘ*` line by applying the listed rules in order.  A trailing
 merge is allowed, so an elided run may end on the calculus's parallel form.
@@ -1019,14 +1035,7 @@ has not started.  Widened, the end of a line carries what the rules up to there
 have reached, which is what the one-`seq_step`-per-line spelling shows. -/
 elab "seq_steps " "[" rs:term,* "]" : tactic => do
   let elems := rs.getElems
-  -- `Info.pos?` reads canonical positions only, so a `seq_steps` built by a
-  -- macro (`sol_derivation`) has none to widen with and keeps the bare refs.
-  let starts := elems.map (·.raw.getPos? (canonicalOnly := true))
-  for i in [0:elems.size] do
-    let r := elems[i]!
-    let ref := match starts[i]!, (if i + 1 < elems.size then starts[i + 1]! else none) with
-      | some pos, some next => if pos < next then Syntax.ofRange ⟨pos, next⟩ else r.raw
-      | _, _ => r.raw
+  for (r, ref) in elems.zip (widenedElemRefs elems) do
     withTacticInfoContext ref do
       evalTactic (← `(tactic| seq_step $r))
   evalTactic (← `(tactic| seq_done))

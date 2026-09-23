@@ -228,6 +228,14 @@ whether a rule exists before writing it. Binders go after the name, a `let`
 prefix writes `Let S₁ = …`, and a chain goes in
 `Traces/Theory.lean`.
 
+`theory_rw [.findDelAt, .findOnSave, …]` is the same chain in the other
+presentation, `sol_rewrite` to `seq_steps` as `sol_derivation` is: the endpoints
+in the statement and the `TheoryRule`s in the proof, each one rewriting the goal
+by its theorem, with its side conditions closed. As inside `rw [a, b]`, the
+cursor on a rule shows the goal it receives, and the end of its line the goal it
+leaves. `rfl` closes the goal at the end if it can.
+`Examples/Derivations/LedgerDelete.lean` has both presentations side by side.
+
 `sol_calculus name from <store> { stmt; stmt }` when the point is that the
 **rule table proves the obligation**: it states `CalculusHolds`, runs the
 taclets with `seq_closes` until no line of the frontier has a statement left,
