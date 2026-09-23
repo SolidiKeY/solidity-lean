@@ -477,7 +477,8 @@ theorem selectOnDelAtCons (s : Struct) (a1 a2 : Seg) (flds : List Seg) :
 laws the paper states for it are the corresponding `findSt`-over-`save` laws with
 that value substituted.  They are stated rather than left to the reader because
 they are the two rules `sections/signature.tex` names, and a chain writes a
-rule on its arrow. -/
+rule on its arrow.  The third, `find_delAt_extends`, is the paper's to gain,
+as `findOnSaveExtends` is: a read *below* the deleted path. -/
 
 /-- **`findDelAt`** — reading exactly the deleted path gives the deleted
 value. -/
@@ -490,6 +491,12 @@ the delete, the frame of `find_save_frame`. -/
 theorem find_delAt_frame (s : Struct) {p q : List Seg} (h : diverges p q = true) :
     findSt (delAt s p) q = findSt s q :=
   find_save_frame s _ p q h
+
+/-- **`findDelAtExtends`** — a read below the deleted path reads out of the
+deleted value, the twin of `find_save_extends`. -/
+theorem find_delAt_extends (s : Struct) {p q : List Seg} (hp : p ≠ []) (hq : q ≠ []) :
+    findSt (delAt s p) (p ++ q) = findSt (asStruct (delValue (findSt s p))) q :=
+  find_save_extends s hp hq _
 
 /-! ## Sanity
 

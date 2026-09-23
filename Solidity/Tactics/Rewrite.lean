@@ -39,6 +39,14 @@ calculus and its signature.
 
 `docs/paper-parity.md` names both chains of an example, and that pair is the
 example.
+
+## `theory_rw`: the same lines with the terms left to the goal
+
+`theory_rw [.findDelAt, .findOnSave]` is to `sol_rewrite` what `seq_steps` is
+to `sol_derivation`: the endpoints in the statement and the rules in the proof,
+each rule a rewrite by its theorem, so the cursor walks the chain as it walks
+`rw [a, b]`.  Use it to find a chain, or when the intermediate terms are not
+the artefact.
 -/
 
 namespace Solidity.Examples
@@ -67,17 +75,18 @@ macro "theory_steps" : tactic =>
 /-- The theorem a `TheoryRule` denotes, as an identifier a tactic can take.
 Evaluating `TheoryRule.lemmaName` at elaboration time is what makes the name on
 the arrow load-bearing rather than a comment. -/
-private def ruleLemmaIdents (rule : Term) : CommandElabM (Array Ident) := do
-  let ns : List Lean.Name <- liftTermElabM do
-    let e <- Term.elabTerm (<- `(Solidity.Theory.TheoryRule.lemmaNames $rule))
-      (some (mkApp (mkConst ``List [levelZero]) (mkConst ``Lean.Name)))
-    Term.synthesizeSyntheticMVarsNoPostponing
-    let e <- instantiateMVars e
-    let ns : List Lean.Name <-
-      unsafe evalExpr (List Lean.Name) (mkApp (mkConst ``List [levelZero]) (mkConst ``Lean.Name)) e
-    return ns
+private def ruleLemmaNames (rule : Term) : TermElabM (List Lean.Name) := do
+  let e <- Term.elabTerm (<- `(Solidity.Theory.TheoryRule.lemmaNames $rule))
+    (some (mkApp (mkConst ``List [levelZero]) (mkConst ``Lean.Name)))
+  Term.synthesizeSyntheticMVarsNoPostponing
+  let e <- instantiateMVars e
+  let ns : List Lean.Name <-
+    unsafe evalExpr (List Lean.Name) (mkApp (mkConst ``List [levelZero]) (mkConst ``Lean.Name)) e
   if ns.isEmpty then throwErrorAt rule "this rule names no theorem"
-  return (ns.map mkIdent).toArray
+  return ns
+
+private def ruleLemmaIdents (rule : Term) : CommandElabM (Array Ident) := do
+  return ((<- liftTermElabM (ruleLemmaNames rule)).map mkIdent).toArray
 
 /-- The line's tactic: the rule at whichever sort the line is written in, tried
 in the table's order. -/
@@ -138,5 +147,47 @@ elab_rules : command
       elabCommand (<-
         `(command| $[$doc:docComment]? theorem $name $binders:bracketedBinder* :
             $first = $prev := $folded))
+
+open Tactic in
+/-- One element of a `theory_rw` list: the first of the rule's theorems that
+rewrites the goal, its side conditions closed.  `rewrite` leaves the rewritten
+goal first and the side conditions after it; a side condition that does not
+close fails the theorem, and the next one is tried.  `erewrite` is the
+fallback because a rule stated over `p ++ q` meets a literal path, and only
+default transparency takes `[a, b, c]` apart as `[a, b] ++ ?q`. -/
+private def theoryRwRule (rule : Term) : TacticM Unit := do
+  let lems <- Tactic.runTermElab (ruleLemmaNames rule)
+  let goal <- getMainGoal
+  let saved <- Tactic.saveState
+  for lem in lems do
+    for useE in [false, true] do
+      let id := mkIdent lem
+      try
+        if useE then evalTactic (<- `(tactic| rewrite (config := { transparency := .default }) [$id:ident]))
+        else evalTactic (<- `(tactic| rewrite [$id:ident]))
+        let main :: sides <- getGoals | throwError "no goal left"
+        for g in sides do
+          setGoals [g]
+          evalTactic (<- `(tactic| first | rfl | assumption | decide | simp | omega))
+          unless (<- getGoals).isEmpty do throwError "side condition left open"
+        setGoals [main]
+        return
+      catch _ => saved.restore
+  throwErrorAt rule "no theorem of this rule rewrites the goal (tried {lems}){indentExpr (<- goal.getType)}"
+
+open Tactic in
+/-- Rewrite by the listed theory rules in order, the goal left to the page
+between them: `sol_rewrite`'s chain as `rw` spells a proof, the way
+`seq_steps` spells a `sol_derivation`.  Each element is a `TheoryRule` under the
+paper's name and is resolved to its theorem, so a wrong name does not
+elaborate; each carries its own info node, widened as `seq_steps`'s are, so the
+cursor on `.b` in `theory_rw [.a, .b, .c]` shows the goal `.a` left and the end
+of `.b`'s line the goal after it.  `rfl` closes the goal at the end if it can,
+as `rw` does. -/
+elab "theory_rw " "[" rs:term,* "]" : tactic => do
+  let elems := rs.getElems
+  for (r, ref) in elems.zip (widenedElemRefs elems) do
+    withTacticInfoContext ref (theoryRwRule r)
+  evalTactic (<- `(tactic| try rfl))
 
 end Solidity.Examples

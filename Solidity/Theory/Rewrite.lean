@@ -53,9 +53,9 @@ definitional, since a path is a `List Seg`, and the second is
 the name it excuses.
 
 The other direction — a constructor the paper does not declare — is
-`paperAbsent`: six rules this package states and the paper is to gain, since
+`paperAbsent`: seven rules this package states and the paper is to gain, since
 this repository is the source of truth the paper is ported from.  The script
-reads that list too, and reports the six rather than failing on them.
+reads that list too, and reports the seven rather than failing on them.
 
 One spelling note.  The array length field is `Seg.field "length"` here where
 solkey writes `size`; the paper's `findLength`/`saveLength` are abbreviations
@@ -98,6 +98,8 @@ inductive TheoryRule where
   | delAtEmpty
   | findDelAt
   | findDelAtOutside
+  /-- Reading below the deleted path: out of the deleted value. -/
+  | findDelAtExtends
   | defValResolve
   | delValueStruct
   | delValueDefault
@@ -160,6 +162,7 @@ def lemmaNames : TheoryRule -> List Lean.Name
   | delAtEmpty            => [``StValue.delAtEmpty]
   | findDelAt             => [``StValue.find_delAt_same]
   | findDelAtOutside      => [``StValue.find_delAt_frame]
+  | findDelAtExtends      => [``StValue.find_delAt_extends]
   | defValResolve         => [``StValue.defaultValueStruct, ``StValue.defaultValueInt,
                               ``StValue.defaultValueBool]
   | delValueStruct        => [``StValue.delValueStruct]
@@ -195,7 +198,7 @@ def all : List TheoryRule :=
     .findEmptyPath, .findPath, .saveEmptyPath, .savePath,
     .singletonPath, .findSingleton, .saveSingleton,
     .findOnSave, .findOnSaveDifferent, .findOnSavePrefix, .findOnSaveExtends,
-    .delAtEmpty, .findDelAt, .findDelAtOutside, .defValResolve,
+    .delAtEmpty, .findDelAt, .findDelAtOutside, .findDelAtExtends, .defValResolve,
     .delValueStruct, .delValueDefault, .delValueCast,
     .selectDelNodeRef, .selectDelNodeDefault, .selectDelNodeIndex, .selectOnDelAt,
     .readWriteEqual, .readWriteDifferent, .readAddEqual, .readAddDifferent,
@@ -209,11 +212,12 @@ additions, which the paper is to gain: this repository is the source of truth
 and the paper is ported from it.  `./scripts/check-theory-rules.mjs` reads the
 list and reports these as "Lean-only (to add to the paper)" instead of
 failing on them.  The four `findOnSave*` are the read-of-a-write shortcuts the
-paper reaches by unfolding, `selectOnDelAt` is one selector out of a delete,
+paper reaches by unfolding, `findDelAtExtends` is the fourth's twin over a
+delete, `selectOnDelAt` is one selector out of a delete,
 and `readRSingleton` the one-segment `readR`. -/
 def paperAbsent : List TheoryRule :=
   [ .findOnSave, .findOnSaveDifferent, .findOnSavePrefix, .findOnSaveExtends,
-    .selectOnDelAt, .readRSingleton ]
+    .findDelAtExtends, .selectOnDelAt, .readRSingleton ]
 
 /-- Every Lean-only rule is a rule of the enumeration. -/
 theorem paperAbsent_sub : paperAbsent.all (all.contains ·) = true := by decide
