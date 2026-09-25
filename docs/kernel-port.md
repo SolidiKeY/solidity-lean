@@ -289,7 +289,9 @@ lists only the standard three axioms.
   - [x] storage, with the control rules on simple conditions
     (`Kernel/Taclet.lean`, `Kernel/Sound.lean`: 41 taclets, all sound)
   - [ ] arrays (bounds checks, `push`/`pop`)  - [ ] memory  - [ ] cross-domain
-  - [ ] arithmetic (`op=`, `++`/`--`, operators into a local)  - [ ] calls, `transfer`
+  - [x] operators into a local (`binopAssignment`, `binopUnfoldLeft/Right`,
+    the two short-circuit rules, `unopAssignment`, `unopCapture`)
+  - [ ] compound assignment `op=`, `++`/`--`, ternary  - [ ] calls, `transfer`
   - [ ] the bridge: each constructor's `RuleName` and `KeyOrigin`, and at
     the scratch names `se`/`sp`/`ie` its residual's erasure against `ruleEffect`
   - [ ] typed shapes, `rules_disjoint`/`rules_complete` (with `Stmt.step`, phase 4)
@@ -313,6 +315,8 @@ lists only the standard three axioms.
 | Conditions | `if`, `require` and `assert` test a `Simple` value; `ksol` captures any other condition into a fresh `bool` first (`ifElseUnfold`, `requireConditionCapture` are the elaborator's). A branch still may not declare, so a complex condition nested in a branch is an elaboration error | 2026-09-25 |
 | `T storage x;` | not a kernel statement: solc ≥ 0.5 rejects an uninitialised storage pointer (`storageLocalDeclSkip` has no kernel counterpart) | 2026-09-25 |
 | Semantics | kernel terms get a structural denotation, proved to be the interpreter's (`Prog.run_eq`); taclets are proved sound over it, not through the untyped `*_sound` theorems, whose scratch names are fixed strings | 2026-09-25 |
+| Typed states | `Premise.Correct` quantifies over the states of the statement's context (`Kernel.Typed`: some `StateWT` for the layout). Only the short-circuit rules use it (a `bool` value evaluates to a boolean); nothing is lost, since a contract starts in one and `execStmt_sound` keeps it there | 2026-09-25 |
+| Operator families | a rule over an operator is one constructor (`binopAssignment op`), as in `Calculus/Rules.lean`; solkey's taclet is per operator | 2026-09-25 |
 | Modalities | the kernel's box is partial correctness (it holds unless the run ends normally in a bad state) and its diamond needs a normal end; neither tells a revert from a stuck run. An unfolding rule then owes its statement the same *successful* outcome (`SameOk`), which the order-changing rules (`*StorageRef_unfold_leftFst`, `*NonSimpleIndexCapture`) meet without the side conditions the untyped `*_sound` theorems carry. `SolidityJudgment.Holds` differs on stuck runs ("a stuck execution validates nothing"); the phase-7 bridge must say so | 2026-09-25 |
 | Unknown names | an error: parameters are declared locals. mini-solkey reads an unknown name as a `uint` parameter | 2026-09-25 |
 | Ported contracts | one named constant per interpreter store, `initStorage_*` checks roots, order and defaults against the store by `simp` | 2026-09-25 |
