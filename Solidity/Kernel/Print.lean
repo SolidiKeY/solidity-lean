@@ -59,12 +59,13 @@ end
 
 def Src.toStr {T : Ty} : Src C Γ T → String
   | .val v => v.toStr true
-  | .path p => p.toStr
+  | .copy p _ => p.toStr
 
 mutual
 
 def Stmt.toStr {Γ Γ' : Ctx} : Stmt C Γ Γ' → String
   | .assign l r => s!"{l.toStr} = {r.toStr};"
+  | .rebind x _ r => s!"{x} = {r.toStr};"
   | .assignLocal x _ r => s!"{x} = {r.toStr true};"
   | .declLocal p x none => s!"{tyStr (.prim p)} {x};"
   | .declLocal p x (some e) => s!"{tyStr (.prim p)} {x} = {e.toStr true};"

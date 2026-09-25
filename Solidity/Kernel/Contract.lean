@@ -58,6 +58,43 @@ namespace Kernel
 
 open Semantics
 
+/-! ## Mapping-free types
+
+A storage copy of a type that holds a mapping is stuck (`rhsToSVal`) and
+rejected by solc, so a kernel copy carries `T.mapFree = true`.  `tyHasMapping`
+is the interpreter's check, but it is well-founded recursion through
+`structDef`, which the kernel cannot evaluate, so a proof of it cannot be
+`Eq.refl`.  `Ty.mapFree` is structural instead: a struct is mapping-free when
+it is listed in `mapFreeStructs`, and `mapFreeStructs_ok` checks the list
+against `tyHasMapping` once.  A struct left off the list is only
+conservative: its copies cannot be written. -/
+
+/-- The structs of `structDef` that hold no mapping. -/
+def mapFreeStructs : List Name :=
+  ["Token", "Account", "Person", "Basket", "TokenBucket", "Toggle", "Pair", "S", "Sub",
+   "WithSub", "Inner", "Outer", "Simple", "WithArray", "Triple", "BadDup"]
+
+/-- Every listed struct holds no mapping: `Person` (an `Account` and a
+`uint`) does not, `Wallet` (with its `stash`) is not listed. -/
+theorem mapFreeStructs_ok : ∀ s ∈ mapFreeStructs, tyHasMapping (.struct s) = false := by
+  simp [mapFreeStructs, tyHasMapping, fieldsHaveMapping, structDef]
+
+/-- `T` holds no mapping, by structural recursion (so by `Eq.refl`). -/
+def _root_.Solidity.Ty.mapFree : Ty → Bool
+  | .prim _ => true
+  | .ref (.mapping ..) => false
+  | .ref (.struct s) => s ∈ mapFreeStructs
+  | .ref (.array e) => e.mapFree
+
+/-- `mapFree` is the interpreter's check: a `Person[]` copies, a
+`mapping(uint => uint)` does not. -/
+theorem _root_.Solidity.Ty.mapFree_sound : ∀ {T : Ty}, T.mapFree = true → tyHasMapping T = false
+  | .prim _, _ => by simp [tyHasMapping]
+  | .ref (.mapping ..), h => by simp [Ty.mapFree] at h
+  | .ref (.struct s), h => mapFreeStructs_ok s (by simpa [Ty.mapFree] using h)
+  | .ref (.array e), h => by
+      rw [tyHasMapping]; exact Ty.mapFree_sound (T := e) (by simpa [Ty.mapFree] using h)
+
 /-! ## The contract -/
 
 /-- A contract: its storage roots, in declaration order. -/
@@ -277,6 +314,8 @@ example : sol_ty!(mapping(uint => Person[])) = .mapping .uint (.array (.struct "
 example : StandardExample.rootType "folks" = some sol_ty!(mapping(uint => Person)) := rfl
 
 example : StandardExample.fieldType "Person" "age" = some sol_ty!(uint) := rfl
+
+example : sol_ty!(Person[]).mapFree = true := rfl
 
 end Kernel
 end Solidity

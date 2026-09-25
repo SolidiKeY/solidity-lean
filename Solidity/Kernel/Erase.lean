@@ -45,7 +45,7 @@ end
 
 def Src.erase {C : Contract} {Γ : Ctx} {T : Ty} : Src C Γ T → WrappedExpr
   | .val v => v.erase
-  | .path p => p.erase
+  | .copy p _ => p.erase
 
 /-! ## Erasure keeps the type -/
 
@@ -78,7 +78,7 @@ end
 theorem Src.erase_ty {C : Contract} {Γ : Ctx} {T : Ty} :
     (r : Src C Γ T) → r.erase.ty = T
   | .val v => v.erase_ty
-  | .path p => p.erase_ty
+  | .copy p _ => p.erase_ty
 
 /-! ## Erasure is well-typed -/
 
@@ -126,7 +126,7 @@ end
 theorem Src.erase_wt {C : Contract} {Γ : Ctx} {T : Ty} :
     (r : Src C Γ T) → wtExpr Γ C.layout r.erase = true
   | .val v => v.erase_wt
-  | .path p => p.erase_wt
+  | .copy p _ => p.erase_wt
 
 /-! ## Statements -/
 
@@ -144,6 +144,8 @@ mutual
 
 def Stmt.erase {C : Contract} {Γ Γ' : Ctx} : Stmt C Γ Γ' → Solidity.Stmt
   | .assign l r => .assign l.toPlace r.erase
+  | .rebind (R := R) x _ r =>
+      .assign (PlaceExpr.var .storage (.ref R) (Field.identity x R (some .local))) r.erase
   | .assignLocal (p := p) x _ r =>
       .assign (PlaceExpr.var .stack (.prim p) (Field.primitive x (.prim p))) r.erase
   | .declLocal p x init => .stackDecl (.prim p) x (init.map Val.erase)
@@ -171,8 +173,11 @@ and binds `x : uint`, with no side condition left to check. -/
 theorem Stmt.erase_wt {C : Contract} {Γ Γ' : Ctx} :
     (s : Stmt C Γ Γ') → stmtWt Γ C.layout s.erase = some Γ'
   | .assign l r => by
-      simp [Stmt.erase, stmtWt, SPath.toPlace, l.erase_wt, r.erase_wt, l.erase_ty,
-        r.erase_ty]
+      simp [Stmt.erase, stmtWt, Loc.toPlace, SPath.toPlace, SPath.erase, l.erase_wt,
+        r.erase_wt, l.erase_ty, r.erase_ty]
+  | .rebind x h r => by
+      simp [Stmt.erase, stmtWt, PlaceExpr.var, wtExpr, h, Field.identity, r.erase_wt,
+        r.erase_ty, Typed.WrappedExpr.ty]
   | .assignLocal x h r => by
       simp [Stmt.erase, stmtWt, PlaceExpr.var, wtExpr, h, Field.primitive, r.erase_wt,
         r.erase_ty, Typed.WrappedExpr.ty]
