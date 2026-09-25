@@ -72,6 +72,7 @@ mutual
 def Stmt.size {Γ Γ' : Ctx} : Stmt C Γ Γ' → Nat
   | .assign l r => l.size + r.size + 2
   | .opAssign _ _ _ l r => l.size + r.size + 2
+  | .incDec _ _ l | .assignIncDec _ _ _ _ l _ => l.size + 1
   | .rebind _ _ p => p.size + 1
   | .assignLocal _ _ v => v.size + 1
   | .declLocal _ _ _ init =>

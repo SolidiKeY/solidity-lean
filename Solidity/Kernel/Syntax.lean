@@ -214,6 +214,12 @@ inductive Src (C : Contract) (Γ : Ctx) : Ty → Type where
   | copy {R : RefTy} (p : SPath C Γ (.ref R)) (h : (Ty.ref R).mapFree = true) :
       Src C Γ (.ref R)
 
+/-- A simple path (`sp`): a state variable or an alias. -/
+def SPath.isSimple {C : Contract} {Γ : Ctx} {T : Ty} : SPath C Γ T → Bool
+  | .alias .. => true
+  | .loc (.root ..) => true
+  | .loc _ => false
+
 /-- The target of a compound assignment `l ⊕= e`: a stack local, a state
 variable, a member, or an entry at a simple index (`ksol` captures any other
 index first; the old table is stuck on one, and solkey has no taclet for
@@ -230,6 +236,12 @@ inductive OpLoc (C : Contract) (Γ : Ctx) : PrimTy → Type where
   /-- `balances[i] += 1;` -/
   | index {R : RefTy} {k p : PrimTy} (it : IndexTy R k (.prim p)) (b : SPath C Γ (.ref R))
       (i : Simple C Γ k) : OpLoc C Γ p
+
+/-- A target whose receiver, if it has one, is simple: `x`, `total`,
+`sp.fld`, `sp[ie]`. -/
+def OpLoc.recvSimple {C : Contract} {Γ : Ctx} {p : PrimTy} : OpLoc C Γ p → Bool
+  | .field b _ _ | .index _ b _ => b.isSimple
+  | _ => true
 
 /-! ## Statements -/
 
@@ -260,6 +272,14 @@ inductive Stmt (C : Contract) : Ctx → Ctx → Type where
   numeric type. -/
   | opAssign {Γ : Ctx} {p : PrimTy} (op : BinOp) (hop : op.hasCompoundAssign = true)
       (hp : p.isNumeric = true) (l : OpLoc C Γ p) (r : Val C Γ p) : Stmt C Γ Γ
+  /-- `x++;`, `++alice.age;`, `--x;`, at a numeric type. -/
+  | incDec {Γ : Ctx} {p : PrimTy} (op : IncDec) (hp : p.isNumeric = true) (l : OpLoc C Γ p) :
+      Stmt C Γ Γ
+  /-- `y = x++;`, `y = ++alice.age;`: into a stack local, from a target whose
+  receiver is simple (no taclet takes another; `ksol` captures it first). -/
+  | assignIncDec {Γ : Ctx} {p : PrimTy} (x : Name) (h : lookupBy x Γ = some (.stack (.prim p)))
+      (op : IncDec) (hp : p.isNumeric = true) (l : OpLoc C Γ p) (hs : l.recvSimple = true) :
+      Stmt C Γ Γ
   /-- `delete alice.account;` -/
   | delete {Γ : Ctx} {T : Ty} (l : Loc C Γ T) : Stmt C Γ Γ
   /-- `if (c) { … } else { … }`, on a simple condition (the paper's

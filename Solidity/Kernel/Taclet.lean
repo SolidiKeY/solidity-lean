@@ -47,12 +47,6 @@ variable {C : Contract}
 
 /-! ## Simple parts -/
 
-/-- A simple path (`sp`): a state variable or an alias. -/
-def SPath.isSimple {Γ : Ctx} {T : Ty} : SPath C Γ T → Bool
-  | .alias .. => true
-  | .loc (.root ..) => true
-  | .loc _ => false
-
 /-- A simple value (`se`). -/
 def Val.isSimple {Γ : Ctx} {p : PrimTy} : Val C Γ p → Bool
   | .simple _ => true
@@ -188,6 +182,11 @@ inductive Upd (C : Contract) (Γ : Ctx) where
   /-- `l := l ⊕ se`: at a local `{lv := lv ⊕ se}`, in storage
   `storage := save(storage, l, find(storage, l) ⊕ se)`. -/
   | opSave {p : PrimTy} (op : BinOp) (l : OpLoc C Γ p) (se : Simple C Γ p)
+  /-- `bump(l++)`: `l := l ± 1`. -/
+  | bump {p : PrimTy} (op : IncDec) (l : OpLoc C Γ p)
+  /-- `bump(l++) || v := l++`: the bump, and `v` bound to the expression's
+  value, in parallel. -/
+  | bumpBind {p : PrimTy} (x : Name) (op : IncDec) (l : OpLoc C Γ p)
 
 /-- The state an update leaves, from `σ`. -/
 def Upd.apply (σ : State) {Γ : Ctx} : Upd C Γ → Res State
@@ -204,6 +203,10 @@ def Upd.apply (σ : State) {Γ : Ctx} : Upd C Γ → Res State
     let (root, segs) ← p.resolve σ
     pure (σ.setEnv x (.spath root segs))
   | .opSave op l se => do l.store σ op (← se.eval σ)
+  | .bump op l => do pure (← l.bump σ op).1
+  | .bumpBind x op l => do
+    let (σ', v) ← l.bump σ op
+    pure (σ'.setEnv x (.val v))
 
 /-- What a rule leaves to prove, for a statement from `Γ` to `Γ'`. -/
 inductive Premise (C : Contract) (Γ Γ' : Ctx) where
@@ -691,6 +694,66 @@ inductive Taclet (C : Contract) (m : Modality) : {Γ Γ' : Ctx} → Stmt C Γ Γ
           (.cons (.declLocal p se hse (some nse))
           (.cons (.opAssign op hop hp (l.weaken (Ctx.Sub.fresh hse _)) (.simple (Simple.new se p))) .nil))
           (Ctx.Sub.fresh hse _)
+  -- Increment and decrement
+  /-- `lv++ ⇝ {bump(lv++)}`. -/
+  | localIncrement {Γ : Ctx} {p : PrimTy} (op : IncDec) (hp : p.isNumeric = true) (x : Name)
+      (h : lookupBy x Γ = some (.stack (.prim p))) :
+      .incDec op hp (.local x h) ⇒ .update (.bump op (.local x h))
+  /-- `gsp++ ⇝ {bump(gsp++)}`. -/
+  | storageRootIncrement {Γ : Ctx} {p : PrimTy} (op : IncDec) (hp : p.isNumeric = true) (r : Name)
+      (hΓ : lookupBy r Γ = none) (hr : C.rootType r = some (.prim p)) :
+      .incDec op hp (.root r hΓ hr) ⇒ .update (.bump op (.root r hΓ hr))
+  /-- `sp.fld++ ⇝ {bump(sp.fld++)}`. -/
+  | storageFieldIncrement {Γ : Ctx} {s : Name} {p : PrimTy} (op : IncDec) (hp : p.isNumeric = true)
+      (sp : SPath C Γ (.struct s)) (hs : sp.isSimple = true) (f : Name)
+      (hf : C.fieldType s f = some (.prim p)) :
+      .incDec op hp (.field sp f hf) ⇒ .update (.bump op (.field sp f hf))
+  /-- `sp[ie]++ ⇝ {bump(sp[ie]++)}`, a mapping entry or an array element (one
+  rule, as in the old table): no bounds split, the bump reverts as the
+  statement does. -/
+  | storageIndexIncrement {Γ : Ctx} {R : RefTy} {kp p : PrimTy} (op : IncDec) (hp : p.isNumeric = true)
+      (it : IndexTy R kp (.prim p)) (sp : SPath C Γ (.ref R)) (hs : sp.isSimple = true)
+      (ie : Simple C Γ kp) :
+      .incDec op hp (.index it sp ie) ⇒ .update (.bump op (.index it sp ie))
+  /-- `nsp.fld++ ⇝ T storage sp = nsp; sp.fld++`. -/
+  | storageFieldIncrementUnfoldLeftFst {Γ : Ctx} {s : Name} {p : PrimTy} (op : IncDec)
+      (hp : p.isNumeric = true) (nsp : SPath C Γ (.struct s)) (hn : nsp.isSimple = false) (f : Name)
+      (hf : C.fieldType s f = some (.prim p)) (sp : Name) (hsp : isFresh C Γ sp = true) :
+      .incDec op hp (.field nsp f hf) ⇒
+        .unfold [sp]
+          (.cons (.declStorage true (.struct s) sp hsp nsp)
+          (.cons (.incDec op hp (.field (SPath.new sp _) f hf)) .nil))
+          (Ctx.Sub.fresh hsp _)
+  /-- `nsp[ie]++ ⇝ T storage sp = nsp; sp[ie]++`. -/
+  | storageIndexIncrementUnfoldLeftFst {Γ : Ctx} {R : RefTy} {kp p : PrimTy} (op : IncDec)
+      (hp : p.isNumeric = true) (it : IndexTy R kp (.prim p)) (nsp : SPath C Γ (.ref R))
+      (hn : nsp.isSimple = false) (ie : Simple C Γ kp) (sp : Name) (hsp : isFresh C Γ sp = true) :
+      .incDec op hp (.index it nsp ie) ⇒
+        .unfold [sp]
+          (.cons (.declStorage true R sp hsp nsp)
+          (.cons (.incDec op hp (.index it (SPath.new sp _) (ie.weaken (Ctx.Sub.fresh hsp _)))) .nil))
+          (Ctx.Sub.fresh hsp _)
+  /-- `vp = lv++ ⇝ {bump(lv++) || vp := lv++}`. -/
+  | localAssignIncrement {Γ : Ctx} {p : PrimTy} (y : Name) (hy : lookupBy y Γ = some (.stack (.prim p)))
+      (op : IncDec) (hp : p.isNumeric = true) (x : Name) (h : lookupBy x Γ = some (.stack (.prim p))) :
+      .assignIncDec y hy op hp (.local x h) rfl ⇒ .update (.bumpBind y op (.local x h))
+  /-- `lv = gsp++ ⇝ {bump(gsp++) || lv := gsp++}`. -/
+  | storageRootIncrementAssignment {Γ : Ctx} {p : PrimTy} (y : Name)
+      (hy : lookupBy y Γ = some (.stack (.prim p))) (op : IncDec) (hp : p.isNumeric = true) (r : Name)
+      (hΓ : lookupBy r Γ = none) (hr : C.rootType r = some (.prim p)) :
+      .assignIncDec y hy op hp (.root r hΓ hr) rfl ⇒ .update (.bumpBind y op (.root r hΓ hr))
+  /-- `lv = sp.fld++ ⇝ {bump(sp.fld++) || lv := sp.fld++}`. -/
+  | storageFieldIncrementAssignment {Γ : Ctx} {s : Name} {p : PrimTy} (y : Name)
+      (hy : lookupBy y Γ = some (.stack (.prim p))) (op : IncDec) (hp : p.isNumeric = true)
+      (sp : SPath C Γ (.struct s)) (f : Name) (hf : C.fieldType s f = some (.prim p))
+      (hs : (OpLoc.field sp f hf).recvSimple = true) :
+      .assignIncDec y hy op hp (.field sp f hf) hs ⇒ .update (.bumpBind y op (.field sp f hf))
+  /-- `lv = sp[ie]++ ⇝ {bump(sp[ie]++) || lv := sp[ie]++}`. -/
+  | storageIndexIncrementAssignment {Γ : Ctx} {R : RefTy} {kp p : PrimTy} (y : Name)
+      (hy : lookupBy y Γ = some (.stack (.prim p))) (op : IncDec) (hp : p.isNumeric = true)
+      (it : IndexTy R kp (.prim p)) (sp : SPath C Γ (.ref R)) (ie : Simple C Γ kp)
+      (hs : (OpLoc.index it sp ie).recvSimple = true) :
+      .assignIncDec y hy op hp (.index it sp ie) hs ⇒ .update (.bumpBind y op (.index it sp ie))
   -- Control
   /-- Two goals: the `then` branch where `se` holds, the `else` branch where it
   does not. -/

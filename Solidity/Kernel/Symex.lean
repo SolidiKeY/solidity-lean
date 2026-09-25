@@ -223,7 +223,7 @@ statement and splitting every branch, until what is left are the goals
 `∀ σ, H.holds ψ σ` (or `False`, when the fuel runs out). -/
 macro "symex" : tactic => `(tactic| repeat' (first
   | (rw [Kont.vc]; try simp only [Stmt.step, localStep, assignStep, rebindStep, deleteStep,
-      binopRightStep, shortCircuitStep, copyStep, opStep, Hole.unfoldStep, Prog.append, Val.weaken,
+      binopRightStep, shortCircuitStep, copyStep, opStep, incStep, assignIncStep, Hole.unfoldStep, Prog.append, Val.weaken,
       OpLoc.weaken,
       Simple.weaken, Loc.weaken, SPath.weaken, Src.weaken, Val.isSimple, SPath.isSimple,
       SPath.isBindable, dite_true, dite_false, Bool.false_eq_true, reduceFreshName])
@@ -243,7 +243,7 @@ macro_rules
       Except.pure, applyBinOp, applyUnOp, unopCheck, checkArith, BinOp.retTy, Value.asInt,
       Value.asBool, Value.toSVal, BinOp.isArith, uintBound, intBound, reduceFreshName, Src.value,
       Loc.target, Loc.resolve, SPath.resolve, Simple.new, envPath, State.saveStorage, OpLoc.store,
-      opStore, opLocal,
+      opStore, opLocal, OpLoc.bump, bumpStore, bumpLocal, IncDec.isPre, IncDec.isIncrement,
       State.findStorage, State.setEnv, State.getEnv, SVal.save, SVal.find, SVal.asValue,
       SVal.defaultOf, defaultForRef, defaultForTy, defaultForFields, structDef, Functor.map,
       Except.map, lookupBy, setBy, SemanticsProperties.lookupBy_setBy_self,
@@ -292,6 +292,13 @@ example : (Kont.modal .diamond exOp (.post .tt)).vc 30 .nil := by
 example : (Kont.modal .diamond exOpStore (.post .tt)).vc 60
     (.assume fun σ => σ.storage = StandardExample.initStorage ∧ σ.env = []) := by
   unfold exOpStore; symex <;> symex_close [initStorage_standardExample, State.exampleStore]
+
+def exInc := ksol{ uint x = 1; uint y; x++; y = ++x; assert(y == 3); total++; y = total++; assert(y == 1); }
+
+/-- `++` on a local and in storage, both forms. -/
+example : (Kont.modal .diamond exInc (.post .tt)).vc 60
+    (.assume fun σ => σ.storage = StandardExample.initStorage ∧ σ.env = []) := by
+  unfold exInc; symex <;> symex_close [initStorage_standardExample, State.exampleStore]
 
 /-- A false specification leaves a goal no evaluation closes. -/
 example : True := by

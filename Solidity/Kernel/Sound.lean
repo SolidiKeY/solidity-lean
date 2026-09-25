@@ -210,6 +210,72 @@ theorem opStore_agree {ns : List Name} {σ₁ σ : State} (h : EnvAgreeExcept ns
   repeat' split
   all_goals first | trivial | exact SameOk.save h _ _ _ | simp_all
 
+/-- Two runs that return a value end alike: both normally, in states that
+agree off `ns` and with the same value, or both abnormally. -/
+def SameOkV (ns : List Name) : Res (State × Value) → Res (State × Value) → Prop
+  | .ok a, .ok b => EnvAgreeExcept ns a.1 b.1 ∧ a.2 = b.2
+  | .error _, .error _ => True
+  | _, _ => False
+
+/-- A `++` at a resolved location, in two agreeing states. -/
+theorem bumpStore_agreeV {ns : List Name} {σ₁ σ : State} (h : EnvAgreeExcept ns σ₁ σ) (op : IncDec)
+    (p : PrimTy) (r : Name) (segs : List Seg) :
+    SameOkV ns (bumpStore σ₁ op p r segs) (bumpStore σ op p r segs) := by
+  simp only [bumpStore, findStorage_congr h]
+  cases σ.findStorage r segs with
+  | error _ => trivial
+  | ok sv =>
+    dsimp only [bind, Except.bind]
+    cases sv.asValue with
+    | error _ => trivial
+    | ok old =>
+      dsimp only
+      cases old.asInt with
+      | error _ => trivial
+      | ok oi =>
+        dsimp only
+        cases checkArith (.prim p) (.int (if op.isIncrement then oi + 1 else oi - 1)) with
+        | error _ => trivial
+        | ok new =>
+          dsimp only
+          have := saveStorage_agree h r segs new.toSVal
+          revert this
+          cases σ₁.saveStorage r segs new.toSVal <;> cases σ.saveStorage r segs new.toSVal <;>
+            simp [ResultsAgree, SameOkV, pure, Except.pure]
+
+/-- The states a `++` leaves, in two agreeing states. -/
+theorem bumpStore_agree {ns : List Name} {σ₁ σ : State} (h : EnvAgreeExcept ns σ₁ σ) (op : IncDec)
+    (p : PrimTy) (r : Name) (segs : List Seg) :
+    SameOk ns (do pure (← bumpStore σ₁ op p r segs).1) (do pure (← bumpStore σ op p r segs).1) := by
+  have := bumpStore_agreeV h op p r segs
+  revert this
+  cases bumpStore σ₁ op p r segs <;> cases bumpStore σ op p r segs <;> intro h <;>
+    first | trivial | exact h.elim | exact h.1
+
+/-- **A `++` frames**: on a target typed at `Γ`, in two states that agree off
+names fresh at `Γ`, it ends alike, with the same value. -/
+theorem OpLoc.bump_agree {Γ : Ctx} {ns : List Name} {σ₁ σ : State} (h : EnvAgreeExcept ns σ₁ σ)
+    (hns : ∀ n ∈ ns, Fresh C Γ n) (op : IncDec) {p : PrimTy} (l : OpLoc C Γ p) :
+    SameOkV ns (l.bump σ₁ op) (l.bump σ op) := by
+  cases l with
+  | «local» x hx =>
+    have hg : σ₁.getEnv x = σ.getEnv x := by
+      simp only [State.getEnv, h.env x (not_mem_of_bound hns hx)]
+    simp only [OpLoc.bump, bumpLocal, hg, bind, Except.bind, pure, Except.pure]
+    repeat' split
+    all_goals first | trivial | exact ⟨h.setEnv_both _ _, rfl⟩ | simp_all [SameOkV]
+  | root r => exact bumpStore_agreeV h op p r []
+  | field b f hf =>
+    simp only [OpLoc.bump, Loc.resolve_frame h hns]
+    cases (Loc.field b f hf).resolve σ with
+    | error _ => trivial
+    | ok a => exact bumpStore_agreeV h op p a.1 a.2
+  | index it b i =>
+    simp only [OpLoc.bump, Loc.resolve_frame h hns]
+    cases (Loc.index it b (.simple i)).resolve σ with
+    | error _ => trivial
+    | ok a => exact bumpStore_agreeV h op p a.1 a.2
+
 /-- **A compound write frames**: into a target typed at `Γ`, in two states
 that agree off names fresh at `Γ`, it ends alike. -/
 theorem OpLoc.store_agree {Γ : Ctx} {ns : List Name} {σ₁ σ : State} (h : EnvAgreeExcept ns σ₁ σ)
@@ -489,6 +555,32 @@ theorem Taclet.sound {m : Modality} {Γ Γ' : Ctx} {s : Stmt C Γ Γ'} {pr : Pre
           cases iv with
           | bool _ => trivial
           | int i => exact opStore_agree (agree_setEnv σ sp _) op p _ _ v
+
+  -- Increment through a captured receiver: the receiver is resolved first either way.
+  case storageFieldIncrementUnfoldLeftFst s p op hp nsp hn f hf sp hsp =>
+    refine ⟨by simp [hsp], fun σ => ?_⟩
+    simp only [Prog.run, Stmt.run, bind_pure, OpLoc.bump, Loc.resolve]
+    cases nsp.resolve σ with
+    | error _ => trivial
+    | ok rs =>
+      simp only [bind, Except.bind, pure, Except.pure, SPath.new, SPath.resolve, envPath,
+        setEnv_env, lookupBy_setBy_self]
+      exact bumpStore_agree (agree_setEnv σ sp _) op p _ _
+  case storageIndexIncrementUnfoldLeftFst R kp p op hp it nsp hn ie sp hsp =>
+    refine ⟨by simp [hsp], fun σ => ?_⟩
+    simp only [Prog.run, Stmt.run, bind_pure, OpLoc.bump, Loc.resolve, Val.eval, Simple.eval_weaken]
+    cases nsp.resolve σ with
+    | error _ => trivial
+    | ok rs =>
+      simp only [bind, Except.bind, pure, Except.pure, SPath.new, SPath.resolve, envPath,
+        setEnv_env, lookupBy_setBy_self]
+      rw [ie.eval_setEnv hsp]
+      cases ie.eval σ with
+      | error _ => trivial
+      | ok iv =>
+        cases iv with
+        | bool _ => trivial
+        | int i => exact bumpStore_agree (agree_setEnv σ sp _) op p _ _
 
   -- Order-changing rules: the premise evaluates the same parts, in another order.
   case storageIndexWriteStorageRef_unfold_leftFst R₀ kp R it nsp hn e src hm sp ie hsp hie =>
