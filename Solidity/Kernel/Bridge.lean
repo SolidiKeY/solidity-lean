@@ -1,5 +1,7 @@
 import Solidity.Kernel.Taclet
-import Solidity.Calculus.Rules
+import Solidity.Calculus.Uniqueness
+import Solidity.Kernel.Step
+import Solidity.Kernel.Print
 
 /-!
 # The bridge to the rule table
@@ -13,7 +15,16 @@ op`) keeps its `RuleName` and takes its origin from it.
 
 Where the old table has box/diamond twins, the rule follows the modality.
 `ifElseSplit` is the one constructor without a rule: the old table splits a
-branch in the sequent, not by a rule (`RuleShapes` excuses the taclet). -/
+branch in the sequent, not by a rule (`RuleShapes` excuses the taclet).
+
+`Prog.disagreements` runs both tables on a block, the kernel's
+`Stmt.step` against the old `candidate` on the erasure, and the tour below
+pins the answer: the two agree except on a state-variable operand (`x =
+total + 1;`, where the kernel captures `total` as KeY's
+`addition_unfold_left` does, a state variable being a `Path`, not a
+`SimpleExpression`) and on a storage declaration whose path is not bindable
+(`Person storage r = persons[x + 1];`, which KeY drops to an assignment and
+the kernel, having no `T storage x;`, captures the index of first). -/
 
 namespace Solidity
 namespace Kernel
@@ -152,6 +163,51 @@ theorem Taclet.origin_claimed {Γ Γ' : Ctx} {s : Stmt C Γ Γ'} {pr : Premise C
 theorem Taclet.rule_none {Γ Γ' : Ctx} {s : Stmt C Γ Γ'} {pr : Premise C Γ Γ'}
     (d : Taclet C m s pr) (h : d.rule = none) : d.origin = .taclet .ifElseSplit := by
   cases d <;> (try cases m) <;> simp_all [Taclet.rule, Taclet.origin]
+
+/-! ## Agreement with the old table, run -/
+
+open UniquenessAux in
+/-- The statements of a block on which the kernel's rule and the old table's
+`candidate` differ, printed. -/
+def Prog.disagreements (m : Modality) : {Γ Γ' : Ctx} → Prog C Γ Γ' → List String
+  | _, _, .nil => []
+  | _, _, .cons s P =>
+    let k := (s.step m).2.rule
+    let o := candidate m s.erase
+    (if k == o then [] else [s!"{s.toStr} kernel={repr k} old={repr o}"]) ++ Prog.disagreements m P
+
+section Tour
+
+local instance : InContract := ⟨StandardExample⟩
+
+/-- Every statement form of the kernel, over `StandardExample`. -/
+def bridgeTour := ksol{
+  uint x = 1; uint y; bool b = true;
+  x = total; x = alice.age; x = folks[x].age; x = balances[x]; x = values[1];
+  x = persons[x + 1].age; x = x + 1; x = total + 1; x = x + total; x = x + (x * 2);
+  x = (x + 1) * 2; b = b && flags[x]; b = b || flags[x]; b = !b; b = !flags[x];
+  total = 5; total = x + 1; alice.age = 3; alice.age = x + 1; folks[x].age = 3;
+  folks[x + 1].age = 3; persons[x].age = x * 2; balances[x] = 1; balances[x + 1] = 2;
+  values[x] = 1; values[x + 1] = x; matrix[x][x] = 1;
+  alice = bob; folks[x] = bob; persons[x] = alice; bob = folks[x];
+  Person storage p = alice; Person storage q = folks[x]; Person storage r = persons[x + 1];
+  p.age = 7; p = bob; x = p.age;
+  delete total; delete alice.age; delete folks[x]; delete folks[x + 1]; delete persons[x].age;
+  delete alice;
+  if (b) { x = 1; } else { x = 2; }; require(b); assert(b); require(x == 1); revert();
+}
+
+-- Under a box, the two tables pick the same rule for every statement but
+-- the three the module docstring names.
+#guard bridgeTour.disagreements .box = [
+  "x = total + 1; kernel=some (Solidity.RuleName.binopUnfoldLeft (Solidity.BinOp.add)) old=some (Solidity.RuleName.binopAssignment (Solidity.BinOp.add))",
+  "x = x + total; kernel=some (Solidity.RuleName.binopUnfoldRight (Solidity.BinOp.add)) old=some (Solidity.RuleName.binopAssignment (Solidity.BinOp.add))",
+  "Person storage r = persons[x + 1]; kernel=some (Solidity.RuleName.storageIndexReadUnfoldRightSndIndex) old=some (Solidity.RuleName.storageLocalDeclInitDrop)"]
+
+-- And under a diamond.
+#guard bridgeTour.disagreements .diamond = bridgeTour.disagreements .box
+
+end Tour
 
 end Kernel
 end Solidity
