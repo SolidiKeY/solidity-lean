@@ -154,6 +154,25 @@ def SPath.toPlace {C : Contract} {Γ : Ctx} {T : Ty} (p : SPath C Γ T) : PlaceE
 def Loc.toPlace {C : Contract} {Γ : Ctx} {T : Ty} (l : Loc C Γ T) : PlaceExpr :=
   (SPath.loc l).toPlace
 
+/-- A compound assignment's target, as the interpreter's place:
+`x += 1` targets the stack local, `values[i] += 1` the element. -/
+def OpLoc.toPlace {C : Contract} {Γ : Ctx} {p : PrimTy} : OpLoc C Γ p → PlaceExpr
+  | .local x _ => PlaceExpr.var .stack (.prim p) (Field.primitive x (.prim p))
+  | .root r hΓ h => (Loc.root r hΓ h).toPlace
+  | .field b f h => (Loc.field b f h).toPlace
+  | .index it b i => (Loc.index it b (.simple i)).toPlace
+
+theorem BinOp.isArith_of_compound {op : BinOp} (h : op.hasCompoundAssign = true) :
+    op.isArith = true := by
+  cases op <;> first | rfl | exact absurd h (by decide)
+
+theorem OpLoc.erase_wt {C : Contract} {Γ : Ctx} {p : PrimTy} :
+    (l : OpLoc C Γ p) → wtExpr Γ C.layout l.toPlace.expr = true
+  | .local x h => by simp [OpLoc.toPlace, PlaceExpr.var, wtExpr, h, Field.primitive]
+  | .root r hΓ h => (Loc.root r hΓ h).erase_wt
+  | .field b f h => (Loc.field b f h).erase_wt
+  | .index it b i => (Loc.index it b (.simple i)).erase_wt
+
 mutual
 
 def Stmt.erase {C : Contract} {Γ Γ' : Ctx} : Stmt C Γ Γ' → Solidity.Stmt
@@ -166,6 +185,7 @@ def Stmt.erase {C : Contract} {Γ Γ' : Ctx} : Stmt C Γ Γ' → Solidity.Stmt
   | .declStorage capture R x _ init =>
       if capture then .storagePlaceAlias (.ref R) x init.erase
       else .storageDecl (.ref R) x (some init.erase)
+  | .opAssign op _ _ l r => .compoundAssign op l.toPlace r.erase
   | .delete l => .delete l.toPlace
   | .ite c thn els => .ite c.erase thn.erase els.erase
   | .require c => .requireStmt c.erase
@@ -199,6 +219,8 @@ theorem Stmt.erase_wt {C : Contract} {Γ Γ' : Ctx} :
       cases init <;> simp [Stmt.erase, stmtWt, Ty.isPrimitive, Val.erase_wt, Val.erase_ty]
   | .declStorage capture R x _ init => by
       cases capture <;> simp [Stmt.erase, stmtWt, init.erase_wt, init.erase_ty]
+  | .opAssign op hop _ l r => by
+      simp [Stmt.erase, stmtWt, BinOp.isArith_of_compound hop, l.erase_wt, r.erase_wt]
   | .delete l => by
       simp [Stmt.erase, stmtWt, Loc.toPlace, SPath.toPlace, SPath.erase, l.erase_wt]
       cases l <;> rfl

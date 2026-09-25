@@ -185,6 +185,9 @@ inductive Upd (C : Contract) (Γ : Ctx) where
   | bind {p : PrimTy} (x : Name) (e : Val C Γ p)
   /-- `lsv := sp`: an alias bound to a path. -/
   | bindPath {R : RefTy} (x : Name) (p : SPath C Γ (.ref R))
+  /-- `l := l ⊕ se`: at a local `{lv := lv ⊕ se}`, in storage
+  `storage := save(storage, l, find(storage, l) ⊕ se)`. -/
+  | opSave {p : PrimTy} (op : BinOp) (l : OpLoc C Γ p) (se : Simple C Γ p)
 
 /-- The state an update leaves, from `σ`. -/
 def Upd.apply (σ : State) {Γ : Ctx} : Upd C Γ → Res State
@@ -200,6 +203,7 @@ def Upd.apply (σ : State) {Γ : Ctx} : Upd C Γ → Res State
   | .bindPath x p => do
     let (root, segs) ← p.resolve σ
     pure (σ.setEnv x (.spath root segs))
+  | .opSave op l se => do l.store σ op (← se.eval σ)
 
 /-- What a rule leaves to prove, for a statement from `Γ` to `Γ'`. -/
 inductive Premise (C : Contract) (Γ Γ' : Ctx) where
@@ -624,6 +628,68 @@ inductive Taclet (C : Contract) (m : Modality) : {Γ Γ' : Ctx} → Stmt C Γ Γ
           (.cons (.declLocal p se hse (some nse))
           (.cons (.assignLocal x ((Ctx.Sub.fresh hse _).local_ _ _ h)
             (.unop op hop hq (.simple (Simple.new se p)))) .nil))
+          (Ctx.Sub.fresh hse _)
+  -- Compound assignment
+  /-- `lv ⊕= se ⇝ {lv := lv ⊕ se}`. -/
+  | localOpAssign {Γ : Ctx} {p : PrimTy} (op : BinOp) (hop : op.hasCompoundAssign = true)
+      (hp : p.isNumeric = true) (x : Name) (h : lookupBy x Γ = some (.stack (.prim p)))
+      (se : Simple C Γ p) :
+      .opAssign op hop hp (.local x h) (.simple se) ⇒ .update (.opSave op (.local x h) se)
+  /-- `gsp ⊕= se ⇝ {storage := store(storage, gsp, gsp ⊕ se)}`. -/
+  | storageRootOpAssign {Γ : Ctx} {p : PrimTy} (op : BinOp) (hop : op.hasCompoundAssign = true)
+      (hp : p.isNumeric = true) (r : Name) (hΓ : lookupBy r Γ = none)
+      (hr : C.rootType r = some (.prim p)) (se : Simple C Γ p) :
+      .opAssign op hop hp (.root r hΓ hr) (.simple se) ⇒ .update (.opSave op (.root r hΓ hr) se)
+  /-- `sp.fld ⊕= se ⇝ {storage := save(storage, sp.fld, sp.fld ⊕ se)}`. -/
+  | storageFieldOpAssign {Γ : Ctx} {s : Name} {p : PrimTy} (op : BinOp)
+      (hop : op.hasCompoundAssign = true) (hp : p.isNumeric = true) (sp : SPath C Γ (.struct s))
+      (hs : sp.isSimple = true) (f : Name) (hf : C.fieldType s f = some (.prim p)) (se : Simple C Γ p) :
+      .opAssign op hop hp (.field sp f hf) (.simple se) ⇒ .update (.opSave op (.field sp f hf) se)
+  /-- `map[ie] ⊕= se ⇝ {storage := save(storage, map[ie], map[ie] ⊕ se)}`. -/
+  | storageIndexMappingOpAssign {Γ : Ctx} {kp p : PrimTy} (op : BinOp)
+      (hop : op.hasCompoundAssign = true) (hp : p.isNumeric = true)
+      (sp : SPath C Γ (.mapping (.prim kp) (.prim p))) (hs : sp.isSimple = true)
+      (ie : Simple C Γ kp) (se : Simple C Γ p) :
+      .opAssign op hop hp (.index .map sp ie) (.simple se) ⇒ .update (.opSave op (.index .map sp ie) se)
+  /-- `arr[ie] ⊕= se ⇝ {storage := save(storage, arr[ie], arr[ie] ⊕ se)}`: no
+  bounds split, the update reverts as the statement does. -/
+  | storageIndexArrayOpAssign {Γ : Ctx} {p : PrimTy} (op : BinOp)
+      (hop : op.hasCompoundAssign = true) (hp : p.isNumeric = true)
+      (sp : SPath C Γ (.array (.prim p))) (hs : sp.isSimple = true)
+      (ie : Simple C Γ .uint) (se : Simple C Γ p) :
+      .opAssign op hop hp (.index .arr sp ie) (.simple se) ⇒ .update (.opSave op (.index .arr sp ie) se)
+  /-- `nsp.fld ⊕= se ⇝ T storage sp = nsp; sp.fld ⊕= se`.  The old table
+  freezes `se` first (`T se ?= se1`); a kernel value has no effects, so
+  resolving `nsp` cannot change it. -/
+  | storageFieldOpAssignUnfoldLeftFst {Γ : Ctx} {s : Name} {p : PrimTy} (op : BinOp)
+      (hop : op.hasCompoundAssign = true) (hp : p.isNumeric = true) (nsp : SPath C Γ (.struct s))
+      (hn : nsp.isSimple = false) (f : Name) (hf : C.fieldType s f = some (.prim p)) (se : Simple C Γ p)
+      (sp : Name) (hsp : isFresh C Γ sp = true) :
+      .opAssign op hop hp (.field nsp f hf) (.simple se) ⇒
+        .unfold [sp]
+          (.cons (.declStorage true (.struct s) sp hsp nsp)
+          (.cons (.opAssign op hop hp (.field (SPath.new sp _) f hf)
+              (.simple (se.weaken (Ctx.Sub.fresh hsp _)))) .nil))
+          (Ctx.Sub.fresh hsp _)
+  /-- `nsp[ie] ⊕= se ⇝ T storage sp = nsp; sp[ie] ⊕= se`. -/
+  | storageIndexOpAssignUnfoldLeftFst {Γ : Ctx} {R : RefTy} {kp p : PrimTy} (op : BinOp)
+      (hop : op.hasCompoundAssign = true) (hp : p.isNumeric = true) (it : IndexTy R kp (.prim p))
+      (nsp : SPath C Γ (.ref R)) (hn : nsp.isSimple = false) (ie : Simple C Γ kp) (se : Simple C Γ p)
+      (sp : Name) (hsp : isFresh C Γ sp = true) :
+      .opAssign op hop hp (.index it nsp ie) (.simple se) ⇒
+        .unfold [sp]
+          (.cons (.declStorage true R sp hsp nsp)
+          (.cons (.opAssign op hop hp (.index it (SPath.new sp _) (ie.weaken (Ctx.Sub.fresh hsp _)))
+              (.simple (se.weaken (Ctx.Sub.fresh hsp _)))) .nil))
+          (Ctx.Sub.fresh hsp _)
+  /-- `lhs ⊕= nse ⇝ T se = nse; lhs ⊕= se`, the source before the target. -/
+  | compoundAssignValueRhsCapture {Γ : Ctx} {p : PrimTy} (op : BinOp)
+      (hop : op.hasCompoundAssign = true) (hp : p.isNumeric = true) (l : OpLoc C Γ p)
+      (nse : Val C Γ p) (hn : nse.isSimple = false) (se : Name) (hse : isFresh C Γ se = true) :
+      .opAssign op hop hp l nse ⇒
+        .unfold [se]
+          (.cons (.declLocal p se hse (some nse))
+          (.cons (.opAssign op hop hp (l.weaken (Ctx.Sub.fresh hse _)) (.simple (Simple.new se p))) .nil))
           (Ctx.Sub.fresh hse _)
   -- Control
   /-- Two goals: the `then` branch where `se` holds, the `else` branch where it

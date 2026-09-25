@@ -113,6 +113,36 @@ def PrimTy.default : PrimTy → Value
   | .bool => .bool false
   | .uint | .int => .int 0
 
+/-- `a ⊕= v` at a resolved storage location, as `execStmt` does it: read,
+apply, check at the target's type, write back. -/
+def opStore (σ : State) (op : BinOp) (p : PrimTy) (root : Name) (segs : List Seg) (v : Value) :
+    Res State := do
+  let old ← (← σ.findStorage root segs).asValue
+  let new ← applyBinOp op old v
+  let new ← checkArith (.prim p) new
+  σ.saveStorage root segs new.toSVal
+
+/-- `x ⊕= v` on a stack local. -/
+def opLocal (σ : State) (op : BinOp) (p : PrimTy) (x : Name) (v : Value) : Res State := do
+  let old ← match ← σ.getEnv x with
+    | .val v => pure v
+    | .spath .. => .error .stuck
+    | .mref _ => .error .stuck
+  let new ← applyBinOp op old v
+  let new ← checkArith (.prim p) new
+  pure (σ.setEnv x (.val new))
+
+/-- A compound assignment's write of `v` into its target. -/
+def OpLoc.store (σ : State) (op : BinOp) : {p : PrimTy} → OpLoc C Γ p → Value → Res State
+  | p, .local x _, v => opLocal σ op p x v
+  | p, .root r _ _, v => opStore σ op p r [] v
+  | p, .field b f h, v => do
+    let (rt, segs) ← (Loc.field b f h).resolve σ
+    opStore σ op p rt segs v
+  | p, .index it b i, v => do
+    let (rt, segs) ← (Loc.index it b (.simple i)).resolve σ
+    opStore σ op p rt segs v
+
 mutual
 
 /-- The state a statement leaves, from `σ`. -/
@@ -133,6 +163,7 @@ def Stmt.run (σ : State) {Γ Γ' : Ctx} : Stmt C Γ Γ' → Res State
   | .declStorage _ _ x _ init => do
     let (root, segs) ← init.resolve σ
     pure (σ.setEnv x (.spath root segs))
+  | .opAssign op _ _ l r => do l.store σ op (← r.eval σ)
   | .delete l => do
     let (root, segs) ← l.resolve σ
     let cur ← σ.findStorage root segs
@@ -353,6 +384,8 @@ theorem Loc.execAssign_erase (σ : State) {T : Ty} (l : Loc C Γ T) (r : Src C �
   | field b f h => exact Loc.execAssignNested_erase σ (.field b f h) r
   | index it b i => exact Loc.execAssignNested_erase σ (.index it b i) r
 
+-- The `opAssign` arms share one simp set across the target kinds.
+set_option linter.unusedSimpArgs false in
 mutual
 
 /-- **Adequacy.** A kernel statement runs as the interpreter runs its erasure,
@@ -387,6 +420,38 @@ theorem Stmt.run_eq (σ : State) {Γ Γ' : Ctx} : (s : Stmt C Γ Γ') → execSt
       rw [execStmt]
       simp only [init.resolveS_erase σ]
       cases init.resolve σ <;> rfl
+  | .opAssign op _ _ l r => by
+    simp only [Stmt.run]
+    rw [Stmt.erase, execStmt, r.evalValue_erase σ]
+    cases r.eval σ with
+    | error _ => rfl
+    | ok v =>
+      simp only [Except.map, bind, Except.bind]
+      cases l with
+      | «local» x h =>
+        simp only [OpLoc.toPlace, PlaceExpr.var, Field.primitive]
+        rw [resolveLoc]; simp only [Except.map, Loc.target, readLoc, writeLoc, OpLoc.store, opStore, opLocal, bind, Except.bind, Typed.WrappedExpr.ty, WrappedExpr.var]
+        cases σ.getEnv x with
+        | error _ => rfl
+        | ok b => cases b <;> rfl
+      | root r hΓ h =>
+        simp only [OpLoc.toPlace, Loc.toPlace, SPath.toPlace, SPath.erase]
+        rw [(Loc.root r hΓ h).resolveLoc_erase σ, Loc.erase_ty]; simp only [Except.map, Loc.target, readLoc, writeLoc, OpLoc.store, opStore, opLocal, bind, Except.bind, Typed.WrappedExpr.ty, WrappedExpr.var]
+        cases σ.findStorage r [] <;> rfl
+      | field b f h =>
+        simp only [OpLoc.toPlace, Loc.toPlace, SPath.toPlace, SPath.erase]
+        rw [(Loc.field b f h).resolveLoc_erase σ, Loc.erase_ty]
+        simp only [OpLoc.store, Loc.target]
+        cases (Loc.field b f h).resolve σ with
+        | error _ => rfl
+        | ok a => obtain ⟨rt, segs⟩ := a; simp only [Except.map, Loc.target, readLoc, writeLoc, OpLoc.store, opStore, opLocal, bind, Except.bind, Typed.WrappedExpr.ty, WrappedExpr.var]; cases σ.findStorage rt segs <;> rfl
+      | index it b i =>
+        simp only [OpLoc.toPlace, Loc.toPlace, SPath.toPlace, SPath.erase]
+        rw [(Loc.index it b (.simple i)).resolveLoc_erase σ, Loc.erase_ty]
+        simp only [OpLoc.store, Loc.target]
+        cases (Loc.index it b (.simple i)).resolve σ with
+        | error _ => rfl
+        | ok a => obtain ⟨rt, segs⟩ := a; simp only [Except.map, Loc.target, readLoc, writeLoc, OpLoc.store, opStore, opLocal, bind, Except.bind, Typed.WrappedExpr.ty, WrappedExpr.var]; cases σ.findStorage rt segs <;> rfl
   | .delete l => by
     simp only [Stmt.run]
     rw [Stmt.erase, execStmt]

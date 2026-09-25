@@ -202,6 +202,38 @@ theorem SameOk.setEnv_val {ns : List Name} {σ₁ σ : State} (h : EnvAgreeExcep
   · trivial
   · exact h.setEnv_both _ _
 
+/-- A compound write at a resolved location, in two agreeing states. -/
+theorem opStore_agree {ns : List Name} {σ₁ σ : State} (h : EnvAgreeExcept ns σ₁ σ) (op : BinOp)
+    (p : PrimTy) (r : Name) (segs : List Seg) (v : Value) :
+    SameOk ns (opStore σ₁ op p r segs v) (opStore σ op p r segs v) := by
+  simp only [opStore, findStorage_congr h, bind, Except.bind]
+  repeat' split
+  all_goals first | trivial | exact SameOk.save h _ _ _ | simp_all
+
+/-- **A compound write frames**: into a target typed at `Γ`, in two states
+that agree off names fresh at `Γ`, it ends alike. -/
+theorem OpLoc.store_agree {Γ : Ctx} {ns : List Name} {σ₁ σ : State} (h : EnvAgreeExcept ns σ₁ σ)
+    (hns : ∀ n ∈ ns, Fresh C Γ n) (op : BinOp) {p : PrimTy} (l : OpLoc C Γ p) (v : Value) :
+    SameOk ns (l.store σ₁ op v) (l.store σ op v) := by
+  cases l with
+  | «local» x hx =>
+    have hg : σ₁.getEnv x = σ.getEnv x := by
+      simp only [State.getEnv, h.env x (not_mem_of_bound hns hx)]
+    simp only [OpLoc.store, opLocal, hg, bind, Except.bind, pure, Except.pure]
+    repeat' split
+    all_goals first | trivial | exact h.setEnv_both _ _ | simp_all
+  | root r => exact opStore_agree h op p r [] v
+  | field b f hf =>
+    simp only [OpLoc.store, Loc.resolve_frame h hns]
+    cases (Loc.field b f hf).resolve σ with
+    | error _ => trivial
+    | ok a => exact opStore_agree h op p a.1 a.2 v
+  | index it b i =>
+    simp only [OpLoc.store, Loc.resolve_frame h hns]
+    cases (Loc.index it b (.simple i)).resolve σ with
+    | error _ => trivial
+    | ok a => exact opStore_agree h op p a.1 a.2 v
+
 /-- Close `EnvAgreeExcept ns (…(σ.setEnv a _)….setEnv b _) σ` with `a b ∈ ns`, and
 `EnvAgreeExcept ns (σ'.setEnv x b) (σ.setEnv x b)` from the same inside. -/
 macro "agree_tac" : tactic => `(tactic| (
@@ -416,6 +448,47 @@ theorem Taclet.sound {m : Modality} {Γ Γ' : Ctx} {s : Stmt C Γ Γ'} {pr : Pre
             simp only [Value.asInt, Val.eval, SPath.new, SPath.resolve, envPath, Simple.new, Simple.eval, Simple.weaken, SPath.weaken, setEnv_env, lookupBy_setBy_self, getEnv_setEnv_self, bind, Except.bind, pure, Except.pure, getEnv_setEnv_ne _ h₃, getEnv_setEnv_ne _ h₁,
               lookupBy_setBy_ne h₂]
             exact SameOk.save (by agree_tac) _ _ _
+
+  -- Compound assignment: the source first, then the target.
+  case compoundAssignValueRhsCapture p op hop hp l nse hn se hse =>
+    refine ⟨by simp [hse], fun σ => ?_⟩
+    simp only [Prog.run, Stmt.run, bind_pure, Val.eval]
+    cases nse.eval σ with
+    | error _ => trivial
+    | ok v =>
+      simp only [bind, Except.bind, pure, Except.pure, Simple.eval_new, OpLoc.store_weaken]
+      exact OpLoc.store_agree (agree_setEnv σ se _) (by simpa using hse) op l v
+  case storageFieldOpAssignUnfoldLeftFst s p op hop hp nsp hn f hf se sp hsp =>
+    refine ⟨by simp [hsp], fun σ => ?_⟩
+    simp only [Prog.run, Stmt.run, bind_pure, Val.eval, Simple.eval_weaken, OpLoc.store, Loc.resolve]
+    cases nsp.resolve σ with
+    | error _ => cases se.eval σ <;> trivial
+    | ok rs =>
+      simp only [bind, Except.bind, pure, Except.pure]
+      rw [se.eval_setEnv hsp]
+      cases se.eval σ with
+      | error _ => trivial
+      | ok v =>
+        simp only [SPath.new, SPath.resolve, envPath, setEnv_env, lookupBy_setBy_self]
+        exact opStore_agree (agree_setEnv σ sp _) op p _ _ v
+  case storageIndexOpAssignUnfoldLeftFst R kp p op hop hp it nsp hn ie se sp hsp =>
+    refine ⟨by simp [hsp], fun σ => ?_⟩
+    simp only [Prog.run, Stmt.run, bind_pure, Val.eval, Simple.eval_weaken, OpLoc.store, Loc.resolve]
+    cases nsp.resolve σ with
+    | error _ => cases se.eval σ <;> trivial
+    | ok rs =>
+      simp only [bind, Except.bind, pure, Except.pure]
+      rw [se.eval_setEnv hsp, ie.eval_setEnv hsp]
+      cases se.eval σ with
+      | error _ => trivial
+      | ok v =>
+        simp only [SPath.new, SPath.resolve, envPath, setEnv_env, lookupBy_setBy_self]
+        cases ie.eval σ with
+        | error _ => trivial
+        | ok iv =>
+          cases iv with
+          | bool _ => trivial
+          | int i => exact opStore_agree (agree_setEnv σ sp _) op p _ _ v
 
   -- Order-changing rules: the premise evaluates the same parts, in another order.
   case storageIndexWriteStorageRef_unfold_leftFst R₀ kp R it nsp hn e src hm sp ie hsp hie =>

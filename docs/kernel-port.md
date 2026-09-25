@@ -280,8 +280,8 @@ lists only the standard three axioms.
 - [ ] Phase 2: typed syntax, erasure, elaboration, quoters.
   - [x] storage and stack values: `Kernel/Syntax.lean`, `Erase.lean`
     (`Prog.erase_wt`), `Elab.lean` (`ksol[C]{}`), `Print.lean`
-  - [ ] memory  - [ ] arrays, `push`/`pop`  - [ ] compound assignment,
-    `++`/`--`, ternary  - [ ] calls, `transfer`
+  - [ ] memory  - [ ] arrays, `push`/`pop`  - [x] compound assignment
+    (`Stmt.opAssign` on an `OpLoc`)  - [ ] `++`/`--`, ternary  - [ ] calls, `transfer`
   - [ ] `decode : Stmt → Option (Stmt C Γ Γ')` with `decode (erase t) = some t`,
     for the corpus and to retire `stmtWt` hypotheses
   - [ ] the 26 `ResidueShape` verdicts (table below)
@@ -293,7 +293,10 @@ lists only the standard three axioms.
   - [ ] `push`/`pop`  - [ ] memory  - [ ] cross-domain
   - [x] operators into a local (`binopAssignment`, `binopUnfoldLeft/Right`,
     the two short-circuit rules, `unopAssignment`, `unopCapture`)
-  - [ ] compound assignment `op=`, `++`/`--`, ternary  - [ ] calls, `transfer`
+  - [x] compound assignment `op=`: `localOpAssign`, `storage{Root,Field}OpAssign`,
+    `storageIndex{Mapping,Array}OpAssign`, the two `…OpAssignUnfoldLeftFst`,
+    `compoundAssignValueRhsCapture`; update `Upd.opSave`, frame `OpLoc.store_agree`
+  - [ ] `++`/`--`, ternary  - [ ] calls, `transfer`
   - [x] the bridge, names: `Taclet.rule`, `Taclet.origin`,
     `Taclet.origin_claimed` (`Kernel/Bridge.lean`); `Taclet` is a `Type`, so
     a derivation's constructor can be read back
@@ -349,6 +352,7 @@ lists only the standard three axioms.
 | `Taclet` in `Type` | a derivation is data: `Taclet.rule`/`Taclet.origin` read its constructor. In `Prop` they could not, and proof irrelevance would identify two rules deriving the same premise. `Stmt.complete` is `∃ pr, Nonempty (Taclet …)` | 2026-09-25 |
 | State-variable operand | `x = total + 1;` captures `total` (`binopUnfoldLeft`), as KeY's `addition_unfold_left` does: a state variable is a `Path[storage,simple,primitive]`, not a `SimpleExpression` (literal or program variable). The old table's `s` admits it and fires `binopAssignment`; the kernel follows KeY | 2026-09-26 |
 | Storage declaration, unbindable path | `Person storage r = persons[x + 1];` captures the index first (`Hole.decl`). KeY's `storageLocalDeclInitDrop` drops any initializer to an assignment, and so does the old table; the kernel has no `T storage x;` to drop to, so it fuses the drop with the rebind and needs the path bindable | 2026-09-26 |
+| Compound target | `OpLoc`: a local, a state variable, a member, or an entry at a *simple* index. The old table is stuck on `values[i + 1] += 1;` and solkey has no taclet for it; `ksol` captures the index into `ie` first, as it does a condition. The update `Upd.opSave` reads the source first, as `execStmt` does, so the terminal rules are exact; no `?=` freeze in the unfolds, a kernel value having no effects | 2026-09-26 |
 | Modalities | the kernel's box is partial correctness (it holds unless the run ends normally in a bad state) and its diamond needs a normal end; neither tells a revert from a stuck run. An unfolding rule then owes its statement the same *successful* outcome (`SameOk`), which the order-changing rules (`*StorageRef_unfold_leftFst`, `*NonSimpleIndexCapture`) meet without the side conditions the untyped `*_sound` theorems carry. `SolidityJudgment.Holds` differs on stuck runs ("a stuck execution validates nothing"); the phase-7 bridge must say so | 2026-09-25 |
 | Unknown names | an error: parameters are declared locals. mini-solkey reads an unknown name as a `uint` parameter | 2026-09-25 |
 | Ported contracts | one named constant per interpreter store, `initStorage_*` checks roots, order and defaults against the store by `simp` | 2026-09-25 |

@@ -60,10 +60,18 @@ def Src.size {Γ : Ctx} {T : Ty} : Src C Γ T → Nat
   | .val v => v.size
   | .copy p _ => p.size
 
+/-- A compound assignment's target: a local or a state variable one, a
+member or an entry one more than its receiver (and index). -/
+def OpLoc.size {Γ : Ctx} {p : PrimTy} : OpLoc C Γ p → Nat
+  | .local .. | .root .. => 1
+  | .field b _ _ => b.size + 1
+  | .index _ b _ => b.size + 2
+
 mutual
 
 def Stmt.size {Γ Γ' : Ctx} : Stmt C Γ Γ' → Nat
   | .assign l r => l.size + r.size + 2
+  | .opAssign _ _ _ l r => l.size + r.size + 2
   | .rebind _ _ p => p.size + 1
   | .assignLocal _ _ v => v.size + 1
   | .declLocal _ _ _ init =>
@@ -208,6 +216,22 @@ theorem Hole.extra_ex {Γ Γ' : Ctx} {T : Ty} (k : Hole C Γ Γ' T) : k.extra = 
 
 /-! ## The obligations -/
 
+@[simp] theorem OpLoc.size_weaken {Γ Γ' : Ctx} (h : Ctx.Sub C Γ Γ') {p : PrimTy} (l : OpLoc C Γ p) :
+    (l.weaken h).size = l.size := by
+  cases l <;> simp only [OpLoc.weaken, OpLoc.size, SPath.size_weaken]
+
+@[simp] theorem OpLoc.size_local {Γ : Ctx} {p : PrimTy} (x : Name) (h : lookupBy x Γ = some (.stack (.prim p))) :
+    (OpLoc.local (C := C) x h).size = 1 := rfl
+@[simp] theorem OpLoc.size_root {Γ : Ctx} {p : PrimTy} (r : Name) (hΓ : lookupBy r Γ = none)
+    (h : C.rootType r = some (.prim p)) : (OpLoc.root r hΓ h).size = 1 := rfl
+@[simp] theorem OpLoc.size_field {Γ : Ctx} {s : Name} {p : PrimTy} (b : SPath C Γ (.struct s)) (f : Name)
+    (h : C.fieldType s f = some (.prim p)) : (OpLoc.field b f h).size = b.size + 1 := rfl
+@[simp] theorem OpLoc.size_index {Γ : Ctx} {R : RefTy} {k p : PrimTy} (it : IndexTy R k (.prim p))
+    (b : SPath C Γ (.ref R)) (i : Simple C Γ k) : (OpLoc.index it b i).size = b.size + 2 := rfl
+
+theorem OpLoc.one_le_size {Γ : Ctx} {p : PrimTy} (l : OpLoc C Γ p) : 1 ≤ l.size := by
+  cases l <;> simp only [OpLoc.size] <;> omega
+
 set_option linter.unusedSimpArgs false in
 /-- **Every rule makes the program smaller.**  `people[i].age = 10;` (size 7)
 unfolds into `uint se = 10; Person storage sp = people[i]; sp.age = se;`, of
@@ -218,9 +242,11 @@ theorem Taclet.smaller {m : Modality} {Γ Γ' : Ctx} {s : Stmt C Γ Γ'} {pr : P
   cases d
   all_goals (try have := SPath.two_le_size (by assumption))
   all_goals (try have := Val.two_le_size (by assumption))
+  all_goals (try have := OpLoc.one_le_size (by assumption))
   all_goals simp only [Premise.Smaller, Prog.sizes, Prog.size, Stmt.size, Src.size, Val.size,
     SPath.size, Loc.size, Simple.size, Hole.fill_size, Hole.extend_extra, SPath.new, Simple.new,
-    SPath.size_weaken, Loc.size_weaken, Val.size_weaken, Src.size_weaken, List.length,
+    SPath.size_weaken, Loc.size_weaken, Val.size_weaken, Src.size_weaken, OpLoc.size_weaken,
+    OpLoc.size_local, OpLoc.size_root, OpLoc.size_field, OpLoc.size_index, List.length,
     List.mem_cons, List.not_mem_nil, forall_eq_or_imp, and_true, true_and, false_implies,
     implies_true, Loc.weaken, SPath.weaken, List.mem_nil_iff, forall_const, scCost_simple,
     scCost_weaken,

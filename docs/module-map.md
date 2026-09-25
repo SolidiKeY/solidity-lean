@@ -184,7 +184,7 @@ the plan and the tracker. No `sorry`, `native_decide` or axiom here.
 | Module | What it is |
 |---|---|
 | `Kernel/Contract.lean` | `Contract` (its storage roots; struct bodies stay `structDef`), `contract!{}`/`sol_ty!()`, the eight ported contracts, each checked against its interpreter store. |
-| `Kernel/Syntax.lean` | The typed syntax, indexed by contract and local context: `SPath`/`Loc`/`Val`/`Src`, `Stmt C Γ Γ'`, `Prog`. Storage slice so far. |
+| `Kernel/Syntax.lean` | The typed syntax, indexed by contract and local context: `SPath`/`Loc`/`Val`/`Src`, `Stmt C Γ Γ'`, `Prog`. Storage slice so far. `OpLoc`, a compound assignment's target. |
 | `Kernel/Erase.lean` | Erasure into the untyped AST, spelled as the rule table spells names; `Stmt.erase_wt`/`Prog.erase_wt`: the erasure is `stmtWt`-typed, no hypothesis. |
 | `Kernel/Print.lean` | `Prog.toStr`/`Prog.show`: a kernel block printed as Solidity. |
 | `Kernel/Semantics.lean` | The denotation (`SPath.resolve`, `Val.eval`, `Stmt.run`) by structural recursion, and adequacy: `Stmt.run_eq`/`Prog.run_eq`, `execStmt σ s.erase = s.run σ` from every state. |

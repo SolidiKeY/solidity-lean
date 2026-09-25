@@ -214,6 +214,23 @@ inductive Src (C : Contract) (Γ : Ctx) : Ty → Type where
   | copy {R : RefTy} (p : SPath C Γ (.ref R)) (h : (Ty.ref R).mapFree = true) :
       Src C Γ (.ref R)
 
+/-- The target of a compound assignment `l ⊕= e`: a stack local, a state
+variable, a member, or an entry at a simple index (`ksol` captures any other
+index first; the old table is stuck on one, and solkey has no taclet for
+it). -/
+inductive OpLoc (C : Contract) (Γ : Ctx) : PrimTy → Type where
+  /-- `x += 1;` -/
+  | local {p : PrimTy} (x : Name) (h : lookupBy x Γ = some (.stack (.prim p))) : OpLoc C Γ p
+  /-- `total += 1;` -/
+  | root {p : PrimTy} (r : Name) (hΓ : lookupBy r Γ = none) (h : C.rootType r = some (.prim p)) :
+      OpLoc C Γ p
+  /-- `alice.age += 1;` -/
+  | field {s : Name} {p : PrimTy} (b : SPath C Γ (.struct s)) (f : Name)
+      (h : C.fieldType s f = some (.prim p)) : OpLoc C Γ p
+  /-- `balances[i] += 1;` -/
+  | index {R : RefTy} {k p : PrimTy} (it : IndexTy R k (.prim p)) (b : SPath C Γ (.ref R))
+      (i : Simple C Γ k) : OpLoc C Γ p
+
 /-! ## Statements -/
 
 mutual
@@ -239,6 +256,10 @@ inductive Stmt (C : Contract) : Ctx → Ctx → Type where
   | declStorage {Γ : Ctx} (capture : Bool) (R : RefTy) (x : Name)
       (hx : isFresh C Γ x = true) (init : SPath C Γ (.ref R)) :
       Stmt C Γ (setBy x (.path (.ref R)) Γ)
+  /-- `alice.age += x;`, `x -= 1;`: `+= -= *= /= %=` (solkey's five), at a
+  numeric type. -/
+  | opAssign {Γ : Ctx} {p : PrimTy} (op : BinOp) (hop : op.hasCompoundAssign = true)
+      (hp : p.isNumeric = true) (l : OpLoc C Γ p) (r : Val C Γ p) : Stmt C Γ Γ
   /-- `delete alice.account;` -/
   | delete {Γ : Ctx} {T : Ty} (l : Loc C Γ T) : Stmt C Γ Γ
   /-- `if (c) { … } else { … }`, on a simple condition (the paper's

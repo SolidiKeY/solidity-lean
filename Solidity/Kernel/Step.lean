@@ -245,6 +245,31 @@ def deleteStep {Γ : Ctx} {T : Ty} : (l : Loc C Γ T) → Step C m (.delete l)
         ⟨_, .storageIndexDeleteNonSimpleIndexCapture it b hb (.unop op hop hq a) rfl _ (freshName_isFresh C Γ "ie")⟩
     else ⟨_, .storageIndexDelete_unfold_leftFst it b (not_simple hb) i _ (freshName_isFresh C Γ "sp")⟩
 
+/-- The rule for a compound assignment: the source first (capture a
+non-simple one), then the target (capture a non-simple receiver). -/
+def opStep {Γ : Ctx} {p : PrimTy} (op : BinOp) (hop : op.hasCompoundAssign = true)
+    (hp : p.isNumeric = true) (l : OpLoc C Γ p) : (r : Val C Γ p) → Step C m (.opAssign op hop hp l r)
+  | .read l' => ⟨_, .compoundAssignValueRhsCapture op hop hp l (.read l') rfl _ (freshName_isFresh C Γ "se")⟩
+  | .binop op' hop' hq' a b =>
+    ⟨_, .compoundAssignValueRhsCapture op hop hp l (.binop op' hop' hq' a b) rfl _ (freshName_isFresh C Γ "se")⟩
+  | .unop op' hop' hq' a =>
+    ⟨_, .compoundAssignValueRhsCapture op hop hp l (.unop op' hop' hq' a) rfl _ (freshName_isFresh C Γ "se")⟩
+  | .simple se =>
+    match l with
+    | .local x h => ⟨_, .localOpAssign op hop hp x h se⟩
+    | .root r hΓ h => ⟨_, .storageRootOpAssign op hop hp r hΓ h se⟩
+    | .field b f h =>
+      if hb : b.isSimple = true then ⟨_, .storageFieldOpAssign op hop hp b hb f h se⟩
+      else ⟨_, .storageFieldOpAssignUnfoldLeftFst op hop hp b (not_simple hb) f h se _
+        (freshName_isFresh C Γ "sp")⟩
+    | .index it b ie =>
+      if hb : b.isSimple = true then
+        match it, b, ie, hb with
+        | .map, b, ie, hb => ⟨_, .storageIndexMappingOpAssign op hop hp b hb ie se⟩
+        | .arr, b, ie, hb => ⟨_, .storageIndexArrayOpAssign op hop hp b hb ie se⟩
+      else ⟨_, .storageIndexOpAssignUnfoldLeftFst op hop hp it b (not_simple hb) ie se _
+        (freshName_isFresh C Γ "sp")⟩
+
 /-- **The rule for a statement**, under the modality `m`.  Total: every
 statement of the kernel has one. -/
 def Stmt.step {Γ Γ' : Ctx} : (s : Stmt C Γ Γ') → Step C m s
@@ -260,6 +285,7 @@ def Stmt.step {Γ Γ' : Ctx} : (s : Stmt C Γ Γ') → Step C m s
     else match p, hb with
       | .alias .., hb => absurd rfl hb
       | .loc l, hb => (Hole.decl c R x hx).unfoldStep m l (not_simple hb)
+  | .opAssign op hop hp l r => opStep m op hop hp l r
   | .delete l => deleteStep m l
   | .ite c thn els => ⟨_, .ifElseSplit c thn els⟩
   | .require c => ⟨_, .requireSimple c⟩
@@ -287,6 +313,10 @@ def Upd.toStr {Γ : Ctx} : Upd C Γ → String
   | .delAt l => s!"\{ storage := delAt(storage, {l.toStr}) }"
   | .bind x e => s!"\{ {x} := {e.toStr true} }"
   | .bindPath x p => s!"\{ {x} := {p.toStr} }"
+  | .opSave op l se =>
+    match l with
+    | .local x _ => s!"\{ {x} := {x} {BinOp.sym op} {se.toStr} }"
+    | l => s!"\{ storage := save(storage, {l.toStr}, {l.toStr} {BinOp.sym op} {se.toStr}) }"
 
 def Premise.toStr {Γ Γ' : Ctx} : Premise C Γ Γ' → String
   | .update U => s!"{U.toStr} ⟨[ ]⟩"
