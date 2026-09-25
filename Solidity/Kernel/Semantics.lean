@@ -48,6 +48,14 @@ def unopCheck (op : UnOp) (p : PrimTy) (v : Value) : Res Value :=
 
 variable {C : Contract} {Γ : Ctx}
 
+/-- `c ? t : e` once `c` is evaluated: the branch it picks (the other is
+never evaluated, `evalValue`'s `mkTernary` arm). -/
+def pickBranch (cv : Value) (t e : Res Value) : Res Value :=
+  match cv with
+  | .bool true => t
+  | .bool false => e
+  | .int _ => .error .stuck
+
 /-- The value a simple value denotes: a literal, or a stack local's
 binding. -/
 def Simple.eval (σ : State) {p : PrimTy} : Simple C Γ p → Res Value
@@ -91,6 +99,7 @@ def Val.eval (σ : State) : {p : PrimTy} → Val C Γ p → Res Value
       let rv ← b.eval σ
       checkArith (op.retTy (.prim p)) (← applyBinOp op lv rv)
   | _, @Val.unop _ _ p _ op _ _ a => do unopCheck op p (← applyUnOp op (← a.eval σ))
+  | _, .ternary c a b => do pickBranch (← c.eval σ) (a.eval σ) (b.eval σ)
 
 end
 
@@ -329,6 +338,19 @@ theorem Val.evalValue_erase (σ : State) : {p : PrimTy} → (v : Val C Γ p) →
         cases b.eval σ <;> (try simp only [Except.map]) <;> (try rfl) <;> rename_i rv <;>
         cases applyBinOp _ _ rv <;> (try simp only) <;> (try rfl) <;> rename_i w <;>
         cases checkArith _ w <;> rfl
+  | _, .ternary c a b => by
+    rw [Val.erase, evalValue, c.evalValue_erase σ]
+    simp only [Val.eval]
+    cases c.eval σ with
+    | error _ => rfl
+    | ok v =>
+      simp only [Except.map, bind, Except.bind, pickBranch]
+      cases v with
+      | int _ => rfl
+      | bool bv =>
+        cases bv
+        · rw [b.evalValue_erase σ]; cases b.eval σ <;> rfl
+        · rw [a.evalValue_erase σ]; cases a.eval σ <;> rfl
   | _, .unop op _ _ a => by
     rw [Val.erase, evalValue, a.evalValue_erase σ, a.erase_ty]
     simp only [Val.eval]

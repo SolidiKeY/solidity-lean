@@ -56,6 +56,9 @@ def Val.toStr {p : PrimTy} : Val C Γ p → (top : Bool := false) → String
     let s := s!"{a.toStr} {BinOp.sym op} {b.toStr}"
     if top then s else s!"({s})"
   | .unop op _ _ a, _ => s!"{UnOp.sym op}{a.toStr}"
+  | .ternary c a b, top =>
+    let s := s!"{c.toStr} ? {a.toStr} : {b.toStr}"
+    if top then s else s!"({s})"
 
 end
 

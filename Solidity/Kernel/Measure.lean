@@ -53,6 +53,7 @@ def Val.size {Γ : Ctx} : {p : PrimTy} → Val C Γ p → Nat
   | _, .read l => l.size + 1
   | _, .binop op _ _ a b => a.size + b.size + 1 + scCost op b
   | _, .unop _ _ _ a => a.size + 2
+  | _, .ternary c a b => c.size + a.size + b.size + 1
 
 end
 
@@ -138,6 +139,8 @@ mutual
     congr 1
     cases b <;> rfl
   | _, .unop _ _ _ a => by simp only [Val.weaken, Val.size, a.size_weaken h]
+  | _, .ternary c a b => by
+    simp only [Val.weaken, Val.size, c.size_weaken h, a.size_weaken h, b.size_weaken h]
 
 end
 
@@ -175,6 +178,8 @@ theorem Val.two_le_size {Γ : Ctx} {p : PrimTy} {v : Val C Γ p} (h : v.isSimple
   | .read l, _ => simp only [Val.size]; have := l.one_le_size; omega
   | .binop _ _ _ a b, _ => simp only [Val.size]; have := a.one_le_size; have := b.one_le_size; omega
   | .unop _ _ _ a, _ => simp only [Val.size]; omega
+  | .ternary c a b, _ =>
+    simp only [Val.size]; have := c.one_le_size; have := a.one_le_size; omega
 
 /-- One less than a size.  The obligations rewrite `v.size` to `v.sz + 1`,
 which shows `omega` the lower bound on an atom it cannot unfold. -/
@@ -233,6 +238,20 @@ theorem Hole.extra_ex {Γ Γ' : Ctx} {T : Ty} (k : Hole C Γ Γ' T) : k.extra = 
 theorem OpLoc.one_le_size {Γ : Ctx} {p : PrimTy} (l : OpLoc C Γ p) : 1 ≤ l.size := by
   cases l <;> simp only [OpLoc.size] <;> omega
 
+/-- What a value hole adds to its value: `x = •` one, `l = •` the place
+and two. -/
+def VHole.extra {Γ : Ctx} {p : PrimTy} : VHole C Γ p → Nat
+  | .local .. => 1
+  | .store l => l.size + 2
+
+@[simp] theorem VHole.fill_size {Γ : Ctx} {p : PrimTy} (k : VHole C Γ p) (v : Val C Γ p) :
+    (k.fill v).size = k.extra + v.size := by
+  cases k <;> simp only [VHole.fill, VHole.extra, Stmt.size, Src.size] <;> omega
+
+@[simp] theorem VHole.extra_weaken {Γ Γ' : Ctx} (h : Ctx.Sub C Γ Γ') {p : PrimTy} (k : VHole C Γ p) :
+    (k.weaken h).extra = k.extra := by
+  cases k <;> simp only [VHole.weaken, VHole.extra, Loc.size_weaken]
+
 set_option linter.unusedSimpArgs false in
 /-- **Every rule makes the program smaller.**  `people[i].age = 10;` (size 7)
 unfolds into `uint se = 10; Person storage sp = people[i]; sp.age = se;`, of
@@ -247,7 +266,8 @@ theorem Taclet.smaller {m : Modality} {Γ Γ' : Ctx} {s : Stmt C Γ Γ'} {pr : P
   all_goals simp only [Premise.Smaller, Prog.sizes, Prog.size, Stmt.size, Src.size, Val.size,
     SPath.size, Loc.size, Simple.size, Hole.fill_size, Hole.extend_extra, SPath.new, Simple.new,
     SPath.size_weaken, Loc.size_weaken, Val.size_weaken, Src.size_weaken, OpLoc.size_weaken,
-    OpLoc.size_local, OpLoc.size_root, OpLoc.size_field, OpLoc.size_index, List.length,
+    OpLoc.size_local, OpLoc.size_root, OpLoc.size_field, OpLoc.size_index, VHole.fill_size,
+    VHole.extra_weaken, List.length,
     List.mem_cons, List.not_mem_nil, forall_eq_or_imp, and_true, true_and, false_implies,
     implies_true, Loc.weaken, SPath.weaken, List.mem_nil_iff, forall_const, scCost_simple,
     scCost_weaken,

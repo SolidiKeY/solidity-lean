@@ -282,7 +282,8 @@ lists only the standard three axioms.
     (`Prog.erase_wt`), `Elab.lean` (`ksol[C]{}`), `Print.lean`
   - [ ] memory  - [ ] arrays, `push`/`pop`  - [x] compound assignment
     (`Stmt.opAssign` on an `OpLoc`)  - [x] `++`/`--` (`Stmt.incDec`,
-    `Stmt.assignIncDec`; `ksol` parses `++` only, `--` being a Lean comment)  - [ ] ternary  - [ ] calls, `transfer`
+    `Stmt.assignIncDec`; `ksol` parses `++` only, `--` being a Lean comment)  - [x] ternary
+    (`Val.ternary`, lazy as `evalValue`)  - [ ] calls, `transfer`
   - [ ] `decode : Stmt → Option (Stmt C Γ Γ')` with `decode (erase t) = some t`,
     for the corpus and to retire `stmtWt` hypotheses
   - [ ] the 26 `ResidueShape` verdicts (table below)
@@ -301,7 +302,10 @@ lists only the standard three axioms.
     `…IncrementUnfoldLeftFst`, `localAssignIncrement`,
     `storage{Root,Field,Index}IncrementAssignment`; updates `Upd.bump`/`Upd.bumpBind`,
     frame `OpLoc.bump_agree`
-  - [ ] ternary  - [ ] calls, `transfer`
+  - [x] ternary: `ternaryToIf`, `ternaryToIfStorage` (a conditional source is lowered
+    before any receiver unfold, as KeY's `isValueSource` requires), `ternaryCaptureCond`
+    over a value hole `VHole`
+  - [ ] calls, `transfer`
   - [x] the bridge, names: `Taclet.rule`, `Taclet.origin`,
     `Taclet.origin_claimed` (`Kernel/Bridge.lean`); `Taclet` is a `Type`, so
     a derivation's constructor can be read back

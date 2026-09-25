@@ -84,6 +84,7 @@ def Val.weaken {Γ Γ' : Ctx} (h : Ctx.Sub C Γ Γ') : {p : PrimTy} → Val C Γ
   | _, .read l => .read (l.weaken h)
   | _, .binop op hop hq a b => .binop op hop hq (a.weaken h) (b.weaken h)
   | _, .unop op hop hq a => .unop op hop hq (a.weaken h)
+  | _, .ternary c a b => .ternary (c.weaken h) (a.weaken h) (b.weaken h)
 
 end
 
@@ -123,6 +124,8 @@ theorem Val.erase_weaken {Γ Γ' : Ctx} (h : Ctx.Sub C Γ Γ') :
   | _, .read l => by simp only [Val.weaken, Val.erase, l.erase_weaken h]
   | _, .binop _ _ _ a b => by simp only [Val.weaken, Val.erase, a.erase_weaken h, b.erase_weaken h]
   | _, .unop _ _ _ a => by simp only [Val.weaken, Val.erase, a.erase_weaken h]
+  | _, .ternary c a b => by
+    simp only [Val.weaken, Val.erase, c.erase_weaken h, a.erase_weaken h, b.erase_weaken h]
 
 end
 
@@ -184,6 +187,8 @@ theorem Val.eval_frame (hag : EnvAgreeExcept ns σ τ) (hns : ∀ n ∈ ns, Fres
   | _, .read l => by simp only [Val.eval, l.resolve_frame hag hns, findStorage_congr hag]
   | _, .binop _ _ _ a b => by simp only [Val.eval, a.eval_frame hag hns, b.eval_frame hag hns]
   | _, .unop _ _ _ a => by simp only [Val.eval, a.eval_frame hag hns]
+  | _, .ternary c a b => by
+    simp only [Val.eval, c.eval_frame hag hns, a.eval_frame hag hns, b.eval_frame hag hns]
 
 end
 
@@ -230,6 +235,8 @@ theorem Val.eval_weaken {Γ Γ' : Ctx} (h : Ctx.Sub C Γ Γ') (σ : State) :
   | _, .read l => by simp only [Val.weaken, Val.eval, l.resolve_weaken h σ]
   | _, .binop _ _ _ a b => by simp only [Val.weaken, Val.eval, a.eval_weaken h σ, b.eval_weaken h σ]
   | _, .unop _ _ _ a => by simp only [Val.weaken, Val.eval, a.eval_weaken h σ]
+  | _, .ternary c a b => by
+    simp only [Val.weaken, Val.eval, c.eval_weaken h σ, a.eval_weaken h σ, b.eval_weaken h σ]
 
 end
 

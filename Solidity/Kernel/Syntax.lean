@@ -202,6 +202,8 @@ inductive Val (C : Contract) (Γ : Ctx) : PrimTy → Type where
       (a b : Val C Γ p) : Val C Γ q
   | unop {p q : PrimTy} (op : UnOp) (h : op.accepts p = true) (hq : op.ret p = q)
       (a : Val C Γ p) : Val C Γ q
+  /-- `c ? a : b`, which evaluates only the branch it takes. -/
+  | ternary {p : PrimTy} (c : Val C Γ .bool) (a b : Val C Γ p) : Val C Γ p
 
 end
 
