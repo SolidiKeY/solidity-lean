@@ -71,11 +71,7 @@ def Loc.resolve (σ : State) : {T : Ty} → Loc C Γ T → Res (Name × List Seg
   | _, .field b f _ => do
     let (r, segs) ← b.resolve σ
     pure (r, segs ++ [.field f])
-  | _, .mapIndex b i => do
-    let (r, segs) ← b.resolve σ
-    let i ← (← i.eval σ).asInt
-    pure (r, segs ++ [.at i])
-  | _, .arrIndex b i => do
+  | _, .index _ b i => do
     let (r, segs) ← b.resolve σ
     let i ← (← i.eval σ).asInt
     pure (r, segs ++ [.at i])
@@ -228,7 +224,7 @@ theorem Loc.resolveS_erase (σ : State) : {T : Ty} → (l : Loc C Γ T) →
     cases b.resolve σ with
     | error _ => rfl
     | ok r => simp [Except.map]; rfl
-  | _, .mapIndex b i => by
+  | _, .index _ b i => by
     rw [Loc.erase, resolveS, b.resolveS_erase σ]
     simp only [Loc.resolve]
     cases b.resolve σ with
@@ -239,17 +235,7 @@ theorem Loc.resolveS_erase (σ : State) : {T : Ty} → (l : Loc C Γ T) →
       cases i.eval σ with
       | error _ => rfl
       | ok v => cases v <;> rfl
-  | _, .arrIndex b i => by
-    rw [Loc.erase, resolveS, b.resolveS_erase σ]
-    simp only [Loc.resolve]
-    cases b.resolve σ with
-    | error _ => rfl
-    | ok r =>
-      simp only [Except.map, bind, Except.bind]
-      rw [evalInt_pure (i.evalValue_erase σ)]
-      cases i.eval σ with
-      | error _ => rfl
-      | ok v => cases v <;> rfl
+
 
 theorem Val.evalValue_erase (σ : State) : {p : PrimTy} → (v : Val C Γ p) →
     evalValue σ v.erase = (v.eval σ).map (σ, ·)
@@ -325,20 +311,7 @@ theorem Loc.resolveLoc_erase (σ : State) {T : Ty} :
     rw [resolveS, b.resolveS_erase σ]
     simp only [Loc.target, Loc.resolve]
     cases b.resolve σ <;> simp [Except.map] <;> rfl
-  | .mapIndex b i => by
-    rw [Loc.erase, resolveLoc]
-    simp only
-    rw [b.resolveS_erase σ]
-    simp only [Loc.target, Loc.resolve]
-    cases b.resolve σ with
-    | error _ => rfl
-    | ok r =>
-      simp only [Except.map, bind, Except.bind]
-      rw [evalInt_pure (i.evalValue_erase σ)]
-      cases i.eval σ with
-      | error _ => rfl
-      | ok v => cases v <;> rfl
-  | .arrIndex b i => by
+  | .index _ b i => by
     rw [Loc.erase, resolveLoc]
     simp only
     rw [b.resolveS_erase σ]
@@ -378,8 +351,7 @@ theorem Loc.execAssign_erase (σ : State) {T : Ty} (l : Loc C Γ T) (r : Src C �
     rw [if_pos (by cases T <;> rfl), r.rhsToSVal_erase σ]
     cases r.value σ <;> simp [Except.map, Loc.target] <;> rfl
   | field b f h => exact Loc.execAssignNested_erase σ (.field b f h) r
-  | mapIndex b i => exact Loc.execAssignNested_erase σ (.mapIndex b i) r
-  | arrIndex b i => exact Loc.execAssignNested_erase σ (.arrIndex b i) r
+  | index it b i => exact Loc.execAssignNested_erase σ (.index it b i) r
 
 mutual
 

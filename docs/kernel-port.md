@@ -288,7 +288,9 @@ lists only the standard three axioms.
 - [ ] Phase 3: `Taclet`, `Taclet.sound`, `rules_disjoint`/`rules_complete`.
   - [x] storage, with the control rules on simple conditions
     (`Kernel/Taclet.lean`, `Kernel/Sound.lean`: 41 taclets, all sound)
-  - [ ] arrays (bounds checks, `push`/`pop`)  - [ ] memory  - [ ] cross-domain
+  - [x] array elements (`Loc.index` over `IndexTy`; no bounds split, the
+    update reverts as the statement does)
+  - [ ] `push`/`pop`  - [ ] memory  - [ ] cross-domain
   - [x] operators into a local (`binopAssignment`, `binopUnfoldLeft/Right`,
     the two short-circuit rules, `unopAssignment`, `unopCapture`)
   - [ ] compound assignment `op=`, `++`/`--`, ternary  - [ ] calls, `transfer`
@@ -315,6 +317,7 @@ lists only the standard three axioms.
 | Conditions | `if`, `require` and `assert` test a `Simple` value; `ksol` captures any other condition into a fresh `bool` first (`ifElseUnfold`, `requireConditionCapture` are the elaborator's). A branch still may not declare, so a complex condition nested in a branch is an elaboration error | 2026-09-25 |
 | `T storage x;` | not a kernel statement: solc ≥ 0.5 rejects an uninitialised storage pointer (`storageLocalDeclSkip` has no kernel counterpart) | 2026-09-25 |
 | Semantics | kernel terms get a structural denotation, proved to be the interpreter's (`Prog.run_eq`); taclets are proved sound over it, not through the untyped `*_sound` theorems, whose scratch names are fixed strings | 2026-09-25 |
+| Array bounds | no `inBounds` split: `SVal.find`/`SVal.save` revert out of range, so the kernel's update fails as the statement does. A failing update is read like a revert by the modalities | 2026-09-25 |
 | Typed states | `Premise.Correct` quantifies over the states of the statement's context (`Kernel.Typed`: some `StateWT` for the layout). Only the short-circuit rules use it (a `bool` value evaluates to a boolean); nothing is lost, since a contract starts in one and `execStmt_sound` keeps it there | 2026-09-25 |
 | Operator families | a rule over an operator is one constructor (`binopAssignment op`), as in `Calculus/Rules.lean`; solkey's taclet is per operator | 2026-09-25 |
 | Modalities | the kernel's box is partial correctness (it holds unless the run ends normally in a bad state) and its diamond needs a normal end; neither tells a revert from a stuck run. An unfolding rule then owes its statement the same *successful* outcome (`SameOk`), which the order-changing rules (`*StorageRef_unfold_leftFst`, `*NonSimpleIndexCapture`) meet without the side conditions the untyped `*_sound` theorems carry. `SolidityJudgment.Holds` differs on stuck runs ("a stuck execution validates nothing"); the phase-7 bridge must say so | 2026-09-25 |
