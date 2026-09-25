@@ -334,7 +334,9 @@ lists only the standard three axioms.
     over a value hole `VHole`
   - [x] `transfer`: the two unfolds, `transferNoCallback` (KeY's default
     `transferSemantics`; `withCallback` is the alternative, not ported)
-  - [ ] calls (`functionBodyExpand`, `functionCallArgCapture`)
+  - [ ] calls (`functionBodyExpand`, `functionCallArgCapture`): the interpreter is
+    stuck on a call (meaning comes from inlining, `SolidityJudgment.checkInlined`), so a
+    kernel call would need function bodies in `Contract`; until then `ksol` has none
   - [x] the bridge, names: `Taclet.rule`, `Taclet.origin`,
     `Taclet.origin_claimed` (`Kernel/Bridge.lean`); `Taclet` is a `Type`, so
     a derivation's constructor can be read back
@@ -349,7 +351,11 @@ lists only the standard three axioms.
   - [ ] `dl{ … }` notation for taclets, premises and updates
 - [ ] Phase 4: `Stmt.step`, `Stmt.complete`, `Fml.progress`.
   - [x] `Stmt.step` and `Stmt.complete` over the current syntax (`Kernel/Step.lean`)
-  - [ ] disjointness (at most one rule per statement, up to scratch names)
+  - [ ] disjointness (at most one rule per statement, up to scratch names), stated as
+    `d.rule = (s.step m).2.rule` for every derivation `d`: `cases d`, a split on the
+    holes, then `simp` with the step functions and `rfl` closes about half; the rest
+    need the `dite` on `b.isSimple` reduced by the hypothesis, and a split on the
+    one non-simple `Val` a rule takes (the step functions enumerate its constructors)
   - [ ] `Fml.progress`, with the formula layer of phase 6
 - [ ] Phase 5: the measure, `symex_normalizes`, `BlockStep.wellFounded`.
   - [x] sizes and `Taclet.smaller` (`Kernel/Measure.lean`): the measure of a goal
