@@ -48,8 +48,10 @@ is the reference: copy the shape of the declaration the plan names.
 1. The `RuleName` it bridges to (existing).
 2. A row in `RuleName.accepts`. If `rules_disjoint` fails it overlaps an old
    row; if `rules_complete` fails a shape has no rule.
-3. A `Taclet` constructor, in the notation, and its case of `Taclet.sound`,
-   from the rule's `*_sound` through erasure.
+3. A `Taclet` constructor and its case of `Taclet.sound`, over the
+   denotation (`Stmt.run`): case on the atoms the premise evaluates, in its
+   order; move later atoms past the fresh bindings with the `*_setEnv`
+   lemmas; close with `SameOk.save`/`agree_tac`.
 4. An arm in `Stmt.step`. If `smaller_tac` fails, fix the rule or the measure;
    do not add a hypothesis.
 5. The bridge theorem to `ruleEffect` (until phase 7).

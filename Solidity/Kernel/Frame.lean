@@ -232,5 +232,20 @@ theorem Val.eval_weaken {Γ Γ' : Ctx} (h : Ctx.Sub C Γ Γ') (σ : State) :
 
 end
 
+/-- A weakened source has the original's value. -/
+theorem Src.value_weaken {Γ Γ' : Ctx} (h : Ctx.Sub C Γ Γ') (σ : State) {T : Ty} :
+    (r : Src C Γ T) → (r.weaken h).value σ = r.value σ
+  | .val v => by simp only [Src.weaken, Src.value, v.eval_weaken h σ]
+  | .copy p _ => by simp only [Src.weaken, Src.value, p.resolve_weaken h σ]
+
+/-- A weakened location is written where the original is. -/
+theorem Loc.target_weaken {Γ Γ' : Ctx} (h : Ctx.Sub C Γ Γ') (σ : State) {T : Ty}
+    (l : Loc C Γ T) : (l.weaken h).target σ = l.target σ := by
+  cases l with
+  | root => rfl
+  | field b f hf => exact Loc.resolve_weaken h σ (.field b f hf)
+  | mapIndex b i => exact Loc.resolve_weaken h σ (.mapIndex b i)
+  | arrIndex b i => exact Loc.resolve_weaken h σ (.arrIndex b i)
+
 end Kernel
 end Solidity

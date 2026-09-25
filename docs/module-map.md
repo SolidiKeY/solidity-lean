@@ -189,6 +189,8 @@ the plan and the tracker. No `sorry`, `native_decide` or axiom here.
 | `Kernel/Print.lean` | `Prog.toStr`/`Prog.show`: a kernel block printed as Solidity. |
 | `Kernel/Semantics.lean` | The denotation (`SPath.resolve`, `Val.eval`, `Stmt.run`) by structural recursion, and adequacy: `Stmt.run_eq`/`Prog.run_eq`, `execStmt σ s.erase = s.run σ` from every state. |
 | `Kernel/Frame.lean` | `Fresh`, `Ctx.Sub` and weakening (erasure unchanged), and the frame lemmas: a term typed at `Γ` does not see a name fresh at `Γ`. |
+| `Kernel/Taclet.lean` | The taclet judgement `Taclet C m s pr`, one constructor per solkey taclet (storage family: 41), with `Hole` for the paper's `lhs = •`, `Upd` and `Premise`. |
+| `Kernel/Sound.lean` | `Premise.Correct` and `Taclet.sound`, no hypothesis beyond the constructors' freshness proofs; `SameOk` is the agreement an unfolding rule owes. |
 | `Kernel/Elab.lean` | `ksol[C]{ … }`/`ksol{ … }`: raw syntax, the elaborator (`synth`/`check`/`elabProg`), the quoters; evaluated at compile time, re-checked by the kernel. |
 
 ## Examples, chains and corpora
