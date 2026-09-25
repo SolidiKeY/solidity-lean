@@ -278,7 +278,12 @@ lists only the standard three axioms.
 - [x] Phase 1: `Ty` eliminator, `Contract`, `InContract`, named contracts
   (`Kernel/Contract.lean`).
 - [ ] Phase 2: typed syntax, erasure, elaboration, quoters.
-  - [ ] storage  - [ ] stack  - [ ] memory  - [ ] arrays, `push`/`pop`  - [ ] calls
+  - [x] storage and stack values: `Kernel/Syntax.lean`, `Erase.lean`
+    (`Prog.erase_wt`), `Elab.lean` (`ksol[C]{}`), `Print.lean`
+  - [ ] memory  - [ ] arrays, `push`/`pop`  - [ ] compound assignment,
+    `++`/`--`, ternary  - [ ] calls, `transfer`
+  - [ ] `decode : Stmt → Option (Stmt C Γ Γ')` with `decode (erase t) = some t`,
+    for the corpus and to retire `stmtWt` hypotheses
   - [ ] the 26 `ResidueShape` verdicts (table below)
 - [ ] Phase 3: `Taclet`, `Taclet.sound`, `rules_disjoint`/`rules_complete`.
   - [ ] storage  - [ ] memory  - [ ] cross-domain  - [ ] arithmetic
@@ -296,6 +301,8 @@ lists only the standard three axioms.
 | Rule names | solkey's taclet names (§5) | 2026-09-25 |
 | `native_decide` | forbidden in `Solidity/Kernel/`; old files keep their count | 2026-09-25 |
 | Struct bodies | stay the package-wide `Semantics.structDef`, which the interpreter reads; a `Contract` is its storage roots only, and `Contract.fieldType` reads the table. A per-contract table would let a contract disagree with what runs. Revisit in phase 7, if the interpreter is made contract-parametric | 2026-09-25 |
+| Context index | a statement is `Stmt C Γ Γ'`, indexed by the local context `stmtWt` threads, and each name carries its `Γ` binding (a root, `lookupBy r Γ = none` too). That is what makes `Prog.erase_wt` hypothesis-free: without the index a typed term could use `x` at two types, and only a predicate could rule it out | 2026-09-25 |
+| Unknown names | an error: parameters are declared locals. mini-solkey reads an unknown name as a `uint` parameter | 2026-09-25 |
 | Ported contracts | one named constant per interpreter store, `initStorage_*` checks roots, order and defaults against the store by `simp` | 2026-09-25 |
 
 ### `ResidueShape` verdicts
@@ -306,28 +313,28 @@ One row per constructor of `Coverage.ResidueShape`, filled in phase 2:
 
 | Shape | Verdict |
 |---|---|
-| `iteSymbolicCond` | open |
+| `iteSymbolicCond` | *rule*: `ifElseSplit`, a `split` premise (phase 3) |
 | `incDecStmt` | open |
 | `assignMemFieldFromStorage` | open |
 | `assignMemIndexFromStorage` | open |
-| `assignStackRefUnfoldTarget` | open |
+| `assignStackRefUnfoldTarget` | *unrepresentable*: a stack local has a primitive type (`Val.local`) |
 | `assignPushPlaceLhsNonStorage` | open |
-| `assignStorageLocalRootFromStack` | open |
+| `assignStorageLocalRootFromStack` | *unrepresentable*: an alias has a reference type, a stack local a primitive one |
 | `assignMemoryRootFromStack` | open |
 | `assignStackVarFromMemory` | open |
-| `assignStackPlace` | open |
+| `assignStackPlace` | *unrepresentable*: a member or index access has its base's location, and a stack local has no members |
 | `assignPushRhsNonStorage` | open |
 | `assignPushRhsNonLocalLhs` | open |
-| `assignOperatorRhsBadLhs` | open |
-| `assignOperatorRhsRefTyped` | open |
+| `assignOperatorRhsBadLhs` | storage slice *unrepresentable* (local root: reference type; stack place: none); memory root and push place open |
+| `assignOperatorRhsRefTyped` | *unrepresentable*: an operator is applied at a primitive type (`Val.binop`) |
 | `assignIncDecBadTarget` | open |
 | `assignTernaryBadLhs` | open |
 | `assignCallRhs` | open |
-| `assignStackPlaceRhs` | open |
+| `assignStackPlaceRhs` | *unrepresentable*: as `assignStackPlace` |
 | `compoundAssignPow` | open |
 | `compoundAssignBadTarget` | open |
 | `memoryDeclBadInit` | open |
-| `deleteStorageLocalRoot` | open |
+| `deleteStorageLocalRoot` | *unrepresentable*: `delete` takes a `Loc`, never an alias |
 | `deletePushPlaceNonStorage` | open |
 | `pushNonStorageTarget` | open |
 | `pushMemoryValue` | open |
