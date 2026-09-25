@@ -559,63 +559,63 @@ inductive Taclet (C : Contract) (m : Modality) : {Γ Γ' : Ctx} → Stmt C Γ Γ
   /-- `v = se₁ ⊕ se₂ ⇝ { v := se₁ ⊕ se₂ }`.  A division by zero or an
   overflow makes the update fail as the statement does, so the kernel needs no
   guard. -/
-  | binopAssignment {Γ : Ctx} {p : PrimTy} (op : BinOp) (hop : op.accepts p = true) (x : Name)
-      (h : lookupBy x Γ = some (.stack (.prim (op.ret p)))) (a b : Simple C Γ p) :
-      .assignLocal x h (.binop op hop (.simple a) (.simple b)) ⇒
-        .update (.bind x (.binop op hop (.simple a) (.simple b)))
+  | binopAssignment {Γ : Ctx} {p q : PrimTy} (op : BinOp) (hop : op.accepts p = true)
+      (hq : op.ret p = q) (x : Name) (h : lookupBy x Γ = some (.stack (.prim q))) (a b : Simple C Γ p) :
+      .assignLocal x h (.binop op hop hq (.simple a) (.simple b)) ⇒
+        .update (.bind x (.binop op hop hq (.simple a) (.simple b)))
   /-- `v = nse ⊕ e ⇝ T se = nse; v = se ⊕ e`. -/
-  | binopUnfoldLeft {Γ : Ctx} {p : PrimTy} (op : BinOp) (hop : op.accepts p = true) (x : Name)
-      (h : lookupBy x Γ = some (.stack (.prim (op.ret p)))) (nse : Val C Γ p)
+  | binopUnfoldLeft {Γ : Ctx} {p q : PrimTy} (op : BinOp) (hop : op.accepts p = true)
+      (hq : op.ret p = q) (x : Name) (h : lookupBy x Γ = some (.stack (.prim q))) (nse : Val C Γ p)
       (hn : nse.isSimple = false) (e : Val C Γ p) (se : Name) (hse : isFresh C Γ se = true) :
-      .assignLocal x h (.binop op hop nse e) ⇒
+      .assignLocal x h (.binop op hop hq nse e) ⇒
         .unfold [se]
           (.cons (.declLocal p se hse (some nse))
           (.cons (.assignLocal x ((Ctx.Sub.fresh hse _).local_ _ _ h)
-            (.binop op hop (.simple (Simple.new se p)) (e.weaken (Ctx.Sub.fresh hse _)))) .nil))
+            (.binop op hop hq (.simple (Simple.new se p)) (e.weaken (Ctx.Sub.fresh hse _)))) .nil))
           (Ctx.Sub.fresh hse _)
   /-- `v = se ⊕ nse ⇝ T se' = nse; v = se ⊕ se'`, for an operator that does
   not short-circuit. -/
-  | binopUnfoldRight {Γ : Ctx} {p : PrimTy} (op : BinOp) (hop : op.accepts p = true)
-      (hsc : op.shortCircuits = false) (x : Name)
-      (h : lookupBy x Γ = some (.stack (.prim (op.ret p)))) (a : Simple C Γ p) (nse : Val C Γ p)
+  | binopUnfoldRight {Γ : Ctx} {p q : PrimTy} (op : BinOp) (hop : op.accepts p = true)
+      (hq : op.ret p = q) (hsc : op.shortCircuits = false) (x : Name)
+      (h : lookupBy x Γ = some (.stack (.prim q))) (a : Simple C Γ p) (nse : Val C Γ p)
       (hn : nse.isSimple = false) (se : Name) (hse : isFresh C Γ se = true) :
-      .assignLocal x h (.binop op hop (.simple a) nse) ⇒
+      .assignLocal x h (.binop op hop hq (.simple a) nse) ⇒
         .unfold [se]
           (.cons (.declLocal p se hse (some nse))
           (.cons (.assignLocal x ((Ctx.Sub.fresh hse _).local_ _ _ h)
-            (.binop op hop (.simple (a.weaken (Ctx.Sub.fresh hse _))) (.simple (Simple.new se p)))) .nil))
+            (.binop op hop hq (.simple (a.weaken (Ctx.Sub.fresh hse _))) (.simple (Simple.new se p)))) .nil))
           (Ctx.Sub.fresh hse _)
   /-- `v = se && nse ⇝ if (se) { v = nse; } else { v = false; }`. -/
-  | logicalAndShortCircuitRhs {Γ : Ctx} (hop : BinOp.accepts .and .bool = true) (x : Name)
-      (h : lookupBy x Γ = some (.stack (.prim .bool))) (a : Simple C Γ .bool) (nse : Val C Γ .bool)
-      (hn : nse.isSimple = false) :
-      .assignLocal x h (.binop .and hop (.simple a) nse) ⇒
+  | logicalAndShortCircuitRhs {Γ : Ctx} (hop : BinOp.accepts .and .bool = true)
+      (hq : BinOp.ret .and .bool = .bool) (x : Name) (h : lookupBy x Γ = some (.stack (.prim .bool)))
+      (a : Simple C Γ .bool) (nse : Val C Γ .bool) (hn : nse.isSimple = false) :
+      .assignLocal x h (.binop .and hop hq (.simple a) nse) ⇒
         .unfold []
           (.cons (.ite a (.cons (.assignLocal x h nse) .nil)
             (.cons (.assignLocal x h (.simple (.bool false))) .nil)) .nil)
           (Ctx.Sub.refl _)
   /-- `v = se || nse ⇝ if (se) { v = true; } else { v = nse; }`. -/
-  | logicalOrShortCircuitRhs {Γ : Ctx} (hop : BinOp.accepts .or .bool = true) (x : Name)
-      (h : lookupBy x Γ = some (.stack (.prim .bool))) (a : Simple C Γ .bool) (nse : Val C Γ .bool)
-      (hn : nse.isSimple = false) :
-      .assignLocal x h (.binop .or hop (.simple a) nse) ⇒
+  | logicalOrShortCircuitRhs {Γ : Ctx} (hop : BinOp.accepts .or .bool = true)
+      (hq : BinOp.ret .or .bool = .bool) (x : Name) (h : lookupBy x Γ = some (.stack (.prim .bool)))
+      (a : Simple C Γ .bool) (nse : Val C Γ .bool) (hn : nse.isSimple = false) :
+      .assignLocal x h (.binop .or hop hq (.simple a) nse) ⇒
         .unfold []
           (.cons (.ite a (.cons (.assignLocal x h (.simple (.bool true))) .nil)
             (.cons (.assignLocal x h nse) .nil)) .nil)
           (Ctx.Sub.refl _)
   /-- `v = ⊖se ⇝ { v := ⊖se }`. -/
-  | unopAssignment {Γ : Ctx} {p : PrimTy} (op : UnOp) (hop : op.accepts p = true) (x : Name)
-      (h : lookupBy x Γ = some (.stack (.prim (op.ret p)))) (a : Simple C Γ p) :
-      .assignLocal x h (.unop op hop (.simple a)) ⇒ .update (.bind x (.unop op hop (.simple a)))
+  | unopAssignment {Γ : Ctx} {p q : PrimTy} (op : UnOp) (hop : op.accepts p = true)
+      (hq : op.ret p = q) (x : Name) (h : lookupBy x Γ = some (.stack (.prim q))) (a : Simple C Γ p) :
+      .assignLocal x h (.unop op hop hq (.simple a)) ⇒ .update (.bind x (.unop op hop hq (.simple a)))
   /-- `v = ⊖nse ⇝ T se = nse; v = ⊖se`. -/
-  | unopCapture {Γ : Ctx} {p : PrimTy} (op : UnOp) (hop : op.accepts p = true) (x : Name)
-      (h : lookupBy x Γ = some (.stack (.prim (op.ret p)))) (nse : Val C Γ p)
+  | unopCapture {Γ : Ctx} {p q : PrimTy} (op : UnOp) (hop : op.accepts p = true)
+      (hq : op.ret p = q) (x : Name) (h : lookupBy x Γ = some (.stack (.prim q))) (nse : Val C Γ p)
       (hn : nse.isSimple = false) (se : Name) (hse : isFresh C Γ se = true) :
-      .assignLocal x h (.unop op hop nse) ⇒
+      .assignLocal x h (.unop op hop hq nse) ⇒
         .unfold [se]
           (.cons (.declLocal p se hse (some nse))
           (.cons (.assignLocal x ((Ctx.Sub.fresh hse _).local_ _ _ h)
-            (.unop op hop (.simple (Simple.new se p)))) .nil))
+            (.unop op hop hq (.simple (Simple.new se p)))) .nil))
           (Ctx.Sub.fresh hse _)
   -- Control
   /-- Two goals: the `then` branch where `se` holds, the `else` branch where it

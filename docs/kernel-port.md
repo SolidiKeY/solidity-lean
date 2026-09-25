@@ -299,6 +299,9 @@ lists only the standard three axioms.
   - [ ] typed shapes, `rules_disjoint`/`rules_complete` (with `Stmt.step`, phase 4)
   - [ ] `dl{ … }` notation for taclets, premises and updates
 - [ ] Phase 4: `Stmt.step`, `Stmt.complete`, `Fml.progress`.
+  - [x] `Stmt.step` and `Stmt.complete` over the current syntax (`Kernel/Step.lean`)
+  - [ ] disjointness (at most one rule per statement, up to scratch names)
+  - [ ] `Fml.progress`, with the formula layer of phase 6
 - [ ] Phase 5: the measure, `symex_normalizes`, `BlockStep.wellFounded`.
 - [ ] Phase 6: `Fml C`, `Proves`, `Proves.sound`, `FreshNames`.
 - [ ] Phase 7: cut over, `lean/solkey` migrated.

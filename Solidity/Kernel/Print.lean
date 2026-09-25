@@ -52,10 +52,10 @@ def Loc.toStr {T : Ty} : Loc C Γ T → String
 def Val.toStr {p : PrimTy} : Val C Γ p → (top : Bool := false) → String
   | .simple s, _ => s.toStr
   | .read l, _ => l.toStr
-  | .binop op _ a b, top =>
+  | .binop op _ _ a b, top =>
     let s := s!"{a.toStr} {BinOp.sym op} {b.toStr}"
     if top then s else s!"({s})"
-  | .unop op _ a, _ => s!"{UnOp.sym op}{a.toStr}"
+  | .unop op _ _ a, _ => s!"{UnOp.sym op}{a.toStr}"
 
 end
 

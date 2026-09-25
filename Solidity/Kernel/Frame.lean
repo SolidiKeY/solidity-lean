@@ -82,8 +82,8 @@ def Loc.weaken {Γ Γ' : Ctx} (h : Ctx.Sub C Γ Γ') : {T : Ty} → Loc C Γ T �
 def Val.weaken {Γ Γ' : Ctx} (h : Ctx.Sub C Γ Γ') : {p : PrimTy} → Val C Γ p → Val C Γ' p
   | _, .simple s => .simple (s.weaken h)
   | _, .read l => .read (l.weaken h)
-  | _, .binop op hop a b => .binop op hop (a.weaken h) (b.weaken h)
-  | _, .unop op hop a => .unop op hop (a.weaken h)
+  | _, .binop op hop hq a b => .binop op hop hq (a.weaken h) (b.weaken h)
+  | _, .unop op hop hq a => .unop op hop hq (a.weaken h)
 
 end
 
@@ -115,8 +115,8 @@ theorem Val.erase_weaken {Γ Γ' : Ctx} (h : Ctx.Sub C Γ Γ') :
     {p : PrimTy} → (v : Val C Γ p) → (v.weaken h).erase = v.erase
   | _, .simple s => by simp only [Val.weaken, Val.erase, s.erase_weaken h]
   | _, .read l => by simp only [Val.weaken, Val.erase, l.erase_weaken h]
-  | _, .binop _ _ a b => by simp only [Val.weaken, Val.erase, a.erase_weaken h, b.erase_weaken h]
-  | _, .unop _ _ a => by simp only [Val.weaken, Val.erase, a.erase_weaken h]
+  | _, .binop _ _ _ a b => by simp only [Val.weaken, Val.erase, a.erase_weaken h, b.erase_weaken h]
+  | _, .unop _ _ _ a => by simp only [Val.weaken, Val.erase, a.erase_weaken h]
 
 end
 
@@ -176,8 +176,8 @@ theorem Val.eval_frame (hag : EnvAgreeExcept ns σ τ) (hns : ∀ n ∈ ns, Fres
     {p : PrimTy} → (v : Val C Γ p) → v.eval σ = v.eval τ
   | _, .simple s => s.eval_frame hag hns
   | _, .read l => by simp only [Val.eval, l.resolve_frame hag hns, findStorage_congr hag]
-  | _, .binop _ _ a b => by simp only [Val.eval, a.eval_frame hag hns, b.eval_frame hag hns]
-  | _, .unop _ _ a => by simp only [Val.eval, a.eval_frame hag hns]
+  | _, .binop _ _ _ a b => by simp only [Val.eval, a.eval_frame hag hns, b.eval_frame hag hns]
+  | _, .unop _ _ _ a => by simp only [Val.eval, a.eval_frame hag hns]
 
 end
 
@@ -222,8 +222,8 @@ theorem Val.eval_weaken {Γ Γ' : Ctx} (h : Ctx.Sub C Γ Γ') (σ : State) :
     {p : PrimTy} → (v : Val C Γ p) → (v.weaken h).eval σ = v.eval σ
   | _, .simple s => by simp only [Val.weaken, Val.eval, s.eval_weaken h σ]
   | _, .read l => by simp only [Val.weaken, Val.eval, l.resolve_weaken h σ]
-  | _, .binop _ _ a b => by simp only [Val.weaken, Val.eval, a.eval_weaken h σ, b.eval_weaken h σ]
-  | _, .unop _ _ a => by simp only [Val.weaken, Val.eval, a.eval_weaken h σ]
+  | _, .binop _ _ _ a b => by simp only [Val.weaken, Val.eval, a.eval_weaken h σ, b.eval_weaken h σ]
+  | _, .unop _ _ _ a => by simp only [Val.weaken, Val.eval, a.eval_weaken h σ]
 
 end
 

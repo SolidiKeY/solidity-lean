@@ -246,12 +246,12 @@ def synth (C : Contract) (Γ : Ctx) : RawExpr → Except String (TExpr C Γ)
     let t ← if a matches .num _ then synth C Γ b else synth C Γ a
     let some ⟨p, _⟩ := t.toVal? | throw "an operand of reference type"
     match h : op.accepts p with
-    | true => pure (.val _ (.binop op h (← check C Γ p a) (← check C Γ p b)))
+    | true => pure (.val _ (.binop op h rfl (← check C Γ p a) (← check C Γ p b)))
     | false => throw s!"operator {repr op} does not take {primName p}"
   | .unop op a => do
     let some ⟨p, a⟩ := (← synth C Γ a).toVal? | throw "an operand of reference type"
     match h : op.accepts p with
-    | true => pure (.val _ (.unop op h a))
+    | true => pure (.val _ (.unop op h rfl a))
     | false => throw s!"operator {repr op} does not take {primName p}"
 termination_by e => (sizeOf e, 0)
 
@@ -274,13 +274,6 @@ def checkPath (C : Contract) (Γ : Ctx) (T : Ty) (e : RawExpr) :
   | .path T' p => if h : T' = T then pure (h ▸ p) else throw "a storage path of another type"
   | .val .. => throw "a value where a storage reference is expected"
 
-/-- A fresh name for a capture: `base`, else `base1`, `base2`, …  One of
-the first `|Γ| + |C.vars| + 1` candidates is free. -/
-def freshName (C : Contract) (Γ : Ctx) (base : Name) : Name :=
-  let cands := (List.range (Γ.length + C.vars.length + 1)).map fun k =>
-    if k = 0 then base else base ++ toString k
-  (cands.find? (isFresh C Γ ·)).getD base
-
 /-- `v`, if it is simple. -/
 def Val.toSimple? {C : Contract} {Γ : Ctx} {p : PrimTy} : Val C Γ p → Option (Simple C Γ p)
   | .simple s => some s
@@ -297,10 +290,8 @@ def elabCond (C : Contract) (Γ : Ctx) (e : RawExpr) :
   | some c => pure ⟨Γ, .nil, c⟩
   | none =>
     let x := freshName C Γ "se"
-    if hx : isFresh C Γ x = true then
-      pure ⟨_, .cons (.declLocal .bool x hx (some v)) .nil,
-        .local x (SemanticsProperties.lookupBy_setBy_self ..)⟩
-    else throw "no fresh name for a condition"
+    pure ⟨_, .cons (.declLocal .bool x (freshName_isFresh C Γ "se") (some v)) .nil,
+      .local x (SemanticsProperties.lookupBy_setBy_self ..)⟩
 
 /-- `x` may be declared: it is neither a local nor a state variable. -/
 def checkFresh (C : Contract) (Γ : Ctx) (x : Name) : Except String (PLift (isFresh C Γ x = true)) :=
@@ -427,11 +418,13 @@ def Loc.quote (Γ : Ctx) : (T : Ty) → Loc C Γ T → Lean.Expr
 def Val.quote (Γ : Ctx) : (p : PrimTy) → Val C Γ p → Lean.Expr
   | p, .simple s => mkAppN (mkConst ``Val.simple) #[c, toExpr Γ, toExpr p, Simple.quote c Γ p s]
   | p, .read l => mkAppN (mkConst ``Val.read) #[c, toExpr Γ, toExpr p, Loc.quote Γ _ l]
-  | _, @Val.binop _ _ p op _ a b =>
-    mkAppN (mkConst ``Val.binop) #[c, toExpr Γ, toExpr p, toExpr op, boolTrue,
+  | _, @Val.binop _ _ p q op _ _ a b =>
+    mkAppN (mkConst ``Val.binop) #[c, toExpr Γ, toExpr p, toExpr q, toExpr op, boolTrue,
+      quoteRefl (mkConst ``PrimTy) (toExpr q),
       Val.quote Γ p a, Val.quote Γ p b]
-  | _, @Val.unop _ _ p op _ a =>
-    mkAppN (mkConst ``Val.unop) #[c, toExpr Γ, toExpr p, toExpr op, boolTrue,
+  | _, @Val.unop _ _ p q op _ _ a =>
+    mkAppN (mkConst ``Val.unop) #[c, toExpr Γ, toExpr p, toExpr q, toExpr op, boolTrue,
+      quoteRefl (mkConst ``PrimTy) (toExpr q),
       Val.quote Γ p a]
 
 end
