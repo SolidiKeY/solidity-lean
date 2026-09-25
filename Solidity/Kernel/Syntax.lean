@@ -289,6 +289,8 @@ inductive Stmt (C : Contract) : Ctx → Ctx → Type where
       (hd : (v.isSome || E.defaultOkS) = true) : Stmt C Γ Γ
   /-- `values.pop();` -/
   | pop {Γ : Ctx} {E : Ty} (b : SPath C Γ (.array E)) : Stmt C Γ Γ
+  /-- `a.transfer(v);`: `v` of the contract's funds to `a`. -/
+  | transfer {Γ : Ctx} (r a : Val C Γ .uint) : Stmt C Γ Γ
   /-- `delete alice.account;` -/
   | delete {Γ : Ctx} {T : Ty} (l : Loc C Γ T) : Stmt C Γ Γ
   /-- `if (c) { … } else { … }`, on a simple condition (the paper's

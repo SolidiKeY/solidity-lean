@@ -95,7 +95,7 @@ theorem StateAgree.findStorage {Γ : Ctx} {σ τ : State} (hag : StateAgree C Γ
 theorem Stmt.sub {Γ Γ' : Ctx} : Stmt C Γ Γ' → Ctx.Sub C Γ Γ'
   | .declLocal _ _ hx _ | .declStorage _ _ _ hx _ => Ctx.Sub.fresh hx _
   | .assign .. | .rebind .. | .assignLocal .. | .opAssign .. | .incDec .. | .assignIncDec .. | .push ..
-  | .pop _
+  | .pop _ | .transfer ..
   | .delete _ | .ite .. | .require _ | .assert _
   | .revert => Ctx.Sub.refl _
 
@@ -159,6 +159,29 @@ theorem Stmt.run_frame {Γ Γ' : Ctx} {σ τ : State} (hag : StateAgree C Γ σ 
       revert h
       cases pushAt σ E rs.1 rs.2 (Src.pushVal σ v) <;> cases pushAt τ E rs.1 rs.2 (Src.pushVal τ v) <;>
         intro h <;> first | trivial | exact h.elim | exact ⟨ns, hns, h⟩
+  | .transfer r a => by
+    obtain ⟨ns, hns, hag'⟩ := hag
+    simp only [Stmt.run, r.eval_frame hag' hns, a.eval_frame hag' hns]
+    cases r.eval τ with
+    | error _ => trivial
+    | ok v =>
+      simp only [bind, Except.bind]
+      cases v.asInt with
+      | error _ => trivial
+      | ok addr =>
+        simp only
+        cases a.eval τ with
+        | error _ => trivial
+        | ok w =>
+          simp only
+          cases w.asInt with
+          | error _ => trivial
+          | ok amt =>
+            dsimp only
+            have h := transferAt_agree hag' addr amt
+            revert h
+            cases transferAt σ addr amt <;> cases transferAt τ addr amt <;> intro h <;>
+              first | trivial | exact h.elim | exact ⟨ns, hns, h⟩
   | .pop b => by
     obtain ⟨ns, hns, hag'⟩ := hag
     simp only [Stmt.run, b.resolve_frame hag' hns]

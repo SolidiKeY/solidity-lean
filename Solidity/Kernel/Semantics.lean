@@ -209,6 +209,13 @@ def popAt (σ : State) (root : Name) (segs : List Seg) : Res State := do
     | last :: restRev => σ.saveStorage root segs (.array restRev.reverse (last.defaultOf :: shadow))
   | .prim _ | .struct _ | .map _ _ => .error .stuck
 
+/-- `a.transfer(v)` with both evaluated: revert when the contract's funds
+cannot cover `v`, else book the debit, as `execStmt` does it. -/
+def transferAt (σ : State) (addr amt : Int) : Res State :=
+  if amt < 0 then .error .stuck
+  else if σ.selfBalance < amt then .error .revert
+  else .ok { σ.setNet addr (σ.getNet addr - amt) with selfBalance := σ.selfBalance - amt }
+
 mutual
 
 /-- The state a statement leaves, from `σ`. -/
@@ -237,6 +244,10 @@ def Stmt.run (σ : State) {Γ Γ' : Ctx} : Stmt C Γ Γ' → Res State
   | .pop b => do
     let (root, segs) ← b.resolve σ
     popAt σ root segs
+  | .transfer r a => do
+    let addr ← (← r.eval σ).asInt
+    let amt ← (← a.eval σ).asInt
+    transferAt σ addr amt
   | .assignIncDec x _ op _ l _ => do
     let (σ', v) ← l.bump σ op
     pure (σ'.setEnv x (.val v))
@@ -652,6 +663,25 @@ theorem Stmt.run_eq (σ : State) {Γ Γ' : Ctx} : (s : Stmt C Γ Γ') → execSt
       cases σ.findStorage rs.1 rs.2 with
       | error _ => rfl
       | ok sv => cases sv <;> rfl
+  | .transfer r a => by
+    simp only [Stmt.run]
+    rw [Stmt.erase, execStmt]
+    simp only [evalInt, r.evalValue_erase σ, a.evalValue_erase σ]
+    cases r.eval σ with
+    | error _ => rfl
+    | ok v =>
+      simp only [Except.map, bind, Except.bind]
+      cases v.asInt with
+      | error _ => rfl
+      | ok addr =>
+        simp only [pure, Except.pure, a.evalValue_erase σ]
+        cases a.eval σ with
+        | error _ => rfl
+        | ok w =>
+          simp only [Except.map]
+          cases w.asInt with
+          | error _ => rfl
+          | ok amt => rfl
   | .delete l => by
     simp only [Stmt.run]
     rw [Stmt.erase, execStmt]

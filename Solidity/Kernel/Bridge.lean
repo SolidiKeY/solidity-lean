@@ -19,9 +19,10 @@ branch in the sequent, not by a rule (`RuleShapes` excuses the taclet).
 
 `Prog.disagreements` runs both tables on a block, the kernel's
 `Stmt.step` against the old `candidate` on the erasure, and the tour below
-pins the answer: the two agree except on a state-variable operand (`x =
-total + 1;`, where the kernel captures `total` as KeY's
-`addition_unfold_left` does, a state variable being a `Path`, not a
+pins the answer: the two agree except on a state-variable operand or
+receiver (`x = total + 1;`, `owner.transfer(1);`, where the kernel captures
+the state variable as KeY's `addition_unfold_left` and
+`transfer_unfold_leftFstReceiver` do, a state variable being a `Path`, not a
 `SimpleExpression`) and on a storage declaration whose path is not bindable
 (`Person storage r = persons[x + 1];`, which KeY drops to an assignment and
 the kernel, having no `T storage x;`, captures the index of first), and on a
@@ -117,6 +118,9 @@ def Taclet.rule {Γ Γ' : Ctx} {s : Stmt C Γ Γ'} {pr : Premise C Γ Γ'} : Tac
   | .storagePush_unfold_leftFstReceiver .. => some .storagePushUnfoldLeftFstReceiver
   | .storagePop_unfold_leftFstReceiver .. => some .storagePopUnfoldLeftFstReceiver
   | .storagePopSave .. => some (match m with | .box => .storagePopSaveBox | .diamond => .storagePopSaveDiamond)
+  | .transfer_unfold_leftFstReceiver .. => some .transferUnfoldLeftFstReceiver
+  | .transfer_unfold_rightSndArgument .. => some .transferUnfoldRightSndArgument
+  | .transferNoCallback .. => some (match m with | .box => .transferNoCallbackBox | .diamond => .transferNoCallbackDiamond)
   | .ifElseSplit .. => none
   | .requireSimple .. => some .requireSimple
   | .assertSimple .. => some .assertSimple
@@ -204,6 +208,10 @@ def Taclet.origin {Γ Γ' : Ctx} {s : Stmt C Γ Γ'} {pr : Premise C Γ Γ'} : T
   | .storagePush_unfold_leftFstReceiver .. => .taclet .storagePush_unfold_leftFstReceiver
   | .storagePop_unfold_leftFstReceiver .. => .taclet .storagePop_unfold_leftFstReceiver
   | .storagePopSave .. => .taclet .storagePopSave
+  | .transfer_unfold_leftFstReceiver .. => .taclet .transfer_unfold_leftFstReceiver
+  | .transfer_unfold_rightSndArgument .. => .taclet .transfer_unfold_rightSndArgument
+  | .transferNoCallback .. =>
+    .taclet (match m with | .box => .transferNoCallbackBox | .diamond => .transferNoCallbackDiamond)
   | .ifElseSplit .. => .taclet .ifElseSplit
   | .requireSimple .. => .taclet .requireSimple
   | .assertSimple .. => .taclet .assertSimple
@@ -265,19 +273,23 @@ def bridgeTour := ksol{
   folks[x + 1].age = b ? 1 : 2; x = (b ? 1 : 2) + 1; x += b ? 1 : 2;
   values.push(x); values.push(x + 1); values.push(); persons.push(alice); persons.push(folks[x]);
   persons.push(); values.pop(); matrix[x].push(1); matrix[x + 1].push(); matrix[x].pop();
+  owner.transfer(1); owner.transfer(x + 1); (x + 1).transfer(2); balances[x].transfer(x);
   if (b) { x = 1; } else { x = 2; }; require(b); assert(b); require(x == 1); revert();
 }
 
 -- Under a box, the two tables pick the same rule for every statement but
--- the four the module docstring names.
+-- the ones the module docstring names.
 #guard bridgeTour.disagreements .box = [
   "x = total + 1; kernel=some (Solidity.RuleName.binopUnfoldLeft (Solidity.BinOp.add)) old=some (Solidity.RuleName.binopAssignment (Solidity.BinOp.add))",
   "x = x + total; kernel=some (Solidity.RuleName.binopUnfoldRight (Solidity.BinOp.add)) old=some (Solidity.RuleName.binopAssignment (Solidity.BinOp.add))",
   "Person storage r = persons[x + 1]; kernel=some (Solidity.RuleName.storageIndexReadUnfoldRightSndIndex) old=some (Solidity.RuleName.storageLocalDeclInitDrop)",
-  "Person storage sp = folks[x]; kernel=some (Solidity.RuleName.storageLocalDeclInitDrop) old=some (Solidity.RuleName.storagePlaceAlias)"]
+  "Person storage sp = folks[x]; kernel=some (Solidity.RuleName.storageLocalDeclInitDrop) old=some (Solidity.RuleName.storagePlaceAlias)",
+  "owner.transfer(1); kernel=some (Solidity.RuleName.transferUnfoldLeftFstReceiver) old=some (Solidity.RuleName.transferNoCallbackBox)",
+  "owner.transfer(x + 1); kernel=some (Solidity.RuleName.transferUnfoldLeftFstReceiver) old=some (Solidity.RuleName.transferUnfoldRightSndArgument)"]
 
--- And under a diamond.
-#guard bridgeTour.disagreements .diamond = bridgeTour.disagreements .box
+-- And under a diamond, up to the old table's box/diamond twins.
+#guard (bridgeTour.disagreements .diamond).map (·.replace "Diamond" "Box") =
+  bridgeTour.disagreements .box
 
 end Tour
 
