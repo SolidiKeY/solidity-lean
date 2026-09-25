@@ -65,17 +65,17 @@ theorem Val.eval_bool {Γ : Ctx} {σ : State} (hσ : Typed C Γ σ) (v : Val C �
   | int n => simp [Value.toSVal, SVal.hasTy] at this
 
 /-- What a premise means for the statement it replaces, under the modality
-`m`, from every state of the statement's context. -/
+`m`, from every state. -/
 def Premise.Correct (m : Modality) {Γ Γ' : Ctx} (s : Stmt C Γ Γ') : Premise C Γ Γ' → Prop
-  | .update U => ∀ σ, Typed C Γ σ → s.run σ = U.apply σ
+  | .update U => ∀ σ, s.run σ = U.apply σ
   | .unfold ns P _ =>
-    (∀ n ∈ ns, isFresh C Γ' n = true) ∧ ∀ σ, Typed C Γ σ → SameOk ns (P.run σ) (s.run σ)
-  | .split c P Q => ∀ σ, Typed C Γ σ → s.run σ = (do
+    (∀ n ∈ ns, isFresh C Γ' n = true) ∧ ∀ σ, SameOk ns (P.run σ) (s.run σ)
+  | .split c P Q => ∀ σ, s.run σ = (do
       match ← c.eval σ with
       | .bool true => P.run σ
       | .bool false => Q.run σ
       | .int _ => .error .stuck)
-  | .done b => ∀ σ, Typed C Γ σ → s.run σ = .error .revert ∧ (b = true ↔ m = .box)
+  | .done b => ∀ σ, s.run σ = .error .revert ∧ (b = true ↔ m = .box)
 
 /-! ## Binding a fresh name moves nothing -/
 
@@ -223,14 +223,14 @@ theorem Taclet.sound {m : Modality} {Γ Γ' : Ctx} {s : Stmt C Γ Γ'} {pr : Pre
     (d : Taclet C m s pr) : pr.Correct m s := by
   cases d
   all_goals first
-    | (intro σ _; rfl)
+    | (intro σ; rfl)
     | skip
-  case valueDeclSkip p x hx => intro σ _; cases p <;> rfl
-  case revertBox h => intro σ _; exact ⟨rfl, by simp [h]⟩
-  case revertDiamond h => intro σ _; exact ⟨rfl, by simp [h]⟩
+  case valueDeclSkip p x hx => intro σ; cases p <;> rfl
+  case revertBox h => intro σ; exact ⟨rfl, by simp [h]⟩
+  case revertDiamond h => intro σ; exact ⟨rfl, by simp [h]⟩
   case storageFieldWrite_unfold_leftFst s p nsp hn f hf e se sp hse hsp =>
     have hsp₀ := isFresh_of_sub (Ctx.Sub.fresh hse _) hsp
-    refine ⟨by simp [hse, hsp₀], fun σ _ => SameOk.of_agree ?_⟩
+    refine ⟨by simp [hse, hsp₀], fun σ => SameOk.of_agree ?_⟩
     simp only [Prog.run, Stmt.run, SPath.resolve_weaken, Simple.eval_weaken, Src.value, Val.eval,
       bind_pure]
     cases he : e.eval σ with
@@ -250,7 +250,7 @@ theorem Taclet.sound {m : Modality} {Γ Γ' : Ctx} {s : Stmt C Γ Γ'} {pr : Pre
         exact ((EnvAgreeExcept.refl [se, sp] σ).setEnv_left (n := se) (by simp) _).setEnv_left
           (n := sp) (by simp) _
   case storageFieldWriteStorageRef_unfold_leftFst s R nsp hn f hf src hm sp hsp =>
-    refine ⟨by simp [hsp], fun σ _ => ?_⟩
+    refine ⟨by simp [hsp], fun σ => ?_⟩
     simp only [Prog.run, Stmt.run, bind_pure, Loc.target, Loc.resolve, Src.value_copy_weaken]
     cases h₁ : nsp.resolve σ with
     | error e => cases Src.value σ (.copy src hm) <;> simp [bind, Except.bind, SameOk]
@@ -263,7 +263,7 @@ theorem Taclet.sound {m : Modality} {Γ Γ' : Ctx} {s : Stmt C Γ Γ'} {pr : Pre
 
   -- A value capture in front of a write: the source is read first either way.
   case storageRootWriteValueRhsCapture p r hΓ hr nse hn se hse =>
-    refine ⟨by simp [hse], fun σ _ => ?_⟩
+    refine ⟨by simp [hse], fun σ => ?_⟩
     simp only [Prog.run, Stmt.run, bind_pure, Src.value, SPath.resolve_weaken, Val.eval_weaken, Simple.eval_weaken, Loc.resolve_weaken, Loc.target_weaken, Src.value_weaken, Src.value_copy_weaken]
     cases nse.eval σ with
     | error _ => simp [SameOk, bind, Except.bind]
@@ -274,7 +274,7 @@ theorem Taclet.sound {m : Modality} {Γ Γ' : Ctx} {s : Stmt C Γ Γ'} {pr : Pre
       cases Loc.target σ (.root r hΓ hr) <;> simp [SameOk]
       exact SameOk.save (by agree_tac) _ _ _
   case fieldWriteValueRhsCapture s p sp hs f hf nse hn se hse =>
-    refine ⟨by simp [hse], fun σ _ => ?_⟩
+    refine ⟨by simp [hse], fun σ => ?_⟩
     simp only [Prog.run, Stmt.run, bind_pure, Src.value, SPath.resolve_weaken, Val.eval_weaken, Simple.eval_weaken, Loc.resolve_weaken, Loc.target_weaken, Src.value_weaken, Src.value_copy_weaken]
     cases nse.eval σ with
     | error _ => simp [SameOk, bind, Except.bind]
@@ -285,7 +285,7 @@ theorem Taclet.sound {m : Modality} {Γ Γ' : Ctx} {s : Stmt C Γ Γ'} {pr : Pre
       cases Loc.target σ (.field sp f hf) <;> simp [SameOk]
       exact SameOk.save (by agree_tac) _ _ _
   case indexWriteValueRhsCapture R₀ kp p it sp hs ie nse hn se hse =>
-    refine ⟨by simp [hse], fun σ _ => ?_⟩
+    refine ⟨by simp [hse], fun σ => ?_⟩
     simp only [Prog.run, Stmt.run, bind_pure, Src.value, SPath.resolve_weaken, Val.eval_weaken, Simple.eval_weaken, Loc.resolve_weaken, Loc.target_weaken, Src.value_weaken, Src.value_copy_weaken]
     cases nse.eval σ with
     | error _ => simp [SameOk, bind, Except.bind]
@@ -297,13 +297,13 @@ theorem Taclet.sound {m : Modality} {Γ Γ' : Ctx} {s : Stmt C Γ Γ'} {pr : Pre
       exact SameOk.save (by agree_tac) _ _ _
   -- `uint v = e` is `uint v; v = e`: `e` does not read the fresh `v`.
   case localValueDeclInitDrop p x hx e =>
-    refine ⟨by simp, fun σ _ => ?_⟩
+    refine ⟨by simp, fun σ => ?_⟩
     simp only [Prog.run, Stmt.run, bind_pure, Val.eval_weaken, bind, Except.bind, pure, Except.pure]
     rw [Val.eval_setEnv hx]
     cases e.eval σ <;> simp [SameOk, SemanticsProperties.State.setEnv_setEnv_absorb] <;> agree_tac
   -- Delete through a captured receiver.
   case storageFieldDelete_unfold_leftFst s T nsp hn f hf sp hsp =>
-    refine ⟨by simp [hsp], fun σ _ => ?_⟩
+    refine ⟨by simp [hsp], fun σ => ?_⟩
     simp only [Prog.run, Stmt.run, bind_pure, Loc.resolve]
     cases nsp.resolve σ with
     | error _ => simp [SameOk, bind, Except.bind]
@@ -312,7 +312,7 @@ theorem Taclet.sound {m : Modality} {Γ Γ' : Ctx} {s : Stmt C Γ Γ'} {pr : Pre
       cases σ.findStorage rs.1 (rs.2 ++ [.field f]) <;> simp [SameOk]
       exact SameOk.save (by agree_tac) _ _ _
   case storageIndexDelete_unfold_leftFst R₀ kp V it nsp hn e sp hsp =>
-    refine ⟨by simp [hsp], fun σ _ => ?_⟩
+    refine ⟨by simp [hsp], fun σ => ?_⟩
     simp only [Prog.run, Stmt.run, bind_pure, Loc.resolve, SPath.resolve_weaken, Val.eval_weaken, Simple.eval_weaken, Loc.resolve_weaken, Loc.target_weaken, Src.value_weaken, Src.value_copy_weaken]
     cases nsp.resolve σ with
     | error _ => simp [SameOk, bind, Except.bind]
@@ -330,7 +330,7 @@ theorem Taclet.sound {m : Modality} {Γ Γ' : Ctx} {s : Stmt C Γ Γ'} {pr : Pre
           cases σ.findStorage rs.1 (rs.2 ++ [.at i]) <;> simp [SameOk]
           exact SameOk.save (by agree_tac) _ _ _
   case storageIndexDeleteNonSimpleIndexCapture R₀ kp V it sp hs nse hn ie hie =>
-    refine ⟨by simp [hie], fun σ _ => ?_⟩
+    refine ⟨by simp [hie], fun σ => ?_⟩
     simp only [Prog.run, Stmt.run, bind_pure, Loc.resolve, SPath.resolve_weaken, Val.eval_weaken, Simple.eval_weaken, Loc.resolve_weaken, Loc.target_weaken, Src.value_weaken, Src.value_copy_weaken]
     cases h₁ : nse.eval σ with
     | error _ => cases sp.resolve σ <;> simp [SameOk, h₁, bind, Except.bind, pure, Except.pure]
@@ -349,7 +349,7 @@ theorem Taclet.sound {m : Modality} {Γ Γ' : Ctx} {s : Stmt C Γ Γ'} {pr : Pre
 
   -- A copy from a member or an entry, through a captured alias: same order.
   case storageFieldRead_unfold_rightSndResult s R l hl hm sp hs f hf se hse =>
-    refine ⟨by simp [hse], fun σ _ => ?_⟩
+    refine ⟨by simp [hse], fun σ => ?_⟩
     simp only [Prog.run, Stmt.run, bind_pure, Src.value, SPath.resolve, Loc.resolve, SPath.resolve_weaken, Val.eval_weaken, Simple.eval_weaken, Loc.resolve_weaken, Loc.target_weaken, Src.value_weaken, Src.value_copy_weaken]
     cases sp.resolve σ with
     | error _ => simp [SameOk, bind, Except.bind, pure, Except.pure]
@@ -364,7 +364,7 @@ theorem Taclet.sound {m : Modality} {Γ Γ' : Ctx} {s : Stmt C Γ Γ'} {pr : Pre
         cases Loc.target σ l <;> simp [SameOk]
         exact SameOk.save (by agree_tac) _ _ _
   case storageIndexRead_unfold_rightSndResult R₀ kp R l hl hm it sp hs ie se hse =>
-    refine ⟨by simp [hse], fun σ _ => ?_⟩
+    refine ⟨by simp [hse], fun σ => ?_⟩
     simp only [Prog.run, Stmt.run, bind_pure, Src.value, SPath.resolve, Loc.resolve, SPath.resolve_weaken, Val.eval_weaken, Simple.eval_weaken, Loc.resolve_weaken, Loc.target_weaken, Src.value_weaken, Src.value_copy_weaken]
     cases sp.resolve σ with
     | error _ => simp [SameOk, bind, Except.bind, pure, Except.pure]
@@ -393,7 +393,7 @@ theorem Taclet.sound {m : Modality} {Γ Γ' : Ctx} {s : Stmt C Γ Γ'} {pr : Pre
     have h₁ := ne_of_isFresh_setBy hsp
     have h₂ := ne_of_isFresh_setBy hie
     have h₃ := ne_of_bound_fresh ((Ctx.Sub.fresh hsp _).local_ _ _ (lookupBy_setBy_self ..)) hie
-    refine ⟨by simp [hse, hsp₀, hie₀], fun σ _ => ?_⟩
+    refine ⟨by simp [hse, hsp₀, hie₀], fun σ => ?_⟩
     simp only [Prog.run, Stmt.run, bind_pure, Src.value, Loc.target, Loc.resolve, SPath.resolve_weaken, Val.eval_weaken, Simple.eval_weaken, Loc.resolve_weaken, Loc.target_weaken, Src.value_weaken, Src.value_copy_weaken]
     cases e₂.eval σ with
     | error _ => simp [SameOk, bind, Except.bind, pure, Except.pure]
@@ -421,7 +421,7 @@ theorem Taclet.sound {m : Modality} {Γ Γ' : Ctx} {s : Stmt C Γ Γ'} {pr : Pre
   case storageIndexWriteStorageRef_unfold_leftFst R₀ kp R it nsp hn e src hm sp ie hsp hie =>
     have hie₀ := isFresh_of_sub (Ctx.Sub.fresh hsp _) hie
     have hne := ne_of_isFresh_setBy hie
-    refine ⟨by simp [hsp, hie₀], fun σ _ => ?_⟩
+    refine ⟨by simp [hsp, hie₀], fun σ => ?_⟩
     simp only [Prog.run, Stmt.run, bind_pure, Loc.target, Loc.resolve, SPath.resolve_weaken, Val.eval_weaken, Simple.eval_weaken, Loc.resolve_weaken, Loc.target_weaken, Src.value_weaken, Src.value_copy_weaken]
     cases h₁ : nsp.resolve σ with
     | error _ => cases Src.value σ (.copy src hm) <;> simp [SameOk, bind, Except.bind, pure, Except.pure, h₁]
@@ -444,7 +444,7 @@ theorem Taclet.sound {m : Modality} {Γ Γ' : Ctx} {s : Stmt C Γ Γ'} {pr : Pre
   case storageIndexWriteNonSimpleIndexCapture R₀ kp p it sp hs nse hn e se ie hse hie =>
     have hie₀ := isFresh_of_sub (Ctx.Sub.fresh hse _) hie
     have hne := ne_of_isFresh_setBy hie
-    refine ⟨by simp [hse, hie₀], fun σ _ => ?_⟩
+    refine ⟨by simp [hse, hie₀], fun σ => ?_⟩
     simp only [Prog.run, Stmt.run, bind_pure, Src.value, Loc.target, Loc.resolve, SPath.resolve_weaken, Val.eval_weaken, Simple.eval_weaken, Loc.resolve_weaken, Loc.target_weaken, Src.value_weaken, Src.value_copy_weaken]
     cases h₁ : e.eval σ with
     | error _ => simp [SameOk, bind, Except.bind, pure, Except.pure]
@@ -465,7 +465,7 @@ theorem Taclet.sound {m : Modality} {Γ Γ' : Ctx} {s : Stmt C Γ Γ'} {pr : Pre
             simp only [h₂, Value.asInt, Val.eval, SPath.new, SPath.resolve, envPath, Simple.new, Simple.eval, Simple.weaken, SPath.weaken, setEnv_env, lookupBy_setBy_self, getEnv_setEnv_self, bind, Except.bind, pure, Except.pure, getEnv_setEnv_ne _ hne]
             exact SameOk.save (by agree_tac) _ _ _
   case storageIndexWriteStorageRefNonSimpleIndexCapture R₀ kp R it sp hs nse hn src hm ie hie =>
-    refine ⟨by simp [hie], fun σ _ => ?_⟩
+    refine ⟨by simp [hie], fun σ => ?_⟩
     simp only [Prog.run, Stmt.run, bind_pure, Loc.target, Loc.resolve, SPath.resolve_weaken, Val.eval_weaken, Simple.eval_weaken, Loc.resolve_weaken, Loc.target_weaken, Src.value_weaken, Src.value_copy_weaken]
     cases h₁ : nse.eval σ with
     | error _ =>
@@ -489,7 +489,7 @@ theorem Taclet.sound {m : Modality} {Γ Γ' : Ctx} {s : Stmt C Γ Γ'} {pr : Pre
 
   -- Operators into a local.
   case binopUnfoldLeft p q op hop hq x h nse hn e se hse =>
-    refine ⟨by simp [hse], fun σ _ => ?_⟩
+    refine ⟨by simp [hse], fun σ => ?_⟩
     simp only [Prog.run, Stmt.run, bind_pure]
     cases hv : nse.eval σ with
     | error _ => simp [SameOk, bind, Except.bind, pure, Except.pure, Val.eval, hv]
@@ -498,7 +498,7 @@ theorem Taclet.sound {m : Modality} {Γ Γ' : Ctx} {s : Stmt C Γ Γ'} {pr : Pre
       rw [binop_left_eval hse op hop hq nse e _ σ hv]
       exact SameOk.setEnv_val (by agree_tac) _ _
   case binopUnfoldRight p q op hop hq hsc x h a nse hn se hse =>
-    refine ⟨by simp [hse], fun σ _ => ?_⟩
+    refine ⟨by simp [hse], fun σ => ?_⟩
     simp only [Prog.run, Stmt.run, bind_pure]
     cases hv : nse.eval σ with
     | error _ =>
@@ -511,7 +511,7 @@ theorem Taclet.sound {m : Modality} {Γ Γ' : Ctx} {s : Stmt C Γ Γ'} {pr : Pre
       rw [binop_right_eval hse op hop hq hsc a nse _ σ hv]
       exact SameOk.setEnv_val (by agree_tac) _ _
   case unopCapture p q op hop hq x h nse hn se hse =>
-    refine ⟨by simp [hse], fun σ _ => ?_⟩
+    refine ⟨by simp [hse], fun σ => ?_⟩
     simp only [Prog.run, Stmt.run, bind_pure]
     cases hv : nse.eval σ with
     | error _ => simp [SameOk, bind, Except.bind, pure, Except.pure, Val.eval, hv]
@@ -521,7 +521,7 @@ theorem Taclet.sound {m : Modality} {Γ Γ' : Ctx} {s : Stmt C Γ Γ'} {pr : Pre
       exact SameOk.setEnv_val (by agree_tac) _ _
   -- Short-circuit: in a state of `Γ` the right operand is a boolean.
   case logicalAndShortCircuitRhs hop hq x h a nse hn =>
-    refine ⟨by simp, fun σ hσ => ?_⟩
+    refine ⟨by simp, fun σ => ?_⟩
     simp only [Prog.run, Stmt.run, bind_pure, Val.eval]
     cases a.eval σ with
     | error _ => simp [SameOk, bind, Except.bind, pure, Except.pure]
@@ -529,20 +529,23 @@ theorem Taclet.sound {m : Modality} {Γ Γ' : Ctx} {s : Stmt C Γ Γ'} {pr : Pre
       cases lv with
       | int _ =>
         simp only [bind, Except.bind, pure, Except.pure]
-        cases hv : nse.eval σ <;> simp [SameOk, applyBinOp, Value.asBool, bind, Except.bind, pure, Except.pure]
+        cases nse.eval σ <;> simp [SameOk, applyBinOp, Value.asBool, bind, Except.bind, pure, Except.pure]
       | bool b =>
         cases b with
         | false => simp [SameOk, bind, Except.bind, pure, Except.pure, Simple.eval]; exact EnvAgreeExcept.refl _ _
         | true =>
           simp only [bind, Except.bind, pure, Except.pure]
-          cases hv : nse.eval σ with
+          cases nse.eval σ with
           | error _ => simp [SameOk]
           | ok w =>
-            obtain ⟨c, rfl⟩ := Val.eval_bool hσ nse hv
-            simp [SameOk, applyBinOp, Value.asBool, checkArith, bind, Except.bind, pure, Except.pure]
-            exact EnvAgreeExcept.refl _ _
+            cases w with
+            | int _ => simp [SameOk, applyBinOp, Value.asBool, Simple.eval, getEnv_setEnv_self, bind, Except.bind, pure, Except.pure]
+            | bool c =>
+              cases c <;> simp [SameOk, applyBinOp, Value.asBool, checkArith, Simple.eval,
+                getEnv_setEnv_self, SemanticsProperties.State.setEnv_setEnv_absorb, bind, Except.bind, pure, Except.pure] <;>
+                exact EnvAgreeExcept.refl _ _
   case logicalOrShortCircuitRhs hop hq x h a nse hn =>
-    refine ⟨by simp, fun σ hσ => ?_⟩
+    refine ⟨by simp, fun σ => ?_⟩
     simp only [Prog.run, Stmt.run, bind_pure, Val.eval]
     cases a.eval σ with
     | error _ => simp [SameOk, bind, Except.bind, pure, Except.pure]
@@ -550,21 +553,24 @@ theorem Taclet.sound {m : Modality} {Γ Γ' : Ctx} {s : Stmt C Γ Γ'} {pr : Pre
       cases lv with
       | int _ =>
         simp only [bind, Except.bind, pure, Except.pure]
-        cases hv : nse.eval σ <;> simp [SameOk, applyBinOp, Value.asBool, bind, Except.bind, pure, Except.pure]
+        cases nse.eval σ <;> simp [SameOk, applyBinOp, Value.asBool, bind, Except.bind, pure, Except.pure]
       | bool b =>
         cases b with
         | true => simp [SameOk, bind, Except.bind, pure, Except.pure, Simple.eval]; exact EnvAgreeExcept.refl _ _
         | false =>
           simp only [bind, Except.bind, pure, Except.pure]
-          cases hv : nse.eval σ with
+          cases nse.eval σ with
           | error _ => simp [SameOk]
           | ok w =>
-            obtain ⟨c, rfl⟩ := Val.eval_bool hσ nse hv
-            simp [SameOk, applyBinOp, Value.asBool, checkArith, bind, Except.bind, pure, Except.pure]
-            exact EnvAgreeExcept.refl _ _
+            cases w with
+            | int _ => simp [SameOk, applyBinOp, Value.asBool, Simple.eval, getEnv_setEnv_self, bind, Except.bind, pure, Except.pure]
+            | bool c =>
+              cases c <;> simp [SameOk, applyBinOp, Value.asBool, checkArith, Simple.eval,
+                getEnv_setEnv_self, SemanticsProperties.State.setEnv_setEnv_absorb, bind, Except.bind, pure, Except.pure] <;>
+                exact EnvAgreeExcept.refl _ _
   -- Step 1, for every `lhs`: read a member through a captured receiver.
   case storageFieldRead_unfold_rightFst s T nsp hn f hf sp k hsp =>
-    refine ⟨by simp [hsp], fun σ _ => ?_⟩
+    refine ⟨by simp [hsp], fun σ => ?_⟩
     cases k with
     | «local» x h =>
       simp only [Hole.fill, Hole.extend, Prog.run, Stmt.run, bind_pure, Src.value, SPath.resolve, Loc.resolve, SPath.resolve_weaken, Val.eval_weaken, Simple.eval_weaken, Loc.resolve_weaken, Loc.target_weaken, Src.value_weaken, Src.value_copy_weaken, Val.eval]
@@ -596,7 +602,7 @@ theorem Taclet.sound {m : Modality} {Γ Γ' : Ctx} {s : Stmt C Γ Γ'} {pr : Pre
           exact SameOk.save (by agree_tac) _ _ _
   -- Step 1, for every `lhs`: read an entry through a captured receiver.
   case storageIndexRead_unfold_rightFst R₀ kp V it nsp hn e sp k hsp =>
-    refine ⟨by simp [hsp], fun σ _ => ?_⟩
+    refine ⟨by simp [hsp], fun σ => ?_⟩
     have hsp₀ := isFresh_of_sub k.sub hsp
     cases k with
     | «local» x h =>
@@ -660,7 +666,7 @@ theorem Taclet.sound {m : Modality} {Γ Γ' : Ctx} {s : Stmt C Γ Γ'} {pr : Pre
   -- Step 1, for every `lhs`: capture a non-simple index (the receiver is
   -- then resolved after it).
   case storageIndexRead_unfold_rightSndIndex R₀ kp V it sp hs nse hn ie k hie =>
-    refine ⟨by simp [hie], fun σ _ => ?_⟩
+    refine ⟨by simp [hie], fun σ => ?_⟩
     have hie₀ := isFresh_of_sub k.sub hie
     cases k with
     | «local» x h =>
@@ -727,7 +733,7 @@ section Examples
 /-- `alice.age = 10;` is `storageFieldWriteSave`, and its update is the
 statement's effect from every state. -/
 example : match ksol[StandardExample]{ alice.age = 10; } with
-    | .cons s .nil => ∀ σ, Typed StandardExample [] σ → s.run σ = (Upd.save (.field (.loc (.root "alice" rfl rfl)) "age" rfl)
+    | .cons s .nil => ∀ σ, s.run σ = (Upd.save (.field (.loc (.root "alice" rfl rfl)) "age" rfl)
         (.val (.simple (.lit 10 rfl))) : Upd StandardExample []).apply σ
     | _ => False :=
   Taclet.sound (m := .box) (.storageFieldWriteSave _ rfl _ _ _)
@@ -737,7 +743,7 @@ example : match ksol[StandardExample]{ alice.age = 10; } with
 off the fresh `se` and `sp`. -/
 example : match ksol[StandardExample]{ folks[1].age = 10; } with
     | .cons s .nil => ∃ ns Γ₁ P h, Taclet StandardExample .diamond s (.unfold (Γ₁ := Γ₁) ns P h) ∧
-        ∀ σ, Typed StandardExample [] σ → SameOk ns (P.run σ) (s.run σ)
+        ∀ σ, SameOk ns (P.run σ) (s.run σ)
     | _ => False :=
   let d := Taclet.storageFieldWrite_unfold_leftFst (m := .diamond) _ rfl _ rfl _ "se" "sp" rfl rfl
   ⟨_, _, _, _, d, (Taclet.sound d).2⟩
