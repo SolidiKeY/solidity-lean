@@ -92,6 +92,7 @@ def ternaryStep {Γ : Ctx} {p : PrimTy} (k : VHole C Γ p) (c : Val C Γ .bool) 
     match k with
     | .local x h => ⟨_, .ternaryToIf x h c a b⟩
     | .store l => ⟨_, .ternaryToIfStorage l c a b⟩
+    | .mem l => ⟨_, .ternaryToIfMemory l c a b⟩
   | .read l => ⟨_, .ternaryCaptureCond k (.read l) rfl a b _ (freshName_isFresh C Γ "se")⟩
   | .binop op hop hq x y => ⟨_, .ternaryCaptureCond k (.binop op hop hq x y) rfl a b _ (freshName_isFresh C Γ "se")⟩
   | .unop op hop hq x => ⟨_, .ternaryCaptureCond k (.unop op hop hq x) rfl a b _ (freshName_isFresh C Γ "se")⟩
@@ -338,6 +339,14 @@ def opStep {Γ : Ctx} {p : PrimTy} (op : BinOp) (hop : op.hasCompoundAssign = tr
         | .arr, b, ie, hb => ⟨_, .storageIndexArrayOpAssign op hop hp b hb ie se⟩
       else ⟨_, .storageIndexOpAssignUnfoldLeftFst op hop hp it b (not_simple hb) ie se _
         (freshName_isFresh C Γ "sp")⟩
+    | .mfield b f h =>
+      if hb : b.isSimple = true then ⟨_, .memoryFieldOpAssign op hop hp b hb f h se⟩
+      else ⟨_, .memoryFieldOpAssignUnfoldLeftFst op hop hp b (not_simple hb) f h se _
+        (freshName_isFresh C Γ "mv")⟩
+    | .mindex b ie =>
+      if hb : b.isSimple = true then ⟨_, .memoryIndexArrayOpAssign op hop hp b hb ie se⟩
+      else ⟨_, .memoryIndexOpAssignUnfoldLeftFst op hop hp b (not_simple hb) ie se _
+        (freshName_isFresh C Γ "mv")⟩
 
 /-- The rule for `l++;`: capture a non-simple receiver. -/
 def incStep {Γ : Ctx} {p : PrimTy} (op : IncDec) (hp : p.isNumeric = true) :
@@ -351,6 +360,12 @@ def incStep {Γ : Ctx} {p : PrimTy} (op : IncDec) (hp : p.isNumeric = true) :
     if hb : b.isSimple = true then ⟨_, .storageIndexIncrement op hp it b hb ie⟩
     else ⟨_, .storageIndexIncrementUnfoldLeftFst op hp it b (not_simple hb) ie _
       (freshName_isFresh C Γ "sp")⟩
+  | .mfield b f h =>
+    if hb : b.isSimple = true then ⟨_, .memoryFieldIncrement op hp b hb f h⟩
+    else ⟨_, .memoryFieldIncrementUnfoldLeftFst op hp b (not_simple hb) f h _ (freshName_isFresh C Γ "mv")⟩
+  | .mindex b ie =>
+    if hb : b.isSimple = true then ⟨_, .memoryIndexArrayIncrement op hp b hb ie⟩
+    else ⟨_, .memoryIndexIncrementUnfoldLeftFst op hp b (not_simple hb) ie _ (freshName_isFresh C Γ "mv")⟩
 
 /-- The rule for `y = l++;`, whose receiver is simple. -/
 def assignIncStep {Γ : Ctx} {p : PrimTy} (y : Name) (hy : lookupBy y Γ = some (.stack (.prim p)))
@@ -360,6 +375,8 @@ def assignIncStep {Γ : Ctx} {p : PrimTy} (y : Name) (hy : lookupBy y Γ = some 
   | .root r hΓ h, rfl => ⟨_, .storageRootIncrementAssignment y hy op hp r hΓ h⟩
   | .field b f h, hs => ⟨_, .storageFieldIncrementAssignment y hy op hp b f h hs⟩
   | .index it b ie, hs => ⟨_, .storageIndexIncrementAssignment y hy op hp it b ie hs⟩
+  | .mfield b f h, hs => ⟨_, .memoryFieldIncrementAssignment y hy op hp b f h hs⟩
+  | .mindex b ie, hs => ⟨_, .memoryIndexArrayIncrementAssignment y hy op hp b ie hs⟩
 
 /-- The rule for a push: the receiver first, then the argument. -/
 def pushStep {Γ : Ctx} {E : Ty} (b : SPath C Γ (.array E)) (v : Option (Src C Γ E))
@@ -453,6 +470,7 @@ def declMemStep {Γ : Ctx} (R : RefTy) (x : Name) (hx : isFresh C Γ x = true) :
 
 /-- A memory location written. -/
 def assignMemStep {Γ : Ctx} {T : Ty} : (l : MLoc C Γ T) → (r : MSrc C Γ T) → Step C m (.assignMem l r)
+  | l, .val (.ternary c a d) => ternaryStep m (.mem l) c a d
   | .field b f hf, .val v =>
     if hb : b.isSimple = true then
       if hv : v.isSimple = true then

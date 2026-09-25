@@ -52,11 +52,6 @@ def Val.isSimple {Γ : Ctx} {p : PrimTy} : Val C Γ p → Bool
   | .simple _ => true
   | _ => false
 
-/-- A simple memory path (`mv`): a memory local. -/
-def MPath.isSimple {Γ : Ctx} {T : Ty} : MPath C Γ T → Bool
-  | .var .. => true
-  | .loc _ => false
-
 /-- A memory path a memory local can be bound to directly: one step from a
 simple path, on a simple index. -/
 def MPath.isBindable {Γ : Ctx} {T : Ty} : MPath C Γ T → Bool
@@ -244,15 +239,18 @@ local, `l = •` into storage. -/
 inductive VHole (C : Contract) (Γ : Ctx) : PrimTy → Type where
   | local {p : PrimTy} (x : Name) (h : lookupBy x Γ = some (.stack (.prim p))) : VHole C Γ p
   | store {p : PrimTy} (l : Loc C Γ (.prim p)) : VHole C Γ p
+  | mem {p : PrimTy} (l : MLoc C Γ (.prim p)) : VHole C Γ p
 
 /-- The statement, with the value in the hole. -/
 def VHole.fill {Γ : Ctx} {p : PrimTy} : VHole C Γ p → Val C Γ p → Stmt C Γ Γ
   | .local x h, v => .assignLocal x h v
   | .store l, v => .assign l (.val v)
+  | .mem l, v => .assignMem l (.val v)
 
 def VHole.weaken {Γ Γ' : Ctx} (h : Ctx.Sub C Γ Γ') {p : PrimTy} : VHole C Γ p → VHole C Γ' p
   | .local x hx => .local x (h.local_ _ _ hx)
   | .store l => .store (l.weaken h)
+  | .mem l => .mem (l.weaken h)
 
 /-- A simple source: a simple value, or a copy from a simple path. -/
 def Src.isSimple {Γ : Ctx} {T : Ty} : Src C Γ T → Bool
@@ -1058,6 +1056,13 @@ inductive Taclet (C : Contract) (m : Modality) : {Γ Γ' : Ctx} → Stmt C Γ Γ
       .assign l (.val (.ternary (.simple c) a b)) ⇒
         .unfold [] (.cons (.ite c (.cons (.assign l (.val a)) .nil) (.cons (.assign l (.val b)) .nil)) .nil)
           (Ctx.Sub.refl _)
+  /-- `mpath = se ? e1 : e2 ⇝ if (se) { mpath = e1 } else { mpath = e2 }` (Lean's own:
+  solkey has no memory twin). -/
+  | ternaryToIfMemory {Γ : Ctx} {p : PrimTy} (l : MLoc C Γ (.prim p)) (c : Simple C Γ .bool)
+      (a b : Val C Γ p) :
+      .assignMem l (.val (.ternary (.simple c) a b)) ⇒
+        .unfold [] (.cons (.ite c (.cons (.assignMem l (.val a)) .nil) (.cons (.assignMem l (.val b)) .nil)) .nil)
+          (Ctx.Sub.refl _)
   /-- `lhs = nse ? e1 : e2 ⇝ bool se = nse; lhs = se ? e1 : e2`. -/
   | ternaryCaptureCond {Γ : Ctx} {p : PrimTy} (k : VHole C Γ p) (nse : Val C Γ .bool)
       (hn : nse.isSimple = false) (a b : Val C Γ p) (se : Name) (hse : isFresh C Γ se = true) :
@@ -1198,6 +1203,75 @@ inductive Taclet (C : Contract) (m : Modality) : {Γ Γ' : Ctx} → Stmt C Γ Γ
   no funds split, the update reverts as the statement does. -/
   | transferNoCallback {Γ : Ctx} (r a : Simple C Γ .uint) :
       .transfer (.simple r) (.simple a) ⇒ .update (.transfer r a)
+  -- Memory arithmetic
+  /-- `mv.fld ⊕= se ⇝ {mv.fld := mv.fld ⊕ se}`. -/
+  | memoryFieldOpAssign {Γ : Ctx} {s : Name} {p : PrimTy} (op : BinOp) (hop : op.hasCompoundAssign = true)
+      (hp : p.isNumeric = true) (b : MPath C Γ (.struct s)) (hb : b.isSimple = true) (f : Name)
+      (hf : C.fieldType s f = some (.prim p)) (se : Simple C Γ p) :
+      .opAssign op hop hp (.mfield b f hf) (.simple se) ⇒ .update (.opSave op (.mfield b f hf) se)
+  /-- `mv[ie] ⊕= se ⇝ {mv[ie] := mv[ie] ⊕ se}`: no bounds split. -/
+  | memoryIndexArrayOpAssign {Γ : Ctx} {p : PrimTy} (op : BinOp) (hop : op.hasCompoundAssign = true)
+      (hp : p.isNumeric = true) (b : MPath C Γ (.array (.prim p))) (hb : b.isSimple = true)
+      (ie : Simple C Γ .uint) (se : Simple C Γ p) :
+      .opAssign op hop hp (.mindex b ie) (.simple se) ⇒ .update (.opSave op (.mindex b ie) se)
+  /-- `nmp.fld ⊕= se ⇝ T memory mv = nmp; mv.fld ⊕= se`. -/
+  | memoryFieldOpAssignUnfoldLeftFst {Γ : Ctx} {s : Name} {p : PrimTy} (op : BinOp)
+      (hop : op.hasCompoundAssign = true) (hp : p.isNumeric = true) (nmp : MPath C Γ (.struct s))
+      (hn : nmp.isSimple = false) (f : Name) (hf : C.fieldType s f = some (.prim p)) (se : Simple C Γ p)
+      (mv : Name) (hmv : isFresh C Γ mv = true) :
+      .opAssign op hop hp (.mfield nmp f hf) (.simple se) ⇒
+        .unfold [mv]
+          (.cons (.declMem (.struct s) mv hmv (some (.alias nmp)) rfl)
+          (.cons (.opAssign op hop hp (.mfield (MPath.new mv _) f hf) (.simple (se.weaken (Ctx.Sub.fresh hmv _))))
+            .nil))
+          (Ctx.Sub.fresh hmv _)
+  /-- `nmp[ie] ⊕= se ⇝ T memory mv = nmp; mv[ie] ⊕= se`. -/
+  | memoryIndexOpAssignUnfoldLeftFst {Γ : Ctx} {p : PrimTy} (op : BinOp) (hop : op.hasCompoundAssign = true)
+      (hp : p.isNumeric = true) (nmp : MPath C Γ (.array (.prim p))) (hn : nmp.isSimple = false)
+      (ie : Simple C Γ .uint) (se : Simple C Γ p) (mv : Name) (hmv : isFresh C Γ mv = true) :
+      .opAssign op hop hp (.mindex nmp ie) (.simple se) ⇒
+        .unfold [mv]
+          (.cons (.declMem (.array (.prim p)) mv hmv (some (.alias nmp)) rfl)
+          (.cons (.opAssign op hop hp (.mindex (MPath.new mv _) (ie.weaken (Ctx.Sub.fresh hmv _)))
+            (.simple (se.weaken (Ctx.Sub.fresh hmv _)))) .nil))
+          (Ctx.Sub.fresh hmv _)
+  /-- `mv.fld++ ⇝ {bump(mv.fld++)}`. -/
+  | memoryFieldIncrement {Γ : Ctx} {s : Name} {p : PrimTy} (op : IncDec) (hp : p.isNumeric = true)
+      (b : MPath C Γ (.struct s)) (hb : b.isSimple = true) (f : Name) (hf : C.fieldType s f = some (.prim p)) :
+      .incDec op hp (.mfield b f hf) ⇒ .update (.bump op (.mfield b f hf))
+  /-- `mv[ie]++ ⇝ {bump(mv[ie]++)}`: no bounds split. -/
+  | memoryIndexArrayIncrement {Γ : Ctx} {p : PrimTy} (op : IncDec) (hp : p.isNumeric = true)
+      (b : MPath C Γ (.array (.prim p))) (hb : b.isSimple = true) (ie : Simple C Γ .uint) :
+      .incDec op hp (.mindex b ie) ⇒ .update (.bump op (.mindex b ie))
+  /-- `nmp.fld++ ⇝ T memory mv = nmp; mv.fld++`. -/
+  | memoryFieldIncrementUnfoldLeftFst {Γ : Ctx} {s : Name} {p : PrimTy} (op : IncDec) (hp : p.isNumeric = true)
+      (nmp : MPath C Γ (.struct s)) (hn : nmp.isSimple = false) (f : Name) (hf : C.fieldType s f = some (.prim p))
+      (mv : Name) (hmv : isFresh C Γ mv = true) :
+      .incDec op hp (.mfield nmp f hf) ⇒
+        .unfold [mv]
+          (.cons (.declMem (.struct s) mv hmv (some (.alias nmp)) rfl)
+          (.cons (.incDec op hp (.mfield (MPath.new mv _) f hf)) .nil))
+          (Ctx.Sub.fresh hmv _)
+  /-- `nmp[ie]++ ⇝ T memory mv = nmp; mv[ie]++`. -/
+  | memoryIndexIncrementUnfoldLeftFst {Γ : Ctx} {p : PrimTy} (op : IncDec) (hp : p.isNumeric = true)
+      (nmp : MPath C Γ (.array (.prim p))) (hn : nmp.isSimple = false) (ie : Simple C Γ .uint) (mv : Name)
+      (hmv : isFresh C Γ mv = true) :
+      .incDec op hp (.mindex nmp ie) ⇒
+        .unfold [mv]
+          (.cons (.declMem (.array (.prim p)) mv hmv (some (.alias nmp)) rfl)
+          (.cons (.incDec op hp (.mindex (MPath.new mv _) (ie.weaken (Ctx.Sub.fresh hmv _)))) .nil))
+          (Ctx.Sub.fresh hmv _)
+  /-- `lv = mv.fld++ ⇝ {bump(mv.fld++) || lv := mv.fld++}`. -/
+  | memoryFieldIncrementAssignment {Γ : Ctx} {s : Name} {p : PrimTy} (y : Name)
+      (hy : lookupBy y Γ = some (.stack (.prim p))) (op : IncDec) (hp : p.isNumeric = true)
+      (b : MPath C Γ (.struct s)) (f : Name) (hf : C.fieldType s f = some (.prim p))
+      (hs : (OpLoc.mfield b f hf).recvSimple = true) :
+      .assignIncDec y hy op hp (.mfield b f hf) hs ⇒ .update (.bumpBind y op (.mfield b f hf))
+  /-- `lv = mv[ie]++ ⇝ {bump(mv[ie]++) || lv := mv[ie]++}`. -/
+  | memoryIndexArrayIncrementAssignment {Γ : Ctx} {p : PrimTy} (y : Name)
+      (hy : lookupBy y Γ = some (.stack (.prim p))) (op : IncDec) (hp : p.isNumeric = true)
+      (b : MPath C Γ (.array (.prim p))) (ie : Simple C Γ .uint) (hs : (OpLoc.mindex b ie).recvSimple = true) :
+      .assignIncDec y hy op hp (.mindex b ie) hs ⇒ .update (.bumpBind y op (.mindex b ie))
   -- Increment and decrement
   /-- `lv++ ⇝ {bump(lv++)}`. -/
   | localIncrement {Γ : Ctx} {p : PrimTy} (op : IncDec) (hp : p.isNumeric = true) (x : Name)

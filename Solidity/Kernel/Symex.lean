@@ -251,7 +251,7 @@ macro_rules
       opStore, opLocal, pickBranch, pushAt, popAt, Src.pushVal, pushSlot, transferAt, State.setNet, State.getNet,
       MPath.mval, MLoc.read, MLoc.write, MSrc.mval, MRhs.bind, memWriteField, memWriteIndex,
       MVal.asRef, MVal.asValue, Value.toMVal, allocDefault, copyStToM, copyStFields, copyStElems,
-      State.getObj, State.setObj, State.alloc, copyMem, copyMToSt, copyMFields, copyMElems, OpLoc.bump, bumpStore, bumpLocal, IncDec.isPre, IncDec.isIncrement,
+      State.getObj, State.setObj, State.alloc, opMem, bumpMem, readLoc, writeLoc, copyMem, copyMToSt, copyMFields, copyMElems, OpLoc.bump, bumpStore, bumpLocal, IncDec.isPre, IncDec.isIncrement,
       State.findStorage, State.setEnv, State.getEnv, SVal.save, SVal.find, SVal.asValue,
       SVal.defaultOf, defaultForRef, defaultForTy, defaultForFields, structDef, Functor.map,
       Except.map, lookupBy, setBy, SemanticsProperties.lookupBy_setBy_self,
@@ -353,6 +353,14 @@ set_option maxHeartbeats 2000000 in
 example : (Kont.modal .diamond exBack (.post .tt)).vc 80
     (.assume fun σ => σ.storage = StandardExample.initStorage ∧ σ.heap = [] ∧ σ.nextId = 0 ∧ σ.env = []) := by
   unfold exBack; symex <;> symex_close [initStorage_standardExample, State.exampleStore]
+
+def exMemOp := ksol{ Person memory m; m.age += 3; m.age++; bool b = true; m.age = b ? m.age * 2 : 0; uint x = m.age; assert(x == 8); }
+
+set_option maxHeartbeats 2000000 in
+/-- Arithmetic on a memory member, and a conditional into it. -/
+example : (Kont.modal .diamond exMemOp (.post .tt)).vc 120
+    (.assume fun σ => σ.heap = [] ∧ σ.nextId = 0 ∧ σ.env = []) := by
+  unfold exMemOp; symex <;> symex_close
 
 /-- A false specification leaves a goal no evaluation closes. -/
 example : True := by

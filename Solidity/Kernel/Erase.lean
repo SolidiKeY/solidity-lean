@@ -216,6 +216,8 @@ def OpLoc.toPlace {C : Contract} {Γ : Ctx} {p : PrimTy} : OpLoc C Γ p → Plac
   | .root r hΓ h => (Loc.root r hΓ h).toPlace
   | .field b f h => (Loc.field b f h).toPlace
   | .index it b i => (Loc.index it b (.simple i)).toPlace
+  | .mfield b f h => (MLoc.field b f h).toPlace
+  | .mindex b i => (MLoc.index b (.simple i)).toPlace
 
 theorem BinOp.isArith_of_compound {op : BinOp} (h : op.hasCompoundAssign = true) :
     op.isArith = true := by
@@ -227,6 +229,8 @@ theorem OpLoc.erase_ty {C : Contract} {Γ : Ctx} {p : PrimTy} :
   | .root r hΓ h => (Loc.root r hΓ h).erase_ty
   | .field b f h => (Loc.field b f h).erase_ty
   | .index it b i => (Loc.index it b (.simple i)).erase_ty
+  | .mfield b f h => (MLoc.field b f h).erase_ty
+  | .mindex b i => (MLoc.index b (.simple i)).erase_ty
 
 theorem OpLoc.erase_wt {C : Contract} {Γ : Ctx} {p : PrimTy} :
     (l : OpLoc C Γ p) → wtExpr Γ C.layout l.toPlace.expr = true
@@ -234,6 +238,8 @@ theorem OpLoc.erase_wt {C : Contract} {Γ : Ctx} {p : PrimTy} :
   | .root r hΓ h => (Loc.root r hΓ h).erase_wt
   | .field b f h => (Loc.field b f h).erase_wt
   | .index it b i => (Loc.index it b (.simple i)).erase_wt
+  | .mfield b f h => (MLoc.field b f h).erase_wt
+  | .mindex b i => (MLoc.index b (.simple i)).erase_wt
 
 mutual
 

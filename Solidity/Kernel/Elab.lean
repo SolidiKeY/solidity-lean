@@ -392,7 +392,19 @@ def elabOpTarget (C : Contract) (Γ : Ctx) (l : RawExpr) :
       | .path (.prim p') (.loc (.index it' b' (.simple ie))) =>
         pure ⟨_, .cons (.declLocal k x hx (some i)) .nil, p', .index it' b' ie⟩
       | _ => throw "the captured index did not read back"
-  | _ => throw "a compound assignment needs a local or a storage place of value type"
+  | .mpath (.prim p) (.loc (.field b f h)) => pure ⟨Γ, .nil, p, .mfield b f h⟩
+  | .mpath (.prim p) (.loc (.index b i)) =>
+    match i.toSimple? with
+    | some ie => pure ⟨Γ, .nil, p, .mindex b ie⟩
+    | none =>
+      let .index e _ := l | throw "an index target that is not an index"
+      let x := freshName C Γ "ie"
+      let hx := freshName_isFresh C Γ "ie"
+      match ← synth C (setBy x (.stack (.prim .uint)) Γ) (.index e (.name x)) with
+      | .mpath (.prim p') (.loc (.index b' (.simple ie))) =>
+        pure ⟨_, .cons (.declLocal .uint x hx (some i)) .nil, p', .mindex b' ie⟩
+      | _ => throw "the captured index did not read back"
+  | _ => throw "a compound assignment needs a local or a place of value type"
 
 /-- An inc/dec target for an assignment form: as `elabOpTarget`, with a
 non-simple receiver captured into a fresh `sp` first (`y = folks[i].age++;`
@@ -410,6 +422,13 @@ def elabIncTarget (C : Contract) (Γ : Ctx) (l : RawExpr) :
       let ⟨Γ₂, pre, p, t⟩ ← elabOpTarget C (setBy x (.path (.ref R)) Γ) (rebuild (.name x))
       match hs : t.recvSimple with
       | true => pure ⟨Γ₂, .cons (.declStorage true R x hx b) pre, p, t, hs⟩
+      | false => throw "the captured receiver did not read back"
+    | .mpath (.ref R) b =>
+      let x := freshName C Γ "mv"
+      let hx := freshName_isFresh C Γ "mv"
+      let ⟨Γ₂, pre, p, t⟩ ← elabOpTarget C (setBy x (.mem (.ref R)) Γ) (rebuild (.name x))
+      match hs : t.recvSimple with
+      | true => pure ⟨Γ₂, .cons (.declMem R x hx (some (.alias b)) rfl) pre, p, t, hs⟩
       | false => throw "the captured receiver did not read back"
     | .path .. | .mpath .. | .val .. => throw "a receiver that is a value"
   let ⟨Γ₁, pre, p, t⟩ ← elabOpTarget C Γ l
@@ -661,6 +680,11 @@ def OpLoc.quote (Γ : Ctx) : (p : PrimTy) → OpLoc C Γ p → Lean.Expr
   | p, @OpLoc.index _ _ R k _ it b i =>
     mkAppN (mkConst ``OpLoc.index) #[c, toExpr Γ, toExpr R, toExpr k, toExpr p, IndexTy.quote it,
       SPath.quote c Γ _ b, Simple.quote c Γ k i]
+  | p, @OpLoc.mfield _ _ s _ b f _ =>
+    mkAppN (mkConst ``OpLoc.mfield) #[c, toExpr Γ, toExpr s, toExpr p,
+      MPath.quote c Γ _ b, toExpr f, quoteRefl optTy (someE (mkConst ``Ty) (toExpr (Ty.prim p)))]
+  | p, .mindex b i =>
+    mkAppN (mkConst ``OpLoc.mindex) #[c, toExpr Γ, toExpr p, MPath.quote c Γ _ b, Simple.quote c Γ .uint i]
 
 def MRhs.quote (Γ : Ctx) (R : RefTy) : MRhs C Γ R → Lean.Expr
   | .alias p => mkAppN (mkConst ``MRhs.alias) #[c, toExpr Γ, toExpr R, MPath.quote c Γ (.ref R) p]
