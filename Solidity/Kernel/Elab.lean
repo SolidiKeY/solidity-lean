@@ -284,8 +284,12 @@ def elabStmt (C : Contract) (Γ : Ctx) : RawStmt → Except String (TStmt C Γ)
     match ← synth C Γ l with
     | .val p (.local x h) => pure ⟨Γ, .assignLocal x h (← check C Γ p r)⟩
     | .val .. => throw "assigning to a value"
-    | .path (.prim p) l => pure ⟨Γ, .assign l (.val (← check C Γ p r))⟩
-    | .path (.ref R) l => pure ⟨Γ, .assign l (.path (← checkPath C Γ (.ref R) r))⟩
+    | .path (.prim p) (.loc l) => pure ⟨Γ, .assign l (.val (← check C Γ p r))⟩
+    | .path (.ref R) (.loc l) =>
+      match h : (Ty.ref R).mapFree with
+      | true => pure ⟨Γ, .assign l (.copy (← checkPath C Γ (.ref R) r) h)⟩
+      | false => throw "a storage copy of a type that holds a mapping"
+    | .path (.ref R) (.alias x h) => pure ⟨Γ, .rebind x h (← checkPath C Γ (.ref R) r)⟩
   | .decl T x init => do
     let .prim p := elabTy T | throw s!"{x}: a reference type needs a data location"
     pure ⟨_, .declLocal p x (← init.mapM (check C Γ p))⟩
@@ -387,8 +391,8 @@ end
 
 def Src.quote (Γ : Ctx) : (T : Ty) → Src C Γ T → Lean.Expr
   | _, @Src.val _ _ p v => mkAppN (mkConst ``Src.val) #[c, toExpr Γ, toExpr p, Val.quote c Γ p v]
-  | _, @Src.path _ _ R p =>
-    mkAppN (mkConst ``Src.path) #[c, toExpr Γ, toExpr R, SPath.quote c Γ (.ref R) p]
+  | _, @Src.copy _ _ R p _ =>
+    mkAppN (mkConst ``Src.copy) #[c, toExpr Γ, toExpr R, SPath.quote c Γ (.ref R) p, boolTrue]
 
 def valTy (Γ : Ctx) (p : PrimTy) : Lean.Expr :=
   mkAppN (mkConst ``Val) #[c, toExpr Γ, toExpr p]
@@ -397,8 +401,12 @@ mutual
 
 def Stmt.quote : (Γ Γ' : Ctx) → Stmt C Γ Γ' → Lean.Expr
   | Γ, _, @Stmt.assign _ _ T l r =>
-    mkAppN (mkConst ``Stmt.assign) #[c, toExpr Γ, toExpr T, SPath.quote c Γ T l,
+    mkAppN (mkConst ``Stmt.assign) #[c, toExpr Γ, toExpr T, Loc.quote c Γ T l,
       Src.quote c Γ T r]
+  | Γ, _, @Stmt.rebind _ _ R x _ r =>
+    mkAppN (mkConst ``Stmt.rebind) #[c, toExpr Γ, toExpr R, toExpr x,
+      quoteRefl optBTy (someE (mkConst ``BTy) (toExpr (BTy.path (.ref R)))),
+      SPath.quote c Γ (.ref R) r]
   | Γ, _, @Stmt.assignLocal _ _ p x _ r =>
     mkAppN (mkConst ``Stmt.assignLocal) #[c, toExpr Γ, toExpr p, toExpr x,
       quoteRefl optBTy (someE (mkConst ``BTy) (toExpr (BTy.stack (.prim p)))),
@@ -529,6 +537,13 @@ example : (ksol{ uint age = 1; age = 2; }).toStr = "uint age = 1; age = 2;" := r
 
 /-- error: Solidity elaboration failed: a branch may not declare a variable -/
 #guard_msgs in #check ksol{ if (true) { uint t = 1; } else { }; }
+
+/-- error: Solidity elaboration failed: a storage copy of a type that holds a mapping -/
+#guard_msgs in #check ksol{ wallet = wallet; }
+
+/-- An alias assigned a path is rebound, not written through. -/
+example : (ksol{ Person storage p = alice; p = bob; }).toStr =
+    "Person storage p = alice; p = bob;" := rfl
 
 end Examples
 

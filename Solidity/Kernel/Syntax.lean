@@ -37,7 +37,10 @@ the verdicts):
 * an operator is applied at the primitive type it accepts
   (`assignOperatorRhsRefTyped`); a source is a `Val` at a primitive type or a
   storage path at a reference type, never a path at a primitive type, so the
-  two readings of `x = alice.age` are one.
+  two readings of `x = alice.age` are one;
+* a storage write and an alias rebinding are different statements, and a
+  copied type holds no mapping (the interpreter's `rhsToSVal` is stuck on one,
+  and solc rejects the program).
 -/
 
 namespace Solidity
@@ -120,11 +123,14 @@ inductive Val (C : Contract) (Γ : Ctx) : PrimTy → Type where
 
 end
 
-/-- The source of an assignment: a value at a primitive type, a storage path
-(copied, or aliased) at a reference type. -/
+/-- The source of a storage write: a value at a primitive type, or a storage
+path at a reference type, copied.  A copied type holds no mapping: solc ≥ 0.7
+rejects the copy otherwise, and the interpreter is stuck on it
+(`rhsToSVal`). -/
 inductive Src (C : Contract) (Γ : Ctx) : Ty → Type where
   | val {p : PrimTy} (v : Val C Γ p) : Src C Γ (.prim p)
-  | path {R : RefTy} (p : SPath C Γ (.ref R)) : Src C Γ (.ref R)
+  | copy {R : RefTy} (p : SPath C Γ (.ref R)) (h : (Ty.ref R).mapFree = true) :
+      Src C Γ (.ref R)
 
 /-! ## Statements -/
 
@@ -132,8 +138,12 @@ mutual
 
 /-- A statement, from context `Γ` to context `Γ'`. -/
 inductive Stmt (C : Contract) : Ctx → Ctx → Type where
-  /-- `alice.age = 10;`, `alice = bob;`, `p = bob;` (an alias rebinds). -/
-  | assign {Γ : Ctx} {T : Ty} (l : SPath C Γ T) (r : Src C Γ T) : Stmt C Γ Γ
+  /-- A storage write, `alice.age = 10;`, `alice = bob;`, `p.age = 1;`. -/
+  | assign {Γ : Ctx} {T : Ty} (l : Loc C Γ T) (r : Src C Γ T) : Stmt C Γ Γ
+  /-- `p = bob;` with `p` an alias: the alias now points at `bob`, nothing is
+  copied. -/
+  | rebind {Γ : Ctx} {R : RefTy} (x : Name) (h : lookupBy x Γ = some (.path (.ref R)))
+      (r : SPath C Γ (.ref R)) : Stmt C Γ Γ
   /-- `x = alice.age;` -/
   | assignLocal {Γ : Ctx} {p : PrimTy} (x : Name)
       (h : lookupBy x Γ = some (.stack (.prim p))) (r : Val C Γ p) : Stmt C Γ Γ
