@@ -407,13 +407,13 @@ One row per constructor of `Coverage.ResidueShape`, filled in phase 2:
 |---|---|
 | `iteSymbolicCond` | *rule*: `ifElseSplit`, a `split` premise (phase 3), on a `Simple` condition; a complex one is captured by `ksol` |
 | `incDecStmt` | storage and stack *unrepresentable*: `Stmt.incDec` takes an `OpLoc` (a local, a state variable, a member, an entry at a simple index; `ksol` captures a complex index). Memory targets open |
-| `assignMemFieldFromStorage` | open |
-| `assignMemIndexFromStorage` | open |
+| `assignMemFieldFromStorage` | a storage *value* into a memory member is a rule (`memoryFieldWriteUnfoldSource` captures the read); a storage *reference* into one is *unrepresentable*: `MSrc` is a value or a memory reference, no copy form |
+| `assignMemIndexFromStorage` | as `assignMemFieldFromStorage`, with `memoryIndexWriteUnfoldSource` |
 | `assignStackRefUnfoldTarget` | *unrepresentable*: a stack local has a primitive type (`Val.local`) |
 | `assignPushPlaceLhsNonStorage` | *unrepresentable* once push places exist: as `deletePushPlaceNonStorage` |
 | `assignStorageLocalRootFromStack` | *unrepresentable*: an alias has a reference type, a stack local a primitive one |
-| `assignMemoryRootFromStack` | open |
-| `assignStackVarFromMemory` | open |
+| `assignMemoryRootFromStack` | *unrepresentable*: a memory local names an object; a stack local holds a primitive |
+| `assignStackVarFromMemory` | *unrepresentable*: as `assignMemoryRootFromStack`, the other way |
 | `assignStackPlace` | *unrepresentable*: a member or index access has its base's location, and a stack local has no members |
 | `assignPushRhsNonStorage` | *unrepresentable* once push places exist: as `deletePushPlaceNonStorage` |
 | `assignPushRhsNonLocalLhs` | open |
@@ -425,9 +425,9 @@ One row per constructor of `Coverage.ResidueShape`, filled in phase 2:
 | `assignStackPlaceRhs` | *unrepresentable*: as `assignStackPlace` |
 | `compoundAssignPow` | *unrepresentable*: `Stmt.opAssign` carries `op.hasCompoundAssign`, which `**` fails (solkey has no `powAssign` taclet) |
 | `compoundAssignBadTarget` | storage and stack *unrepresentable*: an `OpLoc` target. Memory targets open |
-| `memoryDeclBadInit` | open |
+| `memoryDeclBadInit` | *unrepresentable*: `MRhs` is a memory path (aliased) or a storage path (copied) at the declared type |
 | `deleteStorageLocalRoot` | *unrepresentable*: `delete` takes a `Loc`, never an alias |
 | `deletePushPlaceNonStorage` | *unrepresentable* once push places exist: they will be over a storage `SPath` |
 | `pushNonStorageTarget` | *unrepresentable*: `Stmt.push` takes a storage `SPath` (solc has no `push` on a memory array) |
-| `pushMemoryValue` | open |
+| `pushMemoryValue` | *unrepresentable*: `Stmt.push` takes a storage `Src`; a memory argument is a copy the calculus has no rule for |
 | `popNonStorageTarget` | *unrepresentable*: as `pushNonStorageTarget` |
