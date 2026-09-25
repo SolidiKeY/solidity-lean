@@ -32,6 +32,11 @@ def tyStr : Ty → String
 
 variable {C : Contract} {Γ : Ctx}
 
+def Simple.toStr {p : PrimTy} : Simple C Γ p → String
+  | .lit n _ => toString n
+  | .bool b => toString b
+  | .local x _ => x
+
 mutual
 
 def SPath.toStr {T : Ty} : SPath C Γ T → String
@@ -46,9 +51,7 @@ def Loc.toStr {T : Ty} : Loc C Γ T → String
 
 /-- `top` is whether the value stands alone, so needs no parentheses. -/
 def Val.toStr {p : PrimTy} : Val C Γ p → (top : Bool := false) → String
-  | .lit n _, _ => toString n
-  | .bool b, _ => toString b
-  | .local x _, _ => x
+  | .simple s, _ => s.toStr
   | .read l, _ => l.toStr
   | .binop op _ a b, top =>
     let s := s!"{a.toStr} {BinOp.sym op} {b.toStr}"
@@ -67,15 +70,15 @@ def Stmt.toStr {Γ Γ' : Ctx} : Stmt C Γ Γ' → String
   | .assign l r => s!"{l.toStr} = {r.toStr};"
   | .rebind x _ r => s!"{x} = {r.toStr};"
   | .assignLocal x _ r => s!"{x} = {r.toStr true};"
-  | .declLocal p x none => s!"{tyStr (.prim p)} {x};"
-  | .declLocal p x (some e) => s!"{tyStr (.prim p)} {x} = {e.toStr true};"
-  | .declStorage R x e => s!"{tyStr (.ref R)} storage {x} = {e.toStr};"
-  | .declStorageSkip R x => s!"{tyStr (.ref R)} storage {x};"
-  | .bindAlias R x e => s!"{tyStr (.ref R)} storage {x} = {e.toStr};"
+  | .declLocal p x _ init =>
+    match init with
+    | none => s!"{tyStr (.prim p)} {x};"
+    | some e => s!"{tyStr (.prim p)} {x} = {e.toStr true};"
+  | .declStorage _ R x _ e => s!"{tyStr (.ref R)} storage {x} = {e.toStr};"
   | .delete l => s!"delete {l.toStr};"
-  | .ite c thn els => s!"if ({c.toStr true}) \{ {thn.toStr} } else \{ {els.toStr} }"
-  | .require c => s!"require({c.toStr true});"
-  | .assert c => s!"assert({c.toStr true});"
+  | .ite c thn els => s!"if ({c.toStr}) \{ {thn.toStr} } else \{ {els.toStr} }"
+  | .require c => s!"require({c.toStr});"
+  | .assert c => s!"assert({c.toStr});"
   | .revert => "revert();"
 
 def Prog.toStr {Γ Γ' : Ctx} : Prog C Γ Γ' → String

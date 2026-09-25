@@ -25,12 +25,13 @@ open Semantics RuleSoundness
 
 variable {C : Contract}
 
-/-- `x` is fresh at `Γ`: no local and no state variable is called `x`. -/
-def Fresh (C : Contract) (Γ : Ctx) (x : Name) : Prop :=
-  lookupBy x Γ = none ∧ C.rootType x = none
+/-- `isFresh`, as the two facts it says. -/
+theorem isFresh_iff {Γ : Ctx} {x : Name} :
+    isFresh C Γ x = true ↔ lookupBy x Γ = none ∧ C.rootType x = none := by
+  simp [isFresh, Option.isNone_iff_eq_none]
 
-instance (C : Contract) (Γ : Ctx) (x : Name) : Decidable (Fresh C Γ x) :=
-  inferInstanceAs (Decidable (_ ∧ _))
+/-- `x` is fresh at `Γ`: no local and no state variable is called `x`. -/
+abbrev Fresh (C : Contract) (Γ : Ctx) (x : Name) : Prop := isFresh C Γ x = true
 
 /-- `Γ'` extends `Γ`: locals keep their bindings, state variables stay
 visible. -/
@@ -53,6 +54,7 @@ with `se` fresh, `alice` is still the state variable and every local is
 what it was. -/
 theorem Ctx.Sub.fresh {Γ : Ctx} {x : Name} (h : Fresh C Γ x) (b : BTy) :
     Ctx.Sub C Γ (setBy x b Γ) := by
+  have h := isFresh_iff.mp h
   refine ⟨fun y b' hy => ?_, fun r hr hroot => ?_⟩
   · have hne : y ≠ x := fun he => by rw [he, h.1] at hy; cases hy
     rw [lookupBy_setBy_ne hne]; exact hy
@@ -60,6 +62,11 @@ theorem Ctx.Sub.fresh {Γ : Ctx} {x : Name} (h : Fresh C Γ x) (b : BTy) :
     rw [lookupBy_setBy_ne hne]; exact hr
 
 /-! ## Weakening -/
+
+def Simple.weaken {Γ Γ' : Ctx} (h : Ctx.Sub C Γ Γ') {p : PrimTy} : Simple C Γ p → Simple C Γ' p
+  | .lit n hn => .lit n hn
+  | .bool b => .bool b
+  | .local x hx => .local x (h.local_ _ _ hx)
 
 mutual
 
@@ -74,9 +81,7 @@ def Loc.weaken {Γ Γ' : Ctx} (h : Ctx.Sub C Γ Γ') : {T : Ty} → Loc C Γ T �
   | _, .arrIndex b i => .arrIndex (b.weaken h) (i.weaken h)
 
 def Val.weaken {Γ Γ' : Ctx} (h : Ctx.Sub C Γ Γ') : {p : PrimTy} → Val C Γ p → Val C Γ' p
-  | _, .lit n hn => .lit n hn
-  | _, .bool b => .bool b
-  | _, .local x hx => .local x (h.local_ _ _ hx)
+  | _, .simple s => .simple (s.weaken h)
   | _, .read l => .read (l.weaken h)
   | _, .binop op hop a b => .binop op hop (a.weaken h) (b.weaken h)
   | _, .unop op hop a => .unop op hop (a.weaken h)
@@ -86,6 +91,11 @@ end
 def Src.weaken {Γ Γ' : Ctx} (h : Ctx.Sub C Γ Γ') {T : Ty} : Src C Γ T → Src C Γ' T
   | .val v => .val (v.weaken h)
   | .copy p hp => .copy (p.weaken h) hp
+
+/-- Weakening does not change a simple value's erasure. -/
+theorem Simple.erase_weaken {Γ Γ' : Ctx} (h : Ctx.Sub C Γ Γ') {p : PrimTy} :
+    (s : Simple C Γ p) → (s.weaken h).erase = s.erase
+  | .lit .. | .bool _ | .local .. => rfl
 
 mutual
 
@@ -105,7 +115,7 @@ theorem Loc.erase_weaken {Γ Γ' : Ctx} (h : Ctx.Sub C Γ Γ') :
 
 theorem Val.erase_weaken {Γ Γ' : Ctx} (h : Ctx.Sub C Γ Γ') :
     {p : PrimTy} → (v : Val C Γ p) → (v.weaken h).erase = v.erase
-  | _, .lit .. | _, .bool _ | _, .local .. => rfl
+  | _, .simple s => by simp only [Val.weaken, Val.erase, s.erase_weaken h]
   | _, .read l => by simp only [Val.weaken, Val.erase, l.erase_weaken h]
   | _, .binop _ _ a b => by simp only [Val.weaken, Val.erase, a.erase_weaken h, b.erase_weaken h]
   | _, .unop _ _ a => by simp only [Val.weaken, Val.erase, a.erase_weaken h]
@@ -127,15 +137,23 @@ variable {ns : List Name} {σ τ : State} {Γ : Ctx}
 /-- A name a term can use is not a fresh one. -/
 theorem not_mem_of_bound (hns : ∀ n ∈ ns, Fresh C Γ n) {x : Name} {b : BTy}
     (hx : lookupBy x Γ = some b) : x ∉ ns := fun hm => by
-  rw [(hns x hm).1] at hx; cases hx
+  rw [(isFresh_iff.mp (hns x hm)).1] at hx; cases hx
 
 theorem not_mem_of_root (hns : ∀ n ∈ ns, Fresh C Γ n) {r : Name} {T : Ty}
     (hr : C.rootType r = some T) : r ∉ ns := fun hm => by
-  rw [(hns r hm).2] at hr; cases hr
+  rw [(isFresh_iff.mp (hns r hm)).2] at hr; cases hr
 
 theorem envPath_frame (hag : EnvAgreeExcept ns σ τ) {x : Name} (hx : x ∉ ns) (g : Bool) :
     envPath σ x g = envPath τ x g := by
   unfold envPath; rw [hag.env x hx]
+
+/-- **Frame**, for simple values: a local reads alike in two states that
+agree off fresh names. -/
+theorem Simple.eval_frame (hag : EnvAgreeExcept ns σ τ) (hns : ∀ n ∈ ns, Fresh C Γ n)
+    {p : PrimTy} : (s : Simple C Γ p) → s.eval σ = s.eval τ
+  | .lit .. | .bool _ => rfl
+  | .local _ hx => by
+    simp only [Simple.eval, State.getEnv, hag.env _ (not_mem_of_bound hns hx)]
 
 mutual
 
@@ -159,9 +177,7 @@ theorem Loc.resolve_frame (hag : EnvAgreeExcept ns σ τ) (hns : ∀ n ∈ ns, F
 agree off fresh names. -/
 theorem Val.eval_frame (hag : EnvAgreeExcept ns σ τ) (hns : ∀ n ∈ ns, Fresh C Γ n) :
     {p : PrimTy} → (v : Val C Γ p) → v.eval σ = v.eval τ
-  | _, .lit .. | _, .bool _ => rfl
-  | _, .local _ hx => by
-    simp only [Val.eval, State.getEnv, hag.env _ (not_mem_of_bound hns hx)]
+  | _, .simple s => s.eval_frame hag hns
   | _, .read l => by simp only [Val.eval, l.resolve_frame hag hns, findStorage_congr hag]
   | _, .binop _ _ a b => by simp only [Val.eval, a.eval_frame hag hns, b.eval_frame hag hns]
   | _, .unop _ _ a => by simp only [Val.eval, a.eval_frame hag hns]
@@ -182,6 +198,11 @@ theorem Loc.target_frame (hag : EnvAgreeExcept ns σ τ) (hns : ∀ n ∈ ns, Fr
 end Frame
 
 /-! ## Weakening keeps the denotation -/
+
+/-- A weakened simple value evaluates as the original. -/
+theorem Simple.eval_weaken {Γ Γ' : Ctx} (h : Ctx.Sub C Γ Γ') (σ : State) {p : PrimTy} :
+    (s : Simple C Γ p) → (s.weaken h).eval σ = s.eval σ
+  | .lit .. | .bool _ | .local .. => rfl
 
 mutual
 
@@ -204,7 +225,7 @@ theorem Loc.resolve_weaken {Γ Γ' : Ctx} (h : Ctx.Sub C Γ Γ') (σ : State) :
 /-- A weakened value evaluates as the original. -/
 theorem Val.eval_weaken {Γ Γ' : Ctx} (h : Ctx.Sub C Γ Γ') (σ : State) :
     {p : PrimTy} → (v : Val C Γ p) → (v.weaken h).eval σ = v.eval σ
-  | _, .lit .. | _, .bool _ | _, .local .. => rfl
+  | _, .simple s => by simp only [Val.weaken, Val.eval, s.eval_weaken h σ]
   | _, .read l => by simp only [Val.weaken, Val.eval, l.resolve_weaken h σ]
   | _, .binop _ _ a b => by simp only [Val.weaken, Val.eval, a.eval_weaken h σ, b.eval_weaken h σ]
   | _, .unop _ _ a => by simp only [Val.weaken, Val.eval, a.eval_weaken h σ]

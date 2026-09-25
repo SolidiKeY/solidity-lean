@@ -21,6 +21,11 @@ namespace Kernel
 
 open Semantics
 
+def Simple.erase {C : Contract} {Γ : Ctx} {p : PrimTy} : Simple C Γ p → WrappedExpr
+  | .lit (p := p) n _ => .intLit (.prim p) n
+  | .bool b => .bool b
+  | .local (p := p) x _ => .var .stack (.prim p) (Field.primitive x (.prim p))
+
 mutual
 
 def SPath.erase {C : Contract} {Γ : Ctx} {T : Ty} : SPath C Γ T → WrappedExpr
@@ -34,9 +39,7 @@ def Loc.erase {C : Contract} {Γ : Ctx} {T : Ty} : Loc C Γ T → WrappedExpr
   | .arrIndex (E := E) b i => .index .storage E b.erase i.erase
 
 def Val.erase {C : Contract} {Γ : Ctx} {p : PrimTy} : Val C Γ p → WrappedExpr
-  | .lit (p := p) n _ => .intLit (.prim p) n
-  | .bool b => .bool b
-  | .local (p := p) x _ => .var .stack (.prim p) (Field.primitive x (.prim p))
+  | .simple s => s.erase
   | .read l => l.erase
   | .binop op _ a b => .mkBinop op a.erase b.erase
   | .unop op _ a => .mkUnop op a.erase
@@ -48,6 +51,11 @@ def Src.erase {C : Contract} {Γ : Ctx} {T : Ty} : Src C Γ T → WrappedExpr
   | .copy p _ => p.erase
 
 /-! ## Erasure keeps the type -/
+
+/-- A simple value erases at its type: `x` is annotated as `Γ` binds it. -/
+theorem Simple.erase_ty {C : Contract} {Γ : Ctx} {p : PrimTy} :
+    (s : Simple C Γ p) → s.erase.ty = .prim p
+  | .lit .. | .bool _ | .local .. => rfl
 
 mutual
 
@@ -65,7 +73,7 @@ theorem Loc.erase_ty {C : Contract} {Γ : Ctx} {T : Ty} :
 /-- A value erases at its type: `alice.age < 3` is annotated `bool`. -/
 theorem Val.erase_ty {C : Contract} {Γ : Ctx} {p : PrimTy} :
     (v : Val C Γ p) → v.erase.ty = .prim p
-  | .lit .. | .bool _ | .local .. => rfl
+  | .simple s => s.erase_ty
   | .read l => l.erase_ty
   | .binop op _ a _ => by
       simp only [Val.erase, Typed.WrappedExpr.ty, a.erase_ty, BinOp.retTy_prim]
@@ -81,6 +89,14 @@ theorem Src.erase_ty {C : Contract} {Γ : Ctx} {T : Ty} :
   | .copy p _ => p.erase_ty
 
 /-! ## Erasure is well-typed -/
+
+/-- A simple value erases to a well-annotated expression: `x` is the stack
+local `Γ` binds, `1` a number literal. -/
+theorem Simple.erase_wt {C : Contract} {Γ : Ctx} {p : PrimTy} :
+    (s : Simple C Γ p) → wtExpr Γ C.layout s.erase = true
+  | .lit n h => by simp [Simple.erase, wtExpr, isNumericTy, h]
+  | .bool _ => rfl
+  | .local x h => by simp [Simple.erase, wtExpr, h, Field.primitive]
 
 mutual
 
@@ -113,9 +129,7 @@ theorem Loc.erase_wt {C : Contract} {Γ : Ctx} {T : Ty} :
 stack local `Γ` binds and `1` a number literal. -/
 theorem Val.erase_wt {C : Contract} {Γ : Ctx} {p : PrimTy} :
     (v : Val C Γ p) → wtExpr Γ C.layout v.erase = true
-  | .lit n h => by simp [Val.erase, wtExpr, isNumericTy, h]
-  | .bool _ => rfl
-  | .local x h => by simp [Val.erase, wtExpr, h, Field.primitive]
+  | .simple s => s.erase_wt
   | .read l => l.erase_wt
   | .binop _ _ a b => by simp [Val.erase, wtExpr, a.erase_wt, b.erase_wt]
   | .unop _ _ a => by simp [Val.erase, wtExpr, a.erase_wt]
@@ -148,10 +162,10 @@ def Stmt.erase {C : Contract} {Γ Γ' : Ctx} : Stmt C Γ Γ' → Solidity.Stmt
       .assign (PlaceExpr.var .storage (.ref R) (Field.identity x R (some .local))) r.erase
   | .assignLocal (p := p) x _ r =>
       .assign (PlaceExpr.var .stack (.prim p) (Field.primitive x (.prim p))) r.erase
-  | .declLocal p x init => .stackDecl (.prim p) x (init.map Val.erase)
-  | .declStorage R x init => .storageDecl (.ref R) x (some init.erase)
-  | .declStorageSkip R x => .storageDecl (.ref R) x none
-  | .bindAlias R x init => .storagePlaceAlias (.ref R) x init.erase
+  | .declLocal p x _ init => .stackDecl (.prim p) x (init.map Val.erase)
+  | .declStorage capture R x _ init =>
+      if capture then .storagePlaceAlias (.ref R) x init.erase
+      else .storageDecl (.ref R) x (some init.erase)
   | .delete l => .delete l.toPlace
   | .ite c thn els => .ite c.erase thn.erase els.erase
   | .require c => .requireStmt c.erase
@@ -181,13 +195,10 @@ theorem Stmt.erase_wt {C : Contract} {Γ Γ' : Ctx} :
   | .assignLocal x h r => by
       simp [Stmt.erase, stmtWt, PlaceExpr.var, wtExpr, h, Field.primitive, r.erase_wt,
         r.erase_ty, Typed.WrappedExpr.ty]
-  | .declLocal p x init => by
+  | .declLocal p x _ init => by
       cases init <;> simp [Stmt.erase, stmtWt, Ty.isPrimitive, Val.erase_wt, Val.erase_ty]
-  | .declStorage R x init => by
-      simp [Stmt.erase, stmtWt, init.erase_wt, init.erase_ty]
-  | .declStorageSkip R x => rfl
-  | .bindAlias R x init => by
-      simp [Stmt.erase, stmtWt, init.erase_wt, init.erase_ty]
+  | .declStorage capture R x _ init => by
+      cases capture <;> simp [Stmt.erase, stmtWt, init.erase_wt, init.erase_ty]
   | .delete l => by
       simp [Stmt.erase, stmtWt, Loc.toPlace, SPath.toPlace, SPath.erase, l.erase_wt]
       cases l <;> rfl

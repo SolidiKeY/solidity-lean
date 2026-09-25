@@ -48,6 +48,17 @@ def unopCheck (op : UnOp) (p : PrimTy) (v : Value) : Res Value :=
 
 variable {C : Contract} {Γ : Ctx}
 
+/-- The value a simple value denotes: a literal, or a stack local's
+binding. -/
+def Simple.eval (σ : State) {p : PrimTy} : Simple C Γ p → Res Value
+  | .lit n _ => pure (.int n)
+  | .bool b => pure (.bool b)
+  | .local x _ => do
+    match ← σ.getEnv x with
+    | .val v => pure v
+    | .spath .. => .error .stuck
+    | .mref _ => .error .stuck
+
 mutual
 
 /-- The storage path a path denotes, read in `σ`. -/
@@ -71,13 +82,7 @@ def Loc.resolve (σ : State) : {T : Ty} → Loc C Γ T → Res (Name × List Seg
 
 /-- The value a value expression denotes in `σ`. -/
 def Val.eval (σ : State) : {p : PrimTy} → Val C Γ p → Res Value
-  | _, .lit n _ => pure (.int n)
-  | _, .bool b => pure (.bool b)
-  | _, .local x _ => do
-    match ← σ.getEnv x with
-    | .val v => pure v
-    | .spath .. => .error .stuck
-    | .mref _ => .error .stuck
+  | _, .simple s => s.eval σ
   | _, .read l => do
     let (r, segs) ← l.resolve σ
     (← σ.findStorage r segs).asValue
@@ -124,18 +129,14 @@ def Stmt.run (σ : State) {Γ Γ' : Ctx} : Stmt C Γ Γ' → Res State
     let (root, segs) ← r.resolve σ
     pure (σ.setEnv x (.spath root segs))
   | .assignLocal x _ r => do pure (σ.setEnv x (.val (← r.eval σ)))
-  | .declLocal p x init => do
+  | .declLocal p x _ init => do
     let v ← match init with
       | none => pure (PrimTy.default p)
       | some e => e.eval σ
     pure (σ.setEnv x (.val v))
-  | .declStorage _ x init => do
+  | .declStorage _ _ x _ init => do
     let (root, segs) ← init.resolve σ
     pure (σ.setEnv x (.spath root segs))
-  | .bindAlias _ x init => do
-    let (root, segs) ← init.resolve σ
-    pure (σ.setEnv x (.spath root segs))
-  | .declStorageSkip .. => pure σ
   | .delete l => do
     let (root, segs) ← l.resolve σ
     let cur ← σ.findStorage root segs
@@ -196,6 +197,18 @@ theorem envPath_resolveS (σ : State) (x : Name) (T : Ty) (fld : Field) (hx : fl
   | none => by_cases hg : fld.origin = some .global <;> simp [hg] <;> rfl
   | some b => cases b <;> rfl
 
+/-- A simple value evaluates as `evalValue` evaluates its erasure. -/
+theorem Simple.evalValue_erase (σ : State) {p : PrimTy} :
+    (s : Simple C Γ p) → evalValue σ s.erase = (s.eval σ).map (σ, ·)
+  | .lit n _ => by rw [Simple.erase, evalValue]; rfl
+  | .bool b => by rw [Simple.erase, evalValue]; rfl
+  | .local x _ => by
+    rw [Simple.erase, evalValue]
+    simp only [Field.primitive, Simple.eval]
+    cases σ.getEnv x with
+    | error _ => rfl
+    | ok b => cases b <;> rfl
+
 mutual
 
 theorem SPath.resolveS_erase (σ : State) : {T : Ty} → (p : SPath C Γ T) →
@@ -240,14 +253,7 @@ theorem Loc.resolveS_erase (σ : State) : {T : Ty} → (l : Loc C Γ T) →
 
 theorem Val.evalValue_erase (σ : State) : {p : PrimTy} → (v : Val C Γ p) →
     evalValue σ v.erase = (v.eval σ).map (σ, ·)
-  | _, .lit n _ => by rw [Val.erase, evalValue]; rfl
-  | _, .bool b => by rw [Val.erase, evalValue]; rfl
-  | _, .local x _ => by
-    rw [Val.erase, evalValue]
-    simp only [Field.primitive, Val.eval]
-    cases σ.getEnv x with
-    | error _ => rfl
-    | ok b => cases b <;> rfl
+  | _, .simple s => s.evalValue_erase σ
   | _, .read l => by
     rw [Val.erase, l.evalValue_erase_read, l.resolveS_erase σ]
     simp only [Val.eval]
@@ -394,24 +400,21 @@ theorem Stmt.run_eq (σ : State) {Γ Γ' : Ctx} : (s : Stmt C Γ Γ') → execSt
     simp only [PlaceExpr.var, Field.primitive]
     rw [r.evalValue_erase σ]
     cases r.eval σ <;> rfl
-  | .declLocal p x none => by
+  | .declLocal p x _ none => by
     simp only [Stmt.erase, Option.map]
     cases p <;> (rw [execStmt]; rfl)
-  | .declLocal _ x (some e) => by
+  | .declLocal _ x _ (some e) => by
     simp only [Stmt.run, Stmt.erase, Option.map]
     rw [execStmt]
     simp only [e.evalValue_erase σ]
     cases e.eval σ <;> rfl
-  | .declStorage _ x init => by
+  | .declStorage capture _ x _ init => by
     simp only [Stmt.run]
-    rw [Stmt.erase, execStmt]
-    simp only [init.resolveS_erase σ]
-    cases init.resolve σ <;> rfl
-  | .bindAlias _ x init => by
-    simp only [Stmt.run]
-    rw [Stmt.erase, execStmt, init.resolveS_erase σ]
-    cases init.resolve σ <;> rfl
-  | .declStorageSkip .. => by rw [Stmt.erase, execStmt]; rfl
+    cases capture <;>
+    · simp only [Stmt.erase, Bool.false_eq_true, if_false, if_true]
+      rw [execStmt]
+      simp only [init.resolveS_erase σ]
+      cases init.resolve σ <;> rfl
   | .delete l => by
     simp only [Stmt.run]
     rw [Stmt.erase, execStmt]

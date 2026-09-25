@@ -187,6 +187,8 @@ the plan and the tracker. No `sorry`, `native_decide` or axiom here.
 | `Kernel/Syntax.lean` | The typed syntax, indexed by contract and local context: `SPath`/`Loc`/`Val`/`Src`, `Stmt C Γ Γ'`, `Prog`. Storage slice so far. |
 | `Kernel/Erase.lean` | Erasure into the untyped AST, spelled as the rule table spells names; `Stmt.erase_wt`/`Prog.erase_wt`: the erasure is `stmtWt`-typed, no hypothesis. |
 | `Kernel/Print.lean` | `Prog.toStr`/`Prog.show`: a kernel block printed as Solidity. |
+| `Kernel/Semantics.lean` | The denotation (`SPath.resolve`, `Val.eval`, `Stmt.run`) by structural recursion, and adequacy: `Stmt.run_eq`/`Prog.run_eq`, `execStmt σ s.erase = s.run σ` from every state. |
+| `Kernel/Frame.lean` | `Fresh`, `Ctx.Sub` and weakening (erasure unchanged), and the frame lemmas: a term typed at `Γ` does not see a name fresh at `Γ`. |
 | `Kernel/Elab.lean` | `ksol[C]{ … }`/`ksol{ … }`: raw syntax, the elaborator (`synth`/`check`/`elabProg`), the quoters; evaluated at compile time, re-checked by the kernel. |
 
 ## Examples, chains and corpora

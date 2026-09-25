@@ -29,6 +29,20 @@ is the reference: copy the shape of the declaration the plan names.
 - `Kernel/` imports the old layer, never the reverse, until phase 7. Do not
   touch `Calculus/Rules.lean` or `Calculus/KeyTaclets.lean` before then.
 
+## Sharp edges
+
+- A function over `Stmt C Γ Γ'` must match each constructor with variables
+  only: a pattern that fixes a field (`.declStorage true …`, `.declLocal p x
+  none`) makes Lean fail to generate the equation lemmas ("failed to
+  generate splitter"). Branch inside the arm instead.
+- A `match` in a denotation must not capture a subterm the proofs weaken
+  (`Val.eval`'s unary arm goes through `unopCheck` for that reason).
+- `tyHasMapping` and other well-founded definitions do not reduce in the
+  kernel, so a proof of them cannot be `Eq.refl`; carry a structural twin
+  (`Ty.mapFree`) and prove it equal.
+- The MCP server is slow on this package; `lake env lean --tstack=131072
+  file.lean` checks a scratch file (`#print axioms`) in under a second.
+
 ## Porting one rule
 
 1. The `RuleName` it bridges to (existing).
