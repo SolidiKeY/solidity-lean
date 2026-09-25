@@ -111,3 +111,4 @@ import Solidity.Kernel.Taclet
 import Solidity.Kernel.Sound
 import Solidity.Kernel.Step
 import Solidity.Kernel.Measure
+import Solidity.Kernel.Logic

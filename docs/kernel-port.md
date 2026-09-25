@@ -308,6 +308,10 @@ lists only the standard three axioms.
     a split smaller branches
   - [ ] the measure falls on formulas; `Fml.step_wellFounded`, `symex_normalizes`
 - [ ] Phase 6: `Fml C`, `Proves`, `Proves.sound`, `FreshNames`.
+  - [x] `Post`, `Kont` (with `up`, so the rest of a program is never retyped),
+    `Hyps`, `Proves`, `Proves.sound` (`Kernel/Logic.lean`)
+  - [ ] the symbolic executor (`Stmt.step` driving `Proves`), and worked examples
+  - [ ] `FreshNames`
 - [ ] Phase 7: cut over, `lean/solkey` migrated.
 - [ ] Phase 8: chains, `UpdRule`, decision procedure, `delAt`, one notation.
 
@@ -328,6 +332,7 @@ lists only the standard three axioms.
 | Typed states | not needed: `Premise.Correct` is over every state. The short-circuit rules re-apply the operator to the value they read (`v = nse; v = v && true;`), so a non-boolean read is stuck in the premise as in the original. `Kernel.Typed` and `Val.eval_bool` stay for later use | 2026-09-25 |
 | Operator families | a rule over an operator is one constructor (`binopAssignment op`), as in `Calculus/Rules.lean`; solkey's taclet is per operator | 2026-09-25 |
 | Continuations | an unfolding rule's residual binds scratch names fresh at the statement's context; to retype the rest of the program past them, the names must also avoid what the rest declares. The formula-level step picks them avoiding both, and `Prog` weakens along an extension that names its new bindings | 2026-09-25 |
+| Goals | a goal is `H ⊢ k`: hypotheses (path conditions and updates, a predicate transformer) and a continuation (`⟨P⟩ k`, `up h k`, a postcondition). An unfolding rule's premise is `⟨P⟩ up ⟨ω⟩ k`; the frame lemmas make that sound, and the scratch names need not avoid what `ω` declares. A diamond split also owes the condition's definedness (`c || !c`), and a closed box owes `H ⊢ true`: an update that fails under a diamond hypothesis is false | 2026-09-25 |
 | Modalities | the kernel's box is partial correctness (it holds unless the run ends normally in a bad state) and its diamond needs a normal end; neither tells a revert from a stuck run. An unfolding rule then owes its statement the same *successful* outcome (`SameOk`), which the order-changing rules (`*StorageRef_unfold_leftFst`, `*NonSimpleIndexCapture`) meet without the side conditions the untyped `*_sound` theorems carry. `SolidityJudgment.Holds` differs on stuck runs ("a stuck execution validates nothing"); the phase-7 bridge must say so | 2026-09-25 |
 | Unknown names | an error: parameters are declared locals. mini-solkey reads an unknown name as a `uint` parameter | 2026-09-25 |
 | Ported contracts | one named constant per interpreter store, `initStorage_*` checks roots, order and defaults against the store by `simp` | 2026-09-25 |
