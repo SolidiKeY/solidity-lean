@@ -288,6 +288,16 @@ lists only the standard three axioms.
   - [ ] `decode : Stmt → Option (Stmt C Γ Γ')` with `decode (erase t) = some t`,
     for the corpus and to retire `stmtWt` hypotheses
   - [ ] the 26 `ResidueShape` verdicts (table below)
+  - memory, the plan (the old table's 56 memory rules, in three commits):
+    - **M1** `MPath` (`var x` a memory local, `loc`) / `MLoc` (`field`, `index` on a `uint`)
+      beside `SPath`/`Loc` in the mutual block, `Val.readMem`; `declMem R x (init : Option
+      (MRhs R))` with `MRhs := alias (p : MPath) | copy (p : SPath) hm` (none allocates),
+      `rebindMem x (r : MRhs R)`, `assignMem (l : MLoc T) (r : MSrc T)` with
+      `MSrc := val v | ref p` (a memory reference, by identity); the reads, writes,
+      declarations, aliases and their unfolds
+    - **M2** `deleteMem`, `Src.copyMem` (storage from memory, `copyMToSt`) and
+      `MRhs.copy` (memory from storage, `copyStToM`): the cross-domain rules
+    - **M3** `OpLoc`, `VHole` memory cases: compound, `++`, `ternaryToIfMemory`
 - [ ] Phase 3: `Taclet`, `Taclet.sound`, `rules_disjoint`/`rules_complete`.
   - [x] storage, with the control rules on simple conditions
     (`Kernel/Taclet.lean`, `Kernel/Sound.lean`: 41 taclets, all sound)
