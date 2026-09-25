@@ -31,6 +31,12 @@ variable {C : Contract}
 
 def Simple.size {Γ : Ctx} {p : PrimTy} (_ : Simple C Γ p) : Nat := 1
 
+/-- A short-circuiting operator with a right operand that is not simple costs
+four more: its rule branches, and each branch re-applies the operator to a
+simple operand. -/
+def scCost {Γ : Ctx} {p : PrimTy} (op : BinOp) (b : Val C Γ p) : Nat :=
+  if op.shortCircuits && !b.isSimple then 4 else 0
+
 mutual
 
 def SPath.size {Γ : Ctx} : {T : Ty} → SPath C Γ T → Nat
@@ -45,7 +51,7 @@ def Loc.size {Γ : Ctx} : {T : Ty} → Loc C Γ T → Nat
 def Val.size {Γ : Ctx} : {p : PrimTy} → Val C Γ p → Nat
   | _, .simple _ => 1
   | _, .read l => l.size + 1
-  | _, .binop _ _ _ a b => a.size + b.size + 1
+  | _, .binop op _ _ a b => a.size + b.size + 1 + scCost op b
   | _, .unop _ _ _ a => a.size + 2
 
 end
@@ -91,6 +97,15 @@ def Premise.Smaller {Γ Γ' : Ctx} (s : Stmt C Γ Γ') : Premise C Γ Γ' → Pr
 
 /-! ## Facts the obligations use -/
 
+@[simp] theorem scCost_simple {Γ : Ctx} {p : PrimTy} (op : BinOp) (s : Simple C Γ p) :
+    scCost op (.simple s) = 0 := by simp [scCost, Val.isSimple]
+
+theorem scCost_and {Γ : Ctx} {p : PrimTy} {b : Val C Γ p} (hb : b.isSimple = false) :
+    scCost .and b = 4 := by simp [scCost, BinOp.shortCircuits, hb]
+
+theorem scCost_or {Γ : Ctx} {p : PrimTy} {b : Val C Γ p} (hb : b.isSimple = false) :
+    scCost .or b = 4 := by simp [scCost, BinOp.shortCircuits, hb]
+
 mutual
 
 /-- Weakening keeps a path's size. -/
@@ -109,10 +124,17 @@ mutual
     {p : PrimTy} → (v : Val C Γ p) → (v.weaken h).size = v.size
   | _, .simple _ => rfl
   | _, .read l => by simp only [Val.weaken, Val.size, l.size_weaken h]
-  | _, .binop _ _ _ a b => by simp only [Val.weaken, Val.size, a.size_weaken h, b.size_weaken h]
+  | _, .binop op _ _ a b => by
+    simp only [Val.weaken, Val.size, a.size_weaken h, b.size_weaken h]
+    congr 1
+    cases b <;> rfl
   | _, .unop _ _ _ a => by simp only [Val.weaken, Val.size, a.size_weaken h]
 
 end
+
+@[simp] theorem scCost_weaken {Γ Γ' : Ctx} (h : Ctx.Sub C Γ Γ') {p : PrimTy} (op : BinOp)
+    (b : Val C Γ p) : scCost op (b.weaken h) = scCost op b := by
+  cases b <;> rfl
 
 @[simp] theorem Src.size_weaken {Γ Γ' : Ctx} (h : Ctx.Sub C Γ Γ') {T : Ty} (r : Src C Γ T) :
     (r.weaken h).size = r.size := by
@@ -200,9 +222,14 @@ theorem Taclet.smaller {m : Modality} {Γ Γ' : Ctx} {s : Stmt C Γ Γ'} {pr : P
     SPath.size, Loc.size, Simple.size, Hole.fill_size, Hole.extend_extra, SPath.new, Simple.new,
     SPath.size_weaken, Loc.size_weaken, Val.size_weaken, Src.size_weaken, List.length,
     List.mem_cons, List.not_mem_nil, forall_eq_or_imp, and_true, true_and, false_implies,
-    implies_true, Loc.weaken, SPath.weaken, List.mem_nil_iff, forall_const] at *
+    implies_true, Loc.weaken, SPath.weaken, List.mem_nil_iff, forall_const, scCost_simple,
+    scCost_weaken,
+    Simple.weaken] at *
+  all_goals (try rw [scCost_and (by assumption)] at *)
+  all_goals (try rw [scCost_or (by assumption)] at *)
   all_goals (try simp only [Val.size_sz, SPath.size_sz, Loc.size_sz, Hole.extra_ex] at *)
-  all_goals omega
+  all_goals (try simp only [Nat.max_def] at *)
+  all_goals (repeat' split) <;> omega
 
 end Kernel
 end Solidity

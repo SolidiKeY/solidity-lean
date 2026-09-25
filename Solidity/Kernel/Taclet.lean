@@ -585,23 +585,31 @@ inductive Taclet (C : Contract) (m : Modality) : {Γ Γ' : Ctx} → Stmt C Γ Γ
           (.cons (.assignLocal x ((Ctx.Sub.fresh hse _).local_ _ _ h)
             (.binop op hop hq (.simple (a.weaken (Ctx.Sub.fresh hse _))) (.simple (Simple.new se p)))) .nil))
           (Ctx.Sub.fresh hse _)
-  /-- `v = se && nse ⇝ if (se) { v = nse; } else { v = false; }`. -/
+  /-- `v = se && nse ⇝ if (se) { v = nse; v = v && true; } else { v = false; }`.
+  KeY's residual ends with `v = nse;`; the kernel's re-applies the operator to
+  the value it read, so that a non-boolean `nse` gets stuck here too, as the
+  original does, and the rule needs no typed state. -/
   | logicalAndShortCircuitRhs {Γ : Ctx} (hop : BinOp.accepts .and .bool = true)
       (hq : BinOp.ret .and .bool = .bool) (x : Name) (h : lookupBy x Γ = some (.stack (.prim .bool)))
       (a : Simple C Γ .bool) (nse : Val C Γ .bool) (hn : nse.isSimple = false) :
       .assignLocal x h (.binop .and hop hq (.simple a) nse) ⇒
         .unfold []
-          (.cons (.ite a (.cons (.assignLocal x h nse) .nil)
+          (.cons (.ite a
+              (.cons (.assignLocal x h nse)
+                (.cons (.assignLocal x h (.binop .and hop hq (.simple (.local x h)) (.simple (.bool true))))
+                  .nil))
             (.cons (.assignLocal x h (.simple (.bool false))) .nil)) .nil)
           (Ctx.Sub.refl _)
-  /-- `v = se || nse ⇝ if (se) { v = true; } else { v = nse; }`. -/
+  /-- `v = se || nse ⇝ if (se) { v = true; } else { v = nse; v = v || false; }`. -/
   | logicalOrShortCircuitRhs {Γ : Ctx} (hop : BinOp.accepts .or .bool = true)
       (hq : BinOp.ret .or .bool = .bool) (x : Name) (h : lookupBy x Γ = some (.stack (.prim .bool)))
       (a : Simple C Γ .bool) (nse : Val C Γ .bool) (hn : nse.isSimple = false) :
       .assignLocal x h (.binop .or hop hq (.simple a) nse) ⇒
         .unfold []
           (.cons (.ite a (.cons (.assignLocal x h (.simple (.bool true))) .nil)
-            (.cons (.assignLocal x h nse) .nil)) .nil)
+            (.cons (.assignLocal x h nse)
+              (.cons (.assignLocal x h (.binop .or hop hq (.simple (.local x h)) (.simple (.bool false))))
+                .nil))) .nil)
           (Ctx.Sub.refl _)
   /-- `v = ⊖se ⇝ { v := ⊖se }`. -/
   | unopAssignment {Γ : Ctx} {p q : PrimTy} (op : UnOp) (hop : op.accepts p = true)
