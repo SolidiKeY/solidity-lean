@@ -162,6 +162,17 @@ def Taclet.rule {Γ Γ' : Ctx} {s : Stmt C Γ Γ'} {pr : Premise C Γ Γ'} : Tac
   | .memoryToStorageField_unfold_leftFst .. => some .memoryToStorageFieldUnfoldLeftFst
   | .memoryToStorageIndex_unfold_leftFst .. => some .memoryToStorageIndexUnfoldLeftFst
   | .memoryToStorageIndexNonSimpleIndexCapture .. => some .memoryToStorageIndexUnfoldLeftSndIndex
+  | Taclet.memoryFieldOpAssign (op := op) .. => some (.memoryFieldOpAssign op)
+  | Taclet.memoryIndexArrayOpAssign (op := op) .. => some (.memoryIndexArrayOpAssign op)
+  | Taclet.memoryFieldOpAssignUnfoldLeftFst (op := op) .. => some (.memoryFieldOpAssignUnfoldLeftFst op)
+  | Taclet.memoryIndexOpAssignUnfoldLeftFst (op := op) .. => some (.memoryIndexOpAssignUnfoldLeftFst op)
+  | Taclet.memoryFieldIncrement (op := op) .. => some (.memoryFieldIncrement op)
+  | Taclet.memoryIndexArrayIncrement (op := op) .. => some (.memoryIndexArrayIncrement op)
+  | Taclet.memoryFieldIncrementUnfoldLeftFst (op := op) .. => some (.memoryFieldIncrementUnfoldLeftFst op)
+  | Taclet.memoryIndexIncrementUnfoldLeftFst (op := op) .. => some (.memoryIndexIncrementUnfoldLeftFst op)
+  | Taclet.memoryFieldIncrementAssignment (op := op) .. => some (.memoryFieldIncrementAssignment op)
+  | Taclet.memoryIndexArrayIncrementAssignment (op := op) .. => some (.memoryIndexArrayIncrementAssignment op)
+  | .ternaryToIfMemory .. => some .ternaryToIfMemory
   | .ifElseSplit .. => none
   | .requireSimple .. => some .requireSimple
   | .assertSimple .. => some .assertSimple
@@ -288,6 +299,17 @@ def Taclet.origin {Γ Γ' : Ctx} {s : Stmt C Γ Γ'} {pr : Premise C Γ Γ'} : T
   | .memoryToStorageField_unfold_leftFst .. => (ruleEffect .memoryToStorageFieldUnfoldLeftFst).origin
   | .memoryToStorageIndex_unfold_leftFst .. => (ruleEffect .memoryToStorageIndexUnfoldLeftFst).origin
   | .memoryToStorageIndexNonSimpleIndexCapture .. => (ruleEffect .memoryToStorageIndexUnfoldLeftSndIndex).origin
+  | Taclet.memoryFieldOpAssign (op := op) .. => (ruleEffect (.memoryFieldOpAssign op)).origin
+  | Taclet.memoryIndexArrayOpAssign (op := op) .. => (ruleEffect (.memoryIndexArrayOpAssign op)).origin
+  | Taclet.memoryFieldOpAssignUnfoldLeftFst (op := op) .. => (ruleEffect (.memoryFieldOpAssignUnfoldLeftFst op)).origin
+  | Taclet.memoryIndexOpAssignUnfoldLeftFst (op := op) .. => (ruleEffect (.memoryIndexOpAssignUnfoldLeftFst op)).origin
+  | Taclet.memoryFieldIncrement (op := op) .. => (ruleEffect (.memoryFieldIncrement op)).origin
+  | Taclet.memoryIndexArrayIncrement (op := op) .. => (ruleEffect (.memoryIndexArrayIncrement op)).origin
+  | Taclet.memoryFieldIncrementUnfoldLeftFst (op := op) .. => (ruleEffect (.memoryFieldIncrementUnfoldLeftFst op)).origin
+  | Taclet.memoryIndexIncrementUnfoldLeftFst (op := op) .. => (ruleEffect (.memoryIndexIncrementUnfoldLeftFst op)).origin
+  | Taclet.memoryFieldIncrementAssignment (op := op) .. => (ruleEffect (.memoryFieldIncrementAssignment op)).origin
+  | Taclet.memoryIndexArrayIncrementAssignment (op := op) .. => (ruleEffect (.memoryIndexArrayIncrementAssignment op)).origin
+  | .ternaryToIfMemory .. => (ruleEffect .ternaryToIfMemory).origin
   | .ifElseSplit .. => .taclet .ifElseSplit
   | .requireSimple .. => .taclet .requireSimple
   | .assertSimple .. => .taclet .assertSimple
@@ -357,6 +379,8 @@ def bridgeTour := ksol{
   Account memory mf = folks[x + 1].account; mq = bob; mq = persons[x]; ma = bob.account;
   alice = mp; alice.account = ma; alice.account = mp.account; folks[x] = mp; persons[x] = mq;
   folks[x + 1].account = ma; persons[x + 1] = mp; folks[x].account = mp.account;
+  mp.age += 1; mp.account.balance -= x; mp.age++; ++mp.account.balance; y = mp.age++;
+  mp.age = b ? 1 : 2; mp.account.balance = (x > 1) ? x : 0;
   if (b) { x = 1; } else { x = 2; }; require(b); assert(b); require(x == 1); revert();
 }
 

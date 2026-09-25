@@ -217,6 +217,14 @@ def opLocal (σ : State) (op : BinOp) (p : PrimTy) (x : Name) (v : Value) : Res 
   let new ← checkArith (.prim p) new
   pure (σ.setEnv x (.val new))
 
+/-- `a ⊕= v` at a resolved memory location, through the interpreter's own
+`readLoc`/`writeLoc`. -/
+def opMem (σ : State) (op : BinOp) (p : PrimTy) (loc : Semantics.Loc) (v : Value) : Res State := do
+  let old ← readLoc σ loc
+  let new ← applyBinOp op old v
+  let new ← checkArith (.prim p) new
+  writeLoc σ loc new
+
 /-- A compound assignment's write of `v` into its target. -/
 def OpLoc.store (σ : State) (op : BinOp) : {p : PrimTy} → OpLoc C Γ p → Value → Res State
   | p, .local x _, v => opLocal σ op p x v
@@ -227,6 +235,13 @@ def OpLoc.store (σ : State) (op : BinOp) : {p : PrimTy} → OpLoc C Γ p → Va
   | p, .index it b i, v => do
     let (rt, segs) ← (Loc.index it b (.simple i)).resolve σ
     opStore σ op p rt segs v
+  | p, .mfield b f _, v => do
+    let id ← (← b.mval σ).asRef
+    opMem σ op p (.memoryField id f) v
+  | p, .mindex b i, v => do
+    let id ← (← b.mval σ).asRef
+    let iv ← (← i.eval σ).asInt
+    opMem σ op p (.memoryIndex id iv) v
 
 /-- `x++` at a resolved storage location, as `evalValue` does it: read,
 bump, check at the target's type, write back; the value is the new one for
@@ -249,6 +264,14 @@ def bumpLocal (σ : State) (op : IncDec) (p : PrimTy) (x : Name) : Res (State ×
   let new ← checkArith (.prim p) (.int (if op.isIncrement then oldInt + 1 else oldInt - 1))
   pure (σ.setEnv x (.val new), if op.isPre then new else old)
 
+/-- `x++` at a resolved memory location. -/
+def bumpMem (σ : State) (op : IncDec) (p : PrimTy) (loc : Semantics.Loc) : Res (State × Value) := do
+  let old ← readLoc σ loc
+  let oldInt ← old.asInt
+  let new ← checkArith (.prim p) (.int (if op.isIncrement then oldInt + 1 else oldInt - 1))
+  let σ' ← writeLoc σ loc new
+  pure (σ', if op.isPre then new else old)
+
 /-- `l++`: the state it leaves, and its value. -/
 def OpLoc.bump (σ : State) (op : IncDec) : {p : PrimTy} → OpLoc C Γ p → Res (State × Value)
   | p, .local x _ => bumpLocal σ op p x
@@ -259,6 +282,13 @@ def OpLoc.bump (σ : State) (op : IncDec) : {p : PrimTy} → OpLoc C Γ p → Re
   | p, .index it b i => do
     let (rt, segs) ← (Loc.index it b (.simple i)).resolve σ
     bumpStore σ op p rt segs
+  | p, .mfield b f _ => do
+    let id ← (← b.mval σ).asRef
+    bumpMem σ op p (.memoryField id f)
+  | p, .mindex b i => do
+    let id ← (← b.mval σ).asRef
+    let iv ← (← i.eval σ).asInt
+    bumpMem σ op p (.memoryIndex id iv)
 
 /-- `push` at a resolved array: the element `val` gives (from the slot the
 push lands on) appended, as `execStmt` does it. -/
@@ -657,6 +687,38 @@ theorem MSrc.rhsToMVal_erase (σ : State) {T : Ty} :
     rw [rhsToMVal, if_neg (by rw [MSrc.erase, p.erase_ty]; simp [Ty.isPrimitive])]
     simp only [MSrc.erase, p.erase_kind, MSrc.mval, p.readM_erase σ]
 
+/-- A memory member resolves to its object and name. -/
+theorem MLoc.resolveLoc_field_erase (σ : State) {s : Name} {T : Ty} (b : MPath C Γ (.struct s)) (f : Name)
+    (hf : C.fieldType s f = some T) :
+    resolveLoc σ (MLoc.field b f hf).erase = (do
+      let id ← (← b.mval σ).asRef
+      pure (σ, Semantics.Loc.memoryField id f)) := by
+  rw [MLoc.erase, resolveLoc]
+  simp only [b.resolveMBase_erase σ, fieldFor_name]
+  cases b.mval σ with
+  | error _ => rfl
+  | ok v => cases v <;> rfl
+
+/-- A memory element resolves to its object and index. -/
+theorem MLoc.resolveLoc_index_erase (σ : State) {E : Ty} (b : MPath C Γ (.array E)) (i : Val C Γ .uint) :
+    resolveLoc σ (MLoc.index b i).erase = (do
+      let id ← (← b.mval σ).asRef
+      let iv ← (← i.eval σ).asInt
+      pure (σ, Semantics.Loc.memoryIndex id iv)) := by
+  rw [MLoc.erase, resolveLoc]
+  simp only [b.resolveMBase_erase σ]
+  cases b.mval σ with
+  | error _ => rfl
+  | ok v =>
+    cases v with
+    | prim _ => rfl
+    | ref id =>
+      simp only [Except.map, bind, Except.bind, MVal.asRef, pure, Except.pure]
+      rw [evalInt_pure (i.evalValue_erase σ)]
+      cases i.eval σ with
+      | error _ => rfl
+      | ok iv => cases iv <;> rfl
+
 /-- A memory location resolves to the object and member or element it
 writes. -/
 theorem MLoc.execAssignNested_erase (σ : State) {T : Ty} (l : MLoc C Γ T) (r : MSrc C Γ T) :
@@ -926,6 +988,30 @@ theorem Stmt.run_eq (σ : State) {Γ Γ' : Ctx} : (s : Stmt C Γ Γ') → execSt
         cases (Loc.index it b (.simple i)).resolve σ with
         | error _ => rfl
         | ok a => obtain ⟨rt, segs⟩ := a; simp only [Except.map, Loc.target, readLoc, writeLoc, OpLoc.store, opStore, opLocal, bind, Except.bind, Typed.WrappedExpr.ty, WrappedExpr.var]; cases σ.findStorage rt segs <;> rfl
+      | mfield b f h =>
+        simp only [OpLoc.toPlace, MLoc.toPlace]
+        rw [MLoc.resolveLoc_field_erase σ b f h, MLoc.erase_ty]
+        simp only [OpLoc.store]
+        cases b.mval σ with
+        | error _ => rfl
+        | ok w =>
+          simp only [bind, Except.bind]
+          cases w.asRef <;> rfl
+      | mindex b i =>
+        simp only [OpLoc.toPlace, MLoc.toPlace]
+        rw [MLoc.resolveLoc_index_erase σ b (.simple i), MLoc.erase_ty]
+        simp only [OpLoc.store, Val.eval]
+        cases b.mval σ with
+        | error _ => rfl
+        | ok w =>
+          simp only [bind, Except.bind]
+          cases w.asRef with
+          | error _ => rfl
+          | ok id =>
+            simp only
+            cases i.eval σ with
+            | error _ => rfl
+            | ok iv => simp only; cases iv.asInt <;> rfl
   | .incDec op _ l => by
     simp only [Stmt.run]
     rw [Stmt.erase, execStmt, evalValue]
@@ -964,6 +1050,30 @@ theorem Stmt.run_eq (σ : State) {Γ Γ' : Ctx} : (s : Stmt C Γ Γ') → execSt
           cases σ.findStorage rt segs with
           | error _ => rfl
           | ok sv => cases sv.asValue <;> rfl
+      | mfield b f h =>
+        simp only [OpLoc.toPlace, MLoc.toPlace]
+        rw [MLoc.resolveLoc_field_erase σ b f h, MLoc.erase_ty]
+        simp only [OpLoc.bump]
+        cases b.mval σ with
+        | error _ => rfl
+        | ok w =>
+          simp only [Except.map, bind, Except.bind]
+          cases w.asRef <;> rfl
+      | mindex b i =>
+        simp only [OpLoc.toPlace, MLoc.toPlace]
+        rw [MLoc.resolveLoc_index_erase σ b (.simple i), MLoc.erase_ty]
+        simp only [OpLoc.bump, Val.eval]
+        cases b.mval σ with
+        | error _ => rfl
+        | ok w =>
+          simp only [Except.map, bind, Except.bind]
+          cases w.asRef with
+          | error _ => rfl
+          | ok id =>
+            simp only
+            cases i.eval σ with
+            | error _ => rfl
+            | ok iv => simp only; cases iv.asInt <;> rfl
   | .assignIncDec x _ op _ l _ => by
     simp only [Stmt.run]
     rw [Stmt.erase, execStmt, execAssign]
@@ -1004,6 +1114,30 @@ theorem Stmt.run_eq (σ : State) {Γ Γ' : Ctx} : (s : Stmt C Γ Γ') → execSt
           cases σ.findStorage rt segs with
           | error _ => rfl
           | ok sv => cases sv.asValue <;> rfl
+      | mfield b f h =>
+        simp only [OpLoc.toPlace, MLoc.toPlace]
+        rw [MLoc.resolveLoc_field_erase σ b f h, MLoc.erase_ty]
+        simp only [OpLoc.bump]
+        cases b.mval σ with
+        | error _ => rfl
+        | ok w =>
+          simp only [Except.map, bind, Except.bind]
+          cases w.asRef <;> rfl
+      | mindex b i =>
+        simp only [OpLoc.toPlace, MLoc.toPlace]
+        rw [MLoc.resolveLoc_index_erase σ b (.simple i), MLoc.erase_ty]
+        simp only [OpLoc.bump, Val.eval]
+        cases b.mval σ with
+        | error _ => rfl
+        | ok w =>
+          simp only [Except.map, bind, Except.bind]
+          cases w.asRef with
+          | error _ => rfl
+          | ok id =>
+            simp only
+            cases i.eval σ with
+            | error _ => rfl
+            | ok iv => simp only; cases iv.asInt <;> rfl
   | .push b v _ => by
     simp only [Stmt.run]
     rw [Stmt.erase, execStmt]

@@ -270,11 +270,22 @@ inductive OpLoc (C : Contract) (Γ : Ctx) : PrimTy → Type where
   /-- `balances[i] += 1;` -/
   | index {R : RefTy} {k p : PrimTy} (it : IndexTy R k (.prim p)) (b : SPath C Γ (.ref R))
       (i : Simple C Γ k) : OpLoc C Γ p
+  /-- `m.age += 1;`, a memory member. -/
+  | mfield {s : Name} {p : PrimTy} (b : MPath C Γ (.struct s)) (f : Name)
+      (h : C.fieldType s f = some (.prim p)) : OpLoc C Γ p
+  /-- `xs[i] += 1;`, a memory element at a simple index. -/
+  | mindex {p : PrimTy} (b : MPath C Γ (.array (.prim p))) (i : Simple C Γ .uint) : OpLoc C Γ p
+
+/-- A simple memory path (`mv`): a memory local. -/
+def MPath.isSimple {C : Contract} {Γ : Ctx} {T : Ty} : MPath C Γ T → Bool
+  | .var .. => true
+  | .loc _ => false
 
 /-- A target whose receiver, if it has one, is simple: `x`, `total`,
 `sp.fld`, `sp[ie]`. -/
 def OpLoc.recvSimple {C : Contract} {Γ : Ctx} {p : PrimTy} : OpLoc C Γ p → Bool
   | .field b _ _ | .index _ b _ => b.isSimple
+  | .mfield b _ _ | .mindex b _ => b.isSimple
   | _ => true
 
 /-! ## Statements -/

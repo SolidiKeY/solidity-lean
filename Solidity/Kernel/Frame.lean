@@ -106,6 +106,8 @@ def OpLoc.weaken {Γ Γ' : Ctx} (h : Ctx.Sub C Γ Γ') {p : PrimTy} : OpLoc C Γ
   | .root r hΓ hr => .root r (h.root r hΓ (by simp [hr])) hr
   | .field b f hf => .field (b.weaken h) f hf
   | .index it b i => .index it (b.weaken h) (i.weaken h)
+  | .mfield b f hf => .mfield (b.weaken h) f hf
+  | .mindex b i => .mindex (b.weaken h) (i.weaken h)
 
 /-- Weakening does not change a simple value's erasure. -/
 theorem Simple.erase_weaken {Γ Γ' : Ctx} (h : Ctx.Sub C Γ Γ') {p : PrimTy} :
@@ -317,6 +319,8 @@ theorem OpLoc.store_weaken {Γ Γ' : Ctx} (h : Ctx.Sub C Γ Γ') (σ : State) (o
     simp only [OpLoc.weaken, OpLoc.store]
     rw [show (Loc.index it (b.weaken h) (.simple (i.weaken h))) = (Loc.index it b (.simple i)).weaken h
       from rfl, Loc.resolve_weaken]
+  | mfield b f hf => simp only [OpLoc.weaken, OpLoc.store, MPath.mval_weaken]
+  | mindex b i => simp only [OpLoc.weaken, OpLoc.store, MPath.mval_weaken, Simple.eval_weaken]
 
 /-- A weakened `++` target is bumped as the original. -/
 theorem OpLoc.bump_weaken {Γ Γ' : Ctx} (h : Ctx.Sub C Γ Γ') (σ : State) (op : IncDec) {p : PrimTy}
@@ -331,6 +335,8 @@ theorem OpLoc.bump_weaken {Γ Γ' : Ctx} (h : Ctx.Sub C Γ Γ') (σ : State) (op
     simp only [OpLoc.weaken, OpLoc.bump]
     rw [show (Loc.index it (b.weaken h) (.simple (i.weaken h))) = (Loc.index it b (.simple i)).weaken h
       from rfl, Loc.resolve_weaken]
+  | mfield b f hf => simp only [OpLoc.weaken, OpLoc.bump, MPath.mval_weaken]
+  | mindex b i => simp only [OpLoc.weaken, OpLoc.bump, MPath.mval_weaken, Simple.eval_weaken]
 
 end Kernel
 end Solidity

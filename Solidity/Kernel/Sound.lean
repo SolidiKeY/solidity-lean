@@ -215,6 +215,58 @@ theorem opStore_agree {ns : List Name} {σ₁ σ : State} (h : EnvAgreeExcept ns
   repeat' split
   all_goals first | trivial | exact SameOk.save h _ _ _ | simp_all
 
+/-- A memory location reads alike in two agreeing states. -/
+theorem readLoc_mem_congr {ns : List Name} {σ₁ σ : State} (h : EnvAgreeExcept ns σ₁ σ) :
+    (loc : Semantics.Loc) → (hl : (∃ id f, loc = .memoryField id f) ∨ ∃ id i, loc = .memoryIndex id i) →
+      readLoc σ₁ loc = readLoc σ loc
+  | .memoryField id f, _ => by simp only [readLoc, getObj_congr h]
+  | .memoryIndex id i, _ => by simp only [readLoc, getObj_congr h]
+  | .stack _, hl | .storage .., hl | .storageLocal _, hl | .memoryRoot _, hl => by
+    rcases hl with ⟨_, _, h⟩ | ⟨_, _, h⟩ <;> cases h
+
+/-- A memory location is written alike in two agreeing states. -/
+theorem writeLoc_mem_agree {ns : List Name} {σ₁ σ : State} (h : EnvAgreeExcept ns σ₁ σ) (v : Value) :
+    (loc : Semantics.Loc) → (hl : (∃ id f, loc = .memoryField id f) ∨ ∃ id i, loc = .memoryIndex id i) →
+      SameOk ns (writeLoc σ₁ loc v) (writeLoc σ loc v)
+  | .memoryField id f, _ => by
+    simp only [writeLoc, getObj_congr h]
+    cases σ.getObj id with
+    | error _ => trivial
+    | ok o =>
+      cases o with
+      | array _ => trivial
+      | struct _ => exact ⟨h.storage, by simp [State.setObj, h.heap], h.nextId, h.net, h.env, h.selfBalance⟩
+  | .memoryIndex id i, _ => by
+    simp only [writeLoc, getObj_congr h]
+    cases σ.getObj id with
+    | error _ => trivial
+    | ok o =>
+      cases o with
+      | struct _ => trivial
+      | array elems =>
+        simp only [bind, Except.bind]
+        split
+        · exact ⟨h.storage, by simp [State.setObj, h.heap], h.nextId, h.net, h.env, h.selfBalance⟩
+        · trivial
+  | .stack _, hl | .storage .., hl | .storageLocal _, hl | .memoryRoot _, hl => by
+    rcases hl with ⟨_, _, h⟩ | ⟨_, _, h⟩ <;> cases h
+
+theorem opMem_agree {ns : List Name} {σ₁ σ : State} (h : EnvAgreeExcept ns σ₁ σ) (op : BinOp) (p : PrimTy)
+    (loc : Semantics.Loc) (hl : (∃ id f, loc = .memoryField id f) ∨ ∃ id i, loc = .memoryIndex id i)
+    (v : Value) : SameOk ns (opMem σ₁ op p loc v) (opMem σ op p loc v) := by
+  simp only [opMem, readLoc_mem_congr h loc hl]
+  cases readLoc σ loc with
+  | error _ => trivial
+  | ok old =>
+    simp only [bind, Except.bind]
+    cases applyBinOp op old v with
+    | error _ => trivial
+    | ok new =>
+      simp only
+      cases checkArith (.prim p) new with
+      | error _ => trivial
+      | ok new => exact writeLoc_mem_agree h _ loc hl
+
 /-- Two runs that return a value end alike: both normally, in states that
 agree off `ns` and with the same value, or both abnormally. -/
 def SameOkV (ns : List Name) : Res (State × Value) → Res (State × Value) → Prop
@@ -257,6 +309,36 @@ theorem bumpStore_agree {ns : List Name} {σ₁ σ : State} (h : EnvAgreeExcept 
   cases bumpStore σ₁ op p r segs <;> cases bumpStore σ op p r segs <;> intro h <;>
     first | trivial | exact h.elim | exact h.1
 
+theorem bumpMem_agreeV {ns : List Name} {σ₁ σ : State} (h : EnvAgreeExcept ns σ₁ σ) (op : IncDec)
+    (p : PrimTy) (loc : Semantics.Loc)
+    (hl : (∃ id f, loc = .memoryField id f) ∨ ∃ id i, loc = .memoryIndex id i) :
+    SameOkV ns (bumpMem σ₁ op p loc) (bumpMem σ op p loc) := by
+  simp only [bumpMem, readLoc_mem_congr h loc hl]
+  cases readLoc σ loc with
+  | error _ => trivial
+  | ok old =>
+    simp only [bind, Except.bind]
+    cases old.asInt with
+    | error _ => trivial
+    | ok oi =>
+      simp only
+      cases checkArith (.prim p) (.int (if op.isIncrement then oi + 1 else oi - 1)) with
+      | error _ => trivial
+      | ok new =>
+        simp only
+        have := writeLoc_mem_agree h new loc hl
+        revert this
+        cases writeLoc σ₁ loc new <;> cases writeLoc σ loc new <;> simp [SameOk, SameOkV, pure, Except.pure]
+
+theorem bumpMem_agree {ns : List Name} {σ₁ σ : State} (h : EnvAgreeExcept ns σ₁ σ) (op : IncDec)
+    (p : PrimTy) (loc : Semantics.Loc)
+    (hl : (∃ id f, loc = .memoryField id f) ∨ ∃ id i, loc = .memoryIndex id i) :
+    SameOk ns (do pure (← bumpMem σ₁ op p loc).1) (do pure (← bumpMem σ op p loc).1) := by
+  have := bumpMem_agreeV h op p loc hl
+  revert this
+  cases bumpMem σ₁ op p loc <;> cases bumpMem σ op p loc <;> intro h <;>
+    first | trivial | exact h.elim | exact h.1
+
 /-- **A `++` frames**: on a target typed at `Γ`, in two states that agree off
 names fresh at `Γ`, it ends alike, with the same value. -/
 theorem OpLoc.bump_agree {Γ : Ctx} {ns : List Name} {σ₁ σ : State} (h : EnvAgreeExcept ns σ₁ σ)
@@ -280,6 +362,32 @@ theorem OpLoc.bump_agree {Γ : Ctx} {ns : List Name} {σ₁ σ : State} (h : Env
     cases (Loc.index it b (.simple i)).resolve σ with
     | error _ => trivial
     | ok a => exact bumpStore_agreeV h op p a.1 a.2
+  | mfield b f hf =>
+    simp only [OpLoc.bump, b.mval_frame h hns]
+    cases b.mval σ with
+    | error _ => trivial
+    | ok w =>
+      simp only [bind, Except.bind]
+      cases w.asRef with
+      | error _ => trivial
+      | ok id => exact bumpMem_agreeV h op p _ (.inl ⟨_, _, rfl⟩)
+  | mindex b i =>
+    simp only [OpLoc.bump, b.mval_frame h hns, i.eval_frame h hns]
+    cases b.mval σ with
+    | error _ => trivial
+    | ok w =>
+      simp only [bind, Except.bind]
+      cases w.asRef with
+      | error _ => trivial
+      | ok id =>
+        simp only
+        cases i.eval σ with
+        | error _ => trivial
+        | ok iv =>
+          simp only
+          cases iv.asInt with
+          | error _ => trivial
+          | ok n => exact bumpMem_agreeV h op p _ (.inr ⟨_, _, rfl⟩)
 
 /-- A push, in two agreeing states, of elements that agree. -/
 theorem pushAt_agree {ns : List Name} {σ₁ σ : State} (h : EnvAgreeExcept ns σ₁ σ) (E : Ty)
@@ -359,6 +467,32 @@ theorem OpLoc.store_agree {Γ : Ctx} {ns : List Name} {σ₁ σ : State} (h : En
     cases (Loc.index it b (.simple i)).resolve σ with
     | error _ => trivial
     | ok a => exact opStore_agree h op p a.1 a.2 v
+  | mfield b f hf =>
+    simp only [OpLoc.store, b.mval_frame h hns]
+    cases b.mval σ with
+    | error _ => trivial
+    | ok w =>
+      simp only [bind, Except.bind]
+      cases w.asRef with
+      | error _ => trivial
+      | ok id => exact opMem_agree h op p _ (.inl ⟨_, _, rfl⟩) v
+  | mindex b i =>
+    simp only [OpLoc.store, b.mval_frame h hns, i.eval_frame h hns]
+    cases b.mval σ with
+    | error _ => trivial
+    | ok w =>
+      simp only [bind, Except.bind]
+      cases w.asRef with
+      | error _ => trivial
+      | ok id =>
+        simp only
+        cases i.eval σ with
+        | error _ => trivial
+        | ok iv =>
+          simp only
+          cases iv.asInt with
+          | error _ => trivial
+          | ok n => exact opMem_agree h op p _ (.inr ⟨_, _, rfl⟩) v
 
 /-- Close `EnvAgreeExcept ns (…(σ.setEnv a _)….setEnv b _) σ` with `a b ∈ ns`, and
 `EnvAgreeExcept ns (σ'.setEnv x b) (σ.setEnv x b)` from the same inside. -/
@@ -827,6 +961,17 @@ theorem Taclet.sound {m : Modality} {Γ Γ' : Ctx} {s : Stmt C Γ Γ'} {pr : Pre
         cases pickBranch v (a.eval σ) (b.eval σ) with
         | error _ => trivial
         | ok w => simp only [SameOk]; agree_tac
+    | mem l =>
+      simp only [VHole.fill, VHole.weaken, Prog.run, Stmt.run, bind_pure, Val.eval, Val.eval_weaken,
+        MSrc.mval, MLoc.write_weaken]
+      cases nse.eval σ with
+      | error _ => trivial
+      | ok v =>
+        simp only [bind, Except.bind, pure, Except.pure, Simple.eval_new]
+        rw [a.eval_setEnv hse, b.eval_setEnv hse]
+        cases pickBranch v (a.eval σ) (b.eval σ) with
+        | error _ => trivial
+        | ok w => exact MLoc.write_agree (agree_setEnv σ se _) (by simpa using hse) _ l
     | store l =>
       simp only [VHole.fill, VHole.weaken, Prog.run, Stmt.run, bind_pure, Val.eval, Val.eval_weaken,
         Src.value, Loc.target_weaken]
@@ -1014,6 +1159,103 @@ theorem Taclet.sound {m : Modality} {Γ Γ' : Ctx} {s : Stmt C Γ Γ'} {pr : Pre
       simp only [bind, Except.bind, pure, Except.pure, Val.eval, Simple.eval_new, hw, b.mval_setEnv hie₀,
         getObj_setEnv]
       exact MHole.runWith_extend hie k σ _ _
+
+  case ternaryToIfMemory p l c a b =>
+    refine ⟨by simp, fun σ => ?_⟩
+    simp only [Prog.run, Stmt.run, bind_pure, Val.eval, MSrc.mval]
+    cases c.eval σ with
+    | error _ => trivial
+    | ok v =>
+      cases v with
+      | int _ => trivial
+      | bool bv =>
+        cases bv <;> simp only [bind, Except.bind, pickBranch, pure, Except.pure]
+        · cases b.eval σ <;> exact SameOk.refl _ _
+        · cases a.eval σ <;> exact SameOk.refl _ _
+  -- Memory arithmetic through a captured receiver.
+  case memoryFieldOpAssignUnfoldLeftFst s p op hop hp nmp hn f hf se mv hmv =>
+    refine ⟨by simp [hmv], fun σ => ?_⟩
+    simp only [Prog.run, Stmt.run, bind_pure, MRhs.bind, OpLoc.store, Val.eval, Simple.eval_weaken]
+    cases hs : se.eval σ with
+    | error _ =>
+      cases nmp.mval σ with
+      | error _ => trivial
+      | ok w =>
+        simp only [bind, Except.bind]
+        cases w.asRef with
+        | error _ => trivial
+        | ok id => simp only [pure, Except.pure, se.eval_setEnv hmv, hs]; trivial
+    | ok v =>
+      cases nmp.mval σ with
+      | error _ => trivial
+      | ok w =>
+        simp only [bind, Except.bind]
+        cases w.asRef with
+        | error _ => trivial
+        | ok id =>
+          simp only [pure, Except.pure, se.eval_setEnv hmv, hs, MPath.new, MPath.mval, getEnv_setEnv_self,
+            MVal.asRef]
+          exact opMem_agree (agree_setEnv σ mv _) op p _ (.inl ⟨_, _, rfl⟩) v
+  case memoryIndexOpAssignUnfoldLeftFst p op hop hp nmp hn ie se mv hmv =>
+    refine ⟨by simp [hmv], fun σ => ?_⟩
+    simp only [Prog.run, Stmt.run, bind_pure, MRhs.bind, OpLoc.store, Val.eval, Simple.eval_weaken]
+    cases hs : se.eval σ with
+    | error _ =>
+      cases nmp.mval σ with
+      | error _ => trivial
+      | ok w =>
+        simp only [bind, Except.bind]
+        cases w.asRef with
+        | error _ => trivial
+        | ok id => simp only [pure, Except.pure, se.eval_setEnv hmv, hs]; trivial
+    | ok v =>
+      cases nmp.mval σ with
+      | error _ => trivial
+      | ok w =>
+        simp only [bind, Except.bind]
+        cases w.asRef with
+        | error _ => trivial
+        | ok id =>
+          simp only [pure, Except.pure, se.eval_setEnv hmv, hs, MPath.new, MPath.mval, getEnv_setEnv_self,
+            MVal.asRef, ie.eval_setEnv hmv]
+          cases ie.eval σ with
+          | error _ => trivial
+          | ok iv =>
+            simp only
+            cases iv.asInt with
+            | error _ => trivial
+            | ok n => exact opMem_agree (agree_setEnv σ mv _) op p _ (.inr ⟨_, _, rfl⟩) v
+  case memoryFieldIncrementUnfoldLeftFst s p op hp nmp hn f hf mv hmv =>
+    refine ⟨by simp [hmv], fun σ => ?_⟩
+    simp only [Prog.run, Stmt.run, bind_pure, MRhs.bind, OpLoc.bump]
+    cases nmp.mval σ with
+    | error _ => trivial
+    | ok w =>
+      simp only [bind, Except.bind]
+      cases w.asRef with
+      | error _ => trivial
+      | ok id =>
+        simp only [pure, Except.pure, MPath.new, MPath.mval, getEnv_setEnv_self, MVal.asRef]
+        exact bumpMem_agree (agree_setEnv σ mv _) op p _ (.inl ⟨_, _, rfl⟩)
+  case memoryIndexIncrementUnfoldLeftFst p op hp nmp hn ie mv hmv =>
+    refine ⟨by simp [hmv], fun σ => ?_⟩
+    simp only [Prog.run, Stmt.run, bind_pure, MRhs.bind, OpLoc.bump, Simple.eval_weaken]
+    cases nmp.mval σ with
+    | error _ => trivial
+    | ok w =>
+      simp only [bind, Except.bind]
+      cases w.asRef with
+      | error _ => trivial
+      | ok id =>
+        simp only [pure, Except.pure, MPath.new, MPath.mval, getEnv_setEnv_self, MVal.asRef,
+          ie.eval_setEnv hmv]
+        cases ie.eval σ with
+        | error _ => trivial
+        | ok iv =>
+          simp only
+          cases iv.asInt with
+          | error _ => trivial
+          | ok n => exact bumpMem_agree (agree_setEnv σ mv _) op p _ (.inr ⟨_, _, rfl⟩)
 
   -- Memory: a copy into storage through a captured receiver or index.
   case memoryToStorageField_unfold_leftFst s R nsp hn f hf p sp hsp =>

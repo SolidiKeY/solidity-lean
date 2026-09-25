@@ -92,6 +92,8 @@ def OpLoc.size {Γ : Ctx} {p : PrimTy} : OpLoc C Γ p → Nat
   | .local .. | .root .. => 1
   | .field b _ _ => b.size + 1
   | .index _ b _ => b.size + 2
+  | .mfield b _ _ => b.size + 1
+  | .mindex b _ => b.size + 2
 
 mutual
 
@@ -314,7 +316,7 @@ theorem Hole.extra_ex {Γ Γ' : Ctx} {T : Ty} (k : Hole C Γ Γ' T) : k.extra = 
 
 @[simp] theorem OpLoc.size_weaken {Γ Γ' : Ctx} (h : Ctx.Sub C Γ Γ') {p : PrimTy} (l : OpLoc C Γ p) :
     (l.weaken h).size = l.size := by
-  cases l <;> simp only [OpLoc.weaken, OpLoc.size, SPath.size_weaken]
+  cases l <;> simp only [OpLoc.weaken, OpLoc.size, SPath.size_weaken, MPath.size_weaken]
 
 @[simp] theorem OpLoc.size_local {Γ : Ctx} {p : PrimTy} (x : Name) (h : lookupBy x Γ = some (.stack (.prim p))) :
     (OpLoc.local (C := C) x h).size = 1 := rfl
@@ -325,6 +327,11 @@ theorem Hole.extra_ex {Γ Γ' : Ctx} {T : Ty} (k : Hole C Γ Γ' T) : k.extra = 
 @[simp] theorem OpLoc.size_index {Γ : Ctx} {R : RefTy} {k p : PrimTy} (it : IndexTy R k (.prim p))
     (b : SPath C Γ (.ref R)) (i : Simple C Γ k) : (OpLoc.index it b i).size = b.size + 2 := rfl
 
+@[simp] theorem OpLoc.size_mfield {Γ : Ctx} {s : Name} {p : PrimTy} (b : MPath C Γ (.struct s)) (f : Name)
+    (h : C.fieldType s f = some (.prim p)) : (OpLoc.mfield b f h).size = b.size + 1 := rfl
+@[simp] theorem OpLoc.size_mindex {Γ : Ctx} {p : PrimTy} (b : MPath C Γ (.array (.prim p)))
+    (i : Simple C Γ .uint) : (OpLoc.mindex b i).size = b.size + 2 := rfl
+
 theorem OpLoc.one_le_size {Γ : Ctx} {p : PrimTy} (l : OpLoc C Γ p) : 1 ≤ l.size := by
   cases l <;> simp only [OpLoc.size] <;> omega
 
@@ -333,14 +340,15 @@ and two. -/
 def VHole.extra {Γ : Ctx} {p : PrimTy} : VHole C Γ p → Nat
   | .local .. => 1
   | .store l => l.size + 2
+  | .mem l => l.size + 2
 
 @[simp] theorem VHole.fill_size {Γ : Ctx} {p : PrimTy} (k : VHole C Γ p) (v : Val C Γ p) :
     (k.fill v).size = k.extra + v.size := by
-  cases k <;> simp only [VHole.fill, VHole.extra, Stmt.size, Src.size] <;> omega
+  cases k <;> simp only [VHole.fill, VHole.extra, Stmt.size, Src.size, MSrc.size_val] <;> omega
 
 @[simp] theorem VHole.extra_weaken {Γ Γ' : Ctx} (h : Ctx.Sub C Γ Γ') {p : PrimTy} (k : VHole C Γ p) :
     (k.weaken h).extra = k.extra := by
-  cases k <;> simp only [VHole.weaken, VHole.extra, Loc.size_weaken]
+  cases k <;> simp only [VHole.weaken, VHole.extra, Loc.size_weaken, MLoc.size_weaken]
 
 @[simp] theorem Src.size_val {Γ : Ctx} {p : PrimTy} (v : Val C Γ p) : (Src.val v).size = v.size := rfl
 @[simp] theorem Src.size_copy {Γ : Ctx} {R : RefTy} (p : SPath C Γ (.ref R)) (h : (Ty.ref R).mapFree = true) :
@@ -382,7 +390,8 @@ theorem Taclet.smaller {m : Modality} {Γ Γ' : Ctx} {s : Stmt C Γ Γ'} {pr : P
   all_goals simp only [Premise.Smaller, Prog.sizes, Prog.size, Stmt.size, Src.size_val, Src.size_copy, Val.size,
     SPath.size, Loc.size, Simple.size, Hole.fill_size, Hole.extend_extra, SPath.new, Simple.new,
     SPath.size_weaken, Loc.size_weaken, Val.size_weaken, Src.size_weaken, OpLoc.size_weaken,
-    OpLoc.size_local, OpLoc.size_root, OpLoc.size_field, OpLoc.size_index, VHole.fill_size,
+    OpLoc.size_local, OpLoc.size_root, OpLoc.size_field, OpLoc.size_index, OpLoc.size_mfield,
+    OpLoc.size_mindex, VHole.fill_size,
     VHole.extra_weaken, Src.fresh_size, MPath.size, MLoc.size, MRhs.size_alias, MRhs.size_copy, MSrc.size_val,
     MSrc.size_ref, MHole.fill_size, MHole.extend_extra, MPath.new, MPath.size_weaken,
     MLoc.size_weaken, MLoc.weaken, MPath.weaken, List.length,

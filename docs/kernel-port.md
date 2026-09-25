@@ -280,7 +280,7 @@ lists only the standard three axioms.
 - [ ] Phase 2: typed syntax, erasure, elaboration, quoters.
   - [x] storage and stack values: `Kernel/Syntax.lean`, `Erase.lean`
     (`Prog.erase_wt`), `Elab.lean` (`ksol[C]{}`), `Print.lean`
-  - [ ] memory  - [x] arrays, `push`/`pop` (`Stmt.push`, `Stmt.pop`; `sp.push()` as a
+  - [x] memory (M1–M3 below; `delete` excepted)  - [x] arrays, `push`/`pop` (`Stmt.push`, `Stmt.pop`; `sp.push()` as a
     place is still open)  - [x] compound assignment
     (`Stmt.opAssign` on an `OpLoc`)  - [x] `++`/`--` (`Stmt.incDec`,
     `Stmt.assignIncDec`; `ksol` parses `++` only, `--` being a Lean comment)  - [x] ternary
@@ -307,7 +307,9 @@ lists only the standard three axioms.
         (`memoryToStorageUnfoldRightFstSource` would capture it, the verdict below)
       - memory `delete`: not a kernel statement while `stmtWt` rejects it ("v1: storage
         deletes only"); `Prog.erase_wt` has no hypothesis to excuse it
-    - [ ] **M3** `OpLoc`, `VHole` memory cases: compound, `++`, `ternaryToIfMemory`
+    - [x] **M3** `OpLoc.mfield`/`mindex`, `VHole.mem`: `memoryFieldOpAssign`,
+      `memoryIndexArrayOpAssign`, the two `…OpAssignUnfoldLeftFst`, the six `…Increment…`,
+      `ternaryToIfMemory`; through the interpreter's own `readLoc`/`writeLoc` (`opMem`, `bumpMem`)
 - [ ] Phase 3: `Taclet`, `Taclet.sound`, `rules_disjoint`/`rules_complete`.
   - [x] storage, with the control rules on simple conditions
     (`Kernel/Taclet.lean`, `Kernel/Sound.lean`: 41 taclets, all sound)

@@ -80,6 +80,8 @@ def OpLoc.toStr {p : PrimTy} : OpLoc C Γ p → String
   | .root r _ _ => r
   | .field b f _ => s!"{b.toStr}.{f}"
   | .index _ b i => s!"{b.toStr}[{i.toStr}]"
+  | .mfield b f _ => s!"{b.toStr}.{f}"
+  | .mindex b i => s!"{b.toStr}[{i.toStr}]"
 
 def MRhs.toStr {R : RefTy} : MRhs C Γ R → String
   | .alias p => p.toStr
