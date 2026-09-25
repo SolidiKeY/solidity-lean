@@ -101,3 +101,7 @@ import Solidity.Examples.Taclets.NetOps
 import Solidity.Examples.Taclets.FunctionCallOps
 import Solidity.Examples.Taclets.CallbackOps
 import Solidity.Kernel.Contract
+import Solidity.Kernel.Syntax
+import Solidity.Kernel.Erase
+import Solidity.Kernel.Print
+import Solidity.Kernel.Elab
