@@ -289,6 +289,9 @@ them: path conditions (`c = b`) and updates, from the initial context to the
 current one. -/
 inductive Hyps (C : Contract) : Ctx → Ctx → Type where
   | nil {Γ : Ctx} : Hyps C Γ Γ
+  /-- A precondition on the initial state: `alice.age == 3`, or that the
+  storage is `C`'s initial one. -/
+  | assume {Γ : Ctx} (φ : State → Prop) : Hyps C Γ Γ
   | cond {Γ₀ Γ : Ctx} (H : Hyps C Γ₀ Γ) (c : Simple C Γ .bool) (b : Bool) : Hyps C Γ₀ Γ
   | upd {Γ₀ Γ Γ' : Ctx} (H : Hyps C Γ₀ Γ) (m : Modality) (U : Upd C Γ) : Hyps C Γ₀ Γ'
   | shrink {Γ₀ Γ Γ' : Ctx} (H : Hyps C Γ₀ Γ') (h : Ctx.Sub C Γ Γ') : Hyps C Γ₀ Γ
@@ -297,6 +300,7 @@ inductive Hyps (C : Contract) : Ctx → Ctx → Type where
 in the state they lead to from `σ`, whenever their conditions hold. -/
 def Hyps.holds {Γ₀ Γ : Ctx} : Hyps C Γ₀ Γ → (State → Prop) → State → Prop
   | .nil, p, σ => p σ
+  | .assume φ, p, σ => φ σ → p σ
   | .cond H c b, p, σ => H.holds (fun σ' => c.eval σ' = .ok (.bool b) → p σ') σ
   | .upd H m U, p, σ => H.holds (fun σ' => after m (U.apply σ') p) σ
   | .shrink H _, p, σ => H.holds p σ
@@ -304,6 +308,7 @@ def Hyps.holds {Γ₀ Γ : Ctx} : Hyps C Γ₀ Γ → (State → Prop) → State
 theorem Hyps.mono {Γ₀ Γ : Ctx} {p q : State → Prop} (h : ∀ σ, p σ → q σ) :
     (H : Hyps C Γ₀ Γ) → ∀ σ, H.holds p σ → H.holds q σ
   | .nil, σ, hp => h σ hp
+  | .assume _, σ, hp => fun hφ => h σ (hp hφ)
   | .cond H c b, σ, hp =>
     H.mono (p := fun σ' => c.eval σ' = .ok (.bool b) → p σ')
       (q := fun σ' => c.eval σ' = .ok (.bool b) → q σ') (fun σ' hp' hc => h σ' (hp' hc)) σ hp
@@ -315,6 +320,7 @@ theorem Hyps.mono {Γ₀ Γ : Ctx} {p q : State → Prop} (h : ∀ σ, p σ → 
 theorem Hyps.and {Γ₀ Γ : Ctx} {p q : State → Prop} :
     (H : Hyps C Γ₀ Γ) → ∀ σ, H.holds p σ → H.holds q σ → H.holds (fun σ' => p σ' ∧ q σ') σ
   | .nil, σ, hp, hq => ⟨hp, hq⟩
+  | .assume _, σ, hp, hq => fun hφ => ⟨hp hφ, hq hφ⟩
   | .cond H c b, σ, hp, hq =>
     H.mono (fun σ' (h : _ ∧ _) hc => ⟨h.1 hc, h.2 hc⟩) σ (H.and σ hp hq)
   | .upd H m U, σ, hp, hq => by
@@ -350,8 +356,8 @@ inductive Proves : {Γ₀ Γ : Ctx} → Hyps C Γ₀ Γ → Kont C Γ → Prop w
       Proves H (.modal m P (.up h (.modal m ω k))) → Proves H (.modal m (.cons s ω) k)
   /-- `c = true ⟹ ⟨[ P; ω ]⟩ k` and `c = false ⟹ ⟨[ Q; ω ]⟩ k` prove
   `⟨[ s; ω ]⟩ k`; under a diamond, so does `c` being defined. -/
-  | split {Γ₀ Γ Γe : Ctx} {H : Hyps C Γ₀ Γ} {m : Modality} {s : Stmt C Γ Γ} {c : Simple C Γ .bool}
-      {P Q : Prog C Γ Γ} {ω : Prog C Γ Γe} {k : Kont C Γe} (d : Taclet C m s (.split c P Q)) :
+  | split {Γ₀ Γ Γ' Γe : Ctx} {H : Hyps C Γ₀ Γ} {m : Modality} {s : Stmt C Γ Γ'} {c : Simple C Γ .bool}
+      {P Q : Prog C Γ Γ'} {ω : Prog C Γ' Γe} {k : Kont C Γe} (d : Taclet C m s (.split c P Q)) :
       Proves (H.cond c true) (.modal m (P.append ω) k) →
       Proves (H.cond c false) (.modal m (Q.append ω) k) →
       (m = .diamond → Proves H (.post (.defined c))) →
@@ -367,6 +373,9 @@ inductive Proves : {Γ₀ Γ : Ctx} → Hyps C Γ₀ Γ → Kont C Γ → Prop w
   /-- A continuation read at a larger context. -/
   | up {Γ₀ Γ Γ' : Ctx} {H : Hyps C Γ₀ Γ'} {h : Ctx.Sub C Γ Γ'} {k : Kont C Γ} :
       Proves (H.shrink h) k → Proves H (.up h k)
+  /-- Hypotheses no state satisfies prove anything: `x = 1, x != 1 ⊢ k`. -/
+  | absurd {Γ₀ Γ : Ctx} {H : Hyps C Γ₀ Γ} {k : Kont C Γ} :
+      (∀ σ, H.holds (fun _ => False) σ) → Proves H k
   /-- A postcondition, proved in every state the hypotheses allow. -/
   | close {Γ₀ Γ : Ctx} {H : Hyps C Γ₀ Γ} {ψ : Post C Γ} :
       (∀ σ, H.holds ψ.holds σ) → Proves H (.post ψ)
@@ -395,7 +404,7 @@ theorem Proves.sound {Γ₀ Γ : Ctx} {H : Hyps C Γ₀ Γ} {k : Kont C Γ} (d :
       | exact hp
       | exact hag.elim
       | exact (Kont.holds_frame ⟨ns, hfr, hag⟩ (.modal m ω k)).mp hp
-  | @split Γ Γe H m s c P Q ω k d _ _ hdef ih₁ ih₂ ihdef =>
+  | @split Γ Γ' Γe H m s c P Q ω k d _ _ hdef ih₁ ih₂ ihdef =>
     intro σ
     have hdef' : m = .diamond → H.holds (Post.defined c).holds σ := fun hm => ihdef hm σ
     have both := Hyps.and H σ (ih₁ σ) (ih₂ σ)
@@ -429,6 +438,7 @@ theorem Proves.sound {Γ₀ Γ : Ctx} {H : Hyps C Γ₀ Γ} {k : Kont C Γ} (d :
     exact hb.mp rfl
   | empty _ ih => intro σ; exact ih σ
   | up _ ih => intro σ; exact ih σ
+  | absurd h => intro σ; exact Hyps.mono (p := fun _ => False) (fun _ h => h.elim) _ σ (h σ)
   | close h => exact h
 
 end Kernel

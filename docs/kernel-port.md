@@ -310,7 +310,9 @@ lists only the standard three axioms.
 - [ ] Phase 6: `Fml C`, `Proves`, `Proves.sound`, `FreshNames`.
   - [x] `Post`, `Kont` (with `up`, so the rest of a program is never retyped),
     `Hyps`, `Proves`, `Proves.sound` (`Kernel/Logic.lean`)
-  - [ ] the symbolic executor (`Stmt.step` driving `Proves`), and worked examples
+  - [x] the symbolic executor (`Stmt.step` driving `Proves`), `Prog.correct`
+    against `execBlock`, the `symex`/`symex_close` tactics, worked examples
+    (`Kernel/Symex.lean`); a precondition is `Hyps.assume`
   - [ ] `FreshNames`
 - [ ] Phase 7: cut over, `lean/solkey` migrated.
 - [ ] Phase 8: chains, `UpdRule`, decision procedure, `delAt`, one notation.

@@ -194,6 +194,7 @@ the plan and the tracker. No `sorry`, `native_decide` or axiom here.
 | `Kernel/Step.lean` | `Stmt.step`: the rule for every statement, a total dispatcher; `Stmt.complete`, no hypothesis, no residue. `freshName` picks the scratch names. |
 | `Kernel/Measure.lean` | Sizes, `Premise.Smaller`, `Taclet.smaller`: every rule's premise is smaller than its statement (at most four smaller statements, or smaller branches). |
 | `Kernel/Logic.lean` | `StateAgree` and the frame lemmas for programs and continuations; `Post`, `Kont`, `Hyps`; the proof system `Proves` and `Proves.sound` (no hypothesis). |
+| `Kernel/Symex.lean` | the symbolic executor `Kont.vc` (the goals `Stmt.step` leaves), `Kont.vc_sound`, `Prog.correct` against `execBlock`; the `symex`/`symex_close` tactics and worked proofs. |
 | `Kernel/Elab.lean` | `ksol[C]{ … }`/`ksol{ … }`: raw syntax, the elaborator (`synth`/`check`/`elabProg`), the quoters; evaluated at compile time, re-checked by the kernel. |
 
 ## Examples, chains and corpora
