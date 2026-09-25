@@ -198,6 +198,8 @@ def Stmt.erase {C : Contract} {Γ Γ' : Ctx} : Stmt C Γ Γ' → Solidity.Stmt
       else .storageDecl (.ref R) x (some init.erase)
   | .opAssign op _ _ l r => .compoundAssign op l.toPlace r.erase
   | .incDec op _ l => .expr (.mkIncDec op l.toPlace.expr)
+  | .push b v _ => .push b.toPlace (v.map Src.erase)
+  | .pop b => .pop b.toPlace
   | .assignIncDec (p := p) x _ op _ l _ =>
       .assign (PlaceExpr.var .stack (.prim p) (Field.primitive x (.prim p))) (.mkIncDec op l.toPlace.expr)
   | .delete l => .delete l.toPlace
@@ -236,6 +238,14 @@ theorem Stmt.erase_wt {C : Contract} {Γ Γ' : Ctx} :
   | .opAssign op hop _ l r => by
       simp [Stmt.erase, stmtWt, BinOp.isArith_of_compound hop, l.erase_wt, r.erase_wt]
   | .incDec op _ l => by simp [Stmt.erase, stmtWt, wtExpr, l.erase_wt]
+  | .push b v hd => by
+      cases v with
+      | none =>
+        simp only [Option.isSome_none, Bool.false_or] at hd
+        simp [Stmt.erase, stmtWt, SPath.toPlace, b.erase_wt, b.erase_ty, Ty.defaultOkS_sound hd]
+      | some r =>
+        simp [Stmt.erase, stmtWt, SPath.toPlace, b.erase_wt, b.erase_ty, r.erase_wt, r.erase_ty, elemTy]
+  | .pop b => by simp [Stmt.erase, stmtWt, SPath.toPlace, b.erase_wt]
   | .assignIncDec x h op _ l _ => by
       simp [Stmt.erase, stmtWt, PlaceExpr.var, wtExpr, h, Field.primitive, l.erase_wt,
         Typed.WrappedExpr.ty, l.erase_ty]

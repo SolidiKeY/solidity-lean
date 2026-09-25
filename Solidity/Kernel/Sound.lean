@@ -281,6 +281,51 @@ theorem OpLoc.bump_agree {Γ : Ctx} {ns : List Name} {σ₁ σ : State} (h : Env
     | error _ => trivial
     | ok a => exact bumpStore_agreeV h op p a.1 a.2
 
+/-- A push, in two agreeing states, of elements that agree. -/
+theorem pushAt_agree {ns : List Name} {σ₁ σ : State} (h : EnvAgreeExcept ns σ₁ σ) (E : Ty)
+    (root : Name) (segs : List Seg) {val₁ val : SVal → Res SVal} (hv : ∀ slot, val₁ slot = val slot) :
+    SameOk ns (pushAt σ₁ E root segs val₁) (pushAt σ E root segs val) := by
+  simp only [pushAt, findStorage_congr h, hv]
+  cases σ.findStorage root segs with
+  | error _ => trivial
+  | ok sv =>
+    cases sv with
+    | prim _ | struct _ | map _ _ => trivial
+    | array elems shadow =>
+      simp only [bind, Except.bind]
+      cases val (pushSlot E shadow).1 with
+      | error _ => trivial
+      | ok e => exact SameOk.save h _ _ _
+
+/-- A push of an element that fails, fails. -/
+theorem SameOk.error_pushAt {ns : List Name} {e : Halt} {σ : State} (E : Ty) (root : Name)
+    (segs : List Seg) {val : SVal → Res SVal} (hv : ∀ slot, ∃ e', val slot = .error e') :
+    SameOk ns (.error e) (pushAt σ E root segs val) := by
+  simp only [pushAt]
+  cases σ.findStorage root segs with
+  | error _ => trivial
+  | ok sv =>
+    cases sv with
+    | prim _ | struct _ | map _ _ => trivial
+    | array elems shadow =>
+      obtain ⟨e', he⟩ := hv (pushSlot E shadow).1
+      simp only [bind, Except.bind, he]; trivial
+
+/-- A pop in two agreeing states. -/
+theorem popAt_agree {ns : List Name} {σ₁ σ : State} (h : EnvAgreeExcept ns σ₁ σ) (root : Name)
+    (segs : List Seg) : SameOk ns (popAt σ₁ root segs) (popAt σ root segs) := by
+  simp only [popAt, findStorage_congr h]
+  cases σ.findStorage root segs with
+  | error _ => trivial
+  | ok sv =>
+    cases sv with
+    | prim _ | struct _ | map _ _ => trivial
+    | array elems shadow =>
+      simp only [bind, Except.bind]
+      cases elems.reverse with
+      | nil => trivial
+      | cons last rest => exact SameOk.save h _ _ _
+
 /-- **A compound write frames**: into a target typed at `Γ`, in two states
 that agree off names fresh at `Γ`, it ends alike. -/
 theorem OpLoc.store_agree {Γ : Ctx} {ns : List Name} {σ₁ σ : State} (h : EnvAgreeExcept ns σ₁ σ)
@@ -570,6 +615,72 @@ theorem Taclet.sound {m : Modality} {Γ Γ' : Ctx} {s : Stmt C Γ Γ'} {pr : Pre
           cases l.target σ with
           | error _ => trivial
           | ok rs => exact SameOk.save (agree_setEnv σ se _) _ _ _
+
+  -- Arrays: a receiver captured first, then the push; an argument captured before the receiver.
+  case storagePushValue_unfold_leftFstReceiver E nsp hn e sp hsp hd =>
+    refine ⟨by simp [hsp], fun σ => ?_⟩
+    simp only [Prog.run, Stmt.run, bind_pure]
+    cases nsp.resolve σ with
+    | error _ => trivial
+    | ok rs =>
+      simp only [bind, Except.bind, pure, Except.pure, SPath.new, SPath.resolve, envPath,
+        setEnv_env, lookupBy_setBy_self]
+      exact pushAt_agree (agree_setEnv σ sp _) E _ _ fun _ => by
+        simp only [Src.pushVal, Src.value_weaken, e.value_setEnv hsp]
+  case storagePush_unfold_leftFstReceiver E nsp hn sp hsp hd =>
+    refine ⟨by simp [hsp], fun σ => ?_⟩
+    simp only [Prog.run, Stmt.run, bind_pure]
+    cases nsp.resolve σ with
+    | error _ => trivial
+    | ok rs =>
+      simp only [bind, Except.bind, pure, Except.pure, SPath.new, SPath.resolve, envPath,
+        setEnv_env, lookupBy_setBy_self]
+      exact pushAt_agree (agree_setEnv σ sp _) E _ _ fun _ => rfl
+  case storagePop_unfold_leftFstReceiver E nsp hn sp hsp =>
+    refine ⟨by simp [hsp], fun σ => ?_⟩
+    simp only [Prog.run, Stmt.run, bind_pure]
+    cases nsp.resolve σ with
+    | error _ => trivial
+    | ok rs =>
+      simp only [bind, Except.bind, pure, Except.pure, SPath.new, SPath.resolve, envPath,
+        setEnv_env, lookupBy_setBy_self]
+      exact popAt_agree (agree_setEnv σ sp _) _ _
+  case storagePushValue_unfold_rightSndArgument E sp hs r hr se hse hd =>
+    refine ⟨by simp [hse], fun σ => ?_⟩
+    cases r with
+    | val v =>
+      simp only [Src.decl, Src.fresh, Prog.run, Stmt.run, bind_pure, SPath.resolve_weaken]
+      cases hv : v.eval σ with
+      | error e =>
+        simp only [bind, Except.bind]
+        cases sp.resolve σ with
+        | error _ => trivial
+        | ok rs => exact SameOk.error_pushAt _ _ _ fun _ => ⟨e, by simp [Src.pushVal, Src.value, hv, bind, Except.bind]⟩
+      | ok w =>
+        simp only [bind, Except.bind, pure, Except.pure]
+        rw [sp.resolve_setEnv hse]
+        cases sp.resolve σ with
+        | error _ => trivial
+        | ok rs =>
+          exact pushAt_agree (agree_setEnv σ se _) _ _ _ fun _ => by
+            simp [Src.pushVal, Src.value, Val.eval, hv, Simple.eval_new, bind, Except.bind, pure, Except.pure]
+    | copy p hm =>
+      simp only [Src.decl, Src.fresh, Prog.run, Stmt.run, bind_pure, SPath.resolve_weaken]
+      cases hp : p.resolve σ with
+      | error e =>
+        simp only [bind, Except.bind]
+        cases sp.resolve σ with
+        | error _ => trivial
+        | ok rs => exact SameOk.error_pushAt _ _ _ fun _ => ⟨e, by simp [Src.pushVal, Src.value, hp, bind, Except.bind]⟩
+      | ok ps =>
+        simp only [bind, Except.bind, pure, Except.pure]
+        rw [sp.resolve_setEnv hse]
+        cases sp.resolve σ with
+        | error _ => trivial
+        | ok rs =>
+          exact pushAt_agree (agree_setEnv σ se _) _ _ _ fun _ => by
+            simp [Src.pushVal, Src.value, hp, SPath.new, SPath.resolve, envPath, setEnv_env,
+              lookupBy_setBy_self, bind, Except.bind, pure, Except.pure]
 
   -- Compound assignment: the source first, then the target.
   case compoundAssignValueRhsCapture p op hop hp l nse hn se hse =>

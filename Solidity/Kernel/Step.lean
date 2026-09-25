@@ -321,6 +321,33 @@ def assignIncStep {Γ : Ctx} {p : PrimTy} (y : Name) (hy : lookupBy y Γ = some 
   | .field b f h, hs => ⟨_, .storageFieldIncrementAssignment y hy op hp b f h hs⟩
   | .index it b ie, hs => ⟨_, .storageIndexIncrementAssignment y hy op hp it b ie hs⟩
 
+/-- The rule for a push: the receiver first, then the argument. -/
+def pushStep {Γ : Ctx} {E : Ty} (b : SPath C Γ (.array E)) (v : Option (Src C Γ E))
+    (hd : (v.isSome || E.defaultOkS) = true) : Step C m (.push b v hd) :=
+  if hb : b.isSimple = true then
+    match v with
+    | none => ⟨_, .storagePushLengthSave b hb hd⟩
+    | some r =>
+      if hr : r.isSimple = true then
+        match E, b, hb, r, hr, hd with
+        | _, b, hb, .val (.simple se), _, hd => ⟨_, .storagePushValueSave b hb se hd⟩
+        | _, b, hb, .copy sp₂ hm, hr, hd => ⟨_, .storagePushValueCopySource b hb sp₂ hr hm hd⟩
+        | _, _, _, .val (.read _), hr, _ | _, _, _, .val (.binop ..), hr, _
+        | _, _, _, .val (.unop ..), hr, _ | _, _, _, .val (.ternary ..), hr, _ =>
+          absurd hr (by simp [Src.isSimple, Val.isSimple])
+      else ⟨_, .storagePushValue_unfold_rightSndArgument b hb r (not_simple hr) _
+        (freshName_isFresh C Γ "se") hd⟩
+  else
+    match v with
+    | none => ⟨_, .storagePush_unfold_leftFstReceiver b (not_simple hb) _ (freshName_isFresh C Γ "sp") hd⟩
+    | some e => ⟨_, .storagePushValue_unfold_leftFstReceiver b (not_simple hb) e _
+      (freshName_isFresh C Γ "sp") hd⟩
+
+/-- The rule for a pop. -/
+def popStep {Γ : Ctx} {E : Ty} (b : SPath C Γ (.array E)) : Step C m (.pop b) :=
+  if hb : b.isSimple = true then ⟨_, .storagePopSave b hb⟩
+  else ⟨_, .storagePop_unfold_leftFstReceiver b (not_simple hb) _ (freshName_isFresh C Γ "sp")⟩
+
 /-- **The rule for a statement**, under the modality `m`.  Total: every
 statement of the kernel has one. -/
 def Stmt.step {Γ Γ' : Ctx} : (s : Stmt C Γ Γ') → Step C m s
@@ -338,6 +365,8 @@ def Stmt.step {Γ Γ' : Ctx} : (s : Stmt C Γ Γ') → Step C m s
       | .loc l, hb => (Hole.decl c R x hx).unfoldStep m l (not_simple hb)
   | .opAssign op hop hp l r => opStep m op hop hp l r
   | .incDec op hp l => incStep m op hp l
+  | .push b v hd => pushStep m b v hd
+  | .pop b => popStep m b
   | .assignIncDec y hy op hp l hs => assignIncStep m y hy op hp l hs
   | .delete l => deleteStep m l
   | .ite c thn els => ⟨_, .ifElseSplit c thn els⟩
@@ -371,6 +400,11 @@ def Upd.toStr {Γ : Ctx} : Upd C Γ → String
     | .local x _ => s!"\{ {x} := {x} {BinOp.sym op} {se.toStr} }"
     | l => s!"\{ storage := save(storage, {l.toStr}, {l.toStr} {BinOp.sym op} {se.toStr}) }"
   | .bump op l => s!"\{ bump({IncDec.show op l.toStr}) }"
+  | .push b v =>
+    match v with
+    | none => s!"\{ storage := push(storage, {b.toStr}) }"
+    | some r => s!"\{ storage := push(storage, {b.toStr}, {r.toStr}) }"
+  | .pop b => s!"\{ storage := pop(storage, {b.toStr}) }"
   | .bumpBind x op l => s!"\{ bump({IncDec.show op l.toStr}) || {x} := {IncDec.show op l.toStr} }"
 
 def Premise.toStr {Γ Γ' : Ctx} : Premise C Γ Γ' → String

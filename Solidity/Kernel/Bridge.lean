@@ -109,6 +109,14 @@ def Taclet.rule {Γ Γ' : Ctx} {s : Stmt C Γ Γ'} {pr : Premise C Γ Γ'} : Tac
   | .ternaryToIf .. => some .ternaryToIf
   | .ternaryToIfStorage .. => some .ternaryToIfStorage
   | .ternaryCaptureCond .. => some .ternaryCaptureCond
+  | .storagePushValueSave .. => some .storagePushValueSave
+  | .storagePushValueCopySource .. => some .storagePushValueCopySource
+  | .storagePushLengthSave .. => some .storagePushLengthSave
+  | .storagePushValue_unfold_rightSndArgument .. => some .storagePushValueUnfoldRightSndArgument
+  | .storagePushValue_unfold_leftFstReceiver .. => some .storagePushValueUnfoldLeftFstReceiver
+  | .storagePush_unfold_leftFstReceiver .. => some .storagePushUnfoldLeftFstReceiver
+  | .storagePop_unfold_leftFstReceiver .. => some .storagePopUnfoldLeftFstReceiver
+  | .storagePopSave .. => some (match m with | .box => .storagePopSaveBox | .diamond => .storagePopSaveDiamond)
   | .ifElseSplit .. => none
   | .requireSimple .. => some .requireSimple
   | .assertSimple .. => some .assertSimple
@@ -188,6 +196,14 @@ def Taclet.origin {Γ Γ' : Ctx} {s : Stmt C Γ Γ'} {pr : Premise C Γ Γ'} : T
   | .ternaryToIf .. => .taclet .ternaryToIf
   | .ternaryToIfStorage .. => .taclet .ternaryToIfStorage
   | .ternaryCaptureCond .. => .taclet .ternaryCaptureCond
+  | .storagePushValueSave .. => .taclet .storagePushValueSave
+  | .storagePushValueCopySource .. => .taclet .storagePushValueCopySource
+  | .storagePushLengthSave .. => .taclet .storagePushLengthSave
+  | .storagePushValue_unfold_rightSndArgument .. => .taclet .storagePushValue_unfold_rightSndArgument
+  | .storagePushValue_unfold_leftFstReceiver .. => .taclet .storagePushValue_unfold_leftFstReceiver
+  | .storagePush_unfold_leftFstReceiver .. => .taclet .storagePush_unfold_leftFstReceiver
+  | .storagePop_unfold_leftFstReceiver .. => .taclet .storagePop_unfold_leftFstReceiver
+  | .storagePopSave .. => .taclet .storagePopSave
   | .ifElseSplit .. => .taclet .ifElseSplit
   | .requireSimple .. => .taclet .requireSimple
   | .assertSimple .. => .taclet .assertSimple
@@ -247,6 +263,8 @@ def bridgeTour := ksol{
   y = x++; y = ++total; y = alice.age++; y = ++balances[x]; y = folks[x].age++;
   x = b ? 1 : 2; x = (x > 1) ? x : total; total = b ? x : 3; alice.age = (x == 1) ? 2 : x;
   folks[x + 1].age = b ? 1 : 2; x = (b ? 1 : 2) + 1; x += b ? 1 : 2;
+  values.push(x); values.push(x + 1); values.push(); persons.push(alice); persons.push(folks[x]);
+  persons.push(); values.pop(); matrix[x].push(1); matrix[x + 1].push(); matrix[x].pop();
   if (b) { x = 1; } else { x = 2; }; require(b); assert(b); require(x == 1); revert();
 }
 

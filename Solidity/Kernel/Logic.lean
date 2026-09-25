@@ -94,7 +94,8 @@ theorem StateAgree.findStorage {Γ : Ctx} {σ τ : State} (hag : StateAgree C Γ
 /-- A statement's context extends the one it starts from. -/
 theorem Stmt.sub {Γ Γ' : Ctx} : Stmt C Γ Γ' → Ctx.Sub C Γ Γ'
   | .declLocal _ _ hx _ | .declStorage _ _ _ hx _ => Ctx.Sub.fresh hx _
-  | .assign .. | .rebind .. | .assignLocal .. | .opAssign .. | .incDec .. | .assignIncDec ..
+  | .assign .. | .rebind .. | .assignLocal .. | .opAssign .. | .incDec .. | .assignIncDec .. | .push ..
+  | .pop _
   | .delete _ | .ite .. | .require _ | .assert _
   | .revert => Ctx.Sub.refl _
 
@@ -146,6 +147,29 @@ theorem Stmt.run_frame {Γ Γ' : Ctx} {σ τ : State} (hag : StateAgree C Γ σ 
     obtain ⟨hab, hv⟩ := h
     simp only [bind, Except.bind, pure, Except.pure, hv]
     exact StateAgree.setEnv ⟨ns, hns, hab⟩ x _ fun n hn _ => hn
+  | .push (E := E) b v _ => by
+    obtain ⟨ns, hns, hag'⟩ := hag
+    simp only [Stmt.run, b.resolve_frame hag' hns]
+    cases b.resolve τ with
+    | error _ => trivial
+    | ok rs =>
+      have h := pushAt_agree hag' E rs.1 rs.2 (val₁ := Src.pushVal σ v) (val := Src.pushVal τ v)
+        fun _ => by cases v <;> simp [Src.pushVal, Src.value_frame hag' hns]
+      simp only [bind, Except.bind]
+      revert h
+      cases pushAt σ E rs.1 rs.2 (Src.pushVal σ v) <;> cases pushAt τ E rs.1 rs.2 (Src.pushVal τ v) <;>
+        intro h <;> first | trivial | exact h.elim | exact ⟨ns, hns, h⟩
+  | .pop b => by
+    obtain ⟨ns, hns, hag'⟩ := hag
+    simp only [Stmt.run, b.resolve_frame hag' hns]
+    cases b.resolve τ with
+    | error _ => trivial
+    | ok rs =>
+      have h := popAt_agree hag' rs.1 rs.2
+      simp only [bind, Except.bind]
+      revert h
+      cases popAt σ rs.1 rs.2 <;> cases popAt τ rs.1 rs.2 <;>
+        intro h <;> first | trivial | exact h.elim | exact ⟨ns, hns, h⟩
   | .rebind x h r => by
     obtain ⟨ns, hns, hag'⟩ := hag
     simp only [Stmt.run, r.resolve_frame hag' hns]

@@ -223,11 +223,13 @@ statement and splitting every branch, until what is left are the goals
 `∀ σ, H.holds ψ σ` (or `False`, when the fuel runs out). -/
 macro "symex" : tactic => `(tactic| repeat' (first
   | (rw [Kont.vc]; try simp only [Stmt.step, localStep, assignStep, rebindStep, deleteStep,
-      binopRightStep, shortCircuitStep, copyStep, opStep, incStep, assignIncStep, ternaryStep, VHole.fill, VHole.weaken,
+      binopRightStep, shortCircuitStep, copyStep, opStep, incStep, assignIncStep, ternaryStep, pushStep, popStep, VHole.fill, VHole.weaken,
+      Src.isSimple, Src.decl, Src.fresh,
       Hole.unfoldStep, Prog.append, Val.weaken,
       OpLoc.weaken,
       Simple.weaken, Loc.weaken, SPath.weaken, Src.weaken, Val.isSimple, SPath.isSimple,
-      SPath.isBindable, dite_true, dite_false, Bool.false_eq_true, reduceFreshName])
+      SPath.isBindable, dite_true, dite_false, Bool.false_eq_true, and_self, and_true, true_and,
+      and_false, false_and, reduceFreshName])
   | constructor))
 
 /-- `symex_close [lemmas]`: discharge a goal `symex` leaves by evaluating the
@@ -244,7 +246,7 @@ macro_rules
       Except.pure, applyBinOp, applyUnOp, unopCheck, checkArith, BinOp.retTy, Value.asInt,
       Value.asBool, Value.toSVal, BinOp.isArith, uintBound, intBound, reduceFreshName, Src.value,
       Loc.target, Loc.resolve, SPath.resolve, Simple.new, envPath, State.saveStorage, OpLoc.store,
-      opStore, opLocal, pickBranch, OpLoc.bump, bumpStore, bumpLocal, IncDec.isPre, IncDec.isIncrement,
+      opStore, opLocal, pickBranch, pushAt, popAt, Src.pushVal, pushSlot, OpLoc.bump, bumpStore, bumpLocal, IncDec.isPre, IncDec.isIncrement,
       State.findStorage, State.setEnv, State.getEnv, SVal.save, SVal.find, SVal.asValue,
       SVal.defaultOf, defaultForRef, defaultForTy, defaultForFields, structDef, Functor.map,
       Except.map, lookupBy, setBy, SemanticsProperties.lookupBy_setBy_self,
@@ -308,6 +310,14 @@ set_option maxHeartbeats 1000000 in
 example : (Kont.modal .diamond exTern (.post .tt)).vc 80
     (.assume fun σ => σ.storage = StandardExample.initStorage ∧ σ.env = []) := by
   unfold exTern; symex <;> symex_close [initStorage_standardExample, State.exampleStore]
+
+def exPush := ksol{ values.push(5); values.push(); uint x = values[0]; assert(x == 5); values.pop(); values.pop(); }
+
+set_option maxHeartbeats 1000000 in
+/-- Two pushes and two pops on an empty array, reading the first element. -/
+example : (Kont.modal .diamond exPush (.post .tt)).vc 80
+    (.assume fun σ => σ.storage = StandardExample.initStorage ∧ σ.env = []) := by
+  unfold exPush; symex <;> symex_close [initStorage_standardExample, State.exampleStore]
 
 /-- A false specification leaves a goal no evaluation closes. -/
 example : True := by

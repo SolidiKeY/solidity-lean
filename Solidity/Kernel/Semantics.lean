@@ -184,6 +184,31 @@ def OpLoc.bump (σ : State) (op : IncDec) : {p : PrimTy} → OpLoc C Γ p → Re
     let (rt, segs) ← (Loc.index it b (.simple i)).resolve σ
     bumpStore σ op p rt segs
 
+/-- `push` at a resolved array: the element `val` gives (from the slot the
+push lands on) appended, as `execStmt` does it. -/
+def pushAt (σ : State) (E : Ty) (root : Name) (segs : List Seg) (val : SVal → Res SVal) :
+    Res State := do
+  match ← σ.findStorage root segs with
+  | .array elems shadow =>
+    let (slot, shadow') := pushSlot E shadow
+    let newElem ← val slot
+    σ.saveStorage root segs (.array (elems ++ [newElem]) shadow')
+  | .prim _ | .struct _ | .map _ _ => .error .stuck
+
+/-- What a push appends: its argument, or the slot. -/
+def Src.pushVal (σ : State) {T : Ty} : Option (Src C Γ T) → SVal → Res SVal
+  | none, slot => pure slot
+  | some r, _ => r.value σ
+
+/-- `pop` at a resolved array: the last element cleared into the shadow. -/
+def popAt (σ : State) (root : Name) (segs : List Seg) : Res State := do
+  match ← σ.findStorage root segs with
+  | .array elems shadow =>
+    match elems.reverse with
+    | [] => .error .revert
+    | last :: restRev => σ.saveStorage root segs (.array restRev.reverse (last.defaultOf :: shadow))
+  | .prim _ | .struct _ | .map _ _ => .error .stuck
+
 mutual
 
 /-- The state a statement leaves, from `σ`. -/
@@ -206,6 +231,12 @@ def Stmt.run (σ : State) {Γ Γ' : Ctx} : Stmt C Γ Γ' → Res State
     pure (σ.setEnv x (.spath root segs))
   | .opAssign op _ _ l r => do l.store σ op (← r.eval σ)
   | .incDec op _ l => do pure (← l.bump σ op).1
+  | .push (E := E) b v _ => do
+    let (root, segs) ← b.resolve σ
+    pushAt σ E root segs (Src.pushVal σ v)
+  | .pop b => do
+    let (root, segs) ← b.resolve σ
+    popAt σ root segs
   | .assignIncDec x _ op _ l _ => do
     let (σ', v) ← l.bump σ op
     pure (σ'.setEnv x (.val v))
@@ -588,6 +619,39 @@ theorem Stmt.run_eq (σ : State) {Γ Γ' : Ctx} : (s : Stmt C Γ Γ') → execSt
           cases σ.findStorage rt segs with
           | error _ => rfl
           | ok sv => cases sv.asValue <;> rfl
+  | .push b v _ => by
+    simp only [Stmt.run]
+    rw [Stmt.erase, execStmt]
+    simp only [SPath.toPlace]
+    rw [b.resolveS_erase σ, b.erase_ty]
+    cases b.resolve σ with
+    | error _ => rfl
+    | ok rs =>
+      simp only [Except.map, bind, Except.bind, pushAt]
+      cases σ.findStorage rs.1 rs.2 with
+      | error _ => rfl
+      | ok sv =>
+        cases sv with
+        | prim _ | struct _ | map _ _ => rfl
+        | array elems shadow =>
+          simp only
+          cases v with
+          | none => rfl
+          | some r =>
+            simp only [Option.map, Src.pushVal, r.rhsToSVal_erase σ]
+            cases r.value σ <;> rfl
+  | .pop b => by
+    simp only [Stmt.run]
+    rw [Stmt.erase, execStmt]
+    simp only [SPath.toPlace]
+    rw [b.resolveS_erase σ]
+    cases b.resolve σ with
+    | error _ => rfl
+    | ok rs =>
+      simp only [Except.map, bind, Except.bind, popAt]
+      cases σ.findStorage rs.1 rs.2 with
+      | error _ => rfl
+      | ok sv => cases sv <;> rfl
   | .delete l => by
     simp only [Stmt.run]
     rw [Stmt.erase, execStmt]
