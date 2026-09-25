@@ -284,7 +284,7 @@ lists only the standard three axioms.
     place is still open)  - [x] compound assignment
     (`Stmt.opAssign` on an `OpLoc`)  - [x] `++`/`--` (`Stmt.incDec`,
     `Stmt.assignIncDec`; `ksol` parses `++` only, `--` being a Lean comment)  - [x] ternary
-    (`Val.ternary`, lazy as `evalValue`)  - [ ] calls, `transfer`
+    (`Val.ternary`, lazy as `evalValue`)  - [x] `transfer`  - [ ] calls
   - [ ] `decode : Stmt → Option (Stmt C Γ Γ')` with `decode (erase t) = some t`,
     for the corpus and to retire `stmtWt` hypotheses
   - [ ] the 26 `ResidueShape` verdicts (table below)
