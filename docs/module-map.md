@@ -176,6 +176,15 @@ Each is a refutation that pins down why a hypothesis or conjunct is there.
 | `Evm/Correctness.lean` | Leroy-style forward simulation: `compile_preserves_ok`/`_revert`, verified inlining, judgment transfer. See `docs/compiler-verification.md`. |
 | `Evm/Examples.lean` | `native_decide` differential tests and concrete instantiations. |
 
+## The typed kernel
+
+The port of mini-solkey's calculus, phase by phase; `docs/kernel-port.md` is
+the plan and the tracker. No `sorry`, `native_decide` or axiom here.
+
+| Module | What it is |
+|---|---|
+| `Kernel/Contract.lean` | `Contract` (its storage roots; struct bodies stay `structDef`), `contract!{}`/`sol_ty!()`, the eight ported contracts, each checked against its interpreter store. |
+
 ## Examples, chains and corpora
 
 Three trees, told apart by the *proof route*, not by the subject:

@@ -275,7 +275,8 @@ Solidity/Kernel` prints nothing, and `lean_verify` on its headline theorems
 lists only the standard three axioms.
 
 - [x] Phase 0: this tracker, `.claude/rules/kernel.md`, the index rows.
-- [ ] Phase 1: `Ty` eliminator, `Contract`, `InContract`, named contracts.
+- [x] Phase 1: `Ty` eliminator, `Contract`, `InContract`, named contracts
+  (`Kernel/Contract.lean`).
 - [ ] Phase 2: typed syntax, erasure, elaboration, quoters.
   - [ ] storage  - [ ] stack  - [ ] memory  - [ ] arrays, `push`/`pop`  - [ ] calls
   - [ ] the 26 `ResidueShape` verdicts (table below)
@@ -294,6 +295,8 @@ lists only the standard three axioms.
 |---|---|---|
 | Rule names | solkey's taclet names (§5) | 2026-09-25 |
 | `native_decide` | forbidden in `Solidity/Kernel/`; old files keep their count | 2026-09-25 |
+| Struct bodies | stay the package-wide `Semantics.structDef`, which the interpreter reads; a `Contract` is its storage roots only, and `Contract.fieldType` reads the table. A per-contract table would let a contract disagree with what runs. Revisit in phase 7, if the interpreter is made contract-parametric | 2026-09-25 |
+| Ported contracts | one named constant per interpreter store, `initStorage_*` checks roots, order and defaults against the store by `simp` | 2026-09-25 |
 
 ### `ResidueShape` verdicts
 

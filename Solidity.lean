@@ -100,3 +100,4 @@ import Solidity.Examples.Taclets.MemoryOps
 import Solidity.Examples.Taclets.NetOps
 import Solidity.Examples.Taclets.FunctionCallOps
 import Solidity.Examples.Taclets.CallbackOps
+import Solidity.Kernel.Contract
