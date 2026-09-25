@@ -47,6 +47,7 @@ read them by path.
 | `Examples/**`, `Paper/**`, `Tactics/**`, `Update/**`, `Theory/**` (derivations and notation) | `.claude/rules/derivations.md` |
 | `Calculus/RuleSoundness.lean`, `Calculus/RewriteSoundness.lean`, `Wp/**`, `Counterexamples/**` | `.claude/rules/soundness.md` |
 | `Typing/**`, `Semantics/**` | `.claude/rules/typing.md` |
+| `Kernel/**` (the typed port of mini-solkey, tracked in `docs/kernel-port.md`) | `.claude/rules/kernel.md` |
 
 `docs/README.md` indexes the documents. `docs/lean-key-rule-map.md` is the authority for the name-by-name
 map to solkey's taclets (do not restate it in module docstrings);

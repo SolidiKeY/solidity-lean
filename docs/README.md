@@ -13,4 +13,5 @@ referenced from it and from `AGENTS.md`.
 | [soundness-hypotheses.md](soundness-hypotheses.md) | One section per hypothesis family of the `<rule>_sound` theorems: what frees it, and the attempts so far. The counts are `#soundness_ledger`'s. |
 | [solc-alignment.md](solc-alignment.md) | Where the interpreter follows solc rather than KeY, and why. |
 | [compiler-verification.md](compiler-verification.md) | The EVM compiler and its forward-simulation proof. |
+| [kernel-port.md](kernel-port.md) | The plan and progress tracker for porting mini-solkey's typed kernel (typed syntax, `Taclet` judgement, residue-free completeness, `Proves.sound`) into `Solidity/Kernel/`. |
 | [solkey-feedback.md](solkey-feedback.md) | Improvement ideas flowing Lean → solkey. The only outbound document. |

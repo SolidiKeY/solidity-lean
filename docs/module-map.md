@@ -18,6 +18,7 @@ Solidity/  KeySort.lean  AST.lean  Semantics.lean   the three that stay at the r
            Update/      the symbolic-update algebra and the sequent layer
            Wp/          the weakest-precondition verifier and `sol_wp`
            Evm/         the EVM compiler and its correctness proof
+           Kernel/      the typed calculus ported from mini-solkey (`docs/kernel-port.md`)
            Counterexamples/  one refutation per hypothesis that carries weight
            Examples/    worked examples in the default build
            Paper/       the paper's chains (`SolidityPaper`, its own target)
