@@ -93,9 +93,9 @@ theorem StateAgree.findStorage {Γ : Ctx} {σ τ : State} (hag : StateAgree C Γ
 
 /-- A statement's context extends the one it starts from. -/
 theorem Stmt.sub {Γ Γ' : Ctx} : Stmt C Γ Γ' → Ctx.Sub C Γ Γ'
-  | .declLocal _ _ hx _ | .declStorage _ _ _ hx _ => Ctx.Sub.fresh hx _
+  | .declLocal _ _ hx _ | .declStorage _ _ _ hx _ | .declMem _ _ hx _ _ => Ctx.Sub.fresh hx _
   | .assign .. | .rebind .. | .assignLocal .. | .opAssign .. | .incDec .. | .assignIncDec .. | .push ..
-  | .pop _ | .transfer ..
+  | .pop _ | .transfer .. | .rebindMem .. | .assignMem ..
   | .delete _ | .ite .. | .require _ | .assert _
   | .revert => Ctx.Sub.refl _
 
@@ -193,6 +193,56 @@ theorem Stmt.run_frame {Γ Γ' : Ctx} {σ τ : State} (hag : StateAgree C Γ σ 
       revert h
       cases popAt σ rs.1 rs.2 <;> cases popAt τ rs.1 rs.2 <;>
         intro h <;> first | trivial | exact h.elim | exact ⟨ns, hns, h⟩
+  | .declMem R x hx init _ => by
+    obtain ⟨ns, hns, hag'⟩ := hag
+    have hfr : ∀ n, isFresh C Γ n = true → n ≠ x → isFresh C (setBy x (.mem (.ref R)) Γ) n = true :=
+      fun n hn hne => isFresh_setBy hn hne
+    cases init with
+    | none =>
+      have h := allocDefault_agree hag' R
+      simp only [Stmt.run]
+      revert h
+      cases allocDefault σ R <;> cases allocDefault τ R <;> intro h <;> first | trivial | exact h.elim | skip
+      rename_i a b
+      obtain ⟨hab, he⟩ := h
+      simp only [bind, Except.bind, pure, Except.pure, he]
+      exact StateAgree.setEnv ⟨ns, hns, hab⟩ x _ hfr
+    | some r =>
+      cases r with
+      | alias p =>
+        simp only [Stmt.run, MRhs.bind, p.mval_frame hag' hns]
+        cases p.mval τ with
+        | error _ => trivial
+        | ok v =>
+          simp only [bind, Except.bind]
+          cases v.asRef with
+          | error _ => trivial
+          | ok id => exact StateAgree.setEnv ⟨ns, hns, hag'⟩ x _ hfr
+  | .rebindMem x h r => by
+    obtain ⟨ns, hns, hag'⟩ := hag
+    cases r with
+    | alias p =>
+      simp only [Stmt.run, MRhs.bind, p.mval_frame hag' hns]
+      cases p.mval τ with
+      | error _ => trivial
+      | ok v =>
+        simp only [bind, Except.bind]
+        cases v.asRef with
+        | error _ => trivial
+        | ok id => exact StateAgree.setEnv ⟨ns, hns, hag'⟩ x _ fun n hn _ => hn
+  | .assignMem l r => by
+    obtain ⟨ns, hns, hag'⟩ := hag
+    have hr : r.mval σ = r.mval τ := by
+      cases r <;> simp [MSrc.mval, Val.eval_frame hag' hns, MPath.mval_frame hag' hns]
+    simp only [Stmt.run, hr]
+    cases r.mval τ with
+    | error _ => trivial
+    | ok mv =>
+      simp only [bind, Except.bind]
+      have h := MLoc.write_agree hag' hns mv l
+      revert h
+      cases l.write σ mv <;> cases l.write τ mv <;> intro h <;>
+        first | trivial | exact h.elim | exact ⟨ns, hns, h⟩
   | .rebind x h r => by
     obtain ⟨ns, hns, hag'⟩ := hag
     simp only [Stmt.run, r.resolve_frame hag' hns]

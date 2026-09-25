@@ -48,6 +48,14 @@ def Loc.toStr {T : Ty} : Loc C Γ T → String
   | .field b f _ => s!"{b.toStr}.{f}"
   | .index _ b i => s!"{b.toStr}[{i.toStr true}]"
 
+def MPath.toStr {T : Ty} : MPath C Γ T → String
+  | .var x _ => x
+  | .loc l => l.toStr
+
+def MLoc.toStr {T : Ty} : MLoc C Γ T → String
+  | .field b f _ => s!"{b.toStr}.{f}"
+  | .index b i => s!"{b.toStr}[{i.toStr true}]"
+
 /-- `top` is whether the value stands alone, so needs no parentheses. -/
 def Val.toStr {p : PrimTy} : Val C Γ p → (top : Bool := false) → String
   | .simple s, _ => s.toStr
@@ -59,6 +67,7 @@ def Val.toStr {p : PrimTy} : Val C Γ p → (top : Bool := false) → String
   | .ternary c a b, top =>
     let s := s!"{c.toStr} ? {a.toStr} : {b.toStr}"
     if top then s else s!"({s})"
+  | .readMem l, _ => l.toStr
 
 end
 
@@ -71,6 +80,13 @@ def OpLoc.toStr {p : PrimTy} : OpLoc C Γ p → String
   | .root r _ _ => r
   | .field b f _ => s!"{b.toStr}.{f}"
   | .index _ b i => s!"{b.toStr}[{i.toStr}]"
+
+def MRhs.toStr {R : RefTy} : MRhs C Γ R → String
+  | .alias p => p.toStr
+
+def MSrc.toStr {T : Ty} : MSrc C Γ T → String
+  | .val v => v.toStr true
+  | .ref p => p.toStr
 
 /-- `x++`, `--x`. -/
 def IncDec.show (op : IncDec) (x : String) : String :=
@@ -88,6 +104,12 @@ def Stmt.toStr {Γ Γ' : Ctx} : Stmt C Γ Γ' → String
     | none => s!"{tyStr (.prim p)} {x};"
     | some e => s!"{tyStr (.prim p)} {x} = {e.toStr true};"
   | .declStorage _ R x _ e => s!"{tyStr (.ref R)} storage {x} = {e.toStr};"
+  | .declMem R x _ init _ =>
+    match init with
+    | none => s!"{tyStr (.ref R)} memory {x};"
+    | some r => s!"{tyStr (.ref R)} memory {x} = {r.toStr};"
+  | .rebindMem x _ r => s!"{x} = {r.toStr};"
+  | .assignMem l r => s!"{l.toStr} = {r.toStr};"
   | .opAssign op _ _ l r => s!"{l.toStr} {BinOp.sym op}= {r.toStr true};"
   | .incDec op _ l => s!"{IncDec.show op l.toStr};"
   | .push b v _ =>

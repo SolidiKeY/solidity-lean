@@ -67,6 +67,12 @@ def Simple.eval (σ : State) {p : PrimTy} : Simple C Γ p → Res Value
     | .spath .. => .error .stuck
     | .mref _ => .error .stuck
 
+/-- A memory slot read as the object it references (`resolveMBase`'s last
+step): a primitive has no identity. -/
+def _root_.Solidity.Semantics.MVal.asRef : MVal → Res Nat
+  | .ref id => pure id
+  | .prim _ => .error .stuck
+
 mutual
 
 /-- The storage path a path denotes, read in `σ`. -/
@@ -84,6 +90,34 @@ def Loc.resolve (σ : State) : {T : Ty} → Loc C Γ T → Res (Name × List Seg
     let i ← (← i.eval σ).asInt
     pure (r, segs ++ [.at i])
 
+/-- The slot a memory path reads in `σ` (`readM`): a memory local's
+reference, or what a location holds. -/
+def MPath.mval (σ : State) : {T : Ty} → MPath C Γ T → Res MVal
+  | _, .var x _ => do
+    match ← σ.getEnv x with
+    | .mref id => pure (.ref id)
+    | .val _ => .error .stuck
+    | .spath .. => .error .stuck
+  | _, .loc l => l.read σ
+
+def MLoc.read (σ : State) : {T : Ty} → MLoc C Γ T → Res MVal
+  | _, .field b f _ => do
+    let id ← (← b.mval σ).asRef
+    match ← σ.getObj id with
+    | .struct fields =>
+      match lookupBy f fields with
+      | some v => pure v
+      | none => .error .stuck
+    | .array _ => .error .stuck
+  | _, .index b i => do
+    let id ← (← b.mval σ).asRef
+    let iv ← (← i.eval σ).asInt
+    match ← σ.getObj id with
+    | .array elems =>
+      if h : 0 ≤ iv ∧ iv.toNat < elems.length then pure (elems.get ⟨iv.toNat, h.2⟩)
+      else .error .revert
+    | .struct _ => .error .stuck
+
 /-- The value a value expression denotes in `σ`. -/
 def Val.eval (σ : State) : {p : PrimTy} → Val C Γ p → Res Value
   | _, .simple s => s.eval σ
@@ -100,6 +134,7 @@ def Val.eval (σ : State) : {p : PrimTy} → Val C Γ p → Res Value
       checkArith (op.retTy (.prim p)) (← applyBinOp op lv rv)
   | _, @Val.unop _ _ p _ op _ _ a => do unopCheck op p (← applyUnOp op (← a.eval σ))
   | _, .ternary c a b => do pickBranch (← c.eval σ) (a.eval σ) (b.eval σ)
+  | _, .readMem l => do (← l.read σ).asValue
 
 end
 
@@ -121,6 +156,41 @@ def Src.value (σ : State) {T : Ty} : Src C Γ T → Res SVal
 def PrimTy.default : PrimTy → Value
   | .bool => .bool false
   | .uint | .int => .int 0
+
+/-- A write into a memory struct's member, as `execAssignNested` does it. -/
+def memWriteField (σ : State) (id : Nat) (f : Name) (mv : MVal) : Res State := do
+  match ← σ.getObj id with
+  | .struct fields => .ok (σ.setObj id (.struct (setBy f mv fields)))
+  | .array _ => .error .stuck
+
+/-- A write into a memory array's element. -/
+def memWriteIndex (σ : State) (id : Nat) (i : Int) (mv : MVal) : Res State := do
+  match ← σ.getObj id with
+  | .array elems =>
+    if 0 ≤ i ∧ i.toNat < elems.length then .ok (σ.setObj id (.array (elems.set i.toNat mv)))
+    else .error .revert
+  | .struct _ => .error .stuck
+
+/-- `l = mv` into a memory location. -/
+def MLoc.write (σ : State) (mv : MVal) {T : Ty} : MLoc C Γ T → Res State
+  | .field b f _ => do
+    let id ← (← b.mval σ).asRef
+    memWriteField σ id f mv
+  | .index b i => do
+    let id ← (← b.mval σ).asRef
+    let iv ← (← i.eval σ).asInt
+    memWriteIndex σ id iv mv
+
+/-- The slot a memory source writes (`rhsToMVal`): a value, or a reference. -/
+def MSrc.mval (σ : State) {T : Ty} : MSrc C Γ T → Res MVal
+  | .val v => do pure (← v.eval σ).toMVal
+  | .ref p => p.mval σ
+
+/-- `x` bound to the object a memory right-hand side names. -/
+def MRhs.bind (σ : State) (x : Name) {R : RefTy} : MRhs C Γ R → Res State
+  | .alias p => do
+    let id ← (← p.mval σ).asRef
+    pure (σ.setEnv x (.mref id))
 
 /-- `a ⊕= v` at a resolved storage location, as `execStmt` does it: read,
 apply, check at the target's type, write back. -/
@@ -236,6 +306,14 @@ def Stmt.run (σ : State) {Γ Γ' : Ctx} : Stmt C Γ Γ' → Res State
   | .declStorage _ _ x _ init => do
     let (root, segs) ← init.resolve σ
     pure (σ.setEnv x (.spath root segs))
+  | .declMem R x _ init _ => do
+    match init with
+    | none =>
+      let (σ', id) ← allocDefault σ R
+      pure (σ'.setEnv x (.mref id))
+    | some r => r.bind σ x
+  | .rebindMem x _ r => r.bind σ x
+  | .assignMem l r => do l.write σ (← r.mval σ)
   | .opAssign op _ _ l r => do l.store σ op (← r.eval σ)
   | .incDec op _ l => do pure (← l.bump σ op).1
   | .push (E := E) b v _ => do
@@ -323,6 +401,15 @@ theorem Simple.evalValue_erase (σ : State) {p : PrimTy} :
     | error _ => rfl
     | ok b => cases b <;> rfl
 
+/-- A memory read erases to `evalValue`'s memory arm. -/
+theorem MLoc.evalValue_erase_read (σ : State) {T : Ty} (l : MLoc C Γ T) :
+    evalValue σ l.erase = (do
+      let (s, v) ← readM σ l.erase
+      .ok (s, ← v.asValue)) := by
+  cases l <;> rw [MLoc.erase, evalValue]
+
+-- The memory arms share their simp sets across the location kinds.
+set_option linter.unusedSimpArgs false in
 mutual
 
 theorem SPath.resolveS_erase (σ : State) : {T : Ty} → (p : SPath C Γ T) →
@@ -354,6 +441,122 @@ theorem Loc.resolveS_erase (σ : State) : {T : Ty} → (l : Loc C Γ T) →
       | error _ => rfl
       | ok v => cases v <;> rfl
 
+
+theorem MPath.readM_erase (σ : State) : {T : Ty} → (p : MPath C Γ T) →
+    readM σ p.erase = (p.mval σ).map (σ, ·)
+  | _, .var x _ => by
+    rw [MPath.erase, readM]
+    simp only [MPath.mval, Field.identity]
+    cases σ.getEnv x with
+    | error _ => rfl
+    | ok b => cases b <;> rfl
+  | _, .loc l => l.readM_erase σ
+
+theorem MPath.resolveMBase_erase (σ : State) : {T : Ty} → (p : MPath C Γ T) →
+    resolveMBase σ p.erase = ((p.mval σ) >>= MVal.asRef).map (σ, ·)
+  | _, .var x _ => by
+    rw [MPath.erase, resolveMBase]
+    simp only [MPath.mval, Field.identity]
+    cases σ.getEnv x with
+    | error _ => rfl
+    | ok b => cases b <;> rfl
+  | _, .loc l => l.resolveMBase_erase σ
+
+theorem MLoc.readM_erase (σ : State) : {T : Ty} → (l : MLoc C Γ T) →
+    readM σ l.erase = (l.read σ).map (σ, ·)
+  | _, .field b f _ => by
+    rw [MLoc.erase, readM, b.resolveMBase_erase σ]
+    simp only [MLoc.read, fieldFor_name]
+    cases b.mval σ with
+    | error _ => rfl
+    | ok v =>
+      cases v with
+      | prim _ => rfl
+      | ref id =>
+        simp only [Except.map, bind, Except.bind, MVal.asRef, pure, Except.pure]
+        cases σ.getObj id with
+        | error _ => rfl
+        | ok o =>
+          cases o with
+          | array _ => rfl
+          | struct fields => simp only; cases lookupBy f fields <;> rfl
+  | _, .index b i => by
+    rw [MLoc.erase, readM, b.resolveMBase_erase σ]
+    simp only [MLoc.read]
+    cases b.mval σ with
+    | error _ => rfl
+    | ok v =>
+      cases v with
+      | prim _ => rfl
+      | ref id =>
+        simp only [Except.map, bind, Except.bind, MVal.asRef, pure, Except.pure]
+        rw [evalInt_pure (i.evalValue_erase σ)]
+        cases i.eval σ with
+        | error _ => rfl
+        | ok iv =>
+          cases iv with
+          | bool _ => rfl
+          | int n =>
+            simp only [Value.asInt, Except.map, bind, Except.bind]
+            cases σ.getObj id with
+            | error _ => rfl
+            | ok o =>
+              cases o with
+              | struct _ => rfl
+              | array elems => simp only; split <;> rfl
+
+theorem MLoc.resolveMBase_erase (σ : State) : {T : Ty} → (l : MLoc C Γ T) →
+    resolveMBase σ l.erase = ((l.read σ) >>= MVal.asRef).map (σ, ·)
+  | _, .field b f _ => by
+    rw [MLoc.erase, resolveMBase, b.resolveMBase_erase σ]
+    simp only [MLoc.read, fieldFor_name]
+    cases b.mval σ with
+    | error _ => rfl
+    | ok v =>
+      cases v with
+      | prim _ => rfl
+      | ref id =>
+        simp only [Except.map, bind, Except.bind, MVal.asRef, pure, Except.pure]
+        cases σ.getObj id with
+        | error _ => rfl
+        | ok o =>
+          cases o with
+          | array _ => rfl
+          | struct fields =>
+            simp only
+            cases lookupBy f fields with
+            | none => rfl
+            | some w => cases w <;> rfl
+  | _, .index b i => by
+    rw [MLoc.erase, resolveMBase, b.resolveMBase_erase σ]
+    simp only [MLoc.read]
+    cases b.mval σ with
+    | error _ => rfl
+    | ok v =>
+      cases v with
+      | prim _ => rfl
+      | ref id =>
+        simp only [Except.map, bind, Except.bind, MVal.asRef, pure, Except.pure]
+        rw [evalInt_pure (i.evalValue_erase σ)]
+        cases i.eval σ with
+        | error _ => rfl
+        | ok iv =>
+          cases iv with
+          | bool _ => rfl
+          | int n =>
+            simp only [Value.asInt, Except.map, bind, Except.bind]
+            cases σ.getObj id with
+            | error _ => rfl
+            | ok o =>
+              cases o with
+              | struct _ => rfl
+              | array elems =>
+                simp only
+                split
+                · rename_i h; simp only [h, dite_true]
+                  try (cases elems.get ⟨n.toNat, h.2⟩ <;> rfl)
+                · rename_i h; simp only [h, dite_false]
+                  try rfl
 
 theorem Val.evalValue_erase (σ : State) : {p : PrimTy} → (v : Val C Γ p) →
     evalValue σ v.erase = (v.eval σ).map (σ, ·)
@@ -393,6 +596,14 @@ theorem Val.evalValue_erase (σ : State) : {p : PrimTy} → (v : Val C Γ p) →
         cases bv
         · rw [b.evalValue_erase σ]; cases b.eval σ <;> rfl
         · rw [a.evalValue_erase σ]; cases a.eval σ <;> rfl
+  | _, .readMem l => by
+    rw [Val.erase, l.evalValue_erase_read, l.readM_erase σ]
+    simp only [Val.eval]
+    cases l.read σ with
+    | error _ => rfl
+    | ok v =>
+      simp only [Except.map, bind, Except.bind]
+      try (cases v.asValue <;> rfl)
   | _, .unop op _ _ a => by
     rw [Val.erase, evalValue, a.evalValue_erase σ, a.erase_ty]
     simp only [Val.eval]
@@ -415,6 +626,61 @@ theorem SPath.erase_kind {T : Ty} : (p : SPath C Γ T) → p.erase.kind = .stora
 
 theorem Loc.erase_kind {T : Ty} (l : Loc C Γ T) : l.erase.kind = .storage :=
   SPath.erase_kind (.loc l)
+
+/-- Every memory path erases to a memory-kind expression. -/
+theorem MPath.erase_kind {T : Ty} : (p : MPath C Γ T) → p.erase.kind = .memory
+  | .var .. => rfl
+  | .loc (.field ..) | .loc (.index ..) => rfl
+
+theorem MLoc.erase_kind {T : Ty} (l : MLoc C Γ T) : l.erase.kind = .memory :=
+  MPath.erase_kind (.loc l)
+
+/-- A memory source erases to what `rhsToMVal` reads: a value, or a
+reference. -/
+theorem MSrc.rhsToMVal_erase (σ : State) {T : Ty} :
+    (r : MSrc C Γ T) → rhsToMVal σ r.erase = (r.mval σ).map (σ, ·)
+  | .val v => by
+    rw [rhsToMVal, if_pos (by rw [MSrc.erase, v.erase_ty]; rfl)]
+    simp only [MSrc.erase, v.evalValue_erase σ, MSrc.mval]
+    cases v.eval σ <;> rfl
+  | .ref (R := R) p => by
+    rw [rhsToMVal, if_neg (by rw [MSrc.erase, p.erase_ty]; simp [Ty.isPrimitive])]
+    simp only [MSrc.erase, p.erase_kind, MSrc.mval, p.readM_erase σ]
+
+/-- A memory location resolves to the object and member or element it
+writes. -/
+theorem MLoc.execAssignNested_erase (σ : State) {T : Ty} (l : MLoc C Γ T) (r : MSrc C Γ T) :
+    execAssignNested σ l.erase r.erase = (do l.write σ (← r.mval σ)) := by
+  rw [execAssignNested, l.erase_kind]
+  simp only [r.rhsToMVal_erase σ]
+  cases r.mval σ with
+  | error _ => rfl
+  | ok mv =>
+    simp only [Except.map, bind, Except.bind]
+    cases l with
+    | field b f h =>
+      rw [MLoc.erase, resolveLoc]
+      simp only [b.resolveMBase_erase σ, MLoc.write, fieldFor_name]
+      cases b.mval σ with
+      | error _ => rfl
+      | ok v =>
+        cases v with
+        | prim _ => rfl
+        | ref id => simp only [Except.map, MVal.asRef, pure, Except.pure, memWriteField]; rfl
+    | index b i =>
+      rw [MLoc.erase, resolveLoc]
+      simp only [b.resolveMBase_erase σ, MLoc.write]
+      cases b.mval σ with
+      | error _ => rfl
+      | ok v =>
+        cases v with
+        | prim _ => rfl
+        | ref id =>
+          simp only [Except.map, MVal.asRef, pure, Except.pure, bind, Except.bind]
+          rw [evalInt_pure (i.evalValue_erase σ)]
+          cases i.eval σ with
+          | error _ => rfl
+          | ok iv => cases iv <;> rfl
 
 /-- A source is read into a storage value as `rhsToSVal` reads it. -/
 theorem Src.rhsToSVal_erase (σ : State) {T : Ty} :
@@ -520,6 +786,34 @@ theorem Stmt.run_eq (σ : State) {Γ Γ' : Ctx} : (s : Stmt C Γ Γ') → execSt
       rw [execStmt]
       simp only [init.resolveS_erase σ]
       cases init.resolve σ <;> rfl
+  | .declMem R x _ init _ => by
+    simp only [Stmt.run]
+    cases init with
+    | none => rw [Stmt.erase, Option.map, execStmt]; rfl
+    | some r =>
+      cases r with
+      | alias p =>
+        rw [Stmt.erase, Option.map, execStmt]
+        simp only [MRhs.erase, p.erase_kind, p.readM_erase σ, MRhs.bind]
+        cases p.mval σ with
+        | error _ => rfl
+        | ok v => cases v <;> rfl
+  | .rebindMem x _ r => by
+    simp only [Stmt.run]
+    cases r with
+    | alias p =>
+      rw [Stmt.erase, execStmt, execAssign]
+      simp only [PlaceExpr.var, Field.identity, MRhs.erase, p.erase_kind, p.readM_erase σ, MRhs.bind]
+      cases p.mval σ with
+      | error _ => rfl
+      | ok v => cases v <;> rfl
+  | .assignMem l r => by
+    simp only [Stmt.run]
+    rw [Stmt.erase, execStmt, execAssign]
+    have : l.toPlace.expr = l.erase := rfl
+    cases l with
+    | field b f h => exact (MLoc.field b f h).execAssignNested_erase σ r
+    | index b i => exact (MLoc.index b i).execAssignNested_erase σ r
   | .opAssign op _ _ l r => by
     simp only [Stmt.run]
     rw [Stmt.erase, execStmt, r.evalValue_erase σ]

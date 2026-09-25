@@ -48,14 +48,36 @@ def Loc.size {Γ : Ctx} : {T : Ty} → Loc C Γ T → Nat
   | _, .field b _ _ => b.size + 1
   | _, .index _ b i => b.size + i.size + 1
 
+def MPath.size {Γ : Ctx} : {T : Ty} → MPath C Γ T → Nat
+  | _, .var .. => 1
+  | _, .loc l => l.size
+
+def MLoc.size {Γ : Ctx} : {T : Ty} → MLoc C Γ T → Nat
+  | _, .field b _ _ => b.size + 1
+  | _, .index b i => b.size + i.size + 1
+
 def Val.size {Γ : Ctx} : {p : PrimTy} → Val C Γ p → Nat
   | _, .simple _ => 1
   | _, .read l => l.size + 1
   | _, .binop op _ _ a b => a.size + b.size + 1 + scCost op b
   | _, .unop _ _ _ a => a.size + 2
   | _, .ternary c a b => c.size + a.size + b.size + 1
+  | _, .readMem l => l.size + 1
 
 end
+
+def MRhs.size {Γ : Ctx} {R : RefTy} : MRhs C Γ R → Nat
+  | .alias p => p.size
+
+def MSrc.size {Γ : Ctx} {T : Ty} : MSrc C Γ T → Nat
+  | .val v => v.size
+  | .ref p => p.size
+
+@[simp] theorem MRhs.size_alias {Γ : Ctx} {R : RefTy} (p : MPath C Γ (.ref R)) :
+    (MRhs.alias p).size = p.size := rfl
+@[simp] theorem MSrc.size_val {Γ : Ctx} {p : PrimTy} (v : Val C Γ p) : (MSrc.val v).size = v.size := rfl
+@[simp] theorem MSrc.size_ref {Γ : Ctx} {R : RefTy} (p : MPath C Γ (.ref R)) :
+    (MSrc.ref p).size = p.size := rfl
 
 def Src.size {Γ : Ctx} {T : Ty} : Src C Γ T → Nat
   | .val v => v.size
@@ -72,6 +94,12 @@ mutual
 
 def Stmt.size {Γ Γ' : Ctx} : Stmt C Γ Γ' → Nat
   | .assign l r => l.size + r.size + 2
+  | .declMem _ _ _ init _ =>
+    match init with
+    | none => 1
+    | some r => r.size + 1
+  | .rebindMem _ _ r => r.size + 1
+  | .assignMem l r => l.size + r.size + 2
   | .opAssign _ _ _ l r => l.size + r.size + 2
   | .incDec _ _ l | .assignIncDec _ _ _ _ l _ => l.size + 1
   | .push b v _ =>
@@ -136,6 +164,16 @@ mutual
   | _, .field b _ _ => by simp only [Loc.weaken, Loc.size, b.size_weaken h]
   | _, .index _ b i => by simp only [Loc.weaken, Loc.size, b.size_weaken h, i.size_weaken h]
 
+@[simp] theorem MPath.size_weaken {Γ Γ' : Ctx} (h : Ctx.Sub C Γ Γ') :
+    {T : Ty} → (p : MPath C Γ T) → (p.weaken h).size = p.size
+  | _, .var .. => rfl
+  | _, .loc l => l.size_weaken h
+
+@[simp] theorem MLoc.size_weaken {Γ Γ' : Ctx} (h : Ctx.Sub C Γ Γ') :
+    {T : Ty} → (l : MLoc C Γ T) → (l.weaken h).size = l.size
+  | _, .field b _ _ => by simp only [MLoc.weaken, MLoc.size, b.size_weaken h]
+  | _, .index b i => by simp only [MLoc.weaken, MLoc.size, b.size_weaken h, i.size_weaken h]
+
 @[simp] theorem Val.size_weaken {Γ Γ' : Ctx} (h : Ctx.Sub C Γ Γ') :
     {p : PrimTy} → (v : Val C Γ p) → (v.weaken h).size = v.size
   | _, .simple _ => rfl
@@ -147,6 +185,7 @@ mutual
   | _, .unop _ _ _ a => by simp only [Val.weaken, Val.size, a.size_weaken h]
   | _, .ternary c a b => by
     simp only [Val.weaken, Val.size, c.size_weaken h, a.size_weaken h, b.size_weaken h]
+  | _, .readMem l => by simp only [Val.weaken, Val.size, l.size_weaken h]
 
 end
 
@@ -173,6 +212,21 @@ theorem SPath.two_le_size {Γ : Ctx} {T : Ty} {p : SPath C Γ T} (h : p.isSimple
   | .loc (.field b _ _), _ => simp only [SPath.size, Loc.size]; have := b.one_le_size; omega
   | .loc (.index _ b i), _ => simp only [SPath.size, Loc.size]; have := b.one_le_size; omega
 
+theorem MLoc.one_le_size {Γ : Ctx} {T : Ty} (l : MLoc C Γ T) : 1 ≤ l.size := by
+  cases l <;> simp [MLoc.size]
+
+theorem MPath.one_le_size {Γ : Ctx} {T : Ty} (p : MPath C Γ T) : 1 ≤ p.size := by
+  cases p with
+  | var => simp [MPath.size]
+  | loc l => exact l.one_le_size
+
+/-- A memory path that is not simple is a member or an element: size at least two. -/
+theorem MPath.two_le_size {Γ : Ctx} {T : Ty} {p : MPath C Γ T} (h : p.isSimple = false) :
+    2 ≤ p.size := by
+  match p, h with
+  | .loc (.field b _ _), _ => simp only [MPath.size, MLoc.size]; have := b.one_le_size; omega
+  | .loc (.index b i), _ => simp only [MPath.size, MLoc.size]; have := b.one_le_size; omega
+
 /-- Every value has size at least one. -/
 theorem Val.one_le_size {Γ : Ctx} {p : PrimTy} (v : Val C Γ p) : 1 ≤ v.size := by
   cases v <;> simp [Val.size] <;> omega
@@ -186,11 +240,14 @@ theorem Val.two_le_size {Γ : Ctx} {p : PrimTy} {v : Val C Γ p} (h : v.isSimple
   | .unop _ _ _ a, _ => simp only [Val.size]; omega
   | .ternary c a b, _ =>
     simp only [Val.size]; have := c.one_le_size; have := a.one_le_size; omega
+  | .readMem l, _ => simp only [Val.size]; have := l.one_le_size; omega
 
 /-- One less than a size.  The obligations rewrite `v.size` to `v.sz + 1`,
 which shows `omega` the lower bound on an atom it cannot unfold. -/
 def Val.sz {Γ : Ctx} {p : PrimTy} (v : Val C Γ p) : Nat := v.size - 1
 def SPath.sz {Γ : Ctx} {T : Ty} (v : SPath C Γ T) : Nat := v.size - 1
+def MPath.sz {Γ : Ctx} {T : Ty} (v : MPath C Γ T) : Nat := v.size - 1
+def MLoc.sz {Γ : Ctx} {T : Ty} (v : MLoc C Γ T) : Nat := v.size - 1
 def Loc.sz {Γ : Ctx} {T : Ty} (v : Loc C Γ T) : Nat := v.size - 1
 
 theorem Val.size_sz {Γ : Ctx} {p : PrimTy} (v : Val C Γ p) : v.size = v.sz + 1 := by
@@ -199,6 +256,10 @@ theorem SPath.size_sz {Γ : Ctx} {T : Ty} (v : SPath C Γ T) : v.size = v.sz + 1
   have := v.one_le_size; simp only [SPath.sz]; omega
 theorem Loc.size_sz {Γ : Ctx} {T : Ty} (v : Loc C Γ T) : v.size = v.sz + 1 := by
   have := v.one_le_size; simp only [Loc.sz]; omega
+theorem MPath.size_sz {Γ : Ctx} {T : Ty} (v : MPath C Γ T) : v.size = v.sz + 1 := by
+  have := v.one_le_size; simp only [MPath.sz]; omega
+theorem MLoc.size_sz {Γ : Ctx} {T : Ty} (v : MLoc C Γ T) : v.size = v.sz + 1 := by
+  have := v.one_le_size; simp only [MLoc.sz]; omega
 
 /-! ## Holes -/
 
@@ -219,6 +280,25 @@ theorem Hole.fill_size {Γ Γ' : Ctx} {T : Ty} (k : Hole C Γ Γ' T) (p : SPath 
 @[simp] theorem Hole.extend_extra {Γ Γ' : Ctx} {T : Ty} (y : Name) (b : BTy)
     (hy : isFresh C Γ' y = true) (k : Hole C Γ Γ' T) : (k.extend y b hy).extra = k.extra := by
   cases k <;> simp [Hole.extend, Hole.extra]
+
+/-- What a memory hole adds to the location it reads. -/
+def MHole.extra {Γ Γ' : Ctx} {T : Ty} : MHole C Γ Γ' T → Nat
+  | .local .. => 2
+  | .rebind .. | .decl .. => 1
+  | .write l => l.size + 2
+
+theorem MHole.fill_size {Γ Γ' : Ctx} {T : Ty} (k : MHole C Γ Γ' T) (l : MLoc C Γ T) :
+    (k.fill l).size = l.size + k.extra := by
+  cases k <;> simp [MHole.fill, Stmt.size, Val.size, MPath.size, MHole.extra] <;> omega
+
+@[simp] theorem MHole.extend_extra {Γ Γ' : Ctx} {T : Ty} (y : Name) (b : BTy)
+    (hy : isFresh C Γ' y = true) (k : MHole C Γ Γ' T) : (k.extend y b hy).extra = k.extra := by
+  cases k <;> simp [MHole.extend, MHole.extra]
+
+def MHole.ex {Γ Γ' : Ctx} {T : Ty} (k : MHole C Γ Γ' T) : Nat := k.extra - 1
+
+theorem MHole.extra_ex {Γ Γ' : Ctx} {T : Ty} (k : MHole C Γ Γ' T) : k.extra = k.ex + 1 := by
+  cases k <;> simp [MHole.ex, MHole.extra]
 
 /-- One less than a hole's extra weight (it is at least one). -/
 def Hole.ex {Γ Γ' : Ctx} {T : Ty} (k : Hole C Γ Γ' T) : Nat := k.extra - 1
@@ -294,18 +374,22 @@ theorem Taclet.smaller {m : Modality} {Γ Γ' : Ctx} {s : Stmt C Γ Γ'} {pr : P
   all_goals (try have := SPath.two_le_size (by assumption))
   all_goals (try have := Val.two_le_size (by assumption))
   all_goals (try have := OpLoc.one_le_size (by assumption))
+  all_goals (try have := MPath.two_le_size (by assumption))
   all_goals simp only [Premise.Smaller, Prog.sizes, Prog.size, Stmt.size, Src.size_val, Src.size_copy, Val.size,
     SPath.size, Loc.size, Simple.size, Hole.fill_size, Hole.extend_extra, SPath.new, Simple.new,
     SPath.size_weaken, Loc.size_weaken, Val.size_weaken, Src.size_weaken, OpLoc.size_weaken,
     OpLoc.size_local, OpLoc.size_root, OpLoc.size_field, OpLoc.size_index, VHole.fill_size,
-    VHole.extra_weaken, Src.fresh_size, List.length,
+    VHole.extra_weaken, Src.fresh_size, MPath.size, MLoc.size, MRhs.size_alias, MSrc.size_val,
+    MSrc.size_ref, MHole.fill_size, MHole.extend_extra, MPath.new, MPath.size_weaken,
+    MLoc.size_weaken, MLoc.weaken, MPath.weaken, List.length,
     List.mem_cons, List.not_mem_nil, forall_eq_or_imp, and_true, true_and, false_implies,
     implies_true, Loc.weaken, SPath.weaken, List.mem_nil_iff, forall_const, scCost_simple,
     scCost_weaken,
     Simple.weaken] at *
   all_goals (try rw [scCost_and (by assumption)] at *)
   all_goals (try rw [scCost_or (by assumption)] at *)
-  all_goals (try simp only [Val.size_sz, SPath.size_sz, Loc.size_sz, Hole.extra_ex] at *)
+  all_goals (try simp only [Val.size_sz, SPath.size_sz, Loc.size_sz, Hole.extra_ex, MPath.size_sz,
+    MLoc.size_sz, MHole.extra_ex] at *)
   all_goals (try simp only [Nat.max_def] at *)
   all_goals (repeat' split) <;> omega
 

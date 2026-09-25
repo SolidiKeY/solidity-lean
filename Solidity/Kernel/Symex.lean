@@ -223,7 +223,9 @@ statement and splitting every branch, until what is left are the goals
 `∀ σ, H.holds ψ σ` (or `False`, when the fuel runs out). -/
 macro "symex" : tactic => `(tactic| repeat' (first
   | (rw [Kont.vc]; try simp only [Stmt.step, localStep, assignStep, rebindStep, deleteStep,
-      binopRightStep, shortCircuitStep, copyStep, opStep, incStep, assignIncStep, ternaryStep, pushStep, popStep, transferStep, VHole.fill, VHole.weaken,
+      binopRightStep, shortCircuitStep, copyStep, opStep, incStep, assignIncStep, ternaryStep, pushStep, popStep, transferStep, rebindMemStep, declMemStep, assignMemStep,
+      MHole.unfoldStep, MHole.fill, MHole.extend, MPath.isSimple, MPath.isBindable, MPath.new,
+      MPath.weaken, MLoc.weaken, VHole.fill, VHole.weaken,
       Src.isSimple, Src.decl, Src.fresh,
       Hole.unfoldStep, Prog.append, Val.weaken,
       OpLoc.weaken,
@@ -246,7 +248,10 @@ macro_rules
       Except.pure, applyBinOp, applyUnOp, unopCheck, checkArith, BinOp.retTy, Value.asInt,
       Value.asBool, Value.toSVal, BinOp.isArith, uintBound, intBound, reduceFreshName, Src.value,
       Loc.target, Loc.resolve, SPath.resolve, Simple.new, envPath, State.saveStorage, OpLoc.store,
-      opStore, opLocal, pickBranch, pushAt, popAt, Src.pushVal, pushSlot, transferAt, State.setNet, State.getNet, OpLoc.bump, bumpStore, bumpLocal, IncDec.isPre, IncDec.isIncrement,
+      opStore, opLocal, pickBranch, pushAt, popAt, Src.pushVal, pushSlot, transferAt, State.setNet, State.getNet,
+      MPath.mval, MLoc.read, MLoc.write, MSrc.mval, MRhs.bind, memWriteField, memWriteIndex,
+      MVal.asRef, MVal.asValue, Value.toMVal, allocDefault, copyStToM, copyStFields, copyStElems,
+      State.getObj, State.setObj, State.alloc, OpLoc.bump, bumpStore, bumpLocal, IncDec.isPre, IncDec.isIncrement,
       State.findStorage, State.setEnv, State.getEnv, SVal.save, SVal.find, SVal.asValue,
       SVal.defaultOf, defaultForRef, defaultForTy, defaultForFields, structDef, Functor.map,
       Except.map, lookupBy, setBy, SemanticsProperties.lookupBy_setBy_self,
@@ -324,6 +329,14 @@ def exPay := ksol{ uint a = 3; a.transfer(4); a.transfer(a + 3); }
 /-- With 10 in funds, paying 4 and then 6 does not revert. -/
 example : (Kont.modal .diamond exPay (.post .tt)).vc 40 (.assume fun σ => σ.selfBalance = 10) := by
   unfold exPay; symex <;> symex_close
+
+def exMem := ksol{ Person memory m; m.age = 5; Person memory n = m; uint x = n.age; assert(x == 5); }
+
+set_option maxHeartbeats 1000000 in
+/-- A fresh memory object, written and read back through an alias. -/
+example : (Kont.modal .diamond exMem (.post .tt)).vc 80
+    (.assume fun σ => σ.heap = [] ∧ σ.nextId = 0 ∧ σ.env = []) := by
+  unfold exMem; symex <;> symex_close
 
 /-- A false specification leaves a goal no evaluation closes. -/
 example : True := by

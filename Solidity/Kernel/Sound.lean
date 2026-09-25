@@ -368,6 +368,222 @@ macro "agree_tac" : tactic => `(tactic| (
     | refine EnvAgreeExcept.setEnv_both ?_ _ _
     | refine EnvAgreeExcept.setEnv_left ?_ (by simp) _)))
 
+/-! ## Memory frames -/
+
+@[simp] theorem getObj_setEnv (σ : State) (n : Name) (b : Binding) (id : Nat) :
+    (σ.setEnv n b).getObj id = σ.getObj id := rfl
+
+theorem setObj_agree {ns : List Name} {σ₁ σ : State} (h : EnvAgreeExcept ns σ₁ σ) (id : Nat)
+    (o : MObj) : EnvAgreeExcept ns (σ₁.setObj id o) (σ.setObj id o) :=
+  ⟨h.storage, by simp [State.setObj, h.heap], h.nextId, h.net, h.env, h.selfBalance⟩
+
+theorem memWriteField_agree {ns : List Name} {σ₁ σ : State} (h : EnvAgreeExcept ns σ₁ σ) (id : Nat)
+    (f : Name) (mv : MVal) : SameOk ns (memWriteField σ₁ id f mv) (memWriteField σ id f mv) := by
+  simp only [memWriteField, getObj_congr h]
+  cases σ.getObj id with
+  | error _ => trivial
+  | ok o => cases o with
+    | array _ => trivial
+    | struct _ => exact setObj_agree h _ _
+
+theorem memWriteIndex_agree {ns : List Name} {σ₁ σ : State} (h : EnvAgreeExcept ns σ₁ σ) (id : Nat)
+    (i : Int) (mv : MVal) : SameOk ns (memWriteIndex σ₁ id i mv) (memWriteIndex σ id i mv) := by
+  simp only [memWriteIndex, getObj_congr h]
+  cases σ.getObj id with
+  | error _ => trivial
+  | ok o => cases o with
+    | struct _ => trivial
+    | array elems =>
+      simp only [bind, Except.bind]
+      split
+      · exact setObj_agree h _ _
+      · trivial
+
+/-- **A memory write frames**: at a location typed at `Γ`, in two states
+that agree off names fresh at `Γ`, it ends alike. -/
+theorem MLoc.write_agree {Γ : Ctx} {ns : List Name} {σ₁ σ : State} (h : EnvAgreeExcept ns σ₁ σ)
+    (hns : ∀ n ∈ ns, Fresh C Γ n) (mv : MVal) {T : Ty} (l : MLoc C Γ T) :
+    SameOk ns (l.write σ₁ mv) (l.write σ mv) := by
+  cases l with
+  | field b f _ =>
+    simp only [MLoc.write, b.mval_frame h hns]
+    cases b.mval σ with
+    | error _ => trivial
+    | ok v =>
+      simp only [bind, Except.bind]
+      cases v.asRef with
+      | error _ => trivial
+      | ok id => exact memWriteField_agree h _ _ _
+  | index b i =>
+    simp only [MLoc.write, b.mval_frame h hns, i.eval_frame h hns]
+    cases b.mval σ with
+    | error _ => trivial
+    | ok v =>
+      simp only [bind, Except.bind]
+      cases v.asRef with
+      | error _ => trivial
+      | ok id =>
+        simp only
+        cases i.eval σ with
+        | error _ => trivial
+        | ok iv =>
+          simp only
+          cases iv.asInt with
+          | error _ => trivial
+          | ok n => exact memWriteIndex_agree h _ _ _
+
+theorem MLoc.write_weaken {Γ Γ' : Ctx} (hs : Ctx.Sub C Γ Γ') (σ : State) (mv : MVal) {T : Ty}
+    (l : MLoc C Γ T) : (l.weaken hs).write σ mv = l.write σ mv := by
+  cases l <;> simp only [MLoc.weaken, MLoc.write, MPath.mval_weaken, Val.eval_weaken]
+
+/-- What a memory hole's statement does with the slot it reads. -/
+def MHole.runWith (σ : State) {Γ Γ' : Ctx} {T : Ty} : MHole C Γ Γ' T → Res MVal → Res State
+  | .local x _, r => do pure (σ.setEnv x (.val (← (← r).asValue)))
+  | .rebind x _, r => do
+    let id ← (← r).asRef
+    pure (σ.setEnv x (.mref id))
+  | .decl _ x _, r => do
+    let id ← (← r).asRef
+    pure (σ.setEnv x (.mref id))
+  | .write l, r => do l.write σ (← r)
+
+theorem MHole.run_fill (σ : State) {Γ Γ' : Ctx} {T : Ty} (k : MHole C Γ Γ' T) (l : MLoc C Γ T) :
+    (k.fill l).run σ = k.runWith σ (l.read σ) := by
+  cases k <;> simp only [MHole.fill, MHole.runWith, Stmt.run, Val.eval, MRhs.bind, MPath.mval,
+    MSrc.mval] <;> cases l.read σ <;> rfl
+
+/-- A memory hole's statement, past a fresh binding of `y`, ends as it does
+without it, off `[y]`. -/
+theorem MHole.runWith_extend {Γ Γ' : Ctx} {T : Ty} {y : Name} {b : BTy} (hy : isFresh C Γ' y = true)
+    (k : MHole C Γ Γ' T) (σ : State) (v : Binding) (r : Res MVal) :
+    SameOk [y] ((k.extend y b hy).runWith (σ.setEnv y v) r) (k.runWith σ r) := by
+  cases r with
+  | error _ =>
+    cases k <;> trivial
+  | ok mv =>
+    cases k with
+    | «local» x h =>
+      simp only [MHole.extend, MHole.runWith, bind, Except.bind]
+      cases mv.asValue with
+      | error _ => trivial
+      | ok w => simp only [SameOk, pure, Except.pure]; agree_tac
+    | rebind x h =>
+      simp only [MHole.extend, MHole.runWith, bind, Except.bind]
+      cases mv.asRef with
+      | error _ => trivial
+      | ok id => simp only [SameOk, pure, Except.pure]; agree_tac
+    | decl R x hx =>
+      simp only [MHole.extend, MHole.runWith, bind, Except.bind]
+      cases mv.asRef with
+      | error _ => trivial
+      | ok id => simp only [SameOk, pure, Except.pure]; agree_tac
+    | write l =>
+      simp only [MHole.extend, MHole.runWith, bind, Except.bind, MLoc.write_weaken]
+      exact MLoc.write_agree (agree_setEnv σ y v) (by simpa using isFresh_of_sub (Ctx.Sub.refl _) hy) mv l
+
+/-- Two runs that return a result end alike: both normally, in states that
+agree off `ns` and with the same result, or both abnormally. -/
+def SameOkR {α : Type} (ns : List Name) : Res (State × α) → Res (State × α) → Prop
+  | .ok a, .ok b => EnvAgreeExcept ns a.1 b.1 ∧ a.2 = b.2
+  | .error _, .error _ => True
+  | _, _ => False
+
+theorem alloc_agree {ns : List Name} {σ₁ σ : State} (h : EnvAgreeExcept ns σ₁ σ) (o : MObj) :
+    EnvAgreeExcept ns (σ₁.alloc o).1 (σ.alloc o).1 ∧ (σ₁.alloc o).2 = (σ.alloc o).2 :=
+  ⟨⟨h.storage, by simp [State.alloc, h.heap, h.nextId], by simp [State.alloc, h.nextId], h.net, h.env,
+    h.selfBalance⟩, by simp [State.alloc, h.nextId]⟩
+
+mutual
+
+/-- **A deep copy into memory frames**: from two agreeing states it
+allocates alike. -/
+theorem copyStToM_agree {ns : List Name} {σ₁ σ : State} (h : EnvAgreeExcept ns σ₁ σ) :
+    (v : SVal) → SameOkR ns (copyStToM σ₁ v) (copyStToM σ v)
+  | .prim (.int _) => ⟨h, rfl⟩
+  | .prim (.bool _) => ⟨h, rfl⟩
+  | .map _ _ => trivial
+  | .struct fields => by
+    have ih := copyStFields_agree h fields
+    simp only [copyStToM]
+    revert ih
+    cases copyStFields σ₁ fields <;> cases copyStFields σ fields <;> intro ih <;>
+      first | trivial | exact ih.elim | skip
+    rename_i a b
+    obtain ⟨hab, he⟩ := ih
+    simp only [bind, Except.bind, he]
+    exact ⟨(alloc_agree hab _).1, by rw [(alloc_agree hab _).2]⟩
+  | .array elems _ => by
+    have ih := copyStElems_agree h elems
+    simp only [copyStToM]
+    revert ih
+    cases copyStElems σ₁ elems <;> cases copyStElems σ elems <;> intro ih <;>
+      first | trivial | exact ih.elim | skip
+    rename_i a b
+    obtain ⟨hab, he⟩ := ih
+    simp only [bind, Except.bind, he]
+    exact ⟨(alloc_agree hab _).1, by rw [(alloc_agree hab _).2]⟩
+
+theorem copyStFields_agree {ns : List Name} {σ₁ σ : State} (h : EnvAgreeExcept ns σ₁ σ) :
+    (fields : List (Name × SVal)) → SameOkR ns (copyStFields σ₁ fields) (copyStFields σ fields)
+  | [] => ⟨h, rfl⟩
+  | (n, v) :: rest => by
+    have ih := copyStToM_agree h v
+    simp only [copyStFields]
+    revert ih
+    cases copyStToM σ₁ v <;> cases copyStToM σ v <;> intro ih <;> first | trivial | exact ih.elim | skip
+    rename_i a b
+    obtain ⟨hab, he⟩ := ih
+    have ih' := copyStFields_agree hab rest
+    simp only [bind, Except.bind]
+    revert ih'
+    cases copyStFields a.1 rest <;> cases copyStFields b.1 rest <;> intro ih' <;>
+      first | trivial | exact ih'.elim | skip
+    obtain ⟨hab', he'⟩ := ih'
+    exact ⟨hab', by simp [he, he']⟩
+
+theorem copyStElems_agree {ns : List Name} {σ₁ σ : State} (h : EnvAgreeExcept ns σ₁ σ) :
+    (elems : List SVal) → SameOkR ns (copyStElems σ₁ elems) (copyStElems σ elems)
+  | [] => ⟨h, rfl⟩
+  | v :: rest => by
+    have ih := copyStToM_agree h v
+    simp only [copyStElems]
+    revert ih
+    cases copyStToM σ₁ v <;> cases copyStToM σ v <;> intro ih <;> first | trivial | exact ih.elim | skip
+    rename_i a b
+    obtain ⟨hab, he⟩ := ih
+    have ih' := copyStElems_agree hab rest
+    simp only [bind, Except.bind]
+    revert ih'
+    cases copyStElems a.1 rest <;> cases copyStElems b.1 rest <;> intro ih' <;>
+      first | trivial | exact ih'.elim | skip
+    obtain ⟨hab', he'⟩ := ih'
+    exact ⟨hab', by simp [he, he']⟩
+
+end
+
+theorem allocDefault_agree {ns : List Name} {σ₁ σ : State} (h : EnvAgreeExcept ns σ₁ σ) (R : RefTy) :
+    SameOkR ns (allocDefault σ₁ R) (allocDefault σ R) := by
+  have ih := copyStToM_agree h (defaultForRef R)
+  simp only [allocDefault]
+  revert ih
+  cases copyStToM σ₁ (defaultForRef R) <;> cases copyStToM σ (defaultForRef R) <;> intro ih <;>
+    first | trivial | exact ih.elim | skip
+  rename_i a b
+  obtain ⟨hab, he⟩ := ih
+  obtain ⟨sa, ma⟩ := a
+  obtain ⟨sb, mb⟩ := b
+  simp only at he hab
+  subst he
+  cases ma <;> first | trivial | exact ⟨hab, rfl⟩
+
+theorem MHole.runWith_error (σ : State) {Γ Γ' : Ctx} {T : Ty} (k : MHole C Γ Γ' T) (e : Halt) :
+    k.runWith σ (.error e) = .error e := by
+  cases k <;> rfl
+
+theorem MPath.mval_setEnv {Γ : Ctx} {n : Name} (hn : isFresh C Γ n = true) (σ : State) (b : Binding)
+    {T : Ty} (p : MPath C Γ T) : p.mval (σ.setEnv n b) = p.mval σ :=
+  p.mval_frame (agree_setEnv σ n b) (by simpa using hn)
+
 /-! ## Soundness -/
 
 -- The cases share their simp sets, so each uses only part of them.
@@ -739,6 +955,282 @@ theorem Taclet.sound {m : Modality} {Γ Γ' : Ctx} {s : Stmt C Γ Γ'} {pr : Pre
           cases w.asInt with
           | error _ => trivial
           | ok amt => exact transferAt_agree (agree_setEnv σ se _) addr amt
+
+  -- Memory: a read through a captured receiver or index.
+  case memoryFieldRead_unfold_rightFst s T nmp hn f hf mv k hmv =>
+    have hmv₀ := isFresh_of_sub k.sub hmv
+    refine ⟨by simp [hmv], fun σ => ?_⟩
+    simp only [Prog.run, Stmt.run, bind_pure, MRhs.bind, MHole.run_fill]
+    have hread : (MLoc.field nmp f hf).read σ = (do
+        let id ← (← nmp.mval σ).asRef
+        match ← σ.getObj id with
+        | .struct fields =>
+          match lookupBy f fields with
+          | some v => pure v
+          | none => .error .stuck
+        | .array _ => .error .stuck) := rfl
+    rw [hread]
+    cases nmp.mval σ with
+    | error e => simp only [bind, Except.bind, MHole.runWith_error]; trivial
+    | ok v =>
+      simp only [bind, Except.bind]
+      cases v.asRef with
+      | error e => simp only [MHole.runWith_error]; trivial
+      | ok id =>
+        simp only [pure, Except.pure, MLoc.read, MPath.new, MPath.mval, getEnv_setEnv_self, MVal.asRef,
+          getObj_setEnv, bind, Except.bind]
+        exact MHole.runWith_extend hmv k σ _ _
+  case memoryIndexRead_unfold_rightFst E nmp hn e mv k hmv =>
+    have hmv₀ := isFresh_of_sub k.sub hmv
+    refine ⟨by simp [hmv], fun σ => ?_⟩
+    simp only [Prog.run, Stmt.run, bind_pure, MRhs.bind, MHole.run_fill]
+    simp only [MLoc.read, Val.eval_weaken, e.eval_setEnv hmv₀]
+    cases nmp.mval σ with
+    | error e => simp only [bind, Except.bind, MHole.runWith_error]; trivial
+    | ok v =>
+      simp only [bind, Except.bind]
+      cases v.asRef with
+      | error e => simp only [MHole.runWith_error]; trivial
+      | ok id =>
+        simp only [pure, Except.pure, MPath.new, MPath.mval, getEnv_setEnv_self, MVal.asRef,
+          getObj_setEnv, bind, Except.bind, e.eval_setEnv hmv₀]
+        exact MHole.runWith_extend hmv k σ _ _
+  case memoryIndexRead_unfold_rightSndIndex E b hb nse hn ie k hie =>
+    have hie₀ := isFresh_of_sub k.sub hie
+    refine ⟨by simp [hie], fun σ => ?_⟩
+    simp only [Prog.run, Stmt.run, bind_pure, MHole.run_fill]
+    simp only [MLoc.read, MPath.mval_weaken, b.mval_setEnv hie₀]
+    cases hw : nse.eval σ with
+    | error e =>
+      simp only [bind, Except.bind]
+      cases b.mval σ with
+      | error _ => simp only [MHole.runWith_error]; trivial
+      | ok v =>
+        simp only
+        cases v.asRef with
+        | error _ => simp only [MHole.runWith_error]; trivial
+        | ok id => simp only [hw, MHole.runWith_error]; trivial
+    | ok w =>
+      simp only [bind, Except.bind, pure, Except.pure, Val.eval, Simple.eval_new, hw, b.mval_setEnv hie₀,
+        getObj_setEnv]
+      exact MHole.runWith_extend hie k σ _ _
+
+  -- Memory: a write through a captured receiver, index or source.
+  case memoryFieldWrite_unfold_leftFst s p nmp hn f hf e se mv hse hmv =>
+    have hmv₀ := isFresh_of_sub (Ctx.Sub.fresh hse _) hmv
+    have hne := ne_of_isFresh_setBy hmv
+    refine ⟨by simp [hse, hmv₀], fun σ => ?_⟩
+    simp only [Prog.run, Stmt.run, bind_pure, MRhs.bind, MSrc.mval, MLoc.write, Val.eval,
+      MPath.mval_weaken]
+    cases e.eval σ with
+    | error _ => trivial
+    | ok v =>
+      simp only [bind, Except.bind, pure, Except.pure]
+      rw [nmp.mval_setEnv hse]
+      cases nmp.mval σ with
+      | error _ => trivial
+      | ok w =>
+        simp only
+        cases w.asRef with
+        | error _ => trivial
+        | ok id =>
+          simp only [MPath.new, MPath.mval, getEnv_setEnv_self, MVal.asRef, Simple.new, Simple.weaken,
+            Simple.eval, getEnv_setEnv_ne _ hne, Val.eval_weaken, bind, Except.bind, pure, Except.pure]
+          exact memWriteField_agree (by agree_tac) _ _ _
+  case memoryIndexWrite_unfold_leftFst p nmp hn e₁ e₂ se mv hse hmv =>
+    have hmv₀ := isFresh_of_sub (Ctx.Sub.fresh hse _) hmv
+    have hne := ne_of_isFresh_setBy hmv
+    refine ⟨by simp [hse, hmv₀], fun σ => ?_⟩
+    simp only [Prog.run, Stmt.run, bind_pure, MRhs.bind, MSrc.mval, MLoc.write, Val.eval,
+      MPath.mval_weaken, Val.eval_weaken]
+    cases e₂.eval σ with
+    | error _ => trivial
+    | ok v =>
+      simp only [bind, Except.bind, pure, Except.pure]
+      rw [nmp.mval_setEnv hse]
+      cases nmp.mval σ with
+      | error _ => trivial
+      | ok w =>
+        simp only
+        cases w.asRef with
+        | error _ => trivial
+        | ok id =>
+          simp only [MPath.new, MPath.mval, getEnv_setEnv_self, MVal.asRef, Simple.new, Simple.weaken,
+            Simple.eval, getEnv_setEnv_ne _ hne, Val.eval_weaken, bind, Except.bind, pure, Except.pure]
+          rw [e₁.eval_setEnv hmv₀, e₁.eval_setEnv hse]
+          cases e₁.eval σ with
+          | error _ => trivial
+          | ok iv =>
+            simp only
+            cases iv.asInt with
+            | error _ => trivial
+            | ok n => exact memWriteIndex_agree (by agree_tac) _ _ _
+  case memoryFieldWriteMemRef_unfold_leftFst s R nmp hn f hf src hsrc mv hmv =>
+    refine ⟨by simp [hmv], fun σ => ?_⟩
+    simp only [Prog.run, Stmt.run, bind_pure, MRhs.bind, MSrc.mval, MLoc.write, MPath.mval_weaken]
+    cases hs : src.mval σ with
+    | error _ =>
+      simp only [bind, Except.bind]
+      cases nmp.mval σ with
+      | error _ => trivial
+      | ok w =>
+        simp only
+        cases w.asRef with
+        | error _ => trivial
+        | ok id => simp only [pure, Except.pure, src.mval_setEnv hmv, hs]; trivial
+    | ok sv =>
+      simp only [bind, Except.bind]
+      cases nmp.mval σ with
+      | error _ => trivial
+      | ok w =>
+        simp only
+        cases w.asRef with
+        | error _ => trivial
+        | ok id =>
+          simp only [pure, Except.pure, src.mval_setEnv hmv, hs, MPath.new, MPath.mval,
+            getEnv_setEnv_self, MVal.asRef]
+          exact memWriteField_agree (agree_setEnv σ mv _) _ _ _
+  case memoryIndexWriteMemRef_unfold_leftFst R nmp hn e src hsrc mv hmv =>
+    refine ⟨by simp [hmv], fun σ => ?_⟩
+    simp only [Prog.run, Stmt.run, bind_pure, MRhs.bind, MSrc.mval, MLoc.write, MPath.mval_weaken,
+      Val.eval_weaken]
+    cases hs : src.mval σ with
+    | error _ =>
+      simp only [bind, Except.bind]
+      cases nmp.mval σ with
+      | error _ => trivial
+      | ok w =>
+        simp only
+        cases w.asRef with
+        | error _ => trivial
+        | ok id => simp only [pure, Except.pure, src.mval_setEnv hmv, hs]; trivial
+    | ok sv =>
+      simp only [bind, Except.bind]
+      cases nmp.mval σ with
+      | error _ => trivial
+      | ok w =>
+        simp only
+        cases w.asRef with
+        | error _ => trivial
+        | ok id =>
+          simp only [pure, Except.pure, src.mval_setEnv hmv, hs, MPath.new, MPath.mval,
+            getEnv_setEnv_self, MVal.asRef, e.eval_setEnv hmv]
+          cases e.eval σ with
+          | error _ => trivial
+          | ok iv =>
+            simp only
+            cases iv.asInt with
+            | error _ => trivial
+            | ok n => exact memWriteIndex_agree (agree_setEnv σ mv _) _ _ _
+  case memoryIndexWriteNonSimpleIndexCapture p b hb nse hn e se ie hse hie =>
+    have hie₀ := isFresh_of_sub (Ctx.Sub.fresh hse _) hie
+    have hne := ne_of_isFresh_setBy hie
+    refine ⟨by simp [hse, hie₀], fun σ => ?_⟩
+    simp only [Prog.run, Stmt.run, bind_pure, MSrc.mval, MLoc.write, Val.eval, MPath.mval_weaken,
+      Val.eval_weaken]
+    cases e.eval σ with
+    | error _ => trivial
+    | ok v =>
+      simp only [bind, Except.bind, pure, Except.pure]
+      rw [nse.eval_setEnv hse]
+      cases hn' : nse.eval σ with
+      | error _ =>
+        simp only
+        cases b.mval σ with
+        | error _ => trivial
+        | ok w =>
+          simp only
+          cases w.asRef with
+          | error _ => trivial
+          | ok id => simp only [hn']; trivial
+      | ok iw =>
+        simp only [Simple.new, Simple.weaken, Simple.eval, getEnv_setEnv_self,
+          getEnv_setEnv_ne _ hne, MPath.mval_weaken, bind, Except.bind, pure, Except.pure]
+        rw [b.mval_setEnv hie₀, b.mval_setEnv hse]
+        cases b.mval σ with
+        | error _ => trivial
+        | ok w =>
+          simp only
+          cases w.asRef with
+          | error _ => trivial
+          | ok id =>
+            simp only [hn']
+            cases iw.asInt with
+            | error _ => trivial
+            | ok n => exact memWriteIndex_agree (by agree_tac) _ _ _
+  case memoryIndexWriteMemRefNonSimpleIndexCapture R b hb nse hn src hsrc ie hie =>
+    refine ⟨by simp [hie], fun σ => ?_⟩
+    simp only [Prog.run, Stmt.run, bind_pure, MSrc.mval, MLoc.write, Val.eval, MPath.mval_weaken]
+    cases hn' : nse.eval σ with
+    | error _ =>
+      simp only [bind, Except.bind]
+      cases src.mval σ with
+      | error _ => trivial
+      | ok sv =>
+        simp only
+        cases b.mval σ with
+        | error _ => trivial
+        | ok w =>
+          simp only
+          cases w.asRef with
+          | error _ => trivial
+          | ok id => simp only [hn']; trivial
+    | ok iw =>
+      simp only [bind, Except.bind, pure, Except.pure, Simple.new, Simple.eval, getEnv_setEnv_self,
+        src.mval_setEnv hie, b.mval_setEnv hie]
+      cases src.mval σ with
+      | error _ => trivial
+      | ok sv =>
+        simp only
+        cases b.mval σ with
+        | error _ => trivial
+        | ok w =>
+          simp only
+          cases w.asRef with
+          | error _ => trivial
+          | ok id =>
+            simp only [hn']
+            cases iw.asInt with
+            | error _ => trivial
+            | ok n => exact memWriteIndex_agree (agree_setEnv σ ie _) _ _ _
+  case memoryFieldWriteUnfoldSource s p b hb f hf nse hn se hse =>
+    refine ⟨by simp [hse], fun σ => ?_⟩
+    simp only [Prog.run, Stmt.run, bind_pure, MSrc.mval, MLoc.write, Val.eval, MPath.mval_weaken]
+    cases nse.eval σ with
+    | error _ => trivial
+    | ok v =>
+      simp only [bind, Except.bind, pure, Except.pure, Simple.eval_new, b.mval_setEnv hse]
+      cases b.mval σ with
+      | error _ => trivial
+      | ok w =>
+        simp only
+        cases w.asRef with
+        | error _ => trivial
+        | ok id => exact memWriteField_agree (agree_setEnv σ se _) _ _ _
+  case memoryIndexWriteUnfoldSource p b hb ie nse hn se hse =>
+    refine ⟨by simp [hse], fun σ => ?_⟩
+    simp only [Prog.run, Stmt.run, bind_pure, MSrc.mval, MLoc.write, Val.eval, MPath.mval_weaken,
+      Simple.eval_weaken]
+    cases nse.eval σ with
+    | error _ => trivial
+    | ok v =>
+      simp only [bind, Except.bind, pure, Except.pure, Simple.eval_new, b.mval_setEnv hse,
+        ie.eval_setEnv hse]
+      cases b.mval σ with
+      | error _ => trivial
+      | ok w =>
+        simp only
+        cases w.asRef with
+        | error _ => trivial
+        | ok id =>
+          simp only
+          cases ie.eval σ with
+          | error _ => trivial
+          | ok iv =>
+            simp only
+            cases iv.asInt with
+            | error _ => trivial
+            | ok n => exact memWriteIndex_agree (agree_setEnv σ se _) _ _ _
 
   -- Compound assignment: the source first, then the target.
   case compoundAssignValueRhsCapture p op hop hp l nse hn se hse =>

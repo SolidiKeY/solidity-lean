@@ -52,6 +52,18 @@ def Val.isSimple {Γ : Ctx} {p : PrimTy} : Val C Γ p → Bool
   | .simple _ => true
   | _ => false
 
+/-- A simple memory path (`mv`): a memory local. -/
+def MPath.isSimple {Γ : Ctx} {T : Ty} : MPath C Γ T → Bool
+  | .var .. => true
+  | .loc _ => false
+
+/-- A memory path a memory local can be bound to directly: one step from a
+simple path, on a simple index. -/
+def MPath.isBindable {Γ : Ctx} {T : Ty} : MPath C Γ T → Bool
+  | .var .. => true
+  | .loc (.field b _ _) => b.isSimple
+  | .loc (.index b i) => b.isSimple && i.isSimple
+
 /-- A path an alias can be bound to directly (`lsv := sp`, `lsv := sp.fr`,
 `lsv := sp[ie]`): one step from a simple path, on a simple index. -/
 def SPath.isBindable {Γ : Ctx} {T : Ty} : SPath C Γ T → Bool
@@ -63,6 +75,9 @@ def SPath.isBindable {Γ : Ctx} {T : Ty} : SPath C Γ T → Bool
 
 /-- `Γ` with the fresh local `x : p`. -/
 abbrev Ctx.val (Γ : Ctx) (x : Name) (p : PrimTy) : Ctx := setBy x (.stack (.prim p)) Γ
+
+/-- `Γ` with the fresh memory local `x : R`. -/
+abbrev Ctx.mem (Γ : Ctx) (x : Name) (R : RefTy) : Ctx := setBy x (.mem (.ref R)) Γ
 
 /-- `Γ` with the fresh alias `x : R`. -/
 abbrev Ctx.path (Γ : Ctx) (x : Name) (R : RefTy) : Ctx := setBy x (.path (.ref R)) Γ
@@ -165,6 +180,65 @@ theorem extend_sub {Γ Γ' : Ctx} {T : Ty} (y : Name) (b : BTy) (hy : isFresh C 
 
 end Hole
 
+/-- The memory local just declared. -/
+def MPath.new {Γ : Ctx} (x : Name) (R : RefTy) : MPath C (Ctx.mem Γ x R) (.ref R) :=
+  .var x (SemanticsProperties.lookupBy_setBy_self ..)
+
+/-- A statement with a hole for the memory location it reads: `v = •` (a
+value), `mv = •`, `T memory mv = •`, `l = •` (a reference). -/
+inductive MHole (C : Contract) : Ctx → Ctx → Ty → Type where
+  | local {Γ : Ctx} {p : PrimTy} (x : Name) (h : lookupBy x Γ = some (.stack (.prim p))) :
+      MHole C Γ Γ (.prim p)
+  | rebind {Γ : Ctx} {R : RefTy} (x : Name) (h : lookupBy x Γ = some (.mem (.ref R))) :
+      MHole C Γ Γ (.ref R)
+  | decl {Γ : Ctx} (R : RefTy) (x : Name) (hx : isFresh C Γ x = true) :
+      MHole C Γ (Ctx.mem Γ x R) (.ref R)
+  | write {Γ : Ctx} {R : RefTy} (l : MLoc C Γ (.ref R)) : MHole C Γ Γ (.ref R)
+
+namespace MHole
+
+def fill {Γ Γ' : Ctx} {T : Ty} : MHole C Γ Γ' T → MLoc C Γ T → Stmt C Γ Γ'
+  | .local x h, l => .assignLocal x h (.readMem l)
+  | .rebind x h, l => .rebindMem x h (.alias (.loc l))
+  | .decl R x hx, l => .declMem R x hx (some (.alias (.loc l))) rfl
+  | .write l', l => .assignMem l' (.ref (.loc l))
+
+theorem sub {Γ Γ' : Ctx} {T : Ty} : MHole C Γ Γ' T → Ctx.Sub C Γ Γ'
+  | .local .. | .rebind .. | .write .. => Ctx.Sub.refl _
+  | .decl _ _ hx => Ctx.Sub.fresh hx _
+
+def extOut {Γ Γ' : Ctx} {T : Ty} (y : Name) (b : BTy) : MHole C Γ Γ' T → Ctx
+  | .decl R x _ => setBy x (.mem (.ref R)) (setBy y b Γ)
+  | _ => setBy y b Γ
+
+def extend {Γ Γ' : Ctx} {T : Ty} (y : Name) (b : BTy) (hy : isFresh C Γ' y = true) :
+    (k : MHole C Γ Γ' T) → MHole C (setBy y b Γ) (k.extOut y b) T
+  | .local x h => .local x ((Ctx.Sub.fresh hy b).local_ _ _ h)
+  | .rebind x h => .rebind x ((Ctx.Sub.fresh hy b).local_ _ _ h)
+  | .decl R x hx => .decl R x (isFresh_setBy hx (ne_of_isFresh_setBy hy))
+  | .write l => .write (l.weaken (Ctx.Sub.fresh hy b))
+
+theorem extend_sub {Γ Γ' : Ctx} {T : Ty} (y : Name) (b : BTy) (hy : isFresh C Γ' y = true) :
+    (k : MHole C Γ Γ' T) → Ctx.Sub C Γ' (k.extOut y b)
+  | .local .. | .rebind .. | .write .. => Ctx.Sub.fresh hy b
+  | .decl R x hx => by
+    simp only [extOut]
+    have hy' := isFresh_iff.mp hy
+    refine ⟨fun z bz hz => ?_, fun r hr hroot => ?_⟩
+    · by_cases hzx : z = x
+      · subst hzx; rw [SemanticsProperties.lookupBy_setBy_self] at hz ⊢; exact hz
+      · rw [SemanticsProperties.lookupBy_setBy_ne hzx] at hz ⊢
+        have hzy : z ≠ y := fun he => by
+          subst he; rw [SemanticsProperties.lookupBy_setBy_ne hzx] at hy'; rw [hy'.1] at hz; cases hz
+        rw [SemanticsProperties.lookupBy_setBy_ne hzy]; exact hz
+    · have hrx : r ≠ x := fun he => by
+        subst he; rw [SemanticsProperties.lookupBy_setBy_self] at hr; cases hr
+      have hry : r ≠ y := fun he => by subst he; rw [hy'.2] at hroot; cases hroot
+      rw [SemanticsProperties.lookupBy_setBy_ne hrx] at hr ⊢
+      rw [SemanticsProperties.lookupBy_setBy_ne hry]; exact hr
+
+end MHole
+
 /-- A statement with a hole for the value it writes: `x = •` into a stack
 local, `l = •` into storage. -/
 inductive VHole (C : Contract) (Γ : Ctx) : PrimTy → Type where
@@ -232,6 +306,12 @@ inductive Upd (C : Contract) (Γ : Ctx) where
   | pop {E : Ty} (b : SPath C Γ (.array E))
   /-- `transfer(sadr, se)`: the debit booked. -/
   | transfer (r a : Simple C Γ .uint)
+  /-- `mv := ref(p)`: a memory local bound to `p`'s object. -/
+  | bindMem (x : Name) {R : RefTy} (p : MPath C Γ (.ref R))
+  /-- `mv := freshId(alloc(mv)) || memory := alloc(mv)`: a fresh default object. -/
+  | allocMem (x : Name) (R : RefTy)
+  /-- `memory := write(memory, l, r)`. -/
+  | writeMem {T : Ty} (l : MLoc C Γ T) (r : MSrc C Γ T)
 
 /-- The state an update leaves, from `σ`. -/
 def Upd.apply (σ : State) {Γ : Ctx} : Upd C Γ → Res State
@@ -262,6 +342,11 @@ def Upd.apply (σ : State) {Γ : Ctx} : Upd C Γ → Res State
     let addr ← (← r.eval σ).asInt
     let amt ← (← a.eval σ).asInt
     transferAt σ addr amt
+  | .bindMem x p => (MRhs.alias p).bind σ x
+  | .allocMem x R => do
+    let (σ', id) ← allocDefault σ R
+    pure (σ'.setEnv x (.mref id))
+  | .writeMem l r => do l.write σ (← r.mval σ)
 
 /-- What a rule leaves to prove, for a statement from `Γ` to `Γ'`. -/
 inductive Premise (C : Contract) (Γ Γ' : Ctx) where
@@ -686,6 +771,175 @@ inductive Taclet (C : Contract) (m : Modality) : {Γ Γ' : Ctx} → Stmt C Γ Γ
           (.cons (.declLocal p se hse (some nse))
           (.cons (.assignLocal x ((Ctx.Sub.fresh hse _).local_ _ _ h)
             (.unop op hop hq (.simple (Simple.new se p)))) .nil))
+          (Ctx.Sub.fresh hse _)
+  -- Memory: a read whose receiver or index is not simple
+  /-- `lhs = nmp.fld ⇝ T memory mv = nmp; lhs = mv.fld`. -/
+  | memoryFieldRead_unfold_rightFst {Γ Γ' : Ctx} {s : Name} {T : Ty} (k : MHole C Γ Γ' T)
+      (nmp : MPath C Γ (.struct s)) (hn : nmp.isSimple = false) (f : Name)
+      (hf : C.fieldType s f = some T) (mv : Name) (hmv : isFresh C Γ' mv = true) :
+      k.fill (.field nmp f hf) ⇒
+        .unfold [mv]
+          (.cons (.declMem (.struct s) mv (isFresh_of_sub k.sub hmv) (some (.alias nmp)) rfl)
+          (.cons ((k.extend mv _ hmv).fill (.field (MPath.new mv (.struct s)) f hf)) .nil))
+          (k.extend_sub mv _ hmv)
+  /-- `lhs = nmp[e] ⇝ T memory mv = nmp; lhs = mv[e]`. -/
+  | memoryIndexRead_unfold_rightFst {Γ Γ' : Ctx} {E : Ty} (k : MHole C Γ Γ' E)
+      (nmp : MPath C Γ (.array E)) (hn : nmp.isSimple = false) (e : Val C Γ .uint) (mv : Name)
+      (hmv : isFresh C Γ' mv = true) :
+      k.fill (.index nmp e) ⇒
+        .unfold [mv]
+          (.cons (.declMem (.array E) mv (isFresh_of_sub k.sub hmv) (some (.alias nmp)) rfl)
+          (.cons ((k.extend mv _ hmv).fill
+            (.index (MPath.new mv _) (e.weaken (Ctx.Sub.fresh (isFresh_of_sub k.sub hmv) _)))) .nil))
+          (k.extend_sub mv _ hmv)
+  /-- `lhs = mv[nse] ⇝ T ie = nse; lhs = mv[ie]`. -/
+  | memoryIndexRead_unfold_rightSndIndex {Γ Γ' : Ctx} {E : Ty} (k : MHole C Γ Γ' E)
+      (b : MPath C Γ (.array E)) (hb : b.isSimple = true) (nse : Val C Γ .uint)
+      (hn : nse.isSimple = false) (ie : Name) (hie : isFresh C Γ' ie = true) :
+      k.fill (.index b nse) ⇒
+        .unfold [ie]
+          (.cons (.declLocal .uint ie (isFresh_of_sub k.sub hie) (some nse))
+          (.cons ((k.extend ie _ hie).fill
+            (.index (b.weaken (Ctx.Sub.fresh (isFresh_of_sub k.sub hie) _)) (.simple (Simple.new ie .uint))))
+            .nil))
+          (k.extend_sub ie _ hie)
+  -- Memory: reads and aliases
+  /-- `v = mv.fld ⇝ {v := mv.fld}`. -/
+  | memoryFieldReadHeap {Γ : Ctx} {s : Name} {p : PrimTy} (x : Name)
+      (h : lookupBy x Γ = some (.stack (.prim p))) (b : MPath C Γ (.struct s)) (hb : b.isSimple = true)
+      (f : Name) (hf : C.fieldType s f = some (.prim p)) :
+      .assignLocal x h (.readMem (.field b f hf)) ⇒ .update (.bind x (.readMem (.field b f hf)))
+  /-- `v = mv[ie] ⇝ {v := mv[ie]}`: no bounds split, the update reverts as the
+  statement does. -/
+  | memoryIndexReadHeap {Γ : Ctx} {p : PrimTy} (x : Name) (h : lookupBy x Γ = some (.stack (.prim p)))
+      (b : MPath C Γ (.array (.prim p))) (hb : b.isSimple = true) (ie : Simple C Γ .uint) :
+      .assignLocal x h (.readMem (.index b (.simple ie))) ⇒
+        .update (.bind x (.readMem (.index b (.simple ie))))
+  /-- `mv1 = mv2 ⇝ {mv1 := ref(mv2)}`. -/
+  | memoryRootAlias {Γ : Ctx} {R : RefTy} (x : Name) (h : lookupBy x Γ = some (.mem (.ref R)))
+      (y : Name) (hy : lookupBy y Γ = some (.mem (.ref R))) :
+      .rebindMem x h (.alias (.var y hy)) ⇒ .update (.bindMem x (.var y hy))
+  /-- `mv1 = mv2.fr ⇝ {mv1 := ref(mv2.fr)}`. -/
+  | memoryFieldReadAliasRoot {Γ : Ctx} {s : Name} {R : RefTy} (x : Name)
+      (h : lookupBy x Γ = some (.mem (.ref R))) (b : MPath C Γ (.struct s)) (hb : b.isSimple = true)
+      (f : Name) (hf : C.fieldType s f = some (.ref R)) :
+      .rebindMem x h (.alias (.loc (.field b f hf))) ⇒ .update (.bindMem x (.loc (.field b f hf)))
+  /-- `mv1 = mv2[ie] ⇝ {mv1 := ref(mv2[ie])}`. -/
+  | memoryIndexReadAliasRoot {Γ : Ctx} {R : RefTy} (x : Name) (h : lookupBy x Γ = some (.mem (.ref R)))
+      (b : MPath C Γ (.array (.ref R))) (hb : b.isSimple = true) (ie : Simple C Γ .uint) :
+      .rebindMem x h (.alias (.loc (.index b (.simple ie)))) ⇒
+        .update (.bindMem x (.loc (.index b (.simple ie))))
+  /-- `T memory mv = mpath ⇝ {mv := ref(mpath)}`, for a path one step from a
+  simple one (KeY drops the declaration to `mv = mpath` and binds). -/
+  | memoryLocalDeclInitDrop {Γ : Ctx} (R : RefTy) (x : Name) (hx : isFresh C Γ x = true)
+      (p : MPath C Γ (.ref R)) (hp : p.isBindable = true) (hd) :
+      .declMem R x hx (some (.alias p)) hd ⇒ .update (.bindMem x p)
+  /-- `T memory mv; ⇝ {mv := freshId(alloc(mv)) || memory := alloc(mv)}`. -/
+  | memoryDeclFreshAlloc {Γ : Ctx} (R : RefTy) (x : Name) (hx : isFresh C Γ x = true) (hd) :
+      .declMem R x hx none hd ⇒ .update (.allocMem x R)
+  -- Memory: writes
+  /-- `mv.fld = se ⇝ {memory := write(memory, mv.fld, se)}`. -/
+  | memoryFieldWriteStore {Γ : Ctx} {s : Name} {p : PrimTy} (b : MPath C Γ (.struct s))
+      (hb : b.isSimple = true) (f : Name) (hf : C.fieldType s f = some (.prim p)) (se : Simple C Γ p) :
+      .assignMem (.field b f hf) (.val (.simple se)) ⇒ .update (.writeMem (.field b f hf) (.val (.simple se)))
+  /-- `mv[ie] = se ⇝ {memory := write(memory, mv[ie], se)}`: no bounds split. -/
+  | memoryIndexWriteStore {Γ : Ctx} {p : PrimTy} (b : MPath C Γ (.array (.prim p))) (hb : b.isSimple = true)
+      (ie : Simple C Γ .uint) (se : Simple C Γ p) :
+      .assignMem (.index b (.simple ie)) (.val (.simple se)) ⇒
+        .update (.writeMem (.index b (.simple ie)) (.val (.simple se)))
+  /-- `mv1.fld = mpath ⇝ {memory := write(memory, mv1.fld, image(mpath))}`, from a
+  bindable source (the old table first captures a member source into a
+  scratch reference, which needs the slot to hold one; the interpreter copies
+  the slot as it is). -/
+  | memoryFieldWriteCopy {Γ : Ctx} {s : Name} {R : RefTy} (b : MPath C Γ (.struct s))
+      (hb : b.isSimple = true) (f : Name) (hf : C.fieldType s f = some (.ref R))
+      (src : MPath C Γ (.ref R)) (hsrc : src.isBindable = true) :
+      .assignMem (.field b f hf) (.ref src) ⇒ .update (.writeMem (.field b f hf) (.ref src))
+  /-- `mv1[ie] = mpath ⇝ {memory := write(memory, mv1[ie], image(mpath))}`. -/
+  | memoryIndexWriteCopy {Γ : Ctx} {R : RefTy} (b : MPath C Γ (.array (.ref R))) (hb : b.isSimple = true)
+      (ie : Simple C Γ .uint) (src : MPath C Γ (.ref R)) (hsrc : src.isBindable = true) :
+      .assignMem (.index b (.simple ie)) (.ref src) ⇒ .update (.writeMem (.index b (.simple ie)) (.ref src))
+  /-- `nmp.fld = e ⇝ T se = e; T memory mv = nmp; mv.fld = se`. -/
+  | memoryFieldWrite_unfold_leftFst {Γ : Ctx} {s : Name} {p : PrimTy} (nmp : MPath C Γ (.struct s))
+      (hn : nmp.isSimple = false) (f : Name) (hf : C.fieldType s f = some (.prim p)) (e : Val C Γ p)
+      (se mv : Name) (hse : isFresh C Γ se = true) (hmv : isFresh C (Ctx.val Γ se p) mv = true) :
+      .assignMem (.field nmp f hf) (.val e) ⇒
+        .unfold [se, mv]
+          (.cons (.declLocal p se hse (some e))
+          (.cons (.declMem (.struct s) mv hmv (some (.alias (nmp.weaken (Ctx.Sub.fresh hse _)))) rfl)
+          (.cons (.assignMem (.field (MPath.new mv _) f hf)
+              (.val (.simple ((Simple.new se p).weaken (Ctx.Sub.fresh hmv _))))) .nil)))
+          ((Ctx.Sub.fresh hse _).trans (Ctx.Sub.fresh hmv _))
+  /-- `nmp[e1] = e2 ⇝ T se = e2; T memory mv = nmp; mv[e1] = se`. -/
+  | memoryIndexWrite_unfold_leftFst {Γ : Ctx} {p : PrimTy} (nmp : MPath C Γ (.array (.prim p)))
+      (hn : nmp.isSimple = false) (e₁ : Val C Γ .uint) (e₂ : Val C Γ p) (se mv : Name)
+      (hse : isFresh C Γ se = true) (hmv : isFresh C (Ctx.val Γ se p) mv = true) :
+      .assignMem (.index nmp e₁) (.val e₂) ⇒
+        .unfold [se, mv]
+          (.cons (.declLocal p se hse (some e₂))
+          (.cons (.declMem (.array (.prim p)) mv hmv (some (.alias (nmp.weaken (Ctx.Sub.fresh hse _)))) rfl)
+          (.cons (.assignMem (.index (MPath.new mv _) ((e₁.weaken (Ctx.Sub.fresh hse _)).weaken (Ctx.Sub.fresh hmv _)))
+              (.val (.simple ((Simple.new se p).weaken (Ctx.Sub.fresh hmv _))))) .nil)))
+          ((Ctx.Sub.fresh hse _).trans (Ctx.Sub.fresh hmv _))
+  /-- `nmp.fld = mv2 ⇝ T memory mv = nmp; mv.fld = mv2`. -/
+  | memoryFieldWriteMemRef_unfold_leftFst {Γ : Ctx} {s : Name} {R : RefTy} (nmp : MPath C Γ (.struct s))
+      (hn : nmp.isSimple = false) (f : Name) (hf : C.fieldType s f = some (.ref R)) (src : MPath C Γ (.ref R))
+      (hsrc : src.isBindable = true) (mv : Name) (hmv : isFresh C Γ mv = true) :
+      .assignMem (.field nmp f hf) (.ref src) ⇒
+        .unfold [mv]
+          (.cons (.declMem (.struct s) mv hmv (some (.alias nmp)) rfl)
+          (.cons (.assignMem (.field (MPath.new mv _) f hf) (.ref (src.weaken (Ctx.Sub.fresh hmv _)))) .nil))
+          (Ctx.Sub.fresh hmv _)
+  /-- `nmp[e] = mv2 ⇝ T memory mv = nmp; mv[e] = mv2`. -/
+  | memoryIndexWriteMemRef_unfold_leftFst {Γ : Ctx} {R : RefTy} (nmp : MPath C Γ (.array (.ref R)))
+      (hn : nmp.isSimple = false) (e : Val C Γ .uint) (src : MPath C Γ (.ref R))
+      (hsrc : src.isBindable = true) (mv : Name) (hmv : isFresh C Γ mv = true) :
+      .assignMem (.index nmp e) (.ref src) ⇒
+        .unfold [mv]
+          (.cons (.declMem (.array (.ref R)) mv hmv (some (.alias nmp)) rfl)
+          (.cons (.assignMem (.index (MPath.new mv _) (e.weaken (Ctx.Sub.fresh hmv _)))
+            (.ref (src.weaken (Ctx.Sub.fresh hmv _)))) .nil))
+          (Ctx.Sub.fresh hmv _)
+  /-- `mv1[nse] = e ⇝ T se = e; T ie = nse; mv1[ie] = se`. -/
+  | memoryIndexWriteNonSimpleIndexCapture {Γ : Ctx} {p : PrimTy} (b : MPath C Γ (.array (.prim p)))
+      (hb : b.isSimple = true) (nse : Val C Γ .uint) (hn : nse.isSimple = false) (e : Val C Γ p)
+      (se ie : Name) (hse : isFresh C Γ se = true) (hie : isFresh C (Ctx.val Γ se p) ie = true) :
+      .assignMem (.index b nse) (.val e) ⇒
+        .unfold [se, ie]
+          (.cons (.declLocal p se hse (some e))
+          (.cons (.declLocal .uint ie hie (some (nse.weaken (Ctx.Sub.fresh hse _))))
+          (.cons (.assignMem (.index ((b.weaken (Ctx.Sub.fresh hse _)).weaken (Ctx.Sub.fresh hie _))
+              (.simple (Simple.new ie .uint)))
+              (.val (.simple ((Simple.new se p).weaken (Ctx.Sub.fresh hie _))))) .nil)))
+          ((Ctx.Sub.fresh hse _).trans (Ctx.Sub.fresh hie _))
+  /-- `mv1[nse] = mv2 ⇝ T ie = nse; mv1[ie] = mv2`. -/
+  | memoryIndexWriteMemRefNonSimpleIndexCapture {Γ : Ctx} {R : RefTy} (b : MPath C Γ (.array (.ref R)))
+      (hb : b.isSimple = true) (nse : Val C Γ .uint) (hn : nse.isSimple = false) (src : MPath C Γ (.ref R))
+      (hsrc : src.isBindable = true) (ie : Name) (hie : isFresh C Γ ie = true) :
+      .assignMem (.index b nse) (.ref src) ⇒
+        .unfold [ie]
+          (.cons (.declLocal .uint ie hie (some nse))
+          (.cons (.assignMem (.index (b.weaken (Ctx.Sub.fresh hie _)) (.simple (Simple.new ie .uint)))
+            (.ref (src.weaken (Ctx.Sub.fresh hie _)))) .nil))
+          (Ctx.Sub.fresh hie _)
+  /-- `mv.fld = nse ⇝ T se = nse; mv.fld = se`. -/
+  | memoryFieldWriteUnfoldSource {Γ : Ctx} {s : Name} {p : PrimTy} (b : MPath C Γ (.struct s))
+      (hb : b.isSimple = true) (f : Name) (hf : C.fieldType s f = some (.prim p)) (nse : Val C Γ p)
+      (hn : nse.isSimple = false) (se : Name) (hse : isFresh C Γ se = true) :
+      .assignMem (.field b f hf) (.val nse) ⇒
+        .unfold [se]
+          (.cons (.declLocal p se hse (some nse))
+          (.cons (.assignMem (.field (b.weaken (Ctx.Sub.fresh hse _)) f hf) (.val (.simple (Simple.new se p)))) .nil))
+          (Ctx.Sub.fresh hse _)
+  /-- `mv[ie] = nse ⇝ T se = nse; mv[ie] = se`. -/
+  | memoryIndexWriteUnfoldSource {Γ : Ctx} {p : PrimTy} (b : MPath C Γ (.array (.prim p)))
+      (hb : b.isSimple = true) (ie : Simple C Γ .uint) (nse : Val C Γ p) (hn : nse.isSimple = false)
+      (se : Name) (hse : isFresh C Γ se = true) :
+      .assignMem (.index b (.simple ie)) (.val nse) ⇒
+        .unfold [se]
+          (.cons (.declLocal p se hse (some nse))
+          (.cons (.assignMem (.index (b.weaken (Ctx.Sub.fresh hse _)) (.simple (ie.weaken (Ctx.Sub.fresh hse _))))
+            (.val (.simple (Simple.new se p)))) .nil))
           (Ctx.Sub.fresh hse _)
   -- Conditional expressions
   /-- `x = se ? e1 : e2 ⇝ if (se) { x = e1 } else { x = e2 }`, the statement

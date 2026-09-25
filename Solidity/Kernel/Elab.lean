@@ -53,6 +53,7 @@ inductive RawStmt where
   | assign (l r : RawExpr)
   | decl (T : RawTy) (x : String) (init : Option RawExpr)
   | declStorage (T : RawTy) (x : String) (init : Option RawExpr)
+  | declMemory (T : RawTy) (x : String) (init : Option RawExpr)
   | delete (e : RawExpr)
   | opAssign (op : BinOp) (l r : RawExpr)
   | incDec (op : IncDec) (l : RawExpr)
@@ -97,6 +98,8 @@ syntax ksol_expr " = " ksol_expr : ksol_stmt
 syntax kernel_ty ident : ksol_stmt
 syntax kernel_ty ident " = " ksol_expr : ksol_stmt
 syntax kernel_ty &"storage" ident : ksol_stmt
+syntax kernel_ty &"memory" ident : ksol_stmt
+syntax kernel_ty &"memory" ident " = " ksol_expr : ksol_stmt
 syntax kernel_ty &"storage" ident " = " ksol_expr : ksol_stmt
 syntax &"delete " ksol_expr : ksol_stmt
 -- `.push(`, `.push()` and `.pop()` are tokens (the `sol!` syntax's), so a
@@ -191,6 +194,10 @@ partial def expandStmt : TSyntax `ksol_stmt → MacroM Term
           (some $(← expandExpr e)))
   | `(ksol_stmt| $T:kernel_ty storage $x:ident) => do
       `(RawStmt.declStorage $(← expandTy T) $(quote x.getId.toString) none)
+  | `(ksol_stmt| $T:kernel_ty memory $x:ident = $e) => do
+      `(RawStmt.declMemory $(← expandTy T) $(quote x.getId.toString) (some $(← expandExpr e)))
+  | `(ksol_stmt| $T:kernel_ty memory $x:ident) => do
+      `(RawStmt.declMemory $(← expandTy T) $(quote x.getId.toString) none)
   | `(ksol_stmt| $T:kernel_ty $x:ident = $e) => do
       `(RawStmt.decl $(← expandTy T) $(quote x.getId.toString) (some $(← expandExpr e)))
   | `(ksol_stmt| $T:kernel_ty $x:ident) => do
@@ -248,16 +255,18 @@ def elabTy : RawTy → Ty
   | .mapping k v => .mapping (elabTy k) (elabTy v)
   | .array t => .array (elabTy t)
 
-/-- A synthesised expression: a storage path, or a value. -/
+/-- A synthesised expression: a storage path, a memory path, or a value. -/
 inductive TExpr (C : Contract) (Γ : Ctx) where
   | path (T : Ty) (p : SPath C Γ T)
+  | mpath (T : Ty) (p : MPath C Γ T)
   | val (p : PrimTy) (v : Val C Γ p)
 
 /-- A storage path of primitive type is read as a value. -/
 def TExpr.toVal? {C : Contract} {Γ : Ctx} : TExpr C Γ → Option ((p : PrimTy) × Val C Γ p)
   | .val p v => some ⟨p, v⟩
   | .path (.prim p) (.loc l) => some ⟨p, .read l⟩
-  | .path _ _ => none
+  | .mpath (.prim p) (.loc l) => some ⟨p, .readMem l⟩
+  | .path _ _ | .mpath _ _ => none
 
 def primName : PrimTy → String
   | .uint => "uint" | .int => "int" | .bool => "bool"
@@ -271,6 +280,7 @@ def synth (C : Contract) (Γ : Ctx) : RawExpr → Except String (TExpr C Γ)
     match h : lookupBy x Γ with
     | some (.stack (.prim p)) => pure (.val p (.simple (.local x h)))
     | some (.path (.ref R)) => pure (.path (.ref R) (.alias x h))
+    | some (.mem (.ref R)) => pure (.mpath (.ref R) (.var x h))
     | some _ => throw s!"{x} is a local this fragment cannot use"
     | none =>
       match hr : C.rootType x with
@@ -282,11 +292,16 @@ def synth (C : Contract) (Γ : Ctx) : RawExpr → Except String (TExpr C Γ)
       match h : C.fieldType s f with
       | some T => pure (.path T (.loc (.field b f h)))
       | none => throw s!"struct {s} has no member {f}"
+    | .mpath (.ref (.struct s)) b =>
+      match h : C.fieldType s f with
+      | some T => pure (.mpath T (.loc (.field b f h)))
+      | none => throw s!"struct {s} has no member {f}"
     | _ => throw s!"member access .{f} on a non-struct"
   | .index e k => do
     match ← synth C Γ e with
     | .path (.ref (.mapping (.prim kp) V)) b => pure (.path V (.loc (.index .map b (← check C Γ kp k))))
     | .path (.ref (.array E)) b => pure (.path E (.loc (.index .arr b (← check C Γ .uint k))))
+    | .mpath (.ref (.array E)) b => pure (.mpath E (.loc (.index b (← check C Γ .uint k))))
     | _ => throw "indexing something that is not a mapping or an array"
   | .binop op a b => do
     -- the operand type: the first operand that is not a literal gives it
@@ -324,7 +339,14 @@ def checkPath (C : Contract) (Γ : Ctx) (T : Ty) (e : RawExpr) :
     Except String (SPath C Γ T) := do
   match ← synth C Γ e with
   | .path T' p => if h : T' = T then pure (h ▸ p) else throw "a storage path of another type"
-  | .val .. => throw "a value where a storage reference is expected"
+  | .mpath .. | .val .. => throw "a value where a storage reference is expected"
+
+/-- `e` as a memory path of type `T`. -/
+def checkMPath (C : Contract) (Γ : Ctx) (T : Ty) (e : RawExpr) :
+    Except String (MPath C Γ T) := do
+  match ← synth C Γ e with
+  | .mpath T' p => if h : T' = T then pure (h ▸ p) else throw "a memory path of another type"
+  | .path .. | .val .. => throw "a memory reference is expected"
 
 /-- `v`, if it is simple. -/
 def Val.toSimple? {C : Contract} {Γ : Ctx} {p : PrimTy} : Val C Γ p → Option (Simple C Γ p)
@@ -389,7 +411,7 @@ def elabIncTarget (C : Contract) (Γ : Ctx) (l : RawExpr) :
       match hs : t.recvSimple with
       | true => pure ⟨Γ₂, .cons (.declStorage true R x hx b) pre, p, t, hs⟩
       | false => throw "the captured receiver did not read back"
-    | .path .. | .val .. => throw "a receiver that is a value"
+    | .path .. | .mpath .. | .val .. => throw "a receiver that is a value"
   let ⟨Γ₁, pre, p, t⟩ ← elabOpTarget C Γ l
   match hs : t.recvSimple with
   | true => pure ⟨Γ₁, pre, p, t, hs⟩
@@ -418,6 +440,9 @@ def elabStmt (C : Contract) (Γ : Ctx) : RawStmt → Except String (TProg C Γ)
       | true => pure (.one (.assign l (.copy (← checkPath C Γ (.ref R) r) h)))
       | false => throw "a storage copy of a type that holds a mapping"
     | .path (.ref R) (.alias x h) => pure (.one (.rebind x h (← checkPath C Γ (.ref R) r)))
+    | .mpath (.ref R) (.var x h) => pure (.one (.rebindMem x h (.alias (← checkMPath C Γ (.ref R) r))))
+    | .mpath (.prim p) (.loc l) => pure (.one (.assignMem l (.val (← check C Γ p r))))
+    | .mpath (.ref R) (.loc l) => pure (.one (.assignMem l (.ref (← checkMPath C Γ (.ref R) r))))
   | .decl T x init => do
     let .prim p := elabTy T | throw s!"{x}: a reference type needs a data location"
     let ⟨hx⟩ ← checkFresh C Γ x
@@ -427,6 +452,15 @@ def elabStmt (C : Contract) (Γ : Ctx) : RawStmt → Except String (TProg C Γ)
     let ⟨hx⟩ ← checkFresh C Γ x
     let some e := init | throw s!"{x}: an uninitialised storage pointer"
     pure (.one (.declStorage false R x hx (← checkPath C Γ (.ref R) e)))
+  | .declMemory T x init => do
+    let .ref R := elabTy T | throw s!"{x}: `memory` on a value type"
+    let ⟨hx⟩ ← checkFresh C Γ x
+    match init with
+    | some e => pure (.one (.declMem R x hx (some (.alias (← checkMPath C Γ (.ref R) e))) rfl))
+    | none =>
+      match hd : (Ty.ref R).defaultOkS with
+      | true => pure (.one (.declMem R x hx none (by simp [hd])))
+      | false => throw s!"{x}: a memory object whose default is not well-formed"
   | .delete e => do
     match ← synth C Γ e with
     | .path T p =>
@@ -435,6 +469,7 @@ def elabStmt (C : Contract) (Γ : Ctx) : RawStmt → Except String (TProg C Γ)
         if T matches .ref (.mapping ..) then throw "a mapping cannot be deleted"
         else pure (.one (.delete l))
       | .alias .. => throw "`delete` on a storage pointer"
+    | .mpath .. => throw "`delete` in memory is not yet a kernel statement"
     | .val .. => throw "`delete` needs a storage location"
   | .opAssign op l r => do
     let ⟨Γ₁, pre, p, t⟩ ← elabOpTarget C Γ l
@@ -558,6 +593,19 @@ def Loc.quote (Γ : Ctx) : (T : Ty) → Loc C Γ T → Lean.Expr
     mkAppN (mkConst ``Loc.index) #[c, toExpr Γ, toExpr R, toExpr k, toExpr V, IndexTy.quote it,
       SPath.quote Γ _ b, Val.quote Γ k i]
 
+def MPath.quote (Γ : Ctx) : (T : Ty) → MPath C Γ T → Lean.Expr
+  | .ref R, .var x _ =>
+    mkAppN (mkConst ``MPath.var) #[c, toExpr Γ, toExpr R, toExpr x,
+      quoteRefl optBTy (someE (mkConst ``BTy) (toExpr (BTy.mem (.ref R))))]
+  | T, .loc l => mkAppN (mkConst ``MPath.loc) #[c, toExpr Γ, toExpr T, MLoc.quote Γ T l]
+
+def MLoc.quote (Γ : Ctx) : (T : Ty) → MLoc C Γ T → Lean.Expr
+  | T, @MLoc.field _ _ s _ b f _ =>
+    mkAppN (mkConst ``MLoc.field) #[c, toExpr Γ, toExpr s, toExpr T,
+      MPath.quote Γ _ b, toExpr f, quoteRefl optTy (someE (mkConst ``Ty) (toExpr T))]
+  | E, .index b i =>
+    mkAppN (mkConst ``MLoc.index) #[c, toExpr Γ, toExpr E, MPath.quote Γ _ b, Val.quote Γ .uint i]
+
 def Val.quote (Γ : Ctx) : (p : PrimTy) → Val C Γ p → Lean.Expr
   | p, .simple s => mkAppN (mkConst ``Val.simple) #[c, toExpr Γ, toExpr p, Simple.quote c Γ p s]
   | p, .read l => mkAppN (mkConst ``Val.read) #[c, toExpr Γ, toExpr p, Loc.quote Γ _ l]
@@ -572,6 +620,7 @@ def Val.quote (Γ : Ctx) : (p : PrimTy) → Val C Γ p → Lean.Expr
   | p, .ternary cv a b =>
     mkAppN (mkConst ``Val.ternary) #[c, toExpr Γ, toExpr p, Val.quote Γ .bool cv, Val.quote Γ p a,
       Val.quote Γ p b]
+  | p, .readMem l => mkAppN (mkConst ``Val.readMem) #[c, toExpr Γ, toExpr p, MLoc.quote Γ _ l]
 
 end
 
@@ -620,6 +669,22 @@ def Stmt.quote : (Γ Γ' : Ctx) → Stmt C Γ Γ' → Lean.Expr
   | Γ, _, .declStorage capture R x _ init =>
     mkAppN (mkConst ``Stmt.declStorage) #[c, toExpr Γ, toExpr capture, toExpr R, toExpr x,
       boolTrue, SPath.quote c Γ (.ref R) init]
+  | Γ, _, .declMem R x _ init _ =>
+    let rhsTy := mkAppN (mkConst ``MRhs) #[c, toExpr Γ, toExpr R]
+    let init := match init with
+      | none => mkAppN (mkConst ``Option.none [0]) #[rhsTy]
+      | some (.alias p) => someE rhsTy (mkAppN (mkConst ``MRhs.alias) #[c, toExpr Γ, toExpr R,
+          MPath.quote c Γ (.ref R) p])
+    mkAppN (mkConst ``Stmt.declMem) #[c, toExpr Γ, toExpr R, toExpr x, boolTrue, init, boolTrue]
+  | Γ, _, @Stmt.rebindMem _ _ R x _ (.alias p) =>
+    mkAppN (mkConst ``Stmt.rebindMem) #[c, toExpr Γ, toExpr R, toExpr x,
+      quoteRefl optBTy (someE (mkConst ``BTy) (toExpr (BTy.mem (.ref R)))),
+      mkAppN (mkConst ``MRhs.alias) #[c, toExpr Γ, toExpr R, MPath.quote c Γ (.ref R) p]]
+  | Γ, _, @Stmt.assignMem _ _ T l r =>
+    let r := match T, r with
+      | _, @MSrc.val _ _ p v => mkAppN (mkConst ``MSrc.val) #[c, toExpr Γ, toExpr p, Val.quote c Γ p v]
+      | _, @MSrc.ref _ _ R p => mkAppN (mkConst ``MSrc.ref) #[c, toExpr Γ, toExpr R, MPath.quote c Γ (.ref R) p]
+    mkAppN (mkConst ``Stmt.assignMem) #[c, toExpr Γ, toExpr T, MLoc.quote c Γ T l, r]
   | Γ, _, @Stmt.opAssign _ _ p op _ _ l r =>
     mkAppN (mkConst ``Stmt.opAssign) #[c, toExpr Γ, toExpr p, toExpr op, boolTrue, boolTrue,
       OpLoc.quote c Γ p l, Val.quote c Γ p r]
