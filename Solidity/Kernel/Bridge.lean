@@ -106,6 +106,9 @@ def Taclet.rule {Γ Γ' : Ctx} {s : Stmt C Γ Γ'} {pr : Premise C Γ Γ'} : Tac
   | Taclet.storageRootIncrementAssignment (op := op) .. => some (.storageRootIncrementAssignment op)
   | Taclet.storageFieldIncrementAssignment (op := op) .. => some (.storageFieldIncrementAssignment op)
   | Taclet.storageIndexIncrementAssignment (op := op) .. => some (.storageIndexIncrementAssignment op)
+  | .ternaryToIf .. => some .ternaryToIf
+  | .ternaryToIfStorage .. => some .ternaryToIfStorage
+  | .ternaryCaptureCond .. => some .ternaryCaptureCond
   | .ifElseSplit .. => none
   | .requireSimple .. => some .requireSimple
   | .assertSimple .. => some .assertSimple
@@ -182,6 +185,9 @@ def Taclet.origin {Γ Γ' : Ctx} {s : Stmt C Γ Γ'} {pr : Premise C Γ Γ'} : T
   | Taclet.storageRootIncrementAssignment (op := op) .. => (ruleEffect (.storageRootIncrementAssignment op)).origin
   | Taclet.storageFieldIncrementAssignment (op := op) .. => (ruleEffect (.storageFieldIncrementAssignment op)).origin
   | Taclet.storageIndexIncrementAssignment (op := op) .. => (ruleEffect (.storageIndexIncrementAssignment op)).origin
+  | .ternaryToIf .. => .taclet .ternaryToIf
+  | .ternaryToIfStorage .. => .taclet .ternaryToIfStorage
+  | .ternaryCaptureCond .. => .taclet .ternaryCaptureCond
   | .ifElseSplit .. => .taclet .ifElseSplit
   | .requireSimple .. => .taclet .requireSimple
   | .assertSimple .. => .taclet .assertSimple
@@ -239,6 +245,8 @@ def bridgeTour := ksol{
   folks[x].age += 1; persons[x + 1].age -= 1; matrix[x][x] += 1; x += total + 1;
   x++; ++total; alice.age++; ++balances[x]; values[x]++; folks[x].age++; persons[x + 1].age++;
   y = x++; y = ++total; y = alice.age++; y = ++balances[x]; y = folks[x].age++;
+  x = b ? 1 : 2; x = (x > 1) ? x : total; total = b ? x : 3; alice.age = (x == 1) ? 2 : x;
+  folks[x + 1].age = b ? 1 : 2; x = (b ? 1 : 2) + 1; x += b ? 1 : 2;
   if (b) { x = 1; } else { x = 2; }; require(b); assert(b); require(x == 1); revert();
 }
 

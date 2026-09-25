@@ -42,6 +42,11 @@ theorem SameOk.of_agree {ns : List Name} {x y : Res State} (h : ResultsAgree ns 
     SameOk ns x y := by
   cases x <;> cases y <;> simp_all [SameOk, ResultsAgree]
 
+/-- A run ends as itself. -/
+theorem SameOk.refl (ns : List Name) : (x : Res State) → SameOk ns x x
+  | .ok _ => EnvAgreeExcept.refl _ _
+  | .error _ => trivial
+
 /-- Saving in two agreeing states ends alike. -/
 theorem SameOk.save {ns : List Name} {σ' σ : State} (h : EnvAgreeExcept ns σ' σ) (r : Name)
     (segs : List Seg) (v : SVal) : SameOk ns (σ'.saveStorage r segs v) (σ.saveStorage r segs v) :=
@@ -514,6 +519,57 @@ theorem Taclet.sound {m : Modality} {Γ Γ' : Ctx} {s : Stmt C Γ Γ'} {pr : Pre
             simp only [Value.asInt, Val.eval, SPath.new, SPath.resolve, envPath, Simple.new, Simple.eval, Simple.weaken, SPath.weaken, setEnv_env, lookupBy_setBy_self, getEnv_setEnv_self, bind, Except.bind, pure, Except.pure, getEnv_setEnv_ne _ h₃, getEnv_setEnv_ne _ h₁,
               lookupBy_setBy_ne h₂]
             exact SameOk.save (by agree_tac) _ _ _
+
+  -- A conditional lowered to a branch: the condition, then the branch taken.
+  case ternaryToIf p x h c a b =>
+    refine ⟨by simp, fun σ => ?_⟩
+    simp only [Prog.run, Stmt.run, bind_pure, Val.eval]
+    cases c.eval σ with
+    | error _ => trivial
+    | ok v =>
+      cases v with
+      | int _ => trivial
+      | bool bv =>
+        cases bv <;> simp only [bind, Except.bind, pickBranch, pure, Except.pure] <;>
+          exact SameOk.refl _ _
+  case ternaryToIfStorage p l c a b =>
+    refine ⟨by simp, fun σ => ?_⟩
+    simp only [Prog.run, Stmt.run, bind_pure, Val.eval, Src.value]
+    cases c.eval σ with
+    | error _ => trivial
+    | ok v =>
+      cases v with
+      | int _ => trivial
+      | bool bv =>
+        cases bv <;> simp only [bind, Except.bind, pickBranch, pure, Except.pure] <;>
+          exact SameOk.refl _ _
+  case ternaryCaptureCond p k nse hn a b se hse =>
+    refine ⟨by simp [hse], fun σ => ?_⟩
+    cases k with
+    | «local» x h =>
+      simp only [VHole.fill, VHole.weaken, Prog.run, Stmt.run, bind_pure, Val.eval, Val.eval_weaken]
+      cases nse.eval σ with
+      | error _ => trivial
+      | ok v =>
+        simp only [bind, Except.bind, pure, Except.pure, Simple.eval_new]
+        rw [a.eval_setEnv hse, b.eval_setEnv hse]
+        cases pickBranch v (a.eval σ) (b.eval σ) with
+        | error _ => trivial
+        | ok w => simp only [SameOk]; agree_tac
+    | store l =>
+      simp only [VHole.fill, VHole.weaken, Prog.run, Stmt.run, bind_pure, Val.eval, Val.eval_weaken,
+        Src.value, Loc.target_weaken]
+      cases nse.eval σ with
+      | error _ => trivial
+      | ok v =>
+        simp only [bind, Except.bind, pure, Except.pure, Simple.eval_new]
+        rw [a.eval_setEnv hse, b.eval_setEnv hse, Loc.target_setEnv hse]
+        cases pickBranch v (a.eval σ) (b.eval σ) with
+        | error _ => trivial
+        | ok w =>
+          cases l.target σ with
+          | error _ => trivial
+          | ok rs => exact SameOk.save (agree_setEnv σ se _) _ _ _
 
   -- Compound assignment: the source first, then the target.
   case compoundAssignValueRhsCapture p op hop hp l nse hn se hse =>

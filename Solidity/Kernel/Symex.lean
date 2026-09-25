@@ -223,7 +223,8 @@ statement and splitting every branch, until what is left are the goals
 `∀ σ, H.holds ψ σ` (or `False`, when the fuel runs out). -/
 macro "symex" : tactic => `(tactic| repeat' (first
   | (rw [Kont.vc]; try simp only [Stmt.step, localStep, assignStep, rebindStep, deleteStep,
-      binopRightStep, shortCircuitStep, copyStep, opStep, incStep, assignIncStep, Hole.unfoldStep, Prog.append, Val.weaken,
+      binopRightStep, shortCircuitStep, copyStep, opStep, incStep, assignIncStep, ternaryStep, VHole.fill, VHole.weaken,
+      Hole.unfoldStep, Prog.append, Val.weaken,
       OpLoc.weaken,
       Simple.weaken, Loc.weaken, SPath.weaken, Src.weaken, Val.isSimple, SPath.isSimple,
       SPath.isBindable, dite_true, dite_false, Bool.false_eq_true, reduceFreshName])
@@ -243,7 +244,7 @@ macro_rules
       Except.pure, applyBinOp, applyUnOp, unopCheck, checkArith, BinOp.retTy, Value.asInt,
       Value.asBool, Value.toSVal, BinOp.isArith, uintBound, intBound, reduceFreshName, Src.value,
       Loc.target, Loc.resolve, SPath.resolve, Simple.new, envPath, State.saveStorage, OpLoc.store,
-      opStore, opLocal, OpLoc.bump, bumpStore, bumpLocal, IncDec.isPre, IncDec.isIncrement,
+      opStore, opLocal, pickBranch, OpLoc.bump, bumpStore, bumpLocal, IncDec.isPre, IncDec.isIncrement,
       State.findStorage, State.setEnv, State.getEnv, SVal.save, SVal.find, SVal.asValue,
       SVal.defaultOf, defaultForRef, defaultForTy, defaultForFields, structDef, Functor.map,
       Except.map, lookupBy, setBy, SemanticsProperties.lookupBy_setBy_self,
@@ -299,6 +300,14 @@ def exInc := ksol{ uint x = 1; uint y; x++; y = ++x; assert(y == 3); total++; y 
 example : (Kont.modal .diamond exInc (.post .tt)).vc 60
     (.assume fun σ => σ.storage = StandardExample.initStorage ∧ σ.env = []) := by
   unfold exInc; symex <;> symex_close [initStorage_standardExample, State.exampleStore]
+
+def exTern := ksol{ uint x = 3; x = (x > 2) ? x + 1 : 0; total = (x == 4) ? 7 : x; assert(total == 7); }
+
+set_option maxHeartbeats 1000000 in
+/-- A conditional lowers to a branch; the branch not taken is ruled out. -/
+example : (Kont.modal .diamond exTern (.post .tt)).vc 80
+    (.assume fun σ => σ.storage = StandardExample.initStorage ∧ σ.env = []) := by
+  unfold exTern; symex <;> symex_close [initStorage_standardExample, State.exampleStore]
 
 /-- A false specification leaves a goal no evaluation closes. -/
 example : True := by

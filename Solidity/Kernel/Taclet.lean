@@ -165,6 +165,21 @@ theorem extend_sub {Γ Γ' : Ctx} {T : Ty} (y : Name) (b : BTy) (hy : isFresh C 
 
 end Hole
 
+/-- A statement with a hole for the value it writes: `x = •` into a stack
+local, `l = •` into storage. -/
+inductive VHole (C : Contract) (Γ : Ctx) : PrimTy → Type where
+  | local {p : PrimTy} (x : Name) (h : lookupBy x Γ = some (.stack (.prim p))) : VHole C Γ p
+  | store {p : PrimTy} (l : Loc C Γ (.prim p)) : VHole C Γ p
+
+/-- The statement, with the value in the hole. -/
+def VHole.fill {Γ : Ctx} {p : PrimTy} : VHole C Γ p → Val C Γ p → Stmt C Γ Γ
+  | .local x h, v => .assignLocal x h v
+  | .store l, v => .assign l (.val v)
+
+def VHole.weaken {Γ Γ' : Ctx} (h : Ctx.Sub C Γ Γ') {p : PrimTy} : VHole C Γ p → VHole C Γ' p
+  | .local x hx => .local x (h.local_ _ _ hx)
+  | .store l => .store (l.weaken h)
+
 /-! ## Updates and premises -/
 
 /-- An update (KeY's `{U}`): the state change a Step 3 rule leaves in front of
@@ -631,6 +646,33 @@ inductive Taclet (C : Contract) (m : Modality) : {Γ Γ' : Ctx} → Stmt C Γ Γ
           (.cons (.declLocal p se hse (some nse))
           (.cons (.assignLocal x ((Ctx.Sub.fresh hse _).local_ _ _ h)
             (.unop op hop hq (.simple (Simple.new se p)))) .nil))
+          (Ctx.Sub.fresh hse _)
+  -- Conditional expressions
+  /-- `x = se ? e1 : e2 ⇝ if (se) { x = e1 } else { x = e2 }`, the statement
+  `if` in place of KeY's residual (the same meaning: both evaluate only the
+  branch taken). -/
+  | ternaryToIf {Γ : Ctx} {p : PrimTy} (x : Name) (h : lookupBy x Γ = some (.stack (.prim p)))
+      (c : Simple C Γ .bool) (a b : Val C Γ p) :
+      .assignLocal x h (.ternary (.simple c) a b) ⇒
+        .unfold [] (.cons (.ite c (.cons (.assignLocal x h a) .nil) (.cons (.assignLocal x h b) .nil)) .nil)
+          (Ctx.Sub.refl _)
+  /-- `path = se ? e1 : e2 ⇝ if (se) { path = e1 } else { path = e2 }`, for
+  a storage target (a conditional is never a write's source: it is lowered
+  first). -/
+  | ternaryToIfStorage {Γ : Ctx} {p : PrimTy} (l : Loc C Γ (.prim p)) (c : Simple C Γ .bool)
+      (a b : Val C Γ p) :
+      .assign l (.val (.ternary (.simple c) a b)) ⇒
+        .unfold [] (.cons (.ite c (.cons (.assign l (.val a)) .nil) (.cons (.assign l (.val b)) .nil)) .nil)
+          (Ctx.Sub.refl _)
+  /-- `lhs = nse ? e1 : e2 ⇝ bool se = nse; lhs = se ? e1 : e2`. -/
+  | ternaryCaptureCond {Γ : Ctx} {p : PrimTy} (k : VHole C Γ p) (nse : Val C Γ .bool)
+      (hn : nse.isSimple = false) (a b : Val C Γ p) (se : Name) (hse : isFresh C Γ se = true) :
+      k.fill (.ternary nse a b) ⇒
+        .unfold [se]
+          (.cons (.declLocal .bool se hse (some nse))
+          (.cons ((k.weaken (Ctx.Sub.fresh hse _)).fill
+              (.ternary (.simple (Simple.new se .bool)) (a.weaken (Ctx.Sub.fresh hse _))
+                (b.weaken (Ctx.Sub.fresh hse _)))) .nil))
           (Ctx.Sub.fresh hse _)
   -- Compound assignment
   /-- `lv ⊕= se ⇝ {lv := lv ⊕ se}`. -/

@@ -46,6 +46,7 @@ inductive RawExpr where
   | index (e k : RawExpr)
   | binop (op : BinOp) (a b : RawExpr)
   | unop (op : UnOp) (a : RawExpr)
+  | ternary (c a b : RawExpr)
   deriving Repr, Inhabited
 
 inductive RawStmt where
@@ -85,6 +86,7 @@ syntax:45 ksol_expr:46 " == " ksol_expr:46 : ksol_expr
 syntax:45 ksol_expr:46 " != " ksol_expr:46 : ksol_expr
 syntax:35 ksol_expr:36 " && " ksol_expr:35 : ksol_expr
 syntax:30 ksol_expr:31 " || " ksol_expr:30 : ksol_expr
+syntax:20 ksol_expr:21 " ? " ksol_expr:21 " : " ksol_expr:20 : ksol_expr
 
 declare_syntax_cat ksol_stmt (behavior := both)
 declare_syntax_cat ksol_block (behavior := both)
@@ -140,6 +142,8 @@ partial def expandExpr : TSyntax `ksol_expr → MacroM Term
       `(RawExpr.index $(← expandExpr e) $(← expandExpr k))
   | `(ksol_expr| ( $e:ksol_expr )) => expandExpr e
   | `(ksol_expr| ! $a) => do `(RawExpr.unop .not $(← expandExpr a))
+  | `(ksol_expr| $c ? $a : $b) => do
+      `(RawExpr.ternary $(← expandExpr c) $(← expandExpr a) $(← expandExpr b))
   | `(ksol_expr| - $a) => do `(RawExpr.unop .neg $(← expandExpr a))
   | `(ksol_expr| $a * $b) => bin ``BinOp.mul a b
   | `(ksol_expr| $a / $b) => bin ``BinOp.div a b
@@ -271,6 +275,11 @@ def synth (C : Contract) (Γ : Ctx) : RawExpr → Except String (TExpr C Γ)
     match h : op.accepts p with
     | true => pure (.val _ (.binop op h rfl (← check C Γ p a) (← check C Γ p b)))
     | false => throw s!"operator {repr op} does not take {primName p}"
+  | .ternary c a b => do
+    -- the branch type: the first branch that is not a literal gives it
+    let t ← if a matches .num _ then synth C Γ b else synth C Γ a
+    let some ⟨p, _⟩ := t.toVal? | throw "a conditional of reference type"
+    pure (.val p (.ternary (← check C Γ .bool c) (← check C Γ p a) (← check C Γ p b)))
   | .unop op a => do
     let some ⟨p, a⟩ := (← synth C Γ a).toVal? | throw "an operand of reference type"
     match h : op.accepts p with
@@ -519,6 +528,9 @@ def Val.quote (Γ : Ctx) : (p : PrimTy) → Val C Γ p → Lean.Expr
     mkAppN (mkConst ``Val.unop) #[c, toExpr Γ, toExpr p, toExpr q, toExpr op, boolTrue,
       quoteRefl (mkConst ``PrimTy) (toExpr q),
       Val.quote Γ p a]
+  | p, .ternary cv a b =>
+    mkAppN (mkConst ``Val.ternary) #[c, toExpr Γ, toExpr p, Val.quote Γ .bool cv, Val.quote Γ p a,
+      Val.quote Γ p b]
 
 end
 

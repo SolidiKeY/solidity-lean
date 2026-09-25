@@ -69,6 +69,20 @@ def copyStep {Γ : Ctx} {R : RefTy} (l : Loc C Γ (.ref R)) (hl : (SPath.loc l).
           ⟨_, .storageIndexRead_unfold_rightSndResult l hl hm it b hbi.1 ie _ (freshName_isFresh C Γ "se")⟩
       else (Hole.copy l hm).unfoldStep m (.index it b i) (by simpa [SPath.isBindable] using hbi)
 
+/-- `lhs = c ? a : b`: lower it to a branch on a simple condition, capture
+any other condition first. -/
+def ternaryStep {Γ : Ctx} {p : PrimTy} (k : VHole C Γ p) (c : Val C Γ .bool) (a b : Val C Γ p) :
+    Step C m (k.fill (.ternary c a b)) :=
+  match c with
+  | .simple c =>
+    match k with
+    | .local x h => ⟨_, .ternaryToIf x h c a b⟩
+    | .store l => ⟨_, .ternaryToIfStorage l c a b⟩
+  | .read l => ⟨_, .ternaryCaptureCond k (.read l) rfl a b _ (freshName_isFresh C Γ "se")⟩
+  | .binop op hop hq x y => ⟨_, .ternaryCaptureCond k (.binop op hop hq x y) rfl a b _ (freshName_isFresh C Γ "se")⟩
+  | .unop op hop hq x => ⟨_, .ternaryCaptureCond k (.unop op hop hq x) rfl a b _ (freshName_isFresh C Γ "se")⟩
+  | .ternary c' x y => ⟨_, .ternaryCaptureCond k (.ternary c' x y) rfl a b _ (freshName_isFresh C Γ "se")⟩
+
 /-- A storage write. -/
 def assignStep {Γ : Ctx} {T : Ty} : (l : Loc C Γ T) → (r : Src C Γ T) → Step C m (.assign l r)
   -- a state variable
@@ -79,6 +93,7 @@ def assignStep {Γ : Ctx} {T : Ty} : (l : Loc C Γ T) → (r : Src C Γ T) → S
     ⟨_, .storageRootWriteValueRhsCapture x hΓ hr (.binop op hop hq a b) rfl _ (freshName_isFresh C Γ "se")⟩
   | .root x hΓ hr, .val (.unop op hop hq a) =>
     ⟨_, .storageRootWriteValueRhsCapture x hΓ hr (.unop op hop hq a) rfl _ (freshName_isFresh C Γ "se")⟩
+  | .root x hΓ hr, .val (.ternary c a b) => ternaryStep m (.store (.root x hΓ hr)) c a b
   | .root x hΓ hr, .copy sp₂ hm =>
     if hs : sp₂.isSimple = true then ⟨_, .storageRootWriteCopySource x hΓ hr sp₂ hs hm⟩
     else match sp₂, hs with
@@ -95,6 +110,7 @@ def assignStep {Γ : Ctx} {T : Ty} : (l : Loc C Γ T) → (r : Src C Γ T) → S
           | .arr, b, .simple ie, hbi => ⟨_, .storageIndexReadArrayStoreRoot x hΓ hr b hbi.1 ie hm⟩
         else (Hole.copy (.root x hΓ hr) hm).unfoldStep m (.index it b i) (by simpa [SPath.isBindable] using hbi)
   -- a member
+  | .field b f hf, .val (.ternary c a d) => ternaryStep m (.store (.field b f hf)) c a d
   | .field b f hf, .val e =>
     if hb : b.isSimple = true then
       match e with
@@ -104,6 +120,7 @@ def assignStep {Γ : Ctx} {T : Ty} : (l : Loc C Γ T) → (r : Src C Γ T) → S
         ⟨_, .fieldWriteValueRhsCapture b hb f hf (.binop op hop hq a c) rfl _ (freshName_isFresh C Γ "se")⟩
       | .unop op hop hq a =>
         ⟨_, .fieldWriteValueRhsCapture b hb f hf (.unop op hop hq a) rfl _ (freshName_isFresh C Γ "se")⟩
+      | .ternary c a d => ternaryStep m (.store (.field b f hf)) c a d
     else ⟨_, .storageFieldWrite_unfold_leftFst b (not_simple hb) f hf e _ _
       (freshName_isFresh C Γ "se") (freshName_isFresh C _ "sp")⟩
   | .field b f hf, .copy src hm =>
@@ -112,6 +129,7 @@ def assignStep {Γ : Ctx} {T : Ty} : (l : Loc C Γ T) → (r : Src C Γ T) → S
     else ⟨_, .storageFieldWriteStorageRef_unfold_leftFst b (not_simple hb) f hf src hm _
       (freshName_isFresh C Γ "sp")⟩
   -- an entry
+  | .index it b i, .val (.ternary c a d) => ternaryStep m (.store (.index it b i)) c a d
   | .index it b i, .val e =>
     if hb : b.isSimple = true then
       match i with
@@ -126,11 +144,14 @@ def assignStep {Γ : Ctx} {T : Ty} : (l : Loc C Γ T) → (r : Src C Γ T) → S
           ⟨_, .indexWriteValueRhsCapture it b hb ie (.binop op hop hq a c) rfl _ (freshName_isFresh C Γ "se")⟩
         | .unop op hop hq a =>
           ⟨_, .indexWriteValueRhsCapture it b hb ie (.unop op hop hq a) rfl _ (freshName_isFresh C Γ "se")⟩
+        | .ternary c a d => ternaryStep m (.store (.index it b (.simple ie))) c a d
       | .read l => ⟨_, .storageIndexWriteNonSimpleIndexCapture it b hb (.read l) rfl e _ _
           (freshName_isFresh C Γ "se") (freshName_isFresh C _ "ie")⟩
       | .binop op hop hq a c => ⟨_, .storageIndexWriteNonSimpleIndexCapture it b hb (.binop op hop hq a c) rfl e _ _
           (freshName_isFresh C Γ "se") (freshName_isFresh C _ "ie")⟩
       | .unop op hop hq a => ⟨_, .storageIndexWriteNonSimpleIndexCapture it b hb (.unop op hop hq a) rfl e _ _
+          (freshName_isFresh C Γ "se") (freshName_isFresh C _ "ie")⟩
+      | .ternary c a d => ⟨_, .storageIndexWriteNonSimpleIndexCapture it b hb (.ternary c a d) rfl e _ _
           (freshName_isFresh C Γ "se") (freshName_isFresh C _ "ie")⟩
     else ⟨_, .storageIndexWrite_unfold_leftFst it b (not_simple hb) i e _ _ _
       (freshName_isFresh C Γ "se") (freshName_isFresh C _ "sp") (freshName_isFresh C _ "ie")⟩
@@ -217,16 +238,20 @@ def localStep {Γ : Ctx} {p : PrimTy} (x : Name) (h : lookupBy x Γ = some (.sta
       | .read l => binopRightStep m x op hop hq h a (.read l) rfl
       | .binop op' hop' hq' a' c' => binopRightStep m x op hop hq h a (.binop op' hop' hq' a' c') rfl
       | .unop op' hop' hq' a' => binopRightStep m x op hop hq h a (.unop op' hop' hq' a') rfl
+      | .ternary c' a' d' => binopRightStep m x op hop hq h a (.ternary c' a' d') rfl
     | .read l => ⟨_, .binopUnfoldLeft op hop hq x h (.read l) rfl e _ (freshName_isFresh C Γ "se")⟩
     | .binop op' hop' hq' a' c' =>
       ⟨_, .binopUnfoldLeft op hop hq x h (.binop op' hop' hq' a' c') rfl e _ (freshName_isFresh C Γ "se")⟩
     | .unop op' hop' hq' a' => ⟨_, .binopUnfoldLeft op hop hq x h (.unop op' hop' hq' a') rfl e _ (freshName_isFresh C Γ "se")⟩
+    | .ternary c' a' d' => ⟨_, .binopUnfoldLeft op hop hq x h (.ternary c' a' d') rfl e _ (freshName_isFresh C Γ "se")⟩
   | .unop op hop hq a =>
     match a with
     | .simple a => ⟨_, .unopAssignment op hop hq x h a⟩
     | .read l => ⟨_, .unopCapture op hop hq x h (.read l) rfl _ (freshName_isFresh C Γ "se")⟩
     | .binop op' hop' hq' a' c' => ⟨_, .unopCapture op hop hq x h (.binop op' hop' hq' a' c') rfl _ (freshName_isFresh C Γ "se")⟩
     | .unop op' hop' hq' a' => ⟨_, .unopCapture op hop hq x h (.unop op' hop' hq' a') rfl _ (freshName_isFresh C Γ "se")⟩
+    | .ternary c' a' d' => ⟨_, .unopCapture op hop hq x h (.ternary c' a' d') rfl _ (freshName_isFresh C Γ "se")⟩
+  | .ternary c a d => ternaryStep m (.local x h) c a d
 
 /-- A delete. -/
 def deleteStep {Γ : Ctx} {T : Ty} : (l : Loc C Γ T) → Step C m (.delete l)
@@ -243,6 +268,8 @@ def deleteStep {Γ : Ctx} {T : Ty} : (l : Loc C Γ T) → Step C m (.delete l)
         ⟨_, .storageIndexDeleteNonSimpleIndexCapture it b hb (.binop op hop hq a c) rfl _ (freshName_isFresh C Γ "ie")⟩
       | .unop op hop hq a =>
         ⟨_, .storageIndexDeleteNonSimpleIndexCapture it b hb (.unop op hop hq a) rfl _ (freshName_isFresh C Γ "ie")⟩
+      | .ternary c a d =>
+        ⟨_, .storageIndexDeleteNonSimpleIndexCapture it b hb (.ternary c a d) rfl _ (freshName_isFresh C Γ "ie")⟩
     else ⟨_, .storageIndexDelete_unfold_leftFst it b (not_simple hb) i _ (freshName_isFresh C Γ "sp")⟩
 
 /-- The rule for a compound assignment: the source first (capture a
@@ -254,6 +281,8 @@ def opStep {Γ : Ctx} {p : PrimTy} (op : BinOp) (hop : op.hasCompoundAssign = tr
     ⟨_, .compoundAssignValueRhsCapture op hop hp l (.binop op' hop' hq' a b) rfl _ (freshName_isFresh C Γ "se")⟩
   | .unop op' hop' hq' a =>
     ⟨_, .compoundAssignValueRhsCapture op hop hp l (.unop op' hop' hq' a) rfl _ (freshName_isFresh C Γ "se")⟩
+  | .ternary c a b =>
+    ⟨_, .compoundAssignValueRhsCapture op hop hp l (.ternary c a b) rfl _ (freshName_isFresh C Γ "se")⟩
   | .simple se =>
     match l with
     | .local x h => ⟨_, .localOpAssign op hop hp x h se⟩

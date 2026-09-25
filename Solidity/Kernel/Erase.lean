@@ -42,6 +42,7 @@ def Val.erase {C : Contract} {Γ : Ctx} {p : PrimTy} : Val C Γ p → WrappedExp
   | .read l => l.erase
   | .binop op _ _ a b => .mkBinop op a.erase b.erase
   | .unop op _ _ a => .mkUnop op a.erase
+  | .ternary c a b => .mkTernary c.erase a.erase b.erase
 
 end
 
@@ -78,6 +79,7 @@ theorem Val.erase_ty {C : Contract} {Γ : Ctx} {p : PrimTy} :
       simp only [Val.erase, Typed.WrappedExpr.ty, a.erase_ty, BinOp.retTy_prim, hq]
   | .unop op _ hq a => by
       simp only [Val.erase, Typed.WrappedExpr.ty, a.erase_ty, UnOp.retTy_prim, hq]
+  | .ternary _ a _ => by simp only [Val.erase, Typed.WrappedExpr.ty, a.erase_ty]
 
 end
 
@@ -133,6 +135,8 @@ theorem Val.erase_wt {C : Contract} {Γ : Ctx} {p : PrimTy} :
   | .read l => l.erase_wt
   | .binop _ _ _ a b => by simp [Val.erase, wtExpr, a.erase_wt, b.erase_wt]
   | .unop _ _ _ a => by simp [Val.erase, wtExpr, a.erase_wt]
+  | .ternary c a b => by
+      simp [Val.erase, wtExpr, c.erase_wt, a.erase_wt, b.erase_wt, a.erase_ty, b.erase_ty]
 
 end
 
