@@ -85,6 +85,14 @@ def Taclet.rule {Γ Γ' : Ctx} {s : Stmt C Γ Γ'} {pr : Premise C Γ Γ'} : Tac
   | .logicalOrShortCircuitRhs .. => some .logicalOrShortCircuitRhs
   | .unopAssignment op .. => some (.unopAssignment op)
   | .unopCapture op .. => some (.unopCapture op)
+  | .localOpAssign op .. => some (.localOpAssign op)
+  | .storageRootOpAssign op .. => some (.storageRootOpAssign op)
+  | .storageFieldOpAssign op .. => some (.storageFieldOpAssign op)
+  | .storageIndexMappingOpAssign op .. => some (.storageIndexMappingOpAssign op)
+  | .storageIndexArrayOpAssign op .. => some (.storageIndexArrayOpAssign op)
+  | .storageFieldOpAssignUnfoldLeftFst op .. => some (.storageFieldOpAssignUnfoldLeftFst op)
+  | .storageIndexOpAssignUnfoldLeftFst op .. => some (.storageIndexOpAssignUnfoldLeftFst op)
+  | .compoundAssignValueRhsCapture op .. => some (.compoundAssignValueRhsCapture op)
   | .ifElseSplit .. => none
   | .requireSimple .. => some .requireSimple
   | .assertSimple .. => some .assertSimple
@@ -143,6 +151,14 @@ def Taclet.origin {Γ Γ' : Ctx} {s : Stmt C Γ Γ'} {pr : Premise C Γ Γ'} : T
   | .logicalOrShortCircuitRhs .. => .taclet .logicalOrShortCircuitRhs
   | .unopAssignment op .. => (ruleEffect (.unopAssignment op)).origin
   | .unopCapture op .. => (ruleEffect (.unopCapture op)).origin
+  | .localOpAssign op .. => (ruleEffect (.localOpAssign op)).origin
+  | .storageRootOpAssign op .. => (ruleEffect (.storageRootOpAssign op)).origin
+  | .storageFieldOpAssign op .. => (ruleEffect (.storageFieldOpAssign op)).origin
+  | .storageIndexMappingOpAssign op .. => (ruleEffect (.storageIndexMappingOpAssign op)).origin
+  | .storageIndexArrayOpAssign op .. => (ruleEffect (.storageIndexArrayOpAssign op)).origin
+  | .storageFieldOpAssignUnfoldLeftFst op .. => (ruleEffect (.storageFieldOpAssignUnfoldLeftFst op)).origin
+  | .storageIndexOpAssignUnfoldLeftFst op .. => (ruleEffect (.storageIndexOpAssignUnfoldLeftFst op)).origin
+  | .compoundAssignValueRhsCapture op .. => (ruleEffect (.compoundAssignValueRhsCapture op)).origin
   | .ifElseSplit .. => .taclet .ifElseSplit
   | .requireSimple .. => .taclet .requireSimple
   | .assertSimple .. => .taclet .assertSimple
@@ -178,7 +194,7 @@ def Prog.disagreements (m : Modality) : {Γ Γ' : Ctx} → Prog C Γ Γ' → Lis
 
 section Tour
 
-local instance : InContract := ⟨StandardExample⟩
+local instance instBridgeContract : InContract := ⟨StandardExample⟩
 
 /-- Every statement form of the kernel, over `StandardExample`. -/
 def bridgeTour := ksol{
@@ -194,6 +210,8 @@ def bridgeTour := ksol{
   p.age = 7; p = bob; x = p.age;
   delete total; delete alice.age; delete folks[x]; delete folks[x + 1]; delete persons[x].age;
   delete alice;
+  x += 1; x -= y; total *= 2; alice.age /= x; balances[x] %= 3; values[x] += 1;
+  folks[x].age += 1; persons[x + 1].age -= 1; matrix[x][x] += 1; x += total + 1;
   if (b) { x = 1; } else { x = 2; }; require(b); assert(b); require(x == 1); revert();
 }
 

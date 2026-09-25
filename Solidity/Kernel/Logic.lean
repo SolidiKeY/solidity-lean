@@ -94,7 +94,8 @@ theorem StateAgree.findStorage {Γ : Ctx} {σ τ : State} (hag : StateAgree C Γ
 /-- A statement's context extends the one it starts from. -/
 theorem Stmt.sub {Γ Γ' : Ctx} : Stmt C Γ Γ' → Ctx.Sub C Γ Γ'
   | .declLocal _ _ hx _ | .declStorage _ _ _ hx _ => Ctx.Sub.fresh hx _
-  | .assign .. | .rebind .. | .assignLocal .. | .delete _ | .ite .. | .require _ | .assert _
+  | .assign .. | .rebind .. | .assignLocal .. | .opAssign .. | .delete _ | .ite .. | .require _
+  | .assert _
   | .revert => Ctx.Sub.refl _
 
 theorem not_fresh_of_bound {Γ : Ctx} {x : Name} {b : BTy} (h : lookupBy x Γ = some b) :
@@ -117,6 +118,17 @@ theorem Stmt.run_frame {Γ Γ' : Ctx} {σ τ : State} (hag : StateAgree C Γ σ 
       cases l.target τ with
       | error _ => trivial
       | ok rs => exact StateAgree.save ⟨ns, hns, hag'⟩ _ _ _
+  | .opAssign op _ _ l r => by
+    obtain ⟨ns, hns, hag'⟩ := hag
+    simp only [Stmt.run, r.eval_frame hag' hns]
+    cases r.eval τ with
+    | error _ => trivial
+    | ok v =>
+      simp only [bind, Except.bind]
+      have h := OpLoc.store_agree hag' hns op l v
+      revert h
+      cases l.store σ op v <;> cases l.store τ op v <;> intro h <;>
+        first | trivial | exact h.elim | exact ⟨ns, hns, h⟩
   | .rebind x h r => by
     obtain ⟨ns, hns, hag'⟩ := hag
     simp only [Stmt.run, r.resolve_frame hag' hns]

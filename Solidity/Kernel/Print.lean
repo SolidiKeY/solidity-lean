@@ -63,6 +63,12 @@ def Src.toStr {T : Ty} : Src C Γ T → String
   | .val v => v.toStr true
   | .copy p _ => p.toStr
 
+def OpLoc.toStr {p : PrimTy} : OpLoc C Γ p → String
+  | .local x _ => x
+  | .root r _ _ => r
+  | .field b f _ => s!"{b.toStr}.{f}"
+  | .index _ b i => s!"{b.toStr}[{i.toStr}]"
+
 mutual
 
 def Stmt.toStr {Γ Γ' : Ctx} : Stmt C Γ Γ' → String
@@ -74,6 +80,7 @@ def Stmt.toStr {Γ Γ' : Ctx} : Stmt C Γ Γ' → String
     | none => s!"{tyStr (.prim p)} {x};"
     | some e => s!"{tyStr (.prim p)} {x} = {e.toStr true};"
   | .declStorage _ R x _ e => s!"{tyStr (.ref R)} storage {x} = {e.toStr};"
+  | .opAssign op _ _ l r => s!"{l.toStr} {BinOp.sym op}= {r.toStr true};"
   | .delete l => s!"delete {l.toStr};"
   | .ite c thn els => s!"if ({c.toStr}) \{ {thn.toStr} } else \{ {els.toStr} }"
   | .require c => s!"require({c.toStr});"

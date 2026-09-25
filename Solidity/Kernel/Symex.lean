@@ -223,7 +223,8 @@ statement and splitting every branch, until what is left are the goals
 `∀ σ, H.holds ψ σ` (or `False`, when the fuel runs out). -/
 macro "symex" : tactic => `(tactic| repeat' (first
   | (rw [Kont.vc]; try simp only [Stmt.step, localStep, assignStep, rebindStep, deleteStep,
-      binopRightStep, shortCircuitStep, copyStep, Hole.unfoldStep, Prog.append, Val.weaken,
+      binopRightStep, shortCircuitStep, copyStep, opStep, Hole.unfoldStep, Prog.append, Val.weaken,
+      OpLoc.weaken,
       Simple.weaken, Loc.weaken, SPath.weaken, Src.weaken, Val.isSimple, SPath.isSimple,
       SPath.isBindable, dite_true, dite_false, Bool.false_eq_true, reduceFreshName])
   | constructor))
@@ -241,7 +242,8 @@ macro_rules
       PrimTy.defaultSimple, Post.holds, Post.defined, getEnv_setEnv_ne, bind, Except.bind, pure,
       Except.pure, applyBinOp, applyUnOp, unopCheck, checkArith, BinOp.retTy, Value.asInt,
       Value.asBool, Value.toSVal, BinOp.isArith, uintBound, intBound, reduceFreshName, Src.value,
-      Loc.target, Loc.resolve, SPath.resolve, Simple.new, envPath, State.saveStorage,
+      Loc.target, Loc.resolve, SPath.resolve, Simple.new, envPath, State.saveStorage, OpLoc.store,
+      opStore, opLocal,
       State.findStorage, State.setEnv, State.getEnv, SVal.save, SVal.find, SVal.asValue,
       SVal.defaultOf, defaultForRef, defaultForTy, defaultForFields, structDef, Functor.map,
       Except.map, lookupBy, setBy, SemanticsProperties.lookupBy_setBy_self,
@@ -254,7 +256,7 @@ says `P` does not fail and ends where `c` holds. -/
 
 section Examples
 
-local instance : InContract := ⟨StandardExample⟩
+local instance instSymexContract : InContract := ⟨StandardExample⟩
 
 def exAdd := ksol{ uint x = 1; x = x + 2; assert(x == 3); }
 def exIf := ksol{ uint x = 1; if (x == 1) { x = 2; } else { x = 3; }; assert(x == 2); }
@@ -278,6 +280,18 @@ example : (Kont.modal .diamond exIf (.post .tt)).vc 60 .nil := by
 theorem exStore_vc : (Kont.modal .diamond exStore (.post .tt)).vc 60
     (.assume fun σ => σ.storage = StandardExample.initStorage ∧ σ.env = []) := by
   unfold exStore; symex <;> symex_close [initStorage_standardExample, State.exampleStore]
+
+def exOp := ksol{ uint x = 1; x += 2; x *= x; assert(x == 9); }
+def exOpStore := ksol{ total += 5; alice.age -= 0; assert(total == 5); }
+
+/-- Compound assignments on a local. -/
+example : (Kont.modal .diamond exOp (.post .tt)).vc 30 .nil := by
+  unfold exOp; symex <;> symex_close
+
+/-- And in storage, from the initial one. -/
+example : (Kont.modal .diamond exOpStore (.post .tt)).vc 60
+    (.assume fun σ => σ.storage = StandardExample.initStorage ∧ σ.env = []) := by
+  unfold exOpStore; symex <;> symex_close [initStorage_standardExample, State.exampleStore]
 
 /-- A false specification leaves a goal no evaluation closes. -/
 example : True := by

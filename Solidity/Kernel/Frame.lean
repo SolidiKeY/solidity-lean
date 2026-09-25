@@ -91,6 +91,12 @@ def Src.weaken {Γ Γ' : Ctx} (h : Ctx.Sub C Γ Γ') {T : Ty} : Src C Γ T → S
   | .val v => .val (v.weaken h)
   | .copy p hp => .copy (p.weaken h) hp
 
+def OpLoc.weaken {Γ Γ' : Ctx} (h : Ctx.Sub C Γ Γ') {p : PrimTy} : OpLoc C Γ p → OpLoc C Γ' p
+  | .local x hx => .local x (h.local_ _ _ hx)
+  | .root r hΓ hr => .root r (h.root r hΓ (by simp [hr])) hr
+  | .field b f hf => .field (b.weaken h) f hf
+  | .index it b i => .index it (b.weaken h) (i.weaken h)
+
 /-- Weakening does not change a simple value's erasure. -/
 theorem Simple.erase_weaken {Γ Γ' : Ctx} (h : Ctx.Sub C Γ Γ') {p : PrimTy} :
     (s : Simple C Γ p) → (s.weaken h).erase = s.erase
@@ -240,6 +246,21 @@ theorem Loc.target_weaken {Γ Γ' : Ctx} (h : Ctx.Sub C Γ Γ') (σ : State) {T 
   | root => rfl
   | field b f hf => exact Loc.resolve_weaken h σ (.field b f hf)
   | index it b i => exact Loc.resolve_weaken h σ (.index it b i)
+
+/-- A weakened compound-assignment target is written as the original:
+`alice.age += 1` after `uint se = 1;` writes `alice.age`. -/
+theorem OpLoc.store_weaken {Γ Γ' : Ctx} (h : Ctx.Sub C Γ Γ') (σ : State) (op : BinOp) {p : PrimTy}
+    (l : OpLoc C Γ p) (v : Value) : (l.weaken h).store σ op v = l.store σ op v := by
+  cases l with
+  | «local» => rfl
+  | root => rfl
+  | field b f hf =>
+    simp only [OpLoc.weaken, OpLoc.store]
+    rw [show (Loc.field (b.weaken h) f hf) = (Loc.field b f hf).weaken h from rfl, Loc.resolve_weaken]
+  | index it b i =>
+    simp only [OpLoc.weaken, OpLoc.store]
+    rw [show (Loc.index it (b.weaken h) (.simple (i.weaken h))) = (Loc.index it b (.simple i)).weaken h
+      from rfl, Loc.resolve_weaken]
 
 end Kernel
 end Solidity
