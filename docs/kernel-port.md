@@ -302,6 +302,11 @@ lists only the standard three axioms.
 | `native_decide` | forbidden in `Solidity/Kernel/`; old files keep their count | 2026-09-25 |
 | Struct bodies | stay the package-wide `Semantics.structDef`, which the interpreter reads; a `Contract` is its storage roots only, and `Contract.fieldType` reads the table. A per-contract table would let a contract disagree with what runs. Revisit in phase 7, if the interpreter is made contract-parametric | 2026-09-25 |
 | Context index | a statement is `Stmt C Γ Γ'`, indexed by the local context `stmtWt` threads, and each name carries its `Γ` binding (a root, `lookupBy r Γ = none` too). That is what makes `Prog.erase_wt` hypothesis-free: without the index a typed term could use `x` at two types, and only a predicate could rule it out | 2026-09-25 |
+| Declarations | a declaration introduces a fresh name (`isFresh`: neither a local nor a state variable), so contexts only grow and a name fresh at `Γ` occurs in no term typed at `Γ`. That is the freshness the untyped rules assume per rule (`stmtUsesVar … = false`); here it is typing | 2026-09-25 |
+| Scratch names | a taclet takes its scratch names as parameters with freshness proofs; the elaborator and `Stmt.step` pick `se`, `sp`, `ie` first, so on a program that does not use them the residual erases to the rule table's own | 2026-09-25 |
+| Conditions | `if`, `require` and `assert` test a `Simple` value; `ksol` captures any other condition into a fresh `bool` first (`ifElseUnfold`, `requireConditionCapture` are the elaborator's). A branch still may not declare, so a complex condition nested in a branch is an elaboration error | 2026-09-25 |
+| `T storage x;` | not a kernel statement: solc ≥ 0.5 rejects an uninitialised storage pointer (`storageLocalDeclSkip` has no kernel counterpart) | 2026-09-25 |
+| Semantics | kernel terms get a structural denotation, proved to be the interpreter's (`Prog.run_eq`); taclets are proved sound over it, not through the untyped `*_sound` theorems, whose scratch names are fixed strings | 2026-09-25 |
 | Unknown names | an error: parameters are declared locals. mini-solkey reads an unknown name as a `uint` parameter | 2026-09-25 |
 | Ported contracts | one named constant per interpreter store, `initStorage_*` checks roots, order and defaults against the store by `simp` | 2026-09-25 |
 
@@ -313,7 +318,7 @@ One row per constructor of `Coverage.ResidueShape`, filled in phase 2:
 
 | Shape | Verdict |
 |---|---|
-| `iteSymbolicCond` | *rule*: `ifElseSplit`, a `split` premise (phase 3) |
+| `iteSymbolicCond` | *rule*: `ifElseSplit`, a `split` premise (phase 3), on a `Simple` condition; a complex one is captured by `ksol` |
 | `incDecStmt` | open |
 | `assignMemFieldFromStorage` | open |
 | `assignMemIndexFromStorage` | open |

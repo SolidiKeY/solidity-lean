@@ -34,6 +34,10 @@ the verdicts):
   field and index places `wtExpr` admits (`assignStackPlace`,
   `assignStackPlaceRhs`) do not exist;
 * `delete` takes a `Loc`, never a bare alias (`deleteStorageLocalRoot`);
+* a declaration introduces a fresh name, so a local never shadows another or
+  a state variable, and the context only grows;
+* a branch or a guard tests a simple condition (`Simple`), which is what
+  `ifElseSplit`, `requireSimple` and `assertSimple` take;
 * an operator is applied at the primitive type it accepts
   (`assignOperatorRhsRefTyped`); a source is a `Val` at a primitive type or a
   storage path at a reference type, never a path at a primitive type, so the
@@ -80,7 +84,25 @@ namespace Kernel
 
 open Semantics
 
-/-! ## Paths and values -/
+/-- `x` is fresh at `Γ`: no local and no state variable is called `x`.  A
+declaration introduces a fresh name, so contexts only grow.  A `Bool`, so its
+proofs are `Eq.refl true` (the quoters rely on it). -/
+def isFresh (C : Contract) (Γ : Ctx) (x : Name) : Bool :=
+  (lookupBy x Γ).isNone && (C.rootType x).isNone
+
+/-! ## Simple values, paths and values -/
+
+/-- A simple value (KeY's `SimpleExpression`, the paper's `se`): a literal
+or a stack local.  An update is built from simple parts, and a branch or a
+guard tests one. -/
+inductive Simple (C : Contract) (Γ : Ctx) : PrimTy → Type where
+  /-- A number literal, `10`. -/
+  | lit {p : PrimTy} (n : Int) (h : p.isNumeric = true) : Simple C Γ p
+  /-- `true`, `false`. -/
+  | bool (b : Bool) : Simple C Γ .bool
+  /-- A stack local, `uint x = 1;` then `x`. -/
+  | local {p : PrimTy} (x : Name) (h : lookupBy x Γ = some (.stack (.prim p))) :
+      Simple C Γ p
 
 mutual
 
@@ -107,13 +129,7 @@ inductive Loc (C : Contract) (Γ : Ctx) : Ty → Type where
 
 /-- A value of primitive type `p`. -/
 inductive Val (C : Contract) (Γ : Ctx) : PrimTy → Type where
-  /-- A number literal, `10`. -/
-  | lit {p : PrimTy} (n : Int) (h : p.isNumeric = true) : Val C Γ p
-  /-- `true`, `false`. -/
-  | bool (b : Bool) : Val C Γ .bool
-  /-- A stack local, `uint x = 1;` then `x`. -/
-  | local {p : PrimTy} (x : Name) (h : lookupBy x Γ = some (.stack (.prim p))) :
-      Val C Γ p
+  | simple {p : PrimTy} (s : Simple C Γ p) : Val C Γ p
   /-- A storage read, `alice.age`. -/
   | read {p : PrimTy} (l : Loc C Γ (.prim p)) : Val C Γ p
   | binop {p : PrimTy} (op : BinOp) (h : op.accepts p = true) (a b : Val C Γ p) :
@@ -147,25 +163,26 @@ inductive Stmt (C : Contract) : Ctx → Ctx → Type where
   /-- `x = alice.age;` -/
   | assignLocal {Γ : Ctx} {p : PrimTy} (x : Name)
       (h : lookupBy x Γ = some (.stack (.prim p))) (r : Val C Γ p) : Stmt C Γ Γ
-  /-- `uint x;`, `uint x = e;` -/
-  | declLocal {Γ : Ctx} (p : PrimTy) (x : Name) (init : Option (Val C Γ p)) :
-      Stmt C Γ (setBy x (.stack (.prim p)) Γ)
-  /-- `Person storage p = alice;` -/
-  | declStorage {Γ : Ctx} (R : RefTy) (x : Name) (init : SPath C Γ (.ref R)) :
-      Stmt C Γ (setBy x (.path (.ref R)) Γ)
-  /-- `Person storage p;`, which binds nothing (`storageLocalDeclSkip`). -/
-  | declStorageSkip {Γ : Ctx} (R : RefTy) (x : Name) : Stmt C Γ Γ
-  /-- The calculus's own alias capture, `T storage sp = nsp;`: a
-  `storagePlaceAlias`, which a program never writes. -/
-  | bindAlias {Γ : Ctx} (R : RefTy) (x : Name) (init : SPath C Γ (.ref R)) :
+  /-- `uint x;`, `uint x = e;`, with `x` fresh. -/
+  | declLocal {Γ : Ctx} (p : PrimTy) (x : Name) (hx : isFresh C Γ x = true)
+      (init : Option (Val C Γ p)) : Stmt C Γ (setBy x (.stack (.prim p)) Γ)
+  /-- `Person storage p = alice;`, with `p` fresh.  `capture` marks the
+  calculus's own alias capture, `T storage sp = nsp;`, which erases to a
+  `storagePlaceAlias` rather than a `storageDecl`; the two run alike.  An
+  uninitialised `T storage p;` is not a statement: solc ≥ 0.5 rejects it. -/
+  | declStorage {Γ : Ctx} (capture : Bool) (R : RefTy) (x : Name)
+      (hx : isFresh C Γ x = true) (init : SPath C Γ (.ref R)) :
       Stmt C Γ (setBy x (.path (.ref R)) Γ)
   /-- `delete alice.account;` -/
   | delete {Γ : Ctx} {T : Ty} (l : Loc C Γ T) : Stmt C Γ Γ
-  /-- `if (c) { … } else { … }`; the branches declare nothing that
-  survives them, as `stmtWt` requires. -/
-  | ite {Γ : Ctx} (c : Val C Γ .bool) (thn els : Prog C Γ Γ) : Stmt C Γ Γ
-  | require {Γ : Ctx} (c : Val C Γ .bool) : Stmt C Γ Γ
-  | assert {Γ : Ctx} (c : Val C Γ .bool) : Stmt C Γ Γ
+  /-- `if (c) { … } else { … }`, on a simple condition (the paper's
+  `ifElseSplit`; `ksol` captures any other condition into a local first).  The
+  branches declare nothing, as `stmtWt` requires. -/
+  | ite {Γ : Ctx} (c : Simple C Γ .bool) (thn els : Prog C Γ Γ) : Stmt C Γ Γ
+  /-- `require(c);`, on a simple condition (`requireSimple`). -/
+  | require {Γ : Ctx} (c : Simple C Γ .bool) : Stmt C Γ Γ
+  /-- `assert(c);`, on a simple condition (`assertSimple`). -/
+  | assert {Γ : Ctx} (c : Simple C Γ .bool) : Stmt C Γ Γ
   | revert {Γ : Ctx} : Stmt C Γ Γ
 
 /-- A block, threading the context through its statements. -/
@@ -174,6 +191,11 @@ inductive Prog (C : Contract) : Ctx → Ctx → Type where
   | cons {Γ Γ₁ Γ₂ : Ctx} (s : Stmt C Γ Γ₁) (P : Prog C Γ₁ Γ₂) : Prog C Γ Γ₂
 
 end
+
+/-- A block, then another. -/
+def Prog.append {C : Contract} {Γ Γ₁ Γ₂ : Ctx} : Prog C Γ Γ₁ → Prog C Γ₁ Γ₂ → Prog C Γ Γ₂
+  | .nil, Q => Q
+  | .cons s P, Q => .cons s (P.append Q)
 
 end Kernel
 end Solidity

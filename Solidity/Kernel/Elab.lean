@@ -218,11 +218,11 @@ def primName : PrimTy → String
 mutual
 
 def synth (C : Contract) (Γ : Ctx) : RawExpr → Except String (TExpr C Γ)
-  | .num n => pure (.val .uint (.lit n rfl))
-  | .bool b => pure (.val .bool (.bool b))
+  | .num n => pure (.val .uint (.simple (.lit n rfl)))
+  | .bool b => pure (.val .bool (.simple (.bool b)))
   | .name x =>
     match h : lookupBy x Γ with
-    | some (.stack (.prim p)) => pure (.val p (.local x h))
+    | some (.stack (.prim p)) => pure (.val p (.simple (.local x h)))
     | some (.path (.ref R)) => pure (.path (.ref R) (.alias x h))
     | some _ => throw s!"{x} is a local this fragment cannot use"
     | none =>
@@ -258,7 +258,7 @@ termination_by e => (sizeOf e, 0)
 def check (C : Contract) (Γ : Ctx) (p : PrimTy) : RawExpr → Except String (Val C Γ p)
   | .num n =>
     match h : p.isNumeric with
-    | true => pure (.lit n h)
+    | true => pure (.simple (.lit n h))
     | false => throw s!"a number where a {primName p} is expected"
   | e => do
     let some ⟨q, v⟩ := (← synth C Γ e).toVal? | throw s!"a storage reference where a {primName p} is expected"
@@ -274,53 +274,95 @@ def checkPath (C : Contract) (Γ : Ctx) (T : Ty) (e : RawExpr) :
   | .path T' p => if h : T' = T then pure (h ▸ p) else throw "a storage path of another type"
   | .val .. => throw "a value where a storage reference is expected"
 
-/-- A statement, with the context after it. -/
-abbrev TStmt (C : Contract) (Γ : Ctx) := (Γ' : Ctx) × Stmt C Γ Γ'
+/-- A fresh name for a capture: `base`, else `base1`, `base2`, …  One of
+the first `|Γ| + |C.vars| + 1` candidates is free. -/
+def freshName (C : Contract) (Γ : Ctx) (base : Name) : Name :=
+  let cands := (List.range (Γ.length + C.vars.length + 1)).map fun k =>
+    if k = 0 then base else base ++ toString k
+  (cands.find? (isFresh C Γ ·)).getD base
+
+/-- `v`, if it is simple. -/
+def Val.toSimple? {C : Contract} {Γ : Ctx} {p : PrimTy} : Val C Γ p → Option (Simple C Γ p)
+  | .simple s => some s
+  | _ => none
+
+/-- A condition, as a simple value: a simple one as it is, any other
+captured into a fresh `bool` local first (the paper's `ifElseUnfold` and
+`requireConditionCapture`, done here rather than in the calculus, whose
+branch and guard rules take a simple condition). -/
+def elabCond (C : Contract) (Γ : Ctx) (e : RawExpr) :
+    Except String ((Γ' : Ctx) × Prog C Γ Γ' × Simple C Γ' .bool) := do
+  let v ← check C Γ .bool e
+  match v.toSimple? with
+  | some c => pure ⟨Γ, .nil, c⟩
+  | none =>
+    let x := freshName C Γ "se"
+    if hx : isFresh C Γ x = true then
+      pure ⟨_, .cons (.declLocal .bool x hx (some v)) .nil,
+        .local x (SemanticsProperties.lookupBy_setBy_self ..)⟩
+    else throw "no fresh name for a condition"
+
+/-- `x` may be declared: it is neither a local nor a state variable. -/
+def checkFresh (C : Contract) (Γ : Ctx) (x : Name) : Except String (PLift (isFresh C Γ x = true)) :=
+  if h : isFresh C Γ x = true then pure ⟨h⟩
+  else throw s!"{x} is already declared, or names a state variable"
+
+/-- A block fragment, with the context after it. -/
+abbrev TProg (C : Contract) (Γ : Ctx) := (Γ' : Ctx) × Prog C Γ Γ'
+
+def TProg.one {C : Contract} {Γ Γ' : Ctx} (s : Stmt C Γ Γ') : TProg C Γ := ⟨Γ', .cons s .nil⟩
 
 mutual
 
-def elabStmt (C : Contract) (Γ : Ctx) : RawStmt → Except String (TStmt C Γ)
+/-- A statement, as a block: a condition may need a capture before it. -/
+def elabStmt (C : Contract) (Γ : Ctx) : RawStmt → Except String (TProg C Γ)
   | .assign l r => do
     match ← synth C Γ l with
-    | .val p (.local x h) => pure ⟨Γ, .assignLocal x h (← check C Γ p r)⟩
+    | .val p (.simple (.local x h)) => pure (.one (.assignLocal x h (← check C Γ p r)))
     | .val .. => throw "assigning to a value"
-    | .path (.prim p) (.loc l) => pure ⟨Γ, .assign l (.val (← check C Γ p r))⟩
+    | .path (.prim p) (.loc l) => pure (.one (.assign l (.val (← check C Γ p r))))
     | .path (.ref R) (.loc l) =>
       match h : (Ty.ref R).mapFree with
-      | true => pure ⟨Γ, .assign l (.copy (← checkPath C Γ (.ref R) r) h)⟩
+      | true => pure (.one (.assign l (.copy (← checkPath C Γ (.ref R) r) h)))
       | false => throw "a storage copy of a type that holds a mapping"
-    | .path (.ref R) (.alias x h) => pure ⟨Γ, .rebind x h (← checkPath C Γ (.ref R) r)⟩
+    | .path (.ref R) (.alias x h) => pure (.one (.rebind x h (← checkPath C Γ (.ref R) r)))
   | .decl T x init => do
     let .prim p := elabTy T | throw s!"{x}: a reference type needs a data location"
-    pure ⟨_, .declLocal p x (← init.mapM (check C Γ p))⟩
+    let ⟨hx⟩ ← checkFresh C Γ x
+    pure (.one (.declLocal p x hx (← init.mapM (check C Γ p))))
   | .declStorage T x init => do
     let .ref R := elabTy T | throw s!"{x}: `storage` on a value type"
-    match init with
-    | some e => pure ⟨_, .declStorage R x (← checkPath C Γ (.ref R) e)⟩
-    | none => pure ⟨_, .declStorageSkip R x⟩
+    let ⟨hx⟩ ← checkFresh C Γ x
+    let some e := init | throw s!"{x}: an uninitialised storage pointer"
+    pure (.one (.declStorage false R x hx (← checkPath C Γ (.ref R) e)))
   | .delete e => do
     match ← synth C Γ e with
     | .path T p =>
       match p with
       | .loc l =>
         if T matches .ref (.mapping ..) then throw "a mapping cannot be deleted"
-        else pure ⟨Γ, .delete l⟩
+        else pure (.one (.delete l))
       | .alias .. => throw "`delete` on a storage pointer"
     | .val .. => throw "`delete` needs a storage location"
   | .ite c thn els => do
-    let c ← check C Γ .bool c
-    pure ⟨Γ, .ite c (← elabBranch C Γ thn) (← elabBranch C Γ els)⟩
-  | .require c => do pure ⟨Γ, .require (← check C Γ .bool c)⟩
-  | .assert c => do pure ⟨Γ, .assert (← check C Γ .bool c)⟩
-  | .revert => pure ⟨Γ, .revert⟩
+    let ⟨Γ₁, pre, c⟩ ← elabCond C Γ c
+    let s := Stmt.ite c (← elabBranch C Γ₁ thn) (← elabBranch C Γ₁ els)
+    pure ⟨Γ₁, pre.append (.cons s .nil)⟩
+  | .require c => do
+    let ⟨Γ₁, pre, c⟩ ← elabCond C Γ c
+    pure ⟨Γ₁, pre.append (.cons (.require c) .nil)⟩
+  | .assert c => do
+    let ⟨Γ₁, pre, c⟩ ← elabCond C Γ c
+    pure ⟨Γ₁, pre.append (.cons (.assert c) .nil)⟩
+  | .revert => pure (.one .revert)
 
 /-- A block, with the context after it. -/
-def elabProg (C : Contract) (Γ : Ctx) : List RawStmt → Except String ((Γ' : Ctx) × Prog C Γ Γ')
+def elabProg (C : Contract) (Γ : Ctx) : List RawStmt → Except String (TProg C Γ)
   | [] => pure ⟨Γ, .nil⟩
   | s :: ss => do
-    let ⟨Γ₁, s⟩ ← elabStmt C Γ s
-    let ⟨Γ₂, P⟩ ← elabProg C Γ₁ ss
-    pure ⟨Γ₂, .cons s P⟩
+    let ⟨Γ₁, P⟩ ← elabStmt C Γ s
+    let ⟨Γ₂, Q⟩ ← elabProg C Γ₁ ss
+    pure ⟨Γ₂, P.append Q⟩
 
 /-- A branch leaves the context as it found it (`stmtWt`'s join). -/
 def elabBranch (C : Contract) (Γ : Ctx) (ss : List RawStmt) : Except String (Prog C Γ Γ) := do
@@ -350,6 +392,13 @@ def boolTrue : Lean.Expr := quoteRefl (mkConst ``Bool) (mkConst ``Bool.true)
 
 variable (c : Lean.Expr)
 
+def Simple.quote (Γ : Ctx) : (p : PrimTy) → Simple C Γ p → Lean.Expr
+  | p, .lit n _ => mkAppN (mkConst ``Simple.lit) #[c, toExpr Γ, toExpr p, toExpr n, boolTrue]
+  | _, .bool b => mkAppN (mkConst ``Simple.bool) #[c, toExpr Γ, toExpr b]
+  | p, .local x _ =>
+    mkAppN (mkConst ``Simple.local) #[c, toExpr Γ, toExpr p, toExpr x,
+      quoteRefl optBTy (someE (mkConst ``BTy) (toExpr (BTy.stack (.prim p))))]
+
 mutual
 
 def SPath.quote (Γ : Ctx) : (T : Ty) → SPath C Γ T → Lean.Expr
@@ -374,11 +423,7 @@ def Loc.quote (Γ : Ctx) : (T : Ty) → Loc C Γ T → Lean.Expr
       Val.quote Γ .uint i]
 
 def Val.quote (Γ : Ctx) : (p : PrimTy) → Val C Γ p → Lean.Expr
-  | p, .lit n _ => mkAppN (mkConst ``Val.lit) #[c, toExpr Γ, toExpr p, toExpr n, boolTrue]
-  | _, .bool b => mkAppN (mkConst ``Val.bool) #[c, toExpr Γ, toExpr b]
-  | p, .local x _ =>
-    mkAppN (mkConst ``Val.local) #[c, toExpr Γ, toExpr p, toExpr x,
-      quoteRefl optBTy (someE (mkConst ``BTy) (toExpr (BTy.stack (.prim p))))]
+  | p, .simple s => mkAppN (mkConst ``Val.simple) #[c, toExpr Γ, toExpr p, Simple.quote c Γ p s]
   | p, .read l => mkAppN (mkConst ``Val.read) #[c, toExpr Γ, toExpr p, Loc.quote Γ _ l]
   | _, @Val.binop _ _ p op _ a b =>
     mkAppN (mkConst ``Val.binop) #[c, toExpr Γ, toExpr p, toExpr op, boolTrue,
@@ -411,28 +456,23 @@ def Stmt.quote : (Γ Γ' : Ctx) → Stmt C Γ Γ' → Lean.Expr
     mkAppN (mkConst ``Stmt.assignLocal) #[c, toExpr Γ, toExpr p, toExpr x,
       quoteRefl optBTy (someE (mkConst ``BTy) (toExpr (BTy.stack (.prim p)))),
       Val.quote c Γ p r]
-  | Γ, _, .declLocal p x init =>
+  | Γ, _, .declLocal p x _ init =>
     let init := match init with
       | none => mkAppN (mkConst ``Option.none [0]) #[valTy c Γ p]
       | some v => someE (valTy c Γ p) (Val.quote c Γ p v)
-    mkAppN (mkConst ``Stmt.declLocal) #[c, toExpr Γ, toExpr p, toExpr x, init]
-  | Γ, _, .declStorage R x init =>
-    mkAppN (mkConst ``Stmt.declStorage) #[c, toExpr Γ, toExpr R, toExpr x,
-      SPath.quote c Γ (.ref R) init]
-  | Γ, _, .declStorageSkip R x =>
-    mkAppN (mkConst ``Stmt.declStorageSkip) #[c, toExpr Γ, toExpr R, toExpr x]
-  | Γ, _, .bindAlias R x init =>
-    mkAppN (mkConst ``Stmt.bindAlias) #[c, toExpr Γ, toExpr R, toExpr x,
-      SPath.quote c Γ (.ref R) init]
+    mkAppN (mkConst ``Stmt.declLocal) #[c, toExpr Γ, toExpr p, toExpr x, boolTrue, init]
+  | Γ, _, .declStorage capture R x _ init =>
+    mkAppN (mkConst ``Stmt.declStorage) #[c, toExpr Γ, toExpr capture, toExpr R, toExpr x,
+      boolTrue, SPath.quote c Γ (.ref R) init]
   | Γ, _, @Stmt.delete _ _ T l =>
     mkAppN (mkConst ``Stmt.delete) #[c, toExpr Γ, toExpr T, Loc.quote c Γ T l]
   | Γ, _, .ite cond thn els =>
-    mkAppN (mkConst ``Stmt.ite) #[c, toExpr Γ, Val.quote c Γ .bool cond,
+    mkAppN (mkConst ``Stmt.ite) #[c, toExpr Γ, Simple.quote c Γ .bool cond,
       Prog.quote Γ Γ thn, Prog.quote Γ Γ els]
   | Γ, _, .require cond =>
-    mkAppN (mkConst ``Stmt.require) #[c, toExpr Γ, Val.quote c Γ .bool cond]
+    mkAppN (mkConst ``Stmt.require) #[c, toExpr Γ, Simple.quote c Γ .bool cond]
   | Γ, _, .assert cond =>
-    mkAppN (mkConst ``Stmt.assert) #[c, toExpr Γ, Val.quote c Γ .bool cond]
+    mkAppN (mkConst ``Stmt.assert) #[c, toExpr Γ, Simple.quote c Γ .bool cond]
   | Γ, _, .revert => mkAppN (mkConst ``Stmt.revert) #[c, toExpr Γ]
 
 def Prog.quote : (Γ Γ' : Ctx) → Prog C Γ Γ' → Lean.Expr
@@ -509,22 +549,28 @@ info: uint x = alice.age + 1;
 Person storage p = alice;
 p.age = x;
 balances[x] = 10;
-if (x > 3) { alice.age = 0; } else { revert(); }
+bool se = x > 3;
+if (se) { alice.age = 0; } else { revert(); }
 delete bob.account;
 folks[1] = bob;
-require(flags[x] || (x == 2));
+bool se1 = flags[x] || (x == 2);
+require(se1);
 -/
 #guard_msgs in #eval IO.println tour.show
 
-/-- The context after `tour` is its two declarations, as `stmtWt` computes
-it: `Stmt.erase_wt` on the block, with nothing to check by hand. -/
+/-- The context after `tour` is its declarations, the two captured
+conditions among them, as `stmtWt` computes it: `Prog.erase_wt` on the
+block, with nothing to check by hand. -/
 example : blockWt [] StandardExample.layout tour.erase =
-    some [("x", .stack .uint), ("p", .path (.struct "Person"))] :=
+    some [("x", .stack .uint), ("p", .path (.struct "Person")), ("se", .stack .bool),
+      ("se1", .stack .bool)] :=
   Prog.erase_wt tour
 
-/-- A local shadows the state variable of its name, as `resolveS` does:
-after `uint age = 1;`, `age` is the local, not the root. -/
-example : (ksol{ uint age = 1; age = 2; }).toStr = "uint age = 1; age = 2;" := rfl
+/-- error: Solidity elaboration failed: age is already declared, or names a state variable -/
+#guard_msgs in #check ksol{ uint age = 1; }
+
+/-- A condition that is not simple is captured into a fresh `bool` first. -/
+example : (ksol{ require(alice.age > 3); }).toStr = "bool se = alice.age > 3; require(se);" := rfl
 
 /-- error: Solidity elaboration failed: a storage reference where a uint is expected -/
 #guard_msgs in #check ksol{ uint y = alice; }
