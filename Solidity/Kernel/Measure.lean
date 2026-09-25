@@ -74,6 +74,11 @@ def Stmt.size {Γ Γ' : Ctx} : Stmt C Γ Γ' → Nat
   | .assign l r => l.size + r.size + 2
   | .opAssign _ _ _ l r => l.size + r.size + 2
   | .incDec _ _ l | .assignIncDec _ _ _ _ l _ => l.size + 1
+  | .push b v _ =>
+    match v with
+    | none => b.size + 2
+    | some r => b.size + r.size + 2
+  | .pop b => b.size + 2
   | .rebind _ _ p => p.size + 1
   | .assignLocal _ _ v => v.size + 1
   | .declLocal _ _ _ init =>
@@ -252,6 +257,22 @@ def VHole.extra {Γ : Ctx} {p : PrimTy} : VHole C Γ p → Nat
     (k.weaken h).extra = k.extra := by
   cases k <;> simp only [VHole.weaken, VHole.extra, Loc.size_weaken]
 
+@[simp] theorem Src.size_val {Γ : Ctx} {p : PrimTy} (v : Val C Γ p) : (Src.val v).size = v.size := rfl
+@[simp] theorem Src.size_copy {Γ : Ctx} {R : RefTy} (p : SPath C Γ (.ref R)) (h : (Ty.ref R).mapFree = true) :
+    (Src.copy p h).size = p.size := rfl
+
+theorem Src.decl_size_le {Γ : Ctx} {T : Ty} (x : Name) (hx : isFresh C Γ x = true)
+    (r : Src C Γ T) : (r.decl x hx).size ≤ r.size + 2 := by
+  cases r <;> simp [Src.decl, Stmt.size, Src.size]
+
+@[simp] theorem Src.fresh_size {Γ : Ctx} {T : Ty} (x : Name) (r : Src C Γ T) : (r.fresh x).size = 1 := by
+  cases r <;> rfl
+
+theorem Src.two_le_size {Γ : Ctx} {T : Ty} {r : Src C Γ T} (h : r.isSimple = false) : 2 ≤ r.size := by
+  cases r with
+  | val v => exact Val.two_le_size h
+  | copy p _ => exact SPath.two_le_size h
+
 set_option linter.unusedSimpArgs false in
 /-- **Every rule makes the program smaller.**  `people[i].age = 10;` (size 7)
 unfolds into `uint se = 10; Person storage sp = people[i]; sp.age = se;`, of
@@ -260,14 +281,23 @@ smaller than the `if`. -/
 theorem Taclet.smaller {m : Modality} {Γ Γ' : Ctx} {s : Stmt C Γ Γ'} {pr : Premise C Γ Γ'}
     (d : Taclet C m s pr) : pr.Smaller s := by
   cases d
+  case storagePushValue_unfold_rightSndArgument E sp hs r hr se hse hd =>
+    have := Src.two_le_size hr
+    have := Src.decl_size_le se hse r
+    simp only [Premise.Smaller, Prog.sizes, Stmt.size, Src.fresh_size, SPath.size_weaken, List.length,
+      List.mem_cons, List.not_mem_nil, forall_eq_or_imp, or_false, forall_eq, SPath.one_le_size]
+    have := SPath.one_le_size sp
+    have : sp.size = 1 := by
+      rcases sp with _ | (_ | _ | _) <;> simp_all [SPath.isSimple, SPath.size, Loc.size]
+    omega
   all_goals (try have := SPath.two_le_size (by assumption))
   all_goals (try have := Val.two_le_size (by assumption))
   all_goals (try have := OpLoc.one_le_size (by assumption))
-  all_goals simp only [Premise.Smaller, Prog.sizes, Prog.size, Stmt.size, Src.size, Val.size,
+  all_goals simp only [Premise.Smaller, Prog.sizes, Prog.size, Stmt.size, Src.size_val, Src.size_copy, Val.size,
     SPath.size, Loc.size, Simple.size, Hole.fill_size, Hole.extend_extra, SPath.new, Simple.new,
     SPath.size_weaken, Loc.size_weaken, Val.size_weaken, Src.size_weaken, OpLoc.size_weaken,
     OpLoc.size_local, OpLoc.size_root, OpLoc.size_field, OpLoc.size_index, VHole.fill_size,
-    VHole.extra_weaken, List.length,
+    VHole.extra_weaken, Src.fresh_size, List.length,
     List.mem_cons, List.not_mem_nil, forall_eq_or_imp, and_true, true_and, false_implies,
     implies_true, Loc.weaken, SPath.weaken, List.mem_nil_iff, forall_const, scCost_simple,
     scCost_weaken,

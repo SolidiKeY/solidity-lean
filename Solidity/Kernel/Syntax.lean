@@ -282,6 +282,13 @@ inductive Stmt (C : Contract) : Ctx → Ctx → Type where
   | assignIncDec {Γ : Ctx} {p : PrimTy} (x : Name) (h : lookupBy x Γ = some (.stack (.prim p)))
       (op : IncDec) (hp : p.isNumeric = true) (l : OpLoc C Γ p) (hs : l.recvSimple = true) :
       Stmt C Γ Γ
+  /-- `values.push(x);`, `persons.push(alice);`, `values.push();`: append a
+  value, a copy, or (with no argument) the cleared slot, which needs the
+  element type's default to be well-formed. -/
+  | push {Γ : Ctx} {E : Ty} (b : SPath C Γ (.array E)) (v : Option (Src C Γ E))
+      (hd : (v.isSome || E.defaultOkS) = true) : Stmt C Γ Γ
+  /-- `values.pop();` -/
+  | pop {Γ : Ctx} {E : Ty} (b : SPath C Γ (.array E)) : Stmt C Γ Γ
   /-- `delete alice.account;` -/
   | delete {Γ : Ctx} {T : Ty} (l : Loc C Γ T) : Stmt C Γ Γ
   /-- `if (c) { … } else { … }`, on a simple condition (the paper's

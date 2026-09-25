@@ -1,4 +1,5 @@
 import Solidity.Typing.Storage
+import Solidity.Typing.StoragePreservation
 
 /-!
 # Types and the contract
@@ -94,6 +95,33 @@ theorem _root_.Solidity.Ty.mapFree_sound : ∀ {T : Ty}, T.mapFree = true → ty
   | .ref (.struct s), h => mapFreeStructs_ok s (by simpa [Ty.mapFree] using h)
   | .ref (.array e), h => by
       rw [tyHasMapping]; exact Ty.mapFree_sound (T := e) (by simpa [Ty.mapFree] using h)
+
+/-- The structs of `structDef` whose fresh default is well-formed
+(`defaultOk`): every row is the one its name finds.  All but `BadDup`,
+whose second `a` row is the counterexample that condition exists for. -/
+def defaultOkStructs : List Name :=
+  ["Token", "Account", "Person", "Wallet", "Basket", "Ledger", "LedgerUse", "TokenBucket",
+   "Toggle", "Pair", "S", "Sub", "WithSub", "Inner", "Outer", "Simple", "WithArray", "Triple"]
+
+/-- Every listed struct has a well-formed default: `Person`'s rows are
+`account` and `age`, each found by its name. -/
+theorem defaultOkStructs_ok : ∀ s ∈ defaultOkStructs, defaultOk (.struct s) = true := by
+  simp [defaultOkStructs, defaultOk, defaultOkFields, structDef, lookupBy]
+
+/-- `T`'s fresh default is well-formed, by structural recursion (so by
+`Eq.refl`): what a valueless `push()` needs. -/
+def _root_.Solidity.Ty.defaultOkS : Ty → Bool
+  | .prim _ => true
+  | .ref (.struct s) => s ∈ defaultOkStructs
+  | .ref (.array _) => true
+  | .ref (.mapping _ v) => v.defaultOkS
+
+theorem _root_.Solidity.Ty.defaultOkS_sound : ∀ {T : Ty}, T.defaultOkS = true → defaultOk T = true
+  | .prim _, _ => by simp [defaultOk]
+  | .ref (.struct s), h => defaultOkStructs_ok s (by simpa [Ty.defaultOkS] using h)
+  | .ref (.array _), _ => by simp [defaultOk]
+  | .ref (.mapping _ v), h => by
+      rw [defaultOk]; exact Ty.defaultOkS_sound (T := v) (by simpa [Ty.defaultOkS] using h)
 
 /-! ## The contract -/
 

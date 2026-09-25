@@ -280,7 +280,8 @@ lists only the standard three axioms.
 - [ ] Phase 2: typed syntax, erasure, elaboration, quoters.
   - [x] storage and stack values: `Kernel/Syntax.lean`, `Erase.lean`
     (`Prog.erase_wt`), `Elab.lean` (`ksol[C]{}`), `Print.lean`
-  - [ ] memory  - [ ] arrays, `push`/`pop`  - [x] compound assignment
+  - [ ] memory  - [x] arrays, `push`/`pop` (`Stmt.push`, `Stmt.pop`; `sp.push()` as a
+    place is still open)  - [x] compound assignment
     (`Stmt.opAssign` on an `OpLoc`)  - [x] `++`/`--` (`Stmt.incDec`,
     `Stmt.assignIncDec`; `ksol` parses `++` only, `--` being a Lean comment)  - [x] ternary
     (`Val.ternary`, lazy as `evalValue`)  - [ ] calls, `transfer`
@@ -292,7 +293,11 @@ lists only the standard three axioms.
     (`Kernel/Taclet.lean`, `Kernel/Sound.lean`: 41 taclets, all sound)
   - [x] array elements (`Loc.index` over `IndexTy`; no bounds split, the
     update reverts as the statement does)
-  - [ ] `push`/`pop`  - [ ] memory  - [ ] cross-domain
+  - [x] `push`/`pop`: `storagePushValueSave`, `storagePushValueCopySource`,
+    `storagePushLengthSave`, `storagePushValue_unfold_rightSndArgument` (a value or a
+    path, one kind-neutral capture `Src.decl`), the three `…_unfold_leftFstReceiver`,
+    `storagePopSave` (no emptiness split); `push()` needs `Ty.defaultOkS`
+  - [ ] `lsv = sp.push()`, `sp.push() = v`, `sp.push().f = v`  - [ ] memory  - [ ] cross-domain
   - [x] operators into a local (`binopAssignment`, `binopUnfoldLeft/Right`,
     the two short-circuit rules, `unopAssignment`, `unopCapture`)
   - [x] compound assignment `op=`: `localOpAssign`, `storage{Root,Field}OpAssign`,

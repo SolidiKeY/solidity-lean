@@ -90,6 +90,11 @@ def Stmt.toStr {Γ Γ' : Ctx} : Stmt C Γ Γ' → String
   | .declStorage _ R x _ e => s!"{tyStr (.ref R)} storage {x} = {e.toStr};"
   | .opAssign op _ _ l r => s!"{l.toStr} {BinOp.sym op}= {r.toStr true};"
   | .incDec op _ l => s!"{IncDec.show op l.toStr};"
+  | .push b v _ =>
+    match v with
+    | none => s!"{b.toStr}.push();"
+    | some r => s!"{b.toStr}.push({r.toStr});"
+  | .pop b => s!"{b.toStr}.pop();"
   | .assignIncDec x _ op _ l _ => s!"{x} = {IncDec.show op l.toStr};"
   | .delete l => s!"delete {l.toStr};"
   | .ite c thn els => s!"if ({c.toStr}) \{ {thn.toStr} } else \{ {els.toStr} }"

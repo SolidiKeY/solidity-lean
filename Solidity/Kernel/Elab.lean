@@ -56,6 +56,8 @@ inductive RawStmt where
   | delete (e : RawExpr)
   | opAssign (op : BinOp) (l r : RawExpr)
   | incDec (op : IncDec) (l : RawExpr)
+  /-- `f()`, `f(a)`: here `b.push()`, `b.push(a)`, `b.pop()`. -/
+  | call (f : RawExpr) (args : List RawExpr)
   | assignIncDec (x : RawExpr) (op : IncDec) (l : RawExpr)
   | ite (c : RawExpr) (thn els : List RawStmt)
   | require (c : RawExpr)
@@ -97,6 +99,14 @@ syntax kernel_ty ident " = " ksol_expr : ksol_stmt
 syntax kernel_ty &"storage" ident : ksol_stmt
 syntax kernel_ty &"storage" ident " = " ksol_expr : ksol_stmt
 syntax &"delete " ksol_expr : ksol_stmt
+-- `.push(`, `.push()` and `.pop()` are tokens (the `sol!` syntax's), so a
+-- push on a member or an entry is spelt with them; one on a name is an
+-- identifier `values.push` called.
+syntax ksol_expr ".push(" ksol_expr ")" : ksol_stmt
+syntax ksol_expr ".push()" : ksol_stmt
+syntax ksol_expr ".pop()" : ksol_stmt
+syntax ksol_expr "(" ")" : ksol_stmt
+syntax ksol_expr "(" ksol_expr ")" : ksol_stmt
 syntax ksol_expr "++" : ksol_stmt
 syntax "++" ksol_expr : ksol_stmt
 syntax ksol_expr " = " ksol_expr "++" : ksol_stmt
@@ -185,6 +195,13 @@ partial def expandStmt : TSyntax `ksol_stmt → MacroM Term
   | `(ksol_stmt| $T:kernel_ty $x:ident) => do
       `(RawStmt.decl $(← expandTy T) $(quote x.getId.toString) none)
   | `(ksol_stmt| delete $e) => do `(RawStmt.delete $(← expandExpr e))
+  | `(ksol_stmt| $b:ksol_expr .push( $a:ksol_expr )) => do
+      `(RawStmt.call (.field $(← expandExpr b) "push") [$(← expandExpr a)])
+  | `(ksol_stmt| $b:ksol_expr .push()) => do `(RawStmt.call (.field $(← expandExpr b) "push") [])
+  | `(ksol_stmt| $b:ksol_expr .pop()) => do `(RawStmt.call (.field $(← expandExpr b) "pop") [])
+  | `(ksol_stmt| $f:ksol_expr ( )) => do `(RawStmt.call $(← expandExpr f) [])
+  | `(ksol_stmt| $f:ksol_expr ( $a:ksol_expr )) => do
+      `(RawStmt.call $(← expandExpr f) [$(← expandExpr a)])
   | `(ksol_stmt| $l:ksol_expr ++) => do `(RawStmt.incDec .postInc $(← expandExpr l))
   | `(ksol_stmt| ++ $l:ksol_expr) => do `(RawStmt.incDec .preInc $(← expandExpr l))
   | `(ksol_stmt| $x:ksol_expr = $l:ksol_expr ++) => do
@@ -436,6 +453,25 @@ def elabStmt (C : Contract) (Γ : Ctx) : RawStmt → Except String (TProg C Γ)
       | false, _ => throw s!"++ or -- at {primName p}"
       | _, isFalse _ => throw s!"a {primName p} assigned to a {primName q}"
     | _ => throw "the result of ++ or -- goes to a stack local"
+  | .call (.field e "push") args => do
+    let .path (.ref (.array E)) b ← synth C Γ e | throw "push on something that is not an array"
+    match args with
+    | [] =>
+      match hd : E.defaultOkS with
+      | true => pure (.one (.push b none (by simp [hd])))
+      | false => throw "push() of an element whose default is not well-formed"
+    | [a] =>
+      match E with
+      | .prim p => pure (.one (.push b (some (.val (← check C Γ p a))) rfl))
+      | .ref R =>
+        match h : (Ty.ref R).mapFree with
+        | true => pure (.one (.push b (some (.copy (← checkPath C Γ (.ref R) a) h)) rfl))
+        | false => throw "a push copying a type that holds a mapping"
+    | _ => throw "push takes at most one argument"
+  | .call (.field e "pop") [] => do
+    let .path (.ref (.array _)) b ← synth C Γ e | throw "pop on something that is not an array"
+    pure (.one (.pop b))
+  | .call .. => throw "only push and pop are calls here"
   | .ite c thn els => do
     let ⟨Γ₁, pre, c⟩ ← elabCond C Γ c
     let s := Stmt.ite c (← elabBranch C Γ₁ thn) (← elabBranch C Γ₁ els)
@@ -588,6 +624,14 @@ def Stmt.quote : (Γ Γ' : Ctx) → Stmt C Γ Γ' → Lean.Expr
     mkAppN (mkConst ``Stmt.assignIncDec) #[c, toExpr Γ, toExpr p, toExpr x,
       quoteRefl optBTy (someE (mkConst ``BTy) (toExpr (BTy.stack (.prim p)))), toExpr op, boolTrue,
       OpLoc.quote c Γ p l, boolTrue]
+  | Γ, _, @Stmt.push _ _ E b v _ =>
+    let srcTy := mkAppN (mkConst ``Src) #[c, toExpr Γ, toExpr E]
+    let v := match v with
+      | none => mkAppN (mkConst ``Option.none [0]) #[srcTy]
+      | some r => someE srcTy (Src.quote c Γ E r)
+    mkAppN (mkConst ``Stmt.push) #[c, toExpr Γ, toExpr E, SPath.quote c Γ _ b, v, boolTrue]
+  | Γ, _, @Stmt.pop _ _ E b =>
+    mkAppN (mkConst ``Stmt.pop) #[c, toExpr Γ, toExpr E, SPath.quote c Γ _ b]
   | Γ, _, @Stmt.delete _ _ T l =>
     mkAppN (mkConst ``Stmt.delete) #[c, toExpr Γ, toExpr T, Loc.quote c Γ T l]
   | Γ, _, .ite cond thn els =>

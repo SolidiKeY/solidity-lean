@@ -180,6 +180,29 @@ def VHole.weaken {Γ Γ' : Ctx} (h : Ctx.Sub C Γ Γ') {p : PrimTy} : VHole C Γ
   | .local x hx => .local x (h.local_ _ _ hx)
   | .store l => .store (l.weaken h)
 
+/-- A simple source: a simple value, or a copy from a simple path. -/
+def Src.isSimple {Γ : Ctx} {T : Ty} : Src C Γ T → Bool
+  | .val v => v.isSimple
+  | .copy p _ => p.isSimple
+
+/-- What a source is captured as: a value into a stack local, a path into
+an alias. -/
+def Src.bty {Γ : Ctx} {T : Ty} : Src C Γ T → BTy
+  | .val (p := p) _ => .stack (.prim p)
+  | .copy (R := R) _ _ => .path (.ref R)
+
+/-- `T se = e;` for a value, `T storage se = p;` for a path: the paper's
+kind-neutral `_ se = e`. -/
+def Src.decl {Γ : Ctx} {T : Ty} (x : Name) (hx : isFresh C Γ x = true) :
+    (r : Src C Γ T) → Stmt C Γ (setBy x r.bty Γ)
+  | .val (p := p) v => .declLocal p x hx (some v)
+  | .copy (R := R) p _ => .declStorage true R x hx p
+
+/-- The captured source, read back through its scratch name. -/
+def Src.fresh {Γ : Ctx} {T : Ty} (x : Name) : (r : Src C Γ T) → Src C (setBy x r.bty Γ) T
+  | .val (p := p) _ => .val (.simple (Simple.new x p))
+  | .copy (R := R) _ hm => .copy (SPath.new x R) hm
+
 /-! ## Updates and premises -/
 
 /-- An update (KeY's `{U}`): the state change a Step 3 rule leaves in front of
@@ -202,6 +225,11 @@ inductive Upd (C : Contract) (Γ : Ctx) where
   /-- `bump(l++) || v := l++`: the bump, and `v` bound to the expression's
   value, in parallel. -/
   | bumpBind {p : PrimTy} (x : Name) (op : IncDec) (l : OpLoc C Γ p)
+  /-- `storage := save(save(storage, sp[sp.length], v), sp.length, sp.length + 1)`,
+  or with `delAt` for the slot when there is no `v`. -/
+  | push {E : Ty} (b : SPath C Γ (.array E)) (v : Option (Src C Γ E))
+  /-- `storage := save(delAt(storage, sp[sp.length - 1]), sp.length, sp.length - 1)`. -/
+  | pop {E : Ty} (b : SPath C Γ (.array E))
 
 /-- The state an update leaves, from `σ`. -/
 def Upd.apply (σ : State) {Γ : Ctx} : Upd C Γ → Res State
@@ -222,6 +250,12 @@ def Upd.apply (σ : State) {Γ : Ctx} : Upd C Γ → Res State
   | .bumpBind x op l => do
     let (σ', v) ← l.bump σ op
     pure (σ'.setEnv x (.val v))
+  | .push (E := E) b v => do
+    let (root, segs) ← b.resolve σ
+    pushAt σ E root segs (Src.pushVal σ v)
+  | .pop b => do
+    let (root, segs) ← b.resolve σ
+    popAt σ root segs
 
 /-- What a rule leaves to prove, for a statement from `Γ` to `Γ'`. -/
 inductive Premise (C : Contract) (Γ Γ' : Ctx) where
@@ -736,6 +770,53 @@ inductive Taclet (C : Contract) (m : Modality) : {Γ Γ' : Ctx} → Stmt C Γ Γ
           (.cons (.declLocal p se hse (some nse))
           (.cons (.opAssign op hop hp (l.weaken (Ctx.Sub.fresh hse _)) (.simple (Simple.new se p))) .nil))
           (Ctx.Sub.fresh hse _)
+  -- Arrays
+  /-- `sp.push(se) ⇝ {storage := save(save(storage, sp[sp.length], se), …)}`. -/
+  | storagePushValueSave {Γ : Ctx} {p : PrimTy} (sp : SPath C Γ (.array (.prim p)))
+      (hs : sp.isSimple = true) (se : Simple C Γ p) (hd) :
+      .push sp (some (.val (.simple se))) hd ⇒ .update (.push sp (some (.val (.simple se))))
+  /-- `sp1.push(sp2) ⇝ {storage := save(save(storage, sp1[sp1.length], find(storage, sp2)), …)}`. -/
+  | storagePushValueCopySource {Γ : Ctx} {R : RefTy} (sp : SPath C Γ (.array (.ref R)))
+      (hs : sp.isSimple = true) (sp₂ : SPath C Γ (.ref R)) (hs₂ : sp₂.isSimple = true)
+      (hm : (Ty.ref R).mapFree = true) (hd) :
+      .push sp (some (.copy sp₂ hm)) hd ⇒ .update (.push sp (some (.copy sp₂ hm)))
+  /-- `sp.push() ⇝ {storage := save(delAt(storage, sp[sp.length]), sp.length, sp.length + 1)}`. -/
+  | storagePushLengthSave {Γ : Ctx} {E : Ty} (sp : SPath C Γ (.array E)) (hs : sp.isSimple = true)
+      (hd) : .push sp none hd ⇒ .update (.push sp none)
+  /-- `sp.push(nse) ⇝ _ se = nse; sp.push(se)`, a value or a path. -/
+  | storagePushValue_unfold_rightSndArgument {Γ : Ctx} {E : Ty} (sp : SPath C Γ (.array E))
+      (hs : sp.isSimple = true) (r : Src C Γ E) (hr : r.isSimple = false) (se : Name)
+      (hse : isFresh C Γ se = true) (hd) :
+      .push sp (some r) hd ⇒
+        .unfold [se]
+          (.cons (r.decl se hse) (.cons (.push (sp.weaken (Ctx.Sub.fresh hse _)) (some (r.fresh se)) rfl) .nil))
+          (Ctx.Sub.fresh hse _)
+  /-- `nsp.push(e) ⇝ T storage sp = nsp; sp.push(e)`. -/
+  | storagePushValue_unfold_leftFstReceiver {Γ : Ctx} {E : Ty} (nsp : SPath C Γ (.array E))
+      (hn : nsp.isSimple = false) (e : Src C Γ E) (sp : Name) (hsp : isFresh C Γ sp = true) (hd) :
+      .push nsp (some e) hd ⇒
+        .unfold [sp]
+          (.cons (.declStorage true (.array E) sp hsp nsp)
+          (.cons (.push (SPath.new sp _) (some (e.weaken (Ctx.Sub.fresh hsp _))) rfl) .nil))
+          (Ctx.Sub.fresh hsp _)
+  /-- `nsp.push() ⇝ T storage sp = nsp; sp.push()`. -/
+  | storagePush_unfold_leftFstReceiver {Γ : Ctx} {E : Ty} (nsp : SPath C Γ (.array E))
+      (hn : nsp.isSimple = false) (sp : Name) (hsp : isFresh C Γ sp = true) (hd) :
+      .push nsp none hd ⇒
+        .unfold [sp]
+          (.cons (.declStorage true (.array E) sp hsp nsp) (.cons (.push (SPath.new sp _) none hd) .nil))
+          (Ctx.Sub.fresh hsp _)
+  /-- `nsp.pop() ⇝ T storage sp = nsp; sp.pop()`. -/
+  | storagePop_unfold_leftFstReceiver {Γ : Ctx} {E : Ty} (nsp : SPath C Γ (.array E))
+      (hn : nsp.isSimple = false) (sp : Name) (hsp : isFresh C Γ sp = true) :
+      .pop nsp ⇒
+        .unfold [sp]
+          (.cons (.declStorage true (.array E) sp hsp nsp) (.cons (.pop (SPath.new sp _)) .nil))
+          (Ctx.Sub.fresh hsp _)
+  /-- `sp.pop() ⇝ {storage := save(delAt(storage, sp[sp.length - 1]), …)}`: no
+  emptiness split, the update reverts as the statement does. -/
+  | storagePopSave {Γ : Ctx} {E : Ty} (sp : SPath C Γ (.array E)) (hs : sp.isSimple = true) :
+      .pop sp ⇒ .update (.pop sp)
   -- Increment and decrement
   /-- `lv++ ⇝ {bump(lv++)}`. -/
   | localIncrement {Γ : Ctx} {p : PrimTy} (op : IncDec) (hp : p.isNumeric = true) (x : Name)
