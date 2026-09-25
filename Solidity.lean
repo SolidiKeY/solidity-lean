@@ -105,3 +105,5 @@ import Solidity.Kernel.Syntax
 import Solidity.Kernel.Erase
 import Solidity.Kernel.Print
 import Solidity.Kernel.Elab
+import Solidity.Kernel.Semantics
+import Solidity.Kernel.Frame
