@@ -1015,6 +1015,93 @@ theorem Taclet.sound {m : Modality} {Γ Γ' : Ctx} {s : Stmt C Γ Γ'} {pr : Pre
         getObj_setEnv]
       exact MHole.runWith_extend hie k σ _ _
 
+  -- Memory: a copy into storage through a captured receiver or index.
+  case memoryToStorageField_unfold_leftFst s R nsp hn f hf p sp hsp =>
+    refine ⟨by simp [hsp], fun σ => ?_⟩
+    simp only [Prog.run, Stmt.run, bind_pure, MPath.mval_weaken, Loc.target, Loc.resolve]
+    cases hp : p.mval σ with
+    | error _ =>
+      cases nsp.resolve σ with
+      | error _ => trivial
+      | ok rs => simp only [bind, Except.bind, pure, Except.pure, p.mval_setEnv hsp, hp]; trivial
+    | ok mv =>
+      cases nsp.resolve σ with
+      | error _ =>
+        simp only [bind, Except.bind]
+        cases copyMem σ mv <;> trivial
+      | ok rs =>
+        simp only [bind, Except.bind, pure, Except.pure, p.mval_setEnv hsp, hp,
+          copyMem_congr (agree_setEnv σ sp (.spath rs.1 rs.2)), SPath.new, SPath.resolve, envPath,
+          setEnv_env, lookupBy_setBy_self]
+        cases copyMem σ mv with
+        | error _ => trivial
+        | ok sv => exact SameOk.save (agree_setEnv σ sp _) _ _ _
+  case memoryToStorageIndex_unfold_leftFst R₀ kp R it nsp hn e p sp hsp =>
+    refine ⟨by simp [hsp], fun σ => ?_⟩
+    simp only [Prog.run, Stmt.run, bind_pure, MPath.mval_weaken, Val.eval_weaken, Loc.target,
+      Loc.resolve]
+    cases hp : p.mval σ with
+    | error _ =>
+      cases nsp.resolve σ with
+      | error _ => trivial
+      | ok rs => simp only [bind, Except.bind, pure, Except.pure, p.mval_setEnv hsp, hp]; trivial
+    | ok mv =>
+      cases nsp.resolve σ with
+      | error _ =>
+        simp only [bind, Except.bind]
+        cases copyMem σ mv <;> trivial
+      | ok rs =>
+        simp only [bind, Except.bind, pure, Except.pure, p.mval_setEnv hsp, hp,
+          copyMem_congr (agree_setEnv σ sp (.spath rs.1 rs.2)), SPath.new, SPath.resolve, envPath,
+          setEnv_env, lookupBy_setBy_self, e.eval_setEnv hsp]
+        cases copyMem σ mv with
+        | error _ => cases e.eval σ <;> trivial
+        | ok sv =>
+          simp only
+          cases e.eval σ with
+          | error _ => trivial
+          | ok iv =>
+            simp only
+            cases iv.asInt with
+            | error _ => trivial
+            | ok n => exact SameOk.save (agree_setEnv σ sp _) _ _ _
+  case memoryToStorageIndexNonSimpleIndexCapture R₀ kp R it sp hs nse hn p ie hie =>
+    refine ⟨by simp [hie], fun σ => ?_⟩
+    simp only [Prog.run, Stmt.run, bind_pure, MPath.mval_weaken, Loc.target, Loc.resolve,
+      SPath.resolve_weaken, Val.eval]
+    cases hn' : nse.eval σ with
+    | error _ =>
+      simp only [bind, Except.bind]
+      cases p.mval σ with
+      | error _ => trivial
+      | ok mv =>
+        simp only
+        cases copyMem σ mv with
+        | error _ => trivial
+        | ok sv =>
+          simp only
+          cases sp.resolve σ with
+          | error _ => trivial
+          | ok rs => simp only [hn']; trivial
+    | ok iw =>
+      simp only [bind, Except.bind, pure, Except.pure, p.mval_setEnv hie, sp.resolve_setEnv hie,
+        Simple.eval_new]
+      cases p.mval σ with
+      | error _ => trivial
+      | ok mv =>
+        simp only [copyMem_congr (agree_setEnv σ ie (.val iw))]
+        cases copyMem σ mv with
+        | error _ => trivial
+        | ok sv =>
+          simp only
+          cases sp.resolve σ with
+          | error _ => trivial
+          | ok rs =>
+            simp only [hn']
+            cases iw.asInt with
+            | error _ => trivial
+            | ok n => exact SameOk.save (agree_setEnv σ ie _) _ _ _
+
   -- Memory: a copy from storage through a captured path.
   case storageToMemoryDeclUnfoldRightFst R x hx p hp hnf hm sp hsp hd =>
     have hsp₀ := isFresh_of_sub (Ctx.Sub.fresh hx _) hsp

@@ -449,9 +449,14 @@ def elabStmt (C : Contract) (Γ : Ctx) : RawStmt → Except String (TProg C Γ)
     | .val .. => throw "assigning to a value"
     | .path (.prim p) (.loc l) => pure (.one (.assign l (.val (← check C Γ p r))))
     | .path (.ref R) (.loc l) =>
-      match h : (Ty.ref R).mapFree with
-      | true => pure (.one (.assign l (.copy (← checkPath C Γ (.ref R) r) h)))
-      | false => throw "a storage copy of a type that holds a mapping"
+      match ← synth C Γ r with
+      | .mpath T mp =>
+        if hT : T = .ref R then pure (.one (.assignFromMem l (hT ▸ mp)))
+        else throw "a memory path of another type"
+      | _ =>
+        match h : (Ty.ref R).mapFree with
+        | true => pure (.one (.assign l (.copy (← checkPath C Γ (.ref R) r) h)))
+        | false => throw "a storage copy of a type that holds a mapping"
     | .path (.ref R) (.alias x h) => pure (.one (.rebind x h (← checkPath C Γ (.ref R) r)))
     | .mpath (.ref R) (.var x h) => pure (.one (.rebindMem x h (← elabMRhs C Γ R r)))
     | .mpath (.prim p) (.loc l) => pure (.one (.assignMem l (.val (← check C Γ p r))))
@@ -695,6 +700,9 @@ def Stmt.quote : (Γ Γ' : Ctx) → Stmt C Γ Γ' → Lean.Expr
   | Γ, _, @Stmt.rebindMem _ _ R x _ r =>
     mkAppN (mkConst ``Stmt.rebindMem) #[c, toExpr Γ, toExpr R, toExpr x,
       quoteRefl optBTy (someE (mkConst ``BTy) (toExpr (BTy.mem (.ref R)))), MRhs.quote c Γ R r]
+  | Γ, _, @Stmt.assignFromMem _ _ R l p =>
+    mkAppN (mkConst ``Stmt.assignFromMem) #[c, toExpr Γ, toExpr R, Loc.quote c Γ (.ref R) l,
+      MPath.quote c Γ (.ref R) p]
   | Γ, _, @Stmt.assignMem _ _ T l r =>
     let r := match T, r with
       | _, @MSrc.val _ _ p v => mkAppN (mkConst ``MSrc.val) #[c, toExpr Γ, toExpr p, Val.quote c Γ p v]

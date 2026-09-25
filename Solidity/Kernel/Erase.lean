@@ -251,6 +251,7 @@ def Stmt.erase {C : Contract} {Γ Γ' : Ctx} : Stmt C Γ Γ' → Solidity.Stmt
   | .rebindMem (R := R) x _ r =>
       .assign (PlaceExpr.var .memory (.ref R) (Field.identity x R)) r.erase
   | .assignMem l r => .assign l.toPlace r.erase
+  | .assignFromMem l p => .assign l.toPlace p.erase
   | .opAssign op _ _ l r => .compoundAssign op l.toPlace r.erase
   | .incDec op _ l => .expr (.mkIncDec op l.toPlace.expr)
   | .push b v _ => .push b.toPlace (v.map Src.erase)
@@ -308,6 +309,9 @@ theorem Stmt.erase_wt {C : Contract} {Γ Γ' : Ctx} :
       | copy p _ =>
         simp [Stmt.erase, stmtWt, PlaceExpr.var, wtExpr, h, Field.identity, MRhs.erase, p.erase_wt,
           p.erase_ty, Typed.WrappedExpr.ty]
+  | .assignFromMem l p => by
+      simp [Stmt.erase, stmtWt, Loc.toPlace, SPath.toPlace, SPath.erase, l.erase_wt, p.erase_wt,
+        l.erase_ty, p.erase_ty]
   | .assignMem l r => by
       simp [Stmt.erase, stmtWt, MLoc.toPlace, l.erase_wt, r.erase_ty, l.erase_ty]
       cases r <;> simp [MSrc.erase, Val.erase_wt, MPath.erase_wt]

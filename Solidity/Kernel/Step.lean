@@ -503,6 +503,28 @@ def assignMemStep {Γ : Ctx} {T : Ty} : (l : MLoc C Γ T) → (r : MSrc C Γ T) 
       | .var .., hs => absurd rfl hs
       | .loc sl, hs => (MHole.write l).unfoldStep m sl (not_simple hs)
 
+/-- A storage location written from memory. -/
+def assignFromMemStep {Γ : Ctx} {R : RefTy} :
+    (l : Loc C Γ (.ref R)) → (p : MPath C Γ (.ref R)) → Step C m (.assignFromMem l p)
+  | .root r hΓ hr, p => ⟨_, .memoryToStorageStoreRoot r hΓ hr p⟩
+  | .field b f hf, p =>
+    if hb : b.isSimple = true then
+      match p with
+      | .var x hx => ⟨_, .memoryToStorageFieldCopyRoot b hb f hf x hx⟩
+      | .loc ml => ⟨_, .memoryToStorageFieldCopyField b hb f hf ml⟩
+    else ⟨_, .memoryToStorageField_unfold_leftFst b (not_simple hb) f hf p _ (freshName_isFresh C Γ "sp")⟩
+  | .index it b i, p =>
+    if hb : b.isSimple = true then
+      if hi : i.isSimple = true then
+        match it, b, hb, i, hi with
+        | .map, b, hb, .simple ie, _ => ⟨_, .memoryToStorageIndexMappingCopyRoot b hb ie p⟩
+        | .arr, b, hb, .simple ie, _ => ⟨_, .memoryToStorageIndexArrayCopyRoot b hb ie p⟩
+        | _, _, _, .read _, hi | _, _, _, .binop .., hi | _, _, _, .unop .., hi
+        | _, _, _, .ternary .., hi | _, _, _, .readMem _, hi => absurd hi (by simp [Val.isSimple])
+      else ⟨_, .memoryToStorageIndexNonSimpleIndexCapture it b hb i (not_simple hi) p _
+        (freshName_isFresh C Γ "ie")⟩
+    else ⟨_, .memoryToStorageIndex_unfold_leftFst it b (not_simple hb) i p _ (freshName_isFresh C Γ "sp")⟩
+
 /-- **The rule for a statement**, under the modality `m`.  Total: every
 statement of the kernel has one. -/
 def Stmt.step {Γ Γ' : Ctx} : (s : Stmt C Γ Γ') → Step C m s
@@ -521,6 +543,7 @@ def Stmt.step {Γ Γ' : Ctx} : (s : Stmt C Γ Γ') → Step C m s
   | .declMem R x hx init hd => declMemStep m R x hx init hd
   | .rebindMem x h r => rebindMemStep m x h r
   | .assignMem l r => assignMemStep m l r
+  | .assignFromMem l p => assignFromMemStep m l p
   | .opAssign op hop hp l r => opStep m op hop hp l r
   | .incDec op hp l => incStep m op hp l
   | .push b v hd => pushStep m b v hd
@@ -569,6 +592,7 @@ def Upd.toStr {Γ : Ctx} : Upd C Γ → String
   | .bindCopy x p _ => s!"\{ {x} := freshId(alloc({x}, {p.toStr})) || memory := alloc({x}, {p.toStr}) }"
   | .allocMem x _ => s!"\{ {x} := freshId(alloc({x})) || memory := alloc({x}) }"
   | .writeMem l r => s!"\{ memory := write(memory, {l.toStr}, {r.toStr}) }"
+  | .saveMem l p => s!"\{ storage := save(storage, {l.toStr}, copyMem(mtSt, memory, {p.toStr})) }"
   | .bumpBind x op l => s!"\{ bump({IncDec.show op l.toStr}) || {x} := {IncDec.show op l.toStr} }"
 
 def Premise.toStr {Γ Γ' : Ctx} : Premise C Γ Γ' → String

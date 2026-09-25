@@ -320,6 +320,10 @@ def Stmt.run (σ : State) {Γ Γ' : Ctx} : Stmt C Γ Γ' → Res State
     | some r => r.bind σ x
   | .rebindMem x _ r => r.bind σ x
   | .assignMem l r => do l.write σ (← r.mval σ)
+  | .assignFromMem l p => do
+    let sv ← copyMem σ (← p.mval σ)
+    let (root, segs) ← l.target σ
+    σ.saveStorage root segs sv
   | .opAssign op _ _ l r => do l.store σ op (← r.eval σ)
   | .incDec op _ l => do pure (← l.bump σ op).1
   | .push (E := E) b v _ => do
@@ -742,6 +746,30 @@ theorem Loc.execAssignNested_erase (σ : State) {T : Ty} (l : Loc C Γ T) (r : S
     rw [Loc.resolveLoc_erase σ]
     cases Loc.target σ l <;> rfl
 
+/-- A memory source erases to what `rhsToSVal` reads: a deep copy. -/
+theorem MPath.rhsToSVal_erase (σ : State) {R : RefTy} (p : MPath C Γ (.ref R)) :
+    rhsToSVal σ p.erase = (do pure (σ, ← copyMem σ (← p.mval σ))) := by
+  rw [rhsToSVal, if_neg (by rw [p.erase_ty]; simp [Ty.isPrimitive])]
+  simp only [p.erase_kind, p.readM_erase σ]
+  cases p.mval σ <;> rfl
+
+theorem Loc.execAssignNestedMem_erase (σ : State) {R : RefTy} (l : Loc C Γ (.ref R))
+    (p : MPath C Γ (.ref R)) :
+    execAssignNested σ l.erase p.erase = (Stmt.assignFromMem l p : Stmt C Γ Γ).run σ := by
+  rw [execAssignNested, Loc.erase_kind]
+  simp only [Stmt.run]
+  rw [p.rhsToSVal_erase σ]
+  cases p.mval σ with
+  | error _ => rfl
+  | ok mv =>
+    simp only [bind, Except.bind]
+    cases copyMem σ mv with
+    | error _ => rfl
+    | ok sv =>
+      simp only [pure, Except.pure]
+      rw [Loc.resolveLoc_erase σ]
+      cases Loc.target σ l <;> rfl
+
 /-- A storage write, as `execAssign` does it: a state variable at its root,
 anything else through `execAssignNested`. -/
 theorem Loc.execAssign_erase (σ : State) {T : Ty} (l : Loc C Γ T) (r : Src C Γ T) :
@@ -842,6 +870,23 @@ theorem Stmt.run_eq (σ : State) {Γ Γ' : Ctx} : (s : Stmt C Γ Γ') → execSt
           cases copyStToM σ sv with
           | error _ => rfl
           | ok a => obtain ⟨σ', mv⟩ := a; cases mv <;> rfl
+  | .assignFromMem l p => by
+    rw [Stmt.erase, execStmt]
+    cases l with
+    | root x hΓ h =>
+      simp only [Stmt.run, Loc.toPlace, SPath.toPlace, SPath.erase, Loc.erase]
+      rw [execAssign]
+      simp only
+      rw [if_pos (by rfl), p.rhsToSVal_erase σ]
+      cases p.mval σ with
+      | error _ => rfl
+      | ok mv =>
+        simp only [bind, Except.bind]
+        cases copyMem σ mv <;> rfl
+    | field b f h =>
+      rw [execAssign]; exact Loc.execAssignNestedMem_erase σ (.field b f h) p
+    | index it b i =>
+      rw [execAssign]; exact Loc.execAssignNestedMem_erase σ (.index it b i) p
   | .assignMem l r => by
     simp only [Stmt.run]
     rw [Stmt.erase, execStmt, execAssign]

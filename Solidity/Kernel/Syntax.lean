@@ -330,6 +330,9 @@ inductive Stmt (C : Contract) : Ctx → Ctx → Type where
   /-- `m = n;`: the memory local now names `n`'s object. -/
   | rebindMem {Γ : Ctx} {R : RefTy} (x : Name) (h : lookupBy x Γ = some (.mem (.ref R)))
       (r : MRhs C Γ R) : Stmt C Γ Γ
+  /-- `alice = m;`, `folks[i] = m;`: a storage location written with a deep copy
+  of a memory object. -/
+  | assignFromMem {Γ : Ctx} {R : RefTy} (l : Loc C Γ (.ref R)) (p : MPath C Γ (.ref R)) : Stmt C Γ Γ
   /-- `m.age = 3;`, `m.account = n.account;` -/
   | assignMem {Γ : Ctx} {T : Ty} (l : MLoc C Γ T) (r : MSrc C Γ T) : Stmt C Γ Γ
   /-- `delete alice.account;` -/

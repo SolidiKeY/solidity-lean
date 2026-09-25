@@ -111,6 +111,7 @@ def Stmt.toStr {Γ Γ' : Ctx} : Stmt C Γ Γ' → String
     | some r => s!"{tyStr (.ref R)} memory {x} = {r.toStr};"
   | .rebindMem x _ r => s!"{x} = {r.toStr};"
   | .assignMem l r => s!"{l.toStr} = {r.toStr};"
+  | .assignFromMem l p => s!"{l.toStr} = {p.toStr};"
   | .opAssign op _ _ l r => s!"{l.toStr} {BinOp.sym op}= {r.toStr true};"
   | .incDec op _ l => s!"{IncDec.show op l.toStr};"
   | .push b v _ =>

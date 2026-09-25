@@ -312,6 +312,8 @@ inductive Upd (C : Contract) (Γ : Ctx) where
   | bindCopy (x : Name) {R : RefTy} (p : SPath C Γ (.ref R)) (hm : (Ty.ref R).mapFree = true)
   /-- `mv := freshId(alloc(mv)) || memory := alloc(mv)`: a fresh default object. -/
   | allocMem (x : Name) (R : RefTy)
+  /-- `storage := save(storage, l, copyMem(mtSt, memory, p))`. -/
+  | saveMem {R : RefTy} (l : Loc C Γ (.ref R)) (p : MPath C Γ (.ref R))
   /-- `memory := write(memory, l, r)`. -/
   | writeMem {T : Ty} (l : MLoc C Γ T) (r : MSrc C Γ T)
 
@@ -350,6 +352,10 @@ def Upd.apply (σ : State) {Γ : Ctx} : Upd C Γ → Res State
     let (σ', id) ← allocDefault σ R
     pure (σ'.setEnv x (.mref id))
   | .writeMem l r => do l.write σ (← r.mval σ)
+  | .saveMem l p => do
+    let sv ← copyMem σ (← p.mval σ)
+    let (root, segs) ← l.target σ
+    σ.saveStorage root segs sv
 
 /-- What a rule leaves to prove, for a statement from `Γ` to `Γ'`. -/
 inductive Premise (C : Contract) (Γ Γ' : Ctx) where
@@ -877,6 +883,60 @@ inductive Taclet (C : Contract) (m : Modality) : {Γ Γ' : Ctx} → Stmt C Γ Γ
           (.cons (.declStorage true R sp hsp p)
           (.cons (.rebindMem x ((Ctx.Sub.fresh hsp _).local_ _ _ h) (.copy (SPath.new sp R) hm)) .nil))
           (Ctx.Sub.fresh hsp _)
+  -- Memory: copies into storage (from any memory path: capturing one needs
+  -- the slot to hold a reference, which the copy does not check)
+  /-- `gsp = mpath ⇝ {storage := store(storage, gsp, copyMem(mtSt, memory, mpath))}`. -/
+  | memoryToStorageStoreRoot {Γ : Ctx} {R : RefTy} (r : Name) (hΓ : lookupBy r Γ = none)
+      (hr : C.rootType r = some (.ref R)) (p : MPath C Γ (.ref R)) :
+      .assignFromMem (.root r hΓ hr) p ⇒ .update (.saveMem (.root r hΓ hr) p)
+  /-- `sp.fld = mv ⇝ {storage := save(storage, sp.fld, copyMem(mtSt, memory, mv))}`. -/
+  | memoryToStorageFieldCopyRoot {Γ : Ctx} {s : Name} {R : RefTy} (sp : SPath C Γ (.struct s))
+      (hs : sp.isSimple = true) (f : Name) (hf : C.fieldType s f = some (.ref R)) (x : Name)
+      (hx : lookupBy x Γ = some (.mem (.ref R))) :
+      .assignFromMem (.field sp f hf) (.var x hx) ⇒ .update (.saveMem (.field sp f hf) (.var x hx))
+  /-- `sp.fld = mpath ⇝ {storage := save(storage, sp.fld, copyMem(mtSt, memory, mpath))}`. -/
+  | memoryToStorageFieldCopyField {Γ : Ctx} {s : Name} {R : RefTy} (sp : SPath C Γ (.struct s))
+      (hs : sp.isSimple = true) (f : Name) (hf : C.fieldType s f = some (.ref R)) (ml : MLoc C Γ (.ref R)) :
+      .assignFromMem (.field sp f hf) (.loc ml) ⇒ .update (.saveMem (.field sp f hf) (.loc ml))
+  /-- `map[ie] = mpath ⇝ {storage := save(storage, map[ie], copyMem(mtSt, memory, mpath))}`. -/
+  | memoryToStorageIndexMappingCopyRoot {Γ : Ctx} {kp : PrimTy} {R : RefTy}
+      (sp : SPath C Γ (.mapping (.prim kp) (.ref R))) (hs : sp.isSimple = true) (ie : Simple C Γ kp)
+      (p : MPath C Γ (.ref R)) :
+      .assignFromMem (.index .map sp (.simple ie)) p ⇒ .update (.saveMem (.index .map sp (.simple ie)) p)
+  /-- `arr[ie] = mpath ⇝ {storage := save(storage, arr[ie], copyMem(mtSt, memory, mpath))}`: no
+  bounds split. -/
+  | memoryToStorageIndexArrayCopyRoot {Γ : Ctx} {R : RefTy} (sp : SPath C Γ (.array (.ref R)))
+      (hs : sp.isSimple = true) (ie : Simple C Γ .uint) (p : MPath C Γ (.ref R)) :
+      .assignFromMem (.index .arr sp (.simple ie)) p ⇒ .update (.saveMem (.index .arr sp (.simple ie)) p)
+  /-- `nsp.fld = mpath ⇝ T storage sp = nsp; sp.fld = mpath`. -/
+  | memoryToStorageField_unfold_leftFst {Γ : Ctx} {s : Name} {R : RefTy} (nsp : SPath C Γ (.struct s))
+      (hn : nsp.isSimple = false) (f : Name) (hf : C.fieldType s f = some (.ref R)) (p : MPath C Γ (.ref R))
+      (sp : Name) (hsp : isFresh C Γ sp = true) :
+      .assignFromMem (.field nsp f hf) p ⇒
+        .unfold [sp]
+          (.cons (.declStorage true (.struct s) sp hsp nsp)
+          (.cons (.assignFromMem (.field (SPath.new sp _) f hf) (p.weaken (Ctx.Sub.fresh hsp _))) .nil))
+          (Ctx.Sub.fresh hsp _)
+  /-- `nsp[e] = mpath ⇝ T storage sp = nsp; sp[e] = mpath`. -/
+  | memoryToStorageIndex_unfold_leftFst {Γ : Ctx} {R₀ : RefTy} {kp : PrimTy} {R : RefTy}
+      (it : IndexTy R₀ kp (.ref R)) (nsp : SPath C Γ (.ref R₀)) (hn : nsp.isSimple = false) (e : Val C Γ kp)
+      (p : MPath C Γ (.ref R)) (sp : Name) (hsp : isFresh C Γ sp = true) :
+      .assignFromMem (.index it nsp e) p ⇒
+        .unfold [sp]
+          (.cons (.declStorage true R₀ sp hsp nsp)
+          (.cons (.assignFromMem (.index it (SPath.new sp _) (e.weaken (Ctx.Sub.fresh hsp _)))
+            (p.weaken (Ctx.Sub.fresh hsp _))) .nil))
+          (Ctx.Sub.fresh hsp _)
+  /-- `sp[nse] = mpath ⇝ T ie = nse; sp[ie] = mpath`. -/
+  | memoryToStorageIndexNonSimpleIndexCapture {Γ : Ctx} {R₀ : RefTy} {kp : PrimTy} {R : RefTy}
+      (it : IndexTy R₀ kp (.ref R)) (sp : SPath C Γ (.ref R₀)) (hs : sp.isSimple = true) (nse : Val C Γ kp)
+      (hn : nse.isSimple = false) (p : MPath C Γ (.ref R)) (ie : Name) (hie : isFresh C Γ ie = true) :
+      .assignFromMem (.index it sp nse) p ⇒
+        .unfold [ie]
+          (.cons (.declLocal kp ie hie (some nse))
+          (.cons (.assignFromMem (.index it (sp.weaken (Ctx.Sub.fresh hie _)) (.simple (Simple.new ie kp)))
+            (p.weaken (Ctx.Sub.fresh hie _))) .nil))
+          (Ctx.Sub.fresh hie _)
   -- Memory: writes
   /-- `mv.fld = se ⇝ {memory := write(memory, mv.fld, se)}`. -/
   | memoryFieldWriteStore {Γ : Ctx} {s : Name} {p : PrimTy} (b : MPath C Γ (.struct s))
