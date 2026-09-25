@@ -77,8 +77,7 @@ def SPath.weaken {Γ Γ' : Ctx} (h : Ctx.Sub C Γ Γ') : {T : Ty} → SPath C Γ
 def Loc.weaken {Γ Γ' : Ctx} (h : Ctx.Sub C Γ Γ') : {T : Ty} → Loc C Γ T → Loc C Γ' T
   | _, .root r hΓ hr => .root r (h.root r hΓ (by simp [hr])) hr
   | _, .field b f hf => .field (b.weaken h) f hf
-  | _, .mapIndex b i => .mapIndex (b.weaken h) (i.weaken h)
-  | _, .arrIndex b i => .arrIndex (b.weaken h) (i.weaken h)
+  | _, .index it b i => .index it (b.weaken h) (i.weaken h)
 
 def Val.weaken {Γ Γ' : Ctx} (h : Ctx.Sub C Γ Γ') : {p : PrimTy} → Val C Γ p → Val C Γ' p
   | _, .simple s => .simple (s.weaken h)
@@ -110,8 +109,7 @@ theorem Loc.erase_weaken {Γ Γ' : Ctx} (h : Ctx.Sub C Γ Γ') :
     {T : Ty} → (l : Loc C Γ T) → (l.weaken h).erase = l.erase
   | _, .root .. => rfl
   | _, .field b f _ => by simp only [Loc.weaken, Loc.erase, b.erase_weaken h]
-  | _, .mapIndex b i => by simp only [Loc.weaken, Loc.erase, b.erase_weaken h, i.erase_weaken h]
-  | _, .arrIndex b i => by simp only [Loc.weaken, Loc.erase, b.erase_weaken h, i.erase_weaken h]
+  | _, .index _ b i => by simp only [Loc.weaken, Loc.erase, b.erase_weaken h, i.erase_weaken h]
 
 theorem Val.erase_weaken {Γ Γ' : Ctx} (h : Ctx.Sub C Γ Γ') :
     {p : PrimTy} → (v : Val C Γ p) → (v.weaken h).erase = v.erase
@@ -170,8 +168,7 @@ theorem Loc.resolve_frame (hag : EnvAgreeExcept ns σ τ) (hns : ∀ n ∈ ns, F
     {T : Ty} → (l : Loc C Γ T) → l.resolve σ = l.resolve τ
   | _, .root _ _ hr => envPath_frame hag (not_mem_of_root hns hr) _
   | _, .field b _ _ => by simp only [Loc.resolve, b.resolve_frame hag hns]
-  | _, .mapIndex b i => by simp only [Loc.resolve, b.resolve_frame hag hns, i.eval_frame hag hns]
-  | _, .arrIndex b i => by simp only [Loc.resolve, b.resolve_frame hag hns, i.eval_frame hag hns]
+  | _, .index _ b i => by simp only [Loc.resolve, b.resolve_frame hag hns, i.eval_frame hag hns]
 
 /-- **Frame**, for values: `x + alice.age` evaluates alike in two states that
 agree off fresh names. -/
@@ -217,9 +214,7 @@ theorem Loc.resolve_weaken {Γ Γ' : Ctx} (h : Ctx.Sub C Γ Γ') (σ : State) :
     {T : Ty} → (l : Loc C Γ T) → (l.weaken h).resolve σ = l.resolve σ
   | _, .root .. => rfl
   | _, .field b _ _ => by simp only [Loc.weaken, Loc.resolve, b.resolve_weaken h σ]
-  | _, .mapIndex b i => by
-    simp only [Loc.weaken, Loc.resolve, b.resolve_weaken h σ, i.eval_weaken h σ]
-  | _, .arrIndex b i => by
+  | _, .index _ b i => by
     simp only [Loc.weaken, Loc.resolve, b.resolve_weaken h σ, i.eval_weaken h σ]
 
 /-- A weakened value evaluates as the original. -/
@@ -244,8 +239,7 @@ theorem Loc.target_weaken {Γ Γ' : Ctx} (h : Ctx.Sub C Γ Γ') (σ : State) {T 
   cases l with
   | root => rfl
   | field b f hf => exact Loc.resolve_weaken h σ (.field b f hf)
-  | mapIndex b i => exact Loc.resolve_weaken h σ (.mapIndex b i)
-  | arrIndex b i => exact Loc.resolve_weaken h σ (.arrIndex b i)
+  | index it b i => exact Loc.resolve_weaken h σ (.index it b i)
 
 end Kernel
 end Solidity

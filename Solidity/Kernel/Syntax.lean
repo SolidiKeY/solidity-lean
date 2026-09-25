@@ -104,6 +104,14 @@ inductive Simple (C : Contract) (Γ : Ctx) : PrimTy → Type where
   | local {p : PrimTy} (x : Name) (h : lookupBy x Γ = some (.stack (.prim p))) :
       Simple C Γ p
 
+/-- How a reference type is indexed: a mapping by its key, an array by a
+`uint`, each to its element type.  One `Loc.index` for both, so a rule that
+does not care which (every Step 1 and Step 2 index rule) is one constructor;
+the ones that do (`storageIndexWriteMappingSave`, `…ArraySave`) fix it. -/
+inductive IndexTy : RefTy → PrimTy → Ty → Type where
+  | map {k : PrimTy} {V : Ty} : IndexTy (.mapping (.prim k) V) k V
+  | arr {E : Ty} : IndexTy (.array E) .uint E
+
 mutual
 
 /-- A storage path of type `T`: an alias, or a location. -/
@@ -121,11 +129,9 @@ inductive Loc (C : Contract) (Γ : Ctx) : Ty → Type where
   /-- A member, `alice.age`. -/
   | field {s : Name} {T : Ty} (b : SPath C Γ (.struct s)) (f : Name)
       (h : C.fieldType s f = some T) : Loc C Γ T
-  /-- A mapping entry, `balances[i]`. -/
-  | mapIndex {k : PrimTy} {V : Ty} (b : SPath C Γ (.mapping (.prim k) V))
+  /-- A mapping entry `balances[i]`, or an array element `values[i]`. -/
+  | index {R : RefTy} {k : PrimTy} {V : Ty} (it : IndexTy R k V) (b : SPath C Γ (.ref R))
       (i : Val C Γ k) : Loc C Γ V
-  /-- An array element, `values[i]`. -/
-  | arrIndex {E : Ty} (b : SPath C Γ (.array E)) (i : Val C Γ .uint) : Loc C Γ E
 
 /-- A value of primitive type `p`. -/
 inductive Val (C : Contract) (Γ : Ctx) : PrimTy → Type where

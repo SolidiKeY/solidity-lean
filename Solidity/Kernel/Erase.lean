@@ -35,8 +35,7 @@ def SPath.erase {C : Contract} {Γ : Ctx} {T : Ty} : SPath C Γ T → WrappedExp
 def Loc.erase {C : Contract} {Γ : Ctx} {T : Ty} : Loc C Γ T → WrappedExpr
   | .root (T := T) r _ _ => .var .storage T (SoliditySyntax.fieldFor r T (some .global))
   | .field (T := T) b f _ => .field .storage T b.erase (SoliditySyntax.fieldFor f T)
-  | .mapIndex (V := V) b i => .index .storage V b.erase i.erase
-  | .arrIndex (E := E) b i => .index .storage E b.erase i.erase
+  | .index (V := V) _ b i => .index .storage V b.erase i.erase
 
 def Val.erase {C : Contract} {Γ : Ctx} {p : PrimTy} : Val C Γ p → WrappedExpr
   | .simple s => s.erase
@@ -68,7 +67,7 @@ theorem SPath.erase_ty {C : Contract} {Γ : Ctx} {T : Ty} :
 /-- A location erases at its type: `balances[i]` is annotated `uint`. -/
 theorem Loc.erase_ty {C : Contract} {Γ : Ctx} {T : Ty} :
     (l : Loc C Γ T) → l.erase.ty = T
-  | .root .. | .field .. | .mapIndex .. | .arrIndex .. => rfl
+  | .root .. | .field .. | .index .. => rfl
 
 /-- A value erases at its type: `alice.age < 3` is annotated `bool`. -/
 theorem Val.erase_ty {C : Contract} {Γ : Ctx} {p : PrimTy} :
@@ -120,10 +119,11 @@ theorem Loc.erase_wt {C : Contract} {Γ : Ctx} {T : Ty} :
       have h' : lookupBy f (structDef _) = some _ := h
       simp [Loc.erase, wtExpr, b.erase_wt, b.erase_ty, segTy, SoliditySyntax.fieldFor]
       split <;> exact h'
-  | .mapIndex b i => by
-      simp [Loc.erase, wtExpr, b.erase_wt, i.erase_wt, b.erase_ty, elemTy]
-  | .arrIndex b i => by
-      simp [Loc.erase, wtExpr, b.erase_wt, i.erase_wt, b.erase_ty, elemTy]
+  | .index it b i => by
+      have hb := b.erase_wt
+      have hi := i.erase_wt
+      have ht := b.erase_ty
+      cases it <;> simp [Loc.erase, wtExpr, hb, hi, ht, elemTy]
 
 /-- A value erases to a well-annotated expression: in `x + 1`, `x` is the
 stack local `Γ` binds and `1` a number literal. -/

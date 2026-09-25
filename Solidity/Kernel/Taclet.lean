@@ -8,9 +8,16 @@ rules are one inductive judgement, `Taclet C m s p` — under the modality `m`,
 the first statement `s` rewrites to the premise `p` — with one constructor
 per rule, named by the solkey taclet it transcribes (`KeyTaclet`).  This file
 is the **storage family**: reads, writes, aliases, declarations and deletes
-over roots, members and mapping entries, and the control rules on simple
-conditions.  Arrays (bounds checks), the arithmetic rules and memory are the
-next families.
+over roots, members, mapping entries and array elements, the operators into a
+local, and the control rules on simple conditions.  `push`/`pop`, compound
+assignment and memory are the next families.
+
+An array element out of range reverts, in `SVal.find` and `SVal.save` alike,
+so an update at one fails exactly as the statement does: the kernel needs no
+`inBounds` split, where the paper and `Calculus/Rules.lean` give each array
+rule a box/diamond twin.  The Mapping/Array pairs (`storageIndexWriteMappingSave`,
+`storageIndexWriteArraySave`) fix the `IndexTy` witness; every other index rule
+is one constructor over it.
 
 A premise is an update, new statements, a split, or a closed goal
 (`Premise`).  The new statements of an unfolding rule bind **scratch names**,
@@ -52,12 +59,10 @@ def Val.isSimple {Γ : Ctx} {p : PrimTy} : Val C Γ p → Bool
   | _ => false
 
 /-- A path an alias can be bound to directly (`lsv := sp`, `lsv := sp.fr`,
-`lsv := sp[ie]` at a mapping): one step from a simple path, on a simple
-index. -/
+`lsv := sp[ie]`): one step from a simple path, on a simple index. -/
 def SPath.isBindable {Γ : Ctx} {T : Ty} : SPath C Γ T → Bool
   | .loc (.field b _ _) => b.isSimple
-  | .loc (.mapIndex b i) => b.isSimple && i.isSimple
-  | .loc (.arrIndex ..) => false
+  | .loc (.index _ b i) => b.isSimple && i.isSimple
   | p => p.isSimple
 
 /-! ## Fresh bindings -/
@@ -236,26 +241,26 @@ inductive Taclet (C : Contract) (m : Modality) : {Γ Γ' : Ctx} → Stmt C Γ Γ
           (.cons (.declStorage true (.struct s) sp (isFresh_of_sub k.sub hsp) nsp)
           (.cons ((k.extend sp _ hsp).fill (.loc (.field (SPath.new sp (.struct s)) f hf))) .nil))
           (k.extend_sub sp _ hsp)
-  /-- `lhs = nsp[e] ⇝ T storage sp = nsp; lhs = sp[e]`, at a mapping. -/
-  | storageIndexRead_unfold_rightFst {Γ Γ' : Ctx} {kp : PrimTy} {V : Ty} (k : Hole C Γ Γ' V)
-      (nsp : SPath C Γ (.mapping (.prim kp) V)) (hn : nsp.isSimple = false) (e : Val C Γ kp)
+  /-- `lhs = nsp[e] ⇝ T storage sp = nsp; lhs = sp[e]`. -/
+  | storageIndexRead_unfold_rightFst {Γ Γ' : Ctx} {R₀ : RefTy} {kp : PrimTy} {V : Ty} (k : Hole C Γ Γ' V)
+      (it : IndexTy R₀ kp V) (nsp : SPath C Γ (.ref R₀)) (hn : nsp.isSimple = false) (e : Val C Γ kp)
       (sp : Name) (hsp : isFresh C Γ' sp = true) :
-      k.fill (.loc (.mapIndex nsp e)) ⇒
+      k.fill (.loc (.index it nsp e)) ⇒
         .unfold [sp]
-          (.cons (.declStorage true (.mapping (.prim kp) V) sp (isFresh_of_sub k.sub hsp) nsp)
+          (.cons (.declStorage true R₀ sp (isFresh_of_sub k.sub hsp) nsp)
           (.cons ((k.extend sp _ hsp).fill
-            (.loc (.mapIndex (SPath.new sp _) (e.weaken (Ctx.Sub.fresh (isFresh_of_sub k.sub hsp) _)))))
+            (.loc (.index it (SPath.new sp _) (e.weaken (Ctx.Sub.fresh (isFresh_of_sub k.sub hsp) _)))))
             .nil))
           (k.extend_sub sp _ hsp)
   /-- `lhs = sp[nse] ⇝ T ie = nse; lhs = sp[ie]`. -/
-  | storageIndexRead_unfold_rightSndIndex {Γ Γ' : Ctx} {kp : PrimTy} {V : Ty} (k : Hole C Γ Γ' V)
-      (sp : SPath C Γ (.mapping (.prim kp) V)) (hs : sp.isSimple = true) (nse : Val C Γ kp)
+  | storageIndexRead_unfold_rightSndIndex {Γ Γ' : Ctx} {R₀ : RefTy} {kp : PrimTy} {V : Ty} (k : Hole C Γ Γ' V)
+      (it : IndexTy R₀ kp V) (sp : SPath C Γ (.ref R₀)) (hs : sp.isSimple = true) (nse : Val C Γ kp)
       (hn : nse.isSimple = false) (ie : Name) (hie : isFresh C Γ' ie = true) :
-      k.fill (.loc (.mapIndex sp nse)) ⇒
+      k.fill (.loc (.index it sp nse)) ⇒
         .unfold [ie]
           (.cons (.declLocal kp ie (isFresh_of_sub k.sub hie) (some nse))
           (.cons ((k.extend ie _ hie).fill
-            (.loc (.mapIndex (sp.weaken (Ctx.Sub.fresh (isFresh_of_sub k.sub hie) _))
+            (.loc (.index it (sp.weaken (Ctx.Sub.fresh (isFresh_of_sub k.sub hie) _))
               (.simple (Simple.new ie kp))))) .nil))
           (k.extend_sub ie _ hie)
   /-- `nlhs = sp.fld ⇝ T storage se = sp.fld; nlhs = se`: a copy from a
@@ -270,13 +275,13 @@ inductive Taclet (C : Contract) (m : Modality) : {Γ Γ' : Ctx} → Stmt C Γ Γ
           (.cons (.assign (l.weaken (Ctx.Sub.fresh hse _)) (.copy (SPath.new se R) hm)) .nil))
           (Ctx.Sub.fresh hse _)
   /-- `nlhs = sp[ie] ⇝ T storage se = sp[ie]; nlhs = se`. -/
-  | storageIndexRead_unfold_rightSndResult {Γ : Ctx} {kp : PrimTy} {R : RefTy}
+  | storageIndexRead_unfold_rightSndResult {Γ : Ctx} {R₀ : RefTy} {kp : PrimTy} {R : RefTy}
       (l : Loc C Γ (.ref R)) (hl : (SPath.loc l).isSimple = false) (hm : (Ty.ref R).mapFree = true)
-      (sp : SPath C Γ (.mapping (.prim kp) (.ref R))) (hs : sp.isSimple = true)
+      (it : IndexTy R₀ kp (.ref R)) (sp : SPath C Γ (.ref R₀)) (hs : sp.isSimple = true)
       (ie : Simple C Γ kp) (se : Name) (hse : isFresh C Γ se = true) :
-      .assign l (.copy (.loc (.mapIndex sp (.simple ie))) hm) ⇒
+      .assign l (.copy (.loc (.index it sp (.simple ie))) hm) ⇒
         .unfold [se]
-          (.cons (.declStorage true R se hse (.loc (.mapIndex sp (.simple ie))))
+          (.cons (.declStorage true R se hse (.loc (.index it sp (.simple ie))))
           (.cons (.assign (l.weaken (Ctx.Sub.fresh hse _)) (.copy (SPath.new se R) hm)) .nil))
           (Ctx.Sub.fresh hse _)
   -- Step 2: a write whose receiver, index or source is not simple
@@ -303,54 +308,54 @@ inductive Taclet (C : Contract) (m : Modality) : {Γ Γ' : Ctx} → Stmt C Γ Γ
           (.cons (.assign (.field (SPath.new sp _) f hf) (.copy (src.weaken (Ctx.Sub.fresh hsp _)) hm)) .nil))
           (Ctx.Sub.fresh hsp _)
   /-- `nsp[e₁] = e₂ ⇝ T se = e₂; T storage sp = nsp; T ie = e₁; sp[ie] = se`. -/
-  | storageIndexWrite_unfold_leftFst {Γ : Ctx} {kp p : PrimTy}
-      (nsp : SPath C Γ (.mapping (.prim kp) (.prim p))) (hn : nsp.isSimple = false)
+  | storageIndexWrite_unfold_leftFst {Γ : Ctx} {R₀ : RefTy} {kp p : PrimTy}
+      (it : IndexTy R₀ kp (.prim p)) (nsp : SPath C Γ (.ref R₀)) (hn : nsp.isSimple = false)
       (e₁ : Val C Γ kp) (e₂ : Val C Γ p) (se sp ie : Name) (hse : isFresh C Γ se = true)
       (hsp : isFresh C (Ctx.val Γ se p) sp = true)
-      (hie : isFresh C (Ctx.path (Ctx.val Γ se p) sp (.mapping (.prim kp) (.prim p))) ie = true) :
-      .assign (.mapIndex nsp e₁) (.val e₂) ⇒
+      (hie : isFresh C (Ctx.path (Ctx.val Γ se p) sp R₀) ie = true) :
+      .assign (.index it nsp e₁) (.val e₂) ⇒
         .unfold [se, sp, ie]
           (.cons (.declLocal p se hse (some e₂))
           (.cons (.declStorage true _ sp hsp (nsp.weaken (Ctx.Sub.fresh hse _)))
           (.cons (.declLocal kp ie hie (some (e₁.weaken ((Ctx.Sub.fresh hse _).trans (Ctx.Sub.fresh hsp _)))))
-          (.cons (.assign (.mapIndex ((SPath.new sp _).weaken (Ctx.Sub.fresh hie _)) (.simple (Simple.new ie kp)))
+          (.cons (.assign (.index it ((SPath.new sp _).weaken (Ctx.Sub.fresh hie _)) (.simple (Simple.new ie kp)))
               (.val (.simple ((Simple.new se p).weaken ((Ctx.Sub.fresh hsp _).trans (Ctx.Sub.fresh hie _)))))) .nil))))
           (((Ctx.Sub.fresh hse _).trans (Ctx.Sub.fresh hsp _)).trans (Ctx.Sub.fresh hie _))
   /-- `nsp[e] = sp2 ⇝ T storage sp = nsp; T ie = e; sp[ie] = sp2`, a copy. -/
-  | storageIndexWriteStorageRef_unfold_leftFst {Γ : Ctx} {kp : PrimTy} {R : RefTy}
-      (nsp : SPath C Γ (.mapping (.prim kp) (.ref R))) (hn : nsp.isSimple = false)
+  | storageIndexWriteStorageRef_unfold_leftFst {Γ : Ctx} {R₀ : RefTy} {kp : PrimTy} {R : RefTy}
+      (it : IndexTy R₀ kp (.ref R)) (nsp : SPath C Γ (.ref R₀)) (hn : nsp.isSimple = false)
       (e : Val C Γ kp) (src : SPath C Γ (.ref R)) (hm : (Ty.ref R).mapFree = true)
       (sp ie : Name) (hsp : isFresh C Γ sp = true)
-      (hie : isFresh C (Ctx.path Γ sp (.mapping (.prim kp) (.ref R))) ie = true) :
-      .assign (.mapIndex nsp e) (.copy src hm) ⇒
+      (hie : isFresh C (Ctx.path Γ sp R₀) ie = true) :
+      .assign (.index it nsp e) (.copy src hm) ⇒
         .unfold [sp, ie]
           (.cons (.declStorage true _ sp hsp nsp)
           (.cons (.declLocal kp ie hie (some (e.weaken (Ctx.Sub.fresh hsp _))))
-          (.cons (.assign (.mapIndex ((SPath.new sp _).weaken (Ctx.Sub.fresh hie _)) (.simple (Simple.new ie kp)))
+          (.cons (.assign (.index it ((SPath.new sp _).weaken (Ctx.Sub.fresh hie _)) (.simple (Simple.new ie kp)))
               (.copy (src.weaken ((Ctx.Sub.fresh hsp _).trans (Ctx.Sub.fresh hie _))) hm)) .nil)))
           ((Ctx.Sub.fresh hsp _).trans (Ctx.Sub.fresh hie _))
   /-- `sp[nse] = e ⇝ T se = e; T ie = nse; sp[ie] = se`. -/
-  | storageIndexWriteNonSimpleIndexCapture {Γ : Ctx} {kp p : PrimTy}
-      (sp : SPath C Γ (.mapping (.prim kp) (.prim p))) (hs : sp.isSimple = true)
+  | storageIndexWriteNonSimpleIndexCapture {Γ : Ctx} {R₀ : RefTy} {kp p : PrimTy}
+      (it : IndexTy R₀ kp (.prim p)) (sp : SPath C Γ (.ref R₀)) (hs : sp.isSimple = true)
       (nse : Val C Γ kp) (hn : nse.isSimple = false) (e : Val C Γ p) (se ie : Name)
       (hse : isFresh C Γ se = true) (hie : isFresh C (Ctx.val Γ se p) ie = true) :
-      .assign (.mapIndex sp nse) (.val e) ⇒
+      .assign (.index it sp nse) (.val e) ⇒
         .unfold [se, ie]
           (.cons (.declLocal p se hse (some e))
           (.cons (.declLocal kp ie hie (some (nse.weaken (Ctx.Sub.fresh hse _))))
-          (.cons (.assign (.mapIndex (sp.weaken ((Ctx.Sub.fresh hse _).trans (Ctx.Sub.fresh hie _)))
+          (.cons (.assign (.index it (sp.weaken ((Ctx.Sub.fresh hse _).trans (Ctx.Sub.fresh hie _)))
                 (.simple (Simple.new ie kp)))
               (.val (.simple ((Simple.new se p).weaken (Ctx.Sub.fresh hie _))))) .nil)))
           ((Ctx.Sub.fresh hse _).trans (Ctx.Sub.fresh hie _))
   /-- `sp[nse] = sp2 ⇝ T ie = nse; sp[ie] = sp2`, a copy. -/
-  | storageIndexWriteStorageRefNonSimpleIndexCapture {Γ : Ctx} {kp : PrimTy} {R : RefTy}
-      (sp : SPath C Γ (.mapping (.prim kp) (.ref R))) (hs : sp.isSimple = true)
+  | storageIndexWriteStorageRefNonSimpleIndexCapture {Γ : Ctx} {R₀ : RefTy} {kp : PrimTy} {R : RefTy}
+      (it : IndexTy R₀ kp (.ref R)) (sp : SPath C Γ (.ref R₀)) (hs : sp.isSimple = true)
       (nse : Val C Γ kp) (hn : nse.isSimple = false) (src : SPath C Γ (.ref R))
       (hm : (Ty.ref R).mapFree = true) (ie : Name) (hie : isFresh C Γ ie = true) :
-      .assign (.mapIndex sp nse) (.copy src hm) ⇒
+      .assign (.index it sp nse) (.copy src hm) ⇒
         .unfold [ie]
           (.cons (.declLocal kp ie hie (some nse))
-          (.cons (.assign (.mapIndex (sp.weaken (Ctx.Sub.fresh hie _)) (.simple (Simple.new ie kp)))
+          (.cons (.assign (.index it (sp.weaken (Ctx.Sub.fresh hie _)) (.simple (Simple.new ie kp)))
               (.copy (src.weaken (Ctx.Sub.fresh hie _)) hm)) .nil))
           (Ctx.Sub.fresh hie _)
   /-- `gsp = nse ⇝ T se = nse; gsp = se`. -/
@@ -374,13 +379,13 @@ inductive Taclet (C : Contract) (m : Modality) : {Γ Γ' : Ctx} → Stmt C Γ Γ
             .nil))
           (Ctx.Sub.fresh hse _)
   /-- `sp[ie] = nse ⇝ T se = nse; sp[ie] = se`. -/
-  | indexWriteValueRhsCapture {Γ : Ctx} {kp p : PrimTy} (sp : SPath C Γ (.mapping (.prim kp) (.prim p)))
+  | indexWriteValueRhsCapture {Γ : Ctx} {R₀ : RefTy} {kp p : PrimTy} (it : IndexTy R₀ kp (.prim p)) (sp : SPath C Γ (.ref R₀))
       (hs : sp.isSimple = true) (ie : Simple C Γ kp) (nse : Val C Γ p) (hn : nse.isSimple = false)
       (se : Name) (hse : isFresh C Γ se = true) :
-      .assign (.mapIndex sp (.simple ie)) (.val nse) ⇒
+      .assign (.index it sp (.simple ie)) (.val nse) ⇒
         .unfold [se]
           (.cons (.declLocal p se hse (some nse))
-          (.cons (.assign ((Loc.mapIndex sp (.simple ie)).weaken (Ctx.Sub.fresh hse _))
+          (.cons (.assign ((Loc.index it sp (.simple ie)).weaken (Ctx.Sub.fresh hse _))
               (.val (.simple (Simple.new se p)))) .nil))
           (Ctx.Sub.fresh hse _)
   /-- `delete nsp.fld ⇝ T storage sp = nsp; delete sp.fld`. -/
@@ -393,22 +398,22 @@ inductive Taclet (C : Contract) (m : Modality) : {Γ Γ' : Ctx} → Stmt C Γ Γ
           (.cons (.delete (.field (SPath.new sp _) f hf)) .nil))
           (Ctx.Sub.fresh hsp _)
   /-- `delete nsp[e] ⇝ T storage sp = nsp; delete sp[e]`. -/
-  | storageIndexDelete_unfold_leftFst {Γ : Ctx} {kp : PrimTy} {V : Ty}
-      (nsp : SPath C Γ (.mapping (.prim kp) V)) (hn : nsp.isSimple = false) (e : Val C Γ kp)
+  | storageIndexDelete_unfold_leftFst {Γ : Ctx} {R₀ : RefTy} {kp : PrimTy} {V : Ty}
+      (it : IndexTy R₀ kp V) (nsp : SPath C Γ (.ref R₀)) (hn : nsp.isSimple = false) (e : Val C Γ kp)
       (sp : Name) (hsp : isFresh C Γ sp = true) :
-      .delete (.mapIndex nsp e) ⇒
+      .delete (.index it nsp e) ⇒
         .unfold [sp]
           (.cons (.declStorage true _ sp hsp nsp)
-          (.cons (.delete (.mapIndex (SPath.new sp _) (e.weaken (Ctx.Sub.fresh hsp _)))) .nil))
+          (.cons (.delete (.index it (SPath.new sp _) (e.weaken (Ctx.Sub.fresh hsp _)))) .nil))
           (Ctx.Sub.fresh hsp _)
   /-- `delete sp[nse] ⇝ T ie = nse; delete sp[ie]`. -/
-  | storageIndexDeleteNonSimpleIndexCapture {Γ : Ctx} {kp : PrimTy} {V : Ty}
-      (sp : SPath C Γ (.mapping (.prim kp) V)) (hs : sp.isSimple = true) (nse : Val C Γ kp)
+  | storageIndexDeleteNonSimpleIndexCapture {Γ : Ctx} {R₀ : RefTy} {kp : PrimTy} {V : Ty}
+      (it : IndexTy R₀ kp V) (sp : SPath C Γ (.ref R₀)) (hs : sp.isSimple = true) (nse : Val C Γ kp)
       (hn : nse.isSimple = false) (ie : Name) (hie : isFresh C Γ ie = true) :
-      .delete (.mapIndex sp nse) ⇒
+      .delete (.index it sp nse) ⇒
         .unfold [ie]
           (.cons (.declLocal kp ie hie (some nse))
-          (.cons (.delete (.mapIndex (sp.weaken (Ctx.Sub.fresh hie _)) (.simple (Simple.new ie kp)))) .nil))
+          (.cons (.delete (.index it (sp.weaken (Ctx.Sub.fresh hie _)) (.simple (Simple.new ie kp)))) .nil))
           (Ctx.Sub.fresh hie _)
   -- Step 3: an update
   /-- `T v = e ⇝ T v; v = e`. -/
@@ -436,12 +441,18 @@ inductive Taclet (C : Contract) (m : Modality) : {Γ Γ' : Ctx} → Stmt C Γ Γ
       (h : lookupBy x Γ = some (.stack (.prim p))) (sp : SPath C Γ (.struct s)) (hs : sp.isSimple = true)
       (f : Name) (hf : C.fieldType s f = some (.prim p)) :
       .assignLocal x h (.read (.field sp f hf)) ⇒ .update (.bind x (.read (.field sp f hf)))
-  /-- `v = sp[ie] ⇝ { v := find(storage, sp[ie]) }`, at a mapping. -/
+  /-- `v = sp[ie] ⇝ { v := find(storage, sp[ie]) }`. -/
   | storageIndexReadMappingFind {Γ : Ctx} {kp p : PrimTy} (x : Name)
       (h : lookupBy x Γ = some (.stack (.prim p))) (sp : SPath C Γ (.mapping (.prim kp) (.prim p)))
       (hs : sp.isSimple = true) (ie : Simple C Γ kp) :
-      .assignLocal x h (.read (.mapIndex sp (.simple ie))) ⇒
-        .update (.bind x (.read (.mapIndex sp (.simple ie))))
+      .assignLocal x h (.read (.index .map sp (.simple ie))) ⇒
+        .update (.bind x (.read (.index .map sp (.simple ie))))
+  /-- `gsp = se ⇝ { storage := store(storage, gsp, se) }`. -/
+  | storageIndexReadArrayFind {Γ : Ctx} {p : PrimTy} (x : Name)
+      (h : lookupBy x Γ = some (.stack (.prim p))) (sp : SPath C Γ (.array (.prim p)))
+      (hs : sp.isSimple = true) (ie : Simple C Γ .uint) :
+      .assignLocal x h (.read (.index .arr sp (.simple ie))) ⇒
+        .update (.bind x (.read (.index .arr sp (.simple ie))))
   /-- `gsp = se ⇝ { storage := store(storage, gsp, se) }`. -/
   | storageRootWriteStore {Γ : Ctx} {p : PrimTy} (r : Name) (hΓ : lookupBy r Γ = none)
       (hr : C.rootType r = some (.prim p)) (se : Simple C Γ p) :
@@ -462,8 +473,15 @@ inductive Taclet (C : Contract) (m : Modality) : {Γ Γ' : Ctx} → Stmt C Γ Γ
       (hΓ : lookupBy r Γ = none) (hr : C.rootType r = some (.ref R))
       (sp : SPath C Γ (.mapping (.prim kp) (.ref R))) (hs : sp.isSimple = true) (ie : Simple C Γ kp)
       (hm : (Ty.ref R).mapFree = true) :
-      .assign (.root r hΓ hr) (.copy (.loc (.mapIndex sp (.simple ie))) hm) ⇒
-        .update (.save (.root r hΓ hr) (.copy (.loc (.mapIndex sp (.simple ie))) hm))
+      .assign (.root r hΓ hr) (.copy (.loc (.index .map sp (.simple ie))) hm) ⇒
+        .update (.save (.root r hΓ hr) (.copy (.loc (.index .map sp (.simple ie))) hm))
+  /-- `sp.fld = se ⇝ { storage := save(storage, sp.fld, se) }`. -/
+  | storageIndexReadArrayStoreRoot {Γ : Ctx} {R : RefTy} (r : Name)
+      (hΓ : lookupBy r Γ = none) (hr : C.rootType r = some (.ref R))
+      (sp : SPath C Γ (.array (.ref R))) (hs : sp.isSimple = true) (ie : Simple C Γ .uint)
+      (hm : (Ty.ref R).mapFree = true) :
+      .assign (.root r hΓ hr) (.copy (.loc (.index .arr sp (.simple ie))) hm) ⇒
+        .update (.save (.root r hΓ hr) (.copy (.loc (.index .arr sp (.simple ie))) hm))
   /-- `sp.fld = se ⇝ { storage := save(storage, sp.fld, se) }`. -/
   | storageFieldWriteSave {Γ : Ctx} {s : Name} {p : PrimTy} (sp : SPath C Γ (.struct s))
       (hs : sp.isSimple = true) (f : Name) (hf : C.fieldType s f = some (.prim p)) (se : Simple C Γ p) :
@@ -473,18 +491,30 @@ inductive Taclet (C : Contract) (m : Modality) : {Γ Γ' : Ctx} → Stmt C Γ Γ
       (hs : sp.isSimple = true) (f : Name) (hf : C.fieldType s f = some (.ref R))
       (sp₂ : SPath C Γ (.ref R)) (hs₂ : sp₂.isSimple = true) (hm : (Ty.ref R).mapFree = true) :
       .assign (.field sp f hf) (.copy sp₂ hm) ⇒ .update (.save (.field sp f hf) (.copy sp₂ hm))
-  /-- `sp[ie] = se ⇝ { storage := save(storage, sp[ie], se) }`, at a mapping. -/
+  /-- `sp[ie] = se ⇝ { storage := save(storage, sp[ie], se) }`. -/
   | storageIndexWriteMappingSave {Γ : Ctx} {kp p : PrimTy}
       (sp : SPath C Γ (.mapping (.prim kp) (.prim p))) (hs : sp.isSimple = true) (ie : Simple C Γ kp)
       (se : Simple C Γ p) :
-      .assign (.mapIndex sp (.simple ie)) (.val (.simple se)) ⇒
-        .update (.save (.mapIndex sp (.simple ie)) (.val (.simple se)))
+      .assign (.index .map sp (.simple ie)) (.val (.simple se)) ⇒
+        .update (.save (.index .map sp (.simple ie)) (.val (.simple se)))
+  /-- `sp[ie] = sp2 ⇝ { storage := save(storage, sp[ie], find(storage, sp2)) }`. -/
+  | storageIndexWriteArraySave {Γ : Ctx} {p : PrimTy}
+      (sp : SPath C Γ (.array (.prim p))) (hs : sp.isSimple = true) (ie : Simple C Γ .uint)
+      (se : Simple C Γ p) :
+      .assign (.index .arr sp (.simple ie)) (.val (.simple se)) ⇒
+        .update (.save (.index .arr sp (.simple ie)) (.val (.simple se)))
   /-- `sp[ie] = sp2 ⇝ { storage := save(storage, sp[ie], find(storage, sp2)) }`. -/
   | storageIndexWriteMappingCopySource {Γ : Ctx} {kp : PrimTy} {R : RefTy}
       (sp : SPath C Γ (.mapping (.prim kp) (.ref R))) (hs : sp.isSimple = true) (ie : Simple C Γ kp)
       (sp₂ : SPath C Γ (.ref R)) (hs₂ : sp₂.isSimple = true) (hm : (Ty.ref R).mapFree = true) :
-      .assign (.mapIndex sp (.simple ie)) (.copy sp₂ hm) ⇒
-        .update (.save (.mapIndex sp (.simple ie)) (.copy sp₂ hm))
+      .assign (.index .map sp (.simple ie)) (.copy sp₂ hm) ⇒
+        .update (.save (.index .map sp (.simple ie)) (.copy sp₂ hm))
+  /-- `lsv = sp ⇝ { lsv := sp }`. -/
+  | storageIndexWriteArrayCopySource {Γ : Ctx} {R : RefTy}
+      (sp : SPath C Γ (.array (.ref R))) (hs : sp.isSimple = true) (ie : Simple C Γ .uint)
+      (sp₂ : SPath C Γ (.ref R)) (hs₂ : sp₂.isSimple = true) (hm : (Ty.ref R).mapFree = true) :
+      .assign (.index .arr sp (.simple ie)) (.copy sp₂ hm) ⇒
+        .update (.save (.index .arr sp (.simple ie)) (.copy sp₂ hm))
   /-- `lsv = sp ⇝ { lsv := sp }`. -/
   | storageLocalRootRebind {Γ : Ctx} {R : RefTy} (x : Name) (h : lookupBy x Γ = some (.path (.ref R)))
       (sp : SPath C Γ (.ref R)) (hs : sp.isSimple = true) :
@@ -494,11 +524,18 @@ inductive Taclet (C : Contract) (m : Modality) : {Γ Γ' : Ctx} → Stmt C Γ Γ
       (h : lookupBy x Γ = some (.path (.ref R))) (sp : SPath C Γ (.struct s)) (hs : sp.isSimple = true)
       (f : Name) (hf : C.fieldType s f = some (.ref R)) :
       .rebind x h (.loc (.field sp f hf)) ⇒ .update (.bindPath x (.loc (.field sp f hf)))
-  /-- `lsv = sp[ie] ⇝ { lsv := sp[ie] }`, at a mapping. -/
+  /-- `lsv = sp[ie] ⇝ { lsv := sp[ie] }`. -/
   | storageIndexReadMappingBindLocalRoot {Γ : Ctx} {kp : PrimTy} {R : RefTy} (x : Name)
       (h : lookupBy x Γ = some (.path (.ref R))) (sp : SPath C Γ (.mapping (.prim kp) (.ref R)))
       (hs : sp.isSimple = true) (ie : Simple C Γ kp) :
-      .rebind x h (.loc (.mapIndex sp (.simple ie))) ⇒ .update (.bindPath x (.loc (.mapIndex sp (.simple ie))))
+      .rebind x h (.loc (.index .map sp (.simple ie))) ⇒ .update (.bindPath x (.loc (.index .map sp (.simple ie))))
+  /-- `T storage lsv = p ⇝ { lsv := p }`, for a path an alias binds directly.
+  KeY splits this into `storageLocalDeclInitDrop` and a rebind; the kernel has
+  no uninitialised `T storage lsv;` to split into. -/
+  | storageIndexReadArrayBindLocalRoot {Γ : Ctx} {R : RefTy} (x : Name)
+      (h : lookupBy x Γ = some (.path (.ref R))) (sp : SPath C Γ (.array (.ref R)))
+      (hs : sp.isSimple = true) (ie : Simple C Γ .uint) :
+      .rebind x h (.loc (.index .arr sp (.simple ie))) ⇒ .update (.bindPath x (.loc (.index .arr sp (.simple ie))))
   /-- `T storage lsv = p ⇝ { lsv := p }`, for a path an alias binds directly.
   KeY splits this into `storageLocalDeclInitDrop` and a rebind; the kernel has
   no uninitialised `T storage lsv;` to split into. -/
@@ -513,10 +550,10 @@ inductive Taclet (C : Contract) (m : Modality) : {Γ Γ' : Ctx} → Stmt C Γ Γ
   | storageFieldDelete {Γ : Ctx} {s : Name} {T : Ty} (sp : SPath C Γ (.struct s))
       (hs : sp.isSimple = true) (f : Name) (hf : C.fieldType s f = some T) :
       .delete (.field sp f hf) ⇒ .update (.delAt (.field sp f hf))
-  /-- `delete sp[ie] ⇝ { storage := delAt(storage, sp[ie]) }`, at a mapping. -/
-  | storageIndexDelete {Γ : Ctx} {kp : PrimTy} {V : Ty} (sp : SPath C Γ (.mapping (.prim kp) V))
+  /-- `delete sp[ie] ⇝ { storage := delAt(storage, sp[ie]) }`. -/
+  | storageIndexDelete {Γ : Ctx} {R₀ : RefTy} {kp : PrimTy} {V : Ty} (it : IndexTy R₀ kp V) (sp : SPath C Γ (.ref R₀))
       (hs : sp.isSimple = true) (ie : Simple C Γ kp) :
-      .delete (.mapIndex sp (.simple ie)) ⇒ .update (.delAt (.mapIndex sp (.simple ie)))
+      .delete (.index it sp (.simple ie)) ⇒ .update (.delAt (.index it sp (.simple ie)))
   -- Operators into a local.  The families are one constructor each, over
   -- the operator; the solkey taclet is per operator (`additionAssignment`, …).
   /-- `v = se₁ ⊕ se₂ ⇝ { v := se₁ ⊕ se₂ }`.  A division by zero or an

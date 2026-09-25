@@ -238,8 +238,8 @@ def synth (C : Contract) (Γ : Ctx) : RawExpr → Except String (TExpr C Γ)
     | _ => throw s!"member access .{f} on a non-struct"
   | .index e k => do
     match ← synth C Γ e with
-    | .path (.ref (.mapping (.prim kp) V)) b => pure (.path V (.loc (.mapIndex b (← check C Γ kp k))))
-    | .path (.ref (.array E)) b => pure (.path E (.loc (.arrIndex b (← check C Γ .uint k))))
+    | .path (.ref (.mapping (.prim kp) V)) b => pure (.path V (.loc (.index .map b (← check C Γ kp k))))
+    | .path (.ref (.array E)) b => pure (.path E (.loc (.index .arr b (← check C Γ .uint k))))
     | _ => throw "indexing something that is not a mapping or an array"
   | .binop op a b => do
     -- the operand type: the first operand that is not a literal gives it
@@ -390,6 +390,11 @@ def optBTy : Lean.Expr := mkAppN (mkConst ``Option [0]) #[mkConst ``BTy]
 def someE (α a : Lean.Expr) : Lean.Expr := mkAppN (mkConst ``Option.some [0]) #[α, a]
 def boolTrue : Lean.Expr := quoteRefl (mkConst ``Bool) (mkConst ``Bool.true)
 
+/-- An index witness, as a term. -/
+def IndexTy.quote : {R : RefTy} → {k : PrimTy} → {V : Ty} → IndexTy R k V → Lean.Expr
+  | _, _, _, @IndexTy.map k V => mkAppN (mkConst ``IndexTy.map) #[toExpr k, toExpr V]
+  | _, _, _, @IndexTy.arr E => mkAppN (mkConst ``IndexTy.arr) #[toExpr E]
+
 variable (c : Lean.Expr)
 
 def Simple.quote (Γ : Ctx) : (p : PrimTy) → Simple C Γ p → Lean.Expr
@@ -415,12 +420,9 @@ def Loc.quote (Γ : Ctx) : (T : Ty) → Loc C Γ T → Lean.Expr
   | T, @Loc.field _ _ s _ b f _ =>
     mkAppN (mkConst ``Loc.field) #[c, toExpr Γ, toExpr s, toExpr T,
       SPath.quote Γ _ b, toExpr f, quoteRefl optTy (someE (mkConst ``Ty) (toExpr T))]
-  | V, @Loc.mapIndex _ _ k _ b i =>
-    mkAppN (mkConst ``Loc.mapIndex) #[c, toExpr Γ, toExpr k, toExpr V,
+  | V, @Loc.index _ _ R k _ it b i =>
+    mkAppN (mkConst ``Loc.index) #[c, toExpr Γ, toExpr R, toExpr k, toExpr V, IndexTy.quote it,
       SPath.quote Γ _ b, Val.quote Γ k i]
-  | E, .arrIndex b i =>
-    mkAppN (mkConst ``Loc.arrIndex) #[c, toExpr Γ, toExpr E, SPath.quote Γ _ b,
-      Val.quote Γ .uint i]
 
 def Val.quote (Γ : Ctx) : (p : PrimTy) → Val C Γ p → Lean.Expr
   | p, .simple s => mkAppN (mkConst ``Val.simple) #[c, toExpr Γ, toExpr p, Simple.quote c Γ p s]

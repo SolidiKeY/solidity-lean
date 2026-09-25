@@ -46,8 +46,7 @@ def SPath.toStr {T : Ty} : SPath C Γ T → String
 def Loc.toStr {T : Ty} : Loc C Γ T → String
   | .root r _ _ => r
   | .field b f _ => s!"{b.toStr}.{f}"
-  | .mapIndex b i => s!"{b.toStr}[{i.toStr true}]"
-  | .arrIndex b i => s!"{b.toStr}[{i.toStr true}]"
+  | .index _ b i => s!"{b.toStr}[{i.toStr true}]"
 
 /-- `top` is whether the value stands alone, so needs no parentheses. -/
 def Val.toStr {p : PrimTy} : Val C Γ p → (top : Bool := false) → String
