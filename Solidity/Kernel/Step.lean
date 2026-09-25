@@ -348,6 +348,22 @@ def popStep {Γ : Ctx} {E : Ty} (b : SPath C Γ (.array E)) : Step C m (.pop b) 
   if hb : b.isSimple = true then ⟨_, .storagePopSave b hb⟩
   else ⟨_, .storagePop_unfold_leftFstReceiver b (not_simple hb) _ (freshName_isFresh C Γ "sp")⟩
 
+/-- The rule for a transfer: the receiver first, then the amount. -/
+def transferStep {Γ : Ctx} : (r a : Val C Γ .uint) → Step C m (.transfer r a)
+  | .simple r, .simple a => ⟨_, .transferNoCallback r a⟩
+  | .simple r, .read l => ⟨_, .transfer_unfold_rightSndArgument r (.read l) rfl _ (freshName_isFresh C Γ "se")⟩
+  | .simple r, .binop op h hq x y =>
+    ⟨_, .transfer_unfold_rightSndArgument r (.binop op h hq x y) rfl _ (freshName_isFresh C Γ "se")⟩
+  | .simple r, .unop op h hq x =>
+    ⟨_, .transfer_unfold_rightSndArgument r (.unop op h hq x) rfl _ (freshName_isFresh C Γ "se")⟩
+  | .simple r, .ternary c x y =>
+    ⟨_, .transfer_unfold_rightSndArgument r (.ternary c x y) rfl _ (freshName_isFresh C Γ "se")⟩
+  | .read l, a => ⟨_, .transfer_unfold_leftFstReceiver (.read l) rfl a _ (freshName_isFresh C Γ "se")⟩
+  | .binop op h hq x y, a =>
+    ⟨_, .transfer_unfold_leftFstReceiver (.binop op h hq x y) rfl a _ (freshName_isFresh C Γ "se")⟩
+  | .unop op h hq x, a => ⟨_, .transfer_unfold_leftFstReceiver (.unop op h hq x) rfl a _ (freshName_isFresh C Γ "se")⟩
+  | .ternary c x y, a => ⟨_, .transfer_unfold_leftFstReceiver (.ternary c x y) rfl a _ (freshName_isFresh C Γ "se")⟩
+
 /-- **The rule for a statement**, under the modality `m`.  Total: every
 statement of the kernel has one. -/
 def Stmt.step {Γ Γ' : Ctx} : (s : Stmt C Γ Γ') → Step C m s
@@ -367,6 +383,7 @@ def Stmt.step {Γ Γ' : Ctx} : (s : Stmt C Γ Γ') → Step C m s
   | .incDec op hp l => incStep m op hp l
   | .push b v hd => pushStep m b v hd
   | .pop b => popStep m b
+  | .transfer r a => transferStep m r a
   | .assignIncDec y hy op hp l hs => assignIncStep m y hy op hp l hs
   | .delete l => deleteStep m l
   | .ite c thn els => ⟨_, .ifElseSplit c thn els⟩
@@ -405,6 +422,7 @@ def Upd.toStr {Γ : Ctx} : Upd C Γ → String
     | none => s!"\{ storage := push(storage, {b.toStr}) }"
     | some r => s!"\{ storage := push(storage, {b.toStr}, {r.toStr}) }"
   | .pop b => s!"\{ storage := pop(storage, {b.toStr}) }"
+  | .transfer r a => s!"\{ transfer({r.toStr}, {a.toStr}) }"
   | .bumpBind x op l => s!"\{ bump({IncDec.show op l.toStr}) || {x} := {IncDec.show op l.toStr} }"
 
 def Premise.toStr {Γ Γ' : Ctx} : Premise C Γ Γ' → String

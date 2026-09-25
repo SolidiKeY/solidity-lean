@@ -105,6 +105,7 @@ syntax &"delete " ksol_expr : ksol_stmt
 syntax ksol_expr ".push(" ksol_expr ")" : ksol_stmt
 syntax ksol_expr ".push()" : ksol_stmt
 syntax ksol_expr ".pop()" : ksol_stmt
+syntax ksol_expr ".transfer(" ksol_expr ")" : ksol_stmt
 syntax ksol_expr "(" ")" : ksol_stmt
 syntax ksol_expr "(" ksol_expr ")" : ksol_stmt
 syntax ksol_expr "++" : ksol_stmt
@@ -199,6 +200,8 @@ partial def expandStmt : TSyntax `ksol_stmt → MacroM Term
       `(RawStmt.call (.field $(← expandExpr b) "push") [$(← expandExpr a)])
   | `(ksol_stmt| $b:ksol_expr .push()) => do `(RawStmt.call (.field $(← expandExpr b) "push") [])
   | `(ksol_stmt| $b:ksol_expr .pop()) => do `(RawStmt.call (.field $(← expandExpr b) "pop") [])
+  | `(ksol_stmt| $r:ksol_expr .transfer( $a:ksol_expr )) => do
+      `(RawStmt.call (.field $(← expandExpr r) "transfer") [$(← expandExpr a)])
   | `(ksol_stmt| $f:ksol_expr ( )) => do `(RawStmt.call $(← expandExpr f) [])
   | `(ksol_stmt| $f:ksol_expr ( $a:ksol_expr )) => do
       `(RawStmt.call $(← expandExpr f) [$(← expandExpr a)])
@@ -471,7 +474,9 @@ def elabStmt (C : Contract) (Γ : Ctx) : RawStmt → Except String (TProg C Γ)
   | .call (.field e "pop") [] => do
     let .path (.ref (.array _)) b ← synth C Γ e | throw "pop on something that is not an array"
     pure (.one (.pop b))
-  | .call .. => throw "only push and pop are calls here"
+  | .call (.field e "transfer") [a] => do
+    pure (.one (.transfer (← check C Γ .uint e) (← check C Γ .uint a)))
+  | .call .. => throw "only push, pop and transfer are calls here"
   | .ite c thn els => do
     let ⟨Γ₁, pre, c⟩ ← elabCond C Γ c
     let s := Stmt.ite c (← elabBranch C Γ₁ thn) (← elabBranch C Γ₁ els)
@@ -632,6 +637,8 @@ def Stmt.quote : (Γ Γ' : Ctx) → Stmt C Γ Γ' → Lean.Expr
     mkAppN (mkConst ``Stmt.push) #[c, toExpr Γ, toExpr E, SPath.quote c Γ _ b, v, boolTrue]
   | Γ, _, @Stmt.pop _ _ E b =>
     mkAppN (mkConst ``Stmt.pop) #[c, toExpr Γ, toExpr E, SPath.quote c Γ _ b]
+  | Γ, _, .transfer r a =>
+    mkAppN (mkConst ``Stmt.transfer) #[c, toExpr Γ, Val.quote c Γ .uint r, Val.quote c Γ .uint a]
   | Γ, _, @Stmt.delete _ _ T l =>
     mkAppN (mkConst ``Stmt.delete) #[c, toExpr Γ, toExpr T, Loc.quote c Γ T l]
   | Γ, _, .ite cond thn els =>

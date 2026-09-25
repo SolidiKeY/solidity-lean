@@ -223,7 +223,7 @@ statement and splitting every branch, until what is left are the goals
 `∀ σ, H.holds ψ σ` (or `False`, when the fuel runs out). -/
 macro "symex" : tactic => `(tactic| repeat' (first
   | (rw [Kont.vc]; try simp only [Stmt.step, localStep, assignStep, rebindStep, deleteStep,
-      binopRightStep, shortCircuitStep, copyStep, opStep, incStep, assignIncStep, ternaryStep, pushStep, popStep, VHole.fill, VHole.weaken,
+      binopRightStep, shortCircuitStep, copyStep, opStep, incStep, assignIncStep, ternaryStep, pushStep, popStep, transferStep, VHole.fill, VHole.weaken,
       Src.isSimple, Src.decl, Src.fresh,
       Hole.unfoldStep, Prog.append, Val.weaken,
       OpLoc.weaken,
@@ -246,7 +246,7 @@ macro_rules
       Except.pure, applyBinOp, applyUnOp, unopCheck, checkArith, BinOp.retTy, Value.asInt,
       Value.asBool, Value.toSVal, BinOp.isArith, uintBound, intBound, reduceFreshName, Src.value,
       Loc.target, Loc.resolve, SPath.resolve, Simple.new, envPath, State.saveStorage, OpLoc.store,
-      opStore, opLocal, pickBranch, pushAt, popAt, Src.pushVal, pushSlot, OpLoc.bump, bumpStore, bumpLocal, IncDec.isPre, IncDec.isIncrement,
+      opStore, opLocal, pickBranch, pushAt, popAt, Src.pushVal, pushSlot, transferAt, State.setNet, State.getNet, OpLoc.bump, bumpStore, bumpLocal, IncDec.isPre, IncDec.isIncrement,
       State.findStorage, State.setEnv, State.getEnv, SVal.save, SVal.find, SVal.asValue,
       SVal.defaultOf, defaultForRef, defaultForTy, defaultForFields, structDef, Functor.map,
       Except.map, lookupBy, setBy, SemanticsProperties.lookupBy_setBy_self,
@@ -318,6 +318,12 @@ set_option maxHeartbeats 1000000 in
 example : (Kont.modal .diamond exPush (.post .tt)).vc 80
     (.assume fun σ => σ.storage = StandardExample.initStorage ∧ σ.env = []) := by
   unfold exPush; symex <;> symex_close [initStorage_standardExample, State.exampleStore]
+
+def exPay := ksol{ uint a = 3; a.transfer(4); a.transfer(a + 3); }
+
+/-- With 10 in funds, paying 4 and then 6 does not revert. -/
+example : (Kont.modal .diamond exPay (.post .tt)).vc 40 (.assume fun σ => σ.selfBalance = 10) := by
+  unfold exPay; symex <;> symex_close
 
 /-- A false specification leaves a goal no evaluation closes. -/
 example : True := by

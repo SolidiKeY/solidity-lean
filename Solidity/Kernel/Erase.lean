@@ -200,6 +200,7 @@ def Stmt.erase {C : Contract} {Γ Γ' : Ctx} : Stmt C Γ Γ' → Solidity.Stmt
   | .incDec op _ l => .expr (.mkIncDec op l.toPlace.expr)
   | .push b v _ => .push b.toPlace (v.map Src.erase)
   | .pop b => .pop b.toPlace
+  | .transfer r a => .transfer r.erase a.erase
   | .assignIncDec (p := p) x _ op _ l _ =>
       .assign (PlaceExpr.var .stack (.prim p) (Field.primitive x (.prim p))) (.mkIncDec op l.toPlace.expr)
   | .delete l => .delete l.toPlace
@@ -246,6 +247,7 @@ theorem Stmt.erase_wt {C : Contract} {Γ Γ' : Ctx} :
       | some r =>
         simp [Stmt.erase, stmtWt, SPath.toPlace, b.erase_wt, b.erase_ty, r.erase_wt, r.erase_ty, elemTy]
   | .pop b => by simp [Stmt.erase, stmtWt, SPath.toPlace, b.erase_wt]
+  | .transfer r a => by simp [Stmt.erase, stmtWt, r.erase_wt, a.erase_wt]
   | .assignIncDec x h op _ l _ => by
       simp [Stmt.erase, stmtWt, PlaceExpr.var, wtExpr, h, Field.primitive, l.erase_wt,
         Typed.WrappedExpr.ty, l.erase_ty]

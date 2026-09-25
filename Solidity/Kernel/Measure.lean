@@ -79,6 +79,7 @@ def Stmt.size {Γ Γ' : Ctx} : Stmt C Γ Γ' → Nat
     | none => b.size + 2
     | some r => b.size + r.size + 2
   | .pop b => b.size + 2
+  | .transfer r a => r.size + a.size + 2
   | .rebind _ _ p => p.size + 1
   | .assignLocal _ _ v => v.size + 1
   | .declLocal _ _ _ init =>

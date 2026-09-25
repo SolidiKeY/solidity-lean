@@ -230,6 +230,8 @@ inductive Upd (C : Contract) (Γ : Ctx) where
   | push {E : Ty} (b : SPath C Γ (.array E)) (v : Option (Src C Γ E))
   /-- `storage := save(delAt(storage, sp[sp.length - 1]), sp.length, sp.length - 1)`. -/
   | pop {E : Ty} (b : SPath C Γ (.array E))
+  /-- `transfer(sadr, se)`: the debit booked. -/
+  | transfer (r a : Simple C Γ .uint)
 
 /-- The state an update leaves, from `σ`. -/
 def Upd.apply (σ : State) {Γ : Ctx} : Upd C Γ → Res State
@@ -256,6 +258,10 @@ def Upd.apply (σ : State) {Γ : Ctx} : Upd C Γ → Res State
   | .pop b => do
     let (root, segs) ← b.resolve σ
     popAt σ root segs
+  | .transfer r a => do
+    let addr ← (← r.eval σ).asInt
+    let amt ← (← a.eval σ).asInt
+    transferAt σ addr amt
 
 /-- What a rule leaves to prove, for a statement from `Γ` to `Γ'`. -/
 inductive Premise (C : Contract) (Γ Γ' : Ctx) where
@@ -817,6 +823,27 @@ inductive Taclet (C : Contract) (m : Modality) : {Γ Γ' : Ctx} → Stmt C Γ Γ
   emptiness split, the update reverts as the statement does. -/
   | storagePopSave {Γ : Ctx} {E : Ty} (sp : SPath C Γ (.array E)) (hs : sp.isSimple = true) :
       .pop sp ⇒ .update (.pop sp)
+  -- Transfer
+  /-- `nadr.transfer(e) ⇝ uint se = nadr; se.transfer(e)`. -/
+  | transfer_unfold_leftFstReceiver {Γ : Ctx} (nr : Val C Γ .uint) (hn : nr.isSimple = false)
+      (a : Val C Γ .uint) (se : Name) (hse : isFresh C Γ se = true) :
+      .transfer nr a ⇒
+        .unfold [se]
+          (.cons (.declLocal .uint se hse (some nr))
+          (.cons (.transfer (.simple (Simple.new se .uint)) (a.weaken (Ctx.Sub.fresh hse _))) .nil))
+          (Ctx.Sub.fresh hse _)
+  /-- `sadr.transfer(nse) ⇝ uint se = nse; sadr.transfer(se)`. -/
+  | transfer_unfold_rightSndArgument {Γ : Ctx} (r : Simple C Γ .uint) (na : Val C Γ .uint)
+      (hn : na.isSimple = false) (se : Name) (hse : isFresh C Γ se = true) :
+      .transfer (.simple r) na ⇒
+        .unfold [se]
+          (.cons (.declLocal .uint se hse (some na))
+          (.cons (.transfer (.simple (r.weaken (Ctx.Sub.fresh hse _))) (.simple (Simple.new se .uint))) .nil))
+          (Ctx.Sub.fresh hse _)
+  /-- `sadr.transfer(se) ⇝ {transfer(sadr, se)}`, KeY's `transferSemantics:noCallback`:
+  no funds split, the update reverts as the statement does. -/
+  | transferNoCallback {Γ : Ctx} (r a : Simple C Γ .uint) :
+      .transfer (.simple r) (.simple a) ⇒ .update (.transfer r a)
   -- Increment and decrement
   /-- `lv++ ⇝ {bump(lv++)}`. -/
   | localIncrement {Γ : Ctx} {p : PrimTy} (op : IncDec) (hp : p.isNumeric = true) (x : Name)

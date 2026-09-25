@@ -326,6 +326,16 @@ theorem popAt_agree {ns : List Name} {σ₁ σ : State} (h : EnvAgreeExcept ns �
       | nil => trivial
       | cons last rest => exact SameOk.save h _ _ _
 
+/-- A transfer in two agreeing states: the funds and the ledger agree. -/
+theorem transferAt_agree {ns : List Name} {σ₁ σ : State} (h : EnvAgreeExcept ns σ₁ σ) (addr amt : Int) :
+    SameOk ns (transferAt σ₁ addr amt) (transferAt σ addr amt) := by
+  simp only [transferAt, h.selfBalance]
+  split
+  · trivial
+  split
+  · trivial
+  exact ⟨h.storage, h.heap, h.nextId, by simp [State.setNet, State.getNet, h.net], h.env, rfl⟩
+
 /-- **A compound write frames**: into a target typed at `Γ`, in two states
 that agree off names fresh at `Γ`, it ends alike. -/
 theorem OpLoc.store_agree {Γ : Ctx} {ns : List Name} {σ₁ σ : State} (h : EnvAgreeExcept ns σ₁ σ)
@@ -681,6 +691,54 @@ theorem Taclet.sound {m : Modality} {Γ Γ' : Ctx} {s : Stmt C Γ Γ'} {pr : Pre
           exact pushAt_agree (agree_setEnv σ se _) _ _ _ fun _ => by
             simp [Src.pushVal, Src.value, hp, SPath.new, SPath.resolve, envPath, setEnv_env,
               lookupBy_setBy_self, bind, Except.bind, pure, Except.pure]
+
+  -- Transfer: a receiver captured first; an amount captured before the receiver is read.
+  case transfer_unfold_leftFstReceiver nr hn a se hse =>
+    refine ⟨by simp [hse], fun σ => ?_⟩
+    simp only [Prog.run, Stmt.run, bind_pure, Val.eval, Val.eval_weaken]
+    cases nr.eval σ with
+    | error _ => trivial
+    | ok v =>
+      simp only [bind, Except.bind, pure, Except.pure, Simple.eval_new]
+      rw [a.eval_setEnv hse]
+      cases v.asInt with
+      | error _ => trivial
+      | ok addr =>
+        simp only
+        cases a.eval σ with
+        | error _ => trivial
+        | ok w =>
+          simp only
+          cases w.asInt with
+          | error _ => trivial
+          | ok amt => exact transferAt_agree (agree_setEnv σ se _) addr amt
+  case transfer_unfold_rightSndArgument r na hn se hse =>
+    refine ⟨by simp [hse], fun σ => ?_⟩
+    simp only [Prog.run, Stmt.run, bind_pure, Val.eval, Simple.eval_weaken]
+    cases hna : na.eval σ with
+    | error _ =>
+      simp only [bind, Except.bind]
+      cases r.eval σ with
+      | error _ => trivial
+      | ok v =>
+        dsimp only
+        cases v.asInt with
+        | error _ => trivial
+        | ok _ => simp only [hna]; trivial
+    | ok w =>
+      simp only [bind, Except.bind, pure, Except.pure, Simple.eval_new]
+      rw [r.eval_setEnv hse]
+      cases r.eval σ with
+      | error _ => trivial
+      | ok v =>
+        simp only
+        cases v.asInt with
+        | error _ => trivial
+        | ok addr =>
+          simp only
+          cases w.asInt with
+          | error _ => trivial
+          | ok amt => exact transferAt_agree (agree_setEnv σ se _) addr amt
 
   -- Compound assignment: the source first, then the target.
   case compoundAssignValueRhsCapture p op hop hp l nse hn se hse =>

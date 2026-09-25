@@ -310,7 +310,9 @@ lists only the standard three axioms.
   - [x] ternary: `ternaryToIf`, `ternaryToIfStorage` (a conditional source is lowered
     before any receiver unfold, as KeY's `isValueSource` requires), `ternaryCaptureCond`
     over a value hole `VHole`
-  - [ ] calls, `transfer`
+  - [x] `transfer`: the two unfolds, `transferNoCallback` (KeY's default
+    `transferSemantics`; `withCallback` is the alternative, not ported)
+  - [ ] calls (`functionBodyExpand`, `functionCallArgCapture`)
   - [x] the bridge, names: `Taclet.rule`, `Taclet.origin`,
     `Taclet.origin_claimed` (`Kernel/Bridge.lean`); `Taclet` is a `Type`, so
     a derivation's constructor can be read back
