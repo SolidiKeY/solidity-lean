@@ -161,20 +161,22 @@ variable {Γ : Ctx} {p : PrimTy} {se : Name} (hse : isFresh C Γ se = true)
 include hse
 
 /-- The left operand captured: `se ⊕ e` after `T se = nse;` is `nse ⊕ e`. -/
-theorem binop_left_eval (op : BinOp) (hop : op.accepts p = true) (nse e : Val C Γ p)
-    (hw : Ctx.Sub C Γ (Ctx.val Γ se p)) (σ : State) {v : Value} (hv : nse.eval σ = .ok v) :
-    (Val.binop op hop (.simple (Simple.new se p)) (e.weaken hw)).eval (σ.setEnv se (.val v)) =
-      (Val.binop op hop nse e).eval σ := by
+theorem binop_left_eval {q : PrimTy} (op : BinOp) (hop : op.accepts p = true) (hq : op.ret p = q)
+    (nse e : Val C Γ p) (hw : Ctx.Sub C Γ (Ctx.val Γ se p)) (σ : State) {v : Value}
+    (hv : nse.eval σ = .ok v) :
+    (Val.binop op hop hq (.simple (Simple.new se p)) (e.weaken hw)).eval (σ.setEnv se (.val v)) =
+      (Val.binop op hop hq nse e).eval σ := by
   simp only [Val.eval, hv, Simple.eval_new, Val.eval_weaken, bind, Except.bind, pure, Except.pure]
   rw [e.eval_setEnv hse]
 
 /-- The right operand captured, for an operator that does not short-circuit:
 `se ⊕ se'` after `T se' = nse;` is `se ⊕ nse`, up to which one fails first. -/
-theorem binop_right_eval (op : BinOp) (hop : op.accepts p = true) (hsc : op.shortCircuits = false)
-    (a : Simple C Γ p) (nse : Val C Γ p) (hw : Ctx.Sub C Γ (Ctx.val Γ se p)) (σ : State)
-    {v : Value} (hv : nse.eval σ = .ok v) :
-    (Val.binop op hop (.simple (a.weaken hw)) (.simple (Simple.new se p))).eval (σ.setEnv se (.val v)) =
-      (Val.binop op hop (.simple a) nse).eval σ := by
+theorem binop_right_eval {q : PrimTy} (op : BinOp) (hop : op.accepts p = true) (hq : op.ret p = q)
+    (hsc : op.shortCircuits = false) (a : Simple C Γ p) (nse : Val C Γ p)
+    (hw : Ctx.Sub C Γ (Ctx.val Γ se p)) (σ : State) {v : Value} (hv : nse.eval σ = .ok v) :
+    (Val.binop op hop hq (.simple (a.weaken hw)) (.simple (Simple.new se p))).eval
+        (σ.setEnv se (.val v)) =
+      (Val.binop op hop hq (.simple a) nse).eval σ := by
   simp only [Val.eval, Simple.eval_weaken, Simple.eval_new]
   rw [a.eval_setEnv hse]
   cases a.eval σ with
@@ -184,10 +186,10 @@ theorem binop_right_eval (op : BinOp) (hop : op.accepts p = true) (hsc : op.shor
 
 omit hse in
 /-- The operand captured: `⊖se` after `T se = nse;` is `⊖nse`. -/
-theorem unop_capture_eval (op : UnOp) (hop : op.accepts p = true) (nse : Val C Γ p) (σ : State)
-    {v : Value} (hv : nse.eval σ = .ok v) :
-    (Val.unop op hop (.simple (Simple.new (C := C) (Γ := Γ) se p))).eval (σ.setEnv se (.val v)) =
-      (Val.unop op hop nse).eval σ := by
+theorem unop_capture_eval {q : PrimTy} (op : UnOp) (hop : op.accepts p = true) (hq : op.ret p = q)
+    (nse : Val C Γ p) (σ : State) {v : Value} (hv : nse.eval σ = .ok v) :
+    (Val.unop op hop hq (.simple (Simple.new (C := C) (Γ := Γ) se p))).eval (σ.setEnv se (.val v)) =
+      (Val.unop op hop hq nse).eval σ := by
   simp only [Val.eval, hv, Simple.eval_new, bind, Except.bind]
 
 end Capture
@@ -486,16 +488,16 @@ theorem Taclet.sound {m : Modality} {Γ Γ' : Ctx} {s : Stmt C Γ Γ'} {pr : Pre
 
 
   -- Operators into a local.
-  case binopUnfoldLeft p op hop x h nse hn e se hse =>
+  case binopUnfoldLeft p q op hop hq x h nse hn e se hse =>
     refine ⟨by simp [hse], fun σ _ => ?_⟩
     simp only [Prog.run, Stmt.run, bind_pure]
     cases hv : nse.eval σ with
     | error _ => simp [SameOk, bind, Except.bind, pure, Except.pure, Val.eval, hv]
     | ok v =>
       simp only [bind, Except.bind, pure, Except.pure]
-      rw [binop_left_eval hse op hop nse e _ σ hv]
+      rw [binop_left_eval hse op hop hq nse e _ σ hv]
       exact SameOk.setEnv_val (by agree_tac) _ _
-  case binopUnfoldRight p op hop hsc x h a nse hn se hse =>
+  case binopUnfoldRight p q op hop hq hsc x h a nse hn se hse =>
     refine ⟨by simp [hse], fun σ _ => ?_⟩
     simp only [Prog.run, Stmt.run, bind_pure]
     cases hv : nse.eval σ with
@@ -506,19 +508,19 @@ theorem Taclet.sound {m : Modality} {Γ Γ' : Ctx} {s : Stmt C Γ Γ'} {pr : Pre
       | ok lv => cases op <;> simp [BinOp.shortCircuits] at hsc <;> simp [SameOk, hv, bind, Except.bind, pure, Except.pure]
     | ok v =>
       simp only [bind, Except.bind, pure, Except.pure]
-      rw [binop_right_eval hse op hop hsc a nse _ σ hv]
+      rw [binop_right_eval hse op hop hq hsc a nse _ σ hv]
       exact SameOk.setEnv_val (by agree_tac) _ _
-  case unopCapture p op hop x h nse hn se hse =>
+  case unopCapture p q op hop hq x h nse hn se hse =>
     refine ⟨by simp [hse], fun σ _ => ?_⟩
     simp only [Prog.run, Stmt.run, bind_pure]
     cases hv : nse.eval σ with
     | error _ => simp [SameOk, bind, Except.bind, pure, Except.pure, Val.eval, hv]
     | ok v =>
       simp only [bind, Except.bind, pure, Except.pure]
-      rw [unop_capture_eval op hop nse σ hv]
+      rw [unop_capture_eval op hop hq nse σ hv]
       exact SameOk.setEnv_val (by agree_tac) _ _
   -- Short-circuit: in a state of `Γ` the right operand is a boolean.
-  case logicalAndShortCircuitRhs hop x h a nse hn =>
+  case logicalAndShortCircuitRhs hop hq x h a nse hn =>
     refine ⟨by simp, fun σ hσ => ?_⟩
     simp only [Prog.run, Stmt.run, bind_pure, Val.eval]
     cases a.eval σ with
@@ -539,7 +541,7 @@ theorem Taclet.sound {m : Modality} {Γ Γ' : Ctx} {s : Stmt C Γ Γ'} {pr : Pre
             obtain ⟨c, rfl⟩ := Val.eval_bool hσ nse hv
             simp [SameOk, applyBinOp, Value.asBool, checkArith, bind, Except.bind, pure, Except.pure]
             exact EnvAgreeExcept.refl _ _
-  case logicalOrShortCircuitRhs hop x h a nse hn =>
+  case logicalOrShortCircuitRhs hop hq x h a nse hn =>
     refine ⟨by simp, fun σ hσ => ?_⟩
     simp only [Prog.run, Stmt.run, bind_pure, Val.eval]
     cases a.eval σ with

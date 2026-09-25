@@ -191,6 +191,7 @@ the plan and the tracker. No `sorry`, `native_decide` or axiom here.
 | `Kernel/Frame.lean` | `Fresh`, `Ctx.Sub` and weakening (erasure unchanged), and the frame lemmas: a term typed at `Γ` does not see a name fresh at `Γ`. |
 | `Kernel/Taclet.lean` | The taclet judgement `Taclet C m s pr`, one constructor per solkey taclet (storage family: 41), with `Hole` for the paper's `lhs = •`, `Upd` and `Premise`. |
 | `Kernel/Sound.lean` | `Premise.Correct` and `Taclet.sound`, no hypothesis beyond the constructors' freshness proofs; `SameOk` is the agreement an unfolding rule owes. |
+| `Kernel/Step.lean` | `Stmt.step`: the rule for every statement, a total dispatcher; `Stmt.complete`, no hypothesis, no residue. `freshName` picks the scratch names. |
 | `Kernel/Elab.lean` | `ksol[C]{ … }`/`ksol{ … }`: raw syntax, the elaborator (`synth`/`check`/`elabProg`), the quoters; evaluated at compile time, re-checked by the kernel. |
 
 ## Examples, chains and corpora

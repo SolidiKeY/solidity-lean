@@ -90,6 +90,64 @@ proofs are `Eq.refl true` (the quoters rely on it). -/
 def isFresh (C : Contract) (Γ : Ctx) (x : Name) : Bool :=
   (lookupBy x Γ).isNone && (C.rootType x).isNone
 
+/-! ## Fresh names -/
+
+/-- The longest name a context or the contract binds. -/
+def maxNameLen (C : Contract) (Γ : Ctx) : Nat :=
+  ((Γ.map (·.1)) ++ C.vars.map (·.1)).foldl (fun n x => max n x.length) 0
+
+/-- A fresh name: the first of `base`, `base1`, `base2`, … that is free, else
+`base` padded past every name in scope, which no local and no state variable
+can equal. -/
+def freshName (C : Contract) (Γ : Ctx) (base : Name) : Name :=
+  let cands := (List.range (Γ.length + C.vars.length + 1)).map fun k =>
+    if k = 0 then base else base ++ toString k
+  match cands.find? (isFresh C Γ ·) with
+  | some x => x
+  | none => base ++ String.mk (List.replicate (maxNameLen C Γ + 1) '#')
+
+theorem foldl_max_ge (l : List Name) (n : Nat) : n ≤ l.foldl (fun n x => max n x.length) n := by
+  induction l generalizing n with
+  | nil => exact Nat.le_refl _
+  | cons x xs ih => exact Nat.le_trans (Nat.le_max_left _ _) (ih _)
+
+theorem le_foldl_max {l : List Name} {x : Name} (hx : x ∈ l) (n : Nat) :
+    x.length ≤ l.foldl (fun n x => max n x.length) n := by
+  induction l generalizing n with
+  | nil => cases hx
+  | cons y ys ih =>
+    rcases List.mem_cons.mp hx with rfl | hm
+    · exact Nat.le_trans (Nat.le_max_right _ _) (foldl_max_ge _ _)
+    · exact ih hm _
+
+theorem lookupBy_none_of_long {α : Type} {l : List (Name × α)} {x : Name}
+    (h : ∀ p ∈ l, p.1.length < x.length) : lookupBy x l = none := by
+  induction l with
+  | nil => rfl
+  | cons p ps ih =>
+    obtain ⟨k, v⟩ := p
+    have hk : x ≠ k := fun he => by
+      have := h (k, v) (List.mem_cons_self ..); subst he; exact Nat.lt_irrefl _ this
+    simp only [lookupBy, if_neg hk]
+    exact ih fun q hq => h q (List.mem_cons_of_mem _ hq)
+
+/-- `freshName` is fresh.  At the context of `uint sp = 1;`, `sp` is taken,
+so the capture a rule makes is called `sp1`. -/
+theorem freshName_isFresh (C : Contract) (Γ : Ctx) (base : Name) :
+    isFresh C Γ (freshName C Γ base) = true := by
+  unfold freshName
+  dsimp only
+  split
+  · next x hx => simpa using List.find?_some hx
+  · simp only [isFresh, Bool.and_eq_true, Option.isNone_iff_eq_none]
+    have hlen : maxNameLen C Γ < (base ++ String.mk (List.replicate (maxNameLen C Γ + 1) '#')).length := by
+      rw [String.length_append]; simp; omega
+    constructor
+    · refine lookupBy_none_of_long fun p hp => Nat.lt_of_le_of_lt ?_ hlen
+      exact le_foldl_max (List.mem_append_left _ (List.mem_map_of_mem hp)) 0
+    · refine lookupBy_none_of_long fun p hp => Nat.lt_of_le_of_lt ?_ hlen
+      exact le_foldl_max (List.mem_append_right _ (List.mem_map_of_mem hp)) 0
+
 /-! ## Simple values, paths and values -/
 
 /-- A simple value (KeY's `SimpleExpression`, the paper's `se`): a literal
@@ -138,10 +196,12 @@ inductive Val (C : Contract) (Γ : Ctx) : PrimTy → Type where
   | simple {p : PrimTy} (s : Simple C Γ p) : Val C Γ p
   /-- A storage read, `alice.age`. -/
   | read {p : PrimTy} (l : Loc C Γ (.prim p)) : Val C Γ p
-  | binop {p : PrimTy} (op : BinOp) (h : op.accepts p = true) (a b : Val C Γ p) :
-      Val C Γ (op.ret p)
-  | unop {p : PrimTy} (op : UnOp) (h : op.accepts p = true) (a : Val C Γ p) :
-      Val C Γ (op.ret p)
+  /-- `a ⊕ b`, at the result type `q` of `⊕` at `p` (an equation, not a
+  computed index, so a match at a fixed type can take it apart). -/
+  | binop {p q : PrimTy} (op : BinOp) (h : op.accepts p = true) (hq : op.ret p = q)
+      (a b : Val C Γ p) : Val C Γ q
+  | unop {p q : PrimTy} (op : UnOp) (h : op.accepts p = true) (hq : op.ret p = q)
+      (a : Val C Γ p) : Val C Γ q
 
 end
 

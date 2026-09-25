@@ -82,7 +82,7 @@ def Val.eval (σ : State) : {p : PrimTy} → Val C Γ p → Res Value
   | _, .read l => do
     let (r, segs) ← l.resolve σ
     (← σ.findStorage r segs).asValue
-  | _, @Val.binop _ _ p op _ a b => do
+  | _, @Val.binop _ _ p _ op _ _ a b => do
     let lv ← a.eval σ
     match op, lv with
     | .and, .bool false => pure (.bool false)
@@ -90,7 +90,7 @@ def Val.eval (σ : State) : {p : PrimTy} → Val C Γ p → Res Value
     | _, _ => do
       let rv ← b.eval σ
       checkArith (op.retTy (.prim p)) (← applyBinOp op lv rv)
-  | _, @Val.unop _ _ p op _ a => do unopCheck op p (← applyUnOp op (← a.eval σ))
+  | _, @Val.unop _ _ p _ op _ _ a => do unopCheck op p (← applyUnOp op (← a.eval σ))
 
 end
 
@@ -250,7 +250,7 @@ theorem Val.evalValue_erase (σ : State) : {p : PrimTy} → (v : Val C Γ p) →
       cases σ.findStorage r.1 r.2 with
       | error _ => rfl
       | ok v => cases v.asValue <;> rfl
-  | _, .binop op _ a b => by
+  | _, .binop op _ _ a b => by
     rw [Val.erase, evalValue, a.evalValue_erase σ, a.erase_ty]
     simp only [Val.eval]
     cases a.eval σ with
@@ -262,7 +262,7 @@ theorem Val.evalValue_erase (σ : State) : {p : PrimTy} → (v : Val C Γ p) →
         cases b.eval σ <;> (try simp only [Except.map]) <;> (try rfl) <;> rename_i rv <;>
         cases applyBinOp _ _ rv <;> (try simp only) <;> (try rfl) <;> rename_i w <;>
         cases checkArith _ w <;> rfl
-  | _, .unop op _ a => by
+  | _, .unop op _ _ a => by
     rw [Val.erase, evalValue, a.evalValue_erase σ, a.erase_ty]
     simp only [Val.eval]
     cases a.eval σ with
