@@ -191,6 +191,22 @@ inductive Loc (C : Contract) (Γ : Ctx) : Ty → Type where
   | index {R : RefTy} {k : PrimTy} {V : Ty} (it : IndexTy R k V) (b : SPath C Γ (.ref R))
       (i : Val C Γ k) : Loc C Γ V
 
+/-- A memory path of type `T` (KeY's `mv`/`nmp`): a memory local, or a
+memory location. -/
+inductive MPath (C : Contract) (Γ : Ctx) : Ty → Type where
+  /-- A memory local, `Person memory m = alice;` then `m`. -/
+  | var {R : RefTy} (x : Name) (h : lookupBy x Γ = some (.mem (.ref R))) : MPath C Γ (.ref R)
+  | loc {T : Ty} (l : MLoc C Γ T) : MPath C Γ T
+
+/-- A memory location: a member or an element of a memory object (memory
+has no mappings, and no roots of its own). -/
+inductive MLoc (C : Contract) (Γ : Ctx) : Ty → Type where
+  /-- `m.age` -/
+  | field {s : Name} {T : Ty} (b : MPath C Γ (.struct s)) (f : Name)
+      (h : C.fieldType s f = some T) : MLoc C Γ T
+  /-- `xs[i]` -/
+  | index {E : Ty} (b : MPath C Γ (.array E)) (i : Val C Γ .uint) : MLoc C Γ E
+
 /-- A value of primitive type `p`. -/
 inductive Val (C : Contract) (Γ : Ctx) : PrimTy → Type where
   | simple {p : PrimTy} (s : Simple C Γ p) : Val C Γ p
@@ -204,6 +220,8 @@ inductive Val (C : Contract) (Γ : Ctx) : PrimTy → Type where
       (a : Val C Γ p) : Val C Γ q
   /-- `c ? a : b`, which evaluates only the branch it takes. -/
   | ternary {p : PrimTy} (c : Val C Γ .bool) (a b : Val C Γ p) : Val C Γ p
+  /-- A memory read, `m.age`. -/
+  | readMem {p : PrimTy} (l : MLoc C Γ (.prim p)) : Val C Γ p
 
 end
 
@@ -221,6 +239,17 @@ def SPath.isSimple {C : Contract} {Γ : Ctx} {T : Ty} : SPath C Γ T → Bool
   | .alias .. => true
   | .loc (.root ..) => true
   | .loc _ => false
+
+/-- What a memory local is bound to: another memory object's identity
+(aliasing, `m = n;`, `m = n.account;`). -/
+inductive MRhs (C : Contract) (Γ : Ctx) (R : RefTy) where
+  | alias (p : MPath C Γ (.ref R))
+
+/-- What a memory location is written: a value, or a memory reference (by
+identity: `m.account = n.account;` aliases). -/
+inductive MSrc (C : Contract) (Γ : Ctx) : Ty → Type where
+  | val {p : PrimTy} (v : Val C Γ p) : MSrc C Γ (.prim p)
+  | ref {R : RefTy} (p : MPath C Γ (.ref R)) : MSrc C Γ (.ref R)
 
 /-- The target of a compound assignment `l ⊕= e`: a stack local, a state
 variable, a member, or an entry at a simple index (`ksol` captures any other
@@ -291,6 +320,15 @@ inductive Stmt (C : Contract) : Ctx → Ctx → Type where
   | pop {Γ : Ctx} {E : Ty} (b : SPath C Γ (.array E)) : Stmt C Γ Γ
   /-- `a.transfer(v);`: `v` of the contract's funds to `a`. -/
   | transfer {Γ : Ctx} (r a : Val C Γ .uint) : Stmt C Γ Γ
+  /-- `Person memory m;` (a fresh default object) or `Person memory m = n;`. -/
+  | declMem {Γ : Ctx} (R : RefTy) (x : Name) (hx : isFresh C Γ x = true)
+      (init : Option (MRhs C Γ R)) (hd : (init.isSome || (Ty.ref R).defaultOkS) = true) :
+      Stmt C Γ (setBy x (.mem (.ref R)) Γ)
+  /-- `m = n;`: the memory local now names `n`'s object. -/
+  | rebindMem {Γ : Ctx} {R : RefTy} (x : Name) (h : lookupBy x Γ = some (.mem (.ref R)))
+      (r : MRhs C Γ R) : Stmt C Γ Γ
+  /-- `m.age = 3;`, `m.account = n.account;` -/
+  | assignMem {Γ : Ctx} {T : Ty} (l : MLoc C Γ T) (r : MSrc C Γ T) : Stmt C Γ Γ
   /-- `delete alice.account;` -/
   | delete {Γ : Ctx} {T : Ty} (l : Loc C Γ T) : Stmt C Γ Γ
   /-- `if (c) { … } else { … }`, on a simple condition (the paper's

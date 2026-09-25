@@ -79,12 +79,21 @@ def Loc.weaken {Γ Γ' : Ctx} (h : Ctx.Sub C Γ Γ') : {T : Ty} → Loc C Γ T �
   | _, .field b f hf => .field (b.weaken h) f hf
   | _, .index it b i => .index it (b.weaken h) (i.weaken h)
 
+def MPath.weaken {Γ Γ' : Ctx} (h : Ctx.Sub C Γ Γ') : {T : Ty} → MPath C Γ T → MPath C Γ' T
+  | _, .var x hx => .var x (h.local_ _ _ hx)
+  | _, .loc l => .loc (l.weaken h)
+
+def MLoc.weaken {Γ Γ' : Ctx} (h : Ctx.Sub C Γ Γ') : {T : Ty} → MLoc C Γ T → MLoc C Γ' T
+  | _, .field b f hf => .field (b.weaken h) f hf
+  | _, .index b i => .index (b.weaken h) (i.weaken h)
+
 def Val.weaken {Γ Γ' : Ctx} (h : Ctx.Sub C Γ Γ') : {p : PrimTy} → Val C Γ p → Val C Γ' p
   | _, .simple s => .simple (s.weaken h)
   | _, .read l => .read (l.weaken h)
   | _, .binop op hop hq a b => .binop op hop hq (a.weaken h) (b.weaken h)
   | _, .unop op hop hq a => .unop op hop hq (a.weaken h)
   | _, .ternary c a b => .ternary (c.weaken h) (a.weaken h) (b.weaken h)
+  | _, .readMem l => .readMem (l.weaken h)
 
 end
 
@@ -118,6 +127,16 @@ theorem Loc.erase_weaken {Γ Γ' : Ctx} (h : Ctx.Sub C Γ Γ') :
   | _, .field b f _ => by simp only [Loc.weaken, Loc.erase, b.erase_weaken h]
   | _, .index _ b i => by simp only [Loc.weaken, Loc.erase, b.erase_weaken h, i.erase_weaken h]
 
+theorem MPath.erase_weaken {Γ Γ' : Ctx} (h : Ctx.Sub C Γ Γ') :
+    {T : Ty} → (p : MPath C Γ T) → (p.weaken h).erase = p.erase
+  | _, .var .. => rfl
+  | _, .loc l => l.erase_weaken h
+
+theorem MLoc.erase_weaken {Γ Γ' : Ctx} (h : Ctx.Sub C Γ Γ') :
+    {T : Ty} → (l : MLoc C Γ T) → (l.weaken h).erase = l.erase
+  | _, .field b f _ => by simp only [MLoc.weaken, MLoc.erase, b.erase_weaken h]
+  | _, .index b i => by simp only [MLoc.weaken, MLoc.erase, b.erase_weaken h, i.erase_weaken h]
+
 theorem Val.erase_weaken {Γ Γ' : Ctx} (h : Ctx.Sub C Γ Γ') :
     {p : PrimTy} → (v : Val C Γ p) → (v.weaken h).erase = v.erase
   | _, .simple s => by simp only [Val.weaken, Val.erase, s.erase_weaken h]
@@ -126,6 +145,7 @@ theorem Val.erase_weaken {Γ Γ' : Ctx} (h : Ctx.Sub C Γ Γ') :
   | _, .unop _ _ _ a => by simp only [Val.weaken, Val.erase, a.erase_weaken h]
   | _, .ternary c a b => by
     simp only [Val.weaken, Val.erase, c.erase_weaken h, a.erase_weaken h, b.erase_weaken h]
+  | _, .readMem l => by simp only [Val.weaken, Val.erase, l.erase_weaken h]
 
 end
 
@@ -149,6 +169,9 @@ theorem not_mem_of_bound (hns : ∀ n ∈ ns, Fresh C Γ n) {x : Name} {b : BTy}
 theorem not_mem_of_root (hns : ∀ n ∈ ns, Fresh C Γ n) {r : Name} {T : Ty}
     (hr : C.rootType r = some T) : r ∉ ns := fun hm => by
   rw [(isFresh_iff.mp (hns r hm)).2] at hr; cases hr
+
+theorem getObj_congr (hag : EnvAgreeExcept ns σ τ) (id : Nat) : σ.getObj id = τ.getObj id := by
+  unfold State.getObj; rw [hag.heap]
 
 theorem envPath_frame (hag : EnvAgreeExcept ns σ τ) {x : Name} (hx : x ∉ ns) (g : Bool) :
     envPath σ x g = envPath τ x g := by
@@ -179,6 +202,20 @@ theorem Loc.resolve_frame (hag : EnvAgreeExcept ns σ τ) (hns : ∀ n ∈ ns, F
   | _, .field b _ _ => by simp only [Loc.resolve, b.resolve_frame hag hns]
   | _, .index _ b i => by simp only [Loc.resolve, b.resolve_frame hag hns, i.eval_frame hag hns]
 
+/-- **Frame**, for memory paths: a memory local and the heap read alike in
+two states that agree off fresh names. -/
+theorem MPath.mval_frame (hag : EnvAgreeExcept ns σ τ) (hns : ∀ n ∈ ns, Fresh C Γ n) :
+    {T : Ty} → (p : MPath C Γ T) → p.mval σ = p.mval τ
+  | _, .var _ hx => by
+    simp only [MPath.mval, State.getEnv, hag.env _ (not_mem_of_bound hns hx)]
+  | _, .loc l => l.read_frame hag hns
+
+theorem MLoc.read_frame (hag : EnvAgreeExcept ns σ τ) (hns : ∀ n ∈ ns, Fresh C Γ n) :
+    {T : Ty} → (l : MLoc C Γ T) → l.read σ = l.read τ
+  | _, .field b _ _ => by simp only [MLoc.read, b.mval_frame hag hns, getObj_congr hag]
+  | _, .index b i => by
+    simp only [MLoc.read, b.mval_frame hag hns, i.eval_frame hag hns, getObj_congr hag]
+
 /-- **Frame**, for values: `x + alice.age` evaluates alike in two states that
 agree off fresh names. -/
 theorem Val.eval_frame (hag : EnvAgreeExcept ns σ τ) (hns : ∀ n ∈ ns, Fresh C Γ n) :
@@ -189,6 +226,7 @@ theorem Val.eval_frame (hag : EnvAgreeExcept ns σ τ) (hns : ∀ n ∈ ns, Fres
   | _, .unop _ _ _ a => by simp only [Val.eval, a.eval_frame hag hns]
   | _, .ternary c a b => by
     simp only [Val.eval, c.eval_frame hag hns, a.eval_frame hag hns, b.eval_frame hag hns]
+  | _, .readMem l => by simp only [Val.eval, l.read_frame hag hns]
 
 end
 
@@ -228,6 +266,16 @@ theorem Loc.resolve_weaken {Γ Γ' : Ctx} (h : Ctx.Sub C Γ Γ') (σ : State) :
   | _, .index _ b i => by
     simp only [Loc.weaken, Loc.resolve, b.resolve_weaken h σ, i.eval_weaken h σ]
 
+theorem MPath.mval_weaken {Γ Γ' : Ctx} (h : Ctx.Sub C Γ Γ') (σ : State) :
+    {T : Ty} → (p : MPath C Γ T) → (p.weaken h).mval σ = p.mval σ
+  | _, .var .. => rfl
+  | _, .loc l => l.read_weaken h σ
+
+theorem MLoc.read_weaken {Γ Γ' : Ctx} (h : Ctx.Sub C Γ Γ') (σ : State) :
+    {T : Ty} → (l : MLoc C Γ T) → (l.weaken h).read σ = l.read σ
+  | _, .field b _ _ => by simp only [MLoc.weaken, MLoc.read, b.mval_weaken h σ]
+  | _, .index b i => by simp only [MLoc.weaken, MLoc.read, b.mval_weaken h σ, i.eval_weaken h σ]
+
 /-- A weakened value evaluates as the original. -/
 theorem Val.eval_weaken {Γ Γ' : Ctx} (h : Ctx.Sub C Γ Γ') (σ : State) :
     {p : PrimTy} → (v : Val C Γ p) → (v.weaken h).eval σ = v.eval σ
@@ -237,6 +285,7 @@ theorem Val.eval_weaken {Γ Γ' : Ctx} (h : Ctx.Sub C Γ Γ') (σ : State) :
   | _, .unop _ _ _ a => by simp only [Val.weaken, Val.eval, a.eval_weaken h σ]
   | _, .ternary c a b => by
     simp only [Val.weaken, Val.eval, c.eval_weaken h σ, a.eval_weaken h σ, b.eval_weaken h σ]
+  | _, .readMem l => by simp only [Val.weaken, Val.eval, l.read_weaken h σ]
 
 end
 

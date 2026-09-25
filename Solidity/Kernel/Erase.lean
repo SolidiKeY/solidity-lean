@@ -37,14 +37,30 @@ def Loc.erase {C : Contract} {Γ : Ctx} {T : Ty} : Loc C Γ T → WrappedExpr
   | .field (T := T) b f _ => .field .storage T b.erase (SoliditySyntax.fieldFor f T)
   | .index (V := V) _ b i => .index .storage V b.erase i.erase
 
+def MPath.erase {C : Contract} {Γ : Ctx} {T : Ty} : MPath C Γ T → WrappedExpr
+  | .var (R := R) x _ => .var .memory (.ref R) (Field.identity x R)
+  | .loc l => l.erase
+
+def MLoc.erase {C : Contract} {Γ : Ctx} {T : Ty} : MLoc C Γ T → WrappedExpr
+  | .field (T := T) b f _ => .field .memory T b.erase (SoliditySyntax.fieldFor f T)
+  | .index (E := E) b i => .index .memory E b.erase i.erase
+
 def Val.erase {C : Contract} {Γ : Ctx} {p : PrimTy} : Val C Γ p → WrappedExpr
   | .simple s => s.erase
   | .read l => l.erase
   | .binop op _ _ a b => .mkBinop op a.erase b.erase
   | .unop op _ _ a => .mkUnop op a.erase
   | .ternary c a b => .mkTernary c.erase a.erase b.erase
+  | .readMem l => l.erase
 
 end
+
+def MRhs.erase {C : Contract} {Γ : Ctx} {R : RefTy} : MRhs C Γ R → WrappedExpr
+  | .alias p => p.erase
+
+def MSrc.erase {C : Contract} {Γ : Ctx} {T : Ty} : MSrc C Γ T → WrappedExpr
+  | .val v => v.erase
+  | .ref p => p.erase
 
 def Src.erase {C : Contract} {Γ : Ctx} {T : Ty} : Src C Γ T → WrappedExpr
   | .val v => v.erase
@@ -70,6 +86,15 @@ theorem Loc.erase_ty {C : Contract} {Γ : Ctx} {T : Ty} :
     (l : Loc C Γ T) → l.erase.ty = T
   | .root .. | .field .. | .index .. => rfl
 
+theorem MPath.erase_ty {C : Contract} {Γ : Ctx} {T : Ty} :
+    (p : MPath C Γ T) → p.erase.ty = T
+  | .var .. => rfl
+  | .loc l => l.erase_ty
+
+theorem MLoc.erase_ty {C : Contract} {Γ : Ctx} {T : Ty} :
+    (l : MLoc C Γ T) → l.erase.ty = T
+  | .field .. | .index .. => rfl
+
 /-- A value erases at its type: `alice.age < 3` is annotated `bool`. -/
 theorem Val.erase_ty {C : Contract} {Γ : Ctx} {p : PrimTy} :
     (v : Val C Γ p) → v.erase.ty = .prim p
@@ -80,8 +105,14 @@ theorem Val.erase_ty {C : Contract} {Γ : Ctx} {p : PrimTy} :
   | .unop op _ hq a => by
       simp only [Val.erase, Typed.WrappedExpr.ty, a.erase_ty, UnOp.retTy_prim, hq]
   | .ternary _ a _ => by simp only [Val.erase, Typed.WrappedExpr.ty, a.erase_ty]
+  | .readMem l => l.erase_ty
 
 end
+
+theorem MSrc.erase_ty {C : Contract} {Γ : Ctx} {T : Ty} :
+    (r : MSrc C Γ T) → r.erase.ty = T
+  | .val v => v.erase_ty
+  | .ref p => p.erase_ty
 
 /-- A source erases at its type: in `folks[1] = bob;` the source is a `Person`. -/
 theorem Src.erase_ty {C : Contract} {Γ : Ctx} {T : Ty} :
@@ -127,6 +158,20 @@ theorem Loc.erase_wt {C : Contract} {Γ : Ctx} {T : Ty} :
       have ht := b.erase_ty
       cases it <;> simp [Loc.erase, wtExpr, hb, hi, ht, elemTy]
 
+theorem MPath.erase_wt {C : Contract} {Γ : Ctx} {T : Ty} :
+    (p : MPath C Γ T) → wtExpr Γ C.layout p.erase = true
+  | .var x h => by simp [MPath.erase, wtExpr, h, Field.identity]
+  | .loc l => l.erase_wt
+
+theorem MLoc.erase_wt {C : Contract} {Γ : Ctx} {T : Ty} :
+    (l : MLoc C Γ T) → wtExpr Γ C.layout l.erase = true
+  | .field b f h => by
+      have h' : lookupBy f (structDef _) = some _ := h
+      simp [MLoc.erase, wtExpr, b.erase_wt, b.erase_ty, segTy, SoliditySyntax.fieldFor]
+      split <;> exact h'
+  | .index b i => by
+      simp [MLoc.erase, wtExpr, b.erase_wt, i.erase_wt, b.erase_ty, elemTy]
+
 /-- A value erases to a well-annotated expression: in `x + 1`, `x` is the
 stack local `Γ` binds and `1` a number literal. -/
 theorem Val.erase_wt {C : Contract} {Γ : Ctx} {p : PrimTy} :
@@ -137,6 +182,7 @@ theorem Val.erase_wt {C : Contract} {Γ : Ctx} {p : PrimTy} :
   | .unop _ _ _ a => by simp [Val.erase, wtExpr, a.erase_wt]
   | .ternary c a b => by
       simp [Val.erase, wtExpr, c.erase_wt, a.erase_wt, b.erase_wt, a.erase_ty, b.erase_ty]
+  | .readMem l => l.erase_wt
 
 end
 
@@ -157,6 +203,10 @@ def SPath.toPlace {C : Contract} {Γ : Ctx} {T : Ty} (p : SPath C Γ T) : PlaceE
 
 def Loc.toPlace {C : Contract} {Γ : Ctx} {T : Ty} (l : Loc C Γ T) : PlaceExpr :=
   (SPath.loc l).toPlace
+
+/-- A memory location erases to a place. -/
+def MLoc.toPlace {C : Contract} {Γ : Ctx} {T : Ty} (l : MLoc C Γ T) : PlaceExpr :=
+  ⟨l.erase, by cases l <;> rfl⟩
 
 /-- A compound assignment's target, as the interpreter's place:
 `x += 1` targets the stack local, `values[i] += 1` the element. -/
@@ -196,6 +246,10 @@ def Stmt.erase {C : Contract} {Γ Γ' : Ctx} : Stmt C Γ Γ' → Solidity.Stmt
   | .declStorage capture R x _ init =>
       if capture then .storagePlaceAlias (.ref R) x init.erase
       else .storageDecl (.ref R) x (some init.erase)
+  | .declMem R x _ init _ => .memoryDecl (.ref R) x (init.map MRhs.erase)
+  | .rebindMem (R := R) x _ r =>
+      .assign (PlaceExpr.var .memory (.ref R) (Field.identity x R)) r.erase
+  | .assignMem l r => .assign l.toPlace r.erase
   | .opAssign op _ _ l r => .compoundAssign op l.toPlace r.erase
   | .incDec op _ l => .expr (.mkIncDec op l.toPlace.expr)
   | .push b v _ => .push b.toPlace (v.map Src.erase)
@@ -236,6 +290,22 @@ theorem Stmt.erase_wt {C : Contract} {Γ Γ' : Ctx} :
       cases init <;> simp [Stmt.erase, stmtWt, Ty.isPrimitive, Val.erase_wt, Val.erase_ty]
   | .declStorage capture R x _ init => by
       cases capture <;> simp [Stmt.erase, stmtWt, init.erase_wt, init.erase_ty]
+  | .declMem R x _ init hd => by
+      cases init with
+      | none =>
+        simp only [Option.isSome_none, Bool.false_or] at hd
+        simp [Stmt.erase, stmtWt, Ty.defaultOkS_sound hd]
+      | some r =>
+        cases r with
+        | alias p => simp [Stmt.erase, stmtWt, MRhs.erase, p.erase_wt, p.erase_ty]
+  | .rebindMem x h r => by
+      cases r with
+      | alias p =>
+        simp [Stmt.erase, stmtWt, PlaceExpr.var, wtExpr, h, Field.identity, MRhs.erase, p.erase_wt,
+          p.erase_ty, Typed.WrappedExpr.ty]
+  | .assignMem l r => by
+      simp [Stmt.erase, stmtWt, MLoc.toPlace, l.erase_wt, r.erase_ty, l.erase_ty]
+      cases r <;> simp [MSrc.erase, Val.erase_wt, MPath.erase_wt]
   | .opAssign op hop _ l r => by
       simp [Stmt.erase, stmtWt, BinOp.isArith_of_compound hop, l.erase_wt, r.erase_wt]
   | .incDec op _ l => by simp [Stmt.erase, stmtWt, wtExpr, l.erase_wt]

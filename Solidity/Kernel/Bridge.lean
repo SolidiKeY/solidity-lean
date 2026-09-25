@@ -28,7 +28,11 @@ the state variable as KeY's `addition_unfold_left` and
 the kernel, having no `T storage x;`, captures the index of first), and on a
 scratch alias (`Person storage sp = folks[x];`, which `ksol` writes before
 `y = sp.age++;`: the old table binds its own scratch aliases by the Lean-only
-`storagePlaceAlias`, KeY and the kernel by `storageLocalDeclInitDrop`). -/
+`storagePlaceAlias`, KeY and the kernel by `storageLocalDeclInitDrop`), and on a
+memory reference copied from a member (`mp.account = mq.account;`), which the
+old table first captures into a scratch memory local and the kernel copies
+directly: the capture needs the slot to hold a reference, which the
+interpreter does not check when it copies one. -/
 
 namespace Solidity
 namespace Kernel
@@ -121,6 +125,28 @@ def Taclet.rule {Γ Γ' : Ctx} {s : Stmt C Γ Γ'} {pr : Premise C Γ Γ'} : Tac
   | .transfer_unfold_leftFstReceiver .. => some .transferUnfoldLeftFstReceiver
   | .transfer_unfold_rightSndArgument .. => some .transferUnfoldRightSndArgument
   | .transferNoCallback .. => some (match m with | .box => .transferNoCallbackBox | .diamond => .transferNoCallbackDiamond)
+  | .memoryFieldRead_unfold_rightFst .. => some .memoryFieldReadUnfoldRightFst
+  | .memoryIndexRead_unfold_rightFst .. => some .memoryIndexReadUnfoldRightFst
+  | .memoryIndexRead_unfold_rightSndIndex .. => some .memoryIndexReadUnfoldRightSndIndex
+  | .memoryFieldReadHeap .. => some .memoryFieldReadHeap
+  | .memoryIndexReadHeap .. => some (match m with | .box => .memoryIndexReadHeapBox | .diamond => .memoryIndexReadHeapDiamond)
+  | .memoryRootAlias .. => some .memoryRootAlias
+  | .memoryFieldReadAliasRoot .. => some .memoryFieldReadAliasRoot
+  | .memoryIndexReadAliasRoot .. => some (match m with | .box => .memoryIndexReadAliasRootBox | .diamond => .memoryIndexReadAliasRootDiamond)
+  | .memoryLocalDeclInitDrop .. => some .memoryLocalDeclInitDrop
+  | .memoryDeclFreshAlloc .. => some .memoryDeclFreshAlloc
+  | .memoryFieldWriteStore .. => some .memoryFieldWriteStore
+  | .memoryIndexWriteStore .. => some (match m with | .box => .memoryIndexWriteStoreBox | .diamond => .memoryIndexWriteStoreDiamond)
+  | .memoryFieldWriteCopy .. => some .memoryFieldWriteCopy
+  | .memoryIndexWriteCopy .. => some (match m with | .box => .memoryIndexWriteCopyBox | .diamond => .memoryIndexWriteCopyDiamond)
+  | .memoryFieldWrite_unfold_leftFst .. => some .memoryFieldWriteUnfoldLeftFst
+  | .memoryIndexWrite_unfold_leftFst .. => some .memoryIndexWriteUnfoldLeftFst
+  | .memoryFieldWriteMemRef_unfold_leftFst .. => some .memoryFieldWriteRefUnfoldLeftFst
+  | .memoryIndexWriteMemRef_unfold_leftFst .. => some .memoryIndexWriteRefUnfoldLeftFst
+  | .memoryIndexWriteNonSimpleIndexCapture .. => some .memoryIndexWriteUnfoldLeftSndIndex
+  | .memoryIndexWriteMemRefNonSimpleIndexCapture .. => some .memoryIndexWriteRefUnfoldLeftSndIndex
+  | .memoryFieldWriteUnfoldSource .. => some .memoryFieldWriteUnfoldSource
+  | .memoryIndexWriteUnfoldSource .. => some .memoryIndexWriteUnfoldSource
   | .ifElseSplit .. => none
   | .requireSimple .. => some .requireSimple
   | .assertSimple .. => some .assertSimple
@@ -212,6 +238,28 @@ def Taclet.origin {Γ Γ' : Ctx} {s : Stmt C Γ Γ'} {pr : Premise C Γ Γ'} : T
   | .transfer_unfold_rightSndArgument .. => .taclet .transfer_unfold_rightSndArgument
   | .transferNoCallback .. =>
     .taclet (match m with | .box => .transferNoCallbackBox | .diamond => .transferNoCallbackDiamond)
+  | .memoryFieldRead_unfold_rightFst .. => (ruleEffect .memoryFieldReadUnfoldRightFst).origin
+  | .memoryIndexRead_unfold_rightFst .. => (ruleEffect .memoryIndexReadUnfoldRightFst).origin
+  | .memoryIndexRead_unfold_rightSndIndex .. => (ruleEffect .memoryIndexReadUnfoldRightSndIndex).origin
+  | .memoryFieldReadHeap .. => (ruleEffect .memoryFieldReadHeap).origin
+  | .memoryIndexReadHeap .. => (ruleEffect (match m with | .box => .memoryIndexReadHeapBox | .diamond => .memoryIndexReadHeapDiamond)).origin
+  | .memoryRootAlias .. => (ruleEffect .memoryRootAlias).origin
+  | .memoryFieldReadAliasRoot .. => (ruleEffect .memoryFieldReadAliasRoot).origin
+  | .memoryIndexReadAliasRoot .. => (ruleEffect (match m with | .box => .memoryIndexReadAliasRootBox | .diamond => .memoryIndexReadAliasRootDiamond)).origin
+  | .memoryLocalDeclInitDrop .. => (ruleEffect .memoryLocalDeclInitDrop).origin
+  | .memoryDeclFreshAlloc .. => (ruleEffect .memoryDeclFreshAlloc).origin
+  | .memoryFieldWriteStore .. => (ruleEffect .memoryFieldWriteStore).origin
+  | .memoryIndexWriteStore .. => (ruleEffect (match m with | .box => .memoryIndexWriteStoreBox | .diamond => .memoryIndexWriteStoreDiamond)).origin
+  | .memoryFieldWriteCopy .. => (ruleEffect .memoryFieldWriteCopy).origin
+  | .memoryIndexWriteCopy .. => (ruleEffect (match m with | .box => .memoryIndexWriteCopyBox | .diamond => .memoryIndexWriteCopyDiamond)).origin
+  | .memoryFieldWrite_unfold_leftFst .. => (ruleEffect .memoryFieldWriteUnfoldLeftFst).origin
+  | .memoryIndexWrite_unfold_leftFst .. => (ruleEffect .memoryIndexWriteUnfoldLeftFst).origin
+  | .memoryFieldWriteMemRef_unfold_leftFst .. => (ruleEffect .memoryFieldWriteRefUnfoldLeftFst).origin
+  | .memoryIndexWriteMemRef_unfold_leftFst .. => (ruleEffect .memoryIndexWriteRefUnfoldLeftFst).origin
+  | .memoryIndexWriteNonSimpleIndexCapture .. => (ruleEffect .memoryIndexWriteUnfoldLeftSndIndex).origin
+  | .memoryIndexWriteMemRefNonSimpleIndexCapture .. => (ruleEffect .memoryIndexWriteRefUnfoldLeftSndIndex).origin
+  | .memoryFieldWriteUnfoldSource .. => (ruleEffect .memoryFieldWriteUnfoldSource).origin
+  | .memoryIndexWriteUnfoldSource .. => (ruleEffect .memoryIndexWriteUnfoldSource).origin
   | .ifElseSplit .. => .taclet .ifElseSplit
   | .requireSimple .. => .taclet .requireSimple
   | .assertSimple .. => .taclet .assertSimple
@@ -274,6 +322,9 @@ def bridgeTour := ksol{
   values.push(x); values.push(x + 1); values.push(); persons.push(alice); persons.push(folks[x]);
   persons.push(); values.pop(); matrix[x].push(1); matrix[x + 1].push(); matrix[x].pop();
   owner.transfer(1); owner.transfer(x + 1); (x + 1).transfer(2); balances[x].transfer(x);
+  Person memory mp; Person memory mq = mp; Account memory ma = mp.account; mq = mp;
+  x = mp.age; x = mp.account.balance; mp.age = 3; mp.age = x + 1; mp.account.balance = x;
+  mp.account = mq.account; mp.account = ma; mq.account.token = ma.token;
   if (b) { x = 1; } else { x = 2; }; require(b); assert(b); require(x == 1); revert();
 }
 
@@ -285,7 +336,9 @@ def bridgeTour := ksol{
   "Person storage r = persons[x + 1]; kernel=some (Solidity.RuleName.storageIndexReadUnfoldRightSndIndex) old=some (Solidity.RuleName.storageLocalDeclInitDrop)",
   "Person storage sp = folks[x]; kernel=some (Solidity.RuleName.storageLocalDeclInitDrop) old=some (Solidity.RuleName.storagePlaceAlias)",
   "owner.transfer(1); kernel=some (Solidity.RuleName.transferUnfoldLeftFstReceiver) old=some (Solidity.RuleName.transferNoCallbackBox)",
-  "owner.transfer(x + 1); kernel=some (Solidity.RuleName.transferUnfoldLeftFstReceiver) old=some (Solidity.RuleName.transferUnfoldRightSndArgument)"]
+  "owner.transfer(x + 1); kernel=some (Solidity.RuleName.transferUnfoldLeftFstReceiver) old=some (Solidity.RuleName.transferUnfoldRightSndArgument)",
+  "mp.account = mq.account; kernel=some (Solidity.RuleName.memoryFieldWriteCopy) old=some (Solidity.RuleName.memoryFieldReadUnfoldRightSndResult)",
+  "mq.account.token = ma.token; kernel=some (Solidity.RuleName.memoryFieldWriteRefUnfoldLeftFst) old=some (Solidity.RuleName.memoryFieldReadUnfoldRightSndResult)"]
 
 -- And under a diamond, up to the old table's box/diamond twins.
 #guard (bridgeTour.disagreements .diamond).map (·.replace "Diamond" "Box") =

@@ -49,6 +49,20 @@ def Hole.unfoldStep {Γ Γ' : Ctx} {T : Ty} (k : Hole C Γ Γ' T) :
         (freshName_isFresh C Γ' "ie")⟩
     else ⟨_, .storageIndexRead_unfold_rightFst k it b (not_simple hb) i _ (freshName_isFresh C Γ' "sp")⟩
 
+/-- A memory read, rebind, declaration or reference write from a location
+that is not bindable: capture its receiver or its index. -/
+def MHole.unfoldStep {Γ Γ' : Ctx} {T : Ty} (k : MHole C Γ Γ' T) :
+    (l : MLoc C Γ T) → (MPath.loc l).isBindable = false → Step C m (k.fill l)
+  | .field b f hf, h =>
+    if hb : b.isSimple = true then absurd h (by simp [MPath.isBindable, hb])
+    else ⟨_, .memoryFieldRead_unfold_rightFst k b (not_simple hb) f hf _ (freshName_isFresh C Γ' "mv")⟩
+  | .index b i, h =>
+    if hb : b.isSimple = true then
+      if hi : i.isSimple = true then absurd h (by simp [MPath.isBindable, hb, hi])
+      else ⟨_, .memoryIndexRead_unfold_rightSndIndex k b hb i (not_simple hi) _
+        (freshName_isFresh C Γ' "ie")⟩
+    else ⟨_, .memoryIndexRead_unfold_rightFst k b (not_simple hb) i _ (freshName_isFresh C Γ' "mv")⟩
+
 /-- A copy into a member or an entry (`nlhs = …`), from a path. -/
 def copyStep {Γ : Ctx} {R : RefTy} (l : Loc C Γ (.ref R)) (hl : (SPath.loc l).isSimple = false)
     (hm : (Ty.ref R).mapFree = true) (sp₂ : SPath C Γ (.ref R))
@@ -82,6 +96,7 @@ def ternaryStep {Γ : Ctx} {p : PrimTy} (k : VHole C Γ p) (c : Val C Γ .bool) 
   | .binop op hop hq x y => ⟨_, .ternaryCaptureCond k (.binop op hop hq x y) rfl a b _ (freshName_isFresh C Γ "se")⟩
   | .unop op hop hq x => ⟨_, .ternaryCaptureCond k (.unop op hop hq x) rfl a b _ (freshName_isFresh C Γ "se")⟩
   | .ternary c' x y => ⟨_, .ternaryCaptureCond k (.ternary c' x y) rfl a b _ (freshName_isFresh C Γ "se")⟩
+  | .readMem ml => ⟨_, .ternaryCaptureCond k (.readMem ml) rfl a b _ (freshName_isFresh C Γ "se")⟩
 
 /-- A storage write. -/
 def assignStep {Γ : Ctx} {T : Ty} : (l : Loc C Γ T) → (r : Src C Γ T) → Step C m (.assign l r)
@@ -94,6 +109,8 @@ def assignStep {Γ : Ctx} {T : Ty} : (l : Loc C Γ T) → (r : Src C Γ T) → S
   | .root x hΓ hr, .val (.unop op hop hq a) =>
     ⟨_, .storageRootWriteValueRhsCapture x hΓ hr (.unop op hop hq a) rfl _ (freshName_isFresh C Γ "se")⟩
   | .root x hΓ hr, .val (.ternary c a b) => ternaryStep m (.store (.root x hΓ hr)) c a b
+  | .root x hΓ hr, .val (.readMem ml) =>
+    ⟨_, .storageRootWriteValueRhsCapture x hΓ hr (.readMem ml) rfl _ (freshName_isFresh C Γ "se")⟩
   | .root x hΓ hr, .copy sp₂ hm =>
     if hs : sp₂.isSimple = true then ⟨_, .storageRootWriteCopySource x hΓ hr sp₂ hs hm⟩
     else match sp₂, hs with
@@ -121,6 +138,7 @@ def assignStep {Γ : Ctx} {T : Ty} : (l : Loc C Γ T) → (r : Src C Γ T) → S
       | .unop op hop hq a =>
         ⟨_, .fieldWriteValueRhsCapture b hb f hf (.unop op hop hq a) rfl _ (freshName_isFresh C Γ "se")⟩
       | .ternary c a d => ternaryStep m (.store (.field b f hf)) c a d
+      | .readMem ml => ⟨_, .fieldWriteValueRhsCapture b hb f hf (.readMem ml) rfl _ (freshName_isFresh C Γ "se")⟩
     else ⟨_, .storageFieldWrite_unfold_leftFst b (not_simple hb) f hf e _ _
       (freshName_isFresh C Γ "se") (freshName_isFresh C _ "sp")⟩
   | .field b f hf, .copy src hm =>
@@ -145,6 +163,8 @@ def assignStep {Γ : Ctx} {T : Ty} : (l : Loc C Γ T) → (r : Src C Γ T) → S
         | .unop op hop hq a =>
           ⟨_, .indexWriteValueRhsCapture it b hb ie (.unop op hop hq a) rfl _ (freshName_isFresh C Γ "se")⟩
         | .ternary c a d => ternaryStep m (.store (.index it b (.simple ie))) c a d
+        | .readMem ml =>
+          ⟨_, .indexWriteValueRhsCapture it b hb ie (.readMem ml) rfl _ (freshName_isFresh C Γ "se")⟩
       | .read l => ⟨_, .storageIndexWriteNonSimpleIndexCapture it b hb (.read l) rfl e _ _
           (freshName_isFresh C Γ "se") (freshName_isFresh C _ "ie")⟩
       | .binop op hop hq a c => ⟨_, .storageIndexWriteNonSimpleIndexCapture it b hb (.binop op hop hq a c) rfl e _ _
@@ -152,6 +172,8 @@ def assignStep {Γ : Ctx} {T : Ty} : (l : Loc C Γ T) → (r : Src C Γ T) → S
       | .unop op hop hq a => ⟨_, .storageIndexWriteNonSimpleIndexCapture it b hb (.unop op hop hq a) rfl e _ _
           (freshName_isFresh C Γ "se") (freshName_isFresh C _ "ie")⟩
       | .ternary c a d => ⟨_, .storageIndexWriteNonSimpleIndexCapture it b hb (.ternary c a d) rfl e _ _
+          (freshName_isFresh C Γ "se") (freshName_isFresh C _ "ie")⟩
+      | .readMem ml => ⟨_, .storageIndexWriteNonSimpleIndexCapture it b hb (.readMem ml) rfl e _ _
           (freshName_isFresh C Γ "se") (freshName_isFresh C _ "ie")⟩
     else ⟨_, .storageIndexWrite_unfold_leftFst it b (not_simple hb) i e _ _ _
       (freshName_isFresh C Γ "se") (freshName_isFresh C _ "sp") (freshName_isFresh C _ "ie")⟩
@@ -239,11 +261,13 @@ def localStep {Γ : Ctx} {p : PrimTy} (x : Name) (h : lookupBy x Γ = some (.sta
       | .binop op' hop' hq' a' c' => binopRightStep m x op hop hq h a (.binop op' hop' hq' a' c') rfl
       | .unop op' hop' hq' a' => binopRightStep m x op hop hq h a (.unop op' hop' hq' a') rfl
       | .ternary c' a' d' => binopRightStep m x op hop hq h a (.ternary c' a' d') rfl
+      | .readMem ml => binopRightStep m x op hop hq h a (.readMem ml) rfl
     | .read l => ⟨_, .binopUnfoldLeft op hop hq x h (.read l) rfl e _ (freshName_isFresh C Γ "se")⟩
     | .binop op' hop' hq' a' c' =>
       ⟨_, .binopUnfoldLeft op hop hq x h (.binop op' hop' hq' a' c') rfl e _ (freshName_isFresh C Γ "se")⟩
     | .unop op' hop' hq' a' => ⟨_, .binopUnfoldLeft op hop hq x h (.unop op' hop' hq' a') rfl e _ (freshName_isFresh C Γ "se")⟩
     | .ternary c' a' d' => ⟨_, .binopUnfoldLeft op hop hq x h (.ternary c' a' d') rfl e _ (freshName_isFresh C Γ "se")⟩
+    | .readMem ml => ⟨_, .binopUnfoldLeft op hop hq x h (.readMem ml) rfl e _ (freshName_isFresh C Γ "se")⟩
   | .unop op hop hq a =>
     match a with
     | .simple a => ⟨_, .unopAssignment op hop hq x h a⟩
@@ -251,7 +275,19 @@ def localStep {Γ : Ctx} {p : PrimTy} (x : Name) (h : lookupBy x Γ = some (.sta
     | .binop op' hop' hq' a' c' => ⟨_, .unopCapture op hop hq x h (.binop op' hop' hq' a' c') rfl _ (freshName_isFresh C Γ "se")⟩
     | .unop op' hop' hq' a' => ⟨_, .unopCapture op hop hq x h (.unop op' hop' hq' a') rfl _ (freshName_isFresh C Γ "se")⟩
     | .ternary c' a' d' => ⟨_, .unopCapture op hop hq x h (.ternary c' a' d') rfl _ (freshName_isFresh C Γ "se")⟩
+    | .readMem ml => ⟨_, .unopCapture op hop hq x h (.readMem ml) rfl _ (freshName_isFresh C Γ "se")⟩
   | .ternary c a d => ternaryStep m (.local x h) c a d
+  | .readMem l =>
+    if hl : (MPath.loc l).isBindable = true then
+      match l, hl with
+      | .field b f hf, hl => ⟨_, .memoryFieldReadHeap x h b hl f hf⟩
+      | .index b i, hl =>
+        match i, hl with
+        | .simple ie, hl =>
+          ⟨_, .memoryIndexReadHeap x h b (by simpa [MPath.isBindable, Val.isSimple] using hl) ie⟩
+        | .read _, hl | .binop .., hl | .unop .., hl | .ternary .., hl | .readMem _, hl =>
+          absurd hl (by simp [MPath.isBindable, Val.isSimple])
+    else (MHole.local x h).unfoldStep m l (not_simple hl)
 
 /-- A delete. -/
 def deleteStep {Γ : Ctx} {T : Ty} : (l : Loc C Γ T) → Step C m (.delete l)
@@ -270,6 +306,8 @@ def deleteStep {Γ : Ctx} {T : Ty} : (l : Loc C Γ T) → Step C m (.delete l)
         ⟨_, .storageIndexDeleteNonSimpleIndexCapture it b hb (.unop op hop hq a) rfl _ (freshName_isFresh C Γ "ie")⟩
       | .ternary c a d =>
         ⟨_, .storageIndexDeleteNonSimpleIndexCapture it b hb (.ternary c a d) rfl _ (freshName_isFresh C Γ "ie")⟩
+      | .readMem ml =>
+        ⟨_, .storageIndexDeleteNonSimpleIndexCapture it b hb (.readMem ml) rfl _ (freshName_isFresh C Γ "ie")⟩
     else ⟨_, .storageIndexDelete_unfold_leftFst it b (not_simple hb) i _ (freshName_isFresh C Γ "sp")⟩
 
 /-- The rule for a compound assignment: the source first (capture a
@@ -283,6 +321,8 @@ def opStep {Γ : Ctx} {p : PrimTy} (op : BinOp) (hop : op.hasCompoundAssign = tr
     ⟨_, .compoundAssignValueRhsCapture op hop hp l (.unop op' hop' hq' a) rfl _ (freshName_isFresh C Γ "se")⟩
   | .ternary c a b =>
     ⟨_, .compoundAssignValueRhsCapture op hop hp l (.ternary c a b) rfl _ (freshName_isFresh C Γ "se")⟩
+  | .readMem ml =>
+    ⟨_, .compoundAssignValueRhsCapture op hop hp l (.readMem ml) rfl _ (freshName_isFresh C Γ "se")⟩
   | .simple se =>
     match l with
     | .local x h => ⟨_, .localOpAssign op hop hp x h se⟩
@@ -333,7 +373,8 @@ def pushStep {Γ : Ctx} {E : Ty} (b : SPath C Γ (.array E)) (v : Option (Src C 
         | _, b, hb, .val (.simple se), _, hd => ⟨_, .storagePushValueSave b hb se hd⟩
         | _, b, hb, .copy sp₂ hm, hr, hd => ⟨_, .storagePushValueCopySource b hb sp₂ hr hm hd⟩
         | _, _, _, .val (.read _), hr, _ | _, _, _, .val (.binop ..), hr, _
-        | _, _, _, .val (.unop ..), hr, _ | _, _, _, .val (.ternary ..), hr, _ =>
+        | _, _, _, .val (.unop ..), hr, _ | _, _, _, .val (.ternary ..), hr, _
+        | _, _, _, .val (.readMem _), hr, _ =>
           absurd hr (by simp [Src.isSimple, Val.isSimple])
       else ⟨_, .storagePushValue_unfold_rightSndArgument b hb r (not_simple hr) _
         (freshName_isFresh C Γ "se") hd⟩
@@ -358,11 +399,94 @@ def transferStep {Γ : Ctx} : (r a : Val C Γ .uint) → Step C m (.transfer r a
     ⟨_, .transfer_unfold_rightSndArgument r (.unop op h hq x) rfl _ (freshName_isFresh C Γ "se")⟩
   | .simple r, .ternary c x y =>
     ⟨_, .transfer_unfold_rightSndArgument r (.ternary c x y) rfl _ (freshName_isFresh C Γ "se")⟩
+  | .simple r, .readMem ml =>
+    ⟨_, .transfer_unfold_rightSndArgument r (.readMem ml) rfl _ (freshName_isFresh C Γ "se")⟩
   | .read l, a => ⟨_, .transfer_unfold_leftFstReceiver (.read l) rfl a _ (freshName_isFresh C Γ "se")⟩
   | .binop op h hq x y, a =>
     ⟨_, .transfer_unfold_leftFstReceiver (.binop op h hq x y) rfl a _ (freshName_isFresh C Γ "se")⟩
   | .unop op h hq x, a => ⟨_, .transfer_unfold_leftFstReceiver (.unop op h hq x) rfl a _ (freshName_isFresh C Γ "se")⟩
   | .ternary c x y, a => ⟨_, .transfer_unfold_leftFstReceiver (.ternary c x y) rfl a _ (freshName_isFresh C Γ "se")⟩
+  | .readMem ml, a => ⟨_, .transfer_unfold_leftFstReceiver (.readMem ml) rfl a _ (freshName_isFresh C Γ "se")⟩
+
+/-- A memory local rebound. -/
+def rebindMemStep {Γ : Ctx} {R : RefTy} (x : Name) (h : lookupBy x Γ = some (.mem (.ref R))) :
+    (r : MRhs C Γ R) → Step C m (.rebindMem x h r)
+  | .alias (.var y hy) => ⟨_, .memoryRootAlias x h y hy⟩
+  | .alias (.loc l) =>
+    if hl : (MPath.loc l).isBindable = true then
+      match l, hl with
+      | .field b f hf, hl => ⟨_, .memoryFieldReadAliasRoot x h b hl f hf⟩
+      | .index b i, hl =>
+        match i, hl with
+        | .simple ie, hl =>
+          ⟨_, .memoryIndexReadAliasRoot x h b (by simpa [MPath.isBindable, Val.isSimple] using hl) ie⟩
+        | .read _, hl | .binop .., hl | .unop .., hl | .ternary .., hl | .readMem _, hl =>
+          absurd hl (by simp [MPath.isBindable, Val.isSimple])
+    else (MHole.rebind x h).unfoldStep m l (not_simple hl)
+
+/-- A memory local declared. -/
+def declMemStep {Γ : Ctx} (R : RefTy) (x : Name) (hx : isFresh C Γ x = true) :
+    (init : Option (MRhs C Γ R)) → (hd : (init.isSome || (Ty.ref R).defaultOkS) = true) →
+      Step C m (.declMem R x hx init hd)
+  | none, hd => ⟨_, .memoryDeclFreshAlloc R x hx hd⟩
+  | some (.alias p), hd =>
+    if hp : p.isBindable = true then ⟨_, .memoryLocalDeclInitDrop R x hx p hp hd⟩
+    else
+      match p, hp with
+      | .var .., hp => absurd rfl hp
+      | .loc l, hp => (MHole.decl R x hx).unfoldStep m l (not_simple hp)
+
+/-- A memory location written. -/
+def assignMemStep {Γ : Ctx} {T : Ty} : (l : MLoc C Γ T) → (r : MSrc C Γ T) → Step C m (.assignMem l r)
+  | .field b f hf, .val v =>
+    if hb : b.isSimple = true then
+      if hv : v.isSimple = true then
+        match v, hv with
+        | .simple se, _ => ⟨_, .memoryFieldWriteStore b hb f hf se⟩
+        | .read _, hv | .binop .., hv | .unop .., hv | .ternary .., hv | .readMem _, hv =>
+          absurd hv (by simp [Val.isSimple])
+      else ⟨_, .memoryFieldWriteUnfoldSource b hb f hf v (not_simple hv) _ (freshName_isFresh C Γ "se")⟩
+    else ⟨_, .memoryFieldWrite_unfold_leftFst b (not_simple hb) f hf v _ _ (freshName_isFresh C Γ "se")
+      (freshName_isFresh C _ "mv")⟩
+  | .index b i, .val v =>
+    if hb : b.isSimple = true then
+      if hi : i.isSimple = true then
+        match i, hi with
+        | .simple ie, _ =>
+          if hv : v.isSimple = true then
+            match v, hv with
+            | .simple se, _ => ⟨_, .memoryIndexWriteStore b hb ie se⟩
+            | .read _, hv | .binop .., hv | .unop .., hv | .ternary .., hv | .readMem _, hv =>
+              absurd hv (by simp [Val.isSimple])
+          else ⟨_, .memoryIndexWriteUnfoldSource b hb ie v (not_simple hv) _ (freshName_isFresh C Γ "se")⟩
+        | .read _, hi | .binop .., hi | .unop .., hi | .ternary .., hi | .readMem _, hi =>
+          absurd hi (by simp [Val.isSimple])
+      else ⟨_, .memoryIndexWriteNonSimpleIndexCapture b hb i (not_simple hi) v _ _
+        (freshName_isFresh C Γ "se") (freshName_isFresh C _ "ie")⟩
+    else ⟨_, .memoryIndexWrite_unfold_leftFst b (not_simple hb) i v _ _ (freshName_isFresh C Γ "se")
+      (freshName_isFresh C _ "mv")⟩
+  | l, .ref src =>
+    if hs : src.isBindable = true then
+      match l with
+      | .field b f hf =>
+        if hb : b.isSimple = true then ⟨_, .memoryFieldWriteCopy b hb f hf src hs⟩
+        else ⟨_, .memoryFieldWriteMemRef_unfold_leftFst b (not_simple hb) f hf src hs _
+          (freshName_isFresh C Γ "mv")⟩
+      | .index b i =>
+        if hb : b.isSimple = true then
+          if hi : i.isSimple = true then
+            match i, hi with
+            | .simple ie, _ => ⟨_, .memoryIndexWriteCopy b hb ie src hs⟩
+            | .read _, hi | .binop .., hi | .unop .., hi | .ternary .., hi | .readMem _, hi =>
+              absurd hi (by simp [Val.isSimple])
+          else ⟨_, .memoryIndexWriteMemRefNonSimpleIndexCapture b hb i (not_simple hi) src hs _
+            (freshName_isFresh C Γ "ie")⟩
+        else ⟨_, .memoryIndexWriteMemRef_unfold_leftFst b (not_simple hb) i src hs _
+          (freshName_isFresh C Γ "mv")⟩
+    else
+      match src, hs with
+      | .var .., hs => absurd rfl hs
+      | .loc sl, hs => (MHole.write l).unfoldStep m sl (not_simple hs)
 
 /-- **The rule for a statement**, under the modality `m`.  Total: every
 statement of the kernel has one. -/
@@ -379,6 +503,9 @@ def Stmt.step {Γ Γ' : Ctx} : (s : Stmt C Γ Γ') → Step C m s
     else match p, hb with
       | .alias .., hb => absurd rfl hb
       | .loc l, hb => (Hole.decl c R x hx).unfoldStep m l (not_simple hb)
+  | .declMem R x hx init hd => declMemStep m R x hx init hd
+  | .rebindMem x h r => rebindMemStep m x h r
+  | .assignMem l r => assignMemStep m l r
   | .opAssign op hop hp l r => opStep m op hop hp l r
   | .incDec op hp l => incStep m op hp l
   | .push b v hd => pushStep m b v hd
@@ -423,6 +550,9 @@ def Upd.toStr {Γ : Ctx} : Upd C Γ → String
     | some r => s!"\{ storage := push(storage, {b.toStr}, {r.toStr}) }"
   | .pop b => s!"\{ storage := pop(storage, {b.toStr}) }"
   | .transfer r a => s!"\{ transfer({r.toStr}, {a.toStr}) }"
+  | .bindMem x p => s!"\{ {x} := ref({p.toStr}) }"
+  | .allocMem x _ => s!"\{ {x} := freshId(alloc({x})) || memory := alloc({x}) }"
+  | .writeMem l r => s!"\{ memory := write(memory, {l.toStr}, {r.toStr}) }"
   | .bumpBind x op l => s!"\{ bump({IncDec.show op l.toStr}) || {x} := {IncDec.show op l.toStr} }"
 
 def Premise.toStr {Γ Γ' : Ctx} : Premise C Γ Γ' → String
