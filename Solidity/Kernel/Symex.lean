@@ -80,6 +80,133 @@ theorem Prog.correct {Γ Γ' : Ctx} (m : Modality) (P : Prog C Γ Γ') (ψ : Pos
     after m (execBlock σ P.erase) ψ.holds := by
   rw [Prog.run_eq]; exact (Kont.vc_sound n _ _ h).sound σ hσ
 
+/-! ## Termination
+
+The fuel is not a limit: `Kont.weight` is enough, and any more gives the
+same goals.  A statement weighs `5 ^ size`; `Taclet.smaller` makes every
+rule lower the weight of the goal. -/
+
+/-- A block's weight: `Σ 5 ^ size`. -/
+def Prog.weight {Γ Γ' : Ctx} : Prog C Γ Γ' → Nat
+  | .nil => 0
+  | .cons s P => 5 ^ s.size + P.weight
+
+/-- A goal's weight: its blocks, and one for each modality, `up` and
+postcondition. -/
+def Kont.weight {Γ : Ctx} : Kont C Γ → Nat
+  | .post _ => 1
+  | .modal _ P k => 5 * P.weight + k.weight + 1
+  | .up _ k => k.weight + 1
+
+theorem Kont.one_le_weight {Γ : Ctx} (k : Kont C Γ) : 1 ≤ k.weight := by
+  cases k <;> simp only [Kont.weight] <;> omega
+
+theorem Stmt.one_le_size {Γ Γ' : Ctx} (s : Stmt C Γ Γ') : 1 ≤ s.size := by
+  cases s <;> simp only [Stmt.size] <;> (try split) <;> omega
+
+theorem Prog.weight_append {Γ Γ₁ Γ₂ : Ctx} :
+    (P : Prog C Γ Γ₁) → (Q : Prog C Γ₁ Γ₂) → (P.append Q).weight = P.weight + Q.weight
+  | .nil, Q => by simp [Prog.append, Prog.weight]
+  | .cons s P, Q => by simp only [Prog.append, Prog.weight, Prog.weight_append P Q]; omega
+
+theorem five_pow_add {a b : Nat} (ha : 1 ≤ a) (hb : 1 ≤ b) : 5 ^ a + 5 ^ b ≤ 5 ^ (a + b) := by
+  rw [Nat.pow_add]
+  have h₁ : 5 ^ a * 5 ≤ 5 ^ a * 5 ^ b :=
+    Nat.mul_le_mul_left _ (by simpa using Nat.pow_le_pow_right (by omega) hb)
+  have h₂ : 5 * 5 ^ b ≤ 5 ^ a * 5 ^ b :=
+    Nat.mul_le_mul_right _ (by simpa using Nat.pow_le_pow_right (by omega) ha)
+  omega
+
+/-- A block weighs at most `5 ^` its size: `x = 1; y = 2;` weighs
+`5² + 5² ≤ 5⁴`. -/
+theorem Prog.weight_le {Γ Γ' : Ctx} : (P : Prog C Γ Γ') → P.weight ≤ 5 ^ P.size
+  | .nil => by simp [Prog.weight]
+  | .cons s P => by
+    simp only [Prog.weight, Prog.size]
+    cases P with
+    | nil => simp [Prog.weight, Prog.size]
+    | cons s' P' =>
+      have := Prog.weight_le (.cons s' P')
+      have h1 := s.one_le_size
+      have h2 : 1 ≤ (Prog.cons s' P').size := by
+        simp only [Prog.size]; have := s'.one_le_size; omega
+      have := five_pow_add h1 h2
+      omega
+
+/-- At most four statements, each smaller than `m`, weigh at most
+`4 · 5 ^ (m - 1)`. -/
+theorem Prog.weight_of_sizes {Γ Γ' : Ctx} (m : Nat) :
+    (P : Prog C Γ Γ') → (∀ n ∈ P.sizes, n < m) → 5 * P.weight ≤ P.sizes.length * 5 ^ m
+  | .nil, _ => by simp [Prog.weight]
+  | .cons s P, h => by
+    simp only [Prog.weight, Prog.sizes, List.length, List.mem_cons, forall_eq_or_imp] at h ⊢
+    have ih := Prog.weight_of_sizes m P h.2
+    have : 5 ^ s.size * 5 ≤ 5 ^ m := by
+      rw [← Nat.pow_succ]; exact Nat.pow_le_pow_right (by omega) h.1
+    rw [Nat.add_mul, Nat.one_mul]; omega
+
+/-- **The executor normalizes**: once the fuel reaches the goal's weight,
+more changes nothing.  `⟨ uint x = 1; ⟩ true` has the same goals at fuel
+30 as at fuel 3000. -/
+theorem Kont.vc_fuel : (n n' : Nat) → {Γ₀ Γ : Ctx} → (H : Hyps C Γ₀ Γ) → (k : Kont C Γ) →
+    k.weight ≤ n → k.weight ≤ n' → (k.vc n H ↔ k.vc n' H)
+  | 0, _, _, _, _, k, h, _ => absurd h (by have := k.one_le_weight; omega)
+  | _ + 1, 0, _, _, _, k, _, h => absurd h (by have := k.one_le_weight; omega)
+  | _ + 1, _ + 1, _, _, _, .post _, _, _ => Iff.rfl
+  | n + 1, n' + 1, _, _, _, .up _ k, h, h' => by
+    simp only [Kont.weight] at h h'
+    exact Kont.vc_fuel n n' _ k (by omega) (by omega)
+  | n + 1, n' + 1, _, _, H, .modal m P k, h, h' => by
+    cases P with
+    | nil =>
+      simp only [Kont.weight, Prog.weight] at h h'
+      exact Kont.vc_fuel n n' H k (by omega) (by omega)
+    | cons s ω =>
+      simp only [Kont.vc]
+      have hs := Taclet.smaller (s.step m).2
+      have h1 := s.one_le_size
+      have h5 : 5 ≤ 5 ^ s.size := by simpa using Nat.pow_le_pow_right (by omega) h1
+      simp only [Kont.weight, Prog.weight] at h h'
+      revert hs
+      generalize (s.step m).1 = pr
+      intro hs
+      cases pr with
+      | update U =>
+        exact Kont.vc_fuel n n' _ _ (by simp only [Kont.weight]; omega) (by simp only [Kont.weight]; omega)
+      | unfold ns P hsub =>
+        obtain ⟨hlen, hlt⟩ := hs
+        have hw := Prog.weight_of_sizes s.size P hlt
+        have : P.sizes.length * 5 ^ s.size ≤ 4 * 5 ^ s.size := Nat.mul_le_mul_right _ hlen
+        exact Kont.vc_fuel n n' _ _ (by simp only [Kont.weight]; omega) (by simp only [Kont.weight]; omega)
+      | split c P Q =>
+        obtain ⟨hP, hQ⟩ := hs
+        have hP' : P.weight < 5 ^ s.size :=
+          Nat.lt_of_le_of_lt P.weight_le (Nat.pow_lt_pow_right (by omega) hP)
+        have hQ' : Q.weight < 5 ^ s.size :=
+          Nat.lt_of_le_of_lt Q.weight_le (Nat.pow_lt_pow_right (by omega) hQ)
+        dsimp only
+        rw [Kont.vc_fuel n n' _ (.modal m (P.append ω) k)
+            (by simp only [Kont.weight, Prog.weight_append]; omega)
+            (by simp only [Kont.weight, Prog.weight_append]; omega),
+          Kont.vc_fuel n n' _ (.modal m (Q.append ω) k)
+            (by simp only [Kont.weight, Prog.weight_append]; omega)
+            (by simp only [Kont.weight, Prog.weight_append]; omega)]
+      | done b => exact Iff.rfl
+
+/-- The goals of `H ⊢ k`, with the fuel its weight gives. -/
+def Kont.goals {Γ₀ Γ : Ctx} (H : Hyps C Γ₀ Γ) (k : Kont C Γ) : Prop := k.vc k.weight H
+
+/-- The goals at any fuel past the weight are `Kont.goals`. -/
+theorem Kont.vc_goals {Γ₀ Γ : Ctx} {H : Hyps C Γ₀ Γ} {k : Kont C Γ} {n : Nat}
+    (h : k.weight ≤ n) : k.vc n H ↔ k.goals H :=
+  Kont.vc_fuel n k.weight H k h (Nat.le_refl _)
+
+/-- The goals prove the continuation: `⟨ uint x = 1; ⟩ true` follows from
+`{x := 0} {x := 1} true`. -/
+theorem Kont.goals_sound {Γ₀ Γ : Ctx} {H : Hyps C Γ₀ Γ} {k : Kont C Γ} (h : k.goals H) :
+    Proves H k :=
+  Kont.vc_sound _ H k h
+
 /-! ## Tactics -/
 
 open Lean Meta Simp in
@@ -135,6 +262,11 @@ def exStore := ksol{ alice.age = 10; assert(alice.age == 10); }
 def exBad := ksol{ uint x = 1; x = x + 2; assert(x == 4); }
 
 example : (Kont.modal .diamond exAdd (.post .tt)).vc 30 .nil := by
+  unfold exAdd; symex <;> symex_close
+
+/-- The same goals, at the fuel the weight bounds (`19502`; 30 is enough, and any fuel past the weight gives the same goals). -/
+example : (Kont.modal .diamond exAdd (.post .tt)).goals .nil := by
+  rw [← Kont.vc_goals (n := 20000) (by decide)]
   unfold exAdd; symex <;> symex_close
 
 /-- Both branches run; the `else` one is ruled out by its condition. -/

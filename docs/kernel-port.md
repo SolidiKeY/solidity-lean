@@ -306,7 +306,10 @@ lists only the standard three axioms.
   - [x] sizes and `Taclet.smaller` (`Kernel/Measure.lean`): the measure of a goal
     is `Σ 5 ^ size`; an unfolding rule leaves at most four smaller statements,
     a split smaller branches
-  - [ ] the measure falls on formulas; `Fml.step_wellFounded`, `symex_normalizes`
+  - [x] the measure falls on goals: `Kont.weight`, and `Kont.vc_fuel` (past
+    the weight, the executor's fuel changes nothing: `symex_normalizes`),
+    `Kont.goals` (`Kernel/Symex.lean`)
+  - [ ] `BlockStep.wellFounded` (the old layer's `Progress.lean` sorry), at cut-over
 - [ ] Phase 6: `Fml C`, `Proves`, `Proves.sound`, `FreshNames`.
   - [x] `Post`, `Kont` (with `up`, so the rest of a program is never retyped),
     `Hyps`, `Proves`, `Proves.sound` (`Kernel/Logic.lean`)
