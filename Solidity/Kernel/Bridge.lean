@@ -24,7 +24,10 @@ total + 1;`, where the kernel captures `total` as KeY's
 `addition_unfold_left` does, a state variable being a `Path`, not a
 `SimpleExpression`) and on a storage declaration whose path is not bindable
 (`Person storage r = persons[x + 1];`, which KeY drops to an assignment and
-the kernel, having no `T storage x;`, captures the index of first). -/
+the kernel, having no `T storage x;`, captures the index of first), and on a
+scratch alias (`Person storage sp = folks[x];`, which `ksol` writes before
+`y = sp.age++;`: the old table binds its own scratch aliases by the Lean-only
+`storagePlaceAlias`, KeY and the kernel by `storageLocalDeclInitDrop`). -/
 
 namespace Solidity
 namespace Kernel
@@ -93,6 +96,16 @@ def Taclet.rule {Γ Γ' : Ctx} {s : Stmt C Γ Γ'} {pr : Premise C Γ Γ'} : Tac
   | .storageFieldOpAssignUnfoldLeftFst op .. => some (.storageFieldOpAssignUnfoldLeftFst op)
   | .storageIndexOpAssignUnfoldLeftFst op .. => some (.storageIndexOpAssignUnfoldLeftFst op)
   | .compoundAssignValueRhsCapture op .. => some (.compoundAssignValueRhsCapture op)
+  | Taclet.localIncrement (op := op) .. => some (.localIncrement op)
+  | Taclet.storageRootIncrement (op := op) .. => some (.storageRootIncrement op)
+  | Taclet.storageFieldIncrement (op := op) .. => some (.storageFieldIncrement op)
+  | Taclet.storageIndexIncrement (op := op) .. => some (.storageIndexIncrement op)
+  | Taclet.storageFieldIncrementUnfoldLeftFst (op := op) .. => some (.storageFieldIncrementUnfoldLeftFst op)
+  | Taclet.storageIndexIncrementUnfoldLeftFst (op := op) .. => some (.storageIndexIncrementUnfoldLeftFst op)
+  | Taclet.localAssignIncrement (op := op) .. => some (.localAssignIncrement op)
+  | Taclet.storageRootIncrementAssignment (op := op) .. => some (.storageRootIncrementAssignment op)
+  | Taclet.storageFieldIncrementAssignment (op := op) .. => some (.storageFieldIncrementAssignment op)
+  | Taclet.storageIndexIncrementAssignment (op := op) .. => some (.storageIndexIncrementAssignment op)
   | .ifElseSplit .. => none
   | .requireSimple .. => some .requireSimple
   | .assertSimple .. => some .assertSimple
@@ -159,6 +172,16 @@ def Taclet.origin {Γ Γ' : Ctx} {s : Stmt C Γ Γ'} {pr : Premise C Γ Γ'} : T
   | .storageFieldOpAssignUnfoldLeftFst op .. => (ruleEffect (.storageFieldOpAssignUnfoldLeftFst op)).origin
   | .storageIndexOpAssignUnfoldLeftFst op .. => (ruleEffect (.storageIndexOpAssignUnfoldLeftFst op)).origin
   | .compoundAssignValueRhsCapture op .. => (ruleEffect (.compoundAssignValueRhsCapture op)).origin
+  | Taclet.localIncrement (op := op) .. => (ruleEffect (.localIncrement op)).origin
+  | Taclet.storageRootIncrement (op := op) .. => (ruleEffect (.storageRootIncrement op)).origin
+  | Taclet.storageFieldIncrement (op := op) .. => (ruleEffect (.storageFieldIncrement op)).origin
+  | Taclet.storageIndexIncrement (op := op) .. => (ruleEffect (.storageIndexIncrement op)).origin
+  | Taclet.storageFieldIncrementUnfoldLeftFst (op := op) .. => (ruleEffect (.storageFieldIncrementUnfoldLeftFst op)).origin
+  | Taclet.storageIndexIncrementUnfoldLeftFst (op := op) .. => (ruleEffect (.storageIndexIncrementUnfoldLeftFst op)).origin
+  | Taclet.localAssignIncrement (op := op) .. => (ruleEffect (.localAssignIncrement op)).origin
+  | Taclet.storageRootIncrementAssignment (op := op) .. => (ruleEffect (.storageRootIncrementAssignment op)).origin
+  | Taclet.storageFieldIncrementAssignment (op := op) .. => (ruleEffect (.storageFieldIncrementAssignment op)).origin
+  | Taclet.storageIndexIncrementAssignment (op := op) .. => (ruleEffect (.storageIndexIncrementAssignment op)).origin
   | .ifElseSplit .. => .taclet .ifElseSplit
   | .requireSimple .. => .taclet .requireSimple
   | .assertSimple .. => .taclet .assertSimple
@@ -172,13 +195,15 @@ origin. -/
 theorem Taclet.origin_claimed {Γ Γ' : Ctx} {s : Stmt C Γ Γ'} {pr : Premise C Γ Γ'}
     (d : Taclet C m s pr) {r : RuleName} (h : d.rule = some r) :
     ∀ t ∈ d.origin.taclets, t ∈ (ruleEffect r).origin.taclets := by
-  cases d <;> (try cases m) <;> simp only [Taclet.rule, Option.some.injEq, reduceCtorEq] at h <;> subst h <;>
-    simp only [Taclet.origin] <;> first | exact fun _ h => h | decide
+  cases d <;> (try cases m) <;>
+    first
+    | (injection h with h; subst h; first | exact fun _ h => h | (delta Taclet.origin; dsimp only; decide))
+    | injection h
 
 /-- The one step without a rule is the branch split. -/
 theorem Taclet.rule_none {Γ Γ' : Ctx} {s : Stmt C Γ Γ'} {pr : Premise C Γ Γ'}
     (d : Taclet C m s pr) (h : d.rule = none) : d.origin = .taclet .ifElseSplit := by
-  cases d <;> (try cases m) <;> simp_all [Taclet.rule, Taclet.origin]
+  cases d <;> (try cases m) <;> first | rfl | injection h
 
 /-! ## Agreement with the old table, run -/
 
@@ -212,15 +237,18 @@ def bridgeTour := ksol{
   delete alice;
   x += 1; x -= y; total *= 2; alice.age /= x; balances[x] %= 3; values[x] += 1;
   folks[x].age += 1; persons[x + 1].age -= 1; matrix[x][x] += 1; x += total + 1;
+  x++; ++total; alice.age++; ++balances[x]; values[x]++; folks[x].age++; persons[x + 1].age++;
+  y = x++; y = ++total; y = alice.age++; y = ++balances[x]; y = folks[x].age++;
   if (b) { x = 1; } else { x = 2; }; require(b); assert(b); require(x == 1); revert();
 }
 
 -- Under a box, the two tables pick the same rule for every statement but
--- the three the module docstring names.
+-- the four the module docstring names.
 #guard bridgeTour.disagreements .box = [
   "x = total + 1; kernel=some (Solidity.RuleName.binopUnfoldLeft (Solidity.BinOp.add)) old=some (Solidity.RuleName.binopAssignment (Solidity.BinOp.add))",
   "x = x + total; kernel=some (Solidity.RuleName.binopUnfoldRight (Solidity.BinOp.add)) old=some (Solidity.RuleName.binopAssignment (Solidity.BinOp.add))",
-  "Person storage r = persons[x + 1]; kernel=some (Solidity.RuleName.storageIndexReadUnfoldRightSndIndex) old=some (Solidity.RuleName.storageLocalDeclInitDrop)"]
+  "Person storage r = persons[x + 1]; kernel=some (Solidity.RuleName.storageIndexReadUnfoldRightSndIndex) old=some (Solidity.RuleName.storageLocalDeclInitDrop)",
+  "Person storage sp = folks[x]; kernel=some (Solidity.RuleName.storageLocalDeclInitDrop) old=some (Solidity.RuleName.storagePlaceAlias)"]
 
 -- And under a diamond.
 #guard bridgeTour.disagreements .diamond = bridgeTour.disagreements .box

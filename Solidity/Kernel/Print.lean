@@ -69,6 +69,11 @@ def OpLoc.toStr {p : PrimTy} : OpLoc C Γ p → String
   | .field b f _ => s!"{b.toStr}.{f}"
   | .index _ b i => s!"{b.toStr}[{i.toStr}]"
 
+/-- `x++`, `--x`. -/
+def IncDec.show (op : IncDec) (x : String) : String :=
+  let t := if op.isIncrement then "++" else "--"
+  if op.isPre then t ++ x else x ++ t
+
 mutual
 
 def Stmt.toStr {Γ Γ' : Ctx} : Stmt C Γ Γ' → String
@@ -81,6 +86,8 @@ def Stmt.toStr {Γ Γ' : Ctx} : Stmt C Γ Γ' → String
     | some e => s!"{tyStr (.prim p)} {x} = {e.toStr true};"
   | .declStorage _ R x _ e => s!"{tyStr (.ref R)} storage {x} = {e.toStr};"
   | .opAssign op _ _ l r => s!"{l.toStr} {BinOp.sym op}= {r.toStr true};"
+  | .incDec op _ l => s!"{IncDec.show op l.toStr};"
+  | .assignIncDec x _ op _ l _ => s!"{x} = {IncDec.show op l.toStr};"
   | .delete l => s!"delete {l.toStr};"
   | .ite c thn els => s!"if ({c.toStr}) \{ {thn.toStr} } else \{ {els.toStr} }"
   | .require c => s!"require({c.toStr});"

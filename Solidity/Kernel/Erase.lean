@@ -166,6 +166,13 @@ theorem BinOp.isArith_of_compound {op : BinOp} (h : op.hasCompoundAssign = true)
     op.isArith = true := by
   cases op <;> first | rfl | exact absurd h (by decide)
 
+theorem OpLoc.erase_ty {C : Contract} {Γ : Ctx} {p : PrimTy} :
+    (l : OpLoc C Γ p) → l.toPlace.expr.ty = .prim p
+  | .local .. => rfl
+  | .root r hΓ h => (Loc.root r hΓ h).erase_ty
+  | .field b f h => (Loc.field b f h).erase_ty
+  | .index it b i => (Loc.index it b (.simple i)).erase_ty
+
 theorem OpLoc.erase_wt {C : Contract} {Γ : Ctx} {p : PrimTy} :
     (l : OpLoc C Γ p) → wtExpr Γ C.layout l.toPlace.expr = true
   | .local x h => by simp [OpLoc.toPlace, PlaceExpr.var, wtExpr, h, Field.primitive]
@@ -186,6 +193,9 @@ def Stmt.erase {C : Contract} {Γ Γ' : Ctx} : Stmt C Γ Γ' → Solidity.Stmt
       if capture then .storagePlaceAlias (.ref R) x init.erase
       else .storageDecl (.ref R) x (some init.erase)
   | .opAssign op _ _ l r => .compoundAssign op l.toPlace r.erase
+  | .incDec op _ l => .expr (.mkIncDec op l.toPlace.expr)
+  | .assignIncDec (p := p) x _ op _ l _ =>
+      .assign (PlaceExpr.var .stack (.prim p) (Field.primitive x (.prim p))) (.mkIncDec op l.toPlace.expr)
   | .delete l => .delete l.toPlace
   | .ite c thn els => .ite c.erase thn.erase els.erase
   | .require c => .requireStmt c.erase
@@ -221,6 +231,10 @@ theorem Stmt.erase_wt {C : Contract} {Γ Γ' : Ctx} :
       cases capture <;> simp [Stmt.erase, stmtWt, init.erase_wt, init.erase_ty]
   | .opAssign op hop _ l r => by
       simp [Stmt.erase, stmtWt, BinOp.isArith_of_compound hop, l.erase_wt, r.erase_wt]
+  | .incDec op _ l => by simp [Stmt.erase, stmtWt, wtExpr, l.erase_wt]
+  | .assignIncDec x h op _ l _ => by
+      simp [Stmt.erase, stmtWt, PlaceExpr.var, wtExpr, h, Field.primitive, l.erase_wt,
+        Typed.WrappedExpr.ty, l.erase_ty]
   | .delete l => by
       simp [Stmt.erase, stmtWt, Loc.toPlace, SPath.toPlace, SPath.erase, l.erase_wt]
       cases l <;> rfl

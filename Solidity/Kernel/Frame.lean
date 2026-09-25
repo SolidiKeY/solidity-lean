@@ -262,5 +262,19 @@ theorem OpLoc.store_weaken {Γ Γ' : Ctx} (h : Ctx.Sub C Γ Γ') (σ : State) (o
     rw [show (Loc.index it (b.weaken h) (.simple (i.weaken h))) = (Loc.index it b (.simple i)).weaken h
       from rfl, Loc.resolve_weaken]
 
+/-- A weakened `++` target is bumped as the original. -/
+theorem OpLoc.bump_weaken {Γ Γ' : Ctx} (h : Ctx.Sub C Γ Γ') (σ : State) (op : IncDec) {p : PrimTy}
+    (l : OpLoc C Γ p) : (l.weaken h).bump σ op = l.bump σ op := by
+  cases l with
+  | «local» => rfl
+  | root => rfl
+  | field b f hf =>
+    simp only [OpLoc.weaken, OpLoc.bump]
+    rw [show (Loc.field (b.weaken h) f hf) = (Loc.field b f hf).weaken h from rfl, Loc.resolve_weaken]
+  | index it b i =>
+    simp only [OpLoc.weaken, OpLoc.bump]
+    rw [show (Loc.index it (b.weaken h) (.simple (i.weaken h))) = (Loc.index it b (.simple i)).weaken h
+      from rfl, Loc.resolve_weaken]
+
 end Kernel
 end Solidity

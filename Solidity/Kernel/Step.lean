@@ -270,6 +270,28 @@ def opStep {Γ : Ctx} {p : PrimTy} (op : BinOp) (hop : op.hasCompoundAssign = tr
       else ⟨_, .storageIndexOpAssignUnfoldLeftFst op hop hp it b (not_simple hb) ie se _
         (freshName_isFresh C Γ "sp")⟩
 
+/-- The rule for `l++;`: capture a non-simple receiver. -/
+def incStep {Γ : Ctx} {p : PrimTy} (op : IncDec) (hp : p.isNumeric = true) :
+    (l : OpLoc C Γ p) → Step C m (.incDec op hp l)
+  | .local x h => ⟨_, .localIncrement op hp x h⟩
+  | .root r hΓ h => ⟨_, .storageRootIncrement op hp r hΓ h⟩
+  | .field b f h =>
+    if hb : b.isSimple = true then ⟨_, .storageFieldIncrement op hp b hb f h⟩
+    else ⟨_, .storageFieldIncrementUnfoldLeftFst op hp b (not_simple hb) f h _ (freshName_isFresh C Γ "sp")⟩
+  | .index it b ie =>
+    if hb : b.isSimple = true then ⟨_, .storageIndexIncrement op hp it b hb ie⟩
+    else ⟨_, .storageIndexIncrementUnfoldLeftFst op hp it b (not_simple hb) ie _
+      (freshName_isFresh C Γ "sp")⟩
+
+/-- The rule for `y = l++;`, whose receiver is simple. -/
+def assignIncStep {Γ : Ctx} {p : PrimTy} (y : Name) (hy : lookupBy y Γ = some (.stack (.prim p)))
+    (op : IncDec) (hp : p.isNumeric = true) :
+    (l : OpLoc C Γ p) → (hs : l.recvSimple = true) → Step C m (.assignIncDec y hy op hp l hs)
+  | .local x h, rfl => ⟨_, .localAssignIncrement y hy op hp x h⟩
+  | .root r hΓ h, rfl => ⟨_, .storageRootIncrementAssignment y hy op hp r hΓ h⟩
+  | .field b f h, hs => ⟨_, .storageFieldIncrementAssignment y hy op hp b f h hs⟩
+  | .index it b ie, hs => ⟨_, .storageIndexIncrementAssignment y hy op hp it b ie hs⟩
+
 /-- **The rule for a statement**, under the modality `m`.  Total: every
 statement of the kernel has one. -/
 def Stmt.step {Γ Γ' : Ctx} : (s : Stmt C Γ Γ') → Step C m s
@@ -286,6 +308,8 @@ def Stmt.step {Γ Γ' : Ctx} : (s : Stmt C Γ Γ') → Step C m s
       | .alias .., hb => absurd rfl hb
       | .loc l, hb => (Hole.decl c R x hx).unfoldStep m l (not_simple hb)
   | .opAssign op hop hp l r => opStep m op hop hp l r
+  | .incDec op hp l => incStep m op hp l
+  | .assignIncDec y hy op hp l hs => assignIncStep m y hy op hp l hs
   | .delete l => deleteStep m l
   | .ite c thn els => ⟨_, .ifElseSplit c thn els⟩
   | .require c => ⟨_, .requireSimple c⟩
@@ -317,6 +341,8 @@ def Upd.toStr {Γ : Ctx} : Upd C Γ → String
     match l with
     | .local x _ => s!"\{ {x} := {x} {BinOp.sym op} {se.toStr} }"
     | l => s!"\{ storage := save(storage, {l.toStr}, {l.toStr} {BinOp.sym op} {se.toStr}) }"
+  | .bump op l => s!"\{ bump({IncDec.show op l.toStr}) }"
+  | .bumpBind x op l => s!"\{ bump({IncDec.show op l.toStr}) || {x} := {IncDec.show op l.toStr} }"
 
 def Premise.toStr {Γ Γ' : Ctx} : Premise C Γ Γ' → String
   | .update U => s!"{U.toStr} ⟨[ ]⟩"

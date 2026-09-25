@@ -54,6 +54,8 @@ inductive RawStmt where
   | declStorage (T : RawTy) (x : String) (init : Option RawExpr)
   | delete (e : RawExpr)
   | opAssign (op : BinOp) (l r : RawExpr)
+  | incDec (op : IncDec) (l : RawExpr)
+  | assignIncDec (x : RawExpr) (op : IncDec) (l : RawExpr)
   | ite (c : RawExpr) (thn els : List RawStmt)
   | require (c : RawExpr)
   | assert (c : RawExpr)
@@ -93,6 +95,10 @@ syntax kernel_ty ident " = " ksol_expr : ksol_stmt
 syntax kernel_ty &"storage" ident : ksol_stmt
 syntax kernel_ty &"storage" ident " = " ksol_expr : ksol_stmt
 syntax &"delete " ksol_expr : ksol_stmt
+syntax ksol_expr "++" : ksol_stmt
+syntax "++" ksol_expr : ksol_stmt
+syntax ksol_expr " = " ksol_expr "++" : ksol_stmt
+syntax ksol_expr " = " "++" ksol_expr : ksol_stmt
 syntax ksol_expr " += " ksol_expr : ksol_stmt
 syntax ksol_expr " -= " ksol_expr : ksol_stmt
 syntax ksol_expr " *= " ksol_expr : ksol_stmt
@@ -175,6 +181,12 @@ partial def expandStmt : TSyntax `ksol_stmt → MacroM Term
   | `(ksol_stmt| $T:kernel_ty $x:ident) => do
       `(RawStmt.decl $(← expandTy T) $(quote x.getId.toString) none)
   | `(ksol_stmt| delete $e) => do `(RawStmt.delete $(← expandExpr e))
+  | `(ksol_stmt| $l:ksol_expr ++) => do `(RawStmt.incDec .postInc $(← expandExpr l))
+  | `(ksol_stmt| ++ $l:ksol_expr) => do `(RawStmt.incDec .preInc $(← expandExpr l))
+  | `(ksol_stmt| $x:ksol_expr = $l:ksol_expr ++) => do
+      `(RawStmt.assignIncDec $(← expandExpr x) .postInc $(← expandExpr l))
+  | `(ksol_stmt| $x:ksol_expr = ++ $l:ksol_expr) => do
+      `(RawStmt.assignIncDec $(← expandExpr x) .preInc $(← expandExpr l))
   | `(ksol_stmt| $l:ksol_expr += $r) => do `(RawStmt.opAssign .add $(← expandExpr l) $(← expandExpr r))
   | `(ksol_stmt| $l:ksol_expr -= $r) => do `(RawStmt.opAssign .sub $(← expandExpr l) $(← expandExpr r))
   | `(ksol_stmt| $l:ksol_expr *= $r) => do `(RawStmt.opAssign .mul $(← expandExpr l) $(← expandExpr r))
@@ -331,6 +343,33 @@ def elabOpTarget (C : Contract) (Γ : Ctx) (l : RawExpr) :
       | _ => throw "the captured index did not read back"
   | _ => throw "a compound assignment needs a local or a storage place of value type"
 
+/-- An inc/dec target for an assignment form: as `elabOpTarget`, with a
+non-simple receiver captured into a fresh `sp` first (`y = folks[i].age++;`
+is `Person storage sp = folks[i]; y = sp.age++;`). -/
+def elabIncTarget (C : Contract) (Γ : Ctx) (l : RawExpr) :
+    Except String ((Γ' : Ctx) × Prog C Γ Γ' × (p : PrimTy) × (t : OpLoc C Γ' p) ×'
+      t.recvSimple = true) := do
+  let recapture (e : RawExpr) (rebuild : RawExpr → RawExpr) :
+      Except String ((Γ' : Ctx) × Prog C Γ Γ' × (p : PrimTy) × (t : OpLoc C Γ' p) ×'
+        t.recvSimple = true) := do
+    match ← synth C Γ e with
+    | .path (.ref R) b =>
+      let x := freshName C Γ "sp"
+      let hx := freshName_isFresh C Γ "sp"
+      let ⟨Γ₂, pre, p, t⟩ ← elabOpTarget C (setBy x (.path (.ref R)) Γ) (rebuild (.name x))
+      match hs : t.recvSimple with
+      | true => pure ⟨Γ₂, .cons (.declStorage true R x hx b) pre, p, t, hs⟩
+      | false => throw "the captured receiver did not read back"
+    | .path .. | .val .. => throw "a receiver that is a value"
+  let ⟨Γ₁, pre, p, t⟩ ← elabOpTarget C Γ l
+  match hs : t.recvSimple with
+  | true => pure ⟨Γ₁, pre, p, t, hs⟩
+  | false =>
+    match l with
+    | .field e f => recapture e (.field · f)
+    | .index e k => recapture e (.index · k)
+    | _ => throw "a non-simple receiver that is not a member or an entry"
+
 /-- A block fragment, with the context after it. -/
 abbrev TProg (C : Contract) (Γ : Ctx) := (Γ' : Ctx) × Prog C Γ Γ'
 
@@ -374,6 +413,20 @@ def elabStmt (C : Contract) (Γ : Ctx) : RawStmt → Except String (TProg C Γ)
     | true, true => pure ⟨Γ₁, pre.append (.cons (.opAssign op hop hp t (← check C Γ₁ p r)) .nil)⟩
     | false, _ => throw s!"no compound assignment for {repr op}"
     | _, false => throw s!"a compound assignment at {primName p}"
+  | .incDec op l => do
+    let ⟨Γ₁, pre, p, t⟩ ← elabOpTarget C Γ l
+    match hp : p.isNumeric with
+    | true => pure ⟨Γ₁, pre.append (.cons (.incDec op hp t) .nil)⟩
+    | false => throw s!"++ or -- at {primName p}"
+  | .assignIncDec x op l => do
+    let ⟨Γ₁, pre, p, t, hs⟩ ← elabIncTarget C Γ l
+    match ← synth C Γ₁ x with
+    | .val q (.simple (.local y h)) =>
+      match hp : p.isNumeric, decEq q p with
+      | true, isTrue e => pure ⟨Γ₁, pre.append (.cons (.assignIncDec y (e ▸ h) op hp t hs) .nil)⟩
+      | false, _ => throw s!"++ or -- at {primName p}"
+      | _, isFalse _ => throw s!"a {primName p} assigned to a {primName q}"
+    | _ => throw "the result of ++ or -- goes to a stack local"
   | .ite c thn els => do
     let ⟨Γ₁, pre, c⟩ ← elabCond C Γ c
     let s := Stmt.ite c (← elabBranch C Γ₁ thn) (← elabBranch C Γ₁ els)
@@ -408,6 +461,7 @@ deriving instance Lean.ToExpr for RefTy, Ty
 deriving instance Lean.ToExpr for BTy
 deriving instance Lean.ToExpr for BinOp
 deriving instance Lean.ToExpr for UnOp
+deriving instance Lean.ToExpr for IncDec
 
 section Quote
 open Lean (mkAppN mkConst toExpr)
@@ -516,6 +570,12 @@ def Stmt.quote : (Γ Γ' : Ctx) → Stmt C Γ Γ' → Lean.Expr
   | Γ, _, @Stmt.opAssign _ _ p op _ _ l r =>
     mkAppN (mkConst ``Stmt.opAssign) #[c, toExpr Γ, toExpr p, toExpr op, boolTrue, boolTrue,
       OpLoc.quote c Γ p l, Val.quote c Γ p r]
+  | Γ, _, @Stmt.incDec _ _ p op _ l =>
+    mkAppN (mkConst ``Stmt.incDec) #[c, toExpr Γ, toExpr p, toExpr op, boolTrue, OpLoc.quote c Γ p l]
+  | Γ, _, @Stmt.assignIncDec _ _ p x _ op _ l _ =>
+    mkAppN (mkConst ``Stmt.assignIncDec) #[c, toExpr Γ, toExpr p, toExpr x,
+      quoteRefl optBTy (someE (mkConst ``BTy) (toExpr (BTy.stack (.prim p)))), toExpr op, boolTrue,
+      OpLoc.quote c Γ p l, boolTrue]
   | Γ, _, @Stmt.delete _ _ T l =>
     mkAppN (mkConst ``Stmt.delete) #[c, toExpr Γ, toExpr T, Loc.quote c Γ T l]
   | Γ, _, .ite cond thn els =>

@@ -143,6 +143,38 @@ def OpLoc.store (σ : State) (op : BinOp) : {p : PrimTy} → OpLoc C Γ p → Va
     let (rt, segs) ← (Loc.index it b (.simple i)).resolve σ
     opStore σ op p rt segs v
 
+/-- `x++` at a resolved storage location, as `evalValue` does it: read,
+bump, check at the target's type, write back; the value is the new one for
+`++x`, the old one for `x++`. -/
+def bumpStore (σ : State) (op : IncDec) (p : PrimTy) (root : Name) (segs : List Seg) :
+    Res (State × Value) := do
+  let old ← (← σ.findStorage root segs).asValue
+  let oldInt ← old.asInt
+  let new ← checkArith (.prim p) (.int (if op.isIncrement then oldInt + 1 else oldInt - 1))
+  let σ' ← σ.saveStorage root segs new.toSVal
+  pure (σ', if op.isPre then new else old)
+
+/-- `x++` on a stack local. -/
+def bumpLocal (σ : State) (op : IncDec) (p : PrimTy) (x : Name) : Res (State × Value) := do
+  let old ← match ← σ.getEnv x with
+    | .val v => pure v
+    | .spath .. => .error .stuck
+    | .mref _ => .error .stuck
+  let oldInt ← old.asInt
+  let new ← checkArith (.prim p) (.int (if op.isIncrement then oldInt + 1 else oldInt - 1))
+  pure (σ.setEnv x (.val new), if op.isPre then new else old)
+
+/-- `l++`: the state it leaves, and its value. -/
+def OpLoc.bump (σ : State) (op : IncDec) : {p : PrimTy} → OpLoc C Γ p → Res (State × Value)
+  | p, .local x _ => bumpLocal σ op p x
+  | p, .root r _ _ => bumpStore σ op p r []
+  | p, .field b f h => do
+    let (rt, segs) ← (Loc.field b f h).resolve σ
+    bumpStore σ op p rt segs
+  | p, .index it b i => do
+    let (rt, segs) ← (Loc.index it b (.simple i)).resolve σ
+    bumpStore σ op p rt segs
+
 mutual
 
 /-- The state a statement leaves, from `σ`. -/
@@ -164,6 +196,10 @@ def Stmt.run (σ : State) {Γ Γ' : Ctx} : Stmt C Γ Γ' → Res State
     let (root, segs) ← init.resolve σ
     pure (σ.setEnv x (.spath root segs))
   | .opAssign op _ _ l r => do l.store σ op (← r.eval σ)
+  | .incDec op _ l => do pure (← l.bump σ op).1
+  | .assignIncDec x _ op _ l _ => do
+    let (σ', v) ← l.bump σ op
+    pure (σ'.setEnv x (.val v))
   | .delete l => do
     let (root, segs) ← l.resolve σ
     let cur ← σ.findStorage root segs
@@ -452,6 +488,84 @@ theorem Stmt.run_eq (σ : State) {Γ Γ' : Ctx} : (s : Stmt C Γ Γ') → execSt
         cases (Loc.index it b (.simple i)).resolve σ with
         | error _ => rfl
         | ok a => obtain ⟨rt, segs⟩ := a; simp only [Except.map, Loc.target, readLoc, writeLoc, OpLoc.store, opStore, opLocal, bind, Except.bind, Typed.WrappedExpr.ty, WrappedExpr.var]; cases σ.findStorage rt segs <;> rfl
+  | .incDec op _ l => by
+    simp only [Stmt.run]
+    rw [Stmt.erase, execStmt, evalValue]
+    cases l with
+      | «local» x h =>
+        simp only [OpLoc.toPlace, PlaceExpr.var, Field.primitive]
+        rw [resolveLoc]; simp only [Except.map, Loc.target, readLoc, writeLoc, OpLoc.bump, bumpStore, bumpLocal, bind, Except.bind, Typed.WrappedExpr.ty, WrappedExpr.var, pure, Except.pure]
+        cases σ.getEnv x with
+        | error _ => rfl
+        | ok b => cases b <;> rfl
+      | root r hΓ h =>
+        simp only [OpLoc.toPlace, Loc.toPlace, SPath.toPlace, SPath.erase]
+        rw [(Loc.root r hΓ h).resolveLoc_erase σ, Loc.erase_ty]; simp only [Except.map, Loc.target, readLoc, writeLoc, OpLoc.bump, bumpStore, bumpLocal, bind, Except.bind, Typed.WrappedExpr.ty, WrappedExpr.var, pure, Except.pure]
+        cases σ.findStorage r [] with
+        | error _ => rfl
+        | ok sv => cases sv.asValue <;> rfl
+      | field b f h =>
+        simp only [OpLoc.toPlace, Loc.toPlace, SPath.toPlace, SPath.erase]
+        rw [(Loc.field b f h).resolveLoc_erase σ, Loc.erase_ty]
+        simp only [OpLoc.bump, Loc.target]
+        cases (Loc.field b f h).resolve σ with
+        | error _ => rfl
+        | ok a =>
+          obtain ⟨rt, segs⟩ := a; simp only [Except.map, Loc.target, readLoc, writeLoc, OpLoc.bump, bumpStore, bumpLocal, bind, Except.bind, Typed.WrappedExpr.ty, WrappedExpr.var, pure, Except.pure]
+          cases σ.findStorage rt segs with
+          | error _ => rfl
+          | ok sv => cases sv.asValue <;> rfl
+      | index it b i =>
+        simp only [OpLoc.toPlace, Loc.toPlace, SPath.toPlace, SPath.erase]
+        rw [(Loc.index it b (.simple i)).resolveLoc_erase σ, Loc.erase_ty]
+        simp only [OpLoc.bump, Loc.target]
+        cases (Loc.index it b (.simple i)).resolve σ with
+        | error _ => rfl
+        | ok a =>
+          obtain ⟨rt, segs⟩ := a; simp only [Except.map, Loc.target, readLoc, writeLoc, OpLoc.bump, bumpStore, bumpLocal, bind, Except.bind, Typed.WrappedExpr.ty, WrappedExpr.var, pure, Except.pure]
+          cases σ.findStorage rt segs with
+          | error _ => rfl
+          | ok sv => cases sv.asValue <;> rfl
+  | .assignIncDec x _ op _ l _ => by
+    simp only [Stmt.run]
+    rw [Stmt.erase, execStmt, execAssign]
+    simp only [PlaceExpr.var, Field.primitive]
+    rw [evalValue]
+    cases l with
+      | «local» x h =>
+        simp only [OpLoc.toPlace, PlaceExpr.var, Field.primitive]
+        rw [resolveLoc]; simp only [Except.map, Loc.target, readLoc, writeLoc, OpLoc.bump, bumpStore, bumpLocal, bind, Except.bind, Typed.WrappedExpr.ty, WrappedExpr.var, pure, Except.pure]
+        cases σ.getEnv x with
+        | error _ => rfl
+        | ok b => cases b <;> rfl
+      | root r hΓ h =>
+        simp only [OpLoc.toPlace, Loc.toPlace, SPath.toPlace, SPath.erase]
+        rw [(Loc.root r hΓ h).resolveLoc_erase σ, Loc.erase_ty]; simp only [Except.map, Loc.target, readLoc, writeLoc, OpLoc.bump, bumpStore, bumpLocal, bind, Except.bind, Typed.WrappedExpr.ty, WrappedExpr.var, pure, Except.pure]
+        cases σ.findStorage r [] with
+        | error _ => rfl
+        | ok sv => cases sv.asValue <;> rfl
+      | field b f h =>
+        simp only [OpLoc.toPlace, Loc.toPlace, SPath.toPlace, SPath.erase]
+        rw [(Loc.field b f h).resolveLoc_erase σ, Loc.erase_ty]
+        simp only [OpLoc.bump, Loc.target]
+        cases (Loc.field b f h).resolve σ with
+        | error _ => rfl
+        | ok a =>
+          obtain ⟨rt, segs⟩ := a; simp only [Except.map, Loc.target, readLoc, writeLoc, OpLoc.bump, bumpStore, bumpLocal, bind, Except.bind, Typed.WrappedExpr.ty, WrappedExpr.var, pure, Except.pure]
+          cases σ.findStorage rt segs with
+          | error _ => rfl
+          | ok sv => cases sv.asValue <;> rfl
+      | index it b i =>
+        simp only [OpLoc.toPlace, Loc.toPlace, SPath.toPlace, SPath.erase]
+        rw [(Loc.index it b (.simple i)).resolveLoc_erase σ, Loc.erase_ty]
+        simp only [OpLoc.bump, Loc.target]
+        cases (Loc.index it b (.simple i)).resolve σ with
+        | error _ => rfl
+        | ok a =>
+          obtain ⟨rt, segs⟩ := a; simp only [Except.map, Loc.target, readLoc, writeLoc, OpLoc.bump, bumpStore, bumpLocal, bind, Except.bind, Typed.WrappedExpr.ty, WrappedExpr.var, pure, Except.pure]
+          cases σ.findStorage rt segs with
+          | error _ => rfl
+          | ok sv => cases sv.asValue <;> rfl
   | .delete l => by
     simp only [Stmt.run]
     rw [Stmt.erase, execStmt]
