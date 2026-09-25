@@ -32,7 +32,9 @@ scratch alias (`Person storage sp = folks[x];`, which `ksol` writes before
 memory reference copied from a member (`mp.account = mq.account;`), which the
 old table first captures into a scratch memory local and the kernel copies
 directly: the capture needs the slot to hold a reference, which the
-interpreter does not check when it copies one. -/
+interpreter does not check when it copies one.  One statement the old table
+has no rule for: `Person memory md = folks[x];`, a copy into memory from an
+entry, which the kernel captures into a storage alias first. -/
 
 namespace Solidity
 namespace Kernel
@@ -147,6 +149,11 @@ def Taclet.rule {Γ Γ' : Ctx} {s : Stmt C Γ Γ'} {pr : Premise C Γ Γ'} : Tac
   | .memoryIndexWriteMemRefNonSimpleIndexCapture .. => some .memoryIndexWriteRefUnfoldLeftSndIndex
   | .memoryFieldWriteUnfoldSource .. => some .memoryFieldWriteUnfoldSource
   | .memoryIndexWriteUnfoldSource .. => some .memoryIndexWriteUnfoldSource
+  | .storageToMemoryDeclCopyRoot .. => some .storageToMemoryDeclCopyRoot
+  | .storageToMemoryDeclCopyField .. => some .storageToMemoryDeclCopyField
+  | .storageToMemoryDeclUnfoldRightFst .. => some .storageToMemoryDeclUnfoldRightFst
+  | .memoryStorageCopy .. => some .memoryStorageCopy
+  | .memoryStorageCopyUnfold .. => some .memoryStorageCopyUnfold
   | .ifElseSplit .. => none
   | .requireSimple .. => some .requireSimple
   | .assertSimple .. => some .assertSimple
@@ -260,6 +267,11 @@ def Taclet.origin {Γ Γ' : Ctx} {s : Stmt C Γ Γ'} {pr : Premise C Γ Γ'} : T
   | .memoryIndexWriteMemRefNonSimpleIndexCapture .. => (ruleEffect .memoryIndexWriteRefUnfoldLeftSndIndex).origin
   | .memoryFieldWriteUnfoldSource .. => (ruleEffect .memoryFieldWriteUnfoldSource).origin
   | .memoryIndexWriteUnfoldSource .. => (ruleEffect .memoryIndexWriteUnfoldSource).origin
+  | .storageToMemoryDeclCopyRoot .. => (ruleEffect .storageToMemoryDeclCopyRoot).origin
+  | .storageToMemoryDeclCopyField .. => (ruleEffect .storageToMemoryDeclCopyField).origin
+  | .storageToMemoryDeclUnfoldRightFst .. => (ruleEffect .storageToMemoryDeclUnfoldRightFst).origin
+  | .memoryStorageCopy .. => (ruleEffect .memoryStorageCopy).origin
+  | .memoryStorageCopyUnfold .. => (ruleEffect .memoryStorageCopyUnfold).origin
   | .ifElseSplit .. => .taclet .ifElseSplit
   | .requireSimple .. => .taclet .requireSimple
   | .assertSimple .. => .taclet .assertSimple
@@ -325,6 +337,8 @@ def bridgeTour := ksol{
   Person memory mp; Person memory mq = mp; Account memory ma = mp.account; mq = mp;
   x = mp.age; x = mp.account.balance; mp.age = 3; mp.age = x + 1; mp.account.balance = x;
   mp.account = mq.account; mp.account = ma; mq.account.token = ma.token;
+  Person memory mc = alice; Person memory md = folks[x]; Account memory me = alice.account;
+  Account memory mf = folks[x + 1].account; mq = bob; mq = persons[x]; ma = bob.account;
   if (b) { x = 1; } else { x = 2; }; require(b); assert(b); require(x == 1); revert();
 }
 
@@ -338,7 +352,8 @@ def bridgeTour := ksol{
   "owner.transfer(1); kernel=some (Solidity.RuleName.transferUnfoldLeftFstReceiver) old=some (Solidity.RuleName.transferNoCallbackBox)",
   "owner.transfer(x + 1); kernel=some (Solidity.RuleName.transferUnfoldLeftFstReceiver) old=some (Solidity.RuleName.transferUnfoldRightSndArgument)",
   "mp.account = mq.account; kernel=some (Solidity.RuleName.memoryFieldWriteCopy) old=some (Solidity.RuleName.memoryFieldReadUnfoldRightSndResult)",
-  "mq.account.token = ma.token; kernel=some (Solidity.RuleName.memoryFieldWriteRefUnfoldLeftFst) old=some (Solidity.RuleName.memoryFieldReadUnfoldRightSndResult)"]
+  "mq.account.token = ma.token; kernel=some (Solidity.RuleName.memoryFieldWriteRefUnfoldLeftFst) old=some (Solidity.RuleName.memoryFieldReadUnfoldRightSndResult)",
+  "Person memory md = folks[x]; kernel=some (Solidity.RuleName.storageToMemoryDeclUnfoldRightFst) old=none"]
 
 -- And under a diamond, up to the old table's box/diamond twins.
 #guard (bridgeTour.disagreements .diamond).map (·.replace "Diamond" "Box") =

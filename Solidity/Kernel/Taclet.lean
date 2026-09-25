@@ -308,6 +308,8 @@ inductive Upd (C : Contract) (Γ : Ctx) where
   | transfer (r a : Simple C Γ .uint)
   /-- `mv := ref(p)`: a memory local bound to `p`'s object. -/
   | bindMem (x : Name) {R : RefTy} (p : MPath C Γ (.ref R))
+  /-- `mv := freshId(alloc(mv, sp)) || memory := alloc(mv, sp)`: a deep copy of `sp`. -/
+  | bindCopy (x : Name) {R : RefTy} (p : SPath C Γ (.ref R)) (hm : (Ty.ref R).mapFree = true)
   /-- `mv := freshId(alloc(mv)) || memory := alloc(mv)`: a fresh default object. -/
   | allocMem (x : Name) (R : RefTy)
   /-- `memory := write(memory, l, r)`. -/
@@ -343,6 +345,7 @@ def Upd.apply (σ : State) {Γ : Ctx} : Upd C Γ → Res State
     let amt ← (← a.eval σ).asInt
     transferAt σ addr amt
   | .bindMem x p => (MRhs.alias p).bind σ x
+  | .bindCopy x p hm => (MRhs.copy p hm).bind σ x
   | .allocMem x R => do
     let (σ', id) ← allocDefault σ R
     pure (σ'.setEnv x (.mref id))
@@ -837,6 +840,43 @@ inductive Taclet (C : Contract) (m : Modality) : {Γ Γ' : Ctx} → Stmt C Γ Γ
   /-- `T memory mv; ⇝ {mv := freshId(alloc(mv)) || memory := alloc(mv)}`. -/
   | memoryDeclFreshAlloc {Γ : Ctx} (R : RefTy) (x : Name) (hx : isFresh C Γ x = true) (hd) :
       .declMem R x hx none hd ⇒ .update (.allocMem x R)
+  -- Memory: copies from storage
+  /-- `T memory mv = sp ⇝ {mv := freshId(alloc(mv, sp)) || memory := alloc(mv, sp)}`. -/
+  | storageToMemoryDeclCopyRoot {Γ : Ctx} (R : RefTy) (x : Name) (hx : isFresh C Γ x = true)
+      (sp : SPath C Γ (.ref R)) (hs : sp.isSimple = true) (hm : (Ty.ref R).mapFree = true) (hd) :
+      .declMem R x hx (some (.copy sp hm)) hd ⇒ .update (.bindCopy x sp hm)
+  /-- `T memory mv = sp.fld ⇝ {mv := freshId(alloc(mv, sp.fld)) || …}`. -/
+  | storageToMemoryDeclCopyField {Γ : Ctx} {s : Name} (R : RefTy) (x : Name) (hx : isFresh C Γ x = true)
+      (sp : SPath C Γ (.struct s)) (hs : sp.isSimple = true) (f : Name) (hf : C.fieldType s f = some (.ref R))
+      (hm : (Ty.ref R).mapFree = true) (hd) :
+      .declMem R x hx (some (.copy (.loc (.field sp f hf)) hm)) hd ⇒
+        .update (.bindCopy x (.loc (.field sp f hf)) hm)
+  /-- `T memory mv = path ⇝ T storage sp = path; T memory mv = sp`, for any
+  other path (KeY's taclet captures a member's receiver; the kernel captures
+  the whole path, which covers entries too). -/
+  | storageToMemoryDeclUnfoldRightFst {Γ : Ctx} (R : RefTy) (x : Name) (hx : isFresh C Γ x = true)
+      (p : SPath C Γ (.ref R)) (hp : p.isSimple = false)
+      (hnf : ∀ s (b : SPath C Γ (.struct s)) f hf, p = .loc (.field b f hf) → b.isSimple = false)
+      (hm : (Ty.ref R).mapFree = true) (sp : Name) (hsp : isFresh C (Ctx.mem Γ x R) sp = true) (hd) :
+      .declMem R x hx (some (.copy p hm)) hd ⇒
+        .unfold [sp]
+          (.cons (.declStorage true R sp (isFresh_of_sub (Ctx.Sub.fresh hx _) hsp) p)
+          (.cons (.declMem R x (isFresh_setBy hx (ne_of_isFresh_setBy hsp)) (some (.copy (SPath.new sp R) hm)) rfl)
+            .nil))
+          ((MHole.decl R x hx).extend_sub sp (.path (.ref R)) hsp)
+  /-- `mv = sp ⇝ {mv := freshId(alloc(mv, sp)) || memory := alloc(mv, sp)}`. -/
+  | memoryStorageCopy {Γ : Ctx} {R : RefTy} (x : Name) (h : lookupBy x Γ = some (.mem (.ref R)))
+      (sp : SPath C Γ (.ref R)) (hs : sp.isSimple = true) (hm : (Ty.ref R).mapFree = true) :
+      .rebindMem x h (.copy sp hm) ⇒ .update (.bindCopy x sp hm)
+  /-- `mv = path ⇝ T storage sp = path; mv = sp`. -/
+  | memoryStorageCopyUnfold {Γ : Ctx} {R : RefTy} (x : Name) (h : lookupBy x Γ = some (.mem (.ref R)))
+      (p : SPath C Γ (.ref R)) (hp : p.isSimple = false) (hm : (Ty.ref R).mapFree = true) (sp : Name)
+      (hsp : isFresh C Γ sp = true) :
+      .rebindMem x h (.copy p hm) ⇒
+        .unfold [sp]
+          (.cons (.declStorage true R sp hsp p)
+          (.cons (.rebindMem x ((Ctx.Sub.fresh hsp _).local_ _ _ h) (.copy (SPath.new sp R) hm)) .nil))
+          (Ctx.Sub.fresh hsp _)
   -- Memory: writes
   /-- `mv.fld = se ⇝ {memory := write(memory, mv.fld, se)}`. -/
   | memoryFieldWriteStore {Γ : Ctx} {s : Name} {p : PrimTy} (b : MPath C Γ (.struct s))

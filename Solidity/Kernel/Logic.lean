@@ -218,6 +218,29 @@ theorem Stmt.run_frame {Γ Γ' : Ctx} {σ τ : State} (hag : StateAgree C Γ σ 
           cases v.asRef with
           | error _ => trivial
           | ok id => exact StateAgree.setEnv ⟨ns, hns, hag'⟩ x _ hfr
+      | copy p _ =>
+        simp only [Stmt.run, MRhs.bind, p.resolve_frame hag' hns, findStorage_congr hag']
+        cases p.resolve τ with
+        | error _ => trivial
+        | ok rs =>
+          simp only [bind, Except.bind]
+          cases τ.findStorage rs.1 rs.2 with
+          | error _ => trivial
+          | ok sv =>
+            simp only
+            have h := copyStToM_agree hag' sv
+            revert h
+            cases copyStToM σ sv <;> cases copyStToM τ sv <;> intro h <;>
+              first | trivial | exact h.elim | skip
+            rename_i a b
+            obtain ⟨hab, he⟩ := h
+            obtain ⟨σa, ma⟩ := a
+            obtain ⟨σb, mb⟩ := b
+            simp only at he hab
+            subst he
+            cases ma with
+            | prim _ => trivial
+            | ref id => exact StateAgree.setEnv ⟨ns, hns, hab⟩ x _ hfr
   | .rebindMem x h r => by
     obtain ⟨ns, hns, hag'⟩ := hag
     cases r with
@@ -230,6 +253,29 @@ theorem Stmt.run_frame {Γ Γ' : Ctx} {σ τ : State} (hag : StateAgree C Γ σ 
         cases v.asRef with
         | error _ => trivial
         | ok id => exact StateAgree.setEnv ⟨ns, hns, hag'⟩ x _ fun n hn _ => hn
+    | copy p _ =>
+      simp only [Stmt.run, MRhs.bind, p.resolve_frame hag' hns, findStorage_congr hag']
+      cases p.resolve τ with
+      | error _ => trivial
+      | ok rs =>
+        simp only [bind, Except.bind]
+        cases τ.findStorage rs.1 rs.2 with
+        | error _ => trivial
+        | ok sv =>
+          simp only
+          have h := copyStToM_agree hag' sv
+          revert h
+          cases copyStToM σ sv <;> cases copyStToM τ sv <;> intro h <;>
+            first | trivial | exact h.elim | skip
+          rename_i a b
+          obtain ⟨hab, he⟩ := h
+          obtain ⟨σa, ma⟩ := a
+          obtain ⟨σb, mb⟩ := b
+          simp only at he hab
+          subst he
+          cases ma with
+          | prim _ => trivial
+          | ref id => exact StateAgree.setEnv ⟨ns, hns, hab⟩ x _ fun n hn _ => hn
   | .assignMem l r => by
     obtain ⟨ns, hns, hag'⟩ := hag
     have hr : r.mval σ = r.mval τ := by

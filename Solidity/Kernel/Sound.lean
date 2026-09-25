@@ -1015,6 +1015,60 @@ theorem Taclet.sound {m : Modality} {Γ Γ' : Ctx} {s : Stmt C Γ Γ'} {pr : Pre
         getObj_setEnv]
       exact MHole.runWith_extend hie k σ _ _
 
+  -- Memory: a copy from storage through a captured path.
+  case storageToMemoryDeclUnfoldRightFst R x hx p hp hnf hm sp hsp hd =>
+    have hsp₀ := isFresh_of_sub (Ctx.Sub.fresh hx _) hsp
+    have hne := ne_of_isFresh_setBy hsp
+    refine ⟨by simp [hsp], fun σ => ?_⟩
+    simp only [Prog.run, Stmt.run, bind_pure, MRhs.bind]
+    cases p.resolve σ with
+    | error _ => trivial
+    | ok rs =>
+      simp only [bind, Except.bind, pure, Except.pure, SPath.new, SPath.resolve, envPath, setEnv_env,
+        lookupBy_setBy_self, findStorage_setEnv]
+      cases σ.findStorage rs.1 rs.2 with
+      | error _ => trivial
+      | ok sv =>
+        simp only
+        have h := copyStToM_agree (agree_setEnv σ sp (.spath rs.1 rs.2)) sv
+        revert h
+        cases copyStToM (σ.setEnv sp (.spath rs.1 rs.2)) sv <;> cases copyStToM σ sv <;> intro h <;>
+          first | trivial | exact h.elim | skip
+        rename_i a b
+        obtain ⟨hab, he⟩ := h
+        obtain ⟨σa, ma⟩ := a
+        obtain ⟨σb, mb⟩ := b
+        simp only at he hab
+        subst he
+        cases ma with
+        | prim _ => trivial
+        | ref id => exact hab.setEnv_both _ _
+  case memoryStorageCopyUnfold R x h p hp hm sp hsp =>
+    refine ⟨by simp [hsp], fun σ => ?_⟩
+    simp only [Prog.run, Stmt.run, bind_pure, MRhs.bind]
+    cases p.resolve σ with
+    | error _ => trivial
+    | ok rs =>
+      simp only [bind, Except.bind, pure, Except.pure, SPath.new, SPath.resolve, envPath, setEnv_env,
+        lookupBy_setBy_self, findStorage_setEnv]
+      cases σ.findStorage rs.1 rs.2 with
+      | error _ => trivial
+      | ok sv =>
+        simp only
+        have h := copyStToM_agree (agree_setEnv σ sp (.spath rs.1 rs.2)) sv
+        revert h
+        cases copyStToM (σ.setEnv sp (.spath rs.1 rs.2)) sv <;> cases copyStToM σ sv <;> intro h <;>
+          first | trivial | exact h.elim | skip
+        rename_i a b
+        obtain ⟨hab, he⟩ := h
+        obtain ⟨σa, ma⟩ := a
+        obtain ⟨σb, mb⟩ := b
+        simp only at he hab
+        subst he
+        cases ma with
+        | prim _ => trivial
+        | ref id => exact hab.setEnv_both _ _
+
   -- Memory: a write through a captured receiver, index or source.
   case memoryFieldWrite_unfold_leftFst s p nmp hn f hf e se mv hse hmv =>
     have hmv₀ := isFresh_of_sub (Ctx.Sub.fresh hse _) hmv
