@@ -294,8 +294,11 @@ lists only the standard three axioms.
   - [x] operators into a local (`binopAssignment`, `binopUnfoldLeft/Right`,
     the two short-circuit rules, `unopAssignment`, `unopCapture`)
   - [ ] compound assignment `op=`, `++`/`--`, ternary  - [ ] calls, `transfer`
-  - [ ] the bridge: each constructor's `RuleName` and `KeyOrigin`, and at
-    the scratch names `se`/`sp`/`ie` its residual's erasure against `ruleEffect`
+  - [x] the bridge, names: `Taclet.rule`, `Taclet.origin`,
+    `Taclet.origin_claimed` (`Kernel/Bridge.lean`); `Taclet` is a `Type`, so
+    a derivation's constructor can be read back
+  - [ ] the bridge, shapes: `(ruleEffect d.rule).cond s.erase`, and at the
+    scratch names `se`/`sp`/`ie` the residual's erasure against `ruleEffect`
   - [ ] typed shapes, `rules_disjoint`/`rules_complete` (with `Stmt.step`, phase 4)
   - [ ] `dl{ … }` notation for taclets, premises and updates
 - [ ] Phase 4: `Stmt.step`, `Stmt.complete`, `Fml.progress`.
@@ -338,6 +341,7 @@ lists only the standard three axioms.
 | Operator families | a rule over an operator is one constructor (`binopAssignment op`), as in `Calculus/Rules.lean`; solkey's taclet is per operator | 2026-09-25 |
 | Continuations | an unfolding rule's residual binds scratch names fresh at the statement's context; to retype the rest of the program past them, the names must also avoid what the rest declares. The formula-level step picks them avoiding both, and `Prog` weakens along an extension that names its new bindings | 2026-09-25 |
 | Goals | a goal is `H ⊢ k`: hypotheses (path conditions and updates, a predicate transformer) and a continuation (`⟨P⟩ k`, `up h k`, a postcondition). An unfolding rule's premise is `⟨P⟩ up ⟨ω⟩ k`; the frame lemmas make that sound, and the scratch names need not avoid what `ω` declares. A diamond split also owes the condition's definedness (`c || !c`), and a closed box owes `H ⊢ true`: an update that fails under a diamond hypothesis is false | 2026-09-25 |
+| `Taclet` in `Type` | a derivation is data: `Taclet.rule`/`Taclet.origin` read its constructor. In `Prop` they could not, and proof irrelevance would identify two rules deriving the same premise. `Stmt.complete` is `∃ pr, Nonempty (Taclet …)` | 2026-09-25 |
 | Modalities | the kernel's box is partial correctness (it holds unless the run ends normally in a bad state) and its diamond needs a normal end; neither tells a revert from a stuck run. An unfolding rule then owes its statement the same *successful* outcome (`SameOk`), which the order-changing rules (`*StorageRef_unfold_leftFst`, `*NonSimpleIndexCapture`) meet without the side conditions the untyped `*_sound` theorems carry. `SolidityJudgment.Holds` differs on stuck runs ("a stuck execution validates nothing"); the phase-7 bridge must say so | 2026-09-25 |
 | Unknown names | an error: parameters are declared locals. mini-solkey reads an unknown name as a `uint` parameter | 2026-09-25 |
 | Ported contracts | one named constant per interpreter store, `initStorage_*` checks roots, order and defaults against the store by `simp` | 2026-09-25 |

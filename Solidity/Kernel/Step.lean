@@ -273,8 +273,8 @@ def Stmt.step {Γ Γ' : Ctx} : (s : Stmt C Γ Γ') → Step C m s
 has a rule.  No hypothesis, no residue: `uint x = people[i].age;`,
 `alice = bob;`, `delete folks[i + 1];` each have one, and so does anything
 else `ksol` writes. -/
-theorem Stmt.complete {Γ Γ' : Ctx} (s : Stmt C Γ Γ') : ∃ pr, Taclet C m s pr :=
-  ⟨(s.step m).1, (s.step m).2⟩
+theorem Stmt.complete {Γ Γ' : Ctx} (s : Stmt C Γ Γ') : ∃ pr, Nonempty (Taclet C m s pr) :=
+  ⟨(s.step m).1, ⟨(s.step m).2⟩⟩
 
 /-! ## Printing a step -/
 
@@ -325,7 +325,7 @@ def exDelete := ksol{ delete folks[1 + 1]; }
 
 /-- `delete folks[1 + 1];` has a rule, as every statement does. -/
 example : match exDelete with
-    | .cons s .nil => ∃ pr, Taclet StandardExample .diamond s pr
+    | .cons s .nil => ∃ pr, Nonempty (Taclet StandardExample .diamond s pr)
     | _ => False :=
   Stmt.complete _ _
 

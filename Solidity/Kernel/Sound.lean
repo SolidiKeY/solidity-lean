@@ -742,11 +742,11 @@ example : match ksol[StandardExample]{ alice.age = 10; } with
 `storageFieldWrite_unfold_leftFst`: its three statements end as it does,
 off the fresh `se` and `sp`. -/
 example : match ksol[StandardExample]{ folks[1].age = 10; } with
-    | .cons s .nil => ∃ ns Γ₁ P h, Taclet StandardExample .diamond s (.unfold (Γ₁ := Γ₁) ns P h) ∧
+    | .cons s .nil => ∃ ns Γ₁ P h, Nonempty (Taclet StandardExample .diamond s (.unfold (Γ₁ := Γ₁) ns P h)) ∧
         ∀ σ, SameOk ns (P.run σ) (s.run σ)
     | _ => False :=
   let d := Taclet.storageFieldWrite_unfold_leftFst (m := .diamond) _ rfl _ rfl _ "se" "sp" rfl rfl
-  ⟨_, _, _, _, d, (Taclet.sound d).2⟩
+  ⟨_, _, _, _, ⟨d⟩, (Taclet.sound d).2⟩
 
 end Examples
 

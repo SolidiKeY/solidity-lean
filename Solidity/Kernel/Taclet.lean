@@ -230,7 +230,7 @@ local notation:50 s:51 " ⇒ " pr:51 => Taclet C m s pr
 the statement on the left of `⇒` is its `\find`, the premise its
 `\replacewith`.  Scratch names come with freshness proofs; `up` weakens a
 term past them. -/
-inductive Taclet (C : Contract) (m : Modality) : {Γ Γ' : Ctx} → Stmt C Γ Γ' → Premise C Γ Γ' → Prop where
+inductive Taclet (C : Contract) (m : Modality) : {Γ Γ' : Ctx} → Stmt C Γ Γ' → Premise C Γ Γ' → Type where
   -- Step 1: a read whose receiver or index is not simple
   /-- `lhs = nsp.fld ⇝ T storage sp = nsp; lhs = sp.fld`. -/
   | storageFieldRead_unfold_rightFst {Γ Γ' : Ctx} {s : Name} {T : Ty} (k : Hole C Γ Γ' T)

@@ -113,3 +113,4 @@ import Solidity.Kernel.Step
 import Solidity.Kernel.Measure
 import Solidity.Kernel.Logic
 import Solidity.Kernel.Symex
+import Solidity.Kernel.Bridge
