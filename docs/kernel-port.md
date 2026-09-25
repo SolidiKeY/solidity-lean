@@ -286,8 +286,14 @@ lists only the standard three axioms.
     for the corpus and to retire `stmtWt` hypotheses
   - [ ] the 26 `ResidueShape` verdicts (table below)
 - [ ] Phase 3: `Taclet`, `Taclet.sound`, `rules_disjoint`/`rules_complete`.
-  - [ ] storage  - [ ] memory  - [ ] cross-domain  - [ ] arithmetic
-  - [ ] control  - [ ] calls
+  - [x] storage, with the control rules on simple conditions
+    (`Kernel/Taclet.lean`, `Kernel/Sound.lean`: 41 taclets, all sound)
+  - [ ] arrays (bounds checks, `push`/`pop`)  - [ ] memory  - [ ] cross-domain
+  - [ ] arithmetic (`op=`, `++`/`--`, operators into a local)  - [ ] calls, `transfer`
+  - [ ] the bridge: each constructor's `RuleName` and `KeyOrigin`, and at
+    the scratch names `se`/`sp`/`ie` its residual's erasure against `ruleEffect`
+  - [ ] typed shapes, `rules_disjoint`/`rules_complete` (with `Stmt.step`, phase 4)
+  - [ ] `dl{ … }` notation for taclets, premises and updates
 - [ ] Phase 4: `Stmt.step`, `Stmt.complete`, `Fml.progress`.
 - [ ] Phase 5: the measure, `symex_normalizes`, `BlockStep.wellFounded`.
 - [ ] Phase 6: `Fml C`, `Proves`, `Proves.sound`, `FreshNames`.
@@ -307,6 +313,7 @@ lists only the standard three axioms.
 | Conditions | `if`, `require` and `assert` test a `Simple` value; `ksol` captures any other condition into a fresh `bool` first (`ifElseUnfold`, `requireConditionCapture` are the elaborator's). A branch still may not declare, so a complex condition nested in a branch is an elaboration error | 2026-09-25 |
 | `T storage x;` | not a kernel statement: solc ≥ 0.5 rejects an uninitialised storage pointer (`storageLocalDeclSkip` has no kernel counterpart) | 2026-09-25 |
 | Semantics | kernel terms get a structural denotation, proved to be the interpreter's (`Prog.run_eq`); taclets are proved sound over it, not through the untyped `*_sound` theorems, whose scratch names are fixed strings | 2026-09-25 |
+| Modalities | the kernel's box is partial correctness (it holds unless the run ends normally in a bad state) and its diamond needs a normal end; neither tells a revert from a stuck run. An unfolding rule then owes its statement the same *successful* outcome (`SameOk`), which the order-changing rules (`*StorageRef_unfold_leftFst`, `*NonSimpleIndexCapture`) meet without the side conditions the untyped `*_sound` theorems carry. `SolidityJudgment.Holds` differs on stuck runs ("a stuck execution validates nothing"); the phase-7 bridge must say so | 2026-09-25 |
 | Unknown names | an error: parameters are declared locals. mini-solkey reads an unknown name as a `uint` parameter | 2026-09-25 |
 | Ported contracts | one named constant per interpreter store, `initStorage_*` checks roots, order and defaults against the store by `simp` | 2026-09-25 |
 
