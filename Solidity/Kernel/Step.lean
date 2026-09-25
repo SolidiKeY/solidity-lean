@@ -423,6 +423,9 @@ def rebindMemStep {Γ : Ctx} {R : RefTy} (x : Name) (h : lookupBy x Γ = some (.
         | .read _, hl | .binop .., hl | .unop .., hl | .ternary .., hl | .readMem _, hl =>
           absurd hl (by simp [MPath.isBindable, Val.isSimple])
     else (MHole.rebind x h).unfoldStep m l (not_simple hl)
+  | .copy p hm =>
+    if hs : p.isSimple = true then ⟨_, .memoryStorageCopy x h p hs hm⟩
+    else ⟨_, .memoryStorageCopyUnfold x h p (not_simple hs) hm _ (freshName_isFresh C Γ "sp")⟩
 
 /-- A memory local declared. -/
 def declMemStep {Γ : Ctx} (R : RefTy) (x : Name) (hx : isFresh C Γ x = true) :
@@ -435,6 +438,18 @@ def declMemStep {Γ : Ctx} (R : RefTy) (x : Name) (hx : isFresh C Γ x = true) :
       match p, hp with
       | .var .., hp => absurd rfl hp
       | .loc l, hp => (MHole.decl R x hx).unfoldStep m l (not_simple hp)
+  | some (.copy p hm), hd =>
+    if hs : p.isSimple = true then ⟨_, .storageToMemoryDeclCopyRoot R x hx p hs hm hd⟩
+    else
+      match p, hs with
+      | .loc (.field b f hf), hs =>
+        if hb : b.isSimple = true then ⟨_, .storageToMemoryDeclCopyField R x hx b hb f hf hm hd⟩
+        else ⟨_, .storageToMemoryDeclUnfoldRightFst R x hx (.loc (.field b f hf)) (not_simple hs)
+          (fun _ _ _ _ h => by cases h; exact not_simple hb) hm _ (freshName_isFresh C _ "sp") hd⟩
+      | .loc (.index it b i), hs =>
+        ⟨_, .storageToMemoryDeclUnfoldRightFst R x hx (.loc (.index it b i)) (not_simple hs)
+          (fun _ _ _ _ h => by cases h) hm _ (freshName_isFresh C _ "sp") hd⟩
+      | .alias .., hs | .loc (.root ..), hs => absurd rfl hs
 
 /-- A memory location written. -/
 def assignMemStep {Γ : Ctx} {T : Ty} : (l : MLoc C Γ T) → (r : MSrc C Γ T) → Step C m (.assignMem l r)
@@ -551,6 +566,7 @@ def Upd.toStr {Γ : Ctx} : Upd C Γ → String
   | .pop b => s!"\{ storage := pop(storage, {b.toStr}) }"
   | .transfer r a => s!"\{ transfer({r.toStr}, {a.toStr}) }"
   | .bindMem x p => s!"\{ {x} := ref({p.toStr}) }"
+  | .bindCopy x p _ => s!"\{ {x} := freshId(alloc({x}, {p.toStr})) || memory := alloc({x}, {p.toStr}) }"
   | .allocMem x _ => s!"\{ {x} := freshId(alloc({x})) || memory := alloc({x}) }"
   | .writeMem l r => s!"\{ memory := write(memory, {l.toStr}, {r.toStr}) }"
   | .bumpBind x op l => s!"\{ bump({IncDec.show op l.toStr}) || {x} := {IncDec.show op l.toStr} }"

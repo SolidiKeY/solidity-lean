@@ -68,6 +68,7 @@ end
 
 def MRhs.size {Γ : Ctx} {R : RefTy} : MRhs C Γ R → Nat
   | .alias p => p.size
+  | .copy p _ => p.size + 1
 
 def MSrc.size {Γ : Ctx} {T : Ty} : MSrc C Γ T → Nat
   | .val v => v.size
@@ -75,6 +76,8 @@ def MSrc.size {Γ : Ctx} {T : Ty} : MSrc C Γ T → Nat
 
 @[simp] theorem MRhs.size_alias {Γ : Ctx} {R : RefTy} (p : MPath C Γ (.ref R)) :
     (MRhs.alias p).size = p.size := rfl
+@[simp] theorem MRhs.size_copy {Γ : Ctx} {R : RefTy} (p : SPath C Γ (.ref R)) (h : (Ty.ref R).mapFree = true) :
+    (MRhs.copy p h).size = p.size + 1 := rfl
 @[simp] theorem MSrc.size_val {Γ : Ctx} {p : PrimTy} (v : Val C Γ p) : (MSrc.val v).size = v.size := rfl
 @[simp] theorem MSrc.size_ref {Γ : Ctx} {R : RefTy} (p : MPath C Γ (.ref R)) :
     (MSrc.ref p).size = p.size := rfl
@@ -379,7 +382,7 @@ theorem Taclet.smaller {m : Modality} {Γ Γ' : Ctx} {s : Stmt C Γ Γ'} {pr : P
     SPath.size, Loc.size, Simple.size, Hole.fill_size, Hole.extend_extra, SPath.new, Simple.new,
     SPath.size_weaken, Loc.size_weaken, Val.size_weaken, Src.size_weaken, OpLoc.size_weaken,
     OpLoc.size_local, OpLoc.size_root, OpLoc.size_field, OpLoc.size_index, VHole.fill_size,
-    VHole.extra_weaken, Src.fresh_size, MPath.size, MLoc.size, MRhs.size_alias, MSrc.size_val,
+    VHole.extra_weaken, Src.fresh_size, MPath.size, MLoc.size, MRhs.size_alias, MRhs.size_copy, MSrc.size_val,
     MSrc.size_ref, MHole.fill_size, MHole.extend_extra, MPath.new, MPath.size_weaken,
     MLoc.size_weaken, MLoc.weaken, MPath.weaken, List.length,
     List.mem_cons, List.not_mem_nil, forall_eq_or_imp, and_true, true_and, false_implies,

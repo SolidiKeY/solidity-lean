@@ -244,6 +244,9 @@ def SPath.isSimple {C : Contract} {Γ : Ctx} {T : Ty} : SPath C Γ T → Bool
 (aliasing, `m = n;`, `m = n.account;`). -/
 inductive MRhs (C : Contract) (Γ : Ctx) (R : RefTy) where
   | alias (p : MPath C Γ (.ref R))
+  /-- A fresh deep copy of a storage object (`Person memory m = alice;`), of a
+  type that holds no mapping. -/
+  | copy (p : SPath C Γ (.ref R)) (hm : (Ty.ref R).mapFree = true)
 
 /-- What a memory location is written: a value, or a memory reference (by
 identity: `m.account = n.account;` aliases). -/

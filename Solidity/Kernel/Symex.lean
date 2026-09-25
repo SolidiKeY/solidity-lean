@@ -338,6 +338,14 @@ example : (Kont.modal .diamond exMem (.post .tt)).vc 80
     (.assume fun σ => σ.heap = [] ∧ σ.nextId = 0 ∧ σ.env = []) := by
   unfold exMem; symex <;> symex_close
 
+def exCopy := ksol{ alice.age = 7; Person memory m = alice; alice.age = 8; uint x = m.age; assert(x == 7); }
+
+set_option maxHeartbeats 2000000 in
+/-- A copy into memory is a snapshot: a later write to storage does not reach it. -/
+example : (Kont.modal .diamond exCopy (.post .tt)).vc 80
+    (.assume fun σ => σ.storage = StandardExample.initStorage ∧ σ.heap = [] ∧ σ.nextId = 0 ∧ σ.env = []) := by
+  unfold exCopy; symex <;> symex_close [initStorage_standardExample, State.exampleStore]
+
 /-- A false specification leaves a goal no evaluation closes. -/
 example : True := by
   fail_if_success

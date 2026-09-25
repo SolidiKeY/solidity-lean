@@ -191,6 +191,12 @@ def MRhs.bind (σ : State) (x : Name) {R : RefTy} : MRhs C Γ R → Res State
   | .alias p => do
     let id ← (← p.mval σ).asRef
     pure (σ.setEnv x (.mref id))
+  | .copy p _ => do
+    let (root, segs) ← p.resolve σ
+    let sv ← σ.findStorage root segs
+    let (σ', mv) ← copyStToM σ sv
+    let id ← mv.asRef
+    pure (σ'.setEnv x (.mref id))
 
 /-- `a ⊕= v` at a resolved storage location, as `execStmt` does it: read,
 apply, check at the target's type, write back. -/
@@ -798,6 +804,20 @@ theorem Stmt.run_eq (σ : State) {Γ Γ' : Ctx} : (s : Stmt C Γ Γ') → execSt
         cases p.mval σ with
         | error _ => rfl
         | ok v => cases v <;> rfl
+      | copy p _ =>
+        rw [Stmt.erase, Option.map, execStmt]
+        simp only [MRhs.erase, SPath.erase_kind, p.resolveS_erase σ, MRhs.bind]
+        cases p.resolve σ with
+        | error _ => rfl
+        | ok rs =>
+          simp only [Except.map, bind, Except.bind]
+          cases σ.findStorage rs.1 rs.2 with
+          | error _ => rfl
+          | ok sv =>
+            simp only
+            cases copyStToM σ sv with
+            | error _ => rfl
+            | ok a => obtain ⟨σ', mv⟩ := a; cases mv <;> rfl
   | .rebindMem x _ r => by
     simp only [Stmt.run]
     cases r with
@@ -807,6 +827,21 @@ theorem Stmt.run_eq (σ : State) {Γ Γ' : Ctx} : (s : Stmt C Γ Γ') → execSt
       cases p.mval σ with
       | error _ => rfl
       | ok v => cases v <;> rfl
+    | copy p _ =>
+      rw [Stmt.erase, execStmt, execAssign]
+      simp only [PlaceExpr.var, Field.identity, MRhs.erase, SPath.erase_kind, p.resolveS_erase σ,
+        MRhs.bind]
+      cases p.resolve σ with
+      | error _ => rfl
+      | ok rs =>
+        simp only [Except.map, bind, Except.bind]
+        cases σ.findStorage rs.1 rs.2 with
+        | error _ => rfl
+        | ok sv =>
+          simp only
+          cases copyStToM σ sv with
+          | error _ => rfl
+          | ok a => obtain ⟨σ', mv⟩ := a; cases mv <;> rfl
   | .assignMem l r => by
     simp only [Stmt.run]
     rw [Stmt.erase, execStmt, execAssign]

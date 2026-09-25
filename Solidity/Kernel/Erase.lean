@@ -57,6 +57,7 @@ end
 
 def MRhs.erase {C : Contract} {Γ : Ctx} {R : RefTy} : MRhs C Γ R → WrappedExpr
   | .alias p => p.erase
+  | .copy p _ => p.erase
 
 def MSrc.erase {C : Contract} {Γ : Ctx} {T : Ty} : MSrc C Γ T → WrappedExpr
   | .val v => v.erase
@@ -298,9 +299,13 @@ theorem Stmt.erase_wt {C : Contract} {Γ Γ' : Ctx} :
       | some r =>
         cases r with
         | alias p => simp [Stmt.erase, stmtWt, MRhs.erase, p.erase_wt, p.erase_ty]
+        | copy p _ => simp [Stmt.erase, stmtWt, MRhs.erase, p.erase_wt, p.erase_ty]
   | .rebindMem x h r => by
       cases r with
       | alias p =>
+        simp [Stmt.erase, stmtWt, PlaceExpr.var, wtExpr, h, Field.identity, MRhs.erase, p.erase_wt,
+          p.erase_ty, Typed.WrappedExpr.ty]
+      | copy p _ =>
         simp [Stmt.erase, stmtWt, PlaceExpr.var, wtExpr, h, Field.identity, MRhs.erase, p.erase_wt,
           p.erase_ty, Typed.WrappedExpr.ty]
   | .assignMem l r => by

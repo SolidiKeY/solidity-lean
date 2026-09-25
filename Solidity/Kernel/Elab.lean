@@ -421,6 +421,19 @@ def elabIncTarget (C : Contract) (Γ : Ctx) (l : RawExpr) :
     | .index e k => recapture e (.index · k)
     | _ => throw "a non-simple receiver that is not a member or an entry"
 
+/-- What a memory local is bound to: a memory path aliased, or a storage path
+deep-copied. -/
+def elabMRhs (C : Contract) (Γ : Ctx) (R : RefTy) (e : RawExpr) : Except String (MRhs C Γ R) := do
+  match ← synth C Γ e with
+  | .mpath T p => if h : T = .ref R then pure (.alias (h ▸ p)) else throw "a memory path of another type"
+  | .path T p =>
+    if h : T = .ref R then
+      match hm : (Ty.ref R).mapFree with
+      | true => pure (.copy (h ▸ p) hm)
+      | false => throw "a copy into memory of a type that holds a mapping"
+    else throw "a storage path of another type"
+  | .val .. => throw "a value where a memory reference is expected"
+
 /-- A block fragment, with the context after it. -/
 abbrev TProg (C : Contract) (Γ : Ctx) := (Γ' : Ctx) × Prog C Γ Γ'
 
@@ -440,7 +453,7 @@ def elabStmt (C : Contract) (Γ : Ctx) : RawStmt → Except String (TProg C Γ)
       | true => pure (.one (.assign l (.copy (← checkPath C Γ (.ref R) r) h)))
       | false => throw "a storage copy of a type that holds a mapping"
     | .path (.ref R) (.alias x h) => pure (.one (.rebind x h (← checkPath C Γ (.ref R) r)))
-    | .mpath (.ref R) (.var x h) => pure (.one (.rebindMem x h (.alias (← checkMPath C Γ (.ref R) r))))
+    | .mpath (.ref R) (.var x h) => pure (.one (.rebindMem x h (← elabMRhs C Γ R r)))
     | .mpath (.prim p) (.loc l) => pure (.one (.assignMem l (.val (← check C Γ p r))))
     | .mpath (.ref R) (.loc l) => pure (.one (.assignMem l (.ref (← checkMPath C Γ (.ref R) r))))
   | .decl T x init => do
@@ -456,7 +469,7 @@ def elabStmt (C : Contract) (Γ : Ctx) : RawStmt → Except String (TProg C Γ)
     let .ref R := elabTy T | throw s!"{x}: `memory` on a value type"
     let ⟨hx⟩ ← checkFresh C Γ x
     match init with
-    | some e => pure (.one (.declMem R x hx (some (.alias (← checkMPath C Γ (.ref R) e))) rfl))
+    | some e => pure (.one (.declMem R x hx (some (← elabMRhs C Γ R e)) rfl))
     | none =>
       match hd : (Ty.ref R).defaultOkS with
       | true => pure (.one (.declMem R x hx none (by simp [hd])))
@@ -644,6 +657,10 @@ def OpLoc.quote (Γ : Ctx) : (p : PrimTy) → OpLoc C Γ p → Lean.Expr
     mkAppN (mkConst ``OpLoc.index) #[c, toExpr Γ, toExpr R, toExpr k, toExpr p, IndexTy.quote it,
       SPath.quote c Γ _ b, Simple.quote c Γ k i]
 
+def MRhs.quote (Γ : Ctx) (R : RefTy) : MRhs C Γ R → Lean.Expr
+  | .alias p => mkAppN (mkConst ``MRhs.alias) #[c, toExpr Γ, toExpr R, MPath.quote c Γ (.ref R) p]
+  | .copy p _ => mkAppN (mkConst ``MRhs.copy) #[c, toExpr Γ, toExpr R, SPath.quote c Γ (.ref R) p, boolTrue]
+
 def valTy (Γ : Ctx) (p : PrimTy) : Lean.Expr :=
   mkAppN (mkConst ``Val) #[c, toExpr Γ, toExpr p]
 
@@ -673,13 +690,11 @@ def Stmt.quote : (Γ Γ' : Ctx) → Stmt C Γ Γ' → Lean.Expr
     let rhsTy := mkAppN (mkConst ``MRhs) #[c, toExpr Γ, toExpr R]
     let init := match init with
       | none => mkAppN (mkConst ``Option.none [0]) #[rhsTy]
-      | some (.alias p) => someE rhsTy (mkAppN (mkConst ``MRhs.alias) #[c, toExpr Γ, toExpr R,
-          MPath.quote c Γ (.ref R) p])
+      | some r => someE rhsTy (MRhs.quote c Γ R r)
     mkAppN (mkConst ``Stmt.declMem) #[c, toExpr Γ, toExpr R, toExpr x, boolTrue, init, boolTrue]
-  | Γ, _, @Stmt.rebindMem _ _ R x _ (.alias p) =>
+  | Γ, _, @Stmt.rebindMem _ _ R x _ r =>
     mkAppN (mkConst ``Stmt.rebindMem) #[c, toExpr Γ, toExpr R, toExpr x,
-      quoteRefl optBTy (someE (mkConst ``BTy) (toExpr (BTy.mem (.ref R)))),
-      mkAppN (mkConst ``MRhs.alias) #[c, toExpr Γ, toExpr R, MPath.quote c Γ (.ref R) p]]
+      quoteRefl optBTy (someE (mkConst ``BTy) (toExpr (BTy.mem (.ref R)))), MRhs.quote c Γ R r]
   | Γ, _, @Stmt.assignMem _ _ T l r =>
     let r := match T, r with
       | _, @MSrc.val _ _ p v => mkAppN (mkConst ``MSrc.val) #[c, toExpr Γ, toExpr p, Val.quote c Γ p v]

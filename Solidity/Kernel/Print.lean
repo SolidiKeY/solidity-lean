@@ -83,6 +83,7 @@ def OpLoc.toStr {p : PrimTy} : OpLoc C Γ p → String
 
 def MRhs.toStr {R : RefTy} : MRhs C Γ R → String
   | .alias p => p.toStr
+  | .copy p _ => p.toStr
 
 def MSrc.toStr {T : Ty} : MSrc C Γ T → String
   | .val v => v.toStr true
