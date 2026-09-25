@@ -296,11 +296,15 @@ lists only the standard three axioms.
       `MSrc := val v | ref p` (a memory reference, by identity); the reads, writes,
       declarations, aliases and their unfolds: 23 taclets, `MHole` for the reads'
       unfolds, frames `MLoc.write_agree`, `allocDefault_agree`
-    - [ ] **M2** the cross-domain rules
+    - [x] **M2** the cross-domain rules
       - [x] `MRhs.copy` (memory from storage, `copyStToM`): `storageToMemoryDeclCopyRoot`,
         `…CopyField`, `storageToMemoryDeclUnfoldRightFst` (the whole path captured, so an
         entry copies too, which the old table cannot), `memoryStorageCopy`, `…CopyUnfold`
-      - [ ] `Src.copyMem` (storage from memory, `copyMToSt`)
+      - [x] storage from memory, its own statement `Stmt.assignFromMem l p` (not a `Src`,
+        so `push` of a memory value stays unrepresentable): `memoryToStorageStoreRoot`,
+        `…FieldCopyRoot`, `…FieldCopyField`, `…IndexMappingCopyRoot`, `…IndexArrayCopyRoot`,
+        the receiver unfolds and the index capture; the source is any memory path
+        (`memoryToStorageUnfoldRightFstSource` would capture it, the verdict below)
       - memory `delete`: not a kernel statement while `stmtWt` rejects it ("v1: storage
         deletes only"); `Prog.erase_wt` has no hypothesis to excuse it
     - [ ] **M3** `OpLoc`, `VHole` memory cases: compound, `++`, `ternaryToIfMemory`

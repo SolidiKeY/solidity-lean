@@ -103,6 +103,7 @@ def Stmt.size {Γ Γ' : Ctx} : Stmt C Γ Γ' → Nat
     | some r => r.size + 1
   | .rebindMem _ _ r => r.size + 1
   | .assignMem l r => l.size + r.size + 2
+  | .assignFromMem l p => l.size + p.size + 2
   | .opAssign _ _ _ l r => l.size + r.size + 2
   | .incDec _ _ l | .assignIncDec _ _ _ _ l _ => l.size + 1
   | .push b v _ =>

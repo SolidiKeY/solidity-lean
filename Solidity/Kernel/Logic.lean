@@ -95,7 +95,7 @@ theorem StateAgree.findStorage {Γ : Ctx} {σ τ : State} (hag : StateAgree C Γ
 theorem Stmt.sub {Γ Γ' : Ctx} : Stmt C Γ Γ' → Ctx.Sub C Γ Γ'
   | .declLocal _ _ hx _ | .declStorage _ _ _ hx _ | .declMem _ _ hx _ _ => Ctx.Sub.fresh hx _
   | .assign .. | .rebind .. | .assignLocal .. | .opAssign .. | .incDec .. | .assignIncDec .. | .push ..
-  | .pop _ | .transfer .. | .rebindMem .. | .assignMem ..
+  | .pop _ | .transfer .. | .rebindMem .. | .assignMem .. | .assignFromMem ..
   | .delete _ | .ite .. | .require _ | .assert _
   | .revert => Ctx.Sub.refl _
 
@@ -276,6 +276,20 @@ theorem Stmt.run_frame {Γ Γ' : Ctx} {σ τ : State} (hag : StateAgree C Γ σ 
           cases ma with
           | prim _ => trivial
           | ref id => exact StateAgree.setEnv ⟨ns, hns, hab⟩ x _ fun n hn _ => hn
+  | .assignFromMem l p => by
+    obtain ⟨ns, hns, hag'⟩ := hag
+    simp only [Stmt.run, p.mval_frame hag' hns, l.target_frame hag' hns]
+    cases p.mval τ with
+    | error _ => trivial
+    | ok mv =>
+      simp only [bind, Except.bind, copyMem_congr hag']
+      cases copyMem τ mv with
+      | error _ => trivial
+      | ok sv =>
+        simp only
+        cases l.target τ with
+        | error _ => trivial
+        | ok rs => exact StateAgree.save ⟨ns, hns, hag'⟩ _ _ _
   | .assignMem l r => by
     obtain ⟨ns, hns, hag'⟩ := hag
     have hr : r.mval σ = r.mval τ := by

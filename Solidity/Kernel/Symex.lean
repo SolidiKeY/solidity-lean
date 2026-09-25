@@ -223,7 +223,7 @@ statement and splitting every branch, until what is left are the goals
 `∀ σ, H.holds ψ σ` (or `False`, when the fuel runs out). -/
 macro "symex" : tactic => `(tactic| repeat' (first
   | (rw [Kont.vc]; try simp only [Stmt.step, localStep, assignStep, rebindStep, deleteStep,
-      binopRightStep, shortCircuitStep, copyStep, opStep, incStep, assignIncStep, ternaryStep, pushStep, popStep, transferStep, rebindMemStep, declMemStep, assignMemStep,
+      binopRightStep, shortCircuitStep, copyStep, opStep, incStep, assignIncStep, ternaryStep, pushStep, popStep, transferStep, rebindMemStep, declMemStep, assignMemStep, assignFromMemStep,
       MHole.unfoldStep, MHole.fill, MHole.extend, MPath.isSimple, MPath.isBindable, MPath.new,
       MPath.weaken, MLoc.weaken, VHole.fill, VHole.weaken,
       Src.isSimple, Src.decl, Src.fresh,
@@ -251,7 +251,7 @@ macro_rules
       opStore, opLocal, pickBranch, pushAt, popAt, Src.pushVal, pushSlot, transferAt, State.setNet, State.getNet,
       MPath.mval, MLoc.read, MLoc.write, MSrc.mval, MRhs.bind, memWriteField, memWriteIndex,
       MVal.asRef, MVal.asValue, Value.toMVal, allocDefault, copyStToM, copyStFields, copyStElems,
-      State.getObj, State.setObj, State.alloc, OpLoc.bump, bumpStore, bumpLocal, IncDec.isPre, IncDec.isIncrement,
+      State.getObj, State.setObj, State.alloc, copyMem, copyMToSt, copyMFields, copyMElems, OpLoc.bump, bumpStore, bumpLocal, IncDec.isPre, IncDec.isIncrement,
       State.findStorage, State.setEnv, State.getEnv, SVal.save, SVal.find, SVal.asValue,
       SVal.defaultOf, defaultForRef, defaultForTy, defaultForFields, structDef, Functor.map,
       Except.map, lookupBy, setBy, SemanticsProperties.lookupBy_setBy_self,
@@ -345,6 +345,14 @@ set_option maxHeartbeats 2000000 in
 example : (Kont.modal .diamond exCopy (.post .tt)).vc 80
     (.assume fun σ => σ.storage = StandardExample.initStorage ∧ σ.heap = [] ∧ σ.nextId = 0 ∧ σ.env = []) := by
   unfold exCopy; symex <;> symex_close [initStorage_standardExample, State.exampleStore]
+
+def exBack := ksol{ Person memory m; m.age = 9; alice = m; m.age = 1; uint x = alice.age; assert(x == 9); }
+
+set_option maxHeartbeats 2000000 in
+/-- A copy into storage is a snapshot too. -/
+example : (Kont.modal .diamond exBack (.post .tt)).vc 80
+    (.assume fun σ => σ.storage = StandardExample.initStorage ∧ σ.heap = [] ∧ σ.nextId = 0 ∧ σ.env = []) := by
+  unfold exBack; symex <;> symex_close [initStorage_standardExample, State.exampleStore]
 
 /-- A false specification leaves a goal no evaluation closes. -/
 example : True := by
