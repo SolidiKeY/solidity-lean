@@ -303,6 +303,10 @@ lists only the standard three axioms.
   - [ ] disjointness (at most one rule per statement, up to scratch names)
   - [ ] `Fml.progress`, with the formula layer of phase 6
 - [ ] Phase 5: the measure, `symex_normalizes`, `BlockStep.wellFounded`.
+  - [x] sizes and `Taclet.smaller` (`Kernel/Measure.lean`): the measure of a goal
+    is `Σ 5 ^ size`; an unfolding rule leaves at most four smaller statements,
+    a split smaller branches
+  - [ ] the measure falls on formulas; `Fml.step_wellFounded`, `symex_normalizes`
 - [ ] Phase 6: `Fml C`, `Proves`, `Proves.sound`, `FreshNames`.
 - [ ] Phase 7: cut over, `lean/solkey` migrated.
 - [ ] Phase 8: chains, `UpdRule`, decision procedure, `delAt`, one notation.
@@ -323,6 +327,7 @@ lists only the standard three axioms.
 | Array bounds | no `inBounds` split: `SVal.find`/`SVal.save` revert out of range, so the kernel's update fails as the statement does. A failing update is read like a revert by the modalities | 2026-09-25 |
 | Typed states | `Premise.Correct` quantifies over the states of the statement's context (`Kernel.Typed`: some `StateWT` for the layout). Only the short-circuit rules use it (a `bool` value evaluates to a boolean); nothing is lost, since a contract starts in one and `execStmt_sound` keeps it there | 2026-09-25 |
 | Operator families | a rule over an operator is one constructor (`binopAssignment op`), as in `Calculus/Rules.lean`; solkey's taclet is per operator | 2026-09-25 |
+| Continuations | an unfolding rule's residual binds scratch names fresh at the statement's context; to retype the rest of the program past them, the names must also avoid what the rest declares. The formula-level step picks them avoiding both, and `Prog` weakens along an extension that names its new bindings | 2026-09-25 |
 | Modalities | the kernel's box is partial correctness (it holds unless the run ends normally in a bad state) and its diamond needs a normal end; neither tells a revert from a stuck run. An unfolding rule then owes its statement the same *successful* outcome (`SameOk`), which the order-changing rules (`*StorageRef_unfold_leftFst`, `*NonSimpleIndexCapture`) meet without the side conditions the untyped `*_sound` theorems carry. `SolidityJudgment.Holds` differs on stuck runs ("a stuck execution validates nothing"); the phase-7 bridge must say so | 2026-09-25 |
 | Unknown names | an error: parameters are declared locals. mini-solkey reads an unknown name as a `uint` parameter | 2026-09-25 |
 | Ported contracts | one named constant per interpreter store, `initStorage_*` checks roots, order and defaults against the store by `simp` | 2026-09-25 |
