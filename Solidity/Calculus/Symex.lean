@@ -1,5 +1,6 @@
 import Solidity.Calculus.Logic
 import Solidity.Calculus.Completeness
+import Solidity.Calculus.Quote
 
 /-!
 # Symbolic execution
@@ -131,12 +132,24 @@ theorem symex_valid (n : Nat) {φ : Fml C} (h : Valid (symex n φ)) : Valid φ :
 
 open Lean Elab Tactic Meta in
 /-- Compute the formula inside a `⊨ _` goal, so the goal shows the result of
-the rule rather than the call; the kernel re-checks it (`replaceTargetDefEq`). -/
+the rule rather than the call; the kernel re-checks it (`replaceTargetDefEq`).
+
+A closed formula of a named contract — what `dl[C]{ … }` gives — is run by
+the compiled code and quoted back (`Fml.quote`), as mini-solkey's
+`normValid` does: `Meta.reduce` would unfold `symex 200 φ` by the
+interpreter of `whnf`, which takes a minute on three storage writes.  Any
+other formula (a variable in it, or an anonymous contract) falls back to
+`Meta.reduce`. -/
 def normValid (g : MVarId) : TacticM MVarId := do
   let ty ← instantiateMVars (← g.getType)
   let_expr Valid C φ := ty | throwError "expected a goal `Valid φ`"
-  let φ' ← withTransparency .all <| Meta.reduce (← instantiateMVars φ)
-    (skipTypes := true) (skipProofs := true)
+  let φ ← instantiateMVars φ
+  let φ' ← match C.constName?, φ.hasFVar || φ.hasMVar with
+    | some n, false =>
+      let c := mkApp2 (mkConst ``Lean.mkConst) (toExpr n)
+        (mkApp (mkConst ``List.nil [0]) (mkConst ``Lean.Level))
+      unsafe evalExpr Lean.Expr (mkConst ``Lean.Expr) (mkApp3 (mkConst ``Fml.quote) C c φ)
+    | _, _ => withTransparency .all <| Meta.reduce φ (skipTypes := true) (skipProofs := true)
   g.replaceTargetDefEq (mkApp2 (mkConst ``Valid) C φ')
 
 open Lean Elab Tactic Meta in
@@ -152,8 +165,10 @@ elab "sol_step" : tactic => do
   replaceMainGoal [g'']
 
 open Lean Elab Tactic Meta in
-/-- `sol_symex`: run the strategy until no modality is left. -/
+/-- `sol_symex`: run the strategy until no modality is left.  With no goal
+left it does nothing, as `sol_close` does. -/
 elab "sol_symex" : tactic => do
+  if (← getUnsolvedGoals).isEmpty then return
   let g ← getMainGoal
   let gs ← g.apply (← elabTerm (← `(symex_valid 200)) none)
   let [g'] := gs | throwError "sol_symex: unexpected goals"

@@ -1,4 +1,5 @@
 import Solidity.Calculus.Notation
+import Solidity.Calculus.ReadWrite
 
 /-!
 # Closing the first-order goal: `sol_close`
@@ -7,8 +8,9 @@ import Solidity.Calculus.Notation
 not rewritten away, as mini-solkey's `Ch14_Updates` does: a term here *is* a
 call of the interpreter (`Term.eval`, `STerm.eval`), so applying an update
 in an arbitrary state `σ` is running it, and what remains is a statement
-about what `saveStorage`, `findStorage` and `getEnv` return on a `σ` nobody
-knows.  `sol_close` proves that statement, in two stages.
+about what `saveStorage`, `findStorage`, `readAddr` and `getEnv` return on a
+`σ` nobody knows.  `sol_close` proves that statement with one contextual
+`simp` over the `close_rw` set, then `omega` or `grind` for the arithmetic.
 
 **Weakest preconditions.**  `Modality.wp m x P` is `P` of what `x` returns,
 or `m.onHalt` when it halts; `Modality.after` is its instance at `State`.
@@ -17,19 +19,20 @@ equation per constructor below), it turns the goal into a nest of `∀ τ,
 x = .ok τ → …` (the box) or `∃ τ, x = .ok τ ∧ …` (the diamond).  A
 `split` on the unfolded `match`es does not get there: it splits the
 outermost one only, and leaves the evaluator's inner matches in
-hypotheses.  Under the box, a write is named on the spot
-(`Modality.wp_box_saveStorage`) together with everything the rest of the
-goal needs of its result: the path written reads back, a path apart from
-it (`Diverge`) reads as before, the locals are untouched.
+hypotheses.
 
-**Read after write.**  A contextual `simp` then rewrites every read with
-those facts, discharging the apartness of concrete paths by computation
-and that of symbolic keys (`balances[k]`, `balances[j]`) by a hypothesis
-`k != j` of the formula; `omega` or `grind` finishes the arithmetic.
-This is mini-solkey's `Ch07` `sol_close` with `findOnSave` and
-`findOnSaveDifferent` as facts about one state, rather than rewrite rules
-about `save` terms.  Every step is a `simp` lemma or a hypothesis:
-nothing evaluated is trusted, the kernel checks the proof.
+**Read after write.**  Under the box, a write is named on the spot, together
+with what `ReadWrite.lean` knows of the state it returns: a storage write
+(`Modality.wp_box_saveStorage`) reads back at and below the path written
+and as before apart from it, a memory write (`wp_box_writeAddr`) likewise
+at an address, a copy (`wp_box_copyStToM`, `wp_box_copyMem`) member by
+member, and each leaves the other components alone.  A read of a subtree
+(`wp_box_findStorage`) is named with the reads below it, which is what
+settles a read above a write.  The `simp` is contextual, so every such
+fact rewrites what follows it; the apartness of concrete paths is decided
+by computation, that of symbolic keys (`balances[k]`, `balances[j]`) by a
+hypothesis `k != j` of the formula or a branch.  Every step is a lemma or a
+hypothesis: nothing evaluated is trusted, the kernel checks the proof.
 
 What does not close, and why:
 
@@ -37,173 +40,22 @@ What does not close, and why:
   those without `alice`, where `alice.age = 1;` is stuck, so
   `⟨ alice.age = 1; ⟩ true` is not valid.  Write the box, or put the
   well-formedness of the storage in the premise;
-* a read above or below a write (`alice = bob; uint y = alice.age;`):
-  `Diverge` covers only paths that part ways, and the four-way comparison
-  of mini-solkey's `Ch15_Decide` is not ported;
 * two symbolic keys the formula does not tell apart: there is no case
-  split on `k = j`;
-* `push`, `pop`, a memory term, `transfer`: they have no equations below,
-  and fall to `grind`.
+  split on `k = j`, so `[ balances[k] = 5; balances[j] = 6; ] balances[k] == 5`
+  stays open (it is false at `k = j`);
+* two memory objects: nothing says that two allocations are different
+  objects, since `⊨` includes states whose heap already holds an object at
+  `nextId`;
+* a default read out of a fresh memory object (`Person memory m;
+  uint x = m.age;`): the default of a struct type is a well-founded
+  definition (`defaultForTy`) that `simp` does not unfold;
+* the effect of `transfer`: no term reads a balance, so only its frame is
+  observable — a write before it reads the same after.
 -/
 
 namespace Solidity
 
 open Semantics SemanticsProperties
-
-namespace Close
-
-/-! ## Paths that part ways -/
-
-/-- Two storage paths part ways: at some position their segments differ.
-`alice.age` and `alice.account.balance` do (`age` against `account`);
-`alice` and `alice.age` do not — one is a prefix of the other. -/
-def Diverge : List Seg → List Seg → Prop
-  | a :: p, b :: q => a ≠ b ∨ Diverge p q
-  | _, _ => False
-
-/-- `balances[k]` and `balances[j]` part ways when `k ≠ j`, or later on. -/
-@[simp] theorem diverge_cons {a b : Seg} {p q : List Seg} :
-    Diverge (a :: p) (b :: q) ↔ a ≠ b ∨ Diverge p q := Iff.rfl
-
-/-- `diverge_cons` as `sol_close` uses it, with the disequation both ways
-round: a premise `k != j` then discharges the frame of `balances[k]`
-against `balances[j]` whichever of the two was written first. -/
-theorem diverge_cons' {a b : Seg} {p q : List Seg} :
-    Diverge (a :: p) (b :: q) ↔ (¬ a = b ∨ ¬ b = a) ∨ Diverge p q := by
-  simp only [diverge_cons, ne_eq]
-  exact ⟨fun h => h.elim (fun h => .inl (.inl h)) .inr,
-    fun h => h.elim (fun h => .inl (h.elim id (fun h' e => h' e.symm))) .inr⟩
-
-/-- A root does not part ways with anything below it: `alice` against
-`alice.age`. -/
-@[simp] theorem not_diverge_nil_left {q : List Seg} : ¬ Diverge [] q := id
-
-/-- Nor does a path with its root: `alice.age` against `alice`. -/
-@[simp] theorem not_diverge_nil_right {p : List Seg} : ¬ Diverge p [] := by
-  cases p <;> exact id
-
-/-! ## Storage: read after write -/
-
-/-- **Frame, in a tree**: a write leaves every path apart from it as it was.
-After `alice.age = 10;` the tree of `alice` reads the same at `account`;
-after `values[0] = 7;` the array reads the same at `[1]` and at `length`;
-after `balances[1] = 5;` the mapping reads the same at `[2]`. -/
-theorem find_save_diverge {new : SVal} :
-    ∀ {p q : List Seg} {old upd : SVal}, Diverge p q → old.save p new = .ok upd →
-      upd.find q = old.find q
-  | [], _, _, _, h, _ => h.elim
-  | _ :: _, [], _, _, h, _ => (not_diverge_nil_right h).elim
-  | a :: p, b :: q, old, upd, h, hs => by
-    cases old with
-    | prim v => cases a <;> simp [SVal.save] at hs
-    | struct fields =>
-      cases a with
-      | «at» i => simp [SVal.save] at hs
-      | field n =>
-        simp only [SVal.save] at hs
-        split at hs
-        · rename_i old' hl
-          cases hu : old'.save p new with
-          | error e => simp [hu, bind, Except.bind] at hs
-          | ok u =>
-            simp only [hu, bind, Except.bind, Except.ok.injEq] at hs
-            subst hs
-            cases b with
-            | «at» j => simp [SVal.find]
-            | field m =>
-              by_cases hnm : m = n
-              · subst hnm
-                have hd : Diverge p q := by simpa using h
-                simp [SVal.find, hl, find_save_diverge hd hu]
-              · simp [SVal.find, lookupBy_setBy_ne hnm]
-        · simp at hs
-    | array elems shadow =>
-      cases a with
-      | field n => simp [SVal.save] at hs
-      | «at» i =>
-        simp only [SVal.save] at hs
-        split at hs
-        · rename_i hi
-          cases hu : (elems[i.toNat]'hi.2).save p new with
-          | error e => simp [List.get_eq_getElem, hu, bind, Except.bind] at hs
-          | ok u =>
-            simp only [List.get_eq_getElem, hu, bind, Except.bind, Except.ok.injEq] at hs
-            subst hs
-            cases b with
-            | field m =>
-              -- `length` reads the extent, which a write in bounds keeps
-              by_cases hm : m = "length"
-              · subst hm; simp [SVal.find]
-              · simp [SVal.find]
-            | «at» j =>
-              by_cases hij : j = i
-              · subst hij
-                have hd : Diverge p q := by simpa using h
-                simp [SVal.find, hi, find_save_diverge hd hu]
-              · by_cases hj : 0 ≤ j ∧ j.toNat < elems.length
-                · have hne : i.toNat ≠ j.toNat := by omega
-                  simp [SVal.find, hj, List.getElem_set_ne hne]
-                · simp [SVal.find, hj]
-        · simp at hs
-    | map entries dflt =>
-      cases a with
-      | field n => simp [SVal.save] at hs
-      | «at» i =>
-        simp only [SVal.save] at hs
-        -- the slot written: the entry at `i`, or the default when there is none
-        obtain ⟨old', hold, hfind⟩ : ∃ old' : SVal, (old'.save p new >>= fun u =>
-            Except.ok (SVal.map (setBy i u entries) dflt)) = Except.ok upd ∧
-            (SVal.map entries dflt).find (.at i :: q) = old'.find q := by
-          split at hs <;> rename_i hl <;> exact ⟨_, hs, by simp [SVal.find, hl]⟩
-        cases hu : old'.save p new with
-        | error e => simp [hu, bind, Except.bind] at hold
-        | ok u =>
-          simp only [hu, bind, Except.bind, Except.ok.injEq] at hold
-          subst hold
-          cases b with
-          | field m => simp [SVal.find]
-          | «at» j =>
-            by_cases hij : j = i
-            · subst hij
-              have hd : Diverge p q := by simpa using h
-              simp [SVal.find] at hfind ⊢
-              rw [hfind, find_save_diverge hd hu]
-            · simp [SVal.find, lookupBy_setBy_ne hij]
-
-/-- **Frame, in the storage**: `alice.age = 10;` leaves `bob.age` (another
-root) and `alice.account` (a path apart) as they were. -/
-theorem findStorage_saveStorage_apart {σ τ : State} {r r' : Name} {p q : List Seg}
-    {v : SVal} (h : σ.saveStorage r p v = .ok τ) (hd : r' ≠ r ∨ Diverge p q) :
-    τ.findStorage r' q = σ.findStorage r' q := by
-  unfold State.saveStorage at h
-  split at h
-  · rename_i old hl
-    cases hu : old.save p v with
-    | error e => simp [hu, bind, Except.bind] at h
-    | ok u =>
-      simp only [hu, bind, Except.bind, Except.ok.injEq] at h
-      subst h
-      by_cases hr : r' = r
-      · subst hr
-        have hd : Diverge p q := hd.resolve_left (· rfl)
-        simp [State.findStorage, hl, find_save_diverge hd hu]
-      · simp [State.findStorage, lookupBy_setBy_ne hr]
-  · simp at h
-
-/-- A write changes the storage only: the state an update `{storage :=
-save(storage, alice.age, 10)}` builds from `σ` is the one the write returns. -/
-theorem saveStorage_restore {σ τ : State} {r : Name} {p : List Seg} {v : SVal}
-    (h : σ.saveStorage r p v = .ok τ) : { σ with storage := τ.storage } = τ := by
-  obtain ⟨h₁, h₂, h₃, h₄, h₅⟩ := State.saveStorage_frame h
-  cases τ; simp_all
-
-/-- A write leaves the locals alone: `x` reads the same after
-`alice.age = 10;`. -/
-theorem getEnv_saveStorage {σ τ : State} {r : Name} {p : List Seg} {v : SVal}
-    (h : σ.saveStorage r p v = .ok τ) (x : Var) : τ.getEnv x = σ.getEnv x := by
-  simp [State.getEnv, (State.saveStorage_frame h).2.2.1]
-
-end Close
 
 /-! ## Weakest preconditions -/
 
@@ -262,21 +114,106 @@ theorem Modality.wp_diamond {x : Res α} {P : α → Prop} :
     Modality.diamond.wp x P ↔ ∃ a, x = .ok a ∧ P a := by
   cases x <;> simp [Modality.wp, Modality.onHalt]
 
-/-- **A write under the box**, named with what is known of its result: in
-`[ alice.age = 10; bob.age = 20; ] alice.age == 10`, the state `τ` after
-the first write reads `10` at `alice.age`, reads as `σ` does at `bob` and
-at `alice.account`, and has the locals of `σ`. -/
+/-- **A storage write under the box**, named with what is known of its
+result: in `[ alice.age = 10; bob = alice; ] bob.age == 10`, the state `τ`
+after the first write reads `10` at `alice.age` and below it, reads as `σ`
+does at `bob` and at `alice.account`, and has the locals and the heap of
+`σ`. -/
 theorem Modality.wp_box_saveStorage {σ : State} {r : Name} {p : List Seg} {v : SVal}
     {P : State → Prop} :
     Modality.box.wp (σ.saveStorage r p v) P ↔
       ∀ τ, σ.saveStorage r p v = .ok τ → τ.findStorage r p = .ok v →
+        (∀ q, Close.Prefix p q → τ.findStorage r q = v.find (Close.after p q)) →
         (∀ r' q, r' ≠ r ∨ Close.Diverge p q → τ.findStorage r' q = σ.findStorage r' q) →
-        (∀ x, τ.getEnv x = σ.getEnv x) → { σ with storage := τ.storage } = τ → P τ := by
+        (∀ x, τ.getEnv x = σ.getEnv x) → (∀ a, readAddr τ a = readAddr σ a) →
+        (∀ a, Close.readVal τ a = Close.readVal σ a) → P τ := by
   rw [Modality.wp_box]
-  exact ⟨fun h τ hs _ _ _ _ => h τ hs, fun h τ hs =>
+  exact ⟨fun h τ hs _ _ _ _ _ _ => h τ hs, fun h τ hs =>
     h τ hs (State.findStorage_saveStorage_same hs)
+      (fun _ hq => Close.findStorage_saveStorage_below hs hq)
       (fun _ _ hd => Close.findStorage_saveStorage_apart hs hd)
-      (Close.getEnv_saveStorage hs) (Close.saveStorage_restore hs)⟩
+      (Close.getEnv_saveStorage hs) (Close.readAddr_saveStorage hs)
+      (fun a => by simp [Close.readVal, Close.readAddr_saveStorage hs])⟩
+
+/-- **A subtree read under the box**: in `[ bob = alice; ] bob.age ==
+alice.age`, the tree `a` read at `alice` reads at `age` what the storage
+reads at `alice.age`. -/
+theorem Modality.wp_box_findStorage {σ : State} {r : Name} {p : List Seg}
+    {P : SVal → Prop} :
+    Modality.box.wp (σ.findStorage r p) P ↔
+      ∀ a, σ.findStorage r p = .ok a → (∀ q, a.find q = σ.findStorage r (p ++ q)) → P a := by
+  rw [Modality.wp_box]
+  exact ⟨fun h a hs _ => h a hs, fun h a hs => h a hs (Close.find_findStorage hs)⟩
+
+/-- **A memory write under the box**: after `m.age = 5;` the state reads `5`
+at `m.age`, as before at every address apart from it, and has the storage
+and the locals of the state before. -/
+theorem Modality.wp_box_writeAddr {σ : State} {mv : MVal} {a : Addr} {P : State → Prop} :
+    Modality.box.wp (writeAddr σ mv a) P ↔
+      ∀ τ, writeAddr σ mv a = .ok τ → readAddr τ a = .ok mv → Close.readVal τ a = mv.asValue →
+        (∀ a', Close.Apart a a' → readAddr τ a' = readAddr σ a') →
+        (∀ a', Close.Apart a a' → Close.readVal τ a' = Close.readVal σ a') →
+        (∀ r q, τ.findStorage r q = σ.findStorage r q) → (∀ x, τ.getEnv x = σ.getEnv x) →
+        P τ := by
+  rw [Modality.wp_box]
+  refine ⟨fun h τ hs _ _ _ _ _ _ => h τ hs, fun h τ hs => ?_⟩
+  obtain ⟨id, obj, rfl, hap⟩ := Close.writeAddr_setObj hs
+  have hsame := Close.readAddr_writeAddr_same hs
+  exact h _ hs hsame (by simp only [Close.readVal, hsame]; rfl) hap
+    (fun a' ha => by simp [Close.readVal, hap a' ha]) (fun _ _ => rfl) (fun _ => rfl)
+
+/-- **A copy into memory under the box**: after `Person memory m = alice;`,
+`m.age` reads what `alice.age` held; storage and locals are as before. -/
+theorem Modality.wp_box_copyStToM {σ : State} {v : SVal} {P : State × MVal → Prop} :
+    Modality.box.wp (copyStToM σ v) P ↔
+      ∀ τ mv, copyStToM σ v = .ok (τ, mv) →
+        (∀ id f, mv = .ref id → f ≠ "length" →
+          Close.readVal τ (.memoryField id f) = v.find [.field f] >>= SVal.asValue) →
+        (∀ r q, τ.findStorage r q = σ.findStorage r q) → (∀ x, τ.getEnv x = σ.getEnv x) →
+        P (τ, mv) := by
+  rw [Modality.wp_box]
+  refine ⟨fun h τ mv hs _ _ _ => h _ hs, fun h ⟨τ, mv⟩ hs => ?_⟩
+  obtain ⟨hst, hen⟩ := Close.copyStToM_frame' hs
+  exact h τ mv hs (fun id f hid hf => by subst hid; exact Close.copyStToM_member hs hf) hst hen
+
+/-- **A fresh memory object under the box**: `Person memory m;` binds `m` to
+an object whose members read the defaults of `Person`'s. -/
+theorem Modality.wp_box_allocDefault {σ : State} {R : RefTy} {P : State × Nat → Prop} :
+    Modality.box.wp (allocDefault σ R) P ↔
+      ∀ τ id, allocDefault σ R = .ok (τ, id) →
+        (∀ f, f ≠ "length" →
+          Close.readVal τ (.memoryField id f) =
+            (defaultForRef R).find [.field f] >>= SVal.asValue) →
+        (∀ r q, τ.findStorage r q = σ.findStorage r q) → (∀ x, τ.getEnv x = σ.getEnv x) →
+        P (τ, id) := by
+  rw [Modality.wp_box]
+  refine ⟨fun h τ id hs _ _ _ => h _ hs, fun h ⟨τ, id⟩ hs => ?_⟩
+  have hc := Close.allocDefault_copy hs
+  obtain ⟨hst, hen⟩ := Close.copyStToM_frame' hc
+  exact h τ id hs (fun f hf => Close.copyStToM_member hc hf) hst hen
+
+/-- **A copy out of memory under the box**: after `alice = m;`, `alice.age`
+holds what `m.age` held. -/
+theorem Modality.wp_box_copyMem {σ : State} {id : Nat} {P : SVal → Prop} :
+    Modality.box.wp (copyMem σ (.ref id)) P ↔
+      ∀ v, copyMem σ (.ref id) = .ok v →
+        (∀ f, f ≠ "length" → v.find [.field f] =
+          readAddr σ (.memoryField id f) >>= Close.copyLeaf σ id) → P v := by
+  rw [Modality.wp_box]
+  exact ⟨fun h v hs _ => h v hs, fun h v hs => h v hs (fun _ hf => Close.copyMem_member hs hf)⟩
+
+/-- **A transfer under the box**: `to.transfer(5);` leaves the storage, the
+locals and the heap as they were. -/
+theorem Modality.wp_box_transferAt {σ : State} {addr amt : Int} {P : State → Prop} :
+    Modality.box.wp (transferAt σ addr amt) P ↔
+      ∀ τ, transferAt σ addr amt = .ok τ →
+        (∀ r q, τ.findStorage r q = σ.findStorage r q) → (∀ x, τ.getEnv x = σ.getEnv x) →
+        (∀ a, readAddr τ a = readAddr σ a) → (∀ a, Close.readVal τ a = Close.readVal σ a) →
+        P τ := by
+  rw [Modality.wp_box]
+  refine ⟨fun h τ hs _ _ _ _ => h τ hs, fun h τ hs => ?_⟩
+  obtain ⟨h₁, h₂, h₃⟩ := Close.transferAt_frame hs
+  exact h τ hs h₁ h₂ h₃ (fun a => by simp [Close.readVal, h₃])
 
 end WP
 
@@ -287,7 +224,8 @@ namespace Close
 The evaluators' own equations end in `match`es on a binding or a pair,
 which `simp` cannot see through while the scrutinee is unknown.  These
 restate them as binds of named functions, so that `Modality.wp_bind`
-applies and the scrutinee is named first. -/
+applies and the scrutinee is named first.  A read of memory stays whole
+(`readVal`), since what is known of it is known of the value. -/
 
 /-- The value a local holds: `x` after `uint x = 10;` is `10`; an alias or
 a memory local has none. -/
@@ -301,36 +239,83 @@ def bindingPath : Binding → Res (Name × List Seg)
   | .spath r segs => .ok (r, segs)
   | .val _ | .mref _ => .error .stuck
 
+/-- The object a memory local holds: `m` after `Person memory m;`. -/
+def bindingRef : Binding → Res Nat
+  | .mref id => .ok id
+  | .val _ | .spath .. => .error .stuck
+
 /-- `x` bound to `10` reads `10`. -/
 @[simp] theorem bindingVal_val (v : Value) : bindingVal (.val v) = .ok v := rfl
 /-- `p` bound to `alice.account` reads that path. -/
 @[simp] theorem bindingPath_spath (r : Name) (segs : List Seg) :
     bindingPath (.spath r segs) = .ok (r, segs) := rfl
+/-- `m` bound to the object `3` reads `3`. -/
+theorem bindingRef_mref (id : Nat) : bindingRef (.mref id) = .ok id := rfl
 /-- A local read as a value was bound to one: `a == 1` says `a` holds `1`. -/
 @[simp] theorem bindingVal_eq_ok {b : Binding} {v : Value} :
     bindingVal b = .ok v ↔ b = .val v := by
   cases b <;> simp [bindingVal]
+/-- A local read as an object was bound to one. -/
+theorem bindingRef_eq_ok {b : Binding} {id : Nat} :
+    bindingRef b = .ok id ↔ b = .mref id := by
+  cases b <;> simp [bindingRef]
 /-- An index read as an integer is one: `balances[k]` needs `k` a `uint`. -/
 @[simp] theorem asInt_eq_ok {v : Value} {i : Int} : v.asInt = .ok i ↔ v = .int i := by
   cases v <;> simp [Value.asInt]
+/-- A condition read as a boolean is one: `!flag` needs `flag` a `bool`. -/
+theorem asBool_eq_ok {v : Value} {b : Bool} : v.asBool = .ok b ↔ v = .bool b := by
+  cases v <;> simp [Value.asBool]
+/-- A memory slot read as a reference holds one. -/
+theorem asRef_eq_ok {mv : MVal} {id : Nat} : mv.asRef = .ok id ↔ mv = .ref id := by
+  cases mv <;> simp [MVal.asRef, pure, Except.pure]
 /-- `alice.age = 10;` stores the word `10`. -/
 @[simp] theorem toSVal_int (v : Int) : Value.toSVal (.int v) = .int v := rfl
 /-- `flags[k] = true;` stores the word `true`. -/
 @[simp] theorem toSVal_bool (b : Bool) : Value.toSVal (.bool b) = .bool b := rfl
+/-- A value is stored in memory as the primitive it is: `m.age = 5;`. -/
+theorem toMVal_eq (v : Value) : Value.toMVal v = .prim v := by
+  cases v <;> rfl
+/-- A stored value reads back as itself: `age = amount;` then `age` is
+`amount`, whatever it holds. -/
+theorem asValue_toSVal (v : Value) : (Value.toSVal v).asValue = .ok v := by
+  cases v <;> rfl
+/-- The same for a value stored in memory: `m.age = amount;`. -/
+theorem asValue_toMVal (v : Value) : (Value.toMVal v).asValue = .ok v := by
+  cases v <;> rfl
 /-- Reading the word `10` gives `10`. -/
 @[simp] theorem asValue_int (v : Int) : (SVal.int v).asValue = .ok (.int v) := rfl
 /-- Reading the word `true` gives `true`. -/
 @[simp] theorem asValue_bool (b : Bool) : (SVal.bool b).asValue = .ok (.bool b) := rfl
+/-- A memory slot holding `10` reads `10`. -/
+theorem mval_asValue_prim (p : PrimVal) : (MVal.prim p).asValue = .ok p := by
+  cases p <;> rfl
+/-- A memory slot holding a reference reads no value. -/
+theorem mval_asValue_ref (id : Nat) : (MVal.ref id).asValue = .error .stuck := rfl
+/-- A memory slot holding the object `3` references it. -/
+theorem mval_asRef_ref (id : Nat) : (MVal.ref id).asRef = .ok id := rfl
 /-- `delete alice.age;` leaves `0`. -/
 @[simp] theorem defaultOf_int (v : Int) : (SVal.int v).defaultOf = .int 0 := rfl
 /-- `delete flags[k];` leaves `false`. -/
 @[simp] theorem defaultOf_bool (b : Bool) : (SVal.bool b).defaultOf = .bool false := rfl
 /-- The index `1` of `values[1]` is the integer `1`. -/
 @[simp] theorem asInt_int (v : Int) : Value.asInt (.int v) = .ok v := rfl
+/-- The condition `true` is the boolean `true`. -/
+theorem asBool_bool (b : Bool) : Value.asBool (.bool b) = .ok b := rfl
 /-- Binding a local does not touch the storage: after `uint y = 1;`,
 `alice.age` reads as before. -/
 @[simp] theorem findStorage_setEnv (σ : State) (x : Var) (b : Binding) (r : Name)
     (segs : List Seg) : (σ.setEnv x b).findStorage r segs = σ.findStorage r segs := rfl
+/-- `pure` in a run is `ok`. -/
+theorem pure_eq_ok {α : Type} (a : α) : (pure a : Res α) = .ok a := rfl
+/-- A run that returned passes its value on. -/
+theorem ok_bind {α β : Type} (a : α) (f : α → Res β) : (Except.ok a >>= f : Res β) = f a := rfl
+/-- A run that halted halts what follows. -/
+theorem error_bind {α β : Type} (e : Halt) (f : α → Res β) :
+    (Except.error e >>= f : Res β) = .error e := rfl
+
+/-- A run followed by nothing is the run. -/
+theorem bind_ok_right {α : Type} (x : Res α) : (x >>= fun a => Except.ok a) = x := by
+  cases x <;> rfl
 
 /-- `p.age`, with `p` an alias, is the path `p` holds, then `age`. -/
 theorem aliasPath_eq (σ : State) (x : Var) : aliasPath σ x = σ.getEnv x >>= bindingPath := by
@@ -347,6 +332,28 @@ theorem evalBinop_strict {op : BinOp} (h₁ : op ≠ .and) (h₂ : op ≠ .or) (
       b >>= fun rv => applyBinOp op lv rv >>= checkArith (op.retTy (.prim p)) := by
   cases op <;> first | exact absurd rfl h₁ | exact absurd rfl h₂ | rfl
 
+/-- `a && b` reads `b` only when `a` is not `false`. -/
+theorem evalBinop_and (p : PrimTy) (lv : Value) (b : Res Value) :
+    evalBinop .and p lv b = if lv = .bool false then .ok (.bool false) else
+      b >>= fun rv => applyBinOp .and lv rv >>= checkArith (BinOp.and.retTy (.prim p)) := by
+  unfold evalBinop
+  split <;> simp_all [pure, Except.pure]
+
+/-- `a || b` reads `b` only when `a` is not `true`. -/
+theorem evalBinop_or (p : PrimTy) (lv : Value) (b : Res Value) :
+    evalBinop .or p lv b = if lv = .bool true then .ok (.bool true) else
+      b >>= fun rv => applyBinOp .or lv rv >>= checkArith (BinOp.or.retTy (.prim p)) := by
+  unfold evalBinop
+  split <;> simp_all [pure, Except.pure]
+
+/-- `c ? a : b` on a condition that is `true`, `false`, or not a boolean. -/
+theorem pickBranch_eq (cv : Value) (t e : Res Value) :
+    pickBranch cv t e =
+      if cv = .bool true then t else if cv = .bool false then e else .error .stuck := by
+  cases cv with
+  | int _ => rfl
+  | bool b => cases b <;> rfl
+
 section Eval
 
 variable {C : Contract} (σ : State)
@@ -362,9 +369,25 @@ theorem Term.eval_pv (x : Var) : (Term.pv x : Term C).eval σ = σ.getEnv x >>= 
 /-- `x + 1`: `x`, then the operator on `1`. -/
 theorem Term.eval_binop (op : BinOp) (p : PrimTy) (a b : Term C) : (Term.binop op p a b).eval σ =
     a.eval σ >>= fun x => evalBinop op p x (b.eval σ) := rfl
+/-- `-x`, `!flag`: the operand, the operator, the range check. -/
+theorem Term.eval_unop (op : UnOp) (p : PrimTy) (a : Term C) : (Term.unop op p a).eval σ =
+    a.eval σ >>= fun x => applyUnOp op x >>= unopCheck op p := rfl
 /-- `find(storage, alice.age)`: the storage, the path, the word there. -/
 theorem Term.eval_find (s : STerm C) (p : PTerm C) : (Term.find s p).eval σ =
     s.eval σ >>= fun τ => p.eval σ >>= fun rs => τ.findStorage rs.1 rs.2 >>= SVal.asValue := rfl
+/-- `values.length`: the array there, counted. -/
+theorem Term.eval_len (s : STerm C) (p : PTerm C) : (Term.len s p).eval σ =
+    s.eval σ >>= fun τ => p.eval σ >>= fun rs => τ.findStorage rs.1 rs.2 >>= arrLen := by
+  simp only [Term.eval, bind, Except.bind]
+  cases s.eval σ <;> try rfl
+  all_goals cases p.eval σ <;> try rfl
+  all_goals exact arrayLen_eq _ _ _
+/-- `read(memory, m.age)`: the memory, the address, the value there. -/
+theorem Term.eval_read (m : MTerm C) (a : MAddr C) : (Term.read m a).eval σ =
+    m.eval σ >>= fun τ => a.eval σ >>= fun addr => readVal τ addr := rfl
+/-- `c ? a : b`: the condition, then the branch it picks. -/
+theorem Term.eval_ite (c a b : Term C) : (Term.ite c a b).eval σ =
+    c.eval σ >>= fun cv => pickBranch cv (a.eval σ) (b.eval σ) := rfl
 /-- `alice` is the root `alice`. -/
 theorem PTerm.eval_root (r : Name) : (PTerm.root r : PTerm C).eval σ = .ok (r, []) := rfl
 /-- `p`, an alias, is the path it holds. -/
@@ -390,12 +413,80 @@ theorem STerm.eval_save (s : STerm C) (p : PTerm C) (v : SValT C) : (STerm.save 
 theorem STerm.eval_delAt (s : STerm C) (p : PTerm C) : (STerm.delAt s p).eval σ =
     s.eval σ >>= fun τ => p.eval σ >>= fun rs => τ.findStorage rs.1 rs.2 >>= fun cur =>
       τ.saveStorage rs.1 rs.2 cur.defaultOf := rfl
+/-- `values.push(5)`: the array, then the array one longer written back. -/
+theorem STerm.eval_push (s : STerm C) (p : PTerm C) (v : SValT C) : (STerm.push s p v).eval σ =
+    s.eval σ >>= fun τ => p.eval σ >>= fun rs =>
+      τ.findStorage rs.1 rs.2 >>= pushOn τ .uint rs.1 rs.2 (fun _ => v.eval σ) := by
+  simp only [STerm.eval, bind, Except.bind]
+  cases s.eval σ <;> try rfl
+  all_goals cases p.eval σ <;> try rfl
+  all_goals exact pushAt_eq _ _ _ _ _
+/-- `persons.push()`: the recycled or default slot appended. -/
+theorem STerm.eval_pushSlot (s : STerm C) (p : PTerm C) (E : Ty) :
+    (STerm.pushSlot s p E).eval σ = s.eval σ >>= fun τ => p.eval σ >>= fun rs =>
+      τ.findStorage rs.1 rs.2 >>= pushOn τ E rs.1 rs.2 pure := by
+  simp only [STerm.eval, bind, Except.bind]
+  cases s.eval σ <;> try rfl
+  all_goals cases p.eval σ <;> try rfl
+  all_goals exact pushAt_eq _ _ _ _ _
+/-- `values.pop()`: the array, then the array one shorter written back. -/
+theorem STerm.eval_pop (s : STerm C) (p : PTerm C) : (STerm.pop s p).eval σ =
+    s.eval σ >>= fun τ => p.eval σ >>= fun rs => τ.findStorage rs.1 rs.2 >>= popOn τ rs.1 rs.2 := by
+  simp only [STerm.eval, bind, Except.bind]
+  cases s.eval σ <;> try rfl
+  all_goals cases p.eval σ <;> try rfl
+  all_goals exact popAt_eq _ _ _
 /-- The `10` of `alice.age = 10;`, as a word to store. -/
 theorem SValT.eval_val (t : Term C) : (SValT.val t).eval σ = t.eval σ >>= fun v => .ok v.toSVal :=
   rfl
 /-- The `bob` of `alice = bob;`: the subtree read there. -/
 theorem SValT.eval_find (s : STerm C) (p : PTerm C) : (SValT.find s p).eval σ =
     s.eval σ >>= fun τ => p.eval σ >>= fun rs => τ.findStorage rs.1 rs.2 := rfl
+/-- The `m` of `alice = m;`: the memory object, copied out. -/
+theorem SValT.eval_copyMem (m : MTerm C) (i : ITerm C) : (SValT.copyMem m i).eval σ =
+    m.eval σ >>= fun τ => i.eval σ >>= fun id => copyMem τ (.ref id) := rfl
+/-- `m`, a memory local, is the object it holds. -/
+theorem ITerm.eval_pv (x : Var) : (ITerm.pv x : ITerm C).eval σ = σ.getEnv x >>= bindingRef := by
+  simp only [ITerm.eval, bind, Except.bind]
+  cases σ.getEnv x with
+  | error _ => rfl
+  | ok b => cases b <;> rfl
+/-- `m.account`, a reference held in memory. -/
+theorem ITerm.eval_read (m : MTerm C) (a : MAddr C) : (ITerm.read m a).eval σ =
+    m.eval σ >>= fun τ => a.eval σ >>= fun addr => readAddr τ addr >>= MVal.asRef := rfl
+/-- `freshId(addM(memory))`: the object a default allocation takes. -/
+theorem ITerm.eval_alloc (m : MTerm C) (R : RefTy) : (ITerm.alloc m R).eval σ =
+    m.eval σ >>= fun τ => allocDefault τ R >>= fun r => .ok r.2 := rfl
+/-- `freshId(copySt(memory, alice))`: the object a copy takes. -/
+theorem ITerm.eval_copy (m : MTerm C) (v : SValT C) : (ITerm.copy m v).eval σ =
+    v.eval σ >>= fun sv => m.eval σ >>= fun τ => copyStToM τ sv >>= fun r => r.2.asRef := rfl
+/-- `m.age` is the member `age` of the object `m` holds. -/
+theorem MAddr.eval_field (i : ITerm C) (f : Name) : (MAddr.field i f).eval σ =
+    i.eval σ >>= fun id => .ok (.memoryField id f) := rfl
+/-- `xs[k]` is the element `k` of the object `xs` holds. -/
+theorem MAddr.eval_at (i : ITerm C) (k : Term C) : (MAddr.at i k).eval σ =
+    i.eval σ >>= fun id => k.eval σ >>= Value.asInt >>= fun j => .ok (.memoryIndex id j) := by
+  simp only [MAddr.eval, bind, Except.bind]
+  cases i.eval σ <;> try rfl
+  cases k.eval σ <;> rfl
+/-- `memory` is the memory of the state it is read in. -/
+theorem MTerm.eval_memory : (MTerm.memory : MTerm C).eval σ = .ok σ := rfl
+/-- `write(memory, m.age, 5)`: the value, the memory, the address, the write. -/
+theorem MTerm.eval_write (m : MTerm C) (a : MAddr C) (v : MValT C) : (MTerm.write m a v).eval σ =
+    v.eval σ >>= fun mv => m.eval σ >>= fun τ => a.eval σ >>= fun addr => writeAddr τ mv addr :=
+  rfl
+/-- `addM(memory)`: the memory with a default object allocated. -/
+theorem MTerm.eval_addM (m : MTerm C) (R : RefTy) : (MTerm.addM m R).eval σ =
+    m.eval σ >>= fun τ => allocDefault τ R >>= fun r => .ok r.1 := rfl
+/-- `copySt(memory, alice)`: the memory with a copy of `alice` in it. -/
+theorem MTerm.eval_copySt (m : MTerm C) (v : SValT C) : (MTerm.copySt m v).eval σ =
+    v.eval σ >>= fun sv => m.eval σ >>= fun τ => copyStToM τ sv >>= fun r => .ok r.1 := rfl
+/-- The `5` of `m.age = 5;`, as a memory value. -/
+theorem MValT.eval_val (t : Term C) : (MValT.val t).eval σ = t.eval σ >>= fun v => .ok v.toMVal :=
+  rfl
+/-- The `n` of `m.account = n;`: a reference. -/
+theorem MValT.eval_ref (i : ITerm C) :
+    (MValT.ref i).eval σ = i.eval σ >>= fun id => .ok (.ref id) := rfl
 /-- `{y := alice.age}` reads `alice.age` in the state it is applied in and
 binds `y`. -/
 theorem UpdElem.write_val (σ₀ τ : State) (x : Var) (t : Term C) : (UpdElem.val x t).write σ₀ τ =
@@ -404,9 +495,29 @@ theorem UpdElem.write_val (σ₀ τ : State) (x : Var) (t : Term C) : (UpdElem.v
 theorem UpdElem.write_path (σ₀ τ : State) (x : Var) (p : PTerm C) :
     (UpdElem.path x p).write σ₀ τ = p.eval σ₀ >>= fun rs => .ok (τ.setEnv x (.spath rs.1 rs.2)) :=
   rfl
+/-- `{m := freshId(addM(memory))}` binds the memory local `m`. -/
+theorem UpdElem.write_mref (σ₀ τ : State) (x : Var) (i : ITerm C) :
+    (UpdElem.mref x i).write σ₀ τ = i.eval σ₀ >>= fun id => .ok (τ.setEnv x (.mref id)) := rfl
 /-- `{storage := save(…)}` replaces the storage, and nothing else. -/
 theorem UpdElem.write_storage (σ₀ τ : State) (s : STerm C) : (UpdElem.storage s).write σ₀ τ =
     s.eval σ₀ >>= fun τ' => .ok { τ with storage := τ'.storage } := rfl
+/-- `{memory := write(…)}` replaces the heap, and nothing else. -/
+theorem UpdElem.write_memory (σ₀ τ : State) (m : MTerm C) : (UpdElem.memory m).write σ₀ τ =
+    m.eval σ₀ >>= fun μ => .ok { τ with heap := μ.heap, nextId := μ.nextId } := rfl
+/-- `{transfer(to, 5)}`: the address, the amount, the payment. -/
+theorem UpdElem.write_transfer (σ₀ τ : State) (r a : Term C) : (UpdElem.transfer r a).write σ₀ τ =
+    r.eval σ₀ >>= Value.asInt >>= fun addr => a.eval σ₀ >>= Value.asInt >>= fun amt =>
+      transferAt τ addr amt := by
+  simp only [UpdElem.write, bind, Except.bind]
+  cases r.eval σ₀ with
+  | error => rfl
+  | ok v =>
+    cases v with
+    | bool b => rfl
+    | int addr =>
+      cases a.eval σ₀ with
+      | error => rfl
+      | ok w => cases w <;> rfl
 
 /-- `true` holds. -/
 theorem holds_tt : holds σ (Fml.tt : Fml C) ↔ True := Iff.rfl
@@ -430,119 +541,105 @@ theorem holds_upd (m : Modality) (U : Upd C) (φ : Fml C) :
 
 end Eval
 
+end Close
+
 /-! ## The tactic -/
 
-/-- The second stage of `sol_close`: read after write, on the goal, with
-each premise in scope for what follows it. -/
+attribute [close_rw]
+  -- formulas and updates
+  Close.holds_tt Close.holds_not Close.holds_and Close.holds_imp Close.holds_eq Close.holds_upd
+  Hyp.wrap Upd.apply List.foldlM_cons List.foldlM_nil
+  Close.UpdElem.write_val Close.UpdElem.write_path Close.UpdElem.write_mref
+  Close.UpdElem.write_storage Close.UpdElem.write_memory Close.UpdElem.write_transfer
+  -- terms
+  Close.Term.eval_lit Close.Term.eval_pv Close.Term.eval_binop Close.Term.eval_unop
+  Close.Term.eval_find Close.Term.eval_len Close.Term.eval_read Close.Term.eval_ite
+  Close.PTerm.eval_root Close.PTerm.eval_field Close.PTerm.eval_at Close.PTerm.eval_pv
+  Close.STerm.eval_storage Close.STerm.eval_save Close.STerm.eval_delAt Close.STerm.eval_push
+  Close.STerm.eval_pushSlot Close.STerm.eval_pop
+  Close.SValT.eval_val Close.SValT.eval_find Close.SValT.eval_copyMem
+  Close.ITerm.eval_pv Close.ITerm.eval_read Close.ITerm.eval_alloc Close.ITerm.eval_copy
+  Close.MAddr.eval_field Close.MAddr.eval_at
+  Close.MTerm.eval_memory Close.MTerm.eval_write Close.MTerm.eval_addM Close.MTerm.eval_copySt
+  Close.MValT.eval_val Close.MValT.eval_ref
+  -- operators
+  Close.evalBinop_strict Close.evalBinop_and Close.evalBinop_or applyBinOp applyUnOp unopCheck
+  Close.pickBranch_eq BinOp.retTy BinOp.isArith checkArith uintBound intBound
+  -- runs
+  Modality.wp_ok Modality.wp_pure Modality.wp_error Modality.wp_bind Modality.wp_ite
+  Modality.wp_diamond Modality.onHalt_box Modality.onHalt_diamond
+  Close.pure_eq_ok Close.ok_bind Close.error_bind Close.bind_ok_right bind_assoc
+  Close.saveStorage_bind_restore Close.writeAddr_bind_restore
+  -- values
+  Close.bindingVal_val Close.bindingPath_spath Close.bindingRef_mref Close.bindingVal_eq_ok
+  Close.bindingRef_eq_ok Close.asInt_eq_ok Close.asBool_eq_ok Close.asRef_eq_ok Close.toMVal_eq
+  Close.toSVal_int Close.toSVal_bool Close.asValue_toSVal Close.asValue_toMVal Close.asValue_int
+  Close.asValue_bool Close.mval_asValue_prim Close.mval_asValue_ref Close.mval_asRef_ref
+  Close.defaultOf_int Close.defaultOf_bool Close.asInt_int Close.asBool_bool
+  -- states
+  Close.findStorage_setEnv State.getEnv_setEnv_self State.getEnv_setEnv_ne Close.findStorage_mk
+  Close.getEnv_mk Close.readAddr_mk Close.readVal_mk Close.readAddr_setEnv Close.readVal_setEnv
+  -- paths, arrays, copies
+  Close.diverge_cons' Close.not_diverge_nil_left Close.not_diverge_nil_right Close.prefix_nil
+  Close.prefix_cons Close.prefix_cons_nil Close.after_nil Close.after_cons Close.find_nil
+  List.nil_append List.cons_append List.append_nil
+  Close.arrLen_array Close.arrLen_eq_ok Close.pushOn_array Close.popOn_push Close.find_push_last
+  Close.copyLeaf_prim Close.apart_field Close.apart_index Close.apart_field_index
+  Close.apart_index_field
+  -- logic
+  Except.ok.injEq Binding.val.injEq Binding.mref.injEq PrimVal.int.injEq PrimVal.bool.injEq
+  MVal.prim.injEq MVal.ref.injEq SVal.prim.injEq Prod.mk.injEq Seg.field.injEq Seg.at.injEq
+  Var.user.injEq Var.fresh.injEq Int.ofNat.injEq
+  forall_eq' forall_eq exists_eq_left' exists_eq_left forall_exists_index and_imp
+  true_and and_true and_self implies_true forall_const ne_eq not_false_eq_true not_true_eq_false
+  true_or or_true or_false false_or not_and not_exists Classical.not_not true_implies
+  false_implies decide_eq_true_eq decide_eq_false_iff_not
+  Bool.and_true Bool.and_false Bool.true_and Bool.false_and Bool.or_true Bool.or_false
+  Bool.true_or Bool.false_or Bool.not_true Bool.not_false
+  -- computation
+  reduceCtorEq reduceIte reduceDIte String.reduceEq Nat.reduceEqDiff Nat.reducePow Int.reduceEq
+  Int.reduceAdd Int.reduceSub Int.reduceMul Int.reduceNeg Int.reduceLT Int.reduceLE
+
+-- A write, a subtree read, a copy is named together with what is known of it.
+attribute [close_rw] Modality.wp_box_saveStorage Modality.wp_box_findStorage
+  Modality.wp_box_writeAddr Modality.wp_box_copyStToM Modality.wp_box_allocDefault
+  Modality.wp_box_copyMem Modality.wp_box_transferAt
+
+-- The bare box names a result with nothing, so it waits in a set of its own
+-- (`close_rw_last`, consulted after `close_rw`) until every fact is in scope:
+-- a push is not named before the array it pushes onto is known.  The diamond
+-- is named at once, since what a premise says is what the rest needs.
+attribute [close_rw_last] Modality.wp_box
+
+/-- The first pass of `sol_close`: evaluate, and name every write with what
+is known of it. -/
+macro "sol_close_eval" : tactic => `(tactic| simp only [close_rw])
+
+/-- The second: each premise in scope for what follows it, so that the facts
+about a write rewrite the reads after it.  Nothing is named bare yet: a
+result a later fact decides (the array a push lands on) is decided first. -/
+macro "sol_close_facts" : tactic => `(tactic|
+  simp (config := { contextual := true, maxSteps := 400000 }) only [close_rw])
+
+/-- The third: what is left is named bare, under the box. -/
 macro "sol_close_reads" : tactic => `(tactic|
-  simp (config := { contextual := true }) only [Modality.wp_ok, Modality.wp_error,
-    Modality.wp_box, Modality.wp_diamond,
-    Modality.wp_ite, Modality.onHalt_box, Modality.onHalt_diamond, List.nil_append,
-    List.cons_append, bindingVal_val, bindingPath_spath, bindingVal_eq_ok, asInt_eq_ok,
-    toSVal_int, toSVal_bool, asValue_int, asValue_bool, defaultOf_int, defaultOf_bool, asInt_int,
-    findStorage_setEnv, State.getEnv_setEnv_self, State.getEnv_setEnv_ne, Except.ok.injEq,
-    Binding.val.injEq, PrimVal.int.injEq, forall_eq', exists_eq_left', true_and, and_true,
-    and_self, implies_true, forall_const, ne_eq, not_false_eq_true, true_or, or_true, or_false,
-    false_or, diverge_cons', not_diverge_nil_left, not_diverge_nil_right, Seg.field.injEq,
-    Seg.at.injEq, reduceCtorEq, Var.user.injEq, Var.fresh.injEq, Int.ofNat.injEq,
-    String.reduceEq, Nat.reduceEqDiff, Int.reduceEq, Int.reduceAdd, Int.reduceSub, Int.reduceMul,
-    Int.reduceNeg, Int.reduceLT, Int.reduceLE, Nat.reducePow])
+  simp (config := { contextual := true, maxSteps := 400000 }) only [close_rw, close_rw_last])
 
 /-- `sol_close_reads` on the goal and every hypothesis. -/
 macro "sol_close_reads_all" : tactic => `(tactic|
-  simp_all only [Modality.wp_ok, Modality.wp_error, Modality.wp_box, Modality.wp_diamond,
-    Modality.wp_ite, Modality.onHalt_box, Modality.onHalt_diamond, List.nil_append,
-    List.cons_append, bindingVal_val, bindingPath_spath, bindingVal_eq_ok, asInt_eq_ok,
-    toSVal_int, toSVal_bool, asValue_int, asValue_bool, defaultOf_int, defaultOf_bool, asInt_int,
-    findStorage_setEnv, State.getEnv_setEnv_self, State.getEnv_setEnv_ne, Except.ok.injEq,
-    Binding.val.injEq, PrimVal.int.injEq, forall_eq', exists_eq_left', true_and, and_true,
-    and_self, implies_true, forall_const, ne_eq, not_false_eq_true, true_or, or_true, or_false,
-    false_or, diverge_cons', not_diverge_nil_left, not_diverge_nil_right, Seg.field.injEq,
-    Seg.at.injEq, reduceCtorEq, Var.user.injEq, Var.fresh.injEq, Int.ofNat.injEq,
-    String.reduceEq, Nat.reduceEqDiff, Int.reduceEq, Int.reduceAdd, Int.reduceSub, Int.reduceMul,
-    Int.reduceNeg, Int.reduceLT, Int.reduceLE, Nat.reducePow])
+  simp_all (config := { maxSteps := 400000 }) only [close_rw, close_rw_last])
 
 /-- `sol_close`: prove a formula with no modality left in an arbitrary state
-(`Close.lean`).  Run `sol_symex` first. -/
+(`Close.lean`).  Run `sol_symex` first; with no goal left it does nothing. -/
 macro "sol_close" : tactic => `(tactic|
-  (intro σ
-   simp only [holds_tt, holds_not, holds_and, holds_imp, holds_eq, holds_upd, Upd.apply,
-     List.foldlM_cons, List.foldlM_nil, UpdElem.write_val, UpdElem.write_path,
-     UpdElem.write_storage, Term.eval_lit, Term.eval_pv, Term.eval_find, Term.eval_binop,
-     PTerm.eval_root, PTerm.eval_field, PTerm.eval_at, PTerm.eval_pv, STerm.eval_storage,
-     STerm.eval_save, STerm.eval_delAt, SValT.eval_val, SValT.eval_find, Modality.wp_ok,
-     Modality.wp_pure, Modality.wp_error, Modality.wp_bind, Modality.wp_ite,
-     Modality.wp_box_saveStorage, Modality.onHalt_box, Modality.onHalt_diamond,
-     evalBinop_strict, applyBinOp, BinOp.retTy, BinOp.isArith, checkArith, uintBound, intBound,
-     ne_eq, reduceCtorEq, not_false_eq_true, ↓reduceIte]
-   sol_close_reads
-   try (intros; sol_close_reads_all)
-   try (subst_vars; sol_close_reads_all)
-   all_goals (try intros)
-   all_goals first | omega | grind))
-
-/-! ## Examples -/
-
-section Examples
-
-/-- A write, then a read of it; under the box, since `alice.age = 10;` is
-stuck in a state without `alice`. -/
-example : ⊨ dl[StandardExample]{ [ alice.age = 10; uint y = alice.age; ] y == 10 } := by
-  sol_symex
-  sol_close
-
-/-- A parameter: the premise binds `a`, so the diamond holds. -/
-example : ⊨ dl[StandardExample]{ a == 1 → ⟨ x = a; ⟩ x == 1 } := by
-  sol_symex
-  sol_close
-
-/-- Frame: a write to another root. -/
-example : ⊨ dl[StandardExample]{
-    [ alice.age = 10; bob.age = 20; uint y = alice.age; ] y == 10 } := by
-  sol_symex
-  sol_close
-
-/-- A mapping at a symbolic key, written and read back. -/
-example : ⊨ dl[StandardExample]{ [ balances[k] = 5; uint y = balances[k]; ] y == 5 } := by
-  sol_symex
-  sol_close
-
-/-- Frame: two keys the premise tells apart. -/
-example : ⊨ dl[StandardExample]{
-    k != j → [ balances[k] = 5; balances[j] = 6; uint y = balances[k]; ] y == 5 } := by
-  sol_symex
-  sol_close
-
-/-- Frame: a field apart from the one written, through a fresh alias. -/
-example : ⊨ dl[StandardExample]{
-    [ alice.account.balance = 3; alice.age = 10; uint y = alice.account.balance; ] y == 3 } := by
-  sol_symex
-  sol_close
-
-/-- A write through an alias, read through the root. -/
-example : ⊨ dl[StandardExample]{
-    [ Person storage p = alice; p.age = 3; uint y = alice.age; ] y == 3 } := by
-  sol_symex
-  sol_close
-
-/-- A compound assignment: read, add, range-check, write. -/
-example : ⊨ dl[StandardExample]{
-    [ alice.age = 3; alice.age += 1; uint y = alice.age; ] y == 4 } := by
-  sol_symex
-  sol_close
-
-/-- Locals only: the diamond holds everywhere, range check included. -/
-example : ⊨ dl[StandardExample]{ x == 1 → ⟨ y = x + 1; ⟩ y == 2 } := by
-  sol_symex
-  sol_close
-
-/-- `Notation.lean`'s: a declaration's local in the postcondition. -/
-example : ⊨ dl[StandardExample]{ ⟨ uint x = 10; ⟩ x == 10 } := by
-  sol_symex
-  sol_close
-
-end Examples
-
-end Close
+  all_goals
+   (intro σ
+    sol_close_eval
+    all_goals try sol_close_facts
+    all_goals try sol_close_reads
+    all_goals try (intros; sol_close_reads_all)
+    all_goals try (subst_vars; sol_close_reads_all)
+    all_goals (try intros)
+    all_goals first | omega | grind))
 
 end Solidity
