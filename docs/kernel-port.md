@@ -319,7 +319,13 @@ lists only the standard three axioms.
     `storagePushLengthSave`, `storagePushValue_unfold_rightSndArgument` (a value or a
     path, one kind-neutral capture `Src.decl`), the three `…_unfold_leftFstReceiver`,
     `storagePopSave` (no emptiness split); `push()` needs `Ty.defaultOkS`
-  - [ ] `lsv = sp.push()`, `sp.push() = v`, `sp.push().f = v`  - [ ] memory  - [ ] cross-domain
+  - [x] `lsv = sp.push()` and `T storage lsv = sp.push();`: one statement `bindPush` over an
+    `Alias` (a rebind or a declaration), `storageLocalRootPushBind` and
+    `storageLocalRootPush_unfold_leftFstReceiver`; the declaration is the bridge's
+    `storageLocalDeclInitDrop` disagreement
+  - [ ] `sp.push() = v`, `sp.push().f = v` (the old table's `pushAssign`/`pushFieldAssign`;
+    no solkey taclet); a `symex` example through a pushed element (`symex_close`
+    runs out of steps on `matrix[0][0]`)
   - [x] operators into a local (`binopAssignment`, `binopUnfoldLeft/Right`,
     the two short-circuit rules, `unopAssignment`, `unopCapture`)
   - [x] compound assignment `op=`: `localOpAssign`, `storage{Root,Field}OpAssign`,

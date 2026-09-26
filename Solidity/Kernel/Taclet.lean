@@ -211,6 +211,33 @@ theorem extend_sub {Γ Γ' : Ctx} {T : Ty} (y : Name) (b : BTy) (hy : isFresh C 
 
 end Hole
 
+namespace Alias
+
+/-- The alias as a hole: the statement that binds it to a path. -/
+def hole {Γ Γ' : Ctx} {R : RefTy} : Alias C Γ Γ' R → Hole C Γ Γ' (.ref R)
+  | .rebind x h => .rebind x h
+  | .decl R x hx => .decl false R x hx
+
+/-- The alias, past the fresh binding of `y`. -/
+def extend {Γ Γ' : Ctx} {R : RefTy} (y : Name) (b : BTy) (hy : isFresh C Γ' y = true) :
+    (k : Alias C Γ Γ' R) → Alias C (setBy y b Γ) (k.hole.extOut y b) R
+  | .rebind x h => .rebind x ((Ctx.Sub.fresh hy b).local_ _ _ h)
+  | .decl R x hx => .decl R x (isFresh_setBy hx (ne_of_isFresh_setBy hy))
+
+@[simp] theorem extend_name {Γ Γ' : Ctx} {R : RefTy} (y : Name) (b : BTy) (hy : isFresh C Γ' y = true)
+    (k : Alias C Γ Γ' R) : (k.extend y b hy).name = k.name := by
+  cases k <;> rfl
+
+/-- A name fresh before the alias is bound is fresh after, unless it is the
+alias: `p` in `Person storage p = people.push();`. -/
+theorem isFresh_out {Γ Γ' : Ctx} {R : RefTy} (k : Alias C Γ Γ' R) (n : Name)
+    (hn : isFresh C Γ n = true) (hne : n ≠ k.name) : isFresh C Γ' n = true := by
+  cases k with
+  | rebind => exact hn
+  | decl R x hx => exact isFresh_setBy hn hne
+
+end Alias
+
 /-- The memory local just declared. -/
 def MPath.new {Γ : Ctx} (x : Name) (R : RefTy) : MPath C (Ctx.mem Γ x R) (.ref R) :=
   .var x (SemanticsProperties.lookupBy_setBy_self ..)
@@ -338,6 +365,9 @@ inductive Upd (C : Contract) (Γ : Ctx) where
   | push {E : Ty} (b : SPath C Γ (.array E)) (v : Option (Src C Γ E))
   /-- `storage := save(delAt(storage, sp[sp.length - 1]), sp.length, sp.length - 1)`. -/
   | pop {E : Ty} (b : SPath C Γ (.array E))
+  /-- `storage := save(storage, sp.length, sp.length + 1) || lsv := sp[sp.length]`:
+  the slot appended, and the alias bound to it. -/
+  | pushBind (x : Name) {R : RefTy} (b : SPath C Γ (.array (.ref R)))
   /-- `transfer(sadr, se)`: the debit booked. -/
   | transfer (r a : Simple C Γ .uint)
   /-- `mv := ref(p)`: a memory local bound to `p`'s object. -/
@@ -376,6 +406,10 @@ def Upd.apply (σ : State) {Γ : Ctx} : Upd C Γ → Res State
   | .pop b => do
     let (root, segs) ← b.resolve σ
     popAt σ root segs
+  | .pushBind (R := R) x b => do
+    let (root, segs) ← b.resolve σ
+    let (σ', n) ← pushPlaceAt σ (.ref R) root segs
+    pure (σ'.setEnv x (.spath root (segs ++ [.at n])))
   | .transfer r a => do
     let addr ← (← r.eval σ).asInt
     let amt ← (← a.eval σ).asInt
@@ -1219,6 +1253,22 @@ inductive Taclet (C : Contract) (m : Modality) : {Γ Γ' : Ctx} → Stmt C Γ Γ
   emptiness split, the update reverts as the statement does. -/
   | storagePopSave {Γ : Ctx} {E : Ty} (sp : SPath C Γ (.array E)) (hs : sp.isSimple = true) :
       .pop sp ⇒ .update (.pop sp)
+  /-- `lsv = nsp.push() ⇝ T storage sp = nsp; lsv = sp.push()`; the kernel's
+  `T storage lsv = nsp.push();` unfolds alike. -/
+  | storageLocalRootPush_unfold_leftFstReceiver {Γ Γ' : Ctx} {R : RefTy} (k : Alias C Γ Γ' R)
+      (nsp : SPath C Γ (.array (.ref R))) (hn : nsp.isSimple = false) (hd) (sp : Name)
+      (hsp : isFresh C Γ' sp = true) :
+      .bindPush k nsp hd ⇒
+        .unfold [sp]
+          (.cons (.declStorage true _ sp (isFresh_of_sub k.hole.sub hsp) nsp)
+          (.cons (.bindPush (k.extend sp _ hsp) (SPath.new sp _) hd) .nil))
+          (k.hole.extend_sub sp _ hsp)
+  /-- `lsv = sp.push() ⇝ {storage := save(storage, sp.length, sp.length + 1) ||
+  lsv := sp[sp.length]}`; `T storage lsv = sp.push();` is it after
+  `storageLocalDeclInitDrop`, which the kernel has no statement to leave. -/
+  | storageLocalRootPushBind {Γ Γ' : Ctx} {R : RefTy} (k : Alias C Γ Γ' R)
+      (sp : SPath C Γ (.array (.ref R))) (hs : sp.isSimple = true) (hd) :
+      .bindPush k sp hd ⇒ .update (.pushBind k.name sp)
   -- Transfer
   /-- `nadr.transfer(e) ⇝ uint se = nadr; se.transfer(e)`. -/
   | transfer_unfold_leftFstReceiver {Γ : Ctx} (nr : Val C Γ .uint) (hn : nr.isSimple = false)

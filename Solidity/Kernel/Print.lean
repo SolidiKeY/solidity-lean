@@ -121,6 +121,10 @@ def Stmt.toStr {Γ Γ' : Ctx} : Stmt C Γ Γ' → String
     | none => s!"{b.toStr}.push();"
     | some r => s!"{b.toStr}.push({r.toStr});"
   | .pop b => s!"{b.toStr}.pop();"
+  | .bindPush (R := R) k b _ =>
+    match k with
+    | .rebind x _ => s!"{x} = {b.toStr}.push();"
+    | .decl _ x _ => s!"{tyStr (.ref R)} storage {x} = {b.toStr}.push();"
   | .transfer r a => s!"{r.toStr}.transfer({a.toStr true});"
   | .assignIncDec x _ op _ l _ => s!"{x} = {IncDec.show op l.toStr};"
   | .delete l => s!"delete {l.toStr};"

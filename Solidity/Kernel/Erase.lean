@@ -262,6 +262,11 @@ def Stmt.erase {C : Contract} {Γ Γ' : Ctx} : Stmt C Γ Γ' → Solidity.Stmt
   | .incDec op _ l => .expr (.mkIncDec op l.toPlace.expr)
   | .push b v _ => .push b.toPlace (v.map Src.erase)
   | .pop b => .pop b.toPlace
+  | .bindPush (R := R) k b _ =>
+      match k with
+      | .rebind x _ =>
+        .assign (PlaceExpr.var .storage (.ref R) (Field.identity x R (some .local))) (.pushPlace b.erase)
+      | .decl _ x _ => .storageDecl (.ref R) x (some (.pushPlace b.erase))
   | .transfer r a => .transfer r.erase a.erase
   | .assignIncDec (p := p) x _ op _ l _ =>
       .assign (PlaceExpr.var .stack (.prim p) (Field.primitive x (.prim p))) (.mkIncDec op l.toPlace.expr)
@@ -332,6 +337,14 @@ theorem Stmt.erase_wt {C : Contract} {Γ Γ' : Ctx} :
       | some r =>
         simp [Stmt.erase, stmtWt, SPath.toPlace, b.erase_wt, b.erase_ty, r.erase_wt, r.erase_ty, elemTy]
   | .pop b => by simp [Stmt.erase, stmtWt, SPath.toPlace, b.erase_wt]
+  | .bindPush k b hd => by
+      cases k with
+      | rebind x h =>
+        simp [Stmt.erase, stmtWt, PlaceExpr.var, wtExpr, h, Field.identity, b.erase_wt, b.erase_ty,
+          Typed.WrappedExpr.ty, Ty.indexElemTy, Ty.defaultOkS_sound hd]
+      | decl R x _ =>
+        simp [Stmt.erase, stmtWt, wtExpr, b.erase_wt, b.erase_ty, Typed.WrappedExpr.ty, Ty.indexElemTy,
+          Ty.defaultOkS_sound hd]
   | .transfer r a => by simp [Stmt.erase, stmtWt, r.erase_wt, a.erase_wt]
   | .assignIncDec x h op _ l _ => by
       simp [Stmt.erase, stmtWt, PlaceExpr.var, wtExpr, h, Field.primitive, l.erase_wt,

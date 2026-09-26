@@ -34,7 +34,10 @@ memory reference copied from a member (`mp.account = mq.account;`,
 scratch memory local and the kernel copies directly: the capture needs the slot to hold a reference, which the
 interpreter does not check when it copies one.  One statement the old table
 has no rule for: `Person memory md = folks[x];`, a copy into memory from an
-entry, which the kernel captures into a storage alias first. -/
+entry, which the kernel captures into a storage alias first.  A storage
+declaration from a push place (`Person storage pp = people.push();`) the old
+table and KeY first drop to an assignment (`storageLocalDeclInitDrop`); the
+kernel, with no `T storage x;` to drop to, binds it as the assignment would. -/
 
 namespace Solidity
 namespace Kernel
@@ -124,6 +127,8 @@ def Taclet.rule {Γ Γ' : Ctx} {s : Stmt C Γ Γ'} {pr : Premise C Γ Γ'} : Tac
   | .storagePush_unfold_leftFstReceiver .. => some .storagePushUnfoldLeftFstReceiver
   | .storagePop_unfold_leftFstReceiver .. => some .storagePopUnfoldLeftFstReceiver
   | .storagePopSave .. => some (match m with | .box => .storagePopSaveBox | .diamond => .storagePopSaveDiamond)
+  | .storageLocalRootPush_unfold_leftFstReceiver .. => some .storageLocalRootPushUnfoldLeftFstReceiver
+  | .storageLocalRootPushBind .. => some .storageLocalRootPushBind
   | .transfer_unfold_leftFstReceiver .. => some .transferUnfoldLeftFstReceiver
   | .transfer_unfold_rightSndArgument .. => some .transferUnfoldRightSndArgument
   | .transferNoCallback .. => some (match m with | .box => .transferNoCallbackBox | .diamond => .transferNoCallbackDiamond)
@@ -260,6 +265,8 @@ def Taclet.origin {Γ Γ' : Ctx} {s : Stmt C Γ Γ'} {pr : Premise C Γ Γ'} : T
   | .storagePush_unfold_leftFstReceiver .. => .taclet .storagePush_unfold_leftFstReceiver
   | .storagePop_unfold_leftFstReceiver .. => .taclet .storagePop_unfold_leftFstReceiver
   | .storagePopSave .. => .taclet .storagePopSave
+  | .storageLocalRootPush_unfold_leftFstReceiver .. => .taclet .storageLocalRootPush_unfold_leftFstReceiver
+  | .storageLocalRootPushBind .. => .taclet .storageLocalRootPushBind
   | .transfer_unfold_leftFstReceiver .. => .taclet .transfer_unfold_leftFstReceiver
   | .transfer_unfold_rightSndArgument .. => .taclet .transfer_unfold_rightSndArgument
   | .transferNoCallback .. =>
@@ -371,6 +378,7 @@ def bridgeTour := ksol{
   folks[x + 1].age = b ? 1 : 2; x = (b ? 1 : 2) + 1; x += b ? 1 : 2;
   values.push(x); values.push(x + 1); values.push(); persons.push(alice); persons.push(folks[x]);
   persons.push(); values.pop(); matrix[x].push(1); matrix[x + 1].push(); matrix[x].pop();
+  Person storage pp = people.push(); pp = persons.push(); uint[] storage row = matrix.push();
   owner.transfer(1); owner.transfer(x + 1); (x + 1).transfer(2); balances[x].transfer(x);
   Person memory mp; Person memory mq = mp; Account memory ma = mp.account; mq = mp;
   x = mp.age; x = mp.account.balance; mp.age = 3; mp.age = x + 1; mp.account.balance = x;
@@ -391,6 +399,8 @@ def bridgeTour := ksol{
   "x = x + total; kernel=some (Solidity.RuleName.binopUnfoldRight (Solidity.BinOp.add)) old=some (Solidity.RuleName.binopAssignment (Solidity.BinOp.add))",
   "Person storage r = persons[x + 1]; kernel=some (Solidity.RuleName.storageIndexReadUnfoldRightSndIndex) old=some (Solidity.RuleName.storageLocalDeclInitDrop)",
   "Person storage sp = folks[x]; kernel=some (Solidity.RuleName.storageLocalDeclInitDrop) old=some (Solidity.RuleName.storagePlaceAlias)",
+  "Person storage pp = people.push(); kernel=some (Solidity.RuleName.storageLocalRootPushBind) old=some (Solidity.RuleName.storageLocalDeclInitDrop)",
+  "uint[] storage row = matrix.push(); kernel=some (Solidity.RuleName.storageLocalRootPushBind) old=some (Solidity.RuleName.storageLocalDeclInitDrop)",
   "owner.transfer(1); kernel=some (Solidity.RuleName.transferUnfoldLeftFstReceiver) old=some (Solidity.RuleName.transferNoCallbackBox)",
   "owner.transfer(x + 1); kernel=some (Solidity.RuleName.transferUnfoldLeftFstReceiver) old=some (Solidity.RuleName.transferUnfoldRightSndArgument)",
   "mp.account = mq.account; kernel=some (Solidity.RuleName.memoryFieldWriteCopy) old=some (Solidity.RuleName.memoryFieldReadUnfoldRightSndResult)",
@@ -401,6 +411,14 @@ def bridgeTour := ksol{
 -- And under a diamond, up to the old table's box/diamond twins.
 #guard (bridgeTour.disagreements .diamond).map (·.replace "Diamond" "Box") =
   bridgeTour.disagreements .box
+
+/-- A push place on a member: `TestSuite`'s `bucket.tokens`. -/
+def pushTour := ksol[TestSuite]{
+  Token storage t = bucket.tokens.push(); t = tokens.push(); t = bucket.tokens.push();
+}
+
+#guard pushTour.disagreements .box = [
+  "Token storage t = bucket.tokens.push(); kernel=some (Solidity.RuleName.storageLocalRootPushUnfoldLeftFstReceiver) old=some (Solidity.RuleName.storageLocalDeclInitDrop)"]
 
 end Tour
 

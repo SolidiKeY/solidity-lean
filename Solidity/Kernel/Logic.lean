@@ -94,6 +94,7 @@ theorem StateAgree.findStorage {Γ : Ctx} {σ τ : State} (hag : StateAgree C Γ
 /-- A statement's context extends the one it starts from. -/
 theorem Stmt.sub {Γ Γ' : Ctx} : Stmt C Γ Γ' → Ctx.Sub C Γ Γ'
   | .declLocal _ _ hx _ | .declStorage _ _ _ hx _ | .declMem _ _ hx _ _ => Ctx.Sub.fresh hx _
+  | .bindPush k _ _ => k.hole.sub
   | .assign .. | .rebind .. | .assignLocal .. | .opAssign .. | .incDec .. | .assignIncDec .. | .push ..
   | .pop _ | .transfer .. | .rebindMem .. | .assignMem .. | .assignFromMem ..
   | .delete _ | .ite .. | .require _ | .assert _
@@ -182,6 +183,25 @@ theorem Stmt.run_frame {Γ Γ' : Ctx} {σ τ : State} (hag : StateAgree C Γ σ 
             revert h
             cases transferAt σ addr amt <;> cases transferAt τ addr amt <;> intro h <;>
               first | trivial | exact h.elim | exact ⟨ns, hns, h⟩
+  | .bindPush (R := R) k b _ => by
+    obtain ⟨ns, hns, hag'⟩ := hag
+    simp only [Stmt.run, b.resolve_frame hag' hns]
+    cases b.resolve τ with
+    | error _ => trivial
+    | ok rs =>
+      have h := pushPlaceAt_agree hag' (.ref R) rs.1 rs.2
+      simp only [bind, Except.bind]
+      revert h
+      cases pushPlaceAt σ (.ref R) rs.1 rs.2 with
+      | error _ => cases pushPlaceAt τ (.ref R) rs.1 rs.2 <;> intro h <;> first | trivial | exact h.elim
+      | ok a =>
+        cases pushPlaceAt τ (.ref R) rs.1 rs.2 with
+        | error _ => intro h; exact h.elim
+        | ok b' =>
+          rintro ⟨h₁, h₂⟩
+          obtain ⟨σa, na⟩ := a; obtain ⟨σb, nb⟩ := b'
+          simp only at h₂; subst h₂
+          exact StateAgree.setEnv ⟨ns, hns, h₁⟩ k.name _ fun n hn hne => k.isFresh_out n hn hne
   | .pop b => by
     obtain ⟨ns, hns, hag'⟩ := hag
     simp only [Stmt.run, b.resolve_frame hag' hns]

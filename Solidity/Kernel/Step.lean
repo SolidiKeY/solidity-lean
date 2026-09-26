@@ -434,6 +434,12 @@ def popStep {Γ : Ctx} {E : Ty} (b : SPath C Γ (.array E)) : Step C m (.pop b) 
   if hb : b.isSimple = true then ⟨_, .storagePopSave b hb⟩
   else ⟨_, .storagePop_unfold_leftFstReceiver b (not_simple hb) _ (freshName_isFresh C Γ "sp")⟩
 
+/-- The rule for an alias bound to a push place: the receiver first. -/
+def bindPushStep {Γ Γ' : Ctx} {R : RefTy} (k : Alias C Γ Γ' R) (b : SPath C Γ (.array (.ref R)))
+    (hd : (Ty.ref R).defaultOkS = true) : Step C m (.bindPush k b hd) :=
+  if hb : b.isSimple = true then ⟨_, .storageLocalRootPushBind k b hb hd⟩
+  else ⟨_, .storageLocalRootPush_unfold_leftFstReceiver k b (not_simple hb) hd _ (freshName_isFresh C Γ' "sp")⟩
+
 /-- The rule for a transfer: the receiver first, then the amount. -/
 def transferStep {Γ : Ctx} : (r a : Val C Γ .uint) → Step C m (.transfer r a)
   | .simple r, .simple a => ⟨_, .transferNoCallback r a⟩
@@ -608,6 +614,7 @@ def Stmt.step {Γ Γ' : Ctx} : (s : Stmt C Γ Γ') → Step C m s
   | .incDec op hp l => incStep m op hp l
   | .push b v hd => pushStep m b v hd
   | .pop b => popStep m b
+  | .bindPush k b hd => bindPushStep m k b hd
   | .transfer r a => transferStep m r a
   | .assignIncDec y hy op hp l hs => assignIncStep m y hy op hp l hs
   | .delete l => deleteStep m l
@@ -647,6 +654,7 @@ def Upd.toStr {Γ : Ctx} : Upd C Γ → String
     | none => s!"\{ storage := push(storage, {b.toStr}) }"
     | some r => s!"\{ storage := push(storage, {b.toStr}, {r.toStr}) }"
   | .pop b => s!"\{ storage := pop(storage, {b.toStr}) }"
+  | .pushBind x b => s!"\{ storage := push(storage, {b.toStr}) || {x} := {b.toStr}[{b.toStr}.length] }"
   | .transfer r a => s!"\{ transfer({r.toStr}, {a.toStr}) }"
   | .bindMem x p => s!"\{ {x} := ref({p.toStr}) }"
   | .bindCopy x p _ => s!"\{ {x} := freshId(alloc({x}, {p.toStr})) || memory := alloc({x}, {p.toStr}) }"

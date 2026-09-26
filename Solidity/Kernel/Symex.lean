@@ -223,7 +223,7 @@ statement and splitting every branch, until what is left are the goals
 `∀ σ, H.holds ψ σ` (or `False`, when the fuel runs out). -/
 macro "symex" : tactic => `(tactic| repeat' (first
   | (rw [Kont.vc]; try simp only [Stmt.step, localStep, assignStep, rebindStep, deleteStep,
-      binopRightStep, shortCircuitStep, copyStep, opStep, incStep, assignIncStep, ternaryStep, pushStep, popStep, transferStep, rebindMemStep, declMemStep, assignMemStep, assignFromMemStep, fieldLeftFstStep, indexLeftFstStep,
+      binopRightStep, shortCircuitStep, copyStep, opStep, incStep, assignIncStep, ternaryStep, pushStep, popStep, bindPushStep, transferStep, rebindMemStep, declMemStep, assignMemStep, assignFromMemStep, fieldLeftFstStep, indexLeftFstStep,
       indexCaptureStep, memValStep, Val.notTernary,
       MHole.unfoldStep, MHole.fill, MHole.extend, MPath.isSimple, MPath.isBindable, MPath.new,
       MPath.weaken, MLoc.weaken, VHole.fill, VHole.weaken,
@@ -232,7 +232,8 @@ macro "symex" : tactic => `(tactic| repeat' (first
       OpLoc.weaken,
       Simple.weaken, Loc.weaken, SPath.weaken, Src.weaken, Val.isSimple, SPath.isSimple,
       SPath.isBindable, dite_true, dite_false, Bool.false_eq_true, and_self, and_true, true_and,
-      and_false, false_and, reduceFreshName])
+      and_false, false_and, Bool.and_true, Bool.true_and, Bool.and_false, Bool.false_and,
+      reduceFreshName])
   | constructor))
 
 /-- `symex_close [lemmas]`: discharge a goal `symex` leaves by evaluating the
@@ -249,7 +250,7 @@ macro_rules
       Except.pure, applyBinOp, applyUnOp, unopCheck, checkArith, BinOp.retTy, Value.asInt,
       Value.asBool, Value.toSVal, BinOp.isArith, uintBound, intBound, reduceFreshName, Src.value,
       Loc.target, Loc.resolve, SPath.resolve, Simple.new, envPath, State.saveStorage, OpLoc.store,
-      opStore, opLocal, pickBranch, pushAt, popAt, Src.pushVal, pushSlot, transferAt, State.setNet, State.getNet,
+      opStore, opLocal, pickBranch, pushAt, pushPlaceAt, popAt, Src.pushVal, Alias.name, pushSlot, transferAt, State.setNet, State.getNet,
       MPath.mval, MLoc.read, MLoc.write, MSrc.mval, MRhs.bind, memWriteField, memWriteIndex,
       MVal.asRef, MVal.asValue, Value.toMVal, allocDefault, copyStToM, copyStFields, copyStElems,
       State.getObj, State.setObj, State.alloc, opMem, bumpMem, readLoc, writeLoc, copyMem, copyMToSt, copyMFields, copyMElems, OpLoc.bump, bumpStore, bumpLocal, IncDec.isPre, IncDec.isIncrement,

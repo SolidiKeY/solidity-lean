@@ -84,7 +84,7 @@ local macro "target_simp" : tactic => `(tactic| (
 
 /-- Evaluate the step, plainly. -/
 local macro "step_simp0" : tactic => `(tactic| simp only [Stmt.step, localStep, assignStep, rebindStep, deleteStep, binopRightStep, shortCircuitStep,
-      copyStep, opStep, incStep, assignIncStep, ternaryStep, pushStep, popStep, transferStep, rebindMemStep,
+      copyStep, opStep, incStep, assignIncStep, ternaryStep, pushStep, popStep, bindPushStep, transferStep, rebindMemStep,
       declMemStep, assignMemStep, assignFromMemStep, fieldLeftFstStep, indexLeftFstStep, indexCaptureStep,
       memValStep, MHole.unfoldStep, Hole.unfoldStep, Hole.fill,
       MHole.fill, VHole.fill, dite_true, dite_false, Bool.false_eq_true, and_self, and_true, true_and,
@@ -92,7 +92,7 @@ local macro "step_simp0" : tactic => `(tactic| simp only [Stmt.step, localStep, 
 
 /-- Evaluate the step, through the side conditions. -/
 local macro "step_simp" : tactic => `(tactic| simp only [Stmt.step, localStep, assignStep, rebindStep, deleteStep, binopRightStep, shortCircuitStep,
-      copyStep, opStep, incStep, assignIncStep, ternaryStep, pushStep, popStep, transferStep, rebindMemStep,
+      copyStep, opStep, incStep, assignIncStep, ternaryStep, pushStep, popStep, bindPushStep, transferStep, rebindMemStep,
       declMemStep, assignMemStep, assignFromMemStep, fieldLeftFstStep, indexLeftFstStep, indexCaptureStep,
       memValStep, MHole.unfoldStep, Hole.unfoldStep, Hole.fill,
       MHole.fill, VHole.fill, dite_true, dite_false, Bool.false_eq_true, and_self, and_true, true_and,
