@@ -12,10 +12,12 @@ What is left here is about *values*: `Typing/Storage.lean` (`SVal.hasTy`, the
 runtime sorts), `Typing/StoragePreservation.lean` (writes keep a value's
 type), `Typing/State.lean` (`StateWT`, the full-state invariant).
 
-The execution-level theorems — the interpreter keeps `StateWT`, and its
-tightness (`reachable ⇒ canonical`) — were stated over the untyped
-interpreter and are to be ported over `Stmt.run` (`docs/kernel-port.md`,
-"Port later"). Until then nothing may assume them.
+`Typing/Soundness.lean` proves the interpreter keeps the invariant
+(`Stmt.run_wt`, over a locals context `Stmt.wt` threads), and
+`Typing/Reachability.lean` that every reachable storage is canonical
+(`reachable_canon`). The converse — every canonical storage is reachable —
+is not ported. `SortCheck/Faithfulness.lean` uses both: a taclet's declared
+read sort holds of what a well-typed run reads.
 
 `Semantics/Agree.lean` is the frame kit every soundness proof composes:
 `EnvAgreeExcept ns`, and a `*_frame` lemma per evaluator. A new evaluator in

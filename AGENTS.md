@@ -76,6 +76,7 @@ import changes and final confirmation. The `lean-verify` skill in
 | `node scripts/check-orphans.mjs` | every module is reachable from a library root |
 | `./scripts/check-doc-paths.sh` | every backticked `*.lean` in the prose names a file that exists |
 | `lake exe solkeycheck` | sort annotations against solkey's `.key` |
+| `./scripts/check-corpus.sh` | the solkey corpus (`SolidityCorpus`) against `tests/solkey/expected.tsv` |
 
 `solkeycheck` was at zero against solkey `8c5c69ca25` (2026-09-20). A newer
 checkout reports drift (311 taclets, 5 mismatches as of 2026-09-26);

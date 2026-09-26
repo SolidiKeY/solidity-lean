@@ -9,8 +9,7 @@ operationally, and what is still a documented modeling delta rather than a
 behavioral match.
 
 Everything here is about the interpreter (`Stmt.run`, `Semantics.lean`).
-The EVM compiler, which had its own deltas, was removed with the untyped
-syntax (`docs/compiler-verification.md`).
+The EVM compiler's own deltas are in `docs/compiler-verification.md`.
 
 ## Checked arithmetic (solc ≥ 0.8)
 

@@ -91,8 +91,8 @@ the sections further down carry the details.
 2. **Checked `uint256`/`int256` arithmetic.** Solidity ≥ 0.8 reverts
    when `+`, `-`, `*`, unary `-` and the compound forms leave the type's
    range. The Lean interpreter models it (`Semantics.checkArith`) and the
-   EVM compiler proves the guard (`Evm/Compile.checkedOpCode`,
-   `Evm/Correctness.checkedOp_sim`). solkey's arithmetic taclets
+   EVM compiler proves the guard (`Evm/Compile.binTail`,
+   `Evm/Correctness.tail_sim`). solkey's arithmetic taclets
    compute in unbounded `int`, so a postcondition proved in KeY can be
    false on the chain when a value wraps and the transaction reverts.
    Either the arithmetic taclets split on the range (revert branch
