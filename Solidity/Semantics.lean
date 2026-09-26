@@ -852,6 +852,13 @@ def pickBranch (cv : Value) (t e : Res Value) : Res Value :=
   | .bool false => e
   | .int _ => .error .stuck
 
+/-- `a ⊕ b` on values, the right operand evaluated only when the left does not decide. -/
+def evalBinop (op : BinOp) (p : PrimTy) (lv : Value) (b : Res Value) : Res Value :=
+  match op, lv with
+  | .and, .bool false => pure (.bool false)
+  | .or, .bool true => pure (.bool true)
+  | _, _ => do checkArith (op.retTy (.prim p)) (← applyBinOp op lv (← b))
+
 /-- The value a simple value denotes: a literal, or a stack local's. -/
 def Simple.eval (σ : State) {p : PrimTy} : Simple C p → Res Value
   | .lit n _ => pure (.int n)
@@ -918,14 +925,7 @@ def Val.eval (σ : State) : {p : PrimTy} → Val C p → Res Value
   | _, .read l => do
     let (r, segs) ← l.resolve σ
     (← σ.findStorage r segs).asValue
-  | _, @Val.binop _ p _ op _ _ a b => do
-    let lv ← a.eval σ
-    match op, lv with
-    | .and, .bool false => pure (.bool false)
-    | .or, .bool true => pure (.bool true)
-    | _, _ => do
-      let rv ← b.eval σ
-      checkArith (op.retTy (.prim p)) (← applyBinOp op lv rv)
+  | _, @Val.binop _ p _ op _ _ a b => do evalBinop op p (← a.eval σ) (b.eval σ)
   | _, @Val.unop _ p _ op _ _ a => do unopCheck op p (← applyUnOp op (← a.eval σ))
   | _, .ternary c a b => do pickBranch (← c.eval σ) (a.eval σ) (b.eval σ)
   | _, .readMem l => do (← l.read σ).asValue
