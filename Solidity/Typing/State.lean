@@ -47,7 +47,7 @@ inductive BTy where
   deriving DecidableEq, Repr
 
 /-- Binding context Γ. -/
-abbrev Ctx := List (Name × BTy)
+abbrev Ctx := List (Var × BTy)
 
 /-- Store typing H: the type each memory identity holds. -/
 abbrev HeapTy := List (Nat × Ty)
@@ -163,7 +163,7 @@ untracked memory reference would let `resolveMBase`/`readM` produce an
 identity the store typing knows nothing about. (Untracked `val`
 bindings are harmless — every read of one goes through Γ.) -/
 def envTypedB (Γ : Ctx) (L : Layout) (H : HeapTy)
-    (env : List (Name × Binding)) : Bool :=
+    (env : List (Var × Binding)) : Bool :=
   (Γ.all fun g =>
     match lookupBy g.1 env with
     | some b => BTy.matchesB L H g.2 b
@@ -404,7 +404,7 @@ theorem BTy.matchesB_mono {L : Layout} {H H' : HeapTy} {bty : BTy}
     exact MVal.hasTyH_mono hext (by simpa [BTy.matchesB] using h)
 
 theorem envTypedB_mono {Γ : Ctx} {L : Layout} {H H' : HeapTy}
-    {env : List (Name × Binding)} (hext : H.Extends H')
+    {env : List (Var × Binding)} (hext : H.Extends H')
     (h : envTypedB Γ L H env = true) : envTypedB Γ L H' env = true := by
   simp only [envTypedB, Bool.and_eq_true] at h ⊢
   refine ⟨List.all_eq_true.mpr fun g hg => ?_, h.2⟩
@@ -480,46 +480,6 @@ theorem heapTypedB_alloc {H : HeapTy} {s : State} {obj : MObj}
     subst hr'
     rw [hheap', lookupBy_setBy_self]
     exact hobj
-
-/-! ## Well-annotated expressions
-
-Annotation consistency for every kind and nesting, the general form of
-`StorageTyping.wtStorageExpr`. Storage vars resolve through Γ first
-(mirroring `resolveS`'s env-first lookup); a Γ-tracked alias must be
-`origin`-local, because `resolveLoc`/`execAssign` route *global*-origin
-vars straight to the storage root without consulting the env. -/
-def wtExpr (Γ : Ctx) (L : Layout) : WrappedExpr -> Bool
-  | WrappedExpr.var Kind.stack ty fld =>
-      lookupBy fld.name Γ == some (BTy.stack ty)
-  | WrappedExpr.var Kind.storage ty fld =>
-      (match lookupBy fld.name Γ with
-       | some (BTy.path ty') =>
-           ty == ty' && (fld.origin == some StorageOrigin.local)
-       | some _ => false
-       | none =>
-           fld.origin == some StorageOrigin.global &&
-             lookupBy fld.name L.globals == some ty)
-  | WrappedExpr.var Kind.memory ty fld =>
-      lookupBy fld.name Γ == some (BTy.mem ty)
-  | WrappedExpr.field _ ty base fld =>
-      wtExpr Γ L base && (segTy base.ty (Seg.field fld.name) == some ty)
-  | WrappedExpr.index _ ty base index =>
-      wtExpr Γ L base && wtExpr Γ L index && (elemTy base.ty == some ty)
-  | WrappedExpr.pushPlace target =>
-      wtExpr Γ L target &&
-        (match target.ty with
-         | Ty.ref (RefTy.array elem) => defaultOk elem
-         | _ => false)
-  | WrappedExpr.bool _ => true
-  | WrappedExpr.intLit ty _ => isNumericTy ty
-  | Typed.WrappedExpr.mkCall _ ty "net" [addr] =>
-      isNumericTy ty && wtExpr Γ L addr
-  | Typed.WrappedExpr.mkBinop _ l r => wtExpr Γ L l && wtExpr Γ L r
-  | Typed.WrappedExpr.mkUnop _ arg => wtExpr Γ L arg
-  | Typed.WrappedExpr.mkIncDec _ target => wtExpr Γ L target
-  | Typed.WrappedExpr.mkTernary c t e =>
-      wtExpr Γ L c && wtExpr Γ L t && wtExpr Γ L e && (t.ty == e.ty)
-  | _ => false
 
 /-! ## Memory→storage copy typing
 

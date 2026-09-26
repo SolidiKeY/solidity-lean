@@ -585,19 +585,19 @@ theorem setBy_setBy_self [DecidableEq κ] (k : κ) (v v' : α)
 
 /-- KeY `applyOnPV`/`applyOnPVLastInParallel` for locals: read after
 write at the point of application. -/
-@[simp] theorem State.getEnv_setEnv_self (s : State) (n : Name)
+@[simp] theorem State.getEnv_setEnv_self (s : State) (n : Var)
     (b : Binding) : (s.setEnv n b).getEnv n = .ok b := by
   simp [State.getEnv, State.setEnv]
 
 /-- KeY `applyOnDifferentPV` for locals: a write to a different name
 frames. -/
-theorem State.getEnv_setEnv_ne {n n' : Name} (h : n' ≠ n) (s : State)
+theorem State.getEnv_setEnv_ne {n n' : Var} (h : n' ≠ n) (s : State)
     (b : Binding) : (s.setEnv n b).getEnv n' = s.getEnv n' := by
   simp [State.getEnv, State.setEnv, lookupBy_setBy_ne h]
 
 /-- KeY `simplifyUpdate1-3` (semantic core): the later write to the same
 local absorbs the earlier one. -/
-theorem State.setEnv_setEnv_absorb (s : State) (n : Name)
+theorem State.setEnv_setEnv_absorb (s : State) (n : Var)
     (b b' : Binding) : (s.setEnv n b).setEnv n b' = s.setEnv n b' := by
   simp [State.setEnv, setBy_setBy_self]
 
