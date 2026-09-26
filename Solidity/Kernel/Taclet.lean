@@ -72,6 +72,36 @@ def SPath.isBindable {Γ : Ctx} {T : Ty} : SPath C Γ T → Bool
   | .loc (.index _ b i) => b.isSimple && i.isSimple
   | p => p.isSimple
 
+/-- A target every path of which is simple (`x`, `sp.f`, `sp[ie]`): a copy
+into it is the one whose right side unfolds. Into any other target the left
+side unfolds first (`…_unfold_leftFst`), where KeY leaves both open. -/
+def Loc.isTarget {Γ : Ctx} {T : Ty} : Loc C Γ T → Bool
+  | .root .. => true
+  | .field b _ _ => b.isSimple
+  | .index _ b i => b.isSimple && i.isSimple
+
+/-- An entry of a simple path at a simple index is a target: `sp[ie] = …`. -/
+theorem Loc.isTarget_index {Γ : Ctx} {R : RefTy} {k : PrimTy} {V : Ty} (it : IndexTy R k V)
+    {b : SPath C Γ (.ref R)} (hb : b.isSimple = true) (ie : Simple C Γ k) :
+    (Loc.index it b (.simple ie)).isTarget = true := by
+  simp [Loc.isTarget, hb, Val.isSimple]
+
+/-- Weakening keeps a path simple: `sp` is `sp` under a fresh `y`. -/
+theorem SPath.isSimple_weaken {Γ Γ' : Ctx} (h : Ctx.Sub C Γ Γ') {T : Ty} (p : SPath C Γ T) :
+    (p.weaken h).isSimple = p.isSimple := by
+  rcases p with _ | (_ | _ | _) <;> simp [SPath.weaken, Loc.weaken, SPath.isSimple]
+
+/-- Weakening keeps a value simple: `ie` is `ie` under a fresh `y`. -/
+theorem Val.isSimple_weaken {Γ Γ' : Ctx} (h : Ctx.Sub C Γ Γ') {p : PrimTy} (v : Val C Γ p) :
+    (v.weaken h).isSimple = v.isSimple := by
+  cases v <;> simp [Val.weaken, Val.isSimple]
+
+/-- Weakening keeps a target simple: `sp.f = …` stays `sp.f = …` under a
+fresh `y`. -/
+theorem Loc.isTarget_weaken {Γ Γ' : Ctx} (h : Ctx.Sub C Γ Γ') {T : Ty} (l : Loc C Γ T) :
+    (l.weaken h).isTarget = l.isTarget := by
+  cases l <;> simp [Loc.weaken, Loc.isTarget, SPath.isSimple_weaken, Val.isSimple_weaken]
+
 /-! ## Fresh bindings -/
 
 /-- `Γ` with the fresh local `x : p`. -/
@@ -124,8 +154,8 @@ inductive Hole (C : Contract) : Ctx → Ctx → Ty → Type where
       Hole C Γ Γ (.ref R)
   | decl {Γ : Ctx} (capture : Bool) (R : RefTy) (x : Name) (hx : isFresh C Γ x = true) :
       Hole C Γ (setBy x (.path (.ref R)) Γ) (.ref R)
-  | copy {Γ : Ctx} {R : RefTy} (l : Loc C Γ (.ref R)) (h : (Ty.ref R).mapFree = true) :
-      Hole C Γ Γ (.ref R)
+  | copy {Γ : Ctx} {R : RefTy} (l : Loc C Γ (.ref R)) (h : (Ty.ref R).mapFree = true)
+      (ht : l.isTarget = true) : Hole C Γ Γ (.ref R)
 
 namespace Hole
 
@@ -134,7 +164,7 @@ def fill {Γ Γ' : Ctx} {T : Ty} : Hole C Γ Γ' T → SPath C Γ T → Stmt C �
   | .local x h, .loc l => .assignLocal x h (.read l)
   | .rebind x h, p => .rebind x h p
   | .decl c R x hx, p => .declStorage c R x hx p
-  | .copy l h, p => .assign l (.copy p h)
+  | .copy l h _, p => .assign l (.copy p h)
 
 /-- A hole's statement leaves a context that extends the one it starts
 from. -/
@@ -155,7 +185,7 @@ def extend {Γ Γ' : Ctx} {T : Ty} (y : Name) (b : BTy) (hy : isFresh C Γ' y = 
   | .rebind x h => .rebind x ((Ctx.Sub.fresh hy b).local_ _ _ h)
   | .decl c R x hx =>
     .decl c R x (isFresh_setBy hx (ne_of_isFresh_setBy hy))
-  | .copy l h => .copy (l.weaken (Ctx.Sub.fresh hy b)) h
+  | .copy l h ht => .copy (l.weaken (Ctx.Sub.fresh hy b)) h (by rw [Loc.isTarget_weaken]; exact ht)
 
 /-- Binding a fresh `y` first still ends at an extension of what the hole's
 statement leaves. -/
@@ -428,7 +458,8 @@ inductive Taclet (C : Contract) (m : Modality) : {Γ Γ' : Ctx} → Stmt C Γ Γ
   | storageFieldRead_unfold_rightSndResult {Γ : Ctx} {s : Name} {R : RefTy}
       (l : Loc C Γ (.ref R)) (hl : (SPath.loc l).isSimple = false) (hm : (Ty.ref R).mapFree = true)
       (sp : SPath C Γ (.struct s)) (hs : sp.isSimple = true) (f : Name)
-      (hf : C.fieldType s f = some (.ref R)) (se : Name) (hse : isFresh C Γ se = true) :
+      (hf : C.fieldType s f = some (.ref R)) (se : Name) (hse : isFresh C Γ se = true)
+      (ht : l.isTarget = true) :
       .assign l (.copy (.loc (.field sp f hf)) hm) ⇒
         .unfold [se]
           (.cons (.declStorage true R se hse (.loc (.field sp f hf)))
@@ -438,7 +469,7 @@ inductive Taclet (C : Contract) (m : Modality) : {Γ Γ' : Ctx} → Stmt C Γ Γ
   | storageIndexRead_unfold_rightSndResult {Γ : Ctx} {R₀ : RefTy} {kp : PrimTy} {R : RefTy}
       (l : Loc C Γ (.ref R)) (hl : (SPath.loc l).isSimple = false) (hm : (Ty.ref R).mapFree = true)
       (it : IndexTy R₀ kp (.ref R)) (sp : SPath C Γ (.ref R₀)) (hs : sp.isSimple = true)
-      (ie : Simple C Γ kp) (se : Name) (hse : isFresh C Γ se = true) :
+      (ie : Simple C Γ kp) (se : Name) (hse : isFresh C Γ se = true) (ht : l.isTarget = true) :
       .assign l (.copy (.loc (.index it sp (.simple ie))) hm) ⇒
         .unfold [se]
           (.cons (.declStorage true R se hse (.loc (.index it sp (.simple ie))))

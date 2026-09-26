@@ -65,6 +65,7 @@ def MHole.unfoldStep {Γ Γ' : Ctx} {T : Ty} (k : MHole C Γ Γ' T) :
 
 /-- A copy into a member or an entry (`nlhs = …`), from a path. -/
 def copyStep {Γ : Ctx} {R : RefTy} (l : Loc C Γ (.ref R)) (hl : (SPath.loc l).isSimple = false)
+    (ht : l.isTarget = true)
     (hm : (Ty.ref R).mapFree = true) (sp₂ : SPath C Γ (.ref R))
     (simpleStep : sp₂.isSimple = true → Step C m (.assign l (.copy sp₂ hm))) :
     Step C m (.assign l (.copy sp₂ hm)) :=
@@ -74,14 +75,14 @@ def copyStep {Γ : Ctx} {R : RefTy} (l : Loc C Γ (.ref R)) (hl : (SPath.loc l).
     | .loc (.root ..), hs => absurd rfl hs
     | .loc (.field b f hf), hs =>
       if hb : b.isSimple = true then
-        ⟨_, .storageFieldRead_unfold_rightSndResult l hl hm b hb f hf _ (freshName_isFresh C Γ "se")⟩
-      else (Hole.copy l hm).unfoldStep m (.field b f hf) (by simp [SPath.isBindable, not_simple hb])
+        ⟨_, .storageFieldRead_unfold_rightSndResult l hl hm b hb f hf _ (freshName_isFresh C Γ "se") ht⟩
+      else (Hole.copy l hm ht).unfoldStep m (.field b f hf) (by simp [SPath.isBindable, not_simple hb])
     | .loc (.index it b i), hs =>
       if hbi : b.isSimple = true ∧ i.isSimple = true then
         match i, hbi with
         | .simple ie, hbi =>
-          ⟨_, .storageIndexRead_unfold_rightSndResult l hl hm it b hbi.1 ie _ (freshName_isFresh C Γ "se")⟩
-      else (Hole.copy l hm).unfoldStep m (.index it b i) (by simpa [SPath.isBindable] using hbi)
+          ⟨_, .storageIndexRead_unfold_rightSndResult l hl hm it b hbi.1 ie _ (freshName_isFresh C Γ "se") ht⟩
+      else (Hole.copy l hm ht).unfoldStep m (.index it b i) (by simpa [SPath.isBindable] using hbi)
 
 /-- `lhs = c ? a : b`: lower it to a branch on a simple condition, capture
 any other condition first. -/
@@ -155,14 +156,14 @@ def assignStep {Γ : Ctx} {T : Ty} : (l : Loc C Γ T) → (r : Src C Γ T) → S
       | .loc (.root ..), hs => absurd rfl hs
       | .loc (.field b f hf), hs =>
         if hb : b.isSimple = true then ⟨_, .storageFieldReadStoreRoot x hΓ hr b hb f hf hm⟩
-        else (Hole.copy (.root x hΓ hr) hm).unfoldStep m (.field b f hf)
+        else (Hole.copy (.root x hΓ hr) hm rfl).unfoldStep m (.field b f hf)
           (by simp [SPath.isBindable, not_simple hb])
       | .loc (.index it b i), hs =>
         if hbi : b.isSimple = true ∧ i.isSimple = true then
           match it, b, i, hbi with
           | .map, b, .simple ie, hbi => ⟨_, .storageIndexReadMappingStoreRoot x hΓ hr b hbi.1 ie hm⟩
           | .arr, b, .simple ie, hbi => ⟨_, .storageIndexReadArrayStoreRoot x hΓ hr b hbi.1 ie hm⟩
-        else (Hole.copy (.root x hΓ hr) hm).unfoldStep m (.index it b i) (by simpa [SPath.isBindable] using hbi)
+        else (Hole.copy (.root x hΓ hr) hm rfl).unfoldStep m (.index it b i) (by simpa [SPath.isBindable] using hbi)
   -- a member
   | .field b f hf, .val e =>
     if hb : b.isSimple = true then
@@ -178,7 +179,7 @@ def assignStep {Γ : Ctx} {T : Ty} : (l : Loc C Γ T) → (r : Src C Γ T) → S
     else fieldLeftFstStep m b (not_simple hb) f hf e
   | .field b f hf, .copy src hm =>
     if hb : b.isSimple = true then
-      copyStep m (.field b f hf) rfl hm src fun hs => ⟨_, .storageFieldWriteCopySource b hb f hf src hs hm⟩
+      copyStep m (.field b f hf) rfl hb hm src fun hs => ⟨_, .storageFieldWriteCopySource b hb f hf src hs hm⟩
     else ⟨_, .storageFieldWriteStorageRef_unfold_leftFst b (not_simple hb) f hf src hm _
       (freshName_isFresh C Γ "sp")⟩
   -- an entry
@@ -210,7 +211,7 @@ def assignStep {Γ : Ctx} {T : Ty} : (l : Loc C Γ T) → (r : Src C Γ T) → S
       if hi : i.isSimple = true then
         match i, hi with
         | .simple ie, _ =>
-          copyStep m (.index it b (.simple ie)) rfl hm src fun hs =>
+          copyStep m (.index it b (.simple ie)) rfl (Loc.isTarget_index it hb ie) hm src fun hs =>
             match it, b, hb, ie with
             | .map, b, hb, ie => ⟨_, .storageIndexWriteMappingCopySource b hb ie src hs hm⟩
             | .arr, b, hb, ie => ⟨_, .storageIndexWriteArrayCopySource b hb ie src hs hm⟩

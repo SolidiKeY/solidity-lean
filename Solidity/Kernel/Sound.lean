@@ -856,7 +856,7 @@ theorem Taclet.sound {m : Modality} {Γ Γ' : Ctx} {s : Stmt C Γ Γ'} {pr : Pre
           exact SameOk.save (by agree_tac) _ _ _
 
   -- A copy from a member or an entry, through a captured alias: same order.
-  case storageFieldRead_unfold_rightSndResult s R l hl hm sp hs f hf se hse =>
+  case storageFieldRead_unfold_rightSndResult s R l hl hm sp hs f hf se hse _ht =>
     refine ⟨by simp [hse], fun σ => ?_⟩
     simp only [Prog.run, Stmt.run, bind_pure, Src.value, SPath.resolve, Loc.resolve, SPath.resolve_weaken, Val.eval_weaken, Simple.eval_weaken, Loc.resolve_weaken, Loc.target_weaken, Src.value_weaken, Src.value_copy_weaken]
     cases sp.resolve σ with
@@ -871,7 +871,7 @@ theorem Taclet.sound {m : Modality} {Γ Γ' : Ctx} {s : Stmt C Γ Γ'} {pr : Pre
         simp only [bind, Except.bind, pure, Except.pure]
         cases Loc.target σ l <;> simp [SameOk]
         exact SameOk.save (by agree_tac) _ _ _
-  case storageIndexRead_unfold_rightSndResult R₀ kp R l hl hm it sp hs ie se hse =>
+  case storageIndexRead_unfold_rightSndResult R₀ kp R l hl hm it sp hs ie se hse _ht =>
     refine ⟨by simp [hse], fun σ => ?_⟩
     simp only [Prog.run, Stmt.run, bind_pure, Src.value, SPath.resolve, Loc.resolve, SPath.resolve_weaken, Val.eval_weaken, Simple.eval_weaken, Loc.resolve_weaken, Loc.target_weaken, Src.value_weaken, Src.value_copy_weaken]
     cases sp.resolve σ with
@@ -1852,7 +1852,7 @@ theorem Taclet.sound {m : Modality} {Γ Γ' : Ctx} {s : Stmt C Γ Γ'} {pr : Pre
     | decl c R x hx =>
       simp only [Hole.fill, Hole.extend, Prog.run, Stmt.run, bind_pure, Src.value, SPath.resolve, Loc.resolve, SPath.resolve_weaken, Val.eval_weaken, Simple.eval_weaken, Loc.resolve_weaken, Loc.target_weaken, Src.value_weaken, Src.value_copy_weaken]
       cases nsp.resolve σ <;> simp [SameOk, bind, Except.bind, pure, Except.pure, Val.eval, SPath.new, SPath.resolve, Loc.resolve, envPath, Simple.new, Simple.eval, Simple.weaken, SPath.weaken, setEnv_env, lookupBy_setBy_self, getEnv_setEnv_self] <;> agree_tac
-    | copy l h =>
+    | copy l h _ =>
       simp only [Hole.fill, Hole.extend, Prog.run, Stmt.run, bind_pure, Src.value, SPath.resolve, Loc.resolve, SPath.resolve_weaken, Val.eval_weaken, Simple.eval_weaken, Loc.resolve_weaken, Loc.target_weaken, Src.value_weaken, Src.value_copy_weaken]
       cases nsp.resolve σ with
       | error _ => simp [SameOk, bind, Except.bind, pure, Except.pure]
@@ -1907,7 +1907,7 @@ theorem Taclet.sound {m : Modality} {Γ Γ' : Ctx} {s : Stmt C Γ Γ'} {pr : Pre
         cases e.eval σ with
         | error _ => simp [SameOk, bind, Except.bind, pure, Except.pure, Val.eval, SPath.new, SPath.resolve, Loc.resolve, envPath, Simple.new, Simple.eval, Simple.weaken, SPath.weaken, setEnv_env, lookupBy_setBy_self, getEnv_setEnv_self]
         | ok w => cases w <;> simp [SameOk, bind, Except.bind, pure, Except.pure, Val.eval, SPath.new, SPath.resolve, Loc.resolve, envPath, Simple.new, Simple.eval, Simple.weaken, SPath.weaken, setEnv_env, lookupBy_setBy_self, getEnv_setEnv_self, Value.asInt] <;> agree_tac
-    | copy l h =>
+    | copy l h _ =>
       simp only [Hole.fill, Hole.extend, Prog.run, Stmt.run, bind_pure, Src.value, SPath.resolve, Loc.resolve, SPath.resolve_weaken, Val.eval_weaken, Simple.eval_weaken, Loc.resolve_weaken, Loc.target_weaken, Src.value_weaken, Src.value_copy_weaken]
       cases nsp.resolve σ with
       | error _ => simp [SameOk, bind, Except.bind, pure, Except.pure, Val.eval, SPath.new, SPath.resolve, Loc.resolve, envPath, Simple.new, Simple.eval, Simple.weaken, SPath.weaken, setEnv_env, lookupBy_setBy_self, getEnv_setEnv_self]
@@ -1971,7 +1971,7 @@ theorem Taclet.sound {m : Modality} {Γ Γ' : Ctx} {s : Stmt C Γ Γ'} {pr : Pre
         cases sp.resolve σ with
         | error _ => simp [SameOk, bind, Except.bind, pure, Except.pure, Val.eval, SPath.new, SPath.resolve, Loc.resolve, envPath, Simple.new, Simple.eval, Simple.weaken, SPath.weaken, setEnv_env, lookupBy_setBy_self, getEnv_setEnv_self]
         | ok rs => cases w <;> simp [SameOk, bind, Except.bind, pure, Except.pure, h₁, Value.asInt, Val.eval, SPath.new, SPath.resolve, Loc.resolve, envPath, Simple.new, Simple.eval, Simple.weaken, SPath.weaken, setEnv_env, lookupBy_setBy_self, getEnv_setEnv_self] <;> agree_tac
-    | copy l h =>
+    | copy l h _ =>
       simp only [Hole.fill, Hole.extend, Prog.run, Stmt.run, bind_pure, Src.value, SPath.resolve, Loc.resolve, SPath.resolve_weaken, Val.eval_weaken, Simple.eval_weaken, Loc.resolve_weaken, Loc.target_weaken, Src.value_weaken, Src.value_copy_weaken]
       cases h₁ : nse.eval σ with
       | error _ => cases sp.resolve σ <;> simp [SameOk, bind, Except.bind, pure, Except.pure, h₁]
