@@ -878,25 +878,19 @@ partial def schemaFml : TSyntax `dl_fml → MacroM Lean.Term
     Macro.throwErrorAt stx "a program comparison is read against a contract: write `dl{ … }`"
   | _ => Macro.throwUnsupported
 
-/-- The condition of a split's first goal; the second goal's must be its negation. -/
-def splitCond (c nc : TSyntax `dl_fml) : MacroM Lean.Term := do
-  let `(dl_fml| ¬ $c':dl_fml) := nc
-    | Macro.throwErrorAt nc "the second branch assumes the negated condition, `¬…`"
-  unless c'.raw.structEq c.raw do
-    Macro.throwErrorAt nc "the second branch assumes the negation of the first one's condition"
-  schemaFml c
-
 def schemaPremise (fresh : Bool) (Γ : Scope) : TSyntax `dl_premise → MacroM Lean.Term
   | `(dl_premise| $U:dl_upd ⟨[ ]⟩) => do `($(mkIdent `Solidity.Premise.update) $(← schemaUpd Γ U))
   | `(dl_premise| ⟨[ $[$ss:sol_stmt;]* ]⟩) => do
     let (ts, _) ← schemaProg fresh Γ ss
     `($(mkIdent `Solidity.Premise.unfold) [$ts,*])
   | `(dl_premise| $c:dl_fml ⟹ ⟨[ $t:sol_block ]⟩ ; $nc:dl_fml ⟹ ⟨[ $f:sol_block ]⟩) => do
-    `($(mkIdent `Solidity.Premise.split) $(← splitCond c nc) $(← schemaBlock fresh Γ t) $(← schemaBlock fresh Γ f))
+    `($(mkIdent `Solidity.Premise.split) $(← schemaFml c) $(← schemaFml nc)
+        $(← schemaBlock fresh Γ t) $(← schemaBlock fresh Γ f))
   | `(dl_premise| $c:dl_fml ⟹ ⟨[ $[$ts:sol_stmt;]* ]⟩ ; $nc:dl_fml ⟹ ⟨[ $[$fs:sol_stmt;]* ]⟩) => do
     let (ts, _) ← schemaProg fresh Γ ts
     let (fs, _) ← schemaProg fresh Γ fs
-    `($(mkIdent `Solidity.Premise.split) $(← splitCond c nc) ([$ts,*] : List (Stmt _)) ([$fs,*] : List (Stmt _)))
+    `($(mkIdent `Solidity.Premise.split) $(← schemaFml c) $(← schemaFml nc)
+        ([$ts,*] : List (Stmt _)) ([$fs,*] : List (Stmt _)))
   | `(dl_premise| true) => `($(mkIdent `Solidity.Premise.done) true)
   | `(dl_premise| false) => `($(mkIdent `Solidity.Premise.done) false)
   | _ => Macro.throwUnsupported
