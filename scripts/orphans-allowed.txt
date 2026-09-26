@@ -1,6 +1,0 @@
-# Port sources: old modules kept, unbuilt, until their port lands (docs/kernel-port.md).
-Solidity.Examples.CrossDomain
-Solidity.Examples.MemoryBasic
-Solidity.Examples.MemoryDeleteArray
-Solidity.Examples.Taclets.MemoryOps
-Solidity.Examples.Taclets.NetOps

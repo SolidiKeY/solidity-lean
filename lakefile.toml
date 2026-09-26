@@ -6,17 +6,6 @@ defaultTargets = ["Solidity", "solkeycheck"]
 name = "Solidity"
 weakLeanArgs = ["--tstack=131072"]
 
-# The worked derivations, one `sol_derivation` per worked example of the
-# calculus (`Solidity/Traces/`). Its own
-# target, and deliberately not imported by Solidity.lean: ~240 pinned rule
-# applications, each paying its own simp+decide, cost about 7 minutes of
-# CPU, against 24 for the whole default build. The rules themselves are
-# already covered by `Examples/Derivations/`, which is in the default
-# build. Built by scripts/check-traces.sh.
-[[lean_lib]]
-name = "SolidityTraces"
-weakLeanArgs = ["--tstack=131072"]
-
 # Taclet-text conformance against solkey's `solidityProgramRules.key`.
 [[lean_exe]]
 name = "solkeycheck"

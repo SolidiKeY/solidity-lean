@@ -73,7 +73,7 @@ import changes and final confirmation. The `lean-verify` skill in
 | Command | What it covers |
 |---|---|
 | `./run-lean.sh` | `lake build` (default targets) then the solkey sort check |
-| `node scripts/check-orphans.mjs --allow scripts/orphans-allowed.txt` | every module is reachable from a library root |
+| `node scripts/check-orphans.mjs` | every module is reachable from a library root |
 | `./scripts/check-doc-paths.sh` | every backticked `*.lean` in the prose names a file that exists |
 | `lake exe solkeycheck` | sort annotations against solkey's `.key` |
 

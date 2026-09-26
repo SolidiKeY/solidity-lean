@@ -26,6 +26,10 @@ import Solidity.Examples.StorageSteps
 import Solidity.Examples.StorageSuite
 import Solidity.Examples.StorageDelete
 import Solidity.Examples.LedgerDelete
+import Solidity.Examples.Memory
+import Solidity.Examples.CrossDomain
+import Solidity.Examples.Net
+import Solidity.Examples.Theory
 import Solidity.Examples.Branch
 import Solidity.Examples.Revert
 import Solidity.Examples.Values

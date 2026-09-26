@@ -233,6 +233,21 @@ theorem popAfterPushRead :
       (sol{ values.push(); values.pop(); uint result = values[0]; } : Prog StandardExample) =
       .error .revert := rfl
 
+/-! `tokens.push(); tokens[0].value = 7; tokens.pop(); Token storage t = tokens.push();
+uint r = t.value;` — the push-after-pop example (`sec:push-pop-example`):
+the slot `pop()` cleared is not restored by the next `push()`, so the value
+written before the pop is not seen through the returned reference, and the
+program reaches the read without reverting.  Run on `testSuiteStore`, the store
+that has `tokens`; a `Token` default is not unfolded by `rfl`, so it is printed. -/
+
+/--
+info: Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int 0))
+-/
+#guard_msgs in
+#eval localAfter State.testSuiteStore
+  sol[TestSuite]{ tokens.push(); tokens[0].value = 7; tokens.pop();
+                  Token storage t = tokens.push(); uint r = t.value; } "r"
+
 /-! `persons.push(); persons.push(); Person storage p; p = persons.push();
 p.age = 5; uint result = persons[2].age;` (`storage-push-local-bind.key`).  Pushing
 a `Person` builds its default, which `rfl` cannot unfold, so the run is printed. -/
