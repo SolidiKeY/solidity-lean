@@ -13,16 +13,11 @@ top:
   store-typing setup: `MVal.hasTyH` checks a reference against `H`'s
   claim only, so no coinduction is needed and heap cycles cost nothing;
 - `envTypedB` / `heapTypedB` / `StateWT`, the full state invariant.
-  `envTypedB` also forbids *stray* `spath` bindings (aliases unknown to
-  `Γ`): `resolveS` consults the env before falling back to a global
-  root, so an untracked alias could silently retarget a well-typed
-  global read;
-- `wtExpr`, the well-annotatedness check generalizing
-  `StorageTyping.wtStorageExpr` to every kind and nesting (the check is
-  *annotation consistency* — kind mismatches and out-of-range indices
-  are left to die at runtime, where the soundness theorems are
-  vacuous). Deliberate v1 exclusions: `.length` reads (no `tyAtSegs`
-  story) and every call but the `net` ledger read;
+  `envTypedB` also forbids *stray* `spath` and `mref` bindings (names
+  unknown to `Γ`), which the removed untyped resolver needed: it looked
+  a name up in the env before falling back to a storage root.  The
+  typed syntax tells an alias from a root, so `Soundness.lean`'s
+  `RunWT` drops the ban (`StateWT.toRunWT`);
 - the cross-domain copy typing theorems: `copyMToSt_hasTy`
   (memory→storage: a heap-typed source lands as a storage value of its
   type — the fuel is the interpreter's own cycle guard, so exhaustion
@@ -178,9 +173,9 @@ def envTypedB (Γ : Ctx) (L : Layout) (H : HeapTy)
 
 /-- Full state well-typedness: layout and context keys unique, storage
 well-typed, env matching Γ, heap matching H, allocation counter fresh.
-This is the invariant `TypeSoundness` carries through evaluation and
-execution — the executable model of the `wellFormed` assumption the
-solkey proof obligations need. -/
+The executable model of the `wellFormed` assumption the solkey proof
+obligations need; `Soundness.lean` carries it, less the stray-binding
+ban, through `Stmt.run` (`StateWT.toRunWT`, `Prog.run_wt`). -/
 structure StateWT (Γ : Ctx) (H : HeapTy) (L : Layout) (s : State) :
     Prop where
   layoutNodup : nodupKeysB L.globals = true
@@ -243,9 +238,10 @@ theorem StateWT.ofB {Γ : Ctx} {H : HeapTy} {L : Layout} {s : State}
 
 A store typing with a duplicated key is read through `lookupBy`, which
 sees only the first row.  `dedupKeys` keeps exactly the rows `lookupBy`
-sees, so it changes no lookup and is key-unique — the tool that shows
+sees, so it changes no lookup and is key-unique — the tool that showed
 `heapTyNodup` was not needed by the removed untyped layer's type-soundness
-headline (to be ported: `docs/kernel-port.md`'s "Port later"). -/
+headline. `Soundness.lean` keeps the conjunct, which `copyStToM_typed`
+takes. -/
 
 /-- Keep the first row of each key (`seen` accumulates the keys kept). -/
 def dedupKeysAux [DecidableEq κ] : List (κ × α) -> List κ -> List (κ × α)

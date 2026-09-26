@@ -45,6 +45,8 @@ import Solidity.Examples.UpdateRules
 import Solidity.Typing.Storage
 import Solidity.Typing.StoragePreservation
 import Solidity.Typing.State
+import Solidity.Typing.Soundness
+import Solidity.Typing.Reachability
 import Solidity.Theory.Terms
 import Solidity.Theory.Storage
 import Solidity.Theory.Memory
@@ -53,5 +55,8 @@ import Solidity.Theory.Rewrite
 import Solidity.Calculus.KeyTaclets
 import Solidity.SortCheck.Annotations
 import Solidity.SortCheck.Parser
+import Solidity.SortCheck.Faithfulness
+import Solidity.Counterexamples.PreFixSortAnnotations
+import Solidity.Counterexamples.WellTypedNecessity
 import Solidity.Counterexamples.DeleteFamilyGenericOverlap
 import Solidity.Counterexamples.StaticRuntimeSort

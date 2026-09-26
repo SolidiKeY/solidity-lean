@@ -22,18 +22,18 @@ used to carry. Each `TacletReadAnn` row records, per KeY taclet, the
 multiset of read operations its `\replacewith`/`\add` skeleton performs
 and the KeY sort each read declares.
 
-One consumer keeps this table honest today; a second is to be restored:
+Two consumers keep this table honest:
 
 - `SolkeyCheck` (`lake exe solkeycheck`) parses the live `.key` file and
   cross-checks it against `tacletReadAnns` — the **text ↔ table** edge.
   Any upstream drift (say, a reintroduced `find<[int]>` on a copy rule)
   fails the check.
-- The **table ↔ semantics** edge — a faithfulness proof of the table's sort
-  claims against the Lean interpreter, `sortFaithful_all`, unprovable if the
-  table were updated to match a buggy taclet — was removed with the untyped
-  layer and is to be ported (`docs/kernel-port.md`'s "Port later"). The bug
-  such a proof would catch is historical: the exact one the `12e72a1b4b` fix
-  removed is git history before commit `59fa352`.
+- `SortCheck/Faithfulness.lean` proves the table's sort claims against the
+  Lean interpreter — the **table ↔ semantics** edge: one `faithful_<ctor>`
+  per read-bearing `Taclet` constructor, and `rows_covered` that every row
+  with a value read is claimed by one of them.  A table updated to match a
+  buggy taclet stops building there; `Counterexamples/PreFixSortAnnotations`
+  refutes the rows the `12e72a1b4b` fix replaced.
 
 This file is deliberately proof-free data so the checker executable can
 import it cheaply.
@@ -84,9 +84,8 @@ inductive ReadDomain where
 
 - `value` — the payload read the rule copies/tests (the RHS of a copy,
   the current value of a compound assignment or `++`/`--` target, the
-  pushed element). The faithfulness proof's `ReadSite.expr?` mapped it back
-  to a Lean expression (removed with the untyped layer; to be ported,
-  `docs/kernel-port.md`).
+  pushed element). `SortFaithfulness.Stmt.read?` is the place a statement
+  reads it from.
 - `length` — an `.. size` cell read (`find<[int]>(storage,
   consr(sp, size))`, `read<[int]>(memory, mp, size)`): array-length
   bookkeeping, always int-sorted. The Lean model has no `size` cell, so
@@ -314,10 +313,9 @@ def tacletReadAnns : List TacletReadAnn :=
 
 The annotations the fixed commit removed, kept as data so a faithfulness
 proof could show they are *not* sort-faithful — i.e. that this layer catches
-the bug that slipped through. That counterexample was removed with the
-untyped layer, along with the faithfulness proof itself (to be ported,
-`docs/kernel-port.md`'s "Port later"). The `_root` taclets of that era are
-the merged taclets of today; the rows keep the names of their day. -/
+the bug that slipped through: `Counterexamples/PreFixSortAnnotations.lean`.
+The `_root` taclets of that era are the merged taclets of today; the rows
+keep the names of their day. -/
 
 /-- Pre-fix `storageRootWriteCopySource`: `find<[int]>(storage, sp)` on
 a `Path[storage,simple]` source — mis-sorts `flag = flag2` on bools. -/
