@@ -24,6 +24,8 @@ import Solidity.Calculus.CloseTests
 import Solidity.Calculus.Uniqueness
 import Solidity.Calculus.Progress
 import Solidity.Calculus.Termination
+import Solidity.Calculus.Chains
+import Solidity.Calculus.UpdateRules
 import Solidity.Examples.Tour
 import Solidity.Examples.StorageSteps
 import Solidity.Examples.StorageSuite
@@ -38,6 +40,8 @@ import Solidity.Examples.Revert
 import Solidity.Examples.Values
 import Solidity.Examples.Notation
 import Solidity.Examples.ApplySteps
+import Solidity.Examples.Chains
+import Solidity.Examples.UpdateRules
 import Solidity.Typing.Storage
 import Solidity.Typing.StoragePreservation
 import Solidity.Typing.State
