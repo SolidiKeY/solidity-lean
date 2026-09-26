@@ -1,8 +1,6 @@
 # Port sources: old modules kept, unbuilt, until their port lands (docs/kernel-port.md).
 Solidity.Examples.CrossDomain
 Solidity.Examples.Derivations.CompoundAssign
-Solidity.Examples.Derivations.ControlFlow
-Solidity.Examples.Derivations.DynamicLogic
 Solidity.Examples.Derivations.IncDec
 Solidity.Examples.Derivations.LedgerDelete
 Solidity.Examples.Derivations.StorageSteps
@@ -18,4 +16,3 @@ Solidity.Examples.StorageRootOps
 Solidity.Examples.Taclets.MemoryOps
 Solidity.Examples.Taclets.NetOps
 Solidity.Examples.Taclets.StorageOps
-Solidity.Examples.Taclets.ValueOps
