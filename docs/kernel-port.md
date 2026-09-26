@@ -347,15 +347,17 @@ lists only the standard three axioms.
     scratch names `se`/`sp`/`ie` the residual's erasure against `ruleEffect`
     (a sweep closes the terminal rules; the unfolds need `Hole.fill` erasure
     lemmas)
-  - [ ] typed shapes, `rules_disjoint`/`rules_complete` (with `Stmt.step`, phase 4)
+  - [x] ~~typed shapes, `rules_disjoint`/`rules_complete`~~: replaced by
+    `Taclet.origin_unique` and `Stmt.complete`, over the typed syntax itself
   - [ ] `dl{ … }` notation for taclets, premises and updates
 - [ ] Phase 4: `Stmt.step`, `Stmt.complete`, `Fml.progress`.
   - [x] `Stmt.step` and `Stmt.complete` over the current syntax (`Kernel/Step.lean`)
-  - [ ] disjointness (at most one rule per statement, up to scratch names), stated as
-    `d.rule = (s.step m).2.rule` for every derivation `d`: `cases d`, a split on the
-    holes, then `simp` with the step functions and `rfl` closes about half; the rest
-    need the `dite` on `b.isSimple` reduced by the hypothesis, and a split on the
-    one non-simple `Val` a rule takes (the step functions enumerate its constructors)
+  - [x] disjointness (at most one rule per statement, up to scratch names):
+    `Taclet.origin_step`/`Taclet.rule_step`, every derivation ends in the taclet
+    `Stmt.step` picks, and `Taclet.origin_unique` (`Kernel/Unique.lean`). The proof
+    found two overlaps, both closed by a side condition in `Stmt.step`'s order: a
+    conditional in a write was also a capturable value (`Val.notTernary`), and a copy
+    between two non-simple storage paths unfolded either side (`Loc.isTarget`)
   - [ ] `Fml.progress`, with the formula layer of phase 6
 - [ ] Phase 5: the measure, `symex_normalizes`, `BlockStep.wellFounded`.
   - [x] sizes and `Taclet.smaller` (`Kernel/Measure.lean`): the measure of a goal
@@ -399,6 +401,7 @@ lists only the standard three axioms.
 | Compound target | `OpLoc`: a local, a state variable, a member, or an entry at a *simple* index. The old table is stuck on `values[i + 1] += 1;` and solkey has no taclet for it; `ksol` captures the index into `ie` first, as it does a condition. The update `Upd.opSave` reads the source first, as `execStmt` does, so the terminal rules are exact; no `?=` freeze in the unfolds, a kernel value having no effects | 2026-09-26 |
 | `y = nsp.f++;` | the assignment form takes a target whose receiver is simple (`OpLoc.recvSimple`): neither solkey nor the old table has an unfold for it. `ksol` captures the receiver into a scratch `sp`, which the old table would bind by its Lean-only `storagePlaceAlias` and the kernel binds, as KeY does, by `storageLocalDeclInitDrop` (the bridge tour's fourth disagreement) | 2026-09-26 |
 | Memory reference from a member | `mp.account = mq.account;` is `memoryFieldWriteCopy` from any *bindable* source. The old table (and solkey's `memoryFieldRead_unfold_rightSndResult`) first captures the member into a scratch `T memory se = mq.account;`, which requires the slot to hold a reference; the interpreter copies a reference slot as it is, so over every state the capture is not correct. The two `…_rightSndResult` memory rules are not kernel rules (the bridge tour's memory disagreements) | 2026-09-26 |
+| Overlapping taclets | where solkey leaves two taclets open on one statement and its strategy picks, the kernel adds the side condition that makes `Stmt.step`'s choice the only one (`Kernel/Unique.lean`): `sp.f = c ? a : b;` is lowered, never captured (`Val.notTernary`); `folks[1].account = folks[2].account;` unfolds its target first (`Loc.isTarget` on the source unfolds); a memory reference unfolds its source first (`MPath.isBindable` on the target unfolds) | 2026-09-26 |
 | Modalities | the kernel's box is partial correctness (it holds unless the run ends normally in a bad state) and its diamond needs a normal end; neither tells a revert from a stuck run. An unfolding rule then owes its statement the same *successful* outcome (`SameOk`), which the order-changing rules (`*StorageRef_unfold_leftFst`, `*NonSimpleIndexCapture`) meet without the side conditions the untyped `*_sound` theorems carry. `SolidityJudgment.Holds` differs on stuck runs ("a stuck execution validates nothing"); the phase-7 bridge must say so | 2026-09-25 |
 | Unknown names | an error: parameters are declared locals. mini-solkey reads an unknown name as a `uint` parameter | 2026-09-25 |
 | Ported contracts | one named constant per interpreter store, `initStorage_*` checks roots, order and defaults against the store by `simp` | 2026-09-25 |

@@ -196,6 +196,7 @@ the plan and the tracker. No `sorry`, `native_decide` or axiom here.
 | `Kernel/Logic.lean` | `StateAgree` and the frame lemmas for programs and continuations; `Post`, `Kont`, `Hyps`; the proof system `Proves` and `Proves.sound` (no hypothesis). |
 | `Kernel/Symex.lean` | the symbolic executor `Kont.vc` (the goals `Stmt.step` leaves), `Kont.vc_sound`, `Prog.correct` against `execBlock`; `Kont.weight` and `Kont.vc_fuel` (fuel past the weight is irrelevant); the `symex`/`symex_close` tactics and worked proofs. |
 | `Kernel/Bridge.lean` | `Taclet.origin` (the solkey taclet) and `Taclet.rule` (the old `RuleName`) of each constructor, and `Taclet.origin_claimed`: the old rule records that origin; `Prog.disagreements`, the two tables run side by side, pinned on a tour. |
+| `Kernel/Unique.lean` | one rule per statement: `Taclet.origin_step`/`Taclet.rule_step` (every derivation ends in the taclet `Stmt.step` picks), `Taclet.origin_unique`. |
 | `Kernel/Elab.lean` | `ksol[C]{ … }`/`ksol{ … }`: raw syntax, the elaborator (`synth`/`check`/`elabProg`), the quoters; evaluated at compile time, re-checked by the kernel. |
 
 ## Examples, chains and corpora

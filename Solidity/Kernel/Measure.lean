@@ -273,7 +273,7 @@ theorem MLoc.size_sz {Γ : Ctx} {T : Ty} (v : MLoc C Γ T) : v.size = v.sz + 1 :
 def Hole.extra {Γ Γ' : Ctx} {T : Ty} : Hole C Γ Γ' T → Nat
   | .local .. => 2
   | .rebind .. | .decl .. => 1
-  | .copy l _ => l.size + 2
+  | .copy l _ _ => l.size + 2
 
 theorem Hole.fill_size {Γ Γ' : Ctx} {T : Ty} (k : Hole C Γ Γ' T) (p : SPath C Γ T) :
     (k.fill p).size = p.size + k.extra := by
@@ -281,7 +281,7 @@ theorem Hole.fill_size {Γ Γ' : Ctx} {T : Ty} (k : Hole C Γ Γ' T) (p : SPath 
   | «local» => cases p with
     | loc l => simp [Hole.fill, Stmt.size, Val.size, SPath.size, Hole.extra]
   | rebind | decl => simp [Hole.fill, Stmt.size, Hole.extra]
-  | copy l h => simp [Hole.fill, Stmt.size, Src.size, Hole.extra]; omega
+  | copy l h _ => simp [Hole.fill, Stmt.size, Src.size, Hole.extra]; omega
 
 @[simp] theorem Hole.extend_extra {Γ Γ' : Ctx} {T : Ty} (y : Name) (b : BTy)
     (hy : isFresh C Γ' y = true) (k : Hole C Γ Γ' T) : (k.extend y b hy).extra = k.extra := by
