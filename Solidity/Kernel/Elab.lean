@@ -60,6 +60,9 @@ inductive RawStmt where
   /-- `f()`, `f(a)`: here `b.push()`, `b.push(a)`, `b.pop()`. -/
   | call (f : RawExpr) (args : List RawExpr)
   | assignIncDec (x : RawExpr) (op : IncDec) (l : RawExpr)
+  /-- `x = f();`, `T storage x = f();`: here `x = b.push();`. -/
+  | assignCall (l f : RawExpr)
+  | declStorageCall (T : RawTy) (x : String) (f : RawExpr)
   | ite (c : RawExpr) (thn els : List RawStmt)
   | require (c : RawExpr)
   | assert (c : RawExpr)
@@ -106,6 +109,10 @@ syntax &"delete " ksol_expr : ksol_stmt
 -- push on a member or an entry is spelt with them; one on a name is an
 -- identifier `values.push` called.
 syntax ksol_expr ".push(" ksol_expr ")" : ksol_stmt
+syntax ksol_expr " = " ksol_expr ".push()" : ksol_stmt
+syntax ksol_expr " = " ksol_expr "(" ")" : ksol_stmt
+syntax kernel_ty &"storage" ident " = " ksol_expr ".push()" : ksol_stmt
+syntax kernel_ty &"storage" ident " = " ksol_expr "(" ")" : ksol_stmt
 syntax ksol_expr ".push()" : ksol_stmt
 syntax ksol_expr ".pop()" : ksol_stmt
 syntax ksol_expr ".transfer(" ksol_expr ")" : ksol_stmt
@@ -189,6 +196,14 @@ open Lean in
 partial def expandStmt : TSyntax `ksol_stmt → MacroM Term
   | `(ksol_stmt| $l:ksol_expr = $r:ksol_expr) => do
       `(RawStmt.assign $(← expandExpr l) $(← expandExpr r))
+  | `(ksol_stmt| $l:ksol_expr = $b:ksol_expr .push()) => do
+      `(RawStmt.assignCall $(← expandExpr l) (.field $(← expandExpr b) "push"))
+  | `(ksol_stmt| $l:ksol_expr = $f:ksol_expr ( )) => do
+      `(RawStmt.assignCall $(← expandExpr l) $(← expandExpr f))
+  | `(ksol_stmt| $T:kernel_ty storage $x:ident = $b:ksol_expr .push()) => do
+      `(RawStmt.declStorageCall $(← expandTy T) $(quote x.getId.toString) (.field $(← expandExpr b) "push"))
+  | `(ksol_stmt| $T:kernel_ty storage $x:ident = $f:ksol_expr ( )) => do
+      `(RawStmt.declStorageCall $(← expandTy T) $(quote x.getId.toString) $(← expandExpr f))
   | `(ksol_stmt| $T:kernel_ty storage $x:ident = $e) => do
       `(RawStmt.declStorage $(← expandTy T) $(quote x.getId.toString)
           (some $(← expandExpr e)))
@@ -489,6 +504,21 @@ def elabStmt (C : Contract) (Γ : Ctx) : RawStmt → Except String (TProg C Γ)
     let ⟨hx⟩ ← checkFresh C Γ x
     let some e := init | throw s!"{x}: an uninitialised storage pointer"
     pure (.one (.declStorage false R x hx (← checkPath C Γ (.ref R) e)))
+  | .assignCall l f => do
+    let .field b "push" := f | throw "only push() is a call on the right"
+    match ← synth C Γ l with
+    | .path (.ref R) (.alias x h) =>
+      match hd : (Ty.ref R).defaultOkS with
+      | true => pure (.one (.bindPush (.rebind x h) (← checkPath C Γ (.array (.ref R)) b) hd))
+      | false => throw "push() of an element whose default is not well-formed"
+    | _ => throw "`= b.push()` binds a storage pointer"
+  | .declStorageCall T x f => do
+    let .field b "push" := f | throw "only push() is a call on the right"
+    let .ref R := elabTy T | throw s!"{x}: `storage` on a value type"
+    let ⟨hx⟩ ← checkFresh C Γ x
+    match hd : (Ty.ref R).defaultOkS with
+    | true => pure (.one (.bindPush (.decl R x hx) (← checkPath C Γ (.array (.ref R)) b) hd))
+    | false => throw "push() of an element whose default is not well-formed"
   | .declMemory T x init => do
     let .ref R := elabTy T | throw s!"{x}: `memory` on a value type"
     let ⟨hx⟩ ← checkFresh C Γ x
@@ -749,6 +779,13 @@ def Stmt.quote : (Γ Γ' : Ctx) → Stmt C Γ Γ' → Lean.Expr
     mkAppN (mkConst ``Stmt.push) #[c, toExpr Γ, toExpr E, SPath.quote c Γ _ b, v, boolTrue]
   | Γ, _, @Stmt.pop _ _ E b =>
     mkAppN (mkConst ``Stmt.pop) #[c, toExpr Γ, toExpr E, SPath.quote c Γ _ b]
+  | Γ, Γ', @Stmt.bindPush _ _ _ R k b _ =>
+    let k := match k with
+      | .rebind x _ =>
+        mkAppN (mkConst ``Alias.rebind) #[c, toExpr Γ, toExpr R, toExpr x,
+          quoteRefl optBTy (someE (mkConst ``BTy) (toExpr (BTy.path (.ref R))))]
+      | .decl _ x _ => mkAppN (mkConst ``Alias.decl) #[c, toExpr Γ, toExpr R, toExpr x, boolTrue]
+    mkAppN (mkConst ``Stmt.bindPush) #[c, toExpr Γ, toExpr Γ', toExpr R, k, SPath.quote c Γ _ b, boolTrue]
   | Γ, _, .transfer r a =>
     mkAppN (mkConst ``Stmt.transfer) #[c, toExpr Γ, Val.quote c Γ .uint r, Val.quote c Γ .uint a]
   | Γ, _, @Stmt.delete _ _ T l =>

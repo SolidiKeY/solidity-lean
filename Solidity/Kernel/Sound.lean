@@ -622,6 +622,43 @@ def SameOkR {α : Type} (ns : List Name) : Res (State × α) → Res (State × �
   | .error _, .error _ => True
   | _, _ => False
 
+/-- A push place at a resolved array, in two agreeing states: the same
+index, and states that still agree. -/
+theorem pushPlaceAt_agree {ns : List Name} {σ₁ σ : State} (h : EnvAgreeExcept ns σ₁ σ) (E : Ty)
+    (root : Name) (segs : List Seg) :
+    SameOkR ns (pushPlaceAt σ₁ E root segs) (pushPlaceAt σ E root segs) := by
+  simp only [pushPlaceAt, findStorage_congr h]
+  cases σ.findStorage root segs with
+  | error _ => trivial
+  | ok sv =>
+    cases sv with
+    | prim _ | struct _ | map _ _ => trivial
+    | array elems shadow =>
+      simp only [bind, Except.bind]
+      have := saveStorage_agree h root segs (.array (elems ++ [(pushSlot E shadow).1]) (pushSlot E shadow).2)
+      revert this
+      cases σ₁.saveStorage root segs (.array (elems ++ [(pushSlot E shadow).1]) (pushSlot E shadow).2) <;>
+        cases σ.saveStorage root segs (.array (elems ++ [(pushSlot E shadow).1]) (pushSlot E shadow).2) <;>
+        simp [ResultsAgree, SameOkR, pure, Except.pure]
+
+/-- Binding an alias to a push place, in two agreeing states. -/
+theorem pushPlaceAt_bind_agree {ns : List Name} {σ₁ σ : State} (h : EnvAgreeExcept ns σ₁ σ) (E : Ty)
+    (root : Name) (segs : List Seg) (x : Name) :
+    SameOk ns (do let (σ', n) ← pushPlaceAt σ₁ E root segs; pure (σ'.setEnv x (.spath root (segs ++ [.at n]))))
+      (do let (σ', n) ← pushPlaceAt σ E root segs; pure (σ'.setEnv x (.spath root (segs ++ [.at n])))) := by
+  have := pushPlaceAt_agree h E root segs
+  revert this
+  cases pushPlaceAt σ₁ E root segs with
+  | error _ => cases pushPlaceAt σ E root segs <;> simp [SameOkR, SameOk, bind, Except.bind]
+  | ok a =>
+    cases pushPlaceAt σ E root segs with
+    | error _ => simp [SameOkR]
+    | ok b =>
+      rintro ⟨hab, hn⟩
+      obtain ⟨σa, na⟩ := a; obtain ⟨σb, nb⟩ := b
+      simp only at hn; subst hn
+      exact hab.setEnv_both x _
+
 theorem alloc_agree {ns : List Name} {σ₁ σ : State} (h : EnvAgreeExcept ns σ₁ σ) (o : MObj) :
     EnvAgreeExcept ns (σ₁.alloc o).1 (σ.alloc o).1 ∧ (σ₁.alloc o).2 = (σ.alloc o).2 :=
   ⟨⟨h.storage, by simp [State.alloc, h.heap, h.nextId], by simp [State.alloc, h.nextId], h.net, h.env,
@@ -1007,6 +1044,15 @@ theorem Taclet.sound {m : Modality} {Γ Γ' : Ctx} {s : Stmt C Γ Γ'} {pr : Pre
       simp only [bind, Except.bind, pure, Except.pure, SPath.new, SPath.resolve, envPath,
         setEnv_env, lookupBy_setBy_self]
       exact pushAt_agree (agree_setEnv σ sp _) E _ _ fun _ => rfl
+  case storageLocalRootPush_unfold_leftFstReceiver R nsp hn hd sp k hsp =>
+    refine ⟨by simp [hsp], fun σ => ?_⟩
+    simp only [Prog.run, Stmt.run, bind_pure, Alias.extend_name]
+    cases nsp.resolve σ with
+    | error _ => trivial
+    | ok rs =>
+      simp only [bind, Except.bind, pure, Except.pure, SPath.new, SPath.resolve, envPath,
+        setEnv_env, lookupBy_setBy_self]
+      exact pushPlaceAt_bind_agree (agree_setEnv σ sp _) _ _ _ _
   case storagePop_unfold_leftFstReceiver E nsp hn sp hsp =>
     refine ⟨by simp [hsp], fun σ => ?_⟩
     simp only [Prog.run, Stmt.run, bind_pure]

@@ -290,6 +290,18 @@ def OpLoc.recvSimple {C : Contract} {Γ : Ctx} {p : PrimTy} : OpLoc C Γ p → B
 
 /-! ## Statements -/
 
+/-- Where a storage alias lands: an existing one (`p = …;`), or a new one
+(`Person storage p = …;`), which extends the context. -/
+inductive Alias (C : Contract) : Ctx → Ctx → RefTy → Type where
+  | rebind {Γ : Ctx} {R : RefTy} (x : Name) (h : lookupBy x Γ = some (.path (.ref R))) :
+      Alias C Γ Γ R
+  | decl {Γ : Ctx} (R : RefTy) (x : Name) (hx : isFresh C Γ x = true) :
+      Alias C Γ (setBy x (.path (.ref R)) Γ) R
+
+/-- The alias's name. -/
+def Alias.name {C : Contract} {Γ Γ' : Ctx} {R : RefTy} : Alias C Γ Γ' R → Name
+  | .rebind x _ | .decl _ x _ => x
+
 mutual
 
 /-- A statement, from context `Γ` to context `Γ'`. -/
@@ -332,6 +344,10 @@ inductive Stmt (C : Contract) : Ctx → Ctx → Type where
       (hd : (v.isSome || E.defaultOkS) = true) : Stmt C Γ Γ
   /-- `values.pop();` -/
   | pop {Γ : Ctx} {E : Ty} (b : SPath C Γ (.array E)) : Stmt C Γ Γ
+  /-- `p = people.push();`, `Person storage p = people.push();`: the alias
+  bound to a fresh last element, whose default must be well-formed. -/
+  | bindPush {Γ Γ' : Ctx} {R : RefTy} (k : Alias C Γ Γ' R) (b : SPath C Γ (.array (.ref R)))
+      (hd : (Ty.ref R).defaultOkS = true) : Stmt C Γ Γ'
   /-- `a.transfer(v);`: `v` of the contract's funds to `a`. -/
   | transfer {Γ : Ctx} (r a : Val C Γ .uint) : Stmt C Γ Γ
   /-- `Person memory m;` (a fresh default object) or `Person memory m = n;`. -/

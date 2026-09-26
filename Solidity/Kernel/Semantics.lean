@@ -301,6 +301,16 @@ def pushAt (σ : State) (E : Ty) (root : Name) (segs : List Seg) (val : SVal →
     σ.saveStorage root segs (.array (elems ++ [newElem]) shadow')
   | .prim _ | .struct _ | .map _ _ => .error .stuck
 
+/-- A push place at a resolved array: the slot appended, and its index, as
+`resolveS` does it for `arr.push()`. -/
+def pushPlaceAt (σ : State) (E : Ty) (root : Name) (segs : List Seg) : Res (State × Int) := do
+  match ← σ.findStorage root segs with
+  | .array elems shadow =>
+    let (slot, shadow') := pushSlot E shadow
+    let σ' ← σ.saveStorage root segs (.array (elems ++ [slot]) shadow')
+    pure (σ', elems.length)
+  | .prim _ | .struct _ | .map _ _ => .error .stuck
+
 /-- What a push appends: its argument, or the slot. -/
 def Src.pushVal (σ : State) {T : Ty} : Option (Src C Γ T) → SVal → Res SVal
   | none, slot => pure slot
@@ -362,6 +372,10 @@ def Stmt.run (σ : State) {Γ Γ' : Ctx} : Stmt C Γ Γ' → Res State
   | .pop b => do
     let (root, segs) ← b.resolve σ
     popAt σ root segs
+  | .bindPush (R := R) k b _ => do
+    let (root, segs) ← b.resolve σ
+    let (σ', n) ← pushPlaceAt σ (.ref R) root segs
+    pure (σ'.setEnv k.name (.spath root (segs ++ [.at n])))
   | .transfer r a => do
     let addr ← (← r.eval σ).asInt
     let amt ← (← a.eval σ).asInt
@@ -1159,6 +1173,41 @@ theorem Stmt.run_eq (σ : State) {Γ Γ' : Ctx} : (s : Stmt C Γ Γ') → execSt
           | some r =>
             simp only [Option.map, Src.pushVal, r.rhsToSVal_erase σ]
             cases r.value σ <;> rfl
+  | .bindPush k b _ => by
+    simp only [Stmt.run]
+    cases k with
+    | rebind x _ =>
+      rw [Stmt.erase, execStmt, execAssign]
+      simp only [PlaceExpr.var, Field.identity, Alias.name]
+      rw [if_neg (by simp), resolveS, b.resolveS_erase σ, b.erase_ty]
+      cases b.resolve σ with
+      | error _ => rfl
+      | ok rs =>
+        simp only [Except.map, bind, Except.bind, pushPlaceAt]
+        cases σ.findStorage rs.1 rs.2 with
+        | error _ => rfl
+        | ok sv =>
+          cases sv with
+          | prim _ | struct _ | map _ _ => rfl
+          | array elems shadow =>
+            simp only
+            cases σ.saveStorage rs.1 rs.2 _ <;> rfl
+    | decl R x _ =>
+      rw [Stmt.erase, execStmt]
+      simp only [Alias.name]
+      rw [resolveS, b.resolveS_erase σ, b.erase_ty]
+      cases b.resolve σ with
+      | error _ => rfl
+      | ok rs =>
+        simp only [Except.map, bind, Except.bind, pushPlaceAt]
+        cases σ.findStorage rs.1 rs.2 with
+        | error _ => rfl
+        | ok sv =>
+          cases sv with
+          | prim _ | struct _ | map _ _ => rfl
+          | array elems shadow =>
+            simp only
+            cases σ.saveStorage rs.1 rs.2 _ <;> rfl
   | .pop b => by
     simp only [Stmt.run]
     rw [Stmt.erase, execStmt]
