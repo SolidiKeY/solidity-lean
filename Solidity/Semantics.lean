@@ -1,50 +1,39 @@
-import Solidity.AST
+import Solidity.Syntax
 
 /-!
-# Executable state semantics
+# The interpreter
 
-The Lean analogue of the KeY state layer
-(`structRules.key`, `memoryRules.key`, `structMemoryRules.key`,
-`netHeader.key`): a concrete interpreter for statements and expressions
-over a storage tree, an identity-indexed memory heap, local bindings, and
-the `net` payment ledger. It gives meaning to `SolidityJudgment`
-(`sol!{ < stmts > (post) }`), so the ported KeY taclet tests can be proved
-by evaluation.
+What a program does, the reference every rule is proved sound against
+(mini-solkey's `Ch04_Semantics`).  The state is KeY's: a storage tree
+(`structRules.key`), an identity-indexed memory heap (`memoryRules.key`),
+the locals, and the `net` payment ledger (`netHeader.key`).  `Stmt.run`
+runs a statement on it by structural recursion on the typed syntax, so
+every function here terminates and every branch on a type was already
+taken by the index.
 
 Semantic conventions mirrored from KeY:
-- storage assignment copies by value (`save`/`select`/`store`),
-  memory assignment aliases identities, cross-domain assignments deep-copy
-  (`copySt`/`copyMem`, see `docs/copyStMem.md`);
-- array reads/writes out of bounds revert; `pop()` on an empty array
+- storage assignment copies by value (`save`/`select`/`store`), memory
+  assignment aliases identities, cross-domain assignments deep-copy
+  (`copySt`/`copyMem`);
+- array reads and writes out of bounds revert; `pop()` on an empty array
   reverts; `/` and `%` revert on a zero divisor; a failing `assert`
   reverts;
-- `a.transfer(v)` books `net(a) := net(a) - v` with no callback;
-- in the postcondition, `net(a)` reads the ledger.
+- `a.transfer(v)` books `net(a) := net(a) - v` with no callback.
 
-Semantic conventions mirrored from solc (where KeY was more liberal;
-see `docs/solc-alignment.md`):
-- arithmetic is **checked** (solc ≥ 0.8): an `add`/`sub`/`mul`/`pow`/
-  `div`/`mod`/`++`/`--`/compound-assignment result outside its type's
-  range (`uint` = `uint256`, `int` = `int256`) reverts, the executable
-  image of `Panic(0x11)` (`checkArith`);
+Semantic conventions mirrored from solc, where KeY was more liberal
+(`docs/solc-alignment.md`):
+- arithmetic is **checked** (solc ≥ 0.8): a result outside its type's
+  range (`uint` = `uint256`, `int` = `int256`) reverts (`checkArith`);
 - an assignment evaluates its **right-hand side before resolving the
-  left-hand side**, and `++`/`--` and `op=` resolve their l-value
-  exactly **once** (`readLoc`/`writeLoc`) — solc's code generation
-  order for assignments in both the legacy and the IR pipeline;
-- a storage-to-storage copy of a type containing a (nested) mapping is
-  stuck: solc ≥ 0.7 rejects such assignments at compile time
-  (`tyHasMapping`); `delete` keeps its mapping-preserving behavior;
+  left-hand side**, and `++`/`--` and `op=` resolve their target exactly
+  once;
 - `a.transfer(v)` reverts unless the contract's own funds
-  (`State.selfBalance`) cover `v`, and debits them — the EVM's
-  value-transfer balance check.
+  (`State.selfBalance`) cover `v`, and debits them.
 
-The interpreter is total: Lean checks termination of every function.
-Statement execution is structurally recursive (statements never spawn
-statements — `Stmt` has no loops, and the push-assignment forms delegate
-to the non-recursive `execAssign`); expression evaluation terminates on
-the measure `4 * WrappedExpr.size + rank` (see the mutual block below);
-the memory→storage copy terminates on the visited-set complement
-`rem` (`copyMToSt`), and the storage→memory copy is structural.
+A run ends in a state or halts: `revert` (the program reverted) or `stuck`
+(a state that does not fit the program, e.g. a local read before it is
+bound).  The copy from memory back to storage terminates on the visited-set
+complement `rem` (`copyMToSt`); everything else is structural.
 -/
 
 namespace Solidity
@@ -127,7 +116,7 @@ structure State where
   storage : List (Name × SVal)
   heap : List (Nat × MObj) := []
   nextId : Nat := 0
-  env : List (Name × Binding) := []
+  env : List (Var × Binding) := []
   net : List (Int × Int) := []
   /-- The contract's own funds (`address(this).balance`): `transfer`
   reverts when the amount exceeds this and debits it otherwise — the
@@ -143,6 +132,13 @@ inductive Halt where
   deriving Repr, DecidableEq, Inhabited
 
 abbrev Res (α : Type) := Except Halt α
+
+/-- Bind inversion on a successful computation. -/
+theorem bind_ok_inv {x : Res α} {f : α -> Res β} {b : β}
+    (h : (x >>= f) = .ok b) : ∃ a, x = .ok a ∧ f a = .ok b := by
+  cases x with
+  | error e => exact nomatch h
+  | ok a => exact ⟨a, rfl, h⟩
 
 /-! The struct schema, its rank certificate and `tyHasMapping` live in
 `AST.lean`: they are static-type facts (`StorageReferenceTypes.containsMapping`),
@@ -238,17 +234,6 @@ theorem pushSlot_isPrim {elemTy : Ty} {shadow : List SVal}
     (hp : elemTy.isPrimitive = true) :
     (pushSlot elemTy shadow).1 = defaultForTy elemTy := by
   cases shadow <;> simp [pushSlot, hp]
-
-/-! ## Association-list helpers -/
-
-def lookupBy [DecidableEq κ] (k : κ) : List (κ × α) -> Option α
-  | [] => none
-  | (k', v) :: rest => if k = k' then some v else lookupBy k rest
-
-def setBy [DecidableEq κ] (k : κ) (v : α) : List (κ × α) -> List (κ × α)
-  | [] => [(k, v)]
-  | (k', v') :: rest =>
-      if k = k' then (k, v) :: rest else (k', v') :: setBy k v rest
 
 /-! ## Storage find / save -/
 
@@ -397,12 +382,12 @@ def saveStorageExt (s : State) (root : Name) (segs : List Seg) (new : SVal) :
       .ok { s with storage := setBy root updated s.storage }
   | none => .error .stuck
 
-def getEnv (s : State) (name : Name) : Res Binding :=
+def getEnv (s : State) (name : Var) : Res Binding :=
   match lookupBy name s.env with
   | some b => .ok b
   | none => .error .stuck
 
-def setEnv (s : State) (name : Name) (b : Binding) : State :=
+def setEnv (s : State) (name : Var) (b : Binding) : State :=
   { s with env := setBy name b s.env }
 
 def getObj (s : State) (id : Nat) : Res MObj :=
@@ -656,52 +641,28 @@ theorem checkArith_ok_eq {ty : Ty} {v w : Value}
           | bool => exact (Except.ok.inj h).symm
       | ref r => exact (Except.ok.inj h).symm
 
-/-! ## Places, expression evaluation, statement execution
 
-Expression evaluation threads the state because `++`/`--` mutate it.
-Sub-expressions evaluate left to right; `&&`/`||` short-circuit.
+/-! ## Memory addresses
 
-The mutual block below terminates on the measure `4 * e.size + rank`:
-every cross-call either recurses into a strict sub-expression
-(`WrappedExpr.size` drops, and it never drops by less than the rank span
-of `4`) or stays on a size-equal expression while moving to a
-lower-ranked function (`resolveS`/`resolveMBase` = 0, `readM`/`resolveLoc`
-= 1, `evalValue`/`writeValue` = 2, `evalInt` = 3). `WrappedExpr.size`
-ignores the type argument, so `resolveLoc` re-wrapping a field expression
-with `Ty.uint` is size-neutral. -/
+`++`/`--` and `op=` on a memory location resolve it once, then read and
+write through the address: that is what makes the target evaluated exactly
+once, as solc compiles it. -/
 
-/-- A resolved assignment target. -/
-inductive Loc where
-  | stack (name : Name)
-  | storageLocal (name : Name)
-  | memoryRoot (name : Name)
-  | storage (root : Name) (segs : List Seg)
+/-- A resolved memory location: a member or an element of an object. -/
+inductive Addr where
   | memoryField (id : Nat) (field : Name)
   | memoryIndex (id : Nat) (i : Int)
 
-/-- Read the primitive value held at a resolved location. Resolution
-already ran, so this is side-effect free: it is what lets `++`/`--` and
-`op=` evaluate their l-value exactly once, the way solc compiles them.
-Alias roots (`storageLocal`, `memoryRoot`) bind references, not
-primitives, and are stuck. -/
-def readLoc (s : State) : Loc -> Res Value
-  | Loc.stack name => do
-      match ← s.getEnv name with
-      | Binding.val v => .ok v
-      | Binding.spath _ _ => .error .stuck
-      | Binding.mref _ => .error .stuck
-  | Loc.storageLocal _ => .error .stuck
-  | Loc.memoryRoot _ => .error .stuck
-  | Loc.storage root segs => do
-      (← s.findStorage root segs).asValue
-  | Loc.memoryField id fld => do
+/-- Read the primitive value at a memory address. -/
+def readLoc (s : State) : Addr -> Res Value
+  | Addr.memoryField id fld => do
       match ← s.getObj id with
       | MObj.struct fields =>
           match lookupBy fld fields with
           | some v => v.asValue
           | none => .error .stuck
       | MObj.array _ => .error .stuck
-  | Loc.memoryIndex id i => do
+  | Addr.memoryIndex id i => do
       match ← s.getObj id with
       | MObj.array elems =>
           if h : 0 ≤ i ∧ i.toNat < elems.length then
@@ -709,684 +670,31 @@ def readLoc (s : State) : Loc -> Res Value
           else .error .revert
       | MObj.struct _ => .error .stuck
 
-/-- Write a primitive value at a resolved location: the write half of
-`writeValue`, after resolution. Alias roots are stuck, as in
-`writeValue`. -/
-def writeLoc (s : State) (loc : Loc) (v : Value) : Res State :=
+/-- Write a primitive value at a memory address. -/
+def writeLoc (s : State) (loc : Addr) (v : Value) : Res State :=
   match loc with
-  | Loc.stack name => .ok (s.setEnv name (Binding.val v))
-  | Loc.storage root segs => s.saveStorage root segs v.toSVal
-  | Loc.memoryField id fld => do
+  | Addr.memoryField id fld => do
       match ← s.getObj id with
       | MObj.struct fields =>
           .ok (s.setObj id (MObj.struct (setBy fld v.toMVal fields)))
       | MObj.array _ => .error .stuck
-  | Loc.memoryIndex id i => do
+  | Addr.memoryIndex id i => do
       match ← s.getObj id with
       | MObj.array elems =>
           if 0 ≤ i ∧ i.toNat < elems.length then
             .ok (s.setObj id (MObj.array (elems.set i.toNat v.toMVal)))
           else .error .revert
       | MObj.struct _ => .error .stuck
-  | Loc.storageLocal _ => .error .stuck
-  | Loc.memoryRoot _ => .error .stuck
 
-mutual
+/-! ## The stores
 
-/-- Resolve a storage-kind place expression to a root and path,
-evaluating (and possibly mutating through) embedded index
-expressions. Push-lvalues extend the array with a default element and
-address it. -/
-def resolveS (s : State) : WrappedExpr -> Res (State × Name × List Seg)
-  | WrappedExpr.var _ _ fld =>
-      match lookupBy fld.name s.env with
-      | some (Binding.spath root segs) => .ok (s, root, segs)
-      | some (Binding.val _) => .error .stuck
-      | some (Binding.mref _) => .error .stuck
-      | none =>
-          if fld.origin = some StorageOrigin.global then
-            .ok (s, fld.name, [])
-          else .error .stuck
-  | WrappedExpr.field _ _ base fld => do
-      let (s, root, segs) ← resolveS s base
-      .ok (s, root, segs ++ [Seg.field fld.name])
-  | WrappedExpr.index _ _ base index => do
-      let (s, root, segs) ← resolveS s base
-      let (s, i) ← evalInt s index
-      .ok (s, root, segs ++ [Seg.at i])
-  | WrappedExpr.pushPlace target => do
-      let (s, root, segs) ← resolveS s target
-      let arr ← s.findStorage root segs
-      match arr, target.ty with
-      | SVal.array elems shadow, Ty.ref (RefTy.array elemTy) => do
-          let (slot, shadow') := pushSlot elemTy shadow
-          let extended := SVal.array (elems ++ [slot]) shadow'
-          let s ← s.saveStorage root segs extended
-          .ok (s, root, segs ++ [Seg.at elems.length])
-      -- The two mismatches kept apart rather than answered by one joint
-      -- wildcard: a node that is not an array, and a target whose type is
-      -- not an array reference.
-      | SVal.prim _, _ => .error .stuck
-      | SVal.struct _, _ => .error .stuck
-      | SVal.map _ _, _ => .error .stuck
-      | SVal.array _ _, Ty.prim _ => .error .stuck
-      | SVal.array _ _, Ty.ref (RefTy.struct _) => .error .stuck
-      | SVal.array _ _, Ty.ref (RefTy.mapping _ _) => .error .stuck
-  -- The seven constructors that are not places. Listed rather than left
-  -- to a wildcard, so a new `WrappedExpr` constructor is a compile error
-  -- here instead of silently becoming stuck; the same seven arms close
-  -- `resolveMBase`, `readM` and `resolveLoc` below.
-  | WrappedExpr.bool _ => .error .stuck
-  | WrappedExpr.intLit _ _ => .error .stuck
-  | .mkCall _ _ _ _ => .error .stuck
-  | .mkBinop _ _ _ => .error .stuck
-  | .mkUnop _ _ => .error .stuck
-  | .mkIncDec _ _ => .error .stuck
-  | .mkTernary _ _ _ => .error .stuck
-termination_by e => 4 * e.size + 0
-decreasing_by all_goals
-  first
-  | omega
-  | (simp [Typed.WrappedExpr.size] <;> omega)
-
-/-- Resolve a memory place expression down to its base object identity,
-following references field by field. Returns the identity holding the
-final selector. -/
-def resolveMBase (s : State) : WrappedExpr -> Res (State × Nat)
-  | WrappedExpr.var _ _ fld => do
-      match ← s.getEnv fld.name with
-      | Binding.mref id => .ok (s, id)
-      | Binding.val _ => .error .stuck
-      | Binding.spath _ _ => .error .stuck
-  | WrappedExpr.field _ _ base fld => do
-      let (s, baseId) ← resolveMBase s base
-      match ← s.getObj baseId with
-      | MObj.struct fields =>
-          match lookupBy fld.name fields with
-          | some (MVal.ref id) => .ok (s, id)
-          | some (MVal.prim _) => .error .stuck
-          | none => .error .stuck
-      | MObj.array _ => .error .stuck
-  | WrappedExpr.index _ _ base index => do
-      let (s, baseId) ← resolveMBase s base
-      let (s, i) ← evalInt s index
-      match ← s.getObj baseId with
-      | MObj.array elems =>
-          if h : 0 ≤ i ∧ i.toNat < elems.length then
-            match elems.get ⟨i.toNat, h.2⟩ with
-            | MVal.ref id => .ok (s, id)
-            | MVal.prim _ => .error .stuck
-          else .error .revert
-      | MObj.struct _ => .error .stuck
-  | WrappedExpr.pushPlace _ => .error .stuck
-  | WrappedExpr.bool _ => .error .stuck
-  | WrappedExpr.intLit _ _ => .error .stuck
-  | .mkCall _ _ _ _ => .error .stuck
-  | .mkBinop _ _ _ => .error .stuck
-  | .mkUnop _ _ => .error .stuck
-  | .mkIncDec _ _ => .error .stuck
-  | .mkTernary _ _ _ => .error .stuck
-termination_by e => 4 * e.size + 0
-decreasing_by all_goals
-  first
-  | omega
-  | (simp [Typed.WrappedExpr.size] <;> omega)
-
-/-- Read the memory slot addressed by a place expression. -/
-def readM (s : State) : WrappedExpr -> Res (State × MVal)
-  | WrappedExpr.var _ _ fld => do
-      match ← s.getEnv fld.name with
-      | Binding.mref id => .ok (s, MVal.ref id)
-      | Binding.val _ => .error .stuck
-      | Binding.spath _ _ => .error .stuck
-  | WrappedExpr.field _ _ base fld => do
-      let (s, baseId) ← resolveMBase s base
-      match ← s.getObj baseId with
-      | MObj.struct fields =>
-          match lookupBy fld.name fields with
-          | some v => .ok (s, v)
-          | none => .error .stuck
-      | MObj.array _ => .error .stuck
-  | WrappedExpr.index _ _ base index => do
-      let (s, baseId) ← resolveMBase s base
-      let (s, i) ← evalInt s index
-      match ← s.getObj baseId with
-      | MObj.array elems =>
-          if h : 0 ≤ i ∧ i.toNat < elems.length then
-            .ok (s, elems.get ⟨i.toNat, h.2⟩)
-          else .error .revert
-      | MObj.struct _ => .error .stuck
-  | WrappedExpr.pushPlace _ => .error .stuck
-  | WrappedExpr.bool _ => .error .stuck
-  | WrappedExpr.intLit _ _ => .error .stuck
-  | .mkCall _ _ _ _ => .error .stuck
-  | .mkBinop _ _ _ => .error .stuck
-  | .mkUnop _ _ => .error .stuck
-  | .mkIncDec _ _ => .error .stuck
-  | .mkTernary _ _ _ => .error .stuck
-termination_by e => 4 * e.size + 1
-decreasing_by all_goals
-  first
-  | omega
-  | (simp [Typed.WrappedExpr.size] <;> omega)
-
-/-- Resolve an assignable expression to an assignment target. -/
-def resolveLoc (s : State) : WrappedExpr -> Res (State × Loc)
-  | WrappedExpr.var kind _ fld =>
-      match kind with
-      | Kind.stack => .ok (s, Loc.stack fld.name)
-      | Kind.memory => .ok (s, Loc.memoryRoot fld.name)
-      | Kind.storage =>
-          if fld.origin = some StorageOrigin.global then
-            .ok (s, Loc.storage fld.name [])
-          else .ok (s, Loc.storageLocal fld.name)
-  | WrappedExpr.field kind _ base fld =>
-      match kind with
-      | Kind.storage => do
-          let (s, root, segs) ←
-            resolveS s (WrappedExpr.field kind (Ty.uint) base fld)
-          .ok (s, Loc.storage root segs)
-      | Kind.memory => do
-          let (s, baseId) ← resolveMBase s base
-          .ok (s, Loc.memoryField baseId fld.name)
-      | Kind.stack => .error .stuck
-  | WrappedExpr.index kind _ base index =>
-      match kind with
-      | Kind.storage => do
-          let (s, root, segs) ← resolveS s base
-          let (s, i) ← evalInt s index
-          .ok (s, Loc.storage root (segs ++ [Seg.at i]))
-      | Kind.memory => do
-          let (s, baseId) ← resolveMBase s base
-          let (s, i) ← evalInt s index
-          .ok (s, Loc.memoryIndex baseId i)
-      | Kind.stack => .error .stuck
-  | WrappedExpr.pushPlace target => do
-      let (s, root, segs) ← resolveS s (WrappedExpr.pushPlace target)
-      .ok (s, Loc.storage root segs)
-  | WrappedExpr.bool _ => .error .stuck
-  | WrappedExpr.intLit _ _ => .error .stuck
-  | .mkCall _ _ _ _ => .error .stuck
-  | .mkBinop _ _ _ => .error .stuck
-  | .mkUnop _ _ => .error .stuck
-  | .mkIncDec _ _ => .error .stuck
-  | .mkTernary _ _ _ => .error .stuck
-termination_by e => 4 * e.size + 1
-decreasing_by all_goals
-  first
-  | omega
-  | (simp [Typed.WrappedExpr.size] <;> omega)
-
-/-- Evaluate an expression to a primitive value. -/
-def evalValue (s : State) : WrappedExpr -> Res (State × Value)
-  | WrappedExpr.bool b => .ok (s, Value.bool b)
-  | WrappedExpr.intLit _ v => .ok (s, Value.int v)
-  | e@(WrappedExpr.var kind _ fld) =>
-      match kind with
-      | Kind.stack => do
-          match ← s.getEnv fld.name with
-          | Binding.val v => .ok (s, v)
-          | Binding.spath _ _ => .error .stuck
-          | Binding.mref _ => .error .stuck
-      | Kind.storage => do
-          let (s, root, segs) ← resolveS s e
-          let v ← s.findStorage root segs
-          .ok (s, ← v.asValue)
-      | Kind.memory => .error .stuck
-  | e@(WrappedExpr.field kind _ _ _) =>
-      match kind with
-      | Kind.storage => do
-          let (s, root, segs) ← resolveS s e
-          let v ← s.findStorage root segs
-          .ok (s, ← v.asValue)
-      | Kind.memory => do
-          let (s, v) ← readM s e
-          .ok (s, ← v.asValue)
-      | Kind.stack => .error .stuck
-  | e@(WrappedExpr.index kind _ _ _) =>
-      match kind with
-      | Kind.storage => do
-          let (s, root, segs) ← resolveS s e
-          let v ← s.findStorage root segs
-          .ok (s, ← v.asValue)
-      | Kind.memory => do
-          let (s, v) ← readM s e
-          .ok (s, ← v.asValue)
-      | Kind.stack => .error .stuck
-  | .mkBinop op l r => do
-      let (s, lv) ← evalValue s l
-      match op, lv with
-      | BinOp.and, Value.bool false => .ok (s, Value.bool false)
-      | BinOp.or, Value.bool true => .ok (s, Value.bool true)
-      | _, _ => do
-          let (s, rv) ← evalValue s r
-          let v ← applyBinOp op lv rv
-          -- Checked arithmetic at the operation's result type
-          -- (`BinOp.retTy`: the operand type for arithmetic, `bool` —
-          -- unconstrained — for comparisons and connectives).
-          .ok (s, ← checkArith (op.retTy l.ty) v)
-  | .mkUnop op arg => do
-      let (s, v) ← evalValue s arg
-      let v ← applyUnOp op v
-      -- `-x` is checked only at `int` (`-(-2^255)` overflows); solc
-      -- rejects unary minus on unsigned operands at compile time.
-      match op, arg.ty with
-      | UnOp.neg, Ty.int => .ok (s, ← checkArith Ty.int v)
-      | _, _ => .ok (s, v)
-  | .mkIncDec op target => do
-      -- The l-value is resolved exactly once (solc evaluates `x++`'s
-      -- target once); the old double resolution re-ran the target's
-      -- index side effects on the write-back.
-      let (s, loc) ← resolveLoc s target
-      let old ← readLoc s loc
-      let oldInt ← old.asInt
-      let newInt := if op.isIncrement then oldInt + 1 else oldInt - 1
-      -- Checked arithmetic: `++` past the type's maximum and `--`
-      -- below its minimum revert.
-      let newVal ← checkArith target.ty (Value.int newInt)
-      let s ← writeLoc s loc newVal
-      .ok (s, if op.isPre then newVal else old)
-  -- `c ? t : e` short-circuits like `&&`/`||`: only the taken branch is
-  -- evaluated (KeY's `ternaryToIf` residual has the same meaning).
-  | .mkTernary c t e => do
-      let (s, cv) ← evalValue s c
-      match cv with
-      | Value.bool true => evalValue s t
-      | Value.bool false => evalValue s e
-      | Value.int _ => .error .stuck
-  -- `net` is picked out by name and arity, which no constructor pattern
-  -- can express, so this one arm stays order-dependent: every other call
-  -- falls to the `mkCall` arm below, where meaning comes from inlining
-  -- (`SoliditySyntax.inlineBlock`) rather than from the interpreter.
-  | .mkCall _ _ "net" [addr] => do
-      let (s, a) ← evalInt s addr
-      .ok (s, Value.int (s.getNet a))
-  | .mkCall _ _ _ _ => .error .stuck
-  | WrappedExpr.pushPlace _ => .error .stuck
-termination_by e => 4 * e.size + 2
-decreasing_by all_goals
-  subst_vars
-  first
-  | omega
-  | (simp [Typed.WrappedExpr.size, Typed.WrappedExpr.sizeList] <;> omega)
-
-def evalInt (s : State) (e : WrappedExpr) : Res (State × Int) := do
-  let (s, v) ← evalValue s e
-  .ok (s, ← v.asInt)
-termination_by 4 * e.size + 3
-decreasing_by all_goals omega
-
-/-- Write a primitive value through a place expression: resolve, then
-`writeLoc`. -/
-def writeValue (s : State) (target : WrappedExpr) (v : Value) :
-    Res State := do
-  let (s, loc) ← resolveLoc s target
-  writeLoc s loc v
-termination_by 4 * target.size + 2
-decreasing_by all_goals omega
-
-end
-
-/-! ## Statement execution -/
-
-/-- Evaluate an assignment right-hand side down to the storage value a
-storage-kind target stores: primitives evaluate, storage sources copy
-by value (`select`), memory sources deep-copy (`copyMem`). A storage
-source whose type contains a (nested) mapping is stuck — solc ≥ 0.7
-rejects that assignment at compile time. -/
-def rhsToSVal (s : State) (rhs : WrappedExpr) : Res (State × SVal) :=
-  if rhs.ty.isPrimitive then do
-    let (s, v) ← evalValue s rhs
-    .ok (s, v.toSVal)
-  else
-    match rhs.kind with
-    | Kind.storage =>
-        if tyHasMapping rhs.ty then .error .stuck
-        else do
-          let (s, rroot, rsegs) ← resolveS s rhs
-          let v ← s.findStorage rroot rsegs
-          .ok (s, v)
-    | Kind.memory => do
-        let (s, mv) ← readM s rhs
-        let sval ← copyMem s mv
-        .ok (s, sval)
-    -- A non-primitive right-hand side of stack kind: `WrappedExpr.kind`
-    -- of a ternary is always `.stack`, so `Person memory p = flag ? a : b;`
-    -- lands here. A documented scope limit, not an oversight.
-    | Kind.stack => .error .stuck
-
-/-- Evaluate an assignment right-hand side down to the slot value a
-memory-kind target stores: primitives evaluate, memory sources alias,
-storage sources deep-copy (`copySt`; mappings cannot reach memory, so
-`copyStToM` is stuck on them already). -/
-def rhsToMVal (s : State) (rhs : WrappedExpr) : Res (State × MVal) :=
-  if rhs.ty.isPrimitive then do
-    let (s, v) ← evalValue s rhs
-    .ok (s, v.toMVal)
-  else
-    match rhs.kind with
-    | Kind.memory => readM s rhs
-    | Kind.storage => do
-        let (s, rroot, rsegs) ← resolveS s rhs
-        let sval ← s.findStorage rroot rsegs
-        copyStToM s sval
-    -- As in `rhsToSVal`: a non-primitive stack-kind source.
-    | Kind.stack => .error .stuck
-
-/-- Assign into a nested (field/index/push) target: the right-hand
-side is evaluated **before** the left-hand side's location is
-resolved — solc compiles the RHS of an assignment first in both the
-legacy and the IR pipeline, so index side effects interleave in that
-order. -/
-def execAssignNested (s : State) (lhsExpr rhs : WrappedExpr) :
-    Res State :=
-  match lhsExpr.kind with
-  | Kind.storage => do
-      let (s, sv) ← rhsToSVal s rhs
-      let (s, loc) ← resolveLoc s lhsExpr
-      match loc with
-      | Loc.storage root segs => s.saveStorage root segs sv
-      | Loc.stack _ => .error .stuck
-      | Loc.storageLocal _ => .error .stuck
-      | Loc.memoryRoot _ => .error .stuck
-      | Loc.memoryField _ _ => .error .stuck
-      | Loc.memoryIndex _ _ => .error .stuck
-  | Kind.memory => do
-      let (s, mv) ← rhsToMVal s rhs
-      let (s, loc) ← resolveLoc s lhsExpr
-      match loc with
-      | Loc.memoryField id fld => do
-          match ← s.getObj id with
-          | MObj.struct fields =>
-              .ok (s.setObj id (MObj.struct (setBy fld mv fields)))
-          | MObj.array _ => .error .stuck
-      | Loc.memoryIndex id i => do
-          match ← s.getObj id with
-          | MObj.array elems =>
-              if 0 ≤ i ∧ i.toNat < elems.length then
-                .ok (s.setObj id (MObj.array (elems.set i.toNat mv)))
-              else .error .revert
-          | MObj.struct _ => .error .stuck
-      | Loc.stack _ => .error .stuck
-      | Loc.storage _ _ => .error .stuck
-      | Loc.storageLocal _ => .error .stuck
-      | Loc.memoryRoot _ => .error .stuck
-  | Kind.stack => .error .stuck
-
-/-- Assign `rhs` into an assignable place, dispatching on the place kind
-and the right-hand side's data location, mirroring the write/copy rule
-families. Root targets have no embedded index expressions, so only the
-right-hand side computes there; nested targets go through
-`execAssignNested` (RHS first, as in solc).
-
-The final arm is a *delegation*, not a hidden stuck case: every nested
-place goes to `execAssignNested`.  Scrutinizing the `PlaceExpr` instead of
-its `expr` projection would bring the `assignable` proof along and let the
-match compiler refute the seven non-place constructors — the discipline
-`Rules.ruleEffect` gets from its condition proof — but that match is
-dependent, and Lean then generates no equation lemmas for `execAssign` and
-no `execStmt.eq_def`, which `Calculus/RuleSoundness.lean` and
-`Wp/Terminal/UpdateDecl.lean` rewrite with in some fifty places. -/
-def execAssign (s : State) (lhs : PlaceExpr) (rhs : WrappedExpr) :
-    Res State :=
-  match lhs.expr with
-  | WrappedExpr.var kind _ fld =>
-      match kind with
-      | Kind.stack => do
-          let (s, v) ← evalValue s rhs
-          .ok (s.setEnv fld.name (Binding.val v))
-      | Kind.storage =>
-          if fld.origin = some StorageOrigin.global then do
-            -- global storage root: value copy.
-            let (s, sv) ← rhsToSVal s rhs
-            s.saveStorage fld.name [] sv
-          else do
-            -- `storageLocalRootRebind`: a local storage root re-binds
-            -- its path.
-            let (s, root, segs) ← resolveS s rhs
-            .ok (s.setEnv fld.name (Binding.spath root segs))
-      | Kind.memory =>
-          match rhs.kind with
-          | Kind.memory => do
-              -- `memoryRootRebind`: aliasing, no copy.
-              let (s, v) ← readM s rhs
-              match v with
-              | MVal.ref id => .ok (s.setEnv fld.name (Binding.mref id))
-              | MVal.prim _ => .error .stuck
-          | Kind.storage => do
-              -- storage → memory deep copy (`copySt`).
-              let (s, root, segs) ← resolveS s rhs
-              let sval ← s.findStorage root segs
-              let (s, mv) ← copyStToM s sval
-              match mv with
-              | MVal.ref id => .ok (s.setEnv fld.name (Binding.mref id))
-              | MVal.prim _ => .error .stuck
-          | Kind.stack => .error .stuck
-  | lhsExpr => execAssignNested s lhsExpr rhs
-
-mutual
-
-def execStmt (s : State) : Stmt -> Res State
-  | Stmt.expr e => do
-      let (s, _) ← evalValue s e
-      .ok s
-  | Stmt.assign lhs rhs => execAssign s lhs rhs
-  | Stmt.storageDecl _ name init =>
-      match init with
-      | none => .ok s
-      | some rhs => do
-          let (s, root, segs) ← resolveS s rhs
-          .ok (s.setEnv name (Binding.spath root segs))
-  | Stmt.storagePlaceAlias _ name init => do
-      let (s, root, segs) ← resolveS s init
-      .ok (s.setEnv name (Binding.spath root segs))
-  | Stmt.memoryDecl ty name init =>
-      match init with
-      | none =>
-          match ty with
-          | Ty.ref ref => do
-              let (s, id) ← allocDefault s ref
-              .ok (s.setEnv name (Binding.mref id))
-          -- A memory declaration binds an object identity, so a
-          -- primitive declared type has nothing to allocate.
-          | Ty.prim _ => .error .stuck
-      | some rhs =>
-          match rhs.kind with
-          | Kind.memory => do
-              let (s, v) ← readM s rhs
-              match v with
-              | MVal.ref id => .ok (s.setEnv name (Binding.mref id))
-              | MVal.prim _ => .error .stuck
-          | Kind.storage => do
-              let (s, root, segs) ← resolveS s rhs
-              let sval ← s.findStorage root segs
-              let (s, mv) ← copyStToM s sval
-              match mv with
-              | MVal.ref id => .ok (s.setEnv name (Binding.mref id))
-              | MVal.prim _ => .error .stuck
-          | Kind.stack => .error .stuck
-  | Stmt.stackDecl ty name init =>
-      match init with
-      | none =>
-          match ty with
-          | Ty.bool => .ok (s.setEnv name (Binding.val (Value.bool false)))
-          | Ty.uint => .ok (s.setEnv name (Binding.val (Value.int 0)))
-          | Ty.int => .ok (s.setEnv name (Binding.val (Value.int 0)))
-          -- A reference-typed declaration binds the integer `0` rather
-          -- than being stuck, which is odd on its face: a stack binding
-          -- holds a primitive, and `stmtWt` requires `ty.isPrimitive`
-          -- here.  It cannot simply be made stuck, though —
-          -- `valueDeclSkip`'s rule condition is `init = none` with no
-          -- type side condition, so `Wp`'s `valueDeclSkip_update` is
-          -- stated for every `ty` against `defaultValue`, which answers
-          -- `Value.int 0` here.  Tightening one means tightening both.
-          | Ty.ref _ => .ok (s.setEnv name (Binding.val (Value.int 0)))
-      | some rhs => do
-          let (s, v) ← evalValue s rhs
-          .ok (s.setEnv name (Binding.val v))
-  | Stmt.delete target =>
-      match target.expr.kind with
-      | Kind.storage => do
-          let (s, root, segs) ← resolveS s target.expr
-          let current ← s.findStorage root segs
-          s.saveStorage root segs current.defaultOf
-      | Kind.memory =>
-          -- The second arm is a delegation over every non-root place; as
-          -- in `execAssign`, closing it by destructuring the `PlaceExpr`
-          -- would cost `execStmt`'s equation lemmas.
-          match target.expr with
-          | WrappedExpr.var _ ty fld =>
-              -- `memoryRootDeleteFreshRebind`: fresh default identity.
-              match ty with
-              | Ty.ref ref => do
-                  let (s, id) ← allocDefault s ref
-                  .ok (s.setEnv fld.name (Binding.mref id))
-              | Ty.prim _ => .error .stuck
-          | e => do
-              let (s, loc) ← resolveLoc s e
-              let writeM (s : State) (mv : MVal) : Res State :=
-                match loc with
-                | Loc.memoryField id fld => do
-                    match ← s.getObj id with
-                    | MObj.struct fields =>
-                        .ok (s.setObj id (MObj.struct (setBy fld mv fields)))
-                    | MObj.array _ => .error .stuck
-                | Loc.memoryIndex id i => do
-                    match ← s.getObj id with
-                    | MObj.array elems =>
-                        if 0 ≤ i ∧ i.toNat < elems.length then
-                          .ok (s.setObj id
-                            (MObj.array (elems.set i.toNat mv)))
-                        else .error .revert
-                    | MObj.struct _ => .error .stuck
-                | Loc.stack _ => .error .stuck
-                | Loc.storage _ _ => .error .stuck
-                | Loc.storageLocal _ => .error .stuck
-                | Loc.memoryRoot _ => .error .stuck
-              match e.ty with
-              | Ty.bool => writeM s (MVal.bool false)
-              | Ty.uint | Ty.int => writeM s (MVal.int 0)
-              | Ty.ref ref => do
-                  let (s, id) ← allocDefault s ref
-                  writeM s (MVal.ref id)
-      | Kind.stack => .error .stuck
-  | Stmt.push target value => do
-      let (s, root, segs) ← resolveS s target.expr
-      let arr ← s.findStorage root segs
-      match arr, target.expr.ty with
-      | SVal.array elems shadow, Ty.ref (RefTy.array elemTy) => do
-          -- The pushed value goes through the same right-hand-side
-          -- reading as a storage assignment (`rhsToSVal`), including
-          -- the solc rejection of storage sources with (nested)
-          -- mapping types. A valueless `push()` extends with the
-          -- recycled slot — cleared, mapping members and all, which is
-          -- KeY's `delAt` — and stays legal even for mapping-carrying
-          -- element types, as in solc.
-          let (slot, shadow') := pushSlot elemTy shadow
-          let (s, newElem) ←
-            match value with
-            | none => pure (s, slot)
-            | some rhs => rhsToSVal s rhs
-          s.saveStorage root segs (SVal.array (elems ++ [newElem]) shadow')
-      -- As in `resolveS`'s push-lvalue arm: a node that is not an array,
-      -- and a target whose type is not an array reference, kept apart.
-      | SVal.prim _, _ => .error .stuck
-      | SVal.struct _, _ => .error .stuck
-      | SVal.map _ _, _ => .error .stuck
-      | SVal.array _ _, Ty.prim _ => .error .stuck
-      | SVal.array _ _, Ty.ref (RefTy.struct _) => .error .stuck
-      | SVal.array _ _, Ty.ref (RefTy.mapping _ _) => .error .stuck
-  | Stmt.pushAssign target value =>
-      execAssign s (PlaceExpr.pushPlace target) value
-  | Stmt.pushFieldAssign target fld value =>
-      execAssign s
-        (PlaceExpr.field Kind.storage fld.ty
-          (WrappedExpr.pushPlace target) fld)
-        value
-  | Stmt.pop target => do
-      let (s, root, segs) ← resolveS s target.expr
-      let arr ← s.findStorage root segs
-      match arr with
-      | SVal.array elems shadow =>
-          match elems.reverse with
-          | [] => .error .revert
-          | last :: restRev =>
-              -- KeY's `storagePopSave`: `delAt` the last slot, then shorten.
-              -- The cleared slot stays addressable beyond the new length, so
-              -- a mapping nested in it survives into the next `push`.
-              s.saveStorage root segs
-                (SVal.array restRev.reverse (last.defaultOf :: shadow))
-      | SVal.prim _ => .error .stuck
-      | SVal.struct _ => .error .stuck
-      | SVal.map _ _ => .error .stuck
-  | Stmt.revert _ => .error .revert
-  | Stmt.compoundAssign op lhs rhs => do
-      -- `a op= e`: the right-hand side first (solc compiles assignment
-      -- RHS first), then the l-value is resolved exactly **once** —
-      -- read and write go through the same `Loc`, so index side
-      -- effects in `a` run once, as in solc. The result is checked at
-      -- the target's type.
-      let (s, v) ← evalValue s rhs
-      let (s, loc) ← resolveLoc s lhs.expr
-      let old ← readLoc s loc
-      let new ← applyBinOp op old v
-      let new ← checkArith lhs.expr.ty new
-      writeLoc s loc new
-  | Stmt.ite cond thn els => do
-      let (s, c) ← evalValue s cond
-      match c with
-      | Value.bool true => execBlock s thn
-      | Value.bool false => execBlock s els
-      | Value.int _ => .error .stuck
-  | Stmt.assertStmt cond => do
-      let (s, c) ← evalValue s cond
-      match c with
-      | Value.bool true => .ok s
-      | Value.bool false => .error .revert
-      | Value.int _ => .error .stuck
-  /- `require` executes exactly like `assert` (revert on false); the KeY
-  assert/require difference (⊥ vs revert routing) lives in the sequent
-  layer — see solkey `docs/require-assert.md`: diamond `c ∧ φ`, box
-  `c → φ`, which falls out of `check` on the `.revert` outcome. -/
-  | Stmt.requireStmt cond => do
-      let (s, c) ← evalValue s cond
-      match c with
-      | Value.bool true => .ok s
-      | Value.bool false => .error .revert
-      | Value.int _ => .error .stuck
-  | Stmt.transfer recipient amount => do
-      let (s, addr) ← evalInt s recipient
-      let (s, amt) ← evalInt s amount
-      -- `a.transfer(v)` moves `v` of the contract's own funds: it
-      -- reverts when the balance cannot cover the amount (the EVM's
-      -- value-transfer check that solc's `transfer` inherits), then
-      -- books the debit on the `net` ledger. Amounts are `uint`-typed
-      -- in Solidity, so a negative amount is an untypable program.
-      if amt < 0 then .error .stuck
-      else if s.selfBalance < amt then .error .revert
-      else
-        .ok { s.setNet addr (s.getNet addr - amt) with
-                selfBalance := s.selfBalance - amt }
-  /- Calls are given meaning by inlining (`SolidityJudgment.checkInlined`);
-  a call reaching the interpreter directly is stuck, mirroring KeY,
-  where `functionBodyExpand` is the only rule for `FunctionBodyStatement`. -/
-  | Stmt.callStmt _ _ _ => .error .stuck
-
-def execBlock (s : State) : List Stmt -> Res State
-  | [] => .ok s
-  | stmt :: rest => do
-      let s ← execStmt s stmt
-      execBlock s rest
-
-end
-
-/-! ## Initial state and judgment validity -/
+One store per ported contract (`Syntax.lean`), in its roots' order. -/
 
 /-- The globals of `StandardExample.sol` plus the `people` array used by the
 existing worked examples. The contract starts with funds
 (`selfBalance`) so the ported payment examples' transfers are covered;
 insufficient-balance behavior is exercised by explicitly smaller
-balances (see `Examples/Taclets/NetOps.lean`). -/
+balances. -/
 def State.exampleStore : State :=
   { selfBalance := 1000000000,
     storage :=
@@ -1414,10 +722,7 @@ length is a direct multiplier on the cost of every `sol_wp` proof: the
 judgments time out at `whnf`. Per-contract stores are also the faithful
 reading — in solkey each `.sol` file is its own contract with its own
 storage.
-
-The eight renames that keep the *parser's* single name→type table
-(`SoliditySyntax.solkeyGlobalTy`) unambiguous across contracts are noted
-at their entries; `scripts/solkey-port.mjs` applies them. -/
+ -/
 
 /-- `keyext.solidity.examples/TestSuite.sol`. Starts with funds like
 `exampleStore`, for the suite's transfer tests. -/
@@ -1521,57 +826,455 @@ def State.solcControlFlowStore : State :=
 
 end Semantics
 
-/-- Run a judgment: execute the block from the given initial state and
-check the postcondition in the final state. A `revert` makes a box
-judgment hold vacuously and a diamond judgment fail; a stuck execution
-validates nothing. -/
-def SolidityJudgment.check (j : SolidityJudgment)
-    (s0 : Semantics.State := Semantics.State.exampleStore) : Bool :=
-  match Semantics.execBlock s0 j.block.stmts with
-  | .ok s =>
-      -- A default, not a hidden stuck case: a postcondition that does
-      -- not evaluate to a boolean validates nothing, whatever went wrong.
-      -- Left as a wildcard deliberately — `Semantics/Callback.lean` and
-      -- the `Wp` bridge restate this body, and they restate it in
-      -- this shape.
-      match Semantics.evalValue s j.post with
-      | .ok (_, Semantics.Value.bool b) => b
-      | _ => false
-  | .error .revert => j.block.modality = SolidityModality.box
-  | .error .stuck => false
+/-! ## Running a program -/
 
-/-- Validity of a dynamic-logic judgment under the executable
-semantics. -/
-def SolidityJudgment.Holds (j : SolidityJudgment)
-    (s0 : Semantics.State := Semantics.State.exampleStore) : Prop :=
-  j.check s0 = true
+open Semantics
 
-/-- Run a judgment whose program may contain calls: inline through the
-function table (`SoliditySyntax.funDef`) to the given depth, then
-`check`. `check` itself is untouched — call-free judgments mean exactly
-what they did. -/
-def SolidityJudgment.checkInlined (j : SolidityJudgment)
-    (s0 : Semantics.State := Semantics.State.exampleStore)
-    (depth : Nat := 8) : Bool :=
-  (SolidityJudgment.mk
-    ⟨j.block.modality, SoliditySyntax.inlineBlock depth j.block.stmts⟩
-    j.post).check s0
+variable {C : Contract}
 
-instance (j : SolidityJudgment) (s0 : Semantics.State) :
-    Decidable (j.Holds s0) :=
-  inferInstanceAs (Decidable (j.check s0 = true))
+/-- The path an alias is bound to. -/
+def aliasPath (σ : State) (x : Var) : Res (Name × List Seg) := do
+  match ← σ.getEnv x with
+  | .spath root segs => pure (root, segs)
+  | .val _ | .mref _ => .error .stuck
 
-namespace SemanticsExamples
+/-- `-x` is range-checked at `int` only. -/
+def unopCheck (op : UnOp) (p : PrimTy) (v : Value) : Res Value :=
+  match op, p with
+  | .neg, .int => checkArith .int v
+  | _, _ => pure v
 
-/-- The goal example: write a storage field, read it back. -/
-example :
-    (sol!{ < alice.account.balance = 10;
-             result = alice.account.balance > (result == 10) }).Holds := by
-  native_decide
+/-- `c ? t : e` once `c` is evaluated: the branch it picks (the other is
+never evaluated). -/
+def pickBranch (cv : Value) (t e : Res Value) : Res Value :=
+  match cv with
+  | .bool true => t
+  | .bool false => e
+  | .int _ => .error .stuck
 
-example : (sol!{ < result = 1 + 2 > (result == 3) }).Holds := by
-  native_decide
+/-- The value a simple value denotes: a literal, or a stack local's. -/
+def Simple.eval (σ : State) {p : PrimTy} : Simple C p → Res Value
+  | .lit n _ => pure (.int n)
+  | .bool b => pure (.bool b)
+  | .local x => do
+    match ← σ.getEnv x with
+    | .val v => pure v
+    | .spath .. | .mref _ => .error .stuck
 
-end SemanticsExamples
+/-- A memory slot read as the object it references: a primitive has none. -/
+def Semantics.MVal.asRef : MVal → Res Nat
+  | .ref id => pure id
+  | .prim _ => .error .stuck
+
+mutual
+
+/-- The storage path a path denotes in `σ`: `alice.account` is
+`(alice, [account])`, `sp.age` whatever `sp` is bound to, then `age`. -/
+def SPath.resolve (σ : State) : {T : Ty} → SPath C T → Res (Name × List Seg)
+  | _, .alias x => aliasPath σ x
+  | _, .loc l => l.resolve σ
+
+def Loc.resolve (σ : State) : {T : Ty} → Loc C T → Res (Name × List Seg)
+  | _, .root r _ => pure (r, [])
+  | _, .field b f _ => do
+    let (r, segs) ← b.resolve σ
+    pure (r, segs ++ [.field f])
+  | _, .index _ b i => do
+    let (r, segs) ← b.resolve σ
+    let i ← (← i.eval σ).asInt
+    pure (r, segs ++ [.at i])
+
+/-- The slot a memory path holds in `σ`: a memory local's reference, or
+what a location holds. -/
+def MPath.mval (σ : State) : {T : Ty} → MPath C T → Res MVal
+  | _, .var x => do
+    match ← σ.getEnv x with
+    | .mref id => pure (.ref id)
+    | .val _ | .spath .. => .error .stuck
+  | _, .loc l => l.read σ
+
+def MLoc.read (σ : State) : {T : Ty} → MLoc C T → Res MVal
+  | _, .field b f _ => do
+    let id ← (← b.mval σ).asRef
+    match ← σ.getObj id with
+    | .struct fields =>
+      match lookupBy f fields with
+      | some v => pure v
+      | none => .error .stuck
+    | .array _ => .error .stuck
+  | _, .index b i => do
+    let id ← (← b.mval σ).asRef
+    let iv ← (← i.eval σ).asInt
+    match ← σ.getObj id with
+    | .array elems =>
+      if h : 0 ≤ iv ∧ iv.toNat < elems.length then pure (elems.get ⟨iv.toNat, h.2⟩)
+      else .error .revert
+    | .struct _ => .error .stuck
+
+/-- The value a value expression denotes in `σ`.  `&&` and `||` evaluate
+their right operand only when the left does not decide. -/
+def Val.eval (σ : State) : {p : PrimTy} → Val C p → Res Value
+  | _, .simple s => s.eval σ
+  | _, .read l => do
+    let (r, segs) ← l.resolve σ
+    (← σ.findStorage r segs).asValue
+  | _, @Val.binop _ p _ op _ _ a b => do
+    let lv ← a.eval σ
+    match op, lv with
+    | .and, .bool false => pure (.bool false)
+    | .or, .bool true => pure (.bool true)
+    | _, _ => do
+      let rv ← b.eval σ
+      checkArith (op.retTy (.prim p)) (← applyBinOp op lv rv)
+  | _, @Val.unop _ p _ op _ _ a => do unopCheck op p (← applyUnOp op (← a.eval σ))
+  | _, .ternary c a b => do pickBranch (← c.eval σ) (a.eval σ) (b.eval σ)
+  | _, .readMem l => do (← l.read σ).asValue
+
+end
+
+/-- The storage value a source stores: a value, or the copied subtree. -/
+def Src.value (σ : State) {T : Ty} : Src C T → Res SVal
+  | .val v => do pure (← v.eval σ).toSVal
+  | .copy p _ => do
+    let (r, segs) ← p.resolve σ
+    σ.findStorage r segs
+
+/-- The default `uint x;` binds. -/
+def PrimTy.default : PrimTy → Value
+  | .bool => .bool false
+  | .uint | .int => .int 0
+
+/-- A write into a memory struct's member. -/
+def memWriteField (σ : State) (id : Nat) (f : Name) (mv : MVal) : Res State := do
+  match ← σ.getObj id with
+  | .struct fields => .ok (σ.setObj id (.struct (setBy f mv fields)))
+  | .array _ => .error .stuck
+
+/-- A write into a memory array's element. -/
+def memWriteIndex (σ : State) (id : Nat) (i : Int) (mv : MVal) : Res State := do
+  match ← σ.getObj id with
+  | .array elems =>
+    if 0 ≤ i ∧ i.toNat < elems.length then .ok (σ.setObj id (.array (elems.set i.toNat mv)))
+    else .error .revert
+  | .struct _ => .error .stuck
+
+/-- `l = mv` into a memory location. -/
+def MLoc.write (σ : State) (mv : MVal) {T : Ty} : MLoc C T → Res State
+  | .field b f _ => do
+    let id ← (← b.mval σ).asRef
+    memWriteField σ id f mv
+  | .index b i => do
+    let id ← (← b.mval σ).asRef
+    let iv ← (← i.eval σ).asInt
+    memWriteIndex σ id iv mv
+
+/-- The slot a memory source writes: a value, or a reference. -/
+def MSrc.mval (σ : State) {T : Ty} : MSrc C T → Res MVal
+  | .val v => do pure (← v.eval σ).toMVal
+  | .ref p => p.mval σ
+
+/-- `x` bound to the object a memory right-hand side names: `n`'s by
+identity, or a fresh deep copy of a storage object. -/
+def MRhs.bind (σ : State) (x : Var) {R : RefTy} : MRhs C R → Res State
+  | .alias p => do
+    let id ← (← p.mval σ).asRef
+    pure (σ.setEnv x (.mref id))
+  | .copy p _ => do
+    let (root, segs) ← p.resolve σ
+    let sv ← σ.findStorage root segs
+    let (σ', mv) ← copyStToM σ sv
+    let id ← mv.asRef
+    pure (σ'.setEnv x (.mref id))
+
+/-- `a ⊕= v` at a resolved storage location: read, apply, check at the
+target's type, write back. -/
+def opStore (σ : State) (op : BinOp) (p : PrimTy) (root : Name) (segs : List Seg) (v : Value) :
+    Res State := do
+  let old ← (← σ.findStorage root segs).asValue
+  let new ← applyBinOp op old v
+  let new ← checkArith (.prim p) new
+  σ.saveStorage root segs new.toSVal
+
+/-- `x ⊕= v` on a stack local. -/
+def opLocal (σ : State) (op : BinOp) (p : PrimTy) (x : Var) (v : Value) : Res State := do
+  let old ← match ← σ.getEnv x with
+    | .val v => pure v
+    | .spath .. | .mref _ => .error .stuck
+  let new ← applyBinOp op old v
+  let new ← checkArith (.prim p) new
+  pure (σ.setEnv x (.val new))
+
+/-- `a ⊕= v` at a memory address. -/
+def opMem (σ : State) (op : BinOp) (p : PrimTy) (loc : Addr) (v : Value) : Res State := do
+  let old ← readLoc σ loc
+  let new ← applyBinOp op old v
+  let new ← checkArith (.prim p) new
+  writeLoc σ loc new
+
+/-- A compound assignment's write of `v` into its target. -/
+def OpLoc.store (σ : State) (op : BinOp) : {p : PrimTy} → OpLoc C p → Value → Res State
+  | p, .local x, v => opLocal σ op p x v
+  | p, .root r _, v => opStore σ op p r [] v
+  | p, .field b f h, v => do
+    let (rt, segs) ← (Loc.field b f h).resolve σ
+    opStore σ op p rt segs v
+  | p, .index it b i, v => do
+    let (rt, segs) ← (Loc.index it b (.simple i)).resolve σ
+    opStore σ op p rt segs v
+  | p, .mfield b f _, v => do
+    let id ← (← b.mval σ).asRef
+    opMem σ op p (.memoryField id f) v
+  | p, .mindex b i, v => do
+    let id ← (← b.mval σ).asRef
+    let iv ← (← i.eval σ).asInt
+    opMem σ op p (.memoryIndex id iv) v
+
+/-- `x++` at a resolved storage location: read, bump, check, write back;
+the value is the new one for `++x`, the old one for `x++`. -/
+def bumpStore (σ : State) (op : IncDec) (p : PrimTy) (root : Name) (segs : List Seg) :
+    Res (State × Value) := do
+  let old ← (← σ.findStorage root segs).asValue
+  let oldInt ← old.asInt
+  let new ← checkArith (.prim p) (.int (if op.isIncrement then oldInt + 1 else oldInt - 1))
+  let σ' ← σ.saveStorage root segs new.toSVal
+  pure (σ', if op.isPre then new else old)
+
+/-- `x++` on a stack local. -/
+def bumpLocal (σ : State) (op : IncDec) (p : PrimTy) (x : Var) : Res (State × Value) := do
+  let old ← match ← σ.getEnv x with
+    | .val v => pure v
+    | .spath .. | .mref _ => .error .stuck
+  let oldInt ← old.asInt
+  let new ← checkArith (.prim p) (.int (if op.isIncrement then oldInt + 1 else oldInt - 1))
+  pure (σ.setEnv x (.val new), if op.isPre then new else old)
+
+/-- `x++` at a memory address. -/
+def bumpMem (σ : State) (op : IncDec) (p : PrimTy) (loc : Addr) : Res (State × Value) := do
+  let old ← readLoc σ loc
+  let oldInt ← old.asInt
+  let new ← checkArith (.prim p) (.int (if op.isIncrement then oldInt + 1 else oldInt - 1))
+  let σ' ← writeLoc σ loc new
+  pure (σ', if op.isPre then new else old)
+
+/-- `l++`: the state it leaves, and its value. -/
+def OpLoc.bump (σ : State) (op : IncDec) : {p : PrimTy} → OpLoc C p → Res (State × Value)
+  | p, .local x => bumpLocal σ op p x
+  | p, .root r _ => bumpStore σ op p r []
+  | p, .field b f h => do
+    let (rt, segs) ← (Loc.field b f h).resolve σ
+    bumpStore σ op p rt segs
+  | p, .index it b i => do
+    let (rt, segs) ← (Loc.index it b (.simple i)).resolve σ
+    bumpStore σ op p rt segs
+  | p, .mfield b f _ => do
+    let id ← (← b.mval σ).asRef
+    bumpMem σ op p (.memoryField id f)
+  | p, .mindex b i => do
+    let id ← (← b.mval σ).asRef
+    let iv ← (← i.eval σ).asInt
+    bumpMem σ op p (.memoryIndex id iv)
+
+/-- `push` at a resolved array: the element `val` gives (from the slot the
+push lands on) appended. -/
+def pushAt (σ : State) (E : Ty) (root : Name) (segs : List Seg) (val : SVal → Res SVal) :
+    Res State := do
+  match ← σ.findStorage root segs with
+  | .array elems shadow =>
+    let (slot, shadow') := pushSlot E shadow
+    let newElem ← val slot
+    σ.saveStorage root segs (.array (elems ++ [newElem]) shadow')
+  | .prim _ | .struct _ | .map _ _ => .error .stuck
+
+/-- `b.push()` as a place: the slot appended, and its index. -/
+def pushPlaceAt (σ : State) (E : Ty) (root : Name) (segs : List Seg) : Res (State × Int) := do
+  match ← σ.findStorage root segs with
+  | .array elems shadow =>
+    let (slot, shadow') := pushSlot E shadow
+    let σ' ← σ.saveStorage root segs (.array (elems ++ [slot]) shadow')
+    pure (σ', elems.length)
+  | .prim _ | .struct _ | .map _ _ => .error .stuck
+
+/-- What a push appends: its argument, or the slot. -/
+def Src.pushVal (σ : State) {T : Ty} : Option (Src C T) → SVal → Res SVal
+  | none, slot => pure slot
+  | some r, _ => r.value σ
+
+/-- `pop` at a resolved array: the last element cleared into the shadow. -/
+def popAt (σ : State) (root : Name) (segs : List Seg) : Res State := do
+  match ← σ.findStorage root segs with
+  | .array elems shadow =>
+    match elems.reverse with
+    | [] => .error .revert
+    | last :: restRev => σ.saveStorage root segs (.array restRev.reverse (last.defaultOf :: shadow))
+  | .prim _ | .struct _ | .map _ _ => .error .stuck
+
+/-- `a.transfer(v)` with both evaluated: revert when the contract's funds
+cannot cover `v`, else book the debit. -/
+def transferAt (σ : State) (addr amt : Int) : Res State :=
+  if amt < 0 then .error .stuck
+  else if σ.selfBalance < amt then .error .revert
+  else .ok { σ.setNet addr (σ.getNet addr - amt) with selfBalance := σ.selfBalance - amt }
+
+/-- An alias bound to what `r` names: a path, or the slot a push appends. -/
+def ARhs.bind (σ : State) (x : Var) {R : RefTy} : ARhs C R → Res State
+  | .path p => do
+    let (root, segs) ← p.resolve σ
+    pure (σ.setEnv x (.spath root segs))
+  | .push b _ => do
+    let (root, segs) ← b.resolve σ
+    let (σ', n) ← pushPlaceAt σ (.ref R) root segs
+    pure (σ'.setEnv x (.spath root (segs ++ [.at n])))
+
+/-- A condition's outcome: `true` goes on, `false` reverts. -/
+def guard (v : Value) (σ : State) : Res State :=
+  match v with
+  | .bool true => pure σ
+  | .bool false => .error .revert
+  | .int _ => .error .stuck
+
+mutual
+
+/-- The state a statement leaves, from `σ`: `alice.age = 10;` saves `10` at
+`alice.age`, `Person storage p = alice;` binds `p` to `alice`'s path. -/
+def Stmt.run (σ : State) : Stmt C → Res State
+  | .assign l r => do
+    let sv ← r.value σ
+    let (root, segs) ← l.resolve σ
+    σ.saveStorage root segs sv
+  | .rebind x r => r.bind σ x
+  | .assignLocal x r => do pure (σ.setEnv x (.val (← r.eval σ)))
+  | .declLocal p x init => do
+    let v ← match init with
+      | none => pure (PrimTy.default p)
+      | some e => e.eval σ
+    pure (σ.setEnv x (.val v))
+  | .declStorage _ x init =>
+    match init with
+    | none => pure σ
+    | some r => r.bind σ x
+  | .declMem R x init _ => do
+    match init with
+    | none =>
+      let (σ', id) ← allocDefault σ R
+      pure (σ'.setEnv x (.mref id))
+    | some r => r.bind σ x
+  | .rebindMem x r => r.bind σ x
+  | .assignMem l r => do l.write σ (← r.mval σ)
+  | .assignFromMem l p => do
+    let sv ← copyMem σ (← p.mval σ)
+    let (root, segs) ← l.resolve σ
+    σ.saveStorage root segs sv
+  | .opAssign op _ _ l r => do l.store σ op (← r.eval σ)
+  | .incDec op _ l => do pure (← l.bump σ op).1
+  | .assignIncDec x op _ l _ => do
+    let (σ', v) ← l.bump σ op
+    pure (σ'.setEnv x (.val v))
+  | .push (E := E) b v _ => do
+    let (root, segs) ← b.resolve σ
+    pushAt σ E root segs (Src.pushVal σ v)
+  | .pop b => do
+    let (root, segs) ← b.resolve σ
+    popAt σ root segs
+  | .transfer r a => do
+    let addr ← (← r.eval σ).asInt
+    let amt ← (← a.eval σ).asInt
+    transferAt σ addr amt
+  | .delete l => do
+    let (root, segs) ← l.resolve σ
+    let cur ← σ.findStorage root segs
+    σ.saveStorage root segs cur.defaultOf
+  | .ite c thn els => do
+    match ← c.eval σ with
+    | .bool true => Prog.run σ thn
+    | .bool false => Prog.run σ els
+    | .int _ => .error .stuck
+  | .require c => do guard (← c.eval σ) σ
+  | .assert c => do guard (← c.eval σ) σ
+  | .revert => .error .revert
+
+/-- The state a block leaves. -/
+def Prog.run (σ : State) : List (Stmt C) → Res State
+  | [] => pure σ
+  | s :: P => do Prog.run (← s.run σ) P
+
+end
+
+/-! ## Each contract starts in its store -/
+
+/-- The storage a contract starts with: each root at its type's default. -/
+def Contract.initStorage (C : Contract) : List (Name × SVal) :=
+  C.vars.map fun (n, T) => (n, defaultForTy T)
+
+section
+open Contract
+
+/-- `StandardExample` declares exactly the roots `State.exampleStore` holds,
+in order, each at its default: `uint total;` starts at `0`, `Person alice;`
+at the default `Person`. -/
+theorem initStorage_standardExample :
+    StandardExample.initStorage = State.exampleStore.storage := by
+  simp [StandardExample, initStorage, State.exampleStore, defaultForRef, defaultForTy]
+
+/-- `TestSuite` starts in `State.testSuiteStore`; `bool flag;` at `false`. -/
+theorem initStorage_testSuite :
+    TestSuite.initStorage = State.testSuiteStore.storage := by
+  simp [TestSuite, initStorage, State.testSuiteStore, defaultForRef, defaultForTy]
+
+/-- `SolcExpressions` starts in its store: `uint counter;` at `0`. -/
+theorem initStorage_solcExpressions :
+    SolcExpressions.initStorage = State.solcExpressionsStore.storage := by
+  simp [SolcExpressions, initStorage, State.solcExpressionsStore, defaultForTy]
+
+/-- `SolcStructs` starts in its store: `Pair source;` at the default `Pair`. -/
+theorem initStorage_solcStructs :
+    SolcStructs.initStorage = State.solcStructsStore.storage := by
+  simp [SolcStructs, initStorage, State.solcStructsStore, defaultForRef, defaultForTy]
+
+/-- `SolcArrays` starts in its store: `uint[] storageArray;` empty. -/
+theorem initStorage_solcArrays :
+    SolcArrays.initStorage = State.solcArraysStore.storage := by
+  simp [SolcArrays, initStorage, State.solcArraysStore, defaultForTy]
+
+/-- `SolcMemory` starts in its store: `Outer outerX;` at the default `Outer`. -/
+theorem initStorage_solcMemory :
+    SolcMemory.initStorage = State.solcMemoryStore.storage := by
+  simp [SolcMemory, initStorage, State.solcMemoryStore, defaultForRef, defaultForTy]
+
+/-- `SolcMappings` starts in its store: `mapping(uint => S) sMap;` maps every
+key to the default `S`. -/
+theorem initStorage_solcMappings :
+    SolcMappings.initStorage = State.solcMappingsStore.storage := by
+  simp [SolcMappings, initStorage, State.solcMappingsStore, defaultForRef, defaultForTy]
+
+/-- `SolcControlFlow` starts in its store: `uint[] values;` empty. -/
+theorem initStorage_solcControlFlow :
+    SolcControlFlow.initStorage = State.solcControlFlowStore.storage := by
+  simp [SolcControlFlow, initStorage, State.solcControlFlowStore, defaultForRef,
+    defaultForTy]
+
+end
+
+/-! ## Examples
+
+A program run on `StandardExample`'s store. -/
+
+section Examples
+
+local instance : InContract := ⟨StandardExample⟩
+
+/-- `x = 10` through an alias. -/
+def aliasWrite : Prog StandardExample := sol{
+  Person storage p = alice; p.age = 10; uint x = alice.age; assert(x == 10);
+}
+
+/-- info: Except.ok (Solidity.Semantics.SVal.prim (Solidity.Semantics.PrimVal.int 10)) -/
+#guard_msgs in
+#eval (do (← Prog.run State.exampleStore aliasWrite).findStorage "alice" [.field "age"] : Res SVal)
+
+/-- A failing guard reverts. -/
+example : (Prog.run State.exampleStore (sol{ require(age > 3); } : Prog StandardExample)) =
+    .error .revert := rfl
+
+end Examples
 
 end Solidity

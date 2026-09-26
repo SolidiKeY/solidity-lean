@@ -1,25 +1,14 @@
 import Solidity.Semantics
-import Solidity.Calculus.RuleSoundness
 
 /-!
 # Storage layout typing
 
-The typing layer the sort-faithfulness theorems
-(`../SortCheck/Faithfulness.lean`) run on. The interpreter's storage
-(`State.storage`) is untyped; a `Layout` declares the static types of
-the global storage roots (the per-contract layout), with struct bodies
-coming from `Semantics.structDef`. `SVal.hasTy` says a storage value
-inhabits a type, `wellTypedStorageB` lifts that to whole storages, and
-`wtStorageExpr` checks that a *simple-shaped* storage place expression's
-type annotations agree with the layout (resolved through the env's
-`spath` aliases, exactly mirroring `resolveS`).
-
-The workhorse lemmas connect the static side to the interpreter:
-`resolveS_wt_tyAt` (a well-annotated place resolves purely to a path
-whose layout type is the expression's annotation) and
-`findStorage_hasTy` (the value found at a layout-typed path inhabits
-that type); together they give `generic_read_hasTy`, the semantic
-content of every varcond-resolved (`\hasSort`-family) taclet read.
+The interpreter's storage (`State.storage`) is untyped; a `Layout`
+declares the static types of the storage roots, with struct bodies from
+`Semantics.structDef`.  `SVal.hasTy` says a storage value inhabits a type,
+and `wellTypedStorageB` lifts that to whole storages.  The workhorse is
+`findStorage_hasTy`: the value found at a layout-typed path inhabits that
+type, the semantic content of every `\hasSort`-family taclet read.
 -/
 
 namespace Solidity
@@ -174,49 +163,6 @@ def wellTypedStorageB (L : Layout) (storage : List (Name × SVal)) : Bool :=
     match lookupBy g.1 storage with
     | some v => v.hasTy g.2
     | none => false
-
-/-- The expression's storage annotations agree with the layout, resolved
-through the env's `spath` aliases. Only the simple place shapes the
-read-bearing taclets match (`var`, `field`/`index` over a simple base)
-are accepted; everything else is `false`. Mirrors `resolveS` arm for
-arm, including env shadowing of globals. -/
-def wtStorageExpr (L : Layout) (env : List (Name × Binding)) :
-    WrappedExpr -> Bool
-  | WrappedExpr.var Kind.storage ty fld =>
-      match lookupBy fld.name env with
-      | some (Binding.spath root segs) => L.tyAt root segs == some ty
-      | some _ => false
-      | none =>
-          fld.origin == some StorageOrigin.global &&
-            lookupBy fld.name L.globals == some ty
-  | WrappedExpr.field Kind.storage ty base fld =>
-      base.simple && wtStorageExpr L env base &&
-        segTy base.ty (Seg.field fld.name) == some ty
-  | WrappedExpr.index Kind.storage ty base index =>
-      base.simple && wtStorageExpr L env base && index.simple &&
-        elemTy base.ty == some ty
-  | _ => false
-
-/-- The fragment of Solidity's static typing that sort-faithfulness
-leans on, per statement shape: assignment sides agree in type, memory
-places are reference-typed (`bool memory` is not Solidity), a
-storage-to-storage copy is of a mapping-free type (solc ≥ 0.7; solkey's
-`ParserUtils.parseAssignmentMaybe`; `TypedStmt.Assign.mk`'s `mapFree`),
-compound assignment and `++`/`--` targets are numeric, pushed values have
-the array's element type. -/
-def stmtTypingOk : Stmt -> Bool
-  | Stmt.assign lhs rhs =>
-      lhs.expr.ty == rhs.ty &&
-        (!lhs.expr.isMemory || lhs.expr.ty.isReference) &&
-        (!(lhs.expr.isStorage && rhs.isStorage) || !tyHasMapping rhs.ty) &&
-        (match rhs with
-         | WrappedExpr.incDec _ target => isNumericTy target.ty
-         | _ => true)
-  | Stmt.compoundAssign _ lhs _ => isNumericTy lhs.expr.ty
-  | Stmt.expr (WrappedExpr.incDec _ target) => isNumericTy target.ty
-  | Stmt.push target (some value) => elemTy target.expr.ty == some value.ty
-  | Stmt.pushAssign target value => elemTy target.expr.ty == some value.ty
-  | _ => true
 
 /-! ## Association-list and `hasTy` inversion lemmas -/
 
@@ -435,142 +381,6 @@ theorem tyAt_append_seg {L : Layout} {root : Name} {segs : List Seg}
   | some ty0 =>
       rw [hglob] at h
       exact tyAtSegs_append_seg h hseg
-
-/-! ## Purity of simple-expression evaluation -/
-
-/-- Simple expressions are pure (`RuleSoundness.pureExpr`), so the
-purity kit of `RuleSoundness` applies to them. -/
-theorem simple_pureExpr {e : WrappedExpr} (hsimple : e.simple = true) :
-    RuleSoundness.pureExpr e = true := by
-  cases e <;> first
-    | rfl
-    | exact Bool.noConfusion hsimple
-
-theorem evalInt_simple_pure {s s' : State} {e : WrappedExpr} {i : Int}
-    (hsimple : e.simple = true)
-    (h : evalInt s e = Except.ok (s', i)) : s' = s :=
-  RuleSoundness.evalInt_pure (simple_pureExpr hsimple) h
-
-/-! ## `resolveS` on well-annotated simple places -/
-
-/-- A well-annotated simple storage place is a storage variable. -/
-theorem wt_simple_var {L : Layout} {env : List (Name × Binding)}
-    {e : WrappedExpr} (hsimple : e.simple = true)
-    (hwt : wtStorageExpr L env e = true) :
-    ∃ ty fld, e = WrappedExpr.var Kind.storage ty fld := by
-  cases e
-  case var kind ty fld =>
-    cases kind
-    case storage => exact ⟨ty, fld, rfl⟩
-    all_goals exact Bool.noConfusion hwt
-  case bool b => exact Bool.noConfusion hwt
-  case intLit ty v => exact Bool.noConfusion hwt
-  all_goals exact Bool.noConfusion hsimple
-
-theorem resolveS_var_tyAt {L : Layout} {s s' : State} {ty : Ty}
-    {fld : Field} {root : Name} {segs : List Seg}
-    (hwt : wtStorageExpr L s.env (WrappedExpr.var Kind.storage ty fld) = true)
-    (h : resolveS s (WrappedExpr.var Kind.storage ty fld) =
-      Except.ok (s', root, segs)) :
-    s' = s ∧ L.tyAt root segs = some ty := by
-  rw [resolveS] at h
-  simp only [wtStorageExpr] at hwt
-  cases henv : lookupBy fld.name s.env with
-  | none =>
-      rw [henv] at h hwt
-      simp [Bool.and_eq_true, beq_iff_eq] at hwt
-      simp only [hwt.1] at h
-      simp at h
-      obtain ⟨hs, hroot, hsegs⟩ := h
-      subst hs hroot hsegs
-      exact ⟨rfl, by simp [Layout.tyAt, hwt.2, tyAtSegs]⟩
-  | some b =>
-      rw [henv] at h hwt
-      cases b <;> simp at h hwt
-      case spath root0 segs0 =>
-        obtain ⟨hs, hroot, hsegs⟩ := h
-        subst hs hroot hsegs
-        exact ⟨rfl, by simpa [beq_iff_eq] using hwt⟩
-
-/-- The master lemma: a well-annotated (simple-shaped) storage place
-resolves without touching the state, to a path whose layout type is the
-expression's own type annotation. -/
-theorem resolveS_wt_tyAt {L : Layout} {s s' : State} {e : WrappedExpr}
-    {root : Name} {segs : List Seg}
-    (hwt : wtStorageExpr L s.env e = true)
-    (h : resolveS s e = Except.ok (s', root, segs)) :
-    s' = s ∧ L.tyAt root segs = some e.ty := by
-  cases e
-  case bool b => exact Bool.noConfusion hwt
-  case intLit ty v => exact Bool.noConfusion hwt
-  case pushPlace target => exact Bool.noConfusion hwt
-  case mkCall kind ty name args => exact Bool.noConfusion hwt
-  case mkBinop op l r => exact Bool.noConfusion hwt
-  case mkUnop op arg => exact Bool.noConfusion hwt
-  case mkIncDec op target => exact Bool.noConfusion hwt
-  case mkTernary cond thn els => exact Bool.noConfusion hwt
-  case var kind ty fld =>
-    cases kind
-    case memory => exact Bool.noConfusion hwt
-    case stack => exact Bool.noConfusion hwt
-    case storage => exact resolveS_var_tyAt hwt h
-  case field kind ty base fld =>
-    cases kind
-    case memory => exact Bool.noConfusion hwt
-    case stack => exact Bool.noConfusion hwt
-    case storage =>
-    simp only [wtStorageExpr, Bool.and_eq_true] at hwt
-    obtain ⟨⟨hbsimple, hbwt⟩, hfty⟩ := hwt
-    obtain ⟨bty, bfld, hbase⟩ := wt_simple_var hbsimple hbwt
-    subst hbase
-    rw [resolveS] at h
-    obtain ⟨⟨s1, root1, segs1⟩, hres, h⟩ := RuleSoundness.bind_ok_inv h
-    simp at h
-    obtain ⟨hs, hroot, hsegs⟩ := h
-    obtain ⟨hs1, hty1⟩ := resolveS_var_tyAt hbwt hres
-    subst hs1 hs hroot hsegs
-    refine ⟨rfl, ?_⟩
-    have hseg : segTy bty (Seg.field fld.name) = some ty := by
-      simpa [beq_iff_eq, WrappedExpr.ty, Typed.WrappedExpr.ty] using hfty
-    simpa [WrappedExpr.ty, Typed.WrappedExpr.ty]
-      using tyAt_append_seg hty1 hseg
-  case index kind ty base index =>
-    cases kind
-    case memory => exact Bool.noConfusion hwt
-    case stack => exact Bool.noConfusion hwt
-    case storage =>
-    simp only [wtStorageExpr, Bool.and_eq_true] at hwt
-    obtain ⟨⟨⟨hbsimple, hbwt⟩, hisimple⟩, hety⟩ := hwt
-    obtain ⟨bty, bfld, hbase⟩ := wt_simple_var hbsimple hbwt
-    subst hbase
-    rw [resolveS] at h
-    obtain ⟨⟨s1, root1, segs1⟩, hres, h⟩ := RuleSoundness.bind_ok_inv h
-    obtain ⟨⟨s2, i⟩, hint, h⟩ := RuleSoundness.bind_ok_inv h
-    simp at h
-    obtain ⟨hs, hroot, hsegs⟩ := h
-    obtain ⟨hs1, hty1⟩ := resolveS_var_tyAt hbwt hres
-    have hs2 := evalInt_simple_pure hisimple hint
-    subst hs1 hs2 hs hroot hsegs
-    refine ⟨rfl, ?_⟩
-    have hat : segTy bty (Seg.at i) = some ty := by
-      rw [segTy_at]
-      simpa [beq_iff_eq, WrappedExpr.ty, Typed.WrappedExpr.ty] using hety
-    simpa [WrappedExpr.ty, Typed.WrappedExpr.ty]
-      using tyAt_append_seg hty1 hat
-
-/-- Semantic content of every varcond-resolved (`\hasSort`-family)
-taclet read: the value actually found at a well-annotated storage place
-inhabits the place's static type. -/
-theorem generic_read_hasTy {L : Layout} {s s' : State} {e : WrappedExpr}
-    {root : Name} {segs : List Seg} {v : SVal}
-    (hst : wellTypedStorageB L s.storage = true)
-    (hwt : wtStorageExpr L s.env e = true)
-    (hres : resolveS s e = Except.ok (s', root, segs))
-    (hfind : s'.findStorage root segs = Except.ok v) :
-    v.hasTy e.ty = true := by
-  obtain ⟨hs, hty⟩ := resolveS_wt_tyAt hwt hres
-  subst hs
-  exact findStorage_hasTy hst hty hfind
 
 end Semantics
 end Solidity

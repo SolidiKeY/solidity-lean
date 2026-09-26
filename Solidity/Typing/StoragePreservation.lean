@@ -324,7 +324,7 @@ theorem save_hasTy {segs : List Seg} :
                         | some old =>
                             rw [hlook] at hsave
                             obtain ⟨updated, hup, hw⟩ :=
-                              RuleSoundness.bind_ok_inv hsave
+                              Semantics.bind_ok_inv hsave
                             simp at hw
                             obtain ⟨tyf, hdef, htyv⟩ :=
                               hasTyFields_lookup hty hlook
@@ -352,7 +352,7 @@ theorem save_hasTy {segs : List Seg} :
                         split at hsave
                         case isTrue hbound =>
                           obtain ⟨updated, hup, hw⟩ :=
-                            RuleSoundness.bind_ok_inv hsave
+                            Semantics.bind_ok_inv hsave
                           simp at hw
                           subst hw
                           simp only [SVal.hasTy, Bool.and_eq_true]
@@ -370,7 +370,7 @@ theorem save_hasTy {segs : List Seg} :
                         | none =>
                             rw [hlook] at hsave
                             obtain ⟨updated, hup, hw⟩ :=
-                              RuleSoundness.bind_ok_inv hsave
+                              Semantics.bind_ok_inv hsave
                             simp at hw
                             subst hw
                             simp only [SVal.hasTy, Bool.and_eq_true]
@@ -379,7 +379,7 @@ theorem save_hasTy {segs : List Seg} :
                         | some old =>
                             rw [hlook] at hsave
                             obtain ⟨updated, hup, hw⟩ :=
-                              RuleSoundness.bind_ok_inv hsave
+                              Semantics.bind_ok_inv hsave
                             simp at hw
                             subst hw
                             simp only [SVal.hasTy, Bool.and_eq_true]
@@ -453,7 +453,7 @@ theorem State.saveStorage_wellTyped {L : Layout} {s s' : State}
       | none => rw [hroot] at hsave; simp at hsave
       | some v0 =>
           rw [hroot] at hsave
-          obtain ⟨updated, hup, hs'⟩ := RuleSoundness.bind_ok_inv hsave
+          obtain ⟨updated, hup, hs'⟩ := Semantics.bind_ok_inv hsave
           simp at hs'
           have hv0 : v0.hasTy ty0 = true := by
             have hmem := lookupBy_eq_some_mem hglob
@@ -477,18 +477,10 @@ theorem State.saveStorage_wellTyped {L : Layout} {s s' : State}
           · rw [lookupBy_setBy_ne hgr]
             exact (List.all_eq_true.mp hst) _ hg
 
-/-- Non-storage writes leave storage untouched. -/
-theorem writeLoc_storage_frame {s s' : State} {loc : Loc} {v : Value}
-    (hloc : ∀ root segs, loc ≠ Loc.storage root segs)
+/-- A memory write leaves storage untouched. -/
+theorem writeLoc_storage_frame {s s' : State} {loc : Addr} {v : Value}
     (h : writeLoc s loc v = Except.ok s') : s'.storage = s.storage := by
   cases loc with
-  | stack name =>
-      simp only [writeLoc] at h
-      cases Except.ok.inj h
-      rfl
-  | storageLocal name => exact nomatch h
-  | memoryRoot name => exact nomatch h
-  | storage root segs => exact absurd rfl (hloc root segs)
   | memoryField id fld =>
       simp only [writeLoc, State.getObj, bind, Except.bind] at h
       repeat' split at h
