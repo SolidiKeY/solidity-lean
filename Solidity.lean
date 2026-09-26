@@ -21,6 +21,7 @@ import Solidity.Calculus.Symex
 import Solidity.Calculus.Notation
 import Solidity.Calculus.Close
 import Solidity.Calculus.CloseTests
+import Solidity.Calculus.Decide
 import Solidity.Calculus.Uniqueness
 import Solidity.Calculus.Progress
 import Solidity.Calculus.Termination
@@ -42,6 +43,7 @@ import Solidity.Examples.Notation
 import Solidity.Examples.ApplySteps
 import Solidity.Examples.Chains
 import Solidity.Examples.UpdateRules
+import Solidity.Examples.Decide
 import Solidity.Typing.Storage
 import Solidity.Typing.StoragePreservation
 import Solidity.Typing.State
