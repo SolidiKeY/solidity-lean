@@ -102,13 +102,16 @@ def VHole.fill {p : PrimTy} : VHole C p → Val C p → Stmt C
 /-! ## Premises -/
 
 /-- What a taclet leaves: an update in front of the rest (`{U} ⟨[ ]⟩`),
-statements in its place (`⟨[ s₁; …; sₙ; ]⟩`), two goals (a branch, the
-condition assumed in one and its negation in the other), or the whole
-modality closed (`true`, `false`). -/
+statements in its place (`⟨[ s₁; …; sₙ; ]⟩`), two goals (a branch, one
+condition assumed in each: `se = true` and `se = false`), or the whole
+modality closed (`true`, `false`).  A condition can be stuck (a local read
+before it is bound), so a branch's two conditions need not cover every
+state: a box goal is true of a stuck run anyway, and a diamond goal owes
+that one of them holds (`Proves.split`). -/
 inductive Premise (C : Contract) where
   | update (U : Upd C)
   | unfold (P : Prog C)
-  | split (c : Fml C) (P Q : Prog C)
+  | split (c c' : Fml C) (P Q : Prog C)
   | done (b : Bool)
 
 /-! ## The rule table -/
@@ -390,19 +393,19 @@ inductive Taclet (C : Contract) (k : Nat) : Modality → Stmt C → Premise C �
   -- Control flow ---------------------------------------------------------
   | ifElseUnfold :
       dl{ ⟨[ if (nse) thn else els; ]⟩ ⇝ ⟨[ bool se = nse; if (se) thn else els; ]⟩ }
-  /-- Two goals: the `then` branch where `se` holds, the `else` branch where it
-  does not (solkey's `\add(se = TRUE ==>)`). -/
+  /-- Two goals: the `then` branch where `se` is `true`, the `else` branch where
+  it is `false` (solkey's `\add(se = TRUE ==>)`). -/
   | ifElseSplit :
-      dl{ ⟨[ if (se) thn else els; ]⟩ ⇝ se = true ⟹ ⟨[ thn ]⟩ ; ¬se = true ⟹ ⟨[ els ]⟩ }
+      dl{ ⟨[ if (se) thn else els; ]⟩ ⇝ se = true ⟹ ⟨[ thn ]⟩ ; se = false ⟹ ⟨[ els ]⟩ }
   | requireConditionCapture :
       dl{ ⟨[ require(nse); ]⟩ ⇝ ⟨[ bool se = nse; require(se); ]⟩ }
   /-- A guard: if `se` holds the program goes on, if not it reverts. -/
   | requireSimple :
-      dl{ ⟨[ require(se); ]⟩ ⇝ se = true ⟹ ⟨[ ]⟩ ; ¬se = true ⟹ ⟨[ revert(); ]⟩ }
+      dl{ ⟨[ require(se); ]⟩ ⇝ se = true ⟹ ⟨[ ]⟩ ; se = false ⟹ ⟨[ revert(); ]⟩ }
   | assertConditionCapture :
       dl{ ⟨[ assert(nse); ]⟩ ⇝ ⟨[ bool se = nse; assert(se); ]⟩ }
   | assertSimple :
-      dl{ ⟨[ assert(se); ]⟩ ⇝ se = true ⟹ ⟨[ ]⟩ ; ¬se = true ⟹ ⟨[ revert(); ]⟩ }
+      dl{ ⟨[ assert(se); ]⟩ ⇝ se = true ⟹ ⟨[ ]⟩ ; se = false ⟹ ⟨[ revert(); ]⟩ }
   /-- A reverted run satisfies every box formula: the box closes to `true`. -/
   | revertBox :
       dl{ [ revert(); ] ⇝ true }
@@ -425,16 +428,17 @@ def ppPremise? (e : Lean.Expr) : MetaM (Option (TSyntax `dl_premise)) := do
   | Premise.unfold _ P =>
     let some ss ← ppProg? P | return none
     return some (← `(dl_premise| ⟨[ $[$ss;]* ]⟩))
-  | Premise.split _ c P Q =>
+  | Premise.split _ c c' P Q =>
     let c ← ppFml c
+    let c' ← ppFml c'
     match ← ppProg? P, ← ppProg? Q with
     | some ts, some fs =>
       if (← fvarName? P).isNone && (← fvarName? Q).isNone then
-        return some (← `(dl_premise| $c:dl_fml ⟹ ⟨[ $[$ts;]* ]⟩ ; ¬$c:dl_fml ⟹ ⟨[ $[$fs;]* ]⟩))
+        return some (← `(dl_premise| $c:dl_fml ⟹ ⟨[ $[$ts;]* ]⟩ ; $c':dl_fml ⟹ ⟨[ $[$fs;]* ]⟩))
       else
-        return some (← `(dl_premise| $c:dl_fml ⟹ ⟨[ $(← ppBlock P) ]⟩ ; ¬$c:dl_fml ⟹ ⟨[ $(← ppBlock Q) ]⟩))
+        return some (← `(dl_premise| $c:dl_fml ⟹ ⟨[ $(← ppBlock P) ]⟩ ; $c':dl_fml ⟹ ⟨[ $(← ppBlock Q) ]⟩))
     | _, _ =>
-      return some (← `(dl_premise| $c:dl_fml ⟹ ⟨[ $(← ppBlock P) ]⟩ ; ¬$c:dl_fml ⟹ ⟨[ $(← ppBlock Q) ]⟩))
+      return some (← `(dl_premise| $c:dl_fml ⟹ ⟨[ $(← ppBlock P) ]⟩ ; $c':dl_fml ⟹ ⟨[ $(← ppBlock Q) ]⟩))
   | Premise.done _ b =>
     match_expr (← whnf b) with
     | Bool.true => return some (← `(dl_premise| true))
