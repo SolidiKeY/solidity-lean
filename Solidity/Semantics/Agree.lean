@@ -435,3 +435,493 @@ theorem copyMem_congr {ns : List Var} {s₁ s₂ : State}
 
 end Semantics
 end Solidity
+
+/-! ## What a program mentions
+
+The variables a piece of syntax mentions, declared ones included: a rule's
+fresh names are fresh when the statement avoids them (`Avoids`). -/
+
+namespace Solidity
+
+open Semantics
+
+variable {C : Contract}
+
+/-- `vs` avoids `ns`: no variable of `vs` is among `ns`.  `alice.age = x;`
+avoids `[se1, sp1]`. -/
+def Avoids (vs ns : List Var) : Prop := ∀ x ∈ vs, x ∉ ns
+
+theorem Avoids.left {vs ws ns : List Var} (h : Avoids (vs ++ ws) ns) : Avoids vs ns :=
+  fun x hx => h x (List.mem_append_left _ hx)
+
+theorem Avoids.right {vs ws ns : List Var} (h : Avoids (vs ++ ws) ns) : Avoids ws ns :=
+  fun x hx => h x (List.mem_append_right _ hx)
+
+theorem Avoids.tail {x : Var} {vs ns : List Var} (h : Avoids (x :: vs) ns) : Avoids vs ns :=
+  fun y hy => h y (List.mem_cons_of_mem _ hy)
+
+theorem Avoids.head {x : Var} {vs ns : List Var} (h : Avoids (x :: vs) ns) : x ∉ ns :=
+  h x List.mem_cons_self
+
+def Simple.vars {p : PrimTy} : Simple C p → List Var
+  | .local x => [x]
+  | .lit .. | .bool _ => []
+
+mutual
+
+def SPath.vars : {T : Ty} → SPath C T → List Var
+  | _, .alias x => [x]
+  | _, .loc l => l.vars
+
+def Loc.vars : {T : Ty} → Loc C T → List Var
+  | _, .root .. => []
+  | _, .field b _ _ => b.vars
+  | _, .index _ b i => b.vars ++ i.vars
+
+def MPath.vars : {T : Ty} → MPath C T → List Var
+  | _, .var x => [x]
+  | _, .loc l => l.vars
+
+def MLoc.vars : {T : Ty} → MLoc C T → List Var
+  | _, .field b _ _ => b.vars
+  | _, .index b i => b.vars ++ i.vars
+
+def Val.vars : {p : PrimTy} → Val C p → List Var
+  | _, .simple s => s.vars
+  | _, .read l => l.vars
+  | _, .binop _ _ _ a b => a.vars ++ b.vars
+  | _, .unop _ _ _ a => a.vars
+  | _, .ternary c a b => c.vars ++ a.vars ++ b.vars
+  | _, .readMem l => l.vars
+
+end
+
+def Src.vars {T : Ty} : Src C T → List Var
+  | .val v => v.vars
+  | .copy p _ => p.vars
+
+def ARhs.vars {R : RefTy} : ARhs C R → List Var
+  | .path p => p.vars
+  | .push b _ => b.vars
+
+def MRhs.vars {R : RefTy} : MRhs C R → List Var
+  | .alias p => p.vars
+  | .copy p _ => p.vars
+
+def MSrc.vars {T : Ty} : MSrc C T → List Var
+  | .val v => v.vars
+  | .ref p => p.vars
+
+def OpLoc.vars {p : PrimTy} : OpLoc C p → List Var
+  | .local x => [x]
+  | .root .. => []
+  | .field b _ _ => b.vars
+  | .index _ b i => b.vars ++ i.vars
+  | .mfield b _ _ => b.vars
+  | .mindex b i => b.vars ++ i.vars
+
+/-- The variables of an optional part. -/
+def optVars {α : Type} (f : α → List Var) : Option α → List Var
+  | none => []
+  | some a => f a
+
+mutual
+
+/-- The variables a statement mentions: `uint x = y + 1;` mentions `x` and
+`y`. -/
+def Stmt.vars : Stmt C → List Var
+  | .assign l r => l.vars ++ r.vars
+  | .rebind x r => x :: r.vars
+  | .assignLocal x r => x :: r.vars
+  | .declLocal _ x init => x :: optVars Val.vars init
+  | .declStorage _ x init => x :: optVars ARhs.vars init
+  | .opAssign _ _ _ l r => l.vars ++ r.vars
+  | .incDec _ _ l => l.vars
+  | .assignIncDec x _ _ l _ => x :: l.vars
+  | .push b v _ => b.vars ++ optVars Src.vars v
+  | .pop b => b.vars
+  | .transfer r a => r.vars ++ a.vars
+  | .declMem _ x init _ => x :: optVars MRhs.vars init
+  | .rebindMem x r => x :: r.vars
+  | .assignFromMem l p => l.vars ++ p.vars
+  | .assignMem l r => l.vars ++ r.vars
+  | .delete l => l.vars
+  | .ite c thn els => c.vars ++ Prog.vars thn ++ Prog.vars els
+  | .require c => c.vars
+  | .assert c => c.vars
+  | .revert => []
+
+def Prog.vars : List (Stmt C) → List Var
+  | [] => []
+  | s :: P => s.vars ++ Prog.vars P
+
+end
+
+/-! ## Frames
+
+What a piece of syntax does not mention, it does not see: two states that
+agree off `ns` evaluate a part that avoids `ns` alike, and run a statement
+that avoids `ns` to states that agree off `ns` again.  Binding a scratch
+`sp1` changes nothing `alice.age = 10;` reads or writes. -/
+
+section Frame
+
+variable {ns : List Var} {σ τ : State}
+
+theorem aliasPath_frame (hag : EnvAgreeExcept ns σ τ) {x : Var} (hx : x ∉ ns) :
+    aliasPath σ x = aliasPath τ x := by
+  unfold aliasPath; rw [getEnv_congr hag hx]
+
+theorem Simple.eval_frame (hag : EnvAgreeExcept ns σ τ) {p : PrimTy} :
+    (s : Simple C p) → Avoids s.vars ns → s.eval σ = s.eval τ
+  | .lit .., _ | .bool _, _ => rfl
+  | .local x, h => by simp only [Simple.eval, getEnv_congr hag (h x (by simp [Simple.vars]))]
+
+mutual
+
+theorem SPath.resolve_frame (hag : EnvAgreeExcept ns σ τ) :
+    {T : Ty} → (p : SPath C T) → Avoids p.vars ns → p.resolve σ = p.resolve τ
+  | _, .alias x, h => aliasPath_frame hag (h x (by simp [SPath.vars]))
+  | _, .loc l, h => l.resolve_frame hag h
+
+theorem Loc.resolve_frame (hag : EnvAgreeExcept ns σ τ) :
+    {T : Ty} → (l : Loc C T) → Avoids l.vars ns → l.resolve σ = l.resolve τ
+  | _, .root .., _ => rfl
+  | _, .field b _ _, h => by simp only [Loc.resolve, b.resolve_frame hag h]
+  | _, .index _ b i, h => by
+    simp only [Loc.resolve, b.resolve_frame hag h.left, i.eval_frame hag h.right]
+
+theorem MPath.mval_frame (hag : EnvAgreeExcept ns σ τ) :
+    {T : Ty} → (p : MPath C T) → Avoids p.vars ns → p.mval σ = p.mval τ
+  | _, .var x, h => by simp only [MPath.mval, getEnv_congr hag (h x (by simp [MPath.vars]))]
+  | _, .loc l, h => l.read_frame hag h
+
+theorem MLoc.read_frame (hag : EnvAgreeExcept ns σ τ) :
+    {T : Ty} → (l : MLoc C T) → Avoids l.vars ns → l.read σ = l.read τ
+  | _, .field b _ _, h => by simp only [MLoc.read, b.mval_frame hag h, getObj_congr hag]
+  | _, .index b i, h => by
+    simp only [MLoc.read, b.mval_frame hag h.left, i.eval_frame hag h.right, getObj_congr hag]
+
+theorem Val.eval_frame (hag : EnvAgreeExcept ns σ τ) :
+    {p : PrimTy} → (v : Val C p) → Avoids v.vars ns → v.eval σ = v.eval τ
+  | _, .simple s, h => s.eval_frame hag h
+  | _, .read l, h => by simp only [Val.eval, l.resolve_frame hag h, findStorage_congr hag]
+  | _, .binop _ _ _ a b, h => by
+    simp only [Val.eval, a.eval_frame hag h.left, b.eval_frame hag h.right]
+  | _, .unop _ _ _ a, h => by simp only [Val.eval, a.eval_frame hag h]
+  | _, .ternary c a b, h => by
+    simp only [Val.eval, c.eval_frame hag h.left.left, a.eval_frame hag h.left.right,
+      b.eval_frame hag h.right]
+  | _, .readMem l, h => by simp only [Val.eval, l.read_frame hag h]
+
+end
+
+theorem Src.value_frame (hag : EnvAgreeExcept ns σ τ) {T : Ty} :
+    (r : Src C T) → Avoids r.vars ns → r.value σ = r.value τ
+  | .val v, h => by simp only [Src.value, v.eval_frame hag h]
+  | .copy p _, h => by simp only [Src.value, p.resolve_frame hag h, findStorage_congr hag]
+
+theorem MSrc.mval_frame (hag : EnvAgreeExcept ns σ τ) {T : Ty} :
+    (r : MSrc C T) → Avoids r.vars ns → r.mval σ = r.mval τ
+  | .val v, h => by simp only [MSrc.mval, v.eval_frame hag h]
+  | .ref p, h => p.mval_frame hag h
+
+/-! ### The state operations respect agreement -/
+
+theorem ResultsAgree.ok {s₁ s₂ : State} (h : EnvAgreeExcept ns s₁ s₂) :
+    ResultsAgree ns (.ok s₁) (.ok s₂) := h
+
+theorem memWriteField_agree (hag : EnvAgreeExcept ns σ τ) (id : Nat) (f : Name) (mv : MVal) :
+    ResultsAgree ns (memWriteField σ id f mv) (memWriteField τ id f mv) := by
+  unfold memWriteField; rw [getObj_congr hag]
+  cases τ.getObj id with
+  | error _ => rfl
+  | ok o => cases o <;> first | rfl | exact setObj_agree hag _ _
+
+theorem memWriteIndex_agree (hag : EnvAgreeExcept ns σ τ) (id : Nat) (i : Int) (mv : MVal) :
+    ResultsAgree ns (memWriteIndex σ id i mv) (memWriteIndex τ id i mv) := by
+  unfold memWriteIndex; rw [getObj_congr hag]
+  cases τ.getObj id with
+  | error _ => rfl
+  | ok o =>
+    cases o with
+    | struct _ => rfl
+    | array elems =>
+      simp only [bind, Except.bind]
+      split
+      · exact setObj_agree hag _ _
+      · rfl
+
+theorem readLoc_congr (hag : EnvAgreeExcept ns σ τ) (a : Addr) : readLoc σ a = readLoc τ a := by
+  cases a <;> simp only [readLoc, getObj_congr hag]
+
+theorem writeLoc_agree (hag : EnvAgreeExcept ns σ τ) (a : Addr) (v : Value) :
+    ResultsAgree ns (writeLoc σ a v) (writeLoc τ a v) := by
+  cases a with
+  | memoryField id f =>
+    simp only [writeLoc, getObj_congr hag]
+    cases τ.getObj id with
+    | error _ => rfl
+    | ok o => cases o <;> first | rfl | exact setObj_agree hag _ _
+  | memoryIndex id i =>
+    simp only [writeLoc, getObj_congr hag]
+    cases τ.getObj id with
+    | error _ => rfl
+    | ok o =>
+      cases o with
+      | struct _ => rfl
+      | array elems =>
+        simp only [bind, Except.bind]
+        split
+        · exact setObj_agree hag _ _
+        · rfl
+
+theorem ResAgree.of_results {α : Type} {x₁ x₂ : Res State} (h : ResultsAgree ns x₁ x₂) (a : α) :
+    ResAgree ns (x₁ >>= fun s => pure (s, a)) (x₂ >>= fun s => pure (s, a)) := by
+  match x₁, x₂, h with
+  | .error _, .error _, h => subst h; rfl
+  | .ok _, .ok _, h => exact ⟨rfl, h⟩
+
+set_option hygiene false in
+/-- Two runs of one computation from agreeing states: peel the shared pure
+prefix, then close with the operation's agreement lemma. -/
+macro "agree_run" h:term : tactic => `(tactic| repeat (first
+  | exact ResultsAgree.refl _ _
+  | exact EnvAgreeExcept.setEnv_both $h _ _
+  | exact ResAgree.ok (EnvAgreeExcept.setEnv_both $h _ _)
+  | exact $h
+  | exact saveStorage_agree $h _ _ _
+  | exact memWriteField_agree $h _ _ _
+  | exact memWriteIndex_agree $h _ _ _
+  | exact writeLoc_agree $h _ _
+  | exact ResAgree.of_results (saveStorage_agree $h _ _ _) _
+  | exact ResAgree.of_results (writeLoc_agree $h _ _) _
+  | exact opStore_agree $h _ _ _ _ _
+  | exact opMem_agree $h _ _ _ _
+  | exact bumpStore_agree $h _ _ _ _
+  | exact bumpMem_agree $h _ _ _
+  | exact transferAt_agree $h _ _
+  | exact popAt_agree $h _ _
+  | refine bindPureResults_agree _ fun _ => ?_
+  | refine bindPureRes_agree _ fun _ => ?_
+  | split))
+
+theorem MLoc.write_frame (hag : EnvAgreeExcept ns σ τ) (mv : MVal) {T : Ty} :
+    (l : MLoc C T) → Avoids l.vars ns → ResultsAgree ns (l.write σ mv) (l.write τ mv)
+  | .field b f _, h => by
+    simp only [MLoc.write, b.mval_frame hag h]
+    agree_run hag
+  | .index b i, h => by
+    simp only [MLoc.write, b.mval_frame hag h.left, i.eval_frame hag h.right]
+    agree_run hag
+
+theorem opStore_agree (hag : EnvAgreeExcept ns σ τ) (op : BinOp) (p : PrimTy) (r : Name)
+    (segs : List Seg) (v : Value) :
+    ResultsAgree ns (opStore σ op p r segs v) (opStore τ op p r segs v) := by
+  simp only [opStore, findStorage_congr hag]
+  agree_run hag
+
+theorem opMem_agree (hag : EnvAgreeExcept ns σ τ) (op : BinOp) (p : PrimTy) (a : Addr)
+    (v : Value) : ResultsAgree ns (opMem σ op p a v) (opMem τ op p a v) := by
+  simp only [opMem, readLoc_congr hag]
+  agree_run hag
+
+theorem OpLoc.store_frame (hag : EnvAgreeExcept ns σ τ) (op : BinOp) {p : PrimTy} :
+    (l : OpLoc C p) → Avoids l.vars ns → (v : Value) →
+      ResultsAgree ns (l.store σ op v) (l.store τ op v)
+  | .local x, h, v => by
+    simp only [OpLoc.store, opLocal, getEnv_congr hag (h.head)]
+    agree_run hag
+  | .root .., _, v => opStore_agree hag _ _ _ _ _
+  | .field b f hf, h, v => by
+    simp only [OpLoc.store, (Loc.field b f hf).resolve_frame hag h]
+    agree_run hag
+  | .index it b i, h, v => by
+    simp only [OpLoc.store, (Loc.index it b (.simple i)).resolve_frame hag h]
+    agree_run hag
+  | .mfield b f _, h, v => by
+    simp only [OpLoc.store, b.mval_frame hag h]
+    agree_run hag
+  | .mindex b i, h, v => by
+    simp only [OpLoc.store, b.mval_frame hag h.left, i.eval_frame hag h.right]
+    agree_run hag
+
+theorem bumpStore_agree (hag : EnvAgreeExcept ns σ τ) (op : IncDec) (p : PrimTy) (r : Name)
+    (segs : List Seg) : ResAgree ns (bumpStore σ op p r segs) (bumpStore τ op p r segs) := by
+  simp only [bumpStore, findStorage_congr hag]
+  agree_run hag
+
+theorem bumpMem_agree (hag : EnvAgreeExcept ns σ τ) (op : IncDec) (p : PrimTy) (a : Addr) :
+    ResAgree ns (bumpMem σ op p a) (bumpMem τ op p a) := by
+  simp only [bumpMem, readLoc_congr hag]
+  agree_run hag
+
+theorem OpLoc.bump_frame (hag : EnvAgreeExcept ns σ τ) (op : IncDec) {p : PrimTy} :
+    (l : OpLoc C p) → Avoids l.vars ns → ResAgree ns (l.bump σ op) (l.bump τ op)
+  | .local x, h => by
+    simp only [OpLoc.bump, bumpLocal, getEnv_congr hag (h.head)]
+    agree_run hag
+  | .root .., _ => bumpStore_agree hag _ _ _ _
+  | .field b f hf, h => by
+    simp only [OpLoc.bump, (Loc.field b f hf).resolve_frame hag h]
+    agree_run hag
+  | .index it b i, h => by
+    simp only [OpLoc.bump, (Loc.index it b (.simple i)).resolve_frame hag h]
+    agree_run hag
+  | .mfield b f _, h => by
+    simp only [OpLoc.bump, b.mval_frame hag h]
+    agree_run hag
+  | .mindex b i, h => by
+    simp only [OpLoc.bump, b.mval_frame hag h.left, i.eval_frame hag h.right]
+    agree_run hag
+
+theorem pushAt_agree (hag : EnvAgreeExcept ns σ τ) (E : Ty) (r : Name) (segs : List Seg)
+    {f g : SVal → Res SVal} (hfg : ∀ x, f x = g x) :
+    ResultsAgree ns (pushAt σ E r segs f) (pushAt τ E r segs g) := by
+  simp only [pushAt, findStorage_congr hag, hfg]
+  refine bindPureResults_agree _ fun v => ?_
+  cases v <;> first | rfl | agree_run hag
+
+theorem pushPlaceAt_agree (hag : EnvAgreeExcept ns σ τ) (E : Ty) (r : Name) (segs : List Seg) :
+    ResAgree ns (pushPlaceAt σ E r segs) (pushPlaceAt τ E r segs) := by
+  simp only [pushPlaceAt, findStorage_congr hag]
+  refine bindPureRes_agree _ fun v => ?_
+  cases v <;> first | rfl | exact ResAgree.of_results (saveStorage_agree hag _ _ _) _
+
+theorem popAt_agree (hag : EnvAgreeExcept ns σ τ) (r : Name) (segs : List Seg) :
+    ResultsAgree ns (popAt σ r segs) (popAt τ r segs) := by
+  simp only [popAt, findStorage_congr hag]
+  refine bindPureResults_agree _ fun v => ?_
+  cases v with
+  | array elems shadow =>
+    dsimp only
+    split
+    · rfl
+    · exact saveStorage_agree hag _ _ _
+  | _ => rfl
+
+theorem transferAt_agree (hag : EnvAgreeExcept ns σ τ) (addr amt : Int) :
+    ResultsAgree ns (transferAt σ addr amt) (transferAt τ addr amt) := by
+  simp only [transferAt, hag.selfBalance, getNet_congr hag]
+  split
+  · rfl
+  split
+  · rfl
+  exact ⟨hag.storage, hag.heap, hag.nextId, by simp [State.setNet, hag.net], hag.env, rfl⟩
+
+theorem ARhs.bind_frame (hag : EnvAgreeExcept ns σ τ) (x : Var) {R : RefTy} :
+    (r : ARhs C R) → Avoids r.vars ns → ResultsAgree ns (r.bind σ x) (r.bind τ x)
+  | .path p, h => by
+    simp only [ARhs.bind, p.resolve_frame hag h]
+    agree_run hag
+  | .push b _, h => by
+    simp only [ARhs.bind, b.resolve_frame hag h]
+    refine bindPureResults_agree _ fun _ => ?_
+    refine ResAgree.bindState (pushPlaceAt_agree hag _ _ _) fun _ _ _ h' => ?_
+    exact EnvAgreeExcept.setEnv_both h' _ _
+
+theorem MRhs.bind_frame (hag : EnvAgreeExcept ns σ τ) (x : Var) {R : RefTy} :
+    (r : MRhs C R) → Avoids r.vars ns → ResultsAgree ns (r.bind σ x) (r.bind τ x)
+  | .alias p, h => by
+    simp only [MRhs.bind, p.mval_frame hag h]
+    agree_run hag
+  | .copy p _, h => by
+    simp only [MRhs.bind, p.resolve_frame hag h, findStorage_congr hag]
+    refine bindPureResults_agree _ fun _ => bindPureResults_agree _ fun sv => ?_
+    refine ResAgree.bindState (copyStToM_agree hag sv) fun _ _ _ h' => ?_
+    agree_run h'
+
+theorem allocDefault_bind_agree (hag : EnvAgreeExcept ns σ τ) (R : RefTy) (x : Var) :
+    ResultsAgree ns (do let (σ', id) ← allocDefault σ R; pure (σ'.setEnv x (.mref id)))
+      (do let (σ', id) ← allocDefault τ R; pure (σ'.setEnv x (.mref id))) :=
+  ResAgree.bindState (allocDefault_agree hag R) fun _ _ _ h' => EnvAgreeExcept.setEnv_both h' _ _
+
+mutual
+
+/-- **Frame, for statements**: a statement that avoids `ns` runs alike from
+two states that agree off `ns`, and they end agreeing off `ns`.  Binding a
+scratch `sp1` changes nothing `alice.age = 10;` reads or writes. -/
+theorem Stmt.run_frame {σ τ : State} (hag : EnvAgreeExcept ns σ τ) :
+    (s : Stmt C) → Avoids s.vars ns → ResultsAgree ns (s.run σ) (s.run τ)
+  | .assign l r, h => by
+    simp only [Stmt.run, r.value_frame hag h.right, l.resolve_frame hag h.left]
+    agree_run hag
+  | .rebind x r, h => r.bind_frame hag x h.tail
+  | .assignLocal x r, h => by
+    simp only [Stmt.run, r.eval_frame hag h.tail]
+    agree_run hag
+  | .declLocal p x init, h => by
+    cases init with
+    | none => exact EnvAgreeExcept.setEnv_both hag _ _
+    | some e =>
+      simp only [Stmt.run, e.eval_frame hag h.tail]
+      agree_run hag
+  | .declStorage _ x init, h => by
+    cases init with
+    | none => exact hag
+    | some r => exact r.bind_frame hag x h.tail
+  | .opAssign op _ _ l r, h => by
+    simp only [Stmt.run, r.eval_frame hag h.right]
+    exact bindPureResults_agree _ fun v => l.store_frame hag op h.left v
+  | .incDec op _ l, h => by
+    simp only [Stmt.run]
+    exact ResAgree.bindState (l.bump_frame hag op h) fun _ _ _ h' => h'
+  | .assignIncDec x op _ l _, h => by
+    simp only [Stmt.run]
+    exact ResAgree.bindState (l.bump_frame hag op h.tail) fun _ _ _ h' =>
+      EnvAgreeExcept.setEnv_both h' _ _
+  | .push (E := E) b v _, h => by
+    simp only [Stmt.run, b.resolve_frame hag h.left]
+    refine bindPureResults_agree _ fun _ => pushAt_agree hag _ _ _ fun sv => ?_
+    cases v with
+    | none => rfl
+    | some r => exact r.value_frame hag h.right
+  | .pop b, h => by
+    simp only [Stmt.run, b.resolve_frame hag h]
+    agree_run hag
+  | .transfer r a, h => by
+    simp only [Stmt.run, r.eval_frame hag h.left, a.eval_frame hag h.right]
+    agree_run hag
+  | .declMem R x init _, h => by
+    cases init with
+    | none => exact allocDefault_bind_agree hag R x
+    | some r => exact r.bind_frame hag x h.tail
+  | .rebindMem x r, h => r.bind_frame hag x h.tail
+  | .assignFromMem l p, h => by
+    simp only [Stmt.run, p.mval_frame hag h.right, l.resolve_frame hag h.left, copyMem_congr hag]
+    agree_run hag
+  | .assignMem l r, h => by
+    simp only [Stmt.run, r.mval_frame hag h.right]
+    exact bindPureResults_agree _ fun mv => l.write_frame hag mv h.left
+  | .delete l, h => by
+    simp only [Stmt.run, l.resolve_frame hag h, findStorage_congr hag]
+    agree_run hag
+  | .ite c thn els, h => by
+    simp only [Stmt.run, c.eval_frame hag h.left.left]
+    refine bindPureResults_agree _ fun v => ?_
+    cases v with
+    | bool b =>
+      cases b
+      · exact Prog.run_frame hag els h.right
+      · exact Prog.run_frame hag thn h.left.right
+    | int _ => rfl
+  | .require c, h | .assert c, h => by
+    simp only [Stmt.run, c.eval_frame hag h]
+    refine bindPureResults_agree _ fun v => ?_
+    cases v with
+    | bool b => cases b <;> first | rfl | exact hag
+    | int _ => rfl
+  | .revert, _ => rfl
+
+theorem Prog.run_frame {σ τ : State} (hag : EnvAgreeExcept ns σ τ) :
+    (P : List (Stmt C)) → Avoids (Prog.vars P) ns → ResultsAgree ns (Prog.run σ P) (Prog.run τ P)
+  | [], _ => hag
+  | s :: P, h => by
+    simp only [Prog.run]
+    exact ResultsAgree.bind (Stmt.run_frame hag s h.left) fun _ _ h' => Prog.run_frame h' P h.right
+
+end
+
+end Frame
+
+end Solidity

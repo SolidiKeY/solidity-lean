@@ -224,7 +224,9 @@ inductive Taclet (C : Contract) (k : Nat) : Modality → Stmt C → Premise C �
       dl{ ⟨[ v = se₁ ⊕ se₂; ]⟩ ⇝ { v := se₁ ⊕ se₂ } ⟨[ ]⟩ }
   | binopUnfoldLeft :
       dl{ ⟨[ v = nse ⊕ e; ]⟩ ⇝ ⟨[ T se = nse; v = se ⊕ e; ]⟩ }
-  | binopUnfoldRight :
+  /-- Not for `&&`/`||`: their right operand is evaluated only when the left
+  does not decide (`logicalAndShortCircuitRhs`). -/
+  | binopUnfoldRight (hsc : BinOp.shortCircuits op = false) :
       dl{ ⟨[ v = se ⊕ nse; ]⟩ ⇝ ⟨[ T se' = nse; v = se ⊕ se'; ]⟩ }
   | logicalAndShortCircuitRhs :
       dl{ ⟨[ v = se && nse; ]⟩ ⇝ ⟨[ if (se) { v = nse; v = v && true; } else { v = false; }; ]⟩ }

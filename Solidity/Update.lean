@@ -1,4 +1,4 @@
-import Solidity.Semantics
+import Solidity.Semantics.Agree
 
 /-!
 # Terms, updates, formulas
@@ -369,6 +369,303 @@ def holds (σ : State) : Fml C → Prop
 
 /-- Valid: true in every state. -/
 def Valid (φ : Fml C) : Prop := ∀ σ, holds σ φ
+
+
+/-! ## Frames
+
+What a formula does not mention, it does not see: two states that agree off
+`ns` satisfy a formula that avoids `ns` alike.  This is what lets a rule
+declare a fresh `se1` in front of the rest of the program and the
+postcondition. -/
+
+mutual
+
+def Term.vars : Term C → List Var
+  | .lit _ => []
+  | .pv x => [x]
+  | .binop _ _ a b => a.vars ++ b.vars
+  | .unop _ _ a => a.vars
+  | .find s p | .len s p => s.vars ++ p.vars
+  | .read m a => m.vars ++ a.vars
+  | .ite c a b => c.vars ++ a.vars ++ b.vars
+
+def PTerm.vars : PTerm C → List Var
+  | .root _ => []
+  | .pv x => [x]
+  | .field p _ => p.vars
+  | .at p i => p.vars ++ i.vars
+
+def STerm.vars : STerm C → List Var
+  | .storage => []
+  | .save s p v | .push s p v => s.vars ++ p.vars ++ v.vars
+  | .delAt s p | .pushSlot s p _ | .pop s p | .extend s p _ => s.vars ++ p.vars
+
+def SValT.vars : SValT C → List Var
+  | .val t => t.vars
+  | .find s p => s.vars ++ p.vars
+  | .copyMem m i => m.vars ++ i.vars
+
+def ITerm.vars : ITerm C → List Var
+  | .pv x => [x]
+  | .read m a => m.vars ++ a.vars
+  | .alloc m _ => m.vars
+  | .copy m v => m.vars ++ v.vars
+
+def MAddr.vars : MAddr C → List Var
+  | .field i _ => i.vars
+  | .at i k => i.vars ++ k.vars
+
+def MTerm.vars : MTerm C → List Var
+  | .memory => []
+  | .write m a v => m.vars ++ a.vars ++ v.vars
+  | .addM m _ => m.vars
+  | .copySt m v => m.vars ++ v.vars
+
+def MValT.vars : MValT C → List Var
+  | .val t => t.vars
+  | .ref i => i.vars
+
+end
+
+def UpdElem.vars : UpdElem C → List Var
+  | .val x t => x :: t.vars
+  | .path x p => x :: p.vars
+  | .mref x i => x :: i.vars
+  | .storage s => s.vars
+  | .memory m => m.vars
+  | .transfer r a => r.vars ++ a.vars
+
+def Upd.vars : Upd C → List Var
+  | [] => []
+  | e :: U => e.vars ++ Upd.vars U
+
+/-- The variables a formula mentions, its programs' included. -/
+def Fml.vars : Fml C → List Var
+  | .tt => []
+  | .eq a b => a.vars ++ b.vars
+  | .not φ => φ.vars
+  | .and φ ψ | .imp φ ψ => φ.vars ++ ψ.vars
+  | .upd _ U φ => Upd.vars U ++ φ.vars
+  | .modal _ P φ => Prog.vars P ++ φ.vars
+
+section Frame
+
+variable {ns : List Var}
+
+theorem readAddr_congr {σ τ : State} (hag : EnvAgreeExcept ns σ τ) (a : Addr) :
+    readAddr σ a = readAddr τ a := by
+  cases a <;> simp only [readAddr, getObj_congr hag]
+
+theorem writeAddr_agree {σ τ : State} (hag : EnvAgreeExcept ns σ τ) (mv : MVal) (a : Addr) :
+    ResultsAgree ns (writeAddr σ mv a) (writeAddr τ mv a) := by
+  cases a
+  · exact memWriteField_agree hag _ _ _
+  · exact memWriteIndex_agree hag _ _ _
+
+theorem arrayLen_congr {σ τ : State} (hag : EnvAgreeExcept ns σ τ) (r : Name) (segs : List Seg) :
+    arrayLen σ r segs = arrayLen τ r segs := by
+  simp only [arrayLen, findStorage_congr hag]
+
+/-- Peel a shared prefix, or bind two agreeing states. -/
+theorem ResultsAgree.bindEq {α : Type} {x₁ x₂ : Res State} (hx : ResultsAgree ns x₁ x₂)
+    {f₁ f₂ : State → Res α} (hf : ∀ s₁ s₂, EnvAgreeExcept ns s₁ s₂ → f₁ s₁ = f₂ s₂) :
+    (x₁ >>= f₁) = (x₂ >>= f₂) := by
+  match x₁, x₂, hx with
+  | .error _, .error _, hx => subst hx; rfl
+  | .ok s₁, .ok s₂, hs => exact hf s₁ s₂ hs
+
+mutual
+
+theorem Term.eval_frame {σ τ : State} (hag : EnvAgreeExcept ns σ τ) :
+    (t : Term C) → Avoids t.vars ns → t.eval σ = t.eval τ
+  | .lit _, _ => rfl
+  | .pv x, h => by simp only [Term.eval, getEnv_congr hag (h.head)]
+  | .binop _ _ a b, h => by
+    simp only [Term.eval, a.eval_frame hag h.left, b.eval_frame hag h.right]
+  | .unop _ _ a, h => by simp only [Term.eval, a.eval_frame hag h]
+  | .find s p, h => by
+    simp only [Term.eval, p.eval_frame hag h.right]
+    exact ResultsAgree.bindEq (s.eval_frame hag h.left) fun _ _ h' => by
+      simp only [findStorage_congr h']
+  | .len s p, h => by
+    simp only [Term.eval, p.eval_frame hag h.right]
+    exact ResultsAgree.bindEq (s.eval_frame hag h.left) fun _ _ h' => by
+      simp only [arrayLen_congr h']
+  | .read m a, h => by
+    simp only [Term.eval, a.eval_frame hag h.right]
+    exact ResultsAgree.bindEq (m.eval_frame hag h.left) fun _ _ h' => by
+      simp only [readAddr_congr h']
+  | .ite c a b, h => by
+    simp only [Term.eval, c.eval_frame hag h.left.left, a.eval_frame hag h.left.right,
+      b.eval_frame hag h.right]
+
+theorem PTerm.eval_frame {σ τ : State} (hag : EnvAgreeExcept ns σ τ) :
+    (p : PTerm C) → Avoids p.vars ns → p.eval σ = p.eval τ
+  | .root _, _ => rfl
+  | .pv x, h => aliasPath_frame hag (h.head)
+  | .field p _, h => by simp only [PTerm.eval, p.eval_frame hag h]
+  | .at p i, h => by simp only [PTerm.eval, p.eval_frame hag h.left, i.eval_frame hag h.right]
+
+theorem STerm.eval_frame {σ τ : State} (hag : EnvAgreeExcept ns σ τ) :
+    (s : STerm C) → Avoids s.vars ns → ResultsAgree ns (s.eval σ) (s.eval τ)
+  | .storage, _ => hag
+  | .save s p v, h => by
+    simp only [STerm.eval, v.eval_frame hag h.right, p.eval_frame hag h.left.right]
+    refine bindPureResults_agree _ fun _ => ?_
+    refine ResultsAgree.bind (s.eval_frame hag h.left.left) fun _ _ h' => ?_
+    agree_run h'
+  | .delAt s p, h => by
+    simp only [STerm.eval, p.eval_frame hag h.right]
+    refine ResultsAgree.bind (s.eval_frame hag h.left) fun _ _ h' => ?_
+    simp only [findStorage_congr h']
+    agree_run h'
+  | .push s p v, h => by
+    simp only [STerm.eval, p.eval_frame hag h.left.right]
+    refine ResultsAgree.bind (s.eval_frame hag h.left.left) fun _ _ h' => ?_
+    refine bindPureResults_agree _ fun _ => pushAt_agree h' _ _ _ fun _ => ?_
+    exact v.eval_frame hag h.right
+  | .pushSlot s p _, h => by
+    simp only [STerm.eval, p.eval_frame hag h.right]
+    refine ResultsAgree.bind (s.eval_frame hag h.left) fun _ _ h' => ?_
+    exact bindPureResults_agree _ fun _ => pushAt_agree h' _ _ _ fun _ => rfl
+  | .pop s p, h => by
+    simp only [STerm.eval, p.eval_frame hag h.right]
+    refine ResultsAgree.bind (s.eval_frame hag h.left) fun _ _ h' => ?_
+    agree_run h'
+  | .extend s p _, h => by
+    simp only [STerm.eval, p.eval_frame hag h.right]
+    refine ResultsAgree.bind (s.eval_frame hag h.left) fun _ _ h' => ?_
+    refine bindPureResults_agree _ fun _ => ?_
+    exact ResAgree.bindState (pushPlaceAt_agree h' _ _ _) fun _ _ _ h'' => h''
+
+theorem SValT.eval_frame {σ τ : State} (hag : EnvAgreeExcept ns σ τ) :
+    (v : SValT C) → Avoids v.vars ns → v.eval σ = v.eval τ
+  | .val t, h => by simp only [SValT.eval, t.eval_frame hag h]
+  | .find s p, h => by
+    simp only [SValT.eval, p.eval_frame hag h.right]
+    exact ResultsAgree.bindEq (s.eval_frame hag h.left) fun _ _ h' => by
+      simp only [findStorage_congr h']
+  | .copyMem m i, h => by
+    simp only [SValT.eval, i.eval_frame hag h.right]
+    exact ResultsAgree.bindEq (m.eval_frame hag h.left) fun _ _ h' => by
+      simp only [copyMem_congr h']
+
+theorem ITerm.eval_frame {σ τ : State} (hag : EnvAgreeExcept ns σ τ) :
+    (i : ITerm C) → Avoids i.vars ns → i.eval σ = i.eval τ
+  | .pv x, h => by simp only [ITerm.eval, getEnv_congr hag (h.head)]
+  | .read m a, h => by
+    simp only [ITerm.eval, a.eval_frame hag h.right]
+    exact ResultsAgree.bindEq (m.eval_frame hag h.left) fun _ _ h' => by
+      simp only [readAddr_congr h']
+  | .alloc m R, h => by
+    simp only [ITerm.eval]
+    refine ResultsAgree.bindEq (m.eval_frame hag h) fun _ _ h' => ?_
+    rcases (allocDefault_agree h' R).cases with ⟨e, h₁, h₂⟩ | ⟨_, _, a, h₁, h₂, _⟩ <;>
+      simp only [h₁, h₂] <;> rfl
+  | .copy m v, h => by
+    simp only [ITerm.eval, v.eval_frame hag h.right]
+    refine congrArg (_ >>= ·) (funext fun sv => ?_)
+    refine ResultsAgree.bindEq (m.eval_frame hag h.left) fun _ _ h' => ?_
+    rcases (copyStToM_agree h' sv).cases with ⟨e, h₁, h₂⟩ | ⟨_, _, a, h₁, h₂, _⟩ <;>
+      simp only [h₁, h₂] <;> rfl
+
+theorem MAddr.eval_frame {σ τ : State} (hag : EnvAgreeExcept ns σ τ) :
+    (a : MAddr C) → Avoids a.vars ns → a.eval σ = a.eval τ
+  | .field i _, h => by simp only [MAddr.eval, i.eval_frame hag h]
+  | .at i k, h => by simp only [MAddr.eval, i.eval_frame hag h.left, k.eval_frame hag h.right]
+
+theorem MTerm.eval_frame {σ τ : State} (hag : EnvAgreeExcept ns σ τ) :
+    (m : MTerm C) → Avoids m.vars ns → ResultsAgree ns (m.eval σ) (m.eval τ)
+  | .memory, _ => hag
+  | .write m a v, h => by
+    simp only [MTerm.eval, v.eval_frame hag h.right, a.eval_frame hag h.left.right]
+    refine bindPureResults_agree _ fun _ => ?_
+    refine ResultsAgree.bind (m.eval_frame hag h.left.left) fun _ _ h' => ?_
+    exact bindPureResults_agree _ fun _ => writeAddr_agree h' _ _
+  | .addM m R, h => by
+    simp only [MTerm.eval]
+    refine ResultsAgree.bind (m.eval_frame hag h) fun _ _ h' => ?_
+    exact ResAgree.bindState (allocDefault_agree h' R) fun _ _ _ h'' => h''
+  | .copySt m v, h => by
+    simp only [MTerm.eval, v.eval_frame hag h.right]
+    refine bindPureResults_agree _ fun sv => ?_
+    refine ResultsAgree.bind (m.eval_frame hag h.left) fun _ _ h' => ?_
+    exact ResAgree.bindState (copyStToM_agree h' sv) fun _ _ _ h'' => h''
+
+theorem MValT.eval_frame {σ τ : State} (hag : EnvAgreeExcept ns σ τ) :
+    (v : MValT C) → Avoids v.vars ns → v.eval σ = v.eval τ
+  | .val t, h => by simp only [MValT.eval, t.eval_frame hag h]
+  | .ref i, h => by simp only [MValT.eval, i.eval_frame hag h]
+
+end
+
+theorem UpdElem.write_frame {σ₀ σ₀' τ τ' : State} (h₀ : EnvAgreeExcept ns σ₀ σ₀')
+    (h : EnvAgreeExcept ns τ τ') : (e : UpdElem C) → Avoids e.vars ns →
+      ResultsAgree ns (e.write σ₀ τ) (e.write σ₀' τ')
+  | .val x t, hv => by
+    simp only [UpdElem.write, t.eval_frame h₀ hv.tail]
+    agree_run h
+  | .path x p, hv => by
+    simp only [UpdElem.write, p.eval_frame h₀ hv.tail]
+    agree_run h
+  | .mref x i, hv => by
+    simp only [UpdElem.write, i.eval_frame h₀ hv.tail]
+    agree_run h
+  | .storage s, hv => by
+    simp only [UpdElem.write]
+    match s.eval σ₀, s.eval σ₀', s.eval_frame h₀ hv with
+    | .error _, .error _, he => subst he; rfl
+    | .ok a, .ok b, hs => exact ⟨hs.storage, h.heap, h.nextId, h.net, h.env, h.selfBalance⟩
+  | .memory m, hv => by
+    simp only [UpdElem.write]
+    match m.eval σ₀, m.eval σ₀', m.eval_frame h₀ hv with
+    | .error _, .error _, he => subst he; rfl
+    | .ok a, .ok b, hs => exact ⟨h.storage, hs.heap, hs.nextId, h.net, h.env, h.selfBalance⟩
+  | .transfer r a, hv => by
+    simp only [UpdElem.write, r.eval_frame h₀ hv.left, a.eval_frame h₀ hv.right]
+    agree_run h
+
+theorem Upd.foldl_frame {σ₀ σ₀' : State} (h₀ : EnvAgreeExcept ns σ₀ σ₀') :
+    (U : Upd C) → Avoids (Upd.vars U) ns → ∀ {τ τ' : State}, EnvAgreeExcept ns τ τ' →
+      ResultsAgree ns (U.foldlM (fun τ e => e.write σ₀ τ) τ)
+        (U.foldlM (fun τ e => e.write σ₀' τ) τ')
+  | [], _, _, _, h => h
+  | e :: U, hv, _, _, h => by
+    simp only [List.foldlM_cons]
+    exact ResultsAgree.bind (e.write_frame h₀ h hv.left) fun _ _ h' =>
+      Upd.foldl_frame h₀ U hv.right h'
+
+theorem Upd.apply_frame {σ τ : State} (hag : EnvAgreeExcept ns σ τ) (U : Upd C)
+    (hv : Avoids (Upd.vars U) ns) : ResultsAgree ns (U.apply σ) (U.apply τ) :=
+  Upd.foldl_frame hag U hv hag
+
+theorem Modality.after_frame (m : Modality) {p q : State → Prop} {r r' : Res State}
+    (hr : ResultsAgree ns r r') (hpq : ∀ a b, EnvAgreeExcept ns a b → (p a ↔ q b)) :
+    m.after p r ↔ m.after q r' := by
+  match r, r', hr with
+  | .error _, .error _, _ => exact Iff.rfl
+  | .ok a, .ok b, h => exact hpq a b h
+
+/-- **Frame, for formulas**: two states that agree off `ns` satisfy a formula
+that avoids `ns` alike. -/
+theorem holds_frame : (φ : Fml C) → Avoids φ.vars ns → ∀ {σ τ : State},
+    EnvAgreeExcept ns σ τ → (holds σ φ ↔ holds τ φ)
+  | .tt, _, _, _, _ => Iff.rfl
+  | .eq a b, h, _, _, hag => by
+    simp only [holds, a.eval_frame hag h.left, b.eval_frame hag h.right]
+  | .not φ, h, _, _, hag => by simp only [holds, holds_frame φ h hag]
+  | .and φ ψ, h, _, _, hag => by
+    simp only [holds, holds_frame φ h.left hag, holds_frame ψ h.right hag]
+  | .imp φ ψ, h, _, _, hag => by
+    simp only [holds, holds_frame φ h.left hag, holds_frame ψ h.right hag]
+  | .upd m U φ, h, _, _, hag => by
+    simp only [holds]
+    exact m.after_frame (Upd.apply_frame hag U h.left) fun _ _ h' => holds_frame φ h.right h'
+  | .modal m P φ, h, _, _, hag => by
+    simp only [holds]
+    exact m.after_frame (Prog.run_frame hag P h.left) fun _ _ h' => holds_frame φ h.right h'
+
+end Frame
 
 /-! ## Lowering program expressions to terms
 

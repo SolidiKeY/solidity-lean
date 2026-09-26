@@ -1161,7 +1161,7 @@ def Stmt.run (σ : State) : Stmt C → Res State
   | .rebindMem x r => r.bind σ x
   | .assignMem l r => do l.write σ (← r.mval σ)
   | .assignFromMem l p => do
-    let sv ← copyMem σ (← p.mval σ)
+    let sv ← copyMem σ (.ref (← (← p.mval σ).asRef))
     let (root, segs) ← l.resolve σ
     σ.saveStorage root segs sv
   | .opAssign op _ _ l r => do l.store σ op (← r.eval σ)
