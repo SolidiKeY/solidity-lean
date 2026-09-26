@@ -40,7 +40,7 @@ other condition, and `!c` is captured like `a == b`.  The goal whose
 hypothesis is `true = false` is then closed by the logic, not by a rule.
 -/
 
-namespace Solidity.Examples
+namespace Solidity.Examples.Branch
 
 open Proves
 
@@ -226,4 +226,4 @@ theorem branchOnStorage :
   sol_symex
   sol_close
 
-end Solidity.Examples
+end Solidity.Examples.Branch

@@ -29,7 +29,7 @@ solkey names the rule; hover it to see its taclet.  Unification matches its
 only place soundness is used.
 -/
 
-namespace Solidity.Examples
+namespace Solidity.Examples.ApplySteps
 
 open Proves
 
@@ -115,4 +115,4 @@ theorem deepFieldWriteStrategy :
   sol_symex
   sol_close
 
-end Solidity.Examples
+end Solidity.Examples.ApplySteps

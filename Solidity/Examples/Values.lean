@@ -26,7 +26,7 @@ does not decide (`logicalAndShortCircuitRhs`), which is what makes
 lowered to the statement `if` (`ternaryToIf`), and so short-circuits too.
 -/
 
-namespace Solidity.Examples
+namespace Solidity.Examples.Values
 
 open Proves
 
@@ -225,4 +225,4 @@ theorem ternaryToIfStorage :
   sol_symex
   sol_close
 
-end Solidity.Examples
+end Solidity.Examples.Values

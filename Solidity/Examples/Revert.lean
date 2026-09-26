@@ -50,7 +50,7 @@ program, the second reverts.  Under `⊢` the revert rules are
 `apply done .revertBox` and `apply done .revertDiamond` (`Proves.done`).
 -/
 
-namespace Solidity.Examples
+namespace Solidity.Examples.Revert
 
 open Proves
 
@@ -303,4 +303,4 @@ theorem transferStorageReceiver : ⊨ dl!{ [ owner.transfer(5); ] true } := by
   sol_symex
   sol_close
 
-end Solidity.Examples
+end Solidity.Examples.Revert

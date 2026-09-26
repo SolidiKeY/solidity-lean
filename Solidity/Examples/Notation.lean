@@ -10,7 +10,7 @@ derivation as sequents `dl{ Γ ⟹ φ }` (`Logic.lean`).  If a printer changes,
 these fail.
 -/
 
-namespace Solidity.Examples
+namespace Solidity.Examples.Notation
 
 open Proves
 
@@ -184,4 +184,4 @@ theorem twoKeys : ⊢ dl!{ a != b → [ balances[a] = 1; balances[b] = 2; ] bala
   sol_symex
   sol_close
 
-end Solidity.Examples
+end Solidity.Examples.Notation
