@@ -1,24 +1,30 @@
 # Working in this repository
 
 A Lean 4 model of solkey, the KeY-based Solidity prover:
-<https://github.com/SolidiKeY/solkey>. `lake exe solkeycheck` and
-`scripts/solkey-port.mjs` expect a checkout beside this repository
-(`../solkey`); both take an explicit path (`--key`/`SOLKEY_RULES`,
-`--solkey`) when it lives elsewhere.
+<https://github.com/SolidiKeY/solkey>. `lake exe solkeycheck` expects a
+checkout beside this repository (`../solkey`); it takes an explicit path
+(`--key`/`SOLKEY_RULES`) when it lives elsewhere.
 
-**Updates are terms** — `Rules.MemTerm` at `memoryRules.key`'s signature,
-`Rules.StTerm` at `structRules.key`'s: `write`/`addM`/`copySt` nest, and so do
-`save`/`delAt`.  An allocation is the two parallel elements KeY writes, a push
-and a pop are nested writes over `size`, and `docs/lean-key-rule-map.md` is
-the symbol table.  A path alias binds bare (`{ sp := alice.account }`); the
-*value* side is marked instead (`find`/`select`/`read`).
+The design follows mini-solkey (`~/projects/side-projects/lean/mini-solkey`),
+a small readable copy of the calculus: typed syntax, one inductive taclet
+judgement written in the calculus's notation, and a sound proof system.
+`docs/kernel-port.md` says which chapter landed where and what is still to
+port.
+
+**Updates are terms** (`Update.lean`): `STerm` at `structRules.key`'s
+signature, `MTerm` at `memoryRules.key`'s — `save`/`delAt` nest, and so do
+`write`/`addM`/`copySt`.  An allocation is the two parallel elements KeY
+writes, a push and a pop are nested writes over `size`, and
+`docs/lean-key-rule-map.md` is the symbol table.  A path alias binds bare
+(`{ sp := alice.account }`); a read marks the *value* side instead
+(`find`/`select`/`read`).
 
 A second consumer is **the `SolKey` reader**, a Lean reader for KeY `.key`
 files in a separate repository. It imports only `Solidity.Calculus.Rules` and
-`Solidity.Calculus.KeyTaclets` (and through them `Solidity.AST` and
-`Solidity.KeySort`). That is its whole dependency
-surface: renaming a `RuleName` or changing a `ruleEffect` arm breaks its
-correspondence proofs, which is the point of it.
+`Solidity.Calculus.KeyTaclets` (and through them the syntax). That is its
+whole dependency surface: renaming a `Taclet` constructor breaks its
+correspondence proofs, which is the point of it. It still names the old
+`RuleName` table and is to be migrated (`docs/kernel-port.md`, "Port later").
 
 ## The one hard constraint
 
@@ -30,12 +36,14 @@ locally.
 
 ## Where things are
 
-`docs/module-map.md` — one line per module, with the open problems flagged.
-Read it instead of searching when you need to know where something lives.
+`docs/module-map.md` — one line per module. Read it instead of searching
+when you need to know where something lives.
 
-Layering: syntax in `AST.lean`, rule enumeration in `Calculus/Rules.lean`, proof
-relations in later files. Keep imports acyclic and local. Add new modules to
-`Solidity.lean`.
+Layering: types and names in `AST.lean`, the typed syntax in `Syntax.lean`,
+the interpreter in `Semantics.lean`, terms and formulas in `Update.lean`, the
+taclets in `Calculus/Rules.lean`, everything proved about them after. Keep
+imports acyclic and local. Add new modules to `Solidity.lean`:
+`node scripts/check-orphans.mjs` fails on a module nothing imports.
 
 Before editing one of these families, read its conventions file. Claude Code
 loads them automatically when you open a matching file; other agents should
@@ -43,23 +51,17 @@ read them by path.
 
 | Editing | Read first |
 |---|---|
-| the rule table: `Calculus/{Rules,RuleSyntax,RuleShapes,RuleValidation,Uniqueness,Coverage,Completeness,KeyTaclets}.lean`, `SortCheck/**` | `.claude/rules/rule-table.md` |
-| `Examples/**`, `Traces/**`, `Tactics/**`, `Update/**`, `Theory/**` (derivations and notation) | `.claude/rules/derivations.md` |
-| `Calculus/RuleSoundness.lean`, `Calculus/RewriteSoundness.lean`, `Wp/**`, `Counterexamples/**` | `.claude/rules/soundness.md` |
+| the rule table: `Calculus/{Rules,RuleSyntax,Completeness,RuleShapes,PrintedRules,KeyTaclets}.lean`, `SortCheck/**` | `.claude/rules/rule-table.md` |
+| `Examples/**`, `Theory/**`, `Update.lean` (derivations and notation) | `.claude/rules/derivations.md` |
+| `Calculus/{Sound*,RuleSoundness,Logic,Symex,Close}.lean`, `Counterexamples/**` | `.claude/rules/soundness.md` |
 | `Typing/**`, `Semantics/**` | `.claude/rules/typing.md` |
-| `Kernel/**` (the typed port of mini-solkey, tracked in `docs/kernel-port.md`) | `.claude/rules/kernel.md` |
 
-`docs/README.md` indexes the documents. `docs/lean-key-rule-map.md` is the authority for the name-by-name
-map to solkey's taclets (do not restate it in module docstrings);
-`docs/solc-alignment.md` for where the interpreter follows solc over KeY;
-`docs/compiler-verification.md`.
-
-`docs/solkey-parity.md` is what the *interpreter* proves of solkey's suites,
-`docs/calculus-parity.md` what the *rule table* does. `sol_wp` never reads
-`Calculus/Rules.lean`, so a number from the first says nothing about the calculus.
-`SolidityTraces.lean` is the third: one entry per worked example of the calculus,
-naming the chain in `Solidity/Traces/` that is it, or the reason
-there is none. Add a row there before adding a chain.
+`docs/README.md` indexes the documents. `docs/lean-key-rule-map.md` is the
+authority for the name-by-name map to solkey's taclets (do not restate it in
+module docstrings); `docs/solc-alignment.md` for where the interpreter follows
+solc over KeY.
+naming the example in `Solidity/Examples/` that is it, or the reason
+there is none. Add a row there before adding one.
 
 ## Checking your work
 
@@ -68,20 +70,18 @@ shell. Per-file diagnostics after an edit are the check; a full build is for
 import changes and final confirmation. The `lean-verify` skill in
 `.claude/skills/` is the loop written out.
 
-| Command | Cost | What it covers |
-|---|---|---|
-| `./run-lean.sh` | ~24 min CPU | `lake build` (default targets) then the solkey sort check |
-| `./scripts/check-traces.sh` | ~7 min CPU | `SolidityTraces` (`Solidity/Traces/`) |
-| `./scripts/check-doc-paths.sh` | seconds | every backticked `*.lean` in the prose names a file that exists |
-| `./scripts/check-solkey-parity.sh` | medium | the ported corpus against `tests/solkey/expected.tsv` |
-| `./scripts/check-calculus-parity.sh` | long | the same corpus proved from `Calculus/Rules.lean` alone, against `tests/solkey/expected-calculus.tsv` |
-| `lake exe solkeycheck` | seconds | sort annotations against solkey's `.key` |
+| Command | What it covers |
+|---|---|
+| `./run-lean.sh` | `lake build` (default targets) then the solkey sort check |
+| `node scripts/check-orphans.mjs --allow scripts/orphans-allowed.txt` | every module is reachable from a library root |
+| `./scripts/check-doc-paths.sh` | every backticked `*.lean` in the prose names a file that exists |
+| `lake exe solkeycheck` | sort annotations against solkey's `.key` |
 
-`solkeycheck` is at zero against solkey `8c5c69ca25` (2026-09-20), with
-`openFindings` empty. Re-pinning to a newer solkey is its own change: it
-regenerates `Calculus/KeyTaclets.lean`, moves `SortCheck/Annotations.lean`,
-`SortCheck/Faithfulness.lean` and `Counterexamples/PreFixSortAnnotations.lean`,
-and re-partitions `RuleShapes.taclets_partitioned`.
+`solkeycheck` was at zero against solkey `8c5c69ca25` (2026-09-20). A newer
+checkout reports drift (311 taclets, 5 mismatches as of 2026-09-26);
+re-pinning is its own change: it regenerates `Calculus/KeyTaclets.lean`,
+moves `SortCheck/Annotations.lean`, and re-partitions
+`RuleShapes.taclets_partitioned`.
 
 Run long builds in the background and grep the log for `error` rather than
 reading it back whole.
@@ -93,24 +93,17 @@ reading it back whole.
   finds the Nix-provided `lean`/`lake` on NixOS; elan must come first on
   `PATH`, since it honours `lean-toolchain`.)
 - **The language server needs `--tstack=131072`**, the number `lakefile.toml`
-  already gives `lake build`. Without it a file worker on one of the worked
-  derivations dies with "deep recursion was detected at 'interpreter'" before
-  it reports a diagnostic, because a `sol_derivation` chain elaborates through
-  a deeply recursive `rule_simp`. The server does not read `weakLeanArgs`, so
-  the flag is set twice more: `.vscode/settings.json`'s `lean4.serverArgs` for
-  the editor, and `scripts/lean-mcp/bin/lake` for the MCP, whose client spawns
-  a hardcoded `lake serve` with no hook for arguments. The watchdog forwards
-  the flag to each worker as `-s`; `ps -eo args | grep -- --worker` is how to
-  check a running one has it.
+  already gives `lake build`: symbolic execution elaborates through deep
+  recursion. The server does not read `weakLeanArgs`, so the flag is set twice
+  more: `.vscode/settings.json`'s `lean4.serverArgs` for the editor, and
+  `scripts/lean-mcp/bin/lake` for the MCP, whose client spawns a hardcoded
+  `lake serve` with no hook for arguments.
+- `lake env lean --tstack=131072 file.lean` checks one scratch file in
+  seconds; the MCP server is slow on this package.
 - `grind` is built in on this toolchain. Try `grind` or `grind [lemmas]`
-  before a long manual script. Tag safe reusable lemmas `@[grind]` when they
-  do not blow up the search space. For Boolean/bitvector goals prefer
+  before a long manual script. For Boolean/bitvector goals prefer
   `bv_decide`/`omega`.
-- Membership proofs over the large `ruleNames` list use `decide`;
-  `simp [ruleNames]` exceeds the recursion limit.
-- Several files are very large (`Calculus/RuleSoundness.lean` is 10k lines). Use the
-  MCP outline and ranged reads; never read one whole. Use `rg`, which honours
-  `.gitignore` and so skips the 541 MB `.lake/`.
+- Use `rg`, which honours `.gitignore` and so skips `.lake/`.
 
 ## Reading before writing
 

@@ -1,5 +1,8 @@
 # Improvement ideas flowing Lean → solkey
 
+Dated entries below cite modules of the untyped layer that were removed on
+2026-09-26 (commit `59fa352`); `git show 9721af1:<path>` has them.
+
 Collected during the 2026-08-29 re-sync of `lean-key-rule-map.md` against
 solkey (`~/projects/solkey`, 238 program taclets). The reverse direction —
 solkey rules the Lean calculus still lacks — is tracked as `planned` rows
@@ -110,25 +113,18 @@ the sections further down carry the details.
 
 4. **A balance-checked `transfer`.** `a.transfer(v)` reverts when the
    contract's own balance cannot cover `v` (the EVM value-transfer
-   check). The Lean semantics reverts (`Semantics.execStmt`, transfer
-   arm), the compiled code checks the reserved balance word
-   (`Evm/Compile.transferTail`). solkey's `net` ledger debits
+   check). The Lean semantics reverts (`transferAt`, `Semantics.lean`). solkey's `net` ledger debits
    unconditionally, so any claim that a transfer completes is
    unconditional in KeY and conditional on the chain.
 
-5. **The calculus's real boundary, written down.** Progress is false
-   for the conditional rules: `if (flag) …` with a symbolic stack boolean has
-   no rule under any modality (`Calculus/Progress.lean`, `not_progress`,
-   `not_normalizing`); the split belongs to the judgment layer
-   (`symbolicIte_judgment_split`; solkey's `ifSplit`). Completeness holds
-   only over a rule-independent fragment: well-typed (`stmtWt`) and not
-   one of the 26 syntactic `ResidueShape` families of `Calculus/Coverage.lean`
-   (`RuleStep.complete_of_wellTyped`). That list — symbolic `if`
-   conditions, `**=`, inc/dec on memory or storage-local targets,
-   stack values into storage-local roots, `delete` on storage-local
-   roots, memory-value pushes, … — is the precise statement of what the
-   taclet corpus does not cover; solkey's docs should carry it instead
-   of leaving users to discover a stuck proof.
+5. **The calculus's boundary, written down.** With a typed syntax there is
+   none left to write: every statement has exactly one rule
+   (`Stmt.complete`, `Calculus/Completeness.lean`), the `if` on a symbolic
+   condition is a two-goal rule (`ifElseSplit`, a `split` premise), and a
+   statement no rule could run cannot be written. The untyped layer's 26
+   residue shapes are classified in `docs/kernel-port.md` ("`ResidueShape`
+   verdicts"). solkey's docs could carry the same statement: which program
+   shapes its front end rejects, so that no taclet needs to handle them.
 
 6. **`unfoldArgument` (Lean `functionCallArgCapture`).** Already on
    solkey's backlog (`docs/net.md` §5.1). The Lean rule plus its

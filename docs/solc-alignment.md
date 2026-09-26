@@ -8,9 +8,9 @@ current 0.8 line) rather than the original KeY rules, what that means
 operationally, and what is still a documented modeling delta rather than a
 behavioral match.
 
-Everything here is about the *official* interpreter (`evalValue` /
-`execStmt` / `execAssign`); the EVM layer's own deltas are documented in
-`Evm/Machine.lean` and `docs/compiler-verification.md`.
+Everything here is about the interpreter (`Stmt.run`, `Semantics.lean`).
+The EVM compiler, which had its own deltas, was removed with the untyped
+syntax (`docs/compiler-verification.md`).
 
 ## Checked arithmetic (solc ≥ 0.8)
 
@@ -31,8 +31,8 @@ Application points:
   minus on unsigned operands at compile time, so `uint` negation stays
   out of the checked fragment (`.mkUnop`);
 - `++`/`--`, at the target's type (`.mkIncDec`);
-- compound assignment (`op=`), at the target's type (`execStmt`,
-  `Stmt.compoundAssign`).
+- compound assignment (`op=`), at the target's type (`OpLoc.store`,
+  `Stmt.opAssign`).
 
 A failed check is `.error .revert`: the executable image of `Panic(0x11)`.
 The semantics does not model Panic *codes* — all reverts collapse into the
@@ -176,7 +176,7 @@ resolved).
 
 Since `Calculus/Rules.lean` became a taclet table, each terminal rule *states* its KeY
 update and guard rather than deferring the whole state change to
-`Semantics.execStmt`. That makes a second class of divergence visible: not
+the interpreter. That makes a second class of divergence visible: not
 "KeY vs solc" but "the taclet's guard vs the interpreter's fault order". The
 updates themselves are evaluated with the interpreter's own readers
 (`Update/Eval.lean`), so a divergence is a real disagreement, not a
