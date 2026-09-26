@@ -62,7 +62,9 @@ Each is chosen so that the rule which *does* exist subsumes it:
 structurally, because the path *grows* on the way in (`readCopySt` reads
 `flds ++ [a]`).  A lexicographic measure closes it, but well-founded recursion
 gives up definitional unfolding, and `decide` on a closed term is how half the
-taclets here are checked (`Sanity` below, `Corpus/Wp/Rules.lean`).
+taclets here are checked (`Sanity` below; the untyped layer's corpus checked
+the rest, and regenerating it as `sol[C]{}` examples is `docs/kernel-port.md`'s
+"The solkey corpus").
 
 So the cycle is cut instead: `readIn` reads its copied struct with **`findSt`**,
 the read that does not cross back into memory, and everything stays structural.
@@ -136,8 +138,10 @@ inductive MemValue where
   deriving Repr, DecidableEq
 
 /-- An interpreter slot value as a `MemValue`: the interpreter's resolved
-`Nat` names the root of a path identity with an empty path, which is what
-`Update/Theory.lean` writes and what `resolve` inverts. -/
+`Nat` names the root of a path identity with an empty path, which is what a
+future denotation bridging this theory to the interpreter would write and
+what `resolve` inverts (not yet written; the untyped layer's Update/Theory
+module had it). -/
 def MVal.toMemValue : MVal -> MemValue
   | .prim p => .prim p
   | .ref n => .ident (.idCC (.ofNat n))
@@ -184,9 +188,10 @@ mutual
     | storeSt (st : Struct) (a : Seg) (v : StValue)
     | copyMem (mem : Memory) (id : Identity)
     /-- The `storage` program variable below `p`, as the line's pre-state
-    holds it: the leaf a read over the calculus's updates is lowered onto
-    (`Update/Lower.lean`).  A view, like `copyMem`: selecting pushes it down
-    and reads nothing, so every theory law holds of it as of a free term. -/
+    holds it: the leaf a read over the calculus's updates is lowered onto —
+    not yet written; `Update.lean` has the lowering for everything but this
+    leaf.  A view, like `copyMem`: selecting pushes it down and reads
+    nothing, so every theory law holds of it as of a free term. -/
     | cur (p : List Seg)
     deriving Repr
 
@@ -372,8 +377,9 @@ def resolveFrom (h : List (Nat × MObj)) (n : Nat) : List Seg -> Option Nat
 def resolve (h : List (Nat × MObj)) : Identity -> Option Nat
   | .idC r p => resolveFrom h r.toNat p
 
-/-- A root identity resolves to its root.  The equation `Update/Theory.lean`
-needs to keep its bridges `rfl`. -/
+/-- A root identity resolves to its root.  The equation a future
+theory-to-interpreter denotation bridge would need to keep its bridges
+`rfl` (not yet written; the untyped layer's Update/Theory module had it). -/
 @[simp] theorem resolve_idCC (h : List (Nat × MObj)) (n : Nat) :
     resolve h (.idCC (.ofNat n)) = some n := rfl
 

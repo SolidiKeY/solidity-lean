@@ -220,16 +220,17 @@ push-with-value in the admitted fragment lands on a slot with a mapping.
 The `isPrimitive` branch is **redundant on any well-typed storage**, where a
 cleared primitive slot *is* the type's default (`pushSlot_prim`, proved in
 `Typing/StoragePreservation.lean`); it is written out so that a consumer holding a
-value *representation* but no typing — `Evm/Correctness.lean`, whose fragment
-is primitive-element arrays — sees the pushed value without a typing
-hypothesis. -/
+value *representation* but no typing — the removed EVM compiler's
+correctness proof, whose fragment was primitive-element arrays — sees the
+pushed value without a typing hypothesis. -/
 def pushSlot (elemTy : Ty) : List SVal -> SVal × List SVal
   | [] => (defaultForTy elemTy, [])
   | c :: rest =>
       (if elemTy.isPrimitive then defaultForTy elemTy else c.defaultOf, rest)
 
 /-- At a primitive element type the slot a `push` lands on is the type's
-default, recycled or not — what `Evm/Correctness.lean` reads off it. -/
+default, recycled or not — what the removed EVM compiler's correctness proof
+read off it. -/
 theorem pushSlot_isPrim {elemTy : Ty} {shadow : List SVal}
     (hp : elemTy.isPrimitive = true) :
     (pushSlot elemTy shadow).1 = defaultForTy elemTy := by
@@ -312,8 +313,8 @@ makes the slot visible, while here `elems` is the extent -- and a write to
 `pushSlot` deals out.  Together they are `storagePushValueSave`,
 `storagePushLengthSave` and `storagePopSave`.
 
-A program's `a[k] = v` still reverts at `k = size` (solc, and
-`Evm/BoundedSemantics.lean`), and `a.length = n` is still a compile error:
+A program's `a[k] = v` still reverts at `k = size` (solc, and the removed
+EVM compiler's bounded semantics), and `a.length = n` is still a compile error:
 those go through `SVal.save`.  The calculus reaches this one only under an
 `inBounds` guard or from a push or pop, so the two never disagree on a write
 both can perform. -/
@@ -717,9 +718,9 @@ def State.exampleStore : State :=
 
 One store per ported contract, not one union store. The store is an
 association list the interpreter scans on every read and write, so its
-length is a direct multiplier on the cost of every `sol_wp` proof: the
-46-entry union of these schemas made even the fifteen `ExamplesWP`
-judgments time out at `whnf`. Per-contract stores are also the faithful
+length is a direct multiplier on the cost of every run from it: a
+46-entry union of these schemas made even small judgments time out at
+`whnf`. Per-contract stores are also the faithful
 reading — in solkey each `.sol` file is its own contract with its own
 storage.
  -/

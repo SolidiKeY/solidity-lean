@@ -66,9 +66,10 @@ Now:
 - `Stmt.compoundAssign` follows the same single-resolution read/write
   path, with `checkArith` at the target type.
 
-`Calculus/RuleValidation.lean`'s evaluation-order section
-(`storageEvaluationOrder_interpreter_rhsFirst`) pins the interpreter to
-the KeY/solc order on the `a[++i] = ++i` witness.
+The removed `Calculus/` module that validated rule shapes pinned the
+interpreter to the KeY/solc order on the `a[++i] = ++i` witness
+(`storageEvaluationOrder_interpreter_rhsFirst`); that regression test is not
+yet ported to the typed layer.
 
 ### Known divergence: reference (struct) sources are *not* right-hand-side-first
 
@@ -159,9 +160,11 @@ funds). `Stmt.transfer`:
 - otherwise `selfBalance -= amt` and the ledger is *debited*: `net(addr) := net(addr) - amt` (`State.setNet addr (getNet addr - amt)`; the module header of `Semantics.lean` states the same sign).
 
 The example stores (`exampleStore`, `testSuiteStore`) fund the contract with
-a large balance so the ported KeY tests keep their meaning;
-`Semantics/Callback.lean`'s havoc quantifies over the balance like it does
-over storage and the ledger, so the callback boxes remain sound.
+a large balance so the ported KeY tests keep their meaning. The old,
+untyped layer's callback semantics — a `Semantics/Callback` module whose
+havoc quantified over the balance like it did over storage and the ledger,
+so the callback boxes stayed sound — is not in the typed layer: it has no
+call statement at all yet (`docs/kernel-port.md`'s "Port later").
 
 solkey has since adopted the same check: `084de89677` adds `selfBalance`
 to the ledger update of every `transfer` taclet, and `333cc7b353` splits
@@ -179,9 +182,10 @@ update and guard rather than deferring the whole state change to
 the interpreter. That makes a second class of divergence visible: not
 "KeY vs solc" but "the taclet's guard vs the interpreter's fault order". The
 updates themselves are evaluated with the interpreter's own readers
-(`Update/Eval.lean`), so a divergence is a real disagreement, not a
+(`Term.eval`, `Update.lean`), so a divergence is a real disagreement, not a
 re-definition; `Update/SolcDelta.lean` is the table and
-`Update/TacletTable.lean` the theorems.
+`Calculus/SoundUpdate.lean` the theorems that a taclet's update has the
+statement's effect.
 
 One of them is new, and it is an **interpreter** gap rather than a KeY one:
 
@@ -192,8 +196,8 @@ One of them is new, and it is an **interpreter** gap rather than a KeY one:
   with `placePath`, which builds the path `arr[i]` without consulting the
   array's length, and binds it. solc agrees with KeY — an out-of-range index on
   a storage array is `Panic(0x32)` whether the result is read or aliased — so
-  the Lean rule carries KeY's guard and `Update/TacletTable.lean` states that
-  rule's bridge under it. Closing the gap means a bounds check in `placePath`'s
+  the Lean rule carries KeY's guard and `Calculus/SoundUpdate.lean` states
+  that rule's bridge under it. Closing the gap means a bounds check in `placePath`'s
   index arm, which is a change to `Semantics.lean` and to every theorem about
   it, so it is recorded here rather than made silently.
 
@@ -226,6 +230,6 @@ rule is strictly stronger than the program it describes
   `exponentiationSignedBaseOddExponent` row of
   `tests/solkey/expected.tsv`). A macro-level typing environment would
   close this; it is a surface-syntax gap, not an interpreter one.
-- **EVM layer.** `Evm/Machine.lean` documents its own deltas (arithmetic
-  `MAPSLOT` in place of Keccak slot derivation, no gas, relative forward
-  jumps, unbounded stack).
+- **EVM layer.** The compiler had its own deltas (arithmetic `MAPSLOT` in
+  place of Keccak slot derivation, no gas, relative forward jumps, unbounded
+  stack); it was removed with the untyped syntax (`docs/compiler-verification.md`).

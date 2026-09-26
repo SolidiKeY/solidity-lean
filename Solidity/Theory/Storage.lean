@@ -553,8 +553,9 @@ theorem find_delAt_fields (s : Struct) {p q : List Seg} (hp : p ≠ []) (hq : q 
 /-! ## Sanity
 
 The worked examples of the fundamentals repository, in this vocabulary.
-They are here to catch a wrong definition before `Corpus/Wp/Rules.lean`
-builds on one. -/
+They are here to catch a wrong definition before anything is built on one —
+the untyped layer's corpus did this job before it was removed with it
+(`docs/kernel-port.md`'s "The solkey corpus"). -/
 
 section Sanity
 

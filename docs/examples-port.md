@@ -287,3 +287,236 @@ write reverts, which satisfies the formula.
 | Old | New |
 |---|---|
 | Example 18, `alice.age += 1` desugared | `StorageSteps.compoundDesugared` (**added**) |
+
+## Solidity/Traces/Memory.lean
+
+| Old | New |
+|---|---|
+| `memoryAliasWrite` | `Memory.memoryAliasWrite` (a walk) |
+| `memoryFieldCopy` | `Memory.memoryFieldCopy` (a walk, postcondition `true`; the observable aliasing is `Memory.memoryFieldReferenceAssign`) |
+| `memoryDeepFieldWrite` | `Memory.memoryDeepFieldWrite` |
+| `memoryDeepFieldRead` | the read half of `Memory.memoryDeepFieldWrite` |
+| `memoryDeclAlias` | `Memory.memoryDeclAlias` |
+| `memoryDeclDeepAlias` | `Memory.memoryDeclDeepAlias` |
+| `memoryRootRebind` | `Memory.memoryRootRebind` |
+| `memoryRootRead` | the same rule as `Memory.memoryDeclAlias` (`memoryRootAlias`) |
+| `memoryRootAssign` | `Memory.memoryRootAssign` |
+| `memoryFieldWriteCapturedRhs` | `Memory.memoryFieldWriteCapturedRhs` |
+| `memoryDeleteRoot`, `memoryDeleteField`, `memoryIndexDeletePrimitive`, `memoryIndexDeleteReference`, `memoryIndexDeleteNonsimplePath` | not expressible: memory `delete` is not a statement of the typed syntax (`Examples/Memory.lean` §6 pins the elaborator's rejection) |
+| `memoryArrayAlloc` | `Memory.memoryArrayAlloc`, plus a pinned run: a write into the fresh array reverts |
+| `memoryArrayReadBox`, `memoryArrayWriteBox` | `Memory.memoryArrayWriteRead` (the bounds check is now inside the `write`/`read` term) |
+| `memoryNestedArrayWrite` | `Memory.memoryNestedArrayWrite` (`TestSuite`'s `b.tokens[i].value`) |
+| `memoryArrayWriteRefSource` | `Memory.memoryArrayWriteRefSource` |
+| `memoryFieldWriteFromArrayElem` | `Memory.memoryFieldWriteFromArrayElem` |
+| `memoryDeclFromNestedArrayElem` | `Memory.memoryDeclFromNestedArrayElem` |
+| `memoryArrayIncIndexRead`, `memoryArrayIncIndexWrite`, `memoryDeclFromIncIndexElem` | not expressible: `++i` is not an expression of the typed syntax |
+
+## Solidity/Traces/CrossDomain.lean
+
+All seven chains keep their names, each now a walk that reads the copied
+value back rather than stopping at the term the old Wp layer could not merge
+further.
+
+| Old | New |
+|---|---|
+| `storageToMemoryNonsimplePath` | `CrossDomain.storageToMemoryNonsimplePath` |
+| `storageToMemoryRootCopy` | `CrossDomain.storageToMemoryRootCopy` |
+| `storageToMemoryMemberCopy` | `CrossDomain.storageToMemoryMemberCopy` |
+| `memoryToStorageRootCopy` | `CrossDomain.memoryToStorageRootCopy` |
+| `memoryToStorageFromAlias` | `CrossDomain.memoryToStorageFromAlias` |
+| `memoryToStorageFromMemberSource` | `CrossDomain.memoryToStorageFromMemberSource` |
+| `memoryToStorageNonsimplePath` | `CrossDomain.memoryToStorageNonsimplePath` |
+
+## old Solidity/Examples/CrossDomain.lean (Ex 31–37)
+
+| Old | New |
+|---|---|
+| Example 31 | `CrossDomain.storageToMemoryRootCopy` |
+| Example 32, `Person memory carol = alice.account;` (ill-typed: a struct field where a `Person` is expected) | the typed form `CrossDomain.storageToMemoryMemberCopy` |
+| Example 33 | `CrossDomain.storageToMemoryNonsimplePath` |
+| Example 34 | `CrossDomain.memoryToStorageRootCopy` |
+| Example 35 (ill-typed) | `CrossDomain.memoryToStorageFromAlias` |
+| Example 36 | `CrossDomain.memoryToStorageFromMemberSource` |
+| Example 37 (ill-typed) | `CrossDomain.memoryToStorageNonsimplePath` |
+
+## Solidity/Examples/MemoryBasic.lean + MemoryDeleteArray.lean
+
+| Old | New |
+|---|---|
+| Example 19 | `Memory.memoryFieldWrite` |
+| Example 20 | `Memory.memoryRootAssign` |
+| Example 21 | `Memory.memoryDeclAlias` |
+| Example 22 | `Memory.memoryDeclFreshAlloc` |
+| Example 23 | the read in `Memory.memoryDeclFreshAlloc` |
+| Example 24 | `Memory.memoryRootRebind` / `Memory.memoryAliasWrite` |
+| Examples 25, 26 | `Memory.memoryDeepFieldWrite` |
+| Example 27 | `Memory.memoryFieldCopy` |
+| Examples 28–30 | not expressible: memory `delete` |
+
+## Solidity/Examples/Taclets/MemoryOps.lean
+
+| Old | New |
+|---|---|
+| `memory-decl-fresh.key`, `memory-decl-default.key` | the pinned run in `Examples/Memory.lean` §5 (the default read out of a fresh struct is not closable by `sol_close`) |
+| `memory-deep-field.key` | `Memory.memoryDeepFieldWrite` |
+| `memory-root-alias.key` | `Memory.memoryRootAssign` |
+| `memory-field-alias.key` | `Memory.memoryAliasWrite` |
+| `memory-field-reference-assign.key` | the pinned run in `Examples/Memory.lean` §5, plus `Memory.memoryFieldReferenceAssign` for every state |
+| `memory-root-delete-fresh.key`, `memory-delete.key`, `memoryRootDeleteFreshRebind` | not expressible: memory `delete` |
+| `storage-to-memory.key` | `CrossDomain.storageToMemoryIsCopy` |
+| `memory-to-storage.key` | `CrossDomain.memoryToStorageRootCopy` |
+| `testMemoryFieldShallowCopy` | the pinned run in `Examples/CrossDomain.lean` §3; the top-level version is `CrossDomain.memoryToStorageIsCopy` |
+| `memoryStorageCopy` (the assignment form) | `CrossDomain.storageToMemoryAssign` |
+| `memoryStorageCopyUnfold` | `CrossDomain.storageToMemoryUnfold` (at `bob.account`) |
+| `memoryToStorageIndexArrayCopyRoot` | `CrossDomain.memoryToStorageIndexArray` |
+| — | `CrossDomain.memoryToStorageIndexMapping` (**added**) |
+
+## Solidity/Examples/Taclets/NetOps.lean
+
+| Old | New |
+|---|---|
+| `net-transfer-simple.key` | `Net.netTransferSimple` |
+| `net-transfer-capture-receiver.key` | `Net.netTransferStorageReceiver` |
+| `net-transfer-capture-argument.key` | `Net.netTransferCapturedAmount` |
+| two transfers accumulate | `Net.netTransfersAccumulate` |
+| an untouched address | `Net.netUntouched` |
+| an unfunded diamond fails | `Net.transferUnfunded` (the run reverts) |
+| the box holds on revert | duplicate of `Revert.transferBox` |
+| exactly covered | `Net.transferExactlyFunded` |
+| drained | `Net.transferDrained` |
+| `net-manual-update.key`, `net-msg-value.key` | no counterpart (not expressible: a raw update with no program, and `msg.value` is not an expression here) |
+| — | `Net.transferFrameStorage`, `Net.transferFrameRoot`, `Net.transferFrameMapping`, `Net.transferFrameLocal`, `Net.transferFrameMemory` (**added**: a transfer leaves storage, a root, a mapping, a local and memory as they were) |
+
+## Solidity/Traces/Theory.lean
+
+All 13 chains keep their names, each now a `calc` chain over the free-term
+algebras of `Theory/Terms.lean` rather than a `sol_rewrite`.
+
+| Old | New |
+|---|---|
+| `deepFieldWriteValue` | `Theory.deepFieldWriteValue` |
+| `deepFieldWriteFrame` | `Theory.deepFieldWriteFrame` |
+| `deepFieldWritePrefix` | `Theory.deepFieldWritePrefix` |
+| `pushPopSlotValue` | `Theory.pushPopSlotValue` |
+| `deleteLeafValue` | `Theory.deleteLeafValue` |
+| `deleteLeafDefault` | `Theory.deleteLeafDefault` |
+| `memoryAliasIdentity` | `Theory.memoryAliasIdentity` |
+| `memoryFieldValue` | `Theory.memoryFieldValue` |
+| `storageToMemoryRootCopyValue` | `Theory.storageToMemoryRootCopyValue` |
+| `storageToMemoryOtherRoot` | `Theory.storageToMemoryOtherRoot` |
+| `memoryToStorageRootCopyValue` | `Theory.memoryToStorageRootCopyValue` |
+| `memoryToStorageFromAliasValue` | `Theory.memoryToStorageFromAliasValue` |
+| `memoryToStorageNonsimplePathValue` | `Theory.memoryToStorageNonsimplePathValue` |
+
+## Solidity/Traces/Checks.lean
+
+| Old | New |
+|---|---|
+| the headline run | duplicate of `StorageSteps.deepFieldWrite` |
+| `age = 10; age++;` | duplicate of `StorageSteps.rootWriteThenIncrement` |
+| the branching line on a store where `values` is empty | duplicate of `StorageSuite.arrayOutOfBounds` |
+| the allocation run | the pinned run in `Examples/Memory.lean` §5 |
+| the memory aliasing run | duplicate of `Memory.memoryAliasWrite` |
+| the cross-domain run | duplicate of `CrossDomain.storageToMemoryRootCopy` |
+| `pushPopSlotCleared` | the pinned `#eval` in `StorageSuite.lean` on `testSuiteStore` (no declaration name) |
+| the payment run | duplicate of `Net.netTransferSimple` and `Revert.transferBox` |
+| the delete chain run | covered by `StorageDelete.lean` |
+
+Not closable by `sol_close`, per the report that mapped this file: the
+default read out of a fresh memory struct; two allocations being different
+objects; a nested memory object after a memory-to-storage copy; a read out of
+a storage copy compared against the symbolic storage value; the default of a
+pushed struct. Each is now a pinned `#eval` rather than a proved theorem
+(`Examples/Memory.lean` §5, `Examples/CrossDomain.lean` §3).
+
+## Solidity/Traces/Control.lean
+
+The payment and control-flow chains. `transfer` is now one rule
+(`transferNoCallback`) for both modalities — the funds check is inside its
+update term rather than a second, diamond-only line — so the old
+box/diamond pairs collapse to one walk each, and the diamond content becomes
+a run of the interpreter in `Net.lean`.
+
+| Old | New |
+|---|---|
+| `transferBox` | `Revert.transferBox` |
+| `transferDiamond` | no separate chain: the one rule serves both modalities; the funded run is `Net.transferExactlyFunded` |
+| `transferStorageReceiverBox` | `Revert.transferStorageReceiver` |
+| `transferStorageReceiverDiamond` | as above; the run is `Net.netTransferStorageReceiver` |
+| `transferCapturedAmount` | `Revert.transferCapturedAmount` |
+| `transferCapturedAmountDiamond` | as above; the run is `Net.netTransferCapturedAmount` |
+| `transferUnfundedDiamond` | `Net.transferUnfunded` (a run: the contract cannot fund the transfer, so it reverts) |
+| `requireSimple` | `Revert.requireBox` (box), `Revert.requireDiamond` (diamond) |
+| `assertSimple` | `Revert.assertBox` (box), `Revert.assertDiamond` (diamond) |
+| `if (ok) s0 else s1` (the sequent rule `ifElseSplit`) | `Branch.branchLocals` (box), `Branch.branchDiamond` (diamond) — `ifElseSplit` is now a genuine two-premise `Taclet`, not a rule with nothing to cite |
+
+## Solidity/Examples/Derivations/ControlFlow.lean
+
+The condition-directed rewrites this file walked (`ifElseTrue`, `ifElseFalse`,
+`ifElseNegated`) are gone: a literal condition is simple, so `if (true)`
+splits like any other condition under `ifElseSplit`, and `!c` is captured
+like `a == b` under `ifElseUnfold` (`Branch.lean`'s docstring).
+
+| Old | New |
+|---|---|
+| `ifElseTrueThenWrite` | `Branch.ifTrue` |
+| `ifElseFalseThenWrite` | `Branch.ifFalse` |
+| `ifElseNegatedThenWrite` | `Branch.ifNegated` |
+| `revert()` under the box | the unnamed `example : ⊢ dl!{ [ revert(); ] true }` in `Revert.lean` — a single step, no name to cite |
+| `revert()` under the diamond | the unnamed `example : ¬ (⊨ dl!{ ⟨ revert(); ⟩ true })` in `Revert.lean` |
+
+## Solidity/Examples/Derivations/DynamicLogic.lean
+
+The judgment-level rewriting this file demonstrated (`⇝ᵈ`, `JudgmentSplit`,
+the `<[ … ]>` combined modality) is gone with the untyped layer: a walk is now
+a derivation `⊢ φ` in `Calculus/Logic.lean`, built one `apply` per taclet
+(`ApplySteps.lean`'s docstring), and the strategy (`sol_symex`) is a single
+tactic rather than a rewriting relation with its own arrows.
+
+| Old | New |
+|---|---|
+| `deepFieldWriteJudgment` | duplicate of `StorageSteps.deepFieldWrite`, now one `⊨ dl!{ … }` proved end to end rather than a rewrite chain ending at the empty program |
+| `deepFieldReadJudgment` | duplicate of `StorageSteps.deepFieldRead` |
+| `deepFieldWriteInContext` (the `let omega := …` splice) | not expressible: a chain no longer carries an inactive program suffix to splice back in |
+| the `storage-root-postincrement.key` judgment chain | duplicate of `StorageSteps.rootWriteThenIncrement` / `Values.storageRootPostincrement` |
+| the if-then-else box chain | duplicate of `Branch.ifTrue` |
+| the `ifElseUnfold` capture example | the corresponding step of `Branch.branchLocals`'s walk |
+| the `SolidityJudgment.ite_split` example (a universally quantified split over a stuck condition) | not expressible in this form: `ifElseSplit` is now a proper two-premise `Taclet` (`apply split .ifElseSplit`), covered as one of "every constructor once" in `ApplySteps.lean`, not a side lemma about a stuck condition |
+
+## Solidity/Examples/Taclets/ValueOps.lean
+
+One theorem per `.key` file of `keyext.solidity.examples/taclets`'s value
+operators, now `Values.lean`.
+
+| Old | New |
+|---|---|
+| `addition-simple.key` | `Values.additionSimple` |
+| `subtraction-simple.key` | `Values.subtractionSimple` |
+| `multiplication-simple.key` | `Values.multiplicationSimple` |
+| `power-simple.key` | not expressible: `**` has no syntax here |
+| `division-simple.key` | `Values.divisionSimple` |
+| `modulo-simple.key` | `Values.moduloSimple` |
+| division by zero, box and diamond | `Values.divisionByZeroBox`, and the unnamed `example : ¬ …` after it |
+| `less-than-simple.key` | `Values.lessThanSimple` |
+| `less-equal-simple.key` | `Values.lessEqualSimple` |
+| `greater-than-simple.key` | `Values.greaterThanSimple` |
+| `greater-equal-simple.key` | `Values.greaterEqualSimple` |
+| `logical-and-simple.key` (`true && false`) | not ported: `Values.andShortCircuit` is the surviving `&&` example, over a read that would revert rather than two literals |
+| `logical-or-simple.key` (`true || false`) | not ported: no `||` example |
+| `logical-not-simple.key` (`!false`) | not ported: no `!` example |
+| `not-equal-simple.key` | `Values.notEqualSimple` |
+| `unary-minus-simple.key` (`uint x = 5; result = -x;`) | not ported: no unary-minus example |
+| `addition-storage-read.key` | `Values.additionStorageRead` |
+| `subtraction-storage-read.key` | `Values.subtractionStorageRead` |
+| `addition-storage-write.key` | `Values.additionStorageWrite` |
+| `addition-both-storage.key` | `Values.additionBothStorage` |
+| declaration without initialiser, then assignment (`localValueDeclInitDrop`/`valueDeclSkip`/`localValueAssign`) | `Values.declThenAssign` |
+| short-circuiting `&&` | `Values.andShortCircuit` |
+| `localAddAssign`/`localSubAssign` | `Values.compoundLocal` |
+| `localDivAssign` zero-divisor branch, box and diamond | `Values.divAssignByZeroBox`, and the unnamed `example : ¬ …` after it |
+| `localPreincrement`/`localPostincrement` (`++x; x++;`) | `Values.incrementLocal` |
+| `localPredecrement` (via `incDecExpr`) | not expressible: `--` is not a token here (it opens a Lean comment) |
+| `addAssignValueRhsCapture` | `Values.compoundCapture`; `Values.compoundCaptureStorage` for a storage operand |
+| `ternaryCaptureCond`/`ternaryToIf` | `Values.ternaryCapture`, `Values.ternarySimple`, `Values.ternaryCaptureStorage`, `Values.ternaryToIfStorage` |
+| the conditional's short-circuit (the untaken branch) | `Values.ternaryShortCircuit` |
+| — | `Values.overflowBox` and the `0 - 1` underflow refutation (**added**: checked arithmetic, which this file predates) |

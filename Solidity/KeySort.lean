@@ -7,10 +7,11 @@ that exists upstream, and every edge of `parents` is one line of a
 `.key` header or one `new …Sort(…)` in the Java that creates sorts at
 parse time. Nothing here is chosen: this file is read off
 `SolidiKeY/solkey` at the commit `e67a0d7c48`, and it is the *only* model of
-the lattice — `TacletAnnotations`,
-`SortFaithfulness` and the `SolKey` reader's decoder all state their sort
-claims against it, so the two packages cannot disagree about what
-`\extends Prim` means.
+the lattice — `TacletAnnotations` and the `SolKey` reader's decoder both
+state their sort claims against it (as did the faithfulness proof that
+connected the table to the interpreter, removed with the untyped layer and
+to be ported, `docs/kernel-port.md`), so the two packages cannot disagree
+about what `\extends Prim` means.
 
 The named sorts (`keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/`):
 

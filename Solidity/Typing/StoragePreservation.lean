@@ -5,8 +5,9 @@ import Solidity.Semantics.Properties
 # Storage write core: `save` preserves typing
 
 The write-side twin of `StorageTyping`'s read lemmas, and the first
-layer of the type-soundness development (`State.lean`,
-`Soundness.lean`): saving a value of the path's layout type keeps
+layer of the type-soundness development (`State.lean`, and the removed
+`Typing/Soundness` module, to be ported — `docs/kernel-port.md`'s
+"Port later"): saving a value of the path's layout type keeps
 the whole storage well-typed.
 
 - `save_hasTy` mirrors `find_hasTy` arm for arm: a `ty`-typed tree
@@ -16,7 +17,8 @@ the whole storage well-typed.
   under `nodupKeysB L.globals`, which is genuinely load-bearing: with
   a duplicated layout root the two rows check the *same* stored value
   against different types, and a save that satisfies one row can break
-  the other (`Counterexamples/PreservationNecessity.lean`).
+  the other (a counterexample removed with the untyped layer, to be
+  ported — `docs/kernel-port.md`'s "Port later").
 - The written values the interpreter produces are typed:
   `SVal.defaultOf_hasTy` (the `delete` default preserves the type,
   mapping members untouched), `defaultForTy_hasTy` under `defaultOk`
@@ -392,8 +394,9 @@ theorem save_hasTy {segs : List Seg} :
 
 /-- No duplicate keys. `wellTypedStorageB` checks every layout row
 against the single stored value at its root, so a duplicated root would
-check one value against two types — see the refutation in
-`Counterexamples/PreservationNecessity.lean`. -/
+check one value against two types — see the refutation that was the
+removed `PreservationNecessity` counterexample (`docs/kernel-port.md`'s
+"Port later"). -/
 def nodupKeysB [DecidableEq κ] : List (κ × α) -> Bool
   | [] => true
   | (k, _) :: rest => (lookupBy k rest).isNone && nodupKeysB rest

@@ -244,8 +244,8 @@ theorem StateWT.ofB {Γ : Ctx} {H : HeapTy} {L : Layout} {s : State}
 A store typing with a duplicated key is read through `lookupBy`, which
 sees only the first row.  `dedupKeys` keeps exactly the rows `lookupBy`
 sees, so it changes no lookup and is key-unique — the tool that shows
-`heapTyNodup` is not needed by the type-soundness headline
-(`Counterexamples/PreservationNecessity.lean`, `execStmt_sound_dupHeapTy`). -/
+`heapTyNodup` was not needed by the removed untyped layer's type-soundness
+headline (to be ported: `docs/kernel-port.md`'s "Port later"). -/
 
 /-- Keep the first row of each key (`seen` accumulates the keys kept). -/
 def dedupKeysAux [DecidableEq κ] : List (κ × α) -> List κ -> List (κ × α)

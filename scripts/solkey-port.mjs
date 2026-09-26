@@ -226,14 +226,17 @@ const UNSUPPORTED = {
 /**
  * The `.key` suites. They are KeY problem files, not annotated
  * Solidity, so there is nothing here to translate: the obligations that
- * *are* expressible are hand-written in `Corpus/Wp/Net.lean` and
- * `Corpus/Wp/Rules.lean`, and this table records which, so that
+ * *are* expressible are hand-written as `sol{}` examples in
+ * `Solidity/Examples/` (`Net.lean`, `StorageSuite.lean`, and the rest —
+ * the untyped layer's Corpus/Wp/Net.lean and Corpus/Wp/Rules.lean are
+ * gone; `docs/kernel-port.md`'s "Port later" tracks re-deriving this
+ * table from the typed examples), and this table records which, so that
  * every one of solkey's obligations appears in `expected.tsv` — the
  * unported ones with the reason.
  *
  * Two entries may share a `contract`, and so a module: `storage` and
  * `rules` are different upstream directories whose obligations are both
- * term-level and both live in `Corpus/Wp/Rules.lean`.
+ * term-level and both hand-written across `Solidity/Examples/`.
  */
 const KEY_SUITES = [
   {

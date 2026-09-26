@@ -214,8 +214,9 @@ private def readSite (domain : ReadDomain) (r : ParsedRead) : ReadSite :=
 /-- Abstract one scanned read to the `TacletAnnotations` vocabulary. A
 fixed sort token is looked up in the lattice (`KeySort.ofName`); a token
 that names no declared sort is an error, and a fixed sort the
-faithfulness proofs do not cover fails `sortFaithful_all` rather than
-being silently accepted. -/
+faithfulness proof does not cover would fail `sortFaithful_all` rather than
+being silently accepted — that proof is to be ported with the rest of the
+untyped layer's checks (`docs/kernel-port.md`). -/
 def abstractRead (t : ParsedTaclet) (r : ParsedRead) :
     Except String TacletRead := do
   let domain := readDomain r

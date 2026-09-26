@@ -5,10 +5,13 @@
 # Docstrings here cite modules by four different conventions, so a reference
 # is resolved in this order and the first hit wins:
 #
-#   1. relative to the citing file's own directory  (`Vocab.lean` in `Wp/Terminal/`)
+#   1. relative to the citing file's own directory  (`ReadWrite.lean` cited
+#                                                     from `Calculus/Close.lean`)
 #   2. relative to `Solidity/`                      (`Theory/Storage.lean`)
 #   3. relative to the repository root              (`Solidity/AST.lean`)
-#   4. by unique basename anywhere in the package   (`DynamicLogic.lean`)
+#   4. by unique basename anywhere in the package   (`KeyTaclets.lean` cited
+#                                                     from `Examples/Values.lean`,
+#                                                     which is not in `Calculus/`)
 #
 # A basename that matches more than one file resolves, but is reported with
 # --strict: it is the hazard this repository is most prone to, since the

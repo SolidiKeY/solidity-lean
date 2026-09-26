@@ -413,7 +413,8 @@ end
 A copy allocates; it never frees, so every identity at or above the *final*
 `nextId` was already absent before the copy.  That is what makes
 `Theory.Memory.new` a consequence of a denotation rather than an assumption
-about one (`Update/Theory.lean`, `denoteMem_new`). -/
+about one -- connecting `Theory.Memory.new` to the interpreter is a future
+denotation proof, not yet written (`denoteMem_new`). -/
 
 /-- A state computation only advances the fresh-ID counter. -/
 def NextIdGrows (s : State) (r : Res (State × α)) : Prop :=
@@ -514,7 +515,8 @@ theorem allocDefault_nextId {s t : State} {ref : RefTy} {n : Nat}
 /-- A copy that yields a *reference* allocated at least one object, so it
 advanced the counter strictly.  This is what makes the root `addM` mints
 genuinely below the counter afterwards, and hence not fresh
-(`Update/Theory.lean`, `denoteMem_new`). -/
+-- again the future denotation proof connecting the theory to the
+interpreter, not yet written (`denoteMem_new`). -/
 theorem copyStToM_nextId_lt {s t : State} {v : SVal} {n : Nat}
     (h : copyStToM s v = .ok (t, .ref n)) : s.nextId < t.nextId := by
   cases v with

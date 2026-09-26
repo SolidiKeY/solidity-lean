@@ -55,8 +55,8 @@ Mathlib.
 
 ## Reading files
 
-Several files are enormous — `Calculus/RuleSoundness.lean` is 10,864 lines,
-`Evm/Correctness.lean` 6,436, `Calculus/Coverage.lean` 4,094, `Calculus/Rules.lean` 3,486.
+Several files are large — `Calculus/RuleSyntax.lean` is 1,553 lines,
+`Syntax.lean` 1,436, `Calculus/KeyTaclets.lean` 1,348, `Semantics.lean` 1,283.
 
 - `lean_file_outline` first, then `Read` with `offset`/`limit` on the one
   declaration you need.
@@ -72,7 +72,6 @@ Several files are enormous — `Calculus/RuleSoundness.lean` is 10,864 lines,
 |---|---|
 | ordinary edit inside one file | `lean_diagnostic_messages`, nothing else |
 | new import or new module | `lean_build` (restarts the LSP) |
-| touched `SolidityTraces.lean` or `Solidity/Traces/**` | `./scripts/check-traces.sh` (~30 min) |
 | touched `SortCheck/Annotations.lean` | `lake exe solkeycheck` (must stay at zero) |
 | moved or renamed a module | `./scripts/check-doc-paths.sh` (seconds) — the prose cites modules by path, and a docstring naming a file that no longer exists is worse than the move |
 | final confirmation | `./run-lean.sh` (~24 min) |

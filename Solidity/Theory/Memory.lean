@@ -7,9 +7,10 @@ import Solidity.Semantics.DecEq
 The memory twin of `Theory/Storage.lean`: `mtMem`, `write`, `addM`, `read`,
 `readR` and `new` (`memoryHeader.key`, `memoryRules.key`) as total Lean
 functions, one theorem per taclet.  The denotation into the interpreter's heap
-lives in `Update/Theory.lean`, beside the update it is used to read — it needs
-`writeMemField`/`allocDefault`, which this module deliberately does not
-import so that the algebra stays as cheap to elaborate as the storage one.
+is not yet written — the untyped layer had it beside the update it was used
+to read (its Update/Theory module), needing `writeMemField`/`allocDefault`,
+which this module deliberately does not import so that the algebra stays as
+cheap to elaborate as the storage one.
 
 Unlike `structRules.key`, this file has **no counterpart in the fundamentals
 repository**: that one models `read` and nothing else, so `readOnWrite`,
@@ -29,9 +30,10 @@ allocating anything".
 The interpreter is the other way round: every object it allocates gets its own
 `Nat` and a path is resolved to one *before* any read or write happens
 (`Wp.memBase`, `Semantics.readM`).  Resolving a path identity against a
-concrete heap is therefore a function of this module (`resolve`), used by the
-denotation in `Update/Theory.lean` and by the `pre` leaf below; the algebra
-itself never resolves anything, exactly as KeY's does not.
+concrete heap is therefore a function of this module (`resolve`), used by
+the denotation above (not yet written; the untyped layer's Update/Theory
+module had it) and by the `pre` leaf below; the algebra itself never
+resolves anything, exactly as KeY's does not.
 
 `readR` walks a whole path one field at a time, resolving each field to the
 identity it names before reading the next, so the chain-walking layer —
@@ -156,9 +158,9 @@ def isPrimitive (t : Ty) : Bool := t.isPrimitive
 
 `readRCons` is stated upstream with `firsts`/`last`: resolve all but the last
 field, then read there.  The definition here recurses from the front, because
-that is what keeps it structural and every chain in `Traces/Theory.lean` steps
-through `readREmpty`/`readRCons` by `rfl`.  This is the same rule in KeY's
-spelling, as a theorem. -/
+that is what keeps it structural and every chain in `Examples/Theory.lean`
+steps through `readREmpty`/`readRCons` by `rfl`.  This is the same rule in
+KeY's spelling, as a theorem. -/
 
 theorem readR_eq_firsts_last (mem : Memory) (id : Identity) :
     forall (flds : List Seg) (h : flds ≠ []),

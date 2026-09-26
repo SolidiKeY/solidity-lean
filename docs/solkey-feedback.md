@@ -41,7 +41,7 @@ the sections further down carry the details.
    can only get stuck (unbound variable); a *pure* path can revert, because
    path resolution evaluates the index and checked arithmetic reverts.
    `people[1 / 0].age = ghost` hits both at once, and
-   `Counterexamples/ErrorOrder.lean` proves `¬ ResultsAgree` on it. Any
+   Counterexamples/ErrorOrder.lean proves `¬ ResultsAgree` on it. Any
    guard of the form "freeze only when the receiver is non-simple" inherits
    this hole.
 
@@ -78,7 +78,7 @@ the sections further down carry the details.
    `persons[p.age++] = p;` stores `age == 1`. So do **not** extend the freeze
    to reference sources. This is what the `hprim` hypothesis on the Lean
    `*UnfoldLeft*` soundness theorems fences off
-   (`Counterexamples/RefSourceOrder.lean`, `docs/solc-alignment.md`); the fix
+   (Counterexamples/RefSourceOrder.lean, `docs/solc-alignment.md`); the fix
    owed is on the Lean side.
 
    *The deleted `Inner*NonSimpleIndexCapture` pair was doubly wrong*, which
@@ -103,8 +103,8 @@ the sections further down carry the details.
    consume facts the symbolic storage does not provide: `size ≥ 0` for
    `pop`, an in-bounds `at(i)` read succeeds, an unwritten mapping key
    reads `defaultValue`, a declared struct member is never stuck.
-   `Typing/WellFormedConsumers.lean` proves every such row from
-   `wellTypedStorageB`/`canonicalStorageB`, and `Typing/Reachability.lean`
+   Typing/WellFormedConsumers.lean proves every such row from
+   `wellTypedStorageB`/`canonicalStorageB`, and Typing/Reachability.lean
    shows the canonical form is exactly what execution from the initial
    state reaches. In solkey these facts come from nowhere. Shape it
    like `heapRules.key`'s `wellFormed(heap)`: proving taclets per store
@@ -136,7 +136,7 @@ the sections further down carry the details.
    calculus rule rather than a user-side rewrite.
 
 7. **Determinism under the block modality.** solkey's rule set is
-   mutually exclusive per modality (`Calculus/Uniqueness.lean`,
+   mutually exclusive per modality (Calculus/Uniqueness.lean,
    `stepCases_exclusive`), but under the block modality a box/diamond
    twin pair applies at once. The twelve twin pairs are effect-identical
    up to mode (`CandidateStep.twinEffects`); KeY's strategy should
@@ -277,7 +277,7 @@ cheaper to maintain:
   reaches a proof.
 - **Terminal rules as updates.** Every terminal taclet (empty residual)
   now has an explicit state update in the interpreter's vocabulary
-  (`Wp/Terminal/Table.lean`) with `execStmt s stmt = terminalUpdate
+  (Wp/Terminal/Table.lean) with `execStmt s stmt = terminalUpdate
   r stmt s` under the taclet's guard. Those updates are the KeY update
   algebra; the equations are a per-taclet test oracle solkey could run
   on its own `.key` examples.
@@ -317,7 +317,7 @@ cheaper to maintain:
   *before* the simple RHS was read, but solc — and the Lean interpreter —
   read the RHS first. On `values[i++] = i` with `i = 0` the program writes
   `0` and the residual wrote `1`. Lean-checked in
-  `Counterexamples/EvaluationOrder.lean` (`indexWrite_preFix_not_sound`).
+  Counterexamples/EvaluationOrder.lean (`indexWrite_preFix_not_sound`).
   **Fixed upstream 2026-09-09** by the `*ValueRhsCapture` order: bind the
   RHS first, then capture the index; see ranked item 1 for the full
   account, including why the `*_unfold_leftFst` family was never affected
@@ -385,7 +385,7 @@ Lean-checked fact about upstream at `e67a0d7c48`.
 
 Asked whether `find(st, p)` on an int-declared field needs a storage
 wellformedness ("wellfoundness") invariant to return an int. Split
-answer, machine-checked in `Counterexamples/WellTypedNecessity.lean`:
+answer, machine-checked in Counterexamples/WellTypedNecessity.lean:
 
 - **Calculus soundness: no invariant needed.** `find<[int]>` is
   int-sorted by construction, and every mismatch degrades to an
@@ -417,7 +417,7 @@ so `wellFormed(storage)` is a legitimate once-assumed PO hypothesis:
 `execBlock_preserves_wellTyped` carries it to every reachable state and
 `run_then_find_int` closes the original question end-to-end. The
 "only with wellformed" boundary is drawn by six one-hypothesis-dropped
-refutations in `Counterexamples/PreservationNecessity.lean`, two of
+refutations in Counterexamples/PreservationNecessity.lean, two of
 which carry calculus-side lessons for solkey: program-variable typing
 (a lying stack binding breaks storage well-typedness from a well-typed
 store — KeY's program-variable sorts are the calculus twin) and the
@@ -432,7 +432,7 @@ Asked how to guarantee nothing is *missing* from the invariant — whether
 question has a formal reading: "everything inferable" is exactly what
 holds on every *reachable* storage, so the invariant is complete iff it
 coincides with reachability from the contract's initial state. Both
-directions are now machine-checked in `Typing/Reachability.lean`:
+directions are now machine-checked in Typing/Reachability.lean:
 
 - `reachable_wellTyped` — reachable ⇒ well-typed (preservation from
   `initialState L`, whose `StateWT` proof `initialState_wt` is the
@@ -475,7 +475,7 @@ say what such a predicate must contain and how to keep it complete:
 - shape it like `heapRules.key`'s two families — *proving* taclets, one
   per store constructor (`save`, `delAt`, the push/pop `save`s),
   mirroring `save_hasTy`/`save_canonical`, and *using* taclets, one per
-  consumer row of `Typing/WellFormedConsumers.lean` (`size ≥ 0`; `0 ≤ i < size`
+  consumer row of Typing/WellFormedConsumers.lean (`size ≥ 0`; `0 ≤ i < size`
   ⇒ the `at(i)` read is typed; unwritten key ⇒ `defaultValue`; declared
   member ⇒ `selectSt` is defined);
 - state explicitly what Lean's `SVal` datatype gives for free:
