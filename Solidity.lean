@@ -22,6 +22,8 @@ import Solidity.Calculus.Notation
 import Solidity.Calculus.Close
 import Solidity.Calculus.CloseTests
 import Solidity.Calculus.Uniqueness
+import Solidity.Calculus.Progress
+import Solidity.Calculus.Termination
 import Solidity.Examples.Tour
 import Solidity.Examples.StorageSteps
 import Solidity.Examples.StorageSuite
