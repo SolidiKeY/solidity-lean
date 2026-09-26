@@ -10,6 +10,16 @@ import Solidity.Update
 import Solidity.Calculus.RuleSyntax
 import Solidity.Calculus.Rules
 import Solidity.Calculus.Completeness
+import Solidity.Calculus.RuleShapes
+import Solidity.Calculus.PrintedRules
+import Solidity.Calculus.SoundKit
+import Solidity.Calculus.SoundUpdate
+import Solidity.Calculus.SoundUnfold
+import Solidity.Calculus.RuleSoundness
+import Solidity.Calculus.Logic
+import Solidity.Calculus.Symex
+import Solidity.Calculus.Notation
+import Solidity.Calculus.Close
 import Solidity.Typing.Storage
 import Solidity.Typing.StoragePreservation
 import Solidity.Typing.State

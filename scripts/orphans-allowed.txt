@@ -1,7 +1,4 @@
 # Port sources: old modules kept, unbuilt, until their port lands (docs/kernel-port.md).
-Solidity.Calculus.PrintedRules
-Solidity.Calculus.RuleShapes
-Solidity.Calculus.RuleSoundness
 Solidity.Counterexamples.PreFixSortAnnotations
 Solidity.Counterexamples.WellTypedNecessity
 Solidity.Examples.CrossDomain
@@ -24,10 +21,4 @@ Solidity.Examples.Taclets.MemoryOps
 Solidity.Examples.Taclets.NetOps
 Solidity.Examples.Taclets.StorageOps
 Solidity.Examples.Taclets.ValueOps
-Solidity.Kernel.Logic
-Solidity.Kernel.Measure
-Solidity.Kernel.Sound
-Solidity.Kernel.Symex
-Solidity.Kernel.Taclet
-Solidity.Kernel.Unique
 Solidity.SortCheck.Faithfulness
