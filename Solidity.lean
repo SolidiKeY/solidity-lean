@@ -9,6 +9,7 @@ import Solidity.Semantics.Agree
 import Solidity.Update
 import Solidity.Calculus.RuleSyntax
 import Solidity.Calculus.Rules
+import Solidity.Calculus.Completeness
 import Solidity.Typing.Storage
 import Solidity.Typing.StoragePreservation
 import Solidity.Typing.State

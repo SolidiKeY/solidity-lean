@@ -90,12 +90,11 @@ persons[p.age++] = p;
 assert(persons[0].age == 1);   // holds on chain; KeY closes it
 ```
 
-`Counterexamples/RefSourceOrder.lean` shows this interpreter storing `0`
-instead. The calculus is right here and the interpreter is wrong; the
-`hprim : rhs.ty.isPrimitive = true` hypothesis on the `*UnfoldLeft*`
-soundness theorems (`Calculus/RuleSoundness.lean`) is what keeps them from
-asserting the interpreter's answer. **Open:** make `execAssignNested`
-target-first when the source is reference-typed, then drop `hprim`.
+The old untyped interpreter stored `0` instead (its refutation,
+`Counterexamples/RefSourceOrder`, was removed with the untyped layer).  In the
+typed syntax a value has no effects, so `persons[p.age++] = p;` elaborates
+with the index captured first, which is solc's order.  **Open:** confirm that
+with a `Stmt.run` example once `Examples/` is ported.
 
 ## Storage-to-storage copies of mapping-carrying types
 

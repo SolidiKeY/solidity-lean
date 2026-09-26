@@ -1,9 +1,0 @@
-import Solidity.Corpus.Wp.TestSuite
-import Solidity.Corpus.Wp.SolcExpressions
-import Solidity.Corpus.Wp.SolcStructs
-import Solidity.Corpus.Wp.SolcArrays
-import Solidity.Corpus.Wp.SolcMemory
-import Solidity.Corpus.Wp.SolcMappings
-import Solidity.Corpus.Wp.SolcControlFlow
-import Solidity.Corpus.Wp.Net
-import Solidity.Corpus.Wp.Rules
