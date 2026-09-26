@@ -24,6 +24,8 @@ import Solidity.Calculus.CloseTests
 import Solidity.Examples.Tour
 import Solidity.Examples.StorageSteps
 import Solidity.Examples.StorageSuite
+import Solidity.Examples.StorageDelete
+import Solidity.Examples.LedgerDelete
 import Solidity.Examples.Branch
 import Solidity.Examples.Revert
 import Solidity.Examples.Values

@@ -289,6 +289,14 @@ theorem arrayIndexWriteRefSource :
   sol_symex
   sol_close
 
+/-- `Person storage p = people[i]; p.age = 3;` — an alias bound to an entry
+(`storageIndexReadArrayBindLocalRoot`): the write through it lands in
+`people[i]`. -/
+theorem aliasFromIndex :
+    ⊨ dl!{ [ Person storage p = people[i]; p.age = 3; ] people[i].age == 3 } := by
+  sol_symex
+  sol_close
+
 /-- `matrix[i][j] = 100;` — a non-simple receiver under an index: the source is
 captured, then the receiver `matrix[i]` aliased
 (`storageIndexReadArrayBindLocalRoot`), then the index.  The order is the claim;
@@ -490,6 +498,13 @@ theorem fieldCompoundAssign :
   sol_symex
   sol_close
 
+/-- `uint x = alice.age; uint y = x + 1; alice.age = y;` — the read–compute–write
+block that `alice.age += 1;` is not desugared to writes the same value. -/
+theorem compoundDesugared :
+    ⊨ dl!{ [ uint x = alice.age; uint y = x + 1; alice.age = y; ] alice.age == x + 1 } := by
+  sol_symex
+  sol_close
+
 /-- `age = 10; age += 5;` — a root (`storageRootOpAssign`, `storage-root-add-assign.key`). -/
 theorem rootOpAssign : ⊨ dl!{ [ age = 10; age += 5; uint result = age; ] result == 15 } := by
   sol_symex
@@ -602,6 +617,12 @@ theorem addFieldOperandCaptured :
   sol_symex
   sol_close
 
+/-- `result = age + a;` — a state variable operand is not simple either: it is
+captured and read with `select`. -/
+theorem rootOperandCaptured : ⊨ dl!{ [ result = age + a; ] result == age + a } := by
+  sol_symex
+  sol_close
+
 /-- `alice.age = x + y;` — the source is frozen before the write. -/
 theorem addResultCaptured :
     ⊨ dl!{ x == 1 && y == 2 → [ alice.age = x + y; ] alice.age == 3 } := by
@@ -639,6 +660,19 @@ theorem transferRootReceiver : ⊨ dl!{ [ owner.transfer(5); ] true } := by
   apply unfold .transfer_unfold_leftFstReceiver
   apply unfold .localValueDeclInitDrop
   apply update .storageRootReadSelect
+  apply update .transferNoCallback
+  apply empty
+  apply close
+  sol_symex
+  sol_close
+
+/-- `to.transfer(x + 2);` — a non-simple amount is captured first
+(`transfer_unfold_rightSndArgument`, `net-transfer-capture-argument.key`). -/
+theorem transferAmountCaptured : ⊨ dl!{ [ to.transfer(x + 2); ] true } := by
+  apply Proves.valid
+  apply unfold .transfer_unfold_rightSndArgument
+  apply unfold .localValueDeclInitDrop
+  apply update .binopAssignment
   apply update .transferNoCallback
   apply empty
   apply close

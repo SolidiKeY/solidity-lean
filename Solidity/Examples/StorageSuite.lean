@@ -73,6 +73,29 @@ theorem disjointFields :
   sol_symex
   sol_close
 
+/-- `bob.age = 7; alice = bob; uint result = alice.age;` — a root copy is deep
+(`storage-root-copy-struct.key`) … -/
+theorem rootCopyStruct :
+    ⊨ dl!{ [ bob.age = 7; alice = bob; uint result = alice.age; ] result == 7 } := by
+  sol_symex
+  sol_close
+
+/-- … and by value: writing the source afterwards leaves the copy as it was. -/
+theorem rootCopyByValue :
+    ⊨ dl!{ [ bob.age = 7; alice = bob; bob.age = 9; uint result = alice.age; ]
+           result == 7 } := by
+  sol_symex
+  sol_close
+
+/-- `bob.account.balance = 11; Account storage acc = bob.account;
+alice.account = acc; uint result = alice.account.balance;` — a member copied
+from an alias (`storage-field-copy-struct.key`). -/
+theorem fieldCopyStruct :
+    ⊨ dl!{ [ bob.account.balance = 11; Account storage acc = bob.account;
+             alice.account = acc; uint result = alice.account.balance; ] result == 11 } := by
+  sol_symex
+  sol_close
+
 /-! ## 2 · Aliases -/
 
 /-- `Person storage p = alice; bob.age = 20; p = bob; uint result = p.age;` — a
@@ -125,6 +148,13 @@ theorem localDeclSkip :
 (`storage-index-multiple-writes.key`). -/
 theorem arrayMultipleWrites :
     ⊨ dl!{ [ values[3] = 5; values[3] = 8; uint result = values[3]; ] result == 8 } := by
+  sol_symex
+  sol_close
+
+/-- `matrix[2][3] = 99; uint result = matrix[2][3];`
+(`storage-matrix-write-read.key`, `storage-index-decomposition.key`). -/
+theorem matrixWriteRead :
+    ⊨ dl!{ [ matrix[2][3] = 99; uint result = matrix[2][3]; ] result == 99 } := by
   sol_symex
   sol_close
 
@@ -273,6 +303,22 @@ theorem divByZero : ⊨ dl!{ [ age = 10; age /= 0; ] false } := by
 `storage-field-preincrement.key`). -/
 theorem fieldIncrement :
     ⊨ dl!{ [ alice.age = 30; ++alice.age; uint result = alice.age; ] result == 31 } := by
+  sol_symex
+  sol_close
+
+/-- `alice.account.balance = 30; alice.account.balance += 4;` — through the
+alias Step 2 binds (`storage-field-deep-add-assign.key`). -/
+theorem deepOpAssignRead :
+    ⊨ dl!{ [ alice.account.balance = 30; alice.account.balance += 4;
+             uint result = alice.account.balance; ] result == 34 } := by
+  sol_symex
+  sol_close
+
+/-- `alice.account.balance = 100; ++alice.account.balance;`
+(`storage-deep-field-preincrement.key`). -/
+theorem deepIncrementRead :
+    ⊨ dl!{ [ alice.account.balance = 100; ++alice.account.balance;
+             uint result = alice.account.balance; ] result == 101 } := by
   sol_symex
   sol_close
 
