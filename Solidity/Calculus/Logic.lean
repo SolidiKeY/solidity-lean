@@ -287,4 +287,37 @@ open Proves in
 /-- A derivation from the empty context proves validity: `⊢ φ` gives `⊨ φ`. -/
 theorem Proves.valid {φ : Fml C} (h : ⊢ φ) : Valid φ := h.sound
 
+/-! ## Printing sequents
+
+`Proves Γ φ` prints as the sequent `dl{ Γ ⟹ φ }`, so every goal of an
+`apply` derivation reads as the line of the derivation it is: the context
+left of `⟹`, in order, and the formula still to prove right of it. -/
+
+section Print
+open Lean Meta PrettyPrinter Delaborator SubExpr
+set_option hygiene false
+
+def ppHyp? (e : Lean.Expr) : MetaM (Option (TSyntax `dl_hyp)) := do
+  match_expr (← whnf (← instantiateMVars e)) with
+  | Hyp.pre _ a => return some (← `(dl_hyp| $(← ppFml a):dl_fml))
+  | Hyp.upd _ _ U => return some (← `(dl_hyp| $(← ppUpd U):dl_upd))
+  | _ => return none
+
+/-- `Proves Γ φ`: `dl{ Γ ⟹ φ }`. -/
+@[delab app.Solidity.Proves]
+def delabProves : Delab := do
+  unless ← ppOn do failure
+  let e ← getExpr
+  guard (e.getAppNumArgs == 3)
+  let some hs ← listElems? (e.getArg! 1) | failure
+  let mut out := #[]
+  for h in hs do
+    let some h ← ppHyp? h | failure
+    out := out.push h
+  let φ ← ppFml (e.getArg! 2)
+  guard !(isEscape φ)
+  `(dl{ $[$out],* ⟹ $φ:dl_fml })
+
+end Print
+
 end Solidity
