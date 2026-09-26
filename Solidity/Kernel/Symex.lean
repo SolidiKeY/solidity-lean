@@ -223,7 +223,8 @@ statement and splitting every branch, until what is left are the goals
 `∀ σ, H.holds ψ σ` (or `False`, when the fuel runs out). -/
 macro "symex" : tactic => `(tactic| repeat' (first
   | (rw [Kont.vc]; try simp only [Stmt.step, localStep, assignStep, rebindStep, deleteStep,
-      binopRightStep, shortCircuitStep, copyStep, opStep, incStep, assignIncStep, ternaryStep, pushStep, popStep, transferStep, rebindMemStep, declMemStep, assignMemStep, assignFromMemStep,
+      binopRightStep, shortCircuitStep, copyStep, opStep, incStep, assignIncStep, ternaryStep, pushStep, popStep, transferStep, rebindMemStep, declMemStep, assignMemStep, assignFromMemStep, fieldLeftFstStep, indexLeftFstStep,
+      indexCaptureStep, memValStep, Val.notTernary,
       MHole.unfoldStep, MHole.fill, MHole.extend, MPath.isSimple, MPath.isBindable, MPath.new,
       MPath.weaken, MLoc.weaken, VHole.fill, VHole.weaken,
       Src.isSimple, Src.decl, Src.fresh,

@@ -59,6 +59,12 @@ def MPath.isBindable {Γ : Ctx} {T : Ty} : MPath C Γ T → Bool
   | .loc (.field b _ _) => b.isSimple
   | .loc (.index b i) => b.isSimple && i.isSimple
 
+/-- Not a conditional: KeY's `isValueSource` for a value (a conditional in a
+write is lowered first, `ternaryToIf*`, never captured). -/
+def Val.notTernary {Γ : Ctx} {p : PrimTy} : Val C Γ p → Bool
+  | .ternary .. => false
+  | _ => true
+
 /-- A path an alias can be bound to directly (`lsv := sp`, `lsv := sp.fr`,
 `lsv := sp[ie]`): one step from a simple path, on a simple index. -/
 def SPath.isBindable {Γ : Ctx} {T : Ty} : SPath C Γ T → Bool
@@ -443,7 +449,7 @@ inductive Taclet (C : Contract) (m : Modality) : {Γ Γ' : Ctx} → Stmt C Γ Γ
   | storageFieldWrite_unfold_leftFst {Γ : Ctx} {s : Name} {p : PrimTy}
       (nsp : SPath C Γ (.struct s)) (hn : nsp.isSimple = false) (f : Name)
       (hf : C.fieldType s f = some (.prim p)) (e : Val C Γ p)
-      (se sp : Name) (hse : isFresh C Γ se = true) (hsp : isFresh C (Ctx.val Γ se p) sp = true) :
+      (se sp : Name) (hse : isFresh C Γ se = true) (hsp : isFresh C (Ctx.val Γ se p) sp = true) (hnt : e.notTernary = true) :
       .assign (.field nsp f hf) (.val e) ⇒
         .unfold [se, sp]
           (.cons (.declLocal p se hse (some e))
@@ -466,7 +472,7 @@ inductive Taclet (C : Contract) (m : Modality) : {Γ Γ' : Ctx} → Stmt C Γ Γ
       (it : IndexTy R₀ kp (.prim p)) (nsp : SPath C Γ (.ref R₀)) (hn : nsp.isSimple = false)
       (e₁ : Val C Γ kp) (e₂ : Val C Γ p) (se sp ie : Name) (hse : isFresh C Γ se = true)
       (hsp : isFresh C (Ctx.val Γ se p) sp = true)
-      (hie : isFresh C (Ctx.path (Ctx.val Γ se p) sp R₀) ie = true) :
+      (hie : isFresh C (Ctx.path (Ctx.val Γ se p) sp R₀) ie = true) (hnt : e₂.notTernary = true) :
       .assign (.index it nsp e₁) (.val e₂) ⇒
         .unfold [se, sp, ie]
           (.cons (.declLocal p se hse (some e₂))
@@ -492,7 +498,7 @@ inductive Taclet (C : Contract) (m : Modality) : {Γ Γ' : Ctx} → Stmt C Γ Γ
   | storageIndexWriteNonSimpleIndexCapture {Γ : Ctx} {R₀ : RefTy} {kp p : PrimTy}
       (it : IndexTy R₀ kp (.prim p)) (sp : SPath C Γ (.ref R₀)) (hs : sp.isSimple = true)
       (nse : Val C Γ kp) (hn : nse.isSimple = false) (e : Val C Γ p) (se ie : Name)
-      (hse : isFresh C Γ se = true) (hie : isFresh C (Ctx.val Γ se p) ie = true) :
+      (hse : isFresh C Γ se = true) (hie : isFresh C (Ctx.val Γ se p) ie = true) (hnt : e.notTernary = true) :
       .assign (.index it sp nse) (.val e) ⇒
         .unfold [se, ie]
           (.cons (.declLocal p se hse (some e))
@@ -515,7 +521,7 @@ inductive Taclet (C : Contract) (m : Modality) : {Γ Γ' : Ctx} → Stmt C Γ Γ
   /-- `gsp = nse ⇝ T se = nse; gsp = se`. -/
   | storageRootWriteValueRhsCapture {Γ : Ctx} {p : PrimTy} (r : Name)
       (hΓ : lookupBy r Γ = none) (hr : C.rootType r = some (.prim p)) (nse : Val C Γ p)
-      (hn : nse.isSimple = false) (se : Name) (hse : isFresh C Γ se = true) :
+      (hn : nse.isSimple = false) (se : Name) (hse : isFresh C Γ se = true) (hnt : nse.notTernary = true) :
       .assign (.root r hΓ hr) (.val nse) ⇒
         .unfold [se]
           (.cons (.declLocal p se hse (some nse))
@@ -525,7 +531,7 @@ inductive Taclet (C : Contract) (m : Modality) : {Γ Γ' : Ctx} → Stmt C Γ Γ
   /-- `sp.fld = nse ⇝ T se = nse; sp.fld = se`. -/
   | fieldWriteValueRhsCapture {Γ : Ctx} {s : Name} {p : PrimTy} (sp : SPath C Γ (.struct s))
       (hs : sp.isSimple = true) (f : Name) (hf : C.fieldType s f = some (.prim p)) (nse : Val C Γ p)
-      (hn : nse.isSimple = false) (se : Name) (hse : isFresh C Γ se = true) :
+      (hn : nse.isSimple = false) (se : Name) (hse : isFresh C Γ se = true) (hnt : nse.notTernary = true) :
       .assign (.field sp f hf) (.val nse) ⇒
         .unfold [se]
           (.cons (.declLocal p se hse (some nse))
@@ -535,7 +541,7 @@ inductive Taclet (C : Contract) (m : Modality) : {Γ Γ' : Ctx} → Stmt C Γ Γ
   /-- `sp[ie] = nse ⇝ T se = nse; sp[ie] = se`. -/
   | indexWriteValueRhsCapture {Γ : Ctx} {R₀ : RefTy} {kp p : PrimTy} (it : IndexTy R₀ kp (.prim p)) (sp : SPath C Γ (.ref R₀))
       (hs : sp.isSimple = true) (ie : Simple C Γ kp) (nse : Val C Γ p) (hn : nse.isSimple = false)
-      (se : Name) (hse : isFresh C Γ se = true) :
+      (se : Name) (hse : isFresh C Γ se = true) (hnt : nse.notTernary = true) :
       .assign (.index it sp (.simple ie)) (.val nse) ⇒
         .unfold [se]
           (.cons (.declLocal p se hse (some nse))
@@ -960,7 +966,7 @@ inductive Taclet (C : Contract) (m : Modality) : {Γ Γ' : Ctx} → Stmt C Γ Γ
   /-- `nmp.fld = e ⇝ T se = e; T memory mv = nmp; mv.fld = se`. -/
   | memoryFieldWrite_unfold_leftFst {Γ : Ctx} {s : Name} {p : PrimTy} (nmp : MPath C Γ (.struct s))
       (hn : nmp.isSimple = false) (f : Name) (hf : C.fieldType s f = some (.prim p)) (e : Val C Γ p)
-      (se mv : Name) (hse : isFresh C Γ se = true) (hmv : isFresh C (Ctx.val Γ se p) mv = true) :
+      (se mv : Name) (hse : isFresh C Γ se = true) (hmv : isFresh C (Ctx.val Γ se p) mv = true) (hnt : e.notTernary = true) :
       .assignMem (.field nmp f hf) (.val e) ⇒
         .unfold [se, mv]
           (.cons (.declLocal p se hse (some e))
@@ -971,7 +977,7 @@ inductive Taclet (C : Contract) (m : Modality) : {Γ Γ' : Ctx} → Stmt C Γ Γ
   /-- `nmp[e1] = e2 ⇝ T se = e2; T memory mv = nmp; mv[e1] = se`. -/
   | memoryIndexWrite_unfold_leftFst {Γ : Ctx} {p : PrimTy} (nmp : MPath C Γ (.array (.prim p)))
       (hn : nmp.isSimple = false) (e₁ : Val C Γ .uint) (e₂ : Val C Γ p) (se mv : Name)
-      (hse : isFresh C Γ se = true) (hmv : isFresh C (Ctx.val Γ se p) mv = true) :
+      (hse : isFresh C Γ se = true) (hmv : isFresh C (Ctx.val Γ se p) mv = true) (hnt : e₂.notTernary = true) :
       .assignMem (.index nmp e₁) (.val e₂) ⇒
         .unfold [se, mv]
           (.cons (.declLocal p se hse (some e₂))
@@ -1001,7 +1007,7 @@ inductive Taclet (C : Contract) (m : Modality) : {Γ Γ' : Ctx} → Stmt C Γ Γ
   /-- `mv1[nse] = e ⇝ T se = e; T ie = nse; mv1[ie] = se`. -/
   | memoryIndexWriteNonSimpleIndexCapture {Γ : Ctx} {p : PrimTy} (b : MPath C Γ (.array (.prim p)))
       (hb : b.isSimple = true) (nse : Val C Γ .uint) (hn : nse.isSimple = false) (e : Val C Γ p)
-      (se ie : Name) (hse : isFresh C Γ se = true) (hie : isFresh C (Ctx.val Γ se p) ie = true) :
+      (se ie : Name) (hse : isFresh C Γ se = true) (hie : isFresh C (Ctx.val Γ se p) ie = true) (hnt : e.notTernary = true) :
       .assignMem (.index b nse) (.val e) ⇒
         .unfold [se, ie]
           (.cons (.declLocal p se hse (some e))
@@ -1023,7 +1029,7 @@ inductive Taclet (C : Contract) (m : Modality) : {Γ Γ' : Ctx} → Stmt C Γ Γ
   /-- `mv.fld = nse ⇝ T se = nse; mv.fld = se`. -/
   | memoryFieldWriteUnfoldSource {Γ : Ctx} {s : Name} {p : PrimTy} (b : MPath C Γ (.struct s))
       (hb : b.isSimple = true) (f : Name) (hf : C.fieldType s f = some (.prim p)) (nse : Val C Γ p)
-      (hn : nse.isSimple = false) (se : Name) (hse : isFresh C Γ se = true) :
+      (hn : nse.isSimple = false) (se : Name) (hse : isFresh C Γ se = true) (hnt : nse.notTernary = true) :
       .assignMem (.field b f hf) (.val nse) ⇒
         .unfold [se]
           (.cons (.declLocal p se hse (some nse))
@@ -1032,7 +1038,7 @@ inductive Taclet (C : Contract) (m : Modality) : {Γ Γ' : Ctx} → Stmt C Γ Γ
   /-- `mv[ie] = nse ⇝ T se = nse; mv[ie] = se`. -/
   | memoryIndexWriteUnfoldSource {Γ : Ctx} {p : PrimTy} (b : MPath C Γ (.array (.prim p)))
       (hb : b.isSimple = true) (ie : Simple C Γ .uint) (nse : Val C Γ p) (hn : nse.isSimple = false)
-      (se : Name) (hse : isFresh C Γ se = true) :
+      (se : Name) (hse : isFresh C Γ se = true) (hnt : nse.notTernary = true) :
       .assignMem (.index b (.simple ie)) (.val nse) ⇒
         .unfold [se]
           (.cons (.declLocal p se hse (some nse))

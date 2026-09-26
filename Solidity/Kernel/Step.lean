@@ -99,19 +99,55 @@ def ternaryStep {Γ : Ctx} {p : PrimTy} (k : VHole C Γ p) (c : Val C Γ .bool) 
   | .ternary c' x y => ⟨_, .ternaryCaptureCond k (.ternary c' x y) rfl a b _ (freshName_isFresh C Γ "se")⟩
   | .readMem ml => ⟨_, .ternaryCaptureCond k (.readMem ml) rfl a b _ (freshName_isFresh C Γ "se")⟩
 
+/-- `nsp.fld = e`: the receiver captured, a conditional lowered first. -/
+def fieldLeftFstStep {Γ : Ctx} {s : Name} {p : PrimTy} (nsp : SPath C Γ (.struct s))
+    (hn : nsp.isSimple = false) (f : Name) (hf : C.fieldType s f = some (.prim p)) (e : Val C Γ p) :
+    Step C m (.assign (.field nsp f hf) (.val e)) :=
+  if hnt : e.notTernary = true then
+    ⟨_, .storageFieldWrite_unfold_leftFst nsp hn f hf e _ _ (freshName_isFresh C Γ "se")
+      (freshName_isFresh C _ "sp") hnt⟩
+  else
+    match e, hnt with
+    | .ternary c a d, _ => ternaryStep m (.store (.field nsp f hf)) c a d
+    | .simple _, h | .read _, h | .binop .., h | .unop .., h | .readMem _, h => absurd rfl h
+
+/-- `nsp[e1] = e2`: the receiver captured, a conditional lowered first. -/
+def indexLeftFstStep {Γ : Ctx} {R₀ : RefTy} {kp p : PrimTy} (it : IndexTy R₀ kp (.prim p))
+    (nsp : SPath C Γ (.ref R₀)) (hn : nsp.isSimple = false) (i : Val C Γ kp) (e : Val C Γ p) :
+    Step C m (.assign (.index it nsp i) (.val e)) :=
+  if hnt : e.notTernary = true then
+    ⟨_, .storageIndexWrite_unfold_leftFst it nsp hn i e _ _ _ (freshName_isFresh C Γ "se")
+      (freshName_isFresh C _ "sp") (freshName_isFresh C _ "ie") hnt⟩
+  else
+    match e, hnt with
+    | .ternary c a d, _ => ternaryStep m (.store (.index it nsp i)) c a d
+    | .simple _, h | .read _, h | .binop .., h | .unop .., h | .readMem _, h => absurd rfl h
+
+/-- `sp[nse] = e`: the index captured, a conditional lowered first. -/
+def indexCaptureStep {Γ : Ctx} {R₀ : RefTy} {kp p : PrimTy} (it : IndexTy R₀ kp (.prim p))
+    (b : SPath C Γ (.ref R₀)) (hb : b.isSimple = true) (nse : Val C Γ kp) (hn : nse.isSimple = false)
+    (e : Val C Γ p) : Step C m (.assign (.index it b nse) (.val e)) :=
+  if hnt : e.notTernary = true then
+    ⟨_, .storageIndexWriteNonSimpleIndexCapture it b hb nse hn e _ _ (freshName_isFresh C Γ "se")
+      (freshName_isFresh C _ "ie") hnt⟩
+  else
+    match e, hnt with
+    | .ternary c a d, _ => ternaryStep m (.store (.index it b nse)) c a d
+    | .simple _, h | .read _, h | .binop .., h | .unop .., h | .readMem _, h => absurd rfl h
+
 /-- A storage write. -/
 def assignStep {Γ : Ctx} {T : Ty} : (l : Loc C Γ T) → (r : Src C Γ T) → Step C m (.assign l r)
   -- a state variable
   | .root x hΓ hr, .val (.simple a) => ⟨_, .storageRootWriteStore x hΓ hr a⟩
   | .root x hΓ hr, .val (.read l) =>
-    ⟨_, .storageRootWriteValueRhsCapture x hΓ hr (.read l) rfl _ (freshName_isFresh C Γ "se")⟩
+    ⟨_, .storageRootWriteValueRhsCapture x hΓ hr (.read l) rfl _ (freshName_isFresh C Γ "se") rfl⟩
   | .root x hΓ hr, .val (.binop op hop hq a b) =>
-    ⟨_, .storageRootWriteValueRhsCapture x hΓ hr (.binop op hop hq a b) rfl _ (freshName_isFresh C Γ "se")⟩
+    ⟨_, .storageRootWriteValueRhsCapture x hΓ hr (.binop op hop hq a b) rfl _ (freshName_isFresh C Γ "se") rfl⟩
   | .root x hΓ hr, .val (.unop op hop hq a) =>
-    ⟨_, .storageRootWriteValueRhsCapture x hΓ hr (.unop op hop hq a) rfl _ (freshName_isFresh C Γ "se")⟩
+    ⟨_, .storageRootWriteValueRhsCapture x hΓ hr (.unop op hop hq a) rfl _ (freshName_isFresh C Γ "se") rfl⟩
   | .root x hΓ hr, .val (.ternary c a b) => ternaryStep m (.store (.root x hΓ hr)) c a b
   | .root x hΓ hr, .val (.readMem ml) =>
-    ⟨_, .storageRootWriteValueRhsCapture x hΓ hr (.readMem ml) rfl _ (freshName_isFresh C Γ "se")⟩
+    ⟨_, .storageRootWriteValueRhsCapture x hΓ hr (.readMem ml) rfl _ (freshName_isFresh C Γ "se") rfl⟩
   | .root x hΓ hr, .copy sp₂ hm =>
     if hs : sp₂.isSimple = true then ⟨_, .storageRootWriteCopySource x hΓ hr sp₂ hs hm⟩
     else match sp₂, hs with
@@ -128,27 +164,24 @@ def assignStep {Γ : Ctx} {T : Ty} : (l : Loc C Γ T) → (r : Src C Γ T) → S
           | .arr, b, .simple ie, hbi => ⟨_, .storageIndexReadArrayStoreRoot x hΓ hr b hbi.1 ie hm⟩
         else (Hole.copy (.root x hΓ hr) hm).unfoldStep m (.index it b i) (by simpa [SPath.isBindable] using hbi)
   -- a member
-  | .field b f hf, .val (.ternary c a d) => ternaryStep m (.store (.field b f hf)) c a d
   | .field b f hf, .val e =>
     if hb : b.isSimple = true then
       match e with
       | .simple a => ⟨_, .storageFieldWriteSave b hb f hf a⟩
-      | .read l => ⟨_, .fieldWriteValueRhsCapture b hb f hf (.read l) rfl _ (freshName_isFresh C Γ "se")⟩
+      | .read l => ⟨_, .fieldWriteValueRhsCapture b hb f hf (.read l) rfl _ (freshName_isFresh C Γ "se") rfl⟩
       | .binop op hop hq a c =>
-        ⟨_, .fieldWriteValueRhsCapture b hb f hf (.binop op hop hq a c) rfl _ (freshName_isFresh C Γ "se")⟩
+        ⟨_, .fieldWriteValueRhsCapture b hb f hf (.binop op hop hq a c) rfl _ (freshName_isFresh C Γ "se") rfl⟩
       | .unop op hop hq a =>
-        ⟨_, .fieldWriteValueRhsCapture b hb f hf (.unop op hop hq a) rfl _ (freshName_isFresh C Γ "se")⟩
+        ⟨_, .fieldWriteValueRhsCapture b hb f hf (.unop op hop hq a) rfl _ (freshName_isFresh C Γ "se") rfl⟩
       | .ternary c a d => ternaryStep m (.store (.field b f hf)) c a d
-      | .readMem ml => ⟨_, .fieldWriteValueRhsCapture b hb f hf (.readMem ml) rfl _ (freshName_isFresh C Γ "se")⟩
-    else ⟨_, .storageFieldWrite_unfold_leftFst b (not_simple hb) f hf e _ _
-      (freshName_isFresh C Γ "se") (freshName_isFresh C _ "sp")⟩
+      | .readMem ml => ⟨_, .fieldWriteValueRhsCapture b hb f hf (.readMem ml) rfl _ (freshName_isFresh C Γ "se") rfl⟩
+    else fieldLeftFstStep m b (not_simple hb) f hf e
   | .field b f hf, .copy src hm =>
     if hb : b.isSimple = true then
       copyStep m (.field b f hf) rfl hm src fun hs => ⟨_, .storageFieldWriteCopySource b hb f hf src hs hm⟩
     else ⟨_, .storageFieldWriteStorageRef_unfold_leftFst b (not_simple hb) f hf src hm _
       (freshName_isFresh C Γ "sp")⟩
   -- an entry
-  | .index it b i, .val (.ternary c a d) => ternaryStep m (.store (.index it b i)) c a d
   | .index it b i, .val e =>
     if hb : b.isSimple = true then
       match i with
@@ -158,26 +191,20 @@ def assignStep {Γ : Ctx} {T : Ty} : (l : Loc C Γ T) → (r : Src C Γ T) → S
           match it, b, hb, ie, a with
           | .map, b, hb, ie, a => ⟨_, .storageIndexWriteMappingSave b hb ie a⟩
           | .arr, b, hb, ie, a => ⟨_, .storageIndexWriteArraySave b hb ie a⟩
-        | .read l => ⟨_, .indexWriteValueRhsCapture it b hb ie (.read l) rfl _ (freshName_isFresh C Γ "se")⟩
+        | .read l => ⟨_, .indexWriteValueRhsCapture it b hb ie (.read l) rfl _ (freshName_isFresh C Γ "se") rfl⟩
         | .binop op hop hq a c =>
-          ⟨_, .indexWriteValueRhsCapture it b hb ie (.binop op hop hq a c) rfl _ (freshName_isFresh C Γ "se")⟩
+          ⟨_, .indexWriteValueRhsCapture it b hb ie (.binop op hop hq a c) rfl _ (freshName_isFresh C Γ "se") rfl⟩
         | .unop op hop hq a =>
-          ⟨_, .indexWriteValueRhsCapture it b hb ie (.unop op hop hq a) rfl _ (freshName_isFresh C Γ "se")⟩
+          ⟨_, .indexWriteValueRhsCapture it b hb ie (.unop op hop hq a) rfl _ (freshName_isFresh C Γ "se") rfl⟩
         | .ternary c a d => ternaryStep m (.store (.index it b (.simple ie))) c a d
         | .readMem ml =>
-          ⟨_, .indexWriteValueRhsCapture it b hb ie (.readMem ml) rfl _ (freshName_isFresh C Γ "se")⟩
-      | .read l => ⟨_, .storageIndexWriteNonSimpleIndexCapture it b hb (.read l) rfl e _ _
-          (freshName_isFresh C Γ "se") (freshName_isFresh C _ "ie")⟩
-      | .binop op hop hq a c => ⟨_, .storageIndexWriteNonSimpleIndexCapture it b hb (.binop op hop hq a c) rfl e _ _
-          (freshName_isFresh C Γ "se") (freshName_isFresh C _ "ie")⟩
-      | .unop op hop hq a => ⟨_, .storageIndexWriteNonSimpleIndexCapture it b hb (.unop op hop hq a) rfl e _ _
-          (freshName_isFresh C Γ "se") (freshName_isFresh C _ "ie")⟩
-      | .ternary c a d => ⟨_, .storageIndexWriteNonSimpleIndexCapture it b hb (.ternary c a d) rfl e _ _
-          (freshName_isFresh C Γ "se") (freshName_isFresh C _ "ie")⟩
-      | .readMem ml => ⟨_, .storageIndexWriteNonSimpleIndexCapture it b hb (.readMem ml) rfl e _ _
-          (freshName_isFresh C Γ "se") (freshName_isFresh C _ "ie")⟩
-    else ⟨_, .storageIndexWrite_unfold_leftFst it b (not_simple hb) i e _ _ _
-      (freshName_isFresh C Γ "se") (freshName_isFresh C _ "sp") (freshName_isFresh C _ "ie")⟩
+          ⟨_, .indexWriteValueRhsCapture it b hb ie (.readMem ml) rfl _ (freshName_isFresh C Γ "se") rfl⟩
+      | .read l => indexCaptureStep m it b hb (.read l) rfl e
+      | .binop op hop hq a c => indexCaptureStep m it b hb (.binop op hop hq a c) rfl e
+      | .unop op hop hq a => indexCaptureStep m it b hb (.unop op hop hq a) rfl e
+      | .ternary c a d => indexCaptureStep m it b hb (.ternary c a d) rfl e
+      | .readMem ml => indexCaptureStep m it b hb (.readMem ml) rfl e
+    else indexLeftFstStep m it b (not_simple hb) i e
   | .index it b i, .copy src hm =>
     if hb : b.isSimple = true then
       if hi : i.isSimple = true then
@@ -468,9 +495,18 @@ def declMemStep {Γ : Ctx} (R : RefTy) (x : Name) (hx : isFresh C Γ x = true) :
           (fun _ _ _ _ h => by cases h) hm _ (freshName_isFresh C _ "sp") hd⟩
       | .alias .., hs | .loc (.root ..), hs => absurd rfl hs
 
+/-- A memory location written with a value: `k` for a value that is not a
+conditional, which is lowered first. -/
+def memValStep {Γ : Ctx} {p : PrimTy} (l : MLoc C Γ (.prim p)) (v : Val C Γ p)
+    (k : v.notTernary = true → Step C m (.assignMem l (.val v))) : Step C m (.assignMem l (.val v)) :=
+  if hnt : v.notTernary = true then k hnt
+  else
+    match v, hnt with
+    | .ternary c a d, _ => ternaryStep m (.mem l) c a d
+    | .simple _, h | .read _, h | .binop .., h | .unop .., h | .readMem _, h => absurd rfl h
+
 /-- A memory location written. -/
 def assignMemStep {Γ : Ctx} {T : Ty} : (l : MLoc C Γ T) → (r : MSrc C Γ T) → Step C m (.assignMem l r)
-  | l, .val (.ternary c a d) => ternaryStep m (.mem l) c a d
   | .field b f hf, .val v =>
     if hb : b.isSimple = true then
       if hv : v.isSimple = true then
@@ -478,9 +514,11 @@ def assignMemStep {Γ : Ctx} {T : Ty} : (l : MLoc C Γ T) → (r : MSrc C Γ T) 
         | .simple se, _ => ⟨_, .memoryFieldWriteStore b hb f hf se⟩
         | .read _, hv | .binop .., hv | .unop .., hv | .ternary .., hv | .readMem _, hv =>
           absurd hv (by simp [Val.isSimple])
-      else ⟨_, .memoryFieldWriteUnfoldSource b hb f hf v (not_simple hv) _ (freshName_isFresh C Γ "se")⟩
-    else ⟨_, .memoryFieldWrite_unfold_leftFst b (not_simple hb) f hf v _ _ (freshName_isFresh C Γ "se")
-      (freshName_isFresh C _ "mv")⟩
+      else memValStep m (.field b f hf) v fun hnt =>
+        ⟨_, .memoryFieldWriteUnfoldSource b hb f hf v (not_simple hv) _ (freshName_isFresh C Γ "se") hnt⟩
+    else memValStep m (.field b f hf) v fun hnt =>
+      ⟨_, .memoryFieldWrite_unfold_leftFst b (not_simple hb) f hf v _ _ (freshName_isFresh C Γ "se")
+        (freshName_isFresh C _ "mv") hnt⟩
   | .index b i, .val v =>
     if hb : b.isSimple = true then
       if hi : i.isSimple = true then
@@ -491,13 +529,16 @@ def assignMemStep {Γ : Ctx} {T : Ty} : (l : MLoc C Γ T) → (r : MSrc C Γ T) 
             | .simple se, _ => ⟨_, .memoryIndexWriteStore b hb ie se⟩
             | .read _, hv | .binop .., hv | .unop .., hv | .ternary .., hv | .readMem _, hv =>
               absurd hv (by simp [Val.isSimple])
-          else ⟨_, .memoryIndexWriteUnfoldSource b hb ie v (not_simple hv) _ (freshName_isFresh C Γ "se")⟩
+          else memValStep m (.index b (.simple ie)) v fun hnt =>
+            ⟨_, .memoryIndexWriteUnfoldSource b hb ie v (not_simple hv) _ (freshName_isFresh C Γ "se") hnt⟩
         | .read _, hi | .binop .., hi | .unop .., hi | .ternary .., hi | .readMem _, hi =>
           absurd hi (by simp [Val.isSimple])
-      else ⟨_, .memoryIndexWriteNonSimpleIndexCapture b hb i (not_simple hi) v _ _
-        (freshName_isFresh C Γ "se") (freshName_isFresh C _ "ie")⟩
-    else ⟨_, .memoryIndexWrite_unfold_leftFst b (not_simple hb) i v _ _ (freshName_isFresh C Γ "se")
-      (freshName_isFresh C _ "mv")⟩
+      else memValStep m (.index b i) v fun hnt =>
+        ⟨_, .memoryIndexWriteNonSimpleIndexCapture b hb i (not_simple hi) v _ _
+          (freshName_isFresh C Γ "se") (freshName_isFresh C _ "ie") hnt⟩
+    else memValStep m (.index b i) v fun hnt =>
+      ⟨_, .memoryIndexWrite_unfold_leftFst b (not_simple hb) i v _ _ (freshName_isFresh C Γ "se")
+        (freshName_isFresh C _ "mv") hnt⟩
   | l, .ref src =>
     if hs : src.isBindable = true then
       match l with
