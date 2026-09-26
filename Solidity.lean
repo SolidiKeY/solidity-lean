@@ -62,3 +62,4 @@ import Solidity.Counterexamples.PreFixSortAnnotations
 import Solidity.Counterexamples.WellTypedNecessity
 import Solidity.Counterexamples.DeleteFamilyGenericOverlap
 import Solidity.Counterexamples.StaticRuntimeSort
+import Solidity.Evm.Examples
