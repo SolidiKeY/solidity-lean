@@ -1126,7 +1126,7 @@ def ARhs.bind (σ : State) (x : Var) {R : RefTy} : ARhs C R → Res State
     pure (σ'.setEnv x (.spath root (segs ++ [.at n])))
 
 /-- A condition's outcome: `true` goes on, `false` reverts. -/
-def guard (v : Value) (σ : State) : Res State :=
+def guardOk (v : Value) (σ : State) : Res State :=
   match v with
   | .bool true => pure σ
   | .bool false => .error .revert
@@ -1188,8 +1188,8 @@ def Stmt.run (σ : State) : Stmt C → Res State
     | .bool true => Prog.run σ thn
     | .bool false => Prog.run σ els
     | .int _ => .error .stuck
-  | .require c => do guard (← c.eval σ) σ
-  | .assert c => do guard (← c.eval σ) σ
+  | .require c => do guardOk (← c.eval σ) σ
+  | .assert c => do guardOk (← c.eval σ) σ
   | .revert => .error .revert
 
 /-- The state a block leaves. -/
