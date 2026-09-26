@@ -21,6 +21,7 @@ import Solidity.Calculus.Symex
 import Solidity.Calculus.Notation
 import Solidity.Calculus.Close
 import Solidity.Calculus.CloseTests
+import Solidity.Calculus.Uniqueness
 import Solidity.Examples.Tour
 import Solidity.Examples.StorageSteps
 import Solidity.Examples.StorageSuite
