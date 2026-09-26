@@ -549,7 +549,7 @@ inductive RawStmt where
   | revert
   deriving Repr, Inhabited
 
-declare_syntax_cat sol_expr (behavior := both)
+declare_syntax_cat sol_expr
 syntax:max num : sol_expr
 syntax:max ident : sol_expr
 syntax:max sol_expr:max "." ident : sol_expr
@@ -609,6 +609,26 @@ syntax "if " "(" sol_expr ") " sol_block (" else " sol_block)? : sol_stmt
 syntax (name := solRequire) &"require" "(" sol_expr ")" : sol_stmt
 syntax (name := solAssert) &"assert" "(" sol_expr ")" : sol_stmt
 syntax (name := solRevert) &"revert" "(" ")" : sol_stmt
+
+/-! The schema forms of the paper's taclets (`Calculus/RuleSyntax.lean`): an
+escape `‹t›` to any Lean term, and the operator schema variables.  They live
+with the grammar, whose tokens they extend. -/
+
+/-- `‹t›`: any Lean term, in a program position. -/
+syntax:max "‹" term "›" : sol_expr
+syntax "‹" term "›" : sol_stmt
+/-- A block that is a schema variable: `if (se) thn else els`. -/
+syntax ident : sol_block
+syntax "‹" term "›" : sol_block
+/-- A binary operator schema variable `op`. -/
+syntax:65 sol_expr:65 " ⊕ " sol_expr:66 : sol_expr
+/-- A unary operator schema variable `op`. -/
+syntax:80 "⊖" sol_expr:80 : sol_expr
+/-- An increment or decrement schema variable `op`. -/
+syntax sol_expr "⊕⊕" : sol_stmt
+syntax sol_expr " = " sol_expr "⊕⊕" : sol_stmt
+/-- A compound assignment with an operator schema variable `op`. -/
+syntax sol_expr " ⊕= " sol_expr : sol_stmt
 
 /-- `sol_raw!{ s₁; s₂; … }`: the raw statements, before elaboration. -/
 syntax "sol_raw!{" (sol_stmt ";")* "}" : term

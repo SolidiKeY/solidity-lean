@@ -6,6 +6,9 @@ import Solidity.Semantics
 import Solidity.Semantics.DecEq
 import Solidity.Semantics.Properties
 import Solidity.Semantics.Agree
+import Solidity.Update
+import Solidity.Calculus.RuleSyntax
+import Solidity.Calculus.Rules
 import Solidity.Typing.Storage
 import Solidity.Typing.StoragePreservation
 import Solidity.Typing.State
