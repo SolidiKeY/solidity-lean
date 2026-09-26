@@ -45,8 +45,15 @@ Each was removed with the untyped layer and is to be ported over `Stmt C` /
 - **Calls** and the **callback semantics** of `transfer`
   (`transferSemantics:withCallback`): the typed syntax has neither.
 - **Memory `delete`**, `new T[](n)`.
-- **The solkey corpus** (`scripts/solkey-port.mjs`), regenerated as
-  `sol[C]{}` programs proved by `sol_symex`.
+- **The solkey corpus**: ported as `SolidityCorpus` (`scripts/solkey-port.mjs`,
+  `scripts/check-corpus.sh`), each function solkey's `⟨ f() ⟩ true` at the
+  contract's initial store, decided by the kernel — not by `sol_symex`,
+  since `⊨` over every state makes a storage diamond invalid
+  (`Corpus/Basic.lean`). Still to port: the gaps `docs/corpus-parity.md`
+  counts (`.length`, `--`, `++` in an expression, `new`, memory `delete`,
+  a ternary of references, a negative literal at `int`, the state
+  variables `TestSuite` lacks), the five `open` runs, and the `.key` suite
+  rows marked `unported`.
 - **The `SolKey` reader** (`~/projects/side-projects/lean/solkey`) names
   `RuleName`/`ruleEffect`/`StepEffect`; it is to be re-targeted at `Taclet`.
 

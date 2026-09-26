@@ -7,26 +7,30 @@ taclets	TestSuite	storageAliasWrite	proved
 taclets	TestSuite	storageIndexRootMapping	proved		
 taclets	TestSuite	storageIndexAddAssign	proved		
 taclets	TestSuite	storageIndexMappingAddAssign	proved		
-taclets	TestSuite	storageIndexArrayAddAssignOutOfBoundsReverts	unsupported	the function asserts that the program reverts (a box-only obligation): every judgment here is a diamond, which proves the opposite	
-taclets	TestSuite	storageIndexArrayReadOutOfBoundsReverts	unsupported	the function asserts that the program reverts (a box-only obligation): every judgment here is a diamond, which proves the opposite	
-taclets	TestSuite	storageIndexReadComplexReceiverBindLocalRoot	proved		
-taclets	TestSuite	storageIndexWriteComplexReceiverCopySource	proved		
+taclets	TestSuite	storageIndexArrayAddAssignOutOfBoundsReverts	unsupported		the function asserts that the program reverts (a box-only obligation): the obligation is a diamond, which proves the opposite
+taclets	TestSuite	storageIndexArrayReadOutOfBoundsReverts	unsupported		the function asserts that the program reverts (a box-only obligation): the obligation is a diamond, which proves the opposite
+taclets	TestSuite	storageIndexReadComplexReceiverBindLocalRoot	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
+taclets	TestSuite	storageIndexWriteComplexReceiverCopySource	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
 taclets	TestSuite	storageFieldWriteRootRhsComplexReceiver	proved		
 taclets	TestSuite	storageIndexWriteRootRhsComplexReceiver	proved		
-taclets	TestSuite	storagePushValue	proved		
-taclets	TestSuite	storagePushComplexReceiverNonsimpleArg	proved	concretized: solkey proves this for all parameters; ported at x = 40, y = 2	
+taclets	TestSuite	storagePushValue	unsupported		`.length` is not a program expression
+taclets	TestSuite	storagePushComplexReceiverNonsimpleArg	evaluated	concretized: solkey proves this for all parameters; ported at x = 40, y = 2	the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
 taclets	TestSuite	storagePushValueCopySource	proved		
 taclets	TestSuite	requireTrueLiteral	proved		
-taclets	TestSuite	requireFalseLiteral	unsupported	the function asserts that the program reverts (a box-only obligation): every judgment here is a diamond, which proves the opposite	
+taclets	TestSuite	requireFalseLiteral	unsupported		the function asserts that the program reverts (a box-only obligation): the obligation is a diamond, which proves the opposite
 taclets	TestSuite	storageBoolRootReadWrite	proved		
 taclets	TestSuite	storageBoolRootCopy	proved		
 taclets	TestSuite	storageBoolFieldRead	proved		
 taclets	TestSuite	storageBoolMappingRead	proved		
 taclets	TestSuite	storageBoolArrayRead	proved		
 taclets	TestSuite	storageBoolFieldStoreRoot	proved		
-taclets	TestSuite	memoryDeclDefault	proved		
-taclets	TestSuite	memoryArrayIndex	unsupported	`new T[](n)` array allocation is not in the fragment	
-taclets	TestSuite	testStorageComplexReceiverEmptyPush	proved		
+taclets	TestSuite	memoryDeclDefault	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
+taclets	TestSuite	memoryArrayIndex	unsupported		`new T[](n)` array allocation is not in the fragment
+taclets	TestSuite	memoryNewIntoStructField	unsupported		`new T[](n)` array allocation is not in the fragment
+taclets	TestSuite	memoryNewIntoNestedField	unsupported		`new T[](n)` array allocation is not in the fragment
+taclets	TestSuite	memoryNewIntoIndex	unsupported		`new T[](n)` array allocation is not in the fragment
+taclets	TestSuite	storageNewIntoField	unsupported		`new T[](n)` array allocation is not in the fragment
+taclets	TestSuite	testStorageComplexReceiverEmptyPush	unsupported		`.length` is not a program expression
 taclets	TestSuite	additionBothStorage	proved		
 taclets	TestSuite	additionSimple	proved		
 taclets	TestSuite	additionStorageRead	proved		
@@ -51,49 +55,49 @@ taclets	TestSuite	ifFalse	proved
 taclets	TestSuite	ifElseTrue	proved		
 taclets	TestSuite	ifElseFalse	proved		
 taclets	TestSuite	ifElseNegated	proved		
-taclets	TestSuite	memoryDeclFresh	proved		
-taclets	TestSuite	memoryDeepField	proved		
-taclets	TestSuite	memoryFieldAddAssign	proved		
-taclets	TestSuite	memoryFieldSubAssign	proved		
-taclets	TestSuite	memoryFieldMulAssign	proved		
-taclets	TestSuite	memoryFieldDivAssign	proved		
-taclets	TestSuite	memoryFieldModAssign	proved		
-taclets	TestSuite	memoryFieldAddAssignUnfold	proved		
-taclets	TestSuite	memoryFieldAddAssignNse	proved		
-taclets	TestSuite	memoryFieldPreincrement	proved		
-taclets	TestSuite	memoryFieldPostincrement	proved		
-taclets	TestSuite	memoryFieldPredecrement	proved		
-taclets	TestSuite	memoryFieldPostdecrement	proved		
-taclets	TestSuite	memoryFieldPreincrementAssignment	proved		
-taclets	TestSuite	memoryFieldPostincrementAssignment	proved		
-taclets	TestSuite	memoryFieldPredecrementAssignment	proved		
-taclets	TestSuite	memoryFieldPostdecrementAssignment	proved		
-taclets	TestSuite	memoryFieldPreincrementUnfold	proved		
-taclets	TestSuite	memoryFieldAlias	proved		
-taclets	TestSuite	memoryFieldReferenceAssign	proved		
-taclets	TestSuite	memoryIndexArrayAddAssign	unsupported	`new T[](n)` array allocation is not in the fragment	
-taclets	TestSuite	memoryIndexArraySubAssign	unsupported	`new T[](n)` array allocation is not in the fragment	
-taclets	TestSuite	memoryIndexArrayMulAssign	unsupported	`new T[](n)` array allocation is not in the fragment	
-taclets	TestSuite	memoryIndexArrayDivAssign	unsupported	`new T[](n)` array allocation is not in the fragment	
-taclets	TestSuite	memoryIndexArrayModAssign	unsupported	`new T[](n)` array allocation is not in the fragment	
-taclets	TestSuite	memoryIndexArrayAddAssignUnfold	unsupported	`new T[](n)` array allocation is not in the fragment	
-taclets	TestSuite	memoryIndexArrayPreincrementUnfold	unsupported	`new T[](n)` array allocation is not in the fragment	
-taclets	TestSuite	memoryIndexArrayPreincrement	unsupported	`new T[](n)` array allocation is not in the fragment	
-taclets	TestSuite	memoryIndexArrayPostdecrement	unsupported	`new T[](n)` array allocation is not in the fragment	
-taclets	TestSuite	memoryIndexArrayPostincrementAssignment	unsupported	`new T[](n)` array allocation is not in the fragment	
-taclets	TestSuite	memoryIndexArrayPredecrementAssignment	unsupported	`new T[](n)` array allocation is not in the fragment	
-taclets	TestSuite	memoryIndexWriteNse	unsupported	`new T[](n)` array allocation is not in the fragment	
-taclets	TestSuite	memoryRootAlias	proved		
-taclets	TestSuite	memoryRootDeleteFresh	proved		
-taclets	TestSuite	memoryStructArrayIndex	unsupported	`new T[](n)` array allocation is not in the fragment	
-taclets	TestSuite	memoryToStorage	proved		
-taclets	TestSuite	memoryToStorageIndexMappingCopyRootExample	proved		
-taclets	TestSuite	memoryToStorageIndexArrayCopyRootExample	proved		
-taclets	TestSuite	memoryToStorageIndexArrayCopyRootOutOfBoundsReverts	unsupported	the function asserts that the program reverts (a box-only obligation): every judgment here is a diamond, which proves the opposite	
+taclets	TestSuite	memoryDeclFresh	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
+taclets	TestSuite	memoryDeepField	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
+taclets	TestSuite	memoryFieldAddAssign	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
+taclets	TestSuite	memoryFieldSubAssign	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
+taclets	TestSuite	memoryFieldMulAssign	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
+taclets	TestSuite	memoryFieldDivAssign	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
+taclets	TestSuite	memoryFieldModAssign	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
+taclets	TestSuite	memoryFieldAddAssignUnfold	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
+taclets	TestSuite	memoryFieldAddAssignNse	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
+taclets	TestSuite	memoryFieldPreincrement	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
+taclets	TestSuite	memoryFieldPostincrement	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
+taclets	TestSuite	memoryFieldPredecrement	unsupported		decrement: `--` is Lean's comment token, and the grammar has no `x--`/`--x`
+taclets	TestSuite	memoryFieldPostdecrement	unsupported		decrement: `--` is Lean's comment token, and the grammar has no `x--`/`--x`
+taclets	TestSuite	memoryFieldPreincrementAssignment	evaluated	`T r = x++;` split into `T r; r = x++;`	the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
+taclets	TestSuite	memoryFieldPostincrementAssignment	evaluated	`T r = x++;` split into `T r; r = x++;`	the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
+taclets	TestSuite	memoryFieldPredecrementAssignment	unsupported		decrement: `--` is Lean's comment token, and the grammar has no `x--`/`--x`
+taclets	TestSuite	memoryFieldPostdecrementAssignment	unsupported		decrement: `--` is Lean's comment token, and the grammar has no `x--`/`--x`
+taclets	TestSuite	memoryFieldPreincrementUnfold	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
+taclets	TestSuite	memoryFieldAlias	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
+taclets	TestSuite	memoryFieldReferenceAssign	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
+taclets	TestSuite	memoryIndexArrayAddAssign	unsupported		`new T[](n)` array allocation is not in the fragment
+taclets	TestSuite	memoryIndexArraySubAssign	unsupported		`new T[](n)` array allocation is not in the fragment
+taclets	TestSuite	memoryIndexArrayMulAssign	unsupported		`new T[](n)` array allocation is not in the fragment
+taclets	TestSuite	memoryIndexArrayDivAssign	unsupported		`new T[](n)` array allocation is not in the fragment
+taclets	TestSuite	memoryIndexArrayModAssign	unsupported		`new T[](n)` array allocation is not in the fragment
+taclets	TestSuite	memoryIndexArrayAddAssignUnfold	unsupported		`new T[](n)` array allocation is not in the fragment
+taclets	TestSuite	memoryIndexArrayPreincrementUnfold	unsupported		`new T[](n)` array allocation is not in the fragment
+taclets	TestSuite	memoryIndexArrayPreincrement	unsupported		`new T[](n)` array allocation is not in the fragment
+taclets	TestSuite	memoryIndexArrayPostdecrement	unsupported		`new T[](n)` array allocation is not in the fragment
+taclets	TestSuite	memoryIndexArrayPostincrementAssignment	unsupported		`new T[](n)` array allocation is not in the fragment
+taclets	TestSuite	memoryIndexArrayPredecrementAssignment	unsupported		`new T[](n)` array allocation is not in the fragment
+taclets	TestSuite	memoryIndexWriteNse	unsupported		`new T[](n)` array allocation is not in the fragment
+taclets	TestSuite	memoryRootAlias	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
+taclets	TestSuite	memoryRootDeleteFresh	unsupported		Solidity elaboration failed: `delete` in memory is not a statement yet
+taclets	TestSuite	memoryStructArrayIndex	unsupported		`new T[](n)` array allocation is not in the fragment
+taclets	TestSuite	memoryToStorage	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
+taclets	TestSuite	memoryToStorageIndexMappingCopyRootExample	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
+taclets	TestSuite	memoryToStorageIndexArrayCopyRootExample	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
+taclets	TestSuite	memoryToStorageIndexArrayCopyRootOutOfBoundsReverts	unsupported		the function asserts that the program reverts (a box-only obligation): the obligation is a diamond, which proves the opposite
 taclets	TestSuite	moduloSimple	proved		
 taclets	TestSuite	multiplicationSimple	proved		
 taclets	TestSuite	notEqualSimple	proved		
-taclets	TestSuite	powerSimple	proved		
+taclets	TestSuite	powerSimple	unsupported		exponentiation `**` is not in the sol_expr grammar
 taclets	TestSuite	requireGuardBox	proved	concretized: solkey proves this for all parameters; ported at x = 1	
 taclets	TestSuite	requireHoldsDiamond	proved		
 taclets	TestSuite	storageAliasRebindAlias	proved		
@@ -113,13 +117,13 @@ taclets	TestSuite	storageFieldDeleteThenCopyDeep	proved
 taclets	TestSuite	storageFieldDivAssign	proved		
 taclets	TestSuite	storageFieldModAssign	proved		
 taclets	TestSuite	storageFieldMulAssign	proved		
-taclets	TestSuite	storageFieldPostdecrementAssign	proved		
-taclets	TestSuite	storageFieldPostdecrement	proved		
-taclets	TestSuite	storageFieldPostincrementAssign	proved		
+taclets	TestSuite	storageFieldPostdecrementAssign	unsupported		decrement: `--` is Lean's comment token, and the grammar has no `x--`/`--x`
+taclets	TestSuite	storageFieldPostdecrement	unsupported		decrement: `--` is Lean's comment token, and the grammar has no `x--`/`--x`
+taclets	TestSuite	storageFieldPostincrementAssign	proved	`T r = x++;` split into `T r; r = x++;`	
 taclets	TestSuite	storageFieldPostincrement	proved		
-taclets	TestSuite	storageFieldPredecrementAssign	proved		
-taclets	TestSuite	storageFieldPredecrement	proved		
-taclets	TestSuite	storageFieldPreincrementAssign	proved		
+taclets	TestSuite	storageFieldPredecrementAssign	unsupported		decrement: `--` is Lean's comment token, and the grammar has no `x--`/`--x`
+taclets	TestSuite	storageFieldPredecrement	unsupported		decrement: `--` is Lean's comment token, and the grammar has no `x--`/`--x`
+taclets	TestSuite	storageFieldPreincrementAssign	proved	`T r = x++;` split into `T r; r = x++;`	
 taclets	TestSuite	storageFieldPreincrement	proved		
 taclets	TestSuite	storageFieldReadBindLocal	proved		
 taclets	TestSuite	storageFieldReadStoreRoot	proved		
@@ -127,40 +131,40 @@ taclets	TestSuite	storageFieldSubAssign	proved
 taclets	TestSuite	storageFieldWriteCaptureSrc	proved		
 taclets	TestSuite	storageFieldWriteRhsCapture	proved	concretized: solkey proves this for all parameters; ported at x = 1, y = 2, z = 3	
 taclets	TestSuite	storageIndexCopyValue	proved	concretized: solkey proves this for all parameters; ported at i = 5, j = 1	
-taclets	TestSuite	storageIndexCopysourceAfterPush	open		unexpected token ']'; expected sol_expr
-taclets	TestSuite	storageIndexDecomposeAfterPush	proved		
+taclets	TestSuite	storageIndexCopysourceAfterPush	unsupported		`.length` is not a program expression
+taclets	TestSuite	storageIndexDecomposeAfterPush	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
 taclets	TestSuite	storageIndexDeleteMappingBool	proved		
-taclets	TestSuite	storageIndexDeleteMappingStruct	open		`simp` made no progress
+taclets	TestSuite	storageIndexDeleteMappingStruct	proved		
 taclets	TestSuite	storageIndexDeleteNseIndex	proved	concretized: solkey proves this for all parameters; ported at k = 2	
 taclets	TestSuite	storageIndexDelete	proved		
 taclets	TestSuite	storageIndexDivAssign	proved		
 taclets	TestSuite	storageIndexModAssign	proved		
 taclets	TestSuite	storageIndexMulAssign	proved		
-taclets	TestSuite	storageIndexMultipleWrites	open		`simp` made no progress
-taclets	TestSuite	storageIndexPostdecrementAssign	proved		
-taclets	TestSuite	storageIndexPostdecrement	proved		
-taclets	TestSuite	storageIndexPostincrementAssign	proved		
+taclets	TestSuite	storageIndexMultipleWrites	proved		
+taclets	TestSuite	storageIndexPostdecrementAssign	unsupported		decrement: `--` is Lean's comment token, and the grammar has no `x--`/`--x`
+taclets	TestSuite	storageIndexPostdecrement	unsupported		decrement: `--` is Lean's comment token, and the grammar has no `x--`/`--x`
+taclets	TestSuite	storageIndexPostincrementAssign	proved	`T r = x++;` split into `T r; r = x++;`	
 taclets	TestSuite	storageIndexPostincrement	proved		
-taclets	TestSuite	storageIndexPredecrementAssign	proved		
-taclets	TestSuite	storageIndexPredecrement	proved		
-taclets	TestSuite	storageIndexPreincrementAssign	proved		
+taclets	TestSuite	storageIndexPredecrementAssign	unsupported		decrement: `--` is Lean's comment token, and the grammar has no `x--`/`--x`
+taclets	TestSuite	storageIndexPredecrement	unsupported		decrement: `--` is Lean's comment token, and the grammar has no `x--`/`--x`
+taclets	TestSuite	storageIndexPreincrementAssign	proved	`T r = x++;` split into `T r; r = x++;`	
 taclets	TestSuite	storageIndexPreincrement	proved		
 taclets	TestSuite	storageIndexReadMappingStoreRoot	proved	concretized: solkey proves this for all parameters; ported at k = 1	
 taclets	TestSuite	storageIndexReadNseIndex	proved	concretized: solkey proves this for all parameters; ported at i = 1	
 taclets	TestSuite	storageIndexSubAssign	proved		
 taclets	TestSuite	storageIndexWriteNseChain	proved	concretized: solkey proves this for all parameters; ported at i = 2, x = 3, y = 4	
-taclets	TestSuite	storageLocalDeclSkip	open		`simp` made no progress
-taclets	TestSuite	storageMatrixNseIndex	open	concretized: solkey proves this for all parameters; ported at i = 1, j = 2, x = 5, y = 6	`simp` made no progress
-taclets	TestSuite	storageMatrixWriteRead	open		`simp` made no progress
-taclets	TestSuite	storagePopAfterPush	proved		
-taclets	TestSuite	storagePopNonempty	proved		
+taclets	TestSuite	storageLocalDeclSkip	proved		
+taclets	TestSuite	storageMatrixNseIndex	evaluated	concretized: solkey proves this for all parameters; ported at i = 1, j = 2, x = 5, y = 6	the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
+taclets	TestSuite	storageMatrixWriteRead	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
+taclets	TestSuite	storagePopAfterPush	unsupported		`.length` is not a program expression
+taclets	TestSuite	storagePopNonempty	unsupported		`.length` is not a program expression
 taclets	TestSuite	storagePopUnknownLength	proved		
-taclets	TestSuite	storagePushEmpty	proved		
-taclets	TestSuite	storagePushLengthPositive	proved		
-taclets	TestSuite	storagePushLocalBind	open		`simp` made no progress
-taclets	TestSuite	storagePushNonsimpleArg	proved	concretized: solkey proves this for all parameters; ported at x = 40, y = 2	
-taclets	TestSuite	storagePushReadBack	proved		
-taclets	TestSuite	storagePushReturnAssign	proved		
+taclets	TestSuite	storagePushEmpty	unsupported		`.length` is not a program expression
+taclets	TestSuite	storagePushLengthPositive	unsupported		`.length` is not a program expression
+taclets	TestSuite	storagePushLocalBind	unsupported		`.length` is not a program expression
+taclets	TestSuite	storagePushNonsimpleArg	unsupported		`.length` is not a program expression
+taclets	TestSuite	storagePushReadBack	unsupported		`.length` is not a program expression
+taclets	TestSuite	storagePushReturnAssign	unsupported		`b.push() = v` (a push as an lvalue) is not in the grammar
 taclets	TestSuite	storageRootAddAssign	proved		
 taclets	TestSuite	storageRootCopySource	proved		
 taclets	TestSuite	storageRootCopyStruct	proved		
@@ -172,65 +176,89 @@ taclets	TestSuite	storageRootDivAssign	proved
 taclets	TestSuite	storageRootModAssign	proved		
 taclets	TestSuite	storageRootMulAssign	proved		
 taclets	TestSuite	storageRootMultipleWrites	proved		
-taclets	TestSuite	storageRootPostdecrementAssign	proved		
-taclets	TestSuite	storageRootPostincrementAssign	proved		
+taclets	TestSuite	storageRootPostdecrementAssign	unsupported		decrement: `--` is Lean's comment token, and the grammar has no `x--`/`--x`
+taclets	TestSuite	storageRootPostincrementAssign	proved	`T r = x++;` split into `T r; r = x++;`	
 taclets	TestSuite	storageRootPostincrement	proved		
-taclets	TestSuite	storageRootPredecrement	proved		
-taclets	TestSuite	storageRootPreincrementAssign	proved		
+taclets	TestSuite	storageRootPredecrement	unsupported		decrement: `--` is Lean's comment token, and the grammar has no `x--`/`--x`
+taclets	TestSuite	storageRootPreincrementAssign	proved	`T r = x++;` split into `T r; r = x++;`	
 taclets	TestSuite	storageRootPreincrement	proved		
 taclets	TestSuite	storageRootSubAssign	proved		
 taclets	TestSuite	storageRootWriteRhsCapture	proved	concretized: solkey proves this for all parameters; ported at x = 1, y = 2, z = 3	
 taclets	TestSuite	storageToMemory	proved		
 taclets	TestSuite	subtractionSimple	proved		
 taclets	TestSuite	subtractionStorageRead	proved		
-taclets	TestSuite	unaryMinusSimple	proved	concretized: solkey proves this for all parameters; ported at x = 5	
-taclets	TestSuite	testDeepPopDoesNotResetMappingMember	open		`simp` made no progress
-taclets	TestSuite	testMemoryAliasing	proved		
-taclets	TestSuite	testMemoryDeleteAlias	proved		
-taclets	TestSuite	testMemoryDeleteIdentityFieldFreshensSlot	proved		
-taclets	TestSuite	testMemoryDeletePrimitiveField	proved		
-taclets	TestSuite	testMemoryEvaluationOrder	unsupported	`new T[](n)` array allocation is not in the fragment	
-taclets	TestSuite	testMemoryFieldShallowCopy	proved		
-taclets	TestSuite	testMemoryIndexWriteImpureIndexPrimitiveRhs	unsupported	`new T[](n)` array allocation is not in the fragment	
-taclets	TestSuite	testMemoryIndexWriteImpureIndexRefRhs	unsupported	`new T[](n)` array allocation is not in the fragment	
-taclets	TestSuite	testMemoryRootAlias	proved		
-taclets	TestSuite	testMemoryRootDeleteRebindsOnlyLocal	proved		
-taclets	TestSuite	testMemoryToStorageCopyComplexSource	proved		
-taclets	TestSuite	testMemoryToStorageCopyComplexTarget	proved		
-taclets	TestSuite	testMemoryToStorageCopyField	proved		
-taclets	TestSuite	testMemoryToStorageCopyRoot	proved		
-taclets	TestSuite	testMemoryToStorageIndexCopyImpureIndex	proved		
-taclets	TestSuite	testMemoryTokenArrayAuxiliaryCases	unsupported	`new T[](n)` array allocation is not in the fragment	
-taclets	TestSuite	testMemoryUintArrayAuxiliaryCases	unsupported	`new T[](n)` array allocation is not in the fragment	
-taclets	TestSuite	testMemoryUintArrayPostdecrement	unsupported	`new T[](n)` array allocation is not in the fragment	
-taclets	TestSuite	testMemoryUintArrayPostincrement	unsupported	`new T[](n)` array allocation is not in the fragment	
-taclets	TestSuite	testMemoryUintArrayPredecrement	unsupported	`new T[](n)` array allocation is not in the fragment	
-taclets	TestSuite	testNestedIndexWriteImpureIndexPrimitiveRhs	proved		
-taclets	TestSuite	testNestedIndexReadImpureIndex	proved		
-taclets	TestSuite	testNestedIndexWriteImpureReceiverAndIndex	proved		
-taclets	TestSuite	testNestedIndexReadImpureReceiverAndIndex	proved		
-taclets	TestSuite	testStorageDeleteImpureReceiver	proved		
-taclets	TestSuite	testStoragePushImpureReceiver	proved		
-taclets	TestSuite	testCompoundAssignImpureReceiver	proved		
-taclets	TestSuite	testMemoryFieldWriteImpureReceiver	unsupported	`new T[](n)` array allocation is not in the fragment	
-taclets	TestSuite	testIndexWriteReceiverReadsMutatedVar	proved		
+taclets	TestSuite	unaryMinusSimple	unsupported	concretized: solkey proves this for all parameters; ported at x = 5	Solidity elaboration failed: a uint where a int is expected
+taclets	TestSuite	testDeepPopDoesNotResetMappingMember	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
+taclets	TestSuite	testDeleteArrayDoesNotResetElementMappingMember	open		the run from the initial store ends in `revert`
+taclets	TestSuite	testMemoryAliasing	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
+taclets	TestSuite	testMemoryDeleteAlias	unsupported		Solidity elaboration failed: `delete` in memory is not a statement yet
+taclets	TestSuite	testMemoryDeleteIdentityFieldFreshensSlot	unsupported		Solidity elaboration failed: `delete` in memory is not a statement yet
+taclets	TestSuite	testMemoryDeletePrimitiveField	unsupported		Solidity elaboration failed: `delete` in memory is not a statement yet
+taclets	TestSuite	testMemoryEvaluationOrder	unsupported		`new T[](n)` array allocation is not in the fragment
+taclets	TestSuite	testMemoryFieldShallowCopy	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
+taclets	TestSuite	testMemoryIndexWriteImpureIndexPrimitiveRhs	unsupported		`new T[](n)` array allocation is not in the fragment
+taclets	TestSuite	testMemoryIndexWriteImpureIndexRefRhs	unsupported		`new T[](n)` array allocation is not in the fragment
+taclets	TestSuite	testMemoryRootAlias	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
+taclets	TestSuite	testMemoryRootDeleteRebindsOnlyLocal	unsupported		Solidity elaboration failed: `delete` in memory is not a statement yet
+taclets	TestSuite	testMemoryToStorageCopyComplexSource	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
+taclets	TestSuite	testMemoryToStorageCopyComplexTarget	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
+taclets	TestSuite	testMemoryToStorageCopyField	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
+taclets	TestSuite	testMemoryToStorageCopyRoot	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
+taclets	TestSuite	testMemoryToStorageIndexCopyImpureIndex	unsupported		`++` inside an expression: the grammar has it as a statement only
+taclets	TestSuite	testMemoryTokenArrayAuxiliaryCases	unsupported		`new T[](n)` array allocation is not in the fragment
+taclets	TestSuite	testMemoryUintArrayAuxiliaryCases	unsupported		`new T[](n)` array allocation is not in the fragment
+taclets	TestSuite	testMemoryUintArrayPostdecrement	unsupported		`new T[](n)` array allocation is not in the fragment
+taclets	TestSuite	testMemoryUintArrayPostincrement	unsupported		`new T[](n)` array allocation is not in the fragment
+taclets	TestSuite	testMemoryUintArrayPredecrement	unsupported		`new T[](n)` array allocation is not in the fragment
+taclets	TestSuite	testNestedIndexWriteImpureIndexPrimitiveRhs	unsupported		`++` inside an expression: the grammar has it as a statement only
+taclets	TestSuite	testNestedIndexReadImpureIndex	unsupported		`++` inside an expression: the grammar has it as a statement only
+taclets	TestSuite	testNestedIndexWriteImpureReceiverAndIndex	unsupported		`++` inside an expression: the grammar has it as a statement only
+taclets	TestSuite	testNestedIndexReadImpureReceiverAndIndex	unsupported		`++` inside an expression: the grammar has it as a statement only
+taclets	TestSuite	testStorageDeleteImpureReceiver	unsupported		`++` inside an expression: the grammar has it as a statement only
+taclets	TestSuite	testStoragePushImpureReceiver	unsupported		`++` inside an expression: the grammar has it as a statement only
+taclets	TestSuite	testCompoundAssignImpureReceiver	unsupported		`++` inside an expression: the grammar has it as a statement only
+taclets	TestSuite	testMemoryFieldWriteImpureReceiver	unsupported		`new T[](n)` array allocation is not in the fragment
+taclets	TestSuite	testIndexWriteReceiverReadsMutatedVar	unsupported		`++` inside an expression: the grammar has it as a statement only
 taclets	TestSuite	testNestedStorageWrites	proved		
 taclets	TestSuite	testStorageAliases	proved		
-taclets	TestSuite	testStorageArrayReadWrite	proved		
-taclets	TestSuite	testStorageComplexReceiverPushFieldLvalue	proved		
-taclets	TestSuite	testStorageComplexReceiverPushLvalueCopy	proved		
+taclets	TestSuite	testStorageArrayReadWrite	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
+taclets	TestSuite	testStorageComplexReceiverPushFieldLvalue	unsupported		`.length` is not a program expression
+taclets	TestSuite	testStorageComplexReceiverPushLvalueCopy	unsupported		`b.push() = v` (a push as an lvalue) is not in the grammar
 taclets	TestSuite	testStorageDeleteCase	proved		
-taclets	TestSuite	testStorageIndexWriteImpureIndexPrimitiveRhs	proved		
-taclets	TestSuite	testStorageIndexWriteImpureIndexRefRhs	open		`simp` made no progress
-taclets	TestSuite	testStorageEvaluationOrder	proved		
+taclets	TestSuite	testStorageIndexWriteImpureIndexPrimitiveRhs	unsupported		`++` inside an expression: the grammar has it as a statement only
+taclets	TestSuite	testStorageIndexWriteImpureIndexRefRhs	unsupported		`++` inside an expression: the grammar has it as a statement only
+taclets	TestSuite	testStorageEvaluationOrder	unsupported		`++` inside an expression: the grammar has it as a statement only
 taclets	TestSuite	testStorageFieldDeepCopy	proved		
 taclets	TestSuite	testStorageMapReadWriteAndDelete	proved		
-taclets	TestSuite	testStorageMapStructCopy	open		`simp` made no progress
-taclets	TestSuite	testStorageNestedPushReturnAlias	open		elaboration function for `Solidity.«termSstmt!{_}»` has not been implemented
-taclets	TestSuite	testStoragePushFieldLvalue	proved		
-taclets	TestSuite	testStoragePushLvalueCopiesStorageSource	proved		
-taclets	TestSuite	testStoragePushLvaluePrimitive	proved		
-taclets	TestSuite	testStoragePushReturnAlias	proved		
+taclets	TestSuite	testStorageMapStructCopy	proved		
+taclets	TestSuite	testStorageNestedPushReturnAlias	unsupported		`.length` is not a program expression
+taclets	TestSuite	testStoragePushFieldLvalue	unsupported		`.length` is not a program expression
+taclets	TestSuite	testStoragePushLvalueCopiesStorageSource	unsupported		`b.push() = v` (a push as an lvalue) is not in the grammar
+taclets	TestSuite	testStoragePushLvaluePrimitive	unsupported		`b.push() = v` (a push as an lvalue) is not in the grammar
+taclets	TestSuite	testStoragePushReturnAlias	unsupported		`.length` is not a program expression
+taclets	TestSuite	testDanglingReferenceSurvivesPush	open		the run from the initial store ends in `revert`
+taclets	TestSuite	testArrayCopyClearsOldElements	open		the run from the initial store ends in `revert`
+taclets	TestSuite	testArrayCopyKeepsDestinationTail	open		the run from the initial store ends in `revert`
+taclets	TestSuite	testStorageIndexDeleteOutOfBoundsReverts	unsupported		the function asserts that the program reverts (a box-only obligation): the obligation is a diamond, which proves the opposite
+taclets	TestSuite	testFixedArrayDeleteKeepsLength	unsupported		state variable `fixedValues` (`uint[3]`) is not in the Lean contract `TestSuite` (Syntax.lean)
+taclets	TestSuite	testFixedArrayLength	unsupported		`.length` is not a program expression
+taclets	TestSuite	testFixedArrayIndexInBounds	unsupported		state variable `fixedValues` (`uint[3]`) is not in the Lean contract `TestSuite` (Syntax.lean)
+taclets	TestSuite	testFixedStructArrayLength	unsupported		`.length` is not a program expression
+taclets	TestSuite	testStructFixedMemberLength	unsupported		`.length` is not a program expression
+taclets	TestSuite	testMemoryStructFixedMemberLength	unsupported		`.length` is not a program expression
+taclets	TestSuite	testFixedElementOfDynamicArrayLength	unsupported		state variable `rows` (`uint[3][]`) is not in the Lean contract `TestSuite` (Syntax.lean)
+taclets	TestSuite	testMemoryFixedArrayLength	unsupported		fixed-size array type `uint[3]` is not in the grammar
+taclets	TestSuite	testMemoryNestedFixedArrayLength	unsupported		fixed-size array type `uint[2][3]` is not in the grammar
+taclets	TestSuite	testNewArrayOfFixedElementLength	unsupported		fixed-size array type `uint[2][]` is not in the grammar
+taclets	TestSuite	testFixedStructArrayDeleteResetsElements	unsupported		state variable `fixedTokens` (`Token[2]`) is not in the Lean contract `TestSuite` (Syntax.lean)
+taclets	TestSuite	testStructWithFixedArrayDeleteKeepsLength	unsupported		state variable `triple` (`Triple`) is not in the Lean contract `TestSuite` (Syntax.lean)
+taclets	TestSuite	testStructWithFixedArrayCopy	unsupported		state variable `triple` (`Triple`) is not in the Lean contract `TestSuite` (Syntax.lean)
+taclets	TestSuite	testFixedMappingArrayDeleteKeepsEntries	unsupported		state variable `fixedMaps` (`mapping(uint => uint)[2]`) is not in the Lean contract `TestSuite` (Syntax.lean)
+taclets	TestSuite	testDeleteArrayLeavesDataPastLength	open		the run from the initial store ends in `revert`
+taclets	TestSuite	testPopKeepsMappingElementEntries	unsupported		state variable `mapArray` (`mapping(uint => uint)[]`) is not in the Lean contract `TestSuite` (Syntax.lean)
+taclets	TestSuite	testDeleteKeepsMappingElementEntries	unsupported		state variable `mapArray` (`mapping(uint => uint)[]`) is not in the Lean contract `TestSuite` (Syntax.lean)
+taclets	TestSuite	testPushBindMappingElement	unsupported		state variable `mapArray` (`mapping(uint => uint)[]`) is not in the Lean contract `TestSuite` (Syntax.lean)
+taclets	TestSuite	testDanglingInnerArrayReappearsAfterPush	unsupported		`.length` is not a program expression
 taclets	TestSuite	testStorageRootDeepCopy	proved		
 taclets	TestSuite	testStorageStructDeleteSkipsMappingMember	proved		
 taclets	TestSuite	testStorageToMemoryCopyComplexPath	proved		
@@ -239,49 +267,156 @@ taclets	TestSuite	testStorageToMemoryCopyRoot	proved
 taclets	TestSuite	testStorageWriteAndRead	proved		
 taclets	TestSuite	storageFieldDecomposition	proved		
 taclets	TestSuite	storageFieldDeepValue	proved		
-taclets	TestSuite	storageIndexDecomposition	open		`simp` made no progress
+taclets	TestSuite	storageIndexDecomposition	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
 taclets	TestSuite	storageIndexRootArray	proved		
 taclets	TestSuite	storageFieldDisjointFields	proved		
 taclets	TestSuite	storageFieldDisjointRoots	proved		
-taclets	TestSuite	memoryAssignForms	unsupported	`new T[](n)` array allocation is not in the fragment	
-taclets	TestSuite	memoryDelete	proved		
+taclets	TestSuite	memoryAssignForms	unsupported		`new T[](n)` array allocation is not in the fragment
+taclets	TestSuite	memoryDelete	unsupported		Solidity elaboration failed: `delete` in memory is not a statement yet
 taclets	TestSuite	storageAliasRebindOriginal	proved		
 taclets	TestSuite	testSimpleAssert	proved		
-taclets	TestSuite	localArithmeticInRange	unsupported	parameter(s) x are not pinned by any require, so no concrete witness is derivable	
-taclets	TestSuite	signedUnaryMinusInRange	proved	concretized: solkey proves this for all parameters; ported at x = 5	
-taclets	TestSuite	storageIndexWriteRefSourceImpureIndex	open		`simp` made no progress
-taclets	TestSuite	storageFieldWriteRefSourceImpureReceiver	open		`simp` made no progress
-taclets	TestSuite	storageFieldWriteStorageRefImpureReceiver	open		`simp` made no progress
-taclets	TestSuite	storageFieldWriteRootRefImpureReceiver	open		`simp` made no progress
-taclets	TestSuite	memoryFieldWriteMemRefImpureReceiver	unsupported	`new T[](n)` array allocation is not in the fragment	
-taclets	TestSuite	storageIndexWriteRootRefImpureReceiver	proved		
-taclets	TestSuite	storageIndexWriteStorageRefImpureReceiver	proved		
-taclets	TestSuite	memoryToStorageIndexImpureReceiver	proved		
-taclets	TestSuite	memoryIndexWriteMemRefImpureReceiver	unsupported	`new T[](n)` array allocation is not in the fragment	
-taclets	TestSuite	additionLeftImpureRightReadFirst	open		`simp` made no progress
-taclets	TestSuite	additionRightImpure	open		`simp` made no progress
-taclets	TestSuite	additionBothOperandsImpure	proved		
-taclets	TestSuite	subtractionLeftImpureRightReadFirst	open		`simp` made no progress
-taclets	TestSuite	lessThanLeftImpureRightReadFirst	open		`simp` made no progress
+taclets	TestSuite	localArithmeticInRange	proved	concretized: solkey proves this for all parameters; ported at x = 1	
+taclets	TestSuite	signedUnaryMinusInRange	unsupported		type `int8` is not in the fragment
+taclets	TestSuite	storageIndexWriteRefSourceImpureIndex	unsupported		`++` inside an expression: the grammar has it as a statement only
+taclets	TestSuite	storageFieldWriteRefSourceImpureReceiver	unsupported		`++` inside an expression: the grammar has it as a statement only
+taclets	TestSuite	storageFieldWriteStorageRefImpureReceiver	unsupported		`++` inside an expression: the grammar has it as a statement only
+taclets	TestSuite	storageFieldWriteRootRefImpureReceiver	unsupported		`++` inside an expression: the grammar has it as a statement only
+taclets	TestSuite	memoryFieldWriteMemRefImpureReceiver	unsupported		`new T[](n)` array allocation is not in the fragment
+taclets	TestSuite	storageIndexWriteRootRefImpureReceiver	unsupported		`++` inside an expression: the grammar has it as a statement only
+taclets	TestSuite	storageIndexWriteStorageRefImpureReceiver	unsupported		`++` inside an expression: the grammar has it as a statement only
+taclets	TestSuite	memoryToStorageIndexImpureReceiver	unsupported		`++` inside an expression: the grammar has it as a statement only
+taclets	TestSuite	memoryIndexWriteMemRefImpureReceiver	unsupported		`new T[](n)` array allocation is not in the fragment
+taclets	TestSuite	additionLeftImpureRightReadFirst	unsupported		`++` inside an expression: the grammar has it as a statement only
+taclets	TestSuite	additionRightImpure	unsupported		`++` inside an expression: the grammar has it as a statement only
+taclets	TestSuite	additionBothOperandsImpure	unsupported		`++` inside an expression: the grammar has it as a statement only
+taclets	TestSuite	subtractionLeftImpureRightReadFirst	unsupported		`++` inside an expression: the grammar has it as a statement only
+taclets	TestSuite	lessThanLeftImpureRightReadFirst	unsupported		`++` inside an expression: the grammar has it as a statement only
 taclets	TestSuite	testCopyRootKeepsValueMembers	proved		
 taclets	TestSuite	testCopyFieldNested	proved		
-taclets	TestSuite	testCopyOfCopy	proved		
+taclets	TestSuite	testCopyOfCopy	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
 taclets	TestSuite	testCopyIntoMappingEntry	proved	concretized: solkey proves this for all parameters; ported at k = 3	
-taclets	TestSuite	testCopyArrayMemberElements	proved		
+taclets	TestSuite	testCopyArrayMemberElements	unsupported		`.length` is not a program expression
 taclets	TestSuite	testCopyPrimitiveRoot	proved		
 taclets	TestSuite	testCopyStoreRootFromField	proved		
 taclets	TestSuite	testCopyStoreRootFromIndex	proved		
-taclets	TestSuite	testPushCopyThenDeleteTarget	proved		
-taclets	TestSuite	indexWriteBothImpureStorageRef	proved		
-taclets	TestSuite	indexWriteBothImpureMemToStorage	proved		
-taclets	TestSuite	indexWriteBothImpureMemoryValue	unsupported	`new T[](n)` array allocation is not in the fragment	
-taclets	TestSuite	indexWriteBothImpureMemRef	unsupported	`new T[](n)` array allocation is not in the fragment	
-solc	SolcExpressions	postIncrementYieldsOldValue	proved		
-solc	SolcExpressions	preIncrementYieldsNewValue	proved		
-solc	SolcExpressions	incDecChainOnLocal	proved		
-solc	SolcExpressions	incDecChainOnStateVariable	proved		
-solc	SolcExpressions	postDecrementYieldsOldValue	proved		
-solc	SolcExpressions	preDecrementYieldsNewValue	proved		
+taclets	TestSuite	testPushCopyThenDeleteTarget	unsupported		`b.push() = v` (a push as an lvalue) is not in the grammar
+taclets	TestSuite	indexWriteBothImpureStorageRef	unsupported		`++` inside an expression: the grammar has it as a statement only
+taclets	TestSuite	indexWriteBothImpureMemToStorage	unsupported		`++` inside an expression: the grammar has it as a statement only
+taclets	TestSuite	indexWriteBothImpureMemoryValue	unsupported		`new T[](n)` array allocation is not in the fragment
+taclets	TestSuite	indexWriteBothImpureMemRef	unsupported		`new T[](n)` array allocation is not in the fragment
+taclets	TestSuite	nestedMappingWriteRead	unsupported		state variable `grid` (`mapping(uint => mapping(uint => uint))`) is not in the Lean contract `TestSuite` (Syntax.lean)
+taclets	TestSuite	nestedMappingRowAlias	unsupported		state variable `grid` (`mapping(uint => mapping(uint => uint))`) is not in the Lean contract `TestSuite` (Syntax.lean)
+taclets	TestSuite	arrayOfMappingsIndex	unsupported		state variable `mapArray` (`mapping(uint => uint)[]`) is not in the Lean contract `TestSuite` (Syntax.lean)
+taclets	TestSuite	mappingOfLedgerMember	unsupported		state variable `ledgerMap` (`mapping(uint => Ledger)`) is not in the Lean contract `TestSuite` (Syntax.lean)
+taclets	TestSuite	mappingPointerTernary	unsupported		Solidity elaboration failed: a conditional of reference type
+taclets	TestSuite	mappingReadAsKey	proved		
+taclets	TestSuite	memoryFieldAsMappingKey	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
+taclets	TestSuite	mappingEntryThroughMemoryToMappingEntry	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
+taclets	TestSuite	boolKeyMapping	unsupported		state variable `boolKeyed` (`mapping(bool => uint)`) is not in the Lean contract `TestSuite` (Syntax.lean)
+taclets	TestSuite	boolIsTrueOrFalse	unsupported		parameter(s) b are not pinned by any require, so no concrete witness is derivable
+taclets	TestSuite	boolKeyMappingSymbolicKey	unsupported		state variable `boolKeyed` (`mapping(bool => uint)`) is not in the Lean contract `TestSuite` (Syntax.lean)
+taclets	TestSuite	recursiveStructMapping	unsupported		state variable `tree` (`Tree`) is not in the Lean contract `TestSuite` (Syntax.lean)
+taclets	TestSuite	numberLiteralForms	unsupported		ether and time units (`1 gwei`, `2 days`) are not in the grammar
+taclets	TestSuite	localAddAssign	proved		
+taclets	TestSuite	localMulAssign	proved		
+taclets	TestSuite	localDivAssign	proved		
+taclets	TestSuite	localModAssign	proved		
+taclets	TestSuite	localPostincrement	proved		
+taclets	TestSuite	localPostdecrement	unsupported		decrement: `--` is Lean's comment token, and the grammar has no `x--`/`--x`
+taclets	TestSuite	localPredecrement	unsupported		decrement: `--` is Lean's comment token, and the grammar has no `x--`/`--x`
+taclets	TestSuite	localDeclPostdecrement	unsupported		decrement: `--` is Lean's comment token, and the grammar has no `x--`/`--x`
+taclets	TestSuite	localDeclPredecrement	unsupported		decrement: `--` is Lean's comment token, and the grammar has no `x--`/`--x`
+taclets	TestSuite	subAssignValueRhsCapture	proved		
+taclets	TestSuite	mulAssignValueRhsCapture	proved		
+taclets	TestSuite	divAssignValueRhsCapture	proved		
+taclets	TestSuite	modAssignValueRhsCapture	proved		
+taclets	TestSuite	indexWriteValueRhsCapture	unsupported		`new T[](n)` array allocation is not in the fragment
+taclets	TestSuite	memoryIndexWriteMemRefRhsCapture	unsupported		`new T[](n)` array allocation is not in the fragment
+taclets	TestSuite	memoryIndexDeleteNonSimpleIndexCapture	unsupported		`new T[](n)` array allocation is not in the fragment
+taclets	TestSuite	boolInequalityCaptureLhs	proved		
+taclets	TestSuite	boolInequalityCaptureRhs	proved		
+taclets	TestSuite	greaterThanCaptureRhs	proved		
+taclets	TestSuite	greaterEqualCaptureLhs	proved		
+taclets	TestSuite	greaterEqualCaptureRhs	proved		
+taclets	TestSuite	lessEqualCaptureLhs	proved		
+taclets	TestSuite	lessEqualCaptureRhs	proved		
+taclets	TestSuite	logicalNotCapture	proved		
+taclets	TestSuite	unaryMinusCapture	unsupported		Solidity elaboration failed: a uint where a int is expected
+taclets	TestSuite	multiplicationUnfoldLeft	proved		
+taclets	TestSuite	multiplicationUnfoldRight	proved		
+taclets	TestSuite	divisionUnfoldLeft	proved		
+taclets	TestSuite	divisionUnfoldRight	proved		
+taclets	TestSuite	moduloUnfoldLeft	proved		
+taclets	TestSuite	moduloUnfoldRight	proved		
+taclets	TestSuite	signedDivisionTruncates	unsupported		Solidity elaboration failed: a uint where a int is expected
+taclets	TestSuite	signedModuloTakesDividendSign	unsupported		Solidity elaboration failed: a uint where a int is expected
+taclets	TestSuite	storageSignedDivModAssign	unsupported		state variable `signedTotal` (`int`) is not in the Lean contract `TestSuite` (Syntax.lean)
+taclets	TestSuite	powerUnfoldLeft	unsupported		exponentiation `**` is not in the sol_expr grammar
+taclets	TestSuite	powerUnfoldRight	unsupported		exponentiation `**` is not in the sol_expr grammar
+taclets	TestSuite	subtractionUnfoldRight	proved		
+taclets	TestSuite	parenthesizedRightOperand	proved		
+taclets	TestSuite	parenthesizedLeftOperand	proved		
+taclets	TestSuite	parenthesizedCondition	proved		
+taclets	TestSuite	memoryFieldSubAssignUnfold	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
+taclets	TestSuite	memoryFieldMulAssignUnfold	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
+taclets	TestSuite	memoryFieldDivAssignUnfold	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
+taclets	TestSuite	memoryFieldModAssignUnfold	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
+taclets	TestSuite	memoryFieldPostincrementUnfold	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
+taclets	TestSuite	memoryFieldPredecrementUnfold	unsupported		decrement: `--` is Lean's comment token, and the grammar has no `x--`/`--x`
+taclets	TestSuite	memoryFieldPostdecrementUnfold	unsupported		decrement: `--` is Lean's comment token, and the grammar has no `x--`/`--x`
+taclets	TestSuite	memoryFieldDeleteUnfold	unsupported		Solidity elaboration failed: `delete` in memory is not a statement yet
+taclets	TestSuite	memoryFieldReadUnfoldResult	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
+taclets	TestSuite	memoryIndexReadUnfoldResult	unsupported		`new T[](n)` array allocation is not in the fragment
+taclets	TestSuite	memoryIndexArraySubAssignUnfold	unsupported		`new T[](n)` array allocation is not in the fragment
+taclets	TestSuite	memoryIndexArrayMulAssignUnfold	unsupported		`new T[](n)` array allocation is not in the fragment
+taclets	TestSuite	memoryIndexArrayDivAssignUnfold	unsupported		`new T[](n)` array allocation is not in the fragment
+taclets	TestSuite	memoryIndexArrayModAssignUnfold	unsupported		`new T[](n)` array allocation is not in the fragment
+taclets	TestSuite	memoryIndexArrayPostincrementUnfold	unsupported		`new T[](n)` array allocation is not in the fragment
+taclets	TestSuite	memoryIndexArrayPredecrementUnfold	unsupported		`new T[](n)` array allocation is not in the fragment
+taclets	TestSuite	memoryIndexArrayPostdecrementUnfold	unsupported		`new T[](n)` array allocation is not in the fragment
+taclets	TestSuite	memoryIndexArrayDeleteUnfold	unsupported		`new T[](n)` array allocation is not in the fragment
+taclets	TestSuite	memoryIndexArrayPostincrement	unsupported		`new T[](n)` array allocation is not in the fragment
+taclets	TestSuite	memoryIndexArrayPredecrement	unsupported		`new T[](n)` array allocation is not in the fragment
+taclets	TestSuite	memoryIndexArrayPreincrementAssignment	unsupported		`new T[](n)` array allocation is not in the fragment
+taclets	TestSuite	memoryIndexArrayPostdecrementAssignment	unsupported		`new T[](n)` array allocation is not in the fragment
+taclets	TestSuite	storageFieldDeleteUnfold	proved		
+taclets	TestSuite	storageFieldPredecrementUnfold	unsupported		decrement: `--` is Lean's comment token, and the grammar has no `x--`/`--x`
+taclets	TestSuite	storageFieldPostdecrementUnfold	unsupported		decrement: `--` is Lean's comment token, and the grammar has no `x--`/`--x`
+taclets	TestSuite	storageIndexAddAssignUnfold	proved		
+taclets	TestSuite	storageIndexSubAssignUnfold	proved		
+taclets	TestSuite	storageIndexMulAssignUnfold	proved		
+taclets	TestSuite	storageIndexDivAssignUnfold	proved		
+taclets	TestSuite	storageIndexModAssignUnfold	proved		
+taclets	TestSuite	storageIndexPreincrementUnfold	proved		
+taclets	TestSuite	storageIndexPostincrementUnfold	proved		
+taclets	TestSuite	storageIndexPredecrementUnfold	unsupported		decrement: `--` is Lean's comment token, and the grammar has no `x--`/`--x`
+taclets	TestSuite	storageIndexPostdecrementUnfold	unsupported		decrement: `--` is Lean's comment token, and the grammar has no `x--`/`--x`
+taclets	TestSuite	storageIndexMappingSubAssign	proved		
+taclets	TestSuite	storageIndexMappingMulAssign	proved		
+taclets	TestSuite	storageIndexMappingDivAssign	proved		
+taclets	TestSuite	storageIndexMappingModAssign	proved		
+taclets	TestSuite	storageIndexMappingPreincrement	proved		
+taclets	TestSuite	storageIndexMappingPostincrement	proved		
+taclets	TestSuite	storageIndexMappingPredecrement	unsupported		decrement: `--` is Lean's comment token, and the grammar has no `x--`/`--x`
+taclets	TestSuite	storageIndexMappingPostdecrement	unsupported		decrement: `--` is Lean's comment token, and the grammar has no `x--`/`--x`
+taclets	TestSuite	storageIndexMappingPreincrementAssignment	proved	`T r = x++;` split into `T r; r = x++;`	
+taclets	TestSuite	storageIndexMappingPostincrementAssignment	proved	`T r = x++;` split into `T r; r = x++;`	
+taclets	TestSuite	storageIndexMappingPredecrementAssignment	unsupported		decrement: `--` is Lean's comment token, and the grammar has no `x--`/`--x`
+taclets	TestSuite	storageIndexMappingPostdecrementAssignment	unsupported		decrement: `--` is Lean's comment token, and the grammar has no `x--`/`--x`
+taclets	TestSuite	storageIndexReadArrayStoreRoot	proved		
+taclets	TestSuite	storagePopUnfold	proved		
+taclets	TestSuite	storageRootPostdecrement	unsupported		decrement: `--` is Lean's comment token, and the grammar has no `x--`/`--x`
+taclets	TestSuite	storageRootPredecrementAssign	unsupported		decrement: `--` is Lean's comment token, and the grammar has no `x--`/`--x`
+taclets	TestSuite	ternaryToIfStorage	proved		
+taclets	TestSuite	transferToOwner	unsupported		type conversion `payable(…)` is not an expression
+taclets	TestSuite	transferUnfoldReceiver	unsupported		type conversion `payable(…)` is not an expression
+taclets	TestSuite	transferUnfoldArgument	unsupported		type conversion `payable(…)` is not an expression
+solc	SolcExpressions	postIncrementYieldsOldValue	proved	`T r = x++;` split into `T r; r = x++;`	
+solc	SolcExpressions	preIncrementYieldsNewValue	proved	`T r = x++;` split into `T r; r = x++;`	
+solc	SolcExpressions	incDecChainOnLocal	proved	`T r = x++;` split into `T r; r = x++;`	
+solc	SolcExpressions	incDecChainOnStateVariable	proved	`T r = x++;` split into `T r; r = x++;`	
+solc	SolcExpressions	postDecrementYieldsOldValue	unsupported		decrement: `--` is Lean's comment token, and the grammar has no `x--`/`--x`
+solc	SolcExpressions	preDecrementYieldsNewValue	unsupported		decrement: `--` is Lean's comment token, and the grammar has no `x--`/`--x`
 solc	SolcExpressions	compoundAssignOnLocal	proved		
 solc	SolcExpressions	bareIncrementOnLocal	proved		
 solc	SolcExpressions	bareIncrementOnStateVariable	proved		
@@ -291,126 +426,126 @@ solc	SolcExpressions	ternaryNestedOuterHigh	proved	concretized: solkey proves th
 solc	SolcExpressions	ternaryNestedOuterLow	proved	concretized: solkey proves this for all parameters; ported at x = 500	
 solc	SolcExpressions	ternaryNestedInnerHigh	proved	concretized: solkey proves this for all parameters; ported at x = 80	
 solc	SolcExpressions	ternaryNestedInnerLow	proved	concretized: solkey proves this for all parameters; ported at x = 40	
-solc	SolcExpressions	exponentiationIsRightAssociative	proved		
-solc	SolcExpressions	exponentiationZeroBaseZeroExponent	proved		
-solc	SolcExpressions	exponentiationZeroExponent	proved		
-solc	SolcExpressions	exponentiationSignedBaseEvenExponent	proved	concretized: solkey proves this for all parameters; ported at b = minusTwo	
-solc	SolcExpressions	exponentiationSignedBaseOddExponent	open	concretized: solkey proves this for all parameters; ported at b = minusTwo	`simp` made no progress
+solc	SolcExpressions	exponentiationIsRightAssociative	unsupported		exponentiation `**` is not in the sol_expr grammar
+solc	SolcExpressions	exponentiationZeroBaseZeroExponent	unsupported		exponentiation `**` is not in the sol_expr grammar
+solc	SolcExpressions	exponentiationZeroExponent	unsupported		exponentiation `**` is not in the sol_expr grammar
+solc	SolcExpressions	exponentiationSignedBaseEvenExponent	unsupported		exponentiation `**` is not in the sol_expr grammar
+solc	SolcExpressions	exponentiationSignedBaseOddExponent	unsupported		exponentiation `**` is not in the sol_expr grammar
 solc	SolcStructs	deleteMemberThroughStorageAlias	proved		
 solc	SolcStructs	deleteStructLeavesNeighbours	proved		
-solc	SolcStructs	deleteStructResetsArrayLength	proved		
+solc	SolcStructs	deleteStructResetsArrayLength	unsupported		`.length` is not a program expression
 solc	SolcStructs	deleteStructInMapping	proved		
 solc	SolcStructs	deleteEntryKeepsOtherKeys	proved		
-solc	SolcStructs	recursiveStructThroughAliases	unsupported	field-name overloading: Depth0.recursive and Depth1.recursive have different types, and SoliditySyntax.fieldTy is one global name->type table	
-solc	SolcStructs	nestedRecursiveStructSetAndCheck	unsupported	field-name overloading: as recursiveStructThroughAliases, plus Flagged.y (bool) vs Sub.y/Triple.y (uint)	
-solc	SolcStructs	structCopyViaMemoryLocal	proved		
+solc	SolcStructs	recursiveStructThroughAliases	unsupported		field-name overloading: Depth0.recursive and Depth1.recursive have different types, and Semantics.structDef is one global name->fields table
+solc	SolcStructs	nestedRecursiveStructSetAndCheck	unsupported		field-name overloading: as recursiveStructThroughAliases, plus Flagged.y (bool) vs Sub.y/Triple.y (uint)
+solc	SolcStructs	structCopyViaMemoryLocal	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
 solc	SolcStructs	structCopyFromStorageIsDeep	proved		
-solc	SolcStructs	structArrayElementCopy	proved		
-solc	SolcStructs	structArrayElementCopyMemberwise	proved		
-solc	SolcArrays	pushLvalueAssignsAndGrows	proved		
-solc	SolcArrays	pushWithArgument	proved		
-solc	SolcArrays	pushThenPopRestoresLength	proved		
-solc	SolcArrays	pushEmptyGrowsLength	proved		
-solc	SolcArrays	popThenPushSlotIsZeroed	proved		
-solc	SolcArrays	pushedSlotIsZeroed	proved		
+solc	SolcStructs	structArrayElementCopy	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
+solc	SolcStructs	structArrayElementCopyMemberwise	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
+solc	SolcArrays	pushLvalueAssignsAndGrows	unsupported		`b.push() = v` (a push as an lvalue) is not in the grammar
+solc	SolcArrays	pushWithArgument	unsupported		`.length` is not a program expression
+solc	SolcArrays	pushThenPopRestoresLength	unsupported		`.length` is not a program expression
+solc	SolcArrays	pushEmptyGrowsLength	unsupported		`.length` is not a program expression
+solc	SolcArrays	popThenPushSlotIsZeroed	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
+solc	SolcArrays	pushedSlotIsZeroed	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
 solc	SolcArrays	storageIndexReadWrite	proved		
-solc	SolcArrays	storageArrayAliasWritesThrough	proved		
-solc	SolcArrays	storageStructArrayAliasWritesThrough	proved		
-solc	SolcArrays	deleteArrayElementOfStructs	proved		
-solc	SolcArrays	matrixElementWriteRead	open		`simp` made no progress
-solc	SolcArrays	lengthTracksPushAndPop	proved		
-solc	SolcMemory	memoryStructDefaultsToZero	proved		
-solc	SolcMemory	memoryStructWriteRead	proved		
-solc	SolcMemory	storageArrayElementCopiedIntoMemory	proved		
+solc	SolcArrays	storageArrayAliasWritesThrough	unsupported		`.length` is not a program expression
+solc	SolcArrays	storageStructArrayAliasWritesThrough	unsupported		`.length` is not a program expression
+solc	SolcArrays	deleteArrayElementOfStructs	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
+solc	SolcArrays	matrixElementWriteRead	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
+solc	SolcArrays	lengthTracksPushAndPop	unsupported		`.length` is not a program expression
+solc	SolcMemory	memoryStructDefaultsToZero	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
+solc	SolcMemory	memoryStructWriteRead	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
+solc	SolcMemory	storageArrayElementCopiedIntoMemory	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
 solc	SolcMemory	nestedStorageStructToMemory	proved		
-solc	SolcMemory	memoryStructToStorage	proved		
+solc	SolcMemory	memoryStructToStorage	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
 solc	SolcMemory	storageToMemoryCopyIsDeep	proved		
-solc	SolcMemory	memoryToStorageCopyIsDeep	proved		
-solc	SolcMemory	memoryAliasIsNotACopy	proved		
-solc	SolcMemory	memoryArrayInStruct	unsupported	`new T[](n)` array allocation is not in the fragment	
-solc	SolcMemory	deleteMemoryArrayElement	unsupported	`new T[](n)` array allocation is not in the fragment	
+solc	SolcMemory	memoryToStorageCopyIsDeep	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
+solc	SolcMemory	memoryAliasIsNotACopy	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
+solc	SolcMemory	memoryArrayInStruct	unsupported		`new T[](n)` array allocation is not in the fragment
+solc	SolcMemory	deleteMemoryArrayElement	unsupported		`new T[](n)` array allocation is not in the fragment
 solc	SolcMemory	storageArrayCopiedIntoMemory	proved		
 solc	SolcMappings	structStorageToMappingEntry	proved		
 solc	SolcMappings	mappingEntryToStorageStruct	proved		
 solc	SolcMappings	mappingEntryCopyIsDeep	proved		
-solc	SolcMappings	copySubstructureIntoMapping	open		`simp` made no progress
-solc	SolcMappings	copySubstructureFromMapping	open		`simp` made no progress
+solc	SolcMappings	copySubstructureIntoMapping	proved		
+solc	SolcMappings	copySubstructureFromMapping	proved		
 solc	SolcMappings	mappingKeysAreIndependent	proved		
 solc	SolcMappings	deleteStructKeepsMappingMember	proved		
-solc	SolcMappings	arrayElementsToMapping	proved		
-solc	SolcMappings	arrayElementsToMappingElementwise	proved		
+solc	SolcMappings	arrayElementsToMapping	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
+solc	SolcMappings	arrayElementsToMappingElementwise	unsupported		`.length` is not a program expression
 solc	SolcControlFlow	doWhileFalseRunsBodyOnce	proved		
 solc	SolcControlFlow	forLoopUnrolledOverArray	proved		
 solc	SolcControlFlow	sequentialAssignmentDoesNotSwap	proved		
-solc	SolcControlFlow	swapViaTemporary	proved		
-solc	SolcControlFlow	ternarySelectsFirstMemorySource	open	concretized: solkey proves this for all parameters; ported at cond = 1	`simp` made no progress
-solc	SolcControlFlow	ternaryIntoMemoryTarget	open	concretized: solkey proves this for all parameters; ported at cond = 1	`simp` made no progress
-solc	SolcControlFlow	ifElseSelectsMemorySource	proved	concretized: solkey proves this for all parameters; ported at cond = 0	
+solc	SolcControlFlow	swapViaTemporary	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
+solc	SolcControlFlow	ternarySelectsFirstMemorySource	unsupported	concretized: solkey proves this for all parameters; ported at cond = 1	Solidity elaboration failed: a conditional of reference type
+solc	SolcControlFlow	ternaryIntoMemoryTarget	unsupported	concretized: solkey proves this for all parameters; ported at cond = 1	Solidity elaboration failed: a conditional of reference type
+solc	SolcControlFlow	ifElseSelectsMemorySource	evaluated	concretized: solkey proves this for all parameters; ported at cond = 0	the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
 solc	SolcControlFlow	ternarySelectsValueByFlag	proved	concretized: solkey proves this for all parameters; ported at cond = 0	
 solc	SolcControlFlow	chainedIfsSelectLastMatch	proved		
-solc	SolcControlFlow	nestedIfElseSelectsBranch	open	concretized: solkey proves this for all parameters; ported at x = 500	unexpected token '>'; expected ')'
-net	Net	auction_closeAuction_invariant	unsupported	assumes an uninterpreted CInv over a symbolic ledger and books msg.value/msg.sender before the call; sol_wp evaluates from a concrete store and the fragment has no msg.*	
-net	Net	auction_makeBid_invariant	unsupported	assumes an uninterpreted CInv over a symbolic ledger and books msg.value/msg.sender before the call; sol_wp evaluates from a concrete store and the fragment has no msg.*	
-net	Net	auction_makeBid_withcallback	unsupported	needs `transferWithCallback`, which CallbackSemantics.lean gives a relational meaning but the sol_stmt grammar cannot spell	
-net	Net	auction_withdraw_makeBid_invariant	unsupported	assumes an uninterpreted CInv over a symbolic ledger and books msg.value/msg.sender before the call; sol_wp evaluates from a concrete store and the fragment has no msg.*	
-net	Net	auction_withdraw_withdraw_invariant	unsupported	assumes an uninterpreted CInv over a symbolic ledger and books msg.value/msg.sender before the call; sol_wp evaluates from a concrete store and the fragment has no msg.*	
-net	Net	casino_addToPot_invariant	unsupported	assumes an uninterpreted CInv over a symbolic ledger and books msg.value/msg.sender before the call; sol_wp evaluates from a concrete store and the fragment has no msg.*	
-net	Net	casino_decideBet_invariant	unsupported	assumes an uninterpreted CInv over a symbolic ledger and books msg.value/msg.sender before the call; sol_wp evaluates from a concrete store and the fragment has no msg.*	
-net	Net	casino_decideBet_withcallback	unsupported	needs `transferWithCallback`, which CallbackSemantics.lean gives a relational meaning but the sol_stmt grammar cannot spell	
-net	Net	casino_placeBet_invariant	unsupported	assumes an uninterpreted CInv over a symbolic ledger and books msg.value/msg.sender before the call; sol_wp evaluates from a concrete store and the fragment has no msg.*	
-net	Net	escrow_placeInEscrow_invariant	unsupported	assumes an uninterpreted CInv over a symbolic ledger and books msg.value/msg.sender before the call; sol_wp evaluates from a concrete store and the fragment has no msg.*	
-net	Net	escrow_releaseEscrow_invariant	unsupported	assumes an uninterpreted CInv over a symbolic ledger and books msg.value/msg.sender before the call; sol_wp evaluates from a concrete store and the fragment has no msg.*	
-net	Net	escrow_withdrawFrom_invariant	unsupported	assumes an uninterpreted CInv over a symbolic ledger and books msg.value/msg.sender before the call; sol_wp evaluates from a concrete store and the fragment has no msg.*	
-net	Net	net_msg_value	unsupported	`msg.value` is not in the sol_expr grammar	
-net	Net	net_transfer_capture_argument	proved	solkey net-transfer-capture-argument.key	
-net	Net	net_transfer_capture_receiver	proved	solkey net-transfer-capture-receiver.key	
-net	Net	net_transfer_diamond_funded	unsupported	assumes an uninterpreted CInv over a symbolic ledger and books msg.value/msg.sender before the call; sol_wp evaluates from a concrete store and the fragment has no msg.*	
-net	Net	net_transfer_simple	proved	solkey net-transfer-simple.key	
-net	Net	net_transfer_unfunded	unsupported	assumes an uninterpreted CInv over a symbolic ledger and books msg.value/msg.sender before the call; sol_wp evaluates from a concrete store and the fragment has no msg.*	
-net	Net	net_transfer_withcallback_diamond_funded	unsupported	needs `transferWithCallback`, which CallbackSemantics.lean gives a relational meaning but the sol_stmt grammar cannot spell	
-net	Net	net_transfer_withcallback_simple	unsupported	needs `transferWithCallback`, which CallbackSemantics.lean gives a relational meaning but the sol_stmt grammar cannot spell	
-net	Net	piggybank_addMoney_invariant	unsupported	assumes an uninterpreted CInv over a symbolic ledger and books msg.value/msg.sender before the call; sol_wp evaluates from a concrete store and the fragment has no msg.*	
-net	Net	piggybank_breakPiggyBank_invariant	unsupported	assumes an uninterpreted CInv over a symbolic ledger and books msg.value/msg.sender before the call; sol_wp evaluates from a concrete store and the fragment has no msg.*	
-net	Net	piggybank_breakPiggyBank_withcallback	unsupported	needs `transferWithCallback`, which CallbackSemantics.lean gives a relational meaning but the sol_stmt grammar cannot spell	
-rules	Rules	assignRuleExample	proved	solkey assignRuleExample.key	
-rules	Rules	contextAssignTest	proved	solkey contextAssignTest.key	
-rules	Rules	fieldAccessTest	proved	solkey fieldAccessTest.key	
-rules	Rules	functionBodyExpandTest	unsupported	KeY loader/taclet machinery: ad-hoc taclets over `\problem { true }`, a sort condition, a list declaration or an empty problem — there is no identity and no judgment to state	
-rules	Rules	hasSortVarcondTest	unsupported	KeY loader/taclet machinery: ad-hoc taclets over `\problem { true }`, a sort condition, a list declaration or an empty problem — there is no identity and no judgment to state	
-rules	Rules	listTests	unsupported	KeY loader/taclet machinery: ad-hoc taclets over `\problem { true }`, a sort condition, a list declaration or an empty problem — there is no identity and no judgment to state	
-rules	Rules	mainExamples	proved	solkey mainExamples.key	
-rules	Rules	memberAccessExample	unsupported	KeY loader/taclet machinery: ad-hoc taclets over `\problem { true }`, a sort condition, a list declaration or an empty problem — there is no identity and no judgment to state	
-rules	Rules	memoryExample1	proved	solkey memoryExample1.key	
-rules	Rules	memoryExample2	proved	solkey memoryExample2.key	
-rules	Rules	memoryExample2_2	proved	solkey memoryExample2-2.key	
-rules	Rules	memoryExample3	proved	solkey memoryExample3.key	
-rules	Rules	memoryExample4	proved	solkey memoryExample4.key	
-rules	Rules	memoryExample5	proved	solkey memoryExample5.key	
-rules	Rules	problem	unsupported	KeY loader/taclet machinery: ad-hoc taclets over `\problem { true }`, a sort condition, a list declaration or an empty problem — there is no identity and no judgment to state	
-rules	Rules	problem1	proved	solkey problem1.key	
-rules	Rules	problem2	proved	solkey problem2.key	
-rules	Rules	programRulesTest	proved	solkey programRulesTest.key	
-rules	Rules	revert	proved	solkey revert.key	
-rules	Rules	schemaVarExample	proved	solkey schemaVarExample.key	
-rules	Rules	simpleExample1	proved	solkey simpleExample1.key	
-rules	Rules	simpleExample10	proved	solkey simpleExample10.key	
-rules	Rules	simpleExample2	proved	solkey simpleExample2.key	
-rules	Rules	simpleExample3	proved	solkey simpleExample3.key	
-rules	Rules	simpleExample4	proved	solkey simpleExample4.key	
-rules	Rules	simpleExample5	proved	solkey simpleExample5.key	
-rules	Rules	simpleExample6	proved	solkey simpleExample6.key	
-rules	Rules	simpleExample7	proved	solkey simpleExample7.key	
-rules	Rules	simpleExample8	proved	solkey simpleExample8.key	
-rules	Rules	simpleExample9	proved	solkey simpleExample9.key	
-rules	Rules	simpleExpressionTest	proved	solkey simpleExpressionTest.key	
-rules	Rules	storageExample1	proved	solkey storageExample1.key	
-rules	Rules	storageExample1_2	proved	solkey storageExample1-2.key	
-rules	Rules	storageExample2	proved	solkey storageExample2.key	
-rules	Rules	storageExample2_2	proved	solkey storageExample2-2.key	
-rules	Rules	storageExample3	proved	solkey storageExample3.key	
-rules	Rules	storageExample4	proved	solkey storageExample4.key	
-rules	Rules	storageExample4_2	proved	solkey storageExample4-2.key	
-rules	Rules	storageExample5	proved	solkey storageExample5.key	
-rules	Rules	storageFieldRead	unsupported	KeY loader/taclet machinery: ad-hoc taclets over `\problem { true }`, a sort condition, a list declaration or an empty problem — there is no identity and no judgment to state	
-rules	Rules	storageFieldWrite	unsupported	KeY loader/taclet machinery: ad-hoc taclets over `\problem { true }`, a sort condition, a list declaration or an empty problem — there is no identity and no judgment to state	
-storage	Rules	copyKeepsMapping	unsupported	storage-theory problem over a `MapField`: the mapping-preserving copy is unreachable (solc ≥ 0.7 and solkey's parser reject a copy of a mapping-carrying type) and `Theory/Storage.lean` does not model it	
+solc	SolcControlFlow	nestedIfElseSelectsBranch	proved	concretized: solkey proves this for all parameters; ported at x = 500	
+net	Net	auction_closeAuction_invariant	unsupported		assumes an uninterpreted CInv over a symbolic ledger and books msg.value/msg.sender before the call; the fragment has no msg.*
+net	Net	auction_makeBid_invariant	unsupported		assumes an uninterpreted CInv over a symbolic ledger and books msg.value/msg.sender before the call; the fragment has no msg.*
+net	Net	auction_makeBid_withcallback	unsupported		needs `transferWithCallback`: the typed syntax has no calls (docs/kernel-port.md, Port later)
+net	Net	auction_withdraw_makeBid_invariant	unsupported		assumes an uninterpreted CInv over a symbolic ledger and books msg.value/msg.sender before the call; the fragment has no msg.*
+net	Net	auction_withdraw_withdraw_invariant	unsupported		assumes an uninterpreted CInv over a symbolic ledger and books msg.value/msg.sender before the call; the fragment has no msg.*
+net	Net	casino_addToPot_invariant	unsupported		assumes an uninterpreted CInv over a symbolic ledger and books msg.value/msg.sender before the call; the fragment has no msg.*
+net	Net	casino_decideBet_invariant	unsupported		assumes an uninterpreted CInv over a symbolic ledger and books msg.value/msg.sender before the call; the fragment has no msg.*
+net	Net	casino_decideBet_withcallback	unsupported		needs `transferWithCallback`: the typed syntax has no calls (docs/kernel-port.md, Port later)
+net	Net	casino_placeBet_invariant	unsupported		assumes an uninterpreted CInv over a symbolic ledger and books msg.value/msg.sender before the call; the fragment has no msg.*
+net	Net	escrow_placeInEscrow_invariant	unsupported		assumes an uninterpreted CInv over a symbolic ledger and books msg.value/msg.sender before the call; the fragment has no msg.*
+net	Net	escrow_releaseEscrow_invariant	unsupported		assumes an uninterpreted CInv over a symbolic ledger and books msg.value/msg.sender before the call; the fragment has no msg.*
+net	Net	escrow_withdrawFrom_invariant	unsupported		assumes an uninterpreted CInv over a symbolic ledger and books msg.value/msg.sender before the call; the fragment has no msg.*
+net	Net	net_msg_value	unsupported		`msg.value` is not a program expression
+net	Net	net_transfer_capture_argument	proved	solkey net-transfer-capture-argument.key	`Examples/Net.lean` `Net.netTransferCapturedAmount`
+net	Net	net_transfer_capture_receiver	proved	solkey net-transfer-capture-receiver.key	`Examples/Net.lean` `Net.netTransferStorageReceiver`
+net	Net	net_transfer_diamond_funded	unsupported		assumes an uninterpreted CInv over a symbolic ledger and books msg.value/msg.sender before the call; the fragment has no msg.*
+net	Net	net_transfer_simple	proved	solkey net-transfer-simple.key	`Examples/Net.lean` `Net.netTransferSimple`
+net	Net	net_transfer_unfunded	unsupported		assumes an uninterpreted CInv over a symbolic ledger and books msg.value/msg.sender before the call; the fragment has no msg.*
+net	Net	net_transfer_withcallback_diamond_funded	unsupported		needs `transferWithCallback`: the typed syntax has no calls (docs/kernel-port.md, Port later)
+net	Net	net_transfer_withcallback_simple	unsupported		needs `transferWithCallback`: the typed syntax has no calls (docs/kernel-port.md, Port later)
+net	Net	piggybank_addMoney_invariant	unsupported		assumes an uninterpreted CInv over a symbolic ledger and books msg.value/msg.sender before the call; the fragment has no msg.*
+net	Net	piggybank_breakPiggyBank_invariant	unsupported		assumes an uninterpreted CInv over a symbolic ledger and books msg.value/msg.sender before the call; the fragment has no msg.*
+net	Net	piggybank_breakPiggyBank_withcallback	unsupported		needs `transferWithCallback`: the typed syntax has no calls (docs/kernel-port.md, Port later)
+rules	Rules	assignRuleExample	unported	solkey assignRuleExample.key	hand-written in the removed untyped layer (its Corpus/Wp/Rules module); not yet re-derived over the typed syntax (docs/kernel-port.md, Port later)
+rules	Rules	contextAssignTest	unported	solkey contextAssignTest.key	hand-written in the removed untyped layer (its Corpus/Wp/Rules module); not yet re-derived over the typed syntax (docs/kernel-port.md, Port later)
+rules	Rules	fieldAccessTest	unported	solkey fieldAccessTest.key	hand-written in the removed untyped layer (its Corpus/Wp/Rules module); not yet re-derived over the typed syntax (docs/kernel-port.md, Port later)
+rules	Rules	functionBodyExpandTest	unsupported		KeY loader/taclet machinery: ad-hoc taclets over `\problem { true }`, a sort condition, a list declaration or an empty problem — there is no identity and no judgment to state
+rules	Rules	hasSortVarcondTest	unsupported		KeY loader/taclet machinery: ad-hoc taclets over `\problem { true }`, a sort condition, a list declaration or an empty problem — there is no identity and no judgment to state
+rules	Rules	listTests	unsupported		KeY loader/taclet machinery: ad-hoc taclets over `\problem { true }`, a sort condition, a list declaration or an empty problem — there is no identity and no judgment to state
+rules	Rules	mainExamples	unported	solkey mainExamples.key	hand-written in the removed untyped layer (its Corpus/Wp/Rules module); not yet re-derived over the typed syntax (docs/kernel-port.md, Port later)
+rules	Rules	memberAccessExample	unsupported		KeY loader/taclet machinery: ad-hoc taclets over `\problem { true }`, a sort condition, a list declaration or an empty problem — there is no identity and no judgment to state
+rules	Rules	memoryExample1	unported	solkey memoryExample1.key	hand-written in the removed untyped layer (its Corpus/Wp/Rules module); not yet re-derived over the typed syntax (docs/kernel-port.md, Port later)
+rules	Rules	memoryExample2	unported	solkey memoryExample2.key	hand-written in the removed untyped layer (its Corpus/Wp/Rules module); not yet re-derived over the typed syntax (docs/kernel-port.md, Port later)
+rules	Rules	memoryExample2_2	unported	solkey memoryExample2-2.key	hand-written in the removed untyped layer (its Corpus/Wp/Rules module); not yet re-derived over the typed syntax (docs/kernel-port.md, Port later)
+rules	Rules	memoryExample3	unported	solkey memoryExample3.key	hand-written in the removed untyped layer (its Corpus/Wp/Rules module); not yet re-derived over the typed syntax (docs/kernel-port.md, Port later)
+rules	Rules	memoryExample4	unported	solkey memoryExample4.key	hand-written in the removed untyped layer (its Corpus/Wp/Rules module); not yet re-derived over the typed syntax (docs/kernel-port.md, Port later)
+rules	Rules	memoryExample5	unported	solkey memoryExample5.key	hand-written in the removed untyped layer (its Corpus/Wp/Rules module); not yet re-derived over the typed syntax (docs/kernel-port.md, Port later)
+rules	Rules	problem	unsupported		KeY loader/taclet machinery: ad-hoc taclets over `\problem { true }`, a sort condition, a list declaration or an empty problem — there is no identity and no judgment to state
+rules	Rules	problem1	unported	solkey problem1.key	hand-written in the removed untyped layer (its Corpus/Wp/Rules module); not yet re-derived over the typed syntax (docs/kernel-port.md, Port later)
+rules	Rules	problem2	unported	solkey problem2.key	hand-written in the removed untyped layer (its Corpus/Wp/Rules module); not yet re-derived over the typed syntax (docs/kernel-port.md, Port later)
+rules	Rules	programRulesTest	unported	solkey programRulesTest.key	hand-written in the removed untyped layer (its Corpus/Wp/Rules module); not yet re-derived over the typed syntax (docs/kernel-port.md, Port later)
+rules	Rules	revert	unported	solkey revert.key	hand-written in the removed untyped layer (its Corpus/Wp/Rules module); not yet re-derived over the typed syntax (docs/kernel-port.md, Port later)
+rules	Rules	schemaVarExample	unported	solkey schemaVarExample.key	hand-written in the removed untyped layer (its Corpus/Wp/Rules module); not yet re-derived over the typed syntax (docs/kernel-port.md, Port later)
+rules	Rules	simpleExample1	unported	solkey simpleExample1.key	hand-written in the removed untyped layer (its Corpus/Wp/Rules module); not yet re-derived over the typed syntax (docs/kernel-port.md, Port later)
+rules	Rules	simpleExample10	unported	solkey simpleExample10.key	hand-written in the removed untyped layer (its Corpus/Wp/Rules module); not yet re-derived over the typed syntax (docs/kernel-port.md, Port later)
+rules	Rules	simpleExample2	unported	solkey simpleExample2.key	hand-written in the removed untyped layer (its Corpus/Wp/Rules module); not yet re-derived over the typed syntax (docs/kernel-port.md, Port later)
+rules	Rules	simpleExample3	unported	solkey simpleExample3.key	hand-written in the removed untyped layer (its Corpus/Wp/Rules module); not yet re-derived over the typed syntax (docs/kernel-port.md, Port later)
+rules	Rules	simpleExample4	unported	solkey simpleExample4.key	hand-written in the removed untyped layer (its Corpus/Wp/Rules module); not yet re-derived over the typed syntax (docs/kernel-port.md, Port later)
+rules	Rules	simpleExample5	unported	solkey simpleExample5.key	hand-written in the removed untyped layer (its Corpus/Wp/Rules module); not yet re-derived over the typed syntax (docs/kernel-port.md, Port later)
+rules	Rules	simpleExample6	unported	solkey simpleExample6.key	hand-written in the removed untyped layer (its Corpus/Wp/Rules module); not yet re-derived over the typed syntax (docs/kernel-port.md, Port later)
+rules	Rules	simpleExample7	unported	solkey simpleExample7.key	hand-written in the removed untyped layer (its Corpus/Wp/Rules module); not yet re-derived over the typed syntax (docs/kernel-port.md, Port later)
+rules	Rules	simpleExample8	unported	solkey simpleExample8.key	hand-written in the removed untyped layer (its Corpus/Wp/Rules module); not yet re-derived over the typed syntax (docs/kernel-port.md, Port later)
+rules	Rules	simpleExample9	unported	solkey simpleExample9.key	hand-written in the removed untyped layer (its Corpus/Wp/Rules module); not yet re-derived over the typed syntax (docs/kernel-port.md, Port later)
+rules	Rules	simpleExpressionTest	unported	solkey simpleExpressionTest.key	hand-written in the removed untyped layer (its Corpus/Wp/Rules module); not yet re-derived over the typed syntax (docs/kernel-port.md, Port later)
+rules	Rules	storageExample1	unported	solkey storageExample1.key	hand-written in the removed untyped layer (its Corpus/Wp/Rules module); not yet re-derived over the typed syntax (docs/kernel-port.md, Port later)
+rules	Rules	storageExample1_2	unported	solkey storageExample1-2.key	hand-written in the removed untyped layer (its Corpus/Wp/Rules module); not yet re-derived over the typed syntax (docs/kernel-port.md, Port later)
+rules	Rules	storageExample2	unported	solkey storageExample2.key	hand-written in the removed untyped layer (its Corpus/Wp/Rules module); not yet re-derived over the typed syntax (docs/kernel-port.md, Port later)
+rules	Rules	storageExample2_2	unported	solkey storageExample2-2.key	hand-written in the removed untyped layer (its Corpus/Wp/Rules module); not yet re-derived over the typed syntax (docs/kernel-port.md, Port later)
+rules	Rules	storageExample3	unported	solkey storageExample3.key	hand-written in the removed untyped layer (its Corpus/Wp/Rules module); not yet re-derived over the typed syntax (docs/kernel-port.md, Port later)
+rules	Rules	storageExample4	unported	solkey storageExample4.key	hand-written in the removed untyped layer (its Corpus/Wp/Rules module); not yet re-derived over the typed syntax (docs/kernel-port.md, Port later)
+rules	Rules	storageExample4_2	unported	solkey storageExample4-2.key	hand-written in the removed untyped layer (its Corpus/Wp/Rules module); not yet re-derived over the typed syntax (docs/kernel-port.md, Port later)
+rules	Rules	storageExample5	unported	solkey storageExample5.key	hand-written in the removed untyped layer (its Corpus/Wp/Rules module); not yet re-derived over the typed syntax (docs/kernel-port.md, Port later)
+rules	Rules	storageFieldRead	unsupported		KeY loader/taclet machinery: ad-hoc taclets over `\problem { true }`, a sort condition, a list declaration or an empty problem — there is no identity and no judgment to state
+rules	Rules	storageFieldWrite	unsupported		KeY loader/taclet machinery: ad-hoc taclets over `\problem { true }`, a sort condition, a list declaration or an empty problem — there is no identity and no judgment to state
+storage	Rules	copyKeepsMapping	unsupported		storage-theory problem over a `MapField`: the mapping-preserving copy is unreachable (solc ≥ 0.7 and solkey's parser reject a copy of a mapping-carrying type) and `Theory/Storage.lean` does not model it
