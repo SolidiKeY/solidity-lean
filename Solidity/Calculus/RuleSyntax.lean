@@ -138,6 +138,8 @@ syntax dl_fml : dl_hyp
 
 /-- A formula whose names are Lean variables. -/
 syntax "dl_schema{ " dl_fml " }" : term
+/-- A formula, as the printers show one. -/
+syntax (priority := high) "dl{ " dl_fml " }" : term
 /-- A sequent `Γ ⟹ φ`. -/
 syntax "dl{ " sepBy(dl_hyp, ", ") " ⟹ " dl_fml " }" : term
 /-- A taclet for either modality (the paper's `⟨[ s; ]⟩`). -/
@@ -488,8 +490,8 @@ partial def schemaStmt (fresh : Bool) (Γ : Scope) :
           match stemOf x.getId.toString with
           | "lhs" =>
             if isMem Γ r then `($(mkIdent `Solidity.MHole.fill) $x $(← schemaAt Γ .mloc r))
-            else `($(mkIdent `Solidity.Hole.fill) $x $(← schemaAt Γ .spath r))
-          | "x" => `($(mkIdent `Solidity.VHole.fill) $x $(← schemaAt Γ .val r))
+            else if isPath Γ r then `($(mkIdent `Solidity.Hole.fill) $x $(← schemaAt Γ .spath r))
+            else `($(mkIdent `Solidity.VHole.fill) $x $(← schemaAt Γ .val r))
           | _ => Macro.throwErrorAt l "not a left-hand side"
         | _ => Macro.throwErrorAt l "not a left-hand side"
       | _ =>
@@ -914,6 +916,7 @@ def schemaHyp : TSyntax `dl_hyp → MacroM Lean.Term
 
 macro_rules
   | `(dl_schema{ $φ:dl_fml }) => schemaFml φ
+  | `(dl{ $φ:dl_fml }) => schemaFml φ
   | `(dl{ $[$hs:dl_hyp],* ⟹ $φ:dl_fml }) => do
     `($(mkIdent `Solidity.Proves) [$(← hs.mapM schemaHyp),*] $(← schemaFml φ))
   | `(dl{ ⟨[ $s:sol_stmt; ]⟩ ⇝ $p:dl_premise }) => schemaTaclet (schemaIdent "m") s p
@@ -923,5 +926,634 @@ macro_rules
   | `(stmt{ $s:sol_stmt; }) => return (← schemaStmt false [] s).1
 
 end Expand
+
+/-! ## Printing the notation (delaborators)
+
+Each `pp…` function walks a Lean `Expr` and builds syntax of the grammar
+above; Lean's formatter prints it.  The walk first computes (`whnf`), so a
+lowered schema variable, `P ++ ω` and the like print as what they compute
+to.  A subterm the walk does not recognise prints as `‹…›`. -/
+
+section Print
+open Lean Meta PrettyPrinter Delaborator SubExpr
+set_option hygiene false
+
+@[category_parenthesizer dl_fml] def dl_fml.parenthesizer : CategoryParenthesizer
+  | prec => Parenthesizer.maybeParenthesize `dl_fml false
+      (fun stx => Unhygienic.run `(dl_fml| ($(⟨stx⟩)))) prec
+      (Parenthesizer.parenthesizeCategoryCore `dl_fml prec)
+
+@[category_parenthesizer dl_term] def dl_term.parenthesizer : CategoryParenthesizer
+  | prec => Parenthesizer.maybeParenthesize `dl_term false
+      (fun stx => Unhygienic.run `(dl_term| ($(⟨stx⟩)))) prec
+      (Parenthesizer.parenthesizeCategoryCore `dl_term prec)
+
+@[category_parenthesizer sol_expr] def sol_expr.parenthesizer : CategoryParenthesizer
+  | prec => Parenthesizer.maybeParenthesize `sol_expr false
+      (fun stx => Unhygienic.run `(sol_expr| ($(⟨stx⟩)))) prec
+      (Parenthesizer.parenthesizeCategoryCore `sol_expr prec)
+
+register_option pp.sol.dl : Bool := {
+  defValue := true
+  descr := "print statements, formulas, taclets and sequents in the calculus's \
+            notation, rather than as constructor applications"
+}
+
+def ppOn : MetaM Bool := return pp.sol.dl.get (← getOptions)
+
+def nameIdent (s : String) : Ident := mkIdent (Name.mkSimple s)
+
+/-- Lean's own printing of `e`, with this notation off. -/
+def escapeTerm (e : Lean.Expr) : MetaM Lean.Term :=
+  withOptions (fun o => pp.sol.dl.set o false) (PrettyPrinter.delab e)
+
+partial def listElems? (es : Lean.Expr) : MetaM (Option (Array Lean.Expr)) := do
+  let mut out := #[]
+  let mut cur ← whnf es
+  repeat
+    if cur.isAppOfArity ``List.nil 1 then return some out
+    unless cur.isAppOfArity ``List.cons 3 do return none
+    let args := cur.getAppArgs
+    out := out.push args[1]!
+    cur ← whnf args[2]!
+  return some out
+
+/-- The name of a free variable. -/
+def fvarName? (e : Lean.Expr) : MetaM (Option String) := do
+  let .fvar fv := (← instantiateMVars e).consumeMData | return none
+  return some (← fv.getUserName).eraseMacroScopes.toString
+
+/-- A string, or the name of a string variable. -/
+def nameOf? (e : Lean.Expr) : MetaM (Option String) := do
+  if let some n ← fvarName? e then return some n
+  match (← whnf (← instantiateMVars e)).consumeMData with
+  | .lit (.strVal s) => return some s
+  | _ => return none
+
+/-- A closed natural number. -/
+def natOf? (e : Lean.Expr) : MetaM (Option Nat) := do
+  let e ← instantiateMVars e
+  if let some n ← (evalNat e).run then return some n
+  if e.hasFVar || e.hasMVar || e.hasLooseBVars then return none
+  try return some (← unsafe evalExpr Nat (mkConst ``Nat) e) catch _ => return none
+
+/-- A closed integer. -/
+def intOf? (e : Lean.Expr) : MetaM (Option Int) := do
+  let e ← instantiateMVars e
+  if e.hasFVar || e.hasMVar || e.hasLooseBVars then return none
+  try return some (← unsafe evalExpr Int (mkConst ``Int) e) catch _ => return none
+
+/-- The spelling of `.fresh b k` by the `FreshNames` in scope. -/
+def freshName (b : String) (k : Nat) : MetaM String := do
+  let fn ← synthInstance (mkConst ``Solidity.FreshNames)
+  unsafe evalExpr String (mkConst ``String)
+    (mkApp3 (mkConst ``Solidity.FreshNames.name) fn (toExpr b) (toExpr k))
+
+/-- A variable: `x`, `se1` (as `FreshNames` spells it), or `se` for a taclet's
+fresh `.fresh "se" k`. -/
+def ppVar? (e : Lean.Expr) : MetaM (Option Ident) := do
+  if let some n ← fvarName? e then return some (nameIdent n)
+  match_expr (← whnf (← instantiateMVars e)) with
+  | Solidity.Var.user s => return (← nameOf? s).map nameIdent
+  | Solidity.Var.fresh b k =>
+    let some b ← nameOf? b | return none
+    match ← natOf? k with
+    | some n => return some (nameIdent (← freshName b n))
+    | none => return some (nameIdent b)
+  | _ => return none
+
+/-! ### Programs -/
+
+def binopSym? (op : Lean.Expr) : MetaM (Option String) := do
+  if (← fvarName? op).isSome then return some "⊕"
+  match_expr (← whnf op) with
+  | BinOp.add => return "+" | BinOp.sub => return "-" | BinOp.mul => return "*"
+  | BinOp.pow => return "**" | BinOp.div => return "/" | BinOp.mod => return "%"
+  | BinOp.lt => return "<" | BinOp.gt => return ">" | BinOp.le => return "<="
+  | BinOp.ge => return ">=" | BinOp.eqB => return "==" | BinOp.neB => return "!="
+  | BinOp.and => return "&&" | BinOp.or => return "||"
+  | _ => return none
+
+/-- `a ⊕ b` in the program grammar. -/
+def mkBinExpr (sym : String) (a b : TSyntax `sol_expr) : MetaM (TSyntax `sol_expr) :=
+  match sym with
+  | "+" => `(sol_expr| $a + $b) | "-" => `(sol_expr| $a - $b) | "*" => `(sol_expr| $a * $b)
+  | "/" => `(sol_expr| $a / $b) | "%" => `(sol_expr| $a % $b)
+  | "<" => `(sol_expr| $a < $b) | ">" => `(sol_expr| $a > $b)
+  | "<=" => `(sol_expr| $a <= $b) | ">=" => `(sol_expr| $a >= $b)
+  | "==" => `(sol_expr| $a == $b) | "!=" => `(sol_expr| $a != $b)
+  | "&&" => `(sol_expr| $a && $b) | "||" => `(sol_expr| $a || $b)
+  | _ => `(sol_expr| $a ⊕ $b)
+
+/-- `b.f`: one dotted name when `b` is a name, as the parser reads it. -/
+def dotExpr (b : TSyntax `sol_expr) (f : String) : MetaM (TSyntax `sol_expr) :=
+  match b with
+  | `(sol_expr| $x:ident) => `(sol_expr| $(mkIdent (x.getId.str f)):ident)
+  | _ => `(sol_expr| $b . $(nameIdent f):ident)
+
+/-- A Solidity type, as written: `uint`, `Person`, `uint[]`, `mapping(uint => Person)`. -/
+partial def ppTy (e : Lean.Expr) : MetaM (TSyntax `sol_ty) := do
+  if let some n ← fvarName? e then return ← `(sol_ty| $(nameIdent n):ident)
+  let T := nameIdent "T"
+  match_expr (← whnf e) with
+  | Ty.prim p => ppPrim p
+  | Ty.ref R => ppRef R
+  | _ => `(sol_ty| $T:ident)
+where
+  ppPrim (p : Lean.Expr) : MetaM (TSyntax `sol_ty) := do
+    if (← fvarName? p).isSome then return ← `(sol_ty| T)
+    match_expr (← whnf p) with
+    | PrimTy.uint => `(sol_ty| uint)
+    | PrimTy.int => `(sol_ty| int)
+    | PrimTy.bool => `(sol_ty| bool)
+    | _ => `(sol_ty| T)
+  ppRef (R : Lean.Expr) : MetaM (TSyntax `sol_ty) := do
+    if (← fvarName? R).isSome then return ← `(sol_ty| T)
+    match_expr (← whnf R) with
+    | RefTy.struct s =>
+      if (← fvarName? s).isSome then return ← `(sol_ty| T)
+      let some s ← nameOf? s | `(sol_ty| T)
+      `(sol_ty| $(nameIdent s):ident)
+    | RefTy.array E => `(sol_ty| $(← ppTy E):sol_ty[])
+    | RefTy.mapping K V => `(sol_ty| mapping($(← ppTy K) => $(← ppTy V)))
+    | _ => `(sol_ty| T)
+
+/-- A program expression of any sort; indices and proofs are not shown. -/
+partial def ppExpr (e : Lean.Expr) : MetaM (TSyntax `sol_expr) := do
+  let e ← instantiateMVars e
+  if let some n ← fvarName? e then return ← `(sol_expr| $(nameIdent n):ident)
+  let escape := do `(sol_expr| ‹$(← escapeTerm e):term›)
+  let var (x : Lean.Expr) := do
+    let some x ← ppVar? x | escape
+    `(sol_expr| $x:ident)
+  let name (r : Lean.Expr) := do
+    let some r ← nameOf? r | escape
+    `(sol_expr| $(nameIdent r):ident)
+  let field (b f : Lean.Expr) := do
+    let some f ← nameOf? f | escape
+    dotExpr (← ppExpr b) f
+  let index (b k : Lean.Expr) := do `(sol_expr| $(← ppExpr b):sol_expr[$(← ppExpr k):sol_expr])
+  match_expr (← whnf e) with
+  | Simple.lit _ _ n _ =>
+    let some n ← intOf? n | escape
+    if n < 0 then `(sol_expr| -$(Syntax.mkNumLit (toString n.natAbs)):num)
+    else `(sol_expr| $(Syntax.mkNumLit (toString n)):num)
+  | Simple.bool _ b =>
+    match_expr (← whnf b) with
+    | Bool.true => `(sol_expr| true)
+    | Bool.false => `(sol_expr| false)
+    | _ => escape
+  | Simple.local _ _ x => var x
+  | SPath.alias _ _ x => var x
+  | SPath.loc _ _ l => ppExpr l
+  | Loc.root _ _ r _ => name r
+  | Loc.field _ _ _ b f _ => field b f
+  | Loc.index _ _ _ _ _ b i => index b i
+  | MPath.var _ _ x => var x
+  | MPath.loc _ _ l => ppExpr l
+  | MLoc.field _ _ _ b f _ => field b f
+  | MLoc.index _ _ b i => index b i
+  | Val.simple _ _ s => ppExpr s
+  | Val.read _ _ l => ppExpr l
+  | Val.readMem _ _ l => ppExpr l
+  | Val.binop _ _ _ op _ _ a b =>
+    let some sym ← binopSym? op | escape
+    mkBinExpr sym (← ppExpr a) (← ppExpr b)
+  | Val.unop _ _ _ op _ _ a =>
+    if (← fvarName? op).isSome then return ← `(sol_expr| ⊖$(← ppExpr a))
+    match_expr (← whnf op) with
+    | UnOp.neg => `(sol_expr| -$(← ppExpr a))
+    | UnOp.not => `(sol_expr| !$(← ppExpr a))
+    | _ => escape
+  | Val.ternary _ _ c a b => `(sol_expr| $(← ppExpr c) ? $(← ppExpr a) : $(← ppExpr b))
+  | Src.val _ _ v => ppExpr v
+  | Src.copy _ _ p _ => ppExpr p
+  | ARhs.path _ _ p => ppExpr p
+  | MRhs.alias _ _ p => ppExpr p
+  | MRhs.copy _ _ p _ => ppExpr p
+  | MSrc.val _ _ v => ppExpr v
+  | MSrc.ref _ _ p => ppExpr p
+  | OpLoc.local _ _ x => var x
+  | OpLoc.root _ _ r _ => name r
+  | OpLoc.field _ _ _ b f _ => field b f
+  | OpLoc.index _ _ _ _ _ b i => index b i
+  | OpLoc.mfield _ _ _ b f _ => field b f
+  | OpLoc.mindex _ _ b i => index b i
+  | _ => escape
+
+/-- `x++`, `--x`, or `x⊕⊕` for an operator schema variable. -/
+def ppIncDec (op : Lean.Expr) (l : TSyntax `sol_expr) : MetaM (Option (TSyntax `sol_stmt)) := do
+  if (← fvarName? op).isSome then return some (← `(sol_stmt| $l:sol_expr ⊕⊕))
+  match_expr (← whnf op) with
+  | IncDec.postInc => return some (← `(sol_stmt| $l:sol_expr ++))
+  | IncDec.preInc => return some (← `(sol_stmt| ++ $l:sol_expr))
+  | _ => return none
+
+mutual
+
+partial def ppStmt (e : Lean.Expr) : MetaM (TSyntax `sol_stmt) := do
+  let e ← instantiateMVars e
+  let escape := do `(sol_stmt| ‹$(← escapeTerm e):term›)
+  let hole (h : Lean.Expr) (rhs : TSyntax `sol_expr) := do
+    let some n ← fvarName? h | escape
+    `(sol_stmt| $(nameIdent n):ident = $rhs)
+  -- a hole that is a schema variable does not compute: print it by its name
+  if [`Solidity.Hole.fill, `Solidity.MHole.fill, `Solidity.VHole.fill].any (e.isAppOfArity · 4) then
+    let args := e.getAppArgs
+    if (← fvarName? args[2]!).isSome then return ← hole args[2]! (← ppExpr args[3]!)
+  match_expr (← whnf e) with
+  | Stmt.assign _ _ l r => `(sol_stmt| $(← ppExpr l):sol_expr = $(← ppExpr r):sol_expr)
+  | Stmt.rebind _ _ x r =>
+    let some x ← ppVar? x | escape
+    match_expr (← whnf r) with
+    | ARhs.push _ _ b _ => `(sol_stmt| $x:ident = $(← ppExpr b):sol_expr .push())
+    | _ =>
+      if let some n ← fvarName? r then return ← `(sol_stmt| $x:ident = $(nameIdent n):ident)
+      `(sol_stmt| $x:ident = $(← ppExpr r):sol_expr)
+  | Stmt.assignLocal _ _ x r =>
+    let some x ← ppVar? x | escape
+    `(sol_stmt| $x:ident = $(← ppExpr r):sol_expr)
+  | Stmt.declLocal _ p x init =>
+    let some x ← ppVar? x | escape
+    let T ← ppTy.ppPrim p
+    match_expr (← whnf init) with
+    | Option.none _ => `(sol_stmt| $T:sol_ty $x:ident)
+    | Option.some _ v => `(sol_stmt| $T:sol_ty $x:ident = $(← ppExpr v):sol_expr)
+    | _ => escape
+  | Stmt.declStorage _ R x init =>
+    let some x ← ppVar? x | escape
+    let T ← ppTy.ppRef R
+    match_expr (← whnf init) with
+    | Option.none _ => `(sol_stmt| $T:sol_ty storage $x:ident)
+    | Option.some _ r =>
+      match_expr (← whnf r) with
+      | ARhs.push _ _ b _ => `(sol_stmt| $T:sol_ty storage $x:ident = $(← ppExpr b):sol_expr .push())
+      | _ => `(sol_stmt| $T:sol_ty storage $x:ident = $(← ppExpr r):sol_expr)
+    | _ => escape
+  | Stmt.declMem _ R x init _ =>
+    let some x ← ppVar? x | escape
+    let T ← ppTy.ppRef R
+    match_expr (← whnf init) with
+    | Option.none _ => `(sol_stmt| $T:sol_ty memory $x:ident)
+    | Option.some _ r => `(sol_stmt| $T:sol_ty memory $x:ident = $(← ppExpr r):sol_expr)
+    | _ => escape
+  | Stmt.rebindMem _ _ x r =>
+    let some x ← ppVar? x | escape
+    `(sol_stmt| $x:ident = $(← ppExpr r):sol_expr)
+  | Stmt.assignFromMem _ _ l p => `(sol_stmt| $(← ppExpr l):sol_expr = $(← ppExpr p):sol_expr)
+  | Stmt.assignMem _ _ l r => `(sol_stmt| $(← ppExpr l):sol_expr = $(← ppExpr r):sol_expr)
+  | Stmt.opAssign _ _ op _ _ l r =>
+    let l ← ppExpr l
+    let r ← ppExpr r
+    if (← fvarName? op).isSome then return ← `(sol_stmt| $l:sol_expr ⊕= $r:sol_expr)
+    match_expr (← whnf op) with
+    | BinOp.add => `(sol_stmt| $l:sol_expr += $r:sol_expr)
+    | BinOp.sub => `(sol_stmt| $l:sol_expr -= $r:sol_expr)
+    | BinOp.mul => `(sol_stmt| $l:sol_expr *= $r:sol_expr)
+    | BinOp.div => `(sol_stmt| $l:sol_expr /= $r:sol_expr)
+    | BinOp.mod => `(sol_stmt| $l:sol_expr %= $r:sol_expr)
+    | _ => escape
+  | Stmt.incDec _ _ op _ l =>
+    let some s ← ppIncDec op (← ppExpr l) | escape
+    pure s
+  | Stmt.assignIncDec _ _ x op _ l _ =>
+    let some x ← ppVar? x | escape
+    let l ← ppExpr l
+    if (← fvarName? op).isSome then return ← `(sol_stmt| $x:ident = $l:sol_expr ⊕⊕)
+    match_expr (← whnf op) with
+    | IncDec.postInc => `(sol_stmt| $x:ident = $l:sol_expr ++)
+    | IncDec.preInc => `(sol_stmt| $x:ident = ++ $l:sol_expr)
+    | _ => escape
+  | Stmt.push _ _ b v _ =>
+    match_expr (← whnf v) with
+    | Option.none _ => `(sol_stmt| $(← ppExpr b):sol_expr .push())
+    | Option.some _ a =>
+      if let some n ← fvarName? a then
+        return ← `(sol_stmt| $(← ppExpr b):sol_expr .push( $(← `(sol_expr| $(nameIdent n):ident)) ))
+      `(sol_stmt| $(← ppExpr b):sol_expr .push( $(← ppExpr a) ))
+    | _ => escape
+  | Stmt.pop _ _ b => `(sol_stmt| $(← ppExpr b):sol_expr .pop())
+  | Stmt.transfer _ r a => `(sol_stmt| $(← ppExpr r):sol_expr .transfer( $(← ppExpr a) ))
+  | Stmt.delete _ _ l => `(sol_stmt| delete $(← ppExpr l):sol_expr)
+  | Stmt.ite _ c thn els =>
+    `(sol_stmt| if ($(← ppExpr c)) $(← ppBlock thn):sol_block else $(← ppBlock els):sol_block)
+  | Stmt.require _ c => `(sol_stmt| require($(← ppExpr c)))
+  | Stmt.assert _ c => `(sol_stmt| assert($(← ppExpr c)))
+  | Stmt.revert _ => `(sol_stmt| revert())
+  | _ => escape
+
+partial def ppProg? (e : Lean.Expr) : MetaM (Option (Array (TSyntax `sol_stmt))) := do
+  let some ss ← listElems? e | return none
+  return some (← ss.mapM ppStmt)
+
+/-- A branch: `{ s₁; …; sₙ; }`, or the name of a schema variable. -/
+partial def ppBlock (e : Lean.Expr) : MetaM (TSyntax `sol_block) := do
+  let e ← instantiateMVars e
+  if let some n ← fvarName? e then return ← `(sol_block| $(nameIdent n):ident)
+  let some ss ← ppProg? e | `(sol_block| ‹$(← escapeTerm e):term›)
+  `(sol_block| { $[$ss;]* })
+
+end
+
+/-! ### Terms -/
+
+def escapeDl (e : Lean.Expr) : MetaM (TSyntax `dl_term) := do `(dl_term| ‹$(← escapeTerm e):term›)
+
+/-- `p.f`, dotted when `p` is a name. -/
+def dotTerm (b : TSyntax `dl_term) (f : String) : MetaM (TSyntax `dl_term) :=
+  match b with
+  | `(dl_term| $x:ident) => `(dl_term| $(mkIdent (x.getId.str f)):ident)
+  | _ => `(dl_term| $b . $(nameIdent f):ident)
+
+/-- A program expression lowered to a term (`se.lower`): the paper writes
+the expression itself. -/
+def loweredExpr? (e : Lean.Expr) : MetaM (Option (TSyntax `dl_term)) := do
+  let e ← instantiateMVars e
+  for (c, n) in [(``Simple.lower, 3), (``Val.lower, 3), (``SPath.lower, 3), (``Loc.lower, 3),
+      (``MPath.lower, 3), (``MLoc.lower, 3)] do
+    if e.isAppOfArity c n then
+      let x := e.appArg!
+      if let some n ← fvarName? x then return some (← `(dl_term| $(nameIdent n):ident))
+  return none
+
+def mkBinTerm (sym : String) (a b : TSyntax `dl_term) : MetaM (TSyntax `dl_term) :=
+  match sym with
+  | "+" => `(dl_term| $a + $b) | "-" => `(dl_term| $a - $b)
+  | "±" => `(dl_term| $a ± $b)
+  | _ => `(dl_term| $a ⊕ $b)
+
+/-- The term of `t ⊕ u` with a concrete operator: `+`, `-` have term syntax;
+the others print as the program operator, read back through `‹…›`. -/
+def termOpSym? (op : Lean.Expr) : MetaM (Option String) := do
+  if (← fvarName? op).isSome then return some "⊕"
+  if op.isAppOfArity ``IncDec.binOp 1 then
+    if (← fvarName? op.appArg!).isSome then return some "±"
+  match_expr (← whnf op) with
+  | BinOp.add => return "+"
+  | BinOp.sub => return "-"
+  | _ => return none
+
+mutual
+
+partial def ppTerm (e : Lean.Expr) : MetaM (TSyntax `dl_term) := do
+  if let some x ← loweredExpr? e then return x
+  let e ← instantiateMVars e
+  if e.isAppOfArity ``Term.bumped 4 && (← fvarName? (e.getArg! 1)).isSome then
+    return ← `(dl_term| $(← ppTerm e.appArg!):dl_term ⊕⊕)
+  match_expr (← whnf e) with
+  | Term.lit _ v =>
+    match_expr (← whnf v) with
+    | Semantics.PrimVal.int n =>
+      let some n ← intOf? n | escapeDl e
+      `(dl_term| $(Syntax.mkNumLit (toString n)):num)
+    | Semantics.PrimVal.bool b =>
+      match_expr (← whnf b) with
+      | Bool.true => `(dl_term| true)
+      | Bool.false => `(dl_term| false)
+      | _ => escapeDl e
+    | _ =>
+      if v.isAppOfArity ``PrimTy.default 1 then
+        return ← `(dl_term| defVal(T))
+      escapeDl e
+  | Term.pv _ x =>
+    let some x ← ppVar? x | escapeDl e
+    `(dl_term| $x:ident)
+  | Term.binop _ op _ a b =>
+    let some sym ← termOpSym? op | escapeDl e
+    mkBinTerm sym (← ppTerm a) (← ppTerm b)
+  | Term.unop _ op _ a =>
+    if (← fvarName? op).isSome then return ← `(dl_term| ⊖$(← ppTerm a))
+    escapeDl e
+  | Term.find _ s p =>
+    let s' ← ppSTerm s
+    match_expr (← whnf p) with
+    | PTerm.root _ r =>
+      let some r ← nameOf? r | escapeDl e
+      `(dl_term| select($s', $(nameIdent r):ident))
+    | _ => `(dl_term| find($s', $(← ppPTerm p)))
+  | Term.len _ s p =>
+    let p ← ppPTerm p
+    let `(dl_term| $x:ident) := p | escapeDl e
+    let _ := s
+    `(dl_term| $(mkIdent (x.getId.str "length")):ident)
+  | Term.read _ m a => `(dl_term| read($(← ppMTerm m), $(← ppMAddr a)))
+  | _ => escapeDl e
+
+partial def ppPTerm (e : Lean.Expr) : MetaM (TSyntax `dl_term) := do
+  if let some x ← loweredExpr? e then return x
+  match_expr (← whnf e) with
+  | PTerm.root _ r =>
+    let some r ← nameOf? r | escapeDl e
+    `(dl_term| $(nameIdent r):ident)
+  | PTerm.pv _ x =>
+    let some x ← ppVar? x | escapeDl e
+    `(dl_term| $x:ident)
+  | PTerm.field _ p f =>
+    let some f ← nameOf? f | escapeDl e
+    dotTerm (← ppPTerm p) f
+  | PTerm.at _ p i => `(dl_term| $(← ppPTerm p):dl_term[$(← ppTerm i):dl_term])
+  | _ => escapeDl e
+
+/-- `p.length`, and `p[p.length]`, the paper's push positions. -/
+partial def lenTerms (p : TSyntax `dl_term) : MetaM (TSyntax `dl_term × TSyntax `dl_term) := do
+  let len ← match p with
+    | `(dl_term| $x:ident) => `(dl_term| $(mkIdent (x.getId.str "length")):ident)
+    | _ => `(dl_term| $p . $(nameIdent "length"):ident)
+  return (len, ← `(dl_term| $p[$len]))
+
+partial def ppSTerm (e : Lean.Expr) : MetaM (TSyntax `dl_term) := do
+  if let some n ← fvarName? e then return ← `(dl_term| $(nameIdent n):ident)
+  match_expr (← whnf e) with
+  | STerm.storage _ => `(dl_term| storage)
+  | STerm.save _ s p v =>
+    let s ← ppSTerm s
+    match_expr (← whnf p) with
+    | PTerm.root _ r =>
+      let some r ← nameOf? r | escapeDl e
+      `(dl_term| store($s, $(nameIdent r):ident, $(← ppSVal v)))
+    | _ => `(dl_term| save($s, $(← ppPTerm p), $(← ppSVal v)))
+  | STerm.delAt _ s p => `(dl_term| delAt($(← ppSTerm s), $(← ppPTerm p)))
+  | STerm.push _ s p v =>
+    let (len, slot) ← lenTerms (← ppPTerm p)
+    `(dl_term| save(save($(← ppSTerm s), $slot, $(← ppSVal v)), $len, $len + 1))
+  | STerm.pushSlot _ s p _ =>
+    let (len, slot) ← lenTerms (← ppPTerm p)
+    `(dl_term| save(delAt($(← ppSTerm s), $slot), $len, $len + 1))
+  | STerm.pop _ s p =>
+    let p ← ppPTerm p
+    let (len, _) ← lenTerms p
+    `(dl_term| save(delAt($(← ppSTerm s), $p[$len - 1]), $len, $len - 1))
+  | STerm.extend _ s p _ =>
+    let (len, _) ← lenTerms (← ppPTerm p)
+    `(dl_term| save($(← ppSTerm s), $len, $len + 1))
+  | _ => escapeDl e
+
+partial def ppSVal (e : Lean.Expr) : MetaM (TSyntax `dl_term) := do
+  match_expr (← whnf e) with
+  | SValT.val _ t => ppTerm t
+  | SValT.find _ s p => `(dl_term| find($(← ppSTerm s), $(← ppPTerm p)))
+  | SValT.copyMem _ m i => `(dl_term| copyMem(mtSt, $(← ppMTerm m), $(← ppITerm i)))
+  | _ => escapeDl e
+
+partial def ppITerm (e : Lean.Expr) : MetaM (TSyntax `dl_term) := do
+  if let some x ← loweredExpr? e then return x
+  match_expr (← whnf e) with
+  | ITerm.pv _ x =>
+    let some x ← ppVar? x | escapeDl e
+    `(dl_term| $x:ident)
+  | ITerm.read _ m a => `(dl_term| read($(← ppMTerm m), $(← ppMAddr a)))
+  | ITerm.alloc _ m _ => `(dl_term| freshId(addM($(← ppMTerm m))))
+  | ITerm.copy _ m v => `(dl_term| freshId(copySt($(← ppMTerm m), $(← ppSVal v))))
+  | _ => escapeDl e
+
+partial def ppMAddr (e : Lean.Expr) : MetaM (TSyntax `dl_term) := do
+  match_expr (← whnf e) with
+  | MAddr.field _ i f =>
+    let some f ← nameOf? f | escapeDl e
+    dotTerm (← ppITerm i) f
+  | MAddr.at _ i k => `(dl_term| $(← ppITerm i):dl_term[$(← ppTerm k):dl_term])
+  | _ => escapeDl e
+
+partial def ppMTerm (e : Lean.Expr) : MetaM (TSyntax `dl_term) := do
+  if let some n ← fvarName? e then return ← `(dl_term| $(nameIdent n):ident)
+  match_expr (← whnf e) with
+  | MTerm.memory _ => `(dl_term| memory)
+  | MTerm.write _ m a v => `(dl_term| write($(← ppMTerm m), $(← ppMAddr a), $(← ppMVal v)))
+  | MTerm.addM _ m _ => `(dl_term| addM($(← ppMTerm m)))
+  | MTerm.copySt _ m v => `(dl_term| copySt($(← ppMTerm m), $(← ppSVal v)))
+  | _ => escapeDl e
+
+partial def ppMVal (e : Lean.Expr) : MetaM (TSyntax `dl_term) := do
+  match_expr (← whnf e) with
+  | MValT.val _ t => ppTerm t
+  | MValT.ref _ i => ppITerm i
+  | _ => escapeDl e
+
+end
+
+/-! ### Updates and formulas -/
+
+def ppUpdElem? (e : Lean.Expr) : MetaM (Option (TSyntax `dl_upd_elem)) := do
+  let var (x : Lean.Expr) : MetaM (Option (TSyntax `dl_term)) := do
+    let some x ← ppVar? x | return none
+    return some (← `(dl_term| $x:ident))
+  match_expr (← whnf (← instantiateMVars e)) with
+  | UpdElem.val _ x t =>
+    let some x ← var x | return none
+    return some (← `(dl_upd_elem| $x:dl_term := $(← ppTerm t):dl_term))
+  | UpdElem.path _ x p =>
+    let some x ← var x | return none
+    return some (← `(dl_upd_elem| $x:dl_term := $(← ppPTerm p):dl_term))
+  | UpdElem.mref _ x i =>
+    let some x ← var x | return none
+    return some (← `(dl_upd_elem| $x:dl_term := $(← ppITerm i):dl_term))
+  | UpdElem.storage _ s => return some (← `(dl_upd_elem| storage := $(← ppSTerm s):dl_term))
+  | UpdElem.memory _ m => return some (← `(dl_upd_elem| memory := $(← ppMTerm m):dl_term))
+  | UpdElem.transfer _ r a =>
+    return some (← `(dl_upd_elem| transfer($(← ppTerm r):dl_term, $(← ppTerm a):dl_term)))
+  | _ => return none
+
+def ppUpd (e : Lean.Expr) : MetaM (TSyntax `dl_upd) := do
+  let escape := do `(dl_upd| ‹$(← escapeTerm e):term›)
+  let some xs ← listElems? e | escape
+  if xs.isEmpty then return ← escape
+  let mut out := #[]
+  for x in xs do
+    let some u ← ppUpdElem? x | return ← escape
+    out := out.push u
+  `(dl_upd| { $[$out]‖* })
+
+/-- A connective, which the operand of `¬`, `{U}` and `⟨P⟩` parenthesises. -/
+def isConnective (e : Lean.Expr) : MetaM Bool := do
+  let e ← whnf e
+  return e.isAppOfArity ``Fml.and 3 || e.isAppOfArity ``Fml.imp 3
+
+partial def ppFml (e : Lean.Expr) : MetaM (TSyntax `dl_fml) := do
+  let e ← instantiateMVars e
+  let escape := do `(dl_fml| ‹$(← escapeTerm e):term›)
+  let arg (φ : Lean.Expr) : MetaM (TSyntax `dl_fml) := do
+    let s ← ppFml φ
+    if ← isConnective φ then `(dl_fml| ($s)) else pure s
+  match_expr (← whnf e) with
+  | Fml.tt _ => `(dl_fml| true)
+  | Fml.not _ φ =>
+    if (← whnf φ).isAppOfArity ``Fml.tt 1 then `(dl_fml| false) else `(dl_fml| ¬$(← arg φ):dl_fml)
+  | Fml.eq _ a b => `(dl_fml| $(← ppTerm a):dl_term = $(← ppTerm b):dl_term)
+  | Fml.and _ φ ψ =>
+    let ψ' ← ppFml ψ
+    let ψ' ← if (← whnf ψ).isAppOfArity ``Fml.imp 3 then `(dl_fml| ($ψ')) else pure ψ'
+    `(dl_fml| $(← arg φ):dl_fml ∧ $ψ')
+  | Fml.imp _ φ ψ => `(dl_fml| $(← arg φ):dl_fml → $(← ppFml ψ):dl_fml)
+  | Fml.upd _ _ U φ => `(dl_fml| $(← ppUpd U):dl_upd $(← arg φ):dl_fml)
+  | Fml.modal _ m P φ =>
+    let some ss ← ppProg? P |
+      let some n ← fvarName? P | escape
+      let b ← `(sol_block| $(nameIdent n):ident)
+      match_expr (← whnf m) with
+      | Modality.diamond => `(dl_fml| ⟨ $b:sol_block ⟩ $(← arg φ):dl_fml)
+      | Modality.box => `(dl_fml| [ $b:sol_block ] $(← arg φ):dl_fml)
+      | _ => escape
+    match_expr (← whnf m) with
+    | Modality.diamond => `(dl_fml| ⟨ $[$ss;]* ⟩ $(← arg φ):dl_fml)
+    | Modality.box => `(dl_fml| [ $[$ss;]* ] $(← arg φ):dl_fml)
+    | _ => `(dl_fml| ⟨[ $[$ss;]* ]⟩ $(← arg φ):dl_fml)
+  | _ => escape
+
+/-! ### The delaborators
+
+Each stands aside (`failure`, and Lean prints the term its own way) when all
+it would print is one `‹…›`. -/
+
+/-- Printed as `‹…›` as a whole. -/
+def isEscape (s : Syntax) : Bool := s[0].isToken "‹"
+
+/-- Only a full application: `Fml.modal m P` alone is a function. -/
+def fullApp : DelabM Unit := do
+  let e ← getExpr
+  let some c := e.getAppFn.constName? | failure
+  let info ← getConstInfoCtor c
+  guard (e.getAppNumArgs == info.numParams + info.numFields)
+
+/-- A formula standing alone: `dl{ φ }`. -/
+def delabFml : Delab := do
+  unless ← ppOn do failure
+  fullApp
+  let φ ← ppFml (← getExpr)
+  guard !(isEscape φ)
+  `(dl{ $φ:dl_fml })
+
+attribute [delab app.Solidity.Fml.eq, delab app.Solidity.Fml.not,
+  delab app.Solidity.Fml.and, delab app.Solidity.Fml.imp, delab app.Solidity.Fml.upd,
+  delab app.Solidity.Fml.modal] delabFml
+
+/-- `Valid φ`: `⊨ φ`. -/
+@[delab app.Solidity.Valid]
+def delabValid : Delab := do
+  unless ← ppOn do failure
+  let e ← getExpr
+  guard (e.getAppNumArgs == 2)
+  let φ ← ppFml e.appArg!
+  guard !(isEscape φ)
+  `(⊨ dl{ $φ:dl_fml })
+
+/-- A statement standing alone: `stmt{ s; }`. -/
+def delabStmt : Delab := do
+  unless ← ppOn do failure
+  fullApp
+  let s ← ppStmt (← getExpr)
+  guard !(isEscape s)
+  `(stmt{ $s:sol_stmt; })
+
+attribute [delab app.Solidity.Stmt.assign, delab app.Solidity.Stmt.rebind,
+  delab app.Solidity.Stmt.assignLocal, delab app.Solidity.Stmt.declLocal,
+  delab app.Solidity.Stmt.declStorage, delab app.Solidity.Stmt.opAssign,
+  delab app.Solidity.Stmt.incDec, delab app.Solidity.Stmt.assignIncDec,
+  delab app.Solidity.Stmt.push, delab app.Solidity.Stmt.pop, delab app.Solidity.Stmt.transfer,
+  delab app.Solidity.Stmt.declMem, delab app.Solidity.Stmt.rebindMem,
+  delab app.Solidity.Stmt.assignFromMem, delab app.Solidity.Stmt.assignMem,
+  delab app.Solidity.Stmt.delete, delab app.Solidity.Stmt.ite, delab app.Solidity.Stmt.require,
+  delab app.Solidity.Stmt.assert, delab app.Solidity.Stmt.revert] delabStmt
+
+end Print
 
 end Solidity

@@ -233,9 +233,9 @@ inductive Taclet (C : Contract) (k : Nat) : Modality → Stmt C → Premise C �
       dl{ ⟨[ v = ⊖nse; ]⟩ ⇝ ⟨[ T se = nse; v = ⊖se; ]⟩ }
   -- The conditional ------------------------------------------------------
   | ternaryToIf :
-      dl{ ⟨[ x = se ? e₁ : e₂; ]⟩ ⇝ ⟨[ if (se) { x = e₁; } else { x = e₂; }; ]⟩ }
+      dl{ ⟨[ lhs = se ? e₁ : e₂; ]⟩ ⇝ ⟨[ if (se) { lhs = e₁; } else { lhs = e₂; }; ]⟩ }
   | ternaryCaptureCond :
-      dl{ ⟨[ x = nse ? e₁ : e₂; ]⟩ ⇝ ⟨[ bool se = nse; x = se ? e₁ : e₂; ]⟩ }
+      dl{ ⟨[ lhs = nse ? e₁ : e₂; ]⟩ ⇝ ⟨[ bool se = nse; lhs = se ? e₁ : e₂; ]⟩ }
   -- Compound assignment and `++`/`--` -------------------------------------
   | localOpAssign :
       dl{ ⟨[ v ⊕= se; ]⟩ ⇝ { v := v ⊕ se } ⟨[ ]⟩ }
@@ -409,5 +409,63 @@ inductive Taclet (C : Contract) (k : Nat) : Modality → Stmt C → Premise C �
   /-- A reverted run satisfies no diamond formula: the diamond closes to `false`. -/
   | revertDiamond :
       dl{ ⟨ revert(); ⟩ ⇝ false }
+
+/-! ## Printing taclets and premises
+
+`#check @Taclet.storageFieldWriteSave` prints the taclet as it is written
+above: the `\find` with the modality it is for, and the premise. -/
+
+section Print
+open Lean Meta PrettyPrinter Delaborator SubExpr
+set_option hygiene false
+
+def ppPremise? (e : Lean.Expr) : MetaM (Option (TSyntax `dl_premise)) := do
+  match_expr (← whnf (← instantiateMVars e)) with
+  | Premise.update _ U => return some (← `(dl_premise| $(← ppUpd U):dl_upd ⟨[ ]⟩))
+  | Premise.unfold _ P =>
+    let some ss ← ppProg? P | return none
+    return some (← `(dl_premise| ⟨[ $[$ss;]* ]⟩))
+  | Premise.split _ c P Q =>
+    let c ← ppFml c
+    match ← ppProg? P, ← ppProg? Q with
+    | some ts, some fs =>
+      if (← fvarName? P).isNone && (← fvarName? Q).isNone then
+        return some (← `(dl_premise| $c:dl_fml ⟹ ⟨[ $[$ts;]* ]⟩ ; ¬$c:dl_fml ⟹ ⟨[ $[$fs;]* ]⟩))
+      else
+        return some (← `(dl_premise| $c:dl_fml ⟹ ⟨[ $(← ppBlock P) ]⟩ ; ¬$c:dl_fml ⟹ ⟨[ $(← ppBlock Q) ]⟩))
+    | _, _ =>
+      return some (← `(dl_premise| $c:dl_fml ⟹ ⟨[ $(← ppBlock P) ]⟩ ; ¬$c:dl_fml ⟹ ⟨[ $(← ppBlock Q) ]⟩))
+  | Premise.done _ b =>
+    match_expr (← whnf b) with
+    | Bool.true => return some (← `(dl_premise| true))
+    | Bool.false => return some (← `(dl_premise| false))
+    | _ => return none
+  | _ => return none
+
+/-- `Taclet C k m s p`: `dl{ ⟨[ s; ]⟩ ⇝ p }`, with the modality it is for. -/
+@[delab app.Solidity.Taclet]
+def delabTaclet : Delab := do
+  unless ← ppOn do failure
+  let e ← getExpr
+  guard (e.getAppNumArgs == 5)
+  let some p ← ppPremise? (e.getArg! 4) | failure
+  let s ← ppStmt (e.getArg! 3)
+  if isEscape s then failure
+  match_expr (← whnf (e.getArg! 2)) with
+  | Modality.box => `(dl{ [ $s:sol_stmt; ] ⇝ $p })
+  | Modality.diamond => `(dl{ ⟨ $s:sol_stmt; ⟩ ⇝ $p })
+  | _ => `(dl{ ⟨[ $s:sol_stmt; ]⟩ ⇝ $p })
+
+/-- A premise standing alone: `dl{ p }`. -/
+def delabPremise : Delab := do
+  unless ← ppOn do failure
+  fullApp
+  let some p ← ppPremise? (← getExpr) | failure
+  `(dl{ $p:dl_premise })
+
+attribute [delab app.Solidity.Premise.update, delab app.Solidity.Premise.unfold,
+  delab app.Solidity.Premise.split, delab app.Solidity.Premise.done] delabPremise
+
+end Print
 
 end Solidity
