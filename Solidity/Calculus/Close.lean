@@ -595,7 +595,9 @@ attribute [close_rw]
   true_or or_true or_false false_or not_and not_exists Classical.not_not true_implies
   false_implies decide_eq_true_eq decide_eq_false_iff_not
   Bool.and_true Bool.and_false Bool.true_and Bool.false_and Bool.or_true Bool.or_false
-  Bool.true_or Bool.false_or Bool.not_true Bool.not_false
+  Bool.true_or Bool.false_or Bool.not_true Bool.not_false Bool.not_not
+  Bool.not_eq_true' Bool.not_eq_false' Bool.and_eq_true Bool.or_eq_true Bool.and_eq_false_iff
+  Bool.or_eq_false_iff
   -- computation
   reduceCtorEq reduceIte reduceDIte String.reduceEq Nat.reduceEqDiff Nat.reducePow Int.reduceEq
   Int.reduceAdd Int.reduceSub Int.reduceMul Int.reduceNeg Int.reduceLT Int.reduceLE
@@ -629,11 +631,22 @@ macro "sol_close_reads" : tactic => `(tactic|
 macro "sol_close_reads_all" : tactic => `(tactic|
   simp_all (config := { maxSteps := 400000 }) only [close_rw, close_rw_last])
 
+open Lean Elab Tactic Meta in
+/-- The goal `apply close` leaves, `Valid (Hyp.wrap Γ φ)`, with the context
+put back and the taclet's instance computed (`normValid`): its terms are
+still the premise's, `(Simple.lit 1 _).lower` for `1`. -/
+elab "sol_close_unwrap" : tactic => do
+  let g ← getMainGoal
+  let ty ← instantiateMVars (← g.getType)
+  if ty.isAppOf ``Valid && (ty.find? (·.isConstOf ``Hyp.wrap)).isSome then
+    replaceMainGoal [← normValid g]
+
 /-- `sol_close`: prove a formula with no modality left in an arbitrary state
 (`Close.lean`).  Run `sol_symex` first; with no goal left it does nothing. -/
 macro "sol_close" : tactic => `(tactic|
   all_goals
-   (intro σ
+   (sol_close_unwrap
+    intro σ
     sol_close_eval
     all_goals try sol_close_facts
     all_goals try sol_close_reads
