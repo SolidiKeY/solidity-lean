@@ -3,9 +3,9 @@
 
 `solidityProgramRules.key` is the calculus solkey actually runs: 310 named
 taclets.  This module is that list of names, one constructor each, plus the
-`\heuristics` annotation each one carries.  It exists so that a rule in
-`Rules.lean` can say *which* KeY taclet it transcribes with a typed
-`KeyOrigin` rather than a string — a misspelling is then a type error, and
+`\heuristics` annotation each one carries.  It exists so that
+`RuleShapes.lean` can say *which* KeY taclet each rule transcribes with a
+typed `KeyOrigin` rather than a string — a misspelling is then a type error, and
 "which taclets does Lean claim?" is a `decide` rather than a grep.
 
 ## Regenerating
@@ -38,12 +38,11 @@ Three values occur in the corpus — `simplify_prog` (220 taclets),
 `simplify_expression` (85) and `concrete_solidity` (5, the literal-condition
 `if` rules).  They are KeY's *strategy* annotations: which
 automatic rule set may apply the taclet, not what it means.  Lean's rule table
-has no automatic strategy (a derivation pins each step by name, and
-`Uniqueness.lean` shows at most one rule applies anyway), so nothing here
-consumes them.  They are recorded because a `StepEffect` that claims to be a
-taclet should carry everything the taclet header says, and because the split is
-real information about the calculus: the expression rules are the ones KeY
-re-runs eagerly.
+has no automatic strategy (a derivation pins each step by name), so nothing
+here consumes them.  They are recorded because the split is real information
+about the calculus — the expression rules are the ones KeY re-runs eagerly —
+and `RuleShapes.heuristics_agree` checks no Lean rule merges taclets from two
+rule sets.
 -/
 
 namespace Solidity
@@ -1321,16 +1320,15 @@ end KeyTaclet
 /-- Where a Lean rule comes from: the KeY taclet it transcribes, the several
 taclets it merges, or nothing.
 
-`merged` is the common case and it is not a weakness of the port: KeY splits
-one rule by a distinction the Lean model does not draw — a root receiver from a
-decomposed one (`_root`/`_decompose`), a stack right-hand side from a storage
-root (`…RootRhs…`), a value push from a copy-source push — and one Lean rule
-covers the family.  `docs/lean-key-rule-map.md` carries the prose for each.
+`merged` is the common case and it is not a weakness of the port: KeY writes
+one taclet per operator where Lean has one rule for the family, and splits
+one rule by a distinction the Lean syntax does not draw — a value source from
+a memory reference (`…MemRef…`), a mapping receiver from an array one — and one
+Lean rule covers them.  `docs/lean-key-rule-map.md` carries the prose for each.
 
-`leanOnly` is the deliberate absence: front-end normalisations, scratch
-bindings, the call rules, and operator instances KeY does not have.
-`RuleShapes.leanOnlyRules` lists them with a reason each, and checks the list
-is exactly the rules whose origin is `leanOnly`. -/
+`leanOnly` is the deliberate absence: a rule upstream has no counterpart for.
+`RuleShapes.tacletOrigins` gives every `Taclet` constructor its origin, and
+counts the `leanOnly` ones. -/
 inductive KeyOrigin where
   | taclet (t : KeyTaclet)
   | merged (ts : List KeyTaclet)

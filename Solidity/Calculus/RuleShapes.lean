@@ -1,208 +1,404 @@
 import Solidity.Calculus.Rules
 
 /-!
-# The shape of the rule table
+# Where each taclet comes from
 
-`Rules.lean` now says what a KeY taclet says: guarded goals, updates, bare
-obligations, and the name of the taclet each rule transcribes.  That is more
-structure than the old `block`-only table, and more structure is more room to
-be quietly wrong.  This module is the check.
+`Rules.lean` names each `Taclet` constructor after the solkey taclet it
+transcribes, but a name is a promise, not a check: an operator family is one
+constructor for five or fourteen taclets, a constructor can cover two KeY
+shapes the Lean syntax does not tell apart, and a KeY taclet can have no
+constructor at all.  This module writes the correspondence down and checks
+it.
 
-It holds three kinds of fact, and nothing else:
+`Taclet` is a `Prop`, so there is no function on its derivations to hang an
+origin on; the table is keyed by constructor *name* instead, and two checks
+keep it honest.  Each key is a double-backtick name, which fails elaboration
+if the constructor does not exist; `#check_constructor_table` then reads the
+constructor list from the environment and fails unless every constructor has
+exactly one row.  A constructor added to `Rules.lean` without an origin does
+not build here.
 
-* **Reduction lemmas** for `StepEffect.mainBlock` — one per goal combinator, so
-  the rest of the development can see a residual through a goal list without
-  unfolding the combinator by hand.
-* **A shape fact per rule**: every rule offers at least one goal, and a rule
-  whose residual is non-empty carries no update.  These are `rfl` per rule,
-  which is the point — the table is checked against itself, not against a
-  second hand-written table.
-* **Origin facts**: which KeY taclets the table claims, which it does not, and
-  that box/diamond twins claim the same ones.  `taclets_partitioned` is the
-  load-bearing one: of the 310 taclets in `solidityProgramRules.key`, 306 are
-  claimed by a Lean rule and the remaining four are listed here with a reason.
+The other direction is `taclets_partitioned`: every taclet of
+`solidityProgramRules.key` is claimed by some row or listed in
+`unclaimedTaclets` with a reason, never both.  The reasons are the places the
+typed syntax is narrower than solkey's (no calls, no `new`, no memory
+`delete`), the places it is coarser (a memory path is a source as it stands,
+so nothing captures one), and the places the calculus has no strategy to
+express (the literal-condition `if` rules, the callback semantics of
+`transfer`).
 
-What this module does *not* do is say whether a rule's update is *right*; that
-is `Update/TacletTable.lean`, which proves each one against
-`Wp.terminalUpdate?`.
+What this module does *not* say is whether a constructor's premise is
+*right*; that is the soundness development.
 -/
 
 namespace Solidity
+
+/-! ## Checking a table against the environment -/
+
+section Check
+open Lean Elab Command Meta
+
+private unsafe def evalNamesImpl (e : Expr) : MetaM (List Lean.Name) :=
+  evalExpr (List Lean.Name) (mkApp (mkConst ``List [levelZero]) (mkConst ``Lean.Name)) e
+
+@[implemented_by evalNamesImpl]
+private opaque evalNames (e : Expr) : MetaM (List Lean.Name)
+
+/-- `#check_constructor_table I, names` fails unless the list `names` (a
+`List Lean.Name`, evaluated) is the constructors of the inductive `I`, each once.
+The error names every constructor missing from the list, every entry that is
+not a constructor, and every entry listed twice. -/
+elab "#check_constructor_table " ind:ident ", " tbl:term : command => do
+  let indName ← liftCoreM <| realizeGlobalConstNoOverloadWithInfo ind
+  let .inductInfo info ← getConstInfo indName
+    | throwErrorAt ind "{indName} is not an inductive type"
+  let names ← liftTermElabM do
+    let ty := mkApp (mkConst ``List [levelZero]) (mkConst ``Lean.Name)
+    let e ← Term.elabTermEnsuringType tbl ty
+    Term.synthesizeSyntheticMVarsNoPostponing
+    evalNames (← instantiateMVars e)
+  let missing := info.ctors.filter (!names.contains ·)
+  let extra := names.filter (!info.ctors.contains ·)
+  let dups := (names.filter fun n => names.count n > 1).eraseDups
+  unless missing.isEmpty && extra.isEmpty && dups.isEmpty do
+    throwError "the table does not list the constructors of {indName}:\
+      \n  missing: {missing}\n  not a constructor: {extra}\n  listed twice: {dups}"
+
+end Check
+
 namespace RuleShapes
 
-open Rules
+/-! ## The origin of each constructor
 
-/-! ## Reading a residual through a goal list -/
+In `Rules.lean`'s order.  A `merged` row is a constructor whose `\find`
+covers several taclets: an operator family, a KeY split by the source's
+kind (a value against a reference, `…MemRef…`), by the receiver's (a
+mapping against an array), or by capture order (`…CaptureAll`). -/
 
-@[simp] theorem mainBlock_unfoldGoal (b : Block) :
-    StepEffect.mainBlock (unfoldGoal b) = b := rfl
 
-@[simp] theorem mainBlock_terminalGoal (u : UpdTerm) :
-    StepEffect.mainBlock (terminalGoal u) = [] := rfl
+/-- Every `Taclet` constructor, and the solkey taclets it transcribes. -/
+def tacletOrigins : List (Lean.Name × KeyOrigin) := [
+  -- Step 1: unfold a storage read
+  (``Taclet.storageFieldRead_unfold_rightFst, .taclet .storageFieldRead_unfold_rightFst),
+  (``Taclet.storageIndexRead_unfold_rightFst, .taclet .storageIndexRead_unfold_rightFst),
+  (``Taclet.storageIndexRead_unfold_rightSndIndex, .taclet .storageIndexRead_unfold_rightSndIndex),
+  (``Taclet.storageFieldRead_unfold_rightSndResult,
+    .merged [.storageFieldRead_unfold_rightSndResult, .storageFieldWriteCaptureSrc]),
+  (``Taclet.storageIndexRead_unfold_rightSndResult,
+    .merged [.storageIndexRead_unfold_rightSndResult, .storageIndexWriteStorageRefRhsCapture]),
+  -- Step 2: decompose a storage write
+  (``Taclet.storageFieldWrite_unfold_leftFst, .taclet .storageFieldWrite_unfold_leftFst),
+  (``Taclet.storageFieldWriteStorageRef_unfold_leftFst,
+    .taclet .storageFieldWriteStorageRef_unfold_leftFst),
+  (``Taclet.storageIndexWrite_unfold_leftFst,
+    .merged [.storageIndexWrite_unfold_leftFst, .storageIndexWriteCaptureAll]),
+  (``Taclet.storageIndexWriteStorageRef_unfold_leftFst,
+    .merged [.storageIndexWriteStorageRef_unfold_leftFst, .storageIndexWriteStorageRefCaptureAll]),
+  (``Taclet.storageIndexWriteNonSimpleIndexCapture,
+    .merged [.storageIndexWriteNonSimpleIndexCapture, .storageIndexWriteCaptureAll]),
+  (``Taclet.storageIndexWriteStorageRefNonSimpleIndexCapture,
+    .merged [.storageIndexWriteStorageRefNonSimpleIndexCapture,
+      .storageIndexWriteStorageRefCaptureAll]),
+  (``Taclet.storageRootWriteValueRhsCapture, .taclet .storageRootWriteValueRhsCapture),
+  (``Taclet.fieldWriteValueRhsCapture, .taclet .fieldWriteValueRhsCapture),
+  (``Taclet.indexWriteValueRhsCapture, .taclet .indexWriteValueRhsCapture),
+  (``Taclet.storageFieldDelete_unfold_leftFst, .taclet .storageFieldDelete_unfold_leftFst),
+  (``Taclet.storageIndexDelete_unfold_leftFst, .taclet .storageIndexDelete_unfold_leftFst),
+  (``Taclet.storageIndexDeleteNonSimpleIndexCapture,
+    .taclet .storageIndexDeleteNonSimpleIndexCapture),
+  -- Declarations
+  (``Taclet.localValueDeclInitDrop, .taclet .localValueDeclInitDrop),
+  (``Taclet.valueDeclSkip, .taclet .valueDeclSkip),
+  (``Taclet.storageLocalDeclInitDrop, .taclet .storageLocalDeclInitDrop),
+  (``Taclet.storageLocalDeclSkip, .taclet .storageLocalDeclSkip),
+  (``Taclet.memoryLocalDeclInitDrop, .taclet .memoryLocalDeclInitDrop),
+  (``Taclet.memoryReferenceDeclFreshAlloc, .taclet .memoryReferenceDeclFreshAlloc),
+  -- Step 3: storage reads and writes as updates
+  (``Taclet.localValueAssign, .taclet .localValueAssign),
+  (``Taclet.storageRootReadSelect, .taclet .storageRootReadSelect),
+  (``Taclet.storageFieldReadFind, .taclet .storageFieldReadFind),
+  (``Taclet.storageIndexReadMappingFind, .taclet .storageIndexReadMappingFind),
+  (``Taclet.storageIndexReadArrayFind, .taclet .storageIndexReadArrayFind),
+  (``Taclet.storageRootWriteStore, .taclet .storageRootWriteStore),
+  (``Taclet.storageRootWriteCopySource, .taclet .storageRootWriteCopySource),
+  (``Taclet.storageFieldReadStoreRoot, .taclet .storageFieldReadStoreRoot),
+  (``Taclet.storageIndexReadMappingStoreRoot, .taclet .storageIndexReadMappingStoreRoot),
+  (``Taclet.storageIndexReadArrayStoreRoot, .taclet .storageIndexReadArrayStoreRoot),
+  (``Taclet.storageFieldWriteSave, .taclet .storageFieldWriteSave),
+  (``Taclet.storageFieldWriteCopySource, .taclet .storageFieldWriteCopySource),
+  (``Taclet.storageIndexWriteMappingSave, .taclet .storageIndexWriteMappingSave),
+  (``Taclet.storageIndexWriteArraySave, .taclet .storageIndexWriteArraySave),
+  (``Taclet.storageIndexWriteMappingCopySource, .taclet .storageIndexWriteMappingCopySource),
+  (``Taclet.storageIndexWriteArrayCopySource, .taclet .storageIndexWriteArrayCopySource),
+  (``Taclet.storageLocalRootRebind, .taclet .storageLocalRootRebind),
+  (``Taclet.storageFieldReadBindLocalRoot, .taclet .storageFieldReadBindLocalRoot),
+  (``Taclet.storageIndexReadMappingBindLocalRoot, .taclet .storageIndexReadMappingBindLocalRoot),
+  (``Taclet.storageIndexReadArrayBindLocalRoot, .taclet .storageIndexReadArrayBindLocalRoot),
+  (``Taclet.storageRootDelete, .taclet .storageRootDelete),
+  (``Taclet.storageFieldDelete, .taclet .storageFieldDelete),
+  (``Taclet.storageIndexDelete, .taclet .storageIndexDelete),
+  -- Operators: `+ - * ** / %`, then the comparisons, then `&& ||`
+  (``Taclet.binopAssignment, .merged [.additionAssignment, .subtractionAssignment,
+    .multiplicationAssignment, .powerAssignment, .divisionAssignment, .moduloAssignment,
+    .lessThanAssignment, .greaterThanAssignment, .lessEqualAssignment, .greaterEqualAssignment,
+    .boolEqualityAssignment, .boolInequalityAssignment,
+    .logicalAndAssignment, .logicalOrAssignment]),
+  (``Taclet.binopUnfoldLeft, .merged [.addition_unfold_left, .subtraction_unfold_left,
+    .multiplication_unfold_left, .power_unfold_left, .division_unfold_left, .modulo_unfold_left,
+    .lessThanCaptureLhs, .greaterThanCaptureLhs, .lessEqualCaptureLhs, .greaterEqualCaptureLhs,
+    .boolEqualityCaptureLhs, .boolInequalityCaptureLhs,
+    .logicalAndCaptureLhs, .logicalOrCaptureLhs]),
+  -- no `&&`/`||` instance: those are the short-circuit rows below
+  (``Taclet.binopUnfoldRight, .merged [.addition_unfold_right, .subtraction_unfold_right,
+    .multiplication_unfold_right, .power_unfold_right, .division_unfold_right,
+    .modulo_unfold_right,
+    .lessThanCaptureRhs, .greaterThanCaptureRhs, .lessEqualCaptureRhs, .greaterEqualCaptureRhs,
+    .boolEqualityCaptureRhs, .boolInequalityCaptureRhs]),
+  (``Taclet.logicalAndShortCircuitRhs, .taclet .logicalAndShortCircuitRhs),
+  (``Taclet.logicalOrShortCircuitRhs, .taclet .logicalOrShortCircuitRhs),
+  (``Taclet.unopAssignment, .merged [.unaryMinusAssignment, .logicalNotAssignment]),
+  (``Taclet.unopCapture, .merged [.unaryMinusCapture, .logicalNotCapture]),
+  -- The conditional: `lhs` is a local, a storage or a memory location
+  (``Taclet.ternaryToIf, .merged [.ternaryToIf, .ternaryToIfStorage]),
+  (``Taclet.ternaryCaptureCond, .taclet .ternaryCaptureCond),
+  -- Compound assignment (`+= -= *= /= %=`) and `++`/`--` (pre, post)
+  (``Taclet.localOpAssign, .merged [.localAddAssign, .localSubAssign, .localMulAssign,
+    .localDivAssign, .localModAssign]),
+  (``Taclet.storageRootOpAssign, .merged [.storageRootAddAssign, .storageRootSubAssign,
+    .storageRootMulAssign, .storageRootDivAssign, .storageRootModAssign]),
+  (``Taclet.storageFieldOpAssign, .merged [.storageFieldAddAssign, .storageFieldSubAssign,
+    .storageFieldMulAssign, .storageFieldDivAssign, .storageFieldModAssign]),
+  (``Taclet.storageIndexMappingOpAssign, .merged [.storageIndexMappingAddAssign,
+    .storageIndexMappingSubAssign, .storageIndexMappingMulAssign, .storageIndexMappingDivAssign,
+    .storageIndexMappingModAssign]),
+  (``Taclet.storageIndexArrayOpAssign, .merged [.storageIndexArrayAddAssign,
+    .storageIndexArraySubAssign, .storageIndexArrayMulAssign, .storageIndexArrayDivAssign,
+    .storageIndexArrayModAssign]),
+  (``Taclet.memoryFieldOpAssign, .merged [.memoryFieldAddAssign, .memoryFieldSubAssign,
+    .memoryFieldMulAssign, .memoryFieldDivAssign, .memoryFieldModAssign]),
+  (``Taclet.memoryIndexArrayOpAssign, .merged [.memoryIndexArrayAddAssign,
+    .memoryIndexArraySubAssign, .memoryIndexArrayMulAssign, .memoryIndexArrayDivAssign,
+    .memoryIndexArrayModAssign]),
+  (``Taclet.storageFieldOpAssignUnfoldLeftFst, .merged [.storageFieldAddAssign_unfold_leftFst,
+    .storageFieldSubAssign_unfold_leftFst, .storageFieldMulAssign_unfold_leftFst,
+    .storageFieldDivAssign_unfold_leftFst, .storageFieldModAssign_unfold_leftFst]),
+  (``Taclet.storageIndexOpAssignUnfoldLeftFst, .merged [.storageIndexAddAssign_unfold_leftFst,
+    .storageIndexSubAssign_unfold_leftFst, .storageIndexMulAssign_unfold_leftFst,
+    .storageIndexDivAssign_unfold_leftFst, .storageIndexModAssign_unfold_leftFst]),
+  (``Taclet.memoryFieldOpAssignUnfoldLeftFst, .merged [.memoryFieldAddAssign_unfold_leftFst,
+    .memoryFieldSubAssign_unfold_leftFst, .memoryFieldMulAssign_unfold_leftFst,
+    .memoryFieldDivAssign_unfold_leftFst, .memoryFieldModAssign_unfold_leftFst]),
+  (``Taclet.memoryIndexOpAssignUnfoldLeftFst, .merged [.memoryIndexAddAssign_unfold_leftFst,
+    .memoryIndexSubAssign_unfold_leftFst, .memoryIndexMulAssign_unfold_leftFst,
+    .memoryIndexDivAssign_unfold_leftFst, .memoryIndexModAssign_unfold_leftFst]),
+  (``Taclet.compoundAssignValueRhsCapture, .merged [.addAssignValueRhsCapture,
+    .subAssignValueRhsCapture, .mulAssignValueRhsCapture, .divAssignValueRhsCapture,
+    .modAssignValueRhsCapture]),
+  (``Taclet.localIncrement, .merged [.localPreincrement, .localPredecrement,
+    .localPostincrement, .localPostdecrement]),
+  (``Taclet.storageRootIncrement, .merged [.storageRootPreincrement, .storageRootPredecrement,
+    .storageRootPostincrement, .storageRootPostdecrement]),
+  (``Taclet.storageFieldIncrement, .merged [.storageFieldPreincrement,
+    .storageFieldPredecrement, .storageFieldPostincrement, .storageFieldPostdecrement]),
+  (``Taclet.storageIndexIncrement, .merged [
+    .storageIndexMappingPreincrement, .storageIndexMappingPredecrement,
+    .storageIndexMappingPostincrement, .storageIndexMappingPostdecrement,
+    .storageIndexArrayPreincrement, .storageIndexArrayPredecrement,
+    .storageIndexArrayPostincrement, .storageIndexArrayPostdecrement]),
+  (``Taclet.memoryFieldIncrement, .merged [.memoryFieldPreincrement, .memoryFieldPredecrement,
+    .memoryFieldPostincrement, .memoryFieldPostdecrement]),
+  (``Taclet.memoryIndexArrayIncrement, .merged [.memoryIndexArrayPreincrement,
+    .memoryIndexArrayPredecrement, .memoryIndexArrayPostincrement,
+    .memoryIndexArrayPostdecrement]),
+  (``Taclet.storageFieldIncrementUnfoldLeftFst, .merged [
+    .storageFieldPreincrement_unfold_leftFst, .storageFieldPredecrement_unfold_leftFst,
+    .storageFieldPostincrement_unfold_leftFst, .storageFieldPostdecrement_unfold_leftFst]),
+  (``Taclet.storageIndexIncrementUnfoldLeftFst, .merged [
+    .storageIndexPreincrement_unfold_leftFst, .storageIndexPredecrement_unfold_leftFst,
+    .storageIndexPostincrement_unfold_leftFst, .storageIndexPostdecrement_unfold_leftFst]),
+  (``Taclet.memoryFieldIncrementUnfoldLeftFst, .merged [
+    .memoryFieldPreincrement_unfold_leftFst, .memoryFieldPredecrement_unfold_leftFst,
+    .memoryFieldPostincrement_unfold_leftFst, .memoryFieldPostdecrement_unfold_leftFst]),
+  (``Taclet.memoryIndexIncrementUnfoldLeftFst, .merged [
+    .memoryIndexPreincrement_unfold_leftFst, .memoryIndexPredecrement_unfold_leftFst,
+    .memoryIndexPostincrement_unfold_leftFst, .memoryIndexPostdecrement_unfold_leftFst]),
+  -- `vp = v++`: KeY has one taclet for the assignment and one for the declaration
+  (``Taclet.localAssignIncrement, .merged [
+    .localAssignPreincrement, .localAssignPredecrement,
+    .localAssignPostincrement, .localAssignPostdecrement,
+    .localDeclPreincrement, .localDeclPredecrement,
+    .localDeclPostincrement, .localDeclPostdecrement]),
+  (``Taclet.storageRootIncrementAssignment, .merged [
+    .storageRootPreincrementAssignment, .storageRootPredecrementAssignment,
+    .storageRootPostincrementAssignment, .storageRootPostdecrementAssignment]),
+  (``Taclet.storageFieldIncrementAssignment, .merged [
+    .storageFieldPreincrementAssignment, .storageFieldPredecrementAssignment,
+    .storageFieldPostincrementAssignment, .storageFieldPostdecrementAssignment]),
+  (``Taclet.storageIndexIncrementAssignment, .merged [
+    .storageIndexMappingPreincrementAssignment, .storageIndexMappingPredecrementAssignment,
+    .storageIndexMappingPostincrementAssignment, .storageIndexMappingPostdecrementAssignment,
+    .storageIndexArrayPreincrementAssignment, .storageIndexArrayPredecrementAssignment,
+    .storageIndexArrayPostincrementAssignment, .storageIndexArrayPostdecrementAssignment]),
+  (``Taclet.memoryFieldIncrementAssignment, .merged [
+    .memoryFieldPreincrementAssignment, .memoryFieldPredecrementAssignment,
+    .memoryFieldPostincrementAssignment, .memoryFieldPostdecrementAssignment]),
+  (``Taclet.memoryIndexArrayIncrementAssignment, .merged [
+    .memoryIndexArrayPreincrementAssignment, .memoryIndexArrayPredecrementAssignment,
+    .memoryIndexArrayPostincrementAssignment, .memoryIndexArrayPostdecrementAssignment]),
+  -- Arrays
+  (``Taclet.storagePushValueSave, .taclet .storagePushValueSave),
+  (``Taclet.storagePushValueCopySource, .taclet .storagePushValueCopySource),
+  (``Taclet.storagePushLengthSave, .taclet .storagePushLengthSave),
+  (``Taclet.storagePushValue_unfold_rightSndArgument,
+    .taclet .storagePushValue_unfold_rightSndArgument),
+  (``Taclet.storagePushValue_unfold_leftFstReceiver,
+    .taclet .storagePushValue_unfold_leftFstReceiver),
+  (``Taclet.storagePush_unfold_leftFstReceiver, .taclet .storagePush_unfold_leftFstReceiver),
+  (``Taclet.storagePop_unfold_leftFstReceiver, .taclet .storagePop_unfold_leftFstReceiver),
+  (``Taclet.storagePopSave, .taclet .storagePopSave),
+  (``Taclet.storageLocalRootPush_unfold_leftFstReceiver,
+    .taclet .storageLocalRootPush_unfold_leftFstReceiver),
+  (``Taclet.storageLocalRootPushBind, .taclet .storageLocalRootPushBind),
+  -- Transfer
+  (``Taclet.transfer_unfold_leftFstReceiver, .taclet .transfer_unfold_leftFstReceiver),
+  (``Taclet.transfer_unfold_rightSndArgument, .taclet .transfer_unfold_rightSndArgument),
+  (``Taclet.transferNoCallback, .merged [.transferNoCallbackBox, .transferNoCallbackDiamond]),
+  -- Memory: `msrc` is a value or a memory reference, so one row covers `…MemRef…`
+  (``Taclet.memoryFieldRead_unfold_rightFst, .taclet .memoryFieldRead_unfold_rightFst),
+  (``Taclet.memoryIndexRead_unfold_rightFst, .taclet .memoryIndexRead_unfold_rightFst),
+  (``Taclet.memoryIndexRead_unfold_rightSndIndex, .taclet .memoryIndexRead_unfold_rightSndIndex),
+  (``Taclet.memoryFieldReadHeap, .taclet .memoryFieldRead),
+  (``Taclet.memoryIndexReadHeap, .taclet .memoryIndexReadArrayValue),
+  (``Taclet.memoryRootAlias, .taclet .memoryRootRebind),
+  (``Taclet.memoryFieldReadAliasRoot, .taclet .memoryFieldRead),
+  (``Taclet.memoryIndexReadAliasRoot, .taclet .memoryIndexReadArrayMemory),
+  (``Taclet.memoryFieldWriteStore, .taclet .memoryFieldWrite),
+  (``Taclet.memoryIndexWriteStore, .taclet .memoryIndexWriteArray),
+  (``Taclet.memoryFieldWriteCopy, .taclet .memoryFieldWrite),
+  (``Taclet.memoryIndexWriteCopy, .taclet .memoryIndexWriteArray),
+  (``Taclet.memoryFieldWrite_unfold_leftFst,
+    .merged [.memoryFieldWrite_unfold_leftFst, .memoryFieldWriteMemRef_unfold_leftFst]),
+  (``Taclet.memoryIndexWrite_unfold_leftFst,
+    .merged [.memoryIndexWrite_unfold_leftFst, .memoryIndexWriteCaptureAll,
+      .memoryIndexWriteMemRef_unfold_leftFst, .memoryIndexWriteMemRefCaptureAll]),
+  (``Taclet.memoryIndexWriteNonSimpleIndexCapture,
+    .merged [.memoryIndexWriteNonSimpleIndexCapture, .memoryIndexWriteCaptureAll,
+      .memoryIndexWriteMemRefNonSimpleIndexCapture, .memoryIndexWriteMemRefCaptureAll]),
+  (``Taclet.memoryFieldWriteUnfoldSource, .taclet .fieldWriteValueRhsCapture),
+  (``Taclet.memoryIndexWriteUnfoldSource, .taclet .indexWriteValueRhsCapture),
+  -- Storage and memory: `mpath` is any memory path, a member one included
+  (``Taclet.memoryStorageCopy, .taclet .memoryStorageCopy),
+  (``Taclet.memoryStorageCopyUnfold, .taclet .memoryStorageCopyUnfold),
+  (``Taclet.memoryToStorageStoreRoot, .taclet .memoryToStorageStoreRoot),
+  (``Taclet.memoryToStorageFieldCopyRoot,
+    .merged [.memoryToStorageFieldCopyRoot, .memoryToStorageFieldCopyField]),
+  (``Taclet.memoryToStorageIndexMappingCopyRoot, .taclet .memoryToStorageIndexMappingCopyRoot),
+  (``Taclet.memoryToStorageIndexArrayCopyRoot, .taclet .memoryToStorageIndexArrayCopyRoot),
+  (``Taclet.memoryToStorageField_unfold_leftFst, .taclet .memoryToStorageField_unfold_leftFst),
+  (``Taclet.memoryToStorageIndex_unfold_leftFst,
+    .merged [.memoryToStorageIndex_unfold_leftFst, .memoryToStorageIndexCaptureAll]),
+  (``Taclet.memoryToStorageIndexNonSimpleIndexCapture,
+    .merged [.memoryToStorageIndexNonSimpleIndexCapture, .memoryToStorageIndexCaptureAll]),
+  -- Control flow: an `if` without `else` is one with an empty `else`
+  (``Taclet.ifElseUnfold, .merged [.ifUnfold, .ifElseUnfold]),
+  (``Taclet.ifElseSplit, .merged [.ifSplit, .ifElseSplit]),
+  (``Taclet.requireConditionCapture, .taclet .requireConditionCapture),
+  (``Taclet.requireSimple, .taclet .requireSimple),
+  (``Taclet.assertConditionCapture, .taclet .assertConditionCapture),
+  (``Taclet.assertSimple, .taclet .assertSimple),
+  (``Taclet.revertBox, .taclet .revertBox),
+  (``Taclet.revertDiamond, .taclet .revertDiamond) ]
 
-@[simp] theorem mainBlock_splitGoals (φ : SideFormula) (p : List Premise)
-    (u : UpdTerm) : StepEffect.mainBlock (splitGoals φ p u) = [] := rfl
-
-@[simp] theorem mainBlock_assertGoals (c : WrappedExpr) :
-    StepEffect.mainBlock (assertGoals c) = [] := rfl
-
-@[simp] theorem mainBlock_revertGoals : StepEffect.mainBlock revertGoals = [] :=
-  rfl
-
-@[simp] theorem mainBlock_compoundGoals (op : BinOp) (t v : WrappedExpr) :
-    StepEffect.mainBlock (compoundGoals op t v) = [] := rfl
-
-@[simp] theorem mainBlock_compoundIndexGoals (op : BinOp) (t v : WrappedExpr) :
-    StepEffect.mainBlock (compoundIndexGoals op t v) = [] := rfl
-
-@[simp] theorem mainBlock_incDecGoals (v rhs : WrappedExpr) :
-    StepEffect.mainBlock (incDecGoals v rhs) = [] := rfl
-
-/-! ## Every rule offers a goal
-
-A rule with no goals would be a rule that says nothing: its weakest
-precondition would be the empty conjunction, `True`, and it would "prove"
-anything it applied to.  Nothing in the table produces one — every combinator
-emits one or two goals — but the fact is worth having as a `rfl` per rule
-rather than as a reading of the combinators. -/
-
-set_option maxHeartbeats 4000000 in
-theorem goals_nonempty (r : RuleName) (stmt : Stmt)
-    (h : (ruleEffect r).cond stmt) :
-    (ruleEffect r).goals stmt h ≠ [] := by
-  cases r <;> (cases stmt <;> first | exact (h : False).elim | exact List.cons_ne_nil _ _)
+#check_constructor_table Taclet, tacletOrigins.map Prod.fst
 
 /-! ## Which KeY taclets the table claims -/
 
-/-- Every taclet named by some rule of the table, `transferWithCallback`'s two
-included (it is the `transferSemantics` alternative, so it is not in
-`ruleNames`). -/
-def claimedTaclets : List KeyTaclet :=
-  ((ruleNames ++ [RuleName.transferWithCallback]).flatMap
-    fun r => (ruleEffect r).origin.taclets).eraseDups
+/-- Whether some row names the taclet. -/
+def claims (t : KeyTaclet) : Bool :=
+  tacletOrigins.any fun r => r.2.taclets.contains t
 
-/-- The taclets of `solidityProgramRules.key` that **no** Lean rule claims, and
-why.  Four, in two pairs:
+/-- Every taclet some row names, in `KeyTaclet.all`'s order. -/
+def claimedTaclets : List KeyTaclet := KeyTaclet.all.filter claims
 
-* `emptyModality`, `blockEmpty` — architectural.  `Block = List Stmt` with
-  branch bodies inlined, so there is no nested-block statement to erase and no
-  `{} ; rest` find-shape; a derivation that ends in the empty block *is* the
-  Lean analogue of `emptyModality` (`docs/lean-key-rule-map.md`).
-* `ifSplit`, `ifElseSplit` — ported as a theorem, not a rule.  They are
-  sequent-level two-goal splits on a simple condition (`\add(se = TRUE ==>)`),
-  and a single-successor `BlockStep` cannot produce two goals; the rewrite
-  layer is deliberately stuck there and `SolidityJudgment.ite_split`
-  (`JudgmentSplit.lean`) is the split. -/
+/-- The taclets of `solidityProgramRules.key` that **no** row claims, and why.
+
+* `emptyModality`, `blockEmpty` — architectural.  A program is a list of
+  statements with branch bodies inlined, so there is no nested block to erase
+  and no `{} ; rest` to find; a derivation that reaches `⟨[ ]⟩` *is* the Lean
+  analogue of `emptyModality`.
+* `functionBodyExpand` — the typed syntax has no calls.
+* `memoryArrayFreshAlloc` — nor `new T[](n)`: a memory array is made by
+  declaration (`memoryReferenceDeclFreshAlloc`) or by copy from storage.
+* The eight memory-`delete` taclets — nor `delete` of a memory location;
+  `Stmt.delete` takes a storage one.
+* `memoryFieldRead_unfold_rightSndResult`, `memoryIndexRead_unfold_rightSndResult`,
+  `memoryFieldWriteCaptureSrc`, `memoryIndexWriteMemRefRhsCapture` — KeY
+  captures a memory reference into an alias before writing it; here a memory
+  path is a source as it stands (`mpath`), so `memoryFieldWriteCopy` and the
+  `memoryToStorage…CopyRoot` rows write it in one step, and a value read is
+  captured by `fieldWriteValueRhsCapture`/`indexWriteValueRhsCapture`.
+* `ifTrue`, `ifFalse`, `ifElseTrue`, `ifElseFalse`, `ifElseNegated` — the
+  `concrete_solidity` shortcuts on a literal or negated condition.  A literal is
+  simple, so `ifElseSplit` applies and one of its goals assumes `true = false`;
+  `!se` is not simple, so `ifElseUnfold` captures it.  They are strategy, and
+  the table has no strategy.
+* `transferWithCallbackBox`, `transferWithCallbackDiamond` — the other
+  semantics of `transfer`, in which the callee may re-enter; the table
+  transcribes the no-callback pair. -/
 def unclaimedTaclets : List KeyTaclet :=
-  [ KeyTaclet.emptyModality, KeyTaclet.blockEmpty,
-    KeyTaclet.ifSplit, KeyTaclet.ifElseSplit ]
+  [ .emptyModality, .blockEmpty,
+    .functionBodyExpand,
+    .memoryArrayFreshAlloc,
+    .memoryRootDeleteFreshRebind, .memoryFieldDeletePrimitive, .memoryFieldDeleteReference,
+    .memoryIndexDeletePrimitive, .memoryIndexDeleteReference,
+    .memoryFieldDelete_unfold_leftFst, .memoryIndexDelete_unfold_leftFst,
+    .memoryIndexDeleteNonSimpleIndexCapture,
+    .memoryFieldRead_unfold_rightSndResult, .memoryIndexRead_unfold_rightSndResult,
+    .memoryFieldWriteCaptureSrc, .memoryIndexWriteMemRefRhsCapture,
+    .ifTrue, .ifFalse, .ifElseTrue, .ifElseFalse, .ifElseNegated,
+    .transferWithCallbackBox, .transferWithCallbackDiamond ]
 
 /-- **The coverage fact**: the corpus splits into what the table claims and
 what this file excuses, with nothing in both and nothing in neither.  A taclet
-that appears upstream and is never ported fails this, and so does a rule that
-claims a taclet another rule already excused. -/
+that appears upstream and is never ported fails this, and so does a row that
+claims a taclet the list above excuses. -/
 theorem taclets_partitioned :
-    KeyTaclet.all.all
-      (fun t => claimedTaclets.contains t != unclaimedTaclets.contains t) = true := by
-  native_decide
+    KeyTaclet.all.all (fun t => claims t != unclaimedTaclets.contains t) = true := by
+  decide +kernel
 
-theorem claimedTaclets_count : claimedTaclets.length = 306 := by native_decide
+theorem claimedTaclets_count : claimedTaclets.length = 287 := by decide +kernel
 
-theorem unclaimedTaclets_count : unclaimedTaclets.length = 4 := by native_decide
+theorem unclaimedTaclets_count : unclaimedTaclets.length = 23 := by decide +kernel
 
-/-! ## Box/diamond twins claim the same taclets
+/-! ## The rows with no taclet
 
-The `Box`/`Diamond` suffix is a *Lean* naming decision — where the calculus stacks
-a bounds or nonempty check as two sequents, Lean splits the rule by modality.
-Upstream has one taclet for the pair (two, for `revert` and `transfer`), and
-both halves must name it: a twin pair that disagreed about its origin would be
-claiming to come from two different places. -/
+A `leanOnly` row would be a claim that upstream has no counterpart.  There is
+none: the constructors that used to be Lean's own (front-end lowering of push
+sugar, scratch aliases, the call rule, `**=`) went with the untyped syntax.
+The count is kept so that one added later has to say so here. -/
 
-theorem twins_origin_eq :
-    ((ruleEffect .storageIndexWriteArraySaveDiamond).origin =
-      (ruleEffect .storageIndexWriteArraySaveBox).origin) ∧
-    ((ruleEffect .storageIndexWriteArrayCopySourceDiamond).origin =
-      (ruleEffect .storageIndexWriteArrayCopySourceBox).origin) ∧
-    ((ruleEffect .storageIndexReadArrayFindDiamond).origin =
-      (ruleEffect .storageIndexReadArrayFindBox).origin) ∧
-    ((ruleEffect .storageIndexReadArrayBindLocalRootDiamond).origin =
-      (ruleEffect .storageIndexReadArrayBindLocalRootBox).origin) ∧
-    ((ruleEffect .storageIndexReadArrayStoreRootDiamond).origin =
-      (ruleEffect .storageIndexReadArrayStoreRootBox).origin) ∧
-    ((ruleEffect .storagePopSaveDiamond).origin =
-      (ruleEffect .storagePopSaveBox).origin) ∧
-    ((ruleEffect .memoryIndexWriteStoreDiamond).origin =
-      (ruleEffect .memoryIndexWriteStoreBox).origin) ∧
-    ((ruleEffect .memoryIndexWriteCopyDiamond).origin =
-      (ruleEffect .memoryIndexWriteCopyBox).origin) ∧
-    ((ruleEffect .memoryIndexReadHeapDiamond).origin =
-      (ruleEffect .memoryIndexReadHeapBox).origin) ∧
-    ((ruleEffect .memoryIndexReadAliasRootDiamond).origin =
-      (ruleEffect .memoryIndexReadAliasRootBox).origin) ∧
-    ((ruleEffect .memoryToStorageIndexArrayCopyRootDiamond).origin =
-      (ruleEffect .memoryToStorageIndexArrayCopyRootBox).origin) ∧
-    ((ruleEffect .memoryIndexDeletePrimitiveDiamond).origin =
-      (ruleEffect .memoryIndexDeletePrimitiveBox).origin) ∧
-    ((ruleEffect .memoryIndexDeleteReferenceDiamond).origin =
-      (ruleEffect .memoryIndexDeleteReferenceBox).origin) ∧
-    ((ruleEffect .transferNoCallbackDiamond).origin =
-      (ruleEffect .transferNoCallbackBox).origin) ∧
-    ((ruleEffect .revertDiamond).origin =
-      (ruleEffect .revertBox).origin) := by
-  refine ⟨rfl, rfl, rfl, rfl, rfl, rfl, rfl, rfl, rfl, rfl, rfl, rfl, rfl, rfl, rfl⟩
+theorem leanOnly_count :
+    (tacletOrigins.filter fun r => r.2 == .leanOnly).length = 0 := by decide +kernel
 
-/-! ## `\heuristics` is derived, not repeated
+/-! ## `\heuristics` agree within a row
 
-`Rules.withOrigin` computes a rule's `heuristics` from its `origin`, so the two
-cannot drift.  The check below is therefore about the *arms*: it fails on an
-arm that sets `origin` by hand instead of going through `withOrigin`, which is
-the only way the pair could come apart. -/
+`\heuristics` is KeY's strategy annotation (`KeyTaclets.lean`) and the table
+has no strategy, but it is still information about the calculus: a row whose
+taclets sat in two rule sets would be merging taclets KeY treats differently.
+None does, and no row claims a `concrete_solidity` taclet — those are exactly
+the five literal-condition `if` rules excused above. -/
 
-theorem heuristics_eq_origin :
-    ruleNames.all (fun r => (ruleEffect r).heuristics ==
-        ((ruleEffect r).origin.taclets.map KeyTaclet.heuristic).eraseDups)
-      = true := by
-  native_decide
+/-- The rule sets a row's taclets are filed under. -/
+def heuristics (o : KeyOrigin) : List Heuristic :=
+  (o.taclets.map KeyTaclet.heuristic).eraseDups
 
-/-! ## The rules with no taclet
+theorem heuristics_agree :
+    tacletOrigins.all (fun r => (heuristics r.2).length == 1 || r.2 == .leanOnly) = true := by
+  decide +kernel
 
-A `leanOnly` origin is a claim that upstream has no counterpart, and there are
-four reasons for one in this table:
-
-* **front-end normalisation** — `pushAssignLower`, `pushFieldAssignLower`,
-  `storagePushLhsToPushValue` rewrite Solidity's push sugar to the `Stmt.assign`
-  form the interpreter already handles, and the two `storagePushPlaceDelete*`
-  rules cover `delete` of a push place, a shape only this syntax has;
-* **scratch bindings** — `storagePlaceAlias`, `exprStmtCapture`, and the
-  `storageToMemoryDecl*` / `memoryToStorageUnfoldRightFstSource` steps, finer
-  tiers than KeY's;
-* **the call rule** — `functionCallArgCapture` (solkey has it only as a backlog
-  item, `unfoldArgument`);
-* **operator instances KeY does not have** — `**=` throughout the compound
-  families, `&&`/`||` in `binopUnfoldRight` (they short-circuit, so KeY defers
-  to the `if` rules), and the comparison and boolean operators in the
-  compound-assignment and compound-capture families, which have no `op=`
-  form at all.
-
-`Calculus/PrintedRules.lean` draws the same line against the printed rules.  The list
-is computed rather than transcribed, so adding a rule without an origin
-moves the count and fails the theorem below. -/
-def leanOnlyRules : List RuleName :=
-  ruleNames.filter fun r => (ruleEffect r).origin == KeyOrigin.leanOnly
-
-theorem leanOnlyRules_count : leanOnlyRules.length = 123 := by native_decide
-
-/-- And the complement: 297 of the 420 rule *instances* name a taclet.  The
-`leanOnly` share is large because `ruleNames` lists every instance of a
-parameterized family, including the ones whose condition is unsatisfiable —
-`localOpAssign .lt` is a listed rule that can never fire, and KeY of
-course has no `<=` taclet for it.  Counting rule *names* instead would hide
-exactly the thing the count is for: a family with one instance annotated and
-the rest forgotten. -/
-theorem rules_with_origin_count :
-    (ruleNames.filter fun r =>
-      (ruleEffect r).origin != KeyOrigin.leanOnly).length = 297 := by
-  native_decide
+theorem concrete_unclaimed :
+    claimedTaclets.all (fun t => t.heuristic != .concreteSolidity) = true := by
+  decide +kernel
 
 end RuleShapes
 end Solidity

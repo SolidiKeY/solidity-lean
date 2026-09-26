@@ -5,8 +5,8 @@ Tracking checklist for the port. One row per taclet in
 
 **Pinned to solkey `8c5c69ca25` on 2026-09-20** (310 program taclets, three
 `\heuristics` classes; `Calculus/KeyTaclets.lean` is regenerated from that
-file and `RuleShapes.taclets_partitioned` claims 306 of the 310, the four
-excused being `emptyModality`, `blockEmpty`, `ifSplit`, `ifElseSplit`).  The
+file and `RuleShapes.taclets_partitioned` claims 287 of the 310, the 23
+excused being listed with their reasons in `RuleShapes.unclaimedTaclets`).  The
 same pass made the rule table read as the printed tables do —
 `Calculus/PrintedRules.lean` is the printed-rule twin of this file — so the Lean
 column below carries the printed names where there is one: the Step 2
@@ -98,13 +98,13 @@ consequences:
 
 - a misspelled taclet name is a type error, not a stale table row;
 - `RuleShapes.taclets_partitioned` checks the *coverage* direction — of the 310
-  taclets, 306 are claimed by some Lean rule and exactly four are excused with a
-  reason (`emptyModality`, `blockEmpty`, `ifSplit`, `ifElseSplit`). A taclet
-  may be claimed by two rules: each `*CaptureAll` by the `UnfoldLeftFst` and
-  the `UnfoldLeftSndIndex` of its family, `memoryFieldWrite` /
+  taclets, 287 are claimed by some `Taclet` constructor and 23 are excused with
+  a reason (`RuleShapes.unclaimedTaclets`). A taclet may be claimed by two
+  constructors: each `*CaptureAll` by the `_unfold_leftFst` and the
+  `NonSimpleIndexCapture` of its family, `memoryFieldWrite` /
   `memoryIndexWriteArray` by the value write and the reference copy;
-- `RuleShapes.leanOnlyRules` is the other direction, computed from the table
-  rather than transcribed.
+- `RuleShapes.tacletOrigins` is the other direction: one row per constructor,
+  checked against the environment, with `leanOnly` counted (none today).
 
 What stays prose here is everything the `origin` cannot say: *why* a merge is a
 merge, which upstream commit moved a rule, and the evaluation-order and
