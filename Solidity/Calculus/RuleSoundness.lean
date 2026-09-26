@@ -1,91 +1,57 @@
-import Solidity.Calculus.Rules
+import Solidity.Calculus.SoundUpdate
+import Solidity.Calculus.SoundUnfold
+
+/-!
+# The taclets are sound
+
+`Taclet.sound`: every rule's premise is correct for the statement it
+rewrites (`Premise.Correct`), against the interpreter `Stmt.run`, from every
+state, with no hypothesis but that the rule's fresh names are fresh for the
+statement.  An update has the statement's effect; new statements have its
+effect off the fresh names; a branch runs the goal its condition picks, and
+halts where neither condition holds; a closed goal is a halt, closed as the
+modality says.
+
+The four premise kinds are proved apart: `SoundUpdate.lean`,
+`SoundUnfold.lean`, and the branches and closed goals here.
+-/
 
 namespace Solidity
 
-open Semantics SemanticsProperties
+open Semantics
 
 variable {C : Contract}
 
-/-! ## Two runs that end alike -/
 
-/-- The fresh names a rule may declare at index `k`: `se`, `sp`, `ie`, `mv`. -/
-def freshVars (k : Nat) : List Var :=
-  [.fresh "se" k, .fresh "sp" k, .fresh "ie" k, .fresh "mv" k]
-
-def SameOk (ns : List Var) : Res State → Res State → Prop
-  | .ok a, .ok b => EnvAgreeExcept ns a b
-  | .error _, .error _ => True
-  | _, _ => False
-
-theorem SameOk.of_agree {ns : List Var} {x y : Res State} (h : ResultsAgree ns x y) :
-    SameOk ns x y := by
-  cases x <;> cases y <;> simp_all [SameOk, ResultsAgree]
-
-theorem Semantics.EnvAgreeExcept.setEnv_left {ns : List Var} {s₁ s₂ : State}
-    (h : EnvAgreeExcept ns s₁ s₂) {n : Var} (hn : n ∈ ns) (b : Binding) :
-    EnvAgreeExcept ns (s₁.setEnv n b) s₂ :=
-  ⟨h.storage, h.heap, h.nextId, h.net, fun m hm => by
-    have hne : m ≠ n := fun heq => hm (heq ▸ hn)
-    simpa [State.setEnv, lookupBy_setBy_ne hne] using h.env m hm,
-    h.selfBalance⟩
-
-theorem agree_setEnv (σ : State) (x : Var) (b : Binding) :
-    EnvAgreeExcept [x] (σ.setEnv x b) σ :=
-  (EnvAgreeExcept.refl [x] σ).setEnv_left (by simp) b
-
-theorem avoids_single {x : Var} {vs : List Var} (h : x ∉ vs) : Avoids vs [x] :=
-  fun y hy hm => h (by simp at hm; exact hm ▸ hy)
-
-section
-variable {σ : State} {x : Var} {b : Binding}
-
-@[simp] theorem Simple.eval_setEnv {p : PrimTy} {s : Simple C p} (h : x ∉ s.vars) :
-    s.eval (σ.setEnv x b) = s.eval σ := s.eval_frame (agree_setEnv σ x b) (avoids_single h)
-@[simp] theorem Val.eval_setEnv {p : PrimTy} {v : Val C p} (h : x ∉ v.vars) :
-    v.eval (σ.setEnv x b) = v.eval σ := v.eval_frame (agree_setEnv σ x b) (avoids_single h)
-@[simp] theorem SPath.resolve_setEnv {T : Ty} {p : SPath C T} (h : x ∉ p.vars) :
-    p.resolve (σ.setEnv x b) = p.resolve σ := p.resolve_frame (agree_setEnv σ x b) (avoids_single h)
-@[simp] theorem Loc.resolve_setEnv {T : Ty} {l : Loc C T} (h : x ∉ l.vars) :
-    l.resolve (σ.setEnv x b) = l.resolve σ := l.resolve_frame (agree_setEnv σ x b) (avoids_single h)
-@[simp] theorem MPath.mval_setEnv {T : Ty} {p : MPath C T} (h : x ∉ p.vars) :
-    p.mval (σ.setEnv x b) = p.mval σ := p.mval_frame (agree_setEnv σ x b) (avoids_single h)
-@[simp] theorem MLoc.read_setEnv {T : Ty} {l : MLoc C T} (h : x ∉ l.vars) :
-    l.read (σ.setEnv x b) = l.read σ := l.read_frame (agree_setEnv σ x b) (avoids_single h)
-@[simp] theorem Src.value_setEnv {T : Ty} {r : Src C T} (h : x ∉ r.vars) :
-    r.value (σ.setEnv x b) = r.value σ := r.value_frame (agree_setEnv σ x b) (avoids_single h)
-@[simp] theorem MSrc.mval_setEnv {T : Ty} {r : MSrc C T} (h : x ∉ r.vars) :
-    r.mval (σ.setEnv x b) = r.mval σ := r.mval_frame (agree_setEnv σ x b) (avoids_single h)
-@[simp] theorem State.findStorage_setEnv (r : Name) (segs : List Seg) :
-    (σ.setEnv x b).findStorage r segs = σ.findStorage r segs := rfl
-@[simp] theorem State.getObj_setEnv (id : Nat) : (σ.setEnv x b).getObj id = σ.getObj id := rfl
-end
-
-/-- What a premise means for the statement it replaces. -/
-def Premise.Correct (k : Nat) (m : Modality) (s : Stmt C) : Premise C → Prop
-  | .update U => ∀ σ, SameOk [] (U.apply σ) (s.run σ)
-  | .unfold P => ∀ σ, SameOk (freshVars k) (Prog.run σ P) (s.run σ)
-  | .split c c' P Q => ∀ σ,
-      (holds σ c → SameOk (freshVars k) (Prog.run σ P) (s.run σ)) ∧
+theorem Taclet.sound_split {k : Nat} {m : Modality} {s : Stmt C} {c c' : Fml C} {P Q : Prog C}
+    (d : Taclet C k m s (.split c c' P Q)) :
+    ∀ σ, (holds σ c → SameOk (freshVars k) (Prog.run σ P) (s.run σ)) ∧
       (holds σ c' → SameOk (freshVars k) (Prog.run σ Q) (s.run σ)) ∧
-      (¬ holds σ c → ¬ holds σ c' → ∃ e, s.run σ = .error e)
-  | .done b => ∀ σ, (∃ e, s.run σ = .error e) ∧ (b = true → m = .box)
+      (¬ holds σ c → ¬ holds σ c' → ∃ e, s.run σ = .error e) := by
+  cases d <;> intro σ <;>
+    simp only [holds, Simple.lower_eval, Term.eval, Stmt.run, Val.eval, guardOk, Prog.run,
+      bind, Except.bind, pure, Except.pure] <;>
+    (rename_i se; cases se.eval σ with
+      | error e => simp
+      | ok v =>
+        simp only
+        rcases v with _ | (_ | _) <;> simp [SameOk.self])
 
-macro "fresh_ne" : tactic => `(tactic| (intro h; cases h))
+theorem Taclet.sound_done {k : Nat} {m : Modality} {s : Stmt C} {b : Bool}
+    (d : Taclet C k m s (.done b)) :
+    ∀ σ, (∃ e, s.run σ = .error e) ∧ (b = true → m = .box) := by
+  cases d <;> intro σ <;> simp [Stmt.run]
 
+/-- **The taclets are sound.**  `alice.age = 10;` is `storageFieldWriteSave`,
+and its update saves `10` at `alice.age` as running the statement does;
+`people[i].age = 10;` is `storageFieldWrite_unfold_leftFst`, whose three
+statements run as it does except on the fresh `se` and `sp`. -/
 theorem Taclet.sound {k : Nat} {m : Modality} {s : Stmt C} {pr : Premise C}
     (d : Taclet C k m s pr) (hs : Avoids s.vars (freshVars k)) : pr.Correct k m s := by
-  have hse : Var.fresh "se" k ∉ s.vars := fun h => hs _ h (by simp [freshVars])
-  have hsp : Var.fresh "sp" k ∉ s.vars := fun h => hs _ h (by simp [freshVars])
-  have hie : Var.fresh "ie" k ∉ s.vars := fun h => hs _ h (by simp [freshVars])
-  have hmv : Var.fresh "mv" k ∉ s.vars := fun h => hs _ h (by simp [freshVars])
-  clear hs
-  cases d
-  case storageFieldWrite_unfold_leftFst =>
-    intro σ
-    simp only [Stmt.vars, Loc.vars, SPath.vars, Src.vars, List.mem_append, not_or] at hse hsp hie hmv
-    simp only [Prog.run, Stmt.run, ARhs.bind, Src.value, Loc.resolve, SPath.resolve, aliasPath,
-      bind, Except.bind, pure, Except.pure]
-    sorry
-  all_goals sorry
+  cases pr with
+  | update U => exact Taclet.sound_update d
+  | unfold P => exact Taclet.sound_unfold d hs
+  | split c c' P Q => exact Taclet.sound_split d
+  | done b => exact Taclet.sound_done d
 
 end Solidity

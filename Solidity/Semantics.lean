@@ -968,10 +968,13 @@ def MLoc.write (σ : State) (mv : MVal) {T : Ty} : MLoc C T → Res State
     let iv ← (← i.eval σ).asInt
     memWriteIndex σ id iv mv
 
-/-- The slot a memory source writes: a value, or a reference. -/
+/-- The slot a memory source writes: a value, or the object a reference
+names.  A reference is read as one (`asRef`), as the calculus's
+`write(memory, l, mpath)` reads it: a slot holding a primitive where a
+reference is expected is stuck, not copied as it is. -/
 def MSrc.mval (σ : State) {T : Ty} : MSrc C T → Res MVal
   | .val v => do pure (← v.eval σ).toMVal
-  | .ref p => p.mval σ
+  | .ref p => do pure (.ref (← (← p.mval σ).asRef))
 
 /-- `x` bound to the object a memory right-hand side names: `n`'s by
 identity, or a fresh deep copy of a storage object. -/

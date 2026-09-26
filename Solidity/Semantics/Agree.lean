@@ -624,7 +624,7 @@ theorem Src.value_frame (hag : EnvAgreeExcept ns σ τ) {T : Ty} :
 theorem MSrc.mval_frame (hag : EnvAgreeExcept ns σ τ) {T : Ty} :
     (r : MSrc C T) → Avoids r.vars ns → r.mval σ = r.mval τ
   | .val v, h => by simp only [MSrc.mval, v.eval_frame hag h]
-  | .ref p, h => p.mval_frame hag h
+  | .ref p, h => by simp only [MSrc.mval, p.mval_frame hag h]
 
 /-! ### The state operations respect agreement -/
 
