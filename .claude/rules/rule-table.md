@@ -2,90 +2,62 @@
 paths:
   - "Solidity/Calculus/Rules.lean"
   - "Solidity/Calculus/RuleSyntax.lean"
-  - "Solidity/Calculus/RuleShapes.lean"
-  - "Solidity/Calculus/RuleValidation.lean"
-  - "Solidity/Calculus/Uniqueness.lean"
-  - "Solidity/Calculus/Coverage.lean"
   - "Solidity/Calculus/Completeness.lean"
-  - "Solidity/Calculus/KeyTaclets.lean"
+  - "Solidity/Calculus/RuleShapes.lean"
   - "Solidity/Calculus/PrintedRules.lean"
+  - "Solidity/Calculus/KeyTaclets.lean"
   - "Solidity/SortCheck/*.lean"
 ---
 
 # The rule table
 
-`RuleName`, `ruleEffect`, `ruleNames` and `twinPairs` are **generated** from
-the `sol_rule` declarations by `sol_assemble_rules`. Do not hand-edit them.
+A taclet is one constructor of `Taclet C k m s p` (`Calculus/Rules.lean`),
+named as solkey names it, its type written in `dl{ ⟨[ s; ]⟩ ⇝ p }`. Schema
+variables are bound implicitly and their kind is read off their name
+(`RuleSyntax.lean`'s table: `sp`/`nsp`, `se`/`nse`, `fld`, `lhs`, …). There is
+no generated table and no condition to keep disjoint: which rule fires is
+`Stmt.step` (`Completeness.lean`), a total function over the typed syntax.
 
-**Declaration order is the order of all four.** Put a new rule under the
-section its banner names, and write a box twin before its diamond twin
-(`twins` does both at once and fills `twinPairs`; `CandidateStep.twins_box_first`
-checks it). `FirstStepCase` takes the first applicable rule under `.both`, so
-the order decides which name a `⇝[.rule]` derivation pins.
+## Invariants
+
+- No `sorry`, `native_decide` or `axiom` under `Solidity/Calculus/`.
+- **Types, not predicates.** A statement no rule can run is a typing problem:
+  change the syntax (`Syntax.lean`) so it cannot be written. Never add a
+  well-formedness hypothesis.
+- One rule, one constructor; the modality is a parameter (`⟨[ ]⟩`), not a
+  box/diamond twin. Only `revertBox`/`revertDiamond` tell them apart.
+- Every theorem has a docstring with a small Solidity example.
+- Example contracts are **named** `Contract` constants: the quoters and the
+  kernel re-check rely on it. A new syntax constructor needs an arm in every
+  quoter (`Syntax.lean`, `Calculus/Notation.lean`).
 
 ## Adding or changing a rule
 
-1. One `sol_rule` declaration, in the right section.
-2. The condition is generated from the schema variables' *names*
-   (`RuleSyntax.schemaVar`): `sp.fld = se` already says
-   `isSimple sp ∧ isSe se`. `where` appends conjuncts no name carries;
-   `where cond := …` replaces the conjunction outright, for the handful
-   whose applicability is a bespoke predicate. A residual that has to be
-   *computed* from the condition proof is written `⟦ b ⟧`, with the proof in
-   scope as `h` — five rules. There is no other form: the declaration is how
-   a rule is written.
-3. **Keep the condition disjoint from every other rule.** Then add the
-   `candidate` dispatch branch and the `applicable_eq_candidate` case in
-   `Calculus/Uniqueness.lean`. A failing uniqueness build signals an overlap.
-4. Non-empty residual ⇒ add a `Calculus/RuleValidation.lean` entry.
-5. The taclet reads storage/memory (`find`/`read`/`selectSt`/`valAt`/
-   `defaultValue`) ⇒ add or extend its `TacletReadAnn` row in
-   `SortCheck/Annotations.lean`, keep `sortFaithful_all` closing (extend
-   `ruleNumericTarget`/`ruleRefTarget` for new `fixed`-sorted value reads),
-   then run `lake exe solkeycheck`.
-6. Give the rule its printed origin in `Calculus/PrintedRules.lean`
-   (`printedOrigin`): the printed rule it is, the rules it merges, or
-   `leanOnly` with its reason (`keyTier` — solkey has it, the printed rules do not;
-   `plumbing` — this syntax's own normalisation; `calculus` — theory the
-   printed rules are to gain).  `printed_rules_partitioned` and the count theorems
-   move with it.
-
-**Names are the printed names.** A rule is spelled as it is printed where it
-is printed (`storageFieldWrite_unfold_leftFst` → `storageFieldWriteUnfoldLeftFst`),
-and as solkey spells it otherwise.  A residual binds four fixed scratch names,
-the kind-names: `se` (a value), `ie` (an index), `sp` (a storage
-path), `mv` (a memory path).  KeY mints fresh names instead, so a capture
-whose source already is `se` is not repeated (`Rules.freezeRhs`); write the
-matched value `se1` and the generated one `se`.
-
-## Three traps
-
-**A generated `ruleEffect` arm never has a catch-all `| _ => []`.** `block` is
-dependent on the condition proof, so the generator passes that proof as a
-second match discriminant and lists only the arms the `cond` admits — the
-match compiler refutes the rest, because the proof's type reduces to `False`
-there. An empty residual therefore means *terminal rule* and nothing else. A
-`(lhs : WrappedExpr)` scrutinee is destructured as
-`match lhs, h with | ⟨PAT, _⟩, _ => …`, because the condition reaches `block`
-as an unreduced beta-redex.
-
-**A parameterized family** (`(op : BinOp)` and friends) expands to every
-instance in `ruleNames` on its own — classification requires them all, so
-give a KeY-absent instance an unsatisfiable conjunct, which is what the
-binder guard `(op : BinOp | op.isArith = true)` writes.
-
-**A new `*Effect` builder has to be declared twice more.** `Tactics/Derivation.lean`
-lists every builder under `attribute [reducible]` and under
-`attribute [rule_simp_set]`; a builder missing from either makes `single_step`
-fail to synthesise `Decidable` for that rule's condition, with no hint that
-the list is where to look.
-
-## Facts about the table
-
-There is no catch-all tier: a statement no rule matches is stuck, and
-`Calculus/Coverage.lean` proves the stuck set is exactly the documented `ResidueShape`s.
-Membership proofs over `ruleNames` use `decide` (`simp [ruleNames]` exceeds
-the recursion limit).
+1. The constructor, in its section of `Rules.lean`, in `dl{ … }`.
+2. Its arm in `Stmt.step` (`Completeness.lean`). Exhaustiveness is the
+   coverage proof, so a statement form without an arm fails the build.
+3. Its case of `Taclet.sound`: `Calculus/SoundUpdate.lean` for an update
+   premise, `Calculus/SoundUnfold.lean` for statements,
+   `Calculus/RuleSoundness.lean` for a branch or a closed goal
+   (`.claude/rules/soundness.md`).
+4. Its row in `RuleShapes.tacletOrigins` (the solkey taclets it transcribes)
+   and in `PrintedRules.printedOrigins`. `#check_constructor_table` fails the
+   build on a missing or extra row; `taclets_partitioned` and
+   `printed_rules_partitioned` move with it.
+5. A taclet that reads storage or memory: its row in
+   `SortCheck/Annotations.lean`, then `lake exe solkeycheck`.
 
 `docs/lean-key-rule-map.md` is the authority for the correspondence to
 solkey's taclet names. Do not restate it in a docstring or a banner.
+
+## Sharp edges
+
+- A function over `Stmt C` must match each constructor with variables only: a
+  pattern that fixes a field (`.declLocal p x none`) makes Lean fail to
+  generate the equation lemmas ("failed to generate splitter"). Branch inside
+  the arm instead.
+- `tyHasMapping` and other well-founded definitions do not reduce in the
+  kernel, so a proof of them cannot be `Eq.refl`; carry a structural twin
+  (`Ty.mapFree`) and prove it equal.
+- `lake env lean --tstack=131072 file.lean` checks a scratch file in
+  seconds; the MCP server is slow on this package.
