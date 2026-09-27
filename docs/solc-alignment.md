@@ -92,9 +92,30 @@ assert(persons[0].age == 1);   // holds on chain; KeY closes it
 
 The old untyped interpreter stored `0` instead (its refutation,
 `Counterexamples/RefSourceOrder`, was removed with the untyped layer).  In the
-typed syntax a value has no effects, so `persons[p.age++] = p;` elaborates
-with the index captured first, which is solc's order.  **Open:** confirm that
-with a `Stmt.run` example once `Examples/` is ported.
+typed syntax a value has no effects: `persons[p.age++] = p;` elaborates to
+`Person memory mv1 = p; uint se2; se2 = p.age++; persons[se2] = mv1;` — the
+source captured as a *reference* (an alias of the same object), so its
+members are read at copy time, after the increment, as solc reads them.  The
+run from `State.testSuiteStore` ends with `persons[0].age == 1`.
+
+### `++`/`−−` inside an expression: captured in solc's order
+
+An effect inside an expression is captured before its statement by the
+elaborator (`hoist`, `Syntax.lean`), and an operand solc reads *before* the
+effect is captured first (`captureExpr`):
+
+| Form | solc reads | Elaborated |
+|---|---|---|
+| `x = i++ + i` | the right operand first: `1 + 1` | `uint se1 = i; uint se2; se2 = i++; x = se2 + se1;` |
+| `a[++i] = ++i` | the right-hand side, then the target: `a[2] = 1` | `se1 = ++i; se2 = ++i; a[se2] = se1;` |
+| `matrix[k][k++] = 77` | the base, then the index: `matrix[0][0]` | `uint[] storage sp1 = matrix[k]; se2 = k++; sp1[se2] = 77;` |
+| `matrix[i++].push(i)` | the receiver, then the argument | `se1 = i++; matrix[se1].push(i);` |
+| `persons[i++].age += i` | the right-hand side, then the target | `uint se1 = i; se2 = i++; persons[se2].age += se1;` |
+
+`Semantics.lean`'s examples pin three of them; all of `TestSuite.sol`'s
+evaluation-order functions run to their asserts.  An effect under the right
+operand of `&&`/`||`, or in a branch of a conditional, would be evaluated
+where solc does not evaluate it, so it is an elaboration error.
 
 ## Storage-to-storage copies of mapping-carrying types
 

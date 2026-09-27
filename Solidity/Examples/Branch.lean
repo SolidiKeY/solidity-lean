@@ -226,4 +226,30 @@ theorem branchOnStorage :
   sol_symex
   sol_close
 
+/-! ## A conditional of references
+
+A conditional whose branches are references (`c ? alice : bob`) has no value
+to lower: the elaborator binds the reference it picks to a fresh alias (or
+memory local) in a branch, and the statement uses that
+(`sol{ … }`, `Syntax.lean`): `Person storage p = c ? alice : bob;` is
+`if (c) { Person storage sp1 = alice; } else { Person storage sp1 = bob; }
+Person storage p = sp1;`.  The branch is `ifElseSplit`'s, as `ternaryToIf`'s
+is for a value. -/
+
+/-- `Person storage p = c ? alice : bob; p.age = 7;` writes the person the
+condition picks. -/
+theorem ternaryOfReferences :
+    ⊨ dl!{ [ bool c = true; Person storage p = c ? alice : bob; p.age = 7;
+             uint r = alice.age; ] r == 7 } := by
+  sol_symex
+  sol_close
+
+/-- `Person memory m = c ? mx : my;` — in memory the pick is by identity:
+a write through `m` is a write to `my`. -/
+theorem ternaryOfMemoryReferences :
+    ⊨ dl!{ [ bool c = false; Person memory mx = alice; Person memory my = bob;
+             Person memory m = c ? mx : my; m.age = 9; uint r = my.age; ] r == 9 } := by
+  sol_symex
+  sol_close
+
 end Solidity.Examples.Branch

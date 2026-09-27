@@ -73,6 +73,8 @@ inductive Term (C : Contract) where
   | read (m : MTerm C) (a : MAddr C)
   /-- `c ? a : b`, KeY's `if c then a else b`. -/
   | ite (c a b : Term C)
+  /-- `m[i].length`: KeY's `read(m, i, size)`. -/
+  | mlen (m : MTerm C) (i : ITerm C)
 
 /-- A storage path. -/
 inductive PTerm (C : Contract) where
@@ -113,6 +115,9 @@ inductive SValT (C : Contract) where
   | val (t : Term C)
   | find (s : STerm C) (p : PTerm C)
   | copyMem (m : MTerm C) (i : ITerm C)
+  /-- `newArr(n)`: an array of `n` defaults of `R`'s element type, what
+  `new R(n)` copies into memory (`newArrVal`). -/
+  | newArr (R : RefTy) (n : Term C)
 
 /-- A memory identity. -/
 inductive ITerm (C : Contract) where
@@ -175,17 +180,6 @@ def readAddr (σ : State) : Addr → Res MVal
       else .error .revert
     | .struct _ => .error .stuck
 
-/-- A write at a memory address. -/
-def writeAddr (σ : State) (mv : MVal) : Addr → Res State
-  | .memoryField id f => memWriteField σ id f mv
-  | .memoryIndex id i => memWriteIndex σ id i mv
-
-/-- The length of the array at a storage path. -/
-def arrayLen (σ : State) (r : Name) (segs : List Seg) : Res Value := do
-  match ← σ.findStorage r segs with
-  | .array elems _ => pure (.int elems.length)
-  | .prim _ | .struct _ | .map _ _ => .error .stuck
-
 mutual
 
 def Term.eval (σ : State) : Term C → Res Value
@@ -208,6 +202,9 @@ def Term.eval (σ : State) : Term C → Res Value
     let τ ← m.eval σ
     (← readAddr τ (← a.eval σ)).asValue
   | .ite c a b => do pickBranch (← c.eval σ) (a.eval σ) (b.eval σ)
+  | .mlen m i => do
+    let τ ← m.eval σ
+    memArrayLen τ (← i.eval σ)
 
 def PTerm.eval (σ : State) : PTerm C → Res (Name × List Seg)
   | .root r => pure (r, [])
@@ -268,6 +265,7 @@ def SValT.eval (σ : State) : SValT C → Res SVal
   | .copyMem m i => do
     let τ ← m.eval σ
     copyMem τ (.ref (← i.eval σ))
+  | .newArr R n => do pure (newArrVal R (← (← n.eval σ).asInt))
 
 def ITerm.eval (σ : State) : ITerm C → Res Nat
   | .pv x => do
@@ -407,6 +405,7 @@ def Term.vars : Term C → List Var
   | .find s p | .len s p => s.vars ++ p.vars
   | .read m a => m.vars ++ a.vars
   | .ite c a b => c.vars ++ a.vars ++ b.vars
+  | .mlen m i => m.vars ++ i.vars
 
 def PTerm.vars : PTerm C → List Var
   | .root _ => []
@@ -424,6 +423,7 @@ def SValT.vars : SValT C → List Var
   | .val t => t.vars
   | .find s p => s.vars ++ p.vars
   | .copyMem m i => m.vars ++ i.vars
+  | .newArr _ n => n.vars
 
 def ITerm.vars : ITerm C → List Var
   | .pv x => [x]
@@ -476,12 +476,6 @@ theorem readAddr_congr {σ τ : State} (hag : EnvAgreeExcept ns σ τ) (a : Addr
     readAddr σ a = readAddr τ a := by
   cases a <;> simp only [readAddr, getObj_congr hag]
 
-theorem writeAddr_agree {σ τ : State} (hag : EnvAgreeExcept ns σ τ) (mv : MVal) (a : Addr) :
-    ResultsAgree ns (writeAddr σ mv a) (writeAddr τ mv a) := by
-  cases a
-  · exact memWriteField_agree hag _ _ _
-  · exact memWriteIndex_agree hag _ _ _
-
 theorem arrayLen_congr {σ τ : State} (hag : EnvAgreeExcept ns σ τ) (r : Name) (segs : List Seg) :
     arrayLen σ r segs = arrayLen τ r segs := by
   simp only [arrayLen, findStorage_congr hag]
@@ -518,6 +512,10 @@ theorem Term.eval_frame {σ τ : State} (hag : EnvAgreeExcept ns σ τ) :
   | .ite c a b, h => by
     simp only [Term.eval, c.eval_frame hag h.left.left, a.eval_frame hag h.left.right,
       b.eval_frame hag h.right]
+  | .mlen m i, h => by
+    simp only [Term.eval, i.eval_frame hag h.right]
+    exact ResultsAgree.bindEq (m.eval_frame hag h.left) fun _ _ h' => by
+      simp only [memArrayLen, getObj_congr h']
 
 theorem PTerm.eval_frame {σ τ : State} (hag : EnvAgreeExcept ns σ τ) :
     (p : PTerm C) → Avoids p.vars ns → p.eval σ = p.eval τ
@@ -575,6 +573,7 @@ theorem SValT.eval_frame {σ τ : State} (hag : EnvAgreeExcept ns σ τ) :
     simp only [SValT.eval, i.eval_frame hag h.right]
     exact ResultsAgree.bindEq (m.eval_frame hag h.left) fun _ _ h' => by
       simp only [copyMem_congr h']
+  | .newArr _ n, h => by simp only [SValT.eval, n.eval_frame hag h]
 
 theorem ITerm.eval_frame {σ τ : State} (hag : EnvAgreeExcept ns σ τ) :
     (i : ITerm C) → Avoids i.vars ns → i.eval σ = i.eval τ
@@ -730,6 +729,8 @@ def Val.lower : {p : PrimTy} → Val C p → Term C
   | _, @Val.unop _ p _ op _ _ a => .unop op p a.lower
   | _, .ternary c a b => .ite c.lower a.lower b.lower
   | _, .readMem l => .read .memory l.lower
+  | _, .len b _ => .len .storage b.lower
+  | _, .mlen b _ => .mlen .memory b.lower
 
 end
 
@@ -803,6 +804,10 @@ theorem Val.lower_eval (σ : State) : {p : PrimTy} → (v : Val C p) →
     simp only [Val.lower, Term.eval, Val.eval, c.lower_eval σ, a.lower_eval σ, b.lower_eval σ]
   | _, .readMem l => by
     simp only [Val.lower, Term.eval, MTerm.eval, Val.eval, ← l.lower_eval σ, bind_assoc, pure_bind]
+  | _, .len b _ => by
+    simp only [Val.lower, Term.eval, STerm.eval, Val.eval, b.lower_eval σ, pure_bind]
+  | _, .mlen b _ => by
+    simp only [Val.lower, Term.eval, MTerm.eval, Val.eval, b.lower_eval σ, bind_assoc, pure_bind]
 
 end
 

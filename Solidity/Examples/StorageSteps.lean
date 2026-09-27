@@ -536,11 +536,36 @@ theorem indexOpAssign :
   sol_symex
   sol_close
 
-/-! ## 6 · `++` and `--`
+/-- `uint n = values.length;` — the length read, as KeY reads the member
+`length` (`storageLengthRead`). -/
+theorem arrayLength : ⊨ dl!{ [ uint n = values.length; ] n == values.length } := by
+  apply Proves.valid
+  apply unfold .localValueDeclInitDrop
+  apply update .storageLengthRead
+  apply empty
+  apply close
+  sol_symex
+  sol_close
+
+/-- `uint n = matrix[0].length;` — a receiver that is not simple is bound to
+an alias first (`storageLengthRead_unfold_rightFst`). -/
+theorem nestedArrayLength : ⊨ dl!{ [ uint n = matrix[0].length; ] true } := by
+  apply Proves.valid
+  apply unfold .localValueDeclInitDrop
+  apply unfold .storageLengthRead_unfold_rightFst
+  apply unfold .storageLocalDeclInitDrop
+  apply update .storageIndexReadArrayBindLocalRoot
+  apply update .storageLengthRead
+  apply empty
+  apply close
+  sol_symex
+  sol_close
+
+/-! ## 6 · `++` and `−−`
 
 One rule per target serves all four operators (`⊕⊕`), so the increments below
-stand for the decrements too: `--` has no `sol{ … }` spelling (it starts a
-comment in Lean). -/
+stand for the decrements too, which are spelled `x−−` (two U+2212: `--` starts
+a comment in Lean). -/
 
 /-- `age = 10; age++;` — a root write, then the increment
 (`storageRootIncrement`). -/

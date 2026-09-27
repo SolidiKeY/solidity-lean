@@ -514,6 +514,8 @@ def Val.vars : {p : PrimTy} → Val C p → List Var
   | _, .unop _ _ _ a => a.vars
   | _, .ternary c a b => c.vars ++ a.vars ++ b.vars
   | _, .readMem l => l.vars
+  | _, .len b _ => b.vars
+  | _, .mlen b _ => b.vars
 
 end
 
@@ -528,6 +530,11 @@ def ARhs.vars {R : RefTy} : ARhs C R → List Var
 def MRhs.vars {R : RefTy} : MRhs C R → List Var
   | .alias p => p.vars
   | .copy p _ => p.vars
+  | .newArr n _ => n.vars
+
+def NewLhs.vars {R : RefTy} : NewLhs C R → List Var
+  | .store l => l.vars
+  | .mem l => l.vars
 
 def MSrc.vars {T : Ty} : MSrc C T → List Var
   | .val v => v.vars
@@ -567,6 +574,8 @@ def Stmt.vars : Stmt C → List Var
   | .assignFromMem l p => l.vars ++ p.vars
   | .assignMem l r => l.vars ++ r.vars
   | .delete l => l.vars
+  | .deleteMem p _ => p.vars
+  | .assignNew l n _ => l.vars ++ n.vars
   | .ite c thn els => c.vars ++ Prog.vars thn ++ Prog.vars els
   | .require c => c.vars
   | .assert c => c.vars
@@ -635,6 +644,8 @@ theorem Val.eval_frame (hag : EnvAgreeExcept ns σ τ) :
     simp only [Val.eval, c.eval_frame hag h.left.left, a.eval_frame hag h.left.right,
       b.eval_frame hag h.right]
   | _, .readMem l, h => by simp only [Val.eval, l.read_frame hag h]
+  | _, .len b _, h => by simp only [Val.eval, b.resolve_frame hag h, arrayLen, findStorage_congr hag]
+  | _, .mlen b _, h => by simp only [Val.eval, b.mval_frame hag h, memArrayLen, getObj_congr hag]
 
 end
 
@@ -853,6 +864,27 @@ theorem MRhs.bind_frame (hag : EnvAgreeExcept ns σ τ) (x : Var) {R : RefTy} :
     refine bindPureResults_agree _ fun _ => bindPureResults_agree _ fun sv => ?_
     refine ResAgree.bindState (copyStToM_agree hag sv) fun _ _ _ h' => ?_
     agree_run h'
+  | .newArr n _, h => by
+    simp only [MRhs.bind, n.eval_frame hag h]
+    refine bindPureResults_agree _ fun _ => bindPureResults_agree _ fun _ => ?_
+    refine ResAgree.bindState (copyStToM_agree hag _) fun _ _ _ h' => ?_
+    agree_run h'
+
+theorem writeAddr_agree (hag : EnvAgreeExcept ns σ τ) (mv : MVal) (a : Addr) :
+    ResultsAgree ns (writeAddr σ mv a) (writeAddr τ mv a) := by
+  cases a
+  · exact memWriteField_agree hag _ _ _
+  · exact memWriteIndex_agree hag _ _ _
+
+theorem MLoc.addr_frame (hag : EnvAgreeExcept ns σ τ) {T : Ty} :
+    (l : MLoc C T) → Avoids l.vars ns → l.addr σ = l.addr τ
+  | .field b _ _, h => by simp only [MLoc.addr, b.mval_frame hag h]
+  | .index b i, h => by simp only [MLoc.addr, b.mval_frame hag h.left, i.eval_frame hag h.right]
+
+theorem memClear_agree (hag : EnvAgreeExcept ns σ τ) (a : Addr) :
+    (T : Ty) → ResultsAgree ns (memClear σ a T) (memClear τ a T)
+  | .prim _ => writeAddr_agree hag _ _
+  | .ref R => ResAgree.bindState (allocDefault_agree hag R) fun _ _ _ h' => writeAddr_agree h' _ _
 
 theorem allocDefault_bind_agree (hag : EnvAgreeExcept ns σ τ) (R : RefTy) (x : Var) :
     ResultsAgree ns (do let (σ', id) ← allocDefault σ R; pure (σ'.setEnv x (.mref id)))
@@ -919,6 +951,22 @@ theorem Stmt.run_frame {σ τ : State} (hag : EnvAgreeExcept ns σ τ) :
   | .delete l, h => by
     simp only [Stmt.run, l.resolve_frame hag h, findStorage_congr hag]
     agree_run hag
+  | .deleteMem p _, h => by
+    cases p with
+    | var x => exact allocDefault_bind_agree hag _ x
+    | loc l =>
+      simp only [Stmt.run, l.addr_frame hag h]
+      exact bindPureResults_agree _ fun a => memClear_agree hag a _
+  | .assignNew l n _, h => by
+    simp only [Stmt.run, n.eval_frame hag h.right]
+    refine bindPureResults_agree _ fun _ => bindPureResults_agree _ fun _ => ?_
+    refine ResAgree.bindState (copyStToM_agree hag _) fun _ _ _ h' => ?_
+    refine bindPureResults_agree _ fun id => ?_
+    cases l with
+    | store l =>
+      simp only [copyMem_congr h', l.resolve_frame h' h.left]
+      agree_run h'
+    | mem l => exact l.write_frame h' _ h.left
   | .ite c thn els, h => by
     simp only [Stmt.run, c.eval_frame hag h.left.left]
     refine bindPureResults_agree _ fun v => ?_

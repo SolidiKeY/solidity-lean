@@ -11,7 +11,7 @@ of `Calculus/Rules.lean` is a constructor of one inductive `Taclet C k m s p`,
 written `dl{ ⟨[ s; ]⟩ ⇝ p }` and named as solkey names the taclet(s) it
 transcribes — an operator family or a receiver/source-kind split is one
 constructor for several taclets, and a taclet the typed syntax cannot express
-(no calls, no `new`, no memory `delete`, the callback semantics of
+(no calls, the callback semantics of
 `transfer`, the five literal-condition `if` shortcuts) has none.
 
 ## This file is machine-checked
@@ -27,10 +27,11 @@ The correspondence below is not this file's alone to keep straight;
 - **`unclaimedTaclets`** — the taclets no constructor claims, each with the
   reason it is excused (quoted in the tables below).
 - **`taclets_partitioned`** — every one of the 311 taclets is claimed by some
-  row or excused, never both: `claimedTaclets_count = 287`,
-  `unclaimedTaclets_count = 24`. A taclet may be claimed by two constructors
+  row or excused, never both: `claimedTaclets_count = 297`,
+  `unclaimedTaclets_count = 14`. A taclet may be claimed by two constructors
   (`memoryFieldWrite`/`memoryIndexWriteArray` by the value write and the
-  reference copy) — the tables below list both.
+  reference copy; the member reads by the `.length` rules, since KeY reads
+  `sp.length` as the member `length`) — the tables below list both.
 
 What stays prose here is what a typed `KeyOrigin` cannot say: *why* a merge is
 a merge, and the symbol-by-symbol map for the update vocabulary and the
@@ -80,8 +81,8 @@ request that solkey drop the fold.
 | `storageFieldWriteSave` | `storageFieldWriteSave` | same | |
 | `storageFieldWriteCopySource` | `storageFieldWriteCopySource` | same | |
 | `storageFieldWriteCaptureSrc` | `storageFieldRead_unfold_rightSndResult` | merged into `storageFieldRead_unfold_rightSndResult` | the SndResult chain also captures a complex storage source into a fresh local |
-| `storageFieldRead_unfold_rightFst` | `storageFieldRead_unfold_rightFst` | same | |
-| `storageFieldReadFind` | `storageFieldReadFind` | same | |
+| `storageFieldRead_unfold_rightFst` | `storageFieldRead_unfold_rightFst` and `storageLengthRead_unfold_rightFst` | same | the second at the member `length`: `v = nsp.length ⇝ T storage sp = nsp; v = sp.length` (a length is a `Val`, not a member of the typed syntax) |
+| `storageFieldReadFind` | `storageFieldReadFind` and `storageLengthRead` | same | the second at the member `length`: `v = sp.length ⇝ { v := sp.length }`, the term `Term.len` (KeY's `find(storage, sp.size)`) |
 | `storageFieldWrite_unfold_leftFst` | `storageFieldWrite_unfold_leftFst` | same | `nsp.fld = e ⇝ T se = e; T storage sp = nsp; sp.fld = se`: the value source `e` is frozen into `se` before the receiver is captured |
 | `storageFieldWriteStorageRef_unfold_leftFst` | `storageFieldWriteStorageRef_unfold_leftFst` | same | the reference-source twin: `nsp.fld = path ⇝ T storage sp = nsp; sp.fld = path`, no freeze (a reference is aliased, not read) |
 | `storageFieldReadBindLocalRoot` | `storageFieldReadBindLocalRoot` | same | |
@@ -160,9 +161,9 @@ request that solkey drop the fold.
 | KeY taclet | `Taclet` constructor | Status | Notes |
 | --- | --- | --- | --- |
 | `memoryReferenceDeclFreshAlloc` | `memoryReferenceDeclFreshAlloc` | same | `T memory mv; ⇝ { mv := freshId(addM(memory)) ‖ memory := addM(memory) }`, the pair KeY writes |
-| `memoryArrayFreshAlloc` | — | unclaimed | nor `new T[](n)`: a memory array is made by declaration or by copy from storage |
-| `newArrayCapture` | — | unclaimed | no `new` yet: `lhs = new T[](se)` captured into a memory local, which a later wave adds with `new T[](n)` |
-| `memoryRootDeleteFreshRebind` | — | unclaimed | no memory `delete`: `Stmt.delete` takes a storage location (see "Memory delete" below) |
+| `memoryArrayFreshAlloc` | `memoryArrayFreshAlloc` | same | `mv = new T(se); ⇝ { mv := freshId(copySt(memory, newArr(se))) ‖ memory := copySt(memory, newArr(se)) }`: KeY writes `size` into a fresh shaped identity, Lean copies in the storage value `newArrVal R n` (`n` defaults, each struct element its own object, as solc allocates); a non-simple size is captured by the elaborator (KeY's taclet takes a `SimpleExpression`) |
+| `newArrayCapture` | `newArrayCapture` | same | `tgt = new T(se) ⇝ T memory mv = new T(se); tgt = mv`, `tgt` a storage or a memory location (`NewLhs`) |
+| `memoryRootDeleteFreshRebind` | `memoryRootDeleteFreshRebind` | same | `delete mv; ⇝ { mv := freshId(addM(memory)) ‖ memory := addM(memory) }`, the allocation pair (see "Memory delete" below) |
 | `memoryRootRebind` | `memoryRootAlias` | merged into `memoryRootAlias` | `mv₁ = mv₂; ⇝ { mv₁ := mv₂ }`; a storage right-hand side is the row below instead |
 | `memoryStorageCopy` | `memoryStorageCopy` | same | `mv = sp;` deep copy: fresh identity plus `copySt` |
 | `memoryStorageCopyUnfold` | `memoryStorageCopyUnfold` | same | a complex storage path is captured first |
@@ -173,8 +174,8 @@ request that solkey drop the fold.
 | KeY taclet | `Taclet` constructor | Status | Notes |
 | --- | --- | --- | --- |
 | `memoryFieldWrite` | `memoryFieldWriteStore` and `memoryFieldWriteCopy` | merged into `memoryFieldWriteStore` and `memoryFieldWriteCopy` | Lean's sorts are not generic, so KeY's one write is two rules: a value source and a reference-path source |
-| `memoryFieldRead` | `memoryFieldReadHeap` and `memoryFieldReadAliasRoot` | merged into `memoryFieldReadHeap` and `memoryFieldReadAliasRoot` | same split, on the read side (a value lands on a local, a reference on a memory alias) |
-| `memoryFieldRead_unfold_rightFst` | `memoryFieldRead_unfold_rightFst` | same | |
+| `memoryFieldRead` | `memoryFieldReadHeap`, `memoryFieldReadAliasRoot` and `memoryLengthRead` | merged into `memoryFieldReadHeap` and `memoryFieldReadAliasRoot` | same split, on the read side (a value lands on a local, a reference on a memory alias); `memoryLengthRead` is the member `length` (`v = mv.length ⇝ { v := mv.length }`, `Term.mlen`, KeY's `read(memory, mv, size)`) |
+| `memoryFieldRead_unfold_rightFst` | `memoryFieldRead_unfold_rightFst` and `memoryLengthRead_unfold_rightFst` | same | |
 | `memoryFieldWriteCaptureSrc` | — | unclaimed | KeY captures a memory reference into an alias before writing it; here a memory path is a source as it stands (`mpath`), so `memoryFieldWriteCopy` writes it in one step |
 | `memoryFieldWrite_unfold_leftFst` | `memoryFieldWrite_unfold_leftFst` | same | also claims the reference-receiver row below |
 | `memoryFieldWriteMemRef_unfold_leftFst` | `memoryFieldWrite_unfold_leftFst` | merged into `memoryFieldWrite_unfold_leftFst` | `msrc` is a value or a memory reference, so one rule covers both |
@@ -195,22 +196,24 @@ request that solkey drop the fold.
 
 ## Memory delete
 
-Every memory-delete taclet is **unclaimed**: `Stmt.delete` takes a storage
-location, and the typed syntax has no memory `delete` (`docs/kernel-port.md`,
-"Port later"). This is a genuine gap against solkey, not an architectural
-impossibility — unlike `emptyModality`/`blockEmpty` there is no reason memory
-`delete` *could not* be added later; it simply has not been.
+`Stmt.deleteMem p` deletes a memory path: a memory local (`delete mv;`), a
+member or an element.  KeY's primitive/reference split
+(`\hasMemoryFieldSort(fld, alphaPrim)`, `Path[…,primitiveElement]`) is the
+type the rule fixes: `delete mv.pfld`/`delete pmv[ie]` at `T := Ty.prim p`,
+`delete mv.rfld`/`delete rmv[ie]` at `T := Ty.ref R` (the stems in
+`RuleSyntax.lean`'s table).  KeY's `inBounds` split of an index delete is the
+bounds check of the write, which reverts.
 
 | KeY taclet | `Taclet` constructor | Status | Notes |
 | --- | --- | --- | --- |
-| `memoryRootDeleteFreshRebind` | — | unclaimed | listed above, with the allocation rules |
-| `memoryFieldDeletePrimitive` | — | unclaimed | |
-| `memoryFieldDeleteReference` | — | unclaimed | |
-| `memoryIndexDeletePrimitive` | — | unclaimed | |
-| `memoryIndexDeleteReference` | — | unclaimed | |
-| `memoryFieldDelete_unfold_leftFst` | — | unclaimed | |
-| `memoryIndexDelete_unfold_leftFst` | — | unclaimed | |
-| `memoryIndexDeleteNonSimpleIndexCapture` | — | unclaimed | |
+| `memoryRootDeleteFreshRebind` | `memoryRootDeleteFreshRebind` | same | listed above, with the allocation rules |
+| `memoryFieldDeletePrimitive` | `memoryFieldDeletePrimitive` | same | `{ memory := write(memory, mv.pfld, defVal(T)) }` |
+| `memoryFieldDeleteReference` | `memoryFieldDeleteReference` | same | `{ memory := write(addM(memory), mv.rfld, freshId(addM(memory))) }`: the member gets a fresh default object |
+| `memoryIndexDeletePrimitive` | `memoryIndexDeletePrimitive` | same | |
+| `memoryIndexDeleteReference` | `memoryIndexDeleteReference` | same | |
+| `memoryFieldDelete_unfold_leftFst` | `memoryFieldDelete_unfold_leftFst` | same | |
+| `memoryIndexDelete_unfold_leftFst` | `memoryIndexDelete_unfold_leftFst` | same | |
+| `memoryIndexDeleteNonSimpleIndexCapture` | `memoryIndexDeleteNonSimpleIndexCapture` | same | |
 
 ## Memory → storage copies
 
@@ -298,6 +301,10 @@ Pattern per op `⊕ ∈ {Add, Sub, Mul, Div, Mod}`. Lean has one constructor per
 ## Increment / decrement
 
 Pattern per `V ∈ {Preincrement, Postincrement, Predecrement, Postdecrement}`.
+A decrement is written `x−−`/`−−x` in `sol{ … }` (two U+2212: `--` opens a
+Lean comment); an `++`/`−−` inside an expression is captured by the
+elaborator (`uint se1; se1 = i++;`), so it reaches these rules as a
+statement.
 Here (unlike compound assignment) a mapping and an array receiver **do**
 share one constructor: solkey splits the receiver kind, Lean does not.
 

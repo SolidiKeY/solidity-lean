@@ -27,7 +27,7 @@ fails on a module nothing imports.
 |---|---|
 | `KeySort.lean` | solkey's sort lattice as one Lean type: `parents`, `ancestors`, `KeySort.le`, KeY spellings. Imports nothing. |
 | `AST.lean` | The static vocabulary: `PrimTy`/`Ty`/`RefTy` and their KeY sorts, the struct table `structDef`, operators typed at the primitive type they accept, and `Var` (a program name, or a fresh one a rule declares). |
-| `Syntax.lean` | The typed syntax, indexed by contract and type: `Val C p`, `SPath C T`, `Loc`, `MPath`, `Stmt C`. A statement no rule can run cannot be written. `Contract`, the named example contracts, and `sol[C]{…}`: the elaborator, run at compile time and re-checked by the kernel. |
+| `Syntax.lean` | The typed syntax, indexed by contract and type: `Val C p`, `SPath C T`, `Loc`, `MPath`, `Stmt C`. A statement no rule can run cannot be written. `Contract`, the named example contracts, and `sol[C]{…}`: the elaborator, run at compile time and re-checked by the kernel; it captures `++`/`−−` inside an expression and a conditional of references before their statement, in solc's order (`hoist`). |
 | `Semantics.lean` | The interpreter, `Stmt.run`, by structural recursion on the typed syntax. KeY's state (storage tree, identity heap, locals, `net`), following solc where KeY was more liberal (`docs/solc-alignment.md`). |
 | `Semantics/Properties.lean` | Association-list, read-after-write, frame and allocation lemmas about the interpreter's state operations. |
 | `Semantics/Agree.lean` | `EnvAgreeExcept ns`: states that agree off a few scratch names, and a frame lemma per evaluator. What every unfolding rule's soundness composes. |
@@ -133,9 +133,9 @@ went.
 | `Examples/StorageSteps.lean` | One example per storage statement form, the worked derivations as `apply` walks. |
 | `Examples/StorageSuite.lean` | solkey's taclet suite on storage, deduplicated. |
 | `Examples/StorageDelete.lean`, `Examples/LedgerDelete.lean` | `delete`, and a struct holding a mapping deleted. |
-| `Examples/Branch.lean`, `Examples/Revert.lean` | The two-goal split; box and diamond on `revert`, `require`, `assert`, `transfer`. |
-| `Examples/Values.lean` | Operators, short-circuits, checked arithmetic. |
-| `Examples/Memory.lean`, `Examples/CrossDomain.lean`, `Examples/Net.lean`, `Examples/Theory.lean` | Memory, copies between storage and memory, `transfer`, the theory's rewriting. |
+| `Examples/Branch.lean`, `Examples/Revert.lean` | The two-goal split, a conditional of references; box and diamond on `revert`, `require`, `assert`, `transfer`. |
+| `Examples/Values.lean` | Operators, short-circuits, checked arithmetic, `−−`, `++` inside an expression, negative literals. |
+| `Examples/Memory.lean`, `Examples/CrossDomain.lean`, `Examples/Net.lean`, `Examples/Theory.lean` | Memory (memory `delete`, `new T[](n)`, `.length` included), copies between storage and memory, `transfer`, the theory's rewriting. |
 | `Examples/Notation.lean` | What taclets, premises and sequents print, pinned. |
 | `Examples/ApplySteps.lean` | The proof style: every `Proves` constructor once, and a refused rule. |
 | `Examples/Chains.lean`, `Examples/UpdateRules.lean`, `Examples/Decide.lean` | Derivation chains, update simplification, `sol_decide`. |

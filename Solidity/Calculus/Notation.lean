@@ -42,7 +42,7 @@ What a name is:
 What does not read back: `‹…›` (a Lean term, which is also how a
 conditional and an operator other than `+`, `-` print), the operator schema variables
 `⊕ ⊖ ± ⊕⊕` (taclets only), and the terms whose printing drops a type —
-`freshId(addM(m))`, `addM(m)`, `defVal(T)` for a non-primitive `T`.  A
+`freshId(addM(m))`, `addM(m)`, `newArr(n)`, `defVal(T)` for a non-primitive `T`.  A
 concrete `defVal(uint)` reads as the default value itself.
 -/
 
@@ -174,7 +174,7 @@ end Expand
 /-- The names a raw expression reads. -/
 def RawExpr.names : RawExpr → List String
   | .name x => [x]
-  | .field e _ | .unop _ e => e.names
+  | .field e _ | .unop _ e | .incDec _ e | .newArr _ e => e.names
   | .index a b | .binop _ a b => a.names ++ b.names
   | .ternary c a b => c.names ++ a.names ++ b.names
   | .num _ | .bool _ => []
@@ -332,7 +332,9 @@ partial def tVal (Γ : ECtx) : RawTerm → Except String (Term C)
     | .mem => throw s!"`{x}` is a memory reference, not a value"
   | .add a b => do pure (.binop .add .uint (← tVal Γ a) (← tVal Γ b))
   | .sub a b => do pure (.binop .sub .uint (← tVal Γ a) (← tVal Γ b))
-  | .field p "length" => do pure (.len .storage (← tPath Γ p))
+  | .field p "length" => do
+    if isMemTerm C Γ p then pure (.mlen .memory (← tIdent Γ p))
+    else pure (.len .storage (← tPath Γ p))
   | t@(.field ..) | t@(.at ..) => do
     if isMemTerm C Γ t then pure (.read .memory (← tAddr Γ t))
     else pure (.find .storage (← tPath Γ t))
@@ -382,6 +384,7 @@ partial def tStor (Γ : ECtx) : RawTerm → Except String (STerm C)
 partial def tSVal (Γ : ECtx) : RawTerm → Except String (SValT C)
   | .app "find" [s, p] => do pure (.find (← tStor Γ s) (← tPath Γ p))
   | .app "copyMem" [_, m, i] => do pure (.copyMem (← tMem Γ m) (← tIdent Γ i))
+  | .app "newArr" _ => throw "`newArr(n)` does not say what it allocates: write it as a Lean term"
   | t => do pure (.val (← tVal Γ t))
 
 /-- A term at the memory-identity sort. -/
@@ -479,7 +482,7 @@ def elabUpd (Γ : ECtx) : List RawUpdElem → Except String (Upd C × ECtx)
 /-- `a == b`: the operands typed as Solidity types them (the first that is
 not a literal gives the type), then lowered. -/
 def elabCompare (Γ : ECtx) (a b : RawExpr) : Except String (Term C × Term C) := do
-  let t ← if a matches .num _ then synth C Γ b else synth C Γ a
+  let t ← if a.isLit then synth C Γ b else synth C Γ a
   let some ⟨p, _⟩ := t.toVal? | throw "`==` compares values, not storage or memory references"
   pure ((← check C Γ p a).lower, (← check C Γ p b).lower)
 

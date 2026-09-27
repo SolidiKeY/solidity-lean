@@ -540,7 +540,7 @@ def _root_.Solidity.Term.toL (ρ : Sym) : Term C → LTerm
   | .unop op p a => .unop op p (a.toL ρ)
   | .find s p => .find (s.toL ρ) (p.toL ρ)
   | .ite c a b => .ite (c.toL ρ) (a.toL ρ) (b.toL ρ)
-  | .len _ _ | .read _ _ => .err
+  | .len _ _ | .read _ _ | .mlen _ _ => .err
 
 /-- A path with the updates pushed in: after `{ sp1 := alice.account }`,
 `sp1.balance` is `alice.account.balance`. -/
@@ -565,7 +565,7 @@ def _root_.Solidity.STerm.toL (ρ : Sym) : STerm C → LStor
 /-- What a write stores, pushed in: the `5` of `balances[k] = 5;`. -/
 def _root_.Solidity.SValT.toL (ρ : Sym) : SValT C → LTerm
   | .val t => t.toL ρ
-  | .find .. | .copyMem .. => .err
+  | .find .. | .copyMem .. | .newArr .. => .err
 
 end
 
@@ -609,7 +609,7 @@ def _root_.Solidity.Term.inL (ρ : Sym) : Term C → Bool
   | .find .storage p => p.inL ρ
   | .find .. => false
   | .ite c a b => c.inL ρ && a.inL ρ && b.inL ρ
-  | .len _ _ | .read _ _ => false
+  | .len _ _ | .read _ _ | .mlen _ _ => false
 
 /-- A path in the fragment: an alias only where an update bound it
 (`Person storage p = alice;` does), and to a path with no index. -/
@@ -635,7 +635,7 @@ def _root_.Solidity.STerm.inL (ρ : Sym) : STerm C → Bool
 /-- A stored value in the fragment: a word, not a copy (`alice = bob;`). -/
 def _root_.Solidity.SValT.inL (ρ : Sym) : SValT C → Bool
   | .val t => t.inL ρ
-  | .find .. | .copyMem .. => false
+  | .find .. | .copyMem .. | .newArr .. => false
 
 end
 
@@ -1221,7 +1221,8 @@ theorem STerm.toL_eval (h : Rel σ ρ τ) :
       obtain ⟨hq, hl⟩ := (hb _ c).2 ⟨rs, hrs, rfl, hfs⟩
       refine ⟨_, hq, c, hl, ?_⟩
       rw [saveLive_eq_save _ hl, save_root, h'', Close.ok_bind, he]
-  | .save .storage _ (.find ..), hf | .save .storage _ (.copyMem ..), hf => by
+  | .save .storage _ (.find ..), hf | .save .storage _ (.copyMem ..), hf
+  | .save .storage _ (.newArr ..), hf => by
     simp [STerm.inL, SValT.inL] at hf
   | .save (.save ..) .., hf | .save (.delAt ..) .., hf | .save (.push ..) .., hf
   | .save (.pushSlot ..) .., hf | .save (.pop ..) .., hf | .save (.shrink ..) .., hf

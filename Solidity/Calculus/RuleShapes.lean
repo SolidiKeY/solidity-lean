@@ -21,8 +21,7 @@ not build here.
 The other direction is `taclets_partitioned`: every taclet of
 `solidityProgramRules.key` is claimed by some row or listed in
 `unclaimedTaclets` with a reason, never both.  The reasons are the places the
-typed syntax is narrower than solkey's (no calls, no `new`, no memory
-`delete`), the places it is coarser (a memory path is a source as it stands,
+typed syntax is narrower than solkey's (no calls), the places it is coarser (a memory path is a source as it stands,
 so nothing captures one), and the places the calculus has no strategy to
 express (the literal-condition `if` rules, the callback semantics of
 `transfer`).
@@ -139,6 +138,11 @@ def tacletOrigins : List (Lean.Name × KeyOrigin) := [
   (``Taclet.storageFieldDelete, .taclet .storageFieldDelete),
   (``Taclet.storageIndexDelete, .taclet .storageIndexDelete),
   (``Taclet.storageIndexArrayDelete, .taclet .storageIndexArrayDelete),
+  -- Lengths: KeY reads `sp.length` as the member `length`, so the member-read taclets
+  (``Taclet.storageLengthRead, .taclet .storageFieldReadFind),
+  (``Taclet.storageLengthRead_unfold_rightFst, .taclet .storageFieldRead_unfold_rightFst),
+  (``Taclet.memoryLengthRead, .taclet .memoryFieldRead),
+  (``Taclet.memoryLengthRead_unfold_rightFst, .taclet .memoryFieldRead_unfold_rightFst),
   -- Operators: `+ - * ** / %`, then the comparisons, then `&& ||`
   (``Taclet.binopAssignment, .merged [.additionAssignment, .subtractionAssignment,
     .multiplicationAssignment, .powerAssignment, .divisionAssignment, .moduloAssignment,
@@ -296,6 +300,17 @@ def tacletOrigins : List (Lean.Name × KeyOrigin) := [
     .taclet .memoryIndexWriteMemRefCaptureAllNonSimpleIndex),
   (``Taclet.memoryFieldWriteUnfoldSource, .taclet .fieldWriteValueRhsCapture),
   (``Taclet.memoryIndexWriteUnfoldSource, .taclet .indexWriteValueRhsCapture),
+  (``Taclet.memoryRootDeleteFreshRebind, .taclet .memoryRootDeleteFreshRebind),
+  (``Taclet.memoryFieldDeletePrimitive, .taclet .memoryFieldDeletePrimitive),
+  (``Taclet.memoryFieldDeleteReference, .taclet .memoryFieldDeleteReference),
+  (``Taclet.memoryIndexDeletePrimitive, .taclet .memoryIndexDeletePrimitive),
+  (``Taclet.memoryIndexDeleteReference, .taclet .memoryIndexDeleteReference),
+  (``Taclet.memoryFieldDelete_unfold_leftFst, .taclet .memoryFieldDelete_unfold_leftFst),
+  (``Taclet.memoryIndexDelete_unfold_leftFst, .taclet .memoryIndexDelete_unfold_leftFst),
+  (``Taclet.memoryIndexDeleteNonSimpleIndexCapture,
+    .taclet .memoryIndexDeleteNonSimpleIndexCapture),
+  (``Taclet.memoryArrayFreshAlloc, .taclet .memoryArrayFreshAlloc),
+  (``Taclet.newArrayCapture, .taclet .newArrayCapture),
   -- Storage and memory: `mpath` is any memory path, a member one included
   (``Taclet.memoryStorageCopy, .taclet .memoryStorageCopy),
   (``Taclet.memoryStorageCopyUnfold, .taclet .memoryStorageCopyUnfold),
@@ -337,11 +352,6 @@ def claimedTaclets : List KeyTaclet := KeyTaclet.all.filter claims
   and no `{} ; rest` to find; a derivation that reaches `⟨[ ]⟩` *is* the Lean
   analogue of `emptyModality`.
 * `functionBodyExpand` — the typed syntax has no calls.
-* `memoryArrayFreshAlloc`, `newArrayCapture` — nor `new T[](n)` (no `new`
-  yet): a memory array is made by declaration (`memoryReferenceDeclFreshAlloc`)
-  or by copy from storage.
-* The eight memory-`delete` taclets — nor `delete` of a memory location;
-  `Stmt.delete` takes a storage one.
 * `memoryFieldRead_unfold_rightSndResult`, `memoryIndexRead_unfold_rightSndResult`,
   `memoryFieldWriteCaptureSrc`, `memoryIndexWriteMemRefRhsCapture` — KeY
   captures a memory reference into an alias before writing it; here a memory
@@ -359,11 +369,6 @@ def claimedTaclets : List KeyTaclet := KeyTaclet.all.filter claims
 def unclaimedTaclets : List KeyTaclet :=
   [ .emptyModality, .blockEmpty,
     .functionBodyExpand,
-    .memoryArrayFreshAlloc, .newArrayCapture,
-    .memoryRootDeleteFreshRebind, .memoryFieldDeletePrimitive, .memoryFieldDeleteReference,
-    .memoryIndexDeletePrimitive, .memoryIndexDeleteReference,
-    .memoryFieldDelete_unfold_leftFst, .memoryIndexDelete_unfold_leftFst,
-    .memoryIndexDeleteNonSimpleIndexCapture,
     .memoryFieldRead_unfold_rightSndResult, .memoryIndexRead_unfold_rightSndResult,
     .memoryFieldWriteCaptureSrc, .memoryIndexWriteMemRefRhsCapture,
     .ifTrue, .ifFalse, .ifElseTrue, .ifElseFalse, .ifElseNegated,
@@ -377,9 +382,9 @@ theorem taclets_partitioned :
     KeyTaclet.all.all (fun t => claims t != unclaimedTaclets.contains t) = true := by
   decide +kernel
 
-theorem claimedTaclets_count : claimedTaclets.length = 287 := by decide +kernel
+theorem claimedTaclets_count : claimedTaclets.length = 297 := by decide +kernel
 
-theorem unclaimedTaclets_count : unclaimedTaclets.length = 24 := by decide +kernel
+theorem unclaimedTaclets_count : unclaimedTaclets.length = 14 := by decide +kernel
 
 /-! ## The rows with no taclet
 

@@ -51,6 +51,28 @@ info: @Taclet.storageFieldWriteSave : ∀ {C : Contract} {k : Nat} {m : Modality
 -/
 #guard_msgs in #check @Taclet.storageFieldWriteSave
 
+/-! ### Memory `delete`, `new T[](n)`, `.length` -/
+
+/--
+info: @Taclet.memoryFieldDeleteReference : ∀ {C : Contract} {k : Nat} {m : Modality} {R : RefTy} {mv : Var} {rfld x : Name}
+  {hrfld : C.fieldType x rfld = some (Ty.ref R)} {hd : (Ty.ref R).defaultOkS = true},
+  dl{ ⟨[ delete mv.rfld; ]⟩ ⇝ { memory := write(addM(memory), mv.rfld, freshId(addM(memory))) } ⟨[ ]⟩ }
+-/
+#guard_msgs in #check @Taclet.memoryFieldDeleteReference
+
+/--
+info: @Taclet.newArrayCapture : ∀ {C : Contract} {k : Nat} {m : Modality} {R : RefTy} {tgt : NewLhs C R}
+  {se : Simple C PrimTy.uint} {hn : R.newArrOk = true},
+  dl{ ⟨[ tgt = new T(se); ]⟩ ⇝ ⟨[ T memory mv = new T(se); tgt = mv; ]⟩ }
+-/
+#guard_msgs in #check @Taclet.newArrayCapture
+
+/--
+info: @Taclet.storageLengthRead : ∀ {C : Contract} {k : Nat} {m : Modality} {v : Var} {E : Ty} {sp : SPath C E.array}
+  {x : PrimTy} {hlen : x = PrimTy.uint}, dl{ ⟨[ v = sp.length; ]⟩ ⇝ { v := sp.length } ⟨[ ]⟩ }
+-/
+#guard_msgs in #check @Taclet.storageLengthRead
+
 /-! ### Declarations -/
 
 /--

@@ -585,6 +585,11 @@ def printedOrigins : List (Lean.Name × PrintedOrigin) := [
   (``Taclet.storageFieldDelete, .printed .storageFieldDelete),
   (``Taclet.storageIndexDelete, .printed .storageIndexDelete),
   (``Taclet.storageIndexArrayDelete, .printed .storageIndexArrayDelete),
+  -- lengths: the printed rules, as KeY, read `.length` as a member
+  (``Taclet.storageLengthRead, .printed .storageFieldReadFind),
+  (``Taclet.storageLengthRead_unfold_rightFst, .printed .storageFieldRead_unfold_rightFst),
+  (``Taclet.memoryLengthRead, .printed .memoryFieldRead),
+  (``Taclet.memoryLengthRead_unfold_rightFst, .printed .memoryFieldRead_unfold_rightFst),
   -- Operators: solkey's tiers, below what is printed
   (``Taclet.binopAssignment, .leanOnly .keyTier),
   (``Taclet.binopUnfoldLeft, .leanOnly .keyTier),
@@ -676,6 +681,16 @@ def printedOrigins : List (Lean.Name × PrintedOrigin) := [
     .printed .memoryIndexWriteMemRefCaptureAllNonSimpleIndex),
   (``Taclet.memoryFieldWriteUnfoldSource, .printed .fieldWriteValueRhsCapture),
   (``Taclet.memoryIndexWriteUnfoldSource, .printed .indexWriteValueRhsCapture),
+  (``Taclet.memoryRootDeleteFreshRebind, .printed .memoryRootDeleteFreshRebind),
+  (``Taclet.memoryFieldDeletePrimitive, .printed .memoryFieldDeletePrimitive),
+  (``Taclet.memoryFieldDeleteReference, .printed .memoryFieldDeleteReference),
+  (``Taclet.memoryIndexDeletePrimitive, .printed .memoryIndexDeletePrimitive),
+  (``Taclet.memoryIndexDeleteReference, .printed .memoryIndexDeleteReference),
+  (``Taclet.memoryFieldDelete_unfold_leftFst, .printed .memoryFieldDelete_unfold_leftFst),
+  (``Taclet.memoryIndexDelete_unfold_leftFst, .printed .memoryIndexDelete_unfold_leftFst),
+  (``Taclet.memoryIndexDeleteNonSimpleIndexCapture, .leanOnly .keyTier),
+  (``Taclet.memoryArrayFreshAlloc, .printed .memoryArrayFreshAlloc),
+  (``Taclet.newArrayCapture, .printed .newArrayCapture),
   -- Storage and memory
   (``Taclet.memoryStorageCopy, .printed .memoryStorageCopy),
   (``Taclet.memoryStorageCopyUnfold, .printed .memoryStorageCopyUnfold),
@@ -712,17 +727,12 @@ def claimedPrintedRules : List PrintedRule := PrintedRule.all.filter claims
 
 /-- The printed rules of kind `rule` that **no** constructor claims.  The
 reasons are `RuleShapes.unclaimedTaclets`', rule for rule: the printed rules are
-what solkey runs, and the typed syntax has no `new` (`memoryArrayFreshAlloc`,
-`newArrayCapture`) and no memory `delete` (seven rules); takes a memory path
+what solkey runs, and the typed syntax takes a memory path
 as a source in place, so nothing captures one (four); has no strategy for the
 literal-condition `if` shortcuts (three); and transcribes only the
 no-callback `transfer` (two). -/
 def unclaimedRules : List PrintedRule :=
-  [ .memoryArrayFreshAlloc, .newArrayCapture,
-    .memoryFieldDelete_unfold_leftFst, .memoryIndexDelete_unfold_leftFst,
-    .memoryRootDeleteFreshRebind, .memoryFieldDeletePrimitive, .memoryFieldDeleteReference,
-    .memoryIndexDeletePrimitive, .memoryIndexDeleteReference,
-    .memoryFieldRead_unfold_rightSndResult, .memoryIndexRead_unfold_rightSndResult,
+  [ .memoryFieldRead_unfold_rightSndResult, .memoryIndexRead_unfold_rightSndResult,
     .memoryFieldWriteCaptureSrc, .memoryIndexWriteMemRefRhsCapture,
     .ifElseTrue, .ifElseFalse, .ifElseNegated,
     .transferWithCallbackBox, .transferWithCallbackDiamond ]
@@ -738,9 +748,9 @@ theorem printed_rules_partitioned :
 
 theorem printedRules_count : PrintedRule.all.length = 136 := by decide +kernel
 
-theorem claimedPrintedRules_count : claimedPrintedRules.length = 108 := by decide +kernel
+theorem claimedPrintedRules_count : claimedPrintedRules.length = 117 := by decide +kernel
 
-theorem unclaimedRules_count : unclaimedRules.length = 18 := by decide +kernel
+theorem unclaimedRules_count : unclaimedRules.length = 9 := by decide +kernel
 
 /-! ## The constructors with no printed rule -/
 
@@ -748,7 +758,7 @@ theorem unclaimedRules_count : unclaimedRules.length = 18 := by decide +kernel
 def leanOnlyRows (why : LeanOnlyReason) : List Lean.Name :=
   (printedOrigins.filter fun r => r.2 == .leanOnly why).map Prod.fst
 
-theorem leanOnly_keyTier_count : (leanOnlyRows .keyTier).length = 31 := by decide +kernel
+theorem leanOnly_keyTier_count : (leanOnlyRows .keyTier).length = 32 := by decide +kernel
 
 theorem leanOnly_calculus_count : (leanOnlyRows .calculus).length = 0 := by decide +kernel
 

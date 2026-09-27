@@ -433,6 +433,73 @@ theorem upd_memoryStorageCopy (mv : Var) {R : RefTy} (sp : SPath C (Ty.ref R))
   res_split
   all_goals simp [State.setEnv, EnvAgreeExcept.refl]
 
+theorem upd_memoryArrayFreshAlloc (mv : Var) {R : RefTy} (se : Simple C PrimTy.uint)
+    (hn : R.newArrOk = true) (σ : State) :
+    SameOk [] (Upd.apply (C := C)
+      [UpdElem.mref mv (ITerm.copy MTerm.memory (SValT.newArr R se.lower)),
+        UpdElem.memory (MTerm.memory.copySt (SValT.newArr R se.lower))] σ)
+      (Stmt.run σ (Stmt.rebindMem mv (MRhs.newArr se hn))) := by
+  upd_unfold''
+  simp only [copyStToM_eq, bind_assoc, pure_bind]
+  res_split
+  all_goals simp [State.setEnv, EnvAgreeExcept.refl]
+
+theorem upd_memoryRootDeleteFreshRebind (R : RefTy) (mv : Var) (hd : (Ty.ref R).defaultOkS = true)
+    (σ : State) :
+    SameOk [] (Upd.apply (C := C) [UpdElem.mref mv (ITerm.alloc MTerm.memory R),
+        UpdElem.memory (MTerm.memory.addM R)] σ)
+      (Stmt.run σ (Stmt.deleteMem (MPath.var (C := C) (R := R) mv) hd)) := by
+  upd_unfold''
+  simp only [allocDefault_eq, bind_assoc, pure_bind]
+  res_split
+  all_goals simp [State.setEnv, EnvAgreeExcept.refl]
+
+theorem Term.eval_mlen' (σ : State) (m : MTerm C) (i : ITerm C) :
+    (Term.mlen m i).eval σ = (do
+      let τ ← m.eval σ
+      memArrayLen τ (← i.eval σ)) := rfl
+
+theorem upd_memoryLengthRead {p : PrimTy} {E : Ty} (v mv : Var) (hlen : p = .uint) (σ : State) :
+    SameOk [] (Upd.apply (C := C) [UpdElem.val v (Term.mlen MTerm.memory (ITerm.pv mv))] σ)
+      (Stmt.run σ (Stmt.assignLocal v (Val.mlen (C := C) (E := E) (MPath.var mv) hlen))) := by
+  mem_unfold
+  simp only [Term.eval_mlen', MTerm.eval, ITerm.eval_pv, bind_assoc, pure_bind]
+  res_split
+
+theorem upd_memoryDeletePrimitive {p : PrimTy} (l : MLoc C (Ty.prim p)) (a : MAddr C)
+    (ha : ∀ σ, a.eval σ = l.addr σ) (hd : (Ty.prim p).defaultOkS = true) (σ : State) :
+    SameOk [] (Upd.apply (C := C) [UpdElem.memory (MTerm.memory.write a
+        (MValT.val (Term.lit (PrimTy.default p))))] σ)
+      (Stmt.run σ (Stmt.deleteMem (MPath.loc l) hd)) := by
+  upd_unfold''
+  simp only [ha, memClear, writeAddr_eq]
+  res_split
+
+theorem upd_memoryDeleteReference {R : RefTy} (l : MLoc C (Ty.ref R)) (a : MAddr C)
+    (ha : ∀ σ, a.eval σ = l.addr σ) (hd : (Ty.ref R).defaultOkS = true) (σ : State) :
+    SameOk [] (Upd.apply (C := C) [UpdElem.memory ((MTerm.memory.addM R).write a
+        (MValT.ref (ITerm.alloc MTerm.memory R)))] σ)
+      (Stmt.run σ (Stmt.deleteMem (MPath.loc l) hd)) := by
+  upd_unfold''
+  simp only [ha, memClear, allocDefault_eq, writeAddr_eq, bind_assoc, pure_bind]
+  res_split
+
+theorem MLoc.addr_field_var (mv : Var) {s f : Name} {T : Ty} (hf : C.fieldType s f = some T)
+    (σ : State) :
+    (MAddr.field (ITerm.pv mv) f : MAddr C).eval σ = (MLoc.field (MPath.var mv) f hf).addr σ := by
+  simp only [MAddr.eval, ITerm.eval, MLoc.addr, MPath.mval, bind_assoc]
+  cases σ.getEnv mv with
+  | error _ => rfl
+  | ok b => cases b <;> rfl
+
+theorem MLoc.addr_index_var (mv : Var) {E : Ty} (ie : Simple C PrimTy.uint) (σ : State) :
+    (MAddr.at (ITerm.pv mv) ie.lower : MAddr C).eval σ =
+      (MLoc.index (E := E) (MPath.var mv) (Val.simple ie)).addr σ := by
+  simp only [MAddr.eval, ITerm.eval, MLoc.addr, MPath.mval, Val.eval, Simple.lower_eval, bind_assoc]
+  cases σ.getEnv mv with
+  | error _ => rfl
+  | ok b => cases b <;> rfl
+
 /-! ### Memory back to storage -/
 
 theorem upd_memoryToStorageStoreRoot (gsp : Name) {R : RefTy} (hgsp : C.rootType gsp = some (Ty.ref R))
@@ -642,6 +709,17 @@ theorem Taclet.sound_update {k : Nat} {m : Modality} {s : Stmt C} {U : Upd C}
   case memoryFieldWriteStore => exact upd_memoryFieldWriteStore ..
   case memoryIndexWriteStore => exact upd_memoryIndexWriteStore ..
   case memoryStorageCopy => exact upd_memoryStorageCopy ..
+  case memoryArrayFreshAlloc => exact upd_memoryArrayFreshAlloc ..
+  case memoryRootDeleteFreshRebind => exact upd_memoryRootDeleteFreshRebind ..
+  case memoryLengthRead => exact upd_memoryLengthRead ..
+  case memoryFieldDeletePrimitive =>
+    exact upd_memoryDeletePrimitive _ _ (MLoc.addr_field_var _ _) _ σ
+  case memoryFieldDeleteReference =>
+    exact upd_memoryDeleteReference _ _ (MLoc.addr_field_var _ _) _ σ
+  case memoryIndexDeletePrimitive =>
+    exact upd_memoryDeletePrimitive _ _ (MLoc.addr_index_var _ _) _ σ
+  case memoryIndexDeleteReference =>
+    exact upd_memoryDeleteReference _ _ (MLoc.addr_index_var _ _) _ σ
   case memoryToStorageStoreRoot => exact upd_memoryToStorageStoreRoot ..
   case memoryToStorageFieldCopyRoot => exact upd_memoryToStorageFieldCopyRoot ..
   case memoryToStorageIndexMappingCopyRoot => exact upd_memoryToStorageIndexCopyRoot ..

@@ -104,6 +104,12 @@ def VHole.fill {p : PrimTy} : VHole C p → Val C p → Stmt C
   | .store l, v => .assign l (.val v)
   | .mem l, v => .assignMem l (.val v)
 
+/-- A fresh array's target written with the memory local it was bound to:
+`tgt = mv`, a copy into storage or a reference written into memory. -/
+def NewLhs.fill {R : RefTy} : NewLhs C R → MPath C (.ref R) → Stmt C
+  | .store l, p => .assignFromMem l p
+  | .mem l, p => .assignMem l (.ref p)
+
 /-! ## Side conditions
 
 What `Stmt.step` knows of a statement's parts when it fires a rule, read
@@ -321,6 +327,15 @@ inductive Taclet (C : Contract) (k : Nat) : Modality → Stmt C → Premise C �
       dl{ ⟨[ delete map[ie]; ]⟩ ⇝ { storage := delAt(storage, map[ie]) } ⟨[ ]⟩ }
   | storageIndexArrayDelete :
       dl{ ⟨[ delete arr[ie]; ]⟩ ⇝ { storage := delAt(storage, arr[ie]) } ⟨[ ]⟩ }
+  -- Lengths: KeY reads `.length` as the member `length` (`size`) ----------
+  | storageLengthRead :
+      dl{ ⟨[ v = sp.length; ]⟩ ⇝ { v := sp.length } ⟨[ ]⟩ }
+  | storageLengthRead_unfold_rightFst :
+      dl{ ⟨[ v = nsp.length; ]⟩ ⇝ ⟨[ T storage sp = nsp; v = sp.length; ]⟩ }
+  | memoryLengthRead :
+      dl{ ⟨[ v = mv.length; ]⟩ ⇝ { v := mv.length } ⟨[ ]⟩ }
+  | memoryLengthRead_unfold_rightFst :
+      dl{ ⟨[ v = nmp.length; ]⟩ ⇝ ⟨[ T memory mv = nmp; v = mv.length; ]⟩ }
   -- Operators ------------------------------------------------------------
   | binopAssignment :
       dl{ ⟨[ v = se₁ ⊕ se₂; ]⟩ ⇝ { v := se₁ ⊕ se₂ } ⟨[ ]⟩ }
@@ -491,6 +506,34 @@ inductive Taclet (C : Contract) (k : Nat) : Modality → Stmt C → Premise C �
       dl{ ⟨[ mv.fld = nse; ]⟩ ⇝ ⟨[ T se = nse; mv.fld = se; ]⟩ }
   | memoryIndexWriteUnfoldSource :
       dl{ ⟨[ mv[ie] = nse; ]⟩ ⇝ ⟨[ T se = nse; mv[ie] = se; ]⟩ }
+  /-- A memory local deleted is bound to a fresh default object. -/
+  | memoryRootDeleteFreshRebind :
+      dl{ ⟨[ delete mv; ]⟩ ⇝ { mv := freshId(addM(memory)) ‖ memory := addM(memory) } ⟨[ ]⟩ }
+  | memoryFieldDeletePrimitive :
+      dl{ ⟨[ delete mv.pfld; ]⟩ ⇝ { memory := write(memory, mv.pfld, defVal(T)) } ⟨[ ]⟩ }
+  /-- A member of reference type deleted is written a fresh default object. -/
+  | memoryFieldDeleteReference :
+      dl{ ⟨[ delete mv.rfld; ]⟩ ⇝
+          { memory := write(addM(memory), mv.rfld, freshId(addM(memory))) } ⟨[ ]⟩ }
+  | memoryIndexDeletePrimitive :
+      dl{ ⟨[ delete pmv[ie]; ]⟩ ⇝ { memory := write(memory, pmv[ie], defVal(T)) } ⟨[ ]⟩ }
+  | memoryIndexDeleteReference :
+      dl{ ⟨[ delete rmv[ie]; ]⟩ ⇝
+          { memory := write(addM(memory), rmv[ie], freshId(addM(memory))) } ⟨[ ]⟩ }
+  | memoryFieldDelete_unfold_leftFst :
+      dl{ ⟨[ delete nmp.fld; ]⟩ ⇝ ⟨[ T memory mv = nmp; delete mv.fld; ]⟩ }
+  | memoryIndexDelete_unfold_leftFst :
+      dl{ ⟨[ delete nmp[e]; ]⟩ ⇝ ⟨[ T memory mv = nmp; delete mv[e]; ]⟩ }
+  | memoryIndexDeleteNonSimpleIndexCapture :
+      dl{ ⟨[ delete mv[nse]; ]⟩ ⇝ ⟨[ T ie = nse; delete mv[ie]; ]⟩ }
+  /-- `new T(se)`: a fresh array of `se` defaults, bound to `mv`. -/
+  | memoryArrayFreshAlloc :
+      dl{ ⟨[ mv = new T(se); ]⟩ ⇝
+          { mv := freshId(copySt(memory, newArr(se))) ‖ memory := copySt(memory, newArr(se)) }
+          ⟨[ ]⟩ }
+  /-- A fresh array written anywhere else is bound to a fresh memory local first. -/
+  | newArrayCapture :
+      dl{ ⟨[ tgt = new T(se); ]⟩ ⇝ ⟨[ T memory mv = new T(se); tgt = mv; ]⟩ }
   -- Storage and memory ---------------------------------------------------
   | memoryStorageCopy :
       dl{ ⟨[ mv = sp; ]⟩ ⇝

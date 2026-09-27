@@ -225,4 +225,43 @@ theorem ternaryToIfStorage :
   sol_symex
   sol_close
 
+/-! ## Decrement, `++` inside an expression, negative literals
+
+`--` opens a Lean comment, so a decrement is written with two minus signs
+`−` (U+2212): `x−−`, `−−x`, the same `IncDec.postDec`/`preDec` solkey's
+`localPostdecrement` and its family transcribe.  An `++` or `−−` inside an
+expression is captured before its statement into a fresh local
+(`uint se1; se1 = i++;`), as KeY's captures take it.  A negative literal
+takes the type it stands at. -/
+
+/-- `local-postdecrement.key`: `uint x = 5; x−−; −−x;` -/
+theorem decrementLocal : ⊨ dl!{ ⟨ uint x = 5; x−−; −−x; ⟩ x == 3 } := by
+  sol_symex
+  sol_close
+
+/-- `storageRootPostdecrementAssignment`: `uint r = age−−;` keeps the old
+value, `age` the new. -/
+theorem storageRootPostdecrementAssignment :
+    ⊨ dl!{ [ age = 10; uint r; r = age−−; uint s = age; ] r == 10 && s == 9 } := by
+  sol_symex
+  sol_close
+
+/-- `++` in an index: `values[i++] = 1;` is `uint se1; se1 = i++; values[se1] = 1;`,
+so the write is at the old index and `i` moved on. -/
+theorem incrementInIndex :
+    ⊨ dl!{ [ uint i = 0; values.push(0); values[i++] = 1; uint r = values[0]; ] r == 1 && i == 1 } := by
+  sol_symex
+  sol_close
+
+/-- `x = y++ + 1;` reads the old `y`: the increment is captured first. -/
+theorem incrementInOperand :
+    ⊨ dl!{ ⟨ uint y = 4; uint x = 0; x = y++ + 1; ⟩ x == 5 && y == 5 } := by
+  sol_symex
+  sol_close
+
+/-- `int e = -5;` — the literal is an `int`. -/
+theorem negativeLiteral : ⊨ dl!{ ⟨ int e = -5; int f = e + 7; ⟩ f == 2 } := by
+  sol_symex
+  sol_close
+
 end Solidity.Examples.Values

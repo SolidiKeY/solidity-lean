@@ -1264,6 +1264,30 @@ theorem allocDefault_canon (hwt : RunWT C Γ H σ) (hc : Canon C H σ) {R : RefT
       obtain ⟨rfl, rfl⟩ := h
       exact ⟨H', hout, hmv⟩
 
+/-- `new uint[](n)` copies in a canonical array: `n` fresh defaults. -/
+theorem newArrVal_canon {R : RefTy} (h : R.newArrOk = true) (n : Int) :
+    (newArrVal R n).canon (.ref R) := by
+  cases R with
+  | array E =>
+    simp only [RefTy.newArrOk, Bool.and_eq_true] at h
+    have hE := defaultForTy_canon (defaultOk_of_defaultOkS h.2)
+    refine ⟨?_, trivial⟩
+    show canonElems E (List.replicate n.toNat (defaultForTy E))
+    induction n.toNat with
+    | zero => trivial
+    | succ k ih => exact ⟨hE, ih⟩
+  | struct _ => simp [RefTy.newArrOk] at h
+  | mapping _ _ => simp [RefTy.newArrOk] at h
+
+/-- `delete m.inner;` through a resolved address keeps the heap canonical. -/
+theorem writeAddr_canon (hwt : RunWT C Γ H σ) (hc : Canon C H σ) {T : Ty} {a : Addr}
+    {mv : MVal} (ha : AddrTyT H T a) (h : writeAddr σ mv a = .ok σ') : Canon C H σ' := by
+  cases a with
+  | memoryField id f =>
+    obtain ⟨s, hid, hf⟩ := ha
+    exact memWriteField_canon hc hid hf h
+  | memoryIndex id i => exact memWriteIndex_canon hwt hc ha h
+
 /-- `m = n;` and `m = alice;` keep the state canonical, the second by
 allocating a canonical copy. -/
 theorem MRhs.bind_canon (hwt : RunWT C Γ H σ) (hc : Canon C H σ) {x : Var} {R : RefTy}
@@ -1287,6 +1311,17 @@ theorem MRhs.bind_canon (hwt : RunWT C Γ H σ) (hc : Canon C H σ) {x : Var} {R
     have hT := SPath.resolve_wt hwt p hw hr
     obtain ⟨H', hout, hmv⟩ := copyStToM_canon hwt.heapTyNodup hwt.heap hwt.heapWf hc.heap
       (findStorage_hasTy hwt.storage hT hsv) (hc.find hT hsv) hcopy
+    rw [MVal.asRef_ok hid] at hmv
+    exact ⟨H', σ₁, id, hout.out.ext, hwt.ofCopyOut hout.out,
+      ⟨hout.out.storage ▸ hc.storage, hout.canon⟩, hmv, rfl⟩
+  | newArr n hn =>
+    obtain ⟨_, _, h⟩ := bind_ok_inv h
+    obtain ⟨nv, _, h⟩ := bind_ok_inv h
+    obtain ⟨⟨σ₁, mv⟩, hcopy, h⟩ := bind_ok_inv h
+    obtain ⟨id, hid, h⟩ := bind_ok_inv h
+    cases h
+    obtain ⟨H', hout, hmv⟩ := copyStToM_canon hwt.heapTyNodup hwt.heap hwt.heapWf hc.heap
+      (newArrVal_hasTy hn nv) (newArrVal_canon hn nv) hcopy
     rw [MVal.asRef_ok hid] at hmv
     exact ⟨H', σ₁, id, hout.out.ext, hwt.ofCopyOut hout.out,
       ⟨hout.out.storage ▸ hc.storage, hout.canon⟩, hmv, rfl⟩
@@ -1476,6 +1511,52 @@ theorem Stmt.run_canon : ∀ (s : Stmt C) {Γ Γ' : Ctx} {H : HeapTy} {σ σ' : 
     exact ⟨H, .refl H,
       hwt.save hty (SVal.defaultOf_hasTy (findStorage_hasTy hwt.storage hty hcur)) h,
       hcn.save hty (SVal.defaultOf_canon (hcn.find hty hcur)) h⟩
+  | @Stmt.deleteMem _ T p hd, Γ, Γ', H, σ, σ', hwt, hcn, hs, h => by
+    obtain ⟨hc, rfl⟩ := wt_if hs
+    cases p with
+    | var x =>
+      obtain ⟨⟨σ₁, id⟩, ha, h⟩ := bind_ok_inv h
+      cases h
+      obtain ⟨H', hout, hid⟩ := allocDefault_canon hwt hcn (defaultOk_of_defaultOkS hd) ha
+      exact ⟨H', hout.out.ext,
+        (hwt.ofCopyOut hout.out).setEnv_same hc (by simpa [BTy.matchesB] using hid),
+        Canon.of_eq ⟨hout.out.storage ▸ hcn.storage, hout.canon⟩ rfl rfl⟩
+    | loc l =>
+      obtain ⟨a, ha, h⟩ := bind_ok_inv h
+      have hat := MLoc.addr_wt hwt l hc ha
+      cases T with
+      | prim p =>
+        refine ⟨H, .refl H, writeAddr_wt hwt hat (Value.toMVal_hasTyH ?_) h,
+          writeAddr_canon hwt hcn hat h⟩
+        cases p <;> rfl
+      | ref R =>
+        obtain ⟨⟨σ₁, id⟩, hal, h⟩ := bind_ok_inv h
+        obtain ⟨H', hout, hid⟩ := allocDefault_canon hwt hcn (defaultOk_of_defaultOkS hd) hal
+        have hwt₁ := hwt.ofCopyOut hout.out
+        have hcn₁ : Canon C H' σ₁ := ⟨hout.out.storage ▸ hcn.storage, hout.canon⟩
+        exact ⟨H', hout.out.ext, writeAddr_wt hwt₁ (hat.mono hout.out.ext) hid h,
+          writeAddr_canon hwt₁ hcn₁ (hat.mono hout.out.ext) h⟩
+  | .assignNew l n hn, Γ, Γ', H, σ, σ', hwt, hcn, hs, h => by
+    obtain ⟨hc, rfl⟩ := wt_if hs
+    simp only [Bool.and_eq_true] at hc
+    obtain ⟨_, _, h⟩ := bind_ok_inv h
+    obtain ⟨nv, _, h⟩ := bind_ok_inv h
+    obtain ⟨⟨σ₁, mv⟩, hcopy, h⟩ := bind_ok_inv h
+    obtain ⟨id, hid, h⟩ := bind_ok_inv h
+    obtain ⟨H', hout, hmv⟩ := copyStToM_canon hwt.heapTyNodup hwt.heap hwt.heapWf hcn.heap
+      (newArrVal_hasTy hn nv) (newArrVal_canon hn nv) hcopy
+    rw [MVal.asRef_ok hid] at hmv
+    have hwt₁ := hwt.ofCopyOut hout.out
+    have hcn₁ : Canon C H' σ₁ := ⟨hout.out.storage ▸ hcn.storage, hout.canon⟩
+    cases l with
+    | store l =>
+      obtain ⟨sv, hsv, h⟩ := bind_ok_inv h
+      obtain ⟨⟨root, segs⟩, hr, h⟩ := bind_ok_inv h
+      have hT := Loc.resolve_wt hwt₁ l hc.1 hr
+      exact ⟨H', hout.out.ext, hwt₁.write hT (copyMem_hasTy hwt₁.heap hmv hsv) h,
+        hcn₁.write hT (copyMToSt_canon hwt₁.heap hcn₁.heap hmv hsv) h⟩
+    | mem l =>
+      exact ⟨H', hout.out.ext, MLoc.write_wt hwt₁ l hmv hc.1 h, MLoc.write_canon hwt₁ hcn₁ l hc.1 h⟩
   | .ite c thn els, Γ, Γ', H, σ, σ', hwt, hcn, hs, h => by
     simp only [Stmt.wt] at hs
     split at hs

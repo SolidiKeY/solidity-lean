@@ -113,6 +113,8 @@ def Val.wt (Γ : Ctx) : {p : PrimTy} → Val C p → Bool
   | _, .unop _ _ _ a => a.wt Γ
   | _, .ternary c a b => c.wt Γ && a.wt Γ && b.wt Γ
   | _, .readMem l => l.wt Γ
+  | _, .len b _ => b.wt Γ
+  | _, .mlen b _ => b.wt Γ
 
 end
 
@@ -130,6 +132,12 @@ def ARhs.wt (Γ : Ctx) {R : RefTy} : ARhs C R → Bool
 def MRhs.wt (Γ : Ctx) {R : RefTy} : MRhs C R → Bool
   | .alias p => p.wt Γ
   | .copy p _ => p.wt Γ
+  | .newArr n _ => n.wt Γ
+
+/-- Where `basket.items = new uint[](n);` lands. -/
+def NewLhs.wt (Γ : Ctx) {R : RefTy} : NewLhs C R → Bool
+  | .store l => l.wt Γ
+  | .mem l => l.wt Γ
 
 /-- What `m.age = x;` or `m.account = n;` writes. -/
 def MSrc.wt (Γ : Ctx) {T : Ty} : MSrc C T → Bool
@@ -180,6 +188,8 @@ def Stmt.wt (Γ : Ctx) : Stmt C → Option Ctx
   | .assignFromMem l p => if l.wt Γ && p.wt Γ then some Γ else none
   | .assignMem l r => if l.wt Γ && r.wt Γ then some Γ else none
   | .delete l => if l.wt Γ then some Γ else none
+  | .deleteMem p _ => if p.wt Γ then some Γ else none
+  | .assignNew l n _ => if l.wt Γ && n.wt Γ then some Γ else none
   | .ite c thn els =>
     if c.wt Γ then
       match Prog.wt Γ thn, Prog.wt Γ els with
@@ -615,6 +625,21 @@ theorem Val.eval_wt (hwt : RunWT C Γ H σ) :
   | _, .readMem l, w, hw, h => by
     obtain ⟨mv, hmv, h⟩ := bind_ok_inv h
     exact MVal.asValue_hasTy (MLoc.read_wt hwt l hw hmv) h
+  | _, .len b hp, w, _, h => by
+    subst hp
+    obtain ⟨_, _, h⟩ := bind_ok_inv h
+    obtain ⟨sv, _, h⟩ := bind_ok_inv h
+    split at h
+    · cases h; rfl
+    all_goals exact nomatch h
+  | _, .mlen b hp, w, _, h => by
+    subst hp
+    obtain ⟨_, _, h⟩ := bind_ok_inv h
+    obtain ⟨_, _, h⟩ := bind_ok_inv h
+    obtain ⟨o, _, h⟩ := bind_ok_inv h
+    split at h
+    · cases h; rfl
+    all_goals exact nomatch h
 
 end
 
@@ -901,6 +926,50 @@ def AddrTy (H : HeapTy) (p : PrimTy) : Addr → Prop
       lookupBy f (structDef s) = some (.prim p)
   | .memoryIndex id _ => lookupBy id H = some (.ref (.array (.prim p)))
 
+/-- The memory place a memory location resolves to holds a `T`. -/
+def AddrTyT (H : HeapTy) (T : Ty) : Addr → Prop
+  | .memoryField id f => ∃ s, lookupBy id H = some (.ref (.struct s)) ∧
+      lookupBy f (structDef s) = some T
+  | .memoryIndex id _ => lookupBy id H = some (.ref (.array T))
+
+/-- A typed place stays typed as the store typing grows (an allocation). -/
+theorem AddrTyT.mono {H H' : HeapTy} {T : Ty} {a : Addr} (hext : H.Extends H')
+    (h : AddrTyT H T a) : AddrTyT H' T a := by
+  cases a with
+  | memoryField id f => obtain ⟨s, hid, hf⟩ := h; exact ⟨s, hext _ _ hid, hf⟩
+  | memoryIndex id i => exact hext _ _ h
+
+/-- `delete m.inner;` writes an object of the member's type there. -/
+theorem writeAddr_wt (hwt : RunWT C Γ H σ) {T : Ty} {a : Addr} {mv : MVal}
+    (ha : AddrTyT H T a) (hmv : MVal.hasTyH H mv T = true)
+    (h : writeAddr σ mv a = .ok σ') : RunWT C Γ H σ' := by
+  cases a with
+  | memoryField id f =>
+    obtain ⟨s, hid, hf⟩ := ha
+    exact memWriteField_wt hwt hid hf hmv h
+  | memoryIndex id i => exact memWriteIndex_wt hwt ha hmv h
+
+/-- A checked memory location resolves to a place of its type. -/
+theorem MLoc.addr_wt (hwt : RunWT C Γ H σ) :
+    ∀ {T : Ty} (l : MLoc C T) {a : Addr}, l.wt Γ = true → l.addr σ = .ok a → AddrTyT H T a
+  | _, @MLoc.field _ s _ b f hf, a, hw, h => by
+    obtain ⟨m0, hm0, h⟩ := bind_ok_inv h
+    obtain ⟨id, hid, h⟩ := bind_ok_inv h
+    cases h
+    have hb := MPath.mval_wt hwt b hw hm0
+    rw [MVal.asRef_ok hid, MVal.hasTyH_ref] at hb
+    exact ⟨s, hb, hf⟩
+  | _, .index b i, a, hw, h => by
+    simp only [MLoc.wt, Bool.and_eq_true] at hw
+    obtain ⟨m0, hm0, h⟩ := bind_ok_inv h
+    obtain ⟨id, hid, h⟩ := bind_ok_inv h
+    obtain ⟨_, _, h⟩ := bind_ok_inv h
+    obtain ⟨iv, _, h⟩ := bind_ok_inv h
+    cases h
+    have hb := MPath.mval_wt hwt b hw.1 hm0
+    rw [MVal.asRef_ok hid, MVal.hasTyH_ref] at hb
+    exact hb
+
 /-- `m.age -= 1;` writes a number where the heap says `uint`. -/
 theorem writeLoc_wt (hwt : RunWT C Γ H σ) {p : PrimTy} {loc : Addr} {v : Value}
     (hloc : AddrTy H p loc) (hv : (Value.toSVal v).hasTy (.prim p) = true)
@@ -1091,6 +1160,20 @@ theorem MSrc.mval_wt (hwt : RunWT C Γ H σ) {T : Ty} {r : MSrc C T} {mv : MVal}
     have := MPath.mval_wt hwt p hw hm0
     rwa [MVal.asRef_ok hid] at this
 
+/-- `new uint[](n)` copies in a value of its type: `n` well-formed defaults. -/
+theorem newArrVal_hasTy {R : RefTy} (h : R.newArrOk = true) (n : Int) :
+    (newArrVal R n).hasTy (.ref R) = true := by
+  cases R with
+  | array E =>
+    simp only [RefTy.newArrOk, Bool.and_eq_true] at h
+    have hE := defaultForTy_hasTy (defaultOk_of_defaultOkS h.2)
+    simp only [newArrVal, SVal.hasTy, SVal.hasTy.hasTyElems, Bool.and_true]
+    induction n.toNat with
+    | zero => rfl
+    | succ k ih => simp [List.replicate_succ, SVal.hasTy.hasTyElems, hE, ih]
+  | struct _ => simp [RefTy.newArrOk] at h
+  | mapping _ _ => simp [RefTy.newArrOk] at h
+
 /-- `m = n;` and `m = alice;` bind `m` to an object of `m`'s type: `n`'s,
 or a fresh deep copy, which grows the store typing. -/
 theorem MRhs.bind_wt (hwt : RunWT C Γ H σ) {x : Var} {R : RefTy} {r : MRhs C R}
@@ -1113,6 +1196,16 @@ theorem MRhs.bind_wt (hwt : RunWT C Γ H σ) {x : Var} {R : RefTy} {r : MRhs C R
     cases h
     have hsvt := findStorage_hasTy hwt.storage (SPath.resolve_wt hwt p hw hr) hsv
     obtain ⟨H', hout, hmv⟩ := copyStToM_typed hwt.heapTyNodup hwt.heap hwt.heapWf hsvt hcopy
+    rw [MVal.asRef_ok hid] at hmv
+    exact ⟨H', σ₁, id, hout.ext, hwt.ofCopyOut hout, hmv, rfl⟩
+  | newArr n hn =>
+    obtain ⟨_, _, h⟩ := bind_ok_inv h
+    obtain ⟨nv, _, h⟩ := bind_ok_inv h
+    obtain ⟨⟨σ₁, mv⟩, hcopy, h⟩ := bind_ok_inv h
+    obtain ⟨id, hid, h⟩ := bind_ok_inv h
+    cases h
+    obtain ⟨H', hout, hmv⟩ :=
+      copyStToM_typed hwt.heapTyNodup hwt.heap hwt.heapWf (newArrVal_hasTy hn nv) hcopy
     rw [MVal.asRef_ok hid] at hmv
     exact ⟨H', σ₁, id, hout.ext, hwt.ofCopyOut hout, hmv, rfl⟩
 
@@ -1278,6 +1371,45 @@ theorem Stmt.run_wt : ∀ (s : Stmt C) {Γ Γ' : Ctx} {H : HeapTy} {σ σ' : Sta
     have hty := Loc.resolve_wt hwt l hc hr
     exact ⟨H, .refl H,
       hwt.save hty (SVal.defaultOf_hasTy (findStorage_hasTy hwt.storage hty hcur)) h⟩
+  | @Stmt.deleteMem _ T p hd, Γ, Γ', H, σ, σ', hwt, hs, h => by
+    obtain ⟨hc, rfl⟩ := wt_if hs
+    cases p with
+    | var x =>
+      obtain ⟨⟨σ₁, id⟩, ha, h⟩ := bind_ok_inv h
+      cases h
+      obtain ⟨H', hout, hid⟩ := allocDefault_typed hwt.heapTyNodup hwt.heap hwt.heapWf
+        (defaultOk_of_defaultOkS hd) ha
+      exact ⟨H', hout.ext, (hwt.ofCopyOut hout).setEnv_same hc (by simpa [BTy.matchesB] using hid)⟩
+    | loc l =>
+      obtain ⟨a, ha, h⟩ := bind_ok_inv h
+      have hat := MLoc.addr_wt hwt l hc ha
+      cases T with
+      | prim p =>
+        refine ⟨H, .refl H, writeAddr_wt hwt hat (Value.toMVal_hasTyH ?_) h⟩
+        cases p <;> rfl
+      | ref R =>
+        obtain ⟨⟨σ₁, id⟩, hal, h⟩ := bind_ok_inv h
+        obtain ⟨H', hout, hid⟩ := allocDefault_typed hwt.heapTyNodup hwt.heap hwt.heapWf
+          (defaultOk_of_defaultOkS hd) hal
+        exact ⟨H', hout.ext, writeAddr_wt (hwt.ofCopyOut hout) (hat.mono hout.ext) hid h⟩
+  | .assignNew l n hn, Γ, Γ', H, σ, σ', hwt, hs, h => by
+    obtain ⟨hc, rfl⟩ := wt_if hs
+    simp only [Bool.and_eq_true] at hc
+    obtain ⟨_, _, h⟩ := bind_ok_inv h
+    obtain ⟨nv, _, h⟩ := bind_ok_inv h
+    obtain ⟨⟨σ₁, mv⟩, hcopy, h⟩ := bind_ok_inv h
+    obtain ⟨id, hid, h⟩ := bind_ok_inv h
+    obtain ⟨H', hout, hmv⟩ :=
+      copyStToM_typed hwt.heapTyNodup hwt.heap hwt.heapWf (newArrVal_hasTy hn nv) hcopy
+    rw [MVal.asRef_ok hid] at hmv
+    have hwt₁ := hwt.ofCopyOut hout
+    cases l with
+    | store l =>
+      obtain ⟨sv, hsv, h⟩ := bind_ok_inv h
+      obtain ⟨⟨root, segs⟩, hr, h⟩ := bind_ok_inv h
+      exact ⟨H', hout.ext,
+        hwt₁.write (Loc.resolve_wt hwt₁ l hc.1 hr) (copyMem_hasTy hwt₁.heap hmv hsv) h⟩
+    | mem l => exact ⟨H', hout.ext, MLoc.write_wt hwt₁ l hmv hc.1 h⟩
   | .ite c thn els, Γ, Γ', H, σ, σ', hwt, hs, h => by
     simp only [Stmt.wt] at hs
     split at hs

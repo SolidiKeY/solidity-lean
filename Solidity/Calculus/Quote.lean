@@ -36,6 +36,7 @@ def Term.quote : Term C → Lean.Expr
   | .len s p => mkAppN (mkConst ``Term.len) #[c, STerm.quote s, PTerm.quote p]
   | .read m a => mkAppN (mkConst ``Term.read) #[c, MTerm.quote m, MAddr.quote a]
   | .ite i a b => mkAppN (mkConst ``Term.ite) #[c, Term.quote i, Term.quote a, Term.quote b]
+  | .mlen m i => mkAppN (mkConst ``Term.mlen) #[c, MTerm.quote m, ITerm.quote i]
 
 def PTerm.quote : PTerm C → Lean.Expr
   | .root r => mkAppN (mkConst ``PTerm.root) #[c, toExpr r]
@@ -59,6 +60,7 @@ def SValT.quote : SValT C → Lean.Expr
   | .val t => mkAppN (mkConst ``SValT.val) #[c, Term.quote t]
   | .find s p => mkAppN (mkConst ``SValT.find) #[c, STerm.quote s, PTerm.quote p]
   | .copyMem m i => mkAppN (mkConst ``SValT.copyMem) #[c, MTerm.quote m, ITerm.quote i]
+  | .newArr R n => mkAppN (mkConst ``SValT.newArr) #[c, toExpr R, Term.quote n]
 
 def ITerm.quote : ITerm C → Lean.Expr
   | .pv x => mkAppN (mkConst ``ITerm.pv) #[c, toExpr x]

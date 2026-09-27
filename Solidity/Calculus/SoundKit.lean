@@ -71,6 +71,11 @@ variable {σ : State} {x : Var} {b : Binding}
 @[simp] theorem State.findStorage_setEnv (r : Name) (segs : List Seg) :
     (σ.setEnv x b).findStorage r segs = σ.findStorage r segs := rfl
 @[simp] theorem State.getObj_setEnv (id : Nat) : (σ.setEnv x b).getObj id = σ.getObj id := rfl
+@[simp] theorem arrayLen_setEnv (r : Name) (segs : List Seg) :
+    arrayLen (σ.setEnv x b) r segs = arrayLen σ r segs := rfl
+@[simp] theorem memArrayLen_setEnv (id : Nat) : memArrayLen (σ.setEnv x b) id = memArrayLen σ id := rfl
+@[simp] theorem MLoc.addr_setEnv {T : Ty} {l : MLoc C T} (h : x ∉ l.vars) :
+    l.addr (σ.setEnv x b) = l.addr σ := l.addr_frame (agree_setEnv σ x b) (avoids_single h)
 end
 
 /-- What a premise means for the statement it replaces. -/

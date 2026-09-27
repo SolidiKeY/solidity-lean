@@ -914,6 +914,18 @@ def Simple.eval (σ : State) {p : PrimTy} : Simple C p → Res Value
     | .val v => pure v
     | .spath .. | .mref _ => .error .stuck
 
+/-- The length of the array at a storage path: `values.length`. -/
+def arrayLen (σ : State) (r : Name) (segs : List Seg) : Res Value := do
+  match ← σ.findStorage r segs with
+  | .array elems _ => pure (.int elems.length)
+  | .prim _ | .struct _ | .map _ _ => .error .stuck
+
+/-- The length of the memory array `id`: `xs.length`. -/
+def memArrayLen (σ : State) (id : Nat) : Res Value := do
+  match ← σ.getObj id with
+  | .array elems => pure (.int elems.length)
+  | .struct _ => .error .stuck
+
 /-- A memory slot read as the object it references: a primitive has none. -/
 def Semantics.MVal.asRef : MVal → Res Nat
   | .ref id => pure id
@@ -976,6 +988,10 @@ def Val.eval (σ : State) : {p : PrimTy} → Val C p → Res Value
   | _, @Val.unop _ p _ op _ _ a => do unopCheck op p (← applyUnOp op (← a.eval σ))
   | _, .ternary c a b => do pickBranch (← c.eval σ) (a.eval σ) (b.eval σ)
   | _, .readMem l => do (← l.read σ).asValue
+  | _, .len b _ => do
+    let (r, segs) ← b.resolve σ
+    arrayLen σ r segs
+  | _, .mlen b _ => do memArrayLen σ (← (← b.mval σ).asRef)
 
 end
 
@@ -1023,8 +1039,15 @@ def MSrc.mval (σ : State) {T : Ty} : MSrc C T → Res MVal
   | .val v => do pure (← v.eval σ).toMVal
   | .ref p => do pure (.ref (← (← p.mval σ).asRef))
 
+/-- What `new R(n)` allocates, as the storage value it is a copy of: `n`
+default elements (a struct element its own fresh object, as solc allocates
+one per element). -/
+def newArrVal : RefTy → Int → SVal
+  | .array E, n => .array (List.replicate n.toNat (defaultForTy E)) []
+  | R, _ => defaultForRef R
+
 /-- `x` bound to the object a memory right-hand side names: `n`'s by
-identity, or a fresh deep copy of a storage object. -/
+identity, a fresh deep copy of a storage object, or a fresh array. -/
 def MRhs.bind (σ : State) (x : Var) {R : RefTy} : MRhs C R → Res State
   | .alias p => do
     let id ← (← p.mval σ).asRef
@@ -1035,6 +1058,33 @@ def MRhs.bind (σ : State) (x : Var) {R : RefTy} : MRhs C R → Res State
     let (σ', mv) ← copyStToM σ sv
     let id ← mv.asRef
     pure (σ'.setEnv x (.mref id))
+  | .newArr n _ => do
+    let sv := newArrVal R (← (← n.eval σ).asInt)
+    let (σ', mv) ← copyStToM σ sv
+    let id ← mv.asRef
+    pure (σ'.setEnv x (.mref id))
+
+/-- A write at a memory address. -/
+def writeAddr (σ : State) (mv : MVal) : Addr → Res State
+  | .memoryField id f => memWriteField σ id f mv
+  | .memoryIndex id i => memWriteIndex σ id i mv
+
+/-- The address of a memory location: the object, and the member or the
+index.  An index is checked where it is written (`memWriteIndex`). -/
+def MLoc.addr (σ : State) {T : Ty} : MLoc C T → Res Addr
+  | .field b f _ => do pure (.memoryField (← (← b.mval σ).asRef) f)
+  | .index b i => do
+    let id ← (← b.mval σ).asRef
+    pure (.memoryIndex id (← (← i.eval σ).asInt))
+
+/-- `delete` at a memory address, of a location of type `T`: a primitive is
+reset to its default, a reference to a fresh default object (solc; KeY's
+`memoryFieldDeleteReference` allocates one). -/
+def memClear (σ : State) (a : Addr) : Ty → Res State
+  | .prim p => writeAddr σ (PrimTy.default p).toMVal a
+  | .ref R => do
+    let (σ', id) ← allocDefault σ R
+    writeAddr σ' (.ref id) a
 
 /-- `a ⊕= v` at a resolved storage location: read, apply, check at the
 target's type, write back. -/
@@ -1239,6 +1289,22 @@ def Stmt.run (σ : State) : Stmt C → Res State
     let (root, segs) ← l.resolve σ
     let cur ← σ.findStorage root segs
     σ.saveStorage root segs cur.defaultOf
+  | .deleteMem (T := T) p _ =>
+    match p with
+    | @MPath.var _ R x => do
+      let (σ', id) ← allocDefault σ R
+      pure (σ'.setEnv x (.mref id))
+    | .loc l => do memClear σ (← l.addr σ) T
+  | .assignNew (R := R) l n _ => do
+    let sv := newArrVal R (← (← n.eval σ).asInt)
+    let (σ', mv) ← copyStToM σ sv
+    let id ← mv.asRef
+    match l with
+    | .store l => do
+      let sv' ← copyMem σ' (.ref id)
+      let (root, segs) ← l.resolve σ'
+      σ'.writeStorage root segs sv'
+    | .mem l => l.write σ' (.ref id)
   | .ite c thn els => do
     match ← c.eval σ with
     | .bool true => Prog.run σ thn
@@ -1330,6 +1396,23 @@ def aliasWrite : Prog StandardExample := sol{
 /-- A failing guard reverts. -/
 example : (Prog.run State.exampleStore (sol{ require(age > 3); } : Prog StandardExample)) =
     .error .revert := rfl
+
+/-! The order an `++` inside an expression is captured in is solc's, as
+solkey's `TestSuite.sol` pins it: a binary operator's right operand first
+(`i++ + i` is `1 + 1`), an assignment's right-hand side before its target
+(`a[++i] = ++i` writes `1` at `2`), an index's base before the index
+(`matrix[k][k++]` indexes `matrix[0]`). -/
+
+/-- info: (true, true, true) -/
+#guard_msgs in
+#eval
+  ((Prog.run State.testSuiteStore (sol[TestSuite]{ uint i = 1; uint x = i++ + i;
+      assert(x == 2); assert(i == 2); })).isOk,
+  (Prog.run State.testSuiteStore (sol[TestSuite]{ uint i = 0; values.push(100); values.push(100);
+      values.push(100); values[++i] = ++i; assert(values[2] == 1); })).isOk,
+  (Prog.run State.testSuiteStore (sol[TestSuite]{ matrix.push(); matrix.push();
+      matrix[0].push(0); matrix[1].push(0); uint k = 0; matrix[k][k++] = 77; assert(k == 1);
+      assert(matrix[0][0] == 77); assert(matrix[1][0] == 0); })).isOk)
 
 end Examples
 

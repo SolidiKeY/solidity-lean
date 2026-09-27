@@ -19,6 +19,12 @@ writes, a push and a pop are nested writes over `size`, and
 (`{ sp := alice.account }`); a read marks the *value* side instead
 (`find`/`select`/`read`).
 
+**`sol{ … }` is Solidity, with two spellings of its own** (`Syntax.lean`):
+a decrement is `x−−`/`−−x` (two U+2212; `--` opens a Lean comment), and
+effects stay out of values — an `++` inside an expression or a conditional
+of references is captured by the elaborator before its statement, in solc's
+evaluation order.  Fixed-size arrays are not in the syntax.
+
 A second consumer is **the `SolKey` reader**, a Lean reader for KeY `.key`
 files in a separate repository. It imports only `Solidity.Calculus.Rules` and
 `Solidity.Calculus.KeyTaclets` (and through them the syntax). That is its

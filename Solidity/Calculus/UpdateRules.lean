@@ -217,6 +217,7 @@ def Term.subst (U : Upd C) : Term C → Term C
   | .len s p => .len (s.subst U) (p.subst U)
   | .read m a => .read (m.subst U) (a.subst U)
   | .ite c a b => .ite (c.subst U) (a.subst U) (b.subst U)
+  | .mlen m i => .mlen (m.subst U) (i.subst U)
 
 def PTerm.subst (U : Upd C) : PTerm C → PTerm C
   | .root r => .root r
@@ -239,6 +240,7 @@ def SValT.subst (U : Upd C) : SValT C → SValT C
   | .val t => .val (t.subst U)
   | .find s p => .find (s.subst U) (p.subst U)
   | .copyMem m i => .copyMem (m.subst U) (i.subst U)
+  | .newArr R n => .newArr R (n.subst U)
 
 def ITerm.subst (U : Upd C) : ITerm C → ITerm C
   | .pv x => U.refOf x
@@ -316,6 +318,10 @@ theorem Term.subst_eval (h : SubstAgree U ns σ τ) : (t : Term C) → (t.subst 
       simp only [readAddr_congr h']
   | .ite c a b => by
     simp only [Term.subst, Term.eval, c.subst_eval h, a.subst_eval h, b.subst_eval h]
+  | .mlen m i => by
+    simp only [Term.subst, Term.eval, i.subst_eval h]
+    exact ResultsAgree.bindEq (m.subst_eval h) fun _ _ h' => by
+      simp only [memArrayLen, getObj_congr h']
 
 /-- Example: after `Person storage p = alice;`, `{ p := alice }(p.age)` is
 `alice.age`. -/
@@ -377,6 +383,7 @@ theorem SValT.subst_eval (h : SubstAgree U ns σ τ) : (v : SValT C) → (v.subs
     simp only [SValT.subst, SValT.eval, i.subst_eval h]
     exact ResultsAgree.bindEq (m.subst_eval h) fun _ _ h' => by
       simp only [copyMem_congr h']
+  | .newArr _ n => by simp only [SValT.subst, SValT.eval, n.subst_eval h]
 
 /-- Example: after `Person memory m = n;` (`n` a memory local), `{ m := n }m` is `n`. -/
 theorem ITerm.subst_eval (h : SubstAgree U ns σ τ) : (i : ITerm C) → (i.subst U).eval σ = i.eval τ

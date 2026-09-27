@@ -39,10 +39,12 @@ correspondence against `Taclet` (`~/projects/side-projects/lean/solkey`).
 
 - **Calls** and the **callback semantics** of `transfer`
   (`transferSemantics:withCallback`): the typed syntax has neither.
-- **Memory `delete`**, `new T[](n)`, `.length` as an expression, `--`
-  (Lean's comment token), `++` inside an expression, a ternary of
-  references, a negative literal at `int`: the corpus gaps
-  `docs/corpus-parity.md` counts.
+- **Fixed-size arrays** (`uint[3]`, `Token[2]`, `uint[2][]`): not in the
+  typed syntax; the design note below says what they need.
+- **The corpus is not regenerated** since the syntax gaps below closed:
+  `scripts/solkey-port.mjs` no longer refuses `--`, `.length`, `new` and an
+  `++` inside an expression, and `docs/corpus-parity.md` counts the old
+  verdicts until `--probe` re-pins them.
 - **`Ch15`'s realizability**: `sol_decide` is sound, not proved complete —
   constraints between reads of the starting storage (shapes, bounds,
   `length`) are not stated; memory, copies, `push`/`pop` are outside its
@@ -50,6 +52,53 @@ correspondence against `Taclet` (`~/projects/side-projects/lean/solkey`).
 - **The converse of reachability** (every canonical storage is reachable).
 - **The EVM fragment**: `int`, `**`, memory, storage-to-storage copies,
   `push`, `v = x++;` (`docs/compiler-verification.md`).
+
+### Closed: the syntax gaps of the corpus (2026-09-27)
+
+- `.length` of a storage or memory array is a value (`Val.len`, `Val.mlen`,
+  carrying `p = .uint` so that no match refines an index): KeY's member reads
+  at `length`, `storageLengthRead`/`memoryLengthRead` and their unfolds.
+- A decrement is spelled `x−−`/`−−x` (two U+2212), `IncDec.preDec/postDec`.
+- `++`/`−−` inside an expression, and a conditional of references, are
+  captured by the elaborator before their statement, in solc's order
+  (`hoist`, `captureExpr` in `Syntax.lean`): values stay effect-free.
+- A negative literal takes the type it is checked at (`int e = -5;`).
+- Memory `delete` (`Stmt.deleteMem`) with KeY's eight taclets; `new T[](n)`
+  (`MRhs.newArr`, `Stmt.assignNew`) with `memoryArrayFreshAlloc` and
+  `newArrayCapture`.
+
+### Design note: fixed-size arrays
+
+The storage *values* can hold one: a `uint[3]` is an `SVal.array` of three
+live elements with nothing past its end, and no statement changes its
+length.  What is missing is the *type*: `RefTy.array E` has no length, and
+four places would read one.
+
+1. **The type** — `RefTy.fixed (E : Ty) (n : Nat)` (or a length index on
+   `array`).  Every function by cases on `RefTy` gains an arm: `defaultForTy`
+   (`n` defaults, not `[]`: the only place the storage model changes),
+   `tyHasMapping`/`mapFree`/`defaultOkS`, the struct rank certificate,
+   `KeySort` (solkey's sort of a static array), `SVal.hasTy`/`canon`
+   (exactly `n` elements, none past the end), `copyStToM`/`copyMToSt` (a
+   memory copy has `n` elements too).
+2. **The syntax** — `IndexTy.fixed` beside `.arr` for `a[i]`; `Stmt.push`/
+   `Stmt.pop` keep `.array` only, so `push` on a static array cannot be
+   written; `.length` of one is the constant `n`, a `Simple` literal the
+   elaborator writes (solc folds it too), so no rule reads it.
+3. **The rules** — the array index rules (`storageIndexReadArrayFind`, …)
+   are stated at `IndexTy.arr`; a static index needs either a second family
+   or the rules generalised over an "indexed by position" class.  The
+   bounds check (`State.checkIndex`) is unchanged.
+4. **The EVM layout** — `Evm/Repr.lean` places a dynamic array's elements at
+   `keccak(slot)`; solc lays a static array out *inline*, `n × size E`
+   consecutive slots, which changes `size`, `offset` and the injectivity
+   proof of the slot map.
+
+That is a new type constructor through AST, typing, reachability, the sort
+lattice and the compiler — a change of its own, not a syntax gap; the three
+corpus functions that need it (`testMemoryFixedArrayLength`,
+`testMemoryNestedFixedArrayLength`, `testNewArrayOfFixedElementLength`) stay
+unsupported.
 
 ## Sharp edges
 
@@ -107,6 +156,10 @@ correspondence against `Taclet` (`~/projects/side-projects/lean/solkey`).
 | Modalities | the kernel's box is partial correctness (it holds unless the run ends normally in a bad state) and its diamond needs a normal end; neither tells a revert from a stuck run. An unfolding rule then owes its statement the same *successful* outcome (`SameOk`), which the order-changing rules (`*StorageRef_unfold_leftFst`, `*NonSimpleIndexCapture`) meet without the side conditions the untyped `*_sound` theorems carry. `SolidityJudgment.Holds` differs on stuck runs ("a stuck execution validates nothing"); the phase-7 bridge must say so | 2026-09-25 |
 | Unknown names | an error: parameters are declared locals. mini-solkey reads an unknown name as a `uint` parameter | 2026-09-25 |
 | Ported contracts | one named constant per interpreter store, `initStorage_*` checks roots, order and defaults against the store by `simp` | 2026-09-25 |
+| Decrement spelling | `x−−`, `−−x` (two U+2212 MINUS SIGN): `--` opens a Lean comment, and `x -= 1` is another statement (`opAssign`, other taclets). The printers write it back the same way | 2026-09-27 |
+| Effects inside expressions | `++`/`−−` in an expression and a conditional of references are captured by the elaborator before the statement (`uint se1; se1 = i++;`, a branch binding a fresh alias), so `Val` stays effect-free and no rule sees them. The capture order is solc's (right operand before left, right-hand side before target, base before index), which `TestSuite.sol`'s evaluation-order functions pin; an effect under `&&`/`||` or in a conditional's branch is an elaboration error | 2026-09-27 |
+| `.length` | a `Val` (`len`, `mlen`) whose result type is carried as a proof `p = .uint`, not an index: a constructor fixing the index would have to be refined in every inner `match` of `Stmt.step` | 2026-09-27 |
+| Memory `delete` of a reference | the location gets a fresh default object (KeY's `memoryFieldDeleteReference`, solc), not a reset of the old one: an alias keeps it | 2026-09-27 |
 
 ## `ResidueShape` verdicts (history)
 

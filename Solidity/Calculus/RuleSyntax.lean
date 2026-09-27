@@ -36,6 +36,7 @@ hypothesis):
 | `v`, `lv`, `vp` | a stack local | `Var` | |
 | `lsv` | a storage alias | `Var` | |
 | `mv` | a memory local | `Var` | |
+| `pmv`, `rmv` | a memory local, an array of primitives, of references (`delete pmv[ie]` fixes the element type) | `Var` | |
 | `gsp` | a state variable, with its proof `hgsp` | `Name` | |
 | `se`, `ie`, `sadr` | a simple value | `Simple C p` | |
 | `e` | a value | `Val C p` | not a conditional, when written to storage or to a memory target |
@@ -48,6 +49,8 @@ hypothesis):
 | `nmp` | a memory path that is not a memory local | `MPath C T` | not simple |
 | `mpath` | a memory path | `MPath C T` | bindable, when written as a reference into a target |
 | `fld`, `fr`, with its proof `hfld`, `hfr` | a member name | `Name` | |
+| `pfld`, `rfld` | a member of primitive, of reference type (`delete mv.pfld` fixes it) | `Name` | |
+| `tgt` | where a fresh array lands (`NewLhs`) | | |
 | `lhs` | where a storage or memory read lands (`Hole`, `MHole`) | | a target |
 | `x` | where a value lands (`VHole`) | | |
 | `loc`, `nlhs` | a member or entry a copy lands in | `Loc C T` | `loc`: a target, not a state variable |
@@ -252,7 +255,7 @@ def headOf (Γ : Scope) (x : Ident) : Head :=
   | none => match stemOf s with
     | "v" | "lv" | "vp" => .local x
     | "lsv" => .alias x
-    | "mv" => .mem x
+    | "mv" | "pmv" | "rmv" => .mem x
     | "gsp" => .root x (proofIdent x s)
     | "se" | "ie" | "sadr" => .simple x
     | "e" | "nse" | "nadr" => .val x
@@ -357,6 +360,11 @@ mutual
 partial def fieldAt (Γ : Scope) (pos : Pos) (stx : Lean.Syntax) (mem : Bool) (b : Lean.Term)
     (f : Ident) : MacroM Lean.Term := do
   let h := proofIdent f f.getId.toString
+  if f.getId.toString == "length" && pos == .val then
+    -- the element type named `E`, so that the scratch path a rule reads the
+    -- length through has it too
+    return ← if mem then `(Val.mlen (E := $(schemaIdent "E")) $b $(schemaIdent "hlen"))
+      else `(Val.len (E := $(schemaIdent "E")) $b $(schemaIdent "hlen"))
   if mem then
     match pos with
     | .mloc => `(MLoc.field $b $f $h)
@@ -471,6 +479,40 @@ def callRecv? (f : TSyntax `sol_expr) : MacroM (Option (TSyntax `sol_expr × Str
   | `(sol_expr| $e:sol_expr . $g:ident) => return some (e, g.getId.toString)
   | _ => return none
 
+/-- `new T(n)`: its size. -/
+def newRhs? : TSyntax `sol_expr → Option (TSyntax `sol_expr)
+  | `(sol_expr| new $_:sol_ty ( $n:sol_expr )) => some n
+  | _ => none
+
+/-- The stem of a one-name expression. -/
+def stemOfExpr? : TSyntax `sol_expr → Option String
+  | `(sol_expr| $x:ident) =>
+    match nameParts x.getId with
+    | [s] => some (stemOf s)
+    | _ => none
+  | _ => none
+
+/-- The type a memory `delete` fixes by its spelling: `delete mv;` a
+reference, `delete mv.pfld;` and `delete pmv[ie];` a primitive,
+`delete mv.rfld;` and `delete rmv[ie];` a reference; any other leaves it
+free. -/
+def deleteTy? : TSyntax `sol_expr → MacroM (Option Lean.Term)
+  | `(sol_expr| $x:ident) => do
+    match (nameParts x.getId).reverse with
+    | [_] => some <$> `(Ty.ref $(schemaIdent "R"))
+    | f :: _ =>
+      match stemOf f with
+      | "pfld" => some <$> `(Ty.prim $(schemaIdent "p"))
+      | "rfld" => some <$> `(Ty.ref $(schemaIdent "R"))
+      | _ => pure none
+    | [] => pure none
+  | `(sol_expr| $b:sol_expr [ $_:sol_expr ]) => do
+    match stemOfExpr? b with
+    | some "pmv" => some <$> `(Ty.prim $(schemaIdent "p"))
+    | some "rmv" => some <$> `(Ty.ref $(schemaIdent "R"))
+    | _ => pure none
+  | _ => pure none
+
 /-- Whether an expression is a stack local, a storage alias, a memory local,
 a hole — the statement it is the left of. -/
 def lhsHead (Γ : Scope) : TSyntax `sol_expr → Option Head
@@ -505,6 +547,19 @@ partial def schemaStmt (fresh : Bool) (Γ : Scope) :
     return (← `(Stmt.opAssign (p := $(schemaIdent "p")) $(schemaIdent "op") $(schemaIdent "hop") $(schemaIdent "hp")
       $(← schemaAt Γ .oploc l) $(← schemaAt Γ .val r)), Γ)
   | `(sol_stmt| $l:sol_expr = $r:sol_expr) => do
+    let R := schemaIdent "R"
+    if let some n := newRhs? r then
+      let n ← schemaAt Γ .simple n
+      match lhsHead Γ l, stemOfExpr? l with
+      | some (.mem x), _ =>
+        return (← `(Stmt.rebindMem (R := $R) $x (MRhs.newArr (R := $R) $n $(schemaIdent "hn"))), Γ)
+      | _, some "tgt" =>
+        let `(sol_expr| $x:ident) := l | Macro.throwErrorAt l "a `tgt`"
+        return (← `(Stmt.assignNew (R := $R) $x $n $(schemaIdent "hn")), Γ)
+      | _, _ => Macro.throwErrorAt l "`new` lands in a memory local or a `tgt`"
+    if stemOfExpr? l == some "tgt" then
+      let `(sol_expr| $x:ident) := l | Macro.throwErrorAt l "a `tgt`"
+      return (← `($(mkIdent `Solidity.NewLhs.fill) $x $(← schemaAt Γ .mpath r)), Γ)
     let t ← match lhsHead Γ l with
       | some (.local v) => `(Stmt.assignLocal $v $(← schemaAt Γ .val r))
       | some (.alias x) =>
@@ -568,6 +623,8 @@ partial def schemaStmt (fresh : Bool) (Γ : Scope) :
     let v ← declVar fresh x
     let _ := T
     let r : Lean.Term ← if let some r := rhsVar? "mrhs" e then pure ⟨r.raw⟩
+      else if let some n := newRhs? e then
+        `(MRhs.newArr (R := $(schemaIdent "R")) $(← schemaAt Γ .simple n) $(schemaIdent "hn"))
       else if isMem Γ e then `(MRhs.alias $(← schemaAt Γ .mpath e))
       else `(MRhs.copy $(← schemaAt Γ .spath e) $(schemaIdent "hm"))
     let t ← `(Stmt.declMem _ $v (some $r) rfl)
@@ -614,7 +671,15 @@ partial def schemaStmt (fresh : Bool) (Γ : Scope) :
     return (← `(Stmt.ite $(← schemaAt Γ .val c) $(← schemaBlock fresh Γ t) $(← schemaBlock fresh Γ f)), Γ)
   | stx => do
     let k := stx.raw.getKind
-    if k == ``solDelete then return (← `(Stmt.delete $(← schemaAt Γ .loc ⟨stx.raw[1]⟩)), Γ)
+    if k == ``solDelete then
+      let e : TSyntax `sol_expr := ⟨stx.raw[1]⟩
+      if isMem Γ e then
+        let p ← schemaAt Γ .mpath e
+        let hd := schemaIdent "hd"
+        match ← deleteTy? e with
+        | some T => return (← `(Stmt.deleteMem (T := $T) $p $hd), Γ)
+        | none => return (← `(Stmt.deleteMem $p $hd), Γ)
+      return (← `(Stmt.delete $(← schemaAt Γ .loc e)), Γ)
     if k == ``solRequire then return (← `(Stmt.require $(← schemaAt Γ .val ⟨stx.raw[2]⟩)), Γ)
     if k == ``solAssert then return (← `(Stmt.assert $(← schemaAt Γ .val ⟨stx.raw[2]⟩)), Γ)
     if k == ``solRevert then return (← `(Stmt.revert), Γ)
@@ -688,7 +753,9 @@ def headTerm (Γ : Scope) (pos : TPos) (x : Ident) : MacroM Lean.Term := do
 /-- `mv.f₁.….fₙ` at a term sort: the inner members are identities read. -/
 def memMember (pos : TPos) (stx : Lean.Syntax) : Lean.Term → List Ident → MacroM Lean.Term
   | b, [] => pure b
-  | b, [f] => match pos with
+  | b, [f] =>
+    if f.getId.toString == "length" && pos == .val then `(Term.mlen MTerm.memory $b) else
+    match pos with
     | .addr => `(MAddr.field $b $f)
     | .val => `(Term.read MTerm.memory (MAddr.field $b $f))
     | .ident => `(ITerm.read MTerm.memory (MAddr.field $b $f))
@@ -717,7 +784,7 @@ partial def schemaTerm (Γ : Scope) (pos : TPos) (t : TSyntax `dl_term) : MacroM
   | .svalue =>
     match t with
     | `(dl_term| $f:ident($_,*)) =>
-      if ["find", "copyMem"].contains f.getId.toString then schemaTerm0 Γ .svalue t
+      if ["find", "copyMem", "newArr"].contains f.getId.toString then schemaTerm0 Γ .svalue t
       else `(SValT.val $(← schemaTerm0 Γ .val t))
     | _ => `(SValT.val $(← schemaTerm0 Γ .val t))
   | .mvalue =>
@@ -727,6 +794,7 @@ partial def schemaTerm (Γ : Scope) (pos : TPos) (t : TSyntax `dl_term) : MacroM
           | .mem _ | .mpath _ => true
           | _ => false
         | _ => false
+      | `(dl_term| $f:ident($_,*)) => f.getId.toString == "freshId"
       | _ => false
     if memHead then `(MValT.ref $(← schemaTerm0 Γ .ident t))
     else `(MValT.val $(← schemaTerm0 Γ .val t))
@@ -827,6 +895,7 @@ partial def schemaTerm0 (Γ : Scope) (pos : TPos) : TSyntax `dl_term → MacroM 
     | "read", #[m, a], .val => `(Term.read $(← me m) $(← schemaTerm Γ .addr a))
     | "read", #[m, a], .ident => `(ITerm.read $(← me m) $(← schemaTerm Γ .addr a))
     | "copyMem", #[_, m, i], .svalue => `(SValT.copyMem $(← me m) $(← schemaTerm Γ .ident i))
+    | "newArr", #[n], .svalue => `(SValT.newArr $(schemaIdent "R") $(← schemaTerm Γ .val n))
     | "freshId", #[t], .ident =>
       match t with
       | `(dl_term| addM($m)) => `(ITerm.alloc $(← me m) $(schemaIdent "R"))
@@ -1233,7 +1302,7 @@ where
     | PrimTy.bool => `(sol_ty| bool)
     | _ => `(sol_ty| T)
   ppRef (R : Lean.Expr) : MetaM (TSyntax `sol_ty) := do
-    if (← fvarName? R).isSome then return ← `(sol_ty| T)
+    if (← instantiateMVars R).hasFVar then return ← `(sol_ty| T)
     match_expr (← whnf R) with
     | RefTy.struct s =>
       if (← fvarName? s).isSome then return ← `(sol_ty| T)
@@ -1291,6 +1360,11 @@ partial def ppExpr (e : Lean.Expr) : MetaM (TSyntax `sol_expr) := do
     | UnOp.not => `(sol_expr| !$(← ppExpr a))
     | _ => escape
   | Val.ternary _ _ c a b => `(sol_expr| $(← ppExpr c) ? $(← ppExpr a) : $(← ppExpr b))
+  | Val.len _ _ _ b _ => dotExpr (← ppExpr b) "length"
+  | Val.mlen _ _ _ b _ => dotExpr (← ppExpr b) "length"
+  | MRhs.newArr _ R n _ => `(sol_expr| new $(← ppTy.ppRef R):sol_ty ( $(← ppExpr n) ))
+  | NewLhs.store _ _ l => ppExpr l
+  | NewLhs.mem _ _ l => ppExpr l
   | Src.val _ _ v => ppExpr v
   | Src.copy _ _ p _ => ppExpr p
   | ARhs.path _ _ p => ppExpr p
@@ -1312,6 +1386,8 @@ def ppIncDec (op : Lean.Expr) (l : TSyntax `sol_expr) : MetaM (Option (TSyntax `
   match_expr (← whnf op) with
   | IncDec.postInc => return some (← `(sol_stmt| $l:sol_expr ++))
   | IncDec.preInc => return some (← `(sol_stmt| ++ $l:sol_expr))
+  | IncDec.postDec => return some (← `(sol_stmt| $l:sol_expr −−))
+  | IncDec.preDec => return some (← `(sol_stmt| −− $l:sol_expr))
   | _ => return none
 
 mutual
@@ -1323,7 +1399,8 @@ partial def ppStmt (e : Lean.Expr) : MetaM (TSyntax `sol_stmt) := do
     let some n ← fvarName? h | escape
     `(sol_stmt| $(nameIdent n):ident = $rhs)
   -- a hole that is a schema variable does not compute: print it by its name
-  if [`Solidity.Hole.fill, `Solidity.MHole.fill, `Solidity.VHole.fill].any (e.isAppOfArity · 4) then
+  if [`Solidity.Hole.fill, `Solidity.MHole.fill, `Solidity.VHole.fill, `Solidity.NewLhs.fill].any
+      (e.isAppOfArity · 4) then
     let args := e.getAppArgs
     if (← fvarName? args[2]!).isSome then return ← hole args[2]! (← ppExpr args[3]!)
   match_expr (← whnf e) with
@@ -1388,6 +1465,8 @@ partial def ppStmt (e : Lean.Expr) : MetaM (TSyntax `sol_stmt) := do
     match_expr (← whnf op) with
     | IncDec.postInc => `(sol_stmt| $x:ident = $l:sol_expr ++)
     | IncDec.preInc => `(sol_stmt| $x:ident = ++ $l:sol_expr)
+    | IncDec.postDec => `(sol_stmt| $x:ident = $l:sol_expr −−)
+    | IncDec.preDec => `(sol_stmt| $x:ident = −− $l:sol_expr)
     | _ => escape
   | Stmt.push _ _ b v _ =>
     match_expr (← whnf v) with
@@ -1400,6 +1479,10 @@ partial def ppStmt (e : Lean.Expr) : MetaM (TSyntax `sol_stmt) := do
   | Stmt.pop _ _ b => `(sol_stmt| $(← ppExpr b):sol_expr .pop())
   | Stmt.transfer _ r a => `(sol_stmt| $(← ppExpr r):sol_expr .transfer( $(← ppExpr a) ))
   | Stmt.delete _ _ l => `(sol_stmt| delete $(← ppExpr l):sol_expr)
+  | Stmt.deleteMem _ _ p _ => `(sol_stmt| delete $(← ppExpr p):sol_expr)
+  | Stmt.assignNew _ R l n _ =>
+    let l ← if let some x ← fvarName? l then `(sol_expr| $(nameIdent x):ident) else ppExpr l
+    `(sol_stmt| $l:sol_expr = new $(← ppTy.ppRef R):sol_ty ( $(← ppExpr n) ))
   | Stmt.ite _ c thn els =>
     `(sol_stmt| if ($(← ppExpr c)) $(← ppBlock thn):sol_block else $(← ppBlock els):sol_block)
   | Stmt.require _ c => `(sol_stmt| require($(← ppExpr c)))
@@ -1502,6 +1585,10 @@ partial def ppTerm (e : Lean.Expr) : MetaM (TSyntax `dl_term) := do
     let _ := s
     `(dl_term| $(mkIdent (x.getId.str "length")):ident)
   | Term.read _ m a => `(dl_term| read($(← ppMTerm m), $(← ppMAddr a)))
+  | Term.mlen _ m i =>
+    unless (← whnf m).isAppOfArity ``MTerm.memory 1 do return ← escapeDl e
+    let `(dl_term| $x:ident) ← ppITerm i | escapeDl e
+    `(dl_term| $(mkIdent (x.getId.str "length")):ident)
   | _ => escapeDl e
 
 partial def ppPTerm (e : Lean.Expr) : MetaM (TSyntax `dl_term) := do
@@ -1562,6 +1649,7 @@ partial def ppSVal (e : Lean.Expr) : MetaM (TSyntax `dl_term) := do
   | SValT.val _ t => ppTerm t
   | SValT.find _ s p => `(dl_term| find($(← ppSTerm s), $(← ppPTerm p)))
   | SValT.copyMem _ m i => `(dl_term| copyMem(mtSt, $(← ppMTerm m), $(← ppITerm i)))
+  | SValT.newArr _ _ n => `(dl_term| newArr($(← ppTerm n)))
   | _ => escapeDl e
 
 partial def ppITerm (e : Lean.Expr) : MetaM (TSyntax `dl_term) := do
@@ -1720,7 +1808,8 @@ attribute [delab app.Solidity.Stmt.assign, delab app.Solidity.Stmt.rebind,
   delab app.Solidity.Stmt.push, delab app.Solidity.Stmt.pop, delab app.Solidity.Stmt.transfer,
   delab app.Solidity.Stmt.declMem, delab app.Solidity.Stmt.rebindMem,
   delab app.Solidity.Stmt.assignFromMem, delab app.Solidity.Stmt.assignMem,
-  delab app.Solidity.Stmt.delete, delab app.Solidity.Stmt.ite, delab app.Solidity.Stmt.require,
+  delab app.Solidity.Stmt.delete, delab app.Solidity.Stmt.deleteMem,
+  delab app.Solidity.Stmt.assignNew, delab app.Solidity.Stmt.ite, delab app.Solidity.Stmt.require,
   delab app.Solidity.Stmt.assert, delab app.Solidity.Stmt.revert] delabStmt
 
 end Print

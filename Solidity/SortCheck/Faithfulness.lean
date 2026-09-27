@@ -35,7 +35,7 @@ once its constructors read at a type of the right class (`ReadClass`), and
 
 **Which statements.**  A row names a KeY taclet; `RuleShapes.tacletOrigins`
 names the `Taclet` constructors that transcribe it (`ctorsOf`).  For each of
-the 34 read-bearing constructors, `faithful_<ctor>` quantifies over the
+the 36 read-bearing constructors, `faithful_<ctor>` quantifies over the
 constructor's schema variables and takes the statement from the
 constructor's own type (`stmtOf`), so the statement is the rule's `\find`,
 not a restatement of it.  `rows_covered` checks that every row with a value
@@ -57,20 +57,28 @@ variable {C : Contract}
 inductive Read (C : Contract) where
   | storage (T : Ty) (p : SPath C T)
   | memory (T : Ty) (p : MPath C T)
+  /-- `values.length`: KeY reads it as the member `length` of the array, a
+  `uint` cell (`size`). -/
+  | slen {E : Ty} (p : SPath C (.array E))
+  /-- `xs.length` of a memory array. -/
+  | mlen {E : Ty} (p : MPath C (.array E))
 
 /-- `alice.age` is read from storage, `m.age` from memory. -/
 def Read.domain : Read C → ReadDomain
-  | .storage .. => .storage
-  | .memory .. => .memory
+  | .storage .. | .slen _ => .storage
+  | .memory .. | .mlen _ => .memory
 
-/-- `alice.age` is read at `uint`. -/
+/-- `alice.age` is read at `uint`, and so is a length. -/
 def Read.ty : Read C → Ty
   | .storage T _ | .memory T _ => T
+  | .slen _ | .mlen _ => .uint
 
 /-- The read's locals are used as declared. -/
 def Read.wt (Γ : Ctx) : Read C → Bool
   | .storage _ p => p.wt Γ
   | .memory _ p => p.wt Γ
+  | .slen p => p.wt Γ
+  | .mlen p => p.wt Γ
 
 /-- The place `x ⊕= e` and `x++` read: `alice.age` in storage, `m.age` in
 memory; a stack local is not read from a state component. -/
@@ -88,6 +96,8 @@ reads `alice.age`. -/
 def Stmt.read? : Stmt C → Option (Read C)
   | @Stmt.assignLocal _ p _ (.read l) => some (.storage (.prim p) (.loc l))
   | @Stmt.assignLocal _ p _ (.readMem l) => some (.memory (.prim p) (.loc l))
+  | @Stmt.assignLocal _ _ _ (.len b _) => some (.slen b)
+  | @Stmt.assignLocal _ _ _ (.mlen b _) => some (.mlen b)
   | @Stmt.assign _ _ _ (@Src.copy _ R sp _) => some (.storage (.ref R) sp)
   | @Stmt.push _ _ _ (some (@Src.copy _ R sp _)) _ => some (.storage (.ref R) sp)
   | @Stmt.rebindMem _ R _ (.copy sp _) => some (.storage (.ref R) sp)
@@ -168,6 +178,9 @@ def Read.SortOk (σ : State) (H : HeapTy) (rs : ReadSort) : Read C → Prop
   | .storage T p => ∀ r segs v, p.resolve σ = .ok (r, segs) →
       σ.findStorage r segs = .ok v → SortOkS rs T v = true
   | .memory T p => ∀ mv, p.mval σ = .ok mv → SortOkM H rs T mv = true
+  | .slen p => ∀ v, (Val.len (p := .uint) p rfl).eval σ = .ok v → SortOkS rs .uint v.toSVal = true
+  | .mlen p => ∀ v, (Val.mlen (p := .uint) p rfl).eval σ = .ok v →
+      SortOkM H rs .uint v.toMVal = true
 
 /-- What a constructor's schema fixes about its read's static type. -/
 inductive ReadClass where
@@ -254,6 +267,32 @@ theorem Read.sortOk {Γ : Ctx} {H : HeapTy} {σ : State} (hwt : RunWT C Γ H σ)
         rfl
       · obtain ⟨id, rfl⟩ := MVal.ref_of_hasTyH_ref hfit hty
         rfl
+  | slen p =>
+    intro v hv
+    have hty := Val.eval_wt hwt (Val.len (p := .uint) p rfl) hw hv
+    cases rs with
+    | generic _ => exact hty
+    | fixed s =>
+      show v.toSVal.keySort.le s = true
+      cases s <;> simp only [ReadClass.supports, Read.domain, beq_iff_eq] at hsup <;>
+        (try exact Bool.noConfusion hsup) <;> subst_vars
+      · exact SVal.keySort_le_stValue _
+      · obtain ⟨n, hn⟩ := hasTy_numeric (ty := .uint) rfl hty
+        rw [hn]; rfl
+      · simp [ReadClass.fits, Read.ty, Ty.isReference, Ty.isPrimitive] at hfit
+  | mlen p =>
+    intro v hv
+    have hty := Value.toMVal_hasTyH (H := H) (Val.eval_wt hwt (Val.mlen (p := .uint) p rfl) hw hv)
+    cases rs with
+    | generic _ => exact hty
+    | fixed s =>
+      show v.toMVal.keySort.le s = true
+      cases s <;> simp only [ReadClass.supports, Read.domain, beq_iff_eq] at hsup <;>
+        (try exact Bool.noConfusion hsup) <;> subst_vars
+      · exact MVal.keySort_le_memValue _
+      · obtain ⟨n, hn⟩ := MVal.int_of_hasTyH_numeric (T := .uint) rfl hty
+        rw [hn]; rfl
+      · simp [ReadClass.fits, Read.ty, Ty.isReference, Ty.isPrimitive] at hfit
 
 /-- The claims hold after any checked run: from a well-typed state, run a
 block whose locals check, and the next statement's read finds what its
@@ -383,6 +422,21 @@ theorem faithful_storageFieldReadFind {C : Contract} {k : Nat} {m : Modality} {v
     CtorFaithful ``Taclet.storageFieldReadFind
       (stmtOf (@Taclet.storageFieldReadFind C k m v x sp fld x_1 hfld)) :=
   ctorFaithful_of (dom := .storage) (cls := .any) rfl rfl rfl (by decide +kernel)
+
+/-- `n = values.length;` reads a number: KeY's member read at `length`, a
+`uint` cell. -/
+theorem faithful_storageLengthRead {C : Contract} {k : Nat} {m : Modality} {v : Var} {E : Ty}
+    {sp : SPath C E.array} {p : PrimTy} {hlen : p = PrimTy.uint} {hsp : sp.isSimple = true} :
+    CtorFaithful ``Taclet.storageLengthRead
+      (stmtOf (@Taclet.storageLengthRead C k m v E sp p hlen hsp)) :=
+  ctorFaithful_of (dom := .storage) (cls := .any) rfl rfl rfl (by decide +kernel)
+
+/-- `n = xs.length;` reads a number from a memory array. -/
+theorem faithful_memoryLengthRead {C : Contract} {k : Nat} {m : Modality} {v : Var} {E : Ty}
+    {mv : Var} {p : PrimTy} {hlen : p = PrimTy.uint} :
+    CtorFaithful ``Taclet.memoryLengthRead
+      (stmtOf (@Taclet.memoryLengthRead C k m v E mv p hlen)) :=
+  ctorFaithful_of (dom := .memory) (cls := .any) rfl rfl rfl (by decide +kernel)
 
 /-- `tok = a.token;` reads the `Token` member under `find<[StValue]>`. -/
 theorem faithful_storageFieldReadStoreRoot {C : Contract} {k : Nat} {m : Modality} {gsp : Name}
@@ -661,6 +715,8 @@ def faithfulCtors : List Proved := [
   ⟨``Taclet.storageRootReadSelect, _, @faithful_storageRootReadSelect⟩,
   ⟨``Taclet.storageFieldWriteCopySource, _, @faithful_storageFieldWriteCopySource⟩,
   ⟨``Taclet.storageFieldReadFind, _, @faithful_storageFieldReadFind⟩,
+  ⟨``Taclet.storageLengthRead, _, @faithful_storageLengthRead⟩,
+  ⟨``Taclet.memoryLengthRead, _, @faithful_memoryLengthRead⟩,
   ⟨``Taclet.storageFieldReadStoreRoot, _, @faithful_storageFieldReadStoreRoot⟩,
   ⟨``Taclet.storageIndexReadMappingFind, _, @faithful_storageIndexReadMappingFind⟩,
   ⟨``Taclet.storageIndexReadMappingStoreRoot, _, @faithful_storageIndexReadMappingStoreRoot⟩,

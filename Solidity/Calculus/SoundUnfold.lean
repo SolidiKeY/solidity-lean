@@ -244,7 +244,8 @@ elab "cases_holes" : tactic => do
   for d in (← g.getDecl).lctx do
     if d.isImplementationDetail then continue
     let t ← whnf (← instantiateMVars d.type)
-    if [``Hole, ``MHole, ``VHole, ``OpLoc, ``MSrc, ``Src, ``ARhs, ``MRhs, ``MLoc].any t.isAppOf then
+    if [``Hole, ``MHole, ``VHole, ``OpLoc, ``MSrc, ``Src, ``ARhs, ``MRhs, ``MLoc, ``NewLhs].any
+        t.isAppOf then
       let gs ← g.cases d.fvarId
       replaceMainGoal (gs.map (·.mvarId)).toList
       return
@@ -254,14 +255,15 @@ set_option hygiene false in
 /-- Flatten the four freshness hypotheses to atoms. -/
 macro "vars_simp" : tactic => `(tactic|
     simp only [Stmt.vars, Prog.vars, Loc.vars, SPath.vars, Src.vars, Val.vars,
-      MPath.vars, MLoc.vars, ARhs.vars, MRhs.vars, MSrc.vars, OpLoc.vars, optVars, Hole.fill,
-      MHole.fill, VHole.fill, List.mem_append, List.mem_cons, List.not_mem_nil, not_or,
+      MPath.vars, MLoc.vars, ARhs.vars, MRhs.vars, MSrc.vars, OpLoc.vars, NewLhs.vars, optVars,
+      Hole.fill, MHole.fill, VHole.fill, NewLhs.fill, List.mem_append, List.mem_cons, List.not_mem_nil, not_or,
       List.append_nil] at hse hsp hie hmv)
 
 set_option hygiene false in
 /-- Unfold both runs to their reads, moving the reads past the fresh bindings. -/
 macro "unf_simp" : tactic => `(tactic|
-    simp only [Prog.run, Stmt.run, Hole.fill, MHole.fill, VHole.fill, Src.value, Val.eval,
+    simp only [Prog.run, Stmt.run, Hole.fill, MHole.fill, VHole.fill, NewLhs.fill, Src.value,
+      Val.eval, MLoc.addr, arrayLen_setEnv, memArrayLen_setEnv, MLoc.addr_setEnv,
       Simple.eval_local, SPath.resolve, Loc.resolve, ARhs.bind, MRhs.bind, MSrc.mval, MLoc.write,
       MPath.mval_var, bind_assoc, pure_bind, bind_pure, envVal_setEnv_self, envRef_setEnv_self,
       aliasPath_setEnv_self, envVal_setEnv_ne, envRef_setEnv_ne, aliasPath_setEnv_ne,
@@ -277,6 +279,13 @@ macro "unf_simp" : tactic => `(tactic|
       aliasPath_setEnv_ne', pickBranch, evalBinop_noShort, Simple.eval_bool, Simple.eval_lit,
       SemanticsProperties.State.setEnv_setEnv_absorb,
       ne_eq, not_false_eq_true, reduceCtorEq, *])
+
+/-- Two runs that read the same first, then continue alike. -/
+theorem SameOk.bind_same {ns : List Var} {α : Type} (r : Res α) {f g : α → Res State}
+    (h : ∀ a, SameOk ns (f a) (g a)) : SameOk ns (r >>= f) (r >>= g) := by
+  cases r with
+  | error _ => trivial
+  | ok a => exact h a
 
 set_option maxHeartbeats 4000000 in
 theorem Taclet.sound_unfold {k : Nat} {m : Modality} {s : Stmt C} {P : Prog C}
@@ -315,6 +324,27 @@ theorem Taclet.sound_unfold {k : Nat} {m : Modality} {s : Stmt C} {P : Prog C}
         simp only [Res.ok_bind]
         refine copyStToM_bind_agree ?_ sv _
         agree_tac
+  -- a memory `delete` past a fresh binding: the reset reads and allocates alike
+  case memoryFieldDelete_unfold_leftFst =>
+    unf_simp
+    exact SameOk.bind_same _ fun _ => SameOk.bind_same _ fun _ =>
+      SameOk.of_agree (memClear_agree (by agree_tac) _ _)
+  case memoryIndexDelete_unfold_leftFst =>
+    unf_simp
+    exact SameOk.bind_same _ fun _ => SameOk.bind_same _ fun _ => SameOk.bind_same _ fun _ =>
+      SameOk.bind_same _ fun _ => SameOk.of_agree (memClear_agree (by agree_tac) _ _)
+  case memoryIndexDeleteNonSimpleIndexCapture =>
+    unf_simp
+    cases Val.eval σ ‹Val C .uint› with
+    | error _ =>
+      cases envRef σ ‹Var› <;> trivial
+    | ok v =>
+      simp only [Res.ok_bind]
+      cases envRef σ ‹Var› with
+      | error _ => trivial
+      | ok id =>
+        simp only [Res.ok_bind]
+        exact SameOk.bind_same _ fun _ => SameOk.of_agree (memClear_agree (by agree_tac) _ _)
   case ifElseUnfold =>
     unf_simp
     cases Val.eval σ ‹Val C .bool› with

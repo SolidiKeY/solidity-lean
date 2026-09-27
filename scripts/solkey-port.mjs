@@ -90,13 +90,15 @@
  *    like a state variable of the contract gets a trailing `_`.
  *
  * 5. **Syntax.** Statements are Solidity as written, re-emitted one per
- *    `;` with braced branches; `uint r = x++;` is `uint r; r = x++;` (the
- *    grammar has `++` only as a statement and in `v = x++`); a nested
- *    ternary in a branch is parenthesized; `2e3` is spelt out.
+ *    `;` with braced branches; `uint r = x++;` is `uint r; r = x++;`; a
+ *    decrement `x--` is spelled `x−−` (two U+2212: `--` opens a Lean
+ *    comment); a nested ternary in a branch is parenthesized; `2e3` is
+ *    spelt out.  `++`/`−−` inside an expression, `.length`, `new T[](n)`,
+ *    a conditional of references and a negative literal are the
+ *    elaborator's (`Syntax.lean`).
  *
  * 6. **Anything else** is `unsupported` with the reason: a state variable
- *    the Lean contract does not declare, `--` (Lean's comment token, and
- *    the grammar has no decrement), `.length`, `**`, `new`, loops, calls,
+ *    the Lean contract does not declare, `**`, loops, calls,
  *    `return`, a type outside `uint`/`int`/`bool`/`address`/structs/
  *    dynamic arrays/mappings. What the translator lets through and Lean
  *    rejects is recorded with Lean's message.
@@ -542,15 +544,9 @@ function exprGap(e) {
   if (/\b\d+\s*(wei|gwei|ether|seconds|minutes|hours|days|weeks)\b/.test(e)) {
     return "ether and time units (`1 gwei`, `2 days`) are not in the grammar";
   }
-  if (/--/.test(e)) {
-    return "decrement: `--` is Lean's comment token, and the grammar has no `x--`/`--x`";
-  }
-  if (/\.length\b/.test(e)) return "`.length` is not a program expression";
   if (/\*\*/.test(e)) return "exponentiation `**` is not in the sol_expr grammar";
-  if (/\bnew\s+\w+/.test(e)) return "`new T[](n)` array allocation is not in the fragment";
   if (/\b(msg|block|tx)\.\w+|\bthis\b/.test(e)) return "`msg`/`block`/`this` are not expressions";
   if (/(^|[^&|])[&|](?![&|=])|\^|~|<<|>>/.test(e)) return "bitwise operators are not in the grammar";
-  if (/\+\+/.test(e)) return "`++` inside an expression: the grammar has it as a statement only";
   const call = e.match(/\b([A-Za-z_]\w*)\s*\(/);
   if (call && !["push", "pop", "transfer"].includes(call[1])) {
     return VALUE_TYPES[call[1]] || /^u?int\d+$/.test(call[1]) || call[1] === "payable"
@@ -717,7 +713,8 @@ function translateFunction(fn, contract, sol, leanVars, unportedVars) {
   const expr = (e) => {
     const gap = exprGap(e);
     if (gap) throw new Unsupported(gap);
-    return fixTernary(names(expandScientific(e.trim())));
+    // `--` opens a Lean comment: a decrement is spelled `−−` (two U+2212)
+    return fixTernary(names(expandScientific(e.trim()))).replace(/--/g, "−−");
   };
 
   const out = [];

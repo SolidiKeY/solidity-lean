@@ -433,7 +433,7 @@ def wtVal (Γ : TyCtx) : {p : PrimTy} → Val C p → Bool
   | _, @Val.binop _ p _ op _ _ a b => binInFrag op p && wtVal Γ a && wtVal Γ b
   | _, .unop op _ _ a => op == .not && wtVal Γ a
   | p, .ternary c a b => primInFrag p && wtVal Γ c && wtVal Γ a && wtVal Γ b
-  | _, .readMem _ => false
+  | _, .readMem _ | _, .len .. | _, .mlen .. => false
 end
 
 /-- The storage location an `op=` target names, if it is one. -/
@@ -552,7 +552,7 @@ def compileVal : {p : PrimTy} → Val C p → List Instr
   | _, .ternary c a b =>
     compileVal c ++ [.iszero, .jumpi ((compileVal a).length + 1)] ++ compileVal a ++
       [.jump (compileVal b).length] ++ compileVal b
-  | _, .readMem _ => []
+  | _, .readMem _ | _, .len .. | _, .mlen .. => []
 end
 
 /-- `… s → … s` with `0` written at `s + o` for each `o`. -/

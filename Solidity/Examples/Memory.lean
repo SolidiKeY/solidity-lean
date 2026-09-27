@@ -33,9 +33,8 @@ a comment names it (`StorageSteps.lean`'s docstring says why).
 
 The arrays are the struct table's (`AST.lean`): a `Token[]` inside a
 `TokenBucket` stands for `carol.account.tokens`, which
-`Account` does not have here.  Memory `delete` is not a statement of the typed
-syntax (the last section), and an impure index (`v[++i]`) is not an
-expression of it.
+`Account` does not have here.  Memory `delete` is §6, `new T[](n)` and
+`.length` §7.
 -/
 
 namespace Solidity.Examples.Memory
@@ -443,13 +442,257 @@ carries. -/
 
 /-! ## 6 · Memory `delete`
 
-The calculus's memory delete examples (
-`delete carol;`, `delete carol.account;`, `delete carolValues[i];`) have no
-statement: the typed syntax has `delete` on storage locations only, and the
-elaborator says so. -/
+`delete` of a memory local binds it to a fresh default object
+(`memoryRootDeleteFreshRebind`); of a member or an element, it writes the
+member's default there, a fresh default object for a reference
+(`memoryFieldDeleteReference`, `memoryIndexDeleteReference`).  So an alias of
+the old object keeps it, which is the point.  The values a fresh default holds
+are the runs at the end of the section. -/
 
-/-- error: Solidity elaboration failed: `delete` in memory is not a statement yet -/
+/-- `Person memory carolAlias = carol; carol.age = 33; delete carol;
+oldAge = carolAlias.age;` — the alias keeps the old object
+(`memoryRootDeleteFreshRebind`). -/
+theorem memoryRootDelete :
+    ⊨ dl!{ [ Person memory carol = alice; Person memory carolAlias = carol; carol.age = 33;
+             delete carol; uint oldAge = carolAlias.age; ] true } := by
+  apply Proves.valid
+  apply unfold .memoryLocalDeclInitDrop
+  apply update .memoryStorageCopy
+  apply unfold .memoryLocalDeclInitDrop
+  apply update .memoryRootAlias
+  apply update .memoryFieldWriteStore
+  apply update .memoryRootDeleteFreshRebind
+  apply unfold .localValueDeclInitDrop
+  apply update .memoryFieldReadHeap
+  apply empty
+  apply close
+  sol_symex
+  sol_close
+
+/-- `delete carol.age;` — a primitive member is reset to its default
+(`memoryFieldDeletePrimitive`), which reads back. -/
+theorem memoryFieldDeletePrim :
+    ⊨ dl!{ [ Person memory carol = alice; carol.age = 33; delete carol.age;
+             uint x = carol.age; ] x == 0 } := by
+  apply Proves.valid
+  apply unfold .memoryLocalDeclInitDrop
+  apply update .memoryStorageCopy
+  apply update .memoryFieldWriteStore
+  apply update .memoryFieldDeletePrimitive
+  apply unfold .localValueDeclInitDrop
+  apply update .memoryFieldReadHeap
+  apply empty
+  apply close
+  sol_symex
+  sol_close
+
+/-- `Account memory carolAcc = carol.account; delete carol.account;` — a
+member of reference type gets a fresh default object
+(`memoryFieldDeleteReference`); `carolAcc` keeps the old one. -/
+theorem memoryFieldDeleteRef :
+    ⊨ dl!{ [ Person memory carol = alice; Account memory carolAcc = carol.account;
+             delete carol.account; ] true } := by
+  apply Proves.valid
+  apply unfold .memoryLocalDeclInitDrop
+  apply update .memoryStorageCopy
+  apply unfold .memoryLocalDeclInitDrop
+  apply update .memoryFieldReadAliasRoot
+  apply update .memoryFieldDeleteReference
+  apply empty
+  apply close
+  sol_symex
+  sol_close
+
+/-- `delete carolValues[i];` (box) — an element of an array of primitives
+is reset (`memoryIndexDeletePrimitive`); out of bounds the write reverts,
+which the box accepts. -/
+theorem memoryIndexDeletePrim :
+    ⊨ dl!{ [ uint[] memory carolValues = values; carolValues[i] = 5; delete carolValues[i];
+             uint x = carolValues[i]; ] x == 0 } := by
+  apply Proves.valid
+  apply unfold .memoryLocalDeclInitDrop
+  apply update .memoryStorageCopy
+  apply update .memoryIndexWriteStore
+  apply update .memoryIndexDeletePrimitive
+  apply unfold .localValueDeclInitDrop
+  apply update .memoryIndexReadHeap
+  apply empty
+  apply close
+  sol_symex
+  sol_close
+
+/-- `delete carolTokens[i];` (box) — an element of an array of structs gets
+a fresh default object (`memoryIndexDeleteReference`). -/
+theorem memoryIndexDeleteRef :
+    ⊨ dl[TestSuite]{ [ Token[] memory carolTokens = tokens; delete carolTokens[i]; ] true } := by
+  apply Proves.valid
+  apply unfold .memoryLocalDeclInitDrop
+  apply update .memoryStorageCopy
+  apply update .memoryIndexDeleteReference
+  apply empty
+  apply close
+  sol_symex
+  sol_close
+
+/-- `delete carol.account.tokens[i];` (box; here `b.tokens[i]`, `TokenBucket`
+having the tokens) — the receiver is bound first
+(`memoryIndexDelete_unfold_leftFst`). -/
+theorem memoryNestedIndexDelete :
+    ⊨ dl[TestSuite]{ [ TokenBucket memory b = bucket; delete b.tokens[i]; ] true } := by
+  apply Proves.valid
+  apply unfold .memoryLocalDeclInitDrop
+  apply update .memoryStorageCopy
+  apply unfold .memoryIndexDelete_unfold_leftFst
+  apply unfold .memoryLocalDeclInitDrop
+  apply update .memoryFieldReadAliasRoot
+  apply update .memoryIndexDeleteReference
+  apply empty
+  apply close
+  sol_symex
+  sol_close
+
+/-- `delete carolValues[i + 1];` — a complex index is captured first
+(`memoryIndexDeleteNonSimpleIndexCapture`). -/
+theorem memoryIndexDeleteCapture :
+    ⊨ dl!{ [ uint[] memory carolValues = values; delete carolValues[i + 1]; ] true } := by
+  apply Proves.valid
+  apply unfold .memoryLocalDeclInitDrop
+  apply update .memoryStorageCopy
+  apply unfold .memoryIndexDeleteNonSimpleIndexCapture
+  apply unfold .localValueDeclInitDrop
+  apply update .binopAssignment
+  apply update .memoryIndexDeletePrimitive
+  apply empty
+  apply close
+  sol_symex
+  sol_close
+
+/-! `Person memory carolAlias = carol; carol.age = 33; delete carol;` — the
+two reads: the alias still sees `33`, `carol` the default `0`. -/
+
+/--
+info: (Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int 33)),
+ Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int 0)))
+-/
 #guard_msgs in
-#check (sol{ Person memory carol; delete carol; } : Prog StandardExample)
+#eval
+  let P : Prog StandardExample := sol{ Person memory carol; Person memory carolAlias = carol;
+    carol.age = 33; delete carol; uint oldAge = carolAlias.age; uint newAge = carol.age; }
+  (localAfter State.exampleStore P "oldAge", localAfter State.exampleStore P "newAge")
+
+/-! `carol.account.balance = 7; delete carol.account;` — the old account
+keeps `7`, the member reads the fresh default `0`. -/
+
+/--
+info: (Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int 7)),
+ Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int 0)))
+-/
+#guard_msgs in
+#eval
+  let P : Prog StandardExample := sol{ Person memory carol; Account memory carolAcc = carol.account;
+    carol.account.balance = 7; delete carol.account; uint oldBal = carolAcc.balance;
+    uint newBal = carol.account.balance; }
+  (localAfter State.exampleStore P "oldBal", localAfter State.exampleStore P "newBal")
+
+/-! ## 7 · `new T[](n)` and `.length`
+
+`new T[](n)` allocates `n` default elements (`memoryArrayFreshAlloc`, into
+a memory local; `newArrayCapture` binds one first for any other target), and
+`.length` reads an array's length (`memoryLengthRead`, `storageLengthRead`;
+KeY's member reads at `length`). -/
+
+/-- `uint[] memory xs = new uint[](n); uint len = xs.length;` —
+`memoryArrayFreshAlloc`, then `memoryLengthRead`. -/
+theorem memoryNewArray :
+    ⊨ dl!{ [ uint[] memory xs = new uint[](n); uint len = xs.length; ] true } := by
+  apply Proves.valid
+  apply unfold .memoryLocalDeclInitDrop
+  apply update .memoryArrayFreshAlloc
+  apply unfold .localValueDeclInitDrop
+  apply update .memoryLengthRead
+  apply empty
+  apply close
+  sol_symex
+  sol_close
+
+/-- `xs[0] = new uint[](3);` — a fresh array written into a memory element is
+bound to a fresh memory local first (`newArrayCapture`). -/
+theorem memoryNewArrayCapture :
+    ⊨ dl!{ [ uint[][] memory xs = new uint[][](1); xs[0] = new uint[](3); ] true } := by
+  apply Proves.valid
+  apply unfold .memoryLocalDeclInitDrop
+  apply update .memoryArrayFreshAlloc
+  apply unfold .newArrayCapture
+  apply unfold .memoryLocalDeclInitDrop
+  apply update .memoryArrayFreshAlloc
+  apply update .memoryIndexWriteCopy
+  apply empty
+  apply close
+  sol_symex
+  sol_close
+
+/-- `basketA.items = new uint[](2);` — into storage, through a fresh memory
+local (`newArrayCapture`), then copied back (`memoryToStorageFieldCopyRoot`). -/
+theorem storageNewArrayCapture :
+    ⊨ dl[TestSuite]{ [ basketA.items = new uint[](2); uint len = basketA.items.length; ] true } := by
+  apply Proves.valid
+  apply unfold .newArrayCapture
+  apply unfold .memoryLocalDeclInitDrop
+  apply update .memoryArrayFreshAlloc
+  apply update .memoryToStorageFieldCopyRoot
+  apply unfold .localValueDeclInitDrop
+  apply unfold .storageLengthRead_unfold_rightFst
+  apply unfold .storageLocalDeclInitDrop
+  apply update .storageFieldReadBindLocalRoot
+  apply update .storageLengthRead
+  apply empty
+  apply close
+  sol_symex
+  sol_close
+
+/-- `TokenBucket memory b = bucket; uint len = b.tokens.length;` — the
+receiver bound first (`memoryLengthRead_unfold_rightFst`). -/
+theorem memoryNestedLength :
+    ⊨ dl[TestSuite]{ [ TokenBucket memory b = bucket; uint len = b.tokens.length; ] true } := by
+  apply Proves.valid
+  apply unfold .memoryLocalDeclInitDrop
+  apply update .memoryStorageCopy
+  apply unfold .localValueDeclInitDrop
+  apply unfold .memoryLengthRead_unfold_rightFst
+  apply unfold .memoryLocalDeclInitDrop
+  apply update .memoryFieldReadAliasRoot
+  apply update .memoryLengthRead
+  apply empty
+  apply close
+  sol_symex
+  sol_close
+
+/-! `new uint[](3)` holds three zeros; `new Token[](2)` two fresh `Token`s,
+each its own object; the lengths read back. -/
+
+/--
+info: (Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int 3)),
+ Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int 0)))
+-/
+#guard_msgs in
+#eval
+  let P : Prog StandardExample := sol{ uint[] memory xs = new uint[](3); uint len = xs.length;
+    uint x = xs[2]; }
+  (localAfter State.exampleStore P "len", localAfter State.exampleStore P "x")
+
+/--
+info: (Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int 5)),
+ Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int 0)))
+-/
+#guard_msgs in
+#eval
+  let P : Prog TestSuite := sol[TestSuite]{ Token[] memory ts = new Token[](2);
+    ts[0].value = 5; uint a = ts[0].value; uint b = ts[1].value; }
+  (localAfter State.testSuiteStore P "a", localAfter State.testSuiteStore P "b")
+
+/-- info: Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int 2)) -/
+#guard_msgs in
+#eval localAfter State.testSuiteStore
+  (sol[TestSuite]{ basketA.items = new uint[](2); uint len = basketA.items.length; }) "len"
 
 end Solidity.Examples.Memory

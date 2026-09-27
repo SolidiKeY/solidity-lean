@@ -86,6 +86,8 @@ def Val.cost : {p : PrimTy} → Val C p → Nat
   | _, .unop _ _ _ a => a.cost + a.pen
   | _, .ternary c a b => c.cost + c.pen + a.cost + b.cost + 4
   | _, .readMem l => l.cost + 1
+  | _, .len b _ => b.cost + b.pen + 1
+  | _, .mlen b _ => b.cost + b.pen + 1
 
 end
 
@@ -101,6 +103,12 @@ def ARhs.cost {R : RefTy} : ARhs C R → Nat
 def MRhs.cost {R : RefTy} : MRhs C R → Nat
   | .alias p => p.cost
   | .copy p _ => p.cost + p.pen
+  | .newArr _ _ => 1
+
+/-- A fresh array's target costs what the location does. -/
+def NewLhs.cost {R : RefTy} : NewLhs C R → Nat
+  | .store l => l.cost
+  | .mem l => l.cost
 
 def MSrc.cost {T : Ty} : MSrc C T → Nat
   | .val v => v.cost + v.pen
@@ -141,6 +149,8 @@ def Stmt.weight : Stmt C → Nat
   | .assignFromMem l p => l.cost + p.cost + 1
   | .assignMem l r => l.cost + r.cost + 1
   | .delete l => l.cost + 1
+  | .deleteMem p _ => p.cost + 1
+  | .assignNew l _ _ => l.cost + 7
   | .ite c thn els => c.cost + c.pen + max (Prog.weight thn) (Prog.weight els) + 2
   | .require c | .assert c => c.cost + c.pen + 2
   | .revert => 1
@@ -200,6 +210,12 @@ theorem Val.pen_binop {p q : PrimTy} (op : BinOp) (h : op.accepts p = true) (hq 
 /-- Example: the `!b` of `require(!b);` is charged `16`. -/
 theorem Val.pen_unop {p q : PrimTy} (op : UnOp) (h : op.accepts p = true) (hq : op.ret p = q)
     (a : Val C p) : (Val.unop op h hq a).pen = 16 := rfl
+/-- Example: the `values.length` of `total = values.length;` is charged `16`. -/
+theorem Val.pen_len {p : PrimTy} {E : Ty} (b : SPath C (.array E)) (h : p = .uint) :
+    (Val.len b h).pen = 16 := rfl
+/-- Example: the `xs.length` of `total = xs.length;` is charged `16`. -/
+theorem Val.pen_mlen {p : PrimTy} {E : Ty} (b : MPath C (.array E)) (h : p = .uint) :
+    (Val.mlen b h).pen = 16 := rfl
 /-- Example: the `c ? 1 : 2` of `total = c ? 1 : 2;` is charged `16`. -/
 theorem Val.pen_ternary {p : PrimTy} (c : Val C .bool) (a b : Val C p) :
     (Val.ternary c a b).pen = 16 := rfl
@@ -245,6 +261,8 @@ theorem Val.cost_pos : {p : PrimTy} → (v : Val C p) → 1 ≤ v.cost
   | _, .simple _ => by simp [Val.cost]
   | _, .read _ | _, .readMem _ | _, .ternary .. => by simp [Val.cost]
   | _, .binop _ _ _ a _ | _, .unop _ _ _ a => by have := a.pen_pos; simp only [Val.cost]; omega
+  | _, .len b _ => by have := b.pen_pos; simp only [Val.cost]; omega
+  | _, .mlen b _ => by have := b.pen_pos; simp only [Val.cost]; omega
 end
 
 /-- What a rule's premise owes the statement it replaces: new statements
@@ -295,7 +313,8 @@ macro_rules
   | `(tactic| weigh [$ts,*]) => `(tactic| (
     simp only [Step.Small, Premise.Smaller, Prog.weight, Stmt.weight, List.cons_append,
       List.nil_append, Hole.fill, MHole.fill, VHole.fill, SPath.cost, Loc.cost, MPath.cost,
-      MLoc.cost, Val.cost, Src.cost, ARhs.cost, MRhs.cost, MSrc.cost, OpLoc.cost, Val.pen_simple,
+      MLoc.cost, Val.cost, Src.cost, ARhs.cost, MRhs.cost, MSrc.cost, OpLoc.cost, NewLhs.cost,
+      NewLhs.fill, Val.pen_simple, Val.pen_len, Val.pen_mlen,
       SPath.pen_alias, MPath.pen_var, SPath.pen_root, SPath.pen_field, SPath.pen_index,
       MPath.pen_loc, Val.pen_read, Val.pen_readMem, Val.pen_binop, Val.pen_unop,
       Val.pen_ternary, $ts,*]
@@ -353,7 +372,8 @@ theorem MHole.readStep_small {T : Ty} (lhs : MHole C T) (ht : lhs.isTarget = tru
   | .field (.loc _) _ _ => by simp only [MHole.readStep]; cases lhs <;> weigh
   | .index (.var _) (.simple _) => hi ..
   | .index (.var _) (.read _) | .index (.var _) (.binop ..) | .index (.var _) (.unop ..)
-  | .index (.var _) (.ternary ..) | .index (.var _) (.readMem _) => by
+  | .index (.var _) (.ternary ..) | .index (.var _) (.readMem _) | .index (.var _) (.len ..)
+  | .index (.var _) (.mlen ..) => by
     simp only [MHole.readStep]; cases lhs <;> weigh
   | .index (.loc _) _ => by simp only [MHole.readStep]; cases lhs <;> weigh
 
@@ -419,14 +439,24 @@ theorem localStep_small {p : PrimTy} (x : Var) :
   | .binop _ _ _ (.simple _) (.simple _) => trivial
   | .binop op hop hq (.simple se) (.read _) | .binop op hop hq (.simple se) (.binop ..)
   | .binop op hop hq (.simple se) (.unop ..) | .binop op hop hq (.simple se) (.ternary ..)
-  | .binop op hop hq (.simple se) (.readMem _) => by
+  | .binop op hop hq (.simple se) (.readMem _) | .binop op hop hq (.simple se) (.len ..)
+  | .binop op hop hq (.simple se) (.mlen ..) => by
     simp only [localStep]; exact binopRightStep_small x op hop hq se _ rfl
   | .binop _ _ _ (.read _) _ | .binop _ _ _ (.binop ..) _ | .binop _ _ _ (.unop ..) _
-  | .binop _ _ _ (.ternary ..) _ | .binop _ _ _ (.readMem _) _ => by
+  | .binop _ _ _ (.ternary ..) _ | .binop _ _ _ (.readMem _) _ | .binop _ _ _ (.len ..) _
+  | .binop _ _ _ (.mlen ..) _ => by
     simp only [localStep]; weigh
   | .unop _ _ _ (.simple _) => trivial
   | .unop _ _ _ (.read _) | .unop _ _ _ (.binop ..) | .unop _ _ _ (.unop ..)
-  | .unop _ _ _ (.ternary ..) | .unop _ _ _ (.readMem _) => by simp only [localStep]; weigh
+  | .unop _ _ _ (.ternary ..) | .unop _ _ _ (.readMem _) | .unop _ _ _ (.len ..)
+  | .unop _ _ _ (.mlen ..) => by simp only [localStep]; weigh
+  | .len b _ => by
+    simp only [localStep]
+    split
+    · trivial
+    · weigh [SPath.pen_eq_16 ‹_›]
+  | .mlen (.var _) _ => trivial
+  | .mlen (.loc _) _ => by simp only [localStep]; weigh
   | .ternary c a b => ternaryStep_small (.local x) rfl c a b
   | .readMem l => by
     simp only [localStep]
@@ -580,7 +610,7 @@ theorem opStep_small {p : PrimTy} (op : BinOp) (hop : op.hasCompoundAssign = tru
     | mfield b _ _ => cases b <;> simp only [opStep] <;> first | trivial | weigh
     | mindex b _ => cases b <;> simp only [opStep] <;> first | trivial | weigh
     | _ => trivial
-  | .read _ | .binop .. | .unop .. | .ternary .. | .readMem _ => by
+  | .read _ | .binop .. | .unop .. | .ternary .. | .readMem _ | .len .. | .mlen .. => by
     simp only [opStep]; weigh
 
 /-- `++`/`--`: the receiver first.
@@ -646,8 +676,10 @@ Example: `people[i].wallet.transfer(x);` captures the receiver:
 theorem transferStep_small : ∀ r a : Val C .uint, (transferStep (k := k) (m := m) r a).Small
   | .simple _, .simple _ => trivial
   | .simple _, .read _ | .simple _, .binop .. | .simple _, .unop .. | .simple _, .ternary ..
-  | .simple _, .readMem _ => by simp only [transferStep]; weigh
-  | .read _, _ | .binop .., _ | .unop .., _ | .ternary .., _ | .readMem _, _ => by
+  | .simple _, .readMem _ | .simple _, .len .. | .simple _, .mlen .. => by
+    simp only [transferStep]; weigh
+  | .read _, _ | .binop .., _ | .unop .., _ | .ternary .., _ | .readMem _, _ | .len .., _
+  | .mlen .., _ => by
     simp only [transferStep]; weigh
 
 /-- A memory local bound.
@@ -664,6 +696,30 @@ theorem rebindMemStep_small {R : RefTy} (x : Var) :
     split
     · trivial
     · weigh [SPath.pen_eq_16 ‹_›]
+  | .newArr _ _ => trivial
+
+/-- A memory `delete`: a member or an element of a memory local is reset in
+one update; any other receiver is bound first, a complex index captured.
+
+Example: `delete m.inner.age;` unfolds into
+`Inner memory mv = m.inner; delete mv.age;`. -/
+theorem deleteMemStep_small {T : Ty} (p : MPath C T) (hd : T.defaultOkS = true) :
+    (deleteMemStep (k := k) (m := m) p hd).Small := by
+  cases p with
+  | var _ => trivial
+  | loc l =>
+    cases l with
+    | field b f hf =>
+      cases b with
+      | var _ => cases T <;> trivial
+      | loc _ => simp only [deleteMemStep]; weigh
+    | index b i =>
+      cases b with
+      | var _ =>
+        cases i with
+        | simple _ => cases T <;> trivial
+        | _ => simp only [deleteMemStep]; weigh
+      | loc _ => simp only [deleteMemStep]; weigh
 
 /-- A memory reference written: its source unfolded until it is bindable.
 
@@ -737,12 +793,16 @@ theorem Stmt.step_smaller (k : Nat) (m : Modality) :
   | .assignFromMem l p => assignFromMemStep_small l p
   | .assignMem l r => assignMemStep_small l r
   | .delete l => deleteStep_small l
+  | .deleteMem p hd => deleteMemStep_small p hd
+  | .assignNew l _ _ => by cases l <;> (simp only [Stmt.step]; weigh)
   | .ite (.simple _) _ _ | .require (.simple _) | .assert (.simple _) => by
     simp only [Stmt.step]; weigh
   | .ite (.read _) .. | .ite (.binop ..) .. | .ite (.unop ..) .. | .ite (.ternary ..) ..
   | .ite (.readMem _) .. | .require (.read _) | .require (.binop ..) | .require (.unop ..)
   | .require (.ternary ..) | .require (.readMem _) | .assert (.read _) | .assert (.binop ..)
-  | .assert (.unop ..) | .assert (.ternary ..) | .assert (.readMem _) => by
+  | .assert (.unop ..) | .assert (.ternary ..) | .assert (.readMem _) | .ite (.len ..) ..
+  | .ite (.mlen ..) .. | .require (.len ..) | .require (.mlen ..) | .assert (.len ..)
+  | .assert (.mlen ..) => by
     simp only [Stmt.step]; weigh
   | .revert => by cases m <;> trivial
 
