@@ -209,6 +209,43 @@ theorem rejected :
       (sol{ Person storage p = persons[0]; } : Prog StandardExample)).isNone := by
   decide
 
+/-! ## Fixed-size arrays
+
+solc lays a fixed-size array out inline, from its own slot, with no length
+slot: `uint[3] fixedValues;` takes three slots, element `i` at its slot plus
+`i`, and the bound is the constant `3` (`fixedCheck`, `fixedSlot`). -/
+
+section Fixed
+
+local instance : InContract := ⟨TestSuite⟩
+
+/-- `uint[3]` takes three slots; `Token[2]` two; a `FixedTriple`
+(`uint[3] items; uint tag;`) four, `tag` the fourth. -/
+theorem fixed_layout :
+    size (.ref (.fixed .uint 3)) = 3 ∧ size (.ref (.fixed (.ref (.struct "Token")) 2)) = 2 ∧
+      size (.ref (.struct "FixedTriple")) = 4 ∧ offset "FixedTriple" "tag" = 3 := by
+  decide
+
+/-- `fixedValues[2] = 7;` -/
+def fixedWrite : Prog TestSuite := sol{ fixedValues[2] = 7; }
+
+/-- It is in the compiled fragment, so `compile_correct` covers it. -/
+theorem fixedWrite_wt : (wtProg (fun _ => none) fixedWrite).isSome := by decide
+
+/-- `fixedValues[2] = 7;` writes `7` to `fixedValues`'s slot plus `2`. -/
+theorem fixedWrite_run :
+    storeAt (run (compileProg fixedWrite) (Machine.init 0))
+      ((rootSlot TestSuite "fixedValues").add 2) = some 7 := by
+  decide
+
+/-- `uint k = 3; fixedValues[k] = 1;` reverts at the bound: `k` is not below `3`. -/
+theorem fixedOutOfBounds_run :
+    reverted (run (compileProg (sol{ uint k = 3; fixedValues[k] = 1; } : Prog TestSuite))
+      (Machine.init 0)) = true := by
+  decide
+
+end Fixed
+
 /-! ## The interpreter, read off the machine -/
 
 /-- **`alice.age = 10;` in the interpreter.**  From a fresh contract the

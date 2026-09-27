@@ -345,12 +345,14 @@ def rhsVar? (stem : String) : TSyntax `sol_expr → Option Ident
   | _ => none
 
 /-- How a storage receiver is indexed: `map[ie]` by key, `arr[ie]` by
-position, anything else by the schema variable `it`. -/
+position — into a dynamic or a fixed-size array, the schema variable `ak`
+(`ArrTy`), as solkey's `Path[…,array]` takes either — anything else by the
+schema variable `it`. -/
 def indexTyOf : TSyntax `sol_expr → MacroM Lean.Term
   | `(sol_expr| $x:ident) =>
     match stemOf x.getId.toString with
     | "map" => `(IndexTy.map)
-    | "arr" | "parr" | "rarr" | "marr" | "darr" => `(IndexTy.arr)
+    | "arr" | "parr" | "rarr" | "marr" | "darr" => `(IndexTy.arr $(schemaIdent "ak"))
     | _ => pure (schemaIdent "it")
   | _ => pure (schemaIdent "it")
 
@@ -417,11 +419,13 @@ partial def schemaAt (Γ : Scope) (pos : Pos) : TSyntax `sol_expr → MacroM Lea
   | stx@`(sol_expr| $e:sol_expr [ $k:sol_expr ]) => do
     if isMem Γ e then
       let b ← schemaAt Γ .mpath e
+      -- a memory array of either kind: the schema variable `mk` (`ArrTy`)
+      let a := schemaIdent "mk"
       match pos with
-      | .mloc => `(MLoc.index $b $(← schemaAt Γ .val k))
-      | .mpath => `(MPath.loc (MLoc.index $b $(← schemaAt Γ .val k)))
-      | .val => `(Val.readMem (MLoc.index $b $(← schemaAt Γ .val k)))
-      | .oploc => `(OpLoc.mindex $b $(← schemaAt Γ .simple k))
+      | .mloc => `(MLoc.index $a $b $(← schemaAt Γ .val k))
+      | .mpath => `(MPath.loc (MLoc.index $a $b $(← schemaAt Γ .val k)))
+      | .val => `(Val.readMem (MLoc.index $a $b $(← schemaAt Γ .val k)))
+      | .oploc => `(OpLoc.mindex $a $b $(← schemaAt Γ .simple k))
       | _ => posError stx "a memory element" pos
     else
       let b ← schemaAt Γ .spath e
@@ -1272,6 +1276,7 @@ def binopSym? (op : Lean.Expr) : MetaM (Option String) := do
 def mkBinExpr (sym : String) (a b : TSyntax `sol_expr) : MetaM (TSyntax `sol_expr) :=
   match sym with
   | "+" => `(sol_expr| $a + $b) | "-" => `(sol_expr| $a - $b) | "*" => `(sol_expr| $a * $b)
+  | "**" => `(sol_expr| $a ** $b)
   | "/" => `(sol_expr| $a / $b) | "%" => `(sol_expr| $a % $b)
   | "<" => `(sol_expr| $a < $b) | ">" => `(sol_expr| $a > $b)
   | "<=" => `(sol_expr| $a <= $b) | ">=" => `(sol_expr| $a >= $b)
@@ -1309,6 +1314,9 @@ where
       let some s ← nameOf? s | `(sol_ty| T)
       `(sol_ty| $(nameIdent s):ident)
     | RefTy.array E => `(sol_ty| $(← ppTy E):sol_ty[])
+    | RefTy.fixed E n =>
+      let some n ← natOf? n | `(sol_ty| T)
+      `(sol_ty| $(← ppTy E):sol_ty[$(Syntax.mkNumLit (toString n)):num])
     | RefTy.mapping K V => `(sol_ty| mapping($(← ppTy K) => $(← ppTy V)))
     | _ => `(sol_ty| T)
 
@@ -1346,7 +1354,7 @@ partial def ppExpr (e : Lean.Expr) : MetaM (TSyntax `sol_expr) := do
   | MPath.var _ _ x => var x
   | MPath.loc _ _ l => ppExpr l
   | MLoc.field _ _ _ b f _ => field b f
-  | MLoc.index _ _ b i => index b i
+  | MLoc.index _ _ _ _ b i => index b i
   | Val.simple _ _ s => ppExpr s
   | Val.read _ _ l => ppExpr l
   | Val.readMem _ _ l => ppExpr l
@@ -1377,7 +1385,7 @@ partial def ppExpr (e : Lean.Expr) : MetaM (TSyntax `sol_expr) := do
   | OpLoc.field _ _ _ b f _ => field b f
   | OpLoc.index _ _ _ _ _ b i => index b i
   | OpLoc.mfield _ _ _ b f _ => field b f
-  | OpLoc.mindex _ _ b i => index b i
+  | OpLoc.mindex _ _ _ _ b i => index b i
   | _ => escape
 
 /-- `x++`, `--x`, or `x⊕⊕` for an operator schema variable. -/

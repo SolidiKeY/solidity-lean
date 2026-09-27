@@ -36,6 +36,8 @@ mutual
   inductive RefTy where
     | struct (name : Name)
     | array (elem : Ty)
+    /-- `T[n]`: a fixed-size array, its length part of the type. -/
+    | fixed (elem : Ty) (n : Nat)
     | mapping (key value : Ty)
     deriving DecidableEq, Repr
 
@@ -70,20 +72,23 @@ def isMapping : Ty -> Bool
   | ref (.mapping ..) => true
   | _ => false
 
-/-- The element type of an array is a mapping (`Path[…,mappingElement]`):
-`false` for anything that is not an array. -/
+/-- The element type of an array, dynamic or fixed, is a mapping
+(`Path[…,mappingElement]`): `false` for anything that is not an array. -/
 def elemIsMapping : Ty -> Bool
   | ref (.array e) => e.isMapping
+  | ref (.fixed e _) => e.isMapping
   | _ => false
 
 /-- The element type of an array is primitive (`Path[…,primitiveElement]`):
 `false` for anything that is not an array. -/
 def elemIsPrim : Ty -> Bool
   | ref (.array e) => e.isPrimitive
+  | ref (.fixed e _) => e.isPrimitive
   | _ => false
 
 def indexElemTy : Ty -> Ty
   | Ty.ref (RefTy.array elem) => elem
+  | Ty.ref (RefTy.fixed elem _) => elem
   | Ty.ref (RefTy.mapping _ value) => value
   | _ => Ty.uint
 
@@ -101,6 +106,7 @@ mutual
   def RefTy.allowsMemory : RefTy -> Bool
     | RefTy.struct _ => true
     | RefTy.array elem => elem.allowsMemory
+    | RefTy.fixed elem _ => elem.allowsMemory
     | RefTy.mapping _ _ => false
 end
 
@@ -117,6 +123,7 @@ still counts. -/
 def Ty.isMemoryReferenceType : Ty -> Bool
   | Ty.ref (RefTy.struct _) => true
   | Ty.ref (RefTy.array _) => true
+  | Ty.ref (RefTy.fixed _ _) => true
   | _ => false
 
 /-- `StorageReferenceTypes.isReferenceType`: "in storage, mappings are
@@ -174,6 +181,9 @@ def structDef : Name -> List (Name × Ty)
   | "TokenBucket" =>
       [("tokens", Ty.ref (RefTy.array (Ty.ref (RefTy.struct "Token"))))]
   | "Toggle" => [("on", Ty.bool), ("n", Ty.uint)]
+  -- TestSuite.sol's `Triple { uint[3] items; uint tag; }`, renamed: `Triple`
+  -- is `SolcStructs.sol`'s three `uint`s.
+  | "FixedTriple" => [("items", Ty.ref (RefTy.fixed Ty.uint 3)), ("tag", Ty.uint)]
   -- solc/SolcArrays.sol, SolcControlFlow.sol, SolcStructs.sol (agree).
   | "Pair" => [("a", Ty.uint), ("b", Ty.uint)]
   -- solc/SolcMappings.sol.
@@ -227,6 +237,7 @@ def structRank : Name -> Nat
   | "LedgerUse" => 2
   | "TokenBucket" => 2
   | "Toggle" => 1
+  | "FixedTriple" => 2
   | "Pair" => 1
   | "S" => 1
   | "Sub" => 1
@@ -239,12 +250,14 @@ def structRank : Name -> Nat
   | "BadDup" => 1
   | _ => 1
 
-/-- A type's rank: primitives 0, a struct its `structRank`, an array and
-a mapping the rank of the type they expand into. -/
+/-- A type's rank: primitives 0, a struct its `structRank`, a dynamic array
+and a mapping the rank of the type they expand into, a fixed-size array one
+more (its layout recurses into its element, `Evm.sizeF`). -/
 def tyRank : Ty -> Nat
   | Ty.prim _ => 0
   | Ty.ref (RefTy.struct n) => structRank n
   | Ty.ref (RefTy.array e) => tyRank e
+  | Ty.ref (RefTy.fixed e _) => tyRank e + 1
   | Ty.ref (RefTy.mapping _ v) => tyRank v
 
 def fieldsRank : List (Name × Ty) -> Nat
@@ -284,10 +297,13 @@ def tyHasMapping : Ty -> Bool
   | Ty.ref (RefTy.mapping _ _) => true
   | Ty.ref (RefTy.struct name) => fieldsHaveMapping (structDef name)
   | Ty.ref (RefTy.array elem) => tyHasMapping elem
+  | Ty.ref (RefTy.fixed elem _) => tyHasMapping elem
 termination_by ty => (tyRank ty, sizeOf ty)
 decreasing_by
   · exact Prod.Lex.left _ _ (structDef_rank_lt _)
-  · apply Prod.Lex.right; simp; omega
+  all_goals first
+    | (apply Prod.Lex.left; simp [tyRank]; done)
+    | (apply Prod.Lex.right; simp; omega)
 
 def fieldsHaveMapping : List (Name × Ty) -> Bool
   | [] => false
@@ -330,6 +346,10 @@ mutual
     | RefTy.struct _ => if memoryPayload then KeySort.identity else KeySort.struct
     | RefTy.array elem =>
         if memoryPayload then KeySort.identity else KeySort.array (elem.keySort false)
+    -- `ArraySort` (`T[n]`) is the lattice's `array` sort too: its length is in
+    -- the name only (`KeySort.array`'s docstring)
+    | RefTy.fixed elem _ =>
+        if memoryPayload then KeySort.identity else KeySort.array (elem.keySort false)
     | RefTy.mapping key value =>
         KeySort.mapping (key.keySort false) (value.keySort false)
 end
@@ -365,6 +385,7 @@ theorem Ty.keySort_memory_le_memValue (ty : Ty) (h : ty.allowsMemory = true) :
     cases r with
     | struct _ => rfl
     | array _ => rfl
+    | fixed _ _ => rfl
     | mapping _ _ => simp [Ty.allowsMemory, RefTy.allowsMemory] at h
 
 /-- `\generic alphaId \extends Identity` (under `\hasMemoryFieldSort`)
@@ -390,7 +411,10 @@ inductive FieldSort where
   | map
   deriving DecidableEq, Repr
 
-/-- The `Field` subsort a member of this reference sort inhabits. -/
+/-- The `Field` subsort a member of this reference sort inhabits.  A
+fixed-size array member is solkey's `FixedField`, which is a `MemberField`
+beside `RefField`; the calculus here does not tell the two apart (a member's
+type does, `RefTy.fixed`), so it is a `ref` here. -/
 def RefTy.fieldSort : RefTy -> FieldSort
   | RefTy.mapping _ _ => FieldSort.map
   | _ => FieldSort.ref
@@ -542,26 +566,29 @@ def binOp (op : IncDec) : BinOp :=
 
 end IncDec
 
-/-! ## The four shapes of a type
+/-! ## The five shapes of a type
 
 `Ty` is `prim | ref`, with the reference sorts one level down.  A case split
-wants the four source-level shapes at once: `uint x`, `Person p`,
-`uint[] xs`, `mapping(uint => uint) m`. -/
+wants the five source-level shapes at once: `uint x`, `Person p`,
+`uint[] xs`, `uint[3] xs`, `mapping(uint => uint) m`. -/
 
 namespace Ty
 
 @[match_pattern, reducible] def struct (n : Name) : Ty := .ref (.struct n)
 @[match_pattern, reducible] def array (T : Ty) : Ty := .ref (.array T)
+@[match_pattern, reducible] def fixed (T : Ty) (n : Nat) : Ty := .ref (.fixed T n)
 @[match_pattern, reducible] def mapping (K V : Ty) : Ty := .ref (.mapping K V)
 
-/-- `cases T` by the four shapes a Solidity type is written in. -/
+/-- `cases T` by the five shapes a Solidity type is written in. -/
 @[elab_as_elim]
-def casesOn4 {motive : Ty → Sort u} (prim : ∀ p, motive (.prim p))
+def casesOn5 {motive : Ty → Sort u} (prim : ∀ p, motive (.prim p))
     (struct : ∀ n, motive (.struct n)) (array : ∀ T, motive (.array T))
+    (fixed : ∀ T n, motive (.fixed T n))
     (mapping : ∀ K V, motive (.mapping K V)) : ∀ T, motive T
   | .prim p => prim p
   | .ref (.struct n) => struct n
   | .ref (.array T) => array T
+  | .ref (.fixed T n) => fixed T n
   | .ref (.mapping K V) => mapping K V
 
 end Ty
@@ -577,8 +604,8 @@ their proofs are `Eq.refl`, from a list of the structs checked once
 
 /-- The structs of `structDef` that hold no mapping. -/
 def mapFreeStructs : List Name :=
-  ["Token", "Account", "Person", "Basket", "TokenBucket", "Toggle", "Pair", "S", "Sub",
-   "WithSub", "Inner", "Outer", "Simple", "WithArray", "Triple", "BadDup"]
+  ["Token", "Account", "Person", "Basket", "TokenBucket", "Toggle", "FixedTriple", "Pair", "S",
+   "Sub", "WithSub", "Inner", "Outer", "Simple", "WithArray", "Triple", "BadDup"]
 
 /-- `T` holds no mapping: `Person[]` does not, `mapping(uint => uint)` does. -/
 def Ty.mapFree : Ty → Bool
@@ -586,12 +613,14 @@ def Ty.mapFree : Ty → Bool
   | .ref (.mapping ..) => false
   | .ref (.struct s) => s ∈ mapFreeStructs
   | .ref (.array e) => e.mapFree
+  | .ref (.fixed e _) => e.mapFree
 
 /-- The structs whose fresh default is well-formed: all but `BadDup`, whose
 second `a` row is the counterexample the condition exists for. -/
 def defaultOkStructs : List Name :=
   ["Token", "Account", "Person", "Wallet", "Basket", "Ledger", "LedgerUse", "TokenBucket",
-   "Toggle", "Pair", "S", "Sub", "WithSub", "Inner", "Outer", "Simple", "WithArray", "Triple"]
+   "Toggle", "FixedTriple", "Pair", "S", "Sub", "WithSub", "Inner", "Outer", "Simple",
+   "WithArray", "Triple"]
 
 /-- `T`'s fresh default is well-formed: what `values.push();` and
 `Person memory m;` need. -/
@@ -599,6 +628,7 @@ def Ty.defaultOkS : Ty → Bool
   | .prim _ => true
   | .ref (.struct s) => s ∈ defaultOkStructs
   | .ref (.array _) => true
+  | .ref (.fixed e _) => e.defaultOkS
   | .ref (.mapping _ v) => v.defaultOkS
 
 /-! ## Operators at primitive types -/
@@ -608,6 +638,9 @@ comparisons on numbers, `&&`/`||` on booleans, `==`/`!=` on either. -/
 def BinOp.accepts : BinOp → PrimTy → Bool
   | .and, p | .or, p => p == .bool
   | .eqB, _ | .neB, _ => true
+  -- solc takes an unsigned exponent, and an operator here is applied at one
+  -- type: `**` is `uint ** uint`
+  | .pow, p => p == .uint
   | _, p => p.isNumeric
 
 /-- The result type at operand type `p`: `a + b` on `uint` is a `uint`,

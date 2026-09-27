@@ -88,7 +88,7 @@ def OpLoc.read? : {p : PrimTy} → OpLoc C p → Option (Read C)
   | p, .field b f h => some (.storage (.prim p) (.loc (.field b f h)))
   | p, .index it b i => some (.storage (.prim p) (.loc (.index it b (.simple i))))
   | p, .mfield b f h => some (.memory (.prim p) (.loc (.field b f h)))
-  | p, .mindex b i => some (.memory (.prim p) (.loc (.index b (.simple i))))
+  | p, .mindex a b i => some (.memory (.prim p) (.loc (.index a b (.simple i))))
 
 /-- The value read a statement performs: `x = alice.age;` reads `alice.age`,
 `alice = bob;` reads `bob`, `m = alice;` reads `alice`, `alice.age += 1;`
@@ -475,26 +475,27 @@ theorem faithful_storageIndexWriteMappingCopySource {C : Contract} {k : Nat} {m 
 
 /-- `x = values[i];` reads a number, the array's element type (`\hasElementSort`). -/
 theorem faithful_storageIndexReadArrayFind {C : Contract} {k : Nat} {m : Modality} {v : Var}
-    {x : PrimTy} {arr : SPath C (Ty.ref (RefTy.array (Ty.prim x)))} {ie : Simple C PrimTy.uint} :
+    {R : RefTy} {x : PrimTy} {ak : ArrTy R (Ty.prim x)} {arr : SPath C (Ty.ref R)}
+    {ie : Simple C PrimTy.uint} :
     CtorFaithful ``Taclet.storageIndexReadArrayFind
-      (stmtOf (@Taclet.storageIndexReadArrayFind C k m v x arr ie)) :=
+      (stmtOf (@Taclet.storageIndexReadArrayFind C k m v R x ak arr ie)) :=
   ctorFaithful_of (dom := .storage) (cls := .any) rfl rfl rfl (by decide +kernel)
 
 /-- `alice = persons[i];` reads the `Person` element under `find<[StValue]>`. -/
 theorem faithful_storageIndexReadArrayStoreRoot {C : Contract} {k : Nat} {m : Modality}
     {gsp : Name} {x : RefTy} {hgsp : Eq (Contract.rootType C gsp) (some (Ty.ref x))}
-    {arr : SPath C (Ty.ref (RefTy.array (Ty.ref x)))} {ie : Simple C PrimTy.uint}
+    {R : RefTy} {ak : ArrTy R (Ty.ref x)} {arr : SPath C (Ty.ref R)} {ie : Simple C PrimTy.uint}
     {hm : Eq (Ty.mapFree (Ty.ref x)) true} :
     CtorFaithful ``Taclet.storageIndexReadArrayStoreRoot
-      (stmtOf (@Taclet.storageIndexReadArrayStoreRoot C k m gsp x hgsp arr ie hm)) :=
+      (stmtOf (@Taclet.storageIndexReadArrayStoreRoot C k m gsp x hgsp R ak arr ie hm)) :=
   ctorFaithful_of (dom := .storage) (cls := .reference) rfl rfl rfl (by decide +kernel)
 
 /-- `persons[i] = p;` reads `p`'s `Person` node under `find<[StValue]>`. -/
 theorem faithful_storageIndexWriteArrayCopySource {C : Contract} {k : Nat} {m : Modality}
-    {x : RefTy} {arr : SPath C (Ty.ref (RefTy.array (Ty.ref x)))} {ie : Simple C PrimTy.uint}
+    {R x : RefTy} {ak : ArrTy R (Ty.ref x)} {arr : SPath C (Ty.ref R)} {ie : Simple C PrimTy.uint}
     {sp2 : SPath C (Ty.ref x)} {hm : Eq (Ty.mapFree (Ty.ref x)) true} :
     CtorFaithful ``Taclet.storageIndexWriteArrayCopySource
-      (stmtOf (@Taclet.storageIndexWriteArrayCopySource C k m x arr ie sp2 hm)) :=
+      (stmtOf (@Taclet.storageIndexWriteArrayCopySource C k m R x ak arr ie sp2 hm)) :=
   ctorFaithful_of (dom := .storage) (cls := .reference) rfl rfl rfl (by decide +kernel)
 
 /-- `persons.push(p);` reads `p`'s `Person` node under `find<[StValue]>`. -/
@@ -545,10 +546,10 @@ theorem faithful_storageIndexMappingOpAssign {C : Contract} {k : Nat} {m : Modal
 /-- `values[i] += x;` reads the element under `find<[int]>`. -/
 theorem faithful_storageIndexArrayOpAssign {C : Contract} {k : Nat} {m : Modality} {p : PrimTy}
     {op : BinOp} {hop : Eq (BinOp.hasCompoundAssign op) true} {hp : Eq (PrimTy.isNumeric p) true}
-    {arr : SPath C (Ty.ref (RefTy.array (Ty.prim p)))} {ie : Simple C PrimTy.uint}
+    {R : RefTy} {ak : ArrTy R (Ty.prim p)} {arr : SPath C (Ty.ref R)} {ie : Simple C PrimTy.uint}
     {se : Simple C p} :
     CtorFaithful ``Taclet.storageIndexArrayOpAssign
-      (stmtOf (@Taclet.storageIndexArrayOpAssign C k m p op hop hp arr ie se)) :=
+      (stmtOf (@Taclet.storageIndexArrayOpAssign C k m p op hop hp R ak arr ie se)) :=
   ctorFaithful_of (dom := .storage) (cls := .numeric)
     rfl rfl (by simpa [ReadClass.fits, Read.ty, isNumericTy] using hp) (by decide +kernel)
 
@@ -636,16 +637,16 @@ theorem faithful_memoryFieldReadAliasRoot {C : Contract} {k : Nat} {m : Modality
 
 /-- `x = ns[i];` (`ns : uint[] memory`) reads a number (`\hasMemoryElementSort`). -/
 theorem faithful_memoryIndexReadHeap {C : Contract} {k : Nat} {x : PrimTy} {m : Modality}
-    {v mv : Var} {ie : Simple C PrimTy.uint} :
+    {v mv : Var} {R : RefTy} {mk : ArrTy R (Ty.prim x)} {ie : Simple C PrimTy.uint} :
     CtorFaithful ``Taclet.memoryIndexReadHeap
-      (stmtOf (@Taclet.memoryIndexReadHeap C k x m v mv ie)) :=
+      (stmtOf (@Taclet.memoryIndexReadHeap C k m v R x mk mv ie)) :=
   ctorFaithful_of (dom := .memory) (cls := .any) rfl rfl rfl (by decide +kernel)
 
 /-- `p = ps[i];` (`ps : Person[] memory`) reads an `Identity`. -/
 theorem faithful_memoryIndexReadAliasRoot {C : Contract} {k : Nat} {x : RefTy} {m : Modality}
-    {mv₁ mv₂ : Var} {ie : Simple C PrimTy.uint} :
+    {mv₁ mv₂ : Var} {R : RefTy} {mk : ArrTy R (Ty.ref x)} {ie : Simple C PrimTy.uint} :
     CtorFaithful ``Taclet.memoryIndexReadAliasRoot
-      (stmtOf (@Taclet.memoryIndexReadAliasRoot C k x m mv₁ mv₂ ie)) :=
+      (stmtOf (@Taclet.memoryIndexReadAliasRoot C k m mv₁ R x mk mv₂ ie)) :=
   ctorFaithful_of (dom := .memory) (cls := .reference) rfl rfl rfl (by decide +kernel)
 
 /-- `m.age += x;` reads `m.age` under `read<[int]>`. -/
@@ -661,9 +662,10 @@ theorem faithful_memoryFieldOpAssign {C : Contract} {k : Nat} {m : Modality} {p 
 /-- `ns[i] += x;` reads the element under `read<[int]>`. -/
 theorem faithful_memoryIndexArrayOpAssign {C : Contract} {k : Nat} {m : Modality} {p : PrimTy}
     {op : BinOp} {hop : Eq (BinOp.hasCompoundAssign op) true} {hp : Eq (PrimTy.isNumeric p) true}
-    {mv : Var} {ie : Simple C PrimTy.uint} {se : Simple C p} :
+    {R : RefTy} {mk : ArrTy R (Ty.prim p)} {mv : Var} {ie : Simple C PrimTy.uint}
+    {se : Simple C p} :
     CtorFaithful ``Taclet.memoryIndexArrayOpAssign
-      (stmtOf (@Taclet.memoryIndexArrayOpAssign C k m p op hop hp mv ie se)) :=
+      (stmtOf (@Taclet.memoryIndexArrayOpAssign C k m p op hop hp R mk mv ie se)) :=
   ctorFaithful_of (dom := .memory) (cls := .numeric)
     rfl rfl (by simpa [ReadClass.fits, Read.ty, isNumericTy] using hp) (by decide +kernel)
 
@@ -678,9 +680,10 @@ theorem faithful_memoryFieldIncrement {C : Contract} {k : Nat} {m : Modality} {p
 
 /-- `ns[i]++;` reads the element under `read<[int]>`. -/
 theorem faithful_memoryIndexArrayIncrement {C : Contract} {k : Nat} {m : Modality} {p : PrimTy}
-    {op : IncDec} {hp : Eq (PrimTy.isNumeric p) true} {mv : Var} {ie : Simple C PrimTy.uint} :
+    {op : IncDec} {hp : Eq (PrimTy.isNumeric p) true} {R : RefTy} {mk : ArrTy R (Ty.prim p)}
+    {mv : Var} {ie : Simple C PrimTy.uint} :
     CtorFaithful ``Taclet.memoryIndexArrayIncrement
-      (stmtOf (@Taclet.memoryIndexArrayIncrement C k m p op hp mv ie)) :=
+      (stmtOf (@Taclet.memoryIndexArrayIncrement C k m p op hp R mk mv ie)) :=
   ctorFaithful_of (dom := .memory) (cls := .numeric)
     rfl rfl (by simpa [ReadClass.fits, Read.ty, isNumericTy] using hp) (by decide +kernel)
 
@@ -696,10 +699,11 @@ theorem faithful_memoryFieldIncrementAssignment {C : Contract} {k : Nat} {m : Mo
 
 /-- `x = ns[i]++;` reads the element under `read<[int]>`, twice. -/
 theorem faithful_memoryIndexArrayIncrementAssignment {C : Contract} {k : Nat} {m : Modality}
-    {p : PrimTy} {v : Var} {op : IncDec} {hp : Eq (PrimTy.isNumeric p) true} {mv : Var}
-    {ie : Simple C PrimTy.uint} {hs : Eq (OpLoc.recvSimple (OpLoc.mindex (MPath.var mv) ie)) true} :
+    {p : PrimTy} {v : Var} {op : IncDec} {hp : Eq (PrimTy.isNumeric p) true} {R : RefTy}
+    {mk : ArrTy R (Ty.prim p)} {mv : Var} {ie : Simple C PrimTy.uint}
+    {hs : Eq (OpLoc.recvSimple (OpLoc.mindex mk (MPath.var mv) ie)) true} :
     CtorFaithful ``Taclet.memoryIndexArrayIncrementAssignment
-      (stmtOf (@Taclet.memoryIndexArrayIncrementAssignment C k m p v op hp mv ie hs)) :=
+      (stmtOf (@Taclet.memoryIndexArrayIncrementAssignment C k m p v op hp R mk mv ie hs)) :=
   ctorFaithful_of (dom := .memory) (cls := .numeric)
     rfl rfl (by simpa [ReadClass.fits, Read.ty, isNumericTy] using hp) (by decide +kernel)
 

@@ -103,7 +103,7 @@ def MPath.wt (Γ : Ctx) : {T : Ty} → MPath C T → Bool
 /-- `ns[i]` needs `ns` a memory array and `i` a `uint` local. -/
 def MLoc.wt (Γ : Ctx) : {T : Ty} → MLoc C T → Bool
   | _, .field b _ _ => b.wt Γ
-  | _, .index b i => b.wt Γ && i.wt Γ
+  | _, .index _ b i => b.wt Γ && i.wt Γ
 
 /-- `x + alice.age` needs `x` a `uint`. -/
 def Val.wt (Γ : Ctx) : {p : PrimTy} → Val C p → Bool
@@ -151,7 +151,7 @@ def OpLoc.wt (Γ : Ctx) : {p : PrimTy} → OpLoc C p → Bool
   | _, .field b _ _ => b.wt Γ
   | _, .index _ b i => b.wt Γ && i.wt Γ
   | _, .mfield b _ _ => b.wt Γ
-  | _, .mindex b i => b.wt Γ && i.wt Γ
+  | _, .mindex _ b i => b.wt Γ && i.wt Γ
 
 /-- `x` is bound as `bt` in `Γ`. -/
 def Ctx.has (Γ : Ctx) (x : Var) (bt : BTy) : Bool := lookupBy x Γ == some bt
@@ -327,6 +327,22 @@ theorem mHasTyHFields_setBy {str : Name} {fields : List (Name × MVal)} {n : Nam
         simp [setBy, MObj.hasTyH.hasTyHFields, hdef, hw, hwt.2]
       · simp [setBy, hn, MObj.hasTyH.hasTyHFields, hwt.1, ih hwt.2]
 
+/-- The element type of an array type of either kind: `uint` of `uint[]` and
+of `uint[3]`. -/
+def RefTy.arrElem? : RefTy → Option Ty
+  | .array E | .fixed E _ => some E
+  | _ => none
+
+theorem ArrTy.arrElem {R : RefTy} {E : Ty} : ArrTy R E → R.arrElem? = some E
+  | .dyn | .fixed => rfl
+
+/-- An object typed at an array type is an array of the element type. -/
+theorem MObj.hasTyH_arrElem {R : RefTy} {E : Ty} {obj : MObj} (hR : R.arrElem? = some E)
+    (h : MObj.hasTyH H obj (.ref R) = true) :
+    ∃ elems fx, obj = .array elems fx ∧ MObj.hasTyH.hasTyHElems H E elems = true := by
+  cases R <;> simp only [RefTy.arrElem?, Option.some.injEq, reduceCtorEq] at hR <;> subst hR <;>
+    cases obj <;> simp_all [MObj.hasTyH]
+
 /-- `ns[i] = 3;` keeps `ns`'s object a `uint[]`. -/
 theorem mHasTyHElems_set {elem : Ty} {elems : List MVal} {i : Nat} {w : MVal}
     (hwt : MObj.hasTyH.hasTyHElems H elem elems = true) (hw : MVal.hasTyH H w elem = true) :
@@ -446,7 +462,7 @@ theorem evalBinop_wt {op : BinOp} {p q : PrimTy} {lv : Value} {rb : Res Value} {
       simp [BinOp.ret, hA, Value.toSVal, SVal.hasTy]
     · obtain ⟨n, rfl⟩ := applyBinOp_arith_int hA hv'
       have hnum : p.isNumeric = true := by
-        cases op <;> simp_all [BinOp.isArith, BinOp.accepts]
+        cases op <;> simp_all [BinOp.isArith, BinOp.accepts, PrimTy.isNumeric]
       simp only [BinOp.ret, hA, if_true]
       exact int_toSVal_hasTy hnum n
 
@@ -535,7 +551,9 @@ theorem Loc.resolve_wt (hwt : RunWT C Γ H σ) :
     obtain ⟨_, _, h⟩ := bind_ok_inv h
     cases h
     have hb := SPath.resolve_wt hwt b hw.1 h0
-    cases it <;> exact tyAt_append_seg hb rfl
+    cases it with
+    | map => exact tyAt_append_seg hb rfl
+    | arr a => cases a <;> exact tyAt_append_seg hb rfl
 
 /-- A checked memory path holds a slot of its type: `m`, with
 `m : Person memory`, an identity the store typing claims at `Person`. -/
@@ -576,26 +594,24 @@ theorem MLoc.read_wt (hwt : RunWT C Γ H σ) :
         exact hv
       · exact nomatch h
     | array _ => exact nomatch h
-  | _, @MLoc.index _ E b i, mv, hw, h => by
+  | _, @MLoc.index _ _ E a b i, mv, hw, h => by
     simp only [MLoc.wt, Bool.and_eq_true] at hw
     obtain ⟨m0, hm0, h⟩ := bind_ok_inv h
     obtain ⟨id, hid, h⟩ := bind_ok_inv h
     have hb := MPath.mval_wt hwt b hw.1 hm0
     rw [MVal.asRef_ok hid, MVal.hasTyH_ref] at hb
     obtain ⟨obj, hobj, hty⟩ := heapTypedB_obj hwt.heap hb
+    obtain ⟨elems, fx, rfl, hel⟩ := MObj.hasTyH_arrElem a.arrElem hty
     obtain ⟨_, _, h⟩ := bind_ok_inv h
     obtain ⟨iv, _, h⟩ := bind_ok_inv h
     obtain ⟨o, ho, h⟩ := bind_ok_inv h
     simp only [State.getObj, hobj] at ho
     cases ho
-    cases obj with
-    | array elems =>
-      simp only at h
-      split at h
-      · cases h
-        exact mHasTyHElems_mem (by simpa [MObj.hasTyH] using hty) (List.get_mem _ _)
-      · exact nomatch h
-    | struct _ => exact nomatch h
+    simp only at h
+    split at h
+    · cases h
+      exact mHasTyHElems_mem hel (List.get_mem _ _)
+    · exact nomatch h
 
 /-- A checked value evaluates to a value of its type: `alice.age + 1` to
 a number, `x < y` to a boolean. -/
@@ -656,7 +672,7 @@ theorem defaultOk_struct_of_mem {s : Name} (h : s ∈ defaultOkStructs) :
     defaultOk (.ref (.struct s)) = true := by
   simp only [defaultOkStructs, List.mem_cons, List.not_mem_nil, or_false] at h
   rcases h with rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl |
-      rfl | rfl | rfl | rfl | rfl <;>
+      rfl | rfl | rfl | rfl | rfl | rfl <;>
     simp [defaultOk, defaultOkFields, structDef, lookupBy]
 
 /-- `Person memory m;` and `persons.push();` build a default of the type
@@ -665,6 +681,8 @@ theorem defaultOk_of_defaultOkS : ∀ {T : Ty}, T.defaultOkS = true → defaultO
   | .prim _, _ => by simp [defaultOk]
   | .ref (.struct _), h => defaultOk_struct_of_mem (by simpa [Ty.defaultOkS] using h)
   | .ref (.array _), _ => by simp [defaultOk]
+  | .ref (.fixed _ _), h => by
+    rw [defaultOk]; exact defaultOk_of_defaultOkS (by simpa [Ty.defaultOkS] using h)
   | .ref (.mapping _ _), h => by
     rw [defaultOk]; exact defaultOk_of_defaultOkS (by simpa [Ty.defaultOkS] using h)
 
@@ -824,14 +842,14 @@ theorem pushAt_wt (hwt : RunWT C Γ H σ) {E : Ty} {r : Name} {segs : List Seg}
   obtain ⟨sv, hsv, h⟩ := bind_ok_inv h
   have hsvt := findStorage_hasTy hwt.storage hty hsv
   cases sv with
-  | array elems shadow =>
+  | array elems shadow fx =>
     simp only [SVal.hasTy, Bool.and_eq_true] at hsvt
     obtain ⟨newElem, hnew, h⟩ := bind_ok_inv h
     have hslot : defaultOk E = true → (pushSlot E shadow).1.hasTy E = true :=
       fun hok => (pushSlot_hasTy hsvt.2 hok).1
     refine hwt.save hty ?_ h
     simp only [SVal.hasTy, Bool.and_eq_true]
-    refine ⟨hasTyElems_append hsvt.1 ?_, pushSlot_rest_hasTy hsvt.2⟩
+    refine ⟨⟨hsvt.1.1, hasTyElems_append hsvt.1.2 ?_⟩, pushSlot_rest_hasTy hsvt.2⟩
     simp [SVal.hasTy.hasTyElems, hval _ _ hslot hnew]
   | prim _ => exact nomatch h
   | struct _ => exact nomatch h
@@ -844,13 +862,13 @@ theorem pushPlaceAt_wt (hwt : RunWT C Γ H σ) {E : Ty} {r : Name} {segs : List 
   obtain ⟨sv, hsv, h⟩ := bind_ok_inv h
   have hsvt := findStorage_hasTy hwt.storage hty hsv
   cases sv with
-  | array elems shadow =>
+  | array elems shadow fx =>
     simp only [SVal.hasTy, Bool.and_eq_true] at hsvt
     obtain ⟨σ₁, hσ₁, h⟩ := bind_ok_inv h
     cases h
     refine hwt.save hty ?_ hσ₁
     simp only [SVal.hasTy, Bool.and_eq_true]
-    refine ⟨hasTyElems_append hsvt.1 ?_, pushSlot_rest_hasTy hsvt.2⟩
+    refine ⟨⟨hsvt.1.1, hasTyElems_append hsvt.1.2 ?_⟩, pushSlot_rest_hasTy hsvt.2⟩
     simp only [SVal.hasTy.hasTyElems, Bool.and_true]
     exact (pushSlot_hasTy hsvt.2 hok).1
   | prim _ => exact nomatch h
@@ -865,7 +883,7 @@ theorem popAt_wt (hwt : RunWT C Γ H σ) {E : Ty} {keep : Bool} {r : Name} {segs
   obtain ⟨sv, hsv, h⟩ := bind_ok_inv h
   have hsvt := findStorage_hasTy hwt.storage hty hsv
   cases sv with
-  | array elems shadow =>
+  | array elems shadow fx =>
     simp only [SVal.hasTy, Bool.and_eq_true] at hsvt
     simp only at h
     split at h
@@ -875,9 +893,9 @@ theorem popAt_wt (hwt : RunWT C Γ H σ) {E : Ty} {keep : Bool} {r : Name} {segs
         intro v hv; rw [← hrev] at hv; exact List.mem_reverse.mp hv
       refine hwt.save hty ?_ h
       simp only [SVal.hasTy, Bool.and_eq_true, SVal.hasTy.hasTyElems]
-      refine ⟨hasTyElems_of_forall_mem fun v hv => ?_, ?_, hsvt.2⟩
-      · exact hasTyElems_mem hsvt.1 (hmem v (List.mem_cons_of_mem _ (List.mem_reverse.mp hv)))
-      · have hl := hasTyElems_mem hsvt.1 (hmem last List.mem_cons_self)
+      refine ⟨⟨hsvt.1.1, hasTyElems_of_forall_mem fun v hv => ?_⟩, ?_, hsvt.2⟩
+      · exact hasTyElems_mem hsvt.1.2 (hmem v (List.mem_cons_of_mem _ (List.mem_reverse.mp hv)))
+      · have hl := hasTyElems_mem hsvt.1.2 (hmem last List.mem_cons_self)
         cases keep
         · exact SVal.defaultOf_hasTy hl
         · exact hl
@@ -902,20 +920,24 @@ theorem memWriteField_wt (hwt : RunWT C Γ H σ) {id : Nat} {s f : Name} {T : Ty
   | array _ => exact nomatch h
 
 /-- A write into a memory array's element of the element type. -/
-theorem memWriteIndex_wt (hwt : RunWT C Γ H σ) {id : Nat} {i : Int} {E : Ty} {mv : MVal}
-    (hid : lookupBy id H = some (.ref (.array E))) (hmv : MVal.hasTyH H mv E = true)
+theorem memWriteIndex_wt (hwt : RunWT C Γ H σ) {id : Nat} {i : Int} {R : RefTy} {E : Ty}
+    {mv : MVal} (hid : lookupBy id H = some (.ref R)) (hR : R.arrElem? = some E)
+    (hmv : MVal.hasTyH H mv E = true)
     (h : memWriteIndex σ id i mv = .ok σ') : RunWT C Γ H σ' := by
   obtain ⟨obj, hobj, hty⟩ := heapTypedB_obj hwt.heap hid
   obtain ⟨o, ho, h⟩ := bind_ok_inv h
   simp only [State.getObj, hobj] at ho
   cases ho
   cases obj with
-  | array elems =>
+  | array elems fx =>
     simp only at h
     split at h
     · cases h
-      exact hwt.setObj hid hobj
-        (by simpa [MObj.hasTyH] using mHasTyHElems_set (by simpa [MObj.hasTyH] using hty) hmv)
+      refine hwt.setObj hid hobj ?_
+      cases R <;> simp only [RefTy.arrElem?, Option.some.injEq, reduceCtorEq] at hR <;>
+        subst hR <;> simp only [MObj.hasTyH, Bool.and_eq_true, beq_iff_eq] at hty ⊢
+      · exact ⟨hty.1, mHasTyHElems_set hty.2 hmv⟩
+      · exact ⟨⟨hty.1.1, by simp [hty.1.2]⟩, mHasTyHElems_set hty.2 hmv⟩
     · exact nomatch h
   | struct _ => exact nomatch h
 
@@ -924,20 +946,20 @@ with `m : Person memory`, `ns[i]` with `ns : uint[] memory`. -/
 def AddrTy (H : HeapTy) (p : PrimTy) : Addr → Prop
   | .memoryField id f => ∃ s, lookupBy id H = some (.ref (.struct s)) ∧
       lookupBy f (structDef s) = some (.prim p)
-  | .memoryIndex id _ => lookupBy id H = some (.ref (.array (.prim p)))
+  | .memoryIndex id _ => ∃ R, lookupBy id H = some (.ref R) ∧ R.arrElem? = some (.prim p)
 
 /-- The memory place a memory location resolves to holds a `T`. -/
 def AddrTyT (H : HeapTy) (T : Ty) : Addr → Prop
   | .memoryField id f => ∃ s, lookupBy id H = some (.ref (.struct s)) ∧
       lookupBy f (structDef s) = some T
-  | .memoryIndex id _ => lookupBy id H = some (.ref (.array T))
+  | .memoryIndex id _ => ∃ R, lookupBy id H = some (.ref R) ∧ R.arrElem? = some T
 
 /-- A typed place stays typed as the store typing grows (an allocation). -/
 theorem AddrTyT.mono {H H' : HeapTy} {T : Ty} {a : Addr} (hext : H.Extends H')
     (h : AddrTyT H T a) : AddrTyT H' T a := by
   cases a with
   | memoryField id f => obtain ⟨s, hid, hf⟩ := h; exact ⟨s, hext _ _ hid, hf⟩
-  | memoryIndex id i => exact hext _ _ h
+  | memoryIndex id i => obtain ⟨R, hid, hR⟩ := h; exact ⟨R, hext _ _ hid, hR⟩
 
 /-- `delete m.inner;` writes an object of the member's type there. -/
 theorem writeAddr_wt (hwt : RunWT C Γ H σ) {T : Ty} {a : Addr} {mv : MVal}
@@ -947,7 +969,7 @@ theorem writeAddr_wt (hwt : RunWT C Γ H σ) {T : Ty} {a : Addr} {mv : MVal}
   | memoryField id f =>
     obtain ⟨s, hid, hf⟩ := ha
     exact memWriteField_wt hwt hid hf hmv h
-  | memoryIndex id i => exact memWriteIndex_wt hwt ha hmv h
+  | memoryIndex id i => obtain ⟨R, hid, hR⟩ := ha; exact memWriteIndex_wt hwt hid hR hmv h
 
 /-- A checked memory location resolves to a place of its type. -/
 theorem MLoc.addr_wt (hwt : RunWT C Γ H σ) :
@@ -959,7 +981,7 @@ theorem MLoc.addr_wt (hwt : RunWT C Γ H σ) :
     have hb := MPath.mval_wt hwt b hw hm0
     rw [MVal.asRef_ok hid, MVal.hasTyH_ref] at hb
     exact ⟨s, hb, hf⟩
-  | _, .index b i, a, hw, h => by
+  | _, .index ak b i, a, hw, h => by
     simp only [MLoc.wt, Bool.and_eq_true] at hw
     obtain ⟨m0, hm0, h⟩ := bind_ok_inv h
     obtain ⟨id, hid, h⟩ := bind_ok_inv h
@@ -968,7 +990,7 @@ theorem MLoc.addr_wt (hwt : RunWT C Γ H σ) :
     cases h
     have hb := MPath.mval_wt hwt b hw.1 hm0
     rw [MVal.asRef_ok hid, MVal.hasTyH_ref] at hb
-    exact hb
+    exact ⟨_, hb, ak.arrElem⟩
 
 /-- `m.age -= 1;` writes a number where the heap says `uint`. -/
 theorem writeLoc_wt (hwt : RunWT C Γ H σ) {p : PrimTy} {loc : Addr} {v : Value}
@@ -978,7 +1000,9 @@ theorem writeLoc_wt (hwt : RunWT C Γ H σ) {p : PrimTy} {loc : Addr} {v : Value
   | memoryField id f =>
     obtain ⟨s, hid, hf⟩ := hloc
     exact memWriteField_wt hwt hid hf (Value.toMVal_hasTyH hv) h
-  | memoryIndex id i => exact memWriteIndex_wt hwt hloc (Value.toMVal_hasTyH hv) h
+  | memoryIndex id i =>
+    obtain ⟨R, hid, hR⟩ := hloc
+    exact memWriteIndex_wt hwt hid hR (Value.toMVal_hasTyH hv) h
 
 /-- `x ⊕= e` at a storage place of a numeric type. -/
 theorem opStore_wt (hwt : RunWT C Γ H σ) {op : BinOp} {p : PrimTy} {r : Name}
@@ -1035,7 +1059,7 @@ theorem OpLoc.store_wt (hwt : RunWT C Γ H σ) {op : BinOp} (hop : op.isArith = 
     have hb := MPath.mval_wt hwt b hw hm0
     rw [MVal.asRef_ok hid, MVal.hasTyH_ref] at hb
     exact opMem_wt hwt hop hp (loc := .memoryField id f) ⟨s, hb, hf⟩ h
-  | p, .mindex b i, v, hp, hw, h => by
+  | p, .mindex ak b i, v, hp, hw, h => by
     simp only [OpLoc.wt, Bool.and_eq_true] at hw
     obtain ⟨m0, hm0, h⟩ := bind_ok_inv h
     obtain ⟨id, hid, h⟩ := bind_ok_inv h
@@ -1043,7 +1067,7 @@ theorem OpLoc.store_wt (hwt : RunWT C Γ H σ) {op : BinOp} (hop : op.isArith = 
     rw [MVal.asRef_ok hid, MVal.hasTyH_ref] at hb
     obtain ⟨_, _, h⟩ := bind_ok_inv h
     obtain ⟨iv, _, h⟩ := bind_ok_inv h
-    exact opMem_wt hwt hop hp (loc := .memoryIndex id iv) hb h
+    exact opMem_wt hwt hop hp (loc := .memoryIndex id iv) ⟨_, hb, ak.arrElem⟩ h
 
 /-- `alice.age++` stores and yields numbers. -/
 theorem bumpStore_wt (hwt : RunWT C Γ H σ) {op : IncDec} {p : PrimTy} {r : Name}
@@ -1114,7 +1138,7 @@ theorem OpLoc.bump_wt (hwt : RunWT C Γ H σ) {op : IncDec} :
     have hb := MPath.mval_wt hwt b hw hm0
     rw [MVal.asRef_ok hid, MVal.hasTyH_ref] at hb
     exact bumpMem_wt hwt hp (loc := .memoryField id f) ⟨s, hb, hf⟩ h
-  | p, .mindex b i, w, hp, hw, h => by
+  | p, .mindex ak b i, w, hp, hw, h => by
     simp only [OpLoc.wt, Bool.and_eq_true] at hw
     obtain ⟨m0, hm0, h⟩ := bind_ok_inv h
     obtain ⟨id, hid, h⟩ := bind_ok_inv h
@@ -1122,7 +1146,7 @@ theorem OpLoc.bump_wt (hwt : RunWT C Γ H σ) {op : IncDec} :
     rw [MVal.asRef_ok hid, MVal.hasTyH_ref] at hb
     obtain ⟨_, _, h⟩ := bind_ok_inv h
     obtain ⟨iv, _, h⟩ := bind_ok_inv h
-    exact bumpMem_wt hwt hp (loc := .memoryIndex id iv) hb h
+    exact bumpMem_wt hwt hp (loc := .memoryIndex id iv) ⟨_, hb, ak.arrElem⟩ h
 
 /-- `m.age = 3;` writes a slot of the member's type. -/
 theorem MLoc.write_wt (hwt : RunWT C Γ H σ) {mv : MVal} :
@@ -1134,7 +1158,7 @@ theorem MLoc.write_wt (hwt : RunWT C Γ H σ) {mv : MVal} :
     have hb := MPath.mval_wt hwt b hw hm0
     rw [MVal.asRef_ok hid, MVal.hasTyH_ref] at hb
     exact memWriteField_wt hwt hb hf hmv h
-  | _, .index b i, hmv, hw, h => by
+  | _, .index ak b i, hmv, hw, h => by
     simp only [MLoc.wt, Bool.and_eq_true] at hw
     obtain ⟨m0, hm0, h⟩ := bind_ok_inv h
     obtain ⟨id, hid, h⟩ := bind_ok_inv h
@@ -1142,7 +1166,7 @@ theorem MLoc.write_wt (hwt : RunWT C Γ H σ) {mv : MVal} :
     rw [MVal.asRef_ok hid, MVal.hasTyH_ref] at hb
     obtain ⟨_, _, h⟩ := bind_ok_inv h
     obtain ⟨iv, _, h⟩ := bind_ok_inv h
-    exact memWriteIndex_wt hwt hb hmv h
+    exact memWriteIndex_wt hwt hb ak.arrElem hmv h
 
 /-- What a memory write stores is of the place's type: a number, or an
 object the store typing claims at the reference type. -/
@@ -1167,11 +1191,13 @@ theorem newArrVal_hasTy {R : RefTy} (h : R.newArrOk = true) (n : Int) :
   | array E =>
     simp only [RefTy.newArrOk, Bool.and_eq_true] at h
     have hE := defaultForTy_hasTy (defaultOk_of_defaultOkS h.2)
-    simp only [newArrVal, SVal.hasTy, SVal.hasTy.hasTyElems, Bool.and_true]
+    simp only [newArrVal, SVal.hasTy, SVal.hasTy.hasTyElems, Bool.and_true, Bool.not_false,
+      Bool.true_and]
     induction n.toNat with
     | zero => rfl
     | succ k ih => simp [List.replicate_succ, SVal.hasTy.hasTyElems, hE, ih]
   | struct _ => simp [RefTy.newArrOk] at h
+  | fixed _ _ => simp [RefTy.newArrOk] at h
   | mapping _ _ => simp [RefTy.newArrOk] at h
 
 /-- `m = n;` and `m = alice;` bind `m` to an object of `m`'s type: `n`'s,

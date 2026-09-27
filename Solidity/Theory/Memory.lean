@@ -233,10 +233,8 @@ end Memory
 `memoryRules.key`'s shape algebra: `sizeOf`, `shapeAt`, `idShape` over the
 `Shape` sort of `Theory/Terms.lean`, and the one cast that reads a shape,
 `default<[int]>` at a shaped root's length.  All of it is free terms — no
-struct, no memory — so all of it is stated, even though no declared type of
-the language model has a fixed-size array's shape
-(`Shape.ofTy_ne_fixedArr`) and `fixedArr` only arises from a term built by
-hand.
+struct, no memory — so all of it is stated; a declared `uint[3]` has the
+shape `fixedArr(3, leaf)` (`Shape.ofTy_fixed`).
 
 `shapeAt` descends one field at a time, as `save` and `find` do.  solkey
 recurses head-first (`shapeAt(sh, cons(a, xs))`); the suffix rule states one field

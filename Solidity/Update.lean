@@ -172,10 +172,10 @@ def readAddr (σ : State) : Addr → Res MVal
       match lookupBy f fields with
       | some v => pure v
       | none => .error .stuck
-    | .array _ => .error .stuck
+    | .array _ _ => .error .stuck
   | .memoryIndex id i => do
     match ← σ.getObj id with
-    | .array elems =>
+    | .array elems _ =>
       if h : 0 ≤ i ∧ i.toNat < elems.length then pure (elems.get ⟨i.toNat, h.2⟩)
       else .error .revert
     | .struct _ => .error .stuck
@@ -220,7 +220,7 @@ def PTerm.eval (σ : State) : PTerm C → Res (Name × List Seg)
   | .next p => do
     let (r, segs) ← p.eval σ
     match ← σ.findStorage r segs with
-    | .array elems _ => pure (r, segs ++ [.at elems.length])
+    | .array elems _ _ => pure (r, segs ++ [.at elems.length])
     | .prim _ | .struct _ | .map _ _ => .error .stuck
 
 def STerm.eval (σ : State) : STerm C → Res State
@@ -720,7 +720,7 @@ def MPath.lower : {T : Ty} → MPath C T → ITerm C
 
 def MLoc.lower : {T : Ty} → MLoc C T → MAddr C
   | _, .field b f _ => .field b.lower f
-  | _, .index b i => .at b.lower i.lower
+  | _, .index _ b i => .at b.lower i.lower
 
 def Val.lower : {p : PrimTy} → Val C p → Term C
   | _, .simple s => s.lower
@@ -784,7 +784,7 @@ theorem MLoc.lower_eval (σ : State) : {T : Ty} → (l : MLoc C T) →
   | _, .field b f _ => by
     simp only [MLoc.lower, MAddr.eval, MLoc.read, b.lower_eval σ, bind_assoc, pure_bind]
     rfl
-  | _, .index b i => by
+  | _, .index _ b i => by
     simp only [MLoc.lower, MAddr.eval, MLoc.read, b.lower_eval σ, i.lower_eval σ, bind_assoc,
       pure_bind]
     rfl

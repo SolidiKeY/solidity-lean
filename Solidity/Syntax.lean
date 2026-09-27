@@ -69,6 +69,8 @@ declare_syntax_cat sol_ty (behavior := both)
 syntax:max ident : sol_ty
 syntax:max &"mapping" "(" sol_ty " => " sol_ty ")" : sol_ty
 syntax:max sol_ty:max "[" "]" : sol_ty
+/-- `uint[3]`: a fixed-size array; `uint[2][3]` is three `uint[2]`. -/
+syntax:max sol_ty:max "[" num "]" : sol_ty
 
 declare_syntax_cat sol_member (behavior := both)
 syntax sol_ty ident ";" : sol_member
@@ -89,6 +91,7 @@ macro_rules
       | s => `(Ty.struct $(Lean.quote s))
   | `(ty!(mapping($K => $V))) => `(Ty.mapping ty!($K) ty!($V))
   | `(ty!($T[])) => `(Ty.array ty!($T))
+  | `(ty!($T[$n])) => `(Ty.fixed ty!($T) $n)
 
 macro_rules
   | `(contract!{ $ms:sol_member* }) => do
@@ -139,6 +142,15 @@ def TestSuite : Contract := contract!{
   Token tok;
   TokenBucket[] buckets;
   Basket basketA; Basket basketB;
+  int signedTotal;
+  uint[3] fixedValues;
+  uint[3][] rows;
+  Token[2] fixedTokens;
+  mapping(uint => uint)[2] fixedMaps;
+  FixedTriple triple; FixedTriple triple2;
+  mapping(uint => mapping(uint => uint)) grid;
+  mapping(uint => Ledger) ledgerMap;
+  mapping(uint => uint)[] mapArray;
 }
 
 /-- `solc/SolcExpressions.sol`. -/
@@ -194,12 +206,23 @@ The sorts of the schema variables are types here:
 `isSimple` tells `sp` from `nsp` and `se` from `nse`: which one a statement
 has decides which rule runs, not which statements can be written. -/
 
-/-- How a reference type is indexed: a mapping by its key, an array by a
-`uint`.  One `Loc.index` serves both, so a rule that does not care which
-is one constructor, and the ones that do fix it. -/
+/-- An array type and its element type: a dynamic array `E[]`, or a
+fixed-size one `E[n]`.  Both are indexed by position and bounds-checked
+alike; only a dynamic one has `push`/`pop` (`Stmt.push` takes `.array E`),
+and only a fixed one's length is known statically (the elaborator writes
+`fixedValues.length` as the literal `3`).  solkey's `Path[…,array]` is
+either (`PathSVSort.typeCategoryOf`), so a rule over an array index is one
+rule over `ArrTy`. -/
+inductive ArrTy : RefTy → Ty → Type where
+  | dyn {E : Ty} : ArrTy (.array E) E
+  | fixed {E : Ty} {n : Nat} : ArrTy (.fixed E n) E
+
+/-- How a reference type is indexed: a mapping by its key, an array (either
+kind) by a `uint`.  One `Loc.index` serves both, so a rule that does not care
+which is one constructor, and the ones that do fix it. -/
 inductive IndexTy : RefTy → PrimTy → Ty → Type where
   | map {k : PrimTy} {V : Ty} : IndexTy (.mapping (.prim k) V) k V
-  | arr {E : Ty} : IndexTy (.array E) .uint E
+  | arr {R : RefTy} {E : Ty} (a : ArrTy R E) : IndexTy R .uint E
 
 /-- A simple value (`se`): a literal or a stack local. -/
 inductive Simple (C : Contract) : PrimTy → Type where
@@ -234,7 +257,7 @@ inductive MPath (C : Contract) : Ty → Type where
 inductive MLoc (C : Contract) : Ty → Type where
   | field {s : Name} {T : Ty} (b : MPath C (.struct s)) (f : Name)
       (h : C.fieldType s f = some T) : MLoc C T
-  | index {E : Ty} (b : MPath C (.array E)) (i : Val C .uint) : MLoc C E
+  | index {R : RefTy} {E : Ty} (a : ArrTy R E) (b : MPath C (.ref R)) (i : Val C .uint) : MLoc C E
 
 /-- A value of primitive type `p`. -/
 inductive Val (C : Contract) : PrimTy → Type where
@@ -308,7 +331,8 @@ inductive OpLoc (C : Contract) : PrimTy → Type where
       (i : Simple C k) : OpLoc C p
   | mfield {s : Name} {p : PrimTy} (b : MPath C (.struct s)) (f : Name)
       (h : C.fieldType s f = some (.prim p)) : OpLoc C p
-  | mindex {p : PrimTy} (b : MPath C (.array (.prim p))) (i : Simple C .uint) : OpLoc C p
+  | mindex {R : RefTy} {p : PrimTy} (a : ArrTy R (.prim p)) (b : MPath C (.ref R))
+      (i : Simple C .uint) : OpLoc C p
 
 /-! ### Which parts are simple -/
 
@@ -332,7 +356,7 @@ def MPath.isSimple {C : Contract} {T : Ty} : MPath C T → Bool
 `sp.fld`, `sp[ie]`, `mv.fld`, `mv[ie]`. -/
 def OpLoc.recvSimple {C : Contract} {p : PrimTy} : OpLoc C p → Bool
   | .field b _ _ | .index _ b _ => b.isSimple
-  | .mfield b _ _ | .mindex b _ => b.isSimple
+  | .mfield b _ _ | .mindex _ b _ => b.isSimple
   | _ => true
 
 /-- `v`, if it is simple. -/
@@ -424,6 +448,7 @@ def Ty.toStr : Ty → String
   | .prim .uint => "uint" | .prim .int => "int" | .prim .bool => "bool"
   | .ref (.struct s) => s
   | .ref (.array T) => T.toStr ++ "[]"
+  | .ref (.fixed T n) => s!"{T.toStr}[{n}]"
   | .ref (.mapping K V) => s!"mapping({K.toStr} => {V.toStr})"
 
 def Simple.toStr {p : PrimTy} : Simple C p → String
@@ -448,7 +473,7 @@ def MPath.toStr {T : Ty} : MPath C T → String
 
 def MLoc.toStr {T : Ty} : MLoc C T → String
   | .field b f _ => s!"{b.toStr}.{f}"
-  | .index b i => s!"{b.toStr}[{i.toStr true}]"
+  | .index _ b i => s!"{b.toStr}[{i.toStr true}]"
 
 /-- `top` is whether the value stands alone, so needs no parentheses. -/
 def Val.toStr {p : PrimTy} : Val C p → (top : Bool := false) → String
@@ -481,7 +506,7 @@ def OpLoc.toStr {p : PrimTy} : OpLoc C p → String
   | .field b f _ => s!"{b.toStr}.{f}"
   | .index _ b i => s!"{b.toStr}[{i.toStr}]"
   | .mfield b f _ => s!"{b.toStr}.{f}"
-  | .mindex b i => s!"{b.toStr}[{i.toStr}]"
+  | .mindex _ b i => s!"{b.toStr}[{i.toStr}]"
 
 def MRhs.toStr {R : RefTy} : MRhs C R → String
   | .alias p => p.toStr
@@ -561,6 +586,7 @@ inductive RawTy where
   | named (s : String)
   | mapping (k v : RawTy)
   | array (t : RawTy)
+  | fixed (t : RawTy) (n : Nat)
   deriving Repr, Inhabited
 
 inductive RawExpr where
@@ -606,6 +632,8 @@ syntax:max sol_expr:max "[" sol_expr "]" : sol_expr
 syntax:max "(" sol_expr ")" : sol_expr
 syntax:80 "!" sol_expr:80 : sol_expr
 syntax:80 "-" sol_expr:80 : sol_expr
+/-- `a ** b`, right-associative and tighter than `*` (solc ≥ 0.8). -/
+syntax:75 sol_expr:76 " ** " sol_expr:75 : sol_expr
 syntax:70 sol_expr:70 " * " sol_expr:71 : sol_expr
 syntax:70 sol_expr:70 " / " sol_expr:71 : sol_expr
 syntax:70 sol_expr:70 " % " sol_expr:71 : sol_expr
@@ -711,6 +739,7 @@ partial def expandTy : TSyntax `sol_ty → MacroM Term
   | `(sol_ty| $x:ident) => `(RawTy.named $(quote x.getId.toString))
   | `(sol_ty| mapping ( $k => $v )) => do `(RawTy.mapping $(← expandTy k) $(← expandTy v))
   | `(sol_ty| $t[]) => do `(RawTy.array $(← expandTy t))
+  | `(sol_ty| $t[$n]) => do `(RawTy.fixed $(← expandTy t) $n)
   | _ => Macro.throwUnsupported
 
 /-- `alice.account.age` arrives as one identifier; split it into members. -/
@@ -736,6 +765,7 @@ partial def expandExpr : TSyntax `sol_expr → MacroM Term
   | `(sol_expr| - $a) => do `(RawExpr.unop .neg $(← expandExpr a))
   | `(sol_expr| $c ? $a : $b) => do
       `(RawExpr.ternary $(← expandExpr c) $(← expandExpr a) $(← expandExpr b))
+  | `(sol_expr| $a ** $b) => bin ``BinOp.pow a b
   | `(sol_expr| $a * $b) => bin ``BinOp.mul a b
   | `(sol_expr| $a / $b) => bin ``BinOp.div a b
   | `(sol_expr| $a % $b) => bin ``BinOp.mod a b
@@ -882,6 +912,7 @@ def elabTy : RawTy → Ty
   | .named s => .struct s
   | .mapping k v => .mapping (elabTy k) (elabTy v)
   | .array t => .array (elabTy t)
+  | .fixed t n => .fixed (elabTy t) n
 
 def primName : PrimTy → String
   | .uint => "uint" | .int => "int" | .bool => "bool"
@@ -904,6 +935,26 @@ where it stands. -/
 def RawExpr.isLit : RawExpr → Bool
   | .num _ | .unop .neg (.num _) => true
   | _ => false
+
+/-- Whether an index occurs in the expression: evaluating it may revert. -/
+def RawExpr.hasIndex : RawExpr → Bool
+  | .index .. => true
+  | .field e _ | .unop _ e | .incDec _ e => e.hasIndex
+  | .binop _ a b => a.hasIndex || b.hasIndex
+  | .ternary c a b => c.hasIndex || a.hasIndex || b.hasIndex
+  | .newArr _ n => n.hasIndex
+  | .num _ | .name _ | .bool _ => false
+
+/-- Whether a `.length` of an indexed base occurs in the expression
+(`rows[i].length`): if the base is a fixed-size array, it is evaluated for its
+bounds check although the length is a literal, so `hoist` captures it. -/
+def RawExpr.hasIdxLen : RawExpr → Bool
+  | .field e f => (f == "length" && e.hasIndex) || e.hasIdxLen
+  | .unop _ e | .incDec _ e => e.hasIdxLen
+  | .index a b | .binop _ a b => a.hasIdxLen || b.hasIdxLen
+  | .ternary c a b => c.hasIdxLen || a.hasIdxLen || b.hasIdxLen
+  | .newArr _ n => n.hasIdxLen
+  | .num _ | .name _ | .bool _ => false
 
 /-- Whether an `++` or `−−` occurs in the expression. -/
 def RawExpr.hasIncDec : RawExpr → Bool
@@ -940,6 +991,14 @@ def synth (Γ : ECtx) : RawExpr → Except String (TExpr C)
     | .mpath (.ref (.array _)) b =>
       if f == "length" then pure (.val .uint (.mlen b rfl))
       else throw s!"member access .{f} on an array"
+    -- a fixed-size array's length is its type's: the literal, as solc folds
+    -- it.  A base that indexes is evaluated first (it may revert), so
+    -- `hoist` captured it; one left is where no capture may go.
+    | .path (.ref (.fixed _ n)) _ | .mpath (.ref (.fixed _ n)) _ =>
+      if f != "length" then throw s!"member access .{f} on an array"
+      else if e.hasIndex then
+        throw "the length of an indexed fixed-size array under a short-circuit operator or in a conditional's branch"
+      else pure (.val .uint (.simple (.lit n rfl)))
     | .path (.ref (.struct s)) b =>
       match h : C.fieldType s f with
       | some T => pure (.path T (.loc (.field b f h)))
@@ -952,8 +1011,15 @@ def synth (Γ : ECtx) : RawExpr → Except String (TExpr C)
   | .index e k => do
     match ← synth Γ e with
     | .path (.ref (.mapping (.prim kp) V)) b => pure (.path V (.loc (.index .map b (← check Γ kp k))))
-    | .path (.ref (.array E)) b => pure (.path E (.loc (.index .arr b (← check Γ .uint k))))
-    | .mpath (.ref (.array E)) b => pure (.mpath E (.loc (.index b (← check Γ .uint k))))
+    | .path (.ref (.array E)) b => pure (.path E (.loc (.index (.arr .dyn) b (← check Γ .uint k))))
+    | .mpath (.ref (.array E)) b => pure (.mpath E (.loc (.index .dyn b (← check Γ .uint k))))
+    -- a literal index past a fixed-size array's end is solc's compile error
+    | .path (.ref (.fixed E n)) b =>
+      if let .num i := k then if n ≤ i then throw s!"index {i} out of bounds of a length-{n} array"
+      pure (.path E (.loc (.index (.arr .fixed) b (← check Γ .uint k))))
+    | .mpath (.ref (.fixed E n)) b =>
+      if let .num i := k then if n ≤ i then throw s!"index {i} out of bounds of a length-{n} array"
+      pure (.mpath E (.loc (.index .fixed b (← check Γ .uint k))))
     | _ => throw "indexing something that is not a mapping or an array"
   | .binop op a b => do
     -- the operand type: the first operand that is not a literal gives it
@@ -1068,12 +1134,12 @@ def elabOpTarget (l : RawExpr) : ElabM (Prog C × (p : PrimTy) × OpLoc C p) := 
       let x ← freshCapture "ie"
       pure ([.declLocal k x (some i)], ⟨p, .index it b (.local x)⟩)
   | .mpath (.prim p) (.loc (.field b f h)) => pure ([], ⟨p, .mfield b f h⟩)
-  | .mpath (.prim p) (.loc (.index b i)) =>
+  | .mpath (.prim p) (.loc (.index a b i)) =>
     match i.toSimple? with
-    | some ie => pure ([], ⟨p, .mindex b ie⟩)
+    | some ie => pure ([], ⟨p, .mindex a b ie⟩)
     | none =>
       let x ← freshCapture "ie"
-      pure ([.declLocal .uint x (some i)], ⟨p, .mindex b (.local x)⟩)
+      pure ([.declLocal .uint x (some i)], ⟨p, .mindex a b (.local x)⟩)
   | _ => throw "a compound assignment needs a local or a place of value type"
 
 /-- An inc/dec target for the assignment form, with a non-simple receiver
@@ -1095,9 +1161,9 @@ def elabIncTarget (l : RawExpr) :
     | .mfield b f h =>
       let x ← freshCapture "mv"
       pure (pre ++ [.declMem (.struct _) x (some (.alias b)) rfl], ⟨p, .mfield (.var x) f h, rfl⟩)
-    | .mindex b i =>
+    | .mindex a b i =>
       let x ← freshCapture "mv"
-      pure (pre ++ [.declMem (.array _) x (some (.alias b)) rfl], ⟨p, .mindex (.var x) i, rfl⟩)
+      pure (pre ++ [.declMem _ x (some (.alias b)) rfl], ⟨p, .mindex a (.var x) i, rfl⟩)
     | .local _ | .root .. => nomatch hs
 
 /-- Declare `x` in scope. -/
@@ -1170,6 +1236,15 @@ not evaluate it, so there it is an error. -/
 partial def hoist : RawExpr → ElabM (Prog C × RawExpr)
   | .field e f => do
     let (P, e) ← hoist e
+    -- `rows[i].length` of a fixed-size `rows[i]`: the base is evaluated (and
+    -- may revert) although the length is the literal, so it is captured
+    let (Γ, _) ← get
+    if f == "length" && e.hasIndex then
+      match synth C Γ e with
+      | .ok (.path (.ref (.fixed ..)) _) | .ok (.mpath (.ref (.fixed ..)) _) =>
+        let (Pc, e) ← captureExpr C e
+        return (P ++ Pc, .field e f)
+      | _ => pure ()
     pure (P, .field e f)
   | .index e k => do
     -- the base first, then the index: `matrix[k][k++]` indexes `matrix[0]`
@@ -1178,6 +1253,9 @@ partial def hoist : RawExpr → ElabM (Prog C × RawExpr)
       let (Pc, e) ← captureExpr C e
       let (Q, k) ← hoist k
       pure (P ++ Pc ++ Q, .index e k)
+    else if k.hasIdxLen then
+      let (Q, k) ← hoist k
+      pure (P ++ Q, .index e k)
     else pure (P, .index e k)
   | .binop op a b => do
     if op.shortCircuits then
@@ -1191,6 +1269,10 @@ partial def hoist : RawExpr → ElabM (Prog C × RawExpr)
         let (Qc, b) ← captureExpr C b
         let (P, a) ← hoist a
         pure (Q ++ Qc ++ P, .binop op a b)
+      else if a.hasIdxLen then
+        -- a capture that may only revert: the right operand need not be held
+        let (P, a) ← hoist a
+        pure (Q ++ P, .binop op a b)
       else pure (Q, .binop op a b)
   | .unop op a => do
     let (P, a) ← hoist a
@@ -1556,9 +1638,13 @@ def optE (α : Lean.Expr) : Option Lean.Expr → Lean.Expr
   | none => mkAppN (mkConst ``Option.none [0]) #[α]
   | some a => mkAppN (mkConst ``Option.some [0]) #[α, a]
 
+def ArrTy.quote : {R : RefTy} → {E : Ty} → ArrTy R E → Lean.Expr
+  | _, _, @ArrTy.dyn E => mkAppN (mkConst ``ArrTy.dyn) #[toExpr E]
+  | _, _, @ArrTy.fixed E n => mkAppN (mkConst ``ArrTy.fixed) #[toExpr E, toExpr n]
+
 def IndexTy.quote : {R : RefTy} → {k : PrimTy} → {V : Ty} → IndexTy R k V → Lean.Expr
   | _, _, _, @IndexTy.map k V => mkAppN (mkConst ``IndexTy.map) #[toExpr k, toExpr V]
-  | _, _, _, @IndexTy.arr E => mkAppN (mkConst ``IndexTy.arr) #[toExpr E]
+  | _, _, _, @IndexTy.arr R E a => mkAppN (mkConst ``IndexTy.arr) #[toExpr R, toExpr E, ArrTy.quote a]
 
 variable {C : Contract} (c : Lean.Expr)
 
@@ -1588,7 +1674,9 @@ def MPath.quote : (T : Ty) → MPath C T → Lean.Expr
 def MLoc.quote : (T : Ty) → MLoc C T → Lean.Expr
   | T, @MLoc.field _ s _ b f _ =>
     mkAppN (mkConst ``MLoc.field) #[c, toExpr s, toExpr T, MPath.quote _ b, toExpr f, rflSome T]
-  | E, .index b i => mkAppN (mkConst ``MLoc.index) #[c, toExpr E, MPath.quote _ b, Val.quote .uint i]
+  | E, @MLoc.index _ R _ a b i =>
+    mkAppN (mkConst ``MLoc.index) #[c, toExpr R, toExpr E, ArrTy.quote a, MPath.quote _ b,
+      Val.quote .uint i]
 
 def Val.quote : (p : PrimTy) → Val C p → Lean.Expr
   | p, .simple s => mkAppN (mkConst ``Val.simple) #[c, toExpr p, Simple.quote c p s]
@@ -1642,8 +1730,9 @@ def OpLoc.quote : (p : PrimTy) → OpLoc C p → Lean.Expr
   | p, @OpLoc.mfield _ s _ b f _ =>
     mkAppN (mkConst ``OpLoc.mfield) #[c, toExpr s, toExpr p, MPath.quote c _ b, toExpr f,
       rflSome (.prim p)]
-  | p, .mindex b i =>
-    mkAppN (mkConst ``OpLoc.mindex) #[c, toExpr p, MPath.quote c _ b, Simple.quote c .uint i]
+  | p, @OpLoc.mindex _ R _ a b i =>
+    mkAppN (mkConst ``OpLoc.mindex) #[c, toExpr R, toExpr p, ArrTy.quote a, MPath.quote c _ b,
+      Simple.quote c .uint i]
 
 mutual
 

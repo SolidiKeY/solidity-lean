@@ -224,13 +224,15 @@ section Ledger
 
 local instance : InContract := ⟨TestSuite⟩
 
+set_option maxHeartbeats 1600000 in
 /-- The whole program of `LedgerDelete.lean`, both `delete`s included, in
 one call: `ledger.nonce = 5; ledger.balances[1] = 10; ledger.balances[2] = 20;
 delete ledger.balances[1]; uint gone = ledger.balances[1];
 uint kept = ledger.balances[2]; uint before = ledger.nonce; delete ledger;
 uint after = ledger.nonce; uint survives = ledger.balances[2];`.
 `LedgerDelete.lean` closes the first three reads with `sol_close` and runs
-the interpreter for the last two. -/
+the interpreter for the last two.  What `survives` is depends on what
+`ledger.balances` is in the state, below. -/
 theorem ledger :
     ⊨ dl!{ [ ledger.nonce = 5; ledger.balances[1] = 10; ledger.balances[2] = 20;
              delete ledger.balances[1];
@@ -238,21 +240,46 @@ theorem ledger :
              uint before = ledger.nonce;
              delete ledger;
              uint after = ledger.nonce; uint survives = ledger.balances[2]; ]
-           (gone == 0 && kept == 20 && before == 5 && after == 0 && survives == 20) } := by
+           (gone == 0 && kept == 20 && before == 5 && after == 0 &&
+             (survives != 20 → survives == 0)) } := by
   sol_symex
   sol_decide
 
-/-- **What survives `delete ledger`**: a `delete` keeps a mapping's
-entries and empties an array, and `⊨` includes states where
-`ledger.balances` is either.  Where it is a mapping `survives` is `20`;
-where it is an array the read reverts, which the box allows.  The reduction
-guards the read below the key by the location above the key being a
-mapping (`LStor.mapU`). -/
+/-- **What survives `delete ledger`**: a `delete` keeps a mapping's entries,
+resets a fixed-size array's elements in place, and empties a dynamic array,
+and `⊨` includes states where `ledger.balances` is any of them.  Where it is a
+mapping `survives` is `20`; where it is a fixed-size array (a `uint[3]`, say)
+it is `0`; where it is a dynamic array the read reverts, which the box allows.
+The reduction tests the location above the key for a mapping, then for a
+fixed-size array (`delBelow`, `LStor.mapU`). -/
 theorem survives :
     ⊨ dl!{ [ ledger.balances[2] = 20; delete ledger; uint survives = ledger.balances[2]; ]
-           survives == 20 } := by
+           (survives != 20 → survives == 0) } := by
   sol_symex
   sol_decide
+
+/-- A storage in which `ledger.balances` is a fixed-size array of three
+`uint`s. -/
+def fixedBalances : State :=
+  { storage := [("ledger", .struct [("nonce", .int 0),
+      ("balances", .array [.int 0, .int 0, .int 0] [] true)])] }
+
+/-- `fixedValues[1] = 7; delete fixedValues; uint x = fixedValues[1];` — `x` is
+`0` where `fixedValues` holds a fixed-size array (`delete` resets its elements
+in place), `7` where it holds a mapping (which `delete` leaves alone: a state
+`⊨` quantifies over), and the read reverts where it holds a dynamic array. -/
+theorem fixedDelete :
+    ⊨ dl!{ [ fixedValues[1] = 7; delete fixedValues; uint x = fixedValues[1]; ]
+           (x != 7 → x == 0) } := by
+  sol_symex
+  sol_decide
+
+/-- **`survives == 20` alone is not valid**: where `ledger.balances` is a
+fixed-size array, `delete ledger` resets its element `2` to `0`. -/
+theorem survivesMappingOnly :
+    ¬ (⊨ dl!{ [ ledger.balances[2] = 20; delete ledger; uint survives = ledger.balances[2]; ]
+              survives == 20 }) :=
+  fun h => nomatch h fixedBalances
 
 end Ledger
 

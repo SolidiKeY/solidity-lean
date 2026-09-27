@@ -51,7 +51,8 @@ def dflt : Nat → Ty → SVal
   | _, .prim _ => .int 0
   | 0, .ref _ => .struct []
   | n + 1, .ref (.struct s) => .struct ((structDef s).map fun (f, t) => (f, dflt n t))
-  | _ + 1, .ref (.array _) => .array [] []
+  | _ + 1, .ref (.array _) => .array [] [] false
+  | n + 1, .ref (.fixed e k) => .array (List.replicate k (dflt n e)) [] true
   | n + 1, .ref (.mapping _ v) => .map [] (dflt n v)
 
 /-- `σ` with each root of `C` at its default, spelt with `dflt`. -/

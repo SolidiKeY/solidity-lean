@@ -39,19 +39,21 @@ correspondence against `Taclet` (`~/projects/side-projects/lean/solkey`).
 
 - **Calls** and the **callback semantics** of `transfer`
   (`transferSemantics:withCallback`): the typed syntax has neither.
-- **Fixed-size arrays** (`uint[3]`, `Token[2]`, `uint[2][]`): not in the
-  typed syntax; the design note below says what they need.
 - **The corpus is not regenerated** since the syntax gaps below closed:
-  `scripts/solkey-port.mjs` no longer refuses `--`, `.length`, `new` and an
-  `++` inside an expression, and `docs/corpus-parity.md` counts the old
-  verdicts until `--probe` re-pins them.
+  `scripts/solkey-port.mjs` no longer refuses `--`, `.length`, `new`, an
+  `++` inside an expression, `**` and `T[n]`, and `docs/corpus-parity.md`
+  counts the old verdicts until `--probe` re-pins them.  `TestSuite`'s
+  `boolKeyed` (a `bool`-keyed mapping: the interpreter reads keys as `Int`)
+  and `tree` (a struct recursive through a mapping, which `structRank`
+  forbids) are still not declared.
 - **`Ch15`'s realizability**: `sol_decide` is sound, not proved complete —
   constraints between reads of the starting storage (shapes, bounds,
   `length`) are not stated; memory, copies, `push`/`pop` are outside its
   fragment.
 - **The converse of reachability** (every canonical storage is reachable).
-- **The EVM fragment**: `int`, `**`, memory, storage-to-storage copies,
-  `push`, `v = x++;` (`docs/compiler-verification.md`).
+- **The EVM fragment**: `int`, `**` (needs a loop), memory,
+  storage-to-storage copies, `push`, `v = x++;`
+  (`docs/compiler-verification.md`).
 
 ### Closed: the syntax gaps of the corpus (2026-09-27)
 
@@ -67,38 +69,14 @@ correspondence against `Taclet` (`~/projects/side-projects/lean/solkey`).
   (`MRhs.newArr`, `Stmt.assignNew`) with `memoryArrayFreshAlloc` and
   `newArrayCapture`.
 
-### Design note: fixed-size arrays
+### Closed: fixed-size arrays and `**` (2026-09-27)
 
-The storage *values* can hold one: a `uint[3]` is an `SVal.array` of three
-live elements with nothing past its end, and no statement changes its
-length.  What is missing is the *type*: `RefTy.array E` has no length, and
-four places would read one.
-
-1. **The type** — `RefTy.fixed (E : Ty) (n : Nat)` (or a length index on
-   `array`).  Every function by cases on `RefTy` gains an arm: `defaultForTy`
-   (`n` defaults, not `[]`: the only place the storage model changes),
-   `tyHasMapping`/`mapFree`/`defaultOkS`, the struct rank certificate,
-   `KeySort` (solkey's sort of a static array), `SVal.hasTy`/`canon`
-   (exactly `n` elements, none past the end), `copyStToM`/`copyMToSt` (a
-   memory copy has `n` elements too).
-2. **The syntax** — `IndexTy.fixed` beside `.arr` for `a[i]`; `Stmt.push`/
-   `Stmt.pop` keep `.array` only, so `push` on a static array cannot be
-   written; `.length` of one is the constant `n`, a `Simple` literal the
-   elaborator writes (solc folds it too), so no rule reads it.
-3. **The rules** — the array index rules (`storageIndexReadArrayFind`, …)
-   are stated at `IndexTy.arr`; a static index needs either a second family
-   or the rules generalised over an "indexed by position" class.  The
-   bounds check (`State.checkIndex`) is unchanged.
-4. **The EVM layout** — `Evm/Repr.lean` places a dynamic array's elements at
-   `keccak(slot)`; solc lays a static array out *inline*, `n × size E`
-   consecutive slots, which changes `size`, `offset` and the injectivity
-   proof of the slot map.
-
-That is a new type constructor through AST, typing, reachability, the sort
-lattice and the compiler — a change of its own, not a syntax gap; the three
-corpus functions that need it (`testMemoryFixedArrayLength`,
-`testMemoryNestedFixedArrayLength`, `testNewArrayOfFixedElementLength`) stay
-unsupported.
+- `RefTy.fixed E n` (`T[n]`), in storage and memory, through typing,
+  reachability, the sort check, the calculus, `sol_decide` and the compiler.
+  The array rules cover both kinds through `ArrTy` (`IndexTy.arr ak`), as
+  solkey's `Path[…,array]` sorts do; `push`/`pop` stay at `.array`.
+- `**` is checked `uint` exponentiation (`BinOp.pow`), right-associative and
+  tighter than `*`, as in solc; its taclets are the `binopAssignment` family's.
 
 ## Sharp edges
 
@@ -158,6 +136,11 @@ unsupported.
 | Ported contracts | one named constant per interpreter store, `initStorage_*` checks roots, order and defaults against the store by `simp` | 2026-09-25 |
 | Decrement spelling | `x−−`, `−−x` (two U+2212 MINUS SIGN): `--` opens a Lean comment, and `x -= 1` is another statement (`opAssign`, other taclets). The printers write it back the same way | 2026-09-27 |
 | Effects inside expressions | `++`/`−−` in an expression and a conditional of references are captured by the elaborator before the statement (`uint se1; se1 = i++;`, a branch binding a fresh alias), so `Val` stays effect-free and no rule sees them. The capture order is solc's (right operand before left, right-hand side before target, base before index), which `TestSuite.sol`'s evaluation-order functions pin; an effect under `&&`/`||` or in a conditional's branch is an elaboration error | 2026-09-27 |
+| Fixed-size arrays | one `RefTy.fixed E n`, not a length index on `.array`; the array rules take an `ArrTy R E` (`dyn`/`fixed`), so one rule covers both kinds, as solkey's `Path[…,array]` does. `SVal.array`/`MObj.array` carry a `fixed` flag: `defaultOf`/`delete` keeps a fixed array's `n` elements (reset) and empties a dynamic one; `overlay` takes the new value's flag; a fixed array has no `length` slot (`find` of `length` is stuck). `.length` of one is the literal `n` the elaborator writes (an indexed base is captured first); a literal index `≥ n` is an elaboration error. solkey's delete/`pop` taclets exclude fixed elements (`noFixedArrayElement`); the Lean rules do not, and are sound for them | 2026-09-27 |
+| `sol_decide` and fixed arrays | a delete below a key is exact three ways (`KShape`: a mapping keeps its entries, a fixed array keeps its length, anything else resets), `delBelow` guarding on the read shape with `LTerm.orElse`; `sol_decide_reads` splits the storage reads a residual still depends on | 2026-09-27 |
+| Fixed arrays on the EVM | solc's inline layout: `n · size E` slots, element `i` at `slot + i·size E`, no length slot, constant bound check (`fixedCheck`). `tyRank (T[n]) = tyRank T + 1` so that `size` recurses | 2026-09-27 |
+| `**` | `uint` only (`BinOp.accepts`), checked with the other arithmetic; `int ** k` is not ported. Not compiled: solc's `checked_exp` is a loop | 2026-09-27 |
+| `TestSuite` state | `Triple` is `FixedTriple` in Lean (`solkey-port.mjs`'s `STRUCT_RENAMES`); `boolKeyed` and `tree` are not declared | 2026-09-27 |
 | `.length` | a `Val` (`len`, `mlen`) whose result type is carried as a proof `p = .uint`, not an index: a constructor fixing the index would have to be refined in every inner `match` of `Stmt.step` | 2026-09-27 |
 | Memory `delete` of a reference | the location gets a fresh default object (KeY's `memoryFieldDeleteReference`, solc), not a reset of the old one: an alias keeps it | 2026-09-27 |
 

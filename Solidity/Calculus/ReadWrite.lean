@@ -125,14 +125,17 @@ theorem find_append : ∀ (p : List Seg) (v : SVal) (q : List Seg),
       | field n =>
         simp only [List.cons_append, SVal.find]
         split <;> simp [find_append p, bind, Except.bind]
-    | array elems shadow =>
+    | array elems shadow fx =>
       cases a with
       | «at» i =>
         simp only [List.cons_append, SVal.find]
         split <;> simp [find_append p, bind, Except.bind]
       | field n =>
         by_cases hn : n = "length"
-        · subst hn; simp only [List.cons_append, SVal.find]; exact find_append p _ q
+        · subst hn; simp only [List.cons_append, SVal.find]
+          cases fx
+          · exact find_append p _ q
+          · rfl
         · simp [SVal.find, bind, Except.bind]
     | map entries dflt =>
       cases a with
@@ -194,7 +197,7 @@ theorem find_save_diverge {new : SVal} :
                 simp [SVal.find, hl, find_save_diverge hd hu]
               · simp [SVal.find, lookupBy_setBy_ne hnm]
         · simp at hs
-    | array elems shadow =>
+    | array elems shadow fx =>
       cases a with
       | field n => simp [SVal.save] at hs
       | «at» i =>
@@ -210,7 +213,7 @@ theorem find_save_diverge {new : SVal} :
             | field m =>
               -- `length` reads the extent, which a write to a slot keeps
               by_cases hm : m = "length"
-              · subst hm; simp [SVal.find]
+              · subst hm; cases fx <;> simp [SVal.find]
               · simp [SVal.find]
             | «at» j =>
               by_cases hij : j = i
@@ -273,26 +276,26 @@ theorem findStorage_saveStorage_apart {σ τ : State} {r r' : Name} {p q : List 
 /-- An index into what a path names: in bounds of an array's live elements,
 or any key of a mapping; a word or a struct takes none. -/
 def idxOk (k : Int) : SVal → Res Unit
-  | .array elems _ => if 0 ≤ k ∧ k.toNat < elems.length then .ok () else .error .revert
+  | .array elems _ _ => if 0 ≤ k ∧ k.toNat < elems.length then .ok () else .error .revert
   | .map _ _ => .ok ()
   | .prim _ | .struct _ => .error .stuck
 
 /-- The slot one past an array's end, once the array is named. -/
 def pastEnd (rs : Name × List Seg) : SVal → Res (Name × List Seg)
-  | .array elems _ => .ok (rs.1, rs.2 ++ [.at elems.length])
+  | .array elems _ _ => .ok (rs.1, rs.2 ++ [.at elems.length])
   | .prim _ | .struct _ | .map _ _ => .error .stuck
 
 /-- `values[k]` with `k` in bounds. -/
-@[simp] theorem idxOk_array (k : Int) (elems shadow : List SVal) :
-    idxOk k (.array elems shadow) =
+@[simp] theorem idxOk_array (k : Int) (elems shadow : List SVal) (fx : Bool) :
+    idxOk k (.array elems shadow fx) =
       if 0 ≤ k ∧ k.toNat < elems.length then .ok () else .error .revert := rfl
 
 /-- `balances[k]`: every key. -/
 @[simp] theorem idxOk_map (k : Int) (e : List (Int × SVal)) (d : SVal) :
     idxOk k (.map e d) = .ok () := rfl
 
-@[simp] theorem pastEnd_array (rs : Name × List Seg) (elems shadow : List SVal) :
-    pastEnd rs (.array elems shadow) = .ok (rs.1, rs.2 ++ [.at elems.length]) := rfl
+@[simp] theorem pastEnd_array (rs : Name × List Seg) (elems shadow : List SVal) (fx : Bool) :
+    pastEnd rs (.array elems shadow fx) = .ok (rs.1, rs.2 ++ [.at elems.length]) := rfl
 
 /-- One step down a write: the child written below, before and after. -/
 theorem save_cons_find {a : Seg} {p : List Seg} {old new upd : SVal}
@@ -312,7 +315,7 @@ theorem save_cons_find {a : Seg} {p : List Seg} {old new upd : SVal}
         cases hs
         exact ⟨o, u, hu, fun q => ⟨by simp [SVal.find, hl], by simp [SVal.find]⟩⟩
       · simp at hs
-  | array elems shadow =>
+  | array elems shadow fx =>
     cases a with
     | field _ => simp [SVal.save] at hs
     | «at» i =>
@@ -355,7 +358,7 @@ theorem idxOk_save_cons {k : Int} {a : Seg} {rest : List Seg} {old new upd : SVa
       split at h
       · obtain ⟨u, _, h⟩ := Semantics.bind_ok_inv h; cases h; rfl
       · simp at h
-  | array elems shadow =>
+  | array elems shadow fx =>
     cases a with
     | field _ => simp [SVal.save] at h
     | «at» i =>
@@ -462,7 +465,7 @@ theorem save_of_find_error : ∀ {v : SVal} {p : List Seg} {new : SVal} {e : Hal
     · rename_i hl
       (try rw [hl]); exact h
   | .struct _, .at _ :: _, _, _, h => by simpa [SVal.find, SVal.save] using h
-  | .array elems shadow, .at i :: p, new, e, h => by
+  | .array elems shadow _, .at i :: p, new, e, h => by
     simp only [SVal.find] at h
     simp only [SVal.save]
     split at h
@@ -472,11 +475,11 @@ theorem save_of_find_error : ∀ {v : SVal} {p : List Seg} {new : SVal} {e : Hal
       simp [List.get_eq_getElem, save_of_find_error h, bind, Except.bind]
     · rename_i hi
       rw [dif_neg hi]; exact h
-  | .array elems shadow, .field n :: p, new, e, h => by
+  | .array elems shadow fx, .field n :: p, new, e, h => by
     by_cases hn : n = "length"
     · subst hn
       cases p with
-      | nil => simp [SVal.find] at h
+      | nil => cases fx <;> simp_all [SVal.find, SVal.save]
       | cons b p => simpa [SVal.find, SVal.save] using h
     · simpa [SVal.find, SVal.save, hn] using h
   | .map entries dflt, .at i :: p, new, e, h => by
@@ -559,7 +562,7 @@ theorem stripElems_length : ∀ (l : List SVal), (SVal.strip.stripElems l).lengt
         · rfl
       | «at» _ => rfl
     | prim _ => rfl
-    | array _ _ => rfl
+    | array _ _ _ => rfl
     | map _ _ => rfl
 
 /-- Reading laid-on-fresh-slots values along members: as before, stripped. -/
@@ -582,7 +585,7 @@ theorem find_strip_fields : ∀ (v : SVal) (q : List Seg), fieldPath q = true �
     cases lookupBy f fields with
     | none => rfl
     | some w => exact find_strip_fields w q hq
-  | .array elems shadow, .field f :: q, hq => by
+  | .array elems shadow fx, .field f :: q, hq => by
     by_cases hf : f = "length"
     · subst hf
       have hlen : (SVal.strip.stripElems elems).length = elems.length := by
@@ -590,6 +593,8 @@ theorem find_strip_fields : ∀ (v : SVal) (q : List Seg), fieldPath q = true �
         | nil => rfl
         | cons _ _ ih => simp [SVal.strip.stripElems, ih]
       simp only [SVal.strip, SVal.find, hlen]
+      cases fx; rotate_left
+      · rfl
       cases q with
       | nil => simp [find_nil, bind, Except.bind, SVal.strip]
       | cons s q => cases s <;> simp [SVal.find, bind, Except.bind]
@@ -636,9 +641,9 @@ theorem find_overlay_fields : ∀ (old new : SVal) (q : List Seg), fieldPath q =
           | some o =>
             simp only
             rw [find_overlay_fields o w q hq]
-      | prim _ | array _ _ | map _ _ =>
+      | prim _ | array _ _ _ | map _ _ =>
         exact (find_strip_fields (.struct nfs) (.field f :: q) (by simpa using hq)).trans rfl
-    | array nel nsh =>
+    | array nel nsh nfx =>
       by_cases hf : f = "length"
       · subst hf
         have hlen : ∀ os : List SVal, (SVal.overlay.overlayElems os nel).length = nel.length := by
@@ -651,14 +656,16 @@ theorem find_overlay_fields : ∀ (old new : SVal) (q : List Seg), fieldPath q =
               simp only [SVal.overlay.overlayElems]
               exact stripElems_length _
             | cons o os => simp [SVal.overlay.overlayElems, ih]
+        cases nfx; rotate_left
+        · cases old <;> rfl
         cases old with
-        | array oel osh =>
+        | array oel osh ofx =>
           simp only [SVal.overlay, SVal.find, hlen]
           cases q with
           | nil => simp [find_nil, bind, Except.bind, layAt, SVal.strip]
           | cons s q => cases s <;> simp [SVal.find, bind, Except.bind]
         | prim _ | struct _ | map _ _ =>
-          exact (find_strip_fields (.array nel nsh) (.field "length" :: q) (by simpa using hq)).trans
+          exact (find_strip_fields (.array nel nsh false) (.field "length" :: q) (by simpa using hq)).trans
             (by cases q <;> simp [SVal.find, bind, Except.bind, layAt_prim, SVal.strip])
       · cases old <;> simp [SVal.overlay, SVal.strip, SVal.find, hf, bind, Except.bind]
   | _, _, .at _ :: _, hq => by simp at hq
@@ -699,22 +706,23 @@ theorem readAddr_saveStorage {σ τ : State} {r : Name} {p : List Seg} {v : SVal
 named: append, and write the result back. -/
 def pushOn (σ : State) (E : Ty) (r : Name) (segs : List Seg) (val : SVal → Res SVal) :
     SVal → Res State
-  | .array elems shadow => val (pushSlot E shadow).1 >>= fun v =>
-      σ.saveStorage r segs (.array (elems ++ [v]) (pushSlot E shadow).2)
+  | .array elems shadow fx => val (pushSlot E shadow).1 >>= fun v =>
+      σ.saveStorage r segs (.array (elems ++ [v]) (pushSlot E shadow).2 fx)
   | .prim _ | .struct _ | .map _ _ => .error .stuck
 
 /-- What `values.pop()` does to the array, once it is named. -/
 def popOn (σ : State) (keep : Bool) (r : Name) (segs : List Seg) : SVal → Res State
-  | .array elems shadow =>
+  | .array elems shadow fx =>
     match elems.reverse with
     | [] => .error .revert
     | last :: restRev =>
-      σ.saveStorage r segs (.array restRev.reverse ((if keep then last else last.defaultOf) :: shadow))
+      σ.saveStorage r segs
+        (.array restRev.reverse ((if keep then last else last.defaultOf) :: shadow) fx)
   | .prim _ | .struct _ | .map _ _ => .error .stuck
 
 /-- The length of an array, once it is named. -/
 def arrLen : SVal → Res Value
-  | .array elems _ => .ok (.int elems.length)
+  | .array elems _ _ => .ok (.int elems.length)
   | .prim _ | .struct _ | .map _ _ => .error .stuck
 
 /-- `values.push(5)` reads `values`, then writes it back one longer. -/
@@ -743,42 +751,42 @@ theorem arrayLen_eq (σ : State) (r : Name) (segs : List Seg) :
 
 /-- A push onto a named array appends. -/
 theorem pushOn_array (σ : State) (E : Ty) (r : Name) (segs : List Seg)
-    (val : SVal → Res SVal) (elems : List SVal) (shadow : List SVal) :
-    pushOn σ E r segs val (.array elems shadow) = val (pushSlot E shadow).1 >>= fun v =>
-      σ.saveStorage r segs (.array (elems ++ [v]) (pushSlot E shadow).2) := rfl
+    (val : SVal → Res SVal) (elems : List SVal) (shadow : List SVal) (fx : Bool) :
+    pushOn σ E r segs val (.array elems shadow fx) = val (pushSlot E shadow).1 >>= fun v =>
+      σ.saveStorage r segs (.array (elems ++ [v]) (pushSlot E shadow).2 fx) := rfl
 
 /-- A pop after a push takes the pushed element off:
 `values.push(6); values.pop();` leaves `values` as it was, but for the
 recycled slot. -/
 theorem popOn_push (σ : State) (r : Name) (segs : List Seg) (elems : List SVal)
-    (x : SVal) (shadow : List SVal) :
-    popOn σ false r segs (.array (elems ++ [x]) shadow) =
-      σ.saveStorage r segs (.array elems (x.defaultOf :: shadow)) := by
+    (x : SVal) (shadow : List SVal) (fx : Bool) :
+    popOn σ false r segs (.array (elems ++ [x]) shadow fx) =
+      σ.saveStorage r segs (.array elems (x.defaultOf :: shadow) fx) := by
   simp [popOn]
 
 /-- An array of mappings popped after a push keeps the pushed element in the
 recycled slot, as it is. -/
 theorem popOn_push_keep (σ : State) (r : Name) (segs : List Seg) (elems : List SVal)
-    (x : SVal) (shadow : List SVal) :
-    popOn σ true r segs (.array (elems ++ [x]) shadow) =
-      σ.saveStorage r segs (.array elems (x :: shadow)) := by
+    (x : SVal) (shadow : List SVal) (fx : Bool) :
+    popOn σ true r segs (.array (elems ++ [x]) shadow fx) =
+      σ.saveStorage r segs (.array elems (x :: shadow) fx) := by
   simp [popOn]
 
 /-- An array is as long as its elements. -/
-theorem arrLen_array (elems shadow : List SVal) :
-    arrLen (.array elems shadow) = .ok (.int elems.length) := rfl
+theorem arrLen_array (elems shadow : List SVal) (fx : Bool) :
+    arrLen (.array elems shadow fx) = .ok (.int elems.length) := rfl
 
 /-- A length was read off an array: `values.length == n` says `values` is
 an array of `n` elements. -/
 theorem arrLen_eq_ok {a : SVal} {v : Value} :
-    arrLen a = .ok v ↔ ∃ elems shadow, a = .array elems shadow ∧ v = .int elems.length := by
+    arrLen a = .ok v ↔ ∃ elems shadow fx, a = .array elems shadow fx ∧ v = .int elems.length := by
   cases a <;> simp [arrLen, eq_comm]
 
 /-- The element a push appended: after `values.push(5)` on an array of `n`
 elements, `values[n]` reads `5`. -/
-theorem find_push_last {elems : List SVal} {x : SVal} {shadow : List SVal} {i : Int}
+theorem find_push_last {elems : List SVal} {x : SVal} {shadow : List SVal} {fx : Bool} {i : Int}
     (hi : i = elems.length) (q : List Seg) :
-    (SVal.array (elems ++ [x]) shadow).find (.at i :: q) = x.find q := by
+    (SVal.array (elems ++ [x]) shadow fx).find (.at i :: q) = x.find q := by
   subst hi
   simp [SVal.find]
 
@@ -987,7 +995,7 @@ theorem copyStToM_asValue {σ τ : State} {v : SVal} {mv : MVal}
       simp only [hc, bind, Except.bind, State.alloc, Except.ok.injEq, Prod.mk.injEq] at h
       obtain ⟨_, rfl⟩ := h
       rfl
-  | array elems shadow =>
+  | array elems shadow fx =>
     rw [copyStToM] at h
     cases hc : copyStElems σ elems with
     | error e => simp [hc, bind, Except.bind] at h
@@ -1046,7 +1054,7 @@ theorem copyStToM_member {σ τ : State} {v : SVal} {id : Nat} {f : Name}
         Except.bind]
       revert this
       cases lookupBy f mfields <;> cases lookupBy f fields <;> simp [pure, Except.pure]
-  | array elems shadow =>
+  | array elems shadow fx =>
     rw [copyStToM] at h
     cases hc : copyStElems σ elems with
     | error e => simp [hc, bind, Except.bind] at h

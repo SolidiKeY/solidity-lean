@@ -102,6 +102,11 @@ request that solkey drop the fold.
 
 ## Storage index (array)
 
+Each array rule takes an implicit `ak : ArrTy R E` (`IndexTy.arr ak`), `dyn`
+for `T[]` and `fixed` for `T[n]`, so one constructor covers both kinds as
+solkey's `Path[…,array]` sort does (`PathSVSort` puts a static array in the
+`array` category). The memory index rules take the same argument as `mk`.
+
 | KeY taclet | `Taclet` constructor | Status | Notes |
 | --- | --- | --- | --- |
 | `storageIndexWriteArraySave` | `storageIndexWriteArraySave` | same | one rule for both modalities; an out-of-range write reverts in the path's own bounds check (`PTerm.at`, `State.checkIndex`), not as a separate bounds goal |
@@ -145,6 +150,14 @@ request that solkey drop the fold.
 | `storageLocalDeclSkip` | `storageLocalDeclSkip` | same | |
 
 ## Storage delete
+
+solkey leaves `delete` and `pop()` open on a path through a fixed-size array
+element (`noFixedArrayElement`, on `storageRootDelete`, `storageFieldDelete`,
+`storageIndexDelete`, `storageIndexArrayDelete`, `storagePopSave`): its
+`at(i)` carries no field kind. The Lean constructors have no such restriction
+and are sound there, since `SVal.defaultOf` keeps a fixed-size array's `n`
+elements (reset) where it empties a dynamic one; `push`/`pop` are written at
+`.array` only, so neither applies to a `T[n]` receiver.
 
 | KeY taclet | `Taclet` constructor | Status | Notes |
 | --- | --- | --- | --- |
@@ -249,7 +262,7 @@ three constructors are shared with the comparison and boolean operators below.
 | --- | --- | --- | --- |
 | `addition_unfold_left`, `subtraction_unfold_left`, `multiplication_unfold_left`, `power_unfold_left`, `division_unfold_left`, `modulo_unfold_left` | `binopUnfoldLeft` | merged into `binopUnfoldLeft` | `v = nse ⊕ e; ⇝ T se = nse; v = se ⊕ e;` |
 | `addition_unfold_right`, `subtraction_unfold_right`, `multiplication_unfold_right`, `power_unfold_right`, `division_unfold_right`, `modulo_unfold_right` | `binopUnfoldRight` | merged into `binopUnfoldRight` | requires `¬ op.shortCircuits`, true of every arithmetic op |
-| `additionAssignment`, `subtractionAssignment`, `multiplicationAssignment`, `powerAssignment`, `divisionAssignment`, `moduloAssignment` | `binopAssignment` | merged into `binopAssignment` | terminal `v = se₁ ⊕ se₂;`; solkey has no `powAssign` (`**=`) taclets, so there is no `localOpAssign (op := .pow)` instance on the KeY side either |
+| `additionAssignment`, `subtractionAssignment`, `multiplicationAssignment`, `powerAssignment`, `divisionAssignment`, `moduloAssignment` | `binopAssignment` | merged into `binopAssignment` | terminal `v = se₁ ⊕ se₂;`; `**` (`BinOp.pow`) is checked `uint` exponentiation, so `power*` is claimed at `op := .pow`; solkey has no `powAssign` (`**=`) taclets, so there is no `localOpAssign (op := .pow)` instance on the KeY side either |
 
 ## Comparisons, boolean operators, unary
 
@@ -466,17 +479,18 @@ length), `selectStDelNodeIndexStruct` became length-guarded, and
 | `delFieldDefault` | `delFieldDefault`, `delFieldDefault_asBool` | done |
 | `delFieldStValueCast` | `delValueCast`, `delValueCast_asInt`, `delValueCast_asBool` | done as the cast pushed through the reset (was `delValueStValueCast`) |
 | `delFieldMap` | — | **arch**: a `Seg` carries no `MapField` |
-| `delFieldFixed` | — | **arch**: no fixed-size array in the language model, so no `FixedField` |
+| `delFieldFixed` | — | **arch**: it picks `delNodeFixed` by the member being a `FixedField`, and a `Seg` has no sort; the interpreter marks a fixed-size array on the value (`SVal.array`'s `fixed` flag) instead |
 | ~~`delValueStruct`~~, ~~`delValueDefault`~~ | `delValueStruct`, `delValueDefault` | gone upstream (replaced by `delField`); kept as the lemmas under it |
 | `selectStDelNodeMap` | — | **arch**: a `Seg` carries no `MapField`, so a mapping member of a deleted node is reset here; the mapping-preserving `delete` is the interpreter's `SVal.defaultOf` |
 | `selectStDelNodeRef` | `selectStDelNodeRef` (from `selectStDelNodeSelect`) | done, unconditional and for every `Seg`: one theorem, `selectSt (delNode s) a = delValue (selectSt s a)`, covers `Ref`, `Default`, the in-bounds index and an absent member |
 | `selectStDelNodeIndexStruct` | `selectStDelNodeIndexStruct`, `selectStDelNodeIndexKeep` | done: the in-bounds branch (`delNode` of the element, now that `delNode` resets index members in place instead of dropping them) unconditionally; the keep branch under the length invariant |
 | `selectStDelNodeDefault` | `selectStDelNodeDefault`, `selectStDelNodeDefault_asBool` | done |
-| `selectStDelNodeFixed`, `selectStDelNodeFixed{Map,Element,Size,Value}` | — | **arch**: `delNodeFixed` is reached only through a `FixedField`, and there is none |
+| `selectStDelNodeFixed`, `selectStDelNodeFixedMap` | — | **arch**: `selectStDelNodeFixed` picks `delNodeFixed` by a `FixedField`, `selectStDelNodeFixedMap` by a `MapField`; a `Seg` carries neither |
+| `selectStDelNodeFixed{Element,Size,Value}` | `selectStDelNodeFixedElement`, `selectStDelNodeFixedSize`, `selectStDelNodeFixedValue` (+`_asBool`) | done, over `delNodeFixed` (`delNode` with the `length` member stored back) |
 | `delAtEmpty` | `delAtEmpty` | done |
 | `selectOnDelAtCons` | `selectOnDelAtCons` | done, through `selectOnSaveCons`: `delAt` is eager, `save st p (delValue (find st p))`; the leaf is `delField st a1` |
 | `fieldShapeDef` | `fieldShapeDef` (`fieldShape`, `Shape.ofTy`) | done: `#shapeOf` is `Shape.ofTy`, over a member table the caller supplies (a `Seg.field` carries the name, not the declaration) |
-| `selectOnTyped{Struct,FixedSize,DynSize,LeafSize,MapSize,Element,Member}`, `typedTyped` | — | **not modelled**: the only rule that reads the tag is `selectOnTypedFixedSize`; no declared shape is a `fixedArr` (`Shape.ofTy_ne_fixedArr`), and `typed` would be a fifth `Struct` constructor through every proof (`Theory/Storage.lean`, "Shapes") |
+| `selectOnTyped{Struct,FixedSize,DynSize,LeafSize,MapSize,Element,Member}`, `typedTyped` | — | **not modelled**: the only rule that reads the tag is `selectOnTypedFixedSize`; a declared `T[n]` has shape `fixedArr` (`Shape.ofTy_fixed`), but the elaborator writes its `.length` as the literal `n`, so no program reads it, and `typed` would be a fifth `Struct` constructor through every proof (`Theory/Storage.lean`, "Shapes") |
 | ~~`copyAtEmpty`~~, ~~`selectOnCopyAtCons`~~, ~~`mergePrim`~~, ~~`selectStMerge{Map,Ref,IndexStruct,Default}`~~, ~~`mergeStValueCast`~~ | — | gone upstream with the fold; not modelled here for the reason `selectOnSaveEmptyMap` is not |
 | `findStValueCast`, `selectStValueCast` | `asStruct_st`, `asStruct_prim`, `find_append` | done as the cast being the inverse of the injection `st` |
 | `sizeNotNegative` | — | **arch**: an `\add` of a reachability fact, not a rewrite; a bounds check on an array index is a *guard* on the program-level taclet, not a term-algebra theorem |
@@ -586,7 +600,8 @@ And three where the theory reads a rule differently, each argued at its row:
 
 * The reset a `delete` picks is keyed on the *value's* sort, not the field's
   (`delField`, `delNode`): a `Seg` carries no `MapField`/`FixedField`, so the
-  mapping-preserving and length-preserving rules have no statement.
+  rules that pick the mapping-preserving and length-preserving reset have no
+  statement (the ones that read through `delNodeFixed` do).
 * `fieldShape` takes the member table as an argument: KeY's member constants
   know their declaration, a `Seg.field` only its name.
 * `shapeAt` follows `shapeAtSuffix` rather than solkey's

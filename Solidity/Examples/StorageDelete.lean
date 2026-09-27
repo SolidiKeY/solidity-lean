@@ -225,4 +225,39 @@ info: Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int 
     wallet.owner = 7; wallet.stash[1] = 42; delete wallet; uint o = wallet.owner;
   } : Prog StandardExample)).getEnv (.user "o"))
 
+/-! ## A fixed-size array keeps its length
+
+`delete` of a `uint[3]` resets its three elements in place and keeps the
+length (solc; solkey's `delNodeFixed`), where a `uint[]` is emptied.  The
+interpreter knows which by the value (`SVal.array`'s `fixed`), so the rule is
+the same `storageRootDelete`; `sol_decide` reads it back by a case on the
+location's shape (`Examples/Decide.lean`, `fixedDelete`). -/
+
+section Fixed
+
+local instance : InContract := ⟨TestSuite⟩
+
+/-! From the initial store, solkey's `testFixedArrayDeleteKeepsLength`,
+`testFixedStructArrayDeleteResetsElements`,
+`testStructWithFixedArrayDeleteKeepsLength`, `testStructWithFixedArrayCopy`
+and `testFixedMappingArrayDeleteKeepsEntries`: each run ends normally. -/
+
+/-- info: [true, true, true, true, true] -/
+#guard_msgs in
+#eval [
+  (Prog.run State.testSuiteStore (sol{ require(2 < fixedValues.length); fixedValues[1] = 7;
+    delete fixedValues; assert(2 < fixedValues.length); assert(fixedValues[1] == 0); })).isOk,
+  (Prog.run State.testSuiteStore (sol{ require(1 < fixedTokens.length);
+    fixedTokens[1].value = 7; delete fixedTokens; assert(1 < fixedTokens.length);
+    assert(fixedTokens[1].value == 0); })).isOk,
+  (Prog.run State.testSuiteStore (sol{ require(2 < triple.items.length); triple.items[1] = 7;
+    triple.tag = 3; delete triple; assert(2 < triple.items.length);
+    assert(triple.items[1] == 0); assert(triple.tag == 0); })).isOk,
+  (Prog.run State.testSuiteStore (sol{ require(2 < triple.items.length); triple.items[1] = 7;
+    triple2 = triple; assert(triple2.items[1] == 7); })).isOk,
+  (Prog.run State.testSuiteStore (sol{ require(1 < fixedMaps.length); fixedMaps[1][2] = 5;
+    delete fixedMaps; assert(fixedMaps[1][2] == 5); })).isOk]
+
+end Fixed
+
 end Solidity.Examples.StorageDelete

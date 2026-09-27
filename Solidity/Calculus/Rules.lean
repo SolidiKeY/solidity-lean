@@ -134,7 +134,7 @@ def Loc.isTarget {T : Ty} : Loc C T → Bool
 /-- A memory target every part of which is simple (`mv.fld`, `mv[ie]`). -/
 def MLoc.isTarget {T : Ty} : MLoc C T → Bool
   | .field b _ _ => b.isSimple
-  | .index b i => b.isSimple && i.isSimple
+  | .index _ b i => b.isSimple && i.isSimple
 
 /-- A memory path written as it is (`mv`, `mv.fld`, `mv[ie]`): any other is
 unfolded first (`m.account = n.inner.account;`). -/

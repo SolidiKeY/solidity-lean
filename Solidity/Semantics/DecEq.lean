@@ -24,28 +24,30 @@ private def svalDecEq : (a b : SVal) -> Decidable (a = b)
       match svalFieldsDecEq fs gs with
       | .isTrue h => .isTrue (by rw [h])
       | .isFalse h => .isFalse (fun he => h (SVal.struct.inj he))
-  | .array xs sx, .array ys sy =>
-      match svalElemsDecEq xs ys, svalElemsDecEq sx sy with
-      | .isTrue h1, .isTrue h2 => .isTrue (by rw [h1, h2])
-      | .isFalse h1, _ => .isFalse (fun he => h1 (SVal.array.inj he).1)
-      | _, .isFalse h2 => .isFalse (fun he => h2 (SVal.array.inj he).2)
+  | .array xs sx fx, .array ys sy fy =>
+      if h3 : fx = fy then
+        match svalElemsDecEq xs ys, svalElemsDecEq sx sy with
+        | .isTrue h1, .isTrue h2 => .isTrue (by rw [h1, h2, h3])
+        | .isFalse h1, _ => .isFalse (fun he => h1 (SVal.array.inj he).1)
+        | _, .isFalse h2 => .isFalse (fun he => h2 (SVal.array.inj he).2.1)
+      else .isFalse (fun he => h3 (SVal.array.inj he).2.2)
   | .map es d, .map fs e =>
       match svalEntriesDecEq es fs, svalDecEq d e with
       | .isTrue h1, .isTrue h2 => .isTrue (by rw [h1, h2])
       | .isFalse h1, _ => .isFalse (fun he => h1 (SVal.map.inj he).1)
       | _, .isFalse h2 => .isFalse (fun he => h2 (SVal.map.inj he).2)
   | .prim _, .struct _ => .isFalse (fun he => SVal.noConfusion he)
-  | .prim _, .array _ _ => .isFalse (fun he => SVal.noConfusion he)
+  | .prim _, .array _ _ _ => .isFalse (fun he => SVal.noConfusion he)
   | .prim _, .map _ _ => .isFalse (fun he => SVal.noConfusion he)
   | .struct _, .prim _ => .isFalse (fun he => SVal.noConfusion he)
-  | .struct _, .array _ _ => .isFalse (fun he => SVal.noConfusion he)
+  | .struct _, .array _ _ _ => .isFalse (fun he => SVal.noConfusion he)
   | .struct _, .map _ _ => .isFalse (fun he => SVal.noConfusion he)
-  | .array _ _, .prim _ => .isFalse (fun he => SVal.noConfusion he)
-  | .array _ _, .struct _ => .isFalse (fun he => SVal.noConfusion he)
-  | .array _ _, .map _ _ => .isFalse (fun he => SVal.noConfusion he)
+  | .array _ _ _, .prim _ => .isFalse (fun he => SVal.noConfusion he)
+  | .array _ _ _, .struct _ => .isFalse (fun he => SVal.noConfusion he)
+  | .array _ _ _, .map _ _ => .isFalse (fun he => SVal.noConfusion he)
   | .map _ _, .prim _ => .isFalse (fun he => SVal.noConfusion he)
   | .map _ _, .struct _ => .isFalse (fun he => SVal.noConfusion he)
-  | .map _ _, .array _ _ => .isFalse (fun he => SVal.noConfusion he)
+  | .map _ _, .array _ _ _ => .isFalse (fun he => SVal.noConfusion he)
 
 private def svalFieldsDecEq :
     (a b : List (Name × SVal)) -> Decidable (a = b)

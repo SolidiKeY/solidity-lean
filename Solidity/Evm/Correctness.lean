@@ -409,6 +409,25 @@ theorem elemSlot_run (m : Machine) (st : List Word) (i z : Nat) (s : Slot) :
     (by simp [run, Instr.step, Machine.next]), run_append_ok (addRep_run m st i z _)]
   simp [run, Instr.step, Machine.next, Slot.add, Nat.mul_comm]
 
+/-- A fixed-size array's bound is its type's, a constant: `fixedValues[k]`
+checks `k < 3` and reads no length slot. -/
+theorem fixedCheck_run (m : Machine) (st : List Word) (rest : List Instr) (n i : Nat) (s : Slot) :
+    run (fixedCheck n ++ rest) { m with stack := .val i :: .slot s :: st } =
+      if i < n then run rest { m with stack := .val i :: .slot s :: st } else .revert := by
+  by_cases h : i < n
+  · simp [run, fixedCheck, assertTop, Instr.step, Machine.next, h, bword]
+  · simp [run, fixedCheck, assertTop, Instr.step, Machine.next, h, bword]
+
+/-- Element `i` of the fixed-size array laid out from `s`, whose elements take
+`z` slots, is at `s + i·z`: `fixedTokens[1].value` is `fixedTokens`'s slot plus `1`. -/
+theorem fixedSlot_run (m : Machine) (st : List Word) (i z : Nat) (s : Slot) :
+    run (fixedSlot z) { m with stack := .val i :: .slot s :: st } =
+      .ok { m with stack := .slot (s.add (i * z)) :: st } 0 := by
+  rw [fixedSlot, List.append_assoc,
+    run_append_ok (m' := { m with stack := .slot s :: .val i :: st })
+    (by simp [run, Instr.step, Machine.next]), run_append_ok (addRep_run m st i z _)]
+  simp [run, Instr.step, Machine.next, Nat.mul_comm]
+
 /-! ## The simulation relation -/
 
 /-- The machine `m` represents the interpreter state `σ`, whose locals `Γ` types. -/
@@ -555,7 +574,7 @@ theorem loc_sim : ∀ {T : Ty} (l : Loc C T) {free : Bool} {m : Machine}, Sim C 
         exact .inr (.inl ⟨by simp [hres, hv, Value.asInt, State.checkIndex, hsv, bind, Except.bind],
           run_append_revert hrun⟩)
       · exact .inr (.inl ⟨by simp [hres, hv]; rfl, run_append_revert hrun⟩)
-  | _, @Loc.index _ _ _ E .arr b i, free, m, hm, hw => by
+  | _, @Loc.index _ _ _ E (.arr .dyn) b i, free, m, hm, hw => by
     have ihb : ∀ {m : Machine}, Sim C Γ σ m → wtSPath Γ free b = true →
         LocOut C σ free _ (b.resolve σ) (run (compileSPath b) m) m := fun hm hw => spath_sim b hm hw
     have ihi : ∀ {m : Machine}, Sim C Γ σ m → wtVal Γ i = true →
@@ -600,6 +619,55 @@ theorem loc_sim : ∀ {T : Ty} (l : Loc C T) {free : Bool} {m : Machine}, Sim C 
     · exact .inr (.inl ⟨by simp [hres]; rfl, run_append_revert hrun⟩)
     · rcases ihi hm hwi with ⟨v, w, hv, hrep, _⟩ | ⟨hv, _⟩
       · obtain ⟨n, hn, rfl, rfl⟩ := hrep.uint_inv
+        -- the bounds check reads the receiver, which reverts
+        exact .inr (.inl ⟨by simp [hres, hv, Value.asInt, State.checkIndex, hsv, bind, Except.bind],
+          run_append_revert hrun⟩)
+      · exact .inr (.inl ⟨by simp [hres, hv]; rfl, run_append_revert hrun⟩)
+  | _, @Loc.index _ _ _ E (@IndexTy.arr _ _ (@ArrTy.fixed _ n)) b i, free, m, hm, hw => by
+    have ihb : ∀ {m : Machine}, Sim C Γ σ m → wtSPath Γ free b = true →
+        LocOut C σ free _ (b.resolve σ) (run (compileSPath b) m) m := fun hm hw => spath_sim b hm hw
+    have ihi : ∀ {m : Machine}, Sim C Γ σ m → wtVal Γ i = true →
+        ValOut _ (i.eval σ) (run (compileVal i) m) m := fun hm hw => val_sim i hm hw
+    simp only [wtLoc, Bool.and_eq_true, Bool.not_eq_true'] at hw
+    obtain ⟨⟨rfl, hwb⟩, hwi⟩ := hw
+    simp only [Loc.resolve, compileLoc, List.append_assoc]
+    rcases ihb hm hwb with ⟨r, segs, s₀, sv, hres, hsv, hp, hr, hrun⟩ | ⟨hres, hrun⟩ |
+        ⟨r, segs, hres, hsv, hfree, hrun⟩
+    · cases hr with
+      | fixed hl hall =>
+        rename_i elems shadow
+        rw [run_append_ok hrun]
+        rcases ihi (hm.push _) hwi with ⟨v, w, hv, hrep, hrun'⟩ | ⟨hv, hrun'⟩
+        · obtain ⟨k, hk, rfl, rfl⟩ := hrep.uint_inv
+          rw [run_append_ok hrun']
+          have hsv' := State.findStorage_of_findLive hsv
+          have hres' : (do
+              let (r, segs) ← b.resolve σ
+              let i ← (← i.eval σ).asInt
+              σ.checkIndex r segs i
+              pure (r, segs ++ [Seg.at i]) : Res (Name × List Seg)) =
+                (if k < elems.length then .ok (r, segs ++ [.at k]) else .error .revert) := by
+            by_cases hin : k < elems.length <;>
+              simp [hres, hv, Value.asInt, State.checkIndex, hsv', hin, bind, Except.bind, pure,
+                Except.pure] <;> rfl
+          rw [hres']
+          have hb := fixedCheck_run m m.stack (fixedSlot (size E)) n k s₀
+          simp only [Machine.push] at hb ⊢
+          rw [hb, ← hl]
+          by_cases hin : k < elems.length
+          · rw [if_pos hin, if_pos hin]
+            have hp' := PathSlot.felem hp (Int.natCast_nonneg k) (by omega)
+            rw [Int.toNat_natCast] at hp'
+            refine .inl ⟨r, segs ++ [.at k], s₀.add (k * size E), elems[k], rfl, ?_, hp',
+              hall k hin, fixedSlot_run m m.stack k (size E) s₀⟩
+            rw [findLive_append, hsv]
+            simp [bind, Except.bind, SVal.findLive, hin]
+          · rw [if_neg hin, if_neg hin]
+            exact .inr (.inl ⟨rfl, rfl⟩)
+        · exact .inr (.inl ⟨by simp [hres, hv]; rfl, run_append_revert hrun'⟩)
+    · exact .inr (.inl ⟨by simp [hres]; rfl, run_append_revert hrun⟩)
+    · rcases ihi hm hwi with ⟨v, w, hv, hrep, _⟩ | ⟨hv, _⟩
+      · obtain ⟨k, hk, rfl, rfl⟩ := hrep.uint_inv
         -- the bounds check reads the receiver, which reverts
         exact .inr (.inl ⟨by simp [hres, hv, Value.asInt, State.checkIndex, hsv, bind, Except.bind],
           run_append_revert hrun⟩)

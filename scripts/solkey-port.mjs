@@ -94,13 +94,13 @@
  *    decrement `x--` is spelled `x−−` (two U+2212: `--` opens a Lean
  *    comment); a nested ternary in a branch is parenthesized; `2e3` is
  *    spelt out.  `++`/`−−` inside an expression, `.length`, `new T[](n)`,
- *    a conditional of references and a negative literal are the
- *    elaborator's (`Syntax.lean`).
+ *    a conditional of references, a negative literal, `**` and fixed-size
+ *    arrays `T[n]` are the elaborator's (`Syntax.lean`).
  *
  * 6. **Anything else** is `unsupported` with the reason: a state variable
- *    the Lean contract does not declare, `**`, loops, calls,
+ *    the Lean contract does not declare, loops, calls,
  *    `return`, a type outside `uint`/`int`/`bool`/`address`/structs/
- *    dynamic arrays/mappings. What the translator lets through and Lean
+ *    arrays/mappings. What the translator lets through and Lean
  *    rejects is recorded with Lean's message.
  *
  * Usage: node scripts/solkey-port.mjs [--probe] [--solkey <dir>] [--out <repo>]
@@ -152,6 +152,14 @@ const RENAMES = {
   SolcExpressions: { v: "counter" },
   SolcMappings: { s: "sBox", m: "sMap" },
   SolcMemory: { x: "outerX", inner: "innerS", data: "inners" },
+};
+
+/**
+ * Struct renames, keyed by contract: TestSuite's `Triple { uint[3] items; uint
+ * tag; }` is `FixedTriple` (`Semantics.structDef`: `Triple` is SolcStructs').
+ */
+const STRUCT_RENAMES = {
+  TestSuite: { Triple: "FixedTriple" },
 };
 
 /**
@@ -544,7 +552,6 @@ function exprGap(e) {
   if (/\b\d+\s*(wei|gwei|ether|seconds|minutes|hours|days|weeks)\b/.test(e)) {
     return "ether and time units (`1 gwei`, `2 days`) are not in the grammar";
   }
-  if (/\*\*/.test(e)) return "exponentiation `**` is not in the sol_expr grammar";
   if (/\b(msg|block|tx)\.\w+|\bthis\b/.test(e)) return "`msg`/`block`/`this` are not expressions";
   if (/(^|[^&|])[&|](?![&|=])|\^|~|<<|>>/.test(e)) return "bitwise operators are not in the grammar";
   const call = e.match(/\b([A-Za-z_]\w*)\s*\(/);
@@ -641,7 +648,6 @@ function parseDecl(text) {
 
 /** A Solidity type as the Lean grammar spells it, or throw. */
 function leanType(ty) {
-  if (/\[\d+\]/.test(ty)) throw new Unsupported(`fixed-size array type \`${ty}\` is not in the grammar`);
   if (ty.startsWith("mapping")) return ty;
   const base = ty.match(/^[A-Za-z_]\w*/)[0];
   if (base in VALUE_TYPES) return VALUE_TYPES[base] + ty.slice(base.length);
@@ -664,7 +670,9 @@ function translateFunction(fn, contract, sol, leanVars, unportedVars) {
     );
   }
   const renames = RENAMES[contract] || {};
-  const params = new Map(fn.params.map((p) => [p.name, leanType(p.ty)]));
+  const structRenames = STRUCT_RENAMES[contract] || {};
+  const structName = (ty) => ty.replace(/^[A-Za-z_]\w*/, (b) => structRenames[b] ?? b);
+  const params = new Map(fn.params.map((p) => [p.name, structName(leanType(p.ty))]));
   const declared = new Set();
   const pushes = new Map();
   const witnesses = [];
@@ -772,7 +780,7 @@ function translateFunction(fn, contract, sol, leanVars, unportedVars) {
 
     const decl = parseDecl(text);
     if (decl) {
-      const ty = leanType(decl.ty);
+      const ty = structName(leanType(decl.ty));
       const name = localName(decl.name);
       const loc = decl.location === "calldata" ? "memory" : decl.location;
       const head = loc ? `${ty} ${loc} ${name}` : `${ty} ${name}`;
@@ -939,7 +947,6 @@ function reasonClass(reason) {
   if (/^state variable/.test(reason)) {
     return "a state variable the Lean contract does not declare (`Syntax.lean`)";
   }
-  if (/^fixed-size array type/.test(reason)) return "fixed-size array types (`T[n]`) are not in the grammar";
   if (/^parameter\(s\)/.test(reason)) {
     return "a parameter no `require` pins: solkey proves it for every value";
   }

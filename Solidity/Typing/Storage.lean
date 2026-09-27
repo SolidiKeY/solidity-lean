@@ -24,12 +24,14 @@ structure Layout where
 def segTy : Ty -> Seg -> Option Ty
   | Ty.ref (RefTy.struct s), Seg.field n => lookupBy n (structDef s)
   | Ty.ref (RefTy.array elem), Seg.at _ => some elem
+  | Ty.ref (RefTy.fixed elem _), Seg.at _ => some elem
   | Ty.ref (RefTy.mapping _ value), Seg.at _ => some value
   | _, _ => none
 
 /-- Element/value type of an indexable type (`Seg.at` steps). -/
 def elemTy : Ty -> Option Ty
   | Ty.ref (RefTy.array elem) => some elem
+  | Ty.ref (RefTy.fixed elem _) => some elem
   | Ty.ref (RefTy.mapping _ value) => some value
   | _ => none
 
@@ -57,14 +59,18 @@ def isNumericTy : Ty -> Bool
 
 /-- The value inhabits the type. Value-driven on struct fields: every
 field *present* in the value must match its `structDef` schema entry
-(absent fields make `SVal.find` fail, so they never reach a read). -/
+(absent fields make `SVal.find` fail, so they never reach a read).  An
+array is of its kind: a dynamic one unmarked, a fixed-size one marked and
+exactly as long as its type says. -/
 def SVal.hasTy : SVal -> Ty -> Bool
   | SVal.int _, Ty.int => true
   | SVal.int _, Ty.uint => true
   | SVal.bool _, Ty.bool => true
   | SVal.struct fields, Ty.ref (RefTy.struct s) => hasTyFields s fields
-  | SVal.array elems shadow, Ty.ref (RefTy.array elem) =>
-      hasTyElems elem elems && hasTyElems elem shadow
+  | SVal.array elems shadow fx, Ty.ref (RefTy.array elem) =>
+      !fx && hasTyElems elem elems && hasTyElems elem shadow
+  | SVal.array elems shadow fx, Ty.ref (RefTy.fixed elem n) =>
+      fx && elems.length == n && hasTyElems elem elems && hasTyElems elem shadow
   | SVal.map entries dflt, Ty.ref (RefTy.mapping _ value) =>
       hasTyEntries value entries && dflt.hasTy value
   | _, _ => false
@@ -87,7 +93,7 @@ denotes (arrays and mappings are `Struct` nodes with `at`/`MapField`
 fields in `structHeader.key`). -/
 def SVal.isRefVal : SVal -> Bool
   | SVal.struct _ => true
-  | SVal.array _ _ => true
+  | SVal.array _ _ _ => true
   | SVal.map _ _ => true
   | _ => false
 
@@ -111,7 +117,7 @@ def PrimVal.keySort : PrimVal -> KeySort
 def SVal.keySort : SVal -> KeySort
   | SVal.prim p => p.keySort
   | SVal.struct _ => KeySort.struct
-  | SVal.array _ _ => KeySort.struct
+  | SVal.array _ _ _ => KeySort.struct
   | SVal.map _ _ => KeySort.struct
 
 /-- The sort of a memory slot value: `Prim` subsorts inline, `Identity`
@@ -303,6 +309,7 @@ theorem find_hasTy {segs : List Seg} :
                             cases hdef
                             exact ih htyv hsegs hfind
                   | array elem => simp [segTy] at hseg
+                  | fixed elem _ => simp [segTy] at hseg
                   | mapping key value => simp [segTy] at hseg
               | _ => simp [segTy] at hseg
           | «at» i =>
@@ -314,11 +321,22 @@ theorem find_hasTy {segs : List Seg} :
                       simp only [segTy] at hseg
                       cases hseg
                       cases v <;> simp [SVal.hasTy] at hty
-                      case array elems shadow =>
+                      case array elems shadow fx =>
                         simp only [SVal.find] at hfind
                         split at hfind
                         · exact ih
-                            (hasTyElems_mem_append hty.1 hty.2 ((elems ++ shadow).get_mem _))
+                            (hasTyElems_mem_append hty.1.2 hty.2 ((elems ++ shadow).get_mem _))
+                            hsegs hfind
+                        · simp at hfind
+                  | fixed elem n =>
+                      simp only [segTy] at hseg
+                      cases hseg
+                      cases v <;> simp [SVal.hasTy] at hty
+                      case array elems shadow fx =>
+                        simp only [SVal.find] at hfind
+                        split at hfind
+                        · exact ih
+                            (hasTyElems_mem_append hty.1.2 hty.2 ((elems ++ shadow).get_mem _))
                             hsegs hfind
                         · simp at hfind
                   | mapping key value =>

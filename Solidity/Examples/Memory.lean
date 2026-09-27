@@ -695,4 +695,43 @@ info: (Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int
 #eval localAfter State.testSuiteStore
   (sol[TestSuite]{ basketA.items = new uint[](2); uint len = basketA.items.length; }) "len"
 
+/-! ## 8 · Fixed-size arrays in memory
+
+`uint[3] memory x;` allocates three default elements (a memory object marked
+fixed, `MObj.array`); it is indexed by the same rules as a `uint[]`
+(`memoryIndexWriteStore`, `memoryIndexReadHeap`, over either kind of array,
+`ArrTy`), and its `.length` is the literal. -/
+
+/-- `uint[3] memory x; x[1] = 5; uint y = x[1];` (`TestSuite.testMemoryFixedArrayLength`). -/
+theorem memoryFixedWriteRead :
+    ⊨ dl[TestSuite]{ [ uint[3] memory x; x[1] = 5; uint y = x[1]; ] y == 5 } := by
+  sol_symex
+  sol_close
+
+/-! From the initial store, solkey's `testMemoryFixedArrayLength`,
+`testMemoryNestedFixedArrayLength`, `testNewArrayOfFixedElementLength` and
+`testMemoryStructFixedMemberLength`: each run ends normally. -/
+
+/-- info: [true, true, true, true] -/
+#guard_msgs in
+#eval [
+  (Prog.run State.testSuiteStore (sol[TestSuite]{ uint[3] memory x; assert(x.length == 3);
+    x[1] = 5; assert(x[1] == 5); assert(x[0] == 0); })).isOk,
+  (Prog.run State.testSuiteStore (sol[TestSuite]{ uint[2][3] memory y; assert(y.length == 3);
+    assert(y[0].length == 2); })).isOk,
+  (Prog.run State.testSuiteStore (sol[TestSuite]{ uint[2][] memory z = new uint[2][](4);
+    assert(z.length == 4); assert(z[1].length == 2); })).isOk,
+  (Prog.run State.testSuiteStore (sol[TestSuite]{ FixedTriple memory t;
+    assert(t.items.length == 3); t.items[1] = 5; assert(t.items[1] == 5);
+    assert(t.items[0] == 0); })).isOk]
+
+/-! A struct with a fixed-size member copied into memory and back keeps the
+member fixed: `triple.items` is still three long, and `delete` keeps it so. -/
+
+/-- info: true -/
+#guard_msgs in
+#eval (Prog.run State.testSuiteStore (sol[TestSuite]{ FixedTriple memory t = triple;
+  t.items[0] = 9; triple = t; assert(triple.items[0] == 9);
+  assert(triple.items.length == 3); delete triple; assert(triple.items[0] == 0); })).isOk
+
 end Solidity.Examples.Memory

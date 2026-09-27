@@ -258,8 +258,9 @@ def envRef (σ : State) (x : Var) : Res Nat := do
     (MLoc.field b f h).read σ = (do readAddr σ (.memoryField (← (← b.mval σ).asRef) f)) := by
   simp only [MLoc.read, readAddr]; rfl
 
-@[simp] theorem MLoc.read_index (σ : State) {E : Ty} (b : MPath C (.array E)) (i : Val C .uint) :
-    (MLoc.index b i).read σ =
+@[simp] theorem MLoc.read_index (σ : State) {R : RefTy} {E : Ty} (a : ArrTy R E)
+    (b : MPath C (.ref R)) (i : Val C .uint) :
+    (MLoc.index a b i).read σ =
       (do let id ← (← b.mval σ).asRef; readAddr σ (.memoryIndex id (← (← i.eval σ).asInt))) := by
   simp only [MLoc.read, readAddr]; rfl
 

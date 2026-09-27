@@ -46,15 +46,16 @@ beside its name:
   carries no field sort, so the rule has no statement here
   (`Theory/Storage.lean`, "Delete"); the first is also unreachable, being a
   copy `TypedStmt.Assign.mk` refuses.
-* **`FixedField`** — `delFieldFixed`, `selectStDelNodeFixed` and
-  `selectStDelNodeFixed{Element,Size,Value}`: the language model has no
-  fixed-size array, so no member is one, and a `Seg` could not say so.
+* **`FixedField`** — `delFieldFixed`, `selectStDelNodeFixed`: they pick
+  `delNodeFixed` by the member's sort, and a `Seg` has none.  The three rules
+  that read *through* `delNodeFixed` are stated
+  (`selectStDelNodeFixed{Element,Size,Value}`).
 * **`typed`** — `selectOnTyped{Struct,FixedSize,DynSize,LeafSize,MapSize,
   Element,Member}` and `typedTyped`: the tag a struct read through a member
-  carries so that a fixed-size array's length survives.  It is the identity
-  on every shape the model can declare (`Shape.ofTy_ne_fixedArr`) and would
-  be a fifth `Struct` constructor through every proof (`Theory/Storage.lean`,
-  "Shapes").
+  carries so that a fixed-size array's length survives.  Its one reading rule
+  answers `.length` of a fixed-size array, which the elaborator writes as the
+  literal, and it would be a fifth `Struct` constructor through every proof
+  (`Theory/Storage.lean`, "Shapes").
 * the four `expandInUintN`/`expandInIntN` rules, the arithmetic the signature's
   own "not implemented" section lists.
 
@@ -132,6 +133,9 @@ inductive TheoryRule where
   | selectDelNodeRef
   | selectStDelNodeDefault
   | selectStDelNodeIndexStruct
+  | selectStDelNodeFixedElement
+  | selectStDelNodeFixedSize
+  | selectStDelNodeFixedValue
   | selectOnDelAt
   | defValResolve
   -- ### Memory: `read`/`write`/`add`
@@ -226,6 +230,10 @@ def lemmaNames : TheoryRule -> List Lean.Name
                                ``StValue.selectStDelNodeDefault_asBool]
   | selectStDelNodeIndexStruct =>
       [``StValue.selectStDelNodeIndexStruct, ``StValue.selectStDelNodeIndexKeep]
+  | selectStDelNodeFixedElement => [``StValue.selectStDelNodeFixedElement]
+  | selectStDelNodeFixedSize => [``StValue.selectStDelNodeFixedSize]
+  | selectStDelNodeFixedValue => [``StValue.selectStDelNodeFixedValue,
+                                  ``StValue.selectStDelNodeFixedValue_asBool]
   | selectOnDelAt         => [``StValue.selectOnDelAtCons]
   | defValResolve         => [``StValue.defaultValueStruct, ``StValue.defaultValueInt,
                               ``StValue.defaultValueBool]
@@ -276,7 +284,9 @@ def all : List TheoryRule :=
     .findOnSave, .findOnSaveDifferent, .findOnSavePrefix, .findOnSaveExtends,
     .delAtEmpty, .findDelAt, .findDelAtOutside, .findDelAtExtends, .findDelAtFields,
     .delFieldRef, .delFieldIndexStruct, .delFieldDefault, .delFieldStValueCast,
-    .selectDelNodeRef, .selectStDelNodeDefault, .selectStDelNodeIndexStruct, .selectOnDelAt,
+    .selectDelNodeRef, .selectStDelNodeDefault, .selectStDelNodeIndexStruct,
+    .selectStDelNodeFixedElement, .selectStDelNodeFixedSize, .selectStDelNodeFixedValue,
+    .selectOnDelAt,
     .defValResolve,
     .readWriteEqual, .readWriteDifferent, .readAddEqual, .readAddDifferent, .readEmptyMem,
     .defaultDefElement, .defaultDefMember, .defaultSize, .defaultIdentity,

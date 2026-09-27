@@ -109,17 +109,17 @@ index, takes the hole's own rule; any other unfolds its receiver
 def MHole.readStep {T : Ty} (lhs : MHole C T) (ht : lhs.isTarget = true)
     (field : {s : Name} → (mv : Var) → (f : Name) → (hf : C.fieldType s f = some T) →
       Step k m (lhs.fill (.field (.var mv) f hf)))
-    (index : (mv : Var) → (ie : Simple C .uint) →
-      Step k m (lhs.fill (.index (.var mv) (.simple ie)))) :
+    (index : {R : RefTy} → (a : ArrTy R T) → (mv : Var) → (ie : Simple C .uint) →
+      Step k m (lhs.fill (.index a (.var mv) (.simple ie)))) :
     (l : MLoc C T) → Step k m (lhs.fill l)
   | .field (.var mv) f hf => field mv f hf
   | .field (.loc _) _ _ => ⟨_, .memoryFieldRead_unfold_rightFst⟩
-  | .index (.var mv) (.simple ie) => index mv ie
-  | .index (.var _) (.read _) | .index (.var _) (.binop ..) | .index (.var _) (.unop ..)
-  | .index (.var _) (.ternary ..) | .index (.var _) (.readMem _) | .index (.var _) (.len ..)
-  | .index (.var _) (.mlen ..) =>
+  | .index a (.var mv) (.simple ie) => index a mv ie
+  | .index _ (.var _) (.read _) | .index _ (.var _) (.binop ..) | .index _ (.var _) (.unop ..)
+  | .index _ (.var _) (.ternary ..) | .index _ (.var _) (.readMem _) | .index _ (.var _) (.len ..)
+  | .index _ (.var _) (.mlen ..) =>
     ⟨_, .memoryIndexRead_unfold_rightSndIndex⟩
-  | .index (.loc _) _ => ⟨_, .memoryIndexRead_unfold_rightFst⟩
+  | .index _ (.loc _) _ => ⟨_, .memoryIndexRead_unfold_rightFst⟩
 
 /-! ## Locals and aliases -/
 
@@ -152,7 +152,7 @@ def localStep {p : PrimTy} (x : Var) : (v : Val C p) → Step k m (.assignLocal 
       (fun _ _ _ _ => ⟨_, .storageFieldReadFind⟩)
       (fun it sp ie _ => match it, sp, ie with
         | .map, _, _ => ⟨_, .storageIndexReadMappingFind⟩
-        | .arr, _, _ => ⟨_, .storageIndexReadArrayFind⟩) l
+        | .arr _, _, _ => ⟨_, .storageIndexReadArrayFind⟩) l
   | .binop _ _ _ (.simple _) (.simple _) => ⟨_, .binopAssignment⟩
   | .binop op hop hq (.simple se) (.read l) => binopRightStep x op hop hq se (.read l) rfl
   | .binop op hop hq (.simple se) (.binop op' hop' hq' a b) =>
@@ -174,7 +174,7 @@ def localStep {p : PrimTy} (x : Var) : (v : Val C p) → Step k m (.assignLocal 
   | .ternary c a b => ternaryStep (.local x) rfl c a b
   | .readMem l =>
     (MHole.local x).readStep rfl (fun _ _ _ => ⟨_, .memoryFieldReadHeap⟩)
-      (fun _ _ => ⟨_, .memoryIndexReadHeap⟩) l
+      (fun _ _ _ => ⟨_, .memoryIndexReadHeap⟩) l
   | .len b _ =>
     if hb : b.isSimple then ⟨_, .storageLengthRead⟩ else ⟨_, .storageLengthRead_unfold_rightFst⟩
   | .mlen (.var _) _ => ⟨_, .memoryLengthRead⟩
@@ -189,7 +189,7 @@ def rebindStep {R : RefTy} (x : Var) : (r : ARhs C R) → Step k m (.rebind x r)
       (fun _ _ _ _ => ⟨_, .storageFieldReadBindLocalRoot⟩)
       (fun it sp ie _ => match it, sp, ie with
         | .map, _, _ => ⟨_, .storageIndexReadMappingBindLocalRoot⟩
-        | .arr, sp, _ =>
+        | .arr _, sp, _ =>
           if hE : sp.elemMapping then ⟨_, .storageIndexReadArrayBindLocalRootMappingElement⟩
           else ⟨_, .storageIndexReadArrayBindLocalRoot⟩) l
   | .push b _ =>
@@ -228,7 +228,7 @@ def assignStep {T : Ty} : (l : Loc C T) → (r : Src C T) → Step k m (.assign 
       (fun _ _ _ _ => ⟨_, .storageFieldReadStoreRoot⟩)
       (fun it sp ie _ => match it, sp, ie with
         | .map, _, _ => ⟨_, .storageIndexReadMappingStoreRoot⟩
-        | .arr, _, _ => ⟨_, .storageIndexReadArrayStoreRoot⟩) l
+        | .arr _, _, _ => ⟨_, .storageIndexReadArrayStoreRoot⟩) l
   -- a member
   | .field b f hf, .val e =>
     if hb : b.isSimple then
@@ -248,7 +248,7 @@ def assignStep {T : Ty} : (l : Loc C T) → (r : Src C T) → Step k m (.assign 
         (VHole.store (.index it b (.simple ie))).step rfl
           (fun se => match it, b, ie, se, hb with
             | .map, _, _, _, _ => ⟨_, .storageIndexWriteMappingSave⟩
-            | .arr, _, _, _, _ => ⟨_, .storageIndexWriteArraySave⟩)
+            | .arr _, _, _, _, _ => ⟨_, .storageIndexWriteArraySave⟩)
           e (fun _ _ => ⟨_, .indexWriteValueRhsCapture⟩)
       | .read _ | .binop .. | .unop .. | .ternary .. | .readMem _ | .len .. | .mlen .. =>
         (VHole.store (.index it b _)).lower rfl e
@@ -263,7 +263,7 @@ def assignStep {T : Ty} : (l : Loc C T) → (r : Src C T) → Step k m (.assign 
         copyStep (.index it b (.simple ie)) hm (by simp [Loc.isTarget, hb, Val.isSimple]) rfl
           (fun _ _ => match it, b, ie, hb with
             | .map, _, _, _ => ⟨_, .storageIndexWriteMappingCopySource⟩
-            | .arr, _, _, _ => ⟨_, .storageIndexWriteArrayCopySource⟩) sp2
+            | .arr _, _, _, _ => ⟨_, .storageIndexWriteArrayCopySource⟩) sp2
       | .read _ | .binop .. | .unop .. | .ternary .. | .readMem _ | .len .. | .mlen .. =>
         ⟨_, .storageIndexWriteStorageRefCaptureAllNonSimpleIndex⟩
     else ⟨_, .storageIndexWriteStorageRefCaptureAllComplexRecv⟩
@@ -280,7 +280,7 @@ def assignFromMemStep {R : RefTy} :
     if hb : b.isSimple then
       match it, b, i, hb with
       | .map, _, .simple _, _ => ⟨_, .memoryToStorageIndexMappingCopyRoot⟩
-      | .arr, _, .simple _, _ => ⟨_, .memoryToStorageIndexArrayCopyRoot⟩
+      | .arr _, _, .simple _, _ => ⟨_, .memoryToStorageIndexArrayCopyRoot⟩
       | _, _, .read _, _ | _, _, .binop .., _ | _, _, .unop .., _ | _, _, .ternary .., _
       | _, _, .readMem _, _ | _, _, .len .., _ | _, _, .mlen .., _ =>
         ⟨_, .memoryToStorageIndexCaptureAllNonSimpleIndex⟩
@@ -295,7 +295,7 @@ def deleteStep {T : Ty} : (l : Loc C T) → Step k m (.delete l)
     if hb : b.isSimple then
       match it, b, i, hb with
       | .map, _, .simple _, _ => ⟨_, .storageIndexDelete⟩
-      | .arr, _, .simple _, _ => ⟨_, .storageIndexArrayDelete⟩
+      | .arr _, _, .simple _, _ => ⟨_, .storageIndexArrayDelete⟩
       | _, _, .read _, _ | _, _, .binop .., _ | _, _, .unop .., _ | _, _, .ternary .., _
       | _, _, .readMem _, _ | _, _, .len .., _ | _, _, .mlen .., _ =>
         ⟨_, .storageIndexDeleteNonSimpleIndexCapture⟩
@@ -318,12 +318,12 @@ def opStep {p : PrimTy} (op : BinOp) (hop : op.hasCompoundAssign = true)
       if hb : b.isSimple then
         match it, b, ie, hb with
         | .map, _, _, _ => ⟨_, .storageIndexMappingOpAssign⟩
-        | .arr, _, _, _ => ⟨_, .storageIndexArrayOpAssign⟩
+        | .arr _, _, _, _ => ⟨_, .storageIndexArrayOpAssign⟩
       else ⟨_, .storageIndexOpAssignUnfoldLeftFst⟩
     | .mfield (.var _) _ _ => ⟨_, .memoryFieldOpAssign⟩
     | .mfield (.loc _) _ _ => ⟨_, .memoryFieldOpAssignUnfoldLeftFst⟩
-    | .mindex (.var _) _ => ⟨_, .memoryIndexArrayOpAssign⟩
-    | .mindex (.loc _) _ => ⟨_, .memoryIndexOpAssignUnfoldLeftFst⟩
+    | .mindex _ (.var _) _ => ⟨_, .memoryIndexArrayOpAssign⟩
+    | .mindex _ (.loc _) _ => ⟨_, .memoryIndexOpAssignUnfoldLeftFst⟩
   | .read _ | .binop .. | .unop .. | .ternary .. | .readMem _ | .len .. | .mlen .. =>
     ⟨_, .compoundAssignValueRhsCapture⟩
 
@@ -340,8 +340,8 @@ def incStep {p : PrimTy} (op : IncDec) (hp : p.isNumeric = true) :
     else ⟨_, .storageIndexIncrementUnfoldLeftFst⟩
   | .mfield (.var _) _ _ => ⟨_, .memoryFieldIncrement⟩
   | .mfield (.loc _) _ _ => ⟨_, .memoryFieldIncrementUnfoldLeftFst⟩
-  | .mindex (.var _) _ => ⟨_, .memoryIndexArrayIncrement⟩
-  | .mindex (.loc _) _ => ⟨_, .memoryIndexIncrementUnfoldLeftFst⟩
+  | .mindex _ (.var _) _ => ⟨_, .memoryIndexArrayIncrement⟩
+  | .mindex _ (.loc _) _ => ⟨_, .memoryIndexIncrementUnfoldLeftFst⟩
 
 /-- `v = alice.age++;`, whose receiver is simple (`hs`), so one update. -/
 def assignIncStep {p : PrimTy} (v : Var) (op : IncDec) (hp : p.isNumeric = true) :
@@ -351,8 +351,8 @@ def assignIncStep {p : PrimTy} (v : Var) (op : IncDec) (hp : p.isNumeric = true)
   | .field _ _ _, hs => ⟨_, .storageFieldIncrementAssignment⟩
   | .index _ _ _, hs => ⟨_, .storageIndexIncrementAssignment⟩
   | .mfield (.var _) _ _, _ => ⟨_, .memoryFieldIncrementAssignment⟩
-  | .mindex (.var _) _, _ => ⟨_, .memoryIndexArrayIncrementAssignment⟩
-  | .mfield (.loc _) _ _, hs | .mindex (.loc _) _, hs => nomatch hs
+  | .mindex _ (.var _) _, _ => ⟨_, .memoryIndexArrayIncrementAssignment⟩
+  | .mfield (.loc _) _ _, hs | .mindex _ (.loc _) _, hs => nomatch hs
 
 /-! ## Arrays and transfers -/
 
@@ -401,7 +401,7 @@ def rebindMemStep {R : RefTy} (x : Var) : (r : MRhs C R) → Step k m (.rebindMe
   | .alias (.var _) => ⟨_, .memoryRootAlias⟩
   | .alias (.loc l) =>
     (MHole.rebind x).readStep rfl (fun _ _ _ => ⟨_, .memoryFieldReadAliasRoot⟩)
-      (fun _ _ => ⟨_, .memoryIndexReadAliasRoot⟩) l
+      (fun _ _ _ => ⟨_, .memoryIndexReadAliasRoot⟩) l
   | .copy sp _ =>
     if hs : sp.isSimple then ⟨_, .memoryStorageCopy⟩ else ⟨_, .memoryStorageCopyUnfold⟩
   | .newArr _ _ => ⟨_, .memoryArrayFreshAlloc⟩
@@ -414,11 +414,11 @@ def deleteMemFieldStep {s : Name} : (T : Ty) → (mv : Var) → (f : Name) →
   | .ref _, _, _, _, _ => ⟨_, .memoryFieldDeleteReference⟩
 
 /-- `delete mv[ie];`: the element type picks the rule. -/
-def deleteMemIndexStep : (T : Ty) → (mv : Var) → (ie : Simple C .uint) →
-    (hd : T.defaultOkS = true) →
-    Step k m (.deleteMem (.loc (.index (E := T) (.var mv) (.simple ie))) hd)
-  | .prim _, _, _, _ => ⟨_, .memoryIndexDeletePrimitive⟩
-  | .ref _, _, _, _ => ⟨_, .memoryIndexDeleteReference⟩
+def deleteMemIndexStep {R : RefTy} : (T : Ty) → (a : ArrTy R T) → (mv : Var) →
+    (ie : Simple C .uint) → (hd : T.defaultOkS = true) →
+    Step k m (.deleteMem (.loc (.index a (.var mv) (.simple ie))) hd)
+  | .prim _, _, _, _, _ => ⟨_, .memoryIndexDeletePrimitive⟩
+  | .ref _, _, _, _, _ => ⟨_, .memoryIndexDeleteReference⟩
 
 /-- `delete m;`, `delete m.items[i];`: a memory local is bound to a fresh
 default object; a member of one, or an element at a simple index, is reset by
@@ -430,12 +430,12 @@ def deleteMemStep {T : Ty} : (p : MPath C T) → (hd : T.defaultOkS = true) →
   | .var _, _ => ⟨_, .memoryRootDeleteFreshRebind⟩
   | .loc (.field (.var mv) f hf), hd => deleteMemFieldStep _ mv f hf hd
   | .loc (.field (.loc _) _ _), _ => ⟨_, .memoryFieldDelete_unfold_leftFst⟩
-  | .loc (.index (.var mv) (.simple ie)), hd => deleteMemIndexStep _ mv ie hd
-  | .loc (.index (.var _) (.read _)), _ | .loc (.index (.var _) (.binop ..)), _
-  | .loc (.index (.var _) (.unop ..)), _ | .loc (.index (.var _) (.ternary ..)), _
-  | .loc (.index (.var _) (.readMem _)), _ | .loc (.index (.var _) (.len ..)), _
-  | .loc (.index (.var _) (.mlen ..)), _ => ⟨_, .memoryIndexDeleteNonSimpleIndexCapture⟩
-  | .loc (.index (.loc _) _), _ => ⟨_, .memoryIndexDelete_unfold_leftFst⟩
+  | .loc (.index a (.var mv) (.simple ie)), hd => deleteMemIndexStep _ a mv ie hd
+  | .loc (.index _ (.var _) (.read _)), _ | .loc (.index _ (.var _) (.binop ..)), _
+  | .loc (.index _ (.var _) (.unop ..)), _ | .loc (.index _ (.var _) (.ternary ..)), _
+  | .loc (.index _ (.var _) (.readMem _)), _ | .loc (.index _ (.var _) (.len ..)), _
+  | .loc (.index _ (.var _) (.mlen ..)), _ => ⟨_, .memoryIndexDeleteNonSimpleIndexCapture⟩
+  | .loc (.index _ (.loc _) _), _ => ⟨_, .memoryIndexDelete_unfold_leftFst⟩
 
 /-- A memory reference written to the target `l`, `m.account = src;`: a
 memory local or a bindable location (`n.account`, `n[ie]`) is written by
@@ -445,7 +445,17 @@ def memRefStep {R : RefTy} (l : MLoc C (.ref R)) (hl : l.isTarget = true)
     (src : MPath C (.ref R)) → Step k m (.assignMem l (.ref src))
   | .var y => copy (.var y) rfl
   | .loc sl =>
-    (MHole.write l).readStep hl (fun _ _ _ => copy _ rfl) (fun _ _ => copy _ rfl) sl
+    (MHole.write l).readStep hl (fun _ _ _ => copy _ rfl) (fun _ _ _ => copy _ rfl) sl
+
+/-- `mv[ie] = src;`: a value stored (lowered first if it is a conditional,
+captured if it is not simple), a reference written as `memRefStep` does. -/
+def memIndexWriteStep {R : RefTy} : (T : Ty) → (r : MSrc C T) → (a : ArrTy R T) → (mv : Var) →
+    (ie : Simple C .uint) → Step k m (.assignMem (.index a (.var mv) (.simple ie)) r)
+  | _, .val (p := p) e, a, mv, ie =>
+    (VHole.mem (.index a (.var mv) (.simple ie))).step rfl (fun _ => ⟨_, .memoryIndexWriteStore⟩) e
+      (fun _ _ => ⟨_, Taclet.memoryIndexWriteUnfoldSource (p := p)⟩)
+  | _, .ref src, a, mv, ie =>
+    memRefStep (.index a (.var mv) (.simple ie)) rfl (fun _ _ => ⟨_, .memoryIndexWriteCopy⟩) src
 
 /-- A memory location written, `m.age = 3;`, `m.items[i] = n;`: the
 receiver first (`m.inner.age = 3;`), then the index, then the source.
@@ -458,21 +468,17 @@ def assignMemStep {T : Ty} : (l : MLoc C T) → (r : MSrc C T) → Step k m (.as
   | .field (.var mv) f hf, .ref src =>
     memRefStep (.field (.var mv) f hf) rfl (fun _ _ => ⟨_, .memoryFieldWriteCopy⟩) src
   | .field (.loc _) _ _, _ => ⟨_, .memoryFieldWrite_unfold_leftFst⟩
-  | .index (.var mv) (.simple ie), .val (p := p) e =>
-    (VHole.mem (.index (.var mv) (.simple ie))).step rfl (fun _ => ⟨_, .memoryIndexWriteStore⟩) e
-      (fun _ _ => ⟨_, Taclet.memoryIndexWriteUnfoldSource (p := p)⟩)
-  | .index (.var mv) (.simple ie), .ref src =>
-    memRefStep (.index (.var mv) (.simple ie)) rfl (fun _ _ => ⟨_, .memoryIndexWriteCopy⟩) src
-  | .index (.var _) (.read _), .val _ | .index (.var _) (.binop ..), .val _
-  | .index (.var _) (.unop ..), .val _ | .index (.var _) (.ternary ..), .val _
-  | .index (.var _) (.readMem _), .val _ | .index (.var _) (.len ..), .val _
-  | .index (.var _) (.mlen ..), .val _ => ⟨_, .memoryIndexWriteCaptureAllNonSimpleIndex⟩
-  | .index (.var _) (.read _), .ref _ | .index (.var _) (.binop ..), .ref _
-  | .index (.var _) (.unop ..), .ref _ | .index (.var _) (.ternary ..), .ref _
-  | .index (.var _) (.readMem _), .ref _ | .index (.var _) (.len ..), .ref _
-  | .index (.var _) (.mlen ..), .ref _ => ⟨_, .memoryIndexWriteMemRefCaptureAllNonSimpleIndex⟩
-  | .index (.loc _) _, .val _ => ⟨_, .memoryIndexWriteCaptureAllComplexRecv⟩
-  | .index (.loc _) _, .ref _ => ⟨_, .memoryIndexWriteMemRefCaptureAllComplexRecv⟩
+  | .index a (.var mv) (.simple ie), r => memIndexWriteStep _ r a mv ie
+  | .index _ (.var _) (.read _), .val _ | .index _ (.var _) (.binop ..), .val _
+  | .index _ (.var _) (.unop ..), .val _ | .index _ (.var _) (.ternary ..), .val _
+  | .index _ (.var _) (.readMem _), .val _ | .index _ (.var _) (.len ..), .val _
+  | .index _ (.var _) (.mlen ..), .val _ => ⟨_, .memoryIndexWriteCaptureAllNonSimpleIndex⟩
+  | .index _ (.var _) (.read _), .ref _ | .index _ (.var _) (.binop ..), .ref _
+  | .index _ (.var _) (.unop ..), .ref _ | .index _ (.var _) (.ternary ..), .ref _
+  | .index _ (.var _) (.readMem _), .ref _ | .index _ (.var _) (.len ..), .ref _
+  | .index _ (.var _) (.mlen ..), .ref _ => ⟨_, .memoryIndexWriteMemRefCaptureAllNonSimpleIndex⟩
+  | .index _ (.loc _) _, .val _ => ⟨_, .memoryIndexWriteCaptureAllComplexRecv⟩
+  | .index _ (.loc _) _, .ref _ => ⟨_, .memoryIndexWriteMemRefCaptureAllComplexRecv⟩
 
 /-! ## The rule for a statement -/
 

@@ -264,4 +264,35 @@ theorem negativeLiteral : ⊨ dl!{ ⟨ int e = -5; int f = e + 7; ⟩ f == 2 } :
   sol_symex
   sol_close
 
+/-! ## Exponentiation
+
+`a ** b` binds tighter than `*` and to the right, as in solc; it is the
+operator family's rules (`binopAssignment`, `binopUnfoldLeft`,
+`binopUnfoldRight`, solkey's `powerAssignment`/`power_unfold_*`), checked like
+every arithmetic operator: a result past `2^256` reverts.  solc takes an
+unsigned exponent, and an operator here is applied at one type, so `**` is a
+`uint` operator (`BinOp.accepts`). -/
+
+/-- `uint r = 2 ** 3;` (`TestSuite.powerSimple`). -/
+theorem powerSimple : ⊨ dl!{ ⟨ uint r = 2 ** 3; ⟩ r == 8 } := by
+  sol_symex
+  sol_close
+
+/-- `uint r = (x + 1) ** y; uint s = x ** (y + 1);` — a non-simple operand is
+captured first, on either side (`TestSuite.powerUnfoldLeft`,
+`powerUnfoldRight`). -/
+theorem powerUnfold :
+    ⊨ dl!{ [ uint x = 1; uint y = 3; uint r = (x + 1) ** y; uint s = x ** (y + 1); ]
+           (r == 8 && s == 1) } := by
+  sol_symex
+  sol_close
+
+/-! `2 ** 256` overflows a `uint256`: checked, the run reverts; `2 ** 255` is
+in range. -/
+
+/-- info: (Except.error (Solidity.Semantics.Halt.revert), true) -/
+#guard_msgs in
+#eval ((Prog.run Semantics.State.exampleStore (sol{ uint r = 2 ** 256; } : Prog StandardExample)).map
+    (fun _ => ()), (Prog.run Semantics.State.exampleStore (sol{ uint r = 2 ** 255; } : Prog StandardExample)).isOk)
+
 end Solidity.Examples.Values

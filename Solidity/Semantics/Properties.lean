@@ -52,7 +52,7 @@ theorem SVal.find_of_findLive : ∀ {v w : SVal} {p : List Seg}, v.findLive p = 
     · rename_i hl; (try rw [hl]); exact SVal.find_of_findLive h
     · simp at h
   | .struct _, w, .at _ :: _, h => by simp [SVal.findLive] at h
-  | .array elems shadow, w, .at i :: p, h => by
+  | .array elems shadow _, w, .at i :: p, h => by
     simp only [SVal.findLive] at h
     split at h
     · rename_i hi
@@ -62,10 +62,12 @@ theorem SVal.find_of_findLive : ∀ {v w : SVal} {p : List Seg}, v.findLive p = 
       rw [List.get_eq_getElem, List.getElem_append_left hi.2]
       exact SVal.find_of_findLive h
     · simp at h
-  | .array elems shadow, w, .field n :: p, h => by
+  | .array elems shadow fx, w, .field n :: p, h => by
     by_cases hn : n = "length"
     · subst hn; simp only [SVal.findLive] at h; simp only [SVal.find]
-      exact SVal.find_of_findLive h
+      cases fx
+      · exact SVal.find_of_findLive h
+      · simp at h
     · simp [SVal.findLive] at h
   | .map entries dflt, w, .at i :: p, h => by
     simp only [SVal.findLive] at h
@@ -117,7 +119,7 @@ theorem SVal.find_save_same {old new updated : SVal} {path : List Seg}
                   simp [SVal.find, lookupBy_setBy_self, ih hs]
       | «at» i =>
           cases old <;> try { simp [SVal.save] at h }
-          · rename_i elems shadow
+          · rename_i elems shadow fx
             simp only [SVal.save] at h
             split at h
             next hb =>
@@ -339,11 +341,11 @@ theorem copyStToM_frame (s : State) (v : SVal) :
       apply FramePreserving.bind (copyStFields_frame s fields)
       intro t mfields _
       exact FramePreserving.alloc_ref t (.struct mfields)
-  | array elems =>
+  | array elems _ fx =>
       rw [copyStToM]
       apply FramePreserving.bind (copyStElems_frame s elems)
       intro t melems _
-      exact FramePreserving.alloc_ref t (.array melems)
+      exact FramePreserving.alloc_ref t (.array melems fx)
 
 theorem copyStFields_frame (s : State)
     (fields : List (Name × SVal)) :
@@ -430,11 +432,11 @@ theorem copyStToM_nextId (s : State) (v : SVal) :
       apply NextIdGrows.bind (copyStFields_nextId s fields)
       intro t mfields
       exact NextIdGrows.alloc_ref t (.struct mfields)
-  | array elems =>
+  | array elems _ fx =>
       rw [copyStToM]
       apply NextIdGrows.bind (copyStElems_nextId s elems)
       intro t melems
-      exact NextIdGrows.alloc_ref t (.array melems)
+      exact NextIdGrows.alloc_ref t (.array melems fx)
 
 theorem copyStFields_nextId (s : State) (fields : List (Name × SVal)) :
     NextIdGrows s (copyStFields s fields) := by

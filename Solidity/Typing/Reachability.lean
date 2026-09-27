@@ -55,7 +55,10 @@ def Semantics.SVal.canon : SVal → Ty → Prop
   | SVal.bool _, Ty.bool => True
   | SVal.struct fields, Ty.ref (RefTy.struct s) =>
       fields.map (·.1) = (structDef s).map (·.1) ∧ canonFields s fields
-  | SVal.array elems shadow, Ty.ref (RefTy.array E) => canonElems E elems ∧ canonElems E shadow
+  | SVal.array elems shadow fx, Ty.ref (RefTy.array E) =>
+      fx = false ∧ canonElems E elems ∧ canonElems E shadow
+  | SVal.array elems shadow fx, Ty.ref (RefTy.fixed E n) =>
+      fx = true ∧ elems.length = n ∧ canonElems E elems ∧ canonElems E shadow
   | SVal.map entries dflt, Ty.ref (RefTy.mapping _ V) =>
       nodupKeysB entries = true ∧ canonEntries V entries ∧ dflt = defaultForTy V ∧ dflt.canon V
   | _, _ => False
@@ -224,17 +227,27 @@ theorem canon_struct {v : SVal} {s : Name} (h : v.canon (.ref (.struct s))) :
   cases v with
   | prim p => cases p <;> exact h.elim
   | struct fields => exact ⟨fields, rfl, h⟩
-  | array _ _ => exact h.elim
+  | array _ _ _ => exact h.elim
   | map _ _ => exact h.elim
 
 /-- A canonical `uint[]` is an array of canonical numbers, recycled slots
 included. -/
 theorem canon_array {v : SVal} {E : Ty} (h : v.canon (.ref (.array E))) :
-    ∃ elems shadow, v = .array elems shadow ∧ canonElems E elems ∧ canonElems E shadow := by
+    ∃ elems shadow, v = .array elems shadow false ∧ canonElems E elems ∧ canonElems E shadow := by
   cases v with
   | prim p => cases p <;> exact h.elim
   | struct _ => exact h.elim
-  | array elems shadow => exact ⟨elems, shadow, rfl, h⟩
+  | array elems shadow fx => obtain ⟨rfl, h⟩ := h; exact ⟨elems, shadow, rfl, h⟩
+  | map _ _ => exact h.elim
+
+/-- A canonical `uint[3]` is a marked array of three canonical numbers. -/
+theorem canon_fixed {v : SVal} {E : Ty} {n : Nat} (h : v.canon (.ref (.fixed E n))) :
+    ∃ elems shadow, v = .array elems shadow true ∧ elems.length = n ∧ canonElems E elems ∧
+      canonElems E shadow := by
+  cases v with
+  | prim p => cases p <;> exact h.elim
+  | struct _ => exact h.elim
+  | array elems shadow fx => obtain ⟨rfl, h⟩ := h; exact ⟨elems, shadow, rfl, h⟩
   | map _ _ => exact h.elim
 
 /-- A canonical `mapping(uint => uint)` has unique keys and the default
@@ -245,7 +258,7 @@ theorem canon_map {v : SVal} {K V : Ty} (h : v.canon (.ref (.mapping K V))) :
   cases v with
   | prim p => cases p <;> exact h.elim
   | struct _ => exact h.elim
-  | array _ _ => exact h.elim
+  | array _ _ _ => exact h.elim
   | map entries dflt => exact ⟨entries, dflt, rfl, h⟩
 
 /-- On a primitive type canonical is well-typed: `3` at `uint`. -/
@@ -254,7 +267,7 @@ theorem canon_prim_iff {v : SVal} {p : PrimTy} :
   cases v with
   | prim pv => cases p <;> cases pv <;> simp [SVal.canon, SVal.hasTy]
   | struct _ => cases p <;> simp [SVal.canon, SVal.hasTy]
-  | array _ _ => cases p <;> simp [SVal.canon, SVal.hasTy]
+  | array _ _ _ => cases p <;> simp [SVal.canon, SVal.hasTy]
   | map _ _ => cases p <;> simp [SVal.canon, SVal.hasTy]
 
 end Shapes
@@ -293,6 +306,7 @@ theorem find_canon : ∀ {segs : List Seg} {v : SVal} {T T' : Ty} {w : SVal},
               exact find_canon hv hs hf
             · exact nomatch hf
           | array _ => simp [segTy] at hseg
+          | fixed _ _ => simp [segTy] at hseg
           | mapping _ _ => simp [segTy] at hseg
       | «at» i =>
         cases T with
@@ -302,6 +316,14 @@ theorem find_canon : ∀ {segs : List Seg} {v : SVal} {T T' : Ty} {w : SVal},
           | struct _ => simp [segTy] at hseg
           | array E =>
             obtain ⟨elems, sh, rfl, he, hsh⟩ := canon_array h
+            simp only [segTy, Option.some.injEq] at hseg
+            subst hseg
+            simp only [SVal.find] at hf
+            split at hf
+            · exact find_canon (canonElems_mem (canonElems_append he hsh) (List.get_mem _ _)) hs hf
+            · exact nomatch hf
+          | fixed E _ =>
+            obtain ⟨elems, sh, rfl, -, he, hsh⟩ := canon_fixed h
             simp only [segTy, Option.some.injEq] at hseg
             subst hseg
             simp only [SVal.find] at hf
@@ -356,6 +378,7 @@ theorem save_canon : ∀ {segs : List Seg} {v : SVal} {T T' : Ty} {new w : SVal}
               exact hnames
             · exact nomatch hf
           | array _ => simp [segTy] at hseg
+          | fixed _ _ => simp [segTy] at hseg
           | mapping _ _ => simp [segTy] at hseg
       | «at» i =>
         cases T with
@@ -374,7 +397,20 @@ theorem save_canon : ∀ {segs : List Seg} {v : SVal} {T T' : Ty} {new w : SVal}
               have hall := canonElems_append he hsh
               have hset := canonElems_set (i := i.toNat) hall
                 (save_canon (canonElems_mem hall (List.get_mem _ _)) hs hn hup)
-              exact ⟨canonElems_take _ hset, canonElems_drop _ hset⟩
+              exact ⟨rfl, canonElems_take _ hset, canonElems_drop _ hset⟩
+            · exact nomatch hf
+          | fixed E n =>
+            obtain ⟨elems, sh, rfl, hlen, he, hsh⟩ := canon_fixed h
+            simp only [segTy, Option.some.injEq] at hseg
+            subst hseg
+            simp only [SVal.save] at hf
+            split at hf
+            · obtain ⟨up, hup, hf⟩ := bind_ok_inv hf
+              cases hf
+              have hall := canonElems_append he hsh
+              have hset := canonElems_set (i := i.toNat) hall
+                (save_canon (canonElems_mem hall (List.get_mem _ _)) hs hn hup)
+              exact ⟨rfl, by simp [hlen], canonElems_take _ hset, canonElems_drop _ hset⟩
             · exact nomatch hf
           | mapping K V =>
             obtain ⟨es, d, rfl, hnd, hes, hdd, hd⟩ := canon_map h
@@ -404,15 +440,23 @@ theorem SVal.defaultOf_canon : ∀ {v : SVal} {T : Ty}, v.canon T → v.defaultO
     obtain ⟨hn, hf⟩ := h
     refine ⟨?_, SVal.defaultOfFields_canon hf⟩
     rw [← hn]; exact defaultOfFields_names fields
-  | .array _ _, .ref (.array _), h => ⟨trivial, canonElems_append (SVal.defaultOfElems_canon h.1) h.2⟩
+  | .array _ _ false, .ref (.array _), h =>
+    ⟨rfl, trivial, canonElems_append (SVal.defaultOfElems_canon h.2.1) h.2.2⟩
+  | .array elems _ true, .ref (.fixed _ _), h =>
+    ⟨rfl, (SVal.defaultOfElems_length elems).trans h.2.1, SVal.defaultOfElems_canon h.2.2.1,
+      h.2.2.2⟩
+  | .array _ _ true, .ref (.array _), h => nomatch h.1
+  | .array _ _ false, .ref (.fixed _ _), h => nomatch h.1
   | .map _ _, .ref (.mapping _ _), h => h
   | .prim (.int _), .prim .bool, h | .prim (.bool _), .prim .int, h
   | .prim (.bool _), .prim .uint, h => h.elim
   | .prim (.int _), .ref _, h | .prim (.bool _), .ref _, h => h.elim
-  | .struct _, .prim _, h | .array _ _, .prim _, h | .map _ _, .prim _, h => h.elim
-  | .struct _, .ref (.array _), h | .struct _, .ref (.mapping _ _), h => h.elim
-  | .array _ _, .ref (.struct _), h | .array _ _, .ref (.mapping _ _), h => h.elim
-  | .map _ _, .ref (.struct _), h | .map _ _, .ref (.array _), h => h.elim
+  | .struct _, .prim _, h | .array _ _ _, .prim _, h | .map _ _, .prim _, h => h.elim
+  | .struct _, .ref (.array _), h | .struct _, .ref (.mapping _ _), h
+  | .struct _, .ref (.fixed _ _), h => h.elim
+  | .array _ _ _, .ref (.struct _), h | .array _ _ _, .ref (.mapping _ _), h => h.elim
+  | .map _ _, .ref (.struct _), h | .map _ _, .ref (.array _), h
+  | .map _ _, .ref (.fixed _ _), h => h.elim
 
 /-- `delete alice` resets each member in place. -/
 theorem SVal.defaultOfFields_canon {s : Name} :
@@ -465,13 +509,21 @@ theorem defaultForTy_canon : ∀ {T : Ty}, defaultOk T = true → (defaultForTy 
     simp only [defaultForTy]
     exact ⟨defaultForFields_names _, ih name h⟩
   | case5 elem => intro _; simp [defaultForTy, SVal.canon, canonElems]
-  | case6 key value ih =>
+  | case6 elem n ih =>
+    intro h
+    simp only [defaultOk] at h
+    simp only [defaultForTy, SVal.canon, List.length_replicate]
+    refine ⟨trivial, trivial, ?_, trivial⟩
+    induction n with
+    | zero => trivial
+    | succ k ihk => exact ⟨ih h, ihk⟩
+  | case7 key value ih =>
     intro h
     simp only [defaultOk] at h
     simp only [defaultForTy]
     exact ⟨rfl, trivial, rfl, ih h⟩
-  | case7 => simp [defaultForFields, canonFields]
-  | case8 n t rest iht ihrest =>
+  | case8 => simp [defaultForFields, canonFields]
+  | case9 n t rest iht ihrest =>
     rename_i s h
     simp only [defaultOkFields, Bool.and_eq_true, beq_iff_eq] at h
     obtain ⟨⟨hok, hlook⟩, hrest⟩ := h
@@ -518,13 +570,17 @@ theorem SVal.strip_canon : ∀ {v : SVal} {T : Ty}, v.canon T → v.strip.canon 
   | .prim _, _, h => by simpa only [SVal.strip] using h
   | .struct fields, .ref (.struct _), h =>
     ⟨(stripFields_names fields).trans h.1, SVal.stripFields_canon h.2⟩
-  | .array _ _, .ref (.array _), h => ⟨SVal.stripElems_canon h.1, trivial⟩
+  | .array _ _ _, .ref (.array _), h => ⟨h.1, SVal.stripElems_canon h.2.1, trivial⟩
+  | .array elems _ _, .ref (.fixed _ _), h =>
+    ⟨h.1, (SVal.stripElems_length' elems).trans h.2.1, SVal.stripElems_canon h.2.2.1, trivial⟩
   | .map _ _, .ref (.mapping _ _), h => h
-  | .struct _, .prim p, h | .array _ _, .prim p, h | .map _ _, .prim p, h => by
+  | .struct _, .prim p, h | .array _ _ _, .prim p, h | .map _ _, .prim p, h => by
     cases p <;> exact h.elim
-  | .struct _, .ref (.array _), h | .struct _, .ref (.mapping _ _), h => h.elim
-  | .array _ _, .ref (.struct _), h | .array _ _, .ref (.mapping _ _), h => h.elim
-  | .map _ _, .ref (.struct _), h | .map _ _, .ref (.array _), h => h.elim
+  | .struct _, .ref (.array _), h | .struct _, .ref (.mapping _ _), h
+  | .struct _, .ref (.fixed _ _), h => h.elim
+  | .array _ _ _, .ref (.struct _), h | .array _ _ _, .ref (.mapping _ _), h => h.elim
+  | .map _ _, .ref (.struct _), h | .map _ _, .ref (.array _), h
+  | .map _ _, .ref (.fixed _ _), h => h.elim
 
 theorem SVal.stripFields_canon {s : Name} :
     ∀ {fields : List (Name × SVal)}, canonFields s fields →
@@ -564,21 +620,27 @@ theorem SVal.overlay_canon {old new : SVal} {T : Ty} (ho : old.canon T) (hn : ne
                   exact ⟨(overlayFields_names ofs nfs).trans hn.1,
                     SVal.overlayFields_canon ho.2 hn.2⟩
               | array _ => exact hn.elim
+              | fixed _ _ => exact hn.elim
               | mapping _ _ => exact hn.elim
       | prim _ => simp only [SVal.overlay]; exact SVal.strip_canon hn
-      | array _ _ => simp only [SVal.overlay]; exact SVal.strip_canon hn
+      | array _ _ _ => simp only [SVal.overlay]; exact SVal.strip_canon hn
       | map _ _ => simp only [SVal.overlay]; exact SVal.strip_canon hn
-  | .array nel nsh =>
+  | .array nel nsh nfx =>
       cases old with
-      | array oel osh =>
+      | array oel osh ofx =>
           cases T with
           | prim p => cases p <;> exact hn.elim
           | ref r =>
               cases r with
               | array E =>
-                  exact ⟨SVal.overlayElems_canon (canonElems_append ho.1 ho.2) hn.1,
-                    canonElems_append (SVal.defaultOfElems_canon (canonElems_drop _ ho.1))
-                      (canonElems_drop _ ho.2)⟩
+                  exact ⟨hn.1, SVal.overlayElems_canon (canonElems_append ho.2.1 ho.2.2) hn.2.1,
+                    canonElems_append (SVal.defaultOfElems_canon (canonElems_drop _ ho.2.1))
+                      (canonElems_drop _ ho.2.2)⟩
+              | fixed E n =>
+                  exact ⟨hn.1, (SVal.overlayElems_length _ nel).trans hn.2.1,
+                    SVal.overlayElems_canon (canonElems_append ho.2.2.1 ho.2.2.2) hn.2.2.1,
+                    canonElems_append (SVal.defaultOfElems_canon (canonElems_drop _ ho.2.2.1))
+                      (canonElems_drop _ ho.2.2.2)⟩
               | struct _ => exact hn.elim
               | mapping _ _ => exact hn.elim
       | prim _ => simp only [SVal.overlay]; exact SVal.strip_canon hn
@@ -589,7 +651,7 @@ theorem SVal.overlay_canon {old new : SVal} {T : Ty} (ho : old.canon T) (hn : ne
       | map oe od => simpa only [SVal.overlay] using ho
       | prim _ => simp only [SVal.overlay]; exact SVal.strip_canon hn
       | struct _ => simp only [SVal.overlay]; exact SVal.strip_canon hn
-      | array _ _ => simp only [SVal.overlay]; exact SVal.strip_canon hn
+      | array _ _ _ => simp only [SVal.overlay]; exact SVal.strip_canon hn
 
 theorem SVal.overlayFields_canon {s : Name} {ofs nfs : List (Name × SVal)}
     (ho : canonFields s ofs) (hn : canonFields s nfs) :
@@ -719,8 +781,9 @@ theorem copyStToM_canon {H : HeapTy} {s s' : State} {v : SVal} {ty : Ty} {mv : M
             exact ⟨mfields, rfl, (copyStFields_names hf).trans hn⟩)
         exact ⟨_, h.1, h.2⟩
       | array _ => simp [SVal.hasTy] at hty
+      | fixed _ _ => simp [SVal.hasTy] at hty
       | mapping _ _ => simp [SVal.hasTy] at hty
-  | array elems shadow =>
+  | array elems shadow fx =>
     cases ty with
     | prim pt => simp [SVal.hasTy] at hty
     | ref r =>
@@ -729,11 +792,24 @@ theorem copyStToM_canon {H : HeapTy} {s s' : State} {v : SVal} {ty : Ty} {mv : M
       | array elem =>
         simp only [SVal.hasTy, Bool.and_eq_true] at hty
         obtain ⟨⟨s₁, melems⟩, he, h⟩ := bind_ok_inv hcopy
-        obtain ⟨H₁, hout, hels⟩ := copyStElems_canon hnd hheap hwf hc hty.1 hcn.1 he
+        obtain ⟨H₁, hout, hels⟩ := copyStElems_canon hnd hheap hwf hc hty.1.2 hcn.2.1 he
         simp only [Except.ok.injEq, Prod.mk.injEq] at h
         obtain ⟨rfl, rfl⟩ := h
-        have h := CopyOutC.alloc (r := .array elem) (obj := .array melems) hout
-          (by simpa [MObj.hasTyH] using hels) (fun _ he => nomatch he)
+        have h := CopyOutC.alloc (r := .array elem) (obj := .array melems fx) hout
+          (by simp only [MObj.hasTyH, Bool.and_eq_true]; exact ⟨hty.1.1, hels⟩)
+          (fun _ he => nomatch he)
+        exact ⟨_, h.1, h.2⟩
+      | fixed elem n =>
+        simp only [SVal.hasTy, Bool.and_eq_true, beq_iff_eq] at hty
+        obtain ⟨⟨s₁, melems⟩, he, h⟩ := bind_ok_inv hcopy
+        obtain ⟨H₁, hout, hels⟩ := copyStElems_canon hnd hheap hwf hc hty.1.2 hcn.2.2.1 he
+        simp only [Except.ok.injEq, Prod.mk.injEq] at h
+        obtain ⟨rfl, rfl⟩ := h
+        have h := CopyOutC.alloc (r := .fixed elem n) (obj := .array melems fx) hout
+          (by
+            simp only [MObj.hasTyH, Bool.and_eq_true, beq_iff_eq, copyStElems_length he]
+            exact ⟨hty.1.1, hels⟩)
+          (fun _ he => nomatch he)
         exact ⟨_, h.1, h.2⟩
       | mapping _ _ => simp [SVal.hasTy] at hty
   | map _ _ => exact nomatch hcopy
@@ -885,14 +961,22 @@ theorem copyMToSt_canon {H : HeapTy} {s : State} (hheap : heapTypedB H s.heap = 
               (by simpa [MObj.hasTyH] using hrow) hfs
             exact ⟨hn'.trans hn, hcf⟩
           | array _ => simp [MObj.hasTyH] at hrow
+          | fixed _ _ => simp [MObj.hasTyH] at hrow
           | mapping _ _ => simp [MObj.hasTyH] at hrow
-        | array elems =>
+        | array elems fx =>
           cases r with
           | array elem =>
+            simp only [MObj.hasTyH, Bool.and_eq_true, Bool.not_eq_true'] at hrow
             obtain ⟨selems, hes, hcopy⟩ := bind_ok_inv hcopy
             cases hcopy
-            exact ⟨copyMElems_canon (fun hv hc' => copyMToSt_canon hheap hc hv hc')
-              (by simpa [MObj.hasTyH] using hrow) hes, trivial⟩
+            exact ⟨hrow.1, copyMElems_canon (fun hv hc' => copyMToSt_canon hheap hc hv hc')
+              hrow.2 hes, trivial⟩
+          | fixed elem n =>
+            simp only [MObj.hasTyH, Bool.and_eq_true, beq_iff_eq] at hrow
+            obtain ⟨selems, hes, hcopy⟩ := bind_ok_inv hcopy
+            cases hcopy
+            exact ⟨hrow.1.1, (copyMElems_length hes).trans hrow.1.2,
+              copyMElems_canon (fun hv hc' => copyMToSt_canon hheap hc hv hc') hrow.2 hes, trivial⟩
           | struct _ => simp [MObj.hasTyH] at hrow
           | mapping _ _ => simp [MObj.hasTyH] at hrow
       · simp only [copyMToSt, hmem, dif_neg, not_false_iff] at hcopy
@@ -1012,8 +1096,8 @@ theorem pushAt_canon (hc : Canon C H σ) {E : Ty} {r : Name} {segs : List Seg}
   obtain ⟨sv, hsv, h⟩ := bind_ok_inv h
   obtain ⟨elems, shadow, rfl, he, hsh⟩ := canon_array (hc.find hty hsv)
   obtain ⟨newElem, hnew, h⟩ := bind_ok_inv h
-  exact hc.save hty (by exact ⟨canonElems_append he ⟨hval _ _ (pushSlot_canon hsh).1 hnew, trivial⟩,
-    (pushSlot_canon hsh).2⟩) h
+  exact hc.save hty (by exact ⟨rfl, canonElems_append he ⟨hval _ _ (pushSlot_canon hsh).1 hnew,
+    trivial⟩, (pushSlot_canon hsh).2⟩) h
 
 /-- `b.push()` as a place keeps storage canonical. -/
 theorem pushPlaceAt_canon (hc : Canon C H σ) {E : Ty} {r : Name} {segs : List Seg} {n : Int}
@@ -1023,7 +1107,7 @@ theorem pushPlaceAt_canon (hc : Canon C H σ) {E : Ty} {r : Name} {segs : List S
   obtain ⟨elems, shadow, rfl, he, hsh⟩ := canon_array (hc.find hty hsv)
   obtain ⟨σ₁, hσ₁, h⟩ := bind_ok_inv h
   cases h
-  exact hc.save hty (by exact ⟨canonElems_append he ⟨(pushSlot_canon hsh).1 hok, trivial⟩,
+  exact hc.save hty (by exact ⟨rfl, canonElems_append he ⟨(pushSlot_canon hsh).1 hok, trivial⟩,
     (pushSlot_canon hsh).2⟩) hσ₁
 
 /-- `b.pop()` keeps storage canonical: the popped slot is cleared into the
@@ -1040,7 +1124,7 @@ theorem popAt_canon (hc : Canon C H σ) {E : Ty} {keep : Bool} {r : Name} {segs 
     have hmem : ∀ v, v ∈ last :: restRev → v ∈ elems := by
       intro v hv; rw [← hrev] at hv; exact List.mem_reverse.mp hv
     have hl := canonElems_mem he (hmem last List.mem_cons_self)
-    exact hc.save hty (by exact ⟨canonElems_of_forall fun v hv =>
+    exact hc.save hty (by exact ⟨rfl, canonElems_of_forall fun v hv =>
       canonElems_mem he (hmem v (List.mem_cons_of_mem _ (List.mem_reverse.mp hv))),
       by cases keep
          · exact SVal.defaultOf_canon hl
@@ -1098,20 +1182,22 @@ theorem memWriteField_canon (hc : Canon C H σ) {id : Nat} {s f : Name}
 
 /-- A write into a memory array's element touches no struct. -/
 theorem memWriteIndex_canon (hwt : RunWT C Γ H σ) (hc : Canon C H σ) {id : Nat} {i : Int}
-    {E : Ty} {mv : MVal} (hid : lookupBy id H = some (.ref (.array E)))
+    {R : RefTy} {E : Ty} {mv : MVal} (hid : lookupBy id H = some (.ref R))
+    (hR : R.arrElem? = some E)
     (h : memWriteIndex σ id i mv = .ok σ') : Canon C H σ' := by
   obtain ⟨obj, hobj, hty⟩ := heapTypedB_obj hwt.heap hid
   obtain ⟨o, ho, h⟩ := bind_ok_inv h
   simp only [State.getObj, hobj] at ho
   cases ho
   cases obj with
-  | array elems =>
+  | array elems fx =>
     simp only at h
     split at h
     · cases h
       refine ⟨hc.storage, fun id' s' hid' => ?_⟩
       show ∃ fs, lookupBy id' (setBy id _ σ.heap) = some (.struct fs) ∧ _
-      have he : id' ≠ id := by rintro rfl; rw [hid] at hid'; cases hid'
+      have he : id' ≠ id := by
+        rintro rfl; rw [hid] at hid'; cases hid'; simp [RefTy.arrElem?] at hR
       rw [lookupBy_setBy_ne he]; exact hc.heap id' s' hid'
     · exact nomatch h
   | struct _ => exact nomatch h
@@ -1123,7 +1209,9 @@ theorem writeLoc_canon (hwt : RunWT C Γ H σ) (hc : Canon C H σ) {p : PrimTy} 
   | memoryField id f =>
     obtain ⟨s, hid, hf⟩ := hloc
     exact memWriteField_canon hc hid hf h
-  | memoryIndex id i => exact memWriteIndex_canon hwt hc hloc h
+  | memoryIndex id i =>
+    obtain ⟨R, hid, hR⟩ := hloc
+    exact memWriteIndex_canon hwt hc hid hR h
 
 /-- `m.age += 1;` keeps the heap canonical. -/
 theorem opMem_canon (hwt : RunWT C Γ H σ) (hc : Canon C H σ) {op : BinOp} {p : PrimTy}
@@ -1176,7 +1264,7 @@ theorem OpLoc.store_canon (hwt : RunWT C Γ H σ) (hc : Canon C H σ) {op : BinO
     have hb := MPath.mval_wt hwt b hw hm0
     rw [MVal.asRef_ok hid, MVal.hasTyH_ref] at hb
     exact opMem_canon hwt hc (loc := .memoryField id f) ⟨s, hb, hf⟩ h
-  | p, .mindex b i, v, hp, hw, h => by
+  | p, .mindex ak b i, v, hp, hw, h => by
     simp only [OpLoc.wt, Bool.and_eq_true] at hw
     obtain ⟨m0, hm0, h⟩ := bind_ok_inv h
     obtain ⟨id, hid, h⟩ := bind_ok_inv h
@@ -1184,7 +1272,7 @@ theorem OpLoc.store_canon (hwt : RunWT C Γ H σ) (hc : Canon C H σ) {op : BinO
     rw [MVal.asRef_ok hid, MVal.hasTyH_ref] at hb
     obtain ⟨_, _, h⟩ := bind_ok_inv h
     obtain ⟨iv, _, h⟩ := bind_ok_inv h
-    exact opMem_canon hwt hc (loc := .memoryIndex id iv) hb h
+    exact opMem_canon hwt hc (loc := .memoryIndex id iv) ⟨_, hb, ak.arrElem⟩ h
 
 /-- `x++` keeps the state canonical. -/
 theorem OpLoc.bump_canon (hwt : RunWT C Γ H σ) (hc : Canon C H σ) {op : IncDec} :
@@ -1216,7 +1304,7 @@ theorem OpLoc.bump_canon (hwt : RunWT C Γ H σ) (hc : Canon C H σ) {op : IncDe
     have hb := MPath.mval_wt hwt b hw hm0
     rw [MVal.asRef_ok hid, MVal.hasTyH_ref] at hb
     exact bumpMem_canon hwt hc (loc := .memoryField id f) ⟨s, hb, hf⟩ h
-  | p, .mindex b i, w, hp, hw, h => by
+  | p, .mindex ak b i, w, hp, hw, h => by
     simp only [OpLoc.wt, Bool.and_eq_true] at hw
     obtain ⟨m0, hm0, h⟩ := bind_ok_inv h
     obtain ⟨id, hid, h⟩ := bind_ok_inv h
@@ -1224,7 +1312,7 @@ theorem OpLoc.bump_canon (hwt : RunWT C Γ H σ) (hc : Canon C H σ) {op : IncDe
     rw [MVal.asRef_ok hid, MVal.hasTyH_ref] at hb
     obtain ⟨_, _, h⟩ := bind_ok_inv h
     obtain ⟨iv, _, h⟩ := bind_ok_inv h
-    exact bumpMem_canon hwt hc (loc := .memoryIndex id iv) hb h
+    exact bumpMem_canon hwt hc (loc := .memoryIndex id iv) ⟨_, hb, ak.arrElem⟩ h
 
 /-- `m.age = 3;` keeps the heap canonical. -/
 theorem MLoc.write_canon (hwt : RunWT C Γ H σ) (hc : Canon C H σ) {mv : MVal} :
@@ -1235,7 +1323,7 @@ theorem MLoc.write_canon (hwt : RunWT C Γ H σ) (hc : Canon C H σ) {mv : MVal}
     have hb := MPath.mval_wt hwt b hw hm0
     rw [MVal.asRef_ok hid, MVal.hasTyH_ref] at hb
     exact memWriteField_canon hc hb hf h
-  | _, .index b i, hw, h => by
+  | _, .index ak b i, hw, h => by
     simp only [MLoc.wt, Bool.and_eq_true] at hw
     obtain ⟨m0, hm0, h⟩ := bind_ok_inv h
     obtain ⟨id, hid, h⟩ := bind_ok_inv h
@@ -1243,7 +1331,7 @@ theorem MLoc.write_canon (hwt : RunWT C Γ H σ) (hc : Canon C H σ) {mv : MVal}
     rw [MVal.asRef_ok hid, MVal.hasTyH_ref] at hb
     obtain ⟨_, _, h⟩ := bind_ok_inv h
     obtain ⟨iv, _, h⟩ := bind_ok_inv h
-    exact memWriteIndex_canon hwt hc hb h
+    exact memWriteIndex_canon hwt hc hb ak.arrElem h
 
 /-- `Person memory m;` allocates a canonical `Person`. -/
 theorem allocDefault_canon (hwt : RunWT C Γ H σ) (hc : Canon C H σ) {R : RefTy} {id : Nat}
@@ -1271,12 +1359,13 @@ theorem newArrVal_canon {R : RefTy} (h : R.newArrOk = true) (n : Int) :
   | array E =>
     simp only [RefTy.newArrOk, Bool.and_eq_true] at h
     have hE := defaultForTy_canon (defaultOk_of_defaultOkS h.2)
-    refine ⟨?_, trivial⟩
+    refine ⟨rfl, ?_, trivial⟩
     show canonElems E (List.replicate n.toNat (defaultForTy E))
     induction n.toNat with
     | zero => trivial
     | succ k ih => exact ⟨hE, ih⟩
   | struct _ => simp [RefTy.newArrOk] at h
+  | fixed _ _ => simp [RefTy.newArrOk] at h
   | mapping _ _ => simp [RefTy.newArrOk] at h
 
 /-- `delete m.inner;` through a resolved address keeps the heap canonical. -/
@@ -1286,7 +1375,9 @@ theorem writeAddr_canon (hwt : RunWT C Γ H σ) (hc : Canon C H σ) {T : Ty} {a 
   | memoryField id f =>
     obtain ⟨s, hid, hf⟩ := ha
     exact memWriteField_canon hc hid hf h
-  | memoryIndex id i => exact memWriteIndex_canon hwt hc ha h
+  | memoryIndex id i =>
+    obtain ⟨R, hid, hR⟩ := ha
+    exact memWriteIndex_canon hwt hc hid hR h
 
 /-- `m = n;` and `m = alice;` keep the state canonical, the second by
 allocating a canonical copy. -/

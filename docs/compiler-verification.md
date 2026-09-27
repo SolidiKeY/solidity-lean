@@ -70,8 +70,12 @@ simplified (`Evm/Machine.lean` says why):
 ## The layout, and why it is injective
 
 solc's: state variables in declaration order, a struct's members consecutive,
-`uint`/`bool`/arrays/mappings one slot, an array's length at its slot and
-element `i` at `keccak(slot) + i·size(E)`, entry `k` at `keccak(k ‖ slot)`.
+`uint`/`bool`/dynamic arrays/mappings one slot, an array's length at its slot
+and element `i` at `keccak(slot) + i·size(E)`, entry `k` at `keccak(k ‖ slot)`.
+A fixed-size array `T[n]` is laid out inline, as a struct of `n` members:
+`size (T[n]) = n · size T` (`size_fixed`), element `i` at `slot + i·size(T)`,
+no length slot (`Occ.felem`, `ReprAt.fixed`); its bound is the constant `n`
+(`fixedCheck`), and the element's slot is an `ADD` (`fixedSlot`).
 `Occ T s x` says slot `x` belongs to a value of type `T` laid out at `s`.
 Two members, two mapping entries, two array elements, and an array's length and
 its elements occupy disjoint slots: every slot `Occ T s` names descends from
@@ -83,7 +87,7 @@ represented.
 ## The fragment, and what is out
 
 In (`wtStmt`): `uint` and `bool` values; storage of any shape (structs,
-arrays, mappings keyed by `uint`, nested); literals below `2^256`, locals,
+dynamic and fixed-size arrays, mappings keyed by `uint`, nested); literals below `2^256`, locals,
 storage reads, every operator but `**` and unary minus, `?:`, short-circuit
 `&&`/`||`; `=` of a value into storage, `=` to a local, `uint x = e;`,
 `T storage p = …;`, `op=`, `x++;`/`total++;`, `delete` at any type, `pop()`,
@@ -98,7 +102,7 @@ Out, and why:
 | Construct | Why |
 | --- | --- |
 | `int` | Signed arithmetic and its guards are not compiled; `ReprV` has no `int` case. |
-| `**`, unary `-` | `**` needs a loop or an unbounded unrolling; `-x` is `int`-only in solc. |
+| `**`, unary `-` | `**` (checked, `uint` only; the interpreter has it) needs solc's `checked_exp` loop or an unbounded unrolling, and the machine has no loops; `-x` is `int`-only in solc. |
 | memory (`T memory m`, reads and writes, copies) | The machine's memory holds the locals; the heap and `copySt`/`copyMem` are not laid out. |
 | storage-to-storage copies (`alice = bob;`) | A copy is a loop over the type's leaves plus a bound check on nested arrays; not compiled. |
 | `push` | The interpreter's arrays are unbounded, solc's stop at `2^64` elements (`Panic(0x41)`): the two would disagree at that boundary, so the theorem as stated would be false. |

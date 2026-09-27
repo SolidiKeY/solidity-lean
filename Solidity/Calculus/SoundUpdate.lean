@@ -122,11 +122,11 @@ theorem writeAddr_with_bind {α : Type} (σ : State) (mv : MVal) (a : Addr) (f :
       | array elems => by_cases hh : 0 ≤ i ∧ i.toNat < elems.length <;> simp [hh] <;> rfl
 
 theorem upd_memoryIndexArrayOpAssign {p : PrimTy} {op : BinOp} (hop : op.hasCompoundAssign = true)
-    (hp : p.isNumeric = true) (mv : Var) (ie : Simple C PrimTy.uint) (se : Simple C p) (σ : State) :
+    (hp : p.isNumeric = true) {R : RefTy} (a : ArrTy R (.prim p)) (mv : Var) (ie : Simple C PrimTy.uint) (se : Simple C p) (σ : State) :
     SameOk [] (Upd.apply (C := C) [UpdElem.memory
           (MTerm.memory.write (MAddr.at (ITerm.pv mv) ie.lower)
             (MValT.val (Term.binop op p (Term.read MTerm.memory (MAddr.at (ITerm.pv mv) ie.lower)) se.lower)))] σ)
-      (Stmt.run σ (Stmt.opAssign op hop hp (OpLoc.mindex (MPath.var mv) ie) (Val.simple se))) := by
+      (Stmt.run σ (Stmt.opAssign op hop hp (OpLoc.mindex a (MPath.var mv) ie) (Val.simple se))) := by
   upd_unfold'
   simp only [evalBinop_compound hop]
   res_split
@@ -142,14 +142,15 @@ theorem upd_memoryFieldIncrement {p : PrimTy} (op : IncDec) (hp : p.isNumeric = 
   upd_unfold'
   res_split
 
-theorem upd_memoryIndexArrayIncrement {p : PrimTy} (op : IncDec) (hp : p.isNumeric = true) (mv : Var)
+theorem upd_memoryIndexArrayIncrement {p : PrimTy} (op : IncDec) (hp : p.isNumeric = true)
+    {R : RefTy} (a : ArrTy R (.prim p)) (mv : Var)
     (ie : Simple C PrimTy.uint) (σ : State) :
     SameOk [] (Upd.apply (C := C) [UpdElem.memory
           (MTerm.memory.write (MAddr.at (ITerm.pv mv) ie.lower)
             (MValT.val
               (Term.binop op.binOp p (Term.read MTerm.memory (MAddr.at (ITerm.pv mv) ie.lower))
                 (Term.lit (.int 1)))))] σ)
-      (Stmt.run σ (Stmt.incDec op hp (OpLoc.mindex (MPath.var mv) ie))) := by
+      (Stmt.run σ (Stmt.incDec op hp (OpLoc.mindex a (MPath.var mv) ie))) := by
   upd_unfold'
   res_split
 
@@ -203,11 +204,11 @@ def heapRes (σ : State) (mv : MVal) : Addr → Res (List (Nat × MObj))
   | .memoryField id f => do
     match ← σ.getObj id with
     | .struct fields => pure (setBy id (.struct (setBy f mv fields)) σ.heap)
-    | .array _ => .error .stuck
+    | .array _ _ => .error .stuck
   | .memoryIndex id i => do
     match ← σ.getObj id with
-    | .array elems =>
-      if 0 ≤ i ∧ i.toNat < elems.length then pure (setBy id (.array (elems.set i.toNat mv)) σ.heap)
+    | .array elems fx =>
+      if 0 ≤ i ∧ i.toNat < elems.length then pure (setBy id (.array (elems.set i.toNat mv) fx) σ.heap)
       else .error .revert
     | .struct _ => .error .stuck
 
@@ -298,15 +299,15 @@ theorem upd_memoryFieldIncrementAssignment {p : PrimTy} (v : Var) (op : IncDec)
   rw [Term.bumped]; split <;> (upd_unfold''; res_split)
 
 theorem upd_memoryIndexArrayIncrementAssignment {p : PrimTy} (v : Var) (op : IncDec)
-    (hp : p.isNumeric = true) (mv : Var) (ie : Simple C PrimTy.uint)
-    (hs : (OpLoc.mindex (MPath.var mv) ie).recvSimple = true) (σ : State) :
+    (hp : p.isNumeric = true) {R : RefTy} (a : ArrTy R (.prim p)) (mv : Var) (ie : Simple C PrimTy.uint)
+    (hs : (OpLoc.mindex a (MPath.var mv) ie).recvSimple = true) (σ : State) :
     SameOk [] (Upd.apply (C := C) [UpdElem.memory
           (MTerm.memory.write (MAddr.at (ITerm.pv mv) ie.lower)
             (MValT.val
               (Term.binop op.binOp p (Term.read MTerm.memory (MAddr.at (ITerm.pv mv) ie.lower))
                 (Term.lit (.int 1))))),
         UpdElem.val v (Term.bumped op p (Term.read MTerm.memory (MAddr.at (ITerm.pv mv) ie.lower)))] σ)
-      (Stmt.run σ (Stmt.assignIncDec v op hp (OpLoc.mindex (MPath.var mv) ie) hs)) := by
+      (Stmt.run σ (Stmt.assignIncDec v op hp (OpLoc.mindex a (MPath.var mv) ie) hs)) := by
   rw [Term.bumped]; split <;> (upd_unfold''; res_split)
 
 /-! ### Memory reads, aliases and writes -/
@@ -322,9 +323,10 @@ theorem upd_memoryFieldReadHeap (v mv : Var) {fld x : Name} {q : PrimTy}
       (Stmt.run σ (Stmt.assignLocal v (Val.readMem (MLoc.field (MPath.var mv) fld hfld)))) := by
   mem_unfold; res_split
 
-theorem upd_memoryIndexReadHeap {q : PrimTy} (v mv : Var) (ie : Simple C PrimTy.uint) (σ : State) :
+theorem upd_memoryIndexReadHeap {q : PrimTy} {R : RefTy} (a : ArrTy R (Ty.prim q)) (v mv : Var)
+    (ie : Simple C PrimTy.uint) (σ : State) :
     SameOk [] (Upd.apply (C := C) [UpdElem.val v (Term.read MTerm.memory (MAddr.at (ITerm.pv mv) ie.lower))] σ)
-      (Stmt.run σ (Stmt.assignLocal v (Val.readMem (MLoc.index (E := Ty.prim q) (MPath.var mv) (Val.simple ie))))) := by
+      (Stmt.run σ (Stmt.assignLocal v (Val.readMem (MLoc.index a (MPath.var mv) (Val.simple ie))))) := by
   mem_unfold; res_split
 
 theorem upd_memoryRootAlias {R : RefTy} (mv₁ mv₂ : Var) (σ : State) :
@@ -338,10 +340,11 @@ theorem upd_memoryFieldReadAliasRoot (mv₁ mv₂ : Var) {fr x : Name} {R : RefT
       (Stmt.run σ (Stmt.rebindMem mv₁ (MRhs.alias (MPath.loc (MLoc.field (MPath.var mv₂) fr hfr))))) := by
   mem_unfold; res_split
 
-theorem upd_memoryIndexReadAliasRoot {R : RefTy} (mv₁ mv₂ : Var) (ie : Simple C PrimTy.uint) (σ : State) :
+theorem upd_memoryIndexReadAliasRoot {R R' : RefTy} (a : ArrTy R' (Ty.ref R)) (mv₁ mv₂ : Var)
+    (ie : Simple C PrimTy.uint) (σ : State) :
     SameOk [] (Upd.apply (C := C) [UpdElem.mref mv₁ (ITerm.read MTerm.memory (MAddr.at (ITerm.pv mv₂) ie.lower))] σ)
       (Stmt.run σ (Stmt.rebindMem mv₁
-        (MRhs.alias (MPath.loc (MLoc.index (E := Ty.ref R) (MPath.var mv₂) (Val.simple ie)))))) := by
+        (MRhs.alias (MPath.loc (MLoc.index a (MPath.var mv₂) (Val.simple ie)))))) := by
   mem_unfold; res_split
 
 theorem upd_memoryFieldWriteStore (mv : Var) {fld x : Name} {q : PrimTy}
@@ -350,10 +353,10 @@ theorem upd_memoryFieldWriteStore (mv : Var) {fld x : Name} {q : PrimTy}
       (Stmt.run σ (Stmt.assignMem (MLoc.field (MPath.var mv) fld hfld) (MSrc.val (Val.simple se)))) := by
   mem_unfold; res_split
 
-theorem upd_memoryIndexWriteStore {q : PrimTy} (mv : Var) (ie : Simple C PrimTy.uint) (se : Simple C q)
-    (σ : State) :
+theorem upd_memoryIndexWriteStore {q : PrimTy} {R : RefTy} (a : ArrTy R (Ty.prim q)) (mv : Var)
+    (ie : Simple C PrimTy.uint) (se : Simple C q) (σ : State) :
     SameOk [] (Upd.apply (C := C) [UpdElem.memory (MTerm.memory.write (MAddr.at (ITerm.pv mv) ie.lower) (MValT.val se.lower))] σ)
-      (Stmt.run σ (Stmt.assignMem (MLoc.index (MPath.var mv) (Val.simple ie)) (MSrc.val (Val.simple se)))) := by
+      (Stmt.run σ (Stmt.assignMem (MLoc.index a (MPath.var mv) (Val.simple ie)) (MSrc.val (Val.simple se)))) := by
   mem_unfold; res_split
 
 /-- `memoryFieldWriteCopy` from a memory local; a source that is a location is split by cases in `Taclet.sound_update`. -/
@@ -364,10 +367,11 @@ theorem upd_memoryFieldWriteCopy_var (mv : Var) {fld x : Name} {R : RefTy}
       (Stmt.run σ (Stmt.assignMem (MLoc.field (MPath.var mv) fld hfld) (MSrc.ref (MPath.var y)))) := by
   mem_unfold; res_split
 
-theorem upd_memoryIndexWriteCopy_var {R : RefTy} (mv : Var) (ie : Simple C PrimTy.uint) (y : Var) (σ : State) :
+theorem upd_memoryIndexWriteCopy_var {R R' : RefTy} (a : ArrTy R' (Ty.ref R)) (mv : Var)
+    (ie : Simple C PrimTy.uint) (y : Var) (σ : State) :
     SameOk [] (Upd.apply (C := C) [UpdElem.memory (MTerm.memory.write (MAddr.at (ITerm.pv mv) ie.lower)
         (MValT.ref (MPath.var (C := C) (R := R) y).lower))] σ)
-      (Stmt.run σ (Stmt.assignMem (MLoc.index (E := Ty.ref R) (MPath.var mv) (Val.simple ie)) (MSrc.ref (MPath.var y)))) := by
+      (Stmt.run σ (Stmt.assignMem (MLoc.index a (MPath.var mv) (Val.simple ie)) (MSrc.ref (MPath.var y)))) := by
   mem_unfold; res_split
 
 /-! ### Copies and allocations: a new heap and counter, the rest kept -/
@@ -492,9 +496,10 @@ theorem MLoc.addr_field_var (mv : Var) {s f : Name} {T : Ty} (hf : C.fieldType s
   | error _ => rfl
   | ok b => cases b <;> rfl
 
-theorem MLoc.addr_index_var (mv : Var) {E : Ty} (ie : Simple C PrimTy.uint) (σ : State) :
+theorem MLoc.addr_index_var (mv : Var) {R : RefTy} {E : Ty} {a : ArrTy R E}
+    (ie : Simple C PrimTy.uint) (σ : State) :
     (MAddr.at (ITerm.pv mv) ie.lower : MAddr C).eval σ =
-      (MLoc.index (E := E) (MPath.var mv) (Val.simple ie)).addr σ := by
+      (MLoc.index a (MPath.var mv) (Val.simple ie)).addr σ := by
   simp only [MAddr.eval, ITerm.eval, MLoc.addr, MPath.mval, Val.eval, Simple.lower_eval, bind_assoc]
   cases σ.getEnv mv with
   | error _ => rfl

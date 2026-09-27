@@ -182,6 +182,14 @@ interpreter used to be stricter than both now follow them.
   deleted and one past it as it was (`testDeleteArrayDoesNotResetElementMappingMember`).
   KeY used to read every index of a deleted node as `mtSt`; that was the old
   reading here too, and it no longer holds on either side.
+- **A fixed-size array keeps its length.** `SVal.array`/`MObj.array` carry
+  a `fixed` flag: `delete` of a `T[n]` resets its `n` elements in place
+  (solc's `delete`, solkey's `delNodeFixed`), a copy takes the source's
+  elements, and there is no `length` slot to read or write (solc lays the
+  array out inline). `.length` is the literal `n`, and a literal index
+  `≥ n` is rejected at elaboration, as solc rejects it at compile time.
+- **`**` is checked.** `uint` exponentiation reverts on overflow
+  (`2 ** 256`), as solc ≥ 0.8's `checked_exp`; `0 ** 0` is `1`.
 
 A copy into storage (`alice = bob;`, `arr = m;`) is a write over what is
 there (`State.writeStorage`, `SVal.overlay`): a struct member by member, an

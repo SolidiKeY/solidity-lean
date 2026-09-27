@@ -356,7 +356,7 @@ theorem copyStToM_agree {ns : List Var} {s₁ s₂ : State}
       exact ⟨by simp [ht.nextId],
         ht.storage, by simp [ht.heap, ht.nextId],
         by simp [ht.nextId], ht.net, ht.env, ht.selfBalance⟩
-  | .array elems _ =>
+  | .array elems _ _ =>
       rw [copyStToM, copyStToM]
       refine ResAgree.bind (copyStElems_agree h elems) ?_
       intro t₁ t₂ melems ht
@@ -505,7 +505,7 @@ def MPath.vars : {T : Ty} → MPath C T → List Var
 
 def MLoc.vars : {T : Ty} → MLoc C T → List Var
   | _, .field b _ _ => b.vars
-  | _, .index b i => b.vars ++ i.vars
+  | _, .index _ b i => b.vars ++ i.vars
 
 def Val.vars : {p : PrimTy} → Val C p → List Var
   | _, .simple s => s.vars
@@ -546,7 +546,7 @@ def OpLoc.vars {p : PrimTy} : OpLoc C p → List Var
   | .field b _ _ => b.vars
   | .index _ b i => b.vars ++ i.vars
   | .mfield b _ _ => b.vars
-  | .mindex b i => b.vars ++ i.vars
+  | .mindex _ b i => b.vars ++ i.vars
 
 /-- The variables of an optional part. -/
 def optVars {α : Type} (f : α → List Var) : Option α → List Var
@@ -630,7 +630,7 @@ theorem MPath.mval_frame (hag : EnvAgreeExcept ns σ τ) :
 theorem MLoc.read_frame (hag : EnvAgreeExcept ns σ τ) :
     {T : Ty} → (l : MLoc C T) → Avoids l.vars ns → l.read σ = l.read τ
   | _, .field b _ _, h => by simp only [MLoc.read, b.mval_frame hag h, getObj_congr hag]
-  | _, .index b i, h => by
+  | _, .index _ b i, h => by
     simp only [MLoc.read, b.mval_frame hag h.left, i.eval_frame hag h.right, getObj_congr hag]
 
 theorem Val.eval_frame (hag : EnvAgreeExcept ns σ τ) :
@@ -745,7 +745,7 @@ theorem MLoc.write_frame (hag : EnvAgreeExcept ns σ τ) (mv : MVal) {T : Ty} :
   | .field b f _, h => by
     simp only [MLoc.write, b.mval_frame hag h]
     agree_run hag
-  | .index b i, h => by
+  | .index _ b i, h => by
     simp only [MLoc.write, b.mval_frame hag h.left, i.eval_frame hag h.right]
     agree_run hag
 
@@ -776,7 +776,7 @@ theorem OpLoc.store_frame (hag : EnvAgreeExcept ns σ τ) (op : BinOp) {p : Prim
   | .mfield b f _, h, v => by
     simp only [OpLoc.store, b.mval_frame hag h]
     agree_run hag
-  | .mindex b i, h, v => by
+  | .mindex _ b i, h, v => by
     simp only [OpLoc.store, b.mval_frame hag h.left, i.eval_frame hag h.right]
     agree_run hag
 
@@ -805,7 +805,7 @@ theorem OpLoc.bump_frame (hag : EnvAgreeExcept ns σ τ) (op : IncDec) {p : Prim
   | .mfield b f _, h => by
     simp only [OpLoc.bump, b.mval_frame hag h]
     agree_run hag
-  | .mindex b i, h => by
+  | .mindex _ b i, h => by
     simp only [OpLoc.bump, b.mval_frame hag h.left, i.eval_frame hag h.right]
     agree_run hag
 
@@ -879,7 +879,7 @@ theorem writeAddr_agree (hag : EnvAgreeExcept ns σ τ) (mv : MVal) (a : Addr) :
 theorem MLoc.addr_frame (hag : EnvAgreeExcept ns σ τ) {T : Ty} :
     (l : MLoc C T) → Avoids l.vars ns → l.addr σ = l.addr τ
   | .field b _ _, h => by simp only [MLoc.addr, b.mval_frame hag h]
-  | .index b i, h => by simp only [MLoc.addr, b.mval_frame hag h.left, i.eval_frame hag h.right]
+  | .index _ b i, h => by simp only [MLoc.addr, b.mval_frame hag h.left, i.eval_frame hag h.right]
 
 theorem memClear_agree (hag : EnvAgreeExcept ns σ τ) (a : Addr) :
     (T : Ty) → ResultsAgree ns (memClear σ a T) (memClear τ a T)

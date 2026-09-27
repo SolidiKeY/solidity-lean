@@ -23,7 +23,7 @@ writes, a push and a pop are nested writes over `size`, and
 a decrement is `x−−`/`−−x` (two U+2212; `--` opens a Lean comment), and
 effects stay out of values — an `++` inside an expression or a conditional
 of references is captured by the elaborator before its statement, in solc's
-evaluation order.  Fixed-size arrays are not in the syntax.
+evaluation order.
 
 A second consumer is **the `SolKey` reader**, a Lean reader for KeY `.key`
 files in a separate repository. It imports only `Solidity.Calculus.Rules` and

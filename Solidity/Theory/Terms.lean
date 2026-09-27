@@ -107,9 +107,9 @@ inductive Shape where
 
 mutual
   /-- `#shapeOf(T)`, the meta-operator `fieldShapeDef` unfolds to: the shape of a
-  declared type.  `AST.RefTy` has no fixed-size array, so this never produces
-  `fixedArr` — which is why the `typed` family of `structRules.key` is not
-  modelled (`Theory/Storage.lean`, "Shapes"). -/
+  declared type, a fixed-size array's with its length (`fixedArr(3, leaf)` for
+  `uint[3]`), which is what the `typed` family of `structRules.key` reads
+  (`Theory/Storage.lean`, "Shapes"). -/
   def Shape.ofTy : Ty -> Shape
     | .prim _ => .leaf
     | .ref r => Shape.ofRefTy r
@@ -117,6 +117,7 @@ mutual
   def Shape.ofRefTy : RefTy -> Shape
     | .struct _ => .leaf
     | .array e => .dynArr (Shape.ofTy e)
+    | .fixed e n => .fixedArr n (Shape.ofTy e)
     | .mapping _ v => .mapOf (Shape.ofTy v)
 end
 
@@ -430,7 +431,7 @@ def step (h : List (Nat × MObj)) (n : Nat) : Seg -> Option Nat
       | _ => none
   | Seg.at i =>
       match lookupBy n h with
-      | some (MObj.array elems) =>
+      | some (MObj.array elems _) =>
           if hb : 0 ≤ i ∧ i.toNat < elems.length then
             match elems.get ⟨i.toNat, hb.2⟩ with
             | MVal.ref m => some m
@@ -467,7 +468,7 @@ def preRead (h : List (Nat × MObj)) (n : Nat) (a : Seg) : MemValue :=
       match lookupBy f fields with
       | some v => MVal.toMemValue v
       | none => dflt
-  | some (MObj.array elems), Seg.at i =>
+  | some (MObj.array elems _), Seg.at i =>
       if hb : 0 ≤ i ∧ i.toNat < elems.length then
         MVal.toMemValue (elems.get ⟨i.toNat, hb.2⟩)
       else dflt

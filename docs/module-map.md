@@ -26,8 +26,8 @@ fails on a module nothing imports.
 | Module | What it is |
 |---|---|
 | `KeySort.lean` | solkey's sort lattice as one Lean type: `parents`, `ancestors`, `KeySort.le`, KeY spellings. Imports nothing. |
-| `AST.lean` | The static vocabulary: `PrimTy`/`Ty`/`RefTy` and their KeY sorts, the struct table `structDef`, operators typed at the primitive type they accept, and `Var` (a program name, or a fresh one a rule declares). |
-| `Syntax.lean` | The typed syntax, indexed by contract and type: `Val C p`, `SPath C T`, `Loc`, `MPath`, `Stmt C`. A statement no rule can run cannot be written. `Contract`, the named example contracts, and `sol[C]{…}`: the elaborator, run at compile time and re-checked by the kernel; it captures `++`/`−−` inside an expression and a conditional of references before their statement, in solc's order (`hoist`). |
+| `AST.lean` | The static vocabulary: `PrimTy`/`Ty`/`RefTy` (dynamic and fixed-size arrays, `RefTy.fixed`) and their KeY sorts, the struct table `structDef`, operators typed at the primitive type they accept, and `Var` (a program name, or a fresh one a rule declares). |
+| `Syntax.lean` | The typed syntax, indexed by contract and type: `Val C p`, `SPath C T`, `Loc`, `MPath`, `Stmt C`. A statement no rule can run cannot be written. `Contract`, the named example contracts, and `sol[C]{…}`: the elaborator, run at compile time and re-checked by the kernel; it captures `++`/`−−` inside an expression and a conditional of references before their statement, in solc's order (`hoist`), and folds a fixed-size array's `.length` to its literal. Array paths carry `ArrTy` (`dyn`/`fixed`), so one rule covers both kinds. |
 | `Semantics.lean` | The interpreter, `Stmt.run`, by structural recursion on the typed syntax. KeY's state (storage tree, identity heap, locals, `net`), following solc where KeY was more liberal (`docs/solc-alignment.md`). |
 | `Semantics/Properties.lean` | Association-list, read-after-write, frame and allocation lemmas about the interpreter's state operations. |
 | `Semantics/Agree.lean` | `EnvAgreeExcept ns`: states that agree off a few scratch names, and a frame lemma per evaluator. What every unfolding rule's soundness composes. |
@@ -55,7 +55,7 @@ fails on a module nothing imports.
 | `Calculus/ReadWrite.lean` | What a state reads after a write: the four-way path comparison, memory addresses, copies member by member. |
 | `Calculus/Close.lean` | `sol_close`: a first-order goal in an arbitrary state, by weakest preconditions and `ReadWrite.lean`'s facts. Its docstring lists what it does not close. |
 | `Calculus/CloseTests.lean` | What `sol_close` closes, pinned. |
-| `Calculus/Decide.lean` | `sol_decide`: reads of writes eliminated into case trees on key equalities (the four-way path comparison), `delete` included; `Fml.valid_iff_reduce`. The storage fragment, read live (`SVal.findLive`/`saveLive`) and bridged to the program's checked paths (`PTerm.toL_chk`). |
+| `Calculus/Decide.lean` | `sol_decide`: reads of writes eliminated into case trees on key equalities (the four-way path comparison), `delete` included; `Fml.valid_iff_reduce`. The storage fragment, read live (`SVal.findLive`/`saveLive`) and bridged to the program's checked paths (`PTerm.toL_chk`). A delete below a key is exact by the read's shape (`KShape`, `delBelow`): a mapping kept, a fixed-size array's length kept. |
 | `Calculus/Uniqueness.lean` | One rule per statement: every derivation's premise is `Stmt.step`'s. |
 | `Calculus/Progress.lean` | A formula with a modality always steps: `Fml.active_iff_step`. |
 | `Calculus/Termination.lean` | The weights, `Premise.Smaller` (of `Stmt.step`, and of every derivation: `Taclet.smaller`), `Fml.measure`, `Fml.step_wellFounded`, `symex_normalizes`. |
@@ -108,7 +108,7 @@ theorem.
 |---|---|
 | `Evm/Machine.lean` | A straight-line EVM: slots as terms, wrapping words, relative forward jumps. |
 | `Evm/Compile.lean` | The compiler from `Stmt C` for a stated fragment (`wtStmt`), with solc's guards. |
-| `Evm/Repr.lean` | The storage layout: a typed path's slots, injectivity, writing a subtree is writing its slots. |
+| `Evm/Repr.lean` | The storage layout: a typed path's slots (a fixed-size array inline, `ReprAt.fixed`), injectivity, writing a subtree is writing its slots. |
 | `Evm/Correctness.lean` | `compile_correct`, `compile_storage`, `not_stuck`. |
 | `Evm/Examples.lean` | Compiled programs run by `decide`. |
 

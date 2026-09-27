@@ -64,10 +64,13 @@ open Semantics
 
 /-! ## Layout -/
 
-/-- Size in slots, with fuel for the struct table. -/
+/-- Size in slots, with fuel for the struct table: a fixed-size array takes
+its elements' slots, inline. -/
 def sizeF : Nat → Ty → Nat
   | fuel + 1, .ref (.struct n) => (structDef n).foldr (fun f acc => sizeF fuel f.2 + acc) 0
   | 0, .ref (.struct _) => 0
+  | fuel + 1, .ref (.fixed E n) => n * sizeF fuel E
+  | 0, .ref (.fixed _ _) => 0
   | _, _ => 1
 
 /-- Size in slots: `Person` (an `Account`, a `uint`) takes `3`. -/
@@ -124,6 +127,9 @@ theorem sizeF_eq : ∀ (a b : Nat) (T : Ty), tyRank T < a → tyRank T < b → s
   | a + 1, b + 1, T, ha, hb => by
     match T with
     | .prim _ | .ref (.array _) | .ref (.mapping _ _) => rfl
+    | .ref (.fixed E n) =>
+      simp only [sizeF, tyRank] at ha hb ⊢
+      rw [sizeF_eq a b E (by omega) (by omega)]
     | .ref (.struct n) =>
       simp only [sizeF]
       apply foldr_congr_add
@@ -147,6 +153,10 @@ theorem size_struct (n : Name) : size (.ref (.struct n)) = sumSizes (structDef n
 @[simp] theorem size_array (E : Ty) : size (.ref (.array E)) = 1 := rfl
 /-- A mapping takes one slot, never written: `mapping(uint => uint) balances;` is slot `5`. -/
 @[simp] theorem size_mapping (K V : Ty) : size (.ref (.mapping K V)) = 1 := rfl
+/-- A fixed-size array takes its elements' slots, one after the other, and no
+length slot: `uint[3] fixedValues;` takes three, `Token[2] fixedTokens;` two. -/
+@[simp] theorem size_fixed (E : Ty) (n : Nat) : size (.ref (.fixed E n)) = n * size E := by
+  simp only [size, tyRank, sizeF]
 
 /-- A member ends within its list: its offset plus its size is at most the sum
 of the sizes.
@@ -263,6 +273,8 @@ inductive Occ : Ty → Slot → Slot → Prop
   | elem {E : Ty} {s x : Slot} (i : Nat) :
       Occ E (.data s (i * size E)) x → Occ (.ref (.array E)) s x
   | entry {K V : Ty} {s x : Slot} (k : Nat) : Occ V (.hash k s 0) x → Occ (.ref (.mapping K V)) s x
+  | felem {E : Ty} {n : Nat} {s x : Slot} (i : Nat) :
+      i < n → Occ E (s.add (i * size E)) x → Occ (.ref (.fixed E n)) s x
 
 /-- Everything a value occupies descends from its own range of slots.
 
@@ -284,6 +296,13 @@ theorem occ_desc {T : Ty} {s x : Slot} (h : Occ T s x) : ∃ o, o < size T ∧ D
   | entry k _ ih =>
     obtain ⟨o, _, hd⟩ := ih
     exact ⟨0, by simp, by simpa using hd.trans (.hash .refl)⟩
+  | @felem E n s x i hi _ ih =>
+    obtain ⟨o, ho, hd⟩ := ih
+    refine ⟨i * size E + o, ?_, by rwa [← Slot.add_add]⟩
+    rw [size_fixed]
+    have : (i + 1) * size E ≤ n * size E := Nat.mul_le_mul_right _ hi
+    rw [Nat.succ_mul] at this
+    omega
 
 /-- Two different members of a list laid out at `s` share no slot.
 
@@ -328,6 +347,16 @@ theorem occ_elems_disjoint {E : Ty} {s x : Slot} {i j : Nat} (hne : i ≠ j)
   simp only [Slot.add, Slot.data.injEq, true_and] at this
   exact hne (mul_add_inj ha hb this)
 
+/-- Two elements of a fixed-size array share no slot: `fixedTokens[0].value`
+is `fixedTokens`'s slot plus `0`, `fixedTokens[1].value` plus `1`. -/
+theorem occ_felems_disjoint {E : Ty} {s x : Slot} {i j : Nat} (hne : i ≠ j)
+    (o₁ : Occ E (s.add (i * size E)) x) (o₂ : Occ E (s.add (j * size E)) x) : False := by
+  obtain ⟨a, ha, da⟩ := occ_desc o₁
+  obtain ⟨b, hb, db⟩ := occ_desc o₂
+  rw [Slot.add_add] at da db
+  have := Slot.add_inj (Desc.unique da db (by simp))
+  exact hne (mul_add_inj ha hb this)
+
 /-- An array's elements never occupy its length slot: `values.pop();` writes
 slot `4` and no `values[i]`. -/
 theorem occ_len_elem {E : Ty} {s : Slot} {n : Nat} (o : Occ E (.data s n) s) : False := by
@@ -343,10 +372,14 @@ every array to empty (its length slot to `0`), and a mapping not at all
 (`SVal.defaultOf`).  So the slots to write are a static list, `leaves T`,
 relative to where the value starts. -/
 
-/-- The slots `delete` writes, relative to the value's own slot, with fuel. -/
+/-- The slots `delete` writes, relative to the value's own slot, with fuel:
+every element of a fixed-size array, which keeps its length. -/
 def leavesF : Nat → Ty → List Nat
   | _, .prim _ => [0]
   | _, .ref (.array _) => [0]
+  | 0, .ref (.fixed _ _) => []
+  | fuel + 1, .ref (.fixed E n) =>
+      (List.range n).flatMap fun i => (leavesF fuel E).map (i * size E + ·)
   | _, .ref (.mapping _ _) => []
   | 0, .ref (.struct _) => []
   | fuel + 1, .ref (.struct n) => (structDef n).flatMap fun f =>
@@ -367,6 +400,11 @@ theorem leavesF_occ : ∀ (fuel : Nat) (T : Ty) (s : Slot) (o : Nat), o ∈ leav
   | _, .prim _, s, o, h => by simp [leavesF] at h; subst h; simpa using Occ.prim
   | _, .ref (.array _), s, o, h => by simp [leavesF] at h; subst h; simpa using Occ.len
   | _, .ref (.mapping _ _), _, _, h => by simp [leavesF] at h
+  | 0, .ref (.fixed _ _), _, _, h => by simp [leavesF] at h
+  | fuel + 1, .ref (.fixed E n), s, o, h => by
+    simp only [leavesF, List.mem_flatMap, List.mem_range, List.mem_map] at h
+    obtain ⟨i, hi, o', ho', rfl⟩ := h
+    exact Occ.felem i hi (by rw [← Slot.add_add]; exact leavesF_occ fuel E _ o' ho')
   | 0, .ref (.struct _), _, _, h => by simp [leavesF] at h
   | fuel + 1, .ref (.struct n), s, o, h => by
     simp only [leavesF, List.mem_flatMap] at h
@@ -426,7 +464,8 @@ def wtLoc (Γ : TyCtx) (free : Bool) : {T : Ty} → Loc C T → Bool
   | _, .root .. => true
   | _, .field b _ _ => wtSPath Γ free b
   | _, @Loc.index _ _ k _ .map b i => k == .uint && wtSPath Γ free b && wtVal Γ i
-  | _, .index .arr b i => !free && wtSPath Γ free b && wtVal Γ i
+  | _, .index (.arr .dyn) b i => !free && wtSPath Γ free b && wtVal Γ i
+  | _, .index (.arr .fixed) b i => !free && wtSPath Γ free b && wtVal Γ i
 def wtVal (Γ : TyCtx) : {p : PrimTy} → Val C p → Bool
   | _, .simple s => wtSimple Γ s
   | p, .read l => primInFrag p && wtLoc Γ false l
@@ -493,6 +532,10 @@ def assertTop : List Instr := [.jumpi 1, .revert]
 length stored at `s` (solc's `Panic(0x32)`). -/
 def boundsCheck : List Instr := [.dup 2, .sload, .dup 2, .lt] ++ assertTop
 
+/-- `… s i → … s i`, reverting unless `i < n`: a fixed-size array's bound is
+its type's, a constant. -/
+def fixedCheck (n : Nat) : List Instr := [.push (.val n), .dup 2, .lt] ++ assertTop
+
 /-- `z` times `DUP2; ADD`. -/
 def addRep : Nat → List Instr
   | 0 => []
@@ -502,6 +545,10 @@ def addRep : Nat → List Instr
 elements take `z` slots.  The multiplication is `z` additions to a slot, which
 does not wrap (slots are terms, as in mini-solkey). -/
 def elemSlot (z : Nat) : List Instr := [.swap 1, .keccakArr] ++ addRep z ++ [.swap 1, .pop]
+
+/-- `… s i → … s + i·z`: element `i` of the fixed-size array laid out inline
+from `s`, whose elements take `z` slots. -/
+def fixedSlot (z : Nat) : List Instr := [.swap 1] ++ addRep z ++ [.swap 1, .pop]
 
 /-- `… a b → … a ⊕ b` (`b` on top), with solc's guards: `+` reverts when the
 sum wraps below `a`, `-` when `b > a`, `*` when `a ≠ 0` and the product
@@ -536,8 +583,10 @@ def compileLoc : {T : Ty} → Loc C T → List Instr
   | _, .root r _ => [.push (.slot (rootSlot C r))]
   | _, @Loc.field _ s _ b f _ => compileSPath b ++ [.push (.val (offset s f)), .add]
   | _, .index .map b i => compileSPath b ++ compileVal i ++ [.keccakMap]
-  | _, @Loc.index _ _ _ E .arr b i =>
+  | _, @Loc.index _ _ _ E (.arr .dyn) b i =>
     compileSPath b ++ compileVal i ++ boundsCheck ++ elemSlot (size E)
+  | _, @Loc.index _ _ _ E (@IndexTy.arr _ _ (@ArrTy.fixed _ n)) b i =>
+    compileSPath b ++ compileVal i ++ fixedCheck n ++ fixedSlot (size E)
 /-- Push the value of an expression. -/
 def compileVal : {p : PrimTy} → Val C p → List Instr
   | _, .simple s => compileSimple s

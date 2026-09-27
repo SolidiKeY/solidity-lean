@@ -114,6 +114,31 @@ theorem hasTyEntries_setBy {value : Ty} {entries : List (Int × SVal)}
 
 /-! ## The written values the interpreter produces are typed -/
 
+/-- `delete` keeps a list of elements as long as it was: a fixed-size
+array's length survives it. -/
+theorem SVal.defaultOfElems_length (elems : List SVal) :
+    (SVal.defaultOf.defaultOfElems elems).length = elems.length := by
+  induction elems with
+  | nil => rfl
+  | cons _ _ ih => simp [SVal.defaultOf.defaultOfElems, ih]
+
+/-- A copy keeps a list of elements as long as the copied one. -/
+theorem SVal.stripElems_length' (elems : List SVal) :
+    (SVal.strip.stripElems elems).length = elems.length := by
+  induction elems with
+  | nil => rfl
+  | cons _ _ ih => simp [SVal.strip.stripElems, ih]
+
+/-- A copy over old elements is as long as the new ones. -/
+theorem SVal.overlayElems_length (olds news : List SVal) :
+    (SVal.overlay.overlayElems olds news).length = news.length := by
+  induction news generalizing olds with
+  | nil => cases olds <;> rfl
+  | cons x xs ih =>
+    cases olds with
+    | nil => simp [SVal.overlay.overlayElems, SVal.stripElems_length']
+    | cons o os => simp [SVal.overlay.overlayElems, ih]
+
 mutual
 
 /-- The `delete` default preserves the value's type: primitives reset,
@@ -142,17 +167,27 @@ theorem SVal.defaultOf_hasTy {v : SVal} {ty : Ty}
               simpa only [SVal.defaultOf, SVal.hasTy] using
                 defaultOfFields_hasTy h
           | array elem => simp [SVal.hasTy] at h
+          | fixed elem _ => simp [SVal.hasTy] at h
           | mapping key value => simp [SVal.hasTy] at h
-  | array elems shadow =>
+  | array elems shadow fx =>
       cases ty with
       | prim pt => simp [SVal.hasTy] at h
       | ref r =>
           cases r with
           | struct sname => simp [SVal.hasTy] at h
           | array elem =>
-              simp only [SVal.hasTy, Bool.and_eq_true] at h
-              simp only [SVal.defaultOf, SVal.hasTy, Bool.and_eq_true]
-              exact ⟨rfl, hasTyElems_append (SVal.defaultOfElems_hasTy h.1) h.2⟩
+              cases fx
+              · simp only [SVal.hasTy, Bool.and_eq_true] at h
+                simp only [SVal.defaultOf, SVal.hasTy, Bool.and_eq_true]
+                exact ⟨⟨rfl, rfl⟩, hasTyElems_append (SVal.defaultOfElems_hasTy h.1.2) h.2⟩
+              · simp [SVal.hasTy] at h
+          | fixed elem n =>
+              cases fx
+              · simp [SVal.hasTy] at h
+              · simp only [SVal.hasTy, Bool.and_eq_true, beq_iff_eq] at h
+                simp only [SVal.defaultOf, SVal.hasTy, Bool.and_eq_true, beq_iff_eq,
+                  SVal.defaultOfElems_length]
+                exact ⟨⟨h.1.1, SVal.defaultOfElems_hasTy h.1.2⟩, h.2⟩
           | mapping key value => simp [SVal.hasTy] at h
   | map entries dflt =>
       simpa only [SVal.defaultOf] using h
@@ -209,8 +244,9 @@ theorem SVal.strip_hasTy {v : SVal} {ty : Ty} (h : v.hasTy ty = true) :
               simp only [SVal.hasTy] at h
               simpa only [SVal.strip, SVal.hasTy] using SVal.stripFields_hasTy h
           | array _ => simp [SVal.hasTy] at h
+          | fixed _ _ => simp [SVal.hasTy] at h
           | mapping _ _ => simp [SVal.hasTy] at h
-  | .array elems _ =>
+  | .array elems _ fx =>
       cases ty with
       | prim _ => simp [SVal.hasTy] at h
       | ref r =>
@@ -218,7 +254,12 @@ theorem SVal.strip_hasTy {v : SVal} {ty : Ty} (h : v.hasTy ty = true) :
           | array elem =>
               simp only [SVal.hasTy, Bool.and_eq_true] at h
               simp only [SVal.strip, SVal.hasTy, Bool.and_eq_true]
-              exact ⟨SVal.stripElems_hasTy h.1, rfl⟩
+              exact ⟨⟨h.1.1, SVal.stripElems_hasTy h.1.2⟩, rfl⟩
+          | fixed elem n =>
+              simp only [SVal.hasTy, Bool.and_eq_true, beq_iff_eq] at h
+              simp only [SVal.strip, SVal.hasTy, Bool.and_eq_true, beq_iff_eq,
+                SVal.stripElems_length']
+              exact ⟨⟨h.1.1, SVal.stripElems_hasTy h.1.2⟩, rfl⟩
           | struct _ => simp [SVal.hasTy] at h
           | mapping _ _ => simp [SVal.hasTy] at h
   | .map _ _ => simpa [SVal.strip] using h
@@ -269,13 +310,14 @@ theorem SVal.overlay_hasTy {old new : SVal} {ty : Ty} (ho : old.hasTy ty = true)
                   simp only [SVal.hasTy] at ho hn
                   simpa only [SVal.overlay, SVal.hasTy] using SVal.overlayFields_hasTy ho hn
               | array _ => simp [SVal.hasTy] at hn
+              | fixed _ _ => simp [SVal.hasTy] at hn
               | mapping _ _ => simp [SVal.hasTy] at hn
       | prim _ => simp only [SVal.overlay]; exact SVal.strip_hasTy hn
-      | array _ _ => simp only [SVal.overlay]; exact SVal.strip_hasTy hn
+      | array _ _ _ => simp only [SVal.overlay]; exact SVal.strip_hasTy hn
       | map _ _ => simp only [SVal.overlay]; exact SVal.strip_hasTy hn
-  | .array nel nsh =>
+  | .array nel nsh nfx =>
       cases old with
-      | array oel osh =>
+      | array oel osh ofx =>
           cases ty with
           | prim _ => simp [SVal.hasTy] at hn
           | ref r =>
@@ -283,8 +325,16 @@ theorem SVal.overlay_hasTy {old new : SVal} {ty : Ty} (ho : old.hasTy ty = true)
               | array elem =>
                   simp only [SVal.hasTy, Bool.and_eq_true] at ho hn
                   simp only [SVal.overlay, SVal.hasTy, Bool.and_eq_true]
-                  exact ⟨SVal.overlayElems_hasTy (hasTyElems_append ho.1 ho.2) hn.1,
-                    hasTyElems_append (SVal.defaultOfElems_hasTy (hasTyElems_drop _ ho.1))
+                  exact ⟨⟨hn.1.1, SVal.overlayElems_hasTy (hasTyElems_append ho.1.2 ho.2) hn.1.2⟩,
+                    hasTyElems_append (SVal.defaultOfElems_hasTy (hasTyElems_drop _ ho.1.2))
+                      (hasTyElems_drop _ ho.2)⟩
+              | fixed elem n =>
+                  simp only [SVal.hasTy, Bool.and_eq_true, beq_iff_eq] at ho hn
+                  simp only [SVal.overlay, SVal.hasTy, Bool.and_eq_true, beq_iff_eq,
+                    SVal.overlayElems_length]
+                  exact ⟨⟨⟨hn.1.1.1, hn.1.1.2⟩,
+                    SVal.overlayElems_hasTy (hasTyElems_append ho.1.2 ho.2) hn.1.2⟩,
+                    hasTyElems_append (SVal.defaultOfElems_hasTy (hasTyElems_drop _ ho.1.2))
                       (hasTyElems_drop _ ho.2)⟩
               | struct _ => simp [SVal.hasTy] at hn
               | mapping _ _ => simp [SVal.hasTy] at hn
@@ -296,7 +346,7 @@ theorem SVal.overlay_hasTy {old new : SVal} {ty : Ty} (ho : old.hasTy ty = true)
       | map oe od => simpa only [SVal.overlay] using ho
       | prim _ => simp only [SVal.overlay]; exact SVal.strip_hasTy hn
       | struct _ => simp only [SVal.overlay]; exact SVal.strip_hasTy hn
-      | array _ _ => simp only [SVal.overlay]; exact SVal.strip_hasTy hn
+      | array _ _ _ => simp only [SVal.overlay]; exact SVal.strip_hasTy hn
 
 theorem SVal.overlayFields_hasTy {s : Name} {ofs nfs : List (Name × SVal)}
     (ho : SVal.hasTy.hasTyFields s ofs = true) (hn : SVal.hasTy.hasTyFields s nfs = true) :
@@ -348,11 +398,14 @@ def defaultOk : Ty -> Bool
   | Ty.prim _ => true
   | Ty.ref (RefTy.struct s) => defaultOkFields s (structDef s)
   | Ty.ref (RefTy.array _) => true
+  | Ty.ref (RefTy.fixed e _) => defaultOk e
   | Ty.ref (RefTy.mapping _ value) => defaultOk value
 termination_by ty => (tyRank ty, sizeOf ty)
 decreasing_by
   · exact Prod.Lex.left _ _ (structDef_rank_lt _)
-  · apply Prod.Lex.right; simp; omega
+  all_goals first
+    | (apply Prod.Lex.left; simp [tyRank]; done)
+    | (apply Prod.Lex.right; simp; omega)
 
 def defaultOkFields (s : Name) : List (Name × Ty) -> Bool
   | [] => true
@@ -403,14 +456,20 @@ theorem defaultForTy_hasTy : ∀ {ty : Ty}, defaultOk ty = true ->
   | case5 elem =>
       intro _
       simp [defaultForTy, SVal.hasTy, SVal.hasTy.hasTyElems]
-  | case6 key value ih =>
+  | case6 elem n ih =>
+      intro h
+      simp only [defaultOk] at h
+      simp only [defaultForTy, SVal.hasTy, Bool.and_eq_true, beq_iff_eq, List.length_replicate]
+      exact ⟨⟨⟨trivial, trivial⟩, hasTyElems_of_forall_mem fun v hv => by
+        rw [List.eq_of_mem_replicate hv]; exact ih h⟩, rfl⟩
+  | case7 key value ih =>
       intro h
       simp only [defaultOk] at h
       simp only [defaultForTy, SVal.hasTy, SVal.hasTy.hasTyEntries,
         Bool.true_and]
       exact ih h
-  | case7 => simp [defaultForFields, SVal.hasTy.hasTyFields]
-  | case8 n t rest iht ihrest =>
+  | case8 => simp [defaultForFields, SVal.hasTy.hasTyFields]
+  | case9 n t rest iht ihrest =>
       rename_i s h
       simp only [defaultOkFields, Bool.and_eq_true, beq_iff_eq] at h
       obtain ⟨⟨hok, hlook⟩, hrest⟩ := h
@@ -506,6 +565,7 @@ theorem save_hasTy {segs : List Seg} :
                             exact hasTyFields_setBy hty hseg
                               (ih htyv hsegs hnew hup)
                   | array elem => simp [segTy] at hseg
+                  | fixed elem _ => simp [segTy] at hseg
                   | mapping key value => simp [segTy] at hseg
               | _ => simp [segTy] at hseg
           | «at» i =>
@@ -517,7 +577,7 @@ theorem save_hasTy {segs : List Seg} :
                       simp only [segTy] at hseg
                       cases hseg
                       cases v <;> simp [SVal.hasTy] at hty
-                      case array elems shadow =>
+                      case array elems shadow fx =>
                         simp only [SVal.save] at hsave
                         split at hsave
                         case isTrue hbound =>
@@ -526,10 +586,29 @@ theorem save_hasTy {segs : List Seg} :
                           simp at hw
                           subst hw
                           simp only [SVal.hasTy, Bool.and_eq_true]
-                          have hall := hasTyElems_set (i := i.toNat) (hasTyElems_append hty.1 hty.2)
-                            (ih (hasTyElems_mem_append hty.1 hty.2 ((elems ++ shadow).get_mem _))
+                          have hall := hasTyElems_set (i := i.toNat) (hasTyElems_append hty.1.2 hty.2)
+                            (ih (hasTyElems_mem_append hty.1.2 hty.2 ((elems ++ shadow).get_mem _))
                               hsegs hnew hup)
-                          exact ⟨hasTyElems_take _ hall, hasTyElems_drop _ hall⟩
+                          exact ⟨⟨by simp [hty.1.1], hasTyElems_take _ hall⟩, hasTyElems_drop _ hall⟩
+                        case isFalse => simp at hsave
+                  | fixed elem n =>
+                      simp only [segTy] at hseg
+                      cases hseg
+                      cases v <;> simp [SVal.hasTy] at hty
+                      case array elems shadow fx =>
+                        simp only [SVal.save] at hsave
+                        split at hsave
+                        case isTrue hbound =>
+                          obtain ⟨updated, hup, hw⟩ :=
+                            Semantics.bind_ok_inv hsave
+                          simp at hw
+                          subst hw
+                          simp only [SVal.hasTy, Bool.and_eq_true, beq_iff_eq]
+                          have hall := hasTyElems_set (i := i.toNat) (hasTyElems_append hty.1.2 hty.2)
+                            (ih (hasTyElems_mem_append hty.1.2 hty.2 ((elems ++ shadow).get_mem _))
+                              hsegs hnew hup)
+                          refine ⟨⟨⟨hty.1.1.1, ?_⟩, hasTyElems_take _ hall⟩, hasTyElems_drop _ hall⟩
+                          simp [hty.1.1.2]
                         case isFalse => simp at hsave
                   | mapping key value =>
                       simp only [segTy] at hseg

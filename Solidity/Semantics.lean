@@ -70,8 +70,14 @@ inductive SVal where
   reference to one still reads and writes it, and the next `push` of a struct
   lands on it as it is (`storagePushLengthSaveReferenceElement`); `delete`
   never clears a mapping member, so a mapping nested in a popped element
-  survives into that `push` too. -/
-  | array (elems : List SVal) (shadow : List SVal)
+  survives into that `push` too.
+
+  `fixed` marks a fixed-size array (`uint[3]`, KeY's `typed(fixedArr(n, sh),
+  st)`): its length never changes, so `delete` resets its elements in place
+  rather than emptying it (`delNodeFixed`), and a copy over it keeps it
+  fixed.  Nothing else reads the mark: a fixed array is indexed, bounds-checked
+  and copied like a dynamic one. -/
+  | array (elems : List SVal) (shadow : List SVal) (fixed : Bool)
   | map (entries : List (Int × SVal)) (dflt : SVal)
   deriving Repr
 
@@ -92,10 +98,12 @@ namespace MVal
 @[match_pattern] abbrev bool (b : Bool) : MVal := .prim (.bool b)
 end MVal
 
-/-- Memory objects, one per identity (`memoryRules.key`). -/
+/-- Memory objects, one per identity (`memoryRules.key`).  An array carries
+whether it is a fixed-size one, as a storage array does, so that a copy back
+to storage lands as the same kind (`copyMToSt`). -/
 inductive MObj where
   | struct (fields : List (Name × MVal))
-  | array (elems : List MVal)
+  | array (elems : List MVal) (fixed : Bool)
   deriving Repr
 
 /-- One step of a storage path: a field or an `at(i)` selector
@@ -153,12 +161,15 @@ def defaultForTy : Ty -> SVal
   | Ty.uint => SVal.int 0
   | Ty.int => SVal.int 0
   | Ty.ref (RefTy.struct name) => SVal.struct (defaultForFields (structDef name))
-  | Ty.ref (RefTy.array _) => SVal.array [] []
+  | Ty.ref (RefTy.array _) => SVal.array [] [] false
+  | Ty.ref (RefTy.fixed E n) => SVal.array (List.replicate n (defaultForTy E)) [] true
   | Ty.ref (RefTy.mapping _ value) => SVal.map [] (defaultForTy value)
 termination_by ty => (tyRank ty, sizeOf ty)
 decreasing_by
   · exact Prod.Lex.left _ _ (structDef_rank_lt _)
-  · apply Prod.Lex.right; simp; omega
+  all_goals first
+    | (apply Prod.Lex.left; simp [tyRank]; done)
+    | (apply Prod.Lex.right; simp; omega)
 
 def defaultForFields : List (Name × Ty) -> List (Name × SVal)
   | [] => []
@@ -188,12 +199,16 @@ as they are.  That is solc (the element slots are cleared, the mapping
 entries nested in them live on at hashed slots nothing clears, so
 `delete arr; arr.push();` sees them again) and, since `f2eb3d98eb`, solkey:
 `selectStDelNodeIndexStruct` reads an index of a deleted node below its old
-`size` as the element deleted and one past it as it was. -/
+`size` as the element deleted and one past it as it was.
+
+A fixed-size array keeps its length: its elements are reset in place
+(solc; solkey's `delNodeFixed`, `selectStDelNodeFixed{Element,Size,Value}`). -/
 def SVal.defaultOf : SVal -> SVal
   | SVal.int _ => SVal.int 0
   | SVal.bool _ => SVal.bool false
   | SVal.struct fields => SVal.struct (defaultOfFields fields)
-  | SVal.array elems shadow => SVal.array [] (defaultOfElems elems ++ shadow)
+  | SVal.array elems shadow false => SVal.array [] (defaultOfElems elems ++ shadow) false
+  | SVal.array elems shadow true => SVal.array (defaultOfElems elems) shadow true
   | SVal.map entries dflt => SVal.map entries dflt
 where
   defaultOfFields : List (Name × SVal) -> List (Name × SVal)
@@ -208,7 +223,7 @@ nothing past their ends (a copy copies the live elements only). -/
 def SVal.strip : SVal -> SVal
   | SVal.prim p => SVal.prim p
   | SVal.struct fields => SVal.struct (stripFields fields)
-  | SVal.array elems _ => SVal.array (stripElems elems) []
+  | SVal.array elems _ fx => SVal.array (stripElems elems) [] fx
   | SVal.map entries dflt => SVal.map entries dflt
 where
   stripFields : List (Name × SVal) -> List (Name × SVal)
@@ -227,14 +242,17 @@ the new length are cleared (`defaultOf`) up to the old length and left as
 they were beyond it.  That is solc's copy, and solkey's since `f2eb3d98eb`
 (`selectOnSaveEmptyIndexStruct`: below the new `size` the element saved over
 the old one, below the old `size` the old one deleted, beyond both the old
-one).  Onto a slot of another shape, or none, `new` lands as on fresh
-storage (`SVal.strip`).  A mapping is never copied (a copy is `mapFree`),
+one).  An array is `new`'s kind of array, fixed-size or dynamic (a memory
+array carries its kind, `MObj.array`, so a copy from memory lands as the kind
+it was allocated as).  Onto a slot of another shape, or none, `new` lands as
+on fresh storage (`SVal.strip`).  A mapping is never copied (a copy is `mapFree`),
 and one met here keeps the old entries (`selectOnSaveEmptyMap`). -/
 def SVal.overlay : SVal -> SVal -> SVal
   | SVal.struct ofs, SVal.struct nfs => SVal.struct (overlayFields ofs nfs)
-  | SVal.array oel osh, SVal.array nel _ =>
+  | SVal.array oel osh _, SVal.array nel _ nfx =>
     SVal.array (overlayElems (oel ++ osh) nel)
       (SVal.defaultOf.defaultOfElems (oel.drop nel.length) ++ osh.drop (nel.length - oel.length))
+      nfx
   | SVal.map oe od, SVal.map _ _ => SVal.map oe od
   | _, new => new.strip
 where
@@ -298,16 +316,18 @@ def SVal.find : SVal -> List Seg -> Res SVal
       match lookupBy name fields with
       | some v => v.find rest
       | none => .error .stuck
-  | SVal.array elems shadow, Seg.at i :: rest =>
+  | SVal.array elems shadow _, Seg.at i :: rest =>
       if h : 0 ≤ i ∧ i.toNat < (elems ++ shadow).length then
         ((elems ++ shadow).get ⟨i.toNat, h.2⟩).find rest
       else .error .revert
   -- `a.length`: solkey's suites assert array lengths directly
   -- (`assert(values.length == 3)`), and the parser gives `.length` a
   -- `Seg.field`, so it has to be answered here rather than by the struct
-  -- arm above — an array is not a struct with a `length` member.
-  | SVal.array elems _, Seg.field "length" :: rest =>
-      (SVal.int elems.length).find rest
+  -- arm above — an array is not a struct with a `length` member.  A
+  -- fixed-size array has no `length` slot: its length is its type's (KeY's
+  -- `selectOnTypedFixedSize`), and a program's `.length` of one is a literal.
+  | SVal.array elems _ fx, Seg.field "length" :: rest =>
+      if fx then .error .stuck else (SVal.int elems.length).find rest
   | SVal.map entries dflt, Seg.at i :: rest =>
       match lookupBy i entries with
       | some v => v.find rest
@@ -317,7 +337,7 @@ def SVal.find : SVal -> List Seg -> Res SVal
   -- field other than the `length` arm above, a mapping under a field.
   | SVal.prim _, _ :: _ => .error .stuck
   | SVal.struct _, Seg.at _ :: _ => .error .stuck
-  | SVal.array _ _, Seg.field _ :: _ => .error .stuck
+  | SVal.array _ _ _, Seg.field _ :: _ => .error .stuck
   | SVal.map _ _, Seg.field _ :: _ => .error .stuck
 
 def SVal.save : SVal -> List Seg -> SVal -> Res SVal
@@ -328,11 +348,11 @@ def SVal.save : SVal -> List Seg -> SVal -> Res SVal
           let updated ← old.save rest new
           .ok (SVal.struct (setBy name updated fields))
       | none => .error .stuck
-  | SVal.array elems shadow, Seg.at i :: rest, new =>
+  | SVal.array elems shadow fx, Seg.at i :: rest, new =>
       if h : 0 ≤ i ∧ i.toNat < (elems ++ shadow).length then do
         let updated ← ((elems ++ shadow).get ⟨i.toNat, h.2⟩).save rest new
         let slots := (elems ++ shadow).set i.toNat updated
-        .ok (SVal.array (slots.take elems.length) (slots.drop elems.length))
+        .ok (SVal.array (slots.take elems.length) (slots.drop elems.length) fx)
       else .error .revert
   | SVal.map entries dflt, Seg.at i :: rest, new =>
       match lookupBy i entries with
@@ -347,7 +367,7 @@ def SVal.save : SVal -> List Seg -> SVal -> Res SVal
   -- solc compile error since 0.6.
   | SVal.prim _, _ :: _, _ => .error .stuck
   | SVal.struct _, Seg.at _ :: _, _ => .error .stuck
-  | SVal.array _ _, Seg.field _ :: _, _ => .error .stuck
+  | SVal.array _ _ _, Seg.field _ :: _, _ => .error .stuck
   | SVal.map _ _, Seg.field _ :: _, _ => .error .stuck
 
 /-- A read that checks every index against the live length, as a program
@@ -362,19 +382,19 @@ def SVal.findLive : SVal -> List Seg -> Res SVal
       match lookupBy name fields with
       | some v => v.findLive rest
       | none => .error .stuck
-  | SVal.array elems _, Seg.at i :: rest =>
+  | SVal.array elems _ _, Seg.at i :: rest =>
       if h : 0 ≤ i ∧ i.toNat < elems.length then
         (elems.get ⟨i.toNat, h.2⟩).findLive rest
       else .error .revert
-  | SVal.array elems _, Seg.field "length" :: rest =>
-      (SVal.int elems.length).findLive rest
+  | SVal.array elems _ fx, Seg.field "length" :: rest =>
+      if fx then .error .stuck else (SVal.int elems.length).findLive rest
   | SVal.map entries dflt, Seg.at i :: rest =>
       match lookupBy i entries with
       | some v => v.findLive rest
       | none => dflt.findLive rest
   | SVal.prim _, _ :: _ => .error .stuck
   | SVal.struct _, Seg.at _ :: _ => .error .stuck
-  | SVal.array _ _, Seg.field _ :: _ => .error .stuck
+  | SVal.array _ _ _, Seg.field _ :: _ => .error .stuck
   | SVal.map _ _, Seg.field _ :: _ => .error .stuck
 
 namespace State
@@ -405,7 +425,7 @@ mapping takes every key; a word or a struct takes none (no typed program
 indexes one). -/
 def checkIndex (s : State) (root : Name) (segs : List Seg) (i : Int) : Res Unit := do
   match ← s.findStorage root segs with
-  | .array elems _ => if 0 ≤ i ∧ i.toNat < elems.length then pure () else .error .revert
+  | .array elems _ _ => if 0 ≤ i ∧ i.toNat < elems.length then pure () else .error .revert
   | .map _ _ => pure ()
   | .prim _ | .struct _ => .error .stuck
 
@@ -459,9 +479,9 @@ def copyStToM (s : State) : SVal -> Res (State × MVal)
       let (s, mfields) ← copyStFields s fields
       let (s, id) := s.alloc (MObj.struct mfields)
       .ok (s, MVal.ref id)
-  | SVal.array elems _ => do
+  | SVal.array elems _ fx => do
       let (s, melems) ← copyStElems s elems
-      let (s, id) := s.alloc (MObj.array melems)
+      let (s, id) := s.alloc (MObj.array melems fx)
       .ok (s, MVal.ref id)
   | SVal.map _ _ => .error .stuck
 
@@ -515,9 +535,9 @@ def copyMToSt (s : State) (rem : List Nat) : MVal -> Res SVal
         | .ok (MObj.struct fields) => do
             let sfields ← copyMFields s (rem.erase id) fields
             .ok (SVal.struct sfields)
-        | .ok (MObj.array elems) => do
+        | .ok (MObj.array elems fx) => do
             let selems ← copyMElems s (rem.erase id) elems
-            .ok (SVal.array selems [])
+            .ok (SVal.array selems [] fx)
         | .error e => .error e
       else .error .stuck
 termination_by (rem.length, 0)
@@ -564,7 +584,7 @@ def SVal.asValue : SVal -> Res Value
   | SVal.int v => .ok (Value.int v)
   | SVal.bool b => .ok (Value.bool b)
   | SVal.struct _ => .error .stuck
-  | SVal.array _ _ => .error .stuck
+  | SVal.array _ _ _ => .error .stuck
   | SVal.map _ _ => .error .stuck
 
 def MVal.asValue : MVal -> Res Value
@@ -698,10 +718,10 @@ def readLoc (s : State) : Addr -> Res Value
           match lookupBy fld fields with
           | some v => v.asValue
           | none => .error .stuck
-      | MObj.array _ => .error .stuck
+      | MObj.array _ _ => .error .stuck
   | Addr.memoryIndex id i => do
       match ← s.getObj id with
-      | MObj.array elems =>
+      | MObj.array elems _ =>
           if h : 0 ≤ i ∧ i.toNat < elems.length then
             (elems.get ⟨i.toNat, h.2⟩).asValue
           else .error .revert
@@ -714,12 +734,12 @@ def writeLoc (s : State) (loc : Addr) (v : Value) : Res State :=
       match ← s.getObj id with
       | MObj.struct fields =>
           .ok (s.setObj id (MObj.struct (setBy fld v.toMVal fields)))
-      | MObj.array _ => .error .stuck
+      | MObj.array _ _ => .error .stuck
   | Addr.memoryIndex id i => do
       match ← s.getObj id with
-      | MObj.array elems =>
+      | MObj.array elems fx =>
           if 0 ≤ i ∧ i.toNat < elems.length then
-            .ok (s.setObj id (MObj.array (elems.set i.toNat v.toMVal)))
+            .ok (s.setObj id (MObj.array (elems.set i.toNat v.toMVal) fx))
           else .error .revert
       | MObj.struct _ => .error .stuck
 
@@ -739,13 +759,13 @@ def State.exampleStore : State :=
         ("age", SVal.int 0),
         ("owner", SVal.int 0),
         ("balance", SVal.int 0),
-        ("values", SVal.array [] []),
+        ("values", SVal.array [] [] false),
         ("balances", SVal.map [] (SVal.int 0)),
         ("flags", SVal.map [] (SVal.bool false)),
         ("folks", SVal.map [] (defaultForRef (RefTy.struct "Person"))),
-        ("matrix", SVal.array [] []),
-        ("persons", SVal.array [] []),
-        ("people", SVal.array [] []),
+        ("matrix", SVal.array [] [] false),
+        ("persons", SVal.array [] [] false),
+        ("people", SVal.array [] [] false),
         ("alice", defaultForRef (RefTy.struct "Person")),
         ("bob", defaultForRef (RefTy.struct "Person")),
         ("wallet", defaultForRef (RefTy.struct "Wallet")) ] }
@@ -770,11 +790,11 @@ def State.testSuiteStore : State :=
         ("age", SVal.int 0),
         ("owner", SVal.int 0),
         ("balance", SVal.int 0),
-        ("values", SVal.array [] []),
+        ("values", SVal.array [] [] false),
         -- `TestSuite.a : uint[]` ports to `aux`: `a` is a local `uint`
         -- in seven `SolcExpressions` functions.
-        ("aux", SVal.array [] []),
-        ("matrix", SVal.array [] []),
+        ("aux", SVal.array [] [] false),
+        ("matrix", SVal.array [] [] false),
         ("balances", SVal.map [] (SVal.int 0)),
         -- `TestSuite.people : mapping(uint => Person)` ports to `folks`;
         -- `people` is already the `Person[]` of the calculus examples.
@@ -782,24 +802,39 @@ def State.testSuiteStore : State :=
         ("flags", SVal.map [] (SVal.bool false)),
         ("valuesMap", SVal.map [] (SVal.int 0)),
         ("accountMap", SVal.map [] (defaultForRef (RefTy.struct "Account"))),
-        ("persons", SVal.array [] []),
+        ("persons", SVal.array [] [] false),
         ("alice", defaultForRef (RefTy.struct "Person")),
         ("bob", defaultForRef (RefTy.struct "Person")),
         ("ledger", defaultForRef (RefTy.struct "Ledger")),
-        ("tokens", SVal.array [] []),
+        ("tokens", SVal.array [] [] false),
         ("bucket", defaultForRef (RefTy.struct "TokenBucket")),
-        ("ledgerUses", SVal.array [] []),
+        ("ledgerUses", SVal.array [] [] false),
         -- Added by the re-port at solkey `c80a54494c`: the bool tier, the
         -- `Toggle` struct, the standalone `tok`, and the array/basket
         -- state the copy group writes through.
         ("flag", SVal.bool false),
         ("flag2", SVal.bool false),
-        ("boolFlags", SVal.array [] []),
+        ("boolFlags", SVal.array [] [] false),
         ("toggle", defaultForRef (RefTy.struct "Toggle")),
         ("tok", defaultForRef (RefTy.struct "Token")),
-        ("buckets", SVal.array [] []),
+        ("buckets", SVal.array [] [] false),
         ("basketA", defaultForRef (RefTy.struct "Basket")),
-        ("basketB", defaultForRef (RefTy.struct "Basket")) ] }
+        ("basketB", defaultForRef (RefTy.struct "Basket")),
+        -- Added with fixed-size arrays: `signedTotal`, the fixed-array state
+        -- (`Triple` ported as `FixedTriple`, `structDef`) and the mapping
+        -- shapes.  `boolKeyed` (a `bool` key reads as no `Int`) and `tree`
+        -- (a struct recursive through a mapping outranks itself, `structRank`)
+        -- are not ported.
+        ("signedTotal", SVal.int 0),
+        ("fixedValues", defaultForRef (RefTy.fixed Ty.uint 3)),
+        ("rows", SVal.array [] [] false),
+        ("fixedTokens", defaultForRef (RefTy.fixed (Ty.struct "Token") 2)),
+        ("fixedMaps", defaultForRef (RefTy.fixed (Ty.mapping Ty.uint Ty.uint) 2)),
+        ("triple", defaultForRef (RefTy.struct "FixedTriple")),
+        ("triple2", defaultForRef (RefTy.struct "FixedTriple")),
+        ("grid", SVal.map [] (SVal.map [] (SVal.int 0))),
+        ("ledgerMap", SVal.map [] (defaultForRef (RefTy.struct "Ledger"))),
+        ("mapArray", SVal.array [] [] false) ] }
 
 /-- `solc/SolcExpressions.sol`. `v` ports to `counter`: `v` is a local
 `uint` in twelve functions across the suites. -/
@@ -817,16 +852,16 @@ def State.solcStructsStore : State :=
         ("neighbourAfter", SVal.int 0),
         ("source", defaultForRef (RefTy.struct "Pair")),
         ("target", defaultForRef (RefTy.struct "Pair")),
-        ("pairs1", SVal.array [] []),
-        ("pairs2", SVal.array [] []),
+        ("pairs1", SVal.array [] [] false),
+        ("pairs2", SVal.array [] [] false),
         ("campaigns", SVal.map [] (defaultForRef (RefTy.struct "Simple"))) ] }
 
 /-- `solc/SolcArrays.sol`. -/
 def State.solcArraysStore : State :=
   { storage :=
-      [ ("storageArray", SVal.array [] []),
-        ("matrix", SVal.array [] []),
-        ("structs", SVal.array [] []) ] }
+      [ ("storageArray", SVal.array [] [] false),
+        ("matrix", SVal.array [] [] false),
+        ("structs", SVal.array [] [] false) ] }
 
 /-- `solc/SolcMemory.sol`. `x` ports to `outerX` (`x` is the stack `uint`
 root), `inner` to `innerS` (`inner` is a local storage alias in
@@ -836,8 +871,8 @@ def State.solcMemoryStore : State :=
   { storage :=
       [ ("outerX", defaultForRef (RefTy.struct "Outer")),
         ("innerS", defaultForRef (RefTy.struct "Inner")),
-        ("inners", SVal.array [] []),
-        ("prims", SVal.array [] []) ] }
+        ("inners", SVal.array [] [] false),
+        ("prims", SVal.array [] [] false) ] }
 
 /-- `solc/SolcMappings.sol`. `s` ports to `sBox` (`s` is a local
 `Inner memory` in `SolcMemory`) and `m` to `sMap` (`m` is an existing
@@ -849,8 +884,8 @@ def State.solcMappingsStore : State :=
         ("sMap", SVal.map [] (defaultForRef (RefTy.struct "S"))),
         ("withSubMap", SVal.map [] (defaultForRef (RefTy.struct "WithSub"))),
         ("balances", SVal.map [] (SVal.int 0)),
-        ("arrayMap", SVal.map [] (SVal.array [] [])),
-        ("rows", SVal.array [] []),
+        ("arrayMap", SVal.map [] (SVal.array [] [] false)),
+        ("rows", SVal.array [] [] false),
         ("ledger", defaultForRef (RefTy.struct "Ledger")) ] }
 
 /-- `solc/SolcControlFlow.sol`. -/
@@ -859,7 +894,7 @@ def State.solcControlFlowStore : State :=
       [ ("sx", defaultForRef (RefTy.struct "Pair")),
         ("sy", defaultForRef (RefTy.struct "Pair")),
         ("target", defaultForRef (RefTy.struct "Pair")),
-        ("values", SVal.array [] []) ] }
+        ("values", SVal.array [] [] false) ] }
 
 end Semantics
 
@@ -917,13 +952,13 @@ def Simple.eval (σ : State) {p : PrimTy} : Simple C p → Res Value
 /-- The length of the array at a storage path: `values.length`. -/
 def arrayLen (σ : State) (r : Name) (segs : List Seg) : Res Value := do
   match ← σ.findStorage r segs with
-  | .array elems _ => pure (.int elems.length)
+  | .array elems _ _ => pure (.int elems.length)
   | .prim _ | .struct _ | .map _ _ => .error .stuck
 
 /-- The length of the memory array `id`: `xs.length`. -/
 def memArrayLen (σ : State) (id : Nat) : Res Value := do
   match ← σ.getObj id with
-  | .array elems => pure (.int elems.length)
+  | .array elems _ => pure (.int elems.length)
   | .struct _ => .error .stuck
 
 /-- A memory slot read as the object it references: a primitive has none. -/
@@ -967,12 +1002,12 @@ def MLoc.read (σ : State) : {T : Ty} → MLoc C T → Res MVal
       match lookupBy f fields with
       | some v => pure v
       | none => .error .stuck
-    | .array _ => .error .stuck
-  | _, .index b i => do
+    | .array _ _ => .error .stuck
+  | _, .index _ b i => do
     let id ← (← b.mval σ).asRef
     let iv ← (← i.eval σ).asInt
     match ← σ.getObj id with
-    | .array elems =>
+    | .array elems _ =>
       if h : 0 ≤ iv ∧ iv.toNat < elems.length then pure (elems.get ⟨iv.toNat, h.2⟩)
       else .error .revert
     | .struct _ => .error .stuck
@@ -1011,13 +1046,13 @@ def PrimTy.default : PrimTy → Value
 def memWriteField (σ : State) (id : Nat) (f : Name) (mv : MVal) : Res State := do
   match ← σ.getObj id with
   | .struct fields => .ok (σ.setObj id (.struct (setBy f mv fields)))
-  | .array _ => .error .stuck
+  | .array _ _ => .error .stuck
 
 /-- A write into a memory array's element. -/
 def memWriteIndex (σ : State) (id : Nat) (i : Int) (mv : MVal) : Res State := do
   match ← σ.getObj id with
-  | .array elems =>
-    if 0 ≤ i ∧ i.toNat < elems.length then .ok (σ.setObj id (.array (elems.set i.toNat mv)))
+  | .array elems fx =>
+    if 0 ≤ i ∧ i.toNat < elems.length then .ok (σ.setObj id (.array (elems.set i.toNat mv) fx))
     else .error .revert
   | .struct _ => .error .stuck
 
@@ -1026,7 +1061,7 @@ def MLoc.write (σ : State) (mv : MVal) {T : Ty} : MLoc C T → Res State
   | .field b f _ => do
     let id ← (← b.mval σ).asRef
     memWriteField σ id f mv
-  | .index b i => do
+  | .index _ b i => do
     let id ← (← b.mval σ).asRef
     let iv ← (← i.eval σ).asInt
     memWriteIndex σ id iv mv
@@ -1043,7 +1078,7 @@ def MSrc.mval (σ : State) {T : Ty} : MSrc C T → Res MVal
 default elements (a struct element its own fresh object, as solc allocates
 one per element). -/
 def newArrVal : RefTy → Int → SVal
-  | .array E, n => .array (List.replicate n.toNat (defaultForTy E)) []
+  | .array E, n => .array (List.replicate n.toNat (defaultForTy E)) [] false
   | R, _ => defaultForRef R
 
 /-- `x` bound to the object a memory right-hand side names: `n`'s by
@@ -1073,7 +1108,7 @@ def writeAddr (σ : State) (mv : MVal) : Addr → Res State
 index.  An index is checked where it is written (`memWriteIndex`). -/
 def MLoc.addr (σ : State) {T : Ty} : MLoc C T → Res Addr
   | .field b f _ => do pure (.memoryField (← (← b.mval σ).asRef) f)
-  | .index b i => do
+  | .index _ b i => do
     let id ← (← b.mval σ).asRef
     pure (.memoryIndex id (← (← i.eval σ).asInt))
 
@@ -1124,7 +1159,7 @@ def OpLoc.store (σ : State) (op : BinOp) : {p : PrimTy} → OpLoc C p → Value
   | p, .mfield b f _, v => do
     let id ← (← b.mval σ).asRef
     opMem σ op p (.memoryField id f) v
-  | p, .mindex b i, v => do
+  | p, .mindex _ b i, v => do
     let id ← (← b.mval σ).asRef
     let iv ← (← i.eval σ).asInt
     opMem σ op p (.memoryIndex id iv) v
@@ -1169,7 +1204,7 @@ def OpLoc.bump (σ : State) (op : IncDec) : {p : PrimTy} → OpLoc C p → Res (
   | p, .mfield b f _ => do
     let id ← (← b.mval σ).asRef
     bumpMem σ op p (.memoryField id f)
-  | p, .mindex b i => do
+  | p, .mindex _ b i => do
     let id ← (← b.mval σ).asRef
     let iv ← (← i.eval σ).asInt
     bumpMem σ op p (.memoryIndex id iv)
@@ -1179,18 +1214,18 @@ push lands on) appended. -/
 def pushAt (σ : State) (E : Ty) (root : Name) (segs : List Seg) (val : SVal → Res SVal) :
     Res State := do
   match ← σ.findStorage root segs with
-  | .array elems shadow =>
+  | .array elems shadow fx =>
     let (slot, shadow') := pushSlot E shadow
     let newElem ← val slot
-    σ.saveStorage root segs (.array (elems ++ [newElem]) shadow')
+    σ.saveStorage root segs (.array (elems ++ [newElem]) shadow' fx)
   | .prim _ | .struct _ | .map _ _ => .error .stuck
 
 /-- `b.push()` as a place: the slot appended, and its index. -/
 def pushPlaceAt (σ : State) (E : Ty) (root : Name) (segs : List Seg) : Res (State × Int) := do
   match ← σ.findStorage root segs with
-  | .array elems shadow =>
+  | .array elems shadow fx =>
     let (slot, shadow') := pushSlot E shadow
-    let σ' ← σ.saveStorage root segs (.array (elems ++ [slot]) shadow')
+    let σ' ← σ.saveStorage root segs (.array (elems ++ [slot]) shadow' fx)
     pure (σ', elems.length)
   | .prim _ | .struct _ | .map _ _ => .error .stuck
 
@@ -1206,12 +1241,12 @@ mapping alone, and solkey's `storagePopSaveMappingElement` writes no
 `delAt`). -/
 def popAt (σ : State) (keep : Bool) (root : Name) (segs : List Seg) : Res State := do
   match ← σ.findStorage root segs with
-  | .array elems shadow =>
+  | .array elems shadow fx =>
     match elems.reverse with
     | [] => .error .revert
     | last :: restRev =>
       σ.saveStorage root segs
-        (.array restRev.reverse ((if keep then last else last.defaultOf) :: shadow))
+        (.array restRev.reverse ((if keep then last else last.defaultOf) :: shadow) fx)
   | .prim _ | .struct _ | .map _ _ => .error .stuck
 
 /-- `a.transfer(v)` with both evaluated: revert when the contract's funds

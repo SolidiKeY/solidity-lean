@@ -68,9 +68,13 @@ reset in place — a struct recursively, an array element too (the in-bounds
 branch of `selectStDelNodeIndexStruct`), a primitive and the length to their
 defaults.  What a `Seg` cannot carry is `MapField` or `FixedField`, so
 `selectStDelNodeMap`/`delFieldMap` — a mapping member survives `delete` —
-and `delNodeFixed` — a fixed-size array keeps its length — have no statement
-in this algebra; the interpreter's `SVal.defaultOf` is where the first
-behaviour lives, and the second has no type to apply to ("Shapes", below).
+have no statement in this algebra, and neither do `delFieldFixed`/
+`selectStDelNodeFixed`, which pick `delNodeFixed` by the member's sort; the
+interpreter's `SVal.defaultOf` is where both behaviours live (a fixed-size
+array is marked there, `SVal.array`'s `fixed`).  `delNodeFixed` itself — a
+fixed-size array deleted keeps its length — is a function here, and the three
+rules that read through it are theorems (`selectStDelNodeFixed{Element,Size,
+Value}`).
 -/
 
 namespace Solidity
@@ -556,6 +560,39 @@ theorem selectStDelNodeIndexKeep (s : Struct) (i : Int) (hs : selectSt s (Seg.at
     selectSt (delNode s) (Seg.at i) = selectSt s (Seg.at i) := by
   rw [selectStDelNodeSelect, hs]; rfl
 
+/-- `delNodeFixed(st)`: a fixed-size array deleted.  Every element is reset
+in place, as `delNode` resets it, and the length is kept: a fixed-size
+array's length is its type's (`RefTy.fixed`), which `delete` does not change
+(solc; the interpreter's `SVal.defaultOf` on a marked array).  Which member
+*is* a fixed-size array a `Seg` cannot say, so this is the delete at a node
+the caller knows is one. -/
+def delNodeFixed (s : Struct) : Struct :=
+  storeSt (delNode s) (Seg.field "length") (selectSt s (Seg.field "length"))
+
+/-- **`selectStDelNodeFixedElement`** — `selectSt<[Struct]>(delNodeFixed(st), at(i)) ⇝
+delNode(selectSt<[Struct]>(st, at(i)))`: an element of a deleted `Token[2]` is
+deleted recursively, with no bounds guard, the length being the same. -/
+theorem selectStDelNodeFixedElement (s : Struct) (i : Int) :
+    asStruct (selectSt (delNodeFixed s) (Seg.at i)) = delNode (asStruct (selectSt s (Seg.at i))) := by
+  rw [delNodeFixed, selectOnStore, if_neg (by simp), selectStDelNodeRef]
+
+/-- **`selectStDelNodeFixedSize`** — `selectSt<[alphaPrim]>(delNodeFixed(st), size) ⇝
+selectSt<[alphaPrim]>(st, size)`: `delete fixedValues;` keeps `fixedValues.length`. -/
+theorem selectStDelNodeFixedSize (s : Struct) :
+    selectSt (delNodeFixed s) (Seg.field "length") = selectSt s (Seg.field "length") := by
+  rw [delNodeFixed, selectOnStore, if_pos rfl]
+
+/-- **`selectStDelNodeFixedValue`** — `selectSt<[alphaPrim]>(delNodeFixed(st), at(i)) ⇝
+defaultValue<[alphaPrim]>`, at `int`: `delete fixedValues;` then `fixedValues[1]` is `0`. -/
+theorem selectStDelNodeFixedValue (s : Struct) (i : Int) :
+    asInt (selectSt (delNodeFixed s) (Seg.at i)) = 0 := by
+  rw [delNodeFixed, selectOnStore, if_neg (by simp), selectStDelNodeDefault]
+
+/-- …at `bool`. -/
+theorem selectStDelNodeFixedValue_asBool (s : Struct) (i : Int) :
+    asBool (selectSt (delNodeFixed s) (Seg.at i)) = false := by
+  rw [delNodeFixed, selectOnStore, if_neg (by simp), selectStDelNodeDefault_asBool]
+
 /-- `selectOnDelAtCons`: one selector out of a delete, through
 `selectOnSaveCons`.  At the last segment it is `delField<[α]>(st, a1)`. -/
 theorem selectOnDelAtCons (s : Struct) (a1 a2 : Seg) (flds : List Seg) :
@@ -675,18 +712,20 @@ Element,Member}` and `typedTyped`.  Exactly one of them *reads* it:
 declared `n`, which nothing ever writes.  Every other one falls through to the
 struct beneath, so on any shape but `fixedArr` the tag is the identity.
 
-The language model has no fixed-size array (`AST.RefTy`), so no declared
-shape is a `fixedArr` (`Shape.ofTy_ne_fixedArr`), and `typed` would compute
-nothing here — while as a symbol it would be a fifth `Struct` constructor,
+A declared fixed-size array has a `fixedArr` shape (`Shape.ofTy_fixed`), but
+the one rule that reads the tag answers a question no program here asks: the
+elaborator writes a fixed-size array's `.length` as its literal
+(`Syntax.lean`, `synth`), so no read of a fixed-size array's length reaches
+the calculus.  As a symbol `typed` would be a fifth `Struct` constructor,
 threaded through every recursion and every proof of the three algebras, and
 not a free one (`typedTyped` identifies two of its terms).  So `typed` is not
 a symbol of this algebra: the seven-way `findDefinition*` split is
 `findDefinitionCons` (identical once the tag is the identity), and the eight
 rules are absent by this argument.  The
-same argument covers `delNodeFixed` and the `FixedField` rules of the delete
-family — `delFieldFixed`, `selectStDelNodeFixed`,
-`selectStDelNodeFixed{Map,Element,Size,Value}`: no location is a fixed-size
-array member, and a `Seg` could not say so if one were.
+`FixedField` rules that pick `delNodeFixed` by the member's sort —
+`delFieldFixed`, `selectStDelNodeFixed` — are absent for the other reason, a
+`Seg` has no sort; the ones that read through `delNodeFixed` are stated
+("The delete family").
 
 What *is* stated is the part of the shape algebra that is free terms alone:
 `fieldShape` here, and `sizeOf`/`shapeAt`/`idShape` with their taclets in
@@ -696,13 +735,22 @@ What *is* stated is the part of the shape algebra that is free terms alone:
 theorem fieldShapeDef (decl : Name -> Ty) (m : Name) :
     fieldShape decl m = Shape.ofTy (decl m) := rfl
 
-/-- No declared type has a fixed-size array's shape: the argument above, as a
-theorem. -/
-theorem _root_.Solidity.Theory.Shape.ofTy_ne_fixedArr (t : Ty) (n : Int) (sh : Shape) :
-    Shape.ofTy t ≠ .fixedArr n sh := by
+/-- A fixed-size array's declared shape carries its length: `uint[3]` is
+`fixedArr(3, leaf)`. -/
+theorem _root_.Solidity.Theory.Shape.ofTy_fixed (e : Ty) (n : Nat) :
+    Shape.ofTy (.fixed e n) = .fixedArr n (Shape.ofTy e) := rfl
+
+/-- Only a fixed-size array type has a fixed-size shape. -/
+theorem _root_.Solidity.Theory.Shape.ofTy_eq_fixedArr {t : Ty} {n : Int} {sh : Shape}
+    (h : Shape.ofTy t = .fixedArr n sh) : ∃ e m, t = .fixed e m ∧ n = m := by
   cases t with
-  | prim _ => simp [Shape.ofTy]
-  | ref r => cases r <;> simp [Shape.ofTy, Shape.ofRefTy]
+  | prim _ => simp [Shape.ofTy] at h
+  | ref r =>
+    cases r with
+    | fixed e m =>
+      simp only [Shape.ofTy, Shape.ofRefTy, Shape.fixedArr.injEq] at h
+      exact ⟨e, m, rfl, h.1.symm⟩
+    | _ => simp [Shape.ofTy, Shape.ofRefTy] at h
 
 /-! ## Sanity
 
@@ -751,6 +799,15 @@ example :
         (Seg.field "inner") (st (storeSt mtSt (Seg.field "n") (int 5))))
       = storeSt (storeSt mtSt (Seg.field "owner") (int 0))
           (Seg.field "inner") (st (storeSt mtSt (Seg.field "n") (int 0))) := by
+  decide
+
+/-- `delete` on a fixed-size array keeps its length and clears its
+elements: a `uint[2]` holding `7, 8` reads length `2` and `0` at `[1]`. -/
+example :
+    let a := storeSt (storeSt (storeSt mtSt (Seg.field "length") (int 2)) (Seg.at 0) (int 7))
+      (Seg.at 1) (int 8)
+    asInt (selectSt (delNodeFixed a) (Seg.field "length")) = 2 ∧
+      asInt (selectSt (delNodeFixed a) (Seg.at 1)) = 0 := by
   decide
 
 end Sanity

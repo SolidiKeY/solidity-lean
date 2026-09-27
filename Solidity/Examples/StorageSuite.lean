@@ -374,4 +374,65 @@ theorem requireFails : ⊨ dl!{ [ require(false); result = 1; ] false } := by
 theorem requireFailsDiamond : ¬ (⊨ dl!{ ⟨ require(false); result = 1; ⟩ result == 1 }) :=
   fun h => h State.exampleStore
 
+/-! ## 7 · Fixed-size arrays
+
+`TestSuite`'s `uint[3] fixedValues;`, `Token[2] fixedTokens;`,
+`FixedTriple triple;` (`struct Triple { uint[3] items; uint tag; }`, renamed)
+and `uint[3][] rows;`.  A fixed-size array is indexed by the array rules
+(`storageIndexReadArrayFind`, `storageIndexWriteArraySave`: solkey's
+`Path[…,array]` takes either kind) and bounds-checked against its length; it
+has no `push` or `pop`, and its `.length` is its type's, the literal the
+elaborator writes. -/
+
+section Fixed
+
+local instance : InContract := ⟨TestSuite⟩
+
+/-- `fixedValues[2] = 1; uint result = fixedValues[2];`
+(`TestSuite.testFixedArrayIndexInBounds`). -/
+theorem fixedWriteRead :
+    ⊨ dl!{ [ fixedValues[2] = 1; uint result = fixedValues[2]; ] result == 1 } := by
+  sol_symex
+  sol_close
+
+/-- `triple.items[1] = 7; uint result = triple.items[1];` — an element of a
+fixed-size member. -/
+theorem fixedMemberWriteRead :
+    ⊨ dl!{ [ triple.items[1] = 7; uint result = triple.items[1]; ] result == 7 } := by
+  sol_symex
+  sol_close
+
+/-- The lengths are the declared ones, in every state
+(`testFixedArrayLength`, `testStructFixedMemberLength`,
+`testFixedStructArrayLength`). -/
+theorem fixedLengths :
+    ⊨ dl!{ [ uint n = fixedValues.length; uint m = triple.items.length;
+             uint t = fixedTokens.length; ] (n == 3 && m == 3 && t == 2) } := by
+  sol_symex
+  sol_close
+
+/-- `rows[0].length` with `rows : uint[3][]`: `rows[0]` is evaluated (bound to
+a fresh alias, so an index past `rows`'s end reverts), and the length is `3`
+(`testFixedElementOfDynamicArrayLength`). -/
+theorem fixedElementLength : ⊨ dl!{ [ uint k = rows[0].length; ] k == 3 } := by
+  sol_symex
+  sol_close
+
+/-! From the initial store: an index past the declared length reverts, and
+`rows[0].length` reverts while `rows` is empty. -/
+
+/-- info: (Except.error (Solidity.Semantics.Halt.revert), Except.error (Solidity.Semantics.Halt.revert)) -/
+#guard_msgs in
+#eval (Prog.run State.testSuiteStore (sol{ uint k = 3; fixedValues[k] = 1; }),
+  Prog.run State.testSuiteStore (sol{ uint k = rows[0].length; }))
+
+/-- A literal index past the end, and a `push` onto a fixed-size array, are
+solc's compile errors, and the elaborator's. -/
+example : True := by
+  fail_if_success have : Prog TestSuite := sol{ fixedValues[3] = 1; }
+  fail_if_success have : Prog TestSuite := sol{ fixedValues.push(1); }
+  trivial
+
+end Fixed
+
 end Solidity.Examples.StorageSuite
