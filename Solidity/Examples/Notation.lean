@@ -114,13 +114,17 @@ info: @Taclet.ifElseSplit : ∀ {C : Contract} {k : Nat} {m : Modality} {se : Si
 /-- info: @Taclet.revertBox : ∀ {C : Contract} {k : Nat}, dl{ [ revert(); ] ⇝ true } -/
 #guard_msgs in #check @Taclet.revertBox
 
-/-! ### With the notation off: the constructors it stands for -/
+/-! ### With the notation off: the constructors it stands for
+
+and the side condition the line leaves out: `sp` is simple (`Rules.lean`,
+"Side conditions"), filled by `side_cond` wherever the rule is applied. -/
 
 /--
 info: @Taclet.storageFieldWriteSave : ∀ {C : Contract} {k : Nat} {m : Modality} {x : Name} {sp : SPath C (Ty.struct x)}
   {fld : Name} {x_1 : PrimTy} {hfld : C.fieldType x fld = some (Ty.prim x_1)} {se : Simple C x_1},
-  Taclet C k m (Stmt.assign (Loc.field sp fld hfld) (Src.val (Val.simple se)))
-    (Premise.update [UpdElem.storage (STerm.storage.save (sp.lower.field fld) (SValT.val se.lower))])
+  autoParam (sp.isSimple = true) sideCond →
+    Taclet C k m (Stmt.assign (Loc.field sp fld hfld) (Src.val (Val.simple se)))
+      (Premise.update [UpdElem.storage (STerm.storage.save (sp.lower.field fld) (SValT.val se.lower))])
 -/
 #guard_msgs in
 set_option pp.sol.dl false in

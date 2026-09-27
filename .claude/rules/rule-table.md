@@ -14,9 +14,12 @@ paths:
 A taclet is one constructor of `Taclet C k m s p` (`Calculus/Rules.lean`),
 named as solkey names it, its type written in `dl{ ⟨[ s; ]⟩ ⇝ p }`. Schema
 variables are bound implicitly and their kind is read off their name
-(`RuleSyntax.lean`'s table: `sp`/`nsp`, `se`/`nse`, `fld`, `lhs`, …). There is
-no generated table and no condition to keep disjoint: which rule fires is
-`Stmt.step` (`Completeness.lean`), a total function over the typed syntax.
+(`RuleSyntax.lean`'s table: `sp`/`nsp`, `se`/`nse`, `fld`, `lhs`, …), and so
+are the rule's side conditions (`RuleSyntax.sideConds`: `nsp` is not simple,
+`sp` is, a value written to storage is not a conditional, …), hidden
+`autoParam` hypotheses. Which rule fires is `Stmt.step` (`Completeness.lean`),
+a total function over the typed syntax, and it is the only rule that can:
+`Taclet.eq_step` (`Uniqueness.lean`).
 
 ## Invariants
 
@@ -33,9 +36,19 @@ no generated table and no condition to keep disjoint: which rule fires is
 
 ## Adding or changing a rule
 
-1. The constructor, in its section of `Rules.lean`, in `dl{ … }`.
+1. The constructor, in its section of `Rules.lean`, in `dl{ … }`. Spell its
+   schema variables so that the side conditions they give it
+   (`RuleSyntax.sideConds`) are **exactly** what its `Stmt.step` arm knows:
+   `nsp`/`nse` where the arm has found the part not simple, `sp` where it
+   has found it simple, `path`/`e` where it does not look. Check with
+   `set_option pp.sol.dl false in #check @Taclet.r`.
 2. Its arm in `Stmt.step` (`Completeness.lean`). Exhaustiveness is the
-   coverage proof, so a statement form without an arm fails the build.
+   coverage proof, so a statement form without an arm fails the build. The
+   arm must bring the side conditions into scope for `side_cond`: `if h :`
+   rather than `if`, constructor patterns rather than a `_` after a
+   `.simple` arm. `Taclet.eq_step` (`Uniqueness.lean`) fails if a condition
+   is weaker than the arm (two rules for one statement) and `Stmt.step`
+   fails to elaborate if it is stronger (no rule).
 3. Its case of `Taclet.sound`: `Calculus/SoundUpdate.lean` for an update
    premise, `Calculus/SoundUnfold.lean` for statements,
    `Calculus/RuleSoundness.lean` for a branch or a closed goal

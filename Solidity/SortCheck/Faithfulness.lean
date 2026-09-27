@@ -269,10 +269,19 @@ theorem Read.sortOk_after_run {Γ Γ₁ Γ₂ : Ctx} {H : HeapTy} {σ σ₁ : St
 
 /-! ## Rows, constructors, statements -/
 
-/-- The statement a taclet derivation is about: the rule's `\find`, read off
-its type. -/
-def stmtOf {k : Nat} {m : Modality} {s : Stmt C} {p : Premise C} (_ : Taclet C k m s p) :
-    Stmt C := s
+/-- A constructor's type, `Taclet C k m s p` under its side conditions
+(`Rules.lean`): the statement `s` it is about. -/
+class TacletAbout (α : Prop) (C : outParam Contract) (s : outParam (Stmt C)) : Prop where
+
+instance {k : Nat} {m : Modality} {s : Stmt C} {p : Premise C} :
+    TacletAbout (Taclet C k m s p) C s := ⟨⟩
+
+instance {P α : Prop} {s : Stmt C} [TacletAbout α C s] : TacletAbout (P → α) C s := ⟨⟩
+
+/-- The statement a taclet constructor is about: the rule's `\find`, read off
+its type (past its side conditions, which a faithfulness statement does not
+need: it holds of the statement whichever rule fires). -/
+def stmtOf {α : Prop} {s : Stmt C} [TacletAbout α C s] (_ : α) : Stmt C := s
 
 /-- The KeY taclets constructor `n` transcribes (`RuleShapes.tacletOrigins`),
 by name. -/

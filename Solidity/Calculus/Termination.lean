@@ -1,4 +1,5 @@
 import Solidity.Calculus.Progress
+import Solidity.Calculus.Uniqueness
 import Solidity.Calculus.Notation
 
 /-!
@@ -19,11 +20,12 @@ cost of a part is counted where the rules look at it, so a receiver, an
 index, an operand or a source is charged, and a declaration's initializer,
 which no rule captures, is not.
 
-The smallness is proved about **what `Stmt.step` fires**, not about every
-derivation of `Taclet`: a taclet holds of a simple part too
-(`storageFieldRead_unfold_rightFst` of `lhs = sp.fld` leaves
-`lhs = sp'.fld`, as heavy as it started), and only the dispatcher's choice
-rules that out.
+The smallness is proved about what `Stmt.step` fires (`Stmt.step_smaller`)
+and holds of **every derivation** (`Taclet.smaller`): a statement has one
+rule, and it is the dispatcher's (`Taclet.eq_step`).  The side conditions
+are what make it so: without them `storageFieldRead_unfold_rightFst` would
+hold of `lhs = sp.fld` too, leaving `lhs = sp'.fld`, as heavy as it
+started.
 
 **The measure.**  `2 ^ weight P * (measure φ + 1)` for `⟨P⟩ φ`:
 exponential in the program, because a branch (`ifElseSplit`, and a
@@ -307,21 +309,23 @@ declaration and less than the `16` it was charged.
 
 Example: `x = people[i].age;` unfolds into `Person storage sp = people[i];
 x = sp.age;`, of weights `6` and `4`, below the `22` it started from. -/
-theorem Hole.readStep_small {T : Ty} (lhs : Hole C T)
+theorem Hole.readStep_small {T : Ty} (lhs : Hole C T) (ht : lhs.isTarget = true)
     {root : (r : Name) → (h : C.rootType r = some T) → Step k m (lhs.fill (.loc (.root r h)))}
     {field : {s : Name} → (sp : SPath C (.struct s)) → (f : Name) →
-      (hf : C.fieldType s f = some T) → Step k m (lhs.fill (.loc (.field sp f hf)))}
+      (hf : C.fieldType s f = some T) → sp.isSimple = true →
+      Step k m (lhs.fill (.loc (.field sp f hf)))}
     {index : {R : RefTy} → {kp : PrimTy} → (it : IndexTy R kp T) → (sp : SPath C (.ref R)) →
-      (ie : Simple C kp) → Step k m (lhs.fill (.loc (.index it sp (.simple ie))))}
+      (ie : Simple C kp) → sp.isSimple = true →
+      Step k m (lhs.fill (.loc (.index it sp (.simple ie))))}
     (hr : ∀ r h, (root r h).Small)
-    (hf : ∀ {s} (sp : SPath C (.struct s)) f hf, sp.isSimple = true → (field sp f hf).Small)
-    (hi : ∀ {R kp} (it : IndexTy R kp T) sp ie, sp.isSimple = true → (index it sp ie).Small) :
-    ∀ l, (lhs.readStep root field index l).Small
+    (hf : ∀ {s} (sp : SPath C (.struct s)) f hf hs, (field sp f hf hs).Small)
+    (hi : ∀ {R kp} (it : IndexTy R kp T) sp ie hs, (index it sp ie hs).Small) :
+    ∀ l, (lhs.readStep ht root field index l).Small
   | .root r h => hr r h
   | .field b f h => by
     simp only [Hole.readStep]
     split
-    · exact hf b f h (by assumption)
+    · exact hf b f h _
     · rename_i hb
       cases lhs <;> weigh [SPath.pen_eq_16 hb]
   | .index it b i => by
@@ -338,13 +342,13 @@ theorem Hole.readStep_small {T : Ty} (lhs : Hole C T)
 
 Example: `x = m.inner.age;` unfolds into `Inner memory mv = m.inner;
 x = mv.age;`. -/
-theorem MHole.readStep_small {T : Ty} (lhs : MHole C T)
+theorem MHole.readStep_small {T : Ty} (lhs : MHole C T) (ht : lhs.isTarget = true)
     {field : {s : Name} → (mv : Var) → (f : Name) → (hf : C.fieldType s f = some T) →
       Step k m (lhs.fill (.field (.var mv) f hf))}
     {index : (mv : Var) → (ie : Simple C .uint) → Step k m (lhs.fill (.index (.var mv) (.simple ie)))}
     (hf : ∀ {s} mv f (hf : C.fieldType s f = some T), (field mv f hf).Small)
     (hi : ∀ mv ie, (index mv ie).Small) :
-    ∀ l, (lhs.readStep field index l).Small
+    ∀ l, (lhs.readStep ht field index l).Small
   | .field (.var _) _ _ => hf ..
   | .field (.loc _) _ _ => by simp only [MHole.readStep]; cases lhs <;> weigh
   | .index (.var _) (.simple _) => hi ..
@@ -357,29 +361,32 @@ theorem MHole.readStep_small {T : Ty} (lhs : MHole C T)
 
 Example: `x = c ? 1 : 2;`, `c` a `bool` local (weight `9`), becomes
 `if (c) { x = 1; } else { x = 2; }` (weight `6`). -/
-theorem ternaryStep_small {p : PrimTy} (lhs : VHole C p) (c : Val C .bool) (a b : Val C p) :
-    (ternaryStep (k := k) (m := m) lhs c a b).Small := by
+theorem ternaryStep_small {p : PrimTy} (lhs : VHole C p) (hl : lhs.isTarget = true)
+    (c : Val C .bool) (a b : Val C p) : (ternaryStep (k := k) (m := m) lhs hl c a b).Small := by
   cases c <;> simp only [ternaryStep] <;> cases lhs <;> weigh
 
 /-- Lowering a conditional first keeps a rule small.
 
 Example: `people[i].age = b ? 1 : 2;` branches before it captures `people[i]`. -/
-theorem VHole.lower_small {p : PrimTy} (lhs : VHole C p) (e : Val C p)
-    {other : Step k m (lhs.fill e)} (h : other.Small) : (lhs.lower e other).Small := by
+theorem VHole.lower_small {p : PrimTy} (lhs : VHole C p) (hl : lhs.isTarget = true)
+    (e : Val C p) {other : e.notTernary = true → Step k m (lhs.fill e)}
+    (h : ∀ ht, (other ht).Small) : (lhs.lower hl e other).Small := by
   cases e with
-  | ternary c a b => exact ternaryStep_small lhs c a b
-  | _ => exact h
+  | ternary c a b => exact ternaryStep_small lhs hl c a b
+  | _ => exact h _
 
 /-- A value written: a simple one by an update, any other captured.
 
 Example: `total = x + 1;` becomes `uint se = x + 1; total = se;`. -/
-theorem VHole.step_small {p : PrimTy} (lhs : VHole C p)
+theorem VHole.step_small {p : PrimTy} (lhs : VHole C p) (hl : lhs.isTarget = true)
     {simple : (se : Simple C p) → Step k m (lhs.fill (.simple se))}
-    (hs : ∀ se, (simple se).Small) (e : Val C p) {capture : Step k m (lhs.fill e)}
-    (hc : e.isSimple = false → capture.Small) : (lhs.step simple e capture).Small := by
+    (hs : ∀ se, (simple se).Small) (e : Val C p)
+    {capture : e.isSimple = false → e.notTernary = true → Step k m (lhs.fill e)}
+    (hc : ∀ hn ht, (capture hn ht).Small) : (lhs.step hl simple e capture).Small := by
   cases e with
   | simple se => exact hs se
-  | _ => exact VHole.lower_small lhs _ (hc rfl)
+  | ternary c a b => exact ternaryStep_small lhs hl c a b
+  | _ => exact hc _ _
 
 /-- `&&` and `||` branch on their left operand, any other operator captures
 its right one.
@@ -388,9 +395,12 @@ Example: `b = ok && people[i].adult;` becomes
 `if (ok) { b = people[i].adult; b = b && true; } else { b = false; }`. -/
 theorem binopRightStep_small {p q : PrimTy} (x : Var) (op : BinOp) (hop : op.accepts p = true)
     (hq : op.ret p = q) (se : Simple C p) (nse : Val C p) (hn : nse.isSimple = false) :
-    (binopRightStep (k := k) (m := m) x op hop hq se nse).Small := by
-  unfold binopRightStep
-  split <;> first | weigh [Val.pen_eq_16 hn] | (exfalso; contradiction)
+    (binopRightStep (k := k) (m := m) x op hop hq se nse hn).Small := by
+  cases op <;> cases p <;> cases q <;>
+    first
+      | (unfold binopRightStep; weigh [Val.pen_eq_16 hn])
+      | (exfalso; revert hop; decide)
+      | (exfalso; revert hq; decide)
 
 /-- A local assigned.
 
@@ -401,7 +411,7 @@ theorem localStep_small {p : PrimTy} (x : Var) :
   | .simple _ => trivial
   | .read l => by
     simp only [localStep]
-    refine Hole.readStep_small (.local x) (fun _ _ => ?_) (fun _ _ _ _ => ?_)
+    refine Hole.readStep_small (.local x) rfl (fun _ _ => ?_) (fun _ _ _ _ => ?_)
       (fun it _ _ _ => ?_) l
     · trivial
     · trivial
@@ -417,10 +427,10 @@ theorem localStep_small {p : PrimTy} (x : Var) :
   | .unop _ _ _ (.simple _) => trivial
   | .unop _ _ _ (.read _) | .unop _ _ _ (.binop ..) | .unop _ _ _ (.unop ..)
   | .unop _ _ _ (.ternary ..) | .unop _ _ _ (.readMem _) => by simp only [localStep]; weigh
-  | .ternary c a b => ternaryStep_small (.local x) c a b
+  | .ternary c a b => ternaryStep_small (.local x) rfl c a b
   | .readMem l => by
     simp only [localStep]
-    refine MHole.readStep_small (.local x) (fun _ _ _ => ?_) (fun _ _ => ?_) l <;> trivial
+    refine MHole.readStep_small (.local x) rfl (fun _ _ _ => ?_) (fun _ _ => ?_) l <;> trivial
 
 /-- An alias bound.
 
@@ -431,7 +441,7 @@ theorem rebindStep_small {R : RefTy} (x : Var) :
   | .path (.alias _) => trivial
   | .path (.loc l) => by
     simp only [rebindStep]
-    refine Hole.readStep_small (.rebind x) (fun _ _ => ?_) (fun _ _ _ _ => ?_)
+    refine Hole.readStep_small (.rebind x) rfl (fun _ _ => ?_) (fun _ _ _ _ => ?_)
       (fun it _ _ _ => ?_) l
     · trivial
     · trivial
@@ -447,10 +457,11 @@ theorem rebindStep_small {R : RefTy} (x : Var) :
 Example: `alice.account = bob.account;` binds the source first:
 `Account storage sp = bob.account; alice.account = sp;`. -/
 theorem copyStep_small {R : RefTy} (l : Loc C (.ref R)) (hm : (Ty.ref R).mapFree = true)
-    {copy : (sp2 : SPath C (.ref R)) → Step k m (.assign l (.copy sp2 hm))}
-    (hc : ∀ sp2, (copy sp2).Small) : ∀ sp2, (copyStep l hm copy sp2).Small
-  | .alias _ => hc _
-  | .loc l' => Hole.readStep_small (.copy l hm) (fun _ _ => hc _) (fun _ _ _ _ => by weigh)
+    (hl : l.isTarget = true) (hr : l.isRoot = false)
+    {copy : (sp2 : SPath C (.ref R)) → sp2.isSimple = true → Step k m (.assign l (.copy sp2 hm))}
+    (hc : ∀ sp2 h, (copy sp2 h).Small) : ∀ sp2, (copyStep l hm hl hr copy sp2).Small
+  | .alias _ => hc _ _
+  | .loc l' => Hole.readStep_small (.copy l hm) hl (fun _ _ => hc _ _) (fun _ _ _ _ => by weigh)
       (fun _ _ _ _ => by weigh) l'
 
 /-- A storage write: receiver, then index, then source.
@@ -462,13 +473,13 @@ theorem assignStep_small {T : Ty} :
     ∀ (l : Loc C T) (r : Src C T), (assignStep (k := k) (m := m) l r).Small
   | .root r h, .val e => by
     simp only [assignStep]
-    refine VHole.step_small _ (fun _ => ?_) e (fun he => ?_)
+    refine VHole.step_small _ rfl (fun _ => ?_) e (fun he _ => ?_)
     · trivial
     · weigh [Val.pen_eq_16 he]
   | .root _ _, .copy (.alias _) _ => trivial
   | .root r h, .copy (.loc l) hm => by
     simp only [assignStep]
-    refine Hole.readStep_small (.copy (.root r h) hm) (fun _ _ => ?_) (fun _ _ _ _ => ?_)
+    refine Hole.readStep_small (.copy (.root r h) hm) rfl (fun _ _ => ?_) (fun _ _ _ _ => ?_)
       (fun it _ _ _ => ?_) l
     · trivial
     · trivial
@@ -477,14 +488,14 @@ theorem assignStep_small {T : Ty} :
     simp only [assignStep]
     split
     · rename_i hb
-      refine VHole.step_small _ (fun _ => ?_) e (fun he => ?_)
+      refine VHole.step_small _ rfl (fun _ => ?_) e (fun he _ => ?_)
       · trivial
       · weigh [Val.pen_eq_16 he, SPath.pen_eq_one hb]
-    · exact VHole.lower_small _ e (by weigh [SPath.pen_eq_16 ‹_›])
+    · exact VHole.lower_small _ rfl e (fun _ => by weigh [SPath.pen_eq_16 ‹_›])
   | .field b f hf, .copy sp2 hm => by
     simp only [assignStep]
     split
-    · exact copyStep_small _ hm (fun _ => by trivial) sp2
+    · exact copyStep_small _ hm _ rfl (fun _ _ => by trivial) sp2
     · weigh [SPath.pen_eq_16 ‹_›]
   | .index it b i, .val e => by
     simp only [assignStep]
@@ -492,18 +503,18 @@ theorem assignStep_small {T : Ty} :
     · rename_i hb
       cases i with
       | simple ie =>
-        refine VHole.step_small _ (fun _ => ?_) e (fun he => ?_)
+        refine VHole.step_small _ rfl (fun _ => ?_) e (fun he _ => ?_)
         · cases it <;> trivial
         · weigh [Val.pen_eq_16 he, SPath.pen_eq_one hb]
-      | _ => exact VHole.lower_small _ e (by weigh [SPath.pen_eq_one hb])
-    · exact VHole.lower_small _ e (by weigh [SPath.pen_eq_16 ‹_›])
+      | _ => exact VHole.lower_small _ rfl e (fun _ => by weigh [SPath.pen_eq_one hb])
+    · exact VHole.lower_small _ rfl e (fun _ => by weigh [SPath.pen_eq_16 ‹_›])
   | .index it b i, .copy sp2 hm => by
     simp only [assignStep]
     split
     · rename_i hb
       cases i with
       | simple ie =>
-        refine copyStep_small _ hm (fun _ => ?_) sp2
+        refine copyStep_small _ hm _ rfl (fun _ _ => ?_) sp2
         cases it <;> trivial
       | _ => weigh [SPath.pen_eq_one hb]
     · weigh [SPath.pen_eq_16 ‹_›]
@@ -647,7 +658,7 @@ theorem rebindMemStep_small {R : RefTy} (x : Var) :
   | .alias (.var _) => trivial
   | .alias (.loc l) => by
     simp only [rebindMemStep]
-    refine MHole.readStep_small (.rebind x) (fun _ _ _ => ?_) (fun _ _ => ?_) l <;> trivial
+    refine MHole.readStep_small (.rebind x) rfl (fun _ _ _ => ?_) (fun _ _ => ?_) l <;> trivial
   | .copy sp _ => by
     simp only [rebindMemStep]
     split
@@ -657,13 +668,13 @@ theorem rebindMemStep_small {R : RefTy} (x : Var) :
 /-- A memory reference written: its source unfolded until it is bindable.
 
 Example: `m.account = n.inner.account;` binds `n.inner` first. -/
-theorem memRefStep_small {R : RefTy} (l : MLoc C (.ref R))
-    {copy : (src : MPath C (.ref R)) → Step k m (.assignMem l (.ref src))}
-    (hc : ∀ src, (copy src).Small) : ∀ src, (memRefStep l copy src).Small
-  | .var _ => hc _
+theorem memRefStep_small {R : RefTy} (l : MLoc C (.ref R)) (hl : l.isTarget = true)
+    {copy : (src : MPath C (.ref R)) → src.isBindable = true → Step k m (.assignMem l (.ref src))}
+    (hc : ∀ src h, (copy src h).Small) : ∀ src, (memRefStep l hl copy src).Small
+  | .var _ => hc _ _
   | .loc sl => by
     simp only [memRefStep]
-    exact MHole.readStep_small (.write l) (fun _ _ _ => hc _) (fun _ _ => hc _) sl
+    exact MHole.readStep_small (.write l) hl (fun _ _ _ => hc _ _) (fun _ _ => hc _ _) sl
 
 /-- A memory write: receiver, then index, then source.
 
@@ -679,10 +690,11 @@ theorem assignMemStep_small {T : Ty} (l : MLoc C T) (r : MSrc C T) :
     | var mv =>
       cases r with
       | val e =>
-        refine VHole.step_small (VHole.mem (.field (.var mv) f hf)) (fun _ => ?_) e (fun he => ?_)
+        refine VHole.step_small (VHole.mem (.field (.var mv) f hf)) rfl (fun _ => ?_) e
+          (fun he _ => ?_)
         · trivial
         · weigh [Val.pen_eq_16 he]
-      | ref src => exact memRefStep_small (.field (.var mv) f hf) (fun _ => by trivial) src
+      | ref src => exact memRefStep_small (.field (.var mv) f hf) rfl (fun _ _ => by trivial) src
     | loc _ => cases r <;> (delta assignMemStep; dsimp only; weigh)
   | index b i =>
     cases b with
@@ -691,11 +703,12 @@ theorem assignMemStep_small {T : Ty} (l : MLoc C T) (r : MSrc C T) :
       | simple ie =>
         cases r with
         | val e =>
-          refine VHole.step_small (VHole.mem (.index (.var mv) (.simple ie))) (fun _ => ?_) e
-            (fun he => ?_)
+          refine VHole.step_small (VHole.mem (.index (.var mv) (.simple ie))) rfl (fun _ => ?_) e
+            (fun he _ => ?_)
           · trivial
           · weigh [Val.pen_eq_16 he]
-        | ref src => exact memRefStep_small (.index (.var mv) (.simple ie)) (fun _ => by trivial) src
+        | ref src =>
+          exact memRefStep_small (.index (.var mv) (.simple ie)) rfl (fun _ _ => by trivial) src
       | _ => cases r <;> (delta assignMemStep; dsimp only; weigh)
     | loc _ => cases r <;> (delta assignMemStep; dsimp only; weigh)
 
@@ -732,6 +745,16 @@ theorem Stmt.step_smaller (k : Nat) (m : Modality) :
   | .assert (.unop ..) | .assert (.ternary ..) | .assert (.readMem _) => by
     simp only [Stmt.step]; weigh
   | .revert => by cases m <;> trivial
+
+/-- **Every rule makes the program smaller**, as a fact about the rules
+rather than the dispatcher: any derivation of `s` is the one `Stmt.step`
+fires (`Taclet.eq_step`).  `people[i].age = 10;` has only
+`storageFieldWrite_unfold_leftFst`, whose three statements weigh `14`
+against its `23`. -/
+theorem Taclet.smaller {k : Nat} {m : Modality} {s : Stmt C} {p : Premise C}
+    (d : Taclet C k m s p) : p.Smaller s := by
+  rw [d.eq_step]
+  exact Stmt.step_smaller k m s
 
 /-! ## Certificates
 

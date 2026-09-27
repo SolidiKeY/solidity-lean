@@ -58,7 +58,7 @@ fails on a module nothing imports.
 | `Calculus/Decide.lean` | `sol_decide`: reads of writes eliminated into case trees on key equalities (the four-way path comparison), `delete` included; `Fml.valid_iff_reduce`. The storage fragment. |
 | `Calculus/Uniqueness.lean` | One rule per statement: every derivation's premise is `Stmt.step`'s. |
 | `Calculus/Progress.lean` | A formula with a modality always steps: `Fml.active_iff_step`. |
-| `Calculus/Termination.lean` | The weights, `Premise.Smaller`, `Fml.measure`, `Fml.step_wellFounded`, `symex_normalizes`. |
+| `Calculus/Termination.lean` | The weights, `Premise.Smaller` (of `Stmt.step`, and of every derivation: `Taclet.smaller`), `Fml.measure`, `Fml.step_wellFounded`, `symex_normalizes`. |
 | `Calculus/Chains.lean` | Derivations as values: `φ ~[r]~> ψ`, `~>`, `~*>`, `calc` chains of `dl!{…}` lines, `sol_chain`, `#derivation`. |
 | `Calculus/UpdateRules.lean` | KeY's update simplification as `UpdRule`, each an iff: `sequentialToParallel`, `simplifyUpdate`, `applySkip`, `applyOnRigid`; `sol_upd`, `sol_merge`. |
 

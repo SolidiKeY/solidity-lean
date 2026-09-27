@@ -137,7 +137,7 @@ the sections further down carry the details.
 
 7. **Determinism under the block modality.** solkey's rule set is
    mutually exclusive per modality (Calculus/Uniqueness.lean,
-   `stepCases_exclusive`), but under the block modality a box/diamond
+   `Taclet.premise_unique`), but under the block modality a box/diamond
    twin pair applies at once. The twelve twin pairs are effect-identical
    up to mode (`CandidateStep.twinEffects`); KeY's strategy should
    either prefer one deterministically or the taclets should share a

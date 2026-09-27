@@ -152,12 +152,23 @@ def lastName : Lean.Name → Lean.Name
   | .str _ s => .mkSimple s
   | n => n
 
+/-- A derivation, with the auxiliary lemmas the elaborator abstracted it
+into (a constructor applied to its side conditions' proofs) unfolded, down
+to a `Taclet` constructor. -/
+partial def tacletHead (d : Lean.Expr) : MetaM Lean.Expr := do
+  let d ← whnfCore d
+  let .const c us := d.getAppFn | return d
+  if (`Solidity.Taclet).isPrefixOf c then return d
+  match ← getConstInfo c with
+  | info@(.thmInfo _) => tacletHead ((← instantiateValueLevelParams info us).beta d.getAppArgs)
+  | _ => return d
+
 /-- The derivation a `Step` carries, reduced to a `Taclet` constructor. -/
 partial def tacletOf (e : Lean.Expr) : MetaM Lean.Expr := do
   let e ← whnf e
   unless e.isAppOfArity ``Step.mk 6 do throwError "not a step:{indentExpr e}"
   let d ← whnfCore (e.getArg! 5)
-  if d.isAppOf ``Step.taclet then tacletOf d.appArg! else return d
+  if d.isAppOf ``Step.taclet then tacletOf d.appArg! else tacletHead d
 
 /-- The rule the strategy fires on the formula `φ`, as a `StepRule` term
 whose derivation is a constructor, and that constructor's name. -/

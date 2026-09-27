@@ -551,6 +551,7 @@ set_option maxHeartbeats 4000000 in
 theorem Taclet.sound_update {k : Nat} {m : Modality} {s : Stmt C} {U : Upd C}
     (d : Taclet C k m s (.update U)) : ∀ σ, SameOk [] (U.apply σ) (s.run σ) := by
   cases d
+  all_goals clear_side
   all_goals intro σ
   case memoryReferenceDeclFreshAlloc => exact upd_memoryReferenceDeclFreshAlloc ..
   case localOpAssign => exact upd_localOpAssign ..

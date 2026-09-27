@@ -27,23 +27,29 @@ pp.sol.dl false` shows the constructors again.
 In a taclet every identifier is a Lean variable, bound by the constructor
 (an auto-bound implicit), and what it stands for is read off its name with
 trailing digits and subscripts dropped, so no rule
-needs an `\is…` side condition to say what its variables are:
+writes an `\is…` side condition to say what its variables are.  The name
+also gives the side condition the rule carries (`sideConds`, a hidden
+hypothesis):
 
-| name | is | Lean sort |
-|---|---|---|
-| `v`, `lv`, `vp` | a stack local | `Var` |
-| `lsv` | a storage alias | `Var` |
-| `mv` | a memory local | `Var` |
-| `gsp` | a state variable, with its proof `hgsp` | `Name` |
-| `se`, `ie`, `sadr` | a simple value | `Simple C p` |
-| `e`, `nse`, `nadr` | a value | `Val C p` |
-| `sp`, `nsp`, `path`, `map`, `arr` | a storage path (`map`/`arr` fix how it is indexed) | `SPath C T` |
-| `nmp`, `mpath` | a memory path | `MPath C T` |
-| `fld`, `fr`, with its proof `hfld`, `hfr` | a member name | `Name` |
-| `lhs` | where a storage or memory read lands (`Hole`, `MHole`) | |
-| `x` | where a value lands (`VHole`) | |
-| `nlhs` | a member or entry a copy lands in | `Loc C T` |
-| `l` | the target of `⊕=` and `++` | `OpLoc C p` |
+| name | is | Lean sort | side condition |
+|---|---|---|---|
+| `v`, `lv`, `vp` | a stack local | `Var` | |
+| `lsv` | a storage alias | `Var` | |
+| `mv` | a memory local | `Var` | |
+| `gsp` | a state variable, with its proof `hgsp` | `Name` | |
+| `se`, `ie`, `sadr` | a simple value | `Simple C p` | |
+| `e` | a value | `Val C p` | not a conditional, when written to storage or memory |
+| `nse`, `nadr` | a value that is not simple | `Val C p` | not simple (and as `e`) |
+| `sp`, `map`, `arr` | a simple storage path (`map`/`arr` fix how it is indexed) | `SPath C T` | simple |
+| `nsp` | a storage path that is not simple | `SPath C T` | not simple |
+| `path` | any storage path | `SPath C T` | |
+| `nmp` | a memory path that is not a memory local | `MPath C T` | not simple |
+| `mpath` | a memory path | `MPath C T` | bindable, when written as a reference |
+| `fld`, `fr`, with its proof `hfld`, `hfr` | a member name | `Name` | |
+| `lhs` | where a storage or memory read lands (`Hole`, `MHole`) | | a target |
+| `x` | where a value lands (`VHole`) | | |
+| `loc`, `nlhs` | a member or entry a copy lands in | `Loc C T` | `loc`: a target, not a state variable |
+| `l` | the target of `⊕=` and `++` | `OpLoc C p` | |
 
 The position says which sort an operand is read at: `sp.fld` is a location
 left of `=`, a value right of it, a path under `delete`.  A copy is a write
@@ -156,6 +162,29 @@ syntax "stmt{ " sol_stmt "; " "}" : term
 
 macro_rules
   | `(⊨ $φ:term) => `(Solidity.Valid $φ)
+
+/-! ## Side conditions
+
+A taclet's schema variables carry the conditions their names and positions
+state (`sideConds` below): `nsp` is not simple, `sp` is, a value written to
+storage is not a conditional.  Each is a hypothesis of the constructor,
+`autoParam`ed with `side_cond`, so a rule applied to a statement proves its
+own conditions (by computation, or from a branch fact in scope), and the
+printers leave them out: the taclet still reads as its one line. -/
+
+/-- Prove a taclet's side condition: by computation on a statement written
+out, or from the facts a dispatcher branch has in scope (its rules are in
+`Rules.lean`, after the conditions). -/
+syntax "side_cond" : tactic
+
+-- `Solidity.sideCond`: `side_cond`, as an `autoParam` stores a tactic.
+run_elab do
+  discard <| Lean.Elab.Term.declareTacticSyntax (← `(tactic| side_cond)) (some `Solidity.sideCond)
+
+/-- `taclet_side% T (h₁ : c₁) … (hₙ : cₙ)`: `T` under the hypotheses `cᵢ`,
+each filled by `side_cond`.  `T` is elaborated first, so it binds the schema
+variables in the order it reads them. -/
+syntax "taclet_side% " term:max (ppSpace "(" ident " : " term ")")* : term
 
 /-! ## Reading schemas (macros) -/
 
@@ -498,7 +527,16 @@ partial def schemaStmt (fresh : Bool) (Γ : Scope) :
         if isMem Γ l then
           if let some v := rhsVar? "msrc" r then `(Stmt.assignMem $(← schemaAt Γ .mloc l) $v) else
           if isMem Γ r then `(Stmt.assignMem $(← schemaAt Γ .mloc l) (MSrc.ref $(← schemaAt Γ .mpath r)))
-          else `(Stmt.assignMem $(← schemaAt Γ .mloc l) (MSrc.val $(← schemaAt Γ .val r)))
+          else
+            -- a memory element's type is its value's, named `p` so that a
+            -- scratch value written back (`mv[ie] = se`) has it too
+            let elem := match l with
+              | `(sol_expr| $_:sol_expr [ $_:sol_expr ]) => true
+              | _ => false
+            if elem then
+              `(Stmt.assignMem $(← schemaAt Γ .mloc l)
+                (MSrc.val (p := $(schemaIdent "p")) $(← schemaAt Γ .val r)))
+            else `(Stmt.assignMem $(← schemaAt Γ .mloc l) (MSrc.val $(← schemaAt Γ .val r)))
         else if isMem Γ r then
           `(Stmt.assignFromMem $(← schemaAt Γ .loc l) $(← schemaAt Γ .mpath r))
         else if let some v := rhsVar? "src" r then `(Stmt.assign $(← schemaAt Γ .loc l) $v)
@@ -554,7 +592,8 @@ partial def schemaStmt (fresh : Bool) (Γ : Scope) :
   | `(sol_stmt| $b:sol_expr .push()) => do
     return (← `(Stmt.push (E := $(schemaIdent "E")) $(← schemaAt Γ .spath b) none $(schemaIdent "hd")), Γ)
   | `(sol_stmt| $b:sol_expr .pop()) => do
-    return (← `(Stmt.pop $(← schemaAt Γ .spath b)), Γ)
+    -- the element type named `E`, so that a scratch alias popped has it too
+    return (← `(Stmt.pop (E := $(schemaIdent "E")) $(← schemaAt Γ .spath b)), Γ)
   | `(sol_stmt| $r:sol_expr .transfer( $a:sol_expr )) => do
     return (← `(Stmt.transfer $(← schemaAt Γ .val r) $(← schemaAt Γ .val a)), Γ)
   | `(sol_stmt| $f:sol_expr ( $a:sol_expr )) => do
@@ -895,13 +934,90 @@ def schemaPremise (fresh : Bool) (Γ : Scope) : TSyntax `dl_premise → MacroM L
   | `(dl_premise| false) => `($(mkIdent `Solidity.Premise.done) false)
   | _ => Macro.throwUnsupported
 
+/-- The identifiers of a `\find`, outside `‹…›`. -/
+partial def findIdents : Lean.Syntax → Array Ident
+  | stx@(.ident ..) => #[⟨stx⟩]
+  | .node _ _ args =>
+    if args[0]?.any (·.isOfKind `atom) && args[0]!.getAtomVal == "‹" then #[]
+    else args.flatMap findIdents
+  | _ => #[]
+
+/-- A right-hand side that is one schema variable, and its spelling. -/
+def singleVar? : TSyntax `sol_expr → Option String
+  | `(sol_expr| $x:ident) =>
+    match nameParts x.getId with
+    | [s] => some s
+    | _ => none
+  | _ => none
+
+/-- **The side conditions of a `\find`**, as hypothesis names and types: what
+`Stmt.step` knows of the parts when it fires the rule.
+
+* by name: `nsp` is not simple and `sp`, `map`, `arr` are (`SPath.isSimple`),
+  `nse`, `nadr` are not simple values, `nmp` is not a memory local, and `loc`
+  is a member or an entry at a target, never a state variable;
+* by position: a hole `lhs` lands in a target (`Hole.isTarget`,
+  `MHole.isTarget`, `VHole.isTarget`); a value `e`, `nse` written to storage
+  or memory is not a conditional (`Val.notTernary`: a conditional is lowered
+  first); a memory path `mpath` written as a reference is bindable
+  (`MPath.isBindable`). -/
+def sideConds (s : TSyntax `sol_stmt) : MacroM (Array (Ident × Lean.Term)) := do
+  let mut out : Array (Ident × Lean.Term) := #[]
+  let mut seen : List String := []
+  let hyp (n : String) : Ident := mkIdent (Name.mkSimple ("h" ++ n))
+  for x in findIdents s.raw do
+    let some n := (nameParts x.getId).head? | continue
+    if seen.contains n then continue
+    seen := n :: seen
+    let v := schemaIdent n
+    match stemOf n with
+    | "nsp" => out := out.push (hyp n, ← `(SPath.isSimple $v = false))
+    | "sp" | "map" | "arr" => out := out.push (hyp n, ← `(SPath.isSimple $v = true))
+    | "nse" | "nadr" => out := out.push (hyp n, ← `(Val.isSimple $v = false))
+    | "nmp" => out := out.push (hyp n, ← `(MPath.isSimple $v = false))
+    | "loc" =>
+      out := out.push (hyp n, ← `($(mkIdent `Solidity.Loc.isTarget) $v = true))
+      out := out.push (hyp (n ++ "_nr"), ← `($(mkIdent `Solidity.Loc.isRoot) $v = false))
+    | _ => pure ()
+  let notTernary (r : TSyntax `sol_expr) : MacroM (Array (Ident × Lean.Term)) := do
+    let some n := singleVar? r | return #[]
+    unless ["e", "nse"].contains (stemOf n) do return #[]
+    return #[(hyp (n ++ "_nt"), ← `($(mkIdent `Solidity.Val.notTernary) $(schemaIdent n) = true))]
+  match s with
+  | `(sol_stmt| $l:sol_expr = $r:sol_expr) =>
+    match lhsHead [] l with
+    | some (.other h) =>
+      let some n := singleVar? l | return out
+      unless stemOf n == "lhs" do return out
+      if isMem [] r then return out.push (hyp n, ← `($(mkIdent `Solidity.MHole.isTarget) $h = true))
+      if isPath [] r then return out.push (hyp n, ← `($(mkIdent `Solidity.Hole.isTarget) $h = true))
+      return out.push (hyp n, ← `($(mkIdent `Solidity.VHole.isTarget) $h = true))
+    | some (.local _) | some (.alias _) | some (.mem _) => return out
+    | _ =>
+      if isMem [] l then
+        if (rhsVar? "msrc" r).isSome then return out
+        if isMem [] r then
+          let some n := singleVar? r | return out
+          return out.push (hyp (n ++ "_b"), ← `($(mkIdent `Solidity.MPath.isBindable) $(schemaIdent n) = true))
+        return out ++ (← notTernary r)
+      if isMem [] r || (rhsVar? "src" r).isSome || isPath [] r then return out
+      return out ++ (← notTernary r)
+  | _ => return out
+
 /-- The taclet `s ⇝ p` under the modality `m`: the `\find` binds its names;
 the `\replacewith` sees them, and its own declarations are fresh, numbered by
-the taclet's `k`. -/
+the taclet's `k`.  The `\find`'s side conditions (`sideConds`) are
+hypotheses that prove themselves. -/
 def schemaTaclet (m : Lean.Term) (s : TSyntax `sol_stmt) (p : TSyntax `dl_premise) :
     MacroM Lean.Term := do
+  let conds ← sideConds s
   let (s, Γ) ← schemaStmt false [] s
-  `($(mkIdent `Solidity.Taclet) $(schemaIdent "C") $(schemaIdent "k") $m $s $(← schemaPremise true Γ p))
+  let t ← `($(mkIdent `Solidity.Taclet) $(schemaIdent "C") $(schemaIdent "k") $m $s
+    $(← schemaPremise true Γ p))
+  if conds.isEmpty then return t
+  let hs := conds.map (·.1)
+  let cs := conds.map (·.2)
+  `(taclet_side% $t $[($hs : $cs)]*)
 
 def schemaHyp : TSyntax `dl_hyp → MacroM Lean.Term
   | `(dl_hyp| $U:dl_upd) => do `($(mkIdent `Solidity.Hyp.upd) $(schemaIdent "m") $(← schemaUpd [] U))
@@ -920,6 +1036,21 @@ macro_rules
   | `(stmt{ $s:sol_stmt; }) => return (← schemaStmt false [] s).1
 
 end Expand
+
+section Side
+open Lean Elab Term
+
+elab_rules : term
+  | `(taclet_side% $t $[($hs : $cs)]*) => do
+    let T ← elabType t
+    let mut hyps : Array (Lean.Name × Expr) := #[]
+    for h in hs, c in cs do
+      hyps := hyps.push (h.getId, ← elabType c)
+    return hyps.foldr (init := T) fun (n, ty) b =>
+      .forallE n (mkApp2 (mkConst ``autoParam [levelZero]) ty (mkConst ``Solidity.sideCond)) b
+        .default
+
+end Side
 
 /-! ## Printing the notation (delaborators)
 

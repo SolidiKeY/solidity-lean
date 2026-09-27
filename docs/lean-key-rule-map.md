@@ -84,7 +84,7 @@ request that solkey drop the fold.
 | `storageFieldRead_unfold_rightFst` | `storageFieldRead_unfold_rightFst` | same | |
 | `storageFieldReadFind` | `storageFieldReadFind` | same | |
 | `storageFieldWrite_unfold_leftFst` | `storageFieldWrite_unfold_leftFst` | same | `nsp.fld = e ⇝ T se = e; T storage sp = nsp; sp.fld = se`: the value source `e` is frozen into `se` before the receiver is captured |
-| `storageFieldWriteStorageRef_unfold_leftFst` | `storageFieldWriteStorageRef_unfold_leftFst` | same | the reference-source twin: `nsp.fld = sp2 ⇝ T storage sp = nsp; sp.fld = sp2`, no freeze (a reference is aliased, not read) |
+| `storageFieldWriteStorageRef_unfold_leftFst` | `storageFieldWriteStorageRef_unfold_leftFst` | same | the reference-source twin: `nsp.fld = path ⇝ T storage sp = nsp; sp.fld = path`, no freeze (a reference is aliased, not read) |
 | `storageFieldReadBindLocalRoot` | `storageFieldReadBindLocalRoot` | same | |
 | `storageFieldReadStoreRoot` | `storageFieldReadStoreRoot` | same | |
 | `storageFieldRead_unfold_rightSndResult` | `storageFieldRead_unfold_rightSndResult` | same | also claims `storageFieldWriteCaptureSrc` above |

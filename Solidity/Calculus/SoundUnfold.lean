@@ -273,6 +273,7 @@ theorem Taclet.sound_unfold {k : Nat} {m : Modality} {s : Stmt C} {P : Prog C}
   have hmv : Var.fresh "mv" k ∉ s.vars := fun h => hs _ h (by simp [freshVars])
   clear hs
   cases d
+  all_goals clear_side
   all_goals intro σ
   all_goals repeat' cases_holes
   all_goals vars_simp

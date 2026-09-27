@@ -24,8 +24,9 @@ rule at a time with `apply` — the way PLFA builds a typing derivation
 solkey names the rule; hover it to see its taclet.  Unification matches its
 `\find` against the first statement and produces the premise, so after each
 `apply` the goal is the next line of the derivation, printed as the sequent
-`dl{ Γ ⟹ φ }` (`Notation.lean`).  A rule that does not match is refused by
-`apply`.  `Proves.valid` turns a derivation into a proof of `⊨ φ`; it is the
+`dl{ Γ ⟹ φ }` (`Notation.lean`).  A rule that does not match, or whose
+side conditions do not hold (`nsp` where the part is simple, …), is refused
+by `apply`.  `Proves.valid` turns a derivation into a proof of `⊨ φ`; it is the
 only place soundness is used.
 -/
 
@@ -91,19 +92,22 @@ example : ⊢ dl!{ [ alice.age = 10; revert(); ] true } := by
   sol_symex
   sol_close
 
-/-! ## The judgement is not the strategy
+/-! ## The judgement is the strategy
 
-The strategy (`Stmt.step`) sends `alice.account.balance = 10;` to Step 2:
-capture the source, alias the receiver, then write through the alias.
-Soundness does not need that: `storageFieldWriteSave` asks nothing of the
-receiver, and applied directly it writes through the whole path at once. -/
+`Stmt.step` sends `alice.account.balance = 10;` to Step 2: capture the
+source, alias the receiver, then write through the alias.  That is the only
+rule for it (`Taclet.eq_step`): `storageFieldWriteSave` writes through an
+`sp`, a simple path, and `alice.account` is not one, so its side condition
+refuses the shortcut through the whole path at once. -/
 
-/-- `[ alice.account.balance = 10; ] alice.account.balance == 10`, in one rule. -/
-theorem deepFieldWriteShortcut :
+/-- `[ alice.account.balance = 10; ] alice.account.balance == 10`: the
+shortcut is refused, and Step 2 is the rule. -/
+theorem deepFieldWriteStep2 :
     ⊢ dl!{ [ alice.account.balance = 10; ] alice.account.balance == 10 } := by
-  apply update .storageFieldWriteSave
-  -- dl{ { storage := save(storage, alice.account.balance, 10) } ⟹ [ ] find(storage, alice.account.balance) = 10 }
-  apply empty
+  fail_if_success apply update .storageFieldWriteSave
+  apply unfold .storageFieldWrite_unfold_leftFst
+  -- dl{ ⟹ [ uint se1 = 10; Account storage sp1 = alice.account; sp1.balance = se1; ]
+  --       find(storage, alice.account.balance) = 10 }
   apply close
   sol_symex
   sol_close

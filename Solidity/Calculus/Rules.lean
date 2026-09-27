@@ -43,10 +43,15 @@ The storage rules are organised in three steps:
   that order;
 * **Step 3** turns a statement whose parts are all simple into an *update*.
 
-A taclet says what is *sound*, not what fires: the unfold rules hold of a
-simple part too.  Which rule runs is `Stmt.step` (`Completeness.lean`), and
-that each statement has exactly one is `rules_disjoint`/`rules_complete`
-over the statements' shapes (`RuleShapes.lean`).
+A taclet says what fires: each constructor carries the side conditions
+its schema variables state (`nsp` is not simple, `sp` is, a value written
+to storage is not a conditional; `RuleSyntax.sideConds`), as hypotheses
+that prove themselves (`side_cond`) and that the printers leave out, so the
+rule still reads as its one line.  They are exactly what `Stmt.step`
+(`Completeness.lean`) knows when it fires the rule, so every statement has
+exactly one: `Stmt.complete` and `Taclet.eq_step` (`Uniqueness.lean`).
+Where solkey leaves two taclets open on a statement and its strategy picks,
+the side condition keeps only the one `Stmt.step` picks.
 
 A rule over an operator is one constructor for the family (`⊕` is its
 schema variable), and `++`/`--` one for all four (`⊕⊕`); solkey writes one
@@ -99,6 +104,88 @@ def VHole.fill {p : PrimTy} : VHole C p → Val C p → Stmt C
   | .store l, v => .assign l (.val v)
   | .mem l, v => .assignMem l (.val v)
 
+/-! ## Side conditions
+
+What `Stmt.step` knows of a statement's parts when it fires a rule, read
+off the schema variables (`RuleSyntax.sideConds`): besides `isSimple`
+(`sp`/`nsp`, `se`/`nse`, `mv`/`nmp`), whether a write's target is ready for
+its source to be unfolded, whether a value is a conditional, whether a
+memory path can be written as it is. -/
+
+/-- `total`: a state variable. -/
+def Loc.isRoot {T : Ty} : Loc C T → Bool
+  | .root .. => true
+  | _ => false
+
+/-- A target every part of which is simple (`total`, `sp.fld`, `sp[ie]`):
+only into such a target is a copy's *source* unfolded
+(`folks[1].account = folks[2].account;` unfolds its target first). -/
+def Loc.isTarget {T : Ty} : Loc C T → Bool
+  | .root .. => true
+  | .field b _ _ => b.isSimple
+  | .index _ b i => b.isSimple && i.isSimple
+
+/-- A memory target every part of which is simple (`mv.fld`, `mv[ie]`). -/
+def MLoc.isTarget {T : Ty} : MLoc C T → Bool
+  | .field b _ _ => b.isSimple
+  | .index b i => b.isSimple && i.isSimple
+
+/-- A memory path written as it is (`mv`, `mv.fld`, `mv[ie]`): any other is
+unfolded first (`m.account = n.inner.account;`). -/
+def MPath.isBindable {T : Ty} : MPath C T → Bool
+  | .var _ => true
+  | .loc l => l.isTarget
+
+/-- Not a conditional: a conditional written to storage or memory is lowered
+to a branch (`ternaryToIf`), never captured. -/
+def Val.notTernary {p : PrimTy} : Val C p → Bool
+  | .ternary .. => false
+  | _ => true
+
+/-- A hole whose statement is ready for its path to be unfolded: a local, an
+alias, or a copy into a target. -/
+def Hole.isTarget {T : Ty} : Hole C T → Bool
+  | .copy l _ => l.isTarget
+  | _ => true
+
+/-- A memory hole ready for its location to be unfolded: a local, a memory
+local, or a reference written to a target. -/
+def MHole.isTarget {T : Ty} : MHole C T → Bool
+  | .write l => l.isTarget
+  | _ => true
+
+/-- A value hole ready for its value to be lowered: a local, any storage
+location (whose receiver waits for the branch), or a memory target. -/
+def VHole.isTarget {p : PrimTy} : VHole C p → Bool
+  | .mem l => l.isTarget
+  | _ => true
+
+macro_rules
+  | `(tactic| side_cond) => `(tactic| first
+      | rfl
+      | assumption
+      | (simp_all [SPath.isSimple, Val.isSimple, MPath.isSimple, Loc.isTarget, Loc.isRoot,
+          MLoc.isTarget, MPath.isBindable, Val.notTernary, Hole.isTarget, MHole.isTarget,
+          VHole.isTarget]; done)
+      | fail "the rule's side condition does not hold: `Stmt.step` fires another rule here")
+
+/-- The predicates a side condition is stated with. -/
+def sidePreds : List Lean.Name :=
+  [``SPath.isSimple, ``Val.isSimple, ``MPath.isSimple, ``Loc.isTarget, ``Loc.isRoot,
+    ``MLoc.isTarget, ``MPath.isBindable, ``Val.notTernary, ``Hole.isTarget, ``MHole.isTarget,
+    ``VHole.isTarget]
+
+open Lean Elab Tactic Meta in
+/-- Forget a derivation's side conditions: after `cases` on a derivation, a
+proof that does not need to know which rule fires (soundness) clears them. -/
+elab "clear_side" : tactic => withMainContext do
+  let mut g ← getMainGoal
+  for d in ← getLCtx do
+    if d.isImplementationDetail then continue
+    let some (_, lhs, _) := (← instantiateMVars d.type).eq? | continue
+    if sidePreds.any lhs.isAppOf then g ← g.tryClear d.fvarId
+  replaceMainGoal [g]
+
 /-! ## Premises -/
 
 /-- What a taclet leaves: an update in front of the rest (`{U} ⟨[ ]⟩`),
@@ -138,15 +225,15 @@ inductive Taclet (C : Contract) (k : Nat) : Modality → Stmt C → Premise C �
   | storageFieldWrite_unfold_leftFst :
       dl{ ⟨[ nsp.fld = e; ]⟩ ⇝ ⟨[ T se = e; T storage sp = nsp; sp.fld = se; ]⟩ }
   | storageFieldWriteStorageRef_unfold_leftFst :
-      dl{ ⟨[ nsp.fld = sp2; ]⟩ ⇝ ⟨[ T storage sp = nsp; sp.fld = sp2; ]⟩ }
+      dl{ ⟨[ nsp.fld = path; ]⟩ ⇝ ⟨[ T storage sp = nsp; sp.fld = path; ]⟩ }
   | storageIndexWrite_unfold_leftFst :
       dl{ ⟨[ nsp[e₁] = e₂; ]⟩ ⇝ ⟨[ T se = e₂; T storage sp = nsp; T ie = e₁; sp[ie] = se; ]⟩ }
   | storageIndexWriteStorageRef_unfold_leftFst :
-      dl{ ⟨[ nsp[e] = sp2; ]⟩ ⇝ ⟨[ T storage sp = nsp; T ie = e; sp[ie] = sp2; ]⟩ }
+      dl{ ⟨[ nsp[e] = path; ]⟩ ⇝ ⟨[ T storage sp = nsp; T ie = e; sp[ie] = path; ]⟩ }
   | storageIndexWriteNonSimpleIndexCapture :
       dl{ ⟨[ sp[nse₁] = e; ]⟩ ⇝ ⟨[ T se = e; T ie = nse₁; sp[ie] = se; ]⟩ }
   | storageIndexWriteStorageRefNonSimpleIndexCapture :
-      dl{ ⟨[ sp[nse] = sp2; ]⟩ ⇝ ⟨[ T ie = nse; sp[ie] = sp2; ]⟩ }
+      dl{ ⟨[ sp[nse] = path; ]⟩ ⇝ ⟨[ T ie = nse; sp[ie] = path; ]⟩ }
   | storageRootWriteValueRhsCapture :
       dl{ ⟨[ gsp = nse; ]⟩ ⇝ ⟨[ T se = nse; gsp = se; ]⟩ }
   | fieldWriteValueRhsCapture :
@@ -226,7 +313,7 @@ inductive Taclet (C : Contract) (k : Nat) : Modality → Stmt C → Premise C �
       dl{ ⟨[ v = nse ⊕ e; ]⟩ ⇝ ⟨[ T se = nse; v = se ⊕ e; ]⟩ }
   /-- Not for `&&`/`||`: their right operand is evaluated only when the left
   does not decide (`logicalAndShortCircuitRhs`). -/
-  | binopUnfoldRight (hsc : BinOp.shortCircuits op = false) :
+  | binopUnfoldRight (hsc : BinOp.shortCircuits op = false := by side_cond) :
       dl{ ⟨[ v = se ⊕ nse; ]⟩ ⇝ ⟨[ T se' = nse; v = se ⊕ se'; ]⟩ }
   | logicalAndShortCircuitRhs :
       dl{ ⟨[ v = se && nse; ]⟩ ⇝ ⟨[ if (se) { v = nse; v = v && true; } else { v = false; }; ]⟩ }
@@ -307,8 +394,8 @@ inductive Taclet (C : Contract) (k : Nat) : Modality → Stmt C → Premise C �
       dl{ ⟨[ sp.push(se); ]⟩ ⇝
           { storage := save(save(storage, sp[sp.length], se), sp.length, sp.length + 1) } ⟨[ ]⟩ }
   | storagePushValueCopySource :
-      dl{ ⟨[ sp.push(sp2); ]⟩ ⇝
-          { storage := save(save(storage, sp[sp.length], find(storage, sp2)), sp.length,
+      dl{ ⟨[ sp.push(path); ]⟩ ⇝
+          { storage := save(save(storage, sp[sp.length], find(storage, path)), sp.length,
               sp.length + 1) } ⟨[ ]⟩ }
   | storagePushLengthSave :
       dl{ ⟨[ sp.push(); ]⟩ ⇝
@@ -471,6 +558,27 @@ def delabPremise : Delab := do
 
 attribute [delab app.Solidity.Premise.update, delab app.Solidity.Premise.unfold,
   delab app.Solidity.Premise.split, delab app.Solidity.Premise.done] delabPremise
+
+/-- The type without its `autoParam` hypotheses (a taclet's side conditions),
+which nothing after them depends on. -/
+partial def dropSide : Lean.Expr → Lean.Expr
+  | .forallE n t b bi =>
+    let b' := dropSide b
+    if t.isAppOfArity ``autoParam 2 && !b'.hasLooseBVar 0 then b'.lowerLooseBVars 1 1
+    else .forallE n t b' bi
+  | e => e
+
+/-- A taclet's side conditions stay out of sight: `#check @Taclet.x` prints
+its schema variables and its line, as `sideConds` read them off the line.
+`set_option pp.sol.dl false` shows them. -/
+@[delab forallE]
+def delabTacletSide : Delab := do
+  unless ← ppOn do failure
+  let e ← getExpr
+  unless e.getForallBody.isAppOf ``Taclet do failure
+  let e' := dropSide e
+  if e' == e then failure
+  withTheReader SubExpr (fun s => { s with expr := e' }) delab
 
 end Print
 
