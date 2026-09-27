@@ -135,7 +135,7 @@ def Ty.isStorageReferenceType (ty : Ty) : Bool :=
 
 The struct table and the type predicate that reads it live here rather than
 in `Semantics.lean` because they are facts about *static types*, and the
-typed AST needs one of them: `TypedStmt.Assign.mk` refuses a storage-to-storage
+typed AST needs one of them: `Src.copy` refuses a storage-to-storage
 copy whose type carries a mapping, which is solkey's
 `StorageReferenceTypes.containsMapping` behind `ParserUtils.parseAssignmentMaybe`
 and solc's own rule since 0.7.  They keep the `Semantics` namespace, since

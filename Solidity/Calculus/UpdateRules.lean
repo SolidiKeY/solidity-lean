@@ -1179,9 +1179,9 @@ locals.
 
 Example: for `x = 1; y = x;` the context `{ x := 1 }, { y := x }` becomes
 `{ x := 1 ‖ y := 1 }`. -/
-theorem Proves.merge {Γ : List (Hyp C)} {m : Modality} {U V : Upd C} {φ : Fml C}
-    (hU : U.envOnly = true) (h : Proves (Γ ++ [.upd m (U ++ V.subst U)]) φ) :
-    Proves (Γ ++ [.upd m U] ++ [.upd m V]) φ :=
+theorem Proves.merge {R : RuleSet} {Γ : List (Hyp C)} {m : Modality} {U V : Upd C} {φ : Fml C}
+    (hU : U.envOnly = true) (h : Proves R (Γ ++ [.upd m (U ++ V.subst U)]) φ) :
+    Proves R (Γ ++ [.upd m U] ++ [.upd m V]) φ :=
   .close fun σ => by
     have := h.sound σ
     simp only [List.append_assoc, List.cons_append, List.nil_append, Hyp.wrap_append,
@@ -1194,8 +1194,8 @@ theorem Proves.merge {Γ : List (Hyp C)} {m : Modality} {U V : Upd C} {φ : Fml 
 Example: for `alice.account.balance = 10;`, the context
 `{ se1 := 10 ‖ sp1 := alice.account ‖ storage := save(storage, alice.account.balance, 10) }`
 becomes `{ storage := save(storage, alice.account.balance, 10) }`. -/
-theorem Proves.simplify {Γ : List (Hyp C)} {m : Modality} {U : Upd C} {φ : Fml C}
-    (h : Proves (Γ ++ [.upd m (U.dropEffectless φ.vars)]) φ) : Proves (Γ ++ [.upd m U]) φ :=
+theorem Proves.simplify {R : RuleSet} {Γ : List (Hyp C)} {m : Modality} {U : Upd C} {φ : Fml C}
+    (h : Proves R (Γ ++ [.upd m (U.dropEffectless φ.vars)]) φ) : Proves R (Γ ++ [.upd m U]) φ :=
   .close fun σ => by
     have := h.sound σ
     simp only [Hyp.wrap_append, Hyp.wrap] at this ⊢

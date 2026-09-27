@@ -89,7 +89,7 @@ theorem Fml.stepAt_sound {k : Nat} :
     simp only [Fml.stepAt, Option.some.injEq] at h
     subst h
     have hv := freshVars_avoid hk
-    refine Premise.sound ((s.step k m).taclet.sound ?_) ω φ ?_ σ <;>
+    refine Premise.sound ((s.step k m).rule.sound ?_) ω φ ?_ σ <;>
       intro y hy <;> exact hv y (by simp [Fml.vars, Prog.vars, hy])
   | .tt, _, _, h, _ | .eq _ _, _, _, h, _ | .not _, _, _, h, _ => by
     simp [Fml.stepAt] at h

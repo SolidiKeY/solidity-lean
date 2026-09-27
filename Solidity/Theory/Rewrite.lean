@@ -45,7 +45,7 @@ beside its name:
   `selectStDelNodeFixedMap`: "a mapping member is kept".  `Semantics.Seg`
   carries no field sort, so the rule has no statement here
   (`Theory/Storage.lean`, "Delete"); the first is also unreachable, being a
-  copy `TypedStmt.Assign.mk` refuses.
+  copy `Src.copy` refuses.
 * **`FixedField`** — `delFieldFixed`, `selectStDelNodeFixed`: they pick
   `delNodeFixed` by the member's sort, and a `Seg` has none.  The three rules
   that read *through* `delNodeFixed` are stated

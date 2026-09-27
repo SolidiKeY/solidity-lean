@@ -5,8 +5,8 @@ import Solidity.Calculus.Completeness
 
 `Taclet` is a `Prop`, so "one rule per statement" is a statement about
 premises: two derivations of `s` leave the same premise
-(`Taclet.premise_unique`), and that premise is the one `Stmt.step` fires
-(`Taclet.eq_step`).  With `Stmt.complete`, every statement has exactly one
+(`Rule.premise_unique`), and that premise is the one `Stmt.step` fires
+(`Taclet.eq_step`, `LeanTaclet.eq_step`).  With `Stmt.complete`, every statement has exactly one
 rule.
 
 What makes it hold is the side conditions of `Rules.lean`: a constructor's
@@ -112,7 +112,7 @@ theorem Taclet.eq_step {s : Stmt C} {p : Premise C} (d : Taclet C k m s p) :
     p = (s.step k m).premise := by
   cases d <;> (try cases ‹Hole _ _›) <;> (try cases ‹MHole _ _›) <;> (try cases ‹VHole _ _›)
   -- a call: whether an argument is not ready picks the rule
-  case functionCallArgCapture h | functionBodyExpand h =>
+  case functionBodyExpand h =>
     simp only [Stmt.step, callStep]
     split <;> simp_all <;> subst_vars <;> rfl
   all_goals settle_side
@@ -140,11 +140,26 @@ theorem Taclet.eq_step {s : Stmt C} {p : Premise C} (d : Taclet C k m s p) :
     repeat' split
     all_goals rfl
 
+/-- The rules solkey lacks are `Stmt.step`'s too: a call with an argument
+that is not ready captures it. -/
+theorem LeanTaclet.eq_step {s : Stmt C} {p : Premise C} (d : LeanTaclet C k m s p) :
+    p = (s.step k m).premise := by
+  cases d with
+  | functionCallArgCapture h =>
+    simp only [Stmt.step, callStep]
+    split <;> simp_all <;> subst_vars <;> rfl
+
+theorem Rule.eq_step {s : Stmt C} {p : Premise C} (d : Rule C k m s p) :
+    p = (s.step k m).premise := by
+  cases d with
+  | key d => exact d.eq_step
+  | lean d => exact d.eq_step
+
 /-- **At most one rule per statement**: two derivations of `s` leave the same
 premise.  `alice.age = 10;` is `storageFieldWriteSave` and nothing else,
 `people[i].age = 10;` is `storageFieldWrite_unfold_leftFst` and nothing else. -/
-theorem Taclet.premise_unique {s : Stmt C} {p p' : Premise C} (d : Taclet C k m s p)
-    (d' : Taclet C k m s p') : p = p' := by
+theorem Rule.premise_unique {s : Stmt C} {p p' : Premise C} (d : Rule C k m s p)
+    (d' : Rule C k m s p') : p = p' := by
   rw [d.eq_step, d'.eq_step]
 
 /-! `if (b) { } else { }` with `b` a local has one rule, `ifElseSplit`:

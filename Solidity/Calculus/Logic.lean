@@ -17,6 +17,11 @@ update moves it into the context, so the next rule sees the statement at the
 front again, with nothing to look through.  `Proves.sound` says once and for
 all that a derivation is a proof.
 
+The judgement is indexed by the rules it may use (`RuleSet`): every
+constructor takes solkey's `Taclet`s, and `unfoldLean` alone the rule solkey
+lacks (`LeanTaclet`), at `.all`.  `Γ ⊢ φ` is the whole calculus, `Γ ⊢ₖ φ`
+solkey's; `Calculus/SolkeyFragment.lean` says when the two agree.
+
 Fresh names are numbered above every index in sight (`Hyp.fresh`), which is
 what discharges the freshness hypothesis of `Taclet.sound`: no rule of a
 derivation carries a side condition.
@@ -164,40 +169,58 @@ def Hyp.wrap : List (Hyp C) → Fml C → Fml C
 /-- Fresh names are numbered one above every index in the whole sequent. -/
 def Hyp.fresh (Γ : List (Hyp C)) (φ : Fml C) : Nat := maxIdx (Hyp.wrap Γ φ).vars + 1
 
-/-- `Γ ⊢ φ`: the calculus proves `φ` in the context `Γ`. -/
-inductive Proves : List (Hyp C) → Fml C → Prop
+/-- Which rules a derivation may use: solkey's (`Taclet`), or all of them
+(`LeanTaclet` too). -/
+inductive RuleSet where
+  | solkey
+  | all
+  deriving DecidableEq, Repr
+
+/-- `Γ ⊢ φ`: the calculus proves `φ` in the context `Γ`; `Γ ⊢ₖ φ`: solkey's
+rules alone do. -/
+inductive Proves : RuleSet → List (Hyp C) → Fml C → Prop
   /-- `impRight`: the precondition moves into the context. -/
-  | intro {Γ : List (Hyp C)} {a φ : Fml C} (h : Proves (Γ ++ [.pre a]) φ) : Proves Γ (.imp a φ)
+  | intro {R : RuleSet} {Γ : List (Hyp C)} {a φ : Fml C} (h : Proves R (Γ ++ [.pre a]) φ) :
+      Proves R Γ (.imp a φ)
   /-- A taclet that produces an update: the update joins the context. -/
-  | update {Γ : List (Hyp C)} {m : Modality} {s : Stmt C} {ω : Prog C} {φ : Fml C} {U : Upd C}
+  | update {R : RuleSet} {Γ : List (Hyp C)} {m : Modality} {s : Stmt C} {ω : Prog C} {φ : Fml C}
+      {U : Upd C}
       (d : Taclet C (Hyp.fresh Γ (.modal m (s :: ω) φ)) m s (.update U))
-      (h : Proves (Γ ++ [.upd m U]) (.modal m ω φ)) : Proves Γ (.modal m (s :: ω) φ)
+      (h : Proves R (Γ ++ [.upd m U]) (.modal m ω φ)) : Proves R Γ (.modal m (s :: ω) φ)
   /-- A taclet that produces statements: they replace the first one. -/
-  | unfold {Γ : List (Hyp C)} {m : Modality} {s : Stmt C} {ω : Prog C} {φ : Fml C} {P : Prog C}
+  | unfold {R : RuleSet} {Γ : List (Hyp C)} {m : Modality} {s : Stmt C} {ω : Prog C} {φ : Fml C}
+      {P : Prog C}
       (d : Taclet C (Hyp.fresh Γ (.modal m (s :: ω) φ)) m s (.unfold P))
-      (h : Proves Γ (.modal m (P ++ ω) φ)) : Proves Γ (.modal m (s :: ω) φ)
+      (h : Proves R Γ (.modal m (P ++ ω) φ)) : Proves R Γ (.modal m (s :: ω) φ)
   /-- A taclet that branches: two goals, one per condition, and under the
   diamond the fact that one of the conditions holds. -/
-  | split {Γ : List (Hyp C)} {m : Modality} {s : Stmt C} {ω : Prog C} {φ : Fml C}
+  | split {R : RuleSet} {Γ : List (Hyp C)} {m : Modality} {s : Stmt C} {ω : Prog C} {φ : Fml C}
       {c c' : Fml C} {P Q : Prog C}
       (d : Taclet C (Hyp.fresh Γ (.modal m (s :: ω) φ)) m s (.split c c' P Q))
-      (thn : Proves (Γ ++ [.pre c]) (.modal m (P ++ ω) φ))
-      (els : Proves (Γ ++ [.pre c']) (.modal m (Q ++ ω) φ))
-      (cov : Proves Γ (Premise.cover m c c')) : Proves Γ (.modal m (s :: ω) φ)
+      (thn : Proves R (Γ ++ [.pre c]) (.modal m (P ++ ω) φ))
+      (els : Proves R (Γ ++ [.pre c']) (.modal m (Q ++ ω) φ))
+      (cov : Proves R Γ (Premise.cover m c c')) : Proves R Γ (.modal m (s :: ω) φ)
   /-- A taclet that closes the modality (`revertBox`, `revertDiamond`): what
   is left is `true` or `false`. -/
-  | done {Γ : List (Hyp C)} {m : Modality} {s : Stmt C} {ω : Prog C} {φ : Fml C} {b : Bool}
+  | done {R : RuleSet} {Γ : List (Hyp C)} {m : Modality} {s : Stmt C} {ω : Prog C} {φ : Fml C}
+      {b : Bool}
       (d : Taclet C (Hyp.fresh Γ (.modal m (s :: ω) φ)) m s (.done b))
-      (h : Proves Γ ((Premise.done b).fml m ω φ)) : Proves Γ (.modal m (s :: ω) φ)
+      (h : Proves R Γ ((Premise.done b).fml m ω φ)) : Proves R Γ (.modal m (s :: ω) φ)
+  /-- A rule solkey does not have, producing statements. -/
+  | unfoldLean {Γ : List (Hyp C)} {m : Modality} {s : Stmt C} {ω : Prog C} {φ : Fml C}
+      {P : Prog C} (d : LeanTaclet C (Hyp.fresh Γ (.modal m (s :: ω) φ)) m s (.unfold P))
+      (h : Proves .all Γ (.modal m (P ++ ω) φ)) : Proves .all Γ (.modal m (s :: ω) φ)
   /-- `emptyModality`: `⟨⟩ φ` and `[] φ` are `φ`. -/
-  | empty {Γ : List (Hyp C)} {m : Modality} {φ : Fml C} (h : Proves Γ φ) :
-      Proves Γ (.modal m [] φ)
+  | empty {R : RuleSet} {Γ : List (Hyp C)} {m : Modality} {φ : Fml C} (h : Proves R Γ φ) :
+      Proves R Γ (.modal m [] φ)
   /-- Leave the calculus: what is left is proved in the logic. -/
-  | close {Γ : List (Hyp C)} {φ : Fml C} (h : Valid (Hyp.wrap Γ φ)) : Proves Γ φ
+  | close {R : RuleSet} {Γ : List (Hyp C)} {φ : Fml C} (h : Valid (Hyp.wrap Γ φ)) : Proves R Γ φ
 
 namespace Proves
-scoped notation:25 Γ:26 " ⊢ " φ:26 => Proves Γ φ
-scoped notation:25 "⊢ " φ:26 => Proves [] φ
+scoped notation:25 Γ:26 " ⊢ " φ:26 => Proves RuleSet.all Γ φ
+scoped notation:25 "⊢ " φ:26 => Proves RuleSet.all [] φ
+scoped notation:25 Γ:26 " ⊢ₖ " φ:26 => Proves RuleSet.solkey Γ φ
+scoped notation:25 "⊢ₖ " φ:26 => Proves RuleSet.solkey [] φ
 end Proves
 
 theorem Hyp.wrap_append (Γ Δ : List (Hyp C)) (φ : Fml C) :
@@ -251,6 +274,15 @@ theorem Taclet.sound_in {Γ : List (Hyp C)} {m : Modality} {s : Stmt C} {ω : Pr
   refine Premise.sound (d.sound ?_) ω φ ?_ σ <;>
     intro y hy <;> exact hv y (Hyp.vars_wrap Γ (by simp [Fml.vars, Prog.vars, hy]))
 
+/-- `Taclet.sound_in` for a rule solkey does not have. -/
+theorem LeanTaclet.sound_in {Γ : List (Hyp C)} {m : Modality} {s : Stmt C} {ω : Prog C}
+    {φ : Fml C} {p : Premise C} (d : LeanTaclet C (Hyp.fresh Γ (.modal m (s :: ω) φ)) m s p) :
+    ∀ σ, holds σ (p.fml m ω φ) → holds σ (.modal m (s :: ω) φ) := by
+  have hv := freshVars_avoid (Nat.lt_succ_self (maxIdx (Hyp.wrap Γ (.modal m (s :: ω) φ)).vars))
+  intro σ
+  refine Premise.sound (d.sound ?_) ω φ ?_ σ <;>
+    intro y hy <;> exact hv y (Hyp.vars_wrap Γ (by simp [Fml.vars, Prog.vars, hy]))
+
 open Proves in
 /-- **Soundness of the calculus**: a derivation of `Γ ⊢ φ` proves `φ`
 wrapped in its context `Γ`.
@@ -258,18 +290,20 @@ wrapped in its context `Γ`.
 Example: from the derivation of `a == 1 ⟹ ⟨ x = a; ⟩ x == 1` (one
 `localValueAssign`, `empty`, then `close`) follows
 `⊨ a == 1 → ⟨ x = a; ⟩ x == 1`. -/
-theorem Proves.sound {Γ : List (Hyp C)} {φ : Fml C} (h : Γ ⊢ φ) : Valid (Hyp.wrap Γ φ) := by
+theorem Proves.sound {R : RuleSet} {Γ : List (Hyp C)} {φ : Fml C} (h : Proves R Γ φ) :
+    Valid (Hyp.wrap Γ φ) := by
   induction h with
   | intro _ ih => simpa [Hyp.wrap_append, Hyp.wrap] using ih
   | update d _ ih =>
     rw [Hyp.wrap_append] at ih
     exact fun σ => Hyp.wrap_mono d.sound_in _ σ (ih σ)
   | unfold d _ ih | done d _ ih => exact fun σ => Hyp.wrap_mono d.sound_in _ σ (ih σ)
+  | unfoldLean d _ ih => exact fun σ => Hyp.wrap_mono d.sound_in _ σ (ih σ)
   | split d _ _ _ ih₁ ih₂ ih₃ =>
     rw [Hyp.wrap_append] at ih₁ ih₂
     exact fun σ => Hyp.wrap_mono₃ (fun τ h₁ h₂ h₃ => d.sound_in τ ⟨h₁, h₂, h₃⟩) _ σ
       (ih₁ σ) (ih₂ σ) (ih₃ σ)
-  | @empty Γ m φ _ ih =>
+  | @empty _ Γ m φ _ ih =>
     exact fun σ => Hyp.wrap_mono (ψ := φ) (φ := .modal m [] φ)
       (fun _ h => by cases m <;> exact h) Γ σ (ih σ)
   | close h => exact h
@@ -277,6 +311,28 @@ theorem Proves.sound {Γ : List (Hyp C)} {φ : Fml C} (h : Γ ⊢ φ) : Valid (H
 open Proves in
 /-- A derivation from the empty context proves validity: `⊢ φ` gives `⊨ φ`. -/
 theorem Proves.valid {φ : Fml C} (h : ⊢ φ) : Valid φ := h.sound
+
+/-- `unfold` by whichever rule `Rule` names: `apply unfoldRule
+(Stmt.step _ _ _).rule` takes the strategy's rule without naming it. -/
+theorem Proves.unfoldRule {Γ : List (Hyp C)} {m : Modality} {s : Stmt C} {ω : Prog C}
+    {φ : Fml C} {P : Prog C} (d : Rule C (Hyp.fresh Γ (.modal m (s :: ω) φ)) m s (.unfold P))
+    (h : Proves .all Γ (.modal m (P ++ ω) φ)) : Proves .all Γ (.modal m (s :: ω) φ) := by
+  cases d with
+  | key d => exact .unfold d h
+  | lean d => exact .unfoldLean d h
+
+/-- solkey's rules are some of the rules: `Γ ⊢ₖ φ` gives `Γ ⊢ φ`. -/
+theorem Proves.toAll {R : RuleSet} {Γ : List (Hyp C)} {φ : Fml C} (h : Proves R Γ φ) :
+    Proves .all Γ φ := by
+  induction h with
+  | intro _ ih => exact .intro ih
+  | update d _ ih => exact .update d ih
+  | unfold d _ ih => exact .unfold d ih
+  | unfoldLean d h _ => exact .unfoldLean d h
+  | split d _ _ _ ih₁ ih₂ ih₃ => exact .split d ih₁ ih₂ ih₃
+  | done d _ ih => exact .done d ih
+  | empty _ ih => exact .empty ih
+  | close h => exact .close h
 
 /-! ## Printing sequents
 
@@ -294,18 +350,18 @@ def ppHyp? (e : Lean.Expr) : MetaM (Option (TSyntax `dl_hyp)) := do
   | Hyp.upd _ _ U => return some (← `(dl_hyp| $(← ppUpd U):dl_upd))
   | _ => return none
 
-/-- `Proves Γ φ`: `dl{ Γ ⟹ φ }`. -/
+/-- `Proves R Γ φ`: `dl{ Γ ⟹ φ }`, under either rule set. -/
 @[delab app.Solidity.Proves]
 def delabProves : Delab := do
   unless ← ppOn do failure
   let e ← getExpr
-  guard (e.getAppNumArgs == 3)
-  let some hs ← listElems? (e.getArg! 1) | failure
+  guard (e.getAppNumArgs == 4)
+  let some hs ← listElems? (e.getArg! 2) | failure
   let mut out := #[]
   for h in hs do
     let some h ← ppHyp? h | failure
     out := out.push h
-  let φ ← ppFml (e.getArg! 2)
+  let φ ← ppFml (e.getArg! 3)
   guard !(isEscape φ)
   `(dl{ $[$out],* ⟹ $φ:dl_fml })
 

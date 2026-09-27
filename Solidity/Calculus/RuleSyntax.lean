@@ -1141,7 +1141,8 @@ macro_rules
   | `(dl_schema{ $φ:dl_fml }) => schemaFml φ
   | `(dl{ $φ:dl_fml }) => schemaFml φ
   | `(dl{ $[$hs:dl_hyp],* ⟹ $φ:dl_fml }) => do
-    `($(mkIdent `Solidity.Proves) [$(← hs.mapM schemaHyp),*] $(← schemaFml φ))
+    `($(mkIdent `Solidity.Proves) $(mkIdent `Solidity.RuleSet.all) [$(← hs.mapM schemaHyp),*]
+      $(← schemaFml φ))
   | `(dl{ ⟨[ $s:sol_stmt; ]⟩ ⇝ $p:dl_premise }) => schemaTaclet (schemaIdent "m") s p
   | `(dl{ [ $s:sol_stmt; ] ⇝ $p:dl_premise }) => do schemaTaclet (← `(Modality.box)) s p
   | `(dl{ ⟨ $s:sol_stmt; ⟩ ⇝ $p:dl_premise }) => do schemaTaclet (← `(Modality.diamond)) s p

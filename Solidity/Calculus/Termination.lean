@@ -21,7 +21,7 @@ index, an operand or a source is charged, and a declaration's initializer,
 which no rule captures, is not.
 
 The smallness is proved about what `Stmt.step` fires (`Stmt.step_smaller`)
-and holds of **every derivation** (`Taclet.smaller`): a statement has one
+and holds of **every derivation** (`Rule.smaller`): a statement has one
 rule, and it is the dispatcher's (`Taclet.eq_step`).  The side conditions
 are what make it so: without them `storageFieldRead_unfold_rightFst` would
 hold of `lhs = sp.fld` too, leaving `lhs = sp'.fld`, as heavy as it
@@ -880,11 +880,11 @@ theorem Stmt.step_smaller (k : Nat) (m : Modality) :
 
 /-- **Every rule makes the program smaller**, as a fact about the rules
 rather than the dispatcher: any derivation of `s` is the one `Stmt.step`
-fires (`Taclet.eq_step`).  `people[i].age = 10;` has only
+fires (`Rule.eq_step`).  `people[i].age = 10;` has only
 `storageFieldWrite_unfold_leftFst`, whose three statements weigh `14`
 against its `23`. -/
-theorem Taclet.smaller {k : Nat} {m : Modality} {s : Stmt C} {p : Premise C}
-    (d : Taclet C k m s p) : p.Smaller s := by
+theorem Rule.smaller {k : Nat} {m : Modality} {s : Stmt C} {p : Premise C}
+    (d : Rule C k m s p) : p.Smaller s := by
   rw [d.eq_step]
   exact Stmt.step_smaller k m s
 

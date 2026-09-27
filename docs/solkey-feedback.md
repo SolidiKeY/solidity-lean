@@ -124,20 +124,21 @@ the sections further down carry the details.
    statement no rule could run cannot be written. The untyped layer's 26
    residue shapes are classified in `docs/kernel-port.md` ("`ResidueShape`
    verdicts"). solkey's docs could carry the same statement: which program
-   shapes its front end rejects, so that no taclet needs to handle them.
+   shapes its front end rejects, so that no taclet needs to handle them
+   ("What solkey must refuse" below is the list).
 
 6. **`unfoldArgument` (Lean `functionCallArgCapture`).** Already on
    solkey's backlog (`docs/net.md` §5.1). The Lean rule plus its
    inlining-relative soundness statement is a worked design, and its
    hypotheses are the taclet's side conditions: the captured argument
    mentions no callee parameter, the callee body and result are free of
-   the fresh `pv`. That its Lean proof is still a documented `sorry`
-   (`functionCallArgCapture_sound_inlined`) is an argument for a
-   calculus rule rather than a user-side rewrite.
+   the fresh `pv`. It is proved (`LeanTaclet.sound`), and it is the one
+   rule of the Lean calculus solkey lacks (see "What solkey must refuse"
+   below).
 
 7. **Determinism under the block modality.** solkey's rule set is
    mutually exclusive per modality (Calculus/Uniqueness.lean,
-   `Taclet.premise_unique`), but under the block modality a box/diamond
+   `Rule.premise_unique`), but under the block modality a box/diamond
    twin pair applies at once. The twelve twin pairs are effect-identical
    up to mode (`CandidateStep.twinEffects`); KeY's strategy should
    either prefer one deterministically or the taclets should share a
@@ -282,13 +283,48 @@ cheaper to maintain:
   algebra; the equations are a per-taclet test oracle solkey could run
   on its own `.key` examples.
 
+## What solkey must refuse, and the one rule it lacks (2026-09-27)
+
+The Lean calculus is two lists (`Calculus/Rules.lean`): `Taclet`, 152
+constructors, each transcribing solkey taclets, and `LeanTaclet`, the rules
+solkey does not have — one, `functionCallArgCapture`.  Both are sound for
+everything the typed syntax can write (`Rule.sound`).  On the programs whose
+calls take simple arguments (`Stmt.inSolkey`, `Calculus/SolkeyFragment.lean`)
+solkey's list alone derives what the whole calculus does
+(`Proves.toSolkey`).  So solkey is sound on a program if it gains the rule or
+refuses the program, and if it refuses what the typed syntax cannot write:
+
+| solkey should refuse | Lean |
+|---|---|
+| a storage-to-storage copy of a type holding a mapping | `Src.copy`'s `mapFree` |
+| a copy into memory of such a type; `new` of anything but a dynamic array of mapping-free elements | `MRhs.copy`, `RefTy.newArrOk` |
+| a default (`push()`, `T memory m;`, `delete m`) of a type whose default is ill-formed | `defaultOkS` |
+| `**=` and other compound operators outside `+= -= *= /= %=` | `opAssign`'s `hasCompoundAssign` |
+| `op=`, `++`, `--` on a `bool` | `isNumeric` |
+| a compound target at a non-simple index (no taclet takes one) | `OpLoc.index`'s `Simple` index |
+| `y = nsp.f++;` with a non-simple receiver (no taclet takes one) | `assignIncDec`'s `recvSimple` |
+| a call whose argument reads an earlier parameter (sequential binding differs from solc) | `Arg.separatedFrom` |
+| recursion; reference parameters; a `return` before the end; a call inside an expression | the elaborator; `Arg`, `CallRet` |
+| `delete` of a mapping or through a storage alias | `Stmt.delete` takes a `Loc` |
+| a storage reference copied into a memory member or element | `MSrc` has no copy form |
+| `push`/`pop` on a memory or fixed-size array | `Stmt.push`/`pop` at `.array` |
+| effects inside a value: `++` under `&&`/`||`, in a conditional's branch | `Val` has no effect; the elaborator hoists the rest |
+| a conditional of reference type | the elaborator |
+
+Three things are not syntax, and a proof in solkey can be wrong on the chain
+without them: arithmetic is checked (ranked item 2), a `delete` keeps a
+struct's mapping members (`solc-alignment.md`), and storage is well-formed
+(`Counterexamples/WellTypedNecessity.lean`).  A rule whose premise differs
+from its taclet's without changing the syntax (bounds as a revert inside the
+update, `assertSimple`'s branch) is in `docs/lean-key-rule-map.md`.
+
 ## Candidate taclets
 
 - **`unfoldArgument`** (Lean `functionCallArgCapture`): hoist the leftmost
   complex argument of a function call into a fresh `pv` before
   `functionBodyExpand`. Already on solkey's own backlog (`docs/net.md`
   §5.1); the Lean rule plus its soundness proof
-  (`RuleSoundness.functionCallArgCapture_sound`) is a worked design.
+  (`LeanTaclet.sound`) is a worked design.
 - **Literal-condition if rules** (Lean `ifElseTrue` / `ifElseFalse`): ✅ implemented
   2026-09-10 as `ifTrue`/`ifFalse`/`ifElseTrue`/`ifElseFalse`, in
   `concrete_solidity` rather than `simplify_prog` so they outrank the split.
@@ -634,7 +670,7 @@ that a struct written over a location keeps the location's mapping members.
 That is the one case neither side can reach: a storage-to-storage copy of a
 mapping-carrying type is rejected by solc ≥ 0.7, by
 `ParserUtils.parseAssignmentMaybe` (`MAPPING_COPY_ERROR`), and cannot be built
-here (`TypedStmt.Assign.mk`'s `mapFree`).  On every program the two theories
+here (`Src.copy`'s `mapFree`).  On every program the two theories
 agree, and the non-collapsing leaf costs a term that grows with every write
 and five read-through taclets where the signature has one rule,
 `saveEmptyPath` (`save(st, ∅, v) = (Struct) v`).  `Theory/Storage.lean` keeps

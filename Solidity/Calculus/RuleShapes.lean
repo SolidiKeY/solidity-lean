@@ -335,7 +335,6 @@ def tacletOrigins : List (Lean.Name × KeyOrigin) := [
   (``Taclet.revertBox, .taclet .revertBox),
   (``Taclet.revertDiamond, .taclet .revertDiamond),
   -- Calls
-  (``Taclet.functionCallArgCapture, .leanOnly),
   (``Taclet.functionBodyExpand, .taclet .functionBodyExpand) ]
 
 #check_constructor_table Taclet, tacletOrigins.map Prod.fst
@@ -395,19 +394,20 @@ theorem claimedTaclets_count : claimedTaclets.length = 300 := by decide +kernel
 
 theorem unclaimedTaclets_count : unclaimedTaclets.length = 11 := by decide +kernel
 
-/-! ## The rows with no taclet
+/-! ## The rules with no taclet
 
-A `leanOnly` row is a claim that upstream has no counterpart.  There is one:
+A rule upstream has no counterpart for is a `LeanTaclet`, not a `Taclet`, so
+every row above claims a taclet.  There is one:
 `functionCallArgCapture`, printed as `unfoldArgument`, which solkey's
 `docs/net.md` lists as missing (its `ExpandFunctionBody` binds the parameters
 to the arguments as they are; here a parameter is bound to a ready argument
-only, so that inlining is exact).  The constructors that used to be Lean's own
-(front-end lowering of push sugar, scratch aliases, `**=`) went with the
-untyped syntax.  The count is kept so that one added later has to say so
-here. -/
+only, so that inlining is exact).  The list is checked against the
+constructors, so one added later has to say so here. -/
 
-theorem leanOnly_count :
-    (tacletOrigins.filter fun r => r.2 == .leanOnly).length = 1 := by decide +kernel
+/-- Every `LeanTaclet` constructor. -/
+def leanTaclets : List Lean.Name := [``LeanTaclet.functionCallArgCapture]
+
+#check_constructor_table LeanTaclet, leanTaclets
 
 /-! ## `\heuristics` agree within a row
 
@@ -422,7 +422,7 @@ def heuristics (o : KeyOrigin) : List Heuristic :=
   (o.taclets.map KeyTaclet.heuristic).eraseDups
 
 theorem heuristics_agree :
-    tacletOrigins.all (fun r => (heuristics r.2).length == 1 || r.2 == .leanOnly) = true := by
+    tacletOrigins.all (fun r => (heuristics r.2).length == 1) = true := by
   decide +kernel
 
 theorem concrete_unclaimed :

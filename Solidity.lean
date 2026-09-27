@@ -20,6 +20,7 @@ import Solidity.Calculus.RuleSoundness
 import Solidity.Calculus.Logic
 import Solidity.Calculus.Callback
 import Solidity.Calculus.Symex
+import Solidity.Calculus.SolkeyFragment
 import Solidity.Calculus.Notation
 import Solidity.Calculus.Close
 import Solidity.Calculus.CloseTests
@@ -69,3 +70,4 @@ import Solidity.Counterexamples.WellTypedNecessity
 import Solidity.Counterexamples.DeleteFamilyGenericOverlap
 import Solidity.Counterexamples.StaticRuntimeSort
 import Solidity.Evm.Examples
+import Solidity.Theorems

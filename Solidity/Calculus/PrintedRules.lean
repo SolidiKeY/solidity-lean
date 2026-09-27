@@ -713,12 +713,18 @@ def printedOrigins : List (Lean.Name × PrintedOrigin) := [
   (``Taclet.assertSimple, .printed .assertSimple),
   (``Taclet.revertBox, .printed .revertBox),
   (``Taclet.revertDiamond, .printed .revertDiamond),
-  -- Calls: none printed; solkey has `functionBodyExpand`, and the
-  -- capture of an argument (its `unfoldArgument`) has no taclet either
-  (``Taclet.functionCallArgCapture, .leanOnly .calculus),
+  -- Calls: none printed; solkey has `functionBodyExpand`
   (``Taclet.functionBodyExpand, .leanOnly .keyTier) ]
 
 #check_constructor_table Taclet, printedOrigins.map Prod.fst
+
+/-- The rules solkey does not have (`LeanTaclet`), and the printed rule each is.
+The capture of an argument (`unfoldArgument`) has no taclet and
+no printed rule. -/
+def leanPrintedOrigins : List (Lean.Name × PrintedOrigin) := [
+  (``LeanTaclet.functionCallArgCapture, .leanOnly .calculus) ]
+
+#check_constructor_table LeanTaclet, leanPrintedOrigins.map Prod.fst
 
 /-- The callback taclets and the two printed `transferWithCallback` rules. -/
 def callbackPrintedOrigins : List (Lean.Name × PrintedOrigin) := [
@@ -731,7 +737,7 @@ def callbackPrintedOrigins : List (Lean.Name × PrintedOrigin) := [
 
 /-- Whether some row names the printed rule. -/
 def claims (p : PrintedRule) : Bool :=
-  (printedOrigins ++ callbackPrintedOrigins).any fun r => r.2.rules.contains p
+  (printedOrigins ++ leanPrintedOrigins ++ callbackPrintedOrigins).any fun r => r.2.rules.contains p
 
 /-- Every printed rule some row names, in `PrintedRule.all`'s order. -/
 def claimedPrintedRules : List PrintedRule := PrintedRule.all.filter claims
@@ -766,7 +772,7 @@ theorem unclaimedRules_count : unclaimedRules.length = 7 := by decide +kernel
 
 /-- The constructors whose origin is `leanOnly why`. -/
 def leanOnlyRows (why : LeanOnlyReason) : List Lean.Name :=
-  (printedOrigins.filter fun r => r.2 == .leanOnly why).map Prod.fst
+  ((printedOrigins ++ leanPrintedOrigins).filter fun r => r.2 == .leanOnly why).map Prod.fst
 
 theorem leanOnly_keyTier_count : (leanOnlyRows .keyTier).length = 33 := by decide +kernel
 

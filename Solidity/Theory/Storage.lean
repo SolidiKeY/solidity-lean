@@ -50,9 +50,8 @@ of that name below says how).  These are the rules `structRules.key` had before 
 `copyAt`/`save` fold (solkey `c80a54494c`/`8c5c69ca25`); the fold's
 non-collapsing leaf, read through by member sort so that a struct written over
 a location keeps the location's mappings, describes programs no front end
-admits, and this package refuses them one level up: `TypedStmt.Assign.mk`
-demands a mapping-free type for a storage-to-storage copy and
-`stmtTypingOk` states the same predicate.
+admits, and this package refuses them one level up: `Src.copy`
+demands a mapping-free type for a storage-to-storage copy.
 
 Reads are **total**, as KeY's are: reading off the store is `st mtSt`, the
 `Struct` default, and the caller's cast makes it the sort's default
@@ -281,7 +280,7 @@ different term the two agree on every read a mapping-free program can make:
   cleared element reads as the default everywhere (`selectOnSaveEmptyIndexClear`)
   and the kept one is what was there (`selectOnSaveEmptyIndexKeep`);
 * `Map` is not stated: its left-hand side is a copy of a mapping-carrying
-  type, which `TypedStmt.Assign.mk` refuses, and a `Seg` carries no
+  type, which `Src.copy` refuses, and a `Seg` carries no
   `MapField` to state it with. -/
 
 /-- **`selectOnSaveEmptyRef`** — `selectSt<[Struct]>(save(st, nil, v), rf) ⇝

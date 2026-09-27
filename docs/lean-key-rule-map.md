@@ -32,8 +32,9 @@ The correspondence below is not this file's alone to keep straight;
 - **`callbackOrigins`** — the same for `CallbackTaclet`'s two constructors.
 - **`taclets_partitioned`** — every one of the 311 taclets is claimed by some
   row or excused, never both: `claimedTaclets_count = 300`,
-  `unclaimedTaclets_count = 11`.  One row claims no taclet (`leanOnly_count =
-  1`): `functionCallArgCapture`, below. A taclet may be claimed by two constructors
+  `unclaimedTaclets_count = 11`.  Every row claims a taclet: a rule with none
+  is a `LeanTaclet`, not a `Taclet` (`RuleShapes.leanTaclets`), and there is
+  one, `functionCallArgCapture`, below. A taclet may be claimed by two constructors
   (`memoryFieldWrite`/`memoryIndexWriteArray` by the value write and the
   reference copy; the member reads by the `.length` rules, since KeY reads
   `sp.length` as the member `length`) — the tables below list both.
@@ -51,7 +52,7 @@ over a location keeps the location's mapping members.
 `save(st, ∅, v) = (Struct) v` — because the two
 readings differ only on a storage-to-storage copy of a mapping-carrying type,
 which solc ≥ 0.7 and solkey's own parser reject and this package's
-`TypedStmt.Assign.mk` cannot build. `docs/solkey-feedback.md` carries the
+`Src.copy` cannot build. `docs/solkey-feedback.md` carries the
 request that solkey drop the fold.
 
 ## Status legend
@@ -65,15 +66,15 @@ request that solkey drop the fold.
   covers in a single step.
 - **`unclaimed`** — no constructor claims this taclet; the note gives the
   reason from `RuleShapes.unclaimedTaclets`.
-- **`Lean only`** — a constructor that transcribes no taclet (a `leanOnly`
-  row); the note says why the calculus has it.
+- **`Lean only`** — a `LeanTaclet` constructor: a rule that transcribes no
+  taclet; the note says why the calculus has it.
 
 ## Modality / sequent rules
 
 | KeY taclet | `Taclet` constructor | Status | Notes |
 | --- | --- | --- | --- |
 | `functionBodyExpand` | `functionBodyExpand` | same | a call carries its callee inlined (`Stmt.call`, KeY's `FunctionBodyStatement`), and with every argument simple the premise is KeY's `expand_function_body`: the parameters declared with the arguments, the return variable declared, the body, `res = r`. The parameters are the elaborator's fresh names, so the fresh renaming KeY's transformer does at the rule is done once, at elaboration |
-| — | `functionCallArgCapture` | Lean only | `unfoldArgument`, which solkey's `docs/net.md` lists as missing: the leftmost argument that is not simple is captured into a fresh `se` first. KeY's expansion binds a parameter to any expression; here `functionBodyExpand` takes simple ones, so that `Stmt.step` has one rule per call and the capture is its own step |
+| — | `LeanTaclet.functionCallArgCapture` | Lean only | `unfoldArgument`, which solkey's `docs/net.md` lists as missing: the leftmost argument that is not simple is captured into a fresh `se` first. KeY's expansion binds a parameter to any expression; here `functionBodyExpand` takes simple ones, so that `Stmt.step` has one rule per call and the capture is its own step |
 | `emptyModality` | — | unclaimed | a program is a list of statements with branch bodies inlined, so there is no nested block to erase; a derivation reaching `⟨[ ]⟩` is the Lean analogue |
 | `blockEmpty` | — | unclaimed | no `{} ; rest` to find, for the same reason |
 | `revertDiamond` | `revertDiamond` | same | the diamond closes to `false`: a reverted run satisfies no diamond formula |
@@ -481,7 +482,7 @@ length), `selectStDelNodeIndexStruct` became length-guarded, and
 | `selectOnSaveEmptyRef`, `selectOnSaveEmptyFixed` | `selectOnSaveEmptyRef` | done, for every `Seg`: the right-hand side collapses to the pre-fold one |
 | `selectOnSaveEmptyIndexStruct` | `selectOnSaveEmptyIndexStruct`, `selectOnSaveEmptyIndexClear`, `selectOnSaveEmptyIndexKeep` | done: the in-bounds branch as stated; the clear and keep branches under the length invariant (nothing stored past an array's length), the clear one at every primitive read below the element |
 | `selectOnSaveEmptyDefault` (upstream it is `selectOnSaveEmpty`'s primitive case) | `selectOnSaveEmpty` | done |
-| `selectOnSaveEmptyMap` | — | **arch**: upstream a mapping member of a written location stays the location's own; here the leaf collapses and a mapping member is a subtree like any other. Unreachable — solc ≥ 0.7 and solkey's own parser reject the copy, and `TypedStmt.Assign.mk` cannot build it |
+| `selectOnSaveEmptyMap` | — | **arch**: upstream a mapping member of a written location stays the location's own; here the leaf collapses and a mapping member is a subtree like any other. Unreachable — solc ≥ 0.7 and solkey's own parser reject the copy, and `Src.copy` cannot build it |
 | `selectOnSaveCons` | `selectOnSaveCons` | done, and **unconditional** (a total definition needs no `isStruct` guard) |
 | `delFieldRef`, `delFieldIndexStruct` | `delFieldRef`, `delFieldIndexStruct` | done: `delField s a = delValue (selectSt s a)`, the reset picked by the value's sort since a `Seg` has none |
 | `delFieldDefault` | `delFieldDefault`, `delFieldDefault_asBool` | done |
@@ -523,7 +524,7 @@ and `find` reads it back at the caller's sort — which is what
 walk. There is no denotation of storage *writes* (only reads are related to
 the interpreter): the `*CopySource`/`…StoreRoot` program rows are untouched
 because the copy they state is mapping-free by construction
-(`TypedStmt.Assign.mk`, `stmtTypingOk`).
+(`Src.copy`'s `mapFree`).
 
 ### `memoryRules.key` → `Theory/Memory.lean`
 

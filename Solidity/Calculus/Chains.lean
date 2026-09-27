@@ -23,10 +23,10 @@ dl!{ ⟨ alice.age = v; ⟩ alice.age == v }
 enumeration its strategy computes with.  Here the strategy computes
 `Stmt.step` (`Completeness.lean`), and a `Taclet` is a `Prop`: no function
 can read a constructor's name off a derivation.  So the label is the
-*derivation itself*, `StepRule.taclet k m s p d` with `d : Taclet C k m s p`,
+*derivation itself*, `StepRule.taclet k m s p d` with `d : Rule C k m s p`,
 and `φ ~[r]~> ψ` says that `r`'s statement, modality, fresh index and premise
 are exactly what `Stmt.step` fires on `φ` (`Fml.rule`).  The name between
-the brackets is a `Taclet` constructor, which the elaborator (`rule%`)
+the brackets is a `Taclet` or `LeanTaclet` constructor, which the elaborator (`rule%`)
 checks by computing the strategy's derivation and comparing its head, or,
 failing that, by elaborating the named constructor against the step's
 instance; the kernel re-checks the resulting term.  A wrong name is an
@@ -66,7 +66,7 @@ variable {C : Contract}
 /-- A rule as a chain names it: a derivation of a taclet at the fresh index
 `k` under `m`, or the dropping of an empty modality. -/
 inductive StepRule (C : Contract) : Type where
-  | taclet (k : Nat) (m : Modality) (s : Stmt C) (p : Premise C) (d : Taclet C k m s p)
+  | taclet (k : Nat) (m : Modality) (s : Stmt C) (p : Premise C) (d : Rule C k m s p)
   | emptyModality
 
 /-- The rule the strategy fires on a formula, fresh names at index `k`:
@@ -75,7 +75,7 @@ def Fml.ruleAt (k : Nat) : Fml C → Option (StepRule C)
   | .upd _ _ φ | .imp _ φ => φ.ruleAt k
   | .and φ ψ => if φ.active then φ.ruleAt k else ψ.ruleAt k
   | .modal _ [] _ => some .emptyModality
-  | .modal m (s :: _) _ => some (.taclet k m s (s.step k m).premise (s.step k m).taclet)
+  | .modal m (s :: _) _ => some (.taclet k m s (s.step k m).premise (s.step k m).rule)
   | _ => none
 
 /-- The rule `Fml.step` fires. -/
@@ -152,23 +152,35 @@ def lastName : Lean.Name → Lean.Name
   | .str _ s => .mkSimple s
   | n => n
 
+/-- Whether a constant is a rule's constructor, solkey's or Lean's. -/
+def isRuleCtor (c : Lean.Name) : Bool :=
+  (`Solidity.Taclet).isPrefixOf c || (`Solidity.LeanTaclet).isPrefixOf c
+
 /-- A derivation, with the auxiliary lemmas the elaborator abstracted it
 into (a constructor applied to its side conditions' proofs) unfolded, down
-to a `Taclet` constructor. -/
+to a constructor, under the `Rule` that wraps it. -/
 partial def tacletHead (d : Lean.Expr) : MetaM Lean.Expr := do
   let d ← whnfCore d
+  if d.isAppOfArity ``Rule.key 6 || d.isAppOfArity ``Rule.lean 6 then
+    return mkAppN d.getAppFn (d.getAppArgs.set! 5 (← tacletHead d.appArg!))
   let .const c us := d.getAppFn | return d
-  if (`Solidity.Taclet).isPrefixOf c then return d
+  if isRuleCtor c then return d
   match ← getConstInfo c with
   | info@(.thmInfo _) => tacletHead ((← instantiateValueLevelParams info us).beta d.getAppArgs)
   | _ => return d
 
-/-- The derivation a `Step` carries, reduced to a `Taclet` constructor. -/
+/-- The constructor a rule's derivation is, if it is one. -/
+def ruleCtor? (d : Lean.Expr) : Option Lean.Name := do
+  let d := if d.isAppOfArity ``Rule.key 6 || d.isAppOfArity ``Rule.lean 6 then d.appArg! else d
+  let c ← d.getAppFn.constName?
+  if isRuleCtor c then some c else none
+
+/-- The derivation a `Step` carries, reduced to a constructor. -/
 partial def tacletOf (e : Lean.Expr) : MetaM Lean.Expr := do
   let e ← whnf e
   unless e.isAppOfArity ``Step.mk 6 do throwError "not a step:{indentExpr e}"
   let d ← whnfCore (e.getArg! 5)
-  if d.isAppOf ``Step.taclet then tacletOf d.appArg! else tacletHead d
+  if d.isAppOf ``Step.rule then tacletOf d.appArg! else tacletHead d
 
 /-- The rule the strategy fires on the formula `φ`, as a `StepRule` term
 whose derivation is a constructor, and that constructor's name. -/
@@ -181,7 +193,7 @@ def ruleOfLine (φ : Lean.Expr) : MetaM (Option (Lean.Expr × Lean.Name)) := do
   let #[C, k, m, s, p, _] := r.getAppArgs | return none
   -- the derivation in `Fml.ruleAt` is an auxiliary lemma: take it from `Stmt.step` again
   let d' ← tacletOf (mkAppN (mkConst ``Stmt.step) #[C, k, m, s])
-  let some c := d'.getAppFn.constName? | return some (r, `taclet)
+  let some c := ruleCtor? d' | return some (r, `taclet)
   return some (mkAppN (mkConst ``StepRule.taclet) #[C, k, m, s, p, d'], lastName c)
 
 /-- The name `~[r]~>` shows for a label: the head of its derivation, or, when
@@ -191,15 +203,14 @@ def ruleName? (r : Lean.Expr) : MetaM (Option Lean.Name) := do
   let r ← whnfR (← instantiateMVars r)
   if r.isAppOfArity ``StepRule.emptyModality 1 then return some `emptyModality
   unless r.isAppOfArity ``StepRule.taclet 6 do return none
-  let some c := (← instantiateMVars r.appArg!).getAppFn.constName? | return none
-  if (`Solidity.Taclet).isPrefixOf c then return some (lastName c)
+  if let some c := ruleCtor? (← instantiateMVars r.appArg!) then return some (lastName c)
   let #[C, k, m, s, _, _] := r.getAppArgs | return none
-  let some c := (← tacletOf (mkAppN (mkConst ``Stmt.step) #[C, k, m, s])).getAppFn.constName?
+  let some c := ruleCtor? (← tacletOf (mkAppN (mkConst ``Stmt.step) #[C, k, m, s]))
     | return none
   return some (lastName c)
 
 /-- The label of `φ ~[r]~> ψ`: the rule the strategy fires on `φ`, which must be
-`Taclet.r` (or `emptyModality`), or be derived by it. -/
+`Taclet.r` or `LeanTaclet.r` (or `emptyModality`), or be derived by it. -/
 def labelFor (a : Lean.Expr) (r : Ident) : TermElabM Lean.Expr := do
   let some (lbl, found) ← ruleOfLine a | throwError "~[{r}]~>: no rule applies to{indentExpr a}"
   let want := r.getId
@@ -207,11 +218,13 @@ def labelFor (a : Lean.Expr) (r : Ident) : TermElabM Lean.Expr := do
   -- another constructor may derive the same instance: try it
   let alt ← observing? do
     let_expr StepRule.taclet C k m s p _ := lbl | failure
-    let ty := mkAppN (mkConst ``Taclet) #[C, k, m, s, p]
-    let d ← elabTermEnsuringType (mkIdent (``Taclet ++ want)) ty
-    synthesizeSyntheticMVarsNoPostponing
-    let d ← instantiateMVars d
-    if d.hasExprMVar then failure
+    let d ← [(``Taclet, ``Rule.key), (``LeanTaclet, ``Rule.lean)].firstM fun (ty, wrap) => do
+      unless (← getEnv).contains (ty ++ want) do failure
+      let d ← elabTermEnsuringType (mkIdent (ty ++ want)) (mkAppN (mkConst ty) #[C, k, m, s, p])
+      synthesizeSyntheticMVarsNoPostponing
+      let d ← instantiateMVars d
+      if d.hasExprMVar then failure
+      return mkAppN (mkConst wrap) #[C, k, m, s, p, d]
     return mkAppN (mkConst ``StepRule.taclet) #[C, k, m, s, p, d]
   match alt with
   | some l => return l

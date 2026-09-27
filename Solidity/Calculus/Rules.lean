@@ -56,6 +56,12 @@ the side condition keeps only the one `Stmt.step` picks.
 A rule over an operator is one constructor for the family (`⊕` is its
 schema variable), and `++`/`--` one for all four (`⊕⊕`); solkey writes one
 taclet per operator, and `KeyTaclets.lean` maps each instance back.
+The rules are two lists.  `Taclet` is solkey's: every constructor transcribes
+one of its taclets (`RuleShapes.tacletOrigins`), under its name, and the
+`SolKey` reader walks exactly these.  `LeanTaclet` is the rules solkey does
+not have (the capture of a call's argument), and `Rule` is either; the
+calculus runs on `Rule`.  `Calculus/SolkeyFragment.lean` says where the first
+list is enough.
 -/
 
 namespace Solidity
@@ -604,16 +610,6 @@ inductive Taclet (C : Contract) (k : Nat) : Modality → Stmt C → Premise C �
   | revertDiamond :
       dl{ ⟨ revert(); ⟩ ⇝ false }
   -- Calls ----------------------------------------------------------------
-  /-- An argument that is not simple is captured into a fresh local first,
-  the leftmost first: `y = f(x + 1);` is `uint se = x + 1; y = f(se);` (the
-  `unfoldArgument` rule). -/
-  | functionCallArgCapture {f : Name} {args : List (Arg C)} {hsep : Arg.separatedFrom [] args = true}
-      {ret : CallRet} {body : List (Stmt C)} {a : Arg C}
-      (hcap : Arg.firstNonSimple args = some a := by side_cond) :
-      Taclet C k m (.call f args hsep ret body)
-        (.unfold [.declLocal a.p (.fresh "se" k) (some a.e),
-          .call f (Arg.captureFirst (.fresh "se" k) args) (Arg.separatedFrom_captureFirst hsep)
-            ret body])
   /-- A call whose arguments are all simple runs its body: the parameters
   declared with the arguments, the return variable declared, the body, the
   result assigned (KeY's `expand_function_body`). -/
@@ -621,6 +617,32 @@ inductive Taclet (C : Contract) (k : Nat) : Modality → Stmt C → Premise C �
       {ret : CallRet} {body : List (Stmt C)}
       (hexp : Arg.firstNonSimple args = none := by side_cond) :
       Taclet C k m (.call f args hsep ret body) (.unfold (Stmt.expandBody args ret body))
+
+/-! ## The rules solkey does not have
+
+`Taclet` is solkey's calculus: every constructor transcribes a taclet of
+`solidityProgramRules.key` (`RuleShapes.tacletOrigins`).  `LeanTaclet` is the
+rest of this calculus, the rules with no taclet upstream, each a proposal for
+it.  On a program that never needs one (`Calculus/SolkeyFragment.lean`)
+solkey's rules alone derive what the whole calculus derives. -/
+
+/-- The rules with no solkey taclet. -/
+inductive LeanTaclet (C : Contract) (k : Nat) : Modality → Stmt C → Premise C → Prop where
+  /-- An argument that is not simple is captured into a fresh local first,
+  the leftmost first: `y = f(x + 1);` is `uint se = x + 1; y = f(se);` (the
+  `unfoldArgument` rule). -/
+  | functionCallArgCapture {f : Name} {args : List (Arg C)} {hsep : Arg.separatedFrom [] args = true}
+      {ret : CallRet} {body : List (Stmt C)} {a : Arg C}
+      (hcap : Arg.firstNonSimple args = some a := by side_cond) :
+      LeanTaclet C k m (.call f args hsep ret body)
+        (.unfold [.declLocal a.p (.fresh "se" k) (some a.e),
+          .call f (Arg.captureFirst (.fresh "se" k) args) (Arg.separatedFrom_captureFirst hsep)
+            ret body])
+
+/-- A rule of the calculus: solkey's, or one it does not have. -/
+inductive Rule (C : Contract) (k : Nat) (m : Modality) (s : Stmt C) (p : Premise C) : Prop where
+  | key (d : Taclet C k m s p)
+  | lean (d : LeanTaclet C k m s p)
 
 /-! ## The callback taclets
 
@@ -679,7 +701,7 @@ def ppPremise? (e : Lean.Expr) : MetaM (Option (TSyntax `dl_premise)) := do
   | _ => return none
 
 /-- `Taclet C k m s p`: `dl{ ⟨[ s; ]⟩ ⇝ p }`, with the modality it is for. -/
-@[delab app.Solidity.Taclet]
+@[delab app.Solidity.Taclet, delab app.Solidity.LeanTaclet]
 def delabTaclet : Delab := do
   unless ← ppOn do failure
   let e ← getExpr
@@ -718,7 +740,7 @@ its schema variables and its line, as `sideConds` read them off the line.
 def delabTacletSide : Delab := do
   unless ← ppOn do failure
   let e ← getExpr
-  unless e.getForallBody.isAppOf ``Taclet do failure
+  unless e.getForallBody.isAppOf ``Taclet || e.getForallBody.isAppOf ``LeanTaclet do failure
   let e' := dropSide e
   if e' == e then failure
   withTheReader SubExpr (fun s => { s with expr := e' }) delab

@@ -281,7 +281,7 @@ theorem Premise.soundC_unfold {I : Fml C} (hI : I.vars = []) {k : Nat} {m : Moda
 inductive ProvesC (I : Invariant C) : List (Hyp C) → Fml C → Prop
   /-- A goal with no `transfer` left is a goal of the calculus: there the
   two readings agree. -/
-  | plain {Γ : List (Hyp C)} {φ : Fml C} (h : Proves Γ φ)
+  | plain {Γ : List (Hyp C)} {φ : Fml C} (h : Proves .all Γ φ)
       (hφ : (Hyp.wrap Γ φ).hasTransfer = false) : ProvesC I Γ φ
   /-- `impRight`. -/
   | intro {Γ : List (Hyp C)} {a φ : Fml C} (h : ProvesC I (Γ ++ [.pre a]) φ) :
@@ -296,6 +296,11 @@ inductive ProvesC (I : Invariant C) : List (Hyp C) → Fml C → Prop
   and pays nothing, when they pay nothing either. -/
   | unfold {Γ : List (Hyp C)} {m : Modality} {s : Stmt C} {ω : Prog C} {φ : Fml C} {P : Prog C}
       (d : Taclet C (Hyp.fresh Γ (.and I.fml (.modal m (s :: ω) φ))) m s (.unfold P))
+      (hs : s.forks = false) (hP : Prog.hasTransfer P = false)
+      (h : ProvesC I Γ (.modal m (P ++ ω) φ)) : ProvesC I Γ (.modal m (s :: ω) φ)
+  /-- `unfold`, by a rule solkey does not have. -/
+  | unfoldLean {Γ : List (Hyp C)} {m : Modality} {s : Stmt C} {ω : Prog C} {φ : Fml C}
+      {P : Prog C} (d : LeanTaclet C (Hyp.fresh Γ (.and I.fml (.modal m (s :: ω) φ))) m s (.unfold P))
       (hs : s.forks = false) (hP : Prog.hasTransfer P = false)
       (h : ProvesC I Γ (.modal m (P ++ ω) φ)) : ProvesC I Γ (.modal m (s :: ω) φ)
   /-- **A callback taclet**: the invariant on exit, and the rest resumed after
@@ -336,6 +341,12 @@ theorem ProvesC.sound {I : Invariant C} {Γ : List (Hyp C)} {φ : Fml C} (h : Pr
     exact Hyp.withC_mono (fun τ => Premise.soundC_update I.closed
       (d.sound Taclet.avoids_in.1) hs ω φ τ) Γ σ ih
   | @unfold Γ m s ω φ P d hs hP _ ih =>
+    intro σ
+    have ih := ih σ
+    rw [Hyp.holdsC_wrap] at ih ⊢
+    exact Hyp.withC_mono (fun τ => Premise.soundC_unfold I.closed
+      (d.sound Taclet.avoids_in.1) hs hP ω φ Taclet.avoids_in.2 τ) Γ σ ih
+  | @unfoldLean Γ m s ω φ P d hs hP _ ih =>
     intro σ
     have ih := ih σ
     rw [Hyp.holdsC_wrap] at ih ⊢

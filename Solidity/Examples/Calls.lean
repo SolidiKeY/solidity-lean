@@ -12,7 +12,8 @@ variable — so a call statement carries its body, as KeY's
 only the functions declared before it: a recursive one cannot be written.
 
 Two rules run a call.  An argument that is not simple is captured first,
-the leftmost first (`functionCallArgCapture`, printed `unfoldArgument`);
+the leftmost first (`functionCallArgCapture`, printed `unfoldArgument`, a
+`LeanTaclet`: solkey has no such taclet, so the derivation is `⊢`, not `⊢ₖ`);
 with every argument simple, `functionBodyExpand` inlines the body: the
 parameters declared with the arguments, the return variable declared, the
 body, the result assigned (KeY's `expand_function_body`).  From there the
@@ -89,7 +90,7 @@ theorem callCaptureWalk : ⊨ dl!{ x == 1 → [ uint y = addOne(x + 1); ] y == 3
   apply Proves.valid
   apply intro
   apply update .valueDeclSkip            -- uint y;
-  apply unfold .functionCallArgCapture   -- y = addOne(x + 1);  ⇝  uint se = x + 1; y = addOne(se);
+  apply unfoldLean .functionCallArgCapture   -- y = addOne(x + 1);  ⇝  uint se = x + 1; y = addOne(se);
   apply unfold .localValueDeclInitDrop
   apply update .binopAssignment
   apply unfold .functionBodyExpand

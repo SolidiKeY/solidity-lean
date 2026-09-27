@@ -13,7 +13,8 @@ halts where neither condition holds; a closed goal is a halt, closed as the
 modality says.
 
 The four premise kinds are proved apart: `SoundUpdate.lean`,
-`SoundUnfold.lean`, and the branches and closed goals here.
+`SoundUnfold.lean`, and the branches and closed goals here.  The rules solkey
+does not have are `LeanTaclet.sound`, and `Rule.sound` is both lists.
 -/
 
 namespace Solidity
@@ -53,5 +54,19 @@ theorem Taclet.sound {k : Nat} {m : Modality} {s : Stmt C} {pr : Premise C}
   | unfold P => exact Taclet.sound_unfold d hs
   | split c c' P Q => exact Taclet.sound_split d
   | done b => exact Taclet.sound_done d
+
+/-- The rules solkey does not have are sound: `functionCallArgCapture` reads
+the argument where the call would (`Stmt.call_capture_sound`). -/
+theorem LeanTaclet.sound {k : Nat} {m : Modality} {s : Stmt C} {pr : Premise C}
+    (d : LeanTaclet C k m s pr) (hs : Avoids s.vars (freshVars k)) : pr.Correct k m s := by
+  cases d with
+  | functionCallArgCapture h => exact Stmt.call_capture_sound h hs
+
+/-- **Every rule of the calculus is sound**, solkey's and the ones it lacks. -/
+theorem Rule.sound {k : Nat} {m : Modality} {s : Stmt C} {pr : Premise C}
+    (d : Rule C k m s pr) (hs : Avoids s.vars (freshVars k)) : pr.Correct k m s := by
+  cases d with
+  | key d => exact d.sound hs
+  | lean d => exact d.sound hs
 
 end Solidity

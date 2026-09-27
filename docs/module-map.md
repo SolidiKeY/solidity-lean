@@ -15,6 +15,9 @@ Solidity/  KeySort.lean  AST.lean  Syntax.lean  Semantics.lean  Update.lean
            Examples/    the worked examples, in the default build
 ```
 
+**Start at `Theorems.lean`**: the main theorems on one page, in notation
+(`⊢ φ → ⊨ φ`, `(P, σ) ⇓ σ'`, `⟦P⟧`), each proved by the original's name.
+
 The layering: types and names (`AST.lean`), the typed syntax
 (`Syntax.lean`), the interpreter (`Semantics.lean`), terms and formulas
 (`Update.lean`), the taclets (`Calculus/Rules.lean`), then what is proved
@@ -40,7 +43,7 @@ fails on a module nothing imports.
 | Module | What it is |
 |---|---|
 | `Calculus/RuleSyntax.lean` | The notation `dl{ … }`: schemas whose names carry their kind, and the delaborators that print taclets, premises and goals back in it. |
-| `Calculus/Rules.lean` | The taclets: `Taclet C k m s p`, one constructor per rule, named as solkey names it, written in `dl{ ⟨[ s; ]⟩ ⇝ p }`; and `CallbackTaclet`, the other `transferSemantics`. |
+| `Calculus/Rules.lean` | The rules, two lists: `Taclet C k m s p`, solkey's, one constructor per taclet, named as solkey names it, written in `dl{ ⟨[ s; ]⟩ ⇝ p }`; `LeanTaclet`, the rules solkey lacks; `Rule`, either; and `CallbackTaclet`, the other `transferSemantics`. |
 | `Calculus/KeyTaclets.lean` | The 311 taclets of `solidityProgramRules.key` (solkey `f2eb3d98eb`) as one type, their `\heuristics`, and `KeyOrigin`. Regenerate with the recipe in its docstring. |
 | `Calculus/Completeness.lean` | `Stmt.step`: the rule for every statement, a total function; `Stmt.complete`. |
 | `Calculus/RuleShapes.lean` | Which solkey taclets each constructor transcribes (`tacletOrigins`), checked against the constructor list, and `taclets_partitioned`. |
@@ -48,11 +51,12 @@ fails on a module nothing imports.
 | `Calculus/SoundKit.lean` | `SameOk`, `Premise.Correct`, and the lemmas and tactics the soundness proofs are made of. |
 | `Calculus/SoundUpdate.lean` | Every taclet with an update premise has the statement's effect. |
 | `Calculus/SoundUnfold.lean` | Every unfolding taclet runs like its statement off the fresh names. |
-| `Calculus/RuleSoundness.lean` | `Taclet.sound`: every taclet, no hypothesis but freshness. |
-| `Calculus/Logic.lean` | `Premise.fml`, the sequent calculus `Proves Γ φ` (`Γ ⊢ φ`) and `Proves.sound`; sequents print as `dl{ Γ ⟹ φ }`. |
+| `Calculus/RuleSoundness.lean` | `Taclet.sound`: every taclet, no hypothesis but freshness; `LeanTaclet.sound`, `Rule.sound`. |
+| `Calculus/Logic.lean` | `Premise.fml`, the sequent calculus `Proves R Γ φ` at a `RuleSet` (`Γ ⊢ φ` all rules, `Γ ⊢ₖ φ` solkey's) and `Proves.sound`; sequents print as `dl{ Γ ⟹ φ }`. |
 | `Calculus/Callback.lean` | The calculus with callbacks: `CallbackTaclet.sound` (`transferWithCallbackBox`/`Diamond`, premises `{U} I` and `CbResume`), the judgement `ProvesC` and `ProvesC.sound`. |
 | `Calculus/Quote.lean` | Quoters from formulas back to terms, so a computed goal is re-checked by the kernel. |
 | `Calculus/Symex.lean` | Symbolic execution: `Fml.step` fires `Stmt.step`'s rule, `symex`, `symex_sound`; tactics `sol_step`, `sol_symex`. |
+| `Calculus/SolkeyFragment.lean` | The refined syntax: `Stmt.inSolkey` (every call's arguments simple), on which solkey's rules alone are the calculus (`Stmt.step_taclet`, `Taclet.premise_inSolkey`, `Proves.toSolkey`). |
 | `Calculus/Notation.lean` | `dl[C]{ … }` and `dl!{ … }`: concrete formulas read against a contract. |
 | `Calculus/ReadWrite.lean` | What a state reads after a write: the four-way path comparison, memory addresses, copies member by member. |
 | `Calculus/Close.lean` | `sol_close`: a first-order goal in an arbitrary state, by weakest preconditions and `ReadWrite.lean`'s facts. Its docstring lists what it does not close. |
@@ -61,7 +65,7 @@ fails on a module nothing imports.
 | `Calculus/DecideComplete.lean` | The reads of the starting storage realizable: `Obs`, the constraint `ChildOk` (`childOk_findLive`), `realize_findLive`; the reduction over free reads (`LTerm.evalA`), `LFml.valid_iff_cons`/`Fml.valid_iff_cons`; `sol_decide`, deciding under the constraints. |
 | `Calculus/Uniqueness.lean` | One rule per statement: every derivation's premise is `Stmt.step`'s. |
 | `Calculus/Progress.lean` | A formula with a modality always steps: `Fml.active_iff_step`. |
-| `Calculus/Termination.lean` | The weights, `Premise.Smaller` (of `Stmt.step`, and of every derivation: `Taclet.smaller`), `Fml.measure`, `Fml.step_wellFounded`, `symex_normalizes`. |
+| `Calculus/Termination.lean` | The weights, `Premise.Smaller` (of `Stmt.step`, and of every derivation: `Rule.smaller`), `Fml.measure`, `Fml.step_wellFounded`, `symex_normalizes`. |
 | `Calculus/Chains.lean` | Derivations as values: `φ ~[r]~> ψ`, `~>`, `~*>`, `calc` chains of `dl!{…}` lines, `sol_chain`, `#derivation`. |
 | `Calculus/UpdateRules.lean` | KeY's update simplification as `UpdRule`, each an iff: `sequentialToParallel`, `simplifyUpdate`, `applySkip`, `applyOnRigid`; `sol_upd`, `sol_merge`. |
 
@@ -73,7 +77,7 @@ theorem.
 
 | Module | What it is |
 |---|---|
-| `Theory/Storage.lean` | `structRules.key`'s taclets, over `Theory/Terms.lean`'s sorts. Stated about **`findSt`**, the read that does not cross into memory, because that is the reader `structRules.key` has — `copyMem` is declared in `structMemoryRules.key`. `save`, `storeAt`, the delete family and `diverges` are here. Every taclet a theorem, in the *pre-fold* shape: the leaf of a write collapses (`saveOnEmpty`, `saveOnStoreCons` with its `isEmpty(flds)` split, `selectOnSaveEmpty`), because the copy on which solkey's non-collapsing leaf differs — a storage-to-storage copy of a mapping-carrying type — is not a statement (`TypedStmt.Assign.mk`). `storeAt` is the one-segment walk; `selectOnSaveCons` with no well-formedness hypothesis; the four `find`-over-`save` laws (`find_save_same`/`_extends`/`_prefix`/`_frame`) plus `find_append` — `Semantics` had only the first. The delete family is eager (`delNode`/`delValue`/`delAt`) and states every `selectStDelNode*` rule but `Map`: a `Seg` carries no `MapField`, so the mapping-preserving `delete` is the interpreter's alone. `findDelAtFields` carries a read through the fields of a deleted node. Still a theory over free terms, as upstream's is: the pre-state leaf `Struct.cur` is a view like `copyMem`, and what it denotes is `Update.lean`'s lowering business. |
+| `Theory/Storage.lean` | `structRules.key`'s taclets, over `Theory/Terms.lean`'s sorts. Stated about **`findSt`**, the read that does not cross into memory, because that is the reader `structRules.key` has — `copyMem` is declared in `structMemoryRules.key`. `save`, `storeAt`, the delete family and `diverges` are here. Every taclet a theorem, in the *pre-fold* shape: the leaf of a write collapses (`saveOnEmpty`, `saveOnStoreCons` with its `isEmpty(flds)` split, `selectOnSaveEmpty`), because the copy on which solkey's non-collapsing leaf differs — a storage-to-storage copy of a mapping-carrying type — is not a statement (`Src.copy`). `storeAt` is the one-segment walk; `selectOnSaveCons` with no well-formedness hypothesis; the four `find`-over-`save` laws (`find_save_same`/`_extends`/`_prefix`/`_frame`) plus `find_append` — `Semantics` had only the first. The delete family is eager (`delNode`/`delValue`/`delAt`) and states every `selectStDelNode*` rule but `Map`: a `Seg` carries no `MapField`, so the mapping-preserving `delete` is the interpreter's alone. `findDelAtFields` carries a read through the fields of a deleted node. Still a theory over free terms, as upstream's is: the pre-state leaf `Struct.cur` is a view like `copyMem`, and what it denotes is `Update.lean`'s lowering business. |
 | `Theory/Memory.lean` | `memoryRules.key`'s taclets, over `Theory/Terms.lean`'s sorts, plus the `new` predicate. Every taclet a theorem, including the chain-walking family (`readREmpty`, `readRCons`, `idCCDef`, `defaultDefIdentity`) and `newFromAdd`/`readOnAddM` in KeY's branching form. `copySt`/`copyMem` are `Theory/CrossDomain.lean`. |
 | `Theory/Terms.lean` | The sorts, because `structMemoryRules.key` ties the other two files together: `copyMem` is a `Struct` constructor and `copySt` a `Memory` one, as KeY declares them, so `Struct`/`StValue`/`Memory` are one mutual inductive. With them the readers that are mutual for the same reason — `selectSt`, `findSt` (the storage read that stops at a view), `find` (the one that crosses into `readR`), `readIn`/`readId`/`readR`/`readRId`, and the path-identity resolver. All structural: the cycle is cut by `readIn` reading its copied struct with `findSt`, so every equation stays `rfl` and a closed term reduces in the kernel, which is how half the taclets are checked. `Struct.inductionOn`/`Memory.inductionOn` are the one-sort recursors a mutual inductive does not give. `Struct.cur p` is the storage a derivation line started from, below `p`: the leaf a read is lowered onto. |
 | `Theory/CrossDomain.lean` | `structMemoryRules.key`'s four taclets on those sorts: `findCopyMem`, `readCopySt`, `readCopyStIdentity`, `readCopyStOther`. `readCopyStIdentity` falls out of `defaultDefIdentity` because a copied struct member reads as `dflt`. Not modelled: a view nested in a view — `StValue.find_eq_findSt` is where that is stated, and no worked example nests one. |

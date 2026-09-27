@@ -78,13 +78,13 @@ theorem ledgerWriteThenDelete :
   -- `uint gone = ledger.balances[1];`: Step 1 (`storageIndexRead_unfold_rightFst`,
   -- by the strategy: its conclusion is a `Hole.fill`, see `StorageSteps.lean`)
   apply unfold .localValueDeclInitDrop
-  apply unfold (Stmt.step _ _ _).taclet
+  apply unfoldRule (Stmt.step _ _ _).rule
   apply unfold .storageLocalDeclInitDrop
   apply update .storageFieldReadBindLocalRoot
   apply update .storageIndexReadMappingFind
   -- `uint kept = ledger.balances[2];`
   apply unfold .localValueDeclInitDrop
-  apply unfold (Stmt.step _ _ _).taclet
+  apply unfoldRule (Stmt.step _ _ _).rule
   apply unfold .storageLocalDeclInitDrop
   apply update .storageFieldReadBindLocalRoot
   apply update .storageIndexReadMappingFind

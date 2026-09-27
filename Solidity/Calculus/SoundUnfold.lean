@@ -473,7 +473,6 @@ theorem Taclet.sound_unfold {k : Nat} {m : Modality} {s : Stmt C} {P : Prog C}
   have hie : Var.fresh "ie" k ∉ s.vars := fun h => hs _ h (by simp [freshVars])
   have hmv : Var.fresh "mv" k ∉ s.vars := fun h => hs _ h (by simp [freshVars])
   cases d
-  case functionCallArgCapture h => exact Stmt.call_capture_sound h hs
   case functionBodyExpand => intro σ; rw [Stmt.run_call_expand σ]; exact SameOk.self _ _
   all_goals clear hs
   all_goals clear_side

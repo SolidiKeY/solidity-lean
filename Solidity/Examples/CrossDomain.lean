@@ -81,7 +81,7 @@ theorem storageToMemoryNonsimplePath :
   apply unfold .localValueDeclInitDrop
   apply update .localValueAssign
   apply unfold .storageLocalDeclInitDrop
-  apply unfold (Stmt.step _ _ _).taclet  -- `storageFieldRead_unfold_rightFst`
+  apply unfoldRule (Stmt.step _ _ _).rule  -- `storageFieldRead_unfold_rightFst`
   apply unfold .storageLocalDeclInitDrop
   apply update .storageFieldReadBindLocalRoot
   apply update .storageFieldReadBindLocalRoot
@@ -89,7 +89,7 @@ theorem storageToMemoryNonsimplePath :
   apply unfold .memoryLocalDeclInitDrop
   apply unfold .memoryStorageCopyUnfold
   apply unfold .storageLocalDeclInitDrop
-  apply unfold (Stmt.step _ _ _).taclet  -- `storageFieldRead_unfold_rightFst`
+  apply unfoldRule (Stmt.step _ _ _).rule  -- `storageFieldRead_unfold_rightFst`
   apply unfold .storageLocalDeclInitDrop
   apply update .storageFieldReadBindLocalRoot
   apply update .storageFieldReadBindLocalRoot
@@ -163,7 +163,7 @@ theorem memoryToStorageFromAlias :
   apply update .memoryToStorageFieldCopyRoot
   -- { storage := save(storage, alice.account, copyMem(mtSt, memory, acc)) }
   apply unfold .localValueDeclInitDrop
-  apply unfold (Stmt.step _ _ _).taclet  -- `storageFieldRead_unfold_rightFst`
+  apply unfoldRule (Stmt.step _ _ _).rule  -- `storageFieldRead_unfold_rightFst`
   apply unfold .storageLocalDeclInitDrop
   apply update .storageFieldReadBindLocalRoot
   apply update .storageFieldReadFind
@@ -187,7 +187,7 @@ theorem memoryToStorageFromMemberSource :
   apply update .memoryFieldWriteStore
   apply update .memoryToStorageFieldCopyRoot
   apply unfold .localValueDeclInitDrop
-  apply unfold (Stmt.step _ _ _).taclet  -- `storageFieldRead_unfold_rightFst`
+  apply unfoldRule (Stmt.step _ _ _).rule  -- `storageFieldRead_unfold_rightFst`
   apply unfold .storageLocalDeclInitDrop
   apply update .storageFieldReadBindLocalRoot
   apply update .storageFieldReadFind
@@ -206,7 +206,7 @@ theorem memoryToStorageNonsimplePath :
   apply unfold .memoryLocalDeclInitDrop
   apply unfold .memoryStorageCopyUnfold
   apply unfold .storageLocalDeclInitDrop
-  apply unfold (Stmt.step _ _ _).taclet  -- `storageFieldRead_unfold_rightFst`
+  apply unfoldRule (Stmt.step _ _ _).rule  -- `storageFieldRead_unfold_rightFst`
   apply unfold .storageLocalDeclInitDrop
   apply update .storageFieldReadBindLocalRoot
   apply update .storageFieldReadBindLocalRoot
@@ -217,9 +217,9 @@ theorem memoryToStorageNonsimplePath :
   apply update .storageFieldReadBindLocalRoot
   apply update .memoryToStorageFieldCopyRoot
   apply unfold .localValueDeclInitDrop
-  apply unfold (Stmt.step _ _ _).taclet  -- `storageFieldRead_unfold_rightFst`
+  apply unfoldRule (Stmt.step _ _ _).rule  -- `storageFieldRead_unfold_rightFst`
   apply unfold .storageLocalDeclInitDrop
-  apply unfold (Stmt.step _ _ _).taclet  -- `storageFieldRead_unfold_rightFst`
+  apply unfoldRule (Stmt.step _ _ _).rule  -- `storageFieldRead_unfold_rightFst`
   apply unfold .storageLocalDeclInitDrop
   apply update .storageFieldReadBindLocalRoot
   apply update .storageFieldReadBindLocalRoot

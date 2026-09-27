@@ -1325,8 +1325,8 @@ def all : List KeyTaclet := [
 
 end KeyTaclet
 
-/-- Where a Lean rule comes from: the KeY taclet it transcribes, the several
-taclets it merges, or nothing.
+/-- Where a Lean rule comes from: the KeY taclet it transcribes, or the
+several taclets it merges.
 
 `merged` is the common case and it is not a weakness of the port: KeY writes
 one taclet per operator where Lean has one rule for the family, and splits
@@ -1334,13 +1334,12 @@ one rule by a distinction the Lean syntax does not draw — a value source from
 a memory reference (`…MemRef…`), a mapping receiver from an array one — and one
 Lean rule covers them.  `docs/lean-key-rule-map.md` carries the prose for each.
 
-`leanOnly` is the deliberate absence: a rule upstream has no counterpart for.
-`RuleShapes.tacletOrigins` gives every `Taclet` constructor its origin, and
-counts the `leanOnly` ones. -/
+`RuleShapes.tacletOrigins` gives every `Taclet` constructor its origin.  A
+rule upstream has no counterpart for is not a `Taclet` but a `LeanTaclet`
+(`Rules.lean`), so it has no origin to give. -/
 inductive KeyOrigin where
   | taclet (t : KeyTaclet)
   | merged (ts : List KeyTaclet)
-  | leanOnly
   deriving DecidableEq, Repr
 
 namespace KeyOrigin
@@ -1349,7 +1348,6 @@ namespace KeyOrigin
 def taclets : KeyOrigin -> List KeyTaclet
   | taclet t => [t]
   | merged ts => ts
-  | leanOnly => []
 
 end KeyOrigin
 
