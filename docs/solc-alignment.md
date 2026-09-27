@@ -122,26 +122,63 @@ carrying solkey's mapping-preserving one. Its `delete`, on the other hand,
 resets mapping members: a `Seg` carries no `MapField` sort, so the
 mapping-preserving `delete` below is the interpreter's alone.
 
-`pop`/`push` keep it too, and that is what `SVal.array`'s second field is
-for. `arr.pop()` implicitly `delete`s the removed element and `arr.push()`
-lands on the same storage slot, so a mapping nested in a popped struct
-element is visible again after the push — solc's behaviour, and solkey's
-(`storagePopSave` and `storagePushLengthSave` both write
-`save(delAt(storage, at(n)), size, n ± 1)`). `Semantics.pushSlot` is that
-`delAt` read eagerly: the cleared slot stays addressable beyond the new
-length and the next `push` recycles it.
+## Arrays past their end: `pop`, `push`, `delete`, copies
 
-- **`delete arr` on a whole array.** On the EVM the mapping entries nested
-  in a deleted element live at hashed slots that no clearing reaches, so
-  `delete arr; arr.push();` sees them again. Here `SVal.defaultOf` empties
-  the array outright, which is **KeY's** reading
-  (`selectStDelNodeIndexStruct` reads every index of a deleted node as
-  `mtSt`) and not solc's. Matching solc means handing the cleared elements
-  back as recycled slots, which takes the value out of
-  `Reachability.SVal.canonical` — the shadow-free fragment `writeProg`
-  builds — and so costs `WellFormedConsumers` row C6 its value-level
-  proof. Recorded here rather than made silently; `pop`/`push` are not
-  affected.
+An array's storage is a run of slots, and solc never shrinks it: `pop()`
+clears the last element and decrements the length, `delete arr` clears every
+element and sets the length to `0`, and the slots past the new length keep
+what the clearing left, which is not always nothing — a mapping nested in an
+element lives at hashed slots no clearing reaches, and a reference taken
+before the `pop` still points there. `SVal.array elems shadow` is that run:
+`elems` the live elements, `shadow` the slots past the end. solkey
+`f2eb3d98eb` reads storage the same way, and the three places where the
+interpreter used to be stricter than both now follow them.
+
+- **A path is checked where the program takes it.** `State.checkIndex`
+  bounds an array index against the live length once, when the path is
+  resolved (`Loc.resolve`, `PTerm.at`): for a read, a write, and an alias
+  bind (`uint[] storage p = arr[i];` reverts out of range, as KeY's
+  `storageIndexReadArrayBindLocalRoot` guard and solc's `Panic(0x32)` say).
+  `SVal.find` and `SVal.save` then address the slot, past the end included,
+  so an alias used later is not checked again. An index into a word or a
+  struct is `.stuck`: no typed program has one.
+- **A write through a reference to a popped element writes the slot.**
+  `Token storage r = tokens[0]; tokens.pop(); r.value = 5;` writes the
+  cleared slot past the end, and a `push()` of a struct or array element
+  takes that slot as it is (`storagePushLengthSaveReferenceElement`), so
+  `tokens.push(); tokens[0].value` reads `5`, as solc does
+  (`testDanglingReferenceSurvivesPush`). A `push()` of a primitive element
+  clears its slot first (`storagePushLengthSave`: `delAt(storage, at(n))`),
+  and a `pop()` clears the element into the slots past the end
+  (`storagePopSave`), where an element that is a mapping is kept as it is
+  (`storagePopSaveMappingElement`; `delete` of a mapping changes nothing).
+- **`delete arr` keeps the elements' mapping entries.** `SVal.defaultOf`
+  clears each live element in place (`defaultOf` on it: words to `0`,
+  structs member by member, mappings kept) and moves it past the end, ahead
+  of the slots already there, so `delete arr; arr.push();` sees a nested
+  mapping's entries again — solc, and solkey's `selectStDelNodeIndexStruct`,
+  which reads an index of a deleted node below its old `size` as the element
+  deleted and one past it as it was (`testDeleteArrayDoesNotResetElementMappingMember`).
+  KeY used to read every index of a deleted node as `mtSt`; that was the old
+  reading here too, and it no longer holds on either side.
+
+A copy into storage (`alice = bob;`, `arr = m;`) is a write over what is
+there (`State.writeStorage`, `SVal.overlay`): a struct member by member, an
+array taking the source's length and elements, each laid over the slot it
+lands on, the old slots past the new length cleared up to the old length and
+left as they were beyond it — solc's copy, and solkey's
+`selectOnSaveEmptyIndexStruct` (`testArrayCopyClearsOldElements`,
+`testArrayCopyKeepsDestinationTail`). A mapping met on the way keeps its
+entries (a copy is `mapFree`). One delta is left: `arr.push(v)` of a struct
+or array value lays it on fresh slots (`SVal.strip`), not over the recycled
+slot it lands on, so what a reference wrote into that slot's own arrays past
+their ends is dropped where solc would keep it. No test in the corpus reads
+it.
+
+`Calculus/Decide.lean` reads the live storage only (`SVal.findLive`,
+`SVal.saveLive`) and bridges the two: a path the program checked reads the
+same either way, and an alias through an index is outside its fragment once
+the storage has been written after the bind.
 
 ## `transfer` checks and debits the sender's balance
 
@@ -186,19 +223,11 @@ re-definition; `Update/SolcDelta.lean` is the table and
 `Calculus/SoundUpdate.lean` the theorems that a taclet's update has the
 statement's effect.
 
-One of them is new, and it is an **interpreter** gap rather than a KeY one:
-
-- **Bounds on a storage-alias bind.** KeY's `storageIndexReadArrayBindLocalRoot`
-  guards `uint[] storage p = arr[i];` with `0 <= i & i < length(arr)` and
-  reverts otherwise, exactly as it guards the value read. The interpreter does
-  not: `Wp.storageAssignUpd`'s local-root arm resolves the right-hand side
-  with `placePath`, which builds the path `arr[i]` without consulting the
-  array's length, and binds it. solc agrees with KeY — an out-of-range index on
-  a storage array is `Panic(0x32)` whether the result is read or aliased — so
-  the Lean rule carries KeY's guard and `Calculus/SoundUpdate.lean` states
-  that rule's bridge under it. Closing the gap means a bounds check in `placePath`'s
-  index arm, which is a change to `Semantics.lean` and to every theorem about
-  it, so it is recorded here rather than made silently.
+The bounds on a storage-alias bind were one, an **interpreter** gap: KeY's
+`storageIndexReadArrayBindLocalRoot` guards `uint[] storage p = arr[i];` with
+`0 <= i & i < length(arr)`, and the interpreter used to bind without looking.
+It checks there now (`State.checkIndex`, above), which is where solc's
+`Panic(0x32)` is.
 
 Three older divergences are the same kind of thing seen from the rule side, and
 were already known: checked arithmetic in `Sym.combined` (KeY's `+` is

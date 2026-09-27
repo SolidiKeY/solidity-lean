@@ -257,6 +257,13 @@ theorem findStorage_congr {ns : List Var} {s₁ s₂ : State}
   unfold State.findStorage
   rw [h.storage]
 
+/-- A bounds check reads the storage only. -/
+theorem checkIndex_congr {ns : List Var} {s₁ s₂ : State}
+    (h : EnvAgreeExcept ns s₁ s₂) (root : Name) (segs : List Seg) (i : Int) :
+    s₁.checkIndex root segs i = s₂.checkIndex root segs i := by
+  unfold State.checkIndex
+  rw [findStorage_congr h]
+
 theorem saveStorage_agree {ns : List Var} {s₁ s₂ : State}
     (h : EnvAgreeExcept ns s₁ s₂) (root : Name) (segs : List Seg)
     (new : SVal) :
@@ -278,6 +285,20 @@ theorem saveStorage_agree {ns : List Var} {s₁ s₂ : State}
   cases lookupBy root s₂.storage with
   | none => exact rfl
   | some v => exact hsave (v.save segs new)
+
+
+/-- A copy writes over what is there: it agrees as the write does. -/
+theorem writeStorage_agree {ns : List Var} {s₁ s₂ : State}
+    (h : EnvAgreeExcept ns s₁ s₂) (root : Name) (segs : List Seg) (new : SVal) :
+    ResultsAgree ns (s₁.writeStorage root segs new) (s₂.writeStorage root segs new) := by
+  unfold State.writeStorage
+  split
+  · exact saveStorage_agree h _ _ _
+  all_goals
+    rw [findStorage_congr h]
+    cases s₂.findStorage root segs with
+    | error e => exact rfl
+    | ok cur => exact saveStorage_agree h _ _ _
 
 theorem getEnv_congr {ns : List Var} {s₁ s₂ : State}
     (h : EnvAgreeExcept ns s₁ s₂) {n : Var} (hn : n ∉ ns) :
@@ -589,7 +610,8 @@ theorem Loc.resolve_frame (hag : EnvAgreeExcept ns σ τ) :
   | _, .root .., _ => rfl
   | _, .field b _ _, h => by simp only [Loc.resolve, b.resolve_frame hag h]
   | _, .index _ b i, h => by
-    simp only [Loc.resolve, b.resolve_frame hag h.left, i.eval_frame hag h.right]
+    simp only [Loc.resolve, b.resolve_frame hag h.left, i.eval_frame hag h.right,
+      checkIndex_congr hag]
 
 theorem MPath.mval_frame (hag : EnvAgreeExcept ns σ τ) :
     {T : Ty} → (p : MPath C T) → Avoids p.vars ns → p.mval σ = p.mval τ
@@ -691,6 +713,7 @@ macro "agree_run" h:term : tactic => `(tactic| repeat (first
   | exact ResAgree.ok (EnvAgreeExcept.setEnv_both $h _ _)
   | exact $h
   | exact saveStorage_agree $h _ _ _
+  | exact writeStorage_agree $h _ _ _
   | exact memWriteField_agree $h _ _ _
   | exact memWriteIndex_agree $h _ _ _
   | exact writeLoc_agree $h _ _
@@ -701,7 +724,7 @@ macro "agree_run" h:term : tactic => `(tactic| repeat (first
   | exact bumpStore_agree $h _ _ _ _
   | exact bumpMem_agree $h _ _ _
   | exact transferAt_agree $h _ _
-  | exact popAt_agree $h _ _
+  | exact popAt_agree $h _ _ _
   | refine bindPureResults_agree _ fun _ => ?_
   | refine bindPureRes_agree _ fun _ => ?_
   | split))
@@ -788,8 +811,8 @@ theorem pushPlaceAt_agree (hag : EnvAgreeExcept ns σ τ) (E : Ty) (r : Name) (s
   refine bindPureRes_agree _ fun v => ?_
   cases v <;> first | rfl | exact ResAgree.of_results (saveStorage_agree hag _ _ _) _
 
-theorem popAt_agree (hag : EnvAgreeExcept ns σ τ) (r : Name) (segs : List Seg) :
-    ResultsAgree ns (popAt σ r segs) (popAt τ r segs) := by
+theorem popAt_agree (hag : EnvAgreeExcept ns σ τ) (keep : Bool) (r : Name) (segs : List Seg) :
+    ResultsAgree ns (popAt σ keep r segs) (popAt τ keep r segs) := by
   simp only [popAt, findStorage_congr hag]
   refine bindPureResults_agree _ fun v => ?_
   cases v with
@@ -875,7 +898,7 @@ theorem Stmt.run_frame {σ τ : State} (hag : EnvAgreeExcept ns σ τ) :
     refine bindPureResults_agree _ fun _ => pushAt_agree hag _ _ _ fun sv => ?_
     cases v with
     | none => rfl
-    | some r => exact r.value_frame hag h.right
+    | some r => simp only [Src.pushVal, r.value_frame hag h.right]
   | .pop b, h => by
     simp only [Stmt.run, b.resolve_frame hag h]
     agree_run hag

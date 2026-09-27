@@ -40,6 +40,7 @@ theorem twoKeysBothWays :
   sol_symex
   sol_decide
 
+set_option maxHeartbeats 400000 in
 example : ⊨ dl!{ [ balances[k] = 5; balances[j] = 6; uint y = balances[k]; ]
                  ((k == j → y == 6) ∧ (k != j → y == 5)) } := by
   sol_symex

@@ -436,7 +436,7 @@ while resolving it; or it resolves, and the read reverts (an index out of
 bounds) and so does the machine. -/
 def LocOut (C : Contract) (σ : State) (free : Bool) (T : Ty) (res : Res (Name × List Seg))
     (out : Out) (m : Machine) : Prop :=
-  (∃ r segs s sv, res = .ok (r, segs) ∧ σ.findStorage r segs = .ok sv ∧
+  (∃ r segs s sv, res = .ok (r, segs) ∧ σ.findLive r segs = .ok sv ∧
       PathSlot C free r segs T s ∧ ReprAt m.store T s sv ∧ out = .ok (m.push (.slot s)) 0) ∨
     (res = .error .revert ∧ out = .revert) ∨
     (∃ r segs, res = .ok (r, segs) ∧ σ.findStorage r segs = .error .revert ∧ free = false ∧
@@ -503,7 +503,7 @@ theorem loc_sim : ∀ {T : Ty} (l : Loc C T) {free : Bool} {m : Machine}, Sim C 
     wtLoc Γ free l = true → LocOut C σ free T (l.resolve σ) (run (compileLoc l) m) m
   | _, .root r h, free, m, hm, _ => by
     obtain ⟨sv, hl, hr⟩ := hm.store r _ h
-    exact .inl ⟨r, [], rootSlot C r, sv, rfl, by simp [State.findStorage, hl], .root h, hr, rfl⟩
+    exact .inl ⟨r, [], rootSlot C r, sv, rfl, by simp [State.findLive, hl], .root h, hr, rfl⟩
   | _, @Loc.field _ s T b f h, free, m, hm, hw => by
     have hwb : wtSPath Γ free b = true := by simpa [wtLoc] using hw
     have h' : lookupBy f (structDef s) = some T := h
@@ -516,7 +516,7 @@ theorem loc_sim : ∀ {T : Ty} (l : Loc C T) {free : Bool} {m : Machine}, Sim C 
         refine .inl ⟨r, segs ++ [.field f], s₀.add (offset s f), v, ?_, ?_, .field hp h,
           hall f T v h' hv, ?_⟩
         · simp [hres]; rfl
-        · rw [findStorage_append, hsv]; simp [bind, Except.bind, SVal.find, hv]
+        · rw [findLive_append, hsv]; simp [bind, Except.bind, SVal.findLive, hv]
         · rw [run_append_ok hrun]; simp [run, Instr.step, Machine.next, Machine.push]
     · exact .inr (.inl ⟨by simp [hres]; rfl, run_append_revert hrun⟩)
     · exact .inr (.inr ⟨r, segs ++ [.field f], by simp [hres]; rfl,
@@ -541,17 +541,19 @@ theorem loc_sim : ∀ {T : Ty} (l : Loc C T) {free : Bool} {m : Machine}, Sim C 
           have hp' := PathSlot.key hp (Int.natCast_nonneg n) (by omega)
           rw [Int.toNat_natCast] at hp'
           refine .inl ⟨r, segs ++ [.at n], .hash n s₀ 0, _, ?_, ?_, hp', hall n hn, ?_⟩
-          · simp [hres, hv, Value.asInt]; rfl
-          · rw [findStorage_append, hsv]
-            simp only [bind, Except.bind, SVal.find]
+          · simp [hres, hv, Value.asInt, State.checkIndex, State.findStorage_of_findLive hsv, bind,
+              Except.bind, pure, Except.pure] <;> rfl
+          · rw [findLive_append, hsv]
+            simp only [bind, Except.bind, SVal.findLive]
             cases lookupBy (n : Int) entries <;> simp
           · rw [run_append_ok hrun']; simp [run, Instr.step, Machine.next, Machine.push]
         · exact .inr (.inl ⟨by simp [hres, hv]; rfl, run_append_revert hrun'⟩)
     · exact .inr (.inl ⟨by simp [hres]; rfl, run_append_revert hrun⟩)
     · rcases ihi hm hwi with ⟨v, w, hv, hrep, _⟩ | ⟨hv, _⟩
       · obtain ⟨n, hn, rfl, rfl⟩ := hrep.uint_inv
-        exact .inr (.inr ⟨r, segs ++ [.at n], by simp [hres, hv, Value.asInt]; rfl,
-          by rw [findStorage_append, hsv]; rfl, hfree, run_append_revert hrun⟩)
+        -- the bounds check reads the receiver, which reverts
+        exact .inr (.inl ⟨by simp [hres, hv, Value.asInt, State.checkIndex, hsv, bind, Except.bind],
+          run_append_revert hrun⟩)
       · exact .inr (.inl ⟨by simp [hres, hv]; rfl, run_append_revert hrun⟩)
   | _, @Loc.index _ _ _ E .arr b i, free, m, hm, hw => by
     have ihb : ∀ {m : Machine}, Sim C Γ σ m → wtSPath Γ free b = true →
@@ -570,33 +572,37 @@ theorem loc_sim : ∀ {T : Ty} (l : Loc C T) {free : Bool} {m : Machine}, Sim C 
         rcases ihi (hm.push _) hwi with ⟨v, w, hv, hrep, hrun'⟩ | ⟨hv, hrun'⟩
         · obtain ⟨n, hn, rfl, rfl⟩ := hrep.uint_inv
           rw [run_append_ok hrun']
+          have hsv' := State.findStorage_of_findLive hsv
           have hres' : (do
               let (r, segs) ← b.resolve σ
               let i ← (← i.eval σ).asInt
-              pure (r, segs ++ [Seg.at i]) : Res (Name × List Seg)) = .ok (r, segs ++ [.at n]) := by
-            simp [hres, hv, Value.asInt]; rfl
+              σ.checkIndex r segs i
+              pure (r, segs ++ [Seg.at i]) : Res (Name × List Seg)) =
+                (if n < elems.length then .ok (r, segs ++ [.at n]) else .error .revert) := by
+            by_cases hin : n < elems.length <;>
+              simp [hres, hv, Value.asInt, State.checkIndex, hsv', hin, bind, Except.bind, pure,
+                Except.pure] <;> rfl
           rw [hres']
           have hb := boundsCheck_run m m.stack (elemSlot (size E)) n s₀
           simp only [Machine.push] at hb ⊢
           rw [hb, hl]
           by_cases hin : n < elems.length
-          · rw [if_pos hin]
+          · rw [if_pos hin, if_pos hin]
             have hp' := PathSlot.elem hp (Int.natCast_nonneg n) (by omega)
             rw [Int.toNat_natCast] at hp'
             refine .inl ⟨r, segs ++ [.at n], .data s₀ (n * size E), elems[n], rfl, ?_, hp',
               hall n hin, elemSlot_run m m.stack n (size E) s₀⟩
-            rw [findStorage_append, hsv]
-            simp [bind, Except.bind, SVal.find, hin]
-          · rw [if_neg hin]
-            refine .inr (.inr ⟨r, segs ++ [.at n], rfl, ?_, rfl, rfl⟩)
-            rw [findStorage_append, hsv]
-            simp [bind, Except.bind, SVal.find, hin]
+            rw [findLive_append, hsv]
+            simp [bind, Except.bind, SVal.findLive, hin]
+          · rw [if_neg hin, if_neg hin]
+            exact .inr (.inl ⟨rfl, rfl⟩)
         · exact .inr (.inl ⟨by simp [hres, hv]; rfl, run_append_revert hrun'⟩)
     · exact .inr (.inl ⟨by simp [hres]; rfl, run_append_revert hrun⟩)
     · rcases ihi hm hwi with ⟨v, w, hv, hrep, _⟩ | ⟨hv, _⟩
       · obtain ⟨n, hn, rfl, rfl⟩ := hrep.uint_inv
-        exact .inr (.inr ⟨r, segs ++ [.at n], by simp [hres, hv, Value.asInt]; rfl,
-          by rw [findStorage_append, hsv]; rfl, hfree, run_append_revert hrun⟩)
+        -- the bounds check reads the receiver, which reverts
+        exact .inr (.inl ⟨by simp [hres, hv, Value.asInt, State.checkIndex, hsv, bind, Except.bind],
+          run_append_revert hrun⟩)
       · exact .inr (.inl ⟨by simp [hres, hv]; rfl, run_append_revert hrun⟩)
 
 /-- An expression pushes its value, or reverts where the interpreter does.
@@ -622,14 +628,14 @@ theorem val_sim : ∀ {p : PrimTy} (e : Val C p) {m : Machine}, Sim C Γ σ m �
         | uint h0 h1 h2 =>
           rename_i n
           refine .inl ⟨.int n, .val n.toNat, ?_, ⟨h0, h1, rfl⟩, ?_⟩
-          · simp [hres, hsv, SVal.asValue, bind, Except.bind]
+          · simp [hres, (State.findStorage_of_findLive hsv), SVal.asValue, bind, Except.bind]
           · simp [run, Instr.step, Machine.next, Machine.push, h2]
       | bool =>
         cases hr with
         | bool h =>
           rename_i b
           refine .inl ⟨.bool b, .val (bword b), ?_, rfl, ?_⟩
-          · simp [hres, hsv, SVal.asValue, bind, Except.bind]
+          · simp [hres, (State.findStorage_of_findLive hsv), SVal.asValue, bind, Except.bind]
           · simp [run, Instr.step, Machine.next, Machine.push, h]
     · exact .inr ⟨by simp [hres]; rfl, run_append_revert hrun⟩
     · exact .inr ⟨by simp [hres, hsv, bind, Except.bind], run_append_revert hrun⟩
@@ -936,12 +942,12 @@ theorem opStore_sim {Δ : TyCtx} {τ : State} {m : Machine} {op : BinOp}
           obtain ⟨stor, hsave, hrep⟩ := save_repr hm.store hp ⟨_, hsv⟩ hnew
             (fun x hx => upd_other _ _ fun he => hx (he ▸ Occ.prim))
           refine .inl ⟨_, { m with store := upd m.store s an }, ?_, ?_, rfl, hm.store' hrep⟩
-          · simp only [hvr, hres, Except.ok_bind', opStore, hsv, SVal.asValue]
+          · simp only [hvr, hres, Except.ok_bind', opStore, (State.findStorage_of_findLive hsv), SVal.asValue]
             rw [bind_bind_ok hvn]; exact hsave
           · change run (binTail op ++ _) { m with stack := wr :: .val a :: .slot s :: m.stack } = _
             rw [run_append_ok hrunt]; rfl
         · refine .inr ⟨?_, ?_⟩
-          · simp only [hvr, hres, Except.ok_bind', opStore, hsv, SVal.asValue]
+          · simp only [hvr, hres, Except.ok_bind', opStore, (State.findStorage_of_findLive hsv), SVal.asValue]
             rw [bind_bind_error hvn]
           · change run (binTail op ++ _) { m with stack := wr :: .val a :: .slot s :: m.stack } = _
             rw [run_append_revert hrunt]
@@ -1039,13 +1045,13 @@ theorem bumpStore_sim {Δ : TyCtx} {τ : State} {m : Machine} (op : IncDec) {l :
         obtain ⟨stor, hsave, hrep⟩ := save_repr hm.store hp ⟨_, hsv⟩ hnew
           (fun x hx => upd_other _ _ fun he => hx (he ▸ Occ.prim))
         refine .inl ⟨_, { m with store := upd m.store s an }, ?_, ?_, rfl, hm.store' hrep⟩
-        · simp only [hres, Except.ok_bind', bumpStore, hsv, SVal.asValue, Value.asInt]
+        · simp only [hres, Except.ok_bind', bumpStore, (State.findStorage_of_findLive hsv), SVal.asValue, Value.asInt]
           rw [bump_src, hretTy, hvn, Except.ok_bind', hsave]; rfl
         · change run (binTail op.binOp ++ _)
             { m with stack := .val 1 :: .val a :: .slot s :: m.stack } = _
           rw [run_append_ok hrunt]; rfl
       · refine .inr ⟨?_, ?_⟩
-        · simp only [hres, Except.ok_bind', bumpStore, hsv, SVal.asValue, Value.asInt]
+        · simp only [hres, Except.ok_bind', bumpStore, (State.findStorage_of_findLive hsv), SVal.asValue, Value.asInt]
           rw [bump_src, hretTy, hvn]; rfl
         · change run (binTail op.binOp ++ _)
             { m with stack := .val 1 :: .val a :: .slot s :: m.stack } = _
@@ -1175,7 +1181,7 @@ theorem stmt_sim : ∀ (s : Stmt C) {Δ Δ' : TyCtx} {τ : State} {m : Machine},
     simp [wtStmt, wtOpLoc, opLocToLoc] at hw
   | .opAssign _ _ _ (.mindex ..) _, _, _, _, _, _, hw => by
     simp [wtStmt, wtOpLoc, opLocToLoc] at hw
-  | .pop b, Δ, Δ', τ, m, hm, hw => by
+  | .pop (E := E) b, Δ, Δ', τ, m, hm, hw => by
     simp only [wtStmt, Option.ite_none_right_eq_some, Option.some.injEq] at hw
     obtain ⟨hwb, rfl⟩ := hw
     simp only [Stmt.run, compileStmt]
@@ -1193,17 +1199,17 @@ theorem stmt_sim : ∀ (s : Stmt C) {Δ Δ' : TyCtx} {τ : State} {m : Machine},
         · rw [if_pos h0]
           have : elems = [] := List.eq_nil_of_length_eq_zero h0
           subst this
-          exact .inr ⟨by simp [hres, popAt, hsv], rfl⟩
+          exact .inr ⟨by simp [hres, popAt, (State.findStorage_of_findLive hsv)], rfl⟩
         · rw [if_neg h0]
           obtain ⟨last, restRev, hrev⟩ : ∃ last restRev, elems.reverse = last :: restRev := by
             cases h : elems.reverse with
             | nil => simp at h; exact absurd (by simp [h]) h0
             | cons last restRev => exact ⟨last, restRev, rfl⟩
-          have hnew := pop_repr hr' hrev
+          have hnew := pop_repr (if E.isMapping then last else last.defaultOf) hr' hrev
           obtain ⟨stor, hsave, hrep⟩ := save_repr hm.store hp ⟨_, hsv⟩ hnew
             (fun x hx => upd_other _ _ fun he => hx (he ▸ Occ.len))
           refine .inl ⟨_, _, ?_, rfl, rfl, hm.store' hrep⟩
-          simp [hres, popAt, hsv, hrev, hsave]
+          simp [hres, popAt, (State.findStorage_of_findLive hsv), hrev, hsave]
     · exact .inr ⟨by simp [hres], run_append_revert hrun⟩
     · exact .inr ⟨by simp [hres, popAt, hsv], run_append_revert hrun⟩
   | .transfer r a, Δ, Δ', τ, m, hm, hw => by
@@ -1257,7 +1263,7 @@ theorem stmt_sim : ∀ (s : Stmt C) {Δ Δ' : TyCtx} {τ : State} {m : Machine},
         (fun x hx => zeroAt_other fun o ho hxo => hx (hxo ▸ leavesF_occ _ T s o ho))
       refine .inl ⟨_, { m with store := zeroAt m.store s (leaves T) }, ?_, rfl, rfl,
         hm.store' hrep⟩
-      simp [hres, hsv, hsave]
+      simp [hres, (State.findStorage_of_findLive hsv), hsave]
     · exact .inr ⟨by simp [hres], run_append_revert hrun⟩
     · exact .inr ⟨by simp [hres, hsv], run_append_revert hrun⟩
   | .ite c t e, Δ, Δ', τ, m, hm, hw => by
@@ -1423,7 +1429,8 @@ theorem Sim.init (C : Contract) (balance : Nat) :
 
 /-- **The EVM agrees with the interpreter's storage.**  From a fresh contract,
 a program of the fragment either reverts in both, or runs in both, and then
-every `uint` path the interpreter reads, the machine holds at its slot.
+every `uint` path the interpreter reads with its indices in bounds
+(`findLive`, as a program's read checks them), the machine holds at its slot.
 
 Example: `alice.age = 10;` leaves `10` at slot `13` of `StandardExample`
 (`Evm/Examples.lean` derives it from this theorem). -/
@@ -1432,7 +1439,7 @@ theorem compile_storage {P : Prog C} {Γ' : TyCtx} (hP : wtProg (fun _ => none) 
     (∃ σ' m', Prog.run (State.fresh C balance) P = .ok σ' ∧
       run (compileProg P) (Machine.init balance) = .ok m' 0 ∧
       ∀ r segs s n, PathSlot C false r segs (.prim .uint) s →
-        σ'.findStorage r segs = .ok (.prim (.int n)) → m'.store s = n.toNat) ∨
+        σ'.findLive r segs = .ok (.prim (.int n)) → m'.store s = n.toNat) ∨
     (Prog.run (State.fresh C balance) P = .error .revert ∧
       run (compileProg P) (Machine.init balance) = .revert) := by
   rcases compile_correct hP (Sim.init C balance) with ⟨σ', m', h1, h2, _, hm⟩ | h

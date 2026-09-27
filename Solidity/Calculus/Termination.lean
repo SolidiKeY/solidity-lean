@@ -445,11 +445,13 @@ theorem rebindStep_small {R : RefTy} (x : Var) :
       (fun it _ _ _ => ?_) l
     · trivial
     · trivial
-    · cases it <;> trivial
+    · cases it
+      · trivial
+      · dsimp only; split <;> trivial
   | .push b _ => by
     simp only [rebindStep]
     split
-    · trivial
+    · split <;> trivial
     · weigh [SPath.pen_eq_16 ‹_›]
 
 /-- A storage copy into a member or an entry.
@@ -549,13 +551,11 @@ theorem deleteStep_small {T : Ty} : ∀ l : Loc C T, (deleteStep (k := k) (m := 
     split
     · trivial
     · weigh [SPath.pen_eq_16 ‹_›]
-  | .index _ b i => by
+  | .index it b i => by
     simp only [deleteStep]
     split
     · rename_i hb
-      cases i with
-      | simple _ => trivial
-      | _ => weigh [SPath.pen_eq_one hb]
+      cases it <;> cases i <;> first | trivial | weigh [SPath.pen_eq_one hb]
     · weigh [SPath.pen_eq_16 ‹_›]
 
 /-- A compound assignment: source, then receiver.
@@ -623,7 +623,7 @@ theorem pushStep_small {E : Ty} (b : SPath C (.array E)) (v : Option (Src C E))
   split
   · rename_i hb
     rcases v with _ | (⟨e⟩ | ⟨_, _⟩)
-    · trivial
+    · dsimp only; split <;> trivial
     · cases e <;> first | trivial | weigh [SPath.pen_eq_one hb]
     · trivial
   · rename_i hb
@@ -636,7 +636,7 @@ Example: `people[i].values.pop();` unfolds into
 theorem popStep_small {E : Ty} (b : SPath C (.array E)) : (popStep (k := k) (m := m) b).Small := by
   unfold popStep
   split
-  · trivial
+  · split <;> trivial
   · weigh [SPath.pen_eq_16 ‹_›]
 
 /-- `transfer`: the receiver first, then the amount.

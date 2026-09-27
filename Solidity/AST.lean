@@ -64,6 +64,24 @@ def isPrimitive : Ty -> Bool
 def isReference (ty : Ty) : Bool :=
   !ty.isPrimitive
 
+/-- A mapping: `mapping(uint => uint)`, the element of `mapping(uint => uint)[]`
+that `pop` leaves as it is (solkey's `mappingElement`). -/
+def isMapping : Ty -> Bool
+  | ref (.mapping ..) => true
+  | _ => false
+
+/-- The element type of an array is a mapping (`Path[…,mappingElement]`):
+`false` for anything that is not an array. -/
+def elemIsMapping : Ty -> Bool
+  | ref (.array e) => e.isMapping
+  | _ => false
+
+/-- The element type of an array is primitive (`Path[…,primitiveElement]`):
+`false` for anything that is not an array. -/
+def elemIsPrim : Ty -> Bool
+  | ref (.array e) => e.isPrimitive
+  | _ => false
+
 def indexElemTy : Ty -> Ty
   | Ty.ref (RefTy.array elem) => elem
   | Ty.ref (RefTy.mapping _ value) => value

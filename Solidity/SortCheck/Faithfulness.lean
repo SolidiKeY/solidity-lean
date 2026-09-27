@@ -704,13 +704,13 @@ theorem rows_covered :
         (ctorsOf row.keyName).all ((faithfulCtors.map (·.ctor)).contains ·))) = true := by
   decide +kernel
 
-/-- What the theorems speak about: of the 110 rows, 95 carry a value read
+/-- What the theorems speak about: of the 115 rows, 95 carry a value read
 (65 in storage, 30 in memory), 87 of them with a sort that says something
-and 8 with only the claim-free `StValue`; the other 15 read only `size`
+and 8 with only the claim-free `StValue`; the other 20 read only `size`
 cells, the `net` ledger or `delete` defaults, which `solkeycheck` checks
 token by token. -/
 theorem rows_accounting :
-    tacletReadAnns.length = 110 ∧
+    tacletReadAnns.length = 115 ∧
     (tacletReadAnns.filter fun row => !(valueReads row).isEmpty).length = 95 ∧
     (tacletReadAnns.filter fun row => (valueReads row).any (·.domain == .storage)).length = 65 ∧
     (tacletReadAnns.filter fun row => (valueReads row).any (·.domain == .memory)).length = 30 ∧

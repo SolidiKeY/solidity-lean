@@ -42,6 +42,7 @@ def PTerm.quote : PTerm C → Lean.Expr
   | .pv x => mkAppN (mkConst ``PTerm.pv) #[c, toExpr x]
   | .field p f => mkAppN (mkConst ``PTerm.field) #[c, PTerm.quote p, toExpr f]
   | .at p i => mkAppN (mkConst ``PTerm.at) #[c, PTerm.quote p, Term.quote i]
+  | .next p => mkAppN (mkConst ``PTerm.next) #[c, PTerm.quote p]
 
 def STerm.quote : STerm C → Lean.Expr
   | .storage => mkAppN (mkConst ``STerm.storage) #[c]
@@ -51,6 +52,7 @@ def STerm.quote : STerm C → Lean.Expr
   | .pushSlot s p E =>
     mkAppN (mkConst ``STerm.pushSlot) #[c, STerm.quote s, PTerm.quote p, toExpr E]
   | .pop s p => mkAppN (mkConst ``STerm.pop) #[c, STerm.quote s, PTerm.quote p]
+  | .shrink s p => mkAppN (mkConst ``STerm.shrink) #[c, STerm.quote s, PTerm.quote p]
   | .extend s p E => mkAppN (mkConst ``STerm.extend) #[c, STerm.quote s, PTerm.quote p, toExpr E]
 
 def SValT.quote : SValT C → Lean.Expr

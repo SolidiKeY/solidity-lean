@@ -63,13 +63,14 @@ inductive SVal where
   | prim (p : PrimVal)
   | struct (fields : List (Name × SVal))
   /-- A storage array: the live `elems` — `elems.length` is the array's
-  length — beside the slots a `pop` has cleared and given back.  `shadow k` is
-  the content of slot `elems.length + k`, so the stack is LIFO exactly as the
-  slots are recycled.  This is KeY's `save(delAt(storage, at(n)), size, n±1)`
-  (`storagePopSave`, `storagePushLengthSave`) read eagerly: `delete` never
-  clears a mapping member, so a mapping nested in a popped element survives
-  and the next `push` sees it again — solc's own behaviour, and the reason
-  `pop` cannot just drop the element. -/
+  length — beside the slots past the end.  `shadow k` is the content of slot
+  `elems.length + k`: what a `pop`, a `delete` or a shorter copy cleared and
+  left behind, and what a write through a reference to a popped element put
+  there.  The slots are storage like any other (solc: nothing is freed), so a
+  reference to one still reads and writes it, and the next `push` of a struct
+  lands on it as it is (`storagePushLengthSaveReferenceElement`); `delete`
+  never clears a mapping member, so a mapping nested in a popped element
+  survives into that `push` too. -/
   | array (elems : List SVal) (shadow : List SVal)
   | map (entries : List (Int × SVal)) (dflt : SVal)
   deriving Repr
@@ -174,48 +175,95 @@ def defaultForRef (ref : RefTy) : SVal :=
 
 
 /-- Shape-preserving default (`defaultOf` on the current value):
-`delete` resets primitives, empties arrays, and recurses into struct
-fields — but leaves mappings untouched (entries and default), the
-Solidity `delete` semantics solkey implements with the lazy `delNode`
-marker (`selectStDelNodeMap` reads mapping members through to the
-original). A direct `delete` on a mapping is a solc compile error, so
-the no-op `map` arm is unreachable from real programs.
+`delete` resets primitives, recurses into struct fields and array elements —
+but leaves mappings untouched (entries and default), the Solidity `delete`
+semantics solkey implements with the lazy `delNode` marker
+(`selectStDelNodeMap` reads mapping members through to the original). A
+direct `delete` on a mapping is a solc compile error, so the no-op `map` arm
+is unreachable from real programs.
 
-An array is emptied outright — recycled slots and all. On the EVM the
-mapping entries nested in a deleted element survive at their hashed
-slots, so `delete arr; arr.push();` would see them again; KeY says
-otherwise (`selectStDelNodeIndexStruct` reads every index of a deleted
-node as `mtSt`) and the model follows KeY here. Matching solc would mean
-`array [] (defaultOfElems elems ++ shadow)`, which takes the value out of
-`Reachability.SVal.canonical` and so costs row C6 of
-`WellFormedConsumers` its proof; `docs/solc-alignment.md` records the
-divergence. `pop`/`push` are *not* affected — there the slot is recycled
-(`pushSlot`), which is the mapping-preserving behaviour solc and KeY
-agree on. -/
+An array is emptied: its length is `0`, and its live elements are cleared
+into the slots past the end, in place, where the slots already there stay
+as they are.  That is solc (the element slots are cleared, the mapping
+entries nested in them live on at hashed slots nothing clears, so
+`delete arr; arr.push();` sees them again) and, since `f2eb3d98eb`, solkey:
+`selectStDelNodeIndexStruct` reads an index of a deleted node below its old
+`size` as the element deleted and one past it as it was. -/
 def SVal.defaultOf : SVal -> SVal
   | SVal.int _ => SVal.int 0
   | SVal.bool _ => SVal.bool false
   | SVal.struct fields => SVal.struct (defaultOfFields fields)
-  | SVal.array _ _ => SVal.array [] []
+  | SVal.array elems shadow => SVal.array [] (defaultOfElems elems ++ shadow)
   | SVal.map entries dflt => SVal.map entries dflt
 where
   defaultOfFields : List (Name × SVal) -> List (Name × SVal)
   | [] => []
   | (name, v) :: rest => (name, v.defaultOf) :: defaultOfFields rest
-/-- The slot `arr.push()` lands on, and the recycled slots that are left:
-the one a `pop` cleared and handed back, or a fresh default where the array
-has never been that long. KeY writes `delAt(storage, at(n))` in both cases
-(`storagePushLengthSave`), which is the clear this performs — `defaultOf` is
-idempotent, so clearing an already-cleared slot again is exactly that write,
-and a mapping member of a recycled struct slot survives it.
+  defaultOfElems : List SVal -> List SVal
+  | [] => []
+  | v :: rest => v.defaultOf :: defaultOfElems rest
 
-`push(se)` and `push(sp)` overwrite the slot instead (KeY's
-`storagePushValueSave` / `…CopySource` write a plain `save`, whose leaf would
-keep the slot's mapping members). They still *consume* the slot, since it
-becomes live again. The leaf is invisible there: a pushed value has the
-element's type, and `rhsToSVal` is stuck on a storage source of a
-mapping-carrying type while a stack source forces a primitive element, so no
-push-with-value in the admitted fragment lands on a slot with a mapping.
+/-- A value written to slots nothing has written before: its arrays have
+nothing past their ends (a copy copies the live elements only). -/
+def SVal.strip : SVal -> SVal
+  | SVal.prim p => SVal.prim p
+  | SVal.struct fields => SVal.struct (stripFields fields)
+  | SVal.array elems _ => SVal.array (stripElems elems) []
+  | SVal.map entries dflt => SVal.map entries dflt
+where
+  stripFields : List (Name × SVal) -> List (Name × SVal)
+  | [] => []
+  | (name, v) :: rest => (name, v.strip) :: stripFields rest
+  stripElems : List SVal -> List SVal
+  | [] => []
+  | v :: rest => v.strip :: stripElems rest
+
+/-- A copy of `new` written over `old` (a storage-to-storage or a
+memory-to-storage copy of a struct or an array, or a `push` of one onto a
+recycled slot): what the slots hold afterwards.  Primitives are `new`'s; a
+struct's members are copied member by member; an array takes `new`'s length
+and elements, each copied over the slot it lands on, and the old slots past
+the new length are cleared (`defaultOf`) up to the old length and left as
+they were beyond it.  That is solc's copy, and solkey's since `f2eb3d98eb`
+(`selectOnSaveEmptyIndexStruct`: below the new `size` the element saved over
+the old one, below the old `size` the old one deleted, beyond both the old
+one).  Onto a slot of another shape, or none, `new` lands as on fresh
+storage (`SVal.strip`).  A mapping is never copied (a copy is `mapFree`),
+and one met here keeps the old entries (`selectOnSaveEmptyMap`). -/
+def SVal.overlay : SVal -> SVal -> SVal
+  | SVal.struct ofs, SVal.struct nfs => SVal.struct (overlayFields ofs nfs)
+  | SVal.array oel osh, SVal.array nel _ =>
+    SVal.array (overlayElems (oel ++ osh) nel)
+      (SVal.defaultOf.defaultOfElems (oel.drop nel.length) ++ osh.drop (nel.length - oel.length))
+  | SVal.map oe od, SVal.map _ _ => SVal.map oe od
+  | _, new => new.strip
+where
+  overlayFields (ofs : List (Name × SVal)) : List (Name × SVal) -> List (Name × SVal)
+  | [] => []
+  | (name, v) :: rest =>
+    (name, match lookupBy name ofs with
+      | some o => o.overlay v
+      | none => v.strip) :: overlayFields ofs rest
+  overlayElems : List SVal -> List SVal -> List SVal
+  | o :: os, v :: rest => o.overlay v :: overlayElems os rest
+  | [], rest => SVal.strip.stripElems rest
+  | _ :: _, [] => []
+
+/-- The slot `arr.push()` lands on, and the slots past the end that are
+left: the first of them as it is, or a fresh default where the array has
+never been that long.  A primitive element is cleared first (KeY writes
+`delAt(storage, at(n))`, `storagePushLengthSave`); a struct or an array is
+not (`storagePushLengthSaveReferenceElement`): solc's `push()` does not zero
+the slot, which a `pop` cleared already, so a value written there through a
+reference to the popped element is seen again, and so is a mapping nested in
+it.
+
+`push(se)` and `push(sp)` write their value to the slot instead, as on
+fresh slots (`Src.pushVal`, `SVal.strip`).  They still *consume* the slot,
+since it becomes live again.  (solc copies the value member by member over
+the recycled slot, so the one difference is past the end of an array nested
+in the element, which only a write through a reference to a popped element
+can have dirtied.)
 
 The `isPrimitive` branch is **redundant on any well-typed storage**, where a
 cleared primitive slot *is* the type's default (`pushSlot_prim`, proved in
@@ -226,7 +274,7 @@ pushed value without a typing hypothesis. -/
 def pushSlot (elemTy : Ty) : List SVal -> SVal × List SVal
   | [] => (defaultForTy elemTy, [])
   | c :: rest =>
-      (if elemTy.isPrimitive then defaultForTy elemTy else c.defaultOf, rest)
+      (if elemTy.isPrimitive then defaultForTy elemTy else c, rest)
 
 /-- At a primitive element type the slot a `push` lands on is the type's
 default, recycled or not — what the removed EVM compiler's correctness proof
@@ -238,15 +286,21 @@ theorem pushSlot_isPrim {elemTy : Ty} {shadow : List SVal}
 
 /-! ## Storage find / save -/
 
+/-! A path's segments address *slots*: `Seg.at i` into an array is its
+`i`-th slot, a live element or one past the end (the `shadow`).  Whether an
+index is in bounds is checked where the program takes it (`State.checkIndex`,
+in `Loc.resolve` and `PTerm.eval`), not here, so that a reference bound to an
+element keeps addressing its slot after a `pop` (solc). -/
+
 def SVal.find : SVal -> List Seg -> Res SVal
   | v, [] => .ok v
   | SVal.struct fields, Seg.field name :: rest =>
       match lookupBy name fields with
       | some v => v.find rest
       | none => .error .stuck
-  | SVal.array elems _, Seg.at i :: rest =>
-      if h : 0 ≤ i ∧ i.toNat < elems.length then
-        (elems.get ⟨i.toNat, h.2⟩).find rest
+  | SVal.array elems shadow, Seg.at i :: rest =>
+      if h : 0 ≤ i ∧ i.toNat < (elems ++ shadow).length then
+        ((elems ++ shadow).get ⟨i.toNat, h.2⟩).find rest
       else .error .revert
   -- `a.length`: solkey's suites assert array lengths directly
   -- (`assert(values.length == 3)`), and the parser gives `.length` a
@@ -275,9 +329,10 @@ def SVal.save : SVal -> List Seg -> SVal -> Res SVal
           .ok (SVal.struct (setBy name updated fields))
       | none => .error .stuck
   | SVal.array elems shadow, Seg.at i :: rest, new =>
-      if h : 0 ≤ i ∧ i.toNat < elems.length then do
-        let updated ← (elems.get ⟨i.toNat, h.2⟩).save rest new
-        .ok (SVal.array (elems.set i.toNat updated) shadow)
+      if h : 0 ≤ i ∧ i.toNat < (elems ++ shadow).length then do
+        let updated ← ((elems ++ shadow).get ⟨i.toNat, h.2⟩).save rest new
+        let slots := (elems ++ shadow).set i.toNat updated
+        .ok (SVal.array (slots.take elems.length) (slots.drop elems.length))
       else .error .revert
   | SVal.map entries dflt, Seg.at i :: rest, new =>
       match lookupBy i entries with
@@ -287,13 +342,6 @@ def SVal.save : SVal -> List Seg -> SVal -> Res SVal
       | none => do
           let updated ← dflt.save rest new
           .ok (SVal.map (setBy i updated entries) dflt)
-  -- `a.length = n` is not a program assignment -- solc has rejected that
-  -- since 0.6 -- but it is the calculus's own write: `push` and `pop` are
-  -- `save(storage, consr(arr, size), n ± 1)` over the slot write beside it
-  -- (`storagePushLengthSave`, `storagePopSave`), and this is that write read
-  -- eagerly.  Growing is already done, because the `Seg.at` arm above
-  -- appended; shrinking hands the cleared tail back as recycled slots, which
-  -- is what makes a mapping nested in a popped element survive.
   -- The same four mismatches as `find`, with one asymmetry: there is no
   -- `Seg.field "length"` arm, because assigning `a.length` has been a
   -- solc compile error since 0.6.
@@ -302,68 +350,44 @@ def SVal.save : SVal -> List Seg -> SVal -> Res SVal
   | SVal.array _ _, Seg.field _ :: _, _ => .error .stuck
   | SVal.map _ _, Seg.field _ :: _, _ => .error .stuck
 
-/-- `SVal.save` as the **calculus** writes it, where storage is KeY's total
-map and `size` is a location like any other.
-
-Two arms a program cannot reach, and `SVal.save` therefore does not have:
-a write one past the end *appends* -- `save(storage, consr(arr, at(n)), v)`
-at `n = size` is an ordinary write there, and only the companion `size` write
-makes the slot visible, while here `elems` is the extent -- and a write to
-`size` itself truncates, handing the cleared tail back as the recycled slots
-`pushSlot` deals out.  Together they are `storagePushValueSave`,
-`storagePushLengthSave` and `storagePopSave`.
-
-A program's `a[k] = v` still reverts at `k = size` (solc, and the removed
-EVM compiler's bounded semantics), and `a.length = n` is still a compile error:
-those go through `SVal.save`.  The calculus reaches this one only under an
-`inBounds` guard or from a push or pop, so the two never disagree on a write
-both can perform. -/
-def SVal.saveExt : SVal -> List Seg -> SVal -> Res SVal
-  | _, [], new => .ok new
-  | SVal.struct fields, Seg.field name :: rest, new =>
+/-- A read that checks every index against the live length, as a program
+path's resolution does (`State.checkIndex` in `Loc.resolve`) before the slot
+is read: on a path a program resolved it is `find`, and past the end it
+reverts where `find` would read the slot.  The EVM compiler states what its
+storage holds with it (`Evm.compile_storage`), and `sol_decide` reads with it
+(`Calculus/Decide.lean`). -/
+def SVal.findLive : SVal -> List Seg -> Res SVal
+  | v, [] => .ok v
+  | SVal.struct fields, Seg.field name :: rest =>
       match lookupBy name fields with
-      | some old => do
-          let updated ← old.saveExt rest new
-          .ok (SVal.struct (setBy name updated fields))
+      | some v => v.findLive rest
       | none => .error .stuck
-  | SVal.array elems shadow, Seg.at i :: rest, new =>
-      if h : 0 ≤ i ∧ i.toNat < elems.length then do
-        let updated ← (elems.get ⟨i.toNat, h.2⟩).saveExt rest new
-        .ok (SVal.array (elems.set i.toNat updated) shadow)
-      else if 0 ≤ i ∧ i.toNat = elems.length ∧ rest = [] then
-        -- The recycled slot is consumed either way: `push(se)` overwrites the
-        -- value a `pop` handed back but still takes it out of the stack,
-        -- which is `pushSlot`'s second component.
-        .ok (SVal.array (elems ++ [new]) (shadow.drop 1))
+  | SVal.array elems _, Seg.at i :: rest =>
+      if h : 0 ≤ i ∧ i.toNat < elems.length then
+        (elems.get ⟨i.toNat, h.2⟩).findLive rest
       else .error .revert
-  | SVal.array elems shadow, Seg.field name :: rest, new =>
-      if name = "length" ∧ rest = [] then
-        match new with
-        | SVal.int n =>
-            if n = elems.length then .ok (SVal.array elems shadow)
-            else if 0 ≤ n ∧ n < elems.length then
-              .ok (SVal.array (elems.take n.toNat)
-                ((elems.drop n.toNat).reverse.map SVal.defaultOf ++ shadow))
-            else .error .revert
-        | _ => .error .stuck
-      else .error .stuck
-  | SVal.map entries dflt, Seg.at i :: rest, new =>
+  | SVal.array elems _, Seg.field "length" :: rest =>
+      (SVal.int elems.length).findLive rest
+  | SVal.map entries dflt, Seg.at i :: rest =>
       match lookupBy i entries with
-      | some old => do
-          let updated ← old.saveExt rest new
-          .ok (SVal.map (setBy i updated entries) dflt)
-      | none => do
-          let updated ← dflt.saveExt rest new
-          .ok (SVal.map (setBy i updated entries) dflt)
-  | SVal.prim _, _ :: _, _ => .error .stuck
-  | SVal.struct _, Seg.at _ :: _, _ => .error .stuck
-  | SVal.map _ _, Seg.field _ :: _, _ => .error .stuck
+      | some v => v.findLive rest
+      | none => dflt.findLive rest
+  | SVal.prim _, _ :: _ => .error .stuck
+  | SVal.struct _, Seg.at _ :: _ => .error .stuck
+  | SVal.array _ _, Seg.field _ :: _ => .error .stuck
+  | SVal.map _ _, Seg.field _ :: _ => .error .stuck
 
 namespace State
 
 def findStorage (s : State) (root : Name) (segs : List Seg) : Res SVal :=
   match lookupBy root s.storage with
   | some v => v.find segs
+  | none => .error .stuck
+
+/-- `SVal.findLive` at a root. -/
+def findLive (s : State) (root : Name) (segs : List Seg) : Res SVal :=
+  match lookupBy root s.storage with
+  | some v => v.findLive segs
   | none => .error .stuck
 
 def saveStorage (s : State) (root : Name) (segs : List Seg) (new : SVal) :
@@ -374,14 +398,26 @@ def saveStorage (s : State) (root : Name) (segs : List Seg) (new : SVal) :
       .ok { s with storage := setBy root updated s.storage }
   | none => .error .stuck
 
-/-- `saveStorage` through `SVal.saveExt`: the calculus's writer. -/
-def saveStorageExt (s : State) (root : Name) (segs : List Seg) (new : SVal) :
-    Res State :=
-  match lookupBy root s.storage with
-  | some v => do
-      let updated ← v.saveExt segs new
-      .ok { s with storage := setBy root updated s.storage }
-  | none => .error .stuck
+/-- `arr[i]` is in bounds where the program takes the index: solc's
+`Panic(0x32)`, checked once, when the path is resolved (a read, a write, an
+alias bound), and not again when an alias bound to the element is used.  A
+mapping takes every key; a word or a struct takes none (no typed program
+indexes one). -/
+def checkIndex (s : State) (root : Name) (segs : List Seg) (i : Int) : Res Unit := do
+  match ← s.findStorage root segs with
+  | .array elems _ => if 0 ≤ i ∧ i.toNat < elems.length then pure () else .error .revert
+  | .map _ _ => pure ()
+  | .prim _ | .struct _ => .error .stuck
+
+/-- A storage write of what an assignment's right-hand side denotes: a word
+is stored; a struct or an array is copied over what is there
+(`SVal.overlay`). -/
+def writeStorage (s : State) (root : Name) (segs : List Seg) (new : SVal) : Res State :=
+  match new with
+  | .prim p => s.saveStorage root segs (.prim p)
+  | .struct _ | .array .. | .map .. => do
+    let cur ← s.findStorage root segs
+    s.saveStorage root segs (cur.overlay new)
 
 def getEnv (s : State) (name : Var) : Res Binding :=
   match lookupBy name s.env with
@@ -839,6 +875,15 @@ def aliasPath (σ : State) (x : Var) : Res (Name × List Seg) := do
   | .spath root segs => pure (root, segs)
   | .val _ | .mref _ => .error .stuck
 
+/-- A word is stored as it is. -/
+@[simp] theorem State.writeStorage_prim (σ : State) (r : Name) (segs : List Seg) (p : PrimVal) :
+    σ.writeStorage r segs (.prim p) = σ.saveStorage r segs (.prim p) := rfl
+
+/-- A word is stored as it is: `alice.age = 10;` is a `save`. -/
+@[simp] theorem State.writeStorage_toSVal (σ : State) (r : Name) (segs : List Seg) (v : Value) :
+    σ.writeStorage r segs v.toSVal = σ.saveStorage r segs v.toSVal := by
+  cases v <;> rfl
+
 /-- `-x` is range-checked at `int` only. -/
 def unopCheck (op : UnOp) (p : PrimTy) (v : Value) : Res Value :=
   match op, p with
@@ -890,6 +935,7 @@ def Loc.resolve (σ : State) : {T : Ty} → Loc C T → Res (Name × List Seg)
   | _, .index _ b i => do
     let (r, segs) ← b.resolve σ
     let i ← (← i.eval σ).asInt
+    σ.checkIndex r segs i
     pure (r, segs ++ [.at i])
 
 /-- The slot a memory path holds in `σ`: a memory local's reference, or
@@ -1098,18 +1144,24 @@ def pushPlaceAt (σ : State) (E : Ty) (root : Name) (segs : List Seg) : Res (Sta
     pure (σ', elems.length)
   | .prim _ | .struct _ | .map _ _ => .error .stuck
 
-/-- What a push appends: its argument, or the slot. -/
+/-- What a push appends: the slot, or its argument, laid on fresh slots
+(`SVal.strip`: a copy copies the live elements only). -/
 def Src.pushVal (σ : State) {T : Ty} : Option (Src C T) → SVal → Res SVal
   | none, slot => pure slot
-  | some r, _ => r.value σ
+  | some r, _ => do pure (← r.value σ).strip
 
-/-- `pop` at a resolved array: the last element cleared into the shadow. -/
-def popAt (σ : State) (root : Name) (segs : List Seg) : Res State := do
+/-- `pop` at a resolved array: the last element cleared into the shadow, or
+moved there as it is when `keep` (an array of mappings: `delete` leaves a
+mapping alone, and solkey's `storagePopSaveMappingElement` writes no
+`delAt`). -/
+def popAt (σ : State) (keep : Bool) (root : Name) (segs : List Seg) : Res State := do
   match ← σ.findStorage root segs with
   | .array elems shadow =>
     match elems.reverse with
     | [] => .error .revert
-    | last :: restRev => σ.saveStorage root segs (.array restRev.reverse (last.defaultOf :: shadow))
+    | last :: restRev =>
+      σ.saveStorage root segs
+        (.array restRev.reverse ((if keep then last else last.defaultOf) :: shadow))
   | .prim _ | .struct _ | .map _ _ => .error .stuck
 
 /-- `a.transfer(v)` with both evaluated: revert when the contract's funds
@@ -1144,7 +1196,7 @@ def Stmt.run (σ : State) : Stmt C → Res State
   | .assign l r => do
     let sv ← r.value σ
     let (root, segs) ← l.resolve σ
-    σ.saveStorage root segs sv
+    σ.writeStorage root segs sv
   | .rebind x r => r.bind σ x
   | .assignLocal x r => do pure (σ.setEnv x (.val (← r.eval σ)))
   | .declLocal p x init => do
@@ -1167,7 +1219,7 @@ def Stmt.run (σ : State) : Stmt C → Res State
   | .assignFromMem l p => do
     let sv ← copyMem σ (.ref (← (← p.mval σ).asRef))
     let (root, segs) ← l.resolve σ
-    σ.saveStorage root segs sv
+    σ.writeStorage root segs sv
   | .opAssign op _ _ l r => do l.store σ op (← r.eval σ)
   | .incDec op _ l => do pure (← l.bump σ op).1
   | .assignIncDec x op _ l _ => do
@@ -1176,9 +1228,9 @@ def Stmt.run (σ : State) : Stmt C → Res State
   | .push (E := E) b v _ => do
     let (root, segs) ← b.resolve σ
     pushAt σ E root segs (Src.pushVal σ v)
-  | .pop b => do
+  | .pop (E := E) b => do
     let (root, segs) ← b.resolve σ
-    popAt σ root segs
+    popAt σ E.isMapping root segs
   | .transfer r a => do
     let addr ← (← r.eval σ).asInt
     let amt ← (← a.eval σ).asInt

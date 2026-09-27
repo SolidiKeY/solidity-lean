@@ -956,17 +956,11 @@ const STATUSES = ["proved", "evaluated", "open", "unsupported", "unported"];
  * interpreter does there that solc and solkey do not. For the scoreboard
  * only; the verdict itself is re-derived by `--probe`.
  */
-const DANGLING =
-  "the write through `r` after `tokens.pop()` reverts: the interpreter bounds-checks a " +
-  "storage reference against the live length, where solc and solkey write the popped slot";
 const OPEN_CAUSES = {
-  "TestSuite.testDanglingReferenceSurvivesPush": DANGLING,
-  "TestSuite.testArrayCopyClearsOldElements": DANGLING,
-  "TestSuite.testArrayCopyKeepsDestinationTail": DANGLING,
-  "TestSuite.testDeleteArrayLeavesDataPastLength": DANGLING,
-  "TestSuite.testDeleteArrayDoesNotResetElementMappingMember":
-    "the last `assert` fails: `delete ledgerUses` drops the elements' mapping entries, where " +
-    "solc and solkey keep them for the re-pushed element",
+  // None since solkey `f2eb3d98eb`: the five rows traced here (a write through
+  // a reference to a popped element, `delete` of an array keeping its
+  // elements' mapping entries) now run to the end (docs/solc-alignment.md,
+  // "Arrays past their end").
 };
 
 /** `docs/corpus-parity.md`: the scoreboard, generated from the rows. */

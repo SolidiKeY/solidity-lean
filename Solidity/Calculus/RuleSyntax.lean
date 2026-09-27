@@ -38,13 +38,15 @@ hypothesis):
 | `mv` | a memory local | `Var` | |
 | `gsp` | a state variable, with its proof `hgsp` | `Name` | |
 | `se`, `ie`, `sadr` | a simple value | `Simple C p` | |
-| `e` | a value | `Val C p` | not a conditional, when written to storage or memory |
+| `e` | a value | `Val C p` | not a conditional, when written to storage or to a memory target |
 | `nse`, `nadr` | a value that is not simple | `Val C p` | not simple (and as `e`) |
 | `sp`, `map`, `arr` | a simple storage path (`map`/`arr` fix how it is indexed) | `SPath C T` | simple |
+| `parr`, `rarr` | a simple path to an array of primitives, of references | `SPath C T` | simple; the element primitive (`SPath.elemPrim`), or not |
+| `marr`, `darr` | a simple path to an array of mappings, of anything else | `SPath C T` | simple; the element a mapping (`SPath.elemMapping`), or not |
 | `nsp` | a storage path that is not simple | `SPath C T` | not simple |
 | `path` | any storage path | `SPath C T` | |
 | `nmp` | a memory path that is not a memory local | `MPath C T` | not simple |
-| `mpath` | a memory path | `MPath C T` | bindable, when written as a reference |
+| `mpath` | a memory path | `MPath C T` | bindable, when written as a reference into a target |
 | `fld`, `fr`, with its proof `hfld`, `hfr` | a member name | `Name` | |
 | `lhs` | where a storage or memory read lands (`Hole`, `MHole`) | | a target |
 | `x` | where a value lands (`VHole`) | | |
@@ -254,7 +256,7 @@ def headOf (Γ : Scope) (x : Ident) : Head :=
     | "gsp" => .root x (proofIdent x s)
     | "se" | "ie" | "sadr" => .simple x
     | "e" | "nse" | "nadr" => .val x
-    | "sp" | "nsp" | "path" | "map" | "arr" => .spath x
+    | "sp" | "nsp" | "path" | "map" | "arr" | "parr" | "rarr" | "marr" | "darr" => .spath x
     | "nmp" | "mpath" => .mpath x
     | "nlhs" | "loc" => .loc x
     | "mloc" => .mloc x
@@ -345,7 +347,7 @@ def indexTyOf : TSyntax `sol_expr → MacroM Lean.Term
   | `(sol_expr| $x:ident) =>
     match stemOf x.getId.toString with
     | "map" => `(IndexTy.map)
-    | "arr" => `(IndexTy.arr)
+    | "arr" | "parr" | "rarr" | "marr" | "darr" => `(IndexTy.arr)
     | _ => pure (schemaIdent "it")
   | _ => pure (schemaIdent "it")
 
@@ -534,8 +536,8 @@ partial def schemaStmt (fresh : Bool) (Γ : Scope) :
               | `(sol_expr| $_:sol_expr [ $_:sol_expr ]) => true
               | _ => false
             if elem then
-              `(Stmt.assignMem $(← schemaAt Γ .mloc l)
-                (MSrc.val (p := $(schemaIdent "p")) $(← schemaAt Γ .val r)))
+              `(Stmt.assignMem (T := Ty.prim $(schemaIdent "p")) $(← schemaAt Γ .mloc l)
+                (MSrc.val $(← schemaAt Γ .val r)))
             else `(Stmt.assignMem $(← schemaAt Γ .mloc l) (MSrc.val $(← schemaAt Γ .val r)))
         else if isMem Γ r then
           `(Stmt.assignFromMem $(← schemaAt Γ .loc l) $(← schemaAt Γ .mpath r))
@@ -785,7 +787,14 @@ partial def schemaTerm0 (Γ : Scope) (pos : TPos) : TSyntax `dl_term → MacroM 
       | .mvalue => `(MValT.ref (ITerm.read MTerm.memory $a))
       | _ => tposError stx "a memory element" pos
     else
-      let p ← `(PTerm.at $(← schemaTerm Γ .path t) $(← schemaTerm Γ .val i))
+      -- `p[p.length]`, the slot one past the end: no bounds check
+      let pastEnd ← do
+        let some b ← lengthBase? i | pure false
+        match b, t with
+        | `(dl_term| $b:ident), `(dl_term| $x:ident) => pure (b.getId == x.getId)
+        | _, _ => pure false
+      let p ← if pastEnd then `(PTerm.next $(← schemaTerm Γ .path t))
+        else `(PTerm.at $(← schemaTerm Γ .path t) $(← schemaTerm Γ .val i))
       match pos with
       | .path => pure p
       | .val => `(Term.find STerm.storage $p)
@@ -835,7 +844,15 @@ partial def schemaTerm0 (Γ : Scope) (pos : TPos) : TSyntax `dl_term → MacroM 
           `(STerm.pushSlot $(← st s') $(← pa b) $(schemaIdent "E"))
         | `(dl_term| delAt($s', $_[$_])), `(dl_term| $_ - 1) =>
           `(STerm.pop $(← st s') $(← pa b))
-        | _, `(dl_term| $_ + 1) => `(STerm.extend $(← st s) $(← pa b) (Ty.ref $(schemaIdent "R")))
+        | _, `(dl_term| $_ + 1) =>
+          -- a bare `rarr.push()` extends at its element type `E`, an alias's
+          -- `lsv = sp.push()` at the alias's `R`
+          let bare := match b with
+            | `(dl_term| $x:ident) => stemOf x.getId.toString == "rarr"
+            | _ => false
+          if bare then `(STerm.extend $(← st s) $(← pa b) $(schemaIdent "E"))
+          else `(STerm.extend $(← st s) $(← pa b) (Ty.ref $(schemaIdent "R")))
+        | _, `(dl_term| $_ - 1) => `(STerm.shrink $(← st s) $(← pa b))
         | _, _ => `(STerm.save $(← st s) $(← pa p) $(← schemaTerm Γ .svalue v))
       | none => `(STerm.save $(← st s) $(← pa p) $(← schemaTerm Γ .svalue v))
     | "delAt", #[s, p], .storage => `(STerm.delAt $(← st s) $(← pa p))
@@ -950,6 +967,17 @@ def singleVar? : TSyntax `sol_expr → Option String
     | _ => none
   | _ => none
 
+/-- A memory location every part of which is simple: a member or an element
+of a memory local at a simple index (`mv.fld`, `mv[ie]`). -/
+def memTarget : TSyntax `sol_expr → Bool
+  | `(sol_expr| $x:ident) =>
+    match nameParts x.getId with
+    | [h, _] => stemOf h == "mv"
+    | _ => false
+  | `(sol_expr| $b:ident [ $i:ident ]) =>
+    stemOf b.getId.toString == "mv" && ["se", "ie"].contains (stemOf i.getId.toString)
+  | _ => false
+
 /-- **The side conditions of a `\find`**, as hypothesis names and types: what
 `Stmt.step` knows of the parts when it fires the rule.
 
@@ -973,6 +1001,15 @@ def sideConds (s : TSyntax `sol_stmt) : MacroM (Array (Ident × Lean.Term)) := d
     match stemOf n with
     | "nsp" => out := out.push (hyp n, ← `(SPath.isSimple $v = false))
     | "sp" | "map" | "arr" => out := out.push (hyp n, ← `(SPath.isSimple $v = true))
+    | "parr" | "rarr" | "marr" | "darr" =>
+      out := out.push (hyp n, ← `(SPath.isSimple $v = true))
+      let (pred, b) := match stemOf n with
+        | "parr" => (`Solidity.SPath.elemPrim, true)
+        | "rarr" => (`Solidity.SPath.elemPrim, false)
+        | "marr" => (`Solidity.SPath.elemMapping, true)
+        | _ => (`Solidity.SPath.elemMapping, false)
+      let bv ← if b then `(true) else `(false)
+      out := out.push (hyp (n ++ "_e"), ← `($(mkIdent pred) $v = $bv))
     | "nse" | "nadr" => out := out.push (hyp n, ← `(Val.isSimple $v = false))
     | "nmp" => out := out.push (hyp n, ← `(MPath.isSimple $v = false))
     | "loc" =>
@@ -996,6 +1033,9 @@ def sideConds (s : TSyntax `sol_stmt) : MacroM (Array (Ident × Lean.Term)) := d
     | _ =>
       if isMem [] l then
         if (rhsVar? "msrc" r).isSome then return out
+        -- only into a target (`mv.fld`, `mv[ie]`) is a source lowered or
+        -- written as it is; into any other the capture takes it whole
+        unless memTarget l do return out
         if isMem [] r then
           let some n := singleVar? r | return out
           return out.push (hyp (n ++ "_b"), ← `($(mkIdent `Solidity.MPath.isBindable) $(schemaIdent n) = true))
@@ -1477,6 +1517,7 @@ partial def ppPTerm (e : Lean.Expr) : MetaM (TSyntax `dl_term) := do
     let some f ← nameOf? f | escapeDl e
     dotTerm (← ppPTerm p) f
   | PTerm.at _ p i => `(dl_term| $(← ppPTerm p):dl_term[$(← ppTerm i):dl_term])
+  | PTerm.next _ p => return (← lenTerms (← ppPTerm p)).2
   | _ => escapeDl e
 
 /-- `p.length`, and `p[p.length]`, the push positions. -/
@@ -1511,6 +1552,9 @@ partial def ppSTerm (e : Lean.Expr) : MetaM (TSyntax `dl_term) := do
   | STerm.extend _ s p _ =>
     let (len, _) ← lenTerms (← ppPTerm p)
     `(dl_term| save($(← ppSTerm s), $len, $len + 1))
+  | STerm.shrink _ s p =>
+    let (len, _) ← lenTerms (← ppPTerm p)
+    `(dl_term| save($(← ppSTerm s), $len, $len - 1))
   | _ => escapeDl e
 
 partial def ppSVal (e : Lean.Expr) : MetaM (TSyntax `dl_term) := do

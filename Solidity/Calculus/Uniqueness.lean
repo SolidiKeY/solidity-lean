@@ -116,6 +116,19 @@ theorem Taclet.eq_step {s : Stmt C} {p : Premise C} (d : Taclet C k m s p) :
   all_goals (try rfl)
   all_goals repeat' (cases_extra <;> settle_side)
   all_goals (try rfl)
+  -- an array's element type picks between two rules (`storagePopSave`,
+  -- `storagePopSaveMappingElement`): the dispatcher's `if` on it is settled
+  -- by the side condition
+  all_goals first
+    | (simp only [Stmt.step, rebindStep, popStep, pushStep, Hole.readStep, Hole.fill]
+       repeat' split
+       all_goals first
+         | rfl
+         | (simp_all; done)
+         | (simp_all [SPath.elemMapping, SPath.elemPrim, Ty.elemIsMapping, Ty.elemIsPrim]; done)
+         | exact absurd rfl ‹¬ _›
+       done)
+    | skip
   -- a conditional written to a member or an entry is lowered whether or not
   -- its receiver is simple: both branches of the dispatcher agree
   all_goals

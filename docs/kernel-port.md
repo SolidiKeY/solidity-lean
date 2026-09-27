@@ -43,10 +43,6 @@ correspondence against `Taclet` (`~/projects/side-projects/lean/solkey`).
   (Lean's comment token), `++` inside an expression, a ternary of
   references, a negative literal at `int`: the corpus gaps
   `docs/corpus-parity.md` counts.
-- **The three interpreter divergences** found by the ports
-  (`docs/solc-alignment.md`, "Known divergences"): a write through a
-  reference to a popped element, `delete` of an array dropping its elements'
-  mapping entries, an alias through an array index re-checked at each use.
 - **`Ch15`'s realizability**: `sol_decide` is sound, not proved complete —
   constraints between reads of the starting storage (shapes, bounds,
   `length`) are not stated; memory, copies, `push`/`pop` are outside its
@@ -95,7 +91,7 @@ correspondence against `Taclet` (`~/projects/side-projects/lean/solkey`).
 | Conditions | `if`, `require` and `assert` test a `Simple` value; `ksol` captures any other condition into a fresh `bool` first (`ifElseUnfold`, `requireConditionCapture` are the elaborator's). A branch still may not declare, so a complex condition nested in a branch is an elaboration error | 2026-09-25 |
 | `T storage x;` | not a kernel statement: solc ≥ 0.5 rejects an uninitialised storage pointer (`storageLocalDeclSkip` has no kernel counterpart) | 2026-09-25 |
 | Semantics | kernel terms get a structural denotation, proved to be the interpreter's (`Prog.run_eq`); taclets are proved sound over it, not through the untyped `*_sound` theorems, whose scratch names are fixed strings | 2026-09-25 |
-| Array bounds | no `inBounds` split: `SVal.find`/`SVal.save` revert out of range, so the kernel's update fails as the statement does. A failing update is read like a revert by the modalities | 2026-09-25 |
+| Array bounds | no `inBounds` split: an index is checked where the program takes the path (`State.checkIndex`, from `Loc.resolve` and `PTerm.at`), so the kernel's update fails as the statement does, and a failing update is read like a revert by the modalities. `SVal.find`/`SVal.save` address slots, past the end included: an alias checked when bound writes the slot a later `pop` left (solc, solkey `f2eb3d98eb`) | 2026-09-27 |
 | Typed states | not needed: `Premise.Correct` is over every state. The short-circuit rules re-apply the operator to the value they read (`v = nse; v = v && true;`), so a non-boolean read is stuck in the premise as in the original. `Kernel.Typed` and `Val.eval_bool` stay for later use | 2026-09-25 |
 | Operator families | a rule over an operator is one constructor (`binopAssignment op`), as in `Calculus/Rules.lean`; solkey's taclet is per operator | 2026-09-25 |
 | Continuations | an unfolding rule's residual binds scratch names fresh at the statement's context; to retype the rest of the program past them, the names must also avoid what the rest declares. The formula-level step picks them avoiding both, and `Prog` weakens along an extension that names its new bindings | 2026-09-25 |

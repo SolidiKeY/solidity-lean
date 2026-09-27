@@ -212,6 +212,12 @@ theorem hasTyElems_mem {elem : Ty} {elems : List SVal} {v : SVal}
       | head => exact hwt.1
       | tail _ hmem => exact ih hwt.2 hmem
 
+/-- A slot of a typed array, live or past the end, is typed. -/
+theorem hasTyElems_mem_append {elem : Ty} {xs ys : List SVal} {v : SVal}
+    (hx : SVal.hasTy.hasTyElems elem xs = true) (hy : SVal.hasTy.hasTyElems elem ys = true)
+    (hmem : v ∈ xs ++ ys) : v.hasTy elem = true :=
+  (List.mem_append.mp hmem).elim (hasTyElems_mem hx) (hasTyElems_mem hy)
+
 theorem hasTyEntries_lookup {value : Ty} {entries : List (Int × SVal)}
     {i : Int} {v : SVal}
     (hwt : SVal.hasTy.hasTyEntries value entries = true)
@@ -312,7 +318,7 @@ theorem find_hasTy {segs : List Seg} :
                         simp only [SVal.find] at hfind
                         split at hfind
                         · exact ih
-                            (hasTyElems_mem hty.1 (elems.get_mem _))
+                            (hasTyElems_mem_append hty.1 hty.2 ((elems ++ shadow).get_mem _))
                             hsegs hfind
                         · simp at hfind
                   | mapping key value =>

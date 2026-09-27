@@ -201,14 +201,14 @@ theorem find_save_diverge {new : SVal} :
         simp only [SVal.save] at hs
         split at hs
         · rename_i hi
-          cases hu : (elems[i.toNat]'hi.2).save p new with
+          cases hu : ((elems ++ shadow)[i.toNat]'hi.2).save p new with
           | error e => simp [List.get_eq_getElem, hu, bind, Except.bind] at hs
           | ok u =>
             simp only [List.get_eq_getElem, hu, bind, Except.bind, Except.ok.injEq] at hs
             subst hs
             cases b with
             | field m =>
-              -- `length` reads the extent, which a write in bounds keeps
+              -- `length` reads the extent, which a write to a slot keeps
               by_cases hm : m = "length"
               · subst hm; simp [SVal.find]
               · simp [SVal.find]
@@ -216,11 +216,14 @@ theorem find_save_diverge {new : SVal} :
               by_cases hij : j = i
               · subst hij
                 have hd : Diverge p q := by simpa using h
-                simp [SVal.find, hi, find_save_diverge hd hu]
-              · by_cases hj : 0 ≤ j ∧ j.toNat < elems.length
+                have hi' : 0 ≤ j ∧ j.toNat < elems.length + shadow.length := by simpa using hi
+                simp [SVal.find, List.take_append_drop, find_save_diverge hd hu, hi']
+              · by_cases hj : 0 ≤ j ∧ j.toNat < (elems ++ shadow).length
                 · have hne : i.toNat ≠ j.toNat := by omega
-                  simp [SVal.find, hj, List.getElem_set_ne hne]
-                · simp [SVal.find, hj]
+                  simp only [List.length_append] at hj
+                  simp [SVal.find, List.take_append_drop, hj, List.getElem_set_ne hne]
+                · simp only [List.length_append] at hj
+                  simp [SVal.find, List.take_append_drop, hj]
         · simp at hs
     | map entries dflt =>
       cases a with
@@ -267,6 +270,166 @@ theorem findStorage_saveStorage_apart {σ τ : State} {r r' : Name} {p q : List 
       · simp [State.findStorage, lookupBy_setBy_ne hr]
   · simp at h
 
+/-- An index into what a path names: in bounds of an array's live elements,
+or any key of a mapping; a word or a struct takes none. -/
+def idxOk (k : Int) : SVal → Res Unit
+  | .array elems _ => if 0 ≤ k ∧ k.toNat < elems.length then .ok () else .error .revert
+  | .map _ _ => .ok ()
+  | .prim _ | .struct _ => .error .stuck
+
+/-- The slot one past an array's end, once the array is named. -/
+def pastEnd (rs : Name × List Seg) : SVal → Res (Name × List Seg)
+  | .array elems _ => .ok (rs.1, rs.2 ++ [.at elems.length])
+  | .prim _ | .struct _ | .map _ _ => .error .stuck
+
+/-- `values[k]` with `k` in bounds. -/
+@[simp] theorem idxOk_array (k : Int) (elems shadow : List SVal) :
+    idxOk k (.array elems shadow) =
+      if 0 ≤ k ∧ k.toNat < elems.length then .ok () else .error .revert := rfl
+
+/-- `balances[k]`: every key. -/
+@[simp] theorem idxOk_map (k : Int) (e : List (Int × SVal)) (d : SVal) :
+    idxOk k (.map e d) = .ok () := rfl
+
+@[simp] theorem pastEnd_array (rs : Name × List Seg) (elems shadow : List SVal) :
+    pastEnd rs (.array elems shadow) = .ok (rs.1, rs.2 ++ [.at elems.length]) := rfl
+
+/-- One step down a write: the child written below, before and after. -/
+theorem save_cons_find {a : Seg} {p : List Seg} {old new upd : SVal}
+    (hs : old.save (a :: p) new = .ok upd) :
+    ∃ c u : SVal, c.save p new = .ok u ∧
+      ∀ q, old.find (a :: q) = c.find q ∧ upd.find (a :: q) = u.find q := by
+  cases old with
+  | prim _ => cases a <;> simp [SVal.save] at hs
+  | struct fields =>
+    cases a with
+    | «at» _ => simp [SVal.save] at hs
+    | field n =>
+      simp only [SVal.save] at hs
+      split at hs
+      · rename_i o hl
+        obtain ⟨u, hu, hs⟩ := Semantics.bind_ok_inv hs
+        cases hs
+        exact ⟨o, u, hu, fun q => ⟨by simp [SVal.find, hl], by simp [SVal.find]⟩⟩
+      · simp at hs
+  | array elems shadow =>
+    cases a with
+    | field _ => simp [SVal.save] at hs
+    | «at» i =>
+      simp only [SVal.save] at hs
+      split at hs
+      · rename_i hi
+        obtain ⟨u, hu, hs⟩ := Semantics.bind_ok_inv hs
+        cases hs
+        have hi' : 0 ≤ i ∧ i.toNat < elems.length + shadow.length := by simpa using hi
+        refine ⟨_, u, hu, fun q => ⟨?_, ?_⟩⟩
+        · simp [SVal.find, hi']
+        · simp [SVal.find, List.take_append_drop, hi']
+      · simp at hs
+  | map entries dflt =>
+    cases a with
+    | field _ => simp [SVal.save] at hs
+    | «at» i =>
+      simp only [SVal.save] at hs
+      split at hs
+      · rename_i o hl
+        obtain ⟨u, hu, hs⟩ := Semantics.bind_ok_inv hs
+        cases hs
+        exact ⟨o, u, hu, fun q => ⟨by simp [SVal.find, hl], by simp [SVal.find]⟩⟩
+      · rename_i hl
+        obtain ⟨u, hu, hs⟩ := Semantics.bind_ok_inv hs
+        cases hs
+        exact ⟨dflt, u, hu, fun q => ⟨by simp [SVal.find, hl], by simp [SVal.find]⟩⟩
+
+/-- A write below an array or a mapping keeps what an index into it may be:
+`values[0] = 7;` leaves `values` as long as it was. -/
+theorem idxOk_save_cons {k : Int} {a : Seg} {rest : List Seg} {old new upd : SVal}
+    (h : old.save (a :: rest) new = .ok upd) : idxOk k upd = idxOk k old := by
+  cases old with
+  | prim _ => cases a <;> simp [SVal.save] at h
+  | struct fields =>
+    cases a with
+    | «at» _ => simp [SVal.save] at h
+    | field n =>
+      simp only [SVal.save] at h
+      split at h
+      · obtain ⟨u, _, h⟩ := Semantics.bind_ok_inv h; cases h; rfl
+      · simp at h
+  | array elems shadow =>
+    cases a with
+    | field _ => simp [SVal.save] at h
+    | «at» i =>
+      simp only [SVal.save] at h
+      split at h
+      · rename_i hi
+        obtain ⟨u, _, h⟩ := Semantics.bind_ok_inv h
+        cases h
+        have hlen : (((elems ++ shadow).set i.toNat u).take elems.length).length =
+            elems.length := by simp
+        simp only [idxOk, hlen]
+      · simp at h
+  | map entries dflt =>
+    cases a with
+    | field _ => simp [SVal.save] at h
+    | «at» i =>
+      simp only [SVal.save] at h
+      split at h <;> (obtain ⟨u, _, h⟩ := Semantics.bind_ok_inv h; cases h; rfl)
+
+/-- **An index read above or apart from a write** is checked as before:
+after `balances[a] = 1;` any key of `balances` is in bounds, and after
+`values[0] = 7;` `values` is as long as it was. -/
+theorem find_save_idxOk {k : Int} {new : SVal} :
+    ∀ {p q : List Seg} {old upd : SVal}, old.save p new = .ok upd → ¬ Prefix p q →
+      (upd.find q >>= idxOk k) = (old.find q >>= idxOk k)
+  | [], _, _, _, _, hq => (hq trivial).elim
+  | _ :: _, [], _, _, hs, _ => by
+    simp only [find_nil, bind, Except.bind, idxOk_save_cons hs]
+  | a :: p, b :: q, old, upd, hs, hq => by
+    by_cases hab : a = b
+    · subst hab
+      have hq' : ¬ Prefix p q := fun h => hq ⟨rfl, h⟩
+      obtain ⟨c, u, hu, hf⟩ := save_cons_find hs
+      rw [(hf q).1, (hf q).2]
+      exact find_save_idxOk hu hq'
+    · rw [find_save_diverge (show Diverge (a :: p) (b :: q) from Or.inl hab) hs]
+
+/-- `find_save_idxOk` at a root of the storage. -/
+theorem findStorage_saveStorage_idxOk {σ τ : State} {r r' : Name} {p q : List Seg} {v : SVal}
+    (k : Int) (h : σ.saveStorage r p v = .ok τ) (hq : r' ≠ r ∨ ¬ Prefix p q) :
+    (τ.findStorage r' q >>= idxOk k) = (σ.findStorage r' q >>= idxOk k) := by
+  unfold State.saveStorage at h
+  split at h
+  · rename_i old hl
+    obtain ⟨u, hu, h⟩ := Semantics.bind_ok_inv h
+    cases h
+    by_cases hr : r' = r
+    · subst hr
+      simp only [State.findStorage, lookupBy_setBy_self, hl]
+      exact find_save_idxOk hu (hq.resolve_left (· rfl))
+    · simp [State.findStorage, lookupBy_setBy_ne hr]
+  · simp at h
+
+/-- The bounds check reads what the path names, and checks the index there. -/
+theorem checkIndex_eq (σ : State) (r : Name) (q : List Seg) (k : Int) :
+    σ.checkIndex r q k = σ.findStorage r q >>= idxOk k := by
+  unfold State.checkIndex
+  cases σ.findStorage r q with
+  | error => rfl
+  | ok a => cases a <;> rfl
+
+/-- A state reading the storage alike checks alike. -/
+theorem checkIndex_of_findStorage {σ τ : State} (h : ∀ r q, τ.findStorage r q = σ.findStorage r q)
+    (r : Name) (q : List Seg) (k : Int) : τ.checkIndex r q k = σ.checkIndex r q k := by
+  simp only [checkIndex_eq, h]
+
+/-- **A check above or apart from a write** is as before: after
+`balances[a] = 1;`, `balances[b]` is checked as before. -/
+theorem checkIndex_saveStorage_apart {σ τ : State} {r r' : Name} {p q : List Seg} {v : SVal}
+    (k : Int) (h : σ.saveStorage r p v = .ok τ) (hq : r' ≠ r ∨ ¬ Prefix p q) :
+    τ.checkIndex r' q k = σ.checkIndex r' q k := by
+  simp only [checkIndex_eq]
+  exact findStorage_saveStorage_idxOk k h hq
+
 /-- **Below a write**: after `alice = bob;`, `alice.age` reads `age` in the
 tree copied from `bob`; after `alice.age = 10;`, `alice.age` reads `10`. -/
 theorem findStorage_saveStorage_below {σ τ : State} {r : Name} {p q : List Seg} {v : SVal}
@@ -275,6 +438,231 @@ theorem findStorage_saveStorage_below {σ τ : State} {r : Name} {p q : List Seg
   calc τ.findStorage r q = τ.findStorage r (p ++ after p q) := by rw [prefix_append hq]
     _ = v.find (after p q) := by
       rw [findStorage_append, State.findStorage_saveStorage_same h]; rfl
+
+/-- **A check at or below a write** reads the value written: after
+`values = other;`, `values[0]` is checked against `other`'s length. -/
+theorem checkIndex_saveStorage_below {σ τ : State} {r : Name} {p q : List Seg} {v : SVal}
+    (k : Int) (h : σ.saveStorage r p v = .ok τ) (hq : Prefix p q) :
+    τ.checkIndex r q k = v.find (after p q) >>= idxOk k := by
+  rw [checkIndex_eq, findStorage_saveStorage_below h hq]
+
+/-- A write fails where the read of its path fails, and the same way:
+`persons[5].age = 1;` with no `persons[5]`. -/
+theorem save_of_find_error : ∀ {v : SVal} {p : List Seg} {new : SVal} {e : Halt},
+    v.find p = .error e → v.save p new = .error e
+  | _, [], _, _, h => by simp [find_nil] at h
+  | .prim _, a :: _, _, _, h => by cases a <;> simpa [SVal.find, SVal.save] using h
+  | .struct fields, .field n :: p, new, e, h => by
+    simp only [SVal.find] at h
+    simp only [SVal.save]
+    split at h
+    · rename_i o hl
+      (try rw [hl])
+      simp [save_of_find_error h, bind, Except.bind]
+    · rename_i hl
+      (try rw [hl]); exact h
+  | .struct _, .at _ :: _, _, _, h => by simpa [SVal.find, SVal.save] using h
+  | .array elems shadow, .at i :: p, new, e, h => by
+    simp only [SVal.find] at h
+    simp only [SVal.save]
+    split at h
+    · rename_i hi
+      rw [dif_pos hi]
+      simp [List.get_eq_getElem] at h
+      simp [List.get_eq_getElem, save_of_find_error h, bind, Except.bind]
+    · rename_i hi
+      rw [dif_neg hi]; exact h
+  | .array elems shadow, .field n :: p, new, e, h => by
+    by_cases hn : n = "length"
+    · subst hn
+      cases p with
+      | nil => simp [SVal.find] at h
+      | cons b p => simpa [SVal.find, SVal.save] using h
+    · simpa [SVal.find, SVal.save, hn] using h
+  | .map entries dflt, .at i :: p, new, e, h => by
+    simp only [SVal.find] at h
+    simp only [SVal.save]
+    split at h
+    · rename_i o hl
+      (try rw [hl])
+      simp [save_of_find_error h, bind, Except.bind]
+    · rename_i hl
+      (try rw [hl])
+      simp [save_of_find_error h, bind, Except.bind]
+  | .map _ _, .field _ :: _, _, _, h => by simpa [SVal.find, SVal.save] using h
+
+/-- **A write, as `sol_close` reads it**: the value there is read, and what is
+written laid over it (`SVal.overlay`, which a word replaces): `alice = bob;`
+is `alice`'s old tree with `bob`'s members laid over it. -/
+theorem writeStorage_eq (σ : State) (r : Name) (p : List Seg) (v : SVal) :
+    σ.writeStorage r p v = σ.findStorage r p >>= fun cur => σ.saveStorage r p (cur.overlay v) := by
+  unfold State.writeStorage
+  split
+  · rename_i q
+    unfold State.findStorage State.saveStorage
+    cases hl : lookupBy r σ.storage with
+    | none => rfl
+    | some root =>
+      simp only
+      cases hf : root.find p with
+      | error e => simp [save_of_find_error hf, bind, Except.bind]
+      | ok cur =>
+        have : cur.overlay (.prim q) = .prim q := by cases cur <;> rfl
+        simp [this, bind, Except.bind]
+  all_goals rfl
+
+/-! ## Storage: reading through a copy
+
+A copy lays the source over the tree there (`SVal.overlay`).  Along members
+it is read as the source, laid over what the target held at the same
+place: a word read is the source's word. -/
+
+/-- A path of members only: `account.balance`, `tokens.length`. -/
+def fieldPath : List Seg → Bool
+  | [] => true
+  | .field _ :: q => fieldPath q
+  | .at _ :: _ => false
+
+@[simp] theorem fieldPath_nil : fieldPath [] = true := rfl
+@[simp] theorem fieldPath_field (f : Name) (q : List Seg) :
+    fieldPath (.field f :: q) = fieldPath q := rfl
+@[simp] theorem fieldPath_at (i : Int) (q : List Seg) : fieldPath (.at i :: q) = false := rfl
+
+/-- What a copy leaves at a member path, given what the source holds there:
+the source's value laid over the target's (`layAt_prim`: a word is the
+source's word). -/
+def layAt : SVal → List Seg → SVal → SVal
+  | old, [], v => old.overlay v
+  | .struct ofs, .field f :: q, v =>
+    match lookupBy f ofs with
+    | some o => layAt o q v
+    | none => v.strip
+  | _, _ :: _, v => v.strip
+
+theorem stripElems_length : ∀ (l : List SVal), (SVal.strip.stripElems l).length = l.length
+  | [] => rfl
+  | _ :: l => by simp [SVal.strip.stripElems, stripElems_length l]
+
+/-- A word copied is the word: `alice.age` after `alice = bob;` is `bob.age`. -/
+@[simp] theorem layAt_prim (old : SVal) (q : List Seg) (p : PrimVal) :
+    layAt old q (.prim p) = .prim p := by
+  induction q generalizing old with
+  | nil => cases old <;> rfl
+  | cons s q ih =>
+    cases old with
+    | struct ofs =>
+      cases s with
+      | field f =>
+        simp only [layAt]
+        split
+        · exact ih _
+        · rfl
+      | «at» _ => rfl
+    | prim _ => rfl
+    | array _ _ => rfl
+    | map _ _ => rfl
+
+/-- Reading laid-on-fresh-slots values along members: as before, stripped. -/
+theorem find_strip_fields : ∀ (v : SVal) (q : List Seg), fieldPath q = true →
+    v.strip.find q = v.find q >>= fun w => .ok w.strip
+  | v, [], _ => by simp [find_nil, bind, Except.bind]
+  | .prim _, .field _ :: _, _ => by simp [SVal.strip, SVal.find, bind, Except.bind]
+  | .struct fields, .field f :: q, hq => by
+    simp only [fieldPath_field] at hq
+    have hl : ∀ fs : List (Name × SVal), lookupBy f (SVal.strip.stripFields fs) =
+        (lookupBy f fs).map SVal.strip := by
+      intro fs
+      induction fs with
+      | nil => rfl
+      | cons hd tl ih =>
+        obtain ⟨n, w⟩ := hd
+        simp only [SVal.strip.stripFields, lookupBy]
+        split <;> simp_all
+    simp only [SVal.strip, SVal.find, hl fields]
+    cases lookupBy f fields with
+    | none => rfl
+    | some w => exact find_strip_fields w q hq
+  | .array elems shadow, .field f :: q, hq => by
+    by_cases hf : f = "length"
+    · subst hf
+      have hlen : (SVal.strip.stripElems elems).length = elems.length := by
+        induction elems with
+        | nil => rfl
+        | cons _ _ ih => simp [SVal.strip.stripElems, ih]
+      simp only [SVal.strip, SVal.find, hlen]
+      cases q with
+      | nil => simp [find_nil, bind, Except.bind, SVal.strip]
+      | cons s q => cases s <;> simp [SVal.find, bind, Except.bind]
+    · simp [SVal.strip, SVal.find, hf, bind, Except.bind]
+  | .map _ _, .field _ :: _, _ => by simp [SVal.strip, SVal.find, bind, Except.bind]
+  | _, .at _ :: _, hq => by simp at hq
+
+/-- **A copy read along members** is the source read, laid over the target
+(`SVal.overlay`): after `alice = bob;`, `alice.age` reads `bob.age`
+(`layAt_prim`). -/
+theorem find_overlay_fields : ∀ (old new : SVal) (q : List Seg), fieldPath q = true →
+    (old.overlay new).find q = new.find q >>= fun v => .ok (layAt old q v)
+  | old, new, [], _ => by simp [find_nil, bind, Except.bind, layAt]
+  | old, new, .field f :: q, hq => by
+    simp only [fieldPath_field] at hq
+    cases new with
+    | prim p => cases old <;> simp [SVal.overlay, SVal.strip, SVal.find, bind, Except.bind]
+    | map ne nd => cases old <;> simp [SVal.overlay, SVal.strip, SVal.find, bind, Except.bind]
+    | struct nfs =>
+      cases old with
+      | struct ofs =>
+        have hl : ∀ ns : List (Name × SVal), lookupBy f (SVal.overlay.overlayFields ofs ns) =
+            (lookupBy f ns).map (fun v => match lookupBy f ofs with
+              | some o => o.overlay v
+              | none => v.strip) := by
+          intro ns
+          induction ns with
+          | nil => rfl
+          | cons hd tl ih =>
+            obtain ⟨n, w⟩ := hd
+            simp only [SVal.overlay.overlayFields, lookupBy]
+            split
+            · rename_i hn; subst hn; first | rfl | simp_all
+            · exact ih
+        simp only [SVal.overlay, SVal.find, hl nfs, layAt]
+        cases hn : lookupBy f nfs with
+        | none => rfl
+        | some w =>
+          simp only [Option.map]
+          cases ho : lookupBy f ofs with
+          | none =>
+            simp only
+            rw [find_strip_fields w q hq]
+          | some o =>
+            simp only
+            rw [find_overlay_fields o w q hq]
+      | prim _ | array _ _ | map _ _ =>
+        exact (find_strip_fields (.struct nfs) (.field f :: q) (by simpa using hq)).trans rfl
+    | array nel nsh =>
+      by_cases hf : f = "length"
+      · subst hf
+        have hlen : ∀ os : List SVal, (SVal.overlay.overlayElems os nel).length = nel.length := by
+          intro os
+          induction nel generalizing os with
+          | nil => cases os <;> rfl
+          | cons x xs ih =>
+            cases os with
+            | nil =>
+              simp only [SVal.overlay.overlayElems]
+              exact stripElems_length _
+            | cons o os => simp [SVal.overlay.overlayElems, ih]
+        cases old with
+        | array oel osh =>
+          simp only [SVal.overlay, SVal.find, hlen]
+          cases q with
+          | nil => simp [find_nil, bind, Except.bind, layAt, SVal.strip]
+          | cons s q => cases s <;> simp [SVal.find, bind, Except.bind]
+        | prim _ | struct _ | map _ _ =>
+          exact (find_strip_fields (.array nel nsh) (.field "length" :: q) (by simpa using hq)).trans
+            (by cases q <;> simp [SVal.find, bind, Except.bind, layAt_prim, SVal.strip])
+      · cases old <;> simp [SVal.overlay, SVal.strip, SVal.find, hf, bind, Except.bind]
+  | _, _, .at _ :: _, hq => by simp at hq
+
 
 /-- A write changes the storage only: the state an update `{storage :=
 save(storage, alice.age, 10)}` builds from `σ` is the one the write returns. -/
@@ -316,11 +704,12 @@ def pushOn (σ : State) (E : Ty) (r : Name) (segs : List Seg) (val : SVal → Re
   | .prim _ | .struct _ | .map _ _ => .error .stuck
 
 /-- What `values.pop()` does to the array, once it is named. -/
-def popOn (σ : State) (r : Name) (segs : List Seg) : SVal → Res State
+def popOn (σ : State) (keep : Bool) (r : Name) (segs : List Seg) : SVal → Res State
   | .array elems shadow =>
     match elems.reverse with
     | [] => .error .revert
-    | last :: restRev => σ.saveStorage r segs (.array restRev.reverse (last.defaultOf :: shadow))
+    | last :: restRev =>
+      σ.saveStorage r segs (.array restRev.reverse ((if keep then last else last.defaultOf) :: shadow))
   | .prim _ | .struct _ | .map _ _ => .error .stuck
 
 /-- The length of an array, once it is named. -/
@@ -337,8 +726,8 @@ theorem pushAt_eq (σ : State) (E : Ty) (r : Name) (segs : List Seg) (val : SVal
   | ok a => cases a <;> rfl
 
 /-- `values.pop()` reads `values`, then writes it back one shorter. -/
-theorem popAt_eq (σ : State) (r : Name) (segs : List Seg) :
-    popAt σ r segs = σ.findStorage r segs >>= popOn σ r segs := by
+theorem popAt_eq (σ : State) (keep : Bool) (r : Name) (segs : List Seg) :
+    popAt σ keep r segs = σ.findStorage r segs >>= popOn σ keep r segs := by
   unfold popAt
   cases σ.findStorage r segs with
   | error _ => rfl
@@ -363,8 +752,16 @@ theorem pushOn_array (σ : State) (E : Ty) (r : Name) (segs : List Seg)
 recycled slot. -/
 theorem popOn_push (σ : State) (r : Name) (segs : List Seg) (elems : List SVal)
     (x : SVal) (shadow : List SVal) :
-    popOn σ r segs (.array (elems ++ [x]) shadow) =
+    popOn σ false r segs (.array (elems ++ [x]) shadow) =
       σ.saveStorage r segs (.array elems (x.defaultOf :: shadow)) := by
+  simp [popOn]
+
+/-- An array of mappings popped after a push keeps the pushed element in the
+recycled slot, as it is. -/
+theorem popOn_push_keep (σ : State) (r : Name) (segs : List Seg) (elems : List SVal)
+    (x : SVal) (shadow : List SVal) :
+    popOn σ true r segs (.array (elems ++ [x]) shadow) =
+      σ.saveStorage r segs (.array elems (x :: shadow)) := by
   simp [popOn]
 
 /-- An array is as long as its elements. -/
@@ -538,6 +935,11 @@ from. -/
 theorem findStorage_mk (τ : State) (h : List (Nat × MObj)) (n : Nat)
     (e : List (Var × Binding)) (nt : List (Int × Int)) (b : Int) (r : Name) (q : List Seg) :
     (State.mk τ.storage h n e nt b).findStorage r q = τ.findStorage r q := rfl
+
+/-- A bounds check in a state whose storage is `τ`'s checks as in `τ`. -/
+theorem checkIndex_mk (τ : State) (h : List (Nat × MObj)) (n : Nat)
+    (e : List (Var × Binding)) (nt : List (Int × Int)) (b : Int) (r : Name) (q : List Seg)
+    (k : Int) : (State.mk τ.storage h n e nt b).checkIndex r q k = τ.checkIndex r q k := rfl
 
 /-- `x` in a state whose locals are `τ`'s reads as in `τ`. -/
 theorem getEnv_mk (τ : State) (s : List (Name × SVal)) (h : List (Nat × MObj)) (n : Nat)

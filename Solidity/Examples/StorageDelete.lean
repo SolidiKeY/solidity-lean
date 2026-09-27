@@ -72,7 +72,7 @@ theorem deleteDeepField : ⊨ dl!{ [ delete alice.account.token; ] true } := by
 /-- `delete people[i];` -/
 theorem deleteIndex : ⊨ dl!{ [ delete people[i]; ] true } := by
   apply Proves.valid
-  apply update .storageIndexDelete
+  apply update .storageIndexArrayDelete
   apply empty
   apply close
   sol_symex
@@ -85,7 +85,7 @@ theorem deleteNonSimpleIndex : ⊨ dl!{ [ delete people[i + 1]; ] true } := by
   apply unfold .storageIndexDeleteNonSimpleIndexCapture
   apply unfold .localValueDeclInitDrop
   apply update .binopAssignment
-  apply update .storageIndexDelete
+  apply update .storageIndexArrayDelete
   apply empty
   apply close
   sol_symex

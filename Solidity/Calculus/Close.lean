@@ -125,13 +125,17 @@ theorem Modality.wp_box_saveStorage {σ : State} {r : Name} {p : List Seg} {v : 
       ∀ τ, σ.saveStorage r p v = .ok τ → τ.findStorage r p = .ok v →
         (∀ q, Close.Prefix p q → τ.findStorage r q = v.find (Close.after p q)) →
         (∀ r' q, r' ≠ r ∨ Close.Diverge p q → τ.findStorage r' q = σ.findStorage r' q) →
+        (∀ r' q k, r' ≠ r ∨ ¬ Close.Prefix p q → τ.checkIndex r' q k = σ.checkIndex r' q k) →
+        (∀ q k, Close.Prefix p q → τ.checkIndex r q k = v.find (Close.after p q) >>= Close.idxOk k) →
         (∀ x, τ.getEnv x = σ.getEnv x) → (∀ a, readAddr τ a = readAddr σ a) →
         (∀ a, Close.readVal τ a = Close.readVal σ a) → P τ := by
   rw [Modality.wp_box]
-  exact ⟨fun h τ hs _ _ _ _ _ _ => h τ hs, fun h τ hs =>
+  exact ⟨fun h τ hs _ _ _ _ _ _ _ _ => h τ hs, fun h τ hs =>
     h τ hs (State.findStorage_saveStorage_same hs)
       (fun _ hq => Close.findStorage_saveStorage_below hs hq)
       (fun _ _ hd => Close.findStorage_saveStorage_apart hs hd)
+      (fun _ _ k hq => Close.checkIndex_saveStorage_apart k hs hq)
+      (fun _ k hq => Close.checkIndex_saveStorage_below k hs hq)
       (Close.getEnv_saveStorage hs) (Close.readAddr_saveStorage hs)
       (fun a => by simp [Close.readVal, Close.readAddr_saveStorage hs])⟩
 
@@ -153,14 +157,16 @@ theorem Modality.wp_box_writeAddr {σ : State} {mv : MVal} {a : Addr} {P : State
       ∀ τ, writeAddr σ mv a = .ok τ → readAddr τ a = .ok mv → Close.readVal τ a = mv.asValue →
         (∀ a', Close.Apart a a' → readAddr τ a' = readAddr σ a') →
         (∀ a', Close.Apart a a' → Close.readVal τ a' = Close.readVal σ a') →
-        (∀ r q, τ.findStorage r q = σ.findStorage r q) → (∀ x, τ.getEnv x = σ.getEnv x) →
+        (∀ r q, τ.findStorage r q = σ.findStorage r q) →
+        (∀ r q k, τ.checkIndex r q k = σ.checkIndex r q k) → (∀ x, τ.getEnv x = σ.getEnv x) →
         P τ := by
   rw [Modality.wp_box]
-  refine ⟨fun h τ hs _ _ _ _ _ _ => h τ hs, fun h τ hs => ?_⟩
+  refine ⟨fun h τ hs _ _ _ _ _ _ _ => h τ hs, fun h τ hs => ?_⟩
   obtain ⟨id, obj, rfl, hap⟩ := Close.writeAddr_setObj hs
   have hsame := Close.readAddr_writeAddr_same hs
   exact h _ hs hsame (by simp only [Close.readVal, hsame]; rfl) hap
-    (fun a' ha => by simp [Close.readVal, hap a' ha]) (fun _ _ => rfl) (fun _ => rfl)
+    (fun a' ha => by simp [Close.readVal, hap a' ha]) (fun _ _ => rfl) (fun _ _ _ => rfl)
+    (fun _ => rfl)
 
 /-- **A copy into memory under the box**: after `Person memory m = alice;`,
 `m.age` reads what `alice.age` held; storage and locals are as before. -/
@@ -169,12 +175,14 @@ theorem Modality.wp_box_copyStToM {σ : State} {v : SVal} {P : State × MVal →
       ∀ τ mv, copyStToM σ v = .ok (τ, mv) →
         (∀ id f, mv = .ref id → f ≠ "length" →
           Close.readVal τ (.memoryField id f) = v.find [.field f] >>= SVal.asValue) →
-        (∀ r q, τ.findStorage r q = σ.findStorage r q) → (∀ x, τ.getEnv x = σ.getEnv x) →
+        (∀ r q, τ.findStorage r q = σ.findStorage r q) →
+        (∀ r q k, τ.checkIndex r q k = σ.checkIndex r q k) → (∀ x, τ.getEnv x = σ.getEnv x) →
         P (τ, mv) := by
   rw [Modality.wp_box]
-  refine ⟨fun h τ mv hs _ _ _ => h _ hs, fun h ⟨τ, mv⟩ hs => ?_⟩
+  refine ⟨fun h τ mv hs _ _ _ _ => h _ hs, fun h ⟨τ, mv⟩ hs => ?_⟩
   obtain ⟨hst, hen⟩ := Close.copyStToM_frame' hs
-  exact h τ mv hs (fun id f hid hf => by subst hid; exact Close.copyStToM_member hs hf) hst hen
+  exact h τ mv hs (fun id f hid hf => by subst hid; exact Close.copyStToM_member hs hf) hst
+    (Close.checkIndex_of_findStorage hst) hen
 
 /-- **A fresh memory object under the box**: `Person memory m;` binds `m` to
 an object whose members read the defaults of `Person`'s. -/
@@ -184,13 +192,15 @@ theorem Modality.wp_box_allocDefault {σ : State} {R : RefTy} {P : State × Nat 
         (∀ f, f ≠ "length" →
           Close.readVal τ (.memoryField id f) =
             (defaultForRef R).find [.field f] >>= SVal.asValue) →
-        (∀ r q, τ.findStorage r q = σ.findStorage r q) → (∀ x, τ.getEnv x = σ.getEnv x) →
+        (∀ r q, τ.findStorage r q = σ.findStorage r q) →
+        (∀ r q k, τ.checkIndex r q k = σ.checkIndex r q k) → (∀ x, τ.getEnv x = σ.getEnv x) →
         P (τ, id) := by
   rw [Modality.wp_box]
-  refine ⟨fun h τ id hs _ _ _ => h _ hs, fun h ⟨τ, id⟩ hs => ?_⟩
+  refine ⟨fun h τ id hs _ _ _ _ => h _ hs, fun h ⟨τ, id⟩ hs => ?_⟩
   have hc := Close.allocDefault_copy hs
   obtain ⟨hst, hen⟩ := Close.copyStToM_frame' hc
-  exact h τ id hs (fun f hf => Close.copyStToM_member hc hf) hst hen
+  exact h τ id hs (fun f hf => Close.copyStToM_member hc hf) hst
+    (Close.checkIndex_of_findStorage hst) hen
 
 /-- **A copy out of memory under the box**: after `alice = m;`, `alice.age`
 holds what `m.age` held. -/
@@ -207,13 +217,14 @@ locals and the heap as they were. -/
 theorem Modality.wp_box_transferAt {σ : State} {addr amt : Int} {P : State → Prop} :
     Modality.box.wp (transferAt σ addr amt) P ↔
       ∀ τ, transferAt σ addr amt = .ok τ →
-        (∀ r q, τ.findStorage r q = σ.findStorage r q) → (∀ x, τ.getEnv x = σ.getEnv x) →
+        (∀ r q, τ.findStorage r q = σ.findStorage r q) →
+        (∀ r q k, τ.checkIndex r q k = σ.checkIndex r q k) → (∀ x, τ.getEnv x = σ.getEnv x) →
         (∀ a, readAddr τ a = readAddr σ a) → (∀ a, Close.readVal τ a = Close.readVal σ a) →
         P τ := by
   rw [Modality.wp_box]
-  refine ⟨fun h τ hs _ _ _ _ => h τ hs, fun h τ hs => ?_⟩
+  refine ⟨fun h τ hs _ _ _ _ _ => h τ hs, fun h τ hs => ?_⟩
   obtain ⟨h₁, h₂, h₃⟩ := Close.transferAt_frame hs
-  exact h τ hs h₁ h₂ h₃ (fun a => by simp [Close.readVal, h₃])
+  exact h τ hs h₁ (Close.checkIndex_of_findStorage h₁) h₂ h₃ (fun a => by simp [Close.readVal, h₃])
 
 end WP
 
@@ -305,6 +316,15 @@ theorem asBool_bool (b : Bool) : Value.asBool (.bool b) = .ok b := rfl
 `alice.age` reads as before. -/
 @[simp] theorem findStorage_setEnv (σ : State) (x : Var) (b : Binding) (r : Name)
     (segs : List Seg) : (σ.setEnv x b).findStorage r segs = σ.findStorage r segs := rfl
+/-- Nor its bounds checks. -/
+@[simp] theorem checkIndex_setEnv (σ : State) (x : Var) (b : Binding) (r : Name)
+    (segs : List Seg) (k : Int) : (σ.setEnv x b).checkIndex r segs k = σ.checkIndex r segs k := rfl
+/-- A bounds check returns nothing to name: `∀ u : Unit, …` is the one case. -/
+theorem forall_unit {P : PUnit.{1} → Prop} : (∀ u, P u) ↔ P PUnit.unit :=
+  ⟨fun h => h _, fun h u => by cases u; exact h⟩
+/-- The same under the diamond. -/
+theorem exists_unit {P : PUnit.{1} → Prop} : (∃ u, P u) ↔ P PUnit.unit :=
+  ⟨fun ⟨u, h⟩ => by cases u; exact h, fun h => ⟨_, h⟩⟩
 /-- `pure` in a run is `ok`. -/
 theorem pure_eq_ok {α : Type} (a : α) : (pure a : Res α) = .ok a := rfl
 /-- A run that returned passes its value on. -/
@@ -396,19 +416,42 @@ theorem PTerm.eval_pv (x : Var) : (PTerm.pv x : PTerm C).eval σ = σ.getEnv x >
 /-- `alice.age` is `alice`, then `age`. -/
 theorem PTerm.eval_field (p : PTerm C) (f : Name) : (PTerm.field p f).eval σ =
     p.eval σ >>= fun rs => .ok (rs.1, rs.2 ++ [.field f]) := rfl
-/-- `balances[k]` is `balances`, then the integer `k` holds. -/
+/-- `balances[k]` is `balances`, then the integer `k` holds, checked against
+the array's length where the receiver is one. -/
 theorem PTerm.eval_at (p : PTerm C) (i : Term C) : (PTerm.at p i).eval σ =
-    p.eval σ >>= fun rs => i.eval σ >>= Value.asInt >>= fun k => .ok (rs.1, rs.2 ++ [.at k]) := by
+    p.eval σ >>= fun rs => i.eval σ >>= Value.asInt >>= fun k =>
+      σ.checkIndex rs.1 rs.2 k >>= fun _ => .ok (rs.1, rs.2 ++ [.at k]) := by
   simp only [PTerm.eval, bind, Except.bind]
   cases p.eval σ <;> try rfl
   cases i.eval σ <;> rfl
+/-- `values[values.length]`: the slot one past the end. -/
+theorem PTerm.eval_next (p : PTerm C) : (PTerm.next p).eval σ =
+    p.eval σ >>= fun rs => σ.findStorage rs.1 rs.2 >>= Close.pastEnd rs := by
+  simp only [PTerm.eval, bind, Except.bind]
+  cases p.eval σ <;> rfl
 /-- `storage` is the storage of the state it is read in. -/
 theorem STerm.eval_storage : (STerm.storage : STerm C).eval σ = .ok σ := rfl
 /-- `save(storage, alice.age, 10)`: the value, the storage, the path, the
 write. -/
-theorem STerm.eval_save (s : STerm C) (p : PTerm C) (v : SValT C) : (STerm.save s p v).eval σ =
-    v.eval σ >>= fun sv => s.eval σ >>= fun τ => p.eval σ >>= fun rs =>
-      τ.saveStorage rs.1 rs.2 sv := rfl
+theorem STerm.eval_save (s : STerm C) (p : PTerm C) (t : Term C) :
+    (STerm.save s p (.val t)).eval σ =
+    t.eval σ >>= fun x => s.eval σ >>= fun τ => p.eval σ >>= fun rs =>
+      τ.saveStorage rs.1 rs.2 x.toSVal := by
+  simp only [STerm.eval, SValT.eval, bind_assoc, pure_bind, State.writeStorage_toSVal]
+/-- `save(storage, alice, find(storage, bob))`: `bob`'s tree laid over
+`alice`'s (`SVal.overlay`). -/
+theorem STerm.eval_save_find (s s' : STerm C) (p p' : PTerm C) :
+    (STerm.save s p (.find s' p')).eval σ =
+    (SValT.find s' p').eval σ >>= fun sv => s.eval σ >>= fun τ => p.eval σ >>= fun rs =>
+      τ.findStorage rs.1 rs.2 >>= fun cur => τ.saveStorage rs.1 rs.2 (cur.overlay sv) := by
+  simp only [STerm.eval, Close.writeStorage_eq]
+/-- `save(storage, alice, copyMem(mtSt, memory, m))`: the memory object laid
+over `alice`'s tree. -/
+theorem STerm.eval_save_copyMem (s : STerm C) (p : PTerm C) (m : MTerm C) (i : ITerm C) :
+    (STerm.save s p (.copyMem m i)).eval σ =
+    (SValT.copyMem m i).eval σ >>= fun sv => s.eval σ >>= fun τ => p.eval σ >>= fun rs =>
+      τ.findStorage rs.1 rs.2 >>= fun cur => τ.saveStorage rs.1 rs.2 (cur.overlay sv) := by
+  simp only [STerm.eval, Close.writeStorage_eq]
 /-- `delAt(storage, alice.age)`: the word there, reset to its default. -/
 theorem STerm.eval_delAt (s : STerm C) (p : PTerm C) : (STerm.delAt s p).eval σ =
     s.eval σ >>= fun τ => p.eval σ >>= fun rs => τ.findStorage rs.1 rs.2 >>= fun cur =>
@@ -416,7 +459,8 @@ theorem STerm.eval_delAt (s : STerm C) (p : PTerm C) : (STerm.delAt s p).eval σ
 /-- `values.push(5)`: the array, then the array one longer written back. -/
 theorem STerm.eval_push (s : STerm C) (p : PTerm C) (v : SValT C) : (STerm.push s p v).eval σ =
     s.eval σ >>= fun τ => p.eval σ >>= fun rs =>
-      τ.findStorage rs.1 rs.2 >>= pushOn τ .uint rs.1 rs.2 (fun _ => v.eval σ) := by
+      τ.findStorage rs.1 rs.2 >>=
+        pushOn τ .uint rs.1 rs.2 (fun _ => v.eval σ >>= fun sv => pure sv.strip) := by
   simp only [STerm.eval, bind, Except.bind]
   cases s.eval σ <;> try rfl
   all_goals cases p.eval σ <;> try rfl
@@ -431,11 +475,21 @@ theorem STerm.eval_pushSlot (s : STerm C) (p : PTerm C) (E : Ty) :
   all_goals exact pushAt_eq _ _ _ _ _
 /-- `values.pop()`: the array, then the array one shorter written back. -/
 theorem STerm.eval_pop (s : STerm C) (p : PTerm C) : (STerm.pop s p).eval σ =
-    s.eval σ >>= fun τ => p.eval σ >>= fun rs => τ.findStorage rs.1 rs.2 >>= popOn τ rs.1 rs.2 := by
+    s.eval σ >>= fun τ => p.eval σ >>= fun rs =>
+      τ.findStorage rs.1 rs.2 >>= popOn τ false rs.1 rs.2 := by
   simp only [STerm.eval, bind, Except.bind]
   cases s.eval σ <;> try rfl
   all_goals cases p.eval σ <;> try rfl
-  all_goals exact popAt_eq _ _ _
+  all_goals exact popAt_eq _ _ _ _
+/-- `m.pop()` on an array of mappings: the array one shorter, the element
+kept. -/
+theorem STerm.eval_shrink (s : STerm C) (p : PTerm C) : (STerm.shrink s p).eval σ =
+    s.eval σ >>= fun τ => p.eval σ >>= fun rs =>
+      τ.findStorage rs.1 rs.2 >>= popOn τ true rs.1 rs.2 := by
+  simp only [STerm.eval, bind, Except.bind]
+  cases s.eval σ <;> try rfl
+  all_goals cases p.eval σ <;> try rfl
+  all_goals exact popAt_eq _ _ _ _
 /-- The `10` of `alice.age = 10;`, as a word to store. -/
 theorem SValT.eval_val (t : Term C) : (SValT.val t).eval σ = t.eval σ >>= fun v => .ok v.toSVal :=
   rfl
@@ -554,9 +608,14 @@ attribute [close_rw]
   -- terms
   Close.Term.eval_lit Close.Term.eval_pv Close.Term.eval_binop Close.Term.eval_unop
   Close.Term.eval_find Close.Term.eval_len Close.Term.eval_read Close.Term.eval_ite
-  Close.PTerm.eval_root Close.PTerm.eval_field Close.PTerm.eval_at Close.PTerm.eval_pv
-  Close.STerm.eval_storage Close.STerm.eval_save Close.STerm.eval_delAt Close.STerm.eval_push
-  Close.STerm.eval_pushSlot Close.STerm.eval_pop
+  Close.PTerm.eval_root Close.PTerm.eval_field Close.PTerm.eval_at Close.PTerm.eval_next
+  Close.PTerm.eval_pv Close.idxOk_array Close.idxOk_map Close.pastEnd_array
+  Close.forall_unit Close.exists_unit
+  Close.find_overlay_fields Close.layAt_prim Close.fieldPath_nil Close.fieldPath_field
+  Close.fieldPath_at
+  Close.STerm.eval_storage Close.STerm.eval_save Close.STerm.eval_save_find
+  Close.STerm.eval_save_copyMem Close.STerm.eval_delAt Close.STerm.eval_push
+  Close.STerm.eval_pushSlot Close.STerm.eval_pop Close.STerm.eval_shrink
   Close.SValT.eval_val Close.SValT.eval_find Close.SValT.eval_copyMem
   Close.ITerm.eval_pv Close.ITerm.eval_read Close.ITerm.eval_alloc Close.ITerm.eval_copy
   Close.MAddr.eval_field Close.MAddr.eval_at
@@ -577,13 +636,14 @@ attribute [close_rw]
   Close.asValue_bool Close.mval_asValue_prim Close.mval_asValue_ref Close.mval_asRef_ref
   Close.defaultOf_int Close.defaultOf_bool Close.asInt_int Close.asBool_bool
   -- states
-  Close.findStorage_setEnv State.getEnv_setEnv_self State.getEnv_setEnv_ne Close.findStorage_mk
+  Close.findStorage_setEnv Close.checkIndex_setEnv Close.checkIndex_mk
+  State.getEnv_setEnv_self State.getEnv_setEnv_ne Close.findStorage_mk
   Close.getEnv_mk Close.readAddr_mk Close.readVal_mk Close.readAddr_setEnv Close.readVal_setEnv
   -- paths, arrays, copies
   Close.diverge_cons' Close.not_diverge_nil_left Close.not_diverge_nil_right Close.prefix_nil
   Close.prefix_cons Close.prefix_cons_nil Close.after_nil Close.after_cons Close.find_nil
   List.nil_append List.cons_append List.append_nil
-  Close.arrLen_array Close.arrLen_eq_ok Close.pushOn_array Close.popOn_push Close.find_push_last
+  Close.arrLen_array Close.arrLen_eq_ok Close.pushOn_array Close.popOn_push Close.popOn_push_keep Close.find_push_last
   Close.copyLeaf_prim Close.apart_field Close.apart_index Close.apart_field_index
   Close.apart_index_field
   -- logic
@@ -653,6 +713,8 @@ macro "sol_close" : tactic => `(tactic|
     all_goals try (intros; sol_close_reads_all)
     all_goals try (subst_vars; sol_close_reads_all)
     all_goals (try intros)
+    -- a bounds check returns `()`: nothing is left to choose
+    all_goals (try simp only [Close.exists_unit, Close.forall_unit, exists_const, forall_const] at *)
     all_goals first | omega | grind))
 
 end Solidity

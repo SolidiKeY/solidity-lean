@@ -40,7 +40,7 @@ fails on a module nothing imports.
 |---|---|
 | `Calculus/RuleSyntax.lean` | The notation `dl{ … }`: schemas whose names carry their kind, and the delaborators that print taclets, premises and goals back in it. |
 | `Calculus/Rules.lean` | The taclets: `Taclet C k m s p`, one constructor per rule, named as solkey names it, written in `dl{ ⟨[ s; ]⟩ ⇝ p }`. |
-| `Calculus/KeyTaclets.lean` | The 310 taclets of `solidityProgramRules.key` as one type, their `\heuristics`, and `KeyOrigin`. Regenerate with the recipe in its docstring. |
+| `Calculus/KeyTaclets.lean` | The 311 taclets of `solidityProgramRules.key` (solkey `f2eb3d98eb`) as one type, their `\heuristics`, and `KeyOrigin`. Regenerate with the recipe in its docstring. |
 | `Calculus/Completeness.lean` | `Stmt.step`: the rule for every statement, a total function; `Stmt.complete`. |
 | `Calculus/RuleShapes.lean` | Which solkey taclets each constructor transcribes (`tacletOrigins`), checked against the constructor list, and `taclets_partitioned`. |
 | `Calculus/PrintedRules.lean` | The printed rules as a type and which constructor each is. |
@@ -55,7 +55,7 @@ fails on a module nothing imports.
 | `Calculus/ReadWrite.lean` | What a state reads after a write: the four-way path comparison, memory addresses, copies member by member. |
 | `Calculus/Close.lean` | `sol_close`: a first-order goal in an arbitrary state, by weakest preconditions and `ReadWrite.lean`'s facts. Its docstring lists what it does not close. |
 | `Calculus/CloseTests.lean` | What `sol_close` closes, pinned. |
-| `Calculus/Decide.lean` | `sol_decide`: reads of writes eliminated into case trees on key equalities (the four-way path comparison), `delete` included; `Fml.valid_iff_reduce`. The storage fragment. |
+| `Calculus/Decide.lean` | `sol_decide`: reads of writes eliminated into case trees on key equalities (the four-way path comparison), `delete` included; `Fml.valid_iff_reduce`. The storage fragment, read live (`SVal.findLive`/`saveLive`) and bridged to the program's checked paths (`PTerm.toL_chk`). |
 | `Calculus/Uniqueness.lean` | One rule per statement: every derivation's premise is `Stmt.step`'s. |
 | `Calculus/Progress.lean` | A formula with a modality always steps: `Fml.active_iff_step`. |
 | `Calculus/Termination.lean` | The weights, `Premise.Smaller` (of `Stmt.step`, and of every derivation: `Taclet.smaller`), `Fml.measure`, `Fml.step_wellFounded`, `symex_normalizes`. |

@@ -522,6 +522,7 @@ theorem Loc.resolve_wt (hwt : RunWT C Γ H σ) :
     obtain ⟨⟨r0, s0⟩, h0, h⟩ := bind_ok_inv h
     obtain ⟨k, _, h⟩ := bind_ok_inv h
     obtain ⟨iv, _, h⟩ := bind_ok_inv h
+    obtain ⟨_, _, h⟩ := bind_ok_inv h
     cases h
     have hb := SPath.resolve_wt hwt b hw.1 h0
     cases it <;> exact tyAt_append_seg hb rfl
@@ -659,6 +660,19 @@ theorem save (hwt : RunWT C Γ H σ) {r : Name} {segs : List Seg} {T : Ty} {new 
   · rw [henv]; exact hwt.env
   · rw [hheap]; exact hwt.heap
   · intro i hi; rw [hheap]; exact hwt.heapWf i (hnext ▸ hi)
+
+/-- A storage write of what an assignment's right-hand side denotes, of the
+place's type: a word saved, or a copy over what is there (`SVal.overlay`),
+which keeps the type the old value had. -/
+theorem write (hwt : RunWT C Γ H σ) {r : Name} {segs : List Seg} {T : Ty} {new : SVal}
+    (hty : C.layout.tyAt r segs = some T) (hnew : new.hasTy T = true)
+    (h : σ.writeStorage r segs new = .ok σ') : RunWT C Γ H σ' := by
+  unfold State.writeStorage at h
+  split at h
+  · exact hwt.save hty hnew h
+  all_goals
+    obtain ⟨cur, hcur, h⟩ := bind_ok_inv h
+    exact hwt.save hty (SVal.overlay_hasTy (findStorage_hasTy hwt.storage hty hcur) hnew) h
 
 /-- A declaration: `uint x = 1;` binds `x` and `Γ` learns `x : uint`. -/
 theorem setEnv (hwt : RunWT C Γ H σ) {x : Var} {bt : BTy} {b : Binding}
@@ -820,8 +834,8 @@ theorem pushPlaceAt_wt (hwt : RunWT C Γ H σ) {E : Ty} {r : Name} {segs : List 
 
 /-- `b.pop()` keeps the array typed: the popped element is cleared into
 the recycled slots at its own type. -/
-theorem popAt_wt (hwt : RunWT C Γ H σ) {E : Ty} {r : Name} {segs : List Seg}
-    (hty : C.layout.tyAt r segs = some (.ref (.array E))) (h : popAt σ r segs = .ok σ') :
+theorem popAt_wt (hwt : RunWT C Γ H σ) {E : Ty} {keep : Bool} {r : Name} {segs : List Seg}
+    (hty : C.layout.tyAt r segs = some (.ref (.array E))) (h : popAt σ keep r segs = .ok σ') :
     RunWT C Γ H σ' := by
   obtain ⟨sv, hsv, h⟩ := bind_ok_inv h
   have hsvt := findStorage_hasTy hwt.storage hty hsv
@@ -838,7 +852,10 @@ theorem popAt_wt (hwt : RunWT C Γ H σ) {E : Ty} {r : Name} {segs : List Seg}
       simp only [SVal.hasTy, Bool.and_eq_true, SVal.hasTy.hasTyElems]
       refine ⟨hasTyElems_of_forall_mem fun v hv => ?_, ?_, hsvt.2⟩
       · exact hasTyElems_mem hsvt.1 (hmem v (List.mem_cons_of_mem _ (List.mem_reverse.mp hv)))
-      · exact SVal.defaultOf_hasTy (hasTyElems_mem hsvt.1 (hmem last List.mem_cons_self))
+      · have hl := hasTyElems_mem hsvt.1 (hmem last List.mem_cons_self)
+        cases keep
+        · exact SVal.defaultOf_hasTy hl
+        · exact hl
   | prim _ => exact nomatch h
   | struct _ => exact nomatch h
   | map _ _ => exact nomatch h
@@ -1143,7 +1160,7 @@ theorem Stmt.run_wt : ∀ (s : Stmt C) {Γ Γ' : Ctx} {H : HeapTy} {σ σ' : Sta
     simp only [Bool.and_eq_true] at hc
     obtain ⟨sv, hsv, h⟩ := bind_ok_inv h
     obtain ⟨⟨root, segs⟩, hr, h⟩ := bind_ok_inv h
-    exact ⟨H, .refl H, hwt.save (Loc.resolve_wt hwt l hc.1 hr) (Src.value_wt hwt hc.2 hsv) h⟩
+    exact ⟨H, .refl H, hwt.write (Loc.resolve_wt hwt l hc.1 hr) (Src.value_wt hwt hc.2 hsv) h⟩
   | .rebind x r, Γ, Γ', H, σ, σ', hwt, hs, h => by
     obtain ⟨hc, rfl⟩ := wt_if hs
     simp only [Bool.and_eq_true] at hc
@@ -1205,7 +1222,10 @@ theorem Stmt.run_wt : ∀ (s : Stmt C) {Γ Γ' : Ctx} {H : HeapTy} {σ σ' : Sta
     | none =>
       cases hw
       exact hslot (defaultOk_of_defaultOkS (by simpa using hd))
-    | some r => exact Src.value_wt hwt (by simpa using hc.2) hw
+    | some r =>
+      obtain ⟨v, hv, hw⟩ := bind_ok_inv hw
+      cases hw
+      exact SVal.strip_hasTy (Src.value_wt hwt (by simpa using hc.2) hv)
   | .pop b, Γ, Γ', H, σ, σ', hwt, hs, h => by
     obtain ⟨hc, rfl⟩ := wt_if hs
     obtain ⟨⟨root, segs⟩, hr, h⟩ := bind_ok_inv h
@@ -1245,7 +1265,7 @@ theorem Stmt.run_wt : ∀ (s : Stmt C) {Γ Γ' : Ctx} {H : HeapTy} {σ σ' : Sta
     have hm := MPath.mval_wt hwt p hc.2 hm0
     rw [MVal.asRef_ok hid] at hm
     exact ⟨H, .refl H,
-      hwt.save (Loc.resolve_wt hwt l hc.1 hr) (copyMem_hasTy hwt.heap hm hsv) h⟩
+      hwt.write (Loc.resolve_wt hwt l hc.1 hr) (copyMem_hasTy hwt.heap hm hsv) h⟩
   | .assignMem l r, Γ, Γ', H, σ, σ', hwt, hs, h => by
     obtain ⟨hc, rfl⟩ := wt_if hs
     simp only [Bool.and_eq_true] at hc

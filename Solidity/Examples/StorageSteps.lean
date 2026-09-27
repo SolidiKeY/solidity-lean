@@ -304,7 +304,7 @@ reading the entry back is `nonSimpleIndexWrite`'s. -/
 theorem nonsimplePathIndexWrite :
     ⊨ dl!{ [ matrix[i][j] = 100; ] true } := by
   apply Proves.valid
-  apply unfold .storageIndexWrite_unfold_leftFst
+  apply unfold .storageIndexWriteCaptureAllComplexRecv
   apply unfold .localValueDeclInitDrop
   apply update .localValueAssign
   apply unfold .storageLocalDeclInitDrop
@@ -317,14 +317,17 @@ theorem nonsimplePathIndexWrite :
   sol_symex
   sol_close
 
-/-- `values[i + 1] = 5;` — a non-simple index: source first, then the index
-(`storageIndexWriteNonSimpleIndexCapture`), so the value written is the one the
-source had before the index was computed. -/
+/-- `values[i + 1] = 5;` — a non-simple index: source first, then the
+receiver (bound again, as solkey does), then the index
+(`storageIndexWriteCaptureAllNonSimpleIndex`), so the value written is the one
+the source had before the index was computed. -/
 theorem nonSimpleIndexWrite : ⊨ dl!{ [ values[i + 1] = 5; ] values[i + 1] == 5 } := by
   apply Proves.valid
-  apply unfold .storageIndexWriteNonSimpleIndexCapture
+  apply unfold .storageIndexWriteCaptureAllNonSimpleIndex
   apply unfold .localValueDeclInitDrop
   apply update .localValueAssign
+  apply unfold .storageLocalDeclInitDrop
+  apply update .storageLocalRootRebind
   apply unfold .localValueDeclInitDrop
   apply update .binopAssignment
   apply update .storageIndexWriteArraySave
@@ -340,7 +343,7 @@ before the write's index. -/
 theorem receiverAndIndexCaptured :
     ⊨ dl!{ [ matrix[i + 1][j + 1] = 77; ] true } := by
   apply Proves.valid
-  apply unfold .storageIndexWrite_unfold_leftFst
+  apply unfold .storageIndexWriteCaptureAllComplexRecv
   apply unfold .localValueDeclInitDrop
   apply update .localValueAssign
   apply unfold .storageLocalDeclInitDrop
@@ -362,7 +365,7 @@ receiver, written from a root: no source to freeze, the receiver is aliased
 (`storageIndexWriteStorageRef_unfold_leftFst`). -/
 theorem refIndexWriteNonsimpleReceiver : ⊨ dl[TestSuite]{ [ bucket.tokens[i] = tok; ] true } := by
   apply Proves.valid
-  apply unfold .storageIndexWriteStorageRef_unfold_leftFst
+  apply unfold .storageIndexWriteStorageRefCaptureAllComplexRecv
   apply unfold .storageLocalDeclInitDrop
   apply update .storageFieldReadBindLocalRoot
   apply unfold .localValueDeclInitDrop
@@ -438,16 +441,18 @@ theorem bucketPushBare : ⊨ dl[TestSuite]{ [ bucket.tokens.push(); ] true } := 
   apply unfold .storagePush_unfold_leftFstReceiver
   apply unfold .storageLocalDeclInitDrop
   apply update .storageFieldReadBindLocalRoot
-  apply update .storagePushLengthSave
+  apply update .storagePushLengthSaveReferenceElement
   apply empty
   apply close
   sol_symex
   sol_close
 
-/-- `people.push();` — the new slot is cleared (`delAt`), not written. -/
+/-- `people.push();` — a struct element: the slot is taken as it is
+(`storagePushLengthSaveReferenceElement`), no `delAt`; the pop that recycled
+it cleared it, and a mapping in it survives (solkey, solc). -/
 theorem pushBare : ⊨ dl!{ [ people.push(); ] true } := by
   apply Proves.valid
-  apply update .storagePushLengthSave
+  apply update .storagePushLengthSaveReferenceElement
   apply empty
   apply close
   sol_symex

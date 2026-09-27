@@ -216,7 +216,7 @@ interpreter succeeds, and `alice.age` reads `10`: `compile_storage` ties the
 interpreter's read to slot `13`, and the machine run holds `10` there. -/
 theorem setAge_interpreter :
     ∃ σ', Prog.run (State.fresh StandardExample 0) setAge = .ok σ' ∧
-      ∀ n, σ'.findStorage "alice" [.field "age"] = .ok (.prim (.int n)) → n = 10 := by
+      ∀ n, σ'.findLive "alice" [.field "age"] = .ok (.prim (.int n)) → n = 10 := by
   rcases compile_storage (P := setAge) (Γ' := fun _ => none) rfl 0 with
     ⟨σ', m', h1, h2, h3⟩ | ⟨_, h2⟩
   · refine ⟨σ', h1, fun n hn => ?_⟩

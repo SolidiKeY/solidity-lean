@@ -36,11 +36,11 @@ info: @Taclet.storageFieldRead_unfold_rightFst : ∀ {C : Contract} {k : Nat} {m
 /-! ### Step 2: a write, source, receiver and index captured in that order -/
 
 /--
-info: @Taclet.storageIndexWrite_unfold_leftFst : ∀ {C : Contract} {k : Nat} {m : Modality} {x : RefTy} {x_1 x_2 : PrimTy}
-  {it : IndexTy x x_1 (Ty.prim x_2)} {nsp : SPath C (Ty.ref x)} {e₁ : Val C x_1} {e₂ : Val C x_2},
+info: @Taclet.storageIndexWriteCaptureAllComplexRecv : ∀ {C : Contract} {k : Nat} {m : Modality} {x : RefTy}
+  {x_1 x_2 : PrimTy} {it : IndexTy x x_1 (Ty.prim x_2)} {nsp : SPath C (Ty.ref x)} {e₁ : Val C x_1} {e₂ : Val C x_2},
   dl{ ⟨[ nsp[e₁] = e₂; ]⟩ ⇝ ⟨[ T se = e₂; T storage sp = nsp; T ie = e₁; sp[ie] = se; ]⟩ }
 -/
-#guard_msgs in #check @Taclet.storageIndexWrite_unfold_leftFst
+#guard_msgs in #check @Taclet.storageIndexWriteCaptureAllComplexRecv
 
 /-! ### Step 3: a statement with simple parts is an update -/
 

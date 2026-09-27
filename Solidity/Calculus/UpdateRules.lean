@@ -223,6 +223,7 @@ def PTerm.subst (U : Upd C) : PTerm C → PTerm C
   | .pv x => U.pathOf x
   | .field p f => .field (p.subst U) f
   | .at p i => .at (p.subst U) (i.subst U)
+  | .next p => .next (p.subst U)
 
 def STerm.subst (U : Upd C) : STerm C → STerm C
   | .storage => .storage
@@ -231,6 +232,7 @@ def STerm.subst (U : Upd C) : STerm C → STerm C
   | .push s p v => .push (s.subst U) (p.subst U) (v.subst U)
   | .pushSlot s p E => .pushSlot (s.subst U) (p.subst U) E
   | .pop s p => .pop (s.subst U) (p.subst U)
+  | .shrink s p => .shrink (s.subst U) (p.subst U)
   | .extend s p E => .extend (s.subst U) (p.subst U) E
 
 def SValT.subst (U : Upd C) : SValT C → SValT C
@@ -321,7 +323,9 @@ theorem PTerm.subst_eval (h : SubstAgree U ns σ τ) : (p : PTerm C) → (p.subs
   | .root _ => rfl
   | .pv x => h.path x
   | .field p _ => by simp only [PTerm.subst, PTerm.eval, p.subst_eval h]
-  | .at p i => by simp only [PTerm.subst, PTerm.eval, p.subst_eval h, i.subst_eval h]
+  | .at p i => by
+    simp only [PTerm.subst, PTerm.eval, p.subst_eval h, i.subst_eval h, checkIndex_congr h.agree]
+  | .next p => by simp only [PTerm.subst, PTerm.eval, p.subst_eval h, findStorage_congr h.agree]
 
 /-- Example: after `uint se1 = 10;`, `{ se1 := 10 }save(storage, alice.age, se1)` is
 `save(storage, alice.age, 10)`: the same storage, the rest of the state
@@ -343,12 +347,16 @@ theorem STerm.subst_eval (h : SubstAgree U ns σ τ) :
     simp only [STerm.subst, STerm.eval, p.subst_eval h]
     refine ResultsAgree.bind (s.subst_eval h) fun _ _ h' => ?_
     refine bindPureResults_agree _ fun _ => pushAt_agree h' _ _ _ fun _ => ?_
-    exact v.subst_eval h
+    simp only [v.subst_eval h]
   | .pushSlot s p _ => by
     simp only [STerm.subst, STerm.eval, p.subst_eval h]
     refine ResultsAgree.bind (s.subst_eval h) fun _ _ h' => ?_
     exact bindPureResults_agree _ fun _ => pushAt_agree h' _ _ _ fun _ => rfl
   | .pop s p => by
+    simp only [STerm.subst, STerm.eval, p.subst_eval h]
+    refine ResultsAgree.bind (s.subst_eval h) fun _ _ h' => ?_
+    agree_run h'
+  | .shrink s p => by
     simp only [STerm.subst, STerm.eval, p.subst_eval h]
     refine ResultsAgree.bind (s.subst_eval h) fun _ _ h' => ?_
     agree_run h'

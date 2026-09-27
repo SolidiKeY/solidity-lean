@@ -142,6 +142,16 @@ def Val.notTernary {p : PrimTy} : Val C p → Bool
   | .ternary .. => false
   | _ => true
 
+/-- The elements of the array `b` are mappings: `marr` in a rule, and
+solkey's `Path[…,mappingElement]` (`storagePopSaveMappingElement`); `darr`
+is its negation, `nonMappingElement`. -/
+def SPath.elemMapping {T : Ty} (_ : SPath C T) : Bool := T.elemIsMapping
+
+/-- The elements of the array `b` are primitive: `parr` in a rule, solkey's
+`Path[…,primitiveElement]` (`storagePushLengthSave`); `rarr` is its negation,
+`referenceElement`. -/
+def SPath.elemPrim {T : Ty} (_ : SPath C T) : Bool := T.elemIsPrim
+
 /-- A hole whose statement is ready for its path to be unfolded: a local, an
 alias, or a copy into a target. -/
 def Hole.isTarget {T : Ty} : Hole C T → Bool
@@ -166,14 +176,15 @@ macro_rules
       | assumption
       | (simp_all [SPath.isSimple, Val.isSimple, MPath.isSimple, Loc.isTarget, Loc.isRoot,
           MLoc.isTarget, MPath.isBindable, Val.notTernary, Hole.isTarget, MHole.isTarget,
-          VHole.isTarget]; done)
+          VHole.isTarget, SPath.elemMapping, SPath.elemPrim, Ty.elemIsMapping, Ty.elemIsPrim,
+          Ty.isMapping, Ty.isPrimitive]; done)
       | fail "the rule's side condition does not hold: `Stmt.step` fires another rule here")
 
 /-- The predicates a side condition is stated with. -/
 def sidePreds : List Lean.Name :=
   [``SPath.isSimple, ``Val.isSimple, ``MPath.isSimple, ``Loc.isTarget, ``Loc.isRoot,
     ``MLoc.isTarget, ``MPath.isBindable, ``Val.notTernary, ``Hole.isTarget, ``MHole.isTarget,
-    ``VHole.isTarget]
+    ``VHole.isTarget, ``SPath.elemMapping, ``SPath.elemPrim]
 
 open Lean Elab Tactic Meta in
 /-- Forget a derivation's side conditions: after `cases` on a derivation, a
@@ -226,14 +237,14 @@ inductive Taclet (C : Contract) (k : Nat) : Modality → Stmt C → Premise C �
       dl{ ⟨[ nsp.fld = e; ]⟩ ⇝ ⟨[ T se = e; T storage sp = nsp; sp.fld = se; ]⟩ }
   | storageFieldWriteStorageRef_unfold_leftFst :
       dl{ ⟨[ nsp.fld = path; ]⟩ ⇝ ⟨[ T storage sp = nsp; sp.fld = path; ]⟩ }
-  | storageIndexWrite_unfold_leftFst :
+  | storageIndexWriteCaptureAllComplexRecv :
       dl{ ⟨[ nsp[e₁] = e₂; ]⟩ ⇝ ⟨[ T se = e₂; T storage sp = nsp; T ie = e₁; sp[ie] = se; ]⟩ }
-  | storageIndexWriteStorageRef_unfold_leftFst :
+  | storageIndexWriteStorageRefCaptureAllComplexRecv :
       dl{ ⟨[ nsp[e] = path; ]⟩ ⇝ ⟨[ T storage sp = nsp; T ie = e; sp[ie] = path; ]⟩ }
-  | storageIndexWriteNonSimpleIndexCapture :
-      dl{ ⟨[ sp[nse₁] = e; ]⟩ ⇝ ⟨[ T se = e; T ie = nse₁; sp[ie] = se; ]⟩ }
-  | storageIndexWriteStorageRefNonSimpleIndexCapture :
-      dl{ ⟨[ sp[nse] = path; ]⟩ ⇝ ⟨[ T ie = nse; sp[ie] = path; ]⟩ }
+  | storageIndexWriteCaptureAllNonSimpleIndex :
+      dl{ ⟨[ sp[nse₁] = e; ]⟩ ⇝ ⟨[ T se = e; T storage sp' = sp; T ie = nse₁; sp'[ie] = se; ]⟩ }
+  | storageIndexWriteStorageRefCaptureAllNonSimpleIndex :
+      dl{ ⟨[ sp[nse] = path; ]⟩ ⇝ ⟨[ T storage sp' = sp; T ie = nse; sp'[ie] = path; ]⟩ }
   | storageRootWriteValueRhsCapture :
       dl{ ⟨[ gsp = nse; ]⟩ ⇝ ⟨[ T se = nse; gsp = se; ]⟩ }
   | fieldWriteValueRhsCapture :
@@ -299,13 +310,17 @@ inductive Taclet (C : Contract) (k : Nat) : Modality → Stmt C → Premise C �
   | storageIndexReadMappingBindLocalRoot :
       dl{ ⟨[ lsv = map[ie]; ]⟩ ⇝ { lsv := map[ie] } ⟨[ ]⟩ }
   | storageIndexReadArrayBindLocalRoot :
-      dl{ ⟨[ lsv = arr[ie]; ]⟩ ⇝ { lsv := arr[ie] } ⟨[ ]⟩ }
+      dl{ ⟨[ lsv = darr[ie]; ]⟩ ⇝ { lsv := darr[ie] } ⟨[ ]⟩ }
+  | storageIndexReadArrayBindLocalRootMappingElement :
+      dl{ ⟨[ lsv = marr[ie]; ]⟩ ⇝ { lsv := marr[ie] } ⟨[ ]⟩ }
   | storageRootDelete :
       dl{ ⟨[ delete gsp; ]⟩ ⇝ { storage := delAt(storage, gsp) } ⟨[ ]⟩ }
   | storageFieldDelete :
       dl{ ⟨[ delete sp.fld; ]⟩ ⇝ { storage := delAt(storage, sp.fld) } ⟨[ ]⟩ }
   | storageIndexDelete :
-      dl{ ⟨[ delete sp[ie]; ]⟩ ⇝ { storage := delAt(storage, sp[ie]) } ⟨[ ]⟩ }
+      dl{ ⟨[ delete map[ie]; ]⟩ ⇝ { storage := delAt(storage, map[ie]) } ⟨[ ]⟩ }
+  | storageIndexArrayDelete :
+      dl{ ⟨[ delete arr[ie]; ]⟩ ⇝ { storage := delAt(storage, arr[ie]) } ⟨[ ]⟩ }
   -- Operators ------------------------------------------------------------
   | binopAssignment :
       dl{ ⟨[ v = se₁ ⊕ se₂; ]⟩ ⇝ { v := se₁ ⊕ se₂ } ⟨[ ]⟩ }
@@ -398,8 +413,11 @@ inductive Taclet (C : Contract) (k : Nat) : Modality → Stmt C → Premise C �
           { storage := save(save(storage, sp[sp.length], find(storage, path)), sp.length,
               sp.length + 1) } ⟨[ ]⟩ }
   | storagePushLengthSave :
-      dl{ ⟨[ sp.push(); ]⟩ ⇝
-          { storage := save(delAt(storage, sp[sp.length]), sp.length, sp.length + 1) } ⟨[ ]⟩ }
+      dl{ ⟨[ parr.push(); ]⟩ ⇝
+          { storage := save(delAt(storage, parr[parr.length]), parr.length, parr.length + 1) }
+          ⟨[ ]⟩ }
+  | storagePushLengthSaveReferenceElement :
+      dl{ ⟨[ rarr.push(); ]⟩ ⇝ { storage := save(storage, rarr.length, rarr.length + 1) } ⟨[ ]⟩ }
   | storagePushValue_unfold_rightSndArgument :
       dl{ ⟨[ sp.push(nse); ]⟩ ⇝ ⟨[ T se = nse; sp.push(se); ]⟩ }
   | storagePushValue_unfold_leftFstReceiver :
@@ -409,13 +427,21 @@ inductive Taclet (C : Contract) (k : Nat) : Modality → Stmt C → Premise C �
   | storagePop_unfold_leftFstReceiver :
       dl{ ⟨[ nsp.pop(); ]⟩ ⇝ ⟨[ T storage sp = nsp; sp.pop(); ]⟩ }
   | storagePopSave :
-      dl{ ⟨[ sp.pop(); ]⟩ ⇝
-          { storage := save(delAt(storage, sp[sp.length - 1]), sp.length, sp.length - 1) } ⟨[ ]⟩ }
+      dl{ ⟨[ darr.pop(); ]⟩ ⇝
+          { storage := save(delAt(storage, darr[darr.length - 1]), darr.length, darr.length - 1) }
+          ⟨[ ]⟩ }
+  | storagePopSaveMappingElement :
+      dl{ ⟨[ marr.pop(); ]⟩ ⇝ { storage := save(storage, marr.length, marr.length - 1) } ⟨[ ]⟩ }
   | storageLocalRootPush_unfold_leftFstReceiver :
       dl{ ⟨[ lsv = nsp.push(); ]⟩ ⇝ ⟨[ T storage sp = nsp; lsv = sp.push(); ]⟩ }
   | storageLocalRootPushBind :
-      dl{ ⟨[ lsv = sp.push(); ]⟩ ⇝
-          { storage := save(storage, sp.length, sp.length + 1) ‖ lsv := sp[sp.length] } ⟨[ ]⟩ }
+      dl{ ⟨[ lsv = darr.push(); ]⟩ ⇝
+          { storage := save(storage, darr.length, darr.length + 1) ‖ lsv := darr[darr.length] }
+          ⟨[ ]⟩ }
+  | storageLocalRootPushBindMappingElement :
+      dl{ ⟨[ lsv = marr.push(); ]⟩ ⇝
+          { storage := save(storage, marr.length, marr.length + 1) ‖ lsv := marr[marr.length] }
+          ⟨[ ]⟩ }
   -- Transfer -------------------------------------------------------------
   | transfer_unfold_leftFstReceiver :
       dl{ ⟨[ nadr.transfer(e); ]⟩ ⇝ ⟨[ uint se = nadr; se.transfer(e); ]⟩ }
@@ -450,10 +476,17 @@ inductive Taclet (C : Contract) (k : Nat) : Modality → Stmt C → Premise C �
       dl{ ⟨[ mv[ie] = mpath; ]⟩ ⇝ { memory := write(memory, mv[ie], mpath) } ⟨[ ]⟩ }
   | memoryFieldWrite_unfold_leftFst :
       dl{ ⟨[ nmp.fld = msrc; ]⟩ ⇝ ⟨[ T memory mv = nmp; mv.fld = msrc; ]⟩ }
-  | memoryIndexWrite_unfold_leftFst :
-      dl{ ⟨[ nmp[e] = msrc; ]⟩ ⇝ ⟨[ T memory mv = nmp; T ie = e; mv[ie] = msrc; ]⟩ }
-  | memoryIndexWriteNonSimpleIndexCapture :
-      dl{ ⟨[ mv[nse] = msrc; ]⟩ ⇝ ⟨[ T ie = nse; mv[ie] = msrc; ]⟩ }
+  | memoryIndexWriteCaptureAllComplexRecv :
+      dl{ ⟨[ nmp[e₁] = e₂; ]⟩ ⇝ ⟨[ T se = e₂; T memory mv = nmp; T ie = e₁; mv[ie] = se; ]⟩ }
+  | memoryIndexWriteMemRefCaptureAllComplexRecv :
+      dl{ ⟨[ nmp[e] = mpath; ]⟩ ⇝ ⟨[ T memory mv = nmp; T ie = e; mv[ie] = mpath; ]⟩ }
+  /-- KeY re-binds the receiver too (`T memory mv' = mv;`); a memory local is
+  untyped (`MPath.var`), so that alias would not fix its array type, and it
+  renames `mv` and nothing else. -/
+  | memoryIndexWriteCaptureAllNonSimpleIndex :
+      dl{ ⟨[ mv[nse₁] = e; ]⟩ ⇝ ⟨[ T se = e; T ie = nse₁; mv[ie] = se; ]⟩ }
+  | memoryIndexWriteMemRefCaptureAllNonSimpleIndex :
+      dl{ ⟨[ mv[nse] = mpath; ]⟩ ⇝ ⟨[ T ie = nse; mv[ie] = mpath; ]⟩ }
   | memoryFieldWriteUnfoldSource :
       dl{ ⟨[ mv.fld = nse; ]⟩ ⇝ ⟨[ T se = nse; mv.fld = se; ]⟩ }
   | memoryIndexWriteUnfoldSource :
@@ -475,10 +508,10 @@ inductive Taclet (C : Contract) (k : Nat) : Modality → Stmt C → Premise C �
       dl{ ⟨[ arr[ie] = mpath; ]⟩ ⇝ { storage := save(storage, arr[ie], copyMem(mtSt, memory, mpath)) } ⟨[ ]⟩ }
   | memoryToStorageField_unfold_leftFst :
       dl{ ⟨[ nsp.fld = mpath; ]⟩ ⇝ ⟨[ T storage sp = nsp; sp.fld = mpath; ]⟩ }
-  | memoryToStorageIndex_unfold_leftFst :
-      dl{ ⟨[ nsp[e] = mpath; ]⟩ ⇝ ⟨[ T storage sp = nsp; sp[e] = mpath; ]⟩ }
-  | memoryToStorageIndexNonSimpleIndexCapture :
-      dl{ ⟨[ sp[nse] = mpath; ]⟩ ⇝ ⟨[ T ie = nse; sp[ie] = mpath; ]⟩ }
+  | memoryToStorageIndexCaptureAllComplexRecv :
+      dl{ ⟨[ nsp[e] = mpath; ]⟩ ⇝ ⟨[ T storage sp = nsp; T ie = e; sp[ie] = mpath; ]⟩ }
+  | memoryToStorageIndexCaptureAllNonSimpleIndex :
+      dl{ ⟨[ sp[nse] = mpath; ]⟩ ⇝ ⟨[ T storage sp' = sp; T ie = nse; sp'[ie] = mpath; ]⟩ }
   -- Control flow ---------------------------------------------------------
   | ifElseUnfold :
       dl{ ⟨[ if (nse) thn else els; ]⟩ ⇝ ⟨[ bool se = nse; if (se) thn else els; ]⟩ }

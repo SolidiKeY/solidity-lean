@@ -21,7 +21,7 @@ and the script's header:
 
 | Contract | proved | evaluated | open | unsupported | unported |
 |---|---:|---:|---:|---:|---:|
-| TestSuite | 186 | 46 | 5 | 176 | 0 |
+| TestSuite | 186 | 51 | 0 | 176 | 0 |
 | SolcExpressions | 13 | 0 | 0 | 7 | 0 |
 | SolcStructs | 5 | 3 | 0 | 3 | 0 |
 | SolcArrays | 1 | 4 | 0 | 7 | 0 |
@@ -30,15 +30,11 @@ and the script's header:
 | SolcControlFlow | 6 | 2 | 0 | 2 | 0 |
 | Net | 3 | 0 | 0 | 20 | 0 |
 | Rules | 0 | 0 | 0 | 8 | 34 |
-| **all** | **224** | **62** | **5** | **226** | **34** |
+| **all** | **224** | **67** | **0** | **226** | **34** |
 
 ## Open
 
-- `TestSuite.testDeleteArrayDoesNotResetElementMappingMember`: the last `assert` fails: `delete ledgerUses` drops the elements' mapping entries, where solc and solkey keep them for the re-pushed element.
-- `TestSuite.testDanglingReferenceSurvivesPush`: the write through `r` after `tokens.pop()` reverts: the interpreter bounds-checks a storage reference against the live length, where solc and solkey write the popped slot.
-- `TestSuite.testArrayCopyClearsOldElements`: the write through `r` after `tokens.pop()` reverts: the interpreter bounds-checks a storage reference against the live length, where solc and solkey write the popped slot.
-- `TestSuite.testArrayCopyKeepsDestinationTail`: the write through `r` after `tokens.pop()` reverts: the interpreter bounds-checks a storage reference against the live length, where solc and solkey write the popped slot.
-- `TestSuite.testDeleteArrayLeavesDataPastLength`: the write through `r` after `tokens.pop()` reverts: the interpreter bounds-checks a storage reference against the live length, where solc and solkey write the popped slot.
+None.
 
 ## Unsupported, by reason
 

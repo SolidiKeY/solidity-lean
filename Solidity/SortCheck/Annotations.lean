@@ -5,7 +5,7 @@ import Solidity.AST
 
 A machine-checked transcription of the *read-sort annotations* carried
 by the read-bearing taclets of solkey's `solidityProgramRules.key`
-(transcribed at solkey commit `8c5c69ca25`: 310 taclets, 110 of them
+(transcribed at solkey commit `f2eb3d98eb`: 311 taclets, 115 of them
 read-bearing, one row each). The sort-relevant history is
 `12e72a1b4b` "removed find<int> to be more generic", `52c9c2477a`
 "removed valAt", `0f9b99ad55` "removed different fields" (which
@@ -247,6 +247,8 @@ def tacletReadAnns : List TacletReadAnn :=
       reads := [slen, sread .value (.generic .hasElementSort), slen] },
     { keyName := "storageIndexReadArrayBindLocalRoot"
       reads := [slen, slen] },
+    { keyName := "storageIndexReadArrayBindLocalRootMappingElement"
+      reads := [slen, slen] },
     { keyName := "storageIndexReadArrayStoreRoot"
       reads := [slen, sread .value (.fixed .stValue), slen] },
     { keyName := "storageIndexWriteArrayCopySource"
@@ -262,10 +264,19 @@ def tacletReadAnns : List TacletReadAnn :=
       reads := [slen, sread .value (.fixed .stValue), slen] },
     { keyName := "storagePushLengthSave"
       reads := [slen, slen] },
+    { keyName := "storagePushLengthSaveReferenceElement"
+      reads := [slen] },
     { keyName := "storageLocalRootPushBind"
+      reads := [slen, slen] },
+    { keyName := "storageLocalRootPushBindMappingElement"
       reads := [slen, slen] },
     { keyName := "storagePopSave"
       reads := [slen, slen, slen, slen] },
+    { keyName := "storagePopSaveMappingElement"
+      reads := [slen, slen, slen] },
+    -- An array entry deleted: the bounds check reads `size` in each branch.
+    { keyName := "storageIndexArrayDelete"
+      reads := [slen, slen] },
     -- Cross-domain copies.
     { keyName := "memoryStorageCopy"
       -- The one surviving `find<[Struct]>`: its target is
@@ -359,7 +370,7 @@ def preFixTacletReadAnns : List TacletReadAnn :=
 -- Taclet names must be unique, and the table has one row per
 -- read-bearing taclet of the pinned file.
 #guard (tacletReadAnns.map (·.keyName)).Nodup
-#guard tacletReadAnns.length = 110
+#guard tacletReadAnns.length = 115
 
 end TacletAnnotations
 end Solidity

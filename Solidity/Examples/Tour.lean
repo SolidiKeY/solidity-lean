@@ -88,6 +88,7 @@ theorem aliasing :
 
 /-! ## 3. Frames -/
 
+set_option maxHeartbeats 1000000 in
 /-- `uint z = balances[b]; balances[a] += 5; uint y = balances[b];` — another
 mapping key is untouched, given that the keys differ. -/
 theorem mappingFrame :

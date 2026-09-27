@@ -78,11 +78,10 @@ import changes and final confirmation. The `lean-verify` skill in
 | `lake exe solkeycheck` | sort annotations against solkey's `.key` |
 | `./scripts/check-corpus.sh` | the solkey corpus (`SolidityCorpus`) against `tests/solkey/expected.tsv` |
 
-`solkeycheck` was at zero against solkey `8c5c69ca25` (2026-09-20). A newer
-checkout reports drift (311 taclets, 5 mismatches as of 2026-09-26);
-re-pinning is its own change: it regenerates `Calculus/KeyTaclets.lean`,
-moves `SortCheck/Annotations.lean`, and re-partitions
-`RuleShapes.taclets_partitioned`.
+`solkeycheck` is at zero against solkey `f2eb3d98eb` (311 taclets,
+2026-09-27). Re-pinning to a newer checkout is its own change: it regenerates
+`Calculus/KeyTaclets.lean`, moves `SortCheck/Annotations.lean`, and
+re-partitions `RuleShapes.taclets_partitioned`.
 
 Run long builds in the background and grep the log for `error` rather than
 reading it back whole.

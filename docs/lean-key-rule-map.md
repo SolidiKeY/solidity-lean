@@ -5,7 +5,7 @@ The name-by-name map from solkey's `solidityProgramRules.key` (plus
 `Solidity/Calculus/Rules.lean`. One row per taclet, grouped by family as
 solkey's file groups them.
 
-**Pinned to solkey `8c5c69ca25`** (310 program taclets, three `\heuristics`
+**Pinned to solkey `f2eb3d98eb`** (311 program taclets, four `\heuristics`
 classes; `Calculus/KeyTaclets.lean` is the vendored enumeration). Every rule
 of `Calculus/Rules.lean` is a constructor of one inductive `Taclet C k m s p`,
 written `dl{ ⟨[ s; ]⟩ ⇝ p }` and named as solkey names the taclet(s) it
@@ -26,12 +26,11 @@ The correspondence below is not this file's alone to keep straight;
   a misspelled or renamed taclet is a type error, not a stale table cell.
 - **`unclaimedTaclets`** — the taclets no constructor claims, each with the
   reason it is excused (quoted in the tables below).
-- **`taclets_partitioned`** — every one of the 310 taclets is claimed by some
+- **`taclets_partitioned`** — every one of the 311 taclets is claimed by some
   row or excused, never both: `claimedTaclets_count = 287`,
-  `unclaimedTaclets_count = 23`. A taclet may be claimed by two constructors
-  (a `*CaptureAll` by the `_unfold_leftFst` and the `NonSimpleIndexCapture` of
-  its family; `memoryFieldWrite`/`memoryIndexWriteArray` by the value write
-  and the reference copy) — the tables below list both.
+  `unclaimedTaclets_count = 24`. A taclet may be claimed by two constructors
+  (`memoryFieldWrite`/`memoryIndexWriteArray` by the value write and the
+  reference copy) — the tables below list both.
 
 What stays prose here is what a typed `KeyOrigin` cannot say: *why* a merge is
 a merge, and the symbol-by-symbol map for the update vocabulary and the
@@ -104,17 +103,16 @@ request that solkey drop the fold.
 
 | KeY taclet | `Taclet` constructor | Status | Notes |
 | --- | --- | --- | --- |
-| `storageIndexWriteArraySave` | `storageIndexWriteArraySave` | same | one rule for both modalities; an out-of-range write reverts inside `SVal.save`, not as a separate bounds goal |
+| `storageIndexWriteArraySave` | `storageIndexWriteArraySave` | same | one rule for both modalities; an out-of-range write reverts in the path's own bounds check (`PTerm.at`, `State.checkIndex`), not as a separate bounds goal |
 | `storageIndexReadArrayFind` | `storageIndexReadArrayFind` | same | |
-| `storageIndexReadArrayBindLocalRoot` | `storageIndexReadArrayBindLocalRoot` | same | |
+| `storageIndexReadArrayBindLocalRoot` | `storageIndexReadArrayBindLocalRoot` | same | `lsv = darr[ie]`: an element that is not a mapping (`nonMappingElement`, `SPath.elemMapping darr = false`); the bounds check is the path's own (`PTerm.at`) |
+| `storageIndexReadArrayBindLocalRootMappingElement` | `storageIndexReadArrayBindLocalRootMappingElement` | same | `lsv = marr[ie]`: an array of mappings; KeY's `atMap(ie)` is the same `Seg.at` here, a mapping being what `delete` leaves alone |
 | `storageIndexReadArrayStoreRoot` | `storageIndexReadArrayStoreRoot` | same | |
 | `storageIndexWriteArrayCopySource` | `storageIndexWriteArrayCopySource` | same | |
-| `storageIndexWriteNonSimpleIndexCapture` | `storageIndexWriteNonSimpleIndexCapture` | same | `sp[nse] = e ⇝ T se = e; T ie = nse; sp[ie] = se`; also claimed jointly with the row below by `storageIndexWriteCaptureAll` |
-| `storageIndexWriteStorageRefNonSimpleIndexCapture` | `storageIndexWriteStorageRefNonSimpleIndexCapture` | same | the reference-source twin, no freeze |
-| `storageIndexWrite_unfold_leftFst` | `storageIndexWrite_unfold_leftFst` | same | `nsp[e1] = e2 ⇝ T se = e2; T storage sp = nsp; T ie = e1; sp[ie] = se` |
-| `storageIndexWriteStorageRef_unfold_leftFst` | `storageIndexWriteStorageRef_unfold_leftFst` | same | the reference-source twin |
-| `storageIndexWriteCaptureAll` | `storageIndexWrite_unfold_leftFst` and `storageIndexWriteNonSimpleIndexCapture` | merged into `storageIndexWrite_unfold_leftFst` and `storageIndexWriteNonSimpleIndexCapture` | KeY captures a nonsimple receiver **and** a nonsimple index in one step; Lean's `unfold_leftFst` already captures the whole receiver (its index capture is `T ie = e1`), and the index-only case is the other rule — both claim it |
-| `storageIndexWriteStorageRefCaptureAll` | `storageIndexWriteStorageRef_unfold_leftFst` and `storageIndexWriteStorageRefNonSimpleIndexCapture` | merged into `storageIndexWriteStorageRef_unfold_leftFst` and `storageIndexWriteStorageRefNonSimpleIndexCapture` | the reference-source twin of the row above |
+| `storageIndexWriteCaptureAllNonSimpleIndex` | `storageIndexWriteCaptureAllNonSimpleIndex` | same | `sp[nse] = e ⇝ T se = e; T storage sp' = sp; T ie = nse; sp'[ie] = se`: the simple receiver is bound again, as KeY does |
+| `storageIndexWriteStorageRefCaptureAllNonSimpleIndex` | `storageIndexWriteStorageRefCaptureAllNonSimpleIndex` | find agrees | `sp[nse] = path ⇝ T storage sp' = sp; T ie = nse; sp'[ie] = path`: KeY also binds the source to an alias `rv`; a copy source is written as it stands (`path`, `kernel-port.md` Decisions) |
+| `storageIndexWriteCaptureAllComplexRecv` | `storageIndexWriteCaptureAllComplexRecv` | same | `nsp[e1] = e2 ⇝ T se = e2; T storage sp = nsp; T ie = e1; sp[ie] = se` (was `storageIndexWrite_unfold_leftFst`) |
+| `storageIndexWriteStorageRefCaptureAllComplexRecv` | `storageIndexWriteStorageRefCaptureAllComplexRecv` | find agrees | `nsp[e] = path ⇝ T storage sp = nsp; T ie = e; sp[ie] = path`; the source is not captured, as the row above |
 | `storageIndexRead_unfold_rightSndIndex` | `storageIndexRead_unfold_rightSndIndex` | same | |
 | `storageIndexRead_unfold_rightSndResult` | `storageIndexRead_unfold_rightSndResult` | same | also claims `storageIndexWriteStorageRefRhsCapture` above |
 | `storageIndexRead_unfold_rightFst` | `storageIndexRead_unfold_rightFst` | same | |
@@ -130,9 +128,12 @@ request that solkey drop the fold.
 | `storagePushValue_unfold_rightSndArgument` | `storagePushValue_unfold_rightSndArgument` | same | |
 | `storagePushValueSave` | `storagePushValueSave` | same | |
 | `storagePushValueCopySource` | `storagePushValueCopySource` | same | |
-| `storagePushLengthSave` | `storagePushLengthSave` | same | |
-| `storageLocalRootPushBind` | `storageLocalRootPushBind` | same | |
-| `storagePopSave` | `storagePopSave` | same | one rule for both modalities |
+| `storagePushLengthSave` | `storagePushLengthSave` | same | `parr.push()`: a primitive element, the slot cleared (`delAt`) |
+| `storagePushLengthSaveReferenceElement` | `storagePushLengthSaveReferenceElement` | same | `rarr.push()`: a struct or array element, the recycled slot taken as it is (`STerm.extend` at `E`) |
+| `storageLocalRootPushBind` | `storageLocalRootPushBind` | same | `lsv = darr.push()` |
+| `storageLocalRootPushBindMappingElement` | `storageLocalRootPushBindMappingElement` | same | `lsv = marr.push()`: `atMap` is `Seg.at`, as above |
+| `storagePopSave` | `storagePopSave` | same | `darr.pop()`, one rule for both modalities: the element cleared into the recycled slots |
+| `storagePopSaveMappingElement` | `storagePopSaveMappingElement` | same | `marr.pop()`: `save(storage, marr.length, marr.length - 1)`, the element kept (`STerm.shrink`, `popAt` with `keep`) |
 
 ## Storage local declarations
 
@@ -148,7 +149,8 @@ request that solkey drop the fold.
 | --- | --- | --- | --- |
 | `storageRootDelete` | `storageRootDelete` | same | `delete(gsp) ⇝ { storage := delAt(storage, gsp) }` |
 | `storageFieldDelete` | `storageFieldDelete` | same | |
-| `storageIndexDelete` | `storageIndexDelete` | same | `isArray sp ∨ isMapping sp`, one rule for both |
+| `storageIndexDelete` | `storageIndexDelete` | same | `delete map[ie]`: a mapping entry |
+| `storageIndexArrayDelete` | `storageIndexArrayDelete` | same | `delete arr[ie]`: KeY's `inBounds` split is the path's own bounds check, which reverts |
 | `storageFieldDelete_unfold_leftFst` | `storageFieldDelete_unfold_leftFst` | same | |
 | `storageIndexDelete_unfold_leftFst` | `storageIndexDelete_unfold_leftFst` | same | |
 | `storageIndexDeleteNonSimpleIndexCapture` | `storageIndexDeleteNonSimpleIndexCapture` | same | |
@@ -159,6 +161,7 @@ request that solkey drop the fold.
 | --- | --- | --- | --- |
 | `memoryReferenceDeclFreshAlloc` | `memoryReferenceDeclFreshAlloc` | same | `T memory mv; ⇝ { mv := freshId(addM(memory)) ‖ memory := addM(memory) }`, the pair KeY writes |
 | `memoryArrayFreshAlloc` | — | unclaimed | nor `new T[](n)`: a memory array is made by declaration or by copy from storage |
+| `newArrayCapture` | — | unclaimed | no `new` yet: `lhs = new T[](se)` captured into a memory local, which a later wave adds with `new T[](n)` |
 | `memoryRootDeleteFreshRebind` | — | unclaimed | no memory `delete`: `Stmt.delete` takes a storage location (see "Memory delete" below) |
 | `memoryRootRebind` | `memoryRootAlias` | merged into `memoryRootAlias` | `mv₁ = mv₂; ⇝ { mv₁ := mv₂ }`; a storage right-hand side is the row below instead |
 | `memoryStorageCopy` | `memoryStorageCopy` | same | `mv = sp;` deep copy: fresh identity plus `copySt` |
@@ -179,13 +182,11 @@ request that solkey drop the fold.
 | `memoryIndexReadArrayValue` | `memoryIndexReadHeap` | merged into `memoryIndexReadHeap` | |
 | `memoryIndexReadArrayMemory` | `memoryIndexReadAliasRoot` | merged into `memoryIndexReadAliasRoot` | |
 | `memoryIndexRead_unfold_rightFst` | `memoryIndexRead_unfold_rightFst` | same | |
-| `memoryIndexWrite_unfold_leftFst` | `memoryIndexWrite_unfold_leftFst` | same | also claims the three rows below |
-| `memoryIndexWriteMemRef_unfold_leftFst` | `memoryIndexWrite_unfold_leftFst` | merged into `memoryIndexWrite_unfold_leftFst` | `msrc` value-or-reference, as the field case |
-| `memoryIndexWriteCaptureAll` | `memoryIndexWrite_unfold_leftFst` and `memoryIndexWriteNonSimpleIndexCapture` | merged into `memoryIndexWrite_unfold_leftFst` and `memoryIndexWriteNonSimpleIndexCapture` | as `storageIndexWriteCaptureAll` |
-| `memoryIndexWriteMemRefCaptureAll` | `memoryIndexWrite_unfold_leftFst` and `memoryIndexWriteNonSimpleIndexCapture` | merged into `memoryIndexWrite_unfold_leftFst` and `memoryIndexWriteNonSimpleIndexCapture` | the reference-source twin of the row above |
+| `memoryIndexWriteCaptureAllComplexRecv` | `memoryIndexWriteCaptureAllComplexRecv` | same | `nmp[e1] = e2 ⇝ T se = e2; T memory mv = nmp; T ie = e1; mv[ie] = se` |
+| `memoryIndexWriteMemRefCaptureAllComplexRecv` | `memoryIndexWriteMemRefCaptureAllComplexRecv` | find agrees | `nmp[e] = mpath ⇝ T memory mv = nmp; T ie = e; mv[ie] = mpath`: a memory path is a source as it stands |
 | `memoryIndexWriteMemRefRhsCapture` | — | unclaimed | a reference source at an index is written directly, as `memoryFieldWriteCaptureSrc` above |
-| `memoryIndexWriteNonSimpleIndexCapture` | `memoryIndexWriteNonSimpleIndexCapture` | same | also claims the reference-source row below |
-| `memoryIndexWriteMemRefNonSimpleIndexCapture` | `memoryIndexWriteNonSimpleIndexCapture` | merged into `memoryIndexWriteNonSimpleIndexCapture` | |
+| `memoryIndexWriteCaptureAllNonSimpleIndex` | `memoryIndexWriteCaptureAllNonSimpleIndex` | find agrees | `mv[nse] = e ⇝ T se = e; T ie = nse; mv[ie] = se`: KeY binds the receiver again (`T memory mv' = mv`), which for an untyped memory local would leave its array type free, and renames nothing else |
+| `memoryIndexWriteMemRefCaptureAllNonSimpleIndex` | `memoryIndexWriteMemRefCaptureAllNonSimpleIndex` | find agrees | `mv[nse] = mpath ⇝ T ie = nse; mv[ie] = mpath` |
 | `memoryFieldWriteUnfoldSource` (Lean-side name for the value capture below `fieldWriteValueRhsCapture`'s storage form) | `fieldWriteValueRhsCapture` | merged into `fieldWriteValueRhsCapture` | see "Value-RHS capture" in the arithmetic section below: the location-neutral capture rule also claims the memory case |
 | `memoryIndexWriteUnfoldSource` | `indexWriteValueRhsCapture` | merged into `indexWriteValueRhsCapture` | same, at an index |
 | `memoryFieldRead_unfold_rightSndResult` | — | unclaimed | as `memoryFieldWriteCaptureSrc`: a memory path is a source as it stands |
@@ -221,9 +222,8 @@ impossibility — unlike `emptyModality`/`blockEmpty` there is no reason memory
 | `memoryToStorageIndexMappingCopyRoot` | `memoryToStorageIndexMappingCopyRoot` | same | |
 | `memoryToStorageIndexArrayCopyRoot` | `memoryToStorageIndexArrayCopyRoot` | same | one rule for both modalities |
 | `memoryToStorageField_unfold_leftFst` | `memoryToStorageField_unfold_leftFst` | same | |
-| `memoryToStorageIndex_unfold_leftFst` | `memoryToStorageIndex_unfold_leftFst` | same | also claims the row below |
-| `memoryToStorageIndexNonSimpleIndexCapture` | `memoryToStorageIndexNonSimpleIndexCapture` | same | also claims `memoryToStorageIndexCaptureAll` |
-| `memoryToStorageIndexCaptureAll` | `memoryToStorageIndex_unfold_leftFst` and `memoryToStorageIndexNonSimpleIndexCapture` | merged into `memoryToStorageIndex_unfold_leftFst` and `memoryToStorageIndexNonSimpleIndexCapture` | as `storageIndexWriteCaptureAll` |
+| `memoryToStorageIndexCaptureAllComplexRecv` | `memoryToStorageIndexCaptureAllComplexRecv` | find agrees | `nsp[e] = mpath ⇝ T storage sp = nsp; T ie = e; sp[ie] = mpath`; the memory source stands (KeY: `T memory rv = src`); `simplify_prog_expensive` |
+| `memoryToStorageIndexCaptureAllNonSimpleIndex` | `memoryToStorageIndexCaptureAllNonSimpleIndex` | find agrees | `sp[nse] = mpath ⇝ T storage sp' = sp; T ie = nse; sp'[ie] = mpath`; `simplify_prog_expensive` |
 
 ## Value declarations
 
@@ -286,7 +286,7 @@ Pattern per op `⊕ ∈ {Add, Sub, Mul, Div, Mod}`. Lean has one constructor per
 | `storageRootAddAssign`, …SubAssign, …MulAssign, …DivAssign, …ModAssign | `storageRootOpAssign` | merged into `storageRootOpAssign` | |
 | `storageFieldAddAssign`, … | `storageFieldOpAssign` | merged into `storageFieldOpAssign` | |
 | `storageIndexMappingAddAssign`, … | `storageIndexMappingOpAssign` | merged into `storageIndexMappingOpAssign` | mapping and array stay **separate** constructors here, unlike increment/decrement below |
-| `storageIndexArrayAddAssign`, … | `storageIndexArrayOpAssign` | merged into `storageIndexArrayOpAssign` | no bounds split: the update reverts inside `SVal.save` |
+| `storageIndexArrayAddAssign`, … | `storageIndexArrayOpAssign` | merged into `storageIndexArrayOpAssign` | no bounds split: the update reverts in the path's bounds check (`PTerm.at`) |
 | `memoryFieldAddAssign`, … | `memoryFieldOpAssign` | merged into `memoryFieldOpAssign` | |
 | `memoryIndexArrayAddAssign`, … | `memoryIndexArrayOpAssign` | merged into `memoryIndexArrayOpAssign` | no root or mapping form: a memory root binds an identity, memory has no mappings |
 | `storageFieldAddAssign_unfold_leftFst`, … | `storageFieldOpAssignUnfoldLeftFst` | merged into `storageFieldOpAssignUnfoldLeftFst` | `nsp.fld ⊕= se; ⇝ T storage sp = nsp; sp.fld ⊕= se;` |
@@ -411,14 +411,16 @@ minted without either re-deriving the other's answer.
 the new length `size`, both reading the pre-state; here `STerm.push s p v`
 *is* `save(save(s, p[p.length], v), p.length, p.length + 1)` as a single
 constructor, because a *program* can perform neither write alone (there is no
-statement for "write one past the end" or "assign `a.length`"), so the
-soundness proofs need to compare a rule's update against `SVal.saveExt`
-(the length-extending write) rather than plain `SVal.save`. `STerm.pushSlot`
-is the bare `push()`'s slot write (`storagePushLengthSave`, recycling a
-popped slot or the type's default), and `STerm.pop` the dual. What that
-whole-array write *carries* is solkey's `delAt`: both `storagePopSave` and
-`storagePushLengthSave` clear the slot at `n` rather than dropping it, so a
-mapping nested in a popped element survives into the next `push`.
+statement for "write one past the end" or "assign `a.length`"): the length
+grows by the push, and the slot it lands on is a recycled one or a fresh
+default (`Semantics.pushAt`). `STerm.pushSlot` is the bare `push()` of a
+primitive element (`storagePushLengthSave`, the slot cleared), `STerm.extend`
+of a struct or array element (`storagePushLengthSaveReferenceElement`, the
+recycled slot taken as it is, so a write through a reference to the popped
+element is read back), and `STerm.pop`/`STerm.shrink` the duals
+(`storagePopSave` clears the element into the recycled slots,
+`storagePopSaveMappingElement` keeps it). A mapping nested in a popped
+element survives into the next `push` either way.
 
 **Memory `delete` has no update to spell.** All eight memory-delete taclets
 are unclaimed (see "Memory delete" above), so nothing in `Update.lean`

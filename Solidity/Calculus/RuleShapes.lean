@@ -72,8 +72,8 @@ namespace RuleShapes
 
 In `Rules.lean`'s order.  A `merged` row is a constructor whose `\find`
 covers several taclets: an operator family, a KeY split by the source's
-kind (a value against a reference, `…MemRef…`), by the receiver's (a
-mapping against an array), or by capture order (`…CaptureAll`). -/
+kind (a value against a reference, `…MemRef…`) or by the receiver's (a
+mapping against an array). -/
 
 
 /-- Every `Taclet` constructor, and the solkey taclets it transcribes. -/
@@ -90,15 +90,14 @@ def tacletOrigins : List (Lean.Name × KeyOrigin) := [
   (``Taclet.storageFieldWrite_unfold_leftFst, .taclet .storageFieldWrite_unfold_leftFst),
   (``Taclet.storageFieldWriteStorageRef_unfold_leftFst,
     .taclet .storageFieldWriteStorageRef_unfold_leftFst),
-  (``Taclet.storageIndexWrite_unfold_leftFst,
-    .merged [.storageIndexWrite_unfold_leftFst, .storageIndexWriteCaptureAll]),
-  (``Taclet.storageIndexWriteStorageRef_unfold_leftFst,
-    .merged [.storageIndexWriteStorageRef_unfold_leftFst, .storageIndexWriteStorageRefCaptureAll]),
-  (``Taclet.storageIndexWriteNonSimpleIndexCapture,
-    .merged [.storageIndexWriteNonSimpleIndexCapture, .storageIndexWriteCaptureAll]),
-  (``Taclet.storageIndexWriteStorageRefNonSimpleIndexCapture,
-    .merged [.storageIndexWriteStorageRefNonSimpleIndexCapture,
-      .storageIndexWriteStorageRefCaptureAll]),
+  (``Taclet.storageIndexWriteCaptureAllComplexRecv,
+    .taclet .storageIndexWriteCaptureAllComplexRecv),
+  (``Taclet.storageIndexWriteStorageRefCaptureAllComplexRecv,
+    .taclet .storageIndexWriteStorageRefCaptureAllComplexRecv),
+  (``Taclet.storageIndexWriteCaptureAllNonSimpleIndex,
+    .taclet .storageIndexWriteCaptureAllNonSimpleIndex),
+  (``Taclet.storageIndexWriteStorageRefCaptureAllNonSimpleIndex,
+    .taclet .storageIndexWriteStorageRefCaptureAllNonSimpleIndex),
   (``Taclet.storageRootWriteValueRhsCapture, .taclet .storageRootWriteValueRhsCapture),
   (``Taclet.fieldWriteValueRhsCapture, .taclet .fieldWriteValueRhsCapture),
   (``Taclet.indexWriteValueRhsCapture, .taclet .indexWriteValueRhsCapture),
@@ -134,9 +133,12 @@ def tacletOrigins : List (Lean.Name × KeyOrigin) := [
   (``Taclet.storageFieldReadBindLocalRoot, .taclet .storageFieldReadBindLocalRoot),
   (``Taclet.storageIndexReadMappingBindLocalRoot, .taclet .storageIndexReadMappingBindLocalRoot),
   (``Taclet.storageIndexReadArrayBindLocalRoot, .taclet .storageIndexReadArrayBindLocalRoot),
+  (``Taclet.storageIndexReadArrayBindLocalRootMappingElement,
+    .taclet .storageIndexReadArrayBindLocalRootMappingElement),
   (``Taclet.storageRootDelete, .taclet .storageRootDelete),
   (``Taclet.storageFieldDelete, .taclet .storageFieldDelete),
   (``Taclet.storageIndexDelete, .taclet .storageIndexDelete),
+  (``Taclet.storageIndexArrayDelete, .taclet .storageIndexArrayDelete),
   -- Operators: `+ - * ** / %`, then the comparisons, then `&& ||`
   (``Taclet.binopAssignment, .merged [.additionAssignment, .subtractionAssignment,
     .multiplicationAssignment, .powerAssignment, .divisionAssignment, .moduloAssignment,
@@ -249,6 +251,8 @@ def tacletOrigins : List (Lean.Name × KeyOrigin) := [
   (``Taclet.storagePushValueSave, .taclet .storagePushValueSave),
   (``Taclet.storagePushValueCopySource, .taclet .storagePushValueCopySource),
   (``Taclet.storagePushLengthSave, .taclet .storagePushLengthSave),
+  (``Taclet.storagePushLengthSaveReferenceElement,
+    .taclet .storagePushLengthSaveReferenceElement),
   (``Taclet.storagePushValue_unfold_rightSndArgument,
     .taclet .storagePushValue_unfold_rightSndArgument),
   (``Taclet.storagePushValue_unfold_leftFstReceiver,
@@ -256,14 +260,18 @@ def tacletOrigins : List (Lean.Name × KeyOrigin) := [
   (``Taclet.storagePush_unfold_leftFstReceiver, .taclet .storagePush_unfold_leftFstReceiver),
   (``Taclet.storagePop_unfold_leftFstReceiver, .taclet .storagePop_unfold_leftFstReceiver),
   (``Taclet.storagePopSave, .taclet .storagePopSave),
+  (``Taclet.storagePopSaveMappingElement, .taclet .storagePopSaveMappingElement),
   (``Taclet.storageLocalRootPush_unfold_leftFstReceiver,
     .taclet .storageLocalRootPush_unfold_leftFstReceiver),
   (``Taclet.storageLocalRootPushBind, .taclet .storageLocalRootPushBind),
+  (``Taclet.storageLocalRootPushBindMappingElement,
+    .taclet .storageLocalRootPushBindMappingElement),
   -- Transfer
   (``Taclet.transfer_unfold_leftFstReceiver, .taclet .transfer_unfold_leftFstReceiver),
   (``Taclet.transfer_unfold_rightSndArgument, .taclet .transfer_unfold_rightSndArgument),
   (``Taclet.transferNoCallback, .merged [.transferNoCallbackBox, .transferNoCallbackDiamond]),
-  -- Memory: `msrc` is a value or a memory reference, so one row covers `…MemRef…`
+  -- Memory: `msrc` is a value or a memory reference, so a row covers `…MemRef…` except
+  -- for the index captures, which KeY and the table split by the source
   (``Taclet.memoryFieldRead_unfold_rightFst, .taclet .memoryFieldRead_unfold_rightFst),
   (``Taclet.memoryIndexRead_unfold_rightFst, .taclet .memoryIndexRead_unfold_rightFst),
   (``Taclet.memoryIndexRead_unfold_rightSndIndex, .taclet .memoryIndexRead_unfold_rightSndIndex),
@@ -278,12 +286,14 @@ def tacletOrigins : List (Lean.Name × KeyOrigin) := [
   (``Taclet.memoryIndexWriteCopy, .taclet .memoryIndexWriteArray),
   (``Taclet.memoryFieldWrite_unfold_leftFst,
     .merged [.memoryFieldWrite_unfold_leftFst, .memoryFieldWriteMemRef_unfold_leftFst]),
-  (``Taclet.memoryIndexWrite_unfold_leftFst,
-    .merged [.memoryIndexWrite_unfold_leftFst, .memoryIndexWriteCaptureAll,
-      .memoryIndexWriteMemRef_unfold_leftFst, .memoryIndexWriteMemRefCaptureAll]),
-  (``Taclet.memoryIndexWriteNonSimpleIndexCapture,
-    .merged [.memoryIndexWriteNonSimpleIndexCapture, .memoryIndexWriteCaptureAll,
-      .memoryIndexWriteMemRefNonSimpleIndexCapture, .memoryIndexWriteMemRefCaptureAll]),
+  (``Taclet.memoryIndexWriteCaptureAllComplexRecv,
+    .taclet .memoryIndexWriteCaptureAllComplexRecv),
+  (``Taclet.memoryIndexWriteMemRefCaptureAllComplexRecv,
+    .taclet .memoryIndexWriteMemRefCaptureAllComplexRecv),
+  (``Taclet.memoryIndexWriteCaptureAllNonSimpleIndex,
+    .taclet .memoryIndexWriteCaptureAllNonSimpleIndex),
+  (``Taclet.memoryIndexWriteMemRefCaptureAllNonSimpleIndex,
+    .taclet .memoryIndexWriteMemRefCaptureAllNonSimpleIndex),
   (``Taclet.memoryFieldWriteUnfoldSource, .taclet .fieldWriteValueRhsCapture),
   (``Taclet.memoryIndexWriteUnfoldSource, .taclet .indexWriteValueRhsCapture),
   -- Storage and memory: `mpath` is any memory path, a member one included
@@ -295,10 +305,10 @@ def tacletOrigins : List (Lean.Name × KeyOrigin) := [
   (``Taclet.memoryToStorageIndexMappingCopyRoot, .taclet .memoryToStorageIndexMappingCopyRoot),
   (``Taclet.memoryToStorageIndexArrayCopyRoot, .taclet .memoryToStorageIndexArrayCopyRoot),
   (``Taclet.memoryToStorageField_unfold_leftFst, .taclet .memoryToStorageField_unfold_leftFst),
-  (``Taclet.memoryToStorageIndex_unfold_leftFst,
-    .merged [.memoryToStorageIndex_unfold_leftFst, .memoryToStorageIndexCaptureAll]),
-  (``Taclet.memoryToStorageIndexNonSimpleIndexCapture,
-    .merged [.memoryToStorageIndexNonSimpleIndexCapture, .memoryToStorageIndexCaptureAll]),
+  (``Taclet.memoryToStorageIndexCaptureAllComplexRecv,
+    .taclet .memoryToStorageIndexCaptureAllComplexRecv),
+  (``Taclet.memoryToStorageIndexCaptureAllNonSimpleIndex,
+    .taclet .memoryToStorageIndexCaptureAllNonSimpleIndex),
   -- Control flow: an `if` without `else` is one with an empty `else`
   (``Taclet.ifElseUnfold, .merged [.ifUnfold, .ifElseUnfold]),
   (``Taclet.ifElseSplit, .merged [.ifSplit, .ifElseSplit]),
@@ -327,8 +337,9 @@ def claimedTaclets : List KeyTaclet := KeyTaclet.all.filter claims
   and no `{} ; rest` to find; a derivation that reaches `⟨[ ]⟩` *is* the Lean
   analogue of `emptyModality`.
 * `functionBodyExpand` — the typed syntax has no calls.
-* `memoryArrayFreshAlloc` — nor `new T[](n)`: a memory array is made by
-  declaration (`memoryReferenceDeclFreshAlloc`) or by copy from storage.
+* `memoryArrayFreshAlloc`, `newArrayCapture` — nor `new T[](n)` (no `new`
+  yet): a memory array is made by declaration (`memoryReferenceDeclFreshAlloc`)
+  or by copy from storage.
 * The eight memory-`delete` taclets — nor `delete` of a memory location;
   `Stmt.delete` takes a storage one.
 * `memoryFieldRead_unfold_rightSndResult`, `memoryIndexRead_unfold_rightSndResult`,
@@ -348,7 +359,7 @@ def claimedTaclets : List KeyTaclet := KeyTaclet.all.filter claims
 def unclaimedTaclets : List KeyTaclet :=
   [ .emptyModality, .blockEmpty,
     .functionBodyExpand,
-    .memoryArrayFreshAlloc,
+    .memoryArrayFreshAlloc, .newArrayCapture,
     .memoryRootDeleteFreshRebind, .memoryFieldDeletePrimitive, .memoryFieldDeleteReference,
     .memoryIndexDeletePrimitive, .memoryIndexDeleteReference,
     .memoryFieldDelete_unfold_leftFst, .memoryIndexDelete_unfold_leftFst,
@@ -368,7 +379,7 @@ theorem taclets_partitioned :
 
 theorem claimedTaclets_count : claimedTaclets.length = 287 := by decide +kernel
 
-theorem unclaimedTaclets_count : unclaimedTaclets.length = 23 := by decide +kernel
+theorem unclaimedTaclets_count : unclaimedTaclets.length = 24 := by decide +kernel
 
 /-! ## The rows with no taclet
 

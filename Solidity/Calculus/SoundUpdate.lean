@@ -63,7 +63,8 @@ macro "upd_unfold'" : tactic => `(tactic| simp only [Upd.apply, List.foldlM, Upd
     ITerm.eval_copy', MTerm.eval, MValT.eval, MAddr.eval_field', MAddr.eval_at', SPath.lower_eval,
     Loc.lower_eval, Val.lower_eval,
     Simple.lower_eval, Stmt.run, Src.value, Val.eval, Simple.eval_local, bind_assoc, pure_bind,
-    bind_pure, State.saveStorage_with, writeAddr_with, OpLoc.store, OpLoc.bump, opStore, bumpStore,
+    bind_pure, State.writeStorage_toSVal, State.saveStorage_with, State.writeStorage_with,
+    writeAddr_with, OpLoc.store, OpLoc.bump, opStore, bumpStore,
     opLocal_eq, bumpLocal_eq, opMem, bumpMem, readLoc_eq, writeLoc_eq, ARhs.bind, MRhs.bind,
     MSrc.mval, MLoc.write, MPath.mval_var, MVal.asRef_ref, MLoc.read_field, MLoc.read_index,
     Loc.resolve, SPath.resolve, Src.pushVal, evalBinop_bump, applyBinOp_bump, Term.bumped])
@@ -178,6 +179,25 @@ theorem State.saveStorage_eq (σ : State) (r segs x) :
   | none => rfl
   | some v => cases h : v.save segs x <;> simp [h, bind, Except.bind, pure, Except.pure]
 
+/-- The storage a successful `writeStorage` leaves: a word saved, or a copy
+over what is there. -/
+def Semantics.State.writeRes (σ : State) (r : Name) (segs : List Seg) (x : SVal) :
+    Res (List (Name × SVal)) :=
+  match x with
+  | .prim p => σ.storeRes r segs (.prim p)
+  | .struct _ | .array .. | .map .. => do
+    let cur ← σ.findStorage r segs
+    σ.storeRes r segs (cur.overlay x)
+
+@[simp] theorem State.writeRes_toSVal (σ : State) (r segs) (v : Value) :
+    σ.writeRes r segs v.toSVal = σ.storeRes r segs v.toSVal := by
+  cases v <;> rfl
+
+theorem State.writeStorage_eq (σ : State) (r segs x) :
+    σ.writeStorage r segs x = (do let s ← σ.writeRes r segs x; pure { σ with storage := s }) := by
+  unfold State.writeStorage State.writeRes
+  cases x <;> simp only [State.saveStorage_eq, bind_assoc]
+
 /-- The heap a successful `writeAddr` leaves. -/
 def heapRes (σ : State) (mv : MVal) : Addr → Res (List (Nat × MObj))
   | .memoryField id f => do
@@ -220,7 +240,9 @@ macro "upd_unfold''" : tactic => `(tactic| simp only [Upd.apply, List.foldlM, Up
     ITerm.eval_copy', MTerm.eval, MValT.eval, MAddr.eval_field', MAddr.eval_at', SPath.lower_eval,
     Loc.lower_eval, Val.lower_eval,
     Simple.lower_eval, Stmt.run, Src.value, Val.eval, Simple.eval_local, bind_assoc, pure_bind,
-    bind_pure, State.saveStorage_eq, writeAddr_eq, OpLoc.store, OpLoc.bump, opStore, bumpStore,
+    bind_pure, State.writeStorage_toSVal, State.writeRes_toSVal, State.saveStorage_eq,
+    State.writeStorage_eq,
+    writeAddr_eq, OpLoc.store, OpLoc.bump, opStore, bumpStore,
     opLocal_eq, bumpLocal_eq, opMem, bumpMem, readLoc_eq, writeLoc_eq, ARhs.bind, MRhs.bind,
     MSrc.mval, MLoc.write, MPath.mval_var, MVal.asRef_ref, MLoc.read_field, MLoc.read_index,
     Loc.resolve, SPath.resolve, Src.pushVal, evalBinop_bump, applyBinOp_bump,
@@ -455,7 +477,8 @@ theorem pushAt_const (σ : State) (E E' : Ty) (r : Name) (segs : List Seg) (f : 
     | _ => rfl
 
 theorem pushAt_pushVal_some (σ σ' : State) (E : Ty) (r : Name) (segs : List Seg) {T : Ty} (s : Src C T) :
-    pushAt σ E r segs (Src.pushVal σ' (some s)) = pushAt σ .uint r segs (fun _ => s.value σ') :=
+    pushAt σ E r segs (Src.pushVal σ' (some s)) =
+      pushAt σ .uint r segs (fun _ => do pure (← s.value σ').strip) :=
   pushAt_const σ E .uint r segs _
 
 theorem pushVal_none (σ : State) {T : Ty} : Src.pushVal σ (none : Option (Src C T)) = pure := rfl
@@ -475,8 +498,9 @@ theorem pushAt_with (σ : State) (E : Ty) (r : Name) (segs : List Seg) (f : SVal
       | ok w => exact State.saveStorage_with σ r segs _
     | _ => rfl
 
-theorem popAt_with (σ : State) (r : Name) (segs : List Seg) :
-    (popAt σ r segs >>= fun τ => pure { σ with storage := τ.storage }) = popAt σ r segs := by
+theorem popAt_with (σ : State) (keep : Bool) (r : Name) (segs : List Seg) :
+    (popAt σ keep r segs >>= fun τ => pure { σ with storage := τ.storage }) =
+      popAt σ keep r segs := by
   unfold popAt
   simp only [bind, Except.bind]
   cases σ.findStorage r segs with
@@ -501,7 +525,8 @@ theorem upd_storagePushValueSave {q : PrimTy} (sp : SPath C (Ty.prim q).array) (
 
 theorem upd_storagePushValueCopySource {R : RefTy} (sp : SPath C (Ty.ref R).array) (sp2 : SPath C (Ty.ref R))
     (hm : (Ty.ref R).mapFree = true) (σ : State) :
-    SameOk [] (Upd.apply (C := C) [UpdElem.storage (STerm.storage.push sp.lower (SValT.find STerm.storage sp2.lower))] σ)
+    SameOk [] (Upd.apply (C := C)
+        [UpdElem.storage (STerm.storage.push sp.lower (SValT.find STerm.storage sp2.lower))] σ)
       (Stmt.run σ (Stmt.push sp (some (Src.copy sp2 hm)) rfl)) := by
   simp only [Stmt.run, pushAt_pushVal_some]
   upd_unfold''
@@ -517,20 +542,13 @@ theorem upd_storagePushLengthSave {E : Ty} (sp : SPath C E.array)
   simp only [pushAt_with]
   res_split
 
-theorem upd_storagePopSave {E : Ty} (sp : SPath C E.array) (σ : State) :
-    SameOk [] (Upd.apply (C := C) [UpdElem.storage (STerm.storage.pop sp.lower)] σ)
-      (Stmt.run σ (Stmt.pop sp)) := by
+theorem upd_storagePushLengthSaveReferenceElement {E : Ty} (sp : SPath C E.array)
+    (hd : ((none : Option (Src C E)).isSome || E.defaultOkS) = true) (σ : State) :
+    SameOk [] (Upd.apply (C := C) [UpdElem.storage (STerm.storage.extend sp.lower E)] σ)
+      (Stmt.run σ (Stmt.push sp none hd)) := by
+  simp only [Stmt.run, pushVal_none]
   upd_unfold''
-  simp only [popAt_with]
-  res_split
-
-theorem upd_storageLocalRootPushBind {R : RefTy} (lsv : Var) (sp : SPath C (Ty.ref R).array)
-    (hd : (Ty.ref R).defaultOkS = true) (σ : State) :
-    SameOk [] (Upd.apply (C := C) [UpdElem.storage (STerm.storage.extend sp.lower (Ty.ref R)),
-        UpdElem.path lsv (sp.lower.at (Term.len STerm.storage sp.lower))] σ)
-      (Stmt.run σ (Stmt.rebind lsv (ARhs.push sp hd))) := by
-  upd_unfold''
-  simp only [pushPlaceAt, arrayLen, State.saveStorage_eq, bind_assoc, pure_bind]
+  simp only [pushAt, pushPlaceAt, State.saveStorage_eq, bind_assoc, pure_bind]
   simp only [bind, Except.bind, pure, Except.pure]
   cases SPath.resolve σ sp with
   | error _ => trivial
@@ -544,15 +562,59 @@ theorem upd_storageLocalRootPushBind {R : RefTy} (lsv : Var) (sp : SPath C (Ty.r
         simp only
         cases σ.storeRes rs.1 rs.2 _ with
         | error _ => trivial
-        | ok st => simp [Value.asInt]
+        | ok st => simp
+      | _ => trivial
+
+theorem upd_storagePopSave {E : Ty} (sp : SPath C E.array) (hE : E.isMapping = false)
+    (σ : State) :
+    SameOk [] (Upd.apply (C := C) [UpdElem.storage (STerm.storage.pop sp.lower)] σ)
+      (Stmt.run σ (Stmt.pop sp)) := by
+  upd_unfold''
+  simp only [hE, popAt_with]
+  res_split
+
+theorem upd_storagePopSaveMappingElement {E : Ty} (sp : SPath C E.array) (hE : E.isMapping = true)
+    (σ : State) :
+    SameOk [] (Upd.apply (C := C) [UpdElem.storage (STerm.storage.shrink sp.lower)] σ)
+      (Stmt.run σ (Stmt.pop sp)) := by
+  upd_unfold''
+  simp only [hE, popAt_with]
+  res_split
+
+theorem upd_storageLocalRootPushBind {R : RefTy} (lsv : Var) (sp : SPath C (Ty.ref R).array)
+    (hd : (Ty.ref R).defaultOkS = true) (σ : State) :
+    SameOk [] (Upd.apply (C := C) [UpdElem.storage (STerm.storage.extend sp.lower (Ty.ref R)),
+        UpdElem.path lsv sp.lower.next] σ)
+      (Stmt.run σ (Stmt.rebind lsv (ARhs.push sp hd))) := by
+  upd_unfold''
+  simp only [pushPlaceAt, State.saveStorage_eq, bind_assoc, pure_bind]
+  simp only [bind, Except.bind, pure, Except.pure]
+  cases SPath.resolve σ sp with
+  | error _ => trivial
+  | ok rs =>
+    simp only
+    cases σ.findStorage rs.1 rs.2 with
+    | error _ => trivial
+    | ok v =>
+      cases v with
+      | array elems shadow =>
+        simp only
+        cases σ.storeRes rs.1 rs.2 _ with
+        | error _ => trivial
+        | ok st => simp
       | _ => trivial
 
 set_option maxHeartbeats 4000000 in
 theorem Taclet.sound_update {k : Nat} {m : Modality} {s : Stmt C} {U : Upd C}
     (d : Taclet C k m s (.update U)) : ∀ σ, SameOk [] (U.apply σ) (s.run σ) := by
   cases d
-  all_goals clear_side
   all_goals intro σ
+  -- the element type picks what `pop` does to the element: read off the side condition
+  case storagePopSave =>
+    exact upd_storagePopSave _ (by simp_all [SPath.elemMapping, Ty.elemIsMapping]) σ
+  case storagePopSaveMappingElement =>
+    exact upd_storagePopSaveMappingElement _ (by simp_all [SPath.elemMapping, Ty.elemIsMapping]) σ
+  all_goals clear_side
   case memoryReferenceDeclFreshAlloc => exact upd_memoryReferenceDeclFreshAlloc ..
   case localOpAssign => exact upd_localOpAssign ..
   case memoryFieldOpAssign => exact upd_memoryFieldOpAssign ..
@@ -569,8 +631,9 @@ theorem Taclet.sound_update {k : Nat} {m : Modality} {s : Stmt C} {U : Upd C}
   case storagePushValueSave => exact upd_storagePushValueSave ..
   case storagePushValueCopySource => exact upd_storagePushValueCopySource ..
   case storagePushLengthSave => exact upd_storagePushLengthSave ..
-  case storagePopSave => exact upd_storagePopSave ..
+  case storagePushLengthSaveReferenceElement => exact upd_storagePushLengthSaveReferenceElement ..
   case storageLocalRootPushBind => exact upd_storageLocalRootPushBind ..
+  case storageLocalRootPushBindMappingElement => exact upd_storageLocalRootPushBind ..
   case memoryFieldReadHeap => exact upd_memoryFieldReadHeap ..
   case memoryIndexReadHeap => exact upd_memoryIndexReadHeap ..
   case memoryRootAlias => exact upd_memoryRootAlias ..

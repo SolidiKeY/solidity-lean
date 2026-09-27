@@ -53,7 +53,7 @@ theorem ledgerWriteThenDelete :
   apply Proves.valid
   apply update .storageFieldWriteSave
   -- `ledger.balances[1] = 10;`: source, receiver `ledger.balances`, index
-  apply unfold .storageIndexWrite_unfold_leftFst
+  apply unfold .storageIndexWriteCaptureAllComplexRecv
   apply unfold .localValueDeclInitDrop
   apply update .localValueAssign
   apply unfold .storageLocalDeclInitDrop
@@ -62,7 +62,7 @@ theorem ledgerWriteThenDelete :
   apply update .localValueAssign
   apply update .storageIndexWriteMappingSave
   -- `ledger.balances[2] = 20;`, the same way
-  apply unfold .storageIndexWrite_unfold_leftFst
+  apply unfold .storageIndexWriteCaptureAllComplexRecv
   apply unfold .localValueDeclInitDrop
   apply update .localValueAssign
   apply unfold .storageLocalDeclInitDrop

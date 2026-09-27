@@ -102,7 +102,7 @@ Out, and why:
 | memory (`T memory m`, reads and writes, copies) | The machine's memory holds the locals; the heap and `copySt`/`copyMem` are not laid out. |
 | storage-to-storage copies (`alice = bob;`) | A copy is a loop over the type's leaves plus a bound check on nested arrays; not compiled. |
 | `push` | The interpreter's arrays are unbounded, solc's stop at `2^64` elements (`Panic(0x41)`): the two would disagree at that boundary, so the theorem as stated would be false. |
-| an alias bound to a path through an array (`Person storage p = persons[0];`) | The interpreter re-checks the index at every use of `p`; solc checks it once, when `p` is bound, and a later `pop` leaves `p` dangling. Aliases to paths through structs and mappings are in. |
+| an alias bound to a path through an array (`Person storage p = persons[0];`) | The interpreter checks the index once, when `p` is bound, as solc does, and a later `pop` leaves `p` naming a slot past the end, which it still writes. The representation (`Evm/Repr.lean`) relates the live elements only (`SVal.findLive`), so such an alias is not compiled. Aliases to paths through structs and mappings are in. |
 | `v = x++;` | Not compiled (needs the old value kept beside the write); `x++;` is in. |
 | mappings keyed by `bool`/`int` | `ReprAt` claims nothing for them (the interpreter indexes by `Int`). |
 

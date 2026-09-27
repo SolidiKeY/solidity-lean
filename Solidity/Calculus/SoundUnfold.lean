@@ -49,6 +49,20 @@ theorem State.saveStorage_setEnv (σ : State) (x : Var) (b : Binding) (r : Name)
   simp only [State.saveStorage, State.setEnv]
   split <;> simp_all [bind, Except.bind] <;> split <;> rfl
 
+theorem State.writeStorage_setEnv (σ : State) (x : Var) (b : Binding) (r : Name) (segs : List Seg)
+    (v : SVal) : (σ.setEnv x b).writeStorage r segs v =
+      (do let τ ← σ.writeStorage r segs v; pure (τ.setEnv x b)) := by
+  unfold State.writeStorage
+  split
+  · exact State.saveStorage_setEnv σ x b r segs _
+  all_goals
+    simp only [State.findStorage_setEnv, State.saveStorage_setEnv, bind_assoc]
+
+theorem State.checkIndex_setEnv (σ : State) (x : Var) (b : Binding) (r : Name) (segs : List Seg)
+    (i : Int) : (σ.setEnv x b).checkIndex r segs i = σ.checkIndex r segs i := by
+  unfold State.checkIndex
+  simp only [State.findStorage_setEnv]
+
 /-- `EnvAgreeExcept ns (…(σ.setEnv a _)….setEnv b _) σ` with `a b ∈ ns`. -/
 macro "agree_tac" : tactic => `(tactic| (
   repeat (first
@@ -127,8 +141,8 @@ theorem pushPlaceAt_setEnv (E : Ty) (r : Name) (segs : List Seg) :
   all_goals (try simp_all)
   all_goals (subst_vars; rfl)
 
-theorem popAt_setEnv (r : Name) (segs : List Seg) :
-    popAt (σ.setEnv x b) r segs = (do let τ ← popAt σ r segs; pure (τ.setEnv x b)) := by
+theorem popAt_setEnv (keep : Bool) (r : Name) (segs : List Seg) :
+    popAt (σ.setEnv x b) keep r segs = (do let τ ← popAt σ keep r segs; pure (τ.setEnv x b)) := by
   simp only [popAt, State.findStorage_setEnv, State.saveStorage_setEnv, bind_assoc]
   simp only [bind, Except.bind, pure, Except.pure]
   repeat' split
@@ -221,7 +235,7 @@ theorem Res.ok_bind {α β : Type} (a : α) (f : α → Res β) : (Except.ok a >
 @[simp] theorem Src.pushVal_none (σ : State) {T : Ty} :
     Src.pushVal (C := C) (T := T) σ none = fun slot => pure slot := rfl
 @[simp] theorem Src.pushVal_some (σ : State) {T : Ty} (r : Src C T) :
-    Src.pushVal σ (some r) = fun _ => r.value σ := rfl
+    Src.pushVal σ (some r) = fun _ => r.value σ >>= fun v => pure v.strip := rfl
 
 open Lean Elab Tactic Meta in
 /-- Case on a `Hole`/`MHole`/`VHole` (or a source, target, right-hand side) in context. -/
@@ -252,6 +266,7 @@ macro "unf_simp" : tactic => `(tactic|
       MPath.mval_var, bind_assoc, pure_bind, bind_pure, envVal_setEnv_self, envRef_setEnv_self,
       aliasPath_setEnv_self, envVal_setEnv_ne, envRef_setEnv_ne, aliasPath_setEnv_ne,
       Var.fresh.injEq, String.reduceEq, false_and, MVal.asRef_ref, State.saveStorage_setEnv,
+      State.writeStorage_setEnv, State.checkIndex_setEnv, State.writeStorage_toSVal,
       Val.eval_setEnv, SPath.resolve_setEnv, Loc.resolve_setEnv, MPath.mval_setEnv,
       MLoc.read_setEnv, Src.value_setEnv, MSrc.mval_setEnv, State.findStorage_setEnv,
       State.getObj_setEnv, Simple.eval_setEnv, OpLoc.store, OpLoc.bump, guardOk_setEnv,

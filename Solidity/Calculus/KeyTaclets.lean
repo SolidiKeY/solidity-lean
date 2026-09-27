@@ -1,8 +1,8 @@
 /-!
 # The KeY taclets, as a Lean type
 
-`solidityProgramRules.key` is the calculus solkey actually runs: 310 named
-taclets.  This module is that list of names, one constructor each, plus the
+`solidityProgramRules.key` is the calculus solkey actually runs: 311 named
+taclets (solkey `f2eb3d98eb`).  This module is that list of names, one constructor each, plus the
 `\heuristics` annotation each one carries.  It exists so that
 `RuleShapes.lean` can say *which* KeY taclet each rule transcribes with a
 typed `KeyOrigin` rather than a string — a misspelling is then a type error, and
@@ -30,13 +30,14 @@ and rebuild the three tables below in that order.  The `SolKey` reader's
 than going unnoticed.
 
 `name` is deliberately a `match` and not a lookup in `all`: the corpus check is
-a `native_decide` over 252 strings, and a lookup would make it quadratic.
+a `native_decide` over 311 strings, and a lookup would make it quadratic.
 
 ## `\heuristics` is documentary
 
-Three values occur in the corpus — `simplify_prog` (220 taclets),
-`simplify_expression` (85) and `concrete_solidity` (5, the literal-condition
-`if` rules).  They are KeY's *strategy* annotations: which
+Four values occur in the corpus — `simplify_prog` (217 taclets),
+`simplify_expression` (87), `concrete_solidity` (5, the literal-condition
+`if` rules) and `simplify_prog_expensive` (2, the memory-to-storage index
+writes that capture everything).  They are KeY's *strategy* annotations: which
 automatic rule set may apply the taclet, not what it means.  Lean's rule table
 has no automatic strategy (a derivation pins each step by name), so nothing
 here consumes them.  They are recorded because the split is real information
@@ -47,16 +48,19 @@ rule sets.
 
 namespace Solidity
 
-/-- A KeY `\heuristics(...)` rule set.  The corpus uses exactly these three. -/
+/-- A KeY `\heuristics(...)` rule set.  The corpus uses exactly these four. -/
 inductive Heuristic where
-  /-- `simplify_prog`: the program-rewriting rule set (220 taclets). -/
+  /-- `simplify_prog`: the program-rewriting rule set (217 taclets). -/
   | simplifyProg
-  /-- `simplify_expression`: the eager expression rule set (85 taclets). -/
+  /-- `simplify_expression`: the eager expression rule set (87 taclets). -/
   | simplifyExpression
   /-- `concrete_solidity`: the five `if` rules on a literal or negated
   condition (`ifTrue`, `ifFalse`, `ifElseTrue`, `ifElseFalse`,
   `ifElseNegated`), which KeY applies as concrete simplifications. -/
   | concreteSolidity
+  /-- `simplify_prog_expensive`: program rewriting KeY applies after the rest
+  (`memoryToStorageIndexCaptureAllComplexRecv`, `…NonSimpleIndex`). -/
+  | simplifyProgExpensive
   deriving DecidableEq, Repr
 
 /-- One taclet of `solidityProgramRules.key`, named as the file names it. -/
@@ -87,6 +91,7 @@ inductive KeyTaclet where
   | storageIndexWriteArraySave
   | storageIndexReadArrayFind
   | storageIndexReadArrayBindLocalRoot
+  | storageIndexReadArrayBindLocalRootMappingElement
   | storageIndexReadArrayStoreRoot
   | storageIndexWriteArrayCopySource
   | storagePushValue_unfold_leftFstReceiver
@@ -97,8 +102,11 @@ inductive KeyTaclet where
   | storagePushValueSave
   | storagePushValueCopySource
   | storagePushLengthSave
+  | storagePushLengthSaveReferenceElement
   | storageLocalRootPushBind
+  | storageLocalRootPushBindMappingElement
   | storagePopSave
+  | storagePopSaveMappingElement
   | storageLocalRootRebind
   | storageLocalDeclSkip
   | storageLocalDeclInitDrop
@@ -107,6 +115,7 @@ inductive KeyTaclet where
   | memoryRootDeleteFreshRebind
   | memoryRootRebind
   | memoryArrayFreshAlloc
+  | newArrayCapture
   | memoryStorageCopy
   | memoryStorageCopyUnfold
   | memoryFieldWrite
@@ -167,6 +176,7 @@ inductive KeyTaclet where
   | storageRootDelete
   | storageFieldDelete
   | storageIndexDelete
+  | storageIndexArrayDelete
   | storageFieldDelete_unfold_leftFst
   | storageIndexDelete_unfold_leftFst
   | storageRootPreincrement
@@ -352,25 +362,20 @@ inductive KeyTaclet where
   | requireSimple
   | transfer_unfold_leftFstReceiver
   | transfer_unfold_rightSndArgument
+  | storageIndexWriteCaptureAllComplexRecv
+  | storageIndexWriteCaptureAllNonSimpleIndex
+  | memoryIndexWriteCaptureAllComplexRecv
+  | memoryIndexWriteCaptureAllNonSimpleIndex
+  | storageIndexWriteStorageRefCaptureAllComplexRecv
+  | storageIndexWriteStorageRefCaptureAllNonSimpleIndex
+  | memoryToStorageIndexCaptureAllComplexRecv
+  | memoryToStorageIndexCaptureAllNonSimpleIndex
+  | memoryIndexWriteMemRefCaptureAllComplexRecv
+  | memoryIndexWriteMemRefCaptureAllNonSimpleIndex
   | transferNoCallbackBox
   | transferNoCallbackDiamond
   | transferWithCallbackBox
   | transferWithCallbackDiamond
-  | storageIndexWrite_unfold_leftFst
-  | storageIndexWriteStorageRef_unfold_leftFst
-  | memoryToStorageIndex_unfold_leftFst
-  | memoryIndexWrite_unfold_leftFst
-  | memoryIndexWriteMemRef_unfold_leftFst
-  | storageIndexWriteNonSimpleIndexCapture
-  | storageIndexWriteStorageRefNonSimpleIndexCapture
-  | memoryToStorageIndexNonSimpleIndexCapture
-  | memoryIndexWriteNonSimpleIndexCapture
-  | memoryIndexWriteMemRefNonSimpleIndexCapture
-  | storageIndexWriteCaptureAll
-  | storageIndexWriteStorageRefCaptureAll
-  | memoryToStorageIndexCaptureAll
-  | memoryIndexWriteCaptureAll
-  | memoryIndexWriteMemRefCaptureAll
   deriving DecidableEq, Repr
 
 namespace KeyTaclet
@@ -403,6 +408,7 @@ def name : KeyTaclet -> String
   | storageIndexWriteArraySave => "storageIndexWriteArraySave"
   | storageIndexReadArrayFind => "storageIndexReadArrayFind"
   | storageIndexReadArrayBindLocalRoot => "storageIndexReadArrayBindLocalRoot"
+  | storageIndexReadArrayBindLocalRootMappingElement => "storageIndexReadArrayBindLocalRootMappingElement"
   | storageIndexReadArrayStoreRoot => "storageIndexReadArrayStoreRoot"
   | storageIndexWriteArrayCopySource => "storageIndexWriteArrayCopySource"
   | storagePushValue_unfold_leftFstReceiver => "storagePushValue_unfold_leftFstReceiver"
@@ -413,8 +419,11 @@ def name : KeyTaclet -> String
   | storagePushValueSave => "storagePushValueSave"
   | storagePushValueCopySource => "storagePushValueCopySource"
   | storagePushLengthSave => "storagePushLengthSave"
+  | storagePushLengthSaveReferenceElement => "storagePushLengthSaveReferenceElement"
   | storageLocalRootPushBind => "storageLocalRootPushBind"
+  | storageLocalRootPushBindMappingElement => "storageLocalRootPushBindMappingElement"
   | storagePopSave => "storagePopSave"
+  | storagePopSaveMappingElement => "storagePopSaveMappingElement"
   | storageLocalRootRebind => "storageLocalRootRebind"
   | storageLocalDeclSkip => "storageLocalDeclSkip"
   | storageLocalDeclInitDrop => "storageLocalDeclInitDrop"
@@ -423,6 +432,7 @@ def name : KeyTaclet -> String
   | memoryRootDeleteFreshRebind => "memoryRootDeleteFreshRebind"
   | memoryRootRebind => "memoryRootRebind"
   | memoryArrayFreshAlloc => "memoryArrayFreshAlloc"
+  | newArrayCapture => "newArrayCapture"
   | memoryStorageCopy => "memoryStorageCopy"
   | memoryStorageCopyUnfold => "memoryStorageCopyUnfold"
   | memoryFieldWrite => "memoryFieldWrite"
@@ -483,6 +493,7 @@ def name : KeyTaclet -> String
   | storageRootDelete => "storageRootDelete"
   | storageFieldDelete => "storageFieldDelete"
   | storageIndexDelete => "storageIndexDelete"
+  | storageIndexArrayDelete => "storageIndexArrayDelete"
   | storageFieldDelete_unfold_leftFst => "storageFieldDelete_unfold_leftFst"
   | storageIndexDelete_unfold_leftFst => "storageIndexDelete_unfold_leftFst"
   | storageRootPreincrement => "storageRootPreincrement"
@@ -668,25 +679,20 @@ def name : KeyTaclet -> String
   | requireSimple => "requireSimple"
   | transfer_unfold_leftFstReceiver => "transfer_unfold_leftFstReceiver"
   | transfer_unfold_rightSndArgument => "transfer_unfold_rightSndArgument"
+  | storageIndexWriteCaptureAllComplexRecv => "storageIndexWriteCaptureAllComplexRecv"
+  | storageIndexWriteCaptureAllNonSimpleIndex => "storageIndexWriteCaptureAllNonSimpleIndex"
+  | memoryIndexWriteCaptureAllComplexRecv => "memoryIndexWriteCaptureAllComplexRecv"
+  | memoryIndexWriteCaptureAllNonSimpleIndex => "memoryIndexWriteCaptureAllNonSimpleIndex"
+  | storageIndexWriteStorageRefCaptureAllComplexRecv => "storageIndexWriteStorageRefCaptureAllComplexRecv"
+  | storageIndexWriteStorageRefCaptureAllNonSimpleIndex => "storageIndexWriteStorageRefCaptureAllNonSimpleIndex"
+  | memoryToStorageIndexCaptureAllComplexRecv => "memoryToStorageIndexCaptureAllComplexRecv"
+  | memoryToStorageIndexCaptureAllNonSimpleIndex => "memoryToStorageIndexCaptureAllNonSimpleIndex"
+  | memoryIndexWriteMemRefCaptureAllComplexRecv => "memoryIndexWriteMemRefCaptureAllComplexRecv"
+  | memoryIndexWriteMemRefCaptureAllNonSimpleIndex => "memoryIndexWriteMemRefCaptureAllNonSimpleIndex"
   | transferNoCallbackBox => "transferNoCallbackBox"
   | transferNoCallbackDiamond => "transferNoCallbackDiamond"
   | transferWithCallbackBox => "transferWithCallbackBox"
   | transferWithCallbackDiamond => "transferWithCallbackDiamond"
-  | storageIndexWrite_unfold_leftFst => "storageIndexWrite_unfold_leftFst"
-  | storageIndexWriteStorageRef_unfold_leftFst => "storageIndexWriteStorageRef_unfold_leftFst"
-  | memoryToStorageIndex_unfold_leftFst => "memoryToStorageIndex_unfold_leftFst"
-  | memoryIndexWrite_unfold_leftFst => "memoryIndexWrite_unfold_leftFst"
-  | memoryIndexWriteMemRef_unfold_leftFst => "memoryIndexWriteMemRef_unfold_leftFst"
-  | storageIndexWriteNonSimpleIndexCapture => "storageIndexWriteNonSimpleIndexCapture"
-  | storageIndexWriteStorageRefNonSimpleIndexCapture => "storageIndexWriteStorageRefNonSimpleIndexCapture"
-  | memoryToStorageIndexNonSimpleIndexCapture => "memoryToStorageIndexNonSimpleIndexCapture"
-  | memoryIndexWriteNonSimpleIndexCapture => "memoryIndexWriteNonSimpleIndexCapture"
-  | memoryIndexWriteMemRefNonSimpleIndexCapture => "memoryIndexWriteMemRefNonSimpleIndexCapture"
-  | storageIndexWriteCaptureAll => "storageIndexWriteCaptureAll"
-  | storageIndexWriteStorageRefCaptureAll => "storageIndexWriteStorageRefCaptureAll"
-  | memoryToStorageIndexCaptureAll => "memoryToStorageIndexCaptureAll"
-  | memoryIndexWriteCaptureAll => "memoryIndexWriteCaptureAll"
-  | memoryIndexWriteMemRefCaptureAll => "memoryIndexWriteMemRefCaptureAll"
 
 /-- The `\heuristics` rule set the taclet is filed under. -/
 def heuristic : KeyTaclet -> Heuristic
@@ -716,6 +722,7 @@ def heuristic : KeyTaclet -> Heuristic
   | storageIndexWriteArraySave => Heuristic.simplifyProg
   | storageIndexReadArrayFind => Heuristic.simplifyProg
   | storageIndexReadArrayBindLocalRoot => Heuristic.simplifyProg
+  | storageIndexReadArrayBindLocalRootMappingElement => Heuristic.simplifyProg
   | storageIndexReadArrayStoreRoot => Heuristic.simplifyProg
   | storageIndexWriteArrayCopySource => Heuristic.simplifyProg
   | storagePushValue_unfold_leftFstReceiver => Heuristic.simplifyProg
@@ -726,8 +733,11 @@ def heuristic : KeyTaclet -> Heuristic
   | storagePushValueSave => Heuristic.simplifyExpression
   | storagePushValueCopySource => Heuristic.simplifyExpression
   | storagePushLengthSave => Heuristic.simplifyExpression
+  | storagePushLengthSaveReferenceElement => Heuristic.simplifyExpression
   | storageLocalRootPushBind => Heuristic.simplifyExpression
+  | storageLocalRootPushBindMappingElement => Heuristic.simplifyExpression
   | storagePopSave => Heuristic.simplifyProg
+  | storagePopSaveMappingElement => Heuristic.simplifyProg
   | storageLocalRootRebind => Heuristic.simplifyProg
   | storageLocalDeclSkip => Heuristic.simplifyProg
   | storageLocalDeclInitDrop => Heuristic.simplifyProg
@@ -736,6 +746,7 @@ def heuristic : KeyTaclet -> Heuristic
   | memoryRootDeleteFreshRebind => Heuristic.simplifyProg
   | memoryRootRebind => Heuristic.simplifyProg
   | memoryArrayFreshAlloc => Heuristic.simplifyProg
+  | newArrayCapture => Heuristic.simplifyProg
   | memoryStorageCopy => Heuristic.simplifyProg
   | memoryStorageCopyUnfold => Heuristic.simplifyProg
   | memoryFieldWrite => Heuristic.simplifyProg
@@ -796,6 +807,7 @@ def heuristic : KeyTaclet -> Heuristic
   | storageRootDelete => Heuristic.simplifyExpression
   | storageFieldDelete => Heuristic.simplifyExpression
   | storageIndexDelete => Heuristic.simplifyExpression
+  | storageIndexArrayDelete => Heuristic.simplifyProg
   | storageFieldDelete_unfold_leftFst => Heuristic.simplifyProg
   | storageIndexDelete_unfold_leftFst => Heuristic.simplifyProg
   | storageRootPreincrement => Heuristic.simplifyExpression
@@ -981,25 +993,20 @@ def heuristic : KeyTaclet -> Heuristic
   | requireSimple => Heuristic.simplifyProg
   | transfer_unfold_leftFstReceiver => Heuristic.simplifyProg
   | transfer_unfold_rightSndArgument => Heuristic.simplifyProg
+  | storageIndexWriteCaptureAllComplexRecv => Heuristic.simplifyProg
+  | storageIndexWriteCaptureAllNonSimpleIndex => Heuristic.simplifyProg
+  | memoryIndexWriteCaptureAllComplexRecv => Heuristic.simplifyProg
+  | memoryIndexWriteCaptureAllNonSimpleIndex => Heuristic.simplifyProg
+  | storageIndexWriteStorageRefCaptureAllComplexRecv => Heuristic.simplifyProg
+  | storageIndexWriteStorageRefCaptureAllNonSimpleIndex => Heuristic.simplifyProg
+  | memoryToStorageIndexCaptureAllComplexRecv => Heuristic.simplifyProgExpensive
+  | memoryToStorageIndexCaptureAllNonSimpleIndex => Heuristic.simplifyProgExpensive
+  | memoryIndexWriteMemRefCaptureAllComplexRecv => Heuristic.simplifyProg
+  | memoryIndexWriteMemRefCaptureAllNonSimpleIndex => Heuristic.simplifyProg
   | transferNoCallbackBox => Heuristic.simplifyProg
   | transferNoCallbackDiamond => Heuristic.simplifyProg
   | transferWithCallbackBox => Heuristic.simplifyProg
   | transferWithCallbackDiamond => Heuristic.simplifyProg
-  | storageIndexWrite_unfold_leftFst => Heuristic.simplifyProg
-  | storageIndexWriteStorageRef_unfold_leftFst => Heuristic.simplifyProg
-  | memoryToStorageIndex_unfold_leftFst => Heuristic.simplifyProg
-  | memoryIndexWrite_unfold_leftFst => Heuristic.simplifyProg
-  | memoryIndexWriteMemRef_unfold_leftFst => Heuristic.simplifyProg
-  | storageIndexWriteNonSimpleIndexCapture => Heuristic.simplifyProg
-  | storageIndexWriteStorageRefNonSimpleIndexCapture => Heuristic.simplifyProg
-  | memoryToStorageIndexNonSimpleIndexCapture => Heuristic.simplifyProg
-  | memoryIndexWriteNonSimpleIndexCapture => Heuristic.simplifyProg
-  | memoryIndexWriteMemRefNonSimpleIndexCapture => Heuristic.simplifyProg
-  | storageIndexWriteCaptureAll => Heuristic.simplifyProg
-  | storageIndexWriteStorageRefCaptureAll => Heuristic.simplifyProg
-  | memoryToStorageIndexCaptureAll => Heuristic.simplifyProg
-  | memoryIndexWriteCaptureAll => Heuristic.simplifyProg
-  | memoryIndexWriteMemRefCaptureAll => Heuristic.simplifyProg
 
 /-- Every taclet, in the order `solidityProgramRules.key` declares them. -/
 def all : List KeyTaclet := [
@@ -1029,6 +1036,7 @@ def all : List KeyTaclet := [
   KeyTaclet.storageIndexWriteArraySave,
   KeyTaclet.storageIndexReadArrayFind,
   KeyTaclet.storageIndexReadArrayBindLocalRoot,
+  KeyTaclet.storageIndexReadArrayBindLocalRootMappingElement,
   KeyTaclet.storageIndexReadArrayStoreRoot,
   KeyTaclet.storageIndexWriteArrayCopySource,
   KeyTaclet.storagePushValue_unfold_leftFstReceiver,
@@ -1039,8 +1047,11 @@ def all : List KeyTaclet := [
   KeyTaclet.storagePushValueSave,
   KeyTaclet.storagePushValueCopySource,
   KeyTaclet.storagePushLengthSave,
+  KeyTaclet.storagePushLengthSaveReferenceElement,
   KeyTaclet.storageLocalRootPushBind,
+  KeyTaclet.storageLocalRootPushBindMappingElement,
   KeyTaclet.storagePopSave,
+  KeyTaclet.storagePopSaveMappingElement,
   KeyTaclet.storageLocalRootRebind,
   KeyTaclet.storageLocalDeclSkip,
   KeyTaclet.storageLocalDeclInitDrop,
@@ -1049,6 +1060,7 @@ def all : List KeyTaclet := [
   KeyTaclet.memoryRootDeleteFreshRebind,
   KeyTaclet.memoryRootRebind,
   KeyTaclet.memoryArrayFreshAlloc,
+  KeyTaclet.newArrayCapture,
   KeyTaclet.memoryStorageCopy,
   KeyTaclet.memoryStorageCopyUnfold,
   KeyTaclet.memoryFieldWrite,
@@ -1109,6 +1121,7 @@ def all : List KeyTaclet := [
   KeyTaclet.storageRootDelete,
   KeyTaclet.storageFieldDelete,
   KeyTaclet.storageIndexDelete,
+  KeyTaclet.storageIndexArrayDelete,
   KeyTaclet.storageFieldDelete_unfold_leftFst,
   KeyTaclet.storageIndexDelete_unfold_leftFst,
   KeyTaclet.storageRootPreincrement,
@@ -1294,25 +1307,20 @@ def all : List KeyTaclet := [
   KeyTaclet.requireSimple,
   KeyTaclet.transfer_unfold_leftFstReceiver,
   KeyTaclet.transfer_unfold_rightSndArgument,
+  KeyTaclet.storageIndexWriteCaptureAllComplexRecv,
+  KeyTaclet.storageIndexWriteCaptureAllNonSimpleIndex,
+  KeyTaclet.memoryIndexWriteCaptureAllComplexRecv,
+  KeyTaclet.memoryIndexWriteCaptureAllNonSimpleIndex,
+  KeyTaclet.storageIndexWriteStorageRefCaptureAllComplexRecv,
+  KeyTaclet.storageIndexWriteStorageRefCaptureAllNonSimpleIndex,
+  KeyTaclet.memoryToStorageIndexCaptureAllComplexRecv,
+  KeyTaclet.memoryToStorageIndexCaptureAllNonSimpleIndex,
+  KeyTaclet.memoryIndexWriteMemRefCaptureAllComplexRecv,
+  KeyTaclet.memoryIndexWriteMemRefCaptureAllNonSimpleIndex,
   KeyTaclet.transferNoCallbackBox,
   KeyTaclet.transferNoCallbackDiamond,
   KeyTaclet.transferWithCallbackBox,
-  KeyTaclet.transferWithCallbackDiamond,
-  KeyTaclet.storageIndexWrite_unfold_leftFst,
-  KeyTaclet.storageIndexWriteStorageRef_unfold_leftFst,
-  KeyTaclet.memoryToStorageIndex_unfold_leftFst,
-  KeyTaclet.memoryIndexWrite_unfold_leftFst,
-  KeyTaclet.memoryIndexWriteMemRef_unfold_leftFst,
-  KeyTaclet.storageIndexWriteNonSimpleIndexCapture,
-  KeyTaclet.storageIndexWriteStorageRefNonSimpleIndexCapture,
-  KeyTaclet.memoryToStorageIndexNonSimpleIndexCapture,
-  KeyTaclet.memoryIndexWriteNonSimpleIndexCapture,
-  KeyTaclet.memoryIndexWriteMemRefNonSimpleIndexCapture,
-  KeyTaclet.storageIndexWriteCaptureAll,
-  KeyTaclet.storageIndexWriteStorageRefCaptureAll,
-  KeyTaclet.memoryToStorageIndexCaptureAll,
-  KeyTaclet.memoryIndexWriteCaptureAll,
-  KeyTaclet.memoryIndexWriteMemRefCaptureAll
+  KeyTaclet.transferWithCallbackDiamond
 ]
 
 end KeyTaclet

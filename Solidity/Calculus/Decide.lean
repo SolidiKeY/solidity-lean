@@ -62,10 +62,22 @@ word, an index is in bounds exactly below the length) are not stated.  A
 valid goal that needs one of them between two reads of the initial storage
 can stay open.
 
+**Array bounds.**  The program checks an index where it takes a path
+(`State.checkIndex`) and then reads or writes the slot, past the end
+included; the target language reads and writes the live storage
+(`SVal.findLive`, `SVal.saveLive`), where an index past the end halts.  The
+two agree where the path is checked against the storage it reads, which is
+what the fragment keeps to (`PTerm.toL_chk`, `live_bridge`).  Binding an
+alias returns where its indices are in bounds (`guardPath`); an alias
+through an index is checked then and not when used, so a write to the
+storage leaves it stale (`SymB.onWrite`) and a later use of it outside the
+fragment.
+
 **The fragment** (`Fml.inL`): no modality (run `sol_symex` first), one
 element per update, a local, an alias or the storage updated; literals,
-locals, operators, conditionals and storage reads; writes of a value and
-`delete`; every alias bound by an update.  Outside it: memory (`read`,
+locals, operators, conditionals and reads of `storage`; one write of a value
+or one `delete` over `storage` per update; every alias bound by an update
+and, through an index, used before the next write to the storage.  Outside it: memory (`read`,
 `write`, allocation, the copies `copySt`/`copyMem`), a copy between storage
 locations (`alice = bob;`), `push`/`pop`, an array's `length` as a term,
 `transfer`.  Of the gaps `Close.lean` lists, this closes the keys the
@@ -98,6 +110,9 @@ theorem Sim.refl {α : Type} (x : Res α) : Sim x x := fun _ => Iff.rfl
 theorem Sim.trans {α : Type} {x y z : Res α} (h₁ : Sim x y) (h₂ : Sim y z) : Sim x z :=
   fun a => (h₁ a).trans (h₂ a)
 
+/-- Equal runs agree: `balances[k]` and `balances[k]`. -/
+theorem Sim.of_eq {α : Type} {x y : Res α} (h : x = y) : Sim x y := h ▸ Sim.refl x
+
 /-- A bind returned: its first step did, and the rest did from there. -/
 theorem bind_eq_ok {α β : Type} {x : Res α} {f : α → Res β} {b : β} :
     (x >>= f) = .ok b ↔ ∃ a, x = .ok a ∧ f a = .ok b := by
@@ -111,6 +126,238 @@ theorem Sim.bind {α β : Type} {x y : Res α} {f g : α → Res β} (hx : Sim x
   constructor
   · rintro ⟨a, h₁, h₂⟩; exact ⟨a, (hx a).1 h₁, (hf a b).1 h₂⟩
   · rintro ⟨a, h₁, h₂⟩; exact ⟨a, (hx a).2 h₁, (hf a b).2 h₂⟩
+
+/-- The segment is a key or an index. -/
+def Seg.isAt : Seg → Bool
+  | .field _ => false
+  | .at _ => true
+
+/-- An operator on agreeing right operands: `a && b` reads `b` only when
+`a` is not `false`, and then as the operand does. -/
+theorem evalBinop_sim {op : BinOp} {p : PrimTy} {x : Value} {b b' : Res Value} (h : Sim b b') :
+    Sim (evalBinop op p x b) (evalBinop op p x b') := by
+  unfold evalBinop
+  split
+  · exact Sim.refl _
+  · exact Sim.refl _
+  · exact Sim.bind h fun _ => Sim.refl _
+
+/-- `c ? a : b` on agreeing branches. -/
+theorem pickBranch_sim {cv : Value} {t t' e e' : Res Value} (ht : Sim t t') (he : Sim e e') :
+    Sim (pickBranch cv t e) (pickBranch cv t' e') := by
+  cases cv with
+  | int _ => exact Sim.refl _
+  | bool b => cases b <;> assumption
+
+/-! ## The live storage
+
+A path the program takes is checked at every index against the live length
+(`State.checkIndex`), so a read or a write it makes reaches live elements
+only, and the slots past an array's end are never read.  The target language
+below reads and writes the live storage (`SVal.findLive`, `SVal.saveLive`),
+where an index past the end halts: what the program's checked paths and the
+slot-level read and write amount to (`live_bridge`). -/
+
+/-- A write through live elements only: an index past the length halts. -/
+def _root_.Solidity.Semantics.SVal.saveLive : SVal → List Seg → SVal → Res SVal
+  | _, [], new => .ok new
+  | .struct fields, .field name :: rest, new =>
+      match lookupBy name fields with
+      | some old => do
+          let updated ← old.saveLive rest new
+          .ok (.struct (setBy name updated fields))
+      | none => .error .stuck
+  | .array elems shadow, .at i :: rest, new =>
+      if h : 0 ≤ i ∧ i.toNat < elems.length then do
+        let updated ← (elems.get ⟨i.toNat, h.2⟩).saveLive rest new
+        .ok (.array (elems.set i.toNat updated) shadow)
+      else .error .revert
+  | .map entries dflt, .at i :: rest, new =>
+      match lookupBy i entries with
+      | some old => do
+          let updated ← old.saveLive rest new
+          .ok (.map (setBy i updated entries) dflt)
+      | none => do
+          let updated ← dflt.saveLive rest new
+          .ok (.map (setBy i updated entries) dflt)
+  | .prim _, _ :: _, _ => .error .stuck
+  | .struct _, .at _ :: _, _ => .error .stuck
+  | .array _ _, .field _ :: _, _ => .error .stuck
+  | .map _ _, .field _ :: _, _ => .error .stuck
+
+/-- A live write is read back live: `balances[k] = 5;` then `balances[k]` is `5`. -/
+theorem findLive_saveLive_same {old new updated : SVal} {path : List Seg}
+    (h : old.saveLive path new = .ok updated) :
+    updated.findLive path = .ok new := by
+  induction path generalizing old updated with
+  | nil =>
+      simp [SVal.saveLive] at h
+      subst updated
+      simp [SVal.findLive]
+  | cons seg rest ih =>
+      cases seg with
+      | field name =>
+          cases old <;> try { simp [SVal.saveLive] at h }
+          rename_i fields
+          cases hv : lookupBy name fields with
+          | none => simp [SVal.saveLive, hv] at h
+          | some old =>
+              simp only [SVal.saveLive, hv] at h
+              cases hs : old.saveLive rest new with
+              | error e => rw [hs] at h; contradiction
+              | ok child =>
+                  rw [hs] at h
+                  injection h with h'
+                  subst updated
+                  simp [SVal.findLive, lookupBy_setBy_self, ih hs]
+      | «at» i =>
+          cases old <;> try { simp [SVal.saveLive] at h }
+          · rename_i elems shadow
+            simp only [SVal.saveLive] at h
+            split at h
+            next hb =>
+              cases hs :
+                  (elems.get ⟨i.toNat, hb.2⟩).saveLive rest new with
+              | error e => rw [hs] at h; contradiction
+              | ok child =>
+                  rw [hs] at h
+                  injection h with h'
+                  subst updated
+                  simp [SVal.findLive, hb, ih hs]
+            next hb => contradiction
+          · rename_i entries dflt
+            cases hv : lookupBy i entries with
+            | none =>
+                simp only [SVal.saveLive, hv] at h
+                cases hs : dflt.saveLive rest new with
+                | error e => rw [hs] at h; contradiction
+                | ok child =>
+                    rw [hs] at h
+                    injection h with h'
+                    subst updated
+                    simp [SVal.findLive, lookupBy_setBy_self, ih hs]
+            | some old =>
+                simp only [SVal.saveLive, hv] at h
+                cases hs : old.saveLive rest new with
+                | error e => rw [hs] at h; contradiction
+                | ok child =>
+                    rw [hs] at h
+                    injection h with h'
+                    subst updated
+                    simp [SVal.findLive, lookupBy_setBy_self, ih hs]
+
+/-- Reading `alice.account.balance` live is reading `balance` live in the
+subtree at `alice.account`. -/
+theorem findLive_append : ∀ (p : List Seg) (v : SVal) (q : List Seg),
+    v.findLive (p ++ q) = v.findLive p >>= fun w => w.findLive q
+  | [], v, q => by simp [SVal.findLive, bind, Except.bind]
+  | a :: p, v, q => by
+    cases v with
+    | prim x => cases a <;> rfl
+    | struct fields =>
+      cases a with
+      | «at» i => rfl
+      | field n =>
+        simp only [List.cons_append, SVal.findLive]
+        split <;> simp [findLive_append p, bind, Except.bind]
+    | array elems shadow =>
+      cases a with
+      | «at» i =>
+        simp only [List.cons_append, SVal.findLive]
+        split <;> simp [findLive_append p, bind, Except.bind]
+      | field n =>
+        by_cases hn : n = "length"
+        · subst hn; simp only [List.cons_append, SVal.findLive]; exact findLive_append p _ q
+        · simp [SVal.findLive, bind, Except.bind]
+    | map entries dflt =>
+      cases a with
+      | field n => rfl
+      | «at» i =>
+        simp only [List.cons_append, SVal.findLive]
+        split <;> simp [findLive_append p, bind, Except.bind]
+
+/-- **Frame, live**: a write leaves every path apart from it as it was. -/
+theorem findLive_saveLive_diverge {new : SVal} :
+    ∀ {p q : List Seg} {old upd : SVal}, Close.Diverge p q → old.saveLive p new = .ok upd →
+      upd.findLive q = old.findLive q
+  | [], _, _, _, h, _ => h.elim
+  | _ :: _, [], _, _, h, _ => (Close.not_diverge_nil_right h).elim
+  | a :: p, b :: q, old, upd, h, hs => by
+    cases old with
+    | prim v => cases a <;> simp [SVal.saveLive] at hs
+    | struct fields =>
+      cases a with
+      | «at» i => simp [SVal.saveLive] at hs
+      | field n =>
+        simp only [SVal.saveLive] at hs
+        split at hs
+        · rename_i old' hl
+          cases hu : old'.saveLive p new with
+          | error e => simp [hu, bind, Except.bind] at hs
+          | ok u =>
+            simp only [hu, bind, Except.bind, Except.ok.injEq] at hs
+            subst hs
+            cases b with
+            | «at» j => simp [SVal.findLive]
+            | field m =>
+              by_cases hnm : m = n
+              · subst hnm
+                have hd : Close.Diverge p q := by simpa using h
+                simp [SVal.findLive, hl, findLive_saveLive_diverge hd hu]
+              · simp [SVal.findLive, lookupBy_setBy_ne hnm]
+        · simp at hs
+    | array elems shadow =>
+      cases a with
+      | field n => simp [SVal.saveLive] at hs
+      | «at» i =>
+        simp only [SVal.saveLive] at hs
+        split at hs
+        · rename_i hi
+          cases hu : (elems[i.toNat]'hi.2).saveLive p new with
+          | error e => simp [List.get_eq_getElem, hu, bind, Except.bind] at hs
+          | ok u =>
+            simp only [List.get_eq_getElem, hu, bind, Except.bind, Except.ok.injEq] at hs
+            subst hs
+            cases b with
+            | field m =>
+              -- `length` reads the extent, which a write in bounds keeps
+              by_cases hm : m = "length"
+              · subst hm; simp [SVal.findLive]
+              · simp [SVal.findLive]
+            | «at» j =>
+              by_cases hij : j = i
+              · subst hij
+                have hd : Close.Diverge p q := by simpa using h
+                simp [SVal.findLive, hi, findLive_saveLive_diverge hd hu]
+              · by_cases hj : 0 ≤ j ∧ j.toNat < elems.length
+                · have hne : i.toNat ≠ j.toNat := by omega
+                  simp [SVal.findLive, hj, List.getElem_set_ne hne]
+                · simp [SVal.findLive, hj]
+        · simp at hs
+    | map entries dflt =>
+      cases a with
+      | field n => simp [SVal.saveLive] at hs
+      | «at» i =>
+        simp only [SVal.saveLive] at hs
+        -- the slot written: the entry at `i`, or the default when there is none
+        obtain ⟨old', hold, hfind⟩ : ∃ old' : SVal, (old'.saveLive p new >>= fun u =>
+            Except.ok (SVal.map (setBy i u entries) dflt)) = Except.ok upd ∧
+            (SVal.map entries dflt).findLive (.at i :: q) = old'.findLive q := by
+          split at hs <;> rename_i hl <;> exact ⟨_, hs, by simp [SVal.findLive, hl]⟩
+        cases hu : old'.saveLive p new with
+        | error e => simp [hu, bind, Except.bind] at hold
+        | ok u =>
+          simp only [hu, bind, Except.bind, Except.ok.injEq] at hold
+          subst hold
+          cases b with
+          | field m => simp [SVal.findLive]
+          | «at» j =>
+            by_cases hij : j = i
+            · subst hij
+              have hd : Close.Diverge p q := by simpa using h
+              simp [SVal.findLive] at hfind ⊢
+              rw [hfind, findLive_saveLive_diverge hd hu]
+            · simp [SVal.findLive, lookupBy_setBy_ne hij]
 
 /-! ## The target language
 
@@ -204,9 +451,9 @@ def LTerm.eval (σ : State) : LTerm → Res Value
   | .binop op p a b => a.eval σ >>= fun x => evalBinop op p x (b.eval σ)
   | .unop op p a => a.eval σ >>= fun x => applyUnOp op x >>= unopCheck op p
   | .ite c a b => c.eval σ >>= fun cv => pickBranch cv (a.eval σ) (b.eval σ)
-  | .find s q => s.eval σ >>= fun v => q.eval σ >>= fun qs => v.find qs >>= SVal.asValue
-  | .has s q => s.eval σ >>= fun v => q.eval σ >>= fun qs => v.find qs >>= fun _ => .ok (.bool true)
-  | .kmap s q => s.eval σ >>= fun v => q.eval σ >>= fun qs => v.find qs >>= kmapF
+  | .find s q => s.eval σ >>= fun v => q.eval σ >>= fun qs => v.findLive qs >>= SVal.asValue
+  | .has s q => s.eval σ >>= fun v => q.eval σ >>= fun qs => v.findLive qs >>= fun _ => .ok (.bool true)
+  | .kmap s q => s.eval σ >>= fun v => q.eval σ >>= fun qs => v.findLive qs >>= kmapF
   | .sok s => s.eval σ >>= fun _ => .ok (.bool true)
   | .pok q => q.eval σ >>= fun _ => .ok (.bool true)
   | .seq d a => d.eval σ >>= fun _ => a.eval σ
@@ -227,9 +474,9 @@ the tree of `σ` after `balances[k] = 5;`. -/
 def LStor.eval (σ : State) : LStor → Res SVal
   | .init => .ok (.struct σ.storage)
   | .save s q w => w.eval σ >>= fun wv => s.eval σ >>= fun v => q.eval σ >>= fun qs =>
-      v.save qs wv.toSVal
-  | .del s q => s.eval σ >>= fun v => q.eval σ >>= fun qs => v.find qs >>= fun cur =>
-      v.save qs cur.defaultOf
+      v.saveLive qs wv.toSVal
+  | .del s q => s.eval σ >>= fun v => q.eval σ >>= fun qs => v.findLive qs >>= fun cur =>
+      v.saveLive qs cur.defaultOf
 
 end
 
@@ -259,6 +506,9 @@ halts included. -/
 inductive SymB where
   | val (t : LTerm)
   | path (q : LPath)
+  /-- An alias through an index, bound before the storage last changed: it
+  was checked against a storage that is gone, and is outside the fragment. -/
+  | stale
   deriving Inhabited
 
 /-- The updates so far: the names bound, newest first, and the storage. -/
@@ -284,7 +534,7 @@ def _root_.Solidity.Term.toL (ρ : Sym) : Term C → LTerm
   | .pv x =>
     match lookupBy x ρ.env with
     | some (.val t) => t
-    | some (.path _) => .err
+    | some (.path _) | some .stale => .err
     | none => .var x
   | .binop op p a b => .binop op p (a.toL ρ) (b.toL ρ)
   | .unop op p a => .unop op p (a.toL ρ)
@@ -302,6 +552,7 @@ def _root_.Solidity.PTerm.toL (ρ : Sym) : PTerm C → LPath
     | _ => .stuck
   | .field p f => .field (p.toL ρ) f
   | .at p i => .at (p.toL ρ) (i.toL ρ)
+  | .next _ => .stuck
 
 /-- A storage with the updates pushed in: after `{ storage := save(storage,
 balances[k], 5) }`, `storage` is that write. -/
@@ -309,7 +560,7 @@ def _root_.Solidity.STerm.toL (ρ : Sym) : STerm C → LStor
   | .storage => ρ.stor
   | .save s p v => .save (s.toL ρ) (p.toL ρ) (v.toL ρ)
   | .delAt s p => .del (s.toL ρ) (p.toL ρ)
-  | .push .. | .pushSlot .. | .pop .. | .extend .. => .init
+  | .push .. | .pushSlot .. | .pop .. | .shrink .. | .extend .. => .init
 
 /-- What a write stores, pushed in: the `5` of `balances[k] = 5;`. -/
 def _root_.Solidity.SValT.toL (ρ : Sym) : SValT C → LTerm
@@ -318,33 +569,68 @@ def _root_.Solidity.SValT.toL (ρ : Sym) : SValT C → LTerm
 
 end
 
+/-- The path has no index: `alice.account`, not `people[i]`. -/
+def LPath.noAt : LPath → Bool
+  | .root _ => true
+  | .field q _ => q.noAt
+  | .at _ _ => false
+
+/-- The path up to its last index: `people[i]` of `people[i].age`; none for
+`alice.account`. -/
+def LPath.lastAt : LPath → Option LPath
+  | .root _ => none
+  | .field q _ => q.lastAt
+  | .at q k => some (.at q k)
+
+/-- What makes binding an alias to `q` return, in the storage `s`: its keys
+return, and every index on it is in bounds where the program checks it
+(`State.checkIndex`), which is the location up to the last index being there
+(`LStor.hasU`). -/
+def guardPath (s : LStor) (q : LPath) : LTerm :=
+  match q.lastAt with
+  | none => .pok q
+  | some q' => .seq (.pok q) (.has s q')
+
+/-- A write to the storage leaves an alias through an index stale: the
+program checked it against the storage before. -/
+def SymB.onWrite : SymB → SymB
+  | .path q => if q.noAt then .path q else .stale
+  | b => b
+
 mutual
 
 /-- The fragment: storage values and paths only, every alias bound by an
-update. -/
+update.  A read is of the storage the updates left, `find(storage, p)`: its
+path is checked against that storage, and read there. -/
 def _root_.Solidity.Term.inL (ρ : Sym) : Term C → Bool
   | .lit _ | .pv _ => true
   | .binop _ _ a b => a.inL ρ && b.inL ρ
   | .unop _ _ a => a.inL ρ
-  | .find s p => s.inL ρ && p.inL ρ
+  | .find .storage p => p.inL ρ
+  | .find .. => false
   | .ite c a b => c.inL ρ && a.inL ρ && b.inL ρ
   | .len _ _ | .read _ _ => false
 
 /-- A path in the fragment: an alias only where an update bound it
-(`Person storage p = alice;` does). -/
+(`Person storage p = alice;` does), and to a path with no index. -/
 def _root_.Solidity.PTerm.inL (ρ : Sym) : PTerm C → Bool
   | .root _ => true
-  | .pv x => (lookupBy x ρ.env).isSome
+  | .pv x =>
+    match lookupBy x ρ.env with
+    | some (.path _) | some (.val _) => true
+    | some .stale | none => false
   | .field p _ => p.inL ρ
   | .at p i => p.inL ρ && i.inL ρ
+  | .next _ => false
 
-/-- A storage in the fragment: writes of words and `delete`s, no push or
-pop. -/
+/-- A storage in the fragment: one write of a word, or one `delete`, over
+the storage the updates left; no push or pop. -/
 def _root_.Solidity.STerm.inL (ρ : Sym) : STerm C → Bool
   | .storage => true
-  | .save s p v => s.inL ρ && p.inL ρ && v.inL ρ
-  | .delAt s p => s.inL ρ && p.inL ρ
-  | .push .. | .pushSlot .. | .pop .. | .extend .. => false
+  | .save .storage p v => p.inL ρ && v.inL ρ
+  | .delAt .storage p => p.inL ρ
+  | .save .. | .delAt .. => false
+  | .push .. | .pushSlot .. | .pop .. | .shrink .. | .extend .. => false
 
 /-- A stored value in the fragment: a word, not a copy (`alice = bob;`). -/
 def _root_.Solidity.SValT.inL (ρ : Sym) : SValT C → Bool
@@ -356,8 +642,10 @@ end
 /-- One update: the term that has to return, and the names it binds. -/
 def _root_.Solidity.UpdElem.toL (ρ : Sym) : UpdElem C → LTerm × Sym
   | .val x t => (t.toL ρ, { ρ with env := (x, .val (t.toL ρ)) :: ρ.env })
-  | .path x p => (.pok (p.toL ρ), { ρ with env := (x, .path (p.toL ρ)) :: ρ.env })
-  | .storage s => (.sok (s.toL ρ), { ρ with stor := s.toL ρ })
+  | .path x p =>
+    (guardPath ρ.stor (p.toL ρ), { ρ with env := (x, .path (p.toL ρ)) :: ρ.env })
+  | .storage s =>
+    (.sok (s.toL ρ), { stor := s.toL ρ, env := ρ.env.map fun b => (b.1, b.2.onWrite) })
   | .mref .. | .memory .. | .transfer .. => (.err, ρ)
 
 /-- An update in the fragment: a local, an alias or the storage; no memory,
@@ -417,11 +705,21 @@ theorem save_root (τ : State) (r : Name) (segs : List Seg) (new : SVal) :
     simp only
     cases hs : v.save segs new <;> simp [bind, Except.bind]
 
+/-- A path up to its last index: `[people, at i]` of `[people, at i, age]`. -/
+def lastAtSegs (qs : List Seg) : List Seg := (qs.reverse.dropWhile fun s => !Seg.isAt s).reverse
+
+/-- Every index of the path is in bounds of what the storage holds live:
+the location up to the last index is there, live.  What the program's checks
+leave of a path it took (`PTerm.toL_chk`). -/
+def LiveTo (T : SVal) (qs : List Seg) : Prop := ∃ c, T.findLive (lastAtSegs qs) = .ok c
+
 /-- What a name holds after the updates, against what its symbol says. -/
 def EnvRel (σ τ : State) (x : Var) : Option SymB → Prop
   | none => τ.getEnv x = σ.getEnv x
   | some (.val t) => ∃ v, t.eval σ = .ok v ∧ τ.getEnv x = .ok (.val v)
-  | some (.path q) => ∃ r segs, q.eval σ = .ok (.field r :: segs) ∧ τ.getEnv x = .ok (.spath r segs)
+  | some (.path q) => ∃ r segs, q.eval σ = .ok (.field r :: segs) ∧
+      τ.getEnv x = .ok (.spath r segs) ∧ LiveTo (.struct τ.storage) (.field r :: segs)
+  | some .stale => ∃ r segs, τ.getEnv x = .ok (.spath r segs)
 
 /-- `τ` is what the updates `ρ` stand for, applied in `σ`: its storage is the
 stack of writes read in `σ`, and each name holds what its symbol reads in
@@ -444,8 +742,289 @@ theorem Rel.bind {σ τ : State} {ρ : Sym} (h : Rel σ ρ τ) (x : Var) (b : Sy
   · have := h.env y
     simp only [lookupBy, hy, if_false]
     revert this
-    rcases lookupBy y ρ.env with _ | ⟨t⟩ | ⟨q⟩ <;>
-      simp [EnvRel, State.getEnv_setEnv_ne hy]
+    have hst : (τ.setEnv x bd).storage = τ.storage := rfl
+    rcases lookupBy y ρ.env with _ | ⟨t⟩ | ⟨q⟩ | _ <;>
+      simp [EnvRel, State.getEnv_setEnv_ne hy, hst]
+
+/-! ### Checked paths, slot reads and live reads
+
+The program checks each index of a path against the live length where it
+takes the path (`State.checkIndex`), and then reads or writes the slot; the
+target language reads and writes the live storage with no check.  Where the
+path was checked against the storage it reads, the two agree
+(`PTerm.toL_chk`, `live_bridge`). -/
+
+/-- A path with no index evaluates to one. -/
+theorem LPath.noAt_eval (σ : State) : ∀ {q : LPath} {qs : List Seg}, q.noAt = true →
+    q.eval σ = .ok qs → qs.any Seg.isAt = false
+  | .root _, _, _, h => by cases h; rfl
+  | .field q f, _, hn, h => by
+    obtain ⟨qs', h', he⟩ := bind_eq_ok.1 h; cases he
+    simp only [LPath.noAt] at hn
+    simp [LPath.noAt_eval σ hn h', Seg.isAt]
+  | .at _ _, _, hn, _ => by simp [LPath.noAt] at hn
+
+/-- With no index on the way, the live read is the read: `alice.account`. -/
+theorem findLive_eq_find : ∀ (v : SVal) (qs : List Seg), qs.any Seg.isAt = false →
+    v.findLive qs = v.find qs
+  | v, [], _ => by cases v <;> rfl
+  | _, .at _ :: _, h => by simp [Seg.isAt] at h
+  | v, .field f :: qs, h => by
+    have h' : qs.any Seg.isAt = false := by simpa [Seg.isAt] using h
+    cases v with
+    | prim _ => rfl
+    | struct fields =>
+      simp only [SVal.findLive, SVal.find]
+      cases lookupBy f fields with
+      | none => rfl
+      | some w => exact findLive_eq_find w qs h'
+    | array elems shadow =>
+      by_cases hf : f = "length"
+      · subst hf
+        simp only [SVal.findLive, SVal.find]
+        exact findLive_eq_find _ qs h'
+      · simp [SVal.findLive, SVal.find]
+    | map _ _ => rfl
+
+/-- **One index**: the program's check (`Close.idxOk`) passes exactly where
+the live element is there: `values[1]` with two values, `balances[k]`. -/
+theorem idx_iff (c : SVal) (k : Int) :
+    Close.idxOk k c = .ok () ↔ ∃ c', c.findLive [.at k] = .ok c' := by
+  cases c with
+  | prim p => simp [Close.idxOk, SVal.findLive]
+  | struct _ => simp [Close.idxOk, SVal.findLive]
+  | array elems shadow =>
+    by_cases hk : 0 ≤ k ∧ k.toNat < elems.length
+    · simp [Close.idxOk, SVal.findLive, hk]
+    · simp [Close.idxOk, SVal.findLive, hk]
+  | map entries dflt =>
+    simp only [Close.idxOk, SVal.findLive, true_iff]
+    cases lookupBy k entries <;> simp
+
+/-- A live write whose path reads live is the write. -/
+theorem saveLive_eq_save : ∀ {v : SVal} {qs : List Seg} {c : SVal} (new : SVal),
+    v.findLive qs = .ok c → v.saveLive qs new = v.save qs new
+  | v, [], _, _, _ => by cases v <;> rfl
+  | .prim _, _ :: _, _, _, h => by simp [SVal.findLive] at h
+  | .struct fields, .field f :: qs, _, new, h => by
+    simp only [SVal.findLive] at h
+    simp only [SVal.saveLive, SVal.save]
+    split at h
+    · rename_i o hl
+      rw [hl]
+      simp only [saveLive_eq_save new h]
+    · simp at h
+  | .struct _, .at _ :: _, _, _, h => by simp [SVal.findLive] at h
+  | .array elems shadow, .at i :: qs, _, new, h => by
+    simp only [SVal.findLive] at h
+    split at h
+    · rename_i hi
+      have hi' : 0 ≤ i ∧ i.toNat < (elems ++ shadow).length := ⟨hi.1, by simp; omega⟩
+      simp only [SVal.saveLive, SVal.save, dif_pos hi, dif_pos hi', List.get_eq_getElem,
+        List.getElem_append_left hi.2]
+      rw [List.get_eq_getElem] at h
+      rw [saveLive_eq_save new h]
+      cases (elems[i.toNat]'hi.2).save qs new with
+      | error _ => rfl
+      | ok u =>
+        simp only [bind, Except.bind]
+        rw [List.set_append_left _ _ hi.2]
+        simp
+    · simp at h
+  | .array _ _, .field _ :: _, _, _, _ => by simp [SVal.saveLive, SVal.save]
+  | .map entries dflt, .at i :: qs, _, new, h => by
+    simp only [SVal.findLive] at h
+    simp only [SVal.saveLive, SVal.save]
+    split at h <;> rename_i hl <;> rw [hl] <;> simp only [saveLive_eq_save new h]
+  | .map _ _, .field _ :: _, _, _, _ => by simp [SVal.saveLive, SVal.save]
+
+/-- A live write returns only where the live read does. -/
+theorem findLive_of_saveLive : ∀ {v : SVal} {qs : List Seg} {new u : SVal},
+    v.saveLive qs new = .ok u → ∃ c, v.findLive qs = .ok c
+  | v, [], _, _, _ => ⟨v, by cases v <;> rfl⟩
+  | .prim _, s :: _, _, _, h => by cases s <;> simp [SVal.saveLive] at h
+  | .struct fields, .field f :: qs, _, _, h => by
+    simp only [SVal.saveLive] at h
+    simp only [SVal.findLive]
+    split at h
+    · rename_i o hl
+      obtain ⟨_, hu, _⟩ := bind_eq_ok.1 h
+      rw [hl]
+      exact findLive_of_saveLive hu
+    · simp at h
+  | .struct _, .at _ :: _, _, _, h => by simp [SVal.saveLive] at h
+  | .array elems shadow, .at i :: qs, _, _, h => by
+    simp only [SVal.saveLive] at h
+    simp only [SVal.findLive]
+    split at h
+    · rename_i hi
+      obtain ⟨_, hu, _⟩ := bind_eq_ok.1 h
+      rw [dif_pos hi]
+      exact findLive_of_saveLive hu
+    · simp at h
+  | .array _ _, .field _ :: _, _, _, h => by simp [SVal.saveLive] at h
+  | .map entries dflt, .at i :: qs, _, _, h => by
+    simp only [SVal.saveLive] at h
+    simp only [SVal.findLive]
+    split at h <;> rename_i hl <;> rw [hl] <;>
+      (obtain ⟨_, hu, _⟩ := bind_eq_ok.1 h; exact findLive_of_saveLive hu)
+  | .map _ _, .field _ :: _, _, _, h => by simp [SVal.saveLive] at h
+
+/-- A write returns only where the read does. -/
+theorem find_of_save {v : SVal} {qs : List Seg} {new u : SVal} (h : v.save qs new = .ok u) :
+    ∃ c, v.find qs = .ok c := by
+  cases hf : v.find qs with
+  | ok c => exact ⟨c, rfl⟩
+  | error e => rw [Close.save_of_find_error hf] at h; cases h
+
+/-! #### Up to the last index -/
+
+/-- A member after the last index leaves it the last. -/
+theorem lastAtSegs_field (qs : List Seg) (f : Name) :
+    lastAtSegs (qs ++ [.field f]) = lastAtSegs qs := by
+  simp [lastAtSegs, Seg.isAt]
+
+/-- An index is the last one. -/
+theorem lastAtSegs_at (qs : List Seg) (k : Int) :
+    lastAtSegs (qs ++ [.at k]) = qs ++ [.at k] := by
+  simp [lastAtSegs, Seg.isAt]
+
+/-- A path is its part up to the last index, then members. -/
+theorem lastAtSegs_split (qs : List Seg) :
+    ∃ post, qs = lastAtSegs qs ++ post ∧ post.any Seg.isAt = false := by
+  refine ⟨(qs.reverse.takeWhile fun s => !Seg.isAt s).reverse, ?_, ?_⟩
+  · have := congrArg List.reverse
+      (List.takeWhile_append_dropWhile (p := fun s => !Seg.isAt s) (l := qs.reverse))
+    simp only [List.reverse_append, List.reverse_reverse] at this
+    unfold lastAtSegs
+    exact this.symm
+  · have hall := List.all_takeWhile (p := fun s => !Seg.isAt s) (l := qs.reverse)
+    simp only [List.all_eq_true] at hall
+    simp only [List.any_eq_false, List.mem_reverse]
+    intro s hs
+    simpa using hall s hs
+
+/-- A path with no index has nothing up to its last one. -/
+theorem lastAtSegs_noAt {qs : List Seg} (h : qs.any Seg.isAt = false) : lastAtSegs qs = [] := by
+  have hd : ∀ {l : List Seg}, (∀ s ∈ l, Seg.isAt s = false) →
+      l.dropWhile (fun s => !Seg.isAt s) = [] := by
+    intro l hl
+    induction l with
+    | nil => rfl
+    | cons a l ih =>
+      simp only [List.dropWhile_cons, hl a List.mem_cons_self, Bool.not_false, if_true]
+      exact ih fun s hs => hl s (List.mem_cons_of_mem _ hs)
+  simp only [lastAtSegs, List.reverse_eq_nil_iff]
+  apply hd
+  intro s hs
+  simp only [List.any_eq_false] at h
+  simpa using h s (List.mem_reverse.mp hs)
+
+/-- With every index in bounds, the slot read is the live read. -/
+theorem LiveTo.find_eq {T : SVal} {qs : List Seg} (h : LiveTo T qs) : T.find qs = T.findLive qs := by
+  obtain ⟨c, hc⟩ := h
+  obtain ⟨post, hq, hp⟩ := lastAtSegs_split qs
+  rw [hq, Close.find_append, findLive_append, hc, SVal.find_of_findLive hc, Close.ok_bind,
+    Close.ok_bind, findLive_eq_find c post hp]
+
+/-- A path read live has every index in bounds. -/
+theorem LiveTo.of_findLive {T c : SVal} {qs : List Seg} (h : T.findLive qs = .ok c) :
+    LiveTo T qs := by
+  obtain ⟨post, hq, _⟩ := lastAtSegs_split qs
+  rw [hq, findLive_append] at h
+  obtain ⟨c₀, hc₀, -⟩ := bind_eq_ok.1 h
+  exact ⟨c₀, hc₀⟩
+
+/-- A path with no index has none out of bounds. -/
+theorem LiveTo.of_noAt (T : SVal) {qs : List Seg} (h : qs.any Seg.isAt = false) : LiveTo T qs :=
+  ⟨T, by rw [lastAtSegs_noAt h]; cases T <;> rfl⟩
+
+/-- The last index of a path, evaluated. -/
+theorem LPath.lastAt_eval (σ : State) : ∀ {q : LPath} {qs : List Seg}, q.eval σ = .ok qs →
+    (q.lastAt = none → qs.any Seg.isAt = false) ∧
+      (∀ q', q.lastAt = some q' → q'.eval σ = .ok (lastAtSegs qs))
+  | .root _, _, h => by cases h; exact ⟨fun _ => rfl, fun _ h => by simp [LPath.lastAt] at h⟩
+  | .field q f, _, h => by
+    obtain ⟨qs', h', he⟩ := bind_eq_ok.1 h; cases he
+    obtain ⟨h₁, h₂⟩ := LPath.lastAt_eval σ h'
+    refine ⟨fun hn => ?_, fun q' hs => ?_⟩
+    · simp [h₁ hn, Seg.isAt]
+    · rw [lastAtSegs_field]; exact h₂ q' hs
+  | .at q k, _, h => by
+    refine ⟨fun hn => by simp [LPath.lastAt] at hn, fun q' hs => ?_⟩
+    simp only [LPath.lastAt, Option.some.injEq] at hs
+    subst hs
+    obtain ⟨qs', h', h⟩ := bind_eq_ok.1 h
+    obtain ⟨i, hi, he⟩ := bind_eq_ok.1 h; cases he
+    rw [lastAtSegs_at]
+    simp only [LPath.eval, h', hi, Close.ok_bind]
+
+/-- **Binding an alias returns** exactly where its path does and every
+index on it is in bounds of the storage `s` leaves. -/
+theorem guardPath_ok {σ : State} {s : LStor} {T : SVal} (hs : s.eval σ = .ok T) (q : LPath) :
+    (∃ v, (guardPath s q).eval σ = .ok v) ↔ ∃ qs, q.eval σ = .ok qs ∧ LiveTo T qs := by
+  unfold guardPath
+  cases hl : q.lastAt with
+  | none =>
+    simp only [LTerm.eval, bind_eq_ok]
+    constructor
+    · rintro ⟨_, qs, hq, -⟩
+      exact ⟨qs, hq, LiveTo.of_noAt T ((LPath.lastAt_eval σ hq).1 hl)⟩
+    · rintro ⟨qs, hq, -⟩
+      exact ⟨_, qs, hq, rfl⟩
+  | some q' =>
+    simp only [LTerm.eval, bind_eq_ok, hs, Close.ok_bind]
+    constructor
+    · rintro ⟨_, _, ⟨qs, hq, -⟩, qs', hq', c, hc, -⟩
+      have := (LPath.lastAt_eval σ hq).2 q' hl
+      rw [hq'] at this
+      cases this
+      exact ⟨qs, hq, c, hc⟩
+    · rintro ⟨qs, hq, c, hc⟩
+      exact ⟨_, _, ⟨qs, hq, rfl⟩, _, (LPath.lastAt_eval σ hq).2 q' hl, c, hc, rfl⟩
+
+/-- **The read of a checked path is the live read**: given what the checks
+of a path amount to (`PTerm.toL_chk`), a read returns the same either way. -/
+theorem live_bridge {τ : State} {P : Res (Name × List Seg)} {L : Res (List Seg)}
+    (hA : ∀ qs, (∃ rs, P = .ok rs ∧ qs = .field rs.1 :: rs.2) ↔
+      (L = .ok qs ∧ LiveTo (.struct τ.storage) qs)) (qs : List Seg) (c : SVal) :
+    (L = .ok qs ∧ (SVal.struct τ.storage).findLive qs = .ok c) ↔
+      ∃ rs, P = .ok rs ∧ qs = .field rs.1 :: rs.2 ∧ τ.findStorage rs.1 rs.2 = .ok c := by
+  constructor
+  · rintro ⟨hq, hc⟩
+    have hl := LiveTo.of_findLive hc
+    obtain ⟨rs, hrs, rfl⟩ := (hA _).2 ⟨hq, hl⟩
+    refine ⟨rs, hrs, rfl, ?_⟩
+    rw [← find_root, hl.find_eq]
+    exact hc
+  · rintro ⟨rs, hrs, rfl, hc⟩
+    obtain ⟨hq, hl⟩ := (hA _).1 ⟨rs, hrs, rfl⟩
+    refine ⟨hq, ?_⟩
+    rw [← hl.find_eq, find_root]
+    exact hc
+
+/-- A write to the storage keeps what the names hold, an alias through an
+index made stale. -/
+theorem lookupBy_onWrite (y : Var) : ∀ (env : List (Var × SymB)),
+    lookupBy y (env.map fun b => (b.1, b.2.onWrite)) = (lookupBy y env).map SymB.onWrite
+  | [] => rfl
+  | (x, b) :: rest => by
+    by_cases hy : y = x <;> simp [lookupBy, hy, lookupBy_onWrite y rest]
+
+/-- A write to the storage keeps the relation of each name. -/
+theorem EnvRel.onWrite {σ τ τ' : State} {y : Var} {o : Option SymB}
+    (h : EnvRel σ τ y o) (he : τ'.getEnv y = τ.getEnv y) : EnvRel σ τ' y (o.map SymB.onWrite) := by
+  rcases o with _ | ⟨t⟩ | ⟨q⟩ | _
+  · simp only [EnvRel, Option.map] at h ⊢; rw [he]; exact h
+  · simp only [EnvRel, Option.map, SymB.onWrite] at h ⊢; rw [he]; exact h
+  · simp only [EnvRel] at h
+    obtain ⟨r, segs, h₁, h₂, -⟩ := h
+    by_cases hn : q.noAt = true
+    · simp only [Option.map, SymB.onWrite, hn, if_true, EnvRel]
+      exact ⟨r, segs, h₁, by rw [he]; exact h₂, LiveTo.of_noAt _ (LPath.noAt_eval σ hn h₁)⟩
+    · simp only [Option.map, SymB.onWrite, hn, if_false, EnvRel, Bool.false_eq_true]
+      exact ⟨r, segs, by rw [he]; exact h₂⟩
+  · simp only [EnvRel, Option.map, SymB.onWrite] at h ⊢; rw [he]; exact h
 
 section
 variable {σ τ : State} {ρ : Sym}
@@ -457,92 +1036,201 @@ after `balances[k] = 5;`, the local `y` of `uint y = balances[k];` is the
 term `find(save(storage, balances[k], 5), balances[k])`, read in the state
 before the write. -/
 theorem Term.toL_eval (h : Rel σ ρ τ) :
-    (t : Term C) → t.inL ρ = true → (t.toL ρ).eval σ = t.eval τ
-  | .lit _, _ => rfl
+    (t : Term C) → t.inL ρ = true → Sim ((t.toL ρ).eval σ) (t.eval τ)
+  | .lit _, _ => Sim.refl _
   | .pv x, _ => by
     have hx := h.env x
     rw [Close.Term.eval_pv]
-    simp only [Term.toL]
-    split <;> rename_i heq <;> rw [heq] at hx <;> simp only [EnvRel] at hx
-    · obtain ⟨v, h₁, h₂⟩ := hx; rw [h₁, h₂]; rfl
-    · obtain ⟨r, segs, _, h₂⟩ := hx; rw [h₂]; rfl
+    apply Sim.of_eq
+    rcases hl : lookupBy x ρ.env with _ | ⟨t⟩ | ⟨q⟩ | _ <;> rw [hl] at hx <;>
+      simp only [EnvRel] at hx <;> simp only [Term.toL, hl]
     · rw [hx]; rfl
+    · obtain ⟨v, h₁, h₂⟩ := hx; rw [h₁, h₂]; rfl
+    · obtain ⟨r, segs, _, h₂, _⟩ := hx; rw [h₂]; rfl
+    · obtain ⟨r, segs, h₂⟩ := hx; rw [h₂]; rfl
   | .binop op p a b, hf => by
     simp only [Term.inL, Bool.and_eq_true] at hf
     rw [Close.Term.eval_binop]
-    simp only [Term.toL, LTerm.eval, Term.toL_eval h a hf.1, Term.toL_eval h b hf.2]
+    simp only [Term.toL, LTerm.eval]
+    exact Sim.bind (Term.toL_eval h a hf.1) fun _ => evalBinop_sim (Term.toL_eval h b hf.2)
   | .unop op p a, hf => by
     simp only [Term.inL] at hf
     rw [Close.Term.eval_unop]
-    simp only [Term.toL, LTerm.eval, Term.toL_eval h a hf]
+    simp only [Term.toL, LTerm.eval]
+    exact Sim.bind (Term.toL_eval h a hf) fun _ => Sim.refl _
   | .find s p, hf => by
-    simp only [Term.inL, Bool.and_eq_true] at hf
-    rw [Close.Term.eval_find]
-    simp only [Term.toL, LTerm.eval, STerm.toL_eval h s hf.1, PTerm.toL_eval h p hf.2, bind_assoc,
-      Close.ok_bind, find_root]
+    cases s with
+    | storage =>
+      simp only [Term.inL] at hf
+      have hb := live_bridge (PTerm.toL_chk h p hf)
+      rw [Close.Term.eval_find]
+      simp only [Term.toL, STerm.toL, LTerm.eval, h.stor, Close.ok_bind]
+      intro a
+      simp only [bind_eq_ok, Close.STerm.eval_storage, Close.ok_bind]
+      constructor
+      · rintro ⟨qs, hq, c, hc, ha⟩
+        obtain ⟨rs, hrs, rfl, hfs⟩ := (hb qs c).1 ⟨hq, hc⟩
+        exact ⟨rs, hrs, c, hfs, ha⟩
+      · rintro ⟨rs, hrs, c, hfs, ha⟩
+        obtain ⟨hq, hc⟩ := (hb _ c).2 ⟨rs, hrs, rfl, hfs⟩
+        exact ⟨_, hq, c, hc, ha⟩
+    | _ => simp [Term.inL] at hf
   | .ite c a b, hf => by
     simp only [Term.inL, Bool.and_eq_true] at hf
     rw [Close.Term.eval_ite]
-    simp only [Term.toL, LTerm.eval, Term.toL_eval h c hf.1.1, Term.toL_eval h a hf.1.2,
-      Term.toL_eval h b hf.2]
+    simp only [Term.toL, LTerm.eval]
+    exact Sim.bind (Term.toL_eval h c hf.1.1) fun _ =>
+      pickBranch_sim (Term.toL_eval h a hf.1.2) (Term.toL_eval h b hf.2)
   | .len _ _, hf | .read _ _, hf => by simp [Term.inL] at hf
 
-/-- A path term, pushed in, names the path it named after the updates, root
-first.  Example: `sp1.balance`, with `sp1 := alice.account`, is
-`alice.account.balance`. -/
-theorem PTerm.toL_eval (h : Rel σ ρ τ) :
-    (p : PTerm C) → p.inL ρ = true →
-      (p.toL ρ).eval σ = p.eval τ >>= fun rs => .ok (.field rs.1 :: rs.2)
-  | .root _, _ => rfl
-  | .pv x, hf => by
+/-- **A path, pushed in, is the path the program took**: the program's
+path returns exactly where the path pushed in does and every index on it is
+in bounds of the storage the updates left (`LiveTo`).  Example: `values[i]`
+returns in neither where `i` is past the end. -/
+theorem PTerm.toL_chk (h : Rel σ ρ τ) :
+    (p : PTerm C) → p.inL ρ = true → ∀ (qs : List Seg),
+      (∃ rs, p.eval τ = .ok rs ∧ qs = .field rs.1 :: rs.2) ↔
+        ((p.toL ρ).eval σ = .ok qs ∧ LiveTo (.struct τ.storage) qs)
+  | .root r, _, qs => by
+    simp only [PTerm.toL, LPath.eval, PTerm.eval]
+    constructor
+    · rintro ⟨rs, hrs, rfl⟩
+      cases hrs
+      exact ⟨rfl, LiveTo.of_noAt _ rfl⟩
+    · rintro ⟨hq, -⟩
+      cases hq
+      exact ⟨(r, []), rfl, rfl⟩
+  | .pv x, hf, qs => by
     have hx := h.env x
     rw [Close.PTerm.eval_pv]
     simp only [PTerm.inL] at hf
-    rcases hl : lookupBy x ρ.env with _ | ⟨t⟩ | ⟨q⟩ <;> rw [hl] at hx hf <;>
-      simp only [EnvRel, Option.isSome_none, Bool.false_eq_true] at hx hf <;>
+    rcases hl : lookupBy x ρ.env with _ | ⟨t⟩ | ⟨q⟩ | _ <;> rw [hl] at hx hf <;>
+      simp only [EnvRel, Bool.false_eq_true] at hx hf <;>
       simp only [PTerm.toL, hl]
-    · obtain ⟨v, _, h₂⟩ := hx; rw [h₂]; rfl
-    · obtain ⟨r, segs, h₁, h₂⟩ := hx; rw [h₁, h₂]; rfl
-  | .field p f, hf => by
+    · obtain ⟨v, _, h₂⟩ := hx
+      simp [h₂, LPath.stuck, LPath.eval, LTerm.eval, Close.bindingPath, bind, Except.bind]
+    · obtain ⟨r, segs, h₁, h₂, hlive⟩ := hx
+      simp only [h₂, h₁, Close.ok_bind, Close.bindingPath]
+      constructor
+      · rintro ⟨rs, hrs, rfl⟩
+        cases hrs
+        exact ⟨rfl, hlive⟩
+      · rintro ⟨hq, -⟩
+        cases hq
+        exact ⟨(r, segs), rfl, rfl⟩
+  | .field p f, hf, qs => by
     simp only [PTerm.inL] at hf
     rw [Close.PTerm.eval_field]
-    simp only [PTerm.toL, LPath.eval, PTerm.toL_eval h p hf, bind_assoc, Close.ok_bind,
-      List.cons_append]
-  | .at p i, hf => by
+    simp only [PTerm.toL, LPath.eval]
+    constructor
+    · rintro ⟨rs', hrs', rfl⟩
+      obtain ⟨rs, hrs, he⟩ := bind_eq_ok.1 hrs'
+      cases he
+      obtain ⟨hq, hl⟩ := (PTerm.toL_chk h p hf _).1 ⟨rs, hrs, rfl⟩
+      refine ⟨by rw [hq]; rfl, ?_⟩
+      show LiveTo _ ((.field rs.1 :: rs.2) ++ [.field f])
+      unfold LiveTo
+      rw [lastAtSegs_field]
+      exact hl
+    · rintro ⟨hq, hl⟩
+      obtain ⟨qs₀, hq₀, he⟩ := bind_eq_ok.1 hq
+      cases he
+      have hl₀ : LiveTo (.struct τ.storage) qs₀ := by unfold LiveTo at hl ⊢; rw [lastAtSegs_field] at hl; exact hl
+      obtain ⟨rs, hrs, rfl⟩ := (PTerm.toL_chk h p hf qs₀).2 ⟨hq₀, hl₀⟩
+      exact ⟨(rs.1, rs.2 ++ [.field f]), by rw [hrs]; rfl, by simp⟩
+  | .at p i, hf, qs => by
     simp only [PTerm.inL, Bool.and_eq_true] at hf
+    have hi := Term.toL_eval h i hf.2
     rw [Close.PTerm.eval_at]
-    simp only [PTerm.toL, LPath.eval, PTerm.toL_eval h p hf.1, Term.toL_eval h i hf.2, bind_assoc,
-      Close.ok_bind, List.cons_append]
-
-/-- A storage term, pushed in, is the stack of writes it made.  Example:
-`delAt(save(storage, alice.account.balance, 100), alice.account)`. -/
-theorem STerm.toL_eval (h : Rel σ ρ τ) :
-    (s : STerm C) → s.inL ρ = true →
-      (s.toL ρ).eval σ = s.eval τ >>= fun τ' => .ok (.struct τ'.storage)
-  | .storage, _ => h.stor
-  | .save s p v, hf => by
-    simp only [STerm.inL, Bool.and_eq_true] at hf
-    rw [Close.STerm.eval_save, ← SValT.toL_eval h v hf.2]
-    simp only [STerm.toL, LStor.eval, STerm.toL_eval h s hf.1.1, PTerm.toL_eval h p hf.1.2,
-      bind_assoc, Close.ok_bind, save_root]
-  | .delAt s p, hf => by
-    simp only [STerm.inL, Bool.and_eq_true] at hf
-    rw [Close.STerm.eval_delAt]
-    simp only [STerm.toL, LStor.eval, STerm.toL_eval h s hf.1, PTerm.toL_eval h p hf.2,
-      bind_assoc, Close.ok_bind, save_root, find_root]
-  | .push .., hf | .pushSlot .., hf | .pop .., hf | .extend .., hf => by simp [STerm.inL] at hf
-
-/-- The value a write stores, pushed in: the `100` of `alice.account.balance = 100;`. -/
-theorem SValT.toL_eval (h : Rel σ ρ τ) :
-    (v : SValT C) → v.inL ρ = true →
-      ((v.toL ρ).eval σ >>= fun x => .ok x.toSVal) = v.eval τ
-  | .val t, hf => by
-    simp only [SValT.inL] at hf
-    rw [Close.SValT.eval_val]
-    simp only [SValT.toL, Term.toL_eval h t hf]
-  | .find .., hf | .copyMem .., hf => by simp [SValT.inL] at hf
+    simp only [PTerm.toL, LPath.eval]
+    constructor
+    · rintro ⟨rs', hrs', rfl⟩
+      obtain ⟨rs, hrs, hr⟩ := bind_eq_ok.1 hrs'
+      obtain ⟨k, hk, hr⟩ := bind_eq_ok.1 hr
+      obtain ⟨v, hv, hk⟩ := bind_eq_ok.1 hk
+      obtain ⟨u, hu, he⟩ := bind_eq_ok.1 hr
+      cases he
+      rw [Close.checkIndex_eq] at hu
+      obtain ⟨c, hc, hu⟩ := bind_eq_ok.1 hu
+      obtain ⟨hq, hl⟩ := (PTerm.toL_chk h p hf.1 _).1 ⟨rs, hrs, rfl⟩
+      refine ⟨by rw [hq, Close.ok_bind, (hi v).2 hv, Close.ok_bind, hk]; rfl, ?_⟩
+      show LiveTo _ ((.field rs.1 :: rs.2) ++ [.at k])
+      unfold LiveTo
+      rw [lastAtSegs_at, findLive_append, ← hl.find_eq, find_root, hc, Close.ok_bind]
+      exact (idx_iff c k).1 (by cases u; exact hu)
+    · rintro ⟨hq, hl⟩
+      obtain ⟨qs₀, hq₀, hq⟩ := bind_eq_ok.1 hq
+      obtain ⟨k, hk, he⟩ := bind_eq_ok.1 hq
+      cases he
+      obtain ⟨v, hv, hk⟩ := bind_eq_ok.1 hk
+      obtain ⟨c', hc'⟩ := hl
+      rw [lastAtSegs_at, findLive_append] at hc'
+      obtain ⟨c, hc, hck⟩ := bind_eq_ok.1 hc'
+      have hl₀ := LiveTo.of_findLive hc
+      obtain ⟨rs, hrs, rfl⟩ := (PTerm.toL_chk h p hf.1 qs₀).2 ⟨hq₀, hl₀⟩
+      refine ⟨(rs.1, rs.2 ++ [.at k]), ?_, by simp⟩
+      have hfs : τ.findStorage rs.1 rs.2 = .ok c := by rw [← find_root, hl₀.find_eq]; exact hc
+      rw [hrs, Close.ok_bind, (hi v).1 hv, Close.ok_bind, hk, Close.ok_bind, Close.checkIndex_eq,
+        hfs, Close.ok_bind, (idx_iff c k).2 ⟨c', hck⟩, Close.ok_bind]
+  | .next _, hf, _ => by simp [PTerm.inL] at hf
 
 end
+
+/-- A storage term, pushed in, is the write it made.  Example:
+`delAt(storage, alice.account)`. -/
+theorem STerm.toL_eval (h : Rel σ ρ τ) :
+    (s : STerm C) → s.inL ρ = true →
+      Sim ((s.toL ρ).eval σ) (s.eval τ >>= fun τ' => .ok (.struct τ'.storage))
+  | .storage, _ => Sim.of_eq (by rw [STerm.toL, h.stor]; rfl)
+  | .save .storage p (.val t), hf => by
+    simp only [STerm.inL, SValT.inL, Bool.and_eq_true] at hf
+    have ht := Term.toL_eval h t hf.2
+    have hb := live_bridge (PTerm.toL_chk h p hf.1)
+    rw [Close.STerm.eval_save]
+    simp only [STerm.toL, SValT.toL, LStor.eval, h.stor, Close.ok_bind, Close.STerm.eval_storage]
+    intro a
+    simp only [bind_eq_ok]
+    constructor
+    · rintro ⟨x, hx, qs, hq, ha⟩
+      obtain ⟨c, hc⟩ := findLive_of_saveLive ha
+      obtain ⟨rs, hrs, rfl, hfs⟩ := (hb qs c).1 ⟨hq, hc⟩
+      rw [saveLive_eq_save _ hc, save_root] at ha
+      obtain ⟨τ'', h'', he⟩ := bind_eq_ok.1 ha
+      exact ⟨τ'', ⟨x, (ht x).1 hx, rs, hrs, h''⟩, he⟩
+    · rintro ⟨τ'', ⟨x, hx, rs, hrs, h''⟩, he⟩
+      have hsv : (SVal.struct τ.storage).save (.field rs.1 :: rs.2) x.toSVal = .ok a := by
+        rw [save_root, h'', Close.ok_bind, he]
+      obtain ⟨c, hc⟩ := find_of_save hsv
+      rw [find_root] at hc
+      obtain ⟨hq, hl⟩ := (hb _ c).2 ⟨rs, hrs, rfl, hc⟩
+      exact ⟨x, (ht x).2 hx, _, hq, by rw [saveLive_eq_save _ hl]; exact hsv⟩
+  | .delAt .storage p, hf => by
+    simp only [STerm.inL] at hf
+    have hb := live_bridge (PTerm.toL_chk h p hf)
+    rw [Close.STerm.eval_delAt]
+    simp only [STerm.toL, LStor.eval, h.stor, Close.ok_bind, Close.STerm.eval_storage]
+    intro a
+    simp only [bind_eq_ok]
+    constructor
+    · rintro ⟨qs, hq, c, hc, ha⟩
+      obtain ⟨rs, hrs, rfl, hfs⟩ := (hb qs c).1 ⟨hq, hc⟩
+      rw [saveLive_eq_save _ hc, save_root] at ha
+      obtain ⟨τ'', h'', he⟩ := bind_eq_ok.1 ha
+      exact ⟨τ'', ⟨rs, hrs, c, hfs, h''⟩, he⟩
+    · rintro ⟨τ'', ⟨rs, hrs, c, hfs, h''⟩, he⟩
+      obtain ⟨hq, hl⟩ := (hb _ c).2 ⟨rs, hrs, rfl, hfs⟩
+      refine ⟨_, hq, c, hl, ?_⟩
+      rw [saveLive_eq_save _ hl, save_root, h'', Close.ok_bind, he]
+  | .save .storage _ (.find ..), hf | .save .storage _ (.copyMem ..), hf => by
+    simp [STerm.inL, SValT.inL] at hf
+  | .save (.save ..) .., hf | .save (.delAt ..) .., hf | .save (.push ..) .., hf
+  | .save (.pushSlot ..) .., hf | .save (.pop ..) .., hf | .save (.shrink ..) .., hf
+  | .save (.extend ..) .., hf => by simp [STerm.inL] at hf
+  | .delAt (.save ..) _, hf | .delAt (.delAt ..) _, hf | .delAt (.push ..) _, hf
+  | .delAt (.pushSlot ..) _, hf | .delAt (.pop ..) _, hf | .delAt (.shrink ..) _, hf
+  | .delAt (.extend ..) _, hf => by simp [STerm.inL] at hf
+  | .push .., hf | .pushSlot .., hf | .pop .., hf | .shrink .., hf | .extend .., hf => by
+    simp [STerm.inL] at hf
 
 end
 
@@ -589,8 +1277,22 @@ theorem Fml.toL_holds :
   | .tt, _, _, _, _, _ => Iff.rfl
   | .eq a b, _, _, _, h, hf => by
     simp only [Fml.inL, Bool.and_eq_true] at hf
-    simp only [holds, Fml.toL, LFml.holds, Term.toL_eval h a hf.1, Term.toL_eval h b hf.2]
-    cases a.eval _ <;> cases b.eval _ <;> exact Iff.rfl
+    have ha := Term.toL_eval h a hf.1
+    have hb := Term.toL_eval h b hf.2
+    simp only [holds, Fml.toL, LFml.holds]
+    cases hx : a.eval _ with
+    | ok x =>
+      rw [(ha x).2 hx]
+      cases hy : b.eval _ with
+      | ok y => rw [(hb y).2 hy]
+      | error e =>
+        cases hy' : (b.toL _).eval _ with
+        | ok y => exact absurd ((hb y).1 hy') (by simp [hy])
+        | error _ => exact Iff.rfl
+    | error e =>
+      cases hx' : (a.toL _).eval _ with
+      | ok x => exact absurd ((ha x).1 hx') (by simp [hx])
+      | error _ => exact Iff.rfl
   | .not φ, _, _, _, h, hf => by
     simp only [Fml.inL] at hf
     simp only [holds, Fml.toL, LFml.holds, Fml.toL_holds φ h hf]
@@ -612,35 +1314,48 @@ theorem Fml.toL_holds :
       have ht := Term.toL_eval h t hf.1
       rw [Close.UpdElem.write_val]
       refine after_guardM (by
-        simp only [UpdElem.toL, ht, bind_eq_ok]
-        exact ⟨fun ⟨v, hv⟩ => ⟨_, v, hv, rfl⟩, fun ⟨_, v, hv, _⟩ => ⟨v, hv⟩⟩) fun τ' hτ => ?_
+        simp only [UpdElem.toL, bind_eq_ok]
+        exact ⟨fun ⟨v, hv⟩ => ⟨_, v, (ht v).1 hv, rfl⟩, fun ⟨_, v, hv, _⟩ => ⟨v, (ht v).2 hv⟩⟩)
+        fun τ' hτ => ?_
       obtain ⟨v, hv, he⟩ := bind_eq_ok.1 hτ
       cases he
       refine Fml.toL_holds φ (h.bind x _ _ ?_) hf.2
-      exact ⟨v, ht.trans hv, by simp⟩
+      exact ⟨v, (ht v).2 hv, by simp⟩
     | path x p =>
-      have hp := PTerm.toL_eval h p hf.1
+      have hA := PTerm.toL_chk h p hf.1
       rw [Close.UpdElem.write_path]
       refine after_guardM (by
-        simp only [UpdElem.toL, LTerm.eval, hp, bind_eq_ok]
+        simp only [UpdElem.toL]
+        rw [guardPath_ok h.stor]
+        simp only [bind_eq_ok]
         constructor
-        · rintro ⟨_, _, ⟨rs, hr, -⟩, -⟩; exact ⟨_, rs, hr, rfl⟩
-        · rintro ⟨_, rs, hr, -⟩; exact ⟨_, _, ⟨rs, hr, rfl⟩, rfl⟩) fun τ' hτ => ?_
+        · rintro ⟨qs, hq, hl⟩
+          obtain ⟨rs, hrs, -⟩ := (hA qs).2 ⟨hq, hl⟩
+          exact ⟨_, rs, hrs, rfl⟩
+        · rintro ⟨_, rs, hrs, -⟩
+          obtain ⟨hq, hl⟩ := (hA _).1 ⟨rs, hrs, rfl⟩
+          exact ⟨_, hq, hl⟩) fun τ' hτ => ?_
       obtain ⟨rs, hr, he⟩ := bind_eq_ok.1 hτ
       cases he
       refine Fml.toL_holds φ (h.bind x _ _ ?_) hf.2
-      exact ⟨rs.1, rs.2, by rw [hp, hr]; rfl, by simp⟩
+      obtain ⟨hq, hl⟩ := (hA _).1 ⟨rs, hr, rfl⟩
+      exact ⟨rs.1, rs.2, hq, by simp, hl⟩
     | storage s =>
       have hs := STerm.toL_eval h s hf.1
       rw [Close.UpdElem.write_storage]
       refine after_guardM (by
-        simp only [UpdElem.toL, LTerm.eval, hs, bind_eq_ok]
+        simp only [UpdElem.toL, LTerm.eval, bind_eq_ok]
         constructor
-        · rintro ⟨_, _, ⟨τ₁, h₁, -⟩, -⟩; exact ⟨_, τ₁, h₁, rfl⟩
-        · rintro ⟨_, τ₁, h₁, -⟩; exact ⟨_, _, ⟨τ₁, h₁, rfl⟩, rfl⟩) fun τ' hτ => ?_
+        · rintro ⟨_, v, hv, -⟩
+          obtain ⟨τ₁, h₁, -⟩ := bind_eq_ok.1 ((hs v).1 hv)
+          exact ⟨_, τ₁, h₁, rfl⟩
+        · rintro ⟨_, τ₁, h₁, -⟩
+          exact ⟨_, _, (hs _).2 (by rw [h₁]; rfl), rfl⟩) fun τ' hτ => ?_
       obtain ⟨τ₁, h₁, he⟩ := bind_eq_ok.1 hτ
       cases he
-      refine Fml.toL_holds φ ⟨by simp only [UpdElem.toL, hs, h₁]; rfl, fun y => h.env y⟩ hf.2
+      refine Fml.toL_holds φ ⟨(hs _).2 (by rw [h₁]; rfl), fun y => ?_⟩ hf.2
+      simp only [UpdElem.toL, lookupBy_onWrite]
+      exact (h.env y).onWrite rfl
     | mref _ _ | memory _ | transfer _ _ => simp [UpdElem.inL] at hf
   | .upd _ (_ :: _ :: _) _, _, _, _, _, hf | .modal .., _, _, _, _, hf => by simp [Fml.inL] at hf
 
@@ -658,38 +1373,33 @@ an array, which is no word; a read *below* a written word finds nothing; a
 read at or below a deleted location, before any key, finds the default of
 what was there. -/
 
-/-- The segment is a key or an index. -/
-def Seg.isAt : Seg → Bool
-  | .field _ => false
-  | .at _ => true
-
 /-- A write at a nonempty path returns a struct, an array or a mapping,
 which reads as no word: after `alice.age = 3;`, `alice` is not a `uint`. -/
 theorem save_cons_asValue {v new u : SVal} {s : Seg} {r : List Seg}
-    (h : v.save (s :: r) new = .ok u) : ∃ e, u.asValue = .error e := by
+    (h : v.saveLive (s :: r) new = .ok u) : ∃ e, u.asValue = .error e := by
   cases v with
-  | prim p => cases s <;> simp [SVal.save] at h
+  | prim p => cases s <;> simp [SVal.saveLive] at h
   | struct fields =>
     cases s with
-    | «at» _ => simp [SVal.save] at h
+    | «at» _ => simp [SVal.saveLive] at h
     | field n =>
-      simp only [SVal.save] at h
+      simp only [SVal.saveLive] at h
       split at h
       · obtain ⟨_, _, he⟩ := bind_eq_ok.1 h; cases he; exact ⟨_, rfl⟩
       · simp at h
   | array elems shadow =>
     cases s with
-    | field _ => simp [SVal.save] at h
+    | field _ => simp [SVal.saveLive] at h
     | «at» i =>
-      simp only [SVal.save] at h
+      simp only [SVal.saveLive] at h
       split at h
       · obtain ⟨_, _, he⟩ := bind_eq_ok.1 h; cases he; exact ⟨_, rfl⟩
       · simp at h
   | map entries dflt =>
     cases s with
-    | field _ => simp [SVal.save] at h
+    | field _ => simp [SVal.saveLive] at h
     | «at» i =>
-      simp only [SVal.save] at h
+      simp only [SVal.saveLive] at h
       split at h <;> (obtain ⟨_, _, he⟩ := bind_eq_ok.1 h; cases he; exact ⟨_, rfl⟩)
 
 /-- **A write passes through every location above it**: a write at `Q ++ R`
@@ -697,47 +1407,47 @@ finds a location at `Q`, writes at `R` below it, and leaves that location
 readable at `Q`.  Example: `alice.account.balance = 7;` passes through
 `alice` and `alice.account`. -/
 theorem save_through : ∀ {v new u : SVal} (Q R : List Seg),
-    v.save (Q ++ R) new = .ok u →
-      ∃ w w', v.find Q = .ok w ∧ w.save R new = .ok w' ∧ u.find Q = .ok w'
+    v.saveLive (Q ++ R) new = .ok u →
+      ∃ w w', v.findLive Q = .ok w ∧ w.saveLive R new = .ok w' ∧ u.findLive Q = .ok w'
   | v, _, u, [], R, h => ⟨v, u, by cases v <;> rfl, h, by cases u <;> rfl⟩
   | v, new, u, s :: Q, R, h => by
     cases v with
-    | prim p => cases s <;> simp [SVal.save] at h
+    | prim p => cases s <;> simp [SVal.saveLive] at h
     | struct fields =>
       cases s with
-      | «at» _ => simp [SVal.save] at h
+      | «at» _ => simp [SVal.saveLive] at h
       | field n =>
-        simp only [List.cons_append, SVal.save] at h
+        simp only [List.cons_append, SVal.saveLive] at h
         split at h
         · rename_i old hl
           obtain ⟨upd, hu, he⟩ := bind_eq_ok.1 h; cases he
           obtain ⟨w, w', h₁, h₂, h₃⟩ := save_through Q R hu
-          exact ⟨w, w', by simp [SVal.find, hl, h₁], h₂, by simp [SVal.find, h₃]⟩
+          exact ⟨w, w', by simp [SVal.findLive, hl, h₁], h₂, by simp [SVal.findLive, h₃]⟩
         · simp at h
     | array elems shadow =>
       cases s with
-      | field _ => simp [SVal.save] at h
+      | field _ => simp [SVal.saveLive] at h
       | «at» i =>
-        simp only [List.cons_append, SVal.save] at h
+        simp only [List.cons_append, SVal.saveLive] at h
         split at h
         · rename_i hi
           obtain ⟨upd, hu, he⟩ := bind_eq_ok.1 h; cases he
           obtain ⟨w, w', h₁, h₂, h₃⟩ := save_through Q R hu
-          refine ⟨w, w', by simp [SVal.find, hi, ← h₁], h₂, ?_⟩
-          simp [SVal.find, hi, h₃]
+          refine ⟨w, w', by simp [SVal.findLive, hi, ← h₁], h₂, ?_⟩
+          simp [SVal.findLive, hi, h₃]
         · simp at h
     | map entries dflt =>
       cases s with
-      | field _ => simp [SVal.save] at h
+      | field _ => simp [SVal.saveLive] at h
       | «at» i =>
-        simp only [List.cons_append, SVal.save] at h
+        simp only [List.cons_append, SVal.saveLive] at h
         split at h <;> rename_i hl
         · obtain ⟨upd, hu, he⟩ := bind_eq_ok.1 h; cases he
           obtain ⟨w, w', h₁, h₂, h₃⟩ := save_through Q R hu
-          exact ⟨w, w', by simp [SVal.find, hl, h₁], h₂, by simp [SVal.find, h₃]⟩
+          exact ⟨w, w', by simp [SVal.findLive, hl, h₁], h₂, by simp [SVal.findLive, h₃]⟩
         · obtain ⟨upd, hu, he⟩ := bind_eq_ok.1 h; cases he
           obtain ⟨w, w', h₁, h₂, h₃⟩ := save_through Q R hu
-          exact ⟨w, w', by simp [SVal.find, hl, h₁], h₂, by simp [SVal.find, h₃]⟩
+          exact ⟨w, w', by simp [SVal.findLive, hl, h₁], h₂, by simp [SVal.findLive, h₃]⟩
 
 /-- No segment is a `length`: the one field an array answers to, and the
 one a program never writes. -/
@@ -751,18 +1461,18 @@ theorem ex_ok_bind {α β : Type} {x : Res α} {f : α → β} :
 /-- **A write succeeds where a read does**, `length` aside: `alice.age = 3;`
 runs exactly where `alice.age` names a location. -/
 theorem save_ok_iff_find_ok {new : SVal} : ∀ {v : SVal} {ps : List Seg}, NoLen ps →
-    ((∃ u, v.save ps new = .ok u) ↔ ∃ w, v.find ps = .ok w)
-  | v, [], _ => by cases v <;> simp [SVal.save, SVal.find]
+    ((∃ u, v.saveLive ps new = .ok u) ↔ ∃ w, v.findLive ps = .ok w)
+  | v, [], _ => by cases v <;> simp [SVal.saveLive, SVal.findLive]
   | v, s :: ps, hn => by
     have hn' : NoLen ps := fun t ht => hn t (.tail _ ht)
     have hs : s ≠ .field "length" := hn s (.head _)
     cases v with
-    | prim p => cases s <;> simp [SVal.save, SVal.find]
+    | prim p => cases s <;> simp [SVal.saveLive, SVal.findLive]
     | struct fields =>
       cases s with
-      | «at» _ => simp [SVal.save, SVal.find]
+      | «at» _ => simp [SVal.saveLive, SVal.findLive]
       | field n =>
-        simp only [SVal.save, SVal.find]
+        simp only [SVal.saveLive, SVal.findLive]
         cases lookupBy n fields with
         | none => simp
         | some old => simp only [ex_ok_bind]; exact save_ok_iff_find_ok hn'
@@ -770,17 +1480,17 @@ theorem save_ok_iff_find_ok {new : SVal} : ∀ {v : SVal} {ps : List Seg}, NoLen
       cases s with
       | field n =>
         have : n ≠ "length" := fun h => hs (by rw [h])
-        simp [SVal.save, SVal.find]
+        simp [SVal.saveLive, SVal.findLive]
       | «at» i =>
-        simp only [SVal.save, SVal.find]
+        simp only [SVal.saveLive, SVal.findLive]
         split
         · simp only [ex_ok_bind]; exact save_ok_iff_find_ok hn'
         · simp
     | map entries dflt =>
       cases s with
-      | field _ => simp [SVal.save, SVal.find]
+      | field _ => simp [SVal.saveLive, SVal.findLive]
       | «at» i =>
-        simp only [SVal.save, SVal.find]
+        simp only [SVal.saveLive, SVal.findLive]
         cases lookupBy i entries <;> (simp only [ex_ok_bind]; exact save_ok_iff_find_ok hn')
 
 /-- A deleted struct's member is the deleted member: after `delete alice;`,
@@ -808,7 +1518,7 @@ theorem asValue_defaultOf (c : SVal) :
 read: after `delete alice.account;`, `alice.account.balance` is the default
 of the old balance, and an array's `length` is `0`. -/
 theorem find_defaultOf : ∀ (c : SVal) (rest : List Seg), rest.any Seg.isAt = false →
-    c.defaultOf.find rest = c.find rest >>= fun w => .ok w.defaultOf
+    c.defaultOf.findLive rest = c.findLive rest >>= fun w => .ok w.defaultOf
   | c, [], _ => by cases c <;> try (rename_i p; cases p) <;> rfl
   | c, .at _ :: _, h => by simp [Seg.isAt] at h
   | c, .field n :: r, h => by
@@ -816,16 +1526,16 @@ theorem find_defaultOf : ∀ (c : SVal) (rest : List Seg), rest.any Seg.isAt = f
     cases c with
     | prim p => cases p <;> rfl
     | struct fields =>
-      simp only [SVal.defaultOf, SVal.find, lookupBy_defaultOfFields]
+      simp only [SVal.defaultOf, SVal.findLive, lookupBy_defaultOfFields]
       cases lookupBy n fields with
       | none => rfl
       | some c' => exact find_defaultOf c' r hr
     | array elems shadow =>
       by_cases hn : n = "length"
       · subst hn
-        simp only [SVal.defaultOf, SVal.find]
+        simp only [SVal.defaultOf, SVal.findLive]
         cases r <;> rfl
-      · simp [SVal.defaultOf, SVal.find, bind, Except.bind]
+      · simp [SVal.defaultOf, SVal.findLive, bind, Except.bind]
     | map entries dflt => rfl
 
 /-! ## Comparing a write with a read
@@ -1175,29 +1885,9 @@ def LFml.elim : LFml → LFml
 
 /-! ### Eliminating keeps what returns -/
 
-/-- Equal runs agree: `balances[k]` and `balances[k]`. -/
-theorem Sim.of_eq {α : Type} {x y : Res α} (h : x = y) : Sim x y := h ▸ Sim.refl x
-
 /-- Two runs that both halt agree. -/
 theorem Sim.halt {α : Type} {x y : Res α} (hx : ∀ a, x ≠ .ok a) (hy : ∀ a, y ≠ .ok a) : Sim x y :=
   fun a => ⟨fun h => absurd h (hx a), fun h => absurd h (hy a)⟩
-
-/-- An operator on agreeing right operands: `a && b` reads `b` only when
-`a` is not `false`, and then as the operand does. -/
-theorem evalBinop_sim {op : BinOp} {p : PrimTy} {x : Value} {b b' : Res Value} (h : Sim b b') :
-    Sim (evalBinop op p x b) (evalBinop op p x b') := by
-  unfold evalBinop
-  split
-  · exact Sim.refl _
-  · exact Sim.refl _
-  · exact Sim.bind h fun _ => Sim.refl _
-
-/-- `c ? a : b` on agreeing branches. -/
-theorem pickBranch_sim {cv : Value} {t t' e e' : Res Value} (ht : Sim t t') (he : Sim e e') :
-    Sim (pickBranch cv t e) (pickBranch cv t' e') := by
-  cases cv with
-  | int _ => exact Sim.refl _
-  | bool b => cases b <;> assumption
 
 /-- A path without a `length` segment evaluates to one. -/
 theorem LPath.noLen_eval (σ : State) : ∀ {q : LPath} {qs : List Seg},
@@ -1256,30 +1946,30 @@ theorem kmapF_defaultOf (c : SVal) : kmapF c.defaultOf = kmapF c := by
 /-- A write below a location keeps its shape: after `ledger.balances[1] = 5;`,
 `ledger.balances` is the mapping it was. -/
 theorem save_cons_kmapF {v new u : SVal} {s : Seg} {r : List Seg}
-    (h : v.save (s :: r) new = .ok u) : kmapF u = kmapF v := by
+    (h : v.saveLive (s :: r) new = .ok u) : kmapF u = kmapF v := by
   cases v with
-  | prim p => cases s <;> simp [SVal.save] at h
+  | prim p => cases s <;> simp [SVal.saveLive] at h
   | struct fields =>
     cases s with
-    | «at» _ => simp [SVal.save] at h
+    | «at» _ => simp [SVal.saveLive] at h
     | field n =>
-      simp only [SVal.save] at h
+      simp only [SVal.saveLive] at h
       split at h
       · obtain ⟨_, _, he⟩ := bind_eq_ok.1 h; cases he; rfl
       · simp at h
   | array elems shadow =>
     cases s with
-    | field _ => simp [SVal.save] at h
+    | field _ => simp [SVal.saveLive] at h
     | «at» i =>
-      simp only [SVal.save] at h
+      simp only [SVal.saveLive] at h
       split at h
       · obtain ⟨_, _, he⟩ := bind_eq_ok.1 h; cases he; rfl
       · simp at h
   | map entries dflt =>
     cases s with
-    | field _ => simp [SVal.save] at h
+    | field _ => simp [SVal.saveLive] at h
     | «at» i =>
-      simp only [SVal.save] at h
+      simp only [SVal.saveLive] at h
       split at h <;> (obtain ⟨_, _, he⟩ := bind_eq_ok.1 h; cases he; rfl)
 
 /-- The members a list of segments starts with, up to its first key. -/
@@ -1319,20 +2009,20 @@ theorem LPath.addFields_eval (σ : State) : ∀ (xs : List SSeg) (q : LPath),
 /-- **Below a key below a `delete`**: a deleted mapping keeps its entries, a
 deleted array has none, anything else has no key to read. -/
 theorem defaultOf_find_at (N : SVal) (k : Int) (more : List Seg) (a : SVal) :
-    N.defaultOf.find (.at k :: more) = .ok a ↔
-      isMapV N = true ∧ N.find (.at k :: more) = .ok a := by
+    N.defaultOf.findLive (.at k :: more) = .ok a ↔
+      isMapV N = true ∧ N.findLive (.at k :: more) = .ok a := by
   cases N with
-  | prim p => cases p <;> simp [SVal.defaultOf, SVal.find, isMapV]
-  | struct _ => simp [SVal.defaultOf, SVal.find, isMapV]
-  | array _ _ => simp [SVal.defaultOf, SVal.find, isMapV]
+  | prim p => cases p <;> simp [SVal.defaultOf, SVal.findLive, isMapV]
+  | struct _ => simp [SVal.defaultOf, SVal.findLive, isMapV]
+  | array _ _ => simp [SVal.defaultOf, SVal.findLive, isMapV]
   | map _ _ => simp [SVal.defaultOf, isMapV]
 
 /-- The read below a key below a `delete`, guarded by the location above
 the key being a mapping. -/
 theorem below_key_sim {σ : State} {X Y : LTerm} {A : Res SVal} {k : Int} {more : List Seg}
     {G : SVal → Res Value} (hX : Sim (X.eval σ) (A >>= kmapF))
-    (hY : Sim (Y.eval σ) (A >>= fun N => N.find (.at k :: more) >>= G)) :
-    Sim ((LTerm.seq X Y).eval σ) (A >>= fun N => N.defaultOf.find (.at k :: more) >>= G) := by
+    (hY : Sim (Y.eval σ) (A >>= fun N => N.findLive (.at k :: more) >>= G)) :
+    Sim ((LTerm.seq X Y).eval σ) (A >>= fun N => N.defaultOf.findLive (.at k :: more) >>= G) := by
   intro a
   simp only [LTerm.eval, bind_eq_ok]
   constructor
@@ -1354,7 +2044,7 @@ theorem below_key_sim {σ : State} {X Y : LTerm} {A : Res SVal} {k : Int} {more 
 
 /-- A word has nothing below it. -/
 theorem find_prim_cons (p : PrimVal) (f : Seg) (t : List Seg) :
-    (SVal.prim p).find (f :: t) = .error .stuck := by
+    (SVal.prim p).findLive (f :: t) = .error .stuck := by
   cases f <;> rfl
 
 mutual
@@ -1450,7 +2140,7 @@ theorem LStor.okE_sim (σ : State) :
 
 /-- **What a read after writes returns**, peeled one write at a time. -/
 theorem LStor.readU_sim (σ : State) : (s : LStor) → ∀ (Q : LPath) {v : SVal} {qs : List Seg},
-    s.eval σ = .ok v → Q.eval σ = .ok qs → Sim ((s.readU Q).eval σ) (v.find qs >>= SVal.asValue)
+    s.eval σ = .ok v → Q.eval σ = .ok qs → Sim ((s.readU Q).eval σ) (v.findLive qs >>= SVal.asValue)
   | .init, Q, v, qs, hv, hq => by
     cases hv
     simp only [LStor.readU, LTerm.eval, LStor.eval, hq, Close.ok_bind]
@@ -1468,7 +2158,7 @@ theorem LStor.readU_sim (σ : State) : (s : LStor) → ∀ (Q : LPath) {v : SVal
     | eq =>
       simp only [PathRel.Holds] at hr
       subst hr
-      simp only [saveLeaf, SVal.find_save_same hu, Close.ok_bind, Close.asValue_toSVal]
+      simp only [saveLeaf, findLive_saveLive_same hu, Close.ok_bind, Close.asValue_toSVal]
       exact Sim.trans (LTerm.elim_sim σ w) (Sim.of_eq hw)
     | above =>
       obtain ⟨f, t, rfl⟩ := hr
@@ -1479,11 +2169,11 @@ theorem LStor.readU_sim (σ : State) : (s : LStor) → ∀ (Q : LPath) {v : SVal
     | below k =>
       obtain ⟨f, t, rfl, -⟩ := hr
       refine Sim.halt (by simp [saveLeaf, LTerm.eval]) ?_
-      rw [Close.find_append, SVal.find_save_same hu]
+      rw [findLive_append, findLive_saveLive_same hu]
       cases wv <;> simp [Close.ok_bind, find_prim_cons, Close.error_bind]
     | diverge =>
       simp only [saveLeaf]
-      rw [Close.find_save_diverge hr hu]
+      rw [findLive_saveLive_diverge hr hu]
       exact LStor.readU_sim σ s Q hv hq
   | .del s P, Q, u, qs, hu, hq => by
     obtain ⟨v, hv, hu⟩ := bind_eq_ok.1 hu
@@ -1498,7 +2188,7 @@ theorem LStor.readU_sim (σ : State) : (s : LStor) → ∀ (Q : LPath) {v : SVal
     | eq =>
       simp only [PathRel.Holds] at hr
       subst hr
-      simp only [delLeaf, LTerm.eval, SVal.find_save_same hu, Close.ok_bind, asValue_defaultOf]
+      simp only [delLeaf, LTerm.eval, findLive_saveLive_same hu, Close.ok_bind, asValue_defaultOf]
       have h₁ := LStor.readU_sim σ s Q hv hq
       rw [hc, Close.ok_bind] at h₁
       exact Sim.bind h₁ fun _ => Sim.refl _
@@ -1517,10 +2207,10 @@ theorem LStor.readU_sim (σ : State) : (s : LStor) → ∀ (Q : LPath) {v : SVal
         have hA : (P.elim.addFields rest).eval σ = .ok (ps ++ leadFields rest) := by
           rw [LPath.addFields_eval, hp']; rfl
         have hX := LStor.mapU_sim σ s _ hv hA
-        rw [Close.find_append, hc, Close.ok_bind] at hX
+        rw [findLive_append, hc, Close.ok_bind] at hX
         have hY := LStor.readU_sim σ s Q hv hq
-        rw [hft, Close.find_append, hc, Close.ok_bind, Close.find_append, bind_assoc] at hY
-        rw [hft, Close.find_append, SVal.find_save_same hu, Close.ok_bind, Close.find_append,
+        rw [hft, findLive_append, hc, Close.ok_bind, findLive_append, bind_assoc] at hY
+        rw [hft, findLive_append, findLive_saveLive_same hu, Close.ok_bind, findLive_append,
           find_defaultOf c _ (leadFields_noAt rest), bind_assoc, bind_assoc]
         simp only [Close.ok_bind]
         exact below_key_sim hX hY
@@ -1529,18 +2219,18 @@ theorem LStor.readU_sim (σ : State) : (s : LStor) → ∀ (Q : LPath) {v : SVal
           rw [segsEval_any σ hrest]; simpa using hkey
         simp only [LTerm.eval]
         refine Sim.bind (LStor.readU_sim σ s Q hv hq) (fun _ => Sim.refl _) |>.trans ?_
-        rw [Close.find_append, Close.find_append, SVal.find_save_same hu, hc]
+        rw [findLive_append, findLive_append, findLive_saveLive_same hu, hc]
         simp only [Close.ok_bind, find_defaultOf c (f :: t) hk, bind_assoc, asValue_defaultOf]
         exact Sim.refl _
     | diverge =>
       simp only [delLeaf]
-      rw [Close.find_save_diverge hr hu]
+      rw [findLive_saveLive_diverge hr hu]
       exact LStor.readU_sim σ s Q hv hq
 
 /-- **Whether a location is there after writes**, peeled one write at a time. -/
 theorem LStor.hasU_sim (σ : State) : (s : LStor) → ∀ (Q : LPath) {v : SVal} {qs : List Seg},
     s.eval σ = .ok v → Q.eval σ = .ok qs →
-      Sim ((s.hasU Q).eval σ) (v.find qs >>= fun _ => .ok (.bool true))
+      Sim ((s.hasU Q).eval σ) (v.findLive qs >>= fun _ => .ok (.bool true))
   | .init, Q, v, qs, hv, hq => by
     cases hv
     simp only [LStor.hasU, LTerm.eval, LStor.eval, hq, Close.ok_bind]
@@ -1558,7 +2248,7 @@ theorem LStor.hasU_sim (σ : State) : (s : LStor) → ∀ (Q : LPath) {v : SVal}
     | eq =>
       simp only [PathRel.Holds] at hr
       subst hr
-      simp only [saveHas, SVal.find_save_same hu, Close.ok_bind, LTerm.eval]
+      simp only [saveHas, findLive_saveLive_same hu, Close.ok_bind, LTerm.eval]
       exact Sim.refl _
     | above =>
       obtain ⟨f, t, rfl⟩ := hr
@@ -1568,11 +2258,11 @@ theorem LStor.hasU_sim (σ : State) : (s : LStor) → ∀ (Q : LPath) {v : SVal}
     | below k =>
       obtain ⟨f, t, rfl, -⟩ := hr
       refine Sim.halt (by simp [saveHas, LTerm.eval]) ?_
-      rw [Close.find_append, SVal.find_save_same hu]
+      rw [findLive_append, findLive_saveLive_same hu]
       cases wv <;> simp [Close.ok_bind, find_prim_cons, Close.error_bind]
     | diverge =>
       simp only [saveHas]
-      rw [Close.find_save_diverge hr hu]
+      rw [findLive_saveLive_diverge hr hu]
       exact LStor.hasU_sim σ s Q hv hq
   | .del s P, Q, u, qs, hu, hq => by
     obtain ⟨v, hv, hu⟩ := bind_eq_ok.1 hu
@@ -1587,7 +2277,7 @@ theorem LStor.hasU_sim (σ : State) : (s : LStor) → ∀ (Q : LPath) {v : SVal}
     | eq =>
       simp only [PathRel.Holds] at hr
       subst hr
-      simp only [delHas, SVal.find_save_same hu, Close.ok_bind, LTerm.eval]
+      simp only [delHas, findLive_saveLive_same hu, Close.ok_bind, LTerm.eval]
       exact Sim.refl _
     | above =>
       obtain ⟨f, t, rfl⟩ := hr
@@ -1603,10 +2293,10 @@ theorem LStor.hasU_sim (σ : State) : (s : LStor) → ∀ (Q : LPath) {v : SVal}
         have hA : (P.elim.addFields rest).eval σ = .ok (ps ++ leadFields rest) := by
           rw [LPath.addFields_eval, hp']; rfl
         have hX := LStor.mapU_sim σ s _ hv hA
-        rw [Close.find_append, hc, Close.ok_bind] at hX
+        rw [findLive_append, hc, Close.ok_bind] at hX
         have hY := LStor.hasU_sim σ s Q hv hq
-        rw [hft, Close.find_append, hc, Close.ok_bind, Close.find_append, bind_assoc] at hY
-        rw [hft, Close.find_append, SVal.find_save_same hu, Close.ok_bind, Close.find_append,
+        rw [hft, findLive_append, hc, Close.ok_bind, findLive_append, bind_assoc] at hY
+        rw [hft, findLive_append, findLive_saveLive_same hu, Close.ok_bind, findLive_append,
           find_defaultOf c _ (leadFields_noAt rest), bind_assoc, bind_assoc]
         simp only [Close.ok_bind]
         exact below_key_sim hX hY
@@ -1614,17 +2304,17 @@ theorem LStor.hasU_sim (σ : State) : (s : LStor) → ∀ (Q : LPath) {v : SVal}
         have hk : (f :: t).any Seg.isAt = false := by
           rw [segsEval_any σ hrest]; simpa using hkey
         refine (LStor.hasU_sim σ s Q hv hq).trans ?_
-        rw [Close.find_append, Close.find_append, SVal.find_save_same hu, hc]
+        rw [findLive_append, findLive_append, findLive_saveLive_same hu, hc]
         simp only [Close.ok_bind, find_defaultOf c (f :: t) hk, bind_assoc]
         exact Sim.refl _
     | diverge =>
       simp only [delHas]
-      rw [Close.find_save_diverge hr hu]
+      rw [findLive_saveLive_diverge hr hu]
       exact LStor.hasU_sim σ s Q hv hq
 
 /-- **Whether a mapping is there after writes**, peeled one write at a time. -/
 theorem LStor.mapU_sim (σ : State) : (s : LStor) → ∀ (Q : LPath) {v : SVal} {qs : List Seg},
-    s.eval σ = .ok v → Q.eval σ = .ok qs → Sim ((s.mapU Q).eval σ) (v.find qs >>= kmapF)
+    s.eval σ = .ok v → Q.eval σ = .ok qs → Sim ((s.mapU Q).eval σ) (v.findLive qs >>= kmapF)
   | .init, Q, v, qs, hv, hq => by
     cases hv
     simp only [LStor.mapU, LTerm.eval, LStor.eval, hq, Close.ok_bind]
@@ -1643,7 +2333,7 @@ theorem LStor.mapU_sim (σ : State) : (s : LStor) → ∀ (Q : LPath) {v : SVal}
       simp only [PathRel.Holds] at hr
       subst hr
       refine Sim.halt (by simp [saveMap, LTerm.eval]) ?_
-      simp only [SVal.find_save_same hu, Close.ok_bind]
+      simp only [findLive_saveLive_same hu, Close.ok_bind]
       cases wv <;> simp [kmapF, isMapV, Value.toSVal]
     | above =>
       obtain ⟨f, t, rfl⟩ := hr
@@ -1655,11 +2345,11 @@ theorem LStor.mapU_sim (σ : State) : (s : LStor) → ∀ (Q : LPath) {v : SVal}
     | below rest =>
       obtain ⟨f, t, rfl, -⟩ := hr
       refine Sim.halt (by simp [saveMap, LTerm.eval]) ?_
-      rw [Close.find_append, SVal.find_save_same hu]
+      rw [findLive_append, findLive_saveLive_same hu]
       cases wv <;> simp [Close.ok_bind, find_prim_cons, Close.error_bind]
     | diverge =>
       simp only [saveMap]
-      rw [Close.find_save_diverge hr hu]
+      rw [findLive_saveLive_diverge hr hu]
       exact LStor.mapU_sim σ s Q hv hq
   | .del s P, Q, u, qs, hu, hq => by
     obtain ⟨v, hv, hu⟩ := bind_eq_ok.1 hu
@@ -1674,7 +2364,7 @@ theorem LStor.mapU_sim (σ : State) : (s : LStor) → ∀ (Q : LPath) {v : SVal}
     | eq =>
       simp only [PathRel.Holds] at hr
       subst hr
-      simp only [delMap, SVal.find_save_same hu, Close.ok_bind, kmapF_defaultOf]
+      simp only [delMap, findLive_saveLive_same hu, Close.ok_bind, kmapF_defaultOf]
       have := LStor.mapU_sim σ s Q hv hq
       rw [hc, Close.ok_bind] at this
       exact this
@@ -1694,10 +2384,10 @@ theorem LStor.mapU_sim (σ : State) : (s : LStor) → ∀ (Q : LPath) {v : SVal}
         have hA : (P.elim.addFields rest).eval σ = .ok (ps ++ leadFields rest) := by
           rw [LPath.addFields_eval, hp']; rfl
         have hX := LStor.mapU_sim σ s _ hv hA
-        rw [Close.find_append, hc, Close.ok_bind] at hX
+        rw [findLive_append, hc, Close.ok_bind] at hX
         have hY := LStor.mapU_sim σ s Q hv hq
-        rw [hft, Close.find_append, hc, Close.ok_bind, Close.find_append, bind_assoc] at hY
-        rw [hft, Close.find_append, SVal.find_save_same hu, Close.ok_bind, Close.find_append,
+        rw [hft, findLive_append, hc, Close.ok_bind, findLive_append, bind_assoc] at hY
+        rw [hft, findLive_append, findLive_saveLive_same hu, Close.ok_bind, findLive_append,
           find_defaultOf c _ (leadFields_noAt rest), bind_assoc, bind_assoc]
         simp only [Close.ok_bind]
         exact below_key_sim hX hY
@@ -1705,12 +2395,12 @@ theorem LStor.mapU_sim (σ : State) : (s : LStor) → ∀ (Q : LPath) {v : SVal}
         have hk : (f :: t).any Seg.isAt = false := by
           rw [segsEval_any σ hrest]; simpa using hkey
         refine (LStor.mapU_sim σ s Q hv hq).trans ?_
-        rw [Close.find_append, Close.find_append, SVal.find_save_same hu, hc]
+        rw [findLive_append, findLive_append, findLive_saveLive_same hu, hc]
         simp only [Close.ok_bind, find_defaultOf c (f :: t) hk, bind_assoc, kmapF_defaultOf]
         exact Sim.refl _
     | diverge =>
       simp only [delMap]
-      rw [Close.find_save_diverge hr hu]
+      rw [findLive_saveLive_diverge hr hu]
       exact LStor.mapU_sim σ s Q hv hq
 
 end
@@ -1870,13 +2560,13 @@ theorem LTerm.eval_ite (σ : State) (c a b : LTerm) :
     (LTerm.ite c a b).eval σ = c.eval σ >>= fun cv => pickBranch cv (a.eval σ) (b.eval σ) := rfl
 /-- `balances[k]`: the storage, the path, the word there. -/
 theorem LTerm.eval_find (σ : State) (s : LStor) (q : LPath) : (LTerm.find s q).eval σ =
-    s.eval σ >>= fun v => q.eval σ >>= fun qs => v.find qs >>= SVal.asValue := rfl
+    s.eval σ >>= fun v => q.eval σ >>= fun qs => v.findLive qs >>= SVal.asValue := rfl
 /-- `balances[k]` is a location. -/
 theorem LTerm.eval_has (σ : State) (s : LStor) (q : LPath) : (LTerm.has s q).eval σ =
-    s.eval σ >>= fun v => q.eval σ >>= fun qs => v.find qs >>= fun _ => .ok (.bool true) := rfl
+    s.eval σ >>= fun v => q.eval σ >>= fun qs => v.findLive qs >>= fun _ => .ok (.bool true) := rfl
 /-- `ledger.balances` is a mapping. -/
 theorem LTerm.eval_kmap (σ : State) (s : LStor) (q : LPath) : (LTerm.kmap s q).eval σ =
-    s.eval σ >>= fun v => q.eval σ >>= fun qs => v.find qs >>= kmapF := rfl
+    s.eval σ >>= fun v => q.eval σ >>= fun qs => v.findLive qs >>= kmapF := rfl
 /-- `balances[k] = 5;` succeeds. -/
 theorem LTerm.eval_sok (σ : State) (s : LStor) :
     (LTerm.sok s).eval σ = s.eval σ >>= fun _ => .ok (.bool true) := rfl
@@ -1943,7 +2633,7 @@ macro "sol_decide" : tactic => `(tactic|
    (refine (Fml.valid_iff_reduce _ (by
       first
       | decide
-      | fail "sol_decide: the formula is outside the fragment (a modality, memory, a push or pop, a copy between locations, or an alias no update binds)")).2 ?_
+      | fail "sol_decide: the formula is outside the fragment (a modality, memory, a push or pop, a copy between locations, an alias no update binds, or one through an index used after a write)")).2 ?_
     sol_reduce
     intro σ
     sol_decide_split

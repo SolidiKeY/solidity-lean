@@ -351,7 +351,12 @@ partial def tPath (Γ : ECtx) : RawTerm → Except String (PTerm C)
     | .mem => throw s!"`{x}` is a memory reference, not a storage path"
     | _ => pure (.pv (Var.ofName x))
   | .field t f => do pure (.field (← tPath Γ t) f)
-  | .at t i => do pure (.at (← tPath Γ t) (← tVal Γ i))
+  | .at t i => do
+    -- `p[p.length]`, the slot one past the end: no bounds check
+    match t, i with
+    | .name x, .field (.name y) "length" =>
+      if x == y then pure (.next (← tPath Γ t)) else pure (.at (← tPath Γ t) (← tVal Γ i))
+    | _, _ => pure (.at (← tPath Γ t) (← tVal Γ i))
   | _ => throw "not a storage path: a name, `p.f` or `p[t]`"
 
 /-- A term at the storage sort; a push and a pop are nested
@@ -367,6 +372,7 @@ partial def tStor (Γ : ECtx) : RawTerm → Except String (STerm C)
       pure (.pushSlot (← tStor Γ s') (← tPath Γ b) (← elemTy C Γ b))
     | .app "delAt" [s', .at _ _], .sub _ (.num 1) => pure (.pop (← tStor Γ s') (← tPath Γ b))
     | _, .add _ (.num 1) => pure (.extend (← tStor Γ s) (← tPath Γ b) (← elemTy C Γ b))
+    | _, .sub _ (.num 1) => pure (.shrink (← tStor Γ s) (← tPath Γ b))
     | _, _ => throw "the length of an array is written by a push or a pop"
   | .app "save" [s, p, v] => do pure (.save (← tStor Γ s) (← tPath Γ p) (← tSVal Γ v))
   | .app "delAt" [s, p] => do pure (.delAt (← tStor Γ s) (← tPath Γ p))

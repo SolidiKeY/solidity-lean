@@ -79,7 +79,13 @@ inductive PTerm (C : Contract) where
   | root (r : Name)
   | pv (x : Var)
   | field (p : PTerm C) (f : Name)
+  /-- `p[i]`, the index checked against `p`'s length where it is taken
+  (`State.checkIndex`), as the program checks it. -/
   | at (p : PTerm C) (i : Term C)
+  /-- `p[p.length]`: the slot one past the end, where `lsv = p.push()` binds
+  its alias (KeY's `consr(p, at(find(storage, consr(p, size))))`).  No bounds
+  check: it is past them by construction. -/
+  | next (p : PTerm C)
 
 /-- A storage. -/
 inductive STerm (C : Contract) where
@@ -95,6 +101,9 @@ inductive STerm (C : Contract) where
   | pushSlot (s : STerm C) (p : PTerm C) (E : Ty)
   /-- `save(delAt(s, p[p.length - 1]), p.length, p.length - 1)`. -/
   | pop (s : STerm C) (p : PTerm C)
+  /-- `save(s, p.length, p.length - 1)`: a pop that leaves the element as it
+  is, an array of mappings'. -/
+  | shrink (s : STerm C) (p : PTerm C)
   /-- The extent write of `lsv = p.push()`: `save(s, p.length, p.length + 1)`. -/
   | extend (s : STerm C) (p : PTerm C) (E : Ty)
 
@@ -209,7 +218,13 @@ def PTerm.eval (σ : State) : PTerm C → Res (Name × List Seg)
   | .at p i => do
     let (r, segs) ← p.eval σ
     let i ← (← i.eval σ).asInt
+    σ.checkIndex r segs i
     pure (r, segs ++ [.at i])
+  | .next p => do
+    let (r, segs) ← p.eval σ
+    match ← σ.findStorage r segs with
+    | .array elems _ => pure (r, segs ++ [.at elems.length])
+    | .prim _ | .struct _ | .map _ _ => .error .stuck
 
 def STerm.eval (σ : State) : STerm C → Res State
   | .storage => pure σ
@@ -217,7 +232,7 @@ def STerm.eval (σ : State) : STerm C → Res State
     let sv ← v.eval σ
     let τ ← s.eval σ
     let (r, segs) ← p.eval σ
-    τ.saveStorage r segs sv
+    τ.writeStorage r segs sv
   | .delAt s p => do
     let τ ← s.eval σ
     let (r, segs) ← p.eval σ
@@ -226,7 +241,7 @@ def STerm.eval (σ : State) : STerm C → Res State
   | .push s p v => do
     let τ ← s.eval σ
     let (r, segs) ← p.eval σ
-    pushAt τ .uint r segs fun _ => v.eval σ
+    pushAt τ .uint r segs fun _ => do pure (← v.eval σ).strip
   | .pushSlot s p E => do
     let τ ← s.eval σ
     let (r, segs) ← p.eval σ
@@ -234,7 +249,11 @@ def STerm.eval (σ : State) : STerm C → Res State
   | .pop s p => do
     let τ ← s.eval σ
     let (r, segs) ← p.eval σ
-    popAt τ r segs
+    popAt τ false r segs
+  | .shrink s p => do
+    let τ ← s.eval σ
+    let (r, segs) ← p.eval σ
+    popAt τ true r segs
   | .extend s p E => do
     let τ ← s.eval σ
     let (r, segs) ← p.eval σ
@@ -394,11 +413,12 @@ def PTerm.vars : PTerm C → List Var
   | .pv x => [x]
   | .field p _ => p.vars
   | .at p i => p.vars ++ i.vars
+  | .next p => p.vars
 
 def STerm.vars : STerm C → List Var
   | .storage => []
   | .save s p v | .push s p v => s.vars ++ p.vars ++ v.vars
-  | .delAt s p | .pushSlot s p _ | .pop s p | .extend s p _ => s.vars ++ p.vars
+  | .delAt s p | .pushSlot s p _ | .pop s p | .shrink s p | .extend s p _ => s.vars ++ p.vars
 
 def SValT.vars : SValT C → List Var
   | .val t => t.vars
@@ -504,7 +524,9 @@ theorem PTerm.eval_frame {σ τ : State} (hag : EnvAgreeExcept ns σ τ) :
   | .root _, _ => rfl
   | .pv x, h => aliasPath_frame hag (h.head)
   | .field p _, h => by simp only [PTerm.eval, p.eval_frame hag h]
-  | .at p i, h => by simp only [PTerm.eval, p.eval_frame hag h.left, i.eval_frame hag h.right]
+  | .at p i, h => by
+    simp only [PTerm.eval, p.eval_frame hag h.left, i.eval_frame hag h.right, checkIndex_congr hag]
+  | .next p, h => by simp only [PTerm.eval, p.eval_frame hag h, findStorage_congr hag]
 
 theorem STerm.eval_frame {σ τ : State} (hag : EnvAgreeExcept ns σ τ) :
     (s : STerm C) → Avoids s.vars ns → ResultsAgree ns (s.eval σ) (s.eval τ)
@@ -523,12 +545,16 @@ theorem STerm.eval_frame {σ τ : State} (hag : EnvAgreeExcept ns σ τ) :
     simp only [STerm.eval, p.eval_frame hag h.left.right]
     refine ResultsAgree.bind (s.eval_frame hag h.left.left) fun _ _ h' => ?_
     refine bindPureResults_agree _ fun _ => pushAt_agree h' _ _ _ fun _ => ?_
-    exact v.eval_frame hag h.right
+    simp only [v.eval_frame hag h.right]
   | .pushSlot s p _, h => by
     simp only [STerm.eval, p.eval_frame hag h.right]
     refine ResultsAgree.bind (s.eval_frame hag h.left) fun _ _ h' => ?_
     exact bindPureResults_agree _ fun _ => pushAt_agree h' _ _ _ fun _ => rfl
   | .pop s p, h => by
+    simp only [STerm.eval, p.eval_frame hag h.right]
+    refine ResultsAgree.bind (s.eval_frame hag h.left) fun _ _ h' => ?_
+    agree_run h'
+  | .shrink s p, h => by
     simp only [STerm.eval, p.eval_frame hag h.right]
     refine ResultsAgree.bind (s.eval_frame hag h.left) fun _ _ h' => ?_
     agree_run h'

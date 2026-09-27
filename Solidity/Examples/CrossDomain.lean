@@ -237,6 +237,7 @@ theorem memoryToStorageIsCopy :
   sol_symex
   sol_close
 
+set_option maxHeartbeats 1000000 in
 /-- `people[i] = carol;` — into an array element
 (`memoryToStorageIndexArrayCopyRoot`), a copy again. -/
 theorem memoryToStorageIndexArray :

@@ -189,7 +189,7 @@ taclets	TestSuite	subtractionSimple	proved
 taclets	TestSuite	subtractionStorageRead	proved		
 taclets	TestSuite	unaryMinusSimple	unsupported	concretized: solkey proves this for all parameters; ported at x = 5	Solidity elaboration failed: a uint where a int is expected
 taclets	TestSuite	testDeepPopDoesNotResetMappingMember	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
-taclets	TestSuite	testDeleteArrayDoesNotResetElementMappingMember	open		the run from the initial store ends in `revert`
+taclets	TestSuite	testDeleteArrayDoesNotResetElementMappingMember	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
 taclets	TestSuite	testMemoryAliasing	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
 taclets	TestSuite	testMemoryDeleteAlias	unsupported		Solidity elaboration failed: `delete` in memory is not a statement yet
 taclets	TestSuite	testMemoryDeleteIdentityFieldFreshensSlot	unsupported		Solidity elaboration failed: `delete` in memory is not a statement yet
@@ -236,9 +236,9 @@ taclets	TestSuite	testStoragePushFieldLvalue	unsupported		`.length` is not a pro
 taclets	TestSuite	testStoragePushLvalueCopiesStorageSource	unsupported		`b.push() = v` (a push as an lvalue) is not in the grammar
 taclets	TestSuite	testStoragePushLvaluePrimitive	unsupported		`b.push() = v` (a push as an lvalue) is not in the grammar
 taclets	TestSuite	testStoragePushReturnAlias	unsupported		`.length` is not a program expression
-taclets	TestSuite	testDanglingReferenceSurvivesPush	open		the run from the initial store ends in `revert`
-taclets	TestSuite	testArrayCopyClearsOldElements	open		the run from the initial store ends in `revert`
-taclets	TestSuite	testArrayCopyKeepsDestinationTail	open		the run from the initial store ends in `revert`
+taclets	TestSuite	testDanglingReferenceSurvivesPush	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
+taclets	TestSuite	testArrayCopyClearsOldElements	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
+taclets	TestSuite	testArrayCopyKeepsDestinationTail	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
 taclets	TestSuite	testStorageIndexDeleteOutOfBoundsReverts	unsupported		the function asserts that the program reverts (a box-only obligation): the obligation is a diamond, which proves the opposite
 taclets	TestSuite	testFixedArrayDeleteKeepsLength	unsupported		state variable `fixedValues` (`uint[3]`) is not in the Lean contract `TestSuite` (Syntax.lean)
 taclets	TestSuite	testFixedArrayLength	unsupported		`.length` is not a program expression
@@ -254,7 +254,7 @@ taclets	TestSuite	testFixedStructArrayDeleteResetsElements	unsupported		state va
 taclets	TestSuite	testStructWithFixedArrayDeleteKeepsLength	unsupported		state variable `triple` (`Triple`) is not in the Lean contract `TestSuite` (Syntax.lean)
 taclets	TestSuite	testStructWithFixedArrayCopy	unsupported		state variable `triple` (`Triple`) is not in the Lean contract `TestSuite` (Syntax.lean)
 taclets	TestSuite	testFixedMappingArrayDeleteKeepsEntries	unsupported		state variable `fixedMaps` (`mapping(uint => uint)[2]`) is not in the Lean contract `TestSuite` (Syntax.lean)
-taclets	TestSuite	testDeleteArrayLeavesDataPastLength	open		the run from the initial store ends in `revert`
+taclets	TestSuite	testDeleteArrayLeavesDataPastLength	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
 taclets	TestSuite	testPopKeepsMappingElementEntries	unsupported		state variable `mapArray` (`mapping(uint => uint)[]`) is not in the Lean contract `TestSuite` (Syntax.lean)
 taclets	TestSuite	testDeleteKeepsMappingElementEntries	unsupported		state variable `mapArray` (`mapping(uint => uint)[]`) is not in the Lean contract `TestSuite` (Syntax.lean)
 taclets	TestSuite	testPushBindMappingElement	unsupported		state variable `mapArray` (`mapping(uint => uint)[]`) is not in the Lean contract `TestSuite` (Syntax.lean)

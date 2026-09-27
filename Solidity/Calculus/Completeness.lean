@@ -178,9 +178,13 @@ def rebindStep {R : RefTy} (x : Var) : (r : ARhs C R) → Step k m (.rebind x r)
       (fun _ _ _ _ => ⟨_, .storageFieldReadBindLocalRoot⟩)
       (fun it sp ie _ => match it, sp, ie with
         | .map, _, _ => ⟨_, .storageIndexReadMappingBindLocalRoot⟩
-        | .arr, _, _ => ⟨_, .storageIndexReadArrayBindLocalRoot⟩) l
+        | .arr, sp, _ =>
+          if hE : sp.elemMapping then ⟨_, .storageIndexReadArrayBindLocalRootMappingElement⟩
+          else ⟨_, .storageIndexReadArrayBindLocalRoot⟩) l
   | .push b _ =>
-    if hb : b.isSimple then ⟨_, .storageLocalRootPushBind⟩
+    if hb : b.isSimple then
+      if hE : b.elemMapping then ⟨_, .storageLocalRootPushBindMappingElement⟩
+      else ⟨_, .storageLocalRootPushBind⟩
     else ⟨_, .storageLocalRootPush_unfold_leftFstReceiver⟩
 
 /-! ## Storage writes -/
@@ -237,9 +241,10 @@ def assignStep {T : Ty} : (l : Loc C T) → (r : Src C T) → Step k m (.assign 
           e (fun _ _ => ⟨_, .indexWriteValueRhsCapture⟩)
       | .read _ | .binop .. | .unop .. | .ternary .. | .readMem _ =>
         (VHole.store (.index it b _)).lower rfl e
-          (fun _ => ⟨_, .storageIndexWriteNonSimpleIndexCapture⟩)
+          (fun _ => ⟨_, .storageIndexWriteCaptureAllNonSimpleIndex⟩)
     else
-      (VHole.store (.index it b i)).lower rfl e (fun _ => ⟨_, .storageIndexWrite_unfold_leftFst⟩)
+      (VHole.store (.index it b i)).lower rfl e
+        (fun _ => ⟨_, .storageIndexWriteCaptureAllComplexRecv⟩)
   | .index it b i, .copy sp2 hm =>
     if hb : b.isSimple then
       match i with
@@ -249,8 +254,8 @@ def assignStep {T : Ty} : (l : Loc C T) → (r : Src C T) → Step k m (.assign 
             | .map, _, _, _ => ⟨_, .storageIndexWriteMappingCopySource⟩
             | .arr, _, _, _ => ⟨_, .storageIndexWriteArrayCopySource⟩) sp2
       | .read _ | .binop .. | .unop .. | .ternary .. | .readMem _ =>
-        ⟨_, .storageIndexWriteStorageRefNonSimpleIndexCapture⟩
-    else ⟨_, .storageIndexWriteStorageRef_unfold_leftFst⟩
+        ⟨_, .storageIndexWriteStorageRefCaptureAllNonSimpleIndex⟩
+    else ⟨_, .storageIndexWriteStorageRefCaptureAllComplexRecv⟩
 
 /-- A storage location written from memory, `people[i] = m;`: the receiver
 first, then the index; the memory path is copied as it is. -/
@@ -266,20 +271,21 @@ def assignFromMemStep {R : RefTy} :
       | .map, _, .simple _, _ => ⟨_, .memoryToStorageIndexMappingCopyRoot⟩
       | .arr, _, .simple _, _ => ⟨_, .memoryToStorageIndexArrayCopyRoot⟩
       | _, _, .read _, _ | _, _, .binop .., _ | _, _, .unop .., _ | _, _, .ternary .., _
-      | _, _, .readMem _, _ => ⟨_, .memoryToStorageIndexNonSimpleIndexCapture⟩
-    else ⟨_, .memoryToStorageIndex_unfold_leftFst⟩
+      | _, _, .readMem _, _ => ⟨_, .memoryToStorageIndexCaptureAllNonSimpleIndex⟩
+    else ⟨_, .memoryToStorageIndexCaptureAllComplexRecv⟩
 
 /-- `delete people[i].account;`: the receiver first, then the index. -/
 def deleteStep {T : Ty} : (l : Loc C T) → Step k m (.delete l)
   | .root _ _ => ⟨_, .storageRootDelete⟩
   | .field b _ _ =>
     if hb : b.isSimple then ⟨_, .storageFieldDelete⟩ else ⟨_, .storageFieldDelete_unfold_leftFst⟩
-  | .index _ b i =>
+  | .index it b i =>
     if hb : b.isSimple then
-      match i with
-      | .simple _ => ⟨_, .storageIndexDelete⟩
-      | .read _ | .binop .. | .unop .. | .ternary .. | .readMem _ =>
-        ⟨_, .storageIndexDeleteNonSimpleIndexCapture⟩
+      match it, b, i, hb with
+      | .map, _, .simple _, _ => ⟨_, .storageIndexDelete⟩
+      | .arr, _, .simple _, _ => ⟨_, .storageIndexArrayDelete⟩
+      | _, _, .read _, _ | _, _, .binop .., _ | _, _, .unop .., _ | _, _, .ternary .., _
+      | _, _, .readMem _, _ => ⟨_, .storageIndexDeleteNonSimpleIndexCapture⟩
     else ⟨_, .storageIndexDelete_unfold_leftFst⟩
 
 /-! ## Compound assignment and `++`/`--` -/
@@ -343,7 +349,9 @@ def pushStep {E : Ty} (b : SPath C (.array E)) (v : Option (Src C E))
     (hd : (v.isSome || E.defaultOkS) = true) : Step k m (.push b v hd) :=
   if hb : b.isSimple then
     match E, b, v, hd, hb with
-    | _, _, none, _, _ => ⟨_, .storagePushLengthSave⟩
+    | _, b, none, _, _ =>
+      if hE : b.elemPrim then ⟨_, .storagePushLengthSave⟩
+      else ⟨_, .storagePushLengthSaveReferenceElement⟩
     | _, _, some (.val (.simple _)), _, _ => ⟨_, .storagePushValueSave⟩
     | _, _, some (.val (.read _)), _, _ | _, _, some (.val (.binop ..)), _, _
     | _, _, some (.val (.unop ..)), _, _ | _, _, some (.val (.ternary ..)), _, _
@@ -357,7 +365,8 @@ def pushStep {E : Ty} (b : SPath C (.array E)) (v : Option (Src C E))
 /-- `people[i].values.pop();`: the receiver first.  The unfold rule leaves
 the type its alias pops at free, so it is given: `E`. -/
 def popStep {E : Ty} (b : SPath C (.array E)) : Step k m (.pop b) :=
-  if hb : b.isSimple then ⟨_, .storagePopSave⟩
+  if hb : b.isSimple then
+    if hE : b.elemMapping then ⟨_, .storagePopSaveMappingElement⟩ else ⟨_, .storagePopSave⟩
   else ⟨_, Taclet.storagePop_unfold_leftFstReceiver (E := E)⟩
 
 /-- `people[i].wallet.transfer(x + 1);`: the receiver first, then the
@@ -407,10 +416,14 @@ def assignMemStep {T : Ty} : (l : MLoc C T) → (r : MSrc C T) → Step k m (.as
       (fun _ _ => ⟨_, Taclet.memoryIndexWriteUnfoldSource (p := p)⟩)
   | .index (.var mv) (.simple ie), .ref src =>
     memRefStep (.index (.var mv) (.simple ie)) rfl (fun _ _ => ⟨_, .memoryIndexWriteCopy⟩) src
-  | .index (.var _) (.read _), _ | .index (.var _) (.binop ..), _
-  | .index (.var _) (.unop ..), _ | .index (.var _) (.ternary ..), _
-  | .index (.var _) (.readMem _), _ => ⟨_, .memoryIndexWriteNonSimpleIndexCapture⟩
-  | .index (.loc _) _, _ => ⟨_, .memoryIndexWrite_unfold_leftFst⟩
+  | .index (.var _) (.read _), .val _ | .index (.var _) (.binop ..), .val _
+  | .index (.var _) (.unop ..), .val _ | .index (.var _) (.ternary ..), .val _
+  | .index (.var _) (.readMem _), .val _ => ⟨_, .memoryIndexWriteCaptureAllNonSimpleIndex⟩
+  | .index (.var _) (.read _), .ref _ | .index (.var _) (.binop ..), .ref _
+  | .index (.var _) (.unop ..), .ref _ | .index (.var _) (.ternary ..), .ref _
+  | .index (.var _) (.readMem _), .ref _ => ⟨_, .memoryIndexWriteMemRefCaptureAllNonSimpleIndex⟩
+  | .index (.loc _) _, .val _ => ⟨_, .memoryIndexWriteCaptureAllComplexRecv⟩
+  | .index (.loc _) _, .ref _ => ⟨_, .memoryIndexWriteMemRefCaptureAllComplexRecv⟩
 
 /-! ## The rule for a statement -/
 

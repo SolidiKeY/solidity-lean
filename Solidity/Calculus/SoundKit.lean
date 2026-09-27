@@ -92,6 +92,18 @@ theorem State.saveStorage_with (σ : State) (r segs v) :
   · cases h : SVal.save _ segs v <;> rfl
   · rfl
 
+theorem State.writeStorage_with (σ : State) (r segs v) :
+    (σ.writeStorage r segs v >>= fun τ => pure { σ with storage := τ.storage }) =
+      σ.writeStorage r segs v := by
+  unfold State.writeStorage
+  split
+  · exact State.saveStorage_with σ r segs _
+  all_goals
+    simp only [bind_assoc]
+    cases σ.findStorage r segs with
+    | error _ => rfl
+    | ok cur => exact State.saveStorage_with σ r segs _
+
 @[simp] theorem Upd.apply_single (e : UpdElem C) (σ : State) :
     Upd.apply [e] σ = e.write σ σ := by
   simp [Upd.apply]
@@ -105,7 +117,7 @@ theorem upd_assign {T : Ty} (l : Loc C T) (r : Src C T) (σ : State) :
   have hr : r.lower.eval σ = r.value σ := by
     cases r <;> simp [Src.lower, SValT.eval, Src.value, Val.lower_eval, STerm.eval, SPath.lower_eval]
   simp only [Upd.apply_single, UpdElem.write, STerm.eval, hr, Loc.lower_eval, Stmt.run, bind_assoc,
-    pure_bind, State.saveStorage_with]
+    pure_bind, State.writeStorage_with]
 
 theorem upd_rebind (x : Var) {R : RefTy} (p : SPath C (.ref R)) (σ : State) :
     Upd.apply [.path x p.lower] σ = (Stmt.rebind x (.path p)).run σ := by
@@ -154,7 +166,8 @@ theorem upd_opStore {op : BinOp} (hop : op.hasCompoundAssign = true) {p : PrimTy
         (.val (.binop op p (.find .storage l.lower) se.lower)))] σ)
       (do let v ← se.eval σ; let (r, segs) ← l.resolve σ; opStore σ op p r segs v) := by
   simp only [Upd.apply_single, UpdElem.write, STerm.eval, SValT.eval, Term.eval, Loc.lower_eval,
-    Simple.lower_eval, bind_assoc, pure_bind, evalBinop_compound hop, State.saveStorage_with, opStore]
+    Simple.lower_eval, bind_assoc, pure_bind, evalBinop_compound hop, State.writeStorage_toSVal,
+    State.saveStorage_with, opStore]
   res_split
 
 theorem evalBinop_bump (op : IncDec) (p : PrimTy) (lv : Value) (b : Res Value) :
@@ -268,7 +281,8 @@ macro "upd_unfold" : tactic => `(tactic| simp only [Upd.apply, List.foldlM, UpdE
     STerm.eval, SValT.eval, Term.eval_pv, Term.eval, PTerm.eval, ITerm.eval_pv, ITerm.eval,
     MTerm.eval, MValT.eval, MAddr.eval, SPath.lower_eval, Loc.lower_eval, Val.lower_eval,
     Simple.lower_eval, Stmt.run, Src.value, Val.eval, Simple.eval_local, bind_assoc, pure_bind,
-    bind_pure, State.saveStorage_with, writeAddr_with, OpLoc.store, OpLoc.bump, opStore, bumpStore,
+    bind_pure, State.writeStorage_toSVal, State.saveStorage_with, State.writeStorage_with,
+    writeAddr_with, OpLoc.store, OpLoc.bump, opStore, bumpStore,
     opLocal_eq, bumpLocal_eq, opMem, bumpMem, readLoc_eq, writeLoc_eq, ARhs.bind, MRhs.bind,
     MSrc.mval, MLoc.write, MPath.mval_var, MVal.asRef_ref, MLoc.read_field, MLoc.read_index,
     Loc.resolve, SPath.resolve, Src.pushVal, evalBinop_bump, applyBinOp_bump, Term.bumped])
