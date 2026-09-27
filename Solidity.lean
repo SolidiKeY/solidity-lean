@@ -6,6 +6,7 @@ import Solidity.Semantics
 import Solidity.Semantics.DecEq
 import Solidity.Semantics.Properties
 import Solidity.Semantics.Agree
+import Solidity.Semantics.Callback
 import Solidity.Update
 import Solidity.Calculus.RuleSyntax
 import Solidity.Calculus.Rules
@@ -17,6 +18,7 @@ import Solidity.Calculus.SoundUpdate
 import Solidity.Calculus.SoundUnfold
 import Solidity.Calculus.RuleSoundness
 import Solidity.Calculus.Logic
+import Solidity.Calculus.Callback
 import Solidity.Calculus.Symex
 import Solidity.Calculus.Notation
 import Solidity.Calculus.Close
@@ -39,6 +41,8 @@ import Solidity.Examples.Theory
 import Solidity.Examples.Branch
 import Solidity.Examples.Revert
 import Solidity.Examples.Values
+import Solidity.Examples.Calls
+import Solidity.Examples.Callback
 import Solidity.Examples.Notation
 import Solidity.Examples.ApplySteps
 import Solidity.Examples.Chains

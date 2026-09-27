@@ -121,6 +121,18 @@ def OpLoc.cost {p : PrimTy} : OpLoc C p → Nat
   | .mfield b _ _ => b.cost + b.pen
   | .mindex _ b _ => b.cost + b.pen + 1
 
+/-- A call's arguments weigh what declaring them does, and one that is not
+simple `15` more: what its capture costs. -/
+def Arg.weight : List (Arg C) → Nat
+  | [] => 0
+  | a :: as => a.e.cost + a.e.pen + 1 + Arg.weight as
+
+/-- What declaring a call's return variable and assigning it weigh. -/
+def CallRet.weight : CallRet → Nat
+  | .none => 0
+  | .val _ _ Option.none => 1
+  | .val _ _ (some _) => 3
+
 mutual
 
 /-- The weight of a statement.
@@ -154,6 +166,7 @@ def Stmt.weight : Stmt C → Nat
   | .ite c thn els => c.cost + c.pen + max (Prog.weight thn) (Prog.weight els) + 2
   | .require c | .assert c => c.cost + c.pen + 2
   | .revert => 1
+  | .call _ args _ ret body => Arg.weight args + ret.weight + Prog.weight body + 1
 
 /-- The weight of a block: the sum of its statements'. -/
 def Prog.weight : List (Stmt C) → Nat
@@ -769,6 +782,63 @@ theorem assignMemStep_small {T : Ty} (l : MLoc C T) (r : MSrc C T) :
       | _ => cases r <;> (delta assignMemStep; dsimp only; weigh)
     | loc _ => cases r <;> (delta assignMemStep; dsimp only; weigh)
 
+/-- The weight of two programs one after the other is the sum of their
+weights.
+
+Example: `total = 1; x = 1;` weighs `4 + 2 = 6`. -/
+theorem Prog.weight_append (P Q : Prog C) :
+    Prog.weight (P ++ Q) = Prog.weight P + Prog.weight Q := by
+  induction P with
+  | nil => simp [Prog.weight]
+  | cons s P ih => simp [Prog.weight, ih, Nat.add_assoc]
+
+/-- Declaring the arguments of a call whose arguments are all simple weighs
+what they do in the call. -/
+theorem Arg.weight_decls : {args : List (Arg C)} → Arg.firstNonSimple args = none →
+    Prog.weight (args.map Arg.decl) = Arg.weight args
+  | [], _ => rfl
+  | a :: as, h => by
+    by_cases hs : a.e.isSimple = true
+    · simp only [Arg.firstNonSimple, hs, if_true] at h
+      simp only [List.map_cons, Prog.weight, Arg.decl, Stmt.weight, Arg.weight,
+        Arg.weight_decls h, Val.pen, hs, if_true]
+    · simp [Arg.firstNonSimple, hs] at h
+
+/-- A capture takes `12` off a call's arguments, and the declaration it adds
+weighs the argument and `2`. -/
+theorem Arg.weight_captureFirst {se : Var} : {args : List (Arg C)} → {a : Arg C} →
+    Arg.firstNonSimple args = some a →
+      Arg.weight (Arg.captureFirst se args) + a.e.cost + 14 ≤ Arg.weight args
+  | [], _, h => nomatch h
+  | b :: bs, a, h => by
+    by_cases hb : b.e.isSimple = true
+    · simp only [Arg.firstNonSimple, hb, if_true] at h
+      simp only [Arg.captureFirst, hb, if_true, Arg.weight]
+      have := Arg.weight_captureFirst (se := se) h
+      omega
+    · simp only [Arg.firstNonSimple, hb, Bool.false_eq_true, if_false, Option.some.injEq] at h
+      subst h
+      have hp : b.e.pen = 16 := by simp [Val.pen, hb]
+      simp only [Arg.captureFirst, hb, Bool.false_eq_true, if_false, Arg.weight, Val.cost,
+        Val.pen_simple, hp]
+      omega
+
+theorem callStep_small {k : Nat} {m : Modality} (f : Name) (args : List (Arg C))
+    (hsep : Arg.separatedFrom [] args = true) (ret : CallRet) (body : List (Stmt C)) :
+    (callStep (k := k) (m := m) f args hsep ret body).Small := by
+  simp only [callStep]
+  split
+  · rename_i h
+    simp only [Step.Small, Premise.Smaller, Stmt.expandBody, Prog.weight_append,
+      Arg.weight_decls h, Stmt.weight]
+    rcases ret with _ | ⟨p, r, _ | y⟩ <;>
+      simp [CallRet.decl, CallRet.result, CallRet.weight, Prog.weight, Stmt.weight, Val.cost] <;>
+      omega
+  · rename_i a h
+    have := Arg.weight_captureFirst (se := .fresh "se" k) h
+    simp only [Step.Small, Premise.Smaller, Prog.weight, Stmt.weight]
+    omega
+
 /-- **Every rule makes the program smaller**: the premise `Stmt.step` fires
 weighs less than its statement, and each goal of a branch at least `2` less.
 
@@ -806,6 +876,7 @@ theorem Stmt.step_smaller (k : Nat) (m : Modality) :
   | .assert (.mlen ..) => by
     simp only [Stmt.step]; weigh
   | .revert => by cases m <;> trivial
+  | .call f args hsep ret body => callStep_small f args hsep ret body
 
 /-- **Every rule makes the program smaller**, as a fact about the rules
 rather than the dispatcher: any derivation of `s` is the one `Stmt.step`
@@ -853,16 +924,6 @@ theorem Stmt.weight_pos (s : Stmt C) : 0 < s.weight := by
   | declMem _ _ i _ => cases i <;> simp only [Stmt.weight] <;> omega
   | push _ v _ => cases v <;> simp only [Stmt.weight] <;> omega
   | _ => simp only [Stmt.weight] <;> omega
-
-/-- The weight of two programs one after the other is the sum of their
-weights.
-
-Example: `total = 1; x = 1;` weighs `4 + 2 = 6`. -/
-theorem Prog.weight_append (P Q : Prog C) :
-    Prog.weight (P ++ Q) = Prog.weight P + Prog.weight Q := by
-  induction P with
-  | nil => simp [Prog.weight]
-  | cons s P ih => simp [Prog.weight, ih, Nat.add_assoc]
 
 /-- A modality costs `2 ^ weight` times what follows it; the hypothesis of an
 implication and a negated formula cost nothing (no rule steps inside them).

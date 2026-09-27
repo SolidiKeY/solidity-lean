@@ -225,11 +225,22 @@ funds). `Stmt.transfer`:
 - otherwise `selfBalance -= amt` and the ledger is *debited*: `net(addr) := net(addr) - amt` (`State.setNet addr (getNet addr - amt)`; the module header of `Semantics.lean` states the same sign).
 
 The example stores (`exampleStore`, `testSuiteStore`) fund the contract with
-a large balance so the ported KeY tests keep their meaning. The old,
-untyped layer's callback semantics — a `Semantics/Callback` module whose
-havoc quantified over the balance like it did over storage and the ledger,
-so the callback boxes stayed sound — is not in the typed layer: it has no
-call statement at all yet (`docs/kernel-port.md`'s "Port later").
+a large balance so the ported KeY tests keep their meaning.  The callback
+semantics (`Semantics/Callback.lean`) is a relation over this one: after the
+debit its havoc replaces the balance along with storage and the ledger
+(`State.havoc`), as the untyped layer's did, so the callback boxes stay sound
+— the callee may move funds into or out of the contract.
+
+## A call's arguments are bound one after another
+
+solc evaluates every argument of an internal call, left to right, before the
+callee runs.  `Stmt.run` binds them one after another, as KeY's
+`expand_function_body` declares them (`Arg.bindSeq`): the two agree because
+a call is *separated* (`Arg.separatedFrom`: no argument that is not simple
+reads a parameter bound before it), and the elaborator's parameters are
+fresh names no argument mentions.  A callee's locals are renamed fresh at
+each call, so they live in the caller's locals as they would in a frame of
+their own.
 
 solkey has since adopted the same check: `084de89677` adds `selfBalance`
 to the ledger update of every `transfer` taclet, and `333cc7b353` splits

@@ -1152,6 +1152,31 @@ theorem bumpLocal_sim {Δ : TyCtx} {τ : State} {m : Machine} (op : IncDec) (x :
     simp only [OpLoc.bump, bumpLocal, State.getEnv, henv, Except.ok_bind', pure_bind, Value.asInt]
     rw [bump_src, hretTy, hvn]; rfl
 
+/-- A call's parameters: the code stores each argument in its parameter's
+cell, as `Arg.bindSeq` binds it. -/
+theorem args_sim : ∀ (args : List (Arg C)) {Δ Δ' : TyCtx} {τ : State} {m : Machine},
+    Sim C Δ τ m → wtArgs Δ args = some Δ' →
+      StmtOut C Δ' (Arg.bindSeq args τ) (run (argsCode args) m) m
+  | [], Δ, Δ', τ, m, hm, hw => by
+    simp only [wtArgs, Option.some.injEq] at hw
+    subst hw
+    exact .inl ⟨τ, m, rfl, rfl, rfl, hm⟩
+  | a :: as, Δ, Δ', τ, m, hm, hw => by
+    simp only [wtArgs] at hw
+    split at hw
+    · rename_i hc
+      simp only [Bool.and_eq_true] at hc
+      simp only [Arg.bindSeq, argsCode, List.append_assoc]
+      rcases val_sim a.e hm hc.2 with ⟨v, w, hv, hrv, hrun⟩ | ⟨hv, hrun⟩
+      · rw [run_append_ok hrun, hv]
+        have hm₁ := hm.bindVal a.x hrv
+        rw [run_append_ok (m' := { m with mem := upd m.mem a.x w }) rfl]
+        rcases args_sim as hm₁ hw with ⟨τ', m', hτ', hrun', hst', hm'⟩ | ⟨hτ', hrun'⟩
+        · exact .inl ⟨τ', m', by simpa using hτ', hrun', hst', hm'⟩
+        · exact .inr ⟨by simpa using hτ', hrun'⟩
+      · exact .inr ⟨by simp [hv], run_append_revert hrun⟩
+    · cases hw
+
 mutual
 
 /-- **A statement's code does what the statement does**: both succeed, the
@@ -1396,6 +1421,63 @@ theorem stmt_sim : ∀ (s : Stmt C) {Δ Δ' : TyCtx} {τ : State} {m : Machine},
           hm⟩
     · exact .inr ⟨by simp [hvc], run_append_revert hrunc⟩
   | .revert, Δ, Δ', τ, m, hm, hw => .inr ⟨rfl, rfl⟩
+  | .call _ args _ ret body, Δ, Δ', τ, m, hm, hw => by
+    have ihb : ∀ {Δ₂ Δ₃ : TyCtx} {τ₂ : State} {m : Machine}, Sim C Δ₂ τ₂ m →
+        wtProg Δ₂ body = some Δ₃ → StmtOut C Δ₃ (Prog.run τ₂ body) (run (compileProg body) m) m :=
+      fun hm hw => prog_sim body hm hw
+    simp only [wtStmt] at hw
+    split at hw
+    · rename_i Δ₁ hwa
+      split at hw
+      · rename_i Δ₂ hwe
+        split at hw
+        · rename_i Δ₃ hwb
+          obtain ⟨hwl, hΔ⟩ := Option.ite_none_right_eq_some.1 hw
+          cases hΔ
+          simp only [Stmt.run, compileStmt, List.append_assoc]
+          rcases args_sim args hm hwa with ⟨τ₁, m₁, hτ₁, hrun₁, hst₁, hm₁⟩ | ⟨hτ₁, hrun₁⟩
+          · rw [run_append_ok hrun₁, hτ₁]
+            simp only [Except.ok_bind']
+            -- the return variable declared
+            obtain ⟨m₂, hrun₂, hst₂, hm₂⟩ : ∃ m₂, run (retEnterCode ret) m₁ = .ok m₂ 0 ∧
+                m₂.stack = m₁.stack ∧ Sim C Δ₂ (ret.enter τ₁) m₂ := by
+              cases ret with
+              | none =>
+                simp only [wtRetEnter, Option.some.injEq] at hwe
+                subst hwe
+                exact ⟨m₁, rfl, rfl, hm₁⟩
+              | val p r res =>
+                simp only [wtRetEnter, Option.ite_none_right_eq_some, Option.some.injEq] at hwe
+                obtain ⟨hp, rfl⟩ := hwe
+                have hrv : ReprV p (PrimTy.default p) (.val 0) := by
+                  cases p with
+                  | uint => exact ReprV.uint (a := 0) W_pos
+                  | bool => exact ReprV.bool false
+                  | int => simp [primInFrag] at hp
+                exact ⟨{ m₁ with mem := upd m₁.mem r (.val 0) }, rfl, rfl, hm₁.bindVal r hrv⟩
+            rw [run_append_ok hrun₂]
+            rcases ihb hm₂ hwb with ⟨τ₃, m₃, hτ₃, hrun₃, hst₃, hm₃⟩ | ⟨hτ₃, hrun₃⟩
+            · rw [run_append_ok hrun₃, hτ₃]
+              simp only [Except.ok_bind']
+              cases ret with
+              | none =>
+                exact .inl ⟨τ₃, m₃, rfl, rfl, hst₃.trans (hst₂.trans hst₁), hm₃⟩
+              | val p r res =>
+                cases res with
+                | none => exact .inl ⟨τ₃, m₃, rfl, rfl, hst₃.trans (hst₂.trans hst₁), hm₃⟩
+                | some y =>
+                  simp only [wtRetLeave, Bool.and_eq_true, beq_iff_eq] at hwl
+                  obtain ⟨v, henv, hv⟩ := hm₃.vals r p hwl.1
+                  have hs := hm₃.bindVal y hv
+                  rw [TyCtx.set_self hwl.2] at hs
+                  refine .inl ⟨_, { m₃ with mem := upd m₃.mem y (m₃.mem r) }, ?_, rfl,
+                    hst₃.trans (hst₂.trans hst₁), hs⟩
+                  simp [CallRet.leave, Simple.eval, State.getEnv, henv]; rfl
+            · exact .inr ⟨by simp [hτ₃], run_append_revert hrun₃⟩
+          · exact .inr ⟨by simp [hτ₁], run_append_revert hrun₁⟩
+        · cases hw
+      · cases hw
+    · cases hw
   | .assign _ (.copy ..), _, _, _, _, _, hw => by simp [wtStmt] at hw
   | .rebind _ (.push ..), _, _, _, _, _, hw => by simp [wtStmt] at hw
   | .declStorage _ _ (some (.push ..)), _, _, _, _, _, hw => by simp [wtStmt] at hw

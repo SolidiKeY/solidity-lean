@@ -484,41 +484,6 @@ theorem Avoids.tail {x : Var} {vs ns : List Var} (h : Avoids (x :: vs) ns) : Avo
 theorem Avoids.head {x : Var} {vs ns : List Var} (h : Avoids (x :: vs) ns) : x ∉ ns :=
   h x List.mem_cons_self
 
-def Simple.vars {p : PrimTy} : Simple C p → List Var
-  | .local x => [x]
-  | .lit .. | .bool _ => []
-
-mutual
-
-def SPath.vars : {T : Ty} → SPath C T → List Var
-  | _, .alias x => [x]
-  | _, .loc l => l.vars
-
-def Loc.vars : {T : Ty} → Loc C T → List Var
-  | _, .root .. => []
-  | _, .field b _ _ => b.vars
-  | _, .index _ b i => b.vars ++ i.vars
-
-def MPath.vars : {T : Ty} → MPath C T → List Var
-  | _, .var x => [x]
-  | _, .loc l => l.vars
-
-def MLoc.vars : {T : Ty} → MLoc C T → List Var
-  | _, .field b _ _ => b.vars
-  | _, .index _ b i => b.vars ++ i.vars
-
-def Val.vars : {p : PrimTy} → Val C p → List Var
-  | _, .simple s => s.vars
-  | _, .read l => l.vars
-  | _, .binop _ _ _ a b => a.vars ++ b.vars
-  | _, .unop _ _ _ a => a.vars
-  | _, .ternary c a b => c.vars ++ a.vars ++ b.vars
-  | _, .readMem l => l.vars
-  | _, .len b _ => b.vars
-  | _, .mlen b _ => b.vars
-
-end
-
 def Src.vars {T : Ty} : Src C T → List Var
   | .val v => v.vars
   | .copy p _ => p.vars
@@ -553,6 +518,17 @@ def optVars {α : Type} (f : α → List Var) : Option α → List Var
   | none => []
   | some a => f a
 
+/-- The variables of a call's arguments: each parameter and what its
+argument reads. -/
+def Arg.vars : List (Arg C) → List Var
+  | [] => []
+  | a :: as => a.x :: a.e.vars ++ Arg.vars as
+
+/-- The return variable of a call, and the local it lands in. -/
+def CallRet.vars : CallRet → List Var
+  | .none => []
+  | .val _ r res => r :: res.toList
+
 mutual
 
 /-- The variables a statement mentions: `uint x = y + 1;` mentions `x` and
@@ -580,6 +556,7 @@ def Stmt.vars : Stmt C → List Var
   | .require c => c.vars
   | .assert c => c.vars
   | .revert => []
+  | .call _ args _ ret body => Arg.vars args ++ ret.vars ++ Prog.vars body
 
 def Prog.vars : List (Stmt C) → List Var
   | [] => []
@@ -891,6 +868,34 @@ theorem allocDefault_bind_agree (hag : EnvAgreeExcept ns σ τ) (R : RefTy) (x :
       (do let (σ', id) ← allocDefault τ R; pure (σ'.setEnv x (.mref id))) :=
   ResAgree.bindState (allocDefault_agree hag R) fun _ _ _ h' => EnvAgreeExcept.setEnv_both h' _ _
 
+/-- A call's arguments, read from two states that agree off `ns`, bind alike
+into two states that agree off `ns`. -/
+theorem Arg.bindSeq_frame :
+    (args : List (Arg C)) → Avoids (Arg.vars args) ns → ∀ {σ τ : State}, EnvAgreeExcept ns σ τ →
+      ResultsAgree ns (Arg.bindSeq args σ) (Arg.bindSeq args τ)
+  | [], _, _, _, hag => hag
+  | a :: as, h, _, _, hag => by
+    simp only [Arg.bindSeq, a.e.eval_frame hag (fun x hx => h x (by simp [Arg.vars, hx]))]
+    refine bindPureResults_agree _ fun v => ?_
+    exact Arg.bindSeq_frame as (fun x hx => h x (by simp [Arg.vars, hx]))
+      (EnvAgreeExcept.setEnv_both hag _ _)
+
+theorem CallRet.enter_frame {σ τ : State} (hag : EnvAgreeExcept ns σ τ) (ret : CallRet) :
+    EnvAgreeExcept ns (ret.enter σ) (ret.enter τ) := by
+  cases ret with
+  | none => exact hag
+  | val p r _ => exact EnvAgreeExcept.setEnv_both hag _ _
+
+theorem CallRet.leave_frame {σ τ : State} (hag : EnvAgreeExcept ns σ τ) :
+    (ret : CallRet) → Avoids ret.vars ns →
+      ResultsAgree ns (CallRet.leave (C := C) σ ret) (CallRet.leave (C := C) τ ret)
+  | .none, _ => hag
+  | .val _ _ Option.none, _ => hag
+  | .val p r (some y), h => by
+    simp only [CallRet.leave,
+      (Simple.local r : Simple C p).eval_frame hag (fun x hx => h x (by simp_all [Simple.vars, CallRet.vars]))]
+    agree_run hag
+
 mutual
 
 /-- **Frame, for statements**: a statement that avoids `ns` runs alike from
@@ -983,6 +988,12 @@ theorem Stmt.run_frame {σ τ : State} (hag : EnvAgreeExcept ns σ τ) :
     | bool b => cases b <;> first | rfl | exact hag
     | int _ => rfl
   | .revert, _ => rfl
+  | .call _ args _ ret body, h => by
+    simp only [Stmt.run]
+    refine ResultsAgree.bind (Arg.bindSeq_frame args h.left.left hag) fun _ _ h₁ => ?_
+    refine ResultsAgree.bind (Prog.run_frame (CallRet.enter_frame h₁ ret) body h.right)
+      fun _ _ h₂ => ?_
+    exact CallRet.leave_frame h₂ ret h.left.right
 
 theorem Prog.run_frame {σ τ : State} (hag : EnvAgreeExcept ns σ τ) :
     (P : List (Stmt C)) → Avoids (Prog.vars P) ns → ResultsAgree ns (Prog.run σ P) (Prog.run τ P)

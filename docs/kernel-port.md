@@ -37,8 +37,18 @@ correspondence against `Taclet` (`~/projects/side-projects/lean/solkey`).
 
 ## Still open
 
-- **Calls** and the **callback semantics** of `transfer`
-  (`transferSemantics:withCallback`): the typed syntax has neither.
+- **Calls, beyond the fragment**: parameters and return values of reference
+  type (`Person storage p`, `uint[] memory xs`), an early `return` (only the
+  body's last statement, or the last of each branch of a last `if`, may
+  return), a call inside an expression (`x = f(a) + 1`; KeY writes a call as
+  a statement or a whole right-hand side, `res = f(a)@C;`), external calls,
+  `msg.*`.
+- **Callbacks, beyond the invariant**: an invariant over the ledger `net`
+  (no term reads it, nor `selfBalance`), so solkey's `net/*-withcallback.key`
+  problems stay unported; the capture rules of a transfer
+  (`transfer_unfold_*`), a branch or a call around a transfer have no rule of
+  `ProvesC` (their soundness under the callback reading is not proved), and
+  `ProvesC` has no strategy (`sol_symex` is the no-callback reading's).
 - **The corpus is not regenerated** since the syntax gaps below closed:
   `scripts/solkey-port.mjs` no longer refuses `--`, `.length`, `new`, an
   `++` inside an expression, `**` and `T[n]`, and `docs/corpus-parity.md`
@@ -54,6 +64,28 @@ correspondence against `Taclet` (`~/projects/side-projects/lean/solkey`).
 - **The EVM fragment**: `int`, `**` (needs a loop), memory,
   storage-to-storage copies, `push`, `v = x++;`
   (`docs/compiler-verification.md`).
+
+### Closed: calls and the callback semantics of `transfer` (2026-09-27)
+
+- A `Contract` declares its internal functions (`contract!{ function f(uint x)
+  returns (uint r) { … } }`, `FunDecl`): typed parameters, an optional return,
+  the body as read.  A call (`f(a, b);`, `y = f(a);`, `uint y = f(a);`) is
+  `Stmt.call`, which carries the callee **inlined**, as KeY's
+  `FunctionBodyStatement` carries its declaration: the parameters bound to the
+  arguments, the return variable and where its value lands, the body — every
+  callee local renamed fresh by the elaborator, its tail `return e` an
+  assignment to the return variable.  `Stmt.run` recurses into the body
+  structurally.
+- Taclets `functionCallArgCapture` (`unfoldArgument`, Lean-only)
+  and `functionBodyExpand` (KeY's `expand_function_body`), with `Stmt.step`,
+  `eq_step`, termination (`Arg.weight`), soundness, typing, reachability, the
+  EVM (a call compiled inlined, `argsCode`) and `Examples/Calls.lean`.
+- The callback semantics: `Semantics/Callback.lean` (`ExecS`/`ExecP`, a
+  relation over `Stmt.run` through branches and calls; `holdsC`; `TransferSem`
+  and `holdsT`), `CallbackTaclet` with `transferWithCallbackBox`/`Diamond`
+  (claimed by `RuleShapes.callbackOrigins`, `PrintedRules.callbackPrintedOrigins`),
+  `CallbackTaclet.sound`, the judgement `ProvesC` and `ProvesC.sound`
+  (`Calculus/Callback.lean`), and `Examples/Callback.lean`.
 
 ### Closed: the syntax gaps of the corpus (2026-09-27)
 
@@ -143,6 +175,17 @@ correspondence against `Taclet` (`~/projects/side-projects/lean/solkey`).
 | `TestSuite` state | `Triple` is `FixedTriple` in Lean (`solkey-port.mjs`'s `STRUCT_RENAMES`); `boolKeyed` and `tree` are not declared | 2026-09-27 |
 | `.length` | a `Val` (`len`, `mlen`) whose result type is carried as a proof `p = .uint`, not an index: a constructor fixing the index would have to be refined in every inner `match` of `Stmt.step` | 2026-09-27 |
 | Memory `delete` of a reference | the location gets a fresh default object (KeY's `memoryFieldDeleteReference`, solc), not a reset of the old one: an alias keeps it | 2026-09-27 |
+| Where a callee's body lives | in the call (`Stmt.call … body`), not looked up in the contract: a contract holding `Stmt` bodies indexed by itself is an inductive-inductive type Lean does not have. The contract keeps the body as read (`FunDecl.body : List RawStmt`); the elaborator types and inlines it at each call. So `Stmt.run` is structural with no rank certificate, and nothing in the kernel ties a call's body to the declaration (the elaborator is its only author) | 2026-09-27 |
+| Recursion | a function calls only the functions declared before it (`ElabM` reads the visible ones): the declaration order is the rank, as `structRank` is the struct table's, and inlining ends. A recursive call is an elaboration error | 2026-09-27 |
+| A callee's locals | renamed fresh at each call (`renameStmts`, numbered as captures are: `se`, `sp`, `mv`), so running the inlined body in the caller's locals is running it in a frame of its own, and a printed goal reads back | 2026-09-27 |
+| Binding arguments | one after another (`Arg.bindSeq`), exactly as the inlining declares them, so `functionBodyExpand` is exact; solc reads every argument before the call, and the two agree because a call is **separated** (`Stmt.call`'s proof `Arg.separatedFrom [] args`: no argument that is not simple reads a parameter bound before it), which the elaborator's fresh parameters always are. That also makes the capture of an argument before the call sound | 2026-09-27 |
+| Capture of an argument | the leftmost argument that is not *simple* (not "ready": a simple local named like a parameter is bound as it is). Capturing by any criterion the capture itself could re-trigger would loop at an index that is not fresh; `Fml.step_decreases` is proved at every index | 2026-09-27 |
+| `return` | a function's body may end in `return e;` (or end in an `if` each branch of which ends so), lowered to an assignment to the return variable (named `_ret` when the declaration does not name it): KeY's named return, and no abrupt completion in `Stmt.run`. An earlier `return` is an elaboration error | 2026-09-27 |
+| Calls on the EVM | compiled inlined: arguments stored in their parameters' cells, the return variable zeroed, the body, the result copied (`argsCode`, `retEnterCode`, `retLeaveCode`); `stmt_sim`'s case is proved | 2026-09-27 |
+| Callback semantics | a relation over `Stmt.run` (`ExecS`/`ExecP`), not a second interpreter: every statement but a transfer, a branch and a call is `Stmt.run`'s (`det`), so the relation cannot drift from the interpreter. A transfer halts, leaves `I` broken (`violated`, an outcome no formula accepts), or resumes in `State.havoc` (storage, ledger, funds replaced; locals and memory kept) satisfying `I` | 2026-09-27 |
+| The contract invariant | an `Invariant C`: a formula with no local and no transfer (solkey's `CInv(storage, net)`); the frame lemmas need it closed. It cannot read the ledger: no term does | 2026-09-27 |
+| Callback taclets | a second inductive `CallbackTaclet`, not `Taclet` constructors: `Taclet.sound` is against `Stmt.run`, and `Stmt.complete`/`eq_step` say one rule per statement; with callbacks a transfer's rule is the callback one. Two constructors, as solkey's, each premise the booking update read twice: `{U} I` (under the diamond the booking must succeed: "sufficient funds") and `CbResume`, the rest from every havocked state satisfying `I` — a proposition, as KeY's skolem symbols are, since the havoc is no term | 2026-09-27 |
+| `ProvesC` | the ordinary taclets lift to the callback reading on a statement that pays nothing and runs no other (`s.forks = false`), and whose premise pays nothing; a goal with no transfer left is `Proves`'s (`holdsC_iff_holds`). Validity with callbacks implies validity without (`valid_of_validC`) | 2026-09-27 |
 
 ## `ResidueShape` verdicts (history)
 
@@ -168,7 +211,7 @@ One row per constructor of `Coverage.ResidueShape`, filled in phase 2:
 | `assignOperatorRhsRefTyped` | *unrepresentable*: an operator is applied at a primitive type (`Val.binop`) |
 | `assignIncDecBadTarget` | storage and stack *unrepresentable*: `Stmt.assignIncDec` writes a stack local, from an `OpLoc` with a simple receiver (`ksol` captures another). Memory targets open |
 | `assignTernaryBadLhs` | *unrepresentable*: a conditional is a `Val`, and a value is written only to a local or a storage `Loc` (`VHole`) |
-| `assignCallRhs` | open |
+| `assignCallRhs` | *rule*: `y = f(a);` is a `Stmt.call` whose result lands in the local `y` (`functionBodyExpand`, after `functionCallArgCapture`); a call's value to anything but a local is captured into one by the elaborator |
 | `assignStackPlaceRhs` | *unrepresentable*: as `assignStackPlace` |
 | `compoundAssignPow` | *unrepresentable*: `Stmt.opAssign` carries `op.hasCompoundAssign`, which `**` fails (solkey has no `powAssign` taclet) |
 | `compoundAssignBadTarget` | storage and stack *unrepresentable*: an `OpLoc` target. Memory targets open |

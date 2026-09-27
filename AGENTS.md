@@ -19,6 +19,15 @@ writes, a push and a pop are nested writes over `size`, and
 (`{ sp := alice.account }`); a read marks the *value* side instead
 (`find`/`select`/`read`).
 
+**Calls are inlined** (`Syntax.lean`): a contract declares its functions
+(`contract!{ function f(uint x) returns (uint r) { … } }`), a function may
+call only the ones declared before it, and a call statement (`Stmt.call`)
+carries its callee's body with every local renamed fresh — KeY's
+`FunctionBodyStatement`; `functionBodyExpand` inlines it.  **Callbacks** are
+a second reading of the modalities (`Semantics/Callback.lean`, `holdsC`, the
+`CallbackTaclet`s and `ProvesC` of `Calculus/Callback.lean`), not a change
+to `Stmt.run`.
+
 **`sol{ … }` is Solidity, with two spellings of its own** (`Syntax.lean`):
 a decrement is `x−−`/`−−x` (two U+2212; `--` opens a Lean comment), and
 effects stay out of values — an `++` inside an expression or a conditional

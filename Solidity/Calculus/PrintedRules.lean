@@ -712,15 +712,26 @@ def printedOrigins : List (Lean.Name × PrintedOrigin) := [
   (``Taclet.assertConditionCapture, .printed .assertConditionCapture),
   (``Taclet.assertSimple, .printed .assertSimple),
   (``Taclet.revertBox, .printed .revertBox),
-  (``Taclet.revertDiamond, .printed .revertDiamond) ]
+  (``Taclet.revertDiamond, .printed .revertDiamond),
+  -- Calls: none printed; solkey has `functionBodyExpand`, and the
+  -- capture of an argument (its `unfoldArgument`) has no taclet either
+  (``Taclet.functionCallArgCapture, .leanOnly .calculus),
+  (``Taclet.functionBodyExpand, .leanOnly .keyTier) ]
 
 #check_constructor_table Taclet, printedOrigins.map Prod.fst
+
+/-- The callback taclets and the two printed `transferWithCallback` rules. -/
+def callbackPrintedOrigins : List (Lean.Name × PrintedOrigin) := [
+  (``CallbackTaclet.transferWithCallbackBox, .printed .transferWithCallbackBox),
+  (``CallbackTaclet.transferWithCallbackDiamond, .printed .transferWithCallbackDiamond) ]
+
+#check_constructor_table CallbackTaclet, callbackPrintedOrigins.map Prod.fst
 
 /-! ## Which printed rules the table claims -/
 
 /-- Whether some row names the printed rule. -/
 def claims (p : PrintedRule) : Bool :=
-  printedOrigins.any fun r => r.2.rules.contains p
+  (printedOrigins ++ callbackPrintedOrigins).any fun r => r.2.rules.contains p
 
 /-- Every printed rule some row names, in `PrintedRule.all`'s order. -/
 def claimedPrintedRules : List PrintedRule := PrintedRule.all.filter claims
@@ -728,14 +739,13 @@ def claimedPrintedRules : List PrintedRule := PrintedRule.all.filter claims
 /-- The printed rules of kind `rule` that **no** constructor claims.  The
 reasons are `RuleShapes.unclaimedTaclets`', rule for rule: the printed rules are
 what solkey runs, and the typed syntax takes a memory path
-as a source in place, so nothing captures one (four); has no strategy for the
-literal-condition `if` shortcuts (three); and transcribes only the
-no-callback `transfer` (two). -/
+as a source in place, so nothing captures one (four); and has no strategy for the
+literal-condition `if` shortcuts (three).  The callback `transfer` rules are
+`callbackPrintedOrigins`'. -/
 def unclaimedRules : List PrintedRule :=
   [ .memoryFieldRead_unfold_rightSndResult, .memoryIndexRead_unfold_rightSndResult,
     .memoryFieldWriteCaptureSrc, .memoryIndexWriteMemRefRhsCapture,
-    .ifElseTrue, .ifElseFalse, .ifElseNegated,
-    .transferWithCallbackBox, .transferWithCallbackDiamond ]
+    .ifElseTrue, .ifElseFalse, .ifElseNegated ]
 
 /-- **The coverage fact**: a printed rule is claimed exactly when it is of kind
 `rule` and not excused above.  A printed rule Lean never ports
@@ -748,9 +758,9 @@ theorem printed_rules_partitioned :
 
 theorem printedRules_count : PrintedRule.all.length = 136 := by decide +kernel
 
-theorem claimedPrintedRules_count : claimedPrintedRules.length = 117 := by decide +kernel
+theorem claimedPrintedRules_count : claimedPrintedRules.length = 119 := by decide +kernel
 
-theorem unclaimedRules_count : unclaimedRules.length = 9 := by decide +kernel
+theorem unclaimedRules_count : unclaimedRules.length = 7 := by decide +kernel
 
 /-! ## The constructors with no printed rule -/
 
@@ -758,9 +768,9 @@ theorem unclaimedRules_count : unclaimedRules.length = 9 := by decide +kernel
 def leanOnlyRows (why : LeanOnlyReason) : List Lean.Name :=
   (printedOrigins.filter fun r => r.2 == .leanOnly why).map Prod.fst
 
-theorem leanOnly_keyTier_count : (leanOnlyRows .keyTier).length = 32 := by decide +kernel
+theorem leanOnly_keyTier_count : (leanOnlyRows .keyTier).length = 33 := by decide +kernel
 
-theorem leanOnly_calculus_count : (leanOnlyRows .calculus).length = 0 := by decide +kernel
+theorem leanOnly_calculus_count : (leanOnlyRows .calculus).length = 1 := by decide +kernel
 
 end PrintedRules
 end Solidity

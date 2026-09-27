@@ -480,6 +480,14 @@ def assignMemStep {T : Ty} : (l : MLoc C T) → (r : MSrc C T) → Step k m (.as
   | .index _ (.loc _) _, .val _ => ⟨_, .memoryIndexWriteCaptureAllComplexRecv⟩
   | .index _ (.loc _) _, .ref _ => ⟨_, .memoryIndexWriteMemRefCaptureAllComplexRecv⟩
 
+/-- A call: its first argument that is not simple is captured, and with
+every argument simple its body is inlined. -/
+def callStep (f : Name) (args : List (Arg C)) (hsep : Arg.separatedFrom [] args = true)
+    (ret : CallRet) (body : List (Stmt C)) : Step k m (.call f args hsep ret body) :=
+  match h : Arg.firstNonSimple args with
+  | none => ⟨_, .functionBodyExpand h⟩
+  | some _ => ⟨_, .functionCallArgCapture h⟩
+
 /-! ## The rule for a statement -/
 
 /-- **The rule for a statement** under the modality `m`, its fresh variables
@@ -521,6 +529,7 @@ def Stmt.step (k : Nat) (m : Modality) : (s : Stmt C) → Step k m s
     match m with
     | .box => ⟨_, .revertBox⟩
     | .diamond => ⟨_, .revertDiamond⟩
+  | .call f args hsep ret body => callStep f args hsep ret body
 
 /-- **Completeness**: under either modality, every statement has a rule.  No
 hypothesis and no residue: `uint x = people[i].age;`, `alice = bob;`,

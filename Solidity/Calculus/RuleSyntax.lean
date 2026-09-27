@@ -1496,6 +1496,27 @@ partial def ppStmt (e : Lean.Expr) : MetaM (TSyntax `sol_stmt) := do
   | Stmt.require _ c => `(sol_stmt| require($(← ppExpr c)))
   | Stmt.assert _ c => `(sol_stmt| assert($(← ppExpr c)))
   | Stmt.revert _ => `(sol_stmt| revert())
+  | Stmt.call _ f args _ ret _ =>
+    let some f ← nameOf? f | escape
+    let fe ← `(sol_expr| $(mkIdent (Lean.Name.mkSimple f)):ident)
+    let some as ← listElems? args | escape
+    let mut xs : Array (TSyntax `sol_expr) := #[]
+    for a in as do
+      match_expr (← whnf a) with
+      | Arg.mk _ _ _ v => xs := xs.push (← ppExpr v)
+      | _ => return ← escape
+    let res ← match_expr (← whnf ret) with
+      | CallRet.val _ _ res =>
+        match_expr (← whnf res) with
+        | Option.some _ y => ppVar? y
+        | _ => pure none
+      | _ => pure none
+    match res, xs.toList with
+    | none, [] => `(sol_stmt| $fe:sol_expr ( ))
+    | none, [a] => `(sol_stmt| $fe:sol_expr ( $a:sol_expr ))
+    | none, a :: bs => `(sol_stmt| $fe:sol_expr ( $a:sol_expr, $(bs.toArray),* ))
+    | some y, [] => `(sol_stmt| $y:ident = $fe:sol_expr ( ))
+    | some y, bs => `(sol_stmt| $y:ident = $fe:sol_expr ( $(bs.toArray),* ))
   | _ => escape
 
 partial def ppProg? (e : Lean.Expr) : MetaM (Option (Array (TSyntax `sol_stmt))) := do
@@ -1818,7 +1839,8 @@ attribute [delab app.Solidity.Stmt.assign, delab app.Solidity.Stmt.rebind,
   delab app.Solidity.Stmt.assignFromMem, delab app.Solidity.Stmt.assignMem,
   delab app.Solidity.Stmt.delete, delab app.Solidity.Stmt.deleteMem,
   delab app.Solidity.Stmt.assignNew, delab app.Solidity.Stmt.ite, delab app.Solidity.Stmt.require,
-  delab app.Solidity.Stmt.assert, delab app.Solidity.Stmt.revert] delabStmt
+  delab app.Solidity.Stmt.assert, delab app.Solidity.Stmt.revert,
+  delab app.Solidity.Stmt.call] delabStmt
 
 end Print
 

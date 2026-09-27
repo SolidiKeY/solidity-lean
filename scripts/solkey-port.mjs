@@ -95,13 +95,18 @@
  *    comment); a nested ternary in a branch is parenthesized; `2e3` is
  *    spelt out.  `++`/`−−` inside an expression, `.length`, `new T[](n)`,
  *    a conditional of references, a negative literal, `**` and fixed-size
- *    arrays `T[n]` are the elaborator's (`Syntax.lean`).
+ *    arrays `T[n]` are the elaborator's (`Syntax.lean`).  A call of a
+ *    function the Lean contract declares (`contract!{ function … }`) is
+ *    emitted as written where the grammar has one: a statement `f(a, b);`,
+ *    the whole right-hand side of `x = f(a);` or of `uint y = f(a);`; the
+ *    elaborator inlines it (`Stmt.call`).
  *
  * 6. **Anything else** is `unsupported` with the reason: a state variable
- *    the Lean contract does not declare, loops, calls,
- *    `return`, a type outside `uint`/`int`/`bool`/`address`/structs/
- *    arrays/mappings. What the translator lets through and Lean
- *    rejects is recorded with Lean's message.
+ *    the Lean contract does not declare, loops, a call of a function it does
+ *    not declare or a call inside an expression, `return` (which ends only a
+ *    declared function's body), a type outside `uint`/`int`/`bool`/
+ *    `address`/structs/arrays/mappings. What the translator lets through and
+ *    Lean rejects is recorded with Lean's message.
  *
  * Usage: node scripts/solkey-port.mjs [--probe] [--solkey <dir>] [--out <repo>]
  *   --probe   elaborate everything and re-pin expected.tsv (needs the
@@ -197,8 +202,8 @@ const KEY_SUITES = [
     unported: {},
     reason: (name) =>
       name.includes("withcallback")
-        ? "needs `transferWithCallback`: the typed syntax has no calls " +
-          "(docs/kernel-port.md, Port later)"
+        ? "the callback semantics is ported (`Semantics/Callback.lean`, `transferWithCallback`), " +
+          "but the problem's invariant `CInv` reads the ledger `net`, which no term reads"
         : name === "net-msg-value"
           ? "`msg.value` is not a program expression"
           : "assumes an uninterpreted CInv over a symbolic ledger and books " +
@@ -266,14 +271,43 @@ const VALUE_TYPES = { uint: "uint", uint256: "uint", int: "int", int256: "int",
 
 // ─────────────────────────── the Lean side ─────────────────────────────
 
-/** The state variables of each ported `Contract`, read off `Syntax.lean`. */
+/**
+ * The state variables of each ported `Contract`, read off `Syntax.lean`, as a
+ * set; its `functions` are the names of the functions it declares
+ * (`function f(…) … { … }`), which a ported body may call.
+ */
 function leanContracts() {
   const src = readFileSync(join(ROOT, "Solidity/Syntax.lean"), "utf8");
   const out = {};
-  for (const m of src.matchAll(/def (\w+) : Contract := contract!\{([^}]*)\}/g)) {
-    out[m[1]] = new Set(
-      m[2].split(";").map((d) => d.trim()).filter(Boolean)
-        .map((d) => d.split(/\s+/).pop()),
+  for (const m of src.matchAll(/def (\w+) : Contract := contract!\{/g)) {
+    const start = m.index + m[0].length;
+    let depth = 1;
+    let end = start;
+    while (end < src.length && depth > 0) {
+      if (src[end] === "{") depth++;
+      else if (src[end] === "}") depth--;
+      end++;
+    }
+    let body = src.slice(start, end - 1);
+    const functions = new Set();
+    // a function member: its header, then its braced body
+    for (;;) {
+      const f = body.match(/function\s+(\w+)\s*\(/);
+      if (!f) break;
+      functions.add(f[1]);
+      const open = body.indexOf("{", f.index);
+      let d = 1;
+      let k = open + 1;
+      while (k < body.length && d > 0) {
+        if (body[k] === "{") d++;
+        else if (body[k] === "}") d--;
+        k++;
+      }
+      body = body.slice(0, f.index) + body.slice(k);
+    }
+    out[m[1]] = Object.assign(
+      new Set(body.split(";").map((d) => d.trim()).filter(Boolean).map((d) => d.split(/\s+/).pop())),
+      { functions },
     );
   }
   return out;
@@ -547,18 +581,32 @@ function fixTernary(expr) {
   return `${t.cond} ? ${branch(t.thn)} : ${branch(t.els)}`;
 }
 
-/** Why an expression cannot be written, or null. */
-function exprGap(e) {
+/**
+ * Why an expression cannot be written, or null.  `funs` are the functions
+ * the Lean contract declares; `whole` says the expression stands where a
+ * call may (a statement, the whole right-hand side of `=` or of a
+ * declaration).
+ */
+function exprGap(e, funs = new Set(), whole = false) {
   if (/\b\d+\s*(wei|gwei|ether|seconds|minutes|hours|days|weeks)\b/.test(e)) {
     return "ether and time units (`1 gwei`, `2 days`) are not in the grammar";
   }
   if (/\b(msg|block|tx)\.\w+|\bthis\b/.test(e)) return "`msg`/`block`/`this` are not expressions";
   if (/(^|[^&|])[&|](?![&|=])|\^|~|<<|>>/.test(e)) return "bitwise operators are not in the grammar";
-  const call = e.match(/\b([A-Za-z_]\w*)\s*\(/);
-  if (call && !["push", "pop", "transfer"].includes(call[1])) {
-    return VALUE_TYPES[call[1]] || /^u?int\d+$/.test(call[1]) || call[1] === "payable"
-      ? `type conversion \`${call[1]}(…)\` is not an expression`
-      : `a call of \`${call[1]}\`: the typed syntax has no calls`;
+  const calls = [...e.matchAll(/\b([A-Za-z_]\w*)\s*\(/g)].map((m) => m[1])
+    .filter((f) => !["push", "pop", "transfer"].includes(f));
+  for (const f of calls) {
+    if (VALUE_TYPES[f] || /^u?int\d+$/.test(f) || f === "payable") {
+      return `type conversion \`${f}(…)\` is not an expression`;
+    }
+    if (!funs.has(f)) {
+      return `a call of \`${f}\`: the Lean contract does not declare it (\`contract!{ function … }\`)`;
+    }
+  }
+  if (calls.length > 0 && (!whole || calls.length > 1 ||
+      !/^[A-Za-z_]\w*\s*\([\s\S]*\)$/.test(e.trim()))) {
+    return `a call of \`${calls[0]}\` inside an expression: a call is a statement or a whole ` +
+      "right-hand side";
   }
   return null;
 }
@@ -718,8 +766,8 @@ function translateFunction(fn, contract, sol, leanVars, unportedVars) {
       return Object.hasOwn(renames, id) ? renames[id] : id;
     });
 
-  const expr = (e) => {
-    const gap = exprGap(e);
+  const expr = (e, whole = false) => {
+    const gap = exprGap(e, leanVars.functions, whole);
     if (gap) throw new Unsupported(gap);
     // `--` opens a Lean comment: a decrement is spelled `−−` (two U+2212)
     return fixTernary(names(expandScientific(e.trim()))).replace(/--/g, "−−");
@@ -767,7 +815,9 @@ function translateFunction(fn, contract, sol, leanVars, unportedVars) {
     if (/\.push\(\)\s*=(?!=)/.test(text)) {
       throw new Unsupported("`b.push() = v` (a push as an lvalue) is not in the grammar");
     }
-    if (/^return\b/.test(text)) throw new Unsupported("`return` is not in the fragment");
+    if (/^return\b/.test(text)) {
+      throw new Unsupported("`return` ends only a declared function's body (`contract!{ function … }`)");
+    }
     if (/^(emit|unchecked)\b/.test(text)) throw new Unsupported(`\`${text.split(/\s/)[0]}\` is not in the fragment`);
     const guard = text.match(/^(require|assert)\s*\(([\s\S]*)\)$/);
     if (guard) {
@@ -791,7 +841,7 @@ function translateFunction(fn, contract, sol, leanVars, unportedVars) {
         const target = expr(inc[2]);
         return [head, inc[1] ? `${name} = ++${target}` : `${name} = ${target}++`];
       }
-      return [`${head} = ${expr(decl.init)}`];
+      return [`${head} = ${expr(decl.init, true)}`];
     }
 
     // An expression statement: `l = r`, `l += r`, `x++`, `b.push(v)`, ….
@@ -802,8 +852,8 @@ function translateFunction(fn, contract, sol, leanVars, unportedVars) {
       return [incDec[2] ? `${lhs}++${target}` : `${lhs}${target}++`];
     }
     const assign = text.match(/^([^=!<>+\-*/%]+?)\s*([+\-*/%]?=)(?!=)\s*([\s\S]+)$/);
-    if (assign) return [`${expr(assign[1])} ${assign[2]} ${expr(assign[3])}`];
-    return [expr(text)];
+    if (assign) return [`${expr(assign[1])} ${assign[2]} ${expr(assign[3], assign[2] === "=")}`];
+    return [expr(text, true)];
   }
 
   const unconstrained = [...params.keys()].filter((p) => !declared.has(p));

@@ -177,6 +177,7 @@ def RawExpr.names : RawExpr → List String
   | .field e _ | .unop _ e | .incDec _ e | .newArr _ e => e.names
   | .index a b | .binop _ a b => a.names ++ b.names
   | .ternary c a b => c.names ++ a.names ++ b.names
+  | .call _ as => as.attach.flatMap fun ⟨a, _⟩ => a.names
   | .num _ | .bool _ => []
 
 mutual
@@ -204,8 +205,11 @@ def RawStmt.names : RawStmt → List String
   | .assign l r | .assignPush l r | .opAssign _ l r | .assignIncDec l _ r => l.names ++ r.names
   | .decl _ _ i | .declStorage _ _ i | .declMemory _ _ i => (i.map RawExpr.names).getD []
   | .declStoragePush _ _ b | .delete b | .incDec _ b | .require b | .assert b => b.names
+  -- a function's name is not a name the formula reads
+  | .call (.name _) as => (as.map RawExpr.names).flatten
   | .call f as => f.names ++ (as.map RawExpr.names).flatten
   | .ite c t e => c.names ++ RawStmt.namesList t ++ RawStmt.namesList e
+  | .ret e => (e.map RawExpr.names).getD []
   | .revert => []
 
 def RawStmt.namesList : List RawStmt → List String
@@ -534,7 +538,7 @@ def elabDl (φ : RawFml) : Except String (Fml C) :=
     | none, .fresh "sp" _ | none, .fresh "mv" _ => none
     | none, _ => some (x, LocalTy.val .uint)
   let k := (used ++ declared).foldl (fun k x => max k (Var.ofName x).idx) 0 + 1
-  (elabFml C φ).run' (params, k)
+  ((elabFml C φ).run C.funs).run' (params, k)
 
 end Read
 

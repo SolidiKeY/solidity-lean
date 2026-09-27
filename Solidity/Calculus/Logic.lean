@@ -54,15 +54,6 @@ def Premise.fml (m : Modality) : Premise C → Prog C → Fml C → Fml C
   | .done true, _, _ => .tt
   | .done false, _, _ => .ff
 
-theorem Prog.run_append (σ : State) :
-    (P Q : Prog C) → Prog.run σ (P ++ Q) = (do Prog.run (← Prog.run σ P) Q)
-  | [], Q => by simp [Prog.run]
-  | s :: P, Q => by
-    simp only [List.cons_append, Prog.run, bind_assoc]
-    cases s.run σ with
-    | error _ => rfl
-    | ok τ => exact Prog.run_append τ P Q
-
 /-- A modality after a run that continues: a halt anywhere is a halt. -/
 theorem Modality.after_bind (m : Modality) (p : State → Prop) (r : Res State)
     (f : State → Res State) :

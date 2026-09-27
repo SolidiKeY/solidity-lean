@@ -27,11 +27,12 @@ fails on a module nothing imports.
 |---|---|
 | `KeySort.lean` | solkey's sort lattice as one Lean type: `parents`, `ancestors`, `KeySort.le`, KeY spellings. Imports nothing. |
 | `AST.lean` | The static vocabulary: `PrimTy`/`Ty`/`RefTy` (dynamic and fixed-size arrays, `RefTy.fixed`) and their KeY sorts, the struct table `structDef`, operators typed at the primitive type they accept, and `Var` (a program name, or a fresh one a rule declares). |
-| `Syntax.lean` | The typed syntax, indexed by contract and type: `Val C p`, `SPath C T`, `Loc`, `MPath`, `Stmt C`. A statement no rule can run cannot be written. `Contract`, the named example contracts, and `sol[C]{…}`: the elaborator, run at compile time and re-checked by the kernel; it captures `++`/`−−` inside an expression and a conditional of references before their statement, in solc's order (`hoist`), and folds a fixed-size array's `.length` to its literal. Array paths carry `ArrTy` (`dyn`/`fixed`), so one rule covers both kinds. |
+| `Syntax.lean` | The typed syntax, indexed by contract and type: `Val C p`, `SPath C T`, `Loc`, `MPath`, `Stmt C`. A statement no rule can run cannot be written. `Contract` (its roots and its functions, `FunDecl`, the body as read), the named example contracts, and `sol[C]{…}`: a call (`Stmt.call`) carries its callee inlined, every callee local fresh, a function calling only the ones declared before it; the elaborator, run at compile time and re-checked by the kernel; it captures `++`/`−−` inside an expression and a conditional of references before their statement, in solc's order (`hoist`), and folds a fixed-size array's `.length` to its literal. Array paths carry `ArrTy` (`dyn`/`fixed`), so one rule covers both kinds. |
 | `Semantics.lean` | The interpreter, `Stmt.run`, by structural recursion on the typed syntax. KeY's state (storage tree, identity heap, locals, `net`), following solc where KeY was more liberal (`docs/solc-alignment.md`). |
 | `Semantics/Properties.lean` | Association-list, read-after-write, frame and allocation lemmas about the interpreter's state operations. |
 | `Semantics/Agree.lean` | `EnvAgreeExcept ns`: states that agree off a few scratch names, and a frame lemma per evaluator. What every unfolding rule's soundness composes. |
 | `Semantics/DecEq.lean` | The hand-written `DecidableEq SVal`. |
+| `Semantics/Callback.lean` | The callback semantics of `transfer`: `ExecS`/`ExecP`, a relation over `Stmt.run` in which a transfer may resume from any state (`State.havoc`) keeping the contract `Invariant`, or break it; `holdsC`; `TransferSem` and `holdsT`, the judgement parameterised by it; the deterministic run is a callback run (`Prog.exec_run`), the readings agree with no transfer (`holdsC_iff_holds`), frames. |
 | `Update.lean` | Terms (`Term`, `PTerm`, `STerm`, `ITerm`, `MTerm`, …) read by the interpreter's own functions, parallel updates, formulas with both modalities (`Fml`, `holds`, `Valid`), and lowering program expressions to terms. |
 
 ## The calculus
@@ -39,7 +40,7 @@ fails on a module nothing imports.
 | Module | What it is |
 |---|---|
 | `Calculus/RuleSyntax.lean` | The notation `dl{ … }`: schemas whose names carry their kind, and the delaborators that print taclets, premises and goals back in it. |
-| `Calculus/Rules.lean` | The taclets: `Taclet C k m s p`, one constructor per rule, named as solkey names it, written in `dl{ ⟨[ s; ]⟩ ⇝ p }`. |
+| `Calculus/Rules.lean` | The taclets: `Taclet C k m s p`, one constructor per rule, named as solkey names it, written in `dl{ ⟨[ s; ]⟩ ⇝ p }`; and `CallbackTaclet`, the other `transferSemantics`. |
 | `Calculus/KeyTaclets.lean` | The 311 taclets of `solidityProgramRules.key` (solkey `f2eb3d98eb`) as one type, their `\heuristics`, and `KeyOrigin`. Regenerate with the recipe in its docstring. |
 | `Calculus/Completeness.lean` | `Stmt.step`: the rule for every statement, a total function; `Stmt.complete`. |
 | `Calculus/RuleShapes.lean` | Which solkey taclets each constructor transcribes (`tacletOrigins`), checked against the constructor list, and `taclets_partitioned`. |
@@ -49,6 +50,7 @@ fails on a module nothing imports.
 | `Calculus/SoundUnfold.lean` | Every unfolding taclet runs like its statement off the fresh names. |
 | `Calculus/RuleSoundness.lean` | `Taclet.sound`: every taclet, no hypothesis but freshness. |
 | `Calculus/Logic.lean` | `Premise.fml`, the sequent calculus `Proves Γ φ` (`Γ ⊢ φ`) and `Proves.sound`; sequents print as `dl{ Γ ⟹ φ }`. |
+| `Calculus/Callback.lean` | The calculus with callbacks: `CallbackTaclet.sound` (`transferWithCallbackBox`/`Diamond`, premises `{U} I` and `CbResume`), the judgement `ProvesC` and `ProvesC.sound`. |
 | `Calculus/Quote.lean` | Quoters from formulas back to terms, so a computed goal is re-checked by the kernel. |
 | `Calculus/Symex.lean` | Symbolic execution: `Fml.step` fires `Stmt.step`'s rule, `symex`, `symex_sound`; tactics `sol_step`, `sol_symex`. |
 | `Calculus/Notation.lean` | `dl[C]{ … }` and `dl!{ … }`: concrete formulas read against a contract. |
@@ -107,7 +109,7 @@ theorem.
 | Module | What it is |
 |---|---|
 | `Evm/Machine.lean` | A straight-line EVM: slots as terms, wrapping words, relative forward jumps. |
-| `Evm/Compile.lean` | The compiler from `Stmt C` for a stated fragment (`wtStmt`), with solc's guards. |
+| `Evm/Compile.lean` | The compiler from `Stmt C` for a stated fragment (`wtStmt`), with solc's guards; a call compiled inlined. |
 | `Evm/Repr.lean` | The storage layout: a typed path's slots (a fixed-size array inline, `ReprAt.fixed`), injectivity, writing a subtree is writing its slots. |
 | `Evm/Correctness.lean` | `compile_correct`, `compile_storage`, `not_stuck`. |
 | `Evm/Examples.lean` | Compiled programs run by `decide`. |
@@ -135,6 +137,8 @@ went.
 | `Examples/StorageDelete.lean`, `Examples/LedgerDelete.lean` | `delete`, and a struct holding a mapping deleted. |
 | `Examples/Branch.lean`, `Examples/Revert.lean` | The two-goal split, a conditional of references; box and diamond on `revert`, `require`, `assert`, `transfer`. |
 | `Examples/Values.lean` | Operators, short-circuits, checked arithmetic, `−−`, `++` inside an expression, negative literals. |
+| `Examples/Calls.lean` | Internal calls: inlined bodies, captured arguments, nested calls, a `return` per branch, effects on storage; what cannot be written (recursion). |
+| `Examples/Callback.lean` | The callback semantics: a checks-effects-interactions withdrawal proved with callbacks (`ProvesC`, `transferWithCallbackBox`), an interaction-first one proved without and refuted with, the diamond's funds. |
 | `Examples/Memory.lean`, `Examples/CrossDomain.lean`, `Examples/Net.lean`, `Examples/Theory.lean` | Memory (memory `delete`, `new T[](n)`, `.length` included), copies between storage and memory, `transfer`, the theory's rewriting. |
 | `Examples/Notation.lean` | What taclets, premises and sequents print, pinned. |
 | `Examples/ApplySteps.lean` | The proof style: every `Proves` constructor once, and a refused rule. |

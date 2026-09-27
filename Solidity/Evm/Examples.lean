@@ -209,6 +209,42 @@ theorem rejected :
       (sol{ Person storage p = persons[0]; } : Prog StandardExample)).isNone := by
   decide
 
+/-! ## Calls
+
+A call is compiled as symbolic execution runs it, inlined: its arguments
+stored in its parameters' cells, its return variable zeroed, its body, the
+returned value copied where the call lands (`argsCode`). -/
+
+/-- `uint y = addTwo(3); total = y;` over `CallsExample`: `addTwo` calls
+`addOne` twice. -/
+def callTwice : Prog CallsExample := sol[CallsExample]{ uint y = addTwo(3); total = y; }
+
+theorem callTwice_wt : (wtProg (fun _ => none) callTwice).isSome := by decide
+
+/-- It writes `5` to `total`, slot `0`. -/
+theorem callTwice_run :
+    storeAt (run (compileProg callTwice) (Machine.init 0)) (rootSlot CallsExample "total") = some 5 := by
+  decide
+
+/-- **The call runs in the interpreter too**, and `total` reads `5` after it:
+the machine run, through `compile_storage`. -/
+theorem callTwice_interpreter :
+    ∃ σ', Prog.run (State.fresh CallsExample 0) callTwice = .ok σ' ∧
+      ∀ n, σ'.findLive "total" [] = .ok (.prim (.int n)) → n = 5 := by
+  rcases compile_storage (P := callTwice) (Option.some_get callTwice_wt).symm 0 with
+    ⟨σ', m', h1, h2, h3⟩ | ⟨_, h2⟩
+  · refine ⟨σ', h1, fun n hn => ?_⟩
+    have hp : PathSlot CallsExample false "total" [] (.prim .uint) (.root 0) := PathSlot.root rfl
+    have hs := h3 _ _ _ n hp hn
+    have hm := callTwice_run
+    rw [show run (compileProg callTwice) (Machine.init 0) = _ from h2] at hm
+    simp only [storeAt, Option.some.injEq] at hm
+    rw [show rootSlot CallsExample "total" = .root 0 from rfl] at hm
+    omega
+  · have := callTwice_run
+    rw [show run (compileProg callTwice) (Machine.init 0) = _ from h2] at this
+    cases this
+
 /-! ## Fixed-size arrays
 
 solc lays a fixed-size array out inline, from its own slot, with no length

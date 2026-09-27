@@ -156,6 +156,22 @@ def OpLoc.wt (Γ : Ctx) : {p : PrimTy} → OpLoc C p → Bool
 /-- `x` is bound as `bt` in `Γ`. -/
 def Ctx.has (Γ : Ctx) (x : Var) (bt : BTy) : Bool := lookupBy x Γ == some bt
 
+/-- The context a call's parameters leave: each argument checked where it is
+bound, as its inlining declares them one after another. -/
+def Arg.wt : Ctx → List (Arg C) → Option Ctx
+  | Γ, [] => some Γ
+  | Γ, a :: as => if a.e.wt Γ then Arg.wt (setBy a.x (.stack (.prim a.p)) Γ) as else none
+
+/-- The context a call's return variable is declared in. -/
+def CallRet.ctx (Γ : Ctx) : CallRet → Ctx
+  | .none => Γ
+  | .val p r _ => setBy r (.stack (.prim p)) Γ
+
+/-- The returned value lands in a local of its type. -/
+def CallRet.wt (Γ : Ctx) : CallRet → Bool
+  | .val p r (some y) => Ctx.has Γ r (.stack (.prim p)) && Ctx.has Γ y (.stack (.prim p))
+  | _ => true
+
 mutual
 
 /-- The context a statement leaves, if its locals are used as declared:
@@ -199,6 +215,13 @@ def Stmt.wt (Γ : Ctx) : Stmt C → Option Ctx
   | .require c => if c.wt Γ then some Γ else none
   | .assert c => if c.wt Γ then some Γ else none
   | .revert => some Γ
+  | .call _ args _ ret body =>
+    match Arg.wt Γ args with
+    | some Γ₁ =>
+      match Prog.wt (ret.ctx Γ₁) body with
+      | some Γ₂ => if ret.wt Γ₂ then some Γ₂ else none
+      | none => none
+    | none => none
 
 /-- The context a block leaves. -/
 def Prog.wt (Γ : Ctx) : List (Stmt C) → Option Ctx
@@ -1254,6 +1277,35 @@ theorem ARhs.bind_wt (hwt : RunWT C Γ H σ) {x : Var} {R : RefTy} {r : ARhs C R
     exact ⟨σ₁, root, segs ++ [.at n],
       pushPlaceAt_wt hwt hty (defaultOk_of_defaultOkS hd) hpush, tyAt_append_seg hty rfl, rfl⟩
 
+/-- A call's parameters bound: each argument of its type. -/
+theorem Arg.bindSeq_wt : ∀ {args : List (Arg C)} {Γ Γ' : Ctx} {σ σ' : State},
+    RunWT C Γ H σ → Arg.wt Γ args = some Γ' → Arg.bindSeq args σ = .ok σ' → RunWT C Γ' H σ'
+  | [], _, _, _, _, hwt, hs, h => by cases hs; cases h; exact hwt
+  | a :: as, Γ, Γ', σ, σ', hwt, hs, h => by
+    simp only [Arg.wt] at hs
+    split at hs
+    · rename_i hc
+      obtain ⟨w, hv, h⟩ := bind_ok_inv h
+      exact Arg.bindSeq_wt (hwt.setEnv (by simpa [BTy.matchesB] using Val.eval_wt hwt a.e hc hv)) hs h
+    · exact nomatch hs
+
+theorem CallRet.enter_wt (hwt : RunWT C Γ H σ) :
+    (ret : CallRet) → RunWT C (ret.ctx Γ) H (ret.enter σ)
+  | .none => hwt
+  | .val p _ _ => hwt.setEnv (by cases p <;> rfl)
+
+theorem CallRet.leave_wt (hwt : RunWT C Γ H σ) {σ' : State} :
+    (ret : CallRet) → ret.wt Γ = true → CallRet.leave (C := C) σ ret = .ok σ' → RunWT C Γ H σ'
+  | .none, _, h => by cases h; exact hwt
+  | .val _ _ Option.none, _, h => by cases h; exact hwt
+  | .val p r (some y), hr, h => by
+    simp only [CallRet.wt, Bool.and_eq_true] at hr
+    obtain ⟨w, hv, h⟩ := bind_ok_inv h
+    cases h
+    have hw : (Simple.local r : Simple C p).wt Γ = true := by simpa [Simple.wt, Ctx.has] using hr.1
+    have := Simple.eval_wt hwt hw hv
+    exact hwt.setEnv_same hr.2 (by simpa [BTy.matchesB] using this)
+
 end Effects
 
 /-! ## The headline -/
@@ -1469,6 +1521,21 @@ theorem Stmt.run_wt : ∀ (s : Stmt C) {Γ Γ' : Ctx} {H : HeapTy} {σ σ' : Sta
     · exact nomatch h
     · exact nomatch h
   | .revert, _, _, _, _, _, _, _, h => nomatch h
+  | .call _ args _ ret body, Γ, Γ', H, σ, σ', hwt, hs, h => by
+    simp only [Stmt.wt] at hs
+    split at hs
+    · rename_i Γ₁ h₁
+      split at hs
+      · rename_i Γ₂ h₂
+        obtain ⟨hr, rfl⟩ := wt_if hs
+        simp only [Stmt.run] at h
+        obtain ⟨σ₁, hσ₁, h⟩ := bind_ok_inv h
+        obtain ⟨σ₂, hσ₂, h⟩ := bind_ok_inv h
+        obtain ⟨H', hext, hwt₂⟩ :=
+          Prog.run_wt body (CallRet.enter_wt (Arg.bindSeq_wt hwt h₁ hσ₁) ret) h₂ hσ₂
+        exact ⟨H', hext, CallRet.leave_wt hwt₂ ret hr h⟩
+      · exact nomatch hs
+    · exact nomatch hs
 
 /-- **Type soundness, block level.** -/
 theorem Prog.run_wt : ∀ (P : List (Stmt C)) {Γ Γ' : Ctx} {H : HeapTy} {σ σ' : State},

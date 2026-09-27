@@ -488,6 +488,23 @@ def wtOpLoc (Γ : TyCtx) : {p : PrimTy} → OpLoc C p → Bool
     | some loc => wtLoc Γ false loc
     | none => false
 
+/-- A call's parameters, bound one after another: each argument of the
+fragment, at a type the fragment has. -/
+def wtArgs (Γ : TyCtx) : List (Arg C) → Option TyCtx
+  | [] => some Γ
+  | a :: as =>
+    if primInFrag a.p && wtVal Γ a.e then wtArgs (Γ.set a.x (some (.val a.p))) as else none
+
+/-- A call's return variable declared, at a type the fragment has. -/
+def wtRetEnter (Γ : TyCtx) : CallRet → Option TyCtx
+  | .none => some Γ
+  | .val p r _ => if primInFrag p then some (Γ.set r (some (.val p))) else none
+
+/-- The returned value read and assigned. -/
+def wtRetLeave (Γ : TyCtx) : CallRet → Bool
+  | .val p r (some y) => Γ r == some (.val p) && Γ y == some (.val p)
+  | _ => true
+
 mutual
 /-- A statement of the fragment, and the context it leaves. -/
 def wtStmt (Γ : TyCtx) : Stmt C → Option TyCtx
@@ -515,6 +532,17 @@ def wtStmt (Γ : TyCtx) : Stmt C → Option TyCtx
     else none
   | .require c | .assert c => if wtVal Γ c then some Γ else none
   | .revert => some Γ
+  -- a call is compiled inlined, as symbolic execution runs it
+  | .call _ args _ ret body =>
+    match wtArgs Γ args with
+    | some Γ₁ =>
+      match wtRetEnter Γ₁ ret with
+      | some Γ₂ =>
+        match wtProg Γ₂ body with
+        | some Γ₃ => if wtRetLeave Γ₃ ret then some Γ₃ else none
+        | none => none
+      | none => none
+    | none => none
   | _ => none
 def wtProg (Γ : TyCtx) : List (Stmt C) → Option TyCtx
   | [] => some Γ
@@ -613,6 +641,21 @@ def zeroCode (os : List Nat) : List Instr :=
 def popCode : List Instr :=
   [.dup 1, .sload, .dup 1] ++ assertTop ++ [.push (.val 1), .swap 1, .sub, .swap 1, .sstore]
 
+/-- A call's parameters bound: each argument's value stored in its cell. -/
+def argsCode : List (Arg C) → List Instr
+  | [] => []
+  | a :: as => compileVal a.e ++ [.mstore a.x] ++ argsCode as
+
+/-- The return variable declared: `0` in its cell. -/
+def retEnterCode : CallRet → List Instr
+  | .none => []
+  | .val _ r _ => [.push (.val 0), .mstore r]
+
+/-- The returned value copied where the call lands. -/
+def retLeaveCode : CallRet → List Instr
+  | .val _ r (some y) => [.mload r, .mstore y]
+  | _ => []
+
 mutual
 /-- The code of a statement; `[]` outside the fragment (which `wtStmt` rejects). -/
 def compileStmt : Stmt C → List Instr
@@ -640,6 +683,7 @@ def compileStmt : Stmt C → List Instr
       [.jump (compileProg e).length] ++ compileProg e
   | .require c | .assert c => compileVal c ++ assertTop
   | .revert => [.revert]
+  | .call _ args _ ret body => argsCode args ++ retEnterCode ret ++ compileProg body ++ retLeaveCode ret
   | _ => []
 /-- The code of a block: its statements' codes in order. -/
 def compileProg : List (Stmt C) → List Instr

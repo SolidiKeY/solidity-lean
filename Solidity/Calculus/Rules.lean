@@ -176,6 +176,32 @@ def VHole.isTarget {p : PrimTy} : VHole C p → Bool
   | .mem l => l.isTarget
   | _ => true
 
+/-- The first argument that is not simple, if any (`functionCallArgCapture`
+captures it; with none, `functionBodyExpand` inlines the call). -/
+def Arg.firstNonSimple : List (Arg C) → Option (Arg C)
+  | [] => none
+  | a :: as => if a.e.isSimple then Arg.firstNonSimple as else some a
+
+/-- The arguments with the first one that is not simple replaced by the
+local `se` it was captured into. -/
+def Arg.captureFirst (se : Var) : List (Arg C) → List (Arg C)
+  | [] => []
+  | a :: as => if a.e.isSimple then a :: Arg.captureFirst se as else ⟨a.p, a.x, .simple (.local se)⟩ :: as
+
+/-- A capture keeps a call separated: the argument it replaces is simple now. -/
+theorem Arg.separatedFrom_captureFirst {se : Var} :
+    {bound : List Var} → {args : List (Arg C)} → Arg.separatedFrom bound args = true →
+      Arg.separatedFrom bound (Arg.captureFirst se args) = true
+  | _, [], h => h
+  | bound, a :: as, h => by
+    simp only [Arg.separatedFrom, Bool.and_eq_true] at h
+    simp only [Arg.captureFirst]
+    split
+    · simp only [Arg.separatedFrom, Bool.and_eq_true]
+      exact ⟨h.1, Arg.separatedFrom_captureFirst h.2⟩
+    · simp only [Arg.separatedFrom, Val.isSimple, Bool.true_or, Bool.true_and]
+      exact h.2
+
 macro_rules
   | `(tactic| side_cond) => `(tactic| first
       | rfl
@@ -577,6 +603,47 @@ inductive Taclet (C : Contract) (k : Nat) : Modality → Stmt C → Premise C �
   /-- A reverted run satisfies no diamond formula: the diamond closes to `false`. -/
   | revertDiamond :
       dl{ ⟨ revert(); ⟩ ⇝ false }
+  -- Calls ----------------------------------------------------------------
+  /-- An argument that is not simple is captured into a fresh local first,
+  the leftmost first: `y = f(x + 1);` is `uint se = x + 1; y = f(se);` (the
+  `unfoldArgument` rule). -/
+  | functionCallArgCapture {f : Name} {args : List (Arg C)} {hsep : Arg.separatedFrom [] args = true}
+      {ret : CallRet} {body : List (Stmt C)} {a : Arg C}
+      (hcap : Arg.firstNonSimple args = some a := by side_cond) :
+      Taclet C k m (.call f args hsep ret body)
+        (.unfold [.declLocal a.p (.fresh "se" k) (some a.e),
+          .call f (Arg.captureFirst (.fresh "se" k) args) (Arg.separatedFrom_captureFirst hsep)
+            ret body])
+  /-- A call whose arguments are all simple runs its body: the parameters
+  declared with the arguments, the return variable declared, the body, the
+  result assigned (KeY's `expand_function_body`). -/
+  | functionBodyExpand {f : Name} {args : List (Arg C)} {hsep : Arg.separatedFrom [] args = true}
+      {ret : CallRet} {body : List (Stmt C)}
+      (hexp : Arg.firstNonSimple args = none := by side_cond) :
+      Taclet C k m (.call f args hsep ret body) (.unfold (Stmt.expandBody args ret body))
+
+/-! ## The callback taclets
+
+`transferSemantics:withCallback`: `sadr.transfer(se);` when the recipient may
+call back into the contract.  The premise is the booking `U`, KeY's
+`{selfBalance := selfBalance - se ‖ net := …}` (`transfer(sadr, se)`), read two
+ways (`Calculus/Callback.lean`): the contract invariant after it ("invariant on
+exit"), and the rest of the program resumed from any state the callee may leave
+in which the invariant holds ("resume after callback").  Under the diamond the
+booking is owed to succeed, which is solkey's "sufficient funds" premise.
+
+They are not `Taclet` constructors: `Taclet` is sound for `Stmt.run`, which
+books a transfer and returns, and these are sound for the callback reading
+(`holdsC`), in which the other semantics' `transferNoCallback` is not. -/
+
+/-- The two callback taclets: the statement they fire on, under the modality
+they are for, and the booking update of their premise. -/
+inductive CallbackTaclet (C : Contract) : Modality → Stmt C → Upd C → Prop where
+  | transferWithCallbackBox {sadr se : Simple C .uint} :
+      CallbackTaclet C .box (.transfer (.simple sadr) (.simple se)) [.transfer sadr.lower se.lower]
+  | transferWithCallbackDiamond {sadr se : Simple C .uint} :
+      CallbackTaclet C .diamond (.transfer (.simple sadr) (.simple se))
+        [.transfer sadr.lower se.lower]
 
 /-! ## Printing taclets and premises
 

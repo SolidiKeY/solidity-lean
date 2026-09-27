@@ -91,7 +91,10 @@ dynamic and fixed-size arrays, mappings keyed by `uint`, nested); literals below
 storage reads, every operator but `**` and unary minus, `?:`, short-circuit
 `&&`/`||`; `=` of a value into storage, `=` to a local, `uint x = e;`,
 `T storage p = …;`, `op=`, `x++;`/`total++;`, `delete` at any type, `pop()`,
-`transfer`, `if`, `require`, `assert`, `revert();`.
+`transfer`, `if`, `require`, `assert`, `revert();`, and a call of an
+internal function, compiled inlined (its arguments stored in its parameters'
+cells, its return variable zeroed, its body, the result copied: `argsCode`),
+when its parameters, return variable and body are in.
 
 Every guard solc emits is emitted: checked `+`/`-`/`*` (the `*` check is solc's
 `a == 0 || (a·b)/a == b`, `mul_ok_iff`), `/` and `%` by zero, array bounds,

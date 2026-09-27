@@ -21,10 +21,11 @@ not build here.
 The other direction is `taclets_partitioned`: every taclet of
 `solidityProgramRules.key` is claimed by some row or listed in
 `unclaimedTaclets` with a reason, never both.  The reasons are the places the
-typed syntax is narrower than solkey's (no calls), the places it is coarser (a memory path is a source as it stands,
+typed syntax is narrower than solkey's, the places it is coarser (a memory path is a source as it stands,
 so nothing captures one), and the places the calculus has no strategy to
-express (the literal-condition `if` rules, the callback semantics of
-`transfer`).
+express (the literal-condition `if` rules).  The callback semantics of
+`transfer` is a table of its own (`callbackOrigins`), its taclets being sound
+for another reading of the modalities.
 
 What this module does *not* say is whether a constructor's premise is
 *right*; that is the soundness development.
@@ -332,15 +333,26 @@ def tacletOrigins : List (Lean.Name × KeyOrigin) := [
   (``Taclet.assertConditionCapture, .taclet .assertConditionCapture),
   (``Taclet.assertSimple, .taclet .assertSimple),
   (``Taclet.revertBox, .taclet .revertBox),
-  (``Taclet.revertDiamond, .taclet .revertDiamond) ]
+  (``Taclet.revertDiamond, .taclet .revertDiamond),
+  -- Calls
+  (``Taclet.functionCallArgCapture, .leanOnly),
+  (``Taclet.functionBodyExpand, .taclet .functionBodyExpand) ]
 
 #check_constructor_table Taclet, tacletOrigins.map Prod.fst
+
+/-- The callback taclets (`Rules.lean`'s `CallbackTaclet`, the other
+`transferSemantics`), and the solkey taclets they transcribe. -/
+def callbackOrigins : List (Lean.Name × KeyOrigin) := [
+  (``CallbackTaclet.transferWithCallbackBox, .taclet .transferWithCallbackBox),
+  (``CallbackTaclet.transferWithCallbackDiamond, .taclet .transferWithCallbackDiamond) ]
+
+#check_constructor_table CallbackTaclet, callbackOrigins.map Prod.fst
 
 /-! ## Which KeY taclets the table claims -/
 
 /-- Whether some row names the taclet. -/
 def claims (t : KeyTaclet) : Bool :=
-  tacletOrigins.any fun r => r.2.taclets.contains t
+  (tacletOrigins ++ callbackOrigins).any fun r => r.2.taclets.contains t
 
 /-- Every taclet some row names, in `KeyTaclet.all`'s order. -/
 def claimedTaclets : List KeyTaclet := KeyTaclet.all.filter claims
@@ -351,7 +363,6 @@ def claimedTaclets : List KeyTaclet := KeyTaclet.all.filter claims
   statements with branch bodies inlined, so there is no nested block to erase
   and no `{} ; rest` to find; a derivation that reaches `⟨[ ]⟩` *is* the Lean
   analogue of `emptyModality`.
-* `functionBodyExpand` — the typed syntax has no calls.
 * `memoryFieldRead_unfold_rightSndResult`, `memoryIndexRead_unfold_rightSndResult`,
   `memoryFieldWriteCaptureSrc`, `memoryIndexWriteMemRefRhsCapture` — KeY
   captures a memory reference into an alias before writing it; here a memory
@@ -363,16 +374,14 @@ def claimedTaclets : List KeyTaclet := KeyTaclet.all.filter claims
   simple, so `ifElseSplit` applies and one of its goals assumes `true = false`;
   `!se` is not simple, so `ifElseUnfold` captures it.  They are strategy, and
   the table has no strategy.
-* `transferWithCallbackBox`, `transferWithCallbackDiamond` — the other
-  semantics of `transfer`, in which the callee may re-enter; the table
-  transcribes the no-callback pair. -/
+
+The other semantics of `transfer`, `transferWithCallbackBox` and
+`transferWithCallbackDiamond`, are claimed by `callbackOrigins`. -/
 def unclaimedTaclets : List KeyTaclet :=
   [ .emptyModality, .blockEmpty,
-    .functionBodyExpand,
     .memoryFieldRead_unfold_rightSndResult, .memoryIndexRead_unfold_rightSndResult,
     .memoryFieldWriteCaptureSrc, .memoryIndexWriteMemRefRhsCapture,
-    .ifTrue, .ifFalse, .ifElseTrue, .ifElseFalse, .ifElseNegated,
-    .transferWithCallbackBox, .transferWithCallbackDiamond ]
+    .ifTrue, .ifFalse, .ifElseTrue, .ifElseFalse, .ifElseNegated ]
 
 /-- **The coverage fact**: the corpus splits into what the table claims and
 what this file excuses, with nothing in both and nothing in neither.  A taclet
@@ -382,19 +391,23 @@ theorem taclets_partitioned :
     KeyTaclet.all.all (fun t => claims t != unclaimedTaclets.contains t) = true := by
   decide +kernel
 
-theorem claimedTaclets_count : claimedTaclets.length = 297 := by decide +kernel
+theorem claimedTaclets_count : claimedTaclets.length = 300 := by decide +kernel
 
-theorem unclaimedTaclets_count : unclaimedTaclets.length = 14 := by decide +kernel
+theorem unclaimedTaclets_count : unclaimedTaclets.length = 11 := by decide +kernel
 
 /-! ## The rows with no taclet
 
-A `leanOnly` row would be a claim that upstream has no counterpart.  There is
-none: the constructors that used to be Lean's own (front-end lowering of push
-sugar, scratch aliases, the call rule, `**=`) went with the untyped syntax.
-The count is kept so that one added later has to say so here. -/
+A `leanOnly` row is a claim that upstream has no counterpart.  There is one:
+`functionCallArgCapture`, printed as `unfoldArgument`, which solkey's
+`docs/net.md` lists as missing (its `ExpandFunctionBody` binds the parameters
+to the arguments as they are; here a parameter is bound to a ready argument
+only, so that inlining is exact).  The constructors that used to be Lean's own
+(front-end lowering of push sugar, scratch aliases, `**=`) went with the
+untyped syntax.  The count is kept so that one added later has to say so
+here. -/
 
 theorem leanOnly_count :
-    (tacletOrigins.filter fun r => r.2 == .leanOnly).length = 0 := by decide +kernel
+    (tacletOrigins.filter fun r => r.2 == .leanOnly).length = 1 := by decide +kernel
 
 /-! ## `\heuristics` agree within a row
 

@@ -29,6 +29,8 @@ a total function over the typed syntax, and it is the only rule that can:
   well-formedness hypothesis.
 - One rule, one constructor; the modality is a parameter (`⟨[ ]⟩`), not a
   box/diamond twin. Only `revertBox`/`revertDiamond` tell them apart.
+  `CallbackTaclet` (the other `transferSemantics`, sound for `holdsC`, not
+  for `Stmt.run`) is a separate inductive and keeps solkey's box/diamond pair.
 - Every theorem has a docstring with a small Solidity example.
 - Example contracts are **named** `Contract` constants: the quoters and the
   kernel re-check rely on it. A new syntax constructor needs an arm in every

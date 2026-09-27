@@ -1437,6 +1437,21 @@ end Effects
 
 /-! ## The run keeps the state canonical -/
 
+/-- Binding a call's parameters touches only locals. -/
+theorem Arg.bindSeq_locals : ∀ {args : List (Arg C)} {σ σ' : State}, Arg.bindSeq args σ = .ok σ' →
+    σ'.storage = σ.storage ∧ σ'.heap = σ.heap
+  | [], _, _, h => by cases h; exact ⟨rfl, rfl⟩
+  | a :: as, σ, σ', h => by
+    obtain ⟨w, _, h⟩ := bind_ok_inv h
+    exact Arg.bindSeq_locals (σ := σ.setEnv a.x (.val w)) h
+
+theorem CallRet.leave_locals {σ σ' : State} :
+    (ret : CallRet) → CallRet.leave (C := C) σ ret = .ok σ' → σ'.storage = σ.storage ∧ σ'.heap = σ.heap
+  | .none, h | .val _ _ Option.none, h => by cases h; exact ⟨rfl, rfl⟩
+  | .val _ _ (some _), h => by
+    obtain ⟨w, _, h⟩ := bind_ok_inv h
+    cases h; exact ⟨rfl, rfl⟩
+
 mutual
 
 /-- **Canonicity, statement level.**  A checked statement run from a
@@ -1681,6 +1696,25 @@ theorem Stmt.run_canon : ∀ (s : Stmt C) {Γ Γ' : Ctx} {H : HeapTy} {σ σ' : 
     · exact nomatch h
     · exact nomatch h
   | .revert, _, _, _, _, _, _, _, _, h => nomatch h
+  | .call _ args _ ret body, Γ, Γ', H, σ, σ', hwt, hcn, hs, h => by
+    simp only [Stmt.wt] at hs
+    split at hs
+    · rename_i Γ₁ h₁
+      split at hs
+      · rename_i Γ₂ h₂
+        obtain ⟨hr, rfl⟩ := wt_if hs
+        simp only [Stmt.run] at h
+        obtain ⟨σ₁, hσ₁, h⟩ := bind_ok_inv h
+        obtain ⟨σ₂, hσ₂, h⟩ := bind_ok_inv h
+        obtain ⟨hs₁, hh₁⟩ := Arg.bindSeq_locals hσ₁
+        have hcn₁ : Canon C H (ret.enter σ₁) :=
+          hcn.of_eq (by cases ret <;> exact hs₁) (by cases ret <;> exact hh₁)
+        obtain ⟨H', hext, hwt₂, hcn₂⟩ :=
+          Prog.run_canon body (CallRet.enter_wt (Arg.bindSeq_wt hwt h₁ hσ₁) ret) hcn₁ h₂ hσ₂
+        obtain ⟨hs₃, hh₃⟩ := CallRet.leave_locals ret h
+        exact ⟨H', hext, CallRet.leave_wt hwt₂ ret hr h, hcn₂.of_eq hs₃ hh₃⟩
+      · exact nomatch hs
+    · exact nomatch hs
 
 /-- **Canonicity, block level.** -/
 theorem Prog.run_canon : ∀ (P : List (Stmt C)) {Γ Γ' : Ctx} {H : HeapTy} {σ σ' : State},

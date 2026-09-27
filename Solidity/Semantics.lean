@@ -18,7 +18,11 @@ Semantic conventions mirrored from KeY:
 - array reads and writes out of bounds revert; `pop()` on an empty array
   reverts; `/` and `%` revert on a zero divisor; a failing `assert`
   reverts;
-- `a.transfer(v)` books `net(a) := net(a) - v` with no callback.
+- `a.transfer(v)` books `net(a) := net(a) - v` with no callback (the
+  callback reading is `Semantics/Callback.lean`'s, a relation over this one);
+- a call runs its inlined body (`Stmt.call`, KeY's `functionBodyExpand`):
+  its arguments read in the caller's state, bound to its parameters, its
+  return variable declared, the body run, the result assigned.
 
 Semantic conventions mirrored from solc, where KeY was more liberal
 (`docs/solc-alignment.md`):
@@ -1266,6 +1270,24 @@ def ARhs.bind (σ : State) (x : Var) {R : RefTy} : ARhs C R → Res State
     let (σ', n) ← pushPlaceAt σ (.ref R) root segs
     pure (σ'.setEnv x (.spath root (segs ++ [.at n])))
 
+/-- A call's arguments bound to its parameters, one after another, as its
+inlining declares them.  The parameters are fresh at the call and no argument
+that is not simple reads one (`Arg.separatedFrom`), so this is solc's
+reading of every argument before the callee runs. -/
+def Arg.bindSeq : List (Arg C) → State → Res State
+  | [], σ => pure σ
+  | a :: as, σ => do Arg.bindSeq as (σ.setEnv a.x (.val (← a.e.eval σ)))
+
+/-- Entering a call: its return variable declared at its default. -/
+def CallRet.enter (σ : State) : CallRet → State
+  | .none => σ
+  | .val p r _ => σ.setEnv r (.val (PrimTy.default p))
+
+/-- Leaving a call: the returned value assigned where the call is. -/
+def CallRet.leave (σ : State) : CallRet → Res State
+  | .val p r (some res) => do pure (σ.setEnv res (.val (← (Simple.local r : Simple C p).eval σ)))
+  | _ => pure σ
+
 /-- A condition's outcome: `true` goes on, `false` reverts. -/
 def guardOk (v : Value) (σ : State) : Res State :=
   match v with
@@ -1348,6 +1370,10 @@ def Stmt.run (σ : State) : Stmt C → Res State
   | .require c => do guardOk (← c.eval σ) σ
   | .assert c => do guardOk (← c.eval σ) σ
   | .revert => .error .revert
+  | .call _ args _ ret body => do
+    let σ₁ ← Arg.bindSeq args σ
+    let σ₂ ← Prog.run (ret.enter σ₁) body
+    CallRet.leave (C := C) σ₂ ret
 
 /-- The state a block leaves. -/
 def Prog.run (σ : State) : List (Stmt C) → Res State
