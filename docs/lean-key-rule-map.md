@@ -428,6 +428,13 @@ belongs here.
 
 ### `structRules.key` → `Theory/Storage.lean` (`Struct`, `StValue`)
 
+The theory tables track solkey `f2eb3d98eb`'s `structRules.key`,
+`structHeader.key`, `memoryRules.key` and `memoryHeader.key`, which moved on
+from the program-taclet pin above: the `delValue` family became `delField`,
+`delNodeFixed` and the `Shape` sort arrived (for a fixed-size array's
+length), `selectStDelNodeIndexStruct` became length-guarded, and
+`findDefinitionCons` split by field sort.
+
 | KeY taclet | Lean theorem | Status |
 | --- | --- | --- |
 | `defaultValueStruct` | `defaultValueStruct`, with `defaultValueInt`/`defaultValueBool` | done: `defaultValue<[α]>` is `st mtSt`, the `Struct` default, read through the caller's cast |
@@ -436,22 +443,33 @@ belongs here.
 | `saveOnEmptyStorage` | `saveOnEmptyStorage` | done, in the pre-fold shape (an `isEmpty(flds)` split) |
 | `saveOnStoreCons` | `saveOnStoreCons` | done, in the pre-fold shape: the `isEmpty(flds)` split is back, since the leaf collapses; `(Struct) v0` is `asStruct v0` |
 | `findDefinitionEmpty` | `findDefinitionEmpty` | done |
-| `findDefinitionCons` | `findDefinitionCons` | done |
+| `findDefinitionElement`, `findDefinitionMapElement`, `findDefinitionSize`, `findDefinitionMemberPrim`, `findDefinitionMemberValue` | `findDefinitionCons` | done: the old single rule, split upstream by field sort; `atMap(i)` is `Seg.at i` and `size` is `Seg.field "length"` |
+| `findDefinitionMemberStruct`, `findDefinitionMemberCons` | `findDefinitionCons` | done **without the tag**: upstream wraps the struct read through a member in `typed(fieldShape(m), …)`; `typed` is not modelled (below), and without it these are `findDefinitionCons` |
 | ~~`saveOnEmpty`~~ (pre-fold) | `saveOnEmpty` | done — gone upstream with the `copyAt`→`save` fold and kept here: `save(st, nil, v) ⇝ v`, the collapsing leaf |
 | ~~`selectOnSaveEmpty`~~ (pre-fold) | `selectOnSaveEmpty` | done as the pre-fold rule — a member of `save(st, nil, v)` is a member of `(Struct) v` |
 | `saveOnEmptyPrim` | `saveOnEmptyPrimInt`, `saveOnEmptyPrimBool` | done, as the two cast readings at the end of a walk: `storeSt`'s third argument is the supersort, so the primitive leaf is stored verbatim |
+| `selectOnSaveEmptyRef`, `selectOnSaveEmptyFixed` | `selectOnSaveEmptyRef` | done, for every `Seg`: the right-hand side collapses to the pre-fold one |
+| `selectOnSaveEmptyIndexStruct` | `selectOnSaveEmptyIndexStruct`, `selectOnSaveEmptyIndexClear`, `selectOnSaveEmptyIndexKeep` | done: the in-bounds branch as stated; the clear and keep branches under the length invariant (nothing stored past an array's length), the clear one at every primitive read below the element |
+| `selectOnSaveEmptyDefault` (upstream it is `selectOnSaveEmpty`'s primitive case) | `selectOnSaveEmpty` | done |
 | `selectOnSaveEmptyMap` | — | **arch**: upstream a mapping member of a written location stays the location's own; here the leaf collapses and a mapping member is a subtree like any other. Unreachable — solc ≥ 0.7 and solkey's own parser reject the copy, and `TypedStmt.Assign.mk` cannot build it |
 | `selectOnSaveCons` | `selectOnSaveCons` | done, and **unconditional** (a total definition needs no `isStruct` guard) |
-| `delValueStruct` | `delValueStruct` | done |
-| `delValueDefault` | `delValueDefault` (`primDefault`, keyed on the value's own sort) | done |
+| `delFieldRef`, `delFieldIndexStruct` | `delFieldRef`, `delFieldIndexStruct` | done: `delField s a = delValue (selectSt s a)`, the reset picked by the value's sort since a `Seg` has none |
+| `delFieldDefault` | `delFieldDefault`, `delFieldDefault_asBool` | done |
+| `delFieldStValueCast` | `delValueCast`, `delValueCast_asInt`, `delValueCast_asBool` | done as the cast pushed through the reset (was `delValueStValueCast`) |
+| `delFieldMap` | — | **arch**: a `Seg` carries no `MapField` |
+| `delFieldFixed` | — | **arch**: no fixed-size array in the language model, so no `FixedField` |
+| ~~`delValueStruct`~~, ~~`delValueDefault`~~ | `delValueStruct`, `delValueDefault` | gone upstream (replaced by `delField`); kept as the lemmas under it |
 | `selectStDelNodeMap` | — | **arch**: a `Seg` carries no `MapField`, so a mapping member of a deleted node is reset here; the mapping-preserving `delete` is the interpreter's `SVal.defaultOf` |
-| `selectStDelNodeRef` | `selectStDelNodeRef` | done, unconditional: one theorem covers `Ref`, `Default` and an absent member |
-| `selectStDelNodeIndexStruct` | `selectStDelNodeIndexStruct` | done |
-| `selectStDelNodeDefault` | `selectStDelNodeRef`, `selectStDelNodeDefault` | done |
+| `selectStDelNodeRef` | `selectStDelNodeRef` (from `selectStDelNodeSelect`) | done, unconditional and for every `Seg`: one theorem, `selectSt (delNode s) a = delValue (selectSt s a)`, covers `Ref`, `Default`, the in-bounds index and an absent member |
+| `selectStDelNodeIndexStruct` | `selectStDelNodeIndexStruct`, `selectStDelNodeIndexKeep` | done: the in-bounds branch (`delNode` of the element, now that `delNode` resets index members in place instead of dropping them) unconditionally; the keep branch under the length invariant |
+| `selectStDelNodeDefault` | `selectStDelNodeDefault`, `selectStDelNodeDefault_asBool` | done |
+| `selectStDelNodeFixed`, `selectStDelNodeFixed{Map,Element,Size,Value}` | — | **arch**: `delNodeFixed` is reached only through a `FixedField`, and there is none |
 | `delAtEmpty` | `delAtEmpty` | done |
-| `selectOnDelAtCons` | `selectOnDelAtCons` | done, through `selectOnSaveCons`: `delAt` is eager, `save st p (delValue (find st p))` |
+| `selectOnDelAtCons` | `selectOnDelAtCons` | done, through `selectOnSaveCons`: `delAt` is eager, `save st p (delValue (find st p))`; the leaf is `delField st a1` |
+| `fieldShapeDef` | `fieldShapeDef` (`fieldShape`, `Shape.ofTy`) | done: `#shapeOf` is `Shape.ofTy`, over a member table the caller supplies (a `Seg.field` carries the name, not the declaration) |
+| `selectOnTyped{Struct,FixedSize,DynSize,LeafSize,MapSize,Element,Member}`, `typedTyped` | — | **not modelled**: the only rule that reads the tag is `selectOnTypedFixedSize`; no declared shape is a `fixedArr` (`Shape.ofTy_ne_fixedArr`), and `typed` would be a fifth `Struct` constructor through every proof (`Theory/Storage.lean`, "Shapes") |
 | ~~`copyAtEmpty`~~, ~~`selectOnCopyAtCons`~~, ~~`mergePrim`~~, ~~`selectStMerge{Map,Ref,IndexStruct,Default}`~~, ~~`mergeStValueCast`~~ | — | gone upstream with the fold; not modelled here for the reason `selectOnSaveEmptyMap` is not |
-| `findStValueCast`, `delValueStValueCast`, `selectStValueCast` | `asStruct_st`, `asStruct_prim`, `find_append` | done as the cast being the inverse of the injection `st` |
+| `findStValueCast`, `selectStValueCast` | `asStruct_st`, `asStruct_prim`, `find_append` | done as the cast being the inverse of the injection `st` |
 | `sizeNotNegative` | — | **arch**: an `\add` of a reachability fact, not a rewrite; a bounds check on an array index is a *guard* on the program-level taclet, not a term-algebra theorem |
 
 **Beyond the taclets.** solkey has no `find(save(…), …)` rule at all: a read of
@@ -460,7 +478,10 @@ selector at a time. `Theory/Storage.lean` packages the four cases over
 `save` — `find_save_same`, `find_save_extends` (below the write, through the
 cast `find<[Struct]>` makes), `find_save_prefix` (above it) and
 `find_save_frame` (off it, over `diverges`) — and `find_append` composes reads
-along `++`.
+along `++`. Over `delAt` the same: `find_delAt_same` and
+`find_delAt_field` (`findDelAt`), `find_delAt_frame`, `find_delAt_extends`,
+and `find_delAt_below` (a read below a deleted path is the reset of the read
+before it, through any path).
 
 **`storeAt` and the two sorts.** `save` is a recursion on the path over
 `storeAt`, the one-segment walk. It returns `Struct`, as KeY's does, and
@@ -476,7 +497,8 @@ because the copy they state is mapping-free by construction
 ### `memoryRules.key` → `Theory/Memory.lean`
 
 Identities are KeY's path identities `idC(idp, flds)`, so the chain-walking
-rows have counterparts and `MTerm.addM` carries the root it allocates.
+rows have counterparts and `MTerm.addM` carries the root it allocates. A root
+may be `shaped(idp, sh)` (`IdentityPrim.shaped`, `Theory/Terms.lean`).
 
 | KeY taclet | Lean theorem | Status |
 | --- | --- | --- |
@@ -486,16 +508,29 @@ rows have counterparts and `MTerm.addM` carries the root it allocates.
 | `newFromEmptyMemory` | `newFromEmptyMemory` | done |
 | `newFromWrite` | `newFromWrite` | done |
 | `newFromAdd` | `newFromAdd` | done |
-| `defaultValueInt`, `defaultValueBool`, `defaultDef`, `defValResolve` | `MemValue.asPrim`, `defaultDefInt`, `defValResolvePrim` | done as casts |
+| `defaultValueInt`, `defaultValueBool`, `defValResolve` | `MemValue.asPrim`, `defaultDefInt`, `defValResolvePrim` | done as casts |
+| `defaultDefElement`, `defaultDefMember` | `defaultDefElement`, `defaultDefMember` (`MemValue.asIntAt`) | done: the old single `defaultDef`, split by field so that `defaultSize` has the length to itself; the cast takes the location |
+| `defaultSize` | `defaultSize` (and `defaultSizeUnshaped` for a bare root) | done |
 | `defaultDefIdentity` | `defaultDefIdentity` (`MemValue.asIdentity`) | done |
 | `idCCDef` | `idCCDef` | done |
 | `readREmpty`, `readRCons` | `readREmpty`, `readRCons` (`Memory.readR`, `readRId`) | done |
+| `sizeOfFixed`, `sizeOfDyn`, `sizeOfLeaf` | `sizeOfFixed`, `sizeOfDyn`, `sizeOfLeaf` (`shapeSize`: `sizeOf` is Lean's own) | done; `mapOf` has no taclet and is `0` |
+| `shapeAtNil` | `shapeAtNil` | done |
+| `shapeAtFixed`, `shapeAtFixedMapElement` | `shapeAtFixed` | done: `atMap(i)` is `Seg.at i` |
+| `shapeAtDyn`, `shapeAtDynMapElement` | `shapeAtDyn` | done, likewise |
+| `shapeAtMap` | `shapeAtMap` | done |
+| `shapeAtLeafElement`, `shapeAtLeafMapElement` | `shapeAtLeafElement` | **differs** on an ill-typed path: upstream `shapeAt(leaf, cons(at(pk), xs)) ⇝ leaf` drops `xs`; here the walk goes on from `leaf`, which is what makes `shapeAtSuffix` hold (upstream it fails on `leaf·at(i)·m`) |
+| `shapeAtMember` | `shapeAtMember` | done, for a member other than `size` (not a `MemberField`) |
+| — | `shapeAtSuffix` | the tail-first rule; no taclet upstream (solkey recurses head-first) |
+| `idShapeDef` | `idShapeDef` | done |
 
 ### `structMemoryRules.key` → `Theory/CrossDomain.lean`
 
 | KeY taclet | Lean theorem | Status |
 | --- | --- | --- |
-| `findOnCopy` | `StValue.findCopyMem` | done |
+| `findOnCopy` | `StValue.findCopyMem`, `StValue.findCopyMem_asBool` | done, at the primitive sorts, as the taclet is |
+| `selectOnCopyMemPrim` | `StValue.selectOnCopyMemPrim` (`_asBool`) | done, through `find`: `selectSt` on a view stays structural and reads nothing |
+| `selectOnCopyMemRef` | `StValue.selectOnCopyMemRef`, `StValue.findCopyMemStruct` | done, for a slot that is not a primitive (the sort premise); a never-written slot is the view at `defaultDefIdentity`'s identity, so a member memory created implicitly is read through |
 | `readFromCopyToStorage` | `Memory.readCopySt` | done |
 | `readFromCopyToStorageIdentity` | `Memory.readCopyStIdentity` | done |
 | — | `Memory.readCopyStOther` | the split form of the frame |
@@ -503,7 +538,9 @@ rows have counterparts and `MTerm.addM` carries the root it allocates.
 The views are constructors of the two sorts, as KeY declares them
 (`Struct copyMem(Struct, Memory, Identity)`,
 `Memory copySt(Memory, IdentityPrim, Struct)`), which makes `Struct`,
-`StValue` and `Memory` one mutual inductive — `Theory/Terms.lean`.
+`StValue` and `Memory` one mutual inductive — `Theory/Terms.lean`. A read
+through a `copyMem` view is `Memory.viewRead`: `readR`'s walk, with the last
+slot a primitive or the view one field further down.
 
 What this does not model is a view nested in a view: `readIn` reads its
 copied struct with `findSt`, the reader that stops at a view, which is what
@@ -513,12 +550,15 @@ nests one and no taclet rewrites under one.
 ### The names for these rules
 
 `Theory/Rewrite.lean` is the enumeration of the theory's rules under the
-printed names, with `theoryRuleLemma`
+printed names, with `lemmaNames`
 mapping each `TheoryRule` constructor to the theorem(s) above. The theorems
 keep their upstream (KeY) names — that is what makes this file, and
 `Theory/Rewrite.lean`'s own docstring says so explicitly, a map — and the
 join is stated against the printed
-`\namedRwRule` declarations rather than left as prose.
+`\namedRwRule` declarations rather than left as prose. The printed rules with no
+constructor — the `MapField`, `FixedField` and `typed` rows marked **arch** or
+**not modelled** above, and the four arithmetic expansions listed
+as not implemented — are excused in `Theory/Rewrite.lean` by name, each with its reason.
 
 ### Deviations, collected
 
@@ -532,3 +572,14 @@ lazy and the interpreter is eager:
 * `Theory/Storage.lean` renders `defaultValue<[α]>` as `st mtSt`, the `Struct`
   default, resolved by the caller's cast (`asInt (st mtSt) = 0`) rather than
   by the sort the read asks for.
+
+And three where the theory reads a rule differently, each argued at its row:
+
+* The reset a `delete` picks is keyed on the *value's* sort, not the field's
+  (`delField`, `delNode`): a `Seg` carries no `MapField`/`FixedField`, so the
+  mapping-preserving and length-preserving rules have no statement.
+* `fieldShape` takes the member table as an argument: KeY's member constants
+  know their declaration, a `Seg.field` only its name.
+* `shapeAt` follows `shapeAtSuffix` rather than solkey's
+  `shapeAtLeafElement`, which drops the rest of the path under an indexed
+  `leaf`; the two agree on every well-typed path.

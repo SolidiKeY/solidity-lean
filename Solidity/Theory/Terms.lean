@@ -39,16 +39,21 @@ heap moved onto the leaf that actually reads it.  The algebra above is
 unchanged: `pre h` is still "the interpreter's heap, opaque", and every other
 constructor is still a free term.
 
-## Three arms with no taclet upstream
+## Three arms on a view
 
-`selectSt`, `storeAt` (`Theory/Storage.lean`) and `delNode` (likewise) have no
-`.key` rule for a `copyMem` view, so what they do there is ours to choose.
-Each is chosen so that the rule which *does* exist subsumes it:
+`selectSt`, `storeAt` (`Theory/Storage.lean`) and `delNode` (likewise) each
+have an arm for a `copyMem` view.  Only the first has a taclet upstream
+(`selectOnCopyMemPrim`/`selectOnCopyMemRef`, `structMemoryRules.key`), and
+it is stated one level up; the other two are ours to choose, and each is
+chosen so that the rule which *does* exist subsumes it:
 
 * `selectSt (copyMem mem id) a` pushes the view down — `copyMem mem (id·a)` —
-  and reads nothing.  It is reachable only where `findCopyMem` did not already
-  answer, and it is what keeps `selectSt` structural on `Struct` alone, which
-  is what the termination argument below needs.
+  and reads nothing, which keeps `selectSt` structural on `Struct` alone, as
+  the termination argument below needs.  The two taclets that *do* read a
+  selector of a view into memory are answered by `find`, whose `copyMem` arm
+  (`Memory.viewRead`) is reached first: `Theory/CrossDomain.lean` states them
+  there.  `selectSt`'s own arm is reachable only through `findSt`, the reader
+  that stops at a view.
 * `storeAt` puts a `storeSt` shadow node *over* the view rather than replacing
   it.  Replacing it would destroy the view and make `find_save_frame` false.
 * `delNode` answers `mtSt`: it is eager here (`Theory/Storage.lean`), so it
@@ -79,6 +84,48 @@ namespace Theory
 
 open Semantics
 
+/-! ## Shapes
+
+`memoryHeader.key` declares `Shape` with four `\unique` constructors, and a
+root may carry one (`shaped`, below).  It is a sort of its own, outside the
+mutual block, because nothing in it mentions a struct or a memory.  Its
+functions and their taclets — `sizeOf`, `shapeAt`, `idShape` — are
+`Theory/Memory.lean`'s, where `memoryRules.key` states them. -/
+
+/-- `Shape` (`memoryHeader.key`): the static shape of a location, which is
+what carries a fixed-size array's length where no statement ever writes it. -/
+inductive Shape where
+  /-- `leaf`: a primitive, or a struct all of whose members are named. -/
+  | leaf
+  /-- `fixedArr(n, sh)`: a fixed-size array of length `n`. -/
+  | fixedArr (n : Int) (sh : Shape)
+  /-- `dynArr(sh)`: a dynamic array. -/
+  | dynArr (sh : Shape)
+  /-- `mapOf(sh)`: a mapping, its values of shape `sh`. -/
+  | mapOf (sh : Shape)
+  deriving Repr, DecidableEq
+
+mutual
+  /-- `#shapeOf(T)`, the meta-operator `fieldShapeDef` unfolds to: the shape of a
+  declared type.  `AST.RefTy` has no fixed-size array, so this never produces
+  `fixedArr` — which is why the `typed` family of `structRules.key` is not
+  modelled (`Theory/Storage.lean`, "Shapes"). -/
+  def Shape.ofTy : Ty -> Shape
+    | .prim _ => .leaf
+    | .ref r => Shape.ofRefTy r
+  /-- `#shapeOf` at a reference type. -/
+  def Shape.ofRefTy : RefTy -> Shape
+    | .struct _ => .leaf
+    | .array e => .dynArr (Shape.ofTy e)
+    | .mapping _ v => .mapOf (Shape.ofTy v)
+end
+
+/-- `fieldShape(m)` (`structHeader.key`): the declared shape of a member.  KeY's
+member constants know their declaration; a `Seg.field` carries only the
+member's name, so the declarations are the caller's — `decl` is the member
+table `#shapeOf` reads. -/
+def fieldShape (decl : Name -> Ty) (m : Name) : Shape := Shape.ofTy (decl m)
+
 /-! ## Identities
 
 `\unique Identity idC(IdentityPrim, List)` (`memoryRules.key`): the identity
@@ -87,12 +134,20 @@ reached from a root along a path of fields.  `\unique` is injectivity, which
 
 /-- `IdentityPrim` — a sort of its own in `memoryHeader.key`, not a number:
 it is what `addM` allocates, what `new` tests, and what `idC` pairs with a
-path.  The interpreter names objects by `Nat`, so the wrapper is where the two
+path.  The interpreter names objects by `Nat`, so `ofNat` is where the two
 meet and `toNat` is the only place the number is visible. -/
-structure IdentityPrim where
-  ofNat ::
-  toNat : Nat
+inductive IdentityPrim where
+  | ofNat (n : Nat)
+  /-- `\unique IdentityPrim shaped(IdentityPrim, Shape)`: a root tagged with
+  its declared shape, which is how `defaultSize` finds a fixed-size array's
+  length.  `\unique`, so a shaped root is not the root it tags. -/
+  | shaped (idp : IdentityPrim) (sh : Shape)
   deriving Repr, DecidableEq
+
+/-- The interpreter's object number: a shaped root is the root it tags. -/
+def IdentityPrim.toNat : IdentityPrim -> Nat
+  | .ofNat n => n
+  | .shaped r _ => r.toNat
 
 inductive Identity where
   | idC (root : IdentityPrim) (path : List Seg)
@@ -274,20 +329,40 @@ end StValue
 
 namespace MemValue
 
-/-- A memory slot as a storage value.  A slot holding an identity is the
-*sub-view*: reading further below it keeps reading memory, which is the whole
-content of `copyMem` being lazy. -/
-def ofView (mem : Memory) : MemValue -> StValue
+/-- A memory slot read through a `copyMem` view, as a storage value, at the
+location `loc`/`a` it was read from.  A primitive is itself
+(`selectOnCopyMemPrim`); anything else is the view one field down, over the
+identity the slot names (`selectOnCopyMemRef`'s
+`copyMem(mtSt, mem, read<[Identity]>(mem, id, a))`).  That includes a
+never-written slot: its identity is `defaultDefIdentity`'s `idC(r, flds·a)`,
+so a member struct that memory created implicitly is still read *through*,
+and a write below it is seen. -/
+def ofViewAt (mem : Memory) (loc : Identity) (a : Seg) : MemValue -> StValue
   | .prim p => .prim p
-  | .ident i => .st (.copyMem mem i)
-  | .dflt => .st Struct.mtSt
+  | v => .st (Struct.copyMem mem (v.asIdentity loc a))
 
-@[simp] theorem ofView_prim (mem : Memory) (p : PrimVal) :
-    ofView mem (.prim p) = .prim p := rfl
-@[simp] theorem ofView_ident (mem : Memory) (i : Identity) :
-    ofView mem (.ident i) = .st (Struct.copyMem mem i) := rfl
-@[simp] theorem ofView_dflt (mem : Memory) :
-    ofView mem .dflt = .st Struct.mtSt := rfl
+@[simp] theorem ofViewAt_prim (mem : Memory) (loc : Identity) (a : Seg) (p : PrimVal) :
+    ofViewAt mem loc a (.prim p) = .prim p := rfl
+@[simp] theorem ofViewAt_ident (mem : Memory) (loc : Identity) (a : Seg) (i : Identity) :
+    ofViewAt mem loc a (.ident i) = .st (Struct.copyMem mem i) := rfl
+@[simp] theorem ofViewAt_dflt (mem : Memory) (loc : Identity) (a : Seg) :
+    ofViewAt mem loc a .dflt = .st (Struct.copyMem mem (loc.extend a)) := rfl
+
+/-! ### Casts at a primitive sort
+
+`read<[int]>`/`read<[bool]>`: the primitive casts of a memory slot, which a
+non-primitive slot answers with the sort's default, as `StValue.asInt` does
+on the storage side.  They are what `findCopyMem` is stated through. -/
+
+/-- `(int) v` on a memory slot. -/
+def asInt : MemValue -> Int
+  | prim (PrimVal.int v) => v
+  | _ => 0
+
+/-- `(bool) v` on a memory slot. -/
+def asBool : MemValue -> Bool
+  | prim (PrimVal.bool b) => b
+  | _ => false
 
 end MemValue
 
@@ -459,6 +534,16 @@ def readR : Memory -> Identity -> List Seg -> MemValue
   | mem, id, [a] => readIn mem id a
   | mem, id, a :: b :: rest => readR mem (readId mem id a) (b :: rest)
 
+/-- A read through a `copyMem(mtSt, mem, id)` view, as a storage value: `readR`'s
+walk, with the last slot seen through `MemValue.ofViewAt`.  At a primitive sort
+it is `readR` (`findCopyMem`); at `Struct` it is the view one field further
+down (`selectOnCopyMemRef`), which is what lets a storage copy *of* a view's
+member stay lazy. -/
+def viewRead (mem : Memory) : Identity -> List Seg -> StValue
+  | id, [] => .st (Struct.copyMem mem id)
+  | id, [a] => MemValue.ofViewAt mem id a (readIn mem id a)
+  | id, a :: b :: rest => viewRead mem (readId mem id a) (b :: rest)
+
 end Memory
 
 namespace StValue
@@ -469,10 +554,11 @@ open Struct
 branch, and it is not the same as recursing: the last step reads at the
 *caller's* sort, so a primitive leaf survives it where `(Struct)` would not.
 
-The `copyMem` arm is `findCopyMem`: the whole remaining path goes to `readR`
-in one step, as the taclet does. -/
+The `copyMem` arm is `findCopyMem`: the whole remaining path goes to memory
+in one step, as the taclet does, and `Memory.viewRead` is that read at the
+storage sorts. -/
 def find : Struct -> List Seg -> StValue
-  | .copyMem mem id, flds => MemValue.ofView mem (Memory.readR mem id flds)
+  | .copyMem mem id, flds => Memory.viewRead mem id flds
   | s, [] => .st s
   | s, [a] => selectSt s a
   | s, a :: b :: flds => find ((selectSt s a).asStruct) (b :: flds)

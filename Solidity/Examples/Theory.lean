@@ -112,8 +112,10 @@ theorem pushPopSlotValue : findSt S3 [tokens, .at 0, value] = StValue.int 7 :=
 
 /-! ## 3 · `delete`
 
-A deleted node carries the marker (`delAtEmpty`), and a leaf below it then
-reads as its type's default (`delValueDefault`). -/
+A deleted node carries the marker (`delAtEmpty`), a leaf reads as its type's
+default (`delFieldDefault`), and a read below a deleted path descends through
+the marker: the first storage `delete` trace, where `A`
+is the deleted account. -/
 
 /-- `delete alice;` of a struct holding `age = 34`: the marker. -/
 theorem deleteLeafValue :
@@ -121,10 +123,44 @@ theorem deleteLeafValue :
   calc delAt (stSave [alice, age] 34) []
     _ = delNode (stSave [alice, age] 34) := delAtEmpty _  -- delAtEmpty
 
-/-- …and the leaf's default. -/
-theorem deleteLeafDefault (q : PrimVal) : delValue (StValue.prim q) = StValue.prim (primDefault q) :=
-  calc delValue (StValue.prim q)
-    _ = StValue.prim (primDefault q) := delValueDefault q  -- delValueDefault
+/-- …and a leaf's default: `delete s.a;` for a primitive `a`, read at `int`. -/
+theorem deleteLeafDefault (s : Struct) (a : Seg) : asInt (delField s a) = 0 :=
+  calc asInt (delField s a)
+    _ = 0 := delFieldDefault s a  -- delFieldDefault
+
+/-- `S₁` of the storage `delete` example:
+`alice.account.balance = 100; alice.account.token.value = 7;`. -/
+private abbrev S1Del (s : Struct) : Struct :=
+  save (save s [alice, account, balance] (StValue.int 100)) [alice, account, token, value]
+    (StValue.int 7)
+
+/-- `A = delNode(find(S₁, alice·account))`, the deleted account. -/
+private abbrev A (s : Struct) : Struct := delNode (asStruct (findSt (S1Del s) [alice, account]))
+
+/-- `delete alice.account; b = alice.account.balance;` — "the marker becomes
+`A` when a read descends through it", and `A`'s value member is the default. -/
+theorem deleteSubtreeBalance (s : Struct) :
+    asInt (findSt (delAt (S1Del s) [alice, account]) [alice, account, balance]) = 0 :=
+  calc asInt (findSt (delAt (S1Del s) [alice, account]) [alice, account, balance])
+    _ = asInt (findSt (asStruct (delValue (findSt (S1Del s) [alice, account]))) [balance]) :=
+        by rw [show [alice, account, balance] = [alice, account] ++ [balance] from rfl,
+               find_delAt_extends _ (by simp) (by simp)]         -- findPath, findDelAt
+    _ = asInt (selectSt (A s) balance) := by rw [delValueCast]; rfl  -- delFieldRef
+    _ = 0 := selectStDelNodeDefault _ _                           -- selectStDelNodeDefault
+
+/-- `v = alice.account.token.value;` — two members below the marker: the
+reference member is deleted recursively, and its value member is the
+default. -/
+theorem deleteSubtreeTokenValue (s : Struct) :
+    asInt (findSt (delAt (S1Del s) [alice, account]) [alice, account, token, value]) = 0 :=
+  calc asInt (findSt (delAt (S1Del s) [alice, account]) [alice, account, token, value])
+    _ = asInt (findSt (A s) [token, value]) :=
+        by rw [show [alice, account, token, value] = [alice, account] ++ [token, value] from rfl,
+               find_delAt_extends _ (by simp) (by simp), delValueCast]  -- findDelAt, delFieldRef
+    _ = asInt (selectSt (asStruct (selectSt (A s) token)) value) := rfl    -- findPath
+    _ = asInt (selectSt (delNode (asStruct (selectSt (asStruct (findSt (S1Del s) [alice, account]))
+          token))) value) := by rw [selectStDelNodeRef]                    -- selectDelNodeRef
+    _ = 0 := selectStDelNodeDefault _ _                                    -- selectStDelNodeDefault
 
 /-! ## 5–7 · Memory
 
@@ -182,19 +218,18 @@ theorem storageToMemoryOtherRoot (r1 r2 : IdentityPrim) (m : Memory) (s : Struct
 
 /-- `carol.age = 34; alice = carol; v = alice.age;` — the tail of
 `CrossDomain.memoryToStorageRootCopy`, and the three lines spent on
-it.  The decisive one is `findCopyMem`: a storage read becomes a memory read
-without either theory having walked anything. -/
+it, at the sort `v` has.  The decisive one is `findCopyMem`: a storage read
+becomes a memory read without either theory having walked anything. -/
 theorem memoryToStorageRootCopyValue (r : IdentityPrim) :
-    StValue.find (.storeSt Struct.mtSt alice (.st (.copyMem (memWrite r age 34) (.idC r []))))
-      [alice, age] = StValue.prim (PrimVal.int 34) :=
-  calc StValue.find (.storeSt Struct.mtSt alice (.st (.copyMem (memWrite r age 34) (.idC r []))))
-        [alice, age]
-    _ = StValue.find (.copyMem (memWrite r age 34) (.idC r [])) [age] := rfl  -- findPath
-    _ = MemValue.ofView (memWrite r age 34) (Memory.readR (memWrite r age 34) (.idC r []) [age]) :=
+    asInt (StValue.find (.storeSt Struct.mtSt alice (.st (.copyMem (memWrite r age 34) (.idC r []))))
+      [alice, age]) = 34 :=
+  calc asInt (StValue.find (.storeSt Struct.mtSt alice (.st (.copyMem (memWrite r age 34) (.idC r []))))
+        [alice, age])
+    _ = asInt (StValue.find (.copyMem (memWrite r age 34) (.idC r [])) [age]) := rfl  -- findPath
+    _ = (Memory.readR (memWrite r age 34) (.idC r []) [age]).asInt :=
         findCopyMem _ _ _                                                   -- findCopyMem
-    _ = MemValue.ofView (memWrite r age 34)
-          (Memory.readIn (memWrite r age 34) (.idC r []) age) := rfl       -- readRSingleton
-    _ = StValue.prim (PrimVal.int 34) := by rw [Memory.readOnWrite]; simp   -- readWriteEqual
+    _ = (Memory.readIn (memWrite r age 34) (.idC r []) age).asInt := rfl  -- readRSingleton
+    _ = 34 := by rw [Memory.readOnWrite]; simp [MemValue.asInt]            -- readWriteEqual
 
 /-- `acc.balance = 10; alice.account = acc; v = alice.account.balance;` — the
 tail of `CrossDomain.memoryToStorageFromAlias`: the view one selector deeper,
@@ -202,42 +237,64 @@ so the storage half of the read is two segments and the memory half one.
 (`CrossDomain.memoryToStorageFromMemberSource` ends on the same pair of
 rules, with the member `carol.account` where this has the local.) -/
 theorem memoryToStorageFromAliasValue (r : IdentityPrim) :
-    StValue.find (.storeSt Struct.mtSt alice
+    asInt (StValue.find (.storeSt Struct.mtSt alice
         (.st (.storeSt Struct.mtSt account (.st (.copyMem (memWrite r balance 10) (.idC r []))))))
-      [alice, account, balance] = StValue.prim (PrimVal.int 10) :=
-  calc StValue.find (.storeSt Struct.mtSt alice
+      [alice, account, balance]) = 10 :=
+  calc asInt (StValue.find (.storeSt Struct.mtSt alice
           (.st (.storeSt Struct.mtSt account (.st (.copyMem (memWrite r balance 10) (.idC r []))))))
-        [alice, account, balance]
-    _ = StValue.find (.storeSt Struct.mtSt account
-          (.st (.copyMem (memWrite r balance 10) (.idC r [])))) [account, balance] := rfl
+        [alice, account, balance])
+    _ = asInt (StValue.find (.storeSt Struct.mtSt account
+          (.st (.copyMem (memWrite r balance 10) (.idC r [])))) [account, balance]) := rfl
                                                                             -- findPath
-    _ = StValue.find (.copyMem (memWrite r balance 10) (.idC r [])) [balance] := rfl  -- findPath
-    _ = MemValue.ofView (memWrite r balance 10)
-          (Memory.readR (memWrite r balance 10) (.idC r []) [balance]) :=
+    _ = asInt (StValue.find (.copyMem (memWrite r balance 10) (.idC r [])) [balance]) := rfl
+                                                                            -- findPath
+    _ = (Memory.readR (memWrite r balance 10) (.idC r []) [balance]).asInt :=
         findCopyMem _ _ _                                                   -- findCopyMem
-    _ = MemValue.ofView (memWrite r balance 10)
-          (Memory.readIn (memWrite r balance 10) (.idC r []) balance) := rfl  -- readRSingleton
-    _ = StValue.prim (PrimVal.int 10) := by rw [Memory.readOnWrite]; simp     -- readWriteEqual
+    _ = (Memory.readIn (memWrite r balance 10) (.idC r []) balance).asInt := rfl  -- readRSingleton
+    _ = 10 := by rw [Memory.readOnWrite]; simp [MemValue.asInt]                -- readWriteEqual
 
 /-- `t.value = 99; alice.account.token = t; v = alice.account.token.value;` —
 the tail of `CrossDomain.memoryToStorageNonsimplePath`, where the *target* is
 the nonsimple path: three storage selectors above the view. -/
 theorem memoryToStorageNonsimplePathValue (r : IdentityPrim) :
-    StValue.find (.storeSt Struct.mtSt alice
+    asInt (StValue.find (.storeSt Struct.mtSt alice
         (.st (.storeSt Struct.mtSt account
           (.st (.storeSt Struct.mtSt token (.st (.copyMem (memWrite r value 99) (.idC r []))))))))
-      [alice, account, token, value] = StValue.prim (PrimVal.int 99) :=
-  calc StValue.find (.storeSt Struct.mtSt alice
+      [alice, account, token, value]) = 99 :=
+  calc asInt (StValue.find (.storeSt Struct.mtSt alice
           (.st (.storeSt Struct.mtSt account
             (.st (.storeSt Struct.mtSt token (.st (.copyMem (memWrite r value 99) (.idC r []))))))))
-        [alice, account, token, value]
-    _ = StValue.find (.copyMem (memWrite r value 99) (.idC r [])) [value] := rfl
+        [alice, account, token, value])
+    _ = asInt (StValue.find (.copyMem (memWrite r value 99) (.idC r [])) [value]) := rfl
                                                                   -- findPath, three times
-    _ = MemValue.ofView (memWrite r value 99)
-          (Memory.readR (memWrite r value 99) (.idC r []) [value]) :=
+    _ = (Memory.readR (memWrite r value 99) (.idC r []) [value]).asInt :=
         findCopyMem _ _ _                                                   -- findCopyMem
-    _ = MemValue.ofView (memWrite r value 99)
-          (Memory.readIn (memWrite r value 99) (.idC r []) value) := rfl     -- readRSingleton
-    _ = StValue.prim (PrimVal.int 99) := by rw [Memory.readOnWrite]; simp     -- readWriteEqual
+    _ = (Memory.readIn (memWrite r value 99) (.idC r []) value).asInt := rfl   -- readRSingleton
+    _ = 99 := by rw [Memory.readOnWrite]; simp [MemValue.asInt]                -- readWriteEqual
+
+/-- A struct read *out of* a view — `bob.account = alice.account;` after
+`alice = carol;` from memory, where `carol.account` was never assigned: memory
+created it implicitly (`defaultDefIdentity`), and a write below it
+(`carol.account.balance = 5`) is still there to be read.  The storage copy of
+the member is the view one field down (`selectOnCopyMemRef`), and reading
+through that one reaches the write. -/
+theorem memoryToStorageMemberView (r : IdentityPrim) (ty : RefTy) :
+    let M := Memory.write (.addM .mtMem r ty) (.idC r [account]) balance (.prim (PrimVal.int 5))
+    asInt (StValue.find
+        (asStruct (StValue.find (.storeSt Struct.mtSt alice (.st (.copyMem M (.idC r [])))) [alice, account]))
+        [balance]) = 5 := by
+  intro M
+  calc asInt (StValue.find
+          (asStruct (StValue.find (.storeSt Struct.mtSt alice (.st (.copyMem M (.idC r [])))) [alice, account]))
+          [balance])
+    _ = asInt (StValue.find (Struct.copyMem M (Memory.readId M (.idC r []) account)) [balance]) := by
+        rw [show StValue.find (.storeSt Struct.mtSt alice (.st (.copyMem M (.idC r [])))) [alice, account]
+              = StValue.find (.copyMem M (.idC r [])) [account] from rfl,       -- findPath
+            selectOnCopyMemRef _ _ _ (by simp [M])]                           -- selectOnCopyMemRef
+    _ = asInt (StValue.find (Struct.copyMem M (.idC r [account])) [balance]) := by
+        simp [M, Memory.readId]                                  -- readAddEqual, defaultIdentity
+    _ = (Memory.readIn M (.idC r [account]) balance).asInt := findCopyMem _ _ [balance]
+                                                                  -- findCopyMem, readRSingleton
+    _ = 5 := by simp [M, MemValue.asInt]                          -- readWriteEqual
 
 end Solidity.Examples.Theory

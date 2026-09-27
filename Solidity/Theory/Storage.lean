@@ -29,9 +29,11 @@ nested struct; that is what lets `save` store a primitive leaf verbatim.
 
 KeY's `Field` sort maps onto `Semantics.Seg` with nothing added: a member
 constant is `Seg.field n`, `at(i)` is `Seg.at i`, `size` is
-`Seg.field "length"`, and `consr(p, a)` is `p ++ [a]`.  `MapField`/`RefField`
-are *not* carried on a segment, and that is the one thing this algebra cannot
-say (see "Delete").
+`Seg.field "length"`, and `consr(p, a)` is `p ++ [a]`; `atMap(i)`, the index
+of an array of mappings, is `Seg.at i` as well.  The field sub-sorts
+`MemberField`/`MapField`/`RefField`/`FixedField` are *not* carried on a
+segment, and that is the one thing this algebra cannot say (see "Delete" and
+"Shapes").
 
 ## The leaf of a write collapses
 
@@ -42,7 +44,9 @@ error, and solkey's front end rejects it the same way
 So the value written at the end of a walk is the value read back:
 `save(st, nil, v) ⇝ v` (`saveOnEmpty`), `save`'s spine rule carries the
 `isEmpty(flds)` split, and `selectOnSaveEmpty` reads a member of a written
-value out of the value.  These are the rules `structRules.key` had before its
+value out of the value — which is each of the
+`selectOnSaveEmpty{Ref,Fixed,IndexStruct,Default}` at its sort (the section
+of that name below says how).  These are the rules `structRules.key` had before its
 `copyAt`/`save` fold (solkey `c80a54494c`/`8c5c69ca25`); the fold's
 non-collapsing leaf, read through by member sort so that a struct written over
 a location keeps the location's mappings, describes programs no front end
@@ -58,13 +62,15 @@ the taclet (`Rules.SideFormula.inBounds`), not part of the read.
 ## Delete
 
 KeY's `delete` writes a **lazy** marker — `delAt`/`delNode` — whose meaning is
-given by the rules that read *through* it, keyed on the field's sort.  Here
-`delNode` is eager: a `field` member is deleted in place, an `at` member is
-dropped (`selectStDelNodeIndexStruct` reads every index of a deleted node as
-`mtSt`), a primitive resets to its sort's default.  What a `Seg` cannot carry
-is `MapField`, so `selectStDelNodeMap` — a mapping member survives `delete` —
-has no statement in this algebra; the interpreter's `SVal.defaultOf` is where
-that behaviour lives.
+given by the rules that read *through* it, keyed on the field's sort
+(`delField`, `selectStDelNode*`).  Here `delNode` is eager: every member is
+reset in place — a struct recursively, an array element too (the in-bounds
+branch of `selectStDelNodeIndexStruct`), a primitive and the length to their
+defaults.  What a `Seg` cannot carry is `MapField` or `FixedField`, so
+`selectStDelNodeMap`/`delFieldMap` — a mapping member survives `delete` —
+and `delNodeFixed` — a fixed-size array keeps its length — have no statement
+in this algebra; the interpreter's `SVal.defaultOf` is where the first
+behaviour lives, and the second has no type to apply to ("Shapes", below).
 -/
 
 namespace Solidity
@@ -248,9 +254,52 @@ theorem selectOnSaveCons (s : Struct) (a1 a2 : Seg) (flds : List Seg) (v : StVal
       else selectSt s a2 := by
   cases flds <;> simp [save, selectSt_storeAt]
 
-/-- `selectSt<[α]>(save(st, nil, v), a) ⇝ selectSt<[α]>((Struct) v, a)`. -/
+/-- `selectSt<[α]>(save(st, nil, v), a) ⇝ selectSt<[α]>((Struct) v, a)` — the
+pre-fold rule, and at a primitive sort **`selectOnSaveEmptyDefault`**. -/
 theorem selectOnSaveEmpty (s : Struct) (v : StValue) (a : Seg) :
     selectSt (save s [] v) a = selectSt (asStruct v) a := rfl
+
+/-! ### A member of a whole-struct write, by the member's sort
+
+solkey's `selectOnSaveEmpty{Map,Ref,Fixed,IndexStruct,Default}` read a member
+of `save(st, nil, v)` by the member's sort, because there the leaf does not
+collapse: a mapping member is kept from `st`, a reference or fixed member is
+saved recursively, an array element is copied, cleared or kept by the two
+lengths.  Here the leaf collapses (module docstring), so every one of them
+is `selectOnSaveEmpty` at its sort, and where the fold's right-hand side is a
+different term the two agree on every read a mapping-free program can make:
+
+* `Ref`, `Fixed` and `IndexStruct`'s in-bounds branch are the *same*
+  equation — `save(selectSt(st, a), nil, selectSt((Struct) v, a))` collapses to
+  `(Struct) selectSt((Struct) v, a)` — so they hold as stated, for every `Seg`;
+* `IndexStruct`'s other two branches are about an index at or past `v`'s
+  length, where a well-formed `v` holds nothing; with that premise the
+  cleared element reads as the default everywhere (`selectOnSaveEmptyIndexClear`)
+  and the kept one is what was there (`selectOnSaveEmptyIndexKeep`);
+* `Map` is not stated: its left-hand side is a copy of a mapping-carrying
+  type, which `TypedStmt.Assign.mk` refuses, and a `Seg` carries no
+  `MapField` to state it with. -/
+
+/-- **`selectOnSaveEmptyRef`** — `selectSt<[Struct]>(save(st, nil, v), rf) ⇝
+save(selectSt<[Struct]>(st, rf), nil, selectSt<[Struct]>((Struct) v, rf))`.
+Stated for every `Seg`, so it is `selectOnSaveEmptyFixed` too. -/
+theorem selectOnSaveEmptyRef (s : Struct) (v : StValue) (a : Seg) :
+    asStruct (selectSt (save s [] v) a) =
+      save (asStruct (selectSt s a)) [] (selectSt (asStruct v) a) := rfl
+
+/-- **`selectOnSaveEmptyIndexStruct`**, the in-bounds branch — an element the
+new array has is copied from it. -/
+theorem selectOnSaveEmptyIndexStruct (s : Struct) (v : StValue) (i : Int) :
+    asStruct (selectSt (save s [] v) (Seg.at i)) =
+      save (asStruct (selectSt s (Seg.at i))) [] (selectSt (asStruct v) (Seg.at i)) := rfl
+
+/-- `selectOnSaveEmptyIndexStruct`, the keep branch — an index past both lengths
+is left as it was.  The premises are the length invariant: nothing is stored
+past an array's length. -/
+theorem selectOnSaveEmptyIndexKeep (s : Struct) (v : StValue) (i : Int)
+    (hv : selectSt (asStruct v) (Seg.at i) = st mtSt) (hs : selectSt s (Seg.at i) = st mtSt) :
+    selectSt (save s [] v) (Seg.at i) = selectSt s (Seg.at i) := by
+  rw [selectOnSaveEmpty, hv, hs]
 
 /-- `saveOnEmptyPrim` at `int`: the leaf a walk stores is the written value. -/
 @[simp] theorem saveOnEmptyPrimInt (s : Struct) (a : Seg) (v : StValue) :
@@ -366,10 +415,14 @@ theorem find_save_frame (s : Struct) (v : StValue) :
 /-! ## The delete family
 
 KeY's `delete` writes a lazy marker — `delAt`/`delNode` — read through by
-`selectStDelNode{Map,Ref,IndexStruct,Default}`, keyed on the field's sort.
-Eager here: the three sorts a `Seg` and a `PrimVal` do carry — `at(i)`, a
-reference (`st`), a primitive — give the three rules that can be stated;
-`MapField` is the one they cannot (module docstring). -/
+`delField` and `selectStDelNode{Map,Ref,Fixed,IndexStruct,Default}`, keyed on
+the field's sort.  Eager here: `delNode` resets every member in place — a
+struct member recursively, a primitive to its sort's default, an index
+member like any other (`selectStDelNodeIndexStruct`'s in-bounds branch,
+which keeps the element's shape rather than dropping it), and the length
+field to `0`.  What a `Seg` cannot carry is `MapField` and `FixedField`, so
+the mapping-preserving and the length-preserving rules have no statement
+(module docstring). -/
 
 /-- `defaultValue<[alphaPrim]>`, read off the value's own sort. -/
 def primDefault : PrimVal -> PrimVal
@@ -377,11 +430,10 @@ def primDefault : PrimVal -> PrimVal
   | .bool _ => .bool false
 
 mutual
-  /-- `delNode(st)`: a `field` member deleted in place, an `at` member dropped. -/
+  /-- `delNode(st)`: every member reset in place. -/
   def delNode : Struct -> Struct
     | mtSt => mtSt
-    | storeSt s (Seg.field f) v => storeSt (delNode s) (Seg.field f) (delValue v)
-    | storeSt s (Seg.at _) _ => delNode s
+    | storeSt s a v => storeSt (delNode s) a (delValue v)
     -- No taclet upstream.  `delNode` is eager here, so it cannot walk a view
     -- whose members it does not know; every member of a deleted node reads
     -- its default, which is what `mtSt` says.
@@ -389,11 +441,17 @@ mutual
     -- Likewise the pre-state leaf: its members are not known here.
     | Struct.cur _ => mtSt
 
-  /-- `delValue<[α]>(v)`: `delValueStruct` on a `Struct`, `delValueDefault` on a `Prim`. -/
+  /-- A value reset: `delNode` on a `Struct`, the default on a `Prim` — the
+  single-sort `delValue<[α]>` that solkey's `delField` replaced, and still
+  what `delField` is here. -/
   def delValue : StValue -> StValue
     | prim q => prim (primDefault q)
     | st s => st (delNode s)
 end
+
+/-- `delField<[α]>(st, a)`: the field `a` of `st`, reset.  KeY picks the reset
+by the *field's* sort; a `Seg` has none, so here it is the value's own. -/
+def delField (s : Struct) (a : Seg) : StValue := delValue (selectSt s a)
 
 /-- `delAt(st, p)`: the value at `p`, deleted in place. -/
 def delAt (s : Struct) (p : List Seg) : Struct :=
@@ -409,14 +467,14 @@ theorem delValueDefault (q : PrimVal) : delValue (prim q) = prim (primDefault q)
 @[simp] theorem delValueDefault_asInt (q : PrimVal) : asInt (delValue (prim q)) = 0 := by
   cases q <;> rfl
 
-/-- `delValueCast` at `Struct`: `(Struct) delValue<[StValue]>(v) ⇝
-delValue<[Struct]>((Struct) v)`.  The cast a later read carries is pushed
-through the reset, so the sort the reader supplies reaches it. -/
+/-- The cast a later read carries, pushed through the reset at `Struct`:
+`(Struct) delValue<[StValue]>(v) ⇝ delValue<[Struct]>((Struct) v)`.  With
+`delField s a = delValue (selectSt s a)` this is
+**`delFieldStValueCast`**: the sort the reader supplies reaches the reset. -/
 theorem delValueCast (v : StValue) : asStruct (delValue v) = delNode (asStruct v) := by
   cases v <;> rfl
 
-/-- …at `int`: `(int) delValue<[StValue]>(v) ⇝ delValue<[int]>((int) v)`, and the
-right-hand side is `delValueDefault`. -/
+/-- …at `int`, where the right-hand side is the default. -/
 theorem delValueCast_asInt (v : StValue) : asInt (delValue v) = 0 := by
   cases v with
   | prim q => cases q <;> rfl
@@ -428,71 +486,109 @@ theorem delValueCast_asBool (v : StValue) : asBool (delValue v) = false := by
   | prim q => cases q <;> rfl
   | st _ => rfl
 
+/-- **`delFieldRef`** — `delField<[Struct]>(st, rf) ⇝ delNode(selectSt<[Struct]>(st, rf))`.
+Every `Seg`, so it is **`delFieldIndexStruct`** at `at(i)` too. -/
+theorem delFieldRef (s : Struct) (a : Seg) :
+    asStruct (delField s a) = delNode (asStruct (selectSt s a)) :=
+  delValueCast _
+
+/-- **`delFieldIndexStruct`** — `delField<[Struct]>(st, at(i)) ⇝
+delNode(selectSt<[Struct]>(st, at(i)))`. -/
+theorem delFieldIndexStruct (s : Struct) (i : Int) :
+    asStruct (delField s (Seg.at i)) = delNode (asStruct (selectSt s (Seg.at i))) :=
+  delValueCast _
+
+/-- **`delFieldDefault`** — `delField<[alphaPrim]>(st, a) ⇝ defaultValue<[alphaPrim]>`,
+at `int`. -/
+theorem delFieldDefault (s : Struct) (a : Seg) : asInt (delField s a) = 0 :=
+  delValueCast_asInt _
+
+/-- …at `bool`. -/
+theorem delFieldDefault_asBool (s : Struct) (a : Seg) : asBool (delField s a) = false :=
+  delValueCast_asBool _
+
 /-- `delAt(st, nil) ⇝ delNode(st)`. -/
 @[simp] theorem delAtEmpty (s : Struct) : delAt s [] = delNode s := rfl
 
-/-- `selectStDelNodeRef` (a reference member is deleted recursively) and
-`selectStDelNodeDefault` (a value member reads its default) in one: a delete
-commutes with every `field` selector.  Unconditional — an absent member is
-`st mtSt` on both sides. -/
-theorem selectStDelNodeRef (s : Struct) (f : Name) :
-    selectSt (delNode s) (Seg.field f) = delValue (selectSt s (Seg.field f)) := by
+/-- `selectStDelNodeRef` (a reference member is deleted recursively),
+`selectStDelNodeDefault` (a value member reads its default) and
+`selectStDelNodeIndexStruct`'s in-bounds branch in one: a delete commutes with
+every selector.  Unconditional — an absent member is `st mtSt` on both sides. -/
+theorem selectStDelNodeSelect (s : Struct) (a : Seg) :
+    selectSt (delNode s) a = delValue (selectSt s a) := by
   induction s using Struct.inductionOn with
   | h0 => rfl
-  | h1 s b v ih =>
-      cases b with
-      | field g => by_cases h : g = f <;> simp [delNode, selectSt, h, ih]
-      | «at» i => simp [delNode, selectSt, ih]
+  | h1 s b v ih => by_cases h : b = a <;> simp [delNode, selectSt, h, ih]
   -- Both sides are `st mtSt`: the delete flattens the view, and a member of
   -- the flattened view is deleted to the same default.
   | h2 mem id => rfl
   | h3 p => rfl
 
-/-- `selectStDelNodeDefault` at `int`. -/
-theorem selectStDelNodeDefault (s : Struct) (f : Name) :
-    asInt (selectSt (delNode s) (Seg.field f)) = 0 := by
-  rw [selectStDelNodeRef]
-  cases selectSt s (Seg.field f) with
-  | prim q => cases q <;> rfl
-  | st _ => rfl
+/-- **`selectStDelNodeRef`** — `selectSt<[Struct]>(delNode(st), rf) ⇝
+delNode(selectSt<[Struct]>(st, rf))`. -/
+theorem selectStDelNodeRef (s : Struct) (a : Seg) :
+    asStruct (selectSt (delNode s) a) = delNode (asStruct (selectSt s a)) := by
+  rw [selectStDelNodeSelect, delValueCast]
 
-/-- `selectStDelNodeIndexStruct`: an index into a deleted node is `mtSt`. -/
+/-- **`selectStDelNodeDefault`** — `selectSt<[alphaPrim]>(delNode(st), a) ⇝
+defaultValue<[alphaPrim]>`, at `int`. -/
+theorem selectStDelNodeDefault (s : Struct) (a : Seg) :
+    asInt (selectSt (delNode s) a) = 0 := by
+  rw [selectStDelNodeSelect, delValueCast_asInt]
+
+/-- …at `bool`. -/
+theorem selectStDelNodeDefault_asBool (s : Struct) (a : Seg) :
+    asBool (selectSt (delNode s) a) = false := by
+  rw [selectStDelNodeSelect, delValueCast_asBool]
+
+/-- **`selectStDelNodeIndexStruct`**, the in-bounds branch — an element of a
+deleted array is cleared recursively, `delNode(selectSt<[Struct]>(st, at(i)))`,
+not replaced by `mtSt`.  Unconditional here, so it holds under the guard
+`i < selectSt<[int]>(st, size)`. -/
 theorem selectStDelNodeIndexStruct (s : Struct) (i : Int) :
-    selectSt (delNode s) (Seg.at i) = st mtSt := by
-  induction s using Struct.inductionOn with
-  | h0 => rfl
-  | h1 s b v ih =>
-      cases b with
-      | field g => simp [delNode, ih]
-      | «at» j => simp [delNode, ih]
-  | h2 mem id => rfl
-  | h3 p => rfl
+    asStruct (selectSt (delNode s) (Seg.at i)) = delNode (asStruct (selectSt s (Seg.at i))) :=
+  selectStDelNodeRef s (Seg.at i)
 
-/-- `selectOnDelAtCons`: one selector out of a delete, through `selectOnSaveCons`. -/
+/-- `selectStDelNodeIndexStruct`, the keep branch — an element past the old
+length is left as it stood.  The premise is the length invariant: nothing is
+stored there. -/
+theorem selectStDelNodeIndexKeep (s : Struct) (i : Int) (hs : selectSt s (Seg.at i) = st mtSt) :
+    selectSt (delNode s) (Seg.at i) = selectSt s (Seg.at i) := by
+  rw [selectStDelNodeSelect, hs]; rfl
+
+/-- `selectOnDelAtCons`: one selector out of a delete, through
+`selectOnSaveCons`.  At the last segment it is `delField<[α]>(st, a1)`. -/
 theorem selectOnDelAtCons (s : Struct) (a1 a2 : Seg) (flds : List Seg) :
     selectSt (delAt s (a1 :: flds)) a2 =
       if a1 = a2 then
-        (if flds.isEmpty then delValue (selectSt s a1)
+        (if flds.isEmpty then delField s a1
          else st (delAt (asStruct (selectSt s a1)) flds))
       else selectSt s a2 := by
-  unfold delAt
+  unfold delAt delField
   rw [selectOnSaveCons]
   cases flds <;> simp [findSt]
 
 /-! ### `findSt` over `delAt`
 
-`delAt` *is* a `save` of the deleted value (its definition), so the two path
-laws stated for it are the corresponding `findSt`-over-`save` laws with
+`delAt` *is* a `save` of the deleted value (its definition), so the path laws
+stated for it are the corresponding `findSt`-over-`save` laws with
 that value substituted.  They are stated rather than left to the reader because
-they are the two rules the signature names, and a chain writes a
-rule on its arrow.  The third, `find_delAt_extends`, is the printed rules' to gain,
-as `findOnSaveExtends` is: a read *below* the deleted path. -/
+they are the rules the signature names, and a chain writes a rule
+on its arrow.  `find_delAt_extends` and `find_delAt_below` are the printed rules' to
+gain, as `findOnSaveExtends` is: a read *below* the deleted path. -/
 
 /-- **`findDelAt`** — reading exactly the deleted path gives the deleted
 value. -/
 theorem find_delAt_same (s : Struct) {p : List Seg} (hp : p ≠ []) :
     findSt (delAt s p) p = delValue (findSt s p) :=
   find_save_same s hp _
+
+/-- **`findDelAt`** as printed — `find<[α]>(delAt(st, flds·a), flds·a) ⇝
+delField<[α]>(find<[Struct]>(st, flds), a)`. -/
+theorem find_delAt_field (s : Struct) (p : List Seg) (a : Seg) :
+    findSt (delAt s (p ++ [a])) (p ++ [a]) = delField (asStruct (findSt s p)) a := by
+  rw [find_delAt_same s (by simp), find_append s p (by simp)]
+  rfl
 
 /-- **`findDelAtOutside`** — a read that leaves the deleted path does not see
 the delete, the frame of `find_save_frame`. -/
@@ -506,40 +602,45 @@ theorem find_delAt_extends (s : Struct) {p q : List Seg} (hp : p ≠ []) (hq : q
     findSt (delAt s p) (p ++ q) = findSt (asStruct (delValue (findSt s p))) q :=
   find_save_extends s hp hq _
 
-/-- A path of `field` selectors only: what a `delete` resets member by member,
-where an `at` member is dropped instead (`selectStDelNodeIndexStruct`). -/
-def fieldsOnly (q : List Seg) : Bool :=
-  q.all fun | Seg.field _ => true | Seg.at _ => false
-
-/-- `selectStDelNodeRef` along a path of fields: a deleted node, read through
-its fields, is the reset of the read. -/
-theorem findSt_delNode_fields :
-    ∀ (q : List Seg) (S : Struct), q ≠ [] -> fieldsOnly q = true ->
-      findSt (delNode S) q = delValue (findSt S q)
-  | [], _, h, _ => absurd rfl h
-  | [Seg.field f], S, _, _ => selectStDelNodeRef S f
-  | [Seg.at _], _, _, hf => by simp [fieldsOnly] at hf
-  | Seg.at _ :: _ :: _, _, _, hf => by simp [fieldsOnly] at hf
-  | Seg.field f :: b :: r, S, _, hf => by
-      have hf' : fieldsOnly (b :: r) = true := by simpa [fieldsOnly] using hf
-      show findSt (asStruct (selectSt (delNode S) (Seg.field f))) (b :: r)
-        = delValue (findSt (asStruct (selectSt S (Seg.field f))) (b :: r))
-      rw [selectStDelNodeRef]
-      cases selectSt S (Seg.field f) with
+/-- `selectStDelNodeSelect` along a path: a deleted node, read through any
+path, is the reset of the read. -/
+theorem findSt_delNode :
+    ∀ (q : List Seg) (S : Struct), q ≠ [] -> findSt (delNode S) q = delValue (findSt S q)
+  | [], _, h => absurd rfl h
+  | [a], S, _ => selectStDelNodeSelect S a
+  | a :: b :: r, S, _ => by
+      show findSt (asStruct (selectSt (delNode S) a)) (b :: r)
+        = delValue (findSt (asStruct (selectSt S a)) (b :: r))
+      rw [selectStDelNodeSelect]
+      cases selectSt S a with
       | prim l =>
           rw [show asStruct (delValue (prim l)) = mtSt from rfl, asStruct_prim,
             find_mtSt (by simp)]
           rfl
       | st T =>
           rw [show asStruct (delValue (st T)) = delNode T from rfl, asStruct_st]
-          exact findSt_delNode_fields (b :: r) T (by simp) hf'
+          exact findSt_delNode (b :: r) T (by simp)
 
-/-- **`findDelAtFields`** — a read through fields below a deleted path is the
-reset of the read before the delete: `findDelAtExtends` and
-`selectDelNodeRef` in one, so a chain goes on reading the store the delete was
-applied to. -/
-theorem find_delAt_fields (s : Struct) {p q : List Seg} (hp : p ≠ []) (hq : q ≠ [])
-    (hf : fieldsOnly q = true) :
+/-- `selectOnSaveEmptyIndexStruct`, the clear branch — an element the old array
+had and the new one drops reads as `delNode` of the old element: the default
+at every primitive read below it.  Stated where `delNode` is, and under the
+length invariant for `v` (nothing stored past its length), since the collapsed
+leaf reads the element out of `v` rather than clearing the old one. -/
+theorem selectOnSaveEmptyIndexClear (s : Struct) (v : StValue) (i : Int)
+    (hv : selectSt (asStruct v) (Seg.at i) = st mtSt) (q : List Seg) :
+    asInt (findSt (asStruct (selectSt (save s [] v) (Seg.at i))) q) =
+      asInt (findSt (delNode (asStruct (selectSt s (Seg.at i)))) q) := by
+  rw [selectOnSaveEmpty, hv, asStruct_st]
+  cases q with
+  | nil => rfl
+  | cons a r =>
+      rw [find_mtSt (by simp), findSt_delNode _ _ (by simp), delValueCast_asInt]
+      rfl
+
+/-- **`findDelAtFields`** — a read below a deleted path is the reset of the
+read before the delete: `findDelAtExtends` and `selectStDelNodeSelect` in one,
+so a chain goes on reading the store the delete was applied to. -/
+theorem find_delAt_below (s : Struct) {p q : List Seg} (hp : p ≠ []) (hq : q ≠ []) :
     findSt (delAt s p) (p ++ q) = delValue (findSt s (p ++ q)) := by
   rw [find_delAt_extends s hp hq, find_append s p hq]
   cases findSt s p with
@@ -548,7 +649,60 @@ theorem find_delAt_fields (s : Struct) {p q : List Seg} (hp : p ≠ []) (hq : q 
       rfl
   | st S =>
       rw [show asStruct (delValue (st S)) = delNode S from rfl, asStruct_st]
-      exact findSt_delNode_fields q S hq hf
+      exact findSt_delNode q S hq
+
+/-- A path of `field` selectors only.  Before `delNode` reset index members in
+place it dropped them, and `find_delAt_fields` needed this; it no longer
+does, and keeps the premise for its callers. -/
+def fieldsOnly (q : List Seg) : Bool :=
+  q.all fun | Seg.field _ => true | Seg.at _ => false
+
+/-- `find_delAt_below`, with the premise it used to need. -/
+theorem find_delAt_fields (s : Struct) {p q : List Seg} (hp : p ≠ []) (hq : q ≠ [])
+    (_hf : fieldsOnly q = true) :
+    findSt (delAt s p) (p ++ q) = delValue (findSt s (p ++ q)) :=
+  find_delAt_below s hp hq
+
+/-! ## Shapes
+
+`structRules.key` (since `8c5c69ca25`) tags a struct read through a member with
+the member's declared shape — `typed(fieldShape(m), selectSt<[Struct]>(st, m))`,
+by `findDefinitionMemberStruct`/`findDefinitionMemberCons`, the two member
+cases of what used to be one `findDefinitionCons` — and eight taclets read
+through the tag: `selectOnTyped{Struct,FixedSize,DynSize,LeafSize,MapSize,
+Element,Member}` and `typedTyped`.  Exactly one of them *reads* it:
+`selectOnTypedFixedSize` answers a fixed-size array's `.length` with its
+declared `n`, which nothing ever writes.  Every other one falls through to the
+struct beneath, so on any shape but `fixedArr` the tag is the identity.
+
+The language model has no fixed-size array (`AST.RefTy`), so no declared
+shape is a `fixedArr` (`Shape.ofTy_ne_fixedArr`), and `typed` would compute
+nothing here — while as a symbol it would be a fifth `Struct` constructor,
+threaded through every recursion and every proof of the three algebras, and
+not a free one (`typedTyped` identifies two of its terms).  So `typed` is not
+a symbol of this algebra: the seven-way `findDefinition*` split is
+`findDefinitionCons` (identical once the tag is the identity), and the eight
+rules are absent by this argument.  The
+same argument covers `delNodeFixed` and the `FixedField` rules of the delete
+family — `delFieldFixed`, `selectStDelNodeFixed`,
+`selectStDelNodeFixed{Map,Element,Size,Value}`: no location is a fixed-size
+array member, and a `Seg` could not say so if one were.
+
+What *is* stated is the part of the shape algebra that is free terms alone:
+`fieldShape` here, and `sizeOf`/`shapeAt`/`idShape` with their taclets in
+`Theory/Memory.lean`, where `memoryRules.key` puts them. -/
+
+/-- **`fieldShapeDef`** — `fieldShape(m) ⇝ #shapeOf(m)`. -/
+theorem fieldShapeDef (decl : Name -> Ty) (m : Name) :
+    fieldShape decl m = Shape.ofTy (decl m) := rfl
+
+/-- No declared type has a fixed-size array's shape: the argument above, as a
+theorem. -/
+theorem _root_.Solidity.Theory.Shape.ofTy_ne_fixedArr (t : Ty) (n : Int) (sh : Shape) :
+    Shape.ofTy t ≠ .fixedArr n sh := by
+  cases t with
+  | prim _ => simp [Shape.ofTy]
+  | ref r => cases r <;> simp [Shape.ofTy, Shape.ofRefTy]
 
 /-! ## Sanity
 

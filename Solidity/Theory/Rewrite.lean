@@ -15,7 +15,7 @@ after its `.key` original — and a derivation could not name one, because a
 This module is the missing enumeration.  `TheoryRule` is one constructor per
 rewrite rule of the printed signature (storage and memory, plus the two
 cross-domain sections), under **the printed name** rather than KeY's, and
-`theoryRuleLemma` says which theorem each one is.  That is what lets a
+`lemmaNames` says which theorem each one is.  That is what lets a
 `sol_rewrite` chain write `=[.findOnSave]` on a line and have the name checked
 rather than decorative.
 
@@ -28,31 +28,55 @@ prose names the rules it applies — "the sixth step is `readCopySt`"
 in the storage-to-memory example.  A chain that said `findDefinitionCons`
 where the prose says `findPath` would not be the same derivation.  So the
 two naming schemes both exist and this table is the join; a name that is in
-neither is a `theoryRuleLemma` that does not elaborate.
+neither is a `lemmaNames` entry that does not elaborate.
 
 ## Completeness
 
-`theoryRuleLemma` is a total match, so a constructor without a lemma is a build
+`lemmaNames` is a total match, so a constructor without a lemma is a build
 failure, and every right-hand side is a double-backtick name, so a lemma that
 does not exist is one too.  What neither catches is a *printed* rule with no
 constructor.
 
 Every rule of the signature and the two cross-domain theories has
-a constructor, with five exceptions, each deliberate.  `selectDelNodeMap` is
-architectural: `Semantics.Seg` carries no `MapField` classification, so "a
-mapping member survives `delete`" has no statement in this algebra (the
-`Theory/Storage.lean` docstring, and `docs/lean-key-rule-map.md`, which files
-solkey's `selectOnSaveEmptyMap` under the same gap).  The four
-`expandInUintN`/`expandInIntN` rules are the arithmetic the
-"not implemented" section lists.  `singletonPath` (`⟨f⟩ = ∅·f`) and
-`delValueCast` (the cast pushed through the reset) *are* present: the first is
-definitional, since a path is a `List Seg`, and the second is
-`StValue.delValueCast` with its `int`/`bool` twins.
+a constructor except these, each absent by the argument given
+beside its name:
 
-The other direction — a constructor that is not printed — is
-`printedAbsent`: eight rules this package states and the printed rules are to gain, since
-this repository is the source of truth they are ported from.  The script
-reads that list too, and reports the eight rather than failing on them.
+* **`MapField`** — `selectOnSaveEmptyMap`, `delFieldMap`, `selectDelNodeMap`,
+  `selectStDelNodeFixedMap`: "a mapping member is kept".  `Semantics.Seg`
+  carries no field sort, so the rule has no statement here
+  (`Theory/Storage.lean`, "Delete"); the first is also unreachable, being a
+  copy `TypedStmt.Assign.mk` refuses.
+* **`FixedField`** — `delFieldFixed`, `selectStDelNodeFixed` and
+  `selectStDelNodeFixed{Element,Size,Value}`: the language model has no
+  fixed-size array, so no member is one, and a `Seg` could not say so.
+* **`typed`** — `selectOnTyped{Struct,FixedSize,DynSize,LeafSize,MapSize,
+  Element,Member}` and `typedTyped`: the tag a struct read through a member
+  carries so that a fixed-size array's length survives.  It is the identity
+  on every shape the model can declare (`Shape.ofTy_ne_fixedArr`) and would
+  be a fifth `Struct` constructor through every proof (`Theory/Storage.lean`,
+  "Shapes").
+* the four `expandInUintN`/`expandInIntN` rules, the arithmetic the signature's
+  own "not implemented" section lists.
+
+A rule stated for every `Seg` answers for its sub-sort instances too:
+`selectOnSaveEmptyFixed` is `selectOnSaveEmptyRef`'s theorem, and the two
+`shapeAt*MapElement` rules are `shapeAtFixed`/`shapeAtDyn`'s, since
+`atMap(i)` is `Seg.at i`.
+
+## Rules this package states that are not printed
+
+`printedAbsent`: eight rules this package states and the printed rules are to gain,
+since this repository is the source of truth they are ported from.  The
+script reads that list too, and reports the eight rather than failing on
+them.
+
+Three that the printed rules *dropped* are not in it, deliberately.  `saveEmptyPath`
+(`save(st, ∅, v) = (Struct) v`) is this package's collapsing leaf
+(`StValue.saveOnEmpty`), the pre-fold rule replaced by the
+`selectOnSaveEmpty*` family; here that family is its consequence, so the
+rules need not regain it.  `singletonPath` is prose now and
+`StValue.singletonPath` here, definitional.  The single-sort `delValue*`
+rules became `delField*`, and are the lemmas under them.
 
 One spelling note.  The array length field is `Seg.field "length"` here where
 solkey writes `size`; `findLength`/`saveLength` are abbreviations
@@ -73,12 +97,15 @@ inductive TheoryRule where
   -- ### Storage: the lazy `find`/`save` pair
   | findEmptyPath
   | findPath
-  | saveEmptyPath
   | savePath
-  -- ### Storage: singleton paths
-  | singletonPath
   | findSingleton
   | saveSingleton
+  -- ### Storage: a whole-struct write, read back
+  | saveOnEmptyPrim
+  | selectOnSaveEmptyRef
+  | selectOnSaveEmptyFixed
+  | selectOnSaveEmptyIndexStruct
+  | selectOnSaveEmptyDefault
   -- ### Storage: `find` over `save`
   -- The signature reaches a read-of-a-write by unfolding; the slides
   -- state the four shortcuts directly, as `findOnSaveEqual`/`findOnSaveDifferent`.
@@ -98,14 +125,15 @@ inductive TheoryRule where
   /-- Reading below the deleted path: out of the deleted value. -/
   | findDelAtExtends
   | findDelAtFields
-  | defValResolve
-  | delValueStruct
-  | delValueDefault
-  | delValueCast
+  | delFieldRef
+  | delFieldIndexStruct
+  | delFieldDefault
+  | delFieldStValueCast
   | selectDelNodeRef
-  | selectDelNodeDefault
-  | selectDelNodeIndex
+  | selectStDelNodeDefault
+  | selectStDelNodeIndexStruct
   | selectOnDelAt
+  | defValResolve
   -- ### Memory: `read`/`write`/`add`
   | readWriteEqual
   | readWriteDifferent
@@ -113,7 +141,9 @@ inductive TheoryRule where
   | readAddDifferent
   | readEmptyMem
   -- ### Memory: defaults
-  | defaultPrim
+  | defaultDefElement
+  | defaultDefMember
+  | defaultSize
   | defaultIdentity
   -- ### Memory: `readR`
   | readREmptyPath
@@ -124,21 +154,40 @@ inductive TheoryRule where
   | newAddDifferent
   | newWrite
   | newEmptyMem
+  -- ### Shapes
+  | fieldShapeDef
+  | sizeOfFixed
+  | sizeOfDyn
+  | sizeOfLeaf
+  | shapeAtNil
+  | shapeAtSuffix
+  | shapeAtFixed
+  | shapeAtDyn
+  | shapeAtMap
+  | shapeAtFixedMapElement
+  | shapeAtDynMapElement
+  | shapeAtLeafElement
+  | shapeAtLeafMapElement
+  | shapeAtMember
+  | idShapeDef
   -- ### Cross-domain: the two copy views
+  | findCopyMem
+  | selectOnCopyMemPrim
+  | selectOnCopyMemRef
   | readCopySt
   | readCopyStIdentity
   | readCopyStOther
-  | findCopyMem
   deriving DecidableEq, Repr, Inhabited
 
 namespace TheoryRule
 
 /-- The theorems a rule is — one per sort it is stated at.
 
-A printed rule is one rule, but this package states it once per algebra: `findPath`
-is `StValue.find_cons` over `findSt`, the reader that stops at a memory view,
-and `StValue.find_cons_view` over `find`, the one that crosses into it.  So
-the table is a list, tried in order, and not a single name.
+A printed rule is one rule, but this package states it once per algebra and
+once per cast: `findPath` is `StValue.find_cons` over `findSt`, the reader
+that stops at a memory view, and `StValue.find_cons_view` over `find`, the one
+that crosses into it; `delFieldDefault` is one theorem at `int` and one at
+`bool`.  So the table is a list, tried in order, and not a single name.
 
 A total match, so the table cannot fall behind the enumeration; double-backtick
 names, so it cannot fall behind the theories. -/
@@ -148,36 +197,46 @@ def lemmaNames : TheoryRule -> List Lean.Name
   | selectEmptyStruct     => [``StValue.selectOnEmptyStorage]
   | findEmptyPath         => [``StValue.findDefinitionEmpty]
   | findPath              => [``StValue.find_cons, ``StValue.find_cons_view]
-  | saveEmptyPath         => [``StValue.saveOnEmpty]
   | savePath              => [``StValue.save_cons]
-  | singletonPath         => [``StValue.singletonPath]
   | findSingleton         => [``StValue.findDefinitionCons]
   | saveSingleton         => [``StValue.save_single]
+  | saveOnEmptyPrim       => [``StValue.saveOnEmptyPrimInt, ``StValue.saveOnEmptyPrimBool]
+  | selectOnSaveEmptyRef  => [``StValue.selectOnSaveEmptyRef]
+  | selectOnSaveEmptyFixed => [``StValue.selectOnSaveEmptyRef]
+  | selectOnSaveEmptyIndexStruct =>
+      [``StValue.selectOnSaveEmptyIndexStruct, ``StValue.selectOnSaveEmptyIndexClear,
+       ``StValue.selectOnSaveEmptyIndexKeep]
+  | selectOnSaveEmptyDefault => [``StValue.selectOnSaveEmpty]
   | findOnSave            => [``StValue.find_save_same]
   | findOnSaveDifferent   => [``StValue.find_save_frame]
   | findOnSavePrefix      => [``StValue.find_save_prefix]
   | findOnSaveExtends     => [``StValue.find_save_extends]
   | delAtEmpty            => [``StValue.delAtEmpty]
-  | findDelAt             => [``StValue.find_delAt_same]
+  | findDelAt             => [``StValue.find_delAt_field, ``StValue.find_delAt_same]
   | findDelAtOutside      => [``StValue.find_delAt_frame]
   | findDelAtExtends      => [``StValue.find_delAt_extends]
-  | findDelAtFields       => [``StValue.find_delAt_fields]
+  | findDelAtFields       => [``StValue.find_delAt_below, ``StValue.find_delAt_fields]
+  | delFieldRef           => [``StValue.delFieldRef]
+  | delFieldIndexStruct   => [``StValue.delFieldIndexStruct]
+  | delFieldDefault       => [``StValue.delFieldDefault, ``StValue.delFieldDefault_asBool]
+  | delFieldStValueCast   => [``StValue.delValueCast, ``StValue.delValueCast_asInt,
+                              ``StValue.delValueCast_asBool]
+  | selectDelNodeRef      => [``StValue.selectStDelNodeRef, ``StValue.selectStDelNodeSelect]
+  | selectStDelNodeDefault => [``StValue.selectStDelNodeDefault,
+                               ``StValue.selectStDelNodeDefault_asBool]
+  | selectStDelNodeIndexStruct =>
+      [``StValue.selectStDelNodeIndexStruct, ``StValue.selectStDelNodeIndexKeep]
+  | selectOnDelAt         => [``StValue.selectOnDelAtCons]
   | defValResolve         => [``StValue.defaultValueStruct, ``StValue.defaultValueInt,
                               ``StValue.defaultValueBool]
-  | delValueStruct        => [``StValue.delValueStruct]
-  | delValueDefault       => [``StValue.delValueDefault]
-  | delValueCast          => [``StValue.delValueCast, ``StValue.delValueCast_asInt,
-                              ``StValue.delValueCast_asBool]
-  | selectDelNodeRef      => [``StValue.selectStDelNodeRef]
-  | selectDelNodeDefault  => [``StValue.selectStDelNodeDefault]
-  | selectDelNodeIndex    => [``StValue.selectStDelNodeIndexStruct]
-  | selectOnDelAt         => [``StValue.selectOnDelAtCons]
   | readWriteEqual        => [``Memory.readOnWrite]
   | readWriteDifferent    => [``Memory.readOnWrite]
   | readAddEqual          => [``Memory.readAddEqual]
   | readAddDifferent      => [``Memory.readAddDifferent]
   | readEmptyMem          => [``Memory.readFromEmptyMemory]
-  | defaultPrim           => [``Memory.defaultDefInt]
+  | defaultDefElement     => [``Memory.defaultDefElement]
+  | defaultDefMember      => [``Memory.defaultDefMember]
+  | defaultSize           => [``Memory.defaultSize]
   | defaultIdentity       => [``Memory.defaultDefIdentity]
   | readREmptyPath        => [``Memory.readREmptyPath]
   | readRSingleton        => [``Memory.readREmpty]
@@ -186,26 +245,49 @@ def lemmaNames : TheoryRule -> List Lean.Name
   | newAddDifferent       => [``Memory.newAddDifferent]
   | newWrite              => [``Memory.newFromWrite]
   | newEmptyMem           => [``Memory.newFromEmptyMemory]
+  | fieldShapeDef         => [``StValue.fieldShapeDef]
+  | sizeOfFixed           => [``sizeOfFixed]
+  | sizeOfDyn             => [``sizeOfDyn]
+  | sizeOfLeaf            => [``sizeOfLeaf]
+  | shapeAtNil            => [``shapeAtNil]
+  | shapeAtSuffix         => [``shapeAtSuffix]
+  | shapeAtFixed          => [``shapeAtFixed]
+  | shapeAtDyn            => [``shapeAtDyn]
+  | shapeAtMap            => [``shapeAtMap]
+  | shapeAtFixedMapElement => [``shapeAtFixed]
+  | shapeAtDynMapElement  => [``shapeAtDyn]
+  | shapeAtLeafElement    => [``shapeAtLeafElement]
+  | shapeAtLeafMapElement => [``shapeAtLeafElement]
+  | shapeAtMember         => [``shapeAtMember]
+  | idShapeDef            => [``idShapeDef]
+  | findCopyMem           => [``StValue.findCopyMem, ``StValue.findCopyMem_asBool]
+  | selectOnCopyMemPrim   => [``StValue.selectOnCopyMemPrim, ``StValue.selectOnCopyMemPrim_asBool]
+  | selectOnCopyMemRef    => [``StValue.selectOnCopyMemRef, ``StValue.findCopyMemStruct]
   | readCopySt            => [``Memory.readCopySt]
   | readCopyStIdentity    => [``Memory.readCopyStIdentity]
   | readCopyStOther       => [``Memory.readCopyStOther]
-  | findCopyMem           => [``StValue.findCopyMem]
 
 /-- Every rule of the enumeration, for the parity check and for `#theory_rules`. -/
 def all : List TheoryRule :=
   [ .selectStoreEqual, .selectStoreDifferent, .selectEmptyStruct,
-    .findEmptyPath, .findPath, .saveEmptyPath, .savePath,
-    .singletonPath, .findSingleton, .saveSingleton,
+    .findEmptyPath, .findPath, .savePath, .findSingleton, .saveSingleton,
+    .saveOnEmptyPrim, .selectOnSaveEmptyRef, .selectOnSaveEmptyFixed,
+    .selectOnSaveEmptyIndexStruct, .selectOnSaveEmptyDefault,
     .findOnSave, .findOnSaveDifferent, .findOnSavePrefix, .findOnSaveExtends,
     .delAtEmpty, .findDelAt, .findDelAtOutside, .findDelAtExtends, .findDelAtFields,
+    .delFieldRef, .delFieldIndexStruct, .delFieldDefault, .delFieldStValueCast,
+    .selectDelNodeRef, .selectStDelNodeDefault, .selectStDelNodeIndexStruct, .selectOnDelAt,
     .defValResolve,
-    .delValueStruct, .delValueDefault, .delValueCast,
-    .selectDelNodeRef, .selectDelNodeDefault, .selectDelNodeIndex, .selectOnDelAt,
-    .readWriteEqual, .readWriteDifferent, .readAddEqual, .readAddDifferent,
-    .readEmptyMem, .defaultPrim, .defaultIdentity,
+    .readWriteEqual, .readWriteDifferent, .readAddEqual, .readAddDifferent, .readEmptyMem,
+    .defaultDefElement, .defaultDefMember, .defaultSize, .defaultIdentity,
     .readREmptyPath, .readRSingleton, .readRPath,
     .newAddSame, .newAddDifferent, .newWrite, .newEmptyMem,
-    .readCopySt, .readCopyStIdentity, .readCopyStOther, .findCopyMem ]
+    .fieldShapeDef, .sizeOfFixed, .sizeOfDyn, .sizeOfLeaf,
+    .shapeAtNil, .shapeAtSuffix, .shapeAtFixed, .shapeAtDyn, .shapeAtMap,
+    .shapeAtFixedMapElement, .shapeAtDynMapElement,
+    .shapeAtLeafElement, .shapeAtLeafMapElement, .shapeAtMember, .idShapeDef,
+    .findCopyMem, .selectOnCopyMemPrim, .selectOnCopyMemRef,
+    .readCopySt, .readCopyStIdentity, .readCopyStOther ]
 
 /-- The rules this package states that are not printed — Lean's
 additions, which they are to gain: this repository is the source of truth
@@ -213,12 +295,16 @@ and the printed rules are ported from it.  A checker that reads the
 list and reports these as "Lean-only: …" instead of
 failing on them.  The four `findOnSave*` are the read-of-a-write shortcuts the
 signature reaches by unfolding, `findDelAtExtends` is the fourth's twin over a
-delete, `findDelAtFields` is that read carried on through the fields of the
-deleted node, `selectOnDelAt` is one selector out of a delete,
+delete, `findDelAtFields` is that read carried on below the deleted node, as
+the reset of the read before it, `selectOnDelAt` is one selector out of a delete,
 and `readRSingleton` the one-segment `readR`. -/
 def printedAbsent : List TheoryRule :=
   [ .findOnSave, .findOnSaveDifferent, .findOnSavePrefix, .findOnSaveExtends,
     .findDelAtExtends, .findDelAtFields, .selectOnDelAt, .readRSingleton ]
+
+/-- `all` is every rule: a constructor added without a place in the list is a
+failure here, not a row missing from `#theory_rules`. -/
+theorem mem_all (r : TheoryRule) : r ∈ all := by cases r <;> decide
 
 /-- Every Lean-only rule is a rule of the enumeration. -/
 theorem printedAbsent_sub : printedAbsent.all (all.contains ·) = true := by decide

@@ -47,6 +47,13 @@ is lazy, for the same reason as the storage side: KeY resolves a never-written
 slot of a fresh object to `default<[α]>` at whatever sort the reader asks for,
 while `Semantics.allocDefault` materializes the object when it is allocated,
 so the term has to know its type to denote.
+
+## Shaped roots
+
+A root may be `shaped(idp, sh)` (`Theory/Terms.lean`): solkey tags every fresh
+root with its declared shape so that `default<[int]>` at its `size` is the
+declared length of a fixed-size array (`defaultSize`).  The shape algebra
+that answers it — `sizeOf`, `shapeAt`, `idShape` — is the last section here.
 -/
 
 namespace Solidity
@@ -98,7 +105,10 @@ theorem readAddDifferent (mem : Memory) (r1 r2 : IdentityPrim)
       readIn mem (.idC r2 flds) a := by
   simp [readOnAddM, Identity.root, hne]
 
-/-- `defaultValueInt` / `defaultDef`: a primitive default is `0`. -/
+/-- `defaultValueInt`: a primitive default is `0`, wherever it is read — the
+location-free cast.  Where the location matters (a shaped root's length) the
+cast is `MemValue.asIntAt`, and `defaultDefElement`/`defaultDefMember`/
+`defaultSize` below are its three rules. -/
 @[simp] theorem defaultDefInt : MemValue.asPrim dflt = MVal.int 0 := rfl
 
 /-- **`defaultDefIdentity`** — `default<[Identity]>(idC(idp, flds), a)` is
@@ -215,6 +225,154 @@ root `addM` allocates is carried in the term. -/
 theorem newAddDifferent (mem : Memory) (r1 r2 : IdentityPrim)
     (ty : RefTy) (hne : r1 ≠ r2) :
     new (addM mem r1 ty) r2 = new mem r2 := by simp [hne]
+
+end Memory
+
+/-! ## Shapes
+
+`memoryRules.key`'s shape algebra: `sizeOf`, `shapeAt`, `idShape` over the
+`Shape` sort of `Theory/Terms.lean`, and the one cast that reads a shape,
+`default<[int]>` at a shaped root's length.  All of it is free terms — no
+struct, no memory — so all of it is stated, even though no declared type of
+the language model has a fixed-size array's shape
+(`Shape.ofTy_ne_fixedArr`) and `fixedArr` only arises from a term built by
+hand.
+
+`shapeAt` descends one field at a time, as `save` and `find` do.  solkey
+recurses head-first (`shapeAt(sh, cons(a, xs))`); the suffix rule states one field
+at the end (`shapeAtSuffix`).  The two agree on every well-typed path, and
+disagree on one ill-typed one, which is solkey's `shapeAtLeafElement`:
+`shapeAt(leaf, cons(at(pk), xs)) ⇝ leaf` *discards* `xs`, so solkey reads
+`leaf·at(i)·m` as `leaf` where the suffix rule reads it as
+`fieldShape(m)`.  Indexing a `leaf` is ill-typed, but a term can still write
+it.  This package follows the suffix rule: `shapeAt` is `shapeStep` folded along the
+path, `shapeAtSuffix` holds outright, and each head-first rule below is stated
+as "one step, then the rest", which at `xs = nil` is the one-field rule and for
+every `xs` but solkey's leaf case is solkey's. -/
+
+/-- `sizeOf(sh)`: the length a shape fixes, `0` where none is.  (`sizeOf` is
+Lean's own, so the name here is `shapeSize`.)  `mapOf` has no taclet upstream;
+it is given `0`, as for `dynArr`. -/
+def shapeSize : Shape -> Int
+  | .fixedArr n _ => n
+  | .dynArr _ => 0
+  | .leaf => 0
+  | .mapOf _ => 0
+
+/-- One field of `shapeAt`.  An index keeps the element shape, a named member
+restarts from its declared shape.  `size` is not a `MemberField` and has no
+taclet; its shape is `leaf`, the shape of the `int` it holds. -/
+def shapeStep (decl : Name -> Ty) : Shape -> Seg -> Shape
+  | .fixedArr _ sh, .at _ => sh
+  | .dynArr sh, .at _ => sh
+  | .mapOf sh, .at _ => sh
+  | .leaf, .at _ => .leaf
+  | _, .field m => if m = "length" then .leaf else fieldShape decl m
+
+/-- `shapeAt(sh, flds)`: the shape reached along a path. -/
+def shapeAt (decl : Name -> Ty) (sh : Shape) (flds : List Seg) : Shape :=
+  flds.foldl (shapeStep decl) sh
+
+/-- `idShape(id)`: the shape attached to the root an identity is built on,
+carried through the fields it has travelled.  An unshaped root has no taclet
+upstream; `leaf` is the shape whose `shapeSize` is the flat default `0`. -/
+def idShape (decl : Name -> Ty) : Identity -> Shape
+  | .idC (.shaped _ sh) flds => shapeAt decl sh flds
+  | .idC (.ofNat _) _ => .leaf
+
+/-- **`sizeOfFixed`** — `sizeOf(fixedArr(n, sh)) ⇝ n`. -/
+@[simp] theorem sizeOfFixed (n : Int) (sh : Shape) : shapeSize (.fixedArr n sh) = n := rfl
+
+/-- **`sizeOfDyn`** — `sizeOf(dynArr(sh)) ⇝ 0`. -/
+@[simp] theorem sizeOfDyn (sh : Shape) : shapeSize (.dynArr sh) = 0 := rfl
+
+/-- **`sizeOfLeaf`** — `sizeOf(leaf) ⇝ 0`. -/
+@[simp] theorem sizeOfLeaf : shapeSize .leaf = 0 := rfl
+
+/-- **`shapeAtNil`** — `shapeAt(sh, nil) ⇝ sh`. -/
+@[simp] theorem shapeAtNil (decl : Name -> Ty) (sh : Shape) : shapeAt decl sh [] = sh := rfl
+
+/-- **`shapeAtSuffix`** — `shapeAt(sh, flds·a) ⇝ shapeAt(shapeAt(sh, flds), a)`.  No
+taclet upstream (module section above). -/
+theorem shapeAtSuffix (decl : Name -> Ty) (sh : Shape) (flds : List Seg) (a : Seg) :
+    shapeAt decl sh (flds ++ [a]) = shapeAt decl (shapeAt decl sh flds) [a] := by
+  simp [shapeAt, List.foldl_append]
+
+/-- **`shapeAtFixed`** — `shapeAt(fixedArr(n, sh), cons(at(pk), xs)) ⇝ shapeAt(sh, xs)`.
+`atMap(i)` is `Seg.at i` here, so this is **`shapeAtFixedMapElement`** too. -/
+@[simp] theorem shapeAtFixed (decl : Name -> Ty) (n : Int) (sh : Shape) (i : Int) (xs : List Seg) :
+    shapeAt decl (.fixedArr n sh) (.at i :: xs) = shapeAt decl sh xs := rfl
+
+/-- **`shapeAtDyn`** — `shapeAt(dynArr(sh), cons(at(pk), xs)) ⇝ shapeAt(sh, xs)`,
+and **`shapeAtDynMapElement`**. -/
+@[simp] theorem shapeAtDyn (decl : Name -> Ty) (sh : Shape) (i : Int) (xs : List Seg) :
+    shapeAt decl (.dynArr sh) (.at i :: xs) = shapeAt decl sh xs := rfl
+
+/-- **`shapeAtMap`** — `shapeAt(mapOf(sh), cons(at(pk), xs)) ⇝ shapeAt(sh, xs)`. -/
+@[simp] theorem shapeAtMap (decl : Name -> Ty) (sh : Shape) (i : Int) (xs : List Seg) :
+    shapeAt decl (.mapOf sh) (.at i :: xs) = shapeAt decl sh xs := rfl
+
+/-- **`shapeAtLeafElement`** (and **`shapeAtLeafMapElement`**) — `shapeAt(leaf, at(i))
+⇝ leaf`, in its one-field form; along a longer path the walk goes on
+from `leaf` (module section above). -/
+@[simp] theorem shapeAtLeafElement (decl : Name -> Ty) (i : Int) (xs : List Seg) :
+    shapeAt decl .leaf (.at i :: xs) = shapeAt decl .leaf xs := rfl
+
+/-- **`shapeAtMember`** — `shapeAt(sh, cons(m, xs)) ⇝ shapeAt(fieldShape(m), xs)`,
+for a named member: `size` is not one. -/
+theorem shapeAtMember (decl : Name -> Ty) (sh : Shape) (m : Name) (xs : List Seg)
+    (hm : m ≠ "length") :
+    shapeAt decl sh (.field m :: xs) = shapeAt decl (fieldShape decl m) xs := by
+  cases sh <;> simp [shapeAt, shapeStep, hm]
+
+/-- **`idShapeDef`** — `idShape(idC(shaped(idp, sh), flds)) ⇝ shapeAt(sh, flds)`. -/
+@[simp] theorem idShapeDef (decl : Name -> Ty) (r : IdentityPrim) (sh : Shape) (flds : List Seg) :
+    idShape decl (.idC (.shaped r sh) flds) = shapeAt decl sh flds := rfl
+
+/-! ### `default<[int]>` at its location
+
+`default<[α]>(idC(idp, flds), a)` is split three ways by the field since
+solkey `8c5c69ca25`: an element and a named member read the flat default
+(`defaultDefElement`, `defaultDefMember`, the old single `defaultDef`), and
+the length of a *shaped* root reads its shape's size (`defaultSize`).  So the
+cast needs the location, as `MemValue.asIdentity` already does. -/
+
+/-- `read<[int]>` of a memory slot read at `loc`/`a`: the slot's integer, `0`
+for a non-integer, and for a never-written slot the default at that location. -/
+def MemValue.asIntAt (decl : Name -> Ty) : MemValue -> Identity -> Seg -> Int
+  | .prim (.int v), _, _ => v
+  | .prim (.bool _), _, _ => 0
+  | .ident _, _, _ => 0
+  | .dflt, .idC (.shaped _ sh) flds, .field m =>
+      if m = "length" then shapeSize (shapeAt decl sh flds) else 0
+  | .dflt, _, _ => 0
+
+namespace Memory
+
+/-- **`defaultDefElement`** — `default<[prim]>(idC(idp, flds), at(pk)) ⇝
+defaultValue<[prim]>`. -/
+@[simp] theorem defaultDefElement (decl : Name -> Ty) (r : IdentityPrim) (flds : List Seg) (i : Int) :
+    MemValue.asIntAt decl .dflt (.idC r flds) (.at i) = 0 := by
+  cases r <;> rfl
+
+/-- **`defaultDefMember`** — `default<[prim]>(idC(idp, flds), m) ⇝
+defaultValue<[prim]>`, for a named member: `size` is not one. -/
+theorem defaultDefMember (decl : Name -> Ty) (r : IdentityPrim) (flds : List Seg) (m : Name)
+    (hm : m ≠ "length") :
+    MemValue.asIntAt decl .dflt (.idC r flds) (.field m) = 0 := by
+  cases r <;> simp [MemValue.asIntAt, hm]
+
+/-- **`defaultSize`** — `default<[int]>(idC(shaped(idp, sh), flds), size) ⇝
+sizeOf(shapeAt(sh, flds))`: a fixed-size array's length is its declared one
+the moment anything reads it. -/
+@[simp] theorem defaultSize (decl : Name -> Ty) (r : IdentityPrim) (sh : Shape) (flds : List Seg) :
+    MemValue.asIntAt decl .dflt (.idC (.shaped r sh) flds) (.field "length") =
+      shapeSize (shapeAt decl sh flds) := rfl
+
+/-- An unshaped root's length defaults to the flat `0`, the case `defaultSize`
+leaves to `defaultValue<[int]>`. -/
+@[simp] theorem defaultSizeUnshaped (decl : Name -> Ty) (n : Nat) (flds : List Seg) :
+    MemValue.asIntAt decl .dflt (.idC (.ofNat n) flds) (.field "length") = 0 := rfl
 
 end Memory
 end Theory
