@@ -1,6 +1,6 @@
 ---
 name: lean-verify
-description: Verify or repair a Lean change in this repo using the MCP server instead of full builds. Use when editing any .lean file, when a proof fails to elaborate, when hunting for a lemma or a name, or before committing.
+description: Verify or repair a Lean change in this repo using the MCP server instead of full builds. Use when editing any .lean file, when a proof fails to elaborate, when checks are slow, when splitting Lean work across subagents, when hunting for a lemma or a name, or before committing.
 ---
 
 # Verifying a Lean change here
@@ -58,13 +58,78 @@ Mathlib.
 Several files are large — `Calculus/RuleSyntax.lean` is 1,553 lines,
 `Syntax.lean` 1,436, `Calculus/KeyTaclets.lean` 1,348, `Semantics.lean` 1,283.
 
-- `lean_file_outline` first, then `Read` with `offset`/`limit` on the one
-  declaration you need.
+- `rg -n '^(theorem|lemma|def) ' <file>` first (instant), then `Read` with
+  `offset`/`limit` on the one declaration you need. `lean_file_outline` on a
+  big file takes minutes and overflows the result limit.
 - Never `cat` or `Read` one of those files whole.
 - Broad "where is X used" questions: `rg` (it honours `.gitignore`, so it
   skips the 541 MB `.lake/`), or `lean_references`, or delegate the sweep to
   an Explore subagent so the file dumps stay out of this context.
 - `docs/module-map.md` answers "which file is this in" without any search.
+
+## Speed
+
+Most of a slow session is model round trips and a few slow files, not Lean in
+general. The build cache works: an unchanged file re-checks in 1–4 s.
+
+- **Batch edits.** One multi-hunk `Edit` or script beats ten `sed` one-liners;
+  every tool call is a model round trip.
+- **Know the slow checks.** `Calculus/Uniqueness.lean` ~150 s,
+  `Examples/CrossDomain.lean` and `Examples/Memory.lean` ~75–90 s,
+  `Calculus/Termination.lean` and `Calculus/SoundUnfold.lean` ~25–60 s,
+  `Calculus/Decide.lean` ~60 s. Check them once, at the end of a change, not
+  after every edit elsewhere.
+- **Low edits are expensive.** After touching `Syntax.lean`, `Semantics.lean`
+  or `Calculus/Rules.lean`, the next check of any downstream file re-elaborates
+  the whole chain. Finish the low-level edits first, then move up.
+- **One declaration is one core.** Lean elaborates separate theorems in
+  parallel, but a single proof runs serially. A `cases d <;> …` over hundreds
+  of constructors (`Taclet.eq_step`) should be one lemma per constructor (or
+  per family) that the main theorem dispatches to. The check then gets
+  parallel, and a new rule only elaborates its own lemma. Split a proof when
+  its check exceeds ~30 s. `set_option profiler true in` shows where the time
+  goes.
+- **Scratch file for a long proof.** Develop it in a scratch module with the
+  same imports, so each check re-runs one proof, not the file below it. Move
+  it back and check the real file once.
+- **Stay on the open file.** An open file re-checks from the first changed
+  line down, in seconds. Anything that makes the server elaborate a file
+  from the top is expensive:
+  - **`lean_verify` is a full re-elaboration.** It copies the whole file
+    into a scratch document plus `#print axioms`: 2–5 min on a large file,
+    often timing out at 300 s. One agent spent 52 min on 13 of them. Instead
+    append `#print axioms T` at the end of the file, read
+    `lean_diagnostic_messages` with `start_line` at that line, then delete
+    it. Do this once, at the end.
+  - **`lean_run_code` and `lean_verify` share one serial slot** across every
+    agent on the MCP server. A `#check @Int.foo` behind someone's
+    `lean_verify` waited 224–300 s. To see a name's type, use
+    `lean_local_search`/`lean_hover_info`, or append a `#check` to the open
+    file.
+  - **Filter diagnostics.** `severity="error"` and `start_line`/`end_line`
+    around the part you changed. A cascade on a big file returned 208k chars.
+  - `lean_build` blocks every other MCP call on the project until it finishes.
+
+## Parallel subagents
+
+Parallel proving works; a shared working tree is what breaks it. One agent's
+edit to a low module invalidates every other agent's checks.
+
+- **Same checkout:** give each subagent disjoint *leaf* files or
+  declarations (`sorry` lemmas split out first), over a frozen upstream.
+  Nobody edits `Syntax`, `Semantics` or `Rules` while they run.
+- **Separate copies:** `/home` is btrfs, so
+  `cp -r --reflink=always . /tmp/wt-N` copies the repo *with* its `.lake`
+  instantly and without extra space. The MCP server starts one Lean server per
+  project root (up to 8) when given absolute paths into the copy. Merge the
+  results back by hand or with `git diff | git apply`.
+- The MCP server keeps at most `LEAN_LSP_MAX_OPEN_FILES` files open per
+  project (`scripts/run-lean-mcp.sh` sets 8), and closes the oldest beyond
+  that. Reopening is a full re-elaboration. With several agents on one
+  server, each should keep to one or two files. A worker holds 1.5–4.5 GB, and
+  the machine has 64 GB.
+- A subagent prompt should say "invoke the `lean-verify` skill first" rather
+  than restate these rules.
 
 ## Builds
 
@@ -89,7 +154,8 @@ and the failure looks nothing like the missing flag.
 - No new `sorry` and no new `axiom`. Check against the baseline:
   `rg -c 'sorry' Solidity --stats | tail -3`. The existing ones are documented
   at their site and listed in `docs/module-map.md`.
-- `lean_verify` on the headline theorem you touched, to see its axiom set.
+- The axiom set of the headline theorem you touched: `#print axioms T`
+  appended to its file, as in Speed above, not `lean_verify`.
 - Then **minimize**: collapse redundant rewrites, check whether `simp` or
   `grind` absorbs several steps, delete hypotheses `lean_minimal_hypotheses`
   says are unused. A proof that just went green is the first draft.
