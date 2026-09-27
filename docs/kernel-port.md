@@ -20,43 +20,40 @@ reference for the shape of every declaration.
 | `Ch04_Semantics` | `Semantics.lean` (`Stmt.run`), `Semantics/Agree.lean` |
 | `Ch05_Logic` | `Update.lean` (terms, updates, `Fml`, both modalities) |
 | `Notation` | `Calculus/RuleSyntax.lean` (schemas, printers), `Calculus/Notation.lean` (`dl[C]{}`) |
-| `Ch06_Taclets` | `Calculus/Rules.lean`, `Calculus/Sound*.lean`, `Calculus/RuleSoundness.lean` (`Taclet.sound`), `Calculus/Logic.lean` (`Proves`) |
+| `Ch06_Taclets` | `Calculus/Rules.lean`, `Calculus/Sound*.lean`, `Calculus/RuleSoundness.lean` (`Taclet.sound`), `Calculus/Logic.lean` (`Proves`), `Calculus/Uniqueness.lean` |
 | `Ch07_Symex` | `Calculus/Symex.lean`, `Calculus/Close.lean` |
-| `Ch11_Completeness` | `Calculus/Completeness.lean` (`Stmt.step`, `Stmt.complete`) |
+| `Ch08_EVM`–`Ch10_Correctness` | `Evm/` (`docs/compiler-verification.md`) |
+| `Ch11_Completeness` | `Calculus/Completeness.lean` (`Stmt.step`, `Stmt.complete`), `Calculus/Progress.lean` |
+| `Ch12_Termination` | `Calculus/Termination.lean` |
+| `Ch13_Chains` | `Calculus/Chains.lean` |
+| `Ch14_Updates` | `Calculus/UpdateRules.lean` |
+| `Ch15_Decide` | `Calculus/Decide.lean` (the storage fragment) |
 | `Examples/` | `Solidity/Examples/` |
 
-## Port later
+Beyond mini-solkey: type soundness and reachability (`Typing/`), sort
+faithfulness (`SortCheck/Faithfulness.lean`), the solkey corpus
+(`SolidityCorpus`, `docs/corpus-parity.md`), and the `SolKey` reader's
+correspondence against `Taclet` (`~/projects/side-projects/lean/solkey`).
 
-Each was removed with the untyped layer and is to be ported over `Stmt C` /
-`Stmt.run`; git history before `59fa352` has the old versions.
+## Still open
 
-- **Termination** (`Ch12`): a measure on formulas, `symex` normalizes.
-- ~~**Uniqueness**~~: ported (`Calculus/Uniqueness.lean`: `Taclet.eq_step`,
-  `Taclet.premise_unique`) once the taclets carry their side conditions
-  (Decisions, 2026-09-27). `Taclet` is a `Prop`, so it is stated about
-  premises.
-- **Progress** (`Ch11`): a formula with a modality always steps.
-- **Chains** (`Ch13`), **update simplification** (`Ch14`), **the decision
-  procedure** (`Ch15`: the four-way path comparison; `Close.lean` has the
-  "apart" case).
-- **The EVM compiler** (`Ch08`–`Ch10`), `docs/compiler-verification.md`.
-- **Type soundness**: the interpreter keeps `StateWT`; tightness
-  (`reachable ⇒ canonical`); the sort-faithfulness proof of the taclet
-  annotations (`SortCheck/Faithfulness`).
 - **Calls** and the **callback semantics** of `transfer`
   (`transferSemantics:withCallback`): the typed syntax has neither.
-- **Memory `delete`**, `new T[](n)`.
-- **The solkey corpus**: ported as `SolidityCorpus` (`scripts/solkey-port.mjs`,
-  `scripts/check-corpus.sh`), each function solkey's `⟨ f() ⟩ true` at the
-  contract's initial store, decided by the kernel — not by `sol_symex`,
-  since `⊨` over every state makes a storage diamond invalid
-  (`Corpus/Basic.lean`). Still to port: the gaps `docs/corpus-parity.md`
-  counts (`.length`, `--`, `++` in an expression, `new`, memory `delete`,
-  a ternary of references, a negative literal at `int`, the state
-  variables `TestSuite` lacks), the five `open` runs, and the `.key` suite
-  rows marked `unported`.
-- **The `SolKey` reader** (`~/projects/side-projects/lean/solkey`) names
-  `RuleName`/`ruleEffect`/`StepEffect`; it is to be re-targeted at `Taclet`.
+- **Memory `delete`**, `new T[](n)`, `.length` as an expression, `--`
+  (Lean's comment token), `++` inside an expression, a ternary of
+  references, a negative literal at `int`: the corpus gaps
+  `docs/corpus-parity.md` counts.
+- **The three interpreter divergences** found by the ports
+  (`docs/solc-alignment.md`, "Known divergences"): a write through a
+  reference to a popped element, `delete` of an array dropping its elements'
+  mapping entries, an alias through an array index re-checked at each use.
+- **`Ch15`'s realizability**: `sol_decide` is sound, not proved complete —
+  constraints between reads of the starting storage (shapes, bounds,
+  `length`) are not stated; memory, copies, `push`/`pop` are outside its
+  fragment.
+- **The converse of reachability** (every canonical storage is reachable).
+- **The EVM fragment**: `int`, `**`, memory, storage-to-storage copies,
+  `push`, `v = x++;` (`docs/compiler-verification.md`).
 
 ## Sharp edges
 
