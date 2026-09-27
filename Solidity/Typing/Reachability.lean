@@ -30,11 +30,8 @@ is not the default (`map_default_not_reachable`) and one whose struct misses
 a member (`struct_missing_field_not_reachable`) are well-typed and not
 reachable.
 
-What is *not* here is the converse, constructibility (`canonical ⇒
-reachable`): building any canonical storage by a checked program.  With the
-typed syntax the builder must produce `Loc C T` terms and their proofs for
-an arbitrary contract, and the recycled slots of a popped array need a
-`pop` in the builder; `docs/kernel-port.md` keeps it listed.
+The converse is `Constructibility.lean`: canonical is not enough, and
+canonical and tight (`SVal.tight`) is exactly reachable.
 -/
 
 namespace Solidity

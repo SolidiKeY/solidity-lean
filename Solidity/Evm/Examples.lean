@@ -196,17 +196,111 @@ theorem transfer_run :
     reverted (run (compileProg sol{ owner.transfer(200); }) (fresh 100)) = true := by
   decide
 
+/-! ## Lengths, `v = x++`, copies, `push` -/
+
+/-- `total = values.length;` reads the length slot: with `3` elements on the
+machine, `total` is `3`. -/
+theorem length_run :
+    storeAt (run (compileProg sol{ total = values.length; })
+      { fresh with store := upd (fun _ => 0) (.root 4) 3 }) (.root 0) = some 3 := by
+  decide
+
+/-- `uint x = 5; uint y = x++; total = y; age = ++x;`: `x++` is the old value,
+`++x` the new one. -/
+def bumps : Prog StandardExample := sol{ uint x = 5; uint y = x++; total = y; y = ++x; age = y; }
+
+theorem bumps_wt : (wtProg (fun _ => none) bumps).isSome := by decide
+
+theorem bumps_run :
+    storeAt (run (compileProg bumps) fresh) (.root 0) = some 5 ∧
+    storeAt (run (compileProg bumps) fresh) (.root 1) = some 7 := by
+  decide
+
+/-- `total = 5; uint y = total++; age = y;` on a storage target. -/
+theorem bumpStore_run :
+    let o := run (compileProg sol{ total = 5; uint y = total++; age = y; }) fresh
+    storeAt o (.root 0) = some 6 ∧ storeAt o (.root 1) = some 5 := by
+  decide
+
+/-- `alice.age = 7; alice.account.balance = 3; bob = alice;` copies `alice`'s
+three slots onto `bob`'s: `bob.age` is slot `16`, `bob.account.balance` `14`. -/
+def copyPerson : Prog StandardExample :=
+  sol{ alice.age = 7; alice.account.balance = 3; bob = alice; }
+
+theorem copyPerson_wt : (wtProg (fun _ => none) copyPerson).isSome := by decide
+
+theorem copyPerson_run :
+    storeAt (run (compileProg copyPerson) fresh) (.root 16) = some 7 ∧
+    storeAt (run (compileProg copyPerson) fresh) (.root 14) = some 3 := by
+  decide
+
+/-- `values.push(7); values.push(); total = values.length;`: two elements, the
+first `7` at `keccak(4)`, the length `2`. -/
+def pushes2 : Prog StandardExample := sol{ values.push(7); values.push(); total = values.length; }
+
+theorem pushes2_wt : (wtProg (fun _ => none) pushes2).isSome := by decide
+
+theorem pushes2_run :
+    storeAt (run (compileProg pushes2) fresh) (.root 0) = some 2 ∧
+    storeAt (run (compileProg pushes2) fresh) (.data (.root 4) 0) = some 7 := by
+  decide
+
+/-- `alice.age = 9; persons.push(alice);` copies `alice` into the new element:
+its `age` is at `keccak(9) + 2`. -/
+theorem pushPerson_run :
+    storeAt (run (compileProg sol{ alice.age = 9; persons.push(alice); }) fresh)
+      (.data (.root 9) 2) = some 9 := by
+  decide
+
+/-- solc's length limit: with `2^64` elements on the machine, `values.push(1);`
+reverts (`Panic(0x41)`).  `compile_correct` assumes the arrays stay below it
+(`L + pushesP P ≤ 2^64`), which no run of a program with fewer pushes breaks. -/
+theorem pushLimit_run :
+    reverted (run (compileProg sol{ values.push(1); })
+      { fresh with store := upd (fun _ => 0) (.root 4) Lmax }) = true := by
+  decide
+
+set_option maxRecDepth 100000 in
+/-- `**` is solc's `checked_exp_unsigned`, its loop unrolled (`expLoop`):
+`3 ** 5` is `243`, `0 ** 0` is `1`, `2 ** 255` fits and `2 ** 256` reverts.
+(The unrolled code is long, and the kernel's evaluation recurses through it.) -/
+theorem pow_run :
+    storeAt (run (compileProg sol{ total = 3 ** 5; }) fresh) (.root 0) = some 243 ∧
+    storeAt (run (compileProg sol{ total = 0 ** 0; }) fresh) (.root 0) = some 1 ∧
+    storeAt (run (compileProg sol{ total = 2 ** 255; }) fresh) (.root 0) = some (2 ^ 255) ∧
+    reverted (run (compileProg sol{ total = 2 ** 256; }) fresh) = true := by
+  decide
+
+theorem pow_wt : (wtProg (fun _ => none) (sol{ total = 3 ** 5; } : Prog StandardExample)).isSome := by
+  decide
+
 /-! ## What the fragment leaves out -/
 
-/-- `wtProg` rejects a `push`, a memory local, an `int`, and an
-alias bound to an array element (whose bound the interpreter re-checks at every
-use, and solc only once). -/
+/-- An alias bound through an array index: `persons[0]`'s slot, its index
+checked once, when it is bound.  With one person on the machine, writing
+`p.age` writes `keccak(9) + 2`, which `persons[0].age` reads back. -/
+def elemAlias : Prog StandardExample :=
+  sol{ Person storage p = persons[0]; p.age = 7; total = persons[0].age; }
+
+theorem elemAlias_wt : (wtProg (fun _ => none) elemAlias).isSome := by decide
+
+theorem elemAlias_run :
+    let o := run (compileProg elemAlias) { fresh with store := upd (fun _ => 0) (.root 9) 1 }
+    storeAt o (.data (.root 9) 2) = some 7 ∧ storeAt o (.root 0) = some 7 := by
+  decide
+
+/-- `wtProg` rejects a `push()` of a struct (the slot it revives is not
+cleared), a memory local, a copy of a struct holding a dynamic array (solc's
+copy loop), and a use of an alias bound through an array index after a
+`pop` (which may have left its slot past the end; the fragment forgets it,
+`TyCtx.dropFragile`). -/
 theorem rejected :
-    (wtProg (fun _ => none) (sol{ values.push(1); } : Prog StandardExample)).isNone ∧
+    (wtProg (fun _ => none) (sol{ persons.push(); } : Prog StandardExample)).isNone ∧
     (wtProg (fun _ => none) (sol{ Person memory m; } : Prog StandardExample)).isNone ∧
-    (wtProg (fun _ => none) (sol{ int x = 1; } : Prog StandardExample)).isNone ∧
+    (wtProg (fun _ => none) (sol[TestSuite]{ basketA = basketB; } : Prog TestSuite)).isNone ∧
     (wtProg (fun _ => none)
-      (sol{ Person storage p = persons[0]; } : Prog StandardExample)).isNone := by
+      (sol{ Person storage p = persons[0]; persons.pop(); p.age = 1; } :
+        Prog StandardExample)).isNone := by
   decide
 
 /-! ## Calls
@@ -231,7 +325,7 @@ the machine run, through `compile_storage`. -/
 theorem callTwice_interpreter :
     ∃ σ', Prog.run (State.fresh CallsExample 0) callTwice = .ok σ' ∧
       ∀ n, σ'.findLive "total" [] = .ok (.prim (.int n)) → n = 5 := by
-  rcases compile_storage (P := callTwice) (Option.some_get callTwice_wt).symm 0 with
+  rcases compile_storage (P := callTwice) (Option.some_get callTwice_wt).symm (by decide) 0 with
     ⟨σ', m', h1, h2, h3⟩ | ⟨_, h2⟩
   · refine ⟨σ', h1, fun n hn => ?_⟩
     have hp : PathSlot CallsExample false "total" [] (.prim .uint) (.root 0) := PathSlot.root rfl
@@ -244,6 +338,71 @@ theorem callTwice_interpreter :
   · have := callTwice_run
     rw [show run (compileProg callTwice) (Machine.init 0) = _ from h2] at this
     cases this
+
+/-! ## Signed arithmetic
+
+An `int` is its two's complement word; solc's signed checks are compiled
+(`sTail`, `negCode`), the comparisons are `SLT`/`SGT`, `/` and `%` are
+`SDIV`/`SMOD`. -/
+
+section Signed
+
+local instance : InContract := ⟨TestSuite⟩
+
+/-- `int x = -5; int y = 3; signedTotal = x * y + 2;` -/
+def signed : Prog TestSuite := sol{ int x = -5; int y = 3; signedTotal = x * y + 2; }
+
+theorem signed_wt : (wtProg (fun _ => none) signed).isSome := by decide
+
+/-- `signedTotal` holds `-13`'s word, `2^256 - 13`. -/
+theorem signed_run :
+    storeAt (run (compileProg signed) (Machine.init 0)) (rootSlot TestSuite "signedTotal") =
+      some (toWord (-13)) := by
+  decide
+
+/-- Truncating division and the dividend's sign for `%`: `-7 / 2` is `-3`,
+`-7 % 2` is `-1`; `-x` negates. -/
+theorem sdivmod_run :
+    storeAt (run (compileProg sol{ int x = -7; signedTotal = x / 2; })
+      (Machine.init 0)) (rootSlot TestSuite "signedTotal") = some (toWord (-3)) ∧
+    storeAt (run (compileProg sol{ int x = -7; signedTotal = x % 2; })
+      (Machine.init 0)) (rootSlot TestSuite "signedTotal") = some (toWord (-1)) ∧
+    storeAt (run (compileProg sol{ signedTotal = -7; signedTotal = -signedTotal; })
+      (Machine.init 0)) (rootSlot TestSuite "signedTotal") = some 7 := by
+  decide
+
+/-- The signed guards: `2^255 - 1 + 1` overflows, `-2^255 - 1` underflows,
+`-2^255 / -1` and `-(-2^255)` overflow, `-2^255 * -1` overflows; `-1 < 0`. -/
+theorem signedChecks_run :
+    reverted (run (compileProg sol{
+      signedTotal = 57896044618658097711785492504343953926634992332820282019728792003956564819967;
+      signedTotal += 1; }) (Machine.init 0)) = true ∧
+    reverted (run (compileProg sol{
+      signedTotal = -57896044618658097711785492504343953926634992332820282019728792003956564819968;
+      signedTotal -= 1; }) (Machine.init 0)) = true ∧
+    reverted (run (compileProg sol{
+      signedTotal = -57896044618658097711785492504343953926634992332820282019728792003956564819968;
+      signedTotal /= -1; }) (Machine.init 0)) = true ∧
+    reverted (run (compileProg sol{
+      signedTotal = -57896044618658097711785492504343953926634992332820282019728792003956564819968;
+      signedTotal = -signedTotal; }) (Machine.init 0)) = true ∧
+    reverted (run (compileProg sol{
+      signedTotal = -57896044618658097711785492504343953926634992332820282019728792003956564819968;
+      signedTotal *= -1; }) (Machine.init 0)) = true ∧
+    storeAt (run (compileProg sol{ int x = -1; if (x < 0) { total = 1; } else { total = 2; }; })
+      (Machine.init 0)) (rootSlot TestSuite "total") = some 1 := by
+  decide
+
+/-- A copy of a struct holding a fixed-size array: `triple2 = triple;` copies
+all four slots. -/
+theorem copyFixed_run :
+    storeAt (run (compileProg sol{ triple.items[1] = 4; triple.tag = 9; triple2 = triple; })
+      (Machine.init 0)) ((rootSlot TestSuite "triple2").add 1) = some 4 ∧
+    storeAt (run (compileProg sol{ triple.items[1] = 4; triple.tag = 9; triple2 = triple; })
+      (Machine.init 0)) ((rootSlot TestSuite "triple2").add 3) = some 9 := by
+  decide
+
+end Signed
 
 /-! ## Fixed-size arrays
 
@@ -290,7 +449,7 @@ interpreter's read to slot `13`, and the machine run holds `10` there. -/
 theorem setAge_interpreter :
     ∃ σ', Prog.run (State.fresh StandardExample 0) setAge = .ok σ' ∧
       ∀ n, σ'.findLive "alice" [.field "age"] = .ok (.prim (.int n)) → n = 10 := by
-  rcases compile_storage (P := setAge) (Γ' := fun _ => none) rfl 0 with
+  rcases compile_storage (P := setAge) (Γ' := fun _ => none) rfl (by decide) 0 with
     ⟨σ', m', h1, h2, h3⟩ | ⟨_, h2⟩
   · refine ⟨σ', h1, fun n hn => ?_⟩
     have hp : PathSlot StandardExample false "alice" [.field "age"] (.prim .uint) (.root 13) :=
@@ -309,7 +468,7 @@ reverts on the machine: `compile_correct` makes the two revert together. -/
 theorem overflow_interpreter :
     Prog.run (State.fresh StandardExample 0) overflow = .error .revert := by
   rcases compile_correct (P := overflow) (Γ' := fun _ => none) rfl
-      (Sim.init StandardExample 0) with ⟨_, _, _, h, _⟩ | ⟨h, _⟩
+      (Sim.init StandardExample 0) (by decide) with ⟨_, _, _, h, _⟩ | ⟨h, _⟩
   · have := reverted_eq overflow_run
     rw [show run (compileProg overflow) (Machine.init 0) = _ from h] at this
     cases this

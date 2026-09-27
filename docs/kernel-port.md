@@ -27,7 +27,7 @@ reference for the shape of every declaration.
 | `Ch12_Termination` | `Calculus/Termination.lean` |
 | `Ch13_Chains` | `Calculus/Chains.lean` |
 | `Ch14_Updates` | `Calculus/UpdateRules.lean` |
-| `Ch15_Decide` | `Calculus/Decide.lean` (the storage fragment) |
+| `Ch15_Decide` | `Calculus/Decide.lean` (the storage fragment), `Calculus/DecideComplete.lean` (realizability, `Fml.valid_iff_cons`) |
 | `Examples/` | `Solidity/Examples/` |
 
 Beyond mini-solkey: type soundness and reachability (`Typing/`), sort
@@ -56,14 +56,35 @@ correspondence against `Taclet` (`~/projects/side-projects/lean/solkey`).
   `boolKeyed` (a `bool`-keyed mapping: the interpreter reads keys as `Int`)
   and `tree` (a struct recursive through a mapping, which `structRank`
   forbids) are still not declared.
-- **`Ch15`'s realizability**: `sol_decide` is sound, not proved complete —
-  constraints between reads of the starting storage (shapes, bounds,
-  `length`) are not stated; memory, copies, `push`/`pop` are outside its
-  fragment.
-- **The converse of reachability** (every canonical storage is reachable).
-- **The EVM fragment**: `int`, `**` (needs a loop), memory,
-  storage-to-storage copies, `push`, `v = x++;`
-  (`docs/compiler-verification.md`).
+- **`Ch15`, past realizability**: the reads are realizable and
+  `Fml.valid_iff_cons` is an equivalence on `Fml.inL`'s fragment (but a
+  write or `delete` through a member named `length`, where `sol_decide`
+  falls back to the unconstrained `sol_decide_heuristic`); what remains is
+  that `omega`/`grind` are not proved complete on the statement it leaves.
+  Memory, copies, `push`/`pop` are outside the fragment.
+- **Reachability of a contract with an ill-defaulted element type** (a
+  `BadDup[]` root): that such an array stays empty is not proved, so
+  `reachable_iff` asks `Ty.okDeep` of every root (`Typing/Constructibility.lean`).
+- **The EVM fragment**: memory (no heap on the machine; `new T[](n)` with a
+  run-time `n` cannot agree, solc's `2^64` free-pointer panic), copies of
+  dynamic arrays (a loop), `push()` of a struct, a fragile alias after `pop`
+  or `delete` (both need the slots past an array's end related), mappings
+  keyed by `bool`/`int` (`docs/compiler-verification.md`).
+
+### Closed: the converse of reachability (2026-09-27)
+
+- Canonical is not enough: `SVal.tight` adds what every run also keeps —
+  words past the end of an array are cleared, a fixed-size array has nothing
+  past its end, a mapping not keyed by a number has no entries, an array of
+  an ill-defaulted type has no slots.  `dirty_word_not_reachable`,
+  `fixed_past_end_not_reachable` and `bool_key_not_reachable` are canonical
+  storages no program reaches.
+- Canonical and tight ⇒ reachable, by one checked program
+  (`storage_tight`, `canon_reachable`, `no_hidden_invariant`): the builder
+  `Build.rootsProg` reaches the slots past an end through aliases bound
+  before each `pop` (`dangling_slot_reachable`).
+- Reachable ⇒ tight (`Prog.run_tight`), so for a contract whose root types
+  are `Ty.okDeep`, `reachable_iff`: reachable ⇔ canonical ∧ tight.
 
 ### Closed: calls and the callback semantics of `transfer` (2026-09-27)
 

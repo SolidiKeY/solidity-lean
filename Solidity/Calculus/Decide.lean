@@ -22,12 +22,15 @@ and a proof that the function loses nothing.
   mini-solkey's four cases: equal, above, below, apart).  Each read is
   guarded by what makes it return — the writes under it succeed
   (`LStor.okE`) — and peeled one write at a time (`LStor.readU`, and
-  `hasU`/`mapU` for whether a location, or a mapping, is there).
+  `hasU`/`mapU` for whether a location, or a mapping, is there, `lenU` for
+  an array's length: a `delete` empties a dynamic array and keeps a
+  fixed-size one's length).
 * `Fml.valid_iff_reduce`: `⊨ φ` exactly when `φ.reduce`, the two steps
   composed, holds in every state.  Every step is an equivalence.
-* `sol_decide` rewrites the goal by it, computes the reduction, splits on
-  the locals the reduction reads, and finishes with `sol_close`'s weakest
-  preconditions (`close_rw`), `omega` and `grind`.
+* `sol_decide` (`DecideComplete.lean`) rewrites the goal by it, computes the
+  reduction, and rewrites once more by `Fml.valid_iff_cons`: the reads of the
+  starting storage free, under the constraints a storage puts on them.
+  `sol_decide_heuristic`, here, is the finishing step without them.
 
 What the storage adds to mini-solkey's words:
 
@@ -53,14 +56,10 @@ balance is a `bool` (`Examples/Decide.lean`, `deleteWithoutWrite`), while the
 same goal after a write of a `uint` is decided.
 
 **Completeness.**  The reduction loses nothing, so `sol_decide` fails on an
-invalid formula, as it should.  The finishing step is not proved complete:
-mini-solkey's realizability (`LFml.valid_iff`, every choice of reads meeting
-the storage's constraints comes from a storage) is not ported.  Here the
-reads are of a partial tree with shapes, array bounds and `length`, and its
-constraints (a word has nothing below it, a location read as a mapping is no
-word, an index is in bounds exactly below the length) are not stated.  A
-valid goal that needs one of them between two reads of the initial storage
-can stay open.
+invalid formula, as it should.  What it leaves reads a partial tree with
+shapes, array bounds and lengths; the constraints between those reads, and
+that every choice meeting them is a storage's (mini-solkey's
+`LFml.valid_iff`), are `DecideComplete.lean`'s.
 
 **Array bounds.**  The program checks an index where it takes a path
 (`State.checkIndex`) and then reads or writes the slot, past the end
@@ -75,12 +74,12 @@ fragment.
 
 **The fragment** (`Fml.inL`): no modality (run `sol_symex` first), one
 element per update, a local, an alias or the storage updated; literals,
-locals, operators, conditionals and reads of `storage`; one write of a value
+locals, operators, conditionals, reads of `storage` and an array's length
+(`values.length`, `LStor.lenU`); one write of a value
 or one `delete` over `storage` per update; every alias bound by an update
 and, through an index, used before the next write to the storage.  Outside it: memory (`read`,
 `write`, allocation, the copies `copySt`/`copyMem`), a copy between storage
-locations (`alice = bob;`), `push`/`pop`, an array's `length` as a term,
-`transfer`.  Of the gaps `Close.lean` lists, this closes the keys the
+locations (`alice = bob;`), `push`/`pop`, `transfer`.  Of the gaps `Close.lean` lists, this closes the keys the
 formula does not separate and the reads below a deleted struct; the memory
 defaults and the distinct allocations stay open.
 -/
@@ -393,6 +392,8 @@ inductive LTerm where
   | has (s : LStor) (q : LPath)
   /-- `true` when `q` names a mapping (a fixed-size array) of `s`. -/
   | kmap (sh : KShape) (s : LStor) (q : LPath)
+  /-- The length of the array at `q` in `s`: `values.length`. -/
+  | len (s : LStor) (q : LPath)
   /-- `true` when the writes of `s` all succeed. -/
   | sok (s : LStor)
   /-- `true` when the keys of `q` are integers. -/
@@ -486,6 +487,7 @@ def LTerm.eval (σ : State) : LTerm → Res Value
   | .find s q => s.eval σ >>= fun v => q.eval σ >>= fun qs => v.findLive qs >>= SVal.asValue
   | .has s q => s.eval σ >>= fun v => q.eval σ >>= fun qs => v.findLive qs >>= fun _ => .ok (.bool true)
   | .kmap sh s q => s.eval σ >>= fun v => q.eval σ >>= fun qs => v.findLive qs >>= sh.test
+  | .len s q => s.eval σ >>= fun v => q.eval σ >>= fun qs => v.findLive qs >>= Close.arrLen
   | .sok s => s.eval σ >>= fun _ => .ok (.bool true)
   | .pok q => q.eval σ >>= fun _ => .ok (.bool true)
   | .seq d a => d.eval σ >>= fun _ => a.eval σ
@@ -573,7 +575,8 @@ def _root_.Solidity.Term.toL (ρ : Sym) : Term C → LTerm
   | .unop op p a => .unop op p (a.toL ρ)
   | .find s p => .find (s.toL ρ) (p.toL ρ)
   | .ite c a b => .ite (c.toL ρ) (a.toL ρ) (b.toL ρ)
-  | .len _ _ | .read _ _ | .mlen _ _ => .err
+  | .len s p => .len (s.toL ρ) (p.toL ρ)
+  | .read _ _ | .mlen _ _ => .err
 
 /-- A path with the updates pushed in: after `{ sp1 := alice.account }`,
 `sp1.balance` is `alice.account.balance`. -/
@@ -639,10 +642,10 @@ def _root_.Solidity.Term.inL (ρ : Sym) : Term C → Bool
   | .lit _ | .pv _ => true
   | .binop _ _ a b => a.inL ρ && b.inL ρ
   | .unop _ _ a => a.inL ρ
-  | .find .storage p => p.inL ρ
-  | .find .. => false
+  | .find .storage p | .len .storage p => p.inL ρ
+  | .find .. | .len .. => false
   | .ite c a b => c.inL ρ && a.inL ρ && b.inL ρ
-  | .len _ _ | .read _ _ | .mlen _ _ => false
+  | .read _ _ | .mlen _ _ => false
 
 /-- A path in the fragment: an alias only where an update bound it
 (`Person storage p = alice;` does), and to a path with no index. -/
@@ -1110,13 +1113,30 @@ theorem Term.toL_eval (h : Rel σ ρ τ) :
         obtain ⟨hq, hc⟩ := (hb _ c).2 ⟨rs, hrs, rfl, hfs⟩
         exact ⟨_, hq, c, hc, ha⟩
     | _ => simp [Term.inL] at hf
+  | .len s p, hf => by
+    cases s with
+    | storage =>
+      simp only [Term.inL] at hf
+      have hb := live_bridge (PTerm.toL_chk h p hf)
+      rw [Close.Term.eval_len]
+      simp only [Term.toL, STerm.toL, LTerm.eval, h.stor, Close.ok_bind]
+      intro a
+      simp only [bind_eq_ok, Close.STerm.eval_storage, Close.ok_bind]
+      constructor
+      · rintro ⟨qs, hq, c, hc, ha⟩
+        obtain ⟨rs, hrs, rfl, hfs⟩ := (hb qs c).1 ⟨hq, hc⟩
+        exact ⟨rs, hrs, c, hfs, ha⟩
+      · rintro ⟨rs, hrs, c, hfs, ha⟩
+        obtain ⟨hq, hc⟩ := (hb _ c).2 ⟨rs, hrs, rfl, hfs⟩
+        exact ⟨_, hq, c, hc, ha⟩
+    | _ => simp [Term.inL] at hf
   | .ite c a b, hf => by
     simp only [Term.inL, Bool.and_eq_true] at hf
     rw [Close.Term.eval_ite]
     simp only [Term.toL, LTerm.eval]
     exact Sim.bind (Term.toL_eval h c hf.1.1) fun _ =>
       pickBranch_sim (Term.toL_eval h a hf.1.2) (Term.toL_eval h b hf.2)
-  | .len _ _, hf | .read _ _, hf => by simp [Term.inL] at hf
+  | .read _ _, hf => by simp [Term.inL] at hf
 
 /-- **A path, pushed in, is the path the program took**: the program's
 path returns exactly where the path pushed in does and every index on it is
@@ -1899,6 +1919,18 @@ def delMap (old : LTerm) (P : LPath) (guard : KShape → LPath → LTerm) : Path
   | .eq | .above | .diverge => old
   | .below rest => delBelow old old guard P rest
 
+/-- The length of an array's default: a fixed-size array keeps it (`fixed`
+returns where it is one), a dynamic one is emptied.  `delete values;` leaves
+`values.length` at `0`, `delete fixedValues;` at `3`. -/
+def lenEnd (old fixed : LTerm) : LTerm := .orElse (.seq fixed old) (.seq old (.lit (.int 0)))
+
+/-- The length at `Q` after a `delete` of `P`: its default's where `Q` is
+`P`, as `delBelow` walks it below `P`, the old one above or apart. -/
+def delLen (old atEnd : LTerm) (P : LPath) (guard : KShape → LPath → LTerm) : PathRel → LTerm
+  | .eq => atEnd
+  | .above | .diverge => old
+  | .below rest => delBelow old atEnd guard P rest
+
 /-- The path extended by the members `rest` starts with, up to its first
 key: `alice` and `[account, balances, k]` make `alice.account.balances`. -/
 def LPath.addFields : LPath → List SSeg → LPath
@@ -1917,6 +1949,7 @@ def LTerm.elim : LTerm → LTerm
   | .find s q => .seq s.okE (.seq (.pok q.elim) (s.readU q.elim))
   | .has s q => .seq s.okE (.seq (.pok q.elim) (s.hasU q.elim))
   | .kmap sh s q => .seq s.okE (.seq (.pok q.elim) (s.mapU sh q.elim))
+  | .len s q => .seq s.okE (.seq (.pok q.elim) (s.lenU q.elim))
   | .sok s => s.okE
   | .pok q => .pok q.elim
   | .seq d a => .seq d.elim a.elim
@@ -1924,12 +1957,14 @@ def LTerm.elim : LTerm → LTerm
   | .kite a b t e => .kite a.elim b.elim t.elim e.elim
   | .zero a => .zero a.elim
   | .err => .err
+termination_by structural t => t
 
 /-- A path with the reads in its keys eliminated: `people[balances[a]]`. -/
 def LPath.elim : LPath → LPath
   | .root r => .root r
   | .field q f => .field q.elim f
   | .at q k => .at q.elim k.elim
+termination_by structural q => q
 
 /-- Returns exactly when the writes of `s` succeed. -/
 def LStor.okE : LStor → LTerm
@@ -1940,6 +1975,7 @@ def LStor.okE : LStor → LTerm
   | .del s q =>
     if q.noLen then .seq s.okE (.seq (.pok q.elim) (s.hasU q.elim))
     else .sok (.del s q)
+termination_by structural s => s
 
 /-- The word at `Q` in `s`, where `s` and `Q` return. -/
 def LStor.readU : LStor → LPath → LTerm
@@ -1947,6 +1983,7 @@ def LStor.readU : LStor → LPath → LTerm
   | .save s P w, Q => (cmpSegs P.elim.segs Q.segs).toTerm (saveLeaf w.elim (s.readU Q))
   | .del s P, Q => (cmpSegs P.elim.segs Q.segs).toTerm
       (delLeaf (s.readU Q) P.elim fun sh q => s.mapU sh q)
+termination_by structural s => s
 
 /-- Whether `Q` names a location of `s`, where `s` and `Q` return. -/
 def LStor.hasU : LStor → LPath → LTerm
@@ -1954,6 +1991,16 @@ def LStor.hasU : LStor → LPath → LTerm
   | .save s P _, Q => (cmpSegs P.elim.segs Q.segs).toTerm (saveHas (s.hasU Q))
   | .del s P, Q => (cmpSegs P.elim.segs Q.segs).toTerm
       (delHas (s.hasU Q) P.elim fun sh q => s.mapU sh q)
+termination_by structural s => s
+
+/-- The length of the array at `Q` in `s`, where `s` and `Q` return: a
+write keeps the length of every array above it, as it keeps its shape. -/
+def LStor.lenU : LStor → LPath → LTerm
+  | .init, Q => .len .init Q
+  | .save s P _, Q => (cmpSegs P.elim.segs Q.segs).toTerm (saveMap (s.lenU Q))
+  | .del s P, Q => (cmpSegs P.elim.segs Q.segs).toTerm
+      (delLen (s.lenU Q) (lenEnd (s.lenU Q) (s.mapU .fixed Q)) P.elim fun sh q => s.mapU sh q)
+termination_by structural s => s
 
 /-- Whether `Q` names a mapping (`sh = .map`) or a fixed-size array
 (`.fixed`) of `s`, where `s` and `Q` return. -/
@@ -1962,6 +2009,7 @@ def LStor.mapU (sh : KShape) : LStor → LPath → LTerm
   | .save s P _, Q => (cmpSegs P.elim.segs Q.segs).toTerm (saveMap (s.mapU sh Q))
   | .del s P, Q => (cmpSegs P.elim.segs Q.segs).toTerm
       (delMap (s.mapU sh Q) P.elim fun sh' q => s.mapU sh' q)
+termination_by structural s => s
 
 end
 
@@ -2063,6 +2111,35 @@ theorem save_cons_kmapF {sh : KShape} {v new u : SVal} {s : Seg} {r : List Seg}
       simp only [SVal.saveLive] at h
       split at h <;> (obtain ⟨_, _, he⟩ := bind_eq_ok.1 h; cases he; cases sh <;> rfl)
 
+/-- A write below an array keeps its length: after `values[2] = 5;`,
+`values.length` is what it was. -/
+theorem save_cons_arrLen {v new u : SVal} {s : Seg} {r : List Seg}
+    (h : v.saveLive (s :: r) new = .ok u) : Close.arrLen u = Close.arrLen v := by
+  cases v with
+  | prim p => cases s <;> simp [SVal.saveLive] at h
+  | struct fields =>
+    cases s with
+    | «at» _ => simp [SVal.saveLive] at h
+    | field n =>
+      simp only [SVal.saveLive] at h
+      split at h
+      · obtain ⟨_, _, he⟩ := bind_eq_ok.1 h; cases he; rfl
+      · simp at h
+  | array elems shadow fx =>
+    cases s with
+    | field _ => simp [SVal.saveLive] at h
+    | «at» i =>
+      simp only [SVal.saveLive] at h
+      split at h
+      · obtain ⟨_, _, he⟩ := bind_eq_ok.1 h; cases he; simp [Close.arrLen]
+      · simp at h
+  | map entries dflt =>
+    cases s with
+    | field _ => simp [SVal.saveLive] at h
+    | «at» i =>
+      simp only [SVal.saveLive] at h
+      split at h <;> (obtain ⟨_, _, he⟩ := bind_eq_ok.1 h; cases he; rfl)
+
 /-- The members a list of segments starts with, up to its first key. -/
 def leadFields : List SSeg → List Seg
   | .field f :: r => .field f :: leadFields r
@@ -2114,6 +2191,17 @@ theorem Sim.orElse {a a' b b' : Res Value} (ha : Sim a a') (hb : Sim b b') :
 theorem orElseR_eq_ok {a b : Res Value} {x : Value} :
     orElseR a b = .ok x ↔ a = .ok x ∨ ((∀ y, a ≠ .ok y) ∧ b = .ok x) := by
   cases a <;> simp [orElseR]
+
+/-- The length of a default: a fixed-size array keeps its length, a dynamic
+one has none left. -/
+theorem lenEnd_sim {σ : State} {old fixed : LTerm} {x : Res SVal}
+    (ho : Sim (old.eval σ) (x >>= Close.arrLen)) (hf : Sim (fixed.eval σ) (x >>= KShape.fixed.test)) :
+    Sim ((lenEnd old fixed).eval σ) (x >>= fun w => Close.arrLen w.defaultOf) := by
+  refine (Sim.orElse (Sim.bind hf fun _ => ho) (Sim.bind ho fun _ => Sim.refl _)).trans
+    (Sim.of_eq ?_)
+  rcases x with e | ⟨(i | b) | fs | ⟨es, sh, _ | _⟩ | ⟨es, d⟩⟩ <;>
+    simp [bind, Except.bind, orElseR, KShape.test, isFixV, Close.arrLen, SVal.defaultOf,
+      defaultOfElems_eq_map, LTerm.eval]
 
 /-- **`delBelow` reads what the deleted value has below it.**  `v` is the
 storage before the delete, `guard sh q` tests the location `q` names in it for
@@ -2207,6 +2295,7 @@ theorem find_prim_cons (p : PrimVal) (f : Seg) (t : List Seg) :
     (SVal.prim p).findLive (f :: t) = .error .stuck := by
   cases f <;> rfl
 
+set_option maxHeartbeats 800000 in
 mutual
 
 /-- **Eliminating the reads of writes keeps what a term returns.**
@@ -2229,6 +2318,8 @@ theorem LTerm.elim_sim (σ : State) : (t : LTerm) → Sim (t.elim.eval σ) (t.ev
       fun _ _ hv hq => LStor.hasU_sim σ s q.elim hv hq
   | .kmap sh s q => guard_sim (LStor.okE_sim σ s) (LPath.elim_sim σ q)
       fun _ _ hv hq => LStor.mapU_sim σ s sh q.elim hv hq
+  | .len s q => guard_sim (LStor.okE_sim σ s) (LPath.elim_sim σ q)
+      fun _ _ hv hq => LStor.lenU_sim σ s q.elim hv hq
   | .sok s => LStor.okE_sim σ s
   | .pok q => Sim.bind (LPath.elim_sim σ q) fun _ => Sim.refl _
   | .seq d a => Sim.bind (LTerm.elim_sim σ d) fun _ => LTerm.elim_sim σ a
@@ -2531,6 +2622,84 @@ theorem LStor.mapU_sim (σ : State) : (s : LStor) → ∀ (sh : KShape) (Q : LPa
       rw [findLive_saveLive_diverge hr hu]
       exact LStor.mapU_sim σ s sh Q hv hq
 
+/-- **The length of an array after writes**, peeled one write at a time. -/
+theorem LStor.lenU_sim (σ : State) : (s : LStor) → ∀ (Q : LPath) {v : SVal} {qs : List Seg},
+    s.eval σ = .ok v → Q.eval σ = .ok qs →
+      Sim ((s.lenU Q).eval σ) (v.findLive qs >>= Close.arrLen)
+  | .init, Q, v, qs, hv, hq => by
+    cases hv
+    simp only [LStor.lenU, LTerm.eval, LStor.eval, hq, Close.ok_bind]
+    exact Sim.refl _
+  | .save s P w, Q, u, qs, hu, hq => by
+    obtain ⟨wv, hw, hu⟩ := bind_eq_ok.1 hu
+    obtain ⟨v, hv, hu⟩ := bind_eq_ok.1 hu
+    obtain ⟨ps, hp, hu⟩ := bind_eq_ok.1 hu
+    have hp' : P.elim.eval σ = .ok ps := (LPath.elim_sim σ P ps).2 hp
+    have hr := cmpSegs_holds σ P.elim.segs Q.segs (LPath.segs_eval σ hp') (LPath.segs_eval σ hq)
+    rw [LStor.lenU, CaseTree.toTerm_eval σ _ _
+      (cmpSegs_testsOk σ _ _ (LPath.segs_eval σ hp') (LPath.segs_eval σ hq))]
+    generalize (cmpSegs P.elim.segs Q.segs).get σ = r at hr
+    cases r with
+    | eq =>
+      simp only [PathRel.Holds] at hr
+      subst hr
+      refine Sim.halt (by simp [saveMap, LTerm.eval]) ?_
+      simp only [findLive_saveLive_same hu, Close.ok_bind]
+      cases wv <;> simp [Close.arrLen, Value.toSVal]
+    | above =>
+      obtain ⟨f, t, rfl⟩ := hr
+      obtain ⟨w₀, w', hw₀, hs', hf⟩ := save_through qs (f :: t) hu
+      simp only [saveMap, hf, Close.ok_bind, save_cons_arrLen hs']
+      have := LStor.lenU_sim σ s Q hv hq
+      rw [hw₀, Close.ok_bind] at this
+      exact this
+    | below rest =>
+      obtain ⟨f, t, rfl, -⟩ := hr
+      refine Sim.halt (by simp [saveMap, LTerm.eval]) ?_
+      rw [findLive_append, findLive_saveLive_same hu]
+      cases wv <;> simp [Close.ok_bind, find_prim_cons, Close.error_bind]
+    | diverge =>
+      simp only [saveMap]
+      rw [findLive_saveLive_diverge hr hu]
+      exact LStor.lenU_sim σ s Q hv hq
+  | .del s P, Q, u, qs, hu, hq => by
+    obtain ⟨v, hv, hu⟩ := bind_eq_ok.1 hu
+    obtain ⟨ps, hp, hu⟩ := bind_eq_ok.1 hu
+    obtain ⟨c, hc, hu⟩ := bind_eq_ok.1 hu
+    have hp' : P.elim.eval σ = .ok ps := (LPath.elim_sim σ P ps).2 hp
+    have hr := cmpSegs_holds σ P.elim.segs Q.segs (LPath.segs_eval σ hp') (LPath.segs_eval σ hq)
+    have hEnd := lenEnd_sim (LStor.lenU_sim σ s Q hv hq) (LStor.mapU_sim σ s .fixed Q hv hq)
+    rw [LStor.lenU, CaseTree.toTerm_eval σ _ _
+      (cmpSegs_testsOk σ _ _ (LPath.segs_eval σ hp') (LPath.segs_eval σ hq))]
+    generalize (cmpSegs P.elim.segs Q.segs).get σ = r at hr
+    cases r with
+    | eq =>
+      simp only [PathRel.Holds] at hr
+      subst hr
+      simp only [delLen, findLive_saveLive_same hu, Close.ok_bind]
+      rw [hc, Close.ok_bind] at hEnd
+      exact hEnd
+    | above =>
+      obtain ⟨f, t, rfl⟩ := hr
+      obtain ⟨w₀, w', hw₀, hs', hf⟩ := save_through qs (f :: t) hu
+      simp only [delLen, hf, Close.ok_bind, save_cons_arrLen hs']
+      have := LStor.lenU_sim σ s Q hv hq
+      rw [hw₀, Close.ok_bind] at this
+      exact this
+    | below rest =>
+      obtain ⟨f, t, rfl, hrest⟩ := hr
+      simp only [delLen]
+      have h := delBelow_sim (v := v) (G := Close.arrLen)
+        (fun sh' q qs hq' => LStor.mapU_sim σ s sh' q hv hq') (LStor.lenU_sim σ s Q hv hq)
+        hEnd rest P.elim ps (f :: t) hp' hrest rfl
+      rw [hc, Close.ok_bind] at h
+      rw [findLive_append, findLive_saveLive_same hu, Close.ok_bind]
+      exact h
+    | diverge =>
+      simp only [delLen]
+      rw [findLive_saveLive_diverge hr hu]
+      exact LStor.lenU_sim σ s Q hv hq
+
 end
 
 /-- Eliminating keeps the meaning of a formula: an equation holds when both
@@ -2638,7 +2807,7 @@ def LTerm.vars : LTerm → List Var
   | .unop _ _ a | .zero a => a.vars
   | .orElse a b => a.vars ++ b.vars
   | .ite c a b => c.vars ++ a.vars ++ b.vars
-  | .find s q | .has s q | .kmap _ s q => s.vars ++ q.vars
+  | .find s q | .has s q | .kmap _ s q | .len s q => s.vars ++ q.vars
   | .sok s => s.vars
   | .pok q => q.vars
   | .kite a b t e => a.vars ++ b.vars ++ t.vars ++ e.vars
@@ -2697,6 +2866,9 @@ theorem LTerm.eval_has (σ : State) (s : LStor) (q : LPath) : (LTerm.has s q).ev
 theorem LTerm.eval_kmap (σ : State) (sh : KShape) (s : LStor) (q : LPath) :
     (LTerm.kmap sh s q).eval σ =
       s.eval σ >>= fun v => q.eval σ >>= fun qs => v.findLive qs >>= sh.test := rfl
+/-- `values.length`. -/
+theorem LTerm.eval_len (σ : State) (s : LStor) (q : LPath) : (LTerm.len s q).eval σ =
+    s.eval σ >>= fun v => q.eval σ >>= fun qs => v.findLive qs >>= Close.arrLen := rfl
 /-- `a`, or `b` where `a` halts. -/
 theorem LTerm.eval_orElse (σ : State) (a b : LTerm) :
     (LTerm.orElse a b).eval σ = orElseR (a.eval σ) (b.eval σ) := rfl
@@ -2778,7 +2950,7 @@ macro "sol_decide_unfold" : tactic => `(tactic|
   set_option linter.unusedSimpArgs false in
   simp only [LFml.holds_tt, LFml.holds_not, LFml.holds_and, LFml.holds_imp, LFml.holds_eq,
     LTerm.eval_lit, LTerm.eval_binop, LTerm.eval_unop, LTerm.eval_ite, LTerm.eval_find,
-    LTerm.eval_has, LTerm.eval_kmap, LTerm.eval_sok, LTerm.eval_pok, LTerm.eval_seq,
+    LTerm.eval_has, LTerm.eval_kmap, LTerm.eval_len, LTerm.eval_sok, LTerm.eval_pok, LTerm.eval_seq,
     LTerm.eval_kite, LTerm.eval_zero, LTerm.eval_err, LTerm.eval_orElse, LPath.eval, LStor.eval,
     zeroV_int, zeroV_bool, KShape.test, kmapF, isMapV, isFixV, orElseR_ok, orElseR_error,
     close_rw, *])
@@ -2788,25 +2960,20 @@ macro "sol_decide_facts" : tactic => `(tactic|
   set_option linter.unusedSimpArgs false in
   simp_all (config := { maxSteps := 400000 }) only [LFml.holds_tt, LFml.holds_not,
     LFml.holds_and, LFml.holds_imp, LFml.holds_eq, LTerm.eval_lit, LTerm.eval_binop,
-    LTerm.eval_unop, LTerm.eval_ite, LTerm.eval_find, LTerm.eval_has, LTerm.eval_kmap, LTerm.eval_sok,
+    LTerm.eval_unop, LTerm.eval_ite, LTerm.eval_find, LTerm.eval_has, LTerm.eval_kmap,
+    LTerm.eval_len, LTerm.eval_sok,
     LTerm.eval_pok, LTerm.eval_seq, LTerm.eval_kite, LTerm.eval_zero, LTerm.eval_err,
     LTerm.eval_orElse, LPath.eval, LStor.eval, zeroV_int, zeroV_bool, KShape.test, kmapF, isMapV,
     isFixV, orElseR_ok, orElseR_error, close_rw])
 
-/-- `sol_decide`: prove `⊨ φ` for a `φ` whose modalities are gone (run
-`sol_symex` first) and which is in the fragment (`Fml.inL`).  It rewrites
-the goal by `Fml.valid_iff_reduce`, computes the reduction, splits on the
-locals it reads, and closes what is left — a statement about the initial
-storage with one case per key equality — by `simp`, `omega` and `grind`.
-It says so when `φ` is outside the fragment; with no goal left it does
-nothing. -/
-macro "sol_decide" : tactic => `(tactic|
-  all_goals
-   (refine (Fml.valid_iff_reduce _ (by
-      first
-      | decide
-      | fail "sol_decide: the formula is outside the fragment (a modality, memory, a push or pop, a copy between locations, an alias no update binds, or one through an index used after a write)")).2 ?_
-    sol_reduce
+/-- The finishing step without the constraints, on a goal `∀ σ, ψ.holds σ`
+with `ψ` computed: split on the locals, unfold, and close with `simp`,
+`omega` and `grind`, splitting on the shape of a read below a deleted
+location where `delBelow` asks.  It does not know how two reads of the
+initial storage constrain each other; `sol_decide` (`DecideComplete.lean`)
+runs it where the reduction still writes through a member named `length`,
+which the constraints do not cover. -/
+macro "sol_decide_heuristic" : tactic => `(tactic| (
     intro σ
     sol_decide_split
     all_goals sol_decide_unfold

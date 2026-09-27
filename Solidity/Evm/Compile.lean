@@ -36,24 +36,32 @@ is the prefix-sum arithmetic of mini-solkey's `offset_disjoint`.
 
 `compileVal e` leaves `e`'s value on the stack, `compileLoc l` the slot of the
 location `l`.  Every Solidity guard solc emits is emitted here: a checked
-`+`/`-`/`*` reverts on overflow (`binTail`), `/`/`%` on a zero divisor, an
-array index out of bounds (`boundsCheck`), `pop` on an empty array, a
-`transfer` the balance cannot cover; `&&`/`||`, `?:` and `if` jump.
+`+`/`-`/`*` reverts on overflow (`uTail`, and `sTail` at `int`, two's
+complement, with `SLT`/`SGT`/`SDIV`/`SMOD`), `/`/`%` on a zero divisor and
+`-2^255 / -1`, `-x` on `-2^255` (`negCode`), `**` on overflow (`expCode`,
+solc's `checked_exp_unsigned` with its loop unrolled), an array index out of
+bounds (`boundsCheck`), `pop` on an empty array, `push` at `2^64` elements
+(`pushSlotCode`), a `transfer` the balance cannot cover; `&&`/`||`, `?:` and
+`if` jump.
 
-**The fragment** is what `Stmt.wt` accepts, so a program outside it has no
+**The fragment** is what `wtStmt` accepts, so a program outside it has no
 claim (see `docs/compiler-verification.md` for why each exclusion):
 
-* types: `uint` and `bool` values; storage of any shape; mappings keyed by
-  `uint`.  Not `int` (signed arithmetic and its guards are not compiled);
-* expressions: literals below `2^256`, locals, storage reads, the operators but
-  `**` and unary minus, `?:`.  Not memory reads;
-* statements: `=` of a value into storage, `=` to a local, `uint x = e;`,
-  storage aliases bound to a path that indexes no array, `op=`, `x++;`/`--x;`,
-  `delete` at any type, `pop`, `transfer`, `if`, `require`, `assert`,
-  `revert();`.  Not storage-to-storage copies, `push`, `v = x++;`, and nothing
-  in memory.
+* types: `uint`, `int` and `bool` values; storage of any shape; mappings keyed
+  by `uint`;
+* expressions: literals (a `uint` below `2^256`, an `int` in `[-2^255,
+  2^255)`), locals, storage reads, every operator (`-x` at `int`), `?:`,
+  `.length` of a storage array.  Not memory reads;
+* statements: `=` of a value into storage, a copy of a *static* value
+  (`staticF`: no dynamic array, no mapping; `bob = alice;`), `=` to a local,
+  `uint x = e;`, storage aliases (bound through an array index too: a
+  *fragile* alias, forgotten at the next `pop` or `delete`), `op=`,
+  `x++;`/`--x;`, `v = x++;`, `push()` of a primitive, `push(e)`, `push(sp)` of a
+  static value, `delete` at any type, `pop`, `transfer`, `if`, `require`,
+  `assert`, `revert();`, and calls.  Not copies of dynamic arrays, `push()` of a
+  struct or an array, nothing in memory.
 
-`Stmt.wt` also types the locals, as mini-solkey's does: a local lives in one
+`wtStmt` also types the locals, as mini-solkey's does: a local lives in one
 memory cell, a word for a `uint x` and a slot for a `T storage x`.
 -/
 
@@ -418,10 +426,14 @@ theorem leavesF_occ : ∀ (fuel : Nat) (T : Ty) (s : Slot) (o : Nat), o ∈ leav
 
 /-! ## Typing the locals -/
 
-/-- What a local holds: a value of a primitive type, or a storage alias. -/
+/-- What a local holds: a value of a primitive type, or a storage alias —
+bound to a path that indexes no array (`alias`), or to one that does
+(`falias`, *fragile*: a later `pop` or `delete` could leave it past the end of
+an array, so the fragment forgets it there). -/
 inductive LTy where
   | val (p : PrimTy)
   | alias (R : RefTy)
+  | falias (R : RefTy)
   deriving DecidableEq, Repr
 
 /-- `Γ x = some (.val uint)`: `x` is a `uint` local; `some (.alias R)`: a
@@ -430,35 +442,61 @@ abbrev TyCtx := Var → Option LTy
 
 def TyCtx.set (Γ : TyCtx) (x : Var) (t : Option LTy) : TyCtx := upd Γ x t
 
+/-- After a `pop` or a `delete`: the fragile aliases forgotten.  An array may
+have shrunk under one of them (solc still writes the slot, the interpreter its
+`shadow`, and the representation relates live elements only). -/
+def TyCtx.dropFragile (Γ : TyCtx) : TyCtx := fun x =>
+  match Γ x with
+  | some (.falias _) => none
+  | t => t
+
 /-- After an `if`: what both branches agree on. -/
 def TyCtx.meet (Γ₁ Γ₂ : TyCtx) : TyCtx := fun x => if Γ₁ x = Γ₂ x then Γ₁ x else none
 
-/-- The primitive types compiled: `uint` and `bool`, not `int`. -/
-def primInFrag : PrimTy → Bool
-  | .uint | .bool => true
-  | .int => false
-
-/-- The operators compiled at operand type `p`: all but `**`, at `uint`
-(and `==`/`!=` at `bool`, `&&`/`||` at `bool`). -/
+/-- The operators compiled at operand type `p`: arithmetic and comparisons
+at `uint` and `int`, `**` at `uint` (the only type it takes), `==`/`!=` at any
+type, `&&`/`||` at `bool`. -/
 def binInFrag : BinOp → PrimTy → Bool
-  | .add, p | .sub, p | .mul, p | .div, p | .mod, p => p == .uint
-  | .lt, p | .gt, p | .le, p | .ge, p => p == .uint
-  | .eqB, p | .neB, p => p != .int
+  | .add, p | .sub, p | .mul, p | .div, p | .mod, p => p != .bool
+  | .lt, p | .gt, p | .le, p | .ge, p => p != .bool
+  | .eqB, _ | .neB, _ => true
   | .and, p | .or, p => p == .bool
-  | .pow, _ => false
+  | .pow, p => p == .uint
+
+/-- The unary operators compiled: `!` (at `bool`, the only type it takes)
+and `-` at `int` (solc rejects it on an unsigned operand). -/
+def unInFrag : UnOp → PrimTy → Bool
+  | .not, _ => true
+  | .neg, p => p == .int
+
+/-- A type laid out in a fixed set of slots: no dynamic array and no
+mapping anywhere in it (`uint`, `Person`, `uint[3]`; not `Basket`, whose
+`items` is a `uint[]`).  Copying one is a fixed sequence of loads and stores;
+copying a dynamic array is solc's loop over its elements. -/
+def staticF : Nat → Ty → Bool
+  | _, .prim _ => true
+  | fuel + 1, .ref (.struct n) => (structDef n).all fun f => staticF fuel f.2
+  | fuel + 1, .ref (.fixed E _) => staticF fuel E
+  | _, _ => false
+
+/-- `staticF` with enough fuel. -/
+def static (T : Ty) : Bool := staticF (tyRank T + 1) T
 
 variable {C : Contract}
 
-/-- A literal is a `uint` below `2^256`, a local is read at its type. -/
+/-- A literal is a `uint` below `2^256` or an `int` in `[-2^255, 2^255)`,
+a local is read at its type. -/
 def wtSimple (Γ : TyCtx) : {p : PrimTy} → Simple C p → Bool
-  | p, .lit n _ => p == .uint && decide (0 ≤ n) && decide (n < (W : Int))
+  | p, .lit n _ =>
+    (p == .uint && decide (0 ≤ n) && decide (n < (W : Int))) ||
+      (p == .int && decide (-(H : Int) ≤ n) && decide (n < (H : Int)))
   | _, .bool _ => true
   | p, .local x => Γ x == some (.val p)
 
 mutual
 /-- `free`: the path indexes no array (what an alias may be bound to). -/
 def wtSPath (Γ : TyCtx) (free : Bool) : {T : Ty} → SPath C T → Bool
-  | _, @SPath.alias _ R x => Γ x == some (.alias R)
+  | _, @SPath.alias _ R x => Γ x == some (.alias R) || (!free && Γ x == some (.falias R))
   | _, .loc l => wtLoc Γ free l
 def wtLoc (Γ : TyCtx) (free : Bool) : {T : Ty} → Loc C T → Bool
   | _, .root .. => true
@@ -468,11 +506,12 @@ def wtLoc (Γ : TyCtx) (free : Bool) : {T : Ty} → Loc C T → Bool
   | _, .index (.arr .fixed) b i => !free && wtSPath Γ free b && wtVal Γ i
 def wtVal (Γ : TyCtx) : {p : PrimTy} → Val C p → Bool
   | _, .simple s => wtSimple Γ s
-  | p, .read l => primInFrag p && wtLoc Γ false l
+  | _, .read l => wtLoc Γ false l
   | _, @Val.binop _ p _ op _ _ a b => binInFrag op p && wtVal Γ a && wtVal Γ b
-  | _, .unop op _ _ a => op == .not && wtVal Γ a
-  | p, .ternary c a b => primInFrag p && wtVal Γ c && wtVal Γ a && wtVal Γ b
-  | _, .readMem _ | _, .len .. | _, .mlen .. => false
+  | _, @Val.unop _ p _ op _ _ a => unInFrag op p && wtVal Γ a
+  | _, .ternary c a b => wtVal Γ c && wtVal Γ a && wtVal Γ b
+  | _, .len b _ => wtSPath Γ false b
+  | _, .readMem _ | _, .mlen .. => false
 end
 
 /-- The storage location an `op=` target names, if it is one. -/
@@ -493,37 +532,52 @@ fragment, at a type the fragment has. -/
 def wtArgs (Γ : TyCtx) : List (Arg C) → Option TyCtx
   | [] => some Γ
   | a :: as =>
-    if primInFrag a.p && wtVal Γ a.e then wtArgs (Γ.set a.x (some (.val a.p))) as else none
+    if wtVal Γ a.e then wtArgs (Γ.set a.x (some (.val a.p))) as else none
 
 /-- A call's return variable declared, at a type the fragment has. -/
 def wtRetEnter (Γ : TyCtx) : CallRet → Option TyCtx
   | .none => some Γ
-  | .val p r _ => if primInFrag p then some (Γ.set r (some (.val p))) else none
+  | .val p r _ => some (Γ.set r (some (.val p)))
 
 /-- The returned value read and assigned. -/
 def wtRetLeave (Γ : TyCtx) : CallRet → Bool
   | .val p r (some y) => Γ r == some (.val p) && Γ y == some (.val p)
   | _ => true
 
+/-- An alias bound to `q`: a plain one if `q` indexes no array, a fragile
+one if it does. -/
+def bindAliasTy (Γ : TyCtx) (x : Var) (R : RefTy) (q : SPath C (.ref R)) : Option TyCtx :=
+  if wtSPath Γ true q then some (Γ.set x (some (.alias R)))
+  else if wtSPath Γ false q then some (Γ.set x (some (.falias R)))
+  else none
+
+/-- A `push` of the fragment: `push()` of a primitive element, `push(e)`, and
+`push(sp)` of a static element (a fixed sequence of loads and stores). -/
+def wtPush (Γ : TyCtx) : {E : Ty} → Option (Src C E) → SPath C (.array E) → Bool
+  | E, none, b => E.isPrimitive && wtSPath Γ false b
+  | _, some (.val e), b => wtSPath Γ false b && wtVal Γ e
+  | _, some (@Src.copy _ R q _), b => static (.ref R) && wtSPath Γ false b && wtSPath Γ false q
+
 mutual
 /-- A statement of the fragment, and the context it leaves. -/
 def wtStmt (Γ : TyCtx) : Stmt C → Option TyCtx
-  | @Stmt.assign _ (.prim p) l (.val v) =>
-    if primInFrag p && wtLoc Γ false l && wtVal Γ v then some Γ else none
-  | @Stmt.rebind _ R x (.path q) =>
-    if wtSPath Γ true q then some (Γ.set x (some (.alias R))) else none
+  | .assign l (.val v) => if wtLoc Γ false l && wtVal Γ v then some Γ else none
+  | @Stmt.assign _ (.ref R) l (.copy q _) =>
+    if static (.ref R) && wtSPath Γ false q && wtLoc Γ false l then some Γ else none
+  | @Stmt.rebind _ R x (.path q) => bindAliasTy Γ x R q
   | @Stmt.assignLocal _ p x r => if Γ x == some (.val p) && wtVal Γ r then some Γ else none
-  | .declLocal p x none => if primInFrag p then some (Γ.set x (some (.val p))) else none
-  | .declLocal p x (some e) =>
-    if primInFrag p && wtVal Γ e then some (Γ.set x (some (.val p))) else none
+  | .declLocal p x none => some (Γ.set x (some (.val p)))
+  | .declLocal p x (some e) => if wtVal Γ e then some (Γ.set x (some (.val p))) else none
   | .declStorage _ x none => some (Γ.set x none)
-  | .declStorage R x (some (.path q)) =>
-    if wtSPath Γ true q then some (Γ.set x (some (.alias R))) else none
-  | @Stmt.opAssign _ p _ _ _ l r => if p == .uint && wtOpLoc Γ l && wtVal Γ r then some Γ else none
-  | @Stmt.incDec _ p _ _ l => if p == .uint && wtOpLoc Γ l then some Γ else none
-  | .pop b => if wtSPath Γ false b then some Γ else none
+  | .declStorage R x (some (.path q)) => bindAliasTy Γ x R q
+  | @Stmt.opAssign _ p _ _ _ l r => if p != .bool && wtOpLoc Γ l && wtVal Γ r then some Γ else none
+  | @Stmt.incDec _ p _ _ l => if p != .bool && wtOpLoc Γ l then some Γ else none
+  | @Stmt.assignIncDec _ p x _ _ l _ =>
+    if p != .bool && Γ x == some (.val p) && wtOpLoc Γ l then some Γ else none
+  | .push b v _ => if wtPush Γ v b then some Γ else none
+  | .pop b => if wtSPath Γ false b then some Γ.dropFragile else none
   | .transfer r a => if wtVal Γ r && wtVal Γ a then some Γ else none
-  | .delete l => if wtLoc Γ false l then some Γ else none
+  | .delete l => if wtLoc Γ false l then some Γ.dropFragile else none
   | .ite c t e =>
     if wtVal Γ c then
       match wtProg Γ t, wtProg Γ e with
@@ -578,10 +632,44 @@ def elemSlot (z : Nat) : List Instr := [.swap 1, .keccakArr] ++ addRep z ++ [.sw
 from `s`, whose elements take `z` slots. -/
 def fixedSlot (z : Nat) : List Instr := [.swap 1] ++ addRep z ++ [.swap 1, .pop]
 
-/-- `… a b → … a ⊕ b` (`b` on top), with solc's guards: `+` reverts when the
-sum wraps below `a`, `-` when `b > a`, `*` when `a ≠ 0` and the product
-divided by `a` is not `b`, `/` and `%` on a zero divisor. -/
-def binTail : BinOp → List Instr
+/-- One round of solc's `checked_exp_helper` on `… pw bs ex` (`ex` on top):
+revert if `bs · bs` overflows (`bs > (2^256 - 1) / bs`), multiply `pw` by `bs`
+when `ex` is odd, square `bs`, halve `ex`. -/
+def expBody : List Instr :=
+  [.dup 2, .push (.val (W - 1)), .div, .dup 3, .gt, .iszero] ++ assertTop ++
+    [.push (.val 2), .dup 2, .mod, .iszero, .jumpi 5, .dup 2, .dup 4, .mul, .swap 3, .pop] ++
+    [.dup 2, .dup 1, .mul, .swap 2, .pop, .push (.val 2), .swap 1, .div]
+
+/-- solc's `for { } gt(exponent, 1) { }` loop, unrolled `k` times: each round
+first skips all the rest once `ex ≤ 1`.  An exponent below `2^256` halves to
+`1` in at most `255` rounds, so `expLoop 255` is the loop. -/
+def expLoop : Nat → List Instr
+  | 0 => []
+  | k + 1 => [.push (.val 1), .dup 2, .gt, .iszero, .jumpi (expBody.length + (expLoop k).length)] ++
+      expBody ++ expLoop k
+
+/-- `b ** e` with `b` in `[1, 2^256)` and `e ≥ 1`: `pw = 1`, the loop, and
+the last multiplication checked (`pw > (2^256 - 1) / bs` reverts). -/
+def expGeneral : List Instr :=
+  [.push (.val 1), .swap 2, .swap 1] ++ expLoop 255 ++
+    [.pop, .dup 1, .push (.val (W - 1)), .div, .dup 3, .gt, .iszero] ++ assertTop ++ [.mul]
+
+/-- `… b e → … b ** e` for `e ≥ 1`: `0` when `b = 0`, else `expGeneral`. -/
+def expNonzero : List Instr :=
+  [.dup 2, .iszero, .jumpi (expGeneral.length + 1)] ++ expGeneral ++
+    [.jump 3, .pop, .pop, .push (.val 0)]
+
+/-- `… b e → … b ** e` (`e` on top), solc's `checked_exp_unsigned`: `e = 0`
+gives `1`, `b = 0` gives `0`, else `expGeneral`.  (solc's shortcuts for small
+bases, with `EXP`, give the same result.) -/
+def expCode : List Instr :=
+  [.dup 1, .iszero, .jumpi (expNonzero.length + 1)] ++ expNonzero ++
+    [.jump 3, .pop, .pop, .push (.val 1)]
+
+/-- `… a b → … a ⊕ b` (`b` on top) on `uint`s, with solc's guards: `+` reverts
+when the sum wraps below `a`, `-` when `b > a`, `*` when `a ≠ 0` and the
+product divided by `a` is not `b`, `/` and `%` on a zero divisor. -/
+def uTail : BinOp → List Instr
   | .add => [.dup 2, .add, .dup 1, .dup 3, .gt, .iszero] ++ assertTop ++ [.swap 1, .pop]
   | .sub => [.dup 2, .dup 2, .gt, .iszero] ++ assertTop ++ [.swap 1, .sub]
   | .mul => [.dup 2, .dup 2, .mul, .dup 3, .dup 2, .div, .dup 3, .eq, .dup 4, .iszero, .or] ++
@@ -594,10 +682,45 @@ def binTail : BinOp → List Instr
   | .ge => [.gt, .iszero]
   | .eqB => [.eq]
   | .neB => [.eq, .iszero]
+  | .pow => expCode
+  | .and | .or => []
+
+/-- `… x y → … x ⊕ y` (`y` on top) on `int`s, two's complement, with solc's
+guards (`checked_add_t_int256` and its siblings): `+` reverts unless the
+wrapped sum is below `y` exactly when `x` is negative, `-` unless `x` is
+below the wrapped difference exactly when `y` is negative, `*` when `x` is
+negative and `y` is `-2^255` or when `x ≠ 0` and the product `SDIV` `x` is not
+`y`, `/` on a zero divisor and on `-2^255 / -1`, `%` on a zero divisor. -/
+def sTail : BinOp → List Instr
+  | .add => [.dup 2, .dup 2, .add, .dup 2, .dup 2, .slt, .push (.val 0), .dup 5, .slt, .eq] ++
+      assertTop ++ [.swap 2, .pop, .pop]
+  | .sub => [.dup 1, .dup 3, .sub, .dup 1, .dup 4, .slt, .push (.val 0), .dup 4, .slt, .eq] ++
+      assertTop ++ [.swap 2, .pop, .pop]
+  | .mul => [.dup 2, .dup 2, .mul, .push (.val 0), .dup 4, .slt, .push (.val H), .dup 4, .eq, .and,
+      .iszero] ++ assertTop ++ [.dup 3, .dup 2, .sdiv, .dup 3, .eq, .dup 4, .iszero, .or] ++
+      assertTop ++ [.swap 2, .pop, .pop]
+  | .div => [.dup 1] ++ assertTop ++ [.push (.val H), .dup 3, .eq, .push (.val (W - 1)), .dup 3, .eq,
+      .and, .iszero] ++ assertTop ++ [.swap 1, .sdiv]
+  | .mod => [.dup 1] ++ assertTop ++ [.swap 1, .smod]
+  | .lt => [.sgt]
+  | .gt => [.slt]
+  | .le => [.slt, .iszero]
+  | .ge => [.sgt, .iszero]
+  | .eqB => [.eq]
+  | .neB => [.eq, .iszero]
   | .pow | .and | .or => []
 
+/-- An operator's tail at its operand type: signed at `int`. -/
+def binTail : PrimTy → BinOp → List Instr
+  | .int, op => sTail op
+  | _, op => uTail op
+
+/-- `… x → … -x`, reverting on `-2^255` (solc's `negate_t_int256`). -/
+def negCode : List Instr :=
+  [.dup 1, .push (.val H), .eq, .iszero] ++ assertTop ++ [.push (.val 0), .sub]
+
 def compileSimple : {p : PrimTy} → Simple C p → List Instr
-  | _, .lit n _ => [.push (.val n.toNat)]
+  | _, .lit n _ => [.push (.val (toWord n))]
   | _, .bool b => [.push (.val (bword b))]
   | _, .local x => [.mload x]
 
@@ -619,17 +742,21 @@ def compileLoc : {T : Ty} → Loc C T → List Instr
 def compileVal : {p : PrimTy} → Val C p → List Instr
   | _, .simple s => compileSimple s
   | _, .read l => compileLoc l ++ [.sload]
-  | _, .binop op _ _ a b =>
+  | _, @Val.binop _ p _ op _ _ a b =>
     match op with
     | .and => compileVal a ++ [.dup 1, .iszero, .jumpi ((compileVal b).length + 1), .pop] ++
         compileVal b
     | .or => compileVal a ++ [.dup 1, .jumpi ((compileVal b).length + 1), .pop] ++ compileVal b
-    | op => compileVal a ++ compileVal b ++ binTail op
-  | _, .unop _ _ _ a => compileVal a ++ [.iszero]
+    | op => compileVal a ++ compileVal b ++ binTail p op
+  | _, .unop op _ _ a =>
+    compileVal a ++ match op with
+      | .not => [.iszero]
+      | .neg => negCode
   | _, .ternary c a b =>
     compileVal c ++ [.iszero, .jumpi ((compileVal a).length + 1)] ++ compileVal a ++
       [.jump (compileVal b).length] ++ compileVal b
-  | _, .readMem _ | _, .len .. | _, .mlen .. => []
+  | _, .len b _ => compileSPath b ++ [.sload]
+  | _, .readMem _ | _, .mlen .. => []
 end
 
 /-- `… s → … s` with `0` written at `s + o` for each `o`. -/
@@ -640,6 +767,29 @@ def zeroCode (os : List Nat) : List Instr :=
 `Panic(0x31)`). -/
 def popCode : List Instr :=
   [.dup 1, .sload, .dup 1] ++ assertTop ++ [.push (.val 1), .swap 1, .sub, .swap 1, .sstore]
+
+/-- `… s → … s v₁ … vₖ`: the words at `s + o` for each `o`, loaded in order,
+the slot kept on top. -/
+def loadLeaves (os : List Nat) : List Instr :=
+  os.flatMap fun o => [.dup 1, .push (.val o), .add, .sload, .swap 1]
+
+/-- `… vₖ … v₁ d → … d`: each word stored at `d + o`, for the offsets in the
+order given (the last loaded first). -/
+def storeLeaves (os : List Nat) : List Instr :=
+  os.flatMap fun o => [.swap 1, .dup 2, .push (.val o), .add, .sstore]
+
+/-- `… v s → … v slot`: the array at `s` grown by one, reverting at solc's
+maximum length `2^64` (`Panic(0x41)`), and the slot of the new element,
+whose elements take `z` slots. -/
+def pushSlotCode (z : Nat) : List Instr :=
+  [.dup 1, .sload, .push (.val Lmax), .dup 2, .lt] ++ assertTop ++
+    [.push (.val 1), .dup 2, .add, .dup 3, .sstore] ++ elemSlot z
+
+/-- `… old → … new v`: the checked `+ 1` or `- 1`, and the value of the
+expression, the new word for `++x`, the old one for `x++`. -/
+def bumpCode (p : PrimTy) (op : IncDec) : List Instr :=
+  if op.isPre then [.push (.val 1)] ++ binTail p op.binOp ++ [.dup 1]
+  else [.dup 1, .push (.val 1)] ++ binTail p op.binOp
 
 /-- A call's parameters bound: each argument's value stored in its cell. -/
 def argsCode : List (Arg C) → List Instr
@@ -656,25 +806,47 @@ def retLeaveCode : CallRet → List Instr
   | .val _ r (some y) => [.mload r, .mstore y]
   | _ => []
 
+/-- `b.push(…)`: the array's slot, the value (a word, or a static value's
+words), the length checked and grown, the value stored at the new element. -/
+def pushCode : {E : Ty} → Option (Src C E) → SPath C (.array E) → List Instr
+  | _, none, b => compileSPath b ++ [.push (.val 0), .dup 2] ++ pushSlotCode 1 ++ [.sstore, .pop]
+  | _, some (.val e), b =>
+    compileSPath b ++ compileVal e ++ [.dup 2] ++ pushSlotCode 1 ++ [.sstore, .pop]
+  | _, some (@Src.copy _ R q _), b =>
+    compileSPath b ++ compileSPath q ++ loadLeaves (leaves (.ref R)) ++
+      [.pop, .dup ((leaves (.ref R)).length + 1)] ++ pushSlotCode (size (.ref R)) ++
+      storeLeaves (leaves (.ref R)).reverse ++ [.pop, .pop]
+
 mutual
 /-- The code of a statement; `[]` outside the fragment (which `wtStmt` rejects). -/
 def compileStmt : Stmt C → List Instr
   | .assign l (.val v) => compileVal v ++ compileLoc l ++ [.sstore]
+  | @Stmt.assign _ (.ref R) l (.copy q _) =>
+    compileSPath q ++ loadLeaves (leaves (.ref R)) ++ [.pop] ++ compileLoc l ++
+      storeLeaves (leaves (.ref R)).reverse ++ [.pop]
   | .rebind x (.path q) => compileSPath q ++ [.mstore x]
   | .assignLocal x r => compileVal r ++ [.mstore x]
   | .declLocal _ x none => [.push (.val 0), .mstore x]
   | .declLocal _ x (some e) => compileVal e ++ [.mstore x]
   | .declStorage _ x (some (.path q)) => compileSPath q ++ [.mstore x]
-  | .opAssign op _ _ (.local x) r => [.mload x] ++ compileVal r ++ binTail op ++ [.mstore x]
-  | .opAssign op _ _ l r => match opLocToLoc l with
+  | @Stmt.opAssign _ p op _ _ (.local x) r =>
+    [.mload x] ++ compileVal r ++ binTail p op ++ [.mstore x]
+  | @Stmt.opAssign _ p op _ _ l r => match opLocToLoc l with
     | some loc =>
-      compileLoc loc ++ [.dup 1, .sload] ++ compileVal r ++ binTail op ++ [.swap 1, .sstore]
+      compileLoc loc ++ [.dup 1, .sload] ++ compileVal r ++ binTail p op ++ [.swap 1, .sstore]
     | none => []
-  | .incDec op _ (.local x) => [.mload x, .push (.val 1)] ++ binTail op.binOp ++ [.mstore x]
-  | .incDec op _ l => match opLocToLoc l with
+  | @Stmt.incDec _ p op _ (.local x) =>
+    [.mload x, .push (.val 1)] ++ binTail p op.binOp ++ [.mstore x]
+  | @Stmt.incDec _ p op _ l => match opLocToLoc l with
     | some loc =>
-      compileLoc loc ++ [.dup 1, .sload, .push (.val 1)] ++ binTail op.binOp ++ [.swap 1, .sstore]
+      compileLoc loc ++ [.dup 1, .sload, .push (.val 1)] ++ binTail p op.binOp ++ [.swap 1, .sstore]
     | none => []
+  | @Stmt.assignIncDec _ p x op _ (.local y) _ => [.mload y] ++ bumpCode p op ++ [.mstore y, .mstore x]
+  | @Stmt.assignIncDec _ p x op _ l _ => match opLocToLoc l with
+    | some loc =>
+      compileLoc loc ++ [.dup 1, .sload] ++ bumpCode p op ++ [.dup 3, .sstore, .swap 1, .pop, .mstore x]
+    | none => []
+  | .push b v _ => pushCode v b
   | .pop b => compileSPath b ++ popCode
   | .transfer r a => compileVal r ++ compileVal a ++ [.call] ++ assertTop
   | @Stmt.delete _ T l => compileLoc l ++ zeroCode (leaves T) ++ [.pop]
@@ -689,6 +861,20 @@ def compileStmt : Stmt C → List Instr
 def compileProg : List (Stmt C) → List Instr
   | [] => []
   | s :: P => compileStmt s ++ compileProg P
+end
+
+mutual
+/-- How many `push` statements a statement has: each runs at most once (the
+fragment has no loops), so a run grows an array by at most this many. -/
+def pushes : Stmt C → Nat
+  | .push .. => 1
+  | .ite _ t e => pushesP t + pushesP e
+  | .call _ _ _ _ body => pushesP body
+  | _ => 0
+/-- `pushes` of a block. -/
+def pushesP : List (Stmt C) → Nat
+  | [] => 0
+  | s :: P => pushes s + pushesP P
 end
 
 end Evm

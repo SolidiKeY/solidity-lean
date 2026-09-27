@@ -15,9 +15,14 @@ type), `Typing/State.lean` (`StateWT`, the full-state invariant).
 `Typing/Soundness.lean` proves the interpreter keeps the invariant
 (`Stmt.run_wt`, over a locals context `Stmt.wt` threads), and
 `Typing/Reachability.lean` that every reachable storage is canonical
-(`reachable_canon`). The converse — every canonical storage is reachable —
-is not ported. `SortCheck/Faithfulness.lean` uses both: a taclet's declared
-read sort holds of what a well-typed run reads.
+(`reachable_canon`). `SortCheck/Faithfulness.lean` uses both: a taclet's
+declared read sort holds of what a well-typed run reads.
+
+`Typing/Constructibility.lean` is the converse: canonical and tight
+(`SVal.tight`) is exactly reachable (`reachable_iff`, for `Ty.okDeep`
+roots), by a typed builder that reaches past an array's end through aliases
+`slot d`. A new statement needs its case in `Stmt.run_tight` beside
+`Stmt.run_canon`.
 
 `Semantics/Agree.lean` is the frame kit every soundness proof composes:
 `EnvAgreeExcept ns`, and a `*_frame` lemma per evaluator. A new evaluator in

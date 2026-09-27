@@ -24,6 +24,7 @@ import Solidity.Calculus.Notation
 import Solidity.Calculus.Close
 import Solidity.Calculus.CloseTests
 import Solidity.Calculus.Decide
+import Solidity.Calculus.DecideComplete
 import Solidity.Calculus.Uniqueness
 import Solidity.Calculus.Progress
 import Solidity.Calculus.Termination
@@ -53,6 +54,7 @@ import Solidity.Typing.StoragePreservation
 import Solidity.Typing.State
 import Solidity.Typing.Soundness
 import Solidity.Typing.Reachability
+import Solidity.Typing.Constructibility
 import Solidity.Theory.Terms
 import Solidity.Theory.Storage
 import Solidity.Theory.Memory

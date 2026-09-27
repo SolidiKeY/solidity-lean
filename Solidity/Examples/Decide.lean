@@ -1,4 +1,4 @@
-import Solidity.Calculus.Decide
+import Solidity.Calculus.DecideComplete
 
 /-!
 # `sol_decide`: the storage goals, decided
@@ -7,10 +7,12 @@ import Solidity.Calculus.Decide
 on whatever facts the formula states; it cannot split on two keys being
 equal.  `sol_decide` (`Calculus/Decide.lean`) rewrites the goal by an
 equivalence, `Fml.valid_iff_reduce`, into a statement about the initial
-state in which every read of a write is a case tree over key equalities,
-and closes that.  Nothing is lost on the way, so a goal it does not close is
-either not valid (the examples at the end), outside the fragment, or beyond
-the final `simp`/`omega`/`grind` (mini-solkey's `Examples/Decide.lean`).
+state in which every read of a write is a case tree over key equalities;
+then by a second one, `Fml.valid_iff_cons` (`Calculus/DecideComplete.lean`),
+into a statement about free reads under the constraints a storage puts on
+them, and closes that.  Nothing is lost on the way, so a goal it does not
+close is either not valid (the examples at the end), outside the fragment,
+or beyond the final `omega`/`grind`.
 
 Every goal is stated with `⊨`, over **every** state: one whose `balances`
 is an array, whose `alice.account.balance` holds a `bool`, or that has no
@@ -158,6 +160,73 @@ theorem deleteEntryBeside :
   sol_symex
   sol_decide
 
+/-! ## Reads that constrain each other
+
+Two reads of the initial storage are atoms of the reduction, and a valid goal
+can hang on how they constrain each other: a location below a word shows
+nothing, an array has its elements at the indices below its length, a
+mapping has every key.  `sol_decide` states those constraints (`consAll`:
+for each read path, `ChildOk` between the location it names and the one
+above) and decides the goal under them.  Nothing is lost, since any choice
+of reads that meets them is what some storage shows (`realize_findLive`).
+The reduction alone, read with unrelated atoms (`sol_decide_unconstrained`),
+does not close any of these. -/
+
+/-- `uint y = values[5];` then `values[3] = 1;` — where `values[5]` is
+there, `values` is a mapping or an array longer than `5`, and either way
+`values[3]` is there to write. -/
+theorem belowAnIndex : ⊨ dl!{ [ uint y = values[5]; ] ⟨ values[3] = 1; ⟩ true } := by
+  sol_symex
+  fail_if_success sol_decide_unconstrained
+  sol_decide
+
+/-- `uint y = matrix[i][j];` then `matrix[i][0] = 1;` — the row
+`matrix[i]` has an element, so it has a first one. -/
+theorem firstOfARow : ⊨ dl!{ [ uint y = matrix[i][j]; ] ⟨ matrix[i][0] = 1; ⟩ true } := by
+  sol_symex
+  fail_if_success sol_decide_unconstrained
+  sol_decide
+
+/-- `uint y = values[-1];` then `values[7] = 1;` — no array has an element
+at `-1`, so `values` is a mapping, which has every key. -/
+theorem negativeKey : ⊨ dl!{ [ uint y = values[-1]; ] ⟨ values[7] = 1; ⟩ true } := by
+  sol_symex
+  fail_if_success sol_decide_unconstrained
+  sol_decide
+
+/-- `uint y = alice.account.balance;` then `delete alice.account;` — a read
+above one that returns: `alice.account` is there, so it can be deleted. -/
+theorem aboveARead :
+    ⊨ dl!{ [ uint y = alice.account.balance; ] ⟨ delete alice.account; ⟩ true } := by
+  sol_symex
+  fail_if_success sol_decide_unconstrained
+  sol_decide
+
+/-- `uint y = values[3]; uint n = values.length;` — `values.length` reads an
+array, and `values[3]` is below its length. -/
+theorem lengthAboveIndex :
+    ⊨ dl!{ [ uint y = values[3]; uint n = values.length; ] n != 3 } := by
+  sol_symex
+  fail_if_success sol_decide_unconstrained
+  sol_decide
+
+/-- `uint y = values[i]; uint n = values.length; bool c = i < n;` — an
+index read in bounds, the bound being the length. -/
+theorem indexBelowLength :
+    ⊨ dl!{ [ uint y = values[i]; uint n = values.length; bool c = i < n; ] c == true } := by
+  sol_symex
+  fail_if_success sol_decide_unconstrained
+  sol_decide
+
+/-- `values[2] = 7; uint n = values.length; delete values; uint m =
+values.length;` — a `delete` empties a dynamic array and keeps a
+fixed-size one's length (`LStor.lenU`). -/
+theorem lengthAfterDelete :
+    ⊨ dl!{ [ values[2] = 7; uint n = values.length; delete values; uint m = values.length; ]
+           (m != 0 → m == n) } := by
+  sol_symex
+  sol_decide
+
 /-! ## Under the diamond
 
 A diamond update's term has to return, so it becomes a conjunct of the
@@ -191,6 +260,23 @@ equivalence. -/
 example : True := by
   fail_if_success
     have : ⊨ dl!{ [ balances[a] = 1; balances[b] = 2; ] balances[a] == 1 } := by
+      sol_symex
+      sol_decide
+  trivial
+
+/-- An index read does not make another one of the same array in bounds:
+`balances` may be an array longer than `k` and no longer than `j`. -/
+example : True := by
+  fail_if_success
+    have : ⊨ dl!{ [ uint y = balances[k]; ] ⟨ balances[j] = 1; ⟩ true } := by
+      sol_symex
+      sol_decide
+  trivial
+
+/-- An empty array has no last element. -/
+example : True := by
+  fail_if_success
+    have : ⊨ dl!{ [ uint n = values.length; ] ⟨ values[n - 1] = 0; ⟩ true } := by
       sol_symex
       sol_decide
   trivial

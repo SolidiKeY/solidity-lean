@@ -57,7 +57,8 @@ fails on a module nothing imports.
 | `Calculus/ReadWrite.lean` | What a state reads after a write: the four-way path comparison, memory addresses, copies member by member. |
 | `Calculus/Close.lean` | `sol_close`: a first-order goal in an arbitrary state, by weakest preconditions and `ReadWrite.lean`'s facts. Its docstring lists what it does not close. |
 | `Calculus/CloseTests.lean` | What `sol_close` closes, pinned. |
-| `Calculus/Decide.lean` | `sol_decide`: reads of writes eliminated into case trees on key equalities (the four-way path comparison), `delete` included; `Fml.valid_iff_reduce`. The storage fragment, read live (`SVal.findLive`/`saveLive`) and bridged to the program's checked paths (`PTerm.toL_chk`). A delete below a key is exact by the read's shape (`KShape`, `delBelow`): a mapping kept, a fixed-size array's length kept. |
+| `Calculus/Decide.lean` | `sol_decide`: reads of writes eliminated into case trees on key equalities (the four-way path comparison), `delete` included; `Fml.valid_iff_reduce`. The storage fragment, read live (`SVal.findLive`/`saveLive`) and bridged to the program's checked paths (`PTerm.toL_chk`). A delete below a key is exact by the read's shape (`KShape`, `delBelow`): a mapping kept, a fixed-size array's length kept. `values.length` read through writes (`LStor.lenU`). `sol_decide_heuristic`: the finishing step without constraints. |
+| `Calculus/DecideComplete.lean` | The reads of the starting storage realizable: `Obs`, the constraint `ChildOk` (`childOk_findLive`), `realize_findLive`; the reduction over free reads (`LTerm.evalA`), `LFml.valid_iff_cons`/`Fml.valid_iff_cons`; `sol_decide`, deciding under the constraints. |
 | `Calculus/Uniqueness.lean` | One rule per statement: every derivation's premise is `Stmt.step`'s. |
 | `Calculus/Progress.lean` | A formula with a modality always steps: `Fml.active_iff_step`. |
 | `Calculus/Termination.lean` | The weights, `Premise.Smaller` (of `Stmt.step`, and of every derivation: `Taclet.smaller`), `Fml.measure`, `Fml.step_wellFounded`, `symex_normalizes`. |
@@ -86,7 +87,8 @@ theorem.
 | `Typing/StoragePreservation.lean` | The write-side twin: `save` keeps a value's type. |
 | `Typing/State.lean` | `StateWT`, the full-state invariant, and cross-domain copy typing. |
 | `Typing/Soundness.lean` | Type soundness: `Stmt.run_wt`/`Prog.run_wt` keep `RunWT` over the locals context `Stmt.wt` threads. |
-| `Typing/Reachability.lean` | Every reachable storage is canonical (`reachable_canon`); the converse is not ported. |
+| `Typing/Reachability.lean` | Every reachable storage is canonical (`reachable_canon`), and three well-typed storages that are not. |
+| `Typing/Constructibility.lean` | The converse: `SVal.tight`, the builder `Build.rootsProg` (`storage_tight`, `canon_reachable`, `no_hidden_invariant`), `Prog.run_tight`, and `reachable_iff` — reachable ⇔ canonical ∧ tight, for `Ty.okDeep` roots; canonical storages no program reaches. |
 
 ## Sort faithfulness (the solkey cross-check)
 
@@ -108,10 +110,12 @@ theorem.
 
 | Module | What it is |
 |---|---|
-| `Evm/Machine.lean` | A straight-line EVM: slots as terms, wrapping words, relative forward jumps. |
-| `Evm/Compile.lean` | The compiler from `Stmt C` for a stated fragment (`wtStmt`), with solc's guards; a call compiled inlined. |
-| `Evm/Repr.lean` | The storage layout: a typed path's slots (a fixed-size array inline, `ReprAt.fixed`), injectivity, writing a subtree is writing its slots. |
-| `Evm/Correctness.lean` | `compile_correct`, `compile_storage`, `not_stuck`. |
+| `Evm/Machine.lean` | A straight-line EVM: slots as terms, wrapping words and their two's complement reading, relative forward jumps, running code in pieces. |
+| `Evm/Compile.lean` | The compiler from `Stmt C` for a stated fragment (`wtStmt`: `int`, static copies, `push`, fragile aliases), with solc's guards (`uTail`, `sTail`, `expCode`); a call compiled inlined. |
+| `Evm/Repr.lean` | The storage layout: a typed path's slots (a fixed-size array inline, `ReprAt.fixed`), injectivity, writing a subtree is writing its slots, copies and `push`, lengths only grow (`live_mono`). |
+| `Evm/Signed.lean` | The signed guard sequences (`checked_add_t_int256` and siblings) exact on two's complement words. |
+| `Evm/Exp.lean` | `**`: solc's `checked_exp_unsigned`, its loop unrolled 255 times, exact. |
+| `Evm/Correctness.lean` | `compile_correct`, `compile_storage`, `not_stuck`, under the `push` bound `L + pushesP P ≤ 2^64`. |
 | `Evm/Examples.lean` | Compiled programs run by `decide`. |
 
 ## The solkey corpus

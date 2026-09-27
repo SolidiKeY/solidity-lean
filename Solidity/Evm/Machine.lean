@@ -10,7 +10,10 @@ needs.  Instruction meanings follow the EVM as Nethermind's
 
 * arithmetic words are numbers below `2^256` and `ADD`/`SUB`/`MUL` wrap;
   `DIV a 0 = MOD a 0 = 0`;
-* `LT`/`GT`/`EQ`/`ISZERO` push `1` or `0`; `OR` is bitwise;
+* `LT`/`GT`/`EQ`/`ISZERO` push `1` or `0`; `OR` and `AND` are bitwise;
+* `SLT`/`SGT`/`SDIV`/`SMOD` read words as two's complement (`sgn`):
+  `SDIV` truncates (and `-2^255 / -1` wraps to `-2^255`), `SMOD` takes the
+  dividend's sign, both give `0` on a zero divisor;
 * `DUP n` copies the `n`-th item, `SWAP n` swaps the top with the `(n+1)`-th;
 * `SLOAD`/`SSTORE` read and write storage, and a fresh contract's storage is
   all zeroes;
@@ -29,7 +32,9 @@ needs.  Instruction meanings follow the EVM as Nethermind's
 * **Jumps are relative and forward**: `JUMP n`/`JUMPI n` skip the next `n`
   instructions.  The fragment has no loops, so no backward jump is needed, and
   `exec` is structural: it carries the number of instructions still to skip.
-  Absolute targets with `JUMPDEST` are an assembler's business.
+  Absolute targets with `JUMPDEST` are an assembler's business.  The one loop
+  solc emits for the fragment, `checked_exp_helper`'s, runs at most `255`
+  times and is unrolled (`expLoop`, `Compile.lean`).
 * `KECCAK256` takes its inputs from the stack (real code first `MSTORE`s them),
   in two forms: `keccakMap` for a mapping entry, `keccakArr` for array data.
 * **Locals live in memory**, one cell per variable, addressed by the variable
@@ -49,6 +54,30 @@ def W : Nat := 2 ^ 256
 
 /-- Words are not empty: `0` is a word. -/
 theorem W_pos : 0 < W := Nat.pow_pos (by decide)
+
+/-- `2^255`: an `int256` is in `[-2^255, 2^255)`, and a word at or above it
+reads as negative. -/
+def H : Nat := 2 ^ 255
+
+/-- A word is two halves: `2^256 = 2 · 2^255`. -/
+theorem W_eq : W = 2 * H := by unfold W H; rw [Nat.pow_succ, Nat.mul_comm]
+
+/-- The signed reading of a word, two's complement: `2^256 - 1` is `-1`. -/
+def sgn (a : Nat) : Int := if a < H then (a : Int) else (a : Int) - W
+
+/-- The word of an integer in `[-2^256, 2^256)`, two's complement: `-1` is
+`2^256 - 1`. -/
+def toWord (n : Int) : Nat := if 0 ≤ n then n.toNat else (n + W).toNat
+
+/-- `0` reads as `0`. -/
+@[simp] theorem sgn_zero : sgn 0 = 0 := by simp [sgn, H]
+
+/-- solc's maximum length of a storage array, `2^64` (`push` reverts at it
+with `Panic(0x41)`). -/
+def Lmax : Nat := 2 ^ 64
+
+/-- The array bound is below the word bound. -/
+theorem Lmax_lt_W : Lmax < W := by unfold Lmax W; decide
 
 /-- A storage slot: `root off`, `keccak256(k ‖ s) + off`, or `keccak256(s) + off`. -/
 inductive Slot where
@@ -92,7 +121,9 @@ inductive Instr where
   | dup (n : Nat)
   | swap (n : Nat)
   | add | sub | mul | div | mod
-  | lt | gt | eq | iszero | or
+  | lt | gt | eq | iszero | or | and
+  /-- The signed comparisons and division: `SLT`, `SGT`, `SDIV`, `SMOD`. -/
+  | slt | sgt | sdiv | smod
   | keccakMap
   | keccakArr
   | sload
@@ -113,6 +144,7 @@ instance : ToString Instr where
     | .swap n => s!"SWAP{n}"
     | .add => "ADD" | .sub => "SUB" | .mul => "MUL" | .div => "DIV" | .mod => "MOD"
     | .lt => "LT" | .gt => "GT" | .eq => "EQ" | .iszero => "ISZERO" | .or => "OR"
+    | .and => "AND" | .slt => "SLT" | .sgt => "SGT" | .sdiv => "SDIV" | .smod => "SMOD"
     | .keccakMap => "KECCAK256" | .keccakArr => "KECCAK256"
     | .sload => "SLOAD"
     | .sstore => "SSTORE"
@@ -226,6 +258,23 @@ def Instr.step : Instr → Machine → Out
   | .or, m => match m.stack with
     | .val a :: .val b :: st => m.next (.val (a ||| b) :: st)
     | _ => .fault
+  | .and, m => match m.stack with
+    | .val a :: .val b :: st => m.next (.val (a &&& b) :: st)
+    | _ => .fault
+  | .slt, m => match m.stack with
+    | .val a :: .val b :: st => m.next (.val (bword (decide (sgn a < sgn b))) :: st)
+    | _ => .fault
+  | .sgt, m => match m.stack with
+    | .val a :: .val b :: st => m.next (.val (bword (decide (sgn b < sgn a))) :: st)
+    | _ => .fault
+  | .sdiv, m => match m.stack with
+    | .val a :: .val b :: st =>
+      m.next (.val (if b = 0 then 0 else toWord (Int.tdiv (sgn a) (sgn b))) :: st)
+    | _ => .fault
+  | .smod, m => match m.stack with
+    | .val a :: .val b :: st =>
+      m.next (.val (if b = 0 then 0 else toWord (Int.tmod (sgn a) (sgn b))) :: st)
+    | _ => .fault
   | .keccakMap, m => match m.stack with
     | .val k :: .slot s :: st => m.next (.slot (.hash k s 0) :: st)
     | _ => .fault
@@ -299,6 +348,40 @@ theorem exec_skip (c : List Instr) (k : Nat) (m : Machine) :
   induction c with
   | nil => simp
   | cons i c ih => rw [List.length_cons, Nat.add_right_comm]; exact ih
+
+/-! ## Running code in pieces -/
+
+/-- Running two pieces of code is running the second on what the first leaves: `total = 3;`
+then `age = 4;`. -/
+theorem run_append_ok {c₁ c₂ : List Instr} {m m' : Machine} (h : run c₁ m = .ok m' 0) :
+    run (c₁ ++ c₂) m = run c₂ m' := by
+  simp only [run] at h ⊢; rw [exec_append, h]; rfl
+
+/-- A revert in the first piece of code reverts the whole: `require(false); total = 1;` never
+writes. -/
+theorem run_append_revert {c₁ c₂ : List Instr} {m : Machine} (h : run c₁ m = .revert) :
+    run (c₁ ++ c₂) m = .revert := by
+  simp only [run] at h ⊢; rw [exec_append, h]; rfl
+
+/-- The empty code does nothing: `if (c) { } else { }`'s branches. -/
+@[simp] theorem run_nil (m : Machine) : run [] m = .ok m 0 := rfl
+
+/-- A jump pending at the end of the first piece skips into the second: `if`'s `JUMPI` over the
+`then` branch. -/
+theorem run_append_skip {c₁ c₂ : List Instr} {m m' : Machine} {k : Nat} (h : run c₁ m = .ok m' k) :
+    run (c₁ ++ c₂) m = exec c₂ k m' := by
+  simp only [run] at h ⊢; rw [exec_append, h]; rfl
+
+/-- Skipping a whole piece of code leaves the machine as it was: the `JUMP` over an `else`
+branch. -/
+theorem exec_length (c : List Instr) (m : Machine) : exec c c.length m = .ok m 0 :=
+  exec_skip c 0 m
+
+/-- Skipping past a first piece lands in the second: the `JUMPI` over the `then` branch lands in the
+`else`. -/
+theorem exec_skip_append (c₁ c₂ : List Instr) (k : Nat) (m : Machine) :
+    exec (c₁ ++ c₂) (c₁.length + k) m = exec c₂ k m := by
+  rw [exec_append, exec_skip]; rfl
 
 end Evm
 end Solidity
