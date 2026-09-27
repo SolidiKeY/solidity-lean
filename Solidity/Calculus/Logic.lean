@@ -159,12 +159,16 @@ inductive Hyp (C : Contract) where
   | pre (a : Fml C)
   /-- `{U} …`, produced under the modality `m` -/
   | upd (m : Modality) (U : Upd C)
+  /-- `{havoc} …`: any storage, ledger and funds a callee may leave, as
+  KeY's anonymising update with fresh skolem symbols. -/
+  | havoc
 
 /-- Put the context back in front of a formula. -/
 def Hyp.wrap : List (Hyp C) → Fml C → Fml C
   | [], φ => φ
   | .pre a :: Γ, φ => .imp a (Hyp.wrap Γ φ)
   | .upd m U :: Γ, φ => .upd m U (Hyp.wrap Γ φ)
+  | .havoc :: Γ, φ => .havoc (Hyp.wrap Γ φ)
 
 /-- Fresh names are numbered one above every index in the whole sequent. -/
 def Hyp.fresh (Γ : List (Hyp C)) (φ : Fml C) : Nat := maxIdx (Hyp.wrap Γ φ).vars + 1
@@ -213,8 +217,10 @@ inductive Proves : RuleSet → List (Hyp C) → Fml C → Prop
   /-- `emptyModality`: `⟨⟩ φ` and `[] φ` are `φ`. -/
   | empty {R : RuleSet} {Γ : List (Hyp C)} {m : Modality} {φ : Fml C} (h : Proves R Γ φ) :
       Proves R Γ (.modal m [] φ)
-  /-- Leave the calculus: what is left is proved in the logic. -/
-  | close {R : RuleSet} {Γ : List (Hyp C)} {φ : Fml C} (h : Valid (Hyp.wrap Γ φ)) : Proves R Γ φ
+  /-- Leave the calculus: with no modality left anywhere in the sequent, what
+  is left is proved in the logic. -/
+  | close {R : RuleSet} {Γ : List (Hyp C)} {φ : Fml C} (h : Valid (Hyp.wrap Γ φ))
+      (hφ : (Hyp.wrap Γ φ).modalFree = true := by first | rfl | decide) : Proves R Γ φ
 
 namespace Proves
 scoped notation:25 Γ:26 " ⊢ " φ:26 => Proves RuleSet.all Γ φ
@@ -240,6 +246,7 @@ theorem Hyp.wrap_mono {ψ φ : Fml C} (h : ∀ σ, holds σ ψ → holds σ φ) 
     cases U.apply σ with
     | error _ => exact id
     | ok τ => exact Hyp.wrap_mono h Γ τ
+  | .havoc :: Γ => fun σ hψ st nt bal => Hyp.wrap_mono h Γ _ (hψ st nt bal)
 
 /-- `Hyp.wrap_mono` for three premises, as a branch has. -/
 theorem Hyp.wrap_mono₃ {ψ₁ ψ₂ ψ₃ φ : Fml C}
@@ -253,12 +260,15 @@ theorem Hyp.wrap_mono₃ {ψ₁ ψ₂ ψ₃ φ : Fml C}
     cases U.apply σ with
     | error _ => exact fun h _ _ => h
     | ok τ => exact Hyp.wrap_mono₃ h Γ τ
+  | .havoc :: Γ => fun σ h₁ h₂ h₃ st nt bal =>
+    Hyp.wrap_mono₃ h Γ _ (h₁ st nt bal) (h₂ st nt bal) (h₃ st nt bal)
 
 /-- A variable of a formula is a variable of the formula wrapped in a context. -/
 theorem Hyp.vars_wrap {x : Var} {φ : Fml C} :
     (Γ : List (Hyp C)) → x ∈ φ.vars → x ∈ (Hyp.wrap Γ φ).vars
   | [], h => h
-  | .pre _ :: Γ, h | .upd _ _ :: Γ, h => by simp [Hyp.wrap, Fml.vars, Hyp.vars_wrap Γ h]
+  | .pre _ :: Γ, h | .upd _ _ :: Γ, h | .havoc :: Γ, h => by
+    simp [Hyp.wrap, Fml.vars, Hyp.vars_wrap Γ h]
 
 /-- A taclet applied in a context is sound: its fresh names are fresh.
 
@@ -306,7 +316,7 @@ theorem Proves.sound {R : RuleSet} {Γ : List (Hyp C)} {φ : Fml C} (h : Proves 
   | @empty _ Γ m φ _ ih =>
     exact fun σ => Hyp.wrap_mono (ψ := φ) (φ := .modal m [] φ)
       (fun _ h => by cases m <;> exact h) Γ σ (ih σ)
-  | close h => exact h
+  | close h _ => exact h
 
 open Proves in
 /-- A derivation from the empty context proves validity: `⊢ φ` gives `⊨ φ`. -/
@@ -332,7 +342,7 @@ theorem Proves.toAll {R : RuleSet} {Γ : List (Hyp C)} {φ : Fml C} (h : Proves 
   | split d _ _ _ ih₁ ih₂ ih₃ => exact .split d ih₁ ih₂ ih₃
   | done d _ ih => exact .done d ih
   | empty _ ih => exact .empty ih
-  | close h => exact .close h
+  | close h hφ => exact .close h hφ
 
 /-! ## Printing sequents
 
@@ -348,6 +358,7 @@ def ppHyp? (e : Lean.Expr) : MetaM (Option (TSyntax `dl_hyp)) := do
   match_expr (← whnf (← instantiateMVars e)) with
   | Hyp.pre _ a => return some (← `(dl_hyp| $(← ppFml a):dl_fml))
   | Hyp.upd _ _ U => return some (← `(dl_hyp| $(← ppUpd U):dl_upd))
+  | Hyp.havoc _ => return some (← `(dl_hyp| { havoc }))
   | _ => return none
 
 /-- `Proves R Γ φ`: `dl{ Γ ⟹ φ }`, under either rule set. -/

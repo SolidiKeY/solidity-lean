@@ -92,7 +92,7 @@ theorem ledgerWriteThenDelete :
   apply unfold .localValueDeclInitDrop
   apply update .storageFieldReadFind
   apply empty
-  apply close
+  refine close ?_
   sol_symex
   sol_close
 
@@ -102,7 +102,7 @@ theorem deleteLedger : ⊨ dl!{ [ ledger.nonce = 42; delete ledger; ] true } := 
   apply update .storageFieldWriteSave
   apply update .storageRootDelete
   apply empty
-  apply close
+  refine close ?_
   sol_symex
   sol_close
 

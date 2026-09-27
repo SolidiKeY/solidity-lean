@@ -64,11 +64,14 @@ theorem withdrawSafe :
   apply ProvesC.callback .transferWithCallbackBox
   · -- invariant on exit
     apply ProvesC.plain _ rfl
-    apply close
+    refine close ?_
     sol_symex
     sol_close
-  · -- resume after callback
-    exact CbResume.box_nil _ rfl
+  · -- resume after callback: `{U} {havoc} (I → [ ] I)`
+    apply ProvesC.plain _ rfl
+    apply empty
+    rw [show ∀ (Γ : List (Hyp Vault)) a b c, Γ ++ [a, b, c] = (Γ ++ [a, b]) ++ [c] by simp]
+    exact close (Hyp.wrap_assumption _ rfl)
 
 /-- What is safe with callbacks is safe without: the deterministic run is one
 of the runs with callbacks. -/

@@ -692,7 +692,7 @@ macro "sol_close_reads_all" : tactic => `(tactic|
   simp_all (config := { maxSteps := 400000 }) only [close_rw, close_rw_last])
 
 open Lean Elab Tactic Meta in
-/-- The goal `apply close` leaves, `Valid (Hyp.wrap Γ φ)`, with the context
+/-- The goal `refine close ?_` leaves, `Valid (Hyp.wrap Γ φ)`, with the context
 put back and the taclet's instance computed (`normValid`): its terms are
 still the premise's, `(Simple.lit 1 _).lower` for `1`. -/
 elab "sol_close_unwrap" : tactic => do

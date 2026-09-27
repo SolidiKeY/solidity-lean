@@ -52,11 +52,11 @@ fails on a module nothing imports.
 | `Calculus/SoundUpdate.lean` | Every taclet with an update premise has the statement's effect. |
 | `Calculus/SoundUnfold.lean` | Every unfolding taclet runs like its statement off the fresh names. |
 | `Calculus/RuleSoundness.lean` | `Taclet.sound`: every taclet, no hypothesis but freshness; `LeanTaclet.sound`, `Rule.sound`. |
-| `Calculus/Logic.lean` | `Premise.fml`, the sequent calculus `Proves R Γ φ` at a `RuleSet` (`Γ ⊢ φ` all rules, `Γ ⊢ₖ φ` solkey's) and `Proves.sound`; sequents print as `dl{ Γ ⟹ φ }`. |
-| `Calculus/Callback.lean` | The calculus with callbacks: `CallbackTaclet.sound` (`transferWithCallbackBox`/`Diamond`, premises `{U} I` and `CbResume`), the judgement `ProvesC` and `ProvesC.sound`. |
+| `Calculus/Logic.lean` | `Premise.fml`, the sequent calculus `Proves R Γ φ` at a `RuleSet` (`Γ ⊢ φ` all rules, `Γ ⊢ₖ φ` solkey's) and `Proves.sound`; `close` only on a sequent with no modality left (`Fml.modalFree`); sequents print as `dl{ Γ ⟹ φ }`. |
+| `Calculus/Callback.lean` | The calculus with callbacks: `CallbackTaclet.sound` (`transferWithCallbackBox`/`Diamond`, premises `{U} I` and `{U} {havoc} (I → ⟨[ ω ]⟩ φ)`, read by `CbResume`), the judgement `ProvesC` and `ProvesC.sound`. |
 | `Calculus/Quote.lean` | Quoters from formulas back to terms, so a computed goal is re-checked by the kernel. |
-| `Calculus/Symex.lean` | Symbolic execution: `Fml.step` fires `Stmt.step`'s rule, `symex`, `symex_sound`; tactics `sol_step`, `sol_symex`. |
-| `Calculus/SolkeyFragment.lean` | The refined syntax: `Stmt.inSolkey` (every call's arguments simple), on which solkey's rules alone are the calculus (`Stmt.step_taclet`, `Taclet.premise_inSolkey`, `Proves.toSolkey`). |
+| `Calculus/Symex.lean` | Symbolic execution: `Fml.step` fires `Stmt.step`'s rule, `symex`, `symex_sound`; tactics `sol_step`, `sol_symex`, and `sol_derive`, the strategy as a `Proves` derivation. |
+| `Calculus/SolkeyFragment.lean` | The refined syntax: `Stmt.inSolkey` (every call's arguments simple), on which solkey's rules alone are the calculus (`Stmt.step_taclet`, `Taclet.premise_inSolkey`, `Proves.toSolkey`); off it they fall short (`Proves.solkey_lt_calculus`). |
 | `Calculus/Notation.lean` | `dl[C]{ … }` and `dl!{ … }`: concrete formulas read against a contract. |
 | `Calculus/ReadWrite.lean` | What a state reads after a write: the four-way path comparison, memory addresses, copies member by member. |
 | `Calculus/Close.lean` | `sol_close`: a first-order goal in an arbitrary state, by weakest preconditions and `ReadWrite.lean`'s facts. Its docstring lists what it does not close. |

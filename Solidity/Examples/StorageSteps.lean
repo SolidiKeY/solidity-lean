@@ -15,7 +15,7 @@ is a theorem `⊨ dl!{ … }`, proved one of two ways:
   is built one `apply` per taclet, so each rule the derivation names is named here —
   `unfold r` for Steps 1 and 2, `update r` for Step 3, `empty` for
   `emptyModality`, `intro` for a precondition.  Put the cursor after an `apply`
-  to see the next line as a sequent `dl{ Γ ⟹ φ }`.  `apply close` leaves the
+  to see the next line as a sequent `dl{ Γ ⟹ φ }`.  `refine close ?_` leaves the
   calculus; the `sol_symex` after it runs nothing, it only normalises the goal
   for `sol_close`.  The headline is proved both ways.
 
@@ -67,7 +67,7 @@ theorem deepFieldWrite :
   apply empty
   -- dl{ { se1 := 10 }, { sp1 := alice.account }, { storage := save(storage, sp1.balance, se1) } ⟹
   --     find(storage, alice.account.balance) = 10 }
-  apply close
+  refine close ?_
   sol_symex
   sol_close
 
@@ -84,7 +84,7 @@ theorem fieldWriteSimple : ⊨ dl!{ [ alice.age = 7; ] alice.age == 7 } := by
   apply Proves.valid
   apply update .storageFieldWriteSave
   apply empty
-  apply close
+  refine close ?_
   sol_symex
   sol_close
 
@@ -105,7 +105,7 @@ theorem deepFieldRead :
   apply update .storageFieldReadBindLocalRoot
   apply update .storageFieldReadFind
   apply empty
-  apply close
+  refine close ?_
   sol_symex
   sol_close
 
@@ -126,7 +126,7 @@ theorem deeperFieldWrite :
   apply update .storageFieldReadBindLocalRoot
   apply update .storageFieldWriteSave
   apply empty
-  apply close
+  refine close ?_
   sol_symex
   sol_close
 
@@ -147,7 +147,7 @@ theorem fieldWriteFromAlias :
   apply update .storageFieldReadBindLocalRoot
   apply update .storageFieldWriteCopySource
   apply empty
-  apply close
+  refine close ?_
   sol_symex
   sol_close
 
@@ -157,7 +157,7 @@ theorem rootRead : ⊨ dl!{ [ uint v = total; ] v == total } := by
   apply unfold .localValueDeclInitDrop
   apply update .storageRootReadSelect
   apply empty
-  apply close
+  refine close ?_
   sol_symex
   sol_close
 
@@ -170,7 +170,7 @@ theorem rootWriteFromGlobal :
   apply update .storageFieldReadFind
   apply update .storageRootWriteCopySource
   apply empty
-  apply close
+  refine close ?_
   sol_symex
   sol_close
 
@@ -184,7 +184,7 @@ theorem rootWriteFromAlias :
   apply update .storageLocalRootRebind
   apply update .storageRootWriteCopySource
   apply empty
-  apply close
+  refine close ?_
   sol_symex
   sol_close
 
@@ -203,7 +203,7 @@ theorem globalRootCopy :
   apply update .storageFieldReadBindLocalRoot
   apply update .storageFieldReadStoreRoot
   apply empty
-  apply close
+  refine close ?_
   sol_symex
   sol_close
 
@@ -229,7 +229,7 @@ theorem localRebindThenWrite :
   apply update .storageFieldReadBindLocalRoot
   apply update .storageFieldWriteSave
   apply empty
-  apply close
+  refine close ?_
   sol_symex
   sol_close
 
@@ -246,7 +246,7 @@ theorem arrayIndexRead : ⊨ dl!{ [ uint v = values[i]; ] v == values[i] } := by
   apply unfold .localValueDeclInitDrop
   apply update .storageIndexReadArrayFind
   apply empty
-  apply close
+  refine close ?_
   sol_symex
   sol_close
 
@@ -260,7 +260,7 @@ theorem arrayIndexWrite : ⊨ dl!{ [ values[i] = 100; ] values[i] == 100 } := by
   apply Proves.valid
   apply update .storageIndexWriteArraySave
   apply empty
-  apply close
+  refine close ?_
   sol_symex
   sol_close
 
@@ -270,7 +270,7 @@ theorem mappingIndexRead : ⊨ dl!{ [ uint v = balances[i]; ] v == balances[i] }
   apply unfold .localValueDeclInitDrop
   apply update .storageIndexReadMappingFind
   apply empty
-  apply close
+  refine close ?_
   sol_symex
   sol_close
 
@@ -285,7 +285,7 @@ theorem arrayIndexWriteRefSource :
   apply update .storageLocalRootRebind
   apply update .storageIndexWriteArrayCopySource
   apply empty
-  apply close
+  refine close ?_
   sol_symex
   sol_close
 
@@ -313,7 +313,7 @@ theorem nonsimplePathIndexWrite :
   apply update .localValueAssign
   apply update .storageIndexWriteArraySave
   apply empty
-  apply close
+  refine close ?_
   sol_symex
   sol_close
 
@@ -332,7 +332,7 @@ theorem nonSimpleIndexWrite : ⊨ dl!{ [ values[i + 1] = 5; ] values[i + 1] == 5
   apply update .binopAssignment
   apply update .storageIndexWriteArraySave
   apply empty
-  apply close
+  refine close ?_
   sol_symex
   sol_close
 
@@ -356,7 +356,7 @@ theorem receiverAndIndexCaptured :
   apply update .binopAssignment
   apply update .storageIndexWriteArraySave
   apply empty
-  apply close
+  refine close ?_
   sol_symex
   sol_close
 
@@ -372,7 +372,7 @@ theorem refIndexWriteNonsimpleReceiver : ⊨ dl[TestSuite]{ [ bucket.tokens[i] =
   apply update .localValueAssign
   apply update .storageIndexWriteArrayCopySource
   apply empty
-  apply close
+  refine close ?_
   sol_symex
   sol_close
 
@@ -388,7 +388,7 @@ theorem arrayPush : ⊨ dl!{ [ values.push(42); ] true } := by
   apply Proves.valid
   apply update .storagePushValueSave
   apply empty
-  apply close
+  refine close ?_
   sol_symex
   sol_close
 
@@ -397,7 +397,7 @@ theorem arrayPop : ⊨ dl!{ [ people.pop(); ] true } := by
   apply Proves.valid
   apply update .storagePopSave
   apply empty
-  apply close
+  refine close ?_
   sol_symex
   sol_close
 
@@ -414,7 +414,7 @@ theorem pushRefSource : ⊨ dl!{ [ Person storage p = bob; people.push(p); ] tru
   apply update .storageLocalRootRebind
   apply update .storagePushValueCopySource
   apply empty
-  apply close
+  refine close ?_
   sol_symex
   sol_close
 
@@ -430,7 +430,7 @@ theorem pushNonsimpleReceiver :
   apply update .storageFieldReadBindLocalRoot
   apply update .storagePushValueCopySource
   apply empty
-  apply close
+  refine close ?_
   sol_symex
   sol_close
 
@@ -443,7 +443,7 @@ theorem bucketPushBare : ⊨ dl[TestSuite]{ [ bucket.tokens.push(); ] true } := 
   apply update .storageFieldReadBindLocalRoot
   apply update .storagePushLengthSaveReferenceElement
   apply empty
-  apply close
+  refine close ?_
   sol_symex
   sol_close
 
@@ -454,7 +454,7 @@ theorem pushBare : ⊨ dl!{ [ people.push(); ] true } := by
   apply Proves.valid
   apply update .storagePushLengthSaveReferenceElement
   apply empty
-  apply close
+  refine close ?_
   sol_symex
   sol_close
 
@@ -468,7 +468,7 @@ theorem pushSlotWrite :
   apply update .storageLocalRootPushBind
   apply update .storageFieldWriteSave
   apply empty
-  apply close
+  refine close ?_
   sol_symex
   sol_close
 
@@ -478,7 +478,7 @@ theorem popAfterPush : ⊨ dl!{ [ values.push(); values.pop(); ] true } := by
   apply update .storagePushLengthSave
   apply update .storagePopSave
   apply empty
-  apply close
+  refine close ?_
   sol_symex
   sol_close
 
@@ -499,7 +499,7 @@ theorem fieldCompoundAssign :
   apply unfold .localValueDeclInitDrop
   apply update .storageFieldReadFind
   apply empty
-  apply close
+  refine close ?_
   sol_symex
   sol_close
 
@@ -525,7 +525,7 @@ theorem deepOpAssign : ⊨ dl!{ [ alice.account.balance += a; ] true } := by
   apply update .storageFieldReadBindLocalRoot
   apply update .storageFieldOpAssign
   apply empty
-  apply close
+  refine close ?_
   sol_symex
   sol_close
 
@@ -543,7 +543,7 @@ theorem arrayLength : ⊨ dl!{ [ uint n = values.length; ] n == values.length } 
   apply unfold .localValueDeclInitDrop
   apply update .storageLengthRead
   apply empty
-  apply close
+  refine close ?_
   sol_symex
   sol_close
 
@@ -557,7 +557,7 @@ theorem nestedArrayLength : ⊨ dl!{ [ uint n = matrix[0].length; ] true } := by
   apply update .storageIndexReadArrayBindLocalRoot
   apply update .storageLengthRead
   apply empty
-  apply close
+  refine close ?_
   sol_symex
   sol_close
 
@@ -574,7 +574,7 @@ theorem rootWriteThenIncrement : ⊨ dl!{ [ age = 10; age++; ] age == 11 } := by
   apply update .storageRootWriteStore
   apply update .storageRootIncrement
   apply empty
-  apply close
+  refine close ?_
   sol_symex
   sol_close
 
@@ -587,7 +587,7 @@ theorem deepIncrement : ⊨ dl!{ [ alice.account.balance++; ] true } := by
   apply update .storageFieldReadBindLocalRoot
   apply update .storageFieldIncrement
   apply empty
-  apply close
+  refine close ?_
   sol_symex
   sol_close
 
@@ -643,7 +643,7 @@ theorem addFieldOperandCaptured :
   apply update .storageFieldReadFind
   apply update .binopAssignment
   apply empty
-  apply close
+  refine close ?_
   sol_symex
   sol_close
 
@@ -663,7 +663,7 @@ theorem addResultCaptured :
   apply update .binopAssignment
   apply update .storageFieldWriteSave
   apply empty
-  apply close
+  refine close ?_
   sol_symex
   sol_close
 
@@ -679,7 +679,7 @@ theorem transferSimple : ⊨ dl!{ [ to.transfer(5); ] true } := by
   apply Proves.valid
   apply update .transferNoCallback
   apply empty
-  apply close
+  refine close ?_
   sol_symex
   sol_close
 
@@ -692,7 +692,7 @@ theorem transferRootReceiver : ⊨ dl!{ [ owner.transfer(5); ] true } := by
   apply update .storageRootReadSelect
   apply update .transferNoCallback
   apply empty
-  apply close
+  refine close ?_
   sol_symex
   sol_close
 
@@ -705,7 +705,7 @@ theorem transferAmountCaptured : ⊨ dl!{ [ to.transfer(x + 2); ] true } := by
   apply update .binopAssignment
   apply update .transferNoCallback
   apply empty
-  apply close
+  refine close ?_
   sol_symex
   sol_close
 
@@ -721,7 +721,7 @@ theorem memoryFieldIncrement : ⊨ dl!{ [ Person memory m; m.age++; ] true } := 
   apply update .memoryReferenceDeclFreshAlloc
   apply update .memoryFieldIncrement
   apply empty
-  apply close
+  refine close ?_
   sol_symex
   sol_close
 
@@ -732,7 +732,7 @@ theorem memoryFieldIncrementAssign :
   apply update .memoryReferenceDeclFreshAlloc
   apply update .memoryFieldIncrementAssignment
   apply empty
-  apply close
+  refine close ?_
   sol_symex
   sol_close
 
@@ -742,7 +742,7 @@ theorem memoryIndexIncrement : ⊨ dl!{ [ uint[] memory a; ++a[i]; ] true } := b
   apply update .memoryReferenceDeclFreshAlloc
   apply update .memoryIndexArrayIncrement
   apply empty
-  apply close
+  refine close ?_
   sol_symex
   sol_close
 
@@ -756,7 +756,7 @@ theorem memoryDeepIncrement : ⊨ dl!{ [ Person memory m; m.account.balance++; ]
   apply update .memoryFieldReadAliasRoot
   apply update .memoryFieldIncrement
   apply empty
-  apply close
+  refine close ?_
   sol_symex
   sol_close
 
@@ -767,7 +767,7 @@ theorem memoryFieldOpAssign : ⊨ dl!{ [ Person memory m; m.age /= a; ] true } :
   apply update .memoryReferenceDeclFreshAlloc
   apply update .memoryFieldOpAssign
   apply empty
-  apply close
+  refine close ?_
   sol_symex
   sol_close
 
@@ -777,7 +777,7 @@ theorem memoryIndexOpAssign : ⊨ dl!{ [ uint[] memory v; v[i] *= a; ] true } :=
   apply update .memoryReferenceDeclFreshAlloc
   apply update .memoryIndexArrayOpAssign
   apply empty
-  apply close
+  refine close ?_
   sol_symex
   sol_close
 
@@ -791,7 +791,7 @@ theorem memoryDeepOpAssign :
   apply update .memoryFieldReadAliasRoot
   apply update .memoryFieldOpAssign
   apply empty
-  apply close
+  refine close ?_
   sol_symex
   sol_close
 

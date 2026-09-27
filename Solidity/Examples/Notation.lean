@@ -206,7 +206,7 @@ theorem twoKeys : ⊢ dl!{ a != b → [ balances[a] = 1; balances[b] = 2; ] bala
   apply update .storageIndexWriteMappingSave
   apply empty
   trace_state
-  apply close
+  refine close ?_
   sol_symex
   sol_close
 

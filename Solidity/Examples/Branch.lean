@@ -80,19 +80,19 @@ theorem branchLocals : ⊢ dl!{ [ if (a == b) { x = 2; } else { x = 1; }; ] x !=
     -- dl{ { se1 := a == b }, se1 = true ⟹ [ x = 2; ] ¬x = 0 }
     apply update .localValueAssign
     apply empty
-    apply close
+    refine close ?_
     sol_symex
     sol_close
   case els =>
     -- dl{ { se1 := a == b }, se1 = false ⟹ [ x = 1; ] ¬x = 0 }
     apply update .localValueAssign
     apply empty
-    apply close
+    refine close ?_
     sol_symex
     sol_close
   case cov =>
     -- dl{ { se1 := a == b } ⟹ true }: the box owes nothing
-    apply close
+    refine close ?_
     sol_symex
     sol_close
 
@@ -130,7 +130,16 @@ example : ⊢ dl!{ [ if (a == b) { x = 2; } else { x = 1; }; ] x != 0 } := by
   apply update .binopAssignment
   apply split .ifElseSplit
   trace_state
-  all_goals (apply close; sol_symex; sol_close)
+  case thn | els =>
+    apply update .localValueAssign
+    apply empty
+    refine close ?_
+    sol_symex
+    sol_close
+  case cov =>
+    refine close ?_
+    sol_symex
+    sol_close
 
 /-! ## Under the diamond: the condition decides
 
@@ -149,19 +158,19 @@ theorem branchDiamond :
   case thn =>
     apply update .localValueAssign
     apply empty
-    apply close
+    refine close ?_
     sol_symex
     sol_close
   case els =>
     -- dl{ a = b, { se1 := a == b }, se1 = false ⟹ ⟨ x = 1; ⟩ x = 2 }
     apply update .localValueAssign
     apply empty
-    apply close
+    refine close ?_
     sol_symex
     sol_close
   case cov =>
     -- dl{ a = b, { se1 := a == b } ⟹ ¬(¬se1 = true ∧ ¬se1 = false) }
-    apply close
+    refine close ?_
     sol_symex
     sol_close
 

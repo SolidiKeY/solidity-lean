@@ -111,6 +111,8 @@ syntax:max "¬" dl_fml:50 : dl_fml
 syntax:35 dl_fml:36 " ∧ " dl_fml:35 : dl_fml
 syntax:25 dl_fml:26 " → " dl_fml:25 : dl_fml
 syntax:max dl_upd ppSpace dl_fml:50 : dl_fml
+/-- `{ havoc } φ`: `φ` after any storage, ledger and funds a callee may leave. -/
+syntax:max "{ " &"havoc" " } " dl_fml:50 : dl_fml
 /-- The diamond: `P` runs to the end, and `φ` holds after. -/
 syntax:max "⟨ " (sol_stmt "; ")* "⟩ " dl_fml:50 : dl_fml
 /-- The box: if `P` runs to the end, `φ` holds after. -/
@@ -145,6 +147,7 @@ syntax &"false" : dl_premise
 /-- An entry of a sequent's context: an update or a precondition. -/
 declare_syntax_cat dl_hyp (behavior := both)
 syntax dl_upd : dl_hyp
+syntax "{ " &"havoc" " }" : dl_hyp
 syntax dl_fml : dl_hyp
 
 /-- A formula whose names are Lean variables. -/
@@ -970,7 +973,7 @@ partial def fmlModality? : TSyntax `dl_fml → MacroM (Option Lean.Term)
   | `(dl_fml| [ $[$_:sol_stmt;]* ] $_:dl_fml) | `(dl_fml| [ $_:sol_block ] $_:dl_fml) =>
     some <$> `(Modality.box)
   | `(dl_fml| ⟨[ $[$_:sol_stmt;]* ]⟩ $_:dl_fml) => pure (some (schemaIdent "m"))
-  | `(dl_fml| $_:dl_upd $φ:dl_fml) => fmlModality? φ
+  | `(dl_fml| $_:dl_upd $φ:dl_fml) | `(dl_fml| { havoc } $φ:dl_fml) => fmlModality? φ
   | `(dl_fml| ( $φ:dl_fml )) => fmlModality? φ
   | _ => pure none
 
@@ -983,6 +986,7 @@ partial def schemaFml : TSyntax `dl_fml → MacroM Lean.Term
   | `(dl_fml| $φ:dl_fml ∧ $ψ:dl_fml) | `(dl_fml| $φ:dl_fml && $ψ:dl_fml) => do
     `(Fml.and $(← schemaFml φ) $(← schemaFml ψ))
   | `(dl_fml| $φ:dl_fml → $ψ:dl_fml) => do `(Fml.imp $(← schemaFml φ) $(← schemaFml ψ))
+  | `(dl_fml| { havoc } $φ:dl_fml) => do `(Fml.havoc $(← schemaFml φ))
   | `(dl_fml| $U:dl_upd $φ:dl_fml) => do
     let m ← match ← fmlModality? φ with
       | some m => pure m
@@ -1134,6 +1138,7 @@ def schemaTaclet (m : Lean.Term) (s : TSyntax `sol_stmt) (p : TSyntax `dl_premis
 
 def schemaHyp : TSyntax `dl_hyp → MacroM Lean.Term
   | `(dl_hyp| $U:dl_upd) => do `($(mkIdent `Solidity.Hyp.upd) $(schemaIdent "m") $(← schemaUpd [] U))
+  | `(dl_hyp| { havoc }) => `($(mkIdent `Solidity.Hyp.havoc))
   | `(dl_hyp| $φ:dl_fml) => do `($(mkIdent `Solidity.Hyp.pre) $(← schemaFml φ))
   | _ => Macro.throwUnsupported
 
@@ -1772,6 +1777,7 @@ partial def ppFml (e : Lean.Expr) : MetaM (TSyntax `dl_fml) := do
     `(dl_fml| $(← arg φ):dl_fml ∧ $ψ')
   | Fml.imp _ φ ψ => `(dl_fml| $(← arg φ):dl_fml → $(← ppFml ψ):dl_fml)
   | Fml.upd _ _ U φ => `(dl_fml| $(← ppUpd U):dl_upd $(← arg φ):dl_fml)
+  | Fml.havoc _ φ => `(dl_fml| { havoc } $(← arg φ):dl_fml)
   | Fml.modal _ m P φ =>
     let some ss ← ppProg? P |
       let some n ← fvarName? P | escape

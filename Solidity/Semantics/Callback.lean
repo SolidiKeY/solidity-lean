@@ -43,20 +43,6 @@ open Semantics
 
 variable {C : Contract}
 
-/-! ## States a callee may leave -/
-
-/-- The state after a callback: storage, ledger and funds replaced by what
-the callee left (KeY's `{storage := storageSk ‖ net := netSk ‖ selfBalance
-:= selfBalanceSk}`), the locals and memory of the caller kept. -/
-def Semantics.State.havoc (σ : State) (st : List (Name × SVal)) (nt : List (Int × Int))
-    (bal : Int) : State :=
-  { σ with storage := st, net := nt, selfBalance := bal }
-
-/-- A callee that changes nothing. -/
-@[simp] theorem Semantics.State.havoc_self (σ : State) :
-    σ.havoc σ.storage σ.net σ.selfBalance = σ := by
-  cases σ; rfl
-
 /-! ## Outcomes -/
 
 /-- How a run with callbacks ends: in a state, halted, or leaving the
@@ -113,7 +99,7 @@ end
 /-- Whether a `transfer` occurs in a program of the formula. -/
 def Fml.hasTransfer : Fml C → Bool
   | .tt | .eq .. => false
-  | .not φ | .upd _ _ φ => φ.hasTransfer
+  | .not φ | .upd _ _ φ | .havoc φ => φ.hasTransfer
   | .and φ ψ | .imp φ ψ => φ.hasTransfer || ψ.hasTransfer
   | .modal _ P φ => Prog.hasTransfer P || φ.hasTransfer
 
@@ -189,6 +175,7 @@ def holdsC (I : Fml C) (σ : State) : Fml C → Prop
   | .imp φ ψ => holdsC I σ φ → holdsC I σ ψ
   | .upd m U φ => m.after (holdsC I · φ) (U.apply σ)
   | .modal m P φ => ∀ o, ExecP I σ P o → o.after m (holdsC I · φ)
+  | .havoc φ => ∀ st nt bal, holdsC I (σ.havoc st nt bal) φ
 
 /-- Valid with callbacks: true in every state. -/
 def ValidC (I : Invariant C) (φ : Fml C) : Prop := ∀ σ, holdsC I.fml σ φ
@@ -413,6 +400,10 @@ theorem holdsC_iff_holds {I : Fml C} : (φ : Fml C) → φ.hasTransfer = false �
       cases hr : Prog.run σ P with
       | error _ => rw [hr] at H; exact H
       | ok τ => rw [hr] at H; exact (holdsC_iff_holds φ h.2).2 H
+  | .havoc φ, h, _ => by
+    simp only [holdsC, holds]
+    exact forall_congr' fun _ => forall_congr' fun _ => forall_congr' fun _ =>
+      holdsC_iff_holds φ h
 
 /-- **A modal formula true with callbacks is true without**, when its
 postcondition has no program paying: the deterministic run is among the
@@ -453,11 +444,6 @@ theorem Semantics.EnvAgreeExcept.symm' {σ τ : State} (h : EnvAgreeExcept ns σ
     EnvAgreeExcept ns τ σ :=
   ⟨h.storage.symm, h.heap.symm, h.nextId.symm, h.net.symm, fun n hn => (h.env n hn).symm,
     h.selfBalance.symm⟩
-
-theorem Semantics.EnvAgreeExcept.havoc {σ τ : State} (h : EnvAgreeExcept ns σ τ)
-    (st : List (Name × SVal)) (nt : List (Int × Int)) (bal : Int) :
-    EnvAgreeExcept ns (σ.havoc st nt bal) (τ.havoc st nt bal) :=
-  ⟨rfl, h.heap, h.nextId, rfl, h.env, rfl⟩
 
 /-- Two outcomes alike off `ns`. -/
 def COut.Agree (ns : List Var) : COut → COut → Prop
@@ -606,6 +592,10 @@ theorem holdsC_frame {I : Fml C} (hI : I.vars = []) :
     · intro H o he
       obtain ⟨o', he', hag'⟩ := ExecP.frame hI he h.left hag.symm'
       exact (hag'.after m fun _ _ h' => holdsC_frame hI φ h.right h').1 (H o' he')
+  | .havoc φ, h, _, _, hag => by
+    simp only [holdsC]
+    exact forall_congr' fun st => forall_congr' fun nt => forall_congr' fun bal =>
+      holdsC_frame hI φ h (hag.havoc st nt bal)
 
 end Frame
 

@@ -55,7 +55,7 @@ two updates.  A variable read at another sort than `U` binds it
 The rules are optional: nothing else uses them.  They are used through
 `Fml.simpUpds` (merge every stack, drop what is dead), the tactics
 `sol_merge` and `sol_upd r` on `⊨` goals, and `Proves.merge` and
-`Proves.simplify` on `⊢` goals.
+`Proves.simplify` on `⊢` goals with no modality left.
 -/
 
 namespace Solidity
@@ -1039,6 +1039,7 @@ def Fml.updAt (r : UpdRuleName) : Fml C → Option (Fml C)
     | some φ' => some (.imp φ' ψ)
     | none => (ψ.updAt r).map (.imp φ)
   | .modal m P φ => (φ.updAt r).map (.modal m P)
+  | .havoc φ => (φ.updAt r).map .havoc
   | .tt | .eq .. => none
 
 /-- Two postconditions that hold in the same states hold after the same run:
@@ -1088,6 +1089,11 @@ theorem Fml.updAt_sound {r : UpdRuleName} :
     simp only [Fml.updAt, Option.map_eq_some_iff] at h
     obtain ⟨φ', h', rfl⟩ := h
     exact m.after_congr (fun τ => Fml.updAt_sound φ h' τ) _
+  | .havoc φ, ψ, h, σ => by
+    simp only [Fml.updAt, Option.map_eq_some_iff] at h
+    obtain ⟨φ', h', rfl⟩ := h
+    exact forall_congr' fun _ => forall_congr' fun _ => forall_congr' fun _ =>
+      Fml.updAt_sound φ h' _
   | .tt, _, h, _ | .eq .., _, h, _ => by simp [Fml.updAt] at h
 
 /-! ## All of them: `Fml.simpUpds`
@@ -1115,6 +1121,7 @@ def Fml.simpUpds : Fml C → Fml C
   | .and φ ψ => .and φ.simpUpds ψ.simpUpds
   | .imp φ ψ => .imp φ.simpUpds ψ.simpUpds
   | .modal m P φ => .modal m P φ.simpUpds
+  | .havoc φ => .havoc φ.simpUpds
   | φ => φ
 
 /-- `Fml.clean m U φ` holds exactly when `{U} φ` does.
@@ -1164,14 +1171,19 @@ theorem Fml.simpUpds_holds : (φ : Fml C) → ∀ σ, (holds σ φ.simpUpds ↔ 
   | .modal m P φ, σ => by
     simp only [Fml.simpUpds, holds]
     exact m.after_congr (fun τ => Fml.simpUpds_holds φ τ) _
+  | .havoc φ, σ => by
+    simp only [Fml.simpUpds, holds]
+    exact forall_congr' fun _ => forall_congr' fun _ => forall_congr' fun _ =>
+      Fml.simpUpds_holds φ _
   | .tt, _ | .eq .., _ => Iff.rfl
 
 /-! ## In a derivation: `Proves.merge`, `Proves.simplify`
 
 Under `⊢` the updates sit in the context, the latest last.  These two
 lemmas rewrite the last two, or the last one, as `sequentialToParallel` and
-`simplifyUpdate` do.  They are not constructors of `Proves`: each is proved
-from `Proves.sound` and closes with `Proves.close`. -/
+`simplifyUpdate` do, once no modality is left in the sequent.  They are not
+constructors of `Proves`: each is proved from `Proves.sound` and closes with
+`Proves.close`, which is why they wait for the modalities to be gone. -/
 
 /-- Under `⊢`, the last two updates of the context merge into one parallel
 update, the first substituted into the second, when the first writes only
@@ -1180,14 +1192,15 @@ locals.
 Example: for `x = 1; y = x;` the context `{ x := 1 }, { y := x }` becomes
 `{ x := 1 ‖ y := 1 }`. -/
 theorem Proves.merge {R : RuleSet} {Γ : List (Hyp C)} {m : Modality} {U V : Upd C} {φ : Fml C}
-    (hU : U.envOnly = true) (h : Proves R (Γ ++ [.upd m (U ++ V.subst U)]) φ) :
+    (hU : U.envOnly = true) (h : Proves R (Γ ++ [.upd m (U ++ V.subst U)]) φ)
+    (hφ : (Hyp.wrap (Γ ++ [.upd m U] ++ [.upd m V]) φ).modalFree = true := by first | rfl | decide) :
     Proves R (Γ ++ [.upd m U] ++ [.upd m V]) φ :=
-  .close fun σ => by
+  .close (fun σ => by
     have := h.sound σ
     simp only [List.append_assoc, List.cons_append, List.nil_append, Hyp.wrap_append,
       Hyp.wrap] at this ⊢
     exact Hyp.wrap_mono (fun τ hτ => ((UpdRule.sequentialToParallel (V := V) (φ := φ) hU).sound τ).1 hτ)
-      Γ σ this
+      Γ σ this) hφ
 
 /-- Under `⊢`, the effectless elements of the last update can be dropped.
 
@@ -1195,11 +1208,13 @@ Example: for `alice.account.balance = 10;`, the context
 `{ se1 := 10 ‖ sp1 := alice.account ‖ storage := save(storage, alice.account.balance, 10) }`
 becomes `{ storage := save(storage, alice.account.balance, 10) }`. -/
 theorem Proves.simplify {R : RuleSet} {Γ : List (Hyp C)} {m : Modality} {U : Upd C} {φ : Fml C}
-    (h : Proves R (Γ ++ [.upd m (U.dropEffectless φ.vars)]) φ) : Proves R (Γ ++ [.upd m U]) φ :=
-  .close fun σ => by
+    (h : Proves R (Γ ++ [.upd m (U.dropEffectless φ.vars)]) φ)
+    (hφ : (Hyp.wrap (Γ ++ [.upd m U]) φ).modalFree = true := by first | rfl | decide) :
+    Proves R (Γ ++ [.upd m U]) φ :=
+  .close (fun σ => by
     have := h.sound σ
     simp only [Hyp.wrap_append, Hyp.wrap] at this ⊢
-    exact Hyp.wrap_mono (fun τ hτ => (Upd.dropEffectless_holds m U φ τ).1 hτ) Γ σ this
+    exact Hyp.wrap_mono (fun τ hτ => (Upd.dropEffectless_holds m U φ τ).1 hτ) Γ σ this) hφ
 
 /-! ## Tactics -/
 

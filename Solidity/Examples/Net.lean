@@ -43,7 +43,7 @@ theorem transferFrameStorage :
   apply unfold .localValueDeclInitDrop
   apply update .storageFieldReadFind
   apply empty
-  apply close
+  refine close ?_
   sol_symex
   sol_close
 
@@ -60,7 +60,7 @@ theorem transferFrameRoot :
   apply update .storageRootReadSelect
   apply update .transferNoCallback
   apply empty
-  apply close
+  refine close ?_
   sol_symex
   sol_close
 

@@ -41,7 +41,7 @@ theorem storageToMemoryRootCopy :
   apply unfold .localValueDeclInitDrop
   apply update .memoryFieldReadHeap
   apply empty
-  apply close
+  refine close ?_
   sol_symex
   sol_close
 
@@ -66,7 +66,7 @@ theorem storageToMemoryMemberCopy :
   apply unfold .localValueDeclInitDrop
   apply update .memoryFieldReadHeap
   apply empty
-  apply close
+  refine close ?_
   sol_symex
   sol_close
 
@@ -97,7 +97,7 @@ theorem storageToMemoryNonsimplePath :
   apply unfold .localValueDeclInitDrop
   apply update .memoryFieldReadHeap
   apply empty
-  apply close
+  refine close ?_
   sol_symex
   sol_close
 
@@ -144,7 +144,7 @@ theorem memoryToStorageRootCopy :
   apply unfold .localValueDeclInitDrop
   apply update .storageFieldReadFind
   apply empty
-  apply close
+  refine close ?_
   sol_symex
   sol_close
 
@@ -168,7 +168,7 @@ theorem memoryToStorageFromAlias :
   apply update .storageFieldReadBindLocalRoot
   apply update .storageFieldReadFind
   apply empty
-  apply close
+  refine close ?_
   sol_symex
   sol_close
 
@@ -192,7 +192,7 @@ theorem memoryToStorageFromMemberSource :
   apply update .storageFieldReadBindLocalRoot
   apply update .storageFieldReadFind
   apply empty
-  apply close
+  refine close ?_
   sol_symex
   sol_close
 
@@ -225,7 +225,7 @@ theorem memoryToStorageNonsimplePath :
   apply update .storageFieldReadBindLocalRoot
   apply update .storageFieldReadFind
   apply empty
-  apply close
+  refine close ?_
   sol_symex
   sol_close
 

@@ -71,17 +71,17 @@ example : ⊨ dl!{ [ age = amount; ] age == amount } := by
   sol_symex
   sol_close
 
-/-! ## After `apply close` -/
+/-! ## After `refine close ?_` -/
 
 example : ⊢ dl!{ a == 1 → a == 1 } := by
   apply intro
-  apply close
+  refine close ?_
   sol_close
 
 example : ⊢ dl!{ [ x = 1; ] x == 1 } := by
   apply update .localValueAssign
   apply empty
-  apply close
+  refine close ?_
   sol_close
 
 /-- Each goal of a split, closed with no `sol_symex`. -/
@@ -94,15 +94,15 @@ example : ⊢ dl!{ a == b → ⟨ if (a == b) { x = 2; } else { x = 1; }; ⟩ x 
   case thn =>
     apply update .localValueAssign
     apply empty
-    apply close
+    refine close ?_
     sol_close
   case els =>
     apply update .localValueAssign
     apply empty
-    apply close
+    refine close ?_
     sol_close
   case cov =>
-    apply close
+    refine close ?_
     sol_close
 
 /-- With no goal left, `sol_close` does nothing. -/

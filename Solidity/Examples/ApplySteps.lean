@@ -17,8 +17,12 @@ rule at a time with `apply` — the way PLFA builds a typing derivation
 * `done r` — the taclet `r` closes the modality (`revertBox` to `true`,
   `revertDiamond` to `false`; `Revert.lean`);
 * `empty` — `⟨⟩ φ` (or `[] φ`) is `φ`;
-* `close` — leave the calculus: what is left is `⊨ Γ → φ`, for `sol_symex`
-  and `sol_close`.
+* `close` — leave the calculus once no modality is left: what is left is
+  `⊨ Γ → φ`, for `sol_symex` and `sol_close` (`refine close ?_`, which checks
+  that no modality is left).
+
+`sol_derive` runs the strategy as such a derivation: the rule `Stmt.step`
+picks at every goal, until only `close` is left.
 
 `r` is a constructor of the taclet judgement `Taclet C k m s p`, named as
 solkey names the rule; hover it to see its taclet.  Unification matches its
@@ -55,19 +59,19 @@ theorem guardedCopy : ⊢ dl!{ a == 1 → ⟨ uint x = a; require(x == 1); ⟩ x
   case thn =>
     -- dl{ …, se1 = true ⟹ ⟨ ⟩ x = 1 }
     apply empty
-    apply close
+    refine close ?_
     sol_symex
     sol_close
   case els =>
     -- dl{ …, se1 = false ⟹ ⟨ revert(); ⟩ x = 1 }
     apply done .revertDiamond
     -- dl{ …, se1 = false ⟹ false }: `a = 1` and `x == 1` false contradict
-    apply close
+    refine close ?_
     sol_symex
     sol_close
   case cov =>
     -- dl{ a = 1, { x := a }, { se1 := x == 1 } ⟹ ¬(¬se1 = true ∧ ¬se1 = false) }
-    apply close
+    refine close ?_
     sol_symex
     sol_close
 
@@ -88,7 +92,7 @@ example : ⊢ dl!{ [ alice.age = 10; revert(); ] true } := by
   apply update .storageFieldWriteSave
   fail_if_success apply done .revertDiamond
   apply done .revertBox
-  apply close
+  refine close ?_
   sol_symex
   sol_close
 
@@ -108,14 +112,16 @@ theorem deepFieldWriteStep2 :
   apply unfold .storageFieldWrite_unfold_leftFst
   -- dl{ ⟹ [ uint se1 = 10; Account storage sp1 = alice.account; sp1.balance = se1; ]
   --       find(storage, alice.account.balance) = 10 }
-  apply close
+  sol_derive
+  refine close ?_
   sol_symex
   sol_close
 
-/-- The strategy takes the long way round. -/
+/-- The strategy takes the long way round, as a derivation (`sol_derive`). -/
 theorem deepFieldWriteStrategy :
     ⊢ dl!{ [ alice.account.balance = 10; ] alice.account.balance == 10 } := by
-  apply close
+  sol_derive
+  refine close ?_
   sol_symex
   sol_close
 

@@ -92,18 +92,18 @@ theorem requireBox : ⊢ dl!{ [ require(a == b); x = a; ] x == b } := by
     -- dl{ { se1 := a == b }, se1 = true ⟹ [ x = a; ] x = b }
     apply update .localValueAssign
     apply empty
-    apply close
+    refine close ?_
     sol_symex
     sol_close
   case els =>
     -- dl{ { se1 := a == b }, se1 = false ⟹ [ revert(); x = a; ] x = b }
     apply done .revertBox
     -- dl{ { se1 := a == b }, se1 = false ⟹ true }
-    apply close
+    refine close ?_
     sol_symex
     sol_close
   case cov =>
-    apply close
+    refine close ?_
     sol_symex
     sol_close
 
@@ -124,18 +124,18 @@ theorem requireDiamond : ⊢ dl!{ a == b → ⟨ require(a == b); x = a; ⟩ x =
   case thn =>
     apply update .localValueAssign
     apply empty
-    apply close
+    refine close ?_
     sol_symex
     sol_close
   case els =>
     apply done .revertDiamond
     -- dl{ a = b, { se1 := a == b }, se1 = false ⟹ false }: the context is contradictory
-    apply close
+    refine close ?_
     sol_symex
     sol_close
   case cov =>
     -- dl{ a = b, { se1 := a == b } ⟹ ¬(¬se1 = true ∧ ¬se1 = false) }
-    apply close
+    refine close ?_
     sol_symex
     sol_close
 
@@ -180,7 +180,7 @@ trace: ⊢ dl{ ⟹ true }
 theorem revertDropsRest : ⊢ dl!{ [ revert(); total = 5; ] total == 7 } := by
   apply done .revertBox
   trace_state
-  apply close
+  refine close ?_
   exact fun _ => trivial
 
 /-- The diamond of a revert is never true, whatever the postcondition. -/
@@ -190,7 +190,7 @@ example : ¬ (⊨ dl!{ ⟨ revert(); ⟩ true }) := fun h => h Semantics.State.e
 example : ⊢ dl!{ [ revert(); ] true } := by
   fail_if_success apply done .revertDiamond
   apply done .revertBox
-  apply close
+  refine close ?_
   exact fun _ => trivial
 
 /-! ## Under `if`: a revert in one branch
@@ -207,17 +207,17 @@ theorem branchBox : ⊢ dl!{ [ if (a == b) { x = 1; } else { revert(); }; ] x ==
   case thn =>
     apply update .localValueAssign
     apply empty
-    apply close
+    refine close ?_
     sol_symex
     sol_close
   case els =>
     -- dl{ { se1 := a == b }, se1 = false ⟹ [ revert(); ] x = 1 }
     apply done .revertBox
-    apply close
+    refine close ?_
     sol_symex
     sol_close
   case cov =>
-    apply close
+    refine close ?_
     sol_symex
     sol_close
 
@@ -232,17 +232,17 @@ theorem branchDiamond :
   case thn =>
     apply update .localValueAssign
     apply empty
-    apply close
+    refine close ?_
     sol_symex
     sol_close
   case els =>
     -- dl{ a = b, { se1 := a == b }, se1 = false ⟹ ⟨ revert(); ⟩ x = 1 }
     apply done .revertDiamond
-    apply close
+    refine close ?_
     sol_symex
     sol_close
   case cov =>
-    apply close
+    refine close ?_
     sol_symex
     sol_close
 
@@ -267,7 +267,7 @@ theorem transferBox : ⊢ dl!{ [ to.transfer(5); ] true } := by
   apply update .transferNoCallback
   -- dl{ { transfer(to, 5) } ⟹ [ ] true }
   apply empty
-  apply close
+  refine close ?_
   sol_symex
   sol_close
 

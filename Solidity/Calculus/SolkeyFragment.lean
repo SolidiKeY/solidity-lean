@@ -52,7 +52,7 @@ end
 /-- Every program under a modality of `φ` is in the fragment. -/
 def Fml.inSolkey : Fml C → Bool
   | .tt | .eq .. => true
-  | .not φ | .upd _ _ φ => φ.inSolkey
+  | .not φ | .upd _ _ φ | .havoc φ => φ.inSolkey
   | .and φ ψ | .imp φ ψ => φ.inSolkey && ψ.inSolkey
   | .modal _ P φ => Prog.inSolkey P && φ.inSolkey
 
@@ -162,7 +162,7 @@ theorem Proves.toSolkey {R : RuleSet} {Γ : List (Hyp C)} {φ : Fml C} (h : Prov
   | done d _ ih =>
     exact .done d (ih (by rename_i b _; cases b <;> rfl))
   | empty _ ih => exact .empty (ih (by simp_all [Fml.inSolkey]))
-  | close h => exact .close h
+  | close h hm => exact .close h hm
 
 /-- On the fragment, solkey's rules derive exactly what the calculus does. -/
 theorem Proves.solkey_iff {Γ : List (Hyp C)} {φ : Fml C} (hφ : φ.inSolkey = true) :
@@ -182,5 +182,68 @@ example : (Stmt.call (C := C) "f" [⟨.uint, .user "a", .binop .add rfl rfl
 
 example : (Stmt.call (C := C) "f" [⟨.uint, .user "a", .simple (.local (.user "x"))⟩] rfl
     .none []).inSolkey = true := rfl
+
+/-! ## Off the fragment the two differ
+
+`Proves.solkey_iff` needs its hypothesis: `[ f(x + 1); ] true` is derived by
+the calculus (the capture, then the call) and not by solkey's rules, which
+have no rule for the call and may not leave for the logic while a modality
+is left (`close`). -/
+
+set_option maxHeartbeats 4000000 in
+/-- The one taclet of solkey's that fires on a call, `functionBodyExpand`,
+asks every argument to be simple. -/
+theorem Taclet.call_simple {s : Stmt C} {p : Premise C} (d : Taclet C k m s p) :
+    ∀ {f args hsep ret body}, s = .call f args hsep ret body → Arg.firstNonSimple args = none := by
+  cases d <;> (try cases ‹Hole _ _›) <;> (try cases ‹MHole _ _›) <;> (try cases ‹VHole _ _›) <;>
+    intro _ _ _ _ _ h <;> cases h <;> assumption
+
+/-- A sequent with no modality has none in its formula. -/
+theorem Hyp.modalFree_wrap {φ : Fml C} :
+    (Γ : List (Hyp C)) → (Hyp.wrap Γ φ).modalFree = true → φ.modalFree = true
+  | [], h => h
+  | .pre _ :: Γ, h => by
+    simp only [Hyp.wrap, Fml.modalFree, Bool.and_eq_true] at h
+    exact Hyp.modalFree_wrap Γ h.2
+  | .upd _ _ :: Γ, h | .havoc :: Γ, h => Hyp.modalFree_wrap Γ h
+
+/-- **solkey's rules derive nothing about a call whose argument is not
+simple**, in any context. -/
+theorem Proves.solkey_not_call {Γ : List (Hyp C)} {f : Name} {args : List (Arg C)}
+    {hsep : Arg.separatedFrom [] args = true} {ret : CallRet} {body ω : Prog C} {φ : Fml C}
+    {a : Arg C} (ha : Arg.firstNonSimple args = some a) :
+    ¬ Proves .solkey Γ (.modal m (.call f args hsep ret body :: ω) φ) := by
+  intro h
+  cases h with
+  | update d _ | unfold d _ | split d _ _ _ | done d _ => simp [d.call_simple rfl] at ha
+  | close _ hm => exact absurd (Hyp.modalFree_wrap Γ hm) (by simp [Fml.modalFree])
+
+/-- `[ f(x + 1); ] true`, `f(uint a)` with an empty body: a call whose
+argument is not simple. -/
+def captureCall : Fml C :=
+  .modal .box [.call "f" [⟨.uint, .user "a", .binop .add rfl rfl
+    (.simple (.local (.user "x"))) (.simple (.lit 1 rfl))⟩] rfl .none []] .tt
+
+open Proves in
+/-- The calculus derives it: the capture, then the call. -/
+theorem captureCall_derived : ⊢ (captureCall : Fml C) := by
+  apply unfoldLean .functionCallArgCapture   -- uint se = x + 1; f(se);
+  apply unfold .localValueDeclInitDrop
+  apply update .binopAssignment
+  apply unfold .functionBodyExpand          -- uint a = se;
+  apply unfold .localValueDeclInitDrop
+  apply update .localValueAssign
+  apply empty
+  refine close fun σ => ?_
+  simp only [Hyp.wrap, List.nil_append, List.cons_append, holds]
+  cases Upd.apply _ σ <;> simp only [Modality.after, Modality.onHalt] <;>
+    (try cases Upd.apply _ _) <;> trivial
+
+open Proves in
+/-- **Off the fragment solkey's rules fall short**: the calculus derives
+`[ f(x + 1); ] true`, solkey's rules do not.  So `Proves.solkey_iff` needs
+its hypothesis. -/
+theorem Proves.solkey_lt_calculus : ∃ φ : Fml C, (⊢ φ) ∧ ¬ (⊢ₖ φ) :=
+  ⟨captureCall, captureCall_derived, Proves.solkey_not_call rfl⟩
 
 end Solidity

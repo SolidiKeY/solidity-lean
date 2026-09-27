@@ -706,7 +706,7 @@ def _root_.Solidity.Fml.toL : Sym → Fml C → LFml
   | ρ, .imp φ ψ => .imp (φ.toL ρ) (ψ.toL ρ)
   | ρ, .upd _ [] φ => φ.toL ρ
   | ρ, .upd m [e] φ => guardM m (e.toL ρ).1 (φ.toL (e.toL ρ).2)
-  | _, .upd _ (_ :: _ :: _) _ | _, .modal .. => .tt
+  | _, .upd _ (_ :: _ :: _) _ | _, .modal .. | _, .havoc _ => .tt
 
 /-- The fragment `Fml.toL` is exact on: no modality, one element per update,
 no memory, no push or pop, no copy between locations, and every alias bound
@@ -718,7 +718,7 @@ def _root_.Solidity.Fml.inL : Sym → Fml C → Bool
   | ρ, .and φ ψ | ρ, .imp φ ψ => φ.inL ρ && ψ.inL ρ
   | ρ, .upd _ [] φ => φ.inL ρ
   | ρ, .upd _ [e] φ => e.inL ρ && φ.inL (e.toL ρ).2
-  | _, .upd _ (_ :: _ :: _) _ | _, .modal .. => false
+  | _, .upd _ (_ :: _ :: _) _ | _, .modal .. | _, .havoc _ => false
 
 
 /-! ### The updates pushed in keep the meaning -/
@@ -1413,7 +1413,8 @@ theorem Fml.toL_holds :
       simp only [UpdElem.toL, lookupBy_onWrite]
       exact (h.env y).onWrite rfl
     | mref _ _ | memory _ | transfer _ _ => simp [UpdElem.inL] at hf
-  | .upd _ (_ :: _ :: _) _, _, _, _, _, hf | .modal .., _, _, _, _, hf => by simp [Fml.inL] at hf
+  | .upd _ (_ :: _ :: _) _, _, _, _, _, hf | .modal .., _, _, _, _, hf | .havoc _, _, _, _, _, hf => by
+    simp [Fml.inL] at hf
 
 /-- `⊨ φ` is the formula with its updates pushed in, true in every state. -/
 theorem Fml.valid_iff_toL (φ : Fml C) (hf : φ.inL Sym.empty = true) :

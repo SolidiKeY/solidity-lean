@@ -55,7 +55,7 @@ theorem callAddOneWalk : ⊨ dl!{ [ uint y = addOne(4); ] y == 5 } := by
   apply update .binopAssignment      -- r' = x' + 1;
   apply update .localValueAssign     -- y = r';
   apply empty
-  apply close
+  refine close ?_
   sol_symex
   sol_close
 
@@ -85,7 +85,8 @@ theorem callCapture : ⊨ dl!{ x == 1 → ⟨ uint y = addOne(x + 1); ⟩ y == 3
   sol_symex
   sol_close
 
-/-- The same, one rule at a time: the capture, its declaration, the call. -/
+/-- The same, one rule at a time: the capture, its declaration, the call,
+the body. -/
 theorem callCaptureWalk : ⊨ dl!{ x == 1 → [ uint y = addOne(x + 1); ] y == 3 } := by
   apply Proves.valid
   apply intro
@@ -93,8 +94,14 @@ theorem callCaptureWalk : ⊨ dl!{ x == 1 → [ uint y = addOne(x + 1); ] y == 3
   apply unfoldLean .functionCallArgCapture   -- y = addOne(x + 1);  ⇝  uint se = x + 1; y = addOne(se);
   apply unfold .localValueDeclInitDrop
   apply update .binopAssignment
-  apply unfold .functionBodyExpand
-  apply close
+  apply unfold .functionBodyExpand       -- uint x' = se; uint r'; r' = x' + 1; y = r';
+  apply unfold .localValueDeclInitDrop
+  apply update .localValueAssign
+  apply update .valueDeclSkip
+  apply update .binopAssignment
+  apply update .localValueAssign
+  apply empty
+  refine close ?_
   sol_symex
   sol_close
 

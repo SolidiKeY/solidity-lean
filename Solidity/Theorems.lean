@@ -67,7 +67,9 @@ abbrev DoesAs {C : Contract} (p : Premise C) (k : Nat) (m : Modality) (s : Stmt 
 /-- `k ♯ s`: the names a rule numbers `k` are fresh for `s`. -/
 abbrev FreshFor {C : Contract} (k : Nat) (s : Stmt C) : Prop := Avoids s.vars (freshVars k)
 
-/-- No modality left: what symbolic execution ends in, a first-order formula. -/
+/-- No modality left to run: what symbolic execution ends in.  The strategy
+runs modalities in positive positions only, so one under `¬` or left of `→`
+may remain (`Fml.active`). -/
 abbrev FirstOrder {C : Contract} (φ : Fml C) : Prop := φ.active = false
 
 /-- Membership in solkey's fragment, for statements, programs and formulas. -/
@@ -149,7 +151,8 @@ theorem rule_unique (d : s ⇝[k, m] p) (d' : s ⇝[k, m] p') : p = p' :=
 
 /-! ## The calculus -/
 
-/-- **Soundness**: what the calculus derives is valid. -/
+/-- **Soundness**: what the calculus derives is valid.  A derivation leaves
+for the logic (`close`) only once no modality is left in its sequent. -/
 theorem soundness : Γ ⊢ φ → Γ ⊨ φ :=
   Proves.sound
 
@@ -167,13 +170,20 @@ derived at all. -/
 theorem solkey_eq_calculus (h : φ ∈ SolKey) : (⊢ₖ φ) ↔ (⊢ φ) :=
   Proves.solkey_iff h
 
+/-- **Off the fragment they differ**: `[ f(x + 1); ] true` is derived by the
+calculus and not by solkey's rules, so `solkey_eq_calculus` needs its
+hypothesis. -/
+theorem solkey_lt_calculus : ∃ φ : Fml C, (⊢ φ) ∧ ¬ (⊢ₖ φ) :=
+  Proves.solkey_lt_calculus
+
 /-- **On the fragment, solkey has the rule**: the rule the strategy fires is
 one of solkey's. -/
 theorem solkey_rule_exists (h : s ∈ SolKey) : s ⇝ₖ[k, m] (s.step k m).premise :=
   Stmt.step_taclet h
 
 /-- **With callbacks**: when every `transfer` may call back into a contract
-with invariant `I`, what that calculus derives is valid for that reading. -/
+with invariant `I`, what that calculus derives is valid for that reading.  Its
+callback rule has two sequents as premises, the second after a `{havoc}`. -/
 theorem callback_soundness {I : Invariant C} : ⊢[I] φ → ⊨[I] φ :=
   ProvesC.valid
 

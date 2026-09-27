@@ -44,7 +44,7 @@ theorem deleteField : ⊨ dl!{ [ delete alice.account; ] true } := by
   apply Proves.valid
   apply update .storageFieldDelete
   apply empty
-  apply close
+  refine close ?_
   sol_symex
   sol_close
 
@@ -63,7 +63,7 @@ theorem deleteDeepField : ⊨ dl!{ [ delete alice.account.token; ] true } := by
   apply update .storageFieldReadBindLocalRoot
   apply update .storageFieldDelete
   apply empty
-  apply close
+  refine close ?_
   sol_symex
   sol_close
 
@@ -74,7 +74,7 @@ theorem deleteIndex : ⊨ dl!{ [ delete people[i]; ] true } := by
   apply Proves.valid
   apply update .storageIndexArrayDelete
   apply empty
-  apply close
+  refine close ?_
   sol_symex
   sol_close
 
@@ -87,7 +87,7 @@ theorem deleteNonSimpleIndex : ⊨ dl!{ [ delete people[i + 1]; ] true } := by
   apply update .binopAssignment
   apply update .storageIndexArrayDelete
   apply empty
-  apply close
+  refine close ?_
   sol_symex
   sol_close
 
@@ -103,7 +103,7 @@ theorem deleteThenRead :
   apply unfold .localValueDeclInitDrop
   apply update .storageRootReadSelect
   apply empty
-  apply close
+  refine close ?_
   sol_symex
   sol_close
 
@@ -156,7 +156,7 @@ theorem deleteThenReadBeside :
   apply unfold .localValueDeclInitDrop
   apply update .storageFieldReadFind
   apply empty
-  apply close
+  refine close ?_
   sol_symex
   sol_close
 

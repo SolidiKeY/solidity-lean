@@ -56,7 +56,7 @@ theorem memoryDeclFreshAlloc :
   apply unfold .localValueDeclInitDrop
   apply update .memoryFieldReadHeap
   apply empty
-  apply close
+  refine close ?_
   sol_symex
   sol_close
 
@@ -75,7 +75,7 @@ theorem memoryDeclAlias :
   apply unfold .localValueDeclInitDrop
   apply update .memoryFieldReadHeap
   apply empty
-  apply close
+  refine close ?_
   sol_symex
   sol_close
 
@@ -104,7 +104,7 @@ theorem memoryDeclDeepAlias :
   apply update .memoryFieldReadAliasRoot
   apply update .memoryFieldReadHeap
   apply empty
-  apply close
+  refine close ?_
   sol_symex
   sol_close
 
@@ -136,7 +136,7 @@ theorem memoryDeepFieldWrite :
   apply update .memoryFieldReadAliasRoot
   apply update .memoryFieldReadHeap
   apply empty
-  apply close
+  refine close ?_
   sol_symex
   sol_close
 
@@ -153,7 +153,7 @@ theorem memoryFieldWriteCapturedRhs :
   apply unfold .localValueDeclInitDrop
   apply update .memoryFieldReadHeap
   apply empty
-  apply close
+  refine close ?_
   sol_symex
   sol_close
 
@@ -177,7 +177,7 @@ theorem memoryAliasWrite :
   apply update .memoryFieldReadAliasRoot
   apply update .memoryFieldReadHeap
   apply empty
-  apply close
+  refine close ?_
   sol_symex
   sol_close
 
@@ -200,7 +200,7 @@ theorem memoryFieldCopy :
   apply update .memoryReferenceDeclFreshAlloc
   apply update .memoryFieldWriteCopy
   apply empty
-  apply close
+  refine close ?_
   sol_symex
   sol_close
 
@@ -218,7 +218,7 @@ theorem memoryRootAssign :
   apply unfold .localValueDeclInitDrop
   apply update .memoryFieldReadHeap
   apply empty
-  apply close
+  refine close ?_
   sol_symex
   sol_close
 
@@ -244,7 +244,7 @@ theorem memoryRootRebind :
   apply update .memoryFieldReadAliasRoot
   apply update .memoryFieldReadHeap
   apply empty
-  apply close
+  refine close ?_
   sol_symex
   sol_close
 
@@ -262,7 +262,7 @@ theorem memoryArrayAlloc : ⊨ dl!{ [ uint[] memory v; ] true } := by
   apply Proves.valid
   apply update .memoryReferenceDeclFreshAlloc
   apply empty
-  apply close
+  refine close ?_
   sol_symex
   sol_close
 
@@ -277,7 +277,7 @@ theorem memoryArrayWriteRead :
   apply unfold .localValueDeclInitDrop
   apply update .memoryIndexReadHeap
   apply empty
-  apply close
+  refine close ?_
   sol_symex
   sol_close
 
@@ -306,7 +306,7 @@ theorem memoryNestedArrayWrite :
   apply update .memoryIndexReadAliasRoot
   apply update .memoryFieldReadHeap
   apply empty
-  apply close
+  refine close ?_
   sol_symex
   sol_close
 
@@ -329,7 +329,7 @@ theorem memoryArrayWriteRefSource :
   apply update .memoryIndexReadAliasRoot
   apply update .memoryFieldReadHeap
   apply empty
-  apply close
+  refine close ?_
   sol_symex
   sol_close
 
@@ -363,7 +363,7 @@ theorem memoryFieldWriteFromArrayElem :
   apply update .memoryFieldReadAliasRoot
   apply update .memoryFieldReadHeap
   apply empty
-  apply close
+  refine close ?_
   sol_symex
   sol_close
 
@@ -391,7 +391,7 @@ theorem memoryDeclFromNestedArrayElem :
   apply update .memoryIndexReadAliasRoot
   apply update .memoryFieldReadHeap
   apply empty
-  apply close
+  refine close ?_
   sol_symex
   sol_close
 
@@ -465,7 +465,7 @@ theorem memoryRootDelete :
   apply unfold .localValueDeclInitDrop
   apply update .memoryFieldReadHeap
   apply empty
-  apply close
+  refine close ?_
   sol_symex
   sol_close
 
@@ -482,7 +482,7 @@ theorem memoryFieldDeletePrim :
   apply unfold .localValueDeclInitDrop
   apply update .memoryFieldReadHeap
   apply empty
-  apply close
+  refine close ?_
   sol_symex
   sol_close
 
@@ -499,7 +499,7 @@ theorem memoryFieldDeleteRef :
   apply update .memoryFieldReadAliasRoot
   apply update .memoryFieldDeleteReference
   apply empty
-  apply close
+  refine close ?_
   sol_symex
   sol_close
 
@@ -517,7 +517,7 @@ theorem memoryIndexDeletePrim :
   apply unfold .localValueDeclInitDrop
   apply update .memoryIndexReadHeap
   apply empty
-  apply close
+  refine close ?_
   sol_symex
   sol_close
 
@@ -530,7 +530,7 @@ theorem memoryIndexDeleteRef :
   apply update .memoryStorageCopy
   apply update .memoryIndexDeleteReference
   apply empty
-  apply close
+  refine close ?_
   sol_symex
   sol_close
 
@@ -547,7 +547,7 @@ theorem memoryNestedIndexDelete :
   apply update .memoryFieldReadAliasRoot
   apply update .memoryIndexDeleteReference
   apply empty
-  apply close
+  refine close ?_
   sol_symex
   sol_close
 
@@ -563,7 +563,7 @@ theorem memoryIndexDeleteCapture :
   apply update .binopAssignment
   apply update .memoryIndexDeletePrimitive
   apply empty
-  apply close
+  refine close ?_
   sol_symex
   sol_close
 
@@ -611,7 +611,7 @@ theorem memoryNewArray :
   apply unfold .localValueDeclInitDrop
   apply update .memoryLengthRead
   apply empty
-  apply close
+  refine close ?_
   sol_symex
   sol_close
 
@@ -627,7 +627,7 @@ theorem memoryNewArrayCapture :
   apply update .memoryArrayFreshAlloc
   apply update .memoryIndexWriteCopy
   apply empty
-  apply close
+  refine close ?_
   sol_symex
   sol_close
 
@@ -646,7 +646,7 @@ theorem storageNewArrayCapture :
   apply update .storageFieldReadBindLocalRoot
   apply update .storageLengthRead
   apply empty
-  apply close
+  refine close ?_
   sol_symex
   sol_close
 
@@ -663,7 +663,7 @@ theorem memoryNestedLength :
   apply update .memoryFieldReadAliasRoot
   apply update .memoryLengthRead
   apply empty
-  apply close
+  refine close ?_
   sol_symex
   sol_close
 

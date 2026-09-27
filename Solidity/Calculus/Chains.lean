@@ -72,7 +72,7 @@ inductive StepRule (C : Contract) : Type where
 /-- The rule the strategy fires on a formula, fresh names at index `k`:
 `Fml.stepAt`'s choice, with its derivation. -/
 def Fml.ruleAt (k : Nat) : Fml C → Option (StepRule C)
-  | .upd _ _ φ | .imp _ φ => φ.ruleAt k
+  | .upd _ _ φ | .imp _ φ | .havoc φ => φ.ruleAt k
   | .and φ ψ => if φ.active then φ.ruleAt k else ψ.ruleAt k
   | .modal _ [] _ => some .emptyModality
   | .modal m (s :: _) _ => some (.taclet k m s (s.step k m).premise (s.step k m).rule)
@@ -87,7 +87,7 @@ Example: on `⟨ x = 1; ⟩ x == 1` both `localValueAssign` and the step to
 `{ x := 1 } ⟨⟩ x == 1` exist; on `x == 1` neither does. -/
 theorem Fml.ruleAt_isSome {k : Nat} :
     ∀ φ : Fml C, (φ.ruleAt k).isSome = (φ.stepAt k).isSome
-  | .upd _ _ φ | .imp _ φ => by simp [Fml.ruleAt, Fml.stepAt, Fml.ruleAt_isSome φ]
+  | .upd _ _ φ | .imp _ φ | .havoc φ => by simp [Fml.ruleAt, Fml.stepAt, Fml.ruleAt_isSome φ]
   | .and φ ψ => by
     simp only [Fml.ruleAt, Fml.stepAt]
     split <;> simp [Fml.ruleAt_isSome]

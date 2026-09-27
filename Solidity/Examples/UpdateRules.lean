@@ -147,11 +147,12 @@ theorem twoWrites_merge : ⊨ dl!{ [ balances[a] = 1; balances[b] = 2; ] true } 
   trace_state
   sol_close
 
-/-! ## In a derivation: `apply merge`, `apply simplify`
+/-! ## In a derivation: `merge`, `simplify`
 
 Under `⊢` the updates are in the context, the latest last.  `merge` joins
 the last two, when the first writes only locals (`rfl` checks it);
-`simplify` cleans the last one. -/
+`simplify` cleans the last one.  Both wait for the modalities to be gone:
+they are proved through `close`. -/
 
 /--
 trace: case h
@@ -162,7 +163,7 @@ trace: case h
 ⊢ dl{ { se1 := 10 ‖ sp1 := alice.account ‖ storage := save(storage, alice.account.balance, 10) } ⟹
     find(storage, alice.account.balance) = 10 }
 ---
-trace: case h.h
+trace: case h
 ⊢ dl{ { storage := save(storage, alice.account.balance, 10) } ⟹ find(storage, alice.account.balance) = 10 }
 -/
 #guard_msgs in
@@ -177,12 +178,12 @@ theorem deepFieldWriteMerged :
   apply update .storageFieldWriteSave
   apply empty
   trace_state
-  apply merge rfl
-  apply merge rfl
+  refine merge rfl ?_
+  refine merge rfl ?_
   trace_state
-  apply simplify
+  refine simplify ?_
   trace_state
-  apply close
+  refine close ?_
   sol_close
 
 end Solidity.Examples.UpdateRules

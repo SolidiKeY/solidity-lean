@@ -105,6 +105,7 @@ def Fml.quote : Fml C → Lean.Expr
   | .imp φ ψ => mkAppN (mkConst ``Fml.imp) #[c, Fml.quote φ, Fml.quote ψ]
   | .upd m U φ => mkAppN (mkConst ``Fml.upd) #[c, toExpr m, Upd.quote c U, Fml.quote φ]
   | .modal m P φ => mkAppN (mkConst ``Fml.modal) #[c, toExpr m, Prog.quote c P, Fml.quote φ]
+  | .havoc φ => mkAppN (mkConst ``Fml.havoc) #[c, Fml.quote φ]
 
 end Quote
 

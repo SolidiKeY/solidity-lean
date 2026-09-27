@@ -54,7 +54,7 @@ theorem runningExample_byHand :
   apply update .storageFieldReadFind  -- { x := find(storage, sp2.balance) }
   apply empty
   -- first order: apply the updates, then read back what was written
-  apply close
+  refine close ?_
   sol_symex
   sol_close
 
@@ -82,7 +82,7 @@ theorem aliasing :
   apply update .storageFieldReadBindLocalRoot
   apply update .storageFieldReadFind
   apply empty
-  apply close
+  refine close ?_
   sol_symex
   sol_close
 
@@ -102,7 +102,7 @@ theorem mappingFrame :
   apply unfold .localValueDeclInitDrop
   apply update .storageIndexReadMappingFind
   apply empty
-  apply close
+  refine close ?_
   sol_symex
   sol_close
 
@@ -133,7 +133,7 @@ theorem nested :
   apply update .storageFieldReadBindLocalRoot
   apply update .storageFieldReadFind
   apply empty
-  apply close
+  refine close ?_
   sol_symex
   sol_close
 

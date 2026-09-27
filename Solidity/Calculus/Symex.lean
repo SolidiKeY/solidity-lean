@@ -31,7 +31,7 @@ variable {C : Contract}
 
 /-- A modality is left: a statement to run, or a `⟨⟩` (or `[]`) to drop. -/
 def Fml.active : Fml C → Bool
-  | .upd _ _ φ | .imp _ φ => φ.active
+  | .upd _ _ φ | .imp _ φ | .havoc φ => φ.active
   | .and φ ψ => φ.active || ψ.active
   | .modal .. => true
   | _ => false
@@ -41,6 +41,7 @@ precondition and the goals of a branch; fresh names get index `k`. -/
 def Fml.stepAt (k : Nat) : Fml C → Option (Fml C)
   | .upd m U φ => (φ.stepAt k).map (.upd m U)
   | .imp a φ => (φ.stepAt k).map (.imp a)
+  | .havoc φ => (φ.stepAt k).map .havoc
   | .and φ ψ =>
     if φ.active then (φ.stepAt k).map (.and · ψ) else (ψ.stepAt k).map (.and φ)
   | .modal _ [] φ => some φ
@@ -74,6 +75,11 @@ theorem Fml.stepAt_sound {k : Nat} :
     obtain ⟨ψ', h', rfl⟩ := h
     have := maxIdx_lt_of_sub (φ := φ) (fun x hx => by simp [Fml.vars, hx]) hk
     exact fun hψ ha => Fml.stepAt_sound this h' σ (hψ ha)
+  | .havoc φ, ψ, hk, h, σ => by
+    simp only [Fml.stepAt, Option.map_eq_some_iff] at h
+    obtain ⟨ψ', h', rfl⟩ := h
+    have := maxIdx_lt_of_sub (φ := φ) (fun x hx => by simp [Fml.vars, hx]) hk
+    exact fun hψ st nt bal => Fml.stepAt_sound this h' _ (hψ st nt bal)
   | .and φ₁ φ₂, ψ, hk, h, σ => by
     have h₁ := maxIdx_lt_of_sub (φ := φ₁) (fun x hx => by simp [Fml.vars, hx]) hk
     have h₂ := maxIdx_lt_of_sub (φ := φ₂) (fun x hx => by simp [Fml.vars, hx]) hk
@@ -173,5 +179,57 @@ elab "sol_symex" : tactic => do
   let gs ← g.apply (← elabTerm (← `(symex_valid 200)) none)
   let [g'] := gs | throwError "sol_symex: unexpected goals"
   replaceMainGoal [← normValid g']
+
+
+/-! ## The strategy as a derivation
+
+`sol_symex` runs the strategy on a formula, and its soundness is
+`symex_sound`.  `sol_derive` runs it on a sequent instead: each step is a
+constructor of `Proves`, with the rule `Stmt.step` picks, so what it builds
+is a derivation, and `close` takes over only once no modality is left.  The
+three lemmas below are `Proves.unfoldRule` for the other premises; a rule
+solkey lacks only ever unfolds. -/
+
+namespace Proves
+
+variable {Γ : List (Hyp C)} {m : Modality} {s : Stmt C} {ω : Prog C} {φ : Fml C}
+
+/-- `update` by whichever rule `Rule` names. -/
+theorem updateRule {U : Upd C} (d : Rule C (Hyp.fresh Γ (.modal m (s :: ω) φ)) m s (.update U))
+    (h : Proves .all (Γ ++ [.upd m U]) (.modal m ω φ)) : Proves .all Γ (.modal m (s :: ω) φ) := by
+  rcases d with d | d
+  · exact .update d h
+  · cases d
+
+/-- `split` by whichever rule `Rule` names. -/
+theorem splitRule {c c' : Fml C} {P Q : Prog C}
+    (d : Rule C (Hyp.fresh Γ (.modal m (s :: ω) φ)) m s (.split c c' P Q))
+    (thn : Proves .all (Γ ++ [.pre c]) (.modal m (P ++ ω) φ))
+    (els : Proves .all (Γ ++ [.pre c']) (.modal m (Q ++ ω) φ))
+    (cov : Proves .all Γ (Premise.cover m c c')) : Proves .all Γ (.modal m (s :: ω) φ) := by
+  rcases d with d | d
+  · exact .split d thn els cov
+  · cases d
+
+/-- `done` by whichever rule `Rule` names. -/
+theorem doneRule {b : Bool} (d : Rule C (Hyp.fresh Γ (.modal m (s :: ω) φ)) m s (.done b))
+    (h : Proves .all Γ ((Premise.done b).fml m ω φ)) : Proves .all Γ (.modal m (s :: ω) φ) := by
+  rcases d with d | d
+  · exact .done d h
+  · cases d
+
+end Proves
+
+/-- `sol_derive`: run the strategy as a derivation.  On every goal it drops
+an empty modality, fires the rule `Stmt.step` picks (as `update`, `unfold`,
+`split` or `done`), or moves a precondition into the context, until no goal
+has a modality left; what is left is for `close`. -/
+macro "sol_derive" : tactic => `(tactic| repeat (first
+  | apply Proves.empty
+  | apply Proves.updateRule (Stmt.step _ _ _).rule
+  | apply Proves.unfoldRule (Stmt.step _ _ _).rule
+  | apply Proves.splitRule (Stmt.step _ _ _).rule
+  | apply Proves.doneRule (Stmt.step _ _ _).rule
+  | apply Proves.intro))
 
 end Solidity

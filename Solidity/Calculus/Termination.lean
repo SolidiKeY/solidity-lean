@@ -931,7 +931,7 @@ implication and a negated formula cost nothing (no rule steps inside them).
 Example: `dl!{ [ total = 1; ] total == 1 }` measures `2 ^ 4 * 1 = 16`. -/
 def Fml.measure : Fml C → Nat
   | .modal _ P φ => 2 ^ Prog.weight P * (φ.measure + 1)
-  | .upd _ _ φ | .imp _ φ => φ.measure
+  | .upd _ _ φ | .imp _ φ | .havoc φ => φ.measure
   | .and φ ψ => φ.measure + ψ.measure
   | .tt | .eq .. | .not _ => 0
 
@@ -993,7 +993,7 @@ Example: `dl!{ [ total = 1; ] total == 1 }` (measure `16`) steps to
 (measure `1`). -/
 theorem Fml.stepAt_decreases {k : Nat} :
     ∀ {φ ψ : Fml C}, φ.stepAt k = some ψ → ψ.measure < φ.measure
-  | .upd _ _ φ, _, h | .imp _ φ, _, h => by
+  | .upd _ _ φ, _, h | .imp _ φ, _, h | .havoc φ, _, h => by
     simp only [Fml.stepAt, Option.map_eq_some_iff] at h
     obtain ⟨_, h, rfl⟩ := h
     simpa [Fml.measure] using Fml.stepAt_decreases h
@@ -1040,7 +1040,8 @@ Example: `{ x := 1 } [ ] x = 1` still has the empty modality and measures
 `1`; a formula of measure `0`, such as `{ x := 1 } x = 1`, is first order. -/
 theorem Fml.measure_pos : ∀ {φ : Fml C}, φ.active = true → 0 < φ.measure
   | .modal .., _ => Nat.mul_pos (Nat.pow_pos (by decide)) (Nat.succ_pos _)
-  | .upd _ _ φ, h | .imp _ φ, h => Fml.measure_pos (φ := φ) (by simpa [Fml.active] using h)
+  | .upd _ _ φ, h | .imp _ φ, h | .havoc φ, h =>
+    Fml.measure_pos (φ := φ) (by simpa [Fml.active] using h)
   | .and φ ψ, h => by
     simp only [Fml.active, Bool.or_eq_true] at h
     rcases h with h | h <;> have := Fml.measure_pos h <;> simp only [Fml.measure] <;> omega

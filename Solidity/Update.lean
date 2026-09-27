@@ -351,6 +351,25 @@ def UpdElem.write (σ₀ : State) : UpdElem C → State → Res State
 def Upd.apply (U : Upd C) (σ : State) : Res State :=
   U.foldlM (fun τ e => e.write σ τ) σ
 
+/-! ## States a callee may leave -/
+
+/-- The state after a callback: storage, ledger and funds replaced by what
+the callee left (KeY's `{storage := storageSk ‖ net := netSk ‖ selfBalance
+:= selfBalanceSk}`), the locals and memory of the caller kept. -/
+def Semantics.State.havoc (σ : State) (st : List (Name × SVal)) (nt : List (Int × Int))
+    (bal : Int) : State :=
+  { σ with storage := st, net := nt, selfBalance := bal }
+
+/-- A callee that changes nothing. -/
+@[simp] theorem Semantics.State.havoc_self (σ : State) :
+    σ.havoc σ.storage σ.net σ.selfBalance = σ := by
+  cases σ; rfl
+
+theorem Semantics.EnvAgreeExcept.havoc {ns : List Var} {σ τ : State} (h : EnvAgreeExcept ns σ τ)
+    (st : List (Name × SVal)) (nt : List (Int × Int)) (bal : Int) :
+    EnvAgreeExcept ns (σ.havoc st nt bal) (τ.havoc st nt bal) :=
+  ⟨rfl, h.heap, h.nextId, rfl, h.env, rfl⟩
+
 /-! ## Formulas -/
 
 /-- A formula about programs of the contract `C`. -/
@@ -364,6 +383,9 @@ inductive Fml (C : Contract) where
   | upd (m : Modality) (U : Upd C) (φ : Fml C)
   /-- `⟨ P ⟩ φ` or `[ P ] φ`. -/
   | modal (m : Modality) (P : Prog C) (φ : Fml C)
+  /-- `{havoc} φ`: `φ` after any storage, ledger and funds a callee may
+  leave — KeY's anonymising update with fresh skolem symbols. -/
+  | havoc (φ : Fml C)
 
 instance : Inhabited (Fml C) := ⟨.tt⟩
 
@@ -383,9 +405,18 @@ def holds (σ : State) : Fml C → Prop
   | .imp φ ψ => holds σ φ → holds σ ψ
   | .upd m U φ => m.after (holds · φ) (U.apply σ)
   | .modal m P φ => m.after (holds · φ) (Prog.run σ P)
+  | .havoc φ => ∀ st nt bal, holds (σ.havoc st nt bal) φ
 
 /-- Valid: true in every state. -/
 def Valid (φ : Fml C) : Prop := ∀ σ, holds σ φ
+
+/-- No modality anywhere, under a negation and on the left of an implication
+included: a formula of the logic, which the calculus leaves to `Valid`. -/
+def Fml.modalFree : Fml C → Bool
+  | .tt | .eq .. => true
+  | .not φ | .upd _ _ φ | .havoc φ => φ.modalFree
+  | .and φ ψ | .imp φ ψ => φ.modalFree && ψ.modalFree
+  | .modal .. => false
 
 
 /-! ## Frames
@@ -467,6 +498,7 @@ def Fml.vars : Fml C → List Var
   | .and φ ψ | .imp φ ψ => φ.vars ++ ψ.vars
   | .upd _ U φ => Upd.vars U ++ φ.vars
   | .modal _ P φ => Prog.vars P ++ φ.vars
+  | .havoc φ => φ.vars
 
 section Frame
 
@@ -689,6 +721,10 @@ theorem holds_frame : (φ : Fml C) → Avoids φ.vars ns → ∀ {σ τ : State}
   | .modal m P φ, h, _, _, hag => by
     simp only [holds]
     exact m.after_frame (Prog.run_frame hag P h.left) fun _ _ h' => holds_frame φ h.right h'
+  | .havoc φ, h, _, _, hag => by
+    simp only [holds]
+    exact forall_congr' fun st => forall_congr' fun nt => forall_congr' fun bal =>
+      holds_frame φ h (hag.havoc st nt bal)
 
 end Frame
 
