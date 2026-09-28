@@ -604,9 +604,17 @@ def Value.toMVal : Value -> MVal
   | Value.int v => MVal.int v
   | Value.bool b => MVal.bool b
 
+/-- `2^256`, the exclusive upper bound of `uint256` (cast from `Nat`,
+where kernel arithmetic on the literal is fast). -/
+def uintBound : Int := ((2 ^ 256 : Nat) : Int)
+
 /-- Arithmetic and relational operators on values. `/` and `%` revert on
 a zero divisor (KeY `divisionAssignment`/`moduloAssignment`); `**` with a
-negative exponent is stuck. -/
+negative exponent is stuck.  The bitwise operators, the shifts and the
+wrapping arithmetic are solc's at `uint256`: `~x` is `2^256 - 1 - x`,
+`x << n` is `x * 2^n` modulo `2^256`, `x >> n` is `x / 2^n`, a shift by
+`256` or more gives `0`, and `+%` (what `unchecked { a + b; }` is) is `a + b`
+modulo `2^256`. -/
 def applyBinOp (op : BinOp) (l r : Value) : Res Value :=
   match op with
   | .add => do .ok (Value.int ((← l.asInt) + (← r.asInt)))
@@ -632,11 +640,32 @@ def applyBinOp (op : BinOp) (l r : Value) : Res Value :=
   | .neB => .ok (Value.bool (!decide (l = r)))
   | .and => do .ok (Value.bool ((← l.asBool) && (← r.asBool)))
   | .or => do .ok (Value.bool ((← l.asBool) || (← r.asBool)))
+  -- the `uint` operators with no overflow to check (`BinOp.accepts`): their
+  -- result is below `2^256` already, so `checkArith` passes it
+  | .band => do .ok (Value.int ((← l.asInt).toNat &&& (← r.asInt).toNat : Nat))
+  | .bor => do .ok (Value.int ((← l.asInt).toNat ||| (← r.asInt).toNat : Nat))
+  | .bxor => do .ok (Value.int ((← l.asInt).toNat ^^^ (← r.asInt).toNat : Nat))
+  | .shl => do
+      let a ← l.asInt
+      let n ← r.asInt
+      .ok (Value.int (if n < 256 then a * 2 ^ n.toNat % uintBound else 0))
+  | .shr => do
+      let a ← l.asInt
+      let n ← r.asInt
+      .ok (Value.int (if n < 256 then a / 2 ^ n.toNat else 0))
+  | .addW => do .ok (Value.int (((← l.asInt) + (← r.asInt)) % uintBound))
+  | .subW => do .ok (Value.int (((← l.asInt) - (← r.asInt)) % uintBound))
+  | .mulW => do .ok (Value.int ((← l.asInt) * (← r.asInt) % uintBound))
+  | .powW => do
+      let b ← l.asInt
+      let e ← r.asInt
+      if e < 0 then .error .stuck else .ok (Value.int (b ^ e.toNat % uintBound))
 
 def applyUnOp (op : UnOp) (v : Value) : Res Value :=
   match op with
   | .neg => do .ok (Value.int (-(← v.asInt)))
   | .not => do .ok (Value.bool (!(← v.asBool)))
+  | .bnot => do .ok (Value.int (uintBound - 1 - (← v.asInt)))
 
 /-! ## Checked arithmetic (solc ≥ 0.8)
 
@@ -649,10 +678,6 @@ operand type (`BinOp.retTy`). Unary minus is checked only at `Ty.int`:
 solc rejects `-x` on an unsigned operand at compile time, so there is
 no run-time behavior to mirror, and the parser types bare numeric
 literals (including the `-5` of spec postconditions) as `uint`. -/
-
-/-- `2^256`, the exclusive upper bound of `uint256` (cast from `Nat`,
-where kernel arithmetic on the literal is fast). -/
-def uintBound : Int := ((2 ^ 256 : Nat) : Int)
 
 /-- `2^255`, the exclusive upper bound (and negated inclusive lower
 bound) of `int256`. -/

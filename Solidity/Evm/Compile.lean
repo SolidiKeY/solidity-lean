@@ -455,19 +455,23 @@ def TyCtx.meet (Γ₁ Γ₂ : TyCtx) : TyCtx := fun x => if Γ₁ x = Γ₂ x th
 
 /-- The operators compiled at operand type `p`: arithmetic and comparisons
 at `uint` and `int`, `**` at `uint` (the only type it takes), `==`/`!=` at any
-type, `&&`/`||` at `bool`. -/
+type, `&&`/`||` at `bool`, and the bitwise, shift and wrapping operators at
+`uint`, the only type they take. -/
 def binInFrag : BinOp → PrimTy → Bool
   | .add, p | .sub, p | .mul, p | .div, p | .mod, p => p != .bool
   | .lt, p | .gt, p | .le, p | .ge, p => p != .bool
   | .eqB, _ | .neB, _ => true
   | .and, p | .or, p => p == .bool
   | .pow, p => p == .uint
+  | .band, p | .bor, p | .bxor, p | .shl, p | .shr, p => p == .uint
+  | .addW, p | .subW, p | .mulW, p | .powW, p => p == .uint
 
-/-- The unary operators compiled: `!` (at `bool`, the only type it takes)
-and `-` at `int` (solc rejects it on an unsigned operand). -/
+/-- The unary operators compiled: `!` (at `bool`, the only type it takes),
+`-` at `int` (solc rejects it on an unsigned operand) and `~` at `uint`. -/
 def unInFrag : UnOp → PrimTy → Bool
   | .not, _ => true
   | .neg, p => p == .int
+  | .bnot, p => p == .uint
 
 /-- A type laid out in a fixed set of slots: no dynamic array and no
 mapping anywhere in it (`uint`, `Person`, `uint[3]`; not `Basket`, whose
@@ -684,6 +688,16 @@ def uTail : BinOp → List Instr
   | .neB => [.eq, .iszero]
   | .pow => expCode
   | .and | .or => []
+  -- no guard: the opcode is the operator
+  | .band => [.and]
+  | .bor => [.or]
+  | .bxor => [.xor]
+  | .shl => [.shl]
+  | .shr => [.shr]
+  | .addW => [.add]
+  | .subW => [.swap 1, .sub]
+  | .mulW => [.mul]
+  | .powW => [.swap 1, .exp]
 
 /-- `… x y → … x ⊕ y` (`y` on top) on `int`s, two's complement, with solc's
 guards (`checked_add_t_int256` and its siblings): `+` reverts unless the
@@ -709,6 +723,7 @@ def sTail : BinOp → List Instr
   | .eqB => [.eq]
   | .neB => [.eq, .iszero]
   | .pow | .and | .or => []
+  | .band | .bor | .bxor | .shl | .shr | .addW | .subW | .mulW | .powW => []
 
 /-- An operator's tail at its operand type: signed at `int`. -/
 def binTail : PrimTy → BinOp → List Instr
@@ -752,6 +767,7 @@ def compileVal : {p : PrimTy} → Val C p → List Instr
     compileVal a ++ match op with
       | .not => [.iszero]
       | .neg => negCode
+      | .bnot => [.not]
   | _, .ternary c a b =>
     compileVal c ++ [.iszero, .jumpi ((compileVal a).length + 1)] ++ compileVal a ++
       [.jump (compileVal b).length] ++ compileVal b

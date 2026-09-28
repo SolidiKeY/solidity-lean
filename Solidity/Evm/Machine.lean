@@ -10,7 +10,9 @@ needs.  Instruction meanings follow the EVM as Nethermind's
 
 * arithmetic words are numbers below `2^256` and `ADD`/`SUB`/`MUL` wrap;
   `DIV a 0 = MOD a 0 = 0`;
-* `LT`/`GT`/`EQ`/`ISZERO` push `1` or `0`; `OR` and `AND` are bitwise;
+* `LT`/`GT`/`EQ`/`ISZERO` push `1` or `0`; `OR`, `AND`, `XOR` and `NOT` are
+  bitwise; `SHL`/`SHR` take the shift on top and give `0` from `256` on;
+  `EXP` takes the base on top and wraps;
 * `SLT`/`SGT`/`SDIV`/`SMOD` read words as two's complement (`sgn`):
   `SDIV` truncates (and `-2^255 / -1` wraps to `-2^255`), `SMOD` takes the
   dividend's sign, both give `0` on a zero divisor;
@@ -134,6 +136,9 @@ inductive Instr where
   | jumpi (n : Nat)
   | call
   | revert
+  /-- The bitwise and exponentiation opcodes of the `uint` operators with no
+  overflow check: `XOR`, `NOT`, `SHL`, `SHR`, `EXP`. -/
+  | xor | not | shl | shr | exp
   deriving DecidableEq, Repr, Inhabited
 
 instance : ToString Instr where
@@ -154,6 +159,7 @@ instance : ToString Instr where
     | .jumpi n => s!"JUMPI +{n}"
     | .call => "CALL"
     | .revert => "REVERT"
+    | .xor => "XOR" | .not => "NOT" | .shl => "SHL" | .shr => "SHR" | .exp => "EXP"
 
 /-- `f` with `x` sent to `v`. -/
 def upd {α : Type} {β : Type} [DecidableEq α] (f : α → β) (x : α) (v : β) : α → β :=
@@ -302,6 +308,21 @@ def Instr.step : Instr → Machine → Out
                         net := upd m.net a (m.net a - v) } 0
     | _ => .fault
   | .revert, _ => .revert
+  | .xor, m => match m.stack with
+    | .val a :: .val b :: st => m.next (.val (a ^^^ b) :: st)
+    | _ => .fault
+  | .not, m => match m.stack with
+    | .val a :: st => m.next (.val (W - 1 - a) :: st)
+    | _ => .fault
+  | .shl, m => match m.stack with
+    | .val n :: .val a :: st => m.next (.val (if n < 256 then a * 2 ^ n % W else 0) :: st)
+    | _ => .fault
+  | .shr, m => match m.stack with
+    | .val n :: .val a :: st => m.next (.val (if n < 256 then a / 2 ^ n else 0) :: st)
+    | _ => .fault
+  | .exp, m => match m.stack with
+    | .val a :: .val b :: st => m.next (.val (a ^ b % W) :: st)
+    | _ => .fault
 
 /-- Run code, skipping `k` instructions first (a jump still pending). -/
 def exec : List Instr → Nat → Machine → Out

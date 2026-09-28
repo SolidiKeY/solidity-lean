@@ -489,7 +489,7 @@ theorem evalBinop_wt {op : BinOp} {p q : PrimTy} {lv : Value} {rb : Res Value} {
       simp only [BinOp.ret, hA, if_true]
       exact int_toSVal_hasTy hnum n
 
-/-- `-a` and `!a` evaluate to a value of the type they return. -/
+/-- `-a`, `!a` and `~a` evaluate to a value of the type they return. -/
 theorem evalUnop_wt {op : UnOp} {p q : PrimTy} {v w : Value}
     (hacc : op.accepts p = true) (hq : op.ret p = q)
     (h : (do unopCheck op p (← applyUnOp op v)) = (.ok w : Res Value)) :
@@ -513,6 +513,11 @@ theorem evalUnop_wt {op : UnOp} {p q : PrimTy} {v w : Value}
     split at hu
     · exact nomatch hu
     · cases hu; rfl
+  | bnot =>
+    simp only [applyUnOp, bind, Except.bind] at hu
+    split at hu
+    · exact nomatch hu
+    · cases hu; exact int_toSVal_hasTy (by simp_all [UnOp.accepts, UnOp.ret, PrimTy.isNumeric]) _
 
 /-! ## The evaluators are typed
 
