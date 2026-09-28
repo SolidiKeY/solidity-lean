@@ -136,7 +136,116 @@ def Recursive : Contract := contract!{ uint n; function down(uint x) { down(x); 
 /-- error: Solidity elaboration failed: bump returns no value -/
 #guard_msgs in #check sol{ uint y = bump(); }
 
-/-- error: Solidity elaboration failed: `return` only ends a function's body -/
+/-- error: Solidity elaboration failed: `return` outside a function's body -/
 #guard_msgs in #check sol{ return 1; }
+
+/-! ## Early returns
+
+A `return` may stand anywhere in a body.  The elaborator lowers it away when
+it inlines the body (`lowerReturns`): the value assigned to the return
+variable, what follows the `return` in its block dropped, and the statements
+after an `if` that returns in one branch moved into the other.  A `return`
+ends the callee it is written in, never its caller: the lowering is per
+body. -/
+
+/-- Early returns: a guard clause, a `return` before a declaration, a
+checked withdrawal, and a caller that goes on after its callee returned
+early. -/
+def Returns : Contract := contract!{
+  uint total;
+  mapping(uint => uint) balances;
+  function clamp(uint x) returns (uint) { if (x > 10) { return 10; }; return x; }
+  function pick(uint a, uint b) returns (uint r) { if (a > 0) { return a; }; uint c = b + 1; return c; }
+  function withdraw(uint k, uint v) returns (bool) {
+    if (balances[k] < v) { return false; };
+    balances[k] -= v; total -= v;
+    return true;
+  }
+  function clampPlusOne(uint x) returns (uint) { uint y = clamp(x); return y + 1; }
+  function incr(uint x) returns (uint) { return x + 1; }
+  function twiceIncr(uint x) returns (uint) { return incr(x) * 2; }
+}
+
+/-- `if (x > 10) { return 10; }; return x;` is
+`if (x > 10) { r = 10; } else { r = x; }`. -/
+theorem clampHigh : ⊨ dl[Returns]{ ⟨ uint y = clamp(42); ⟩ y == 10 } := by
+  sol_symex
+  sol_close
+
+theorem clampLow : ⊨ dl[Returns]{ ⟨ uint y = clamp(7); ⟩ y == 7 } := by
+  sol_symex
+  sol_close
+
+/-- The statements after the `if` declare `c`: they move into the `else`
+branch, where the declaration is the branch's own. -/
+theorem pickFallThrough : ⊨ dl[Returns]{ ⟨ uint y = pick(0, 4); ⟩ y == 5 } := by
+  sol_symex
+  sol_close
+
+set_option maxHeartbeats 2000000 in
+/-- `withdraw` returns `false` early and writes nothing when the balance is
+short. -/
+theorem withdrawShort :
+    ⊨ dl[Returns]{ [ uint b = balances[k]; bool ok = withdraw(k, b + 1); uint c = balances[k]; ]
+      (ok == false ∧ c == b) } := by
+  sol_symex
+  sol_close
+
+/-- The `return` in `clamp` ends `clamp`, not `clampPlusOne`, which adds one
+after the call. -/
+theorem returnEndsCallee : ⊨ dl[Returns]{ ⟨ uint y = clampPlusOne(42); ⟩ y == 11 } := by
+  sol_symex
+  sol_close
+
+/-- A function that returns nothing may not return a value. -/
+def NoValue : Contract := contract!{ uint n; function f(uint x) { if (x > 0) { return x; }; n = x; } }
+
+/-- error: Solidity elaboration failed: `return` of a value from a function that returns none -/
+#guard_msgs in #check sol[NoValue]{ f(1); }
+
+/-! ## Calls inside expressions
+
+A call inside an expression is run before its statement, into a fresh local
+(`hoist`), as an `++` is: `uint z = incr(a) + 1;` is
+`uint se; se = incr(a); uint z = se + 1;` with `incr` inlined.  The order is
+the one pinned for `++` (Decision "Effects inside expressions"): a binary
+operator's right operand first, a call's arguments left to right, and an
+operand read before a call is captured first. -/
+
+/-- `uint z = incr(a) + 1;` -/
+theorem callPlusOne : ⊨ dl[Returns]{ ⟨ uint z = incr(4) + 1; ⟩ z == 6 } := by
+  sol_symex
+  sol_close
+
+/-- `uint z = incr(a) + incr(b);`: two calls in one expression. -/
+theorem callPlusCall : ⊨ dl[Returns]{ ⟨ uint z = incr(1) + incr(2); ⟩ z == 5 } := by
+  sol_symex
+  sol_close
+
+/-- `uint z = incr(incr(1));`: a call as another's argument. -/
+theorem callOfCall : ⊨ dl[Returns]{ ⟨ uint z = incr(incr(1)); ⟩ z == 3 } := by
+  sol_symex
+  sol_close
+
+/-- `require(incr(a) > 0);`: a call in a condition. -/
+theorem callInRequire : ⊨ dl[Returns]{ ⟨ require(incr(0) > 0); uint z = 1; ⟩ z == 1 } := by
+  sol_symex
+  sol_close
+
+/-- `return incr(x) * 2;`: a call inside a returned expression. -/
+theorem callInReturn : ⊨ dl[Returns]{ ⟨ uint z = twiceIncr(3); ⟩ z == 8 } := by
+  sol_symex
+  sol_close
+
+/-- The elaborated form: the call captured into a fresh `se`, the
+statement reading it. -/
+example : Prog.toStr (sol[Returns]{ uint z = incr(4) + 1; } : Prog Returns) =
+    "uint se1; se1 = incr(4); uint z = se1 + 1;" := rfl
+
+/-- error: Solidity elaboration failed: a call under a short-circuit operator -/
+#guard_msgs in #check sol[Returns]{ bool b = total > 0 && incr(1) > 0; }
+
+/-- error: Solidity elaboration failed: a call in a conditional's branch -/
+#guard_msgs in #check sol[Returns]{ uint z = total > 0 ? incr(1) : 0; }
 
 end Solidity.Examples.Calls
