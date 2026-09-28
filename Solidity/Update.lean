@@ -9,8 +9,9 @@ program expressions (mini-solkey's `Ch05_Logic`).  The sorts are KeY's:
 * `Term` — a value: a constant, a stack local, `a + b`, `find(s, p)`,
   `read(m, a)`, the length of an array;
 * `PTerm` — a storage path: a state variable, an alias, `p.f`, `p[i]`;
-* `STerm` — a storage: the program variable `storage`, `save(s, p, v)`,
-  `delAt(s, p)`, a push and a pop (KeY's nested `save`s over `size`);
+* `STerm` — a storage: the program variable `storage`, a storage variable
+  (`old`, which `\old` reads), `save(s, p, v)`, `delAt(s, p)`, a push and a
+  pop (KeY's nested `save`s over `size`);
 * `ITerm`, `MAddr`, `MTerm` — a memory identity, a member or element of one,
   a memory: `memory`, `write(m, a, v)`, `addM(m)`, `copySt(m, v)`.
 
@@ -18,7 +19,7 @@ program expressions (mini-solkey's `Ch05_Logic`).  The sorts are KeY's:
 of elementary updates, applied in parallel: every right-hand side is read in
 the state the update is applied in.  Nothing runs when a rule produces one.
 
-A formula is first-order (`=`, `¬`, `∧`, `→`) plus `{U} φ` and the two
+A formula is first-order (`=`, `¬`, `∧`, `→`, `∀`) plus `{U} φ` and the two
 modalities: the diamond `⟨ P ⟩ φ` ("`P` runs to the end and φ holds after",
 total correctness) and the box `[ P ] φ` ("if `P` runs to the end, φ holds
 after", partial correctness).  They differ on a run that halts: it satisfies
@@ -95,6 +96,9 @@ inductive PTerm (C : Contract) where
 /-- A storage. -/
 inductive STerm (C : Contract) where
   | storage
+  /-- A storage variable: KeY's `old`, of sort `Struct`, bound by the update
+  `old := storage` in front of a specification's modality. -/
+  | pv (x : Var)
   /-- `save(s, p, v)`; at a state variable, KeY's `store(s, r, v)`. -/
   | save (s : STerm C) (p : PTerm C) (v : SValT C)
   /-- `delAt(s, p)`: the value at `p` reset to its default. -/
@@ -190,7 +194,7 @@ def Term.eval (σ : State) : Term C → Res Value
   | .pv x => do
     match ← σ.getEnv x with
     | .val v => pure v
-    | .spath .. | .mref _ => .error .stuck
+    | .spath .. | .mref _ | .store _ => .error .stuck
   | .binop op p a b => do evalBinop op p (← a.eval σ) (b.eval σ)
   | .unop op p a => do unopCheck op p (← applyUnOp op (← a.eval σ))
   | .find s p => do
@@ -229,6 +233,10 @@ def PTerm.eval (σ : State) : PTerm C → Res (Name × List Seg)
 
 def STerm.eval (σ : State) : STerm C → Res State
   | .storage => pure σ
+  | .pv x => do
+    match ← σ.getEnv x with
+    | .store st => pure { σ with storage := st }
+    | .val _ | .spath .. | .mref _ => .error .stuck
   | .save s p v => do
     let sv ← v.eval σ
     let τ ← s.eval σ
@@ -275,7 +283,7 @@ def ITerm.eval (σ : State) : ITerm C → Res Nat
   | .pv x => do
     match ← σ.getEnv x with
     | .mref id => pure id
-    | .val _ | .spath .. => .error .stuck
+    | .val _ | .spath .. | .store _ => .error .stuck
   | .read m a => do
     let τ ← m.eval σ
     (← readAddr τ (← a.eval σ)).asRef
@@ -325,6 +333,8 @@ inductive UpdElem (C : Contract) where
   | mref (x : Var) (i : ITerm C)
   /-- `storage := s` -/
   | storage (s : STerm C)
+  /-- `old := s`: a storage variable binds a storage. -/
+  | store (x : Var) (s : STerm C)
   /-- `memory := m` -/
   | memory (m : MTerm C)
   /-- `transfer(r, a)`: KeY's `{selfBalance := selfBalance - a ‖ net := …}`,
@@ -343,6 +353,7 @@ def UpdElem.write (σ₀ : State) : UpdElem C → State → Res State
     pure (τ.setEnv x (.spath r segs))
   | .mref x i, τ => do pure (τ.setEnv x (.mref (← i.eval σ₀)))
   | .storage s, τ => do pure { τ with storage := (← s.eval σ₀).storage }
+  | .store x s, τ => do pure (τ.setEnv x (.store (← s.eval σ₀).storage))
   | .memory m, τ => do
     let μ ← m.eval σ₀
     pure { τ with heap := μ.heap, nextId := μ.nextId }
@@ -390,11 +401,21 @@ inductive Fml (C : Contract) where
   /-- `{havoc} φ`: `φ` after any storage, ledger and funds a callee may
   leave — KeY's anonymising update with fresh skolem symbols. -/
   | havoc (φ : Fml C)
+  /-- `∀ p x. φ`: `φ` for every value of the type `p` the local `x` may
+  hold (a `uint` in `[0, 2^256)`), KeY's `\forall`. -/
+  | all (x : Var) (p : PrimTy) (φ : Fml C)
 
 instance : Inhabited (Fml C) := ⟨.tt⟩
 
 /-- `false` is `¬true`. -/
 abbrev Fml.ff : Fml C := .not .tt
+
+/-- The values of the primitive type `p`, which a quantifier ranges over. -/
+def PrimTy.admits : PrimTy → Value → Prop
+  | .bool, .bool _ => True
+  | .uint, .int n => 0 ≤ n ∧ n < uintBound
+  | .int, .int n => -intBound ≤ n ∧ n < intBound
+  | _, _ => False
 
 /-- Whether `φ` holds in `σ`.  An equation holds when both sides are
 defined and equal. -/
@@ -410,6 +431,7 @@ def holds (σ : State) : Fml C → Prop
   | .upd m U φ => m.after (holds · φ) (U.apply σ)
   | .modal m P φ => m.after (holds · φ) (Prog.run σ P)
   | .havoc φ => ∀ st nt bal, holds (σ.havoc st nt bal) φ
+  | .all x p φ => ∀ v, p.admits v → holds (σ.setEnv x (.val v)) φ
 
 /-- Valid: true in every state. -/
 def Valid (φ : Fml C) : Prop := ∀ σ, holds σ φ
@@ -418,7 +440,7 @@ def Valid (φ : Fml C) : Prop := ∀ σ, holds σ φ
 included: a formula of the logic, which the calculus leaves to `Valid`. -/
 def Fml.modalFree : Fml C → Bool
   | .tt | .eq .. => true
-  | .not φ | .upd _ _ φ | .havoc φ => φ.modalFree
+  | .not φ | .upd _ _ φ | .havoc φ | .all _ _ φ => φ.modalFree
   | .and φ ψ | .imp φ ψ => φ.modalFree && ψ.modalFree
   | .modal .. => false
 
@@ -452,6 +474,7 @@ def PTerm.vars : PTerm C → List Var
 
 def STerm.vars : STerm C → List Var
   | .storage => []
+  | .pv x => [x]
   | .save s p v | .push s p v => s.vars ++ p.vars ++ v.vars
   | .delAt s p | .pushSlot s p _ | .pop s p | .shrink s p | .extend s p _ => s.vars ++ p.vars
 
@@ -488,6 +511,7 @@ def UpdElem.vars : UpdElem C → List Var
   | .path x p => x :: p.vars
   | .mref x i => x :: i.vars
   | .storage s => s.vars
+  | .store x s => x :: s.vars
   | .memory m => m.vars
   | .transfer r a => r.vars ++ a.vars
 
@@ -495,7 +519,8 @@ def Upd.vars : Upd C → List Var
   | [] => []
   | e :: U => e.vars ++ Upd.vars U
 
-/-- The variables a formula mentions, its programs' included. -/
+/-- The variables a formula mentions, its programs' included, and a
+quantifier's own. -/
 def Fml.vars : Fml C → List Var
   | .tt => []
   | .eq a b => a.vars ++ b.vars
@@ -504,6 +529,7 @@ def Fml.vars : Fml C → List Var
   | .upd _ U φ => Upd.vars U ++ φ.vars
   | .modal _ P φ => Prog.vars P ++ φ.vars
   | .havoc φ => φ.vars
+  | .all x _ φ => x :: φ.vars
 
 section Frame
 
@@ -567,6 +593,14 @@ theorem PTerm.eval_frame {σ τ : State} (hag : EnvAgreeExcept ns σ τ) :
 theorem STerm.eval_frame {σ τ : State} (hag : EnvAgreeExcept ns σ τ) :
     (s : STerm C) → Avoids s.vars ns → ResultsAgree ns (s.eval σ) (s.eval τ)
   | .storage, _ => hag
+  | .pv x, h => by
+    simp only [STerm.eval, getEnv_congr hag (h.head)]
+    rcases τ.getEnv x with _ | b
+    · exact ResultsAgree.refl _ _
+    · cases b
+      all_goals first
+        | exact ResultsAgree.refl _ _
+        | exact ⟨rfl, hag.heap, hag.nextId, hag.net, hag.env, hag.selfBalance, hag.tx⟩
   | .save s p v, h => by
     simp only [STerm.eval, v.eval_frame hag h.right, p.eval_frame hag h.left.right]
     refine bindPureResults_agree _ fun _ => ?_
@@ -679,6 +713,15 @@ theorem UpdElem.write_frame {σ₀ σ₀' τ τ' : State} (h₀ : EnvAgreeExcept
     match s.eval σ₀, s.eval σ₀', s.eval_frame h₀ hv with
     | .error _, .error _, he => subst he; rfl
     | .ok a, .ok b, hs => exact ⟨hs.storage, h.heap, h.nextId, h.net, h.env, h.selfBalance, h.tx⟩
+  | .store x s, hv => by
+    simp only [UpdElem.write]
+    match s.eval σ₀, s.eval σ₀', s.eval_frame h₀ hv.tail with
+    | .error _, .error _, he => subst he; rfl
+    | .ok a, .ok b, hs =>
+      have hs : EnvAgreeExcept ns a b := hs
+      show ResultsAgree ns (.ok (τ.setEnv x (.store a.storage))) (.ok (τ'.setEnv x (.store b.storage)))
+      rw [hs.storage]
+      exact h.setEnv_both x _
   | .memory m, hv => by
     simp only [UpdElem.write]
     match m.eval σ₀, m.eval σ₀', m.eval_frame h₀ hv with
@@ -731,6 +774,10 @@ theorem holds_frame : (φ : Fml C) → Avoids φ.vars ns → ∀ {σ τ : State}
     simp only [holds]
     exact forall_congr' fun st => forall_congr' fun nt => forall_congr' fun bal =>
       holds_frame φ h (hag.havoc st nt bal)
+  | .all x _ φ, h, _, _, hag => by
+    simp only [holds]
+    exact forall_congr' fun v => imp_congr_right fun _ =>
+      holds_frame φ h.tail (hag.setEnv_both x (.val v))
 
 end Frame
 

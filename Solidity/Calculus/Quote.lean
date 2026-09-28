@@ -48,6 +48,7 @@ def PTerm.quote : PTerm C → Lean.Expr
 
 def STerm.quote : STerm C → Lean.Expr
   | .storage => mkAppN (mkConst ``STerm.storage) #[c]
+  | .pv x => mkAppN (mkConst ``STerm.pv) #[c, toExpr x]
   | .save s p v => mkAppN (mkConst ``STerm.save) #[c, STerm.quote s, PTerm.quote p, SValT.quote v]
   | .delAt s p => mkAppN (mkConst ``STerm.delAt) #[c, STerm.quote s, PTerm.quote p]
   | .push s p v => mkAppN (mkConst ``STerm.push) #[c, STerm.quote s, PTerm.quote p, SValT.quote v]
@@ -90,6 +91,7 @@ def UpdElem.quote : UpdElem C → Lean.Expr
   | .path x p => mkAppN (mkConst ``UpdElem.path) #[c, toExpr x, PTerm.quote c p]
   | .mref x i => mkAppN (mkConst ``UpdElem.mref) #[c, toExpr x, ITerm.quote c i]
   | .storage s => mkAppN (mkConst ``UpdElem.storage) #[c, STerm.quote c s]
+  | .store x s => mkAppN (mkConst ``UpdElem.store) #[c, toExpr x, STerm.quote c s]
   | .memory m => mkAppN (mkConst ``UpdElem.memory) #[c, MTerm.quote c m]
   | .transfer r a => mkAppN (mkConst ``UpdElem.transfer) #[c, Term.quote c r, Term.quote c a]
 
@@ -107,6 +109,7 @@ def Fml.quote : Fml C → Lean.Expr
   | .upd m U φ => mkAppN (mkConst ``Fml.upd) #[c, toExpr m, Upd.quote c U, Fml.quote φ]
   | .modal m P φ => mkAppN (mkConst ``Fml.modal) #[c, toExpr m, Prog.quote c P, Fml.quote φ]
   | .havoc φ => mkAppN (mkConst ``Fml.havoc) #[c, Fml.quote φ]
+  | .all x p φ => mkAppN (mkConst ``Fml.all) #[c, toExpr x, toExpr p, Fml.quote φ]
 
 end Quote
 

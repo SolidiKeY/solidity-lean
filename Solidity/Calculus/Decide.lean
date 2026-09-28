@@ -594,6 +594,7 @@ def _root_.Solidity.PTerm.toL (ρ : Sym) : PTerm C → LPath
 balances[k], 5) }`, `storage` is that write. -/
 def _root_.Solidity.STerm.toL (ρ : Sym) : STerm C → LStor
   | .storage => ρ.stor
+  | .pv _ => .init
   | .save s p v => .save (s.toL ρ) (p.toL ρ) (v.toL ρ)
   | .delAt s p => .del (s.toL ρ) (p.toL ρ)
   | .push .. | .pushSlot .. | .pop .. | .shrink .. | .extend .. => .init
@@ -660,9 +661,11 @@ def _root_.Solidity.PTerm.inL (ρ : Sym) : PTerm C → Bool
   | .next _ => false
 
 /-- A storage in the fragment: one write of a word, or one `delete`, over
-the storage the updates left; no push or pop. -/
+the storage the updates left; no push or pop, and no storage variable
+(`old`, read at the current storage's paths: `sol_close` reads it). -/
 def _root_.Solidity.STerm.inL (ρ : Sym) : STerm C → Bool
   | .storage => true
+  | .pv _ => false
   | .save .storage p v => p.inL ρ && v.inL ρ
   | .delAt .storage p => p.inL ρ
   | .save .. | .delAt .. => false
@@ -682,7 +685,7 @@ def _root_.Solidity.UpdElem.toL (ρ : Sym) : UpdElem C → LTerm × Sym
     (guardPath ρ.stor (p.toL ρ), { ρ with env := (x, .path (p.toL ρ)) :: ρ.env })
   | .storage s =>
     (.sok (s.toL ρ), { stor := s.toL ρ, env := ρ.env.map fun b => (b.1, b.2.onWrite) })
-  | .mref .. | .memory .. | .transfer .. => (.err, ρ)
+  | .mref .. | .memory .. | .transfer .. | .store .. => (.err, ρ)
 
 /-- An update in the fragment: a local, an alias or the storage; no memory,
 no `transfer`. -/
@@ -690,7 +693,7 @@ def _root_.Solidity.UpdElem.inL (ρ : Sym) : UpdElem C → Bool
   | .val _ t => t.inL ρ
   | .path _ p => p.inL ρ
   | .storage s => s.inL ρ
-  | .mref .. | .memory .. | .transfer .. => false
+  | .mref .. | .memory .. | .transfer .. | .store .. => false
 
 /-- The update's term as a premise (box) or a conjunct (diamond). -/
 def guardM : Modality → LTerm → LFml → LFml
@@ -706,7 +709,7 @@ def _root_.Solidity.Fml.toL : Sym → Fml C → LFml
   | ρ, .imp φ ψ => .imp (φ.toL ρ) (ψ.toL ρ)
   | ρ, .upd _ [] φ => φ.toL ρ
   | ρ, .upd m [e] φ => guardM m (e.toL ρ).1 (φ.toL (e.toL ρ).2)
-  | _, .upd _ (_ :: _ :: _) _ | _, .modal .. | _, .havoc _ => .tt
+  | _, .upd _ (_ :: _ :: _) _ | _, .modal .. | _, .havoc _ | _, .all .. => .tt
 
 /-- The fragment `Fml.toL` is exact on: no modality, one element per update,
 no memory, no push or pop, no copy between locations, and every alias bound
@@ -718,7 +721,7 @@ def _root_.Solidity.Fml.inL : Sym → Fml C → Bool
   | ρ, .and φ ψ | ρ, .imp φ ψ => φ.inL ρ && ψ.inL ρ
   | ρ, .upd _ [] φ => φ.inL ρ
   | ρ, .upd _ [e] φ => e.inL ρ && φ.inL (e.toL ρ).2
-  | _, .upd _ (_ :: _ :: _) _ | _, .modal .. | _, .havoc _ => false
+  | _, .upd _ (_ :: _ :: _) _ | _, .modal .. | _, .havoc _ | _, .all .. => false
 
 
 /-! ### The updates pushed in keep the meaning -/
@@ -1285,7 +1288,8 @@ theorem STerm.toL_eval (h : Rel σ ρ τ) :
   | .delAt (.save ..) _, hf | .delAt (.delAt ..) _, hf | .delAt (.push ..) _, hf
   | .delAt (.pushSlot ..) _, hf | .delAt (.pop ..) _, hf | .delAt (.shrink ..) _, hf
   | .delAt (.extend ..) _, hf => by simp [STerm.inL] at hf
-  | .push .., hf | .pushSlot .., hf | .pop .., hf | .shrink .., hf | .extend .., hf => by
+  | .push .., hf | .pushSlot .., hf | .pop .., hf | .shrink .., hf | .extend .., hf
+  | .pv _, hf => by
     simp [STerm.inL] at hf
 
 end
@@ -1412,8 +1416,9 @@ theorem Fml.toL_holds :
       refine Fml.toL_holds φ ⟨(hs _).2 (by rw [h₁]; rfl), fun y => ?_⟩ hf.2
       simp only [UpdElem.toL, lookupBy_onWrite]
       exact (h.env y).onWrite rfl
-    | mref _ _ | memory _ | transfer _ _ => simp [UpdElem.inL] at hf
-  | .upd _ (_ :: _ :: _) _, _, _, _, _, hf | .modal .., _, _, _, _, hf | .havoc _, _, _, _, _, hf => by
+    | mref _ _ | memory _ | transfer _ _ | store _ _ => simp [UpdElem.inL] at hf
+  | .upd _ (_ :: _ :: _) _, _, _, _, _, hf | .modal .., _, _, _, _, hf | .havoc _, _, _, _, _, hf
+  | .all .., _, _, _, _, hf => by
     simp [Fml.inL] at hf
 
 /-- `⊨ φ` is the formula with its updates pushed in, true in every state. -/

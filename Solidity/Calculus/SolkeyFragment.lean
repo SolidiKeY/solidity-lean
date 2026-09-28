@@ -52,7 +52,7 @@ end
 /-- Every program under a modality of `φ` is in the fragment. -/
 def Fml.inSolkey : Fml C → Bool
   | .tt | .eq .. => true
-  | .not φ | .upd _ _ φ | .havoc φ => φ.inSolkey
+  | .not φ | .upd _ _ φ | .havoc φ | .all _ _ φ => φ.inSolkey
   | .and φ ψ | .imp φ ψ => φ.inSolkey && ψ.inSolkey
   | .modal _ P φ => Prog.inSolkey P && φ.inSolkey
 

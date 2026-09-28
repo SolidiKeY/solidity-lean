@@ -75,6 +75,9 @@ def PTerm.stuck : PTerm C := .at (.root "") Term.stuck
 /-- An identity that always halts: its source does. -/
 def ITerm.stuck : ITerm C := .copy .memory (.val Term.stuck)
 
+/-- A storage that always halts: its path does. -/
+def STerm.stuck : STerm C := .delAt .storage PTerm.stuck
+
 /-- `x`, read as a value after `{ x := alice }` (`x` an alias), halts; so does its
 substitution. -/
 @[simp] theorem Term.stuck_eval (σ : State) : (Term.stuck : Term C).eval σ = .error .stuck := rfl
@@ -82,6 +85,8 @@ substitution. -/
 @[simp] theorem PTerm.stuck_eval (σ : State) : (PTerm.stuck : PTerm C).eval σ = .error .stuck := rfl
 /-- `m.age`, `m` bound to a path, halts; so does its substitution. -/
 @[simp] theorem ITerm.stuck_eval (σ : State) : (ITerm.stuck : ITerm C).eval σ = .error .stuck := rfl
+/-- `old`, bound to a number by `{ old := 1 }`, halts as a storage; so does its substitution. -/
+@[simp] theorem STerm.stuck_eval (σ : State) : (STerm.stuck : STerm C).eval σ = .error .stuck := rfl
 
 /-- A value term that cannot halt: a literal. -/
 def Term.total : Term C → Bool
@@ -205,6 +210,14 @@ def Upd.refOf (U : Upd C) (x : Var) : ITerm C :=
   | some _ => ITerm.stuck
   | none => .pv x
 
+/-- `{U}old` for a storage variable `old`: `U` binds no storage
+(`Upd.envOnly`), so `old` is itself where `U` does not write the name, and
+halts where `U` binds it to a value, a path or an identity. -/
+def Upd.storOf (U : Upd C) (x : Var) : STerm C :=
+  match U.lastWrite x with
+  | some _ => STerm.stuck
+  | none => .pv x
+
 mutual
 
 /-- `{U}t`: KeY's `applyOnPV`/`applyOnDifferentPV`, through every operator. -/
@@ -229,6 +242,7 @@ def PTerm.subst (U : Upd C) : PTerm C → PTerm C
 
 def STerm.subst (U : Upd C) : STerm C → STerm C
   | .storage => .storage
+  | .pv x => U.storOf x
   | .save s p v => .save (s.subst U) (p.subst U) (v.subst U)
   | .delAt s p => .delAt (s.subst U) (p.subst U)
   | .push s p v => .push (s.subst U) (p.subst U) (v.subst U)
@@ -271,6 +285,7 @@ def UpdElem.subst (U : Upd C) : UpdElem C → UpdElem C
   | .path x p => .path x (p.subst U)
   | .mref x i => .mref x (i.subst U)
   | .storage s => .storage (s.subst U)
+  | .store x s => .store x (s.subst U)
   | .memory m => .memory (m.subst U)
   | .transfer r a => .transfer (r.subst U) (a.subst U)
 
@@ -290,6 +305,7 @@ structure SubstAgree (U : Upd C) (ns : List Var) (σ τ : State) : Prop where
   val : ∀ x, (U.valOf x).eval σ = (Term.pv x : Term C).eval τ
   path : ∀ x, (U.pathOf x).eval σ = (PTerm.pv x : PTerm C).eval τ
   ref : ∀ x, (U.refOf x).eval σ = (ITerm.pv x : ITerm C).eval τ
+  stor : ∀ x, ResultsAgree ns ((U.storOf x).eval σ) ((STerm.pv x : STerm C).eval τ)
 
 section Subst
 
@@ -341,6 +357,7 @@ agreeing off `se1`. -/
 theorem STerm.subst_eval (h : SubstAgree U ns σ τ) :
     (s : STerm C) → ResultsAgree ns ((s.subst U).eval σ) (s.eval τ)
   | .storage => h.agree
+  | .pv x => h.stor x
   | .save s p v => by
     simp only [STerm.subst, STerm.eval, v.subst_eval h, p.subst_eval h]
     refine bindPureResults_agree _ fun _ => ?_
@@ -452,6 +469,11 @@ theorem UpdElem.subst_write (h : SubstAgree U ns σ τ) (τ' : State) :
     match (s.subst U).eval σ, s.eval τ, s.subst_eval h with
     | .error _, .error _, he => subst he; rfl
     | .ok a, .ok b, hs => simp [bind, Except.bind, hs.storage]
+  | .store _ s => by
+    simp only [UpdElem.subst, UpdElem.write]
+    match (s.subst U).eval σ, s.eval τ, s.subst_eval h with
+    | .error _, .error _, he => subst he; rfl
+    | .ok a, .ok b, hs => simp [bind, Except.bind, hs.storage]
   | .memory m => by
     simp only [UpdElem.subst, UpdElem.write]
     match (m.subst U).eval σ, m.eval τ, m.subst_eval h with
@@ -546,7 +568,40 @@ theorem Upd.substAgree {U : Upd C} (hU : U.envOnly = true) {σ τ : State}
   obtain ⟨hag, hnone, hsome⟩ := Upd.foldl_env σ U hU h
   have getEnv_eq : ∀ x, U.lastWrite x = none → τ.getEnv x = σ.getEnv x := fun x hx => by
     simp only [State.getEnv, hnone x hx]
-  refine ⟨hag, fun x => ?_, fun x => ?_, fun x => ?_⟩
+  refine ⟨hag, fun x => ?_, fun x => ?_, fun x => ?_, fun x => ?_⟩
+  rotate_left 3
+  · unfold Upd.storOf
+    split
+    · rename_i e hx
+      obtain ⟨b, hb, hl⟩ := hsome x _ hx
+      have hvar := Upd.lastWrite_var hx
+      have hτ : τ.getEnv x = .ok b := by simp [State.getEnv, hl]
+      have hb' : ∀ st, b ≠ .store st := by
+        intro st hst
+        subst hst
+        cases e with
+        | val _ t =>
+          simp only [UpdElem.binding, bind, Except.bind] at hb
+          split at hb <;> simp [pure, Except.pure] at hb
+        | path _ p =>
+          simp only [UpdElem.binding, bind, Except.bind] at hb
+          split at hb <;> simp [pure, Except.pure] at hb
+        | mref _ i =>
+          simp only [UpdElem.binding, bind, Except.bind] at hb
+          split at hb <;> simp [pure, Except.pure] at hb
+        | storage | memory | transfer | store => simp [UpdElem.var?] at hvar
+      simp only [STerm.stuck_eval, STerm.eval, hτ, bind, Except.bind]
+      cases b with
+      | store st => exact absurd rfl (hb' st)
+      | _ => rfl
+    · rename_i hx
+      simp only [STerm.eval, getEnv_eq x hx, bind, Except.bind]
+      cases σ.getEnv x with
+      | error => rfl
+      | ok b =>
+        cases b with
+        | store st => exact ⟨rfl, hag.heap, hag.nextId, hag.net, hag.env, hag.selfBalance, hag.tx⟩
+        | _ => rfl
   · unfold Upd.valOf
     split
     · rename_i y t hx
@@ -579,7 +634,7 @@ theorem Upd.substAgree {U : Upd C} (hU : U.envOnly = true) {σ τ : State}
           simp only [hi, pure, Except.pure, Except.ok.injEq] at hb
           subst hb
           simp [Term.eval, State.getEnv, hl, bind, Except.bind]
-      | storage | memory | transfer => simp [UpdElem.var?] at hvar
+      | storage | memory | transfer | store => simp [UpdElem.var?] at hvar
     · rename_i hx
       simp only [Term.eval, getEnv_eq x hx]
   · unfold Upd.pathOf
@@ -614,7 +669,7 @@ theorem Upd.substAgree {U : Upd C} (hU : U.envOnly = true) {σ τ : State}
           simp only [hi, pure, Except.pure, Except.ok.injEq] at hb
           subst hb
           simp [PTerm.eval, aliasPath, State.getEnv, hl, bind, Except.bind]
-      | storage | memory | transfer => simp [UpdElem.var?] at hvar
+      | storage | memory | transfer | store => simp [UpdElem.var?] at hvar
     · rename_i hx
       simp only [PTerm.eval, aliasPath, getEnv_eq x hx]
   · unfold Upd.refOf
@@ -649,7 +704,7 @@ theorem Upd.substAgree {U : Upd C} (hU : U.envOnly = true) {σ τ : State}
           simp only [hp, pure, Except.pure, Except.ok.injEq] at hb
           subst hb
           simp [ITerm.eval, State.getEnv, hl, bind, Except.bind]
-      | storage | memory | transfer => simp [UpdElem.var?] at hvar
+      | storage | memory | transfer | store => simp [UpdElem.var?] at hvar
     · rename_i hx
       simp only [ITerm.eval, getEnv_eq x hx]
 
@@ -710,6 +765,11 @@ states that differ at `x` gives two that differ at `x`. -/
 theorem UpdElem.write_agree {A : List Var} {σ₀ τ₁ τ₂ : State} (h : EnvAgreeExcept A τ₁ τ₂) :
     (e : UpdElem C) → ResultsAgree A (e.write σ₀ τ₁) (e.write σ₀ τ₂)
   | .val .. | .path .. | .mref .. | .transfer .. => by simp only [UpdElem.write]; agree_run h
+  | .store x s => by
+    simp only [UpdElem.write]
+    cases s.eval σ₀ with
+    | error => rfl
+    | ok a => exact h.setEnv_both x _
   | .storage s => by
     simp only [UpdElem.write]
     cases s.eval σ₀ with
@@ -1042,6 +1102,7 @@ def Fml.updAt (r : UpdRuleName) : Fml C → Option (Fml C)
     | none => (ψ.updAt r).map (.imp φ)
   | .modal m P φ => (φ.updAt r).map (.modal m P)
   | .havoc φ => (φ.updAt r).map .havoc
+  | .all x p φ => (φ.updAt r).map (.all x p)
   | .tt | .eq .. => none
 
 /-- Two postconditions that hold in the same states hold after the same run:
@@ -1096,6 +1157,10 @@ theorem Fml.updAt_sound {r : UpdRuleName} :
     obtain ⟨φ', h', rfl⟩ := h
     exact forall_congr' fun _ => forall_congr' fun _ => forall_congr' fun _ =>
       Fml.updAt_sound φ h' _
+  | .all _ _ φ, ψ, h, σ => by
+    simp only [Fml.updAt, Option.map_eq_some_iff] at h
+    obtain ⟨φ', h', rfl⟩ := h
+    exact forall_congr' fun _ => imp_congr_right fun _ => Fml.updAt_sound φ h' _
   | .tt, _, h, _ | .eq .., _, h, _ => by simp [Fml.updAt] at h
 
 /-! ## All of them: `Fml.simpUpds`
@@ -1124,6 +1189,7 @@ def Fml.simpUpds : Fml C → Fml C
   | .imp φ ψ => .imp φ.simpUpds ψ.simpUpds
   | .modal m P φ => .modal m P φ.simpUpds
   | .havoc φ => .havoc φ.simpUpds
+  | .all x p φ => .all x p φ.simpUpds
   | φ => φ
 
 /-- `Fml.clean m U φ` holds exactly when `{U} φ` does.
@@ -1177,6 +1243,9 @@ theorem Fml.simpUpds_holds : (φ : Fml C) → ∀ σ, (holds σ φ.simpUpds ↔ 
     simp only [Fml.simpUpds, holds]
     exact forall_congr' fun _ => forall_congr' fun _ => forall_congr' fun _ =>
       Fml.simpUpds_holds φ _
+  | .all _ _ φ, σ => by
+    simp only [Fml.simpUpds, holds]
+    exact forall_congr' fun _ => imp_congr_right fun _ => Fml.simpUpds_holds φ _
   | .tt, _ | .eq .., _ => Iff.rfl
 
 /-! ## In a derivation: `Proves.merge`, `Proves.simplify`

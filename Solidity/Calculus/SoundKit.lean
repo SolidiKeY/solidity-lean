@@ -194,13 +194,13 @@ code; these name the reads, so both sides split on the same atoms. -/
 def envVal (σ : State) (x : Var) : Res Value := do
   match ← σ.getEnv x with
   | .val v => pure v
-  | .spath .. | .mref _ => .error .stuck
+  | .spath .. | .mref _ | .store _ => .error .stuck
 
 /-- A memory local's identity. -/
 def envRef (σ : State) (x : Var) : Res Nat := do
   match ← σ.getEnv x with
   | .mref id => pure id
-  | .val _ | .spath .. => .error .stuck
+  | .val _ | .spath .. | .store _ => .error .stuck
 
 @[simp] theorem Term.eval_pv (σ : State) (x : Var) : (Term.pv x : Term C).eval σ = envVal σ x := rfl
 @[simp] theorem Simple.eval_local (σ : State) {p : PrimTy} (x : Var) :

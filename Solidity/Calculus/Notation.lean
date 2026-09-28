@@ -78,6 +78,11 @@ inductive RawFml where
   | eq (a b : RawTerm)
   | peq (a b : RawExpr)
   | pne (a b : RawExpr)
+  /-- `a < b`, `a <= b`, `a > b`, `a >= b`: terms, compared as `uint`s
+  (as `+` and `-` add them). -/
+  | cmp (op : BinOp) (a b : RawTerm)
+  /-- `∀ uint x; φ` -/
+  | all (p : PrimTy) (x : String) (φ : RawFml)
   | not (φ : RawFml)
   | and (φ ψ : RawFml)
   | imp (φ ψ : RawFml)
@@ -126,6 +131,7 @@ partial def expandTerm : TSyntax `dl_term → MacroM Lean.Term
   | `(dl_term| $a:dl_term + $b:dl_term) => do `(RawTerm.add $(← expandTerm a) $(← expandTerm b))
   | `(dl_term| $a:dl_term - $b:dl_term) => do `(RawTerm.sub $(← expandTerm a) $(← expandTerm b))
   | `(dl_term| ( $t:dl_term )) => expandTerm t
+  | `(dl_term| ! $t:dl_term) => do `(RawTerm.app "!" [$(← expandTerm t)])
   | `(dl_term| $f:ident($args,*)) => do
       `(RawTerm.app $(quote f.getId.toString) [$(← args.getElems.mapM expandTerm),*])
   | stx@`(dl_term| ‹ $_:term ›) => noEscape stx
@@ -173,6 +179,12 @@ partial def expandFml : TSyntax `dl_fml → MacroM Lean.Term
       `(RawFml.peq $(← expandOperand a) $(← expandOperand b))
   | `(dl_fml| $a:dl_term != $b:dl_term) => do
       `(RawFml.pne $(← expandOperand a) $(← expandOperand b))
+  | `(dl_fml| $a:dl_term < $b:dl_term) => cmp ``BinOp.lt a b
+  | `(dl_fml| $a:dl_term <= $b:dl_term) => cmp ``BinOp.le a b
+  | `(dl_fml| $a:dl_term > $b:dl_term) => cmp ``BinOp.gt a b
+  | `(dl_fml| $a:dl_term >= $b:dl_term) => cmp ``BinOp.ge a b
+  | `(dl_fml| ∀ $T:ident $x:ident; $φ:dl_fml) => do
+      `(RawFml.all $(← specSort T) $(quote x.getId.toString) $(← expandFml φ))
   | `(dl_fml| ¬ $φ:dl_fml) => do `(RawFml.not $(← expandFml φ))
   | `(dl_fml| $φ:dl_fml ∧ $ψ:dl_fml) | `(dl_fml| $φ:dl_fml && $ψ:dl_fml) => do
       `(RawFml.and $(← expandFml φ) $(← expandFml ψ))
@@ -189,6 +201,9 @@ partial def expandFml : TSyntax `dl_fml → MacroM Lean.Term
   | `(dl_fml| ( $φ:dl_fml )) => expandFml φ
   | stx@`(dl_fml| ‹ $_:term ›) => noEscape stx
   | _ => Macro.throwUnsupported
+where
+  cmp (op : Lean.Name) (a b : TSyntax `dl_term) : MacroM Lean.Term := do
+    `(RawFml.cmp $(mkIdent op) $(← expandTerm a) $(← expandTerm b))
 
 end Expand
 
@@ -268,6 +283,10 @@ def RawFml.names : RawFml → List String × List String
   | .tt => ([], [])
   | .eq a b => (a.names ++ b.names, [])
   | .peq a b | .pne a b => (a.names ++ b.names, [])
+  | .cmp _ a b => (a.names ++ b.names, [])
+  | .all _ x φ =>
+    let (u, d) := φ.names
+    (u.filter (· != x), d)
   | .not φ => φ.names
   | .and φ ψ | .imp φ ψ =>
     let (u, d) := φ.names
@@ -282,7 +301,7 @@ def RawFml.names : RawFml → List String × List String
 
 /-- The statements of every program in a formula. -/
 def RawFml.stmts : RawFml → List RawStmt
-  | .not φ | .upd _ φ => φ.stmts
+  | .not φ | .upd _ φ | .all _ _ φ => φ.stmts
   | .and φ ψ | .imp φ ψ => φ.stmts ++ ψ.stmts
   | .modal _ P φ => P ++ φ.stmts
   | _ => []
@@ -302,7 +321,7 @@ variable [FreshNames] (C : Contract)
 
 /-- What a name stands for in a term. -/
 inductive NameKind where
-  | local | alias | mem | root
+  | local | alias | mem | root | store
 
 /-- A local in scope by what it holds, then a state variable, then a fresh
 `sp1`/`mv1` by its spelling; anything else is a stack local. -/
@@ -311,6 +330,7 @@ def nameKind (Γ : ECtx) (x : String) : NameKind :=
   | some (.val _) => .local
   | some (.alias _) => .alias
   | some (.mem _) => .mem
+  | some .store => .store
   | none =>
     if (C.rootType x).isSome then .root else
     match Var.ofName x with
@@ -361,6 +381,7 @@ partial def tVal (Γ : ECtx) : RawTerm → Except String (Term C)
     | .root => pure (.find .storage (.root x))
     | .alias => throw s!"`{x}` is a storage alias, not a value: read it with `find(storage, …)`"
     | .mem => throw s!"`{x}` is a memory reference, not a value"
+    | .store => throw s!"`{x}` is a storage, not a value: read it with `find({x}, …)`"
   | .add a b => do pure (.binop .add .uint (← tVal Γ a) (← tVal Γ b))
   | .sub a b => do pure (.binop .sub .uint (← tVal Γ a) (← tVal Γ b))
   | .field p "length" => do
@@ -371,6 +392,7 @@ partial def tVal (Γ : ECtx) : RawTerm → Except String (Term C)
     else pure (.find .storage (← tPath Γ t))
   | .app "select" [s, r] | .app "find" [s, r] => do pure (.find (← tStor Γ s) (← tPath Γ r))
   | .app "read" [m, a] => do pure (.read (← tMem Γ m) (← tAddr Γ a))
+  | .app "!" [t] => do pure (.unop .not .bool (← tVal Γ t))
   | .app "defVal" [.name "uint"] => pure (.lit (PrimTy.default .uint))
   | .app "defVal" [.name "int"] => pure (.lit (PrimTy.default .int))
   | .app "defVal" [.name "bool"] => pure (.lit (PrimTy.default .bool))
@@ -397,6 +419,9 @@ partial def tPath (Γ : ECtx) : RawTerm → Except String (PTerm C)
 `save`s over the length. -/
 partial def tStor (Γ : ECtx) : RawTerm → Except String (STerm C)
   | .name "storage" => pure .storage
+  | .name x =>
+    if nameKind C Γ x matches .store then pure (.pv (Var.ofName x))
+    else throw s!"`{x}` is not a storage: `storage`, or a variable an update binds to one"
   | .app "store" [s, .name r, v] => do pure (.save (← tStor Γ s) (.root r) (← tSVal Γ v))
   | .app "save" [s, .field b "length", v] => do
     match s, v with
@@ -502,6 +527,8 @@ def elabUpd (Γ : ECtx) : List RawUpdElem → Except String (Upd C × ECtx)
     let (U', Γ') ← elabUpd Γ U
     if x = "storage" then return (.storage (← tStor C Γ t) :: U', Γ')
     if x = "memory" then return (.memory (← tMem C Γ t) :: U', Γ')
+    -- `old := storage`: a storage variable
+    if isStorTerm t then return (.store (Var.ofName x) (← tStor C Γ t) :: U', setBy x .store Γ')
     if let some (.ref R) := pathTy C Γ t then
       return (.path (Var.ofName x) (← tPath C Γ t) :: U', setBy x (.alias R) Γ')
     if t matches .app "freshId" _ then return (.mref (Var.ofName x) (← tIdent C Γ t) :: U', Γ')
@@ -509,7 +536,15 @@ def elabUpd (Γ : ECtx) : List RawUpdElem → Except String (Upd C × ECtx)
     | .alias => return (.path (Var.ofName x) (← tPath C Γ t) :: U', Γ')
     | .mem => return (.mref (Var.ofName x) (← tIdent C Γ t) :: U', Γ')
     | .root => throw s!"`{x}` is a state variable: an update writes it through `storage := …`"
+    | .store => throw s!"`{x}` is a storage variable: its right-hand side is a storage"
     | .local => return (.val (Var.ofName x) (← tVal C Γ t) :: U', Γ')
+where
+  /-- A storage term: `storage`, a storage variable, or a write over one. -/
+  isStorTerm : RawTerm → Bool
+    | .name "storage" => true
+    | .name y => (nameKind C Γ y matches .store)
+    | .app "store" _ | .app "save" _ | .app "delAt" _ => true
+    | _ => false
 
 /-- `a == b`: the operands typed as Solidity types them (the first that is
 not a literal gives the type), then lowered. -/
@@ -540,6 +575,12 @@ def elabFml : RawFml → ElabM (Fml C)
     let (Γ, _) ← get
     let (a, b) ← elabCompare C Γ a b
     pure (.not (.eq a b))
+  | .cmp op a b => do
+    let (Γ, _) ← get
+    pure (.eq (.binop op .uint (← tVal C Γ a) (← tVal C Γ b)) (.lit (.bool true)))
+  | .all p x φ => inScope do
+    modify fun (Γ, k) => (setBy x (.val p) Γ, k)
+    pure (.all (Var.ofName x) p (← elabFml φ))
   | .not φ => do pure (.not (← inScope (elabFml φ)))
   | .and φ ψ => do pure (.and (← inScope (elabFml φ)) (← inScope (elabFml ψ)))
   | .imp φ ψ => do pure (.imp (← inScope (elabFml φ)) (← inScope (elabFml ψ)))

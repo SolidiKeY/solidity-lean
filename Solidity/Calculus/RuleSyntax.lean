@@ -85,6 +85,8 @@ syntax:65 dl_term:65 " ⊕ " dl_term:66 : dl_term
 syntax:65 dl_term:65 " + " dl_term:66 : dl_term
 /-- A unary operator schema variable `op`, applied. -/
 syntax:80 "⊖" dl_term:80 : dl_term
+/-- `!t`: the negation of a `bool`. -/
+syntax:80 "!" dl_term:80 : dl_term
 /-- `t ± 1`: the increment or decrement schema variable `op`, as arithmetic. -/
 syntax:65 dl_term:65 " ± " dl_term:66 : dl_term
 /-- The value `t⊕⊕` has: the new one for `++t`, the old one for `t++`. -/
@@ -128,6 +130,14 @@ syntax:max "‹" term "›" : dl_fml
 `find(storage, alice.age) = 10`. -/
 syntax:55 dl_term:56 " == " dl_term:56 : dl_fml
 syntax:55 dl_term:56 " != " dl_term:56 : dl_fml
+/-- An order between program values, as in Solidity: `count >= 1` is
+`count ≥ 1 = true`. -/
+syntax:55 dl_term:56 " < " dl_term:56 : dl_fml
+syntax:55 dl_term:56 " <= " dl_term:56 : dl_fml
+syntax:55 dl_term:56 " > " dl_term:56 : dl_fml
+syntax:55 dl_term:56 " >= " dl_term:56 : dl_fml
+/-- `∀ uint a; φ`: KeY's `\forall`, over the values of a primitive type. -/
+syntax:25 "∀ " ident ident "; " dl_fml:25 : dl_fml
 syntax:50 dl_fml:55 " && " dl_fml:50 : dl_fml
 
 /-- What a taclet leaves: an update in front of the rest, statements, two
@@ -1622,6 +1632,7 @@ partial def ppTerm (e : Lean.Expr) : MetaM (TSyntax `dl_term) := do
     mkBinTerm sym (← ppTerm a) (← ppTerm b)
   | Term.unop _ op _ a =>
     if (← fvarName? op).isSome then return ← `(dl_term| ⊖$(← ppTerm a))
+    if (← whnf op).isConstOf ``UnOp.not then return ← `(dl_term| !$(← ppTerm a))
     escapeDl e
   | Term.find _ s p =>
     let s' ← ppSTerm s
@@ -1676,6 +1687,9 @@ partial def ppSTerm (e : Lean.Expr) : MetaM (TSyntax `dl_term) := do
   if let some n ← fvarName? e then return ← `(dl_term| $(nameIdent n):ident)
   match_expr (← whnf e) with
   | STerm.storage _ => `(dl_term| storage)
+  | STerm.pv _ x =>
+    let some x ← ppVar? x | escapeDl e
+    `(dl_term| $x:ident)
   | STerm.save _ s p v =>
     let s ← ppSTerm s
     match_expr (← whnf p) with
@@ -1763,6 +1777,9 @@ def ppUpdElem? (e : Lean.Expr) : MetaM (Option (TSyntax `dl_upd_elem)) := do
     let some x ← var x | return none
     return some (← `(dl_upd_elem| $x:dl_term := $(← ppITerm i):dl_term))
   | UpdElem.storage _ s => return some (← `(dl_upd_elem| storage := $(← ppSTerm s):dl_term))
+  | UpdElem.store _ x s =>
+    let some x ← var x | return none
+    return some (← `(dl_upd_elem| $x:dl_term := $(← ppSTerm s):dl_term))
   | UpdElem.memory _ m => return some (← `(dl_upd_elem| memory := $(← ppMTerm m):dl_term))
   | UpdElem.transfer _ r a =>
     return some (← `(dl_upd_elem| transfer($(← ppTerm r):dl_term, $(← ppTerm a):dl_term)))
@@ -1781,7 +1798,31 @@ def ppUpd (e : Lean.Expr) : MetaM (TSyntax `dl_upd) := do
 /-- A connective, which the operand of `¬`, `{U}` and `⟨P⟩` parenthesises. -/
 def isConnective (e : Lean.Expr) : MetaM Bool := do
   let e ← whnf e
-  return e.isAppOfArity ``Fml.and 3 || e.isAppOfArity ``Fml.imp 3
+  return e.isAppOfArity ``Fml.and 3 || e.isAppOfArity ``Fml.imp 3 || e.isAppOfArity ``Fml.all 4
+
+/-- `a < b = true`, a comparison as the specification writes one: its
+operator and operands. -/
+def cmpParts? (a b : Lean.Expr) : MetaM (Option (String × Lean.Expr × Lean.Expr)) := do
+  let some (_, v) := (← whnf b).app2? ``Term.lit | return none
+  unless (← whnf v).isAppOfArity ``Semantics.PrimVal.bool 1 &&
+    (← whnf (← whnf v).appArg!).isConstOf ``Bool.true do return none
+  let a ← whnf a
+  unless a.isAppOfArity ``Term.binop 5 do return none
+  let sym ← match_expr (← whnf (a.getArg! 1)) with
+    | BinOp.lt => pure "<"
+    | BinOp.le => pure "<="
+    | BinOp.gt => pure ">"
+    | BinOp.ge => pure ">="
+    | _ => return none
+  return some (sym, a.getArg! 3, a.getArg! 4)
+
+/-- A quantifier's type, as the specification writes it. -/
+def primName? (p : Lean.Expr) : MetaM (Option String) := do
+  match_expr (← whnf p) with
+  | PrimTy.uint => return "uint"
+  | PrimTy.int => return "int"
+  | PrimTy.bool => return "bool"
+  | _ => return none
 
 partial def ppFml (e : Lean.Expr) : MetaM (TSyntax `dl_fml) := do
   let e ← instantiateMVars e
@@ -1793,7 +1834,20 @@ partial def ppFml (e : Lean.Expr) : MetaM (TSyntax `dl_fml) := do
   | Fml.tt _ => `(dl_fml| true)
   | Fml.not _ φ =>
     if (← whnf φ).isAppOfArity ``Fml.tt 1 then `(dl_fml| false) else `(dl_fml| ¬$(← arg φ):dl_fml)
-  | Fml.eq _ a b => `(dl_fml| $(← ppTerm a):dl_term = $(← ppTerm b):dl_term)
+  | Fml.eq _ a b =>
+    if let some (sym, l, r) ← cmpParts? a b then
+      let l ← ppTerm l
+      let r ← ppTerm r
+      return ← match sym with
+        | "<" => `(dl_fml| $l:dl_term < $r:dl_term)
+        | "<=" => `(dl_fml| $l:dl_term <= $r:dl_term)
+        | ">" => `(dl_fml| $l:dl_term > $r:dl_term)
+        | _ => `(dl_fml| $l:dl_term >= $r:dl_term)
+    `(dl_fml| $(← ppTerm a):dl_term = $(← ppTerm b):dl_term)
+  | Fml.all _ x p φ =>
+    let some x ← ppVar? x | escape
+    let some T ← primName? p | escape
+    `(dl_fml| ∀ $(mkIdent (Name.mkSimple T)):ident $x:ident; $(← ppFml φ):dl_fml)
   | Fml.and _ φ ψ =>
     let ψ' ← ppFml ψ
     let ψ' ← if (← whnf ψ).isAppOfArity ``Fml.imp 3 then `(dl_fml| ($ψ')) else pure ψ'
@@ -1840,7 +1894,7 @@ def delabFml : Delab := do
 
 attribute [delab app.Solidity.Fml.eq, delab app.Solidity.Fml.not,
   delab app.Solidity.Fml.and, delab app.Solidity.Fml.imp, delab app.Solidity.Fml.upd,
-  delab app.Solidity.Fml.modal] delabFml
+  delab app.Solidity.Fml.modal, delab app.Solidity.Fml.all] delabFml
 
 /-- `Valid φ`: `⊨ φ`. -/
 @[delab app.Solidity.Valid]

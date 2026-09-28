@@ -1,4 +1,5 @@
 import Solidity.AST
+import Solidity.SpecSyntax
 
 /-!
 # The typed syntax and its elaboration
@@ -184,6 +185,8 @@ structure FunDecl where
   body : List RawStmt
   /-- The modifiers it applies, the first listed outermost. -/
   mods : List ModApp := []
+  /-- Its `requires`/`ensures` clauses, as read (`Calculus/Spec.lean`). -/
+  spec : FunSpec := {}
   deriving Repr, Inhabited
 
 /-! ## The contract
@@ -205,6 +208,8 @@ structure Contract where
   /-- Its enums, each with its members in order: `State.Locked` is the
   `uint` literal `1` (an enum is read as `uint`, as `address` is). -/
   enums : List (Name × List Name) := []
+  /-- Its `invariant` clauses, as read: solkey's `CInv`. -/
+  inv : List SpecExpr := []
   deriving Repr, Inhabited
 
 namespace Contract
@@ -1245,6 +1250,15 @@ syntax &"error " ident "(" sol_eparam,* ")" ";" : sol_member
 /-- `enum State { Created, Locked }`: `State.Locked` is `1`. -/
 syntax &"enum " ident "{" ident,* "}" : sol_member
 
+/-- A clause of the specification, where solkey's NatSpec line stands:
+`requires e;` and `ensures e;` above the function they specify (`/// @custom:key
+requires e`), `skip;` for a function with no obligation, `invariant e;`
+anywhere, a clause of the contract. -/
+syntax (name := solRequires) (priority := high) &"requires " spec_expr ";" : sol_member
+syntax (name := solEnsures) (priority := high) &"ensures " spec_expr ";" : sol_member
+syntax (name := solSkip) (priority := high) &"skip" ";" : sol_member
+syntax (name := solInvariant) (priority := high) &"invariant " spec_expr ";" : sol_member
+
 /-- `contract!{ uint total; Person alice; mapping(uint => Person) folks; }`:
 a contract written as Solidity declares its state, and its functions. -/
 syntax "contract!{" sol_member* "}" : term
@@ -1285,7 +1299,7 @@ def expandModifier (enums : List String) (m : Ident) (ps : Array (TSyntax `sol_p
 modifiers read off its attributes. -/
 def expandFun (enums : List String) (mods : List (String × Array Term × Term × Term)) (f : Ident)
     (ps : Array (TSyntax `sol_param)) (attrs : Array (TSyntax `sol_fattr))
-    (b : TSyntax `sol_block) : MacroM Term := do
+    (b : TSyntax `sol_block) (spec : Term) : MacroM Term := do
   let ps ← expandParams enums ps
   let mut ret ← `(none)
   let mut apps : Array Term := #[]
@@ -1313,7 +1327,7 @@ def expandFun (enums : List String) (mods : List (String × Array Term × Term �
     | _ => Macro.throwUnsupported
   let body ← expandStmt.expandBlock b
   `(($(quote f.getId.toString),
-    ({ params := [$ps,*], ret := $ret, body := $body, mods := [$apps,*] } : FunDecl)))
+    ({ params := [$ps,*], ret := $ret, body := $body, mods := [$apps,*], spec := $spec } : FunDecl)))
 
 end
 
@@ -1338,18 +1352,36 @@ macro_rules
         | _ => pure ()
       let mut rows := #[]
       let mut funs := #[]
+      -- the clauses read since the last function: they specify the next one
+      let mut reqs : Array Lean.Term := #[]
+      let mut enss : Array Lean.Term := #[]
+      let mut skip := false
+      let mut invs : Array Lean.Term := #[]
       for m in ms do
+        -- `requires x;` also reads as a state variable `x` of a type `requires`
+        let m : Lean.TSyntax `sol_member := if m.raw.isOfKind Lean.choiceKind then
+            ⟨(m.raw.getArgs.find? fun a => [``solRequires, ``solEnsures, ``solSkip,
+              ``solInvariant].any a.isOfKind).getD m.raw[0]⟩
+          else m
         match m with
+        | `(sol_member| requires $e:spec_expr ;) => reqs := reqs.push (← expandSpec e)
+        | `(sol_member| ensures $e:spec_expr ;) => enss := enss.push (← expandSpec e)
+        | `(sol_member| skip ;) => skip := true
+        | `(sol_member| invariant $e:spec_expr ;) => invs := invs.push (← expandSpec e)
         | `(sol_member| $T:sol_ty $_:sol_vis* $x:ident ;) =>
           rows := rows.push (← `(($(Lean.quote x.getId.toString), $(← expandMemberTy enums T))))
         | `(sol_member| function $f:ident ( $ps:sol_param,* ) $as:sol_fattr* $b:sol_block) =>
-          funs := funs.push (← expandFun enums mods f ps.getElems as b)
+          let spec ← `(({ requires := [$reqs,*], ensures := [$enss,*], skip := $(Lean.quote skip) } : FunSpec))
+          funs := funs.push (← expandFun enums mods f ps.getElems as b spec)
+          reqs := #[]; enss := #[]; skip := false
         | `(sol_member| modifier $_:ident $[( $_:sol_param,* )]? $_:sol_block)
         | `(sol_member| event $_:ident ( $_:sol_eparam,* ) ;)
         | `(sol_member| error $_:ident ( $_:sol_eparam,* ) ;)
         | `(sol_member| enum $_:ident { $_:ident,* }) => pure ()
         | _ => Lean.Macro.throwUnsupported
-      `(({ vars := [$rows,*], funs := [$funs,*], enums := [$enumRows,*] } : Contract))
+      unless reqs.isEmpty && enss.isEmpty && !skip do
+        Lean.Macro.throwError "a `requires`, `ensures` or `skip` clause after the last function"
+      `(({ vars := [$rows,*], funs := [$funs,*], enums := [$enumRows,*], inv := [$invs,*] } : Contract))
 /-! ### The contracts
 
 One per store of `Semantics.lean`, under the store's renames, with
@@ -1468,6 +1500,9 @@ inductive LocalTy where
   | val (p : PrimTy)
   | alias (R : RefTy)
   | mem (R : RefTy)
+  /-- A storage variable, `old`: only a formula binds one (`old := storage`),
+  and a program cannot read it. -/
+  | store
   deriving DecidableEq, Repr
 
 /-- The locals in scope, most recent first. -/
@@ -1570,6 +1605,7 @@ def synth (Γ : ECtx) : RawExpr → Except String (TExpr C)
     | some (.val p) => pure (.val p (.simple (.local (Var.ofName x))))
     | some (.alias R) => pure (.path (.ref R) (.alias (Var.ofName x)))
     | some (.mem R) => pure (.mpath (.ref R) (.var (Var.ofName x)))
+    | some .store => throw s!"{x} is a storage variable, not a program value"
     | none =>
       match hr : C.rootType x with
       | some T => pure (.path T (.loc (.root x hr)))

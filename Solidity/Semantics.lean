@@ -86,6 +86,94 @@ inductive SVal where
   | map (entries : List (Int × SVal)) (dflt : SVal)
   deriving Repr
 
+/-! `SVal`'s equality is decidable, written out by hand (a nested
+inductive): `Binding` holds a storage (`Binding.store`) and derives its
+`DecidableEq`. -/
+mutual
+
+private def svalDecEq : (a b : SVal) -> Decidable (a = b)
+  | .prim x, .prim y =>
+      if h : x = y then .isTrue (by rw [h])
+      else .isFalse (fun he => h (SVal.prim.inj he))
+  | .struct fs, .struct gs =>
+      match svalFieldsDecEq fs gs with
+      | .isTrue h => .isTrue (by rw [h])
+      | .isFalse h => .isFalse (fun he => h (SVal.struct.inj he))
+  | .array xs sx fx, .array ys sy fy =>
+      if h3 : fx = fy then
+        match svalElemsDecEq xs ys, svalElemsDecEq sx sy with
+        | .isTrue h1, .isTrue h2 => .isTrue (by rw [h1, h2, h3])
+        | .isFalse h1, _ => .isFalse (fun he => h1 (SVal.array.inj he).1)
+        | _, .isFalse h2 => .isFalse (fun he => h2 (SVal.array.inj he).2.1)
+      else .isFalse (fun he => h3 (SVal.array.inj he).2.2)
+  | .map es d, .map fs e =>
+      match svalEntriesDecEq es fs, svalDecEq d e with
+      | .isTrue h1, .isTrue h2 => .isTrue (by rw [h1, h2])
+      | .isFalse h1, _ => .isFalse (fun he => h1 (SVal.map.inj he).1)
+      | _, .isFalse h2 => .isFalse (fun he => h2 (SVal.map.inj he).2)
+  | .prim _, .struct _ => .isFalse (fun he => SVal.noConfusion he)
+  | .prim _, .array _ _ _ => .isFalse (fun he => SVal.noConfusion he)
+  | .prim _, .map _ _ => .isFalse (fun he => SVal.noConfusion he)
+  | .struct _, .prim _ => .isFalse (fun he => SVal.noConfusion he)
+  | .struct _, .array _ _ _ => .isFalse (fun he => SVal.noConfusion he)
+  | .struct _, .map _ _ => .isFalse (fun he => SVal.noConfusion he)
+  | .array _ _ _, .prim _ => .isFalse (fun he => SVal.noConfusion he)
+  | .array _ _ _, .struct _ => .isFalse (fun he => SVal.noConfusion he)
+  | .array _ _ _, .map _ _ => .isFalse (fun he => SVal.noConfusion he)
+  | .map _ _, .prim _ => .isFalse (fun he => SVal.noConfusion he)
+  | .map _ _, .struct _ => .isFalse (fun he => SVal.noConfusion he)
+  | .map _ _, .array _ _ _ => .isFalse (fun he => SVal.noConfusion he)
+
+private def svalFieldsDecEq :
+    (a b : List (Name × SVal)) -> Decidable (a = b)
+  | [], [] => .isTrue rfl
+  | [], _ :: _ => .isFalse (fun he => List.noConfusion he)
+  | _ :: _, [] => .isFalse (fun he => List.noConfusion he)
+  | (n, v) :: xs, (m, w) :: ys =>
+      if hn : n = m then
+        match svalDecEq v w, svalFieldsDecEq xs ys with
+        | .isTrue hv, .isTrue ht => .isTrue (by rw [hn, hv, ht])
+        | .isFalse hv, _ =>
+            .isFalse (fun he =>
+              hv (Prod.mk.inj (List.cons.inj he).1).2)
+        | _, .isFalse ht =>
+            .isFalse (fun he => ht (List.cons.inj he).2)
+      else
+        .isFalse (fun he => hn (Prod.mk.inj (List.cons.inj he).1).1)
+
+private def svalElemsDecEq : (a b : List SVal) -> Decidable (a = b)
+  | [], [] => .isTrue rfl
+  | [], _ :: _ => .isFalse (fun he => List.noConfusion he)
+  | _ :: _, [] => .isFalse (fun he => List.noConfusion he)
+  | x :: xs, y :: ys =>
+      match svalDecEq x y, svalElemsDecEq xs ys with
+      | .isTrue hx, .isTrue ht => .isTrue (by rw [hx, ht])
+      | .isFalse hx, _ =>
+          .isFalse (fun he => hx (List.cons.inj he).1)
+      | _, .isFalse ht =>
+          .isFalse (fun he => ht (List.cons.inj he).2)
+
+private def svalEntriesDecEq :
+    (a b : List (Int × SVal)) -> Decidable (a = b)
+  | [], [] => .isTrue rfl
+  | [], _ :: _ => .isFalse (fun he => List.noConfusion he)
+  | _ :: _, [] => .isFalse (fun he => List.noConfusion he)
+  | (i, v) :: xs, (j, w) :: ys =>
+      if hi : i = j then
+        match svalDecEq v w, svalEntriesDecEq xs ys with
+        | .isTrue hv, .isTrue ht => .isTrue (by rw [hi, hv, ht])
+        | .isFalse hv, _ =>
+            .isFalse (fun he =>
+              hv (Prod.mk.inj (List.cons.inj he).1).2)
+        | _, .isFalse ht =>
+            .isFalse (fun he => ht (List.cons.inj he).2)
+      else
+        .isFalse (fun he => hi (Prod.mk.inj (List.cons.inj he).1).1)
+
+end
+
+instance : DecidableEq SVal := svalDecEq
+
 namespace SVal
 @[match_pattern] abbrev int (v : Int) : SVal := .prim (.int v)
 @[match_pattern] abbrev bool (b : Bool) : SVal := .prim (.bool b)
@@ -119,11 +207,13 @@ inductive Seg where
   deriving Repr, DecidableEq
 
 /-- Local bindings: stack values, storage path aliases, memory
-references. -/
+references, and a whole storage (KeY's program variable `old` of sort
+`Struct`, which a specification's `\old` reads; no statement binds one). -/
 inductive Binding where
   | val (v : Value)
   | spath (root : Name) (segs : List Seg)
   | mref (id : Nat)
+  | store (st : List (Name × SVal))
   deriving Repr, DecidableEq
 
 /-- What the transaction running the program was sent with: KeY's program
@@ -971,7 +1061,7 @@ variable {C : Contract}
 def aliasPath (σ : State) (x : Var) : Res (Name × List Seg) := do
   match ← σ.getEnv x with
   | .spath root segs => pure (root, segs)
-  | .val _ | .mref _ => .error .stuck
+  | .val _ | .mref _ | .store _ => .error .stuck
 
 /-- A word is stored as it is. -/
 @[simp] theorem State.writeStorage_prim (σ : State) (r : Name) (segs : List Seg) (p : PrimVal) :
@@ -1011,7 +1101,7 @@ def Simple.eval (σ : State) {p : PrimTy} : Simple C p → Res Value
   | .local x => do
     match ← σ.getEnv x with
     | .val v => pure v
-    | .spath .. | .mref _ => .error .stuck
+    | .spath .. | .mref _ | .store _ => .error .stuck
   | .env k _ => pure (.int (σ.envVal k))
 
 /-- The length of the array at a storage path: `values.length`. -/
@@ -1056,7 +1146,7 @@ def MPath.mval (σ : State) : {T : Ty} → MPath C T → Res MVal
   | _, .var x => do
     match ← σ.getEnv x with
     | .mref id => pure (.ref id)
-    | .val _ | .spath .. => .error .stuck
+    | .val _ | .spath .. | .store _ => .error .stuck
   | _, .loc l => l.read σ
 
 def MLoc.read (σ : State) : {T : Ty} → MLoc C T → Res MVal
@@ -1199,7 +1289,7 @@ def opStore (σ : State) (op : BinOp) (p : PrimTy) (root : Name) (segs : List Se
 def opLocal (σ : State) (op : BinOp) (p : PrimTy) (x : Var) (v : Value) : Res State := do
   let old ← match ← σ.getEnv x with
     | .val v => pure v
-    | .spath .. | .mref _ => .error .stuck
+    | .spath .. | .mref _ | .store _ => .error .stuck
   let new ← applyBinOp op old v
   let new ← checkArith (.prim p) new
   pure (σ.setEnv x (.val new))
@@ -1243,7 +1333,7 @@ def bumpStore (σ : State) (op : IncDec) (p : PrimTy) (root : Name) (segs : List
 def bumpLocal (σ : State) (op : IncDec) (p : PrimTy) (x : Var) : Res (State × Value) := do
   let old ← match ← σ.getEnv x with
     | .val v => pure v
-    | .spath .. | .mref _ => .error .stuck
+    | .spath .. | .mref _ | .store _ => .error .stuck
   let oldInt ← old.asInt
   let new ← checkArith (.prim p) (.int (if op.isIncrement then oldInt + 1 else oldInt - 1))
   pure (σ.setEnv x (.val new), if op.isPre then new else old)

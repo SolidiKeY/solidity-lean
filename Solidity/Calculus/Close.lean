@@ -248,18 +248,27 @@ applies and the scrutinee is named first.  A read of memory stays whole
 a memory local has none. -/
 def bindingVal : Binding → Res Value
   | .val v => .ok v
-  | .spath .. | .mref _ => .error .stuck
+  | .spath .. | .mref _ | .store _ => .error .stuck
 
 /-- The path an alias holds: `p` after `Person storage p = alice;` is
 `alice`. -/
 def bindingPath : Binding → Res (Name × List Seg)
   | .spath r segs => .ok (r, segs)
-  | .val _ | .mref _ => .error .stuck
+  | .val _ | .mref _ | .store _ => .error .stuck
 
 /-- The object a memory local holds: `m` after `Person memory m;`. -/
 def bindingRef : Binding → Res Nat
   | .mref id => .ok id
-  | .val _ | .spath .. => .error .stuck
+  | .val _ | .spath .. | .store _ => .error .stuck
+
+/-- The storage a storage variable holds: `old` after `{old := storage}`. -/
+def bindingStore : Binding → Res (List (Name × SVal))
+  | .store st => .ok st
+  | .val _ | .spath .. | .mref _ => .error .stuck
+
+/-- `old` bound to a storage reads it. -/
+@[simp] theorem bindingStore_store (st : List (Name × SVal)) :
+    bindingStore (.store st) = .ok st := rfl
 
 /-- `x` bound to `10` reads `10`. -/
 @[simp] theorem bindingVal_val (v : Value) : bindingVal (.val v) = .ok v := rfl
@@ -303,6 +312,10 @@ theorem asValue_toMVal (v : Value) : (Value.toMVal v).asValue = .ok v := by
 @[simp] theorem asValue_int (v : Int) : (SVal.int v).asValue = .ok (.int v) := rfl
 /-- Reading the word `true` gives `true`. -/
 @[simp] theorem asValue_bool (b : Bool) : (SVal.bool b).asValue = .ok (.bool b) := rfl
+/-- A read that gives a word read one: `delete balances[a];` then leaves that
+word's default. -/
+theorem asValue_eq_ok {v : SVal} {p : PrimVal} : v.asValue = .ok p ↔ v = .prim p := by
+  rcases v with p' | _ | _ | _ <;> (try cases p') <;> cases p <;> simp [SVal.asValue]
 /-- A memory slot holding `10` reads `10`. -/
 theorem mval_asValue_prim (p : PrimVal) : (MVal.prim p).asValue = .ok p := by
   cases p <;> rfl
@@ -450,6 +463,13 @@ theorem PTerm.eval_next (p : PTerm C) : (PTerm.next p).eval σ =
   cases p.eval σ <;> rfl
 /-- `storage` is the storage of the state it is read in. -/
 theorem STerm.eval_storage : (STerm.storage : STerm C).eval σ = .ok σ := rfl
+/-- `old` is the storage it was bound to, in the state it is read in. -/
+theorem STerm.eval_pv (x : Var) : (STerm.pv x : STerm C).eval σ =
+    σ.getEnv x >>= bindingStore >>= fun st => .ok { σ with storage := st } := by
+  simp only [STerm.eval, bind, Except.bind]
+  cases σ.getEnv x with
+  | error _ => rfl
+  | ok b => cases b <;> rfl
 /-- `save(storage, alice.age, 10)`: the value, the storage, the path, the
 write. -/
 theorem STerm.eval_save (s : STerm C) (p : PTerm C) (t : Term C) :
@@ -574,6 +594,10 @@ theorem UpdElem.write_mref (σ₀ τ : State) (x : Var) (i : ITerm C) :
 /-- `{storage := save(…)}` replaces the storage, and nothing else. -/
 theorem UpdElem.write_storage (σ₀ τ : State) (s : STerm C) : (UpdElem.storage s).write σ₀ τ =
     s.eval σ₀ >>= fun τ' => .ok { τ with storage := τ'.storage } := rfl
+/-- `{old := storage}` binds the storage variable `old` to the storage. -/
+theorem UpdElem.write_store (σ₀ τ : State) (x : Var) (s : STerm C) :
+    (UpdElem.store x s).write σ₀ τ = s.eval σ₀ >>= fun τ' => .ok (τ.setEnv x (.store τ'.storage)) :=
+  rfl
 /-- `{memory := write(…)}` replaces the heap, and nothing else. -/
 theorem UpdElem.write_memory (σ₀ τ : State) (m : MTerm C) : (UpdElem.memory m).write σ₀ τ =
     m.eval σ₀ >>= fun μ => .ok { τ with heap := μ.heap, nextId := μ.nextId } := rfl
@@ -611,6 +635,9 @@ produced in. -/
 theorem holds_upd (m : Modality) (U : Upd C) (φ : Fml C) :
     holds σ (.upd m U φ) ↔ m.wp (U.apply σ) (holds · φ) := by
   simp only [holds, Modality.after_eq_wp]
+/-- `∀ uint a; φ`: `φ` for every `a` of the type. -/
+theorem holds_all (x : Var) (p : PrimTy) (φ : Fml C) :
+    holds σ (.all x p φ) ↔ ∀ v, p.admits v → holds (σ.setEnv x (.val v)) φ := Iff.rfl
 
 end Eval
 
@@ -621,9 +648,11 @@ end Close
 attribute [close_rw]
   -- formulas and updates
   Close.holds_tt Close.holds_not Close.holds_and Close.holds_imp Close.holds_eq Close.holds_upd
+  Close.holds_all
   Hyp.wrap Upd.apply List.foldlM_cons List.foldlM_nil
   Close.UpdElem.write_val Close.UpdElem.write_path Close.UpdElem.write_mref
-  Close.UpdElem.write_storage Close.UpdElem.write_memory Close.UpdElem.write_transfer
+  Close.UpdElem.write_storage Close.UpdElem.write_store Close.UpdElem.write_memory
+  Close.UpdElem.write_transfer
   -- terms
   Close.Term.eval_lit Close.Term.eval_pv Close.Term.eval_binop Close.Term.eval_unop
   Close.Term.eval_find Close.Term.eval_len Close.Term.eval_read Close.Term.eval_ite
@@ -633,7 +662,7 @@ attribute [close_rw]
   Close.forall_unit Close.exists_unit
   Close.find_overlay_fields Close.layAt_prim Close.fieldPath_nil Close.fieldPath_field
   Close.fieldPath_at
-  Close.STerm.eval_storage Close.STerm.eval_save Close.STerm.eval_save_find
+  Close.STerm.eval_storage Close.STerm.eval_pv Close.STerm.eval_save Close.STerm.eval_save_find
   Close.STerm.eval_save_copyMem Close.STerm.eval_delAt Close.STerm.eval_push
   Close.STerm.eval_pushSlot Close.STerm.eval_pop Close.STerm.eval_shrink
   Close.SValT.eval_val Close.SValT.eval_find Close.SValT.eval_copyMem
@@ -652,7 +681,8 @@ attribute [close_rw]
   Close.pure_eq_ok Close.ok_bind Close.error_bind Close.bind_ok_right bind_assoc
   Close.saveStorage_bind_restore Close.writeAddr_bind_restore
   -- values
-  Close.bindingVal_val Close.bindingPath_spath Close.bindingRef_mref Close.bindingVal_eq_ok
+  Close.bindingVal_val Close.bindingPath_spath Close.bindingRef_mref Close.bindingStore_store
+  Close.bindingVal_eq_ok
   Close.bindingRef_eq_ok Close.asInt_eq_ok Close.asBool_eq_ok Close.asRef_eq_ok Close.toMVal_eq
   Close.toSVal_int Close.toSVal_bool Close.asValue_toSVal Close.asValue_toMVal Close.asValue_int
   Close.asValue_bool Close.mval_asValue_prim Close.mval_asValue_ref Close.mval_asRef_ref
@@ -670,7 +700,8 @@ attribute [close_rw]
   Close.copyLeaf_prim Close.apart_field Close.apart_index Close.apart_field_index
   Close.apart_index_field
   -- logic
-  Except.ok.injEq Binding.val.injEq Binding.mref.injEq PrimVal.int.injEq PrimVal.bool.injEq
+  Except.ok.injEq Binding.val.injEq Binding.mref.injEq Binding.store.injEq PrimVal.int.injEq
+  PrimVal.bool.injEq
   MVal.prim.injEq MVal.ref.injEq SVal.prim.injEq Prod.mk.injEq Seg.field.injEq Seg.at.injEq
   Var.user.injEq Var.fresh.injEq Int.ofNat.injEq
   forall_eq' forall_eq exists_eq_left' exists_eq_left forall_exists_index and_imp

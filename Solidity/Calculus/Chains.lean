@@ -92,7 +92,7 @@ theorem Fml.ruleAt_isSome {k : Nat} :
     simp only [Fml.ruleAt, Fml.stepAt]
     split <;> simp [Fml.ruleAt_isSome]
   | .modal _ [] _ | .modal _ (_ :: _) _ => rfl
-  | .tt | .eq .. | .not _ => rfl
+  | .tt | .eq .. | .not _ | .all .. => rfl
 
 /-! ## One step, several, a chain -/
 

@@ -933,7 +933,7 @@ def Fml.measure : Fml C → Nat
   | .modal _ P φ => 2 ^ Prog.weight P * (φ.measure + 1)
   | .upd _ _ φ | .imp _ φ | .havoc φ => φ.measure
   | .and φ ψ => φ.measure + ψ.measure
-  | .tt | .eq .. | .not _ => 0
+  | .tt | .eq .. | .not _ | .all .. => 0
 
 /-- What a diamond branch owes besides its goals measures nothing.
 
@@ -1010,7 +1010,7 @@ theorem Fml.stepAt_decreases {k : Nat} :
     simp only [Fml.stepAt, Option.some.injEq] at h
     subst h
     exact Premise.measure_lt (Stmt.step_smaller k m s) ω φ
-  | .tt, _, h | .eq .., _, h | .not _, _, h => by simp [Fml.stepAt] at h
+  | .tt, _, h | .eq .., _, h | .not _, _, h | .all .., _, h => by simp [Fml.stepAt] at h
 
 /-- `Fml.measure` is a termination certificate: every step lowers it.
 
@@ -1045,7 +1045,7 @@ theorem Fml.measure_pos : ∀ {φ : Fml C}, φ.active = true → 0 < φ.measure
   | .and φ ψ, h => by
     simp only [Fml.active, Bool.or_eq_true] at h
     rcases h with h | h <;> have := Fml.measure_pos h <;> simp only [Fml.measure] <;> omega
-  | .tt, h | .eq .., h | .not _, h => by simp [Fml.active] at h
+  | .tt, h | .eq .., h | .not _, h | .all .., h => by simp [Fml.active] at h
 
 /-- **Normalization.**  Given as much fuel as its measure, the strategy leaves
 no modality in a formula: symbolic execution always runs to the end.

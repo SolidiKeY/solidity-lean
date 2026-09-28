@@ -1,6 +1,7 @@
 -- The root of the `Solidity` library: every module of the default build.
 import Solidity.KeySort
 import Solidity.AST
+import Solidity.SpecSyntax
 import Solidity.Syntax
 import Solidity.Semantics
 import Solidity.Semantics.DecEq
@@ -26,6 +27,7 @@ import Solidity.Calculus.Close
 import Solidity.Calculus.CloseTests
 import Solidity.Calculus.Decide
 import Solidity.Calculus.DecideComplete
+import Solidity.Calculus.Spec
 import Solidity.Calculus.Uniqueness
 import Solidity.Calculus.Progress
 import Solidity.Calculus.Termination

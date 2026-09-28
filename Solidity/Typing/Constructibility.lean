@@ -2382,6 +2382,7 @@ theorem SPath.resolve_keys (hwt : RunWT C Γ H σ) (hte : TightEnv C σ.env) :
         rw [hr] at hT; cases hT; exact hk
       | val _ => simp [hx, bind, Except.bind] at h
       | mref _ => simp [hx, bind, Except.bind] at h
+      | store _ => simp [hx, bind, Except.bind] at h
   | _, .loc l, r, segs, hw, h, T₀, hr => Loc.resolve_keys hwt hte l hw h T₀ hr
 
 theorem Loc.resolve_keys (hwt : RunWT C Γ H σ) (hte : TightEnv C σ.env) :
@@ -2770,6 +2771,7 @@ theorem OpLoc.store_tight (hd : DeepOk C) (hwt : RunWT C Γ H σ) (hc : Canon C 
         · cases h; exact ht.setEnv x (fun _ _ h => Binding.noConfusion h)
     | spath _ _ => exact nomatch h
     | mref _ => exact nomatch h
+    | store _ => exact nomatch h
   | p, .root r hr, v, _, h =>
     opStore_tight hd hc ht (Contract.layout_tyAt_root hr) (fun _ _ => trivial)
       (fun V _ => IdxLive.nil V) h
@@ -2810,6 +2812,7 @@ theorem OpLoc.bump_tight (hd : DeepOk C) (hwt : RunWT C Γ H σ) (hc : Canon C H
         · cases h; exact ht.setEnv x (fun _ _ h => Binding.noConfusion h)
     | spath _ _ => exact nomatch h
     | mref _ => exact nomatch h
+    | store _ => exact nomatch h
   | p, .root r hr, w, _, h =>
     bumpStore_tight hd hc ht (Contract.layout_tyAt_root hr) (fun _ _ => trivial)
       (fun V _ => IdxLive.nil V) h

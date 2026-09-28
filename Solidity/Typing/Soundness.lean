@@ -542,6 +542,7 @@ theorem Simple.eval_wt (hwt : RunWT C Γ H σ) {p : PrimTy} {s : Simple C p} {w 
     | val v => cases h; simpa [BTy.matchesB] using hm
     | spath _ _ => exact nomatch h
     | mref _ => exact nomatch h
+    | store _ => exact nomatch h
   | env k hp => subst hp; cases h; rfl
 
 mutual
@@ -560,6 +561,7 @@ theorem SPath.resolve_wt (hwt : RunWT C Γ H σ) :
       simpa [BTy.matchesB] using hm
     | val _ => exact nomatch h
     | mref _ => exact nomatch h
+    | store _ => exact nomatch h
   | _, .loc l, r, segs, hw, h => Loc.resolve_wt hwt l hw h
 
 /-- `alice.age` resolves to `(alice, [age])`, which the layout types `uint`. -/
@@ -597,6 +599,7 @@ theorem MPath.mval_wt (hwt : RunWT C Γ H σ) :
     | mref id => cases h; simpa [BTy.matchesB] using hm
     | val _ => exact nomatch h
     | spath _ _ => exact nomatch h
+    | store _ => exact nomatch h
   | _, .loc l, mv, hw, h => MLoc.read_wt hwt l hw h
 
 /-- `m.age` reads a slot the heap types `uint`. -/
@@ -1076,6 +1079,7 @@ theorem OpLoc.store_wt (hwt : RunWT C Γ H σ) {op : BinOp} (hop : op.isArith = 
           exact hwt.setEnv_same hw (by simpa [BTy.matchesB] using arith_new_wt hop hp h₁ h₂)
     | spath _ _ => exact nomatch h
     | mref _ => exact nomatch h
+    | store _ => exact nomatch h
   | p, .root r hr, v, hp, _, h => opStore_wt hwt hop hp (Contract.layout_tyAt_root hr) h
   | p, .field b f hf, v, hp, hw, h => by
     obtain ⟨⟨rt, segs⟩, hr, h⟩ := bind_ok_inv h
@@ -1155,6 +1159,7 @@ theorem OpLoc.bump_wt (hwt : RunWT C Γ H σ) {op : IncDec} :
           · rw [Value.asInt_ok hm]; exact int_toSVal_hasTy hp m
     | spath _ _ => exact nomatch h
     | mref _ => exact nomatch h
+    | store _ => exact nomatch h
   | p, .root r hr, w, hp, _, h => bumpStore_wt hwt hp (Contract.layout_tyAt_root hr) h
   | p, .field b f hf, w, hp, hw, h => by
     obtain ⟨⟨rt, segs⟩, hr, h⟩ := bind_ok_inv h

@@ -1248,6 +1248,7 @@ theorem OpLoc.store_canon (hwt : RunWT C Γ H σ) (hc : Canon C H σ) {op : BinO
         · cases h; exact hc.of_eq rfl rfl
     | spath _ _ => exact nomatch h
     | mref _ => exact nomatch h
+    | store _ => exact nomatch h
   | p, .root r hr, v, hp, _, h => opStore_canon hc hop hp (Contract.layout_tyAt_root hr) h
   | p, .field b f hf, v, hp, hw, h => by
     obtain ⟨⟨rt, segs⟩, hr, h⟩ := bind_ok_inv h
@@ -1288,6 +1289,7 @@ theorem OpLoc.bump_canon (hwt : RunWT C Γ H σ) (hc : Canon C H σ) {op : IncDe
         · cases h; exact hc.of_eq rfl rfl
     | spath _ _ => exact nomatch h
     | mref _ => exact nomatch h
+    | store _ => exact nomatch h
   | p, .root r hr, w, hp, _, h => bumpStore_canon hc hp (Contract.layout_tyAt_root hr) h
   | p, .field b f hf, w, hp, hw, h => by
     obtain ⟨⟨rt, segs⟩, hr, h⟩ := bind_ok_inv h
