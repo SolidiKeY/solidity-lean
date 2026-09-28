@@ -17,8 +17,8 @@ as it was — storage, locals and memory.  Those are theorems for every state.
 The ledger itself, and the revert when the contract is unfunded, are runs of
 the interpreter from `State.exampleStore` (which holds `10⁹` wei), checked by
 `rfl` (solkey's `net-*.key` files; `net-manual-update.key`, a raw update with
-no program, and `net-msg-value.key`, whose `msg.value` is not an expression
-here, have no counterpart).
+no program, has no counterpart).  `net-msg-value.key` reads `msg.value` and
+`msg.sender`, the transaction's values (`Simple.env`), into storage (§4).
 -/
 
 namespace Solidity.Examples.Net
@@ -135,5 +135,23 @@ theorem transferDrained :
     Prog.run { State.exampleStore with selfBalance := 5 }
       (sol{ uint to = 9; to.transfer(3); to.transfer(3); } : Prog StandardExample) =
       .error .revert := rfl
+
+/-! ## 4 · `msg.value`, `msg.sender`
+
+`net-msg-value.key`: `PiggyBankNet.readMsg` stores the transaction's value
+and sender. -/
+
+/-- `PiggyBankNet`'s fields `readMsg` writes, and `readMsg`. -/
+def PiggyMsg : Contract := contract!{
+  address paidBy; uint paidValue;
+  function readMsg() { paidValue = msg.value; paidBy = msg.sender; }
+}
+
+/-- `[ readMsg(); ] paidValue == msg.value && paidBy == msg.sender`
+(`net-msg-value.key`). -/
+theorem netMsgValue :
+    ⊨ dl[PiggyMsg]{ [ readMsg(); ] paidValue == msg.value && paidBy == msg.sender } := by
+  sol_symex
+  sol_close
 
 end Solidity.Examples.Net

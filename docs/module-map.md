@@ -155,3 +155,5 @@ went.
 | `Examples/Benchmark/Syntax.lean` | What elaborates away, pinned by what it prints: units, `payable`/`address` casts, events and `emit`, errors and `require`/`revert` with a message or an error, enums, struct constructors, modifiers. |
 | `Examples/Benchmark/Counter.lean`, `Examples/Benchmark/SimpleStorage.lean`, `Examples/Benchmark/Mapping.lean` | solkey's benchmark contracts `Counter`, `SimpleStorage`, `Mapping` and `NestedMapping` as published, their `@custom:key` clauses proved. |
 | `Examples/Benchmark/Purchase.lean` | solkey's benchmark `Purchase` with its enum, modifiers, errors and events as published (`msg.*` and `address(this).balance` as state variables), its clauses on `state` and `buyer` proved. |
+| `Examples/Benchmark/Coin.lean` | solkey's benchmark `Coin`: `msg.sender` in `require` and as a mapping key; `mint` and `send` against their `@custom:key` clauses, the two `send` clauses `sol_close` does not close as runs. |
+| `Examples/Benchmark/EtherWallet.lean` | solkey's benchmark `EtherWallet`: `withdraw` pays `msg.sender`; the owner kept, `address(this).balance` less by the amount, the ledger as a run. |

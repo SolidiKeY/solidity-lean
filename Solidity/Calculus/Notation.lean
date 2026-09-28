@@ -61,6 +61,9 @@ inductive RawTerm where
   | add (a b : RawTerm)
   | sub (a b : RawTerm)
   | app (f : String) (args : List RawTerm)
+  /-- `msg.sender`, `address(this).balance`, …: KeY's program variables
+  `msgSender`, `selfBalance`, …. -/
+  | env (k : EnvKey)
   deriving Repr, Inhabited
 
 /-- One elementary update as written. -/
@@ -91,13 +94,32 @@ def noEscape (stx : Syntax) : MacroM α :=
 def schemaOnly (stx : Syntax) : MacroM α :=
   Macro.throwErrorAt stx "an operator schema variable (`⊕`, `⊖`, `±`, `⊕⊕`) belongs to a taclet"
 
+/-- `address(this).balance`, which reads as the application `address(this)`
+and a member. -/
+def isSelfBalance (t : TSyntax `dl_term) (f : Ident) : Bool :=
+  match t with
+  | `(dl_term| $h:ident($as,*)) =>
+    h.getId.toString == "address" && f.getId.toString == "balance" &&
+      match as.getElems.toList with
+      | [a] => match a with
+        | `(dl_term| $x:ident) => x.getId.toString == "this"
+        | _ => false
+      | _ => false
+  | _ => false
+
 partial def expandTerm : TSyntax `dl_term → MacroM Lean.Term
   | `(dl_term| $n:num) => `(RawTerm.num $n)
   | `(dl_term| $x:ident) => do
       let root :: flds := nameParts x.getId | Macro.throwError "empty identifier"
-      flds.foldlM (init := ← `(RawTerm.name $(quote root))) fun acc f =>
+      let (base, flds) ← match flds with
+        | f :: flds' => match EnvKey.ofParts root f with
+          | some k => pure (← `(RawTerm.env $(k.ident)), flds')
+          | none => pure (← `(RawTerm.name $(quote root)), flds)
+        | [] => pure (← `(RawTerm.name $(quote root)), flds)
+      flds.foldlM (init := base) fun acc f =>
         `(RawTerm.field $acc $(quote f))
   | `(dl_term| $t:dl_term . $f:ident) => do
+      if isSelfBalance t f then return ← `(RawTerm.env EnvKey.selfBalance)
       (nameParts f.getId).foldlM (init := ← expandTerm t) fun acc c =>
         `(RawTerm.field $acc $(quote c))
   | `(dl_term| $t:dl_term [ $i:dl_term ]) => do `(RawTerm.at $(← expandTerm t) $(← expandTerm i))
@@ -116,6 +138,7 @@ partial def expandOperand : TSyntax `dl_term → MacroM Lean.Term
   | `(dl_term| $n:num) => `(RawExpr.num $n)
   | `(dl_term| $x:ident) => expandIdent x
   | `(dl_term| $t:dl_term . $f:ident) => do
+      if isSelfBalance t f then return ← `(RawExpr.env EnvKey.selfBalance)
       (nameParts f.getId).foldlM (init := ← expandOperand t) fun acc c =>
         `(RawExpr.field $acc $(quote c))
   | `(dl_term| $t:dl_term [ $i:dl_term ]) => do
@@ -179,7 +202,7 @@ def RawExpr.names : RawExpr → List String
   | .ternary c a b => c.names ++ a.names ++ b.names
   | .call _ as => as.attach.flatMap fun ⟨a, _⟩ => a.names
   | .named _ _ as => as.attach.flatMap fun ⟨a, _⟩ => a.names
-  | .num _ | .bool _ => []
+  | .num _ | .bool _ | .env _ => []
 
 mutual
 
@@ -191,7 +214,7 @@ def RawTerm.names : RawTerm → List String
   | .app "defVal" _ => []
   | .app "copyMem" (_ :: ts) => RawTerm.namesList ts
   | .app _ ts => RawTerm.namesList ts
-  | .num _ => []
+  | .num _ | .env _ => []
 
 def RawTerm.namesList : List RawTerm → List String
   | [] => []
@@ -352,6 +375,7 @@ partial def tVal (Γ : ECtx) : RawTerm → Except String (Term C)
   | .app "defVal" [.name "int"] => pure (.lit (PrimTy.default .int))
   | .app "defVal" [.name "bool"] => pure (.lit (PrimTy.default .bool))
   | .app f _ => throw s!"`{f}(…)` is not a value term"
+  | .env k => pure (.env k)
 
 /-- A term at the storage-path sort. -/
 partial def tPath (Γ : ECtx) : RawTerm → Except String (PTerm C)

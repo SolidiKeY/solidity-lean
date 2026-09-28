@@ -25,6 +25,7 @@ structure EnvAgreeExcept (ns : List Var) (s₁ s₂ : State) : Prop where
   net : s₁.net = s₂.net
   env : ∀ n, n ∉ ns -> lookupBy n s₁.env = lookupBy n s₂.env
   selfBalance : s₁.selfBalance = s₂.selfBalance
+  tx : s₁.tx = s₂.tx
 
 /-- Agreement of two executions: identical aborts, or final states that
 agree off `ns`. -/
@@ -50,9 +51,14 @@ abbrev ValuesAgree (ns : List Var) :
 namespace EnvAgreeExcept
 
 theorem refl (ns : List Var) (s : State) : EnvAgreeExcept ns s s :=
-  ⟨rfl, rfl, rfl, rfl, fun _ _ => rfl, rfl⟩
+  ⟨rfl, rfl, rfl, rfl, fun _ _ => rfl, rfl, rfl⟩
 
 end EnvAgreeExcept
+
+/-- Agreeing states have one environment: `msg.sender` reads alike. -/
+theorem State.envVal_congr {ns : List Var} {s₁ s₂ : State} (h : EnvAgreeExcept ns s₁ s₂)
+    (k : EnvKey) : s₁.envVal k = s₂.envVal k := by
+  cases k <;> simp [State.envVal, h.tx, h.selfBalance]
 
 /-! ## Monadic combinators for the agreement relations
 
@@ -235,7 +241,7 @@ theorem EnvAgreeExcept.setEnv_right {ns : List Var} {s₁ s₂ : State}
   ⟨h.storage, h.heap, h.nextId, h.net, fun m hm => by
     have hne : m ≠ n := fun heq => hm (heq ▸ hn)
     simpa [State.setEnv, lookupBy_setBy_ne hne] using h.env m hm,
-    h.selfBalance⟩
+    h.selfBalance, h.tx⟩
 
 /-- Setting the same (non-scratch or scratch) binding on both sides
 preserves agreement. -/
@@ -247,7 +253,7 @@ theorem EnvAgreeExcept.setEnv_both {ns : List Var} {s₁ s₂ : State}
     · subst he
       simp [State.setEnv, lookupBy_setBy_self]
     · simp [State.setEnv, lookupBy_setBy_ne he, h.env m hm],
-    h.selfBalance⟩
+    h.selfBalance, h.tx⟩
 
 /-! ## Relational lemmas for the storage primitives -/
 
@@ -279,7 +285,7 @@ theorem saveStorage_agree {ns : List Var} {s₁ s₂ : State}
     cases r with
     | error e => exact rfl
     | ok updated => exact ⟨rfl, h.heap, h.nextId, h.net, h.env,
-        h.selfBalance⟩
+        h.selfBalance, h.tx⟩
   unfold State.saveStorage
   rw [h.storage]
   cases lookupBy root s₂.storage with
@@ -318,13 +324,13 @@ theorem setObj_agree {ns : List Var} {s₁ s₂ : State}
     (h : EnvAgreeExcept ns s₁ s₂) (id : Nat) (obj : MObj) :
     EnvAgreeExcept ns (s₁.setObj id obj) (s₂.setObj id obj) :=
   ⟨h.storage, by simp [State.setObj, h.heap], h.nextId, h.net, h.env,
-    h.selfBalance⟩
+    h.selfBalance, h.tx⟩
 
 theorem setNet_agree {ns : List Var} {s₁ s₂ : State}
     (h : EnvAgreeExcept ns s₁ s₂) (addr amount : Int) :
     EnvAgreeExcept ns (s₁.setNet addr amount) (s₂.setNet addr amount) :=
   ⟨h.storage, h.heap, h.nextId, by simp [State.setNet, h.net], h.env,
-    h.selfBalance⟩
+    h.selfBalance, h.tx⟩
 
 theorem getNet_congr {ns : List Var} {s₁ s₂ : State}
     (h : EnvAgreeExcept ns s₁ s₂) (addr : Int) :
@@ -338,7 +344,7 @@ theorem alloc_agree {ns : List Var} {s₁ s₂ : State}
       EnvAgreeExcept ns (s₁.alloc obj).1 (s₂.alloc obj).1 :=
   ⟨by simp [State.alloc, h.nextId],
     ⟨h.storage, by simp [State.alloc, h.heap, h.nextId],
-      by simp [State.alloc, h.nextId], h.net, h.env, h.selfBalance⟩⟩
+      by simp [State.alloc, h.nextId], h.net, h.env, h.selfBalance, h.tx⟩⟩
 
 /-! ## Congruence for the cross-domain copies -/
 
@@ -355,14 +361,14 @@ theorem copyStToM_agree {ns : List Var} {s₁ s₂ : State}
       intro t₁ t₂ mfields ht
       exact ⟨by simp [ht.nextId],
         ht.storage, by simp [ht.heap, ht.nextId],
-        by simp [ht.nextId], ht.net, ht.env, ht.selfBalance⟩
+        by simp [ht.nextId], ht.net, ht.env, ht.selfBalance, ht.tx⟩
   | .array elems _ _ =>
       rw [copyStToM, copyStToM]
       refine ResAgree.bind (copyStElems_agree h elems) ?_
       intro t₁ t₂ melems ht
       exact ⟨by simp [ht.nextId],
         ht.storage, by simp [ht.heap, ht.nextId],
-        by simp [ht.nextId], ht.net, ht.env, ht.selfBalance⟩
+        by simp [ht.nextId], ht.net, ht.env, ht.selfBalance, ht.tx⟩
   | .map entries dflt => rw [copyStToM, copyStToM]; exact rfl
 
 theorem copyStFields_agree {ns : List Var} {s₁ s₂ : State}
@@ -583,6 +589,7 @@ theorem Simple.eval_frame (hag : EnvAgreeExcept ns σ τ) {p : PrimTy} :
     (s : Simple C p) → Avoids s.vars ns → s.eval σ = s.eval τ
   | .lit .., _ | .bool _, _ => rfl
   | .local x, h => by simp only [Simple.eval, getEnv_congr hag (h x (by simp [Simple.vars]))]
+  | .env k _, _ => by simp only [Simple.eval, State.envVal_congr hag]
 
 mutual
 
@@ -818,7 +825,7 @@ theorem transferAt_agree (hag : EnvAgreeExcept ns σ τ) (addr amt : Int) :
   · rfl
   split
   · rfl
-  exact ⟨hag.storage, hag.heap, hag.nextId, by simp [State.setNet, hag.net], hag.env, rfl⟩
+  exact ⟨hag.storage, hag.heap, hag.nextId, by simp [State.setNet, hag.net], hag.env, rfl, hag.tx⟩
 
 theorem ARhs.bind_frame (hag : EnvAgreeExcept ns σ τ) (x : Var) {R : RefTy} :
     (r : ARhs C R) → Avoids r.vars ns → ResultsAgree ns (r.bind σ x) (r.bind τ x)

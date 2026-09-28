@@ -56,6 +56,8 @@ import Solidity.Examples.Benchmark.Counter
 import Solidity.Examples.Benchmark.SimpleStorage
 import Solidity.Examples.Benchmark.Mapping
 import Solidity.Examples.Benchmark.Purchase
+import Solidity.Examples.Benchmark.Coin
+import Solidity.Examples.Benchmark.EtherWallet
 import Solidity.Typing.Storage
 import Solidity.Typing.StoragePreservation
 import Solidity.Typing.State

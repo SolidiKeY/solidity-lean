@@ -196,6 +196,17 @@ theorem transfer_run :
     reverted (run (compileProg sol{ owner.transfer(200); }) (fresh 100)) = true := by
   decide
 
+/-- `owner = msg.sender; total = address(this).balance;`, called by `7` with
+`100` in funds: `CALLER` and `SELFBALANCE` push them. -/
+def envReads : Prog StandardExample := sol{ owner = msg.sender; total = address(this).balance; }
+
+theorem envReads_wt : (wtProg (fun _ => none) envReads).isSome := by decide
+
+theorem envReads_run :
+    let o := run (compileProg envReads) { fresh 100 with caller := 7 }
+    storeAt o (rootSlot StandardExample "owner") = some 7 ∧ storeAt o (.root 0) = some 100 := by
+  decide
+
 /-! ## Lengths, `v = x++`, copies, `push` -/
 
 /-- `total = values.length;` reads the length slot: with `3` elements on the
@@ -325,7 +336,7 @@ the machine run, through `compile_storage`. -/
 theorem callTwice_interpreter :
     ∃ σ', Prog.run (State.fresh CallsExample 0) callTwice = .ok σ' ∧
       ∀ n, σ'.findLive "total" [] = .ok (.prim (.int n)) → n = 5 := by
-  rcases compile_storage (P := callTwice) (Option.some_get callTwice_wt).symm (by decide) 0 with
+  rcases compile_storage (P := callTwice) (Option.some_get callTwice_wt).symm (by decide) 0 W_pos with
     ⟨σ', m', h1, h2, h3⟩ | ⟨_, h2⟩
   · refine ⟨σ', h1, fun n hn => ?_⟩
     have hp : PathSlot CallsExample false "total" [] (.prim .uint) (.root 0) := PathSlot.root rfl
@@ -449,7 +460,7 @@ interpreter's read to slot `13`, and the machine run holds `10` there. -/
 theorem setAge_interpreter :
     ∃ σ', Prog.run (State.fresh StandardExample 0) setAge = .ok σ' ∧
       ∀ n, σ'.findLive "alice" [.field "age"] = .ok (.prim (.int n)) → n = 10 := by
-  rcases compile_storage (P := setAge) (Γ' := fun _ => none) rfl (by decide) 0 with
+  rcases compile_storage (P := setAge) (Γ' := fun _ => none) rfl (by decide) 0 W_pos with
     ⟨σ', m', h1, h2, h3⟩ | ⟨_, h2⟩
   · refine ⟨σ', h1, fun n hn => ?_⟩
     have hp : PathSlot StandardExample false "alice" [.field "age"] (.prim .uint) (.root 13) :=
@@ -468,7 +479,7 @@ reverts on the machine: `compile_correct` makes the two revert together. -/
 theorem overflow_interpreter :
     Prog.run (State.fresh StandardExample 0) overflow = .error .revert := by
   rcases compile_correct (P := overflow) (Γ' := fun _ => none) rfl
-      (Sim.init StandardExample 0) (by decide) with ⟨_, _, _, h, _⟩ | ⟨h, _⟩
+      (Sim.init StandardExample 0 W_pos) (by decide) with ⟨_, _, _, h, _⟩ | ⟨h, _⟩
   · have := reverted_eq overflow_run
     rw [show run (compileProg overflow) (Machine.init 0) = _ from h] at this
     cases this

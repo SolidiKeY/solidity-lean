@@ -37,6 +37,7 @@ def Term.quote : Term C → Lean.Expr
   | .read m a => mkAppN (mkConst ``Term.read) #[c, MTerm.quote m, MAddr.quote a]
   | .ite i a b => mkAppN (mkConst ``Term.ite) #[c, Term.quote i, Term.quote a, Term.quote b]
   | .mlen m i => mkAppN (mkConst ``Term.mlen) #[c, MTerm.quote m, ITerm.quote i]
+  | .env k => mkAppN (mkConst ``Term.env) #[c, toExpr k]
 
 def PTerm.quote : PTerm C → Lean.Expr
   | .root r => mkAppN (mkConst ``PTerm.root) #[c, toExpr r]

@@ -80,6 +80,7 @@ def Simple.wt (Γ : Ctx) : {p : PrimTy} → Simple C p → Bool
   | p, .local x => lookupBy x Γ == some (.stack (.prim p))
   | _, .lit .. => true
   | _, .bool _ => true
+  | _, .env .. => true
 
 mutual
 
@@ -541,6 +542,7 @@ theorem Simple.eval_wt (hwt : RunWT C Γ H σ) {p : PrimTy} {s : Simple C p} {w 
     | val v => cases h; simpa [BTy.matchesB] using hm
     | spath _ _ => exact nomatch h
     | mref _ => exact nomatch h
+  | env k hp => subst hp; cases h; rfl
 
 mutual
 

@@ -218,6 +218,7 @@ def Term.subst (U : Upd C) : Term C → Term C
   | .read m a => .read (m.subst U) (a.subst U)
   | .ite c a b => .ite (c.subst U) (a.subst U) (b.subst U)
   | .mlen m i => .mlen (m.subst U) (i.subst U)
+  | .env k => .env k
 
 def PTerm.subst (U : Upd C) : PTerm C → PTerm C
   | .root r => .root r
@@ -322,6 +323,7 @@ theorem Term.subst_eval (h : SubstAgree U ns σ τ) : (t : Term C) → (t.subst 
     simp only [Term.subst, Term.eval, i.subst_eval h]
     exact ResultsAgree.bindEq (m.subst_eval h) fun _ _ h' => by
       simp only [memArrayLen, getObj_congr h']
+  | .env k => by simp only [Term.subst, Term.eval, State.envVal_congr h.agree]
 
 /-- Example: after `Person storage p = alice;`, `{ p := alice }(p.age)` is
 `alice.age`. -/
@@ -506,7 +508,7 @@ theorem Upd.foldl_env (σ₀ : State) : (U : Upd C) → U.envOnly = true →
       simp [Upd.targets, hx₀]
     refine ⟨?_, fun x hx => ?_, fun x e' hx => ?_⟩
     · rw [htargets]
-      refine ⟨hag.storage, hag.heap, hag.nextId, hag.net, fun n hn => ?_, hag.selfBalance⟩
+      refine ⟨hag.storage, hag.heap, hag.nextId, hag.net, fun n hn => ?_, hag.selfBalance, hag.tx⟩
       have hne : n ≠ x₀ := fun he => hn (he ▸ List.mem_cons_self)
       rw [← hag.env n (fun h' => hn (List.mem_cons_of_mem _ h'))]
       simp [State.setEnv, SemanticsProperties.lookupBy_setBy_ne hne]
@@ -688,7 +690,7 @@ def Upd.dropEffectless (F : List Var) : Upd C → Upd C
 only at `se1` differ only at `se1` and `sp1`. -/
 theorem Semantics.EnvAgreeExcept.mono {A B : List Var} {σ τ : State} (h : EnvAgreeExcept A σ τ)
     (hAB : ∀ x ∈ A, x ∈ B) : EnvAgreeExcept B σ τ :=
-  ⟨h.storage, h.heap, h.nextId, h.net, fun n hn => h.env n (fun h' => hn (hAB n h')), h.selfBalance⟩
+  ⟨h.storage, h.heap, h.nextId, h.net, fun n hn => h.env n (fun h' => hn (hAB n h')), h.selfBalance, h.tx⟩
 
 /-- Binding `x` on both sides makes two states agree at `x`: after `x = 1;` in
 two states that differed at `x` and `y`, they differ at `y` only. -/
@@ -700,7 +702,7 @@ theorem Semantics.EnvAgreeExcept.setEnv_filter {A : List Var} {σ τ : State} (h
     · subst he; simp [State.setEnv]
     · have : n ∉ A := fun h' => hn (List.mem_filter.2 ⟨h', by simpa using he⟩)
       simp [State.setEnv, SemanticsProperties.lookupBy_setBy_ne he, h.env n this],
-    h.selfBalance⟩
+    h.selfBalance, h.tx⟩
 
 /-- One element written into two agreeing states, its right-hand side read
 in the same pre-state, leaves them agreeing: `y := 2` written into two
@@ -712,12 +714,12 @@ theorem UpdElem.write_agree {A : List Var} {σ₀ τ₁ τ₂ : State} (h : EnvA
     simp only [UpdElem.write]
     cases s.eval σ₀ with
     | error => rfl
-    | ok a => exact ⟨rfl, h.heap, h.nextId, h.net, h.env, h.selfBalance⟩
+    | ok a => exact ⟨rfl, h.heap, h.nextId, h.net, h.env, h.selfBalance, h.tx⟩
   | .memory m => by
     simp only [UpdElem.write]
     cases m.eval σ₀ with
     | error => rfl
-    | ok a => exact ⟨h.storage, rfl, rfl, h.net, h.env, h.selfBalance⟩
+    | ok a => exact ⟨h.storage, rfl, rfl, h.net, h.env, h.selfBalance, h.tx⟩
 
 /-- The invariant of dropping: the two runs agree off `A`, and every variable
 of `A` is either one the formula does not read (`G`) or one the rest of the
@@ -833,7 +835,7 @@ def UpdElem.isSelf : UpdElem C → Bool
 binding `x` to `1` again gives the same lookups. -/
 theorem State.setEnv_same {σ : State} {x : Var} {b : Binding} (hl : lookupBy x σ.env = some b) :
     EnvAgreeExcept [] (σ.setEnv x b) σ := by
-  refine ⟨rfl, rfl, rfl, rfl, fun n _ => ?_, rfl⟩
+  refine ⟨rfl, rfl, rfl, rfl, fun n _ => ?_, rfl, rfl⟩
   by_cases he : n = x
   · subst he; simp [State.setEnv, hl]
   · simp [State.setEnv, SemanticsProperties.lookupBy_setBy_ne he]

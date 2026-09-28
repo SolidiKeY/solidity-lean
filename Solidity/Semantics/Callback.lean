@@ -443,7 +443,7 @@ variable {ns : List Var}
 theorem Semantics.EnvAgreeExcept.symm' {σ τ : State} (h : EnvAgreeExcept ns σ τ) :
     EnvAgreeExcept ns τ σ :=
   ⟨h.storage.symm, h.heap.symm, h.nextId.symm, h.net.symm, fun n hn => (h.env n hn).symm,
-    h.selfBalance.symm⟩
+    h.selfBalance.symm, h.tx.symm⟩
 
 /-- Two outcomes alike off `ns`. -/
 def COut.Agree (ns : List Var) : COut → COut → Prop
