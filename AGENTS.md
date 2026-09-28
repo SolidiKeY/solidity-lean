@@ -118,6 +118,16 @@ reading it back whole.
 - `grind` is built in on this toolchain. Try `grind` or `grind [lemmas]`
   before a long manual script. For Boolean/bitvector goals prefer
   `bv_decide`/`omega`.
+- **Finish a working proof with `simp only [...]`.** Once a proof passes,
+  replace each bare `simp` with the lemma list `simp?` prints. Unrestricted
+  `simp` re-searches the whole simp set on every re-check.
+- **Do not raise `maxHeartbeats`.** When a proof needs more, make it cheaper
+  (`simp only`, a helper lemma, a smaller `decide`). New overrides use the
+  smallest value that passes. Existing ones go up to 8000000; lower them when
+  you touch them. A runaway should fail in seconds, not use tens of GB of RAM.
+- **Write the types of signatures and `have`s explicitly.** Errors then point
+  at the line that is wrong. Do not annotate every subterm: that only adds
+  places for a type mismatch.
 - Use `rg`, which honours `.gitignore` and so skips `.lake/`.
 
 ## Reading before writing
