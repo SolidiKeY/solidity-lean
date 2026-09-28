@@ -487,13 +487,13 @@ theorem tail_sim {op : BinOp} {p : PrimTy} (hop : binInFrag op p = true) (hand :
       simp [applyBinOp, checkArith, bind, Except.bind, Int.natCast_inj]
     · -- `&`
       refine word_tail rfl (Nat.and_lt_two_pow b ha') ?_ (by simp [run, uTail, Instr.step, Machine.next]; rfl)
-      simp [applyBinOp, Value.asInt, bind, Except.bind, Nat.and_comm]
+      simp [applyBinOp, Value.asInt, bind, Except.bind, uintBitwise_natCast, Nat.and_comm]
     · -- `|`
       refine word_tail rfl (Nat.or_lt_two_pow hb' ha') ?_ (by simp [run, uTail, Instr.step, Machine.next]; rfl)
-      simp [applyBinOp, Value.asInt, bind, Except.bind, Nat.or_comm]
+      simp [applyBinOp, Value.asInt, bind, Except.bind, uintBitwise_natCast, Nat.or_comm]
     · -- `^`
       refine word_tail rfl (Nat.xor_lt_two_pow hb' ha') ?_ (by simp [run, uTail, Instr.step, Machine.next]; rfl)
-      simp [applyBinOp, Value.asInt, bind, Except.bind, Nat.xor_comm]
+      simp [applyBinOp, Value.asInt, bind, Except.bind, uintBitwise_natCast, Nat.xor_comm]
     · -- `<<`
       refine word_tail (op := .shl) rfl (r := if b < 256 then a * 2 ^ b % W else 0)
         (by split <;> first | exact Nat.mod_lt _ W_pos | exact W_pos) ?_

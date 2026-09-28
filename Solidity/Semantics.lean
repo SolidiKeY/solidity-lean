@@ -608,6 +608,18 @@ def Value.toMVal : Value -> MVal
 where kernel arithmetic on the literal is fast). -/
 def uintBound : Int := ((2 ^ 256 : Nat) : Int)
 
+/-- `&&&`, `|||` or `^^^` on two `uint` words, behind a match on the operands:
+the kernel meets `Nat.land` only on numerals, where it computes it, and never
+unfolds it (well-founded recursion, a deep-recursion error), even when an
+operand is still a read of the state.  A negative operand, which `uint`
+rules out, gives `0`. -/
+def uintBitwise (f : Nat → Nat → Nat) : Int → Int → Int
+  | .ofNat a, .ofNat b => .ofNat (f a b)
+  | _, _ => 0
+
+theorem uintBitwise_natCast (f : Nat → Nat → Nat) (a b : Nat) :
+    uintBitwise f (a : Int) (b : Int) = ((f a b : Nat) : Int) := rfl
+
 /-- Arithmetic and relational operators on values. `/` and `%` revert on
 a zero divisor (KeY `divisionAssignment`/`moduloAssignment`); `**` with a
 negative exponent is stuck.  The bitwise operators, the shifts and the
@@ -642,9 +654,9 @@ def applyBinOp (op : BinOp) (l r : Value) : Res Value :=
   | .or => do .ok (Value.bool ((← l.asBool) || (← r.asBool)))
   -- the `uint` operators with no overflow to check (`BinOp.accepts`): their
   -- result is below `2^256` already, so `checkArith` passes it
-  | .band => do .ok (Value.int ((← l.asInt).toNat &&& (← r.asInt).toNat : Nat))
-  | .bor => do .ok (Value.int ((← l.asInt).toNat ||| (← r.asInt).toNat : Nat))
-  | .bxor => do .ok (Value.int ((← l.asInt).toNat ^^^ (← r.asInt).toNat : Nat))
+  | .band => do .ok (Value.int (uintBitwise (· &&& ·) (← l.asInt) (← r.asInt)))
+  | .bor => do .ok (Value.int (uintBitwise (· ||| ·) (← l.asInt) (← r.asInt)))
+  | .bxor => do .ok (Value.int (uintBitwise (· ^^^ ·) (← l.asInt) (← r.asInt)))
   | .shl => do
       let a ← l.asInt
       let n ← r.asInt
