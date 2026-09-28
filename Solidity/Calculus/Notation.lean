@@ -178,6 +178,7 @@ def RawExpr.names : RawExpr → List String
   | .index a b | .binop _ a b => a.names ++ b.names
   | .ternary c a b => c.names ++ a.names ++ b.names
   | .call _ as => as.attach.flatMap fun ⟨a, _⟩ => a.names
+  | .named _ _ as => as.attach.flatMap fun ⟨a, _⟩ => a.names
   | .num _ | .bool _ => []
 
 mutual
@@ -211,6 +212,7 @@ def RawStmt.names : RawStmt → List String
   | .ite c t e => c.names ++ RawStmt.namesList t ++ RawStmt.namesList e
   | .ret e => (e.map RawExpr.names).getD []
   | .revert => []
+  | .eval as => (as.map RawExpr.names).flatten
 
 def RawStmt.namesList : List RawStmt → List String
   | [] => []
@@ -531,7 +533,9 @@ variable the formula writes. -/
 def elabDl (φ : RawFml) : Except String (Fml C) :=
   let (used, declared) := φ.names
   let hints := RawStmt.aliasHintsList C φ.stmts
-  let free := (used.filter fun x => !declared.contains x && (C.rootType x).isNone).eraseDups
+  -- an enum's name (`State` in `State.Locked`) is no parameter
+  let free := (used.filter fun x => !declared.contains x && (C.rootType x).isNone &&
+    (lookupBy x C.enums).isNone).eraseDups
   let params := free.filterMap fun x =>
     match lookupBy x hints, Var.ofName x with
     | some R, _ => some (x, LocalTy.alias R)

@@ -78,6 +78,9 @@ inductive RawExpr where
   side of an assignment or a declaration, or of a `return`; captured before
   the statement anywhere else (`hoist`). -/
   | call (f : String) (args : List RawExpr)
+  /-- `T({f: a, g: b})`, a struct constructor with named arguments: put in
+  the members' order by `hoist`, then read as the positional `T(a, b)`. -/
+  | named (f : String) (names : List String) (args : List RawExpr)
   deriving Repr, Inhabited
 
 inductive RawStmt where
@@ -101,6 +104,41 @@ inductive RawStmt where
   /-- `return e;`, `return;`: only a function body's last statement (or the
   last of each branch of a last `if`). -/
   | ret (e : Option RawExpr)
+  /-- The arguments of `emit E(a, b);`, or of the error in
+  `require(c, Err(a, b));`, evaluated left to right for their effects and
+  their reverts and then dropped: the log and the error data are not
+  modelled.  One that can neither revert nor have an effect (a literal, a
+  name, a member of one) is not evaluated at all. -/
+  | eval (args : List RawExpr)
+  deriving Repr, Inhabited
+
+/-- Evaluating `e` can neither revert nor have an effect: a literal, a name,
+or a member of one (`msg.sender`, `State.Created`). -/
+def RawExpr.isPure : RawExpr → Bool
+  | .num _ | .bool _ | .name _ => true
+  | .field e _ => e.isPure
+  | _ => false
+
+/-- `require(c, Err(a, b));` and `require(c, "msg");`: solc evaluates the
+condition, then the error's arguments, then reverts if the condition is
+false.  With arguments that cannot revert nor have an effect that is
+`require(c);`; with others, `if (c) { eval(a, b) } else { revert(); }`, the
+same run: a false condition reverts whatever the arguments do, and a true one
+evaluates them after the condition, as solc does. -/
+def RawStmt.requireWith (c : RawExpr) (args : List RawExpr) : RawStmt :=
+  if args.all RawExpr.isPure then .require c else .ite c [.eval args] [.revert]
+
+/-- A modifier as a function applies it (`function f() onlyOwner
+inState(State.Created) { … }`): its parameters, the arguments of this
+application (read in the function's scope), and its body split at its one
+`_;`, the code before and the code after.  The elaborator inlines it around
+the function's body (`wrapMods`). -/
+structure ModApp where
+  name : String
+  params : List (Name × Ty)
+  args : List RawExpr
+  pre : List RawStmt
+  post : List RawStmt
   deriving Repr, Inhabited
 
 /-- An internal function as the contract declares it: its parameters and
@@ -111,6 +149,8 @@ structure FunDecl where
   params : List (Name × Ty)
   ret : Option (Name × Ty) := none
   body : List RawStmt
+  /-- The modifiers it applies, the first listed outermost. -/
+  mods : List ModApp := []
   deriving Repr, Inhabited
 
 /-! ## The contract
@@ -129,6 +169,9 @@ inlining a call, which is what the elaborator does and KeY's
 structure Contract where
   vars : List (Name × Ty)
   funs : List (Name × FunDecl) := []
+  /-- Its enums, each with its members in order: `State.Locked` is the
+  `uint` literal `1` (an enum is read as `uint`, as `address` is). -/
+  enums : List (Name × List Name) := []
   deriving Repr, Inhabited
 
 namespace Contract
@@ -153,6 +196,8 @@ syntax:max &"mapping" "(" sol_ty " => " sol_ty ")" : sol_ty
 syntax:max sol_ty:max "[" "]" : sol_ty
 /-- `uint[3]`: a fixed-size array; `uint[2][3]` is three `uint[2]`. -/
 syntax:max sol_ty:max "[" num "]" : sol_ty
+/-- `address payable`: an `address`, read as `uint`. -/
+syntax:max &"address" &"payable" : sol_ty
 
 /-- `ty!(mapping(uint => Person))`: a type written as Solidity does. -/
 syntax "ty!(" sol_ty ")" : term
@@ -160,10 +205,11 @@ syntax "ty!(" sol_ty ")" : term
 macro_rules
   | `(ty!($x:ident)) =>
       match x.getId.toString with
-      | "uint" | "address" => `(Ty.uint)
-      | "int" => `(Ty.int)
+      | "uint" | "uint256" | "address" => `(Ty.uint)
+      | "int" | "int256" => `(Ty.int)
       | "bool" => `(Ty.bool)
       | s => `(Ty.struct $(Lean.quote s))
+  | `(ty!(address payable)) => `(Ty.uint)
   | `(ty!(mapping($K => $V))) => `(Ty.mapping ty!($K) ty!($V))
   | `(ty!($T[])) => `(Ty.array ty!($T))
   | `(ty!($T[$n])) => `(Ty.fixed ty!($T) $n)
@@ -704,6 +750,21 @@ syntax:max "−−" sol_expr:max : sol_expr
 /-- `new uint[](n)`: a fresh memory array. -/
 syntax:max &"new" sol_ty "(" sol_expr ")" : sol_expr
 
+/-! What elaborates away (`sol{ … }` reads it, no statement or value holds
+it): an ether or time unit on a number literal (`2 ether`, `3 days`), the
+casts `payable(e)` and `address(e)` of a value (identities: an address is a
+`uint`), a struct constructor with named arguments (`T({f: a, g: b})`). -/
+
+/-- `2 ether`, `3 days`: the literal times its unit (`wei gwei ether`,
+`seconds minutes hours days weeks`). -/
+syntax:max atomic(num ident) : sol_expr
+/-- `payable(e)`: `e`. -/
+syntax:max atomic(&"payable" "(") sol_expr ")" : sol_expr
+/-- `address(e)`: `e` (not `address(this)`, which is no value here). -/
+syntax:max atomic(&"address" "(") sol_expr ")" : sol_expr
+/-- `T({f: a, g: b})`: a struct constructor with named arguments. -/
+syntax:max atomic(ident "(" "{") (ident ": " sol_expr),* "}" ")" : sol_expr
+
 declare_syntax_cat sol_stmt (behavior := both)
 declare_syntax_cat sol_block (behavior := both)
 syntax "{" (sol_stmt ";")* "}" : sol_block
@@ -754,6 +815,24 @@ syntax "if " "(" sol_expr ") " sol_block (" else " sol_block)? : sol_stmt
 syntax (name := solRequire) &"require" "(" sol_expr ")" : sol_stmt
 syntax (name := solAssert) &"assert" "(" sol_expr ")" : sol_stmt
 syntax (name := solRevert) &"revert" "(" ")" : sol_stmt
+/-- `emit E(a, b);`: the arguments evaluated (`RawStmt.eval`), the log dropped. -/
+syntax (name := solEmit) &"emit" ident "(" sol_expr,* ")" : sol_stmt
+/-- `require(c, "msg");`: `require(c);`. -/
+syntax (name := solRequireMsg) &"require" "(" sol_expr ", " str ")" : sol_stmt
+/-- `require(c, Err(a));`: `RawStmt.requireWith`. -/
+syntax (name := solRequireErr) &"require" "(" sol_expr ", " ident "(" sol_expr,* ")" ")" : sol_stmt
+/-- `revert Err(a);`: `revert();`, since a revert undoes whatever evaluating
+`a` did. -/
+syntax (name := solRevertErr) &"revert" ident "(" sol_expr,* ")" : sol_stmt
+/-- `revert("msg");`: `revert();`. -/
+syntax (name := solRevertMsg) &"revert" "(" str ")" : sol_stmt
+/-- `_;`: where a modifier's body runs the function's (`contract!{ … }`). -/
+syntax (name := solHole) "_" : sol_stmt
+/-- `T memory t = T(a, b);`: a struct constructor declared. -/
+syntax sol_ty &"memory" ident " = " sol_expr "(" sol_expr,* ")" : sol_stmt
+/-- `todos.push(Todo(a, b));`: a struct constructor pushed. -/
+syntax sol_expr "(" sol_expr "(" sol_expr,* ")" ")" : sol_stmt
+syntax sol_expr ".push(" sol_expr "(" sol_expr,* ")" ")" : sol_stmt
 
 /-! The schema forms of the taclets (`Calculus/RuleSyntax.lean`): an
 escape `‹t›` to any Lean term, and the operator schema variables.  They live
@@ -793,6 +872,19 @@ partial def expandTy : TSyntax `sol_ty → MacroM Term
   | `(sol_ty| $t[]) => do `(RawTy.array $(← expandTy t))
   | `(sol_ty| $t[$n]) => do `(RawTy.fixed $(← expandTy t) $n)
   | _ => Macro.throwUnsupported
+
+/-- What a unit multiplies a literal by: `1 gwei` is `10^9`, `1 days` is
+`86400`. -/
+def unitFactor? : String → Option Nat
+  | "wei" => some 1
+  | "gwei" => some (10 ^ 9)
+  | "ether" => some (10 ^ 18)
+  | "seconds" => some 1
+  | "minutes" => some 60
+  | "hours" => some 3600
+  | "days" => some 86400
+  | "weeks" => some 604800
+  | _ => none
 
 /-- `alice.account.age` arrives as one identifier; split it into members. -/
 def expandIdent (x : Ident) : MacroM Term := do
@@ -837,6 +929,18 @@ partial def expandExpr : TSyntax `sol_expr → MacroM Term
   | `(sol_expr| −− $e:sol_expr) => do `(RawExpr.incDec .preDec $(← expandExpr e))
   | `(sol_expr| new $T:sol_ty ( $n:sol_expr )) => do
       `(RawExpr.newArr $(← expandTy T) $(← expandExpr n))
+  | `(sol_expr| $n:num $u:ident) => do
+      let some k := unitFactor? u.getId.toString |
+        Macro.throwErrorAt u "a unit is one of wei gwei ether seconds minutes hours days weeks"
+      `(RawExpr.num $(quote (n.getNat * k)))
+  | `(sol_expr| payable ( $e:sol_expr )) => expandExpr e
+  | `(sol_expr| address ( $e:sol_expr )) => do
+      if let `(sol_expr| $x:ident) := e then
+        if x.getId.toString == "this" then Macro.throwErrorAt e "`address(this)` is not a value here"
+      expandExpr e
+  | `(sol_expr| $f:ident ( { $[$ns:ident : $as:sol_expr],* } )) => do
+      let ns : Array Term := ns.map fun n => quote n.getId.toString
+      `(RawExpr.named $(quote f.getId.toString) [$ns,*] [$(← as.mapM expandExpr),*])
   | _ => Macro.throwUnsupported
 where
   bin (op : Lean.Name) (a b : TSyntax `sol_expr) : MacroM Term := do
@@ -871,6 +975,12 @@ partial def expandStmt (s : TSyntax `sol_stmt) : MacroM Term := do
   | ``solRevert => `(RawStmt.revert)
   | ``solReturn => `(RawStmt.ret (some $(← expandExpr ⟨s.raw[1]⟩)))
   | ``solReturnNone => `(RawStmt.ret none)
+  | ``solEmit => `(RawStmt.eval [$(← s.raw[3].getSepArgs.mapM (expandExpr ⟨·⟩)),*])
+  | ``solRequireMsg => `(RawStmt.require $(← expandExpr ⟨s.raw[2]⟩))
+  | ``solRequireErr =>
+    `(RawStmt.requireWith $(← expandExpr ⟨s.raw[2]⟩) [$(← s.raw[6].getSepArgs.mapM (expandExpr ⟨·⟩)),*])
+  | ``solRevertErr | ``solRevertMsg => `(RawStmt.revert)
+  | ``solHole => Macro.throwErrorAt s "`_;` stands once, at the top level of a modifier's body"
   | _ => expandStmt1 s
 where
   expandStmt1 : TSyntax `sol_stmt → MacroM Term
@@ -891,6 +1001,17 @@ where
         (some (RawExpr.call $(quote g) [$(← as.getElems.mapM expandExpr),*])))
   | `(sol_stmt| $f:sol_expr ( $a:sol_expr, $as:sol_expr,* )) => do
       `(RawStmt.call $(← expandExpr f) [$(← expandExpr a), $(← as.getElems.mapM expandExpr),*])
+  | `(sol_stmt| $T:sol_ty memory $x:ident = $f:sol_expr ( $as:sol_expr,* )) => do
+      let some g := funName? f | Macro.throwErrorAt f "a constructor's name is a struct's name"
+      `(RawStmt.declMemory $(← expandTy T) $(quote x.getId.toString)
+        (some (RawExpr.call $(quote g) [$(← as.getElems.mapM expandExpr),*])))
+  | `(sol_stmt| $b:sol_expr ( $g:sol_expr ( $as:sol_expr,* ) )) => do
+      let some g := funName? g | Macro.throwErrorAt g "a constructor's name is a struct's name"
+      `(RawStmt.call $(← expandExpr b) [RawExpr.call $(quote g) [$(← as.getElems.mapM expandExpr),*]])
+  | `(sol_stmt| $b:sol_expr .push( $g:sol_expr ( $as:sol_expr,* ) )) => do
+      let some g := funName? g | Macro.throwErrorAt g "a constructor's name is a struct's name"
+      `(RawStmt.call (.field $(← expandExpr b) "push")
+        [RawExpr.call $(quote g) [$(← as.getElems.mapM expandExpr),*]])
   | `(sol_stmt| $T:sol_ty storage $x:ident = $b:sol_expr .push()) => do
       `(RawStmt.declStoragePush $(← expandTy T) $(quote x.getId.toString) $(← expandExpr b))
   | `(sol_stmt| $T:sol_ty storage $x:ident = $f:sol_expr ( )) => do
@@ -961,19 +1082,57 @@ macro_rules
 
 end Expand
 
-/-! ## `contract!{ … }` -/
+/-! ## `contract!{ … }`
+
+A contract written as Solidity writes one, less what elaborates away: a
+state variable's visibility, a function's visibility and mutability, events
+and errors (declared, then dropped), and enums (read as `uint`, a member as
+its position).  A modifier is inlined around the body of each function that
+applies it (`wrapMods`), as a call is inlined where it is called. -/
 
 declare_syntax_cat sol_member (behavior := both)
-syntax sol_ty ident ";" : sol_member
+
+/-- A state variable's visibility, dropped. -/
+declare_syntax_cat sol_vis (behavior := both)
+syntax &"public" : sol_vis
+syntax &"private" : sol_vis
+syntax &"internal" : sol_vis
+syntax &"immutable" : sol_vis
+
+/-- `uint public count;`: a state variable. -/
+syntax sol_ty sol_vis* ident ";" : sol_member
 
 /-- A parameter, `uint x`. -/
 declare_syntax_cat sol_param (behavior := both)
 syntax sol_ty ident : sol_param
 
+/-- A function's attribute: its return variable, `returns (uint r)`; a
+visibility or a mutability (dropped); or a modifier applied, `onlyOwner`,
+`inState(State.Created)`. -/
+declare_syntax_cat sol_fattr (behavior := both)
+syntax (name := solAttrReturns) &"returns" "(" sol_ty (ppSpace ident)? ")" : sol_fattr
+syntax (name := solAttrKw) (&"public" <|> &"external" <|> &"internal" <|> &"private" <|> &"view" <|>
+  &"pure" <|> &"payable" <|> &"virtual" <|> &"override") : sol_fattr
+syntax (name := solAttrMod) ident ("(" sol_expr,* ")")? : sol_fattr
+
 /-- `function f(uint x, uint y) returns (uint r) { r = x + y; }`: an internal
 function, which may call the functions declared before it. -/
-syntax &"function " ident "(" sol_param,* ")" (&" returns " "(" sol_ty (ppSpace ident)? ")")?
-  ppSpace sol_block : sol_member
+syntax &"function " ident "(" sol_param,* ")" sol_fattr* ppSpace sol_block : sol_member
+
+/-- `modifier inState(State s) { if (state != s) revert(); _; }`: the code
+before and after its one `_;`. -/
+syntax &"modifier " ident ("(" sol_param,* ")")? ppSpace sol_block : sol_member
+
+/-- An event's or an error's parameter, `address indexed from`. -/
+declare_syntax_cat sol_eparam (behavior := both)
+syntax sol_ty (&"indexed")? (ppSpace ident)? : sol_eparam
+
+/-- `event Sent(address from, uint amount);`, dropped. -/
+syntax &"event " ident "(" sol_eparam,* ")" ";" : sol_member
+/-- `error Unauthorized(uint code);`, dropped. -/
+syntax &"error " ident "(" sol_eparam,* ")" ";" : sol_member
+/-- `enum State { Created, Locked }`: `State.Locked` is `1`. -/
+syntax &"enum " ident "{" ident,* "}" : sol_member
 
 /-- `contract!{ uint total; Person alice; mapping(uint => Person) folks; }`:
 a contract written as Solidity declares its state, and its functions. -/
@@ -982,38 +1141,104 @@ syntax "contract!{" sol_member* "}" : term
 section
 open Lean
 
-/-- A function's declaration, as a term. -/
-def expandFun (f : Ident) (ps : Array (TSyntax `sol_param)) (rt : Option (TSyntax `sol_ty))
-    (rn : Option Ident) (b : TSyntax `sol_block) : MacroM Term := do
-  let ps ← ps.mapM fun
-    | `(sol_param| $T:sol_ty $x:ident) => `(($(quote x.getId.toString), ty!($T)))
+/-- The words among a function's attributes that are not modifiers. -/
+def attrKeywords : List String :=
+  ["public", "external", "internal", "private", "view", "pure", "payable", "virtual", "override"]
+
+/-- A declared type, an enum of the contract read as `uint`. -/
+def expandMemberTy (enums : List String) (T : TSyntax `sol_ty) : MacroM Term :=
+  match T with
+  | `(sol_ty| $x:ident) => if enums.contains x.getId.toString then `(Ty.uint) else `(ty!($T))
+  | _ => `(ty!($T))
+
+def expandParams (enums : List String) (ps : Array (TSyntax `sol_param)) : MacroM (Array Term) :=
+  ps.mapM fun
+    | `(sol_param| $T:sol_ty $x:ident) => do
+      `(($(quote x.getId.toString), $(← expandMemberTy enums T)))
     | _ => Macro.throwUnsupported
-  let ret ← match rt with
-    | some T =>
-      let n := (rn.map (·.getId.toString)).getD "_ret"
-      `(some ($(quote n), ty!($T)))
-    | none => `(none)
+
+/-- A modifier: its name, its parameters, and its body before and after its
+`_;`, which stands once, at the top level. -/
+def expandModifier (enums : List String) (m : Ident) (ps : Array (TSyntax `sol_param))
+    (b : TSyntax `sol_block) : MacroM (String × Array Term × Term × Term) := do
+  let `(sol_block| { $[$ss:sol_stmt;]* }) := b | Macro.throwErrorAt b "a modifier's body is a block"
+  let isHole (s : TSyntax `sol_stmt) := s.raw.isOfKind ``solHole
+  unless (ss.filter isHole).size == 1 do
+    Macro.throwErrorAt b "a modifier's body has one `_;`, at its top level"
+  let i := (ss.findIdx? isHole).getD 0
+  let pre ← (ss.extract 0 i).mapM expandStmt
+  let post ← (ss.extract (i + 1) ss.size).mapM expandStmt
+  pure (m.getId.toString, ← expandParams enums ps, ← `([$pre,*]), ← `([$post,*]))
+
+/-- A function's declaration, as a term: its return variable and its
+modifiers read off its attributes. -/
+def expandFun (enums : List String) (mods : List (String × Array Term × Term × Term)) (f : Ident)
+    (ps : Array (TSyntax `sol_param)) (attrs : Array (TSyntax `sol_fattr))
+    (b : TSyntax `sol_block) : MacroM Term := do
+  let ps ← expandParams enums ps
+  let mut ret ← `(none)
+  let mut apps : Array Term := #[]
+  for a in attrs do
+    -- `returns (uint)` also reads as a modifier `returns` applied to `uint`,
+    -- and `view` as a modifier `view`: take the other reading
+    let a : Syntax :=
+      if a.raw.isOfKind choiceKind then
+        (a.raw.getArgs.find? (!·.isOfKind ``solAttrMod)).getD a.raw[0]
+      else a.raw
+    if a.isOfKind ``solAttrKw then continue
+    match (⟨a⟩ : TSyntax `sol_fattr) with
+    | `(sol_fattr| returns ( $T:sol_ty $[$r:ident]? )) =>
+      let n := (r.map (·.getId.toString)).getD "_ret"
+      ret ← `(some ($(quote n), $(← expandMemberTy enums T)))
+    | `(sol_fattr| $m:ident $[( $as:sol_expr,* )]?) =>
+      let name := m.getId.toString
+      if attrKeywords.contains name then continue
+      let some (_, params, pre, post) := mods.find? (·.1 == name) |
+        Macro.throwErrorAt m s!"{name} is not a modifier of this contract"
+      let args ← match as with
+        | some as => as.getElems.mapM expandExpr
+        | none => pure #[]
+      apps := apps.push (← `(ModApp.mk $(quote name) [$params,*] [$args,*] $pre $post))
+    | _ => Macro.throwUnsupported
   let body ← expandStmt.expandBlock b
-  `(($(quote f.getId.toString), FunDecl.mk [$ps,*] $ret $body))
+  `(($(quote f.getId.toString),
+    ({ params := [$ps,*], ret := $ret, body := $body, mods := [$apps,*] } : FunDecl)))
 
 end
 
 macro_rules
   | `(contract!{ $ms:sol_member* }) => do
+      -- the enums and the modifiers first: a function may apply a modifier
+      -- declared after it
+      let mut enums : List String := []
+      let mut enumRows : Array Lean.Term := #[]
+      let mut mods := []
+      for m in ms do
+        match m with
+        | `(sol_member| enum $e:ident { $xs:ident,* }) =>
+          enums := enums ++ [e.getId.toString]
+          let xs : Array Lean.Term := xs.getElems.map fun x => Lean.quote x.getId.toString
+          enumRows := enumRows.push (← `(($(Lean.quote e.getId.toString), [$xs,*])))
+        | _ => pure ()
+      for m in ms do
+        match m with
+        | `(sol_member| modifier $f:ident $[( $ps:sol_param,* )]? $b:sol_block) =>
+          mods := mods ++ [← expandModifier enums f ((ps.map (·.getElems)).getD #[]) b]
+        | _ => pure ()
       let mut rows := #[]
       let mut funs := #[]
       for m in ms do
         match m with
-        | `(sol_member| $T:sol_ty $x:ident ;) =>
-          rows := rows.push (← `(($(Lean.quote x.getId.toString), ty!($T))))
-        | `(sol_member| function $f:ident ( $ps:sol_param,* ) $b:sol_block) =>
-          funs := funs.push (← expandFun f ps.getElems none none b)
-        | `(sol_member| function $f:ident ( $ps:sol_param,* ) returns ( $T:sol_ty $[$r:ident]? )
-            $b:sol_block) =>
-          funs := funs.push (← expandFun f ps.getElems (some T) r b)
+        | `(sol_member| $T:sol_ty $_:sol_vis* $x:ident ;) =>
+          rows := rows.push (← `(($(Lean.quote x.getId.toString), $(← expandMemberTy enums T))))
+        | `(sol_member| function $f:ident ( $ps:sol_param,* ) $as:sol_fattr* $b:sol_block) =>
+          funs := funs.push (← expandFun enums mods f ps.getElems as b)
+        | `(sol_member| modifier $_:ident $[( $_:sol_param,* )]? $_:sol_block)
+        | `(sol_member| event $_:ident ( $_:sol_eparam,* ) ;)
+        | `(sol_member| error $_:ident ( $_:sol_eparam,* ) ;)
+        | `(sol_member| enum $_:ident { $_:ident,* }) => pure ()
         | _ => Lean.Macro.throwUnsupported
-      `(({ vars := [$rows,*], funs := [$funs,*] } : Contract))
-
+      `(({ vars := [$rows,*], funs := [$funs,*], enums := [$enumRows,*] } : Contract))
 /-! ### The contracts
 
 One per store of `Semantics.lean`, under the store's renames, with
@@ -1138,8 +1363,8 @@ inductive LocalTy where
 abbrev ECtx := List (Name × LocalTy)
 
 def elabTy : RawTy → Ty
-  | .named "uint" | .named "address" => .uint
-  | .named "int" => .int
+  | .named "uint" | .named "uint256" | .named "address" => .uint
+  | .named "int" | .named "int256" => .int
   | .named "bool" => .bool
   | .named s => .struct s
   | .mapping k v => .mapping (elabTy k) (elabTy v)
@@ -1176,6 +1401,7 @@ def RawExpr.hasIndex : RawExpr → Bool
   | .ternary c a b => c.hasIndex || a.hasIndex || b.hasIndex
   | .newArr _ n => n.hasIndex
   | .call _ as => as.attach.any fun ⟨a, _⟩ => a.hasIndex
+  | .named _ _ as => as.attach.any fun ⟨a, _⟩ => a.hasIndex
   | .num _ | .name _ | .bool _ => false
 
 /-- Whether a `.length` of an indexed base occurs in the expression
@@ -1188,11 +1414,12 @@ def RawExpr.hasIdxLen : RawExpr → Bool
   | .ternary c a b => c.hasIdxLen || a.hasIdxLen || b.hasIdxLen
   | .newArr _ n => n.hasIdxLen
   | .call _ as => as.attach.any fun ⟨a, _⟩ => a.hasIdxLen
+  | .named _ _ as => as.attach.any fun ⟨a, _⟩ => a.hasIdxLen
   | .num _ | .name _ | .bool _ => false
 
 /-- Whether an effect occurs in the expression: an `++` or `−−`, or a call. -/
 def RawExpr.hasIncDec : RawExpr → Bool
-  | .incDec .. | .call .. => true
+  | .incDec .. | .call .. | .named .. => true
   | .field e _ | .unop _ e => e.hasIncDec
   | .index a b | .binop _ a b => a.hasIncDec || b.hasIncDec
   | .ternary c a b => c.hasIncDec || a.hasIncDec || b.hasIncDec
@@ -1202,6 +1429,15 @@ def RawExpr.hasIncDec : RawExpr → Bool
 section Elab
 
 variable [FreshNames] (C : Contract)
+
+/-- `E.m` for an enum `E` of the contract that no local or state variable
+shadows: the position of `m`. -/
+def enumLit? (Γ : ECtx) : RawExpr → String → Option Nat
+  | .name x, m =>
+    if (lookupBy x Γ).isNone && (C.rootType x).isNone then
+      (lookupBy x C.enums).bind (·.findIdx? (· == m))
+    else none
+  | _, _ => none
 
 mutual
 
@@ -1218,6 +1454,7 @@ def synth (Γ : ECtx) : RawExpr → Except String (TExpr C)
       | some T => pure (.path T (.loc (.root x hr)))
       | none => throw s!"unknown name {x}"
   | .field e f => do
+    if let some i := enumLit? C Γ e f then return .val .uint (.simple (.lit i rfl))
     match ← synth Γ e with
     | .path (.ref (.array _)) b =>
       if f == "length" then pure (.val .uint (.len b rfl))
@@ -1274,6 +1511,7 @@ def synth (Γ : ECtx) : RawExpr → Except String (TExpr C)
   | .incDec .. => throw "`++` or `−−` under a short-circuit operator or in a conditional's branch"
   | .newArr .. => throw "`new` stands only on the right of `=`"
   | .call f _ => throw s!"the call {f}(…) under a short-circuit operator or in a conditional's branch"
+  | .named f .. => throw s!"the constructor {f}(\{…}) under a short-circuit operator or in a conditional's branch"
 termination_by e => (sizeOf e, 0)
 
 /-- `e` checked at `p` through its synthesised type. -/
@@ -1471,6 +1709,7 @@ partial def RawExpr.rename (ρ : List (String × String)) : RawExpr → RawExpr
   | .incDec op e => .incDec op (e.rename ρ)
   | .newArr T n => .newArr T (n.rename ρ)
   | .call f as => .call f (as.map (·.rename ρ))
+  | .named f ns as => .named f ns (as.map (·.rename ρ))
   | e => e
 
 /-- A callee's body with its locals renamed fresh, each declaration's name
@@ -1511,6 +1750,7 @@ partial def renameStmts (ρ : List (String × String)) : List RawStmt → ElabM 
         | .require c => .require (r c)
         | .assert c => .assert (r c)
         | .ret e => .ret (e.map r)
+        | .eval as => .eval (as.map r)
         | s => s
       pure (s :: (← renameStmts ρ ss))
 
@@ -1542,6 +1782,33 @@ partial def lowerLast (r : Option String) : RawStmt → Except String (List RawS
   | s => if s.hasReturn then throw "`return` only ends a function's body" else pure [s]
 
 end
+
+/-- **Modifiers, inlined** around a function's body (its locals already
+fresh), the first listed outermost, as solc runs them: a modifier's
+parameters are declared fresh with its arguments (read in the function's
+scope, and evaluated when the modifier is entered: after the code before
+the `_;` of the modifiers outside it), then its code before `_;`, the next
+modifier (or the body), its code after `_;`.  A modifier's locals are
+renamed fresh, so the body cannot see them.  A `return` in a modifier is
+not read; one in the body is its last statement (`lowerReturns`), so the
+code after `_;` runs after it, as it does in solc. -/
+partial def wrapMods (body : List RawStmt) : List ModApp → ElabM (List RawStmt)
+  | [] => pure body
+  | m :: ms => do
+    let inner ← wrapMods body ms
+    unless m.params.length == m.args.length do
+      throw s!"modifier {m.name} takes {m.params.length} arguments, not {m.args.length}"
+    if (m.pre ++ m.post).any RawStmt.hasReturn then throw s!"modifier {m.name}: `return` in a modifier"
+    let mut ρ : List (String × String) := []
+    let mut decls : List RawStmt := []
+    for ((n, T), a) in m.params.zip m.args do
+      let .prim p := T | throw s!"modifier {m.name}: the parameter {n} has a reference type"
+      let y := toString (← freshCapture "se")
+      decls := decls ++ [.decl (.named (primName p)) y (some a)]
+      ρ := (n, y) :: ρ
+    -- one renaming for both parts: a local declared before `_;` is in scope after it
+    let code ← renameStmts ρ (m.pre ++ m.post)
+    pure (decls ++ code.take m.pre.length ++ inner ++ code.drop m.pre.length)
 
 mutual
 
@@ -1634,7 +1901,28 @@ partial def hoist : RawExpr → ElabM (Prog C × RawExpr)
       declare C (toString x) (.val p)
       pure (P ++ pre ++ [.declLocal p x none, .assignIncDec x op hp t hs], .name (toString x))
     | false => throw s!"++ or −− at {primName p}"
+  | .named f ns args => do
+    -- the members' order; an effect may not move
+    let flds := (structDef f).map (·.1)
+    if flds.isEmpty then throw s!"{f}(\{…}): named arguments of a struct's constructor only"
+    unless ns.length == flds.length && flds.all ns.contains do
+      throw s!"{f}(\{…}) names each member of {f} once: {flds}"
+    if ns != flds && args.any (·.hasIncDec) then
+      throw s!"{f}(\{…}): an argument with an effect, out of the members' order"
+    hoist (.call f (flds.map fun g => (lookupBy g (ns.zip args)).getD (.num 0)))
   | .call f args => do
+    -- a struct's constructor (no function of that name): a fresh memory
+    -- object, its members written in order, after the arguments are evaluated
+    -- left to right (`T memory mv1; mv1.a = x; mv1.b = y;`)
+    let flds := structDef f
+    if (← read).all (·.1 != f) && !flds.isEmpty then
+      let (P, args) ← hoistArgs args
+      unless flds.length == args.length do
+        throw s!"{f} has {flds.length} members, not {args.length}"
+      let x := toString (← freshCapture "mv")
+      let Q ← elabStmts (.declMemory (.named f) x none ::
+        (flds.zip args).map fun ((g, _), a) => .assign (.field (.name x) g) a)
+      return (P ++ Q, .name x)
     -- a call inside an expression runs before the statement, into a fresh local
     let (P, args) ← hoistArgs args
     let some (_, d) := (← read).find? (·.1 == f) | throw s!"{f} is not a function declared before this one"
@@ -1693,6 +1981,7 @@ partial def elabCall (f : String) (args : List RawExpr) (res : Option (Var × Pr
       pure (CallRet.val p r (res.map (·.1)))
   let body ← ElabM.lift (lowerReturns (d.ret.map (·.1)) d.body)
   let body ← renameStmts ρ body
+  let body ← wrapMods body (d.mods.map fun m => { m with args := m.args.map (·.rename ρ) })
   modify fun (_, k) => (Γf, k)
   let P ← withReader (fun _ => funs.take i) (elabStmts body)
   modify fun (_, k) => (Γ, k)
@@ -1781,6 +2070,14 @@ partial def hoistStmt : RawStmt → ElabM (Prog C × RawStmt)
   | .assert c => do
     let (P, c) ← hoist c
     pure (P, .assert c)
+  | .eval args => do
+    -- the effects captured, left to right; then what may still revert is
+    -- evaluated into a fresh local, which nothing reads
+    let (P, args) ← hoistArgs args
+    let mut Q := P
+    for a in args do
+      unless a.isPure do Q := Q ++ (← captureExpr C a).1
+    pure (Q, .eval [])
   | s => pure ([], s)
 
 /-- A statement, as a block: its captures (`hoistStmt`), then the statement,
@@ -1923,6 +2220,11 @@ partial def elabStmt1 : RawStmt → ElabM (Prog C)
       match E with
       | .prim p => pure [.push b (some (.val (← check C Γ p a))) rfl]
       | .ref R =>
+        -- a memory object (a struct's constructor): a default slot pushed,
+        -- then written with its copy
+        if (← synth C Γ a) matches .mpath .. then
+          return ← elabStmts [.call (.field e "push") [],
+            .assign (.index e (.binop .sub (.field e "length") (.num 1))) a]
         match h : (Ty.ref R).mapFree with
         | true => pure [.push b (some (.copy (← checkPath C Γ (.ref R) a) h)) rfl]
         | false => throw "a push copying a type that holds a mapping"
@@ -1950,6 +2252,7 @@ partial def elabStmt1 : RawStmt → ElabM (Prog C)
     let (Γ, _) ← get
     pure [.assert (← check C Γ .bool c)]
   | .revert => pure [.revert]
+  | .eval _ => pure []
 
 /-- A block. -/
 partial def elabStmts : List RawStmt → ElabM (Prog C)
@@ -1982,6 +2285,7 @@ def RawExpr.maxIdx : RawExpr → Nat
   | .incDec _ e => e.maxIdx
   | .newArr _ n => n.maxIdx
   | .call _ as => as.attach.foldl (fun n ⟨a, _⟩ => max n a.maxIdx) 0
+  | .named _ _ as => as.attach.foldl (fun n ⟨a, _⟩ => max n a.maxIdx) 0
   | .num _ | .bool _ => 0
 
 end
@@ -2003,6 +2307,7 @@ def RawStmt.maxIdx : RawStmt → Nat
   | .ite c t e => max c.maxIdx (max (RawStmt.maxIdxs t) (RawStmt.maxIdxs e))
   | .ret e => (e.map RawExpr.maxIdx).getD 0
   | .revert => 0
+  | .eval as => RawExpr.maxIdxs as
 
 def RawStmt.maxIdxs : List RawStmt → Nat
   | [] => 0
