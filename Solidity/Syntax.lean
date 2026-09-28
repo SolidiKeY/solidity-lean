@@ -41,8 +41,9 @@ return variable and the body, every local of the callee renamed fresh for
 this call (`elabCall`), as KeY's `FunctionBodyStatement` carries the function
 it stands for.  A call is a statement or a whole right-hand side, as KeY
 writes it (`res = f(a)@C;`); one inside an expression is captured before its
-statement.  A body's `return e;` ends it, as an assignment to the return
-variable.
+statement.  A body's `return e;` ends it: an assignment to the return variable, the
+statements after it moved into the branches that do not return
+(`lowerReturns`).
 -/
 
 namespace Solidity
@@ -130,8 +131,8 @@ inductive RawStmt where
   | require (c : RawExpr)
   | assert (c : RawExpr)
   | revert
-  /-- `return e;`, `return;`: only a function body's last statement (or the
-  last of each branch of a last `if`). -/
+  /-- `return e;`, `return;`: in a function's body, lowered away when it is
+  inlined (`lowerReturns`). -/
   | ret (e : Option RawExpr)
   /-- The arguments of `emit E(a, b);`, or of the error in
   `require(c, Err(a, b));`, evaluated left to right for their effects and
@@ -825,6 +826,13 @@ syntax:max atomic(&"address" "(") sol_expr ")" : sol_expr
 /-- `T({f: a, g: b})`: a struct constructor with named arguments. -/
 syntax:max atomic(ident "(" "{") (ident ": " sol_expr),* "}" ")" : sol_expr
 
+/-- `f(a, b)` inside an expression (`x = f(a) + 1;`), captured before its
+statement (`hoist`).  At precedence `arg`, as a postfix `++`: a statement
+`f(a);` reads its callee at `max`, so it stays the call statement, and the
+call statements below are preferred (`priority := high`) where both
+readings take the same text (`y = f(a);`, `lsv = values.push();`). -/
+syntax:arg (name := solCallExpr) sol_expr:max "(" sol_expr,* ")" : sol_expr
+
 declare_syntax_cat sol_stmt (behavior := both)
 declare_syntax_cat sol_block (behavior := both)
 syntax "{" (sol_stmt ";")* "}" : sol_block
@@ -845,19 +853,19 @@ syntax sol_expr ".pop()" : sol_stmt
 syntax sol_expr " = " sol_expr ".push()" : sol_stmt
 syntax sol_ty &"storage" ident " = " sol_expr ".push()" : sol_stmt
 syntax sol_expr ".transfer(" sol_expr ")" : sol_stmt
-syntax sol_expr "(" ")" : sol_stmt
-syntax sol_expr "(" sol_expr ")" : sol_stmt
-syntax sol_expr " = " sol_expr "(" ")" : sol_stmt
+syntax sol_expr:max "(" ")" : sol_stmt
+syntax sol_expr:max "(" sol_expr ")" : sol_stmt
+syntax (priority := high) sol_expr " = " sol_expr:max "(" ")" : sol_stmt
 /-- A call of the contract's function with two arguments or more. -/
-syntax sol_expr "(" sol_expr ", " sol_expr,+ ")" : sol_stmt
+syntax sol_expr:max "(" sol_expr ", " sol_expr,+ ")" : sol_stmt
 /-- `y = f(a, b);`: a call assigned. -/
-syntax sol_expr " = " sol_expr "(" sol_expr,+ ")" : sol_stmt
+syntax (priority := high) sol_expr " = " sol_expr:max "(" sol_expr,+ ")" : sol_stmt
 /-- `uint y = f(a);`: a call declared. -/
-syntax sol_ty ident " = " sol_expr "(" sol_expr,* ")" : sol_stmt
-/-- `return e;`, `return;`: a function body's last statement. -/
+syntax (priority := high) sol_ty ident " = " sol_expr:max "(" sol_expr,* ")" : sol_stmt
+/-- `return e;`, `return;`: anywhere in a function's body (`lowerReturns`). -/
 syntax (name := solReturn) "return " sol_expr : sol_stmt
 syntax (name := solReturnNone) "return" : sol_stmt
-syntax sol_ty &"storage" ident " = " sol_expr "(" ")" : sol_stmt
+syntax (priority := high) sol_ty &"storage" ident " = " sol_expr:max "(" ")" : sol_stmt
 syntax sol_expr:max "++" : sol_stmt
 syntax "++" sol_expr : sol_stmt
 syntax sol_expr " = " sol_expr:max "++" : sol_stmt
@@ -979,6 +987,15 @@ def expandIdent (x : Ident) : MacroM Term := do
     flds.foldlM (init := ← `(RawExpr.name $(quote root)))
       fun acc f => `(RawExpr.field $acc $(quote f))
 
+/-- `f`, a function's name: an identifier with no member access. -/
+def funName? (f : TSyntax `sol_expr) : Option String :=
+  match f with
+  | `(sol_expr| $x:ident) =>
+    match nameParts x.getId with
+    | [g] => some g
+    | _ => none
+  | _ => none
+
 partial def expandExpr : TSyntax `sol_expr → MacroM Term
   | `(sol_expr| $n:num) => `(RawExpr.num $n)
   | `(sol_expr| $x:ident) => expandIdent x
@@ -1035,19 +1052,13 @@ partial def expandExpr : TSyntax `sol_expr → MacroM Term
   | `(sol_expr| $f:ident ( { $[$ns:ident : $as:sol_expr],* } )) => do
       let ns : Array Term := ns.map fun n => quote n.getId.toString
       `(RawExpr.named $(quote f.getId.toString) [$ns,*] [$(← as.mapM expandExpr),*])
+  | `(sol_expr| $f:sol_expr ( $as:sol_expr,* )) => do
+      let some g := funName? f | Macro.throwErrorAt f "a call's callee is a function's name"
+      `(RawExpr.call $(quote g) [$(← as.getElems.mapM expandExpr),*])
   | _ => Macro.throwUnsupported
 where
   bin (op : Lean.Name) (a b : TSyntax `sol_expr) : MacroM Term := do
     `(RawExpr.binop $(mkIdent op) $(← expandExpr a) $(← expandExpr b))
-
-/-- `f`, a function's name: an identifier with no member access. -/
-def funName? (f : TSyntax `sol_expr) : Option String :=
-  match f with
-  | `(sol_expr| $x:ident) =>
-    match nameParts x.getId with
-    | [g] => some g
-    | _ => none
-  | _ => none
 
 partial def expandStmt (s : TSyntax `sol_stmt) : MacroM Term := do
   -- `delete x` also parses as a declaration `T x` of a type called
@@ -1526,6 +1537,16 @@ def RawExpr.hasIncDec : RawExpr → Bool
   | .newArr _ n => n.hasIncDec
   | .num _ | .name _ | .bool _ | .env _ => false
 
+/-- Whether a call occurs in the expression. -/
+def RawExpr.hasCall : RawExpr → Bool
+  | .call .. => true
+  | .incDec _ e | .field e _ | .unop _ e => e.hasCall
+  | .index a b | .binop _ a b => a.hasCall || b.hasCall
+  | .ternary c a b => c.hasCall || a.hasCall || b.hasCall
+  | .newArr _ n => n.hasCall
+  | .named _ _ as => as.attach.any fun ⟨a, _⟩ => a.hasCall
+  | .num _ | .name _ | .bool _ | .env _ => false
+
 section Elab
 
 variable [FreshNames] (C : Contract)
@@ -1863,28 +1884,66 @@ partial def RawStmt.hasReturn : RawStmt → Bool
   | .unchecked b => b.any RawStmt.hasReturn
   | _ => false
 
-mutual
+/-- Whether the name `x` occurs in the expression. -/
+partial def RawExpr.mentions (x : String) : RawExpr → Bool
+  | .name y => y == x
+  | .field e _ | .unop _ e | .incDec _ e | .newArr _ e => e.mentions x
+  | .index a b | .binop _ a b => a.mentions x || b.mentions x
+  | .ternary c a b => c.mentions x || a.mentions x || b.mentions x
+  | .call _ as | .named _ _ as => as.any (·.mentions x)
+  | .num _ | .bool _ | .env _ => false
 
-/-- A body's `return`s, which may only end it (or end each branch of an `if`
-that ends it), as assignments to the return variable `r`: `return x + 1;` is
-`r = x + 1;`. -/
+/-- Whether the name `x` occurs in the statement, read, written or declared. -/
+partial def RawStmt.mentions (x : String) : RawStmt → Bool
+  | .assign l r | .assignPush l r => l.mentions x || r.mentions x
+  | .decl _ y i | .declStorage _ y i | .declMemory _ y i => y == x || i.any (·.mentions x)
+  | .declStoragePush _ y b => y == x || b.mentions x
+  | .delete e | .incDec _ e | .require e | .assert e => e.mentions x
+  | .opAssign _ l r => l.mentions x || r.mentions x
+  | .call f as => f.mentions x || as.any (·.mentions x)
+  | .assignIncDec y _ l => y.mentions x || l.mentions x
+  | .ite c t e => c.mentions x || t.any (·.mentions x) || e.any (·.mentions x)
+  | .ret e => e.any (·.mentions x)
+  | .eval as => as.any (·.mentions x)
+  | .unchecked b => b.any (·.mentions x)
+  | .revert => false
+
+/-- The name a statement declares in its own block. -/
+def RawStmt.declared? : RawStmt → Option String
+  | .decl _ x _ | .declStorage _ x _ | .declMemory _ x _ | .declStoragePush _ x _ => some x
+  | _ => none
+
+/-- **A body's `return`s, lowered** to assignments to its return variable
+`r` (`return x + 1;` is `r = x + 1;`), so that `Stmt.run` has no abrupt
+completion.  What follows a `return` in its block is dead and dropped; the
+statements after an `if` one of whose branches returns move into both
+branches, which is where they run: `if (c) { return a; } s;` is
+`if (c) { r = a; } else { s; }`.  A branch's own declarations would then be
+in scope over the moved statements, so a moved statement may not name one
+(Solidity scopes it to the branch); in an inlined body every local is
+already fresh (`renameStmts`), and that never happens.  A function on a body
+as read: it may run before or after the body is renamed. -/
 partial def lowerReturns (r : Option String) : List RawStmt → Except String (List RawStmt)
   | [] => pure []
-  | [s] => lowerLast r s
-  | s :: ss => do
-    if s.hasReturn then throw "`return` only ends a function's body"
-    pure (s :: (← lowerReturns r ss))
-
-partial def lowerLast (r : Option String) : RawStmt → Except String (List RawStmt)
-  | .ret none => pure []
-  | .ret (some e) =>
+  | .ret none :: _ => pure []
+  | .ret (some e) :: _ =>
     match r with
     | some n => pure [.assign (.name n) e]
     | none => throw "`return` of a value from a function that returns none"
-  | .ite c t e => do pure [.ite c (← lowerReturns r t) (← lowerReturns r e)]
-  | s => if s.hasReturn then throw "`return` only ends a function's body" else pure [s]
-
-end
+  | .ite c t e :: ss => do
+    if (t.any RawStmt.hasReturn || e.any RawStmt.hasReturn) && !ss.isEmpty then
+      for x in (t ++ e).filterMap RawStmt.declared? do
+        if ss.any (·.mentions x) then
+          throw s!"`return` in a branch declaring {x}, which the statements after it name"
+      pure [.ite c (← lowerReturns r (t ++ ss)) (← lowerReturns r (e ++ ss))]
+    else
+      pure (.ite c (← lowerReturns r t) (← lowerReturns r e) :: (← lowerReturns r ss))
+  | .unchecked b :: ss => do
+    -- the statements after it would move into the block, and be unchecked
+    if b.any RawStmt.hasReturn && !ss.isEmpty then
+      throw "`return` inside `unchecked { … }` with statements after the block"
+    pure (.unchecked (← lowerReturns r b) :: (← lowerReturns r ss))
+  | s :: ss => do pure (s :: (← lowerReturns r ss))
 
 /-- **Modifiers, inlined** around a function's body (its locals already
 fresh), the first listed outermost, as solc runs them: a modifier's
@@ -2001,6 +2060,7 @@ partial def hoist : RawExpr → ElabM (Prog C × RawExpr)
   | .binop op a b => do
     if op.shortCircuits then
       let (P, a) ← hoist a
+      if b.hasCall then throw "a call under a short-circuit operator"
       if b.hasIncDec then throw "`++` or `−−` under a short-circuit operator"
       pure (P, .binop op a b)
     else
@@ -2020,6 +2080,7 @@ partial def hoist : RawExpr → ElabM (Prog C × RawExpr)
     pure (P, .unop op a)
   | .ternary c a b => do
     let (P, c) ← hoist c
+    if a.hasCall || b.hasCall then throw "a call in a conditional's branch"
     if a.hasIncDec || b.hasIncDec then throw "`++` or `−−` in a conditional's branch"
     let (Γ, _) ← get
     match synth C Γ a, synth C Γ b with
@@ -2097,7 +2158,7 @@ partial def hoistArgs : List RawExpr → ElabM (Prog C × List RawExpr)
 is found among the functions the scope may call, its arguments are checked
 at its parameters' types in the caller's scope, and its body is elaborated in
 a scope of its own — its parameters and its return variable, every local
-renamed fresh (`renameStmts`), its `return`s lowered (`lowerReturns`) — with
+renamed fresh (`renameStmts`), then its `return`s lowered (`lowerReturns`) — with
 the functions declared before `f`, so no call recurses.  `res` is the local
 the returned value lands in, with its type. -/
 partial def elabCall (f : String) (args : List RawExpr) (res : Option (Var × PrimTy)) :
@@ -2129,8 +2190,8 @@ partial def elabCall (f : String) (args : List RawExpr) (res : Option (Var × Pr
       ρ := (n, toString r) :: ρ
       Γf := setBy (toString r) (.val p) Γf
       pure (CallRet.val p r (res.map (·.1)))
-  let body ← ElabM.lift (lowerReturns (d.ret.map (·.1)) d.body)
-  let body ← renameStmts ρ body
+  let body ← renameStmts ρ d.body
+  let body ← ElabM.lift (lowerReturns (d.ret.map fun (n, _) => (lookupBy n ρ).getD n) body)
   let body ← wrapMods body (d.mods.map fun m => { m with args := m.args.map (·.rename ρ) })
   modify fun (_, k) => (Γf, k)
   let P ← withReader (fun _ => funs.take i) (elabStmts body)
@@ -2392,7 +2453,7 @@ partial def elabStmt1 : RawStmt → ElabM (Prog C)
     pure [.transfer (← check C Γ .uint e) (← check C Γ .uint a)]
   | .call (.name f) args => elabCall f args none
   | .call .. => throw "only push, pop and transfer are calls on a receiver"
-  | .ret _ => throw "`return` only ends a function's body"
+  | .ret _ => throw "`return` outside a function's body"
   | .ite c thn els => do
     let (Γ, _) ← get
     let c ← check C Γ .bool c

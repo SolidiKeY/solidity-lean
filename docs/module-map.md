@@ -146,7 +146,7 @@ went.
 | `Examples/Branch.lean`, `Examples/Revert.lean` | The two-goal split, a conditional of references; box and diamond on `revert`, `require`, `assert`, `transfer`. |
 | `Examples/Values.lean` | Operators, short-circuits, checked arithmetic, `−−`, `++` inside an expression, negative literals. |
 | `Examples/Operators.lean` | Bitwise `& \| ^ ~`, shifts, their compound assignments, `unchecked { … }`; the same on the machine. |
-| `Examples/Calls.lean` | Internal calls: inlined bodies, captured arguments, nested calls, a `return` per branch, effects on storage; what cannot be written (recursion). |
+| `Examples/Calls.lean` | Internal calls: inlined bodies, captured arguments, nested calls, early returns (in a branch, in a callee), calls inside expressions, effects on storage; what cannot be written (recursion, a call under `&&`/`\|\|` or in a conditional's branch). |
 | `Examples/Callback.lean` | The callback semantics: a checks-effects-interactions withdrawal proved with callbacks (`ProvesC`, `transferWithCallbackBox`), an interaction-first one proved without and refuted with, the diamond's funds. |
 | `Examples/Memory.lean`, `Examples/CrossDomain.lean`, `Examples/Net.lean`, `Examples/Theory.lean` | Memory (memory `delete`, `new T[](n)`, `.length` included), copies between storage and memory, `transfer`, the theory's rewriting. |
 | `Examples/Notation.lean` | What taclets, premises and sequents print, pinned. |
@@ -157,3 +157,4 @@ went.
 | `Examples/Benchmark/Purchase.lean` | solkey's benchmark `Purchase` with its enum, modifiers, errors and events as published (`msg.*` and `address(this).balance` as state variables), its clauses on `state` and `buyer` proved. |
 | `Examples/Benchmark/Coin.lean` | solkey's benchmark `Coin`: `msg.sender` in `require` and as a mapping key; `mint` and `send` against their `@custom:key` clauses, the two `send` clauses `sol_close` does not close as runs. |
 | `Examples/Benchmark/EtherWallet.lean` | solkey's benchmark `EtherWallet`: `withdraw` pays `msg.sender`; the owner kept, `address(this).balance` less by the amount, the ledger as a run. |
+| `Examples/Benchmark/ERC20.lean` | solkey's benchmark ERC20 in its published `return true;` form, `mint`/`burn` calling `_mint`/`_burn`; every `@custom:key` postcondition proved. |
