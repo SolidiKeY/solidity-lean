@@ -21,6 +21,7 @@ pp.sol.dl false` shows the constructors again.
 | `dl{ [ s; ] ⇝ p }`, `dl{ ⟨ s; ⟩ ⇝ p }` | a taclet for the box only, the diamond only |
 | `dl{ p }` | a premise |
 | `⊨ φ` | `Valid φ` |
+| `σ ⊧ φ` | `holds σ φ` |
 
 ## Names are schema variables, and a name carries its kind
 
@@ -175,11 +176,14 @@ syntax "dl{ " "⟨ " sol_stmt "; " "⟩" " ⇝ " dl_premise " }" : term
 syntax "dl{ " dl_premise " }" : term
 /-- `⊨ φ` for a formula given as a Lean term. -/
 syntax:25 "⊨ " term:26 : term
+/-- `σ ⊧ φ`: the formula `φ` holds in the state `σ`. -/
+syntax:50 term:51 " ⊧ " term:51 : term
 /-- A statement standing alone, as the printers show one. -/
 syntax "stmt{ " sol_stmt "; " "}" : term
 
 macro_rules
   | `(⊨ $φ:term) => `(Solidity.Valid $φ)
+  | `($σ:term ⊧ $φ:term) => `(Solidity.holds $σ $φ)
 
 /-! ## Side conditions
 
@@ -1905,6 +1909,17 @@ def delabValid : Delab := do
   let φ ← ppFml e.appArg!
   guard !(isEscape φ)
   `(⊨ dl{ $φ:dl_fml })
+
+/-- `holds σ φ`: `σ ⊧ φ`, what `Valid` leaves once its state is introduced. -/
+@[delab app.Solidity.holds]
+def delabHolds : Delab := do
+  unless ← ppOn do failure
+  let e ← getExpr
+  guard (e.getAppNumArgs == 3)
+  let φ ← ppFml e.appArg!
+  guard !(isEscape φ)
+  let σ ← withNaryArg 1 delab
+  `($σ ⊧ dl{ $φ:dl_fml })
 
 /-- A statement standing alone: `stmt{ s; }`. -/
 def delabStmt : Delab := do

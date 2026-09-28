@@ -104,7 +104,6 @@ and `Γ'` after. -/
 abbrev Compiles {C : Contract} (Γ : Evm.TyCtx) (P : Prog C) (Γ' : Evm.TyCtx) : Prop :=
   Evm.wtProg Γ P = some Γ'
 
-scoped notation:50 σ:51 " ⊧ " φ:51 => holds σ φ
 scoped notation:25 Γ:26 " ⊨ " φ:26 => ValidUnder Γ φ
 scoped notation:25 Γ:26 " ⊢ " φ:26 => Derives Γ φ
 scoped notation:25 "⊢ " φ:26 => Derives [] φ
