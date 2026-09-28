@@ -384,7 +384,7 @@ theorem res_frame_eq {α : Type} {σ : State} {x : Res (State × α)} (hx : Fram
   | error _ => rfl
   | ok p =>
     obtain ⟨τ, a⟩ := p
-    obtain ⟨h1, h2, h3, h4⟩ := hx τ a h
+    obtain ⟨h1, h2, h3, h4, h5⟩ := hx τ a h
     cases τ; cases σ
     simp_all [Except.map, bind, Except.bind, pure, Except.pure]
 

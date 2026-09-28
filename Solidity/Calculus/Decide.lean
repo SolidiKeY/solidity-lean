@@ -576,7 +576,7 @@ def _root_.Solidity.Term.toL (ρ : Sym) : Term C → LTerm
   | .find s p => .find (s.toL ρ) (p.toL ρ)
   | .ite c a b => .ite (c.toL ρ) (a.toL ρ) (b.toL ρ)
   | .len s p => .len (s.toL ρ) (p.toL ρ)
-  | .read _ _ | .mlen _ _ => .err
+  | .read _ _ | .mlen _ _ | .env _ => .err
 
 /-- A path with the updates pushed in: after `{ sp1 := alice.account }`,
 `sp1.balance` is `alice.account.balance`. -/
@@ -645,7 +645,7 @@ def _root_.Solidity.Term.inL (ρ : Sym) : Term C → Bool
   | .find .storage p | .len .storage p => p.inL ρ
   | .find .. | .len .. => false
   | .ite c a b => c.inL ρ && a.inL ρ && b.inL ρ
-  | .read _ _ | .mlen _ _ => false
+  | .read _ _ | .mlen _ _ | .env _ => false
 
 /-- A path in the fragment: an alias only where an update bound it
 (`Person storage p = alice;` does), and to a path with no index. -/

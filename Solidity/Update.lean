@@ -75,6 +75,9 @@ inductive Term (C : Contract) where
   | ite (c a b : Term C)
   /-- `m[i].length`: KeY's `read(m, i, size)`. -/
   | mlen (m : MTerm C) (i : ITerm C)
+  /-- `msgSender`, `msgValue`, `selfBalance`: KeY's program variables of
+  `netHeader.key`, and `block.timestamp`. -/
+  | env (k : EnvKey)
 
 /-- A storage path. -/
 inductive PTerm (C : Contract) where
@@ -205,6 +208,7 @@ def Term.eval (σ : State) : Term C → Res Value
   | .mlen m i => do
     let τ ← m.eval σ
     memArrayLen τ (← i.eval σ)
+  | .env k => pure (.int (σ.envVal k))
 
 def PTerm.eval (σ : State) : PTerm C → Res (Name × List Seg)
   | .root r => pure (r, [])
@@ -368,7 +372,7 @@ def Semantics.State.havoc (σ : State) (st : List (Name × SVal)) (nt : List (In
 theorem Semantics.EnvAgreeExcept.havoc {ns : List Var} {σ τ : State} (h : EnvAgreeExcept ns σ τ)
     (st : List (Name × SVal)) (nt : List (Int × Int)) (bal : Int) :
     EnvAgreeExcept ns (σ.havoc st nt bal) (τ.havoc st nt bal) :=
-  ⟨rfl, h.heap, h.nextId, rfl, h.env, rfl⟩
+  ⟨rfl, h.heap, h.nextId, rfl, h.env, rfl, h.tx⟩
 
 /-! ## Formulas -/
 
@@ -437,6 +441,7 @@ def Term.vars : Term C → List Var
   | .read m a => m.vars ++ a.vars
   | .ite c a b => c.vars ++ a.vars ++ b.vars
   | .mlen m i => m.vars ++ i.vars
+  | .env _ => []
 
 def PTerm.vars : PTerm C → List Var
   | .root _ => []
@@ -548,6 +553,7 @@ theorem Term.eval_frame {σ τ : State} (hag : EnvAgreeExcept ns σ τ) :
     simp only [Term.eval, i.eval_frame hag h.right]
     exact ResultsAgree.bindEq (m.eval_frame hag h.left) fun _ _ h' => by
       simp only [memArrayLen, getObj_congr h']
+  | .env k, _ => by simp only [Term.eval, State.envVal_congr hag]
 
 theorem PTerm.eval_frame {σ τ : State} (hag : EnvAgreeExcept ns σ τ) :
     (p : PTerm C) → Avoids p.vars ns → p.eval σ = p.eval τ
@@ -672,12 +678,12 @@ theorem UpdElem.write_frame {σ₀ σ₀' τ τ' : State} (h₀ : EnvAgreeExcept
     simp only [UpdElem.write]
     match s.eval σ₀, s.eval σ₀', s.eval_frame h₀ hv with
     | .error _, .error _, he => subst he; rfl
-    | .ok a, .ok b, hs => exact ⟨hs.storage, h.heap, h.nextId, h.net, h.env, h.selfBalance⟩
+    | .ok a, .ok b, hs => exact ⟨hs.storage, h.heap, h.nextId, h.net, h.env, h.selfBalance, h.tx⟩
   | .memory m, hv => by
     simp only [UpdElem.write]
     match m.eval σ₀, m.eval σ₀', m.eval_frame h₀ hv with
     | .error _, .error _, he => subst he; rfl
-    | .ok a, .ok b, hs => exact ⟨h.storage, hs.heap, hs.nextId, h.net, h.env, h.selfBalance⟩
+    | .ok a, .ok b, hs => exact ⟨h.storage, hs.heap, hs.nextId, h.net, h.env, h.selfBalance, h.tx⟩
   | .transfer r a, hv => by
     simp only [UpdElem.write, r.eval_frame h₀ hv.left, a.eval_frame h₀ hv.right]
     agree_run h
@@ -738,6 +744,7 @@ def Simple.lower {p : PrimTy} : Simple C p → Term C
   | .lit n _ => .lit (.int n)
   | .bool b => .lit (.bool b)
   | .local x => .pv x
+  | .env k _ => .env k
 
 mutual
 

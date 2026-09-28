@@ -178,7 +178,7 @@ theorem State.saveStorage_frame {s s' : State} {root : Name}
     {path : List Seg} {new : SVal}
     (h : s.saveStorage root path new = .ok s') :
     s'.heap = s.heap ∧ s'.nextId = s.nextId ∧
-      s'.env = s.env ∧ s'.net = s.net ∧ s'.selfBalance = s.selfBalance := by
+      s'.env = s.env ∧ s'.net = s.net ∧ s'.selfBalance = s.selfBalance ∧ s'.tx = s.tx := by
   unfold State.saveStorage at h
   cases hv : lookupBy root s.storage with
   | none => simp [hv] at h
@@ -190,7 +190,7 @@ theorem State.saveStorage_frame {s s' : State} {root : Name}
           rw [hs] at h
           injection h with h'
           subst s'
-          exact ⟨rfl, rfl, rfl, rfl, rfl⟩
+          exact ⟨rfl, rfl, rfl, rfl, rfl, rfl⟩
 
 /-! ## Allocation and heap freshness -/
 
@@ -265,17 +265,17 @@ contract balance.  The heap and `nextId` are intentionally omitted: deep
 copying allocates fresh memory objects. -/
 def StateFrame (s t : State) : Prop :=
   t.storage = s.storage ∧ t.env = s.env ∧ t.net = s.net ∧
-    t.selfBalance = s.selfBalance
+    t.selfBalance = s.selfBalance ∧ t.tx = s.tx
 
 namespace StateFrame
 
-@[simp] theorem refl (s : State) : StateFrame s s := ⟨rfl, rfl, rfl, rfl⟩
+@[simp] theorem refl (s : State) : StateFrame s s := ⟨rfl, rfl, rfl, rfl, rfl⟩
 
 theorem trans {s t u : State} (hst : StateFrame s t)
     (htu : StateFrame t u) : StateFrame s u := by
-  rcases hst with ⟨hss, hse, hsn, hsb⟩
-  rcases htu with ⟨hts, hte, htn, htb⟩
-  exact ⟨hts.trans hss, hte.trans hse, htn.trans hsn, htb.trans hsb⟩
+  rcases hst with ⟨hss, hse, hsn, hsb, hsx⟩
+  rcases htu with ⟨hts, hte, htn, htb, htx⟩
+  exact ⟨hts.trans hss, hte.trans hse, htn.trans hsn, htb.trans hsb, htx.trans hsx⟩
 
 end StateFrame
 
@@ -318,7 +318,7 @@ theorem alloc_ref (s : State) (obj : MObj) :
   simp only [FramePreserving, State.alloc]
   intro t mv h
   cases h
-  exact ⟨rfl, rfl, rfl, rfl⟩
+  exact ⟨rfl, rfl, rfl, rfl, rfl⟩
 
 end FramePreserving
 

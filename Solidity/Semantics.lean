@@ -6,7 +6,8 @@ import Solidity.Syntax
 What a program does, the reference every rule is proved sound against
 (mini-solkey's `Ch04_Semantics`).  The state is KeY's: a storage tree
 (`structRules.key`), an identity-indexed memory heap (`memoryRules.key`),
-the locals, and the `net` payment ledger (`netHeader.key`).  `Stmt.run`
+the locals, the `net` payment ledger and the contract's funds
+(`netHeader.key`), and the transaction's environment (`msg.sender`, …).  `Stmt.run`
 runs a statement on it by structural recursion on the typed syntax, so
 every function here terminates and every branch on a type was already
 taken by the index.
@@ -125,6 +126,17 @@ inductive Binding where
   | mref (id : Nat)
   deriving Repr, DecidableEq
 
+/-- What the transaction running the program was sent with: KeY's program
+variables `msgSender` and `msgValue` (`netHeader.key`) and the block's
+timestamp.  No statement changes them, and a callback leaves them as they
+were (`State.havoc`): a re-entrant call runs in its own transaction, which
+the caller never sees. -/
+structure TxEnv where
+  msgSender : Int := 0
+  msgValue : Int := 0
+  timestamp : Int := 0
+  deriving Repr, DecidableEq
+
 structure State where
   storage : List (Name × SVal)
   heap : List (Nat × MObj) := []
@@ -137,6 +149,8 @@ structure State where
   inherits. Example stores that exercise `transfer` start it high
   enough for their payments. -/
   selfBalance : Int := 0
+  /-- `msg.sender`, `msg.value`, `block.timestamp`. -/
+  tx : TxEnv := {}
   deriving Repr
 
 inductive Halt where
@@ -468,6 +482,14 @@ def getNet (s : State) (addr : Int) : Int :=
 
 def setNet (s : State) (addr amount : Int) : State :=
   { s with net := setBy addr amount s.net }
+
+/-- A value of the environment: `msg.sender` is `tx.msgSender`,
+`address(this).balance` the funds `transfer` debits. -/
+def envVal (s : State) : EnvKey → Int
+  | .msgSender => s.tx.msgSender
+  | .msgValue => s.tx.msgValue
+  | .timestamp => s.tx.timestamp
+  | .selfBalance => s.selfBalance
 
 end State
 
@@ -944,7 +966,8 @@ def evalBinop (op : BinOp) (p : PrimTy) (lv : Value) (b : Res Value) : Res Value
   | .or, .bool true => pure (.bool true)
   | _, _ => do checkArith (op.retTy (.prim p)) (← applyBinOp op lv (← b))
 
-/-- The value a simple value denotes: a literal, or a stack local's. -/
+/-- The value a simple value denotes: a literal, a stack local's, or the
+environment's. -/
 def Simple.eval (σ : State) {p : PrimTy} : Simple C p → Res Value
   | .lit n _ => pure (.int n)
   | .bool b => pure (.bool b)
@@ -952,6 +975,7 @@ def Simple.eval (σ : State) {p : PrimTy} : Simple C p → Res Value
     match ← σ.getEnv x with
     | .val v => pure v
     | .spath .. | .mref _ => .error .stuck
+  | .env k _ => pure (.int (σ.envVal k))
 
 /-- The length of the array at a storage path: `values.length`. -/
 def arrayLen (σ : State) (r : Name) (segs : List Seg) : Res Value := do

@@ -41,7 +41,8 @@ needs.  Instruction meanings follow the EVM as Nethermind's
   itself (as Vyper does); solc keeps them on the stack.
 * **The world is one ledger**: `net a` is what KeY's `net` records for address
   `a`, the value the contract has sent there, negated; `balance` is
-  `address(this).balance`.  `CALL` takes only an address and a value — no gas,
+  `address(this).balance` (`SELFBALANCE`), and `caller`, `callvalue`,
+  `timestamp` the transaction's (`CALLER`, `CALLVALUE`, `TIMESTAMP`).  `CALL` takes only an address and a value — no gas,
   no calldata, no callee code.
 * No gas, no stack-depth limit.
 -/
@@ -134,6 +135,10 @@ inductive Instr where
   | jumpi (n : Nat)
   | call
   | revert
+  /-- The transaction's environment: `CALLER` (`msg.sender`), `CALLVALUE`
+  (`msg.value`), `TIMESTAMP` (`block.timestamp`), `SELFBALANCE`
+  (`address(this).balance`). -/
+  | caller | callvalue | timestamp | selfbalance
   deriving DecidableEq, Repr, Inhabited
 
 instance : ToString Instr where
@@ -154,6 +159,8 @@ instance : ToString Instr where
     | .jumpi n => s!"JUMPI +{n}"
     | .call => "CALL"
     | .revert => "REVERT"
+    | .caller => "CALLER" | .callvalue => "CALLVALUE" | .timestamp => "TIMESTAMP"
+    | .selfbalance => "SELFBALANCE"
 
 /-- `f` with `x` sent to `v`. -/
 def upd {α : Type} {β : Type} [DecidableEq α] (f : α → β) (x : α) (v : β) : α → β :=
@@ -173,11 +180,16 @@ structure Machine where
   mem : Var → Word
   balance : Nat
   net : Nat → Int
+  /-- The transaction's sender, value and block time, as `CALLER`,
+  `CALLVALUE`, `TIMESTAMP` push them. -/
+  caller : Nat := 0
+  callvalue : Nat := 0
+  timestamp : Nat := 0
 
 /-- A fresh contract holding `balance`: empty stack, storage and memory all
-zeroes, nothing sent anywhere. -/
+zeroes, nothing sent anywhere, called by `0` with nothing at time `0`. -/
 def Machine.init (balance : Nat := 0) : Machine :=
-  ⟨[], fun _ => 0, fun _ => .val 0, balance, fun _ => 0⟩
+  { stack := [], store := fun _ => 0, mem := fun _ => .val 0, balance, net := fun _ => 0 }
 
 def Machine.push (m : Machine) (w : Word) : Machine := { m with stack := w :: m.stack }
 
@@ -302,6 +314,10 @@ def Instr.step : Instr → Machine → Out
                         net := upd m.net a (m.net a - v) } 0
     | _ => .fault
   | .revert, _ => .revert
+  | .caller, m => m.next (.val m.caller :: m.stack)
+  | .callvalue, m => m.next (.val m.callvalue :: m.stack)
+  | .timestamp, m => m.next (.val m.timestamp :: m.stack)
+  | .selfbalance, m => m.next (.val m.balance :: m.stack)
 
 /-- Run code, skipping `k` instructions first (a jump still pending). -/
 def exec : List Instr → Nat → Machine → Out

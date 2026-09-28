@@ -61,6 +61,33 @@ inductive RawTy where
   | fixed (t : RawTy) (n : Nat)
   deriving Repr, Inhabited
 
+/-- The environment a transaction runs in, read as values: `msg.sender`,
+`msg.value`, `block.timestamp`, `address(this).balance`.  solkey's
+`netHeader.key` declares the first two and the last as the program variables
+`msgSender`, `msgValue`, `selfBalance`; `block.timestamp` it has not (its
+benchmark reads a `timeNow` state variable instead), so its name here is the
+one solc's Yul gives it. -/
+inductive EnvKey where
+  | msgSender
+  | msgValue
+  | timestamp
+  | selfBalance
+  deriving Repr, DecidableEq, Inhabited
+
+/-- The Solidity spelling. -/
+def EnvKey.toStr : EnvKey → String
+  | .msgSender => "msg.sender"
+  | .msgValue => "msg.value"
+  | .timestamp => "block.timestamp"
+  | .selfBalance => "address(this).balance"
+
+/-- `msg.sender`, `msg.value`, `block.timestamp` by their two parts. -/
+def EnvKey.ofParts : String → String → Option EnvKey
+  | "msg", "sender" => some .msgSender
+  | "msg", "value" => some .msgValue
+  | "block", "timestamp" => some .timestamp
+  | _, _ => none
+
 inductive RawExpr where
   | num (n : Nat)
   | name (x : String)
@@ -78,6 +105,8 @@ inductive RawExpr where
   side of an assignment or a declaration, or of a `return`; captured before
   the statement anywhere else (`hoist`). -/
   | call (f : String) (args : List RawExpr)
+  /-- `msg.sender`, `address(this).balance`, …: a value of the environment. -/
+  | env (k : EnvKey)
   deriving Repr, Inhabited
 
 inductive RawStmt where
@@ -201,11 +230,16 @@ inductive IndexTy : RefTy → PrimTy → Ty → Type where
   | map {k : PrimTy} {V : Ty} : IndexTy (.mapping (.prim k) V) k V
   | arr {R : RefTy} {E : Ty} (a : ArrTy R E) : IndexTy R .uint E
 
-/-- A simple value (`se`): a literal or a stack local. -/
+/-- A simple value (`se`): a literal, a stack local, or a value of the
+environment (`msg.sender`), which solkey's `netHeader.key` declares as program
+variables, so a `SimpleExpression` like a local. -/
 inductive Simple (C : Contract) : PrimTy → Type where
   | lit {p : PrimTy} (n : Int) (h : p.isNumeric = true) : Simple C p
   | bool (b : Bool) : Simple C .bool
   | local {p : PrimTy} (x : Var) : Simple C p
+  /-- `msg.sender`, `msg.value`, `block.timestamp`, `address(this).balance`:
+  a `uint` (an `address` is one). -/
+  | env {p : PrimTy} (k : EnvKey) (hp : p = .uint) : Simple C p
 
 mutual
 
@@ -348,7 +382,7 @@ variable {C : Contract}
 
 def Simple.vars {p : PrimTy} : Simple C p → List Var
   | .local x => [x]
-  | .lit .. | .bool _ => []
+  | .lit .. | .bool _ | .env .. => []
 
 mutual
 
@@ -535,6 +569,7 @@ def Simple.toStr {p : PrimTy} : Simple C p → String
   | .lit n _ => toString n
   | .bool b => toString b
   | .local x => toString x
+  | .env k _ => k.toStr
 
 mutual
 
@@ -703,6 +738,10 @@ syntax:max "++" sol_expr:max : sol_expr
 syntax:max "−−" sol_expr:max : sol_expr
 /-- `new uint[](n)`: a fresh memory array. -/
 syntax:max &"new" sol_ty "(" sol_expr ")" : sol_expr
+/-! `address(this).balance`, the contract's own funds: one form, since an
+`address(…)` conversion is not otherwise an expression here.  `msg.sender`,
+`msg.value` and `block.timestamp` arrive as identifiers (`expandIdent`). -/
+syntax:max &"address" "(" &"this" ")" "." &"balance" : sol_expr
 
 declare_syntax_cat sol_stmt (behavior := both)
 declare_syntax_cat sol_block (behavior := both)
@@ -794,12 +833,28 @@ partial def expandTy : TSyntax `sol_ty → MacroM Term
   | `(sol_ty| $t[$n]) => do `(RawTy.fixed $(← expandTy t) $n)
   | _ => Macro.throwUnsupported
 
-/-- `alice.account.age` arrives as one identifier; split it into members. -/
+/-- The constructor's name, to splice. -/
+def EnvKey.ident : EnvKey → Ident
+  | .msgSender => mkIdent ``EnvKey.msgSender
+  | .msgValue => mkIdent ``EnvKey.msgValue
+  | .timestamp => mkIdent ``EnvKey.timestamp
+  | .selfBalance => mkIdent ``EnvKey.selfBalance
+
+/-- `alice.account.age` arrives as one identifier; split it into members;
+`msg.sender` and `block.timestamp` are the environment's. -/
 def expandIdent (x : Ident) : MacroM Term := do
   match nameParts x.getId with
   | [] => Macro.throwError "empty identifier"
   | ["true"] => `(RawExpr.bool true)
   | ["false"] => `(RawExpr.bool false)
+  | root :: f :: flds =>
+    match EnvKey.ofParts root f with
+    | some k =>
+      flds.foldlM (init := ← `(RawExpr.env $(k.ident)))
+        fun acc f => `(RawExpr.field $acc $(quote f))
+    | none =>
+      (f :: flds).foldlM (init := ← `(RawExpr.name $(quote root)))
+        fun acc f => `(RawExpr.field $acc $(quote f))
   | root :: flds =>
     flds.foldlM (init := ← `(RawExpr.name $(quote root)))
       fun acc f => `(RawExpr.field $acc $(quote f))
@@ -837,6 +892,7 @@ partial def expandExpr : TSyntax `sol_expr → MacroM Term
   | `(sol_expr| −− $e:sol_expr) => do `(RawExpr.incDec .preDec $(← expandExpr e))
   | `(sol_expr| new $T:sol_ty ( $n:sol_expr )) => do
       `(RawExpr.newArr $(← expandTy T) $(← expandExpr n))
+  | `(sol_expr| address ( this ) . balance) => `(RawExpr.env .selfBalance)
   | _ => Macro.throwUnsupported
 where
   bin (op : Lean.Name) (a b : TSyntax `sol_expr) : MacroM Term := do
@@ -1176,7 +1232,7 @@ def RawExpr.hasIndex : RawExpr → Bool
   | .ternary c a b => c.hasIndex || a.hasIndex || b.hasIndex
   | .newArr _ n => n.hasIndex
   | .call _ as => as.attach.any fun ⟨a, _⟩ => a.hasIndex
-  | .num _ | .name _ | .bool _ => false
+  | .num _ | .name _ | .bool _ | .env _ => false
 
 /-- Whether a `.length` of an indexed base occurs in the expression
 (`rows[i].length`): if the base is a fixed-size array, it is evaluated for its
@@ -1188,7 +1244,7 @@ def RawExpr.hasIdxLen : RawExpr → Bool
   | .ternary c a b => c.hasIdxLen || a.hasIdxLen || b.hasIdxLen
   | .newArr _ n => n.hasIdxLen
   | .call _ as => as.attach.any fun ⟨a, _⟩ => a.hasIdxLen
-  | .num _ | .name _ | .bool _ => false
+  | .num _ | .name _ | .bool _ | .env _ => false
 
 /-- Whether an effect occurs in the expression: an `++` or `−−`, or a call. -/
 def RawExpr.hasIncDec : RawExpr → Bool
@@ -1197,7 +1253,7 @@ def RawExpr.hasIncDec : RawExpr → Bool
   | .index a b | .binop _ a b => a.hasIncDec || b.hasIncDec
   | .ternary c a b => c.hasIncDec || a.hasIncDec || b.hasIncDec
   | .newArr _ n => n.hasIncDec
-  | .num _ | .name _ | .bool _ => false
+  | .num _ | .name _ | .bool _ | .env _ => false
 
 section Elab
 
@@ -1274,6 +1330,7 @@ def synth (Γ : ECtx) : RawExpr → Except String (TExpr C)
   | .incDec .. => throw "`++` or `−−` under a short-circuit operator or in a conditional's branch"
   | .newArr .. => throw "`new` stands only on the right of `=`"
   | .call f _ => throw s!"the call {f}(…) under a short-circuit operator or in a conditional's branch"
+  | .env k => pure (.val .uint (.simple (.env k rfl)))
 termination_by e => (sizeOf e, 0)
 
 /-- `e` checked at `p` through its synthesised type. -/
@@ -1982,7 +2039,7 @@ def RawExpr.maxIdx : RawExpr → Nat
   | .incDec _ e => e.maxIdx
   | .newArr _ n => n.maxIdx
   | .call _ as => as.attach.foldl (fun n ⟨a, _⟩ => max n a.maxIdx) 0
-  | .num _ | .bool _ => 0
+  | .num _ | .bool _ | .env _ => 0
 
 end
 
@@ -2030,6 +2087,7 @@ deriving instance Lean.ToExpr for RefTy, Ty
 deriving instance Lean.ToExpr for BinOp
 deriving instance Lean.ToExpr for UnOp
 deriving instance Lean.ToExpr for IncDec
+deriving instance Lean.ToExpr for EnvKey
 
 section Quote
 open Lean (mkAppN mkConst toExpr)
@@ -2063,6 +2121,8 @@ def Simple.quote : (p : PrimTy) → Simple C p → Lean.Expr
   | p, .lit n _ => mkAppN (mkConst ``Simple.lit) #[c, toExpr p, toExpr n, rflTrue]
   | _, .bool b => mkAppN (mkConst ``Simple.bool) #[c, toExpr b]
   | p, .local x => mkAppN (mkConst ``Simple.local) #[c, toExpr p, toExpr x]
+  | p, .env k _ => mkAppN (mkConst ``Simple.env) #[c, toExpr p, toExpr k,
+      quoteRefl (mkConst ``PrimTy) (toExpr p)]
 
 mutual
 

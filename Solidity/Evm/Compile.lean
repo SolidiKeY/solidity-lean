@@ -492,6 +492,7 @@ def wtSimple (Γ : TyCtx) : {p : PrimTy} → Simple C p → Bool
       (p == .int && decide (-(H : Int) ≤ n) && decide (n < (H : Int)))
   | _, .bool _ => true
   | p, .local x => Γ x == some (.val p)
+  | _, .env .. => true
 
 mutual
 /-- `free`: the path indexes no array (what an alias may be bound to). -/
@@ -719,10 +720,18 @@ def binTail : PrimTy → BinOp → List Instr
 def negCode : List Instr :=
   [.dup 1, .push (.val H), .eq, .iszero] ++ assertTop ++ [.push (.val 0), .sub]
 
+/-- The opcode that pushes a value of the environment. -/
+def envInstr : EnvKey → Instr
+  | .msgSender => .caller
+  | .msgValue => .callvalue
+  | .timestamp => .timestamp
+  | .selfBalance => .selfbalance
+
 def compileSimple : {p : PrimTy} → Simple C p → List Instr
   | _, .lit n _ => [.push (.val (toWord n))]
   | _, .bool b => [.push (.val (bword b))]
   | _, .local x => [.mload x]
+  | _, .env k _ => [envInstr k]
 
 mutual
 /-- Push the slot a storage path names. -/

@@ -40,7 +40,7 @@ theorem Semantics.EnvAgreeExcept.setEnv_left {ns : List Var} {s₁ s₂ : State}
   ⟨h.storage, h.heap, h.nextId, h.net, fun m hm => by
     have hne : m ≠ n := fun heq => hm (heq ▸ hn)
     simpa [State.setEnv, lookupBy_setBy_ne hne] using h.env m hm,
-    h.selfBalance⟩
+    h.selfBalance, h.tx⟩
 
 theorem agree_setEnv (σ : State) (x : Var) (b : Binding) :
     EnvAgreeExcept [x] (σ.setEnv x b) σ :=

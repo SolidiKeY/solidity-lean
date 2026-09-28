@@ -675,7 +675,7 @@ theorem find_overlay_fields : ∀ (old new : SVal) (q : List Seg), fieldPath q =
 save(storage, alice.age, 10)}` builds from `σ` is the one the write returns. -/
 theorem saveStorage_restore {σ τ : State} {r : Name} {p : List Seg} {v : SVal}
     (h : σ.saveStorage r p v = .ok τ) : { σ with storage := τ.storage } = τ := by
-  obtain ⟨h₁, h₂, h₃, h₄, h₅⟩ := State.saveStorage_frame h
+  obtain ⟨h₁, h₂, h₃, h₄, h₅, h₆⟩ := State.saveStorage_frame h
   cases τ; simp_all
 
 /-- The update `{storage := save(storage, alice.age, 10)}` is the write:
@@ -941,29 +941,29 @@ from. -/
 
 /-- `alice.age` in a state whose storage is `τ`'s reads as in `τ`. -/
 theorem findStorage_mk (τ : State) (h : List (Nat × MObj)) (n : Nat)
-    (e : List (Var × Binding)) (nt : List (Int × Int)) (b : Int) (r : Name) (q : List Seg) :
-    (State.mk τ.storage h n e nt b).findStorage r q = τ.findStorage r q := rfl
+    (e : List (Var × Binding)) (nt : List (Int × Int)) (b : Int) (tx : TxEnv) (r : Name) (q : List Seg) :
+    (State.mk τ.storage h n e nt b tx).findStorage r q = τ.findStorage r q := rfl
 
 /-- A bounds check in a state whose storage is `τ`'s checks as in `τ`. -/
 theorem checkIndex_mk (τ : State) (h : List (Nat × MObj)) (n : Nat)
-    (e : List (Var × Binding)) (nt : List (Int × Int)) (b : Int) (r : Name) (q : List Seg)
-    (k : Int) : (State.mk τ.storage h n e nt b).checkIndex r q k = τ.checkIndex r q k := rfl
+    (e : List (Var × Binding)) (nt : List (Int × Int)) (b : Int) (tx : TxEnv) (r : Name) (q : List Seg)
+    (k : Int) : (State.mk τ.storage h n e nt b tx).checkIndex r q k = τ.checkIndex r q k := rfl
 
 /-- `x` in a state whose locals are `τ`'s reads as in `τ`. -/
 theorem getEnv_mk (τ : State) (s : List (Name × SVal)) (h : List (Nat × MObj)) (n : Nat)
-    (nt : List (Int × Int)) (b : Int) (x : Var) :
-    (State.mk s h n τ.env nt b).getEnv x = τ.getEnv x := rfl
+    (nt : List (Int × Int)) (b : Int) (tx : TxEnv) (x : Var) :
+    (State.mk s h n τ.env nt b tx).getEnv x = τ.getEnv x := rfl
 
 /-- `m.age` in a state whose heap is `τ`'s reads as in `τ`. -/
 theorem readAddr_mk (τ : State) (s : List (Name × SVal)) (n : Nat)
-    (e : List (Var × Binding)) (nt : List (Int × Int)) (b : Int) (a : Addr) :
-    readAddr (State.mk s τ.heap n e nt b) a = readAddr τ a := by
+    (e : List (Var × Binding)) (nt : List (Int × Int)) (b : Int) (tx : TxEnv) (a : Addr) :
+    readAddr (State.mk s τ.heap n e nt b tx) a = readAddr τ a := by
   cases a <;> rfl
 
 /-- `readAddr_mk` for a value read. -/
 theorem readVal_mk (τ : State) (s : List (Name × SVal)) (n : Nat)
-    (e : List (Var × Binding)) (nt : List (Int × Int)) (b : Int) (a : Addr) :
-    readVal (State.mk s τ.heap n e nt b) a = readVal τ a := by
+    (e : List (Var × Binding)) (nt : List (Int × Int)) (b : Int) (tx : TxEnv) (a : Addr) :
+    readVal (State.mk s τ.heap n e nt b tx) a = readVal τ a := by
   simp only [readVal, readAddr_mk]
 
 /-- Binding a local does not touch the heap. -/

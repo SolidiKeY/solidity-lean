@@ -1352,6 +1352,13 @@ partial def ppExpr (e : Lean.Expr) : MetaM (TSyntax `sol_expr) := do
     | Bool.false => `(sol_expr| false)
     | _ => escape
   | Simple.local _ _ x => var x
+  | Simple.env _ _ k _ =>
+    match_expr (← whnf k) with
+    | EnvKey.msgSender => `(sol_expr| msg.sender)
+    | EnvKey.msgValue => `(sol_expr| msg.value)
+    | EnvKey.timestamp => `(sol_expr| block.timestamp)
+    | EnvKey.selfBalance => `(sol_expr| address(this).balance)
+    | _ => escape
   | SPath.alias _ _ x => var x
   | SPath.loc _ _ l => ppExpr l
   | Loc.root _ _ r _ => name r
@@ -1624,6 +1631,13 @@ partial def ppTerm (e : Lean.Expr) : MetaM (TSyntax `dl_term) := do
     unless (← whnf m).isAppOfArity ``MTerm.memory 1 do return ← escapeDl e
     let `(dl_term| $x:ident) ← ppITerm i | escapeDl e
     `(dl_term| $(mkIdent (x.getId.str "length")):ident)
+  | Term.env _ k =>
+    match_expr (← whnf k) with
+    | EnvKey.msgSender => `(dl_term| msg.sender)
+    | EnvKey.msgValue => `(dl_term| msg.value)
+    | EnvKey.timestamp => `(dl_term| block.timestamp)
+    | EnvKey.selfBalance => `(dl_term| address(this).balance)
+    | _ => escapeDl e
   | _ => escapeDl e
 
 partial def ppPTerm (e : Lean.Expr) : MetaM (TSyntax `dl_term) := do

@@ -521,6 +521,12 @@ theorem fixedSlot_run (m : Machine) (st : List Word) (i z : Nat) (s : Slot) :
 
 /-! ## The simulation relation -/
 
+/-- The machine's environment is the state's: `CALLER` pushes `msg.sender`,
+and each of them, the funds included, is a word. -/
+def EnvSim (σ : State) (m : Machine) : Prop :=
+  σ.tx.msgSender = m.caller ∧ σ.tx.msgValue = m.callvalue ∧ σ.tx.timestamp = m.timestamp ∧
+    m.caller < W ∧ m.callvalue < W ∧ m.timestamp < W ∧ m.balance < W
+
 /-- The machine `m` represents the interpreter state `σ`, whose locals `Γ` types. -/
 structure Sim (C : Contract) (L : Nat) (Γ : TyCtx) (σ : State) (m : Machine) : Prop where
   store : ReprStore C L m.store σ.storage
@@ -538,11 +544,13 @@ structure Sim (C : Contract) (L : Nat) (Γ : TyCtx) (σ : State) (m : Machine) :
   fragile : ∀ x R, Γ x = some (.falias R) →
     ∃ r segs s, lookupBy x σ.env = some (.spath r segs) ∧ m.mem x = .slot s ∧
       PathSlot C false r segs (.ref R) s ∧ ∃ sv, σ.findLive r segs = .ok sv
+  /-- `msg.sender`, `msg.value`, `block.timestamp`, the funds. -/
+  env : EnvSim σ m
 
 /-- `Sim` does not look at the stack. -/
 theorem Sim.stack {C : Contract} {L : Nat} {Γ : TyCtx} {σ : State} {m : Machine} (h : Sim C L Γ σ m)
     (st : List Word) : Sim C L Γ σ { m with stack := st } :=
-  ⟨h.store, h.vals, h.aliases, h.balance, h.net, h.bound, h.fragile⟩
+  ⟨h.store, h.vals, h.aliases, h.balance, h.net, h.bound, h.fragile, h.env⟩
 
 /-- Pushing a word keeps `Sim`: `total + 1` pushes `total`'s word, then `1`. -/
 theorem Sim.push {C : Contract} {L : Nat} {Γ : TyCtx} {σ : State} {m : Machine} (h : Sim C L Γ σ m)
@@ -591,6 +599,16 @@ theorem simple_sim {m : Machine} (hm : Sim C L Γ σ m) : ∀ {p : PrimTy} (s : 
     have hx : Γ x = some (.val p) := by simpa [wtSimple] using hw
     obtain ⟨v, henv, hv⟩ := hm.vals x p hx
     exact .inl ⟨v, m.mem x, by simp [Simple.eval, State.getEnv, henv]; rfl, hv, rfl⟩
+  | _, .env k hp, _ => by
+    subst hp
+    obtain ⟨h1, h2, h3, w1, w2, w3, w4⟩ := hm.env
+    have hn : ∀ n : Nat, n < W → ReprV .uint (.int n) (.val n) := fun n h =>
+      ⟨by omega, by exact_mod_cast h, by simp⟩
+    cases k
+    · exact .inl ⟨_, _, by simp [Simple.eval, State.envVal, h1]; rfl, hn _ w1, rfl⟩
+    · exact .inl ⟨_, _, by simp [Simple.eval, State.envVal, h2]; rfl, hn _ w2, rfl⟩
+    · exact .inl ⟨_, _, by simp [Simple.eval, State.envVal, h3]; rfl, hn _ w3, rfl⟩
+    · exact .inl ⟨_, _, by simp [Simple.eval, State.envVal, hm.balance]; rfl, hn _ w4, rfl⟩
 
 /-- An operator other than `&&`/`||` evaluates both operands: `a + b` evaluates `b` even when `a =
 0`. -/
@@ -937,14 +955,14 @@ def StmtOut (C : Contract) (L : Nat) (Γ' : TyCtx) (res : Res State) (out : Out)
 theorem Sim.weaken {Γ' : TyCtx} {m : Machine} (h : Sim C L Γ σ m)
     (hΓ : ∀ x t, Γ' x = some t → Γ x = some t) : Sim C L Γ' σ m :=
   ⟨h.store, fun x p hx => h.vals x p (hΓ x _ hx), fun x R hx => h.aliases x R (hΓ x _ hx),
-    h.balance, h.net, h.bound, fun x R hx => h.fragile x R (hΓ x _ hx)⟩
+    h.balance, h.net, h.bound, fun x R hx => h.fragile x R (hΓ x _ hx), h.env⟩
 
 /-- `uint x = e;`: the cell of `x` and the binding of `x` change together. -/
 theorem Sim.bindVal {m : Machine} (h : Sim C L Γ σ m) (x : Var) {p : PrimTy} {v : Value} {w : Word}
     (hv : ReprV p v w) :
     Sim C L (Γ.set x (some (.val p))) (σ.setEnv x (.val v)) { m with mem := upd m.mem x w } := by
   refine ⟨h.store, fun y q hy => ?_, fun y R hy => ?_, h.balance, h.net, h.bound,
-    fun y R hy => ?_⟩
+    fun y R hy => ?_, h.env⟩
   · by_cases hyx : y = x
     · subst hyx
       simp only [TyCtx.set, upd_same, Option.some.injEq, LTy.val.injEq] at hy
@@ -972,7 +990,7 @@ theorem Sim.bindAlias {m : Machine} (h : Sim C L Γ σ m) (x : Var) {R : RefTy} 
     Sim C L (Γ.set x (some (.alias R))) (σ.setEnv x (.spath r segs))
       { m with mem := upd m.mem x (.slot s) } := by
   refine ⟨h.store, fun y q hy => ?_, fun y R' hy => ?_, h.balance, h.net, h.bound,
-    fun y R' hy => ?_⟩
+    fun y R' hy => ?_, h.env⟩
   · by_cases hyx : y = x
     · subst hyx; simp [TyCtx.set] at hy
     · simp only [TyCtx.set, upd_other _ _ hyx] at hy
@@ -1002,7 +1020,7 @@ theorem Sim.bindFragile {m : Machine} (h : Sim C L Γ σ m) (x : Var) {R : RefTy
     Sim C L (Γ.set x (some (.falias R))) (σ.setEnv x (.spath r segs))
       { m with mem := upd m.mem x (.slot s) } := by
   refine ⟨h.store, fun y q hy => ?_, fun y R' hy => ?_, h.balance, h.net, h.bound,
-    fun y R' hy => ?_⟩
+    fun y R' hy => ?_, h.env⟩
   · by_cases hyx : y = x
     · subst hyx; simp [TyCtx.set] at hy
     · simp only [TyCtx.set, upd_other _ _ hyx] at hy
@@ -1032,7 +1050,7 @@ theorem Sim.store' {m : Machine} (h : Sim C L Γ σ m) {st' : Slot → Nat} {sto
     Sim C L Γ { σ with storage := stor } { m with store := st' } :=
   ⟨hs, h.vals, h.aliases, h.balance, h.net, h.bound, fun x R hx => by
     obtain ⟨r, segs, s, h1, h2, h3, h4⟩ := h.fragile x R hx
-    exact ⟨r, segs, s, h1, h2, h3, live_mono (σ' := { σ with storage := stor }) h.store hs hlen h3 h4⟩⟩
+    exact ⟨r, segs, s, h1, h2, h3, live_mono (σ' := { σ with storage := stor }) h.store hs hlen h3 h4⟩, h.env⟩
 
 /-- A storage write that may shrink an array (`pop`, `delete`): the fragile
 aliases forgotten. -/
@@ -1040,7 +1058,7 @@ theorem Sim.storeDrop {m : Machine} (h : Sim C L Γ σ m) {st' : Slot → Nat}
     {stor : List (Name × SVal)} (hs : ReprStore C L st' stor) :
     Sim C L Γ.dropFragile { σ with storage := stor } { m with store := st' } := by
   refine ⟨hs, fun x p hx => h.vals x p ?_, fun x R hx => h.aliases x R ?_, h.balance, h.net, h.bound,
-    fun x R hx => ?_⟩ <;> simp only [TyCtx.dropFragile] at hx <;> split at hx <;> simp_all
+    fun x R hx => ?_, h.env⟩ <;> simp only [TyCtx.dropFragile] at hx <;> split at hx <;> simp_all
 
 /-- A write to a primitive leaves every array's length. -/
 theorem upd_len {st : Slot → Nat} {a : Bool} {r : Name} {segs : List Seg} {p : PrimTy} {s : Slot}
@@ -1417,7 +1435,7 @@ theorem args_sim : ∀ (args : List (Arg C)) {Δ Δ' : TyCtx} {τ : State} {m : 
 /-- `Sim` under a looser bound on the arrays. -/
 theorem Sim.mono {Γ : TyCtx} {m : Machine} {L' : Nat} (h : Sim C L Γ σ m) (hL : L ≤ L')
     (hL' : L' ≤ Lmax) : Sim C L' Γ σ m :=
-  ⟨h.store.mono hL, h.vals, h.aliases, h.balance, h.net, hL', h.fragile⟩
+  ⟨h.store.mono hL, h.vals, h.aliases, h.balance, h.net, hL', h.fragile, h.env⟩
 
 /-- `StmtOut` under a looser bound. -/
 theorem StmtOut.mono {Γ' : TyCtx} {res : Res State} {out : Out} {m : Machine} {L' : Nat}
@@ -1926,7 +1944,7 @@ theorem stmt_sim : ∀ (s : Stmt C) {L : Nat} {Δ Δ' : TyCtx} {τ : State} {m :
           refine .inl ⟨_, { m with balance := m.balance - y, net := upd m.net x (m.net x - y) },
             by simp only [hvr, hva, Value.asInt, Except.ok_bind']; exact hsrc, ?_, rfl, ?_⟩
           · simp [run, Instr.step, Machine.push, hb, assertTop]
-          · refine ⟨hm.store, hm.vals, hm.aliases, ?_, fun a' ha' => ?_, hm.bound, hm.fragile⟩
+          · refine ⟨hm.store, hm.vals, hm.aliases, ?_, fun a' ha' => ?_, hm.bound, hm.fragile, ?_⟩
             · show τ.selfBalance - ↑y = ↑(m.balance - y)
               rw [hm.balance]; omega
             · show (lookupBy (↑a') (setBy (↑x) (τ.getNet ↑x - ↑y) τ.net)).getD 0 =
@@ -1937,6 +1955,8 @@ theorem stmt_sim : ∀ (s : Stmt C) {L : Nat} {Δ Δ' : TyCtx} {τ : State} {m :
               · have : (a' : Int) ≠ x := by omega
                 rw [lookupBy_setBy_ne this, upd_other _ _ hax]
                 exact hm.net a' ha'
+            · obtain ⟨h1, h2, h3, w1, w2, w3, w4⟩ := hm.env
+              exact ⟨h1, h2, h3, w1, w2, w3, Nat.lt_of_le_of_lt (Nat.sub_le _ _) w4⟩
       · exact .inr ⟨by simp [hvr, hva, Value.asInt], run_append_revert hruna⟩
     · exact .inr ⟨by simp [hvr], run_append_revert hrunr⟩
   | @Stmt.delete _ T l, L, Δ, Δ', τ, m, hm, hw, hL => by
@@ -2202,12 +2222,14 @@ nothing sent, `balance` in funds. -/
 def State.fresh (C : Contract) (balance : Nat) : State :=
   { storage := C.initStorage, selfBalance := balance }
 
-/-- A fresh machine represents a fresh contract: every slot `0`. -/
-theorem Sim.init (C : Contract) (balance : Nat) :
+/-- A fresh machine represents a fresh contract: every slot `0`, the funds
+a word. -/
+theorem Sim.init (C : Contract) (balance : Nat) (hb : balance < W) :
     Sim C 1 (fun _ => none) (State.fresh C balance) (Machine.init balance) :=
   ⟨initStorage_repr C Nat.one_pos, fun _ _ h => (by cases h), fun _ _ h => (by cases h), rfl,
     fun _ _ => by simp [State.getNet, State.fresh, lookupBy, Machine.init],
-    by unfold Lmax; decide, fun _ _ h => (by cases h)⟩
+    by unfold Lmax; decide, fun _ _ h => (by cases h),
+    ⟨rfl, rfl, rfl, W_pos, W_pos, W_pos, hb⟩⟩
 
 /-- **The EVM agrees with the interpreter's storage.**  From a fresh contract,
 a program of the fragment either reverts in both, or runs in both, and then
@@ -2217,14 +2239,14 @@ every `uint` path the interpreter reads with its indices in bounds
 Example: `alice.age = 10;` leaves `10` at slot `13` of `StandardExample`
 (`Evm/Examples.lean` derives it from this theorem). -/
 theorem compile_storage {P : Prog C} {Γ' : TyCtx} (hP : wtProg (fun _ => none) P = some Γ')
-    (hL : pushesP P < Lmax) (balance : Nat) :
+    (hL : pushesP P < Lmax) (balance : Nat) (hb : balance < W) :
     (∃ σ' m', Prog.run (State.fresh C balance) P = .ok σ' ∧
       run (compileProg P) (Machine.init balance) = .ok m' 0 ∧
       ∀ r segs s n, PathSlot C false r segs (.prim .uint) s →
         σ'.findLive r segs = .ok (.prim (.int n)) → m'.store s = n.toNat) ∨
     (Prog.run (State.fresh C balance) P = .error .revert ∧
       run (compileProg P) (Machine.init balance) = .revert) := by
-  rcases compile_correct hP (Sim.init C balance) (by omega) with ⟨σ', m', h1, h2, _, hm⟩ | h
+  rcases compile_correct hP (Sim.init C balance hb) (by omega) with ⟨σ', m', h1, h2, _, hm⟩ | h
   · refine .inl ⟨σ', m', h1, h2, fun r segs s n hp hf => ?_⟩
     rcases find_repr hm.store hp with ⟨sv, hsv, hr⟩ | ⟨_, hsv⟩
     · rw [hf] at hsv; cases hsv
