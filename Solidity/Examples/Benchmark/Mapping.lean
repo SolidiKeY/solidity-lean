@@ -10,7 +10,9 @@ Changes: none but the spelling of `contract!{ … }` (two contracts, as the
 file has).  solkey's clauses are the theorems below; `\forall address a;
 a != _addr -> myMap[a] == \old(myMap[a])` is stated for one key `b`, a
 parameter, with `v` its old value.  A free name of a formula is a `uint`
-parameter, so `NestedMapping.set`'s `bool` is passed as both literals.
+parameter, so `NestedMapping.set`'s `bool` is passed as both literals.  The
+`remove` clauses carry a premise that the old entry has its declared type
+(`remove_spec`).
 
 ```solidity
 contract Mapping {
@@ -101,8 +103,12 @@ theorem set_frame : ⊨ dl!{ b != a && v == myMap[b] → [ set(a, i); ] myMap[b]
   sol_symex
   sol_close
 
-/-- `remove(a)`: `ensures myMap[_addr] == 0`. -/
-theorem remove_spec : ⊨ dl!{ [ remove(a); ] myMap[a] == 0 } := by
+/-- `remove(a)`: `ensures myMap[_addr] == 0`, where `myMap[a]` held a
+`uint` (`myMap[a] + 0` evaluates).  A `delete` leaves the default of the old
+value, and `⊨` ranges over every storage, `myMap[a]` holding a `bool` too
+(`Decide.deleteWithoutWrite`): the premise is the typing every storage of
+this contract has. -/
+theorem remove_spec : ⊨ dl!{ myMap[a] + 0 == myMap[a] → [ remove(a); ] myMap[a] == 0 } := by
   sol_symex
   sol_decide
 
@@ -132,8 +138,11 @@ theorem nested_set_spec_false : ⊨ dl!{ [ set(a, i, false); ] nested[a][i] == f
   sol_symex
   sol_close
 
-/-- `remove(a, i)`: `ensures !nested[_addr1][_i]`. -/
-theorem nested_remove_spec : ⊨ dl!{ [ remove(a, i); ] nested[a][i] == false } := by
+/-- `remove(a, i)`: `ensures !nested[_addr1][_i]`, where `nested[a][i]`
+held a `bool`, `true` or `false` (as `remove_spec`). -/
+theorem nested_remove_spec :
+    ⊨ dl!{ (nested[a][i] == true → [ remove(a, i); ] nested[a][i] == false) ∧
+           (nested[a][i] == false → [ remove(a, i); ] nested[a][i] == false) } := by
   sol_symex
   sol_decide
 

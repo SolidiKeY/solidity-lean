@@ -151,3 +151,5 @@ went.
 | `Examples/Notation.lean` | What taclets, premises and sequents print, pinned. |
 | `Examples/ApplySteps.lean` | The proof style: every `Proves` constructor once, and a refused rule. |
 | `Examples/Chains.lean`, `Examples/UpdateRules.lean`, `Examples/Decide.lean` | Derivation chains, update simplification, `sol_decide`. |
+| `Examples/Benchmark/Syntax.lean` | What elaborates away, pinned by what it prints: units, `payable`/`address` casts, events and `emit`, errors and `require`/`revert` with a message or an error, enums, struct constructors, modifiers. |
+| `Examples/Benchmark/Counter.lean`, `Examples/Benchmark/SimpleStorage.lean`, `Examples/Benchmark/Mapping.lean` | solkey's benchmark contracts `Counter`, `SimpleStorage`, `Mapping` and `NestedMapping` as published, their `@custom:key` clauses proved. |

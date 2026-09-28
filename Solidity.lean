@@ -50,6 +50,10 @@ import Solidity.Examples.ApplySteps
 import Solidity.Examples.Chains
 import Solidity.Examples.UpdateRules
 import Solidity.Examples.Decide
+import Solidity.Examples.Benchmark.Syntax
+import Solidity.Examples.Benchmark.Counter
+import Solidity.Examples.Benchmark.SimpleStorage
+import Solidity.Examples.Benchmark.Mapping
 import Solidity.Typing.Storage
 import Solidity.Typing.StoragePreservation
 import Solidity.Typing.State
