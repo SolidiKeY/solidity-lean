@@ -151,3 +151,5 @@ went.
 | `Examples/Notation.lean` | What taclets, premises and sequents print, pinned. |
 | `Examples/ApplySteps.lean` | The proof style: every `Proves` constructor once, and a refused rule. |
 | `Examples/Chains.lean`, `Examples/UpdateRules.lean`, `Examples/Decide.lean` | Derivation chains, update simplification, `sol_decide`. |
+| `Examples/Benchmark/Coin.lean` | solkey's benchmark `Coin`: `msg.sender` in `require` and as a mapping key; `mint` and `send` against their `@custom:key` clauses, the two `send` clauses `sol_close` does not close as runs. |
+| `Examples/Benchmark/EtherWallet.lean` | solkey's benchmark `EtherWallet`: `withdraw` pays `msg.sender`; the owner kept, `address(this).balance` less by the amount, the ledger as a run. |
