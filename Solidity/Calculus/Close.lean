@@ -49,8 +49,10 @@ What does not close, and why:
 * a default read out of a fresh memory object (`Person memory m;
   uint x = m.age;`): the default of a struct type is a well-founded
   definition (`defaultForTy`) that `simp` does not unfold;
-* the effect of `transfer`: no term reads a balance, so only its frame is
-  observable — a write before it reads the same after.
+* the ledger a `transfer` books: no term reads `net`, so what is observable
+  of it is its frame — a write before it reads the same after — and the
+  funds it spends, `address(this).balance`, `5` less after
+  `to.transfer(5);` (`Modality.wp_box_transferAt`).
 -/
 
 namespace Solidity
@@ -128,16 +130,18 @@ theorem Modality.wp_box_saveStorage {σ : State} {r : Name} {p : List Seg} {v : 
         (∀ r' q k, r' ≠ r ∨ ¬ Close.Prefix p q → τ.checkIndex r' q k = σ.checkIndex r' q k) →
         (∀ q k, Close.Prefix p q → τ.checkIndex r q k = v.find (Close.after p q) >>= Close.idxOk k) →
         (∀ x, τ.getEnv x = σ.getEnv x) → (∀ a, readAddr τ a = readAddr σ a) →
-        (∀ a, Close.readVal τ a = Close.readVal σ a) → P τ := by
+        (∀ a, Close.readVal τ a = Close.readVal σ a) →
+        τ.tx = σ.tx → τ.selfBalance = σ.selfBalance → P τ := by
   rw [Modality.wp_box]
-  exact ⟨fun h τ hs _ _ _ _ _ _ _ _ => h τ hs, fun h τ hs =>
+  exact ⟨fun h τ hs _ _ _ _ _ _ _ _ _ _ => h τ hs, fun h τ hs =>
     h τ hs (State.findStorage_saveStorage_same hs)
       (fun _ hq => Close.findStorage_saveStorage_below hs hq)
       (fun _ _ hd => Close.findStorage_saveStorage_apart hs hd)
       (fun _ _ k hq => Close.checkIndex_saveStorage_apart k hs hq)
       (fun _ k hq => Close.checkIndex_saveStorage_below k hs hq)
       (Close.getEnv_saveStorage hs) (Close.readAddr_saveStorage hs)
-      (fun a => by simp [Close.readVal, Close.readAddr_saveStorage hs])⟩
+      (fun a => by simp [Close.readVal, Close.readAddr_saveStorage hs])
+      (Close.env_saveStorage hs).1 (Close.env_saveStorage hs).2⟩
 
 /-- **A subtree read under the box**: in `[ bob = alice; ] bob.age ==
 alice.age`, the tree `a` read at `alice` reads at `age` what the storage
@@ -159,14 +163,14 @@ theorem Modality.wp_box_writeAddr {σ : State} {mv : MVal} {a : Addr} {P : State
         (∀ a', Close.Apart a a' → Close.readVal τ a' = Close.readVal σ a') →
         (∀ r q, τ.findStorage r q = σ.findStorage r q) →
         (∀ r q k, τ.checkIndex r q k = σ.checkIndex r q k) → (∀ x, τ.getEnv x = σ.getEnv x) →
-        P τ := by
+        τ.tx = σ.tx → τ.selfBalance = σ.selfBalance → P τ := by
   rw [Modality.wp_box]
-  refine ⟨fun h τ hs _ _ _ _ _ _ _ => h τ hs, fun h τ hs => ?_⟩
+  refine ⟨fun h τ hs _ _ _ _ _ _ _ _ _ => h τ hs, fun h τ hs => ?_⟩
   obtain ⟨id, obj, rfl, hap⟩ := Close.writeAddr_setObj hs
   have hsame := Close.readAddr_writeAddr_same hs
   exact h _ hs hsame (by simp only [Close.readVal, hsame]; rfl) hap
     (fun a' ha => by simp [Close.readVal, hap a' ha]) (fun _ _ => rfl) (fun _ _ _ => rfl)
-    (fun _ => rfl)
+    (fun _ => rfl) rfl rfl
 
 /-- **A copy into memory under the box**: after `Person memory m = alice;`,
 `m.age` reads what `alice.age` held; storage and locals are as before. -/
@@ -177,12 +181,12 @@ theorem Modality.wp_box_copyStToM {σ : State} {v : SVal} {P : State × MVal →
           Close.readVal τ (.memoryField id f) = v.find [.field f] >>= SVal.asValue) →
         (∀ r q, τ.findStorage r q = σ.findStorage r q) →
         (∀ r q k, τ.checkIndex r q k = σ.checkIndex r q k) → (∀ x, τ.getEnv x = σ.getEnv x) →
-        P (τ, mv) := by
+        τ.tx = σ.tx → τ.selfBalance = σ.selfBalance → P (τ, mv) := by
   rw [Modality.wp_box]
-  refine ⟨fun h τ mv hs _ _ _ _ => h _ hs, fun h ⟨τ, mv⟩ hs => ?_⟩
+  refine ⟨fun h τ mv hs _ _ _ _ _ _ => h _ hs, fun h ⟨τ, mv⟩ hs => ?_⟩
   obtain ⟨hst, hen⟩ := Close.copyStToM_frame' hs
   exact h τ mv hs (fun id f hid hf => by subst hid; exact Close.copyStToM_member hs hf) hst
-    (Close.checkIndex_of_findStorage hst) hen
+    (Close.checkIndex_of_findStorage hst) hen (Close.env_copyStToM hs).1 (Close.env_copyStToM hs).2
 
 /-- **A fresh memory object under the box**: `Person memory m;` binds `m` to
 an object whose members read the defaults of `Person`'s. -/
@@ -194,13 +198,13 @@ theorem Modality.wp_box_allocDefault {σ : State} {R : RefTy} {P : State × Nat 
             (defaultForRef R).find [.field f] >>= SVal.asValue) →
         (∀ r q, τ.findStorage r q = σ.findStorage r q) →
         (∀ r q k, τ.checkIndex r q k = σ.checkIndex r q k) → (∀ x, τ.getEnv x = σ.getEnv x) →
-        P (τ, id) := by
+        τ.tx = σ.tx → τ.selfBalance = σ.selfBalance → P (τ, id) := by
   rw [Modality.wp_box]
-  refine ⟨fun h τ id hs _ _ _ _ => h _ hs, fun h ⟨τ, id⟩ hs => ?_⟩
+  refine ⟨fun h τ id hs _ _ _ _ _ _ => h _ hs, fun h ⟨τ, id⟩ hs => ?_⟩
   have hc := Close.allocDefault_copy hs
   obtain ⟨hst, hen⟩ := Close.copyStToM_frame' hc
   exact h τ id hs (fun f hf => Close.copyStToM_member hc hf) hst
-    (Close.checkIndex_of_findStorage hst) hen
+    (Close.checkIndex_of_findStorage hst) hen (Close.env_copyStToM hc).1 (Close.env_copyStToM hc).2
 
 /-- **A copy out of memory under the box**: after `alice = m;`, `alice.age`
 holds what `m.age` held. -/
@@ -213,18 +217,20 @@ theorem Modality.wp_box_copyMem {σ : State} {id : Nat} {P : SVal → Prop} :
   exact ⟨fun h v hs _ => h v hs, fun h v hs => h v hs (fun _ hf => Close.copyMem_member hs hf)⟩
 
 /-- **A transfer under the box**: `to.transfer(5);` leaves the storage, the
-locals and the heap as they were. -/
+locals, the heap and `msg.sender` as they were, and takes `5` off
+`address(this).balance`. -/
 theorem Modality.wp_box_transferAt {σ : State} {addr amt : Int} {P : State → Prop} :
     Modality.box.wp (transferAt σ addr amt) P ↔
       ∀ τ, transferAt σ addr amt = .ok τ →
         (∀ r q, τ.findStorage r q = σ.findStorage r q) →
         (∀ r q k, τ.checkIndex r q k = σ.checkIndex r q k) → (∀ x, τ.getEnv x = σ.getEnv x) →
         (∀ a, readAddr τ a = readAddr σ a) → (∀ a, Close.readVal τ a = Close.readVal σ a) →
-        P τ := by
+        τ.tx = σ.tx → τ.selfBalance = σ.selfBalance - amt → P τ := by
   rw [Modality.wp_box]
-  refine ⟨fun h τ hs _ _ _ _ _ => h τ hs, fun h τ hs => ?_⟩
+  refine ⟨fun h τ hs _ _ _ _ _ _ _ => h τ hs, fun h τ hs => ?_⟩
   obtain ⟨h₁, h₂, h₃⟩ := Close.transferAt_frame hs
   exact h τ hs h₁ (Close.checkIndex_of_findStorage h₁) h₂ h₃ (fun a => by simp [Close.readVal, h₃])
+    (Close.transferAt_env hs).1 (Close.transferAt_env hs).2
 
 end WP
 
@@ -408,6 +414,9 @@ theorem Term.eval_read (m : MTerm C) (a : MAddr C) : (Term.read m a).eval σ =
 /-- `c ? a : b`: the condition, then the branch it picks. -/
 theorem Term.eval_ite (c a b : Term C) : (Term.ite c a b).eval σ =
     c.eval σ >>= fun cv => pickBranch cv (a.eval σ) (b.eval σ) := rfl
+/-- `msg.sender` is the transaction's, `address(this).balance` the funds. -/
+theorem Term.eval_env (k : EnvKey) :
+    (Term.env k : Term C).eval σ = .ok (.int (σ.envVal k)) := rfl
 /-- `alice` is the root `alice`. -/
 theorem PTerm.eval_root (r : Name) : (PTerm.root r : PTerm C).eval σ = .ok (r, []) := rfl
 /-- `p`, an alias, is the path it holds. -/
@@ -608,6 +617,7 @@ attribute [close_rw]
   -- terms
   Close.Term.eval_lit Close.Term.eval_pv Close.Term.eval_binop Close.Term.eval_unop
   Close.Term.eval_find Close.Term.eval_len Close.Term.eval_read Close.Term.eval_ite
+  Close.Term.eval_env State.envVal
   Close.PTerm.eval_root Close.PTerm.eval_field Close.PTerm.eval_at Close.PTerm.eval_next
   Close.PTerm.eval_pv Close.idxOk_array Close.idxOk_map Close.pastEnd_array
   Close.forall_unit Close.exists_unit
@@ -639,6 +649,7 @@ attribute [close_rw]
   Close.findStorage_setEnv Close.checkIndex_setEnv Close.checkIndex_mk
   State.getEnv_setEnv_self State.getEnv_setEnv_ne Close.findStorage_mk
   Close.getEnv_mk Close.readAddr_mk Close.readVal_mk Close.readAddr_setEnv Close.readVal_setEnv
+  Close.tx_setEnv Close.selfBalance_setEnv
   -- paths, arrays, copies
   Close.diverge_cons' Close.not_diverge_nil_left Close.not_diverge_nil_right Close.prefix_nil
   Close.prefix_cons Close.prefix_cons_nil Close.after_nil Close.after_cons Close.find_nil

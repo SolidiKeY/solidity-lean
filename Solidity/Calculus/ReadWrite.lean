@@ -1168,6 +1168,49 @@ theorem transferAt_frame {σ τ : State} {addr amt : Int} (h : transferAt σ add
       refine ⟨fun _ _ => rfl, fun _ => rfl, fun a => ?_⟩
       cases a <;> rfl
 
+/-! ## The environment: `msg.sender`, `address(this).balance`
+
+`msg.sender`, `msg.value` and `block.timestamp` are the transaction's, and
+nothing a program does changes them; the funds only a `transfer` changes, by
+the amount it pays. -/
+
+/-- `address(this).balance` after `to.transfer(5);` is `5` less, and
+`msg.sender` is as it was. -/
+theorem transferAt_env {σ τ : State} {addr amt : Int} (h : transferAt σ addr amt = .ok τ) :
+    τ.tx = σ.tx ∧ τ.selfBalance = σ.selfBalance - amt := by
+  unfold transferAt at h
+  split at h
+  · simp at h
+  · split at h
+    · simp at h
+    · simp only [Except.ok.injEq] at h
+      subst h
+      exact ⟨rfl, rfl⟩
+
+/-- A storage write leaves the environment. -/
+theorem env_saveStorage {σ τ : State} {r : Name} {p : List Seg} {v : SVal}
+    (h : σ.saveStorage r p v = .ok τ) : τ.tx = σ.tx ∧ τ.selfBalance = σ.selfBalance :=
+  have hf := State.saveStorage_frame h
+  ⟨hf.2.2.2.2.2, hf.2.2.2.2.1⟩
+
+/-- A copy into memory leaves the environment. -/
+theorem env_copyStToM {σ τ : State} {v : SVal} {mv : MVal} (h : copyStToM σ v = .ok (τ, mv)) :
+    τ.tx = σ.tx ∧ τ.selfBalance = σ.selfBalance :=
+  have hf := copyStToM_frame σ v τ mv h
+  ⟨hf.2.2.2.2, hf.2.2.2.1⟩
+
+/-- A memory write leaves the environment. -/
+theorem env_writeAddr {σ τ : State} {mv : MVal} {a : Addr} (h : writeAddr σ mv a = .ok τ) :
+    τ.tx = σ.tx ∧ τ.selfBalance = σ.selfBalance := by
+  obtain ⟨id, obj, rfl, _⟩ := writeAddr_setObj h
+  exact ⟨rfl, rfl⟩
+
+/-- Binding a local leaves the environment. -/
+theorem tx_setEnv (σ : State) (x : Var) (b : Binding) : (σ.setEnv x b).tx = σ.tx := rfl
+/-- Binding a local leaves the funds. -/
+theorem selfBalance_setEnv (σ : State) (x : Var) (b : Binding) :
+    (σ.setEnv x b).selfBalance = σ.selfBalance := rfl
+
 end Close
 
 end Solidity
