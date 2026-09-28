@@ -50,6 +50,7 @@ import Solidity.Examples.ApplySteps
 import Solidity.Examples.Chains
 import Solidity.Examples.UpdateRules
 import Solidity.Examples.Decide
+import Solidity.Examples.Benchmark.ERC20
 import Solidity.Typing.Storage
 import Solidity.Typing.StoragePreservation
 import Solidity.Typing.State
