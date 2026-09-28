@@ -54,6 +54,7 @@ import Solidity.Examples.Benchmark.Syntax
 import Solidity.Examples.Benchmark.Counter
 import Solidity.Examples.Benchmark.SimpleStorage
 import Solidity.Examples.Benchmark.Mapping
+import Solidity.Examples.Benchmark.Purchase
 import Solidity.Typing.Storage
 import Solidity.Typing.StoragePreservation
 import Solidity.Typing.State
