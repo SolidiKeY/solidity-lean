@@ -59,9 +59,11 @@ fails on a module nothing imports.
 | `Calculus/SolkeyFragment.lean` | The refined syntax: `Stmt.inSolkey` (every call's arguments simple), on which solkey's rules alone are the calculus (`Stmt.step_taclet`, `Taclet.premise_inSolkey`, `Proves.toSolkey`); off it they fall short (`Proves.solkey_lt_calculus`). |
 | `Calculus/Notation.lean` | `dl[C]{ … }` and `dl!{ … }`: concrete formulas read against a contract. |
 | `Calculus/ReadWrite.lean` | What a state reads after a write: the four-way path comparison, memory addresses, copies member by member. |
+| `SpecSyntax.lean` | The specification language as read: solkey's `SolSpec.g4` (`SpecExpr`, `spec!(…)`), and a function's clauses (`FunSpec`), which `contract!{ … }` reads as members above the function (`requires e;`, `ensures e;`, `skip;`, `invariant e;`). |
 | `Calculus/Close.lean` | `sol_close`: a first-order goal in an arbitrary state, by weakest preconditions and `ReadWrite.lean`'s facts. Its docstring lists what it does not close. |
 | `Calculus/CloseTests.lean` | What `sol_close` closes, pinned. |
 | `Calculus/Decide.lean` | `sol_decide`: reads of writes eliminated into case trees on key equalities (the four-way path comparison), `delete` included; `Fml.valid_iff_reduce`. The storage fragment, read live (`SVal.findLive`/`saveLive`) and bridged to the program's checked paths (`PTerm.toL_chk`). A delete below a key is exact by the read's shape (`KShape`, `delBelow`): a mapping kept, a fixed-size array's length kept. `values.length` read through writes (`LStor.lenU`). `sol_decide_heuristic`: the finishing step without constraints. |
+| `Calculus/Spec.lean` | Specifications compiled to dynamic logic, solkey's `SpecCompiler`/`SolidityProblemSynthesizer`: a clause against a storage term (`storage`, or the storage variable `old` under `\old`), `\forall` as `Fml.all`; `spec[C]{f}`, the box obligation `R ∧ L ∧ I ∧ requires → {old := storage} [ f(…); ] (I ∧ ensures)` with the layout premises `L`; `sol_spec`. |
 | `Calculus/DecideComplete.lean` | The reads of the starting storage realizable: `Obs`, the constraint `ChildOk` (`childOk_findLive`), `realize_findLive`; the reduction over free reads (`LTerm.evalA`), `LFml.valid_iff_cons`/`Fml.valid_iff_cons`; `sol_decide`, deciding under the constraints. |
 | `Calculus/Uniqueness.lean` | One rule per statement: every derivation's premise is `Stmt.step`'s. |
 | `Calculus/Progress.lean` | A formula with a modality always steps: `Fml.active_iff_step`. |
@@ -152,6 +154,7 @@ went.
 | `Examples/Notation.lean` | What taclets, premises and sequents print, pinned. |
 | `Examples/ApplySteps.lean` | The proof style: every `Proves` constructor once, and a refused rule. |
 | `Examples/Chains.lean`, `Examples/UpdateRules.lean`, `Examples/Decide.lean` | Derivation chains, update simplification, `sol_decide`. |
+| `Examples/Specs.lean` | solkey's benchmark clauses as obligations (`spec!{f}`), proved by `sol_spec`: Counter, Mapping, NestedMapping, Coin's `mint`, SimpleStorage, ERC20's `approve` and `_mint`; one obligation pinned as it prints. |
 | `Examples/Benchmark/Syntax.lean` | What elaborates away, pinned by what it prints: units, `payable`/`address` casts, events and `emit`, errors and `require`/`revert` with a message or an error, enums, struct constructors, modifiers. |
 | `Examples/Benchmark/Counter.lean`, `Examples/Benchmark/SimpleStorage.lean`, `Examples/Benchmark/Mapping.lean` | solkey's benchmark contracts `Counter`, `SimpleStorage`, `Mapping` and `NestedMapping` as published, their `@custom:key` clauses proved. |
 | `Examples/Benchmark/Purchase.lean` | solkey's benchmark `Purchase` with its enum, modifiers, errors and events as published (`msg.*` and `address(this).balance` as state variables), its clauses on `state` and `buyer` proved. |

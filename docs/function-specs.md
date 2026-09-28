@@ -1,9 +1,10 @@
 # Function specifications: design
 
 Per-function `requires`/`ensures` with `\old` and `\forall`, the contract
-invariant, and proof obligations that `sol_symex` + `sol_decide` discharge
-over symbolic parameters. This is a design and a plan; nothing here is built
-yet. Read `docs/kernel-port.md` ("Still open", "Decisions") first.
+invariant, and proof obligations that `sol_symex` + `sol_close` discharge
+over symbolic parameters. The front end, the obligation and `sol_spec` are
+built ("Decisions"); the plan below lists the rest. Read
+`docs/kernel-port.md` ("Still open", "Decisions") first.
 
 ## What solkey does
 
@@ -82,118 +83,61 @@ So the procedure is in place. What is missing is the **front end** that
 states the obligation, plus `\old`, `\forall`, range facts, and a
 precondition that makes a diamond meaningful.
 
-## Decisions
+## Decisions (built 2026-09-28)
 
-**1. A spec is data in the `FunDecl`, raw, elaborated where it is used.**
+The clauses are translated to dynamic logic as solkey translates them, with
+the same shapes: a clause is read against a storage term, `\old` reads the
+storage variable `old`, `\forall` is a quantifier of the logic.
 
-- Shape: `FunDecl.spec : FunSpec` with
-  `requires ensures : List RawExpr` and `skip : Bool`.
-- Contract-level `invariant` clauses go in `Contract.inv : List RawExpr`.
-- Why raw: a `Contract` cannot hold an `Fml C`, because `C` is `Fml`'s
-  index. This is the same reason the body is kept as read (Decisions row
-  "Where a callee's body lives").
-- Syntax in `contract!{ }` (`Syntax.lean`): JML-style keywords between the
-  header and the body, for example
-  `function dec() requires count >= 1 ensures count == \old(count) - 1 { … }`,
-  and `invariant e;` among the state variables.
-- `scripts/solkey-port.mjs` translates `@custom:key` lines to this syntax.
+**1. A clause is data, kept as read, where solkey's NatSpec line stands.**
+`SpecExpr` (`SpecSyntax.lean`) is `SolSpec.g4`; `contract!{ … }` reads
+`requires e;`, `ensures e;`, `skip;` above a function and `invariant e;`
+anywhere (`FunDecl.spec`, `Contract.inv`).  Kept raw because a `Contract`
+cannot hold an `Fml C`.
 
-**2. The obligation is a box validity, as solkey's.**
+**2. The compiler is `SpecCompiler`'s** (`Calculus/Spec.lean`): a context
+(`SpecCtx`) names the storage term, whether `\old`/`\result` mean
+something, and the locals in scope.  A state variable is
+`find(ctx.storage, p)`; `\old(e)` is `e` against `old`, and not nested;
+`msg.sender`, `msg.value`, `block.timestamp`, `this.balance` are `Term.env`;
+an enum member its position; `==` between conditions is `<->`; `\exists`
+is `¬∀¬`.
 
-- `spec[C]{f}` (a new macro beside `dl[C]{}`, `Calculus/Notation.lean`)
-  elaborates to:
+**3. `old` is a storage variable**, KeY's `Struct old`: `STerm.pv`, bound
+in the env (`Binding.store`) by the update `{old := storage}`
+(`UpdElem.store`).  The update is in front only when an `ensures` reads
+`\old`.  `find(old, p)` checks `p`'s indices against the current storage
+and reads `old`: `sol_decide` cannot state that exactly and keeps `old`
+outside its fragment; `sol_close` reads it semantically.
 
-  ```
-  ⊨ R ∧ Î ∧ pre → {o₁ := ⌊e₁⌋} … {oₖ := ⌊eₖ⌋} [ res = f(x₁, …, xₙ); ] (Î ∧ post)
-  ```
+**4. `\forall` is `Fml.all x T φ`**, over `PrimTy.admits` (a `uint` in
+`[0, 2^256)`).  `Fml.vars` keeps the bound name (a quantified invariant is
+not `closed` yet).  `sol_close` reads it as a Lean `∀` over integers
+(`Close.forall_admits_uint`), and `grind` instantiates it.
 
-  - `x₁ … xₙ` are the parameters as free locals, under their declared
-    names.
-  - `res` stands for `\result`.
-  - `Î` is the invariant, `pre`/`post` the conjoined clauses, lowered by
-    the `dl` reader.
-  - `R` gives each parameter's **range** (`0 <= x && x <= 2^256 - 1`,
-    `b == b` for a `bool`). A free local ranges over every value,
-    including a halt, and a checked operator on it halts outside its type's
-    range.
-- The call has simple arguments, so `functionBodyExpand` fires at once. The
-  callee writes only its fresh copies of the parameters, so `post` reads
-  the parameters' pre-state values. That is solc's value semantics, and
-  `\old(x)` is simply `x`.
-- **Why the box.** Under `⊨`, a diamond over a storage write is false in
-  the states that lack the root (`Calculus/Close.lean`, first gap), so it
-  needs a layout premise (decision 6). The box needs nothing and matches
-  solkey.
-- **The limit.** Lean's box accepts every halt (Decisions row
-  "Modalities"). A failing `assert` inside a box-specified body therefore
-  proves nothing, and "does not revert" is the diamond's job.
+**5. The obligation is solkey's box** (`spec[C]{f}`):
 
-**3. `\old(e)` is a snapshot local, taken by an update in front of the modality.**
+```
+R ∧ L ∧ I ∧ requires → {old := storage} [ T result = f(x₁, …, xₙ); ] (I ∧ ensures)
+```
 
-- Each occurrence gets a fresh local `oᵢ := ⌊eᵢ⌋`.
-- This is exact: an update reads its right-hand side in the state it is
-  applied in, which is the pre-state.
-- It stays inside `sol_decide`'s fragment: one element per update, and a
-  read of the starting storage (`LFml.initOnly`).
-- It applies when `eᵢ`'s free names are parameters, state variables, or
-  quantified variables that decision 4 skolemizes. That covers every
-  benchmark clause except those over `net`.
-- **Rejected for now:** solkey's whole-storage snapshot `old := storage`.
-  `STerm` has no storage-valued variable, so it would take a new
-  constructor, an arm in every quoter (the "Sharp edges" section of
-  `docs/kernel-port.md`), and a second base storage in `Decide`. It is
-  needed only for an `\old` under a quantifier that cannot be skolemized.
-  That is stage S5.
+`R` is each parameter's range and `L` the layout of the state the clauses
+read (`layoutFmls`: each word of its declared type, at every key of a
+mapping); solkey's reads are total and typed and need neither
+(`docs/solkey-feedback.md`).  `I` is `Contract.inv`, assumed and owed.
+Not built: `net(a)`, `oldNet`, the booking of `msg.value`, and the
+`msgValue` precondition.
 
-**4. `\forall` is skolemized where it is positive, and a real quantifier where it is not.**
+**6. `sol_spec` proves one**: `sol_symex`, then `sol_close` with a word read
+known to be a word (`Close.asValue_eq_ok`) and `grind`'s instantiation
+bounded.  Splitting the obligation clause by clause was tried and costs
+more: symbolic execution runs once per clause.  `Examples/Specs.lean` has
+what closes; Coin's `send` and ERC20's `transfer` (the debit and the
+credit to two keys that may be equal) do not, as in the benchmark files.
 
-- **Positive position** (an `ensures` conjunct, or the right of `→`):
-  `\forall address a; P` becomes a fresh free local `a` with its range
-  guard, `range(a) → P`. This is sound and complete, because `⊨` already
-  quantifies over `a`, and `a` is fresh, so no program writes it. Every
-  `\forall` in the benchmark's `ensures` is of this kind (Coin, ERC20).
-  No new constructor is needed.
-- **Negative position** (`requires`, the invariant assumed on entry, under
-  `¬`): this needs **`Fml.all (x : Var) (p : PrimTy) (φ)`**, with
-  `holds σ (.all x p φ) ↔ ∀ v : p, holds (σ.setEnv x v) φ`. The
-  consequences:
-  - `Fml.vars` must exclude the bound variable, so `Invariant.closed`
-    means "no *free* local";
-  - `holds_frame`, the quoters and the `dl` reader each gain one case;
-  - `Fml.stepAt` steps under the binder;
-  - `Decide`'s reduction commutes with `∀` state by state, so
-    `Fml.valid_iff_reduce` survives;
-  - the closing step, however, has to instantiate a hypothesis `∀ v, …`:
-    `omega` cannot, and `grind` does so heuristically. The procedure is
-    therefore **not complete** above this line.
-- `\exists` is `¬∀¬`.
-
-**5. The contract invariant is assumed on entry and owed on exit.**
-
-- `Î` in decision 2 is `Contract.inv`, elaborated to an `Invariant C`.
-- Under callbacks the obligation is `ValidC I` of the same formula, proved
-  with `ProvesC`. Two items in "Still open" of `docs/kernel-port.md` apply:
-  `ProvesC` has no strategy, and a branch or a call around a transfer has
-  no rule.
-- Lean can also establish what solkey never does: the invariant at the
-  initial store (`holds State.*Store Î`, decided by the kernel as the
-  corpus is). That is a `docs/solkey-feedback.md` item.
-- **Blocked:** an invariant or `ensures` over `net` (Purchase's invariant,
-  EtherWallet's `ensures net(owner) == …`), because no term reads the
-  ledger. `msg.sender` and `msg.value` (Coin, ERC20) wait for wave 1's
-  environment values, which also supply solkey's booking of `msg.value`
-  before the call.
-
-**6. The diamond (no revert) comes later, as validity over reachable states.**
-
-- `ValidR C φ` would mean true in every state whose storage is reachable
-  for `C`, which `reachable_iff` (`Typing/Constructibility.lean`)
-  characterises.
-- `⊨ φ` implies `ValidR C φ`.
-- Deciding it takes the layout's types as extra constraints in
-  `DecideComplete`: a read at `alice.age` shows a word, and one at
-  `balances` shows a mapping. Realizability would then have to produce a
-  canonical and tight storage.
+**Still open.** The diamond (no revert) over reachable states (decision 6
+of the earlier draft, `ValidR`); the invariant under callbacks (`ValidC`);
+`net`; a quantified invariant as an `Invariant C`; `sol_decide` on `old`.
 
 ## The corpus's concretized rows
 
@@ -248,7 +192,7 @@ Of the 23 rows:
 | Stage | Scope (files) | Risk |
 |---|---|---|
 | **S1 Symbolic corpus** | `scripts/solkey-port.mjs` (rules 2 and 3 emit `D ∧ R ∧ pre → ⟨…⟩ true` for the 17 rows), `Corpus/Basic.lean` (the obligation form beside `Diamond`), `tests/solkey/expected.tsv`, `docs/corpus-parity.md`. | Low. The risk is `sol_decide`'s heartbeats on longer bodies. Best done together with regenerating the corpus. |
-| **S2 Specs and obligations** | `Syntax.lean` (`FunSpec`, `Contract.inv`, the `contract!{}` clauses, `\old`/`\result` in `RawExpr`), `Calculus/Notation.lean` (`spec[C]{f}`: ranges, snapshot updates, the call, skolemizing positive `\forall`), `Semantics/Callback.lean` (`Invariant` from `Contract.inv`). Examples: a new module `Examples/Specs` with Counter, SimpleStorage, Mapping, NestedMapping, `Coin.mint` without `msg.sender`, the invariant at the initial store. | Medium. The elaborator is the only new trusted-looking part, and the kernel re-checks its output. |
+| **S2 Specs and obligations** (built 2026-09-28, with S4's `Fml.all` and S5's `old`: see Decisions) | `Syntax.lean` (`FunSpec`, `Contract.inv`, the `contract!{}` clauses, `\old`/`\result` in `RawExpr`), `Calculus/Notation.lean` (`spec[C]{f}`: ranges, snapshot updates, the call, skolemizing positive `\forall`), `Semantics/Callback.lean` (`Invariant` from `Contract.inv`). Examples: a new module `Examples/Specs` with Counter, SimpleStorage, Mapping, NestedMapping, `Coin.mint` without `msg.sender`, the invariant at the initial store. | Medium. The elaborator is the only new trusted-looking part, and the kernel re-checks its output. |
 | **S3 Benchmark port** | `scripts/solkey-port.mjs` reads `benchmark/*.sol`; `tests/solkey/expected.tsv` gets a status `specified`; `docs/corpus-parity.md`. Coin and ERC20 after wave 1's `msg.sender`/`msg.value`. | Low to medium. It depends on wave 1 (events, errors, `return`). |
 | **S4 `Fml.all`** | `Update.lean`, `Calculus/Logic.lean`, `Calculus/Symex.lean`, `Calculus/Quote.lean`, `Calculus/Notation.lean`, `Calculus/Decide.lean`, `Calculus/DecideComplete.lean`, `Semantics/Callback.lean` (`Invariant.closed`). Unlocks SimpleAuction's invariant and the loops' quantified invariants (`docs/loops.md`, L5). | High. Completeness stops at `grind`'s instantiation. |
 | **S5 Whole-storage `\old`** | `Update.lean` (a storage-valued snapshot term), the quoters, `Calculus/Decide.lean` (a second base storage that reduces to the initial one). Only if an `\old` under an unskolemizable quantifier turns up. | Medium to high. |

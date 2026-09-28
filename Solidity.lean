@@ -53,6 +53,7 @@ import Solidity.Examples.ApplySteps
 import Solidity.Examples.Chains
 import Solidity.Examples.UpdateRules
 import Solidity.Examples.Decide
+import Solidity.Examples.Specs
 import Solidity.Examples.Benchmark.Syntax
 import Solidity.Examples.Benchmark.Counter
 import Solidity.Examples.Benchmark.SimpleStorage

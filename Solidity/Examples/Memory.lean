@@ -310,6 +310,7 @@ theorem memoryNestedArrayWrite :
   sol_symex
   sol_close
 
+set_option maxHeartbeats 300000 in
 /-- `ts[i] = t;` — a reference-valued element written from a memory path: the
 identity is stored (`memoryIndexWriteCopy`), so the slot and `t` alias (the
 printed `carolTokens[i] = david.account.token;`). -/

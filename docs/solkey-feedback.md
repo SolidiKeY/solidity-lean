@@ -283,6 +283,29 @@ cheaper to maintain:
   algebra; the equations are a per-taclet test oracle solkey could run
   on its own `.key` examples.
 
+## Specifications ported to Lean (2026-09-28)
+
+`Calculus/Spec.lean` compiles `@custom:key` clauses as `SpecCompiler` does
+(a storage term per context, `old := storage`, real quantifiers).  What the
+Lean side adds, each a question for solkey:
+
+- **The layout as a premise.** `⊨` ranges over every storage, so the Lean
+  obligation assumes that each word the clauses read holds a value of its
+  declared type (`∀ uint k1; 0 <= balances[k1] <= 2^256 - 1`).  solkey's
+  obligation has no such premise: its reads are total and its sorts typed.
+  Whether a `\forall` clause over a mapping is provable in a storage where
+  the mapping holds a `bool` is the same question as `wellFormed(storage)`
+  (see "Sorts vs. storage wellformedness").
+- **Parameter ranges.** A parameter is a KeY `int`, unbounded; Lean's
+  obligation assumes `0 <= x <= 2^256 - 1` for a `uint`.  A clause like
+  `requires amount >= 0` is then redundant, and solkey could add the range
+  to `specifiedProblemText` instead of relying on it.
+- **Checked arithmetic in clauses.** A clause's `+`/`-` is solc's, checked:
+  `\old(balances[to]) + amount` overflowing makes the equation false.
+  solkey's is KeY's unbounded `int`.
+- **`\old` over a path with an array index** reads `old` at a path checked
+  against the current storage (`find(old, p)`); KeY's `find` checks nothing.
+
 ## What solkey must refuse, and the one rule it lacks (2026-09-27)
 
 The Lean calculus is two lists (`Calculus/Rules.lean`): `Taclet`, 152
