@@ -110,6 +110,8 @@ inductive RawStmt where
   modelled.  One that can neither revert nor have an effect (a literal, a
   name, a member of one) is not evaluated at all. -/
   | eval (args : List RawExpr)
+  /-- `unchecked { … }`: a scope whose `+ - * **` wrap (`uncheckStmts`). -/
+  | unchecked (body : List RawStmt)
   deriving Repr, Inhabited
 
 /-- Evaluating `e` can neither revert nor have an effect: a literal, a name,
@@ -566,9 +568,11 @@ def BinOp.sym : BinOp → String
   | .add => "+" | .sub => "-" | .mul => "*" | .pow => "**" | .div => "/" | .mod => "%"
   | .lt => "<" | .gt => ">" | .le => "<=" | .ge => ">="
   | .eqB => "==" | .neB => "!=" | .and => "&&" | .or => "||"
+  | .band => "&" | .bor => "|" | .bxor => "^" | .shl => "<<" | .shr => ">>"
+  | .addW => "+%" | .subW => "-%" | .mulW => "*%" | .powW => "**%"
 
 def UnOp.sym : UnOp → String
-  | .neg => "-" | .not => "!"
+  | .neg => "-" | .not => "!" | .bnot => "~"
 
 def Ty.toStr : Ty → String
   | .prim .uint => "uint" | .prim .int => "int" | .prim .bool => "bool"
@@ -728,6 +732,22 @@ syntax:70 sol_expr:70 " / " sol_expr:71 : sol_expr
 syntax:70 sol_expr:70 " % " sol_expr:71 : sol_expr
 syntax:65 sol_expr:65 " + " sol_expr:66 : sol_expr
 syntax:65 sol_expr:65 " - " sol_expr:66 : sol_expr
+/-- solc's precedence: `+ -` > `<< >>` > `&` > `^` > `|` > comparisons. -/
+syntax:60 sol_expr:60 " << " sol_expr:61 : sol_expr
+syntax:60 sol_expr:60 " >> " sol_expr:61 : sol_expr
+syntax:58 sol_expr:58 " & " sol_expr:59 : sol_expr
+syntax:56 sol_expr:56 " ^ " sol_expr:57 : sol_expr
+syntax:54 sol_expr:54 " | " sol_expr:55 : sol_expr
+/-- `~x`.  The category reads a leading atom as a non-reserved keyword, which
+`~` (no Lean token) cannot be: `ppAllowUngrouped` makes it not the first. -/
+syntax:80 ppAllowUngrouped "~" sol_expr:80 : sol_expr
+/-- The wrapping arithmetic of an `unchecked { … }` block, spelt as Zig spells
+it: `a +% b` is `a + b` modulo `2^256`.  Not Solidity: it is what the printers
+write for an operator inside `unchecked`, and it reads back. -/
+syntax:75 sol_expr:76 " **% " sol_expr:75 : sol_expr
+syntax:70 sol_expr:70 " *% " sol_expr:71 : sol_expr
+syntax:65 sol_expr:65 " +% " sol_expr:66 : sol_expr
+syntax:65 sol_expr:65 " -% " sol_expr:66 : sol_expr
 syntax:50 sol_expr:51 " < " sol_expr:51 : sol_expr
 syntax:50 sol_expr:51 " > " sol_expr:51 : sol_expr
 syntax:50 sol_expr:51 " <= " sol_expr:51 : sol_expr
@@ -811,6 +831,13 @@ syntax sol_expr " -= " sol_expr : sol_stmt
 syntax sol_expr " *= " sol_expr : sol_stmt
 syntax sol_expr " /= " sol_expr : sol_stmt
 syntax sol_expr " %= " sol_expr : sol_stmt
+syntax sol_expr " &= " sol_expr : sol_stmt
+syntax sol_expr " |= " sol_expr : sol_stmt
+syntax sol_expr " ^= " sol_expr : sol_stmt
+syntax sol_expr " <<= " sol_expr : sol_stmt
+syntax sol_expr " >>= " sol_expr : sol_stmt
+/-- `unchecked { … }`: its `+ - * **` wrap at `2^256` instead of reverting. -/
+syntax (name := solUnchecked) &"unchecked" ppSpace sol_block : sol_stmt
 syntax "if " "(" sol_expr ") " sol_block (" else " sol_block)? : sol_stmt
 syntax (name := solRequire) &"require" "(" sol_expr ")" : sol_stmt
 syntax (name := solAssert) &"assert" "(" sol_expr ")" : sol_stmt
@@ -907,6 +934,7 @@ partial def expandExpr : TSyntax `sol_expr → MacroM Term
   | `(sol_expr| ( $e:sol_expr )) => expandExpr e
   | `(sol_expr| ! $a) => do `(RawExpr.unop .not $(← expandExpr a))
   | `(sol_expr| - $a) => do `(RawExpr.unop .neg $(← expandExpr a))
+  | `(sol_expr| ~ $a) => do `(RawExpr.unop .bnot $(← expandExpr a))
   | `(sol_expr| $c ? $a : $b) => do
       `(RawExpr.ternary $(← expandExpr c) $(← expandExpr a) $(← expandExpr b))
   | `(sol_expr| $a ** $b) => bin ``BinOp.pow a b
@@ -923,6 +951,15 @@ partial def expandExpr : TSyntax `sol_expr → MacroM Term
   | `(sol_expr| $a != $b) => bin ``BinOp.neB a b
   | `(sol_expr| $a && $b) => bin ``BinOp.and a b
   | `(sol_expr| $a || $b) => bin ``BinOp.or a b
+  | `(sol_expr| $a & $b) => bin ``BinOp.band a b
+  | `(sol_expr| $a | $b) => bin ``BinOp.bor a b
+  | `(sol_expr| $a ^ $b) => bin ``BinOp.bxor a b
+  | `(sol_expr| $a << $b) => bin ``BinOp.shl a b
+  | `(sol_expr| $a >> $b) => bin ``BinOp.shr a b
+  | `(sol_expr| $a +% $b) => bin ``BinOp.addW a b
+  | `(sol_expr| $a -% $b) => bin ``BinOp.subW a b
+  | `(sol_expr| $a *% $b) => bin ``BinOp.mulW a b
+  | `(sol_expr| $a **% $b) => bin ``BinOp.powW a b
   | `(sol_expr| $e:sol_expr ++) => do `(RawExpr.incDec .postInc $(← expandExpr e))
   | `(sol_expr| $e:sol_expr −−) => do `(RawExpr.incDec .postDec $(← expandExpr e))
   | `(sol_expr| ++ $e:sol_expr) => do `(RawExpr.incDec .preInc $(← expandExpr e))
@@ -981,6 +1018,7 @@ partial def expandStmt (s : TSyntax `sol_stmt) : MacroM Term := do
     `(RawStmt.requireWith $(← expandExpr ⟨s.raw[2]⟩) [$(← s.raw[6].getSepArgs.mapM (expandExpr ⟨·⟩)),*])
   | ``solRevertErr | ``solRevertMsg => `(RawStmt.revert)
   | ``solHole => Macro.throwErrorAt s "`_;` stands once, at the top level of a modifier's body"
+  | ``solUnchecked => `(RawStmt.unchecked $(← expandStmt.expandBlock ⟨s.raw[1]⟩))
   | _ => expandStmt1 s
 where
   expandStmt1 : TSyntax `sol_stmt → MacroM Term
@@ -1054,6 +1092,11 @@ where
   | `(sol_stmt| $l:sol_expr *= $r) => do `(RawStmt.opAssign .mul $(← expandExpr l) $(← expandExpr r))
   | `(sol_stmt| $l:sol_expr /= $r) => do `(RawStmt.opAssign .div $(← expandExpr l) $(← expandExpr r))
   | `(sol_stmt| $l:sol_expr %= $r) => do `(RawStmt.opAssign .mod $(← expandExpr l) $(← expandExpr r))
+  | `(sol_stmt| $l:sol_expr &= $r) => do `(RawStmt.opAssign .band $(← expandExpr l) $(← expandExpr r))
+  | `(sol_stmt| $l:sol_expr |= $r) => do `(RawStmt.opAssign .bor $(← expandExpr l) $(← expandExpr r))
+  | `(sol_stmt| $l:sol_expr ^= $r) => do `(RawStmt.opAssign .bxor $(← expandExpr l) $(← expandExpr r))
+  | `(sol_stmt| $l:sol_expr <<= $r) => do `(RawStmt.opAssign .shl $(← expandExpr l) $(← expandExpr r))
+  | `(sol_stmt| $l:sol_expr >>= $r) => do `(RawStmt.opAssign .shr $(← expandExpr l) $(← expandExpr r))
   | `(sol_stmt| if ($c) $t $[else $f]?) => do
       let els ← match f with
         | some f => expandBlock f
@@ -1738,6 +1781,7 @@ partial def renameStmts (ρ : List (String × String)) : List RawStmt → ElabM 
       pure (.declStoragePush T y (r b) :: (← renameStmts ρ' ss))
     | .ite c t e =>
       pure (.ite (r c) (← renameStmts ρ t) (← renameStmts ρ e) :: (← renameStmts ρ ss))
+    | .unchecked b => pure (.unchecked (← renameStmts ρ b) :: (← renameStmts ρ ss))
     | s =>
       let s := match s with
         | .assign l e => .assign (r l) (r e)
@@ -1758,6 +1802,7 @@ partial def renameStmts (ρ : List (String × String)) : List RawStmt → ElabM 
 partial def RawStmt.hasReturn : RawStmt → Bool
   | .ret _ => true
   | .ite _ t e => t.any RawStmt.hasReturn || e.any RawStmt.hasReturn
+  | .unchecked b => b.any RawStmt.hasReturn
   | _ => false
 
 mutual
@@ -1809,6 +1854,53 @@ partial def wrapMods (body : List RawStmt) : List ModApp → ElabM (List RawStmt
     -- one renaming for both parts: a local declared before `_;` is in scope after it
     let code ← renameStmts ρ (m.pre ++ m.post)
     pure (decls ++ code.take m.pre.length ++ inner ++ code.drop m.pre.length)
+
+/-- An expression inside `unchecked { … }`: `+ - * **` wrap (`+%` …).  An
+`++`/`−−` inside it is an error: its capture (`hoist`) is checked. -/
+partial def RawExpr.uncheck : RawExpr → Except String RawExpr
+  | .binop op a b => do
+    let op' : BinOp := match op with
+      | .add => .addW | .sub => .subW | .mul => .mulW | .pow => .powW | op => op
+    pure (.binop op' (← a.uncheck) (← b.uncheck))
+  | .field e f => do pure (.field (← e.uncheck) f)
+  | .index e k => do pure (.index (← e.uncheck) (← k.uncheck))
+  | .unop op a => do pure (.unop op (← a.uncheck))
+  | .ternary c a b => do pure (.ternary (← c.uncheck) (← a.uncheck) (← b.uncheck))
+  | .incDec .. => throw "`++` or `−−` inside an expression in `unchecked`"
+  | .newArr T n => do pure (.newArr T (← n.uncheck))
+  | .call f as => do pure (.call f (← as.mapM RawExpr.uncheck))
+  | .named f ns as => do pure (.named f ns (← as.mapM RawExpr.uncheck))
+  | e => pure e
+
+/-- The statements of `unchecked { … }` with their arithmetic wrapping: `x += 1;`
+and `x++;` are `x = x +% 1;`.  A call's callee stays checked, as in solc. -/
+partial def uncheckStmts : List RawStmt → Except String (List RawStmt)
+  | [] => pure []
+  | s :: ss => do
+    let u := RawExpr.uncheck
+    let s' ← match s with
+      | .assign l e => do pure (.assign (← u l) (← u e))
+      | .decl T x i => do pure (.decl T x (← i.mapM u))
+      | .declStorage T x i => do pure (.declStorage T x (← i.mapM u))
+      | .declMemory T x i => do pure (.declMemory T x (← i.mapM u))
+      | .delete e => do pure (.delete (← u e))
+      | .opAssign op l e => do
+        let op' : BinOp := match op with | .add => .addW | .sub => .subW | .mul => .mulW | op => op
+        pure (.opAssign op' (← u l) (← u e))
+      | .incDec op l => do
+        pure (.opAssign (if op.isIncrement then .addW else .subW) (← u l) (.num 1))
+      | .call f as => do pure (.call (← u f) (← as.mapM u))
+      | .assignIncDec .. => throw "`v = x++;` inside `unchecked`: write `v = x; x += 1;`"
+      | .assignPush l b => do pure (.assignPush (← u l) (← u b))
+      | .declStoragePush T x b => do pure (.declStoragePush T x (← u b))
+      | .ite c t e => do pure (.ite (← u c) (← uncheckStmts t) (← uncheckStmts e))
+      | .require c => do pure (.require (← u c))
+      | .assert c => do pure (.assert (← u c))
+      | .revert => pure .revert
+      | .ret e => do pure (.ret (← e.mapM u))
+      | .unchecked b => do pure (.unchecked (← uncheckStmts b))
+      | .eval as => do pure (.eval (← as.mapM u))
+    pure (s' :: (← uncheckStmts ss))
 
 mutual
 
@@ -2187,6 +2279,10 @@ partial def elabStmt1 : RawStmt → ElabM (Prog C)
       | false => throw "`delete` of a memory object whose default is not well-formed"
     | .val .. => throw "`delete` needs a storage or a memory location"
   | .opAssign op l r => do
+    -- `&= |= ^= <<= >>=` and a wrapping `+=`: `l = l ⊕ r`, the target's
+    -- effects already captured (`hoistStmt`), so reading it twice is safe
+    if op.isArith && !op.hasCompoundAssign && op != .pow then
+      return ← elabStmt1 (.assign l (.binop op l r))
     let (pre, ⟨p, t⟩) ← elabOpTarget C l
     let (Γ, _) ← get
     match hop : op.hasCompoundAssign, hp : p.isNumeric with
@@ -2253,6 +2349,7 @@ partial def elabStmt1 : RawStmt → ElabM (Prog C)
     pure [.assert (← check C Γ .bool c)]
   | .revert => pure [.revert]
   | .eval _ => pure []
+  | .unchecked ss => do elabBranch (← ElabM.lift (uncheckStmts ss))
 
 /-- A block. -/
 partial def elabStmts : List RawStmt → ElabM (Prog C)
@@ -2308,6 +2405,7 @@ def RawStmt.maxIdx : RawStmt → Nat
   | .ret e => (e.map RawExpr.maxIdx).getD 0
   | .revert => 0
   | .eval as => RawExpr.maxIdxs as
+  | .unchecked b => RawStmt.maxIdxs b
 
 def RawStmt.maxIdxs : List RawStmt → Nat
   | [] => 0

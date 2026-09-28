@@ -143,6 +143,8 @@ def binopRightStep {p q : PrimTy} (x : Var) (op : BinOp) (hop : op.accepts p = t
     | .uint, _, hop, _, _, _, _ | .int, _, hop, _, _, _, _ => absurd hop (by decide)
   | .add, _, _ | .sub, _, _ | .mul, _, _ | .pow, _, _ | .div, _, _ | .mod, _, _ | .lt, _, _
   | .gt, _, _ | .le, _, _ | .ge, _, _ | .eqB, _, _ | .neB, _, _ => ⟨_, .key .binopUnfoldRight⟩
+  | .band, _, _ | .bor, _, _ | .bxor, _, _ | .shl, _, _ | .shr, _, _
+  | .addW, _, _ | .subW, _, _ | .mulW, _, _ | .powW, _, _ => ⟨_, .key .binopUnfoldRight⟩
 
 /-- A local assigned: `x = 10;`, `x = people[i].age;` (a read, unfolded
 until it is one), `x = a + b;`, `x = m.age;`. -/

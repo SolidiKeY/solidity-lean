@@ -337,6 +337,16 @@ theorem error_bind {α β : Type} (e : Halt) (f : α → Res β) :
 theorem bind_ok_right {α : Type} (x : Res α) : (x >>= fun a => Except.ok a) = x := by
   cases x <;> rfl
 
+/-- `12 & 10` on numerals: `Nat`'s `&&&`, which `Nat.reduceAnd` computes.  An
+operand is a numeral or the cast of one, a result computed before. -/
+theorem uintBitwise_ofNat (f : Nat → Nat → Nat) (a b : Nat) :
+    uintBitwise f (no_index (OfNat.ofNat a)) (no_index (OfNat.ofNat b)) = ((f a b : Nat) : Int) :=
+  rfl
+theorem uintBitwise_ofNat_cast (f : Nat → Nat → Nat) (a b : Nat) :
+    uintBitwise f (no_index (OfNat.ofNat a)) (b : Int) = ((f a b : Nat) : Int) := rfl
+theorem uintBitwise_cast_ofNat (f : Nat → Nat → Nat) (a b : Nat) :
+    uintBitwise f (a : Int) (no_index (OfNat.ofNat b)) = ((f a b : Nat) : Int) := rfl
+
 /-- `p.age`, with `p` an alias, is the path `p` holds, then `age`. -/
 theorem aliasPath_eq (σ : State) (x : Var) : aliasPath σ x = σ.getEnv x >>= bindingPath := by
   simp only [aliasPath, bind, Except.bind]
@@ -624,6 +634,8 @@ attribute [close_rw]
   -- operators
   Close.evalBinop_strict Close.evalBinop_and Close.evalBinop_or applyBinOp applyUnOp unopCheck
   Close.pickBranch_eq BinOp.retTy BinOp.isArith checkArith uintBound intBound
+  Close.uintBitwise_ofNat Close.uintBitwise_ofNat_cast Close.uintBitwise_cast_ofNat
+  uintBitwise_natCast Nat.reduceAnd Nat.reduceOr Nat.reduceXor
   -- runs
   Modality.wp_ok Modality.wp_pure Modality.wp_error Modality.wp_bind Modality.wp_ite
   Modality.wp_diamond Modality.onHalt_box Modality.onHalt_diamond

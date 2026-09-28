@@ -483,17 +483,23 @@ end Field
 /-- Binary operators of the KeY calculus (`solidityProgramRules.key`):
 arithmetic (`addition` .. `modulo`), comparisons (`lessThan` ..
 `greaterEqual`) and boolean connectives (`boolEquality`, `boolInequality`,
-`logicalAnd`, `logicalOr`). -/
+`logicalAnd`, `logicalOr`).  Then the operators solkey has no taclet for,
+all at `uint` only: bitwise `&`, `|`, `^` and the shifts `<<`, `>>`, and the
+wrapping arithmetic an `unchecked { … }` block is made of, spelt `+%`, `-%`,
+`*%`, `**%` (`band` … `powW`). -/
 inductive BinOp where
   | add | sub | mul | pow | div | mod
   | lt | gt | le | ge
   | eqB | neB | and | or
+  | band | bor | bxor | shl | shr
+  | addW | subW | mulW | powW
   deriving DecidableEq, Repr
 
 namespace BinOp
 
 def isArith : BinOp -> Bool
   | add | sub | mul | pow | div | mod => true
+  | band | bor | bxor | shl | shr | addW | subW | mulW | powW => true
   | _ => false
 
 def isComparison : BinOp -> Bool
@@ -531,9 +537,11 @@ def retTy (op : BinOp) (operand : Ty) : Ty :=
 
 end BinOp
 
-/-- Unary operators: `unaryMinus*` and `logicalNot*` taclets. -/
+/-- Unary operators: `unaryMinus*` and `logicalNot*` taclets; `~`, the
+bitwise complement at `uint`, has none. -/
 inductive UnOp where
   | neg | not
+  | bnot
   deriving DecidableEq, Repr
 
 namespace UnOp
@@ -541,6 +549,7 @@ namespace UnOp
 def retTy : UnOp -> Ty -> Ty
   | neg, operand => operand
   | not, _ => Ty.bool
+  | bnot, operand => operand
 
 end UnOp
 
@@ -641,6 +650,10 @@ def BinOp.accepts : BinOp → PrimTy → Bool
   -- solc takes an unsigned exponent, and an operator here is applied at one
   -- type: `**` is `uint ** uint`
   | .pow, p => p == .uint
+  -- bitwise, shifts and wrapping arithmetic at `uint` only: at `int` solc
+  -- reads them in two's complement, which the interpreter does not model
+  | .band, p | .bor, p | .bxor, p | .shl, p | .shr, p => p == .uint
+  | .addW, p | .subW, p | .mulW, p | .powW, p => p == .uint
   | _, p => p.isNumeric
 
 /-- The result type at operand type `p`: `a + b` on `uint` is a `uint`,
@@ -651,11 +664,13 @@ def BinOp.ret (op : BinOp) (p : PrimTy) : PrimTy :=
 def UnOp.accepts : UnOp → PrimTy → Bool
   | .neg, p => p.isNumeric
   | .not, p => p == .bool
+  | .bnot, p => p == .uint
 
-/-- `-x` keeps its type, `!b` is a `bool`. -/
+/-- `-x` and `~x` keep their type, `!b` is a `bool`. -/
 def UnOp.ret : UnOp → PrimTy → PrimTy
   | .neg, p => p
   | .not, _ => .bool
+  | .bnot, p => p
 
 /-! ## Local variables
 

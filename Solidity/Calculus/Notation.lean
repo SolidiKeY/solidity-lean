@@ -213,6 +213,7 @@ def RawStmt.names : RawStmt → List String
   | .ret e => (e.map RawExpr.names).getD []
   | .revert => []
   | .eval as => (as.map RawExpr.names).flatten
+  | .unchecked b => RawStmt.namesList b
 
 def RawStmt.namesList : List RawStmt → List String
   | [] => []
@@ -226,6 +227,7 @@ mutual
 def RawStmt.decls : RawStmt → List String
   | .decl _ x _ | .declStorage _ x _ | .declMemory _ x _ | .declStoragePush _ x _ => [x]
   | .ite _ t e => RawStmt.declsList t ++ RawStmt.declsList e
+  | .unchecked b => RawStmt.declsList b
   | _ => []
 
 def RawStmt.declsList : List RawStmt → List String

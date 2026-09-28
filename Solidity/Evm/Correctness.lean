@@ -373,6 +373,24 @@ theorem stail_sim {op : BinOp} (hop : binInFrag op .int = true) (hand : op ≠ .
     have : (sgn a = sgn b) ↔ a = b := ⟨sgn_inj ha' hb', fun h => h ▸ rfl⟩
     simp [applyBinOp, checkArith, bind, Except.bind, this]
 
+/-- An operator whose tail is its opcode, with no guard: the interpreter's
+result is a word, which the opcode pushes.  Example: `a & b`, `a +% b`. -/
+theorem word_tail {op : BinOp} (hop : op.isArith = true) {a b r : Nat} (hr : r < W)
+    (hsrc : applyBinOp op (.int a) (.int b) = .ok (.int (r : Int))) {m : Machine}
+    (hrun : run (uTail op) { m with stack := .val b :: .val a :: m.stack } = .ok (m.push (.val r)) 0) :
+    ValOut (op.ret .uint) (applyBinOp op (.int a) (.int b) >>= checkArith (op.retTy (.prim .uint)))
+      (run (uTail op) { m with stack := .val b :: .val a :: m.stack }) m := by
+  have e1 : op.ret .uint = .uint := by simp [BinOp.ret, hop]
+  have e2 : op.retTy (.prim .uint) = .prim .uint := by simp [BinOp.retTy, hop]
+  rw [e1, e2, hsrc, hrun, Except.ok_bind', checkArith_uint, if_pos (by omega)]
+  exact .inl ⟨_, _, rfl, ReprV.uint hr, rfl⟩
+
+/-- `x - y` modulo `2^256` is `x + (2^256 - y)` modulo `2^256`: `SUB`. -/
+theorem subW_eq {a b : Nat} (hb : b < W) :
+    ((a + (W - b)) % W : Nat) = ((a : Int) - b) % (W : Int) := by
+  rw [Int.natCast_emod, show ((a + (W - b) : Nat) : Int) = ((a : Int) - b) + W by omega,
+    Int.add_emod_right]
+
 /-- **The operators agree.**  On words representing its operands, an
 operator's tail computes the word of the interpreter's checked result, or
 reverts exactly when the interpreter does.
@@ -467,6 +485,50 @@ theorem tail_sim {op : BinOp} {p : PrimTy} (hop : binInFrag op p = true) (hand :
     · -- `!=`
       refine .inl ⟨.bool (!decide (a = b)), _, ?_, ReprV.bool _, (cmp_tail m m.stack a b).2.2.2.2.2⟩
       simp [applyBinOp, checkArith, bind, Except.bind, Int.natCast_inj]
+    · -- `&`
+      refine word_tail rfl (Nat.and_lt_two_pow b ha') ?_ (by simp [run, uTail, Instr.step, Machine.next]; rfl)
+      simp [applyBinOp, Value.asInt, bind, Except.bind, uintBitwise_natCast, Nat.and_comm]
+    · -- `|`
+      refine word_tail rfl (Nat.or_lt_two_pow hb' ha') ?_ (by simp [run, uTail, Instr.step, Machine.next]; rfl)
+      simp [applyBinOp, Value.asInt, bind, Except.bind, uintBitwise_natCast, Nat.or_comm]
+    · -- `^`
+      refine word_tail rfl (Nat.xor_lt_two_pow hb' ha') ?_ (by simp [run, uTail, Instr.step, Machine.next]; rfl)
+      simp [applyBinOp, Value.asInt, bind, Except.bind, uintBitwise_natCast, Nat.xor_comm]
+    · -- `<<`
+      refine word_tail (op := .shl) rfl (r := if b < 256 then a * 2 ^ b % W else 0)
+        (by split <;> first | exact Nat.mod_lt _ W_pos | exact W_pos) ?_
+        (by simp [run, uTail, Instr.step, Machine.next]; rfl)
+      simp only [applyBinOp, Value.asInt, bind, Except.bind]
+      by_cases h : b < 256
+      · rw [if_pos (by omega), if_pos h, uintBound_eq, Int.toNat_natCast]
+        simp [Int.natCast_emod, Int.natCast_mul, Int.natCast_pow]
+      · rw [if_neg (by omega), if_neg h]; rfl
+    · -- `>>`
+      refine word_tail (op := .shr) rfl (r := if b < 256 then a / 2 ^ b else 0)
+        (by split <;> first | exact Nat.lt_of_le_of_lt (Nat.div_le_self _ _) ha' | exact W_pos) ?_
+        (by simp [run, uTail, Instr.step, Machine.next]; rfl)
+      simp only [applyBinOp, Value.asInt, bind, Except.bind]
+      by_cases h : b < 256
+      · rw [if_pos (by omega), if_pos h, Int.toNat_natCast]
+        simp [Int.natCast_ediv, Int.natCast_pow]
+      · rw [if_neg (by omega), if_neg h]; rfl
+    · -- `+%`
+      refine word_tail rfl (Nat.mod_lt (b + a) W_pos) ?_
+        (by simp [run, uTail, Instr.step, Machine.next]; rfl)
+      simp [applyBinOp, Value.asInt, bind, Except.bind, uintBound_eq, Int.natCast_emod, Nat.add_comm]
+    · -- `-%`
+      refine word_tail rfl (Nat.mod_lt (a + (W - b)) W_pos) ?_
+        (by simp [run, uTail, Instr.step, Machine.next]; rfl)
+      simp [applyBinOp, Value.asInt, bind, Except.bind, uintBound_eq, subW_eq hb']
+    · -- `*%`
+      refine word_tail rfl (Nat.mod_lt (b * a) W_pos) ?_
+        (by simp [run, uTail, Instr.step, Machine.next]; rfl)
+      simp [applyBinOp, Value.asInt, bind, Except.bind, uintBound_eq, Int.natCast_emod, Nat.mul_comm]
+    · -- `**%`
+      refine word_tail rfl (Nat.mod_lt (a ^ b) W_pos) ?_
+        (by simp [run, uTail, Instr.step, Machine.next]; rfl)
+      simp [applyBinOp, Value.asInt, bind, Except.bind, uintBound_eq, Int.natCast_emod,
+        Int.natCast_pow]
 
 /-! ## Locations -/
 
@@ -879,6 +941,19 @@ theorem val_sim : ∀ {p : PrimTy} (e : Val C p) {m : Machine}, Sim C L Γ σ m 
         by_cases h : -(H : Int) ≤ -sgn a ∧ -sgn a < H
         · rw [if_pos h, if_pos h]; exact .inl ⟨_, _, rfl, ReprV.int h.1 h.2, rfl⟩
         · rw [if_neg h, if_neg h]; exact .inr ⟨rfl, rfl⟩
+      · exact .inr ⟨by simp [hva, bind, Except.bind], run_append_revert hruna⟩
+    | bnot =>
+      obtain rfl : p = .uint := by simpa [unInFrag] using hop
+      simp only [Val.eval, compileVal]
+      rcases iha hm hwa with ⟨va, wa, hva, hra, hruna⟩ | ⟨hva, hruna⟩
+      · obtain ⟨a, ha, rfl, rfl⟩ := hra.uint_inv
+        rw [run_append_ok hruna, hva]
+        have := W_pos
+        refine .inl ⟨.int ↑(W - 1 - a), .val (W - 1 - a), ?_, ReprV.uint (by omega), ?_⟩
+        · simp only [applyUnOp, Value.asInt, unopCheck, bind, Except.bind, pure, Except.pure,
+            uintBound_eq]
+          congr 2; omega
+        · simp [run, Instr.step, Machine.next]; rfl
       · exact .inr ⟨by simp [hva, bind, Except.bind], run_append_revert hruna⟩
   | p, .ternary c a b, m, hm, hw => by
     have ihc : ∀ {m : Machine}, Sim C L Γ σ m → wtVal Γ c = true →

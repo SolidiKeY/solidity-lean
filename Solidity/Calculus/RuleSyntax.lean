@@ -1276,6 +1276,10 @@ def binopSym? (op : Lean.Expr) : MetaM (Option String) := do
   | BinOp.lt => return "<" | BinOp.gt => return ">" | BinOp.le => return "<="
   | BinOp.ge => return ">=" | BinOp.eqB => return "==" | BinOp.neB => return "!="
   | BinOp.and => return "&&" | BinOp.or => return "||"
+  | BinOp.band => return "&" | BinOp.bor => return "|" | BinOp.bxor => return "^"
+  | BinOp.shl => return "<<" | BinOp.shr => return ">>"
+  | BinOp.addW => return "+%" | BinOp.subW => return "-%" | BinOp.mulW => return "*%"
+  | BinOp.powW => return "**%"
   | _ => return none
 
 /-- `a ⊕ b` in the program grammar. -/
@@ -1288,6 +1292,10 @@ def mkBinExpr (sym : String) (a b : TSyntax `sol_expr) : MetaM (TSyntax `sol_exp
   | "<=" => `(sol_expr| $a <= $b) | ">=" => `(sol_expr| $a >= $b)
   | "==" => `(sol_expr| $a == $b) | "!=" => `(sol_expr| $a != $b)
   | "&&" => `(sol_expr| $a && $b) | "||" => `(sol_expr| $a || $b)
+  | "&" => `(sol_expr| $a & $b) | "|" => `(sol_expr| $a | $b) | "^" => `(sol_expr| $a ^ $b)
+  | "<<" => `(sol_expr| $a << $b) | ">>" => `(sol_expr| $a >> $b)
+  | "+%" => `(sol_expr| $a +% $b) | "-%" => `(sol_expr| $a -% $b)
+  | "*%" => `(sol_expr| $a *% $b) | "**%" => `(sol_expr| $a **% $b)
   | _ => `(sol_expr| $a ⊕ $b)
 
 /-- `b.f`: one dotted name when `b` is a name, as the parser reads it. -/
@@ -1372,6 +1380,7 @@ partial def ppExpr (e : Lean.Expr) : MetaM (TSyntax `sol_expr) := do
     match_expr (← whnf op) with
     | UnOp.neg => `(sol_expr| -$(← ppExpr a))
     | UnOp.not => `(sol_expr| !$(← ppExpr a))
+    | UnOp.bnot => `(sol_expr| ~$(← ppExpr a))
     | _ => escape
   | Val.ternary _ _ c a b => `(sol_expr| $(← ppExpr c) ? $(← ppExpr a) : $(← ppExpr b))
   | Val.len _ _ _ b _ => dotExpr (← ppExpr b) "length"
