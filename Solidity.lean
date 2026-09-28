@@ -43,6 +43,7 @@ import Solidity.Examples.Theory
 import Solidity.Examples.Branch
 import Solidity.Examples.Revert
 import Solidity.Examples.Values
+import Solidity.Examples.Operators
 import Solidity.Examples.Calls
 import Solidity.Examples.Callback
 import Solidity.Examples.Notation

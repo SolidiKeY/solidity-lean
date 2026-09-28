@@ -145,6 +145,7 @@ went.
 | `Examples/StorageDelete.lean`, `Examples/LedgerDelete.lean` | `delete`, and a struct holding a mapping deleted. |
 | `Examples/Branch.lean`, `Examples/Revert.lean` | The two-goal split, a conditional of references; box and diamond on `revert`, `require`, `assert`, `transfer`. |
 | `Examples/Values.lean` | Operators, short-circuits, checked arithmetic, `−−`, `++` inside an expression, negative literals. |
+| `Examples/Operators.lean` | Bitwise `& \| ^ ~`, shifts, their compound assignments, `unchecked { … }`; the same on the machine. |
 | `Examples/Calls.lean` | Internal calls: inlined bodies, captured arguments, nested calls, a `return` per branch, effects on storage; what cannot be written (recursion). |
 | `Examples/Callback.lean` | The callback semantics: a checks-effects-interactions withdrawal proved with callbacks (`ProvesC`, `transferWithCallbackBox`), an interaction-first one proved without and refuted with, the diamond's funds. |
 | `Examples/Memory.lean`, `Examples/CrossDomain.lean`, `Examples/Net.lean`, `Examples/Theory.lean` | Memory (memory `delete`, `new T[](n)`, `.length` included), copies between storage and memory, `transfer`, the theory's rewriting. |
