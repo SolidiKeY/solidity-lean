@@ -121,9 +121,9 @@ theorem ageWriteReadKeY : ⊢ dl!{ [ alice.age = 42; uint x = alice.age; ] x == 
   -- sequentialToParallel:
   -- dl{ { storage := save(storage, alice.age, 42) ‖ x := find(save(storage, alice.age, 42), alice.age) }
   --     ⟹ x = 42 }
-  refine Proves.rewriteUpd 0 Hyp.EqRun.findOnSave ?_
+  rw [Hyp.EqRun.findOnSave]
   -- findOnSave: dl{ { storage := save(storage, alice.age, 42) ‖ x := 42 } ⟹ x = 42 }
-  refine Proves.rewrite 1 Hyp.EqUnder.applyOnPV ?_
+  rw [Hyp.EqUnder.applyOnPV]
   -- applyOnPV: dl{ { storage := save(storage, alice.age, 42) ‖ x := 42 } ⟹ 42 = 42 }
   refine Proves.simplify (Γ := []) ?_
   -- simplifyUpdate: dl{ { storage := save(storage, alice.age, 42) } ⟹ 42 = 42 }

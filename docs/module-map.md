@@ -70,7 +70,7 @@ fails on a module nothing imports.
 | `Calculus/Termination.lean` | The weights, `Premise.Smaller` (of `Stmt.step`, and of every derivation: `Rule.smaller`), `Fml.measure`, `Fml.step_wellFounded`, `symex_normalizes`. |
 | `Calculus/Chains.lean` | Derivations as values: `φ ~[r]~> ψ`, `~>`, `~*>`, `calc` chains of `dl!{…}` lines, `sol_chain`, `#derivation`. |
 | `Calculus/UpdateRules.lean` | KeY's update simplification as `UpdRule`, each an iff: `sequentialToParallel`, `simplifyUpdate`, `applySkip`, `applyOnRigid`; `sol_upd`, `sol_merge`. |
-| `Calculus/Rewrite.lean` | Rewriting a term anywhere in a sequent, KeY's way: `Proves.rewrite n`, sound for any equation `Hyp.EqUnder Γ₀ t t'` (the terms agree in every state the first `n` hypotheses lead to, `Hyp.Reaches`); `Proves.mergeStorage`, `sequentialToParallel` over a storage write (`withSt`, for terms with no implicit storage read); `Proves.rewriteUpd`, rewriting a box update's right-hand sides under `Hyp.EqRun`; the rules `findOnSave`, `applyOnPV`, and `Proves.eqClose`. |
+| `Calculus/Rewrite.lean` | Rewriting a term anywhere in a sequent, KeY's way: `Proves.rewrite n`, sound for any equation `Hyp.EqUnder Γ₀ t t'` (the terms agree in every state the first `n` hypotheses lead to, `Hyp.Reaches`); `Proves.mergeStorage`, `sequentialToParallel` over a storage write (`withSt`, for terms with no implicit storage read); `Proves.rewriteUpd`, rewriting a box update's right-hand sides under `Hyp.EqRun`; the rules `findOnSave`, `applyOnPV`, and `Proves.eqClose`. Both relations are setoids (`Hyp.EqUnder.setoid`, `Hyp.EqRun.setoid`, `Trans` for `calc`); under `open Proves`, `rw [r]` with such an equation finds the hypothesis to rewrite at (`sol_rw`). |
 
 ## The data-structure theories
 

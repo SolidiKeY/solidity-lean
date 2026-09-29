@@ -900,4 +900,100 @@ theorem Hyp.EqRun.findOnSave {Γ : List (Hyp C)} {U : Upd C} {p : PTerm C} {v : 
       Close.ok_bind, State.findStorage_saveStorage_same hsave, Close.ok_bind,
       Close.asValue_toSVal]
 
+/-! ## The relation is a setoid
+
+For a fixed context, `Hyp.EqUnder Γ₀` is an equivalence on terms (and a
+congruence for the term constructors: `Hyp.EqUnder.rw`), so it is a
+`Setoid`.  It is not a congruence for every formula context, which is why
+`rw` with it rewrites only where the sequent reads in the state `Γ₀` leads
+to (`Hyp.rwHere_holds`); `Proves.rewrite` is that setoid rewrite. -/
+
+section Setoid
+
+variable {Γ : List (Hyp C)} {U : Upd C} {t₁ t₂ t₃ : Term C}
+
+theorem Hyp.EqUnder.refl (Γ : List (Hyp C)) (t : Term C) : Hyp.EqUnder Γ t t :=
+  fun _ _ _ => rfl
+
+theorem Hyp.EqUnder.symm (h : Hyp.EqUnder Γ t₁ t₂) : Hyp.EqUnder Γ t₂ t₁ :=
+  fun σ τ hr => (h σ τ hr).symm
+
+theorem Hyp.EqUnder.trans (h₁ : Hyp.EqUnder Γ t₁ t₂) (h₂ : Hyp.EqUnder Γ t₂ t₃) :
+    Hyp.EqUnder Γ t₁ t₃ :=
+  fun σ τ hr => (h₁ σ τ hr).trans (h₂ σ τ hr)
+
+/-- A congruence for the term constructors: an equal subterm replaced. -/
+theorem Hyp.EqUnder.rw (h : Hyp.EqUnder Γ t₁ t₂) (e : Term C) :
+    Hyp.EqUnder Γ (e.rw (t₁, t₂)) e :=
+  fun σ τ hr => Term.rw_eval (q := (t₁, t₂)) (h σ τ hr) e
+
+theorem Hyp.EqUnder.equivalence (Γ : List (Hyp C)) : Equivalence (Hyp.EqUnder Γ) :=
+  ⟨Hyp.EqUnder.refl Γ, Hyp.EqUnder.symm, Hyp.EqUnder.trans⟩
+
+/-- The terms that read alike behind `Γ`. -/
+def Hyp.EqUnder.setoid (Γ : List (Hyp C)) : Setoid (Term C) :=
+  ⟨Hyp.EqUnder Γ, Hyp.EqUnder.equivalence Γ⟩
+
+instance : Trans (Hyp.EqUnder (C := C) Γ) (Hyp.EqUnder Γ) (Hyp.EqUnder Γ) :=
+  ⟨Hyp.EqUnder.trans⟩
+
+theorem Hyp.EqRun.refl (Γ : List (Hyp C)) (U : Upd C) (t : Term C) : Hyp.EqRun Γ U t t :=
+  fun _ _ _ _ _ => rfl
+
+theorem Hyp.EqRun.symm (h : Hyp.EqRun Γ U t₁ t₂) : Hyp.EqRun Γ U t₂ t₁ :=
+  fun σ τ ρ hr hU => (h σ τ ρ hr hU).symm
+
+theorem Hyp.EqRun.trans (h₁ : Hyp.EqRun Γ U t₁ t₂) (h₂ : Hyp.EqRun Γ U t₂ t₃) :
+    Hyp.EqRun Γ U t₁ t₃ :=
+  fun σ τ ρ hr hU => (h₁ σ τ ρ hr hU).trans (h₂ σ τ ρ hr hU)
+
+theorem Hyp.EqRun.equivalence (Γ : List (Hyp C)) (U : Upd C) : Equivalence (Hyp.EqRun Γ U) :=
+  ⟨Hyp.EqRun.refl Γ U, Hyp.EqRun.symm, Hyp.EqRun.trans⟩
+
+/-- The terms that read alike behind `Γ`, wherever `U` then runs. -/
+def Hyp.EqRun.setoid (Γ : List (Hyp C)) (U : Upd C) : Setoid (Term C) :=
+  ⟨Hyp.EqRun Γ U, Hyp.EqRun.equivalence Γ U⟩
+
+instance : Trans (Hyp.EqRun (C := C) Γ U) (Hyp.EqRun Γ U) (Hyp.EqRun Γ U) :=
+  ⟨Hyp.EqRun.trans⟩
+
+/-- What holds behind the whole context holds wherever its last update runs. -/
+theorem Hyp.EqUnder.toRun (h : Hyp.EqUnder Γ t₁ t₂) : Hyp.EqRun Γ U t₁ t₂ :=
+  fun σ τ _ hr _ => h σ τ hr
+
+end Setoid
+
+/-! ## `rw` on a sequent
+
+`rw [r]`, with `r` an equation under a context (`Hyp.EqUnder`, `Hyp.EqRun`)
+rather than an `=`, rewrites the sequent at the hypothesis where `r` holds:
+it tries `Proves.rewriteUpd n r` and `Proves.rewrite n r` for each `n` and
+keeps the first that fits the rule's shape and changes the goal.  Scoped to
+`Proves`, where the derivations are written; elsewhere `rw` is Lean's. -/
+
+open Lean Elab Tactic Meta in
+/-- Rewrite a sequent with an equation under its context, at the first
+hypothesis where it applies. -/
+elab "sol_rw " r:term : tactic => do
+  let goal ← getMainGoal
+  let before ← instantiateMVars (← goal.getType)
+  for n in List.range 17 do
+    for rule in [``Proves.rewriteUpd, ``Proves.rewrite] do
+      let saved ← saveState
+      try
+        let k := Syntax.mkNumLit (toString n)
+        evalTactic (← `(tactic| refine $(mkIdent rule) $k $r ?_))
+        let after ← instantiateMVars (← (← getMainGoal).getType)
+        if ← isDefEq after before then throwError "no change"
+        return
+      catch _ => saved.restore
+  throwError "sol_rw: no hypothesis of the sequent where {r} rewrites"
+
+namespace Proves
+
+scoped macro_rules
+  | `(tactic| rw [$r:term]) => `(tactic| sol_rw $r)
+
+end Proves
+
 end Solidity
