@@ -1,5 +1,6 @@
 import Solidity.Calculus.Notation
 import Solidity.Calculus.ReadWrite
+import Solidity.Theory.Bridge.Denote
 
 /-!
 # Closing the first-order goal: `sol_close`
@@ -616,12 +617,36 @@ theorem holds_not (φ : Fml C) : holds σ (.not φ) ↔ ¬ holds σ φ := Iff.rf
 theorem holds_and (φ ψ : Fml C) : holds σ (.and φ ψ) ↔ holds σ φ ∧ holds σ ψ := Iff.rfl
 /-- `a == 1 → …`. -/
 theorem holds_imp (φ ψ : Fml C) : holds σ (.imp φ ψ) ↔ (holds σ φ → holds σ ψ) := Iff.rfl
-/-- `y == 10` holds when both sides are defined and equal: as a diamond on
-each side, since a side that halts makes it false. -/
-theorem holds_eq (a b : Term C) : holds σ (.eq a b) ↔
+/-- `y == 10` (`Fml.eqD`) holds when both sides are defined and equal: as a
+diamond on each side, since a side that halts makes it false. -/
+theorem holds_eqD (a b : Term C) : holds σ (Fml.eqD a b) ↔
     Modality.diamond.wp (a.eval σ) fun x => Modality.diamond.wp (b.eval σ) fun y => x = y := by
+  rw [holds_eqD_iff]
+  cases a.eval σ <;> cases b.eval σ <;>
+    simp only [Modality.wp, Modality.onHalt, Except.ok.injEq, reduceCtorEq, false_and, and_false,
+      and_self, exists_false, exists_eq_left', eq_comm]
+/-- `se1 ≐ true` (`Fml.eq`, the total equation a taclet writes): the Theory
+values of the two sides agree.  Of a literal and a bound local, which is
+what a branch condition compares, that is their values
+(`Term.denote_lit`, `Term.denote_pv`, `Theory.StValue.Equiv.prim_iff`). -/
+theorem holds_eq (a b : Term C) : holds σ (.eq a b) ↔
+    Theory.StValue.Equiv (a.denote σ) (b.denote σ) := Iff.rfl
+/-- A literal denotes its value. -/
+theorem Term.denote_lit (v : Value) : (Term.lit v : Term C).denote σ = .prim v := rfl
+/-- A local denotes its value, if it is bound to one. -/
+theorem Term.denote_pv (x : Var) : (Term.pv x : Term C).denote σ = match σ.getEnv x with
+    | .ok (.val v) => .prim v
+    | _ => .st .mtSt := rfl
+/-- `Equiv.prim_iff` with the primitive on the left. -/
+theorem equiv_prim_left_iff {p : Value} {v : Theory.StValue} :
+    Theory.StValue.Equiv (.prim p) v ↔ Theory.StValue.prim p = v :=
+  ⟨fun h => (Theory.StValue.Equiv.prim_iff.1 h.symm).symm,
+    fun h => h ▸ Theory.StValue.Equiv.refl _⟩
+/-- `defined t`: `t` returns, a diamond with nothing after. -/
+theorem holds_defined (t : Term C) : holds σ (.defined t) ↔
+    Modality.diamond.wp (t.eval σ) fun _ => True := by
   simp only [holds]
-  cases a.eval σ <;> cases b.eval σ <;> simp [Modality.wp, Modality.onHalt]
+  cases t.eval σ <;> simp [Modality.wp, Modality.onHalt]
 /-- `{y := alice.age} y == 10`: apply the update, under the modality it was
 produced in. -/
 theorem holds_upd (m : Modality) (U : Upd C) (φ : Fml C) :
@@ -637,10 +662,15 @@ end Close
 
 /-! ## The tactic -/
 
+-- `Fml.eqD` is a conjunction: its lemma goes first, ahead of `holds_and`.
+attribute [close_rw high] Close.holds_eqD
+
 attribute [close_rw]
   -- formulas and updates
-  Close.holds_tt Close.holds_not Close.holds_and Close.holds_imp Close.holds_eq Close.holds_upd
-  Close.holds_all
+  Close.holds_tt Close.holds_not Close.holds_and Close.holds_imp Close.holds_upd
+  Close.holds_defined Close.holds_all
+  Close.holds_eq Close.Term.denote_lit Close.Term.denote_pv Close.equiv_prim_left_iff
+  Theory.StValue.Equiv.prim_iff Theory.StValue.prim.injEq
   Hyp.wrap Upd.apply List.foldlM_cons List.foldlM_nil
   Close.UpdElem.write_val Close.UpdElem.write_path Close.UpdElem.write_mref
   Close.UpdElem.write_storage Close.UpdElem.write_store Close.UpdElem.write_memory

@@ -1,4 +1,4 @@
-import Solidity.Calculus.Rewrite
+import Solidity.Calculus.TheoryLaws
 
 /-!
 # Select on save meets a `consr` path
@@ -8,31 +8,48 @@ KeY builds a path by appending on the right: `storageFieldWriteSave` writes
 `PTerm.eval` returns `segs ++ [.field f]` the same way.  Reading a write back
 walks the path from the left: `SVal.save` and `SVal.find` unfold only on
 `Seg.field name :: rest`, as the theory's `findDefinitionCons` and
-`selectOnSaveCons` match `cons(a, flds)`.  So once the program is gone, the
-path in the goal, `[] ++ [.field "age"]`, blocks every rewrite until it is
-reassociated into `cons` form — a step solkey has no taclet for
-(`consr(nil, a) ⇝ cons(a, nil)`).  Even the derivation's context comes out
-`consr`-shaped: `[] ++ [h₁] ++ [h₂]`.
+`selectOnSaveCons` match `cons(a, flds)`.
 
-The proof below is `apply` for every step of the calculus, then `rw` until
-the goal is closed, with no `sol_close`.  Each `fail_if_success` marks a
-rewrite that the `consr` path blocks.  `Modality.wp_box_saveStorage` would
-hand over the read-after-write at any path and hide the problem, so the
-write is read back by hand.  `sol_close` does the reassociation silently:
-`List.nil_append` and `List.cons_append` are in its `close_rw` set.
+`ageWriteRead` shows the problem where it bites, at the interpreter: `apply`
+for every step of the calculus, then `rw` on the semantics until the goal is
+closed, with no `sol_close`.  Once the program is gone the path in the goal,
+`[] ++ [.field "age"]`, blocks every rewrite until it is reassociated into
+`cons` form — a step solkey has no taclet for (`consr(nil, a) ⇝ cons(a, nil)`).
+Each `fail_if_success` marks a rewrite that the `consr` path blocks.
+`Modality.wp_box_saveStorage` would hand over the read-after-write at any path
+and hide the problem, so the write is read back by hand.  (`sol_close` does
+the reassociation silently: `List.nil_append` and `List.cons_append` are in
+its `close_rw` set.)
 
-`ageWriteReadKeY` proves the same program in solkey's order, without
-leaving the sequent (`Calculus/Rewrite.lean`): `sequentialToParallel`
-merges the two updates into `{storage := S ‖ x := find(S, alice.age)}`,
-`findOnSave` rewrites the read inside it, `applyOnPV` the local in the goal,
-`simplifyUpdate` drops the dead element, `eqClose` closes `42 = 42`.  Two
-steps differ from KeY's.  `findOnSave` fires *inside* the update, where the
-write is known to succeed: `applyOnRigid` would drop the update, and with it
-the fact that `alice` exists, leaving `find(S, alice.age) = 42`, false where
-the write is stuck — KeY's terms do not halt, these do.  And `findOnSave` is
-one rule on the whole path, so the consr problem does not arise: solkey has
-no such taclet, and reaches a read of a write through `findDefinitionCons`
-and `selectOnSaveCons`, which want the path in `cons` form.
+`ageWriteReadKeY` proves the same program in solkey's order and never leaves
+the sequent: after the calculus steps there is no interpreter reasoning at
+all.  The two updates are merged first (`sequentialToParallel`,
+`Proves.mergeStorage`): the storage write is substituted into the read, so
+the context is one parallel update
+`{storage := save(storage, alice.age, 42) ‖ x := find(save(storage, alice.age, 42), alice.age)}`.
+The comparison `x = 42` then splits into `defined(x)`, `defined(42)` and the
+Theory equation `x ≐ 42` (`Proves.eqDSplit`).  `defined(x)` is proved from
+the update that wrote `x` (`Proves.definedWritten`), `defined(42)` from
+nothing (`Proves.definedLit`).  The merged update is applied to the
+equation and dropped in one step (`Proves.applyOnRigidBox`, through
+`sol_apply_upd`); it writes the storage too, which it may because `x ≐ 42`
+reads no storage (`Fml.stFree`).  The one storage step, the read of the
+write, is `findOnSave` (`Calculus/TheoryLaws.lean`), the Theory's
+`find_copyTo_same`, a rewrite rule for free through `Proves.theoryRw` with
+no soundness proof of its own.  `42 ≐ 42` closes by `Proves.eqRefl`.
+
+The `consr` path has not gone away, it has moved into the Theory.
+`alice.age` still denotes `[.field "alice"] ++ [.field "age"]`
+(`PTerm.denote` of `.field`), and the laws are stated at a list path:
+`find_copyTo_same` at any `p ≠ []`, and the rule-shaped `findDelAt` at
+`p ++ [a]` (`find_delAt_field`, which splits the read with `find_append`).
+The reassociation happens once, inside the proof of the law
+(`find_save_same` walks `p` from the left), never in a derivation.  What the
+derivation still sees of it is the side condition `p.hasSeg`, that a
+`consr`-built path is not empty; `sol_rw` closes it by `rfl` once the match
+has fixed `p`, so the law is named bare.  The context too is
+`consr`-shaped, `[] ++ [h₁] ++ [h₂]`; the rules take it as
+`Γ ++ [.upd .box U]`.
 -/
 
 namespace Solidity.Examples.SelectOnSaveConsr
@@ -102,31 +119,38 @@ theorem ageWriteRead : ⊢ dl!{ [ alice.age = 42; uint x = alice.age; ] x == 42 
         rw [SVal.find, Modality.wp_ok, asValue_toSVal, Modality.wp_ok, Modality.wp_ok,
           List.foldlM_nil, Modality.wp_pure]
         -- `x = 42`
-        rw [holds_eq, Close.Term.eval_pv, State.getEnv_setEnv_self, Modality.wp_bind,
+        rw [holds_eqD, Close.Term.eval_pv, State.getEnv_setEnv_self, Modality.wp_bind,
           Modality.wp_ok, bindingVal_val, Modality.wp_ok, Term.eval_lit, Modality.wp_ok]
     | _ =>
       rw [List.nil_append, SVal.save] at hsave
       cases hsave
 
-/-- The same program step by step as solkey takes it: the updates merged
-into one parallel update, the read rewritten inside it, the local applied,
-the dead element dropped, `42 = 42` closed. -/
+/-- The same program as solkey takes it: the calculus steps, the updates
+merged, the comparison split, the merged update applied, the read of the
+write rewritten by the Theory law `findOnSave`, `42 ≐ 42` closed by
+reflexivity. -/
 theorem ageWriteReadKeY : ⊢ dl!{ [ alice.age = 42; uint x = alice.age; ] x == 42 } := by
   apply update .storageFieldWriteSave
+  -- dl{ { storage := save(storage, alice.age, 42) } ⟹ [ uint x = alice.age; ] x = 42 }
   apply unfold .localValueDeclInitDrop
   apply update .storageFieldReadFind
   apply empty
   -- dl{ { storage := save(storage, alice.age, 42) }, { x := find(storage, alice.age) } ⟹ x = 42 }
   refine Proves.mergeStorage ?_
   -- sequentialToParallel:
-  -- dl{ { storage := save(storage, alice.age, 42) ‖ x := find(save(storage, alice.age, 42), alice.age) }
-  --     ⟹ x = 42 }
-  rw [Hyp.EqRun.findOnSave]
-  -- findOnSave: dl{ { storage := save(storage, alice.age, 42) ‖ x := 42 } ⟹ x = 42 }
-  rw [Hyp.EqUnder.applyOnPV]
-  -- applyOnPV: dl{ { storage := save(storage, alice.age, 42) ‖ x := 42 } ⟹ 42 = 42 }
-  refine Proves.simplify (Γ := []) ?_
-  -- simplifyUpdate: dl{ { storage := save(storage, alice.age, 42) } ⟹ 42 = 42 }
-  exact Proves.eqClose
+  -- dl{ { storage := save(storage, alice.age, 42)
+  --       ‖ x := find(save(storage, alice.age, 42), alice.age) } ⟹ x = 42 }
+  refine Proves.eqDSplit ?_ ?_ ?_
+  · -- dl{ { storage := … ‖ x := find(save(storage, alice.age, 42), alice.age) } ⟹ defined(x) }
+    exact Proves.definedWritten
+  · -- dl{ { storage := … ‖ x := … } ⟹ defined(42) }
+    exact Proves.definedLit
+  · -- dl{ { storage := … ‖ x := find(save(storage, alice.age, 42), alice.age) } ⟹ x ≐ 42 }
+    sol_apply_upd
+    -- applyOnRigidBox, the merged update dropped:
+    -- dl{ ⟹ find(save(storage, alice.age, 42), alice.age) ≐ 42 }
+    rw [findOnSave]
+    -- findOnSave: dl{ ⟹ 42 ≐ 42 }
+    exact Proves.eqRefl
 
 end Solidity.Examples.SelectOnSaveConsr

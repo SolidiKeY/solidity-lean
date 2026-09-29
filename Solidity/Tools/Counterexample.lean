@@ -1,5 +1,6 @@
 import Solidity.Calculus.Spec
 import Solidity.Tools.Common
+import Solidity.Theory.Bridge.Denote
 
 /-!
 # Counterexamples: formulas evaluated in a state
@@ -10,9 +11,12 @@ three-valued shadow, which evaluates everything else (terms, updates, the
 programs under a modality) with the interpreter itself: a quantifier is
 tried on a finite domain, `ff` as soon as one instance is `ff`, `tt` only
 where the domain is the whole type (`bool`), `unknown` otherwise, and the
-connectives are Kleene's.  So an answer is never wrong, only sometimes
-missing: `eval3_tt` and `eval3_ff` say that `tt` implies `holds σ φ` and
-`ff` implies `¬ holds σ φ`.
+connectives are Kleene's.  An equation is decided where both sides
+return (`Term.holdsEq_of_eval`) and `unknown` where one halts: `holds`
+reads it through `denote`, where two halting sides may agree (`eqD` puts
+the halt in its `defined` conjuncts, which are decided).  So an answer is
+never wrong, only sometimes missing: `eval3_tt` and `eval3_ff` say that
+`tt` implies `holds σ φ` and `ff` implies `¬ holds σ φ`.
 
 A counterexample to a specification (`refuteSpec`) is a state in
 which the stated premises (`I ∧ requires`) evaluate to `tt` and a
@@ -112,7 +116,11 @@ def _root_.Solidity.Fml.eval3 (dom : PrimTy → List Value) (σ : State) : Fml C
   | .eq a b =>
     match a.eval σ, b.eval σ with
     | .ok x, .ok y => if x = y then .tt else .ff
-    | _, _ => .ff
+    | _, _ => .unknown
+  | .defined t =>
+    match t.eval σ with
+    | .ok _ => .tt
+    | .error _ => .ff
   | .not φ => (φ.eval3 dom σ).not
   | .and φ ψ => (φ.eval3 dom σ).and (ψ.eval3 dom σ)
   | .imp φ ψ => (φ.eval3 dom σ).imp (ψ.eval3 dom σ)
@@ -133,8 +141,16 @@ theorem _root_.Solidity.Fml.eval3_sound (dom : PrimTy → List Value) : (φ : Fm
   | .tt, σ => ⟨fun _ => trivial, nofun⟩
   | .eq a b, σ => by
     simp only [Fml.eval3, holds]
-    split <;> simp_all only [ite_eq_left_iff, ite_eq_right_iff, reduceCtorEq, imp_false,
-      Decidable.not_not, implies_true, not_false_eq_true, and_self]
+    split
+    · rename_i x y ha hb
+      rw [Term.holdsEq_of_eval ha hb]
+      by_cases hxy : x = y <;> simp only [hxy, if_true, if_false, reduceCtorEq, imp_false,
+        not_true_eq_false, not_false_eq_true, implies_true, and_self]
+    · simp only [reduceCtorEq, false_implies, and_self]
+  | .defined t, σ => by
+    simp only [Fml.eval3, holds]
+    split <;> rename_i h <;> simp only [h, Except.ok.injEq, exists_eq', exists_false, imp_self,
+      reduceCtorEq, not_true_eq_false, not_false_eq_true, and_self]
   | .not φ, σ => by
     have ih := Fml.eval3_sound dom φ σ
     simp only [Fml.eval3, holds]

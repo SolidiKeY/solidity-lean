@@ -107,6 +107,7 @@ def Upd.quote : List (UpdElem C) → Lean.Expr
 def Fml.quote : Fml C → Lean.Expr
   | .tt => mkAppN (mkConst ``Fml.tt) #[c]
   | .eq a b => mkAppN (mkConst ``Fml.eq) #[c, Term.quote c a, Term.quote c b]
+  | .defined t => mkAppN (mkConst ``Fml.defined) #[c, Term.quote c t]
   | .not φ => mkAppN (mkConst ``Fml.not) #[c, Fml.quote φ]
   | .and φ ψ => mkAppN (mkConst ``Fml.and) #[c, Fml.quote φ, Fml.quote ψ]
   | .imp φ ψ => mkAppN (mkConst ``Fml.imp) #[c, Fml.quote φ, Fml.quote ψ]

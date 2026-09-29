@@ -24,13 +24,33 @@ open Semantics
 variable {C : Contract}
 
 
+/-- A simple value denotes exactly what it evaluates to, a halt as `st mtSt`:
+its term has no storage in it, so `denote` is `eval` read through `Res.toSt`. -/
+theorem Simple.lower_denote (σ : State) {p : PrimTy} (se : Simple C p) :
+    se.lower.denote σ = Res.toSt (se.lower.eval σ) := by
+  cases se with
+  | lit n h => rfl
+  | bool b => rfl
+  | «local» x =>
+    simp only [Simple.lower, Term.denote, Term.eval, bind, Except.bind]
+    rcases σ.getEnv x with _ | (_ | _ | _ | _ | _) <;> rfl
+  | env k h => rfl
+
+/-- A result reads as a primitive exactly when it returns it. -/
+theorem Res.toSt_eq_prim {r : Res Value} {v : Value} :
+    Res.toSt r = .prim v ↔ r = .ok v := by
+  cases r with
+  | error e => exact ⟨fun h => (by cases h), fun h => (by cases h)⟩
+  | ok w => exact ⟨fun h => (by cases h; rfl), fun h => (by cases h; rfl)⟩
+
 theorem Taclet.sound_split {k : Nat} {m : Modality} {s : Stmt C} {c c' : Fml C} {P Q : Prog C}
     (d : Taclet C k m s (.split c c' P Q)) :
     ∀ σ, (holds σ c → SameOk (freshVars k) (Prog.run σ P) (s.run σ)) ∧
       (holds σ c' → SameOk (freshVars k) (Prog.run σ Q) (s.run σ)) ∧
       (¬ holds σ c → ¬ holds σ c' → ∃ e, s.run σ = .error e) := by
   cases d <;> intro σ <;>
-    simp only [holds, Simple.lower_eval, Term.eval, Stmt.run, Val.eval, guardOk, Prog.run,
+    simp only [holds, Term.denote, Theory.StValue.Equiv.prim_iff, Simple.lower_denote,
+      Res.toSt_eq_prim, Simple.lower_eval, Stmt.run, Val.eval, guardOk, Prog.run,
       bind, Except.bind, pure, Except.pure] <;>
     (rename_i se; cases se.eval σ with
       | error e => simp

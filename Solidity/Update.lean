@@ -1,4 +1,5 @@
 import Solidity.Semantics.Agree
+import Solidity.Theory.Abs
 
 /-!
 # Terms, updates, formulas
@@ -332,6 +333,128 @@ def MValT.eval (σ : State) : MValT C → Res MVal
 
 end
 
+/-! ## What a term denotes in the Theory
+
+`Term.denote` reads a formula's terms in the Theory algebra over the storage
+node `State.abs σ`, total, as KeY reads them: a read off the end of what is
+there is a node, not a halt.  `Term.eval` is the interpreter's reading; the
+term bridge (`Theory/Bridge/Denote.lean`) says the two agree wherever `eval`
+returns.  An equation is read through `denote` (`holds`).
+
+**Where it does not follow the Theory.**
+- Arithmetic is the interpreter's checked arithmetic (`evalBinop`,
+  `unopCheck`), and a halt reads `st mtSt` (`Res.toSt`): exact against
+  `eval`, not KeY's unbounded integers.
+- The memory island is not bridged: `read`, `mlen` and `SValT.copyMem`
+  denote the interpreter's value, and `ITerm`/`MAddr`/`MTerm`/`MValT` have
+  no `denote`.
+- A path is not bounds-checked (`PTerm.at`): that is KeY's guard, a premise
+  of the laws, not a halt.  `PTerm.next` reads the length in `σ`, as
+  `PTerm.eval` does.
+-/
+
+section Denote
+
+open Theory Theory.StValue
+
+/-- A Theory value as an interpreter result: a primitive, or a halt. -/
+def Theory.StValue.toRes : StValue → Res Value
+  | .prim p => .ok p
+  | .st _ => .error .stuck
+
+/-- An interpreter result as a Theory value: a halt reads as nothing. -/
+def Res.toSt : Res Value → StValue
+  | .ok v => .prim v
+  | .error _ => .st .mtSt
+
+mutual
+
+/-- A value term in the Theory, over `State.abs σ`. -/
+def Term.denote (σ : State) : Term C → StValue
+  | .lit v => .prim v
+  | .pv x => match σ.getEnv x with
+    | .ok (.val v) => .prim v
+    | _ => .st .mtSt
+  | .binop op p a b => Res.toSt (do evalBinop op p (← (a.denote σ).toRes) (b.denote σ).toRes)
+  | .unop op p a => Res.toSt (do unopCheck op p (← applyUnOp op (← (a.denote σ).toRes)))
+  | .find s p => findSt (s.denote σ) (p.denote σ)
+  | .len s p => findSt (s.denote σ) (p.denote σ ++ [lengthSeg])
+  | .read m a => Res.toSt ((Term.read m a).eval σ)
+  | .ite c a b => match c.denote σ with
+    | .prim (.bool true) => a.denote σ
+    | .prim (.bool false) => b.denote σ
+    | _ => .st .mtSt
+  | .mlen m i => Res.toSt ((Term.mlen m i).eval σ)
+  | .env k => .prim (.int (σ.envVal k))
+  | .net a => match a.denote σ with
+    | .prim (.int n) => .prim (.int (σ.getNet n))
+    | _ => .st .mtSt
+  | .netOf x a => match σ.getEnv x, a.denote σ with
+    | .ok (.ledger l), .prim (.int n) => .prim (.int ((lookupBy n l).getD 0))
+    | _, _ => .st .mtSt
+
+/-- A path from the storage node; indices are not bounds-checked (KeY's guard). -/
+def PTerm.denote (σ : State) : PTerm C → List Seg
+  | .root r => [.field r]
+  | .pv x => match aliasPath σ x with
+    | .ok (r, segs) => rootPath r segs
+    | .error _ => []
+  | .field p f => p.denote σ ++ [.field f]
+  | .at p i => p.denote σ ++ [.at (asInt (i.denote σ))]
+  | .next p => p.denote σ ++ [.at (lenAt σ.abs (p.denote σ))]
+
+/-- A storage term in the Theory: the storage node it denotes. -/
+def STerm.denote (σ : State) : STerm C → Struct
+  | .storage => σ.abs
+  | .pv x => match σ.getEnv x with
+    | .ok (.store roots) => SVal.abs.fields roots
+    | _ => .mtSt
+  | .save s p v => copyTo (s.denote σ) (p.denote σ) (v.denote σ)
+  | .delAt s p => delAt (s.denote σ) (p.denote σ)
+  | .push s p v => pushT (s.denote σ) (p.denote σ) (stripVal (v.denote σ))
+  | .pushSlot s p E | .extend s p E =>
+      pushSlotT E.isPrimitive (defaultForTy E).abs (s.denote σ) (p.denote σ)
+  | .pop s p => popT (s.denote σ) (p.denote σ)
+  | .shrink s p => shrinkT (s.denote σ) (p.denote σ)
+
+/-- What a storage `save` writes, in the Theory. -/
+def SValT.denote (σ : State) : SValT C → StValue
+  | .val t => t.denote σ
+  | .find s p => findSt (s.denote σ) (p.denote σ)
+  | .copyMem m i => match (SValT.copyMem m i).eval σ with
+    | .ok w => w.abs
+    | .error _ => .st .mtSt
+  | .newArr R n => (newArrVal R (asInt (n.denote σ))).abs
+
+end
+
+
+/-- A binop that returns on a halting right operand short-circuited, so it
+returns the same on any.  `denote` hands `evalBinop` the right operand's
+`toRes`, which is not `eval`'s halt where `eval` halts. -/
+theorem Denote.evalBinop_of_error {op : BinOp} {p : PrimTy} {lv x : Value} {e : Halt}
+    (rb : Res Value) (h : evalBinop op p lv (.error e) = .ok x) :
+    evalBinop op p lv rb = .ok x := by
+  unfold evalBinop at h ⊢
+  split <;> simp_all only [bind, Except.bind, reduceCtorEq]
+
+/-- A stored word read as a value abstracts to that value. -/
+theorem _root_.Solidity.Semantics.SVal.abs_of_asValue {w : SVal} {x : Value}
+    (h : w.asValue = .ok x) : w.abs = .prim x := by
+  match w, h with
+  | .prim (.int _), h => cases h; rfl
+  | .prim (.bool _), h => cases h; rfl
+  | .struct _, h | .array .., h | .map .., h => cases h
+
+/-- The Theory's `int` cast agrees with the interpreter's where it returns:
+an index and `newArr`'s size are read with the Theory's total cast. -/
+theorem Denote.asInt_prim_of_asInt {v : Value} {i : Int} (h : v.asInt = .ok i) :
+    asInt (.prim v) = i := by
+  cases v <;> cases h; rfl
+
+
+end Denote
+
 /-! ## Updates -/
 
 /-- One elementary update. -/
@@ -422,7 +545,11 @@ theorem Semantics.EnvAgreeExcept.havoc {ns : List Var} {σ τ : State} (h : EnvA
 /-- A formula about programs of the contract `C`. -/
 inductive Fml (C : Contract) where
   | tt
+  /-- `a = b`, read in the Theory (`Term.denote`): total, so it may hold
+  of terms that halt. -/
   | eq (a b : Term C)
+  /-- `t` returns: the interpreter's `eval` does not halt on it. -/
+  | defined (t : Term C)
   | not (φ : Fml C)
   | and (φ ψ : Fml C)
   | imp (φ ψ : Fml C)
@@ -442,6 +569,10 @@ instance : Inhabited (Fml C) := ⟨.tt⟩
 /-- `false` is `¬true`. -/
 abbrev Fml.ff : Fml C := .not .tt
 
+/-- `a = b` with both sides defined: the equation of the interpreter, which
+`holds_eqD_iff` (`Theory/Bridge/Denote.lean`) states. -/
+abbrev Fml.eqD (a b : Term C) : Fml C := .and (.defined a) (.and (.defined b) (.eq a b))
+
 /-- The values of the primitive type `p`, which a quantifier ranges over. -/
 def PrimTy.admits : PrimTy → Value → Prop
   | .bool, .bool _ => True
@@ -449,14 +580,12 @@ def PrimTy.admits : PrimTy → Value → Prop
   | .int, .int n => -intBound ≤ n ∧ n < intBound
   | _, _ => False
 
-/-- Whether `φ` holds in `σ`.  An equation holds when both sides are
-defined and equal. -/
+/-- Whether `φ` holds in `σ`.  An equation compares the Theory values of its
+sides, up to `StValue.Equiv`; `defined` says a term returns. -/
 def holds (σ : State) : Fml C → Prop
   | .tt => True
-  | .eq a b =>
-    match a.eval σ, b.eval σ with
-    | .ok x, .ok y => x = y
-    | _, _ => False
+  | .eq a b => Theory.StValue.Equiv (a.denote σ) (b.denote σ)
+  | .defined t => ∃ x, t.eval σ = .ok x
   | .not φ => ¬ holds σ φ
   | .and φ ψ => holds σ φ ∧ holds σ ψ
   | .imp φ ψ => holds σ φ → holds σ ψ
@@ -471,7 +600,7 @@ def Valid (φ : Fml C) : Prop := ∀ σ, holds σ φ
 /-- No modality anywhere, under a negation and on the left of an implication
 included: a formula of the logic, which the calculus leaves to `Valid`. -/
 def Fml.modalFree : Fml C → Bool
-  | .tt | .eq .. => true
+  | .tt | .eq .. | .defined _ => true
   | .not φ | .upd _ _ φ | .havoc φ | .all _ _ φ => φ.modalFree
   | .and φ ψ | .imp φ ψ => φ.modalFree && ψ.modalFree
   | .modal .. => false
@@ -560,6 +689,7 @@ quantifier's own. -/
 def Fml.vars : Fml C → List Var
   | .tt => []
   | .eq a b => a.vars ++ b.vars
+  | .defined t => t.vars
   | .not φ => φ.vars
   | .and φ ψ | .imp φ ψ => φ.vars ++ ψ.vars
   | .upd _ U φ => Upd.vars U ++ φ.vars
@@ -734,6 +864,56 @@ theorem MValT.eval_frame {σ τ : State} (hag : EnvAgreeExcept ns σ τ) :
 
 end
 
+mutual
+
+theorem Term.denote_frame {σ τ : State} (hag : EnvAgreeExcept ns σ τ) :
+    (t : Term C) → Avoids t.vars ns → t.denote σ = t.denote τ
+  | .lit _, _ => rfl
+  | .pv x, h => by simp only [Term.denote, getEnv_congr hag (h.head)]
+  | .binop _ _ a b, h => by
+    simp only [Term.denote, a.denote_frame hag h.left, b.denote_frame hag h.right]
+  | .unop _ _ a, h => by simp only [Term.denote, a.denote_frame hag h]
+  | .find s p, h | .len s p, h => by
+    simp only [Term.denote, s.denote_frame hag h.left, p.denote_frame hag h.right]
+  | .read m a, h => by simp only [Term.denote, (Term.read m a).eval_frame hag h]
+  | .ite c a b, h => by
+    simp only [Term.denote, c.denote_frame hag h.left.left, a.denote_frame hag h.left.right,
+      b.denote_frame hag h.right]
+  | .mlen m i, h => by simp only [Term.denote, (Term.mlen m i).eval_frame hag h]
+  | .env k, _ => by simp only [Term.denote, State.envVal_congr hag]
+  | .net a, h => by simp only [Term.denote, a.denote_frame hag h, State.getNet, hag.net]
+  | .netOf x a, h => by
+    simp only [Term.denote, a.denote_frame hag h.tail, getEnv_congr hag h.head]
+
+theorem PTerm.denote_frame {σ τ : State} (hag : EnvAgreeExcept ns σ τ) :
+    (p : PTerm C) → Avoids p.vars ns → p.denote σ = p.denote τ
+  | .root _, _ => rfl
+  | .pv x, h => by simp only [PTerm.denote, aliasPath_frame hag (h.head)]
+  | .field p _, h => by simp only [PTerm.denote, p.denote_frame hag h]
+  | .at p i, h => by
+    simp only [PTerm.denote, p.denote_frame hag h.left, i.denote_frame hag h.right]
+  | .next p, h => by simp only [PTerm.denote, p.denote_frame hag h, State.abs, hag.storage]
+
+theorem STerm.denote_frame {σ τ : State} (hag : EnvAgreeExcept ns σ τ) :
+    (s : STerm C) → Avoids s.vars ns → s.denote σ = s.denote τ
+  | .storage, _ => by simp only [STerm.denote, State.abs, hag.storage]
+  | .pv x, h => by simp only [STerm.denote, getEnv_congr hag (h.head)]
+  | .save s p v, h | .push s p v, h => by
+    simp only [STerm.denote, s.denote_frame hag h.left.left, p.denote_frame hag h.left.right,
+      v.denote_frame hag h.right]
+  | .delAt s p, h | .pushSlot s p _, h | .pop s p, h | .shrink s p, h | .extend s p _, h => by
+    simp only [STerm.denote, s.denote_frame hag h.left, p.denote_frame hag h.right]
+
+theorem SValT.denote_frame {σ τ : State} (hag : EnvAgreeExcept ns σ τ) :
+    (v : SValT C) → Avoids v.vars ns → v.denote σ = v.denote τ
+  | .val t, h => t.denote_frame hag h
+  | .find s p, h => by
+    simp only [SValT.denote, s.denote_frame hag h.left, p.denote_frame hag h.right]
+  | .copyMem m i, h => by simp only [SValT.denote, (SValT.copyMem m i).eval_frame hag h]
+  | .newArr _ n, h => by simp only [SValT.denote, n.denote_frame hag h]
+
+end
+
 theorem UpdElem.write_frame {σ₀ σ₀' τ τ' : State} (h₀ : EnvAgreeExcept ns σ₀ σ₀')
     (h : EnvAgreeExcept ns τ τ') : (e : UpdElem C) → Avoids e.vars ns →
       ResultsAgree ns (e.write σ₀ τ) (e.write σ₀' τ')
@@ -805,7 +985,8 @@ theorem holds_frame : (φ : Fml C) → Avoids φ.vars ns → ∀ {σ τ : State}
     EnvAgreeExcept ns σ τ → (holds σ φ ↔ holds τ φ)
   | .tt, _, _, _, _ => Iff.rfl
   | .eq a b, h, _, _, hag => by
-    simp only [holds, a.eval_frame hag h.left, b.eval_frame hag h.right]
+    simp only [holds, a.denote_frame hag h.left, b.denote_frame hag h.right]
+  | .defined t, h, _, _, hag => by simp only [holds, t.eval_frame hag h]
   | .not φ, h, _, _, hag => by simp only [holds, holds_frame φ h hag]
   | .and φ ψ, h, _, _, hag => by
     simp only [holds, holds_frame φ h.left hag, holds_frame ψ h.right hag]

@@ -51,7 +51,7 @@ end
 
 /-- Every program under a modality of `φ` is in the fragment. -/
 def Fml.inSolkey : Fml C → Bool
-  | .tt | .eq .. => true
+  | .tt | .eq .. | .defined _ => true
   | .not φ | .upd _ _ φ | .havoc φ | .all _ _ φ => φ.inSolkey
   | .and φ ψ | .imp φ ψ => φ.inSolkey && ψ.inSolkey
   | .modal _ P φ => Prog.inSolkey P && φ.inSolkey
@@ -135,6 +135,14 @@ theorem Stmt.step_taclet {s : Stmt C} (h : s.inSolkey = true) :
   | key d => exact d
   | lean d => exact absurd h (by simp [d.not_inSolkey])
 
+/-- A Theory rewrite changes no program: a formula in the fragment stays in it. -/
+theorem Fml.rwEq_inSolkey (q : Term C × Term C) : (φ : Fml C) → (φ.rwEq q).inSolkey = φ.inSolkey
+  | .tt | .eq .. | .defined _ => rfl
+  | .not φ | .upd _ _ φ | .havoc φ | .all _ _ φ => Fml.rwEq_inSolkey q φ
+  | .modal _ P φ => by simp only [Fml.rwEq, Fml.inSolkey, Fml.rwEq_inSolkey q φ]
+  | .and φ ψ | .imp φ ψ => by
+    simp only [Fml.rwEq, Fml.inSolkey, Fml.rwEq_inSolkey q φ, Fml.rwEq_inSolkey q ψ]
+
 /-- **A derivation on the fragment is solkey's**: whatever the calculus
 derives about a formula whose programs are in the fragment, solkey's rules
 derive alone. -/
@@ -159,6 +167,7 @@ theorem Proves.toSolkey {R : RuleSet} {Γ : List (Hyp C)} {φ : Fml C} (h : Prov
   | done d _ ih =>
     exact .done d (ih (by rename_i b _; cases b <;> rfl))
   | empty _ ih => exact .empty (ih (by simp_all [Fml.inSolkey]))
+  | theoryRw h _ ih => exact .theoryRw h (ih (by rw [Fml.rwEq_inSolkey]; exact hφ))
   | close h hm => exact .close h hm
 
 /-- On the fragment, solkey's rules derive exactly what the calculus does. -/
@@ -211,9 +220,15 @@ theorem Proves.solkey_not_call {Γ : List (Hyp C)} {f : Name} {args : List (Arg 
     {a : Arg C} (ha : Arg.firstNonSimple args = some a) :
     ¬ Proves .solkey Γ (.modal m (.call f args hsep ret body :: ω) φ) := by
   intro h
-  cases h with
-  | update d _ | unfold d _ | split d _ _ _ | done d _ => simp [d.call_simple rfl] at ha
-  | close _ hm => exact absurd (Hyp.modalFree_wrap Γ hm) (by simp [Fml.modalFree])
+  generalize hR : RuleSet.solkey = R at h
+  generalize hψ : Fml.modal m (.call f args hsep ret body :: ω) φ = ψ at h
+  induction h generalizing φ with
+  | update d _ _ | unfold d _ _ | split d _ _ _ _ _ _ | done d _ _ =>
+    cases hψ; simp [d.call_simple rfl] at ha
+  | unfoldLean => cases hR
+  | intro _ _ | empty _ _ => cases hψ
+  | theoryRw _ _ ih => exact ih hR (by rw [← hψ]; rfl)
+  | close _ hm => subst hψ; exact absurd (Hyp.modalFree_wrap _ hm) (by simp [Fml.modalFree])
 
 /-- `[ f(x + 1); ] true`, `f(uint a)` with an empty body: a call whose
 argument is not simple. -/

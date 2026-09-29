@@ -34,7 +34,7 @@ theorem Fml.stepAt_active {k : Nat} :
     · simp [Fml.active, *]
     · simp [Fml.active, Fml.stepAt_active h]
   | .modal .., _, _ => rfl
-  | .tt, _, h | .eq .., _, h | .not _, _, h => by simp [Fml.stepAt] at h
+  | .tt, _, h | .eq .., _, h | .defined _, _, h | .not _, _, h => by simp [Fml.stepAt] at h
 
 /-- A formula with a modality left steps, wherever the modality sits: under
 an update, right of an implication, or in either conjunct.
@@ -61,7 +61,7 @@ theorem Fml.stepAt_of_active (k : Nat) :
       exact ⟨.and φ₁ ψ, by simp [Fml.stepAt, h₁, hs]⟩
   | .modal _ [] φ, _ => ⟨φ, rfl⟩
   | .modal _ (_ :: _) _, _ => ⟨_, rfl⟩
-  | .tt, h | .eq .., h | .not _, h => by simp [Fml.active] at h
+  | .tt, h | .eq .., h | .defined _, h | .not _, h => by simp [Fml.active] at h
 
 /-- **Progress.**  A formula with a modality left takes a step, and only such
 a formula does: the strategy stops exactly when the formula is first order.

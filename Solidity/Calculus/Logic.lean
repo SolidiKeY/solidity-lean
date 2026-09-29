@@ -1,4 +1,5 @@
 import Solidity.Calculus.RuleSoundness
+import Solidity.Calculus.TermRules
 
 /-!
 # The calculus as a judgement: `Γ ⊢ φ`
@@ -194,6 +195,15 @@ def Hyp.wrap : List (Hyp C) → Fml C → Fml C
   | .upd m U :: Γ, φ => .upd m U (Hyp.wrap Γ φ)
   | .havoc :: Γ, φ => .havoc (Hyp.wrap Γ φ)
 
+/-- A Theory rewrite of the context (`Fml.rwEq`): in every precondition; an
+update or a `havoc` stays as it is, since its right-hand sides run in the
+interpreter. -/
+def Hyp.rwEq (q : Term C × Term C) : List (Hyp C) → List (Hyp C)
+  | [] => []
+  | .pre a :: Γ => .pre (a.rwEq q) :: Hyp.rwEq q Γ
+  | .upd m U :: Γ => .upd m U :: Hyp.rwEq q Γ
+  | .havoc :: Γ => .havoc :: Hyp.rwEq q Γ
+
 /-- Fresh names are numbered one above every index in the whole sequent. -/
 def Hyp.fresh (Γ : List (Hyp C)) (φ : Fml C) : Nat := (Hyp.wrap Γ φ).fresh
 
@@ -241,6 +251,13 @@ inductive Proves : RuleSet → List (Hyp C) → Fml C → Prop
   /-- `emptyModality`: `⟨⟩ φ` and `[] φ` are `φ`. -/
   | empty {R : RuleSet} {Γ : List (Hyp C)} {m : Modality} {φ : Fml C} (h : Proves R Γ φ) :
       Proves R Γ (.modal m [] φ)
+  /-- A Theory equation as a rewrite rule: `t` and `t'` have one Theory value
+  in every state (`Term.Theq`), so `t` becomes `t'` in every equation of the
+  sequent, at any depth (`Hyp.rwEq`, `Fml.rwEq`).  Any law of the Theory is
+  one; its soundness is `Fml.rwEq_holds`, proved once. -/
+  | theoryRw {R : RuleSet} {Γ : List (Hyp C)} {φ : Fml C} {t t' : Term C}
+      (h : Term.Theq t t') (d : Proves R (Hyp.rwEq (t, t') Γ) (Fml.rwEq (t, t') φ)) :
+      Proves R Γ φ
   /-- Leave the calculus: with no modality left anywhere in the sequent, what
   is left is proved in the logic. -/
   | close {R : RuleSet} {Γ : List (Hyp C)} {φ : Fml C} (h : Valid (Hyp.wrap Γ φ))
@@ -364,6 +381,23 @@ theorem LeanTaclet.sound_in {Γ : List (Hyp C)} {m : Modality} {s : Stmt C} {ω 
     ∀ σ, holds σ (p.fml m ω φ) → holds σ (.modal m (s :: ω) φ) :=
   Premise.sound_above d.sound (Nat.lt_succ_self _) fun _ => Hyp.vars_wrap Γ
 
+/-! ### The Theory rewrite -/
+
+/-- Rewriting the context and the goal is rewriting the sequent. -/
+theorem Hyp.wrap_rwEq (q : Term C × Term C) (φ : Fml C) :
+    (Γ : List (Hyp C)) → Hyp.wrap (Hyp.rwEq q Γ) (φ.rwEq q) = (Hyp.wrap Γ φ).rwEq q
+  | [] => rfl
+  | .pre _ :: Γ | .upd _ _ :: Γ | .havoc :: Γ => by
+    simp only [Hyp.rwEq, Hyp.wrap, Fml.rwEq, Hyp.wrap_rwEq q φ Γ]
+
+/-- A sequent rewritten by a Theory equation holds where the sequent does. -/
+theorem Proves.theoryRw_sound {Γ : List (Hyp C)} {φ : Fml C} {t t' : Term C}
+    (h : Term.Theq t t') (d : Valid (Hyp.wrap (Hyp.rwEq (t, t') Γ) (Fml.rwEq (t, t') φ))) :
+    Valid (Hyp.wrap Γ φ) := fun σ => by
+  have hσ : holds σ (Hyp.wrap (Hyp.rwEq (t, t') Γ) (Fml.rwEq (t, t') φ)) := d σ
+  rw [Hyp.wrap_rwEq] at hσ
+  exact (Fml.rwEq_holds (q := (t, t')) h _ σ).1 hσ
+
 open Proves in
 /-- **Soundness of the calculus**: a derivation of `Γ ⊢ φ` proves `φ`
 wrapped in its context `Γ`.
@@ -387,6 +421,7 @@ theorem Proves.sound {R : RuleSet} {Γ : List (Hyp C)} {φ : Fml C} (h : Proves 
   | @empty _ Γ m φ _ ih =>
     exact fun σ => Hyp.wrap_mono (ψ := φ) (φ := .modal m [] φ)
       (fun _ h => by cases m <;> exact h) Γ σ (ih σ)
+  | theoryRw h _ ih => exact Proves.theoryRw_sound h ih
   | close h _ => exact h
 
 open Proves in
@@ -413,6 +448,7 @@ theorem Proves.toAll {R : RuleSet} {Γ : List (Hyp C)} {φ : Fml C} (h : Proves 
   | split d _ _ _ ih₁ ih₂ ih₃ => exact .split d ih₁ ih₂ ih₃
   | done d _ ih => exact .done d ih
   | empty _ ih => exact .empty ih
+  | theoryRw h _ ih => exact .theoryRw h ih
   | close h hφ => exact .close h hφ
 
 /-! ## Printing sequents

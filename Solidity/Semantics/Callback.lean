@@ -98,7 +98,7 @@ end
 
 /-- Whether a `transfer` occurs in a program of the formula. -/
 def Fml.hasTransfer : Fml C → Bool
-  | .tt | .eq .. => false
+  | .tt | .eq .. | .defined _ => false
   | .not φ | .upd _ _ φ | .havoc φ | .all _ _ φ => φ.hasTransfer
   | .and φ ψ | .imp φ ψ => φ.hasTransfer || ψ.hasTransfer
   | .modal _ P φ => Prog.hasTransfer P || φ.hasTransfer
@@ -170,6 +170,7 @@ with callbacks, and none of them may break `I`. -/
 def holdsC (I : Fml C) (σ : State) : Fml C → Prop
   | .tt => True
   | .eq a b => holds σ (.eq a b)
+  | .defined t => holds σ (.defined t)
   | .not φ => ¬ holdsC I σ φ
   | .and φ ψ => holdsC I σ φ ∧ holdsC I σ ψ
   | .imp φ ψ => holdsC I σ φ → holdsC I σ ψ
@@ -364,7 +365,7 @@ theorem ExecS.of_run {I : Fml C} {σ τ : State} {s : Stmt C} (hs : s.forks = fa
 theorem holdsC_iff_holds {I : Fml C} : (φ : Fml C) → φ.hasTransfer = false →
     ∀ {σ : State}, (holdsC I σ φ ↔ holds σ φ)
   | .tt, _, _ => Iff.rfl
-  | .eq _ _, _, _ => Iff.rfl
+  | .eq _ _, _, _ | .defined _, _, _ => Iff.rfl
   | .not φ, h, _ => by simp only [holdsC, holds, holdsC_iff_holds φ h]
   | .and φ ψ, h, _ => by
     simp only [Fml.hasTransfer, Bool.or_eq_false_iff] at h
@@ -573,6 +574,7 @@ theorem holdsC_frame {I : Fml C} (hI : I.vars = []) :
       EnvAgreeExcept ns σ τ → (holdsC I σ φ ↔ holdsC I τ φ)
   | .tt, _, _, _, _ => Iff.rfl
   | .eq a b, h, _, _, hag => holds_frame (.eq a b) h hag
+  | .defined t, h, _, _, hag => holds_frame (.defined t) h hag
   | .not φ, h, _, _, hag => by simp only [holdsC, holdsC_frame hI φ h hag]
   | .and φ ψ, h, _, _, hag => by
     simp only [holdsC, holdsC_frame hI φ h.left hag, holdsC_frame hI ψ h.right hag]

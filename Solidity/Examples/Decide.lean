@@ -293,7 +293,8 @@ well-typed storage as a premise it would be valid — a hypothesis `⊨` cannot
 state. -/
 theorem deleteWithoutWrite :
     ¬ (⊨ dl!{ [ delete alice.account; ] alice.account.balance == 0 }) :=
-  fun h => nomatch h boolBalance
+  fun h => match h boolBalance with
+    | ⟨_, _, he⟩ => nomatch Theory.StValue.Equiv.prim_iff.1 he
 
 example : True := by
   fail_if_success
@@ -365,7 +366,8 @@ fixed-size array, `delete ledger` resets its element `2` to `0`. -/
 theorem survivesMappingOnly :
     ¬ (⊨ dl!{ [ ledger.balances[2] = 20; delete ledger; uint survives = ledger.balances[2]; ]
               survives == 20 }) :=
-  fun h => nomatch h fixedBalances
+  fun h => match h fixedBalances with
+    | ⟨_, _, he⟩ => nomatch Theory.StValue.Equiv.prim_iff.1 he
 
 end Ledger
 

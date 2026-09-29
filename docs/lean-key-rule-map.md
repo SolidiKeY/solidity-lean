@@ -380,19 +380,43 @@ share one constructor: solkey splits the receiver kind, Lean does not.
 
 ## Update algebra (`updateRules.key`)
 
-The Lean model has no update syntax — state change is function application —
-so KeY's update calculus splits into (a) point-of-application laws with real
-semantic content, ported as `State` lemmas in `Semantics/Properties.lean`,
-and (b) the update-monoid normal-form machinery, which is definitional
-function composition in Lean and has no Lean counterpart to name.
+An update is a term (`Upd C`, a list of `UpdElem`s applied against the
+pre-state, `Update.lean`), so KeY's update rules are rules here too:
+`Calculus/UpdateRules.lean`, each an equivalence over `holds` (`UpdRule`),
+plus the box forms a derivation uses once the program is gone. Where a rule
+has a side condition KeY's lacks, it is because a term here can halt and
+KeY's cannot (the module docstring, "What halting changes").
 
-| KeY rule | Lean analogue | Status | Notes |
+| KeY rule | Lean | Status | Notes |
 | --- | --- | --- | --- |
-| `applyOnPV` / `applyOnPVLastInParallel` | `State.getEnv_setEnv_self`, `State.getNet_setNet_self`; storage: `State.findStorage_saveStorage_same` | lemma | read after write at the point of application |
-| `applyOnDifferentPV` / `applyOnDifferentPVLastInParallel` | `State.getEnv_setEnv_ne`, `State.getNet_setNet_ne`; storage: `State.saveStorage_frame` | lemma | frame under a distinct location |
-| `simplifyUpdate1`–`3` | `State.setEnv_setEnv_absorb`, `State.setNet_setNet_absorb` (core: `setBy_setBy_self`) | lemma | the syntactic `\dropEffectlessElementaries` procedure is meaningless without update terms; its semantic law is overwrite absorption |
-| `sequentialToParallel1-3`, `applyOnParallel`, `applyOnElementary`, `applyOnSkip`, `applySkip1-3`, `parallelWithSkip1-2` | — | arch | the update monoid normal form: `Upd C` is `List (UpdElem C)` applied left to right against the pre-state (`Upd.apply`), so sequencing and parallelism are the list structure itself, not something to normalize |
-| `simplifyIfThenElseUpdate1-4`, `commuteSimpleUpdates`, `elimSelfUpdate*` | — | arch | commented-out dead code in the KeY source |
+| `sequentialToParallel1-3` | `UpdRule.sequentialToParallel`, `Proves.merge`; `Proves.mergeStorage` | done | `{u}{u2}φ ⇝ {u ‖ {u}u2}φ` for `u` an update of locals (`Upd.envOnly`); over a storage write (`mergeStorage`, `Calculus/Rewrite.lean`) for terms whose every storage read is a `storage` term (`stExplicit`) |
+| `applyOnElementary`, `applyOnParallel` | `UpdElem.subst`, `Upd.subst` | functions | `{u}` pushed into an update's right-hand sides |
+| `applyOnPV`, `applyOnPVLastInParallel`, `applyOnDifferentPV`, `applyOnDifferentPVLastInParallel` | `Fml.subst` (`Upd.lastWrite`) | functions | the last write of a local wins; a local the update does not write is kept |
+| `simplifyUpdate1-3` | `UpdRule.simplifyUpdate`, `Upd.dropEffectless`, `Proves.simplify` | done | only elements that cannot halt are dropped (`UpdElem.total`): dropping one drops its halting too |
+| `applySkip1-3`, `applyOnSkip` | `UpdRule.applySkip` | done | `skip` is `[]` |
+| `parallelWithSkip1-2` | — | arch | `‖` is `++` and `skip` is `[]`: nothing to rewrite |
+| `applyOnRigidFormula` | `UpdRule.applyOnRigid` | done | as an equivalence, for an update that cannot halt (`Upd.total`) and a formula reading no variable at another sort than the update writes it (`Fml.sortedFor`, which KeY's sorts give for free) |
+| `applyOnRigidFormula`, under the box | `Proves.applyOnRigidBox` (an update of locals, or locals and a storage write under a storage-free goal), `Proves.applyStorageBox` (`{storage := s}`, `Calculus/Rewrite.lean`); `sol_apply_upd` | done | one direction, **no totality premise**: the last update of the context applied to a first-order goal and dropped. A halting box update proves what follows, and the goal's equations are read in the Theory, where a term that halts still denotes |
+| `elimSelfUpdate*` | `UpdElem.elimSelf_box`, `UpdElem.elimSelf_diamond` | done, one direction each | commented out in the KeY source; `x := x` halts when `x` holds no value, so it is no equivalence here |
+| `simplifyIfThenElseUpdate1-4`, `commuteSimpleUpdates` | — | arch | commented-out dead code in the KeY source |
+
+### Closing the first-order goal
+
+What symbolic execution leaves is closed with KeY's first-order steps, derived
+through `Proves.close` (`Calculus/Rewrite.lean`, `Calculus/UpdateRules.lean`),
+each needing only a context with no diamond (`Hyp.boxOnly`). The formula
+`a = b` a program comparison produces is `Fml.eqD a b` — `defined(a) ∧
+defined(b) ∧ a ≐ b` — because a term here can halt and KeY's `=` is between
+terms that cannot; `a ≐ b` (`Fml.eq`) is the total Theory equation, KeY's `=`.
+
+| KeY rule | Lean | Status | Notes |
+| --- | --- | --- | --- |
+| `eqClose` | `Proves.eqRefl`; `Proves.eqClose` (`v ≐ v`), `Proves.eqDClose` (`v = v`) | done | `t ≐ t` for any term, halting or not (`StValue.Equiv.refl`) |
+| `andRight` | `Proves.andSplit`, `Proves.andSplitUpd` (behind an update) | done | |
+| — | `Proves.eqDSplit` | Lean only | `a = b` from `defined(a)`, `defined(b)` and `a ≐ b`: `Fml.eqD` unfolded |
+| — | `Proves.definedWritten` | Lean only | `defined(x)` behind a box update whose last binder of `x` is `x := t`: what `applyOnRigidBox` forgets, that the update ran |
+| — | `Proves.definedLit` | Lean only | a literal is defined |
+| any theory taclet on a sequent | `Proves.theoryRw` (`Calculus/Logic.lean`), `rw [h]`/`sol_rw` (`Calculus/Rewrite.lean`) | done | a Theory equation `h : Term.Theq t t'` rewrites every total equation of the sequent (`Fml.rwEq`), with no soundness proof per rule; the laws are the next section's |
 
 ## The data-structure theories
 
@@ -477,30 +501,31 @@ length), `selectStDelNodeIndexStruct` became length-guarded, and
 | `findDefinitionElement`, `findDefinitionMapElement`, `findDefinitionSize`, `findDefinitionMemberPrim`, `findDefinitionMemberValue` | `findDefinitionCons` | done: the old single rule, split upstream by field sort; `atMap(i)` is `Seg.at i` and `size` is `Seg.field "length"` |
 | `findDefinitionMemberStruct`, `findDefinitionMemberCons` | `findDefinitionCons` | done **without the tag**: upstream wraps the struct read through a member in `typed(fieldShape(m), …)`; `typed` is not modelled (below), and without it these are `findDefinitionCons` |
 | ~~`saveOnEmpty`~~ (pre-fold) | `saveOnEmpty` | done — gone upstream with the `copyAt`→`save` fold and kept here: `save(st, nil, v) ⇝ v`, the collapsing leaf |
-| ~~`selectOnSaveEmpty`~~ (pre-fold) | `selectOnSaveEmpty` | done as the pre-fold rule — a member of `save(st, nil, v)` is a member of `(Struct) v` |
+| ~~`selectOnSaveEmpty`~~ (pre-fold) | `selectOnSaveEmpty` | done as the pre-fold rule over the collapsing `save` — a member of `save(st, nil, v)` is a member of `(Struct) v`. The word write and `delAt`'s write collapse; a struct or array written over a location is the copying `copyTo` (`Theory/Copy.lean`), whose rules are the `selectOnSaveEmpty*` rows below |
 | `saveOnEmptyPrim` | `saveOnEmptyPrimInt`, `saveOnEmptyPrimBool` | done, as the two cast readings at the end of a walk: `storeSt`'s third argument is the supersort, so the primitive leaf is stored verbatim |
-| `selectOnSaveEmptyRef`, `selectOnSaveEmptyFixed` | `selectOnSaveEmptyRef` | done, for every `Seg`: the right-hand side collapses to the pre-fold one |
-| `selectOnSaveEmptyIndexStruct` | `selectOnSaveEmptyIndexStruct`, `selectOnSaveEmptyIndexClear`, `selectOnSaveEmptyIndexKeep` | done: the in-bounds branch as stated; the clear and keep branches under the length invariant (nothing stored past an array's length), the clear one at every primitive read below the element |
-| `selectOnSaveEmptyDefault` (upstream it is `selectOnSaveEmpty`'s primitive case) | `selectOnSaveEmpty` | done |
-| `selectOnSaveEmptyMap` | — | **arch**: upstream a mapping member of a written location stays the location's own; here the leaf collapses and a mapping member is a subtree like any other. Unreachable — solc ≥ 0.7 and solkey's own parser reject the copy, and `Src.copy` cannot build it |
+| `selectOnSaveEmptyRef`, `selectOnSaveEmptyFixed` | `selectOnCopyRef` | done over the copying write, `save(st, nil, v)` being `copyTo s [] (st n)` = `copyAt s n` (`copyTo_nil`), for every `Seg`, with both nodes struct-like as the premise; `StValue.selectOnSaveEmptyRef` is the same equation over the collapsing `save` |
+| `selectOnSaveEmptyIndexStruct` | `selectOnCopyIndexNew`, `selectOnCopyIndexClear`, `selectOnCopyIndexKeep`, `selectOnCopySize` | done over the copying write with **no length invariant**: the branch is picked by `inRange` on the two nodes' lengths (`lenOf`), and the length read is the new array's. The collapsing-`save` versions `selectOnSaveEmptyIndexStruct`/`Clear`/`Keep` remain, the last two under the invariant |
+| `selectOnSaveEmptyDefault` (upstream it is `selectOnSaveEmpty`'s primitive case) | `selectOnCopyDefault` | done: a word member of the new node is the word |
+| `selectOnSaveEmptyMap` | `selectOnCopyMap` | done: a mapping copied over a mapping keeps the old entries, both nodes' kinds the premise. Unreachable from a program — solc ≥ 0.7 and solkey's own parser reject the copy, and `Src.copy` cannot build it |
 | `selectOnSaveCons` | `selectOnSaveCons` | done, and **unconditional** (a total definition needs no `isStruct` guard) |
 | `delFieldRef`, `delFieldIndexStruct` | `delFieldRef`, `delFieldIndexStruct` | done: `delField s a = delValue (selectSt s a)`, the reset picked by the value's sort since a `Seg` has none |
 | `delFieldDefault` | `delFieldDefault`, `delFieldDefault_asBool` | done |
 | `delFieldStValueCast` | `delValueCast`, `delValueCast_asInt`, `delValueCast_asBool` | done as the cast pushed through the reset (was `delValueStValueCast`) |
-| `delFieldMap` | — | **arch**: a `Seg` carries no `MapField` |
-| `delFieldFixed` | — | **arch**: it picks `delNodeFixed` by the member being a `FixedField`, and a `Seg` has no sort; the interpreter marks a fixed-size array on the value (`SVal.array`'s `fixed` flag) instead |
+| `delFieldMap` | `delFieldMap` | done one selector down (both sides literal terms), the member's kind being a mapping as the premise: a `Seg` has no sort, the node carries it |
+| `delFieldFixed` | `delFieldFixed` | done one selector down, the member's kind being a fixed-size array (`.arr true`) as the premise |
 | ~~`delValueStruct`~~, ~~`delValueDefault`~~ | `delValueStruct`, `delValueDefault` | gone upstream (replaced by `delField`); kept as the lemmas under it |
-| `selectStDelNodeMap` | — | **arch**: a `Seg` carries no `MapField`, so a mapping member of a deleted node is reset here; the mapping-preserving `delete` is the interpreter's `SVal.defaultOf` |
-| `selectStDelNodeRef` | `selectStDelNodeRef` (from `selectStDelNodeSelect`) | done, unconditional and for every `Seg`: one theorem, `selectSt (delNode s) a = delValue (selectSt s a)`, covers `Ref`, `Default`, the in-bounds index and an absent member |
-| `selectStDelNodeIndexStruct` | `selectStDelNodeIndexStruct`, `selectStDelNodeIndexKeep` | done: the in-bounds branch (`delNode` of the element, now that `delNode` resets index members in place instead of dropping them) unconditionally; the keep branch under the length invariant |
-| `selectStDelNodeDefault` | `selectStDelNodeDefault`, `selectStDelNodeDefault_asBool` | done |
-| `selectStDelNodeFixed`, `selectStDelNodeFixedMap` | — | **arch**: `selectStDelNodeFixed` picks `delNodeFixed` by a `FixedField`, `selectStDelNodeFixedMap` by a `MapField`; a `Seg` carries neither |
-| `selectStDelNodeFixed{Element,Size,Value}` | `selectStDelNodeFixedElement`, `selectStDelNodeFixedSize`, `selectStDelNodeFixedValue` (+`_asBool`) | done, over `delNodeFixed` (`delNode` with the `length` member stored back) |
+| `selectStDelNodeMap` | `selectDelNodeMap`, `selectStDelNodeMap` | done one selector down: `selectDelNodeMap` is the rule (the member is a mapping, whatever the node); `selectStDelNodeMap` is the node-kind form, every member of a deleted mapping kept (`selectStDelNodeKeep`) |
+| `selectStDelNodeRef` | `selectStDelNodeRef` (from `selectStDelNodeSelect`) | done at a member the node does not keep (`keepsOnDelete`, false for every member of a struct and every field but `length` of a non-mapping): one theorem, `selectSt (delNode s) a = delValue (selectSt s a)`, covers `Ref`, `Default` and the in-bounds index; `selectOnDelNode` is the general form, `selectStDelNodeKeep` the kept members |
+| `selectStDelNodeIndexStruct` | `selectStDelNodeIndexStruct`, `selectStDelNodeSelect`, `selectStDelNodeKeep`, `selectStDelNodeIndexKeep` | done: the in-bounds branch under the `keepsOnDelete` premise, which at an array is KeY's guard `i < size` (`keepsOnDelete_at`); the keep branch past the length (`selectStDelNodeKeep`) and at an absent slot (`selectStDelNodeIndexKeep`) |
+| `selectStDelNodeDefault` | `selectStDelNodeDefault`, `selectStDelNodeDefault_asBool` | done, at a member the node does not keep |
+| `selectStDelNodeFixed` | `selectStDelNodeFixed` (through `selectSt_delNode_fixed`) | done one selector down, at a member the node does not keep whose kind is a fixed-size array |
+| `selectStDelNodeFixedMap` | — | **derived**: two rules in a row — `selectStDelNodeFixedElement` takes an in-bounds element to `delNode` of it and `selectStDelNodeMap` keeps a deleted mapping's members; past the length the slot is kept outright (`selectStDelNodeKeep`) |
+| `selectStDelNodeFixed{Element,Size,Value}` | `selectStDelNodeFixedElement`, `selectStDelNodeFixedSize`, `selectStDelNodeFixedValue` (+`_asBool`) | done, over `delNodeFixed` (`delNode` with the `length` member stored back); `Element` and `Value` at a member the node does not keep |
 | `delAtEmpty` | `delAtEmpty` | done |
 | `selectOnDelAtCons` | `selectOnDelAtCons` | done, through `selectOnSaveCons`: `delAt` is eager, `save st p (delValue (find st p))`; the leaf is `delField st a1` |
 | `fieldShapeDef` | `fieldShapeDef` (`fieldShape`, `Shape.ofTy`) | done: `#shapeOf` is `Shape.ofTy`, over a member table the caller supplies (a `Seg.field` carries the name, not the declaration) |
-| `selectOnTyped{Struct,FixedSize,DynSize,LeafSize,MapSize,Element,Member}`, `typedTyped` | — | **not modelled**: the only rule that reads the tag is `selectOnTypedFixedSize`; a declared `T[n]` has shape `fixedArr` (`Shape.ofTy_fixed`), but the elaborator writes its `.length` as the literal `n`, so no program reads it, and `typed` would be a fifth `Struct` constructor through every proof (`Theory/Storage.lean`, "Shapes") |
-| ~~`copyAtEmpty`~~, ~~`selectOnCopyAtCons`~~, ~~`mergePrim`~~, ~~`selectStMerge{Map,Ref,IndexStruct,Default}`~~, ~~`mergeStValueCast`~~ | — | gone upstream with the fold; not modelled here for the reason `selectOnSaveEmptyMap` is not |
+| `selectOnTyped{Struct,FixedSize,DynSize,LeafSize,MapSize,Element,Member}`, `typedTyped` | — | **not modelled**: the only rule that reads the tag is `selectOnTypedFixedSize`; a declared `T[n]` has shape `fixedArr` (`Shape.ofTy_fixed`), but the elaborator writes its `.length` as the literal `n`, so no program reads it, and `typed` would be one more `Struct` constructor through every proof (`Theory/Storage.lean`, "Shapes"). A delete keeps a fixed-size array's length without it: the node's kind says what it is (`keepsOnDelete`) |
+| ~~`copyAtEmpty`~~, ~~`selectOnCopyAtCons`~~, ~~`mergePrim`~~, ~~`selectStMerge{Map,Ref,IndexStruct,Default}`~~, ~~`mergeStValueCast`~~ | `selectOnCopyAt` | gone upstream with the fold; here `Struct.copyAt` is `copyTo`'s leaf, read one member at a time by `selectOnCopyAt` (`copyRead`, by the two nodes' kinds and lengths), and the `selectOnCopy*` rows above are its rules |
 | `findStValueCast`, `selectStValueCast` | `asStruct_st`, `asStruct_prim`, `find_append` | done as the cast being the inverse of the injection `st` |
 | `sizeNotNegative` | — | **arch**: an `\add` of a reachability fact, not a rewrite; a bounds check on an array index is a *guard* on the program-level taclet, not a term-algebra theorem |
 
@@ -512,19 +537,20 @@ cast `find<[Struct]>` makes), `find_save_prefix` (above it) and
 `find_save_frame` (off it, over `diverges`) — and `find_append` composes reads
 along `++`. Over `delAt` the same: `find_delAt_same` and
 `find_delAt_field` (`findDelAt`), `find_delAt_frame`, `find_delAt_extends`,
-and `find_delAt_below` (a read below a deleted path is the reset of the read
-before it, through any path).
+`find_delAt_member` (one member below a deleted path, at a member the node
+does not keep), and `find_delAt_below` (a read below a deleted path is the
+reset of the read before it, through any path, on a node with no kinds in it).
 
 **`storeAt` and the two sorts.** `save` is a recursion on the path over
 `storeAt`, the one-segment walk. It returns `Struct`, as KeY's does, and
 stores the written value verbatim at the last segment: `storeSt`'s third
 argument is the supersort `StValue`, so a primitive leaf is kept as itself
 and `find` reads it back at the caller's sort — which is what
-`saveOnEmptyPrim` does in KeY. `delAt`/`delNode` are eager over the same
-walk. There is no denotation of storage *writes* (only reads are related to
-the interpreter): the `*CopySource`/`…StoreRoot` program rows are untouched
-because the copy they state is mapping-free by construction
-(`Src.copy`'s `mapFree`).
+`saveOnEmptyPrim` does in KeY. `delAt` is eager over the same walk, down to
+the lazy leaf at the deleted node (`delNode`, the `delSt` leaf). The storage terms
+denote in this algebra (`Term.denote`, over `State.abs`, `Update.lean`), and
+`Theory/Bridge/` relates every write to the interpreter's — a word write and
+a push literally, a copy, a delete and a pop up to `StValue.Equiv`.
 
 ### `memoryRules.key` → `Theory/Memory.lean`
 
@@ -579,6 +605,29 @@ copied struct with `findSt`, the reader that stops at a view, which is what
 keeps every definition structural and so kernel-reducible. No worked example
 nests one and no taclet rewrites under one.
 
+### The Theory's laws as rules (`Calculus/TheoryLaws.lean`)
+
+A law of the two storage modules, read through `Term.denote`, is a
+`Term.Theq` between the terms that denote its sides, and so a rule on a
+sequent (`rw [findOnSave]`) with no soundness proof of its own. Each is
+stated at the terms `Update.lean` has; its side conditions are syntactic
+`Bool`s on the `PTerm`s, closed by `rfl` (`PTerm.hasSeg`: never the empty
+path; `PTerm.diverges`: members and literal indices that diverge as lists).
+
+| Law | Theory lemma | Printed rule (`TheoryRule`) | Notes |
+| --- | --- | --- | --- |
+| `findOnSave` | `find_copyTo_same` (`Theory/Copy.lean`) | `findOnSave` | `find(save(s, p, v), p) ≐ v` for a literal word `v`: a copy reads back the new value laid over the old, which is `v` only for a word |
+| `findOnSaveFrame` | `find_copyTo_frame` | `findOnSaveDifferent` | any written value, `p` diverging from `q` |
+| `findOnDelAt` | `find_delAt_same`, `delValueDefault` (`Theory/Storage.lean`) | `findDelAt` | where `find(s, p) ≐ w` for a word `w`, the delete reads its default |
+| `findOnDelAtSave` | `findOnDelAt` over `findOnSave` | `findDelAt` | a delete over a written word |
+| `findOnDelAtFrame` | `find_delAt_frame` | `findDelAtOutside` | |
+| `findOnPushFrame` | `find_pushT_frame` (`Theory/Copy.lean`) | — | a push is one term here (`STerm.push`), not two saves |
+| `findOnPopFrame` | `find_popT_frame` | — | likewise a pop |
+
+solkey has none of these as a taclet (it reaches a read of a write one
+selector at a time, "Beyond the taclets" above); they are the rules
+`Theory/Rewrite.lean` lists as Lean-only, stated on terms.
+
 ### The names for these rules
 
 `Theory/Rewrite.lean` is the enumeration of the theory's rules under the
@@ -588,9 +637,10 @@ keep their upstream (KeY) names — that is what makes this file, and
 `Theory/Rewrite.lean`'s own docstring says so explicitly, a map — and the
 join is stated against the printed
 `\namedRwRule` declarations rather than left as prose. The printed rules with no
-constructor — the `MapField`, `FixedField` and `typed` rows marked **arch** or
-**not modelled** above, and the four arithmetic expansions listed
-as not implemented — are excused in `Theory/Rewrite.lean` by name, each with its reason.
+constructor — the `typed` rows marked **not modelled** above,
+`selectStDelNodeFixedMap` (**derived**), and the four arithmetic expansions
+listed as not implemented — are excused in `Theory/Rewrite.lean` by name, each with its
+reason.
 
 ### Deviations, collected
 
@@ -607,10 +657,11 @@ lazy and the interpreter is eager:
 
 And three where the theory reads a rule differently, each argued at its row:
 
-* The reset a `delete` picks is keyed on the *value's* sort, not the field's
-  (`delField`, `delNode`): a `Seg` carries no `MapField`/`FixedField`, so the
-  rules that pick the mapping-preserving and length-preserving reset have no
-  statement (the ones that read through `delNodeFixed` do).
+* The reset a `delete` picks is keyed on the *node's kind*, not the field's
+  sort (`delField`, `delNode`, `keepsOnDelete`): a `Seg` carries no
+  `MapField`/`FixedField`, so the rules that pick the mapping-preserving and
+  length-preserving reset are stated one selector down, with the kind of the
+  node they read as a premise.
 * `fieldShape` takes the member table as an argument: KeY's member constants
   know their declaration, a `Seg.field` only its name.
 * `shapeAt` follows `shapeAtSuffix` rather than solkey's

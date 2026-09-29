@@ -137,21 +137,44 @@ private abbrev S1Del (s : Struct) : Struct :=
 /-- `A = delNode(find(S₁, alice·account))`, the deleted account. -/
 private abbrev A (s : Struct) : Struct := delNode (asStruct (findSt (S1Del s) [alice, account]))
 
+/-- The writes of `S₁` are below `alice.account`, so the account keeps its kind. -/
+private theorem S1Del_account_kind (s : Struct) :
+    (asStruct (findSt (S1Del s) [alice, account])).kind =
+      (asStruct (findSt s [alice, account])).kind := by
+  rw [S1Del, show [alice, account, token, value] = [alice, account] ++ [token, value] from rfl,
+    find_save_prefix _ _ (by simp), asStruct_st, kind_save _ (by simp),
+    show [alice, account, balance] = [alice, account] ++ [balance] from rfl,
+    find_save_prefix _ _ (by simp), asStruct_st, kind_save _ (by simp)]
+
+/-- …and so does its token, which the write of `balance` leaves alone. -/
+private theorem S1Del_token_kind (s : Struct) :
+    (asStruct (findSt (S1Del s) [alice, account, token])).kind =
+      (asStruct (findSt s [alice, account, token])).kind := by
+  rw [S1Del, show [alice, account, token, value] = [alice, account, token] ++ [value] from rfl,
+    find_save_prefix _ _ (by simp), asStruct_st, kind_save _ (by simp),
+    find_save_frame _ _ _ _ (by decide)]
+
 /-- `delete alice.account; b = alice.account.balance;` — "the marker becomes
-`A` when a read descends through it", and `A`'s value member is the default. -/
-theorem deleteSubtreeBalance (s : Struct) :
+`A` when a read descends through it", and `A`'s value member is the default.
+The premise is the account's sort: a mapping would keep its members. -/
+theorem deleteSubtreeBalance (s : Struct)
+    (hk : (asStruct (findSt s [alice, account])).kind ≠ some .map) :
     asInt (findSt (delAt (S1Del s) [alice, account]) [alice, account, balance]) = 0 :=
   calc asInt (findSt (delAt (S1Del s) [alice, account]) [alice, account, balance])
     _ = asInt (findSt (asStruct (delValue (findSt (S1Del s) [alice, account]))) [balance]) :=
         by rw [show [alice, account, balance] = [alice, account] ++ [balance] from rfl,
                find_delAt_extends _ (by simp) (by simp)]         -- findPath, findDelAt
     _ = asInt (selectSt (A s) balance) := by rw [delValueCast]; rfl  -- delFieldRef
-    _ = 0 := selectStDelNodeDefault _ _                           -- selectStDelNodeDefault
+    _ = 0 := selectStDelNodeDefault _ _
+          (keepsOnDelete_field (by rw [S1Del_account_kind]; exact hk) (by decide))
+                                                                  -- selectStDelNodeDefault
 
 /-- `v = alice.account.token.value;` — two members below the marker: the
 reference member is deleted recursively, and its value member is the
-default. -/
-theorem deleteSubtreeTokenValue (s : Struct) :
+default.  The premises are the account's and the token's sorts. -/
+theorem deleteSubtreeTokenValue (s : Struct)
+    (hk : (asStruct (findSt s [alice, account])).kind ≠ some .map)
+    (hk' : (asStruct (findSt s [alice, account, token])).kind ≠ some .map) :
     asInt (findSt (delAt (S1Del s) [alice, account]) [alice, account, token, value]) = 0 :=
   calc asInt (findSt (delAt (S1Del s) [alice, account]) [alice, account, token, value])
     _ = asInt (findSt (A s) [token, value]) :=
@@ -159,8 +182,13 @@ theorem deleteSubtreeTokenValue (s : Struct) :
                find_delAt_extends _ (by simp) (by simp), delValueCast]  -- findDelAt, delFieldRef
     _ = asInt (selectSt (asStruct (selectSt (A s) token)) value) := rfl    -- findPath
     _ = asInt (selectSt (delNode (asStruct (selectSt (asStruct (findSt (S1Del s) [alice, account]))
-          token))) value) := by rw [selectStDelNodeRef]                    -- selectDelNodeRef
-    _ = 0 := selectStDelNodeDefault _ _                                    -- selectStDelNodeDefault
+          token))) value) := by
+        rw [selectStDelNodeRef _ _
+          (keepsOnDelete_field (by rw [S1Del_account_kind]; exact hk) (by decide))]
+                                                                           -- selectDelNodeRef
+    _ = 0 := selectStDelNodeDefault _ _
+          (keepsOnDelete_field (fun he => hk' ((S1Del_token_kind s).symm.trans he)) (by decide))
+                                                                           -- selectStDelNodeDefault
 
 /-! ## 5–7 · Memory
 

@@ -112,7 +112,15 @@ syntax "‹" term "›" : dl_upd
 declare_syntax_cat dl_fml (behavior := both)
 syntax:max &"true" : dl_fml
 syntax:max &"false" : dl_fml
+/-- `a = b`.  In a taclet (`dl{ … }`) the total equation `Fml.eq`, KeY's
+`=`; against a contract (`dl[C]{ … }`) the defined one, `Fml.eqD`, which is
+what `==` means.  `Fml.eqD` prints as it. -/
 syntax:50 dl_term:51 " = " dl_term:51 : dl_fml
+/-- `a ≐ b`: the total equation `Fml.eq` in either reading, which may hold of
+terms that halt.  `Fml.eq` prints as it. -/
+syntax:50 dl_term:51 " ≐ " dl_term:51 : dl_fml
+/-- `defined(t)`: `t` returns (`Fml.defined`). -/
+syntax:max &"defined" "(" dl_term ")" : dl_fml
 syntax:max "¬" dl_fml:50 : dl_fml
 syntax:35 dl_fml:36 " ∧ " dl_fml:35 : dl_fml
 syntax:25 dl_fml:26 " → " dl_fml:25 : dl_fml
@@ -1007,8 +1015,9 @@ partial def fmlModality? : TSyntax `dl_fml → MacroM (Option Lean.Term)
 partial def schemaFml : TSyntax `dl_fml → MacroM Lean.Term
   | `(dl_fml| true) => `(Fml.tt)
   | `(dl_fml| false) => `(Fml.not Fml.tt)
-  | `(dl_fml| $a:dl_term = $b:dl_term) => do
+  | `(dl_fml| $a:dl_term = $b:dl_term) | `(dl_fml| $a:dl_term ≐ $b:dl_term) => do
     `(Fml.eq $(← schemaTerm [] .val a) $(← schemaTerm [] .val b))
+  | `(dl_fml| defined( $t:dl_term )) => do `(Fml.defined $(← schemaTerm [] .val t))
   | `(dl_fml| ¬ $φ:dl_fml) => do `(Fml.not $(← schemaFml φ))
   | `(dl_fml| $φ:dl_fml ∧ $ψ:dl_fml) | `(dl_fml| $φ:dl_fml && $ψ:dl_fml) => do
     `(Fml.and $(← schemaFml φ) $(← schemaFml ψ))
@@ -1820,8 +1829,21 @@ def ppUpd (e : Lean.Expr) : MetaM (TSyntax `dl_upd) := do
     out := out.push u
   `(dl_upd| { $[$out]‖* })
 
+/-- `defined(a) ∧ defined(b) ∧ a ≐ b`, which `Fml.eqD a b` unfolds to and
+`a = b` prints: `a` and `b`. -/
+def eqDParts? (e : Lean.Expr) : MetaM (Option (Lean.Expr × Lean.Expr)) := do
+  let_expr Fml.and _ l r := (← whnf (← instantiateMVars e)) | return none
+  let_expr Fml.defined _ a := (← whnf l) | return none
+  let_expr Fml.and _ l' r' := (← whnf r) | return none
+  let_expr Fml.defined _ b := (← whnf l') | return none
+  let_expr Fml.eq _ a' b' := (← whnf r') | return none
+  let (a, b, a', b') := (← instantiateMVars a, ← instantiateMVars b, ← instantiateMVars a',
+    ← instantiateMVars b')
+  return if a == a' && b == b' then some (a, b) else none
+
 /-- A connective, which the operand of `¬`, `{U}` and `⟨P⟩` parenthesises. -/
 def isConnective (e : Lean.Expr) : MetaM Bool := do
+  if (← eqDParts? e).isSome then return false
   let e ← whnf e
   return e.isAppOfArity ``Fml.and 3 || e.isAppOfArity ``Fml.imp 3 || e.isAppOfArity ``Fml.all 4
 
@@ -1889,21 +1911,23 @@ partial def ppFml (e : Lean.Expr) : MetaM (TSyntax `dl_fml) := do
       if let (some x, some T) := (← ppVar? x, ← primName? p) then
         return ← `(dl_fml| ∃ $(mkIdent (Name.mkSimple T)):ident $x:ident; $(← ppFml a):dl_fml)
     `(dl_fml| ¬$(← arg φ):dl_fml)
-  | Fml.eq _ a b =>
-    if let some (sym, l, r) ← cmpParts? a b then
-      let l ← ppTerm l
-      let r ← ppTerm r
-      return ← match sym with
-        | "<" => `(dl_fml| $l:dl_term < $r:dl_term)
-        | "<=" => `(dl_fml| $l:dl_term <= $r:dl_term)
-        | ">" => `(dl_fml| $l:dl_term > $r:dl_term)
-        | _ => `(dl_fml| $l:dl_term >= $r:dl_term)
-    `(dl_fml| $(← ppTerm a):dl_term = $(← ppTerm b):dl_term)
+  | Fml.eq _ a b => `(dl_fml| $(← ppTerm a):dl_term ≐ $(← ppTerm b):dl_term)
+  | Fml.defined _ t => `(dl_fml| defined($(← ppTerm t):dl_term))
   | Fml.all _ x p φ =>
     let some x ← ppVar? x | escape
     let some T ← primName? p | escape
     `(dl_fml| ∀ $(mkIdent (Name.mkSimple T)):ident $x:ident; $(← ppFml φ):dl_fml)
   | Fml.and _ φ ψ =>
+    if let some (a, b) ← eqDParts? e then
+      if let some (sym, l, r) ← cmpParts? a b then
+        let l ← ppTerm l
+        let r ← ppTerm r
+        return ← match sym with
+          | "<" => `(dl_fml| $l:dl_term < $r:dl_term)
+          | "<=" => `(dl_fml| $l:dl_term <= $r:dl_term)
+          | ">" => `(dl_fml| $l:dl_term > $r:dl_term)
+          | _ => `(dl_fml| $l:dl_term >= $r:dl_term)
+      return ← `(dl_fml| $(← ppTerm a):dl_term = $(← ppTerm b):dl_term)
     if let some (a, b) ← iffParts? e then
       return ← `(dl_fml| $(← ppFml a):dl_fml ↔ $(← ppFml b):dl_fml)
     let ψ' ← ppFml ψ
@@ -1938,6 +1962,9 @@ def isEscape (s : Syntax) : Bool := s[0].isToken "‹"
 def fullApp : DelabM Unit := do
   let e ← getExpr
   let some c := e.getAppFn.constName? | failure
+  if c == ``Fml.eqD then
+    guard (e.getAppNumArgs == 3)
+    return
   let info ← getConstInfoCtor c
   guard (e.getAppNumArgs == info.numParams + info.numFields)
 
@@ -1949,7 +1976,8 @@ def delabFml : Delab := do
   guard !(isEscape φ)
   `(dl{ $φ:dl_fml })
 
-attribute [delab app.Solidity.Fml.eq, delab app.Solidity.Fml.not,
+attribute [delab app.Solidity.Fml.eq, delab app.Solidity.Fml.eqD, delab app.Solidity.Fml.defined,
+  delab app.Solidity.Fml.not,
   delab app.Solidity.Fml.and, delab app.Solidity.Fml.imp, delab app.Solidity.Fml.upd,
   delab app.Solidity.Fml.modal, delab app.Solidity.Fml.all, delab app.Solidity.Fml.havoc] delabFml
 

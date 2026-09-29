@@ -167,7 +167,7 @@ def boolTotal : State := { State.exampleStore with storage := [("total", .bool t
 state, and where `total` holds a `bool` the delete resets it to `false`.  A
 write first fixes what is there (`deleteThenRead`). -/
 theorem deleteRootUnknown : ¬ (⊨ dl!{ [ delete total; ] total == 0 }) :=
-  fun h => nomatch h boolTotal
+  fun h => by obtain ⟨x, hx, hy⟩ := holds_eqD_iff.1 (h boolTotal); cases hx; cases hy
 
 /-! ### Below a deleted struct, from the initial store
 

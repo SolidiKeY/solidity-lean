@@ -1,4 +1,5 @@
 import Solidity.Calculus.Close
+import Solidity.Theory.Bridge.Denote
 
 /-!
 # Deciding the storage goals: `sol_decide`
@@ -73,7 +74,11 @@ storage leaves it stale (`SymB.onWrite`) and a later use of it outside the
 fragment.
 
 **The fragment** (`Fml.inL`): no modality (run `sol_symex` first), one
-element per update, a local, an alias or the storage updated; literals,
+element per update, a local, an alias or the storage updated; an equation
+as `eqD a b`, both sides defined (a bare `a ≐ b` compares the Theory
+values, and a term that halts still denotes one: `Fml.eqDView`), or a bare
+`a ≐ b` of a literal and a literal or a local, where the two readings agree
+(`Term.eqLit`: the branch condition `se1 ≐ true` of an `if`); literals,
 locals, operators, conditionals, reads of `storage` and an array's length
 (`values.length`, `LStor.lenU`); one write of a value
 or one `delete` over `storage` per update; every alias bound by an update
@@ -452,8 +457,8 @@ def LStor.eval (σ : State) : LStor → Res SVal
 
 end
 
-/-- A formula holds when, as in `holds`, both sides of each equation return
-and agree. -/
+/-- A formula holds when, as in `holds` of `eqD`, both sides of each equation
+return and agree. -/
 def LFml.holds (σ : State) : LFml → Prop
   | .tt => True
   | .eq a b =>
@@ -615,6 +620,65 @@ def _root_.Solidity.SValT.inL (ρ : Sym) : SValT C → Bool
 
 end
 
+/-- The storage the updates left, `storage`. -/
+def _root_.Solidity.STerm.isStorage : STerm C → Bool
+  | .storage => true
+  | _ => false
+
+theorem _root_.Solidity.STerm.isStorage_eq {s : STerm C} (h : s.isStorage = true) :
+    s = .storage := by
+  cases s <;> simp only [STerm.isStorage, Bool.false_eq_true] at h ⊢
+
+mutual
+
+/-- The same term of the fragment, as a `Bool` the kernel computes: how
+`Fml.inL` recognises `eqD a b` (`Fml.eqDView`).  Outside the fragment it is
+`false`, which only narrows the fragment. -/
+def _root_.Solidity.Term.sameL : Term C → Term C → Bool
+  | .lit v, .lit w => decide (v = w)
+  | .pv x, .pv y => decide (x = y)
+  | .binop o p a b, .binop o' p' a' b' =>
+    decide (o = o') && decide (p = p') && a.sameL a' && b.sameL b'
+  | .unop o p a, .unop o' p' a' => decide (o = o') && decide (p = p') && a.sameL a'
+  | .find s q, .find s' q' => s.isStorage && s'.isStorage && q.sameL q'
+  | .len s q, .len s' q' => s.isStorage && s'.isStorage && q.sameL q'
+  | .ite c a b, .ite c' a' b' => c.sameL c' && a.sameL a' && b.sameL b'
+  | _, _ => false
+
+/-- `Term.sameL` for a path. -/
+def _root_.Solidity.PTerm.sameL : PTerm C → PTerm C → Bool
+  | .root r, .root r' => decide (r = r')
+  | .pv x, .pv y => decide (x = y)
+  | .field q f, .field q' f' => q.sameL q' && decide (f = f')
+  | .at q i, .at q' i' => q.sameL q' && i.sameL i'
+  | _, _ => false
+
+end
+
+/-- `eqD a b`, `defined a ∧ (defined b ∧ a = b)` (`Update.lean`), split at
+its outer conjunction: the equation of the fragment.  A bare `a = b` reads
+the Theory (`holds`), where a term that halts still denotes something, so
+the fragment takes an equation only with both sides defined. -/
+def _root_.Solidity.Fml.eqDView : Fml C → Fml C → Option (Term C × Term C)
+  | .defined a, .and (.defined b) (.eq a' b') =>
+    if a.sameL a' && b.sameL b' then some (a, b) else none
+  | _, _ => none
+
+/-- A literal or a local: a term whose Theory value is its value where it
+returns, and no primitive where it halts (`Term.atom_equiv_prim`). -/
+def _root_.Solidity.Term.isAtom : Term C → Bool
+  | .lit _ | .pv _ => true
+  | _ => false
+
+/-- A total equation `a ≐ b` the fragment takes: a literal against a literal
+or a local, `se1 ≐ true` of a symbolically executed `if`.  There the total
+reading is the partial one (`Fml.toL_holds`); `x ≐ y` of two unbound locals
+is not, since both denote the empty struct. -/
+def _root_.Solidity.Term.eqLit : Term C → Term C → Bool
+  | .lit _, b => b.isAtom
+  | a, .lit _ => a.isAtom
+  | _, _ => false
+
 /-- One update: the term that has to return, and the names it binds. -/
 def _root_.Solidity.UpdElem.toL (ρ : Sym) : UpdElem C → LTerm × Sym
   | .val x t => (t.toL ρ, { ρ with env := (x, .val (t.toL ρ)) :: ρ.env })
@@ -641,8 +705,12 @@ def guardM : Modality → LTerm → LFml → LFml
 def _root_.Solidity.Fml.toL : Sym → Fml C → LFml
   | _, .tt => .tt
   | ρ, .eq a b => .eq (a.toL ρ) (b.toL ρ)
+  | ρ, .defined t => .eq (t.toL ρ) (t.toL ρ)
   | ρ, .not φ => .not (φ.toL ρ)
-  | ρ, .and φ ψ => .and (φ.toL ρ) (ψ.toL ρ)
+  | ρ, .and φ ψ =>
+    match Fml.eqDView φ ψ with
+    | some (a, b) => .eq (a.toL ρ) (b.toL ρ)
+    | none => .and (φ.toL ρ) (ψ.toL ρ)
   | ρ, .imp φ ψ => .imp (φ.toL ρ) (ψ.toL ρ)
   | ρ, .upd _ [] φ => φ.toL ρ
   | ρ, .upd m [e] φ => guardM m (e.toL ρ).1 (φ.toL (e.toL ρ).2)
@@ -653,9 +721,14 @@ no memory, no push or pop, no copy between locations, and every alias bound
 by an update. -/
 def _root_.Solidity.Fml.inL : Sym → Fml C → Bool
   | _, .tt => true
-  | ρ, .eq a b => a.inL ρ && b.inL ρ
+  | _, .eq a b => a.eqLit b
+  | ρ, .defined t => t.inL ρ
   | ρ, .not φ => φ.inL ρ
-  | ρ, .and φ ψ | ρ, .imp φ ψ => φ.inL ρ && ψ.inL ρ
+  | ρ, .and φ ψ =>
+    match Fml.eqDView φ ψ with
+    | some (a, b) => a.inL ρ && b.inL ρ
+    | none => φ.inL ρ && ψ.inL ρ
+  | ρ, .imp φ ψ => φ.inL ρ && ψ.inL ρ
   | ρ, .upd _ [] φ => φ.inL ρ
   | ρ, .upd _ [e] φ => e.inL ρ && φ.inL (e.toL ρ).2
   | _, .upd _ (_ :: _ :: _) _ | _, .modal .. | _, .havoc _ | _, .all .. => false
@@ -1231,6 +1304,109 @@ theorem STerm.toL_eval (h : Rel σ ρ τ) :
 
 end
 
+mutual
+
+/-- `Term.sameL` is equality. -/
+theorem Term.sameL_eq : (a b : Term C) → a.sameL b = true → a = b
+  | .lit _, b, h | .pv _, b, h => by
+    cases b <;> simp only [Term.sameL, decide_eq_true_eq, Bool.false_eq_true] at h <;> rw [h]
+  | .binop o p a₁ a₂, b, h => by
+    cases b <;> simp only [Term.sameL, Bool.and_eq_true, decide_eq_true_eq,
+      Bool.false_eq_true] at h
+    obtain ⟨⟨⟨rfl, rfl⟩, h₁⟩, h₂⟩ := h
+    rw [Term.sameL_eq a₁ _ h₁, Term.sameL_eq a₂ _ h₂]
+  | .unop o p a₁, b, h => by
+    cases b <;> simp only [Term.sameL, Bool.and_eq_true, decide_eq_true_eq,
+      Bool.false_eq_true] at h
+    obtain ⟨⟨rfl, rfl⟩, h₁⟩ := h
+    rw [Term.sameL_eq a₁ _ h₁]
+  | .find s q, b, h => by
+    cases b <;> simp only [Term.sameL, Bool.and_eq_true, Bool.false_eq_true] at h
+    obtain ⟨⟨h₁, h₂⟩, h₃⟩ := h
+    rw [STerm.isStorage_eq h₁, STerm.isStorage_eq h₂, PTerm.sameL_eq q _ h₃]
+  | .len s q, b, h => by
+    cases b <;> simp only [Term.sameL, Bool.and_eq_true, Bool.false_eq_true] at h
+    obtain ⟨⟨h₁, h₂⟩, h₃⟩ := h
+    rw [STerm.isStorage_eq h₁, STerm.isStorage_eq h₂, PTerm.sameL_eq q _ h₃]
+  | .ite c a₁ a₂, b, h => by
+    cases b <;> simp only [Term.sameL, Bool.and_eq_true, Bool.false_eq_true] at h
+    obtain ⟨⟨h₀, h₁⟩, h₂⟩ := h
+    rw [Term.sameL_eq c _ h₀, Term.sameL_eq a₁ _ h₁, Term.sameL_eq a₂ _ h₂]
+  | .read .., b, h | .mlen .., b, h | .env _, b, h | .net _, b, h | .netOf .., b, h => by
+    cases b <;> simp [Term.sameL] at h
+
+/-- `PTerm.sameL` is equality. -/
+theorem PTerm.sameL_eq : (p q : PTerm C) → p.sameL q = true → p = q
+  | .root _, q, h | .pv _, q, h => by
+    cases q <;> simp only [PTerm.sameL, decide_eq_true_eq, Bool.false_eq_true] at h <;> rw [h]
+  | .field p f, q, h => by
+    cases q <;> simp only [PTerm.sameL, Bool.and_eq_true, decide_eq_true_eq,
+      Bool.false_eq_true] at h
+    obtain ⟨h₁, rfl⟩ := h
+    rw [PTerm.sameL_eq p _ h₁]
+  | .at p i, q, h => by
+    cases q <;> simp only [PTerm.sameL, Bool.and_eq_true, Bool.false_eq_true] at h
+    obtain ⟨h₁, h₂⟩ := h
+    rw [PTerm.sameL_eq p _ h₁, Term.sameL_eq i _ h₂]
+  | .next _, q, h => by
+    cases q <;> simp [PTerm.sameL] at h
+
+end
+
+/-- What `Fml.eqDView` recognises is `eqD a b`. -/
+theorem Fml.eqDView_some {φ ψ : Fml C} {a b : Term C} (h : Fml.eqDView φ ψ = some (a, b)) :
+    φ = .defined a ∧ ψ = .and (.defined b) (.eq a b) := by
+  unfold Fml.eqDView at h
+  split at h
+  · rename_i a₀ b₀ a' b'
+    split at h
+    · rename_i hs
+      simp only [Bool.and_eq_true] at hs
+      simp only [Option.some.injEq, Prod.mk.injEq] at h
+      obtain ⟨rfl, rfl⟩ := h
+      rw [← Term.sameL_eq _ _ hs.1, ← Term.sameL_eq _ _ hs.2]
+      exact ⟨rfl, rfl⟩
+    · cases h
+  · cases h
+
+theorem Term.eqLit_cases {a b : Term C} (h : a.eqLit b = true) :
+    (∃ w, a = .lit w ∧ b.isAtom = true) ∨ (∃ w, b = .lit w ∧ a.isAtom = true) := by
+  unfold Term.eqLit at h
+  split at h
+  · exact .inl ⟨_, rfl, h⟩
+  · exact .inr ⟨_, rfl, h⟩
+  · cases h
+
+theorem Term.inL_of_isAtom {t : Term C} {ρ : Sym} (h : t.isAtom = true) : t.inL ρ = true := by
+  cases t <;> simp only [Term.isAtom, Bool.false_eq_true, Term.inL] at h ⊢
+
+/-- A literal or a local is `≐` a primitive exactly when it returns it: a
+local bound to no value denotes the empty struct, no primitive. -/
+theorem Term.atom_equiv_prim {τ : State} {t : Term C} (h : t.isAtom = true) (v : Value) :
+    Theory.StValue.Equiv (t.denote τ) (.prim v) ↔ t.eval τ = .ok v := by
+  rw [Theory.StValue.Equiv.prim_iff]
+  cases t <;> simp only [Term.isAtom, Bool.false_eq_true] at h
+  · simp only [Close.Term.denote_lit, Close.Term.eval_lit, Theory.StValue.prim.injEq,
+      Except.ok.injEq]
+  · rename_i x
+    rw [Close.Term.denote_pv, Close.Term.eval_pv]
+    cases τ.getEnv x with
+    | ok b => cases b <;> simp only [Theory.StValue.prim.injEq, reduceCtorEq, bind, Except.bind,
+        Close.bindingVal, Except.ok.injEq]
+    | error e => simp only [reduceCtorEq, bind, Except.bind]
+
+/-- An equation of the target language holds when both sides return, with
+one value. -/
+theorem LFml.holds_eq_iff (σ : State) (a b : LTerm) :
+    (LFml.eq a b).holds σ ↔ ∃ x, a.eval σ = .ok x ∧ b.eval σ = .ok x := by
+  simp only [LFml.holds]
+  cases a.eval σ with
+  | ok x =>
+    cases b.eval σ with
+    | ok y => exact ⟨fun h => ⟨x, rfl, h ▸ rfl⟩, fun ⟨_, h₁, h₂⟩ => by cases h₁; cases h₂; rfl⟩
+    | error _ => exact ⟨False.elim, fun ⟨_, _, h⟩ => nomatch h⟩
+  | error _ => exact ⟨False.elim, fun ⟨_, h, _⟩ => nomatch h⟩
+
 /-- An update's term returns, as a formula: `eq g g`. -/
 theorem holds_eq_self (σ : State) (g : LTerm) :
     (LFml.eq g g).holds σ ↔ ∃ v, g.eval σ = .ok v := by
@@ -1272,30 +1448,46 @@ theorem Fml.toL_holds :
     (φ : Fml C) → ∀ {σ τ : State} {ρ : Sym}, Rel σ ρ τ → φ.inL ρ = true →
       (holds τ φ ↔ (φ.toL ρ).holds σ)
   | .tt, _, _, _, _, _ => Iff.rfl
-  | .eq a b, _, _, _, h, hf => by
-    simp only [Fml.inL, Bool.and_eq_true] at hf
-    have ha := Term.toL_eval h a hf.1
-    have hb := Term.toL_eval h b hf.2
+  | .eq a b, _, τ, _, h, hf => by
+    simp only [Fml.inL] at hf
+    simp only [holds, Fml.toL]
+    rw [LFml.holds_eq_iff]
+    rcases Term.eqLit_cases hf with ⟨w, rfl, hb⟩ | ⟨w, rfl, ha⟩
+    · have hs : Sim ((b.toL _).eval _) (b.eval τ) := Term.toL_eval h b (Term.inL_of_isAtom hb)
+      rw [Close.Term.denote_lit, Close.equiv_prim_left_iff, eq_comm, ← Theory.StValue.Equiv.prim_iff, Term.atom_equiv_prim hb]
+      simp only [Term.toL, LTerm.eval, Except.ok.injEq, exists_eq_left']
+      exact (hs w).symm
+    · have hs : Sim ((a.toL _).eval _) (a.eval τ) := Term.toL_eval h a (Term.inL_of_isAtom ha)
+      rw [Close.Term.denote_lit, Term.atom_equiv_prim ha]
+      simp only [Term.toL, LTerm.eval, Except.ok.injEq, exists_eq_right']
+      exact (hs w).symm
+  | .defined t, _, _, _, h, hf => by
+    have ht := Term.toL_eval h t hf
     simp only [holds, Fml.toL, LFml.holds]
-    cases hx : a.eval _ with
-    | ok x =>
-      rw [(ha x).2 hx]
-      cases hy : b.eval _ with
-      | ok y => rw [(hb y).2 hy]
-      | error e =>
-        cases hy' : (b.toL _).eval _ with
-        | ok y => exact absurd ((hb y).1 hy') (by simp [hy])
-        | error _ => exact Iff.rfl
-    | error e =>
-      cases hx' : (a.toL _).eval _ with
-      | ok x => exact absurd ((ha x).1 hx') (by simp [hx])
-      | error _ => exact Iff.rfl
+    cases hx : (t.toL _).eval _ with
+    | ok x => exact ⟨fun _ => rfl, fun _ => ⟨x, (ht x).1 hx⟩⟩
+    | error _ =>
+      refine ⟨fun ⟨v, hv⟩ => ?_, False.elim⟩
+      have := (ht v).2 hv
+      simp_all
   | .not φ, _, _, _, h, hf => by
     simp only [Fml.inL] at hf
     simp only [holds, Fml.toL, LFml.holds, Fml.toL_holds φ h hf]
   | .and φ ψ, _, _, _, h, hf => by
-    simp only [Fml.inL, Bool.and_eq_true] at hf
-    simp only [holds, Fml.toL, LFml.holds, Fml.toL_holds φ h hf.1, Fml.toL_holds ψ h hf.2]
+    cases hv : Fml.eqDView φ ψ with
+    | none =>
+      simp only [Fml.inL, hv, Bool.and_eq_true] at hf
+      simp only [holds, Fml.toL, hv, LFml.holds, Fml.toL_holds φ h hf.1, Fml.toL_holds ψ h hf.2]
+    | some ab =>
+      obtain ⟨a, b⟩ := ab
+      simp only [Fml.inL, hv, Bool.and_eq_true] at hf
+      simp only [Fml.toL, hv]
+      obtain ⟨rfl, rfl⟩ := Fml.eqDView_some hv
+      have ha : Sim ((a.toL _).eval _) (a.eval _) := Term.toL_eval h a hf.1
+      have hb : Sim ((b.toL _).eval _) (b.eval _) := Term.toL_eval h b hf.2
+      refine holds_eqD_iff.trans ?_
+      rw [LFml.holds_eq_iff]
+      exact exists_congr fun x => and_congr (ha x).symm (hb x).symm
   | .imp φ ψ, _, _, _, h, hf => by
     simp only [Fml.inL, Bool.and_eq_true] at hf
     simp only [holds, Fml.toL, LFml.holds, Fml.toL_holds φ h hf.1, Fml.toL_holds ψ h hf.2]

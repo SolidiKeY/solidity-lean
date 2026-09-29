@@ -136,11 +136,16 @@ Memory types cannot contain mappings, so `rhsToMVal` needs no guard.
 The same fact is in the syntax. `Src.copy` carries a `mapFree`
 obligation, so the typed AST cannot express the copy at all — solkey's
 `ParserUtils.parseAssignmentMaybe` at the type level.
-That is what lets `Theory/Storage.lean`, solkey's storage theory as a term
-algebra, collapse the leaf of a write (`save(st, nil, v) ⇝ v`) instead of
-carrying solkey's mapping-preserving one. Its `delete`, on the other hand,
-resets mapping members: a `Seg` carries no `MapField` sort, so the
-mapping-preserving `delete` below is the interpreter's alone.
+The Theory, solkey's storage theory as a term algebra, has both of solkey's
+writes all the same: the collapsing `save` (`save(st, nil, v) ⇝ v`,
+`Theory/Storage.lean`) for a word and for `delAt`, and the non-collapsing
+leaf, `copyTo` (`Theory/Copy.lean`), for a struct or an array written over a
+location, which keeps a mapping member of the old node (`selectOnCopyMap`)
+though no program here writes that copy. Its `delete` keeps mapping members
+too, as the interpreter's does: a `Seg` carries no `MapField` sort, so the
+kind of the node read says what a member is (`keepsOnDelete`,
+`selectStDelNodeMap`), and `State.abs_delete` (`Theory/Bridge/Delete.lean`)
+proves the two deletes agree on every read.
 
 ## Arrays past their end: `pop`, `push`, `delete`, copies
 

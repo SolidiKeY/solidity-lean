@@ -66,7 +66,7 @@ local instance : InContract := ⟨StandardExample⟩
 
 /--
 info: @Taclet.requireSimple : ∀ {C : Contract} {k : Nat} {m : Modality} {se : Simple C PrimTy.bool},
-  dl{ ⟨[ require(se); ]⟩ ⇝ se = true ⟹ ⟨[ ]⟩ ; se = false ⟹ ⟨[ revert(); ]⟩ }
+  dl{ ⟨[ require(se); ]⟩ ⇝ se ≐ true ⟹ ⟨[ ]⟩ ; se ≐ false ⟹ ⟨[ revert(); ]⟩ }
 -/
 #guard_msgs in #check @Taclet.requireSimple
 
@@ -89,16 +89,16 @@ theorem requireBox : ⊢ dl!{ [ require(a == b); x = a; ] x == b } := by
   -- dl{ { se1 := a == b } ⟹ [ require(se1); x = a; ] x = b }
   apply split .requireSimple
   case thn =>
-    -- dl{ { se1 := a == b }, se1 = true ⟹ [ x = a; ] x = b }
+    -- dl{ { se1 := a == b }, se1 ≐ true ⟹ [ x = a; ] x = b }
     apply update .localValueAssign
     apply empty
     refine close ?_
     sol_symex
     sol_close
   case els =>
-    -- dl{ { se1 := a == b }, se1 = false ⟹ [ revert(); x = a; ] x = b }
+    -- dl{ { se1 := a == b }, se1 ≐ false ⟹ [ revert(); x = a; ] x = b }
     apply done .revertBox
-    -- dl{ { se1 := a == b }, se1 = false ⟹ true }
+    -- dl{ { se1 := a == b }, se1 ≐ false ⟹ true }
     refine close ?_
     sol_symex
     sol_close
@@ -111,7 +111,7 @@ theorem requireBox : ⊢ dl!{ [ require(a == b); x = a; ] x == b } := by
 
 The same program under the diamond needs `a == b`: where it does not hold
 the program reverts, and `revertDiamond` leaves `false`.  With the
-precondition, the second goal has both `a = b` and `se1 = false` in its
+precondition, the second goal has both `a = b` and `se1 ≐ false` in its
 context. -/
 
 /-- `a == b → ⟨ require(a == b); x = a; ⟩ x == b`. -/
@@ -129,12 +129,12 @@ theorem requireDiamond : ⊢ dl!{ a == b → ⟨ require(a == b); x = a; ⟩ x =
     sol_close
   case els =>
     apply done .revertDiamond
-    -- dl{ a = b, { se1 := a == b }, se1 = false ⟹ false }: the context is contradictory
+    -- dl{ a = b, { se1 := a == b }, se1 ≐ false ⟹ false }: the context is contradictory
     refine close ?_
     sol_symex
     sol_close
   case cov =>
-    -- dl{ a = b, { se1 := a == b } ⟹ ¬(¬se1 = true ∧ ¬se1 = false) }
+    -- dl{ a = b, { se1 := a == b } ⟹ ¬(¬se1 ≐ true ∧ ¬se1 ≐ false) }
     refine close ?_
     sol_symex
     sol_close
@@ -153,7 +153,7 @@ proof failure rather than a revert.) -/
 
 /--
 info: @Taclet.assertSimple : ∀ {C : Contract} {k : Nat} {m : Modality} {se : Simple C PrimTy.bool},
-  dl{ ⟨[ assert(se); ]⟩ ⇝ se = true ⟹ ⟨[ ]⟩ ; se = false ⟹ ⟨[ revert(); ]⟩ }
+  dl{ ⟨[ assert(se); ]⟩ ⇝ se ≐ true ⟹ ⟨[ ]⟩ ; se ≐ false ⟹ ⟨[ revert(); ]⟩ }
 -/
 #guard_msgs in #check @Taclet.assertSimple
 
@@ -211,7 +211,7 @@ theorem branchBox : ⊢ dl!{ [ if (a == b) { x = 1; } else { revert(); }; ] x ==
     sol_symex
     sol_close
   case els =>
-    -- dl{ { se1 := a == b }, se1 = false ⟹ [ revert(); ] x = 1 }
+    -- dl{ { se1 := a == b }, se1 ≐ false ⟹ [ revert(); ] x = 1 }
     apply done .revertBox
     refine close ?_
     sol_symex
@@ -236,7 +236,7 @@ theorem branchDiamond :
     sol_symex
     sol_close
   case els =>
-    -- dl{ a = b, { se1 := a == b }, se1 = false ⟹ ⟨ revert(); ⟩ x = 1 }
+    -- dl{ a = b, { se1 := a == b }, se1 ≐ false ⟹ ⟨ revert(); ⟩ x = 1 }
     apply done .revertDiamond
     refine close ?_
     sol_symex
@@ -274,7 +274,8 @@ theorem transferBox : ⊢ dl!{ [ to.transfer(5); ] true } := by
 /-- The diamond is not valid: `exampleStore` holds `1000000000` wei, and
 `to.transfer(2000000000)` reverts there. -/
 example : ¬ (⊨ dl!{ to == 1 → ⟨ to.transfer(2000000000); ⟩ true }) := fun h =>
-  h (Semantics.State.exampleStore.setEnv (.user "to") (.val (.int 1))) rfl
+  h (Semantics.State.exampleStore.setEnv (.user "to") (.val (.int 1)))
+    (holds_eqD_iff.2 ⟨_, rfl, rfl⟩)
 
 /-! ### `to.transfer(x + 2);` — a nonsimple amount
 

@@ -62,4 +62,4 @@ None.
 | field-name overloading: Depth0.recursive and Depth1.recursive have different types, and Semantics.structDef is one global name->fields table | 1 | SolcStructs 1 |
 | field-name overloading: as recursiveStructThroughAliases, plus Flagged.y (bool) vs Sub.y/Triple.y (uint) | 1 | SolcStructs 1 |
 | `msg.value` is not a program expression | 1 | Net 1 |
-| storage-theory problem over a `MapField`: the mapping-preserving copy is unreachable (solc ≥ 0.7 and solkey's parser reject a copy of a mapping-carrying type) and `Theory/Storage.lean` does not model it | 1 | Rules 1 |
+| storage-theory problem over a `MapField`: a copy of a mapping-carrying type, which no program writes (solc ≥ 0.7 and solkey's parser reject it); `Theory/Copy.lean` states the rule it exercises (`selectOnCopyMap`), and the corpus's obligations are programs' (`⟨ f() ⟩ true`) | 1 | Rules 1 |

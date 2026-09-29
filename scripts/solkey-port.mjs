@@ -238,9 +238,10 @@ const KEY_SUITES = [
     ported: {},
     unported: {},
     reason: () =>
-      "storage-theory problem over a `MapField`: the mapping-preserving copy " +
-      "is unreachable (solc ≥ 0.7 and solkey's parser reject a copy of a " +
-      "mapping-carrying type) and `Theory/Storage.lean` does not model it",
+      "storage-theory problem over a `MapField`: a copy of a mapping-carrying " +
+      "type, which no program writes (solc ≥ 0.7 and solkey's parser reject " +
+      "it); `Theory/Copy.lean` states the rule it exercises (`selectOnCopyMap`), " +
+      "and the corpus's obligations are programs' (`⟨ f() ⟩ true`)",
   },
 ];
 

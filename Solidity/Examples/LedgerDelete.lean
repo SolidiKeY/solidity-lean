@@ -28,9 +28,10 @@ keeps every entry (`SVal.defaultOf`).
 **Part 2** is the storage theory, by hand: the same storages
 written as terms of `structRules.key`'s algebra over an arbitrary store `s`
 (`Theory/Storage.lean`), `S1`…`S5` one per `storage :=` update, and each read
-taken to its value one lemma at a time.  The read it cannot take is
-`survives`: the theory's `delNode` drops every `at` member, because a `Seg`
-carries no `MapField` (`Theory/Storage.lean`, "Delete").
+taken to its value one lemma at a time.  The two reads after `delete ledger`
+carry the sorts the program's types give: `ledger` is not a mapping, and
+`ledger.balances` is one, so its entry survives (`selectDelNodeMap`,
+`Theory/Storage.lean`, "Delete").
 -/
 
 namespace Solidity.Examples.LedgerDelete
@@ -193,12 +194,45 @@ theorem nonceBeforeDelete (s : Struct) : findSt (S4 s) [ledger, nonce] = int 5 :
   rw [S3, find_save_frame _ _ _ _ (by decide), S2, find_save_frame _ _ _ _ (by decide)]
   rw [S1, find_save_same _ (by simp)]
 
+/-- A write below `ledger` leaves the kind of what `ledger` holds. -/
+private theorem kind_ledger_save (s : Struct) {r : List Seg} (hr : r ≠ []) (v : StValue) :
+    (asStruct (findSt (save s (ledger :: r) v) [ledger])).kind =
+      (asStruct (findSt s [ledger])).kind := by
+  rw [show ledger :: r = [ledger] ++ r from rfl, find_save_prefix _ _ hr, asStruct_st,
+    kind_save _ hr]
+
+/-- …and one below `ledger.balances` the kind of what that holds. -/
+private theorem kind_balances_save (s : Struct) {r : List Seg} (hr : r ≠ []) (v : StValue) :
+    (asStruct (findSt (save s (ledger :: balances :: r) v) [ledger, balances])).kind =
+      (asStruct (findSt s [ledger, balances])).kind := by
+  rw [show ledger :: balances :: r = [ledger, balances] ++ r from rfl, find_save_prefix _ _ hr,
+    asStruct_st, kind_save _ hr]
+
 /-- `after`: after `delete ledger` the field is below the deleted location, and
-reads the reset of what was there (`findDelAtFields`), which at `int` is `0`. -/
-theorem nonceAfterDelete (s : Struct) : asInt (findSt (S5 s) [ledger, nonce]) = 0 := by
+reads the reset of what was there (`findDelAt` one member down), which at `int`
+is `0`.  The premise is `ledger`'s sort: a struct, not a mapping. -/
+theorem nonceAfterDelete (s : Struct) (hk : (asStruct (findSt s [ledger])).kind ≠ some .map) :
+    asInt (findSt (S5 s) [ledger, nonce]) = 0 := by
+  have hk4 : (asStruct (findSt (S4 s) [ledger])).kind ≠ some .map := by
+    rw [S4, delAt, kind_ledger_save _ (by simp), S3, kind_ledger_save _ (by simp), S2,
+      kind_ledger_save _ (by simp), S1, kind_ledger_save _ (by simp)]
+    exact hk
   rw [S5, show [ledger, nonce] = [ledger] ++ [nonce] from rfl,
-    find_delAt_fields _ (by simp) (by simp) (by decide)]
+    find_delAt_member _ (by simp) _ (keepsOnDelete_field hk4 (by decide))]
   exact delValueCast_asInt _
+
+/-- `survives`: `ledger.balances` is a mapping, so `delete ledger` keeps its
+entries (`selectDelNodeMap`): the entry reads what it read before. -/
+theorem balancesSurvive (s : Struct)
+    (hm : (asStruct (findSt s [ledger, balances])).kind = some .map) :
+    findSt (S5 s) [ledger, balances, .at 2] = findSt (S4 s) [ledger, balances, .at 2] := by
+  have hm4 : (asStruct (findSt (S4 s) [ledger, balances])).kind = some .map := by
+    rw [S4, delAt, kind_balances_save _ (by simp), S3, kind_balances_save _ (by simp), S2,
+      kind_balances_save _ (by simp), S1, find_save_frame _ _ _ _ (by decide)]
+    exact hm
+  rw [S5, show [ledger, balances, .at 2] = [ledger] ++ [balances, .at 2] from rfl,
+    find_delAt_extends _ (by simp) (by simp), delValueCast]
+  exact selectDelNodeMap hm4
 
 end Store
 

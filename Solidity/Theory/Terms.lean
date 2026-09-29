@@ -41,8 +41,8 @@ constructor is still a free term.
 
 ## Three arms on a view
 
-`selectSt`, `storeAt` (`Theory/Storage.lean`) and `delNode` (likewise) each
-have an arm for a `copyMem` view.  Only the first has a taclet upstream
+`selectSt`, `storeAt` (`Theory/Storage.lean`) and `delNode` each have an arm
+for a `copyMem` view.  Only the first has a taclet upstream
 (`selectOnCopyMemPrim`/`selectOnCopyMemRef`, `structMemoryRules.key`), and
 it is stated one level up; the other two are ours to choose, and each is
 chosen so that the rule which *does* exist subsumes it:
@@ -56,9 +56,39 @@ chosen so that the rule which *does* exist subsumes it:
   that stops at a view.
 * `storeAt` puts a `storeSt` shadow node *over* the view rather than replacing
   it.  Replacing it would destroy the view and make `find_save_frame` false.
-* `delNode` answers `mtSt`: it is eager here (`Theory/Storage.lean`), so it
-  cannot walk a view whose members it does not know, and every member of a
-  deleted node reads its default anyway.
+* `delNode` flattens a view (and `mtSt`, and the pre-state leaf `cur`) to
+  `mtSt`: it cannot mark a view whose members it does not know, and every
+  member of a deleted node of unknown kind reads its default anyway.
+
+## Kinded nodes and the two lazy leaves
+
+A chain built on `mtSt` is KeY's untyped world: it cannot tell a mapping from
+a struct, so a delete resets every member and a copy goes member by member.
+The interpreter can tell them apart, and what it does with a mapping member
+(kept by `delete`), a fixed-size array (keeps its length), or an array
+written over a longer one (the old slots cleared up to the old length, kept
+beyond) depends on it.  Three constructors carry that knowledge:
+
+* `mtK k d` — an empty node of kind `k` (`NodeKind`), whose absent members
+  read `d`: a mapping's default, or `st mtSt` for a struct or an array.
+  `Struct.kind` reads the kind through every write (`storeSt`) and every lazy
+  leaf; `none` is "nothing is here", the kind of `mtSt` and of a view.
+* `copyAt old new` — solkey's non-collapsing leaf: `new` copied over `old`,
+  read one selector at a time by `copyRead`, from the two kinds, the two
+  lengths and the two members (the interpreter's `SVal.overlay`, arm by arm).
+* `delSt s` — `s` deleted, read one selector at a time: a member that
+  `keepsOnDelete` names (a mapping's, a fixed-size array's length, an array's
+  slot past its end) is kept, every other one is `delValue`d.
+
+Both leaves are lazy for the same reason `copyMem` is: `selectSt` stays
+structural, and a leaf's meaning is the read taclets that go through it,
+which is how solkey states it.  On a kind-free chain (no `mtK`, no leaf) they
+agree with the eager delete and the collapsing copy they replace.
+
+`Seen`/`StValue.Equiv` at the end is observational equality: two values that
+agree on every primitive and every kind along every path.  It is what the
+laws that are not literal (a copy, a delete, a pop) are stated up to
+(`Theory/Observe.lean`).
 
 ## A view inside a view
 
@@ -232,6 +262,13 @@ end MemValue
 
 /-! ## The three sorts -/
 
+/-- What a storage node is.  `none` (see `Struct.kind`) is "nothing is here". -/
+inductive NodeKind where
+  | struct
+  | arr (fixed : Bool)
+  | map
+  deriving Repr, DecidableEq
+
 mutual
   /-- `structHeader.key`: `Struct ⊑ StValue`, `\unique Struct mtSt`,
   `Struct storeSt(Struct, Field, StValue)`, plus `structMemoryRules.key`'s
@@ -249,6 +286,13 @@ mutual
     leaf.  A view, like `copyMem`: selecting pushes it down and reads
     nothing, so every theory law holds of it as of a free term. -/
     | cur (p : List Seg)
+    /-- An empty node of kind `k` whose absent members read `d`.  For a struct or an
+    array `d` is `st mtSt`; for a mapping it is the mapping's default. -/
+    | mtK (k : NodeKind) (d : StValue)
+    /-- solkey's non-collapsing leaf: `new` copied over `old`, read lazily. -/
+    | copyAt (old new : Struct)
+    /-- `s` deleted, read lazily by `s`'s kind and length. -/
+    | delSt (s : Struct)
     deriving Repr
 
   /-- `solidityDLHeader.key`: `Prim ⊑ StValue`; `st` is the injection
@@ -369,33 +413,145 @@ end MemValue
 
 namespace Struct
 
+/-- An empty struct. -/
+abbrev structSt : Struct := .mtK .struct (.st .mtSt)
+/-- An empty array, fixed-size or dynamic. -/
+abbrev arrSt (fx : Bool) : Struct := .mtK (.arr fx) (.st .mtSt)
+/-- An empty mapping whose absent entries read `d`. -/
+abbrev mapSt (d : StValue) : Struct := .mtK .map d
+
+/-- The kind of the node a term is: a write keeps it, a copy takes the new
+value's, a delete keeps the deleted node's.  `none` is "nothing is here". -/
+def kind : Struct -> Option NodeKind
+  | .mtSt | .copyMem .. | .cur _ => none
+  | .mtK k _ => some k
+  | .storeSt s _ _ => s.kind
+  | .copyAt _ n => n.kind
+  | .delSt s => s.kind
+
 /-- `induction` does not support a mutual inductive; this is the one-sort
 recursor, which is all the `Struct`-recursive proofs need — none of them
 descends into a stored value or into a view's memory. -/
 theorem inductionOn {motive : Struct -> Prop} (h0 : motive mtSt)
     (h1 : forall s a v, motive s -> motive (storeSt s a v))
     (h2 : forall mem id, motive (copyMem mem id))
-    (h3 : forall p, motive (cur p)) : forall s, motive s
+    (h3 : forall p, motive (cur p))
+    (h4 : forall k d, motive (mtK k d))
+    (h5 : forall o n, motive o -> motive n -> motive (copyAt o n))
+    (h6 : forall s, motive s -> motive (delSt s)) : forall s, motive s
   | mtSt => h0
-  | storeSt s a v => h1 s a v (inductionOn h0 h1 h2 h3 s)
+  | storeSt s a v => h1 s a v (inductionOn h0 h1 h2 h3 h4 h5 h6 s)
   | copyMem mem id => h2 mem id
   | cur p => h3 p
+  | mtK k d => h4 k d
+  | copyAt o n =>
+      h5 o n (inductionOn h0 h1 h2 h3 h4 h5 h6 o) (inductionOn h0 h1 h2 h3 h4 h5 h6 n)
+  | delSt s => h6 s (inductionOn h0 h1 h2 h3 h4 h5 h6 s)
 
 end Struct
+
+/-- An array, of either length discipline. -/
+def NodeKind.isArr : Option NodeKind -> Bool
+  | some (.arr _) => true
+  | _ => false
+
+/-- A struct, or nothing: the kinds a copy goes through member by member. -/
+def NodeKind.isStructLike : Option NodeKind -> Bool
+  | none | some .struct => true
+  | _ => false
 
 namespace StValue
 
 open Struct
 
+/-! ## Delete and copy, one node at a time
+
+A delete and a copy are the two lazy leaves `delSt` and `copyAt`; what is
+here is how one member of each reads, which `selectSt` below calls. -/
+
+/-- KeY's `size`: an array's length is a member like any other. -/
+abbrev lengthSeg : Seg := .field "length"
+
+/-- `defaultValue<[alphaPrim]>`, read off the value's own sort. -/
+def primDefault : PrimVal -> PrimVal
+  | .int _ => .int 0
+  | .bool _ => .bool false
+
+/-- `delNode(st)`: the delete marker.  A view, the pre-state leaf and `mtSt`
+are flattened to `mtSt` (module docstring); anything else is marked, and read
+through by `selectSt`'s `delSt` arm. -/
+def delNode : Struct -> Struct
+  | .mtSt | .copyMem .. | .cur _ => .mtSt
+  | s => .delSt s
+
+/-- A value reset: `delNode` on a `Struct`, the default on a `Prim` — the
+single-sort `delValue<[α]>` that solkey's `delField` replaced, and still
+what `delField` is here. -/
+def delValue : StValue -> StValue
+  | prim q => prim (primDefault q)
+  | st s => st (delNode s)
+
+/-- `v` copied over `old`: the value `SVal.overlay` computes.  A word
+replaces; a node is laid over what was there. -/
+def copyVal (old : StValue) : StValue -> StValue
+  | prim p => prim p
+  | st n => st (.copyAt (asStruct old) n)
+
+/-- `0 ≤ i < n`: an index inside an array of length `n`. -/
+def inRange (n i : Int) : Bool := decide (0 ≤ i) && decide (i < n)
+
+/-- A member that a delete leaves as it is. -/
+def keepsOnDelete : Option NodeKind -> Int -> Seg -> Bool
+  -- a mapping: all of it (`selectStDelNodeMap`)
+  | some .map, _, _ => true
+  -- a fixed-size array: its length (`delNodeFixed`)
+  | some (.arr true), _, .field f => f == "length"
+  -- an array: a slot past the end (`selectStDelNodeIndexStruct`'s keep branch)
+  | some (.arr _), n, .at i => !inRange n i
+  | _, _, _ => false
+
+/-- One member of `copyAt o n`, from the two kinds, the two lengths and the two
+members (`SVal.overlay`, arm by arm). -/
+def copyRead (ko kn : Option NodeKind) (lo ln : Int) (a : Seg) (vo vn : StValue) : StValue :=
+  match kn with
+  -- a map over a map keeps the old one (Solidity copies no mapping); over
+  -- anything else it is laid as it is
+  | some .map => if ko = some .map then vo else vn
+  | some (.arr _) =>
+    match a with
+    | .field f => if f = "length" then vn else st .mtSt
+    | .at i =>
+      -- a new element over the old slot
+      if inRange ln i then copyVal (if NodeKind.isArr ko then vo else st .mtSt) vn
+      -- between the two lengths: cleared
+      else if NodeKind.isArr ko && inRange lo i then delValue vo
+      -- beyond both: kept
+      else if NodeKind.isArr ko then vo else st .mtSt
+  -- a struct: member by member; over another shape, onto fresh slots
+  | some .struct | none =>
+      copyVal (if NodeKind.isStructLike ko then vo else st .mtSt) vn
+
 /-! ## `selectSt` -/
 
 /-- `selectSt<[α]>(st, a)`: the outermost store at `a`, or the default.  On a
-view it pushes the view down and reads nothing — see the module docstring. -/
+view it pushes the view down and reads nothing — see the module docstring.  On
+an empty kinded node it is the node's default, and on the two lazy leaves it
+is the member `copyRead`/`keepsOnDelete` say. -/
 def selectSt : Struct -> Seg -> StValue
   | mtSt, _ => .st mtSt
   | storeSt s a1 v, a2 => if a1 = a2 then v else selectSt s a2
   | Struct.copyMem mem id, a => .st (Struct.copyMem mem (id.extend a))
   | Struct.cur p, a => .st (Struct.cur (p ++ [a]))
+  | Struct.mtK _ d, _ => d
+  | Struct.copyAt o n, a =>
+      copyRead o.kind n.kind (asInt (selectSt o lengthSeg)) (asInt (selectSt n lengthSeg)) a
+        (selectSt o a) (selectSt n a)
+  | Struct.delSt s, a =>
+      if keepsOnDelete s.kind (asInt (selectSt s lengthSeg)) a then selectSt s a
+      else delValue (selectSt s a)
+
+/-- An array's length, `selectSt<[int]>(st, size)`. -/
+def lenOf (s : Struct) : Int := asInt (selectSt s lengthSeg)
 
 /-- `find<[α]>(st, flds)` on a storage term that holds no memory view: the
 read `readCopySt` takes into a copied struct.  `find` below is this one plus
@@ -407,6 +563,37 @@ def findSt : Struct -> List Seg -> StValue
   | s, a :: b :: flds => findSt ((selectSt s a).asStruct) (b :: flds)
 
 end StValue
+
+/-! ## Observation
+
+What a read shows, and the equality the laws that are not literal are stated
+up to.  (`Obs` is `Calculus/DecideComplete.lean`'s, hence `Seen`.) -/
+
+/-- What one read shows: a primitive exactly, or a node's kind (`none` means absent). -/
+inductive Seen where
+  | prim (p : PrimVal)
+  | node (k : Option NodeKind)
+  deriving DecidableEq, Repr
+
+namespace StValue
+
+/-- What `v` shows. -/
+def seen : StValue -> Seen
+  | .prim p => .prim p
+  | .st s => .node s.kind
+
+/-- `v` read along a path, one selector at a time through the `Struct` cast. -/
+def readAt (v : StValue) : List Seg -> StValue
+  | [] => v
+  | a :: q => readAt (selectSt (asStruct v) a) q
+
+/-- Observational equality: every read along every path shows the same. -/
+def Equiv (v w : StValue) : Prop := ∀ q, (v.readAt q).seen = (w.readAt q).seen
+
+end StValue
+
+/-- `StValue.Equiv` at `Struct`. -/
+def Struct.Equiv (s t : Struct) : Prop := StValue.Equiv (.st s) (.st t)
 
 namespace Memory
 
@@ -580,6 +767,9 @@ theorem StValue.find_cons_view (s : Struct) (a : Seg) {flds : List Seg}
       | mtSt => rfl
       | storeSt _ _ _ => rfl
       | cur _ => rfl
+      | mtK _ _ => rfl
+      | copyAt _ _ => rfl
+      | delSt _ => rfl
 
 /-! ### Where the two readers agree -/
 
@@ -590,6 +780,9 @@ mutual
     | .storeSt s _ v => StValue.structViewFree s && StValue.viewFree v
     | .copyMem _ _ => false
     | .cur _ => true
+    | .mtK _ d => StValue.viewFree d
+    | .copyAt o n => StValue.structViewFree o && StValue.structViewFree n
+    | .delSt s => StValue.structViewFree s
   def StValue.viewFree : StValue -> Bool
     | .prim _ => true
     | .st s => StValue.structViewFree s
@@ -601,18 +794,66 @@ end
   | prim _ => rfl
   | st s => exact h
 
+/-- A copy of view-free values is view-free. -/
+theorem StValue.copyVal_viewFree {o n : StValue} (ho : o.viewFree = true)
+    (hn : n.viewFree = true) : (StValue.copyVal o n).viewFree = true := by
+  cases n with
+  | prim _ => rfl
+  | st n' =>
+      simp only [StValue.copyVal, StValue.viewFree, StValue.structViewFree, Bool.and_eq_true]
+      exact ⟨StValue.asStruct_viewFree ho, hn⟩
+
+/-- A delete of a view-free value is view-free. -/
+theorem StValue.delValue_viewFree {v : StValue} (h : v.viewFree = true) :
+    (StValue.delValue v).viewFree = true := by
+  cases v with
+  | prim _ => rfl
+  | st s =>
+      cases s <;> first
+        | rfl
+        | exact h
+
+/-- `copyRead` builds nothing but copies and deletes of its two members. -/
+theorem StValue.copyRead_viewFree (ko kn : Option NodeKind) (lo ln : Int) (a : Seg)
+    {vo vn : StValue} (ho : vo.viewFree = true) (hn : vn.viewFree = true) :
+    (StValue.copyRead ko kn lo ln a vo vn).viewFree = true := by
+  have hm : (StValue.st Struct.mtSt).viewFree = true := rfl
+  unfold StValue.copyRead
+  split
+  · split <;> assumption
+  · split
+    · split
+      · exact hn
+      · exact hm
+    · split
+      · exact StValue.copyVal_viewFree (by split <;> assumption) hn
+      · split
+        · exact StValue.delValue_viewFree ho
+        · split <;> assumption
+  · exact StValue.copyVal_viewFree (by split <;> assumption) hn
+  · exact StValue.copyVal_viewFree (by split <;> assumption) hn
+
 theorem StValue.selectSt_viewFree {s : Struct} (a : Seg)
     (h : StValue.structViewFree s = true) :
     StValue.viewFree (StValue.selectSt s a) = true := by
-  induction s using Struct.inductionOn with
-  | h0 => simp [selectSt, viewFree, structViewFree]
+  induction s using Struct.inductionOn generalizing a with
+  | h0 => rfl
   | h1 s0 a1 v ih =>
       simp only [StValue.structViewFree, Bool.and_eq_true] at h
       by_cases he : a1 = a
       · simp only [selectSt, he, reduceIte]; exact h.2
-      · simp only [selectSt, he, reduceIte]; exact ih h.1
-  | h2 mem id => simp [StValue.structViewFree] at h
+      · simp only [selectSt, he, reduceIte]; exact ih a h.1
+  | h2 mem id => simp only [StValue.structViewFree, Bool.false_eq_true] at h
   | h3 p => rfl
+  | h4 k d => exact h
+  | h5 o n iho ihn =>
+      simp only [StValue.structViewFree, Bool.and_eq_true] at h
+      exact StValue.copyRead_viewFree _ _ _ _ _ (iho a h.1) (ihn a h.2)
+  | h6 s0 ih =>
+      simp only [selectSt]
+      split
+      · exact ih a h
+      · exact StValue.delValue_viewFree (ih a h)
 
 /-- A term with no view in it reads the same either way, which is what makes
 `findSt` an under-approximation of `find` rather than a second reader. -/
@@ -620,33 +861,21 @@ theorem StValue.find_eq_findSt : forall (flds : List Seg) (s : Struct),
     StValue.structViewFree s = true -> find s flds = findSt s flds
   | [], s, h => by
       cases s with
-      | copyMem _ _ => simp [StValue.structViewFree] at h
-      | mtSt => rfl
-      | storeSt _ _ _ => rfl
-      | cur _ => rfl
+      | copyMem _ _ => simp only [StValue.structViewFree, Bool.false_eq_true] at h
+      | _ => rfl
   | [a], s, h => by
       cases s with
-      | copyMem _ _ => simp [StValue.structViewFree] at h
-      | mtSt => rfl
-      | storeSt _ _ _ => rfl
-      | cur _ => rfl
+      | copyMem _ _ => simp only [StValue.structViewFree, Bool.false_eq_true] at h
+      | _ => rfl
   | a :: b :: rest, s, h => by
       have hnext : StValue.structViewFree ((selectSt s a).asStruct) = true :=
         StValue.asStruct_viewFree (StValue.selectSt_viewFree a h)
-      cases s with
-      | copyMem _ _ => simp [StValue.structViewFree] at h
-      | mtSt =>
-          show find ((selectSt Struct.mtSt a).asStruct) (b :: rest)
-            = findSt ((selectSt Struct.mtSt a).asStruct) (b :: rest)
-          exact StValue.find_eq_findSt (b :: rest) _ hnext
-      | storeSt s0 a1 v =>
-          show find (((selectSt (Struct.storeSt s0 a1 v) a)).asStruct) (b :: rest)
-            = findSt (((selectSt (Struct.storeSt s0 a1 v) a)).asStruct) (b :: rest)
-          exact StValue.find_eq_findSt (b :: rest) _ hnext
-      | cur p =>
-          show find ((selectSt (Struct.cur p) a).asStruct) (b :: rest)
-            = findSt ((selectSt (Struct.cur p) a).asStruct) (b :: rest)
-          exact StValue.find_eq_findSt (b :: rest) _ hnext
+      have hs : forall mem id, s ≠ Struct.copyMem mem id := by
+        intro mem id he
+        subst he
+        simp only [StValue.structViewFree, Bool.false_eq_true] at h
+      rw [StValue.find_cons_view s a (List.cons_ne_nil _ _) hs]
+      exact StValue.find_eq_findSt (b :: rest) _ hnext
 
 end Theory
 end Solidity

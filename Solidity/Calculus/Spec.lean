@@ -35,7 +35,9 @@ function only: `M` makes the other's a booking of `0`.
 Not ported: the benchmarks' clauses over `net(a)` are not tried.  A spec's
 arithmetic is Solidity's, checked at its operands' type, where solkey's is
 KeY's unbounded `int`: an overflowing side makes its equation false rather
-than true of a larger number.  `net(a)` is read as a `uint`, as `msg.value`
+than true of a larger number.  Every equation compiled here is the
+interpreter's, `Fml.eqD` (both sides return, with one value), not the total
+`Fml.eq`.  `net(a)` is read as a `uint`, as `msg.value`
 is, so `\old(net(a)) + msg.value` is checked too.
 -/
 
@@ -116,7 +118,7 @@ defined for a `bool`. -/
 def rangeFml (t : Term C) : PrimTy → Fml C
   | .uint => .and (cmpFml .le .uint (.lit (.int 0)) t) (cmpFml .le .uint t (.lit (.int (uintBound - 1))))
   | .int => .and (cmpFml .le .int (.lit (.int (-intBound))) t) (cmpFml .le .int t (.lit (.int (intBound - 1))))
-  | .bool => .eq (.unop .not .bool t) (.unop .not .bool t)
+  | .bool => .eqD (.unop .not .bool t) (.unop .not .bool t)
 
 /-- **The layout, as premises**: every word the declared state holds is a
 value of its type, `0 <= count <= 2^256 - 1`, and so at every key of a
@@ -258,7 +260,7 @@ partial def SpecExpr.fml (ctx : SpecCtx C) : SpecExpr → Except String (Fml C)
     if op = .eqB || op = .neB then
       let (pa, ta) ← a.term C ctx
       let (pb, tb) ← b.term C ctx
-      let eq ← if pa = .bool && pb = .bool then iff a b else pure (Fml.eq ta tb)
+      let eq ← if pa = .bool && pb = .bool then iff a b else pure (Fml.eqD ta tb)
       return if op = .eqB then eq else .not eq
     cond (.binop op a b)
   | e => cond e
@@ -333,7 +335,7 @@ on under the condition `x = t`, `m[*]` unconditionally. -/
 def enterKey (x : Var) (ls : List (List (Fml C) × List (SpecStep C))) :
     List (List (Fml C) × List (SpecStep C)) :=
   ls.filterMap fun
-    | (cs, .key t :: rest) => some (cs ++ [.eq (.pv x) t], rest)
+    | (cs, .key t :: rest) => some (cs ++ [.eqD (.pv x) t], rest)
     | (cs, .all :: rest) => some (cs, rest)
     | _ => none
 
@@ -352,7 +354,7 @@ partial def frameAt (T : Ty) (p : PTerm C) (keys : List (Var × PrimTy)) (hyps :
   let ls := ls.filter (!·.2.isEmpty)
   -- owed where the word was there to begin with: `⊨` also ranges over
   -- storages without it, where both sides halt
-  let owe (a b : Term C) : Fml C := closeFml C keys hyps (.imp (.eq b b) (.eq a b))
+  let owe (a b : Term C) : Fml C := closeFml C keys hyps (.imp (.eqD b b) (.eqD a b))
   match T with
   | .prim _ => [owe (.find .storage p) (.find (.pv oldVar) p)]
   | .ref (.mapping (.prim K) V) =>
@@ -430,7 +432,7 @@ def specPieces (f : String) :
   -- booking, `book(0)`, is left out: it changes nothing
   let U := snap ++ if d.payable then [.book (.env .msgValue)] else []
   let msgValue : Fml C := if d.payable then cmpFml .ge .uint (.env .msgValue) (.lit (.int 0))
-    else .eq (.env .msgValue) (.lit (.int 0))
+    else .eqD (.env .msgValue) (.lit (.int 0))
   let read := (C.inv ++ d.spec.requires ++ d.spec.ensures).flatMap SpecExpr.names ++
     (d.spec.assignable.getD []).flatMap SpecLoc.names
   pure (ps.map (fun (n, p) => rangeFml (.pv (.ofName n)) p) ++ layoutFmls C read ++ [msgValue],

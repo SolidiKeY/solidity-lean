@@ -1,4 +1,5 @@
 import Solidity.Theory.Storage
+import Solidity.Theory.Copy
 import Solidity.Theory.Memory
 import Solidity.Theory.CrossDomain
 
@@ -41,26 +42,36 @@ Every rule of the signature and the two cross-domain theories has
 a constructor except these, each absent by the argument given
 beside its name:
 
-* **`MapField`** — `selectOnSaveEmptyMap`, `delFieldMap`, `selectDelNodeMap`,
-  `selectStDelNodeFixedMap`: "a mapping member is kept".  `Semantics.Seg`
-  carries no field sort, so the rule has no statement here
-  (`Theory/Storage.lean`, "Delete"); the first is also unreachable, being a
-  copy `Src.copy` refuses.
-* **`FixedField`** — `delFieldFixed`, `selectStDelNodeFixed`: they pick
-  `delNodeFixed` by the member's sort, and a `Seg` has none.  The three rules
-  that read *through* `delNodeFixed` are stated
-  (`selectStDelNodeFixed{Element,Size,Value}`).
+* **`selectStDelNodeFixedMap`** — a mapping element of a deleted fixed-size
+  array is kept.  It is two stated rules in a row, not a third: inside the
+  length `selectStDelNodeFixedElement` takes the element to `delNode` of it,
+  and `selectStDelNodeMap` reads a member of a deleted mapping as it was;
+  past it the slot is kept outright (`selectStDelNodeKeep`).
 * **`typed`** — `selectOnTyped{Struct,FixedSize,DynSize,LeafSize,MapSize,
   Element,Member}` and `typedTyped`: the tag a struct read through a member
   carries so that a fixed-size array's length survives.  Its one reading rule
   answers `.length` of a fixed-size array, which the elaborator writes as the
-  literal, and it would be a fifth `Struct` constructor through every proof
-  (`Theory/Storage.lean`, "Shapes").
+  literal, and it would be one more `Struct` constructor through every proof
+  (`Theory/Storage.lean`, "Shapes").  A delete keeps that length without it:
+  the node's kind says it is a fixed-size array (`keepsOnDelete`).
 * the four `expandInUintN`/`expandInIntN` rules, the arithmetic the signature's
   own "not implemented" section lists.
 
+## The member's sort, as the node's kind
+
+The signature picks a `MapField`, `FixedField` or `RefField` rule by the sort of
+the field; a `Seg` has no sort.  The node carries it instead
+(`Theory/Terms.lean`, "Kinded nodes and the two lazy leaves"), so each of
+those rules is a theorem whose premise is the kind of the node it reads —
+`selectDelNodeMap` asks that `selectSt(st, mf)` be a mapping, `delFieldFixed`
+that it be a fixed-size array — stated one selector down, where both sides
+are literal terms.  `save(st, nil, v)` is the copying write
+`copyTo s [] v` (`Theory/Copy.lean`), so the `selectOnSaveEmpty*` family
+points at the `selectOnCopy*` laws, not at the collapsing `save`'s
+`selectOnSaveEmpty*` of `Theory/Storage.lean`, which share their names.
+
 A rule stated for every `Seg` answers for its sub-sort instances too:
-`selectOnSaveEmptyFixed` is `selectOnSaveEmptyRef`'s theorem, and the two
+`selectOnSaveEmptyFixed` is `selectOnCopyRef`'s theorem, and the two
 `shapeAt*MapElement` rules are `shapeAtFixed`/`shapeAtDyn`'s, since
 `atMap(i)` is `Seg.at i`.
 
@@ -73,9 +84,10 @@ them.
 
 Three that the printed rules *dropped* are not in it, deliberately.  `saveEmptyPath`
 (`save(st, ∅, v) = (Struct) v`) is this package's collapsing leaf
-(`StValue.saveOnEmpty`), the pre-fold rule replaced by the
-`selectOnSaveEmpty*` family; here that family is its consequence, so the
-rules need not regain it.  `singletonPath` is prose now and
+(`StValue.saveOnEmpty`), the word write and `delAt`'s; the
+`save(st, ∅, v)` of a struct is the copying write, whose laws are the
+`selectOnSaveEmpty*` family, so the collapsing rule is not one to
+regain.  `singletonPath` is prose now and
 `StValue.singletonPath` here, definitional.  The single-sort `delValue*`
 rules became `delField*`, and are the lemmas under them.
 
@@ -103,6 +115,7 @@ inductive TheoryRule where
   | saveSingleton
   -- ### Storage: a whole-struct write, read back
   | saveOnEmptyPrim
+  | selectOnSaveEmptyMap
   | selectOnSaveEmptyRef
   | selectOnSaveEmptyFixed
   | selectOnSaveEmptyIndexStruct
@@ -127,10 +140,14 @@ inductive TheoryRule where
   | findDelAtExtends
   | findDelAtFields
   | delFieldRef
+  | delFieldMap
+  | delFieldFixed
   | delFieldIndexStruct
   | delFieldDefault
   | delFieldStValueCast
   | selectDelNodeRef
+  | selectDelNodeMap
+  | selectStDelNodeFixed
   | selectStDelNodeDefault
   | selectStDelNodeIndexStruct
   | selectStDelNodeFixedElement
@@ -205,12 +222,13 @@ def lemmaNames : TheoryRule -> List Lean.Name
   | findSingleton         => [``StValue.findDefinitionCons]
   | saveSingleton         => [``StValue.save_single]
   | saveOnEmptyPrim       => [``StValue.saveOnEmptyPrimInt, ``StValue.saveOnEmptyPrimBool]
-  | selectOnSaveEmptyRef  => [``StValue.selectOnSaveEmptyRef]
-  | selectOnSaveEmptyFixed => [``StValue.selectOnSaveEmptyRef]
+  | selectOnSaveEmptyMap  => [``StValue.selectOnCopyMap]
+  | selectOnSaveEmptyRef  => [``StValue.selectOnCopyRef]
+  | selectOnSaveEmptyFixed => [``StValue.selectOnCopyRef]
   | selectOnSaveEmptyIndexStruct =>
-      [``StValue.selectOnSaveEmptyIndexStruct, ``StValue.selectOnSaveEmptyIndexClear,
-       ``StValue.selectOnSaveEmptyIndexKeep]
-  | selectOnSaveEmptyDefault => [``StValue.selectOnSaveEmpty]
+      [``StValue.selectOnCopyIndexNew, ``StValue.selectOnCopyIndexClear,
+       ``StValue.selectOnCopyIndexKeep, ``StValue.selectOnCopySize]
+  | selectOnSaveEmptyDefault => [``StValue.selectOnCopyDefault]
   | findOnSave            => [``StValue.find_save_same]
   | findOnSaveDifferent   => [``StValue.find_save_frame]
   | findOnSavePrefix      => [``StValue.find_save_prefix]
@@ -221,15 +239,20 @@ def lemmaNames : TheoryRule -> List Lean.Name
   | findDelAtExtends      => [``StValue.find_delAt_extends]
   | findDelAtFields       => [``StValue.find_delAt_below, ``StValue.find_delAt_fields]
   | delFieldRef           => [``StValue.delFieldRef]
+  | delFieldMap           => [``StValue.delFieldMap]
+  | delFieldFixed         => [``StValue.delFieldFixed]
   | delFieldIndexStruct   => [``StValue.delFieldIndexStruct]
   | delFieldDefault       => [``StValue.delFieldDefault, ``StValue.delFieldDefault_asBool]
   | delFieldStValueCast   => [``StValue.delValueCast, ``StValue.delValueCast_asInt,
                               ``StValue.delValueCast_asBool]
   | selectDelNodeRef      => [``StValue.selectStDelNodeRef, ``StValue.selectStDelNodeSelect]
+  | selectDelNodeMap      => [``StValue.selectDelNodeMap, ``StValue.selectStDelNodeMap]
+  | selectStDelNodeFixed  => [``StValue.selectStDelNodeFixed]
   | selectStDelNodeDefault => [``StValue.selectStDelNodeDefault,
                                ``StValue.selectStDelNodeDefault_asBool]
   | selectStDelNodeIndexStruct =>
-      [``StValue.selectStDelNodeIndexStruct, ``StValue.selectStDelNodeIndexKeep]
+      [``StValue.selectStDelNodeIndexStruct, ``StValue.selectStDelNodeSelect,
+       ``StValue.selectStDelNodeKeep, ``StValue.selectStDelNodeIndexKeep]
   | selectStDelNodeFixedElement => [``StValue.selectStDelNodeFixedElement]
   | selectStDelNodeFixedSize => [``StValue.selectStDelNodeFixedSize]
   | selectStDelNodeFixedValue => [``StValue.selectStDelNodeFixedValue,
@@ -279,12 +302,14 @@ def lemmaNames : TheoryRule -> List Lean.Name
 def all : List TheoryRule :=
   [ .selectStoreEqual, .selectStoreDifferent, .selectEmptyStruct,
     .findEmptyPath, .findPath, .savePath, .findSingleton, .saveSingleton,
-    .saveOnEmptyPrim, .selectOnSaveEmptyRef, .selectOnSaveEmptyFixed,
+    .saveOnEmptyPrim, .selectOnSaveEmptyMap, .selectOnSaveEmptyRef, .selectOnSaveEmptyFixed,
     .selectOnSaveEmptyIndexStruct, .selectOnSaveEmptyDefault,
     .findOnSave, .findOnSaveDifferent, .findOnSavePrefix, .findOnSaveExtends,
     .delAtEmpty, .findDelAt, .findDelAtOutside, .findDelAtExtends, .findDelAtFields,
-    .delFieldRef, .delFieldIndexStruct, .delFieldDefault, .delFieldStValueCast,
-    .selectDelNodeRef, .selectStDelNodeDefault, .selectStDelNodeIndexStruct,
+    .delFieldRef, .delFieldMap, .delFieldFixed, .delFieldIndexStruct, .delFieldDefault,
+    .delFieldStValueCast,
+    .selectDelNodeRef, .selectDelNodeMap, .selectStDelNodeFixed, .selectStDelNodeDefault,
+    .selectStDelNodeIndexStruct,
     .selectStDelNodeFixedElement, .selectStDelNodeFixedSize, .selectStDelNodeFixedValue,
     .selectOnDelAt,
     .defValResolve,

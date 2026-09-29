@@ -19,6 +19,14 @@ The reading is mini-solkey's: the macros build a raw formula, `elabDl`
 resolves its names at compile time (`elabAgainst`, as `sol[C]{ … }` does),
 and `Fml.quote` (`Quote.lean`) splices the result.
 
+**Two equations.**  `a = b` here is the interpreter's equation, `Fml.eqD`:
+both sides return, with one value — what `==` means, and what `a = b`
+meant before `holds` read an equation in the Theory.  `a ≐ b` is the total
+one, `Fml.eq` (KeY's `=`, which a taclet writes as `=` in `dl{ … }`): it
+compares what the sides denote, and may hold of sides that halt.
+`defined(t)` says `t` returns.  The printer follows: `Fml.eqD` prints as `=`
+(a comparison `a < b` as itself), `Fml.eq` as `≐`.
+
 What a name is:
 
 * a program reads and writes it as `sol[C]{ … }` does; `==` and `!=`
@@ -76,7 +84,12 @@ inductive RawUpdElem where
 /-- A formula as written.  `peq`/`pne` compare program expressions (`==`, `!=`). -/
 inductive RawFml where
   | tt
+  /-- `a = b`: both sides return, with one value (`Fml.eqD`). -/
   | eq (a b : RawTerm)
+  /-- `a ≐ b`: the total equation (`Fml.eq`). -/
+  | teq (a b : RawTerm)
+  /-- `defined(t)` -/
+  | defined (t : RawTerm)
   | peq (a b : RawExpr)
   | pne (a b : RawExpr)
   /-- `a < b`, `a <= b`, `a > b`, `a >= b`: terms, compared as `uint`s
@@ -178,6 +191,8 @@ partial def expandFml : TSyntax `dl_fml → MacroM Lean.Term
   | `(dl_fml| true) => `(RawFml.tt)
   | `(dl_fml| false) => `(RawFml.not RawFml.tt)
   | `(dl_fml| $a:dl_term = $b:dl_term) => do `(RawFml.eq $(← expandTerm a) $(← expandTerm b))
+  | `(dl_fml| $a:dl_term ≐ $b:dl_term) => do `(RawFml.teq $(← expandTerm a) $(← expandTerm b))
+  | `(dl_fml| defined( $t:dl_term )) => do `(RawFml.defined $(← expandTerm t))
   | `(dl_fml| $a:dl_term == $b:dl_term) => do
       `(RawFml.peq $(← expandOperand a) $(← expandOperand b))
   | `(dl_fml| $a:dl_term != $b:dl_term) => do
@@ -257,7 +272,8 @@ def RawUpdElem.names : RawUpdElem → List String
 /-- The names a raw formula mentions, and those its programs declare. -/
 def RawFml.names : RawFml → List String × List String
   | .tt => ([], [])
-  | .eq a b => (a.names ++ b.names, [])
+  | .eq a b | .teq a b => (a.names ++ b.names, [])
+  | .defined t => (t.names, [])
   | .peq a b | .pne a b => (a.names ++ b.names, [])
   | .cmp _ a b => (a.names ++ b.names, [])
   | .all _ x φ =>
@@ -282,10 +298,10 @@ def RawFml.stmts : RawFml → List RawStmt
   | .modal _ P φ => P ++ φ.stmts
   | _ => []
 
-/-- `t = true`: a condition as a formula. -/
-def boolFml {C : Contract} (t : Term C) : Fml C := .eq t (.lit (.bool true))
+/-- `t = true`, both sides defined: a condition as a formula. -/
+def boolFml {C : Contract} (t : Term C) : Fml C := .eqD t (.lit (.bool true))
 
-/-- `a ⊕ b = true`: a comparison as a formula (`a < b` and the like). -/
+/-- `a ⊕ b = true`, defined: a comparison as a formula (`a < b` and the like). -/
 def cmpFml {C : Contract} (op : BinOp) (p : PrimTy) (a b : Term C) : Fml C :=
   boolFml (.binop op p a b)
 
@@ -543,15 +559,21 @@ def elabFml : RawFml → ElabM (Fml C)
   | .tt => pure .tt
   | .eq a b => do
     let (Γ, _) ← get
+    pure (.eqD (← tVal C Γ a) (← tVal C Γ b))
+  | .teq a b => do
+    let (Γ, _) ← get
     pure (.eq (← tVal C Γ a) (← tVal C Γ b))
+  | .defined t => do
+    let (Γ, _) ← get
+    pure (.defined (← tVal C Γ t))
   | .peq a b => do
     let (Γ, _) ← get
     let (a, b) ← elabCompare C Γ a b
-    pure (.eq a b)
+    pure (.eqD a b)
   | .pne a b => do
     let (Γ, _) ← get
     let (a, b) ← elabCompare C Γ a b
-    pure (.not (.eq a b))
+    pure (.not (.eqD a b))
   | .cmp op a b => do
     let (Γ, _) ← get
     pure (cmpFml op .uint (← tVal C Γ a) (← tVal C Γ b))
@@ -669,6 +691,19 @@ example : dl!{ ∃ uint y; y == a } = dl!{ ¬(∀ uint y; ¬y == a) } := rfl
 
 /-- info: dl{ ∃ uint y; y = a } : Fml StandardExample -/
 #guard_msgs in #check dl!{ ∃ uint y; y == a }
+
+/-- `=` is `==`'s equation; `≐` the total one, and `defined` is its own atom. -/
+example : dl!{ a = 1 } = Fml.eqD (.pv (.user "a")) (.lit (.int 1)) := rfl
+example : dl!{ a ≐ 1 } = Fml.eq (.pv (.user "a")) (.lit (.int 1)) := rfl
+
+/-- info: dl{ (defined(a) ∧ a ≐ 1) → a = 1 } : Fml StandardExample -/
+#guard_msgs in #check dl!{ defined(a) ∧ a ≐ 1 → a = 1 }
+
+/-- info: dl{ a = 1 } : Fml StandardExample -/
+#guard_msgs in #check (Fml.eqD (.pv (.user "a")) (.lit (.int 1)) : Fml StandardExample)
+
+/-- info: dl{ ¬a = 1 ∧ a < 2 } : Fml StandardExample -/
+#guard_msgs in #check dl!{ a != 1 ∧ a < 2 }
 
 /-- error: Solidity elaboration failed: unknown name y -/
 #guard_msgs in #check dl!{ ⟨ uint y = 1; ⟩ true ∧ y == 1 }

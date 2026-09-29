@@ -121,16 +121,18 @@ theorem withdrawUnsafe_withCallback : ¬ ValidT (.withCallback vaultInv) withdra
   intro h
   have h := h before
   simp only [withdrawUnsafe, holdsT, holdsC] at h
-  have hI : holds before vaultInv.fml := rfl
+  have hI : holds before vaultInv.fml := holds_eqD_iff.2 ⟨_, rfl, rfl⟩
   -- the run: `amt = 5`; pay `5`; the callee withdraws again (`reentered`);
   -- `balance = 0`; `paidOut += 5`
   have H := h hI _
     (.cons (ExecS.of_run rfl rfl)
-      (.cons (ExecS.transferResume (st := reentered) (nt := []) (bal := 0) rfl rfl rfl)
+      (.cons (ExecS.transferResume (st := reentered) (nt := []) (bal := 0) rfl
+        (holds_eqD_iff.2 ⟨_, rfl, rfl⟩) (holds_eqD_iff.2 ⟨_, rfl, rfl⟩))
         (.cons (ExecS.of_run rfl rfl)
           (.cons (ExecS.of_run rfl rfl) .nil))))
   -- `0 + 10 == 5` fails
-  cases H
+  obtain ⟨x, hx, hy⟩ := holds_eqD_iff.1 H
+  cases hx; cases hy
 
 /-! ## The diamond owes the funds -/
 

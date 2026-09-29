@@ -18,6 +18,7 @@ import Solidity.Calculus.SoundKit
 import Solidity.Calculus.SoundUpdate
 import Solidity.Calculus.SoundUnfold
 import Solidity.Calculus.RuleSoundness
+import Solidity.Calculus.TermRules
 import Solidity.Calculus.Logic
 import Solidity.Calculus.Callback
 import Solidity.Calculus.Symex
@@ -34,6 +35,7 @@ import Solidity.Calculus.Termination
 import Solidity.Calculus.Chains
 import Solidity.Calculus.UpdateRules
 import Solidity.Calculus.Rewrite
+import Solidity.Calculus.TheoryLaws
 import Solidity.Examples.Tour
 import Solidity.Examples.StorageSteps
 import Solidity.Examples.StorageSuite
@@ -72,6 +74,16 @@ import Solidity.Typing.Reachability
 import Solidity.Typing.Constructibility
 import Solidity.Theory.Terms
 import Solidity.Theory.Storage
+import Solidity.Theory.Copy
+import Solidity.Theory.Observe
+import Solidity.Theory.Abs
+import Solidity.Theory.Bridge.Find
+import Solidity.Theory.Bridge.Save
+import Solidity.Theory.Bridge.CopyArray
+import Solidity.Theory.Bridge.Delete
+import Solidity.Theory.Bridge.Copy
+import Solidity.Theory.Bridge.Push
+import Solidity.Theory.Bridge.Denote
 import Solidity.Theory.Memory
 import Solidity.Theory.CrossDomain
 import Solidity.Theory.Rewrite

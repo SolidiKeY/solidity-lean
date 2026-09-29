@@ -197,11 +197,11 @@ example : dl!{ ⟨ balances[a] = 1; if (true) { x = 2; } else { x = 1; }; ⟩ ba
             ⟨ if (true) { x = 2; } else { x = 1; }; ⟩ balances[a] == x }
     ~[ifElseSplit]~>
         dl!{ { storage := save(storage, balances[a], 1) }
-            ((true = true → ⟨ x = 2; ⟩ balances[a] == x) ∧
-              (true = false → ⟨ x = 1; ⟩ balances[a] == x) ∧ ¬(¬true = true ∧ ¬true = false)) }
+            ((true ≐ true → ⟨ x = 2; ⟩ balances[a] == x) ∧
+              (true ≐ false → ⟨ x = 1; ⟩ balances[a] == x) ∧ ¬(¬true ≐ true ∧ ¬true ≐ false)) }
     ~*> dl!{ { storage := save(storage, balances[a], 1) }
-            ((true = true → { x := 2 } balances[a] == x) ∧
-              (true = false → { x := 1 } balances[a] == x) ∧ ¬(¬true = true ∧ ¬true = false)) } := by
+            ((true ≐ true → { x := 2 } balances[a] == x) ∧
+              (true ≐ false → { x := 1 } balances[a] == x) ∧ ¬(¬true ≐ true ∧ ¬true ≐ false)) } := by
   sol_chain
 
 /-! ## 6 · The evidence is unique

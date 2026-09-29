@@ -129,7 +129,7 @@ info: @Taclet.memoryStorageCopy : ∀ {C : Contract} {k : Nat} {m : Modality} {m
 
 /--
 info: @Taclet.ifElseSplit : ∀ {C : Contract} {k : Nat} {m : Modality} {se : Simple C PrimTy.bool} {thn els : List (Stmt C)},
-  dl{ ⟨[ if (se) thn else els; ]⟩ ⇝ se = true ⟹ ⟨[ thn ]⟩ ; se = false ⟹ ⟨[ els ]⟩ }
+  dl{ ⟨[ if (se) thn else els; ]⟩ ⇝ se ≐ true ⟹ ⟨[ thn ]⟩ ; se ≐ false ⟹ ⟨[ els ]⟩ }
 -/
 #guard_msgs in #check @Taclet.ifElseSplit
 

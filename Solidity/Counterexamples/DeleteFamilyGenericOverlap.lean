@@ -55,6 +55,12 @@ and no later cast can revive it (`findStValueCast` matches
 `find<[StValue]>` under a cast, not a bare `delValue<[StValue]>` inside
 a `save`). Delete-then-copy therefore fails to symbolically execute.
 
+This package's own theory has neither overlap by construction: a member of
+a deleted node is read by one `if` on the node's kind (`selectOnDelNode`,
+`keepsOnDelete` in `Theory/Storage.lean`), so the mapping-keeping branch and
+the resetting one are two cases of a single definition, never two rules for
+the same term.
+
 Recorded in `docs/solkey-feedback.md`; the matcher-admissibility claims
 (`alphaSt := Struct`; `Field` schema variable matching a `MapField`
 term) are transcriptions of standard KeY generic-sort/subsort matching

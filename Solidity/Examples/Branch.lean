@@ -37,7 +37,7 @@ one of them holds (`Premise.cover`); under the box `cov` is `true`.
 The old table's condition-directed rewrites (`ifElseTrue`, `ifElseFalse`,
 `ifElseNegated`) are gone: a literal is simple, so `if (true)` splits like any
 other condition, and `!c` is captured like `a == b`.  The goal whose
-hypothesis is `true = false` is then closed by the logic, not by a rule.
+hypothesis is `true ≐ false` is then closed by the logic, not by a rule.
 -/
 
 namespace Solidity.Examples.Branch
@@ -58,7 +58,7 @@ info: @Taclet.ifElseUnfold : ∀ {C : Contract} {k : Nat} {m : Modality} {nse : 
 
 /--
 info: @Taclet.ifElseSplit : ∀ {C : Contract} {k : Nat} {m : Modality} {se : Simple C PrimTy.bool} {thn els : List (Stmt C)},
-  dl{ ⟨[ if (se) thn else els; ]⟩ ⇝ se = true ⟹ ⟨[ thn ]⟩ ; se = false ⟹ ⟨[ els ]⟩ }
+  dl{ ⟨[ if (se) thn else els; ]⟩ ⇝ se ≐ true ⟹ ⟨[ thn ]⟩ ; se ≐ false ⟹ ⟨[ els ]⟩ }
 -/
 #guard_msgs in #check @Taclet.ifElseSplit
 
@@ -77,14 +77,14 @@ theorem branchLocals : ⊢ dl!{ [ if (a == b) { x = 2; } else { x = 1; }; ] x !=
   -- dl{ { se1 := a == b } ⟹ [ if (se1) { x = 2; } else { x = 1; }; ] ¬x = 0 }
   apply split .ifElseSplit
   case thn =>
-    -- dl{ { se1 := a == b }, se1 = true ⟹ [ x = 2; ] ¬x = 0 }
+    -- dl{ { se1 := a == b }, se1 ≐ true ⟹ [ x = 2; ] ¬x = 0 }
     apply update .localValueAssign
     apply empty
     refine close ?_
     sol_symex
     sol_close
   case els =>
-    -- dl{ { se1 := a == b }, se1 = false ⟹ [ x = 1; ] ¬x = 0 }
+    -- dl{ { se1 := a == b }, se1 ≐ false ⟹ [ x = 1; ] ¬x = 0 }
     apply update .localValueAssign
     apply empty
     refine close ?_
@@ -107,14 +107,14 @@ trace: case thn
     {
         se1 :=
           ‹Term.binop BinOp.eqB PrimTy.uint (Simple.local (Var.user "a")).lower (Simple.local (Var.user "b")).lower› },
-    se1 = true ⟹ [ x = 2; ] ¬x = 0 }
+    se1 ≐ true ⟹ [ x = 2; ] ¬x = 0 }
 
 case els
 ⊢ dl{
     {
         se1 :=
           ‹Term.binop BinOp.eqB PrimTy.uint (Simple.local (Var.user "a")).lower (Simple.local (Var.user "b")).lower› },
-    se1 = false ⟹ [ x = 1; ] ¬x = 0 }
+    se1 ≐ false ⟹ [ x = 1; ] ¬x = 0 }
 
 case cov
 ⊢ dl{
@@ -144,7 +144,7 @@ example : ⊢ dl!{ [ if (a == b) { x = 2; } else { x = 1; }; ] x != 0 } := by
 /-! ## Under the diamond: the condition decides
 
 With the precondition `a == b` the `else` goal has both `a = b` and
-`se1 = false` in its context, a contradiction; and the precondition binds
+`se1 ≐ false` in its context, a contradiction; and the precondition binds
 `a` and `b`, so the condition is not stuck and `cov` holds. -/
 
 /-- `a == b → ⟨ if (a == b) { x = 2; } else { x = 1; } ⟩ x == 2`. -/
@@ -162,14 +162,14 @@ theorem branchDiamond :
     sol_symex
     sol_close
   case els =>
-    -- dl{ a = b, { se1 := a == b }, se1 = false ⟹ ⟨ x = 1; ⟩ x = 2 }
+    -- dl{ a = b, { se1 := a == b }, se1 ≐ false ⟹ ⟨ x = 1; ⟩ x = 2 }
     apply update .localValueAssign
     apply empty
     refine close ?_
     sol_symex
     sol_close
   case cov =>
-    -- dl{ a = b, { se1 := a == b } ⟹ ¬(¬se1 = true ∧ ¬se1 = false) }
+    -- dl{ a = b, { se1 := a == b } ⟹ ¬(¬se1 ≐ true ∧ ¬se1 ≐ false) }
     refine close ?_
     sol_symex
     sol_close
@@ -182,13 +182,13 @@ example : ¬ (⊨ dl!{ ⟨ if (a == b) { x = 2; } else { x = 1; }; ⟩ x != 0 })
 /-! ## A literal condition
 
 `true` is simple: no capture, and the split's `else` goal carries
-`true = false`.  (The old `ifElseTrue` collapsed this in one rewrite.) -/
+`true ≐ false`.  (The old `ifElseTrue` collapsed this in one rewrite.) -/
 
 /--
 trace: ⊢ ⊨
     dl{
-      (true = true → [ age = 1; ] select(storage, age) = 1) ∧
-        (true = false → [ age = 2; ] select(storage, age) = 1) ∧ true }
+      (true ≐ true → [ age = 1; ] select(storage, age) = 1) ∧
+        (true ≐ false → [ age = 2; ] select(storage, age) = 1) ∧ true }
 -/
 #guard_msgs in
 /-- `if (true) { age = 1; } else { age = 2; }` writes `1`. -/

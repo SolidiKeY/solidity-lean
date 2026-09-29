@@ -1,4 +1,5 @@
 import Solidity.Calculus.Notation
+import Solidity.Theory.Bridge.Denote
 
 /-!
 # Update simplification
@@ -38,7 +39,9 @@ carries the side condition that makes it an equivalence again:
   path of state variables and members) — `se1 := 10` and
   `sp1 := alice.account`, what Step 2 captures, are;
 * substituting `U` into a formula (`applyOnRigid`) forgets whether `U`
-  halts, so `U` must not halt;
+  halts, so `U` must not halt — for the equivalence; under the box one
+  direction holds for any update of locals, and for one that also writes
+  the storage where the formula reads none (`Proves.applyOnRigidBox`);
 * `x := x` halts when `x` is not bound to a value, so `elimSelfUpdate` is
   no equivalence: dropping it is sound under the box, keeping it under the
   diamond.
@@ -50,7 +53,10 @@ state, and a `U` that writes the storage would have to be substituted for
 it.  So the local captures of a stack merge, and two storage writes stay
 two updates.  A variable read at another sort than `U` binds it
 (`x := 1`, then `p.age` for an alias `p`) becomes a term that halts
-(`Term.stuck`), as the read would.
+(`Term.stuck`), as the read would.  `applyOnRigid` excludes that case
+(`Fml.sortedFor`): an equation reads its terms in the Theory, where a halt
+still denotes something, and a storage or path variable of the wrong sort
+denotes something other than its substitution.
 
 The rules are optional: nothing else uses them.  They are used through
 `Fml.simpUpds` (merge every stack, drop what is dead), the tactics
@@ -318,6 +324,8 @@ structure SubstAgree (U : Upd C) (ns : List Var) (σ τ : State) : Prop where
   unwritten : ∀ x, U.lastWrite x = none → σ.getEnv x = τ.getEnv x
   /-- A variable `U` writes holds no ledger after it. -/
   written : ∀ x e, U.lastWrite x = some e → ∃ b, τ.getEnv x = .ok b ∧ ∀ l, b ≠ .ledger l
+  /-- Every element of `U` that writes a variable returns in `σ`: `U` did not halt. -/
+  bound : ∀ x e, U.lastWrite x = some e → ∃ b, e.binding σ = .ok b
 
 section Subst
 
@@ -610,7 +618,10 @@ theorem Upd.substAgree {U : Upd C} (hU : U.envOnly = true) {σ τ : State}
     | storage | memory | transfer | store | saveNet | book => simp only [UpdElem.var?,
         reduceCtorEq] at hvar
   refine ⟨hag, fun x => ?_, fun x => ?_, fun x => ?_, fun x => ?_,
-    fun x hx => (getEnv_eq x hx).symm, written⟩
+    fun x hx => (getEnv_eq x hx).symm, written, fun x e hx => ?_⟩
+  rotate_left 4
+  · obtain ⟨b, hb, _⟩ := hsome x e hx
+    exact ⟨b, hb⟩
   rotate_left 3
   · unfold Upd.storOf
     split
@@ -1005,11 +1016,296 @@ theorem UpdElem.elimSelf_diamond {e : UpdElem C} (he : e.isSelf = true) {σ : St
       Modality.onHalt] at h
   | ok τ => exact (UpdElem.elimSelf_holds he hw .diamond U φ).1 h
 
+/-! ### Substitution is denotation after the update
+
+`holds` reads an equation through `denote`, which is total: a halting term
+denotes something (`Res.toSt`), and so does `Term.stuck`, `PTerm.stuck` and
+`STerm.stuck` — not always what the variable they replace denotes after the
+update.  A value variable is fine (`Term.stuck` and an unbound value both
+denote `st mtSt`); a path or storage variable written at another sort is not:
+`find(x, a)` after `{ x := 1 }` denotes `st mtSt`, its substitution
+`find(STerm.stuck, a)` reads `a` in the storage.  KeY's terms are sorted and
+cannot say it; here `Term.sortedFor U` excludes it. -/
+
+/-- `U` writes `x`, if at all, as an alias. -/
+def Upd.pathSorted (U : Upd C) (x : Var) : Bool :=
+  match U.lastWrite x with
+  | some (.path ..) | none => true
+  | some _ => false
+
+mutual
+
+/-- Every alias the term reads `U` writes, if at all, as an alias, and every
+storage variable it reads `U` does not write. -/
+def Term.sortedFor (U : Upd C) : Term C → Bool
+  | .lit _ | .pv _ | .env _ | .read .. | .mlen .. => true
+  | .binop _ _ a b => a.sortedFor U && b.sortedFor U
+  | .unop _ _ a | .net a | .netOf _ a => a.sortedFor U
+  | .find s p | .len s p => s.sortedFor U && p.sortedFor U
+  | .ite c a b => c.sortedFor U && a.sortedFor U && b.sortedFor U
+
+def PTerm.sortedFor (U : Upd C) : PTerm C → Bool
+  | .root _ => true
+  | .pv x => U.pathSorted x
+  | .field p _ | .next p => p.sortedFor U
+  | .at p i => p.sortedFor U && i.sortedFor U
+
+def STerm.sortedFor (U : Upd C) : STerm C → Bool
+  | .storage => true
+  | .pv x => (U.lastWrite x).isNone
+  | .save s p v | .push s p v => s.sortedFor U && p.sortedFor U && v.sortedFor U
+  | .delAt s p | .pop s p | .shrink s p | .pushSlot s p _ | .extend s p _ =>
+    s.sortedFor U && p.sortedFor U
+
+def SValT.sortedFor (U : Upd C) : SValT C → Bool
+  | .val t | .newArr _ t => t.sortedFor U
+  | .find s p => s.sortedFor U && p.sortedFor U
+  | .copyMem .. => true
+
+end
+
+/-- A value variable that does not read denotes nothing. -/
+theorem Term.pv_denote_of_error {σ : State} {x : Var} {e : Halt}
+    (h : (Term.pv x : Term C).eval σ = .error e) : (Term.pv x : Term C).denote σ = .st .mtSt := by
+  simp only [Term.eval, bind, Except.bind] at h
+  simp only [Term.denote]
+  split at h
+  · rename_i he
+    simp only [he]
+  · rename_i b hb
+    rw [hb]
+    cases b <;> simp_all only [pure, Except.pure, reduceCtorEq]
+
+/-- An alias that does not resolve denotes the empty path. -/
+theorem PTerm.pv_denote_of_error {σ : State} {x : Var} {e : Halt}
+    (h : (PTerm.pv x : PTerm C).eval σ = .error e) : (PTerm.pv x : PTerm C).denote σ = [] := by
+  have h' : aliasPath σ x = .error e := h
+  simp only [PTerm.denote, h']
+
+section SubstDenote
+
+variable {U : Upd C} {ns : List Var} {σ τ : State}
+
+open Theory Theory.StValue
+
+theorem SubstAgree.abs_eq (h : SubstAgree U ns σ τ) : σ.abs = τ.abs := by
+  simp only [State.abs, h.agree.storage]
+
+/-- `{U}x` denotes before the update what `x` denotes after it. -/
+theorem SubstAgree.val_denote (h : SubstAgree U ns σ τ) (x : Var) :
+    Equiv ((U.valOf x).denote σ) ((Term.pv x : Term C).denote τ) := by
+  have h1 : (U.valOf x).eval σ = (Term.pv x : Term C).eval τ := h.val x
+  cases hv : (U.valOf x).eval σ with
+  | ok v =>
+    rw [hv] at h1
+    rw [Term.denote_eval hv, Term.denote_eval h1.symm]
+    exact Equiv.refl _
+  | error e =>
+    rw [hv] at h1
+    rw [Term.pv_denote_of_error h1.symm]
+    unfold Upd.valOf at hv ⊢
+    split
+    · rename_i y t hx
+      rw [hx] at hv
+      obtain ⟨b, hb⟩ := h.bound x _ hx
+      simp only [UpdElem.binding, hv, bind, Except.bind, reduceCtorEq] at hb
+    · exact Equiv.refl _
+    · rename_i hx
+      rw [hx] at hv
+      rw [Term.pv_denote_of_error hv]
+      exact Equiv.refl _
+
+/-- `{U}p` denotes before the update the path `p` denotes after it. -/
+theorem SubstAgree.path_denote (h : SubstAgree U ns σ τ) {x : Var} (hs : U.pathSorted x = true) :
+    (U.pathOf x).denote σ = (PTerm.pv x : PTerm C).denote τ := by
+  have h1 : (U.pathOf x).eval σ = (PTerm.pv x : PTerm C).eval τ := h.path x
+  cases hp : (U.pathOf x).eval σ with
+  | ok rs =>
+    obtain ⟨r, segs⟩ := rs
+    rw [hp] at h1
+    rw [PTerm.denote_eval hp, PTerm.denote_eval h1.symm]
+  | error e =>
+    rw [hp] at h1
+    rw [PTerm.pv_denote_of_error h1.symm]
+    unfold Upd.pathSorted at hs
+    unfold Upd.pathOf at hp ⊢
+    split
+    · rename_i y q hx
+      rw [hx] at hp
+      obtain ⟨b, hb⟩ := h.bound x _ hx
+      simp only [UpdElem.binding, hp, bind, Except.bind, reduceCtorEq] at hb
+    · rename_i e' hne hx
+      rw [hx] at hs
+      split at hs
+      · rename_i heq
+        cases heq
+        exact absurd rfl (hne _ _)
+      · simp_all only [reduceCtorEq]
+      · cases hs
+    · rename_i hx
+      rw [hx] at hp
+      exact PTerm.pv_denote_of_error hp
+
+mutual
+
+/-- A substituted term denotes before the update, up to `Equiv`, what the
+term denotes after it.
+
+Example: after `y = 3;`, `{ y := 3 }(y + 1)` is `3 + 1`, which denotes `4`
+before the update as `y + 1` does after it. -/
+theorem Term.subst_denote (h : SubstAgree U ns σ τ) :
+    (t : Term C) → t.sortedFor U = true → Equiv ((t.subst U).denote σ) (t.denote τ)
+  | .lit _, _ => Equiv.refl _
+  | .pv x, _ => h.val_denote x
+  | .binop op p a b, hs => by
+    simp only [Term.sortedFor, Bool.and_eq_true] at hs
+    simp only [Term.subst, Term.denote, (Term.subst_denote h a hs.1).toRes,
+      (Term.subst_denote h b hs.2).toRes]
+    exact Equiv.refl _
+  | .unop op p a, hs => by
+    simp only [Term.subst, Term.denote, (Term.subst_denote h a hs).toRes]
+    exact Equiv.refl _
+  | .find s p, hs => by
+    simp only [Term.sortedFor, Bool.and_eq_true] at hs
+    simp only [Term.subst, Term.denote, PTerm.subst_denote h p hs.2]
+    exact Equiv.findSt (STerm.subst_denote h s hs.1) _
+  | .len s p, hs => by
+    simp only [Term.sortedFor, Bool.and_eq_true] at hs
+    simp only [Term.subst, Term.denote, PTerm.subst_denote h p hs.2]
+    exact Equiv.findSt (STerm.subst_denote h s hs.1) _
+  | .read m a, _ => by
+    show Equiv (Res.toSt (((Term.read m a).subst U).eval σ)) (Res.toSt ((Term.read m a).eval τ))
+    rw [Term.subst_eval h]
+    exact Equiv.refl _
+  | .mlen m i, _ => by
+    show Equiv (Res.toSt (((Term.mlen m i).subst U).eval σ)) (Res.toSt ((Term.mlen m i).eval τ))
+    rw [Term.subst_eval h]
+    exact Equiv.refl _
+  | .ite c a b, hs => by
+    simp only [Term.sortedFor, Bool.and_eq_true] at hs
+    have ea : Equiv ((a.subst U).denote σ) (a.denote τ) := Term.subst_denote h a hs.1.2
+    have eb : Equiv ((b.subst U).denote σ) (b.denote τ) := Term.subst_denote h b hs.2
+    simp only [Term.subst, Term.denote]
+    rcases (Term.subst_denote h c hs.1.1).eq_or_st with hc | ⟨s, t, hc, hc'⟩
+    · rw [hc]
+      split
+      · exact ea
+      · exact eb
+      · exact Equiv.refl _
+    · rw [hc, hc']
+      exact Equiv.refl _
+  | .env k, _ => by
+    simp only [Term.subst, Term.denote, State.envVal_congr h.agree]
+    exact Equiv.refl _
+  | .net a, hs => by
+    simp only [Term.subst, Term.denote, State.getNet, h.agree.net]
+    rcases (Term.subst_denote h a hs).eq_or_st with ha | ⟨s, t, ha, ha'⟩
+    · rw [ha]
+      exact Equiv.refl _
+    · rw [ha, ha']
+      exact Equiv.refl _
+  | .netOf x a, hs => by
+    simp only [Term.subst]
+    split
+    · rename_i e hx
+      obtain ⟨b, hb, hnl⟩ := h.written x e hx
+      show Equiv (Term.stuck.denote σ) _
+      simp only [Term.denote, hb]
+      cases b with
+      | ledger l => exact absurd rfl (hnl l)
+      | _ => exact Equiv.refl _
+    · rename_i hx
+      simp only [Term.denote, h.unwritten x hx]
+      rcases (Term.subst_denote h a hs).eq_or_st with ha | ⟨s, t, ha, ha'⟩
+      · rw [ha]
+        exact Equiv.refl _
+      · rw [ha, ha']
+        rcases τ.getEnv x with _ | b
+        · exact Equiv.refl _
+        · cases b <;> exact Equiv.refl _
+
+/-- A substituted path denotes before the update the path it denotes after it. -/
+theorem PTerm.subst_denote (h : SubstAgree U ns σ τ) :
+    (p : PTerm C) → p.sortedFor U = true → (p.subst U).denote σ = p.denote τ
+  | .root _, _ => rfl
+  | .pv _, hs => h.path_denote hs
+  | .field p _, hs => by simp only [PTerm.subst, PTerm.denote, PTerm.subst_denote h p hs]
+  | .at p i, hs => by
+    simp only [PTerm.sortedFor, Bool.and_eq_true] at hs
+    simp only [PTerm.subst, PTerm.denote, PTerm.subst_denote h p hs.1,
+      (Term.subst_denote h i hs.2).asInt]
+  | .next p, hs => by
+    simp only [PTerm.subst, PTerm.denote, PTerm.subst_denote h p hs, h.abs_eq]
+
+/-- A substituted storage denotes before the update, up to `Equiv`, the
+storage it denotes after it. -/
+theorem STerm.subst_denote (h : SubstAgree U ns σ τ) :
+    (s : STerm C) → s.sortedFor U = true → Struct.Equiv ((s.subst U).denote σ) (s.denote τ)
+  | .storage, _ => by
+    simp only [STerm.subst, STerm.denote, h.abs_eq]
+    exact Equiv.refl _
+  | .pv x, hs => by
+    simp only [STerm.sortedFor, Option.isNone_iff_eq_none] at hs
+    simp only [STerm.subst, Upd.storOf, hs, STerm.denote, h.unwritten x hs]
+    exact Equiv.refl _
+  | .save s p v, hs => by
+    simp only [STerm.sortedFor, Bool.and_eq_true] at hs
+    simp only [STerm.subst, STerm.denote, PTerm.subst_denote h p hs.1.2]
+    exact Struct.Equiv.copyTo (STerm.subst_denote h s hs.1.1) (SValT.subst_denote h v hs.2) _
+  | .delAt s p, hs => by
+    simp only [STerm.sortedFor, Bool.and_eq_true] at hs
+    simp only [STerm.subst, STerm.denote, PTerm.subst_denote h p hs.2]
+    exact Struct.Equiv.delAt (STerm.subst_denote h s hs.1) _
+  | .push s p v, hs => by
+    simp only [STerm.sortedFor, Bool.and_eq_true] at hs
+    simp only [STerm.subst, STerm.denote, PTerm.subst_denote h p hs.1.2]
+    exact Struct.Equiv.pushT (STerm.subst_denote h s hs.1.1)
+      (Equiv.stripVal (SValT.subst_denote h v hs.2)) _
+  | .pushSlot s p _, hs => by
+    simp only [STerm.sortedFor, Bool.and_eq_true] at hs
+    simp only [STerm.subst, STerm.denote, PTerm.subst_denote h p hs.2]
+    exact Struct.Equiv.pushSlotT _ _ (STerm.subst_denote h s hs.1) _
+  | .extend s p _, hs => by
+    simp only [STerm.sortedFor, Bool.and_eq_true] at hs
+    simp only [STerm.subst, STerm.denote, PTerm.subst_denote h p hs.2]
+    exact Struct.Equiv.pushSlotT _ _ (STerm.subst_denote h s hs.1) _
+  | .pop s p, hs => by
+    simp only [STerm.sortedFor, Bool.and_eq_true] at hs
+    simp only [STerm.subst, STerm.denote, PTerm.subst_denote h p hs.2]
+    exact Struct.Equiv.popT (STerm.subst_denote h s hs.1) _
+  | .shrink s p, hs => by
+    simp only [STerm.sortedFor, Bool.and_eq_true] at hs
+    simp only [STerm.subst, STerm.denote, PTerm.subst_denote h p hs.2]
+    exact Struct.Equiv.shrinkT (STerm.subst_denote h s hs.1) _
+
+/-- A substituted stored value denotes before the update, up to `Equiv`, what
+it denotes after it. -/
+theorem SValT.subst_denote (h : SubstAgree U ns σ τ) :
+    (v : SValT C) → v.sortedFor U = true → Equiv ((v.subst U).denote σ) (v.denote τ)
+  | .val t, hs => Term.subst_denote h t hs
+  | .find s p, hs => by
+    simp only [SValT.sortedFor, Bool.and_eq_true] at hs
+    simp only [SValT.subst, SValT.denote, PTerm.subst_denote h p hs.2]
+    exact Equiv.findSt (STerm.subst_denote h s hs.1) _
+  | .copyMem m i, _ => by
+    show Equiv (match ((SValT.copyMem m i).subst U).eval σ with
+      | .ok w => w.abs
+      | .error _ => .st .mtSt) _
+    rw [SValT.subst_eval h]
+    exact Equiv.refl _
+  | .newArr R n, hs => by
+    simp only [SValT.subst, SValT.denote, (Term.subst_denote h n hs).asInt]
+    exact Equiv.refl _
+
+end
+
+end SubstDenote
+
 /-! ## An update on a first-order formula -/
 
 /-- No update and no modality in it: `applyOnRigidFormula` applies. -/
 def Fml.rigid : Fml C → Bool
-  | .tt | .eq .. => true
+  | .tt | .eq .. | .defined _ => true
   | .not φ => φ.rigid
   | .and φ ψ | .imp φ ψ => φ.rigid && ψ.rigid
   | _ => false
@@ -1018,10 +1314,19 @@ def Fml.rigid : Fml C → Bool
 def Fml.subst (U : Upd C) : Fml C → Fml C
   | .tt => .tt
   | .eq a b => .eq (a.subst U) (b.subst U)
+  | .defined t => .defined (t.subst U)
   | .not φ => .not (φ.subst U)
   | .and φ ψ => .and (φ.subst U) (ψ.subst U)
   | .imp φ ψ => .imp (φ.subst U) (ψ.subst U)
   | φ => φ
+
+/-- Every equation of `φ` reads its variables at the sorts `U` writes them
+(`Term.sortedFor`). -/
+def Fml.sortedFor (U : Upd C) : Fml C → Bool
+  | .eq a b => a.sortedFor U && b.sortedFor U
+  | .not φ => φ.sortedFor U
+  | .and φ ψ | .imp φ ψ => φ.sortedFor U && ψ.sortedFor U
+  | _ => true
 
 /-- A substituted first-order formula holds before the update as the formula
 does after it.
@@ -1029,16 +1334,26 @@ does after it.
 Example: after `y = 3;`, `(y = 3).subst { y := 3 }` is `3 = 3`, true before
 the update as `y = 3` is after it. -/
 theorem Fml.subst_holds {U : Upd C} {ns : List Var} {σ τ : State} (h : SubstAgree U ns σ τ) :
-    (φ : Fml C) → φ.rigid = true → (holds σ (φ.subst U) ↔ holds τ φ)
-  | .tt, _ => Iff.rfl
-  | .eq a b, _ => by simp only [Fml.subst, holds, a.subst_eval h, b.subst_eval h]
-  | .not φ, hr => by simp only [Fml.subst, holds, Fml.subst_holds h φ hr]
-  | .and φ ψ, hr => by
+    (φ : Fml C) → φ.rigid = true → φ.sortedFor U = true → (holds σ (φ.subst U) ↔ holds τ φ)
+  | .tt, _, _ => Iff.rfl
+  | .eq a b, _, hs => by
+    simp only [Fml.sortedFor, Bool.and_eq_true] at hs
+    have ea : Theory.StValue.Equiv ((a.subst U).denote σ) (a.denote τ) :=
+      Term.subst_denote h a hs.1
+    have eb : Theory.StValue.Equiv ((b.subst U).denote σ) (b.denote τ) :=
+      Term.subst_denote h b hs.2
+    simp only [Fml.subst, holds]
+    exact ⟨fun e => (ea.symm.trans e).trans eb, fun e => (ea.trans e).trans eb.symm⟩
+  | .defined t, _, _ => by simp only [Fml.subst, holds, t.subst_eval h]
+  | .not φ, hr, hs => by simp only [Fml.subst, holds, Fml.subst_holds h φ hr hs]
+  | .and φ ψ, hr, hs => by
     simp only [Fml.rigid, Bool.and_eq_true] at hr
-    simp only [Fml.subst, holds, Fml.subst_holds h φ hr.1, Fml.subst_holds h ψ hr.2]
-  | .imp φ ψ, hr => by
+    simp only [Fml.sortedFor, Bool.and_eq_true] at hs
+    simp only [Fml.subst, holds, Fml.subst_holds h φ hr.1 hs.1, Fml.subst_holds h ψ hr.2 hs.2]
+  | .imp φ ψ, hr, hs => by
     simp only [Fml.rigid, Bool.and_eq_true] at hr
-    simp only [Fml.subst, holds, Fml.subst_holds h φ hr.1, Fml.subst_holds h ψ hr.2]
+    simp only [Fml.sortedFor, Bool.and_eq_true] at hs
+    simp only [Fml.subst, holds, Fml.subst_holds h φ hr.1 hs.1, Fml.subst_holds h ψ hr.2 hs.2]
 
 /-- An update that cannot halt writes only locals: `{ se1 := 10 ‖ sp1 := alice.account }`. -/
 theorem Upd.total_envOnly : {U : Upd C} → U.total = true → U.envOnly = true
@@ -1079,9 +1394,10 @@ inductive UpdRule : Fml C → Fml C → Prop
   /-- `applyOnRigidFormula { \find({u}phi)
   \varcond(\applyUpdateOnRigid(u, phi, result)) \replacewith(result) }`, and
   `applyOnPV`/`applyOnDifferentPV` on the terms under it; for `u` that
-  cannot halt. -/
+  cannot halt, and `φ` reading no variable at another sort than `u` writes it
+  (`Fml.sortedFor`, which KeY's sorts give for free). -/
   | applyOnRigid {m : Modality} {U : Upd C} {φ : Fml C} (hU : U.total = true)
-      (hφ : φ.rigid = true) : UpdRule (.upd m U φ) (φ.subst U)
+      (hφ : φ.rigid = true) (hs : φ.sortedFor U = true) : UpdRule (.upd m U φ) (φ.subst U)
 
 /-- **Soundness of the update rules**: each rewrites a formula to an
 equivalent one.
@@ -1095,10 +1411,10 @@ theorem UpdRule.sound {φ ψ : Fml C} : UpdRule φ ψ → ∀ σ, (holds σ ψ �
     rw [Upd.apply_seq hU, ← Modality.after_bind]
   | .simplifyUpdate, σ => Upd.dropEffectless_holds _ _ _ σ
   | .applySkip, _ => Iff.rfl
-  | @UpdRule.applyOnRigid _ m U φ hU hφ, σ => by
+  | @UpdRule.applyOnRigid _ m U φ hU hφ hs, σ => by
     obtain ⟨τ, hτ⟩ := Upd.foldl_total σ U hU σ
     simp only [holds, Upd.apply, hτ]
-    exact Fml.subst_holds (Upd.substAgree (Upd.total_envOnly hU) hτ) φ hφ
+    exact Fml.subst_holds (Upd.substAgree (Upd.total_envOnly hU) hτ) φ hφ hs
 
 /-! ## One rule at a time: `sol_upd r`
 
@@ -1121,7 +1437,8 @@ def UpdRuleName.top : UpdRuleName → Modality → Upd C → Fml C → Option (F
     if (U.dropEffectless φ.vars).length < U.length then some (.upd m (U.dropEffectless φ.vars) φ)
     else none
   | .applySkip, _, [], φ => some φ
-  | .applyOnRigid, _, U, φ => if U.total = true ∧ φ.rigid = true then some (φ.subst U) else none
+  | .applyOnRigid, _, U, φ =>
+    if U.total = true ∧ φ.rigid = true ∧ φ.sortedFor U = true then some (φ.subst U) else none
   | _, _, _, _ => none
 
 /-- When rule `r` fits at the top of `{U} φ`, what it returns is an `UpdRule`
@@ -1141,7 +1458,7 @@ theorem UpdRuleName.top_rule {r : UpdRuleName} {m : Modality} {U : Upd C} {φ ψ
     · cases h
   · cases h; exact .applySkip
   · split at h
-    · rename_i hc; cases h; exact .applyOnRigid hc.1 hc.2
+    · rename_i hc; cases h; exact .applyOnRigid hc.1 hc.2.1 hc.2.2
     · cases h
   · cases h
 
@@ -1158,7 +1475,7 @@ def Fml.updAt (r : UpdRuleName) : Fml C → Option (Fml C)
   | .modal m P φ => (φ.updAt r).map (.modal m P)
   | .havoc φ => (φ.updAt r).map .havoc
   | .all x p φ => (φ.updAt r).map (.all x p)
-  | .tt | .eq .. => none
+  | .tt | .eq .. | .defined _ => none
 
 /-- Two postconditions that hold in the same states hold after the same run:
 `{ x := 1 } (y = 1 → y = 1)` and `{ x := 1 } true` alike. -/
@@ -1216,7 +1533,8 @@ theorem Fml.updAt_sound {r : UpdRuleName} :
     simp only [Fml.updAt, Option.map_eq_some_iff] at h
     obtain ⟨φ', h', rfl⟩ := h
     exact forall_congr' fun _ => imp_congr_right fun _ => Fml.updAt_sound φ h' _
-  | .tt, _, h, _ | .eq .., _, h, _ => by simp only [updAt, reduceCtorEq] at h
+  | .tt, _, h, _ | .eq .., _, h, _ | .defined _, _, h, _ => by
+    simp only [updAt, reduceCtorEq] at h
 
 /-! ## All of them: `Fml.simpUpds`
 
@@ -1301,7 +1619,7 @@ theorem Fml.simpUpds_holds : (φ : Fml C) → ∀ σ, (holds σ φ.simpUpds ↔ 
   | .all _ _ φ, σ => by
     simp only [Fml.simpUpds, holds]
     exact forall_congr' fun _ => imp_congr_right fun _ => Fml.simpUpds_holds φ _
-  | .tt, _ | .eq .., _ => Iff.rfl
+  | .tt, _ | .eq .., _ | .defined _, _ => Iff.rfl
 
 /-! ## In a derivation: `Proves.merge`, `Proves.simplify`
 
@@ -1341,6 +1659,429 @@ theorem Proves.simplify {R : RuleSet} {Γ : List (Hyp C)} {m : Modality} {U : Up
     have := h.sound σ
     simp only [Hyp.wrap_append, Hyp.wrap] at this ⊢
     exact Hyp.wrap_mono (fun τ hτ => (Upd.dropEffectless_holds m U φ τ).1 hτ) Γ σ this) hφ
+
+/-! ## Under the box: `applyOnRigid` without totality
+
+`UpdRule.applyOnRigid` is an equivalence, so it asks that `U` cannot halt
+(`Upd.total`): the substituted formula has forgotten the halt.  Under the box
+a halting update proves what follows it (`Modality.onHalt .box`), so one
+direction needs no totality: where `U` runs, the run itself is the agreement
+the substitution needs (`Upd.substAgree`, whose `bound` is the run), and
+where `U` halts there is nothing to prove.  That direction — the substituted
+formula gives `{U} φ` — is the one a derivation uses, so under the box KeY's
+`applyOnRigidFormula` is a derived rule for every update of locals:
+`{ x := find(storage, alice.age) }` may halt (no `alice`), and is still
+applied.
+
+What the substitution forgets, that `U` ran, a derivation keeps apart:
+`defined(x)` behind a box update that binds `x` to a value
+(`Proves.definedWritten`), proved before the update is dropped. -/
+
+/-- Under the box, a first-order formula substituted with an update of
+locals gives the formula behind the update: where `U` runs, the run gives
+`SubstAgree` (`Upd.substAgree`); where it halts, the box holds.
+
+Example: `find(storage, alice.age) ≐ 42` gives
+`[{ x := find(storage, alice.age) }] x ≐ 42`, also where `alice.age` does not
+read and the update halts. -/
+theorem Fml.subst_box {U : Upd C} (hU : U.envOnly = true) {φ : Fml C} (hφ : φ.rigid = true)
+    (hs : φ.sortedFor U = true) (σ : State) (h : holds σ (φ.subst U)) :
+    holds σ (.upd .box U φ) := by
+  simp only [holds]
+  cases hτ : U.apply σ with
+  | error _ => trivial
+  | ok τ => exact (Fml.subst_holds (Upd.substAgree hU hτ) φ hφ hs).1 h
+
+/-! ### Under the box, past a storage write
+
+A parallel update reads every right-hand side in the pre-state
+(`UpdElem.write`), so in the merged `{ storage := S ‖ x := t }` of
+`Proves.mergeStorage` the storage write does not reach `t`: the locals it
+binds are the ones its locals alone bind (`Upd.locals`, with the same
+`lastWrite`, so the same substitution), and the state it leaves differs from
+theirs in the storage only (`Upd.foldl_locals`).  A formula that reads no
+storage (`Fml.stFree`) cannot see that difference (`Fml.holds_withStorage`),
+so substituting the locals is still the box direction of
+`applyOnRigidFormula`.
+
+`stFree` is syntactic and conservative, so that `rfl` decides it: no
+storage, path or memory subterm at all.  That also leaves out a
+`find(old, p)` of a storage variable, which reads only the environment, and
+a path, whose index check reads the storage. -/
+
+/-- The element writes the storage: `storage := s`. -/
+def UpdElem.isStorage : UpdElem C → Bool
+  | .storage _ => true
+  | _ => false
+
+/-- Every element writes a local, an alias, a memory local or the storage:
+`{ storage := S ‖ x := find(storage, alice.age) }`. -/
+def Upd.localsOrStorage (U : Upd C) : Bool := U.all fun e => e.var?.isSome || e.isStorage
+
+/-- The elements that write a variable: `{ x := t }` of
+`{ storage := S ‖ x := t }`. -/
+def Upd.locals (U : Upd C) : Upd C := U.filter (·.var?.isSome)
+
+/-- A value term with no storage, path or memory subterm: `x + 1`, not
+`find(storage, alice.age)`. -/
+def Term.stFree : Term C → Bool
+  | .lit _ | .pv _ | .env _ => true
+  | .binop _ _ a b => a.stFree && b.stFree
+  | .unop _ _ a | .net a | .netOf _ a => a.stFree
+  | .ite c a b => c.stFree && a.stFree && b.stFree
+  | .find .. | .len .. | .read .. | .mlen .. => false
+
+/-- A first-order formula whose terms are `Term.stFree`: `x ≐ 42`. -/
+def Fml.stFree : Fml C → Bool
+  | .tt => true
+  | .eq a b => a.stFree && b.stFree
+  | .defined t => t.stFree
+  | .not φ => φ.stFree
+  | .and φ ψ | .imp φ ψ => φ.stFree && ψ.stFree
+  | _ => false
+
+/-- A storage-free formula is first-order. -/
+theorem Fml.stFree_rigid : {φ : Fml C} → φ.stFree = true → φ.rigid = true
+  | .tt, _ | .eq .., _ | .defined _, _ => rfl
+  | .not φ, h => Fml.stFree_rigid (φ := φ) h
+  | .and φ ψ, h | .imp φ ψ, h => by
+    simp only [Fml.stFree, Bool.and_eq_true] at h
+    simp only [Fml.rigid, Fml.stFree_rigid h.1, Fml.stFree_rigid h.2, Bool.and_self]
+
+/-- The locals of an update are an update of locals. -/
+theorem Upd.locals_envOnly : (U : Upd C) → Upd.envOnly (Upd.locals U) = true
+  | [] => rfl
+  | e :: U => by
+    have ih : Upd.envOnly (Upd.locals U) = true := Upd.locals_envOnly U
+    cases he : e.var?.isSome
+    · simpa only [Upd.locals, List.filter_cons, he] using ih
+    · simp only [Upd.locals, List.filter_cons, he, if_true, Upd.envOnly, List.all_cons,
+        Bool.true_and] at ih ⊢
+      exact ih
+
+/-- The locals of an update write each variable last where the update does:
+an element that writes no variable is no write of one. -/
+theorem Upd.lastWrite_locals (x : Var) :
+    (U : Upd C) → Upd.lastWrite x (Upd.locals U) = Upd.lastWrite x U
+  | [] => rfl
+  | e :: U => by
+    have ih : Upd.lastWrite x (Upd.locals U) = Upd.lastWrite x U := Upd.lastWrite_locals x U
+    cases he : e.var? with
+    | none =>
+      have hf : Upd.locals (e :: U) = Upd.locals U := by
+        simp only [Upd.locals, List.filter_cons, he, Option.isSome_none]
+        rfl
+      rw [hf, ih]
+      simp only [Upd.lastWrite, he, reduceCtorEq, if_false]
+      split <;> simp_all only
+    | some y =>
+      have hf : Upd.locals (e :: U) = e :: Upd.locals U := by
+        simp only [Upd.locals, List.filter_cons, he, Option.isSome_some, if_true]
+      rw [hf]
+      simp only [Upd.lastWrite, ih]
+
+/-- `SubstAgree` sees an update through its `lastWrite` only. -/
+theorem SubstAgree.of_lastWrite {U V : Upd C} {ns : List Var} {σ τ : State}
+    (hw : ∀ x, Upd.lastWrite x U = V.lastWrite x) (h : SubstAgree V ns σ τ) :
+    SubstAgree U ns σ τ where
+  agree := h.agree
+  val x := by
+    rw [show U.valOf x = V.valOf x by simp only [Upd.valOf, hw x]]
+    exact h.val x
+  path x := by
+    rw [show U.pathOf x = V.pathOf x by simp only [Upd.pathOf, hw x]]
+    exact h.path x
+  ref x := by
+    rw [show U.refOf x = V.refOf x by simp only [Upd.refOf, hw x]]
+    exact h.ref x
+  stor x := by
+    rw [show U.storOf x = V.storOf x by simp only [Upd.storOf, hw x]]
+    exact h.stor x
+  unwritten x hx := h.unwritten x (by rw [← hw x]; exact hx)
+  written x e hx := h.written x e (by rw [← hw x]; exact hx)
+  bound x e hx := h.bound x e (by rw [← hw x]; exact hx)
+
+/-- Run from a state, an update of locals and storage writes the locals its
+`Upd.locals` write from that state with any storage, and leaves the state
+they leave with some storage: the storage writes read the pre-state `σ₀`,
+and no other element reads the storage it is writing into. -/
+theorem Upd.foldl_locals (σ₀ : State) : (U : Upd C) → U.localsOrStorage = true →
+    ∀ {ρ : State} {st : List (Name × SVal)} {τ : State},
+      U.foldlM (fun ρ e => e.write σ₀ ρ) { ρ with storage := st } = .ok τ →
+      ∃ τ', (Upd.locals U).foldlM (fun ρ e => e.write σ₀ ρ) ρ = .ok τ' ∧
+        ∃ st', τ = { τ' with storage := st' }
+  | [], _, ρ, st, τ, h => by
+    cases h
+    exact ⟨ρ, rfl, st, rfl⟩
+  | e :: U, hU, ρ, st, τ, h => by
+    simp only [Upd.localsOrStorage, List.all_cons, Bool.and_eq_true, Bool.or_eq_true] at hU
+    obtain ⟨he, hU⟩ := hU
+    simp only [List.foldlM_cons] at h
+    obtain ⟨ρ₁, h₁, h⟩ := bind_ok_inv h
+    cases hv : e.var? with
+    | some x =>
+      rw [UpdElem.write_var hv] at h₁
+      obtain ⟨b, hb, h₁⟩ := bind_ok_inv h₁
+      cases h₁
+      obtain ⟨τ', hτ', st', rfl⟩ := Upd.foldl_locals σ₀ U hU (ρ := ρ.setEnv x b) (st := st) h
+      have hf : Upd.locals (e :: U) = e :: Upd.locals U := by
+        simp only [Upd.locals, List.filter_cons, hv, Option.isSome_some, if_true]
+      refine ⟨τ', ?_, st', rfl⟩
+      rw [hf, List.foldlM_cons, UpdElem.write_var hv, hb]
+      exact hτ'
+    | none =>
+      have hs : e.isStorage = true := by
+        simpa only [hv, Option.isSome_none, Bool.false_eq_true, false_or] using he
+      have hf : Upd.locals (e :: U) = Upd.locals U := by
+        simp only [Upd.locals, List.filter_cons, hv, Option.isSome_none]
+        rfl
+      rw [hf]
+      cases e with
+      | storage s =>
+        simp only [UpdElem.write] at h₁
+        obtain ⟨v, -, h₁⟩ := bind_ok_inv h₁
+        cases h₁
+        exact Upd.foldl_locals σ₀ U hU (ρ := ρ) (st := v.storage) h
+      | _ => simp only [UpdElem.isStorage, Bool.false_eq_true] at hs
+
+/-- A storage-free term reads alike in two states that differ in the storage. -/
+theorem Term.eval_withStorage (σ : State) (st : List (Name × SVal)) :
+    (t : Term C) → t.stFree = true → t.eval { σ with storage := st } = t.eval σ
+  | .lit _, _ | .pv _, _ | .env _, _ => rfl
+  | .binop _ _ a b, h => by
+    simp only [Term.stFree, Bool.and_eq_true] at h
+    simp only [Term.eval, Term.eval_withStorage σ st a h.1, Term.eval_withStorage σ st b h.2]
+  | .unop _ _ a, h => by simp only [Term.eval, Term.eval_withStorage σ st a h]
+  | .net a, h => by
+    simp only [Term.eval, Term.eval_withStorage σ st a h]
+    rfl
+  | .netOf _ a, h => by
+    simp only [Term.eval, Term.eval_withStorage σ st a h]
+    rfl
+  | .ite c a b, h => by
+    simp only [Term.stFree, Bool.and_eq_true] at h
+    simp only [Term.eval, Term.eval_withStorage σ st c h.1.1, Term.eval_withStorage σ st a h.1.2,
+      Term.eval_withStorage σ st b h.2]
+
+/-- A storage-free term denotes alike in two states that differ in the storage. -/
+theorem Term.denote_withStorage (σ : State) (st : List (Name × SVal)) :
+    (t : Term C) → t.stFree = true → t.denote { σ with storage := st } = t.denote σ
+  | .lit _, _ | .pv _, _ | .env _, _ => rfl
+  | .binop _ _ a b, h => by
+    simp only [Term.stFree, Bool.and_eq_true] at h
+    simp only [Term.denote, Term.denote_withStorage σ st a h.1,
+      Term.denote_withStorage σ st b h.2]
+  | .unop _ _ a, h => by simp only [Term.denote, Term.denote_withStorage σ st a h]
+  | .net a, h => by
+    simp only [Term.denote, Term.denote_withStorage σ st a h]
+    rfl
+  | .netOf _ a, h => by
+    simp only [Term.denote, Term.denote_withStorage σ st a h]
+    rfl
+  | .ite c a b, h => by
+    simp only [Term.stFree, Bool.and_eq_true] at h
+    simp only [Term.denote, Term.denote_withStorage σ st c h.1.1,
+      Term.denote_withStorage σ st a h.1.2, Term.denote_withStorage σ st b h.2]
+
+/-- A storage-free formula holds alike in two states that differ in the storage. -/
+theorem Fml.holds_withStorage (σ : State) (st : List (Name × SVal)) :
+    (φ : Fml C) → φ.stFree = true → (holds { σ with storage := st } φ ↔ holds σ φ)
+  | .tt, _ => Iff.rfl
+  | .eq a b, h => by
+    simp only [Fml.stFree, Bool.and_eq_true] at h
+    simp only [holds, Term.denote_withStorage σ st a h.1, Term.denote_withStorage σ st b h.2]
+  | .defined t, h => by simp only [holds, Term.eval_withStorage σ st t h]
+  | .not φ, h => by simp only [holds, Fml.holds_withStorage σ st φ h]
+  | .and φ ψ, h | .imp φ ψ, h => by
+    simp only [Fml.stFree, Bool.and_eq_true] at h
+    simp only [holds, Fml.holds_withStorage σ st φ h.1, Fml.holds_withStorage σ st ψ h.2]
+
+/-- Under the box, a storage-free formula substituted with an update of
+locals and storage writes gives the formula behind the update: where `U`
+runs, its locals ran to the same state up to the storage.
+
+Example: `x ≐ 42` substituted is `find(S, alice.age) ≐ 42`, which gives
+`[{ storage := S ‖ x := find(S, alice.age) }] x ≐ 42`. -/
+theorem Fml.subst_box_st {U : Upd C} (hU : U.localsOrStorage = true) {φ : Fml C}
+    (hφ : φ.stFree = true) (hs : φ.sortedFor U = true) (σ : State) (h : holds σ (φ.subst U)) :
+    holds σ (.upd .box U φ) := by
+  simp only [holds]
+  cases hτ : U.apply σ with
+  | error _ => trivial
+  | ok τ =>
+    obtain ⟨τ', hτ', st', rfl⟩ := Upd.foldl_locals σ U hU (ρ := σ) (st := σ.storage) hτ
+    have hA : SubstAgree U U.locals.targets σ τ' :=
+      (Upd.substAgree (Upd.locals_envOnly U) hτ').of_lastWrite
+        fun x => (Upd.lastWrite_locals x U).symm
+    exact (Fml.holds_withStorage τ' st' φ hφ).2
+      ((Fml.subst_holds hA φ (Fml.stFree_rigid hφ) hs).1 h)
+
+/-- **`applyOnRigidFormula` under the box**: the last update of the context
+is applied to a first-order goal and dropped — with no totality premise,
+since a halting box update proves what follows.  The update writes locals
+(`Fml.subst_box`), or locals and the storage where the goal reads no storage
+(`Fml.subst_box_st`): the merged update of `Proves.mergeStorage` is applied
+in one step.
+
+Example: `{ storage := S }, { x := find(storage, alice.age) } ⟹ x ≐ 42`
+becomes `{ storage := S } ⟹ find(storage, alice.age) ≐ 42`, and
+`{ storage := S ‖ x := find(storage, alice.age) } ⟹ x ≐ 42` becomes
+`⟹ find(storage, alice.age) ≐ 42`. -/
+theorem Proves.applyOnRigidBox {R : RuleSet} {Γ : List (Hyp C)} {U : Upd C} {φ : Fml C}
+    (h : Proves R Γ (φ.subst U))
+    (hU : (U.envOnly || U.localsOrStorage && φ.stFree) = true := by first | rfl | decide)
+    (hr : φ.rigid = true := by first | rfl | decide)
+    (hs : φ.sortedFor U = true := by first | rfl | decide)
+    (hφ : (Hyp.wrap (Γ ++ [.upd .box U]) φ).modalFree = true := by first | rfl | decide) :
+    Proves R (Γ ++ [.upd .box U]) φ :=
+  .close (fun σ => by
+    have hσ : holds σ (Hyp.wrap Γ (φ.subst U)) := h.sound σ
+    rw [Hyp.wrap_append]
+    refine Hyp.wrap_mono (fun τ hτ => ?_) Γ σ hσ
+    rcases Bool.or_eq_true_iff.1 hU with hU | hU
+    · exact Fml.subst_box hU hr hs τ hτ
+    · simp only [Bool.and_eq_true] at hU
+      exact Fml.subst_box_st hU.1 hU.2 hs τ hτ) hφ
+
+/-! ### `defined` of a written local -/
+
+/-- The local an element binds in the environment: `var?`'s, and also a
+storage variable (`old := s`) and a ledger variable (`oldNet := net`), which
+`var?` leaves out because `Upd.subst` has nothing to put for them. -/
+def UpdElem.envVar? : UpdElem C → Option Var
+  | .val x _ | .path x _ | .mref x _ | .store x _ | .saveNet x => some x
+  | _ => none
+
+/-- An element that binds another local leaves `x` as it was: a storage,
+memory or funds write does not touch the environment. -/
+theorem UpdElem.write_getEnv_other {σ₀ ρ ρ' : State} {x : Var} :
+    (e : UpdElem C) → e.envVar? ≠ some x → e.write σ₀ ρ = .ok ρ' → ρ'.getEnv x = ρ.getEnv x
+  | .val y t, hne, h | .mref y t, hne, h => by
+    obtain ⟨v, -, h⟩ := bind_ok_inv h
+    cases h
+    exact SemanticsProperties.State.getEnv_setEnv_ne (by rintro rfl; exact hne rfl) _ _
+  | .path y p, hne, h => by
+    obtain ⟨⟨r, segs⟩, -, h⟩ := bind_ok_inv h
+    cases h
+    exact SemanticsProperties.State.getEnv_setEnv_ne (by rintro rfl; exact hne rfl) _ _
+  | .store y s, hne, h => by
+    obtain ⟨v, -, h⟩ := bind_ok_inv h
+    cases h
+    exact SemanticsProperties.State.getEnv_setEnv_ne (by rintro rfl; exact hne rfl) _ _
+  | .saveNet y, hne, h => by
+    cases h
+    exact SemanticsProperties.State.getEnv_setEnv_ne (by rintro rfl; exact hne rfl) _ _
+  | .storage s, _, h => by
+    obtain ⟨v, -, h⟩ := bind_ok_inv h
+    cases h
+    rfl
+  | .memory m, _, h => by
+    obtain ⟨v, -, h⟩ := bind_ok_inv h
+    cases h
+    rfl
+  | .transfer r a, _, h => by
+    obtain ⟨v, -, h⟩ := bind_ok_inv h
+    obtain ⟨addr, -, h⟩ := bind_ok_inv h
+    obtain ⟨w, -, h⟩ := bind_ok_inv h
+    obtain ⟨amt, -, h⟩ := bind_ok_inv h
+    simp only [transferAt] at h
+    split at h
+    · cases h
+    · split at h
+      · cases h
+      · cases h
+        rfl
+  | .book a, _, h => by
+    obtain ⟨v, -, h⟩ := bind_ok_inv h
+    obtain ⟨amt, -, h⟩ := bind_ok_inv h
+    cases h
+    rfl
+
+/-- The last element of `U` that binds `x` in the environment (`envVar?`)
+binds it to a value: `x := t`.
+
+Example: true of `x` in `{ storage := S ‖ x := find(S, alice.age) }`, false
+in `{ x := 1 ‖ x := alice.account }`, where the last write makes `x` an
+alias. -/
+def Upd.bindsVal (x : Var) : Upd C → Bool
+  | [] => false
+  | e :: U =>
+    if U.any (fun e' => decide (e'.envVar? = some x)) then Upd.bindsVal x U
+    else match e with
+      | .val y _ => decide (y = x)
+      | _ => false
+
+/-- A run of an update leaves a local no element binds as it was, and a local
+whose last binder is `x := t` bound to a value. -/
+theorem Upd.foldl_getEnv (σ₀ : State) {x : Var} : (U : Upd C) → ∀ {τ₀ τ : State},
+    U.foldlM (fun ρ e => e.write σ₀ ρ) τ₀ = .ok τ →
+      (U.any (fun e => decide (e.envVar? = some x)) = false → τ.getEnv x = τ₀.getEnv x) ∧
+      (U.bindsVal x = true → ∃ v, τ.getEnv x = .ok (.val v))
+  | [], τ₀, τ, h => by
+    cases h
+    exact ⟨fun _ => rfl, fun hb => by cases hb⟩
+  | e :: U, τ₀, τ, h => by
+    simp only [List.foldlM_cons] at h
+    obtain ⟨τ₁, h₁, h⟩ := bind_ok_inv h
+    obtain ⟨ih₁, ih₂⟩ := Upd.foldl_getEnv σ₀ U h
+    refine ⟨fun hn => ?_, fun hb => ?_⟩
+    · simp only [List.any_cons, Bool.or_eq_false_iff, decide_eq_false_iff_not] at hn
+      rw [ih₁ hn.2, UpdElem.write_getEnv_other e hn.1 h₁]
+    · simp only [Upd.bindsVal] at hb
+      split at hb
+      · exact ih₂ hb
+      · rename_i hn
+        split at hb
+        · rename_i y t
+          have hyx : y = x := of_decide_eq_true hb
+          subst hyx
+          obtain ⟨v, -, h₁⟩ := bind_ok_inv h₁
+          cases h₁
+          exact ⟨v, by
+            rw [ih₁ (Bool.eq_false_iff.2 hn), SemanticsProperties.State.getEnv_setEnv_self]⟩
+        · cases hb
+
+/-- Behind a box update whose last binder of `x` is `x := t`, `x` reads:
+where the update runs it bound `x` to the value of `t`, and where it halts
+the box holds. -/
+theorem Upd.defined_box {U : Upd C} {x : Var} (hw : U.bindsVal x = true) (σ : State) :
+    holds σ (.upd .box U (.defined (.pv x))) := by
+  simp only [holds]
+  cases hτ : U.apply σ with
+  | error _ => trivial
+  | ok τ =>
+    obtain ⟨v, hv⟩ := (Upd.foldl_getEnv σ U hτ).2 hw
+    exact ⟨v, by simp only [Term.eval, hv, bind, Except.bind, pure, Except.pure]⟩
+
+/-- **`defined(x)` after `x := t`**: behind a box update whose last binder of
+`x` is `x := t`, in a context with no diamond, `x` is defined.  This keeps
+what `Proves.applyOnRigidBox` forgets, that the update ran.
+
+Example: `{ storage := S }, { x := find(storage, alice.age) } ⟹ defined(x)`. -/
+theorem Proves.definedWritten {R : RuleSet} {Γ : List (Hyp C)} {U : Upd C} {x : Var}
+    (hw : U.bindsVal x = true := by first | rfl | decide)
+    (hb : Hyp.boxOnly Γ = true := by first | rfl | decide)
+    (hφ : (Hyp.wrap (Γ ++ [.upd .box U]) (.defined (.pv x))).modalFree = true := by
+      first | rfl | decide) :
+    Proves R (Γ ++ [.upd .box U]) (.defined (.pv x)) :=
+  .close (fun σ => by
+    rw [Hyp.wrap_append]
+    exact Hyp.wrap_of_reaches Γ hb σ (fun τ _ => Upd.defined_box hw τ)) hφ
+
+/-- **`{U}(φ ∧ ψ)` from `{U}φ` and `{U}ψ`**, under either modality: where
+`U` runs both hold after it, where it halts both judge the halt alike.
+
+Example: `⟹ [{ x := t }](defined(x) ∧ x ≐ 42)` from
+`⟹ [{ x := t }] defined(x)` and `⟹ [{ x := t }] x ≐ 42`. -/
+theorem Proves.andSplitUpd {R : RuleSet} {Γ : List (Hyp C)} {m : Modality} {U : Upd C}
+    {φ ψ : Fml C} (h₁ : Proves R Γ (.upd m U φ)) (h₂ : Proves R Γ (.upd m U ψ))
+    (hφ : (Hyp.wrap Γ (.upd m U (.and φ ψ))).modalFree = true := by first | rfl | decide) :
+    Proves R Γ (.upd m U (.and φ ψ)) :=
+  .close (fun σ => Hyp.wrap_mono₃ (fun τ a b _ => by
+      simp only [holds] at a b ⊢
+      cases hU : U.apply τ with
+      | error _ => rw [hU] at a; exact a
+      | ok ρ => rw [hU] at a b; exact ⟨a, b⟩) Γ σ (h₁.sound σ) (h₂.sound σ) (h₁.sound σ)) hφ
 
 /-! ## Tactics -/
 
