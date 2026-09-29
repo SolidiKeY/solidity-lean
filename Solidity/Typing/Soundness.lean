@@ -38,7 +38,8 @@ and each statement's write stores what the place holds.
 namespace Solidity
 
 open Semantics
-open SemanticsProperties (lookupBy_setBy_self lookupBy_setBy_ne HeapWellFormed)
+open SemanticsProperties (lookupBy_setBy_self lookupBy_setBy_ne HeapWellFormed
+  lookupBy_eq_some_mem)
 
 variable {C : Contract}
 
@@ -450,9 +451,6 @@ theorem int_toSVal_hasTy {p : PrimTy} (hp : p.isNumeric = true) (n : Int) :
     (Value.toSVal (.int n)).hasTy (.prim p) = true := by
   cases p <;> simp_all [PrimTy.isNumeric, Value.toSVal, SVal.hasTy]
 
-/-- `true` is a `bool`. -/
-theorem bool_toSVal_hasTy (b : Bool) : (Value.toSVal (.bool b)).hasTy (.prim .bool) = true := rfl
-
 /-- Comparisons and connectives produce booleans. -/
 theorem applyBinOp_nonarith_bool {op : BinOp} {l r v : Value}
     (hop : op.isArith = false) (h : applyBinOp op l r = .ok v) : ∃ b, v = .bool b := by
@@ -543,6 +541,7 @@ theorem Simple.eval_wt (hwt : RunWT C Γ H σ) {p : PrimTy} {s : Simple C p} {w 
     | spath _ _ => exact nomatch h
     | mref _ => exact nomatch h
     | store _ => exact nomatch h
+    | ledger _ => exact nomatch h
   | env k hp => subst hp; cases h; rfl
 
 mutual
@@ -562,6 +561,7 @@ theorem SPath.resolve_wt (hwt : RunWT C Γ H σ) :
     | val _ => exact nomatch h
     | mref _ => exact nomatch h
     | store _ => exact nomatch h
+    | ledger _ => exact nomatch h
   | _, .loc l, r, segs, hw, h => Loc.resolve_wt hwt l hw h
 
 /-- `alice.age` resolves to `(alice, [age])`, which the layout types `uint`. -/
@@ -580,7 +580,7 @@ theorem Loc.resolve_wt (hwt : RunWT C Γ H σ) :
     obtain ⟨⟨r0, s0⟩, h0, h⟩ := bind_ok_inv h
     obtain ⟨k, _, h⟩ := bind_ok_inv h
     obtain ⟨iv, _, h⟩ := bind_ok_inv h
-    obtain ⟨_, _, h⟩ := bind_ok_inv h
+    bind_inv h
     cases h
     have hb := SPath.resolve_wt hwt b hw.1 h0
     cases it with
@@ -600,6 +600,7 @@ theorem MPath.mval_wt (hwt : RunWT C Γ H σ) :
     | val _ => exact nomatch h
     | spath _ _ => exact nomatch h
     | store _ => exact nomatch h
+    | ledger _ => exact nomatch h
   | _, .loc l, mv, hw, h => MLoc.read_wt hwt l hw h
 
 /-- `m.age` reads a slot the heap types `uint`. -/
@@ -635,7 +636,7 @@ theorem MLoc.read_wt (hwt : RunWT C Γ H σ) :
     rw [MVal.asRef_ok hid, MVal.hasTyH_ref] at hb
     obtain ⟨obj, hobj, hty⟩ := heapTypedB_obj hwt.heap hb
     obtain ⟨elems, fx, rfl, hel⟩ := MObj.hasTyH_arrElem a.arrElem hty
-    obtain ⟨_, _, h⟩ := bind_ok_inv h
+    bind_inv h
     obtain ⟨iv, _, h⟩ := bind_ok_inv h
     obtain ⟨o, ho, h⟩ := bind_ok_inv h
     simp only [State.getObj, hobj] at ho
@@ -676,15 +677,14 @@ theorem Val.eval_wt (hwt : RunWT C Γ H σ) :
     exact MVal.asValue_hasTy (MLoc.read_wt hwt l hw hmv) h
   | _, .len b hp, w, _, h => by
     subst hp
-    obtain ⟨_, _, h⟩ := bind_ok_inv h
+    bind_inv h
     obtain ⟨sv, _, h⟩ := bind_ok_inv h
     split at h
     · cases h; rfl
     all_goals exact nomatch h
   | _, .mlen b hp, w, _, h => by
     subst hp
-    obtain ⟨_, _, h⟩ := bind_ok_inv h
-    obtain ⟨_, _, h⟩ := bind_ok_inv h
+    iterate 2 bind_inv h
     obtain ⟨o, _, h⟩ := bind_ok_inv h
     split at h
     · cases h; rfl
@@ -743,12 +743,9 @@ which keeps the type the old value had. -/
 theorem write (hwt : RunWT C Γ H σ) {r : Name} {segs : List Seg} {T : Ty} {new : SVal}
     (hty : C.layout.tyAt r segs = some T) (hnew : new.hasTy T = true)
     (h : σ.writeStorage r segs new = .ok σ') : RunWT C Γ H σ' := by
-  unfold State.writeStorage at h
-  split at h
+  rcases State.writeStorage_ok_inv h with h | ⟨cur, hcur, h⟩
   · exact hwt.save hty hnew h
-  all_goals
-    obtain ⟨cur, hcur, h⟩ := bind_ok_inv h
-    exact hwt.save hty (SVal.overlay_hasTy (findStorage_hasTy hwt.storage hty hcur) hnew) h
+  · exact hwt.save hty (SVal.overlay_hasTy (findStorage_hasTy hwt.storage hty hcur) hnew) h
 
 /-- A declaration: `uint x = 1;` binds `x` and `Γ` learns `x : uint`. -/
 theorem setEnv (hwt : RunWT C Γ H σ) {x : Var} {bt : BTy} {b : Binding}
@@ -827,12 +824,6 @@ end RunWT
 section Effects
 
 variable {Γ : Ctx} {H : HeapTy} {σ σ' : State}
-
-/-- A value read as a number is one: the old `x` of `x++`. -/
-theorem Value.asInt_ok {v : Value} {n : Int} (h : v.asInt = .ok n) : v = .int n := by
-  cases v with
-  | int m => cases h; rfl
-  | bool _ => exact nomatch h
 
 /-- The arithmetic write-back of `x += e` stores a number of `x`'s type. -/
 theorem arith_new_wt {op : BinOp} {p : PrimTy} {old v n₁ n₂ : Value}
@@ -1018,7 +1009,7 @@ theorem MLoc.addr_wt (hwt : RunWT C Γ H σ) :
     simp only [MLoc.wt, Bool.and_eq_true] at hw
     obtain ⟨m0, hm0, h⟩ := bind_ok_inv h
     obtain ⟨id, hid, h⟩ := bind_ok_inv h
-    obtain ⟨_, _, h⟩ := bind_ok_inv h
+    bind_inv h
     obtain ⟨iv, _, h⟩ := bind_ok_inv h
     cases h
     have hb := MPath.mval_wt hwt b hw.1 hm0
@@ -1042,20 +1033,14 @@ theorem opStore_wt (hwt : RunWT C Γ H σ) {op : BinOp} {p : PrimTy} {r : Name}
     {segs : List Seg} {v : Value} (hop : op.isArith = true) (hp : p.isNumeric = true)
     (hty : C.layout.tyAt r segs = some (.prim p)) (h : opStore σ op p r segs v = .ok σ') :
     RunWT C Γ H σ' := by
-  obtain ⟨_, _, h⟩ := bind_ok_inv h
-  obtain ⟨old, _, h⟩ := bind_ok_inv h
-  obtain ⟨n₁, h₁, h⟩ := bind_ok_inv h
-  obtain ⟨n₂, h₂, h⟩ := bind_ok_inv h
-  have := arith_new_wt hop hp h₁ h₂
-  exact hwt.save hty (by simpa using this) h
+  obtain ⟨_, _, _, h₁, h₂, h⟩ := opStore_ok_inv h
+  exact hwt.save hty (arith_new_wt hop hp h₁ h₂) h
 
 /-- `m.age += x;` keeps the heap typed. -/
 theorem opMem_wt (hwt : RunWT C Γ H σ) {op : BinOp} {p : PrimTy} {loc : Addr} {v : Value}
     (hop : op.isArith = true) (hp : p.isNumeric = true) (hloc : AddrTy H p loc)
     (h : opMem σ op p loc v = .ok σ') : RunWT C Γ H σ' := by
-  obtain ⟨old, _, h⟩ := bind_ok_inv h
-  obtain ⟨n₁, h₁, h⟩ := bind_ok_inv h
-  obtain ⟨n₂, h₂, h⟩ := bind_ok_inv h
+  obtain ⟨_, _, _, h₁, h₂, h⟩ := opMem_ok_inv h
   exact writeLoc_wt hwt hloc (arith_new_wt hop hp h₁ h₂) h
 
 /-- `x ⊕= e` keeps the state typed: the target is resolved once, and the
@@ -1080,6 +1065,7 @@ theorem OpLoc.store_wt (hwt : RunWT C Γ H σ) {op : BinOp} (hop : op.isArith = 
     | spath _ _ => exact nomatch h
     | mref _ => exact nomatch h
     | store _ => exact nomatch h
+    | ledger _ => exact nomatch h
   | p, .root r hr, v, hp, _, h => opStore_wt hwt hop hp (Contract.layout_tyAt_root hr) h
   | p, .field b f hf, v, hp, hw, h => by
     obtain ⟨⟨rt, segs⟩, hr, h⟩ := bind_ok_inv h
@@ -1099,7 +1085,7 @@ theorem OpLoc.store_wt (hwt : RunWT C Γ H σ) {op : BinOp} (hop : op.isArith = 
     obtain ⟨id, hid, h⟩ := bind_ok_inv h
     have hb := MPath.mval_wt hwt b hw.1 hm0
     rw [MVal.asRef_ok hid, MVal.hasTyH_ref] at hb
-    obtain ⟨_, _, h⟩ := bind_ok_inv h
+    bind_inv h
     obtain ⟨iv, _, h⟩ := bind_ok_inv h
     exact opMem_wt hwt hop hp (loc := .memoryIndex id iv) ⟨_, hb, ak.arrElem⟩ h
 
@@ -1108,32 +1094,23 @@ theorem bumpStore_wt (hwt : RunWT C Γ H σ) {op : IncDec} {p : PrimTy} {r : Nam
     {segs : List Seg} {w : Value} (hp : p.isNumeric = true)
     (hty : C.layout.tyAt r segs = some (.prim p)) (h : bumpStore σ op p r segs = .ok (σ', w)) :
     RunWT C Γ H σ' ∧ (Value.toSVal w).hasTy (.prim p) = true := by
-  obtain ⟨_, _, h⟩ := bind_ok_inv h
-  obtain ⟨old, _, h⟩ := bind_ok_inv h
-  obtain ⟨m, hm, h⟩ := bind_ok_inv h
-  obtain ⟨n, hn, h⟩ := bind_ok_inv h
-  obtain ⟨σ₁, hσ₁, h⟩ := bind_ok_inv h
-  cases h
+  obtain ⟨m, n, hn, hσ₁, rfl⟩ := bumpStore_ok_inv h
   have hnew := bump_new_wt hp hn
-  refine ⟨hwt.save hty (by simpa using hnew) hσ₁, ?_⟩
+  refine ⟨hwt.save hty hnew hσ₁, ?_⟩
   split
   · exact hnew
-  · rw [Value.asInt_ok hm]; exact int_toSVal_hasTy hp m
+  · exact int_toSVal_hasTy hp m
 
 /-- `m.age++` stores and yields numbers. -/
 theorem bumpMem_wt (hwt : RunWT C Γ H σ) {op : IncDec} {p : PrimTy} {loc : Addr} {w : Value}
     (hp : p.isNumeric = true) (hloc : AddrTy H p loc) (h : bumpMem σ op p loc = .ok (σ', w)) :
     RunWT C Γ H σ' ∧ (Value.toSVal w).hasTy (.prim p) = true := by
-  obtain ⟨old, _, h⟩ := bind_ok_inv h
-  obtain ⟨m, hm, h⟩ := bind_ok_inv h
-  obtain ⟨n, hn, h⟩ := bind_ok_inv h
-  obtain ⟨σ₁, hσ₁, h⟩ := bind_ok_inv h
-  cases h
+  obtain ⟨m, n, hn, hσ₁, rfl⟩ := bumpMem_ok_inv h
   have hnew := bump_new_wt hp hn
   refine ⟨writeLoc_wt hwt hloc hnew hσ₁, ?_⟩
   split
   · exact hnew
-  · rw [Value.asInt_ok hm]; exact int_toSVal_hasTy hp m
+  · exact int_toSVal_hasTy hp m
 
 /-- `x++` keeps the state typed, and its value is of `x`'s type. -/
 theorem OpLoc.bump_wt (hwt : RunWT C Γ H σ) {op : IncDec} :
@@ -1160,6 +1137,7 @@ theorem OpLoc.bump_wt (hwt : RunWT C Γ H σ) {op : IncDec} :
     | spath _ _ => exact nomatch h
     | mref _ => exact nomatch h
     | store _ => exact nomatch h
+    | ledger _ => exact nomatch h
   | p, .root r hr, w, hp, _, h => bumpStore_wt hwt hp (Contract.layout_tyAt_root hr) h
   | p, .field b f hf, w, hp, hw, h => by
     obtain ⟨⟨rt, segs⟩, hr, h⟩ := bind_ok_inv h
@@ -1179,7 +1157,7 @@ theorem OpLoc.bump_wt (hwt : RunWT C Γ H σ) {op : IncDec} :
     obtain ⟨id, hid, h⟩ := bind_ok_inv h
     have hb := MPath.mval_wt hwt b hw.1 hm0
     rw [MVal.asRef_ok hid, MVal.hasTyH_ref] at hb
-    obtain ⟨_, _, h⟩ := bind_ok_inv h
+    bind_inv h
     obtain ⟨iv, _, h⟩ := bind_ok_inv h
     exact bumpMem_wt hwt hp (loc := .memoryIndex id iv) ⟨_, hb, ak.arrElem⟩ h
 
@@ -1199,7 +1177,7 @@ theorem MLoc.write_wt (hwt : RunWT C Γ H σ) {mv : MVal} :
     obtain ⟨id, hid, h⟩ := bind_ok_inv h
     have hb := MPath.mval_wt hwt b hw.1 hm0
     rw [MVal.asRef_ok hid, MVal.hasTyH_ref] at hb
-    obtain ⟨_, _, h⟩ := bind_ok_inv h
+    bind_inv h
     obtain ⟨iv, _, h⟩ := bind_ok_inv h
     exact memWriteIndex_wt hwt hb ak.arrElem hmv h
 
@@ -1260,7 +1238,7 @@ theorem MRhs.bind_wt (hwt : RunWT C Γ H σ) {x : Var} {R : RefTy} {r : MRhs C R
     rw [MVal.asRef_ok hid] at hmv
     exact ⟨H', σ₁, id, hout.ext, hwt.ofCopyOut hout, hmv, rfl⟩
   | newArr n hn =>
-    obtain ⟨_, _, h⟩ := bind_ok_inv h
+    bind_inv h
     obtain ⟨nv, _, h⟩ := bind_ok_inv h
     obtain ⟨⟨σ₁, mv⟩, hcopy, h⟩ := bind_ok_inv h
     obtain ⟨id, hid, h⟩ := bind_ok_inv h
@@ -1415,10 +1393,7 @@ theorem Stmt.run_wt : ∀ (s : Stmt C) {Γ Γ' : Ctx} {H : HeapTy} {σ σ' : Sta
     exact ⟨H, .refl H, popAt_wt hwt (SPath.resolve_wt hwt b hc hr) h⟩
   | .transfer r a, Γ, Γ', H, σ, σ', hwt, hs, h => by
     obtain ⟨_, rfl⟩ := wt_if hs
-    obtain ⟨_, _, h⟩ := bind_ok_inv h
-    obtain ⟨_, _, h⟩ := bind_ok_inv h
-    obtain ⟨_, _, h⟩ := bind_ok_inv h
-    obtain ⟨_, _, h⟩ := bind_ok_inv h
+    iterate 4 bind_inv h
     exact ⟨H, .refl H, hwt.transferAt h⟩
   | .declMem R x init hd, Γ, Γ', H, σ, σ', hwt, hs, h => by
     obtain ⟨hc, rfl⟩ := wt_if hs
@@ -1485,7 +1460,7 @@ theorem Stmt.run_wt : ∀ (s : Stmt C) {Γ Γ' : Ctx} {H : HeapTy} {σ σ' : Sta
   | .assignNew l n hn, Γ, Γ', H, σ, σ', hwt, hs, h => by
     obtain ⟨hc, rfl⟩ := wt_if hs
     simp only [Bool.and_eq_true] at hc
-    obtain ⟨_, _, h⟩ := bind_ok_inv h
+    bind_inv h
     obtain ⟨nv, _, h⟩ := bind_ok_inv h
     obtain ⟨⟨σ₁, mv⟩, hcopy, h⟩ := bind_ok_inv h
     obtain ⟨id, hid, h⟩ := bind_ok_inv h
@@ -1610,15 +1585,6 @@ theorem Prog.run_storage_wt {Γ Γ' : Ctx} {H : HeapTy} {σ σ' : State} {P : Pr
     wellTypedStorageB C.layout σ'.storage = true :=
   let ⟨_, _, hwt'⟩ := Prog.run_wt P hwt hP h
   hwt'.storage
-
-/-- What a read finds after a checked run is of the place's type: after
-any checked run from a well-typed state, `alice.age` holds a number. -/
-theorem Prog.run_find_hasTy {Γ Γ' : Ctx} {H : HeapTy} {σ σ' : State} {P : Prog C}
-    {r : Name} {segs : List Seg} {T : Ty} {v : SVal}
-    (hwt : RunWT C Γ H σ) (hP : Prog.wt Γ P = some Γ') (h : Prog.run σ P = .ok σ')
-    (hT : C.layout.tyAt r segs = some T) (hv : σ'.findStorage r segs = .ok v) :
-    v.hasTy T = true :=
-  findStorage_hasTy (Prog.run_storage_wt hwt hP h) hT hv
 
 /-- `aliasWrite` (`Person storage p = alice; p.age = 10; uint x = alice.age;
 assert(x == 10);`) uses its locals as it declares them. -/

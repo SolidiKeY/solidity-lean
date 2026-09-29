@@ -96,10 +96,13 @@ syntax:65 dl_term:65 " - " dl_term:66 : dl_term
 syntax:max "(" dl_term ")" : dl_term
 syntax:max "‹" term "›" : dl_term
 
-/-- One elementary update `x := t`, or `transfer(r, a)`. -/
+/-- One elementary update `x := t`, `transfer(r, a)`, or `book(a)`. -/
 declare_syntax_cat dl_upd_elem (behavior := both)
 syntax dl_term " := " dl_term : dl_upd_elem
 syntax &"transfer" "(" dl_term ", " dl_term ")" : dl_upd_elem
+/-- `book(a)`: `a` paid in by `msg.sender`, credited to its ledger entry and
+to the contract's funds. -/
+syntax &"book" "(" dl_term ")" : dl_upd_elem
 
 /-- A parallel update `{ a ‖ b }`. -/
 declare_syntax_cat dl_upd (behavior := both)
@@ -139,7 +142,13 @@ syntax:55 dl_term:56 " > " dl_term:56 : dl_fml
 syntax:55 dl_term:56 " >= " dl_term:56 : dl_fml
 /-- `∀ uint a; φ`: KeY's `\forall`, over the values of a primitive type. -/
 syntax:25 "∀ " ident ident "; " dl_fml:25 : dl_fml
+/-- `∃ uint a; φ`: `¬(∀ uint a; ¬φ)`. -/
+syntax:25 "∃ " ident ident "; " dl_fml:25 : dl_fml
 syntax:50 dl_fml:55 " && " dl_fml:50 : dl_fml
+/-- `φ ∨ ψ`: `¬(¬φ ∧ ¬ψ)`, the logic having no disjunction of its own. -/
+syntax:30 dl_fml:31 " ∨ " dl_fml:30 : dl_fml
+/-- `φ ↔ ψ`: `(φ → ψ) ∧ (ψ → φ)`. -/
+syntax:20 dl_fml:21 " ↔ " dl_fml:21 : dl_fml
 
 /-- What a taclet leaves: an update in front of the rest, statements, two
 goals (a branch, each with its condition), or — for a revert — `true` or
@@ -167,6 +176,8 @@ syntax "dl_schema{ " dl_fml " }" : term
 syntax (priority := high) "dl{ " dl_fml " }" : term
 /-- A sequent `Γ ⟹ φ`. -/
 syntax "dl{ " sepBy(dl_hyp, ", ") " ⟹ " dl_fml " }" : term
+/-- A sequent `Γ ⟹ₖ φ`, to be proved with solkey's rules alone (`⊢ₖ`). -/
+syntax "dl{ " sepBy(dl_hyp, ", ") " ⟹ₖ " dl_fml " }" : term
 /-- A taclet for either modality (`⟨[ s; ]⟩`). -/
 syntax "dl{ " "⟨" "[ " sol_stmt "; " "]" "⟩" " ⇝ " dl_premise " }" : term
 /-- A taclet for the box only. -/
@@ -911,6 +922,7 @@ partial def schemaTerm0 (Γ : Scope) (pos : TPos) : TSyntax `dl_term → MacroM 
     let me := schemaTerm Γ .memory
     match f.getId.toString, args, pos with
     | "select", #[s, r], .val => `(Term.find $(← st s) $(← pa r))
+    | "net", #[a], .val => `(Term.net $(← schemaTerm Γ .val a))
     | "find", #[s, p], .val => `(Term.find $(← st s) $(← pa p))
     | "find", #[s, p], .svalue => `(SValT.find $(← st s) $(← pa p))
     | "read", #[m, a], .val => `(Term.read $(← me m) $(← schemaTerm Γ .addr a))
@@ -960,6 +972,7 @@ end
 def schemaUpdElem (Γ : Scope) : TSyntax `dl_upd_elem → MacroM Lean.Term
   | `(dl_upd_elem| transfer($r, $a)) => do
     `(UpdElem.transfer $(← schemaTerm Γ .val r) $(← schemaTerm Γ .val a))
+  | `(dl_upd_elem| book($a)) => do `(UpdElem.book $(← schemaTerm Γ .val a))
   | `(dl_upd_elem| $l:dl_term := $r:dl_term) => do
     let `(dl_term| $x:ident) := l | Macro.throwErrorAt l "an update assigns a variable"
     let n := x.getId.toString
@@ -1000,6 +1013,12 @@ partial def schemaFml : TSyntax `dl_fml → MacroM Lean.Term
   | `(dl_fml| $φ:dl_fml ∧ $ψ:dl_fml) | `(dl_fml| $φ:dl_fml && $ψ:dl_fml) => do
     `(Fml.and $(← schemaFml φ) $(← schemaFml ψ))
   | `(dl_fml| $φ:dl_fml → $ψ:dl_fml) => do `(Fml.imp $(← schemaFml φ) $(← schemaFml ψ))
+  | `(dl_fml| $φ:dl_fml ∨ $ψ:dl_fml) => do
+    `(Fml.not (Fml.and (Fml.not $(← schemaFml φ)) (Fml.not $(← schemaFml ψ))))
+  | `(dl_fml| $φ:dl_fml ↔ $ψ:dl_fml) => do
+    let φ ← schemaFml φ
+    let ψ ← schemaFml ψ
+    `(Fml.and (Fml.imp $φ $ψ) (Fml.imp $ψ $φ))
   | `(dl_fml| { havoc } $φ:dl_fml) => do `(Fml.havoc $(← schemaFml φ))
   | `(dl_fml| $U:dl_upd $φ:dl_fml) => do
     let m ← match ← fmlModality? φ with
@@ -1023,6 +1042,13 @@ partial def schemaFml : TSyntax `dl_fml → MacroM Lean.Term
   | `(dl_fml| ‹ $t:term ›) => pure t
   | stx@`(dl_fml| $_:dl_term == $_:dl_term) | stx@`(dl_fml| $_:dl_term != $_:dl_term) =>
     Macro.throwErrorAt stx "a program comparison is read against a contract: write `dl{ … }`"
+  | stx@`(dl_fml| $_:dl_term < $_:dl_term) | stx@`(dl_fml| $_:dl_term <= $_:dl_term)
+  | stx@`(dl_fml| $_:dl_term > $_:dl_term) | stx@`(dl_fml| $_:dl_term >= $_:dl_term) =>
+    Macro.throwErrorAt stx
+      "an order between values is read against a contract: write `dl[C]{ … }` or `dl!{ … }`"
+  | stx@`(dl_fml| ∀ $_:ident $_:ident; $_:dl_fml) | stx@`(dl_fml| ∃ $_:ident $_:ident; $_:dl_fml) =>
+    Macro.throwErrorAt stx
+      "a quantifier is read against a contract: write `dl[C]{ … }` or `dl!{ … }`"
   | _ => Macro.throwUnsupported
 
 def schemaPremise (fresh : Bool) (Γ : Scope) : TSyntax `dl_premise → MacroM Lean.Term
@@ -1162,6 +1188,9 @@ macro_rules
   | `(dl{ $[$hs:dl_hyp],* ⟹ $φ:dl_fml }) => do
     `($(mkIdent `Solidity.Proves) $(mkIdent `Solidity.RuleSet.all) [$(← hs.mapM schemaHyp),*]
       $(← schemaFml φ))
+  | `(dl{ $[$hs:dl_hyp],* ⟹ₖ $φ:dl_fml }) => do
+    `($(mkIdent `Solidity.Proves) $(mkIdent `Solidity.RuleSet.solkey) [$(← hs.mapM schemaHyp),*]
+      $(← schemaFml φ))
   | `(dl{ ⟨[ $s:sol_stmt; ]⟩ ⇝ $p:dl_premise }) => schemaTaclet (schemaIdent "m") s p
   | `(dl{ [ $s:sol_stmt; ] ⇝ $p:dl_premise }) => do schemaTaclet (← `(Modality.box)) s p
   | `(dl{ ⟨ $s:sol_stmt; ⟩ ⇝ $p:dl_premise }) => do schemaTaclet (← `(Modality.diamond)) s p
@@ -1284,33 +1313,17 @@ def ppVar? (e : Lean.Expr) : MetaM (Option Ident) := do
 
 def binopSym? (op : Lean.Expr) : MetaM (Option String) := do
   if (← fvarName? op).isSome then return some "⊕"
-  match_expr (← whnf op) with
-  | BinOp.add => return "+" | BinOp.sub => return "-" | BinOp.mul => return "*"
-  | BinOp.pow => return "**" | BinOp.div => return "/" | BinOp.mod => return "%"
-  | BinOp.lt => return "<" | BinOp.gt => return ">" | BinOp.le => return "<="
-  | BinOp.ge => return ">=" | BinOp.eqB => return "==" | BinOp.neB => return "!="
-  | BinOp.and => return "&&" | BinOp.or => return "||"
-  | BinOp.band => return "&" | BinOp.bor => return "|" | BinOp.bxor => return "^"
-  | BinOp.shl => return "<<" | BinOp.shr => return ">>"
-  | BinOp.addW => return "+%" | BinOp.subW => return "-%" | BinOp.mulW => return "*%"
-  | BinOp.powW => return "**%"
-  | _ => return none
+  let op ← whnf op
+  return (BinOp.all.find? (toExpr · == op)).map BinOp.sym
 
-/-- `a ⊕ b` in the program grammar. -/
-def mkBinExpr (sym : String) (a b : TSyntax `sol_expr) : MetaM (TSyntax `sol_expr) :=
-  match sym with
-  | "+" => `(sol_expr| $a + $b) | "-" => `(sol_expr| $a - $b) | "*" => `(sol_expr| $a * $b)
-  | "**" => `(sol_expr| $a ** $b)
-  | "/" => `(sol_expr| $a / $b) | "%" => `(sol_expr| $a % $b)
-  | "<" => `(sol_expr| $a < $b) | ">" => `(sol_expr| $a > $b)
-  | "<=" => `(sol_expr| $a <= $b) | ">=" => `(sol_expr| $a >= $b)
-  | "==" => `(sol_expr| $a == $b) | "!=" => `(sol_expr| $a != $b)
-  | "&&" => `(sol_expr| $a && $b) | "||" => `(sol_expr| $a || $b)
-  | "&" => `(sol_expr| $a & $b) | "|" => `(sol_expr| $a | $b) | "^" => `(sol_expr| $a ^ $b)
-  | "<<" => `(sol_expr| $a << $b) | ">>" => `(sol_expr| $a >> $b)
-  | "+%" => `(sol_expr| $a +% $b) | "-%" => `(sol_expr| $a -% $b)
-  | "*%" => `(sol_expr| $a *% $b) | "**%" => `(sol_expr| $a **% $b)
-  | _ => `(sol_expr| $a ⊕ $b)
+/-- `a ⊕ b` in the program grammar: the node the parser makes of `a ⊕ b` for
+an operator of the table (`BinOp.ofSym?`), else the schema operator `⊕`. -/
+def mkBinExpr (sym : String) (a b : TSyntax `sol_expr) : MetaM (TSyntax `sol_expr) := do
+  if (BinOp.ofSym? sym).isSome then
+    if let .ok t := Lean.Parser.runParserCategory (← getEnv) `sol_expr s!"a {sym} b" then
+      if t.getNumArgs == 3 then
+        return ⟨Syntax.node .none t.getKind #[a, mkAtom sym, b]⟩
+  `(sol_expr| $a ⊕ $b)
 
 /-- `b.f`: one dotted name when `b` is a name, as the parser reads it. -/
 def dotExpr (b : TSyntax `sol_expr) (f : String) : MetaM (TSyntax `sol_expr) :=
@@ -1662,6 +1675,10 @@ partial def ppTerm (e : Lean.Expr) : MetaM (TSyntax `dl_term) := do
     | EnvKey.timestamp => `(dl_term| block.timestamp)
     | EnvKey.selfBalance => `(dl_term| address(this).balance)
     | _ => escapeDl e
+  | Term.net _ a => `(dl_term| net($(← ppTerm a)))
+  | Term.netOf _ x a =>
+    let some x ← ppVar? x | escapeDl e
+    `(dl_term| net($x:ident, $(← ppTerm a)))
   | _ => escapeDl e
 
 partial def ppPTerm (e : Lean.Expr) : MetaM (TSyntax `dl_term) := do
@@ -1787,6 +1804,10 @@ def ppUpdElem? (e : Lean.Expr) : MetaM (Option (TSyntax `dl_upd_elem)) := do
   | UpdElem.memory _ m => return some (← `(dl_upd_elem| memory := $(← ppMTerm m):dl_term))
   | UpdElem.transfer _ r a =>
     return some (← `(dl_upd_elem| transfer($(← ppTerm r):dl_term, $(← ppTerm a):dl_term)))
+  | UpdElem.saveNet _ x =>
+    let some x ← var x | return none
+    return some (← `(dl_upd_elem| $x:dl_term := net))
+  | UpdElem.book _ a => return some (← `(dl_upd_elem| book($(← ppTerm a):dl_term)))
   | _ => return none
 
 def ppUpd (e : Lean.Expr) : MetaM (TSyntax `dl_upd) := do
@@ -1828,6 +1849,30 @@ def primName? (p : Lean.Expr) : MetaM (Option String) := do
   | PrimTy.bool => return "bool"
   | _ => return none
 
+/-- `¬(¬φ ∧ ¬ψ)`, which `φ ∨ ψ` spells: `φ` and `ψ`. -/
+def orParts? (e : Lean.Expr) : MetaM (Option (Lean.Expr × Lean.Expr)) := do
+  let_expr Fml.not _ a := (← whnf e) | return none
+  let_expr Fml.and _ l r := (← whnf a) | return none
+  let_expr Fml.not _ φ := (← whnf l) | return none
+  let_expr Fml.not _ ψ := (← whnf r) | return none
+  return some (φ, ψ)
+
+/-- `¬(∀ T x; ¬φ)`, which `∃ T x; φ` spells: `x`, `T` and `φ`. -/
+def exParts? (e : Lean.Expr) : MetaM (Option (Lean.Expr × Lean.Expr × Lean.Expr)) := do
+  let_expr Fml.not _ a := (← whnf e) | return none
+  let_expr Fml.all _ x p b := (← whnf a) | return none
+  let_expr Fml.not _ φ := (← whnf b) | return none
+  return some (x, p, φ)
+
+/-- `(φ → ψ) ∧ (ψ → φ)`, which `φ ↔ ψ` spells: `φ` and `ψ`. -/
+def iffParts? (e : Lean.Expr) : MetaM (Option (Lean.Expr × Lean.Expr)) := do
+  let_expr Fml.and _ l r := (← whnf e) | return none
+  let_expr Fml.imp _ φ ψ := (← whnf l) | return none
+  let_expr Fml.imp _ ψ' φ' := (← whnf r) | return none
+  let (φ, ψ, φ', ψ') := (← instantiateMVars φ, ← instantiateMVars ψ, ← instantiateMVars φ',
+    ← instantiateMVars ψ')
+  return if φ == φ' && ψ == ψ' then some (φ, ψ) else none
+
 partial def ppFml (e : Lean.Expr) : MetaM (TSyntax `dl_fml) := do
   let e ← instantiateMVars e
   let escape := do `(dl_fml| ‹$(← escapeTerm e):term›)
@@ -1837,7 +1882,13 @@ partial def ppFml (e : Lean.Expr) : MetaM (TSyntax `dl_fml) := do
   match_expr (← whnf e) with
   | Fml.tt _ => `(dl_fml| true)
   | Fml.not _ φ =>
-    if (← whnf φ).isAppOfArity ``Fml.tt 1 then `(dl_fml| false) else `(dl_fml| ¬$(← arg φ):dl_fml)
+    if (← whnf φ).isAppOfArity ``Fml.tt 1 then return ← `(dl_fml| false)
+    if let some (a, b) ← orParts? e then
+      return ← `(dl_fml| $(← ppFml a):dl_fml ∨ $(← ppFml b):dl_fml)
+    if let some (x, p, a) ← exParts? e then
+      if let (some x, some T) := (← ppVar? x, ← primName? p) then
+        return ← `(dl_fml| ∃ $(mkIdent (Name.mkSimple T)):ident $x:ident; $(← ppFml a):dl_fml)
+    `(dl_fml| ¬$(← arg φ):dl_fml)
   | Fml.eq _ a b =>
     if let some (sym, l, r) ← cmpParts? a b then
       let l ← ppTerm l
@@ -1853,6 +1904,8 @@ partial def ppFml (e : Lean.Expr) : MetaM (TSyntax `dl_fml) := do
     let some T ← primName? p | escape
     `(dl_fml| ∀ $(mkIdent (Name.mkSimple T)):ident $x:ident; $(← ppFml φ):dl_fml)
   | Fml.and _ φ ψ =>
+    if let some (a, b) ← iffParts? e then
+      return ← `(dl_fml| $(← ppFml a):dl_fml ↔ $(← ppFml b):dl_fml)
     let ψ' ← ppFml ψ
     let ψ' ← if (← whnf ψ).isAppOfArity ``Fml.imp 3 then `(dl_fml| ($ψ')) else pure ψ'
     `(dl_fml| $(← arg φ):dl_fml ∧ $ψ')
@@ -1898,7 +1951,7 @@ def delabFml : Delab := do
 
 attribute [delab app.Solidity.Fml.eq, delab app.Solidity.Fml.not,
   delab app.Solidity.Fml.and, delab app.Solidity.Fml.imp, delab app.Solidity.Fml.upd,
-  delab app.Solidity.Fml.modal, delab app.Solidity.Fml.all] delabFml
+  delab app.Solidity.Fml.modal, delab app.Solidity.Fml.all, delab app.Solidity.Fml.havoc] delabFml
 
 /-- `Valid φ`: `⊨ φ`. -/
 @[delab app.Solidity.Valid]

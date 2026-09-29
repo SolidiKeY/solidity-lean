@@ -12,7 +12,7 @@ states agree everywhere but on the fresh names.
 
 namespace Solidity
 
-open Semantics
+open Semantics SemanticsProperties
 
 variable {C : Contract}
 
@@ -58,11 +58,6 @@ theorem State.writeStorage_setEnv (σ : State) (x : Var) (b : Binding) (r : Name
   all_goals
     simp only [State.findStorage_setEnv, State.saveStorage_setEnv, bind_assoc]
 
-theorem State.checkIndex_setEnv (σ : State) (x : Var) (b : Binding) (r : Name) (segs : List Seg)
-    (i : Int) : (σ.setEnv x b).checkIndex r segs i = σ.checkIndex r segs i := by
-  unfold State.checkIndex
-  simp only [State.findStorage_setEnv]
-
 /-- `EnvAgreeExcept ns (…(σ.setEnv a _)….setEnv b _) σ` with `a b ∈ ns`. -/
 macro "agree_tac" : tactic => `(tactic| (
   repeat (first
@@ -74,9 +69,6 @@ macro "agree_tac" : tactic => `(tactic| (
 
 section
 variable (σ : State) (x : Var) (b : Binding)
-
-theorem State.setObj_setEnv (id : Nat) (o : MObj) :
-    (σ.setEnv x b).setObj id o = (σ.setObj id o).setEnv x b := rfl
 
 theorem guardOk_setEnv (v : Value) :
     guardOk v (σ.setEnv x b) = (do let τ ← guardOk v σ; pure (τ.setEnv x b)) := by
@@ -173,8 +165,6 @@ theorem envRef_setEnv_ne' (σ : State) {x y : Var} (h : x ≠ y) (b : Binding) :
 theorem aliasPath_setEnv_ne' (σ : State) {x y : Var} (h : x ≠ y) (b : Binding) :
     aliasPath (σ.setEnv x b) y = aliasPath σ y := aliasPath_setEnv_ne σ (Ne.symm h) b
 
-theorem MPath.mval_loc (σ : State) {T : Ty} (l : MLoc C T) : (MPath.loc l).mval σ = l.read σ := rfl
-
 /-- A push whose element fails fails. -/
 @[simp] theorem SameOk.error_pushAt (ns : List Var) (σ : State) (E : Ty) (r : Name)
     (segs : List Seg) (e e' : Halt) :
@@ -183,12 +173,6 @@ theorem MPath.mval_loc (σ : State) {T : Ty} (l : MLoc C T) : (MPath.loc l).mval
   cases σ.findStorage r segs with
   | error _ => trivial
   | ok v => cases v <;> trivial
-
-/-- `res_split`, knowing that a push whose element fails fails. -/
-macro "res_split'" : tactic => `(tactic| (
-  simp only [bind, Except.bind, pure, Except.pure]
-  repeat' split
-  all_goals (try simp_all [EnvAgreeExcept.refl, SameOk.error_pushAt])))
 
 theorem evalBinop_noShort {op : BinOp} (h : op.shortCircuits = false) (p : PrimTy) (lv : Value)
     (b : Res Value) :
@@ -230,10 +214,6 @@ theorem copyStToM_bind_agree {ns : List Var} {σ τ : State} (hag : EnvAgreeExce
       | error _ => trivial
       | ok id => exact hs.setEnv_both _ _
 
-theorem Res.ok_bind {α β : Type} (a : α) (f : α → Res β) : (Except.ok a >>= f) = f a := rfl
-
-@[simp] theorem Src.pushVal_none (σ : State) {T : Ty} :
-    Src.pushVal (C := C) (T := T) σ none = fun slot => pure slot := rfl
 @[simp] theorem Src.pushVal_some (σ : State) {T : Ty} (r : Src C T) :
     Src.pushVal σ (some r) = fun _ => r.value σ >>= fun v => pure v.strip := rfl
 
@@ -292,16 +272,6 @@ theorem SameOk.bind_same {ns : List Var} {α : Type} (r : Res α) {f g : α → 
 A call binds its arguments as they were read in the caller's state; its
 inlining binds them one after another.  The two agree when every argument is
 ready (`Arg.ready`): a literal, or a local no earlier parameter rebinds. -/
-
-/-- A block of two parts runs the first, then the second. -/
-theorem Prog.run_append (σ : State) :
-    (P Q : Prog C) → Prog.run σ (P ++ Q) = (do Prog.run (← Prog.run σ P) Q)
-  | [], Q => by simp [Prog.run]
-  | s :: P, Q => by
-    simp only [List.cons_append, Prog.run, bind_assoc]
-    cases s.run σ with
-    | error _ => rfl
-    | ok τ => exact Prog.run_append τ P Q
 
 /-- The parameters declared one after another are the call's binding. -/
 theorem Arg.decls_run : (args : List (Arg C)) → ∀ σ, Prog.run σ (args.map Arg.decl) = Arg.bindSeq args σ
@@ -464,7 +434,7 @@ theorem Stmt.call_capture_sound {k : Nat} {f : Name} {args : List (Arg C)}
     · exact fun x hx => hs x (by simp [Stmt.vars, hx])
     · exact fun x hx => hs x (by simp [Stmt.vars, hx])
 
-set_option maxHeartbeats 4000000 in
+set_option maxHeartbeats 1000000 in
 theorem Taclet.sound_unfold {k : Nat} {m : Modality} {s : Stmt C} {P : Prog C}
     (d : Taclet C k m s (.unfold P)) (hs : Avoids s.vars (freshVars k)) :
     ∀ σ, SameOk (freshVars k) (Prog.run σ P) (s.run σ) := by
@@ -479,7 +449,7 @@ theorem Taclet.sound_unfold {k : Nat} {m : Modality} {s : Stmt C} {P : Prog C}
   all_goals intro σ
   all_goals repeat' cases_holes
   all_goals vars_simp
-  all_goals (try (unf_simp; res_split'; all_goals agree_tac; done))
+  all_goals (try (unf_simp; res_split; all_goals agree_tac; done))
   case logicalAndShortCircuitRhs =>
     rename_i v se nse
     unf_simp

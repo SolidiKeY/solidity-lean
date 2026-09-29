@@ -64,6 +64,25 @@ elab "#check_constructor_table " ind:ident ", " tbl:term : command => do
     throwError "the table does not list the constructors of {indName}:\
       \n  missing: {missing}\n  not a constructor: {extra}\n  listed twice: {dups}"
 
+/-- `#enum_ctors I` defines, for an inductive `I` whose constructors take no
+arguments, `I.all`, every constructor in declaration order, and `I.name`, a
+constructor's own name (`I.c` is `"c"`): the two tables an enumeration of
+names needs, written from the constructor list so that they cannot drift
+from it.  Both are ordinary definitions, which the kernel reduces. -/
+elab "#enum_ctors " ind:ident : command => do
+  let indName ← liftCoreM <| realizeGlobalConstNoOverloadWithInfo ind
+  let .inductInfo info ← getConstInfo indName
+    | throwErrorAt ind "{indName} is not an inductive type"
+  let T := mkIdent indName
+  let ctors := info.ctors.toArray.map mkIdent
+  let alts ← info.ctors.toArray.mapM fun c =>
+    `(Parser.Term.matchAltExpr| | $(mkIdent c):ident => $(quote c.getString!))
+  elabCommand (← `(/-- Every constructor, in declaration order. -/
+    def $(mkIdent (`_root_ ++ indName ++ `all)):ident : List $T := [$ctors,*]))
+  elabCommand (← `(/-- The constructor's own name. -/
+    def $(mkIdent (`_root_ ++ indName ++ `name)):ident : $T → String :=
+      fun r => match r with $alts:matchAlt*))
+
 end Check
 
 namespace RuleShapes

@@ -178,10 +178,10 @@ then both members read back as `0`. -/
 info: Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int 0))
 -/
 #guard_msgs in
-#eval (do (← Prog.run State.exampleStore (sol{
+#eval Prog.localAfter State.exampleStore (sol{
     alice.account.balance = 100; alice.account.token.value = 7; delete alice.account;
     uint b = alice.account.balance; uint v = alice.account.token.value; uint r = b + v;
-  } : Prog StandardExample)).getEnv (.user "r"))
+  } : Prog StandardExample) "r"
 
 /-! `alice.age = 30; delete alice; uint result = alice.age;` (`storage-root-delete-struct.key`). -/
 
@@ -189,9 +189,9 @@ info: Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int 
 info: Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int 0))
 -/
 #guard_msgs in
-#eval (do (← Prog.run State.exampleStore (sol{
+#eval Prog.localAfter State.exampleStore (sol{
     alice.age = 30; delete alice; uint result = alice.age;
-  } : Prog StandardExample)).getEnv (.user "result"))
+  } : Prog StandardExample) "result"
 
 /-! `folks[1].age = 44; delete folks[1]; uint result = folks[1].age;` — a struct
 entry of a mapping (`storage-index-delete-mapping-struct.key`). -/
@@ -200,9 +200,9 @@ entry of a mapping (`storage-index-delete-mapping-struct.key`). -/
 info: Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int 0))
 -/
 #guard_msgs in
-#eval (do (← Prog.run State.exampleStore (sol{
+#eval Prog.localAfter State.exampleStore (sol{
     folks[1].age = 44; delete folks[1]; uint result = folks[1].age;
-  } : Prog StandardExample)).getEnv (.user "result"))
+  } : Prog StandardExample) "result"
 
 /-! A struct's mapping members survive its `delete` (solkey `selectStDelNodeMap`),
 its value members do not (`selectStDelNodePrim`): after
@@ -213,17 +213,17 @@ the owner `0`. -/
 info: Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int 42))
 -/
 #guard_msgs in
-#eval (do (← Prog.run State.exampleStore (sol{
+#eval Prog.localAfter State.exampleStore (sol{
     wallet.owner = 7; wallet.stash[1] = 42; delete wallet; uint kept = wallet.stash[1];
-  } : Prog StandardExample)).getEnv (.user "kept"))
+  } : Prog StandardExample) "kept"
 
 /--
 info: Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int 0))
 -/
 #guard_msgs in
-#eval (do (← Prog.run State.exampleStore (sol{
+#eval Prog.localAfter State.exampleStore (sol{
     wallet.owner = 7; wallet.stash[1] = 42; delete wallet; uint o = wallet.owner;
-  } : Prog StandardExample)).getEnv (.user "o"))
+  } : Prog StandardExample) "o"
 
 /-! ## A fixed-size array keeps its length
 

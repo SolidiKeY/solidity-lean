@@ -12,10 +12,11 @@ here in its **published** form: `returns (bool)` with `return true;`, and
 
 Changes from the published text:
 
-* `msg.sender` is not in this stream's syntax: it is a parameter of the
-  function that reads it (`sender` of `transfer` and `approve`, `caller` of
-  `transferFrom`), the hack the benchmark's README lists for it.  With
-  `msg.sender` in the language the parameter goes.
+* `msg.sender` is a parameter of the function that reads it (`sender` of
+  `transfer` and `approve`, `caller` of `transferFrom`), the hack the
+  benchmark's README lists for it, from before the language had
+  `msg.sender`.  The proofs below are over this form; `Examples/Specs.lean`
+  states `approve` and `_mint` with `msg.sender` itself.
 * `emit Transfer(…)`/`emit Approval(…)` and the event declarations are
   dropped (events are another stream's), as solkey's port drops them.
 * `address` is `uint`, as the interpreter reads it; `external` and
@@ -45,7 +46,7 @@ def ERC20 : Contract := contract!{
   uint totalSupply;
   mapping(uint => uint) balanceOf;
   mapping(uint => mapping(uint => uint)) allowance;
-  -- `sender` is `msg.sender`, a parameter until the language has it
+  -- `sender` is `msg.sender`, passed as a parameter
   function transfer(uint sender, uint recipient, uint amount) returns (bool) {
     balanceOf[sender] -= amount;
     balanceOf[recipient] += amount;

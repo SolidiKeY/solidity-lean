@@ -587,5 +587,252 @@ theorem State.setNet_setNet_absorb (s : State) (a : Int) (v v' : Int) :
     (s.setNet a v).setNet a v' = s.setNet a v' := by
   simp [State.setNet, setBy_setBy_self]
 
+/-! ## Paths, runs and results
+
+The laws the calculus, the typing layer and the EVM compiler all use; kept
+here once rather than in each of them. -/
+
+/-- A member that `lookupBy` finds is in the list: `age` is a member of `Person`. -/
+theorem lookupBy_eq_some_mem [DecidableEq κ] {k : κ} {v : α} :
+    ∀ {l : List (κ × α)}, lookupBy k l = some v → (k, v) ∈ l
+  | [], h => by simp [lookupBy] at h
+  | (k', v') :: l, h => by
+    simp only [lookupBy] at h
+    split at h
+    · cases h; rename_i hk; subst hk; exact List.mem_cons_self
+    · exact List.mem_cons_of_mem _ (lookupBy_eq_some_mem h)
+
+/-- Reading at the empty path reads the whole value: `alice` itself. -/
+theorem SVal.find_nil (v : SVal) : v.find [] = .ok v := by cases v <;> rfl
+
+/-- Writing at the empty path replaces the whole value: `alice = …` at `alice`. -/
+theorem SVal.save_nil (v new : SVal) : v.save [] new = .ok new := by cases v <;> rfl
+
+@[simp] theorem SVal.findLive_nil (v : SVal) : v.findLive [] = .ok v := by cases v <;> rfl
+
+/-- Reading along `segs ++ rest` is reading `segs`, then `rest` from there:
+`alice.account.balance` is `alice.account`, then `.balance`. -/
+theorem SVal.find_append : ∀ (v : SVal) (segs rest : List Seg),
+    v.find (segs ++ rest) = (v.find segs >>= fun w => w.find rest)
+  | v, [], rest => by simp only [List.nil_append, SVal.find_nil]; rfl
+  | .prim _, _ :: _, _ => by simp [SVal.find]; rfl
+  | .struct fields, .field name :: segs, rest => by
+    simp only [List.cons_append, SVal.find]
+    split
+    · exact SVal.find_append _ _ _
+    · rfl
+  | .struct _, .at _ :: _, _ => by simp [SVal.find]; rfl
+  | .array elems _ _, .at i :: segs, rest => by
+    simp only [List.cons_append, SVal.find]
+    split
+    · exact SVal.find_append _ _ _
+    · rfl
+  | .array elems sh fx, .field name :: segs, rest => by
+    by_cases h : name = "length"
+    · subst h; simp only [List.cons_append, SVal.find]
+      cases fx
+      · exact SVal.find_append _ _ _
+      · rfl
+    · have e : ∀ l, SVal.find (.array elems sh fx) (.field name :: l) = .error .stuck := by
+        intro l; simp [SVal.find]
+      simp only [List.cons_append, e]; rfl
+  | .map entries dflt, .at i :: segs, rest => by
+    simp only [List.cons_append, SVal.find]
+    split
+    · exact SVal.find_append _ _ _
+    · exact SVal.find_append _ _ _
+  | .map _ _, .field _ :: _, _ => by simp [SVal.find]; rfl
+
+/-- `SVal.find_append` for the live read. -/
+theorem SVal.findLive_append : ∀ (v : SVal) (segs rest : List Seg),
+    v.findLive (segs ++ rest) = (v.findLive segs >>= fun w => w.findLive rest)
+  | v, [], rest => by simp only [List.nil_append, SVal.findLive_nil]; rfl
+  | .prim _, _ :: _, _ => by simp [SVal.findLive]; rfl
+  | .struct fields, .field name :: segs, rest => by
+    simp only [List.cons_append, SVal.findLive]
+    split
+    · exact SVal.findLive_append _ _ _
+    · rfl
+  | .struct _, .at _ :: _, _ => by simp [SVal.findLive]; rfl
+  | .array elems _ _, .at i :: segs, rest => by
+    simp only [List.cons_append, SVal.findLive]
+    split
+    · exact SVal.findLive_append _ _ _
+    · rfl
+  | .array elems sh fx, .field name :: segs, rest => by
+    by_cases h : name = "length"
+    · subst h; simp only [List.cons_append, SVal.findLive]
+      cases fx
+      · exact SVal.findLive_append _ _ _
+      · rfl
+    · have e : ∀ l, SVal.findLive (.array elems sh fx) (.field name :: l) = .error .stuck := by
+        intro l; simp [SVal.findLive]
+      simp only [List.cons_append, e]; rfl
+  | .map entries dflt, .at i :: segs, rest => by
+    simp only [List.cons_append, SVal.findLive]
+    split
+    · exact SVal.findLive_append _ _ _
+    · exact SVal.findLive_append _ _ _
+  | .map _ _, .field _ :: _, _ => by simp [SVal.findLive]; rfl
+
+/-- A write along `segs ++ rest`, where `segs` reads `sub`, writes `rest` into
+`sub` and puts the result back at `segs`: `alice.age = 1;` rebuilds `alice`
+with its `age` replaced. -/
+theorem SVal.save_append : ∀ (v : SVal) (segs rest : List Seg) (new sub : SVal),
+    v.find segs = .ok sub → v.save (segs ++ rest) new = (sub.save rest new >>= v.save segs)
+  | v, [], rest, new, sub, h => by
+    simp only [SVal.find_nil, Except.ok.injEq] at h; subst h
+    simp only [List.nil_append]
+    cases v.save rest new with
+    | error e => rfl
+    | ok a => exact (SVal.save_nil v a).symm
+  | .prim _, _ :: _, _, _, _, h => by simp [SVal.find] at h
+  | .struct fields, .field name :: segs, rest, new, sub, h => by
+    simp only [List.cons_append, SVal.save]
+    simp only [SVal.find] at h
+    split
+    · rename_i old hold
+      rw [hold] at h
+      rw [SVal.save_append old segs rest new sub h]
+      cases sub.save rest new <;> rfl
+    · rename_i hn; rw [hn] at h; cases h
+  | .struct _, .at _ :: _, _, _, _, h => by simp [SVal.find] at h
+  | .array elems sh _, .at i :: segs, rest, new, sub, h => by
+    simp only [List.cons_append, SVal.save]
+    simp only [SVal.find] at h
+    split
+    · rename_i hb; rw [dif_pos hb] at h; rw [SVal.save_append _ segs rest new sub h]
+      cases sub.save rest new <;> rfl
+    · rename_i hb; rw [dif_neg hb] at h; cases h
+  | .array elems sh fx, .field name :: segs, rest, new, sub, h => by
+    by_cases hn : name = "length"
+    · subst hn
+      cases fx
+      · cases segs with
+        | nil =>
+          simp [SVal.find] at h; subst h
+          cases rest <;> simp [SVal.save] <;> rfl
+        | cons s segs => simp [SVal.find] at h
+      · simp [SVal.find] at h
+    · simp [SVal.find] at h
+  | .map entries dflt, .at i :: segs, rest, new, sub, h => by
+    simp only [List.cons_append, SVal.save]
+    simp only [SVal.find] at h
+    split
+    · rename_i old hold; rw [hold] at h; rw [SVal.save_append _ segs rest new sub h]
+      cases sub.save rest new <;> rfl
+    · rename_i hold; rw [hold] at h; rw [SVal.save_append _ segs rest new sub h]
+      cases sub.save rest new <;> rfl
+  | .map _ _, .field _ :: _, _, _, _, h => by simp [SVal.find] at h
+
+/-- `SVal.find_append` at a root: `folks[7].age` is `folks[7]`, then `.age`. -/
+theorem State.findStorage_append (σ : State) (r : Name) (segs rest : List Seg) :
+    σ.findStorage r (segs ++ rest) = (σ.findStorage r segs >>= fun w => w.find rest) := by
+  unfold State.findStorage
+  split
+  · exact SVal.find_append _ _ _
+  · rfl
+
+/-- `SVal.save_append` at a root: `alice.age = 1;` writes `age` below `alice`. -/
+theorem State.saveStorage_append {σ : State} {r : Name} {segs : List Seg} {sub : SVal}
+    (h : σ.findStorage r segs = .ok sub) (rest : List Seg) (new : SVal) :
+    σ.saveStorage r (segs ++ rest) new = (sub.save rest new >>= σ.saveStorage r segs) := by
+  unfold State.findStorage at h
+  unfold State.saveStorage
+  split
+  · rename_i v hv
+    rw [hv] at h
+    rw [SVal.save_append v segs rest new sub h]
+    cases sub.save rest new <;> rfl
+  · rename_i hv; rw [hv] at h; cases h
+
+/-- The storage a successful `saveStorage` leaves. -/
+def _root_.Solidity.Semantics.State.storeRes (σ : State) (r : Name) (segs : List Seg)
+    (x : SVal) : Res (List (Name × SVal)) :=
+  match lookupBy r σ.storage with
+  | some v => do
+    let u ← v.save segs x
+    pure (setBy r u σ.storage)
+  | none => .error .stuck
+
+theorem State.saveStorage_eq (σ : State) (r : Name) (segs : List Seg) (x : SVal) :
+    σ.saveStorage r segs x = (do let s ← σ.storeRes r segs x; pure { σ with storage := s }) := by
+  unfold State.saveStorage State.storeRes
+  cases lookupBy r σ.storage with
+  | none => rfl
+  | some v => cases h : v.save segs x <;> simp [h, bind, Except.bind, pure, Except.pure]
+
+/-- A write that returned wrote below a root that was there. -/
+theorem State.saveStorage_ok_inv {σ σ' : State} {r : Name} {segs : List Seg} {new : SVal}
+    (h : σ.saveStorage r segs new = .ok σ') :
+    ∃ V up, lookupBy r σ.storage = some V ∧ V.save segs new = .ok up ∧
+      σ' = { σ with storage := setBy r up σ.storage } := by
+  unfold State.saveStorage at h
+  cases hV : lookupBy r σ.storage with
+  | none => simp [hV] at h
+  | some V =>
+    simp only [hV] at h
+    cases hs : V.save segs new with
+    | error e => rw [hs] at h; cases h
+    | ok up => rw [hs] at h; cases h; exact ⟨V, up, rfl, hs, rfl⟩
+
+/-- `delete` clears a list of elements one by one. -/
+theorem defaultOfElems_eq_map :
+    ∀ l : List SVal, SVal.defaultOf.defaultOfElems l = l.map SVal.defaultOf
+  | [] => rfl
+  | v :: l => by simp [SVal.defaultOf.defaultOfElems, defaultOfElems_eq_map l]
+
+/-- A deleted struct's member is the member deleted: `delete alice;` makes `alice.age` `0`. -/
+theorem lookupBy_defaultOfFields (n : Name) : ∀ fields : List (Name × SVal),
+    lookupBy n (SVal.defaultOf.defaultOfFields fields) = (lookupBy n fields).map SVal.defaultOf
+  | [] => rfl
+  | (m, v) :: fields => by
+    simp only [SVal.defaultOf.defaultOfFields, lookupBy]
+    split
+    · rfl
+    · exact lookupBy_defaultOfFields n fields
+
+/-- A fresh struct's member is its type's default: a fresh `Person`'s `age` is `0`. -/
+theorem lookupBy_defaultForFields (n : Name) : ∀ l : List (Name × Ty),
+    lookupBy n (defaultForFields l) = (lookupBy n l).map defaultForTy
+  | [] => by simp [defaultForFields, lookupBy]
+  | (m, T) :: l => by
+    rw [defaultForFields]
+    simp only [lookupBy]
+    split
+    · rfl
+    · exact lookupBy_defaultForFields n l
+
+/-- A block of two parts runs the first, then the second. -/
+theorem Prog.run_append {C : Contract} (σ : State) :
+    (P Q : Prog C) → Prog.run σ (P ++ Q) = (do Prog.run (← Prog.run σ P) Q)
+  | [], Q => by simp [Prog.run]
+  | s :: P, Q => by
+    simp only [List.cons_append, Prog.run, bind_assoc]
+    cases s.run σ with
+    | error _ => rfl
+    | ok τ => exact Prog.run_append τ P Q
+
+theorem Prog.run_cons {C : Contract} (σ : State) (s : Stmt C) (P : Prog C) :
+    Prog.run σ (s :: P) = (do Prog.run (← s.run σ) P) := rfl
+
+/-- What the local `x` holds after `P` runs from the store `σ`. -/
+def _root_.Solidity.Prog.localAfter {C : Contract} (σ : State) (P : Prog C) (x : String) :
+    Res Binding := do
+  (← Prog.run σ P).getEnv (.user x)
+
+/-- A run that returned passes its value on. -/
+theorem Res.ok_bind {α β : Type} (a : α) (f : α → Res β) :
+    (Except.ok a >>= f : Res β) = f a := rfl
+
+/-- A run that halted halts what follows. -/
+theorem Res.error_bind {α β : Type} (e : Halt) (f : α → Res β) :
+    (Except.error e >>= f : Res β) = .error e := rfl
+
+/-- A bind returned: its first step did, and the rest did from there. -/
+theorem Res.bind_eq_ok {α β : Type} {x : Res α} {f : α → Res β} {b : β} :
+    (x >>= f) = .ok b ↔ ∃ a, x = .ok a ∧ f a = .ok b := by
+  cases x <;> simp [bind, Except.bind]
+
 end SemanticsProperties
 end Solidity

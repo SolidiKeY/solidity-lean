@@ -1,4 +1,5 @@
 import Solidity.Calculus.DecideComplete
+import Solidity.Calculus.Spec
 
 /-!
 # Benchmark: `Mapping` and `NestedMapping`
@@ -7,9 +8,11 @@ Source: <https://raw.githubusercontent.com/Cyfrin/solidity-by-example.github.io/
 (solkey's `keyext.solidity.examples/benchmark/Mapping.sol`).
 
 Changes: none but the spelling of `contract!{ … }` (two contracts, as the
-file has).  solkey's clauses are the theorems below; `\forall address a;
-a != _addr -> myMap[a] == \old(myMap[a])` is stated for one key `b`, a
-parameter, with `v` its old value.  A free name of a formula is a `uint`
+file has) and solkey's clauses, written above the functions.  They are
+proved as `spec!{f}`, the obligation solkey synthesizes (`spec_set`, …),
+and by hand before it: `\forall address a; a != _addr -> myMap[a] ==
+\old(myMap[a])` is stated for one key `b`, a parameter, with `v` its old
+value.  A free name of a formula is a `uint`
 parameter, so `NestedMapping.set`'s `bool` is passed as both literals.  The
 `remove` clauses carry a premise that the old entry has its declared type
 (`remove_spec`).
@@ -61,29 +64,36 @@ namespace Solidity.Examples.Benchmark.Mapping
 
 open Proves
 
-/-- `Mapping`, as published. -/
+/-- `Mapping`, as published, with solkey's clauses. -/
 def Mapping : Contract := contract!{
   mapping(address => uint256) public myMap;
   function get(address _addr) public view returns (uint256) {
     return myMap[_addr];
   }
+  requires _i >= 0;
+  ensures myMap[_addr] == _i;
+  ensures \forall address a; a != _addr -> myMap[a] == \old(myMap[a]);
   function set(address _addr, uint256 _i) public {
     myMap[_addr] = _i;
   }
+  ensures myMap[_addr] == 0;
+  ensures \forall address a; a != _addr -> myMap[a] == \old(myMap[a]);
   function remove(address _addr) public {
     delete myMap[_addr];
   }
 }
 
-/-- `NestedMapping`, as published. -/
+/-- `NestedMapping`, as published, with solkey's clauses. -/
 def NestedMapping : Contract := contract!{
   mapping(address => mapping(uint256 => bool)) public nested;
   function get(address _addr1, uint256 _i) public view returns (bool) {
     return nested[_addr1][_i];
   }
+  ensures nested[_addr1][_i] == _boo;
   function set(address _addr1, uint256 _i, bool _boo) public {
     nested[_addr1][_i] = _boo;
   }
+  ensures !nested[_addr1][_i];
   function remove(address _addr1, uint256 _i) public {
     delete nested[_addr1][_i];
   }
@@ -122,6 +132,17 @@ theorem set_get : ⊨ dl!{ [ set(a, i); uint y = get(a); ] y == i } := by
   sol_symex
   sol_close
 
+/-- `set(_addr, _i)`'s obligation: the entry written, every other key kept. -/
+theorem spec_set : ⊨ spec!{ set } := by
+  sol_spec
+/-- `remove(_addr)`'s obligation: the entry reset to `0`, every other key
+kept. -/
+theorem spec_remove : ⊨ spec!{ remove } := by
+  sol_spec
+/-- `get(_addr)` has no clause: the obligation is the invariant-free `true`. -/
+theorem spec_get : ⊨ spec!{ get } := by
+  sol_spec
+
 end Mapping
 
 section NestedMapping
@@ -145,6 +166,13 @@ theorem nested_remove_spec :
            (nested[a][i] == false → [ remove(a, i); ] nested[a][i] == false) } := by
   sol_symex
   sol_decide
+
+set_option maxHeartbeats 500000 in
+/-- `set(_addr1, _i, _boo)`'s obligation: `ensures nested[_addr1][_i] ==
+_boo`, an `<->`. -/
+theorem spec_nested_set : ⊨ spec!{ set } := by sol_spec
+/-- `remove(_addr1, _i)`'s obligation: `ensures !nested[_addr1][_i]`. -/
+theorem spec_nested_remove : ⊨ spec!{ remove } := by sol_spec
 
 end NestedMapping
 

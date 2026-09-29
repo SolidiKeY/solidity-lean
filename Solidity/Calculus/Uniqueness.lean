@@ -61,44 +61,42 @@ elab "settle_side" : tactic => do
       return
   replaceMainGoal [g]
 
+/-- Case on the local `fv` of the main goal. -/
+def casesLocal (fv : FVarId) : TacticM Unit := do
+  let gs ← (← getMainGoal).cases fv
+  replaceMainGoal (gs.map (·.mvarId)).toList
+
+/-- Case on the first local of the main goal whose type is one of `heads`;
+whether there was one. -/
+def casesFirstLocal (heads : List Lean.Name) : TacticM Bool := withMainContext do
+  for d in ← getLCtx do
+    if d.isImplementationDetail then continue
+    let t ← whnfR (← instantiateMVars d.type)
+    if heads.any t.isAppOf then
+      casesLocal d.fvarId
+      return true
+  return false
+
 /-- Case on a part whose constructor `Stmt.step` reads: a variable a side
 condition speaks of, or a storage or memory location. -/
 elab "cases_part" : tactic => withMainContext do
-  let g ← getMainGoal
-  let lctx ← getLCtx
   let parts := [``Val, ``SPath, ``Loc, ``MPath, ``MLoc, ``BinOp]
   let isPart (e : Expr) : MetaM Bool := do
     let t ← whnfR (← instantiateMVars (← inferType e))
     return parts.any t.isAppOf
-  for d in lctx do
+  for d in ← getLCtx do
     if d.isImplementationDetail then continue
     let some (_, lhs, _) := (← instantiateMVars d.type).eq? | continue
     unless (``BinOp.shortCircuits :: sidePreds).any lhs.isAppOf do continue
     for fv in (Lean.collectFVars {} lhs).fvarIds do
       if ← isPart (.fvar fv) then
-        let gs ← g.cases fv
-        replaceMainGoal (gs.map (·.mvarId)).toList
+        casesLocal fv
         return
-  for d in lctx do
-    if d.isImplementationDetail then continue
-    let t ← whnfR (← instantiateMVars d.type)
-    if t.isAppOf ``Loc || t.isAppOf ``MLoc then
-      let gs ← g.cases d.fvarId
-      replaceMainGoal (gs.map (·.mvarId)).toList
-      return
-  throwError "cases_part: no part to case on"
+  unless ← casesFirstLocal [``Loc, ``MLoc] do throwError "cases_part: no part to case on"
 
 /-- Case on a memory source or an index kind `Stmt.step` still matches on. -/
-elab "cases_extra" : tactic => withMainContext do
-  let g ← getMainGoal
-  for d in ← getLCtx do
-    if d.isImplementationDetail then continue
-    let t ← whnfR (← instantiateMVars d.type)
-    if t.isAppOf ``MSrc || t.isAppOf ``IndexTy then
-      let gs ← g.cases d.fvarId
-      replaceMainGoal (gs.map (·.mvarId)).toList
-      return
-  throwError "cases_extra: nothing to case on"
+elab "cases_extra" : tactic => do
+  unless ← casesFirstLocal [``MSrc, ``IndexTy] do throwError "cases_extra: nothing to case on"
 
 end Tactics
 

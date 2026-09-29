@@ -18,7 +18,7 @@ examples).
 Every line is a formula `dl!{ … }`: copy it from `#derivation` (`se1`, `sp1`
 are the rules' fresh variables).  The chains are under the diamond, whose
 lines read back; a line with no modality left reads as a diamond
-(`RawFml.modality`), so a box derivation's last line does not.  What is
+(`fmlModality?`), so a box derivation's last line does not.  What is
 *proved valid* is under the box (`Close.lean`: a write under the diamond is
 stuck in a state without `alice`), with the lines left to `sol_chain`.
 -/

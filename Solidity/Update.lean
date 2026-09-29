@@ -7,7 +7,7 @@ After a rule fires, the calculus talks about *terms* of the logic, not about
 program expressions (mini-solkey's `Ch05_Logic`).  The sorts are KeY's:
 
 * `Term` — a value: a constant, a stack local, `a + b`, `find(s, p)`,
-  `read(m, a)`, the length of an array;
+  `read(m, a)`, the length of an array, what the ledger holds, `net(a)`;
 * `PTerm` — a storage path: a state variable, an alias, `p.f`, `p[i]`;
 * `STerm` — a storage: the program variable `storage`, a storage variable
   (`old`, which `\old` reads), `save(s, p, v)`, `delAt(s, p)`, a push and a
@@ -79,6 +79,12 @@ inductive Term (C : Contract) where
   /-- `msgSender`, `msgValue`, `selfBalance`: KeY's program variables of
   `netHeader.key`, and `block.timestamp`. -/
   | env (k : EnvKey)
+  /-- `net(a)`: what the ledger holds for the address `a`, KeY's
+  `selectSt(net, at(a))`; `0` where it never booked `a`. -/
+  | net (a : Term C)
+  /-- `x[a]`: what the ledger bound at `x` holds for `a`, KeY's
+  `selectSt(oldNet, at(a))`, which a specification's `\old(net(a))` reads. -/
+  | netOf (x : Var) (a : Term C)
 
 /-- A storage path. -/
 inductive PTerm (C : Contract) where
@@ -194,7 +200,7 @@ def Term.eval (σ : State) : Term C → Res Value
   | .pv x => do
     match ← σ.getEnv x with
     | .val v => pure v
-    | .spath .. | .mref _ | .store _ => .error .stuck
+    | .spath .. | .mref _ | .store _ | .ledger _ => .error .stuck
   | .binop op p a b => do evalBinop op p (← a.eval σ) (b.eval σ)
   | .unop op p a => do unopCheck op p (← applyUnOp op (← a.eval σ))
   | .find s p => do
@@ -213,6 +219,11 @@ def Term.eval (σ : State) : Term C → Res Value
     let τ ← m.eval σ
     memArrayLen τ (← i.eval σ)
   | .env k => pure (.int (σ.envVal k))
+  | .net a => do pure (.int (σ.getNet (← (← a.eval σ).asInt)))
+  | .netOf x a => do
+    match ← σ.getEnv x with
+    | .ledger l => pure (.int ((lookupBy (← (← a.eval σ).asInt) l).getD 0))
+    | .val _ | .spath .. | .mref _ | .store _ => .error .stuck
 
 def PTerm.eval (σ : State) : PTerm C → Res (Name × List Seg)
   | .root r => pure (r, [])
@@ -236,7 +247,7 @@ def STerm.eval (σ : State) : STerm C → Res State
   | .pv x => do
     match ← σ.getEnv x with
     | .store st => pure { σ with storage := st }
-    | .val _ | .spath .. | .mref _ => .error .stuck
+    | .val _ | .spath .. | .mref _ | .ledger _ => .error .stuck
   | .save s p v => do
     let sv ← v.eval σ
     let τ ← s.eval σ
@@ -283,7 +294,7 @@ def ITerm.eval (σ : State) : ITerm C → Res Nat
   | .pv x => do
     match ← σ.getEnv x with
     | .mref id => pure id
-    | .val _ | .spath .. | .store _ => .error .stuck
+    | .val _ | .spath .. | .store _ | .ledger _ => .error .stuck
   | .read m a => do
     let τ ← m.eval σ
     (← readAddr τ (← a.eval σ)).asRef
@@ -340,9 +351,26 @@ inductive UpdElem (C : Contract) where
   /-- `transfer(r, a)`: KeY's `{selfBalance := selfBalance - a ‖ net := …}`,
   the pair that moves together. -/
   | transfer (r a : Term C)
+  /-- `oldNet := net`: a ledger variable binds the ledger, which
+  `\old(net(a))` reads. -/
+  | saveNet (x : Var)
+  /-- `book(a)`: `a` paid in by the sender, KeY's `{net := storeSt(net,
+  at(msgSender), selectSt(net, at(msgSender)) + a) ‖ selfBalance :=
+  selfBalance + a}`, which a specification puts in front of the call it
+  specifies for `msg.value`.  Not a `transfer` with the amount negated:
+  that one reads the ledger it writes into, debits, and halts on a negative
+  amount or short funds, where this is a parallel update of the two
+  locations, read in the pre-state, that never halts. -/
+  | book (a : Term C)
 
 /-- A parallel update `{a ‖ b ‖ …}`. -/
 abbrev Upd (C : Contract) := List (UpdElem C)
+
+/-- `book(a)` from `σ₀` into `τ`: the sender's entry of `σ₀`'s ledger and
+`σ₀`'s funds, both up by `amt`. -/
+def Semantics.State.book (σ₀ τ : State) (amt : Int) : State :=
+  { τ with net := setBy σ₀.tx.msgSender (σ₀.getNet σ₀.tx.msgSender + amt) σ₀.net,
+           selfBalance := σ₀.selfBalance + amt }
 
 /-- One elementary update: the right-hand side is read in the *pre*-state
 `σ₀`, the write goes into `τ`.  That is what makes a list of them parallel. -/
@@ -361,6 +389,10 @@ def UpdElem.write (σ₀ : State) : UpdElem C → State → Res State
     let addr ← (← r.eval σ₀).asInt
     let amt ← (← a.eval σ₀).asInt
     transferAt τ addr amt
+  | .saveNet x, τ => pure (τ.setEnv x (.ledger σ₀.net))
+  | .book a, τ => do
+    let amt ← (← a.eval σ₀).asInt
+    pure (State.book σ₀ τ amt)
 
 /-- The state an update leaves, from `σ`. -/
 def Upd.apply (U : Upd C) (σ : State) : Res State :=
@@ -464,6 +496,8 @@ def Term.vars : Term C → List Var
   | .ite c a b => c.vars ++ a.vars ++ b.vars
   | .mlen m i => m.vars ++ i.vars
   | .env _ => []
+  | .net a => a.vars
+  | .netOf x a => x :: a.vars
 
 def PTerm.vars : PTerm C → List Var
   | .root _ => []
@@ -514,6 +548,8 @@ def UpdElem.vars : UpdElem C → List Var
   | .store x s => x :: s.vars
   | .memory m => m.vars
   | .transfer r a => r.vars ++ a.vars
+  | .saveNet x => [x]
+  | .book a => a.vars
 
 def Upd.vars : Upd C → List Var
   | [] => []
@@ -580,6 +616,8 @@ theorem Term.eval_frame {σ τ : State} (hag : EnvAgreeExcept ns σ τ) :
     exact ResultsAgree.bindEq (m.eval_frame hag h.left) fun _ _ h' => by
       simp only [memArrayLen, getObj_congr h']
   | .env k, _ => by simp only [Term.eval, State.envVal_congr hag]
+  | .net a, h => by simp only [Term.eval, a.eval_frame hag h, State.getNet, hag.net]
+  | .netOf x a, h => by simp only [Term.eval, a.eval_frame hag h.tail, getEnv_congr hag h.head]
 
 theorem PTerm.eval_frame {σ τ : State} (hag : EnvAgreeExcept ns σ τ) :
     (p : PTerm C) → Avoids p.vars ns → p.eval σ = p.eval τ
@@ -730,6 +768,15 @@ theorem UpdElem.write_frame {σ₀ σ₀' τ τ' : State} (h₀ : EnvAgreeExcept
   | .transfer r a, hv => by
     simp only [UpdElem.write, r.eval_frame h₀ hv.left, a.eval_frame h₀ hv.right]
     agree_run h
+  | .saveNet x, _ => by
+    show ResultsAgree ns (.ok (τ.setEnv x (.ledger σ₀.net))) (.ok (τ'.setEnv x (.ledger σ₀'.net)))
+    rw [h₀.net]
+    exact h.setEnv_both x _
+  | .book a, hv => by
+    simp only [UpdElem.write, a.eval_frame h₀ hv, State.book, State.getNet, h₀.net, h₀.tx,
+      h₀.selfBalance]
+    agree_run h
+    exact ⟨h.storage, h.heap, h.nextId, rfl, h.env, rfl, h.tx⟩
 
 theorem Upd.foldl_frame {σ₀ σ₀' : State} (h₀ : EnvAgreeExcept ns σ₀ σ₀') :
     (U : Upd C) → Avoids (Upd.vars U) ns → ∀ {τ τ' : State}, EnvAgreeExcept ns τ τ' →

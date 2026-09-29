@@ -1,4 +1,4 @@
-import Solidity.Calculus.Close
+import Solidity.Calculus.Spec
 
 /-!
 # Benchmark: `Counter`
@@ -6,13 +6,17 @@ import Solidity.Calculus.Close
 Source: <https://raw.githubusercontent.com/Cyfrin/solidity-by-example.github.io/5bcdca0239409d7336a07b66a6fca8d0bcc710e6/contracts/src/first-app/Counter.sol>
 (solkey's `keyext.solidity.examples/benchmark/Counter.sol`).
 
-Changes: none but the spelling of `contract!{ … }` (the comments are Lean's).
-The functions are internal functions here, and a call inlines one
-(`Examples/Calls.lean`); solkey's `@custom:key` clauses are the theorems
-below, a clause `ensures count == \old(count) + 1` stated with a parameter
-`c` for the old value.  `requires count >= 1` has no counterpart: the
-formula language has `==` and `!=` only, and the box needs none (a `dec()`
-that underflows reverts, and a reverted run satisfies every box formula).
+Changes: none but the spelling of `contract!{ … }` (the comments are Lean's)
+and solkey's `@custom:key` clauses, written above the functions as its file
+has them.  The functions are internal functions here, and a call inlines one
+(`Examples/Calls.lean`).
+
+The clauses are proved twice.  `spec!{f}` is the obligation solkey's
+`SolidityProblemSynthesizer` builds from them (`Calculus/Spec.lean`), proved
+by `sol_spec` (`spec_inc`, `spec_dec`).  Before it, the same clauses by hand:
+`ensures count == \old(count) + 1` with a parameter `c` for the old value,
+and no `requires count >= 1`, which the box does not need (a `dec()` that
+underflows reverts, and a reverted run satisfies every box formula).
 
 ```solidity
 contract Counter {
@@ -41,15 +45,18 @@ namespace Solidity.Examples.Benchmark.Counter
 
 open Proves
 
-/-- `Counter.sol`, as published. -/
+/-- `Counter.sol`, as published, with solkey's clauses. -/
 def Counter : Contract := contract!{
   uint256 public count;
   function get() public view returns (uint256) {
     return count;
   }
+  ensures count == \old(count) + 1;
   function inc() public {
     count += 1;
   }
+  requires count >= 1;
+  ensures count == \old(count) - 1;
   function dec() public {
     count -= 1;
   }
@@ -71,5 +78,25 @@ theorem dec_spec : ⊨ dl!{ c == count → [ dec(); ] count == c - 1 } := by
 theorem get_spec : ⊨ dl!{ [ uint y = get(); ] y == count } := by
   sol_symex
   sol_close
+
+/-! ## The clauses as obligations
+
+`dec()`'s obligation, as solkey's synthesizer states it: the layout,
+`msg.value == 0` (`dec` is not `payable`), the `requires`, the snapshot
+`old := storage`, the call, the `ensures` read against both storages. -/
+
+/--
+info: dl{
+  ((0 <= select(storage, count) ∧
+            select(storage, count) <= 115792089237316195423570985008687907853269984665640564039457584007913129639935) ∧
+        msg.value = 0 ∧ select(storage, count) >= 1) →
+    { old := storage } [ dec(); ] select(storage, count) = select(old, count) - 1 } : Fml Counter
+-/
+#guard_msgs in #check spec!{ dec }
+
+/-- `inc()`: `ensures count == \old(count) + 1`. -/
+theorem spec_inc : ⊨ spec!{ inc } := by sol_spec
+/-- `dec()`: `requires count >= 1`, `ensures count == \old(count) - 1`. -/
+theorem spec_dec : ⊨ spec!{ dec } := by sol_spec
 
 end Solidity.Examples.Benchmark.Counter

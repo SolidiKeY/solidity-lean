@@ -17,7 +17,11 @@ specify, as members of `contract!{ … }` (`Syntax.lean`):
 /// @custom:key ensures count == \old(count) - 1   ensures count == \old(count) - 1;
 /// @custom:key invariant total >= 0         invariant total >= 0;
 /// @custom:key skip                         skip;
+/// @custom:key assignable count             assignable count;
 ```
+
+An `assignable` clause lists locations (`SpecLoc`), not values: a state
+variable, a member, an entry `m[e]`, every entry `m[*]`, or `\nothing`.
 -/
 
 namespace Solidity
@@ -45,11 +49,23 @@ inductive SpecExpr where
   | ex (p : PrimTy) (x : String) (e : SpecExpr)
   deriving Repr, Inhabited
 
-/-- A function's clauses: solkey's `requires`, `ensures`, and `skip` (no
-obligation). -/
+/-- A location an `assignable` clause names: a state variable, a member,
+an entry `m[e]` (`e` read in the pre-state), or every entry `m[*]`.  A
+location covers everything stored below it. -/
+inductive SpecLoc where
+  | root (r : String)
+  | field (l : SpecLoc) (f : String)
+  | index (l : SpecLoc) (e : SpecExpr)
+  | all (l : SpecLoc)
+  deriving Repr, Inhabited
+
+/-- A function's clauses: solkey's `requires`, `ensures`, `assignable`
+(`none` without the clause, which frames nothing; `some []` for
+`\nothing`), and `skip` (no obligation). -/
 structure FunSpec where
   requires : List SpecExpr := []
   ensures : List SpecExpr := []
+  assignable : Option (List SpecLoc) := none
   skip : Bool := false
   deriving Repr, Inhabited
 
@@ -88,15 +104,31 @@ syntax:10 "\\" noWs &"exists"  ident ident "; " spec_expr:10 : spec_expr
 section
 open Lean
 
-/-- A quantifier's sort: `uint`, `int`, `bool`, or `address` (a `uint`). -/
+/-- A quantifier's sort: `uint`, `int`, `bool`, or `address` (a `uint`),
+by `PrimTy.ofName?`. -/
 def specSort (T : Ident) : MacroM Term :=
-  match T.getId.toString with
-  | "uint" | "uint256" | "address" => `(PrimTy.uint)
-  | "int" | "int256" => `(PrimTy.int)
-  | "bool" => `(PrimTy.bool)
-  | s => Macro.throwErrorAt T s!"a quantifier ranges over uint, int, bool or address, not {s}"
+  let s := T.getId.toString
+  match PrimTy.ofName? s with
+  | some .uint => `(PrimTy.uint)
+  | some .int => `(PrimTy.int)
+  | some .bool => `(PrimTy.bool)
+  | none => Macro.throwErrorAt T s!"a quantifier ranges over uint, int, bool or address, not {s}"
+
+/-- `e.f.g`: `init` with the members `fs` read off it by the constructor `field`
+(`SpecExpr.field`, `SpecLoc.field`, `RawExpr.field`). -/
+def foldFields (field : Ident) (init : Term) (fs : List String) : MacroM Term :=
+  fs.foldlM (fun e f => `($field $e $(quote f))) init
+
+/-- The constructor `a` of the enumeration `ns`, to splice: `BinOp.add`. -/
+def ctorIdent [Repr α] (ns : Lean.Name) (a : α) : Ident :=
+  mkIdent (.str ns ((toString (repr a)).splitOn ".").getLast!)
 
 partial def expandSpec (e : TSyntax `spec_expr) : MacroM Term := do
+  -- the binary operators, by their table (`BinOp.ofSym?`): a node `[a, ⊕, b]`
+  if e.raw.getNumArgs == 3 && e.raw[1].isAtom then
+    if let some op := BinOp.ofSym? e.raw[1].getAtomVal then
+      return ← `(SpecExpr.binop $(ctorIdent ``BinOp op) $(← expandSpec ⟨e.raw[0]⟩)
+        $(← expandSpec ⟨e.raw[2]⟩))
   match e with
   | `(spec_expr| ( $a )) => expandSpec a
   | `(spec_expr| $n:num) => `(SpecExpr.num $n)
@@ -108,7 +140,7 @@ partial def expandSpec (e : TSyntax `spec_expr) : MacroM Term := do
       -- `msg.sender`, `State.Created` are read as one dotted identifier
       match x.getId.components.map (·.toString) with
       | [] => Macro.throwUnsupported
-      | n :: fs => fs.foldlM (fun e f => `(SpecExpr.field $e $(quote f))) (← `(SpecExpr.name $(quote n)))
+      | n :: fs => do foldFields (mkIdent ``SpecExpr.field) (← `(SpecExpr.name $(quote n))) fs
   | `(spec_expr| \result) => `(SpecExpr.result)
   | `(spec_expr| \old ( $a )) => do `(SpecExpr.old $(← expandSpec a))
   | `(spec_expr| net ( $a )) => do `(SpecExpr.net $(← expandSpec a))
@@ -117,19 +149,6 @@ partial def expandSpec (e : TSyntax `spec_expr) : MacroM Term := do
   | `(spec_expr| $a:spec_expr.$f:ident) => do `(SpecExpr.field $(← expandSpec a) $(quote f.getId.toString))
   | `(spec_expr| ! $a) => do `(SpecExpr.unop .not $(← expandSpec a))
   | `(spec_expr| - $a) => do `(SpecExpr.unop .neg $(← expandSpec a))
-  | `(spec_expr| $a * $b) => bin ``BinOp.mul a b
-  | `(spec_expr| $a / $b) => bin ``BinOp.div a b
-  | `(spec_expr| $a % $b) => bin ``BinOp.mod a b
-  | `(spec_expr| $a + $b) => bin ``BinOp.add a b
-  | `(spec_expr| $a - $b) => bin ``BinOp.sub a b
-  | `(spec_expr| $a < $b) => bin ``BinOp.lt a b
-  | `(spec_expr| $a <= $b) => bin ``BinOp.le a b
-  | `(spec_expr| $a > $b) => bin ``BinOp.gt a b
-  | `(spec_expr| $a >= $b) => bin ``BinOp.ge a b
-  | `(spec_expr| $a == $b) => bin ``BinOp.eqB a b
-  | `(spec_expr| $a != $b) => bin ``BinOp.neB a b
-  | `(spec_expr| $a && $b) => bin ``BinOp.and a b
-  | `(spec_expr| $a || $b) => bin ``BinOp.or a b
   | `(spec_expr| $a -> $b) => do `(SpecExpr.imp $(← expandSpec a) $(← expandSpec b))
   | `(spec_expr| $a <-> $b) => do `(SpecExpr.iff $(← expandSpec a) $(← expandSpec b))
   | `(spec_expr| \forall $T:ident $x:ident; $a) => do
@@ -137,9 +156,38 @@ partial def expandSpec (e : TSyntax `spec_expr) : MacroM Term := do
   | `(spec_expr| \exists $T:ident $x:ident; $a) => do
     `(SpecExpr.ex $(← specSort T) $(quote x.getId.toString) $(← expandSpec a))
   | _ => Macro.throwUnsupported
-where
-  bin (op : Lean.Name) (a b : TSyntax `spec_expr) : MacroM Term := do
-    `(SpecExpr.binop $(mkIdent op) $(← expandSpec a) $(← expandSpec b))
+
+/-- A location of an `assignable` clause: `count`, `alice.age`,
+`balances[msg.sender]`, `balances[*]`. -/
+declare_syntax_cat spec_loc (behavior := both)
+syntax:max ident : spec_loc
+syntax:max spec_loc noWs "." noWs ident : spec_loc
+syntax:max spec_loc "[" spec_expr "]" : spec_loc
+syntax:max spec_loc "[" "*" "]" : spec_loc
+
+/-- What an `assignable` clause lists: locations, or `\nothing`. -/
+declare_syntax_cat spec_locs (behavior := both)
+syntax "\\" noWs &"nothing" : spec_locs
+syntax spec_loc,+ : spec_locs
+
+partial def expandSpecLoc (l : TSyntax `spec_loc) : MacroM Term := do
+  match l with
+  | `(spec_loc| $x:ident) =>
+    -- `alice.age` is read as one dotted identifier
+    match x.getId.components.map (·.toString) with
+    | [] => Macro.throwUnsupported
+    | n :: fs => do foldFields (mkIdent ``SpecLoc.field) (← `(SpecLoc.root $(quote n))) fs
+  | `(spec_loc| $a:spec_loc.$f:ident) => do `(SpecLoc.field $(← expandSpecLoc a) $(quote f.getId.toString))
+  | `(spec_loc| $a:spec_loc [ * ]) => do `(SpecLoc.all $(← expandSpecLoc a))
+  | `(spec_loc| $a:spec_loc [ $e:spec_expr ]) => do `(SpecLoc.index $(← expandSpecLoc a) $(← expandSpec e))
+  | _ => Macro.throwUnsupported
+
+/-- The locations of an `assignable` clause, `[]` for `\nothing`. -/
+def expandSpecLocs (ls : TSyntax `spec_locs) : MacroM Term := do
+  match ls with
+  | `(spec_locs| \nothing) => `(([] : List SpecLoc))
+  | `(spec_locs| $ls:spec_loc,*) => do `([$(← ls.getElems.mapM expandSpecLoc),*])
+  | _ => Macro.throwUnsupported
 
 end
 

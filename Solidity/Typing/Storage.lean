@@ -1,4 +1,4 @@
-import Solidity.Semantics
+import Solidity.Semantics.Properties
 
 /-!
 # Storage layout typing
@@ -13,6 +13,8 @@ type, the semantic content of every `\hasSort`-family taclet read.
 
 namespace Solidity
 namespace Semantics
+
+open SemanticsProperties (lookupBy_eq_some_mem)
 
 /-- Declared types of the global storage roots (the contract-level
 layout); struct bodies come from `structDef`. -/
@@ -34,11 +36,6 @@ def elemTy : Ty -> Option Ty
   | Ty.ref (RefTy.fixed elem _) => some elem
   | Ty.ref (RefTy.mapping _ value) => some value
   | _ => none
-
-theorem segTy_at (ty : Ty) (i : Int) : segTy ty (Seg.at i) = elemTy ty := by
-  cases ty with
-  | ref ref => cases ref <;> rfl
-  | _ => rfl
 
 def tyAtSegs : Ty -> List Seg -> Option Ty
   | ty, [] => some ty
@@ -172,19 +169,6 @@ def wellTypedStorageB (L : Layout) (storage : List (Name × SVal)) : Bool :=
 
 /-! ## Association-list and `hasTy` inversion lemmas -/
 
-theorem lookupBy_eq_some_mem [DecidableEq κ] {k : κ} {l : List (κ × α)}
-    {v : α} (h : lookupBy k l = some v) : (k, v) ∈ l := by
-  induction l with
-  | nil => simp [lookupBy] at h
-  | cons p rest ih =>
-      obtain ⟨k', v'⟩ := p
-      by_cases hk : k = k'
-      · subst hk
-        simp [lookupBy] at h
-        simp [h]
-      · simp [lookupBy, hk] at h
-        exact List.mem_cons_of_mem _ (ih h)
-
 theorem hasTyFields_lookup {s : Name} {fields : List (Name × SVal)}
     {n : Name} {v : SVal}
     (hwt : SVal.hasTy.hasTyFields s fields = true)
@@ -253,12 +237,6 @@ theorem hasTy_numeric {ty : Ty} {v : SVal} (hnum : isNumericTy ty = true)
       | array elems => simp [SVal.hasTy] at h
       | map entries dflt => simp [SVal.hasTy] at h
   | ref r => simp [isNumericTy] at hnum
-
-theorem hasTy_bool {v : SVal} (h : v.hasTy Ty.bool = true) :
-    ∃ b, v = SVal.bool b := by
-  cases v with
-  | prim pv => cases pv <;> simp [SVal.hasTy] at h <;> exact ⟨_, rfl⟩
-  | _ => simp [SVal.hasTy] at h
 
 theorem hasTy_isRefVal {ty : Ty} {v : SVal} (href : ty.isReference = true)
     (h : v.hasTy ty = true) : v.isRefVal = true := by
@@ -395,6 +373,15 @@ theorem tyAtSegs_append_seg {ty t t' : Ty} {segs : List Seg} {seg : Seg}
           simp only [List.cons_append, tyAtSegs, h0]
           exact ih h
 
+/-- A typed path starts at a declared root: `alice.age` at `Person`'s `age`. -/
+theorem Layout.tyAt_split {L : Layout} {r : Name} {segs : List Seg} {T' : Ty}
+    (h : L.tyAt r segs = some T') :
+    ∃ T, lookupBy r L.globals = some T ∧ tyAtSegs T segs = some T' := by
+  simp only [Layout.tyAt] at h
+  split at h
+  · rename_i T hr; exact ⟨T, hr, h⟩
+  · exact nomatch h
+
 theorem tyAt_append_seg {L : Layout} {root : Name} {segs : List Seg}
     {seg : Seg} {t t' : Ty} (h : L.tyAt root segs = some t)
     (hseg : segTy t seg = some t') :
@@ -405,6 +392,83 @@ theorem tyAt_append_seg {L : Layout} {root : Name} {segs : List Seg}
   | some ty0 =>
       rw [hglob] at h
       exact tyAtSegs_append_seg h hseg
+
+/-! ## Inverting the writes
+
+What a write that returned did, one lemma per interpreter step, so the
+invariant proofs (`Soundness`, `Reachability`, `Constructibility`) do not
+each re-run its `bind`s. -/
+
+/-- `bind_inv h` drops the first step of the run `h` returned from:
+`obtain ⟨_, _, h⟩ := bind_ok_inv h`. -/
+macro "bind_inv " h:ident : tactic => `(tactic| obtain ⟨_, _, $h⟩ := bind_ok_inv $h)
+
+theorem Value.asInt_ok {v : Value} {n : Int} (h : v.asInt = .ok n) : v = .int n := by
+  cases v with
+  | int m => cases h; rfl
+  | bool _ => exact nomatch h
+
+/-- An assignment's storage write saved the value, or laid it over what was there. -/
+theorem State.writeStorage_ok_inv {σ σ' : State} {r : Name} {segs : List Seg} {new : SVal}
+    (h : σ.writeStorage r segs new = .ok σ') :
+    σ.saveStorage r segs new = .ok σ' ∨
+      ∃ cur, σ.findStorage r segs = .ok cur ∧ σ.saveStorage r segs (cur.overlay new) = .ok σ' := by
+  unfold State.writeStorage at h
+  split at h
+  · exact .inl h
+  all_goals
+    obtain ⟨cur, hcur, h⟩ := bind_ok_inv h
+    exact .inr ⟨cur, hcur, h⟩
+
+/-- `alice.age += x;` saved the checked result of the operation. -/
+theorem opStore_ok_inv {σ σ' : State} {op : BinOp} {p : PrimTy} {r : Name} {segs : List Seg}
+    {v : Value} (h : opStore σ op p r segs v = .ok σ') :
+    ∃ old n new, applyBinOp op old v = .ok n ∧ checkArith (.prim p) n = .ok new ∧
+      σ.saveStorage r segs new.toSVal = .ok σ' := by
+  bind_inv h
+  obtain ⟨old, _, h⟩ := bind_ok_inv h
+  obtain ⟨n, hn, h⟩ := bind_ok_inv h
+  obtain ⟨new, hnew, h⟩ := bind_ok_inv h
+  exact ⟨old, n, new, hn, hnew, h⟩
+
+/-- `m.age += x;` wrote the checked result of the operation. -/
+theorem opMem_ok_inv {σ σ' : State} {op : BinOp} {p : PrimTy} {loc : Addr} {v : Value}
+    (h : opMem σ op p loc v = .ok σ') :
+    ∃ old n new, applyBinOp op old v = .ok n ∧ checkArith (.prim p) n = .ok new ∧
+      writeLoc σ loc new = .ok σ' := by
+  obtain ⟨old, _, h⟩ := bind_ok_inv h
+  obtain ⟨n, hn, h⟩ := bind_ok_inv h
+  obtain ⟨new, hnew, h⟩ := bind_ok_inv h
+  exact ⟨old, n, new, hn, hnew, h⟩
+
+/-- `alice.age++` saved the checked bump of the number it read, and yields
+the new number or the old one. -/
+theorem bumpStore_ok_inv {σ σ' : State} {op : IncDec} {p : PrimTy} {r : Name}
+    {segs : List Seg} {w : Value} (h : bumpStore σ op p r segs = .ok (σ', w)) :
+    ∃ m new, checkArith (.prim p) (.int (if op.isIncrement then m + 1 else m - 1)) = .ok new ∧
+      σ.saveStorage r segs new.toSVal = .ok σ' ∧ w = (if op.isPre then new else .int m) := by
+  bind_inv h
+  obtain ⟨old, _, h⟩ := bind_ok_inv h
+  obtain ⟨m, hm, h⟩ := bind_ok_inv h
+  obtain ⟨new, hnew, h⟩ := bind_ok_inv h
+  obtain ⟨σ₁, hσ₁, h⟩ := bind_ok_inv h
+  cases h
+  cases Value.asInt_ok hm
+  exact ⟨m, new, hnew, hσ₁, rfl⟩
+
+/-- `m.age++` wrote the checked bump of the number it read, and yields the
+new number or the old one. -/
+theorem bumpMem_ok_inv {σ σ' : State} {op : IncDec} {p : PrimTy} {loc : Addr} {w : Value}
+    (h : bumpMem σ op p loc = .ok (σ', w)) :
+    ∃ m new, checkArith (.prim p) (.int (if op.isIncrement then m + 1 else m - 1)) = .ok new ∧
+      writeLoc σ loc new = .ok σ' ∧ w = (if op.isPre then new else .int m) := by
+  obtain ⟨old, _, h⟩ := bind_ok_inv h
+  obtain ⟨m, hm, h⟩ := bind_ok_inv h
+  obtain ⟨new, hnew, h⟩ := bind_ok_inv h
+  obtain ⟨σ₁, hσ₁, h⟩ := bind_ok_inv h
+  cases h
+  cases Value.asInt_ok hm
+  exact ⟨m, new, hnew, hσ₁, rfl⟩
 
 end Semantics
 end Solidity

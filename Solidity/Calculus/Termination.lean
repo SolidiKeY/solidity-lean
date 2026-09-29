@@ -40,17 +40,21 @@ variable {C : Contract}
 
 /-! ## Weights -/
 
+/-- What a part costs beyond itself: `1` if it is simple, `16` if a rule
+must capture (or bind) it first. -/
+def penOf (simple : Bool) : Nat := if simple then 1 else 16
+
 /-- What a value in a captured position costs beyond itself: `1` if it is
 simple, `16` if a rule must capture it first. -/
-def Val.pen {p : PrimTy} (v : Val C p) : Nat := if v.isSimple then 1 else 16
+def Val.pen {p : PrimTy} (v : Val C p) : Nat := penOf v.isSimple
 
 /-- What a storage receiver costs beyond itself: `1` for an alias or a
 state variable, `16` for a path a rule must bind to an alias first. -/
-def SPath.pen {T : Ty} (b : SPath C T) : Nat := if b.isSimple then 1 else 16
+def SPath.pen {T : Ty} (b : SPath C T) : Nat := penOf b.isSimple
 
 /-- What a memory receiver costs beyond itself: `1` for a memory local, `16`
 for a path a rule must bind first. -/
-def MPath.pen {T : Ty} (b : MPath C T) : Nat := if b.isSimple then 1 else 16
+def MPath.pen {T : Ty} (b : MPath C T) : Nat := penOf b.isSimple
 
 mutual
 
@@ -177,24 +181,23 @@ end
 
 /-! ## Every part costs something -/
 
+/-- A penalty is at least `1`. -/
+theorem penOf_pos (b : Bool) : 1 ≤ penOf b := by cases b <;> decide
+/-- A penalty is at most `16`. -/
+theorem penOf_le (b : Bool) : penOf b ≤ 16 := by cases b <;> decide
+
 /-- Example: `x` has penalty `1`, `x + 1` has `16`. -/
-theorem Val.pen_pos {p : PrimTy} (v : Val C p) : 1 ≤ v.pen := by
-  unfold Val.pen; split <;> omega
+theorem Val.pen_pos {p : PrimTy} (v : Val C p) : 1 ≤ v.pen := penOf_pos _
 /-- Example: `alice` has penalty `1`, `people[i]` has `16`. -/
-theorem SPath.pen_pos {T : Ty} (b : SPath C T) : 1 ≤ b.pen := by
-  unfold SPath.pen; split <;> omega
+theorem SPath.pen_pos {T : Ty} (b : SPath C T) : 1 ≤ b.pen := penOf_pos _
 /-- Example: a memory local `m` has penalty `1`, `m.inner` has `16`. -/
-theorem MPath.pen_pos {T : Ty} (b : MPath C T) : 1 ≤ b.pen := by
-  unfold MPath.pen; split <;> omega
+theorem MPath.pen_pos {T : Ty} (b : MPath C T) : 1 ≤ b.pen := penOf_pos _
 /-- Example: no value is charged more than `16`, not even `a ? b : c`. -/
-theorem Val.pen_le {p : PrimTy} (v : Val C p) : v.pen ≤ 16 := by
-  unfold Val.pen; split <;> omega
+theorem Val.pen_le {p : PrimTy} (v : Val C p) : v.pen ≤ 16 := penOf_le _
 /-- Example: no receiver is charged more than `16`, not even `people[i].account`. -/
-theorem SPath.pen_le {T : Ty} (b : SPath C T) : b.pen ≤ 16 := by
-  unfold SPath.pen; split <;> omega
+theorem SPath.pen_le {T : Ty} (b : SPath C T) : b.pen ≤ 16 := penOf_le _
 /-- Example: no memory receiver is charged more than `16`. -/
-theorem MPath.pen_le {T : Ty} (b : MPath C T) : b.pen ≤ 16 := by
-  unfold MPath.pen; split <;> omega
+theorem MPath.pen_le {T : Ty} (b : MPath C T) : b.pen ≤ 16 := penOf_le _
 
 /-- Example: the `x` of `total = x;` is charged `1`. -/
 theorem Val.pen_simple {p : PrimTy} (s : Simple C p) : (Val.simple s).pen = 1 := rfl
@@ -237,17 +240,17 @@ theorem Val.pen_ternary {p : PrimTy} (c : Val C .bool) (a b : Val C p) :
 
 Example: `sp` in `sp.age = 1;`. -/
 theorem SPath.pen_eq_one {T : Ty} {b : SPath C T} (h : b.isSimple = true) : b.pen = 1 := by
-  simp [SPath.pen, h]
+  simp only [SPath.pen, penOf, h, if_true]
 /-- A receiver `Stmt.step` found not simple is charged `16`.
 
 Example: `people[i]` in `people[i].age = 1;`. -/
 theorem SPath.pen_eq_16 {T : Ty} {b : SPath C T} (h : ¬ b.isSimple = true) : b.pen = 16 := by
-  simp [SPath.pen, h]
+  simp only [SPath.pen, penOf, h, Bool.false_eq_true, if_false]
 /-- A value `Stmt.step` found not simple is charged `16`.
 
 Example: `x + 1` in `total = x + 1;`. -/
 theorem Val.pen_eq_16 {p : PrimTy} {v : Val C p} (h : v.isSimple = false) : v.pen = 16 := by
-  simp [Val.pen, h]
+  simp only [Val.pen, penOf, h, Bool.false_eq_true, if_false]
 
 mutual
 /-- Every part costs at least `1`.
@@ -801,7 +804,7 @@ theorem Arg.weight_decls : {args : List (Arg C)} → Arg.firstNonSimple args = n
     by_cases hs : a.e.isSimple = true
     · simp only [Arg.firstNonSimple, hs, if_true] at h
       simp only [List.map_cons, Prog.weight, Arg.decl, Stmt.weight, Arg.weight,
-        Arg.weight_decls h, Val.pen, hs, if_true]
+        Arg.weight_decls h, Val.pen, penOf, hs, if_true]
     · simp [Arg.firstNonSimple, hs] at h
 
 /-- A capture takes `12` off a call's arguments, and the declaration it adds
@@ -818,7 +821,7 @@ theorem Arg.weight_captureFirst {se : Var} : {args : List (Arg C)} → {a : Arg 
       omega
     · simp only [Arg.firstNonSimple, hb, Bool.false_eq_true, if_false, Option.some.injEq] at h
       subst h
-      have hp : b.e.pen = 16 := by simp [Val.pen, hb]
+      have hp : b.e.pen = 16 := by simp [Val.pen, penOf, hb]
       simp only [Arg.captureFirst, hb, Bool.false_eq_true, if_false, Arg.weight, Val.cost,
         Val.pen_simple, hp]
       omega

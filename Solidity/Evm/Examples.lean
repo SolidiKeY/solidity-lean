@@ -44,6 +44,17 @@ abbrev fresh (balance : Nat := 0) : Machine := Machine.init balance
 
 def code (P : Prog StandardExample) : String := "; ".intercalate ((compileProg P).map toString)
 
+/-- The word at slot `s` after `P`, compiled, runs from `m`. -/
+abbrev slotAfter {C : Contract} (P : Prog C) (s : Slot) (m : Machine := fresh) : Option Nat :=
+  storeAt (run (compileProg P) m) s
+
+/-- Whether `P`, compiled, reverts from `m`. -/
+abbrev reverts {C : Contract} (P : Prog C) (m : Machine := fresh) : Bool :=
+  reverted (run (compileProg P) m)
+
+/-- `P` is in the compiled fragment, from no locals. -/
+abbrev compiles {C : Contract} (P : Prog C) : Bool := (wtProg (fun _ => none) P).isSome
+
 /-! ## Layout -/
 
 /-- `alice` is the twelfth slot: after four `uint`s and seven one-slot
@@ -64,7 +75,7 @@ def setAge : Prog StandardExample := sol{ alice.age = 10; }
 #guard_msgs in #eval IO.println (code setAge)
 
 /-- `alice.age = 10;` writes `10` to slot `13`. -/
-theorem setAge_run : storeAt (run (compileProg setAge) (fresh)) (.root 13) = some 10 := by decide
+theorem setAge_run : slotAfter setAge (.root 13) = some 10 := by decide
 
 /-- `balances[7] = 5; total = balances[7] + balances[8]; folks[7].age = 3;` -/
 def mappings : Prog StandardExample :=
@@ -91,9 +102,8 @@ PUSH @0; SSTORE
 /-- `balances[7]` is `keccak(7, 5)`, `folks[7].age` is `keccak(7, 7) + 2`, and
 `total` reads the sum `5 + 0`. -/
 theorem mappings_run :
-    storeAt (run (compileProg mappings) (fresh)) (.hash 7 (.root 5) 0) = some 5 ∧
-    storeAt (run (compileProg mappings) (fresh)) (.root 0) = some 5 ∧
-    storeAt (run (compileProg mappings) (fresh)) (.hash 7 (.root 7) 2) = some 3 := by
+    slotAfter mappings (.hash 7 (.root 5) 0) = some 5 ∧ slotAfter mappings (.root 0) = some 5 ∧
+    slotAfter mappings (.hash 7 (.root 7) 2) = some 3 := by
   decide
 
 /-- `Person storage p = folks[7]; p.age = 9; total = folks[7].age;` -/
@@ -102,13 +112,13 @@ def alias : Prog StandardExample := sol{
 }
 
 /-- Writing through the alias writes `folks[7].age`, which `total` then reads. -/
-theorem alias_run : storeAt (run (compileProg alias) (fresh)) (.root 0) = some 9 := by decide
+theorem alias_run : slotAfter alias (.root 0) = some 9 := by decide
 
 /-- `uint x = 3; x += 4; age = x > 5 ? x : 0;` -/
 def locals : Prog StandardExample := sol{ uint x = 3; x += 4; age = x > 5 ? x : 0; }
 
 /-- A local lives in a memory cell; `?:` runs only the branch it picks. -/
-theorem locals_run : storeAt (run (compileProg locals) (fresh)) (.root 1) = some 7 := by decide
+theorem locals_run : slotAfter locals (.root 1) = some 7 := by decide
 
 /-! ## Checked arithmetic -/
 
@@ -119,16 +129,15 @@ def overflow : Prog StandardExample := sol{
 }
 
 /-- The sum wraps to `0`, below `2^256 - 1`: the guard reverts. -/
-theorem overflow_run : reverted (run (compileProg overflow) (fresh)) = true := by decide
+theorem overflow_run : reverts overflow = true := by decide
 
 /-- `total = 2^128; total *= total;` overflows; `total = 3; total *= 4;` does
 not; `total = 3; total -= 4;` underflows; `total = 1 / age;` divides by zero. -/
 theorem checks_run :
-    reverted (run (compileProg sol{
-      total = 340282366920938463463374607431768211456; total *= total; }) (fresh)) = true ∧
-    storeAt (run (compileProg sol{ total = 3; total *= 4; }) (fresh)) (.root 0) = some 12 ∧
-    reverted (run (compileProg sol{ total = 3; total -= 4; }) (fresh)) = true ∧
-    reverted (run (compileProg sol{ total = 1 / age; }) (fresh)) = true := by
+    reverts sol{ total = 340282366920938463463374607431768211456; total *= total; } = true ∧
+    slotAfter sol{ total = 3; total *= 4; } (.root 0) = some 12 ∧
+    reverts sol{ total = 3; total -= 4; } = true ∧
+    reverts sol{ total = 1 / age; } = true := by
   decide
 
 /-- `total = 3; total++; uint x = 1; x++; age = x;` counts up; `++` past
@@ -136,16 +145,15 @@ theorem checks_run :
 theorem incDec_run :
     let o := run (compileProg sol{ total = 3; total++; uint x = 1; x++; age = x; }) (fresh)
     storeAt o (.root 0) = some 4 ∧ storeAt o (.root 1) = some 2 ∧
-    reverted (run (compileProg sol{
+    reverts sol{
       total = 115792089237316195423570985008687907853269984665640564039457584007913129639935;
-      total++; }) (fresh)) = true := by
+      total++; } = true := by
   decide
 
 /-- `require(total == 0 || total / total == 1);` passes on a fresh contract:
 `||` does not evaluate its right operand, whose division would revert. -/
 theorem shortCircuit_run :
-    reverted (run (compileProg sol{ require(total == 0 || total / total == 1); }) (fresh))
-      = false := by
+    reverts sol{ require(total == 0 || total / total == 1); } = false := by
   decide
 
 /-! ## Control flow, `delete`, arrays, `transfer` -/
@@ -153,8 +161,8 @@ theorem shortCircuit_run :
 /-- `total = 5; if (total > 3) { age = 1; } else { age = 2; }` takes the first
 branch and skips the second. -/
 theorem ite_run :
-    storeAt (run (compileProg sol{ total = 5; if (total > 3) { age = 1; } else { age = 2; }; })
-      (fresh)) (.root 1) = some 1 := by
+    slotAfter sol{ total = 5; if (total > 3) { age = 1; } else { age = 2; }; } (.root 1)
+      = some 1 := by
   decide
 
 /-- `alice.age = 10; alice.account.balance = 4; delete alice;` zeroes all three
@@ -175,8 +183,7 @@ theorem deleteMapping_run :
 /-- On a fresh contract `values` is empty: `values[0] = 1;` fails the bounds
 check and `values.pop();` the emptiness check. -/
 theorem arrays_revert :
-    reverted (run (compileProg sol{ values[0] = 1; }) (fresh)) = true ∧
-    reverted (run (compileProg sol{ values.pop(); }) (fresh)) = true := by
+    reverts sol{ values[0] = 1; } = true ∧ reverts sol{ values.pop(); } = true := by
   decide
 
 /-- With `values` of length `2` on the machine, `values[1] = 7; values.pop();`
@@ -193,14 +200,14 @@ theorem transfer_run :
     (match run (compileProg sol{ owner = 5; owner.transfer(30); }) (fresh 100) with
       | .ok m _ => some (m.balance, m.net 5)
       | _ => none) = some (70, -30) ∧
-    reverted (run (compileProg sol{ owner.transfer(200); }) (fresh 100)) = true := by
+    reverts sol{ owner.transfer(200); } (fresh 100) = true := by
   decide
 
 /-- `owner = msg.sender; total = address(this).balance;`, called by `7` with
 `100` in funds: `CALLER` and `SELFBALANCE` push them. -/
 def envReads : Prog StandardExample := sol{ owner = msg.sender; total = address(this).balance; }
 
-theorem envReads_wt : (wtProg (fun _ => none) envReads).isSome := by decide
+theorem envReads_wt : compiles envReads := by decide
 
 theorem envReads_run :
     let o := run (compileProg envReads) { fresh 100 with caller := 7 }
@@ -212,19 +219,18 @@ theorem envReads_run :
 /-- `total = values.length;` reads the length slot: with `3` elements on the
 machine, `total` is `3`. -/
 theorem length_run :
-    storeAt (run (compileProg sol{ total = values.length; })
-      { fresh with store := upd (fun _ => 0) (.root 4) 3 }) (.root 0) = some 3 := by
+    slotAfter sol{ total = values.length; } (.root 0)
+      { fresh with store := upd (fun _ => 0) (.root 4) 3 } = some 3 := by
   decide
 
 /-- `uint x = 5; uint y = x++; total = y; age = ++x;`: `x++` is the old value,
 `++x` the new one. -/
 def bumps : Prog StandardExample := sol{ uint x = 5; uint y = x++; total = y; y = ++x; age = y; }
 
-theorem bumps_wt : (wtProg (fun _ => none) bumps).isSome := by decide
+theorem bumps_wt : compiles bumps := by decide
 
 theorem bumps_run :
-    storeAt (run (compileProg bumps) fresh) (.root 0) = some 5 ∧
-    storeAt (run (compileProg bumps) fresh) (.root 1) = some 7 := by
+    slotAfter bumps (.root 0) = some 5 ∧ slotAfter bumps (.root 1) = some 7 := by
   decide
 
 /-- `total = 5; uint y = total++; age = y;` on a storage target. -/
@@ -238,37 +244,34 @@ three slots onto `bob`'s: `bob.age` is slot `16`, `bob.account.balance` `14`. -/
 def copyPerson : Prog StandardExample :=
   sol{ alice.age = 7; alice.account.balance = 3; bob = alice; }
 
-theorem copyPerson_wt : (wtProg (fun _ => none) copyPerson).isSome := by decide
+theorem copyPerson_wt : compiles copyPerson := by decide
 
 theorem copyPerson_run :
-    storeAt (run (compileProg copyPerson) fresh) (.root 16) = some 7 ∧
-    storeAt (run (compileProg copyPerson) fresh) (.root 14) = some 3 := by
+    slotAfter copyPerson (.root 16) = some 7 ∧ slotAfter copyPerson (.root 14) = some 3 := by
   decide
 
 /-- `values.push(7); values.push(); total = values.length;`: two elements, the
 first `7` at `keccak(4)`, the length `2`. -/
 def pushes2 : Prog StandardExample := sol{ values.push(7); values.push(); total = values.length; }
 
-theorem pushes2_wt : (wtProg (fun _ => none) pushes2).isSome := by decide
+theorem pushes2_wt : compiles pushes2 := by decide
 
 theorem pushes2_run :
-    storeAt (run (compileProg pushes2) fresh) (.root 0) = some 2 ∧
-    storeAt (run (compileProg pushes2) fresh) (.data (.root 4) 0) = some 7 := by
+    slotAfter pushes2 (.root 0) = some 2 ∧ slotAfter pushes2 (.data (.root 4) 0) = some 7 := by
   decide
 
 /-- `alice.age = 9; persons.push(alice);` copies `alice` into the new element:
 its `age` is at `keccak(9) + 2`. -/
 theorem pushPerson_run :
-    storeAt (run (compileProg sol{ alice.age = 9; persons.push(alice); }) fresh)
-      (.data (.root 9) 2) = some 9 := by
+    slotAfter sol{ alice.age = 9; persons.push(alice); } (.data (.root 9) 2) = some 9 := by
   decide
 
 /-- solc's length limit: with `2^64` elements on the machine, `values.push(1);`
 reverts (`Panic(0x41)`).  `compile_correct` assumes the arrays stay below it
 (`L + pushesP P ≤ 2^64`), which no run of a program with fewer pushes breaks. -/
 theorem pushLimit_run :
-    reverted (run (compileProg sol{ values.push(1); })
-      { fresh with store := upd (fun _ => 0) (.root 4) Lmax }) = true := by
+    reverts sol{ values.push(1); } { fresh with store := upd (fun _ => 0) (.root 4) Lmax }
+      = true := by
   decide
 
 set_option maxRecDepth 100000 in
@@ -276,14 +279,13 @@ set_option maxRecDepth 100000 in
 `3 ** 5` is `243`, `0 ** 0` is `1`, `2 ** 255` fits and `2 ** 256` reverts.
 (The unrolled code is long, and the kernel's evaluation recurses through it.) -/
 theorem pow_run :
-    storeAt (run (compileProg sol{ total = 3 ** 5; }) fresh) (.root 0) = some 243 ∧
-    storeAt (run (compileProg sol{ total = 0 ** 0; }) fresh) (.root 0) = some 1 ∧
-    storeAt (run (compileProg sol{ total = 2 ** 255; }) fresh) (.root 0) = some (2 ^ 255) ∧
-    reverted (run (compileProg sol{ total = 2 ** 256; }) fresh) = true := by
+    slotAfter sol{ total = 3 ** 5; } (.root 0) = some 243 ∧
+    slotAfter sol{ total = 0 ** 0; } (.root 0) = some 1 ∧
+    slotAfter sol{ total = 2 ** 255; } (.root 0) = some (2 ^ 255) ∧
+    reverts sol{ total = 2 ** 256; } = true := by
   decide
 
-theorem pow_wt : (wtProg (fun _ => none) (sol{ total = 3 ** 5; } : Prog StandardExample)).isSome := by
-  decide
+theorem pow_wt : compiles (sol{ total = 3 ** 5; } : Prog StandardExample) := by decide
 
 /-! ## What the fragment leaves out -/
 
@@ -293,7 +295,7 @@ checked once, when it is bound.  With one person on the machine, writing
 def elemAlias : Prog StandardExample :=
   sol{ Person storage p = persons[0]; p.age = 7; total = persons[0].age; }
 
-theorem elemAlias_wt : (wtProg (fun _ => none) elemAlias).isSome := by decide
+theorem elemAlias_wt : compiles elemAlias := by decide
 
 theorem elemAlias_run :
     let o := run (compileProg elemAlias) { fresh with store := upd (fun _ => 0) (.root 9) 1 }
@@ -324,11 +326,11 @@ returned value copied where the call lands (`argsCode`). -/
 `addOne` twice. -/
 def callTwice : Prog CallsExample := sol[CallsExample]{ uint y = addTwo(3); total = y; }
 
-theorem callTwice_wt : (wtProg (fun _ => none) callTwice).isSome := by decide
+theorem callTwice_wt : compiles callTwice := by decide
 
 /-- It writes `5` to `total`, slot `0`. -/
 theorem callTwice_run :
-    storeAt (run (compileProg callTwice) (Machine.init 0)) (rootSlot CallsExample "total") = some 5 := by
+    slotAfter callTwice (rootSlot CallsExample "total") = some 5 := by
   decide
 
 /-- **The call runs in the interpreter too**, and `total` reads `5` after it:
@@ -342,12 +344,14 @@ theorem callTwice_interpreter :
     have hp : PathSlot CallsExample false "total" [] (.prim .uint) (.root 0) := PathSlot.root rfl
     have hs := h3 _ _ _ n hp hn
     have hm := callTwice_run
-    rw [show run (compileProg callTwice) (Machine.init 0) = _ from h2] at hm
+    unfold slotAfter at hm
+    rw [show run (compileProg callTwice) fresh = _ from h2] at hm
     simp only [storeAt, Option.some.injEq] at hm
     rw [show rootSlot CallsExample "total" = .root 0 from rfl] at hm
     omega
   · have := callTwice_run
-    rw [show run (compileProg callTwice) (Machine.init 0) = _ from h2] at this
+    unfold slotAfter at this
+    rw [show run (compileProg callTwice) fresh = _ from h2] at this
     cases this
 
 /-! ## Signed arithmetic
@@ -363,54 +367,53 @@ local instance : InContract := ⟨TestSuite⟩
 /-- `int x = -5; int y = 3; signedTotal = x * y + 2;` -/
 def signed : Prog TestSuite := sol{ int x = -5; int y = 3; signedTotal = x * y + 2; }
 
-theorem signed_wt : (wtProg (fun _ => none) signed).isSome := by decide
+theorem signed_wt : compiles signed := by decide
 
 /-- `signedTotal` holds `-13`'s word, `2^256 - 13`. -/
 theorem signed_run :
-    storeAt (run (compileProg signed) (Machine.init 0)) (rootSlot TestSuite "signedTotal") =
-      some (toWord (-13)) := by
+    slotAfter signed (rootSlot TestSuite "signedTotal") = some (toWord (-13)) := by
   decide
 
 /-- Truncating division and the dividend's sign for `%`: `-7 / 2` is `-3`,
 `-7 % 2` is `-1`; `-x` negates. -/
 theorem sdivmod_run :
-    storeAt (run (compileProg sol{ int x = -7; signedTotal = x / 2; })
-      (Machine.init 0)) (rootSlot TestSuite "signedTotal") = some (toWord (-3)) ∧
-    storeAt (run (compileProg sol{ int x = -7; signedTotal = x % 2; })
-      (Machine.init 0)) (rootSlot TestSuite "signedTotal") = some (toWord (-1)) ∧
-    storeAt (run (compileProg sol{ signedTotal = -7; signedTotal = -signedTotal; })
-      (Machine.init 0)) (rootSlot TestSuite "signedTotal") = some 7 := by
+    slotAfter sol{ int x = -7; signedTotal = x / 2; } (rootSlot TestSuite "signedTotal")
+      = some (toWord (-3)) ∧
+    slotAfter sol{ int x = -7; signedTotal = x % 2; } (rootSlot TestSuite "signedTotal")
+      = some (toWord (-1)) ∧
+    slotAfter sol{ signedTotal = -7; signedTotal = -signedTotal; }
+      (rootSlot TestSuite "signedTotal") = some 7 := by
   decide
 
 /-- The signed guards: `2^255 - 1 + 1` overflows, `-2^255 - 1` underflows,
 `-2^255 / -1` and `-(-2^255)` overflow, `-2^255 * -1` overflows; `-1 < 0`. -/
 theorem signedChecks_run :
-    reverted (run (compileProg sol{
+    reverts sol{
       signedTotal = 57896044618658097711785492504343953926634992332820282019728792003956564819967;
-      signedTotal += 1; }) (Machine.init 0)) = true ∧
-    reverted (run (compileProg sol{
+      signedTotal += 1; } = true ∧
+    reverts sol{
       signedTotal = -57896044618658097711785492504343953926634992332820282019728792003956564819968;
-      signedTotal -= 1; }) (Machine.init 0)) = true ∧
-    reverted (run (compileProg sol{
+      signedTotal -= 1; } = true ∧
+    reverts sol{
       signedTotal = -57896044618658097711785492504343953926634992332820282019728792003956564819968;
-      signedTotal /= -1; }) (Machine.init 0)) = true ∧
-    reverted (run (compileProg sol{
+      signedTotal /= -1; } = true ∧
+    reverts sol{
       signedTotal = -57896044618658097711785492504343953926634992332820282019728792003956564819968;
-      signedTotal = -signedTotal; }) (Machine.init 0)) = true ∧
-    reverted (run (compileProg sol{
+      signedTotal = -signedTotal; } = true ∧
+    reverts sol{
       signedTotal = -57896044618658097711785492504343953926634992332820282019728792003956564819968;
-      signedTotal *= -1; }) (Machine.init 0)) = true ∧
-    storeAt (run (compileProg sol{ int x = -1; if (x < 0) { total = 1; } else { total = 2; }; })
-      (Machine.init 0)) (rootSlot TestSuite "total") = some 1 := by
+      signedTotal *= -1; } = true ∧
+    slotAfter sol{ int x = -1; if (x < 0) { total = 1; } else { total = 2; }; }
+      (rootSlot TestSuite "total") = some 1 := by
   decide
 
 /-- A copy of a struct holding a fixed-size array: `triple2 = triple;` copies
 all four slots. -/
 theorem copyFixed_run :
-    storeAt (run (compileProg sol{ triple.items[1] = 4; triple.tag = 9; triple2 = triple; })
-      (Machine.init 0)) ((rootSlot TestSuite "triple2").add 1) = some 4 ∧
-    storeAt (run (compileProg sol{ triple.items[1] = 4; triple.tag = 9; triple2 = triple; })
-      (Machine.init 0)) ((rootSlot TestSuite "triple2").add 3) = some 9 := by
+    slotAfter sol{ triple.items[1] = 4; triple.tag = 9; triple2 = triple; }
+      ((rootSlot TestSuite "triple2").add 1) = some 4 ∧
+    slotAfter sol{ triple.items[1] = 4; triple.tag = 9; triple2 = triple; }
+      ((rootSlot TestSuite "triple2").add 3) = some 9 := by
   decide
 
 end Signed
@@ -436,18 +439,16 @@ theorem fixed_layout :
 def fixedWrite : Prog TestSuite := sol{ fixedValues[2] = 7; }
 
 /-- It is in the compiled fragment, so `compile_correct` covers it. -/
-theorem fixedWrite_wt : (wtProg (fun _ => none) fixedWrite).isSome := by decide
+theorem fixedWrite_wt : compiles fixedWrite := by decide
 
 /-- `fixedValues[2] = 7;` writes `7` to `fixedValues`'s slot plus `2`. -/
 theorem fixedWrite_run :
-    storeAt (run (compileProg fixedWrite) (Machine.init 0))
-      ((rootSlot TestSuite "fixedValues").add 2) = some 7 := by
+    slotAfter fixedWrite ((rootSlot TestSuite "fixedValues").add 2) = some 7 := by
   decide
 
 /-- `uint k = 3; fixedValues[k] = 1;` reverts at the bound: `k` is not below `3`. -/
 theorem fixedOutOfBounds_run :
-    reverted (run (compileProg (sol{ uint k = 3; fixedValues[k] = 1; } : Prog TestSuite))
-      (Machine.init 0)) = true := by
+    reverts (sol{ uint k = 3; fixedValues[k] = 1; } : Prog TestSuite) = true := by
   decide
 
 end Fixed
@@ -467,10 +468,12 @@ theorem setAge_interpreter :
       PathSlot.field (segs := []) (PathSlot.root (T := .ref (.struct "Person")) rfl) rfl
     have hs := h3 _ _ _ n hp hn
     have hm := setAge_run
+    unfold slotAfter at hm
     rw [show run (compileProg setAge) fresh = _ from h2] at hm
     simp only [storeAt, Option.some.injEq] at hm
     omega
   · have := setAge_run
+    unfold slotAfter at this
     rw [show run (compileProg setAge) fresh = _ from h2] at this
     cases this
 

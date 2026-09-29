@@ -13,23 +13,30 @@ A state variable `count` is `find(storage, count)`, and `\old(count)` is
 The obligation of a function `f(x₁, …, xₙ)` is solkey's, a box:
 
 ```
-R ∧ L ∧ I ∧ requires → {old := storage} [ T result = f(x₁, …, xₙ); ] (I ∧ ensures)
+R ∧ L ∧ M ∧ I ∧ requires →
+  {old := storage ‖ oldNet := net ‖ book(msg.value)} [ T result = f(x₁, …, xₙ); ] (I ∧ ensures ∧ A)
 ```
 
 The parameters are free locals, so `⊨` ranges over every argument; `R`
 gives each its type's range, since a free local also ranges over values of
 other types and over none (solkey's parameters are KeY `int`s, unbounded,
 and need no such fact).  `L` is the contract's layout (`layoutFmls`): `⊨`
-also ranges over storages the contract never has.  `I` is the contract's invariants, assumed and owed
-(solkey's `CInv(storage, net)`).  The update `{old := storage}` is there only
-when an `ensures` reads `\old`, as solkey's is.
+also ranges over storages the contract never has.  `M` is what `msg.value`
+is: `>= 0`, or `== 0` for a function that is not `payable`.  `I` is the
+contract's invariants, assumed and owed (solkey's `CInv(storage, net)`).
+`A` is the frame of an `assignable` clause (`assignableFml`).
 
-Not ported: `net(a)` (no term reads the ledger) and so `oldNet`, and the
-booking of `msg.value` in front of the call (`net := … + msgValue ‖
-selfBalance := … + msgValue`): the precondition is solkey's without
-`msgValue ≥ 0`/`msgValue = 0`.  A spec's arithmetic is Solidity's, checked at
-its operands' type, where solkey's is KeY's unbounded `int`: an overflowing
-side makes its equation false rather than true of a larger number.
+The update takes solkey's snapshots only where something reads them: `old`
+when an `ensures` reads `\old` or an `assignable` clause is given, `oldNet`
+when an `\old(…)` reads `net(a)`.  The booking of `msg.value`, the sender's
+ledger entry and the contract's funds credited, is there for a `payable`
+function only: `M` makes the other's a booking of `0`.
+
+Not ported: the benchmarks' clauses over `net(a)` are not tried.  A spec's
+arithmetic is Solidity's, checked at its operands' type, where solkey's is
+KeY's unbounded `int`: an overflowing side makes its equation false rather
+than true of a larger number.  `net(a)` is read as a `uint`, as `msg.value`
+is, so `\old(net(a)) + msg.value` is checked too.
 -/
 
 namespace Solidity
@@ -46,32 +53,57 @@ structure SpecCtx (C : Contract) where
   ensures : Bool
   locals : List (String × PrimTy)
   result : Option PrimTy
+  /-- The ledger `net(a)` reads: the current one, or the snapshot bound at
+  the variable (`oldNet` under `\old`). -/
+  ledger : Option Var := none
 
 /-- The storage variable `\old` reads, solkey's `old`. -/
 def oldVar : Var := .ofName "old"
 
+/-- The ledger variable `\old(net(a))` reads, solkey's `oldNet`. -/
+def oldNetVar : Var := .ofName "oldNet"
+
 /-- The local `\result` names, solkey's `result`. -/
 def resultVar : Var := .ofName "result"
 
-/-- `\old(e)` is read against `old`, and not nested. -/
+/-- `\old(e)` is read against `old` and `oldNet`, and not nested. -/
 def SpecCtx.old (ctx : SpecCtx C) : SpecCtx C :=
-  { ctx with storage := .pv oldVar, ensures := false }
+  { ctx with storage := .pv oldVar, ensures := false, ledger := some oldNetVar }
+
+/-- The fold every query over a clause is: `here e` where it answers for the
+node `e` itself, else `join` over its operands, `leaf` at a leaf. -/
+def SpecExpr.foldMap {α : Type} (leaf : α) (join : α → α → α) (here : SpecExpr → Option α) :
+    SpecExpr → α
+  | e@(.old a) | e@(.net a) | e@(.field a _) | e@(.unop _ a) | e@(.all _ _ a) | e@(.ex _ _ a) =>
+    match here e with
+    | some r => r
+    | none => a.foldMap leaf join here
+  | e@(.index a b) | e@(.binop _ a b) | e@(.imp a b) | e@(.iff a b) =>
+    match here e with
+    | some r => r
+    | none => join (a.foldMap leaf join here) (b.foldMap leaf join here)
+  | e@(.num _) | e@(.bool _) | e@(.name _) | e@.result => (here e).getD leaf
+
+/-- Whether a node `here` picks out occurs, and what it says of it. -/
+def SpecExpr.any (here : SpecExpr → Option Bool) : SpecExpr → Bool :=
+  SpecExpr.foldMap false (· || ·) here
+
+/-- Whether `net(a)` occurs. -/
+def SpecExpr.usesNet : SpecExpr → Bool :=
+  SpecExpr.any fun | .net _ => some true | _ => none
+
+/-- Whether an `\old(… net(a) …)` occurs: what reads `oldNet`. -/
+def SpecExpr.usesOldNet : SpecExpr → Bool :=
+  SpecExpr.any fun | .old e => some e.usesNet | _ => none
 
 /-- Whether an `\old` occurs. -/
-def SpecExpr.usesOld : SpecExpr → Bool
-  | .old _ => true
-  | .net e | .field e _ | .unop _ e | .all _ _ e | .ex _ _ e => e.usesOld
-  | .index a b | .binop _ a b | .imp a b | .iff a b => a.usesOld || b.usesOld
-  | .num _ | .bool _ | .name _ | .result => false
+def SpecExpr.usesOld : SpecExpr → Bool :=
+  SpecExpr.any fun | .old _ => some true | _ => none
 
 /-- A number literal: it takes the type of the other operand. -/
 def SpecExpr.isNum : SpecExpr → Bool
   | .num _ => true
   | _ => false
-
-/-- `a ⊕ b = true`: a comparison as a formula. -/
-def cmpFml (op : BinOp) (p : PrimTy) (a b : Term C) : Fml C :=
-  .eq (.binop op p a b) (.lit (.bool true))
 
 /-- The conjunction of the clauses, `true` for none. -/
 def Fml.conj : List (Fml C) → Fml C
@@ -104,11 +136,8 @@ partial def layoutAt (T : Ty) (p : PTerm C) (keys : List (Var × PrimTy)) (k : N
   | _ => []
 
 /-- The names a clause reads. -/
-def SpecExpr.names : SpecExpr → List String
-  | .name x => [x]
-  | .old e | .net e | .field e _ | .unop _ e | .all _ _ e | .ex _ _ e => e.names
-  | .index a b | .binop _ a b | .imp a b | .iff a b => a.names ++ b.names
-  | .num _ | .bool _ | .result => []
+def SpecExpr.names : SpecExpr → List String :=
+  SpecExpr.foldMap [] (· ++ ·) fun | .name x => some [x] | _ => none
 
 /-- The layout premises of the state variables among `rs`: those the
 clauses read.  What only the body reads needs none: a read the program
@@ -159,22 +188,23 @@ partial def SpecExpr.term (ctx : SpecCtx C) : SpecExpr → Except String (PrimTy
   | .old e => do
     unless ctx.ensures do throw "\\old is only allowed in ensures, and not nested"
     e.term ctx.old
-  | .net _ => throw "net(…): no term reads the ledger"
+  | .net e => do
+    let (p, t) ← e.term ctx
+    unless p = .uint || e.isNum do throw s!"net(…) of a {primName p}, where an address is expected"
+    match ctx.ledger with
+    | none => pure (.uint, .net t)
+    | some x => pure (.uint, .netOf x t)
   | .name x =>
     match lookupBy x ctx.locals with
     | some p => pure (p, .pv (.ofName x))
     | none => SpecExpr.read ctx (.name x)
   | .field (.name b) m => do
     if (lookupBy b ctx.locals).isNone && (C.rootType b).isNone then
-      match b, m with
-      | "msg", "sender" => return (.uint, .env .msgSender)
-      | "msg", "value" => return (.uint, .env .msgValue)
-      | "block", "timestamp" => return (.uint, .env .timestamp)
-      | "this", "balance" => return (.uint, .env .selfBalance)
-      | _, _ =>
-        let some ms := lookupBy b C.enums | throw s!"unknown name {b}"
-        let some i := ms.findIdx? (· == m) | throw s!"enum {b} has no member {m}"
-        return (.uint, .lit (.int i))
+      if let some k := EnvKey.ofParts b m then return (.uint, .env k)
+      if b == "this" && m == "balance" then return (.uint, .env .selfBalance)
+      let some ms := lookupBy b C.enums | throw s!"unknown name {b}"
+      let some i := ms.findIdx? (· == m) | throw s!"enum {b} has no member {m}"
+      return (.uint, .lit (.int i))
     SpecExpr.read ctx (.field (.name b) m)
   | e@(.field ..) | e@(.index ..) => SpecExpr.read ctx e
   | .unop .neg (.num n) => pure (.int, .lit (.int (-(n : Int))))
@@ -217,46 +247,161 @@ partial def SpecExpr.fml (ctx : SpecCtx C) : SpecExpr → Except String (Fml C)
   | .binop .and a b => do pure (.and (← a.fml ctx) (← b.fml ctx))
   | .binop .or a b => do pure (.not (.and (.not (← a.fml ctx)) (.not (← b.fml ctx))))
   | .imp a b => do pure (.imp (← a.fml ctx) (← b.fml ctx))
-  | .iff a b => do
-    let φ ← a.fml ctx
-    let ψ ← b.fml ctx
-    pure (.and (.imp φ ψ) (.imp ψ φ))
+  | .iff a b => iff a b
   | .all p x e => do pure (.all (.ofName x) p (← e.fml { ctx with locals := (x, p) :: ctx.locals }))
   | .ex p x e => do
     pure (.not (.all (.ofName x) p (.not (← e.fml { ctx with locals := (x, p) :: ctx.locals }))))
   | .old e => do
     unless ctx.ensures do throw "\\old is only allowed in ensures, and not nested"
     e.fml ctx.old
-  | e@(.binop op a b) => do
+  | .binop op a b => do
     if op = .eqB || op = .neB then
       let (pa, ta) ← a.term C ctx
       let (pb, tb) ← b.term C ctx
-      let eq ← if pa = .bool && pb = .bool then do
-          let φ ← a.fml ctx
-          let ψ ← b.fml ctx
-          pure (Fml.and (.imp φ ψ) (.imp ψ φ))
-        else pure (Fml.eq ta tb)
+      let eq ← if pa = .bool && pb = .bool then iff a b else pure (Fml.eq ta tb)
       return if op = .eqB then eq else .not eq
+    cond (.binop op a b)
+  | e => cond e
+where
+  /-- `a <-> b`, and `==` between conditions. -/
+  iff (a b : SpecExpr) : Except String (Fml C) := do
+    let φ ← a.fml ctx
+    let ψ ← b.fml ctx
+    pure (.and (.imp φ ψ) (.imp ψ φ))
+  /-- A `bool` value as a condition, `t = true`. -/
+  cond (e : SpecExpr) : Except String (Fml C) := do
     let (p, t) ← e.term C ctx
     unless p = .bool do throw s!"a {primName p} where a condition is expected"
-    pure (.eq t (.lit (.bool true)))
-  | e => do
-    let (p, t) ← e.term C ctx
-    unless p = .bool do throw s!"a {primName p} where a condition is expected"
-    pure (.eq t (.lit (.bool true)))
+    pure (boolFml t)
+
+/-! ### `assignable`: the words a function may change -/
+
+/-- A step of an `assignable` location, below its state variable: a member,
+the entry at a key (read in the pre-state), or every entry. -/
+inductive SpecStep (C : Contract) where
+  | field (f : String)
+  | key (t : Term C)
+  | all
+
+/-- A location, checked against the contract: its state variable, the type
+it names, and the steps to it.  A key is read in the pre-state, against
+`old` and `oldNet` (`ctx`), as JML reads it. -/
+def SpecLoc.compile (ctx : SpecCtx C) : SpecLoc → Except String (String × Ty × List (SpecStep C))
+  | .root r =>
+    match C.rootType r with
+    | some T => pure (r, T, [])
+    | none => throw s!"assignable: unknown state variable {r}"
+  | .field l f => do
+    let (r, T, ss) ← l.compile ctx
+    let .ref (.struct s) := T | throw s!"assignable: member access .{f} on a non-struct"
+    let some T' := C.fieldType s f | throw s!"assignable: struct {s} has no member {f}"
+    pure (r, T', ss ++ [.field f])
+  | .index l e => do
+    let (r, T, ss) ← l.compile ctx
+    let (q, t) ← e.term C ctx
+    match T with
+    | .ref (.mapping (.prim kp) V) =>
+      unless q = kp || e.isNum do
+        throw s!"assignable: a key of type {primName q} where a {primName kp} is expected"
+      pure (r, V, ss ++ [.key t])
+    | .ref (.array E) | .ref (.fixed E _) => pure (r, E, ss ++ [.key t])
+    | _ => throw "assignable: indexing something that is not a mapping or an array"
+  | .all l => do
+    let (r, T, ss) ← l.compile ctx
+    match T with
+    | .ref (.mapping _ V) | .ref (.array V) | .ref (.fixed V _) => pure (r, V, ss ++ [.all])
+    | _ => throw "assignable: `[*]` of something that is not a mapping or an array"
+
+/-- The names a location's keys read. -/
+def SpecLoc.names : SpecLoc → List String
+  | .root _ => []
+  | .field l _ | .all l => l.names
+  | .index l e => l.names ++ e.names
+
+/-- Whether a key reads `net(a)`, which it reads in the pre-state, `oldNet`. -/
+def SpecLoc.usesNet : SpecLoc → Bool
+  | .root _ => false
+  | .field l _ | .all l => l.usesNet
+  | .index l e => l.usesNet || e.usesNet
+
+/-- `∀ keys. h₁ → … → φ`. -/
+def closeFml (keys : List (Var × PrimTy)) (hyps : List (Fml C)) (φ : Fml C) : Fml C :=
+  keys.foldl (fun φ (x, q) => .all x q φ) (hyps.foldr .imp φ)
+
+/-- The locations below a node, entered at the key `x`: an entry `m[t]` goes
+on under the condition `x = t`, `m[*]` unconditionally. -/
+def enterKey (x : Var) (ls : List (List (Fml C) × List (SpecStep C))) :
+    List (List (Fml C) × List (SpecStep C)) :=
+  ls.filterMap fun
+    | (cs, .key t :: rest) => some (cs ++ [.eq (.pv x) t], rest)
+    | (cs, .all :: rest) => some (cs, rest)
+    | _ => none
+
+/-- **The frame of `assignable`**, at the node `p` of type `T`: every word
+below it that no location covers is where it was, `find(storage, p) =
+find(old, p)`, and so is an array's length.  `ls` are the locations still
+going down, each with the conditions on the keys it was entered at; a word
+one of them covers under conditions `c` is owed only where `¬c`
+(`k ≠ e` for `m[e]`).  A mapping entry is every key, `∀ k`; an array's
+element every index below its length. -/
+partial def frameAt (T : Ty) (p : PTerm C) (keys : List (Var × PrimTy)) (hyps : List (Fml C))
+    (ls : List (List (Fml C) × List (SpecStep C))) (k : Nat) : List (Fml C) :=
+  let here := ls.filter (·.2.isEmpty)
+  if here.any (·.1.isEmpty) then [] else
+  let hyps := hyps ++ here.map fun (cs, _) => Fml.not (Fml.conj cs)
+  let ls := ls.filter (!·.2.isEmpty)
+  -- owed where the word was there to begin with: `⊨` also ranges over
+  -- storages without it, where both sides halt
+  let owe (a b : Term C) : Fml C := closeFml C keys hyps (.imp (.eq b b) (.eq a b))
+  match T with
+  | .prim _ => [owe (.find .storage p) (.find (.pv oldVar) p)]
+  | .ref (.mapping (.prim K) V) =>
+    let x : Var := .ofName s!"k{k}"
+    frameAt V (.at p (.pv x)) ((x, K) :: keys) hyps (enterKey C x ls) (k + 1)
+  | .ref (.struct s) => (structDef s).flatMap fun (f, T') =>
+    frameAt T' (.field p f) keys hyps
+      (ls.filterMap fun
+        | (cs, .field g :: rest) => if g == f then some (cs, rest) else none
+        | _ => none) k
+  | .ref (.array E) =>
+    let i : Var := .ofName s!"k{k}"
+    owe (.len .storage p) (.len (.pv oldVar) p) ::
+      frameAt E (.at p (.pv i)) ((i, .uint) :: keys)
+        (hyps ++ [cmpFml .lt .uint (.pv i) (.len .storage p)]) (enterKey C i ls) (k + 1)
+  | .ref (.fixed E n) =>
+    let i : Var := .ofName s!"k{k}"
+    frameAt E (.at p (.pv i)) ((i, .uint) :: keys)
+      (hyps ++ [cmpFml .lt .uint (.pv i) (.lit (.int n))]) (enterKey C i ls) (k + 1)
+  | _ => []
+
+/-- The frame of an `assignable` clause over every state variable of the
+contract. -/
+def assignableFml (ctx : SpecCtx C) (locs : List SpecLoc) : Except String (List (Fml C)) := do
+  let cs ← locs.mapM (SpecLoc.compile C ctx)
+  pure <| C.vars.flatMap fun (r, T) =>
+    frameAt C T (.root r) [] [] (cs.filterMap fun (r', _, ss) => if r' == r then some ([], ss) else none) 1
 
 variable [FreshNames]
 
-/-- **The obligation of `f`**, solkey's `specifiedProblemText`:
-`R ∧ L ∧ I ∧ requires → {old := storage} [ T result = f(x₁, …, xₙ); ] (I ∧ ensures)`. -/
-def specObligation (f : String) : Except String (Fml C) := do
+/-- **The pieces of the obligation of `f`**, solkey's `specifiedProblemText`:
+the premises every run meets by construction (`R`, `L` and what `msg.value`
+is, `M`), the premises the specification states (`I ∧ requires`), the
+update `{old := storage ‖ oldNet := net ‖ book(msg.value)}`, the call
+`T result = f(x₁, …, xₙ);`, and what is owed after it, `I`, `ensures` and
+`A` one by one (a counterexample search names the one that fails). -/
+def specPieces (f : String) :
+    Except String (List (Fml C) × List (Fml C) × Upd C × Prog C × List (Fml C)) := do
   let some d := lookupBy f C.funs | throw s!"{f} is not a function of the contract"
   if d.spec.skip then throw s!"{f} is marked `skip`: it has no obligation"
   let ps ← d.params.mapM fun (n, T) => match T with
     | .prim p => pure (n, p)
     | _ => throw s!"{f}: the parameter {n} has a reference type"
   for (n, _) in ps do
-    if n == "old" || n == "result" then throw s!"{f}: a parameter named {n}, which the obligation names"
+    if n == "old" || n == "oldNet" || n == "result" then
+      throw s!"{f}: a parameter named {n}, which the obligation names"
+    -- `k1`, `k2`, …: the keys the layout and the frame quantify over
+    if n.startsWith "k" && n.length > 1 && (n.drop 1).all Char.isDigit then
+      throw s!"{f}: a parameter named {n}, which the obligation's quantifiers name"
   let res ← match d.ret with
     | none => pure none
     | some (_, .prim p) => pure (some p)
@@ -266,18 +411,50 @@ def specObligation (f : String) : Except String (Fml C) := do
   let inv ← C.inv.mapM (SpecExpr.fml C { pre with locals := [] })
   let reqs ← d.spec.requires.mapM (SpecExpr.fml C pre)
   let enss ← d.spec.ensures.mapM (SpecExpr.fml C post)
+  let frame ← match d.spec.assignable with
+    | some locs =>
+      assignableFml C { post with storage := .pv oldVar, ledger := some oldNetVar, result := none } locs
+    | none => pure []
   let args := ps.map fun (n, _) => RawExpr.name n
   let call : RawStmt := match res with
     | some p => .decl (.named (primName p)) "result" (some (.call f args))
     | none => .call (.name f) args
   let P ← ((elabStmts C [call]).run C.funs).run' (ps.map fun (n, p) => (n, LocalTy.val p), 1)
-  let body : Fml C := .modal .box P (Fml.conj (inv ++ enss))
-  let body := if d.spec.ensures.any SpecExpr.usesOld then .upd .box [.store oldVar .storage] body
-    else body
-  let read := (C.inv ++ d.spec.requires ++ d.spec.ensures).flatMap SpecExpr.names
-  pure (.imp (Fml.conj (ps.map (fun (n, p) => rangeFml (.pv (.ofName n)) p) ++ layoutFmls C read ++
-      inv ++ reqs))
-    body)
+  -- the snapshots `\old` reads, taken where something reads them
+  let snap : Upd C :=
+    (if d.spec.ensures.any SpecExpr.usesOld || d.spec.assignable.isSome then [.store oldVar .storage]
+      else []) ++
+    if d.spec.ensures.any SpecExpr.usesOldNet || (d.spec.assignable.getD []).any SpecLoc.usesNet
+    then [.saveNet oldNetVar] else []
+  -- a function that is not `payable` is called with `msg.value == 0`, so its
+  -- booking, `book(0)`, is left out: it changes nothing
+  let U := snap ++ if d.payable then [.book (.env .msgValue)] else []
+  let msgValue : Fml C := if d.payable then cmpFml .ge .uint (.env .msgValue) (.lit (.int 0))
+    else .eq (.env .msgValue) (.lit (.int 0))
+  let read := (C.inv ++ d.spec.requires ++ d.spec.ensures).flatMap SpecExpr.names ++
+    (d.spec.assignable.getD []).flatMap SpecLoc.names
+  pure (ps.map (fun (n, p) => rangeFml (.pv (.ofName n)) p) ++ layoutFmls C read ++ [msgValue],
+    inv ++ reqs, U, P, inv ++ enss ++ frame)
+
+/-- The conclusion `{U} [ P ] (φ₁ ∧ … ∧ φₙ)`, the update left out when it
+is empty. -/
+def specBody (U : Upd C) (P : Prog C) (posts : List (Fml C)) : Fml C :=
+  let body : Fml C := .modal .box P (Fml.conj posts)
+  if U.isEmpty then body else .upd .box U body
+
+/-- **The parts of the obligation of `f`**: the premises met by
+construction, the premises stated, and the conclusion
+`{old := storage ‖ oldNet := net ‖ book(msg.value)} [ T result = f(x₁, …, xₙ); ] (I ∧ ensures ∧ A)`. -/
+def specParts (f : String) : Except String (List (Fml C) × List (Fml C) × Fml C) := do
+  let (a, b, U, P, posts) ← specPieces C f
+  pure (a, b, specBody C U P posts)
+
+/-- **The obligation of `f`**: `R ∧ L ∧ M ∧ I ∧ requires → {old := storage ‖
+oldNet := net ‖ book(msg.value)} [ T result = f(x₁, …, xₙ); ] (I ∧ ensures ∧ A)`,
+the parts of `specParts` put together. -/
+def specObligation (f : String) : Except String (Fml C) := do
+  let (a, b, body) ← specParts C f
+  pure (.imp (Fml.conj (a ++ b)) body)
 
 end Compile
 
@@ -331,27 +508,45 @@ end Close
 
 attribute [close_rw] Close.forall_admits_uint Close.forall_admits_int Close.forall_admits_bool
 
-/-- The closing half of `sol_spec`: `sol_close`, knowing also that a word
-read is a word (`Close.asValue_eq_ok`), which the layout premises of a
-specification say of every key (a `delete` then leaves its type's default),
-and with `grind`'s instantiation bounded, since those premises are
-quantified. -/
+/-- What `sol_spec_close` does before its last step: `sol_close`'s
+evaluation and reads, knowing also that a word read is a word
+(`Close.asValue_eq_ok`), which the layout premises of a specification say of
+every key (a `delete` then leaves its type's default). -/
+macro "sol_spec_prep" : tactic => `(tactic|
+  (sol_close_unwrap
+   intro σ
+   sol_close_eval
+   all_goals try sol_close_facts
+   all_goals try sol_close_reads
+   all_goals try (intros; sol_close_reads_all)
+   all_goals try (subst_vars; sol_close_reads_all)
+   all_goals (try intros)
+   all_goals (try simp only [Close.exists_unit, Close.forall_unit, exists_const, forall_const] at *)
+   all_goals (try simp only [Close.asValue_eq_ok] at *)))
+
+/-- The last step of `sol_spec_close`: `omega` or `grind`, `grind`'s
+instantiation bounded, since the layout premises are quantified. -/
+macro "sol_spec_finish" : tactic => `(tactic|
+  first | omega | grind (gen := 3) [Close.defaultOf_int, Close.defaultOf_bool])
+
+/-- The closing half of `sol_spec`: `sol_spec_prep`, then `sol_spec_finish`
+on every goal. -/
 macro "sol_spec_close" : tactic => `(tactic|
   all_goals
-   (sol_close_unwrap
-    intro σ
-    sol_close_eval
-    all_goals try sol_close_facts
-    all_goals try sol_close_reads
-    all_goals try (intros; sol_close_reads_all)
-    all_goals try (subst_vars; sol_close_reads_all)
-    all_goals (try intros)
-    all_goals (try simp only [Close.exists_unit, Close.forall_unit, exists_const, forall_const] at *)
-    all_goals (try simp only [Close.asValue_eq_ok] at *)
-    all_goals first | omega | grind (gen := 3) [Close.defaultOf_int, Close.defaultOf_bool]))
+   (sol_spec_prep
+    all_goals sol_spec_finish))
 
 /-- `sol_spec`: prove an obligation `spec[C]{f}` by symbolic execution and
 `sol_spec_close`. -/
 macro "sol_spec" : tactic => `(tactic| (sol_symex; sol_spec_close))
+
+/-- `sol_spec` that does not fail: what `omega` and `grind` do not close is
+left as goals, one per path and conjunct, for a caller to show or to work
+on. -/
+macro "sol_spec_try" : tactic => `(tactic|
+  (sol_symex
+   all_goals
+    (sol_spec_prep
+     all_goals try sol_spec_finish)))
 
 end Solidity

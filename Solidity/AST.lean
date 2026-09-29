@@ -32,6 +32,34 @@ inductive PrimTy where
   | int
   deriving DecidableEq, Repr
 
+namespace PrimTy
+
+/-- The Solidity spelling. -/
+def toStr : PrimTy → String
+  | .uint => "uint" | .int => "int" | .bool => "bool"
+
+/-- A primitive type by its Solidity name: the one table of them.  An
+`address` (and an `address payable`) is a `uint`; `uint256` and `int256` are
+`uint` and `int`.  The other widths are not modelled (`unknownTyMsg`). -/
+def ofName? : String → Option PrimTy
+  | "uint" | "uint256" | "address" => some .uint
+  | "int" | "int256" => some .int
+  | "bool" => some .bool
+  | _ => none
+
+end PrimTy
+
+/-- Why the type name `s` is refused: neither a primitive type, nor a struct
+of `Semantics.structDef`, nor an enum of the contract. -/
+def unknownTyMsg (s : String) : String :=
+  let hint :=
+    if s.startsWith "uint" || s.startsWith "int" then
+      ": only the 256-bit integers are modelled, write `uint` or `int`"
+    else if s.startsWith "bytes" || s == "string" || s == "byte" then
+      ": `bytes` and `string` are not modelled"
+    else ""
+  s!"unknown type {s}{hint}"
+
 mutual
   inductive RefTy where
     | struct (name : Name)
@@ -125,11 +153,6 @@ def Ty.isMemoryReferenceType : Ty -> Bool
   | Ty.ref (RefTy.array _) => true
   | Ty.ref (RefTy.fixed _ _) => true
   | _ => false
-
-/-- `StorageReferenceTypes.isReferenceType`: "in storage, mappings are
-reference-typed locations as well, unlike in memory". -/
-def Ty.isStorageReferenceType (ty : Ty) : Bool :=
-  ty.isReference
 
 /-! ### The struct schema and `containsMapping`
 
@@ -397,89 +420,6 @@ theorem Ty.keySort_memory_le_identity (ty : Ty) :
   | prim p => cases p <;> rfl
   | ref r => cases r <;> rfl
 
-/-- KeY `MapField, RefField \extends Field` (`structHeader.key`): `ref`
-marks a struct/array member (`RefField`), `map` a mapping member
-(`MapField`), and `prim` a value member — which in KeY is a bare `Field`
-with no subsort of its own. KeY used to spell that one `PrimField` (and
-`ref` `IdField`); solkey `0f9b99ad55` dropped the primitive subsort, and
-its rules now discriminate a value member by binding its declared type
-under a `Prim` bound, `\varcond(\hasFieldSort(a, \sort(alphaPrim)))`,
-rather than by sort. -/
-inductive FieldSort where
-  | prim
-  | ref
-  | map
-  deriving DecidableEq, Repr
-
-/-- The `Field` subsort a member of this reference sort inhabits.  A
-fixed-size array member is solkey's `FixedField`, which is a `MemberField`
-beside `RefField`; the calculus here does not tell the two apart (a member's
-type does, `RefTy.fixed`), so it is a `ref` here. -/
-def RefTy.fieldSort : RefTy -> FieldSort
-  | RefTy.mapping _ _ => FieldSort.map
-  | _ => FieldSort.ref
-
-/-- `SolJSONParser.fieldSortFor`: the `Field` subsort a member's declared
-type stamps on its field constant — `MapField` for a mapping, `RefField`
-for a memory reference type (struct or array), the bare `Field` for a
-value. -/
-def Ty.fieldSort : Ty -> FieldSort
-  | Ty.ref r => r.fieldSort
-  | Ty.prim _ => FieldSort.prim
-
-theorem Ty.fieldSort_ref (r : RefTy) : Ty.fieldSort (Ty.ref r) = r.fieldSort := rfl
-
-/-- A member declaration (KeY `FieldDeclaration`): a name and a declared
-type. Its `Field` subsort is not stored — it is `sort`, stamped from the
-type exactly as `SolJSONParser.fieldSortFor` stamps the field constant,
-so a field cannot be classified against its own type. -/
-structure Field where
-  name : Name
-  ty : Ty
-  deriving DecidableEq, Repr
-
-namespace Field
-
-/-- The `Field` subsort of this member, from its declared type. -/
-def sort (field : Field) : FieldSort :=
-  field.ty.fieldSort
-
-/-- Value member (a bare `Field` in KeY). -/
-def primitive (name : Name) (ty : Ty) : Field :=
-  { name, ty }
-
-/-- Reference member; classifies itself `RefField` vs `MapField` from
-the target sort. -/
-def identity (name : Name) (ref : RefTy := RefTy.struct name) : Field :=
-  { name, ty := Ty.ref ref }
-
-def isPrimitive (field : Field) : Bool :=
-  field.sort matches FieldSort.prim
-
-/-- A value member is exactly one whose declared type `\hasFieldSort`
-binds under `\generic alphaPrim \extends Prim`. -/
-theorem isPrimitive_eq_keySort_le_prim (field : Field) :
-    field.isPrimitive = (field.ty.keySort false).le KeySort.prim := by
-  rw [Ty.keySort_le_prim]
-  unfold Field.isPrimitive Field.sort
-  cases field.ty with
-  | prim p => rfl
-  | ref r => cases r <;> rfl
-
-/-- Non-primitive member (`RefField ∪ MapField`) — the delete-target and
-alias classifications in `Calculus/Rules.lean` bipartition on this, so it keeps
-the pre-`FieldSort` meaning rather than `RefField` alone. -/
-def isIdentity (field : Field) : Bool :=
-  !field.isPrimitive
-
-def isRefField (field : Field) : Bool :=
-  field.sort matches FieldSort.ref
-
-def isMapField (field : Field) : Bool :=
-  field.sort matches FieldSort.map
-
-end Field
-
 /-- Binary operators of the KeY calculus (`solidityProgramRules.key`):
 arithmetic (`addition` .. `modulo`), comparisons (`lessThan` ..
 `greaterEqual`) and boolean connectives (`boolEquality`, `boolInequality`,
@@ -502,20 +442,6 @@ def isArith : BinOp -> Bool
   | band | bor | bxor | shl | shr | addW | subW | mulW | powW => true
   | _ => false
 
-def isComparison : BinOp -> Bool
-  | lt | gt | le | ge => true
-  | _ => false
-
-def isBoolean : BinOp -> Bool
-  | eqB | neB | and | or => true
-  | _ => false
-
-/-- `/` and `%` revert on a zero divisor (KeY `division_unfold_result`,
-`modulo_unfold_result`). -/
-def needsGuard : BinOp -> Bool
-  | div | mod => true
-  | _ => false
-
 /-- `&&` and `||` short-circuit: the right operand must not be hoisted
 into a temporary ahead of the left (KeY defers these to the if rules, so
 there is no `logicalAndCaptureRhs`/`logicalOrCaptureRhs` taclet). -/
@@ -535,6 +461,24 @@ comparisons and boolean connectives produce `bool`. -/
 def retTy (op : BinOp) (operand : Ty) : Ty :=
   if op.isArith then operand else Ty.bool
 
+/-- The Solidity spelling: the one operator table, which the printers write
+and the grammar's expanders read back (`ofSym?`). -/
+def sym : BinOp → String
+  | .add => "+" | .sub => "-" | .mul => "*" | .pow => "**" | .div => "/" | .mod => "%"
+  | .lt => "<" | .gt => ">" | .le => "<=" | .ge => ">="
+  | .eqB => "==" | .neB => "!=" | .and => "&&" | .or => "||"
+  | .band => "&" | .bor => "|" | .bxor => "^" | .shl => "<<" | .shr => ">>"
+  | .addW => "+%" | .subW => "-%" | .mulW => "*%" | .powW => "**%"
+
+/-- Every operator. -/
+def all : List BinOp :=
+  [add, sub, mul, pow, div, mod, lt, gt, le, ge, eqB, neB, and, or,
+   band, bor, bxor, shl, shr, addW, subW, mulW, powW]
+
+/-- The operator spelt `s`. -/
+def ofSym? (s : String) : Option BinOp :=
+  all.find? (·.sym == s)
+
 end BinOp
 
 /-- Unary operators: `unaryMinus*` and `logicalNot*` taclets; `~`, the
@@ -544,14 +488,8 @@ inductive UnOp where
   | bnot
   deriving DecidableEq, Repr
 
-namespace UnOp
-
-def retTy : UnOp -> Ty -> Ty
-  | neg, operand => operand
-  | not, _ => Ty.bool
-  | bnot, operand => operand
-
-end UnOp
+def UnOp.sym : UnOp → String
+  | .neg => "-" | .not => "!" | .bnot => "~"
 
 /-- Prefix/postfix increment and decrement (`storageRootPreincrement`,
 `localAssignPostdecrement`, ... taclet families). -/
@@ -573,6 +511,13 @@ def isIncrement : IncDec -> Bool
 def binOp (op : IncDec) : BinOp :=
   if op.isIncrement then BinOp.add else BinOp.sub
 
+/-- The operator the token `t` (`++`, or `−−`, two U+2212) spells, before its
+operand (`pre`) or after it. -/
+def ofTok? (pre : Bool) : String → Option IncDec
+  | "++" => some (if pre then preInc else postInc)
+  | "−−" => some (if pre then preDec else postDec)
+  | _ => none
+
 end IncDec
 
 /-! ## The five shapes of a type
@@ -588,17 +533,15 @@ namespace Ty
 @[match_pattern, reducible] def fixed (T : Ty) (n : Nat) : Ty := .ref (.fixed T n)
 @[match_pattern, reducible] def mapping (K V : Ty) : Ty := .ref (.mapping K V)
 
-/-- `cases T` by the five shapes a Solidity type is written in. -/
-@[elab_as_elim]
-def casesOn5 {motive : Ty → Sort u} (prim : ∀ p, motive (.prim p))
-    (struct : ∀ n, motive (.struct n)) (array : ∀ T, motive (.array T))
-    (fixed : ∀ T n, motive (.fixed T n))
-    (mapping : ∀ K V, motive (.mapping K V)) : ∀ T, motive T
-  | .prim p => prim p
-  | .ref (.struct n) => struct n
-  | .ref (.array T) => array T
-  | .ref (.fixed T n) => fixed T n
-  | .ref (.mapping K V) => mapping K V
+/-- The Solidity spelling: `uint`, `Person[]`, `mapping(uint => bool)`. -/
+def toStr : Ty → String
+  | .prim p => p.toStr
+  | .ref (.struct s) => s
+  | .ref (.array T) => T.toStr ++ "[]"
+  | .ref (.fixed T n) => s!"{T.toStr}[{n}]"
+  | .ref (.mapping K V) => s!"mapping({K.toStr} => {V.toStr})"
+
+instance : ToString Ty := ⟨toStr⟩
 
 end Ty
 

@@ -404,10 +404,6 @@ allocations being different objects — holds of the contract's initial store,
 definition (`defaultForTy`) that `rfl` does not unfold, so these runs are
 printed, as `StorageSuite.lean` prints its. -/
 
-/-- What the local `x` holds after `P` runs from the store `σ`. -/
-def localAfter {C : Contract} (σ : State) (P : Prog C) (x : String) : Res Binding := do
-  (← Prog.run σ P).getEnv (.user x)
-
 /-! `Person memory carol; uint result = carol.age;` — a fresh object holds its
 type's default (`memory-decl-fresh.key`, `memory-decl-default.key`). -/
 
@@ -415,7 +411,7 @@ type's default (`memory-decl-fresh.key`, `memory-decl-default.key`). -/
 info: Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int 0))
 -/
 #guard_msgs in
-#eval localAfter State.exampleStore
+#eval Prog.localAfter State.exampleStore
   sol{ Person memory carol; uint result = carol.age; } "result"
 
 /-! `Person memory carol; Person memory david; Account memory mv = david.account;
@@ -428,7 +424,7 @@ same claim over copies of storage objects, for every state. -/
 info: Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int 60))
 -/
 #guard_msgs in
-#eval localAfter State.exampleStore
+#eval Prog.localAfter State.exampleStore
   sol{ Person memory carol; Person memory david; Account memory mv = david.account;
        carol.account = mv; carol.account.balance = 60; uint result = david.account.balance; }
   "result"
@@ -579,7 +575,7 @@ info: (Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int
 #eval
   let P : Prog StandardExample := sol{ Person memory carol; Person memory carolAlias = carol;
     carol.age = 33; delete carol; uint oldAge = carolAlias.age; uint newAge = carol.age; }
-  (localAfter State.exampleStore P "oldAge", localAfter State.exampleStore P "newAge")
+  (Prog.localAfter State.exampleStore P "oldAge", Prog.localAfter State.exampleStore P "newAge")
 
 /-! `carol.account.balance = 7; delete carol.account;` — the old account
 keeps `7`, the member reads the fresh default `0`. -/
@@ -593,7 +589,7 @@ info: (Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int
   let P : Prog StandardExample := sol{ Person memory carol; Account memory carolAcc = carol.account;
     carol.account.balance = 7; delete carol.account; uint oldBal = carolAcc.balance;
     uint newBal = carol.account.balance; }
-  (localAfter State.exampleStore P "oldBal", localAfter State.exampleStore P "newBal")
+  (Prog.localAfter State.exampleStore P "oldBal", Prog.localAfter State.exampleStore P "newBal")
 
 /-! ## 7 · `new T[](n)` and `.length`
 
@@ -679,7 +675,7 @@ info: (Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int
 #eval
   let P : Prog StandardExample := sol{ uint[] memory xs = new uint[](3); uint len = xs.length;
     uint x = xs[2]; }
-  (localAfter State.exampleStore P "len", localAfter State.exampleStore P "x")
+  (Prog.localAfter State.exampleStore P "len", Prog.localAfter State.exampleStore P "x")
 
 /--
 info: (Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int 5)),
@@ -689,11 +685,11 @@ info: (Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int
 #eval
   let P : Prog TestSuite := sol[TestSuite]{ Token[] memory ts = new Token[](2);
     ts[0].value = 5; uint a = ts[0].value; uint b = ts[1].value; }
-  (localAfter State.testSuiteStore P "a", localAfter State.testSuiteStore P "b")
+  (Prog.localAfter State.testSuiteStore P "a", Prog.localAfter State.testSuiteStore P "b")
 
 /-- info: Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int 2)) -/
 #guard_msgs in
-#eval localAfter State.testSuiteStore
+#eval Prog.localAfter State.testSuiteStore
   (sol[TestSuite]{ basketA.items = new uint[](2); uint len = basketA.items.length; }) "len"
 
 /-! ## 8 · Fixed-size arrays in memory

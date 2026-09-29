@@ -49,7 +49,7 @@ def Fml.stepAt (k : Nat) : Fml C → Option (Fml C)
   | _ => none
 
 /-- Fresh names are numbered one above every index in the whole formula. -/
-def Fml.step (φ : Fml C) : Option (Fml C) := φ.stepAt (maxIdx φ.vars + 1)
+def Fml.step (φ : Fml C) : Option (Fml C) := φ.stepAt φ.fresh
 
 theorem maxIdx_lt_of_sub {φ ψ : Fml C} {k : Nat} (h : ∀ x ∈ φ.vars, x ∈ ψ.vars)
     (hk : maxIdx ψ.vars < k) : maxIdx φ.vars < k :=
@@ -94,9 +94,7 @@ theorem Fml.stepAt_sound {k : Nat} :
   | .modal m (s :: ω) φ, ψ, hk, h, σ => by
     simp only [Fml.stepAt, Option.some.injEq] at h
     subst h
-    have hv := freshVars_avoid hk
-    refine Premise.sound ((s.step k m).rule.sound ?_) ω φ ?_ σ <;>
-      intro y hy <;> exact hv y (by simp [Fml.vars, Prog.vars, hy])
+    exact Premise.sound_above (s.step k m).rule.sound hk (fun _ h => h) σ
   | .tt, _, _, h, _ | .eq _ _, _, _, h, _ | .not _, _, _, h, _ => by
     simp [Fml.stepAt] at h
 
@@ -152,33 +150,36 @@ def normValid (g : MVarId) : TacticM MVarId := do
   let φ ← instantiateMVars φ
   let φ' ← match C.constName?, φ.hasFVar || φ.hasMVar with
     | some n, false =>
-      let c := mkApp2 (mkConst ``Lean.mkConst) (toExpr n)
-        (mkApp (mkConst ``List.nil [0]) (mkConst ``Lean.Level))
-      unsafe evalExpr Lean.Expr (mkConst ``Lean.Expr) (mkApp3 (mkConst ``Fml.quote) C c φ)
+      unsafe evalExpr Lean.Expr (mkConst ``Lean.Expr)
+        (mkApp3 (mkConst ``Fml.quote) C (quoteConstName n) φ)
     | _, _ => withTransparency .all <| Meta.reduce φ (skipTypes := true) (skipProofs := true)
   g.replaceTargetDefEq (mkApp2 (mkConst ``Valid) C φ')
 
 open Lean Elab Tactic Meta in
-/-- `sol_step`: fire the rule of the first active statement. -/
-elab "sol_step" : tactic => do
+/-- The shape of the formula tactics: apply `lem`, a lemma `Valid ψ → Valid φ`
+with `ψ` computed from `φ`, to the main goal, and compute `ψ` (`normValid`).
+With `unchanged` given, a goal left as it was is an error, `tac: unchanged`. -/
+def applyValid (tac : String) (lem : Lean.Term) (unchanged : Option MessageData := none) :
+    TacticM Unit := do
   let g ← getMainGoal
   let before ← instantiateMVars (← g.getType)
-  let gs ← g.apply (← elabTerm (← `(Fml.step_valid)) none)
-  let [g'] := gs | throwError "sol_step: unexpected goals"
+  let [g'] ← g.apply (← elabTerm lem none) | throwError "{tac}: unexpected goals"
   let g'' ← normValid g'
-  if (← instantiateMVars (← g''.getType)) == before then
-    throwError "sol_step: no modality left"
+  if let some msg := unchanged then
+    if (← instantiateMVars (← g''.getType)) == before then throwError "{tac}: {msg}"
   replaceMainGoal [g'']
+
+open Lean Elab Tactic Meta in
+/-- `sol_step`: fire the rule of the first active statement. -/
+elab "sol_step" : tactic => do
+  applyValid "sol_step" (← `(Fml.step_valid)) (some m!"no modality left")
 
 open Lean Elab Tactic Meta in
 /-- `sol_symex`: run the strategy until no modality is left.  With no goal
 left it does nothing, as `sol_close` does. -/
 elab "sol_symex" : tactic => do
   if (← getUnsolvedGoals).isEmpty then return
-  let g ← getMainGoal
-  let gs ← g.apply (← elabTerm (← `(symex_valid 200)) none)
-  let [g'] := gs | throwError "sol_symex: unexpected goals"
-  replaceMainGoal [← normValid g']
+  applyValid "sol_symex" (← `(symex_valid 200))
 
 
 /-! ## The strategy as a derivation

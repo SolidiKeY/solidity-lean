@@ -1,167 +1,28 @@
 import Solidity.Calculus.Spec
 
 /-!
-# Specifications: solkey's benchmark clauses, as obligations
+# Specifications: clauses as obligations
 
-Each contract is solkey's benchmark contract (`keyext.solidity.examples/benchmark/`)
-with its `@custom:key` clauses written where the NatSpec lines stand
-(`requires e;`, `ensures e;` above the function).  `spec!{f}` is the
-obligation solkey's `SolidityProblemSynthesizer` builds for `f`
-(`Calculus/Spec.lean`), and `sol_spec` proves it.
+A contract here carries `@custom:key` clauses where the NatSpec lines stand
+(`requires e;`, `ensures e;`, `assignable l;` above the function).
+`spec!{f}` is the obligation solkey's `SolidityProblemSynthesizer` builds for
+`f` (`Calculus/Spec.lean`), and `sol_spec` proves it.
 
-Not here: `Coin.send`, whose debit-and-credit clause `sol_close` does not
+solkey's benchmark contracts carry their clauses in their own files, with
+their `spec!{f}` theorems: `Examples/Benchmark/Counter.lean` (with `dec`'s
+obligation pinned as it prints), `Examples/Benchmark/SimpleStorage.lean`,
+`Examples/Benchmark/Mapping.lean` (`Mapping` and `NestedMapping`) and
+`Examples/Benchmark/Coin.lean` (`mint`).  What is here is what those files
+do not have: `ERC20` with `msg.sender` itself, where
+`Examples/Benchmark/ERC20.lean` passes it as a parameter; and `Tally`, no
+benchmark, which exercises an `assignable` clause and a `payable` function
+booking `msg.value`.
+
+Not proved: `Coin.send`, whose debit-and-credit clause `sol_close` does not
 close (as in `Examples/Benchmark/Coin.lean`); `ERC20.transfer`, the same; and
-the clauses over `net(a)`, which no term reads (EtherWallet, Purchase,
-SimpleAuction).
+the benchmarks' clauses over `net(a)` (EtherWallet, Purchase, SimpleAuction).
 -/
 namespace Solidity.Examples.Specs
-
-def Counter : Contract := contract!{
-  uint256 public count;
-  function get() public view returns (uint256) {
-    return count;
-  }
-  ensures count == \old(count) + 1;
-  function inc() public {
-    count += 1;
-  }
-  requires count >= 1;
-  ensures count == \old(count) - 1;
-  function dec() public {
-    count -= 1;
-  }
-}
-
-section
-local instance : InContract := ⟨Counter⟩
-/-! `dec()`'s obligation, as solkey's synthesizer states it: the layout,
-the `requires`, the snapshot `old := storage`, the call, the `ensures` read
-against both storages. -/
-
-/--
-info: dl{
-  ((0 <= select(storage, count) ∧
-            select(storage, count) <= 115792089237316195423570985008687907853269984665640564039457584007913129639935) ∧
-        select(storage, count) >= 1) →
-    { old := storage } [ dec(); ] select(storage, count) = select(old, count) - 1 } : Fml Counter
--/
-#guard_msgs in #check spec!{ dec }
-
-/-- `inc()`: `ensures count == \old(count) + 1`. -/
-theorem inc_spec : ⊨ spec!{ inc } := by sol_spec
-/-- `dec()`: `requires count >= 1`, `ensures count == \old(count) - 1`. -/
-theorem dec_spec : ⊨ spec!{ dec } := by sol_spec
-end
-
-def Mapping : Contract := contract!{
-  mapping(address => uint256) public myMap;
-  function get(address _addr) public view returns (uint256) {
-    return myMap[_addr];
-  }
-  requires _i >= 0;
-  ensures myMap[_addr] == _i;
-  ensures \forall address a; a != _addr -> myMap[a] == \old(myMap[a]);
-  function set(address _addr, uint256 _i) public {
-    myMap[_addr] = _i;
-  }
-  ensures myMap[_addr] == 0;
-  ensures \forall address a; a != _addr -> myMap[a] == \old(myMap[a]);
-  function remove(address _addr) public {
-    delete myMap[_addr];
-  }
-}
-
-section
-local instance : InContract := ⟨Mapping⟩
-/-- `set(_addr, _i)`: the entry written, every other key kept. -/
-theorem set_spec : ⊨ spec!{ set } := by
-  sol_spec
-/-- `remove(_addr)`: the entry reset to `0`, every other key kept. -/
-theorem remove_spec : ⊨ spec!{ remove } := by
-  sol_spec
-/-- `get(_addr)` has no clause: the obligation is the invariant-free `true`. -/
-theorem get_spec : ⊨ spec!{ get } := by
-  sol_spec
-end
-
-def Coin : Contract := contract!{
-  address minter;
-  mapping(address => uint) balances;
-  requires amount >= 0;
-  ensures \old(minter) == msg.sender && minter == \old(minter);
-  ensures balances[receiver] == \old(balances[receiver]) + amount;
-  ensures \forall address a; a != receiver -> balances[a] == \old(balances[a]);
-  function mint(address receiver, uint amount) {
-    require(msg.sender == minter);
-    balances[receiver] += amount;
-  }
-  requires amount >= 0;
-  ensures \old(balances[msg.sender]) >= amount;
-  ensures msg.sender != receiver -> balances[msg.sender] == \old(balances[msg.sender]) - amount && balances[receiver] == \old(balances[receiver]) + amount;
-  ensures msg.sender == receiver -> balances[msg.sender] == \old(balances[msg.sender]);
-  ensures \forall address a; a != msg.sender && a != receiver -> balances[a] == \old(balances[a]);
-  function send(address receiver, uint amount) {
-    require(amount <= balances[msg.sender]);
-    balances[msg.sender] -= amount;
-    balances[receiver] += amount;
-  }
-}
-
-section
-local instance : InContract := ⟨Coin⟩
-set_option maxHeartbeats 500000 in
-/-- `mint(receiver, amount)`: only the minter mints, the receiver credited,
-every other balance kept. -/
-theorem mint_spec : ⊨ spec!{ mint } := by
-  sol_spec
-
-end
-
-
-def SimpleStorage : Contract := contract!{
-  uint storedData;
-  requires x >= 0;
-  ensures storedData == x;
-  function set(uint x) public {
-    storedData = x;
-  }
-  ensures \result == storedData;
-  function get() public view returns (uint) {
-    return storedData;
-  }
-}
-
-section
-local instance : InContract := ⟨SimpleStorage⟩
-/-- `set(x)`: `ensures storedData == x`. -/
-theorem ss_set : ⊨ spec!{ set } := by sol_spec
-/-- `get()`: `ensures \result == storedData`. -/
-theorem ss_get : ⊨ spec!{ get } := by sol_spec
-end
-
-def NestedMapping : Contract := contract!{
-  mapping(address => mapping(uint256 => bool)) public nested;
-  function get(address _addr1, uint256 _i) public view returns (bool) {
-    return nested[_addr1][_i];
-  }
-  ensures nested[_addr1][_i] == _boo;
-  function set(address _addr1, uint256 _i, bool _boo) public {
-    nested[_addr1][_i] = _boo;
-  }
-  ensures !nested[_addr1][_i];
-  function remove(address _addr1, uint256 _i) public {
-    delete nested[_addr1][_i];
-  }
-}
-
-section
-local instance : InContract := ⟨NestedMapping⟩
-set_option maxHeartbeats 500000 in
-/-- `set(_addr1, _i, _boo)`: `ensures nested[_addr1][_i] == _boo`, an `<->`. -/
-theorem nm_set : ⊨ spec!{ set } := by sol_spec
-/-- `remove(_addr1, _i)`: `ensures !nested[_addr1][_i]`. -/
-theorem nm_remove : ⊨ spec!{ remove } := by sol_spec
-end
 
 def ERC20 : Contract := contract!{
   uint totalSupply;
@@ -198,6 +59,57 @@ theorem erc_approve : ⊨ spec!{ approve } := by sol_spec
 set_option maxHeartbeats 1000000 in
 /-- `_mint(to, amount)`: the balance and the supply both up by `amount`. -/
 theorem erc_mint : ⊨ spec!{ _mint } := by sol_spec
+end
+
+def Tally : Contract := contract!{
+  uint count;
+  uint total;
+  mapping(address => uint) seen;
+  ensures count == \old(count) + 1;
+  assignable count;
+  function inc() public {
+    count += 1;
+  }
+  ensures seen[msg.sender] == 1;
+  assignable seen[msg.sender];
+  function mark() public {
+    seen[msg.sender] = 1;
+  }
+  requires net(msg.sender) + msg.value >= 0;
+  ensures net(msg.sender) == \old(net(msg.sender)) + msg.value;
+  assignable \nothing;
+  function pay() public payable {
+  }
+}
+
+section
+local instance : InContract := ⟨Tally⟩
+/-! `pay()`'s obligation: `msg.value` is booked to the sender's ledger entry
+in front of the call, `\old(net(msg.sender))` reads the snapshot `oldNet`,
+and `assignable \nothing` owes every word of the storage where it was.  The
+`requires` says that the sum is a `uint`, which the `ensures` reads it as. -/
+
+/--
+info: dl{
+  (msg.value >= 0 ∧ net(msg.sender) + msg.value >= 0) →
+    { old := storage ‖ oldNet := net ‖ book(msg.value) }
+      [ pay(); ]
+        (net(msg.sender) = net(oldNet, msg.sender) + msg.value ∧
+            (select(old, count) = select(old, count) → select(storage, count) = select(old, count)) ∧
+              (select(old, total) = select(old, total) → select(storage, total) = select(old, total)) ∧
+                (∀ uint k1;
+                    find(old, seen[k1]) = find(old, seen[k1]) →
+                      find(storage, seen[k1]) = find(old, seen[k1]))) } : Fml Tally
+-/
+#guard_msgs in #check spec!{ pay }
+
+/-- `inc()`: `assignable count`, so `total` and every `seen[k]` are kept. -/
+theorem tally_inc : ⊨ spec!{ inc } := by sol_spec
+/-- `mark()`: `assignable seen[msg.sender]`, so every other key is kept. -/
+theorem tally_mark : ⊨ spec!{ mark } := by sol_spec
+/-- `pay()`, `payable`: the sender's ledger entry up by `msg.value`, the
+storage untouched. -/
+theorem tally_pay : ⊨ spec!{ pay } := by sol_spec
 end
 
 end Solidity.Examples.Specs

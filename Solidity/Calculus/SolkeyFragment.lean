@@ -62,9 +62,6 @@ def Premise.inSolkey : Premise C → Bool
   | .unfold P => Prog.inSolkey P
   | .split c c' P Q => c.inSolkey && c'.inSolkey && Prog.inSolkey P && Prog.inSolkey Q
 
-/-- **The refined syntax**: the programs solkey's rules run to the end. -/
-abbrev SolkeyProg (C : Contract) := { P : Prog C // Prog.inSolkey P = true }
-
 @[simp] theorem Prog.inSolkey_nil : Prog.inSolkey ([] : Prog C) = true := rfl
 
 @[simp] theorem Prog.inSolkey_cons {s : Stmt C} {P : Prog C} :

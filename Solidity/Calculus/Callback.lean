@@ -156,29 +156,11 @@ theorem CbResume.of_holdsC {I : Fml C} (hI : I.hasTransfer = false) {m : Modalit
   | error _ => rw [hu] at h; exact h
   | ok τ => rw [hu] at h; exact fun st nt bal hi => h st nt bal ((holdsC_iff_holds I hI).2 hi)
 
-/-- A context whose updates are all under the box holds around anything true
-everywhere: a box update that halts proves what is in front of it. -/
-theorem Hyp.wrap_of_forall {ψ : Fml C} (h : ∀ τ, holds τ ψ) :
-    (Γ : List (Hyp C)) → (Γ.all fun
-      | .upd m _ => m == .box
-      | _ => true) = true → ∀ σ, holds σ (Hyp.wrap Γ ψ)
-  | [], _ => h
-  | .pre _ :: Γ, hb => fun σ _ => Hyp.wrap_of_forall h Γ (by simpa using hb) σ
-  | .havoc :: Γ, hb => fun σ _ _ _ => Hyp.wrap_of_forall h Γ (by simpa using hb) _
-  | .upd m U :: Γ, hb => fun σ => by
-    simp only [List.all_cons, Bool.and_eq_true, beq_iff_eq] at hb
-    obtain ⟨rfl, hb⟩ := hb
-    simp only [Hyp.wrap, holds]
-    cases U.apply σ with
-    | error _ => trivial
-    | ok τ => exact Hyp.wrap_of_forall h Γ hb τ
-
 /-- Under a context of box updates, the last precondition holds: `…, a ⟹ a`. -/
-theorem Hyp.wrap_assumption {a : Fml C} (Γ : List (Hyp C)) (hb : (Γ.all fun
-      | .upd m _ => m == .box
-      | _ => true) = true) : Valid (Hyp.wrap (Γ ++ [.pre a]) a) := by
+theorem Hyp.wrap_assumption {a : Fml C} (Γ : List (Hyp C)) (hb : Hyp.boxOnly Γ = true) :
+    Valid (Hyp.wrap (Γ ++ [.pre a]) a) := by
   rw [Hyp.wrap_append]
-  exact Hyp.wrap_of_forall (ψ := .imp a a) (fun _ h => h) Γ hb
+  exact fun σ => Hyp.wrap_of_reaches (φ := .imp a a) Γ hb σ fun _ _ h => h
 
 /-! ## Taclets on a statement that runs as `Stmt.run` -/
 
@@ -337,10 +319,9 @@ theorem Taclet.avoids_in {I : Fml C} {Γ : List (Hyp C)} {m : Modality} {s : Stm
     {φ : Fml C} :
     let k := Hyp.fresh Γ (.and I (.modal m (s :: ω) φ))
     Avoids s.vars (freshVars k) ∧ Avoids (Prog.vars ω ++ φ.vars) (freshVars k) := by
-  intro k
-  have hv := freshVars_avoid (Nat.lt_succ_self (maxIdx (Hyp.wrap Γ (.and I (.modal m (s :: ω) φ))).vars))
-  constructor <;> intro y hy <;>
-    exact hv y (Hyp.vars_wrap Γ (by simp [Fml.vars, Prog.vars, hy]))
+  intro _
+  exact freshVars_avoid_modal (m := m) (Nat.lt_succ_self _) fun _ hy =>
+    Hyp.vars_wrap Γ (List.mem_append_right I.vars hy)
 
 /-- **Soundness of the calculus with callbacks**: a derivation of `Γ ⊢ φ`
 proves `φ` wrapped in `Γ`, valid when every `transfer` may call back. -/

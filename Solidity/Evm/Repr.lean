@@ -46,216 +46,13 @@ variable {L : Nat}
 
 /-! ## Paths through the storage tree -/
 
-/-- Reading at the empty path reads the whole value: `alice` itself. -/
-@[simp] theorem SVal.find_nil (v : SVal) : v.find [] = .ok v := by cases v <;> rfl
-
-/-- Writing at the empty path replaces the whole value: `alice = …` at `alice`. -/
-@[simp] theorem SVal.save_nil (v new : SVal) : v.save [] new = .ok new := by cases v <;> rfl
-
-/-- Reading along `segs ++ rest` is reading `segs`, then `rest` from there:
-`alice.account.balance` is `alice.account`, then `.balance`. -/
-theorem SVal.find_append : ∀ (v : SVal) (segs rest : List Seg),
-    v.find (segs ++ rest) = (v.find segs >>= fun w => w.find rest)
-  | v, [], rest => by simp; rfl
-  | .prim _, _ :: _, _ => by simp [SVal.find]; rfl
-  | .struct fields, .field name :: segs, rest => by
-    simp only [List.cons_append, SVal.find]
-    split
-    · exact SVal.find_append _ _ _
-    · rfl
-  | .struct _, .at _ :: _, _ => by simp [SVal.find]; rfl
-  | .array elems _ _, .at i :: segs, rest => by
-    simp only [List.cons_append, SVal.find]
-    split
-    · exact SVal.find_append _ _ _
-    · rfl
-  | .array elems sh fx, .field name :: segs, rest => by
-    by_cases h : name = "length"
-    · subst h; simp only [List.cons_append, SVal.find]
-      cases fx
-      · exact SVal.find_append _ _ _
-      · rfl
-    · have e : ∀ l, SVal.find (.array elems sh fx) (.field name :: l) = .error .stuck := by
-        intro l; simp [SVal.find]
-      simp only [List.cons_append, e]; rfl
-  | .map entries dflt, .at i :: segs, rest => by
-    simp only [List.cons_append, SVal.find]
-    split
-    · exact SVal.find_append _ _ _
-    · exact SVal.find_append _ _ _
-  | .map _ _, .field _ :: _, _ => by simp [SVal.find]; rfl
-
-@[simp] theorem SVal.findLive_nil (v : SVal) : v.findLive [] = .ok v := by cases v <;> rfl
-
-/-- `SVal.find_append` for the live read. -/
-theorem SVal.findLive_append : ∀ (v : SVal) (segs rest : List Seg),
-    v.findLive (segs ++ rest) = (v.findLive segs >>= fun w => w.findLive rest)
-  | v, [], rest => by simp; rfl
-  | .prim _, _ :: _, _ => by simp [SVal.findLive]; rfl
-  | .struct fields, .field name :: segs, rest => by
-    simp only [List.cons_append, SVal.findLive]
-    split
-    · exact SVal.findLive_append _ _ _
-    · rfl
-  | .struct _, .at _ :: _, _ => by simp [SVal.findLive]; rfl
-  | .array elems _ _, .at i :: segs, rest => by
-    simp only [List.cons_append, SVal.findLive]
-    split
-    · exact SVal.findLive_append _ _ _
-    · rfl
-  | .array elems sh fx, .field name :: segs, rest => by
-    by_cases h : name = "length"
-    · subst h; simp only [List.cons_append, SVal.findLive]
-      cases fx
-      · exact SVal.findLive_append _ _ _
-      · rfl
-    · have e : ∀ l, SVal.findLive (.array elems sh fx) (.field name :: l) = .error .stuck := by
-        intro l; simp [SVal.findLive]
-      simp only [List.cons_append, e]; rfl
-  | .map entries dflt, .at i :: segs, rest => by
-    simp only [List.cons_append, SVal.findLive]
-    split
-    · exact SVal.findLive_append _ _ _
-    · exact SVal.findLive_append _ _ _
-  | .map _ _, .field _ :: _, _ => by simp [SVal.findLive]; rfl
-
-/-- A write along a path the read fails on fails the same way: `persons[5].age
-= 1;` with three persons reverts, as reading `persons[5]` does. -/
-theorem SVal.save_error : ∀ (v : SVal) (segs rest : List Seg) (new : SVal) (e : Halt),
-    v.find segs = .error e → v.save (segs ++ rest) new = .error e
-  | v, [], rest, new, e, h => by simp at h
-  | .prim _, _ :: _, _, _, e, h => by simp [SVal.find] at h; simp [SVal.save, h]
-  | .struct fields, .field name :: segs, rest, new, e, h => by
-    simp only [List.cons_append, SVal.save]
-    simp only [SVal.find] at h
-    split
-    · rename_i old hold
-      rw [hold] at h
-      rw [SVal.save_error old segs rest new e h]; rfl
-    · rename_i hn; rw [hn] at h; exact h
-  | .struct _, .at _ :: _, _, _, e, h => by simp [SVal.find] at h; simp [SVal.save, h]
-  | .array elems sh _, .at i :: segs, rest, new, e, h => by
-    simp only [List.cons_append, SVal.save]
-    simp only [SVal.find] at h
-    split
-    · rename_i hb; rw [dif_pos hb] at h; rw [SVal.save_error _ segs rest new e h]; rfl
-    · rename_i hb; rw [dif_neg hb] at h; exact h
-  | .array elems sh fx, .field name :: segs, rest, new, e, h => by
-    by_cases hn : name = "length"
-    · subst hn
-      cases segs with
-      | nil => cases fx <;> simp_all [SVal.find, SVal.save]
-      | cons s segs => cases fx <;> simp_all [SVal.find, SVal.save]
-    · simp [SVal.find] at h; simp [SVal.save, h]
-  | .map entries dflt, .at i :: segs, rest, new, e, h => by
-    simp only [List.cons_append, SVal.save]
-    simp only [SVal.find] at h
-    split
-    · rename_i old hold; rw [hold] at h; rw [SVal.save_error _ segs rest new e h]; rfl
-    · rename_i hold; rw [hold] at h; rw [SVal.save_error _ segs rest new e h]; rfl
-  | .map _ _, .field _ :: _, _, _, e, h => by simp [SVal.find] at h; simp [SVal.save, h]
-
-/-- A write along `segs ++ rest`, where `segs` reads `sub`, writes `rest` into
-`sub` and puts the result back at `segs`: `alice.age = 1;` rebuilds `alice`
-with its `age` replaced. -/
-theorem SVal.save_append : ∀ (v : SVal) (segs rest : List Seg) (new sub : SVal),
-    v.find segs = .ok sub → v.save (segs ++ rest) new = (sub.save rest new >>= v.save segs)
-  | v, [], rest, new, sub, h => by
-    simp at h; subst h
-    simp only [List.nil_append]
-    cases v.save rest new with
-    | error e => rfl
-    | ok a => exact (SVal.save_nil v a).symm
-  | .prim _, _ :: _, _, _, _, h => by simp [SVal.find] at h
-  | .struct fields, .field name :: segs, rest, new, sub, h => by
-    simp only [List.cons_append, SVal.save]
-    simp only [SVal.find] at h
-    split
-    · rename_i old hold
-      rw [hold] at h
-      rw [SVal.save_append old segs rest new sub h]
-      cases sub.save rest new <;> rfl
-    · rename_i hn; rw [hn] at h; cases h
-  | .struct _, .at _ :: _, _, _, _, h => by simp [SVal.find] at h
-  | .array elems sh _, .at i :: segs, rest, new, sub, h => by
-    simp only [List.cons_append, SVal.save]
-    simp only [SVal.find] at h
-    split
-    · rename_i hb; rw [dif_pos hb] at h; rw [SVal.save_append _ segs rest new sub h]
-      cases sub.save rest new <;> rfl
-    · rename_i hb; rw [dif_neg hb] at h; cases h
-  | .array elems sh fx, .field name :: segs, rest, new, sub, h => by
-    by_cases hn : name = "length"
-    · subst hn
-      cases fx
-      · cases segs with
-        | nil =>
-          simp [SVal.find] at h; subst h
-          cases rest <;> simp [SVal.save] <;> rfl
-        | cons s segs => simp [SVal.find] at h
-      · simp [SVal.find] at h
-    · simp [SVal.find] at h
-  | .map entries dflt, .at i :: segs, rest, new, sub, h => by
-    simp only [List.cons_append, SVal.save]
-    simp only [SVal.find] at h
-    split
-    · rename_i old hold; rw [hold] at h; rw [SVal.save_append _ segs rest new sub h]
-      cases sub.save rest new <;> rfl
-    · rename_i hold; rw [hold] at h; rw [SVal.save_append _ segs rest new sub h]
-      cases sub.save rest new <;> rfl
-  | .map _ _, .field _ :: _, _, _, _, h => by simp [SVal.find] at h
-
-/-- `findStorage` along `segs ++ rest`: `folks[7].age` is `folks[7]`, then
-`.age`. -/
-theorem findStorage_append (σ : State) (r : Name) (segs rest : List Seg) :
-    σ.findStorage r (segs ++ rest) = (σ.findStorage r segs >>= fun w => w.find rest) := by
-  unfold State.findStorage
-  split
-  · exact SVal.find_append _ _ _
-  · rfl
-
-/-- `findStorage_append` for the live read. -/
+/-- `State.findStorage_append` for the live read. -/
 theorem findLive_append (σ : State) (r : Name) (segs rest : List Seg) :
     σ.findLive r (segs ++ rest) = (σ.findLive r segs >>= fun w => w.findLive rest) := by
   unfold State.findLive
   split
   · exact SVal.findLive_append _ _ _
   · rfl
-
-/-- A write at a live element replaces it: `persons[0] = p;` with one person. -/
-theorem SVal.save_live {elems shadow : List SVal} {fx : Bool} {i : Int} {rest : List Seg}
-    {new u : SVal} (h0 : 0 ≤ i) (hb : i.toNat < elems.length)
-    (hu : (elems[i.toNat]'hb).save rest new = .ok u) :
-    (SVal.array elems shadow fx).save (.at i :: rest) new =
-      .ok (.array (elems.set i.toNat u) shadow fx) := by
-  have hb' : 0 ≤ i ∧ i.toNat < (elems ++ shadow).length := by
-    simp only [List.length_append]; omega
-  simp only [SVal.save, dif_pos hb', List.get_eq_getElem, List.getElem_append_left hb, hu,
-    bind, Except.bind, List.set_append_left _ _ hb, List.take_left', List.drop_left',
-    List.length_set]
-
-/-- A state variable's write fails where its read does: `persons[5].age = 1;` with three persons. -/
-theorem saveStorage_error {σ : State} {r : Name} {segs : List Seg} {e : Halt}
-    (h : σ.findStorage r segs = .error e) (rest : List Seg) (new : SVal) :
-    σ.saveStorage r (segs ++ rest) new = .error e := by
-  unfold State.findStorage at h
-  unfold State.saveStorage
-  split
-  · rename_i v hv; rw [hv] at h; rw [SVal.save_error v segs rest new e h]; rfl
-  · rename_i hv; simp only [hv, Except.error.injEq] at h; subst h; rfl
-
-/-- A state variable's write along `segs ++ rest` writes `rest` below `segs`: `alice.age = 1;`. -/
-theorem saveStorage_append {σ : State} {r : Name} {segs : List Seg} {sub : SVal}
-    (h : σ.findStorage r segs = .ok sub) (rest : List Seg) (new : SVal) :
-    σ.saveStorage r (segs ++ rest) new = (sub.save rest new >>= σ.saveStorage r segs) := by
-  unfold State.findStorage at h
-  unfold State.saveStorage
-  split
-  · rename_i v hv
-    rw [hv] at h
-    rw [SVal.save_append v segs rest new sub h]
-    cases sub.save rest new <;> rfl
-  · rename_i hv; rw [hv] at h; cases h
 
 /-! ## The representation -/
 
@@ -373,16 +170,6 @@ theorem PathSlot.weaken {C : Contract} {a : Bool} {r : Name} {segs : List Seg} {
 
 /-! ## Reading -/
 
-/-- A member that `lookupBy` finds is in the list: `age` is a member of `Person`. -/
-theorem lookupBy_some_mem {κ α : Type} [DecidableEq κ] {k : κ} {v : α} :
-    ∀ {l : List (κ × α)}, lookupBy k l = some v → (k, v) ∈ l
-  | [], h => by simp [lookupBy] at h
-  | (k', v') :: l, h => by
-    simp only [lookupBy] at h
-    split at h
-    · cases h; rename_i hk; subst hk; exact List.mem_cons_self
-    · exact List.mem_cons_of_mem _ (lookupBy_some_mem h)
-
 /-- A typed path reads a value its slot represents, or (if it indexes an
 array) reverts out of bounds.
 
@@ -467,7 +254,7 @@ theorem save_repr {C : Contract} {st : Slot → Nat} {σ : State} (hs : ReprStor
   | @root a r T h =>
     intro st' new _ hnew hout
     obtain ⟨sv, hl, _⟩ := hs _ _ h
-    refine ⟨setBy r new σ.storage, by simp [State.saveStorage, hl]; rfl, ?_⟩
+    refine ⟨setBy r new σ.storage, by simp only [State.saveStorage, hl, SVal.save_nil]; rfl, ?_⟩
     intro r' T' h'
     by_cases hr : r' = r
     · subst hr; rw [h] at h'; cases h'
@@ -500,7 +287,7 @@ theorem save_repr {C : Contract} {st : Slot → Nat} {σ : State} (hs : ReprStor
                   occ_members_disjoint hg hsd hgf hx hx')
           (fun x hx => hout x fun hx' => hx (.field hsd hx'))
         refine ⟨stor, ?_, hrep⟩
-        rw [saveStorage_append (State.findStorage_of_findLive hsv)]
+        rw [State.saveStorage_append (State.findStorage_of_findLive hsv)]
         simp [bind, Except.bind, SVal.save, hold, hsave]
     · obtain ⟨old, hold⟩ := hfind
       rw [findLive_append, hsv] at hold; cases hold
@@ -523,7 +310,7 @@ theorem save_repr {C : Contract} {st : Slot → Nat} {σ : State} (hs : ReprStor
                 occ_entries_disjoint (by omega) hx hx')
           (fun x hx => hout x fun hx' => hx (.entry _ hx'))
         refine ⟨stor, ?_, hrep⟩
-        rw [saveStorage_append (State.findStorage_of_findLive hsv)]
+        rw [State.saveStorage_append (State.findStorage_of_findLive hsv)]
         simp only [bind, Except.bind, SVal.save]
         cases lookupBy k entries <;> simpa using hsave
       | mapOther hK => exact absurd rfl hK
@@ -553,7 +340,7 @@ theorem save_repr {C : Contract} {st : Slot → Nat} {σ : State} (hs : ReprStor
                   occ_elems_disjoint hji hx hx')
           (fun x hx => hout x fun hx' => hx (.elem _ hx'))
         refine ⟨stor, ?_, hrep⟩
-        rw [saveStorage_append (State.findStorage_of_findLive hsv)]
+        rw [State.saveStorage_append (State.findStorage_of_findLive hsv)]
         have hb2 : i < (elems.length : Int) + shadow.length := by omega
         simp [bind, Except.bind, SVal.save, h0, hb, hb2, hsave]
     · obtain ⟨old, hold⟩ := hfind
@@ -577,19 +364,13 @@ theorem save_repr {C : Contract} {st : Slot → Nat} {σ : State} (hs : ReprStor
                 occ_felems_disjoint hji hx hx')
           (fun x hx => hout x fun hx' => hx (.felem _ (by omega) hx'))
         refine ⟨stor, ?_, hrep⟩
-        rw [saveStorage_append (State.findStorage_of_findLive hsv)]
+        rw [State.saveStorage_append (State.findStorage_of_findLive hsv)]
         have hb2 : i < (elems.length : Int) + shadow.length := by omega
         simp [bind, Except.bind, SVal.save, h0, hb, hb2, hsave]
     · obtain ⟨old, hold⟩ := hfind
       rw [findLive_append, hsv] at hold; cases hold
 
 /-! ## `delete` and `pop` -/
-
-/-- `delete` clears a list of elements one by one. -/
-theorem defaultOfElems_eq_map :
-    ∀ l : List SVal, SVal.defaultOf.defaultOfElems l = l.map SVal.defaultOf
-  | [] => rfl
-  | v :: l => by simp [SVal.defaultOf.defaultOfElems, defaultOfElems_eq_map l]
 
 /-- `st` with `0` written at `s + o` for each `o`, in order. -/
 def zeroAt (st : Slot → Nat) (s : Slot) : List Nat → Slot → Nat
@@ -617,16 +398,6 @@ theorem zeroAt_zero {s x : Slot} :
       rcases List.mem_cons.1 ho' with rfl | ho'
       · rw [zeroAt_other fun o'' ho'' hx' => h' ⟨o'', ho'', hx'⟩, hx, upd_same]
       · exact absurd ⟨o', ho', hx⟩ h'
-
-/-- A deleted struct's member is the member deleted: `delete alice;` makes `alice.age` `0`. -/
-theorem lookupBy_defaultOfFields (g : Name) : ∀ (fields : List (Name × SVal)),
-    lookupBy g (SVal.defaultOf.defaultOfFields fields) = (lookupBy g fields).map SVal.defaultOf
-  | [] => rfl
-  | (h, v) :: fields => by
-    simp only [SVal.defaultOf.defaultOfFields, lookupBy]
-    split
-    · rfl
-    · exact lookupBy_defaultOfFields g fields
 
 /-- **`delete` is represented by zeroing its leaves.**  If `st'` is zero at
 every slot `delete` writes (`leavesF`) and agrees with `st` on the rest of what
@@ -661,7 +432,7 @@ theorem zero_repr {st st' : Slot → Nat} {T : Ty} {s : Slot} {sv : SVal} (h : R
         exact ⟨w.defaultOf, by rw [lookupBy_defaultOfFields, hw]; rfl⟩
       · rw [lookupBy_defaultOfFields] at hv
         obtain ⟨w, hw, rfl⟩ := Option.map_eq_some_iff.1 hv
-        have hmem := lookupBy_some_mem hg
+        have hmem := lookupBy_eq_some_mem hg
         have hrank : tyRank Tg < f' := by
           have := tyRank_member hmem; simp only [tyRank] at hr this; omega
         have hleaf : ∀ o ∈ leavesF f' Tg, offset n g + o ∈ leavesF (f' + 1) (.ref (.struct n)) := by
@@ -775,7 +546,7 @@ theorem move_repr {st st' : Slot → Nat} {T : Ty} {s : Slot} {v : SVal} (h : Re
     | zero => exact absurd hr (Nat.not_lt_zero _)
     | succ f' =>
       refine .struct hex fun g Tg v hg hv => ?_
-      have hmem := lookupBy_some_mem hg
+      have hmem := lookupBy_eq_some_mem hg
       have hrank : tyRank Tg < f' := by
         have := tyRank_member hmem; simp only [tyRank] at hr this; omega
       have hst : staticF f' Tg = true := by
@@ -879,7 +650,7 @@ theorem overlay_repr {st : Slot → Nat} {T : Ty} {d : Slot} {v : SVal} (h : Rep
       have sub : ∀ g Tg v, lookupBy g (structDef n) = some Tg → lookupBy g fields = some v →
           ReprAt st L Tg (d.add (offset n g)) v.strip ∧
             ∀ old : SVal, ReprAt st L Tg (d.add (offset n g)) (old.overlay v) := fun g Tg v hg hv => by
-        have hmem := lookupBy_some_mem hg
+        have hmem := lookupBy_eq_some_mem hg
         have hrank : tyRank Tg < f' := by
           have := tyRank_member hmem; simp only [tyRank] at hr this; omega
         have hst : staticF f' Tg = true := by
@@ -1085,7 +856,7 @@ theorem leavesF_occAt : ∀ (fuel : Nat) (T : Ty) (s : Slot) (o : Nat), staticF 
     · rename_i T hT
       obtain ⟨o', ho', rfl⟩ := List.mem_map.1 hf
       have hs' : staticF fuel T = true := by
-        simp only [staticF, List.all_eq_true] at hs; exact hs _ (lookupBy_some_mem hT)
+        simp only [staticF, List.all_eq_true] at hs; exact hs _ (lookupBy_eq_some_mem hT)
       exact OccAt.field hT (by rw [← Slot.add_add]; exact leavesF_occAt fuel T _ o' hs' ho')
     · cases hf
   | 0, .ref (.struct _), _, _, hs, _ => by simp [staticF] at hs
@@ -1168,17 +939,6 @@ theorem live_mono {C : Contract} {st st' : Slot → Nat} {σ σ' : State} {L' : 
 
 /-! ## A fresh contract -/
 
-/-- A fresh struct's member is its type's default: a fresh `Person`'s `age` is `0`. -/
-theorem lookupBy_defaultForFields (f : Name) : ∀ (l : List (Name × Ty)),
-    lookupBy f (defaultForFields l) = (lookupBy f l).map defaultForTy
-  | [] => by simp [defaultForFields, lookupBy]
-  | (g, T) :: l => by
-    rw [defaultForFields]
-    simp only [lookupBy]
-    split
-    · rfl
-    · exact lookupBy_defaultForFields f l
-
 /-- An all-zero storage represents every type's default: a fresh `Person` is
 three zero slots, a fresh `mapping(uint => Person)` maps every key to one. -/
 theorem default_repr (hL : 0 < L) : ∀ (T : Ty) (s : Slot), ReprAt (fun _ => 0) L T s (defaultForTy T)
@@ -1205,7 +965,7 @@ theorem default_repr (hL : 0 < L) : ∀ (T : Ty) (s : Slot), ReprAt (fun _ => 0)
     · exact .mapOther hK
 termination_by T => (tyRank T, sizeOf T)
 decreasing_by
-  · exact Prod.Lex.left _ _ (tyRank_member (lookupBy_some_mem hT))
+  · exact Prod.Lex.left _ _ (tyRank_member (lookupBy_eq_some_mem hT))
   all_goals first
     | (apply Prod.Lex.left; simp [tyRank]; done)
     | (apply Prod.Lex.right; simp; omega)

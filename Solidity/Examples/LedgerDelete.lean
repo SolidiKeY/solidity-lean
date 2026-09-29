@@ -106,10 +106,6 @@ theorem deleteLedger : ⊨ dl!{ [ ledger.nonce = 42; delete ledger; ] true } := 
   sol_symex
   sol_close
 
-/-- What the local `x` holds after `P` runs from `TestSuite`'s initial store. -/
-def localAfter (P : Prog TestSuite) (x : String) : Res Binding := do
-  (← Prog.run State.testSuiteStore P).getEnv (.user x)
-
 /-- The whole program. -/
 def ledgerProgram : Prog TestSuite := sol{
   ledger.nonce = 5; ledger.balances[1] = 10; ledger.balances[2] = 20;
@@ -125,7 +121,7 @@ def ledgerProgram : Prog TestSuite := sol{
 info: Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int 0))
 -/
 #guard_msgs in
-#eval localAfter ledgerProgram "after"
+#eval Prog.localAfter State.testSuiteStore ledgerProgram "after"
 
 /-! `survives`: the mapping entry is not. -/
 
@@ -133,7 +129,7 @@ info: Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int 
 info: Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int 20))
 -/
 #guard_msgs in
-#eval localAfter ledgerProgram "survives"
+#eval Prog.localAfter State.testSuiteStore ledgerProgram "survives"
 
 /-! `ledger.nonce = 5; ledger.balances[1] = 10; delete ledger;
 uint kept = ledger.balances[1]; delete ledger.balances[1]; uint nonce0 = ledger.nonce;
@@ -144,10 +140,11 @@ uint gone = ledger.balances[1];` — deleting the entry is what clears it:
 info: Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int 1000))
 -/
 #guard_msgs in
-#eval localAfter sol{ ledger.nonce = 5; ledger.balances[1] = 10; delete ledger;
-                      uint kept = ledger.balances[1]; delete ledger.balances[1];
-                      uint nonce0 = ledger.nonce; uint gone = ledger.balances[1];
-                      uint r = kept * 100 + nonce0 * 10 + gone; } "r"
+#eval Prog.localAfter State.testSuiteStore
+  sol{ ledger.nonce = 5; ledger.balances[1] = 10; delete ledger;
+       uint kept = ledger.balances[1]; delete ledger.balances[1];
+       uint nonce0 = ledger.nonce; uint gone = ledger.balances[1];
+       uint r = kept * 100 + nonce0 * 10 + gone; } "r"
 
 /-! ## Part 2 · The storage theory, by hand -/
 

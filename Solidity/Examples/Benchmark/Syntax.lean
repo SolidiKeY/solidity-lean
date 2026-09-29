@@ -18,7 +18,9 @@ away").  Each is pinned here by what it elaborates to, printed.
 * an enum member is its position, a `uint`;
 * a struct constructor `T(a, b)`, `T({b: y, a: x})` is a fresh memory object
   written member by member, the arguments evaluated first, left to right;
-* a modifier is inlined around the body of the function that applies it.
+* a modifier is inlined around the body of the function that applies it;
+* a `constructor` is the function `init`, and `constant`, like `immutable`,
+  is dropped.
 -/
 
 namespace Solidity.Examples.Benchmark.Syntax
@@ -95,6 +97,9 @@ example : Prog.toStr (sol{ require(total > 0, TooLow(total + 1, 2)); }) =
 /-- `Phase.Closed` is the second member: `1`. -/
 example : Prog.toStr (sol{ phase = Phase.Closed; }) = "phase = 1;" := rfl
 
+/-- A local of an enum type is a `uint`. -/
+example : Prog.toStr (sol{ Phase p = Phase.Closed; phase = p; }) = "uint p = 1; phase = p;" := rfl
+
 /-! ## Struct constructors -/
 
 /-- A storage target is written from a fresh memory object (the arguments may
@@ -147,5 +152,30 @@ def MissingArg : Contract := contract!{ uint owner;
 
 /-- error: Solidity elaboration failed: modifier onlyOwner takes 1 arguments, not 0 -/
 #guard_msgs in #check sol[MissingArg]{ f(); }
+
+/-! ## Constructors and constants -/
+
+/-- `constructor(…) { … }` is the function `init`; `constant`, like
+`immutable`, is dropped. -/
+def WithCtor : Contract := contract!{
+  uint constant limit;
+  address public immutable owner;
+  uint total;
+  enum Phase { Open, Closed }
+  constructor(uint start) payable {
+    Phase p = Phase.Open;
+    if (start > limit) { total = limit; } else if (start > 0) { total = start; } else { total = 1; }
+    owner = msg.sender;
+  }
+}
+
+example : WithCtor.funs.map (·.1) = ["init"] := rfl
+example : WithCtor.vars.map (·.1) = ["limit", "owner", "total"] := rfl
+
+/-- Its body, an enum local and an `else if` in it, inlined where it is called. -/
+example : Prog.toStr (C := WithCtor) (sol[WithCtor]{ init(5); }) = "init(5);" := rfl
+
+/-- error: unknown type uint8: only the 256-bit integers are modelled, write `uint` or `int` -/
+#guard_msgs (error, drop info) in #check contract!{ uint8 small; }
 
 end Solidity.Examples.Benchmark.Syntax

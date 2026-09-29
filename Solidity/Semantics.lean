@@ -214,6 +214,9 @@ inductive Binding where
   | spath (root : Name) (segs : List Seg)
   | mref (id : Nat)
   | store (st : List (Name × SVal))
+  /-- A whole ledger: KeY's `oldNet`, which a specification's `\old(net(a))`
+  reads; no statement binds one either. -/
+  | ledger (l : List (Int × Int))
   deriving Repr, DecidableEq
 
 /-- What the transaction running the program was sent with: KeY's program
@@ -1061,7 +1064,7 @@ variable {C : Contract}
 def aliasPath (σ : State) (x : Var) : Res (Name × List Seg) := do
   match ← σ.getEnv x with
   | .spath root segs => pure (root, segs)
-  | .val _ | .mref _ | .store _ => .error .stuck
+  | .val _ | .mref _ | .store _ | .ledger _ => .error .stuck
 
 /-- A word is stored as it is. -/
 @[simp] theorem State.writeStorage_prim (σ : State) (r : Name) (segs : List Seg) (p : PrimVal) :
@@ -1101,7 +1104,7 @@ def Simple.eval (σ : State) {p : PrimTy} : Simple C p → Res Value
   | .local x => do
     match ← σ.getEnv x with
     | .val v => pure v
-    | .spath .. | .mref _ | .store _ => .error .stuck
+    | .spath .. | .mref _ | .store _ | .ledger _ => .error .stuck
   | .env k _ => pure (.int (σ.envVal k))
 
 /-- The length of the array at a storage path: `values.length`. -/
@@ -1146,7 +1149,7 @@ def MPath.mval (σ : State) : {T : Ty} → MPath C T → Res MVal
   | _, .var x => do
     match ← σ.getEnv x with
     | .mref id => pure (.ref id)
-    | .val _ | .spath .. | .store _ => .error .stuck
+    | .val _ | .spath .. | .store _ | .ledger _ => .error .stuck
   | _, .loc l => l.read σ
 
 def MLoc.read (σ : State) : {T : Ty} → MLoc C T → Res MVal
@@ -1289,7 +1292,7 @@ def opStore (σ : State) (op : BinOp) (p : PrimTy) (root : Name) (segs : List Se
 def opLocal (σ : State) (op : BinOp) (p : PrimTy) (x : Var) (v : Value) : Res State := do
   let old ← match ← σ.getEnv x with
     | .val v => pure v
-    | .spath .. | .mref _ | .store _ => .error .stuck
+    | .spath .. | .mref _ | .store _ | .ledger _ => .error .stuck
   let new ← applyBinOp op old v
   let new ← checkArith (.prim p) new
   pure (σ.setEnv x (.val new))
@@ -1333,7 +1336,7 @@ def bumpStore (σ : State) (op : IncDec) (p : PrimTy) (root : Name) (segs : List
 def bumpLocal (σ : State) (op : IncDec) (p : PrimTy) (x : Var) : Res (State × Value) := do
   let old ← match ← σ.getEnv x with
     | .val v => pure v
-    | .spath .. | .mref _ | .store _ => .error .stuck
+    | .spath .. | .mref _ | .store _ | .ledger _ => .error .stuck
   let oldInt ← old.asInt
   let new ← checkArith (.prim p) (.int (if op.isIncrement then oldInt + 1 else oldInt - 1))
   pure (σ.setEnv x (.val new), if op.isPre then new else old)

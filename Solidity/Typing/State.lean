@@ -30,7 +30,7 @@ namespace Solidity
 namespace Semantics
 
 open SemanticsProperties (lookupBy_setBy_self lookupBy_setBy_ne
-  HeapWellFormed)
+  HeapWellFormed lookupBy_eq_some_mem)
 
 /-! ## Contexts and store typings -/
 
@@ -237,95 +237,6 @@ theorem StateWT.ofB {Γ : Ctx} {H : HeapTy} {L : Layout} {s : State}
   exact ⟨h.1.1.1.1.1.1, h.1.1.1.1.1.2, h.1.1.1.1.2, h.1.1.1.2, h.1.1.2,
     h.1.2, heapWellFormedB_iff.mp h.2⟩
 
-/-! ## Deduplicating a store typing
-
-A store typing with a duplicated key is read through `lookupBy`, which
-sees only the first row.  `dedupKeys` keeps exactly the rows `lookupBy`
-sees, so it changes no lookup and is key-unique — the tool that showed
-`heapTyNodup` was not needed by the removed untyped layer's type-soundness
-headline. `Soundness.lean` keeps the conjunct, which `copyStToM_typed`
-takes. -/
-
-/-- Keep the first row of each key (`seen` accumulates the keys kept). -/
-def dedupKeysAux [DecidableEq κ] : List (κ × α) -> List κ -> List (κ × α)
-  | [], _ => []
-  | (k, v) :: rest, seen =>
-      if k ∈ seen then dedupKeysAux rest seen
-      else (k, v) :: dedupKeysAux rest (k :: seen)
-
-def dedupKeys [DecidableEq κ] (l : List (κ × α)) : List (κ × α) :=
-  dedupKeysAux l []
-
-theorem lookupBy_dedupKeysAux [DecidableEq κ] (k : κ) :
-    ∀ (l : List (κ × α)) (seen : List κ),
-      lookupBy k (dedupKeysAux l seen) =
-        if k ∈ seen then none else lookupBy k l
-  | [], seen => by
-      cases h : decide (k ∈ seen) <;> simp_all [dedupKeysAux, lookupBy]
-  | (k', v) :: rest, seen => by
-      simp only [dedupKeysAux]
-      by_cases hk' : k' ∈ seen
-      · rw [if_pos hk', lookupBy_dedupKeysAux k rest seen]
-        by_cases hk : k ∈ seen
-        · simp [hk]
-        · have hne : k ≠ k' := fun he => hk (he ▸ hk')
-          simp [hk, lookupBy, hne]
-      · rw [if_neg hk']
-        simp only [lookupBy]
-        by_cases hkk : k = k'
-        · subst hkk
-          simp [hk']
-        · rw [if_neg hkk, lookupBy_dedupKeysAux k rest (k' :: seen)]
-          simp [List.mem_cons, hkk]
-
-theorem lookupBy_dedupKeys [DecidableEq κ] (k : κ) (l : List (κ × α)) :
-    lookupBy k (dedupKeys l) = lookupBy k l := by
-  simp [dedupKeys, lookupBy_dedupKeysAux]
-
-theorem nodupKeysB_dedupKeysAux [DecidableEq κ] :
-    ∀ (l : List (κ × α)) (seen : List κ),
-      nodupKeysB (dedupKeysAux l seen) = true
-  | [], _ => rfl
-  | (k, v) :: rest, seen => by
-      simp only [dedupKeysAux]
-      by_cases hk : k ∈ seen
-      · rw [if_pos hk]; exact nodupKeysB_dedupKeysAux rest seen
-      · rw [if_neg hk]
-        simp only [nodupKeysB, Bool.and_eq_true]
-        refine ⟨?_, nodupKeysB_dedupKeysAux rest (k :: seen)⟩
-        rw [lookupBy_dedupKeysAux]
-        simp
-
-theorem nodupKeysB_dedupKeys [DecidableEq κ] (l : List (κ × α)) :
-    nodupKeysB (dedupKeys l) = true :=
-  nodupKeysB_dedupKeysAux l []
-
-theorem mem_of_mem_dedupKeysAux [DecidableEq κ] {p : κ × α} :
-    ∀ {l : List (κ × α)} {seen : List κ},
-      p ∈ dedupKeysAux l seen -> p ∈ l
-  | [], _, h => by simp [dedupKeysAux] at h
-  | (k, v) :: rest, seen, h => by
-      simp only [dedupKeysAux] at h
-      by_cases hk : k ∈ seen
-      · rw [if_pos hk] at h
-        exact List.mem_cons_of_mem _ (mem_of_mem_dedupKeysAux h)
-      · rw [if_neg hk] at h
-        rcases List.mem_cons.mp h with rfl | h
-        · exact List.mem_cons_self
-        · exact List.mem_cons_of_mem _ (mem_of_mem_dedupKeysAux h)
-
-theorem mem_of_mem_dedupKeys [DecidableEq κ] {p : κ × α}
-    {l : List (κ × α)} (h : p ∈ dedupKeys l) : p ∈ l :=
-  mem_of_mem_dedupKeysAux h
-
-/-- Deduplication changes no lookup, so it extends and is extended by
-the original typing. -/
-theorem HeapTy.extends_dedup (H : HeapTy) : HeapTy.Extends H (dedupKeys H) :=
-  fun id ty h => by rw [lookupBy_dedupKeys]; exact h
-
-theorem HeapTy.dedup_extends (H : HeapTy) : HeapTy.Extends (dedupKeys H) H :=
-  fun id ty h => by rw [lookupBy_dedupKeys] at h; exact h
-
 /-! ## Weakening -/
 
 theorem MVal.hasTyH_mono {H H' : HeapTy} {v : MVal} {ty : Ty}
@@ -406,18 +317,6 @@ theorem BTy.matchesB_mono {L : Layout} {H H' : HeapTy} {bty : BTy}
   case mem.mref ty id =>
     exact MVal.hasTyH_mono hext (by simpa [BTy.matchesB] using h)
 
-theorem envTypedB_mono {Γ : Ctx} {L : Layout} {H H' : HeapTy}
-    {env : List (Var × Binding)} (hext : H.Extends H')
-    (h : envTypedB Γ L H env = true) : envTypedB Γ L H' env = true := by
-  simp only [envTypedB, Bool.and_eq_true] at h ⊢
-  refine ⟨List.all_eq_true.mpr fun g hg => ?_, h.2⟩
-  have := List.all_eq_true.mp h.1 g hg
-  cases hlook : lookupBy g.1 env with
-  | none => rw [hlook] at this; exact Bool.noConfusion this
-  | some b =>
-      rw [hlook] at this
-      exact BTy.matchesB_mono hext this
-
 /-- On a fresh key, `setBy` is exactly an append. -/
 theorem setBy_eq_append_of_fresh [DecidableEq κ] {l : List (κ × α)}
     {k : κ} {v : α} (hfresh : lookupBy k l = none) :
@@ -432,19 +331,6 @@ theorem setBy_eq_append_of_fresh [DecidableEq κ] {l : List (κ × α)}
       · rw [if_neg hk] at hfresh
         simp only [setBy, if_neg hk, List.cons_append]
         exact congrArg _ (ih hfresh)
-
-/-- A heap typed by `H` is typed by `dedupKeys H`: every kept row is a
-row of `H`, and each claim transports along `HeapTy.extends_dedup`. -/
-theorem heapTypedB_dedup {H : HeapTy} {heap : List (Nat × MObj)}
-    (h : heapTypedB H heap = true) : heapTypedB (dedupKeys H) heap = true := by
-  simp only [heapTypedB, List.all_eq_true] at h ⊢
-  intro r hr
-  have hrow := h r (mem_of_mem_dedupKeys hr)
-  cases hl : lookupBy r.1 heap with
-  | none => rw [hl] at hrow; exact Bool.noConfusion hrow
-  | some obj =>
-      rw [hl] at hrow
-      exact MObj.hasTyH_mono (HeapTy.extends_dedup H) hrow
 
 /-- Allocating a typed object under a fresh claim keeps the heap
 typed. -/

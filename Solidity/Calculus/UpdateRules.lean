@@ -109,7 +109,7 @@ theorem PTerm.total_eval (σ : State) : {p : PTerm C} → p.total = true → ∃
   | .root r, _ => ⟨(r, []), rfl⟩
   | .field p f, h => by
     obtain ⟨⟨r, segs⟩, hp⟩ := PTerm.total_eval σ (p := p) h
-    exact ⟨(r, segs ++ [.field f]), by simp [PTerm.eval, hp, bind, Except.bind, pure, Except.pure]⟩
+    exact ⟨(r, segs ++ [.field f]), by simp only [eval, bind, Except.bind, hp, pure, Except.pure]⟩
 
 /-! ## What an element writes -/
 
@@ -154,10 +154,10 @@ theorem UpdElem.total_binding (σ₀ : State) :
     {e : UpdElem C} → e.total = true → ∃ b, e.binding σ₀ = .ok b
   | .val _ t, h => by
     obtain ⟨v, hv⟩ := Term.total_eval σ₀ (t := t) h
-    exact ⟨.val v, by simp [UpdElem.binding, hv, bind, Except.bind, pure, Except.pure]⟩
+    exact ⟨.val v, by simp only [binding, bind, Except.bind, hv, pure, Except.pure]⟩
   | .path _ p, h => by
     obtain ⟨⟨r, segs⟩, hp⟩ := PTerm.total_eval σ₀ (p := p) h
-    exact ⟨.spath r segs, by simp [UpdElem.binding, hp, bind, Except.bind, pure, Except.pure]⟩
+    exact ⟨.spath r segs, by simp only [binding, bind, Except.bind, hp, pure, Except.pure]⟩
 
 /-- An element that cannot halt writes a variable: `se1 := 10` writes `se1`. -/
 theorem UpdElem.total_var : {e : UpdElem C} → e.total = true → ∃ x, e.var? = some x
@@ -232,6 +232,12 @@ def Term.subst (U : Upd C) : Term C → Term C
   | .ite c a b => .ite (c.subst U) (a.subst U) (b.subst U)
   | .mlen m i => .mlen (m.subst U) (i.subst U)
   | .env k => .env k
+  | .net a => .net (a.subst U)
+  | .netOf x a =>
+    -- `U` binds no ledger (`Upd.envOnly`): a ledger variable it writes halts
+    match U.lastWrite x with
+    | some _ => Term.stuck
+    | none => .netOf x (a.subst U)
 
 def PTerm.subst (U : Upd C) : PTerm C → PTerm C
   | .root r => .root r
@@ -288,6 +294,8 @@ def UpdElem.subst (U : Upd C) : UpdElem C → UpdElem C
   | .store x s => .store x (s.subst U)
   | .memory m => .memory (m.subst U)
   | .transfer r a => .transfer (r.subst U) (a.subst U)
+  | .saveNet x => .saveNet x
+  | .book a => .book (a.subst U)
 
 /-- `V.subst U` is `{U}V`: `{U}(e₁ ‖ … ‖ eₙ)` is `{U}e₁ ‖ … ‖ {U}eₙ`, KeY's
 `applyOnParallel`. -/
@@ -306,6 +314,10 @@ structure SubstAgree (U : Upd C) (ns : List Var) (σ τ : State) : Prop where
   path : ∀ x, (U.pathOf x).eval σ = (PTerm.pv x : PTerm C).eval τ
   ref : ∀ x, (U.refOf x).eval σ = (ITerm.pv x : ITerm C).eval τ
   stor : ∀ x, ResultsAgree ns ((U.storOf x).eval σ) ((STerm.pv x : STerm C).eval τ)
+  /-- A variable `U` does not write, a ledger variable `oldNet`, is bound alike. -/
+  unwritten : ∀ x, U.lastWrite x = none → σ.getEnv x = τ.getEnv x
+  /-- A variable `U` writes holds no ledger after it. -/
+  written : ∀ x e, U.lastWrite x = some e → ∃ b, τ.getEnv x = .ok b ∧ ∀ l, b ≠ .ledger l
 
 section Subst
 
@@ -340,6 +352,18 @@ theorem Term.subst_eval (h : SubstAgree U ns σ τ) : (t : Term C) → (t.subst 
     exact ResultsAgree.bindEq (m.subst_eval h) fun _ _ h' => by
       simp only [memArrayLen, getObj_congr h']
   | .env k => by simp only [Term.subst, Term.eval, State.envVal_congr h.agree]
+  | .net a => by simp only [Term.subst, Term.eval, a.subst_eval h, State.getNet, h.agree.net]
+  | .netOf x a => by
+    simp only [Term.subst]
+    split
+    · rename_i e hx
+      obtain ⟨b, hb, hnl⟩ := h.written x e hx
+      simp only [Term.stuck_eval, Term.eval, hb, bind, Except.bind]
+      cases b with
+      | ledger l => exact absurd rfl (hnl l)
+      | _ => rfl
+    · rename_i hx
+      simp only [Term.eval, h.unwritten x hx, a.subst_eval h]
 
 /-- Example: after `Person storage p = alice;`, `{ p := alice }(p.age)` is
 `alice.age`. -/
@@ -468,18 +492,22 @@ theorem UpdElem.subst_write (h : SubstAgree U ns σ τ) (τ' : State) :
     simp only [UpdElem.subst, UpdElem.write]
     match (s.subst U).eval σ, s.eval τ, s.subst_eval h with
     | .error _, .error _, he => subst he; rfl
-    | .ok a, .ok b, hs => simp [bind, Except.bind, hs.storage]
+    | .ok a, .ok b, hs => simp only [bind, Except.bind, hs.storage]
   | .store _ s => by
     simp only [UpdElem.subst, UpdElem.write]
     match (s.subst U).eval σ, s.eval τ, s.subst_eval h with
     | .error _, .error _, he => subst he; rfl
-    | .ok a, .ok b, hs => simp [bind, Except.bind, hs.storage]
+    | .ok a, .ok b, hs => simp only [bind, Except.bind, hs.storage]
   | .memory m => by
     simp only [UpdElem.subst, UpdElem.write]
     match (m.subst U).eval σ, m.eval τ, m.subst_eval h with
     | .error _, .error _, he => subst he; rfl
-    | .ok a, .ok b, hs => simp [bind, Except.bind, hs.heap, hs.nextId]
+    | .ok a, .ok b, hs => simp only [bind, Except.bind, hs.heap, hs.nextId]
   | .transfer r a => by simp only [UpdElem.subst, UpdElem.write, r.subst_eval h, a.subst_eval h]
+  | .saveNet _ => by simp only [UpdElem.subst, UpdElem.write, h.agree.net]
+  | .book a => by
+    simp only [UpdElem.subst, UpdElem.write, a.subst_eval h, State.book, State.getNet, h.agree.net,
+      h.agree.tx, h.agree.selfBalance]
 
 /-- Running `{U}V` before `U` is running `V` after it, element by element.
 
@@ -527,13 +555,13 @@ theorem Upd.foldl_env (σ₀ : State) : (U : Upd C) → U.envOnly = true →
     cases h₁
     obtain ⟨hag, hnone, hsome⟩ := Upd.foldl_env σ₀ U hU h
     have htargets : Upd.targets (e :: U) = x₀ :: Upd.targets U := by
-      simp [Upd.targets, hx₀]
+      simp only [targets, hx₀, Option.some.injEq, List.filterMap_cons_some]
     refine ⟨?_, fun x hx => ?_, fun x e' hx => ?_⟩
     · rw [htargets]
       refine ⟨hag.storage, hag.heap, hag.nextId, hag.net, fun n hn => ?_, hag.selfBalance, hag.tx⟩
       have hne : n ≠ x₀ := fun he => hn (he ▸ List.mem_cons_self)
       rw [← hag.env n (fun h' => hn (List.mem_cons_of_mem _ h'))]
-      simp [State.setEnv, SemanticsProperties.lookupBy_setBy_ne hne]
+      simp only [State.setEnv, SemanticsProperties.lookupBy_setBy_ne hne]
     · simp only [Upd.lastWrite] at hx
       split at hx
       · cases hx
@@ -543,7 +571,7 @@ theorem Upd.foldl_env (σ₀ : State) : (U : Upd C) → U.envOnly = true →
         · rename_i hne
           rw [hnone x hU']
           have : x ≠ x₀ := fun h' => hne (h' ▸ hx₀)
-          simp [State.setEnv, SemanticsProperties.lookupBy_setBy_ne this]
+          simp only [State.setEnv, SemanticsProperties.lookupBy_setBy_ne this]
     · simp only [Upd.lastWrite] at hx
       split at hx
       · rename_i hU'
@@ -555,7 +583,8 @@ theorem Upd.foldl_env (σ₀ : State) : (U : Upd C) → U.envOnly = true →
           cases hx
           rw [hx₀] at hxe
           cases hxe
-          exact ⟨b₀, hb₀, by rw [hnone _ hU']; simp [State.setEnv]⟩
+          exact ⟨b₀, hb₀, by rw [hnone _ hU']; simp only [State.setEnv,
+              SemanticsProperties.lookupBy_setBy_self]⟩
         · cases hx
 
 /-- After an update of locals, a variable reads as what the update binds it
@@ -568,28 +597,42 @@ theorem Upd.substAgree {U : Upd C} (hU : U.envOnly = true) {σ τ : State}
   obtain ⟨hag, hnone, hsome⟩ := Upd.foldl_env σ U hU h
   have getEnv_eq : ∀ x, U.lastWrite x = none → τ.getEnv x = σ.getEnv x := fun x hx => by
     simp only [State.getEnv, hnone x hx]
-  refine ⟨hag, fun x => ?_, fun x => ?_, fun x => ?_, fun x => ?_⟩
+  have written : ∀ x e, U.lastWrite x = some e →
+      ∃ b, τ.getEnv x = .ok b ∧ ∀ l, b ≠ .ledger l := fun x e hx => by
+    obtain ⟨b, hb, hl⟩ := hsome x e hx
+    refine ⟨b, by simp only [State.getEnv, hl], fun l hbl => ?_⟩
+    subst hbl
+    have hvar := Upd.lastWrite_var hx
+    cases e with
+    | val _ t | path _ t | mref _ t =>
+      simp only [UpdElem.binding, bind, Except.bind] at hb
+      split at hb <;> simp only [pure, Except.pure, Except.ok.injEq, reduceCtorEq] at hb
+    | storage | memory | transfer | store | saveNet | book => simp only [UpdElem.var?,
+        reduceCtorEq] at hvar
+  refine ⟨hag, fun x => ?_, fun x => ?_, fun x => ?_, fun x => ?_,
+    fun x hx => (getEnv_eq x hx).symm, written⟩
   rotate_left 3
   · unfold Upd.storOf
     split
     · rename_i e hx
       obtain ⟨b, hb, hl⟩ := hsome x _ hx
       have hvar := Upd.lastWrite_var hx
-      have hτ : τ.getEnv x = .ok b := by simp [State.getEnv, hl]
+      have hτ : τ.getEnv x = .ok b := by simp only [State.getEnv, hl]
       have hb' : ∀ st, b ≠ .store st := by
         intro st hst
         subst hst
         cases e with
         | val _ t =>
           simp only [UpdElem.binding, bind, Except.bind] at hb
-          split at hb <;> simp [pure, Except.pure] at hb
+          split at hb <;> simp only [pure, Except.pure, Except.ok.injEq, reduceCtorEq] at hb
         | path _ p =>
           simp only [UpdElem.binding, bind, Except.bind] at hb
-          split at hb <;> simp [pure, Except.pure] at hb
+          split at hb <;> simp only [pure, Except.pure, Except.ok.injEq, reduceCtorEq] at hb
         | mref _ i =>
           simp only [UpdElem.binding, bind, Except.bind] at hb
-          split at hb <;> simp [pure, Except.pure] at hb
-        | storage | memory | transfer | store => simp [UpdElem.var?] at hvar
+          split at hb <;> simp only [pure, Except.pure, Except.ok.injEq, reduceCtorEq] at hb
+        | storage | memory | transfer | store | saveNet | book => simp only [UpdElem.var?,
+            reduceCtorEq] at hvar
       simp only [STerm.stuck_eval, STerm.eval, hτ, bind, Except.bind]
       cases b with
       | store st => exact absurd rfl (hb' st)
@@ -608,11 +651,11 @@ theorem Upd.substAgree {U : Upd C} (hU : U.envOnly = true) {σ τ : State}
       obtain ⟨b, hb, hl⟩ := hsome x _ hx
       simp only [UpdElem.binding, bind, Except.bind] at hb
       cases ht : t.eval σ with
-      | error e => simp [ht] at hb
+      | error e => simp only [ht, reduceCtorEq] at hb
       | ok v =>
         simp only [ht, pure, Except.pure, Except.ok.injEq] at hb
         subst hb
-        simp [Term.eval, State.getEnv, hl, bind, Except.bind, pure, Except.pure]
+        simp only [Term.eval, bind, Except.bind, State.getEnv, hl, pure, Except.pure]
     · rename_i e hnv hx
       obtain ⟨b, hb, hl⟩ := hsome x _ hx
       have hvar := Upd.lastWrite_var hx
@@ -621,20 +664,21 @@ theorem Upd.substAgree {U : Upd C} (hU : U.envOnly = true) {σ τ : State}
       | path _ p =>
         simp only [UpdElem.binding, bind, Except.bind] at hb
         cases hp : p.eval σ with
-        | error => simp [hp] at hb
+        | error => simp only [hp, reduceCtorEq] at hb
         | ok r =>
           simp only [hp, pure, Except.pure, Except.ok.injEq] at hb
           subst hb
-          simp [Term.eval, State.getEnv, hl, bind, Except.bind]
+          simp only [Term.stuck_eval, Term.eval, bind, Except.bind, State.getEnv, hl]
       | mref _ i =>
         simp only [UpdElem.binding, bind, Except.bind] at hb
         cases hi : i.eval σ with
-        | error => simp [hi] at hb
+        | error => simp only [hi, reduceCtorEq] at hb
         | ok r =>
           simp only [hi, pure, Except.pure, Except.ok.injEq] at hb
           subst hb
-          simp [Term.eval, State.getEnv, hl, bind, Except.bind]
-      | storage | memory | transfer | store => simp [UpdElem.var?] at hvar
+          simp only [Term.stuck_eval, Term.eval, bind, Except.bind, State.getEnv, hl]
+      | storage | memory | transfer | store | saveNet | book => simp only [UpdElem.var?,
+          reduceCtorEq] at hvar
     · rename_i hx
       simp only [Term.eval, getEnv_eq x hx]
   · unfold Upd.pathOf
@@ -643,11 +687,11 @@ theorem Upd.substAgree {U : Upd C} (hU : U.envOnly = true) {σ τ : State}
       obtain ⟨b, hb, hl⟩ := hsome x _ hx
       simp only [UpdElem.binding, bind, Except.bind] at hb
       cases hp : p.eval σ with
-      | error e => simp [hp] at hb
+      | error e => simp only [hp, reduceCtorEq] at hb
       | ok r =>
         simp only [hp, pure, Except.pure, Except.ok.injEq] at hb
         subst hb
-        simp [PTerm.eval, aliasPath, State.getEnv, hl, bind, Except.bind, pure, Except.pure]
+        simp only [PTerm.eval, aliasPath, bind, Except.bind, State.getEnv, hl, pure, Except.pure]
     · rename_i e hnp hx
       obtain ⟨b, hb, hl⟩ := hsome x _ hx
       have hvar := Upd.lastWrite_var hx
@@ -656,20 +700,21 @@ theorem Upd.substAgree {U : Upd C} (hU : U.envOnly = true) {σ τ : State}
       | val _ t =>
         simp only [UpdElem.binding, bind, Except.bind] at hb
         cases ht : t.eval σ with
-        | error => simp [ht] at hb
+        | error => simp only [ht, reduceCtorEq] at hb
         | ok r =>
           simp only [ht, pure, Except.pure, Except.ok.injEq] at hb
           subst hb
-          simp [PTerm.eval, aliasPath, State.getEnv, hl, bind, Except.bind]
+          simp only [PTerm.stuck_eval, PTerm.eval, aliasPath, bind, Except.bind, State.getEnv, hl]
       | mref _ i =>
         simp only [UpdElem.binding, bind, Except.bind] at hb
         cases hi : i.eval σ with
-        | error => simp [hi] at hb
+        | error => simp only [hi, reduceCtorEq] at hb
         | ok r =>
           simp only [hi, pure, Except.pure, Except.ok.injEq] at hb
           subst hb
-          simp [PTerm.eval, aliasPath, State.getEnv, hl, bind, Except.bind]
-      | storage | memory | transfer | store => simp [UpdElem.var?] at hvar
+          simp only [PTerm.stuck_eval, PTerm.eval, aliasPath, bind, Except.bind, State.getEnv, hl]
+      | storage | memory | transfer | store | saveNet | book => simp only [UpdElem.var?,
+          reduceCtorEq] at hvar
     · rename_i hx
       simp only [PTerm.eval, aliasPath, getEnv_eq x hx]
   · unfold Upd.refOf
@@ -678,11 +723,11 @@ theorem Upd.substAgree {U : Upd C} (hU : U.envOnly = true) {σ τ : State}
       obtain ⟨b, hb, hl⟩ := hsome x _ hx
       simp only [UpdElem.binding, bind, Except.bind] at hb
       cases hi : i.eval σ with
-      | error e => simp [hi] at hb
+      | error e => simp only [hi, reduceCtorEq] at hb
       | ok r =>
         simp only [hi, pure, Except.pure, Except.ok.injEq] at hb
         subst hb
-        simp [ITerm.eval, State.getEnv, hl, bind, Except.bind, pure, Except.pure]
+        simp only [ITerm.eval, bind, Except.bind, State.getEnv, hl, pure, Except.pure]
     · rename_i e hnr hx
       obtain ⟨b, hb, hl⟩ := hsome x _ hx
       have hvar := Upd.lastWrite_var hx
@@ -691,20 +736,21 @@ theorem Upd.substAgree {U : Upd C} (hU : U.envOnly = true) {σ τ : State}
       | val _ t =>
         simp only [UpdElem.binding, bind, Except.bind] at hb
         cases ht : t.eval σ with
-        | error => simp [ht] at hb
+        | error => simp only [ht, reduceCtorEq] at hb
         | ok r =>
           simp only [ht, pure, Except.pure, Except.ok.injEq] at hb
           subst hb
-          simp [ITerm.eval, State.getEnv, hl, bind, Except.bind]
+          simp only [ITerm.stuck_eval, ITerm.eval, bind, Except.bind, State.getEnv, hl]
       | path _ p =>
         simp only [UpdElem.binding, bind, Except.bind] at hb
         cases hp : p.eval σ with
-        | error => simp [hp] at hb
+        | error => simp only [hp, reduceCtorEq] at hb
         | ok r =>
           simp only [hp, pure, Except.pure, Except.ok.injEq] at hb
           subst hb
-          simp [ITerm.eval, State.getEnv, hl, bind, Except.bind]
-      | storage | memory | transfer | store => simp [UpdElem.var?] at hvar
+          simp only [ITerm.stuck_eval, ITerm.eval, bind, Except.bind, State.getEnv, hl]
+      | storage | memory | transfer | store | saveNet | book => simp only [UpdElem.var?,
+          reduceCtorEq] at hvar
     · rename_i hx
       simp only [ITerm.eval, getEnv_eq x hx]
 
@@ -754,9 +800,9 @@ theorem Semantics.EnvAgreeExcept.setEnv_filter {A : List Var} {σ τ : State} (h
     EnvAgreeExcept (A.filter (· != x)) (σ.setEnv x b) (τ.setEnv x b) :=
   ⟨h.storage, h.heap, h.nextId, h.net, fun n hn => by
     by_cases he : n = x
-    · subst he; simp [State.setEnv]
+    · subst he; simp only [State.setEnv, SemanticsProperties.lookupBy_setBy_self]
     · have : n ∉ A := fun h' => hn (List.mem_filter.2 ⟨h', by simpa using he⟩)
-      simp [State.setEnv, SemanticsProperties.lookupBy_setBy_ne he, h.env n this],
+      simp only [State.setEnv, SemanticsProperties.lookupBy_setBy_ne he, h.env n this],
     h.selfBalance, h.tx⟩
 
 /-- One element written into two agreeing states, its right-hand side read
@@ -780,6 +826,11 @@ theorem UpdElem.write_agree {A : List Var} {σ₀ τ₁ τ₂ : State} (h : EnvA
     cases m.eval σ₀ with
     | error => rfl
     | ok a => exact ⟨h.storage, rfl, rfl, h.net, h.env, h.selfBalance, h.tx⟩
+  | .saveNet x => by simp only [UpdElem.write]; exact h.setEnv_both x _
+  | .book _ => by
+    simp only [UpdElem.write]
+    agree_run h
+    exact ⟨h.storage, h.heap, h.nextId, rfl, h.env, rfl, h.tx⟩
 
 /-- The invariant of dropping: the two runs agree off `A`, and every variable
 of `A` is either one the formula does not read (`G`) or one the rest of the
@@ -796,7 +847,8 @@ theorem Upd.dropEffectless_foldl (F G : List Var) (σ₀ : State) :
       ResultsAgree G ((U.dropEffectless F).foldlM (fun ρ e => e.write σ₀ ρ) τ₁)
         (U.foldlM (fun ρ e => e.write σ₀ ρ) τ₂)
   | [], _, A, τ₁, τ₂, h, hA =>
-    h.mono fun x hx => (hA x hx).elim id fun ⟨_, h'⟩ => by simp at h'
+    h.mono fun x hx => (hA x hx).elim id fun ⟨_, h'⟩ => by simp only [List.any_nil,
+        Bool.false_eq_true] at h'
   | e :: U, hG, A, τ₁, τ₂, h, hA => by
     have hGU : ∀ e ∈ U, ∀ x, e.var? = some x → x ∉ F → x ∈ G :=
       fun e' he' => hG e' (List.mem_cons_of_mem _ he')
@@ -856,7 +908,7 @@ theorem Upd.dropEffectless_foldl (F G : List Var) (σ₀ : State) :
           · exact .inl hy
           simp only [List.any_cons, Bool.or_eq_true, hv] at hany
           rcases hany with he | hany
-          · simp at he
+          · simp only [Option.none_beq_some, Bool.false_eq_true] at he
           · exact .inr ⟨hF, hany⟩
 
 /-- Dropping the effectless elements changes only variables the formula does
@@ -897,8 +949,8 @@ theorem State.setEnv_same {σ : State} {x : Var} {b : Binding} (hl : lookupBy x 
     EnvAgreeExcept [] (σ.setEnv x b) σ := by
   refine ⟨rfl, rfl, rfl, rfl, fun n _ => ?_, rfl, rfl⟩
   by_cases he : n = x
-  · subst he; simp [State.setEnv, hl]
-  · simp [State.setEnv, SemanticsProperties.lookupBy_setBy_ne he]
+  · subst he; simp only [State.setEnv, SemanticsProperties.lookupBy_setBy_self, hl]
+  · simp only [State.setEnv, SemanticsProperties.lookupBy_setBy_ne he]
 
 /-- Writing `x := x` changes nothing, when it does not halt.
 
@@ -911,12 +963,12 @@ theorem UpdElem.write_self {σ τ : State} :
     subst h
     cases hl : lookupBy x σ.env with
     | none =>
-      simp [UpdElem.write, Term.eval, PTerm.eval, ITerm.eval, aliasPath, State.getEnv, hl,
-        bind, Except.bind] at hw
+      simp only [write, bind, Except.bind, Term.eval, PTerm.eval, aliasPath, ITerm.eval,
+        State.getEnv, hl, reduceCtorEq] at hw
     | some b =>
       cases b <;>
-        simp [UpdElem.write, Term.eval, PTerm.eval, ITerm.eval, aliasPath, State.getEnv, hl,
-          bind, Except.bind, pure, Except.pure] at hw <;>
+        simp only [write, bind, Except.bind, Term.eval, PTerm.eval, aliasPath, ITerm.eval,
+          State.getEnv, hl, pure, Except.pure, Except.ok.injEq, reduceCtorEq] at hw <;>
         subst hw <;> exact State.setEnv_same hl
 
 /-- `{x := x ‖ U} φ` is `{U} φ` when `x := x` does not halt. -/
@@ -924,7 +976,8 @@ theorem UpdElem.elimSelf_holds {e : UpdElem C} (he : e.isSelf = true) {σ τ : S
     (hw : e.write σ σ = .ok τ) (m : Modality) (U : Upd C) (φ : Fml C) :
     holds σ (.upd m (e :: U) φ) ↔ holds σ (.upd m U φ) := by
   simp only [holds, Upd.apply, List.foldlM_cons, hw]
-  exact m.after_frame (Upd.foldl_frame (EnvAgreeExcept.refl [] σ) U (fun _ _ h => by simp at h)
+
+  exact m.after_frame (Upd.foldl_frame (EnvAgreeExcept.refl [] σ) U (fun _ _ h => nomatch h)
     (UpdElem.write_self he hw)) fun _ _ h => holds_frame φ (fun _ _ h => by simp at h) h
 
 /-- **`elimSelfUpdate`, under the box**: to prove `{x := x ‖ U} φ`, prove
@@ -935,7 +988,8 @@ Example: `[ x = x; y = 3; ] y == 3` leaves `{ x := x ‖ y := 3 } y = 3`, which
 theorem UpdElem.elimSelf_box {e : UpdElem C} (he : e.isSelf = true) {σ : State} {U : Upd C}
     {φ : Fml C} (h : holds σ (.upd .box U φ)) : holds σ (.upd .box (e :: U) φ) := by
   cases hw : e.write σ σ with
-  | error => simp [holds, Upd.apply, hw, bind, Except.bind, Modality.after, Modality.onHalt]
+  | error => simp only [holds, Modality.after, Upd.apply, List.foldlM_cons, bind, Except.bind, hw,
+      Modality.onHalt]
   | ok τ => exact (UpdElem.elimSelf_holds he hw .box U φ).2 h
 
 /-- **`elimSelfUpdate`, under the diamond**, the other way: `{x := x ‖ U} φ`
@@ -947,7 +1001,8 @@ theorem UpdElem.elimSelf_diamond {e : UpdElem C} (he : e.isSelf = true) {σ : St
     {U : Upd C} {φ : Fml C} (h : holds σ (.upd .diamond (e :: U) φ)) :
     holds σ (.upd .diamond U φ) := by
   cases hw : e.write σ σ with
-  | error => simp [holds, Upd.apply, hw, bind, Except.bind, Modality.after, Modality.onHalt] at h
+  | error => simp only [holds, Modality.after, Upd.apply, List.foldlM_cons, bind, Except.bind, hw,
+      Modality.onHalt] at h
   | ok τ => exact (UpdElem.elimSelf_holds he hw .diamond U φ).1 h
 
 /-! ## An update on a first-order formula -/
@@ -1161,7 +1216,7 @@ theorem Fml.updAt_sound {r : UpdRuleName} :
     simp only [Fml.updAt, Option.map_eq_some_iff] at h
     obtain ⟨φ', h', rfl⟩ := h
     exact forall_congr' fun _ => imp_congr_right fun _ => Fml.updAt_sound φ h' _
-  | .tt, _, h, _ | .eq .., _, h, _ => by simp [Fml.updAt] at h
+  | .tt, _, h, _ | .eq .., _, h, _ => by simp only [updAt, reduceCtorEq] at h
 
 /-! ## All of them: `Fml.simpUpds`
 
@@ -1311,22 +1366,12 @@ theorem Fml.simpUpds_valid {φ : Fml C} (h : Valid φ.simpUpds) : Valid φ :=
 open Lean Elab Tactic Meta in
 /-- `sol_upd r`: apply the update rule `r` at the first update where it fits. -/
 elab "sol_upd " r:term : tactic => do
-  let g ← getMainGoal
-  let before ← instantiateMVars (← g.getType)
-  let gs ← g.apply (← elabTerm (← `(Fml.updAt_valid $r)) none)
-  let [g'] := gs | throwError "sol_upd: unexpected goals"
-  let g'' ← normValid g'
-  if (← instantiateMVars (← g''.getType)) == before then
-    throwError "sol_upd: rule {r} does not apply here"
-  replaceMainGoal [g'']
+  applyValid "sol_upd" (← `(Fml.updAt_valid $r)) (some m!"rule {r} does not apply here")
 
 open Lean Elab Tactic Meta in
 /-- `sol_merge`: merge every stack of updates into one and drop what is dead
 (`Fml.simpUpds`). -/
 elab "sol_merge" : tactic => do
-  let g ← getMainGoal
-  let gs ← g.apply (← elabTerm (← `(Fml.simpUpds_valid)) none)
-  let [g'] := gs | throwError "sol_merge: unexpected goals"
-  replaceMainGoal [← normValid g']
+  applyValid "sol_merge" (← `(Fml.simpUpds_valid))
 
 end Solidity

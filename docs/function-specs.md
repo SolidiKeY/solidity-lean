@@ -75,7 +75,7 @@ proof was checked for vacuity.
   storage copies, `push`/`pop` or `transfer`.
 - **The contract invariant.** `Invariant C` (`Semantics/Callback.lean`) is
   a formula that must be *closed* (`fml.vars = []`) and contain no
-  transfer. It cannot read the ledger, since no term does. `ValidC` and
+  transfer. `ValidC` and
   `ProvesC` (`Calculus/Callback.lean`) use it for callbacks
   (`Examples/Callback.lean`).
 
@@ -91,8 +91,10 @@ storage variable `old`, `\forall` is a quantifier of the logic.
 
 **1. A clause is data, kept as read, where solkey's NatSpec line stands.**
 `SpecExpr` (`SpecSyntax.lean`) is `SolSpec.g4`; `contract!{ … }` reads
-`requires e;`, `ensures e;`, `skip;` above a function and `invariant e;`
-anywhere (`FunDecl.spec`, `Contract.inv`).  Kept raw because a `Contract`
+`requires e;`, `ensures e;`, `assignable l, …;` (or `assignable \nothing;`),
+`skip;` above a function and `invariant e;` anywhere (`FunDecl.spec`,
+`Contract.inv`); a function's `payable` attribute is kept
+(`FunDecl.payable`).  Kept raw because a `Contract`
 cannot hold an `Fml C`.
 
 **2. The compiler is `SpecCompiler`'s** (`Calculus/Spec.lean`): a context
@@ -118,26 +120,59 @@ not `closed` yet).  `sol_close` reads it as a Lean `∀` over integers
 **5. The obligation is solkey's box** (`spec[C]{f}`):
 
 ```
-R ∧ L ∧ I ∧ requires → {old := storage} [ T result = f(x₁, …, xₙ); ] (I ∧ ensures)
+R ∧ L ∧ M ∧ I ∧ requires →
+  {old := storage ‖ oldNet := net ‖ book(msg.value)} [ T result = f(x₁, …, xₙ); ] (I ∧ ensures ∧ A)
 ```
 
 `R` is each parameter's range and `L` the layout of the state the clauses
 read (`layoutFmls`: each word of its declared type, at every key of a
 mapping); solkey's reads are total and typed and need neither
-(`docs/solkey-feedback.md`).  `I` is `Contract.inv`, assumed and owed.
-Not built: `net(a)`, `oldNet`, the booking of `msg.value`, and the
-`msgValue` precondition.
+(`docs/solkey-feedback.md`).  `M` is `msg.value >= 0` for a `payable`
+function and `msg.value == 0` otherwise.  `I` is `Contract.inv`, assumed and
+owed.  `specParts` returns the three parts apart: the premises every run
+meets (`R`, `L`, `M`), the ones the specification states (`I`, `requires`),
+and the conclusion.
+
+The update is solkey's with three differences, none of which changes what
+the formula means: `old := storage` is there when an `ensures` reads `\old`
+or an `assignable` clause is given; `oldNet := net` only when an `\old(…)`
+reads `net(a)` (solkey takes both with any `\old`); and `book(msg.value)`
+(`UpdElem.book`, KeY's `net := storeSt(net, at(msgSender), … + msgValue) ‖
+selfBalance := selfBalance + msgValue`) only for a `payable` function, since
+`M` makes the other's `book(0)`.  Leaving them out is cheaper: symbolic
+execution and `sol_close` pay for every element.
+
+`net(a)` is `Term.net`, what the ledger holds for `a` (`State.getNet`), read
+as a `uint` as `msg.value` is; under `\old` it is `Term.netOf oldNet a`, the
+ledger snapshot `Binding.ledger` holds.  So `net(a) + msg.value` is
+range-checked: `requires net(msg.sender) + msg.value >= 0;` says the sum is a
+`uint`.
+
+`A` is the frame of `assignable` (`assignableFml`): every word of the
+contract's storage that no listed location covers is where it was,
+`find(old, p) = find(old, p) → find(storage, p) = find(old, p)` (owed where
+the word was there to begin with, since `⊨` also ranges over storages
+without it), under `∀ k` at a mapping, with `¬ k = e` where `m[e]` is
+listed and nothing below `m[*]` or a listed location itself.  An array owes
+its length and every element below it.  A key is read in the pre-state,
+against `old`.
 
 **6. `sol_spec` proves one**: `sol_symex`, then `sol_close` with a word read
 known to be a word (`Close.asValue_eq_ok`) and `grind`'s instantiation
 bounded.  Splitting the obligation clause by clause was tried and costs
-more: symbolic execution runs once per clause.  `Examples/Specs.lean` has
-what closes; Coin's `send` and ERC20's `transfer` (the debit and the
-credit to two keys that may be equal) do not, as in the benchmark files.
+more: symbolic execution runs once per clause.  What closes is proved
+beside each benchmark contract, which carries its clauses
+(`Examples/Benchmark/Counter.lean`, `Examples/Benchmark/SimpleStorage.lean`,
+`Examples/Benchmark/Mapping.lean`, `Examples/Benchmark/Coin.lean`), and in
+`Examples/Specs.lean` (ERC20 over `msg.sender`, `Tally`); Coin's `send` and
+ERC20's `transfer` (the debit and the credit to two keys that may be equal)
+do not, as in the benchmark files.
 
 **Still open.** The diamond (no revert) over reachable states (decision 6
 of the earlier draft, `ValidR`); the invariant under callbacks (`ValidC`);
-`net`; a quantified invariant as an `Invariant C`; `sol_decide` on `old`.
+a quantified invariant as an `Invariant C`; `sol_decide` on `old`, `net`
+and `book` (outside `Fml.inL`); the benchmarks' clauses over `net(a)`
+(EtherWallet, Purchase, SimpleAuction), not yet tried.
 
 ## The corpus's concretized rows
 

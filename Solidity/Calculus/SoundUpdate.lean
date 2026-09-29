@@ -12,7 +12,7 @@ lemmas below show the two reach the same writes through the same reads.
 
 namespace Solidity
 
-open Semantics
+open Semantics SemanticsProperties
 
 variable {C : Contract}
 
@@ -57,17 +57,18 @@ theorem MAddr.eval_at' (i : ITerm C) (k : Term C) :
       pure (.memoryIndex id (← (← k.eval σ).asInt))) := rfl
 end
 
-macro "upd_unfold'" : tactic => `(tactic| simp only [Upd.apply, List.foldlM, UpdElem.write,
-    STerm.eval, SValT.eval, Term.eval_pv, Term.eval_lit', Term.eval_binop', Term.eval_find',
-    Term.eval_len', Term.eval_read', PTerm.eval, ITerm.eval_pv, ITerm.eval_read', ITerm.eval_alloc',
-    ITerm.eval_copy', MTerm.eval, MValT.eval, MAddr.eval_field', MAddr.eval_at', SPath.lower_eval,
-    Loc.lower_eval, Val.lower_eval,
-    Simple.lower_eval, Stmt.run, Src.value, Val.eval, Simple.eval_local, bind_assoc, pure_bind,
-    bind_pure, State.writeStorage_toSVal, State.saveStorage_with, State.writeStorage_with,
-    writeAddr_with, OpLoc.store, OpLoc.bump, opStore, bumpStore,
-    opLocal_eq, bumpLocal_eq, opMem, bumpMem, readLoc_eq, writeLoc_eq, ARhs.bind, MRhs.bind,
-    MSrc.mval, MLoc.write, MPath.mval_var, MVal.asRef_ref, MLoc.read_field, MLoc.read_index,
-    Loc.resolve, SPath.resolve, Src.pushVal, evalBinop_bump, applyBinOp_bump, Term.bumped])
+theorem memWriteField_eq' (σ : State) (id : Nat) (f : Name) (mv : MVal) :
+    memWriteField σ id f mv = writeAddr σ mv (.memoryField id f) := rfl
+theorem memWriteIndex_eq' (σ : State) (id : Nat) (i : Int) (mv : MVal) :
+    memWriteIndex σ id i mv = writeAddr σ mv (.memoryIndex id i) := rfl
+
+/-- `upd_unfold_with`, one term constructor at a time (so `envVal`/`envRef`
+stay atomic), with each write as the storage or heap it leaves. -/
+macro "upd_unfold'" : tactic => `(tactic| upd_unfold_with [Term.eval_lit', Term.eval_binop',
+    Term.eval_find', Term.eval_len', Term.eval_read', ITerm.eval_read', ITerm.eval_alloc',
+    ITerm.eval_copy', MAddr.eval_field', MAddr.eval_at', State.writeRes_toSVal,
+    State.saveStorage_eq, State.writeStorage_eq, writeAddr_eq, MPath.mval_loc, memWriteField_eq',
+    memWriteIndex_eq'])
 
 theorem upd_localOpAssign {p : PrimTy} {op : BinOp} (hop : op.hasCompoundAssign = true)
     (hp : p.isNumeric = true) (v : Var) (se : Simple C p) (σ : State) :
@@ -94,32 +95,6 @@ theorem upd_memoryFieldOpAssign {p : PrimTy} {op : BinOp} (hop : op.hasCompoundA
   upd_unfold'
   simp only [evalBinop_compound hop]
   res_split
-
-theorem State.saveStorage_with_bind {α : Type} (σ : State) (r segs v) (f : State → Res α) :
-    (σ.saveStorage r segs v >>= fun τ => f { σ with storage := τ.storage }) =
-      (σ.saveStorage r segs v >>= f) := by
-  unfold State.saveStorage
-  split
-  · cases h : SVal.save _ segs v <;> rfl
-  · rfl
-
-theorem writeAddr_with_bind {α : Type} (σ : State) (mv : MVal) (a : Addr) (f : State → Res α) :
-    (writeAddr σ mv a >>= fun μ => f { σ with heap := μ.heap, nextId := μ.nextId }) =
-      (writeAddr σ mv a >>= f) := by
-  cases a with
-  | memoryField id f =>
-    simp only [writeAddr, memWriteField, bind, Except.bind]
-    cases σ.getObj id with
-    | error _ => rfl
-    | ok o => cases o <;> rfl
-  | memoryIndex id i =>
-    simp only [writeAddr, memWriteIndex, bind, Except.bind]
-    cases σ.getObj id with
-    | error _ => rfl
-    | ok o =>
-      cases o with
-      | struct _ => rfl
-      | array elems => by_cases hh : 0 ≤ i ∧ i.toNat < elems.length <;> simp [hh] <;> rfl
 
 theorem upd_memoryIndexArrayOpAssign {p : PrimTy} {op : BinOp} (hop : op.hasCompoundAssign = true)
     (hp : p.isNumeric = true) {R : RefTy} (a : ArrTy R (.prim p)) (mv : Var) (ie : Simple C PrimTy.uint) (se : Simple C p) (σ : State) :
@@ -162,93 +137,6 @@ theorem upd_localAssignIncrement {p : PrimTy} (vp : Var) (op : IncDec) (hp : p.i
       (Stmt.run σ (Stmt.assignIncDec vp op hp (OpLoc.local v) hs)) := by
   rw [Term.bumped]; split <;> (upd_unfold'; res_split)
 
-/-! ### Writes as a new storage or heap, the rest of the state kept -/
-
-/-- The storage a successful `saveStorage` leaves. -/
-def Semantics.State.storeRes (σ : State) (r : Name) (segs : List Seg) (x : SVal) :
-    Res (List (Name × SVal)) :=
-  match lookupBy r σ.storage with
-  | some v => do
-    let u ← v.save segs x
-    pure (setBy r u σ.storage)
-  | none => .error .stuck
-
-theorem State.saveStorage_eq (σ : State) (r segs x) :
-    σ.saveStorage r segs x = (do let s ← σ.storeRes r segs x; pure { σ with storage := s }) := by
-  unfold State.saveStorage State.storeRes
-  cases lookupBy r σ.storage with
-  | none => rfl
-  | some v => cases h : v.save segs x <;> simp [h, bind, Except.bind, pure, Except.pure]
-
-/-- The storage a successful `writeStorage` leaves: a word saved, or a copy
-over what is there. -/
-def Semantics.State.writeRes (σ : State) (r : Name) (segs : List Seg) (x : SVal) :
-    Res (List (Name × SVal)) :=
-  match x with
-  | .prim p => σ.storeRes r segs (.prim p)
-  | .struct _ | .array .. | .map .. => do
-    let cur ← σ.findStorage r segs
-    σ.storeRes r segs (cur.overlay x)
-
-@[simp] theorem State.writeRes_toSVal (σ : State) (r segs) (v : Value) :
-    σ.writeRes r segs v.toSVal = σ.storeRes r segs v.toSVal := by
-  cases v <;> rfl
-
-theorem State.writeStorage_eq (σ : State) (r segs x) :
-    σ.writeStorage r segs x = (do let s ← σ.writeRes r segs x; pure { σ with storage := s }) := by
-  unfold State.writeStorage State.writeRes
-  cases x <;> simp only [State.saveStorage_eq, bind_assoc]
-
-/-- The heap a successful `writeAddr` leaves. -/
-def heapRes (σ : State) (mv : MVal) : Addr → Res (List (Nat × MObj))
-  | .memoryField id f => do
-    match ← σ.getObj id with
-    | .struct fields => pure (setBy id (.struct (setBy f mv fields)) σ.heap)
-    | .array _ _ => .error .stuck
-  | .memoryIndex id i => do
-    match ← σ.getObj id with
-    | .array elems fx =>
-      if 0 ≤ i ∧ i.toNat < elems.length then pure (setBy id (.array (elems.set i.toNat mv) fx) σ.heap)
-      else .error .revert
-    | .struct _ => .error .stuck
-
-theorem writeAddr_eq (σ : State) (mv : MVal) (a : Addr) :
-    writeAddr σ mv a = (do let h ← heapRes σ mv a; pure { σ with heap := h }) := by
-  cases a with
-  | memoryField id f =>
-    simp only [writeAddr, heapRes, memWriteField, bind, Except.bind]
-    cases σ.getObj id with
-    | error _ => rfl
-    | ok o => cases o <;> rfl
-  | memoryIndex id i =>
-    simp only [writeAddr, heapRes, memWriteIndex, bind, Except.bind]
-    cases σ.getObj id with
-    | error _ => rfl
-    | ok o =>
-      cases o with
-      | struct _ => rfl
-      | array elems => by_cases hh : 0 ≤ i ∧ i.toNat < elems.length <;> simp [hh] <;> rfl
-
-theorem MPath.mval_loc' (σ : State) {T : Ty} (l : MLoc C T) : (MPath.loc l).mval σ = l.read σ := rfl
-theorem memWriteField_eq' (σ : State) (id : Nat) (f : Name) (mv : MVal) :
-    memWriteField σ id f mv = writeAddr σ mv (.memoryField id f) := rfl
-theorem memWriteIndex_eq' (σ : State) (id : Nat) (i : Int) (mv : MVal) :
-    memWriteIndex σ id i mv = writeAddr σ mv (.memoryIndex id i) := rfl
-
-macro "upd_unfold''" : tactic => `(tactic| simp only [Upd.apply, List.foldlM, UpdElem.write,
-    STerm.eval, SValT.eval, Term.eval_pv, Term.eval_lit', Term.eval_binop', Term.eval_find',
-    Term.eval_len', Term.eval_read', PTerm.eval, ITerm.eval_pv, ITerm.eval_read', ITerm.eval_alloc',
-    ITerm.eval_copy', MTerm.eval, MValT.eval, MAddr.eval_field', MAddr.eval_at', SPath.lower_eval,
-    Loc.lower_eval, Val.lower_eval,
-    Simple.lower_eval, Stmt.run, Src.value, Val.eval, Simple.eval_local, bind_assoc, pure_bind,
-    bind_pure, State.writeStorage_toSVal, State.writeRes_toSVal, State.saveStorage_eq,
-    State.writeStorage_eq,
-    writeAddr_eq, OpLoc.store, OpLoc.bump, opStore, bumpStore,
-    opLocal_eq, bumpLocal_eq, opMem, bumpMem, readLoc_eq, writeLoc_eq, ARhs.bind, MRhs.bind,
-    MSrc.mval, MLoc.write, MPath.mval_var, MVal.asRef_ref, MLoc.read_field, MLoc.read_index,
-    Loc.resolve, SPath.resolve, Src.pushVal, evalBinop_bump, applyBinOp_bump,
-    MPath.mval_loc', memWriteField_eq', memWriteIndex_eq'])
-
 theorem upd_storageRootIncrementAssignment {p : PrimTy} (v : Var) (op : IncDec)
     (hp : p.isNumeric = true) (gsp : Name) (hgsp : C.rootType gsp = some (Ty.prim p))
     (hs : (OpLoc.root gsp hgsp).recvSimple = true) (σ : State) :
@@ -258,7 +146,7 @@ theorem upd_storageRootIncrementAssignment {p : PrimTy} (v : Var) (op : IncDec)
               (Term.binop op.binOp p (Term.find STerm.storage (PTerm.root gsp)) (Term.lit (.int 1))))),
         UpdElem.val v (Term.bumped op p (Term.find STerm.storage (PTerm.root gsp)))] σ)
       (Stmt.run σ (Stmt.assignIncDec v op hp (OpLoc.root gsp hgsp) hs)) := by
-  rw [Term.bumped]; split <;> (upd_unfold''; res_split)
+  rw [Term.bumped]; split <;> (upd_unfold'; res_split)
 
 theorem upd_storageFieldIncrementAssignment {p : PrimTy} (v : Var) (op : IncDec)
     (hp : p.isNumeric = true) {x : Name} (sp : SPath C (Ty.struct x)) {fld : Name}
@@ -271,7 +159,7 @@ theorem upd_storageFieldIncrementAssignment {p : PrimTy} (v : Var) (op : IncDec)
                 (Term.lit (.int 1))))),
         UpdElem.val v (Term.bumped op p (Term.find STerm.storage (sp.lower.field fld)))] σ)
       (Stmt.run σ (Stmt.assignIncDec v op hp (OpLoc.field sp fld hfld) hs)) := by
-  rw [Term.bumped]; split <;> (upd_unfold''; res_split)
+  rw [Term.bumped]; split <;> (upd_unfold'; res_split)
 
 theorem upd_storageIndexIncrementAssignment {p : PrimTy} (v : Var) (op : IncDec)
     (hp : p.isNumeric = true) {x : RefTy} {x_1 : PrimTy} (it : IndexTy x x_1 (Ty.prim p))
@@ -284,7 +172,7 @@ theorem upd_storageIndexIncrementAssignment {p : PrimTy} (v : Var) (op : IncDec)
                 (Term.lit (.int 1))))),
         UpdElem.val v (Term.bumped op p (Term.find STerm.storage (sp.lower.at ie.lower)))] σ)
       (Stmt.run σ (Stmt.assignIncDec v op hp (OpLoc.index it sp ie) hs)) := by
-  rw [Term.bumped]; split <;> (upd_unfold''; res_split)
+  rw [Term.bumped]; split <;> (upd_unfold'; res_split)
 
 theorem upd_memoryFieldIncrementAssignment {p : PrimTy} (v : Var) (op : IncDec)
     (hp : p.isNumeric = true) (mv : Var) {fld x : Name} (hfld : C.fieldType x fld = some (Ty.prim p))
@@ -296,7 +184,7 @@ theorem upd_memoryFieldIncrementAssignment {p : PrimTy} (v : Var) (op : IncDec)
                 (Term.lit (.int 1))))),
         UpdElem.val v (Term.bumped op p (Term.read MTerm.memory (MAddr.field (ITerm.pv mv) fld)))] σ)
       (Stmt.run σ (Stmt.assignIncDec v op hp (OpLoc.mfield (MPath.var mv) fld hfld) hs)) := by
-  rw [Term.bumped]; split <;> (upd_unfold''; res_split)
+  rw [Term.bumped]; split <;> (upd_unfold'; res_split)
 
 theorem upd_memoryIndexArrayIncrementAssignment {p : PrimTy} (v : Var) (op : IncDec)
     (hp : p.isNumeric = true) {R : RefTy} (a : ArrTy R (.prim p)) (mv : Var) (ie : Simple C PrimTy.uint)
@@ -308,14 +196,14 @@ theorem upd_memoryIndexArrayIncrementAssignment {p : PrimTy} (v : Var) (op : Inc
                 (Term.lit (.int 1))))),
         UpdElem.val v (Term.bumped op p (Term.read MTerm.memory (MAddr.at (ITerm.pv mv) ie.lower)))] σ)
       (Stmt.run σ (Stmt.assignIncDec v op hp (OpLoc.mindex a (MPath.var mv) ie) hs)) := by
-  rw [Term.bumped]; split <;> (upd_unfold''; res_split)
+  rw [Term.bumped]; split <;> (upd_unfold'; res_split)
 
 /-! ### Memory reads, aliases and writes -/
 
 
 macro "mem_unfold" : tactic => `(tactic| (
   try simp only [MPath.lower, MLoc.lower]
-  upd_unfold''))
+  upd_unfold'))
 
 theorem upd_memoryFieldReadHeap (v mv : Var) {fld x : Name} {q : PrimTy}
     (hfld : C.fieldType x fld = some (Ty.prim q)) (σ : State) :
@@ -376,7 +264,6 @@ theorem upd_memoryIndexWriteCopy_var {R R' : RefTy} (a : ArrTy R' (Ty.ref R)) (m
 
 /-! ### Copies and allocations: a new heap and counter, the rest kept -/
 
-open SemanticsProperties in
 theorem res_frame_eq {α : Type} {σ : State} {x : Res (State × α)} (hx : FramePreserving σ x) :
     x = ((x.map fun p => (p.1.heap, p.1.nextId, p.2)) >>= fun q =>
       pure ({ σ with heap := q.1, nextId := q.2.1 }, q.2.2)) := by
@@ -396,7 +283,6 @@ theorem copyStToM_eq (σ : State) (sv : SVal) :
     copyStToM σ sv = (copyHN σ sv >>= fun q => pure ({ σ with heap := q.1, nextId := q.2.1 }, q.2.2)) :=
   res_frame_eq (SemanticsProperties.copyStToM_frame σ sv)
 
-open SemanticsProperties in
 theorem allocDefault_frame (σ : State) (R : RefTy) : FramePreserving σ (allocDefault σ R) := by
   intro t a h
   unfold allocDefault at h
@@ -421,7 +307,7 @@ theorem upd_memoryReferenceDeclFreshAlloc (R : RefTy) (mv : Var)
     SameOk [] (Upd.apply (C := C) [UpdElem.mref mv (ITerm.alloc MTerm.memory R),
         UpdElem.memory (MTerm.memory.addM R)] σ)
       (Stmt.run σ (Stmt.declMem R mv none hd)) := by
-  upd_unfold''
+  upd_unfold'
   simp only [allocDefault_eq, bind_assoc, pure_bind]
   res_split
   all_goals simp [State.setEnv, EnvAgreeExcept.refl]
@@ -432,7 +318,7 @@ theorem upd_memoryStorageCopy (mv : Var) {R : RefTy} (sp : SPath C (Ty.ref R))
       [UpdElem.mref mv (ITerm.copy MTerm.memory (SValT.find STerm.storage sp.lower)),
         UpdElem.memory (MTerm.memory.copySt (SValT.find STerm.storage sp.lower))] σ)
       (Stmt.run σ (Stmt.rebindMem mv (MRhs.copy sp hm))) := by
-  upd_unfold''
+  upd_unfold'
   simp only [copyStToM_eq, bind_assoc, pure_bind]
   res_split
   all_goals simp [State.setEnv, EnvAgreeExcept.refl]
@@ -443,7 +329,7 @@ theorem upd_memoryArrayFreshAlloc (mv : Var) {R : RefTy} (se : Simple C PrimTy.u
       [UpdElem.mref mv (ITerm.copy MTerm.memory (SValT.newArr R se.lower)),
         UpdElem.memory (MTerm.memory.copySt (SValT.newArr R se.lower))] σ)
       (Stmt.run σ (Stmt.rebindMem mv (MRhs.newArr se hn))) := by
-  upd_unfold''
+  upd_unfold'
   simp only [copyStToM_eq, bind_assoc, pure_bind]
   res_split
   all_goals simp [State.setEnv, EnvAgreeExcept.refl]
@@ -453,7 +339,7 @@ theorem upd_memoryRootDeleteFreshRebind (R : RefTy) (mv : Var) (hd : (Ty.ref R).
     SameOk [] (Upd.apply (C := C) [UpdElem.mref mv (ITerm.alloc MTerm.memory R),
         UpdElem.memory (MTerm.memory.addM R)] σ)
       (Stmt.run σ (Stmt.deleteMem (MPath.var (C := C) (R := R) mv) hd)) := by
-  upd_unfold''
+  upd_unfold'
   simp only [allocDefault_eq, bind_assoc, pure_bind]
   res_split
   all_goals simp [State.setEnv, EnvAgreeExcept.refl]
@@ -475,7 +361,7 @@ theorem upd_memoryDeletePrimitive {p : PrimTy} (l : MLoc C (Ty.prim p)) (a : MAd
     SameOk [] (Upd.apply (C := C) [UpdElem.memory (MTerm.memory.write a
         (MValT.val (Term.lit (PrimTy.default p))))] σ)
       (Stmt.run σ (Stmt.deleteMem (MPath.loc l) hd)) := by
-  upd_unfold''
+  upd_unfold'
   simp only [ha, memClear, writeAddr_eq]
   res_split
 
@@ -484,7 +370,7 @@ theorem upd_memoryDeleteReference {R : RefTy} (l : MLoc C (Ty.ref R)) (a : MAddr
     SameOk [] (Upd.apply (C := C) [UpdElem.memory ((MTerm.memory.addM R).write a
         (MValT.ref (ITerm.alloc MTerm.memory R)))] σ)
       (Stmt.run σ (Stmt.deleteMem (MPath.loc l) hd)) := by
-  upd_unfold''
+  upd_unfold'
   simp only [ha, memClear, allocDefault_eq, writeAddr_eq, bind_assoc, pure_bind]
   res_split
 
@@ -512,7 +398,7 @@ theorem upd_memoryToStorageStoreRoot (gsp : Name) {R : RefTy} (hgsp : C.rootType
     SameOk [] (Upd.apply (C := C) [UpdElem.storage (STerm.storage.save (PTerm.root gsp)
         (SValT.copyMem MTerm.memory mpath.lower))] σ)
       (Stmt.run σ (Stmt.assignFromMem (Loc.root gsp hgsp) mpath)) := by
-  upd_unfold''
+  upd_unfold'
   simp only [MPath.lower_eval, bind_assoc]
   res_split
 
@@ -521,7 +407,7 @@ theorem upd_memoryToStorageFieldCopyRoot {x : Name} (sp : SPath C (Ty.struct x))
     SameOk [] (Upd.apply (C := C) [UpdElem.storage (STerm.storage.save (sp.lower.field fld)
         (SValT.copyMem MTerm.memory mpath.lower))] σ)
       (Stmt.run σ (Stmt.assignFromMem (Loc.field sp fld hfld) mpath)) := by
-  upd_unfold''
+  upd_unfold'
   simp only [MPath.lower_eval, bind_assoc]
   res_split
 
@@ -530,7 +416,7 @@ theorem upd_memoryToStorageIndexCopyRoot {R R' : RefTy} {q : PrimTy} (it : Index
     SameOk [] (Upd.apply (C := C) [UpdElem.storage (STerm.storage.save (b.lower.at ie.lower)
         (SValT.copyMem MTerm.memory mpath.lower))] σ)
       (Stmt.run σ (Stmt.assignFromMem (Loc.index it b (Val.simple ie)) mpath)) := by
-  upd_unfold''
+  upd_unfold'
   simp only [MPath.lower_eval, bind_assoc]
   res_split
 
@@ -552,8 +438,6 @@ theorem pushAt_pushVal_some (σ σ' : State) (E : Ty) (r : Name) (segs : List Se
     pushAt σ E r segs (Src.pushVal σ' (some s)) =
       pushAt σ .uint r segs (fun _ => do pure (← s.value σ').strip) :=
   pushAt_const σ E .uint r segs _
-
-theorem pushVal_none (σ : State) {T : Ty} : Src.pushVal σ (none : Option (Src C T)) = pure := rfl
 
 theorem pushAt_with (σ : State) (E : Ty) (r : Name) (segs : List Seg) (f : SVal → Res SVal) :
     (pushAt σ E r segs f >>= fun τ => pure { σ with storage := τ.storage }) = pushAt σ E r segs f := by
@@ -591,7 +475,7 @@ theorem upd_storagePushValueSave {q : PrimTy} (sp : SPath C (Ty.prim q).array) (
     SameOk [] (Upd.apply (C := C) [UpdElem.storage (STerm.storage.push sp.lower (SValT.val se.lower))] σ)
       (Stmt.run σ (Stmt.push sp (some (Src.val (Val.simple se))) rfl)) := by
   simp only [Stmt.run, pushAt_pushVal_some]
-  upd_unfold''
+  upd_unfold'
   simp only [pushAt_with]
   res_split
 
@@ -601,7 +485,7 @@ theorem upd_storagePushValueCopySource {R : RefTy} (sp : SPath C (Ty.ref R).arra
         [UpdElem.storage (STerm.storage.push sp.lower (SValT.find STerm.storage sp2.lower))] σ)
       (Stmt.run σ (Stmt.push sp (some (Src.copy sp2 hm)) rfl)) := by
   simp only [Stmt.run, pushAt_pushVal_some]
-  upd_unfold''
+  upd_unfold'
   simp only [pushAt_with]
   res_split
 
@@ -609,17 +493,17 @@ theorem upd_storagePushLengthSave {E : Ty} (sp : SPath C E.array)
     (hd : ((none : Option (Src C E)).isSome || E.defaultOkS) = true) (σ : State) :
     SameOk [] (Upd.apply (C := C) [UpdElem.storage (STerm.storage.pushSlot sp.lower E)] σ)
       (Stmt.run σ (Stmt.push sp none hd)) := by
-  simp only [Stmt.run, pushVal_none]
-  upd_unfold''
+  simp only [Stmt.run, Src.pushVal_none]
+  upd_unfold'
   simp only [pushAt_with]
-  res_split
+  cases SPath.resolve σ sp <;> exact SameOk.self _ _
 
 theorem upd_storagePushLengthSaveReferenceElement {E : Ty} (sp : SPath C E.array)
     (hd : ((none : Option (Src C E)).isSome || E.defaultOkS) = true) (σ : State) :
     SameOk [] (Upd.apply (C := C) [UpdElem.storage (STerm.storage.extend sp.lower E)] σ)
       (Stmt.run σ (Stmt.push sp none hd)) := by
-  simp only [Stmt.run, pushVal_none]
-  upd_unfold''
+  simp only [Stmt.run, Src.pushVal_none]
+  upd_unfold'
   simp only [pushAt, pushPlaceAt, State.saveStorage_eq, bind_assoc, pure_bind]
   simp only [bind, Except.bind, pure, Except.pure]
   cases SPath.resolve σ sp with
@@ -641,7 +525,7 @@ theorem upd_storagePopSave {E : Ty} (sp : SPath C E.array) (hE : E.isMapping = f
     (σ : State) :
     SameOk [] (Upd.apply (C := C) [UpdElem.storage (STerm.storage.pop sp.lower)] σ)
       (Stmt.run σ (Stmt.pop sp)) := by
-  upd_unfold''
+  upd_unfold'
   simp only [hE, popAt_with]
   res_split
 
@@ -649,7 +533,7 @@ theorem upd_storagePopSaveMappingElement {E : Ty} (sp : SPath C E.array) (hE : E
     (σ : State) :
     SameOk [] (Upd.apply (C := C) [UpdElem.storage (STerm.storage.shrink sp.lower)] σ)
       (Stmt.run σ (Stmt.pop sp)) := by
-  upd_unfold''
+  upd_unfold'
   simp only [hE, popAt_with]
   res_split
 
@@ -658,7 +542,7 @@ theorem upd_storageLocalRootPushBind {R : RefTy} (lsv : Var) (sp : SPath C (Ty.r
     SameOk [] (Upd.apply (C := C) [UpdElem.storage (STerm.storage.extend sp.lower (Ty.ref R)),
         UpdElem.path lsv sp.lower.next] σ)
       (Stmt.run σ (Stmt.rebind lsv (ARhs.push sp hd))) := by
-  upd_unfold''
+  upd_unfold'
   simp only [pushPlaceAt, State.saveStorage_eq, bind_assoc, pure_bind]
   simp only [bind, Except.bind, pure, Except.pure]
   cases SPath.resolve σ sp with
@@ -676,7 +560,7 @@ theorem upd_storageLocalRootPushBind {R : RefTy} (lsv : Var) (sp : SPath C (Ty.r
         | ok st => simp
       | _ => trivial
 
-set_option maxHeartbeats 4000000 in
+set_option maxHeartbeats 1000000 in
 theorem Taclet.sound_update {k : Nat} {m : Modality} {s : Stmt C} {U : Upd C}
     (d : Taclet C k m s (.update U)) : ∀ σ, SameOk [] (U.apply σ) (s.run σ) := by
   cases d

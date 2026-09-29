@@ -70,6 +70,7 @@ inductive RawTerm where
 inductive RawUpdElem where
   | assign (x : String) (t : RawTerm)
   | transfer (r a : RawTerm)
+  | book (a : RawTerm)
   deriving Repr, Inhabited
 
 /-- A formula as written.  `peq`/`pne` compare program expressions (`==`, `!=`). -/
@@ -86,7 +87,8 @@ inductive RawFml where
   | not (φ : RawFml)
   | and (φ ψ : RawFml)
   | imp (φ ψ : RawFml)
-  | upd (U : List RawUpdElem) (φ : RawFml)
+  /-- `{U} φ`, under the modality of the goal it came from (`fmlModality?`). -/
+  | upd (m : Modality) (U : List RawUpdElem) (φ : RawFml)
   | modal (m : Modality) (P : List RawStmt) (φ : RawFml)
   deriving Repr, Inhabited
 
@@ -164,6 +166,7 @@ def expandUpd (U : TSyntax `dl_upd) : MacroM Lean.Term := do
     match (⟨e⟩ : TSyntax `dl_upd_elem) with
     | `(dl_upd_elem| transfer($r, $a)) =>
       `(RawUpdElem.transfer $(← expandTerm r) $(← expandTerm a))
+    | `(dl_upd_elem| book($a)) => do `(RawUpdElem.book $(← expandTerm a))
     | `(dl_upd_elem| $l:dl_term := $r:dl_term) =>
       let `(dl_term| $x:ident) := l | Macro.throwErrorAt l "an update assigns a variable"
       let [n] := nameParts x.getId | Macro.throwErrorAt l "an update assigns a variable"
@@ -185,11 +188,27 @@ partial def expandFml : TSyntax `dl_fml → MacroM Lean.Term
   | `(dl_fml| $a:dl_term >= $b:dl_term) => cmp ``BinOp.ge a b
   | `(dl_fml| ∀ $T:ident $x:ident; $φ:dl_fml) => do
       `(RawFml.all $(← specSort T) $(quote x.getId.toString) $(← expandFml φ))
+  | `(dl_fml| ∃ $T:ident $x:ident; $φ:dl_fml) => do
+      `(RawFml.not (RawFml.all $(← specSort T) $(quote x.getId.toString)
+        (RawFml.not $(← expandFml φ))))
   | `(dl_fml| ¬ $φ:dl_fml) => do `(RawFml.not $(← expandFml φ))
   | `(dl_fml| $φ:dl_fml ∧ $ψ:dl_fml) | `(dl_fml| $φ:dl_fml && $ψ:dl_fml) => do
       `(RawFml.and $(← expandFml φ) $(← expandFml ψ))
+  | `(dl_fml| $φ:dl_fml ∨ $ψ:dl_fml) => do
+      `(RawFml.not (RawFml.and (RawFml.not $(← expandFml φ)) (RawFml.not $(← expandFml ψ))))
   | `(dl_fml| $φ:dl_fml → $ψ:dl_fml) => do `(RawFml.imp $(← expandFml φ) $(← expandFml ψ))
-  | `(dl_fml| $U:dl_upd $φ:dl_fml) => do `(RawFml.upd $(← expandUpd U) $(← expandFml φ))
+  | `(dl_fml| $φ:dl_fml ↔ $ψ:dl_fml) => do
+      let φ ← expandFml φ
+      let ψ ← expandFml ψ
+      `(RawFml.and (RawFml.imp $φ $ψ) (RawFml.imp $ψ $φ))
+  | stx@`(dl_fml| { havoc } $_:dl_fml) =>
+      Macro.throwErrorAt stx "`{ havoc }` is what a callback rule leaves, not a formula to write: \
+        `dl[C]{ … }` reads formulas of `Stmt.run`"
+  | `(dl_fml| $U:dl_upd $φ:dl_fml) => do
+      let m ← match ← fmlModality? φ with
+        | some m => pure m
+        | none => `(Modality.diamond)
+      `(RawFml.upd $m $(← expandUpd U) $(← expandFml φ))
   | `(dl_fml| ⟨ $[$ss:sol_stmt;]* ⟩ $φ:dl_fml) => do
       `(RawFml.modal .diamond [$(← ss.mapM expandStmt),*] $(← expandFml φ))
   | `(dl_fml| [ $[$ss:sol_stmt;]* ] $φ:dl_fml) => do
@@ -207,17 +226,10 @@ where
 
 end Expand
 
-/-! ## Names -/
+/-! ## Names
 
-/-- The names a raw expression reads. -/
-def RawExpr.names : RawExpr → List String
-  | .name x => [x]
-  | .field e _ | .unop _ e | .incDec _ e | .newArr _ e => e.names
-  | .index a b | .binop _ a b => a.names ++ b.names
-  | .ternary c a b => c.names ++ a.names ++ b.names
-  | .call _ as => as.attach.flatMap fun ⟨a, _⟩ => a.names
-  | .named _ _ as => as.attach.flatMap fun ⟨a, _⟩ => a.names
-  | .num _ | .bool _ | .env _ => []
+Those of the program syntax (`RawExpr.names`, `RawStmt.names`,
+`RawStmt.decls`) are `Syntax.lean`'s. -/
 
 mutual
 
@@ -237,46 +249,10 @@ def RawTerm.namesList : List RawTerm → List String
 
 end
 
-mutual
-
-/-- The names a raw statement reads. -/
-def RawStmt.names : RawStmt → List String
-  | .assign l r | .assignPush l r | .opAssign _ l r | .assignIncDec l _ r => l.names ++ r.names
-  | .decl _ _ i | .declStorage _ _ i | .declMemory _ _ i => (i.map RawExpr.names).getD []
-  | .declStoragePush _ _ b | .delete b | .incDec _ b | .require b | .assert b => b.names
-  -- a function's name is not a name the formula reads
-  | .call (.name _) as => (as.map RawExpr.names).flatten
-  | .call f as => f.names ++ (as.map RawExpr.names).flatten
-  | .ite c t e => c.names ++ RawStmt.namesList t ++ RawStmt.namesList e
-  | .ret e => (e.map RawExpr.names).getD []
-  | .revert => []
-  | .eval as => (as.map RawExpr.names).flatten
-  | .unchecked b => RawStmt.namesList b
-
-def RawStmt.namesList : List RawStmt → List String
-  | [] => []
-  | s :: ss => s.names ++ RawStmt.namesList ss
-
-end
-
-mutual
-
-/-- The names a raw statement declares, in either branch of an `if`. -/
-def RawStmt.decls : RawStmt → List String
-  | .decl _ x _ | .declStorage _ x _ | .declMemory _ x _ | .declStoragePush _ x _ => [x]
-  | .ite _ t e => RawStmt.declsList t ++ RawStmt.declsList e
-  | .unchecked b => RawStmt.declsList b
-  | _ => []
-
-def RawStmt.declsList : List RawStmt → List String
-  | [] => []
-  | s :: ss => s.decls ++ RawStmt.declsList ss
-
-end
-
 def RawUpdElem.names : RawUpdElem → List String
   | .assign x t => if x = "storage" || x = "memory" then t.names else x :: t.names
   | .transfer r a => r.names ++ a.names
+  | .book a => a.names
 
 /-- The names a raw formula mentions, and those its programs declare. -/
 def RawFml.names : RawFml → List String × List String
@@ -292,7 +268,7 @@ def RawFml.names : RawFml → List String × List String
     let (u, d) := φ.names
     let (u', d') := ψ.names
     (u ++ u', d ++ d')
-  | .upd U φ =>
+  | .upd _ U φ =>
     let (u, d) := φ.names
     ((U.map RawUpdElem.names).flatten ++ u, d)
   | .modal _ P φ =>
@@ -301,17 +277,17 @@ def RawFml.names : RawFml → List String × List String
 
 /-- The statements of every program in a formula. -/
 def RawFml.stmts : RawFml → List RawStmt
-  | .not φ | .upd _ φ | .all _ _ φ => φ.stmts
+  | .not φ | .upd _ _ φ | .all _ _ φ => φ.stmts
   | .and φ ψ | .imp φ ψ => φ.stmts ++ ψ.stmts
   | .modal _ P φ => P ++ φ.stmts
   | _ => []
 
-/-- The modality of the formula under an update: an update is judged as the
-goal it came from (`fmlModality?` of the schema reader). -/
-def RawFml.modality : RawFml → Modality
-  | .modal m _ _ => m
-  | .upd _ φ => φ.modality
-  | _ => .diamond
+/-- `t = true`: a condition as a formula. -/
+def boolFml {C : Contract} (t : Term C) : Fml C := .eq t (.lit (.bool true))
+
+/-- `a ⊕ b = true`: a comparison as a formula (`a < b` and the like). -/
+def cmpFml {C : Contract} (op : BinOp) (p : PrimTy) (a b : Term C) : Fml C :=
+  boolFml (.binop op p a b)
 
 /-! ## Elaboration -/
 
@@ -392,6 +368,8 @@ partial def tVal (Γ : ECtx) : RawTerm → Except String (Term C)
     else pure (.find .storage (← tPath Γ t))
   | .app "select" [s, r] | .app "find" [s, r] => do pure (.find (← tStor Γ s) (← tPath Γ r))
   | .app "read" [m, a] => do pure (.read (← tMem Γ m) (← tAddr Γ a))
+  | .app "net" [a] => do pure (.net (← tVal Γ a))
+  | .app "net" [.name x, a] => do pure (.netOf (Var.ofName x) (← tVal Γ a))
   | .app "!" [t] => do pure (.unop .not .bool (← tVal Γ t))
   | .app "defVal" [.name "uint"] => pure (.lit (PrimTy.default .uint))
   | .app "defVal" [.name "int"] => pure (.lit (PrimTy.default .int))
@@ -494,8 +472,6 @@ def RawExpr.pathTy : RawExpr → Option Ty
     | _ => none
   | _ => none
 
-mutual
-
 /-- A name a statement binds to a storage path without declaring it
 (`p = alice;`, `p = people.push();`): what symbolic execution leaves of
 `Person storage p = alice;`. -/
@@ -506,14 +482,9 @@ def RawStmt.aliasHints : RawStmt → List (String × RefTy)
   | .assignPush (.name x) b => match b.pathTy C with
     | some (.ref (.array (.ref R))) => [(x, R)]
     | _ => []
-  | .ite _ t e => RawStmt.aliasHintsList t ++ RawStmt.aliasHintsList e
+  | .ite _ t e => (t.attach.flatMap fun ⟨s, _⟩ => s.aliasHints) ++
+      e.attach.flatMap fun ⟨s, _⟩ => s.aliasHints
   | _ => []
-
-def RawStmt.aliasHintsList : List RawStmt → List (String × RefTy)
-  | [] => []
-  | s :: ss => s.aliasHints ++ RawStmt.aliasHintsList ss
-
-end
 
 /-- A parallel update, and the scope under it: `x := p` for a path `p` of
 reference type binds `x` as an alias of that type.  Every right-hand side is
@@ -523,10 +494,16 @@ def elabUpd (Γ : ECtx) : List RawUpdElem → Except String (Upd C × ECtx)
   | .transfer r a :: U => do
     let (U', Γ') ← elabUpd Γ U
     pure (.transfer (← tVal C Γ r) (← tVal C Γ a) :: U', Γ')
+  | .book a :: U => do
+    let (U', Γ') ← elabUpd Γ U
+    pure (.book (← tVal C Γ a) :: U', Γ')
   | .assign x t :: U => do
     let (U', Γ') ← elabUpd Γ U
     if x = "storage" then return (.storage (← tStor C Γ t) :: U', Γ')
     if x = "memory" then return (.memory (← tMem C Γ t) :: U', Γ')
+    -- `oldNet := net`: a ledger variable, which `net(oldNet, a)` reads
+    if (t matches .name "net") && (C.rootType "net").isNone then
+      return (.saveNet (Var.ofName x) :: U', Γ')
     -- `old := storage`: a storage variable
     if isStorTerm t then return (.store (Var.ofName x) (← tStor C Γ t) :: U', setBy x .store Γ')
     if let some (.ref R) := pathTy C Γ t then
@@ -577,18 +554,18 @@ def elabFml : RawFml → ElabM (Fml C)
     pure (.not (.eq a b))
   | .cmp op a b => do
     let (Γ, _) ← get
-    pure (.eq (.binop op .uint (← tVal C Γ a) (← tVal C Γ b)) (.lit (.bool true)))
+    pure (cmpFml op .uint (← tVal C Γ a) (← tVal C Γ b))
   | .all p x φ => inScope do
     modify fun (Γ, k) => (setBy x (.val p) Γ, k)
     pure (.all (Var.ofName x) p (← elabFml φ))
   | .not φ => do pure (.not (← inScope (elabFml φ)))
   | .and φ ψ => do pure (.and (← inScope (elabFml φ)) (← inScope (elabFml ψ)))
   | .imp φ ψ => do pure (.imp (← inScope (elabFml φ)) (← inScope (elabFml ψ)))
-  | .upd U φ => inScope do
+  | .upd m U φ => inScope do
     let (Γ, k) ← get
     let (U', Γ') ← elabUpd C Γ U
     set (Γ', k)
-    pure (.upd φ.modality U' (← elabFml φ))
+    pure (.upd m U' (← elabFml φ))
   | .modal m P φ => inScope do
     let P' ← elabStmts C P
     pure (.modal m P' (← elabFml φ))
@@ -599,7 +576,7 @@ storage path, else a `uint` local.  A capture is numbered past every fresh
 variable the formula writes. -/
 def elabDl (φ : RawFml) : Except String (Fml C) :=
   let (used, declared) := φ.names
-  let hints := RawStmt.aliasHintsList C φ.stmts
+  let hints := φ.stmts.flatMap (RawStmt.aliasHints C)
   -- an enum's name (`State` in `State.Locked`) is no parameter
   let free := (used.filter fun x => !declared.contains x && (C.rootType x).isNone &&
     (lookupBy x C.enums).isNone).eraseDups
@@ -681,6 +658,17 @@ example : (dl!{ ⟨ Person storage p = alice; p.age = 3; ⟩ p.age == 3 }).step 
 /-- A capture is numbered past the fresh variables the formula writes. -/
 example : dl!{ ⟨ values[total + 1] += 2; ⟩ ie3 == 0 } =
     dl!{ ⟨ uint ie4 = total + 1; values[ie4] += 2; ⟩ ie3 == 0 } := rfl
+
+/-- `∨`, `↔` and `∃` are the connectives they stand for, and print back. -/
+example : dl!{ a == 1 ∨ a == 2 } = dl!{ ¬(¬a == 1 ∧ ¬a == 2) } := rfl
+example : dl!{ a == 1 ↔ b == 1 } = dl!{ (a == 1 → b == 1) ∧ (b == 1 → a == 1) } := rfl
+example : dl!{ ∃ uint y; y == a } = dl!{ ¬(∀ uint y; ¬y == a) } := rfl
+
+/-- info: dl{ a = 1 ∨ a = 2 ↔ ¬b = 1 } : Fml StandardExample -/
+#guard_msgs in #check dl!{ a == 1 ∨ a == 2 ↔ ¬b == 1 }
+
+/-- info: dl{ ∃ uint y; y = a } : Fml StandardExample -/
+#guard_msgs in #check dl!{ ∃ uint y; y == a }
 
 /-- error: Solidity elaboration failed: unknown name y -/
 #guard_msgs in #check dl!{ ⟨ uint y = 1; ⟩ true ∧ y == 1 }

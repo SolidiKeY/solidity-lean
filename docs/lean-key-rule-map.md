@@ -419,7 +419,7 @@ block in `Update.lean` **is** the signature):
 
 | KeY sort | Here | Notes |
 | --- | --- | --- |
-| a value | `Term` | a constant, a stack local, `a ⊕ b`, `find(s, p)`, `read(m, a)`, `select(s, r)` (`Term.find` at a state variable), the length of an array (`Term.len`), `c ? a : b` |
+| a value | `Term` | a constant, a stack local, `a ⊕ b`, `find(s, p)`, `read(m, a)`, `select(s, r)` (`Term.find` at a state variable), the length of an array (`Term.len`), `c ? a : b`, `selectSt(net, at(a))` (`Term.net`) and `selectSt(oldNet, at(a))` (`Term.netOf`) |
 | `Path[storage]` | `PTerm` | a state variable (`.root`), an alias (`.pv`), `.field`/`.at` |
 | `Storage` | `STerm` | `.storage`, `save`/`.save`, `delAt`/`.delAt`; a push and a pop are `.push`/`.pushSlot`/`.pop`/`.extend`, **not** two plain `save`s stacked — see below |
 | what a storage `save` writes | `SValT` | a value (`.val`), a subtree read out of a storage (`.find`), or a memory object copied back (`.copyMem`, KeY's `copyMem(mtSt, m, i)`) |
@@ -427,7 +427,7 @@ block in `Update.lean` **is** the signature):
 | a member or element of a memory object | `MAddr` | `.field`/`.at` |
 | `Memory` | `MTerm` | `.memory`, `write(m, a, v)` (`.write`), `addM(m)` (`.addM`, eager: the type rides along), `copySt(m, v)` (`.copySt`) |
 | what a memory `write` writes | `MValT` | a value (`.val`) or a reference (`.ref`) |
-| one elementary update | `UpdElem` | `.val`/`.path`/`.mref`/`.storage`/`.memory`, plus `.transfer` for `{selfBalance := selfBalance - a ‖ net := …}`, the pair that moves together |
+| one elementary update | `UpdElem` | `.val`/`.path`/`.mref`/`.storage`/`.memory`, plus `.transfer` for `{selfBalance := selfBalance - a ‖ net := …}`, the pair that moves together; `.store` for `old := storage`, `.saveNet` for `oldNet := net`, and `.book` for a specification's `{net := storeSt(net, at(msgSender), … + msgValue) ‖ selfBalance := selfBalance + msgValue}` |
 
 **An allocation is still the two parallel elements KeY writes** —
 `memoryReferenceDeclFreshAlloc`'s premise is

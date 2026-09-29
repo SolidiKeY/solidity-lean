@@ -79,7 +79,7 @@ def Fml.ruleAt (k : Nat) : Fml C → Option (StepRule C)
   | _ => none
 
 /-- The rule `Fml.step` fires. -/
-def Fml.rule (φ : Fml C) : Option (StepRule C) := φ.ruleAt (maxIdx φ.vars + 1)
+def Fml.rule (φ : Fml C) : Option (StepRule C) := φ.ruleAt φ.fresh
 
 /-- A rule fires exactly where a step is taken.
 
@@ -156,13 +156,17 @@ def lastName : Lean.Name → Lean.Name
 def isRuleCtor (c : Lean.Name) : Bool :=
   (`Solidity.Taclet).isPrefixOf c || (`Solidity.LeanTaclet).isPrefixOf c
 
+/-- `Rule.key d` or `Rule.lean d`: the derivation `d` it wraps. -/
+def unwrapRule? (d : Lean.Expr) : Option Lean.Expr :=
+  if d.isAppOfArity ``Rule.key 6 || d.isAppOfArity ``Rule.lean 6 then some d.appArg! else none
+
 /-- A derivation, with the auxiliary lemmas the elaborator abstracted it
 into (a constructor applied to its side conditions' proofs) unfolded, down
 to a constructor, under the `Rule` that wraps it. -/
 partial def tacletHead (d : Lean.Expr) : MetaM Lean.Expr := do
   let d ← whnfCore d
-  if d.isAppOfArity ``Rule.key 6 || d.isAppOfArity ``Rule.lean 6 then
-    return mkAppN d.getAppFn (d.getAppArgs.set! 5 (← tacletHead d.appArg!))
+  if let some inner := unwrapRule? d then
+    return mkAppN d.getAppFn (d.getAppArgs.set! 5 (← tacletHead inner))
   let .const c us := d.getAppFn | return d
   if isRuleCtor c then return d
   match ← getConstInfo c with
@@ -171,8 +175,7 @@ partial def tacletHead (d : Lean.Expr) : MetaM Lean.Expr := do
 
 /-- The constructor a rule's derivation is, if it is one. -/
 def ruleCtor? (d : Lean.Expr) : Option Lean.Name := do
-  let d := if d.isAppOfArity ``Rule.key 6 || d.isAppOfArity ``Rule.lean 6 then d.appArg! else d
-  let c ← d.getAppFn.constName?
+  let c ← ((unwrapRule? d).getD d).getAppFn.constName?
   if isRuleCtor c then some c else none
 
 /-- The derivation a `Step` carries, reduced to a constructor. -/
@@ -181,6 +184,14 @@ partial def tacletOf (e : Lean.Expr) : MetaM Lean.Expr := do
   unless e.isAppOfArity ``Step.mk 6 do throwError "not a step:{indentExpr e}"
   let d ← whnfCore (e.getArg! 5)
   if d.isAppOf ``Step.rule then tacletOf d.appArg! else tacletHead d
+
+/-- The derivation `Stmt.step` gives for `s` (fresh index `k`, modality
+`m`), reduced to a constructor, and that constructor.  The derivation in a
+`StepRule` that `Fml.ruleAt` built is an auxiliary lemma: this is where its
+constructor is read instead. -/
+def stepTaclet (C k m s : Lean.Expr) : MetaM (Lean.Expr × Option Lean.Name) := do
+  let d ← tacletOf (mkAppN (mkConst ``Stmt.step) #[C, k, m, s])
+  return (d, ruleCtor? d)
 
 /-- The rule the strategy fires on the formula `φ`, as a `StepRule` term
 whose derivation is a constructor, and that constructor's name. -/
@@ -191,9 +202,7 @@ def ruleOfLine (φ : Lean.Expr) : MetaM (Option (Lean.Expr × Lean.Name)) := do
   if r.isAppOfArity ``StepRule.emptyModality 1 then return some (r, `emptyModality)
   unless r.isAppOfArity ``StepRule.taclet 6 do return none
   let #[C, k, m, s, p, _] := r.getAppArgs | return none
-  -- the derivation in `Fml.ruleAt` is an auxiliary lemma: take it from `Stmt.step` again
-  let d' ← tacletOf (mkAppN (mkConst ``Stmt.step) #[C, k, m, s])
-  let some c := ruleCtor? d' | return some (r, `taclet)
+  let (d', some c) ← stepTaclet C k m s | return some (r, `taclet)
   return some (mkAppN (mkConst ``StepRule.taclet) #[C, k, m, s, p, d'], lastName c)
 
 /-- The name `~[r]~>` shows for a label: the head of its derivation, or, when
@@ -205,9 +214,7 @@ def ruleName? (r : Lean.Expr) : MetaM (Option Lean.Name) := do
   unless r.isAppOfArity ``StepRule.taclet 6 do return none
   if let some c := ruleCtor? (← instantiateMVars r.appArg!) then return some (lastName c)
   let #[C, k, m, s, _, _] := r.getAppArgs | return none
-  let some c := ruleCtor? (← tacletOf (mkAppN (mkConst ``Stmt.step) #[C, k, m, s]))
-    | return none
-  return some (lastName c)
+  return (← stepTaclet C k m s).2.map lastName
 
 /-- The label of `φ ~[r]~> ψ`: the rule the strategy fires on `φ`, which must be
 `Taclet.r` or `LeanTaclet.r` (or `emptyModality`), or be derived by it. -/
@@ -399,7 +406,7 @@ theorem Fml.StepBy.rule_eq {r : StepRule C} {φ ψ : Fml C} (h : Fml.StepBy r φ
 Example: `⟨ x = 1; ⟩ x == 1 ~> { x := 1 } ⟨⟩ x == 1`, and the rule is
 `localValueAssign`. -/
 theorem Fml.OneStep.stepBy {φ ψ : Fml C} (h : φ ~> ψ) : ∃ r, Fml.StepBy r φ ψ := by
-  have := Fml.ruleAt_isSome (k := maxIdx φ.vars + 1) φ
+  have := Fml.ruleAt_isSome (k := φ.fresh) φ
   unfold Fml.OneStep Fml.step at h
   rw [h] at this
   obtain ⟨r, hr⟩ := Option.isSome_iff_exists.1 this
@@ -597,11 +604,9 @@ def chainLines (C φ : Lean.Expr) : MetaM (List Lean.Expr) := do
   if φ.hasFVar || φ.hasMVar then
     throwError "sol_chain: the formula is not closed; give the number of steps instead: \
       `Fml.Steps.ofRun n rfl`{indentExpr φ}"
-  let c := mkApp2 (mkConst ``Lean.mkConst) (toExpr n)
-    (mkApp (mkConst ``List.nil [0]) (mkConst ``Lean.Level))
   let ty ← mkAppM ``List #[mkConst ``Lean.Expr]
   unsafe evalExpr (List Lean.Expr) ty
-    (mkApp4 (mkConst ``Fml.linesQuoted) C c (toExpr 200) φ)
+    (mkApp4 (mkConst ``Fml.linesQuoted) C (quoteConstName n) (toExpr 200) φ)
 
 /-- The derivation of `φ`, shown: every line with the rule that reached it. -/
 def showLines (φ : Lean.Expr) (lines : List Lean.Expr) : MetaM MessageData := do

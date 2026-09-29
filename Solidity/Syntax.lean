@@ -32,7 +32,9 @@ U+2212 MINUS SIGN): `--` opens a comment in Lean, so it cannot appear in a
 `sol{ … }` block, and `x -= 1` is another statement.  And a value has no
 effects: an `++`/`−−` inside an expression, or a conditional whose branches
 are references, is captured by the elaborator into a fresh local before its
-statement (`hoist`), in the order solc evaluates the operands.
+statement (`hoist`), in the order solc evaluates the operands.  A statement
+ending in a block (`if (c) { … }`, `unchecked { … }`) may leave out its `;`
+(`solSemi`), and `else if` nests an `if` in the `else` branch.
 
 A contract declares its internal functions (`contract!{ function f(uint x)
 returns (uint r) { … } }`), each calling only the ones declared before it.
@@ -187,6 +189,9 @@ structure FunDecl where
   mods : List ModApp := []
   /-- Its `requires`/`ensures` clauses, as read (`Calculus/Spec.lean`). -/
   spec : FunSpec := {}
+  /-- Declared `payable`: its obligation assumes `msg.value >= 0` where
+  another's assumes `msg.value == 0`, as solkey's does. -/
+  payable : Bool := false
   deriving Repr, Inhabited
 
 /-! ## The contract
@@ -242,11 +247,15 @@ syntax "ty!(" sol_ty ")" : term
 
 macro_rules
   | `(ty!($x:ident)) =>
-      match x.getId.toString with
-      | "uint" | "uint256" | "address" => `(Ty.uint)
-      | "int" | "int256" => `(Ty.int)
-      | "bool" => `(Ty.bool)
-      | s => `(Ty.struct $(Lean.quote s))
+      let s := x.getId.toString
+      match PrimTy.ofName? s with
+      | some .uint => `(Ty.uint)
+      | some .int => `(Ty.int)
+      | some .bool => `(Ty.bool)
+      | none =>
+        -- a struct of the table; an enum never reaches here (`expandMemberTy`)
+        if (structDef s).isEmpty then Lean.Macro.throwErrorAt x (unknownTyMsg s)
+        else `(Ty.struct $(Lean.quote s))
   | `(ty!(address payable)) => `(Ty.uint)
   | `(ty!(mapping($K => $V))) => `(Ty.mapping ty!($K) ty!($V))
   | `(ty!($T[])) => `(Ty.array ty!($T))
@@ -575,9 +584,6 @@ abbrev Prog (C : Contract) := List (Stmt C)
 /-- `T x = e;`: a parameter bound to its argument. -/
 def Arg.decl {C : Contract} (a : Arg C) : Stmt C := .declLocal a.p a.x (some a.e)
 
-/-- The parameters of a call. -/
-def Arg.params {C : Contract} (args : List (Arg C)) : List Var := args.map (·.x)
-
 /-- `T r;`: the return variable declared, at its default. -/
 def CallRet.decl {C : Contract} : CallRet → Prog C
   | .none => []
@@ -604,23 +610,6 @@ is the whole expression. -/
 section Print
 
 variable {C : Contract} [FreshNames]
-
-def BinOp.sym : BinOp → String
-  | .add => "+" | .sub => "-" | .mul => "*" | .pow => "**" | .div => "/" | .mod => "%"
-  | .lt => "<" | .gt => ">" | .le => "<=" | .ge => ">="
-  | .eqB => "==" | .neB => "!=" | .and => "&&" | .or => "||"
-  | .band => "&" | .bor => "|" | .bxor => "^" | .shl => "<<" | .shr => ">>"
-  | .addW => "+%" | .subW => "-%" | .mulW => "*%" | .powW => "**%"
-
-def UnOp.sym : UnOp → String
-  | .neg => "-" | .not => "!" | .bnot => "~"
-
-def Ty.toStr : Ty → String
-  | .prim .uint => "uint" | .prim .int => "int" | .prim .bool => "bool"
-  | .ref (.struct s) => s
-  | .ref (.array T) => T.toStr ++ "[]"
-  | .ref (.fixed T n) => s!"{T.toStr}[{n}]"
-  | .ref (.mapping K V) => s!"mapping({K.toStr} => {V.toStr})"
 
 def Simple.toStr {p : PrimTy} : Simple C p → String
   | .lit n _ => toString n
@@ -750,10 +739,8 @@ def Prog.toStr : List (Stmt C) → String
 end
 
 /-- One statement per line, for display. -/
-def Prog.show : List (Stmt C) → String
-  | [] => ""
-  | [s] => s.toStr
-  | s :: P => s!"{s.toStr}\n{Prog.show P}"
+def Prog.show (P : List (Stmt C)) : String :=
+  "\n".intercalate (P.map Stmt.toStr)
 
 end Print
 
@@ -840,7 +827,37 @@ syntax:arg (name := solCallExpr) sol_expr:max "(" sol_expr,* ")" : sol_expr
 
 declare_syntax_cat sol_stmt (behavior := both)
 declare_syntax_cat sol_block (behavior := both)
-syntax "{" (sol_stmt ";")* "}" : sol_block
+
+section Semi
+open Lean Parser PrettyPrinter
+
+/-- The last token of a node: an atom or an identifier. -/
+partial def lastToken? : Syntax → Option Syntax
+  | .node _ _ args => args.reverse.findSome? lastToken?
+  | .missing => none
+  | s => some s
+
+/-- `;` after a statement, which a statement ending in a block (`if (c) { … }`,
+`unchecked { … }`) may leave out: it is then read as if written, so the
+statement's syntax is the same either way. -/
+def solSemiFn : ParserFn := fun c s =>
+  let s' := symbolFn ";" c s
+  if s'.hasError && (lastToken? s.stxStack.back).any (·.isToken "}") then
+    s.pushSyntax (mkAtom ";")
+  else s'
+
+def solSemi : Parser :=
+  { fn := solSemiFn, info := { collectTokens := (";" :: ·) } }
+
+@[combinator_formatter solSemi]
+def solSemi.formatter : Formatter := Formatter.symbolNoAntiquot.formatter ";"
+
+@[combinator_parenthesizer solSemi]
+def solSemi.parenthesizer : Parenthesizer := Parenthesizer.symbolNoAntiquot.parenthesizer ";"
+
+end Semi
+
+syntax "{" (sol_stmt solSemi)* "}" : sol_block
 syntax sol_expr " = " sol_expr : sol_stmt
 syntax sol_ty ident : sol_stmt
 syntax sol_ty ident " = " sol_expr : sol_stmt
@@ -892,6 +909,9 @@ syntax sol_expr " >>= " sol_expr : sol_stmt
 /-- `unchecked { … }`: its `+ - * **` wrap at `2^256` instead of reverting. -/
 syntax (name := solUnchecked) &"unchecked" ppSpace sol_block : sol_stmt
 syntax "if " "(" sol_expr ") " sol_block (" else " sol_block)? : sol_stmt
+/-- `if (c) { … } else if (d) { … } else { … }`: the `if`s nested. -/
+syntax (name := solIfChain) "if " "(" sol_expr ") " sol_block
+  (atomic(" else " "if ") "(" sol_expr ") " sol_block)+ (" else " sol_block)? : sol_stmt
 syntax (name := solRequire) &"require" "(" sol_expr ")" : sol_stmt
 syntax (name := solAssert) &"assert" "(" sol_expr ")" : sol_stmt
 syntax (name := solRevert) &"revert" "(" ")" : sol_stmt
@@ -935,7 +955,7 @@ syntax sol_expr " = " sol_expr "⊕⊕" : sol_stmt
 syntax sol_expr " ⊕= " sol_expr : sol_stmt
 
 /-- `sol_raw!{ s₁; s₂; … }`: the raw statements, before elaboration. -/
-syntax "sol_raw!{" (sol_stmt ";")* "}" : term
+syntax "sol_raw!{" (sol_stmt solSemi)* "}" : term
 
 /-- The dot-separated parts of a name: `alice.account` is `["alice", "account"]`. -/
 def nameParts : Lean.Name → List String
@@ -948,6 +968,7 @@ open Lean
 
 partial def expandTy : TSyntax `sol_ty → MacroM Term
   | `(sol_ty| $x:ident) => `(RawTy.named $(quote x.getId.toString))
+  | `(sol_ty| address payable) => `(RawTy.named "address")
   | `(sol_ty| mapping ( $k => $v )) => do `(RawTy.mapping $(← expandTy k) $(← expandTy v))
   | `(sol_ty| $t[]) => do `(RawTy.array $(← expandTy t))
   | `(sol_ty| $t[$n]) => do `(RawTy.fixed $(← expandTy t) $n)
@@ -973,6 +994,13 @@ def EnvKey.ident : EnvKey → Ident
   | .timestamp => mkIdent ``EnvKey.timestamp
   | .selfBalance => mkIdent ``EnvKey.selfBalance
 
+/-- A name, as a string literal. -/
+def strLit (x : Ident) : Term := quote x.getId.toString
+
+/-- `e.f.g`: the members `fs` of `e`. -/
+def fieldChain (e : Term) (fs : List String) : MacroM Term :=
+  foldFields (mkIdent ``RawExpr.field) e fs
+
 /-- `alice.account.age` arrives as one identifier; split it into members;
 `msg.sender` and `block.timestamp` are the environment's. -/
 def expandIdent (x : Ident) : MacroM Term := do
@@ -982,15 +1010,9 @@ def expandIdent (x : Ident) : MacroM Term := do
   | ["false"] => `(RawExpr.bool false)
   | root :: f :: flds =>
     match EnvKey.ofParts root f with
-    | some k =>
-      flds.foldlM (init := ← `(RawExpr.env $(k.ident)))
-        fun acc f => `(RawExpr.field $acc $(quote f))
-    | none =>
-      (f :: flds).foldlM (init := ← `(RawExpr.name $(quote root)))
-        fun acc f => `(RawExpr.field $acc $(quote f))
-  | root :: flds =>
-    flds.foldlM (init := ← `(RawExpr.name $(quote root)))
-      fun acc f => `(RawExpr.field $acc $(quote f))
+    | some k => fieldChain (← `(RawExpr.env $(k.ident))) flds
+    | none => fieldChain (← `(RawExpr.name $(quote root))) (f :: flds)
+  | root :: flds => fieldChain (← `(RawExpr.name $(quote root))) flds
 
 /-- `f`, a function's name: an identifier with no member access. -/
 def funName? (f : TSyntax `sol_expr) : Option String :=
@@ -1001,12 +1023,50 @@ def funName? (f : TSyntax `sol_expr) : Option String :=
     | _ => none
   | _ => none
 
-partial def expandExpr : TSyntax `sol_expr → MacroM Term
+/-- `a ⊕ b` for an operator of the table (`BinOp.ofSym?`): a node
+`[a, ⊕, b]`, whatever its kind. -/
+def binParts? (s : Syntax) : Option (BinOp × Syntax × Syntax) :=
+  if s.getNumArgs == 3 && s[1].isAtom then
+    (BinOp.ofSym? s[1].getAtomVal).map (·, s[0], s[2])
+  else none
+
+/-- `e++`, `−−e`: a node `[e, tok]` or `[tok, e]` (`IncDec.ofTok?`). -/
+def incDecParts? (s : Syntax) : Option (IncDec × Syntax) :=
+  if s.getNumArgs != 2 then none
+  else if s[1].isAtom then (IncDec.ofTok? false s[1].getAtomVal).map (·, s[0])
+  else if s[0].isAtom then (IncDec.ofTok? true s[0].getAtomVal).map (·, s[1])
+  else none
+
+/-- Of an ambiguous parse, the readings `good` accepts first, then all of them;
+of an unambiguous one, itself. -/
+def readings (s : Syntax) (good : Syntax → Bool) : Array Syntax :=
+  if s.isOfKind choiceKind then s.getArgs.filter good ++ s.getArgs else #[s]
+
+/-- Of an ambiguous parse, the first reading `good` accepts (else the first). -/
+def preferReading (s : Syntax) (good : Syntax → Bool) : Syntax :=
+  (readings s good)[0]?.getD s
+
+/-- What a call's callee must be. -/
+def callMsg : String := "a call's callee is a function's name"
+
+/-- The expressions and blocks of a node, its atoms and groupings dropped. -/
+partial def payload (s : Syntax) : Array Syntax :=
+  if s.isAtom then #[]
+  else if s.getKind == nullKind || s.getKind == groupKind then s.getArgs.flatMap payload
+  else #[s]
+
+partial def expandExpr (e : TSyntax `sol_expr) : MacroM Term := do
+  -- the operators, by their table: one arm for all of them
+  if let some (op, a, b) := binParts? e then
+    return ← `(RawExpr.binop $(ctorIdent ``BinOp op) $(← expandExpr ⟨a⟩) $(← expandExpr ⟨b⟩))
+  if let some (op, a) := incDecParts? e then
+    return ← `(RawExpr.incDec $(ctorIdent ``IncDec op) $(← expandExpr ⟨a⟩))
+  expandExpr1 e
+where
+  expandExpr1 : TSyntax `sol_expr → MacroM Term
   | `(sol_expr| $n:num) => `(RawExpr.num $n)
   | `(sol_expr| $x:ident) => expandIdent x
-  | `(sol_expr| $e:sol_expr . $f:ident) => do
-      (nameParts f.getId).foldlM (init := ← expandExpr e)
-        fun acc c => `(RawExpr.field $acc $(quote c))
+  | `(sol_expr| $e:sol_expr . $f:ident) => do fieldChain (← expandExpr e) (nameParts f.getId)
   | `(sol_expr| $e:sol_expr [ $k:sol_expr ]) => do
       `(RawExpr.index $(← expandExpr e) $(← expandExpr k))
   | `(sol_expr| ( $e:sol_expr )) => expandExpr e
@@ -1015,33 +1075,6 @@ partial def expandExpr : TSyntax `sol_expr → MacroM Term
   | `(sol_expr| ~ $a) => do `(RawExpr.unop .bnot $(← expandExpr a))
   | `(sol_expr| $c ? $a : $b) => do
       `(RawExpr.ternary $(← expandExpr c) $(← expandExpr a) $(← expandExpr b))
-  | `(sol_expr| $a ** $b) => bin ``BinOp.pow a b
-  | `(sol_expr| $a * $b) => bin ``BinOp.mul a b
-  | `(sol_expr| $a / $b) => bin ``BinOp.div a b
-  | `(sol_expr| $a % $b) => bin ``BinOp.mod a b
-  | `(sol_expr| $a + $b) => bin ``BinOp.add a b
-  | `(sol_expr| $a - $b) => bin ``BinOp.sub a b
-  | `(sol_expr| $a < $b) => bin ``BinOp.lt a b
-  | `(sol_expr| $a > $b) => bin ``BinOp.gt a b
-  | `(sol_expr| $a <= $b) => bin ``BinOp.le a b
-  | `(sol_expr| $a >= $b) => bin ``BinOp.ge a b
-  | `(sol_expr| $a == $b) => bin ``BinOp.eqB a b
-  | `(sol_expr| $a != $b) => bin ``BinOp.neB a b
-  | `(sol_expr| $a && $b) => bin ``BinOp.and a b
-  | `(sol_expr| $a || $b) => bin ``BinOp.or a b
-  | `(sol_expr| $a & $b) => bin ``BinOp.band a b
-  | `(sol_expr| $a | $b) => bin ``BinOp.bor a b
-  | `(sol_expr| $a ^ $b) => bin ``BinOp.bxor a b
-  | `(sol_expr| $a << $b) => bin ``BinOp.shl a b
-  | `(sol_expr| $a >> $b) => bin ``BinOp.shr a b
-  | `(sol_expr| $a +% $b) => bin ``BinOp.addW a b
-  | `(sol_expr| $a -% $b) => bin ``BinOp.subW a b
-  | `(sol_expr| $a *% $b) => bin ``BinOp.mulW a b
-  | `(sol_expr| $a **% $b) => bin ``BinOp.powW a b
-  | `(sol_expr| $e:sol_expr ++) => do `(RawExpr.incDec .postInc $(← expandExpr e))
-  | `(sol_expr| $e:sol_expr −−) => do `(RawExpr.incDec .postDec $(← expandExpr e))
-  | `(sol_expr| ++ $e:sol_expr) => do `(RawExpr.incDec .preInc $(← expandExpr e))
-  | `(sol_expr| −− $e:sol_expr) => do `(RawExpr.incDec .preDec $(← expandExpr e))
   | `(sol_expr| new $T:sol_ty ( $n:sol_expr )) => do
       `(RawExpr.newArr $(← expandTy T) $(← expandExpr n))
   | `(sol_expr| address ( this ) . balance) => `(RawExpr.env .selfBalance)
@@ -1055,15 +1088,15 @@ partial def expandExpr : TSyntax `sol_expr → MacroM Term
         if x.getId.toString == "this" then Macro.throwErrorAt e "`address(this)` is not a value here"
       expandExpr e
   | `(sol_expr| $f:ident ( { $[$ns:ident : $as:sol_expr],* } )) => do
-      let ns : Array Term := ns.map fun n => quote n.getId.toString
-      `(RawExpr.named $(quote f.getId.toString) [$ns,*] [$(← as.mapM expandExpr),*])
-  | `(sol_expr| $f:sol_expr ( $as:sol_expr,* )) => do
-      let some g := funName? f | Macro.throwErrorAt f "a call's callee is a function's name"
-      `(RawExpr.call $(quote g) [$(← as.getElems.mapM expandExpr),*])
+      `(RawExpr.named $(strLit f) [$(ns.map strLit),*] [$(← as.mapM expandExpr),*])
+  | `(sol_expr| $f:sol_expr ( $as:sol_expr,* )) => expandCall f as.getElems callMsg
   | _ => Macro.throwUnsupported
-where
-  bin (op : Lean.Name) (a b : TSyntax `sol_expr) : MacroM Term := do
-    `(RawExpr.binop $(mkIdent op) $(← expandExpr a) $(← expandExpr b))
+  -- `f(a, b)`, a call of the function `f` (or a struct's constructor, `msg`
+  -- says which): `RawExpr.call`
+  expandCall (f : TSyntax `sol_expr) (as : Array (TSyntax `sol_expr)) (msg : String) :
+      MacroM Term := do
+  let some g := funName? f | Macro.throwErrorAt f msg
+  `(RawExpr.call $(quote g) [$(← as.mapM expandExpr),*])
 
 partial def expandStmt (s : TSyntax `sol_stmt) : MacroM Term := do
   -- `delete x` also parses as a declaration `T x` of a type called
@@ -1071,11 +1104,19 @@ partial def expandStmt (s : TSyntax `sol_stmt) : MacroM Term := do
   -- identifiers too): of an ambiguous parse, take the reading that starts
   -- with a keyword.
   if s.raw.isOfKind choiceKind then
-    let alts := s.raw.getArgs
-    let kw := alts.filter (·[0].isAtom)
-    for alt in kw ++ alts do
+    for alt in readings s (·[0].isAtom) do
       try return ← expandStmt ⟨alt⟩ catch _ => pure ()
     Macro.throwUnsupported
+  -- `x++;`, `−−x;` and `l ⊕= r;`: by their tokens.  (`y = x++;` is read as
+  -- an assignment of the expression `x++`, which `hoistStmt` makes an
+  -- `assignIncDec` when `y` is a local: its other parse is not expanded.)
+  let r := s.raw
+  if let some (op, l) := incDecParts? r then
+    return ← `(RawStmt.incDec $(ctorIdent ``IncDec op) $(← expandExpr ⟨l⟩))
+  if r.getNumArgs == 3 && r[1].isAtom && r[1].getAtomVal.endsWith "=" then
+    if let some op := BinOp.ofSym? (r[1].getAtomVal.dropRight 1) then
+      return ← `(RawStmt.opAssign $(ctorIdent ``BinOp op) $(← expandExpr ⟨r[0]⟩)
+        $(← expandExpr ⟨r[2]⟩))
   -- the four keyword statements, by their node kind: a quotation pattern
   -- for them would be as ambiguous as the parse
   match s.raw.getKind with
@@ -1085,15 +1126,26 @@ partial def expandStmt (s : TSyntax `sol_stmt) : MacroM Term := do
   | ``solRevert => `(RawStmt.revert)
   | ``solReturn => `(RawStmt.ret (some $(← expandExpr ⟨s.raw[1]⟩)))
   | ``solReturnNone => `(RawStmt.ret none)
-  | ``solEmit => `(RawStmt.eval [$(← s.raw[3].getSepArgs.mapM (expandExpr ⟨·⟩)),*])
+  | ``solEmit => `(RawStmt.eval [$(← exprs s.raw[3]),*])
   | ``solRequireMsg => `(RawStmt.require $(← expandExpr ⟨s.raw[2]⟩))
-  | ``solRequireErr =>
-    `(RawStmt.requireWith $(← expandExpr ⟨s.raw[2]⟩) [$(← s.raw[6].getSepArgs.mapM (expandExpr ⟨·⟩)),*])
+  | ``solRequireErr => `(RawStmt.requireWith $(← expandExpr ⟨s.raw[2]⟩) [$(← exprs s.raw[6]),*])
   | ``solRevertErr | ``solRevertMsg => `(RawStmt.revert)
   | ``solHole => Macro.throwErrorAt s "`_;` stands once, at the top level of a modifier's body"
   | ``solUnchecked => `(RawStmt.unchecked $(← expandStmt.expandBlock ⟨s.raw[1]⟩))
+  | ``solIfChain =>
+    -- `if (c₀) b₀ else if (c₁) b₁ … else e`: nested, from the last branch out
+    let arms := payload s.raw[5]
+    let last : Term ← match payload s.raw[6] with
+      | #[f] => expandStmt.expandBlock ⟨f⟩
+      | _ => `([])
+    let els ← (List.range (arms.size / 2)).foldrM (init := last) fun k els => do
+      `([RawStmt.ite $(← expandExpr ⟨arms[2 * k]!⟩) $(← expandStmt.expandBlock ⟨arms[2 * k + 1]!⟩)
+        $els])
+    `(RawStmt.ite $(← expandExpr ⟨s.raw[2]⟩) $(← expandStmt.expandBlock ⟨s.raw[4]⟩) $els)
   | _ => expandStmt1 s
 where
+  /-- The expressions of a `sol_expr,*`. -/
+  exprs (as : Syntax) : MacroM (Array Term) := as.getSepArgs.mapM (expandExpr ⟨·⟩)
   expandStmt1 : TSyntax `sol_stmt → MacroM Term
   | `(sol_stmt| $l:sol_expr = $r:sol_expr) => do
       `(RawStmt.assign $(← expandExpr l) $(← expandExpr r))
@@ -1104,41 +1156,34 @@ where
       | some g => `(RawStmt.assign $(← expandExpr l) (RawExpr.call $(quote g) []))
       | none => `(RawStmt.assignPush $(← expandExpr l) $(← pushRecv f))
   | `(sol_stmt| $l:sol_expr = $f:sol_expr ( $as:sol_expr,* )) => do
-      let some g := funName? f | Macro.throwErrorAt f "a call's callee is a function's name"
-      `(RawStmt.assign $(← expandExpr l) (RawExpr.call $(quote g) [$(← as.getElems.mapM expandExpr),*]))
+      `(RawStmt.assign $(← expandExpr l) $(← expandExpr.expandCall f as.getElems callMsg))
   | `(sol_stmt| $T:sol_ty $x:ident = $f:sol_expr ( $as:sol_expr,* )) => do
-      let some g := funName? f | Macro.throwErrorAt f "a call's callee is a function's name"
-      `(RawStmt.decl $(← expandTy T) $(quote x.getId.toString)
-        (some (RawExpr.call $(quote g) [$(← as.getElems.mapM expandExpr),*])))
+      `(RawStmt.decl $(← expandTy T) $(strLit x) (some $(← expandExpr.expandCall f as.getElems callMsg)))
   | `(sol_stmt| $f:sol_expr ( $a:sol_expr, $as:sol_expr,* )) => do
       `(RawStmt.call $(← expandExpr f) [$(← expandExpr a), $(← as.getElems.mapM expandExpr),*])
   | `(sol_stmt| $T:sol_ty memory $x:ident = $f:sol_expr ( $as:sol_expr,* )) => do
-      let some g := funName? f | Macro.throwErrorAt f "a constructor's name is a struct's name"
-      `(RawStmt.declMemory $(← expandTy T) $(quote x.getId.toString)
-        (some (RawExpr.call $(quote g) [$(← as.getElems.mapM expandExpr),*])))
+      `(RawStmt.declMemory $(← expandTy T) $(strLit x)
+        (some $(← expandExpr.expandCall f as.getElems ctorMsg)))
   | `(sol_stmt| $b:sol_expr ( $g:sol_expr ( $as:sol_expr,* ) )) => do
-      let some g := funName? g | Macro.throwErrorAt g "a constructor's name is a struct's name"
-      `(RawStmt.call $(← expandExpr b) [RawExpr.call $(quote g) [$(← as.getElems.mapM expandExpr),*]])
+      `(RawStmt.call $(← expandExpr b) [$(← expandExpr.expandCall g as.getElems ctorMsg)])
   | `(sol_stmt| $b:sol_expr .push( $g:sol_expr ( $as:sol_expr,* ) )) => do
-      let some g := funName? g | Macro.throwErrorAt g "a constructor's name is a struct's name"
-      `(RawStmt.call (.field $(← expandExpr b) "push")
-        [RawExpr.call $(quote g) [$(← as.getElems.mapM expandExpr),*]])
+      `(RawStmt.call (.field $(← expandExpr b) "push") [$(← expandExpr.expandCall g as.getElems ctorMsg)])
   | `(sol_stmt| $T:sol_ty storage $x:ident = $b:sol_expr .push()) => do
-      `(RawStmt.declStoragePush $(← expandTy T) $(quote x.getId.toString) $(← expandExpr b))
+      `(RawStmt.declStoragePush $(← expandTy T) $(strLit x) $(← expandExpr b))
   | `(sol_stmt| $T:sol_ty storage $x:ident = $f:sol_expr ( )) => do
-      `(RawStmt.declStoragePush $(← expandTy T) $(quote x.getId.toString) $(← pushRecv f))
+      `(RawStmt.declStoragePush $(← expandTy T) $(strLit x) $(← pushRecv f))
   | `(sol_stmt| $T:sol_ty storage $x:ident = $e) => do
-      `(RawStmt.declStorage $(← expandTy T) $(quote x.getId.toString) (some $(← expandExpr e)))
+      `(RawStmt.declStorage $(← expandTy T) $(strLit x) (some $(← expandExpr e)))
   | `(sol_stmt| $T:sol_ty storage $x:ident) => do
-      `(RawStmt.declStorage $(← expandTy T) $(quote x.getId.toString) none)
+      `(RawStmt.declStorage $(← expandTy T) $(strLit x) none)
   | `(sol_stmt| $T:sol_ty memory $x:ident = $e) => do
-      `(RawStmt.declMemory $(← expandTy T) $(quote x.getId.toString) (some $(← expandExpr e)))
+      `(RawStmt.declMemory $(← expandTy T) $(strLit x) (some $(← expandExpr e)))
   | `(sol_stmt| $T:sol_ty memory $x:ident) => do
-      `(RawStmt.declMemory $(← expandTy T) $(quote x.getId.toString) none)
+      `(RawStmt.declMemory $(← expandTy T) $(strLit x) none)
   | `(sol_stmt| $T:sol_ty $x:ident = $e) => do
-      `(RawStmt.decl $(← expandTy T) $(quote x.getId.toString) (some $(← expandExpr e)))
+      `(RawStmt.decl $(← expandTy T) $(strLit x) (some $(← expandExpr e)))
   | `(sol_stmt| $T:sol_ty $x:ident) => do
-      `(RawStmt.decl $(← expandTy T) $(quote x.getId.toString) none)
+      `(RawStmt.decl $(← expandTy T) $(strLit x) none)
   | `(sol_stmt| $b:sol_expr .push( $a:sol_expr )) => do
       `(RawStmt.call (.field $(← expandExpr b) "push") [$(← expandExpr a)])
   | `(sol_stmt| $b:sol_expr .push()) => do `(RawStmt.call (.field $(← expandExpr b) "push") [])
@@ -1148,42 +1193,20 @@ where
   | `(sol_stmt| $f:sol_expr ( )) => do `(RawStmt.call $(← expandExpr f) [])
   | `(sol_stmt| $f:sol_expr ( $a:sol_expr )) => do
       `(RawStmt.call $(← expandExpr f) [$(← expandExpr a)])
-  | `(sol_stmt| $l:sol_expr ++) => do `(RawStmt.incDec .postInc $(← expandExpr l))
-  | `(sol_stmt| ++ $l:sol_expr) => do `(RawStmt.incDec .preInc $(← expandExpr l))
-  | `(sol_stmt| $x:sol_expr = $l:sol_expr ++) => do
-      `(RawStmt.assignIncDec $(← expandExpr x) .postInc $(← expandExpr l))
-  | `(sol_stmt| $x:sol_expr = ++ $l:sol_expr) => do
-      `(RawStmt.assignIncDec $(← expandExpr x) .preInc $(← expandExpr l))
-  | `(sol_stmt| $l:sol_expr −−) => do `(RawStmt.incDec .postDec $(← expandExpr l))
-  | `(sol_stmt| −− $l:sol_expr) => do `(RawStmt.incDec .preDec $(← expandExpr l))
-  | `(sol_stmt| $x:sol_expr = $l:sol_expr −−) => do
-      `(RawStmt.assignIncDec $(← expandExpr x) .postDec $(← expandExpr l))
-  | `(sol_stmt| $x:sol_expr = −− $l:sol_expr) => do
-      `(RawStmt.assignIncDec $(← expandExpr x) .preDec $(← expandExpr l))
-  | `(sol_stmt| $l:sol_expr += $r) => do `(RawStmt.opAssign .add $(← expandExpr l) $(← expandExpr r))
-  | `(sol_stmt| $l:sol_expr -= $r) => do `(RawStmt.opAssign .sub $(← expandExpr l) $(← expandExpr r))
-  | `(sol_stmt| $l:sol_expr *= $r) => do `(RawStmt.opAssign .mul $(← expandExpr l) $(← expandExpr r))
-  | `(sol_stmt| $l:sol_expr /= $r) => do `(RawStmt.opAssign .div $(← expandExpr l) $(← expandExpr r))
-  | `(sol_stmt| $l:sol_expr %= $r) => do `(RawStmt.opAssign .mod $(← expandExpr l) $(← expandExpr r))
-  | `(sol_stmt| $l:sol_expr &= $r) => do `(RawStmt.opAssign .band $(← expandExpr l) $(← expandExpr r))
-  | `(sol_stmt| $l:sol_expr |= $r) => do `(RawStmt.opAssign .bor $(← expandExpr l) $(← expandExpr r))
-  | `(sol_stmt| $l:sol_expr ^= $r) => do `(RawStmt.opAssign .bxor $(← expandExpr l) $(← expandExpr r))
-  | `(sol_stmt| $l:sol_expr <<= $r) => do `(RawStmt.opAssign .shl $(← expandExpr l) $(← expandExpr r))
-  | `(sol_stmt| $l:sol_expr >>= $r) => do `(RawStmt.opAssign .shr $(← expandExpr l) $(← expandExpr r))
   | `(sol_stmt| if ($c) $t $[else $f]?) => do
       let els ← match f with
         | some f => expandBlock f
         | none => `([])
       `(RawStmt.ite $(← expandExpr c) $(← expandBlock t) $els)
   | _ => Macro.throwUnsupported
+  /-- A struct constructor's callee. -/
+  ctorMsg : String := "a constructor's name is a struct's name"
   /-- `values.push` (one identifier) or `e.push`: the receiver `values`, `e`. -/
   pushRecv (f : TSyntax `sol_expr) : MacroM Term := do
     match f with
     | `(sol_expr| $x:ident) =>
       match (nameParts x.getId).reverse with
-      | "push" :: r :: rs =>
-        (rs.reverse.foldlM (init := ← `(RawExpr.name $(quote r))) fun acc c =>
-          `(RawExpr.field $acc $(quote c))) >>= fun e => pure e
+      | "push" :: r :: rs => fieldChain (← `(RawExpr.name $(quote r))) rs.reverse
       | _ => Macro.throwErrorAt f "only `b.push()` is a call on the right of `=`"
     | `(sol_expr| $e:sol_expr . $g:ident) =>
       if g.getId.toString == "push" then expandExpr ⟨e.raw⟩
@@ -1214,6 +1237,7 @@ syntax &"public" : sol_vis
 syntax &"private" : sol_vis
 syntax &"internal" : sol_vis
 syntax &"immutable" : sol_vis
+syntax &"constant" : sol_vis
 
 /-- `uint public count;`: a state variable. -/
 syntax sol_ty sol_vis* ident ";" : sol_member
@@ -1234,6 +1258,11 @@ syntax (name := solAttrMod) ident ("(" sol_expr,* ")")? : sol_fattr
 /-- `function f(uint x, uint y) returns (uint r) { r = x + y; }`: an internal
 function, which may call the functions declared before it. -/
 syntax &"function " ident "(" sol_param,* ")" sol_fattr* ppSpace sol_block : sol_member
+
+/-- `constructor(uint v) payable { … }`: the function `init`, the name the
+benchmark ports give their constructors (`Examples/Benchmark/Purchase.lean`). -/
+syntax (name := solConstructor) &"constructor" "(" sol_param,* ")" sol_fattr* ppSpace sol_block :
+  sol_member
 
 /-- `modifier inState(State s) { if (state != s) revert(); _; }`: the code
 before and after its one `_;`. -/
@@ -1258,6 +1287,9 @@ syntax (name := solRequires) (priority := high) &"requires " spec_expr ";" : sol
 syntax (name := solEnsures) (priority := high) &"ensures " spec_expr ";" : sol_member
 syntax (name := solSkip) (priority := high) &"skip" ";" : sol_member
 syntax (name := solInvariant) (priority := high) &"invariant " spec_expr ";" : sol_member
+/-- `assignable count, balances[msg.sender];` or `assignable \nothing;`: what
+the next function may change (solkey's `@custom:key assignable`). -/
+syntax (name := solAssignable) (priority := high) &"assignable " spec_locs ";" : sol_member
 
 /-- `contract!{ uint total; Person alice; mapping(uint => Person) folks; }`:
 a contract written as Solidity declares its state, and its functions. -/
@@ -1278,8 +1310,7 @@ def expandMemberTy (enums : List String) (T : TSyntax `sol_ty) : MacroM Term :=
 
 def expandParams (enums : List String) (ps : Array (TSyntax `sol_param)) : MacroM (Array Term) :=
   ps.mapM fun
-    | `(sol_param| $T:sol_ty $x:ident) => do
-      `(($(quote x.getId.toString), $(← expandMemberTy enums T)))
+    | `(sol_param| $T:sol_ty $x:ident) => do `(($(strLit x), $(← expandMemberTy enums T)))
     | _ => Macro.throwUnsupported
 
 /-- A modifier: its name, its parameters, and its body before and after its
@@ -1301,15 +1332,16 @@ def expandFun (enums : List String) (mods : List (String × Array Term × Term �
     (ps : Array (TSyntax `sol_param)) (attrs : Array (TSyntax `sol_fattr))
     (b : TSyntax `sol_block) (spec : Term) : MacroM Term := do
   let ps ← expandParams enums ps
+  -- `payable` is an atom of the keyword reading and an identifier of the
+  -- modifier reading
+  let payable := attrs.any fun a => (a.raw.find? fun s =>
+    s.isAtom && s.getAtomVal == "payable" || s.isIdent && s.getId == `payable).isSome
   let mut ret ← `(none)
   let mut apps : Array Term := #[]
   for a in attrs do
     -- `returns (uint)` also reads as a modifier `returns` applied to `uint`,
     -- and `view` as a modifier `view`: take the other reading
-    let a : Syntax :=
-      if a.raw.isOfKind choiceKind then
-        (a.raw.getArgs.find? (!·.isOfKind ``solAttrMod)).getD a.raw[0]
-      else a.raw
+    let a := preferReading a.raw (!·.isOfKind ``solAttrMod)
     if a.isOfKind ``solAttrKw then continue
     match (⟨a⟩ : TSyntax `sol_fattr) with
     | `(sol_fattr| returns ( $T:sol_ty $[$r:ident]? )) =>
@@ -1326,8 +1358,9 @@ def expandFun (enums : List String) (mods : List (String × Array Term × Term �
       apps := apps.push (← `(ModApp.mk $(quote name) [$params,*] [$args,*] $pre $post))
     | _ => Macro.throwUnsupported
   let body ← expandStmt.expandBlock b
-  `(($(quote f.getId.toString),
-    ({ params := [$ps,*], ret := $ret, body := $body, mods := [$apps,*], spec := $spec } : FunDecl)))
+  `(($(strLit f),
+    ({ params := [$ps,*], ret := $ret, body := $body, mods := [$apps,*], spec := $spec,
+       payable := $(quote payable) } : FunDecl)))
 
 end
 
@@ -1342,8 +1375,7 @@ macro_rules
         match m with
         | `(sol_member| enum $e:ident { $xs:ident,* }) =>
           enums := enums ++ [e.getId.toString]
-          let xs : Array Lean.Term := xs.getElems.map fun x => Lean.quote x.getId.toString
-          enumRows := enumRows.push (← `(($(Lean.quote e.getId.toString), [$xs,*])))
+          enumRows := enumRows.push (← `(($(strLit e), [$(xs.getElems.map strLit),*])))
         | _ => pure ()
       for m in ms do
         match m with
@@ -1356,31 +1388,43 @@ macro_rules
       let mut reqs : Array Lean.Term := #[]
       let mut enss : Array Lean.Term := #[]
       let mut skip := false
+      let mut asg : Option Lean.Term := none
       let mut invs : Array Lean.Term := #[]
       for m in ms do
         -- `requires x;` also reads as a state variable `x` of a type `requires`
-        let m : Lean.TSyntax `sol_member := if m.raw.isOfKind Lean.choiceKind then
-            ⟨(m.raw.getArgs.find? fun a => [``solRequires, ``solEnsures, ``solSkip,
-              ``solInvariant].any a.isOfKind).getD m.raw[0]⟩
-          else m
+        let m : Lean.TSyntax `sol_member := ⟨preferReading m.raw fun a =>
+          [``solRequires, ``solEnsures, ``solSkip, ``solInvariant, ``solAssignable].any a.isOfKind⟩
+        -- a constructor is the function `init`
+        let m : Lean.TSyntax `sol_member ← match m with
+          | `(sol_member| constructor ( $ps:sol_param,* ) $as:sol_fattr* $b:sol_block) =>
+            `(sol_member| function $(Lean.mkIdent `init):ident ( $ps,* ) $as:sol_fattr* $b:sol_block)
+          | _ => pure m
         match m with
         | `(sol_member| requires $e:spec_expr ;) => reqs := reqs.push (← expandSpec e)
         | `(sol_member| ensures $e:spec_expr ;) => enss := enss.push (← expandSpec e)
         | `(sol_member| skip ;) => skip := true
+        | `(sol_member| assignable $ls:spec_locs ;) =>
+          if asg.isSome then Lean.Macro.throwErrorAt m "one `assignable` clause per function"
+          asg := some (← expandSpecLocs ls)
         | `(sol_member| invariant $e:spec_expr ;) => invs := invs.push (← expandSpec e)
         | `(sol_member| $T:sol_ty $_:sol_vis* $x:ident ;) =>
-          rows := rows.push (← `(($(Lean.quote x.getId.toString), $(← expandMemberTy enums T))))
+          rows := rows.push (← `(($(strLit x), $(← expandMemberTy enums T))))
         | `(sol_member| function $f:ident ( $ps:sol_param,* ) $as:sol_fattr* $b:sol_block) =>
-          let spec ← `(({ requires := [$reqs,*], ensures := [$enss,*], skip := $(Lean.quote skip) } : FunSpec))
+          let asgT ← match asg with
+            | some ls => `(some $ls)
+            | none => `(none)
+          let spec ← `(({ requires := [$reqs,*], ensures := [$enss,*], assignable := $asgT,
+                          skip := $(Lean.quote skip) } : FunSpec))
           funs := funs.push (← expandFun enums mods f ps.getElems as b spec)
-          reqs := #[]; enss := #[]; skip := false
+          reqs := #[]; enss := #[]; skip := false; asg := none
         | `(sol_member| modifier $_:ident $[( $_:sol_param,* )]? $_:sol_block)
         | `(sol_member| event $_:ident ( $_:sol_eparam,* ) ;)
         | `(sol_member| error $_:ident ( $_:sol_eparam,* ) ;)
         | `(sol_member| enum $_:ident { $_:ident,* }) => pure ()
         | _ => Lean.Macro.throwUnsupported
-      unless reqs.isEmpty && enss.isEmpty && !skip do
-        Lean.Macro.throwError "a `requires`, `ensures` or `skip` clause after the last function"
+      unless reqs.isEmpty && enss.isEmpty && !skip && asg.isNone do
+        Lean.Macro.throwError
+          "a `requires`, `ensures`, `assignable` or `skip` clause after the last function"
       `(({ vars := [$rows,*], funs := [$funs,*], enums := [$enumRows,*], inv := [$invs,*] } : Contract))
 /-! ### The contracts
 
@@ -1508,23 +1552,34 @@ inductive LocalTy where
 /-- The locals in scope, most recent first. -/
 abbrev ECtx := List (Name × LocalTy)
 
-def elabTy : RawTy → Ty
-  | .named "uint" | .named "uint256" | .named "address" => .uint
-  | .named "int" | .named "int256" => .int
-  | .named "bool" => .bool
-  | .named s => .struct s
-  | .mapping k v => .mapping (elabTy k) (elabTy v)
-  | .array t => .array (elabTy t)
-  | .fixed t n => .fixed (elabTy t) n
+/-- A type as read, against the contract: a primitive type (`PrimTy.ofName?`),
+an enum of `C` (a `uint`, as a state variable of it is), a struct of
+`structDef`.  Any other name is refused (`unknownTyMsg`). -/
+def elabTy (C : Contract) : RawTy → Except String Ty
+  | .named s =>
+    match PrimTy.ofName? s with
+    | some p => pure (.prim p)
+    | none =>
+      if (lookupBy s C.enums).isSome then pure .uint
+      else if (structDef s).isEmpty then throw (unknownTyMsg s)
+      else pure (.struct s)
+  | .mapping k v => do pure (.mapping (← elabTy C k) (← elabTy C v))
+  | .array t => do pure (.array (← elabTy C t))
+  | .fixed t n => do pure (.fixed (← elabTy C t) n)
 
-def primName : PrimTy → String
-  | .uint => "uint" | .int => "int" | .bool => "bool"
+/-- `PrimTy.toStr`, under the name `Calculus/Spec.lean` uses. -/
+abbrev primName (p : PrimTy) : String := p.toStr
 
 /-- A synthesised expression: a storage path, a memory path, or a value. -/
 inductive TExpr (C : Contract) where
   | path (T : Ty) (p : SPath C T)
   | mpath (T : Ty) (p : MPath C T)
   | val (p : PrimTy) (v : Val C p)
+
+/-- Its type. -/
+def TExpr.ty {C : Contract} : TExpr C → Ty
+  | .path T _ | .mpath T _ => T
+  | .val p _ => .prim p
 
 /-- A path of primitive type is read as a value. -/
 def TExpr.toVal? {C : Contract} : TExpr C → Option ((p : PrimTy) × Val C p)
@@ -1539,48 +1594,209 @@ def RawExpr.isLit : RawExpr → Bool
   | .num _ | .unop .neg (.num _) => true
   | _ => false
 
+/-! ### Traversals of the raw syntax
+
+Every question about a raw expression is `RawExpr.any` of a question about
+one node, and every rewrite `RawExpr.mapM` of a rewrite of one node; a
+statement is its own expressions (`RawStmt.exprs`) and its blocks
+(`RawStmt.blocks`). -/
+
+/-- The Solidity spelling. -/
+def RawTy.toStr : RawTy → String
+  | .named s => s
+  | .mapping k v => s!"mapping({k.toStr} => {v.toStr})"
+  | .array t => t.toStr ++ "[]"
+  | .fixed t n => s!"{t.toStr}[{n}]"
+
+/-- The Solidity spelling, for messages: an operator application is
+parenthesised unless it is the whole expression (`top`). -/
+partial def RawExpr.toStr (e : RawExpr) (top : Bool := true) : String :=
+  let paren (s : String) := if top then s else s!"({s})"
+  match e with
+  | .num n => toString n
+  | .name x => x
+  | .bool b => toString b
+  | .field e f => s!"{e.toStr false}.{f}"
+  | .index e k => s!"{e.toStr false}[{k.toStr}]"
+  | .binop op a b => paren s!"{a.toStr false} {op.sym} {b.toStr false}"
+  | .unop op a => s!"{op.sym}{a.toStr false}"
+  | .ternary c a b => paren s!"{c.toStr false} ? {a.toStr false} : {b.toStr false}"
+  | .incDec op e => IncDec.show op (e.toStr false)
+  | .newArr T n => s!"new {T.toStr}({n.toStr})"
+  | .call f as => s!"{f}({", ".intercalate (as.map (·.toStr))})"
+  | .named f ns as =>
+    s!"{f}(\{{", ".intercalate ((ns.zip as).map fun (n, a) => s!"{n}: {a.toStr}")}})"
+  | .env k => k.toStr
+
+/-- Whether `p` holds of the expression or of an expression inside it. -/
+def RawExpr.any (p : RawExpr → Bool) (e : RawExpr) : Bool :=
+  p e || match e with
+    | .field a _ | .unop _ a | .incDec _ a | .newArr _ a => a.any p
+    | .index a b | .binop _ a b => a.any p || b.any p
+    | .ternary c a b => c.any p || a.any p || b.any p
+    | .call _ as | .named _ _ as => as.attach.any fun ⟨a, _⟩ => a.any p
+    | .num _ | .name _ | .bool _ | .env _ => false
+
+/-- The expression rewritten from the top down: `f` rewrites a node, then
+the expressions inside what it returns are rewritten, left to right. -/
+partial def RawExpr.mapM {m : Type → Type} [Monad m] [Inhabited (m RawExpr)]
+    (f : RawExpr → m RawExpr) (e : RawExpr) : m RawExpr := do
+  match ← f e with
+  | .field a g => return .field (← a.mapM f) g
+  | .index a b => return .index (← a.mapM f) (← b.mapM f)
+  | .binop op a b => return .binop op (← a.mapM f) (← b.mapM f)
+  | .unop op a => return .unop op (← a.mapM f)
+  | .ternary c a b => return .ternary (← c.mapM f) (← a.mapM f) (← b.mapM f)
+  | .incDec op a => return .incDec op (← a.mapM f)
+  | .newArr T n => return .newArr T (← n.mapM f)
+  | .call g as => return .call g (← as.mapM (·.mapM f))
+  | .named g ns as => return .named g ns (← as.mapM (·.mapM f))
+  | e => pure e
+
+/-- The names a raw expression reads, in order. -/
+def RawExpr.names : RawExpr → List String
+  | .name x => [x]
+  | .field e _ | .unop _ e | .incDec _ e | .newArr _ e => e.names
+  | .index a b | .binop _ a b => a.names ++ b.names
+  | .ternary c a b => c.names ++ a.names ++ b.names
+  | .call _ as => as.attach.flatMap fun ⟨a, _⟩ => a.names
+  | .named _ _ as => as.attach.flatMap fun ⟨a, _⟩ => a.names
+  | .num _ | .bool _ | .env _ => []
+
 /-- Whether an index occurs in the expression: evaluating it may revert. -/
-def RawExpr.hasIndex : RawExpr → Bool
-  | .index .. => true
-  | .field e _ | .unop _ e | .incDec _ e => e.hasIndex
-  | .binop _ a b => a.hasIndex || b.hasIndex
-  | .ternary c a b => c.hasIndex || a.hasIndex || b.hasIndex
-  | .newArr _ n => n.hasIndex
-  | .call _ as => as.attach.any fun ⟨a, _⟩ => a.hasIndex
-  | .named _ _ as => as.attach.any fun ⟨a, _⟩ => a.hasIndex
-  | .num _ | .name _ | .bool _ | .env _ => false
+def RawExpr.hasIndex : RawExpr → Bool :=
+  RawExpr.any (· matches .index ..)
 
 /-- Whether a `.length` of an indexed base occurs in the expression
 (`rows[i].length`): if the base is a fixed-size array, it is evaluated for its
 bounds check although the length is a literal, so `hoist` captures it. -/
-def RawExpr.hasIdxLen : RawExpr → Bool
-  | .field e f => (f == "length" && e.hasIndex) || e.hasIdxLen
-  | .unop _ e | .incDec _ e => e.hasIdxLen
-  | .index a b | .binop _ a b => a.hasIdxLen || b.hasIdxLen
-  | .ternary c a b => c.hasIdxLen || a.hasIdxLen || b.hasIdxLen
-  | .newArr _ n => n.hasIdxLen
-  | .call _ as => as.attach.any fun ⟨a, _⟩ => a.hasIdxLen
-  | .named _ _ as => as.attach.any fun ⟨a, _⟩ => a.hasIdxLen
-  | .num _ | .name _ | .bool _ | .env _ => false
+def RawExpr.hasIdxLen : RawExpr → Bool :=
+  RawExpr.any fun | .field b "length" => b.hasIndex | _ => false
 
 /-- Whether an effect occurs in the expression: an `++` or `−−`, or a call. -/
-def RawExpr.hasIncDec : RawExpr → Bool
-  | .incDec .. | .call .. | .named .. => true
-  | .field e _ | .unop _ e => e.hasIncDec
-  | .index a b | .binop _ a b => a.hasIncDec || b.hasIncDec
-  | .ternary c a b => c.hasIncDec || a.hasIncDec || b.hasIncDec
-  | .newArr _ n => n.hasIncDec
-  | .num _ | .name _ | .bool _ | .env _ => false
+def RawExpr.hasIncDec : RawExpr → Bool :=
+  RawExpr.any (· matches .incDec .. | .call .. | .named ..)
 
 /-- Whether a call occurs in the expression. -/
-def RawExpr.hasCall : RawExpr → Bool
-  | .call .. => true
-  | .incDec _ e | .field e _ | .unop _ e => e.hasCall
-  | .index a b | .binop _ a b => a.hasCall || b.hasCall
-  | .ternary c a b => c.hasCall || a.hasCall || b.hasCall
-  | .newArr _ n => n.hasCall
-  | .named _ _ as => as.attach.any fun ⟨a, _⟩ => a.hasCall
-  | .num _ | .name _ | .bool _ | .env _ => false
+def RawExpr.hasCall : RawExpr → Bool :=
+  RawExpr.any (· matches .call ..)
+
+/-- Whether the name `x` occurs in the expression. -/
+def RawExpr.mentions (x : String) : RawExpr → Bool :=
+  RawExpr.any fun | .name y => y == x | _ => false
+
+/-- `e` with the names `ρ` maps renamed (a callee's locals, made fresh). -/
+def RawExpr.rename (ρ : List (String × String)) (e : RawExpr) : RawExpr :=
+  Id.run <| e.mapM fun
+    | .name x => .name ((lookupBy x ρ).getD x)
+    | e => e
+
+/-- An expression inside `unchecked { … }`: `+ - * **` wrap (`+%` …).  An
+`++`/`−−` inside it is an error: its capture (`hoist`) is checked. -/
+def RawExpr.uncheck : RawExpr → Except String RawExpr :=
+  RawExpr.mapM fun
+    | .binop op a b =>
+      let op' : BinOp := match op with
+        | .add => .addW | .sub => .subW | .mul => .mulW | .pow => .powW | op => op
+      pure (.binop op' a b)
+    | .incDec .. => throw "`++` or `−−` inside an expression in `unchecked`"
+    | e => pure e
+
+/-- The largest index among the fresh variables an expression writes. -/
+def RawExpr.maxIdx (e : RawExpr) : Nat :=
+  e.names.foldl (fun n x => max n (Var.ofName x).idx) 0
+
+def RawExpr.maxIdxs (es : List RawExpr) : Nat :=
+  es.foldl (fun n e => max n e.maxIdx) 0
+
+/-- A statement's own expressions, in the order it is written (not those of
+its blocks). -/
+def RawStmt.exprs : RawStmt → List RawExpr
+  | .assign l r | .assignPush l r | .opAssign _ l r | .assignIncDec l _ r => [l, r]
+  | .decl _ _ i | .declStorage _ _ i | .declMemory _ _ i | .ret i => i.toList
+  | .declStoragePush _ _ b | .delete b | .incDec _ b | .require b | .assert b | .ite b _ _ => [b]
+  | .call f as => f :: as
+  | .eval as => as
+  | .revert | .unchecked _ => []
+
+/-- A statement's blocks: an `if`'s branches, an `unchecked` block's body. -/
+def RawStmt.blocks : RawStmt → List (List RawStmt)
+  | .ite _ t e => [t, e]
+  | .unchecked b => [b]
+  | _ => []
+
+/-- A statement with its own expressions rewritten by `f`, left to right (its
+blocks as they are). -/
+def RawStmt.mapExprsM {m : Type → Type} [Monad m] (f : RawExpr → m RawExpr) :
+    RawStmt → m RawStmt
+  | .assign l r => return .assign (← f l) (← f r)
+  | .assignPush l r => return .assignPush (← f l) (← f r)
+  | .opAssign op l r => return .opAssign op (← f l) (← f r)
+  | .assignIncDec l op r => return .assignIncDec (← f l) op (← f r)
+  | .decl T x i => return .decl T x (← i.mapM f)
+  | .declStorage T x i => return .declStorage T x (← i.mapM f)
+  | .declMemory T x i => return .declMemory T x (← i.mapM f)
+  | .ret i => return .ret (← i.mapM f)
+  | .declStoragePush T x b => return .declStoragePush T x (← f b)
+  | .delete b => return .delete (← f b)
+  | .incDec op b => return .incDec op (← f b)
+  | .require b => return .require (← f b)
+  | .assert b => return .assert (← f b)
+  | .ite c t e => return .ite (← f c) t e
+  | .call g as => return .call (← f g) (← as.mapM f)
+  | .eval as => return .eval (← as.mapM f)
+  | .revert => pure .revert
+  | .unchecked b => pure (.unchecked b)
+
+/-- The name a statement declares in its own block. -/
+def RawStmt.declared? : RawStmt → Option String
+  | .decl _ x _ | .declStorage _ x _ | .declMemory _ x _ | .declStoragePush _ x _ => some x
+  | _ => none
+
+/-- Whether a `return` occurs in the statement. -/
+partial def RawStmt.hasReturn (s : RawStmt) : Bool :=
+  s matches .ret _ || s.blocks.any (·.any RawStmt.hasReturn)
+
+/-- Whether the name `x` occurs in the statement, read, written or declared. -/
+partial def RawStmt.mentions (x : String) (s : RawStmt) : Bool :=
+  s.declared? == some x || s.exprs.any (·.mentions x) || s.blocks.any (·.any (·.mentions x))
+
+mutual
+
+/-- The names a raw statement reads (a function's name is not one). -/
+partial def RawStmt.names (s : RawStmt) : List String :=
+  let es := match s with
+    | .call (.name _) as => as
+    | s => s.exprs
+  es.flatMap RawExpr.names ++ s.blocks.flatMap RawStmt.namesList
+
+partial def RawStmt.namesList (ss : List RawStmt) : List String :=
+  ss.flatMap RawStmt.names
+
+end
+
+mutual
+
+/-- The names a raw statement declares, in either branch of an `if`. -/
+partial def RawStmt.decls (s : RawStmt) : List String :=
+  s.declared?.toList ++ s.blocks.flatMap RawStmt.declsList
+
+partial def RawStmt.declsList (ss : List RawStmt) : List String :=
+  ss.flatMap RawStmt.decls
+
+end
+
+mutual
+
+/-- The largest index among the fresh variables a raw statement writes. -/
+partial def RawStmt.maxIdx (s : RawStmt) : Nat :=
+  max ((s.declared?.map fun x => (Var.ofName x).idx).getD 0)
+    (max (RawExpr.maxIdxs s.exprs) ((s.blocks.map RawStmt.maxIdxs).foldl max 0))
+
+partial def RawStmt.maxIdxs (ss : List RawStmt) : Nat :=
+  ss.foldl (fun n s => max n s.maxIdx) 0
+
+end
 
 section Elab
 
@@ -1648,11 +1864,12 @@ def synth (Γ : ECtx) : RawExpr → Except String (TExpr C)
     | .mpath (.ref (.fixed E n)) b =>
       if let .num i := k then if n ≤ i then throw s!"index {i} out of bounds of a length-{n} array"
       pure (.mpath E (.loc (.index .fixed b (← check Γ .uint k))))
-    | _ => throw "indexing something that is not a mapping or an array"
+    | t => throw s!"{e.toStr} is indexed, but it is a {t.ty}, not a mapping or an array"
   | .binop op a b => do
     -- the operand type: the first operand that is not a literal gives it
     let t ← if a.isLit then synth Γ b else synth Γ a
-    let some ⟨p, _⟩ := t.toVal? | throw "an operand of reference type"
+    let some ⟨p, _⟩ := t.toVal? |
+      throw s!"{(if a.isLit then b else a).toStr}: an operand of reference type {t.ty}"
     match h : op.accepts p with
     | true => pure (.val _ (.binop op h rfl (← check Γ p a) (← check Γ p b)))
     | false => throw s!"operator {BinOp.sym op} does not take {primName p}"
@@ -1661,9 +1878,10 @@ def synth (Γ : ECtx) : RawExpr → Except String (TExpr C)
     let some ⟨p, _⟩ := t.toVal? | throw "a conditional of reference type"
     pure (.val p (.ternary (← check Γ .bool c) (← check Γ p a) (← check Γ p b)))
   | .unop op a => do
-    let some ⟨p, a⟩ := (← synth Γ a).toVal? | throw "an operand of reference type"
+    let t ← synth Γ a
+    let some ⟨p, v⟩ := t.toVal? | throw s!"{a.toStr}: an operand of reference type {t.ty}"
     match h : op.accepts p with
-    | true => pure (.val _ (.unop op h rfl a))
+    | true => pure (.val _ (.unop op h rfl v))
     | false => throw s!"operator {UnOp.sym op} does not take {primName p}"
   | .incDec .. => throw "`++` or `−−` under a short-circuit operator or in a conditional's branch"
   | .newArr .. => throw "`new` stands only on the right of `=`"
@@ -1705,26 +1923,32 @@ end
 /-- `e` as a storage path of type `T`. -/
 def checkPath (Γ : ECtx) (T : Ty) (e : RawExpr) : Except String (SPath C T) := do
   match ← synth C Γ e with
-  | .path T' p => if h : T' = T then pure (h ▸ p) else throw "a storage path of another type"
+  | .path T' p =>
+    if h : T' = T then pure (h ▸ p)
+    else throw s!"{e.toStr}: a storage reference to a {T'} where a {T} is expected"
   | .mpath .. | .val .. => throw "a value where a storage reference is expected"
 
 /-- `e` as a memory path of type `T`. -/
 def checkMPath (Γ : ECtx) (T : Ty) (e : RawExpr) : Except String (MPath C T) := do
   match ← synth C Γ e with
-  | .mpath T' p => if h : T' = T then pure (h ▸ p) else throw "a memory path of another type"
+  | .mpath T' p =>
+    if h : T' = T then pure (h ▸ p)
+    else throw s!"{e.toStr}: a memory reference to a {T'} where a {T} is expected"
   | .path .. | .val .. => throw "a memory reference is expected"
 
 /-- What a memory local is bound to: a memory path by identity, or a storage
 path deep-copied. -/
 def elabMRhs (Γ : ECtx) (R : RefTy) (e : RawExpr) : Except String (MRhs C R) := do
   match ← synth C Γ e with
-  | .mpath T p => if h : T = .ref R then pure (.alias (h ▸ p)) else throw "a memory path of another type"
+  | .mpath T p =>
+    if h : T = .ref R then pure (.alias (h ▸ p))
+    else throw s!"{e.toStr}: a memory reference to a {T} where a {Ty.ref R} is expected"
   | .path T p =>
     if h : T = .ref R then
       match hm : (Ty.ref R).mapFree with
       | true => pure (.copy (h ▸ p) hm)
       | false => throw "a copy into memory of a type that holds a mapping"
-    else throw "a storage path of another type"
+    else throw s!"{e.toStr}: a storage reference to a {T} where a {Ty.ref R} is expected"
   | .val .. => throw "a value where a memory reference is expected"
 
 /-- The slot `b.push()` appends, as what an alias of `R` is bound to. -/
@@ -1754,11 +1978,19 @@ def freshCapture (base : String) : ElabM Var := do
   set (Γ, k + 1)
   pure (.fresh base k)
 
+/-- The locals in scope. -/
+def ctx : ElabM ECtx := do pure (← get).1
+
+/-- `synth`, in the locals in scope. -/
+def synthM (e : RawExpr) : ElabM (TExpr C) := do ElabM.lift (synth C (← ctx) e)
+
+/-- `check`, in the locals in scope. -/
+def checkM (p : PrimTy) (e : RawExpr) : ElabM (Val C p) := do ElabM.lift (check C (← ctx) p e)
+
 /-- A compound assignment's target, with a non-simple index captured into a
 fresh `ie` first: `values[i + 1] += 1;` is `uint ie1 = i + 1; values[ie1] += 1;`. -/
 def elabOpTarget (l : RawExpr) : ElabM (Prog C × (p : PrimTy) × OpLoc C p) := do
-  let (Γ, _) ← get
-  match ← synth C Γ l with
+  match ← synthM C l with
   | .val p (.simple (.local x)) => pure ([], ⟨p, .local x⟩)
   | .path (.prim p) (.loc (.root r h)) => pure ([], ⟨p, .root r h⟩)
   | .path (.prim p) (.loc (.field b f h)) => pure ([], ⟨p, .field b f h⟩)
@@ -1807,12 +2039,17 @@ def declare (x : Name) (t : LocalTy) : ElabM Unit := do
   checkFresh C Γ x
   set (setBy x t Γ, k)
 
+/-- A capture: a fresh `base` variable (`freshCapture`), declared at `t`. -/
+def captureAs (base : String) (t : LocalTy) : ElabM Var := do
+  let x ← freshCapture base
+  declare C (toString x) t
+  pure x
+
 /-- The size of `new T[](n)` as a simple value: a size that is not one is
 captured into a fresh `uint` first (KeY's `memoryArrayFreshAlloc` takes a
 `SimpleExpression`). -/
 def elabSize (n : RawExpr) : ElabM (Prog C × Simple C .uint) := do
-  let (Γ, _) ← get
-  let v ← ElabM.lift (check C Γ .uint n)
+  let v ← checkM C .uint n
   match v.toSimple? with
   | some se => pure ([], se)
   | none =>
@@ -1821,7 +2058,7 @@ def elabSize (n : RawExpr) : ElabM (Prog C × Simple C .uint) := do
 
 /-- The array type `new T(n)` allocates, if it may be allocated. -/
 def elabNewTy (T : RawTy) : ElabM ((R : RefTy) ×' R.newArrOk = true) := do
-  let .ref R := elabTy T | throw "`new` of a value type"
+  let .ref R ← ElabM.lift (elabTy C T) | throw "`new` of a value type"
   match h : R.newArrOk with
   | true => pure ⟨R, h⟩
   | false => throw "`new` of an array whose elements a memory array cannot hold"
@@ -1836,39 +2073,21 @@ def captureExpr (e : RawExpr) : ElabM (Prog C × RawExpr) := do
   -- a capture already made holds its value
   if let .name x := e then
     if Var.ofName x matches .fresh .. then return ([], e)
-  let (Γ, _) ← get
-  let t ← ElabM.lift (synth C Γ e)
+  let t ← synthM C e
   match e, t with
   | .name _, .path (.ref _) _ | .name _, .mpath (.ref _) _ => return ([], e)
   | _, .path (.ref R) sp =>
-    let x ← freshCapture "sp"
-    declare C (toString x) (.alias R)
+    let x ← captureAs C "sp" (.alias R)
     return ([.declStorage R x (some (.path sp))], .name (toString x))
   | _, .mpath (.ref R) mp =>
-    let x ← freshCapture "mv"
-    declare C (toString x) (.mem R)
+    let x ← captureAs C "mv" (.mem R)
     return ([.declMem R x (some (.alias mp)) rfl], .name (toString x))
   | _, t =>
-    let some ⟨p, v⟩ := t.toVal? | throw "a value or a reference is expected"
-    let x ← freshCapture "se"
-    declare C (toString x) (.val p)
+    let some ⟨p, v⟩ := t.toVal? | throw s!"{e.toStr}: a value or a reference is expected"
+    let x ← captureAs C "se" (.val p)
     return ([.declLocal p x (some v)], .name (toString x))
 
 /-! ### Inlining a call -/
-
-/-- `e` with the names `ρ` maps renamed (a callee's locals, made fresh). -/
-partial def RawExpr.rename (ρ : List (String × String)) : RawExpr → RawExpr
-  | .name x => .name ((lookupBy x ρ).getD x)
-  | .field e f => .field (e.rename ρ) f
-  | .index e k => .index (e.rename ρ) (k.rename ρ)
-  | .binop op a b => .binop op (a.rename ρ) (b.rename ρ)
-  | .unop op a => .unop op (a.rename ρ)
-  | .ternary c a b => .ternary (c.rename ρ) (a.rename ρ) (b.rename ρ)
-  | .incDec op e => .incDec op (e.rename ρ)
-  | .newArr T n => .newArr T (n.rename ρ)
-  | .call f as => .call f (as.map (·.rename ρ))
-  | .named f ns as => .named f ns (as.map (·.rename ρ))
-  | e => e
 
 /-- A callee's body with its locals renamed fresh, each declaration's name
 numbered as a capture of its kind is (`se`, `sp`, `mv`), and the names `ρ`
@@ -1897,57 +2116,7 @@ partial def renameStmts (ρ : List (String × String)) : List RawStmt → ElabM 
     | .ite c t e =>
       pure (.ite (r c) (← renameStmts ρ t) (← renameStmts ρ e) :: (← renameStmts ρ ss))
     | .unchecked b => pure (.unchecked (← renameStmts ρ b) :: (← renameStmts ρ ss))
-    | s =>
-      let s := match s with
-        | .assign l e => .assign (r l) (r e)
-        | .delete e => .delete (r e)
-        | .opAssign op l e => .opAssign op (r l) (r e)
-        | .incDec op l => .incDec op (r l)
-        | .call f as => .call (r f) (as.map r)
-        | .assignIncDec x op l => .assignIncDec (r x) op (r l)
-        | .assignPush l b => .assignPush (r l) (r b)
-        | .require c => .require (r c)
-        | .assert c => .assert (r c)
-        | .ret e => .ret (e.map r)
-        | .eval as => .eval (as.map r)
-        | s => s
-      pure (s :: (← renameStmts ρ ss))
-
-/-- Whether a `return` occurs in the statement. -/
-partial def RawStmt.hasReturn : RawStmt → Bool
-  | .ret _ => true
-  | .ite _ t e => t.any RawStmt.hasReturn || e.any RawStmt.hasReturn
-  | .unchecked b => b.any RawStmt.hasReturn
-  | _ => false
-
-/-- Whether the name `x` occurs in the expression. -/
-partial def RawExpr.mentions (x : String) : RawExpr → Bool
-  | .name y => y == x
-  | .field e _ | .unop _ e | .incDec _ e | .newArr _ e => e.mentions x
-  | .index a b | .binop _ a b => a.mentions x || b.mentions x
-  | .ternary c a b => c.mentions x || a.mentions x || b.mentions x
-  | .call _ as | .named _ _ as => as.any (·.mentions x)
-  | .num _ | .bool _ | .env _ => false
-
-/-- Whether the name `x` occurs in the statement, read, written or declared. -/
-partial def RawStmt.mentions (x : String) : RawStmt → Bool
-  | .assign l r | .assignPush l r => l.mentions x || r.mentions x
-  | .decl _ y i | .declStorage _ y i | .declMemory _ y i => y == x || i.any (·.mentions x)
-  | .declStoragePush _ y b => y == x || b.mentions x
-  | .delete e | .incDec _ e | .require e | .assert e => e.mentions x
-  | .opAssign _ l r => l.mentions x || r.mentions x
-  | .call f as => f.mentions x || as.any (·.mentions x)
-  | .assignIncDec y _ l => y.mentions x || l.mentions x
-  | .ite c t e => c.mentions x || t.any (·.mentions x) || e.any (·.mentions x)
-  | .ret e => e.any (·.mentions x)
-  | .eval as => as.any (·.mentions x)
-  | .unchecked b => b.any (·.mentions x)
-  | .revert => false
-
-/-- The name a statement declares in its own block. -/
-def RawStmt.declared? : RawStmt → Option String
-  | .decl _ x _ | .declStorage _ x _ | .declMemory _ x _ | .declStoragePush _ x _ => some x
-  | _ => none
+    | s => pure ((Id.run (s.mapExprsM (pure ∘ r))) :: (← renameStmts ρ ss))
 
 /-- **A body's `return`s, lowered** to assignments to its return variable
 `r` (`return x + 1;` is `r = x + 1;`), so that `Stmt.run` has no abrupt
@@ -2008,51 +2177,21 @@ partial def wrapMods (body : List RawStmt) : List ModApp → ElabM (List RawStmt
     let code ← renameStmts ρ (m.pre ++ m.post)
     pure (decls ++ code.take m.pre.length ++ inner ++ code.drop m.pre.length)
 
-/-- An expression inside `unchecked { … }`: `+ - * **` wrap (`+%` …).  An
-`++`/`−−` inside it is an error: its capture (`hoist`) is checked. -/
-partial def RawExpr.uncheck : RawExpr → Except String RawExpr
-  | .binop op a b => do
-    let op' : BinOp := match op with
-      | .add => .addW | .sub => .subW | .mul => .mulW | .pow => .powW | op => op
-    pure (.binop op' (← a.uncheck) (← b.uncheck))
-  | .field e f => do pure (.field (← e.uncheck) f)
-  | .index e k => do pure (.index (← e.uncheck) (← k.uncheck))
-  | .unop op a => do pure (.unop op (← a.uncheck))
-  | .ternary c a b => do pure (.ternary (← c.uncheck) (← a.uncheck) (← b.uncheck))
-  | .incDec .. => throw "`++` or `−−` inside an expression in `unchecked`"
-  | .newArr T n => do pure (.newArr T (← n.uncheck))
-  | .call f as => do pure (.call f (← as.mapM RawExpr.uncheck))
-  | .named f ns as => do pure (.named f ns (← as.mapM RawExpr.uncheck))
-  | e => pure e
-
 /-- The statements of `unchecked { … }` with their arithmetic wrapping: `x += 1;`
 and `x++;` are `x = x +% 1;`.  A call's callee stays checked, as in solc. -/
 partial def uncheckStmts : List RawStmt → Except String (List RawStmt)
   | [] => pure []
   | s :: ss => do
-    let u := RawExpr.uncheck
     let s' ← match s with
-      | .assign l e => do pure (.assign (← u l) (← u e))
-      | .decl T x i => do pure (.decl T x (← i.mapM u))
-      | .declStorage T x i => do pure (.declStorage T x (← i.mapM u))
-      | .declMemory T x i => do pure (.declMemory T x (← i.mapM u))
-      | .delete e => do pure (.delete (← u e))
       | .opAssign op l e => do
         let op' : BinOp := match op with | .add => .addW | .sub => .subW | .mul => .mulW | op => op
-        pure (.opAssign op' (← u l) (← u e))
+        pure (.opAssign op' (← l.uncheck) (← e.uncheck))
       | .incDec op l => do
-        pure (.opAssign (if op.isIncrement then .addW else .subW) (← u l) (.num 1))
-      | .call f as => do pure (.call (← u f) (← as.mapM u))
+        pure (.opAssign (if op.isIncrement then .addW else .subW) (← l.uncheck) (.num 1))
       | .assignIncDec .. => throw "`v = x++;` inside `unchecked`: write `v = x; x += 1;`"
-      | .assignPush l b => do pure (.assignPush (← u l) (← u b))
-      | .declStoragePush T x b => do pure (.declStoragePush T x (← u b))
-      | .ite c t e => do pure (.ite (← u c) (← uncheckStmts t) (← uncheckStmts e))
-      | .require c => do pure (.require (← u c))
-      | .assert c => do pure (.assert (← u c))
-      | .revert => pure .revert
-      | .ret e => do pure (.ret (← e.mapM u))
+      | .ite c t e => do pure (.ite (← c.uncheck) (← uncheckStmts t) (← uncheckStmts e))
       | .unchecked b => do pure (.unchecked (← uncheckStmts b))
-      | .eval as => do pure (.eval (← as.mapM u))
+      | s => s.mapExprsM RawExpr.uncheck
     pure (s' :: (← uncheckStmts ss))
 
 mutual
@@ -2074,9 +2213,8 @@ partial def hoist : RawExpr → ElabM (Prog C × RawExpr)
     let (P, e) ← hoist e
     -- `rows[i].length` of a fixed-size `rows[i]`: the base is evaluated (and
     -- may revert) although the length is the literal, so it is captured
-    let (Γ, _) ← get
     if f == "length" && e.hasIndex then
-      match synth C Γ e with
+      match synth C (← ctx) e with
       | .ok (.path (.ref (.fixed ..)) _) | .ok (.mpath (.ref (.fixed ..)) _) =>
         let (Pc, e) ← captureExpr C e
         return (P ++ Pc, .field e f)
@@ -2118,21 +2256,19 @@ partial def hoist : RawExpr → ElabM (Prog C × RawExpr)
     let (P, c) ← hoist c
     if a.hasCall || b.hasCall then throw "a call in a conditional's branch"
     if a.hasIncDec || b.hasIncDec then throw "`++` or `−−` in a conditional's branch"
-    let (Γ, _) ← get
+    let Γ ← ctx
     match synth C Γ a, synth C Γ b with
     | .ok (.path (.ref R) pa), .ok (.path (.ref R') pb) =>
       if hR : R' = R then
         let c ← ElabM.lift (check C Γ .bool c)
-        let x ← freshCapture "sp"
-        declare C (toString x) (.alias R)
+        let x ← captureAs C "sp" (.alias R)
         pure (P ++ [.ite c [.declStorage R x (some (.path pa))]
           [.declStorage R x (some (.path (hR ▸ pb)))]], .name (toString x))
       else throw "a conditional of two reference types"
     | .ok (.mpath (.ref R) pa), .ok (.mpath (.ref R') pb) =>
       if hR : R' = R then
         let c ← ElabM.lift (check C Γ .bool c)
-        let x ← freshCapture "mv"
-        declare C (toString x) (.mem R)
+        let x ← captureAs C "mv" (.mem R)
         pure (P ++ [.ite c [.declMem R x (some (.alias pa)) rfl]
           [.declMem R x (some (.alias (hR ▸ pb))) rfl]], .name (toString x))
       else throw "a conditional of two reference types"
@@ -2144,8 +2280,7 @@ partial def hoist : RawExpr → ElabM (Prog C × RawExpr)
     let (pre, ⟨p, t, hs⟩) ← elabIncTarget C e
     match hp : p.isNumeric with
     | true =>
-      let x ← freshCapture "se"
-      declare C (toString x) (.val p)
+      let x ← captureAs C "se" (.val p)
       pure (P ++ pre ++ [.declLocal p x none, .assignIncDec x op hp t hs], .name (toString x))
     | false => throw s!"++ or −− at {primName p}"
   | .named f ns args => do
@@ -2204,7 +2339,7 @@ partial def elabCall (f : String) (args : List RawExpr) (res : Option (Var × Pr
   let d := (funs[i]?.map (·.2)).getD default
   unless d.params.length == args.length do
     throw s!"{f} takes {d.params.length} arguments, not {args.length}"
-  let (Γ, _) ← get
+  let Γ ← ctx
   let mut targs : List (Arg C) := []
   let mut ρ : List (String × String) := []
   let mut Γf : ECtx := []
@@ -2242,8 +2377,7 @@ interpreter evaluates them, a receiver before an argument.  A branch's statement
 own. -/
 partial def hoistStmt : RawStmt → ElabM (Prog C × RawStmt)
   | .assign l r => do
-    let (Γ, _) ← get
-    match r, synth C Γ l with
+    match r, synth C (← ctx) l with
     | .incDec op e, .ok (.val _ (.simple (.local _))) =>
       let (P, e) ← hoist e
       pure (P, .assignIncDec l op e)
@@ -2262,30 +2396,20 @@ partial def hoistStmt : RawStmt → ElabM (Prog C × RawStmt)
   | .decl T x (some (.call f args)) => do
     let (P, args) ← hoistArgs args
     pure (P, .decl T x (some (.call f args)))
-  | .decl T x (some e) => do
-    let (P, e) ← hoist e
-    pure (P, .decl T x (some e))
-  | .declStorage T x (some e) => do
-    let (P, e) ← hoist e
-    pure (P, .declStorage T x (some e))
   | .declMemory T x (some (.newArr T' n)) => pure ([], .declMemory T x (some (.newArr T' n)))
-  | .declMemory T x (some e) => do
-    let (P, e) ← hoist e
-    pure (P, .declMemory T x (some e))
-  | .declStoragePush T x b => do
-    let (P, b) ← hoist b
-    pure (P, .declStoragePush T x b)
-  | .delete e => do
-    let (P, e) ← hoist e
-    pure (P, .delete e)
+  -- a statement of one expression: its captures, then the statement
+  | s@(.decl ..) | s@(.declStorage ..) | s@(.declMemory ..) | s@(.declStoragePush ..)
+  | s@(.delete _) | s@(.incDec ..) | s@(.ite ..) | s@(.require _) | s@(.assert _) => do
+    let (s, P) ← (s.mapExprsM fun e => do
+      let (Q, e) ← hoist e
+      modify (· ++ Q)
+      pure e : StateT (Prog C) ElabM RawStmt).run []
+    pure (P, s)
   | .opAssign op l r => do
     let (P, r) ← hoist r
     let (Pc, r) ← if l.hasIncDec then captureExpr C r else pure ([], r)
     let (Q, l) ← hoist l
     pure (P ++ Pc ++ Q, .opAssign op l r)
-  | .incDec op l => do
-    let (P, l) ← hoist l
-    pure (P, .incDec op l)
   | .assignIncDec x op l => do
     let (P, l) ← hoist l
     pure (P, .assignIncDec x op l)
@@ -2308,15 +2432,6 @@ partial def hoistStmt : RawStmt → ElabM (Prog C × RawStmt)
     let (P, b) ← hoist b
     let (Q, l) ← hoist l
     pure (P ++ Q, .assignPush l b)
-  | .ite c thn els => do
-    let (P, c) ← hoist c
-    pure (P, .ite c thn els)
-  | .require c => do
-    let (P, c) ← hoist c
-    pure (P, .require c)
-  | .assert c => do
-    let (P, c) ← hoist c
-    pure (P, .assert c)
   | .eval args => do
     -- the effects captured, left to right; then what may still revert is
     -- evaluated into a fresh local, which nothing reads
@@ -2336,10 +2451,9 @@ partial def elabStmt (s : RawStmt) : ElabM (Prog C) := do
 /-- A statement whose expressions have no effect left. -/
 partial def elabStmt1 : RawStmt → ElabM (Prog C)
   | .assign l (.newArr T n) => do
-    let ⟨R, hR⟩ ← elabNewTy T
+    let ⟨R, hR⟩ ← elabNewTy C T
     let (P, se) ← elabSize C n
-    let (Γ, _) ← get
-    match ← synth C Γ l with
+    match ← synthM C l with
     | .mpath (.ref R') (.var x) =>
       if R' = R then pure (P ++ [.rebindMem (R := R) x (.newArr se hR)])
       else throw "`new` of another type than the memory local's"
@@ -2352,67 +2466,65 @@ partial def elabStmt1 : RawStmt → ElabM (Prog C)
     | .path _ (.alias _) => throw "a storage pointer bound to a memory array"
     | .val .. => throw "`new` assigned to a value"
   | .assign l (.call f args) => do
-    let (Γ, _) ← get
-    match ← synth C Γ l with
+    match ← synthM C l with
     | .val p (.simple (.local x)) => elabCall f args (some (x, p))
     | _ => throw "a call's value is assigned to a stack local"
   | .assign l r => do
-    let (Γ, _) ← get
-    match ← synth C Γ l with
-    | .val p (.simple (.local x)) => pure [.assignLocal x (← check C Γ p r)]
-    | .val .. => throw "assigning to a value"
-    | .path (.prim p) (.loc l) => pure [.assign l (.val (← check C Γ p r))]
+    let Γ ← ctx
+    match ← synthM C l with
+    | .val p (.simple (.local x)) => pure [.assignLocal x (← checkM C p r)]
+    | .val p _ => throw s!"{l.toStr} is a {p.toStr} value, not a place to assign to"
+    | .path (.prim p) (.loc l) => pure [.assign l (.val (← checkM C p r))]
     | .path (.ref R) (.loc l) =>
-      match ← synth C Γ r with
+      match ← synthM C r with
       | .mpath T mp =>
         if hT : T = .ref R then pure [.assignFromMem l (hT ▸ mp)]
-        else throw "a memory path of another type"
+        else throw s!"{r.toStr}: a memory reference to a {T} where a {Ty.ref R} is expected"
       | _ =>
         match h : (Ty.ref R).mapFree with
         | true => pure [.assign l (.copy (← checkPath C Γ (.ref R) r) h)]
         | false => throw "a storage copy of a type that holds a mapping"
     | .path (.ref R) (.alias x) => pure [.rebind x (.path (← checkPath C Γ (.ref R) r))]
     | .mpath (.ref R) (.var x) => pure [.rebindMem x (← elabMRhs C Γ R r)]
-    | .mpath (.prim p) (.loc l) => pure [.assignMem l (.val (← check C Γ p r))]
+    | .mpath (.prim p) (.loc l) => pure [.assignMem l (.val (← checkM C p r))]
     | .mpath (.ref R) (.loc l) => pure [.assignMem l (.ref (← checkMPath C Γ (.ref R) r))]
   | .decl T x (some (.call f args)) => do
-    let .prim p := elabTy T | throw s!"{x}: a reference type needs a data location"
+    let .prim p ← ElabM.lift (elabTy C T) | throw s!"{x}: a reference type needs a data location"
     let P ← elabCall f args (some (Var.ofName x, p))
     declare C x (.val p)
     pure (.declLocal p (Var.ofName x) none :: P)
   | .decl T x init => do
-    let .prim p := elabTy T | throw s!"{x}: a reference type needs a data location"
-    let (Γ, _) ← get
-    let init ← ElabM.lift (init.mapM (check C Γ p))
+    let .prim p ← ElabM.lift (elabTy C T) | throw s!"{x}: a reference type needs a data location"
+    let init ← init.mapM (checkM C p)
     declare C x (.val p)
     pure [.declLocal p (Var.ofName x) init]
   | .declStorage T x init => do
-    let .ref R := elabTy T | throw s!"{x}: `storage` on a value type"
-    let (Γ, _) ← get
+    let .ref R ← ElabM.lift (elabTy C T) | throw s!"{x}: `storage` on a value type"
+    let Γ ← ctx
     let init ← ElabM.lift (init.mapM fun e => ARhs.path <$> checkPath C Γ (.ref R) e)
     declare C x (.alias R)
     pure [.declStorage R (Var.ofName x) init]
   | .declStoragePush T x b => do
-    let .ref R := elabTy T | throw s!"{x}: `storage` on a value type"
-    let (Γ, _) ← get
+    let .ref R ← ElabM.lift (elabTy C T) | throw s!"{x}: `storage` on a value type"
+    let Γ ← ctx
     let r ← elabPush C Γ R b
     declare C x (.alias R)
     pure [.declStorage R (Var.ofName x) (some r)]
   | .assignPush l b => do
-    let (Γ, _) ← get
-    match ← synth C Γ l with
+    let Γ ← ctx
+    match ← synthM C l with
     | .path (.ref R) (.alias x) => pure [.rebind x (← elabPush C Γ R b)]
     | _ => throw "`= b.push()` binds a storage pointer"
   | .declMemory T x (some (.newArr T' n)) => do
-    let .ref R := elabTy T | throw s!"{x}: `memory` on a value type"
-    let ⟨R', hR⟩ ← elabNewTy T'
+    let .ref R ← ElabM.lift (elabTy C T) | throw s!"{x}: `memory` on a value type"
+    let ⟨R', hR⟩ ← elabNewTy C T'
     unless R' = R do throw s!"{x}: `new` of another type"
     let (P, se) ← elabSize C n
     declare C x (.mem R')
     pure (P ++ [.declMem R' (Var.ofName x) (some (.newArr se hR)) rfl])
   | .declMemory T x init => do
-    let .ref R := elabTy T | throw s!"{x}: `memory` on a value type"
-    let (Γ, _) ← get
+    let .ref R ← ElabM.lift (elabTy C T) | throw s!"{x}: `memory` on a value type"
+    let Γ ← ctx
     let s ← match init with
       | some e => pure (Stmt.declMem R (Var.ofName x) (some (← elabMRhs C Γ R e)) rfl)
       | none =>
@@ -2422,8 +2534,7 @@ partial def elabStmt1 : RawStmt → ElabM (Prog C)
     declare C x (.mem R)
     pure [s]
   | .delete e => do
-    let (Γ, _) ← get
-    match ← synth C Γ e with
+    match ← synthM C e with
     | .path T (.loc l) =>
       if T matches .ref (.mapping ..) then throw "a mapping cannot be deleted"
       else pure [.delete l]
@@ -2439,9 +2550,8 @@ partial def elabStmt1 : RawStmt → ElabM (Prog C)
     if op.isArith && !op.hasCompoundAssign && op != .pow then
       return ← elabStmt1 (.assign l (.binop op l r))
     let (pre, ⟨p, t⟩) ← elabOpTarget C l
-    let (Γ, _) ← get
     match hop : op.hasCompoundAssign, hp : p.isNumeric with
-    | true, true => pure (pre ++ [.opAssign op hop hp t (← check C Γ p r)])
+    | true, true => pure (pre ++ [.opAssign op hop hp t (← checkM C p r)])
     | false, _ => throw s!"no compound assignment for {BinOp.sym op}"
     | _, false => throw s!"a compound assignment at {primName p}"
   | .incDec op l => do
@@ -2451,8 +2561,7 @@ partial def elabStmt1 : RawStmt → ElabM (Prog C)
     | false => throw s!"++ or −− at {primName p}"
   | .assignIncDec x op l => do
     let (pre, ⟨p, t, hs⟩) ← elabIncTarget C l
-    let (Γ, _) ← get
-    match ← synth C Γ x with
+    match ← synthM C x with
     | .val q (.simple (.local y)) =>
       match hp : p.isNumeric with
       | true => if q = p then pure (pre ++ [.assignIncDec y op hp t hs])
@@ -2460,8 +2569,8 @@ partial def elabStmt1 : RawStmt → ElabM (Prog C)
       | false => throw s!"++ or −− at {primName p}"
     | _ => throw "the result of ++ or −− goes to a stack local"
   | .call (.field e "push") args => do
-    let (Γ, _) ← get
-    let .path (.ref (.array E)) b ← synth C Γ e | throw "push on something that is not an array"
+    let Γ ← ctx
+    let .path (.ref (.array E)) b ← synthM C e | throw "push on something that is not an array"
     match args with
     | [] =>
       match hd : E.defaultOkS with
@@ -2469,11 +2578,11 @@ partial def elabStmt1 : RawStmt → ElabM (Prog C)
       | false => throw "push() of an element whose default is not well-formed"
     | [a] =>
       match E with
-      | .prim p => pure [.push b (some (.val (← check C Γ p a))) rfl]
+      | .prim p => pure [.push b (some (.val (← checkM C p a))) rfl]
       | .ref R =>
         -- a memory object (a struct's constructor): a default slot pushed,
         -- then written with its copy
-        if (← synth C Γ a) matches .mpath .. then
+        if (← synthM C a) matches .mpath .. then
           return ← elabStmts [.call (.field e "push") [],
             .assign (.index e (.binop .sub (.field e "length") (.num 1))) a]
         match h : (Ty.ref R).mapFree with
@@ -2481,27 +2590,22 @@ partial def elabStmt1 : RawStmt → ElabM (Prog C)
         | false => throw "a push copying a type that holds a mapping"
     | _ => throw "push takes at most one argument"
   | .call (.field e "pop") [] => do
-    let (Γ, _) ← get
-    let .path (.ref (.array _)) b ← synth C Γ e | throw "pop on something that is not an array"
+    let .path (.ref (.array _)) b ← synthM C e | throw "pop on something that is not an array"
     pure [.pop b]
   | .call (.field e "transfer") [a] => do
-    let (Γ, _) ← get
-    pure [.transfer (← check C Γ .uint e) (← check C Γ .uint a)]
+    pure [.transfer (← checkM C .uint e) (← checkM C .uint a)]
   | .call (.name f) args => elabCall f args none
   | .call .. => throw "only push, pop and transfer are calls on a receiver"
   | .ret _ => throw "`return` outside a function's body"
   | .ite c thn els => do
-    let (Γ, _) ← get
-    let c ← check C Γ .bool c
+    let c ← checkM C .bool c
     let thn ← elabBranch thn
     let els ← elabBranch els
     pure [.ite c thn els]
   | .require c => do
-    let (Γ, _) ← get
-    pure [.require (← check C Γ .bool c)]
+    pure [.require (← checkM C .bool c)]
   | .assert c => do
-    let (Γ, _) ← get
-    pure [.assert (← check C Γ .bool c)]
+    pure [.assert (← checkM C .bool c)]
   | .revert => pure [.revert]
   | .eval _ => pure []
   | .unchecked ss => do elabBranch (← ElabM.lift (uncheckStmts ss))
@@ -2524,54 +2628,22 @@ partial def elabBranch (ss : List RawStmt) : ElabM (Prog C) := do
 
 end
 
-mutual
-
-/-- The largest index among the fresh variables a raw program writes. -/
-def RawExpr.maxIdx : RawExpr → Nat
-  | .name x => (Var.ofName x).idx
-  | .field e _ => e.maxIdx
-  | .index e k => max e.maxIdx k.maxIdx
-  | .binop _ a b => max a.maxIdx b.maxIdx
-  | .unop _ a => a.maxIdx
-  | .ternary c a b => max c.maxIdx (max a.maxIdx b.maxIdx)
-  | .incDec _ e => e.maxIdx
-  | .newArr _ n => n.maxIdx
-  | .call _ as => as.attach.foldl (fun n ⟨a, _⟩ => max n a.maxIdx) 0
-  | .named _ _ as => as.attach.foldl (fun n ⟨a, _⟩ => max n a.maxIdx) 0
-  | .num _ | .bool _ | .env _ => 0
-
-end
-
-def RawExpr.maxIdxs : List RawExpr → Nat
-  | [] => 0
-  | e :: es => max e.maxIdx (RawExpr.maxIdxs es)
-
-mutual
-
-def RawStmt.maxIdx : RawStmt → Nat
-  | .assign l r | .assignPush l r => max l.maxIdx r.maxIdx
-  | .decl _ x i | .declStorage _ x i | .declMemory _ x i =>
-    max (Var.ofName x).idx ((i.map RawExpr.maxIdx).getD 0)
-  | .declStoragePush _ x b => max (Var.ofName x).idx b.maxIdx
-  | .delete e | .incDec _ e | .require e | .assert e => e.maxIdx
-  | .opAssign _ l r | .assignIncDec l _ r => max l.maxIdx r.maxIdx
-  | .call f as => max f.maxIdx (RawExpr.maxIdxs as)
-  | .ite c t e => max c.maxIdx (max (RawStmt.maxIdxs t) (RawStmt.maxIdxs e))
-  | .ret e => (e.map RawExpr.maxIdx).getD 0
-  | .revert => 0
-  | .eval as => RawExpr.maxIdxs as
-  | .unchecked b => RawStmt.maxIdxs b
-
-def RawStmt.maxIdxs : List RawStmt → Nat
-  | [] => 0
-  | s :: ss => max s.maxIdx (RawStmt.maxIdxs ss)
-
-end
-
 /-- Elaborate a block against `C`, from no locals.  A capture is numbered
 past every fresh variable the block writes. -/
 def elabProg (ss : List RawStmt) : Except String (Prog C) :=
   ((elabStmts C ss).run C.funs).run' ([], RawStmt.maxIdxs ss + 1)
+
+/-- `elabProg`, an error naming the statement of the block it arose in (its
+position): the same block, statement by statement. -/
+def elabProgAt (ss : List RawStmt) : Except (Nat × String) (Prog C) :=
+  go 0 ss ([], RawStmt.maxIdxs ss + 1)
+where
+  go (i : Nat) : List RawStmt → ECtx × Nat → Except (Nat × String) (Prog C)
+    | [], _ => pure []
+    | s :: ss, st =>
+      match ((elabStmt C s).run C.funs).run st with
+      | .error e => .error (i, e)
+      | .ok (P, st) => do pure (P ++ (← go (i + 1) ss st))
 
 end Elab
 
@@ -2595,6 +2667,9 @@ open Lean (mkAppN mkConst toExpr)
 
 /-- `a = a`. -/
 def quoteRefl (α a : Lean.Expr) : Lean.Expr := mkAppN (mkConst ``Eq.refl [1]) #[α, a]
+
+/-- `p = p`, at `PrimTy`. -/
+def rflPrim (p : PrimTy) : Lean.Expr := quoteRefl (mkConst ``PrimTy) (toExpr p)
 
 /-- `true = true`: every Boolean side condition. -/
 def rflTrue : Lean.Expr := quoteRefl (mkConst ``Bool) (mkConst ``Bool.true)
@@ -2623,7 +2698,7 @@ def Simple.quote : (p : PrimTy) → Simple C p → Lean.Expr
   | _, .bool b => mkAppN (mkConst ``Simple.bool) #[c, toExpr b]
   | p, .local x => mkAppN (mkConst ``Simple.local) #[c, toExpr p, toExpr x]
   | p, .env k _ => mkAppN (mkConst ``Simple.env) #[c, toExpr p, toExpr k,
-      quoteRefl (mkConst ``PrimTy) (toExpr p)]
+      rflPrim p]
 
 mutual
 
@@ -2655,17 +2730,17 @@ def Val.quote : (p : PrimTy) → Val C p → Lean.Expr
   | p, .read l => mkAppN (mkConst ``Val.read) #[c, toExpr p, Loc.quote _ l]
   | _, @Val.binop _ p q op _ _ a b =>
     mkAppN (mkConst ``Val.binop) #[c, toExpr p, toExpr q, toExpr op, rflTrue,
-      quoteRefl (mkConst ``PrimTy) (toExpr q), Val.quote p a, Val.quote p b]
+      rflPrim q, Val.quote p a, Val.quote p b]
   | _, @Val.unop _ p q op _ _ a =>
     mkAppN (mkConst ``Val.unop) #[c, toExpr p, toExpr q, toExpr op, rflTrue,
-      quoteRefl (mkConst ``PrimTy) (toExpr q), Val.quote p a]
+      rflPrim q, Val.quote p a]
   | p, .ternary cv a b =>
     mkAppN (mkConst ``Val.ternary) #[c, toExpr p, Val.quote .bool cv, Val.quote p a, Val.quote p b]
   | p, .readMem l => mkAppN (mkConst ``Val.readMem) #[c, toExpr p, MLoc.quote _ l]
   | p, @Val.len _ _ E b _ => mkAppN (mkConst ``Val.len) #[c, toExpr p, toExpr E, SPath.quote _ b,
-      quoteRefl (mkConst ``PrimTy) (toExpr p)]
+      rflPrim p]
   | p, @Val.mlen _ _ E b _ => mkAppN (mkConst ``Val.mlen) #[c, toExpr p, toExpr E, MPath.quote _ b,
-      quoteRefl (mkConst ``PrimTy) (toExpr p)]
+      rflPrim p]
 
 end
 
@@ -2775,33 +2850,46 @@ end Quote
 
 /-- `sol[C]{ s₁; s₂; … }`: the statements, elaborated against the named
 contract `C`. -/
-syntax "sol[" term "]{" (sol_stmt ";")* "}" : term
+syntax "sol[" term "]{" (sol_stmt solSemi)* "}" : term
 
 /-- `sol{ … }`: `sol[C]{ … }` for the file's `InContract` contract. -/
-syntax "sol{" (sol_stmt ";")* "}" : term
+syntax "sol{" (sol_stmt solSemi)* "}" : term
 
 open Lean Elab Term Meta in
 /-- Run `f C` at compile time for the contract the term `c` names, and splice
-the term it computes; an elaboration error is reported at the source.  `c`
-is unfolded through instances only, so it may be `InContract.contract` but
-must end at a named contract. -/
-def elabAgainst (c : Lean.Term) (f : Lean.Term → TermElabM Lean.Term) : TermElabM Lean.Expr := do
+the term it computes, of type `Except ε Lean.Expr` (`ε` the Lean type `errTy`);
+an error is reported by `onErr`.  `c` is unfolded through instances only, so
+it may be `InContract.contract` but must end at a named contract. -/
+def elabAgainstWith {ε : Type} (errTy : Lean.Expr) (onErr : ε → TermElabM Lean.Expr)
+    (c : Lean.Term) (f : Lean.Term → TermElabM Lean.Term) : TermElabM Lean.Expr := do
   let C ← withTransparency .instances <| whnf (← elabTermAndSynthesize c (mkConst ``Contract))
   let some n := C.constName? | throwError "not a named contract: {C}"
   let t ← f (← `(Lean.mkConst $(quote n)))
-  let ty := mkApp2 (mkConst ``Except [0, 0]) (mkConst ``String) (mkConst ``Lean.Expr)
+  let ty := mkApp2 (mkConst ``Except [0, 0]) errTy (mkConst ``Lean.Expr)
   let e ← elabTermEnsuringType t ty
   synthesizeSyntheticMVarsNoPostponing
   let e ← instantiateMVars e
-  match ← unsafe evalExpr (Except String Lean.Expr) ty e with
+  match ← unsafe evalExpr (Except ε Lean.Expr) ty e with
   | .ok r => pure r
-  | .error msg => throwError "Solidity elaboration failed: {msg}"
+  | .error err => onErr err
+
+open Lean Elab Term Meta in
+/-- `elabAgainstWith`, an error reported at the source. -/
+def elabAgainst (c : Lean.Term) (f : Lean.Term → TermElabM Lean.Term) : TermElabM Lean.Expr :=
+  elabAgainstWith (ε := String) (mkConst ``String)
+    (fun msg => throwError "Solidity elaboration failed: {msg}") c f
 
 open Lean Elab Term Meta in
 elab_rules : term
   | `(sol[ $c ]{ $[$ss:sol_stmt;]* }) => do
     let raw ← `(sol_raw!{ $[$ss;]* })
-    elabAgainst c fun q => `((elabProg $c $raw).map (Prog.quote $q))
+    -- an error is reported at the statement it arose in
+    let errTy := mkApp2 (mkConst ``Prod [0, 0]) (mkConst ``Nat) (mkConst ``String)
+    let ref ← getRef
+    let stmts : Array Syntax := ss.map TSyntax.raw
+    elabAgainstWith (ε := Nat × String) errTy (fun ((i, msg) : Nat × String) =>
+        throwErrorAt (stmts[i]?.getD ref) "Solidity elaboration failed: {msg}") c
+      fun q => `((elabProgAt $c $raw).map (Prog.quote $q))
 
 macro_rules
   | `(sol{ $[$ss;]* }) => `(sol[InContract.contract]{ $[$ss;]* })
@@ -2925,6 +3013,37 @@ info: uint y; uint se1 = 3; uint se2; uint se3 = se1; uint se4; se4 = se3 + 1; s
 
 /-- error: Solidity elaboration failed: addOne takes 1 arguments, not 2 -/
 #guard_msgs in #check sol[CallsExample]{ uint y = addOne(1, 2); }
+
+/-! ### Friendlier spellings -/
+
+/-- `else if`: the `if`s nested. -/
+example : Prog.toStr (sol{ if (total > 2) { total = 1; } else if (total > 1) { total = 2; }
+    else if (total > 0) { total = 3; } else { total = 4; } }) =
+    "if (total > 2) { total = 1; } else { if (total > 1) { total = 2; } else { \
+    if (total > 0) { total = 3; } else { total = 4; } } }" := rfl
+
+/-- A statement ending in a block needs no `;`; one with it reads the same. -/
+example : (sol{ if (total > 0) { total = 0; } unchecked { total += 1; } total = 1; } :
+    Prog StandardExample) = sol{ if (total > 0) { total = 0; }; unchecked { total += 1; }; total = 1; } :=
+  rfl
+
+/-- `address payable` is an `address`, a `uint`. -/
+example : Prog.toStr (sol{ address payable a = owner; }) = "uint a = owner;" := rfl
+
+/-- error: Solidity elaboration failed: unknown type Foo -/
+#guard_msgs in #check sol{ Foo x; }
+
+/-- error: Solidity elaboration failed: unknown type uint8: only the 256-bit integers are modelled, write `uint` or `int` -/
+#guard_msgs in #check sol{ uint8 x = 1; }
+
+/-- error: Solidity elaboration failed: total is indexed, but it is a uint, not a mapping or an array -/
+#guard_msgs in #check sol{ total[1] = 2; }
+
+/-- error: Solidity elaboration failed: alice: an operand of reference type Person -/
+#guard_msgs in #check sol{ total = alice + 1; }
+
+/-- error: Solidity elaboration failed: alice: a storage reference to a Person where a Person[] is expected -/
+#guard_msgs in #check sol{ Person[] storage ps = alice; }
 
 
 

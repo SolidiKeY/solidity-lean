@@ -12,7 +12,7 @@ state, and one per operator family where solkey has a file per operator.
 
 A `.key` file states its claim in the contract's initial store, where every
 array is empty; a claim that is only about that store is a run of the
-interpreter from `State.exampleStore` (`localAfter`), checked by `rfl`, or
+interpreter from `State.exampleStore` (`Prog.localAfter`), checked by `rfl`, or
 printed by `#eval` where `rfl` cannot unfold a struct's default (`defaultForTy`
 is well-founded).  A length premise (`1 < values.length`) is dropped instead:
 under the box a write out of bounds reverts, which satisfies the formula, so
@@ -24,10 +24,6 @@ namespace Solidity.Examples.StorageSuite
 open Proves Semantics
 
 local instance : InContract := ⟨StandardExample⟩
-
-/-- What the local `x` holds after `P` runs from the store `σ`. -/
-def localAfter {C : Contract} (σ : State) (P : Prog C) (x : String) : Res Binding := do
-  (← Prog.run σ P).getEnv (.user x)
 
 /-! ## 1 · Roots and fields -/
 
@@ -187,20 +183,20 @@ bare push leaves the default (`storage-push-empty.key`). -/
 info: Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int 0))
 -/
 #guard_msgs in
-#eval localAfter State.exampleStore
+#eval Prog.localAfter State.exampleStore
   sol{ values.push(); values.push(); values.push(); uint result = values[2]; } "result"
 
 /-- `values.push(); values.push(); values.push(42); uint result = values[2];`
 (`storage-push-value.key`). -/
 theorem pushValue :
-    localAfter State.exampleStore
+    Prog.localAfter State.exampleStore
       sol{ values.push(); values.push(); values.push(42); uint result = values[2]; } "result" =
       .ok (.val (.int 42)) := rfl
 
 /-- `uint x = 40; uint y = 2; values.push(x + y); uint result = values[0];` — the
 argument is captured first (`storage-push-nonsimple-arg.key`). -/
 theorem pushNonsimpleArg :
-    localAfter State.exampleStore
+    Prog.localAfter State.exampleStore
       sol{ uint x = 40; uint y = 2; values.push(x + y); uint result = values[0]; } "result" =
       .ok (.val (.int 42)) := rfl
 
@@ -211,7 +207,7 @@ theorem pushNonsimpleArg :
 info: Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int 0))
 -/
 #guard_msgs in
-#eval localAfter State.exampleStore
+#eval Prog.localAfter State.exampleStore
   sol{ values.push(); values.push(); values.pop(); uint result = values[0]; } "result"
 
 /-- `values.push(); values.push(); values.pop(); uint result = values[1];` — the
@@ -244,7 +240,7 @@ that has `tokens`; a `Token` default is not unfolded by `rfl`, so it is printed.
 info: Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int 0))
 -/
 #guard_msgs in
-#eval localAfter State.testSuiteStore
+#eval Prog.localAfter State.testSuiteStore
   sol[TestSuite]{ tokens.push(); tokens[0].value = 7; tokens.pop();
                   Token storage t = tokens.push(); uint r = t.value; } "r"
 
@@ -256,7 +252,7 @@ a `Person` builds its default, which `rfl` cannot unfold, so the run is printed.
 info: Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int 5))
 -/
 #guard_msgs in
-#eval localAfter State.exampleStore
+#eval Prog.localAfter State.exampleStore
   sol{ persons.push(); persons.push(); Person storage p; p = persons.push(); p.age = 5;
        uint result = persons[2].age; } "result"
 
@@ -268,7 +264,7 @@ m[0] = values; uint result = matrix[0][1];` — an array copied into a pushed ro
 info: Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int 6))
 -/
 #guard_msgs in
-#eval localAfter State.exampleStore
+#eval Prog.localAfter State.exampleStore
   sol{ values.push(5); values.push(6); uint[][] storage m = matrix; m.push(); m[0] = values;
        uint result = matrix[0][1]; } "result"
 
@@ -281,7 +277,7 @@ reset. -/
 info: Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int 10))
 -/
 #guard_msgs in
-#eval localAfter State.testSuiteStore
+#eval Prog.localAfter State.testSuiteStore
   sol[TestSuite]{ ledgerUses.push(); Ledger storage l = ledgerUses[0].ledger; l.balances[1] = 10;
                   ledgerUses.pop(); ledgerUses.push(); Ledger storage l2 = ledgerUses[0].ledger;
                   uint result = l2.balances[1]; } "result"
@@ -290,7 +286,7 @@ info: Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int 
 info: Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int 0))
 -/
 #guard_msgs in
-#eval localAfter State.testSuiteStore
+#eval Prog.localAfter State.testSuiteStore
   sol[TestSuite]{ ledgerUses.push(); Ledger storage l = ledgerUses[0].ledger; l.nonce = 7;
                   ledgerUses.pop(); ledgerUses.push(); Ledger storage l2 = ledgerUses[0].ledger;
                   uint result = l2.nonce; } "result"

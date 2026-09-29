@@ -91,10 +91,10 @@ def ChildOk : Obs → Seg → Obs → Prop
 `alice.account.balance` as read in any tree. -/
 theorem childOk_findLive (T : SVal) (P : List Seg) (s : Seg) :
     ChildOk (obsOf (T.findLive P)) s (obsOf (T.findLive (P ++ [s]))) := by
-  rw [findLive_append]
+  rw [SVal.findLive_append]
   rcases T.findLive P with e | v
   · cases s <;> simp [ChildOk, obsOf, bind, Except.bind]
-  · simp only [Close.ok_bind]
+  · simp only [Res.ok_bind]
     cases v with
     | prim p => cases s <;> simp [ChildOk, obsOf, SVal.findLive]
     | struct fs =>
@@ -467,8 +467,8 @@ theorem find_sim (r : Res SVal) : Sim ((obsOf r).find) (r >>= SVal.asValue) := b
   intro a
   rcases r with e | (p | fs | ⟨es, sh, fx⟩ | ⟨es, d⟩)
   · simp [obsOf, Obs.find, bind, Except.bind]
-  · cases p <;> simp [obsOf, Obs.find, SVal.asValue, Close.ok_bind]
-  all_goals simp [obsOf, Obs.find, SVal.asValue, Close.ok_bind]
+  · cases p <;> simp [obsOf, Obs.find, SVal.asValue, Res.ok_bind]
+  all_goals simp [obsOf, Obs.find, SVal.asValue, Res.ok_bind]
 
 theorem has_sim (r : Res SVal) : Sim ((obsOf r).has) (r >>= fun _ => .ok (.bool true)) := by
   intro a
@@ -485,7 +485,7 @@ theorem test_sim (sh : KShape) (r : Res SVal) : Sim ((obsOf r).test sh) (r >>= s
   rcases r with e | (p | fs | ⟨es, sh', fx⟩ | ⟨es, d⟩)
   · cases sh <;> simp [obsOf, Obs.test, bind, Except.bind]
   all_goals cases sh <;> try cases fx
-  all_goals simp [obsOf, Obs.test, KShape.test, kmapF, isMapV, isFixV, Close.ok_bind]
+  all_goals simp [obsOf, Obs.test, KShape.test, kmapF, isMapV, isFixV, Res.ok_bind]
 
 mutual
 
@@ -641,7 +641,7 @@ theorem bind_agree {α : Type} {E o o'} {q : LPath} {R : List LPath} (h : Agree 
     (q.evalA E o >>= fun qs => F (o' qs)) = (q.evalA E o >>= fun qs => F (o qs)) := by
   cases hv : q.evalA E o with
   | error e => rfl
-  | ok qs => simp only [Close.ok_bind, h q hq qs hv]
+  | ok qs => simp only [Res.ok_bind, h q hq qs hv]
 
 mutual
 
@@ -812,12 +812,12 @@ theorem LPath.evalA_root {E o} : (q : LPath) → ∀ {K : List Seg}, q.evalA E o
     ∃ r t, K = .field r :: t
   | .root r, K, h => by cases h; exact ⟨r, [], rfl⟩
   | .field q f, K, h => by
-    obtain ⟨qs, hq, he⟩ := bind_eq_ok.1 h; cases he
+    obtain ⟨qs, hq, he⟩ := Res.bind_eq_ok.1 h; cases he
     obtain ⟨r, t, rfl⟩ := LPath.evalA_root q hq
     exact ⟨r, t ++ [.field f], rfl⟩
   | .at q k, K, h => by
-    obtain ⟨qs, hq, h⟩ := bind_eq_ok.1 h
-    obtain ⟨i, _, he⟩ := bind_eq_ok.1 h; cases he
+    obtain ⟨qs, hq, h⟩ := Res.bind_eq_ok.1 h
+    obtain ⟨i, _, he⟩ := Res.bind_eq_ok.1 h; cases he
     obtain ⟨r, t, rfl⟩ := LPath.evalA_root q hq
     exact ⟨r, t ++ [.at i], rfl⟩
 
@@ -842,12 +842,12 @@ theorem evalPaths_closed {E o} {R : List LPath} (hR : ParentClosed R) :
     | nil => rfl
     | cons _ _ => simp at he
   | field q f =>
-    obtain ⟨qs, hq, h⟩ := bind_eq_ok.1 hv; cases h
+    obtain ⟨qs, hq, h⟩ := Res.bind_eq_ok.1 hv; cases h
     obtain ⟨rfl, -⟩ := append_singleton_inj he.symm
     exact .inr (mem_evalPaths.2 ⟨q, hR _ hQ q rfl, hq⟩)
   | «at» q k =>
-    obtain ⟨qs, hq, h⟩ := bind_eq_ok.1 hv
-    obtain ⟨i, _, h⟩ := bind_eq_ok.1 h; cases h
+    obtain ⟨qs, hq, h⟩ := Res.bind_eq_ok.1 hv
+    obtain ⟨i, _, h⟩ := Res.bind_eq_ok.1 h; cases h
     obtain ⟨rfl, -⟩ := append_singleton_inj he.symm
     exact .inr (mem_evalPaths.2 ⟨q, hR _ hQ q rfl, hq⟩)
 
@@ -863,12 +863,12 @@ theorem evalPaths_childOk {E o} {R : List LPath} (hc : ∀ Q ∈ R, Q.consA E o)
     | nil => exact absurd rfl hP
     | cons _ _ => simp at he
   | field q f =>
-    obtain ⟨qs, hq, h⟩ := bind_eq_ok.1 hv; cases h
+    obtain ⟨qs, hq, h⟩ := Res.bind_eq_ok.1 hv; cases h
     obtain ⟨rfl, rfl⟩ := append_singleton_inj he.symm
     exact hc _ hq
   | «at» q k =>
-    obtain ⟨qs, hq, h⟩ := bind_eq_ok.1 hv
-    obtain ⟨i, hi, h⟩ := bind_eq_ok.1 h; cases h
+    obtain ⟨qs, hq, h⟩ := Res.bind_eq_ok.1 hv
+    obtain ⟨i, hi, h⟩ := Res.bind_eq_ok.1 h; cases h
     obtain ⟨rfl, rfl⟩ := append_singleton_inj he.symm
     exact hc _ hq _ hi
 
@@ -1091,18 +1091,19 @@ elab "sol_decide_parents" : tactic => withMainContext do
     evalTactic (← `(tactic| all_goals
       rcases obs_cases $t with h | ⟨_, h⟩ | h | ⟨_, h⟩ | ⟨_, h⟩ | h <;> simp only [h] at *))
 
+attribute [decide_evalA] LFml.holdsA_tt LFml.holdsA_not LFml.holdsA_and LFml.holdsA_imp
+  LFml.holdsA_eq LTerm.evalA_lit LTerm.evalA_binop LTerm.evalA_unop LTerm.evalA_ite
+  LTerm.evalA_find LTerm.evalA_has LTerm.evalA_kmap LTerm.evalA_len LTerm.evalA_sok
+  LTerm.evalA_pok LTerm.evalA_seq LTerm.evalA_orElse LTerm.evalA_kite LTerm.evalA_zero
+  LTerm.evalA_err LTerm.evalA_var LPath.evalA LPath.consA zeroV_int zeroV_bool orElseR_ok
+  orElseR_error Obs.find_eq_ok Obs.has_eq_ok Obs.test_map_eq_ok Obs.test_fixed_eq_ok Obs.len_eq_ok
+
 /-- Unfold the reduced formula over free reads into `sol_close`'s weakest
 preconditions, the constraints into `ChildOk`s between reads, and what a
 location shows into equations on `o`. -/
 macro "sol_decide_unfoldA" : tactic => `(tactic|
   set_option linter.unusedSimpArgs false in
-  simp only [LFml.holdsA_tt, LFml.holdsA_not, LFml.holdsA_and, LFml.holdsA_imp,
-    LFml.holdsA_eq, LTerm.evalA_lit, LTerm.evalA_binop, LTerm.evalA_unop, LTerm.evalA_ite,
-    LTerm.evalA_find, LTerm.evalA_has, LTerm.evalA_kmap, LTerm.evalA_len, LTerm.evalA_sok,
-    LTerm.evalA_pok, LTerm.evalA_seq, LTerm.evalA_orElse, LTerm.evalA_kite, LTerm.evalA_zero,
-    LTerm.evalA_err, LTerm.evalA_var, LPath.evalA, LPath.consA, zeroV_int, zeroV_bool, orElseR_ok,
-    orElseR_error, close_rw, forall_eq', List.cons_append, List.nil_append, Obs.find_eq_ok,
-    Obs.has_eq_ok, Obs.test_map_eq_ok, Obs.test_fixed_eq_ok, Obs.len_eq_ok, and_assoc, *] at *)
+  simp only [decide_evalA, close_rw, and_assoc, *] at *)
 
 /-- The finishing step with the constraints (`LFml.valid_iff_cons`), on a
 goal `∀ σ, ψ.holds σ` with `ψ` computed and reading the initial storage
@@ -1120,8 +1121,8 @@ macro "sol_decide_cons" : tactic => `(tactic| (
       | omega
       | grind
       | (sol_decide_parents
-         all_goals simp only [ChildOk, Obs.test, Obs.find, Obs.has, Obs.len, Close.ok_bind,
-           Close.error_bind, orElseR_ok, orElseR_error, Bool.false_eq_true, false_and, and_self,
+         all_goals simp only [ChildOk, Obs.test, Obs.find, Obs.has, Obs.len, Res.ok_bind,
+           Res.error_bind, orElseR_ok, orElseR_error, Bool.false_eq_true, false_and, and_self,
            if_true, if_false] at *
          all_goals first | omega | grind)))
 

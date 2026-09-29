@@ -31,7 +31,7 @@ the whole storage well-typed.
 namespace Solidity
 namespace Semantics
 
-open SemanticsProperties (lookupBy_setBy_self lookupBy_setBy_ne)
+open SemanticsProperties (lookupBy_setBy_self lookupBy_setBy_ne lookupBy_eq_some_mem)
 
 /-! ## `hasTy` under the update primitives -/
 
@@ -419,26 +419,6 @@ decreasing_by
              · simp; omega)
 end
 
-/-- `defaultOkFields` from the two facts its rows have to satisfy: each
-row is the one its name looks up to, and each row type is `defaultOk`.
-Stated over an arbitrary row list so the caller can induct on a sublist
-of `structDef s` while looking up in the whole table. -/
-theorem defaultOkFields_of_rows {s : Name} :
-    ∀ {rows : List (Name × Ty)},
-      (∀ p ∈ rows, lookupBy p.1 (structDef s) = some p.2) ->
-      (∀ p ∈ rows, defaultOk p.2 = true) ->
-      defaultOkFields s rows = true := by
-  intro rows
-  induction rows with
-  | nil => intro _ _; simp [defaultOkFields]
-  | cons fld rest ih =>
-      intro hlook hok
-      obtain ⟨n, t⟩ := fld
-      simp only [defaultOkFields, Bool.and_eq_true, beq_iff_eq]
-      exact ⟨⟨hok _ (List.mem_cons_self ..), hlook _ (List.mem_cons_self ..)⟩,
-        ih (fun p hp => hlook p (List.mem_cons_of_mem _ hp))
-           (fun p hp => hok p (List.mem_cons_of_mem _ hp))⟩
-
 /-- Fresh defaults inhabit their type. -/
 theorem defaultForTy_hasTy : ∀ {ty : Ty}, defaultOk ty = true ->
     (defaultForTy ty).hasTy ty = true := by
@@ -694,56 +674,24 @@ theorem State.saveStorage_wellTyped {L : Layout} {s s' : State}
     (hnew : new.hasTy ty' = true)
     (hsave : s.saveStorage root segs new = Except.ok s') :
     wellTypedStorageB L s'.storage = true := by
-  simp only [Layout.tyAt] at hty
-  cases hglob : lookupBy root L.globals with
-  | none => rw [hglob] at hty; simp at hty
-  | some ty0 =>
-      rw [hglob] at hty
-      simp only [State.saveStorage] at hsave
-      cases hroot : lookupBy root s.storage with
-      | none => rw [hroot] at hsave; simp at hsave
-      | some v0 =>
-          rw [hroot] at hsave
-          obtain ⟨updated, hup, hs'⟩ := Semantics.bind_ok_inv hsave
-          simp at hs'
-          have hv0 : v0.hasTy ty0 = true := by
-            have hmem := lookupBy_eq_some_mem hglob
-            have hall := (List.all_eq_true.mp hst) _ hmem
-            simpa [hroot] using hall
-          have hupd : updated.hasTy ty0 = true :=
-            save_hasTy hv0 hty hnew hup
-          subst hs'
-          refine List.all_eq_true.mpr ?_
-          intro g hg
-          show (match lookupBy g.1 (setBy root updated s.storage) with
-            | some v => v.hasTy g.2
-            | none => false) = true
-          by_cases hgr : g.1 = root
-          · have hgty : g.2 = ty0 := by
-              have hl := lookupBy_eq_of_nodup hnd hg
-              rw [hgr, hglob] at hl
-              exact (Option.some.inj hl).symm
-            rw [hgr, hgty]
-            simpa [lookupBy_setBy_self] using hupd
-          · rw [lookupBy_setBy_ne hgr]
-            exact (List.all_eq_true.mp hst) _ hg
-
-/-- A memory write leaves storage untouched. -/
-theorem writeLoc_storage_frame {s s' : State} {loc : Addr} {v : Value}
-    (h : writeLoc s loc v = Except.ok s') : s'.storage = s.storage := by
-  cases loc with
-  | memoryField id fld =>
-      simp only [writeLoc, State.getObj, bind, Except.bind] at h
-      repeat' split at h
-      all_goals first
-        | (cases Except.ok.inj h; rfl)
-        | exact nomatch h
-  | memoryIndex id i =>
-      simp only [writeLoc, State.getObj, bind, Except.bind] at h
-      repeat' split at h
-      all_goals first
-        | (cases Except.ok.inj h; rfl)
-        | exact nomatch h
+  obtain ⟨ty0, hglob, hty⟩ := Layout.tyAt_split hty
+  obtain ⟨v0, updated, hroot, hup, rfl⟩ := SemanticsProperties.State.saveStorage_ok_inv hsave
+  have hv0 : v0.hasTy ty0 = true := by
+    simpa only [hroot] using (List.all_eq_true.mp hst) _ (lookupBy_eq_some_mem hglob)
+  have hupd : updated.hasTy ty0 = true := save_hasTy hv0 hty hnew hup
+  refine List.all_eq_true.mpr fun g hg => ?_
+  show (match lookupBy g.1 (setBy root updated s.storage) with
+    | some v => v.hasTy g.2
+    | none => false) = true
+  by_cases hgr : g.1 = root
+  · have hgty : g.2 = ty0 := by
+      have hl := lookupBy_eq_of_nodup hnd hg
+      rw [hgr, hglob] at hl
+      exact (Option.some.inj hl).symm
+    rw [hgr, hgty]
+    simpa only [lookupBy_setBy_self] using hupd
+  · rw [lookupBy_setBy_ne hgr]
+    exact (List.all_eq_true.mp hst) _ hg
 
 /-! ## The recycled slot a `push` lands on
 

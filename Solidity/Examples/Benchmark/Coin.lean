@@ -1,4 +1,4 @@
-import Solidity.Calculus.Close
+import Solidity.Calculus.Spec
 
 /-!
 # Benchmark: `Coin`
@@ -12,8 +12,11 @@ is the `emit`; `require(c, Err(..))` is `require(c)`.  Here besides: the
 the constructor's body `minter = msg.sender;` is stated as a statement of its
 own (`ctor`), since a contract here has no constructor.
 
-The `@custom:key` clauses become `dl{}` obligations over every state, one
-per clause; `\old(e)` is a local declared before the call (`uint b =
+solkey's `@custom:key` clauses are written above the functions, as its
+file has them.  `spec!{ mint }`, the obligation solkey synthesizes
+(`Calculus/Spec.lean`), is proved by `sol_spec` (`spec_mint`); `send`'s is
+not (below).  Before it, the clauses by hand, as `dl{}` obligations over
+every state, one per clause; `\old(e)` is a local declared before the call (`uint b =
 balances[r];`), and `msg.sender` is the transaction's (`Simple.env`), the
 same before and after.  `requires amount >= 0` holds of a `uint`.
 
@@ -29,13 +32,23 @@ namespace Solidity.Examples.Benchmark.Coin
 
 open Proves
 
+/-- `Coin.sol`, as solkey's benchmark has it, with its clauses. -/
 def Coin : Contract := contract!{
   address minter;
   mapping(address => uint) balances;
+  requires amount >= 0;
+  ensures \old(minter) == msg.sender && minter == \old(minter);
+  ensures balances[receiver] == \old(balances[receiver]) + amount;
+  ensures \forall address a; a != receiver -> balances[a] == \old(balances[a]);
   function mint(address receiver, uint amount) {
     require(msg.sender == minter);
     balances[receiver] += amount;
   }
+  requires amount >= 0;
+  ensures \old(balances[msg.sender]) >= amount;
+  ensures msg.sender != receiver -> balances[msg.sender] == \old(balances[msg.sender]) - amount && balances[receiver] == \old(balances[receiver]) + amount;
+  ensures msg.sender == receiver -> balances[msg.sender] == \old(balances[msg.sender]);
+  ensures \forall address a; a != msg.sender && a != receiver -> balances[a] == \old(balances[a]);
   function send(address receiver, uint amount) {
     require(amount <= balances[msg.sender]);
     balances[msg.sender] -= amount;
@@ -75,6 +88,12 @@ theorem mintOthers :
     ⊨ dl!{ k != r → [ uint b = balances[k]; mint(r, a); ] balances[k] == b } := by
   sol_symex
   sol_close
+
+set_option maxHeartbeats 510000 in
+/-- `mint(receiver, amount)`'s obligation: only the minter mints, the
+receiver credited, every other balance kept. -/
+theorem spec_mint : ⊨ spec!{ mint } := by
+  sol_spec
 
 /-! ## `send` -/
 

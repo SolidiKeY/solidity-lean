@@ -54,14 +54,6 @@ open Semantics SemanticsProperties
 
 /-! ## The guard sequences -/
 
-/-- A successful step goes on: `uint x = 1;` then the next statement. -/
-theorem Except.ok_bind' {ε α β : Type} (x : α) (f : α → Except ε β) :
-    (Except.ok x >>= f) = f x := rfl
-/-- A revert stops the rest: `revert(); total = 1;` never writes. -/
-theorem Except.error_bind' {ε α β : Type} (e : ε) (f : α → Except ε β) :
-    (Except.error e >>= f) = Except.error e := rfl
-
-
 /-- A sum below `2^256` does not wrap: `3 + 4` is `7`. -/
 theorem mod_W_of_lt {x : Nat} (h : x < W) : x % W = x := Nat.mod_eq_of_lt h
 
@@ -73,19 +65,6 @@ theorem mod_W_of_ge {x : Nat} (h₁ : W ≤ x) (h₂ : x < W + W) : x % W = x - 
 @[simp] theorem bword_or_eq_zero (x y : Bool) :
     (bword x ||| bword y) = 0 ↔ x = false ∧ y = false := by
   cases x <;> cases y <;> decide
-
-/-- Comparison words tell `true` from `false`: `flag == true` compares `1` with `1`. -/
-theorem bword_inj {x y : Bool} (h : bword x = bword y) : x = y := by
-  cases x <;> cases y <;> simp_all [bword]
-
-/-- A failed guard reverts. -/
-theorem assertTop_zero (m : Machine) (st : List Word) (rest : List Instr) :
-    run (assertTop ++ rest) { m with stack := .val 0 :: st } = .revert := rfl
-
-/-- A passed guard goes on. -/
-theorem assertTop_ok (m : Machine) (st : List Word) (rest : List Instr) {c : Nat} (hc : c ≠ 0) :
-    run (assertTop ++ rest) { m with stack := .val c :: st } = run rest { m with stack := st } := by
-  simp [run, assertTop, Instr.step, hc]
 
 /-- `a + b` with solc's overflow check: the sum wraps exactly when it is below
 `a`.  With `a = 2^256 - 1` and `b = 1` the word is `0`, below `a`, and the code
@@ -212,9 +191,6 @@ theorem ReprV.int_inv {v : Value} {w : Word} (h : ReprV .int v w) :
 theorem ReprV.int {n : Int} (h1 : -(H : Int) ≤ n) (h2 : n < H) :
     ReprV .int (.int n) (.val (toWord n)) :=
   ⟨toWord_lt (by have := W_eq; omega) (by have := W_eq; omega), (sgn_toWord h1 h2).symm⟩
-
-/-- A word represents its signed reading as an `int`. -/
-theorem ReprV.ofWord {a : Nat} (h : a < W) : ReprV .int (.int (sgn a)) (.val a) := ⟨h, rfl⟩
 
 /-- `1`, the step of `++`, at a numeric type. -/
 theorem ReprV.one {p : PrimTy} (hp : p ≠ .bool) : ReprV p (.int 1) (.val 1) := by
@@ -382,7 +358,7 @@ theorem word_tail {op : BinOp} (hop : op.isArith = true) {a b r : Nat} (hr : r <
       (run (uTail op) { m with stack := .val b :: .val a :: m.stack }) m := by
   have e1 : op.ret .uint = .uint := by simp [BinOp.ret, hop]
   have e2 : op.retTy (.prim .uint) = .prim .uint := by simp [BinOp.retTy, hop]
-  rw [e1, e2, hsrc, hrun, Except.ok_bind', checkArith_uint, if_pos (by omega)]
+  rw [e1, e2, hsrc, hrun, Res.ok_bind, checkArith_uint, if_pos (by omega)]
   exact .inl ⟨_, _, rfl, ReprV.uint hr, rfl⟩
 
 /-- `x - y` modulo `2^256` is `x + (2^256 - y)` modulo `2^256`: `SUB`. -/
@@ -447,7 +423,7 @@ theorem tail_sim {op : BinOp} {p : PrimTy} (hop : binInFrag op p = true) (hand :
         have e1 : applyBinOp .pow (.int ↑a) (.int ↑b) = .ok (.int ↑(a ^ b)) := by
           simp [applyBinOp, Value.asInt, bind, Except.bind, Int.natCast_pow]
         have e2 : BinOp.pow.retTy (.prim .uint) = .prim .uint := rfl
-        rw [e1, e2, Except.ok_bind', checkArith_uint]
+        rw [e1, e2, Res.ok_bind, checkArith_uint]
         by_cases h : a ^ b < W
         · rw [if_pos (by omega), if_pos h]
         · rw [if_neg (by omega), if_neg h]
@@ -1187,21 +1163,21 @@ theorem opLoc_store {p : PrimTy} {l : OpLoc C p} {loc : Loc C (.prim p)}
   cases l <;> simp [opLocToLoc] at h <;> subst h <;> rfl
 
 
-attribute [simp] Except.ok_bind' Except.error_bind'
+attribute [local simp] Res.ok_bind Res.error_bind
 
 /-- Reassociating a checked result: `total += 1;` computes, checks, then writes. -/
 theorem bind_bind_ok {x : Res Value} {f : Value → Res Value} {g : Value → Res State} {v : Value}
     (h : (x >>= f) = .ok v) : (x >>= fun a => f a >>= g) = g v := by
   cases x with
   | error e => cases h
-  | ok a => simp only [Except.ok_bind'] at h ⊢; rw [h]; rfl
+  | ok a => simp only [Res.ok_bind] at h ⊢; rw [h]; rfl
 
 /-- A failed check stops the write: `total += 1;` at `2^256 - 1` never writes. -/
 theorem bind_bind_error {x : Res Value} {f : Value → Res Value} {g : Value → Res State} {e : Halt}
     (h : (x >>= f) = .error e) : (x >>= fun a => f a >>= g) = .error e := by
   cases x with
-  | error e' => simp only [Except.error_bind', Except.error.injEq] at h ⊢; exact h
-  | ok a => simp only [Except.ok_bind'] at h ⊢; rw [h]; rfl
+  | error e' => simp only [Res.error_bind, Except.error.injEq] at h ⊢; exact h
+  | ok a => simp only [Res.ok_bind] at h ⊢; rw [h]; rfl
 
 /-- Retyping a local at its type changes nothing: `x = 3;` keeps `x` a `uint`. -/
 theorem TyCtx.set_self {Δ : TyCtx} {x : Var} {t : Option LTy} (h : Δ x = t) : Δ.set x t = Δ := by
@@ -1295,14 +1271,14 @@ theorem opStore_sim {Δ : TyCtx} {τ : State} {m : Machine} {p : PrimTy} (hp : p
           (fun x hx => upd_other _ _ fun he => hx (he ▸ Occ.prim))
         refine .inl ⟨_, { m with store := upd m.store s an }, ?_, ?_, rfl,
           hm.store' hrep (upd_len hps an)⟩
-        · simp only [hvr, hres, Except.ok_bind', opStore, (State.findStorage_of_findLive hsv),
+        · simp only [hvr, hres, Res.ok_bind, opStore, (State.findStorage_of_findLive hsv),
             hold]
           rw [bind_bind_ok hvn]; exact hsave
         · change run (binTail p op ++ _)
             { m with stack := wr :: .val (m.store s) :: .slot s :: m.stack } = _
           rw [run_append_ok hrunt]; rfl
       · refine .inr ⟨?_, ?_⟩
-        · simp only [hvr, hres, Except.ok_bind', opStore, (State.findStorage_of_findLive hsv),
+        · simp only [hvr, hres, Res.ok_bind, opStore, (State.findStorage_of_findLive hsv),
             hold]
           rw [bind_bind_error hvn]
         · change run (binTail p op ++ _)
@@ -1332,12 +1308,12 @@ theorem opLocal_sim {Δ : TyCtx} {τ : State} {m : Machine} {p : PrimTy} (hp : p
     · have hs := hm.bindVal x hrn
       rw [TyCtx.set_self hx] at hs
       refine .inl ⟨_, { m with mem := upd m.mem x wn }, ?_, ?_, rfl, hs⟩
-      · simp only [hvr, Except.ok_bind', OpLoc.store, opLocal, State.getEnv, henv, pure_bind]
+      · simp only [hvr, Res.ok_bind, OpLoc.store, opLocal, State.getEnv, henv, pure_bind]
         rw [bind_bind_ok hvn]; rfl
       · change run (binTail p op ++ _) { m with stack := wr :: m.mem x :: m.stack } = _
         rw [run_append_ok hrunt]; rfl
     · refine .inr ⟨?_, ?_⟩
-      · simp only [hvr, Except.ok_bind', OpLoc.store, opLocal, State.getEnv, henv, pure_bind]
+      · simp only [hvr, Res.ok_bind, OpLoc.store, opLocal, State.getEnv, henv, pure_bind]
         rw [bind_bind_error hvn]
       · change run (binTail p op ++ _) { m with stack := wr :: m.mem x :: m.stack } = _
         rw [run_append_revert hrunt]
@@ -1428,11 +1404,11 @@ theorem bumpStore_sim {Δ : TyCtx} {τ : State} {m : Machine} {p : PrimTy} (hp :
         (fun x hx => upd_other _ _ fun he => hx (he ▸ Occ.prim))
       refine .inl ⟨_, { m with store := upd m.store s an }, ?_, ?_, rfl,
         hm.store' hrep (upd_len hps an)⟩
-      · simp only [hres, Except.ok_bind', bumpStore, (State.findStorage_of_findLive hsv), hold,
+      · simp only [hres, Res.ok_bind, bumpStore, (State.findStorage_of_findLive hsv), hold,
           Value.asInt, hvn, hsave]; rfl
       · rw [run_append_ok hrunt]; rfl
     · refine .inr ⟨?_, run_append_revert hrunt⟩
-      simp only [hres, Except.ok_bind', bumpStore, (State.findStorage_of_findLive hsv), hold,
+      simp only [hres, Res.ok_bind, bumpStore, (State.findStorage_of_findLive hsv), hold,
         Value.asInt, hvn]; rfl
   · exact .inr ⟨by simp [hres] <;> rfl, run_append_revert hrunl⟩
 
@@ -1450,11 +1426,11 @@ theorem bumpLocal_sim {Δ : TyCtx} {τ : State} {m : Machine} {p : PrimTy} (hp :
   · have hs := hm.bindVal x hrn
     rw [TyCtx.set_self hx] at hs
     refine .inl ⟨_, { m with mem := upd m.mem x wn }, ?_, ?_, rfl, hs⟩
-    · simp only [OpLoc.bump, bumpLocal, State.getEnv, henv, Except.ok_bind', pure_bind,
+    · simp only [OpLoc.bump, bumpLocal, State.getEnv, henv, Res.ok_bind, pure_bind,
         Value.asInt, hvn]; rfl
     · rw [run_append_ok hrunt]; rfl
   · refine .inr ⟨?_, run_append_revert hrunt⟩
-    simp only [OpLoc.bump, bumpLocal, State.getEnv, henv, Except.ok_bind', pure_bind, Value.asInt,
+    simp only [OpLoc.bump, bumpLocal, State.getEnv, henv, Res.ok_bind, pure_bind, Value.asInt,
       hvn]; rfl
 
 /-- `v = x++;` on a numeric local: the cell of `x` bumped, and `v` given the
@@ -1476,11 +1452,11 @@ theorem assignBumpLocal_sim {Δ : TyCtx} {τ : State} {m : Machine} {p : PrimTy}
       TyCtx.set_self hy] at hs
     refine .inl ⟨_, { m with mem := upd (upd m.mem y wn) x (if op.isPre then wn else m.mem y) },
       ?_, ?_, rfl, hs⟩
-    · simp only [OpLoc.bump, bumpLocal, State.getEnv, henv, Except.ok_bind', pure_bind,
+    · simp only [OpLoc.bump, bumpLocal, State.getEnv, henv, Res.ok_bind, pure_bind,
         Value.asInt, hvn]; rfl
     · rw [run_append_ok hrunt]; rfl
   · refine .inr ⟨?_, run_append_revert hrunt⟩
-    simp only [OpLoc.bump, bumpLocal, State.getEnv, henv, Except.ok_bind', pure_bind, Value.asInt,
+    simp only [OpLoc.bump, bumpLocal, State.getEnv, henv, Res.ok_bind, pure_bind, Value.asInt,
       hvn]; rfl
 
 /-- A call's parameters: the code stores each argument in its parameter's
@@ -1545,13 +1521,13 @@ theorem assignBumpStore_sim {Δ : TyCtx} {τ : State} {m : Machine} {p : PrimTy}
       refine .inl ⟨_, { m with
           store := upd m.store s an
           mem := upd m.mem x (if op.isPre then .val an else .val (m.store s)) }, ?_, ?_, rfl, hs⟩
-      · simp only [hres, Except.ok_bind', bumpStore, State.findStorage_of_findLive hsv, hold,
+      · simp only [hres, Res.ok_bind, bumpStore, State.findStorage_of_findLive hsv, hold,
           Value.asInt, hvn, hsave]; rfl
       · simp only at hrunt
         rw [run_append_ok hrunt]
         simp [run, Instr.step, Machine.next]
     · refine .inr ⟨?_, run_append_revert hrunt⟩
-      simp only [hres, Except.ok_bind', bumpStore, State.findStorage_of_findLive hsv, hold,
+      simp only [hres, Res.ok_bind, bumpStore, State.findStorage_of_findLive hsv, hold,
         Value.asInt, hvn]; rfl
   · exact .inr ⟨by simp [hres] <;> rfl, run_append_revert hrunl⟩
 
@@ -2009,7 +1985,7 @@ theorem stmt_sim : ∀ (s : Stmt C) {L : Nat} {Δ Δ' : TyCtx} {τ : State} {m :
         rw [run_append_ok hruna]
         by_cases hb : m.balance < y
         · refine .inr ⟨?_, ?_⟩
-          · simp only [hvr, hva, Value.asInt, transferAt, hm.balance, Except.ok_bind']
+          · simp only [hvr, hva, Value.asInt, transferAt, hm.balance, Res.ok_bind]
             rw [if_neg (by omega), if_pos (by exact_mod_cast hb)]
           · simp [run, Instr.step, Machine.next, Machine.push, hb, assertTop]
         · have hsrc : transferAt τ x y = .ok { τ.setNet x (τ.getNet x - y) with
@@ -2017,7 +1993,7 @@ theorem stmt_sim : ∀ (s : Stmt C) {L : Nat} {Δ Δ' : TyCtx} {τ : State} {m :
             unfold transferAt
             rw [if_neg (by omega), if_neg (by rw [hm.balance]; exact_mod_cast hb)]
           refine .inl ⟨_, { m with balance := m.balance - y, net := upd m.net x (m.net x - y) },
-            by simp only [hvr, hva, Value.asInt, Except.ok_bind']; exact hsrc, ?_, rfl, ?_⟩
+            by simp only [hvr, hva, Value.asInt, Res.ok_bind]; exact hsrc, ?_, rfl, ?_⟩
           · simp [run, Instr.step, Machine.push, hb, assertTop]
           · refine ⟨hm.store, hm.vals, hm.aliases, ?_, fun a' ha' => ?_, hm.bound, hm.fragile, ?_⟩
             · show τ.selfBalance - ↑y = ↑(m.balance - y)
@@ -2079,7 +2055,7 @@ theorem stmt_sim : ∀ (s : Stmt C) {L : Nat} {Δ Δ' : TyCtx} {τ : State} {m :
               exec_skip_append,
               show exec ([Instr.jump (compileProg e).length] ++ compileProg e) 1 m =
                 run (compileProg e) m from rfl]
-            simp only [Except.ok_bind']
+            simp only [Res.ok_bind]
             rcases ihe hm he with ⟨τ', m', hτ', hrun', hst', hm'⟩ | ⟨hτ', hrun'⟩
             · exact .inl ⟨τ', m', hτ', hrun', hst', hm'.weaken wk₂⟩
             · exact .inr ⟨hτ', hrun'⟩
@@ -2133,7 +2109,7 @@ theorem stmt_sim : ∀ (s : Stmt C) {L : Nat} {Δ Δ' : TyCtx} {τ : State} {m :
           simp only [Stmt.run, compileStmt, List.append_assoc]
           rcases args_sim args hm hwa with ⟨τ₁, m₁, hτ₁, hrun₁, hst₁, hm₁⟩ | ⟨hτ₁, hrun₁⟩
           · rw [run_append_ok hrun₁, hτ₁]
-            simp only [Except.ok_bind']
+            simp only [Res.ok_bind]
             -- the return variable declared
             obtain ⟨m₂, hrun₂, hst₂, hm₂⟩ : ∃ m₂, run (retEnterCode ret) m₁ = .ok m₂ 0 ∧
                 m₂.stack = m₁.stack ∧ Sim C L Δ₂ (ret.enter τ₁) m₂ := by
@@ -2150,7 +2126,7 @@ theorem stmt_sim : ∀ (s : Stmt C) {L : Nat} {Δ Δ' : TyCtx} {τ : State} {m :
             rw [run_append_ok hrun₂]
             rcases ihb hm₂ hwb with ⟨τ₃, m₃, hτ₃, hrun₃, hst₃, hm₃⟩ | ⟨hτ₃, hrun₃⟩
             · rw [run_append_ok hrun₃, hτ₃]
-              simp only [Except.ok_bind']
+              simp only [Res.ok_bind]
               cases ret with
               | none =>
                 exact .inl ⟨τ₃, m₃, rfl, rfl, hst₃.trans (hst₂.trans hst₁), hm₃⟩

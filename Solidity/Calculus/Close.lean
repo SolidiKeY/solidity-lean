@@ -244,27 +244,9 @@ restate them as binds of named functions, so that `Modality.wp_bind`
 applies and the scrutinee is named first.  A read of memory stays whole
 (`readVal`), since what is known of it is known of the value. -/
 
-/-- The value a local holds: `x` after `uint x = 10;` is `10`; an alias or
-a memory local has none. -/
-def bindingVal : Binding → Res Value
-  | .val v => .ok v
-  | .spath .. | .mref _ | .store _ => .error .stuck
-
-/-- The path an alias holds: `p` after `Person storage p = alice;` is
-`alice`. -/
-def bindingPath : Binding → Res (Name × List Seg)
-  | .spath r segs => .ok (r, segs)
-  | .val _ | .mref _ | .store _ => .error .stuck
-
-/-- The object a memory local holds: `m` after `Person memory m;`. -/
-def bindingRef : Binding → Res Nat
-  | .mref id => .ok id
-  | .val _ | .spath .. | .store _ => .error .stuck
-
-/-- The storage a storage variable holds: `old` after `{old := storage}`. -/
-def bindingStore : Binding → Res (List (Name × SVal))
-  | .store st => .ok st
-  | .val _ | .spath .. | .mref _ => .error .stuck
+/-- `oldNet` bound to a ledger reads it. -/
+@[simp] theorem bindingLedger_ledger (l : List (Int × Int)) :
+    bindingLedger (.ledger l) = .ok l := rfl
 
 /-- `old` bound to a storage reads it. -/
 @[simp] theorem bindingStore_store (st : List (Name × SVal)) :
@@ -331,13 +313,6 @@ theorem mval_asRef_ref (id : Nat) : (MVal.ref id).asRef = .ok id := rfl
 @[simp] theorem asInt_int (v : Int) : Value.asInt (.int v) = .ok v := rfl
 /-- The condition `true` is the boolean `true`. -/
 theorem asBool_bool (b : Bool) : Value.asBool (.bool b) = .ok b := rfl
-/-- Binding a local does not touch the storage: after `uint y = 1;`,
-`alice.age` reads as before. -/
-@[simp] theorem findStorage_setEnv (σ : State) (x : Var) (b : Binding) (r : Name)
-    (segs : List Seg) : (σ.setEnv x b).findStorage r segs = σ.findStorage r segs := rfl
-/-- Nor its bounds checks. -/
-@[simp] theorem checkIndex_setEnv (σ : State) (x : Var) (b : Binding) (r : Name)
-    (segs : List Seg) (k : Int) : (σ.setEnv x b).checkIndex r segs k = σ.checkIndex r segs k := rfl
 /-- A bounds check returns nothing to name: `∀ u : Unit, …` is the one case. -/
 theorem forall_unit {P : PUnit.{1} → Prop} : (∀ u, P u) ↔ P PUnit.unit :=
   ⟨fun h => h _, fun h u => by cases u; exact h⟩
@@ -346,12 +321,6 @@ theorem exists_unit {P : PUnit.{1} → Prop} : (∃ u, P u) ↔ P PUnit.unit :=
   ⟨fun ⟨u, h⟩ => by cases u; exact h, fun h => ⟨_, h⟩⟩
 /-- `pure` in a run is `ok`. -/
 theorem pure_eq_ok {α : Type} (a : α) : (pure a : Res α) = .ok a := rfl
-/-- A run that returned passes its value on. -/
-theorem ok_bind {α β : Type} (a : α) (f : α → Res β) : (Except.ok a >>= f : Res β) = f a := rfl
-/-- A run that halted halts what follows. -/
-theorem error_bind {α β : Type} (e : Halt) (f : α → Res β) :
-    (Except.error e >>= f : Res β) = .error e := rfl
-
 /-- A run followed by nothing is the run. -/
 theorem bind_ok_right {α : Type} (x : Res α) : (x >>= fun a => Except.ok a) = x := by
   cases x <;> rfl
@@ -367,11 +336,7 @@ theorem uintBitwise_cast_ofNat (f : Nat → Nat → Nat) (a b : Nat) :
     uintBitwise f (a : Int) (no_index (OfNat.ofNat b)) = ((f a b : Nat) : Int) := rfl
 
 /-- `p.age`, with `p` an alias, is the path `p` holds, then `age`. -/
-theorem aliasPath_eq (σ : State) (x : Var) : aliasPath σ x = σ.getEnv x >>= bindingPath := by
-  simp only [aliasPath, bind, Except.bind]
-  cases σ.getEnv x with
-  | error _ => rfl
-  | ok b => cases b <;> rfl
+theorem aliasPath_eq (σ : State) (x : Var) : aliasPath σ x = σ.getEnv x >>= bindingPath := rfl
 
 /-- Every operator but `&&` and `||` reads both operands: `x + 1` reads `x`,
 then `1`, adds, and range-checks the sum. -/
@@ -410,11 +375,7 @@ variable {C : Contract} (σ : State)
 /-- `10` is `10`. -/
 theorem Term.eval_lit (v : Value) : (Term.lit v : Term C).eval σ = .ok v := rfl
 /-- `x` is what `x` is bound to. -/
-theorem Term.eval_pv (x : Var) : (Term.pv x : Term C).eval σ = σ.getEnv x >>= bindingVal := by
-  simp only [Term.eval, bind, Except.bind]
-  cases σ.getEnv x with
-  | error _ => rfl
-  | ok b => cases b <;> rfl
+theorem Term.eval_pv (x : Var) : (Term.pv x : Term C).eval σ = σ.getEnv x >>= bindingVal := rfl
 /-- `x + 1`: `x`, then the operator on `1`. -/
 theorem Term.eval_binop (op : BinOp) (p : PrimTy) (a b : Term C) : (Term.binop op p a b).eval σ =
     a.eval σ >>= fun x => evalBinop op p x (b.eval σ) := rfl
@@ -440,6 +401,21 @@ theorem Term.eval_ite (c a b : Term C) : (Term.ite c a b).eval σ =
 /-- `msg.sender` is the transaction's, `address(this).balance` the funds. -/
 theorem Term.eval_env (k : EnvKey) :
     (Term.env k : Term C).eval σ = .ok (.int (σ.envVal k)) := rfl
+/-- `net(a)`: the address, then the ledger's entry for it. -/
+theorem Term.eval_net (a : Term C) : (Term.net a).eval σ =
+    a.eval σ >>= Value.asInt >>= fun n => .ok (.int (σ.getNet n)) := by
+  simp only [Term.eval, bind, Except.bind]
+  cases a.eval σ <;> rfl
+/-- `net(oldNet, a)`: the ledger `oldNet` holds, then its entry for the address. -/
+theorem Term.eval_netOf (x : Var) (a : Term C) : (Term.netOf x a).eval σ =
+    σ.getEnv x >>= bindingLedger >>= fun l => a.eval σ >>= Value.asInt >>= fun n =>
+      .ok (.int ((lookupBy n l).getD 0)) := by
+  simp only [Term.eval, bind, Except.bind]
+  cases σ.getEnv x with
+  | error _ => rfl
+  | ok b =>
+    cases b <;> try rfl
+    cases a.eval σ <;> rfl
 /-- `alice` is the root `alice`. -/
 theorem PTerm.eval_root (r : Name) : (PTerm.root r : PTerm C).eval σ = .ok (r, []) := rfl
 /-- `p`, an alias, is the path it holds. -/
@@ -539,11 +515,8 @@ theorem SValT.eval_find (s : STerm C) (p : PTerm C) : (SValT.find s p).eval σ =
 theorem SValT.eval_copyMem (m : MTerm C) (i : ITerm C) : (SValT.copyMem m i).eval σ =
     m.eval σ >>= fun τ => i.eval σ >>= fun id => copyMem τ (.ref id) := rfl
 /-- `m`, a memory local, is the object it holds. -/
-theorem ITerm.eval_pv (x : Var) : (ITerm.pv x : ITerm C).eval σ = σ.getEnv x >>= bindingRef := by
-  simp only [ITerm.eval, bind, Except.bind]
-  cases σ.getEnv x with
-  | error _ => rfl
-  | ok b => cases b <;> rfl
+theorem ITerm.eval_pv (x : Var) : (ITerm.pv x : ITerm C).eval σ = σ.getEnv x >>= bindingRef :=
+  rfl
 /-- `m.account`, a reference held in memory. -/
 theorem ITerm.eval_read (m : MTerm C) (a : MAddr C) : (ITerm.read m a).eval σ =
     m.eval σ >>= fun τ => a.eval σ >>= fun addr => readAddr τ addr >>= MVal.asRef := rfl
@@ -616,6 +589,25 @@ theorem UpdElem.write_transfer (σ₀ τ : State) (r a : Term C) : (UpdElem.tran
       | error => rfl
       | ok w => cases w <;> rfl
 
+/-- `{oldNet := net}` binds the ledger variable `oldNet` to the ledger. -/
+theorem UpdElem.write_saveNet (σ₀ τ : State) (x : Var) :
+    (UpdElem.saveNet x : UpdElem C).write σ₀ τ = .ok (τ.setEnv x (.ledger σ₀.net)) := rfl
+/-- `{book(msg.value)}`: the amount, then the sender's entry and the funds
+credited. -/
+theorem UpdElem.write_book (σ₀ τ : State) (a : Term C) : (UpdElem.book a).write σ₀ τ =
+    a.eval σ₀ >>= Value.asInt >>= fun amt => .ok (State.book σ₀ τ amt) := by
+  simp only [UpdElem.write, bind, Except.bind]
+  cases a.eval σ₀ <;> rfl
+/-- Binding a local leaves the ledger. -/
+theorem net_setEnv (σ : State) (x : Var) (b : Binding) : (σ.setEnv x b).net = σ.net := rfl
+/-- A ledger entry after a write: the written amount at that address, the old
+one elsewhere. -/
+theorem lookupBy_setBy_int (k k' v : Int) (l : List (Int × Int)) :
+    lookupBy k (setBy k' v l) = if k = k' then some v else lookupBy k l := by
+  split
+  · subst_vars; exact SemanticsProperties.lookupBy_setBy_self _ _ _
+  · exact SemanticsProperties.lookupBy_setBy_ne ‹_› _ _
+
 /-- `true` holds. -/
 theorem holds_tt : holds σ (Fml.tt : Fml C) ↔ True := Iff.rfl
 /-- `¬ φ`. -/
@@ -652,11 +644,11 @@ attribute [close_rw]
   Hyp.wrap Upd.apply List.foldlM_cons List.foldlM_nil
   Close.UpdElem.write_val Close.UpdElem.write_path Close.UpdElem.write_mref
   Close.UpdElem.write_storage Close.UpdElem.write_store Close.UpdElem.write_memory
-  Close.UpdElem.write_transfer
+  Close.UpdElem.write_transfer Close.UpdElem.write_saveNet Close.UpdElem.write_book State.book
   -- terms
   Close.Term.eval_lit Close.Term.eval_pv Close.Term.eval_binop Close.Term.eval_unop
   Close.Term.eval_find Close.Term.eval_len Close.Term.eval_read Close.Term.eval_ite
-  Close.Term.eval_env State.envVal
+  Close.Term.eval_env State.envVal Close.Term.eval_net Close.Term.eval_netOf State.getNet
   Close.PTerm.eval_root Close.PTerm.eval_field Close.PTerm.eval_at Close.PTerm.eval_next
   Close.PTerm.eval_pv Close.idxOk_array Close.idxOk_map Close.pastEnd_array
   Close.forall_unit Close.exists_unit
@@ -678,29 +670,31 @@ attribute [close_rw]
   -- runs
   Modality.wp_ok Modality.wp_pure Modality.wp_error Modality.wp_bind Modality.wp_ite
   Modality.wp_diamond Modality.onHalt_box Modality.onHalt_diamond
-  Close.pure_eq_ok Close.ok_bind Close.error_bind Close.bind_ok_right bind_assoc
+  Close.pure_eq_ok Res.ok_bind Res.error_bind Close.bind_ok_right bind_assoc
   Close.saveStorage_bind_restore Close.writeAddr_bind_restore
   -- values
   Close.bindingVal_val Close.bindingPath_spath Close.bindingRef_mref Close.bindingStore_store
+  Close.bindingLedger_ledger
   Close.bindingVal_eq_ok
   Close.bindingRef_eq_ok Close.asInt_eq_ok Close.asBool_eq_ok Close.asRef_eq_ok Close.toMVal_eq
   Close.toSVal_int Close.toSVal_bool Close.asValue_toSVal Close.asValue_toMVal Close.asValue_int
   Close.asValue_bool Close.mval_asValue_prim Close.mval_asValue_ref Close.mval_asRef_ref
   Close.defaultOf_int Close.defaultOf_bool Close.asInt_int Close.asBool_bool
   -- states
-  Close.findStorage_setEnv Close.checkIndex_setEnv Close.checkIndex_mk
+  State.findStorage_setEnv State.checkIndex_setEnv Close.checkIndex_mk
   State.getEnv_setEnv_self State.getEnv_setEnv_ne Close.findStorage_mk
   Close.getEnv_mk Close.readAddr_mk Close.readVal_mk Close.readAddr_setEnv Close.readVal_setEnv
-  Close.tx_setEnv Close.selfBalance_setEnv
+  Close.tx_setEnv Close.selfBalance_setEnv Close.net_setEnv Close.lookupBy_setBy_int
   -- paths, arrays, copies
   Close.diverge_cons' Close.not_diverge_nil_left Close.not_diverge_nil_right Close.prefix_nil
-  Close.prefix_cons Close.prefix_cons_nil Close.after_nil Close.after_cons Close.find_nil
+  Close.prefix_cons Close.prefix_cons_nil Close.after_nil Close.after_cons SVal.find_nil
   List.nil_append List.cons_append List.append_nil
   Close.arrLen_array Close.arrLen_eq_ok Close.pushOn_array Close.popOn_push Close.popOn_push_keep Close.find_push_last
   Close.copyLeaf_prim Close.apart_field Close.apart_index Close.apart_field_index
   Close.apart_index_field
   -- logic
-  Except.ok.injEq Binding.val.injEq Binding.mref.injEq Binding.store.injEq PrimVal.int.injEq
+  Except.ok.injEq Binding.val.injEq Binding.mref.injEq Binding.store.injEq Binding.ledger.injEq
+  PrimVal.int.injEq
   PrimVal.bool.injEq
   MVal.prim.injEq MVal.ref.injEq SVal.prim.injEq Prod.mk.injEq Seg.field.injEq Seg.at.injEq
   Var.user.injEq Var.fresh.injEq Int.ofNat.injEq

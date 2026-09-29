@@ -353,12 +353,6 @@ theorem ExecP.eq_run {I : Fml C} {σ : State} {P : List (Stmt C)} {o : COut} :
 
 end
 
-/-- The empty program: its one run ends where it starts. -/
-theorem holdsC_modal_nil {I : Fml C} {σ : State} {m : Modality} {φ : Fml C} :
-    holdsC I σ (.modal m [] φ) ↔ holdsC I σ φ := by
-  simp only [holdsC]
-  exact ⟨fun h => h _ .nil, fun h o he => by cases he; exact h⟩
-
 /-- A statement that runs no other and pays nothing, run to a state, is a
 run with callbacks. -/
 theorem ExecS.of_run {I : Fml C} {σ τ : State} {s : Stmt C} (hs : s.forks = false)

@@ -38,6 +38,8 @@ def Term.quote : Term C → Lean.Expr
   | .ite i a b => mkAppN (mkConst ``Term.ite) #[c, Term.quote i, Term.quote a, Term.quote b]
   | .mlen m i => mkAppN (mkConst ``Term.mlen) #[c, MTerm.quote m, ITerm.quote i]
   | .env k => mkAppN (mkConst ``Term.env) #[c, toExpr k]
+  | .net a => mkAppN (mkConst ``Term.net) #[c, Term.quote a]
+  | .netOf x a => mkAppN (mkConst ``Term.netOf) #[c, toExpr x, Term.quote a]
 
 def PTerm.quote : PTerm C → Lean.Expr
   | .root r => mkAppN (mkConst ``PTerm.root) #[c, toExpr r]
@@ -94,6 +96,8 @@ def UpdElem.quote : UpdElem C → Lean.Expr
   | .store x s => mkAppN (mkConst ``UpdElem.store) #[c, toExpr x, STerm.quote c s]
   | .memory m => mkAppN (mkConst ``UpdElem.memory) #[c, MTerm.quote c m]
   | .transfer r a => mkAppN (mkConst ``UpdElem.transfer) #[c, Term.quote c r, Term.quote c a]
+  | .saveNet x => mkAppN (mkConst ``UpdElem.saveNet) #[c, toExpr x]
+  | .book a => mkAppN (mkConst ``UpdElem.book) #[c, Term.quote c a]
 
 def Upd.quote : List (UpdElem C) → Lean.Expr
   | [] => mkAppN (mkConst ``List.nil [0]) #[mkAppN (mkConst ``UpdElem) #[c]]
@@ -110,6 +114,12 @@ def Fml.quote : Fml C → Lean.Expr
   | .modal m P φ => mkAppN (mkConst ``Fml.modal) #[c, toExpr m, Prog.quote c P, Fml.quote φ]
   | .havoc φ => mkAppN (mkConst ``Fml.havoc) #[c, Fml.quote φ]
   | .all x p φ => mkAppN (mkConst ``Fml.all) #[c, toExpr x, toExpr p, Fml.quote φ]
+
+/-- The expression `Lean.mkConst n []`: the `c` a quoter takes for the
+contract named `n`, when the quoter runs as compiled code (`evalExpr`). -/
+def quoteConstName (n : Lean.Name) : Lean.Expr :=
+  mkAppN (mkConst ``Lean.mkConst)
+    #[toExpr n, mkAppN (mkConst ``List.nil [0]) #[mkConst ``Lean.Level]]
 
 end Quote
 

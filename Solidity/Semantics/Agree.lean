@@ -42,12 +42,6 @@ def ResAgree (ns : List Var) :
   | .ok (s₁, a₁), .ok (s₂, a₂) => a₁ = a₂ ∧ EnvAgreeExcept ns s₁ s₂
   | _, _ => False
 
-/-- Agreement of two evaluations: identical aborts, or equal values in
-states that agree off `ns`. -/
-abbrev ValuesAgree (ns : List Var) :
-    Res (State × Value) -> Res (State × Value) -> Prop :=
-  ResAgree ns
-
 namespace EnvAgreeExcept
 
 theorem refl (ns : List Var) (s : State) : EnvAgreeExcept ns s s :=
@@ -129,23 +123,6 @@ theorem ResAgree.bindState {ns : List Var} {x₁ x₂ : Res (State × α)}
       subst heq
       exact hf s₁ s₂ a₁ hs
 
-/-- `ResAgree.bindState`, additionally handing the continuation the two
-`ok`-equations (see `ResAgree.bindWith`). -/
-theorem ResAgree.bindStateWith {ns : List Var} {x₁ x₂ : Res (State × α)}
-    (hx : ResAgree ns x₁ x₂)
-    {f₁ f₂ : State × α -> Res State}
-    (hf : ∀ s₁ s₂ a, x₁ = .ok (s₁, a) -> x₂ = .ok (s₂, a) ->
-      EnvAgreeExcept ns s₁ s₂ ->
-      ResultsAgree ns (f₁ (s₁, a)) (f₂ (s₂, a))) :
-    ResultsAgree ns (x₁ >>= f₁) (x₂ >>= f₂) := by
-  match x₁, x₂, hx with
-  | .error e₁, .error e₂, hx =>
-      subst hx
-      exact rfl
-  | .ok (s₁, a₁), .ok (s₂, a₂), ⟨heq, hs⟩ =>
-      subst heq
-      exact hf s₁ s₂ a₁ rfl rfl hs
-
 /-- A shared effect-free prefix (`v.asValue`, `applyBinOp`, a storage
 lookup evaluated at already-agreeing states) binds into agreeing
 continuations. -/
@@ -164,19 +141,6 @@ theorem bindPureResults_agree {ns : List Var} (r : Res α)
   cases r with
   | error e => exact rfl
   | ok a => exact hf a
-
-theorem ResultsAgree.bindRes {ns : List Var} {x₁ x₂ : Res State}
-    (hx : ResultsAgree ns x₁ x₂)
-    {f₁ f₂ : State -> Res (State × α)}
-    (hf : ∀ s₁ s₂, EnvAgreeExcept ns s₁ s₂ ->
-      ResAgree ns (f₁ s₁) (f₂ s₂)) :
-    ResAgree ns (x₁ >>= f₁) (x₂ >>= f₂) := by
-  match x₁, x₂, hx with
-  | .error e₁, .error e₂, hx =>
-      subst hx
-      exact rfl
-  | .ok s₁, .ok s₂, hs =>
-      exact hf s₁ s₂ hs
 
 theorem ResultsAgree.bind {ns : List Var} {x₁ x₂ : Res State}
     (hx : ResultsAgree ns x₁ x₂)
@@ -216,22 +180,6 @@ theorem ResultsAgree.cases {ns : List Var} {x₁ x₂ : Res State}
       exact Or.inl ⟨e₁, rfl, rfl⟩
   | .ok s₁, .ok s₂, hs =>
       exact Or.inr ⟨s₁, s₂, rfl, rfl, hs⟩
-
-/-- Lift a state-agreeing pair of `Res (State × α)` computations whose
-payload feeds a pure continuation into `Res State`. -/
-theorem ResAgree.toResults {ns : List Var} {x₁ x₂ : Res (State × α)}
-    (hx : ResAgree ns x₁ x₂)
-    {f₁ f₂ : State × α -> State}
-    (hf : ∀ s₁ s₂ a, EnvAgreeExcept ns s₁ s₂ ->
-      EnvAgreeExcept ns (f₁ (s₁, a)) (f₂ (s₂, a))) :
-    ResultsAgree ns (x₁.map f₁) (x₂.map f₂) := by
-  match x₁, x₂, hx with
-  | .error e₁, .error e₂, hx =>
-      subst hx
-      exact rfl
-  | .ok (s₁, a₁), .ok (s₂, a₂), ⟨heq, hs⟩ =>
-      subst heq
-      exact hf s₁ s₂ a₁ hs
 
 /-- Inserting a scratch binding moves a state within its
 `EnvAgreeExcept` class. -/
@@ -326,25 +274,11 @@ theorem setObj_agree {ns : List Var} {s₁ s₂ : State}
   ⟨h.storage, by simp [State.setObj, h.heap], h.nextId, h.net, h.env,
     h.selfBalance, h.tx⟩
 
-theorem setNet_agree {ns : List Var} {s₁ s₂ : State}
-    (h : EnvAgreeExcept ns s₁ s₂) (addr amount : Int) :
-    EnvAgreeExcept ns (s₁.setNet addr amount) (s₂.setNet addr amount) :=
-  ⟨h.storage, h.heap, h.nextId, by simp [State.setNet, h.net], h.env,
-    h.selfBalance, h.tx⟩
-
 theorem getNet_congr {ns : List Var} {s₁ s₂ : State}
     (h : EnvAgreeExcept ns s₁ s₂) (addr : Int) :
     s₁.getNet addr = s₂.getNet addr := by
   unfold State.getNet
   rw [h.net]
-
-theorem alloc_agree {ns : List Var} {s₁ s₂ : State}
-    (h : EnvAgreeExcept ns s₁ s₂) (obj : MObj) :
-    (s₁.alloc obj).2 = (s₂.alloc obj).2 ∧
-      EnvAgreeExcept ns (s₁.alloc obj).1 (s₂.alloc obj).1 :=
-  ⟨by simp [State.alloc, h.nextId],
-    ⟨h.storage, by simp [State.alloc, h.heap, h.nextId],
-      by simp [State.alloc, h.nextId], h.net, h.env, h.selfBalance, h.tx⟩⟩
 
 /-! ## Congruence for the cross-domain copies -/
 

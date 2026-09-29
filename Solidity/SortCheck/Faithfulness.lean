@@ -521,7 +521,7 @@ theorem faithful_storageRootOpAssign {C : Contract} {k : Nat} {m : Modality} {p 
     CtorFaithful ``Taclet.storageRootOpAssign
       (stmtOf (@Taclet.storageRootOpAssign C k m p op hop hp gsp hgsp se)) :=
   ctorFaithful_of (dom := .storage) (cls := .numeric)
-    rfl rfl (by simpa [ReadClass.fits, Read.ty, isNumericTy] using hp) (by decide +kernel)
+    rfl rfl hp (by decide +kernel)
 
 /-- `alice.age += x;` reads `alice.age` under `find<[int]>`. -/
 theorem faithful_storageFieldOpAssign {C : Contract} {k : Nat} {m : Modality} {p : PrimTy}
@@ -531,7 +531,7 @@ theorem faithful_storageFieldOpAssign {C : Contract} {k : Nat} {m : Modality} {p
     CtorFaithful ``Taclet.storageFieldOpAssign
       (stmtOf (@Taclet.storageFieldOpAssign C k m p op hop hp x sp fld hfld se)) :=
   ctorFaithful_of (dom := .storage) (cls := .numeric)
-    rfl rfl (by simpa [ReadClass.fits, Read.ty, isNumericTy] using hp) (by decide +kernel)
+    rfl rfl hp (by decide +kernel)
 
 /-- `balances[i] += x;` reads the entry under `find<[int]>`. -/
 theorem faithful_storageIndexMappingOpAssign {C : Contract} {k : Nat} {m : Modality} {p : PrimTy}
@@ -541,7 +541,7 @@ theorem faithful_storageIndexMappingOpAssign {C : Contract} {k : Nat} {m : Modal
     CtorFaithful ``Taclet.storageIndexMappingOpAssign
       (stmtOf (@Taclet.storageIndexMappingOpAssign C k m p op hop hp x map ie se)) :=
   ctorFaithful_of (dom := .storage) (cls := .numeric)
-    rfl rfl (by simpa [ReadClass.fits, Read.ty, isNumericTy] using hp) (by decide +kernel)
+    rfl rfl hp (by decide +kernel)
 
 /-- `values[i] += x;` reads the element under `find<[int]>`. -/
 theorem faithful_storageIndexArrayOpAssign {C : Contract} {k : Nat} {m : Modality} {p : PrimTy}
@@ -551,7 +551,7 @@ theorem faithful_storageIndexArrayOpAssign {C : Contract} {k : Nat} {m : Modalit
     CtorFaithful ``Taclet.storageIndexArrayOpAssign
       (stmtOf (@Taclet.storageIndexArrayOpAssign C k m p op hop hp R ak arr ie se)) :=
   ctorFaithful_of (dom := .storage) (cls := .numeric)
-    rfl rfl (by simpa [ReadClass.fits, Read.ty, isNumericTy] using hp) (by decide +kernel)
+    rfl rfl hp (by decide +kernel)
 
 /-- `total++;` reads `total` under `find<[int]>`. -/
 theorem faithful_storageRootIncrement {C : Contract} {k : Nat} {m : Modality} {p : PrimTy}
@@ -560,7 +560,7 @@ theorem faithful_storageRootIncrement {C : Contract} {k : Nat} {m : Modality} {p
     CtorFaithful ``Taclet.storageRootIncrement
       (stmtOf (@Taclet.storageRootIncrement C k m p op hp gsp hgsp)) :=
   ctorFaithful_of (dom := .storage) (cls := .numeric)
-    rfl rfl (by simpa [ReadClass.fits, Read.ty, isNumericTy] using hp) (by decide +kernel)
+    rfl rfl hp (by decide +kernel)
 
 /-- `alice.age++;` reads `alice.age` under `find<[int]>`. -/
 theorem faithful_storageFieldIncrement {C : Contract} {k : Nat} {m : Modality} {p : PrimTy}
@@ -569,7 +569,7 @@ theorem faithful_storageFieldIncrement {C : Contract} {k : Nat} {m : Modality} {
     CtorFaithful ``Taclet.storageFieldIncrement
       (stmtOf (@Taclet.storageFieldIncrement C k m p op hp x sp fld hfld)) :=
   ctorFaithful_of (dom := .storage) (cls := .numeric)
-    rfl rfl (by simpa [ReadClass.fits, Read.ty, isNumericTy] using hp) (by decide +kernel)
+    rfl rfl hp (by decide +kernel)
 
 /-- `balances[i]++;` and `values[i]--;` read the entry under `find<[int]>`. -/
 theorem faithful_storageIndexIncrement {C : Contract} {k : Nat} {m : Modality} {p : PrimTy}
@@ -578,7 +578,7 @@ theorem faithful_storageIndexIncrement {C : Contract} {k : Nat} {m : Modality} {
     CtorFaithful ``Taclet.storageIndexIncrement
       (stmtOf (@Taclet.storageIndexIncrement C k m p op hp x x_1 it sp ie)) :=
   ctorFaithful_of (dom := .storage) (cls := .numeric)
-    rfl rfl (by simpa [ReadClass.fits, Read.ty, isNumericTy] using hp) (by decide +kernel)
+    rfl rfl hp (by decide +kernel)
 
 /-- `x = total++;` reads `total` under `find<[int]>`, twice. -/
 theorem faithful_storageRootIncrementAssignment {C : Contract} {k : Nat} {m : Modality}
@@ -588,7 +588,7 @@ theorem faithful_storageRootIncrementAssignment {C : Contract} {k : Nat} {m : Mo
     CtorFaithful ``Taclet.storageRootIncrementAssignment
       (stmtOf (@Taclet.storageRootIncrementAssignment C k m p v op hp gsp hgsp hs)) :=
   ctorFaithful_of (dom := .storage) (cls := .numeric)
-    rfl rfl (by simpa [ReadClass.fits, Read.ty, isNumericTy] using hp) (by decide +kernel)
+    rfl rfl hp (by decide +kernel)
 
 /-- `x = alice.age++;` reads `alice.age` under `find<[int]>`. -/
 theorem faithful_storageFieldIncrementAssignment {C : Contract} {k : Nat} {m : Modality}
@@ -599,7 +599,7 @@ theorem faithful_storageFieldIncrementAssignment {C : Contract} {k : Nat} {m : M
     CtorFaithful ``Taclet.storageFieldIncrementAssignment
       (stmtOf (@Taclet.storageFieldIncrementAssignment C k m p v op hp x sp fld hfld hs)) :=
   ctorFaithful_of (dom := .storage) (cls := .numeric)
-    rfl rfl (by simpa [ReadClass.fits, Read.ty, isNumericTy] using hp) (by decide +kernel)
+    rfl rfl hp (by decide +kernel)
 
 /-- `x = values[i]++;` reads the element under `find<[int]>`. -/
 theorem faithful_storageIndexIncrementAssignment {C : Contract} {k : Nat} {m : Modality}
@@ -609,7 +609,7 @@ theorem faithful_storageIndexIncrementAssignment {C : Contract} {k : Nat} {m : M
     CtorFaithful ``Taclet.storageIndexIncrementAssignment
       (stmtOf (@Taclet.storageIndexIncrementAssignment C k m p v op hp x x_1 it sp ie hs)) :=
   ctorFaithful_of (dom := .storage) (cls := .numeric)
-    rfl rfl (by simpa [ReadClass.fits, Read.ty, isNumericTy] using hp) (by decide +kernel)
+    rfl rfl hp (by decide +kernel)
 
 /-- `alice.account = m;` (`m : Account memory`) reads `m` under
 `read<[Identity]>`: a memory reference. -/
@@ -657,7 +657,7 @@ theorem faithful_memoryFieldOpAssign {C : Contract} {k : Nat} {m : Modality} {p 
     CtorFaithful ``Taclet.memoryFieldOpAssign
       (stmtOf (@Taclet.memoryFieldOpAssign C k m p op hop hp mv fld x hfld se)) :=
   ctorFaithful_of (dom := .memory) (cls := .numeric)
-    rfl rfl (by simpa [ReadClass.fits, Read.ty, isNumericTy] using hp) (by decide +kernel)
+    rfl rfl hp (by decide +kernel)
 
 /-- `ns[i] += x;` reads the element under `read<[int]>`. -/
 theorem faithful_memoryIndexArrayOpAssign {C : Contract} {k : Nat} {m : Modality} {p : PrimTy}
@@ -667,7 +667,7 @@ theorem faithful_memoryIndexArrayOpAssign {C : Contract} {k : Nat} {m : Modality
     CtorFaithful ``Taclet.memoryIndexArrayOpAssign
       (stmtOf (@Taclet.memoryIndexArrayOpAssign C k m p op hop hp R mk mv ie se)) :=
   ctorFaithful_of (dom := .memory) (cls := .numeric)
-    rfl rfl (by simpa [ReadClass.fits, Read.ty, isNumericTy] using hp) (by decide +kernel)
+    rfl rfl hp (by decide +kernel)
 
 /-- `m.age++;` reads `m.age` under `read<[int]>`. -/
 theorem faithful_memoryFieldIncrement {C : Contract} {k : Nat} {m : Modality} {p : PrimTy}
@@ -676,7 +676,7 @@ theorem faithful_memoryFieldIncrement {C : Contract} {k : Nat} {m : Modality} {p
     CtorFaithful ``Taclet.memoryFieldIncrement
       (stmtOf (@Taclet.memoryFieldIncrement C k m p op hp mv fld x hfld)) :=
   ctorFaithful_of (dom := .memory) (cls := .numeric)
-    rfl rfl (by simpa [ReadClass.fits, Read.ty, isNumericTy] using hp) (by decide +kernel)
+    rfl rfl hp (by decide +kernel)
 
 /-- `ns[i]++;` reads the element under `read<[int]>`. -/
 theorem faithful_memoryIndexArrayIncrement {C : Contract} {k : Nat} {m : Modality} {p : PrimTy}
@@ -685,7 +685,7 @@ theorem faithful_memoryIndexArrayIncrement {C : Contract} {k : Nat} {m : Modalit
     CtorFaithful ``Taclet.memoryIndexArrayIncrement
       (stmtOf (@Taclet.memoryIndexArrayIncrement C k m p op hp R mk mv ie)) :=
   ctorFaithful_of (dom := .memory) (cls := .numeric)
-    rfl rfl (by simpa [ReadClass.fits, Read.ty, isNumericTy] using hp) (by decide +kernel)
+    rfl rfl hp (by decide +kernel)
 
 /-- `x = m.age++;` reads `m.age` under `read<[int]>`, twice. -/
 theorem faithful_memoryFieldIncrementAssignment {C : Contract} {k : Nat} {m : Modality}
@@ -695,7 +695,7 @@ theorem faithful_memoryFieldIncrementAssignment {C : Contract} {k : Nat} {m : Mo
     CtorFaithful ``Taclet.memoryFieldIncrementAssignment
       (stmtOf (@Taclet.memoryFieldIncrementAssignment C k m p v op hp mv fld x hfld hs)) :=
   ctorFaithful_of (dom := .memory) (cls := .numeric)
-    rfl rfl (by simpa [ReadClass.fits, Read.ty, isNumericTy] using hp) (by decide +kernel)
+    rfl rfl hp (by decide +kernel)
 
 /-- `x = ns[i]++;` reads the element under `read<[int]>`, twice. -/
 theorem faithful_memoryIndexArrayIncrementAssignment {C : Contract} {k : Nat} {m : Modality}
@@ -705,7 +705,7 @@ theorem faithful_memoryIndexArrayIncrementAssignment {C : Contract} {k : Nat} {m
     CtorFaithful ``Taclet.memoryIndexArrayIncrementAssignment
       (stmtOf (@Taclet.memoryIndexArrayIncrementAssignment C k m p v op hp R mk mv ie hs)) :=
   ctorFaithful_of (dom := .memory) (cls := .numeric)
-    rfl rfl (by simpa [ReadClass.fits, Read.ty, isNumericTy] using hp) (by decide +kernel)
+    rfl rfl hp (by decide +kernel)
 
 /-- A constructor with the theorem that it is faithful. -/
 structure Proved where

@@ -262,15 +262,11 @@ seen either (solkey's `testMemoryFieldShallowCopy`).  `sol_close` reads a
 copy member by member, one level down, so this one is a run from
 `State.exampleStore`. -/
 
-/-- What the local `x` holds after `P` runs from the store `σ`. -/
-def localAfter {C : Contract} (σ : State) (P : Prog C) (x : String) : Res Binding := do
-  (← Prog.run σ P).getEnv (.user x)
-
 /--
 info: Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int 8))
 -/
 #guard_msgs in
-#eval localAfter State.exampleStore
+#eval Prog.localAfter State.exampleStore
   sol{ Person memory carol; carol.account.balance = 8; alice = carol;
        carol.account.balance = 9; uint result = alice.account.balance; } "result"
 

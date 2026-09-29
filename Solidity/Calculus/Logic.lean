@@ -93,10 +93,10 @@ theorem Premise.sound {k : Nat} {m : Modality} {s : Stmt C} {pr : Premise C}
     simp only [Premise.fml, holds, Prog.run, Modality.after_bind]
     exact (m.after_sameOk (h σ) h₀).1
   | unfold P =>
-    simp only [Premise.fml, holds, Prog.run, Prog.run_append]
+    simp only [Premise.fml, holds, Prog.run, SemanticsProperties.Prog.run_append]
     exact (m.after_sameOk (h σ) hω).1
   | split c c' P Q =>
-    simp only [Premise.fml, holds, Prog.run_append]
+    simp only [Premise.fml, holds, SemanticsProperties.Prog.run_append]
     intro ⟨hP, hQ, hcov⟩
     by_cases hc : holds σ c
     · exact (m.after_sameOk ((h σ).1 hc) hω).1 (hP hc)
@@ -151,6 +151,30 @@ theorem freshVars_avoid {vs : List Var} {k : Nat} (hk : maxIdx vs < k) :
   simp only [freshVars, List.mem_cons, List.not_mem_nil] at hF
   rcases hF with rfl | rfl | rfl | rfl | hF <;> simp_all [Var.idx] <;> omega
 
+/-- Fresh names are numbered one above every index in the formula. -/
+abbrev Fml.fresh (φ : Fml C) : Nat := maxIdx φ.vars + 1
+
+/-- An index `k` above every variable of `vs`, among them those of
+`⟨[ s; ω ]⟩ φ`, gives names that the statement, the rest of the program and
+the postcondition all avoid: what `Taclet.sound` and `Premise.sound` ask. -/
+theorem freshVars_avoid_modal {k : Nat} {vs : List Var} {m : Modality} {s : Stmt C}
+    {ω : Prog C} {φ : Fml C} (hk : maxIdx vs < k)
+    (hsub : ∀ y ∈ (Fml.modal m (s :: ω) φ).vars, y ∈ vs) :
+    Avoids s.vars (freshVars k) ∧ Avoids (Prog.vars ω ++ φ.vars) (freshVars k) := by
+  have hv := freshVars_avoid hk
+  constructor <;> intro y hy <;> exact hv y (hsub y (by simp [Fml.vars, Prog.vars, hy]))
+
+/-- A rule fired on `⟨[ s; ω ]⟩ φ` with its fresh names above every index in
+sight is sound: its premise, in front of `ω` and `φ`, implies the formula.
+
+Example: `localValueAssign` fired on `⟨ x = a; ⟩ x == 1` at index `1`. -/
+theorem Premise.sound_above {k : Nat} {vs : List Var} {m : Modality} {s : Stmt C} {ω : Prog C}
+    {φ : Fml C} {p : Premise C} (hc : Avoids s.vars (freshVars k) → p.Correct k m s)
+    (hk : maxIdx vs < k) (hsub : ∀ y ∈ (Fml.modal m (s :: ω) φ).vars, y ∈ vs) (σ : State) :
+    holds σ (p.fml m ω φ) → holds σ (.modal m (s :: ω) φ) :=
+  let h := freshVars_avoid_modal hk hsub
+  Premise.sound (hc h.1) ω φ h.2 σ
+
 /-! ## The judgement -/
 
 /-- One entry of the context. -/
@@ -171,7 +195,7 @@ def Hyp.wrap : List (Hyp C) → Fml C → Fml C
   | .havoc :: Γ, φ => .havoc (Hyp.wrap Γ φ)
 
 /-- Fresh names are numbered one above every index in the whole sequent. -/
-def Hyp.fresh (Γ : List (Hyp C)) (φ : Fml C) : Nat := maxIdx (Hyp.wrap Γ φ).vars + 1
+def Hyp.fresh (Γ : List (Hyp C)) (φ : Fml C) : Nat := (Hyp.wrap Γ φ).fresh
 
 /-- Which rules a derivation may use: solkey's (`Taclet`), or all of them
 (`LeanTaclet` too). -/
@@ -235,18 +259,71 @@ theorem Hyp.wrap_append (Γ Δ : List (Hyp C)) (φ : Fml C) :
   | nil => rfl
   | cons h Γ ih => cases h <;> simp [Hyp.wrap, ih]
 
+/-! ## The states a context leads to -/
+
+/-- `Reaches Γ σ τ`: running the context `Γ` from `σ` ends in `τ` — every
+update returns, every precondition holds where it is met, and a `havoc`
+leaves any storage, ledger and funds. -/
+def Hyp.Reaches : List (Hyp C) → State → State → Prop
+  | [], σ, τ => τ = σ
+  | .pre a :: Γ, σ, τ => holds σ a ∧ Hyp.Reaches Γ σ τ
+  | .upd _ U :: Γ, σ, τ => ∃ ρ, U.apply σ = .ok ρ ∧ Hyp.Reaches Γ ρ τ
+  | .havoc :: Γ, σ, τ => ∃ st nt bal, Hyp.Reaches Γ (σ.havoc st nt bal) τ
+
+/-- What follows a context is judged only in the states it leads to. -/
+theorem Hyp.wrap_reach {A B : Fml C} : (Γ : List (Hyp C)) → ∀ σ,
+    (∀ τ, Hyp.Reaches Γ σ τ → holds τ A → holds τ B) →
+      holds σ (Hyp.wrap Γ A) → holds σ (Hyp.wrap Γ B)
+  | [], σ, h => h σ rfl
+  | .pre _ :: Γ, σ, h => fun hA ha => Hyp.wrap_reach Γ σ (fun τ hr => h τ ⟨ha, hr⟩) (hA ha)
+  | .upd m U :: Γ, σ, h => by
+    simp only [Hyp.wrap, holds]
+    cases hU : U.apply σ with
+    | error _ => exact id
+    | ok ρ => exact Hyp.wrap_reach Γ ρ (fun τ hr => h τ ⟨ρ, hU, hr⟩)
+  | .havoc :: Γ, σ, h => fun hA st nt bal =>
+    Hyp.wrap_reach Γ _ (fun τ hr => h τ ⟨st, nt, bal, hr⟩) (hA st nt bal)
+
 /-- An implication between two formulas survives wrapping both in the same
 context. -/
-theorem Hyp.wrap_mono {ψ φ : Fml C} (h : ∀ σ, holds σ ψ → holds σ φ) :
-    (Γ : List (Hyp C)) → ∀ σ, holds σ (Hyp.wrap Γ ψ) → holds σ (Hyp.wrap Γ φ)
-  | [] => h
-  | .pre _ :: Γ => fun σ hψ ha => Hyp.wrap_mono h Γ σ (hψ ha)
-  | .upd m U :: Γ => fun σ => by
+theorem Hyp.wrap_mono {ψ φ : Fml C} (h : ∀ σ, holds σ ψ → holds σ φ) (Γ : List (Hyp C))
+    (σ : State) : holds σ (Hyp.wrap Γ ψ) → holds σ (Hyp.wrap Γ φ) :=
+  Hyp.wrap_reach Γ σ fun τ _ => h τ
+
+/-- A state `Γ ++ Δ` leads to is one `Δ` leads to from a state `Γ` leads to. -/
+theorem Hyp.reaches_append : (Γ Δ : List (Hyp C)) → ∀ σ τ,
+    Hyp.Reaches (Γ ++ Δ) σ τ → ∃ ρ, Hyp.Reaches Γ σ ρ ∧ Hyp.Reaches Δ ρ τ
+  | [], _, σ, _, h => ⟨σ, rfl, h⟩
+  | .pre _ :: Γ, Δ, σ, τ, ⟨ha, h⟩ =>
+    let ⟨ρ, h₁, h₂⟩ := Hyp.reaches_append Γ Δ σ τ h
+    ⟨ρ, ⟨ha, h₁⟩, h₂⟩
+  | .upd _ _ :: Γ, Δ, _, τ, ⟨ρ', hU, h⟩ =>
+    let ⟨ρ, h₁, h₂⟩ := Hyp.reaches_append Γ Δ ρ' τ h
+    ⟨ρ, ⟨ρ', hU, h₁⟩, h₂⟩
+  | .havoc :: Γ, Δ, _, τ, ⟨st, nt, bal, h⟩ =>
+    let ⟨ρ, h₁, h₂⟩ := Hyp.reaches_append Γ Δ _ τ h
+    ⟨ρ, ⟨st, nt, bal, h₁⟩, h₂⟩
+
+/-- No diamond update in the context: a halting update proves what follows. -/
+def Hyp.boxOnly : List (Hyp C) → Bool
+  | [] => true
+  | .upd .diamond _ :: _ => false
+  | _ :: Γ => Hyp.boxOnly Γ
+
+/-- Behind a context with no diamond, what holds in every state it leads to
+holds. -/
+theorem Hyp.wrap_of_reaches {φ : Fml C} : (Γ : List (Hyp C)) → Hyp.boxOnly Γ = true → ∀ σ,
+    (∀ τ, Hyp.Reaches Γ σ τ → holds τ φ) → holds σ (Hyp.wrap Γ φ)
+  | [], _, σ, h => h σ rfl
+  | .pre _ :: Γ, hb, σ, h => fun ha => Hyp.wrap_of_reaches Γ hb σ (fun τ hr => h τ ⟨ha, hr⟩)
+  | .upd .box U :: Γ, hb, σ, h => by
     simp only [Hyp.wrap, holds]
-    cases U.apply σ with
-    | error _ => exact id
-    | ok τ => exact Hyp.wrap_mono h Γ τ
-  | .havoc :: Γ => fun σ hψ st nt bal => Hyp.wrap_mono h Γ _ (hψ st nt bal)
+    cases hU : U.apply σ with
+    | error _ => trivial
+    | ok ρ => exact Hyp.wrap_of_reaches Γ hb ρ (fun τ hr => h τ ⟨ρ, hU, hr⟩)
+  | .upd .diamond _ :: _, hb, _, _ => by cases hb
+  | .havoc :: Γ, hb, σ, h => fun st nt bal =>
+    Hyp.wrap_of_reaches Γ hb _ (fun τ hr => h τ ⟨st, nt, bal, hr⟩)
 
 /-- `Hyp.wrap_mono` for three premises, as a branch has. -/
 theorem Hyp.wrap_mono₃ {ψ₁ ψ₂ ψ₃ φ : Fml C}
@@ -278,20 +355,14 @@ the taclet's index is `Hyp.fresh` of the whole sequent, so the names it could
 introduce avoid `se1`, `sp1` and every other name in sight. -/
 theorem Taclet.sound_in {Γ : List (Hyp C)} {m : Modality} {s : Stmt C} {ω : Prog C} {φ : Fml C}
     {p : Premise C} (d : Taclet C (Hyp.fresh Γ (.modal m (s :: ω) φ)) m s p) :
-    ∀ σ, holds σ (p.fml m ω φ) → holds σ (.modal m (s :: ω) φ) := by
-  have hv := freshVars_avoid (Nat.lt_succ_self (maxIdx (Hyp.wrap Γ (.modal m (s :: ω) φ)).vars))
-  intro σ
-  refine Premise.sound (d.sound ?_) ω φ ?_ σ <;>
-    intro y hy <;> exact hv y (Hyp.vars_wrap Γ (by simp [Fml.vars, Prog.vars, hy]))
+    ∀ σ, holds σ (p.fml m ω φ) → holds σ (.modal m (s :: ω) φ) :=
+  Premise.sound_above d.sound (Nat.lt_succ_self _) fun _ => Hyp.vars_wrap Γ
 
 /-- `Taclet.sound_in` for a rule solkey does not have. -/
 theorem LeanTaclet.sound_in {Γ : List (Hyp C)} {m : Modality} {s : Stmt C} {ω : Prog C}
     {φ : Fml C} {p : Premise C} (d : LeanTaclet C (Hyp.fresh Γ (.modal m (s :: ω) φ)) m s p) :
-    ∀ σ, holds σ (p.fml m ω φ) → holds σ (.modal m (s :: ω) φ) := by
-  have hv := freshVars_avoid (Nat.lt_succ_self (maxIdx (Hyp.wrap Γ (.modal m (s :: ω) φ)).vars))
-  intro σ
-  refine Premise.sound (d.sound ?_) ω φ ?_ σ <;>
-    intro y hy <;> exact hv y (Hyp.vars_wrap Γ (by simp [Fml.vars, Prog.vars, hy]))
+    ∀ σ, holds σ (p.fml m ω φ) → holds σ (.modal m (s :: ω) φ) :=
+  Premise.sound_above d.sound (Nat.lt_succ_self _) fun _ => Hyp.vars_wrap Γ
 
 open Proves in
 /-- **Soundness of the calculus**: a derivation of `Γ ⊢ φ` proves `φ`
@@ -348,7 +419,8 @@ theorem Proves.toAll {R : RuleSet} {Γ : List (Hyp C)} {φ : Fml C} (h : Proves 
 
 `Proves Γ φ` prints as the sequent `dl{ Γ ⟹ φ }`, so every goal of an
 `apply` derivation reads as the line of the derivation it is: the context
-left of `⟹`, in order, and the formula still to prove right of it. -/
+left of `⟹`, in order, and the formula still to prove right of it.  A goal
+of `⊢ₖ`, solkey's rules alone, prints as `dl{ Γ ⟹ₖ φ }`; both read back. -/
 
 section Print
 open Lean Meta PrettyPrinter Delaborator SubExpr
@@ -361,12 +433,13 @@ def ppHyp? (e : Lean.Expr) : MetaM (Option (TSyntax `dl_hyp)) := do
   | Hyp.havoc _ => return some (← `(dl_hyp| { havoc }))
   | _ => return none
 
-/-- `Proves R Γ φ`: `dl{ Γ ⟹ φ }`, under either rule set. -/
+/-- `Proves .all Γ φ`: `dl{ Γ ⟹ φ }`; `Proves .solkey Γ φ`: `dl{ Γ ⟹ₖ φ }`. -/
 @[delab app.Solidity.Proves]
 def delabProves : Delab := do
   unless ← ppOn do failure
   let e ← getExpr
   guard (e.getAppNumArgs == 4)
+  let R ← whnf (e.getArg! 1)
   let some hs ← listElems? (e.getArg! 2) | failure
   let mut out := #[]
   for h in hs do
@@ -374,7 +447,9 @@ def delabProves : Delab := do
     out := out.push h
   let φ ← ppFml (e.getArg! 3)
   guard !(isEscape φ)
-  `(dl{ $[$out],* ⟹ $φ:dl_fml })
+  if R.isConstOf ``RuleSet.all then `(dl{ $[$out],* ⟹ $φ:dl_fml })
+  else if R.isConstOf ``RuleSet.solkey then `(dl{ $[$out],* ⟹ₖ $φ:dl_fml })
+  else failure
 
 end Print
 

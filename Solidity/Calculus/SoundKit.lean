@@ -70,6 +70,8 @@ variable {σ : State} {x : Var} {b : Binding}
     r.mval (σ.setEnv x b) = r.mval σ := r.mval_frame (agree_setEnv σ x b) (avoids_single h)
 @[simp] theorem State.findStorage_setEnv (r : Name) (segs : List Seg) :
     (σ.setEnv x b).findStorage r segs = σ.findStorage r segs := rfl
+@[simp] theorem State.checkIndex_setEnv (r : Name) (segs : List Seg) (i : Int) :
+    (σ.setEnv x b).checkIndex r segs i = σ.checkIndex r segs i := rfl
 @[simp] theorem State.getObj_setEnv (id : Nat) : (σ.setEnv x b).getObj id = σ.getObj id := rfl
 @[simp] theorem arrayLen_setEnv (r : Name) (segs : List Seg) :
     arrayLen (σ.setEnv x b) r segs = arrayLen σ r segs := rfl
@@ -88,60 +90,75 @@ def Premise.Correct (k : Nat) (m : Modality) (s : Stmt C) : Premise C → Prop
       (¬ holds σ c → ¬ holds σ c' → ∃ e, s.run σ = .error e)
   | .done b => ∀ σ, (∃ e, s.run σ = .error e) ∧ (b = true → m = .box)
 
+/-! ### Writes as a new storage or heap, the rest of the state kept -/
+
+/-- The storage a successful `writeStorage` leaves: a word saved, or a copy
+over what is there. -/
+def Semantics.State.writeRes (σ : State) (r : Name) (segs : List Seg) (x : SVal) :
+    Res (List (Name × SVal)) :=
+  match x with
+  | .prim p => σ.storeRes r segs (.prim p)
+  | .struct _ | .array .. | .map .. => do
+    let cur ← σ.findStorage r segs
+    σ.storeRes r segs (cur.overlay x)
+
+@[simp] theorem State.writeRes_toSVal (σ : State) (r segs) (v : Value) :
+    σ.writeRes r segs v.toSVal = σ.storeRes r segs v.toSVal := by
+  cases v <;> rfl
+
+theorem State.writeStorage_eq (σ : State) (r segs x) :
+    σ.writeStorage r segs x = (do let s ← σ.writeRes r segs x; pure { σ with storage := s }) := by
+  unfold State.writeStorage State.writeRes
+  cases x <;> simp only [State.saveStorage_eq, bind_assoc]
+
+/-- The heap a successful `writeAddr` leaves. -/
+def heapRes (σ : State) (mv : MVal) : Addr → Res (List (Nat × MObj))
+  | .memoryField id f => do
+    match ← σ.getObj id with
+    | .struct fields => pure (setBy id (.struct (setBy f mv fields)) σ.heap)
+    | .array _ _ => .error .stuck
+  | .memoryIndex id i => do
+    match ← σ.getObj id with
+    | .array elems fx =>
+      if 0 ≤ i ∧ i.toNat < elems.length then pure (setBy id (.array (elems.set i.toNat mv) fx) σ.heap)
+      else .error .revert
+    | .struct _ => .error .stuck
+
+theorem writeAddr_eq (σ : State) (mv : MVal) (a : Addr) :
+    writeAddr σ mv a = (do let h ← heapRes σ mv a; pure { σ with heap := h }) := by
+  cases a with
+  | memoryField id f =>
+    simp only [writeAddr, heapRes, memWriteField, bind, Except.bind]
+    cases σ.getObj id with
+    | error _ => rfl
+    | ok o => cases o <;> rfl
+  | memoryIndex id i =>
+    simp only [writeAddr, heapRes, memWriteIndex, bind, Except.bind]
+    cases σ.getObj id with
+    | error _ => rfl
+    | ok o =>
+      cases o with
+      | struct _ => rfl
+      | array elems => by_cases hh : 0 ≤ i ∧ i.toNat < elems.length <;> simp [hh] <;> rfl
 
 theorem State.saveStorage_with (σ : State) (r segs v) :
     (σ.saveStorage r segs v >>= fun τ => pure { σ with storage := τ.storage }) =
       σ.saveStorage r segs v := by
-  unfold State.saveStorage
-  split
-  · cases h : SVal.save _ segs v <;> rfl
-  · rfl
+  rw [State.saveStorage_eq]; cases σ.storeRes r segs v <;> rfl
 
 theorem State.writeStorage_with (σ : State) (r segs v) :
     (σ.writeStorage r segs v >>= fun τ => pure { σ with storage := τ.storage }) =
       σ.writeStorage r segs v := by
-  unfold State.writeStorage
-  split
-  · exact State.saveStorage_with σ r segs _
-  all_goals
-    simp only [bind_assoc]
-    cases σ.findStorage r segs with
-    | error _ => rfl
-    | ok cur => exact State.saveStorage_with σ r segs _
+  rw [State.writeStorage_eq]; cases σ.writeRes r segs v <;> rfl
+
+theorem writeAddr_with (σ : State) (mv : MVal) (a : Addr) :
+    (writeAddr σ mv a >>= fun μ => pure { σ with heap := μ.heap, nextId := μ.nextId }) =
+      writeAddr σ mv a := by
+  rw [writeAddr_eq]; cases heapRes σ mv a <;> rfl
 
 @[simp] theorem Upd.apply_single (e : UpdElem C) (σ : State) :
     Upd.apply [e] σ = e.write σ σ := by
   simp [Upd.apply]
-
-theorem upd_val (x : Var) {p : PrimTy} (e : Val C p) (σ : State) :
-    Upd.apply [.val x e.lower] σ = (Stmt.assignLocal x e).run σ := by
-  simp [UpdElem.write, Val.lower_eval, Stmt.run]
-
-theorem upd_assign {T : Ty} (l : Loc C T) (r : Src C T) (σ : State) :
-    Upd.apply [.storage (.save .storage l.lower r.lower)] σ = (Stmt.assign l r).run σ := by
-  have hr : r.lower.eval σ = r.value σ := by
-    cases r <;> simp [Src.lower, SValT.eval, Src.value, Val.lower_eval, STerm.eval, SPath.lower_eval]
-  simp only [Upd.apply_single, UpdElem.write, STerm.eval, hr, Loc.lower_eval, Stmt.run, bind_assoc,
-    pure_bind, State.writeStorage_with]
-
-theorem upd_rebind (x : Var) {R : RefTy} (p : SPath C (.ref R)) (σ : State) :
-    Upd.apply [.path x p.lower] σ = (Stmt.rebind x (.path p)).run σ := by
-  simp [UpdElem.write, SPath.lower_eval, Stmt.run, ARhs.bind]
-
-theorem upd_delete {T : Ty} (l : Loc C T) (σ : State) :
-    Upd.apply [.storage (.delAt .storage l.lower)] σ = (Stmt.delete l).run σ := by
-  simp only [Upd.apply_single, UpdElem.write, STerm.eval, Loc.lower_eval, Stmt.run, bind_assoc,
-    pure_bind]
-  cases l.resolve σ with
-  | error _ => rfl
-  | ok rs =>
-    simp only [bind, Except.bind]
-    cases σ.findStorage rs.1 rs.2 with
-    | error _ => rfl
-    | ok cur => exact State.saveStorage_with σ _ _ _
-
-theorem SameOk.of_eq {ns : List Var} {x y : Res State} (h : x = y) : SameOk ns x y := by
-  subst h; cases x <;> simp [SameOk, EnvAgreeExcept.refl]
 
 theorem evalBinop_compound {op : BinOp} (hop : op.hasCompoundAssign = true) (p : PrimTy) (lv : Value)
     (b : Res Value) : evalBinop op p lv b = (do checkArith (.prim p) (← applyBinOp op lv (← b))) := by
@@ -165,16 +182,6 @@ macro "res_split" : tactic => `(tactic| (
   repeat' split
   all_goals (try simp_all [EnvAgreeExcept.refl])))
 
-theorem upd_opStore {op : BinOp} (hop : op.hasCompoundAssign = true) {p : PrimTy}
-    (l : Loc C (.prim p)) (se : Simple C p) (σ : State) :
-    SameOk [] (Upd.apply [.storage (.save .storage l.lower
-        (.val (.binop op p (.find .storage l.lower) se.lower)))] σ)
-      (do let v ← se.eval σ; let (r, segs) ← l.resolve σ; opStore σ op p r segs v) := by
-  simp only [Upd.apply_single, UpdElem.write, STerm.eval, SValT.eval, Term.eval, Loc.lower_eval,
-    Simple.lower_eval, bind_assoc, pure_bind, evalBinop_compound hop, State.writeStorage_toSVal,
-    State.saveStorage_with, opStore]
-  res_split
-
 theorem evalBinop_bump (op : IncDec) (p : PrimTy) (lv : Value) (b : Res Value) :
     evalBinop op.binOp p lv b = (do
       checkArith (.prim p) (← applyBinOp op.binOp lv (← b))) := by
@@ -190,17 +197,42 @@ theorem applyBinOp_bump (op : IncDec) (lv : Value) :
 The update and the statement read the same things through differently shaped
 code; these name the reads, so both sides split on the same atoms. -/
 
+namespace Close
+
+/-- The value a local holds: `x` after `uint x = 10;` is `10`; an alias or
+a memory local has none. -/
+def bindingVal : Binding → Res Value
+  | .val v => .ok v
+  | .spath .. | .mref _ | .store _ | .ledger _ => .error .stuck
+
+/-- The path an alias holds: `p` after `Person storage p = alice;` is
+`alice`. -/
+def bindingPath : Binding → Res (Name × List Seg)
+  | .spath r segs => .ok (r, segs)
+  | .val _ | .mref _ | .store _ | .ledger _ => .error .stuck
+
+/-- The object a memory local holds: `m` after `Person memory m;`. -/
+def bindingRef : Binding → Res Nat
+  | .mref id => .ok id
+  | .val _ | .spath .. | .store _ | .ledger _ => .error .stuck
+
+/-- The storage a storage variable holds: `old` after `{old := storage}`. -/
+def bindingStore : Binding → Res (List (Name × SVal))
+  | .store st => .ok st
+  | .val _ | .spath .. | .mref _ | .ledger _ => .error .stuck
+
+/-- The ledger a ledger variable holds: `oldNet` after `{oldNet := net}`. -/
+def bindingLedger : Binding → Res (List (Int × Int))
+  | .ledger l => .ok l
+  | .val _ | .spath .. | .mref _ | .store _ => .error .stuck
+
+end Close
+
 /-- A stack local's value. -/
-def envVal (σ : State) (x : Var) : Res Value := do
-  match ← σ.getEnv x with
-  | .val v => pure v
-  | .spath .. | .mref _ | .store _ => .error .stuck
+def envVal (σ : State) (x : Var) : Res Value := σ.getEnv x >>= Close.bindingVal
 
 /-- A memory local's identity. -/
-def envRef (σ : State) (x : Var) : Res Nat := do
-  match ← σ.getEnv x with
-  | .mref id => pure id
-  | .val _ | .spath .. | .store _ => .error .stuck
+def envRef (σ : State) (x : Var) : Res Nat := σ.getEnv x >>= Close.bindingRef
 
 @[simp] theorem Term.eval_pv (σ : State) (x : Var) : (Term.pv x : Term C).eval σ = envVal σ x := rfl
 @[simp] theorem Simple.eval_local (σ : State) {p : PrimTy} (x : Var) :
@@ -208,7 +240,7 @@ def envRef (σ : State) (x : Var) : Res Nat := do
 @[simp] theorem ITerm.eval_pv (σ : State) (x : Var) : (ITerm.pv x : ITerm C).eval σ = envRef σ x := rfl
 @[simp] theorem MPath.mval_var (σ : State) {R : RefTy} (x : Var) :
     (MPath.var x : MPath C (.ref R)).mval σ = (do pure (MVal.ref (← envRef σ x))) := by
-  simp only [MPath.mval, envRef, bind, Except.bind]
+  simp only [MPath.mval, envRef, Close.bindingRef, bind, Except.bind]
   cases σ.getEnv x with
   | error _ => rfl
   | ok b => cases b <;> rfl
@@ -220,7 +252,7 @@ def envRef (σ : State) (x : Var) : Res Nat := do
       let oldInt ← old.asInt
       let new ← checkArith (.prim p) (.int (if op.isIncrement then oldInt + 1 else oldInt - 1))
       pure (σ.setEnv x (.val new), if op.isPre then new else old)) := by
-  simp only [bumpLocal, envVal, bind, Except.bind, pure, Except.pure]
+  simp only [bumpLocal, envVal, Close.bindingVal, bind, Except.bind, pure, Except.pure]
   repeat' split
   all_goals simp_all
 
@@ -230,7 +262,7 @@ def envRef (σ : State) (x : Var) : Res Nat := do
       let new ← applyBinOp op old v
       let new ← checkArith (.prim p) new
       pure (σ.setEnv x (.val new))) := by
-  simp only [opLocal, envVal, bind, Except.bind, pure, Except.pure]
+  simp only [opLocal, envVal, Close.bindingVal, bind, Except.bind, pure, Except.pure]
   repeat' split
   all_goals simp_all
 
@@ -264,38 +296,28 @@ def envRef (σ : State) (x : Var) : Res Nat := do
       (do let id ← (← b.mval σ).asRef; readAddr σ (.memoryIndex id (← (← i.eval σ).asInt))) := by
   simp only [MLoc.read, readAddr]; rfl
 
-theorem writeAddr_with (σ : State) (mv : MVal) (a : Addr) :
-    (writeAddr σ mv a >>= fun μ => pure { σ with heap := μ.heap, nextId := μ.nextId }) =
-      writeAddr σ mv a := by
-  cases a with
-  | memoryField id f =>
-    simp only [writeAddr, memWriteField, bind, Except.bind, pure, Except.pure]
-    cases σ.getObj id with
-    | error _ => rfl
-    | ok o => cases o <;> rfl
-  | memoryIndex id i =>
-    simp only [writeAddr, memWriteIndex, bind, Except.bind, pure, Except.pure]
-    cases σ.getObj id with
-    | error _ => rfl
-    | ok o =>
-      cases o with
-      | struct _ => rfl
-      | array elems => by_cases hh : 0 ≤ i ∧ i.toNat < elems.length <;> simp [hh] <;> rfl
+theorem MPath.mval_loc (σ : State) {T : Ty} (l : MLoc C T) : (MPath.loc l).mval σ = l.read σ := rfl
 
-/-- The simp set that unfolds an update and a statement to their reads and writes. -/
-macro "upd_unfold" : tactic => `(tactic| simp only [Upd.apply, List.foldlM, UpdElem.write,
-    STerm.eval, SValT.eval, Term.eval_pv, Term.eval, PTerm.eval, ITerm.eval_pv, ITerm.eval,
-    MTerm.eval, MValT.eval, MAddr.eval, SPath.lower_eval, Loc.lower_eval, Val.lower_eval,
-    Simple.lower_eval, Stmt.run, Src.value, Val.eval, Simple.eval_local, bind_assoc, pure_bind,
-    bind_pure, State.writeStorage_toSVal, State.saveStorage_with, State.writeStorage_with,
-    writeAddr_with, OpLoc.store, OpLoc.bump, opStore, bumpStore,
-    opLocal_eq, bumpLocal_eq, opMem, bumpMem, readLoc_eq, writeLoc_eq, ARhs.bind, MRhs.bind,
-    MSrc.mval, MLoc.write, MPath.mval_var, MVal.asRef_ref, MLoc.read_field, MLoc.read_index,
-    Loc.resolve, SPath.resolve, Src.pushVal, evalBinop_bump, applyBinOp_bump, Term.bumped])
+@[simp] theorem Src.pushVal_none (σ : State) {T : Ty} :
+    Src.pushVal (C := C) (T := T) σ none = fun slot => pure slot := rfl
 
-open Lean Elab Tactic in
-elab "show_tags" : tactic => do
-  let gs ← getGoals
-  logInfo m!"{gs.length}: {← gs.mapM fun g => return (← g.getTag)}"
+open Lean Parser.Tactic in
+/-- The simp set that unfolds an update and a statement to their reads and
+writes; `extra` says how terms are evaluated and writes are named. -/
+macro "upd_unfold_with" "[" extra:simpArg,* "]" : tactic => do
+  let extra : Array (TSyntax [``simpStar, ``simpErase, ``simpLemma]) := extra.getElems.map (⟨·.raw⟩)
+  `(tactic| simp only [Upd.apply, List.foldlM, UpdElem.write,
+    STerm.eval, SValT.eval, Term.eval_pv, PTerm.eval, ITerm.eval_pv, MTerm.eval, MValT.eval,
+    SPath.lower_eval, Loc.lower_eval, Val.lower_eval, Simple.lower_eval, Stmt.run, Src.value,
+    Val.eval, Simple.eval_local, bind_assoc, pure_bind, bind_pure, State.writeStorage_toSVal,
+    OpLoc.store, OpLoc.bump, opStore, bumpStore, opLocal_eq, bumpLocal_eq, opMem, bumpMem,
+    readLoc_eq, writeLoc_eq, ARhs.bind, MRhs.bind, MSrc.mval, MLoc.write, MPath.mval_var,
+    MVal.asRef_ref, MLoc.read_field, MLoc.read_index, Loc.resolve, SPath.resolve, Src.pushVal,
+    evalBinop_bump, applyBinOp_bump, $extra,*])
+
+/-- `upd_unfold_with`, evaluating terms whole and keeping the rest of the state
+through each write. -/
+macro "upd_unfold" : tactic => `(tactic| upd_unfold_with [Term.eval, ITerm.eval, MAddr.eval,
+    State.saveStorage_with, State.writeStorage_with, writeAddr_with, Term.bumped])
 
 end Solidity

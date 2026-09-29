@@ -7,11 +7,12 @@ Source: <https://raw.githubusercontent.com/ethereum/solidity/v0.8.30/docs/exampl
 (solkey's `keyext.solidity.examples/benchmark/Purchase.sol`, which drops the
 events and the errors; here they stay, and elaborate away).
 
-Changes, each a light hack for what another part of the model has yet to
-read:
+Changes, each a light hack for what another part of the model did not
+read when this port was written:
 * `msg.sender`, `msg.value` and `address(this).balance` are the state
-  variables `msgSender`, `msgValue` and `thisBalance` (no `msg` or `this`
-  here yet);
+  variables `msgSender`, `msgValue` and `thisBalance` (the language now
+  has all three, `Examples/Benchmark/Coin.lean` reads `msg.sender`; the
+  theorems below are over this form);
 * the constructor is the function `init` (no constructors here; solkey
   skips it, `@custom:key skip`);
 * the spelling of `contract!{ … }`: a branch is a block (`if (c) { revert
@@ -22,8 +23,9 @@ function headers (inlined, the first listed outermost), the errors and
 `revert OnlyBuyer();`, the events and `emit Aborted();`, `payable(…)`.
 
 solkey's clauses about `state` and `buyer` are the theorems below.  Its
-clauses about `net(seller)` and `net(buyer)` have no counterpart: no formula
-term reads the `net` ledger (`Examples/Net.lean`).  A `requires msg.sender ==
+clauses about `net(seller)` and `net(buyer)` have no counterpart yet: a
+formula reads the ledger now (`net(a)`, `Tally.pay` in `Examples/Specs.lean`),
+but these clauses are not tried (`docs/function-specs.md`, "Still open").  A `requires msg.sender ==
 seller` is a premise on `msgSender`.
 
 ```solidity

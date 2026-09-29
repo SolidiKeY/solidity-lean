@@ -144,18 +144,13 @@ theorem Term.pick_eval (h : q.1.eval σ = q.2.eval σ) {e d : Term C} (hd : d.ev
 mutual
 
 theorem Term.rw_eval (h : q.1.eval σ = q.2.eval σ) : (e : Term C) → (e.rw q).eval σ = e.eval σ
-  | .lit _ => Term.pick_eval h rfl
-  | .pv _ => Term.pick_eval h rfl
+  | .lit _ | .pv _ | .env _ => Term.pick_eval h rfl
   | .binop _ _ a b => Term.pick_eval h (by simp only [Term.eval, a.rw_eval h, b.rw_eval h])
-  | .unop _ _ a => Term.pick_eval h (by simp only [Term.eval, a.rw_eval h])
-  | .find s p => Term.pick_eval h (by simp only [Term.eval, s.rw_eval h, p.rw_eval h])
-  | .len s p => Term.pick_eval h (by simp only [Term.eval, s.rw_eval h, p.rw_eval h])
+  | .unop _ _ a | .net a | .netOf _ a => Term.pick_eval h (by simp only [Term.eval, a.rw_eval h])
+  | .find s p | .len s p => Term.pick_eval h (by simp only [Term.eval, s.rw_eval h, p.rw_eval h])
   | .read m a => Term.pick_eval h (by simp only [Term.eval, m.rw_eval h, a.rw_eval h])
   | .ite c a b => Term.pick_eval h (by simp only [Term.eval, c.rw_eval h, a.rw_eval h, b.rw_eval h])
   | .mlen m i => Term.pick_eval h (by simp only [Term.eval, m.rw_eval h, i.rw_eval h])
-  | .env _ => Term.pick_eval h rfl
-  | .net a => Term.pick_eval h (by simp only [Term.eval, a.rw_eval h])
-  | .netOf _ a => Term.pick_eval h (by simp only [Term.eval, a.rw_eval h])
 
 theorem PTerm.rw_eval (h : q.1.eval σ = q.2.eval σ) : (p : PTerm C) → (p.rw q).eval σ = p.eval σ
   | .root _ | .pv _ => rfl
@@ -165,13 +160,10 @@ theorem PTerm.rw_eval (h : q.1.eval σ = q.2.eval σ) : (p : PTerm C) → (p.rw 
 
 theorem STerm.rw_eval (h : q.1.eval σ = q.2.eval σ) : (s : STerm C) → (s.rw q).eval σ = s.eval σ
   | .storage | .pv _ => rfl
-  | .save s p v => by simp only [STerm.rw, STerm.eval, s.rw_eval h, p.rw_eval h, v.rw_eval h]
-  | .delAt s p => by simp only [STerm.rw, STerm.eval, s.rw_eval h, p.rw_eval h]
-  | .push s p v => by simp only [STerm.rw, STerm.eval, s.rw_eval h, p.rw_eval h, v.rw_eval h]
-  | .pushSlot s p _ => by simp only [STerm.rw, STerm.eval, s.rw_eval h, p.rw_eval h]
-  | .pop s p => by simp only [STerm.rw, STerm.eval, s.rw_eval h, p.rw_eval h]
-  | .shrink s p => by simp only [STerm.rw, STerm.eval, s.rw_eval h, p.rw_eval h]
-  | .extend s p _ => by simp only [STerm.rw, STerm.eval, s.rw_eval h, p.rw_eval h]
+  | .save s p v | .push s p v => by
+    simp only [STerm.rw, STerm.eval, s.rw_eval h, p.rw_eval h, v.rw_eval h]
+  | .delAt s p | .pushSlot s p _ | .pop s p | .shrink s p | .extend s p _ => by
+    simp only [STerm.rw, STerm.eval, s.rw_eval h, p.rw_eval h]
 
 theorem SValT.rw_eval (h : q.1.eval σ = q.2.eval σ) : (v : SValT C) → (v.rw q).eval σ = v.eval σ
   | .val e => by simp only [SValT.rw, SValT.eval, e.rw_eval h]
@@ -271,45 +263,6 @@ theorem Hyp.rwHere_holds {q : Term C × Term C} {σ : State} (h : q.1.eval σ = 
   | .upd m U :: Γ, φ => by simp only [Hyp.rwHere, Hyp.wrap, holds, Upd.rw_apply h]
   | .havoc :: _, _ => Iff.rfl
 
-/-! ## The states a context leads to -/
-
-/-- `Reaches Γ σ τ`: running the context `Γ` from `σ` ends in `τ` — every
-update returns, every precondition holds where it is met, and a `havoc`
-leaves any storage, ledger and funds. -/
-def Hyp.Reaches : List (Hyp C) → State → State → Prop
-  | [], σ, τ => τ = σ
-  | .pre a :: Γ, σ, τ => holds σ a ∧ Hyp.Reaches Γ σ τ
-  | .upd _ U :: Γ, σ, τ => ∃ ρ, U.apply σ = .ok ρ ∧ Hyp.Reaches Γ ρ τ
-  | .havoc :: Γ, σ, τ => ∃ st nt bal, Hyp.Reaches Γ (σ.havoc st nt bal) τ
-
-/-- What follows a context is judged only in the states it leads to. -/
-theorem Hyp.wrap_reach {A B : Fml C} : (Γ : List (Hyp C)) → ∀ σ,
-    (∀ τ, Hyp.Reaches Γ σ τ → holds τ A → holds τ B) →
-      holds σ (Hyp.wrap Γ A) → holds σ (Hyp.wrap Γ B)
-  | [], σ, h => h σ rfl
-  | .pre _ :: Γ, σ, h => fun hA ha => Hyp.wrap_reach Γ σ (fun τ hr => h τ ⟨ha, hr⟩) (hA ha)
-  | .upd m U :: Γ, σ, h => by
-    simp only [Hyp.wrap, holds]
-    cases hU : U.apply σ with
-    | error _ => exact id
-    | ok ρ => exact Hyp.wrap_reach Γ ρ (fun τ hr => h τ ⟨ρ, hU, hr⟩)
-  | .havoc :: Γ, σ, h => fun hA st nt bal =>
-    Hyp.wrap_reach Γ _ (fun τ hr => h τ ⟨st, nt, bal, hr⟩) (hA st nt bal)
-
-/-- A state `Γ ++ Δ` leads to is one `Δ` leads to from a state `Γ` leads to. -/
-theorem Hyp.reaches_append : (Γ Δ : List (Hyp C)) → ∀ σ τ,
-    Hyp.Reaches (Γ ++ Δ) σ τ → ∃ ρ, Hyp.Reaches Γ σ ρ ∧ Hyp.Reaches Δ ρ τ
-  | [], _, σ, _, h => ⟨σ, rfl, h⟩
-  | .pre _ :: Γ, Δ, σ, τ, ⟨ha, h⟩ =>
-    let ⟨ρ, h₁, h₂⟩ := Hyp.reaches_append Γ Δ σ τ h
-    ⟨ρ, ⟨ha, h₁⟩, h₂⟩
-  | .upd _ _ :: Γ, Δ, _, τ, ⟨ρ', hU, h⟩ =>
-    let ⟨ρ, h₁, h₂⟩ := Hyp.reaches_append Γ Δ ρ' τ h
-    ⟨ρ, ⟨ρ', hU, h₁⟩, h₂⟩
-  | .havoc :: Γ, Δ, _, τ, ⟨st, nt, bal, h⟩ =>
-    let ⟨ρ, h₁, h₂⟩ := Hyp.reaches_append Γ Δ _ τ h
-    ⟨ρ, ⟨st, nt, bal, h₁⟩, h₂⟩
-
 /-! ## Equations, and the rule -/
 
 /-- `t ≐ t'` under `Γ`: the two terms read alike in every state `Γ` leads
@@ -373,35 +326,17 @@ theorem Hyp.EqUnder.findOnSave {Γ : List (Hyp C)} {m : Modality} {p : PTerm C} 
   cases hτ
   obtain ⟨⟨r, segs⟩, hpe⟩ := PTerm.total_eval σ hp
   simp only [Upd.apply, List.foldlM_cons, List.foldlM_nil, Close.UpdElem.write_storage,
-    Close.STerm.eval_save, Close.Term.eval_lit, Close.STerm.eval_storage, hpe, Close.ok_bind,
+    Close.STerm.eval_save, Close.Term.eval_lit, Close.STerm.eval_storage, hpe, Res.ok_bind,
     Close.pure_eq_ok] at hU
   cases hs : σ.saveStorage r segs v.toSVal with
   | error _ => rw [hs] at hU; cases hU
   | ok τ' =>
     rw [hs] at hU
     cases hU
-    rw [Close.Term.eval_find, Close.STerm.eval_storage, Close.ok_bind,
-      PTerm.total_eval_eq _ σ hp, hpe, Close.ok_bind, Close.findStorage_mk,
-      State.findStorage_saveStorage_same hs, Close.ok_bind, Close.asValue_toSVal,
+    rw [Close.Term.eval_find, Close.STerm.eval_storage, Res.ok_bind,
+      PTerm.total_eval_eq _ σ hp, hpe, Res.ok_bind, Close.findStorage_mk,
+      State.findStorage_saveStorage_same hs, Res.ok_bind, Close.asValue_toSVal,
       Close.Term.eval_lit]
-
-/-- A run that returned ran its first step. -/
-theorem Except.bind_eq_ok {ε α β : Type} {x : Except ε α} {f : α → Except ε β} {b : β}
-    (h : (x >>= f) = .ok b) : ∃ a, x = .ok a ∧ f a = .ok b := by
-  cases x with
-  | error _ => cases h
-  | ok a => exact ⟨a, rfl, h⟩
-
-/-- A list whose last element is `x` ends in `x`. -/
-theorem List.eq_append_of_getLast? {α : Type} : {l : List α} → {x : α} → l.getLast? = some x →
-    ∃ l', l = l' ++ [x]
-  | [], _, h => by cases h
-  | [a], x, h => by
-    have ha : a = x := Option.some.inj h
-    exact ⟨[], by rw [ha]; rfl⟩
-  | a :: b :: l, _, h =>
-    let ⟨l', e⟩ := List.eq_append_of_getLast? (l := b :: l) h
-    ⟨a :: l', by rw [e]; rfl⟩
 
 /-- **`applyOnPV`**: behind `{… ‖ x := v}`, `x` is `v` — the last element
 of a parallel update is the write that stands. -/
@@ -412,37 +347,16 @@ theorem Hyp.EqUnder.applyOnPV {Γ : List (Hyp C)} {m : Modality} {U : Upd C} {x 
   refine Hyp.EqUnder.last (fun σ τ hr => ?_) hx
   obtain ⟨ρ, hρ, hτ⟩ := hr
   cases hτ
-  obtain ⟨U₀, rfl⟩ := List.eq_append_of_getLast? hU
+  obtain ⟨U₀, rfl⟩ := List.getLast?_eq_some_iff.1 hU
   rw [Upd.apply, List.foldlM_append] at hρ
-  obtain ⟨ρ₀, -, hρ⟩ := Except.bind_eq_ok hρ
+  obtain ⟨ρ₀, -, hρ⟩ := bind_ok_inv hρ
   simp only [List.foldlM_cons, List.foldlM_nil, Close.UpdElem.write_val, Close.Term.eval_lit,
-    Close.ok_bind] at hρ
+    Res.ok_bind] at hρ
   cases hρ
-  rw [Close.Term.eval_pv, State.getEnv_setEnv_self, Close.ok_bind, Close.bindingVal_val,
+  rw [Close.Term.eval_pv, State.getEnv_setEnv_self, Res.ok_bind, Close.bindingVal_val,
     Close.Term.eval_lit]
 
 /-! ## Closing -/
-
-/-- No diamond update in the context: a halting update proves what follows. -/
-def Hyp.boxOnly : List (Hyp C) → Bool
-  | [] => true
-  | .upd .diamond _ :: _ => false
-  | _ :: Γ => Hyp.boxOnly Γ
-
-/-- Behind a context with no diamond, what holds in every state it leads to
-holds. -/
-theorem Hyp.wrap_of_reaches {φ : Fml C} : (Γ : List (Hyp C)) → Hyp.boxOnly Γ = true → ∀ σ,
-    (∀ τ, Hyp.Reaches Γ σ τ → holds τ φ) → holds σ (Hyp.wrap Γ φ)
-  | [], _, σ, h => h σ rfl
-  | .pre _ :: Γ, hb, σ, h => fun ha => Hyp.wrap_of_reaches Γ hb σ (fun τ hr => h τ ⟨ha, hr⟩)
-  | .upd .box U :: Γ, hb, σ, h => by
-    simp only [Hyp.wrap, holds]
-    cases hU : U.apply σ with
-    | error _ => trivial
-    | ok ρ => exact Hyp.wrap_of_reaches Γ hb ρ (fun τ hr => h τ ⟨ρ, hU, hr⟩)
-  | .upd .diamond _ :: _, hb, _, _ => by cases hb
-  | .havoc :: Γ, hb, σ, h => fun st nt bal =>
-    Hyp.wrap_of_reaches Γ hb _ (fun τ hr => h τ ⟨st, nt, bal, hr⟩)
 
 /-- **`eqClose`**: `v = v`, behind a context with no diamond. -/
 theorem Proves.eqClose {R : RuleSet} {Γ : List (Hyp C)} {v : Value}
@@ -539,47 +453,47 @@ theorem STerm.eval_keeps {σ τ : State} : (s : STerm C) → s.eval σ = .ok τ 
   | .storage, h => by cases h; exact State.Keeps.refl σ
   | .pv x, h => by
     simp only [STerm.eval] at h
-    obtain ⟨b, -, h⟩ := Except.bind_eq_ok h
+    obtain ⟨b, -, h⟩ := bind_ok_inv h
     cases b with
     | store st => cases h; rfl
     | val _ | spath _ _ | mref _ | ledger _ => cases h
   | .save s p v, h => by
     simp only [STerm.eval] at h
-    obtain ⟨_, -, h⟩ := Except.bind_eq_ok h
-    obtain ⟨τ₀, h₀, h⟩ := Except.bind_eq_ok h
-    obtain ⟨⟨_, _⟩, -, h⟩ := Except.bind_eq_ok h
+    obtain ⟨_, -, h⟩ := bind_ok_inv h
+    obtain ⟨τ₀, h₀, h⟩ := bind_ok_inv h
+    obtain ⟨⟨_, _⟩, -, h⟩ := bind_ok_inv h
     exact (s.eval_keeps h₀).trans (State.writeStorage_keeps h)
   | .delAt s p, h => by
     simp only [STerm.eval] at h
-    obtain ⟨τ₀, h₀, h⟩ := Except.bind_eq_ok h
-    obtain ⟨⟨_, _⟩, -, h⟩ := Except.bind_eq_ok h
-    obtain ⟨_, -, h⟩ := Except.bind_eq_ok h
+    obtain ⟨τ₀, h₀, h⟩ := bind_ok_inv h
+    obtain ⟨⟨_, _⟩, -, h⟩ := bind_ok_inv h
+    obtain ⟨_, -, h⟩ := bind_ok_inv h
     exact (s.eval_keeps h₀).trans (State.saveStorage_keeps h)
   | .push s p v, h => by
     simp only [STerm.eval] at h
-    obtain ⟨τ₀, h₀, h⟩ := Except.bind_eq_ok h
-    obtain ⟨⟨_, _⟩, -, h⟩ := Except.bind_eq_ok h
+    obtain ⟨τ₀, h₀, h⟩ := bind_ok_inv h
+    obtain ⟨⟨_, _⟩, -, h⟩ := bind_ok_inv h
     exact (s.eval_keeps h₀).trans (pushAt_keeps h)
   | .pushSlot s p E, h => by
     simp only [STerm.eval] at h
-    obtain ⟨τ₀, h₀, h⟩ := Except.bind_eq_ok h
-    obtain ⟨⟨_, _⟩, -, h⟩ := Except.bind_eq_ok h
+    obtain ⟨τ₀, h₀, h⟩ := bind_ok_inv h
+    obtain ⟨⟨_, _⟩, -, h⟩ := bind_ok_inv h
     exact (s.eval_keeps h₀).trans (pushAt_keeps h)
   | .pop s p, h => by
     simp only [STerm.eval] at h
-    obtain ⟨τ₀, h₀, h⟩ := Except.bind_eq_ok h
-    obtain ⟨⟨_, _⟩, -, h⟩ := Except.bind_eq_ok h
+    obtain ⟨τ₀, h₀, h⟩ := bind_ok_inv h
+    obtain ⟨⟨_, _⟩, -, h⟩ := bind_ok_inv h
     exact (s.eval_keeps h₀).trans (popAt_keeps h)
   | .shrink s p, h => by
     simp only [STerm.eval] at h
-    obtain ⟨τ₀, h₀, h⟩ := Except.bind_eq_ok h
-    obtain ⟨⟨_, _⟩, -, h⟩ := Except.bind_eq_ok h
+    obtain ⟨τ₀, h₀, h⟩ := bind_ok_inv h
+    obtain ⟨⟨_, _⟩, -, h⟩ := bind_ok_inv h
     exact (s.eval_keeps h₀).trans (popAt_keeps h)
   | .extend s p E, h => by
     simp only [STerm.eval] at h
-    obtain ⟨τ₀, h₀, h⟩ := Except.bind_eq_ok h
-    obtain ⟨⟨_, _⟩, -, h⟩ := Except.bind_eq_ok h
-    obtain ⟨⟨τ', _⟩, hp, h⟩ := Except.bind_eq_ok h
+    obtain ⟨τ₀, h₀, h⟩ := bind_ok_inv h
+    obtain ⟨⟨_, _⟩, -, h⟩ := bind_ok_inv h
+    obtain ⟨⟨τ', _⟩, hp, h⟩ := bind_ok_inv h
     cases h
     exact (s.eval_keeps h₀).trans (pushPlaceAt_keeps hp)
 
@@ -675,25 +589,21 @@ reads after it. -/
 theorem Term.withSt_eval (hs : w.s.eval σ = .ok τ) (hk : σ.Keeps τ) :
     (e : Term C) → e.stExplicit = true → (e.withSt w).eval σ = e.eval τ
   | .lit _, _ => rfl
-  | .pv _, _ => by rw [← hk]; rfl
-  | .env _, _ => by rw [← hk]; rfl
+  | .pv _, _ | .env _, _ => by rw [← hk]; rfl
   | .binop _ _ a b, he => by
     simp only [Term.stExplicit, Bool.and_eq_true] at he
     simp only [Term.withSt, Term.eval, Term.withSt_eval hs hk a he.1, Term.withSt_eval hs hk b he.2]
   | .unop _ _ a, he => by
     simp only [Term.stExplicit] at he
     simp only [Term.withSt, Term.eval, Term.withSt_eval hs hk a he]
-  | .find s' p, he => by
-    simp only [Term.stExplicit, Bool.and_eq_true] at he
-    simp only [Term.withSt, Term.eval, STerm.withSt_eval hs hk s' he.1, PTerm.withSt_eval hs hk p he.2]
-  | .len s' p, he => by
+  | .find s' p, he | .len s' p, he => by
     simp only [Term.stExplicit, Bool.and_eq_true] at he
     simp only [Term.withSt, Term.eval, STerm.withSt_eval hs hk s' he.1, PTerm.withSt_eval hs hk p he.2]
   | .ite c a b, he => by
     simp only [Term.stExplicit, Bool.and_eq_true] at he
     simp only [Term.withSt, Term.eval, Term.withSt_eval hs hk c he.1.1, Term.withSt_eval hs hk a he.1.2,
       Term.withSt_eval hs hk b he.2]
-  | .read .., he | .mlen .., he => by simp [Term.stExplicit] at he
+  | .read .., he | .mlen .., he => by simp only [Term.stExplicit, Bool.false_eq_true] at he
   | .net a, he | .netOf _ a, he => by
     simp only [Term.stExplicit] at he
     simp only [Term.withSt, Term.eval, Term.withSt_eval hs hk a he]
@@ -706,48 +616,30 @@ theorem PTerm.withSt_eval (hs : w.s.eval σ = .ok τ) (hk : σ.Keeps τ) :
   | .field p _, he => by
     simp only [PTerm.stExplicit] at he
     simp only [PTerm.withSt, PTerm.eval, PTerm.withSt_eval hs hk p he]
-  | .at .., he | .next _, he => by simp [PTerm.stExplicit] at he
+  | .at .., he | .next _, he => by simp only [PTerm.stExplicit, Bool.false_eq_true] at he
 
 theorem STerm.withSt_eval (hs : w.s.eval σ = .ok τ) (hk : σ.Keeps τ) :
     (s' : STerm C) → s'.stExplicit = true → (s'.withSt w).eval σ = s'.eval τ
   | .storage, _ => hs
   | .pv _, _ => by rw [← hk]; rfl
-  | .save s' p v, he => by
+  | .save s' p v, he | .push s' p v, he => by
     simp only [STerm.stExplicit, Bool.and_eq_true] at he
     simp only [STerm.withSt, STerm.eval, STerm.withSt_eval hs hk s' he.1.1, PTerm.withSt_eval hs hk p he.1.2,
       SValT.withSt_eval hs hk v he.2]
-  | .push s' p v, he => by
-    simp only [STerm.stExplicit, Bool.and_eq_true] at he
-    simp only [STerm.withSt, STerm.eval, STerm.withSt_eval hs hk s' he.1.1, PTerm.withSt_eval hs hk p he.1.2,
-      SValT.withSt_eval hs hk v he.2]
-  | .delAt s' p, he => by
-    simp only [STerm.stExplicit, Bool.and_eq_true] at he
-    simp only [STerm.withSt, STerm.eval, STerm.withSt_eval hs hk s' he.1, PTerm.withSt_eval hs hk p he.2]
-  | .pop s' p, he => by
-    simp only [STerm.stExplicit, Bool.and_eq_true] at he
-    simp only [STerm.withSt, STerm.eval, STerm.withSt_eval hs hk s' he.1, PTerm.withSt_eval hs hk p he.2]
-  | .shrink s' p, he => by
-    simp only [STerm.stExplicit, Bool.and_eq_true] at he
-    simp only [STerm.withSt, STerm.eval, STerm.withSt_eval hs hk s' he.1, PTerm.withSt_eval hs hk p he.2]
-  | .pushSlot s' p _, he => by
-    simp only [STerm.stExplicit, Bool.and_eq_true] at he
-    simp only [STerm.withSt, STerm.eval, STerm.withSt_eval hs hk s' he.1, PTerm.withSt_eval hs hk p he.2]
+  | .delAt s' p, he | .pop s' p, he | .shrink s' p, he | .pushSlot s' p _, he
   | .extend s' p _, he => by
     simp only [STerm.stExplicit, Bool.and_eq_true] at he
     simp only [STerm.withSt, STerm.eval, STerm.withSt_eval hs hk s' he.1, PTerm.withSt_eval hs hk p he.2]
 
 theorem SValT.withSt_eval (hs : w.s.eval σ = .ok τ) (hk : σ.Keeps τ) :
     (v : SValT C) → v.stExplicit = true → (v.withSt w).eval σ = v.eval τ
-  | .val t, he => by
+  | .val t, he | .newArr _ t, he => by
     simp only [SValT.stExplicit] at he
     simp only [SValT.withSt, SValT.eval, Term.withSt_eval hs hk t he]
-  | .newArr _ n, he => by
-    simp only [SValT.stExplicit] at he
-    simp only [SValT.withSt, SValT.eval, Term.withSt_eval hs hk n he]
   | .find s' p, he => by
     simp only [SValT.stExplicit, Bool.and_eq_true] at he
     simp only [SValT.withSt, SValT.eval, STerm.withSt_eval hs hk s' he.1, PTerm.withSt_eval hs hk p he.2]
-  | .copyMem .., he => by simp [SValT.stExplicit] at he
+  | .copyMem .., he => by simp only [SValT.stExplicit, Bool.false_eq_true] at he
 
 end
 
@@ -785,9 +677,7 @@ theorem UpdElem.withSt_write {s : STerm C} {σ τ : State} (hs : s.eval σ = .ok
     simp only [UpdElem.withSt, UpdElem.write, Term.withSt_eval (w := ⟨s⟩) hs hk t he]
   | .path _ p, he => by
     simp only [UpdElem.withSt, UpdElem.write, PTerm.withSt_eval (w := ⟨s⟩) hs hk p he]
-  | .storage s', he => by
-    simp only [UpdElem.withSt, UpdElem.write, STerm.withSt_eval (w := ⟨s⟩) hs hk s' he]
-  | .store _ s', he => by
+  | .storage s', he | .store _ s', he => by
     simp only [UpdElem.withSt, UpdElem.write, STerm.withSt_eval (w := ⟨s⟩) hs hk s' he]
   | .transfer r a, he => by
     simp only [UpdElem.stExplicit, Bool.and_eq_true] at he
@@ -798,7 +688,7 @@ theorem UpdElem.withSt_write {s : STerm C} {σ τ : State} (hs : s.eval σ = .ok
     simp only [UpdElem.stExplicit] at he
     simp only [UpdElem.withSt, UpdElem.write, Term.withSt_eval (w := ⟨s⟩) hs hk a he]
     rw [← hk]; rfl
-  | .mref .., he | .memory _, he => by simp [UpdElem.stExplicit] at he
+  | .mref .., he | .memory _, he => by simp only [UpdElem.stExplicit, Bool.false_eq_true] at he
 
 theorem Upd.withSt_foldl {s : STerm C} {σ τ : State} (hs : s.eval σ = .ok τ) (hk : σ.Keeps τ) :
     (V : Upd C) → V.all (·.stExplicit) = true → ∀ ρ,
@@ -821,7 +711,7 @@ theorem Upd.mergeStorage_holds (m : Modality) (s : STerm C) (V : Upd C)
   | error _ => exact Iff.rfl
   | ok τ =>
     have hk : σ.Keeps τ := STerm.eval_keeps s hs
-    simp only [Close.ok_bind]
+    simp only [Res.ok_bind]
     rw [hk, Upd.withSt_foldl hs hk V hV τ]
     exact Iff.rfl
 
@@ -890,14 +780,14 @@ theorem Hyp.EqRun.findOnSave {Γ : List (Hyp C)} {U : Upd C} {p : PTerm C} {v : 
   | cons e U =>
     cases hU
     simp only [Upd.apply, List.foldlM_cons, Close.UpdElem.write_storage] at hρ
-    obtain ⟨τ₁, hρ, -⟩ := Except.bind_eq_ok hρ
-    obtain ⟨τ₂, hsave, -⟩ := Except.bind_eq_ok hρ
-    rw [Close.STerm.eval_save, Close.Term.eval_lit, Close.ok_bind, Close.STerm.eval_storage,
-      Close.ok_bind] at hsave
-    obtain ⟨⟨r, segs⟩, hp, hsave⟩ := Except.bind_eq_ok hsave
-    rw [Close.Term.eval_find, Close.STerm.eval_save, Close.Term.eval_lit, Close.ok_bind,
-      Close.STerm.eval_storage, Close.ok_bind, hp, Close.ok_bind, hsave, Close.ok_bind,
-      Close.ok_bind, State.findStorage_saveStorage_same hsave, Close.ok_bind,
+    obtain ⟨τ₁, hρ, -⟩ := bind_ok_inv hρ
+    obtain ⟨τ₂, hsave, -⟩ := bind_ok_inv hρ
+    rw [Close.STerm.eval_save, Close.Term.eval_lit, Res.ok_bind, Close.STerm.eval_storage,
+      Res.ok_bind] at hsave
+    obtain ⟨⟨r, segs⟩, hp, hsave⟩ := bind_ok_inv hsave
+    rw [Close.Term.eval_find, Close.STerm.eval_save, Close.Term.eval_lit, Res.ok_bind,
+      Close.STerm.eval_storage, Res.ok_bind, hp, Res.ok_bind, hsave, Res.ok_bind,
+      Res.ok_bind, State.findStorage_saveStorage_same hsave, Res.ok_bind,
       Close.asValue_toSVal]
 
 /-! ## The relation is a setoid
@@ -957,42 +847,65 @@ def Hyp.EqRun.setoid (Γ : List (Hyp C)) (U : Upd C) : Setoid (Term C) :=
 instance : Trans (Hyp.EqRun (C := C) Γ U) (Hyp.EqRun Γ U) (Hyp.EqRun Γ U) :=
   ⟨Hyp.EqRun.trans⟩
 
-/-- What holds behind the whole context holds wherever its last update runs. -/
-theorem Hyp.EqUnder.toRun (h : Hyp.EqUnder Γ t₁ t₂) : Hyp.EqRun Γ U t₁ t₂ :=
-  fun σ τ _ hr _ => h σ τ hr
-
 end Setoid
 
 /-! ## `rw` on a sequent
 
 `rw [r]`, with `r` an equation under a context (`Hyp.EqUnder`, `Hyp.EqRun`)
 rather than an `=`, rewrites the sequent at the hypothesis where `r` holds:
-it tries `Proves.rewriteUpd n r` and `Proves.rewrite n r` for each `n` and
-keeps the first that fits the rule's shape and changes the goal.  Scoped to
-`Proves`, where the derivations are written; elsewhere `rw` is Lean's. -/
+it tries `Proves.rewriteUpd n r` and `Proves.rewrite n r` for each `n` up to
+the length of the context, and keeps the first that fits the rule's shape
+and changes the goal.  `rw [← r]` rewrites right to left (the relations are
+symmetric: `Hyp.EqUnder.symm`, `Hyp.EqRun.symm`), and `rw [r₁, r₂]` is one
+rewrite after the other.  Scoped to `Proves`, where the derivations are
+written; elsewhere, and for an `=`, `rw` is Lean's. -/
 
 open Lean Elab Tactic Meta in
-/-- Rewrite a sequent with an equation under its context, at the first
-hypothesis where it applies. -/
-elab "sol_rw " r:term : tactic => do
-  let goal ← getMainGoal
-  let before ← instantiateMVars (← goal.getType)
-  for n in List.range 17 do
-    for rule in [``Proves.rewriteUpd, ``Proves.rewrite] do
+/-- Rewrite the main goal, a sequent, with `r` (right to left if `symm`) at
+the first hypothesis where it applies. -/
+def solRw (r : Lean.Term) (symm : Bool) : TacticM Unit := do
+  let before ← instantiateMVars (← (← getMainGoal).getType)
+  let len ← match_expr (← whnfR before) with
+    | Proves _ _ Γ _ => pure ((← listElems? Γ).map (·.size))
+    | _ => pure none
+  let some len := len
+    | throwError "sol_rw: the goal is not a sequent `Γ ⟹ φ` whose context is written out"
+  let mut last : Option MessageData := none
+  for n in List.range (len + 1) do
+    for (rule, sym) in [(``Proves.rewriteUpd, ``Hyp.EqRun.symm),
+        (``Proves.rewrite, ``Hyp.EqUnder.symm)] do
       let saved ← saveState
       try
-        let k := Syntax.mkNumLit (toString n)
-        evalTactic (← `(tactic| refine $(mkIdent rule) $k $r ?_))
+        let e ← if symm then `($(mkIdent sym) $r) else pure r
+        -- without recovery, an elaboration error is thrown rather than logged
+        withoutRecover <| evalTactic
+          (← `(tactic| refine $(mkIdent rule) $(Syntax.mkNumLit (toString n)) $e ?_))
         let after ← instantiateMVars (← (← getMainGoal).getType)
-        if ← isDefEq after before then throwError "no change"
+        if ← isDefEq after before then throwError "the sequent does not change"
         return
-      catch _ => saved.restore
-  throwError "sol_rw: no hypothesis of the sequent where {r} rewrites"
+      catch ex =>
+        if let .error _ msg := ex then last := some m!"`{rule} {n}`: {msg}"
+        saved.restore
+  let why := match last with
+    | some msg => m!"  The last attempt, {msg}"
+    | none => m!""
+  throwError "sol_rw: no hypothesis of the sequent where {r} rewrites.{why}"
+
+/-- `sol_rw r`: rewrite a sequent with an equation under its context, at the
+first hypothesis where it applies. -/
+elab "sol_rw " r:term : tactic => solRw r false
+
+/-- `sol_rw ← r`: `sol_rw r`, right to left. -/
+elab "sol_rw " "← " r:term : tactic => solRw r true
 
 namespace Proves
 
 scoped macro_rules
-  | `(tactic| rw [$r:term]) => `(tactic| sol_rw $r)
+  | `(tactic| rw [$rs,*]) => do
+    let steps ← rs.getElems.mapM fun r => do
+      let t : Lean.Term := ⟨r.raw[1]⟩
+      if r.raw[0].isNone then `(tactic| sol_rw $t) else `(tactic| sol_rw ← $t)
+    `(tactic| ($[$steps];*))
 
 end Proves
 

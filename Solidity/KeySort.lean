@@ -47,12 +47,11 @@ with `Field ⊃ {MapField, RefField}` and the free-standing `List`,
 
 Constructor names are lowercase Lean identifiers; `name`/`ofName` carry
 the KeY spelling. The KeY names `List`, `Memory` and `Field` would
-otherwise shadow `List KeySort` inside this namespace and the AST's
-`Field` in every file that opened it.
+otherwise shadow `List KeySort` inside this namespace.
 
-This module imports nothing: `AST.lean` imports it, and the maps from
-Solidity static types to these sorts (`Ty.keySort`, `Ty.fieldSort`,
-`localVarSort`) live there, next to `Ty`.
+This module imports nothing: `AST.lean` imports it, and the map from
+Solidity static types to these sorts (`Ty.keySort`) lives there, next to
+`Ty`.
 -/
 
 namespace Solidity
