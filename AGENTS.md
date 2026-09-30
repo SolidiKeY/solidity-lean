@@ -75,8 +75,6 @@ read them by path.
 authority for the name-by-name map to solkey's taclets (do not restate it in
 module docstrings); `docs/solc-alignment.md` for where the interpreter follows
 solc over KeY.
-naming the example in `Solidity/Examples/` that is it, or the reason
-there is none. Add a row there before adding one.
 
 ## Checking your work
 
