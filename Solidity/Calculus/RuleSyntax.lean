@@ -82,6 +82,9 @@ syntax:max num : dl_term
 syntax:max ident : dl_term
 syntax:max dl_term:max "." ident : dl_term
 syntax:max dl_term:max "[" dl_term "]" : dl_term
+/-- `T[]`: a dynamic array type, where a term names what an allocation makes
+(`addM(m, uint[])`, `newArr(Person[], n)`); `uint[3]` is the index form. -/
+syntax:max dl_term:max "[" "]" : dl_term
 syntax:max ident noWs "(" dl_term,* ")" : dl_term
 syntax:65 dl_term:65 " ⊕ " dl_term:66 : dl_term
 syntax:65 dl_term:65 " + " dl_term:66 : dl_term
@@ -161,6 +164,11 @@ syntax:50 dl_fml:55 " && " dl_fml:50 : dl_fml
 syntax:30 dl_fml:31 " ∨ " dl_fml:30 : dl_fml
 /-- `φ ↔ ψ`: `(φ → ψ) ∧ (ψ → φ)`. -/
 syntax:20 dl_fml:21 " ↔ " dl_fml:21 : dl_fml
+/-- `φ where Person memory carol`: `φ` with `carol` a memory local, a
+declaration the formula's programs do not make (KeY's `\programVariables`).
+Only `dl[C]{ … }` reads it; a line prints it where the kind of a local is
+not otherwise written (`copyDecls`). -/
+syntax:10 dl_fml:11 " where " sepBy1(sol_stmt, ", ") : dl_fml
 
 /-- What a taclet leaves: an update in front of the rest, statements, two
 goals (a branch, each with its condition), or — for a revert — `true` or
@@ -1640,13 +1648,37 @@ def dotTerm (b : TSyntax `dl_term) (f : String) : MetaM (TSyntax `dl_term) :=
   | `(dl_term| $x:ident) => `(dl_term| $(mkIdent (x.getId.str f)):ident)
   | _ => `(dl_term| $b . $(nameIdent f):ident)
 
-/-- The struct a concrete allocation carries (`S` of `RefTy.struct "S"`), which
-`dl!{ … }` needs to read `addM(m, S)` back.  A rule's `R` and an array type give
-none: the rule table writes `addM(m)`, the type being the statement's. -/
-def allocStruct? (R : Lean.Expr) : MetaM (Option Ident) := do
-  let_expr RefTy.struct s := (← whnf (← instantiateMVars R)) | return none
-  let .lit (.strVal s) := (← whnf (← instantiateMVars s)).consumeMData | return none
-  return some (nameIdent s)
+/-- The type a concrete allocation carries, which `dl!{ … }` needs to read
+`addM(m, T)` and `newArr(T, n)` back: `Person`, `uint[]`, `Token[3]`.  A rule's
+`R` gives none: the rule table writes `addM(m)`, the type being the
+statement's. -/
+partial def allocTy? (R : Lean.Expr) : MetaM (Option (TSyntax `dl_term)) := do
+  let R ← instantiateMVars R
+  if R.hasFVar then return none
+  let elem (E : Lean.Expr) : MetaM (Option (TSyntax `dl_term)) := do
+    match_expr (← whnf E) with
+    | Ty.prim p =>
+      let T? : Option String ← match_expr (← whnf p) with
+        | PrimTy.uint => pure (some "uint")
+        | PrimTy.int => pure (some "int")
+        | PrimTy.bool => pure (some "bool")
+        | _ => pure none
+      let some T := T? | return none
+      return some (← `(dl_term| $(nameIdent T):ident))
+    | Ty.ref R' => allocTy? R'
+    | _ => return none
+  match_expr (← whnf R) with
+  | RefTy.struct s =>
+    let .lit (.strVal s) := (← whnf s).consumeMData | return none
+    return some (← `(dl_term| $(nameIdent s):ident))
+  | RefTy.array E =>
+    let some E ← elem E | return none
+    return some (← `(dl_term| $E:dl_term[]))
+  | RefTy.fixed E n =>
+    let some E ← elem E | return none
+    let some n ← natOf? n | return none
+    return some (← `(dl_term| $E:dl_term[$(Syntax.mkNumLit (toString n)):num]))
+  | _ => return none
 
 /-- A program expression lowered to a term (`se.lower`): the notation writes
 the expression itself. -/
@@ -1799,7 +1831,10 @@ partial def ppSVal (e : Lean.Expr) : MetaM (TSyntax `dl_term) := do
   | SValT.val _ t => ppTerm t
   | SValT.find _ s p => `(dl_term| find($(← ppSTerm s), $(← ppPTerm p)))
   | SValT.copyMem _ m i => `(dl_term| copyMem(mtSt, $(← ppMTerm m), $(← ppITerm i)))
-  | SValT.newArr _ _ n => `(dl_term| newArr($(← ppTerm n)))
+  | SValT.newArr _ R n =>
+    match ← allocTy? R with
+    | some T => `(dl_term| newArr($T, $(← ppTerm n)))
+    | none => `(dl_term| newArr($(← ppTerm n)))
   | _ => escapeDl e
 
 partial def ppITerm (e : Lean.Expr) : MetaM (TSyntax `dl_term) := do
@@ -1811,8 +1846,8 @@ partial def ppITerm (e : Lean.Expr) : MetaM (TSyntax `dl_term) := do
   | ITerm.read _ m a => `(dl_term| read($(← ppMTerm m), $(← ppMAddr a)))
   | ITerm.alloc _ m R =>
     let m ← ppMTerm m
-    match ← allocStruct? R with
-    | some S => `(dl_term| freshId(addM($m, $S:ident)))
+    match ← allocTy? R with
+    | some T => `(dl_term| freshId(addM($m, $T)))
     | none => `(dl_term| freshId(addM($m)))
   | ITerm.copy _ m v => `(dl_term| freshId(copySt($(← ppMTerm m), $(← ppSVal v))))
   | _ => escapeDl e
@@ -1832,8 +1867,8 @@ partial def ppMTerm (e : Lean.Expr) : MetaM (TSyntax `dl_term) := do
   | MTerm.write _ m a v => `(dl_term| write($(← ppMTerm m), $(← ppMAddr a), $(← ppMVal v)))
   | MTerm.addM _ m R =>
     let m ← ppMTerm m
-    match ← allocStruct? R with
-    | some S => `(dl_term| addM($m, $S:ident))
+    match ← allocTy? R with
+    | some T => `(dl_term| addM($m, $T))
     | none => `(dl_term| addM($m))
   | MTerm.copySt _ m v => `(dl_term| copySt($(← ppMTerm m), $(← ppSVal v)))
   | _ => escapeDl e
@@ -2033,6 +2068,62 @@ partial def ppFml (e : Lean.Expr) : MetaM (TSyntax `dl_fml) := do
     | _ => `(dl_fml| ⟨[ $[$ss;]* ]⟩ $(← arg φ):dl_fml)
   | _ => escape
 
+/-- The name a variable prints as. -/
+def varName? (x : Lean.Expr) : MetaM (Option String) := do
+  return (← ppVar? x).map (·.getId.toString)
+
+mutual
+
+/-- The memory locals a formula's programs copy a storage path into without
+declaring them, where no update in front binds them, with their types:
+`carol = alice;`, what `memoryLocalDeclInitDrop` leaves of `Person memory
+carol = alice;`.  `storageLocalDeclInitDrop` leaves the same line of `Person
+storage carol = alice;`, and `dl[C]{ … }` reads a line on its own, so a line
+says which it is: `φ where Person memory carol`.  `bound` holds the names
+bound so far. -/
+partial def copyDecls (bound : Array String) (e : Lean.Expr) :
+    MetaM (Array (String × Lean.Expr)) := do
+  match_expr (← whnf (← instantiateMVars e)) with
+  | Fml.upd _ _ U φ =>
+    let mut bound := bound
+    if let some us ← listElems? U then
+      for u in us do
+        let_expr UpdElem.mref _ x _ := (← whnf u) | continue
+        if let some x ← varName? x then bound := bound.push x
+    copyDecls bound φ
+  | Fml.modal _ _ P φ =>
+    let some ss ← listElems? P | copyDecls bound φ
+    let (bound, out) ← copyDeclsProg bound ss
+    return out ++ (← copyDecls bound φ)
+  | Fml.and _ φ ψ => return (← copyDecls bound φ) ++ (← copyDecls bound ψ)
+  | Fml.imp _ φ ψ => return (← copyDecls bound φ) ++ (← copyDecls bound ψ)
+  | Fml.not _ φ => copyDecls bound φ
+  | Fml.all _ _ _ φ => copyDecls bound φ
+  | Fml.havoc _ φ => copyDecls bound φ
+  | _ => return #[]
+
+/-- `copyDecls` over a program's statements, and the names bound after them. -/
+partial def copyDeclsProg (bound : Array String) (ss : Array Lean.Expr) :
+    MetaM (Array String × Array (String × Lean.Expr)) := do
+  let mut bound := bound
+  let mut out := #[]
+  for s in ss do
+    match_expr (← whnf (← instantiateMVars s)) with
+    | Stmt.declMem _ _ x _ _ => if let some x ← varName? x then bound := bound.push x
+    | Stmt.rebindMem _ R x r =>
+      let some x ← varName? x | continue
+      if !bound.contains x && (← whnf r).isAppOfArity ``MRhs.copy 4 then
+        out := out.push (x, R)
+        bound := bound.push x
+    | Stmt.ite _ _ t f =>
+      for b in [t, f] do
+        let some bs ← listElems? b | continue
+        out := out ++ (← copyDeclsProg bound bs).2
+    | _ => pure ()
+  return (bound, out)
+
+end
+
 /-! ### The delaborators
 
 Each stands aside (`failure`, and Lean prints the term its own way) when all
@@ -2043,6 +2134,17 @@ def isEscape (s : Syntax) : Bool := s[0].isToken "‹"
 
 /-- Printed as `‹…›` or as a name (`fmlVar?`): what Lean prints as well. -/
 def isEscapeOrVar (s : Syntax) : Bool := isEscape s || s.isOfKind ``dlFmlVar
+
+/-- `φ`, the formula `e` prints as, with its `where` clause (`copyDecls`). -/
+def withDecls (e : Lean.Expr) (φ : TSyntax `dl_fml) : MetaM (TSyntax `dl_fml) := do
+  let mut seen : Array String := #[]
+  let mut ds : Array (TSyntax `sol_stmt) := #[]
+  for (x, R) in ← copyDecls #[] e do
+    if seen.contains x then continue
+    seen := seen.push x
+    ds := ds.push (← `(sol_stmt| $(← ppTy.ppRef R):sol_ty memory $(nameIdent x):ident))
+  if ds.isEmpty then return φ
+  `(dl_fml| $φ:dl_fml where $ds,*)
 
 /-- Only a full application: `Fml.modal m P` alone is a function. -/
 def fullApp : DelabM Unit := do
@@ -2058,9 +2160,10 @@ def fullApp : DelabM Unit := do
 def delabFml : Delab := do
   unless ← ppOn do failure
   fullApp
-  let φ ← ppFml (← getExpr)
+  let e ← getExpr
+  let φ ← ppFml e
   guard !(isEscape φ)
-  `(dl{ $φ:dl_fml })
+  `(dl{ $(← withDecls e φ):dl_fml })
 
 attribute [delab app.Solidity.Fml.eq, delab app.Solidity.Fml.eqD, delab app.Solidity.Fml.defined,
   delab app.Solidity.Fml.not,
@@ -2075,7 +2178,7 @@ def delabValid : Delab := do
   guard (e.getAppNumArgs == 2)
   let φ ← ppFml e.appArg!
   guard !(isEscapeOrVar φ)
-  `(⊨ dl{ $φ:dl_fml })
+  `(⊨ dl{ $(← withDecls e.appArg! φ):dl_fml })
 
 /-- `holds σ φ`: `σ ⊧ φ`, what `Valid` leaves once its state is introduced. -/
 @[delab app.Solidity.holds]
@@ -2086,7 +2189,7 @@ def delabHolds : Delab := do
   let φ ← ppFml e.appArg!
   guard !(isEscapeOrVar φ)
   let σ ← withNaryArg 1 delab
-  `($σ ⊧ dl{ $φ:dl_fml })
+  `($σ ⊧ dl{ $(← withDecls e.appArg! φ):dl_fml })
 
 /-- A statement standing alone: `stmt{ s; }`. -/
 def delabStmt : Delab := do

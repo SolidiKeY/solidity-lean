@@ -510,10 +510,11 @@ namespace Chain
 section Print
 open Lean Meta PrettyPrinter Delaborator SubExpr
 
-/-- A line of a chain: `dl{ φ }`, or Lean's own printing. -/
+/-- A line of a chain: `dl{ φ }`, with its `where` clause, or Lean's own
+printing. -/
 def ppLine (e : Lean.Expr) : MetaM Lean.Term := do
   let φ ← ppFml e
-  if isEscape φ then escapeTerm e else `(dl{ $φ:dl_fml })
+  if isEscape φ then escapeTerm e else `(dl{ $(← withDecls e φ):dl_fml })
 
 /-- The arrow a `Link` stands for. -/
 def arrowOf (l : Lean.Expr) : MetaM (TSyntax `chain_arrow) := do

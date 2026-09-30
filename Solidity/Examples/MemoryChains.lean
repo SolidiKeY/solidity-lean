@@ -5,8 +5,9 @@ import Solidity.Calculus.Close
 # The calculus's memory traces as chains
 
 The derivations of the memory examples,
-the memory `delete` examples, the storage-to-memory copies and
-memory-to-storage copies, written as the calculus draws them: a `calc`
+the memory `delete` examples, the storage-to-memory copies,
+the memory-to-storage copies and the memory arrays,
+written as drawn there: a `calc`
 whose lines are formulas `dl![m]{ … }`, for every modality `m` and
 postcondition `φ` (`Examples/Chains.lean` says how to read one).  A `⇝` of
 the calculus is a `~[r]~>` naming the rule, a `⇝*` a `~*>`.  Each is a `def`:
@@ -32,17 +33,15 @@ left as the rules leave them (the printed trace merges them and resolves the rea
 `Theory/`).  The printed `v`, `oldAge`, `oldBal` are left undeclared, as it
 leaves them: parameters of the formula, `uint` locals.
 
-The line a storage copy's declaration leaves does not read back: `carol =
-alice;` is what `memoryLocalDeclInitDrop` leaves of `Person memory carol =
-alice;`, and also what `storageLocalDeclInitDrop` leaves of `Person storage
-carol = alice;`, and a line is read on its own, so it reads as the storage
-alias (`Calculus/Notation.lean`).  §3's chains go over it with `~*>`.
+The line a storage copy's declaration leaves, `carol = alice;`, is also what
+`storageLocalDeclInitDrop` leaves of `Person storage carol = alice;`; a line
+is read on its own, so it says which: `… where Person memory carol`, as it
+prints (`Calculus/Notation.lean`).
 
-Not here: the array traces (an allocation of an
-array prints `addM(memory)`, which does not read back), the ones through a
-call (`choosePersonMem().account = makeAccount();`), and the third delete
-trace, whose `carol.account.tokens` `Account` does not have here
-(`Examples/Memory.lean`'s docstring).
+Not here: the traces through a call (`choosePersonMem().account =
+makeAccount();`, `carolValues[i] = makeValue();`, `Examples/CallOperands.lean`),
+and those through `carol.account.tokens` or `carol.account.values`, members
+`Account` does not have here (`Examples/Memory.lean`'s docstring).
 -/
 
 namespace Solidity.Examples.MemoryChains
@@ -326,7 +325,7 @@ def fieldDeleteRef (m : Modality) (φ : Post StandardExample) :
 
 /-- `alice.age = 25; Person memory carol = alice; v = carol.age;` — the
 copy is a fresh object holding a snapshot of `alice`, and the read is a read
-of it. -/
+of it.  The line the declaration leaves says `carol` is a memory local. -/
 def storageCopy (m : Modality) (φ : Post StandardExample) :
     dl![m]{ ⟨[ alice.age = 25; Person memory carol = alice; v = carol.age; ]⟩ φ }
     ~*> dl![m]{ { storage := save(storage, alice.age, 25) }
@@ -337,11 +336,14 @@ def storageCopy (m : Modality) (φ : Post StandardExample) :
     _ ~[storageFieldWriteSave]~>
         dl![m]{ { storage := save(storage, alice.age, 25) }
                 ⟨[ Person memory carol = alice; v = carol.age; ]⟩ φ } := rfl
-    -- `memoryLocalDeclInitDrop`, `memoryStorageCopy`
-    _ ~*> dl![m]{ { storage := save(storage, alice.age, 25) }
-                  { carol := freshId(copySt(memory, find(storage, alice))) ‖
-                    memory := copySt(memory, find(storage, alice)) }
-                  ⟨[ v = carol.age; ]⟩ φ } := by sol_chain
+    _ ~[memoryLocalDeclInitDrop]~>
+        dl![m]{ { storage := save(storage, alice.age, 25) }
+                ⟨[ carol = alice; v = carol.age; ]⟩ φ where Person memory carol } := rfl
+    _ ~[memoryStorageCopy]~>
+        dl![m]{ { storage := save(storage, alice.age, 25) }
+                { carol := freshId(copySt(memory, find(storage, alice))) ‖
+                  memory := copySt(memory, find(storage, alice)) }
+                ⟨[ v = carol.age; ]⟩ φ } := rfl
     _ ~[memoryFieldReadHeap]~>
         dl![m]{ { storage := save(storage, alice.age, 25) }
                 { carol := freshId(copySt(memory, find(storage, alice))) ‖
@@ -355,7 +357,7 @@ def storageCopy (m : Modality) (φ : Post StandardExample) :
 
 /-- `alice.account.balance = 10; Account memory acc = alice.account;
 v = acc.balance;` — a member copied: its path is bound to a storage alias
-first. -/
+first (`sp2`). -/
 def storageFieldCopy (m : Modality) (φ : Post StandardExample) :
     dl![m]{ ⟨[ alice.account.balance = 10; Account memory acc = alice.account; v = acc.balance; ]⟩ φ }
     ~*> dl![m]{ { se1 := 10 } { sp1 := alice.account } { storage := save(storage, sp1.balance, se1) }
@@ -366,13 +368,26 @@ def storageFieldCopy (m : Modality) (φ : Post StandardExample) :
   calc dl![m]{ ⟨[ alice.account.balance = 10; Account memory acc = alice.account; v = acc.balance; ]⟩ φ }
     _ ~*> dl![m]{ { se1 := 10 } { sp1 := alice.account } { storage := save(storage, sp1.balance, se1) }
                   ⟨[ Account memory acc = alice.account; v = acc.balance; ]⟩ φ } := by sol_chain
-    -- `memoryLocalDeclInitDrop`, `memoryStorageCopyUnfold` (`acc = sp2;`, `sp2` bound to
-    -- `alice.account`), `memoryStorageCopy`
-    _ ~*> dl![m]{ { se1 := 10 } { sp1 := alice.account } { storage := save(storage, sp1.balance, se1) }
-                  { sp2 := alice.account }
-                  { acc := freshId(copySt(memory, find(storage, sp2))) ‖
-                    memory := copySt(memory, find(storage, sp2)) }
-                  ⟨[ v = acc.balance; ]⟩ φ } := by sol_chain
+    _ ~[memoryLocalDeclInitDrop]~>
+        dl![m]{ { se1 := 10 } { sp1 := alice.account } { storage := save(storage, sp1.balance, se1) }
+                ⟨[ acc = alice.account; v = acc.balance; ]⟩ φ where Account memory acc } := rfl
+    _ ~[memoryStorageCopyUnfold]~>
+        dl![m]{ { se1 := 10 } { sp1 := alice.account } { storage := save(storage, sp1.balance, se1) }
+                ⟨[ Account storage sp2 = alice.account; acc = sp2; v = acc.balance; ]⟩ φ
+                where Account memory acc } := by sol_chain
+    _ ~[storageLocalDeclInitDrop]~>
+        dl![m]{ { se1 := 10 } { sp1 := alice.account } { storage := save(storage, sp1.balance, se1) }
+                ⟨[ sp2 = alice.account; acc = sp2; v = acc.balance; ]⟩ φ where Account memory acc } := rfl
+    _ ~[storageFieldReadBindLocalRoot]~>
+        dl![m]{ { se1 := 10 } { sp1 := alice.account } { storage := save(storage, sp1.balance, se1) }
+                { sp2 := alice.account } ⟨[ acc = sp2; v = acc.balance; ]⟩ φ where Account memory acc } :=
+      rfl
+    _ ~[memoryStorageCopy]~>
+        dl![m]{ { se1 := 10 } { sp1 := alice.account } { storage := save(storage, sp1.balance, se1) }
+                { sp2 := alice.account }
+                { acc := freshId(copySt(memory, find(storage, sp2))) ‖
+                  memory := copySt(memory, find(storage, sp2)) }
+                ⟨[ v = acc.balance; ]⟩ φ } := rfl
     _ ~[memoryFieldReadHeap]~>
         dl![m]{ { se1 := 10 } { sp1 := alice.account } { storage := save(storage, sp1.balance, se1) }
                 { sp2 := alice.account }
@@ -385,6 +400,31 @@ def storageFieldCopy (m : Modality) (φ : Post StandardExample) :
                 { acc := freshId(copySt(memory, find(storage, sp2))) ‖
                   memory := copySt(memory, find(storage, sp2)) }
                 { v := read(memory, acc.balance) } φ } := rfl
+
+/-- `Token memory t = alice.account.token;` — a nonsimple source is aliased
+(`sp1`, printed `aliceTok`), and the alias resolved one selector at a
+time. -/
+def storageDeepCopy (m : Modality) (φ : Post StandardExample) :
+    dl![m]{ ⟨[ Token memory t = alice.account.token; ]⟩ φ }
+    ~*> dl![m]{ { sp2 := alice.account } { sp1 := sp2.token }
+                { t := freshId(copySt(memory, find(storage, sp1))) ‖
+                  memory := copySt(memory, find(storage, sp1)) } φ } :=
+  calc dl![m]{ ⟨[ Token memory t = alice.account.token; ]⟩ φ }
+    _ ~[memoryLocalDeclInitDrop]~>
+        dl![m]{ ⟨[ t = alice.account.token; ]⟩ φ where Token memory t } := rfl
+    _ ~[memoryStorageCopyUnfold]~>
+        dl![m]{ ⟨[ Token storage sp1 = alice.account.token; t = sp1; ]⟩ φ where Token memory t } :=
+      by sol_chain
+    _ ~*> dl![m]{ { sp2 := alice.account } { sp1 := sp2.token } ⟨[ t = sp1; ]⟩ φ
+                  where Token memory t } := by sol_chain
+    _ ~[memoryStorageCopy]~>
+        dl![m]{ { sp2 := alice.account } { sp1 := sp2.token }
+                { t := freshId(copySt(memory, find(storage, sp1))) ‖
+                  memory := copySt(memory, find(storage, sp1)) } ⟨[ ]⟩ φ } := rfl
+    _ ~[emptyModality]~>
+        dl![m]{ { sp2 := alice.account } { sp1 := sp2.token }
+                { t := freshId(copySt(memory, find(storage, sp1))) ‖
+                  memory := copySt(memory, find(storage, sp1)) } φ } := rfl
 
 /-! ## 4 · Memory to storage -/
 
@@ -470,5 +510,115 @@ def memoryPathCopy (m : Modality) (φ : Post StandardExample) :
                   { storage := save(storage, alice.account,
                       copyMem(mtSt, memory, read(memory, carol.account))) }
                   { sp2 := alice.account } { v := find(storage, sp2.balance) } φ } := by sol_chain
+
+
+/-! ## 5 · Memory arrays
+
+The arrays are allocated as `uint[] memory carolValues;` leaves them,
+`addM(memory, uint[])`.  A read or a write of an element takes no bounds
+branch here: an index out of range halts the read (`Term.read` is undefined
+there), where the printed trace splits on `0 ≤ i < ℓ`.  A nonsimple index is
+captured by the elaborator (`uint se1; se1 = ++i;`), so the printed first
+line is the formula it writes. -/
+
+/-- `v = carolValues[i];` -/
+def indexRead (m : Modality) (φ : Post StandardExample) :
+    dl![m]{ { carolValues := freshId(addM(memory, uint[])) ‖ memory := addM(memory, uint[]) } ⟨[ v = carolValues[i]; ]⟩ φ }
+    ~*> dl![m]{ { carolValues := freshId(addM(memory, uint[])) ‖ memory := addM(memory, uint[]) } { v := read(memory, carolValues[i]) } φ } :=
+  calc dl![m]{ { carolValues := freshId(addM(memory, uint[])) ‖ memory := addM(memory, uint[]) } ⟨[ v = carolValues[i]; ]⟩ φ }
+    _ ~[memoryIndexReadHeap]~>
+        dl![m]{ { carolValues := freshId(addM(memory, uint[])) ‖ memory := addM(memory, uint[]) } { v := read(memory, carolValues[i]) } ⟨[ ]⟩ φ } := rfl
+    _ ~[emptyModality]~> dl![m]{ { carolValues := freshId(addM(memory, uint[])) ‖ memory := addM(memory, uint[]) } { v := read(memory, carolValues[i]) } φ } := rfl
+
+/-- `carolValues[i] = 100;` -/
+def indexWrite (m : Modality) (φ : Post StandardExample) :
+    dl![m]{ { carolValues := freshId(addM(memory, uint[])) ‖ memory := addM(memory, uint[]) } ⟨[ carolValues[i] = 100; ]⟩ φ }
+    ~*> dl![m]{ { carolValues := freshId(addM(memory, uint[])) ‖ memory := addM(memory, uint[]) } { memory := write(memory, carolValues[i], 100) } φ } :=
+  calc dl![m]{ { carolValues := freshId(addM(memory, uint[])) ‖ memory := addM(memory, uint[]) } ⟨[ carolValues[i] = 100; ]⟩ φ }
+    _ ~[memoryIndexWriteStore]~>
+        dl![m]{ { carolValues := freshId(addM(memory, uint[])) ‖ memory := addM(memory, uint[]) } { memory := write(memory, carolValues[i], 100) } ⟨[ ]⟩ φ } := rfl
+    _ ~[emptyModality]~> dl![m]{ { carolValues := freshId(addM(memory, uint[])) ‖ memory := addM(memory, uint[]) } { memory := write(memory, carolValues[i], 100) } φ } := rfl
+
+/-- `v = carolValues[++i];` — the index captured, then read at. -/
+def indexReadCaptured (m : Modality) (φ : Post StandardExample) :
+    dl![m]{ { carolValues := freshId(addM(memory, uint[])) ‖ memory := addM(memory, uint[]) } ⟨[ v = carolValues[++i]; ]⟩ φ }
+    ~*> dl![m]{ { carolValues := freshId(addM(memory, uint[])) ‖ memory := addM(memory, uint[]) } { se1 := 0 } { i := i + 1 ‖ se1 := i + 1 } { v := read(memory, carolValues[se1]) } φ } :=
+  calc dl![m]{ { carolValues := freshId(addM(memory, uint[])) ‖ memory := addM(memory, uint[]) } ⟨[ v = carolValues[++i]; ]⟩ φ }
+    _ = dl![m]{ { carolValues := freshId(addM(memory, uint[])) ‖ memory := addM(memory, uint[]) } ⟨[ uint se1; se1 = ++i; v = carolValues[se1]; ]⟩ φ } := rfl
+    _ ~*> dl![m]{ { carolValues := freshId(addM(memory, uint[])) ‖ memory := addM(memory, uint[]) } { se1 := 0 } { i := i + 1 ‖ se1 := i + 1 } ⟨[ v = carolValues[se1]; ]⟩ φ } := by sol_chain
+    _ ~[memoryIndexReadHeap]~>
+        dl![m]{ { carolValues := freshId(addM(memory, uint[])) ‖ memory := addM(memory, uint[]) } { se1 := 0 } { i := i + 1 ‖ se1 := i + 1 } { v := read(memory, carolValues[se1]) } ⟨[ ]⟩ φ } := rfl
+    _ ~[emptyModality]~> dl![m]{ { carolValues := freshId(addM(memory, uint[])) ‖ memory := addM(memory, uint[]) } { se1 := 0 } { i := i + 1 ‖ se1 := i + 1 } { v := read(memory, carolValues[se1]) } φ } := rfl
+
+/-- `carolValues[++i] = val;` — the right-hand side is snapshot before the
+index runs (`se1`, printed `pv`); the receiver, simple, is not re-aliased
+(printed `mv1`, `Examples/CallOperands.lean`). -/
+def indexWriteCaptured (m : Modality) (φ : Post StandardExample) :
+    dl![m]{ { carolValues := freshId(addM(memory, uint[])) ‖ memory := addM(memory, uint[]) } ⟨[ carolValues[++i] = val; ]⟩ φ }
+    ~*> dl![m]{ { carolValues := freshId(addM(memory, uint[])) ‖ memory := addM(memory, uint[]) } { se1 := val } { se2 := 0 } { i := i + 1 ‖ se2 := i + 1 }
+                { memory := write(memory, carolValues[se2], se1) } φ } :=
+  calc dl![m]{ { carolValues := freshId(addM(memory, uint[])) ‖ memory := addM(memory, uint[]) } ⟨[ carolValues[++i] = val; ]⟩ φ }
+    _ = dl![m]{ { carolValues := freshId(addM(memory, uint[])) ‖ memory := addM(memory, uint[]) } ⟨[ uint se1 = val; uint se2; se2 = ++i; carolValues[se2] = se1; ]⟩ φ } := rfl
+    _ ~*> dl![m]{ { carolValues := freshId(addM(memory, uint[])) ‖ memory := addM(memory, uint[]) } { se1 := val } { se2 := 0 } { i := i + 1 ‖ se2 := i + 1 }
+                  ⟨[ carolValues[se2] = se1; ]⟩ φ } := by sol_chain
+    _ ~[memoryIndexWriteStore]~>
+        dl![m]{ { carolValues := freshId(addM(memory, uint[])) ‖ memory := addM(memory, uint[]) } { se1 := val } { se2 := 0 } { i := i + 1 ‖ se2 := i + 1 }
+                { memory := write(memory, carolValues[se2], se1) } ⟨[ ]⟩ φ } := rfl
+    _ ~[emptyModality]~>
+        dl![m]{ { carolValues := freshId(addM(memory, uint[])) ‖ memory := addM(memory, uint[]) } { se1 := val } { se2 := 0 } { i := i + 1 ‖ se2 := i + 1 }
+                { memory := write(memory, carolValues[se2], se1) } φ } := rfl
+
+/-- `carolTokens[i] = david.account.token;` — the source's receiver bound
+(`mv1`), and the element written with the identity the member holds (the
+printed `tok`). -/
+def elementFromField (m : Modality) (φ : Post StandardExample) :
+    dl![m]{ { carolTokens := freshId(addM(memory, Token[])) ‖ memory := addM(memory, Token[]) } { david := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) } ⟨[ carolTokens[i] = david.account.token; ]⟩ φ }
+    ~*> dl![m]{ { carolTokens := freshId(addM(memory, Token[])) ‖ memory := addM(memory, Token[]) } { david := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) } { mv1 := read(memory, david.account) }
+                { memory := write(memory, carolTokens[i], read(memory, mv1.token)) } φ } :=
+  calc dl![m]{ { carolTokens := freshId(addM(memory, Token[])) ‖ memory := addM(memory, Token[]) } { david := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) } ⟨[ carolTokens[i] = david.account.token; ]⟩ φ }
+    _ ~[memoryFieldRead_unfold_rightFst]~>
+        dl![m]{ { carolTokens := freshId(addM(memory, Token[])) ‖ memory := addM(memory, Token[]) } { david := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) } ⟨[ Account memory mv1 = david.account; carolTokens[i] = mv1.token; ]⟩ φ } :=
+      by sol_chain
+    _ ~*> dl![m]{ { carolTokens := freshId(addM(memory, Token[])) ‖ memory := addM(memory, Token[]) } { david := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) } { mv1 := read(memory, david.account) } ⟨[ carolTokens[i] = mv1.token; ]⟩ φ } :=
+      by sol_chain
+    _ ~[memoryIndexWriteCopy]~>
+        dl![m]{ { carolTokens := freshId(addM(memory, Token[])) ‖ memory := addM(memory, Token[]) } { david := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) } { mv1 := read(memory, david.account) }
+                { memory := write(memory, carolTokens[i], read(memory, mv1.token)) } ⟨[ ]⟩ φ } := rfl
+    _ ~[emptyModality]~>
+        dl![m]{ { carolTokens := freshId(addM(memory, Token[])) ‖ memory := addM(memory, Token[]) } { david := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) } { mv1 := read(memory, david.account) }
+                { memory := write(memory, carolTokens[i], read(memory, mv1.token)) } φ } := rfl
+
+/-- `carol.account.token = davidTokens[i];` — the target's receiver bound
+(`mv1`), and the member written with the element's
+identity. -/
+def fieldFromElement (m : Modality) (φ : Post StandardExample) :
+    dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) } { davidTokens := freshId(addM(memory, Token[])) ‖ memory := addM(memory, Token[]) } ⟨[ carol.account.token = davidTokens[i]; ]⟩ φ }
+    ~*> dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) } { davidTokens := freshId(addM(memory, Token[])) ‖ memory := addM(memory, Token[]) } { mv1 := read(memory, carol.account) }
+                { memory := write(memory, mv1.token, read(memory, davidTokens[i])) } φ } :=
+  calc dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) } { davidTokens := freshId(addM(memory, Token[])) ‖ memory := addM(memory, Token[]) } ⟨[ carol.account.token = davidTokens[i]; ]⟩ φ }
+    _ ~[memoryFieldWrite_unfold_leftFst]~>
+        dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) } { davidTokens := freshId(addM(memory, Token[])) ‖ memory := addM(memory, Token[]) } ⟨[ Account memory mv1 = carol.account; mv1.token = davidTokens[i]; ]⟩ φ } :=
+      by sol_chain
+    _ ~*> dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) } { davidTokens := freshId(addM(memory, Token[])) ‖ memory := addM(memory, Token[]) } { mv1 := read(memory, carol.account) } ⟨[ mv1.token = davidTokens[i]; ]⟩ φ } :=
+      by sol_chain
+    _ ~[memoryFieldWriteCopy]~>
+        dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) } { davidTokens := freshId(addM(memory, Token[])) ‖ memory := addM(memory, Token[]) } { mv1 := read(memory, carol.account) }
+                { memory := write(memory, mv1.token, read(memory, davidTokens[i])) } ⟨[ ]⟩ φ } := rfl
+    _ ~[emptyModality]~>
+        dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) } { davidTokens := freshId(addM(memory, Token[])) ‖ memory := addM(memory, Token[]) } { mv1 := read(memory, carol.account) }
+                { memory := write(memory, mv1.token, read(memory, davidTokens[i])) } φ } := rfl
+
+/-- `Token memory tok = carolTokens[++i];` — the index captured, the
+declaration dropped, and `tok` bound to the element's identity. -/
+def elementAlias (m : Modality) (φ : Post StandardExample) :
+    dl![m]{ { carolTokens := freshId(addM(memory, Token[])) ‖ memory := addM(memory, Token[]) } ⟨[ Token memory tok = carolTokens[++i]; ]⟩ φ }
+    ~*> dl![m]{ { carolTokens := freshId(addM(memory, Token[])) ‖ memory := addM(memory, Token[]) } { se1 := 0 } { i := i + 1 ‖ se1 := i + 1 } { tok := read(memory, carolTokens[se1]) } φ } :=
+  calc dl![m]{ { carolTokens := freshId(addM(memory, Token[])) ‖ memory := addM(memory, Token[]) } ⟨[ Token memory tok = carolTokens[++i]; ]⟩ φ }
+    _ = dl![m]{ { carolTokens := freshId(addM(memory, Token[])) ‖ memory := addM(memory, Token[]) } ⟨[ uint se1; se1 = ++i; Token memory tok = carolTokens[se1]; ]⟩ φ } := rfl
+    _ ~*> dl![m]{ { carolTokens := freshId(addM(memory, Token[])) ‖ memory := addM(memory, Token[]) } { se1 := 0 } { i := i + 1 ‖ se1 := i + 1 } ⟨[ Token memory tok = carolTokens[se1]; ]⟩ φ } := by sol_chain
+    _ ~[memoryLocalDeclInitDrop]~> dl![m]{ { carolTokens := freshId(addM(memory, Token[])) ‖ memory := addM(memory, Token[]) } { se1 := 0 } { i := i + 1 ‖ se1 := i + 1 } ⟨[ tok = carolTokens[se1]; ]⟩ φ } := rfl
+    _ ~[memoryIndexReadAliasRoot]~>
+        dl![m]{ { carolTokens := freshId(addM(memory, Token[])) ‖ memory := addM(memory, Token[]) } { se1 := 0 } { i := i + 1 ‖ se1 := i + 1 } { tok := read(memory, carolTokens[se1]) } ⟨[ ]⟩ φ } := rfl
+    _ ~[emptyModality]~> dl![m]{ { carolTokens := freshId(addM(memory, Token[])) ‖ memory := addM(memory, Token[]) } { se1 := 0 } { i := i + 1 ‖ se1 := i + 1 } { tok := read(memory, carolTokens[se1]) } φ } := rfl
 
 end Solidity.Examples.MemoryChains
