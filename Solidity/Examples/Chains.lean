@@ -207,8 +207,9 @@ example : dl!{ [ alice.account.balance = 10; ] alice.account.balance == 10 }
 /-! ## 5 · A branch
 
 `ifElseSplit` makes the two goals one formula, `(c → …) ∧ ((c' → …) ∧ cover)`
-(`Logic.lean`'s `Premise.fml`; under the diamond the cover is
-`¬(¬c ∧ ¬c')`).  The chain runs the `then` branch, then the `else` branch.
+(`Logic.lean`'s `Premise.fml`), the cover `⟨ revert(); ⟩ false ∨ c ∨ c'`
+(`Premise.coverFml`: a stuck condition is owed under the diamond only).  The
+chain runs the `then` branch, then the `else` branch.
 
 The condition is a literal: a boolean local that an update binds
 (`{ se1 := find(storage, flags[a]) } ⟨ if (se1) … ⟩`) reads back as a
@@ -221,10 +222,12 @@ example : dl!{ ⟨ balances[a] = 1; if (true) { x = 2; } else { x = 1; }; ⟩ ba
     ~[ifElseSplit]~>
         dl!{ { storage := save(storage, balances[a], 1) }
             ((true ≐ true → ⟨ x = 2; ⟩ balances[a] == x) ∧
-              (true ≐ false → ⟨ x = 1; ⟩ balances[a] == x) ∧ ¬(¬true ≐ true ∧ ¬true ≐ false)) }
+              (true ≐ false → ⟨ x = 1; ⟩ balances[a] == x) ∧
+              (⟨ revert(); ⟩ false ∨ true ≐ true ∨ true ≐ false)) }
     ~*> dl!{ { storage := save(storage, balances[a], 1) }
             ((true ≐ true → { x := 2 } balances[a] == x) ∧
-              (true ≐ false → { x := 1 } balances[a] == x) ∧ ¬(¬true ≐ true ∧ ¬true ≐ false)) } := by
+              (true ≐ false → { x := 1 } balances[a] == x) ∧
+              (⟨ revert(); ⟩ false ∨ true ≐ true ∨ true ≐ false)) } := by
   sol_chain
 
 /-! ## 6 · The evidence is unique
@@ -272,11 +275,12 @@ variable (m : Modality) (φ : Post StandardExample) in
 
 /-! ## 8 · Where the modality matters
 
-A revert, and the cover of a branch (`Premise.cover`, left by an `if`, a
-`require`, an `assert`), are the only steps that look at the modality: under
-`m` the lines stop in front of them, and the chain goes on after `cases m`.
-Nothing after a split is written under `m`: its cover, and every fresh index
-after it, are stuck on it. -/
+A revert is the only step that looks at the modality (`revertBox` leaves
+`true`, `revertDiamond` `false`): under `m` the lines go through branches and
+guards and stop in front of the first `revert();` the strategy steps, which
+is where the calculus's traces part too, and the chain goes on after `cases m`.
+A branch's cover is one formula under either modality,
+`⟨[ revert(); ]⟩ false ∨ c ∨ c'` (`Premise.coverFml`). -/
 
 section Modality
 variable (m : Modality)
@@ -287,7 +291,7 @@ example : dl![m]{ ⟨[ x = 1; revert(); ]⟩ true } ~> dl![m]{ { x := 1 } ⟨[ r
 /--
 error: sol_chain: the line after
   dl{ { x := 1 } ⟨[ revert(); ]⟩ true }
-depends on the modality m, through a `revert();` or a branch's cover: go on after `cases m`
+depends on the modality m, through a `revert();` (`revertBox`, `revertDiamond`): go on after `cases m`
 -/
 #guard_msgs in
 example : dl![m]{ { x := 1 } ⟨[ revert(); ]⟩ true } ~> dl![m]{ { x := 1 } true } := by
@@ -314,20 +318,47 @@ example : dl![m]{ ⟨[ to.transfer(x + 2); ]⟩ true }
             (¬(0 <= se1 ∧ se1 <= selfBalance) → ⟨[ revert(); ]⟩ true)) } := by
   sol_chain
 
--- A `require` and an `if` are branches, whose cover depends on the modality.
+-- A `require` is a branch: its `then` goal runs to the end under `m`, and
+-- its `else` goal is the revert that ends the lines.
 /--
 info:     dl{ ⟨[ require(true); x = 1; ]⟩ x = 1 }
-  (the line after depends on the modality m, through a `revert();` or a branch's cover: go on after `cases m`)
+  ~[requireSimple]~>
+    dl{
+  (true ≐ true → ⟨[ x = 1; ]⟩ x = 1) ∧
+    (true ≐ false → ⟨[ revert(); x = 1; ]⟩ x = 1) ∧ (⟨[ revert(); ]⟩ false ∨ true ≐ true ∨ true ≐ false) }
+  ~[localValueAssign]~>
+    dl{
+  (true ≐ true → { x := 1 } ⟨[ ]⟩ x = 1) ∧
+    (true ≐ false → ⟨[ revert(); x = 1; ]⟩ x = 1) ∧ (⟨[ revert(); ]⟩ false ∨ true ≐ true ∨ true ≐ false) }
+  ~[emptyModality]~>
+    dl{
+  (true ≐ true → { x := 1 } x = 1) ∧
+    (true ≐ false → ⟨[ revert(); x = 1; ]⟩ x = 1) ∧ (⟨[ revert(); ]⟩ false ∨ true ≐ true ∨ true ≐ false) }
+  (the line after depends on the modality m, through a `revert();` (`revertBox`, `revertDiamond`): go on after `cases m`)
 -/
 #guard_msgs in
 #derivation dl![m]{ ⟨[ require(true); x = 1; ]⟩ x == 1 }
 
+/-- An `if` runs both its goals under `m`. -/
+example : dl![m]{ ⟨[ if (true) { x = 2; } else { x = 1; }; ]⟩ x == 1 }
+    ~[ifElseSplit]~>
+      dl![m]{ (true ≐ true → ⟨[ x = 2; ]⟩ x == 1) ∧ (true ≐ false → ⟨[ x = 1; ]⟩ x == 1) ∧
+        (⟨[ revert(); ]⟩ false ∨ true ≐ true ∨ true ≐ false) }
+    ~*> dl![m]{ (true ≐ true → { x := 2 } x == 1) ∧ (true ≐ false → { x := 1 } x == 1) ∧
+        (⟨[ revert(); ]⟩ false ∨ true ≐ true ∨ true ≐ false) } := by
+  sol_chain
+
+-- A revert in the `then` goal stops the lines before the `else` goal.
 /--
-info:     dl{ ⟨[ if (true) {x = 2;} else {x = 1;}; ]⟩ x = 1 }
-  (the line after depends on the modality m, through a `revert();` or a branch's cover: go on after `cases m`)
+info:     dl{ ⟨[ if (true) {revert();} else {x = 1;}; ]⟩ x = 1 }
+  ~[ifElseSplit]~>
+    dl{
+  (true ≐ true → ⟨[ revert(); ]⟩ x = 1) ∧
+    (true ≐ false → ⟨[ x = 1; ]⟩ x = 1) ∧ (⟨[ revert(); ]⟩ false ∨ true ≐ true ∨ true ≐ false) }
+  (the line after depends on the modality m, through a `revert();` (`revertBox`, `revertDiamond`): go on after `cases m`)
 -/
 #guard_msgs in
-#derivation dl![m]{ ⟨[ if (true) { x = 2; } else { x = 1; }; ]⟩ x == 1 }
+#derivation dl![m]{ ⟨[ if (true) { revert(); } else { x = 1; }; ]⟩ x == 1 }
 
 end Modality
 
@@ -364,94 +395,122 @@ example (φ : Post StandardExample) : dl!{ ⟨ to.transfer(x + 2); ⟩ φ }
   sol_chain
 
 section Past
-variable (φ : Post StandardExample)
+variable (m : Modality) (φ : Post StandardExample)
 
-/-- `require(true); x = 1;` under the box: its `else` goal reverts to `true`.
-A step past the done goal is `by sol_chain`: `rfl` would have to decide
-that `φ` has no modality left. -/
-example : dl![.box]{ ⟨[ require(true); x = 1; ]⟩ φ }
-    ~*> dl![.box]{ (true ≐ true → { x := 1 } φ) ∧ (true ≐ false → true) ∧ true } :=
-  calc dl![.box]{ ⟨[ require(true); x = 1; ]⟩ φ }
+/-- `require(true); x = 1;` for every modality: the `then` goal runs to its
+end, and the `else` goal is left at its revert, where the modalities part
+(the `requireSimple` trace).  A step past the done goal is
+`by sol_chain`: `rfl` would have to decide that `φ` has no modality left. -/
+def requireTrace : dl![m]{ ⟨[ require(true); x = 1; ]⟩ φ }
+    ~*> dl![m]{ (true ≐ true → { x := 1 } φ) ∧ (true ≐ false → ⟨[ revert(); x = 1; ]⟩ φ) ∧
+          (⟨[ revert(); ]⟩ false ∨ true ≐ true ∨ true ≐ false) } :=
+  calc dl![m]{ ⟨[ require(true); x = 1; ]⟩ φ }
     _ ~[requireSimple]~>
-        dl![.box]{ (true ≐ true → ⟨[ x = 1; ]⟩ φ) ∧ (true ≐ false → ⟨[ revert(); x = 1; ]⟩ φ) ∧ true } :=
+        dl![m]{ (true ≐ true → ⟨[ x = 1; ]⟩ φ) ∧ (true ≐ false → ⟨[ revert(); x = 1; ]⟩ φ) ∧
+          (⟨[ revert(); ]⟩ false ∨ true ≐ true ∨ true ≐ false) } :=
       rfl
-    _ ~*> dl![.box]{ (true ≐ true → { x := 1 } φ) ∧ (true ≐ false → ⟨[ revert(); x = 1; ]⟩ φ) ∧ true } := by
-      sol_chain
-    _ ~[revertBox]~> dl![.box]{ (true ≐ true → { x := 1 } φ) ∧ (true ≐ false → true) ∧ true } := by
+    _ ~*> dl![m]{ (true ≐ true → { x := 1 } φ) ∧ (true ≐ false → ⟨[ revert(); x = 1; ]⟩ φ) ∧
+          (⟨[ revert(); ]⟩ false ∨ true ≐ true ∨ true ≐ false) } := by
       sol_chain
 
-/-- `assert(true); x = 1;` under the diamond: its `else` goal reverts to
-`false`, and the cover is left. -/
+/-- Under the box the revert closes to `true`: the trace, then `revertBox`. -/
+example : dl![.box]{ ⟨[ require(true); x = 1; ]⟩ φ }
+    ~*> dl![.box]{ (true ≐ true → { x := 1 } φ) ∧ (true ≐ false → true) ∧
+          ([ revert(); ] false ∨ true ≐ true ∨ true ≐ false) } :=
+  calc dl![.box]{ ⟨[ require(true); x = 1; ]⟩ φ }
+    _ ~*> dl![.box]{ (true ≐ true → { x := 1 } φ) ∧ (true ≐ false → ⟨[ revert(); x = 1; ]⟩ φ) ∧
+          (⟨[ revert(); ]⟩ false ∨ true ≐ true ∨ true ≐ false) } := requireTrace .box φ
+    _ ~[revertBox]~> dl![.box]{ (true ≐ true → { x := 1 } φ) ∧ (true ≐ false → true) ∧
+          ([ revert(); ] false ∨ true ≐ true ∨ true ≐ false) } := by
+      sol_chain
+
+/-- `assert(true); x = 1;`, the same trace for every modality. -/
+def assertTrace : dl![m]{ ⟨[ assert(true); x = 1; ]⟩ φ }
+    ~[assertSimple]~>
+      dl![m]{ (true ≐ true → ⟨[ x = 1; ]⟩ φ) ∧ (true ≐ false → ⟨[ revert(); x = 1; ]⟩ φ) ∧
+        (⟨[ revert(); ]⟩ false ∨ true ≐ true ∨ true ≐ false) }
+    ~*> dl![m]{ (true ≐ true → { x := 1 } φ) ∧ (true ≐ false → ⟨[ revert(); x = 1; ]⟩ φ) ∧
+        (⟨[ revert(); ]⟩ false ∨ true ≐ true ∨ true ≐ false) } := by
+  sol_chain
+
+/-- Under the diamond its `else` goal reverts to `false`. -/
 example : dl!{ ⟨ assert(true); x = 1; ⟩ φ }
     ~*> dl!{ (true ≐ true → { x := 1 } φ) ∧ (true ≐ false → ⟨ revert(); x = 1; ⟩ φ) ∧
-          (true ≐ true ∨ true ≐ false) }
+          (⟨ revert(); ⟩ false ∨ true ≐ true ∨ true ≐ false) }
     ~[revertDiamond]~> dl!{ (true ≐ true → { x := 1 } φ) ∧ (true ≐ false → false) ∧
-          (true ≐ true ∨ true ≐ false) } := by
+          (⟨ revert(); ⟩ false ∨ true ≐ true ∨ true ≐ false) } := by
   sol_chain
 
-/--
-info:     dl{ [ if (true) {x = 2;} else {x = 1;}; ] φ }
-  ~[ifElseSplit]~>
-    dl{ (true ≐ true → [ x = 2; ] φ) ∧ (true ≐ false → [ x = 1; ] φ) ∧ true }
-  ~[localValueAssign]~>
-    dl{ (true ≐ true → { x := 2 } [ ] φ) ∧ (true ≐ false → [ x = 1; ] φ) ∧ true }
-  ~[emptyModality]~>
-    dl{ (true ≐ true → { x := 2 } φ) ∧ (true ≐ false → [ x = 1; ] φ) ∧ true }
-  ~[localValueAssign]~>
-    dl{ (true ≐ true → { x := 2 } φ) ∧ (true ≐ false → { x := 1 } [ ] φ) ∧ true }
-  ~[emptyModality]~>
-    dl{ (true ≐ true → { x := 2 } φ) ∧ (true ≐ false → { x := 1 } φ) ∧ true }
--/
-#guard_msgs in
-#derivation dl![.box]{ ⟨[ if (true) { x = 2; } else { x = 1; }; ]⟩ φ }
-
-/-- `if (true) { x = 2; } else { x = 1; }` under the box, both goals run. -/
-example : dl![.box]{ ⟨[ if (true) { x = 2; } else { x = 1; }; ]⟩ φ }
-    ~*> dl![.box]{ (true ≐ true → { x := 2 } φ) ∧ (true ≐ false → { x := 1 } ⟨[ ]⟩ φ) ∧ true }
-    ~[emptyModality]~> dl![.box]{ (true ≐ true → { x := 2 } φ) ∧ (true ≐ false → { x := 1 } φ) ∧ true } := by
+/-- `if (true) { x = 2; } else { x = 1; }` for every modality, both goals
+run to their end. -/
+def ifTrace : dl![m]{ ⟨[ if (true) { x = 2; } else { x = 1; }; ]⟩ φ }
+    ~[ifElseSplit]~>
+      dl![m]{ (true ≐ true → ⟨[ x = 2; ]⟩ φ) ∧ (true ≐ false → ⟨[ x = 1; ]⟩ φ) ∧
+        (⟨[ revert(); ]⟩ false ∨ true ≐ true ∨ true ≐ false) }
+    ~*> dl![m]{ (true ≐ true → { x := 2 } φ) ∧ (true ≐ false → { x := 1 } ⟨[ ]⟩ φ) ∧
+        (⟨[ revert(); ]⟩ false ∨ true ≐ true ∨ true ≐ false) }
+    ~[emptyModality]~> dl![m]{ (true ≐ true → { x := 2 } φ) ∧ (true ≐ false → { x := 1 } φ) ∧
+        (⟨[ revert(); ]⟩ false ∨ true ≐ true ∨ true ≐ false) } := by
   sol_chain
 
--- Nested: past the done goal of the inner branch, the next step asks the
--- goal `[ x = 1; ] φ`, active whatever `φ` is.
+-- Nested: past the done goal of the inner branch, its cover included, the
+-- next step asks the goal `⟨[ x = 1; ]⟩ φ`, active whatever `φ` is.
 /--
-info:     dl{ [ if (true) {if (true) {x = 2;} else {x = 1;};} else {x = 1;}; ] φ }
-  ~[ifElseSplit]~>
-    dl{ (true ≐ true → [ if (true) {x = 2;} else {x = 1;}; ] φ) ∧ (true ≐ false → [ x = 1; ] φ) ∧ true }
+info:     dl{ ⟨[ if (true) {if (true) {x = 2;} else {x = 1;};} else {x = 1;}; ]⟩ φ }
   ~[ifElseSplit]~>
     dl{
-  (true ≐ true → (true ≐ true → [ x = 2; ] φ) ∧ (true ≐ false → [ x = 1; ] φ) ∧ true) ∧
-    (true ≐ false → [ x = 1; ] φ) ∧ true }
+  (true ≐ true → ⟨[ if (true) {x = 2;} else {x = 1;}; ]⟩ φ) ∧
+    (true ≐ false → ⟨[ x = 1; ]⟩ φ) ∧ (⟨[ revert(); ]⟩ false ∨ true ≐ true ∨ true ≐ false) }
+  ~[ifElseSplit]~>
+    dl{
+  (true ≐ true →
+        (true ≐ true → ⟨[ x = 2; ]⟩ φ) ∧
+          (true ≐ false → ⟨[ x = 1; ]⟩ φ) ∧ (⟨[ revert(); ]⟩ false ∨ true ≐ true ∨ true ≐ false)) ∧
+    (true ≐ false → ⟨[ x = 1; ]⟩ φ) ∧ (⟨[ revert(); ]⟩ false ∨ true ≐ true ∨ true ≐ false) }
   ~[localValueAssign]~>
     dl{
-  (true ≐ true → (true ≐ true → { x := 2 } [ ] φ) ∧ (true ≐ false → [ x = 1; ] φ) ∧ true) ∧
-    (true ≐ false → [ x = 1; ] φ) ∧ true }
+  (true ≐ true →
+        (true ≐ true → { x := 2 } ⟨[ ]⟩ φ) ∧
+          (true ≐ false → ⟨[ x = 1; ]⟩ φ) ∧ (⟨[ revert(); ]⟩ false ∨ true ≐ true ∨ true ≐ false)) ∧
+    (true ≐ false → ⟨[ x = 1; ]⟩ φ) ∧ (⟨[ revert(); ]⟩ false ∨ true ≐ true ∨ true ≐ false) }
   ~[emptyModality]~>
     dl{
-  (true ≐ true → (true ≐ true → { x := 2 } φ) ∧ (true ≐ false → [ x = 1; ] φ) ∧ true) ∧
-    (true ≐ false → [ x = 1; ] φ) ∧ true }
+  (true ≐ true →
+        (true ≐ true → { x := 2 } φ) ∧
+          (true ≐ false → ⟨[ x = 1; ]⟩ φ) ∧ (⟨[ revert(); ]⟩ false ∨ true ≐ true ∨ true ≐ false)) ∧
+    (true ≐ false → ⟨[ x = 1; ]⟩ φ) ∧ (⟨[ revert(); ]⟩ false ∨ true ≐ true ∨ true ≐ false) }
   ~[localValueAssign]~>
     dl{
-  (true ≐ true → (true ≐ true → { x := 2 } φ) ∧ (true ≐ false → { x := 1 } [ ] φ) ∧ true) ∧
-    (true ≐ false → [ x = 1; ] φ) ∧ true }
+  (true ≐ true →
+        (true ≐ true → { x := 2 } φ) ∧
+          (true ≐ false → { x := 1 } ⟨[ ]⟩ φ) ∧ (⟨[ revert(); ]⟩ false ∨ true ≐ true ∨ true ≐ false)) ∧
+    (true ≐ false → ⟨[ x = 1; ]⟩ φ) ∧ (⟨[ revert(); ]⟩ false ∨ true ≐ true ∨ true ≐ false) }
   ~[emptyModality]~>
     dl{
-  (true ≐ true → (true ≐ true → { x := 2 } φ) ∧ (true ≐ false → { x := 1 } φ) ∧ true) ∧
-    (true ≐ false → [ x = 1; ] φ) ∧ true }
+  (true ≐ true →
+        (true ≐ true → { x := 2 } φ) ∧
+          (true ≐ false → { x := 1 } φ) ∧ (⟨[ revert(); ]⟩ false ∨ true ≐ true ∨ true ≐ false)) ∧
+    (true ≐ false → ⟨[ x = 1; ]⟩ φ) ∧ (⟨[ revert(); ]⟩ false ∨ true ≐ true ∨ true ≐ false) }
   ~[localValueAssign]~>
     dl{
-  (true ≐ true → (true ≐ true → { x := 2 } φ) ∧ (true ≐ false → { x := 1 } φ) ∧ true) ∧
-    (true ≐ false → { x := 1 } [ ] φ) ∧ true }
+  (true ≐ true →
+        (true ≐ true → { x := 2 } φ) ∧
+          (true ≐ false → { x := 1 } φ) ∧ (⟨[ revert(); ]⟩ false ∨ true ≐ true ∨ true ≐ false)) ∧
+    (true ≐ false → { x := 1 } ⟨[ ]⟩ φ) ∧ (⟨[ revert(); ]⟩ false ∨ true ≐ true ∨ true ≐ false) }
   ~[emptyModality]~>
     dl{
-  (true ≐ true → (true ≐ true → { x := 2 } φ) ∧ (true ≐ false → { x := 1 } φ) ∧ true) ∧
-    (true ≐ false → { x := 1 } φ) ∧ true }
+  (true ≐ true →
+        (true ≐ true → { x := 2 } φ) ∧
+          (true ≐ false → { x := 1 } φ) ∧ (⟨[ revert(); ]⟩ false ∨ true ≐ true ∨ true ≐ false)) ∧
+    (true ≐ false → { x := 1 } φ) ∧ (⟨[ revert(); ]⟩ false ∨ true ≐ true ∨ true ≐ false) }
 -/
 #guard_msgs in
-#derivation dl![.box]{ ⟨[ if (true) { if (true) { x = 2; } else { x = 1; } } else { x = 1; }; ]⟩ φ }
+#derivation dl![m]{ ⟨[ if (true) { if (true) { x = 2; } else { x = 1; } } else { x = 1; }; ]⟩ φ }
 
-example : dl![.box]{ ⟨[ if (true) { if (true) { x = 2; } else { x = 1; } } else { x = 1; }; ]⟩ φ }
-    ~*> dl![.box]{ (true ≐ true → (true ≐ true → { x := 2 } φ) ∧ (true ≐ false → { x := 1 } φ) ∧ true) ∧
-          (true ≐ false → { x := 1 } φ) ∧ true } := by
+example : dl![m]{ ⟨[ if (true) { if (true) { x = 2; } else { x = 1; } } else { x = 1; }; ]⟩ φ }
+    ~*> dl![m]{ (true ≐ true → (true ≐ true → { x := 2 } φ) ∧ (true ≐ false → { x := 1 } φ) ∧
+            (⟨[ revert(); ]⟩ false ∨ true ≐ true ∨ true ≐ false)) ∧
+          (true ≐ false → { x := 1 } φ) ∧ (⟨[ revert(); ]⟩ false ∨ true ≐ true ∨ true ≐ false) } := by
   sol_chain
 
 end Past

@@ -1,4 +1,5 @@
 import Solidity.Calculus.Close
+import Solidity.Calculus.Chains
 
 /-!
 # The two modalities: `revert();`, `require`, `assert`
@@ -247,5 +248,133 @@ theorem branchDiamond :
     refine close ?_
     sol_symex
     sol_close
+
+/-! ## The calculus's traces, for every modality
+
+As chains (`Calculus/Chains.lean`), at a modality `m` and a postcondition
+`φ`: every rule of a `require`, an `assert`
+and an `if` is the same under either modality, the cover of the split
+included (`⟨[ revert(); ]⟩ false ∨ c ∨ c'`, `Premise.coverFml`), so the
+lines are written once, up to the `revert();` of a failing branch.  There
+the modalities part: after it the chain is one per
+modality, `revertBox` to `true` and `revertDiamond` to `false`.
+
+The condition is a `bool` of the storage, `flags[a]`, which `se`
+stands for once captured: `{ se1 := find(storage, flags[a]) }`. -/
+
+section Trace
+variable (m : Modality) (φ : Post StandardExample)
+
+/-- `revert();` ends the calculus's traces: under the box it closes to `true`,
+whatever follows… -/
+example : dl![.box]{ ⟨[ revert(); y = 1; ]⟩ φ } ~[revertBox]~> dl![.box]{ true } := rfl
+
+/-- …and under the diamond to `false`. -/
+example : dl!{ ⟨ revert(); y = 1; ⟩ φ } ~[revertDiamond]~> dl!{ false } := rfl
+
+/-- The `requireSimple` trace: the condition captured and read, the
+split, the goal where it holds run to its end; the goal where it fails is
+left at its revert. -/
+def requireTrace : dl![m]{ ⟨[ require(flags[a]); y = 1; ]⟩ φ }
+    ~*> dl![m]{ { se1 := find(storage, flags[a]) }
+          ((se1 ≐ true → { y := 1 } φ) ∧ (se1 ≐ false → ⟨[ revert(); y = 1; ]⟩ φ) ∧
+            (⟨[ revert(); ]⟩ false ∨ se1 ≐ true ∨ se1 ≐ false)) } :=
+  calc dl![m]{ ⟨[ require(flags[a]); y = 1; ]⟩ φ }
+    _ ~[requireConditionCapture]~> dl![m]{ ⟨[ bool se1 = flags[a]; require(se1); y = 1; ]⟩ φ } := by
+      sol_chain
+    -- `localValueDeclInitDrop`, `storageIndexReadMappingFind`, `requireSimple`: the two
+    -- lines between leave `se1` bound by an update in a statement, which `dl![m]{ … }`
+    -- reads as a `uint` parameter (`Branch.lean`), so they are not written
+    _ ~*> dl![m]{ { se1 := find(storage, flags[a]) }
+          ((se1 ≐ true → ⟨[ y = 1; ]⟩ φ) ∧ (se1 ≐ false → ⟨[ revert(); y = 1; ]⟩ φ) ∧
+            (⟨[ revert(); ]⟩ false ∨ se1 ≐ true ∨ se1 ≐ false)) } := by
+      sol_chain
+    _ ~*> dl![m]{ { se1 := find(storage, flags[a]) }
+          ((se1 ≐ true → { y := 1 } φ) ∧ (se1 ≐ false → ⟨[ revert(); y = 1; ]⟩ φ) ∧
+            (⟨[ revert(); ]⟩ false ∨ se1 ≐ true ∨ se1 ≐ false)) } := by
+      sol_chain
+
+/-- Under the box the failing goal closes: the trace, then `revertBox`. -/
+example : dl![.box]{ ⟨[ require(flags[a]); y = 1; ]⟩ φ }
+    ~*> dl![.box]{ { se1 := find(storage, flags[a]) }
+          ((se1 ≐ true → { y := 1 } φ) ∧ (se1 ≐ false → true) ∧
+            ([ revert(); ] false ∨ se1 ≐ true ∨ se1 ≐ false)) } :=
+  calc dl![.box]{ ⟨[ require(flags[a]); y = 1; ]⟩ φ }
+    _ ~*> dl![.box]{ { se1 := find(storage, flags[a]) }
+          ((se1 ≐ true → { y := 1 } φ) ∧ (se1 ≐ false → [ revert(); y = 1; ] φ) ∧
+            ([ revert(); ] false ∨ se1 ≐ true ∨ se1 ≐ false)) } := requireTrace .box φ
+    _ ~[revertBox]~> dl![.box]{ { se1 := find(storage, flags[a]) }
+          ((se1 ≐ true → { y := 1 } φ) ∧ (se1 ≐ false → true) ∧
+            ([ revert(); ] false ∨ se1 ≐ true ∨ se1 ≐ false)) } := by
+      sol_chain
+
+/-- Under the diamond it leaves `false`: the condition must hold. -/
+example : dl!{ ⟨ require(flags[a]); y = 1; ⟩ φ }
+    ~*> dl!{ { se1 := find(storage, flags[a]) }
+          ((se1 ≐ true → { y := 1 } φ) ∧ (se1 ≐ false → false) ∧
+            (⟨ revert(); ⟩ false ∨ se1 ≐ true ∨ se1 ≐ false)) } :=
+  (requireTrace .diamond φ).trans (by sol_chain)
+
+/-- `assert` has `require`'s trace (the table's `assertSimple`). -/
+def assertTrace : dl![m]{ ⟨[ assert(flags[a]); y = 1; ]⟩ φ }
+    ~[assertConditionCapture]~> dl![m]{ ⟨[ bool se1 = flags[a]; assert(se1); y = 1; ]⟩ φ }
+    ~*> dl![m]{ { se1 := find(storage, flags[a]) }
+          ((se1 ≐ true → { y := 1 } φ) ∧ (se1 ≐ false → ⟨[ revert(); y = 1; ]⟩ φ) ∧
+            (⟨[ revert(); ]⟩ false ∨ se1 ≐ true ∨ se1 ≐ false)) } := by
+  sol_chain
+
+/-- The `ifElseSplit` trace: both goals to their end, under `m`. -/
+def ifTrace : dl![m]{ ⟨[ if (flags[a]) { y = 1; } else { y = 2; }; ]⟩ φ }
+    ~[ifElseUnfold]~> dl![m]{ ⟨[ bool se1 = flags[a]; if (se1) { y = 1; } else { y = 2; }; ]⟩ φ }
+    ~*> dl![m]{ { se1 := find(storage, flags[a]) }
+          ((se1 ≐ true → ⟨[ y = 1; ]⟩ φ) ∧ (se1 ≐ false → ⟨[ y = 2; ]⟩ φ) ∧
+            (⟨[ revert(); ]⟩ false ∨ se1 ≐ true ∨ se1 ≐ false)) }
+    ~*> dl![m]{ { se1 := find(storage, flags[a]) }
+          ((se1 ≐ true → { y := 1 } φ) ∧ (se1 ≐ false → { y := 2 } φ) ∧
+            (⟨[ revert(); ]⟩ false ∨ se1 ≐ true ∨ se1 ≐ false)) } := by
+  sol_chain
+
+/-- A revert in the `else` branch: the lines stop at it, the `then` goal done. -/
+def ifRevertTrace : dl![m]{ ⟨[ if (flags[a]) { y = 1; } else { revert(); }; ]⟩ φ }
+    ~*> dl![m]{ { se1 := find(storage, flags[a]) }
+          ((se1 ≐ true → { y := 1 } φ) ∧ (se1 ≐ false → ⟨[ revert(); ]⟩ φ) ∧
+            (⟨[ revert(); ]⟩ false ∨ se1 ≐ true ∨ se1 ≐ false)) } := by
+  sol_chain
+
+-- In the `then` branch it stops them before the `else` goal: go on after `cases m`.
+/--
+error: sol_chain: the derivation of
+  dl{ ⟨[ if (flags[a]) {revert();} else {y = 1;}; ]⟩ φ }
+does not reach
+  dl{
+    { se1 := find(storage, flags[a]) }
+      ((se1 ≐ true → true) ∧ (se1 ≐ false → { y := 1 } φ) ∧ (⟨[ revert(); ]⟩ false ∨ se1 ≐ true ∨ se1 ≐ false)) }
+Its lines:
+    dl{ ⟨[ if (flags[a]) {revert();} else {y = 1;}; ]⟩ φ }
+  ~[ifElseUnfold]~>
+    dl{ ⟨[ bool se1 = flags[a]; if (se1) {revert();} else {y = 1;}; ]⟩ φ }
+  ~[localValueDeclInitDrop]~>
+    dl{ ⟨[ se1 = flags[a]; if (se1) {revert();} else {y = 1;}; ]⟩ φ }
+  ~[storageIndexReadMappingFind]~>
+    dl{ { se1 := find(storage, flags[a]) } ⟨[ if (se1) {revert();} else {y = 1;}; ]⟩ φ }
+  ~[ifElseSplit]~>
+    dl{
+  { se1 := find(storage, flags[a]) }
+    ((se1 ≐ true → ⟨[ revert(); ]⟩ φ) ∧
+        (se1 ≐ false → ⟨[ y = 1; ]⟩ φ) ∧ (⟨[ revert(); ]⟩ false ∨ se1 ≐ true ∨ se1 ≐ false)) }
+  (the line after depends on the modality m, through a `revert();` (`revertBox`, `revertDiamond`): go on after `cases m`)
+-/
+#guard_msgs in
+example : dl![m]{ ⟨[ if (flags[a]) { revert(); } else { y = 1; }; ]⟩ φ }
+    ~*> dl![m]{ { se1 := find(storage, flags[a]) }
+          ((se1 ≐ true → true) ∧ (se1 ≐ false → { y := 1 } φ) ∧
+            (⟨[ revert(); ]⟩ false ∨ se1 ≐ true ∨ se1 ≐ false)) } := by
+  sol_chain
+
+/-- After `cases m`, each modality runs to the end. -/
+example : ∃ ψ, Nonempty (dl![m]{ ⟨[ if (flags[a]) { revert(); } else { y = 1; }; ]⟩ φ } ~*> ψ) := by
+  cases m <;> exact ⟨_, ⟨by sol_chain⟩⟩
+
+end Trace
 
 end Solidity.Examples.Revert

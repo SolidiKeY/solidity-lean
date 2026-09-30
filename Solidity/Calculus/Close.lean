@@ -663,6 +663,12 @@ theorem holds_upd (m : Modality) (U : Upd C) (φ : Fml C) :
 /-- `∀ uint a; φ`: `φ` for every `a` of the type. -/
 theorem holds_all (x : Var) (p : PrimTy) (φ : Fml C) :
     holds σ (.all x p φ) ↔ ∀ v, p.admits v → holds (σ.setEnv x (.val v)) φ := Iff.rfl
+/-- `⟨[ revert(); ]⟩ ψ`, the modality a branch's cover keeps (`Premise.coverFml`):
+the run halts, so it holds under the box and not under the diamond. -/
+theorem holds_revert (m : Modality) (ω : Prog C) (φ : Fml C) :
+    holds σ (.modal m (.revert :: ω) φ) ↔ m.onHalt := by
+  cases m <;> simp only [holds, Prog.run, Stmt.run, bind, Except.bind, Modality.after,
+    Modality.onHalt]
 
 end Eval
 
@@ -676,7 +682,7 @@ attribute [close_rw high] Close.holds_eqD
 attribute [close_rw]
   -- formulas and updates
   Close.holds_tt Close.holds_not Close.holds_and Close.holds_imp Close.holds_upd
-  Close.holds_defined Close.holds_all
+  Close.holds_defined Close.holds_all Close.holds_revert
   Close.holds_eq Close.Term.denote_lit Close.Term.denote_pv Close.equiv_prim_left_iff
   Theory.StValue.Equiv.prim_iff Theory.StValue.prim.injEq
   Hyp.wrap Upd.apply List.foldlM_cons List.foldlM_nil

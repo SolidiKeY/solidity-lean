@@ -31,7 +31,11 @@ A branch (`ifElseSplit`, `requireSimple`, `assertSimple`) has two goals, one
 per condition.  A condition can be stuck (a local read before it is bound),
 so the two conditions need not cover every state: a box goal is true of a
 stuck run anyway, and a diamond goal owes that one of them holds
-(`Premise.cover`).
+(`Premise.cover`, the third goal of `Proves.split`).  The premise formula
+says the same without looking at the modality, `⟨[ revert(); ]⟩ false ∨ c ∨ c'`
+(`Premise.coverFml`): so every premise but a revert's is one formula under
+either modality, and a line of a derivation at a
+modality `m` goes on through a branch.
 -/
 
 namespace Solidity
@@ -49,6 +53,21 @@ def Premise.cover (m : Modality) (c c' : Fml C) : Fml C :=
   | .diamond => .not (.and (.not c) (.not c'))
   | .box => .tt
 
+/-- The cover as a branch's premise formula carries it, one formula under
+either modality: `⟨[ revert(); ]⟩ false ∨ c ∨ c'`.  A halted run satisfies
+`⟨[ revert(); ]⟩ false` under the box and not under the diamond, so it
+holds exactly where `Premise.cover m c c'` does (`Premise.coverFml_holds`).
+It is no goal of the strategy: under its negation it is not active. -/
+def Premise.coverFml (m : Modality) (c c' : Fml C) : Fml C :=
+  .not (.and (.not (.modal m [.revert] .ff)) (.not (.not (.and (.not c) (.not c')))))
+
+/-- The premise's cover says what the third goal of a branch says. -/
+theorem Premise.coverFml_holds (m : Modality) (c c' : Fml C) (σ : State) :
+    holds σ (Premise.coverFml m c c') ↔ holds σ (Premise.cover m c c') := by
+  cases m <;> simp only [Premise.coverFml, Premise.cover, holds, Prog.run, Stmt.run, bind,
+    Except.bind, Modality.after, Modality.onHalt, not_and,
+    Classical.not_not, not_true_eq_false, not_false_eq_true, false_implies, true_implies]
+
 /-- The premise as one formula, under the modality `m` the rule found, in
 front of the rest `ω` of the program and the postcondition `φ`. -/
 def Premise.fml (m : Modality) : Premise C → Prog C → Fml C → Fml C
@@ -56,7 +75,7 @@ def Premise.fml (m : Modality) : Premise C → Prog C → Fml C → Fml C
   | .unfold P, ω, φ => .modal m (P ++ ω) φ
   | .split c c' P Q, ω, φ =>
     .and (.imp c (.modal m (P ++ ω) φ))
-      (.and (.imp c' (.modal m (Q ++ ω) φ)) (Premise.cover m c c'))
+      (.and (.imp c' (.modal m (Q ++ ω) φ)) (Premise.coverFml m c c'))
   | .guard c U, ω, φ =>
     .and (.imp c (.upd m U (.modal m ω φ))) (.imp (.not c) (.modal m (.revert :: ω) φ))
   | .done true, _, _ => .tt
@@ -103,6 +122,7 @@ theorem Premise.sound {k : Nat} {m : Modality} {s : Stmt C} {pr : Premise C}
     cases m with
     | box => simp only [Prog.run, he, bind, Except.bind, Modality.after, Modality.onHalt]
     | diamond =>
+      rw [Premise.coverFml_holds] at hcov
       simp only [Premise.cover, holds, not_and, Classical.not_not] at hcov
       exact absurd (hcov hc) hc'
   | guard c U =>
@@ -554,7 +574,7 @@ theorem Proves.sound {R : RuleSet} {Γ : List (Hyp C)} {φ : Fml C} (h : Proves 
   | unfoldLean d _ ih => exact fun σ => Hyp.wrap_mono d.sound_in _ σ (ih σ)
   | split d _ _ _ ih₁ ih₂ ih₃ =>
     rw [Hyp.wrap_append] at ih₁ ih₂
-    exact fun σ => Hyp.wrap_mono₃ (fun τ h₁ h₂ h₃ => d.sound_in τ ⟨h₁, h₂, h₃⟩) _ σ
+    exact fun σ => Hyp.wrap_mono₃ (fun τ h₁ h₂ h₃ => d.sound_in τ ⟨h₁, h₂, (Premise.coverFml_holds _ _ _ τ).2 h₃⟩) _ σ
       (ih₁ σ) (ih₂ σ) (ih₃ σ)
   | guard d _ _ ih₁ ih₂ =>
     rw [Hyp.wrap_append] at ih₁ ih₂
