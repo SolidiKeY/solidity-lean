@@ -32,7 +32,10 @@ negation) added to the left of `⟹`, the rest of the program `#c` after the
 branch in both.  Under `⊢` it is `apply split .ifElseSplit`, which leaves the
 goals `thn` and `els`, and a third, `cov`: a condition can be stuck (a local
 read before it is bound), so under the diamond the two conditions owe that
-one of them holds (`Premise.cover`); under the box `cov` is `true`.
+one of them holds (`Premise.cover`); under the box `cov` is `true`.  The
+formula the strategy steps to (`sol_step`, a chain) carries the cover as one
+formula under either modality, `⟨[ revert(); ]⟩ false ∨ c ∨ c'`
+(`Premise.coverFml`): a reverting run satisfies the box, and no diamond.
 
 The old table's condition-directed rewrites (`ifElseTrue`, `ifElseFalse`,
 `ifElseNegated`) are gone: a literal is simple, so `if (true)` splits like any
@@ -188,7 +191,7 @@ example : ¬ (⊨ dl!{ ⟨ if (a == b) { x = 2; } else { x = 1; }; ⟩ x != 0 })
 trace: ⊢ ⊨
     dl{
       (true ≐ true → [ age = 1; ] select(storage, age) = 1) ∧
-        (true ≐ false → [ age = 2; ] select(storage, age) = 1) ∧ true }
+        (true ≐ false → [ age = 2; ] select(storage, age) = 1) ∧ ([ revert(); ] false ∨ true ≐ true ∨ true ≐ false) }
 -/
 #guard_msgs in
 /-- `if (true) { age = 1; } else { age = 2; }` writes `1`. -/
