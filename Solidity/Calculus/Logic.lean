@@ -148,6 +148,14 @@ theorem maxIdx_le {xs ys : List Var} (h : ∀ x ∈ ys, x ∈ xs) : maxIdx ys �
     simp only [maxIdx]
     exact Nat.max_le.2 ⟨le_maxIdx (h y (.head _)), ih (fun x hx => h x (.tail _ hx))⟩
 
+/-- The largest index of two lists is the larger of theirs: `[x, se1] ++ [sp2]`
+has `2`.  With it the fresh index of a line whose postcondition `φ` names no
+fresh variable is computed without knowing `φ` (`Chains.lean`). -/
+theorem maxIdx_append (xs ys : List Var) : maxIdx (xs ++ ys) = max (maxIdx xs) (maxIdx ys) := by
+  induction xs with
+  | nil => exact (Nat.zero_max _).symm
+  | cons x xs ih => simp only [List.cons_append, maxIdx, ih, Nat.max_assoc]
+
 /-- Indices above every index in sight give fresh names.
 
 Example: in `alice.account.balance = x;` every variable has index `0` (`x` is

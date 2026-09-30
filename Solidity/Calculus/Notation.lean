@@ -14,10 +14,27 @@ table is written in it — so the formula of the file's `InContract` is
 `dl!{ φ }`, as `sol_raw!{ … }` sits beside `sol{ … }`.
 
 The printers do not change: a formula prints as `dl{ φ }`, and the `φ` it
-shows reads back through `dl[C]{ φ }` (or `dl!{ φ }`) as the formula it is.
-The reading is mini-solkey's: the macros build a raw formula, `elabDl`
-resolves its names at compile time (`elabAgainst`, as `sol[C]{ … }` does),
-and `Fml.quote` (`Quote.lean`) splices the result.
+shows reads back through `dl[C]{ φ }` (or `dl!{ φ }`) as the formula it is —
+at its modality, `dl![m]{ φ }`, when it has `⟨[ ]⟩` or is a box's: an update
+prints `{U} ψ` whatever the modality it is judged at.  The reading is
+mini-solkey's: the macros build a raw formula, `elabDl` resolves its names
+at compile time (`elabAgainst`, as `sol[C]{ … }` does), and `Fml.quote`
+(`Quote.lean`) splices the result.
+
+**Lean terms in a formula.**  `dl![m]{ φ }` (`dl[C, m]{ φ }`) reads `φ` at
+the modality `m`, a Lean term — a variable, `.box`, `.diamond`: `⟨[ P ]⟩ ψ`
+is `P` under `m`, and an update with no modality under
+it is judged at `m`, so the last line of a box derivation is
+`dl![.box]{ { x := 1 } x == 1 }`.  In `dl!{ φ }` such an update is judged at
+the diamond, and `⟨[ ]⟩` is refused.  A name where a formula stands, or
+`‹t›`, is a Lean formula: the postcondition `φ` (a `Post C`,
+`Chains.lean`), which prints back as its name.  The reader runs as compiled
+code, which no Lean variable can enter, so each of these stands in for
+something closed while the formula is read, and one walk (`fillSlots`) puts
+the Lean terms back: a formula is read as a slot (`Fml.slot`), and the
+modality as the difference between two readings, one at the diamond and one
+at the box — the reading never looks at a modality, so they differ exactly
+where `m` goes.
 
 **Two equations.**  `a = b` here is the interpreter's equation, `Fml.eqD`:
 both sides return, with one value — what `==` means, and what `a = b`
@@ -47,7 +64,7 @@ What a name is:
   alias of that type for the formula under it; `sp1`, `mv1` (`FreshNames`)
   are an alias and a memory local wherever nothing else says otherwise.
 
-What does not read back: `‹…›` (a Lean term, which is also how a
+What does not read back: `‹…›` in a term or an update (a Lean term, which is also how a
 conditional and an operator other than `+`, `-` print), the operator schema variables
 `⊕ ⊖ ± ⊕⊕` (taclets only), and the terms whose printing drops a type —
 `freshId(addM(m))`, `addM(m)`, `newArr(n)`, `defVal(T)` for a non-primitive `T`.  A
@@ -102,9 +119,13 @@ inductive RawFml where
   | not (φ : RawFml)
   | and (φ ψ : RawFml)
   | imp (φ ψ : RawFml)
-  /-- `{U} φ`, under the modality of the goal it came from (`fmlModality?`). -/
+  /-- `{U} φ`, under the modality of the goal it came from (`fmlModality?`),
+  else the formula's. -/
   | upd (m : Modality) (U : List RawUpdElem) (φ : RawFml)
   | modal (m : Modality) (P : List RawStmt) (φ : RawFml)
+  /-- `φ` or `‹t›` where a formula stands: the formula's `i`th Lean formula,
+  read as `Fml.slot i` and put back after (`fillSlots`). -/
+  | lean (i : Nat)
   deriving Repr, Inhabited
 
 section Expand
@@ -201,7 +222,26 @@ def expandUpd (U : TSyntax `dl_upd) : MacroM Lean.Term := do
     | _ => Macro.throwUnsupported
   `([$elems,*])
 
-partial def expandFml : TSyntax `dl_fml → MacroM Lean.Term
+/-- The Lean term of a formula that is one: a name `φ`, or `‹t›`. -/
+def fmlHole? (stx : Syntax) : Option Lean.Term :=
+  match (⟨stx⟩ : TSyntax `dl_fml) with
+  | `(dl_fml| $x:ident) => some x
+  | `(dl_fml| ‹ $t:term ›) => some t
+  | _ => none
+
+/-- The Lean formulas of a formula, each once, in order. -/
+partial def fmlHoles (stx : Syntax) (acc : Array Syntax := #[]) : Array Syntax :=
+  if (fmlHole? stx).isSome then
+    if acc.any (·.structEq stx) then acc else acc.push stx
+  else stx.getArgs.foldl (fun acc s => fmlHoles s acc) acc
+
+/-- How a formula is read: what `⟨[ ]⟩` stands for (none in `dl[C]{ … }`,
+which refuses it), and its Lean formulas (`fmlHoles`), numbered. -/
+structure Reading where
+  either : Option Lean.Term := none
+  holes : Array Syntax := #[]
+
+partial def expandFml (r : Reading) : TSyntax `dl_fml → MacroM Lean.Term
   | `(dl_fml| true) => `(RawFml.tt)
   | `(dl_fml| false) => `(RawFml.not RawFml.tt)
   | `(dl_fml| $a:dl_term = $b:dl_term) => do `(RawFml.eq $(← expandTerm a) $(← expandTerm b))
@@ -216,38 +256,44 @@ partial def expandFml : TSyntax `dl_fml → MacroM Lean.Term
   | `(dl_fml| $a:dl_term > $b:dl_term) => cmp ``BinOp.gt a b
   | `(dl_fml| $a:dl_term >= $b:dl_term) => cmp ``BinOp.ge a b
   | `(dl_fml| ∀ $T:ident $x:ident; $φ:dl_fml) => do
-      `(RawFml.all $(← specSort T) $(quote x.getId.toString) $(← expandFml φ))
+      `(RawFml.all $(← specSort T) $(quote x.getId.toString) $(← expandFml r φ))
   | `(dl_fml| ∃ $T:ident $x:ident; $φ:dl_fml) => do
       `(RawFml.not (RawFml.all $(← specSort T) $(quote x.getId.toString)
-        (RawFml.not $(← expandFml φ))))
-  | `(dl_fml| ¬ $φ:dl_fml) => do `(RawFml.not $(← expandFml φ))
+        (RawFml.not $(← expandFml r φ))))
+  | `(dl_fml| ¬ $φ:dl_fml) => do `(RawFml.not $(← expandFml r φ))
   | `(dl_fml| $φ:dl_fml ∧ $ψ:dl_fml) | `(dl_fml| $φ:dl_fml && $ψ:dl_fml) => do
-      `(RawFml.and $(← expandFml φ) $(← expandFml ψ))
+      `(RawFml.and $(← expandFml r φ) $(← expandFml r ψ))
   | `(dl_fml| $φ:dl_fml ∨ $ψ:dl_fml) => do
-      `(RawFml.not (RawFml.and (RawFml.not $(← expandFml φ)) (RawFml.not $(← expandFml ψ))))
-  | `(dl_fml| $φ:dl_fml → $ψ:dl_fml) => do `(RawFml.imp $(← expandFml φ) $(← expandFml ψ))
+      `(RawFml.not (RawFml.and (RawFml.not $(← expandFml r φ)) (RawFml.not $(← expandFml r ψ))))
+  | `(dl_fml| $φ:dl_fml → $ψ:dl_fml) => do `(RawFml.imp $(← expandFml r φ) $(← expandFml r ψ))
   | `(dl_fml| $φ:dl_fml ↔ $ψ:dl_fml) => do
-      let φ ← expandFml φ
-      let ψ ← expandFml ψ
+      let φ ← expandFml r φ
+      let ψ ← expandFml r ψ
       `(RawFml.and (RawFml.imp $φ $ψ) (RawFml.imp $ψ $φ))
   | stx@`(dl_fml| { havoc } $_:dl_fml) =>
       Macro.throwErrorAt stx "`{ havoc }` is what a callback rule leaves, not a formula to write: \
         `dl[C]{ … }` reads formulas of `Stmt.run`"
   | `(dl_fml| $U:dl_upd $φ:dl_fml) => do
-      let m ← match ← fmlModality? φ with
+      -- judged as the modality under it, else as the formula's (the diamond in `dl!{ … }`)
+      let dflt ← match r.either with
         | some m => pure m
         | none => `(Modality.diamond)
-      `(RawFml.upd $m $(← expandUpd U) $(← expandFml φ))
+      let m := (← fmlModality? dflt φ).getD dflt
+      `(RawFml.upd $m $(← expandUpd U) $(← expandFml r φ))
   | `(dl_fml| ⟨ $[$ss:sol_stmt;]* ⟩ $φ:dl_fml) => do
-      `(RawFml.modal .diamond [$(← ss.mapM expandStmt),*] $(← expandFml φ))
+      `(RawFml.modal .diamond [$(← ss.mapM expandStmt),*] $(← expandFml r φ))
   | `(dl_fml| [ $[$ss:sol_stmt;]* ] $φ:dl_fml) => do
-      `(RawFml.modal .box [$(← ss.mapM expandStmt),*] $(← expandFml φ))
-  | stx@`(dl_fml| ⟨[ $[$_:sol_stmt;]* ]⟩ $_:dl_fml) =>
-      Macro.throwErrorAt stx "`⟨[ … ]⟩` stands for either modality, in a taclet: write `⟨ … ⟩` or `[ … ]`"
+      `(RawFml.modal .box [$(← ss.mapM expandStmt),*] $(← expandFml r φ))
+  | stx@`(dl_fml| ⟨[ $[$ss:sol_stmt;]* ]⟩ $φ:dl_fml) => do
+      let some m := r.either | Macro.throwErrorAt stx ("`⟨[ … ]⟩` is either modality: " ++
+        "read the formula at one, `dl![m]{ … }`, or write `⟨ … ⟩` or `[ … ]`")
+      `(RawFml.modal $m [$(← ss.mapM expandStmt),*] $(← expandFml r φ))
   | stx@`(dl_fml| ⟨ $_:sol_block ⟩ $_:dl_fml) | stx@`(dl_fml| [ $_:sol_block ] $_:dl_fml) =>
       Macro.throwErrorAt stx "a program that is a schema variable belongs to `dl{ … }`"
-  | `(dl_fml| ( $φ:dl_fml )) => expandFml φ
-  | stx@`(dl_fml| ‹ $_:term ›) => noEscape stx
+  | `(dl_fml| ( $φ:dl_fml )) => expandFml r φ
+  | stx@`(dl_fml| $_:ident) | stx@`(dl_fml| ‹ $_:term ›) => do
+      let some i := r.holes.findIdx? (·.structEq stx) | Macro.throwUnsupported
+      `(RawFml.lean $(quote i))
   | _ => Macro.throwUnsupported
 where
   cmp (op : Lean.Name) (a b : TSyntax `dl_term) : MacroM Lean.Term := do
@@ -304,6 +350,7 @@ def RawFml.names : RawFml → List String × List String
   | .modal _ P φ =>
     let (u, d) := φ.names
     (RawStmt.namesList P ++ u, RawStmt.declsList P ++ d)
+  | .lean _ => ([], [])
 
 /-- The statements of every program in a formula. -/
 def RawFml.stmts : RawFml → List RawStmt
@@ -318,6 +365,16 @@ def boolFml {C : Contract} (t : Term C) : Fml C := .eqD t (.lit (.bool true))
 /-- `a ⊕ b = true`, defined: a comparison as a formula (`a < b` and the like). -/
 def cmpFml {C : Contract} (op : BinOp) (p : PrimTy) (a b : Term C) : Fml C :=
   boolFml (.binop op p a b)
+
+/-- The slot of a formula's `i`th Lean formula while it is read:
+`defined(⟪i⟫)`, a local no program can name, with index `0` and no modality,
+as the formula it stands for (`Post`, `Chains.lean`). -/
+def Fml.slot {C : Contract} (i : Nat) : Fml C := .defined (.pv (.user s!"⟪{i}⟫"))
+
+/-- Whether a formula is a slot. -/
+def Fml.isSlot {C : Contract} : Fml C → Bool
+  | .defined (.pv (.user s)) => s.startsWith "⟪"
+  | _ => false
 
 /-! ## Elaboration -/
 
@@ -605,6 +662,7 @@ def elabFml : RawFml → ElabM (Fml C)
   | .modal m P φ => inScope do
     let P' ← elabStmts C P
     pure (.modal m P' (← elabFml φ))
+  | .lean i => pure (Fml.slot i)
 
 /-- Elaborate a formula against `C`.  Its parameters (the names nothing
 declares) are in scope from the start: an alias if a program binds one to a
@@ -626,23 +684,105 @@ def elabDl (φ : RawFml) : Except String (Fml C) :=
 
 end Read
 
+/-! ## Putting the Lean terms back -/
+
+section Fill
+open Lean (mkApp mkApp2 mkConst mkStrLit)
+
+/-- `Fml.slot i`, quoted, for the contract `c`. -/
+def slotExpr (c : Lean.Expr) (i : Nat) : Lean.Expr :=
+  mkApp2 (mkConst ``Fml.defined) c
+    (mkApp2 (mkConst ``Term.pv) c (mkApp (mkConst ``Var.user) (mkStrLit s!"⟪{i}⟫")))
+
+/-- The `i` of a quoted `Fml.slot i`. -/
+def slotIdx? (e : Lean.Expr) : Option Nat := do
+  guard (e.isAppOfArity ``Fml.defined 2)
+  let t := e.appArg!
+  guard (t.isAppOfArity ``Term.pv 2)
+  let x := t.appArg!
+  guard (x.isAppOfArity ``Var.user 1)
+  let .lit (.strVal s) := x.appArg! | none
+  guard (s.startsWith "⟪" && s.endsWith "⟫")
+  ((s.drop 1).dropRight 1).toNat?
+
+/-- The formula whose readings at the diamond (`d`) and at the box (`b`) are
+given, with its Lean terms back: `m` where `d` has the diamond and `b` the
+box, the formula `φs[i]` at the slot `i`.  Elsewhere the two agree.  A quoted
+formula has no binders, so a term is put back as it is. -/
+partial def fillSlots (m? : Option Lean.Expr) (φs : Array Lean.Expr) (d b : Lean.Expr) :
+    Except String Lean.Expr := do
+  if let some m := m? then
+    if d.isConstOf ``Modality.diamond && b.isConstOf ``Modality.box then return m
+  if let some i := slotIdx? d then
+    if let some φ := φs[i]? then
+      if slotIdx? b == some i then return φ
+  match d, b with
+  | .app f x, .app g y => return .app (← fillSlots m? φs f g) (← fillSlots m? φs x y)
+  | _, _ => if d == b then pure d else throw "the readings at the diamond and at the box differ"
+
+end Fill
+
 /-! ## `dl[C]{ … }` and `dl!{ … }` -/
 
 /-- `dl[C]{ φ }`: the formula `φ`, its names resolved against the contract `C`. -/
 syntax "dl[" term "]{ " dl_fml " }" : term
 
+/-- `dl[C, m]{ φ }`: `dl[C]{ φ }` at the modality `m`, a Lean term (a
+variable, `.box`, `.diamond`): `⟨[ P ]⟩ ψ` is `P` under `m`, and an update with
+no modality under it is judged at `m`. -/
+syntax "dl[" term ", " term "]{ " dl_fml " }" : term
+
 /-- `dl!{ φ }`: `dl[C]{ φ }` for the file's `InContract` contract.  (`dl{ φ }`
 is the schema reading.) -/
 syntax "dl!{ " dl_fml " }" : term
 
+/-- `dl![m]{ φ }`: `dl[C, m]{ φ }` for the file's `InContract` contract. -/
+syntax "dl![" term "]{ " dl_fml " }" : term
+
+open Lean Elab Term Meta in
+/-- `dl[C, m]{ φ }`, `m` optional.  A constructor is read as itself, any other
+modality twice, at the diamond and at the box, in one evaluation (the two
+sides of a conjunction); `fillSlots` then puts `m` and the Lean formulas
+back. -/
+def elabDlAt (c : Lean.Term) (m? : Option Lean.Term) (φ : TSyntax `dl_fml) :
+    TermElabM Lean.Expr := do
+  let holes := fmlHoles φ
+  let m? ← m?.mapM fun m => do instantiateMVars (← elabTermEnsuringType m (mkConst ``Modality))
+  let read (μ : Option Lean.Name) : TermElabM Lean.Term :=
+    liftMacroM (expandFml { either := μ.map fun n => (mkCIdent n : Lean.Term), holes } φ)
+  let once (μ : Option Lean.Name) : TermElabM Lean.Expr := do
+    let raw ← read μ
+    elabAgainst c fun q => `((elabDl $c $raw).map (Fml.quote $q))
+  let (d, b) ← match m? with
+    | none => do let e ← once none; pure (e, e)
+    | some m =>
+      if m.isConstOf ``Modality.diamond || m.isConstOf ``Modality.box then
+        let e ← once m.constName?
+        pure (e, e)
+      else
+        let rd ← read ``Modality.diamond
+        let rb ← read ``Modality.box
+        let e ← elabAgainst c fun q =>
+          `((do pure (Fml.and (← elabDl $c $rd) (← elabDl $c $rb))).map (Fml.quote $q))
+        let #[_, d, b] := e.getAppArgs | throwError "dl[C, m]: not two readings{indentExpr e}"
+        pure (d, b)
+  if holes.isEmpty && d == b then return d
+  let ty ← inferType d
+  let φs ← holes.mapM fun h => do
+    let some t := fmlHole? h | throwError "dl[C]: not a formula hole"
+    withRef h do elabTermEnsuringType t ty
+  match fillSlots m? φs d b with
+  | .ok e => return e
+  | .error msg => throwError "dl[C, m]: {msg}"
+
 open Lean Elab Term Meta in
 elab_rules : term
-  | `(dl[ $c ]{ $φ:dl_fml }) => do
-    let raw ← liftMacroM (expandFml φ)
-    elabAgainst c fun q => `((elabDl $c $raw).map (Fml.quote $q))
+  | `(dl[ $c ]{ $φ:dl_fml }) => elabDlAt c none φ
+  | `(dl[ $c, $m ]{ $φ:dl_fml }) => elabDlAt c (some m) φ
 
 macro_rules
   | `(dl!{ $φ:dl_fml }) => `(dl[InContract.contract]{ $φ })
+  | `(dl![ $m ]{ $φ:dl_fml }) => `(dl[InContract.contract, $m]{ $φ })
 
 /-! ## Examples -/
 
@@ -721,6 +861,52 @@ example : dl!{ a ≐ 1 } = Fml.eq (.pv (.user "a")) (.lit (.int 1)) := rfl
 
 /-- error: Solidity elaboration failed: unknown name y -/
 #guard_msgs in #check dl!{ ⟨ uint y = 1; ⟩ true ∧ y == 1 }
+
+/-! ### At a modality: `dl![m]{ … }` -/
+
+/-- `⟨[ P ]⟩` at a constructor is its bracket. -/
+example : dl![.box]{ ⟨[ alice.age = 10; ]⟩ alice.age == 10 } =
+    dl!{ [ alice.age = 10; ] alice.age == 10 } := rfl
+example : dl[StandardExample, .diamond]{ ⟨[ x = 1; ]⟩ x == 1 } = dl!{ ⟨ x = 1; ⟩ x == 1 } := rfl
+
+/-- An update with no modality under it is judged at the formula's: the last
+line of a box derivation, which `dl!{ … }` reads at the diamond. -/
+example : symex 2 dl!{ [ x = 1; ] x == 1 } = dl![.box]{ { x := 1 } x == 1 } := rfl
+example : dl![.box]{ { x := 1 } x == 1 } ≠ dl!{ { x := 1 } x == 1 } := by intro h; cases h
+
+/-- A modality under the update still decides. -/
+example : dl![.diamond]{ { x := 1 } [ x = 2; ] x == 2 } = dl!{ { x := 1 } [ x = 2; ] x == 2 } := rfl
+
+/-- At a modality `m` the rules reduce: none but a revert looks at it. -/
+example (m : Modality) :
+    (dl![m]{ ⟨[ x = 1; ]⟩ x == 1 }).step = some dl![m]{ { x := 1 } ⟨[ ]⟩ x == 1 } := rfl
+example (m : Modality) : symex 2 dl![m]{ ⟨[ x = 1; ]⟩ x == 1 } = dl![m]{ { x := 1 } x == 1 } := rfl
+
+/-- info: dl{ ⟨[ x = 1; ]⟩ x = 1 } : Fml StandardExample -/
+#guard_msgs in
+variable (m : Modality) in
+#check dl![m]{ ⟨[ x = 1; ]⟩ x == 1 }
+
+/--
+error: `⟨[ … ]⟩` is either modality: read the formula at one, `dl![m]{ … }`, or write `⟨ … ⟩` or `[ … ]`
+-/
+#guard_msgs in #check dl!{ ⟨[ x = 1; ]⟩ x == 1 }
+
+/-! ### A Lean formula where a formula stands -/
+
+/-- A name is a Lean formula: the postcondition `φ`. -/
+example (φ : Fml StandardExample) :
+    dl!{ { x := 1 } φ } = Fml.upd .diamond [.val (.user "x") (.lit (.int 1))] φ := rfl
+
+/-- So is `‹t›`; `true` stays the keyword. -/
+example (φ ψ : Fml StandardExample) : dl!{ ‹φ› ∧ ψ ∧ true } = Fml.and φ (Fml.and ψ .tt) := rfl
+
+/-- Both at once: `m` and `φ` are put back by one walk. -/
+example (m : Modality) (φ : Fml StandardExample) :
+    (dl![m]{ ⟨[ x = 1; ]⟩ φ }).step = some dl![m]{ { x := 1 } ⟨[ ]⟩ φ } := rfl
+
+/-- info: fun m φ => dl{ ⟨[ x = 1; ]⟩ φ } : Modality → Fml StandardExample → Fml StandardExample -/
+#guard_msgs in #check fun (m : Modality) (φ : Fml StandardExample) => dl![m]{ ⟨[ x = 1; ]⟩ φ }
 
 end Examples
 
