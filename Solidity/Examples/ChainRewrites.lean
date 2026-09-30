@@ -15,7 +15,8 @@ validity of the last line back to the first.
   `φ`, `⟨[ p ]⟩ φ`;
 * §3 — on to the value under the box: `simplifyUpdate`, `applyStorageBox`,
   `findOnSave`;
-* §4 — a law in an update's right-hand side: `alice.age = 42; uint x = alice.age;`;
+* §4 — a law in an update's right-hand side: `alice.age = 42; uint x = alice.age;`,
+  and the headline's write read back;
 * §5 — a rebound alias: the overwritten capture dropped, as the printed line
   has it.
 
@@ -187,7 +188,9 @@ there on `⊢`): the read merged into the write (`sequentialToParallel` over a
 storage write), read back inside the update (`findOnSave`, onto a literal),
 the update applied (`applyOnRigidBox`: `x ≐ 42` reads no storage).  The
 calculus's traces read terms back in the update this way
-(`Examples/Theory.lean`). -/
+(`Examples/Theory.lean`).  Then the headline's write read back
+(`Theory.deepFieldWriteValue`'s program): the write sits amid captures, and
+the spine merges inside out. -/
 
 /-- `alice.age = 42; uint x = alice.age;` under the box: the strategy's four steps. -/
 theorem ageWriteReadBox :
@@ -228,6 +231,58 @@ theorem ageWriteReadValue : ⊨ dl!{ [ alice.age = 42; uint x = alice.age; ] x �
   refine (LineRw.lawUpd (findOnSave (s := .storage) (p := age) (v := .int 42)) rfl 0).valid
     ageWriteReadLaw ?_
   refine (LineRw.applyOnRigidBox 0).valid ageWriteReadApplied ?_
+  exact fun _ => Theory.StValue.Equiv.refl _
+
+/-- `alice.account.balance = 10; uint x = alice.account.balance;` under the
+box: the strategy's twelve steps, a storage write amid the captures. -/
+theorem readBackBox :
+    symex 12 dl!{ [ alice.account.balance = 10; uint x = alice.account.balance; ] x ≐ 10 }
+      = over .box dl!{ x ≐ 10 }
+          dl!{ { se1 := 10 } { sp1 := alice.account } { storage := save(storage, sp1.balance, se1) }
+            { sp2 := alice.account } { x := find(storage, sp2.balance) } true } :=
+  rfl
+
+/-- `alice.account.balance = 10; uint x = alice.account.balance;`: merged
+inside out, the read over the write first (`withSt`), then the captures. -/
+theorem readBackMerged :
+    Fml.mergeSpine 4 (over .box dl!{ x ≐ 10 }
+        dl!{ { se1 := 10 } { sp1 := alice.account } { storage := save(storage, sp1.balance, se1) }
+          { sp2 := alice.account } { x := find(storage, sp2.balance) } true })
+      = some (over .box dl!{ x ≐ 10 }
+          dl!{ { se1 := 10 ‖ sp1 := alice.account ‖ storage := save(storage, alice.account.balance, 10)
+            ‖ sp2 := alice.account
+            ‖ x := find(save(storage, alice.account.balance, 10), alice.account.balance) } true }) := rfl
+
+/-- `alice.account.balance = 10; uint x = alice.account.balance;`: `x` reads
+back `10` in the update. -/
+theorem readBackLaw :
+    Fml.rwUpdAt (.find (.save .storage balance (.val (.lit (.int 10)))) balance, .lit (.int 10)) 0
+        (over .box dl!{ x ≐ 10 }
+          dl!{ { se1 := 10 ‖ sp1 := alice.account ‖ storage := save(storage, alice.account.balance, 10)
+            ‖ sp2 := alice.account
+            ‖ x := find(save(storage, alice.account.balance, 10), alice.account.balance) } true })
+      = some (over .box dl!{ x ≐ 10 }
+          dl!{ { se1 := 10 ‖ sp1 := alice.account ‖ storage := save(storage, alice.account.balance, 10)
+            ‖ sp2 := alice.account ‖ x := 10 } true }) := rfl
+
+/-- `alice.account.balance = 10; uint x = alice.account.balance;`: the
+update applied. -/
+theorem readBackApplied :
+    Fml.applyOnRigidBoxAt 0 (over .box dl!{ x ≐ 10 }
+        dl!{ { se1 := 10 ‖ sp1 := alice.account ‖ storage := save(storage, alice.account.balance, 10)
+          ‖ sp2 := alice.account ‖ x := 10 } true })
+      = some dl!{ 10 ≐ 10 } := rfl
+
+/-- `alice.account.balance = 10; uint x = alice.account.balance;` reads back
+`10`, the lines above chained. -/
+theorem readBackValue :
+    ⊨ dl!{ [ alice.account.balance = 10; uint x = alice.account.balance; ] x ≐ 10 } := by
+  apply symex_valid 12
+  rw [readBackBox]
+  refine (LineRw.mergeSpine 4).valid readBackMerged ?_
+  refine (LineRw.lawUpd (findOnSave (s := .storage) (p := balance) (v := .int 10)) rfl 0).valid
+    readBackLaw ?_
+  refine (LineRw.applyOnRigidBox 0).valid readBackApplied ?_
   exact fun _ => Theory.StValue.Equiv.refl _
 
 /-! ## 5 · A rebound alias
