@@ -18,7 +18,20 @@ dl!{ ⟨ alice.age = v; ⟩ alice.age == v }
 * `φ ~*> ψ` — zero or more steps (`Fml.Steps`, a `Type`: the derivation as
   a value, indexed by its two ends);
 * `φ₀ ~*> φ₁ ~[r]~> φ₂ ~> φ₃` — a chain, every link holding (`Fml.Via`), and
-  `calc`, whose steps are these links.
+  `calc`, whose steps are these links;
+* past the program, `φ ~[sequentialToParallel]~> ψ`, `φ ~[findOnSave]~> ψ` —
+  a rewrite of the line (`Fml.RwBy`, below), and `φ ~~> ψ` (`Fml.Leads`):
+  wherever `ψ` holds, `φ` does, what a chain with a rewrite composes to.
+
+**Rewrites.**  The last lines merge the updates the program left
+into one parallel update, and a Theory law reads a term down to its value:
+no step of the strategy.  The arrow then names an update rule (KeY's name)
+or a law, and its label is a rewrite of `Calculus/ChainRewrites.lean`
+(`LineRw`): the elaborator finds, from the line before, the position on the
+update spine and the law's instance (as `rw` finds one) that give the line
+after, and the kernel checks `r.apply φ = some ψ`.  A name that is no rule,
+a rule that does not apply and a name that resolves twice are errors.  The
+evidence is unique for `~*>` only: a rewrite and a step may commute.
 
 **Naming a rule.**  mini-solkey names a step by a `RuleName`, an
 enumeration its strategy computes with.  Here the strategy computes
@@ -594,7 +607,7 @@ theorem Fml.Via.valid {φ : Fml C} {ws : List (Link C × Fml C)} (v : Fml.Via φ
 
 /-- A chain with rewrites is a proof: to prove its first line, prove its last.
 
-Example: `headlineNamed .box φ` of `Examples/Chains.lean`, down to the
+Example: `headlineNamed .box φ` of `Examples/ChainRewrites.lean`, down to the
 last line, proves `[ alice.account.balance = 10; ] φ` from
 `{ se1 := 10 ‖ sp1 := alice.account ‖ storage := save(storage, alice.account.balance, 10) } φ`. -/
 theorem Fml.Leads.valid {φ ψ : Fml C} (h : φ ~~> ψ) (hψ : ⊨ ψ) : ⊨ φ :=
@@ -1008,7 +1021,7 @@ def rwArrow? (r : Ident) : MetaM (Option RwArrow) := do
   match cs with
   | [c] => if ← isLaw c then return some (.law c)
   | [] => pure ()
-  | cs => throwError "~[{r}]~>: ambiguous, {r} may be any of {cs}"
+  | cs => throwError "~[{r}]~>: ambiguous, {r} may be {", ".intercalate (cs.map toString)}"
   throwError "~[{r}]~>: {r} is no rule: not a `Taclet` or `LeanTaclet` constructor, not an \
     update rule ({", ".intercalate (rwTable.map toString)}), not a Theory law (`Term.Theq`)"
 

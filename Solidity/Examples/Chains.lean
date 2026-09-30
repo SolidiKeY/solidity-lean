@@ -152,8 +152,9 @@ The derivation of the headline
 in the storage examples, for every modality `m` and postcondition
 `φ`: a step, the steps to the write, the write, the end of the program.  Its
 fresh names are the rules' (`se1`, `sp1` for the printed `pv`, `acc`), and its
-updates stay as the rules leave them (the printed trace merges them).  It is a
-`def`: the chain is data. -/
+updates stay as the rules leave them; the printed trace merges them, which
+`Examples/ChainRewrites.lean`'s `headlineNamed` does with rewrite links.  It
+is a `def`: the chain is data. -/
 
 def headline (m : Modality) (φ : Post StandardExample) :
     dl![m]{ ⟨[ alice.account.balance = 10; ]⟩ φ }
