@@ -73,7 +73,9 @@ through an index is checked then and not when used, so a write to the
 storage leaves it stale (`SymB.onWrite`) and a later use of it outside the
 fragment.
 
-**The fragment** (`Fml.inL`): no modality (run `sol_symex` first), one
+**The fragment** (`Fml.inL`): no modality (run `sol_symex` first) but the
+`⟨[ revert(); ]⟩` a branch's cover keeps (`Premise.coverFml`: `true` under
+the box, `false` under the diamond), one
 element per update, a local, an alias or the storage updated; an equation
 as `eqD a b`, both sides defined (a bare `a ≐ b` compares the Theory
 values, and a term that halts still denotes one: `Fml.eqDView`), or a bare
@@ -701,6 +703,18 @@ def guardM : Modality → LTerm → LFml → LFml
   | .box, g, φ => .imp (.eq g g) φ
   | .diamond, g, φ => .and (.eq g g) φ
 
+/-- A program that starts with `revert();`: it halts, whatever follows. -/
+def _root_.Solidity.Prog.reverts : Prog C → Bool
+  | .revert :: _ => true
+  | _ => false
+
+theorem _root_.Solidity.Prog.reverts_eq {P : Prog C} (h : P.reverts = true) :
+    ∃ ω, P = .revert :: ω := by
+  unfold Prog.reverts at h
+  split at h
+  · exact ⟨_, rfl⟩
+  · cases h
+
 /-- A formula with its updates pushed in. -/
 def _root_.Solidity.Fml.toL : Sym → Fml C → LFml
   | _, .tt => .tt
@@ -714,7 +728,9 @@ def _root_.Solidity.Fml.toL : Sym → Fml C → LFml
   | ρ, .imp φ ψ => .imp (φ.toL ρ) (ψ.toL ρ)
   | ρ, .upd _ [] φ => φ.toL ρ
   | ρ, .upd m [e] φ => guardM m (e.toL ρ).1 (φ.toL (e.toL ρ).2)
-  | _, .upd _ (_ :: _ :: _) _ | _, .modal .. | _, .havoc _ | _, .all .. => .tt
+  | _, .modal .box _ _ => .tt
+  | _, .modal .diamond _ _ => .not .tt
+  | _, .upd _ (_ :: _ :: _) _ | _, .havoc _ | _, .all .. => .tt
 
 /-- The fragment `Fml.toL` is exact on: no modality, one element per update,
 no memory, no push or pop, no copy between locations, and every alias bound
@@ -731,7 +747,8 @@ def _root_.Solidity.Fml.inL : Sym → Fml C → Bool
   | ρ, .imp φ ψ => φ.inL ρ && ψ.inL ρ
   | ρ, .upd _ [] φ => φ.inL ρ
   | ρ, .upd _ [e] φ => e.inL ρ && φ.inL (e.toL ρ).2
-  | _, .upd _ (_ :: _ :: _) _ | _, .modal .. | _, .havoc _ | _, .all .. => false
+  | _, .modal _ P _ => P.reverts
+  | _, .upd _ (_ :: _ :: _) _ | _, .havoc _ | _, .all .. => false
 
 
 /-! ### The updates pushed in keep the meaning -/
@@ -1547,7 +1564,11 @@ theorem Fml.toL_holds :
       exact (h.env y).onWrite rfl
     | mref _ _ | memory _ | selfBalance _ _ | net _ _ _ | store _ _ | saveNet _ =>
       simp [UpdElem.inL] at hf
-  | .upd _ (_ :: _ :: _) _, _, _, _, _, hf | .modal .., _, _, _, _, hf | .havoc _, _, _, _, _, hf
+  | .modal m P φ, _, _, _, _, hf => by
+    obtain ⟨ω, rfl⟩ := Prog.reverts_eq hf
+    cases m <;> simp only [holds, Prog.run, Stmt.run, bind, Except.bind, Modality.after,
+      Modality.onHalt, Fml.toL, LFml.holds, not_true_eq_false]
+  | .upd _ (_ :: _ :: _) _, _, _, _, _, hf | .havoc _, _, _, _, _, hf
   | .all .., _, _, _, _, hf => by
     simp [Fml.inL] at hf
 

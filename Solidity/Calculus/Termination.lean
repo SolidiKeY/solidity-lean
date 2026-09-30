@@ -939,12 +939,12 @@ def Fml.measure : Fml C → Nat
   | .and φ ψ => φ.measure + ψ.measure
   | .tt | .eq .. | .defined _ | .not _ | .all .. => 0
 
-/-- What a diamond branch owes besides its goals measures nothing.
+/-- What a branch owes besides its goals measures nothing: its revert sits
+under a negation, which the strategy does not step into.
 
-Example: `¬(¬(se = true) ∧ ¬(se = false))` measures `0`. -/
-theorem Premise.cover_measure (m : Modality) (c c' : Fml C) :
-    (Premise.cover m c c').measure = 0 := by
-  cases m <;> rfl
+Example: `⟨[ revert(); ]⟩ false ∨ se ≐ true ∨ se ≐ false` measures `0`. -/
+theorem Premise.coverFml_measure (m : Modality) (c c' : Fml C) :
+    (Premise.coverFml m c c').measure = 0 := rfl
 
 /-- A premise that weighs less than its statement lowers the measure of the
 modality: an update, new statements, the two goals of a branch, or the
@@ -985,7 +985,7 @@ theorem Premise.measure_lt {m : Modality} {s : Stmt C} {p : Premise C} (h : p.Sm
   | split c c' P Q =>
     simp only [Premise.Smaller] at h
     simp only [Premise.fml, Fml.measure, Prog.weight, Prog.weight_append,
-      Premise.cover_measure, Nat.add_zero]
+      Premise.coverFml_measure, Nat.add_zero]
     -- both goals are below `X`, and the `if` is above `4 X`
     generalize Prog.weight ω = a
     generalize hX : 2 ^ (s.weight - 2 + a) = X

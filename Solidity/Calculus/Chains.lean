@@ -71,11 +71,13 @@ derivation, to copy a line from.
 **Unknowns in a line.**  A line may keep two unknowns
 (`Notation.lean`): a modality `m`, `dl![m]{ ⟨[ p ]⟩ φ }`, and a
 postcondition `φ : Post C`.  Every rule but a revert is the same under
-either modality, so `sol_chain` runs such a line as the diamond and as the
-box and keeps the lines the two share, up to a `revert();` or a branch's
-cover (`Premise.cover`), which do depend on it; after a split nothing is
-written under `m` (the cover, and every fresh index after it, are stuck on
-it), and the chain goes on after `cases m`.  `φ` stands in a slot
+either modality — a branch's cover too, `⟨[ revert(); ]⟩ false ∨ c ∨ c'`
+(`Premise.coverFml`) — so `sol_chain` runs such a line as the diamond and
+as the box and keeps the lines the two share, through branches and guards,
+up to the first `revert();` the strategy steps: `revertBox` leaves `true`
+and `revertDiamond` `false`, as the calculus's traces part at
+`⟨[ revert(); ]⟩ φ`.  That line ends the chain under `m`; after `cases m`
+it goes on.  `φ` stands in a slot
 (`Fml.slot`) while the strategy runs; `rfl` cannot compute a fresh index
 over it, so a step is proved at the index the run found
 (`Fml.OneStep.ofFresh`), the index by `simp` from `Post.noFresh`, the step
@@ -959,7 +961,7 @@ def shared (f : Line → Line → Option Line) : List Line → List Line → Lis
 
 /-- The derivation of `φ`: its postconditions in slots, and, under a modality
 `m`, run as the diamond and as the box, whose shared lines are the lines
-under `m` — up to a revert or a branch's cover, the rules that look at it. -/
+under `m` — up to a revert, the one rule that looks at it. -/
 def runChain (C φ : Lean.Expr) : MetaM Run := do
   let some n := (← whnfR C).constName?
     | throwError "sol_chain: the contract is not a named constant: {C}"
@@ -983,7 +985,8 @@ def runChain (C φ : Lean.Expr) : MetaM Run := do
 
 /-- Why a line is not written under the modality `m`. -/
 def modalityStop (m : Lean.Expr) : MessageData :=
-  m!"depends on the modality {m}, through a `revert();` or a branch's cover: go on after `cases {m}`"
+  m!"depends on the modality {m}, through a `revert();` (`revertBox`, `revertDiamond`): \
+    go on after `cases {m}`"
 
 /-- Why the lines stop, when the modality stops them. -/
 def stuckNote (run : Run) : MessageData :=
