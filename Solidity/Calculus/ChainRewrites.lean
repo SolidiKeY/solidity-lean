@@ -16,53 +16,64 @@ None of these is a step of the strategy (`Fml.step`).  Each is here a
 function on the whole line, computing the line after, with the one fact a
 chain needs of it: wherever the line after holds, the line before does
 (`LineRw`).  The semantics is `Calculus/UpdateRules.lean`'s and
-`Calculus/TermRules.lean`'s; this module only says *where* a rule acts.
+`Calculus/TermRules.lean`'s; this module says *where* a rule acts.  A
+function returns `none` where its rule does not fit or would change
+nothing, so a link never repeats its line.
 
-**Where.**  A line is an update prefix, its *spine*
-`{U₀}{U₁}…{Uₙ} ψ`, over a body `ψ` — a program still to run, or the
-postcondition.  A chain rewrites the spine at a position, so the
-functions take one: `i` is the update `Uᵢ`, counted from the outside, and
-`Fml.atSpine` walks to it.  A function looks at nothing below the updates
-it rewrites: a merge looks at two updates, never at the body, so a line
-over an opaque postcondition `φ` computes, and a link on it is `rfl`.  Only
-the rules whose premise is about the body read it: `simplifyUpdate` (the
-variables it reads), the `apply…` rules (a first-order body) and the law
-(its equations).
+| `LineRw` | computes | line before ⇝ line after | sound by | the rule on `⊢` |
+|---|---|---|---|---|
+| `mergeAt i` | `Fml.mergeAt` | `{U}{V} ⇝ {U ‖ {U}V}`, `U` at `i` | `Upd.merge_holds` (iff) | `merge`, `mergeStorage` |
+| `mergeSpine n` | `Fml.mergeSpine` | the first `n + 1` updates into one | `n` merges (iff) | — |
+| `updRule r i` | `Fml.updRuleAt` | `simplifyUpdate`, `applySkip`, `applyOnRigid` | `UpdRule.sound` (iff) | `simplify` |
+| `dropShadowed i` | `Fml.dropShadowedAt` | the elements a later one overwrites go | `Upd.dropShadowed_holds` (iff) | — |
+| `applyOnRigidBox i` | `Fml.applyOnRigidBoxAt` | `[{U}] φ ⇝ φ[U]`, `φ` first-order | `Fml.subst_box(_st)` | `applyOnRigidBox` |
+| `applyStorageBox i` | `Fml.applyStorageBoxAt` | `[{storage := s}] φ ⇝ φ[s/storage]` | `Fml.withSt_box` | `applyStorageBox` |
+| `law h` | `Fml.rwLaw` | `t ⇝ t'` in every equation | `Fml.rwEq_holds` (iff) | `theoryRw` |
+| `lawUpd h ht i` | `Fml.rwUpdAt` | `t ⇝ t'` in `[{Uᵢ}]`'s right-hand sides | `Upd.rw_box` | `updRw` |
+
+KeY's names: the merges are `sequentialToParallel`, `dropShadowed` is
+`simplifyUpdate` for the overwritten elements alone, the two `apply…Box`
+are `applyOnRigidFormula`, and a law is the theory taclet it names.
+
+**Where.**  A line is an update prefix, its *spine* `{U₀}{U₁}…{Uₙ} ψ`, over
+a body `ψ`: a program still to run, or the postcondition.  A chain rewrites
+the spine at a position, so the functions take one, `i` counted from the
+outside (`Fml.atSpine` walks there); the innermost pair of three updates is
+`mergeAt 1`.  The `⊢` rules act on the last update of the context; a chain's
+line has no context, and names the position instead.  An update under a
+connective (a branch's `c → {U} …`) is not reached: no worked trace merges
+there.  A law acts where `Fml.rwEq` does — every equation, never `defined(…)`,
+an update's right-hand side or a program — and `lawUpd` in one box update's
+right-hand sides, where `t'` cannot halt (`Term.EvalRefines.of_theq`).
+
+**What is looked at.**  A function looks at nothing below what it rewrites,
+so a line over an opaque postcondition `φ` computes as far as its concrete
+part goes, and a link on it is `rfl`.  The merges look at two updates, never
+the body; `dropShadowed`, `applySkip` and `lawUpd` at one update.  The rules
+whose premise is about the body read it: `simplifyUpdate` (the variables it
+reads), `applyOnRigid` and the `apply…Box` (a first-order body), `law` (its
+equations).
 
 **The modality of an update.**  An update carries the modality it was
-produced under, and merging `{U}_m {V}_m'` needs `m = m'`: a halting
-update is true under the box and false under the diamond.  An update that
-cannot halt (`Upd.total`: literals and paths of state variables, what the
-rules capture) reads alike under both (`Upd.holds_total`), so a merge with
-one takes the other's modality without comparing them.  That is what lets
-the merges compute over a modality variable `m`; a merge of two
-updates that may both halt compares `m' = m`, which a variable does not
-decide.  The `…Box` rules are sound under the box only and match `.box`.
+produced under, and merging `{U}_m {V}_m'` needs `m = m'`: a halting update
+is true under the box and false under the diamond.  An update that cannot
+halt (`Upd.total`: literals and paths of state variables, what the rules
+capture) reads alike under both (`Upd.holds_total`), so a merge with one
+takes the other's modality without comparing them.  That is what lets the
+merges compute over a modality variable `m`; a merge of two updates
+that may both halt compares `m' = m`, which a variable does not decide.  The
+`…Box` rules and `lawUpd` are sound under the box only, and match `.box`.
 
-| function (`LineRw`) | line before ⇝ line after | KeY | sound by | on `⊢` |
-|---|---|---|---|---|
-| `Fml.mergeAt i` (`mergeAt`) | `{U}{V} ⇝ {U ‖ {U}V}` at `i` | `sequentialToParallel` | `Upd.merge_holds` (iff) | `merge`, `mergeStorage` |
-| `Fml.mergeSpine n` (`mergeSpine`) | the first `n + 1` updates into one, innermost pair first | `sequentialToParallel` | the same, `n` times | — |
-| `Fml.atSpine r.top i` (`updRule r i`) | `simplifyUpdate`, `applySkip`, `applyOnRigid` at `i` | the same | `UpdRule.sound` (iff) | `simplify` |
-| `Fml.dropShadowedAt i` (`dropShadowed`) | the elements a later one overwrites | `simplifyUpdate` | `Upd.dropShadowed_holds` (iff) | — |
-| `Fml.atSpine Fml.applyOnRigidBoxTop i` (`applyOnRigidBox`) | `[{U}] φ ⇝ φ[U]`, first-order `φ` | `applyOnRigidFormula` | `Fml.subst_box`, `Fml.subst_box_st` | `applyOnRigidBox` |
-| `Fml.atSpine Fml.applyStorageBoxTop i` (`applyStorageBox`) | `[{storage := s}] φ ⇝ φ[s/storage]` | `applyOnRigidFormula` | `Fml.withSt_box` | `applyStorageBox` |
-| `Fml.rwLaw (t, t')` (`law h`) | `t ⇝ t'` in every equation (`Fml.rwEq`) | a theory taclet | `Fml.rwEq_holds` (iff) | `theoryRw` |
-| `Fml.atSpine (Fml.rwUpdTop (t, t')) i` (`lawUpd h ht i`) | `t ⇝ t'` in the right-hand sides of `[{Uᵢ}]` | a theory taclet | `Upd.rw_box` | `updRw` |
-
-Positions are counted on the spine only: an update under a connective (a
-branch's `c → {U} …`) is not reached; no worked trace merges there yet.
-
-**Merging in the spine, innermost first.**  `{U}{V}` merges when `U` writes
-only locals (`Upd.envOnly`, substituted into `V`), or is one storage write
-over a `V` whose storage reads are all `storage` terms (`withSt`).  So
-`{a := t}{storage := S ‖ x := u}` does not merge (a parallel update of
-locals and the storage over another is KeY's general case, whose
-substitution is simultaneous), but inside out each merge is one of the two:
-`{storage := S}{x := u}` first, then `{a := t}` into the result.
-`Fml.mergeSpine` merges that way; the count is the chain's to give, since a
-merge cannot ask the body whether it is one more update without reading
-it. -/
+**Merging, innermost first.**  `{U}{V}` merges when `U` writes only locals
+(`Upd.envOnly`, substituted into `V`), or is one storage write over a `V`
+whose storage reads are all `storage` terms (`withSt`).  So
+`{a := t ‖ storage := S}{x := u}` does not merge (a parallel update of locals
+and the storage over another is KeY's general case, whose substitution is
+simultaneous), but inside out every merge of a stack the program leaves is
+one of the two: `{storage := S}{x := u}` first, then `{a := t}` into the
+result.  `Fml.mergeSpine` merges that way.  It takes the count from the
+chain: whether the body is one more update is a question about the body.
+-/
 
 namespace Solidity
 
@@ -218,30 +229,29 @@ theorem Fml.mergeAt_holds {i : Nat} {φ ψ : Fml C} (h : φ.mergeAt i = some ψ)
 
 /-- The first `n + 1` updates of the spine merged into one, the innermost
 pair first: `sequentialToParallel` `n` times, as a chain's last line
-shows it.  `none` unless every pair merges. -/
+shows it.  `none` unless every pair merges, and for `n = 0`, which would
+merge nothing. -/
 def Fml.mergeSpine : Nat → Fml C → Option (Fml C)
-  | 0, .upd m U φ => some (.upd m U φ)
-  | n + 1, .upd m U φ => (φ.mergeSpine n).bind (Fml.mergeInto m U)
+  | 1, .upd m U φ => Fml.mergeInto m U φ
+  | n + 2, .upd m U φ => (φ.mergeSpine (n + 1)).bind (Fml.mergeInto m U)
   | _, _ => none
 
 theorem Fml.mergeSpine_holds :
     (n : Nat) → (φ : Fml C) → ∀ {ψ : Fml C}, φ.mergeSpine n = some ψ → ∀ σ, (holds σ ψ ↔ holds σ φ)
-  | 0, .upd m U φ, _, h, _ => by
-    simp only [Fml.mergeSpine, Option.some.injEq] at h
-    subst h
-    exact Iff.rfl
-  | n + 1, .upd m U φ, _, h, σ => by
+  | 1, .upd m U φ, _, h, σ => Fml.mergeInto_holds h σ
+  | n + 2, .upd m U φ, _, h, σ => by
     simp only [Fml.mergeSpine, Option.bind_eq_some_iff] at h
     obtain ⟨χ, hχ, h⟩ := h
     rw [Fml.mergeInto_holds h σ]
     simp only [holds]
-    exact m.after_congr (fun τ => Fml.mergeSpine_holds n φ hχ τ) _
-  | 0, .tt, _, h, _ | 0, .eq .., _, h, _ | 0, .defined _, _, h, _
-  | 0, .not _, _, h, _ | 0, .and .., _, h, _ | 0, .imp .., _, h, _
-  | 0, .modal .., _, h, _ | 0, .havoc _, _, h, _ | 0, .all .., _, h, _
-  | _ + 1, .tt, _, h, _ | _ + 1, .eq .., _, h, _ | _ + 1, .defined _, _, h, _
-  | _ + 1, .not _, _, h, _ | _ + 1, .and .., _, h, _ | _ + 1, .imp .., _, h, _
-  | _ + 1, .modal .., _, h, _ | _ + 1, .havoc _, _, h, _ | _ + 1, .all .., _, h, _ =>
+    exact m.after_congr (fun τ => Fml.mergeSpine_holds (n + 1) φ hχ τ) _
+  | 0, _, _, h, _ => nomatch h
+  | 1, .tt, _, h, _ | 1, .eq .., _, h, _ | 1, .defined _, _, h, _
+  | 1, .not _, _, h, _ | 1, .and .., _, h, _ | 1, .imp .., _, h, _
+  | 1, .modal .., _, h, _ | 1, .havoc _, _, h, _ | 1, .all .., _, h, _
+  | _ + 2, .tt, _, h, _ | _ + 2, .eq .., _, h, _ | _ + 2, .defined _, _, h, _
+  | _ + 2, .not _, _, h, _ | _ + 2, .and .., _, h, _ | _ + 2, .imp .., _, h, _
+  | _ + 2, .modal .., _, h, _ | _ + 2, .havoc _, _, h, _ | _ + 2, .all .., _, h, _ =>
     nomatch h
 
 /-- An update rule (`UpdRuleName.top`) on the update at position `i`:
