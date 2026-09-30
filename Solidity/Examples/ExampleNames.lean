@@ -205,24 +205,27 @@ local instance : FreshNames := .ofTable names
 /--
 info:     dl{ ⟨ Person memory carol; carol.account.balance = 10; ⟩ true }
   ~[memoryReferenceDeclFreshAlloc]~>
-    dl{ { carol := freshId(addM(memory)) ‖ memory := addM(memory) } ⟨ carol.account.balance = 10; ⟩ true }
+    dl{
+  { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) } ⟨ carol.account.balance = 10; ⟩ true }
   ~[memoryFieldWrite_unfold_leftFst]~>
     dl{
-  { carol := freshId(addM(memory)) ‖ memory := addM(memory) }
+  { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
     ⟨ Account memory acc = carol.account; acc.balance = 10; ⟩ true }
   ~[memoryLocalDeclInitDrop]~>
-    dl{ { carol := freshId(addM(memory)) ‖ memory := addM(memory) } ⟨ acc = carol.account; acc.balance = 10; ⟩ true }
+    dl{
+  { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
+    ⟨ acc = carol.account; acc.balance = 10; ⟩ true }
   ~[memoryFieldReadAliasRoot]~>
     dl{
-  { carol := freshId(addM(memory)) ‖ memory := addM(memory) }
+  { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
     { acc := read(memory, carol.account) } ⟨ acc.balance = 10; ⟩ true }
   ~[memoryFieldWriteStore]~>
     dl{
-  { carol := freshId(addM(memory)) ‖ memory := addM(memory) }
+  { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
     { acc := read(memory, carol.account) } { memory := write(memory, acc.balance, 10) } ⟨ ⟩ true }
   ~[emptyModality]~>
     dl{
-  { carol := freshId(addM(memory)) ‖ memory := addM(memory) }
+  { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
     { acc := read(memory, carol.account) } { memory := write(memory, acc.balance, 10) } true }
 -/
 #guard_msgs in
