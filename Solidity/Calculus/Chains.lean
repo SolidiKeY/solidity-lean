@@ -53,6 +53,19 @@ closed formula (as `normValid` does), finding the line, and handing the
 kernel a `rfl` to check.  A line left `_` becomes the next line (`~>`) or
 the last (`~*>`).  When the line is not reached, the error shows the
 derivation, to copy a line from.
+
+**Unknowns in a line.**  A line may keep two unknowns
+(`Notation.lean`): a modality `m`, `dl![m]{ ⟨[ p ]⟩ φ }`, and a
+postcondition `φ : Post C`.  Every rule but a revert is the same under
+either modality, so `sol_chain` runs such a line as the diamond and as the
+box and keeps the lines the two share, up to a `revert();` or a branch's
+cover (`Premise.cover`), which do depend on it; after a split nothing is
+written under `m` (the cover, and every fresh index after it, are stuck on
+it), and the chain goes on after `cases m`.  `φ` stands in a slot
+(`Fml.slot`) while the strategy runs; `rfl` cannot compute a fresh index
+over it, so a step is proved at the index the run found
+(`Fml.OneStep.ofFresh`), the index by `simp` from `Post.noFresh`, the step
+by the kernel.
 -/
 
 namespace Solidity
@@ -202,7 +215,12 @@ def ruleOfLine (φ : Lean.Expr) : MetaM (Option (Lean.Expr × Lean.Name)) := do
   if r.isAppOfArity ``StepRule.emptyModality 1 then return some (r, `emptyModality)
   unless r.isAppOfArity ``StepRule.taclet 6 do return none
   let #[C, k, m, s, p, _] := r.getAppArgs | return none
-  let (d', some c) ← stepTaclet C k m s | return some (r, `taclet)
+  let (d', c?) ← try stepTaclet C k m s catch ex => do
+    -- a revert, under a modality that is a variable
+    if (← whnfR m).isConst then throw ex
+    throwError "the rule on{indentExpr φ}\ndepends on its modality {m} (`revertBox`, \
+      `revertDiamond`): go on after `cases {m}`"
+  let some c := c? | return some (r, `taclet)
   return some (mkAppN (mkConst ``StepRule.taclet) #[C, k, m, s, p, d'], lastName c)
 
 /-- The name `~[r]~>` shows for a label: the head of its derivation, or, when
@@ -579,34 +597,185 @@ theorem Fml.Steps.eq_of_measure (μ : Fml C → Nat) (hμ : ∀ {φ ψ : Fml C},
     obtain rfl : ψ₁ = ψ₂ := s.unique s'
     rw [Fml.Steps.eq_of_measure μ hμ c c']
 
+/-! ## An abstract postcondition
+
+The calculus derives `⟨[ p ]⟩ φ` for any postcondition `φ`.  Here `φ` is a
+`Post C`, written by its name in a line (`dl![m]{ ⟨[ p ]⟩ φ }`, printed
+back so).  `rfl` proves a step over it where the rule declares nothing
+fresh; where it does, the fresh index is the largest in the whole line,
+`φ`'s included, and `rfl` cannot compute it: `Fml.OneStep.ofFresh` takes it
+as a hypothesis, which `sol_chain` proves from `Post.noFresh`. -/
+
+/-- A postcondition `φ`: a formula that names no fresh variable
+(`se1`, `sp1`, …), so that the rules' fresh names avoid it whatever it is,
+and has no modality, so that the strategy never steps into it.
+
+Example: `⟨dl!{ alice.account.balance == 10 }, by decide, by decide⟩`, which
+`{ fml := dl!{ alice.account.balance == 10 } }` abbreviates. -/
+structure Post (C : Contract) where
+  fml : Fml C
+  noFresh : maxIdx fml.vars = 0 := by decide
+  inactive : fml.active = false := by decide
+
+attribute [coe] Post.fml
+
+instance : Coe (Post C) (Fml C) := ⟨Post.fml⟩
+
+/-- A step, at the index its fresh names start from: `⟨ alice.account.balance = 10; ⟩ φ`
+steps to its unfolding with `se1`, `sp1` once its fresh index is known to
+be `1`, whatever `φ : Post C` is. -/
+theorem Fml.OneStep.ofFresh {φ ψ : Fml C} {k : Nat} (hk : φ.fresh = k)
+    (h : φ.stepAt k = some ψ) : φ ~> ψ := by
+  unfold Fml.OneStep Fml.step
+  rw [hk]
+  exact h
+
+/-- A step, and the rule `Fml.rule` finds, are a named step: `localValueAssign`
+on `⟨ x = 1; ⟩ φ`. -/
+theorem Fml.StepBy.ofOneStep {r : StepRule C} {φ ψ : Fml C} (hr : φ.rule = some r)
+    (h : φ ~> ψ) : Fml.StepBy r φ ψ := by
+  unfold Fml.StepBy
+  rw [hr, show φ.step = some ψ from h]
+
 /-! ## `sol_chain` and `#derivation`
 
 On a goal `φ ~> ψ`, `φ ~[r]~> ψ`, `φ ~*> ψ` or a chain, `sol_chain` runs the
-strategy on `φ` as compiled code (`φ` a closed formula of a named contract),
-finds `ψ` among the lines, and closes the goal with `rfl`, or
-`Steps.ofRun n rfl`: the kernel checks it by computing the steps itself. -/
+strategy on `φ` as compiled code (`φ` a formula of a named contract, its
+modality and postconditions in slots), finds `ψ` among the lines, and closes
+the goal with `rfl`, or `Steps.ofRun n rfl`: the kernel checks it by
+computing the steps itself.  Over a postcondition each step is
+`Fml.OneStep.ofFresh`. -/
+
+/-- A line of a derivation as `sol_chain` computes it: the line, quoted; the
+fresh index of the step that reached it; and whether that step was taken
+without asking a slot (`Fml.slot`) whether it has a modality. -/
+structure Chain.Line where
+  fml : Lean.Expr
+  fresh : Nat
+  decided : Bool
+
+/-- `Fml.active`, `none` where a slot decides it: a slot has no modality,
+but the kernel does not know that of the postcondition put back in it. -/
+def Fml.activeOpen : Fml C → Option Bool
+  | .upd _ _ φ | .imp _ φ | .havoc φ => φ.activeOpen
+  | .and φ ψ => match φ.activeOpen with
+    | some false => ψ.activeOpen
+    | r => r
+  | .modal .. => some true
+  | φ => if φ.isSlot then none else some false
+
+/-- Whether the step on `φ` is taken without asking a slot whether it has a
+modality: past the first goal of a branch, once it is done, it asks. -/
+def Fml.stepOpenOk : Fml C → Bool
+  | .upd _ _ φ | .imp _ φ | .havoc φ => φ.stepOpenOk
+  | .and φ ψ => match φ.activeOpen with
+    | some true => φ.stepOpenOk
+    | some false => ψ.stepOpenOk
+    | none => false
+  | _ => true
 
 /-- The lines of the derivation of `φ`, at most `n` of them, quoted. -/
-def Fml.linesQuoted (c : Lean.Expr) : Nat → Fml C → List Lean.Expr
+def Fml.linesQuoted (c : Lean.Expr) : Nat → Fml C → List Chain.Line
   | 0, _ => []
   | n + 1, φ => match φ.step with
-    | some ψ => ψ.quote c :: Fml.linesQuoted c n ψ
+    | some ψ => ⟨ψ.quote c, φ.fresh, φ.stepOpenOk⟩ :: Fml.linesQuoted c n ψ
     | none => []
 
 namespace Chain
 section Tactic
 open Lean Elab Tactic Meta
 
+/-- The Lean terms of a line (`fillSlots`): its modality, a variable, and
+its postconditions `↑φ` by slot, each with its `Post.noFresh`. -/
+structure Splice where
+  modality : Option Lean.Expr := none
+  fmls : Array Lean.Expr := #[]
+  noFresh : Array Lean.Expr := #[]
+
+/-- The line with each open postcondition `↑φ` in its slot. -/
+partial def punch (C : Lean.Expr) : Lean.Expr → StateT Splice MetaM Lean.Expr
+  | e@(.app f x) => do
+    unless e.isAppOfArity ``Post.fml 2 && e.hasFVar do
+      return .app (← punch C f) (← punch C x)
+    let sp ← get
+    if let some i := sp.fmls.findIdx? (· == e) then return slotExpr C i
+    set { sp with fmls := sp.fmls.push e,
+                  noFresh := sp.noFresh.push (mkApp2 (mkConst ``Post.noFresh) (e.getArg! 0) x) }
+    return slotExpr C sp.fmls.size
+  | .mdata _ e => punch C e
+  | e => return e
+
+/-- The modality of a line with its postconditions in their slots, when it
+is a variable; no other variable may be left. -/
+def modalityOf? (φ : Lean.Expr) : MetaM (Option Lean.Expr) := do
+  let fvs := (collectFVars {} φ).fvarIds
+  if fvs.isEmpty then return none
+  for x in fvs do
+    let ty ← instantiateMVars (← x.getType)
+    if ty.isConstOf ``Modality && fvs.size == 1 then return some (.fvar x)
+    if ty.isAppOfArity ``Fml 1 then
+      throwError "sol_chain: {mkFVar x} may name a fresh variable or have a modality: \
+        take it as a postcondition, `{mkFVar x} : Post {ty.appArg!}`"
+    unless ty.isConstOf ``Modality do
+      throwError "sol_chain: {mkFVar x} is free in the line: only a modality `m` and \
+        postconditions `φ : Post C` may be{indentExpr φ}"
+  throwError "sol_chain: the line is under two modalities: take `cases` on one{indentExpr φ}"
+
 /-- The lines of the derivation of the closed formula `φ`, computed. -/
-def chainLines (C φ : Lean.Expr) : MetaM (List Lean.Expr) := do
+def closedLines (n : Lean.Name) (C φ : Lean.Expr) : MetaM (List Line) := do
+  unsafe evalExpr (List Line) (mkApp (mkConst ``List [0]) (mkConst ``Line))
+    (mkApp4 (mkConst ``Fml.linesQuoted) C (quoteConstName n) (toExpr 200) φ)
+
+/-- A derivation as `sol_chain` computed it: the Lean terms of its first
+line, its lines with them put back, and whether they stop because the next
+rule depends on the modality. -/
+structure Run where
+  splice : Splice
+  lines : List Line
+  stuck : Bool
+
+/-- The lines two runs share, put together (`fillSlots`), and whether the
+runs part before they end. -/
+def shared (f : Line → Line → Option Line) : List Line → List Line → List Line × Bool
+  | d :: ds, b :: bs => match f d b with
+    | some l => let (ls, stuck) := shared f ds bs; (l :: ls, stuck)
+    | none => ([], true)
+  | [], [] => ([], false)
+  | _, _ => ([], true)
+
+/-- The derivation of `φ`: its postconditions in slots, and, under a modality
+`m`, run as the diamond and as the box, whose shared lines are the lines
+under `m` — up to a revert or a branch's cover, the rules that look at it. -/
+def runChain (C φ : Lean.Expr) : MetaM Run := do
   let some n := (← whnfR C).constName?
     | throwError "sol_chain: the contract is not a named constant: {C}"
-  if φ.hasFVar || φ.hasMVar then
-    throwError "sol_chain: the formula is not closed; give the number of steps instead: \
-      `Fml.Steps.ofRun n rfl`{indentExpr φ}"
-  let ty ← mkAppM ``List #[mkConst ``Lean.Expr]
-  unsafe evalExpr (List Lean.Expr) ty
-    (mkApp4 (mkConst ``Fml.linesQuoted) C (quoteConstName n) (toExpr 200) φ)
+  let φ ← instantiateMVars φ
+  if φ.hasMVar then throwError "sol_chain: the formula is not known{indentExpr φ}"
+  let (φ', sp) ← (punch C φ).run {}
+  let fill (m? : Option Lean.Expr) (d b : Line) : Option Line :=
+    match fillSlots m? sp.fmls d.fml b.fml with
+    | .ok e => some { d with fml := e, decided := d.decided && b.decided }
+    | .error _ => none
+  match ← modalityOf? φ' with
+  | none =>
+    let ls ← closedLines n C φ'
+    let ls := if sp.fmls.isEmpty then ls else ls.map fun l => (fill none l l).getD l
+    return { splice := sp, lines := ls, stuck := false }
+  | some m =>
+    let ds ← closedLines n C (φ'.replaceFVar m (mkConst ``Modality.diamond))
+    let bs ← closedLines n C (φ'.replaceFVar m (mkConst ``Modality.box))
+    let (ls, stuck) := shared (fill m) ds bs
+    return { splice := { sp with modality := m }, lines := ls, stuck }
+
+/-- Why a line is not written under the modality `m`. -/
+def modalityStop (m : Lean.Expr) : MessageData :=
+  m!"depends on the modality {m}, through a `revert();` or a branch's cover: go on after `cases {m}`"
+
+/-- Why the lines stop, when the modality stops them. -/
+def stuckNote (run : Run) : MessageData :=
+  match run.stuck, run.splice.modality with
+  | true, some m => m!"\n  (the line after {modalityStop m})"
+  | _, _ => m!""
 
 /-- The derivation of `φ`, shown: every line with the rule that reached it. -/
 def showLines (φ : Lean.Expr) (lines : List Lean.Expr) : MetaM MessageData := do
@@ -629,9 +798,9 @@ def findLine (φ ψ : Lean.Expr) (lines : List Lean.Expr) : MetaM (Option Nat) :
     if ← withReducible (isDefEq q ψ) then return some i
   return none
 
-def notReached (φ ψ : Lean.Expr) (lines : List Lean.Expr) : MetaM α := do
+def notReached (φ ψ : Lean.Expr) (run : Run) (lines : List Lean.Expr) : MetaM α := do
   throwError "sol_chain: the derivation of{indentExpr φ}\ndoes not reach{indentExpr ψ}\n\
-    Its lines:\n{← showLines φ lines}"
+    Its lines:\n{← showLines φ lines}{stuckNote run}"
 
 /-- `some ψ = some ψ`, the proof of `φ.step = some ψ` and `φ.run n = some ψ`. -/
 def someRefl (C ψ : Lean.Expr) : Lean.Expr :=
@@ -639,38 +808,92 @@ def someRefl (C ψ : Lean.Expr) : Lean.Expr :=
   mkApp2 (mkConst ``Eq.refl [1]) ty (mkApp2 (mkConst ``Option.some [0]) (mkApp (mkConst ``Fml) C) ψ)
 
 /-- The next line, `ψ` if it is given. -/
-def nextLine (C φ ψ : Lean.Expr) : MetaM Lean.Expr := do
-  let lines ← chainLines C (← instantiateMVars φ)
-  let some q := lines.head? | throwError "sol_chain: no rule applies to{indentExpr φ}"
+def nextLine (C φ ψ : Lean.Expr) : MetaM (Run × Line) := do
+  let run ← runChain C φ
+  let some q := run.lines.head? |
+    match run.stuck, run.splice.modality with
+    | true, some m => throwError "sol_chain: the line after{indentExpr φ}\n{modalityStop m}"
+    | _, _ => throwError "sol_chain: no rule applies to{indentExpr φ}"
   let ψ ← instantiateMVars ψ
-  if ψ.isMVar then ψ.mvarId!.assign q
-  else unless q == ψ || (← withReducible (isDefEq q ψ)) do notReached φ ψ (lines.take 1)
-  return q
+  if ψ.isMVar then ψ.mvarId!.assign q.fml
+  else unless q.fml == ψ || (← withReducible (isDefEq q.fml ψ)) do
+    notReached φ ψ run [q.fml]
+  return (run, q)
 
-partial def solveChain (g : MVarId) : MetaM Unit := do
+/-- `A.fresh = K`, from the postconditions' `Post.noFresh`: `simp` takes the
+line's variables apart (`maxIdx_append`), `decide` computes the rest. -/
+def proveFresh (C A : Lean.Expr) (K : Nat) (hs : Array Lean.Expr) : TermElabM Lean.Expr := do
+  let ty ← mkEq (mkApp2 (mkConst ``Fml.fresh) C A) (toExpr K)
+  let names := #[``Fml.fresh, ``Fml.vars, ``maxIdx, ``maxIdx_append]
+  let ts : Array Lean.Term := names.map fun n => mkCIdent n
+  let ts := ts ++ (← hs.mapM Term.exprToSyntax)
+  let args ← ts.mapM fun t => `(Lean.Parser.Tactic.simpLemma| $t:term)
+  let tac ← `(by simp only [$args,*] <;> decide)
+  try
+    Term.withoutErrToSorry do
+      let p ← Term.elabTermEnsuringType tac ty
+      Term.synthesizeSyntheticMVarsNoPostponing
+      instantiateMVars p
+  catch
+    | .error _ msg => throwError "sol_chain: cannot compute the fresh index of{indentExpr A}\n{msg}"
+    | ex => throw ex
+
+/-- `A ~> B`, for the line `B` computed after `A`: `rfl`, or, over a
+postcondition, `Fml.OneStep.ofFresh` at the index the run used. -/
+def oneStepProof (C : Lean.Expr) (sp : Splice) (A : Lean.Expr) (B : Line) :
+    TermElabM Lean.Expr := do
+  let refl := someRefl C B.fml
+  if sp.fmls.isEmpty then return refl
+  unless B.decided do
+    throwError "sol_chain: the step on{indentExpr A}\nasks whether a postcondition has a \
+      modality left (the first goal of a branch is done): not supported yet"
+  let hk ← proveFresh C A B.fresh sp.noFresh
+  return mkAppN (mkConst ``Fml.OneStep.ofFresh) #[C, A, B.fml, toExpr B.fresh, hk, refl]
+
+/-- `A ~*> Z` along the computed lines `ls`, `Z` the last, a step at a time. -/
+def stepsProof (C : Lean.Expr) (sp : Splice) (A : Lean.Expr) (ls : List Line) :
+    TermElabM Lean.Expr := do
+  let Z := (ls.getLast?.map (·.fml)).getD A
+  let rec go (A : Lean.Expr) : List Line → TermElabM Lean.Expr
+    | [] => pure (mkApp2 (mkConst ``Fml.Steps.refl) C A)
+    | B :: ls => do
+      let s ← oneStepProof C sp A B
+      pure (mkAppN (mkConst ``Fml.Steps.cons) #[C, A, B.fml, Z, s, ← go B.fml ls])
+  go A ls
+
+partial def solveChain (g : MVarId) : TermElabM Unit := do
   let ty ← instantiateMVars (← g.getType)
   if ty.isAppOfArity ``Fml.StepBy 4 then
     let #[C, r, φ, ψ] := ty.getAppArgs | unreachable!
-    let q ← nextLine C φ ψ
-    let pair ← mkAppM ``Prod.mk #[← mkAppM ``Option.some #[r], ← mkAppM ``Option.some #[q]]
-    g.assign (← mkEqRefl pair)
+    let (run, q) ← nextLine C φ ψ
+    if run.splice.fmls.isEmpty then
+      let pair ← mkAppM ``Prod.mk #[← mkAppM ``Option.some #[r], ← mkAppM ``Option.some #[q.fml]]
+      g.assign (← mkEqRefl pair)
+    else
+      let hr ← mkEqRefl (← mkAppM ``Option.some #[r])
+      g.assign (mkAppN (mkConst ``Fml.StepBy.ofOneStep)
+        #[C, r, φ, q.fml, hr, ← oneStepProof C run.splice φ q])
   else if ty.isAppOfArity ``Fml.OneStep 3 then
     let #[C, φ, ψ] := ty.getAppArgs | unreachable!
-    let q ← nextLine C φ ψ
-    g.assign (someRefl C q)
+    let (run, q) ← nextLine C φ ψ
+    g.assign (← oneStepProof C run.splice φ q)
   else if ty.isAppOfArity ``Fml.Steps 3 then
     let #[C, φ, ψ] := ty.getAppArgs | unreachable!
     let φ ← instantiateMVars φ
-    let lines ← chainLines C φ
+    let run ← runChain C φ
+    let lines := run.lines.map (·.fml)
     let ψ ← instantiateMVars ψ
     let i ← if ψ.isMVar then
         ψ.mvarId!.assign ((lines.getLast?).getD φ)
         pure lines.length
       else match ← findLine φ ψ lines with
         | some i => pure i
-        | none => notReached φ ψ lines
-    let q := if i = 0 then φ else lines[i - 1]!
-    g.assign (mkAppN (mkConst ``Fml.Steps.ofRun) #[C, φ, q, toExpr i, someRefl C q])
+        | none => notReached φ ψ run lines
+    if run.splice.fmls.isEmpty then
+      let q := if i = 0 then φ else lines[i - 1]!
+      g.assign (mkAppN (mkConst ``Fml.Steps.ofRun) #[C, φ, q, toExpr i, someRefl C q])
+    else
+      g.assign (← stepsProof C run.splice φ (run.lines.take i))
   else
     -- a chain: split it into its links
     match_expr ← whnf ty with
@@ -690,17 +913,21 @@ partial def solveChain (g : MVarId) : MetaM Unit := do
 
 /-- `sol_chain`: prove `φ ~> ψ`, `φ ~[r]~> ψ`, `φ ~*> ψ` or a chain of them by
 running the strategy; the kernel checks the lines it found. -/
-elab "sol_chain" : tactic => liftMetaTactic fun g => do solveChain g; pure []
+elab "sol_chain" : tactic => withMainContext do
+  solveChain (← getMainGoal)
+  replaceMainGoal []
 
 /-- `#derivation φ`: the derivation the strategy takes from `φ`, one line per
-step with the rule that reached it. -/
-elab "#derivation " t:term : command => Command.liftTermElabM do
+step with the rule that reached it.  The section's variables are in scope
+(`variable (m : Modality) (φ : Post C)`). -/
+elab "#derivation " t:term : command => Command.runTermElabM fun _ => do
   let φ ← instantiateMVars (← Term.elabTerm t none)
   Term.synthesizeSyntheticMVarsNoPostponing
   let φ ← instantiateMVars φ
   let ty ← whnf (← inferType φ)
   unless ty.isAppOfArity ``Fml 1 do throwError "#derivation: not a formula{indentExpr φ}"
-  logInfo (← showLines φ (← chainLines ty.appArg! φ))
+  let run ← runChain ty.appArg! φ
+  logInfo ((← showLines φ (run.lines.map (·.fml))) ++ stuckNote run)
 
 end Tactic
 end Chain
