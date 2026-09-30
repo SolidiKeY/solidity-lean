@@ -188,7 +188,7 @@ elab "sol_symex" : tactic => do
 `symex_sound`.  `sol_derive` runs it on a sequent instead: each step is a
 constructor of `Proves`, with the rule `Stmt.step` picks, so what it builds
 is a derivation, and `close` takes over only once no modality is left.  The
-three lemmas below are `Proves.unfoldRule` for the other premises; a rule
+four lemmas below are `Proves.unfoldRule` for the other premises; a rule
 solkey lacks only ever unfolds. -/
 
 namespace Proves
@@ -212,6 +212,16 @@ theorem splitRule {c c' : Fml C} {P Q : Prog C}
   · exact .split d thn els cov
   · cases d
 
+/-- `guard` by whichever rule `Rule` names. -/
+theorem guardRule {c : Fml C} {U : Upd C}
+    (d : Rule C (Hyp.fresh Γ (.modal m (s :: ω) φ)) m s (.guard c U))
+    (thn : Proves .all (Γ ++ [.pre c, .upd m U]) (.modal m ω φ))
+    (els : Proves .all (Γ ++ [.pre (.not c)]) (.modal m (.revert :: ω) φ)) :
+    Proves .all Γ (.modal m (s :: ω) φ) := by
+  rcases d with d | d
+  · exact .guard d thn els
+  · cases d
+
 /-- `done` by whichever rule `Rule` names. -/
 theorem doneRule {b : Bool} (d : Rule C (Hyp.fresh Γ (.modal m (s :: ω) φ)) m s (.done b))
     (h : Proves .all Γ ((Premise.done b).fml m ω φ)) : Proves .all Γ (.modal m (s :: ω) φ) := by
@@ -223,13 +233,14 @@ end Proves
 
 /-- `sol_derive`: run the strategy as a derivation.  On every goal it drops
 an empty modality, fires the rule `Stmt.step` picks (as `update`, `unfold`,
-`split` or `done`), or moves a precondition into the context, until no goal
+`split`, `guard` or `done`), or moves a precondition into the context, until no goal
 has a modality left; what is left is for `close`. -/
 macro "sol_derive" : tactic => `(tactic| repeat (first
   | apply Proves.empty
   | apply Proves.updateRule (Stmt.step _ _ _).rule
   | apply Proves.unfoldRule (Stmt.step _ _ _).rule
   | apply Proves.splitRule (Stmt.step _ _ _).rule
+  | apply Proves.guardRule (Stmt.step _ _ _).rule
   | apply Proves.doneRule (Stmt.step _ _ _).rule
   | apply Proves.intro))
 

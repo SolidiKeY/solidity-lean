@@ -57,6 +57,8 @@ def Premise.fml (m : Modality) : Premise C → Prog C → Fml C → Fml C
   | .split c c' P Q, ω, φ =>
     .and (.imp c (.modal m (P ++ ω) φ))
       (.and (.imp c' (.modal m (Q ++ ω) φ)) (Premise.cover m c c'))
+  | .guard c U, ω, φ =>
+    .and (.imp c (.upd m U (.modal m ω φ))) (.imp (.not c) (.modal m (.revert :: ω) φ))
   | .done true, _, _ => .tt
   | .done false, _, _ => .ff
 
@@ -103,6 +105,18 @@ theorem Premise.sound {k : Nat} {m : Modality} {s : Stmt C} {pr : Premise C}
     | diamond =>
       simp only [Premise.cover, holds, not_and, Classical.not_not] at hcov
       exact absurd (hcov hc) hc'
+  | guard c U =>
+    simp only [Premise.fml, holds]
+    intro ⟨hU, hR⟩
+    by_cases hc : holds σ c
+    · have hU := hU hc
+      simp only [Prog.run, Modality.after_bind] at hU ⊢
+      exact (m.after_sameOk ((h σ).1 hc) h₀).1 hU
+    · obtain ⟨e, he⟩ := (h σ).2 hc
+      have hR := hR hc
+      cases m with
+      | box => simp only [Prog.run, he, bind, Except.bind, Modality.after, Modality.onHalt]
+      | diamond => simp only [Modality.after, Prog.run, bind, Except.bind, Stmt.run, Modality.onHalt] at hR
   | done b =>
     obtain ⟨⟨e, he⟩, hb⟩ := h σ
     simp only [holds, Prog.run, he, bind, Except.bind]
@@ -243,6 +257,14 @@ inductive Proves : RuleSet → List (Hyp C) → Fml C → Prop
       (thn : Proves R (Γ ++ [.pre c]) (.modal m (P ++ ω) φ))
       (els : Proves R (Γ ++ [.pre c']) (.modal m (Q ++ ω) φ))
       (cov : Proves R Γ (Premise.cover m c c')) : Proves R Γ (.modal m (s :: ω) φ)
+  /-- A taclet with a guarded update (`transferNoCallback`): under the guard
+  the update joins the context, and without it the run reverts. -/
+  | guard {R : RuleSet} {Γ : List (Hyp C)} {m : Modality} {s : Stmt C} {ω : Prog C} {φ : Fml C}
+      {c : Fml C} {U : Upd C}
+      (d : Taclet C (Hyp.fresh Γ (.modal m (s :: ω) φ)) m s (.guard c U))
+      (thn : Proves R (Γ ++ [.pre c, .upd m U]) (.modal m ω φ))
+      (els : Proves R (Γ ++ [.pre (.not c)]) (.modal m (.revert :: ω) φ)) :
+      Proves R Γ (.modal m (s :: ω) φ)
   /-- A taclet that closes the modality (`revertBox`, `revertDiamond`): what
   is left is `true` or `false`. -/
   | done {R : RuleSet} {Γ : List (Hyp C)} {m : Modality} {s : Stmt C} {ω : Prog C} {φ : Fml C}
@@ -400,6 +422,13 @@ theorem Hyp.wrap_mono₃ {ψ₁ ψ₂ ψ₃ φ : Fml C}
   | .havoc :: Γ => fun σ h₁ h₂ h₃ st nt bal =>
     Hyp.wrap_mono₃ h Γ _ (h₁ st nt bal) (h₂ st nt bal) (h₃ st nt bal)
 
+/-- `Hyp.wrap_mono` for two premises, as a guarded update has. -/
+theorem Hyp.wrap_mono₂ {ψ₁ ψ₂ φ : Fml C} (h : ∀ σ, holds σ ψ₁ → holds σ ψ₂ → holds σ φ)
+    (Γ : List (Hyp C)) (σ : State) (h₁ : holds σ (Hyp.wrap Γ ψ₁)) (h₂ : holds σ (Hyp.wrap Γ ψ₂)) :
+    holds σ (Hyp.wrap Γ φ) :=
+  Hyp.wrap_mono₃ (ψ₃ := .tt) (fun σ h₁ h₂ _ => h σ h₁ h₂) Γ σ h₁ h₂
+    (Hyp.wrap_mono (ψ := ψ₁) (φ := .tt) (fun _ _ => trivial) Γ σ h₁)
+
 /-- A variable of a formula is a variable of the formula wrapped in a context. -/
 theorem Hyp.vars_wrap {x : Var} {φ : Fml C} :
     (Γ : List (Hyp C)) → x ∈ φ.vars → x ∈ (Hyp.wrap Γ φ).vars
@@ -519,6 +548,9 @@ theorem Proves.sound {R : RuleSet} {Γ : List (Hyp C)} {φ : Fml C} (h : Proves 
     rw [Hyp.wrap_append] at ih₁ ih₂
     exact fun σ => Hyp.wrap_mono₃ (fun τ h₁ h₂ h₃ => d.sound_in τ ⟨h₁, h₂, h₃⟩) _ σ
       (ih₁ σ) (ih₂ σ) (ih₃ σ)
+  | guard d _ _ ih₁ ih₂ =>
+    rw [Hyp.wrap_append] at ih₁ ih₂
+    exact fun σ => Hyp.wrap_mono₂ (fun τ h₁ h₂ => d.sound_in τ ⟨h₁, h₂⟩) _ σ (ih₁ σ) (ih₂ σ)
   | @empty _ Γ m φ _ ih =>
     exact fun σ => Hyp.wrap_mono (ψ := φ) (φ := .modal m [] φ)
       (fun _ h => by cases m <;> exact h) Γ σ (ih σ)
@@ -553,6 +585,7 @@ theorem Proves.toAll {R : RuleSet} {Γ : List (Hyp C)} {φ : Fml C} (h : Proves 
   | unfold d _ ih => exact .unfold d ih
   | unfoldLean d h _ => exact .unfoldLean d h
   | split d _ _ _ ih₁ ih₂ ih₃ => exact .split d ih₁ ih₂ ih₃
+  | guard d _ _ ih₁ ih₂ => exact .guard d ih₁ ih₂
   | done d _ ih => exact .done d ih
   | empty _ ih => exact .empty ih
   | theoryRw h _ ih => exact .theoryRw h ih

@@ -673,15 +673,20 @@ theorem assertConditionCaptured : ⊨ dl!{ [ assert(a == b); ] a == b } := by
   sol_symex
   sol_close
 
-/-- `to.transfer(5);` — both operands simple: one update on the `net` ledger
+/-- `to.transfer(5);` — both operands simple: the funds check, then the
+booking on `selfBalance` and the `net` ledger, or a revert
 (`transferNoCallback`). -/
 theorem transferSimple : ⊨ dl!{ [ to.transfer(5); ] true } := by
   apply Proves.valid
-  apply update .transferNoCallback
-  apply empty
-  refine close ?_
-  sol_symex
-  sol_close
+  apply guard .transferNoCallback
+  · apply empty
+    refine close ?_
+    sol_symex
+    sol_close
+  · apply done .revertBox
+    refine close ?_
+    sol_symex
+    sol_close
 
 /-- `owner.transfer(5);` — a state variable as the receiver is captured first
 (`transfer_unfold_leftFstReceiver`). -/
@@ -690,11 +695,15 @@ theorem transferRootReceiver : ⊨ dl!{ [ owner.transfer(5); ] true } := by
   apply unfold .transfer_unfold_leftFstReceiver
   apply unfold .localValueDeclInitDrop
   apply update .storageRootReadSelect
-  apply update .transferNoCallback
-  apply empty
-  refine close ?_
-  sol_symex
-  sol_close
+  apply guard .transferNoCallback
+  · apply empty
+    refine close ?_
+    sol_symex
+    sol_close
+  · apply done .revertBox
+    refine close ?_
+    sol_symex
+    sol_close
 
 /-- `to.transfer(x + 2);` — a non-simple amount is captured first
 (`transfer_unfold_rightSndArgument`, `net-transfer-capture-argument.key`). -/
@@ -703,11 +712,15 @@ theorem transferAmountCaptured : ⊨ dl!{ [ to.transfer(x + 2); ] true } := by
   apply unfold .transfer_unfold_rightSndArgument
   apply unfold .localValueDeclInitDrop
   apply update .binopAssignment
-  apply update .transferNoCallback
-  apply empty
-  refine close ?_
-  sol_symex
-  sol_close
+  apply guard .transferNoCallback
+  · apply empty
+    refine close ?_
+    sol_symex
+    sol_close
+  · apply done .revertBox
+    refine close ?_
+    sol_symex
+    sol_close
 
 /-! ## 8 · Memory targets
 

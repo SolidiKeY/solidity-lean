@@ -304,9 +304,9 @@ def UpdElem.subst (U : Upd C) : UpdElem C → UpdElem C
   | .storage s => .storage (s.subst U)
   | .store x s => .store x (s.subst U)
   | .memory m => .memory (m.subst U)
-  | .transfer r a => .transfer (r.subst U) (a.subst U)
+  | .selfBalance op a => .selfBalance op (a.subst U)
+  | .net r op a => .net (r.subst U) op (a.subst U)
   | .saveNet x => .saveNet x
-  | .book a => .book (a.subst U)
 
 /-- `V.subst U` is `{U}V`: `{U}(e₁ ‖ … ‖ eₙ)` is `{U}e₁ ‖ … ‖ {U}eₙ`, KeY's
 `applyOnParallel`. -/
@@ -516,11 +516,12 @@ theorem UpdElem.subst_write (h : SubstAgree U ns σ τ) (τ' : State) :
     match (m.subst U).eval σ, m.eval τ, m.subst_eval h with
     | .error _, .error _, he => subst he; rfl
     | .ok a, .ok b, hs => simp only [bind, Except.bind, hs.heap, hs.nextId]
-  | .transfer r a => by simp only [UpdElem.subst, UpdElem.write, r.subst_eval h, a.subst_eval h]
+  | .selfBalance _ a => by
+    simp only [UpdElem.subst, UpdElem.write, a.subst_eval h, h.agree.selfBalance]
+  | .net r _ a => by
+    simp only [UpdElem.subst, UpdElem.write, r.subst_eval h, a.subst_eval h, State.getNet,
+      h.agree.net]
   | .saveNet _ => by simp only [UpdElem.subst, UpdElem.write, h.agree.net]
-  | .book a => by
-    simp only [UpdElem.subst, UpdElem.write, a.subst_eval h, State.book, State.getNet, h.agree.net,
-      h.agree.tx, h.agree.selfBalance]
 
 /-- Running `{U}V` before `U` is running `V` after it, element by element.
 
@@ -620,7 +621,7 @@ theorem Upd.substAgree {U : Upd C} (hU : U.envOnly = true) {σ τ : State}
     | val _ t | path _ t | mref _ t =>
       simp only [UpdElem.binding, bind, Except.bind] at hb
       split at hb <;> simp only [pure, Except.pure, Except.ok.injEq, reduceCtorEq] at hb
-    | storage | memory | transfer | store | saveNet | book => simp only [UpdElem.var?,
+    | storage | memory | selfBalance | net | store | saveNet => simp only [UpdElem.var?,
         reduceCtorEq] at hvar
   refine ⟨hag, fun x => ?_, fun x => ?_, fun x => ?_, fun x => ?_,
     fun x hx => (getEnv_eq x hx).symm, written, fun x e hx => ?_⟩
@@ -647,7 +648,7 @@ theorem Upd.substAgree {U : Upd C} (hU : U.envOnly = true) {σ τ : State}
         | mref _ i =>
           simp only [UpdElem.binding, bind, Except.bind] at hb
           split at hb <;> simp only [pure, Except.pure, Except.ok.injEq, reduceCtorEq] at hb
-        | storage | memory | transfer | store | saveNet | book => simp only [UpdElem.var?,
+        | storage | memory | selfBalance | net | store | saveNet => simp only [UpdElem.var?,
             reduceCtorEq] at hvar
       simp only [STerm.stuck_eval, STerm.eval, hτ, bind, Except.bind]
       cases b with
@@ -693,7 +694,7 @@ theorem Upd.substAgree {U : Upd C} (hU : U.envOnly = true) {σ τ : State}
           simp only [hi, pure, Except.pure, Except.ok.injEq] at hb
           subst hb
           simp only [Term.stuck_eval, Term.eval, bind, Except.bind, State.getEnv, hl]
-      | storage | memory | transfer | store | saveNet | book => simp only [UpdElem.var?,
+      | storage | memory | selfBalance | net | store | saveNet => simp only [UpdElem.var?,
           reduceCtorEq] at hvar
     · rename_i hx
       simp only [Term.eval, getEnv_eq x hx]
@@ -729,7 +730,7 @@ theorem Upd.substAgree {U : Upd C} (hU : U.envOnly = true) {σ τ : State}
           simp only [hi, pure, Except.pure, Except.ok.injEq] at hb
           subst hb
           simp only [PTerm.stuck_eval, PTerm.eval, aliasPath, bind, Except.bind, State.getEnv, hl]
-      | storage | memory | transfer | store | saveNet | book => simp only [UpdElem.var?,
+      | storage | memory | selfBalance | net | store | saveNet => simp only [UpdElem.var?,
           reduceCtorEq] at hvar
     · rename_i hx
       simp only [PTerm.eval, aliasPath, getEnv_eq x hx]
@@ -765,7 +766,7 @@ theorem Upd.substAgree {U : Upd C} (hU : U.envOnly = true) {σ τ : State}
           simp only [hp, pure, Except.pure, Except.ok.injEq] at hb
           subst hb
           simp only [ITerm.stuck_eval, ITerm.eval, bind, Except.bind, State.getEnv, hl]
-      | storage | memory | transfer | store | saveNet | book => simp only [UpdElem.var?,
+      | storage | memory | selfBalance | net | store | saveNet => simp only [UpdElem.var?,
           reduceCtorEq] at hvar
     · rename_i hx
       simp only [ITerm.eval, getEnv_eq x hx]
@@ -787,8 +788,8 @@ theorem Upd.apply_seq {U : Upd C} (hU : U.envOnly = true) (V : Upd C) (σ : Stat
 An element has no effect on `{U} φ` when a later element of `U` writes the
 same variable (it is *shadowed*), or when `φ` does not mention the variable
 (it is *unused*).  Dropping it also drops its halting, so only an element
-that cannot halt goes.  A `storage :=`, `memory :=` or `transfer` element
-never goes. -/
+that cannot halt goes.  A `storage :=`, `memory :=`, `selfBalance :=` or
+`net :=` element never goes. -/
 
 /-- The element can go from `{e ‖ rest} φ`, `F` the variables of `φ`. -/
 def UpdElem.effectless (F : List Var) (rest : Upd C) (e : UpdElem C) : Bool :=
@@ -826,7 +827,7 @@ in the same pre-state, leaves them agreeing: `y := 2` written into two
 states that differ at `x` gives two that differ at `x`. -/
 theorem UpdElem.write_agree {A : List Var} {σ₀ τ₁ τ₂ : State} (h : EnvAgreeExcept A τ₁ τ₂) :
     (e : UpdElem C) → ResultsAgree A (e.write σ₀ τ₁) (e.write σ₀ τ₂)
-  | .val .. | .path .. | .mref .. | .transfer .. => by simp only [UpdElem.write]; agree_run h
+  | .val .. | .path .. | .mref .. => by simp only [UpdElem.write]; agree_run h
   | .store x s => by
     simp only [UpdElem.write]
     cases s.eval σ₀ with
@@ -843,10 +844,14 @@ theorem UpdElem.write_agree {A : List Var} {σ₀ τ₁ τ₂ : State} (h : EnvA
     | error => rfl
     | ok a => exact ⟨h.storage, rfl, rfl, h.net, h.env, h.selfBalance, h.tx⟩
   | .saveNet x => by simp only [UpdElem.write]; exact h.setEnv_both x _
-  | .book _ => by
+  | .selfBalance .. => by
     simp only [UpdElem.write]
     agree_run h
-    exact ⟨h.storage, h.heap, h.nextId, rfl, h.env, rfl, h.tx⟩
+    exact ⟨h.storage, h.heap, h.nextId, h.net, h.env, rfl, h.tx⟩
+  | .net .. => by
+    simp only [UpdElem.write]
+    agree_run h
+    exact ⟨h.storage, h.heap, h.nextId, rfl, h.env, h.selfBalance, h.tx⟩
 
 /-- The invariant of dropping: the two runs agree off `A`, and every variable
 of `A` is either one the formula does not read (`G`) or one the rest of the
@@ -1924,20 +1929,15 @@ theorem UpdElem.write_getEnv_other {σ₀ ρ ρ' : State} {x : Var} :
     obtain ⟨v, -, h⟩ := bind_ok_inv h
     cases h
     rfl
-  | .transfer r a, _, h => by
+  | .selfBalance _ a, _, h => by
+    obtain ⟨v, -, h⟩ := bind_ok_inv h
+    obtain ⟨amt, -, h⟩ := bind_ok_inv h
+    cases h
+    rfl
+  | .net r _ a, _, h => by
     obtain ⟨v, -, h⟩ := bind_ok_inv h
     obtain ⟨addr, -, h⟩ := bind_ok_inv h
     obtain ⟨w, -, h⟩ := bind_ok_inv h
-    obtain ⟨amt, -, h⟩ := bind_ok_inv h
-    simp only [transferAt] at h
-    split at h
-    · cases h
-    · split at h
-      · cases h
-      · cases h
-        rfl
-  | .book a, _, h => by
-    obtain ⟨v, -, h⟩ := bind_ok_inv h
     obtain ⟨amt, -, h⟩ := bind_ok_inv h
     cases h
     rfl
@@ -2314,19 +2314,19 @@ def UpdElem.withSt (s : STerm C) : UpdElem C → UpdElem C
   | .path x p => .path x (p.withSt ⟨s⟩)
   | .storage s' => .storage (s'.withSt ⟨s⟩)
   | .store x s' => .store x (s'.withSt ⟨s⟩)
-  | .transfer r a => .transfer (r.withSt ⟨s⟩) (a.withSt ⟨s⟩)
+  | .selfBalance op a => .selfBalance op (a.withSt ⟨s⟩)
+  | .net r op a => .net (r.withSt ⟨s⟩) op (a.withSt ⟨s⟩)
   | .mref x i => .mref x i
   | .memory m => .memory m
   | .saveNet x => .saveNet x
-  | .book a => .book (a.withSt ⟨s⟩)
 
 def UpdElem.stExplicit : UpdElem C → Bool
   | .val _ t => t.stExplicit
   | .path _ p => p.stExplicit
   | .storage s | .store _ s => s.stExplicit
-  | .transfer r a => r.stExplicit && a.stExplicit
+  | .selfBalance _ a => a.stExplicit
+  | .net r _ a => r.stExplicit && a.stExplicit
   | .saveNet _ => true
-  | .book a => a.stExplicit
   | .mref .. | .memory _ => false
 
 /-- `{storage := s}V`: `s` substituted for `storage` in `V`'s right-hand sides. -/
@@ -2341,15 +2341,16 @@ theorem UpdElem.withSt_write {s : STerm C} {σ τ : State} (hs : s.eval σ = .ok
     simp only [UpdElem.withSt, UpdElem.write, PTerm.withSt_eval (w := ⟨s⟩) hs hk p he]
   | .storage s', he | .store _ s', he => by
     simp only [UpdElem.withSt, UpdElem.write, STerm.withSt_eval (w := ⟨s⟩) hs hk s' he]
-  | .transfer r a, he => by
+  | .selfBalance _ a, he => by
+    simp only [UpdElem.stExplicit] at he
+    simp only [UpdElem.withSt, UpdElem.write, Term.withSt_eval (w := ⟨s⟩) hs hk a he]
+    rw [← hk]
+  | .net r _ a, he => by
     simp only [UpdElem.stExplicit, Bool.and_eq_true] at he
     simp only [UpdElem.withSt, UpdElem.write, Term.withSt_eval (w := ⟨s⟩) hs hk r he.1,
       Term.withSt_eval (w := ⟨s⟩) hs hk a he.2]
-  | .saveNet _, _ => by simp only [UpdElem.withSt, UpdElem.write]; rw [← hk]
-  | .book a, he => by
-    simp only [UpdElem.stExplicit] at he
-    simp only [UpdElem.withSt, UpdElem.write, Term.withSt_eval (w := ⟨s⟩) hs hk a he]
     rw [← hk]; rfl
+  | .saveNet _, _ => by simp only [UpdElem.withSt, UpdElem.write]; rw [← hk]
   | .mref .., he | .memory _, he => by simp only [UpdElem.stExplicit, Bool.false_eq_true] at he
 
 theorem Upd.withSt_foldl {s : STerm C} {σ τ : State} (hs : s.eval σ = .ok τ) (hk : σ.Keeps τ) :
@@ -2747,9 +2748,9 @@ def UpdElem.rw (q : Term C × Term C) : UpdElem C → UpdElem C
   | .storage s => .storage (s.rw q)
   | .store x s => .store x (s.rw q)
   | .memory m => .memory m
-  | .transfer r a => .transfer (r.rw q) (a.rw q)
+  | .selfBalance op a => .selfBalance op (a.rw q)
+  | .net r op a => .net (r.rw q) op (a.rw q)
   | .saveNet x => .saveNet x
-  | .book a => .book (a.rw q)
 
 /-- Every right-hand side of an update, rewritten (`UpdElem.rw`). -/
 def Upd.rw (q : Term C × Term C) (U : Upd C) : Upd C := U.map (·.rw q)
@@ -2759,10 +2760,10 @@ theorem UpdElem.rw_write (hq : Term.EvalRefines q.1 q.2) (σ₀ τ : State) :
   | .val _ t => Res.Le.bind (Term.rw_eval hq t σ₀) fun _ => Res.Le.refl _
   | .path _ p => Res.Le.bind (PTerm.rw_eval hq p σ₀) fun _ => Res.Le.refl _
   | .storage s | .store _ s => Res.Le.bind (STerm.rw_eval hq s σ₀) fun _ => Res.Le.refl _
-  | .transfer r a =>
+  | .net r _ a =>
     Res.Le.bind (Term.rw_eval hq r σ₀) fun _ => Res.Le.bind (Res.Le.refl _) fun _ =>
       Res.Le.bind (Term.rw_eval hq a σ₀) fun _ => Res.Le.refl _
-  | .book a =>
+  | .selfBalance _ a =>
     Res.Le.bind (Term.rw_eval hq a σ₀) fun _ => Res.Le.refl _
   | .mref .. | .memory _ | .saveNet _ => Res.Le.refl _
 

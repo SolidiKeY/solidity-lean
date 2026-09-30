@@ -93,16 +93,16 @@ syntax:65 dl_term:65 " ± " dl_term:66 : dl_term
 /-- The value `t⊕⊕` has: the new one for `++t`, the old one for `t++`. -/
 syntax:max dl_term:max "⊕⊕" : dl_term
 syntax:65 dl_term:65 " - " dl_term:66 : dl_term
+/-- `at(r)`: the ledger's key for the address `r` (`net := store(net, at(r), …)`). -/
+syntax:max "at" noWs "(" dl_term ")" : dl_term
 syntax:max "(" dl_term ")" : dl_term
 syntax:max "‹" term "›" : dl_term
 
-/-- One elementary update `x := t`, `transfer(r, a)`, or `book(a)`. -/
+/-- One elementary update `x := t`.  The funds and the ledger are written
+`selfBalance := selfBalance - a` and `net := store(net, at(r), net(r) - a)`
+(`+` as well), their arithmetic KeY's `int`. -/
 declare_syntax_cat dl_upd_elem (behavior := both)
 syntax dl_term " := " dl_term : dl_upd_elem
-syntax &"transfer" "(" dl_term ", " dl_term ")" : dl_upd_elem
-/-- `book(a)`: `a` paid in by `msg.sender`, credited to its ledger entry and
-to the contract's funds. -/
-syntax &"book" "(" dl_term ")" : dl_upd_elem
 
 /-- A parallel update `{ a ‖ b }`. -/
 declare_syntax_cat dl_upd (behavior := both)
@@ -168,6 +168,9 @@ syntax "⟨" "[ " (sol_stmt "; ")* "]" "⟩" : dl_premise
 syntax dl_fml " ⟹ " "⟨" "[ " sol_block " ]" "⟩" " ; " dl_fml " ⟹ " "⟨" "[ " sol_block " ]" "⟩" :
   dl_premise
 syntax dl_fml " ⟹ " "⟨" "[ " (sol_stmt "; ")* "]" "⟩" " ; "
+  dl_fml " ⟹ " "⟨" "[ " (sol_stmt "; ")* "]" "⟩" : dl_premise
+/-- A guarded update: under `c` the update and the rest, else a revert. -/
+syntax dl_fml " ⟹" ppIndent(ppLine ppGroup(dl_upd " ⟨" "[ " "]" "⟩")) " ;" ppLine
   dl_fml " ⟹ " "⟨" "[ " (sol_stmt "; ")* "]" "⟩" : dl_premise
 syntax &"true" : dl_premise
 syntax &"false" : dl_premise
@@ -770,6 +773,7 @@ def headTerm (Γ : Scope) (pos : TPos) (x : Ident) : MacroM Lean.Term := do
     return ← `(Term.lit (.bool $(mkIdent (Name.mkSimple n))))
   if n == "storage" && pos == .storage then return ← `(STerm.storage)
   if n == "memory" && pos == .memory then return ← `(MTerm.memory)
+  if n == "selfBalance" && pos == .val then return ← `(Term.env EnvKey.selfBalance)
   match headOf Γ x, pos with
   | .local v, .val => `(Term.pv $v)
   | .local v, .svalue => `(SValT.val (Term.pv $v))
@@ -978,12 +982,27 @@ end
 
 /-- One elementary update: the sort of `x := t` is read off `x`. -/
 def schemaUpdElem (Γ : Scope) : TSyntax `dl_upd_elem → MacroM Lean.Term
-  | `(dl_upd_elem| transfer($r, $a)) => do
-    `(UpdElem.transfer $(← schemaTerm Γ .val r) $(← schemaTerm Γ .val a))
-  | `(dl_upd_elem| book($a)) => do `(UpdElem.book $(← schemaTerm Γ .val a))
   | `(dl_upd_elem| $l:dl_term := $r:dl_term) => do
     let `(dl_term| $x:ident) := l | Macro.throwErrorAt l "an update assigns a variable"
     let n := x.getId.toString
+    if n == "selfBalance" then
+      return ← match r with
+        | `(dl_term| selfBalance - $a) => do
+          `(UpdElem.selfBalance IntOp.sub $(← schemaTerm Γ .val a))
+        | `(dl_term| selfBalance + $a) => do
+          `(UpdElem.selfBalance IntOp.add $(← schemaTerm Γ .val a))
+        | _ => Macro.throwErrorAt r "`selfBalance - a` or `selfBalance + a`"
+    if n == "net" then
+      return ← match r with
+        | `(dl_term| store(net, at($a), net($a') - $v)) =>
+          if a.raw.structEq a'.raw then do
+            `(UpdElem.net $(← schemaTerm Γ .val a) IntOp.sub $(← schemaTerm Γ .val v))
+          else Macro.throwErrorAt a' "the entry read is the one written"
+        | `(dl_term| store(net, at($a), net($a') + $v)) =>
+          if a.raw.structEq a'.raw then do
+            `(UpdElem.net $(← schemaTerm Γ .val a) IntOp.add $(← schemaTerm Γ .val v))
+          else Macro.throwErrorAt a' "the entry read is the one written"
+        | _ => Macro.throwErrorAt r "`store(net, at(r), net(r) - a)` or `… + a`"
     if n == "storage" then return ← `(UpdElem.storage $(← schemaTerm Γ .storage r))
     if n == "memory" then return ← `(UpdElem.memory $(← schemaTerm Γ .memory r))
     match headOf Γ x with
@@ -1051,7 +1070,11 @@ partial def schemaFml : TSyntax `dl_fml → MacroM Lean.Term
   | `(dl_fml| ‹ $t:term ›) => pure t
   | stx@`(dl_fml| $_:dl_term == $_:dl_term) | stx@`(dl_fml| $_:dl_term != $_:dl_term) =>
     Macro.throwErrorAt stx "a program comparison is read against a contract: write `dl{ … }`"
-  | stx@`(dl_fml| $_:dl_term < $_:dl_term) | stx@`(dl_fml| $_:dl_term <= $_:dl_term)
+  | `(dl_fml| $a:dl_term <= $b:dl_term) => do
+    -- in a taclet, between `uint`s: `se <= selfBalance`
+    `(Fml.eqD (Term.binop BinOp.le PrimTy.uint $(← schemaTerm [] .val a) $(← schemaTerm [] .val b))
+        (Term.lit (.bool true)))
+  | stx@`(dl_fml| $_:dl_term < $_:dl_term)
   | stx@`(dl_fml| $_:dl_term > $_:dl_term) | stx@`(dl_fml| $_:dl_term >= $_:dl_term) =>
     Macro.throwErrorAt stx
       "an order between values is read against a contract: write `dl[C]{ … }` or `dl!{ … }`"
@@ -1073,6 +1096,17 @@ def schemaPremise (fresh : Bool) (Γ : Scope) : TSyntax `dl_premise → MacroM L
     let (fs, _) ← schemaProg fresh Γ fs
     `($(mkIdent `Solidity.Premise.split) $(← schemaFml c) $(← schemaFml nc)
         ([$ts,*] : List (Stmt _)) ([$fs,*] : List (Stmt _)))
+  | `(dl_premise| $c:dl_fml ⟹ $U:dl_upd ⟨[ ]⟩ ; $nc:dl_fml ⟹ ⟨[ $[$fs:sol_stmt;]* ]⟩) => do
+    -- the other branch is the guard's negation, and reverts
+    let neg := match nc with
+      | `(dl_fml| ¬ ( $c':dl_fml )) | `(dl_fml| ¬ $c':dl_fml) => c'.raw.structEq c.raw
+      | _ => false
+    unless neg do Macro.throwErrorAt nc "the other branch's condition is `¬(c)`"
+    let isRevert (x : Lean.Syntax) := x.getKind == ``solRevert ||
+      (x.getKind == Lean.choiceKind && x.getArgs.any (·.getKind == ``solRevert))
+    unless fs.size == 1 && isRevert fs[0]!.raw do
+      Macro.throwErrorAt nc "the other branch is `⟨[ revert(); ]⟩`"
+    `($(mkIdent `Solidity.Premise.guard) $(← schemaFml c) $(← schemaUpd Γ U))
   | `(dl_premise| true) => `($(mkIdent `Solidity.Premise.done) true)
   | `(dl_premise| false) => `($(mkIdent `Solidity.Premise.done) false)
   | _ => Macro.throwUnsupported
@@ -1682,7 +1716,7 @@ partial def ppTerm (e : Lean.Expr) : MetaM (TSyntax `dl_term) := do
     | EnvKey.msgSender => `(dl_term| msg.sender)
     | EnvKey.msgValue => `(dl_term| msg.value)
     | EnvKey.timestamp => `(dl_term| block.timestamp)
-    | EnvKey.selfBalance => `(dl_term| address(this).balance)
+    | EnvKey.selfBalance => `(dl_term| selfBalance)
     | _ => escapeDl e
   | Term.net _ a => `(dl_term| net($(← ppTerm a)))
   | Term.netOf _ x a =>
@@ -1811,12 +1845,22 @@ def ppUpdElem? (e : Lean.Expr) : MetaM (Option (TSyntax `dl_upd_elem)) := do
     let some x ← var x | return none
     return some (← `(dl_upd_elem| $x:dl_term := $(← ppSTerm s):dl_term))
   | UpdElem.memory _ m => return some (← `(dl_upd_elem| memory := $(← ppMTerm m):dl_term))
-  | UpdElem.transfer _ r a =>
-    return some (← `(dl_upd_elem| transfer($(← ppTerm r):dl_term, $(← ppTerm a):dl_term)))
+  | UpdElem.selfBalance _ op a =>
+    let a ← ppTerm a
+    match_expr (← whnf op) with
+    | IntOp.sub => return some (← `(dl_upd_elem| selfBalance := selfBalance - $a))
+    | IntOp.add => return some (← `(dl_upd_elem| selfBalance := selfBalance + $a))
+    | _ => return none
+  | UpdElem.net _ r op a =>
+    let r ← ppTerm r
+    let a ← ppTerm a
+    match_expr (← whnf op) with
+    | IntOp.sub => return some (← `(dl_upd_elem| net := store(net, at($r), net($r) - $a)))
+    | IntOp.add => return some (← `(dl_upd_elem| net := store(net, at($r), net($r) + $a)))
+    | _ => return none
   | UpdElem.saveNet _ x =>
     let some x ← var x | return none
     return some (← `(dl_upd_elem| $x:dl_term := net))
-  | UpdElem.book _ a => return some (← `(dl_upd_elem| book($(← ppTerm a):dl_term)))
   | _ => return none
 
 def ppUpd (e : Lean.Expr) : MetaM (TSyntax `dl_upd) := do

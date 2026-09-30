@@ -251,25 +251,35 @@ theorem branchDiamond :
 The transfer rule could be stated twice, since the modalities part company at
 it: the box books the payment unconditionally, the diamond owes a
 *sufficient funds* obligation beside it.  Here there is one rule,
-`transferNoCallback`, and the obligation is inside its update: a term can
-halt (`Update.lean`), and `{ transfer(to, 5) }` halts where the contract's
-balance is below `5`.  Under the box that halt is harmless; under the
-diamond it is the funds obligation. -/
+`transferNoCallback`, with the funds check as its guard: where
+`0 <= se ∧ se <= selfBalance` the booking, KeY's
+`{ selfBalance := selfBalance - se ‖ net := store(net, at(sadr), net(sadr) - se) }`,
+and where not a `revert();`.  Under the box that branch closes to `true`
+(`revertBox`); under the diamond to `false` (`revertDiamond`), so what is
+left to prove is the guard: the funds obligation. -/
 
 /--
 info: @Taclet.transferNoCallback : ∀ {C : Contract} {k : Nat} {m : Modality} {sadr se : Simple C PrimTy.uint},
-  dl{ ⟨[ sadr .transfer(se); ]⟩ ⇝ { transfer(sadr, se) } ⟨[ ]⟩ }
+  dl{ ⟨[ sadr .transfer(se); ]⟩ ⇝
+    0 <= se ∧ se <= selfBalance ⟹
+        { selfBalance := selfBalance - se ‖ net := store(net, at(sadr), net(sadr) - se) } ⟨[ ]⟩ ;
+      ¬(0 <= se ∧ se <= selfBalance) ⟹ ⟨[ revert(); ]⟩ }
 -/
 #guard_msgs in #check @Taclet.transferNoCallback
 
-/-- `[ to.transfer(5); ] true`: one rule. -/
+/-- `[ to.transfer(5); ] true`: one rule, two goals. -/
 theorem transferBox : ⊢ dl!{ [ to.transfer(5); ] true } := by
-  apply update .transferNoCallback
-  -- dl{ { transfer(to, 5) } ⟹ [ ] true }
-  apply empty
-  refine close ?_
-  sol_symex
-  sol_close
+  apply guard .transferNoCallback
+  · -- dl{ 0 <= 5 ∧ 5 <= selfBalance, { selfBalance := selfBalance - 5 ‖ … } ⟹ [ ] true }
+    apply empty
+    refine close ?_
+    sol_symex
+    sol_close
+  · -- dl{ ¬(0 <= 5 ∧ 5 <= selfBalance) ⟹ [ revert(); ] true }
+    apply done .revertBox
+    refine close ?_
+    sol_symex
+    sol_close
 
 /-- The diamond is not valid: `exampleStore` holds `1000000000` wei, and
 `to.transfer(2000000000)` reverts there. -/
@@ -282,7 +292,14 @@ example : ¬ (⊨ dl!{ to == 1 → ⟨ to.transfer(2000000000); ⟩ true }) := f
 The amount is captured into `se1` first (`transfer_unfold_rightSndArgument`),
 and the booking is read under that capture. -/
 
-/-- trace: ⊢ ⊨ dl{ { se1 := x + 2 } { transfer(to, se1) } true } -/
+/--
+trace: ⊢ ⊨
+    dl{
+      { se1 := x + 2 }
+        (((0 <= se1 ∧ se1 <= selfBalance) →
+                { selfBalance := selfBalance - se1 ‖ net := store(net, at(to), net(to) - se1) } true) ∧
+            (¬(0 <= se1 ∧ se1 <= selfBalance) → true)) }
+-/
 #guard_msgs in
 /-- `[ to.transfer(x + 2); ] true`. -/
 theorem transferCapturedAmount : ⊨ dl!{ [ to.transfer(x + 2); ] true } := by

@@ -432,10 +432,11 @@ pushed struct. Each is now a pinned `#eval` rather than a proved theorem
 ## Solidity/Traces/Control.lean
 
 The payment and control-flow chains. `transfer` is now one rule
-(`transferNoCallback`) for both modalities — the funds check is inside its
-update term rather than a second, diamond-only line — so the old
-box/diamond pairs collapse to one walk each, and the diamond content becomes
-a run of the interpreter in `Net.lean`.
+(`transferNoCallback`) for both modalities — the funds check is its guard,
+`0 <= se ∧ se <= selfBalance ⟹ {booking} ; ¬(…) ⟹ revert();`, rather than a
+second, diamond-only line — so the old box/diamond pairs collapse to one
+walk each, and the diamond content becomes a run of the interpreter in
+`Net.lean`.
 
 | Old | New |
 |---|---|

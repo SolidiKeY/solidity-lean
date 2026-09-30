@@ -77,8 +77,10 @@ inductive RawTerm where
 /-- One elementary update as written. -/
 inductive RawUpdElem where
   | assign (x : String) (t : RawTerm)
-  | transfer (r a : RawTerm)
-  | book (a : RawTerm)
+  /-- `selfBalance := selfBalance ± a` -/
+  | selfBalance (op : IntOp) (a : RawTerm)
+  /-- `net := store(net, at(r), net(r) ± a)` -/
+  | net (r : RawTerm) (op : IntOp) (a : RawTerm)
   deriving Repr, Inhabited
 
 /-- A formula as written.  `peq`/`pne` compare program expressions (`==`, `!=`). -/
@@ -135,7 +137,9 @@ partial def expandTerm : TSyntax `dl_term → MacroM Lean.Term
         | f :: flds' => match EnvKey.ofParts root f with
           | some k => pure (← `(RawTerm.env $(k.ident)), flds')
           | none => pure (← `(RawTerm.name $(quote root)), flds)
-        | [] => pure (← `(RawTerm.name $(quote root)), flds)
+        | [] =>
+          if root == "selfBalance" then pure (← `(RawTerm.env EnvKey.selfBalance), flds)
+          else pure (← `(RawTerm.name $(quote root)), flds)
       flds.foldlM (init := base) fun acc f =>
         `(RawTerm.field $acc $(quote f))
   | `(dl_term| $t:dl_term . $f:ident) => do
@@ -177,12 +181,22 @@ def expandUpd (U : TSyntax `dl_upd) : MacroM Lean.Term := do
   -- the elements, read off the `sepBy1` node: `‖` does not splice in a pattern
   let elems ← U.raw[1].getSepArgs.mapM fun e => do
     match (⟨e⟩ : TSyntax `dl_upd_elem) with
-    | `(dl_upd_elem| transfer($r, $a)) =>
-      `(RawUpdElem.transfer $(← expandTerm r) $(← expandTerm a))
-    | `(dl_upd_elem| book($a)) => do `(RawUpdElem.book $(← expandTerm a))
     | `(dl_upd_elem| $l:dl_term := $r:dl_term) =>
       let `(dl_term| $x:ident) := l | Macro.throwErrorAt l "an update assigns a variable"
       let [n] := nameParts x.getId | Macro.throwErrorAt l "an update assigns a variable"
+      if n == "selfBalance" then
+        return ← match r with
+          | `(dl_term| selfBalance - $a) => do `(RawUpdElem.selfBalance IntOp.sub $(← expandTerm a))
+          | `(dl_term| selfBalance + $a) => do `(RawUpdElem.selfBalance IntOp.add $(← expandTerm a))
+          | _ => Macro.throwErrorAt r "`selfBalance - a` or `selfBalance + a`"
+      if n == "net" then
+        let net (a a' v : TSyntax `dl_term) (op : Lean.Term) : MacroM Lean.Term := do
+          unless a.raw.structEq a'.raw do Macro.throwErrorAt a' "the entry read is the one written"
+          `(RawUpdElem.net $(← expandTerm a) $op $(← expandTerm v))
+        match r with
+        | `(dl_term| store(net, at($a), net($a') - $v)) => return ← net a a' v (← `(IntOp.sub))
+        | `(dl_term| store(net, at($a), net($a') + $v)) => return ← net a a' v (← `(IntOp.add))
+        | _ => pure ()
       `(RawUpdElem.assign $(quote n) $(← expandTerm r))
     | _ => Macro.throwUnsupported
   `([$elems,*])
@@ -266,8 +280,8 @@ end
 
 def RawUpdElem.names : RawUpdElem → List String
   | .assign x t => if x = "storage" || x = "memory" then t.names else x :: t.names
-  | .transfer r a => r.names ++ a.names
-  | .book a => a.names
+  | .selfBalance _ a => a.names
+  | .net r _ a => r.names ++ a.names
 
 /-- The names a raw formula mentions, and those its programs declare. -/
 def RawFml.names : RawFml → List String × List String
@@ -507,12 +521,12 @@ reference type binds `x` as an alias of that type.  Every right-hand side is
 read in the scope in front of the update. -/
 def elabUpd (Γ : ECtx) : List RawUpdElem → Except String (Upd C × ECtx)
   | [] => pure ([], Γ)
-  | .transfer r a :: U => do
+  | .selfBalance op a :: U => do
     let (U', Γ') ← elabUpd Γ U
-    pure (.transfer (← tVal C Γ r) (← tVal C Γ a) :: U', Γ')
-  | .book a :: U => do
+    pure (.selfBalance op (← tVal C Γ a) :: U', Γ')
+  | .net r op a :: U => do
     let (U', Γ') ← elabUpd Γ U
-    pure (.book (← tVal C Γ a) :: U', Γ')
+    pure (.net (← tVal C Γ r) op (← tVal C Γ a) :: U', Γ')
   | .assign x t :: U => do
     let (U', Γ') ← elabUpd Γ U
     if x = "storage" then return (.storage (← tStor C Γ t) :: U', Γ')

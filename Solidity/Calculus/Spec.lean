@@ -14,8 +14,11 @@ The obligation of a function `f(x₁, …, xₙ)` is solkey's, a box:
 
 ```
 R ∧ L ∧ M ∧ I ∧ requires →
-  {old := storage ‖ oldNet := net ‖ book(msg.value)} [ T result = f(x₁, …, xₙ); ] (I ∧ ensures ∧ A)
+  {old := storage ‖ oldNet := net ‖ B} [ T result = f(x₁, …, xₙ); ] (I ∧ ensures ∧ A)
 ```
+
+where `B` books `msg.value`, KeY's
+`net := store(net, at(msg.sender), net(msg.sender) + msg.value) ‖ selfBalance := selfBalance + msg.value`.
 
 The parameters are free locals, so `⊨` ranges over every argument; `R`
 gives each its type's range, since a free local also ranges over values of
@@ -388,7 +391,8 @@ variable [FreshNames]
 /-- **The pieces of the obligation of `f`**, solkey's `specifiedProblemText`:
 the premises every run meets by construction (`R`, `L` and what `msg.value`
 is, `M`), the premises the specification states (`I ∧ requires`), the
-update `{old := storage ‖ oldNet := net ‖ book(msg.value)}`, the call
+update `{old := storage ‖ oldNet := net ‖ B}` (`B` the booking of
+`msg.value`), the call
 `T result = f(x₁, …, xₙ);`, and what is owed after it, `I`, `ensures` and
 `A` one by one (a counterexample search names the one that fails). -/
 def specPieces (f : String) :
@@ -428,9 +432,12 @@ def specPieces (f : String) :
       else []) ++
     if d.spec.ensures.any SpecExpr.usesOldNet || (d.spec.assignable.getD []).any SpecLoc.usesNet
     then [.saveNet oldNetVar] else []
-  -- a function that is not `payable` is called with `msg.value == 0`, so its
-  -- booking, `book(0)`, is left out: it changes nothing
-  let U := snap ++ if d.payable then [.book (.env .msgValue)] else []
+  -- the payment booked, KeY's `{net := store(net, at(msgSender),
+  -- net(msgSender) + msgValue) ‖ selfBalance := selfBalance + msgValue}`; a
+  -- function that is not `payable` is called with `msg.value == 0`, so its
+  -- booking is left out: it changes nothing
+  let U := snap ++ if d.payable then
+    [.net (.env .msgSender) .add (.env .msgValue), .selfBalance .add (.env .msgValue)] else []
   let msgValue : Fml C := if d.payable then cmpFml .ge .uint (.env .msgValue) (.lit (.int 0))
     else .eqD (.env .msgValue) (.lit (.int 0))
   let read := (C.inv ++ d.spec.requires ++ d.spec.ensures).flatMap SpecExpr.names ++
@@ -446,13 +453,13 @@ def specBody (U : Upd C) (P : Prog C) (posts : List (Fml C)) : Fml C :=
 
 /-- **The parts of the obligation of `f`**: the premises met by
 construction, the premises stated, and the conclusion
-`{old := storage ‖ oldNet := net ‖ book(msg.value)} [ T result = f(x₁, …, xₙ); ] (I ∧ ensures ∧ A)`. -/
+`{old := storage ‖ oldNet := net ‖ B} [ T result = f(x₁, …, xₙ); ] (I ∧ ensures ∧ A)`. -/
 def specParts (f : String) : Except String (List (Fml C) × List (Fml C) × Fml C) := do
   let (a, b, U, P, posts) ← specPieces C f
   pure (a, b, specBody C U P posts)
 
 /-- **The obligation of `f`**: `R ∧ L ∧ M ∧ I ∧ requires → {old := storage ‖
-oldNet := net ‖ book(msg.value)} [ T result = f(x₁, …, xₙ); ] (I ∧ ensures ∧ A)`,
+oldNet := net ‖ B} [ T result = f(x₁, …, xₙ); ] (I ∧ ensures ∧ A)`,
 the parts of `specParts` put together. -/
 def specObligation (f : String) : Except String (Fml C) := do
   let (a, b, body) ← specParts C f

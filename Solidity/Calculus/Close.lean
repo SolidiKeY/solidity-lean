@@ -575,10 +575,18 @@ theorem UpdElem.write_store (σ₀ τ : State) (x : Var) (s : STerm C) :
 /-- `{memory := write(…)}` replaces the heap, and nothing else. -/
 theorem UpdElem.write_memory (σ₀ τ : State) (m : MTerm C) : (UpdElem.memory m).write σ₀ τ =
     m.eval σ₀ >>= fun μ => .ok { τ with heap := μ.heap, nextId := μ.nextId } := rfl
-/-- `{transfer(to, 5)}`: the address, the amount, the payment. -/
-theorem UpdElem.write_transfer (σ₀ τ : State) (r a : Term C) : (UpdElem.transfer r a).write σ₀ τ =
-    r.eval σ₀ >>= Value.asInt >>= fun addr => a.eval σ₀ >>= Value.asInt >>= fun amt =>
-      transferAt τ addr amt := by
+/-- `{selfBalance := selfBalance - 5}`: the amount, then the funds. -/
+theorem UpdElem.write_selfBalance (σ₀ τ : State) (op : IntOp) (a : Term C) :
+    (UpdElem.selfBalance op a).write σ₀ τ = a.eval σ₀ >>= Value.asInt >>= fun amt =>
+      .ok { τ with selfBalance := op.apply σ₀.selfBalance amt } := by
+  simp only [UpdElem.write, bind, Except.bind]
+  cases a.eval σ₀ <;> rfl
+/-- `{net := store(net, at(to), net(to) - 5)}`: the address, the amount, then
+the entry. -/
+theorem UpdElem.write_net (σ₀ τ : State) (r : Term C) (op : IntOp) (a : Term C) :
+    (UpdElem.net r op a).write σ₀ τ =
+      r.eval σ₀ >>= Value.asInt >>= fun addr => a.eval σ₀ >>= Value.asInt >>= fun amt =>
+        .ok { τ with net := setBy addr (op.apply (σ₀.getNet addr) amt) σ₀.net } := by
   simp only [UpdElem.write, bind, Except.bind]
   cases r.eval σ₀ with
   | error => rfl
@@ -593,12 +601,6 @@ theorem UpdElem.write_transfer (σ₀ τ : State) (r a : Term C) : (UpdElem.tran
 /-- `{oldNet := net}` binds the ledger variable `oldNet` to the ledger. -/
 theorem UpdElem.write_saveNet (σ₀ τ : State) (x : Var) :
     (UpdElem.saveNet x : UpdElem C).write σ₀ τ = .ok (τ.setEnv x (.ledger σ₀.net)) := rfl
-/-- `{book(msg.value)}`: the amount, then the sender's entry and the funds
-credited. -/
-theorem UpdElem.write_book (σ₀ τ : State) (a : Term C) : (UpdElem.book a).write σ₀ τ =
-    a.eval σ₀ >>= Value.asInt >>= fun amt => .ok (State.book σ₀ τ amt) := by
-  simp only [UpdElem.write, bind, Except.bind]
-  cases a.eval σ₀ <;> rfl
 /-- Binding a local leaves the ledger. -/
 theorem net_setEnv (σ : State) (x : Var) (b : Binding) : (σ.setEnv x b).net = σ.net := rfl
 /-- A ledger entry after a write: the written amount at that address, the old
@@ -674,7 +676,7 @@ attribute [close_rw]
   Hyp.wrap Upd.apply List.foldlM_cons List.foldlM_nil
   Close.UpdElem.write_val Close.UpdElem.write_path Close.UpdElem.write_mref
   Close.UpdElem.write_storage Close.UpdElem.write_store Close.UpdElem.write_memory
-  Close.UpdElem.write_transfer Close.UpdElem.write_saveNet Close.UpdElem.write_book State.book
+  Close.UpdElem.write_selfBalance Close.UpdElem.write_net Close.UpdElem.write_saveNet IntOp.apply
   -- terms
   Close.Term.eval_lit Close.Term.eval_pv Close.Term.eval_binop Close.Term.eval_unop
   Close.Term.eval_find Close.Term.eval_len Close.Term.eval_read Close.Term.eval_ite

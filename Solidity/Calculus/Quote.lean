@@ -88,6 +88,10 @@ def MValT.quote : MValT C → Lean.Expr
 
 end
 
+def IntOp.quote : IntOp → Lean.Expr
+  | .add => mkConst ``IntOp.add
+  | .sub => mkConst ``IntOp.sub
+
 def UpdElem.quote : UpdElem C → Lean.Expr
   | .val x t => mkAppN (mkConst ``UpdElem.val) #[c, toExpr x, Term.quote c t]
   | .path x p => mkAppN (mkConst ``UpdElem.path) #[c, toExpr x, PTerm.quote c p]
@@ -95,9 +99,10 @@ def UpdElem.quote : UpdElem C → Lean.Expr
   | .storage s => mkAppN (mkConst ``UpdElem.storage) #[c, STerm.quote c s]
   | .store x s => mkAppN (mkConst ``UpdElem.store) #[c, toExpr x, STerm.quote c s]
   | .memory m => mkAppN (mkConst ``UpdElem.memory) #[c, MTerm.quote c m]
-  | .transfer r a => mkAppN (mkConst ``UpdElem.transfer) #[c, Term.quote c r, Term.quote c a]
+  | .selfBalance op a => mkAppN (mkConst ``UpdElem.selfBalance) #[c, IntOp.quote op, Term.quote c a]
+  | .net r op a =>
+    mkAppN (mkConst ``UpdElem.net) #[c, Term.quote c r, IntOp.quote op, Term.quote c a]
   | .saveNet x => mkAppN (mkConst ``UpdElem.saveNet) #[c, toExpr x]
-  | .book a => mkAppN (mkConst ``UpdElem.book) #[c, Term.quote c a]
 
 def Upd.quote : List (UpdElem C) → Lean.Expr
   | [] => mkAppN (mkConst ``List.nil [0]) #[mkAppN (mkConst ``UpdElem) #[c]]

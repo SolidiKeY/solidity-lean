@@ -39,13 +39,19 @@ theorem transferFrameStorage :
   apply unfold .transfer_unfold_rightSndArgument
   apply unfold .localValueDeclInitDrop
   apply update .binopAssignment
-  apply update .transferNoCallback  -- { transfer(to, se1) }
-  apply unfold .localValueDeclInitDrop
-  apply update .storageFieldReadFind
-  apply empty
-  refine close ?_
-  sol_symex
-  sol_close
+  apply guard .transferNoCallback
+  · -- { selfBalance := selfBalance - se1 ‖ net := store(net, at(to), net(to) - se1) }
+    apply unfold .localValueDeclInitDrop
+    apply update .storageFieldReadFind
+    apply empty
+    refine close ?_
+    sol_symex
+    sol_close
+  · -- ¬(0 <= se1 ∧ se1 <= selfBalance): the transfer reverts
+    apply done .revertBox
+    refine close ?_
+    sol_symex
+    sol_close
 
 /-- `uint z = total; owner.transfer(5);` — a state variable as the receiver is
 captured (`transfer_unfold_leftFstReceiver`), and the transfer leaves it, and
@@ -58,11 +64,15 @@ theorem transferFrameRoot :
   apply unfold .transfer_unfold_leftFstReceiver
   apply unfold .localValueDeclInitDrop
   apply update .storageRootReadSelect
-  apply update .transferNoCallback
-  apply empty
-  refine close ?_
-  sol_symex
-  sol_close
+  apply guard .transferNoCallback
+  · apply empty
+    refine close ?_
+    sol_symex
+    sol_close
+  · apply done .revertBox
+    refine close ?_
+    sol_symex
+    sol_close
 
 /-- `uint z = balances[k]; to.transfer(5); uint y = balances[k];` — a mapping
 entry, read before and after. -/

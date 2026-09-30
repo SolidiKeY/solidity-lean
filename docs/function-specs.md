@@ -121,7 +121,7 @@ not `closed` yet).  `sol_close` reads it as a Lean `∀` over integers
 
 ```
 R ∧ L ∧ M ∧ I ∧ requires →
-  {old := storage ‖ oldNet := net ‖ book(msg.value)} [ T result = f(x₁, …, xₙ); ] (I ∧ ensures ∧ A)
+  {old := storage ‖ oldNet := net ‖ B} [ T result = f(x₁, …, xₙ); ] (I ∧ ensures ∧ A)
 ```
 
 `R` is each parameter's range and `L` the layout of the state the clauses
@@ -136,10 +136,11 @@ and the conclusion.
 The update is solkey's with three differences, none of which changes what
 the formula means: `old := storage` is there when an `ensures` reads `\old`
 or an `assignable` clause is given; `oldNet := net` only when an `\old(…)`
-reads `net(a)` (solkey takes both with any `\old`); and `book(msg.value)`
-(`UpdElem.book`, KeY's `net := storeSt(net, at(msgSender), … + msgValue) ‖
-selfBalance := selfBalance + msgValue`) only for a `payable` function, since
-`M` makes the other's `book(0)`.  Leaving them out is cheaper: symbolic
+reads `net(a)` (solkey takes both with any `\old`); and the booking `B` of
+`msg.value`, KeY's `net := store(net, at(msg.sender), net(msg.sender) +
+msg.value) ‖ selfBalance := selfBalance + msg.value` (`UpdElem.net`,
+`UpdElem.selfBalance`), only for a `payable` function, since `M` makes the
+other's a booking of `0`.  Leaving them out is cheaper: symbolic
 execution and `sol_close` pay for every element.
 
 `net(a)` is `Term.net`, what the ledger holds for `a` (`State.getNet`), read

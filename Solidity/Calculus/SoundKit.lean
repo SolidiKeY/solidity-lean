@@ -88,6 +88,8 @@ def Premise.Correct (k : Nat) (m : Modality) (s : Stmt C) : Premise C → Prop
       (holds σ c → SameOk (freshVars k) (Prog.run σ P) (s.run σ)) ∧
       (holds σ c' → SameOk (freshVars k) (Prog.run σ Q) (s.run σ)) ∧
       (¬ holds σ c → ¬ holds σ c' → ∃ e, s.run σ = .error e)
+  | .guard c U => ∀ σ,
+      (holds σ c → SameOk [] (U.apply σ) (s.run σ)) ∧ (¬ holds σ c → ∃ e, s.run σ = .error e)
   | .done b => ∀ σ, (∃ e, s.run σ = .error e) ∧ (b = true → m = .box)
 
 /-! ### Writes as a new storage or heap, the rest of the state kept -/

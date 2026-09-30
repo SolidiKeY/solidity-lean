@@ -213,6 +213,7 @@ def soundLine (n : Lean.Name) (ty : Lean.Expr) : MetaM String := do
         | some ``Premise.update => ``Taclet.sound_update
         | some ``Premise.unfold => ``Taclet.sound_unfold
         | some ``Premise.split => ``Taclet.sound_split
+        | some ``Premise.guard => ``Taclet.sound_guard
         | some ``Premise.done => ``Taclet.sound_done
         | _ => ``Taclet.sound
   let upd := Name.mkStr `Solidity ("upd_" ++ n.getString!)

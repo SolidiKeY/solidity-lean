@@ -239,8 +239,9 @@ elab "clear_side" : tactic => withMainContext do
 
 /-- What a taclet leaves: an update in front of the rest (`{U} ⟨[ ]⟩`),
 statements in its place (`⟨[ s₁; …; sₙ; ]⟩`), two goals (a branch, one
-condition assumed in each: `se = true` and `se = false`), or the whole
-modality closed (`true`, `false`).  A condition can be stuck (a local read
+condition assumed in each: `se = true` and `se = false`), a guarded update
+(`c ⟹ {U} ⟨[ ]⟩ ; ¬(c) ⟹ ⟨[ revert(); ]⟩`), or the whole modality closed
+(`true`, `false`).  A condition can be stuck (a local read
 before it is bound), so a branch's two conditions need not cover every
 state: a box goal is true of a stuck run anyway, and a diamond goal owes
 that one of them holds (`Proves.split`). -/
@@ -248,6 +249,7 @@ inductive Premise (C : Contract) where
   | update (U : Upd C)
   | unfold (P : Prog C)
   | split (c c' : Fml C) (P Q : Prog C)
+  | guard (c : Fml C) (U : Upd C)
   | done (b : Bool)
 
 /-! ## The rule table -/
@@ -494,8 +496,12 @@ inductive Taclet (C : Contract) (k : Nat) : Modality → Stmt C → Premise C �
       dl{ ⟨[ nadr.transfer(e); ]⟩ ⇝ ⟨[ uint se = nadr; se.transfer(e); ]⟩ }
   | transfer_unfold_rightSndArgument :
       dl{ ⟨[ sadr.transfer(nse); ]⟩ ⇝ ⟨[ uint se = nse; sadr.transfer(se); ]⟩ }
+  /-- The funds cover the amount: the booking; they do not: a revert. -/
   | transferNoCallback :
-      dl{ ⟨[ sadr.transfer(se); ]⟩ ⇝ { transfer(sadr, se) } ⟨[ ]⟩ }
+      dl{ ⟨[ sadr.transfer(se); ]⟩ ⇝
+          0 <= se ∧ se <= selfBalance ⟹
+            { selfBalance := selfBalance - se ‖ net := store(net, at(sadr), net(sadr) - se) } ⟨[ ]⟩ ;
+          ¬(0 <= se ∧ se <= selfBalance) ⟹ ⟨[ revert(); ]⟩ }
   -- Memory ---------------------------------------------------------------
   | memoryFieldRead_unfold_rightFst :
       dl{ ⟨[ lhs = nmp.fld; ]⟩ ⇝ ⟨[ T memory mv = nmp; lhs = mv.fld; ]⟩ }
@@ -647,25 +653,32 @@ inductive Rule (C : Contract) (k : Nat) (m : Modality) (s : Stmt C) (p : Premise
 /-! ## The callback taclets
 
 `transferSemantics:withCallback`: `sadr.transfer(se);` when the recipient may
-call back into the contract.  The premise is the booking `U`, KeY's
-`{selfBalance := selfBalance - se ‖ net := …}` (`transfer(sadr, se)`), read two
-ways (`Calculus/Callback.lean`): the contract invariant after it ("invariant on
-exit"), and the rest of the program resumed from any state the callee may leave
-in which the invariant holds ("resume after callback").  Under the diamond the
-booking is owed to succeed, which is solkey's "sufficient funds" premise.
+call back into the contract.  Their premise has `transferNoCallback`'s shape,
+the funds check `0 <= se ∧ se <= selfBalance` and the booking
+`{selfBalance := selfBalance - se ‖ net := store(net, at(sadr), net(sadr) - se)}`,
+read differently (`Calculus/Callback.lean`): under the funds check, the
+contract invariant after the booking ("invariant on exit"), and the rest of
+the program resumed from any state the callee may leave in which the
+invariant holds ("resume after callback").  Under the diamond the funds
+check is owed, solkey's "sufficient funds" premise.
 
 They are not `Taclet` constructors: `Taclet` is sound for `Stmt.run`, which
 books a transfer and returns, and these are sound for the callback reading
 (`holdsC`), in which the other semantics' `transferNoCallback` is not. -/
 
 /-- The two callback taclets: the statement they fire on, under the modality
-they are for, and the booking update of their premise. -/
-inductive CallbackTaclet (C : Contract) : Modality → Stmt C → Upd C → Prop where
+they are for, and the funds check and booking of their premise. -/
+inductive CallbackTaclet (C : Contract) : Modality → Stmt C → Premise C → Prop where
   | transferWithCallbackBox {sadr se : Simple C .uint} :
-      CallbackTaclet C .box (.transfer (.simple sadr) (.simple se)) [.transfer sadr.lower se.lower]
+      CallbackTaclet C .box (.transfer (.simple sadr) (.simple se))
+        dl{ 0 <= se ∧ se <= selfBalance ⟹
+              { selfBalance := selfBalance - se ‖ net := store(net, at(sadr), net(sadr) - se) } ⟨[ ]⟩ ;
+            ¬(0 <= se ∧ se <= selfBalance) ⟹ ⟨[ revert(); ]⟩ }
   | transferWithCallbackDiamond {sadr se : Simple C .uint} :
       CallbackTaclet C .diamond (.transfer (.simple sadr) (.simple se))
-        [.transfer sadr.lower se.lower]
+        dl{ 0 <= se ∧ se <= selfBalance ⟹
+              { selfBalance := selfBalance - se ‖ net := store(net, at(sadr), net(sadr) - se) } ⟨[ ]⟩ ;
+            ¬(0 <= se ∧ se <= selfBalance) ⟹ ⟨[ revert(); ]⟩ }
 
 /-! ## Printing taclets and premises
 
@@ -693,6 +706,10 @@ def ppPremise? (e : Lean.Expr) : MetaM (Option (TSyntax `dl_premise)) := do
         return some (← `(dl_premise| $c:dl_fml ⟹ ⟨[ $(← ppBlock P) ]⟩ ; $c':dl_fml ⟹ ⟨[ $(← ppBlock Q) ]⟩))
     | _, _ =>
       return some (← `(dl_premise| $c:dl_fml ⟹ ⟨[ $(← ppBlock P) ]⟩ ; $c':dl_fml ⟹ ⟨[ $(← ppBlock Q) ]⟩))
+  | Premise.guard _ c U =>
+    let c ← ppFml c
+    return some (← `(dl_premise| $c:dl_fml ⟹ $(← ppUpd U):dl_upd ⟨[ ]⟩ ;
+      ¬($c) ⟹ ⟨[ revert(); ]⟩))
   | Premise.done _ b =>
     match_expr (← whnf b) with
     | Bool.true => return some (← `(dl_premise| true))
@@ -722,7 +739,8 @@ def delabPremise : Delab := do
   `(dl{ $p:dl_premise })
 
 attribute [delab app.Solidity.Premise.update, delab app.Solidity.Premise.unfold,
-  delab app.Solidity.Premise.split, delab app.Solidity.Premise.done] delabPremise
+  delab app.Solidity.Premise.split, delab app.Solidity.Premise.guard,
+  delab app.Solidity.Premise.done] delabPremise
 
 /-- The type without its `autoParam` hypotheses (a taclet's side conditions),
 which nothing after them depends on. -/

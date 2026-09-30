@@ -1,5 +1,6 @@
 import Solidity.Calculus.SoundUpdate
 import Solidity.Calculus.SoundUnfold
+import Solidity.Theory.Bridge.Denote
 
 /-!
 # The taclets are sound
@@ -12,7 +13,7 @@ effect off the fresh names; a branch runs the goal its condition picks, and
 halts where neither condition holds; a closed goal is a halt, closed as the
 modality says.
 
-The four premise kinds are proved apart: `SoundUpdate.lean`,
+The five premise kinds are proved apart: `SoundUpdate.lean`,
 `SoundUnfold.lean`, and the branches and closed goals here.  The rules solkey
 does not have are `LeanTaclet.sound`, and `Rule.sound` is both lists.
 -/
@@ -58,6 +59,64 @@ theorem Taclet.sound_split {k : Nat} {m : Modality} {s : Stmt C} {c c' : Fml C} 
         simp only
         rcases v with _ | (_ | _) <;> simp [SameOk.self])
 
+/-- `0 <= se ∧ se <= selfBalance`, the funds check of a transfer: `se` is a
+word the contract's funds cover. -/
+theorem holds_funds {σ : State} (se : Simple C .uint) :
+    holds σ (Fml.and (.eqD (.binop .le .uint (.lit (.int 0)) se.lower) (.lit (.bool true)))
+      (.eqD (.binop .le .uint se.lower (.env .selfBalance)) (.lit (.bool true)))) ↔
+      ∃ n : Int, se.lower.eval σ = .ok (.int n) ∧ 0 ≤ n ∧ n ≤ σ.selfBalance := by
+  show holds σ (Fml.eqD _ _) ∧ holds σ (Fml.eqD _ _) ↔ _
+  rw [holds_eqD_iff, holds_eqD_iff]
+  cases h : se.lower.eval σ with
+  | error e =>
+    simp only [Term.eval, bind, Except.bind, evalBinop, h, reduceCtorEq, false_and, exists_false,
+      and_false]
+  | ok v =>
+    rcases v with _ | (_ | _) <;>
+      simp only [Term.eval, bind, Except.bind, pure, Except.pure, evalBinop, h, applyBinOp,
+        Value.asInt, checkArith, Except.ok.injEq, exists_eq_left', PrimVal.bool.injEq,
+        true_eq_decide_iff, State.envVal, PrimVal.int.injEq, reduceCtorEq, false_and, exists_false,
+        and_self]
+
+/-- `transferNoCallback`: where the funds cover the amount the booking is the
+transfer, where they do not it halts. -/
+theorem Taclet.guard_run {k : Nat} {m : Modality} {s : Stmt C} {c : Fml C} {U : Upd C}
+    (d : Taclet C k m s (.guard c U)) (σ : State) :
+    (holds σ c → U.apply σ = s.run σ) ∧ (¬ holds σ c → ∃ e, s.run σ = .error e) := by
+  cases d with
+  | transferNoCallback =>
+    rename_i sadr se
+    rw [holds_funds]
+    simp only [Simple.lower_eval]
+    constructor
+    · rintro ⟨n, hn, h0, hb⟩
+      have hn0 : ¬ n < 0 := Int.not_lt.2 h0
+      have hnb : ¬ σ.selfBalance < n := Int.not_lt.2 hb
+      simp only [Upd.apply, List.foldlM_cons, List.foldlM_nil, UpdElem.write, Stmt.run, Val.eval,
+        Simple.lower_eval, hn, transferAt, hn0, hnb, if_false, bind, Except.bind, pure,
+        Except.pure, Value.asInt]
+      cases sadr.eval σ with
+      | error => rfl
+      | ok w =>
+        rcases w with a | _
+        · simp only [IntOp.apply, State.setNet]
+        · rfl
+    · intro hn
+      simp only [Stmt.run, Val.eval]
+      rcases sadr.eval σ with e | (a | b) <;> rcases hs : se.eval σ with e' | (n | b') <;>
+        simp only [bind, Except.bind, Value.asInt, transferAt, Except.error.injEq, exists_eq']
+      by_cases h0 : n < 0
+      · exact ⟨_, if_pos h0⟩
+      by_cases hb : σ.selfBalance < n
+      · exact ⟨_, by rw [if_neg h0, if_pos hb]⟩
+      exact absurd ⟨n, hs, Int.not_lt.1 h0, Int.not_lt.1 hb⟩ hn
+
+theorem Taclet.sound_guard {k : Nat} {m : Modality} {s : Stmt C} {c : Fml C} {U : Upd C}
+    (d : Taclet C k m s (.guard c U)) :
+    ∀ σ, (holds σ c → SameOk [] (U.apply σ) (s.run σ)) ∧
+      (¬ holds σ c → ∃ e, s.run σ = .error e) := fun σ =>
+  ⟨fun hc => by rw [(d.guard_run σ).1 hc]; exact SameOk.self _ _, (d.guard_run σ).2⟩
+
 theorem Taclet.sound_done {k : Nat} {m : Modality} {s : Stmt C} {b : Bool}
     (d : Taclet C k m s (.done b)) :
     ∀ σ, (∃ e, s.run σ = .error e) ∧ (b = true → m = .box) := by
@@ -73,6 +132,7 @@ theorem Taclet.sound {k : Nat} {m : Modality} {s : Stmt C} {pr : Premise C}
   | update U => exact Taclet.sound_update d
   | unfold P => exact Taclet.sound_unfold d hs
   | split c c' P Q => exact Taclet.sound_split d
+  | guard c U => exact Taclet.sound_guard d
   | done b => exact Taclet.sound_done d
 
 /-- The rules solkey does not have are sound: `functionCallArgCapture` reads

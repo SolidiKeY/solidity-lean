@@ -92,7 +92,8 @@ and `assignable \nothing` owes every word of the storage where it was.  The
 /--
 info: dl{
   (msg.value >= 0 ∧ net(msg.sender) + msg.value >= 0) →
-    { old := storage ‖ oldNet := net ‖ book(msg.value) }
+    { old := storage ‖ oldNet := net ‖ net := store(net, at(msg.sender), net(msg.sender) + msg.value) ‖
+        selfBalance := selfBalance + msg.value }
       [ pay(); ]
         (net(msg.sender) = net(oldNet, msg.sender) + msg.value ∧
             (select(old, count) = select(old, count) → select(storage, count) = select(old, count)) ∧

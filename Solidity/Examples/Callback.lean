@@ -61,16 +61,17 @@ theorem withdrawSafe :
   apply ProvesC.update .storageRootReadSelect rfl
   apply ProvesC.update .storageRootWriteStore rfl
   apply ProvesC.update .storageRootOpAssign rfl
-  apply ProvesC.callback .transferWithCallbackBox
-  · -- invariant on exit
+  -- the box owes no funds
+  apply ProvesC.callback .transferWithCallbackBox nofun
+  · -- invariant on exit: `0 <= amt ∧ amt <= selfBalance → {U} I`
     apply ProvesC.plain _ rfl
     refine close ?_
     sol_symex
     sol_close
-  · -- resume after callback: `{U} {havoc} (I → [ ] I)`
+  · -- resume after callback: `0 <= amt ∧ amt <= selfBalance → {U} {havoc} (I → [ ] I)`
     apply ProvesC.plain _ rfl
     apply empty
-    rw [show ∀ (Γ : List (Hyp Vault)) a b c, Γ ++ [a, b, c] = (Γ ++ [a, b]) ++ [c] by simp]
+    rw [show ∀ (Γ : List (Hyp Vault)) a b c d, Γ ++ [a, b, c, d] = (Γ ++ [a, b, c]) ++ [d] by simp]
     exact close (Hyp.wrap_assumption _ rfl)
 
 /-- What is safe with callbacks is safe without: the deterministic run is one
@@ -141,7 +142,7 @@ def broke : State := { before with selfBalance := 0 }
 
 /-- `⟨ to.transfer(5); ⟩ true` is not valid with callbacks: from a vault with
 no funds the transfer reverts, and a diamond admits no halting run
-(`transferWithCallbackDiamond` owes the booking to succeed: solkey's
+(`transferWithCallbackDiamond` owes `0 <= se ∧ se <= selfBalance`: solkey's
 "sufficient funds"). -/
 theorem unfunded_diamond : ¬ ValidC vaultInv dl!{ ⟨ to.transfer(5); ⟩ true } := by
   intro h
@@ -152,7 +153,11 @@ theorem unfunded_diamond : ¬ ValidC vaultInv dl!{ ⟨ to.transfer(5); ⟩ true 
 
 /--
 info: @CallbackTaclet.transferWithCallbackBox : ∀ {C : Contract} {sadr se : Simple C PrimTy.uint},
-  CallbackTaclet C Modality.box (stmt{ sadr .transfer(se); }) [UpdElem.transfer sadr.lower se.lower]
+  CallbackTaclet C Modality.box (stmt{ sadr .transfer(se); })
+    (dl{
+      0 <= se ∧ se <= selfBalance ⟹
+          { selfBalance := selfBalance - se ‖ net := store(net, at(sadr), net(sadr) - se) } ⟨[ ]⟩ ;
+        ¬(0 <= se ∧ se <= selfBalance) ⟹ ⟨[ revert(); ]⟩ })
 -/
 #guard_msgs in #check @CallbackTaclet.transferWithCallbackBox
 
