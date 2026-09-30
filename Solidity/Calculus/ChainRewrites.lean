@@ -24,16 +24,18 @@ nothing, so a link never repeats its line.
 |---|---|---|---|---|
 | `mergeAt i` | `Fml.mergeAt` | `{U}{V} ⇝ {U ‖ {U}V}`, `U` at `i` | `Upd.merge_holds` (iff) | `merge`, `mergeStorage` |
 | `mergeSpine n` | `Fml.mergeSpine` | the first `n + 1` updates into one | `n` merges (iff) | — |
-| `updRule r i` | `Fml.updRuleAt` | `simplifyUpdate`, `applySkip`, `applyOnRigid` | `UpdRule.sound` (iff) | `simplify` |
-| `dropShadowed i` | `Fml.dropShadowedAt` | the elements a later one overwrites go | `Upd.dropShadowed_holds` (iff) | — |
-| `applyOnRigidBox i` | `Fml.applyOnRigidBoxAt` | `[{U}] φ ⇝ φ[U]`, `φ` first-order | `Fml.subst_box(_st)` | `applyOnRigidBox` |
+| `updRule r i` | `Fml.updRuleAt` | `applySkip`, `applyOnRigid` | `UpdRule.sound` (iff) | `simplify` |
+| `simplify i` | `Fml.simplifyAt` | the elements `ψ` does not read, or a later one overwrites, go | `Upd.dropEffectless_holds_of` (iff) | `simplify` |
+| `simplifyFresh i` | `Fml.simplifyFreshAt` | the same, `ψ` asked its fresh variables only | `Upd.dropEffectless_holds_of` (iff) | — |
+| `applyOnRigidBox i` | `Fml.applyOnRigidBoxAt` | `[{U}] φ ⇝ φ[U]`, `φ` first-order; any modality if `U` cannot halt | `Fml.subst_box(_st)` | `applyOnRigidBox` |
 | `applyStorageBox i` | `Fml.applyStorageBoxAt` | `[{storage := s}] φ ⇝ φ[s/storage]` | `Fml.withSt_box` | `applyStorageBox` |
 | `law h` | `Fml.rwLaw` | `t ⇝ t'` in every equation | `Fml.rwEq_holds` (iff) | `theoryRw` |
 | `lawUpd h ht i` | `Fml.rwUpdAt` | `t ⇝ t'` in `[{Uᵢ}]`'s right-hand sides | `Upd.rw_box` | `updRw` |
 
-KeY's names: the merges are `sequentialToParallel`, `dropShadowed` is
-`simplifyUpdate` for the overwritten elements alone, the two `apply…Box`
-are `applyOnRigidFormula`, and a law is the theory taclet it names.
+KeY's names: the merges are `sequentialToParallel`, the two `simplify…` are
+`simplifyUpdate` (with `applySkip` when they empty the update), the two
+`apply…Box` are `applyOnRigidFormula`, and a law is the theory taclet it
+names.
 
 **Where.**  A line is an update prefix, its *spine* `{U₀}{U₁}…{Uₙ} ψ`, over
 a body `ψ`: a program still to run, or the postcondition.  A chain rewrites
@@ -49,10 +51,12 @@ right-hand sides, where `t'` cannot halt (`Term.EvalRefines.of_theq`).
 **What is looked at.**  A function looks at nothing below what it rewrites,
 so a line over an opaque postcondition `φ` computes as far as its concrete
 part goes, and a link on it is `rfl`.  The merges look at two updates, never
-the body; `dropShadowed`, `applySkip` and `lawUpd` at one update.  The rules
-whose premise is about the body read it: `simplifyUpdate` (the variables it
-reads), `applyOnRigid` and the `apply…Box` (a first-order body), `law` (its
-equations).
+the body; `applySkip` and `lawUpd` at one update.  The rules whose premise
+is about the body read it: `simplify` (the variables it reads),
+`applyOnRigid` and the `apply…Box` (a first-order body), `law` (its
+equations).  `simplifyFresh` reads only the body's fresh variables, which a
+postcondition `φ : Post C` has none of: over `φ` it computes by `simp` from
+`Post.noFresh`, not by `rfl` (`Chain.proveRw`, `Calculus/Chains.lean`).
 
 **The modality of an update.**  An update carries the modality it was
 produced under, and merging `{U}_m {V}_m'` needs `m = m'`: a halting update
@@ -62,7 +66,9 @@ capture) reads alike under both (`Upd.holds_total`), so a merge with one
 takes the other's modality without comparing them.  That is what lets the
 merges compute over a modality variable `m`; a merge of two updates
 that may both halt compares `m' = m`, which a variable does not decide.  The
-`…Box` rules and `lawUpd` are sound under the box only, and match `.box`.
+same holds of `applyOnRigidBox`: under the box, or where `U` cannot halt.
+`applyStorageBox` and `lawUpd` are the box's only, since a storage write and
+a right-hand side a law rewrites can halt; they match `.box`.
 
 **Merging, innermost first.**  `{U}{V}` merges when `U` writes only locals
 (`Upd.envOnly`, substituted into `V`), or is one storage write over a `V`
@@ -252,14 +258,14 @@ theorem Fml.mergeSpine_holds :
     | _ => nomatch h
 
 /-- An update rule (`UpdRuleName.top`) on the update at position `i`:
-`simplifyUpdate`, `applySkip`, `applyOnRigid`, each an equivalence.
-`sequentialToParallel` gives `none`: that rule is `Fml.mergeAt` (and
+`applySkip`, `applyOnRigid`, each an equivalence.  `sequentialToParallel`
+and `simplifyUpdate` give `none`: those rules are `Fml.mergeAt` (and
 `Fml.mergeSpine`), which also merges a storage write and compares no
-modality where an update cannot halt, so a link labelled with it has one
-spelling. -/
+modality where an update cannot halt, and `Fml.simplifyAt` (and
+`Fml.simplifyFreshAt`), which also drops the update it empties, so a link
+labelled with one has one spelling. -/
 def Fml.updRuleAt : UpdRuleName → Nat → Fml C → Option (Fml C)
-  | .sequentialToParallel, _, _ => none
-  | .simplifyUpdate, i, φ => Fml.atSpine UpdRuleName.simplifyUpdate.top i φ
+  | .sequentialToParallel, _, _ | .simplifyUpdate, _, _ => none
   | .applySkip, i, φ => Fml.atSpine UpdRuleName.applySkip.top i φ
   | .applyOnRigid, i, φ => Fml.atSpine UpdRuleName.applyOnRigid.top i φ
 
@@ -268,84 +274,161 @@ theorem Fml.updRuleAt_holds {r : UpdRuleName} {i : Nat} {φ ψ : Fml C} (h : φ.
   have top : ∀ (r : UpdRuleName), φ.atSpine r.top i = some ψ → (holds σ ψ ↔ holds σ φ) :=
     fun _ h => Fml.atSpine_holds (fun h σ => (UpdRuleName.top_rule h).sound σ) i φ h σ
   cases r with
-  | sequentialToParallel => nomatch h
-  | simplifyUpdate => exact top _ h
+  | sequentialToParallel | simplifyUpdate => nomatch h
   | applySkip => exact top _ h
   | applyOnRigid => exact top _ h
 
-/-! ## `simplifyUpdate` without the body
+/-! ## `simplifyUpdate`
 
 `simplifyUpdate` drops an element that cannot halt when the formula under
-the update does not read its variable, or a later element writes it again.
-The second needs nothing of the formula: an overwritten element is dropped
-under any body (KeY's `\dropEffectlessElementaries` with every variable
-read). -/
+the update does not read its variable, or a later element writes it again;
+an update it empties goes too (`applySkip`), since `dl!{}` has no spelling
+for KeY's `skip`.  What the formula reads is asked of the update's own
+variables only (`Upd.dropEffectless_holds_of`): any list `F` that holds
+every one the formula reads will do, and the fewer it holds the more goes.
 
-/-- The update without the elements a later element overwrites. -/
-def Upd.dropShadowed (U : Upd C) : Upd C := U.dropEffectless U.targets
+* `Fml.simplifyAt` reads the formula's variables, as KeY's
+  `\dropEffectlessElementaries` does: `{ x := 10 ‖ y := 1 } y ≐ 1 ⇝ { y := 1 } y ≐ 1`.
+* `Fml.simplifyFreshAt` reads only its *fresh* variables (`Fml.freshVars`),
+  and counts every user variable the update writes as read.  A postcondition
+  `φ : Post C` names no fresh variable, so over `φ` a capture of the rules
+  (`se1`, `pv`) goes, and the rewrite computes from `Post.noFresh` rather than
+  by `rfl` (`Chain.proveRw`): `{ pv := 10 ‖ acc := alice.account ‖
+  storage := S } φ ⇝ { storage := S } φ`.  An overwritten element goes too,
+  whatever it writes: `{ acc := alice.account ‖ acc := bob.account } φ`
+  keeps the second. -/
 
-/-- Dropping an overwritten element changes no binding.
+/-- The fresh variables a formula mentions (`Var.idx` not `0`), taken apart
+connective by connective, so that a postcondition's are asked of it alone
+(`Post.freshVars_eq_nil`). -/
+def Fml.freshVars : Fml C → List Var
+  | .tt => []
+  | .eq a b => (a.vars ++ b.vars).filter (·.idx != 0)
+  | .defined t => t.vars.filter (·.idx != 0)
+  | .not φ | .havoc φ => φ.freshVars
+  | .and φ ψ | .imp φ ψ => φ.freshVars ++ ψ.freshVars
+  | .upd _ U φ => U.vars.filter (·.idx != 0) ++ φ.freshVars
+  | .modal _ P φ => (Prog.vars P).filter (·.idx != 0) ++ φ.freshVars
+  | .all x _ φ => [x].filter (·.idx != 0) ++ φ.freshVars
 
-Example: `{ acc := alice.account ‖ acc := bob.account }` binds what
-`{ acc := bob.account }` binds. -/
-theorem Upd.dropShadowed_holds (m : Modality) (U : Upd C) (φ : Fml C) (σ : State) :
-    holds σ (.upd m U.dropShadowed φ) ↔ holds σ (.upd m U φ) :=
-  m.after_frame (Upd.dropEffectless_apply U.targets U σ) fun _ _ h =>
-    holds_frame φ (fun x _ hG => by
-      obtain ⟨hx, hn⟩ := List.mem_filter.1 hG
+theorem Fml.freshVars_eq : (φ : Fml C) → φ.freshVars = φ.vars.filter (·.idx != 0)
+  | .tt | .eq .. | .defined _ => rfl
+  | .not φ | .havoc φ => Fml.freshVars_eq φ
+  | .and φ ψ | .imp φ ψ => by
+    simp only [Fml.freshVars, Fml.vars, List.filter_append, Fml.freshVars_eq φ, Fml.freshVars_eq ψ]
+  | .upd _ _ φ | .modal _ _ φ => by
+    simp only [Fml.freshVars, Fml.vars, List.filter_append, Fml.freshVars_eq φ]
+  | .all x _ φ => by
+    simp only [Fml.freshVars, Fml.vars, Fml.freshVars_eq φ, ← List.filter_append, List.singleton_append]
+
+/-- Dropping the effectless elements, reading `F` for what the formula
+reads, changes no binding the formula sees, if `F` holds every variable of
+the update the formula reads. -/
+theorem Upd.dropEffectless_holds_of {F : List Var} {U : Upd C} {φ : Fml C}
+    (hF : ∀ x ∈ φ.vars, x ∈ U.targets → x ∈ F) (m : Modality) (σ : State) :
+    holds σ (.upd m (U.dropEffectless F) φ) ↔ holds σ (.upd m U φ) :=
+  m.after_frame (Upd.dropEffectless_apply F U σ) fun _ _ h =>
+    holds_frame φ (fun x hx hG => by
+      obtain ⟨hU, hn⟩ := List.mem_filter.1 hG
       simp only [decide_eq_true_eq] at hn
-      exact hn hx) h
+      exact hn (hF x hx hU)) h
 
-/-- The overwritten elements of `{U}_m φ` dropped, if there is one. -/
-def Fml.dropShadowedTop (m : Modality) (U : Upd C) (φ : Fml C) : Option (Fml C) :=
-  if U.dropShadowed.length < U.length then some (.upd m U.dropShadowed φ) else none
+/-- `{U}_m φ` with its effectless elements dropped, `F` read for what `φ`
+reads, and the update with them if none is left; `none` if none goes. -/
+def Fml.simplifyWith (F : List Var) (m : Modality) (U : Upd C) (φ : Fml C) : Option (Fml C) :=
+  if (U.dropEffectless F).length < U.length then
+    some (match U.dropEffectless F with
+      | [] => φ
+      | V => .upd m V φ)
+  else none
 
-/-- The overwritten elements of the update at position `i` dropped. -/
-def Fml.dropShadowedAt (i : Nat) : Fml C → Option (Fml C) := Fml.atSpine Fml.dropShadowedTop i
+theorem Fml.simplifyWith_holds {F : List Var} {m : Modality} {U : Upd C} {φ ψ : Fml C}
+    (hF : ∀ x ∈ φ.vars, x ∈ U.targets → x ∈ F) (h : Fml.simplifyWith F m U φ = some ψ)
+    (σ : State) : holds σ ψ ↔ holds σ (.upd m U φ) := by
+  unfold Fml.simplifyWith at h
+  split at h
+  · cases h
+    rw [← Upd.dropEffectless_holds_of hF m σ]
+    split
+    · rename_i hV
+      rw [hV]
+      exact Iff.rfl
+    · exact Iff.rfl
+  · nomatch h
 
-theorem Fml.dropShadowedAt_holds {i : Nat} {φ ψ : Fml C} (h : φ.dropShadowedAt i = some ψ)
-    (σ : State) : holds σ ψ ↔ holds σ φ :=
-  Fml.atSpine_holds (fun h σ => by
-    unfold Fml.dropShadowedTop at h
-    split at h
-    · cases h; exact Upd.dropShadowed_holds _ _ _ σ
-    · nomatch h) i φ h σ
+/-- `simplifyUpdate` on `{U}_m φ`, reading `φ`'s variables. -/
+def Fml.simplifyTop (m : Modality) (U : Upd C) (φ : Fml C) : Option (Fml C) :=
+  Fml.simplifyWith φ.vars m U φ
 
-/-! ## An update applied to the body, under the box -/
+/-- `simplifyUpdate` on `{U}_m φ`, reading `φ`'s fresh variables, and every
+user variable `U` writes. -/
+def Fml.simplifyFreshTop (m : Modality) (U : Upd C) (φ : Fml C) : Option (Fml C) :=
+  Fml.simplifyWith (φ.freshVars ++ U.targets.filter (·.idx == 0)) m U φ
+
+theorem Fml.simplifyFreshTop_holds {m : Modality} {U : Upd C} {φ ψ : Fml C}
+    (h : Fml.simplifyFreshTop m U φ = some ψ) (σ : State) : holds σ ψ ↔ holds σ (.upd m U φ) :=
+  Fml.simplifyWith_holds (fun x hx hU => by
+    rw [List.mem_append, Fml.freshVars_eq, List.mem_filter, List.mem_filter]
+    by_cases h0 : x.idx = 0
+    · exact .inr ⟨hU, by simp only [h0, BEq.rfl]⟩
+    · exact .inl ⟨hx, by simp only [h0, bne_iff_ne, ne_eq, not_false_eq_true]⟩) h σ
+
+/-- `simplifyUpdate` on the update at position `i`, reading the formula's variables. -/
+def Fml.simplifyAt (i : Nat) : Fml C → Option (Fml C) := Fml.atSpine Fml.simplifyTop i
+
+/-- `simplifyUpdate` on the update at position `i`, reading the formula's
+fresh variables: it computes over a postcondition `φ : Post C`. -/
+def Fml.simplifyFreshAt (i : Nat) : Fml C → Option (Fml C) := Fml.atSpine Fml.simplifyFreshTop i
+
+/-! ## An update applied to the body, under the box
+
+`[{U}] φ ⇝ φ[U]` holds where `U` halts because the box does, so these rules
+are the box's.  Under the diamond an update that cannot halt reads as under
+the box (`Upd.holds_total`), so `applyOnRigidBox` applies there too, and at
+a modality variable `m`: it asks `U.total || m = .box`, which a total `U`
+decides without `m`, as the merges do.  A storage write is never total (its
+path may be missing), and neither is an update whose right-hand side a law
+rewrites (`find(save(…), p)` halts where `p` does not resolve), so
+`applyStorageBox` and `lawUpd` stay the box's. -/
+
+/-- A line under the box gives it under `m` where `m` is the box or `U`
+cannot halt. -/
+theorem Fml.upd_of_box {m : Modality} {U : Upd C} {φ : Fml C} (hm : U.total = true ∨ m = .box)
+    {σ : State} (h : holds σ (.upd .box U φ)) : holds σ (.upd m U φ) := by
+  rcases hm with hU | rfl
+  · exact (Upd.holds_total hU .box m φ σ).1 h
+  · exact h
 
 /-- `applyOnRigidFormula` under the box (`Proves.applyOnRigidBox`): `[{U}] φ ⇝ φ[U]`
 for a first-order `φ`, `U` of locals, or of locals and storage writes under a
-`φ` that reads no storage. -/
-def Fml.applyOnRigidBoxTop : Modality → Upd C → Fml C → Option (Fml C)
-  | .box, U, φ =>
-    if ((U.envOnly || U.localsOrStorage && φ.stFree) && φ.rigid && φ.sortedFor U) = true then
-      some (φ.subst U)
-    else none
-  | .diamond, _, _ => none
+`φ` that reads no storage; under any modality where `U` cannot halt. -/
+def Fml.applyOnRigidBoxTop (m : Modality) (U : Upd C) (φ : Fml C) : Option (Fml C) :=
+  if ((U.total || decide (m = .box)) && (U.envOnly || U.localsOrStorage && φ.stFree) &&
+      φ.rigid && φ.sortedFor U) = true then
+    some (φ.subst U)
+  else none
 
 theorem Fml.applyOnRigidBoxTop_sound {m : Modality} {U : Upd C} {φ ψ : Fml C}
     (h : Fml.applyOnRigidBoxTop m U φ = some ψ) (σ : State) (hψ : holds σ ψ) :
     holds σ (.upd m U φ) := by
-  cases m with
-  | diamond => nomatch h
-  | box =>
-    simp only [Fml.applyOnRigidBoxTop] at h
-    split at h
-    · rename_i hc
-      cases h
-      simp only [Bool.and_eq_true] at hc
-      obtain ⟨⟨hU, hr⟩, hs⟩ := hc
-      rcases Bool.or_eq_true_iff.1 hU with hU | hU
-      · exact Fml.subst_box hU hr hs σ hψ
-      · simp only [Bool.and_eq_true] at hU
-        exact Fml.subst_box_st hU.1 hU.2 hs σ hψ
-    · nomatch h
+  unfold Fml.applyOnRigidBoxTop at h
+  split at h
+  · rename_i hc
+    cases h
+    simp only [Bool.and_eq_true, Bool.or_eq_true, decide_eq_true_eq] at hc
+    obtain ⟨⟨⟨hm, hU⟩, hr⟩, hs⟩ := hc
+    refine Fml.upd_of_box hm ?_
+    rcases hU with hU | hU
+    · exact Fml.subst_box hU hr hs σ hψ
+    · exact Fml.subst_box_st hU.1 hU.2 hs σ hψ
+  · nomatch h
 
-/-- `applyOnRigidFormula` on the box update at position `i`. -/
+/-- `applyOnRigidFormula` on the update at position `i`. -/
 def Fml.applyOnRigidBoxAt (i : Nat) : Fml C → Option (Fml C) := Fml.atSpine Fml.applyOnRigidBoxTop i
 
 /-- `applyOnRigidFormula` for a storage write under the box
-(`Proves.applyStorageBox`): `[{storage := s}] φ ⇝ φ[s/storage]`. -/
+(`Proves.applyStorageBox`): `[{storage := s}] φ ⇝ φ[s/storage]`.  The box
+only: the write halts where its path does not resolve. -/
 def Fml.applyStorageBoxTop : Modality → Upd C → Fml C → Option (Fml C)
   | .box, [.storage s], φ => if (φ.rigid && φ.stExplicit) = true then some (φ.withSt s) else none
   | _, _, _ => none
@@ -398,7 +481,8 @@ theorem Fml.rwLaw_holds {q : Term C × Term C} (h : Term.Theq q.1 q.2) {φ ψ : 
 deriving instance DecidableEq for UpdElem
 
 /-- The law on the right-hand sides of `[{U}] φ` (`Proves.updRw`), if it
-rewrites one. -/
+rewrites one.  The box only: the rewritten update may run where `U` halts
+(`find(save(S, p, 10), p) ⇝ 10`), which the diamond would count against. -/
 def Fml.rwUpdTop (q : Term C × Term C) : Modality → Upd C → Fml C → Option (Fml C)
   | .box, U, φ => if (U.rw q != U) = true then some (.upd .box (U.rw q) φ) else none
   | .diamond, _, _ => none
@@ -429,16 +513,22 @@ def mergeAt (i : Nat) : LineRw C := ⟨Fml.mergeAt i, fun h σ => (Fml.mergeAt_h
 def mergeSpine (n : Nat) : LineRw C :=
   ⟨Fml.mergeSpine n, fun h σ => (Fml.mergeSpine_holds n _ h σ).1⟩
 
-/-- An update rule at position `i`: `simplifyUpdate`, `applySkip`, `applyOnRigid`.
-`sequentialToParallel` is `mergeAt`/`mergeSpine`; here it gives no line. -/
+/-- An update rule at position `i`: `applySkip`, `applyOnRigid`.
+`sequentialToParallel` is `mergeAt`/`mergeSpine` and `simplifyUpdate` is
+`simplify`/`simplifyFresh`; here they give no line. -/
 def updRule (r : UpdRuleName) (i : Nat) : LineRw C :=
   ⟨Fml.updRuleAt r i, fun h σ => (Fml.updRuleAt_holds h σ).1⟩
 
-/-- The overwritten elements of the update at position `i` dropped. -/
-def dropShadowed (i : Nat) : LineRw C :=
-  ⟨Fml.dropShadowedAt i, fun h σ => (Fml.dropShadowedAt_holds h σ).1⟩
+/-- `simplifyUpdate` on the update at position `i`, reading the formula's variables. -/
+def simplify (i : Nat) : LineRw C :=
+  ⟨Fml.simplifyAt i, Fml.atSpine_sound (fun h σ => (Fml.simplifyWith_holds (fun _ h _ => h) h σ).1) i _⟩
 
-/-- `applyOnRigidFormula` on the box update at position `i`. -/
+/-- `simplifyUpdate` on the update at position `i`, reading the formula's
+fresh variables. -/
+def simplifyFresh (i : Nat) : LineRw C :=
+  ⟨Fml.simplifyFreshAt i, Fml.atSpine_sound (fun h σ => (Fml.simplifyFreshTop_holds h σ).1) i _⟩
+
+/-- `applyOnRigidFormula` on the update at position `i`, under the box or where it cannot halt. -/
 def applyOnRigidBox (i : Nat) : LineRw C :=
   ⟨Fml.applyOnRigidBoxAt i, Fml.atSpine_sound Fml.applyOnRigidBoxTop_sound i _⟩
 
