@@ -38,4 +38,3 @@ of the interpreter from `State.exampleStore`, checked by `rfl` or pinned with
 When `sol_close` does not close a true goal, the gap belongs in
 `Calculus/Close.lean` (its docstring lists what it cannot do yet), not in a
 bespoke proof in the example.
-
