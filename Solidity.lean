@@ -46,6 +46,7 @@ import Solidity.Examples.LedgerDelete
 import Solidity.Examples.Memory
 import Solidity.Examples.CrossDomain
 import Solidity.Examples.Net
+import Solidity.Examples.Payment
 import Solidity.Examples.Theory
 import Solidity.Examples.Branch
 import Solidity.Examples.Revert

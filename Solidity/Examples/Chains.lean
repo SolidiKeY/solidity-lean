@@ -331,25 +331,6 @@ info:     dl{ ⟨[ if (true) {x = 2;} else {x = 1;}; ]⟩ x = 1 }
 
 end Modality
 
--- Past the first goal of a branch, once it is done, the step asks whether the
--- postcondition has a modality left: not written yet (`Chains.oneStepProof`).
-/--
-error: sol_chain: the step on
-  dl{
-    { se1 := x + 2 }
-      (((0 <= se1 ∧ se1 <= selfBalance) →
-              { selfBalance := selfBalance - se1 ‖ net := store(net, at(to), net(to) - se1) } φ) ∧
-          (¬(0 <= se1 ∧ se1 <= selfBalance) → ⟨ revert(); ⟩ φ)) }
-asks whether a postcondition has a modality left (the first goal of a branch is done): not supported yet
--/
-#guard_msgs in
-example (φ : Post StandardExample) : dl!{ ⟨ to.transfer(x + 2); ⟩ φ }
-    ~*> dl!{ { se1 := x + 2 }
-          (((0 <= se1 ∧ se1 <= selfBalance) →
-              { selfBalance := selfBalance - se1 ‖ net := store(net, at(to), net(to) - se1) } φ) ∧
-            (¬(0 <= se1 ∧ se1 <= selfBalance) → false)) } := by
-  sol_chain
-
 -- A line holds no other Lean term than a modality and postconditions…
 /--
 error: sol_chain: n is free in the line: only a modality `m` and postconditions `φ : Post C` may be
@@ -367,5 +348,112 @@ error: sol_chain: the line is under two modalities: take `cases` on one
 #guard_msgs in
 example (m m' : Modality) : ∃ ψ, Fml.and dl![m]{ ⟨[ x = 1; ]⟩ true } dl![m']{ ⟨[ x = 2; ]⟩ true }
     ~> ψ := ⟨_, by sol_chain⟩
+
+/-! ## 9 · Past a finished goal
+
+Once the first goal of a branch is done, `(c → {U} φ) ∧ …`, the step on the
+next one asks `φ` whether a modality is left, which only `Post.inactive`
+knows (`Chains.stepAtProof`): a `transfer`, a `require`, an `assert` and an
+`if`, each to its end, at a modality and over any postcondition. -/
+
+example (φ : Post StandardExample) : dl!{ ⟨ to.transfer(x + 2); ⟩ φ }
+    ~*> dl!{ { se1 := x + 2 }
+          (((0 <= se1 ∧ se1 <= selfBalance) →
+              { selfBalance := selfBalance - se1 ‖ net := store(net, at(to), net(to) - se1) } φ) ∧
+            (¬(0 <= se1 ∧ se1 <= selfBalance) → false)) } := by
+  sol_chain
+
+section Past
+variable (φ : Post StandardExample)
+
+/-- `require(true); x = 1;` under the box: its `else` goal reverts to `true`.
+A step past the done goal is `by sol_chain`: `rfl` would have to decide
+that `φ` has no modality left. -/
+example : dl![.box]{ ⟨[ require(true); x = 1; ]⟩ φ }
+    ~*> dl![.box]{ (true ≐ true → { x := 1 } φ) ∧ (true ≐ false → true) ∧ true } :=
+  calc dl![.box]{ ⟨[ require(true); x = 1; ]⟩ φ }
+    _ ~[requireSimple]~>
+        dl![.box]{ (true ≐ true → ⟨[ x = 1; ]⟩ φ) ∧ (true ≐ false → ⟨[ revert(); x = 1; ]⟩ φ) ∧ true } :=
+      rfl
+    _ ~*> dl![.box]{ (true ≐ true → { x := 1 } φ) ∧ (true ≐ false → ⟨[ revert(); x = 1; ]⟩ φ) ∧ true } := by
+      sol_chain
+    _ ~[revertBox]~> dl![.box]{ (true ≐ true → { x := 1 } φ) ∧ (true ≐ false → true) ∧ true } := by
+      sol_chain
+
+/-- `assert(true); x = 1;` under the diamond: its `else` goal reverts to
+`false`, and the cover is left. -/
+example : dl!{ ⟨ assert(true); x = 1; ⟩ φ }
+    ~*> dl!{ (true ≐ true → { x := 1 } φ) ∧ (true ≐ false → ⟨ revert(); x = 1; ⟩ φ) ∧
+          (true ≐ true ∨ true ≐ false) }
+    ~[revertDiamond]~> dl!{ (true ≐ true → { x := 1 } φ) ∧ (true ≐ false → false) ∧
+          (true ≐ true ∨ true ≐ false) } := by
+  sol_chain
+
+/--
+info:     dl{ [ if (true) {x = 2;} else {x = 1;}; ] φ }
+  ~[ifElseSplit]~>
+    dl{ (true ≐ true → [ x = 2; ] φ) ∧ (true ≐ false → [ x = 1; ] φ) ∧ true }
+  ~[localValueAssign]~>
+    dl{ (true ≐ true → { x := 2 } [ ] φ) ∧ (true ≐ false → [ x = 1; ] φ) ∧ true }
+  ~[emptyModality]~>
+    dl{ (true ≐ true → { x := 2 } φ) ∧ (true ≐ false → [ x = 1; ] φ) ∧ true }
+  ~[localValueAssign]~>
+    dl{ (true ≐ true → { x := 2 } φ) ∧ (true ≐ false → { x := 1 } [ ] φ) ∧ true }
+  ~[emptyModality]~>
+    dl{ (true ≐ true → { x := 2 } φ) ∧ (true ≐ false → { x := 1 } φ) ∧ true }
+-/
+#guard_msgs in
+#derivation dl![.box]{ ⟨[ if (true) { x = 2; } else { x = 1; }; ]⟩ φ }
+
+/-- `if (true) { x = 2; } else { x = 1; }` under the box, both goals run. -/
+example : dl![.box]{ ⟨[ if (true) { x = 2; } else { x = 1; }; ]⟩ φ }
+    ~*> dl![.box]{ (true ≐ true → { x := 2 } φ) ∧ (true ≐ false → { x := 1 } ⟨[ ]⟩ φ) ∧ true }
+    ~[emptyModality]~> dl![.box]{ (true ≐ true → { x := 2 } φ) ∧ (true ≐ false → { x := 1 } φ) ∧ true } := by
+  sol_chain
+
+-- Nested: past the done goal of the inner branch, the next step asks the
+-- goal `[ x = 1; ] φ`, active whatever `φ` is.
+/--
+info:     dl{ [ if (true) {if (true) {x = 2;} else {x = 1;};} else {x = 1;}; ] φ }
+  ~[ifElseSplit]~>
+    dl{ (true ≐ true → [ if (true) {x = 2;} else {x = 1;}; ] φ) ∧ (true ≐ false → [ x = 1; ] φ) ∧ true }
+  ~[ifElseSplit]~>
+    dl{
+  (true ≐ true → (true ≐ true → [ x = 2; ] φ) ∧ (true ≐ false → [ x = 1; ] φ) ∧ true) ∧
+    (true ≐ false → [ x = 1; ] φ) ∧ true }
+  ~[localValueAssign]~>
+    dl{
+  (true ≐ true → (true ≐ true → { x := 2 } [ ] φ) ∧ (true ≐ false → [ x = 1; ] φ) ∧ true) ∧
+    (true ≐ false → [ x = 1; ] φ) ∧ true }
+  ~[emptyModality]~>
+    dl{
+  (true ≐ true → (true ≐ true → { x := 2 } φ) ∧ (true ≐ false → [ x = 1; ] φ) ∧ true) ∧
+    (true ≐ false → [ x = 1; ] φ) ∧ true }
+  ~[localValueAssign]~>
+    dl{
+  (true ≐ true → (true ≐ true → { x := 2 } φ) ∧ (true ≐ false → { x := 1 } [ ] φ) ∧ true) ∧
+    (true ≐ false → [ x = 1; ] φ) ∧ true }
+  ~[emptyModality]~>
+    dl{
+  (true ≐ true → (true ≐ true → { x := 2 } φ) ∧ (true ≐ false → { x := 1 } φ) ∧ true) ∧
+    (true ≐ false → [ x = 1; ] φ) ∧ true }
+  ~[localValueAssign]~>
+    dl{
+  (true ≐ true → (true ≐ true → { x := 2 } φ) ∧ (true ≐ false → { x := 1 } φ) ∧ true) ∧
+    (true ≐ false → { x := 1 } [ ] φ) ∧ true }
+  ~[emptyModality]~>
+    dl{
+  (true ≐ true → (true ≐ true → { x := 2 } φ) ∧ (true ≐ false → { x := 1 } φ) ∧ true) ∧
+    (true ≐ false → { x := 1 } φ) ∧ true }
+-/
+#guard_msgs in
+#derivation dl![.box]{ ⟨[ if (true) { if (true) { x = 2; } else { x = 1; } } else { x = 1; }; ]⟩ φ }
+
+example : dl![.box]{ ⟨[ if (true) { if (true) { x = 2; } else { x = 1; } } else { x = 1; }; ]⟩ φ }
+    ~*> dl![.box]{ (true ≐ true → (true ≐ true → { x := 2 } φ) ∧ (true ≐ false → { x := 1 } φ) ∧ true) ∧
+          (true ≐ false → { x := 1 } φ) ∧ true } := by
+  sol_chain
+
+end Past
 
 end Solidity.Examples.Chains
