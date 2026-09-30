@@ -1496,6 +1496,50 @@ def ppIncDec (op : Lean.Expr) (l : TSyntax `sol_expr) : MetaM (Option (TSyntax `
   | IncDec.preDec => return some (← `(sol_stmt| −− $l:sol_expr))
   | _ => return none
 
+/-- A call's callee and its arguments, printed. -/
+def ppCallParts? (f args : Lean.Expr) :
+    MetaM (Option (TSyntax `sol_expr × Array (TSyntax `sol_expr))) := do
+  let some f ← nameOf? f | return none
+  let fe ← `(sol_expr| $(mkIdent (Lean.Name.mkSimple f)):ident)
+  let some as ← listElems? args | return none
+  let mut xs : Array (TSyntax `sol_expr) := #[]
+  for a in as do
+    match_expr (← whnf a) with
+    | Arg.mk _ _ _ v => xs := xs.push (← ppExpr v)
+    | _ => return none
+  return some (fe, xs)
+
+/-- A call of a function returning a memory reference and the statement
+after it binding the callee's return variable (the one its body declares
+first), as the one statement they are elaborated from:
+`Person memory mv1 = choosePersonMem();`, `m = choosePersonMem();`
+(`Stmt.memCallStr?`). -/
+def ppMemCall? (s t : Lean.Expr) : MetaM (Option (TSyntax `sol_stmt)) := do
+  let_expr Stmt.call _ f args _ ret body := (← whnf (← instantiateMVars s)) | return none
+  let_expr CallRet.none := (← whnf ret) | return none
+  let some bs ← listElems? body | return none
+  let some b := bs[0]? | return none
+  let_expr Stmt.declMem _ _ r init _ := (← whnf b) | return none
+  let_expr Option.none _ := (← whnf init) | return none
+  -- the local `t` binds to `r`, and the statement's form
+  let bound (rhs : Lean.Expr) : MetaM Bool := do
+    let_expr MRhs.alias _ _ p := (← whnf rhs) | return false
+    let_expr MPath.var _ _ r' := (← whnf p) | return false
+    isDefEq r r'
+  let some (fe, xs) ← ppCallParts? f args | return none
+  let call ← `(sol_expr| $fe:sol_expr ( $xs,* ))
+  match_expr (← whnf (← instantiateMVars t)) with
+  | Stmt.declMem _ R x init' _ =>
+    let_expr Option.some _ rhs := (← whnf init') | return none
+    unless ← bound rhs do return none
+    let some x ← ppVar? x | return none
+    return some (← `(sol_stmt| $(← ppTy.ppRef R):sol_ty memory $x:ident = $call:sol_expr))
+  | Stmt.rebindMem _ _ x rhs =>
+    unless ← bound rhs do return none
+    let some x ← ppVar? x | return none
+    return some (← `(sol_stmt| $x:ident = $call:sol_expr))
+  | _ => return none
+
 mutual
 
 partial def ppStmt (e : Lean.Expr) : MetaM (TSyntax `sol_stmt) := do
@@ -1595,14 +1639,7 @@ partial def ppStmt (e : Lean.Expr) : MetaM (TSyntax `sol_stmt) := do
   | Stmt.assert _ c => `(sol_stmt| assert($(← ppExpr c)))
   | Stmt.revert _ => `(sol_stmt| revert())
   | Stmt.call _ f args _ ret _ =>
-    let some f ← nameOf? f | escape
-    let fe ← `(sol_expr| $(mkIdent (Lean.Name.mkSimple f)):ident)
-    let some as ← listElems? args | escape
-    let mut xs : Array (TSyntax `sol_expr) := #[]
-    for a in as do
-      match_expr (← whnf a) with
-      | Arg.mk _ _ _ v => xs := xs.push (← ppExpr v)
-      | _ => return ← escape
+    let some (fe, xs) ← ppCallParts? f args | escape
     let res ← match_expr (← whnf ret) with
       | CallRet.val _ _ res =>
         match_expr (← whnf res) with
@@ -1619,7 +1656,17 @@ partial def ppStmt (e : Lean.Expr) : MetaM (TSyntax `sol_stmt) := do
 
 partial def ppProg? (e : Lean.Expr) : MetaM (Option (Array (TSyntax `sol_stmt))) := do
   let some ss ← listElems? e | return none
-  return some (← ss.mapM ppStmt)
+  let mut out : Array (TSyntax `sol_stmt) := #[]
+  let mut i := 0
+  while i < ss.size do
+    if let (some s, some t) := (ss[i]?, ss[i + 1]?) then
+      if let some st ← ppMemCall? s t then
+        out := out.push st
+        i := i + 2
+        continue
+    out := out.push (← ppStmt ss[i]!)
+    i := i + 1
+  return some out
 
 /-- A branch: `{ s₁; …; sₙ; }`, or the name of a schema variable. -/
 partial def ppBlock (e : Lean.Expr) : MetaM (TSyntax `sol_block) := do

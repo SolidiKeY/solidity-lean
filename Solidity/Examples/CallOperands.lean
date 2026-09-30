@@ -30,6 +30,12 @@ written with its `++i` left in place, and that program is pinned
 `carolValues[i] = makeValue();` is a chain from its first step to its last
 line (`memoryIndexWriteCallChain` says why not every line between).
 
+A function returning a memory reference (§8,
+`choosePersonMem().account = makeAccount();`) needs no rule of its own: the
+elaborator declares the callee's return variable at the head of its body and
+binds the caller's local to it after the call (`Syntax.lean`), and the
+printers write the pair as the call it came from.
+
 The push rows are chains, not box theorems about the pushed value:
 `sol_close` does not read back what a push wrote into an array known only by
 its shape (pinned at the end of §3; `Calculus/Close.lean`).
@@ -46,6 +52,9 @@ Where the printed rules differ, to be taken to them (Lean is the source of truth
   term;
 * its first step of `carolValues[++i] = makeValue();` re-aliases the receiver
   (`uint[] memory mv1 = carolValues;`), which the elaborator does not (§6);
+* its first step of `choosePersonMem().account = makeAccount();` is not one
+  formula here: its second capture reads back only with its call, since a
+  line naming `mv3` numbers the callees past it (§8);
 * its last line of `bucket.tokens.push() = tokRef;` writes the original path
   (`save(save(storage, bucket.tokens.length, q+1), bucket.tokens[q],
   find(bob, token(account)))`), where `bucketPushLvalueRefSource` keeps what
@@ -214,8 +223,8 @@ example : Prog.toStr (sol[TestSuite]{ Token storage t = bucket.tokens[0];
 
 /-- `Token storage t = bucket.tokens.push(); t.value = 11;` — the slot a push
 on a member chain returns, bound and written (the printed
-`bucket.tokens.push().value = valueVal;`, whose member of `push()` does not
-parse). -/
+`bucket.tokens.push().value = valueVal;`, whose member of `push()` is
+refused: a member of a call is one of a function's value). -/
 theorem bucketPushSlotWrite :
     ⊨ dl[TestSuite]{ [ Token storage t = bucket.tokens.push(); t.value = 11; ]
       t.value == 11 } := by
@@ -342,25 +351,195 @@ example : Prog.toStr (sol{ uint i = 0; uint[] memory carolValues = values;
     "uint i = 0; uint[] memory carolValues = values; uint se1 = i; uint se2; se2 = makeValue(); uint se4 = se2 + se1; uint se5; se5 = i++; carolValues[se5] = se4;" :=
   rfl
 
-/-! ## What cannot be written
+/-! ## 8 · A function returning a memory reference
 
-A function returning a memory reference, as in
-`choosePersonMem().account = makeAccount();`: a call's value is a value type
-(`CallRet`), and a member of a call does not parse.  Nor is a memory return
-declared: `returns (Account memory)` parses, but reads `memory` as the return
-variable's name, not as a location. -/
+The program `choosePersonMem().account = makeAccount();`
+(a memory example).  A call of a function returning a memory
+reference is KeY's expansion written out (`Syntax.lean`'s docstring): the
+callee's return variable, fresh, is declared at the head of its body (a
+fresh default object, as solc allocates one on entry), and the statement
+after the call binds the caller's local to its identity.  The two print, and
+read back, as the one statement `Person memory p = choosePersonMem();`.  No
+statement, rule or semantics is added: `functionBodyExpand` inlines the
+body, and the rest are the memory rules.
 
-/-- A function whose return is a struct: a call of it is refused, a call's
-value being a value type. -/
-def MemReturn : Contract := contract!{
-  uint seed;
-  function makeAccount() returns (Account r) { Account memory a; return a; }
+`makeAccount` writes its named return variable; `choosePersonMem` returns a
+copy of the state variable `alice`. -/
+
+def MemCalls : Contract := contract!{
+  Person alice;
+  function makeAccount() returns (Account memory a) { a.balance = 100; }
+  function choosePersonMem() returns (Person memory) { return alice; }
+}
+
+/-- A declaration from a memory-returning call: one statement, printed as
+written. -/
+example : Prog.toStr (sol[MemCalls]{ Person memory p = choosePersonMem(); } : Prog MemCalls) =
+    "Person memory p = choosePersonMem();" := rfl
+
+/-- An assignment to a memory local, the same. -/
+example : Prog.toStr (sol[MemCalls]{ Person memory p; p = choosePersonMem(); } : Prog MemCalls) =
+    "Person memory p; p = choosePersonMem();" := rfl
+
+-- The call inlined (`Prog.inlined`): the return variable `mv1` declared, the
+-- body (`return alice;` a copy into it), `p` bound to it.
+/-- info: Person memory mv1; mv1 = alice; Person memory p = mv1; -/
+#guard_msgs in
+#eval IO.println (Prog.toStr (Prog.inlined (sol[MemCalls]{ Person memory p = choosePersonMem(); } :
+    Prog MemCalls)))
+
+/-- The call's first step, `functionBodyExpand`. -/
+example : dl[MemCalls]{ ⟨ Person memory p = choosePersonMem(); ⟩ true }
+    ~[functionBodyExpand]~>
+      dl[MemCalls]{ ⟨ Person memory mv1; mv1 = alice; Person memory p = mv1; ⟩ true } :=
+  rfl
+
+/-- `choosePersonMem().account = makeAccount();`: the first step,
+the right-hand side then the receiver captured (`mv1`, `mv3`; printed
+`pv`, `mv`), each call's return variable the next fresh index. -/
+example : Prog.toStr (sol[MemCalls]{ choosePersonMem().account = makeAccount(); } :
+    Prog MemCalls) =
+    "Account memory mv1 = makeAccount(); Person memory mv3 = choosePersonMem(); mv3.account = mv1;" :=
+  rfl
+
+/-- The right-hand side's capture, as one formula: the receiver's capture
+reads back only with its call (a line naming `mv3` numbers the callees past
+it). -/
+example : dl[MemCalls]{ ⟨ choosePersonMem().account = makeAccount(); ⟩ true } =
+    dl[MemCalls]{ ⟨ Account memory mv1 = makeAccount(); choosePersonMem().account = mv1; ⟩ true } :=
+  rfl
+
+/-- The program to its last line: `makeAccount`'s body (`mv2`), its
+result bound (`mv1 := mv2`), `choosePersonMem`'s copy of `alice` (`mv4`),
+bound (`mv3 := mv4`), the member written (`memoryFieldWriteCopy`). -/
+def choosePersonMemAccount :
+    dl[MemCalls]{ ⟨ choosePersonMem().account = makeAccount(); ⟩ true }
+    ~*> dl[MemCalls]{ { mv2 := freshId(addM(memory, Account)) ‖ memory := addM(memory, Account) }
+          { memory := write(memory, mv2.balance, 100) } { mv1 := mv2 }
+          { mv4 := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
+          { mv4 := freshId(copySt(memory, find(storage, alice))) ‖
+            memory := copySt(memory, find(storage, alice)) }
+          { mv3 := mv4 } { memory := write(memory, mv3.account, mv1) } true } :=
+  calc dl[MemCalls]{ ⟨ choosePersonMem().account = makeAccount(); ⟩ true }
+    _ = dl[MemCalls]{ ⟨ Account memory mv1 = makeAccount(); choosePersonMem().account = mv1; ⟩
+          true } := rfl
+    _ ~*> dl[MemCalls]{ { mv2 := freshId(addM(memory, Account)) ‖ memory := addM(memory, Account) }
+          { memory := write(memory, mv2.balance, 100) } { mv1 := mv2 }
+          { mv4 := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
+          { mv4 := freshId(copySt(memory, find(storage, alice))) ‖
+            memory := copySt(memory, find(storage, alice)) }
+          { mv3 := mv4 } { memory := write(memory, mv3.account, mv1) } true } := by sol_chain
+
+/--
+info:     dl{ ⟨ Account memory mv1 = makeAccount(); Person memory mv3 = choosePersonMem(); mv3.account = mv1; ⟩ true }
+  ~[functionBodyExpand]~>
+    dl{
+  ⟨ Account memory mv2; mv2.balance = 100; Account memory mv1 = mv2; Person memory mv3 = choosePersonMem();
+    mv3.account = mv1; ⟩ true }
+  ~[memoryReferenceDeclFreshAlloc]~>
+    dl{
+  { mv2 := freshId(addM(memory, Account)) ‖ memory := addM(memory, Account) }
+    ⟨ mv2.balance = 100; Account memory mv1 = mv2; Person memory mv3 = choosePersonMem(); mv3.account = mv1; ⟩ true }
+  ~[memoryFieldWriteStore]~>
+    dl{
+  { mv2 := freshId(addM(memory, Account)) ‖ memory := addM(memory, Account) }
+    { memory := write(memory, mv2.balance, 100) }
+      ⟨ Account memory mv1 = mv2; Person memory mv3 = choosePersonMem(); mv3.account = mv1; ⟩ true }
+  ~[memoryLocalDeclInitDrop]~>
+    dl{
+  { mv2 := freshId(addM(memory, Account)) ‖ memory := addM(memory, Account) }
+    { memory := write(memory, mv2.balance, 100) }
+      ⟨ mv1 = mv2; Person memory mv3 = choosePersonMem(); mv3.account = mv1; ⟩ true }
+  ~[memoryRootAlias]~>
+    dl{
+  { mv2 := freshId(addM(memory, Account)) ‖ memory := addM(memory, Account) }
+    { memory := write(memory, mv2.balance, 100) }
+      { mv1 := mv2 } ⟨ Person memory mv3 = choosePersonMem(); mv3.account = mv1; ⟩ true }
+  ~[functionBodyExpand]~>
+    dl{
+  { mv2 := freshId(addM(memory, Account)) ‖ memory := addM(memory, Account) }
+    { memory := write(memory, mv2.balance, 100) }
+      { mv1 := mv2 } ⟨ Person memory mv4; mv4 = alice; Person memory mv3 = mv4; mv3.account = mv1; ⟩ true }
+  ~[memoryReferenceDeclFreshAlloc]~>
+    dl{
+  { mv2 := freshId(addM(memory, Account)) ‖ memory := addM(memory, Account) }
+    { memory := write(memory, mv2.balance, 100) }
+      { mv1 := mv2 }
+        { mv4 := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
+          ⟨ mv4 = alice; Person memory mv3 = mv4; mv3.account = mv1; ⟩ true }
+  ~[memoryStorageCopy]~>
+    dl{
+  { mv2 := freshId(addM(memory, Account)) ‖ memory := addM(memory, Account) }
+    { memory := write(memory, mv2.balance, 100) }
+      { mv1 := mv2 }
+        { mv4 := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
+          { mv4 := freshId(copySt(memory, find(storage, alice))) ‖ memory := copySt(memory, find(storage, alice)) }
+            ⟨ Person memory mv3 = mv4; mv3.account = mv1; ⟩ true }
+  ~[memoryLocalDeclInitDrop]~>
+    dl{
+  { mv2 := freshId(addM(memory, Account)) ‖ memory := addM(memory, Account) }
+    { memory := write(memory, mv2.balance, 100) }
+      { mv1 := mv2 }
+        { mv4 := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
+          { mv4 := freshId(copySt(memory, find(storage, alice))) ‖ memory := copySt(memory, find(storage, alice)) }
+            ⟨ mv3 = mv4; mv3.account = mv1; ⟩ true }
+  ~[memoryRootAlias]~>
+    dl{
+  { mv2 := freshId(addM(memory, Account)) ‖ memory := addM(memory, Account) }
+    { memory := write(memory, mv2.balance, 100) }
+      { mv1 := mv2 }
+        { mv4 := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
+          { mv4 := freshId(copySt(memory, find(storage, alice))) ‖ memory := copySt(memory, find(storage, alice)) }
+            { mv3 := mv4 } ⟨ mv3.account = mv1; ⟩ true }
+  ~[memoryFieldWriteCopy]~>
+    dl{
+  { mv2 := freshId(addM(memory, Account)) ‖ memory := addM(memory, Account) }
+    { memory := write(memory, mv2.balance, 100) }
+      { mv1 := mv2 }
+        { mv4 := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
+          { mv4 := freshId(copySt(memory, find(storage, alice))) ‖ memory := copySt(memory, find(storage, alice)) }
+            { mv3 := mv4 } { memory := write(memory, mv3.account, mv1) } ⟨ ⟩ true }
+  ~[emptyModality]~>
+    dl{
+  { mv2 := freshId(addM(memory, Account)) ‖ memory := addM(memory, Account) }
+    { memory := write(memory, mv2.balance, 100) }
+      { mv1 := mv2 }
+        { mv4 := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
+          { mv4 := freshId(copySt(memory, find(storage, alice))) ‖ memory := copySt(memory, find(storage, alice)) }
+            { mv3 := mv4 } { memory := write(memory, mv3.account, mv1) } true }
+-/
+#guard_msgs in
+#derivation dl[MemCalls]{ ⟨ choosePersonMem().account = makeAccount(); ⟩ true }
+
+/-- A declaration from a memory-returning call: the copy of `alice`. -/
+theorem memCallDecl :
+    ⊨ dl[MemCalls]{ [ alice.age = 34; Person memory p = choosePersonMem(); uint v = p.age; ]
+      v == 34 } := by
+  sol_symex
+  sol_close
+
+/-- The write through a bound result: the member holds what
+`makeAccount` built. -/
+theorem memCallMemberWrite :
+    ⊨ dl[MemCalls]{ [ Person memory p = choosePersonMem(); p.account = makeAccount();
+      uint b = p.account.balance; ] b == 100 } := by
+  sol_symex
+  sol_close
+
+/-! What is refused: a reference return not declared `memory` (solc's
+rule), and a memory reference where a value is expected. -/
+
+def NoLocation : Contract := contract!{
+  function makeAccount() returns (Account a) { a.balance = 1; }
 }
 
 /--
-error: Solidity elaboration failed: makeAccount returns a reference (Account): a call's value is a value type
+error: Solidity elaboration failed: makeAccount: its return of reference type Account needs the location `memory`
 -/
-#guard_msgs in #check sol[MemReturn]{ Account memory acc = makeAccount(); }
+#guard_msgs in #check sol[NoLocation]{ Account memory acc = makeAccount(); }
+
+/-- error: Solidity elaboration failed: makeAccount returns a memory Account, not a uint -/
+#guard_msgs in #check sol[MemCalls]{ uint x = makeAccount(); }
 
 -- A push used as a target on an entry: its receiver is evaluated after the
 -- right-hand side, and `b.push(e)` evaluates it before.
@@ -370,5 +549,13 @@ error: `b.push() = e;` is written on a name or a member chain, `bucket.tokens`
 error: cannot evaluate code because 'sorryAx' uses 'sorry' and/or contains errors
 -/
 #guard_msgs in #check sol[TestSuite]{ matrix[0].push() = 5; }
+
+-- A member of `push()`: a member of a call is one of a function's value.
+/--
+error: a call's callee is a function's name
+---
+error: cannot evaluate code because 'sorryAx' uses 'sorry' and/or contains errors
+-/
+#guard_msgs in #check sol[TestSuite]{ bucket.tokens.push().value = 1; }
 
 end Solidity.Examples.CallOperands

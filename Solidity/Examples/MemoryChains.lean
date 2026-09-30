@@ -39,8 +39,9 @@ carol = alice;`, and a line is read on its own, so it reads as the storage
 alias (`Calculus/Notation.lean`).  §3's chains go over it with `~*>`.
 
 Not here: the array traces (an allocation of an
-array prints `addM(memory)`, which does not read back), the ones through a
-call (`choosePersonMem().account = makeAccount();`), and the third delete
+array prints `addM(memory)`, which does not read back), the one through a
+call (`choosePersonMem().account = makeAccount();`, `Examples/CallOperands.lean`),
+and the third delete
 trace, whose `carol.account.tokens` `Account` does not have here
 (`Examples/Memory.lean`'s docstring).
 -/

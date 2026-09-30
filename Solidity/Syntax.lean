@@ -48,6 +48,17 @@ statement.  A push used as a target, `values.push() = e;`, is the push
 `values.push(e);`, as the front end normalises it.  A body's
 `return e;` ends it: an assignment to the return variable, the statements
 after it moved into the branches that do not return (`lowerReturns`).
+
+A function may return a memory reference (`returns (Person memory p)`), and
+its call is then KeY's expansion written out, with no return of its own
+(`CallRet.none`): the callee's fresh return variable is declared at the head
+of the body (`Person memory mv2;`, a fresh default object, as solc
+allocates one on entry), and the statement after the call binds the
+caller's local to its identity (`Person memory mv1 = mv2;`, `m = mv2;`,
+KeY's `resultVar = freshReturn`).  The printers write the two statements as
+the call they are (`Person memory mv1 = choosePersonMem();`), which reads
+back to them.  A member of a call's value is a member of that capture
+(`choosePersonMem().account = a;`).
 -/
 
 namespace Solidity
@@ -180,11 +191,14 @@ structure ModApp where
 
 /-- An internal function as the contract declares it: its parameters and
 its return variable (`returns (uint r)`; unnamed, `returns (uint)`, it is
-called `_ret`), at their types, and its body as read.  The elaborator types
+called `_ret`; `returns (Account memory a)`, a memory reference), at their
+types, and its body as read.  The elaborator types
 the body where the function is called and inlines it there (`Stmt.call`). -/
 structure FunDecl where
   params : List (Name × Ty)
   ret : Option (Name × Ty) := none
+  /-- Its return variable is declared `memory`, as a reference one must be. -/
+  retMem : Bool := false
   body : List RawStmt
   /-- The modifiers it applies, the first listed outermost. -/
   mods : List ModApp := []
@@ -498,7 +512,10 @@ structure Arg (C : Contract) where
 
 /-- What a call returns: nothing, or the value of its return variable `r` of
 type `p` (declared at the call, KeY's fresh named return), which lands in the
-caller's local `res` when the call is assigned (`y = f(a);`). -/
+caller's local `res` when the call is assigned (`y = f(a);`).  A memory
+reference is returned through the caller's locals, with `none`: the body
+declares the return variable, and the statement after the call binds it
+(the module docstring). -/
 inductive CallRet where
   | none
   | val (p : PrimTy) (r : Var) (res : Option Var)
@@ -689,6 +706,20 @@ def IncDec.show (op : IncDec) (x : String) : String :=
   let t := if op.isIncrement then "++" else "−−"
   if op.isPre then t ++ x else x ++ t
 
+/-- A call of a function returning a memory reference and the statement
+after it that binds its fresh return variable, the one the body declares
+first: `Person memory mv1 = choosePersonMem();`, `m = choosePersonMem();`,
+the statement they are elaborated from. -/
+def Stmt.memCallStr? : Stmt C → Stmt C → Option String
+  | .call f args _ .none (.declMem _ r none _ :: _), .declMem R x (some (.alias (.var r'))) _ =>
+    if r' = r then
+      some s!"{Ty.toStr (.ref R)} memory {x} = {f}({", ".intercalate (args.map fun a => a.e.toStr true)});"
+    else none
+  | .call f args _ .none (.declMem _ r none _ :: _), .rebindMem x (.alias (.var r')) =>
+    if r' = r then some s!"{x} = {f}({", ".intercalate (args.map fun a => a.e.toStr true)});"
+    else none
+  | _, _ => none
+
 mutual
 
 def Stmt.toStr : Stmt C → String
@@ -722,7 +753,8 @@ def Stmt.toStr : Stmt C → String
   | .delete l => s!"delete {l.toStr};"
   | .deleteMem p _ => s!"delete {p.toStr};"
   | .assignNew (R := R) l n _ => s!"{l.toStr} = new {Ty.toStr (.ref R)}({n.toStr});"
-  | .ite c thn els => s!"if ({c.toStr true}) \{ {Prog.toStr thn} } else \{ {Prog.toStr els} }"
+  | .ite c thn els =>
+    s!"if ({c.toStr true}) \{ {" ".intercalate (Prog.toStrs false thn)} } else \{ {" ".intercalate (Prog.toStrs false els)} }"
   | .require c => s!"require({c.toStr true});"
   | .assert c => s!"assert({c.toStr true});"
   | .revert => "revert();"
@@ -732,16 +764,29 @@ def Stmt.toStr : Stmt C → String
     | .val _ _ (some y) => s!"{y} = {call}"
     | _ => call
 
-def Prog.toStr : List (Stmt C) → String
-  | [] => ""
-  | [s] => s.toStr
-  | s :: P => s!"{s.toStr} {Prog.toStr P}"
+/-- The statements of a block, one string each; a memory call and the
+statement binding its result are one (`Stmt.memCallStr?`), the second
+skipped (`skip`). -/
+def Prog.toStrs (skip : Bool) : List (Stmt C) → List String
+  | [] => []
+  | s :: P =>
+    if skip then Prog.toStrs false P
+    else
+      match P with
+      | t :: _ =>
+        match Stmt.memCallStr? s t with
+        | some c => c :: Prog.toStrs true P
+        | none => s.toStr :: Prog.toStrs false P
+      | [] => [s.toStr]
 
 end
 
+/-- A block, as the Solidity it came from. -/
+def Prog.toStr (P : List (Stmt C)) : String := " ".intercalate (Prog.toStrs false P)
+
 /-- One statement per line, for display. -/
 def Prog.show (P : List (Stmt C)) : String :=
-  "\n".intercalate (P.map Stmt.toStr)
+  "\n".intercalate (Prog.toStrs false P)
 
 end Print
 
@@ -825,6 +870,10 @@ statement (`hoist`).  At precedence `arg`, as a postfix `++`: a statement
 call statements below are preferred (`priority := high`) where both
 readings take the same text (`y = f(a);`, `lsv = values.push();`). -/
 syntax:arg (name := solCallExpr) sol_expr:max "(" sol_expr,* ")" : sol_expr
+/-- `choosePersonMem().account`: a member of a call's value, a memory
+reference (`hoist` captures the call).  At `max`, as a member is; `atomic`,
+so that a call with no member after it is left to the readings above. -/
+syntax:max (name := solCallMember) sol_expr:max atomic("(" sol_expr,* ")" ".") ident : sol_expr
 
 declare_syntax_cat sol_stmt (behavior := both)
 declare_syntax_cat sol_block (behavior := both)
@@ -1098,6 +1147,8 @@ where
       expandExpr e
   | `(sol_expr| $f:ident ( { $[$ns:ident : $as:sol_expr],* } )) => do
       `(RawExpr.named $(strLit f) [$(ns.map strLit),*] [$(← as.mapM expandExpr),*])
+  | `(sol_expr| $f:sol_expr ( $as:sol_expr,* ) . $g:ident) => do
+      fieldChain (← expandCall f as.getElems callMsg) (nameParts g.getId)
   | `(sol_expr| $f:sol_expr ( $as:sol_expr,* )) => expandCall f as.getElems callMsg
   | _ => Macro.throwUnsupported
   -- `f(a, b)`, a call of the function `f` (or a struct's constructor, `msg`
@@ -1286,11 +1337,12 @@ syntax sol_ty sol_vis* ident ";" : sol_member
 declare_syntax_cat sol_param (behavior := both)
 syntax sol_ty ident : sol_param
 
-/-- A function's attribute: its return variable, `returns (uint r)`; a
-visibility or a mutability (dropped); or a modifier applied, `onlyOwner`,
-`inState(State.Created)`. -/
+/-- A function's attribute: its return variable, `returns (uint r)`,
+`returns (Person memory p)`; a visibility or a mutability (dropped); or a
+modifier applied, `onlyOwner`, `inState(State.Created)`. -/
 declare_syntax_cat sol_fattr (behavior := both)
-syntax (name := solAttrReturns) &"returns" "(" sol_ty (ppSpace ident)? ")" : sol_fattr
+syntax (name := solAttrReturns) &"returns" "(" sol_ty (ppSpace &"memory")? (ppSpace ident)? ")" :
+  sol_fattr
 syntax (name := solAttrKw) (&"public" <|> &"external" <|> &"internal" <|> &"private" <|> &"view" <|>
   &"pure" <|> &"payable" <|> &"virtual" <|> &"override") : sol_fattr
 syntax (name := solAttrMod) ident ("(" sol_expr,* ")")? : sol_fattr
@@ -1377,16 +1429,20 @@ def expandFun (enums : List String) (mods : List (String × Array Term × Term �
   let payable := attrs.any fun a => (a.raw.find? fun s =>
     s.isAtom && s.getAtomVal == "payable" || s.isIdent && s.getId == `payable).isSome
   let mut ret ← `(none)
+  let mut retMem := false
   let mut apps : Array Term := #[]
   for a in attrs do
     -- `returns (uint)` also reads as a modifier `returns` applied to `uint`,
     -- and `view` as a modifier `view`: take the other reading
     let a := preferReading a.raw (!·.isOfKind ``solAttrMod)
     if a.isOfKind ``solAttrKw then continue
+    if a.isOfKind ``solAttrReturns then
+      -- `returns ( T memory? r? )`
+      let n := (a[4].getOptional?.map (·.getId.toString)).getD "_ret"
+      ret ← `(some ($(quote n), $(← expandMemberTy enums ⟨a[2]⟩)))
+      retMem := !a[3].isNone
+      continue
     match (⟨a⟩ : TSyntax `sol_fattr) with
-    | `(sol_fattr| returns ( $T:sol_ty $[$r:ident]? )) =>
-      let n := (r.map (·.getId.toString)).getD "_ret"
-      ret ← `(some ($(quote n), $(← expandMemberTy enums T)))
     | `(sol_fattr| $m:ident $[( $as:sol_expr,* )]?) =>
       let name := m.getId.toString
       if attrKeywords.contains name then continue
@@ -1399,8 +1455,8 @@ def expandFun (enums : List String) (mods : List (String × Array Term × Term �
     | _ => Macro.throwUnsupported
   let body ← expandStmt.expandBlock b
   `(($(strLit f),
-    ({ params := [$ps,*], ret := $ret, body := $body, mods := [$apps,*], spec := $spec,
-       payable := $(quote payable) } : FunDecl)))
+    ({ params := [$ps,*], ret := $ret, retMem := $(quote retMem), body := $body,
+       mods := [$apps,*], spec := $spec, payable := $(quote payable) } : FunDecl)))
 
 end
 
@@ -2353,14 +2409,19 @@ partial def hoist : RawExpr → ElabM (Prog C × RawExpr)
     -- a call inside an expression runs before the statement, into a fresh local
     let (P, args) ← hoistArgs args
     let some (_, d) := (← read).find? (·.1 == f) | throw s!"{f} is not a function declared before this one"
-    let p ← match d.ret with
-      | some (_, .prim p) => pure p
-      | some (_, T) => throw (refReturnMsg f T)
+    match d.ret with
+      | some (_, .prim p) =>
+        let x ← freshCapture "se"
+        let Q ← elabCall f args (some (x, p))
+        declare C (toString x) (.val p)
+        pure (P ++ [.declLocal p x none] ++ Q, .name (toString x))
+      | some (_, .ref R) =>
+        -- `Account memory mv1 = makeAccount();`
+        let x ← freshCapture "mv"
+        let Q ← elabMemCall f args R fun r => .declMem R x (some (.alias (.var r))) rfl
+        declare C (toString x) (.mem R)
+        pure (P ++ Q, .name (toString x))
       | none => throw s!"{f} returns no value"
-    let x ← freshCapture "se"
-    let Q ← elabCall f args (some (x, p))
-    declare C (toString x) (.val p)
-    pure (P ++ [.declLocal p x none] ++ Q, .name (toString x))
   | e => pure ([], e)
 
 /-- A call's arguments, left to right: one read before a later argument's
@@ -2382,6 +2443,26 @@ the functions declared before `f`, so no call recurses.  `res` is the local
 the returned value lands in, with its type. -/
 partial def elabCall (f : String) (args : List RawExpr) (res : Option (Var × PrimTy)) :
     ElabM (Prog C) := do
+  pure (← elabCallRet f args res).1
+
+/-- A call of `f`, which returns a memory reference of type `R`, and `bind r`,
+the statement that binds the callee's return variable `r` where the call
+is: `Account memory mv1 = mv2;`, `m = mv2;` (the module docstring). -/
+partial def elabMemCall (f : String) (args : List RawExpr) (R : RefTy) (bind : Var → Stmt C) :
+    ElabM (Prog C) := do
+  let (P, r) ← elabCallRet f args none
+  match r with
+  | some ⟨R', r⟩ =>
+    unless R' = R do throw s!"{f} returns a {Ty.ref R'}, not a {Ty.ref R}"
+    pure (P ++ [bind r])
+  | none => throw s!"{f} does not return a memory reference"
+
+/-- `elabCall`, and the fresh return variable of a callee that returns a
+memory reference, with its type: the body's first statement declares it (a
+fresh default object) and the call returns nothing (`CallRet.none`), the
+caller binding it after the call (`elabMemCall`). -/
+partial def elabCallRet (f : String) (args : List RawExpr) (res : Option (Var × PrimTy)) :
+    ElabM (Prog C × Option (RefTy × Var)) := do
   let funs ← read
   let some i := funs.findIdx? (·.1 == f) | throw s!"{f} is not a function declared before this one"
   let d := (funs[i]?.map (·.2)).getD default
@@ -2398,11 +2479,20 @@ partial def elabCall (f : String) (args : List RawExpr) (res : Option (Var × Pr
     targs := targs ++ [⟨p, x, e⟩]
     ρ := (n, toString x) :: ρ
     Γf := setBy (toString x) (.val p) Γf
+  let mut mret : Option (RefTy × Var) := none
   let ret ← match d.ret, res with
     | none, none => pure CallRet.none
     | none, some _ => throw s!"{f} returns no value"
-    | some (n, T), res => do
-      let .prim p := T | throw (refReturnMsg f T)
+    | some (n, .ref R), none => do
+      unless d.retMem do throw s!"{f}: its return of reference type {Ty.ref R} needs the location `memory`"
+      let r ← freshCapture "mv"
+      ρ := (n, toString r) :: ρ
+      Γf := setBy (toString r) (.mem R) Γf
+      mret := some ⟨R, r⟩
+      pure CallRet.none
+    | some (_, .ref R), some (_, q) => throw s!"{f} returns a memory {Ty.ref R}, not a {primName q}"
+    | some (n, .prim p), res => do
+      if d.retMem then throw s!"{f}: `memory` on its return of value type {primName p}"
       if let some (_, q) := res then
         unless q = p do throw s!"{f} returns a {primName p}, not a {primName q}"
       let r ← freshCapture "se"
@@ -2415,8 +2505,15 @@ partial def elabCall (f : String) (args : List RawExpr) (res : Option (Var × Pr
   modify fun (_, k) => (Γf, k)
   let P ← withReader (fun _ => funs.take i) (elabStmts body)
   modify fun (_, k) => (Γ, k)
+  -- a memory return variable: declared on entry, a fresh default object
+  let P ← match mret with
+    | none => pure P
+    | some ⟨R, r⟩ =>
+      match hd : (Ty.ref R).defaultOkS with
+      | true => pure (Stmt.declMem R r none (by simp [hd]) :: P)
+      | false => throw s!"{f} returns a {Ty.ref R}, whose default is not well-formed"
   match hsep : Arg.separatedFrom [] targs with
-  | true => pure [.call f targs hsep ret P]
+  | true => pure ([.call f targs hsep ret P], mret)
   | false => throw s!"{f}: an argument reads a parameter"
 
 /-- The captures a statement's own expressions need (`hoist`), and the
@@ -2425,6 +2522,11 @@ interpreter evaluates them, a receiver before an argument.  A branch's statement
 own. -/
 partial def hoistStmt : RawStmt → ElabM (Prog C × RawStmt)
   | .assign l r => do
+    -- `m = f(a);` to a memory local: its arguments only (`elabStmt1`)
+    if let .call f args := r then
+      if (← read).any (·.1 == f) && synth C (← ctx) l matches .ok (.mpath (.ref _) (.var _)) then
+        let (P, args) ← hoistArgs args
+        return (P, .assign l (.call f args))
     match r, synth C (← ctx) l with
     | .incDec op e, .ok (.val _ (.simple (.local _))) =>
       let (P, e) ← hoist e
@@ -2448,6 +2550,11 @@ partial def hoistStmt : RawStmt → ElabM (Prog C × RawStmt)
   -- a statement of one expression: its captures, then the statement
   | s@(.decl ..) | s@(.declStorage ..) | s@(.declMemory ..) | s@(.declStoragePush ..)
   | s@(.delete _) | s@(.incDec ..) | s@(.ite ..) | s@(.require _) | s@(.assert _) => do
+    -- `T memory x = f(a);`: its arguments only (`elabStmt1`)
+    if let .declMemory T x (some (.call f args)) := s then
+      if (← read).any (·.1 == f) then
+        let (P, args) ← hoistArgs args
+        return (P, .declMemory T x (some (.call f args)))
     let (s, P) ← (s.mapExprsM fun e => do
       let (Q, e) ← hoist e
       modify (· ++ Q)
@@ -2516,6 +2623,7 @@ partial def elabStmt1 : RawStmt → ElabM (Prog C)
   | .assign l (.call f args) => do
     match ← synthM C l with
     | .val p (.simple (.local x)) => elabCall f args (some (x, p))
+    | .mpath (.ref R) (.var x) => elabMemCall f args R fun r => .rebindMem (R := R) x (.alias (.var r))
     | _ => throw "a call's value is assigned to a stack local"
   | .assign l r => do
     let Γ ← ctx
@@ -2570,6 +2678,11 @@ partial def elabStmt1 : RawStmt → ElabM (Prog C)
     let (P, se) ← elabSize C n
     declare C x (.mem R')
     pure (P ++ [.declMem R' (Var.ofName x) (some (.newArr se hR)) rfl])
+  | .declMemory T x (some (.call f args)) => do
+    let .ref R ← ElabM.lift (elabTy C T) | throw s!"{x}: `memory` on a value type"
+    let P ← elabMemCall f args R fun r => .declMem R (Var.ofName x) (some (.alias (.var r))) rfl
+    declare C x (.mem R)
+    pure P
   | .declMemory T x init => do
     let .ref R ← ElabM.lift (elabTy C T) | throw s!"{x}: `memory` on a value type"
     let Γ ← ctx
