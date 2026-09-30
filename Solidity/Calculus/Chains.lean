@@ -65,7 +65,10 @@ it), and the chain goes on after `cases m`.  `φ` stands in a slot
 (`Fml.slot`) while the strategy runs; `rfl` cannot compute a fresh index
 over it, so a step is proved at the index the run found
 (`Fml.OneStep.ofFresh`), the index by `simp` from `Post.noFresh`, the step
-by the kernel.
+by the kernel — and, past the first goal of a branch once it is done, where
+the step asks `φ` whether a modality is left, along the connectives to the
+statement that fires, from `Post.inactive` (`Chain.stepAtProof`).  Such a
+step is `by sol_chain`, not `rfl`.
 -/
 
 namespace Solidity
@@ -106,6 +109,80 @@ theorem Fml.ruleAt_isSome {k : Nat} :
     split <;> simp [Fml.ruleAt_isSome]
   | .modal _ [] _ | .modal _ (_ :: _) _ => rfl
   | .tt | .eq .. | .defined _ | .not _ | .all .. => rfl
+
+/-! ## An abstract postcondition
+
+The calculus derives `⟨[ p ]⟩ φ` for any postcondition `φ`.  Here `φ` is a
+`Post C`, written by its name in a line (`dl![m]{ ⟨[ p ]⟩ φ }`, printed
+back so).  `rfl` proves a step over it where the rule declares nothing
+fresh; where it does, the fresh index is the largest in the whole line,
+`φ`'s included, and `rfl` cannot compute it: `Fml.OneStep.ofFresh` takes it
+as a hypothesis, which `sol_chain` proves from `Post.noFresh`. -/
+
+/-- A postcondition `φ`: a formula that names no fresh variable
+(`se1`, `sp1`, …), so that the rules' fresh names avoid it whatever it is,
+and has no modality, so that the strategy never steps into it.
+
+Example: `⟨dl!{ alice.account.balance == 10 }, by decide, by decide⟩`, which
+`{ fml := dl!{ alice.account.balance == 10 } }` abbreviates. -/
+structure Post (C : Contract) where
+  fml : Fml C
+  noFresh : maxIdx fml.vars = 0 := by decide
+  inactive : fml.active = false := by decide
+
+attribute [coe] Post.fml
+
+instance : Coe (Post C) (Fml C) := ⟨Post.fml⟩
+
+/-! ## Past a finished goal
+
+Past the first goal of a branch, once it is done, `Fml.stepAt` and
+`Fml.ruleAt` ask the goal whether a modality is left, and over a
+postcondition only `Post.inactive` knows: the step is then taken apart, a
+lemma per connective on the way to the statement that fires
+(`Chain.stepAtProof`, `Chain.ruleFocus`). -/
+
+theorem Fml.stepAt_upd_of {k : Nat} {m : Modality} {U : Upd C} {φ ψ : Fml C}
+    (h : φ.stepAt k = some ψ) : (Fml.upd m U φ).stepAt k = some (.upd m U ψ) := by
+  simp only [Fml.stepAt, h, Option.map_some]
+
+theorem Fml.stepAt_imp_of {k : Nat} {a φ ψ : Fml C}
+    (h : φ.stepAt k = some ψ) : (Fml.imp a φ).stepAt k = some (.imp a ψ) := by
+  simp only [Fml.stepAt, h, Option.map_some]
+
+theorem Fml.stepAt_havoc_of {k : Nat} {φ ψ : Fml C}
+    (h : φ.stepAt k = some ψ) : (Fml.havoc φ).stepAt k = some (.havoc ψ) := by
+  simp only [Fml.stepAt, h, Option.map_some]
+
+/-- The first goal steps while it is active. -/
+theorem Fml.stepAt_and_left {k : Nat} {φ ψ φ' : Fml C} (ha : φ.active = true)
+    (h : φ.stepAt k = some φ') : (Fml.and φ ψ).stepAt k = some (.and φ' ψ) := by
+  simp only [Fml.stepAt, ha, h, if_true, Option.map_some]
+
+/-- Once it is done, the second: `(c → {U} φ) ∧ (¬c → ⟨ revert(); ⟩ φ)`. -/
+theorem Fml.stepAt_and_right {k : Nat} {φ ψ ψ' : Fml C} (ha : φ.active = false)
+    (h : ψ.stepAt k = some ψ') : (Fml.and φ ψ).stepAt k = some (.and φ ψ') := by
+  simp only [Fml.stepAt, ha, h, Bool.false_eq_true, if_false, Option.map_some]
+
+theorem Fml.active_and_false {φ ψ : Fml C} (h : φ.active = false) (h' : ψ.active = false) :
+    (Fml.and φ ψ).active = false := by
+  simp only [Fml.active, h, h', Bool.or_self]
+
+theorem Fml.active_and_true_left {φ ψ : Fml C} (h : φ.active = true) :
+    (Fml.and φ ψ).active = true := by
+  simp only [Fml.active, h, Bool.true_or]
+
+theorem Fml.active_and_true {φ ψ : Fml C} (h : ψ.active = true) :
+    (Fml.and φ ψ).active = true := by
+  simp only [Fml.active, h, Bool.or_true]
+
+theorem Fml.ruleAt_and_left {k : Nat} {φ ψ : Fml C} (ha : φ.active = true) :
+    (Fml.and φ ψ).ruleAt k = φ.ruleAt k := by
+  simp only [Fml.ruleAt, ha, if_true]
+
+theorem Fml.ruleAt_and_right {k : Nat} {φ ψ : Fml C} (ha : φ.active = false) :
+    (Fml.and φ ψ).ruleAt k = ψ.ruleAt k := by
+  simp only [Fml.ruleAt, ha, Bool.false_eq_true, if_false]
 
 /-! ## One step, several, a chain -/
 
@@ -206,10 +283,69 @@ def stepTaclet (C k m s : Lean.Expr) : MetaM (Lean.Expr × Option Lean.Name) := 
   let d ← tacletOf (mkAppN (mkConst ``Stmt.step) #[C, k, m, s])
   return (d, ruleCtor? d)
 
+/-- Whether a quoted line holds a postcondition `↑φ`. -/
+def hasPost (e : Lean.Expr) : Bool := (e.find? (·.isAppOfArity ``Post.fml 2)).isSome
+
+/-- `e.active = b`: the postconditions' `Post.inactive`, put together along
+the connectives `Fml.active` looks through; the kernel's `rfl` where no
+postcondition is left.  `none` when that is not how it goes. -/
+partial def activeProof (C e : Lean.Expr) (b : Bool) : MetaM (Option Lean.Expr) := do
+  let e := e.consumeMData
+  let goal := mkApp2 (mkConst ``Fml.active) C e
+  let ty ← mkEq goal (toExpr b)
+  if e.isAppOfArity ``Post.fml 2 then
+    return if b then none else some (mkApp2 (mkConst ``Post.inactive) (e.getArg! 0) (e.getArg! 1))
+  if !hasPost e then
+    unless ← isDefEq goal (toExpr b) do return none
+    return some (← mkExpectedTypeHint (← mkEqRefl (toExpr b)) ty)
+  let a := e.getAppArgs
+  if e.isAppOfArity ``Fml.upd 4 || e.isAppOfArity ``Fml.imp 3 || e.isAppOfArity ``Fml.havoc 2 then
+    let some h ← activeProof C a.back! b | return none
+    return some (← mkExpectedTypeHint h ty)
+  unless e.isAppOfArity ``Fml.and 3 do return none
+  if !b then
+    let some h ← activeProof C a[1]! false | return none
+    let some h' ← activeProof C a[2]! false | return none
+    return some (mkAppN (mkConst ``Fml.active_and_false) #[C, a[1]!, a[2]!, h, h'])
+  if let some h ← activeProof C a[1]! true then
+    return some (mkAppN (mkConst ``Fml.active_and_true_left) #[C, a[1]!, a[2]!, h])
+  let some h ← activeProof C a[2]! true | return none
+  return some (mkAppN (mkConst ``Fml.active_and_true) #[C, a[1]!, a[2]!, h])
+
+/-- The goal of `φ` the strategy steps in, and `φ.ruleAt k = ψ.ruleAt k` for
+it: through the connectives `Fml.ruleAt` looks through, past a goal that is
+done (`Fml.ruleAt_and_right`, its `Post.inactive` from `activeProof`). -/
+partial def ruleFocus (C k φ : Lean.Expr) : MetaM (Lean.Expr × Lean.Expr) := do
+  let φ := φ.consumeMData
+  let here : MetaM (Lean.Expr × Lean.Expr) := do
+    return (φ, ← mkEqRefl (mkApp3 (mkConst ``Fml.ruleAt) C k φ))
+  unless hasPost φ do return ← here
+  let a := φ.getAppArgs
+  let into (ψ : Lean.Expr) (h? : Option Lean.Expr) : MetaM (Lean.Expr × Lean.Expr) := do
+    let (χ, h) ← ruleFocus C k ψ
+    let h ← match h? with
+      | some h' => mkEqTrans h' h
+      | none => mkExpectedTypeHint h (← mkEq (mkApp3 (mkConst ``Fml.ruleAt) C k φ)
+          (mkApp3 (mkConst ``Fml.ruleAt) C k χ))
+    return (χ, h)
+  if φ.isAppOfArity ``Fml.upd 4 || φ.isAppOfArity ``Fml.imp 3 || φ.isAppOfArity ``Fml.havoc 2 then
+    return ← into a.back! none
+  if φ.isAppOfArity ``Fml.and 3 then
+    if let some ha ← activeProof C a[1]! false then
+      return ← into a[2]! (mkAppN (mkConst ``Fml.ruleAt_and_right) #[C, k, a[1]!, a[2]!, ha])
+    if let some ha ← activeProof C a[1]! true then
+      return ← into a[1]! (mkAppN (mkConst ``Fml.ruleAt_and_left) #[C, k, a[1]!, a[2]!, ha])
+  here
+
 /-- The rule the strategy fires on the formula `φ`, as a `StepRule` term
 whose derivation is a constructor, and that constructor's name. -/
 def ruleOfLine (φ : Lean.Expr) : MetaM (Option (Lean.Expr × Lean.Name)) := do
   let r ← whnf (← mkAppM ``Fml.rule #[φ])
+  let r ← if r.isAppOfArity ``Option.some 2 || !hasPost φ then pure r else do
+    -- past a goal that is done: the goal it steps in
+    let C := (← whnfR (← inferType φ)).appArg!
+    let k := mkApp2 (mkConst ``Fml.fresh) C φ
+    whnf (mkApp3 (mkConst ``Fml.ruleAt) C k (← ruleFocus C k φ).1)
   unless r.isAppOfArity ``Option.some 2 do return none
   let r ← whnf r.appArg!
   if r.isAppOfArity ``StepRule.emptyModality 1 then return some (r, `emptyModality)
@@ -599,29 +735,7 @@ theorem Fml.Steps.eq_of_measure (μ : Fml C → Nat) (hμ : ∀ {φ ψ : Fml C},
     obtain rfl : ψ₁ = ψ₂ := s.unique s'
     rw [Fml.Steps.eq_of_measure μ hμ c c']
 
-/-! ## An abstract postcondition
-
-The calculus derives `⟨[ p ]⟩ φ` for any postcondition `φ`.  Here `φ` is a
-`Post C`, written by its name in a line (`dl![m]{ ⟨[ p ]⟩ φ }`, printed
-back so).  `rfl` proves a step over it where the rule declares nothing
-fresh; where it does, the fresh index is the largest in the whole line,
-`φ`'s included, and `rfl` cannot compute it: `Fml.OneStep.ofFresh` takes it
-as a hypothesis, which `sol_chain` proves from `Post.noFresh`. -/
-
-/-- A postcondition `φ`: a formula that names no fresh variable
-(`se1`, `sp1`, …), so that the rules' fresh names avoid it whatever it is,
-and has no modality, so that the strategy never steps into it.
-
-Example: `⟨dl!{ alice.account.balance == 10 }, by decide, by decide⟩`, which
-`{ fml := dl!{ alice.account.balance == 10 } }` abbreviates. -/
-structure Post (C : Contract) where
-  fml : Fml C
-  noFresh : maxIdx fml.vars = 0 := by decide
-  inactive : fml.active = false := by decide
-
-attribute [coe] Post.fml
-
-instance : Coe (Post C) (Fml C) := ⟨Post.fml⟩
+/-! ## A step over a postcondition -/
 
 /-- A step, at the index its fresh names start from: `⟨ alice.account.balance = 10; ⟩ φ`
 steps to its unfolding with `se1`, `sp1` once its fresh index is known to
@@ -853,27 +967,56 @@ def checkStep (C : Lean.Expr) (sp : Splice) (A : Lean.Expr) (B : Line) : MetaM U
   unless ← isDefEq st sB do
     throwError "sol_chain: the line after{indentExpr A}\n{modalityStop m}"
 
-/-- `A ~> B`, for the line `B` computed after `A`: `rfl`, or, over a
-postcondition, `Fml.OneStep.ofFresh` at the index the run used.
+/-- `A.stepAt k = some B`, where the step asks a postcondition whether it has
+a modality left: taken apart along the path to the statement that fires
+(`Fml.stepAt_and_right` past a goal that is done, its `Post.inactive` from
+`activeProof`), the kernel's `rfl` from there. -/
+partial def stepAtProof (C : Lean.Expr) (sp : Splice) (k : Nat) (A B : Lean.Expr) :
+    MetaM Lean.Expr := do
+  let A := A.consumeMData
+  let B := B.consumeMData
+  let kE := toExpr k
+  let leaf : MetaM Lean.Expr := do
+    if let some m := sp.modality then
+      let st := mkApp3 (mkConst ``Fml.stepAt) C kE A
+      unless ← isDefEq st (mkApp2 (mkConst ``Option.some [0]) (mkApp (mkConst ``Fml) C) B) do
+        throwError "sol_chain: the line after{indentExpr A}\n{modalityStop m}"
+    return someRefl C B
+  unless hasPost A do return ← leaf
+  let a := A.getAppArgs
+  let b := B.getAppArgs
+  if A.isAppOfArity ``Fml.upd 4 && B.isAppOfArity ``Fml.upd 4 then
+    return mkAppN (mkConst ``Fml.stepAt_upd_of)
+      #[C, kE, a[1]!, a[2]!, a[3]!, b[3]!, ← stepAtProof C sp k a[3]! b[3]!]
+  if A.isAppOfArity ``Fml.imp 3 && B.isAppOfArity ``Fml.imp 3 then
+    return mkAppN (mkConst ``Fml.stepAt_imp_of)
+      #[C, kE, a[1]!, a[2]!, b[2]!, ← stepAtProof C sp k a[2]! b[2]!]
+  if A.isAppOfArity ``Fml.havoc 2 && B.isAppOfArity ``Fml.havoc 2 then
+    return mkAppN (mkConst ``Fml.stepAt_havoc_of) #[C, kE, a[1]!, b[1]!, ← stepAtProof C sp k a[1]! b[1]!]
+  if A.isAppOfArity ``Fml.and 3 && B.isAppOfArity ``Fml.and 3 then
+    if let some ha ← activeProof C a[1]! false then
+      return mkAppN (mkConst ``Fml.stepAt_and_right)
+        #[C, kE, a[1]!, a[2]!, b[2]!, ha, ← stepAtProof C sp k a[2]! b[2]!]
+    if let some ha ← activeProof C a[1]! true then
+      return mkAppN (mkConst ``Fml.stepAt_and_left)
+        #[C, kE, a[1]!, a[2]!, b[1]!, ha, ← stepAtProof C sp k a[1]! b[1]!]
+  leaf
 
-Not yet: a step that asks a postcondition whether it has a modality
-(`Line.decided` false), past the first goal of a branch once it is done,
-`(c → {U} φ) ∧ ψ`.  `Fml.stepAt`'s `.and` arm reads `(c → {U} ↑φ).active`,
-which is `(↑φ).active` and stuck.  It would be a lemma `φ.active = false →
-(φ.and ψ).stepAt k = (ψ.stepAt k).map φ.and` (`Fml.stepAt` unfolded), its
-hypothesis by `simp only [Fml.active, Bool.or_false]` and the
-postconditions' `Post.inactive`, and the kernel's `rfl` for `ψ.stepAt k`:
-a proof built as `proveFresh`'s is. -/
+/-- `A ~> B`, for the line `B` computed after `A`: `rfl`, or, over a
+postcondition, `Fml.OneStep.ofFresh` at the index the run used, the step by
+the kernel's `rfl` — or by `stepAtProof`, where it asks a postcondition
+whether it has a modality left (`Line.decided` false): past the first goal of
+a branch once it is done, `(c → {U} φ) ∧ (¬c → ⟨ revert(); ⟩ φ)`, whose
+`.and` arm reads `(↑φ).active`. -/
 def oneStepProof (C : Lean.Expr) (sp : Splice) (A : Lean.Expr) (B : Line) :
     TermElabM Lean.Expr := do
-  checkStep C sp A B
-  let refl := someRefl C B.fml
-  if sp.fmls.isEmpty then return refl
-  unless B.decided do
-    throwError "sol_chain: the step on{indentExpr A}\nasks whether a postcondition has a \
-      modality left (the first goal of a branch is done): not supported yet"
+  if sp.fmls.isEmpty then
+    checkStep C sp A B
+    return someRefl C B.fml
+  let h ← if B.decided then do checkStep C sp A B; pure (someRefl C B.fml)
+    else stepAtProof C sp B.fresh A B.fml
   let hk ← proveFresh C A B.fresh sp.noFresh
-  return mkAppN (mkConst ``Fml.OneStep.ofFresh) #[C, A, B.fml, toExpr B.fresh, hk, refl]
+  return mkAppN (mkConst ``Fml.OneStep.ofFresh) #[C, A, B.fml, toExpr B.fresh, hk, h]
 
 /-- `A ~*> Z` along the computed lines `ls`, `Z` the last, a step at a time. -/
 def stepsProof (C : Lean.Expr) (sp : Splice) (A : Lean.Expr) (ls : List Line) :
@@ -896,7 +1039,11 @@ partial def solveChain (g : MVarId) : TermElabM Unit := do
       let pair ← mkAppM ``Prod.mk #[← mkAppM ``Option.some #[r], ← mkAppM ``Option.some #[q.fml]]
       g.assign (← mkEqRefl pair)
     else
-      let hr ← mkEqRefl (← mkAppM ``Option.some #[r])
+      let hr ← if q.decided then mkEqRefl (← mkAppM ``Option.some #[r]) else do
+        -- `φ.rule` is `φ.ruleAt φ.fresh`: the goal it steps in, then `rfl`
+        let k := mkApp2 (mkConst ``Fml.fresh) C φ
+        let (_, h) ← ruleFocus C k φ
+        mkEqTrans h (← mkEqRefl (← mkAppM ``Option.some #[r]))
       g.assign (mkAppN (mkConst ``Fml.StepBy.ofOneStep)
         #[C, r, φ, q.fml, hr, ← oneStepProof C run.splice φ q])
   else if ty.isAppOfArity ``Fml.OneStep 3 then
