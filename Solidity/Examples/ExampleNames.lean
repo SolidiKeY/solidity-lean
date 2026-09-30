@@ -20,6 +20,8 @@ printed names:
   reference;
 * `Matrix` — `matrix[i++][i++] = 77;`: `idx1`, `sp`, `idx2`, captured by the
   elaborator in solc's order;
+* `Snapshot` — `m[i++] = i;`: the value `a` captured before the index `b`
+  runs;
 * `Capture` — a `sol{ … }` capture numbered past a table name.
 
 A table changes spellings only: each line is the term its default spelling
@@ -53,13 +55,13 @@ info: ["se2 is itself a fresh variable's spelling", "alice is a state variable o
   "sp9x is not a fresh variable's spelling", "pv names two variables", "se3 has two names",
   "storage is a word the readers resolve first", "k2 is a word the readers resolve first", "my var is not a name",
   "selfBalance is a word the readers resolve first", "net is a word the readers resolve first",
-  "ie6 is given the empty name"]
+  "ie6 is given the empty name", "Account is a struct type or a function of the contract"]
 -/
 #guard_msgs in
 #eval FreshNames.clashes StandardExample
   [("se2", "se1"), ("alice", "sp1"), ("x", "sp9x"), ("pv", "se2"), ("pv", "se4"), ("y", "se3"),
    ("z", "se3"), ("storage", "ie1"), ("k2", "ie2"), ("my var", "ie3"), ("selfBalance", "ie4"),
-   ("net", "ie5"), ("", "ie6")]
+   ("net", "ie5"), ("", "ie6"), ("Account", "mv1")]
 
 namespace Headline
 
@@ -280,20 +282,59 @@ local instance : FreshNames := .ofTable names
 
 #guard (FreshNames.clashes StandardExample names).isEmpty
 
--- the increments are captured before the write, in solc's order
-example : dl!{ ⟨ matrix[i++][i++] = 77; ⟩ true } = dl!{ ⟨ uint idx1; idx1 = i++;
-    uint[] storage sp = matrix[idx1]; uint idx2; idx2 = i++; sp[idx2] = 77; ⟩ true } := rfl
-
 /-- `matrix[i++][i++] = 77;`, Lean's derivation of
-it in the printed names.  The lines are not the printed ones: the elaborator
-captures both increments before the write (above), where the printed rules
-capture them as they unfold it. -/
-def matrix : dl!{ ⟨ matrix[i++][i++] = 77; ⟩ true }
+it in the printed names, down to the in-bounds write.  The lines are not the
+printed ones: the elaborator captures both increments before the write (the first
+step, an equality), where the printed rules capture them as they unfold it;
+the printed `pv` is not declared, since `77` is already a value. -/
+def matrix : dl!{ ⟨ matrix[i++][i++] = 77; ⟩ matrix[0][1] == 77 }
     ~*> dl!{ { idx1 := 0 } { i := i + 1 ‖ idx1 := i } { sp := matrix[idx1] } { idx2 := 0 }
-              { i := i + 1 ‖ idx2 := i } ⟨ sp[idx2] = 77; ⟩ true } := by
-  sol_chain
+              { i := i + 1 ‖ idx2 := i } { storage := save(storage, sp[idx2], 77) }
+              matrix[0][1] == 77 } :=
+  calc dl!{ ⟨ matrix[i++][i++] = 77; ⟩ matrix[0][1] == 77 }
+    _ = dl!{ ⟨ uint idx1; idx1 = i++; uint[] storage sp = matrix[idx1]; uint idx2; idx2 = i++;
+            sp[idx2] = 77; ⟩ matrix[0][1] == 77 } := rfl
+    _ ~*> dl!{ { idx1 := 0 } { i := i + 1 ‖ idx1 := i } { sp := matrix[idx1] } { idx2 := 0 }
+              { i := i + 1 ‖ idx2 := i } ⟨ sp[idx2] = 77; ⟩ matrix[0][1] == 77 } := by sol_chain
+    _ ~[storageIndexWriteArraySave]~>
+        dl!{ { idx1 := 0 } { i := i + 1 ‖ idx1 := i } { sp := matrix[idx1] } { idx2 := 0 }
+              { i := i + 1 ‖ idx2 := i } { storage := save(storage, sp[idx2], 77) } ⟨⟩
+              matrix[0][1] == 77 } := rfl
+    _ ~[emptyModality]~>
+        dl!{ { idx1 := 0 } { i := i + 1 ‖ idx1 := i } { sp := matrix[idx1] } { idx2 := 0 }
+              { i := i + 1 ‖ idx2 := i } { storage := save(storage, sp[idx2], 77) }
+              matrix[0][1] == 77 } := rfl
 
 end Matrix
+
+namespace Snapshot
+
+/-- `m[i++] = i;`: the value `a`, then the index `b`. -/
+def names : FreshTable := [("a", "se1"), ("b", "se2")]
+
+local instance : FreshNames := .ofTable names
+
+#guard (FreshNames.clashes StandardExample names).isEmpty
+
+/-- `m[i++] = i;`, as `balances[i++] = i;`:
+the elaborator snapshots the value `a` before the index `b` runs `i++`, so
+the write stores the old `i`.  Lean declares `b` and then assigns it, where
+the printed chain initialises it. -/
+def snapshot : dl!{ ⟨ balances[i++] = i; ⟩ balances[0] == 0 }
+    ~*> dl!{ { a := i } { b := 0 } { i := i + 1 ‖ b := i } { storage := save(storage, balances[b], a) }
+              balances[0] == 0 } :=
+  calc dl!{ ⟨ balances[i++] = i; ⟩ balances[0] == 0 }
+    _ = dl!{ ⟨ uint a = i; uint b; b = i++; balances[b] = a; ⟩ balances[0] == 0 } := rfl
+    _ ~*> dl!{ { a := i } { b := 0 } { i := i + 1 ‖ b := i } ⟨ balances[b] = a; ⟩
+            balances[0] == 0 } := by sol_chain
+    _ ~[storageIndexWriteMappingSave]~>
+        dl!{ { a := i } { b := 0 } { i := i + 1 ‖ b := i } { storage := save(storage, balances[b], a) }
+            ⟨⟩ balances[0] == 0 } := rfl
+    _ ~[emptyModality]~>
+        dl!{ { a := i } { b := 0 } { i := i + 1 ‖ b := i } { storage := save(storage, balances[b], a) }
+            balances[0] == 0 } := rfl
+
+end Snapshot
 
 namespace Capture
 
@@ -307,7 +348,9 @@ local instance : FreshNames := .ofTable names
 example : Prog.toStr (sol{ values[total + 1] += 2; }) = "uint idx = total + 1; values[idx] += 2;" :=
   rfl
 
--- a block that declares `idx` numbers its capture past it
+-- a program local spelled like a row is that fresh variable (the hazard of
+-- `FreshNames.lean`'s docstring); its capture is numbered past it, not
+-- re-declared
 example : sol{ uint idx = 1; values[total + 1] += 2; } = captured := rfl
 example : Prog.toStr (sol{ uint idx = 1; values[total + 1] += 2; }) =
     "uint idx = 1; uint ie2 = total + 1; values[ie2] += 2;" := rfl

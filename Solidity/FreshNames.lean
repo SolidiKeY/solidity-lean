@@ -23,7 +23,9 @@ A printed line reads back when the table round-trips, which
 identifier, the names are distinct and none is itself a default spelling
 (`se2`), and none is a name the readers resolve before a variable — a state
 variable or an enum of the contract, a word of `FreshNames.reserved`, or a
-`k1` of `Calculus/Spec.lean`.  An example guards its table with
+`k1` of `Calculus/Spec.lean` — or a name a reader resolves before it in
+its own position: a struct type (`Account storage Account` does not read
+back) or a function of the contract.  An example guards its table with
 `#guard (FreshNames.clashes C rows).isEmpty`.  What it cannot check: a table
 name must not be a name of the example's own program (a local `pv` would
 read as the fresh one), nor a token of the grammar (`if`, `uint`).  A table
@@ -40,7 +42,9 @@ abbrev FreshTable := List (String × String)
 
 /-- `rows` renames some of `base`'s spellings: `("pv", "se1")` spells
 `.fresh "se" 1` as `pv`, and reads `pv` back as it.  Every other variable is
-spelled by `base`, the default (`se1`, `sp1`, …) unless one is given.  The
+spelled by `base`.  Its default is the package's spelling (`se1`, `sp1`, …),
+not the instance in scope: a default argument is elaborated here, once.  A
+file with its own prefixes passes them, `.ofTable rows (.ofPrefixes …)`.  The
 lookup is by spelling, so `name` reduces wherever `base.name` does (`rfl` on a
 printed program). -/
 def FreshNames.ofTable (rows : FreshTable) (base : FreshNames := inferInstance) :
@@ -61,7 +65,9 @@ def FreshNames.reserved : List String :=
 
 /-- What keeps `rows` from reading back against `C`, one line per row that
 fails a check below; `[]` when none does.  The module docstring says what the
-checks cannot see. -/
+checks cannot see.  `base` is the one `rows` renames, and defaults to the
+package's spelling as in `ofTable`: under a table, pass the table's base, not
+the table. -/
 def FreshNames.clashes (C : Contract) (rows : FreshTable)
     (base : FreshNames := inferInstance) : List String :=
   let fn : FreshNames := .ofTable rows base
@@ -76,6 +82,8 @@ def FreshNames.clashes (C : Contract) (rows : FreshTable)
       else if fn.name b k != n then some s!"{d} has two names"
       else if (C.rootType n).isSome || (lookupBy n C.enums).isSome then
         some s!"{n} is a state variable or an enum of the contract"
+      else if !(structDef n).isEmpty || (lookupBy n C.funs).isSome then
+        some s!"{n} is a struct type or a function of the contract"
       else if FreshNames.reserved.contains n || (n.startsWith "k" && n.length > 1 &&
           (n.drop 1).all Char.isDigit) then
         some s!"{n} is a word the readers resolve first"
