@@ -1,5 +1,6 @@
 import Solidity.Calculus.Chains
 import Solidity.Calculus.Close
+import Solidity.Examples.ExampleNames
 
 /-!
 # Chains: `φ ~> ψ`, `φ ~[r]~> ψ`, `φ ~*> ψ`, and `calc`
@@ -16,9 +17,10 @@ examples).
 * `calc` — the same chain, one line per step, each with its reason.
 
 Every line is a formula `dl!{ … }`: copy it from `#derivation` (`se1`, `sp1`
-are the rules' fresh variables).  The chains are under the diamond, whose
-lines read back; a line with no modality left reads as a diamond
-(`fmlModality?`), so a box derivation's last line does not.  What is
+are the rules' fresh variables; from § 2 on, the printed `pv` and `acc`, by
+the headline's table in `Examples/ExampleNames.lean`).  The chains are under
+the diamond, whose lines read back; a line with no modality left reads as a
+diamond (`fmlModality?`), so a box derivation's last line does not.  What is
 *proved valid* is under the box (`Close.lean`: a write under the diamond is
 stuck in a state without `alice`), with the lines left to `sol_chain`.
 -/
@@ -71,6 +73,9 @@ example : dl!{ ⟨ x = people[i].age; ⟩ x == 1 }
     ~[storageFieldRead_unfold_rightFst]~> dl!{ ⟨ Person storage sp1 = people[i]; x = sp1.age; ⟩ x == 1 } :=
   rfl
 
+/-- The headline in the printed names: the value `pv`, the alias `acc`. -/
+local instance : FreshNames := .ofTable ExampleNames.Headline.names
+
 /-! ## 2 · Several steps: `~*>`
 
 The headline, from the statement to the formula with its three updates. -/
@@ -79,48 +84,47 @@ The headline, from the statement to the formula with its three updates. -/
 info:     dl{ ⟨ alice.account.balance = 10; ⟩ find(storage, alice.account.balance) = 10 }
   ~[storageFieldWrite_unfold_leftFst]~>
     dl{
-  ⟨ uint se1 = 10; Account storage sp1 = alice.account; sp1.balance = se1; ⟩ find(storage, alice.account.balance) = 10 }
+  ⟨ uint pv = 10; Account storage acc = alice.account; acc.balance = pv; ⟩ find(storage, alice.account.balance) = 10 }
   ~[localValueDeclInitDrop]~>
-    dl{
-  ⟨ se1 = 10; Account storage sp1 = alice.account; sp1.balance = se1; ⟩ find(storage, alice.account.balance) = 10 }
+    dl{ ⟨ pv = 10; Account storage acc = alice.account; acc.balance = pv; ⟩ find(storage, alice.account.balance) = 10 }
   ~[localValueAssign]~>
     dl{
-  { se1 := 10 } ⟨ Account storage sp1 = alice.account; sp1.balance = se1; ⟩ find(storage, alice.account.balance) = 10 }
+  { pv := 10 } ⟨ Account storage acc = alice.account; acc.balance = pv; ⟩ find(storage, alice.account.balance) = 10 }
   ~[storageLocalDeclInitDrop]~>
-    dl{ { se1 := 10 } ⟨ sp1 = alice.account; sp1.balance = se1; ⟩ find(storage, alice.account.balance) = 10 }
+    dl{ { pv := 10 } ⟨ acc = alice.account; acc.balance = pv; ⟩ find(storage, alice.account.balance) = 10 }
   ~[storageFieldReadBindLocalRoot]~>
-    dl{ { se1 := 10 } { sp1 := alice.account } ⟨ sp1.balance = se1; ⟩ find(storage, alice.account.balance) = 10 }
+    dl{ { pv := 10 } { acc := alice.account } ⟨ acc.balance = pv; ⟩ find(storage, alice.account.balance) = 10 }
   ~[storageFieldWriteSave]~>
     dl{
-  { se1 := 10 }
-    { sp1 := alice.account }
-      { storage := save(storage, sp1.balance, se1) } ⟨ ⟩ find(storage, alice.account.balance) = 10 }
+  { pv := 10 }
+    { acc := alice.account }
+      { storage := save(storage, acc.balance, pv) } ⟨ ⟩ find(storage, alice.account.balance) = 10 }
   ~[emptyModality]~>
     dl{
-  { se1 := 10 }
-    { sp1 := alice.account } { storage := save(storage, sp1.balance, se1) } find(storage, alice.account.balance) = 10 }
+  { pv := 10 }
+    { acc := alice.account } { storage := save(storage, acc.balance, pv) } find(storage, alice.account.balance) = 10 }
 -/
 #guard_msgs in
 #derivation dl!{ ⟨ alice.account.balance = 10; ⟩ alice.account.balance == 10 }
 
 example : dl!{ ⟨ alice.account.balance = 10; ⟩ alice.account.balance == 10 }
-    ~*> dl!{ { se1 := 10 } { sp1 := alice.account } { storage := save(storage, sp1.balance, se1) }
+    ~*> dl!{ { pv := 10 } { acc := alice.account } { storage := save(storage, acc.balance, pv) }
             alice.account.balance == 10 } := by
   sol_chain
 
 /-! ## 3 · A chain: the arrows mixed
 
 The lines you want to see, and `~*>` over the ones you do not.  Here: Step 2
-opens the write, the declaration of the alias `sp1` is dropped, and the rest
+opens the write, the declaration of the alias `acc` is dropped, and the rest
 runs to the end. -/
 
 example : dl!{ ⟨ alice.account.balance = 10; ⟩ alice.account.balance == 10 }
-    ~*> dl!{ { se1 := 10 } ⟨ Account storage sp1 = alice.account; sp1.balance = se1; ⟩
+    ~*> dl!{ { pv := 10 } ⟨ Account storage acc = alice.account; acc.balance = pv; ⟩
             alice.account.balance == 10 }
     ~[storageLocalDeclInitDrop]~>
-        dl!{ { se1 := 10 } ⟨ sp1 = alice.account; sp1.balance = se1; ⟩ alice.account.balance == 10 }
-    ~> dl!{ { se1 := 10 } { sp1 := alice.account } ⟨ sp1.balance = se1; ⟩ alice.account.balance == 10 }
-    ~*> dl!{ { se1 := 10 } { sp1 := alice.account } { storage := save(storage, sp1.balance, se1) }
+        dl!{ { pv := 10 } ⟨ acc = alice.account; acc.balance = pv; ⟩ alice.account.balance == 10 }
+    ~> dl!{ { pv := 10 } { acc := alice.account } ⟨ acc.balance = pv; ⟩ alice.account.balance == 10 }
+    ~*> dl!{ { pv := 10 } { acc := alice.account } { storage := save(storage, acc.balance, pv) }
             alice.account.balance == 10 } := by
   sol_chain
 
@@ -130,29 +134,29 @@ The derivation of the headline, one line per rule,
 each checked by `rfl`.  It is a `def`: the chain is data. -/
 
 def headline : dl!{ ⟨ alice.account.balance = 10; ⟩ alice.account.balance == 10 }
-    ~*> dl!{ { se1 := 10 } { sp1 := alice.account } { storage := save(storage, sp1.balance, se1) }
+    ~*> dl!{ { pv := 10 } { acc := alice.account } { storage := save(storage, acc.balance, pv) }
             alice.account.balance == 10 } :=
   calc dl!{ ⟨ alice.account.balance = 10; ⟩ alice.account.balance == 10 }
     _ ~[storageFieldWrite_unfold_leftFst]~>
-        dl!{ ⟨ uint se1 = 10; Account storage sp1 = alice.account; sp1.balance = se1; ⟩
+        dl!{ ⟨ uint pv = 10; Account storage acc = alice.account; acc.balance = pv; ⟩
             alice.account.balance == 10 } := rfl
     _ ~[localValueDeclInitDrop]~>
-        dl!{ ⟨ se1 = 10; Account storage sp1 = alice.account; sp1.balance = se1; ⟩
+        dl!{ ⟨ pv = 10; Account storage acc = alice.account; acc.balance = pv; ⟩
             alice.account.balance == 10 } := rfl
     _ ~[localValueAssign]~>
-        dl!{ { se1 := 10 } ⟨ Account storage sp1 = alice.account; sp1.balance = se1; ⟩
+        dl!{ { pv := 10 } ⟨ Account storage acc = alice.account; acc.balance = pv; ⟩
             alice.account.balance == 10 } := rfl
     _ ~[storageLocalDeclInitDrop]~>
-        dl!{ { se1 := 10 } ⟨ sp1 = alice.account; sp1.balance = se1; ⟩
+        dl!{ { pv := 10 } ⟨ acc = alice.account; acc.balance = pv; ⟩
             alice.account.balance == 10 } := rfl
     _ ~[storageFieldReadBindLocalRoot]~>
-        dl!{ { se1 := 10 } { sp1 := alice.account } ⟨ sp1.balance = se1; ⟩
+        dl!{ { pv := 10 } { acc := alice.account } ⟨ acc.balance = pv; ⟩
             alice.account.balance == 10 } := rfl
     _ ~[storageFieldWriteSave]~>
-        dl!{ { se1 := 10 } { sp1 := alice.account } { storage := save(storage, sp1.balance, se1) } ⟨⟩
+        dl!{ { pv := 10 } { acc := alice.account } { storage := save(storage, acc.balance, pv) } ⟨⟩
             alice.account.balance == 10 } := rfl
     _ ~[emptyModality]~>
-        dl!{ { se1 := 10 } { sp1 := alice.account } { storage := save(storage, sp1.balance, se1) }
+        dl!{ { pv := 10 } { acc := alice.account } { storage := save(storage, acc.balance, pv) }
             alice.account.balance == 10 } := rfl
 
 -- A wrong rule in a `calc` step is refused once the line before it is known.
@@ -173,10 +177,10 @@ the box, so that the write is valid; `_ ~*> _` runs to the end. -/
 theorem headline_valid : ⊨ dl!{ [ alice.account.balance = 10; ] alice.account.balance == 10 } := by
   apply Fml.Steps.valid
   · calc dl!{ [ alice.account.balance = 10; ] alice.account.balance == 10 }
-      _ ~*> dl!{ { se1 := 10 } [ Account storage sp1 = alice.account; sp1.balance = se1; ]
+      _ ~*> dl!{ { pv := 10 } [ Account storage acc = alice.account; acc.balance = pv; ]
                 alice.account.balance == 10 } := by sol_chain
       _ ~[storageLocalDeclInitDrop]~>
-          dl!{ { se1 := 10 } [ sp1 = alice.account; sp1.balance = se1; ]
+          dl!{ { pv := 10 } [ acc = alice.account; acc.balance = pv; ]
               alice.account.balance == 10 } := rfl
       _ ~*> _ := by sol_chain
   · sol_close
@@ -211,7 +215,7 @@ derivations of the same length between the same ends are one: every
 seven-step derivation of the headline is the `calc` above. -/
 
 example (d : dl!{ ⟨ alice.account.balance = 10; ⟩ alice.account.balance == 10 }
-    ~*> dl!{ { se1 := 10 } { sp1 := alice.account } { storage := save(storage, sp1.balance, se1) }
+    ~*> dl!{ { pv := 10 } { acc := alice.account } { storage := save(storage, acc.balance, pv) }
             alice.account.balance == 10 }) (h : d.length = 7) : d = headline :=
   Fml.Steps.eq_of_length d headline (h.trans rfl)
 
@@ -230,7 +234,8 @@ info: dl{ ⟨ alice.age = v; ⟩ find(storage, alice.age) = v }
 #check dl!{ ⟨ alice.age = v; ⟩ alice.age == v }
     ~[storageFieldWriteSave]~> dl!{ { storage := save(storage, alice.age, v) } ⟨⟩ alice.age == v }
 
--- `se1` and `sp1` are the fresh variables the rule declares
+-- `pv` and `acc` are the fresh variables the rule declares, `se1` and `sp1`,
+-- whose default spelling still reads
 example : dl!{ ⟨ alice.account.balance = 10; ⟩ true }
     ~[storageFieldWrite_unfold_leftFst]~>
       dl!{ ⟨ uint se1 = 10; Account storage sp1 = alice.account; sp1.balance = se1; ⟩ true } :=

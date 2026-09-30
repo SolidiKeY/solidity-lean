@@ -11,9 +11,10 @@ with its own table (`FreshNames.lean`), and every line in it — `dl!{ … }`,
 printed names:
 
 * `Headline` — `alice.account.balance = 10;`: the value `pv`, the alias
-  `acc`, and the table's tests: a line is the term
-  its default spelling gives, a capture is numbered past `pv`, an error
-  prints `pv`;
+  `acc`.  Its chains are the headline's of
+  `Examples/Chains.lean`, which reads this table; here are its tests: a
+  line is the term its default spelling gives, a capture is numbered past
+  `pv`, an error prints `pv`;
 * `Token` — `alice.account.token.value = 5;`: `aliceTok`, then `aliceAcc`,
   the alias the second unfolding declares;
 * `Memory` — `carol.account.balance = 10;`: `acc` again, now a memory
@@ -25,8 +26,8 @@ printed names:
 * `Capture` — a `sol{ … }` capture numbered past a table name.
 
 A table changes spellings only: each line is the term its default spelling
-gives (`headlineLast`, `captured`), so the chains check as those of
-`Examples/Chains.lean` do.  The printed `int pv` is `uint pv` here (the
+gives (`headlineLast`, `captured`), so the chains check as they do in
+the default spelling.  The printed `int pv` is `uint pv` here (the
 type of the place written), and its last lines, with the updates applied,
 are not drawn.
 -/
@@ -82,51 +83,6 @@ example : dl!{ { se1 := 10 } true } = dl!{ { pv := 10 } true } := rfl
 
 -- a capture is numbered past `pv`
 example : dl!{ ⟨ values[total + 1] += 2; ⟩ pv == 0 } = capturedDl := rfl
-
-/--
-info:     dl{ ⟨ alice.account.balance = 10; ⟩ find(storage, alice.account.balance) = 10 }
-  ~[storageFieldWrite_unfold_leftFst]~>
-    dl{
-  ⟨ uint pv = 10; Account storage acc = alice.account; acc.balance = pv; ⟩ find(storage, alice.account.balance) = 10 }
-  ~[localValueDeclInitDrop]~>
-    dl{ ⟨ pv = 10; Account storage acc = alice.account; acc.balance = pv; ⟩ find(storage, alice.account.balance) = 10 }
-  ~[localValueAssign]~>
-    dl{
-  { pv := 10 } ⟨ Account storage acc = alice.account; acc.balance = pv; ⟩ find(storage, alice.account.balance) = 10 }
-  ~[storageLocalDeclInitDrop]~>
-    dl{ { pv := 10 } ⟨ acc = alice.account; acc.balance = pv; ⟩ find(storage, alice.account.balance) = 10 }
-  ~[storageFieldReadBindLocalRoot]~>
-    dl{ { pv := 10 } { acc := alice.account } ⟨ acc.balance = pv; ⟩ find(storage, alice.account.balance) = 10 }
-  ~[storageFieldWriteSave]~>
-    dl{
-  { pv := 10 }
-    { acc := alice.account }
-      { storage := save(storage, acc.balance, pv) } ⟨ ⟩ find(storage, alice.account.balance) = 10 }
-  ~[emptyModality]~>
-    dl{
-  { pv := 10 }
-    { acc := alice.account } { storage := save(storage, acc.balance, pv) } find(storage, alice.account.balance) = 10 }
--/
-#guard_msgs in
-#derivation dl!{ ⟨ alice.account.balance = 10; ⟩ alice.account.balance == 10 }
-
-/-- The printed chain, line by line; its last step is two here, the write and
-the empty modality. -/
-def headline : dl!{ ⟨ alice.account.balance = 10; ⟩ alice.account.balance == 10 }
-    ~*> dl!{ { pv := 10 } { acc := alice.account } { storage := save(storage, acc.balance, pv) }
-            alice.account.balance == 10 } :=
-  calc dl!{ ⟨ alice.account.balance = 10; ⟩ alice.account.balance == 10 }
-    _ ~[storageFieldWrite_unfold_leftFst]~>
-        dl!{ ⟨ uint pv = 10; Account storage acc = alice.account; acc.balance = pv; ⟩
-            alice.account.balance == 10 } := rfl
-    _ ~*> dl!{ { pv := 10 } { acc := alice.account } ⟨ acc.balance = pv; ⟩
-            alice.account.balance == 10 } := by sol_chain
-    _ ~[storageFieldWriteSave]~>
-        dl!{ { pv := 10 } { acc := alice.account } { storage := save(storage, acc.balance, pv) } ⟨⟩
-            alice.account.balance == 10 } := rfl
-    _ ~[emptyModality]~>
-        dl!{ { pv := 10 } { acc := alice.account } { storage := save(storage, acc.balance, pv) }
-            alice.account.balance == 10 } := rfl
 
 -- an error prints the table's names too
 /--
@@ -213,10 +169,12 @@ info:     dl{ ⟨ alice.account.token.value = 5; ⟩ find(storage, alice.account
 #derivation dl!{ ⟨ alice.account.token.value = 5; ⟩ alice.account.token.value == 5 }
 
 /-- The printed chain.  The line `storageFieldRead_unfold_rightFst` reaches is
-left `_`: `dl!{ … }` does not read it back in any spelling, since it types an
-alias bound by an assignment only from a state variable's path (`aliceTok =
-alice.account.token`), not from another alias's (`aliceTok = aliceAcc.token`).
-The `#derivation` above shows it. -/
+left `_`: `dl!{ … }` does not read it back in any spelling (`sp1 =
+sp2.token` is refused as well), since it types an alias bound by an
+assignment only from a state variable's path (`aliceTok =
+alice.account.token`), not from another alias's (`aliceTok =
+aliceAcc.token`); `Calculus/Notation.lean` lists the gap.  The
+`#derivation` above shows the line. -/
 def token : dl!{ ⟨ alice.account.token.value = 5; ⟩ alice.account.token.value == 5 }
     ~*> dl!{ { pv := 5 } { aliceAcc := alice.account } { aliceTok := aliceAcc.token }
               { storage := save(storage, aliceTok.value, pv) } alice.account.token.value == 5 } :=
