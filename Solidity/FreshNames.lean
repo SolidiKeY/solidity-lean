@@ -5,9 +5,8 @@ import Solidity.Syntax
 
 A rule declares `.fresh b k`, and `FreshNames` spells it: `se1`, `sp1` by
 default.  The names follow what each one holds, and vary per example —
-`acc` is `sp1` in the headline and `mv1` in a memory example; in the matrix
-example `idx2` is `ie1`, declared before `idx1` — so an example puts its
-own table in scope, a renaming of the default spellings:
+`acc` is `sp1` in the headline and `mv1` in a memory example — so an
+example puts its own table in scope, a renaming of the default spellings:
 
 ```
 local instance : FreshNames := .ofTable [("pv", "se1"), ("acc", "sp1")]
