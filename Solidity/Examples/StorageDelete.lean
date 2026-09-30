@@ -18,7 +18,8 @@ extent, a struct its mapping members).  Reading it back:
 | `p` itself, after a write to `p` | `sol_close` | `deleteThenRead` |
 | `p` itself, in the sequent | the Theory's lemmas (`sol_rw`) | `deleteReadDeep_theory` |
 | a path apart from `p` | `sol_close` | `deleteThenReadBeside` |
-| a path apart from `p`, in the sequent | the Theory's lemmas (`rw`) | `deleteFrame_theory` |
+| a path apart from `p`, in the sequent | the Theory's lemmas (`sol_rw`) | `deleteFrame_theory` |
+| a path apart from `p`, mid-program | the same, with the program still to run | `deleteFrameMid_theory` |
 | a member below `p` | a run from the initial store | the `#eval`s at the end |
 | `p`, with nothing known of it | not valid | `deleteRootUnknown` |
 
@@ -133,14 +134,18 @@ theorem deleteBoolThenRead :
 
 /-! ## Reading after a delete, in the sequent
 
-The same reads, closed as KeY closes them: the calculus steps
+The same reads, closed as mini-solkey closes them: the calculus steps
 (`sol_derive`), the updates merged into one parallel update (`Proves.merge`
-for the locals, `Proves.mergeStorage` for a storage write), the comparison
-split and the merged update applied (`sol_apply_upd`), and the read that is
-left rewritten by the Theory's own lemmas — `find_delAt_same`,
+for the locals, `Proves.mergeStorage` for a storage write), and the read the
+last element binds rewritten by the Theory's own lemmas — `find_delAt_same`,
 `find_copyTo_same`, `find_delAt_frame` of `Theory/Storage.lean` and
-`Theory/Copy.lean`, named directly, not lifted to `Term.Theq` by hand
-(`sol_rw`, `Calculus/TheoryRewrite.lean`). -/
+`Theory/Copy.lean`, named directly (`sol_rw`, `Calculus/TheoryRewrite.lean`).
+The read sits in an update's right-hand side, `{ x := find(…) }`, which the
+rewrite reaches because its result is a literal and the update is under the
+box (`Proves.updRw`).  Then the update is applied to the goal and dropped
+(`sol_apply_upd`) and `v = v` closes (`Proves.eqDClose`).  Every step is a
+rule of the calculus, so none of them waits for the program to be gone
+(`deleteFrameMid_theory`). -/
 
 open Theory Theory.StValue in
 /-- `alice.account.balance = 5; delete alice.account.balance;` read two
@@ -162,15 +167,11 @@ theorem deleteReadDeep_theory :
   refine Proves.merge rfl ?_
   -- dl{ { se1 := 5 ‖ … ‖ x := find(delAt(save(storage, alice.account.balance, 5),
   --       alice.account.balance), alice.account.balance) } ⟹ x = 0 }
-  refine Proves.eqDSplit ?_ ?_ ?_
-  · exact Proves.definedWritten
-  · exact Proves.definedLit
-  · sol_apply_upd
-    -- dl{ ⟹ find(delAt(save(storage, alice.account.balance, 5), alice.account.balance),
-    --       alice.account.balance) ≐ 0 }
-    sol_rw [find_delAt_same, find_copyTo_same, copyVal, delValueDefault, primDefault]
-    -- dl{ ⟹ 0 ≐ 0 }
-    exact Proves.eqRefl
+  sol_rw [find_delAt_same, find_copyTo_same, copyVal, delValueDefault, primDefault]
+  -- dl{ { se1 := 5 ‖ … ‖ x := 0 } ⟹ x = 0 }
+  sol_apply_upd
+  -- dl{ ⟹ 0 = 0 }
+  exact Proves.eqDClose
 
 open Theory Theory.StValue in
 /-- `bob.age = 7; delete alice;` read at `bob.age`: the delete is off the
@@ -183,14 +184,31 @@ theorem deleteFrame_theory :
   --     { x := find(storage, bob.age) } ⟹ x = 7 }
   refine Proves.mergeStorage ?_
   refine Proves.mergeStorage ?_
-  refine Proves.eqDSplit ?_ ?_ ?_
-  · exact Proves.definedWritten
-  · exact Proves.definedLit
-  · sol_apply_upd
-    -- dl{ ⟹ find(delAt(save(storage, bob.age, 7), alice), bob.age) ≐ 7 }
-    rw [find_delAt_frame, find_copyTo_same, copyVal]
-    -- dl{ ⟹ 7 ≐ 7 }
-    exact Proves.eqRefl
+  sol_rw [find_delAt_frame, find_copyTo_same, copyVal]
+  -- dl{ { storage := save(storage, bob.age, 7) ‖ storage := delAt(…) ‖ x := 7 } ⟹ x = 7 }
+  sol_apply_upd
+  exact Proves.eqDClose
+
+open Theory Theory.StValue in
+/-- The same read, rewritten while `x = x + 1;` is still to run: the merge
+and the rewrite are rules of the calculus, not steps after it. -/
+theorem deleteFrameMid_theory :
+    ⊢ dl!{ [ bob.age = 7; delete alice; uint x = bob.age; x = x + 1; ] x == 8 } := by
+  apply update .storageFieldWriteSave
+  apply update .storageRootDelete
+  apply unfold .localValueDeclInitDrop
+  apply update .storageFieldReadFind
+  refine Proves.mergeStorage ?_
+  refine Proves.mergeStorage ?_
+  sol_rw [find_delAt_frame, find_copyTo_same, copyVal]
+  -- dl{ { storage := save(storage, bob.age, 7) ‖ storage := delAt(…) ‖ x := 7 } ⟹
+  --     [ x = x + 1; ] x = 8 }
+  sol_derive
+  sol_apply_upd
+  sol_apply_upd
+  -- dl{ ⟹ 7 + 1 = 8 }
+  refine close ?_
+  sol_close
 
 set_option maxHeartbeats 1000000 in
 /-- `k != j → balances[k] = 5; balances[j] = 6; delete balances[j];` — the entry

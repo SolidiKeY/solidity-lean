@@ -1,5 +1,4 @@
-import Solidity.Calculus.UpdateRules
-import Solidity.Calculus.Close
+import Solidity.Calculus.Rewrite
 
 /-!
 # Update simplification: one update instead of a stack
@@ -151,8 +150,8 @@ theorem twoWrites_merge : ⊨ dl!{ [ balances[a] = 1; balances[b] = 2; ] true } 
 
 Under `⊢` the updates are in the context, the latest last.  `merge` joins
 the last two, when the first writes only locals (`rfl` checks it);
-`simplify` cleans the last one.  Both wait for the modalities to be gone:
-they are proved through `close`. -/
+`simplify` cleans the last one.  Both are rules of the calculus
+(`Calculus/Logic.lean`), so they need not wait for the modalities to be gone. -/
 
 /--
 trace: case h

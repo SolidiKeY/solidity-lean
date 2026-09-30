@@ -213,6 +213,19 @@ def normProves (g : MVarId) : MetaM MVarId := do
     (mkApp3 (mkConst ``Fml.quote) C (quoteConstName n) φ)
   g.replaceTargetDefEq (mkAppN ty.getAppFn #[C, R, Γ', φ'])
 
+/-- The goal `[h₁, …, hₙ] ⟹ φ` as `[] ++ [h₁] ++ … ++ [hₙ] ⟹ φ`, the shape the
+steps of a derivation build, so that a rule stated on `Γ ++ [.upd m U]`
+(`Proves.merge`, `Proves.applyOnRigidBox`) finds its `Γ` by unification;
+any other goal as it is. -/
+def snocProves (g : MVarId) : MetaM MVarId := do
+  let ty ← instantiateMVars (← g.getType)
+  let_expr Proves C R Γ φ := ty | return g
+  let some hs := listLit? Γ | return g
+  let hyp := mkApp (mkConst ``Hyp) C
+  let Γ' ← hs.foldlM (fun acc h => do mkAppM ``HAppend.hAppend #[acc, ← mkListLit hyp [h]])
+    (← mkListLit hyp [])
+  g.replaceTargetDefEq (mkAppN ty.getAppFn #[C, R, Γ', φ])
+
 /-- The terms of `e` a Theory law may rewrite (`find` and `len` reads),
 outermost first, each once. -/
 partial def theoryCandidates (e : Expr) (acc : Array Expr := #[]) : Array Expr :=

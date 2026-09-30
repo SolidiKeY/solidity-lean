@@ -383,27 +383,29 @@ share one constructor: solkey splits the receiver kind, Lean does not.
 An update is a term (`Upd C`, a list of `UpdElem`s applied against the
 pre-state, `Update.lean`), so KeY's update rules are rules here too:
 `Calculus/UpdateRules.lean`, each an equivalence over `holds` (`UpdRule`),
-plus the box forms a derivation uses once the program is gone. Where a rule
+plus the box forms; on sequents they are constructors of `Proves`
+(`Calculus/Logic.lean`), so a derivation uses them with the program still
+to run. Where a rule
 has a side condition KeY's lacks, it is because a term here can halt and
 KeY's cannot (the module docstring, "What halting changes").
 
 | KeY rule | Lean | Status | Notes |
 | --- | --- | --- | --- |
-| `sequentialToParallel1-3` | `UpdRule.sequentialToParallel`, `Proves.merge`; `Proves.mergeStorage` | done | `{u}{u2}φ ⇝ {u ‖ {u}u2}φ` for `u` an update of locals (`Upd.envOnly`); over a storage write (`mergeStorage`, `Calculus/Rewrite.lean`) for terms whose every storage read is a `storage` term (`stExplicit`) |
+| `sequentialToParallel1-3` | `UpdRule.sequentialToParallel`, `Proves.merge`; `Proves.mergeStorage` | done | `{u}{u2}φ ⇝ {u ‖ {u}u2}φ` for `u` an update of locals (`Upd.envOnly`); over a storage write (`mergeStorage`) for terms whose every storage read is a `storage` term (`stExplicit`) |
 | `applyOnElementary`, `applyOnParallel` | `UpdElem.subst`, `Upd.subst` | functions | `{u}` pushed into an update's right-hand sides |
 | `applyOnPV`, `applyOnPVLastInParallel`, `applyOnDifferentPV`, `applyOnDifferentPVLastInParallel` | `Fml.subst` (`Upd.lastWrite`) | functions | the last write of a local wins; a local the update does not write is kept |
 | `simplifyUpdate1-3` | `UpdRule.simplifyUpdate`, `Upd.dropEffectless`, `Proves.simplify` | done | only elements that cannot halt are dropped (`UpdElem.total`): dropping one drops its halting too |
 | `applySkip1-3`, `applyOnSkip` | `UpdRule.applySkip` | done | `skip` is `[]` |
 | `parallelWithSkip1-2` | — | arch | `‖` is `++` and `skip` is `[]`: nothing to rewrite |
 | `applyOnRigidFormula` | `UpdRule.applyOnRigid` | done | as an equivalence, for an update that cannot halt (`Upd.total`) and a formula reading no variable at another sort than the update writes it (`Fml.sortedFor`, which KeY's sorts give for free) |
-| `applyOnRigidFormula`, under the box | `Proves.applyOnRigidBox` (an update of locals, or locals and a storage write under a storage-free goal), `Proves.applyStorageBox` (`{storage := s}`, `Calculus/Rewrite.lean`); `sol_apply_upd` | done | one direction, **no totality premise**: the last update of the context applied to a first-order goal and dropped. A halting box update proves what follows, and the goal's equations are read in the Theory, where a term that halts still denotes |
+| `applyOnRigidFormula`, under the box | `Proves.applyOnRigidBox` (an update of locals, or locals and a storage write under a storage-free goal), `Proves.applyStorageBox` (`{storage := s}`); `sol_apply_upd` | done | one direction, **no totality premise**: the last update of the context applied to a first-order goal and dropped. A halting box update proves what follows, and the goal's equations are read in the Theory, where a term that halts still denotes |
 | `elimSelfUpdate*` | `UpdElem.elimSelf_box`, `UpdElem.elimSelf_diamond` | done, one direction each | commented out in the KeY source; `x := x` halts when `x` holds no value, so it is no equivalence here |
 | `simplifyIfThenElseUpdate1-4`, `commuteSimpleUpdates` | — | arch | commented-out dead code in the KeY source |
 
 ### Closing the first-order goal
 
 What symbolic execution leaves is closed with KeY's first-order steps, derived
-through `Proves.close` (`Calculus/Rewrite.lean`, `Calculus/UpdateRules.lean`),
+through `Proves.close` (`Calculus/Rewrite.lean`),
 each needing only a context with no diamond (`Hyp.boxOnly`). The formula
 `a = b` a program comparison produces is `Fml.eqD a b` — `defined(a) ∧
 defined(b) ∧ a ≐ b` — because a term here can halt and KeY's `=` is between
@@ -417,6 +419,7 @@ terms that cannot; `a ≐ b` (`Fml.eq`) is the total Theory equation, KeY's `=`.
 | — | `Proves.definedWritten` | Lean only | `defined(x)` behind a box update whose last binder of `x` is `x := t`: what `applyOnRigidBox` forgets, that the update ran |
 | — | `Proves.definedLit` | Lean only | a literal is defined |
 | any theory taclet on a sequent | `Proves.theoryRw` (`Calculus/Logic.lean`), `rw [h]`/`sol_rw` (`Calculus/Rewrite.lean`) | done | a Theory equation `h : Term.Theq t t'` rewrites every total equation of the sequent (`Fml.rwEq`), with no soundness proof per rule; the laws are the next section's |
+| the same, inside an update | `Proves.updRw` (`Calculus/Logic.lean`), `sol_rw` | done | an update's right-hand side runs in the interpreter, so the rewrite there asks `Term.EvalRefines t t'` (where `t` returns, `t'` returns the same value), which a Theory equation onto a literal gives (`Term.EvalRefines.of_theq`); box updates only |
 
 ## The data-structure theories
 

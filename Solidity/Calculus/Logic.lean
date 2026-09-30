@@ -1,5 +1,5 @@
 import Solidity.Calculus.RuleSoundness
-import Solidity.Calculus.TermRules
+import Solidity.Calculus.UpdateRules
 
 /-!
 # The calculus as a judgement: `Γ ⊢ φ`
@@ -59,12 +59,6 @@ def Premise.fml (m : Modality) : Premise C → Prog C → Fml C → Fml C
       (.and (.imp c' (.modal m (Q ++ ω) φ)) (Premise.cover m c c'))
   | .done true, _, _ => .tt
   | .done false, _, _ => .ff
-
-/-- A modality after a run that continues: a halt anywhere is a halt. -/
-theorem Modality.after_bind (m : Modality) (p : State → Prop) (r : Res State)
-    (f : State → Res State) :
-    m.after (fun x => m.after p (f x)) r = m.after p (r >>= f) := by
-  cases r <;> rfl
 
 /-- Two runs that end alike off `ns` satisfy the same modal formula, when
 neither the rest of the program nor the postcondition mentions `ns`. -/
@@ -204,6 +198,17 @@ def Hyp.rwEq (q : Term C × Term C) : List (Hyp C) → List (Hyp C)
   | .upd m U :: Γ => .upd m U :: Hyp.rwEq q Γ
   | .havoc :: Γ => .havoc :: Hyp.rwEq q Γ
 
+/-- An update rewrite of the context (`Upd.rw`): in the right-hand sides of
+every box update.  A precondition, a diamond update or a `havoc` stays as it
+is: a rewritten diamond update would also have to return where the old one
+does, which `Term.EvalRefines` does not say. -/
+def Hyp.rwUpd (q : Term C × Term C) : List (Hyp C) → List (Hyp C)
+  | [] => []
+  | .pre a :: Γ => .pre a :: Hyp.rwUpd q Γ
+  | .upd .box U :: Γ => .upd .box (U.rw q) :: Hyp.rwUpd q Γ
+  | .upd .diamond U :: Γ => .upd .diamond U :: Hyp.rwUpd q Γ
+  | .havoc :: Γ => .havoc :: Hyp.rwUpd q Γ
+
 /-- Fresh names are numbered one above every index in the whole sequent. -/
 def Hyp.fresh (Γ : List (Hyp C)) (φ : Fml C) : Nat := (Hyp.wrap Γ φ).fresh
 
@@ -258,6 +263,44 @@ inductive Proves : RuleSet → List (Hyp C) → Fml C → Prop
   | theoryRw {R : RuleSet} {Γ : List (Hyp C)} {φ : Fml C} {t t' : Term C}
       (h : Term.Theq t t') (d : Proves R (Hyp.rwEq (t, t') Γ) (Fml.rwEq (t, t') φ)) :
       Proves R Γ φ
+  /-- A rewrite inside the context's updates: `t` becomes `t'` in the
+  right-hand sides of every box update (`Hyp.rwUpd`), where `t'` returns
+  whatever `t` returns (`Term.EvalRefines`).  With `theoryRw` it reaches the
+  whole sequent, as mini-solkey's `rewrite` does. -/
+  | updRw {R : RuleSet} {Γ : List (Hyp C)} {φ : Fml C} {t t' : Term C}
+      (h : Term.EvalRefines t t') (d : Proves R (Hyp.rwUpd (t, t') Γ) φ) : Proves R Γ φ
+  /-- `sequentialToParallel`: the last two updates of the context merge into
+  one parallel update, the first substituted into the second, when the first
+  writes only locals (`UpdRule.sequentialToParallel`). -/
+  | merge {R : RuleSet} {Γ : List (Hyp C)} {m : Modality} {U V : Upd C} {φ : Fml C}
+      (hU : U.envOnly = true) (h : Proves R (Γ ++ [.upd m (U ++ V.subst U)]) φ) :
+      Proves R (Γ ++ [.upd m U] ++ [.upd m V]) φ
+  /-- `sequentialToParallel` over a storage write, `{storage := s ‖ {storage := s}V}`,
+  for a `V` whose storage reads are all `storage` terms (`Upd.mergeStorage_holds`). -/
+  | mergeStorage {R : RuleSet} {Γ : List (Hyp C)} {m : Modality} {s : STerm C} {V : Upd C}
+      {φ : Fml C} (h : Proves R (Γ ++ [.upd m (.storage s :: V.withSt s)]) φ)
+      (hV : V.all (·.stExplicit) = true := by rfl) :
+      Proves R (Γ ++ [.upd m [.storage s]] ++ [.upd m V]) φ
+  /-- `simplifyUpdate`: the effectless elements of the last update are
+  dropped (`Upd.dropEffectless`). -/
+  | simplify {R : RuleSet} {Γ : List (Hyp C)} {m : Modality} {U : Upd C} {φ : Fml C}
+      (h : Proves R (Γ ++ [.upd m (U.dropEffectless φ.vars)]) φ) : Proves R (Γ ++ [.upd m U]) φ
+  /-- `applyOnRigidFormula` under the box: the last update, of locals (or
+  locals and a storage write, under a goal that reads no storage), applied to
+  a first-order goal and dropped (`Fml.subst_box`, `Fml.subst_box_st`). -/
+  | applyOnRigidBox {R : RuleSet} {Γ : List (Hyp C)} {U : Upd C} {φ : Fml C}
+      (h : Proves R Γ (φ.subst U))
+      (hU : (U.envOnly || U.localsOrStorage && φ.stFree) = true := by first | rfl | decide)
+      (hr : φ.rigid = true := by first | rfl | decide)
+      (hs : φ.sortedFor U = true := by first | rfl | decide) :
+      Proves R (Γ ++ [.upd .box U]) φ
+  /-- `applyOnRigidFormula` for a storage write under the box: `s` for every
+  `storage` of a first-order goal (`Fml.withSt_box`). -/
+  | applyStorageBox {R : RuleSet} {Γ : List (Hyp C)} {s : STerm C} {φ : Fml C}
+      (h : Proves R Γ (φ.withSt s))
+      (hr : φ.rigid = true := by first | rfl | decide)
+      (he : φ.stExplicit = true := by first | rfl | decide) :
+      Proves R (Γ ++ [.upd .box [.storage s]]) φ
   /-- Leave the calculus: with no modality left anywhere in the sequent, what
   is left is proved in the logic. -/
   | close {R : RuleSet} {Γ : List (Hyp C)} {φ : Fml C} (h : Valid (Hyp.wrap Γ φ))
@@ -398,6 +441,64 @@ theorem Proves.theoryRw_sound {Γ : List (Hyp C)} {φ : Fml C} {t t' : Term C}
   rw [Hyp.wrap_rwEq] at hσ
   exact (Fml.rwEq_holds (q := (t, t')) h _ σ).1 hσ
 
+/-! ### The update rules -/
+
+/-- A context whose box updates are rewritten gives the context: each
+rewritten box update gives the update (`Upd.rw_box`). -/
+theorem Hyp.rwUpd_wrap {q : Term C × Term C} (hq : Term.EvalRefines q.1 q.2) {φ : Fml C} :
+    (Γ : List (Hyp C)) → ∀ σ, holds σ (Hyp.wrap (Hyp.rwUpd q Γ) φ) → holds σ (Hyp.wrap Γ φ)
+  | [], _, h => h
+  | .pre _ :: Γ, σ, h => fun ha => Hyp.rwUpd_wrap hq Γ σ (h ha)
+  | .upd .box _ :: Γ, σ, h => Upd.rw_box hq (Hyp.rwUpd_wrap hq Γ) σ h
+  | .upd .diamond U :: Γ, σ, h => by
+    simp only [Hyp.rwUpd, Hyp.wrap, holds] at h ⊢
+    cases hU : U.apply σ with
+    | error _ => rw [hU] at h; exact h
+    | ok τ => rw [hU] at h; exact Hyp.rwUpd_wrap hq Γ τ h
+  | .havoc :: Γ, σ, h => fun st nt bal => Hyp.rwUpd_wrap hq Γ _ (h st nt bal)
+
+theorem Proves.merge_sound {Γ : List (Hyp C)} {m : Modality} {U V : Upd C} {φ : Fml C}
+    (hU : U.envOnly = true) (d : Valid (Hyp.wrap (Γ ++ [.upd m (U ++ V.subst U)]) φ)) :
+    Valid (Hyp.wrap (Γ ++ [.upd m U] ++ [.upd m V]) φ) := fun σ => by
+  have hσ : holds σ (Hyp.wrap (Γ ++ [.upd m (U ++ V.subst U)]) φ) := d σ
+  simp only [List.append_assoc, List.cons_append, List.nil_append, Hyp.wrap_append,
+    Hyp.wrap] at hσ ⊢
+  exact Hyp.wrap_mono (fun τ hτ => ((UpdRule.sequentialToParallel (V := V) (φ := φ) hU).sound τ).1 hτ)
+    Γ σ hσ
+
+theorem Proves.mergeStorage_sound {Γ : List (Hyp C)} {m : Modality} {s : STerm C} {V : Upd C}
+    {φ : Fml C} (hV : V.all (·.stExplicit) = true)
+    (d : Valid (Hyp.wrap (Γ ++ [.upd m (.storage s :: V.withSt s)]) φ)) :
+    Valid (Hyp.wrap (Γ ++ [.upd m [.storage s]] ++ [.upd m V]) φ) := fun σ => by
+  have hσ : holds σ (Hyp.wrap (Γ ++ [.upd m (.storage s :: V.withSt s)]) φ) := d σ
+  simp only [List.append_assoc, List.cons_append, List.nil_append, Hyp.wrap_append,
+    Hyp.wrap] at hσ ⊢
+  exact Hyp.wrap_mono (fun τ hτ => (Upd.mergeStorage_holds m s V hV φ τ).1 hτ) Γ σ hσ
+
+theorem Proves.simplify_sound {Γ : List (Hyp C)} {m : Modality} {U : Upd C} {φ : Fml C}
+    (d : Valid (Hyp.wrap (Γ ++ [.upd m (U.dropEffectless φ.vars)]) φ)) :
+    Valid (Hyp.wrap (Γ ++ [.upd m U]) φ) := fun σ => by
+  have hσ : holds σ (Hyp.wrap (Γ ++ [.upd m (U.dropEffectless φ.vars)]) φ) := d σ
+  simp only [Hyp.wrap_append, Hyp.wrap] at hσ ⊢
+  exact Hyp.wrap_mono (fun τ hτ => (Upd.dropEffectless_holds m U φ τ).1 hτ) Γ σ hσ
+
+theorem Proves.applyOnRigidBox_sound {Γ : List (Hyp C)} {U : Upd C} {φ : Fml C}
+    (hU : (U.envOnly || U.localsOrStorage && φ.stFree) = true) (hr : φ.rigid = true)
+    (hs : φ.sortedFor U = true) (d : Valid (Hyp.wrap Γ (φ.subst U))) :
+    Valid (Hyp.wrap (Γ ++ [.upd .box U]) φ) := fun σ => by
+  rw [Hyp.wrap_append]
+  refine Hyp.wrap_mono (fun τ hτ => ?_) Γ σ (d σ)
+  rcases Bool.or_eq_true_iff.1 hU with hU | hU
+  · exact Fml.subst_box hU hr hs τ hτ
+  · simp only [Bool.and_eq_true] at hU
+    exact Fml.subst_box_st hU.1 hU.2 hs τ hτ
+
+theorem Proves.applyStorageBox_sound {Γ : List (Hyp C)} {s : STerm C} {φ : Fml C}
+    (hr : φ.rigid = true) (he : φ.stExplicit = true) (d : Valid (Hyp.wrap Γ (φ.withSt s))) :
+    Valid (Hyp.wrap (Γ ++ [.upd .box [.storage s]]) φ) := fun σ => by
+  rw [Hyp.wrap_append]
+  exact Hyp.wrap_mono (fun τ hτ => Fml.withSt_box hr he τ hτ) Γ σ (d σ)
+
 open Proves in
 /-- **Soundness of the calculus**: a derivation of `Γ ⊢ φ` proves `φ`
 wrapped in its context `Γ`.
@@ -422,6 +523,12 @@ theorem Proves.sound {R : RuleSet} {Γ : List (Hyp C)} {φ : Fml C} (h : Proves 
     exact fun σ => Hyp.wrap_mono (ψ := φ) (φ := .modal m [] φ)
       (fun _ h => by cases m <;> exact h) Γ σ (ih σ)
   | theoryRw h _ ih => exact Proves.theoryRw_sound h ih
+  | updRw h _ ih => exact fun σ => Hyp.rwUpd_wrap h _ σ (ih σ)
+  | merge hU _ ih => exact Proves.merge_sound hU ih
+  | mergeStorage _ hV ih => exact Proves.mergeStorage_sound hV ih
+  | simplify _ ih => exact Proves.simplify_sound ih
+  | applyOnRigidBox _ hU hr hs ih => exact Proves.applyOnRigidBox_sound hU hr hs ih
+  | applyStorageBox _ hr he ih => exact Proves.applyStorageBox_sound hr he ih
   | close h _ => exact h
 
 open Proves in
@@ -449,6 +556,12 @@ theorem Proves.toAll {R : RuleSet} {Γ : List (Hyp C)} {φ : Fml C} (h : Proves 
   | done d _ ih => exact .done d ih
   | empty _ ih => exact .empty ih
   | theoryRw h _ ih => exact .theoryRw h ih
+  | updRw h _ ih => exact .updRw h ih
+  | merge hU _ ih => exact .merge hU ih
+  | mergeStorage _ hV ih => exact .mergeStorage ih hV
+  | simplify _ ih => exact .simplify ih
+  | applyOnRigidBox _ hU hr hs ih => exact .applyOnRigidBox ih hU hr hs
+  | applyStorageBox _ hr he ih => exact .applyStorageBox ih hr he
   | close h hφ => exact .close h hφ
 
 /-! ## Printing sequents

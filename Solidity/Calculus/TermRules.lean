@@ -23,7 +23,9 @@ the state a subformula is judged in does not matter.  It does not reach:
 
 * `defined t`, which is read by the interpreter (`eval`), not the Theory —
   two terms with one Theory value can differ in whether they halt;
-* an update's right-hand sides or a program, which run in the interpreter;
+* an update's right-hand sides or a program, which run in the interpreter
+  (`Proves.updRw` reaches the first, for a rewrite that keeps what a run
+  returns, `Calculus/UpdateRules.lean`);
 * a memory term (`read`, `mlen`, `copyMem`), which `denote`s through `eval`:
   an equality of denotations says nothing about its subterms' evaluations.
   `Term.rw` replaces such a term as a whole, but never looks inside it.

@@ -1,4 +1,5 @@
-import Solidity.Calculus.Notation
+import Solidity.Calculus.ReadWrite
+import Solidity.Calculus.TermRules
 import Solidity.Theory.Bridge.Denote
 
 /-!
@@ -58,10 +59,14 @@ two updates.  A variable read at another sort than `U` binds it
 still denotes something, and a storage or path variable of the wrong sort
 denotes something other than its substitution.
 
-The rules are optional: nothing else uses them.  They are used through
-`Fml.simpUpds` (merge every stack, drop what is dead), the tactics
-`sol_merge` and `sol_upd r` on `⊨` goals, and `Proves.merge` and
-`Proves.simplify` on `⊢` goals with no modality left.
+The rules are used through `Fml.simpUpds` (merge every stack, drop what is
+dead) and the tactics `sol_merge` and `sol_upd r` (`Calculus/Rewrite.lean`)
+on `⊨` goals, and on `⊢` goals as constructors of `Proves`
+(`Calculus/Logic.lean`), which is why this module sits below it:
+`Proves.merge`, `Proves.mergeStorage`, `Proves.simplify`,
+`Proves.applyOnRigidBox`, `Proves.applyStorageBox`, and `Proves.updRw`, the
+rewrite inside an update's right-hand sides (the last section).  Being rules,
+they apply with a modality still in the goal, as mini-solkey's do.
 -/
 
 namespace Solidity
@@ -1376,6 +1381,12 @@ theorem Upd.foldl_total (σ₀ : State) : (U : Upd C) → U.total = true →
     simp only [List.foldlM_cons, UpdElem.write_var hx, hb]
     exact Upd.foldl_total σ₀ U h.2 _
 
+/-- A modality after a run that continues: a halt anywhere is a halt. -/
+theorem Modality.after_bind (m : Modality) (p : State → Prop) (r : Res State)
+    (f : State → Res State) :
+    m.after (fun x => m.after p (f x)) r = m.after p (r >>= f) := by
+  cases r <;> rfl
+
 /-! ## The rules -/
 
 /-- The update rules, each a rewrite `φ ⇝ ψ` of a formula.  Hover a
@@ -1620,45 +1631,6 @@ theorem Fml.simpUpds_holds : (φ : Fml C) → ∀ σ, (holds σ φ.simpUpds ↔ 
     simp only [Fml.simpUpds, holds]
     exact forall_congr' fun _ => imp_congr_right fun _ => Fml.simpUpds_holds φ _
   | .tt, _ | .eq .., _ | .defined _, _ => Iff.rfl
-
-/-! ## In a derivation: `Proves.merge`, `Proves.simplify`
-
-Under `⊢` the updates sit in the context, the latest last.  These two
-lemmas rewrite the last two, or the last one, as `sequentialToParallel` and
-`simplifyUpdate` do, once no modality is left in the sequent.  They are not
-constructors of `Proves`: each is proved from `Proves.sound` and closes with
-`Proves.close`, which is why they wait for the modalities to be gone. -/
-
-/-- Under `⊢`, the last two updates of the context merge into one parallel
-update, the first substituted into the second, when the first writes only
-locals.
-
-Example: for `x = 1; y = x;` the context `{ x := 1 }, { y := x }` becomes
-`{ x := 1 ‖ y := 1 }`. -/
-theorem Proves.merge {R : RuleSet} {Γ : List (Hyp C)} {m : Modality} {U V : Upd C} {φ : Fml C}
-    (hU : U.envOnly = true) (h : Proves R (Γ ++ [.upd m (U ++ V.subst U)]) φ)
-    (hφ : (Hyp.wrap (Γ ++ [.upd m U] ++ [.upd m V]) φ).modalFree = true := by first | rfl | decide) :
-    Proves R (Γ ++ [.upd m U] ++ [.upd m V]) φ :=
-  .close (fun σ => by
-    have := h.sound σ
-    simp only [List.append_assoc, List.cons_append, List.nil_append, Hyp.wrap_append,
-      Hyp.wrap] at this ⊢
-    exact Hyp.wrap_mono (fun τ hτ => ((UpdRule.sequentialToParallel (V := V) (φ := φ) hU).sound τ).1 hτ)
-      Γ σ this) hφ
-
-/-- Under `⊢`, the effectless elements of the last update can be dropped.
-
-Example: for `alice.account.balance = 10;`, the context
-`{ se1 := 10 ‖ sp1 := alice.account ‖ storage := save(storage, alice.account.balance, 10) }`
-becomes `{ storage := save(storage, alice.account.balance, 10) }`. -/
-theorem Proves.simplify {R : RuleSet} {Γ : List (Hyp C)} {m : Modality} {U : Upd C} {φ : Fml C}
-    (h : Proves R (Γ ++ [.upd m (U.dropEffectless φ.vars)]) φ)
-    (hφ : (Hyp.wrap (Γ ++ [.upd m U]) φ).modalFree = true := by first | rfl | decide) :
-    Proves R (Γ ++ [.upd m U]) φ :=
-  .close (fun σ => by
-    have := h.sound σ
-    simp only [Hyp.wrap_append, Hyp.wrap] at this ⊢
-    exact Hyp.wrap_mono (fun τ hτ => (Upd.dropEffectless_holds m U φ τ).1 hτ) Γ σ this) hφ
 
 /-! ## Under the box: `applyOnRigid` without totality
 
@@ -1916,33 +1888,6 @@ theorem Fml.subst_box_st {U : Upd C} (hU : U.localsOrStorage = true) {φ : Fml C
     exact (Fml.holds_withStorage τ' st' φ hφ).2
       ((Fml.subst_holds hA φ (Fml.stFree_rigid hφ) hs).1 h)
 
-/-- **`applyOnRigidFormula` under the box**: the last update of the context
-is applied to a first-order goal and dropped — with no totality premise,
-since a halting box update proves what follows.  The update writes locals
-(`Fml.subst_box`), or locals and the storage where the goal reads no storage
-(`Fml.subst_box_st`): the merged update of `Proves.mergeStorage` is applied
-in one step.
-
-Example: `{ storage := S }, { x := find(storage, alice.age) } ⟹ x ≐ 42`
-becomes `{ storage := S } ⟹ find(storage, alice.age) ≐ 42`, and
-`{ storage := S ‖ x := find(storage, alice.age) } ⟹ x ≐ 42` becomes
-`⟹ find(storage, alice.age) ≐ 42`. -/
-theorem Proves.applyOnRigidBox {R : RuleSet} {Γ : List (Hyp C)} {U : Upd C} {φ : Fml C}
-    (h : Proves R Γ (φ.subst U))
-    (hU : (U.envOnly || U.localsOrStorage && φ.stFree) = true := by first | rfl | decide)
-    (hr : φ.rigid = true := by first | rfl | decide)
-    (hs : φ.sortedFor U = true := by first | rfl | decide)
-    (hφ : (Hyp.wrap (Γ ++ [.upd .box U]) φ).modalFree = true := by first | rfl | decide) :
-    Proves R (Γ ++ [.upd .box U]) φ :=
-  .close (fun σ => by
-    have hσ : holds σ (Hyp.wrap Γ (φ.subst U)) := h.sound σ
-    rw [Hyp.wrap_append]
-    refine Hyp.wrap_mono (fun τ hτ => ?_) Γ σ hσ
-    rcases Bool.or_eq_true_iff.1 hU with hU | hU
-    · exact Fml.subst_box hU hr hs τ hτ
-    · simp only [Bool.and_eq_true] at hU
-      exact Fml.subst_box_st hU.1 hU.2 hs τ hτ) hφ
-
 /-! ### `defined` of a written local -/
 
 /-- The local an element binds in the environment: `var?`'s, and also a
@@ -2053,36 +1998,6 @@ theorem Upd.defined_box {U : Upd C} {x : Var} (hw : U.bindsVal x = true) (σ : S
     obtain ⟨v, hv⟩ := (Upd.foldl_getEnv σ U hτ).2 hw
     exact ⟨v, by simp only [Term.eval, hv, bind, Except.bind, pure, Except.pure]⟩
 
-/-- **`defined(x)` after `x := t`**: behind a box update whose last binder of
-`x` is `x := t`, in a context with no diamond, `x` is defined.  This keeps
-what `Proves.applyOnRigidBox` forgets, that the update ran.
-
-Example: `{ storage := S }, { x := find(storage, alice.age) } ⟹ defined(x)`. -/
-theorem Proves.definedWritten {R : RuleSet} {Γ : List (Hyp C)} {U : Upd C} {x : Var}
-    (hw : U.bindsVal x = true := by first | rfl | decide)
-    (hb : Hyp.boxOnly Γ = true := by first | rfl | decide)
-    (hφ : (Hyp.wrap (Γ ++ [.upd .box U]) (.defined (.pv x))).modalFree = true := by
-      first | rfl | decide) :
-    Proves R (Γ ++ [.upd .box U]) (.defined (.pv x)) :=
-  .close (fun σ => by
-    rw [Hyp.wrap_append]
-    exact Hyp.wrap_of_reaches Γ hb σ (fun τ _ => Upd.defined_box hw τ)) hφ
-
-/-- **`{U}(φ ∧ ψ)` from `{U}φ` and `{U}ψ`**, under either modality: where
-`U` runs both hold after it, where it halts both judge the halt alike.
-
-Example: `⟹ [{ x := t }](defined(x) ∧ x ≐ 42)` from
-`⟹ [{ x := t }] defined(x)` and `⟹ [{ x := t }] x ≐ 42`. -/
-theorem Proves.andSplitUpd {R : RuleSet} {Γ : List (Hyp C)} {m : Modality} {U : Upd C}
-    {φ ψ : Fml C} (h₁ : Proves R Γ (.upd m U φ)) (h₂ : Proves R Γ (.upd m U ψ))
-    (hφ : (Hyp.wrap Γ (.upd m U (.and φ ψ))).modalFree = true := by first | rfl | decide) :
-    Proves R Γ (.upd m U (.and φ ψ)) :=
-  .close (fun σ => Hyp.wrap_mono₃ (fun τ a b _ => by
-      simp only [holds] at a b ⊢
-      cases hU : U.apply τ with
-      | error _ => rw [hU] at a; exact a
-      | ok ρ => rw [hU] at a b; exact ⟨a, b⟩) Γ σ (h₁.sound σ) (h₂.sound σ) (h₁.sound σ)) hφ
-
 /-! ## Tactics -/
 
 /-- To prove a formula, prove it with rule `r` applied where it fits first (or
@@ -2104,15 +2019,778 @@ Example: after `sol_symex` on `[ alice.account.balance = 10; ] …`, `sol_merge`
 theorem Fml.simpUpds_valid {φ : Fml C} (h : Valid φ.simpUpds) : Valid φ :=
   fun σ => (Fml.simpUpds_holds φ σ).1 (h σ)
 
-open Lean Elab Tactic Meta in
-/-- `sol_upd r`: apply the update rule `r` at the first update where it fits. -/
-elab "sol_upd " r:term : tactic => do
-  applyValid "sol_upd" (← `(Fml.updAt_valid $r)) (some m!"rule {r} does not apply here")
+section StorageWrite
 
-open Lean Elab Tactic Meta in
-/-- `sol_merge`: merge every stack of updates into one and drop what is dead
-(`Fml.simpUpds`). -/
-elab "sol_merge" : tactic => do
-  applyValid "sol_merge" (← `(Fml.simpUpds_valid))
+open SemanticsProperties
+
+/-- `{storage := s}` replaces the storage, and nothing else. -/
+theorem UpdElem.storage_write (σ₀ τ : State) (s : STerm C) : (UpdElem.storage s).write σ₀ τ =
+    s.eval σ₀ >>= fun τ' => .ok { τ with storage := τ'.storage } := rfl
+
+/-! ## Updates in parallel: `sequentialToParallel` over a storage write
+
+`Proves.merge` joins `{U}{V}` only when `U` writes locals.  A storage write
+`{storage := s}` joins too, KeY's `{storage := s ‖ {storage := s}V}`: `V`'s
+right-hand sides read `storage` after the write, so `s` is substituted for
+`storage` in them (`withSt`), and they are read before it.  The substitution
+is exact only where every storage read is a `storage` term: a path through
+an index (`a[i]`) or one past the end (`a[a.length]`) checks the array in
+the state it is read in, which is not a term (`stExplicit`).
+
+A storage term changes the storage and nothing else (`State.Keeps`), which
+is what lets the substituted term read the post-state's locals, heap and
+funds off the pre-state. -/
+
+/-- `τ` is `σ` with another storage. -/
+def Semantics.State.Keeps (σ τ : State) : Prop := { σ with storage := τ.storage } = τ
+
+theorem Semantics.State.Keeps.refl (σ : State) : σ.Keeps σ := rfl
+
+theorem Semantics.State.Keeps.trans {σ ρ τ : State} (h₁ : σ.Keeps ρ) (h₂ : ρ.Keeps τ) : σ.Keeps τ := by
+  unfold Semantics.State.Keeps at *
+  rw [← h₂, ← h₁]
+
+theorem Semantics.State.saveStorage_keeps {σ τ : State} {r : Name} {segs : List Seg} {v : SVal}
+    (h : σ.saveStorage r segs v = .ok τ) : σ.Keeps τ :=
+  Close.saveStorage_restore h
+
+theorem Semantics.State.writeStorage_keeps {σ τ : State} {r : Name} {segs : List Seg} {v : SVal}
+    (h : σ.writeStorage r segs v = .ok τ) : σ.Keeps τ := by
+  unfold State.writeStorage at h
+  cases v with
+  | prim _ => exact State.saveStorage_keeps h
+  | struct _ | array _ _ _ | map _ _ =>
+    cases hf : σ.findStorage r segs with
+    | error _ => rw [hf] at h; cases h
+    | ok _ => rw [hf] at h; exact State.saveStorage_keeps h
+
+theorem pushAt_keeps {σ τ : State} {E : Ty} {r : Name} {segs : List Seg} {val : SVal → Res SVal}
+    (h : pushAt σ E r segs val = .ok τ) : σ.Keeps τ := by
+  unfold pushAt at h
+  cases hf : σ.findStorage r segs with
+  | error _ => rw [hf] at h; cases h
+  | ok cur =>
+    rw [hf] at h
+    cases cur with
+    | array elems shadow fx =>
+      cases hv : val (pushSlot E shadow).1 with
+      | error _ => simp only [hv, bind, Except.bind] at h; cases h
+      | ok _ => simp only [hv, bind, Except.bind] at h; exact State.saveStorage_keeps h
+    | prim _ | struct _ | map _ _ => cases h
+
+theorem popAt_keeps {σ τ : State} {keep : Bool} {r : Name} {segs : List Seg}
+    (h : popAt σ keep r segs = .ok τ) : σ.Keeps τ := by
+  unfold popAt at h
+  cases hf : σ.findStorage r segs with
+  | error _ => rw [hf] at h; cases h
+  | ok cur =>
+    rw [hf] at h
+    cases cur with
+    | array elems shadow fx =>
+      simp only [bind, Except.bind] at h
+      split at h
+      · cases h
+      · exact State.saveStorage_keeps h
+    | prim _ | struct _ | map _ _ => cases h
+
+theorem pushPlaceAt_keeps {σ τ : State} {E : Ty} {r : Name} {segs : List Seg} {k : Int}
+    (h : pushPlaceAt σ E r segs = .ok (τ, k)) : σ.Keeps τ := by
+  unfold pushPlaceAt at h
+  cases hf : σ.findStorage r segs with
+  | error _ => rw [hf] at h; cases h
+  | ok cur =>
+    rw [hf] at h
+    cases cur with
+    | array elems shadow fx =>
+      cases hs : σ.saveStorage r segs (.array (elems ++ [(pushSlot E shadow).1]) (pushSlot E shadow).2 fx) with
+      | error _ => simp only [hs, bind, Except.bind] at h; cases h
+      | ok σ' =>
+        simp only [hs, bind, Except.bind, pure, Except.pure, Except.ok.injEq, Prod.mk.injEq] at h
+        obtain ⟨rfl, -⟩ := h
+        exact State.saveStorage_keeps hs
+    | prim _ | struct _ | map _ _ => cases h
+
+/-- A storage term changes the storage only. -/
+theorem STerm.eval_keeps {σ τ : State} : (s : STerm C) → s.eval σ = .ok τ → σ.Keeps τ
+  | .storage, h => by cases h; exact State.Keeps.refl σ
+  | .pv x, h => by
+    simp only [STerm.eval] at h
+    obtain ⟨b, -, h⟩ := bind_ok_inv h
+    cases b with
+    | store st => cases h; rfl
+    | val _ | spath _ _ | mref _ | ledger _ => cases h
+  | .save s p v, h => by
+    simp only [STerm.eval] at h
+    obtain ⟨_, -, h⟩ := bind_ok_inv h
+    obtain ⟨τ₀, h₀, h⟩ := bind_ok_inv h
+    obtain ⟨⟨_, _⟩, -, h⟩ := bind_ok_inv h
+    exact (s.eval_keeps h₀).trans (State.writeStorage_keeps h)
+  | .delAt s p, h => by
+    simp only [STerm.eval] at h
+    obtain ⟨τ₀, h₀, h⟩ := bind_ok_inv h
+    obtain ⟨⟨_, _⟩, -, h⟩ := bind_ok_inv h
+    obtain ⟨_, -, h⟩ := bind_ok_inv h
+    exact (s.eval_keeps h₀).trans (State.saveStorage_keeps h)
+  | .push s p v, h => by
+    simp only [STerm.eval] at h
+    obtain ⟨τ₀, h₀, h⟩ := bind_ok_inv h
+    obtain ⟨⟨_, _⟩, -, h⟩ := bind_ok_inv h
+    exact (s.eval_keeps h₀).trans (pushAt_keeps h)
+  | .pushSlot s p E, h => by
+    simp only [STerm.eval] at h
+    obtain ⟨τ₀, h₀, h⟩ := bind_ok_inv h
+    obtain ⟨⟨_, _⟩, -, h⟩ := bind_ok_inv h
+    exact (s.eval_keeps h₀).trans (pushAt_keeps h)
+  | .pop s p, h => by
+    simp only [STerm.eval] at h
+    obtain ⟨τ₀, h₀, h⟩ := bind_ok_inv h
+    obtain ⟨⟨_, _⟩, -, h⟩ := bind_ok_inv h
+    exact (s.eval_keeps h₀).trans (popAt_keeps h)
+  | .shrink s p, h => by
+    simp only [STerm.eval] at h
+    obtain ⟨τ₀, h₀, h⟩ := bind_ok_inv h
+    obtain ⟨⟨_, _⟩, -, h⟩ := bind_ok_inv h
+    exact (s.eval_keeps h₀).trans (popAt_keeps h)
+  | .extend s p E, h => by
+    simp only [STerm.eval] at h
+    obtain ⟨τ₀, h₀, h⟩ := bind_ok_inv h
+    obtain ⟨⟨_, _⟩, -, h⟩ := bind_ok_inv h
+    obtain ⟨⟨τ', _⟩, hp, h⟩ := bind_ok_inv h
+    cases h
+    exact (s.eval_keeps h₀).trans (pushPlaceAt_keeps hp)
+
+/-! ### Substituting a storage term for `storage` -/
+
+/-- The storage term a write installs, substituted for `storage` by `withSt`.
+(A structure rather than an `STerm` argument, so that the substitution is
+structural recursion on the term alone.) -/
+structure StWrite (C : Contract) where
+  s : STerm C
+
+mutual
+
+/-- `{storage := s}e`: `s` for every `storage` in `e`. -/
+def Term.withSt (w : StWrite C) : Term C → Term C
+  | .binop op p a b => .binop op p (a.withSt w) (b.withSt w)
+  | .unop op p a => .unop op p (a.withSt w)
+  | .find s' p => .find (s'.withSt w) (p.withSt w)
+  | .len s' p => .len (s'.withSt w) (p.withSt w)
+  | .ite c a b => .ite (c.withSt w) (a.withSt w) (b.withSt w)
+  | .lit v => .lit v
+  | .pv x => .pv x
+  | .env k => .env k
+  | .read m a => .read m a
+  | .mlen m i => .mlen m i
+  | .net a => .net (a.withSt w)
+  | .netOf x a => .netOf x (a.withSt w)
+
+def PTerm.withSt (w : StWrite C) : PTerm C → PTerm C
+  | .root r => .root r
+  | .pv x => .pv x
+  | .field p f => .field (p.withSt w) f
+  | .at p i => .at (p.withSt w) (i.withSt w)
+  | .next p => .next (p.withSt w)
+
+def STerm.withSt (w : StWrite C) : STerm C → STerm C
+  | .storage => w.s
+  | .pv x => .pv x
+  | .save s' p v => .save (s'.withSt w) (p.withSt w) (v.withSt w)
+  | .delAt s' p => .delAt (s'.withSt w) (p.withSt w)
+  | .push s' p v => .push (s'.withSt w) (p.withSt w) (v.withSt w)
+  | .pushSlot s' p E => .pushSlot (s'.withSt w) (p.withSt w) E
+  | .pop s' p => .pop (s'.withSt w) (p.withSt w)
+  | .shrink s' p => .shrink (s'.withSt w) (p.withSt w)
+  | .extend s' p E => .extend (s'.withSt w) (p.withSt w) E
+
+def SValT.withSt (w : StWrite C) : SValT C → SValT C
+  | .val t => .val (t.withSt w)
+  | .find s' p => .find (s'.withSt w) (p.withSt w)
+  | .copyMem m i => .copyMem m i
+  | .newArr R n => .newArr R (n.withSt w)
+
+end
+
+mutual
+
+/-- Every storage read of the term is a `storage` term: no index check, no
+push slot, no memory. -/
+def Term.stExplicit : Term C → Bool
+  | .lit _ | .pv _ | .env _ => true
+  | .binop _ _ a b => a.stExplicit && b.stExplicit
+  | .unop _ _ a | .net a | .netOf _ a => a.stExplicit
+  | .find s p | .len s p => s.stExplicit && p.stExplicit
+  | .ite c a b => c.stExplicit && a.stExplicit && b.stExplicit
+  | .read .. | .mlen .. => false
+
+def PTerm.stExplicit : PTerm C → Bool
+  | .root _ | .pv _ => true
+  | .field p _ => p.stExplicit
+  | .at .. | .next _ => false
+
+def STerm.stExplicit : STerm C → Bool
+  | .storage | .pv _ => true
+  | .save s p v | .push s p v => s.stExplicit && p.stExplicit && v.stExplicit
+  | .delAt s p | .pop s p | .shrink s p | .pushSlot s p _ | .extend s p _ =>
+    s.stExplicit && p.stExplicit
+
+def SValT.stExplicit : SValT C → Bool
+  | .val t | .newArr _ t => t.stExplicit
+  | .find s p => s.stExplicit && p.stExplicit
+  | .copyMem .. => false
+
+end
+
+section WithSt
+
+variable {w : StWrite C} {σ τ : State}
+
+mutual
+
+/-- Read before `{storage := s}`, the substituted term reads what the term
+reads after it. -/
+theorem Term.withSt_eval (hs : w.s.eval σ = .ok τ) (hk : σ.Keeps τ) :
+    (e : Term C) → e.stExplicit = true → (e.withSt w).eval σ = e.eval τ
+  | .lit _, _ => rfl
+  | .pv _, _ | .env _, _ => by rw [← hk]; rfl
+  | .binop _ _ a b, he => by
+    simp only [Term.stExplicit, Bool.and_eq_true] at he
+    simp only [Term.withSt, Term.eval, Term.withSt_eval hs hk a he.1, Term.withSt_eval hs hk b he.2]
+  | .unop _ _ a, he => by
+    simp only [Term.stExplicit] at he
+    simp only [Term.withSt, Term.eval, Term.withSt_eval hs hk a he]
+  | .find s' p, he | .len s' p, he => by
+    simp only [Term.stExplicit, Bool.and_eq_true] at he
+    simp only [Term.withSt, Term.eval, STerm.withSt_eval hs hk s' he.1, PTerm.withSt_eval hs hk p he.2]
+  | .ite c a b, he => by
+    simp only [Term.stExplicit, Bool.and_eq_true] at he
+    simp only [Term.withSt, Term.eval, Term.withSt_eval hs hk c he.1.1, Term.withSt_eval hs hk a he.1.2,
+      Term.withSt_eval hs hk b he.2]
+  | .read .., he | .mlen .., he => by simp only [Term.stExplicit, Bool.false_eq_true] at he
+  | .net a, he | .netOf _ a, he => by
+    simp only [Term.stExplicit] at he
+    simp only [Term.withSt, Term.eval, Term.withSt_eval hs hk a he]
+    rw [← hk]; rfl
+
+theorem PTerm.withSt_eval (hs : w.s.eval σ = .ok τ) (hk : σ.Keeps τ) :
+    (p : PTerm C) → p.stExplicit = true → (p.withSt w).eval σ = p.eval τ
+  | .root _, _ => rfl
+  | .pv _, _ => by rw [← hk]; rfl
+  | .field p _, he => by
+    simp only [PTerm.stExplicit] at he
+    simp only [PTerm.withSt, PTerm.eval, PTerm.withSt_eval hs hk p he]
+  | .at .., he | .next _, he => by simp only [PTerm.stExplicit, Bool.false_eq_true] at he
+
+theorem STerm.withSt_eval (hs : w.s.eval σ = .ok τ) (hk : σ.Keeps τ) :
+    (s' : STerm C) → s'.stExplicit = true → (s'.withSt w).eval σ = s'.eval τ
+  | .storage, _ => hs
+  | .pv _, _ => by rw [← hk]; rfl
+  | .save s' p v, he | .push s' p v, he => by
+    simp only [STerm.stExplicit, Bool.and_eq_true] at he
+    simp only [STerm.withSt, STerm.eval, STerm.withSt_eval hs hk s' he.1.1, PTerm.withSt_eval hs hk p he.1.2,
+      SValT.withSt_eval hs hk v he.2]
+  | .delAt s' p, he | .pop s' p, he | .shrink s' p, he | .pushSlot s' p _, he
+  | .extend s' p _, he => by
+    simp only [STerm.stExplicit, Bool.and_eq_true] at he
+    simp only [STerm.withSt, STerm.eval, STerm.withSt_eval hs hk s' he.1, PTerm.withSt_eval hs hk p he.2]
+
+theorem SValT.withSt_eval (hs : w.s.eval σ = .ok τ) (hk : σ.Keeps τ) :
+    (v : SValT C) → v.stExplicit = true → (v.withSt w).eval σ = v.eval τ
+  | .val t, he | .newArr _ t, he => by
+    simp only [SValT.stExplicit] at he
+    simp only [SValT.withSt, SValT.eval, Term.withSt_eval hs hk t he]
+  | .find s' p, he => by
+    simp only [SValT.stExplicit, Bool.and_eq_true] at he
+    simp only [SValT.withSt, SValT.eval, STerm.withSt_eval hs hk s' he.1, PTerm.withSt_eval hs hk p he.2]
+  | .copyMem .., he => by simp only [SValT.stExplicit, Bool.false_eq_true] at he
+
+end
+
+end WithSt
+
+/-! ### The merge -/
+
+def UpdElem.withSt (s : STerm C) : UpdElem C → UpdElem C
+  | .val x t => .val x (t.withSt ⟨s⟩)
+  | .path x p => .path x (p.withSt ⟨s⟩)
+  | .storage s' => .storage (s'.withSt ⟨s⟩)
+  | .store x s' => .store x (s'.withSt ⟨s⟩)
+  | .transfer r a => .transfer (r.withSt ⟨s⟩) (a.withSt ⟨s⟩)
+  | .mref x i => .mref x i
+  | .memory m => .memory m
+  | .saveNet x => .saveNet x
+  | .book a => .book (a.withSt ⟨s⟩)
+
+def UpdElem.stExplicit : UpdElem C → Bool
+  | .val _ t => t.stExplicit
+  | .path _ p => p.stExplicit
+  | .storage s | .store _ s => s.stExplicit
+  | .transfer r a => r.stExplicit && a.stExplicit
+  | .saveNet _ => true
+  | .book a => a.stExplicit
+  | .mref .. | .memory _ => false
+
+/-- `{storage := s}V`: `s` substituted for `storage` in `V`'s right-hand sides. -/
+def Upd.withSt (s : STerm C) (V : Upd C) : Upd C := V.map (·.withSt s)
+
+theorem UpdElem.withSt_write {s : STerm C} {σ τ : State} (hs : s.eval σ = .ok τ)
+    (hk : σ.Keeps τ) (ρ : State) :
+    (e : UpdElem C) → e.stExplicit = true → (e.withSt s).write σ ρ = e.write τ ρ
+  | .val _ t, he => by
+    simp only [UpdElem.withSt, UpdElem.write, Term.withSt_eval (w := ⟨s⟩) hs hk t he]
+  | .path _ p, he => by
+    simp only [UpdElem.withSt, UpdElem.write, PTerm.withSt_eval (w := ⟨s⟩) hs hk p he]
+  | .storage s', he | .store _ s', he => by
+    simp only [UpdElem.withSt, UpdElem.write, STerm.withSt_eval (w := ⟨s⟩) hs hk s' he]
+  | .transfer r a, he => by
+    simp only [UpdElem.stExplicit, Bool.and_eq_true] at he
+    simp only [UpdElem.withSt, UpdElem.write, Term.withSt_eval (w := ⟨s⟩) hs hk r he.1,
+      Term.withSt_eval (w := ⟨s⟩) hs hk a he.2]
+  | .saveNet _, _ => by simp only [UpdElem.withSt, UpdElem.write]; rw [← hk]
+  | .book a, he => by
+    simp only [UpdElem.stExplicit] at he
+    simp only [UpdElem.withSt, UpdElem.write, Term.withSt_eval (w := ⟨s⟩) hs hk a he]
+    rw [← hk]; rfl
+  | .mref .., he | .memory _, he => by simp only [UpdElem.stExplicit, Bool.false_eq_true] at he
+
+theorem Upd.withSt_foldl {s : STerm C} {σ τ : State} (hs : s.eval σ = .ok τ) (hk : σ.Keeps τ) :
+    (V : Upd C) → V.all (·.stExplicit) = true → ∀ ρ,
+      (V.withSt s).foldlM (fun ρ e => e.write σ ρ) ρ = V.foldlM (fun ρ e => e.write τ ρ) ρ
+  | [], _, _ => rfl
+  | e :: V, hV, ρ => by
+    simp only [List.all_cons, Bool.and_eq_true] at hV
+    simp only [Upd.withSt, List.map_cons, List.foldlM_cons, UpdElem.withSt_write hs hk ρ e hV.1]
+    congr 1
+    funext ρ'
+    exact Upd.withSt_foldl hs hk V hV.2 ρ'
+
+/-- **`sequentialToParallel`** over a storage write:
+`{storage := s}{V} ψ ⟺ {storage := s ‖ {storage := s}V} ψ`. -/
+theorem Upd.mergeStorage_holds (m : Modality) (s : STerm C) (V : Upd C)
+    (hV : V.all (·.stExplicit) = true) (ψ : Fml C) (σ : State) :
+    holds σ (.upd m (.storage s :: V.withSt s) ψ) ↔ holds σ (.upd m [.storage s] (.upd m V ψ)) := by
+  simp only [holds, Upd.apply, List.foldlM_cons, List.foldlM_nil, UpdElem.storage_write]
+  cases hs : s.eval σ with
+  | error _ => exact Iff.rfl
+  | ok τ =>
+    have hk : σ.Keeps τ := STerm.eval_keeps s hs
+    simp only [Res.ok_bind]
+    rw [hk, Upd.withSt_foldl hs hk V hV τ]
+    exact Iff.rfl
+
+/-! ### A storage write applied to a first-order formula
+
+`{storage := s} φ ⇝ φ[s/storage]` (KeY's `applyOnRigidFormula` with
+`applyOnPV` at `storage`): `withSt`, as `mergeStorage` substitutes into an
+update, now into a formula.  An equation reads its terms through `denote`,
+so the substitution is exact up to `Equiv` where every storage read is a
+`storage` term (`stExplicit`): the storage `s` denotes is the storage its run
+leaves (`STerm.denote_eval`), and every other part of the state is the same
+on both sides (`State.Keeps`).  As for `Proves.applyOnRigidBox`, only the
+direction the box needs holds without knowing that `s` runs. -/
+
+section WithStDenote
+
+open Theory Theory.StValue
+
+variable {w : StWrite C} {σ τ : State}
+
+/-- A storage term leaves the environment as it was. -/
+theorem Semantics.State.Keeps.getEnv (hk : σ.Keeps τ) (x : Var) : τ.getEnv x = σ.getEnv x := by
+  rw [← hk]; rfl
+
+mutual
+
+/-- Read before `{storage := s}`, the substituted term denotes, up to
+`Equiv`, what the term denotes after it. -/
+theorem Term.withSt_denote (hs : w.s.eval σ = .ok τ) (hk : σ.Keeps τ) :
+    (e : Term C) → e.stExplicit = true → Equiv ((e.withSt w).denote σ) (e.denote τ)
+  | .lit _, _ => Equiv.refl _
+  | .pv x, _ => by
+    simp only [Term.withSt, Term.denote, hk.getEnv x]
+    exact Equiv.refl _
+  | .env k, _ => by
+    rw [← hk]
+    exact Equiv.refl _
+  | .binop op p a b, he => by
+    simp only [Term.stExplicit, Bool.and_eq_true] at he
+    simp only [Term.withSt, Term.denote, (Term.withSt_denote hs hk a he.1).toRes,
+      (Term.withSt_denote hs hk b he.2).toRes]
+    exact Equiv.refl _
+  | .unop op p a, he => by
+    simp only [Term.stExplicit] at he
+    simp only [Term.withSt, Term.denote, (Term.withSt_denote hs hk a he).toRes]
+    exact Equiv.refl _
+  | .find s' p, he => by
+    simp only [Term.stExplicit, Bool.and_eq_true] at he
+    simp only [Term.withSt, Term.denote, PTerm.withSt_denote hs hk p he.2]
+    exact Equiv.findSt (STerm.withSt_denote hs hk s' he.1) _
+  | .len s' p, he => by
+    simp only [Term.stExplicit, Bool.and_eq_true] at he
+    simp only [Term.withSt, Term.denote, PTerm.withSt_denote hs hk p he.2]
+    exact Equiv.findSt (STerm.withSt_denote hs hk s' he.1) _
+  | .ite c a b, he => by
+    simp only [Term.stExplicit, Bool.and_eq_true] at he
+    have ea : Equiv ((a.withSt w).denote σ) (a.denote τ) := Term.withSt_denote hs hk a he.1.2
+    have eb : Equiv ((b.withSt w).denote σ) (b.denote τ) := Term.withSt_denote hs hk b he.2
+    simp only [Term.withSt, Term.denote]
+    rcases (Term.withSt_denote hs hk c he.1.1).eq_or_st with hc | ⟨s, t, hc, hc'⟩
+    · rw [hc]
+      split
+      · exact ea
+      · exact eb
+      · exact Equiv.refl _
+    · rw [hc, hc']
+      exact Equiv.refl _
+  | .read .., he | .mlen .., he => by simp only [Term.stExplicit, Bool.false_eq_true] at he
+  | .net a, he => by
+    simp only [Term.stExplicit] at he
+    have hn : τ.net = σ.net := by rw [← hk]
+    simp only [Term.withSt, Term.denote, State.getNet, hn]
+    rcases (Term.withSt_denote hs hk a he).eq_or_st with ha | ⟨s, t, ha, ha'⟩
+    · rw [ha]
+      exact Equiv.refl _
+    · rw [ha, ha']
+      exact Equiv.refl _
+  | .netOf x a, he => by
+    simp only [Term.stExplicit] at he
+    simp only [Term.withSt, Term.denote, hk.getEnv x]
+    rcases (Term.withSt_denote hs hk a he).eq_or_st with ha | ⟨s, t, ha, ha'⟩
+    · rw [ha]
+      exact Equiv.refl _
+    · rw [ha, ha']
+      rcases σ.getEnv x with _ | b
+      · exact Equiv.refl _
+      · cases b <;> exact Equiv.refl _
+
+/-- Read before `{storage := s}`, the substituted path denotes the path the
+path denotes after it. -/
+theorem PTerm.withSt_denote (hs : w.s.eval σ = .ok τ) (hk : σ.Keeps τ) :
+    (p : PTerm C) → p.stExplicit = true → (p.withSt w).denote σ = p.denote τ
+  | .root _, _ => rfl
+  | .pv x, _ => by
+    simp only [PTerm.withSt, PTerm.denote, aliasPath, hk.getEnv x]
+  | .field p _, he => by
+    simp only [PTerm.stExplicit] at he
+    simp only [PTerm.withSt, PTerm.denote, PTerm.withSt_denote hs hk p he]
+  | .at .., he | .next _, he => by simp only [PTerm.stExplicit, Bool.false_eq_true] at he
+
+/-- Read before `{storage := s}`, the substituted storage denotes, up to
+`Equiv`, what the storage term denotes after it; `storage` itself becomes
+`s`, which denotes the storage its run leaves (`STerm.denote_eval`). -/
+theorem STerm.withSt_denote (hs : w.s.eval σ = .ok τ) (hk : σ.Keeps τ) :
+    (s' : STerm C) → s'.stExplicit = true → Struct.Equiv ((s'.withSt w).denote σ) (s'.denote τ)
+  | .storage, _ => STerm.denote_eval hs
+  | .pv x, _ => by
+    simp only [STerm.withSt, STerm.denote, hk.getEnv x]
+    exact Equiv.refl _
+  | .save s' p v, he => by
+    simp only [STerm.stExplicit, Bool.and_eq_true] at he
+    simp only [STerm.withSt, STerm.denote, PTerm.withSt_denote hs hk p he.1.2]
+    exact Struct.Equiv.copyTo (STerm.withSt_denote hs hk s' he.1.1)
+      (SValT.withSt_denote hs hk v he.2) _
+  | .delAt s' p, he => by
+    simp only [STerm.stExplicit, Bool.and_eq_true] at he
+    simp only [STerm.withSt, STerm.denote, PTerm.withSt_denote hs hk p he.2]
+    exact Struct.Equiv.delAt (STerm.withSt_denote hs hk s' he.1) _
+  | .push s' p v, he => by
+    simp only [STerm.stExplicit, Bool.and_eq_true] at he
+    simp only [STerm.withSt, STerm.denote, PTerm.withSt_denote hs hk p he.1.2]
+    exact Struct.Equiv.pushT (STerm.withSt_denote hs hk s' he.1.1)
+      (Equiv.stripVal (SValT.withSt_denote hs hk v he.2)) _
+  | .pushSlot s' p _, he => by
+    simp only [STerm.stExplicit, Bool.and_eq_true] at he
+    simp only [STerm.withSt, STerm.denote, PTerm.withSt_denote hs hk p he.2]
+    exact Struct.Equiv.pushSlotT _ _ (STerm.withSt_denote hs hk s' he.1) _
+  | .extend s' p _, he => by
+    simp only [STerm.stExplicit, Bool.and_eq_true] at he
+    simp only [STerm.withSt, STerm.denote, PTerm.withSt_denote hs hk p he.2]
+    exact Struct.Equiv.pushSlotT _ _ (STerm.withSt_denote hs hk s' he.1) _
+  | .pop s' p, he => by
+    simp only [STerm.stExplicit, Bool.and_eq_true] at he
+    simp only [STerm.withSt, STerm.denote, PTerm.withSt_denote hs hk p he.2]
+    exact Struct.Equiv.popT (STerm.withSt_denote hs hk s' he.1) _
+  | .shrink s' p, he => by
+    simp only [STerm.stExplicit, Bool.and_eq_true] at he
+    simp only [STerm.withSt, STerm.denote, PTerm.withSt_denote hs hk p he.2]
+    exact Struct.Equiv.shrinkT (STerm.withSt_denote hs hk s' he.1) _
+
+/-- Read before `{storage := s}`, the substituted stored value denotes, up
+to `Equiv`, what it denotes after it. -/
+theorem SValT.withSt_denote (hs : w.s.eval σ = .ok τ) (hk : σ.Keeps τ) :
+    (v : SValT C) → v.stExplicit = true → Equiv ((v.withSt w).denote σ) (v.denote τ)
+  | .val t, he => Term.withSt_denote hs hk t he
+  | .newArr R n, he => by
+    simp only [SValT.stExplicit] at he
+    simp only [SValT.withSt, SValT.denote, (Term.withSt_denote hs hk n he).asInt]
+    exact Equiv.refl _
+  | .find s' p, he => by
+    simp only [SValT.stExplicit, Bool.and_eq_true] at he
+    simp only [SValT.withSt, SValT.denote, PTerm.withSt_denote hs hk p he.2]
+    exact Equiv.findSt (STerm.withSt_denote hs hk s' he.1) _
+  | .copyMem .., he => by simp only [SValT.stExplicit, Bool.false_eq_true] at he
+
+end
+
+end WithStDenote
+
+/-- `{storage := s} φ` for a first-order `φ`: `s` for every `storage` in its
+terms. -/
+def Fml.withSt (s : STerm C) : Fml C → Fml C
+  | .eq a b => .eq (a.withSt ⟨s⟩) (b.withSt ⟨s⟩)
+  | .defined t => .defined (t.withSt ⟨s⟩)
+  | .not φ => .not (φ.withSt s)
+  | .and φ ψ => .and (φ.withSt s) (ψ.withSt s)
+  | .imp φ ψ => .imp (φ.withSt s) (ψ.withSt s)
+  | φ => φ
+
+/-- Every storage read of the formula's terms is a `storage` term
+(`Term.stExplicit`). -/
+def Fml.stExplicit : Fml C → Bool
+  | .eq a b => a.stExplicit && b.stExplicit
+  | .defined t => t.stExplicit
+  | .not φ => φ.stExplicit
+  | .and φ ψ | .imp φ ψ => φ.stExplicit && ψ.stExplicit
+  | _ => true
+
+/-- A first-order formula with `s` substituted for `storage` holds before
+the write as the formula holds after it. -/
+theorem Fml.withSt_holds {s : STerm C} {σ τ : State} (hs : s.eval σ = .ok τ) :
+    (φ : Fml C) → φ.rigid = true → φ.stExplicit = true → (holds σ (φ.withSt s) ↔ holds τ φ)
+  | .tt, _, _ => Iff.rfl
+  | .eq a b, _, he => by
+    simp only [Fml.stExplicit, Bool.and_eq_true] at he
+    have hk : σ.Keeps τ := STerm.eval_keeps s hs
+    have ea : Theory.StValue.Equiv ((a.withSt ⟨s⟩).denote σ) (a.denote τ) :=
+      Term.withSt_denote (w := ⟨s⟩) hs hk a he.1
+    have eb : Theory.StValue.Equiv ((b.withSt ⟨s⟩).denote σ) (b.denote τ) :=
+      Term.withSt_denote (w := ⟨s⟩) hs hk b he.2
+    simp only [Fml.withSt, holds]
+    exact ⟨fun e => (ea.symm.trans e).trans eb, fun e => (ea.trans e).trans eb.symm⟩
+  | .defined t, _, he => by
+    simp only [Fml.stExplicit] at he
+    simp only [Fml.withSt, holds,
+      Term.withSt_eval (w := ⟨s⟩) hs (STerm.eval_keeps s hs) t he]
+  | .not φ, hr, he => by
+    simp only [Fml.rigid] at hr
+    simp only [Fml.stExplicit] at he
+    simp only [Fml.withSt, holds, Fml.withSt_holds hs φ hr he]
+  | .and φ ψ, hr, he => by
+    simp only [Fml.rigid, Bool.and_eq_true] at hr
+    simp only [Fml.stExplicit, Bool.and_eq_true] at he
+    simp only [Fml.withSt, holds, Fml.withSt_holds hs φ hr.1 he.1, Fml.withSt_holds hs ψ hr.2 he.2]
+  | .imp φ ψ, hr, he => by
+    simp only [Fml.rigid, Bool.and_eq_true] at hr
+    simp only [Fml.stExplicit, Bool.and_eq_true] at he
+    simp only [Fml.withSt, holds, Fml.withSt_holds hs φ hr.1 he.1, Fml.withSt_holds hs ψ hr.2 he.2]
+  | .upd .., hr, _ | .modal .., hr, _ | .havoc _, hr, _ | .all .., hr, _ => by
+    simp only [Fml.rigid, Bool.false_eq_true] at hr
+
+/-- Under the box, a first-order formula with `s` for `storage` gives the
+formula behind `{storage := s}`: where `s` runs, `Fml.withSt_holds`; where it
+halts, the box holds. -/
+theorem Fml.withSt_box {s : STerm C} {φ : Fml C} (hr : φ.rigid = true)
+    (he : φ.stExplicit = true) (σ : State) (h : holds σ (φ.withSt s)) :
+    holds σ (.upd .box [.storage s] φ) := by
+  simp only [holds, Upd.apply, List.foldlM_cons, List.foldlM_nil, UpdElem.storage_write]
+  cases hs : s.eval σ with
+  | error _ => trivial
+  | ok τ =>
+    have hk : σ.Keeps τ := STerm.eval_keeps s hs
+    simp only [Res.ok_bind]
+    rw [hk]
+    exact (Fml.withSt_holds hs φ hr he).1 h
+
+end StorageWrite
+
+/-! ## A rewrite inside an update's right-hand sides
+
+`Fml.rwEq` stops at an update: its right-hand sides run in the interpreter,
+and a Theory equation (`Term.Theq`) says nothing about whether a term
+halts.  What does reach them is a rewrite that keeps every value a run
+returns: `t` becomes `t'` where, in every state in which `t` returns, `t'`
+returns that value (`Term.EvalRefines`).  Replacing it anywhere in a right-hand
+side keeps every run that returns (`Upd.rw_apply`), and behind a box that is
+all that matters: where the old update halts, the box holds (`Upd.rw_box`).
+
+A Theory equation whose right side cannot halt is such a rewrite
+(`Term.EvalRefines.of_theq`): a term that returns denotes its value
+(`Term.denote_eval`), so it returns what the literal denotes.  So a Theory
+law reads `find(delAt(save(…)))` as `0` in `{ x := find(…) }` too, as
+mini-solkey's `Hyp.rwAll` does in a calculus whose terms cannot halt. -/
+
+section RwEval
+
+/-- Where `a` returns a value, `b` returns it too. -/
+def Res.Le {α : Type} (a b : Res α) : Prop := ∀ x, a = .ok x → b = .ok x
+
+theorem Res.Le.refl {α : Type} (a : Res α) : Res.Le a a := fun _ h => h
+
+theorem Res.Le.bind {α β : Type} {a a' : Res α} {f f' : α → Res β} (ha : Res.Le a a')
+    (hf : ∀ x, Res.Le (f x) (f' x)) : Res.Le (a >>= f) (a' >>= f') := fun y h => by
+  obtain ⟨x, hx, hy⟩ := bind_ok_inv h
+  rw [ha x hx]
+  exact hf x y hy
+
+/-- Where `t` returns, `t'` returns the same value. -/
+def Term.EvalRefines (t t' : Term C) : Prop := ∀ σ, Res.Le (t.eval σ) (t'.eval σ)
+
+/-- **A Theory equation onto a term that cannot halt refines evaluation**:
+where `t` returns `x` it denotes `x`, the two denote alike, and `t'`
+returns what it denotes. -/
+theorem Term.EvalRefines.of_theq {t t' : Term C} (h : Term.Theq t t') (ht : t'.total = true) :
+    Term.EvalRefines t t' := fun σ x hx => by
+  obtain ⟨y, hy⟩ := Term.total_eval σ ht
+  have e : Theory.StValue.Equiv (.prim x) (.prim y) := by
+    have h' := h σ
+    rwa [Term.denote_eval hx, Term.denote_eval hy] at h'
+  rw [hy]
+  cases Theory.StValue.Equiv.prim_iff.1 e
+  rfl
+
+theorem evalBinop_le {op : BinOp} {p : PrimTy} {v : Value} {b b' : Res Value} (hb : Res.Le b b') :
+    Res.Le (evalBinop op p v b) (evalBinop op p v b') := by
+  unfold evalBinop
+  split
+  · exact Res.Le.refl _
+  · exact Res.Le.refl _
+  · exact Res.Le.bind hb fun _ => Res.Le.refl _
+
+theorem pickBranch_le {c : Value} {a a' b b' : Res Value} (ha : Res.Le a a') (hb : Res.Le b b') :
+    Res.Le (pickBranch c a b) (pickBranch c a' b') := by
+  unfold pickBranch
+  split
+  · exact ha
+  · exact hb
+  · exact Res.Le.refl _
+
+theorem pushAt_le {σ : State} {E : Ty} {r : Name} {segs : List Seg} {val val' : SVal → Res SVal}
+    (hv : ∀ x, Res.Le (val x) (val' x)) : Res.Le (pushAt σ E r segs val) (pushAt σ E r segs val') := by
+  unfold pushAt
+  refine Res.Le.bind (Res.Le.refl _) fun cur => ?_
+  cases cur with
+  | array elems shadow fx => exact Res.Le.bind (hv _) fun _ => Res.Le.refl _
+  | prim _ | struct _ | map _ _ => exact Res.Le.refl _
+
+variable {q : Term C × Term C}
+
+theorem Term.pick_eval (hq : Term.EvalRefines q.1 q.2) {e d : Term C}
+    (hd : ∀ σ, Res.Le (e.eval σ) (d.eval σ)) (σ : State) :
+    Res.Le (e.eval σ) ((Term.pick q e d).eval σ) := by
+  unfold Term.pick
+  split
+  · rename_i h
+    subst h
+    exact hq σ
+  · exact hd σ
+
+mutual
+
+/-- Replacing `q.1` by a term that refines it keeps every value a term returns. -/
+theorem Term.rw_eval (hq : Term.EvalRefines q.1 q.2) :
+    (e : Term C) → ∀ σ, Res.Le (e.eval σ) ((e.rw q).eval σ)
+  | .lit _ | .pv _ | .read .. | .mlen .. | .env _ => Term.pick_eval hq fun _ => Res.Le.refl _
+  | .binop _ _ a b => Term.pick_eval hq fun σ =>
+      Res.Le.bind (Term.rw_eval hq a σ) fun _ => evalBinop_le (Term.rw_eval hq b σ)
+  | .unop _ _ a => Term.pick_eval hq fun σ =>
+      Res.Le.bind (Term.rw_eval hq a σ) fun _ => Res.Le.refl _
+  | .find s p | .len s p => Term.pick_eval hq fun σ =>
+      Res.Le.bind (STerm.rw_eval hq s σ) fun _ =>
+        Res.Le.bind (PTerm.rw_eval hq p σ) fun _ => Res.Le.refl _
+  | .ite c a b => Term.pick_eval hq fun σ =>
+      Res.Le.bind (Term.rw_eval hq c σ) fun _ => pickBranch_le (Term.rw_eval hq a σ) (Term.rw_eval hq b σ)
+  | .net a => Term.pick_eval hq fun σ =>
+      Res.Le.bind (Term.rw_eval hq a σ) fun _ => Res.Le.refl _
+  | .netOf _ a => Term.pick_eval hq fun σ =>
+      Res.Le.bind (Res.Le.refl _) fun b => by
+        cases b <;> first
+          | exact Res.Le.refl _
+          | exact Res.Le.bind (Term.rw_eval hq a σ) fun _ => Res.Le.refl _
+
+theorem PTerm.rw_eval (hq : Term.EvalRefines q.1 q.2) :
+    (p : PTerm C) → ∀ σ, Res.Le (p.eval σ) ((p.rw q).eval σ)
+  | .root _, _ | .pv _, _ => Res.Le.refl _
+  | .field p _, σ => Res.Le.bind (PTerm.rw_eval hq p σ) fun _ => Res.Le.refl _
+  | .at p i, σ => Res.Le.bind (PTerm.rw_eval hq p σ) fun _ =>
+      Res.Le.bind (Term.rw_eval hq i σ) fun _ => Res.Le.refl _
+  | .next p, σ => Res.Le.bind (PTerm.rw_eval hq p σ) fun _ => Res.Le.refl _
+
+theorem STerm.rw_eval (hq : Term.EvalRefines q.1 q.2) :
+    (s : STerm C) → ∀ σ, Res.Le (s.eval σ) ((s.rw q).eval σ)
+  | .storage, _ | .pv _, _ => Res.Le.refl _
+  | .save s p v, σ =>
+    Res.Le.bind (SValT.rw_eval hq v σ) fun _ => Res.Le.bind (STerm.rw_eval hq s σ) fun _ =>
+      Res.Le.bind (PTerm.rw_eval hq p σ) fun _ => Res.Le.refl _
+  | .delAt s p, σ | .pushSlot s p _, σ | .pop s p, σ | .shrink s p, σ | .extend s p _, σ =>
+    Res.Le.bind (STerm.rw_eval hq s σ) fun _ => Res.Le.bind (PTerm.rw_eval hq p σ) fun _ =>
+      Res.Le.refl _
+  | .push s p v, σ =>
+    Res.Le.bind (STerm.rw_eval hq s σ) fun _ => Res.Le.bind (PTerm.rw_eval hq p σ) fun _ =>
+      pushAt_le fun _ => Res.Le.bind (SValT.rw_eval hq v σ) fun _ => Res.Le.refl _
+
+theorem SValT.rw_eval (hq : Term.EvalRefines q.1 q.2) :
+    (v : SValT C) → ∀ σ, Res.Le (v.eval σ) ((v.rw q).eval σ)
+  | .val t, σ => Res.Le.bind (Term.rw_eval hq t σ) fun _ => Res.Le.refl _
+  | .find s p, σ => Res.Le.bind (STerm.rw_eval hq s σ) fun _ =>
+      Res.Le.bind (PTerm.rw_eval hq p σ) fun _ => Res.Le.refl _
+  | .copyMem .., _ => Res.Le.refl _
+  | .newArr _ n, σ =>
+    Res.Le.bind (Term.rw_eval hq n σ) fun _ => Res.Le.refl _
+
+end
+
+/-- Every occurrence of `q.1` in an element's right-hand side, replaced by
+`q.2`; a memory right-hand side is left alone, as `Term.rw` leaves a memory term. -/
+def UpdElem.rw (q : Term C × Term C) : UpdElem C → UpdElem C
+  | .val x t => .val x (t.rw q)
+  | .path x p => .path x (p.rw q)
+  | .mref x i => .mref x i
+  | .storage s => .storage (s.rw q)
+  | .store x s => .store x (s.rw q)
+  | .memory m => .memory m
+  | .transfer r a => .transfer (r.rw q) (a.rw q)
+  | .saveNet x => .saveNet x
+  | .book a => .book (a.rw q)
+
+/-- Every right-hand side of an update, rewritten (`UpdElem.rw`). -/
+def Upd.rw (q : Term C × Term C) (U : Upd C) : Upd C := U.map (·.rw q)
+
+theorem UpdElem.rw_write (hq : Term.EvalRefines q.1 q.2) (σ₀ τ : State) :
+    (e : UpdElem C) → Res.Le (e.write σ₀ τ) ((e.rw q).write σ₀ τ)
+  | .val _ t => Res.Le.bind (Term.rw_eval hq t σ₀) fun _ => Res.Le.refl _
+  | .path _ p => Res.Le.bind (PTerm.rw_eval hq p σ₀) fun _ => Res.Le.refl _
+  | .storage s | .store _ s => Res.Le.bind (STerm.rw_eval hq s σ₀) fun _ => Res.Le.refl _
+  | .transfer r a =>
+    Res.Le.bind (Term.rw_eval hq r σ₀) fun _ => Res.Le.bind (Res.Le.refl _) fun _ =>
+      Res.Le.bind (Term.rw_eval hq a σ₀) fun _ => Res.Le.refl _
+  | .book a =>
+    Res.Le.bind (Term.rw_eval hq a σ₀) fun _ => Res.Le.refl _
+  | .mref .. | .memory _ | .saveNet _ => Res.Le.refl _
+
+theorem Upd.rw_foldl (hq : Term.EvalRefines q.1 q.2) (σ₀ : State) :
+    (U : Upd C) → ∀ ρ, Res.Le (U.foldlM (fun τ e => e.write σ₀ τ) ρ)
+      ((U.rw q).foldlM (fun τ e => e.write σ₀ τ) ρ)
+  | [], _ => Res.Le.refl _
+  | e :: U, ρ => by
+    simp only [Upd.rw, List.map_cons, List.foldlM_cons]
+    exact Res.Le.bind (UpdElem.rw_write hq σ₀ ρ e) fun ρ' => Upd.rw_foldl hq σ₀ U ρ'
+
+/-- A rewritten update ends where the update does, wherever the update returns. -/
+theorem Upd.rw_apply (hq : Term.EvalRefines q.1 q.2) (U : Upd C) (σ : State) :
+    Res.Le (U.apply σ) ((U.rw q).apply σ) :=
+  Upd.rw_foldl hq σ U σ
+
+/-- **Under the box, a rewritten update gives the update**: where the update
+returns, the rewritten one returns the same state; where it halts, the box holds. -/
+theorem Upd.rw_box (hq : Term.EvalRefines q.1 q.2) {U : Upd C} {ψ ψ' : Fml C}
+    (h : ∀ τ, holds τ ψ' → holds τ ψ) (σ : State) (hσ : holds σ (.upd .box (U.rw q) ψ')) :
+    holds σ (.upd .box U ψ) := by
+  simp only [holds] at hσ ⊢
+  cases hU : U.apply σ with
+  | error _ => trivial
+  | ok τ =>
+    rw [Upd.rw_apply hq U σ τ hU] at hσ
+    exact h τ hσ
+
+end RwEval
 
 end Solidity

@@ -143,6 +143,28 @@ theorem Fml.rwEq_inSolkey (q : Term C × Term C) : (φ : Fml C) → (φ.rwEq q).
   | .and φ ψ | .imp φ ψ => by
     simp only [Fml.rwEq, Fml.inSolkey, Fml.rwEq_inSolkey q φ, Fml.rwEq_inSolkey q ψ]
 
+/-- A first-order formula has no program, and neither has it substituted. -/
+theorem Fml.inSolkey_subst (U : Upd C) : (φ : Fml C) → φ.rigid = true → (φ.subst U).inSolkey = true
+  | .tt, _ | .eq .., _ | .defined _, _ => rfl
+  | .not φ, h => Fml.inSolkey_subst U φ h
+  | .and φ ψ, h | .imp φ ψ, h => by
+    simp only [Fml.rigid, Bool.and_eq_true] at h
+    simp only [Fml.subst, Fml.inSolkey, Fml.inSolkey_subst U φ h.1, Fml.inSolkey_subst U ψ h.2,
+      Bool.and_self]
+  | .upd .., h | .modal .., h | .havoc _, h | .all .., h => by
+    simp only [Fml.rigid, Bool.false_eq_true] at h
+
+/-- `Fml.inSolkey_subst` for a storage write. -/
+theorem Fml.inSolkey_withSt (s : STerm C) : (φ : Fml C) → φ.rigid = true → (φ.withSt s).inSolkey = true
+  | .tt, _ | .eq .., _ | .defined _, _ => rfl
+  | .not φ, h => Fml.inSolkey_withSt s φ h
+  | .and φ ψ, h | .imp φ ψ, h => by
+    simp only [Fml.rigid, Bool.and_eq_true] at h
+    simp only [Fml.withSt, Fml.inSolkey, Fml.inSolkey_withSt s φ h.1, Fml.inSolkey_withSt s ψ h.2,
+      Bool.and_self]
+  | .upd .., h | .modal .., h | .havoc _, h | .all .., h => by
+    simp only [Fml.rigid, Bool.false_eq_true] at h
+
 /-- **A derivation on the fragment is solkey's**: whatever the calculus
 derives about a formula whose programs are in the fragment, solkey's rules
 derive alone. -/
@@ -168,6 +190,12 @@ theorem Proves.toSolkey {R : RuleSet} {Γ : List (Hyp C)} {φ : Fml C} (h : Prov
     exact .done d (ih (by rename_i b _; cases b <;> rfl))
   | empty _ ih => exact .empty (ih (by simp_all [Fml.inSolkey]))
   | theoryRw h _ ih => exact .theoryRw h (ih (by rw [Fml.rwEq_inSolkey]; exact hφ))
+  | updRw h _ ih => exact .updRw h (ih hφ)
+  | merge hU _ ih => exact .merge hU (ih hφ)
+  | mergeStorage _ hV ih => exact .mergeStorage (ih hφ) hV
+  | simplify _ ih => exact .simplify (ih hφ)
+  | applyOnRigidBox _ hU hr hs ih => exact .applyOnRigidBox (ih (Fml.inSolkey_subst _ _ hr)) hU hr hs
+  | applyStorageBox _ hr he ih => exact .applyStorageBox (ih (Fml.inSolkey_withSt _ _ hr)) hr he
   | close h hm => exact .close h hm
 
 /-- On the fragment, solkey's rules derive exactly what the calculus does. -/
@@ -228,6 +256,9 @@ theorem Proves.solkey_not_call {Γ : List (Hyp C)} {f : Name} {args : List (Arg 
   | unfoldLean => cases hR
   | intro _ _ | empty _ _ => cases hψ
   | theoryRw _ _ ih => exact ih hR (by rw [← hψ]; rfl)
+  | updRw _ _ ih | merge _ _ ih | mergeStorage _ _ ih | simplify _ ih => exact ih hR hψ
+  | applyOnRigidBox _ _ hr _ _ | applyStorageBox _ hr _ _ =>
+    subst hψ; simp only [Fml.rigid, Bool.false_eq_true] at hr
   | close _ hm => subst hψ; exact absurd (Hyp.modalFree_wrap _ hm) (by simp [Fml.modalFree])
 
 /-- `[ f(x + 1); ] true`, `f(uint a)` with an empty body: a call whose
