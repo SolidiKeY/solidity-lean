@@ -1946,7 +1946,9 @@ def iffParts? (e : Lean.Expr) : MetaM (Option (Lean.Expr × Lean.Expr)) := do
   return if φ == φ' && ψ == ψ' then some (φ, ψ) else none
 
 /-- A formula that is a Lean variable, or the coercion of one (`↑φ` for
-`φ : Post C`, `Chains.lean`): its name, which reads back as `‹φ›` does. -/
+`φ : Post C`, `Chains.lean`): its name, which reads back as `‹φ›` does.  Not
+an inaccessible one (`φ✝`): its bare name would read back as another variable,
+so it stays `‹φ✝›`. -/
 def fmlVar? (e : Lean.Expr) : MetaM (Option Ident) := do
   let e := (← instantiateMVars e).consumeMData
   let x ← match e.getAppFn with
@@ -1954,6 +1956,9 @@ def fmlVar? (e : Lean.Expr) : MetaM (Option Ident) := do
       | some i => pure (if e.getAppNumArgs == i.numArgs then e.getArg! i.coercee else e)
       | none => pure e
     | _ => pure e
+  let .fvar fv := x.consumeMData | return none
+  let n : Lean.Name ← fv.getUserName
+  if n.hasMacroScopes || n.isInaccessibleUserName then return none
   return (← fvarName? x).map nameIdent
 
 partial def ppFml (e : Lean.Expr) : MetaM (TSyntax `dl_fml) := do

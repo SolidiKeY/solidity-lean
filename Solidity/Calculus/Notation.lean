@@ -770,7 +770,12 @@ def elabDlAt (c : Lean.Term) (m? : Option Lean.Term) (φ : TSyntax `dl_fml) :
   let ty ← inferType d
   let φs ← holes.mapM fun h => do
     let some t := fmlHole? h | throwError "dl[C]: not a formula hole"
-    withRef h do elabTermEnsuringType t ty
+    withRef h do
+      -- A misspelt `true` is not a new variable of the signature.
+      if let `($x:ident) := t then
+        if (← resolveLocalName x.getId).isNone && (← resolveGlobalName x.getId).isEmpty then
+          throwError "a name where a formula stands is a Lean formula (φ : Post C): unknown `{x}`"
+      withoutAutoBoundImplicit do elabTermEnsuringType t ty
   match fillSlots m? φs d b with
   | .ok e => return e
   | .error msg => throwError "dl[C, m]: {msg}"
@@ -901,12 +906,29 @@ example (φ : Fml StandardExample) :
 /-- So is `‹t›`; `true` stays the keyword. -/
 example (φ ψ : Fml StandardExample) : dl!{ ‹φ› ∧ ψ ∧ true } = Fml.and φ (Fml.and ψ .tt) := rfl
 
+-- A name nothing binds is refused, not bound as a new variable of the
+-- signature (`autoImplicit`): here a misspelt `true`.
+/-- error: a name where a formula stands is a Lean formula (φ : Post C): unknown `ture` -/
+#guard_msgs in
+example : dl!{ ⟨ x = 1; ⟩ ture } = dl!{ ⟨ x = 1; ⟩ true } := rfl
+
 /-- Both at once: `m` and `φ` are put back by one walk. -/
 example (m : Modality) (φ : Fml StandardExample) :
     (dl![m]{ ⟨[ x = 1; ]⟩ φ }).step = some dl![m]{ { x := 1 } ⟨[ ]⟩ φ } := rfl
 
 /-- info: fun m φ => dl{ ⟨[ x = 1; ]⟩ φ } : Modality → Fml StandardExample → Fml StandardExample -/
 #guard_msgs in #check fun (m : Modality) (φ : Fml StandardExample) => dl![m]{ ⟨[ x = 1; ]⟩ φ }
+
+-- An inaccessible name prints escaped: bare, it would read back as another.
+/--
+trace: φ✝ : Fml StandardExample
+⊢ dl{ ⟨ x = 1; ⟩ ‹φ✝› } = dl{ ⟨ x = 1; ⟩ ‹φ✝› }
+-/
+#guard_msgs in
+example : ∀ φ : Fml StandardExample, dl!{ ⟨ x = 1; ⟩ φ } = dl!{ ⟨ x = 1; ⟩ φ } := by
+  intro
+  trace_state
+  rfl
 
 -- `⊨` and `⊧` of a name alone are Lean's to print.
 /-- info: fun φ => Valid φ ∧ ∀ (σ : State), holds σ φ : Fml StandardExample → Prop -/
