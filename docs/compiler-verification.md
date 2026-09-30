@@ -5,8 +5,8 @@
 compiled code does what the interpreter (`Stmt.run`, `Solidity/Semantics.lean`)
 does. It is mini-solkey's `Ch08_EVM`–`Ch10_Correctness` scaled up to the typed
 calculus: control flow, reverts, checked arithmetic (signed too, and `**`),
-arrays (`push` and `pop`, copies, aliases into elements) and `transfer`.
-(The untyped compiler it replaces is at commit `9721af1`.)
+arrays (`push` and `pop`, copies, aliases into elements), internal calls and
+`transfer`. `docs/module-map.md` lists the seven modules.
 
 ## What is proved
 
@@ -39,7 +39,7 @@ theorem compile_storage (hP : wtProg (fun _ => none) P = some Γ')
 ```
 
 every `uint` path the interpreter reads, the machine holds at its slot.
-`#print axioms` of all three: `propext`, `Classical.choice`, `Quot.sound`. No
+None uses more than `propext`, `Classical.choice` and `Quot.sound`; no
 `sorry`, no `native_decide`.
 
 **The bound.** solc's `push` reverts when an array already holds `2^64`
@@ -51,18 +51,6 @@ at most `pushesP P`, its number of `push` statements. From a fresh contract
 the hypothesis is `pushesP P < 2^64`, which `decide` discharges for any
 program one can write. The compiled `push` emits solc's check all the same;
 under the hypothesis it never fires.
-
-## The modules
-
-| Module | Content |
-| --- | --- |
-| `Evm/Machine.lean` | Words, two's complement (`sgn`, `toWord`), slots, instructions (`SLT`/`SGT`/`SDIV`/`SMOD`/`AND` beside the unsigned ones), `Instr.step`, `exec`/`run`; running code in pieces (`exec_append`, `run_append_ok`, …). |
-| `Evm/Compile.lean` | The layout (`size`, `offset`, `rootSlot`), what a value occupies (`Occ`) and its disjointness lemmas, static types (`staticF`), the fragment (`wtStmt`, `wtProg`, fragile aliases), the compiler (`compileVal`, `compileLoc`, `compileStmt`, `compileProg`), the guard sequences (`uTail`, `sTail`, `negCode`, `expCode`, `pushSlotCode`), `pushesP`. |
-| `Evm/Repr.lean` | `ReprAt`/`ReprStore` (with the bound `L`); `PathSlot`; `find_repr`, `save_repr`, `zero_repr` (`delete`), `pop_repr`, `push_repr`, `move_repr`/`overlay_repr` (copies), `OccAt.kind_unique` and `live_mono` (fragile aliases stay in bounds), `initStorage_repr`. |
-| `Evm/Signed.lean` | The signed guard sequences exact: `sadd_tail`, `ssub_tail`, `smul_tail` (solc's `sdiv(product, x) == y` check, `smul_ok`), `sdiv_tail`, `smod_tail`, `scmp_tail`, `neg_run`. |
-| `Evm/Exp.lean` | `**`: one round of solc's `checked_exp_helper` (`expBody_run`), the unrolled loop (`expLoop_run`), `exp_tail`. |
-| `Evm/Correctness.lean` | The unsigned guard sequences, `tail_sim`/`stail_sim`, `Sim`, the simulation lemmas `spath_sim`/`loc_sim`/`val_sim`, the statement lemmas (`copy_sim`, `push_sim`, `assignBumpStore_sim`, …), `stmt_sim`/`prog_sim`, the headline theorems. |
-| `Evm/Examples.lean` | Compiled code printed, runs checked by `decide` for every feature, and the headline applied: `setAge_interpreter` reads the interpreter's `alice.age` off the machine, `overflow_interpreter` proves the interpreter reverts because the machine does. |
 
 ## The machine
 
@@ -159,9 +147,8 @@ target and stores; solc interleaves the two member by member. The two agree
 whenever source and target do not overlap; loading first is right even when
 they do, so the proof needs no argument about it.
 
-## Elaboration
+## Build cost
 
-`lake build Solidity.Evm.Examples` builds the seven modules. `Correctness`
-is the slow one (a few minutes: `stmt_sim` is one mutual declaration);
-`Examples` runs the unrolled `**` code under `decide` with a raised
-`maxRecDepth`.
+`lake build Solidity.Evm.Examples` builds the seven modules. `Correctness` is
+the slow one (`stmt_sim` is one mutual declaration); `Examples` runs the
+unrolled `**` code under `decide` with a raised `maxRecDepth`.

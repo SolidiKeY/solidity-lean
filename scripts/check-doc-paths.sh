@@ -32,14 +32,6 @@ strict=0
 # placeholder (`PartNN` stands for Part01..Part11).
 EXTERNAL='^(SolKey/|EvmYul/|Decode/)|PartNN'
 
-# Known stale, recorded rather than silently tolerated. `Update/SolcDelta.lean`
-# is cited four times as "the table" of the places where the rule table is
-# stronger than the interpreter, naming two rows (`assertViolatedReverts`,
-# `assertSimple_box_gap`) that exist nowhere either: the module was planned
-# and never written. Either write it or repoint the prose at the `SolKey`
-# reader's `SolKey/Corresp/SolcDelta.lean`, then delete this line.
-KNOWN_STALE='^Update/SolcDelta\.lean$'
-
 lean_files=$(git ls-files '*.lean')
 
 missing=0
@@ -48,7 +40,6 @@ ambiguous=0
 while IFS=$'\t' read -r src ref; do
   [ -z "$ref" ] && continue
   [[ "$ref" =~ $EXTERNAL ]] && continue
-  [[ "$ref" =~ $KNOWN_STALE ]] && continue
 
   dir=$(dirname "$src")
   if [ -f "$dir/$ref" ] || [ -f "Solidity/$ref" ] || [ -f "$ref" ]; then

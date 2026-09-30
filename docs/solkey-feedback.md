@@ -1,733 +1,209 @@
 # Improvement ideas flowing Lean → solkey
 
-Dated entries below cite modules of the untyped layer that were removed on
-2026-09-26 (commit `59fa352`); `git show 9721af1:<path>` has them.
+The only outbound document: what the Lean model shows solkey (`~/projects/solkey`,
+<https://github.com/SolidiKeY/solkey>) could gain or should tighten. The reverse
+direction, solkey rules the Lean calculus lacks, is tracked as `planned` rows in
+`docs/lean-key-rule-map.md`.
 
-Collected during the 2026-08-29 re-sync of `lean-key-rule-map.md` against
-solkey (`~/projects/solkey`, 238 program taclets). The reverse direction —
-solkey rules the Lean calculus still lacks — is tracked as `planned` rows
-in the map itself.
+**Pinned to solkey `f2eb3d98eb`** (311 taclets, the `solkeycheck` baseline in
+`AGENTS.md`). Every item was re-checked against the checkout's HEAD
+(`cf1c25551e`); the fourteen commits between the two touch no `.key` rule file
+(`git diff f2eb3d98eb HEAD -- keyext.solidity.core/src/main/resources/…/rules`
+is empty), so the pin and HEAD agree on everything below.
 
-## What solkey should have and does not — ranked (2026-09-09)
+**Ranking.** Items that let KeY close a goal that is false on the chain come
+first, then missing rules and missing invariants, then refusals, then
+simplifications, then hygiene and sort-level observations. Each item gives the
+problem, the Lean evidence and the suggested fix. Items are numbered for
+citation, not as a schedule.
 
-A consolidated list, ordered by how much each item changes what solkey
-can prove *correctly*. Items 1 and 2 are the ones where KeY can today
-close a goal that is false on the chain; everything below is coverage or
-hygiene. Each entry points at the Lean artefact that establishes it;
-the sections further down carry the details.
+## 1. Checked arithmetic (can close a false goal)
 
-1. **A correct evaluation order in the `*NonSimpleIndexCapture` taclets.**
-   ~~Open~~ **Fixed on both sides, independently** — solkey in `8ba30fd742`
-   (storage) and `63c38cfaf6` (memory + recursion), Lean in the
-   `Rules.freezeRhs` change. The 2026-09-09 attempt noted in earlier
-   revisions of this file was reverted the same day (`beeb97d2b1`); these
-   are the commits that stuck.
+**Problem.** Solidity ≥ 0.8 reverts when `+`, `-`, `*`, unary `-` and the
+compound forms leave the type's range. solkey's arithmetic taclets compute in
+unbounded `int`, so a postcondition proved in KeY can be false on the chain when
+a value wraps and the transaction reverts. `docs/taclet-ideas.md` (Tier 5) and
+`docs/taclets-implementation.md` record it as a deliberate choice; it is still
+the largest gap between a solkey proof and the chain.
 
-   The bug was unsound, not merely incomplete: the taclets captured the
-   target index into a fresh variable before the simple right-hand side was
-   read, while solc and the Lean interpreter read the right-hand side first.
-   `values[i++] = i` with `i = 0` writes `0` in Solidity and `1` under the
-   pre-fix taclet.
+The same choice reaches the specifications. A clause's `+`/`-` is solc's
+checked arithmetic in Lean (`\old(balances[to]) + amount` overflowing makes the
+equation false) and KeY's unbounded `int` in solkey. A parameter is a KeY `int`
+with no range; Lean's obligation assumes `0 <= x <= 2^256 - 1` for a `uint`
+(`rangeFml` in `Calculus/Spec.lean`), so a clause like `requires amount >= 0` is
+redundant there and load-bearing in solkey.
 
-   **Two things the Lean side learned that solkey should know.**
+**Lean evidence.** `Semantics.checkArith` (`Semantics.lean`); the EVM compiler
+proves the guard: `checkArith_uint`, `checkArith_int`, `tail_sim`
+(`Evm/Correctness.lean`), `overflow_run`/`overflow_interpreter`
+(`Evm/Examples.lean`).
 
-   *The freeze is needed even when the path is pure.* It is tempting to fire
-   the freeze only on a `nonSimpleIndex` receiver and leave the ordinary
-   `_unfold_leftFst` alone. That is unsound, for a reason independent of
-   interference: the interpreter evaluates the value operand first, so a
-   failing right-hand side decides the outcome, while an unfrozen
-   target-capture residual resolves the path first, so a failing path decides
-   it instead — and the two failure modes differ. A *simple* right-hand side
-   can only get stuck (unbound variable); a *pure* path can revert, because
-   path resolution evaluates the index and checked arithmetic reverts.
-   `people[1 / 0].age = ghost` hits both at once, and
-   Counterexamples/ErrorOrder.lean proves `¬ ResultsAgree` on it. Any
-   guard of the form "freeze only when the receiver is non-simple" inherits
-   this hole.
+**Fix.** Either split each arithmetic taclet on the range (revert branch under
+`\diamond`, closed branch under `\box`, as Java KeY's `inInt`/`expandInInt`), or
+give the sort `uint` its range as an axiom every update re-establishes. In
+either case add the range of each `uint` parameter to `specifiedProblemText`
+rather than relying on the user's `require`.
 
-   *The four `*IndexedReceiver_unfold_leftFst` taclets are right but do not
-   fire.* ~~Open~~ **Diagnosed and fixed** (patch in this working tree).
-   Neither hypothesis in `docs/taclet-ideas.md` was the cause. `aliasType`
-   and `rvType` coexisting is harmless — `\program Type` schema variables are
-   display-only (`StatementVariableDeclaration.schemaType` is documented
-   "kept for display only; not matched", `getChildCount()` returns 1, so
-   `ProgramSVCollector` never collects them) — and sort matching is fine:
-   `PathSVSort.classify` on `matrix[i+1]` against
-   `Path[storage,complex,nonSimpleIndex]` matches, now pinned by two new
-   `PathSVSortTest` cases (the `anyIndex`/`nonSimpleIndex` flags previously
-   had none).
+## 2. A `wellFormed(storage)` beyond `size >= 0`
 
-   The actual cause is a null dereference in name proposal. A schema variable
-   whose sort is not the plain `ProgramSVSort.VARIABLE` gets no proposal, so
-   `VariableNamer`'s `previousProposals` list can carry `null`. These four
-   taclets are the only ones minting two fresh program variables at
-   *different* data locations, which is what first puts a `null` in that list
-   ahead of a live entry; `previousProposal.equals(...)` then throws and the
-   taclet silently fails to apply. Two one-line fixes: skip `null` entries in
-   `VariableNamer`, and do not append a `null` proposal in `TacletApp`. Result:
-   242 -> 0 failures, 784 tests green, all three CI gates pass.
+**Problem.** solkey has one storage fact, `sizeNotNegative` (`structRules.key`;
+`docs/storage.md` §8b). The taclets consume more that nothing provides: an
+`at(i)` read with `0 <= i < size` is typed, an unwritten mapping key reads
+`defaultValue`, a declared struct member is never stuck, and a `uint` cell is in
+range. This is a completeness and faithfulness gap, not an unsoundness: a read
+on a mismatching store degrades to an underspecified cast and proves nothing
+false (`WellTypedNecessity.readSelect_needs_storage` shows the interpreter-side
+claim does need the invariant). A `\forall` clause over a mapping is provable
+in Lean only under the layout premises `layoutAt` states (`Calculus/Spec.lean`);
+solkey's obligation states none.
 
-   *Where solkey is right and the Lean interpreter is wrong: reference
-   sources.* The freeze above is correct for a **primitive** right-hand side.
-   For a **struct** source solc is *not* right-hand-side-first — it resolves
-   the target slot and copies member by member, reading the source at copy
-   time — so an impure target index has already run. KeY's answer matches the
-   chain; `Semantics.execAssignNested` is uniformly value-first and does not.
-   Witness, added here and green on a real EVM as
-   `TestSuite.storageIndexWriteRefSourceImpureIndex`:
-   `persons[p.age++] = p;` stores `age == 1`. So do **not** extend the freeze
-   to reference sources. This is what the `hprim` hypothesis on the Lean
-   `*UnfoldLeft*` soundness theorems fences off
-   (Counterexamples/RefSourceOrder.lean, `docs/solc-alignment.md`); the fix
-   owed is on the Lean side.
+**Lean evidence.** `Prog.run_wt` (`Typing/Soundness.lean`) preserves
+`RunWT`, so the invariant can be assumed once. It is not tight:
+`SVal.canon` adds what `hasTy` forgets (mapping default is the type's default,
+mapping keys are unique, a struct carries exactly its declared members), and
+`Prog.run_canon`, `reachable_canon`, `map_default_not_reachable` and
+`struct_missing_field_not_reachable` (`Typing/Reachability.lean`) prove that
+canonical storage is what execution keeps. `SVal.tight`, `reachable_iff` and
+`no_hidden_invariant` (`Typing/Constructibility.lean`) prove canonical and tight
+is exactly reachable, so no hidden invariant is missing. `uint` range is not an
+invariant of the model (literals and plain assignments are unchecked), which is
+why item 1 owns it.
 
-   *The deleted `Inner*NonSimpleIndexCapture` pair was doubly wrong*, which
-   is worth recording rather than just dropping: its `\find` was hard-coded
-   to `e1[nse][e2]`, so `m[i++][j][k] = v` matched nothing, **and** it bound
-   `pv = nse` before reading `se`, so it had the same evaluation-order bug at
-   depth 2. Lean never modelled it separately — it always captured the whole
-   inner path, which is strictly more general.
+**Fix.** Shape it like `heapRules.key`'s `wellFormed(heap)`: *proving* taclets
+per store constructor (`save`, `delAt`, the push/pop `save`s), *using* taclets
+per consumer (`0 <= i < size` ⇒ the `at(i)` read is typed; unwritten key ⇒
+`defaultValue`; declared member ⇒ `selectSt` is defined). A taclet that needs a
+storage fact its `\assumes(wellFormed(storage))` cannot deliver then shows up as
+an unprovable example.
 
-2. **Checked `uint256`/`int256` arithmetic.** Solidity ≥ 0.8 reverts
-   when `+`, `-`, `*`, unary `-` and the compound forms leave the type's
-   range. The Lean interpreter models it (`Semantics.checkArith`) and the
-   EVM compiler proves the guard (`Evm/Compile.binTail`,
-   `Evm/Correctness.tail_sim`). solkey's arithmetic taclets
-   compute in unbounded `int`, so a postcondition proved in KeY can be
-   false on the chain when a value wraps and the transaction reverts.
-   Either the arithmetic taclets split on the range (revert branch
-   under `\diamond`, closed branch under `\box`) or the sort `uint`
-   carries the range as an axiom that every update re-establishes.
+## 3. `unfoldArgument` (Lean `functionCallArgCapture`)
 
-3. **A `wellFormed(storage)` precondition, stated once.** The taclets
-   consume facts the symbolic storage does not provide: `size ≥ 0` for
-   `pop`, an in-bounds `at(i)` read succeeds, an unwritten mapping key
-   reads `defaultValue`, a declared struct member is never stuck.
-   Typing/WellFormedConsumers.lean proves every such row from
-   `wellTypedStorageB`/`canonicalStorageB`, and Typing/Reachability.lean
-   shows the canonical form is exactly what execution from the initial
-   state reaches. In solkey these facts come from nowhere. Shape it
-   like `heapRules.key`'s `wellFormed(heap)`: proving taclets per store
-   constructor, using taclets per consumer row (details in
-   "Is `wellFormed(storage)` complete?" below).
+**Problem.** `f(nse)@C` with a non-simple argument is stuck: `functionBodyExpand`
+matches only the whole-program call statement, and no rule hoists the argument
+into a fresh local. It is on solkey's own backlog (`docs/net.md` §4 item 1;
+`docs/bugs.md`, "Internal calls are never inlined").
 
-4. **A balance-checked `transfer`.** `a.transfer(v)` reverts when the
-   contract's own balance cannot cover `v` (the EVM value-transfer
-   check). The Lean semantics reverts (`transferAt`, `Semantics.lean`). solkey's `net` ledger debits
-   unconditionally, so any claim that a transfer completes is
-   unconditional in KeY and conditional on the chain.
-
-5. **The calculus's boundary, written down.** With a typed syntax there is
-   none left to write: every statement has exactly one rule
-   (`Stmt.complete`, `Calculus/Completeness.lean`), the `if` on a symbolic
-   condition is a two-goal rule (`ifElseSplit`, a `split` premise), and a
-   statement no rule could run cannot be written. The untyped layer's 26
-   residue shapes are classified in `docs/kernel-port.md` ("`ResidueShape`
-   verdicts"). solkey's docs could carry the same statement: which program
-   shapes its front end rejects, so that no taclet needs to handle them
-   ("What solkey must refuse" below is the list).
-
-6. **`unfoldArgument` (Lean `functionCallArgCapture`).** Already on
-   solkey's backlog (`docs/net.md` §5.1). The Lean rule plus its
-   inlining-relative soundness statement is a worked design, and its
-   hypotheses are the taclet's side conditions: the captured argument
-   mentions no callee parameter, the callee body and result are free of
-   the fresh `pv`. It is proved (`LeanTaclet.sound`), and it is the one
-   rule of the Lean calculus solkey lacks (see "What solkey must refuse"
-   below).
-
-7. **Determinism under the block modality.** solkey's rule set is
-   mutually exclusive per modality (Calculus/Uniqueness.lean,
-   `Rule.premise_unique`), but under the block modality a box/diamond
-   twin pair applies at once. The twelve twin pairs are effect-identical
-   up to mode (`CandidateStep.twinEffects`); KeY's strategy should
-   either prefer one deterministically or the taclets should share a
-   single mode-generic rule. Not a soundness issue — a proof-search and
-   reproducibility one.
-
-8. **The two open `Struct` sort findings** (`SortFaithfulness.openFindings`).
-   ~~Open~~ **Fixed upstream on 2026-09-10.**
-   `find<[Struct]>` reads whose value is a `Struct` node at run time but
-   whose static sort is an array or mapping sort below `StValue`. Sound
-   today because the corpus binds only `alphaPrim`; latent for any
-   future `alphaSt`-bound rule (`Counterexamples/StaticRuntimeSort.lean`).
-   solkey took the first of the two options offered: `SolJSONParser` now
-   builds `T[]`, `T[n]` and `mapping(K => V)` with `Struct` as their
-   supersort rather than `StValue`, so the lattice states what the values
-   already were, and `docs/storage.md`'s "`Struct` (incl. the dynamically
-   created array/mapping sorts)" became true of the lattice rather than
-   only of the prose. `docs/taclets-implementation.md`'s sort paragraph —
-   which called `StValue` "`Struct` + `Prim`" and then added a third
-   family two lines later — was rewritten to match, and
-   `SolJsonParserTest#arrayAndMappingSortsExtendStruct` pins it.
-
-   **One correction to the report.** The `\hasSort` route was not the only
-   latent binder of `alphaSt`: `findStValueCast` binds it by *matching* the
-   cast `selectOnStore` inserts, with no varcond involved. That widens the
-   exposure the finding describes, and it is the route item 9 below turned
-   out to travel.
-
-9. **`StValue`-instantiated delete reads.** ~~Open~~ **Fixed upstream on
-   2026-09-10.** After the delete-family fix (`e67a0d7c48`) a
-   delete-then-copy sequence on an `StValue` read is a stuck term. A gap,
-   not an unsoundness (section below).
-   The observed stuck term for `bob.account.balance = 10; delete
-   bob.account; alice.account = bob.account;` was
-   `cast<[Struct]>(delValue<[StValue]>(save(…)))` — note the cast *is*
-   present, which is what made the fix cheap. solkey added one taclet,
-   `delValueStValueCast` in `structRules.key`, the twin of `findStValueCast`
-   for that shape:
-   `cast<[alphaSt]>(delValue<[StValue]>(v))` ⇝
-   `delValue<[alphaSt]>(cast<[alphaSt]>(v))`. The cast then meets
-   `castDel`, and one of `delValueStruct` / `delValueDefault` fires, so the
-   `Struct`/`Prim` split stays disjoint — widening `delValueDefault` back to
-   `StValue` would have reintroduced exactly the overlap `e67a0d7c48`
-   removed. Three new examples (`storageFieldDeleteThenCopy`,
-   `storageFieldDeleteThenCopyDeep`, `storageRootDeleteThenCopy`) all fail
-   without the rule and close with it.
-
-   The parallel `selectSt<[StValue]>(delNode(…), f)` shape the analysis
-   predicted turned out to be unreachable in the corpus: a
-   `selectStStValueCast` twin was written, found to change nothing on any
-   of the three traces, and dropped rather than shipped unused.
-
-10. **Memory compound assignment and the small simplifiers.** ~~Open~~
-    **Fixed upstream on 2026-09-10.** `mv.x += se`
-    has no taclet; `ifElseTrue`/`ifElseFalse`/`ifElseNegated` only remove
-    trivially closed goals. Convenience.
-    solkey added the full memory matrix rather than the single rule: 44
-    taclets, `memoryCompoundAssign` (`+= -= *= /= %=`) and `memoryIncDec`
-    (pre/post × inc/dec, statement and `result = …` forms), each with a
-    `_unfold_leftFst` twin, over `{field, indexArray}` — there is no root
-    form (a memory root holds an `Identity`, never an int cell) and no
-    mapping form (memory has no mappings). They are the storage rules with
-    `find`/`save` replaced by `read`/`write`; no new capture rules were
-    needed, since `addAssignValueRhsCapture` and friends already take a
-    plain `Expression` target. The indexed terminals had to form their own
-    `RuleGeneralizationTest` groups: memory states its bounds with
-    `\sameUpdateLevel` + `\add`, storage with an implication inside
-    `\replacewith`. 27 new examples.
-
-    The five simplifiers are `ifTrue`/`ifFalse`/`ifElseTrue`/`ifElseFalse`
-    (the Lean rules now carry the same names) and
-    `ifElseNegated`, in the `concrete_solidity` rule set, which was declared
-    and costed (−11000 in `SymExStrategy`) but had no members until now, so
-    they outrank both `ifSplit` and `ifElseUnfold`.
-
-    **One thing the proposal did not anticipate.** `ifElseTrue`/`ifElseFalse`
-    were not writable as stated: `Literal#match` compares with `equals`,
-    `BoolLiteral` overrode only `computeHashCode`, and the two parsers
-    disagree on identity — the `.key` path builds a fresh `BoolLiteral`,
-    the `.sol` path returns the `TRUE`/`FALSE` singletons. A taclet pattern
-    `if (true) s#s0` compiled and matched nothing. `BoolLiteral` now
-    overrides `equals`/`hashCode` as `Uint256Literal` already did.
-
-11. **Housekeeping.** ~~Open~~ **Resolved on 2026-09-10 — two of the three
-    items were stale in *this file*, not in solkey.**
-    - `memoryToStorageIndexArrayCopyRoot` **does** exist upstream, at
-      `solidityProgramRules.key:1014`, with exactly the `[slen, slen]`
-      reads `SortCheck/Annotations.lean` records. It was neither renamed nor
-      unmerged: it arrived in `4c486907c8`, and the `SolKey` reader's
-      vendored pin was 12 commits behind at `e67a0d7c48`, so
-      `check-solkey.sh` was reading a vendored corpus that predated it.
-      The pin is now `beeb97d2b185fe70435c88865a31f20877c51ee6` and that
-      row passes. (Note the pin does *not* yet include the items 8–10 work
-      above, which is uncommitted upstream — one more
-      `vendor-key.sh --update` is due once it lands.)
-    - The claim that `docs/taclets-implementation.md` says the `net-*`
-      starters were deleted is false at upstream HEAD: the doc describes
-      them as present and driving `NetExamplesTest` (`:431-438`). The
-      likely misreading is `:489-491`, about the removed end-to-end test
-      `testStorageArrayPushPop`. `keyext.solidity.examples/net/` holds 23
-      `.key` problems and 5 `.sol` contracts, not 20 `.key`.
-    - The `solidity-key-taclets` skill was genuinely stale and has been
-      rewritten: all five `keyext.solidity.examples/taclets/*.key` starters
-      it named are gone, so is that directory's `README.md`, and
-      `TacletStarterExamplesTest.examples()` is now a one-line enumeration
-      with nothing to register.
-
-    Also fixed while there, all found by reading rather than reported:
-    `docs/taclet-ideas.md` and `docs/taclets-implementation.md` still
-    listed `if` as unimplemented and named a `ternarySplit` rule that is
-    now `ternaryToIf`/`ternaryToIfStorage`; the delete section claimed
-    "any non-struct sort" where `delValueDefault` is `alphaPrim`-bounded;
-    two places claimed `storageIndexWrite{Array,Mapping}CopySource` use
-    `find<[alphaSt]>` + `\hasSort` where they use `find<[StValue]>`; and
-    the starter count was 68 low.
-
-    **Still open on the Lean side** (unrelated to the above, surfaced by
-    re-running the check against the current corpus): 19 `MISSING TACLET`
-    rows where `SortCheck/Annotations.lean` still names taclets upstream has
-    since split or renamed — `storageIndex{Add,Sub,Mul,Div,Mod}Assign` and
-    `storageIndex{Pre,Post}{in,de}crement*` are now `…Mapping…`/`…Array…`
-    pairs, and the `*_root` / `*_decompose` suffixes are now
-    `*_unfold_{leftFst,rightFst}`. Plus one `READ DRIFT`,
-    `storageFieldWriteCopySource`, where the table says `Struct` and the
-    rule says `StValue` — the table is behind, the rule is the sort-free
-    copy described in item 9.
-
-Two further ideas that are not gaps but would make the correspondence
-cheaper to maintain:
-
-- **Rule-parity as a CI test.** the `SolKey` reader already checks taclet
-  names and read sorts against the `.key` corpus. The next step is to
-  check *conditions*: the Lean `candidate` dispatch mirrors every
-  taclet's guard, and `applicable_eq_candidate` is what makes
-  exclusivity a theorem. Exporting the guards (or a hash of them) from
-  solkey's test suite would catch an overlapping new taclet before it
-  reaches a proof.
-- **Terminal rules as updates.** Every terminal taclet (empty residual)
-  now has an explicit state update in the interpreter's vocabulary
-  (Wp/Terminal/Table.lean) with `execStmt s stmt = terminalUpdate
-  r stmt s` under the taclet's guard. Those updates are the KeY update
-  algebra; the equations are a per-taclet test oracle solkey could run
-  on its own `.key` examples.
-
-## Specifications ported to Lean (2026-09-28)
-
-`Calculus/Spec.lean` compiles `@custom:key` clauses as `SpecCompiler` does
-(a storage term per context, `old := storage`, real quantifiers).  What the
-Lean side adds, each a question for solkey:
-
-- **The layout as a premise.** `⊨` ranges over every storage, so the Lean
-  obligation assumes that each word the clauses read holds a value of its
-  declared type (`∀ uint k1; 0 <= balances[k1] <= 2^256 - 1`).  solkey's
-  obligation has no such premise: its reads are total and its sorts typed.
-  Whether a `\forall` clause over a mapping is provable in a storage where
-  the mapping holds a `bool` is the same question as `wellFormed(storage)`
-  (see "Sorts vs. storage wellformedness").
-- **Parameter ranges.** A parameter is a KeY `int`, unbounded; Lean's
-  obligation assumes `0 <= x <= 2^256 - 1` for a `uint`.  A clause like
-  `requires amount >= 0` is then redundant, and solkey could add the range
-  to `specifiedProblemText` instead of relying on it.
-- **Checked arithmetic in clauses.** A clause's `+`/`-` is solc's, checked:
-  `\old(balances[to]) + amount` overflowing makes the equation false.
-  solkey's is KeY's unbounded `int`.
-- **`\old` over a path with an array index** reads `old` at a path checked
-  against the current storage (`find(old, p)`); KeY's `find` checks nothing.
-
-## What solkey must refuse, and the one rule it lacks (2026-09-27)
-
-The Lean calculus is two lists (`Calculus/Rules.lean`): `Taclet`, 152
-constructors, each transcribing solkey taclets, and `LeanTaclet`, the rules
-solkey does not have — one, `functionCallArgCapture`.  Both are sound for
-everything the typed syntax can write (`Rule.sound`).  On the programs whose
+**Lean evidence.** The one rule of the Lean calculus solkey lacks:
+`LeanTaclet.functionCallArgCapture` (`Calculus/Rules.lean`), proved
+`LeanTaclet.sound` (`Calculus/RuleSoundness.lean`). Its hypotheses are the
+taclet's side conditions: the captured argument mentions no callee parameter,
+and the callee body and result are free of the fresh `pv`. On programs whose
 calls take simple arguments (`Stmt.inSolkey`, `Calculus/SolkeyFragment.lean`)
-solkey's list alone derives what the whole calculus does
-(`Proves.toSolkey`).  So solkey is sound on a program if it gains the rule or
-refuses the program, and if it refuses what the typed syntax cannot write:
+solkey's rules alone derive what the whole calculus does (`Proves.toSolkey`).
+
+**Fix.** Add the rule with those side conditions. Until then a program with a complex
+argument stays stuck, which is safe.
+
+## 4. What solkey should refuse or leave stuck
+
+The Lean syntax cannot write the programs below (each right column is the
+constraint that excludes it). solkey is sound on them if it refuses them or has
+no taclet for them; where it has a taclet, the taclet must agree with solc. Only
+the first two rows are checked rejected in solkey (`MAPPING_COPY_ERROR`,
+`MEMORY_MAPPING_ERROR` in `ParserUtils.java`); the rest were not re-tested
+against the parser.
 
 | solkey should refuse | Lean |
 |---|---|
-| a storage-to-storage copy of a type holding a mapping | `Src.copy`'s `mapFree` |
-| a copy into memory of such a type; `new` of anything but a dynamic array of mapping-free elements | `MRhs.copy`, `RefTy.newArrOk` |
-| a default (`push()`, `T memory m;`, `delete m`) of a type whose default is ill-formed | `defaultOkS` |
-| `**=` and other compound operators outside `+= -= *= /= %=` | `opAssign`'s `hasCompoundAssign` |
-| `op=`, `++`, `--` on a `bool` | `isNumeric` |
-| a compound target at a non-simple index (no taclet takes one) | `OpLoc.index`'s `Simple` index |
-| `y = nsp.f++;` with a non-simple receiver (no taclet takes one) | `assignIncDec`'s `recvSimple` |
 | a call whose argument reads an earlier parameter (sequential binding differs from solc) | `Arg.separatedFrom` |
-| recursion; reference parameters; a `return` before the end; a call inside an expression | the elaborator; `Arg`, `CallRet` |
 | `delete` of a mapping or through a storage alias | `Stmt.delete` takes a `Loc` |
-| a storage reference copied into a memory member or element | `MSrc` has no copy form |
 | `push`/`pop` on a memory or fixed-size array | `Stmt.push`/`pop` at `.array` |
-| effects inside a value: `++` under `&&`/`||`, in a conditional's branch | `Val` has no effect; the elaborator hoists the rest |
-| a conditional of reference type | the elaborator |
+| a storage reference copied into a memory member or element | `MSrc` has no copy form |
+| a default (`push()`, `T memory m;`, `delete m`) of a type whose default is ill-formed | `defaultOkS` |
+| `new` of anything but a dynamic array of mapping-free elements | `RefTy.newArrOk` |
+| `op=`, `++`, `--` on a `bool` | `PrimTy.isNumeric` |
+| effects inside a value (`++` under `&&`/`||`, in a conditional branch); a conditional of reference type | `Val` has no effect; the elaborator hoists the rest |
+| recursion; reference parameters; a `return` before the end; a call inside an expression | the elaborator; `Arg`, `CallRet` |
 
-Three things are not syntax, and a proof in solkey can be wrong on the chain
-without them: arithmetic is checked (ranked item 2), a `delete` keeps a
-struct's mapping members (`solc-alignment.md`), and storage is well-formed
-(`Counterexamples/WellTypedNecessity.lean`).  A rule whose premise differs
-from its taclet's without changing the syntax (bounds as a revert inside the
-update, `assertSimple`'s branch) is in `docs/lean-key-rule-map.md`.
+A program no taclet matches (`**=` and other compound operators outside
+`+= -= *= /= %=`, a compound target at a non-simple index, `y = nsp.f++;`) stays
+stuck, which is safe. Three things are not syntax and a solkey proof can be
+wrong on the chain without them: checked arithmetic (item 1), a `delete` that
+keeps a struct's mapping members (`docs/solc-alignment.md`), and well-formed
+storage (item 2). Rules whose premise differs from their taclet's without
+changing the syntax (bounds as a revert inside the update, `assertSimple`'s
+branch) are in `docs/lean-key-rule-map.md`.
 
-## Candidate taclets
+## 5. The `save` leaf should collapse
 
-- **`unfoldArgument`** (Lean `functionCallArgCapture`): hoist the leftmost
-  complex argument of a function call into a fresh `pv` before
-  `functionBodyExpand`. Already on solkey's own backlog (`docs/net.md`
-  §5.1); the Lean rule plus its soundness proof
-  (`LeanTaclet.sound`) is a worked design.
-- **Literal-condition if rules** (Lean `ifElseTrue` / `ifElseFalse`): ✅ implemented
-  2026-09-10 as `ifTrue`/`ifFalse`/`ifElseTrue`/`ifElseFalse`, in
-  `concrete_solidity` rather than `simplify_prog` so they outrank the split.
-  Needed a `BoolLiteral.equals`/`hashCode` fix first — see ranked item 10.
-- **`ifElseNegated`** (Lean `ifElseNegated`): ✅ implemented 2026-09-10, same
-  rule set, so it outranks `ifElseUnfold`'s capture of the negation.
-- **Memory compound assignment**: ✅ implemented in solkey 2026-09-10 as
-  `memoryCompoundAssign` + `memoryIncDec` over `{field, indexArray}` (ranked
-  item 10). Ported on the Lean side as `memoryFieldOpAssign` /
-  `memoryIndexArrayOpAssign` / `memoryFieldIncrement` /
-  `memoryIndexArrayIncrement` and their `UnfoldLeftFst` twins, each
-  instance's `from` clause naming its taclet.
+**Problem.** `save(st, nil, v)` is a leaf every write leaves, read through by
+member sort by six taclets (`saveOnEmptyPrim`, `selectOnSaveEmpty{Map,Ref,Fixed,
+IndexStruct,Default}` in `structRules.key`), so that a struct written over a
+location keeps the location's mapping members. That is the one case neither
+side reaches: a storage-to-storage copy of a mapping-carrying type is rejected
+by solc ≥ 0.7 and by `ParserUtils.parseAssignmentMaybe`, and Lean cannot build
+it (`Src.copy`'s `mapFree`). On every program the two theories agree, and the
+lazy leaf costs a term that grows with every write and six taclets where the
+signature has one rule, `saveEmptyPath` (`save(st, ∅, v) = (Struct) v`).
 
-## Semantics observations from the Lean proofs
+**Lean evidence.** `Theory/Storage.lean` keeps the collapsing leaf
+(`saveOnEmpty`, mirrored in `Theory/Rewrite.lean`) as the source of truth for
+solkey; `docs/lean-key-rule-map.md` records the difference.
 
-- **Evaluation order / non-interference**: the Lean per-rule soundness
-  proofs surfaced that the RHS-first `*ValueRhsCapture` rewrites are only
-  meaning-preserving when the assignment target's index and the RHS do not
-  interfere (the `hstable` hypothesis of
-  `RuleSoundness.valueRhsCaptureAssign_sound`; cf. KeY's
-  `testStorageEvaluationOrder`, `a[++i] = ++i`). Worth stating explicitly in
-  `docs/storage.md` §evaluation-order.
-- **The `*NonSimpleIndexCapture` taclets were unsound on an interfering
-  impure index** (`storageIndexWriteNonSimpleIndexCapture` and its memory
-  and depth-2 siblings): they captured the index into a fresh variable
-  *before* the simple RHS was read, but solc — and the Lean interpreter —
-  read the RHS first. On `values[i++] = i` with `i = 0` the program writes
-  `0` and the residual wrote `1`. Lean-checked in
-  Counterexamples/EvaluationOrder.lean (`indexWrite_preFix_not_sound`).
-  **Fixed upstream 2026-09-09** by the `*ValueRhsCapture` order: bind the
-  RHS first, then capture the index; see ranked item 1 for the full
-  account, including why the `*_unfold_leftFst` family was never affected
-  in solkey and why `fieldWrite_not_sound` refutes the calculus's rule rather
-  than the taclet.
-- **`commuteSimpleUpdates`** (commented-out in `updateRules.key`) is false
-  as state equality on an assoc-list storage representation — only true
-  pointwise. Keep it dead.
+**Fix.** Revert to the collapsing leaf, or state the program on which the fold
+is observable.
 
-## Sort-level observations (from the shared `KeySort` lattice)
+## 6. Sort-level and hygiene observations
 
-Collected on 2026-09-02 while making `Solidity`'s types the same
-shape as solkey's sort model (`Solidity/KeySort.lean`, `Ty.keySort`,
-`Field.sort` computed from the declared type; the `SolKey` reader's
-`Decode/PathSort.lean` for the schema-variable sorts). Each item is a
-Lean-checked fact about upstream at `e67a0d7c48`.
+None is wrong on the corpus; each matters for a future taclet.
 
-- **Array/mapping static sorts vs. their runtime nodes.** `SolJSONParser`
-  gives an array type its own sort `T[]` and a mapping type
-  `mapping(K => V)`, each `\extends StValue` *directly* — siblings of
-  `Struct` (`SolJSONParser.java:1015-1030`, `valueSupersort("StValue")`).
-  At runtime the value at such a path is a `Struct` node (built from
-  `mtSt` with `at(i)` fields; the copy taclets read it `find<[Struct]>`).
-  `Counterexamples/StaticRuntimeSort.lean` proves the two sorts are
-  incomparable. Consequence: a `\hasSort(x, \sort(alphaSt))` on an
-  array- or mapping-typed path binds `alphaSt := uint[]`, and the
-  `find<[alphaSt]>` it produces is a term no `selectSt`/`find` rule (all
-  stated on `Struct`) can consume. Latent today — `\hasSort` binds only
-  `alphaPrim` in `solidityProgramRules.key` — but any future taclet
-  binding `alphaSt` on an unconstrained `Path` would hit it. Either make
-  the created sorts `\extends Struct` (then `docs/storage.md`'s "Struct
-  (incl. the dynamically created array/mapping sorts)" becomes true of
-  the lattice, not just of the prose) or keep `alphaSt` off value reads.
-  ✅ **Fixed 2026-09-10** — solkey took the first option; `Decode/Sorts.lean`
-  and `Solidity/KeySort.lean` now lag the upstream lattice and need the same
-  edit. (Ranked item 8.)
-- **`docs/taclets-implementation.md` / `docs/storage.md` describe the
-  lattice as `Struct` including the array/mapping sorts**; the headers and
-  `SolJSONParser` say otherwise (previous item). One of them should move.
-  ✅ **Fixed 2026-09-10** — the parser moved, and
-  `docs/taclets-implementation.md`'s paragraph (which contradicted itself)
-  was rewritten to match.
-- **`PathSVSort.createInstance` ignores the receiver's presets**: it
-  builds `PathFilters` from scratch, so `StoragePath[memory]` is
-  `Path[memory]` and `SimpleStoragePath[complex]` is `Path[complex]`. No
-  corpus file parameterises a named variant, so nothing is wrong today;
-  worth either refusing parameters on the named variants or seeding the
-  filters from them. (`Decode/Sorts.lean` mirrors the current behaviour.)
-- **`ProgramVariableSVSort.createInstance` matches the joined parameter**,
-  so `Variable[storage,local]` is accepted and `Variable[local,storage]`
-  is not, while `PathSVSort` accepts its flags in any order. Cosmetic.
-- **`memory,global` is refused on `Path` but `memory` + `Origin.GLOBAL`
-  cannot arise anyway** (`classify` gives a `FieldReference` storage,
-  and every memory local `Origin.LOCAL`): the explicit check is dead but
-  harmless.
+- **The cast syntax `(S) t` is a no-op in solkey's taclets.** The Solidity DL
+  grammar imports KeY's `cast_term` but `keyext.solidity.core`'s
+  `ExpressionBuilder` has no `visitCast_term`, so a parenthesised cast is dropped
+  and the rewrite executor inserts a `cast` only where the argument sort demands
+  one. Three places still write the dropped form (`saveOnStoreCons`,
+  `findDefinitionEmpty` and one `delAt` rule, `structRules.key:123,131,337`);
+  the rules that need a cast write `cast<[S]>(t)` in full. Fix with a
+  grammar-level visit or a lint.
+- **`PathSVSort.createInstance` ignores the receiver's presets.** It builds
+  `PathFilters` from scratch, so `StoragePath[memory]` is `Path[memory]` and
+  `SimpleStoragePath[complex]` is `Path[complex]`. No corpus file parameterises a
+  named variant. Refuse parameters on the named variants or seed the filters from
+  them. (`Decode/Sorts.lean` of the `SolKey` reader mirrors the current
+  behaviour.)
 - **`SimpleExpressionSVSort` excludes contract fields** (`Literal |
   ProgramVariable` only; a state variable is a `FieldReference`), so
-  `NonSimpleExpression` admits a bare storage root. The Lean rules treat a
-  storage root as *simple*; the difference is invisible in the corpus
-  because every `SimpleExpression` position is value-typed there, but it
-  is a real gap for any future taclet with `SimpleExpression` in a storage
-  position. Recorded in `Decode/PathSort.lean`.
+  `NonSimpleExpression` admits a bare storage root. The Lean rules treat a storage
+  root as simple. Invisible today because every `SimpleExpression` position is
+  value-typed; a real gap for a taclet with `SimpleExpression` in a storage
+  position.
+- **`ProgramVariableSVSort.createInstance` matches the joined parameter**:
+  `Variable[storage,local]` is accepted and `Variable[local,storage]` is not,
+  while `PathSVSort` accepts its flags in any order. Cosmetic.
+- **`commuteSimpleUpdates`** (commented out in `updateRules.key`) is false as
+  state equality on an assoc-list storage; it holds only pointwise. Keep it dead
+  (`Semantics/Properties.lean`).
+- **Overlapping taclets are separated by strategy cost, not by guards.** Lean's
+  side conditions leave one rule per statement (`Rule.premise_unique`,
+  `Calculus/Uniqueness.lean`); the cases where solkey leaves two taclets open
+  (an unfold or capture against a terminal rule on a non-simple part, a
+  conditional written to storage or memory, a copy between two storage members,
+  a memory reference from a non-bindable source) are those its docstring lists.
+  A test that exports each taclet's guard, or a hash of it, would catch an
+  overlapping new taclet before it reaches a proof.
 
-## Sorts vs. storage wellformedness (2026-09-02)
+## Resolved (kept for orientation)
 
-Asked whether `find(st, p)` on an int-declared field needs a storage
-wellformedness ("wellfoundness") invariant to return an int. Split
-answer, machine-checked in Counterexamples/WellTypedNecessity.lean:
+Each was found by the Lean side and is fixed in solkey; git has the details.
 
-- **Calculus soundness: no invariant needed.** `find<[int]>` is
-  int-sorted by construction, and every mismatch degrades to an
-  underspecified cast: `selectOnStore` emits `cast<[alpha]>(v)`,
-  `castDel` fires only when the argument's static sort already fits,
-  and `cast.key` gives the mismatch case no axioms. Underspecified
-  values prove nothing false. Values written in-proof are recovered
-  syntactically (read-over-write unfolds; `findStValueCast` pushes a
-  read's cast onto the sort-free copy source), so the common
-  write/copy/read patterns also need no invariant.
-- **Faithfulness to the interpreter: indispensable.**
-  `SortFaithfulUntyped` (= `SortFaithful` minus `wellTypedStorageB`) is
-  refuted for the live `storageRootReadSelect` table row — the same row
-  `sortFaithful_all` proves *with* the hypothesis. The invariant is
-  exactly the boundary.
-- **Completeness: a `wellFormed(storage)` assumption is needed where
-  the underspecified value must be *constrained*, not just typed** —
-  first of all `find<[int]>(storage, consr(sp, size)) >= 0` on a
-  symbolic initial storage: without it `storagePopSave`'s "empty"
-  branch and every bounds check downstream of an unknown `size` are
-  unprovable. That means: a wellformedness predicate in the proof
-  obligation plus preservation through every `save` the rules emit —
-  the calculus twin of `wellTypedStorageB`.
-
-Update 2026-09-02: that preservation theorem is now machine-checked —
-`TypeSoundness.execStmt_sound`/`execBlock_sound` prove full type
-soundness of the interpreter (storage + env + heap invariants, `StateWT`),
-so `wellFormed(storage)` is a legitimate once-assumed PO hypothesis:
-`execBlock_preserves_wellTyped` carries it to every reachable state and
-`run_then_find_int` closes the original question end-to-end. The
-"only with wellformed" boundary is drawn by six one-hypothesis-dropped
-refutations in Counterexamples/PreservationNecessity.lean, two of
-which carry calculus-side lessons for solkey: program-variable typing
-(a lying stack binding breaks storage well-typedness from a well-typed
-store — KeY's program-variable sorts are the calculus twin) and the
-`checkArith`-passes-bools subtlety (a non-arithmetic `op=` slips a bool
-into a `uint` cell — `op.isArith` is load-bearing in the compound
-taclet family too).
-
-## Is `wellFormed(storage)` complete? Tightness (2026-09-03)
-
-Asked how to guarantee nothing is *missing* from the invariant — whether
-`wellFormed` already carries every fact that can be inferred. The
-question has a formal reading: "everything inferable" is exactly what
-holds on every *reachable* storage, so the invariant is complete iff it
-coincides with reachability from the contract's initial state. Both
-directions are now machine-checked in Typing/Reachability.lean:
-
-- `reachable_wellTyped` — reachable ⇒ well-typed (preservation from
-  `initialState L`, whose `StateWT` proof `initialState_wt` is the
-  base case "assume `wellFormed` once" was missing);
-- `storage_tight` / `canonical_reachable` — canonical ⇒ reachable: a
-  program `writeProg` (literal assignments, `push()`, `delete` to
-  materialise mapping entries) builds any canonical storage;
-- `no_hidden_invariant` — any storage property that holds initially and
-  is preserved by every well-typed program already follows from
-  `canonical`.
-
-The exercise found that `wellTypedStorageB` is **not** tight: execution
-maintains three facts `SVal.hasTy` forgets, and `SVal.canonical` adds
-exactly those —
-
-1. a mapping's default is the type's default (`save`/`defaultOf` never
-   touch `dflt`; `hasTy` only asks `dflt.hasTy value`) — the
-   `Witness.badDfltStorage` mapping with default `7` is well-typed, and
-   a read of an unwritten key returns `7`, so any "read of an unwritten
-   key is `defaultValue`" taclet is *unfaithful* on it;
-2. mapping keys are unique (entries only grow by `setBy`);
-3. a struct carries exactly its declared fields, in order
-   (`defaultForTy` creates them, no operation removes one; `hasTy`
-   checks only the fields present) — on `Witness.missingFieldStorage`
-   a read of the declared `token` field is `.stuck`.
-
-Conversely `uint` range is **not** an invariant of the model:
-`Witness.uint_negative_reachable` runs `total = -5;` from the initial
-state (literals and plain assignments are unchecked; only arithmetic
-goes through `checkArith`). So the `find<[int]>(storage, consr(sp, size))
->= 0` fact `storagePopSave`'s non-empty branch needs does not come from
-the *cell type*: it is the `size`-cell discipline (`push`/`pop` are the
-only writers; in Lean the length is structural), which a KeY-side
-`wellFormed(storage)` must state explicitly.
-
-**Calculus-side proposal.** solkey has no `wellFormed(storage)` today
-(only Java's `wellFormed(heap)` in `heapRules.key`). The Lean results
-say what such a predicate must contain and how to keep it complete:
-
-- shape it like `heapRules.key`'s two families — *proving* taclets, one
-  per store constructor (`save`, `delAt`, the push/pop `save`s),
-  mirroring `save_hasTy`/`save_canonical`, and *using* taclets, one per
-  consumer row of Typing/WellFormedConsumers.lean (`size ≥ 0`; `0 ≤ i < size`
-  ⇒ the `at(i)` read is typed; unwritten key ⇒ `defaultValue`; declared
-  member ⇒ `selectSt` is defined);
-- state explicitly what Lean's `SVal` datatype gives for free:
-  `size ≥ 0`, `at(i)` present exactly for `0 ≤ i < size`, mapping
-  default = `defaultValue`, exactly the declared members;
-- the completeness check going forward is the consumer table: a new
-  taclet that needs a storage fact its `\assumes(wellFormed(storage))`
-  cannot deliver shows up as an unprovable row.
-
-Open: the converse invariant "reachable ⇒ canonical" (needed to *refute*
-reachability of the non-canonical witnesses) is a second
-`TypeSoundness`-sized traversal of the interpreter, and env/heap
-tightness (up to identity renaming) is likewise future work.
-
-## Delete-family generic overlap (found at `0f9b99ad55`, fixed at `e67a0d7c48`)
-
-`Counterexamples/DeleteFamilyGenericOverlap.lean` proves the
-`0f9b99ad55` delete fallthroughs (`delValueDefault`,
-`selectStDelNodeDefault`, both bounded `alphaSt \extends StValue`)
-overlapped their dedicated `Struct` rules at `alphaSt := Struct` — two
-first-order inconsistency theorems derive `5 = 7` from the taclet
-equations alone (no ill-typed store required; reachable via
-`delete s.member;` + any later `Struct`-sorted read through
-`selectOnDelAtCons`). Generic-sort upper bounds admit everything below
-them; they discriminate only when the bound *excludes* the special
-case. `e67a0d7c48`'s re-bounding to `alphaPrim \extends Prim` (plus
-`selectStDelNodeIndexStruct`) is exactly the fix the proofs demand —
-same pattern as `memoryRules.key`'s `prim \extends Prim`.
-
-**~~Still open there~~ Fixed 2026-09-10 by `delValueStValueCast`; ranked item 9
-has the account. Original text: `StValue`-instantiated delete reads are stuck.**
-`selectOnDelAtCons` instantiates `alpha` at the outer read's sort, and
-the copy taclets read `find<[StValue]>`. On `delete s.p; x = s.p;`
-(struct-typed `p`, root target, `storageRootWriteCopySource`) the
-unfolding reaches `delValue<[StValue]>(selectSt<[StValue]>(node, p))` —
-`StValue` is neither `Struct` nor `≤ Prim`, so no delete rule matches,
-and no later cast revives it (`findStValueCast` needs the cast directly
-on `find<[StValue]>`). Delete-then-copy fails to symbolically execute.
-Candidate fixes: `delValueStValue` / `selectStDelNodeStValue` twins of
-`findStValueCast` that re-sort through the declared type, or have the
-copy rules avoid `StValue` reads over `delAt`/`delNode` terms.
-
-## Housekeeping (stale solkey docs/tooling) — resolved 2026-09-10
-
-- ~~`docs/taclets-implementation.md` claims the `net-*` starters were deleted,
-  but 20 committed `.key` problems remain in `keyext.solidity.examples/net/`.~~
-  **Not a real finding.** The doc says the opposite; see ranked item 11.
-- ~~The `solidity-key-taclets` Claude skill still points at
-  `keyext.solidity.examples/taclets/*.key` starter files and
-  `TacletStarterExamplesTest.examples()`~~ — **fixed**: the skill now describes
-  the `TestSuite.sol` workflow, the `test*`/non-`test*` suite split, the
-  `RuleGeneralizationTest` step for operator families, and the three CI gates.
-
-## Delete-then-copy, resolved (2026-09-10)
-
-The "Still open there" note at the end of the delete-family section below is
-closed by `delValueStValueCast`; see ranked item 9 for the fix and for why the
-`selectSt<[StValue]>(delNode(…), f)` half of the prediction was dropped as
-unreachable.
-
-## `selectOnSaveEmpty` rewrites to a term its `\find` does not bind (2026-09-15)
-
-~~Open~~ **Fixed upstream in `c80a54494c`** (2026-09-16): the `\replacewith`
-is now `selectSt<[alpha]>((Struct) v, a)`, the restatement below, with the cast
-absorbed by `castDel`. The open question at the end of this section — whether
-KeY's schema-variable check should have rejected the old form — still stands,
-and it is now a question about the checker rather than about this taclet.
-
-`structRules.key` as it read before the fix:
-
-```
-selectOnSaveEmpty {
-    \find(selectSt<[alpha]>(save(st,nil,v), a))
-    \replacewith(selectSt<[alpha]>(save(st,flds,v), a))
-    \heuristics(simplify)
-};
-```
-
-The `\find` binds `st`, `v` and `a`. It does not bind `flds` — that schema
-variable is declared at the top of the file and left free by this taclet, so
-the `\replacewith` names a list the match never determined. Read literally the
-rule rewrites a closed term to one with an unconstrained subterm.
-
-The intended reading is presumably `selectSt<[alpha]>(v, a)`: `saveOnEmpty`
-already gives `save(st, nil, v) ⇝ v`, so the rule is subsumed by it and the
-`flds` looks like an editing residue from `selectOnSaveCons` just below.
-
-Lean's `Theory/Storage.lean` states the intended form
-(`StValue.selectOnSaveEmpty : selectSt (save st [] v) a = selectSt v a`) and
-records the difference in `docs/lean-key-rule-map.md`.
-
-**Worth checking upstream** whether KeY's schema-variable well-formedness
-check should reject a `\replacewith` that mentions a variable the `\find` does
-not bind. If it should, this taclet is the witness; if it should not, the rule
-is unsound as written rather than merely redundant.
-
-## `copyKeepsMapping.key`'s last two conjuncts are reflexive (2026-09-16)
-
-~~Open~~ **Fixed upstream with the `copyAt`→`save` fold** (2026-09-16): the
-last two conjuncts now compare the post-state read, under the update, with the
-pre-state read outside it, which is the claim below.
-
-`keyext.solidity.examples/storage/copyKeepsMapping.key`, added in
-`c80a54494c`, is the only obligation that pins the mapping-preserving half of
-the new `copyAt`: no `.sol` example can state it, since both front ends reject
-a copy whose type carries a mapping. Its first two conjuncts do their job —
-the value members `nonce` and `inner·nonce` come from the source. The last two
-compare
-
-```
-find<[int]>(storage, cons(ledger2, cons(balances, cons(at(1), nil))))
-  = find<[int]>(storage, cons(ledger2, cons(balances, cons(at(1), nil))))
-```
-
-against *themselves*: both sides read `ledger2`, so each conjunct is an
-instance of reflexivity and closes without exercising `selectStMergeMap` at
-all. The problem therefore proves nothing about mappings, which is the one
-thing it exists to prove.
-
-The claim they presumably meant is that the target keeps its **own** entries —
-`find(storage, ledger2·balances·at(1))` after the update equals what it was
-before, and is *not* `find(storage, ledger·balances·at(1))`. Lean states the
-file as written (`Corpus/Wp/Rules.solkey_Rules_copyKeepsMapping`, the
-reflexive conjuncts included and flagged) and the intended claim beside it,
-with a `native_decide` refutation of the source-wins reading — which is what
-would catch an inverted `isMapping` branch.
-
-**On this side (2026-09-18):** the Lean port no longer states the file.
-`Theory/Storage.lean` is now solkey's two-sorted algebra with the *pre-fold*
-leaf (`save(st, nil, v) ⇝ v`), since the post-fold leaf differs only on a copy
-no front end admits, and `copyKeepsMapping` is `unsupported` in
-`tests/solkey/expected.tsv`.
-
-## The ported corpus is 102 `TestSuite.sol` obligations behind (2026-09-16)
-
-Not feedback to solkey but the standing gap on this side, recorded where the
-other cross-repository facts are. `tests/solkey/expected.tsv` holds 176
-`TestSuite` rows; the porter run against `c80a54494c` emits 278, so a plain
-re-run adds 102 rows — its own change, since it also wants
-`basketA`/`basketB` in the porter's `GLOBAL_TYPES` and in
-`Semantics.State.testSuiteStore`. Nine of those 102 are `c80a54494c`'s own
-`testCopy*` group, which pins the mapping-*free* half of every `merge` rule.
-`copyKeepsMapping.key` is ported now (the porter learned the upstream
-`storage/` directory); the `.sol` group is not.
-
-Also in `c80a54494c`: upstream dropped the **`mapfree` PathSVSort flag** idea
-from `docs/taclet-ideas.md`, which `copyAt` makes unnecessary — the calculus
-now gives the mapping-carrying copy a meaning instead of hardening the taclets
-against it.
-
-## The `save` leaf should collapse again (2026-09-20)
-
-`8c5c69ca25` made `save(st, nil, v)` a leaf every write leaves, read through
-by member sort by the five `selectOnSaveEmpty*`/`saveOnEmptyPrim` taclets, so
-that a struct written over a location keeps the location's mapping members.
-That is the one case neither side can reach: a storage-to-storage copy of a
-mapping-carrying type is rejected by solc ≥ 0.7, by
-`ParserUtils.parseAssignmentMaybe` (`MAPPING_COPY_ERROR`), and cannot be built
-here (`Src.copy`'s `mapFree`).  On every program the two theories
-agree, and the non-collapsing leaf costs a term that grows with every write
-and five read-through taclets where the signature has one rule,
-`saveEmptyPath` (`save(st, ∅, v) = (Struct) v`).  `Theory/Storage.lean` keeps
-the collapsing leaf (`saveOnEmpty`) as the source of truth for this package
-and solkey; the request is that solkey revert to it, or state the program on
-which the fold is observable.
-
-## `copyAt` folded into `save` (2026-09-16)
-
-Done upstream the same day `c80a54494c` landed, on the observation that
-`copyAt(st, p, v)` and `save(st, p, v)` differ only at the leaf —
-`merge(st, v)` against `v` — and every `merge` read rule is a rule about that
-leaf. So `save(st, nil, v)` is now the irreducible node itself: the eight copy
-rules write `save(…)` again, `copyAt`/`merge` and their eleven taclets are
-gone, and what replaces them is `selectOnSaveEmpty{Map,Ref,IndexStruct,
-Default}` (the old `selectStMerge*` over `save(st, nil, v)`), `saveOnEmptyPrim`
-(the old `mergePrim`, as a cast rule), and the deletion of the three eager
-leaf collapses `saveOnEmpty`/`saveOnEmptyStorageEmpty`/`saveOnStoreEmpty` and
-of `selectOnSaveEmpty`; `saveOnStoreCons` lost its `isEmpty(flds)` branch.
-Three things followed, and two of them are worth recording here:
-
-- **`delete sp[ie]` is mapping-preserving now.** `storageIndexDelete` wrote
-  `save(storage, sp·at(ie), defVal)`; with a lazy leaf an eager
-  `save(st, nil, defVal) ⇝ defVal` beside `selectOnSaveEmptyMap` would have
-  been non-confluent, so it writes `delAt(storage, consr(sp, at(ie)))` like
-  the root and field deletes. That closes the one deliberate divergence
-  `docs/lean-key-rule-map.md` recorded.
-- **The `(Struct) v` cast syntax is a no-op in solkey's taclets.** The
-  Solidity DL grammar imports KeY's parser but its `ExpressionBuilder` has no
-  `visitCast_term`, so a parenthesised cast is dropped, and the rewrite
-  executor inserts a `cast` only where the argument sort of the rewritten
-  position demands one (`equals` takes `any`, so a leaf under `=` sits bare).
-  The leaf rules therefore write `cast<[Struct]>(v)` / `cast<[alpha]>(…)` out
-  in full, as `selectOnStore` always did; `saveOnStoreCons`'s `(Struct) v0`
-  is still the dropped form. Worth a grammar-level fix upstream, or a lint.
-- Memory-to-storage copies sit under the same leaf, so `structMemoryRules.key`
-  gained `selectOnCopyMemPrim`/`selectOnCopyMemRef` beside `findOnCopy`.
+- Evaluation order of the `*NonSimpleIndexCapture` taclets: `8ba30fd742`
+  (storage), `63c38cfaf6` (memory, recursion). The freeze applies to primitive
+  sources only; a struct source is target-first in solc, which is the Lean
+  interpreter's open gap (`Counterexamples/RefSourceOrder`, removed with the
+  untyped layer).
+- Delete-family generic overlap (`delValueDefault` at `alphaSt := Struct`):
+  `e67a0d7c48`; `delValueStValueCast` closes delete-then-copy (`444f029579`).
+- Array and mapping sorts now `\extends Struct` in `SolJSONParser`, so the two
+  `SortFaithfulness` findings are closed.
+- `selectOnSaveEmpty` rewriting to an unbound `flds`, and the reflexive last two
+  conjuncts of `copyKeepsMapping.key`: `c80a54494c`, and the `copyAt` fold that
+  followed.
+- Memory compound assignment, the `if` simplifiers (`ifTrue`, `ifElseTrue`,
+  `ifElseNegated`), and `BoolLiteral.equals`/`hashCode`: `444f029579`.
+- Balance-checked `transfer`: `transferNoCallbackDiamond` and the callback
+  diamond owe `0 <= se & se <= selfBalance`; the boxes book unconditionally,
+  which is sound for partial correctness (`333cc7b353`).
+- The four `*IndexedReceiver_unfold_leftFst` taclets that did not fire (a null
+  proposal in `VariableNamer`).
+- Determinism under the block modality: no box/diamond twin pairs remain.
+- `sizeNotNegative` (`8a977688dc`) covers `size >= 0`; the rest is item 2.
