@@ -1,5 +1,6 @@
 import Solidity.Calculus.Chains
 import Solidity.Calculus.TheoryLaws
+import Solidity.Examples.ExampleNames
 
 /-!
 # The lines after the program, as chain links
@@ -54,32 +55,39 @@ local instance : InContract := ⟨StandardExample⟩
 `alice.account.balance = 10;` unfolds (Step 2), runs to the two captures,
 which are shown merged (the `⇝*` line), writes, and ends: the write
 merges into the captures, its right-hand side substituted — the printed last
-line.  The fresh names are the rules' (`se1`, `sp1` for the printed `pv`,
-`acc`). -/
+line, in the printed names for the rules' fresh variables (`pv`, `acc` for
+`se1`, `sp1`). -/
 
 section Headline
 variable (m : Modality) (φ : Post StandardExample)
 
+section ExampleNames
+
+local instance : FreshNames := .ofTable ExampleNames.Headline.names
+
 /-- `alice.account.balance = 10;`, for every modality and postcondition: the
-printed trace, line by line. -/
+printed trace, line by line, in its names `pv` and `acc`
+(`ExampleNames.Headline.names`). -/
 theorem headlineNamed :
     dl![m]{ ⟨[ alice.account.balance = 10; ]⟩ φ }
-    ~~> dl![m]{ { se1 := 10 ‖ sp1 := alice.account ‖ storage := save(storage, alice.account.balance, 10) } φ } :=
+    ~~> dl![m]{ { pv := 10 ‖ acc := alice.account ‖ storage := save(storage, alice.account.balance, 10) } φ } :=
   calc dl![m]{ ⟨[ alice.account.balance = 10; ]⟩ φ }
     _ ~[storageFieldWrite_unfold_leftFst]~>
-        dl![m]{ ⟨[ uint se1 = 10; Account storage sp1 = alice.account; sp1.balance = se1; ]⟩ φ } := by
+        dl![m]{ ⟨[ uint pv = 10; Account storage acc = alice.account; acc.balance = pv; ]⟩ φ } := by
       sol_chain
-    _ ~*> dl![m]{ { se1 := 10 } { sp1 := alice.account } ⟨[ sp1.balance = se1; ]⟩ φ } := by sol_chain
+    _ ~*> dl![m]{ { pv := 10 } { acc := alice.account } ⟨[ acc.balance = pv; ]⟩ φ } := by sol_chain
     _ ~[sequentialToParallel]~>
-        dl![m]{ { se1 := 10 ‖ sp1 := alice.account } ⟨[ sp1.balance = se1; ]⟩ φ } := by sol_chain
+        dl![m]{ { pv := 10 ‖ acc := alice.account } ⟨[ acc.balance = pv; ]⟩ φ } := by sol_chain
     _ ~[storageFieldWriteSave]~>
-        dl![m]{ { se1 := 10 ‖ sp1 := alice.account } { storage := save(storage, sp1.balance, se1) } ⟨[ ]⟩ φ } :=
+        dl![m]{ { pv := 10 ‖ acc := alice.account } { storage := save(storage, acc.balance, pv) } ⟨[ ]⟩ φ } :=
       rfl
     _ ~[emptyModality]~>
-        dl![m]{ { se1 := 10 ‖ sp1 := alice.account } { storage := save(storage, sp1.balance, se1) } φ } := rfl
+        dl![m]{ { pv := 10 ‖ acc := alice.account } { storage := save(storage, acc.balance, pv) } φ } := rfl
     _ ~[sequentialToParallel]~>
-        dl![m]{ { se1 := 10 ‖ sp1 := alice.account ‖ storage := save(storage, alice.account.balance, 10) } φ } := by
+        dl![m]{ { pv := 10 ‖ acc := alice.account ‖ storage := save(storage, alice.account.balance, 10) } φ } := by
       sol_chain
+
+end ExampleNames
 
 /-- The three updates `headline` (`Examples/Chains.lean`) ends with merge in one
 link: the whole spine, the innermost pair first. -/

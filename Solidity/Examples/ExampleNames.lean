@@ -11,8 +11,9 @@ with its own table (`FreshNames.lean`), and every line in it — `dl!{ … }`,
 printed names:
 
 * `Headline` — `alice.account.balance = 10;`: the value `pv`, the alias
-  `acc`.  Its chains are the headline's of
-  `Examples/Chains.lean`, which reads this table; here are its tests: a
+  `acc`.  Its chain, the calculus's trace, is
+  `headlineNamed` of `Examples/ChainRewrites.lean`, which reads this table;
+  here are its tests: a
   line is the term its default spelling gives, a capture is numbered past
   `pv`, an error prints `pv`;
 * `Token` — `alice.account.token.value = 5;`: `aliceTok`, then `aliceAcc`,
