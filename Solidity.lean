@@ -35,6 +35,7 @@ import Solidity.Calculus.Progress
 import Solidity.Calculus.Termination
 import Solidity.Calculus.Chains
 import Solidity.Calculus.UpdateRules
+import Solidity.Calculus.ChainRewrites
 import Solidity.Calculus.Rewrite
 import Solidity.Calculus.TheoryLaws
 import Solidity.Examples.Tour
@@ -56,6 +57,7 @@ import Solidity.Examples.Notation
 import Solidity.Examples.ApplySteps
 import Solidity.Examples.Chains
 import Solidity.Examples.UpdateRules
+import Solidity.Examples.ChainRewrites
 import Solidity.Examples.Decide
 import Solidity.Examples.Specs
 import Solidity.Examples.SelectOnSaveConsr
