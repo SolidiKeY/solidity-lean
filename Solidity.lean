@@ -57,6 +57,7 @@ import Solidity.Examples.Callback
 import Solidity.Examples.Notation
 import Solidity.Examples.ApplySteps
 import Solidity.Examples.Chains
+import Solidity.Examples.MemoryChains
 import Solidity.Examples.UpdateRules
 import Solidity.Examples.ChainRewrites
 import Solidity.Examples.Decide

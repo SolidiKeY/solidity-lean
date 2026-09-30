@@ -19,6 +19,7 @@ fresh (`Person memory carol;`, `memoryReferenceDeclFreshAlloc`) or as a copy
 of a storage object (`Person memory carol = alice;`, `memoryStorageCopy`,
 whose storage side is `CrossDomain.lean`).  The printed worked examples start
 after `Person memory carol;`; here that line is the first of the program.
+Their derivations, line by line, are `MemoryChains.lean`.
 
 Where `sol_close` cannot read the result back, the postcondition is `true` and
 the walk is the claim.  Two things it does not know (`Close.lean`): that two
@@ -446,20 +447,20 @@ member's default there, a fresh default object for a reference
 the old object keeps it, which is the point.  The values a fresh default holds
 are the runs at the end of the section. -/
 
-/-- `Person memory carolAlias = carol; carol.age = 33; delete carol;
-oldAge = carolAlias.age;` — the alias keeps the old object
-(`memoryRootDeleteFreshRebind`). -/
+/-- `Person memory carol; Person memory carolAlias = carol; carol.age = 33;
+delete carol; oldAge = carolAlias.age; newAge = carol.age;` — the alias keeps
+the old object (`memoryRootDeleteFreshRebind`).  The printed program, its
+`oldAge`, `newAge` undeclared; its chain is `MemoryChains.rootDelete`. -/
 theorem memoryRootDelete :
-    ⊨ dl!{ [ Person memory carol = alice; Person memory carolAlias = carol; carol.age = 33;
-             delete carol; uint oldAge = carolAlias.age; ] true } := by
+    ⊨ dl!{ [ Person memory carol; Person memory carolAlias = carol; carol.age = 33; delete carol;
+             oldAge = carolAlias.age; newAge = carol.age; ] true } := by
   apply Proves.valid
-  apply unfold .memoryLocalDeclInitDrop
-  apply update .memoryStorageCopy
+  apply update .memoryReferenceDeclFreshAlloc
   apply unfold .memoryLocalDeclInitDrop
   apply update .memoryRootAlias
   apply update .memoryFieldWriteStore
   apply update .memoryRootDeleteFreshRebind
-  apply unfold .localValueDeclInitDrop
+  apply update .memoryFieldReadHeap
   apply update .memoryFieldReadHeap
   apply empty
   refine close ?_
@@ -483,18 +484,26 @@ theorem memoryFieldDeletePrim :
   sol_symex
   sol_close
 
-/-- `Account memory carolAcc = carol.account; delete carol.account;` — a
-member of reference type gets a fresh default object
-(`memoryFieldDeleteReference`); `carolAcc` keeps the old one. -/
+/-- `Person memory carol; Account memory carolAcc = carol.account;
+carolAcc.balance = 100; delete carol.account; oldBal = carolAcc.balance;
+newBal = carol.account.balance;` — a member of reference type gets a fresh
+default object (`memoryFieldDeleteReference`); `carolAcc` keeps the old one.
+The printed program; its chain is `MemoryChains.fieldDeleteRef`. -/
 theorem memoryFieldDeleteRef :
-    ⊨ dl!{ [ Person memory carol = alice; Account memory carolAcc = carol.account;
-             delete carol.account; ] true } := by
+    ⊨ dl!{ [ Person memory carol; Account memory carolAcc = carol.account; carolAcc.balance = 100;
+             delete carol.account; oldBal = carolAcc.balance; newBal = carol.account.balance; ]
+           true } := by
   apply Proves.valid
-  apply unfold .memoryLocalDeclInitDrop
-  apply update .memoryStorageCopy
+  apply update .memoryReferenceDeclFreshAlloc
   apply unfold .memoryLocalDeclInitDrop
   apply update .memoryFieldReadAliasRoot
+  apply update .memoryFieldWriteStore
   apply update .memoryFieldDeleteReference
+  apply update .memoryFieldReadHeap
+  apply unfoldRule (Stmt.step _ _ _).rule  -- `memoryFieldRead_unfold_rightFst`
+  apply unfold .memoryLocalDeclInitDrop
+  apply update .memoryFieldReadAliasRoot
+  apply update .memoryFieldReadHeap
   apply empty
   refine close ?_
   sol_symex
@@ -577,17 +586,17 @@ info: (Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int
     carol.age = 33; delete carol; uint oldAge = carolAlias.age; uint newAge = carol.age; }
   (Prog.localAfter State.exampleStore P "oldAge", Prog.localAfter State.exampleStore P "newAge")
 
-/-! `carol.account.balance = 7; delete carol.account;` — the old account
-keeps `7`, the member reads the fresh default `0`. -/
+/-! `carolAcc.balance = 100; delete carol.account;` — the old account keeps
+`100`, the member reads the fresh default `0`. -/
 
 /--
-info: (Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int 7)),
+info: (Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int 100)),
  Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int 0)))
 -/
 #guard_msgs in
 #eval
   let P : Prog StandardExample := sol{ Person memory carol; Account memory carolAcc = carol.account;
-    carol.account.balance = 7; delete carol.account; uint oldBal = carolAcc.balance;
+    carolAcc.balance = 100; delete carol.account; uint oldBal = carolAcc.balance;
     uint newBal = carol.account.balance; }
   (Prog.localAfter State.exampleStore P "oldBal", Prog.localAfter State.exampleStore P "newBal")
 

@@ -450,9 +450,9 @@ block in `Update.lean` **is** the signature):
 | `Path[storage]` | `PTerm` | a state variable (`.root`), an alias (`.pv`), `.field`/`.at` |
 | `Storage` | `STerm` | `.storage`, `save`/`.save`, `delAt`/`.delAt`; a push and a pop are `.push`/`.pushSlot`/`.pop`/`.extend`, **not** two plain `save`s stacked — see below |
 | what a storage `save` writes | `SValT` | a value (`.val`), a subtree read out of a storage (`.find`), or a memory object copied back (`.copyMem`, KeY's `copyMem(mtSt, m, i)`) |
-| `Identity` | `ITerm` | a memory local (`.pv`), a reference read out of memory (`.read`), `freshId(addM(m))` (`.alloc`, carrying the allocated `RefTy`), `freshId(copySt(m, v))` (`.copy`) |
+| `Identity` | `ITerm` | a memory local (`.pv`), a reference read out of memory (`.read`), `freshId(addM(m))` (`.alloc`, carrying the allocated `RefTy`; a concrete struct's prints `freshId(addM(m, S))`), `freshId(copySt(m, v))` (`.copy`) |
 | a member or element of a memory object | `MAddr` | `.field`/`.at` |
-| `Memory` | `MTerm` | `.memory`, `write(m, a, v)` (`.write`), `addM(m)` (`.addM`, eager: the type rides along), `copySt(m, v)` (`.copySt`) |
+| `Memory` | `MTerm` | `.memory`, `write(m, a, v)` (`.write`), `addM(m)` (`.addM`, eager: the type rides along; a concrete struct's prints `addM(m, S)`, KeY's `addM(mem, idp)`), `copySt(m, v)` (`.copySt`) |
 | what a memory `write` writes | `MValT` | a value (`.val`) or a reference (`.ref`) |
 | one elementary update | `UpdElem` | `.val`/`.path`/`.mref`/`.storage`/`.memory`, plus `.transfer` for `{selfBalance := selfBalance - a ‖ net := …}`, the pair that moves together; `.store` for `old := storage`, `.saveNet` for `oldNet := net`, and `.book` for a specification's `{net := storeSt(net, at(msgSender), … + msgValue) ‖ selfBalance := selfBalance + msgValue}` |
 
@@ -460,7 +460,10 @@ block in `Update.lean` **is** the signature):
 `memoryReferenceDeclFreshAlloc`'s premise is
 `{ mv := freshId(addM(memory)) ‖ memory := addM(memory) }` — evaluated against
 the same pre-state, so `ITerm.alloc` and `MTerm.addM` agree on which root gets
-minted without either re-deriving the other's answer.
+minted without either re-deriving the other's answer.  A rule's `R` and an
+array print `addM(memory)`; a concrete struct prints as KeY's two-argument
+`addM(mem, idp)` does, `{ carol := freshId(addM(memory, Person)) ‖ memory :=
+addM(memory, Person) }`, which `dl!{ … }` reads back.
 
 **A push is one term, not two saves in a nested update.** KeY writes
 `arr.push(se)` as two saves in one parallel update, the new slot `at(n)` and

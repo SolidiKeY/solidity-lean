@@ -1640,6 +1640,14 @@ def dotTerm (b : TSyntax `dl_term) (f : String) : MetaM (TSyntax `dl_term) :=
   | `(dl_term| $x:ident) => `(dl_term| $(mkIdent (x.getId.str f)):ident)
   | _ => `(dl_term| $b . $(nameIdent f):ident)
 
+/-- The struct a concrete allocation carries (`S` of `RefTy.struct "S"`), which
+`dl!{ … }` needs to read `addM(m, S)` back.  A rule's `R` and an array type give
+none: the rule table writes `addM(m)`, the type being the statement's. -/
+def allocStruct? (R : Lean.Expr) : MetaM (Option Ident) := do
+  let_expr RefTy.struct s := (← whnf (← instantiateMVars R)) | return none
+  let .lit (.strVal s) := (← whnf (← instantiateMVars s)).consumeMData | return none
+  return some (nameIdent s)
+
 /-- A program expression lowered to a term (`se.lower`): the notation writes
 the expression itself. -/
 def loweredExpr? (e : Lean.Expr) : MetaM (Option (TSyntax `dl_term)) := do
@@ -1801,7 +1809,11 @@ partial def ppITerm (e : Lean.Expr) : MetaM (TSyntax `dl_term) := do
     let some x ← ppVar? x | escapeDl e
     `(dl_term| $x:ident)
   | ITerm.read _ m a => `(dl_term| read($(← ppMTerm m), $(← ppMAddr a)))
-  | ITerm.alloc _ m _ => `(dl_term| freshId(addM($(← ppMTerm m))))
+  | ITerm.alloc _ m R =>
+    let m ← ppMTerm m
+    match ← allocStruct? R with
+    | some S => `(dl_term| freshId(addM($m, $S:ident)))
+    | none => `(dl_term| freshId(addM($m)))
   | ITerm.copy _ m v => `(dl_term| freshId(copySt($(← ppMTerm m), $(← ppSVal v))))
   | _ => escapeDl e
 
@@ -1818,7 +1830,11 @@ partial def ppMTerm (e : Lean.Expr) : MetaM (TSyntax `dl_term) := do
   match_expr (← whnf e) with
   | MTerm.memory _ => `(dl_term| memory)
   | MTerm.write _ m a v => `(dl_term| write($(← ppMTerm m), $(← ppMAddr a), $(← ppMVal v)))
-  | MTerm.addM _ m _ => `(dl_term| addM($(← ppMTerm m)))
+  | MTerm.addM _ m R =>
+    let m ← ppMTerm m
+    match ← allocStruct? R with
+    | some S => `(dl_term| addM($m, $S:ident))
+    | none => `(dl_term| addM($m))
   | MTerm.copySt _ m v => `(dl_term| copySt($(← ppMTerm m), $(← ppSVal v)))
   | _ => escapeDl e
 
