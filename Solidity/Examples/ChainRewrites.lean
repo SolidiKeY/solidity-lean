@@ -15,8 +15,10 @@ validity of the last line back to the first.
   `φ`, `⟨[ p ]⟩ φ`;
 * §3 — on to the value under the box: `simplifyUpdate`, `applyStorageBox`,
   `findOnSave`;
-* §4 — a law in an update's right-hand side: `alice.age = 42; uint x = alice.age;`,
-  and the headline's write read back;
+* §4 — `alice.age = 42; uint x = alice.age;` read back two ways: the law in
+  the update's right-hand side, and the update applied
+  first, then the law (`SelectOnSaveConsr.ageWriteReadKeY`'s order); and the
+  headline's write read back;
 * §5 — a rebound alias: the overwritten capture dropped, as the printed line
   has it.
 
@@ -24,8 +26,15 @@ validity of the last line back to the first.
 `dl!{}` (`fmlModality?`), and `dl!{}` has no modality variable and no
 formula variable.  So those lines are written `over m φ dl!{ … true }`: the
 updates and programs of a `dl!{}` line, under `m`, over `φ` in place of its
-postcondition `true`.  A law names its instance: `findOnSave` at the path
-it reads, which a chain finds in the line (`sol_rw`'s search).
+postcondition `true`.  Such a line prints as `over m φ dl{ … }`, not in
+the printed form: a `dl!{}` with a modality and a postcondition variable
+would replace `over`.
+
+A law link is `(LineRw.law h).apply φ = some ψ`, the instance `h` naming
+the law and the path it reads (`findOnSave (p := balance)`); the pair it
+rewrites comes from `h`'s type.  The path is still a raw `PTerm`
+(`balance`, `age`): finding it in the line, as `sol_rw` does, is for the
+chain's search.
 -/
 
 namespace Solidity.Examples.ChainRewrites
@@ -51,6 +60,22 @@ theorem headlineLastLine :
     Fml.mergeSpine 2 dl!{ { se1 := 10 } { sp1 := alice.account } { storage := save(storage, sp1.balance, se1) }
         alice.account.balance == 10 }
       = some dl!{ { se1 := 10 ‖ sp1 := alice.account ‖ storage := save(storage, alice.account.balance, 10) }
+        alice.account.balance == 10 } := rfl
+
+/--
+info: dl{
+  { se1 := 10 ‖ sp1 := alice.account ‖ storage := save(storage, alice.account.balance, 10) }
+    find(storage, alice.account.balance) = 10 } : Fml StandardExample
+-/
+#guard_msgs in
+#check (dl!{ { se1 := 10 ‖ sp1 := alice.account ‖ storage := save(storage, alice.account.balance, 10) }
+    alice.account.balance == 10 } : Fml StandardExample)
+
+/-- The last line as printed reads back as the line. -/
+example :
+    dl!{ { se1 := 10 ‖ sp1 := alice.account ‖ storage := save(storage, alice.account.balance, 10) }
+      find(storage, alice.account.balance) = 10 }
+      = dl!{ { se1 := 10 ‖ sp1 := alice.account ‖ storage := save(storage, alice.account.balance, 10) }
         alice.account.balance == 10 } := rfl
 
 /-- `alice.account.balance = 10;`: the `⇝*` line merges the two
@@ -81,12 +106,14 @@ example (h : ⊨ dl!{ { se1 := 10 ‖ sp1 := alice.account ‖ storage := save(s
       alice.account.balance == 10 } :=
   (LineRw.mergeSpine 2).valid headlineLastLine h
 
-/-- A rule that does not fit gives no line: one update has no pair to merge,
-and `se1` is read after it, so `simplifyUpdate` has nothing to drop. -/
+/-- A rule that does not fit gives no line: `alice.account.balance = se1;`
+after one update has no pair to merge. -/
 example :
     Fml.mergeAt 0 dl!{ { se1 := 10 } ⟨ alice.account.balance = se1; ⟩ alice.account.balance == 10 } = none :=
   rfl
 
+/-- `alice.account.balance = 10;`: `se1` is still read, so `simplifyUpdate`
+drops nothing. -/
 example :
     Fml.updRuleAt .simplifyUpdate 0 dl!{ { se1 := 10 } { sp1 := alice.account }
         { storage := save(storage, sp1.balance, se1) } alice.account.balance == 10 } = none := rfl
@@ -108,6 +135,15 @@ theorem headlineLastLineAny (m : Modality) (φ : Fml StandardExample) :
 theorem headlineCapturesAny (m : Modality) (φ : Fml StandardExample) :
     Fml.mergeAt 0 (over m φ dl!{ { se1 := 10 } { sp1 := alice.account } ⟨ sp1.balance = se1; ⟩ true })
       = some (over m φ dl!{ { se1 := 10 ‖ sp1 := alice.account } ⟨ sp1.balance = se1; ⟩ true }) := rfl
+
+/-- `applySkip` looks at the update alone: the empty update goes over any
+`φ` under either modality. -/
+example (m : Modality) (φ : Fml StandardExample) : Fml.updRuleAt .applySkip 0 (.upd m [] φ) = some φ :=
+  rfl
+
+/-- `sequentialToParallel` is `mergeAt`: as an update rule it gives no line. -/
+example :
+    Fml.updRuleAt .sequentialToParallel 0 dl!{ { se1 := 10 } { sp1 := alice.account } true } = none := rfl
 
 /-- `y = 3;`: an update that cannot halt, applied to a first-order formula
 under either modality (`applyOnRigid`, an equivalence). -/
@@ -158,7 +194,7 @@ abbrev balance : PTerm StandardExample := .field (.field (.root "alice") "accoun
 
 /-- `alice.account.balance = 10;`: `findOnSave` reads the write back. -/
 theorem headlineRead :
-    Fml.rwLaw (.find (.save .storage balance (.val (.lit (.int 10)))) balance, .lit (.int 10))
+    (LineRw.law (findOnSave (s := .storage) (p := balance) (v := .int 10))).apply
         dl!{ find(save(storage, alice.account.balance, 10), alice.account.balance) ≐ 10 }
       = some dl!{ 10 ≐ 10 } := rfl
 
@@ -177,20 +213,27 @@ equation, not the `defined(…)` beside it. -/
 theorem headlineEqD :
     Fml.applyStorageBoxAt 0 (over .box dl!{ alice.account.balance == 10 }
         dl!{ { storage := save(storage, alice.account.balance, 10) } true }) >>=
-      Fml.rwLaw (.find (.save .storage balance (.val (.lit (.int 10)))) balance, .lit (.int 10))
+      (LineRw.law (findOnSave (s := .storage) (p := balance) (v := .int 10))).apply
       = some dl!{ defined(find(save(storage, alice.account.balance, 10), alice.account.balance)) ∧
           defined(10) ∧ 10 ≐ 10 } := rfl
 
 /-! ## 4 · A law in an update's right-hand side
 
-`alice.age = 42; uint x = alice.age;` (`SelectOnSaveConsr.ageWriteReadKeY`,
-there on `⊢`): the read merged into the write (`sequentialToParallel` over a
-storage write), read back inside the update (`findOnSave`, onto a literal),
-the update applied (`applyOnRigidBox`: `x ≐ 42` reads no storage).  The
-calculus's traces read terms back in the update this way
-(`Examples/Theory.lean`).  Then the headline's write read back
-(`Theory.deepFieldWriteValue`'s program): the write sits amid captures, and
-the spine merges inside out. -/
+`alice.age = 42; uint x = alice.age;`, against `x ≐ 42` (KeY's `=`; the
+`==` of `SelectOnSaveConsr.ageWriteReadKeY` would leave `defined(…)` atoms,
+which that proof splits off with `eqDSplit`).  Two orders from the merged
+line:
+
+* `ageWriteReadValue`, the in-update reading (`Examples/Theory.lean`):
+  `findOnSave` inside the update (`lawUpd`, onto a literal), then the update
+  applied (`applyOnRigidBox`: `x ≐ 42` reads no storage);
+* `ageWriteReadKeYValue`, `ageWriteReadKeY`'s order past its `eqDSplit`:
+  the update applied first (`sol_apply_upd`), leaving
+  `find(save(…), alice.age) ≐ 42`, then `findOnSave` on that equation
+  (`law`).
+
+Then the headline's write read back (`Theory.deepFieldWriteValue`'s
+program): the write sits amid captures, and the spine merges inside out. -/
 
 /-- `alice.age = 42; uint x = alice.age;` under the box: the strategy's four steps. -/
 theorem ageWriteReadBox :
@@ -211,7 +254,7 @@ abbrev age : PTerm StandardExample := .field (.root "alice") "age"
 
 /-- `alice.age = 42; uint x = alice.age;`: `x` reads back `42` in the update. -/
 theorem ageWriteReadLaw :
-    Fml.rwUpdAt (.find (.save .storage age (.val (.lit (.int 42)))) age, .lit (.int 42)) 0
+    (LineRw.lawUpd (findOnSave (s := .storage) (p := age) (v := .int 42)) rfl 0).apply
         (over .box dl!{ x ≐ 42 } dl!{ { storage := save(storage, alice.age, 42)
           ‖ x := find(save(storage, alice.age, 42), alice.age) } true })
       = some (over .box dl!{ x ≐ 42 } dl!{ { storage := save(storage, alice.age, 42) ‖ x := 42 } true }) :=
@@ -231,6 +274,31 @@ theorem ageWriteReadValue : ⊨ dl!{ [ alice.age = 42; uint x = alice.age; ] x �
   refine (LineRw.lawUpd (findOnSave (s := .storage) (p := age) (v := .int 42)) rfl 0).valid
     ageWriteReadLaw ?_
   refine (LineRw.applyOnRigidBox 0).valid ageWriteReadApplied ?_
+  exact fun _ => Theory.StValue.Equiv.refl _
+
+/-- `alice.age = 42; uint x = alice.age;`, in `ageWriteReadKeY`'s order: the
+merged update applied, the read of the write left in the equation. -/
+theorem ageWriteReadKeYApplied :
+    Fml.applyOnRigidBoxAt 0 (over .box dl!{ x ≐ 42 } dl!{ { storage := save(storage, alice.age, 42)
+        ‖ x := find(save(storage, alice.age, 42), alice.age) } true })
+      = some dl!{ find(save(storage, alice.age, 42), alice.age) ≐ 42 } := rfl
+
+/-- `alice.age = 42; uint x = alice.age;`, in `ageWriteReadKeY`'s order:
+`findOnSave` on the equation. -/
+theorem ageWriteReadKeYRead :
+    (LineRw.law (findOnSave (s := .storage) (p := age) (v := .int 42))).apply
+        dl!{ find(save(storage, alice.age, 42), alice.age) ≐ 42 }
+      = some dl!{ 42 ≐ 42 } := rfl
+
+/-- `alice.age = 42; uint x = alice.age;` reads back `42`, in
+`ageWriteReadKeY`'s order: merge, apply, then the law. -/
+theorem ageWriteReadKeYValue : ⊨ dl!{ [ alice.age = 42; uint x = alice.age; ] x ≐ 42 } := by
+  apply symex_valid 4
+  rw [ageWriteReadBox]
+  refine (LineRw.mergeSpine 1).valid ageWriteReadMerged ?_
+  refine (LineRw.applyOnRigidBox 0).valid ageWriteReadKeYApplied ?_
+  refine (LineRw.law (findOnSave (s := .storage) (p := age) (v := .int 42))).valid
+    ageWriteReadKeYRead ?_
   exact fun _ => Theory.StValue.Equiv.refl _
 
 /-- `alice.account.balance = 10; uint x = alice.account.balance;` under the
@@ -256,7 +324,7 @@ theorem readBackMerged :
 /-- `alice.account.balance = 10; uint x = alice.account.balance;`: `x` reads
 back `10` in the update. -/
 theorem readBackLaw :
-    Fml.rwUpdAt (.find (.save .storage balance (.val (.lit (.int 10)))) balance, .lit (.int 10)) 0
+    (LineRw.lawUpd (findOnSave (s := .storage) (p := balance) (v := .int 10)) rfl 0).apply
         (over .box dl!{ x ≐ 10 }
           dl!{ { se1 := 10 ‖ sp1 := alice.account ‖ storage := save(storage, alice.account.balance, 10)
             ‖ sp2 := alice.account
@@ -288,10 +356,20 @@ theorem readBackValue :
 /-! ## 5 · A rebound alias
 
 `Account storage acc = alice.account; acc = bob.account; acc.balance = 10;`
-(`StorageSteps.localRebindThenWrite`): the printed line keeps
+(`StorageSteps.localRebindThenWrite` without its first capture), from the
+stack the strategy leaves (`localRebindBox`): the printed line keeps
 `acc := bob.account` and drops the capture it overwrites.  Dropping an
 overwritten element needs nothing of the postcondition, so it computes over
 `φ` and `m`. -/
+
+/-- `Account storage acc = alice.account; acc = bob.account; acc.balance = 10;`
+under the box: the strategy's five steps, the alias bound twice. -/
+theorem localRebindBox :
+    symex 5 dl!{ [ Account storage acc = alice.account; acc = bob.account; acc.balance = 10; ]
+        bob.account.balance ≐ 10 }
+      = over .box dl!{ bob.account.balance ≐ 10 } dl!{ { acc := alice.account } { acc := bob.account }
+          { storage := save(storage, acc.balance, 10) } true } :=
+  rfl
 
 /-- `Account storage acc = alice.account; acc = bob.account; acc.balance = 10;`: merged. -/
 theorem localRebindMerged (m : Modality) (φ : Fml StandardExample) :

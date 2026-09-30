@@ -255,13 +255,26 @@ theorem Fml.mergeSpine_holds :
     nomatch h
 
 /-- An update rule (`UpdRuleName.top`) on the update at position `i`:
-`simplifyUpdate`, `applySkip`, `applyOnRigid`, each an equivalence.  (Its
-`sequentialToParallel` is `Fml.mergeAt`'s without the storage write.) -/
-def Fml.updRuleAt (r : UpdRuleName) (i : Nat) : Fml C → Option (Fml C) := Fml.atSpine r.top i
+`simplifyUpdate`, `applySkip`, `applyOnRigid`, each an equivalence.
+`sequentialToParallel` gives `none`: that rule is `Fml.mergeAt` (and
+`Fml.mergeSpine`), which also merges a storage write and compares no
+modality where an update cannot halt, so a link labelled with it has one
+spelling. -/
+def Fml.updRuleAt : UpdRuleName → Nat → Fml C → Option (Fml C)
+  | .sequentialToParallel, _, _ => none
+  | .simplifyUpdate, i, φ => Fml.atSpine UpdRuleName.simplifyUpdate.top i φ
+  | .applySkip, i, φ => Fml.atSpine UpdRuleName.applySkip.top i φ
+  | .applyOnRigid, i, φ => Fml.atSpine UpdRuleName.applyOnRigid.top i φ
 
 theorem Fml.updRuleAt_holds {r : UpdRuleName} {i : Nat} {φ ψ : Fml C} (h : φ.updRuleAt r i = some ψ)
-    (σ : State) : holds σ ψ ↔ holds σ φ :=
-  Fml.atSpine_holds (fun h σ => (UpdRuleName.top_rule h).sound σ) i φ h σ
+    (σ : State) : holds σ ψ ↔ holds σ φ := by
+  have top : ∀ (r : UpdRuleName), φ.atSpine r.top i = some ψ → (holds σ ψ ↔ holds σ φ) :=
+    fun _ h => Fml.atSpine_holds (fun h σ => (UpdRuleName.top_rule h).sound σ) i φ h σ
+  cases r with
+  | sequentialToParallel => nomatch h
+  | simplifyUpdate => exact top _ h
+  | applySkip => exact top _ h
+  | applyOnRigid => exact top _ h
 
 /-! ## `simplifyUpdate` without the body
 
@@ -383,6 +396,8 @@ theorem Fml.rwLaw_holds {q : Term C × Term C} (h : Term.Theq q.1 q.2) {φ ψ : 
   · cases hl; exact Fml.rwEq_holds h φ σ
   · nomatch hl
 
+-- Here rather than on `UpdElem` (`Update.lean`) to spare a low edit; it moves
+-- to that type's `deriving` clause at the next batched edit of `Update.lean`.
 deriving instance DecidableEq for UpdElem
 
 /-- The law on the right-hand sides of `[{U}] φ` (`Proves.updRw`), if it
@@ -417,7 +432,8 @@ def mergeAt (i : Nat) : LineRw C := ⟨Fml.mergeAt i, fun h σ => (Fml.mergeAt_h
 def mergeSpine (n : Nat) : LineRw C :=
   ⟨Fml.mergeSpine n, fun h σ => (Fml.mergeSpine_holds n _ h σ).1⟩
 
-/-- An update rule at position `i`: `simplifyUpdate`, `applySkip`, `applyOnRigid`. -/
+/-- An update rule at position `i`: `simplifyUpdate`, `applySkip`, `applyOnRigid`.
+`sequentialToParallel` is `mergeAt`/`mergeSpine`; here it gives no line. -/
 def updRule (r : UpdRuleName) (i : Nat) : LineRw C :=
   ⟨Fml.updRuleAt r i, fun h σ => (Fml.updRuleAt_holds h σ).1⟩
 
