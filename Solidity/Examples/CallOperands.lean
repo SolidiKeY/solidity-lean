@@ -209,6 +209,24 @@ theorem memoryIndexWriteCallIncrement :
   sol_symex
   sol_close
 
+/-! ## 7 · Calls among other operands, in solc's order
+
+The right-hand side before the target, the right operand of a binary
+operator before the left (`docs/solc-alignment.md`); each call a capture of
+its own, its callee's return variable the next fresh index. -/
+
+example : Prog.toStr (sol{ values[makeValue()] = makeValue(); } : Prog Operands) =
+    "uint se1; se1 = makeValue(); uint se3; se3 = makeValue(); values[se3] = se1;" := rfl
+
+example : Prog.toStr (sol{ uint i = 0; values.push(makeValue() + i++); } : Prog Operands) =
+    "uint i = 0; uint se1; se1 = i++; uint se2; se2 = makeValue(); values.push(se2 + se1);" :=
+  rfl
+
+example : Prog.toStr (sol{ uint i = 0; uint[] memory carolValues = values;
+    carolValues[i++] = makeValue() + i; } : Prog Operands) =
+    "uint i = 0; uint[] memory carolValues = values; uint se1 = i; uint se2; se2 = makeValue(); uint se4 = se2 + se1; uint se5; se5 = i++; carolValues[se5] = se4;" :=
+  rfl
+
 /-! ## What cannot be written
 
 A function returning a memory reference, as in
