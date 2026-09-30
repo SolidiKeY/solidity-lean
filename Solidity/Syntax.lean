@@ -876,7 +876,7 @@ syntax sol_expr ".pop()" : sol_stmt
 syntax sol_expr " = " sol_expr ".push()" : sol_stmt
 /-- `values .push() = e;`, `a[i].push() = e;`: a push used as a target spelt
 with the `.push()` token; on a name or a member chain it is the push
-`b.push(e);` (`assignTo`), on another receiver refused (`expandStmt`). -/
+`b.push(e);`, on another receiver refused (`expandStmt.pushTarget`). -/
 syntax (name := solPushTarget) sol_expr ".push()" " = " sol_expr : sol_stmt
 syntax sol_ty &"storage" ident " = " sol_expr ".push()" : sol_stmt
 syntax sol_expr ".transfer(" sol_expr ")" : sol_stmt
@@ -1141,9 +1141,7 @@ partial def expandStmt (s : TSyntax `sol_stmt) : MacroM Term := do
   | ``solRevertErr | ``solRevertMsg => `(RawStmt.revert)
   | ``solHole => Macro.throwErrorAt s "`_;` stands once, at the top level of a modifier's body"
   | ``solPushTarget =>
-    if expandStmt.nameChain ⟨s.raw[0]⟩ then
-      `(RawStmt.call (.field $(← expandExpr ⟨s.raw[0]⟩) "push") [$(← expandExpr ⟨s.raw[3]⟩)])
-    else Macro.throwErrorAt s pushTargetMsg
+    expandStmt.pushTarget s ⟨s.raw[0]⟩ (← expandExpr ⟨s.raw[0]⟩) (← expandExpr ⟨s.raw[3]⟩)
   | ``solUnchecked => `(RawStmt.unchecked $(← expandStmt.expandBlock ⟨s.raw[1]⟩))
   | ``solIfChain =>
     -- `if (c₀) b₀ else if (c₁) b₁ … else e`: nested, from the last branch out
@@ -1240,10 +1238,14 @@ where
   assignTo (l : TSyntax `sol_expr) (r : Term) : MacroM Term := do
     if let `(sol_expr| $f:sol_expr ( $as:sol_expr,* )) := l then
       if as.getElems.isEmpty then
-        if let some b ← pushRecv? f then
-          unless nameChain f do Macro.throwErrorAt l pushTargetMsg
-          return ← `(RawStmt.call (.field $b "push") [$r])
+        if let some b ← pushRecv? f then return ← pushTarget l f b r
     `(RawStmt.assign $(← expandExpr l) $r)
+  /-- `b.push() = r;`, `b` and `r` expanded: the push `b.push(r);` when the
+  receiver, spelt `chain` (`b` or `b.push`), is a name or a member chain
+  (`assignTo` says why the order is solc's); refused at `ref` otherwise. -/
+  pushTarget (ref : Syntax) (chain : TSyntax `sol_expr) (b r : Term) : MacroM Term := do
+    unless nameChain chain do Macro.throwErrorAt ref pushTargetMsg
+    `(RawStmt.call (.field $b "push") [$r])
   /-- A name or a member chain of names: `values`, `bucket.tokens`,
   `bucket .tokens.push`. -/
   nameChain : TSyntax `sol_expr → Bool

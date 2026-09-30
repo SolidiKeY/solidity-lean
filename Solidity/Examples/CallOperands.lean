@@ -29,6 +29,33 @@ written with its `++i` left in place, and that program is pinned
 (`Prog.toStr`) and proved by the strategy rather than drawn line by line.
 `carolValues[i] = makeValue();` is a chain from its first step to its last
 line (`memoryIndexWriteCallChain` says why not every line between).
+
+The push rows are chains, not box theorems about the pushed value:
+`sol_close` does not read back what a push wrote into an array known only by
+its shape (pinned at the end of §3; `Calculus/Close.lean`).
+
+Where the printed rules differ, to be taken to them (Lean is the source of truth):
+
+* its coverage tables cite call operands (`values.push(makeValue())`,
+  `values[i] = makeValue()`, `total = makeValue()`,
+  `carolValues[i] = makeValue()`) as instances of the unfold-source rules,
+  which never fire on a call here: the elaborator has captured it, and they
+  fire on a pure operand such as `values.push(v + 1)`;
+* its last line of `values.push() = makeValue();` saves the length before the
+  element, `storagePushValueSave` the element first: the same store, another
+  term;
+* its first step of `carolValues[++i] = makeValue();` re-aliases the receiver
+  (`uint[] memory mv1 = carolValues;`), which the elaborator does not (§6);
+* its last line of `bucket.tokens.push() = tokRef;` writes the original path
+  (`save(save(storage, bucket.tokens.length, q+1), bucket.tokens[q],
+  find(bob, token(account)))`), where `bucketPushLvalueRefSource` keeps what
+  the rules bind, the receiver's alias `sp2` and the source's `tokRef`: the
+  printed line is that one with the alias updates applied, which no rule of
+  the chain does;
+* both push-as-target chains with a storage source (`pushLvalueRefSource`,
+  `bucketPushLvalueRefSource`) start with `{sp1 := bob.account}
+  {tokRef := sp1.token}` where the printed chain writes `{tokRef := bob.account.token}`:
+  the declaration's nested initialiser is aliased one member at a time.
 -/
 
 namespace Solidity.Examples.CallOperands
@@ -195,6 +222,16 @@ theorem bucketPushSlotWrite :
   sol_symex
   sol_close
 
+/-- `[ uint n = values.length; values.push(42); ] values.length == n + 1` is
+valid, but the strategy leaves it open: the push's write is not read back
+(`Calculus/Close.lean`).  Pinned, so that closing it shows here. -/
+example : True := by
+  fail_if_success
+    have : ⊨ dl!{ [ uint n = values.length; values.push(42); ] values.length == n + 1 } := by
+      sol_symex
+      sol_close
+  trivial
+
 /-! ## 4 · Storage writes: `values[i] = makeValue();`, `total = makeValue();`
 
 These are the call-valued operands
@@ -309,15 +346,15 @@ example : Prog.toStr (sol{ uint i = 0; uint[] memory carolValues = values;
 
 A function returning a memory reference, as in
 `choosePersonMem().account = makeAccount();`: a call's value is a value type
-(`CallRet`), and `returns (Account memory)` reads `memory` as the return
-variable's name, so no memory return is declared either. -/
+(`CallRet`), and a member of a call does not parse.  Nor is a memory return
+declared: `returns (Account memory)` parses, but reads `memory` as the return
+variable's name, not as a location. -/
 
-/-- A function whose return is a struct (`memory` read as the return
-variable's name): a call of it is refused, a call's value being a value
-type. -/
+/-- A function whose return is a struct: a call of it is refused, a call's
+value being a value type. -/
 def MemReturn : Contract := contract!{
   uint seed;
-  function makeAccount() returns (Account memory) { Account memory a; return a; }
+  function makeAccount() returns (Account r) { Account memory a; return a; }
 }
 
 /--
