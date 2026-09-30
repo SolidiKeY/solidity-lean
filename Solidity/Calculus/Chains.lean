@@ -1,4 +1,5 @@
 import Solidity.Calculus.Notation
+import Solidity.Calculus.ChainRewrites
 
 /-!
 # Chains: `φ ~> ψ`, `φ ~[r]~> ψ` and `φ ~*> ψ`
@@ -121,6 +122,20 @@ inductive Fml.Steps : Fml C → Fml C → Type where
   | refl (φ : Fml C) : Fml.Steps φ φ
   | cons {φ ψ χ : Fml C} (s : Fml.OneStep φ ψ) (rest : Fml.Steps ψ χ) : Fml.Steps φ χ
 
+/-- `φ ~[n]~> ψ` past the strategy: the rewrite `r` of
+`Calculus/ChainRewrites.lean` turns `φ` into `ψ`, and `n` is the rule the
+arrow names (`sequentialToParallel`, `findOnSave`, …).  The rewrite is the
+one the elaborator found for `n` on `φ`: its position on the update spine,
+and for a law its instance. -/
+def Fml.RwBy (_n : String) (r : LineRw C) (φ ψ : Fml C) : Prop := r.apply φ = some ψ
+
+/-- `φ ~~> ψ`: to prove `φ`, prove `ψ` — wherever `ψ` holds, `φ` does.  What
+a chain with a rewrite in it composes to (a rewrite and a step may commute,
+so it is no derivation `~*>`). -/
+def Fml.Leads (φ ψ : Fml C) : Prop := ∀ σ, holds σ ψ → holds σ φ
+
+@[inherit_doc] notation:50 φ:51 " ~~> " ψ:51 => Fml.Leads φ ψ
+
 /-- The arrows of a chain. -/
 inductive Link (C : Contract) : Type where
   /-- `~>` -/
@@ -129,12 +144,15 @@ inductive Link (C : Contract) : Type where
   | many
   /-- `~[r]~>` -/
   | rule (r : StepRule C)
+  /-- `~[n]~>` for a rewrite: an update rule or a Theory law -/
+  | rw (n : String) (r : LineRw C)
 
 /-- What an arrow says about the two lines it joins. -/
 @[reducible] def Link.Rel : Link C → Fml C → Fml C → Type
   | .one => fun φ ψ => PLift (Fml.OneStep φ ψ)
   | .many => Fml.Steps
   | .rule r => fun φ ψ => PLift (Fml.StepBy r φ ψ)
+  | .rw n r => fun φ ψ => PLift (Fml.RwBy n r φ ψ)
 
 /-- `φ ~> φ₁ ~*> φ₂ …`: every link of a chain that starts at `φ`, as
 evidence (a product, one factor per arrow). -/
@@ -277,13 +295,10 @@ elab "ruleCheck% " l:term:max a:term:max r:ident : term => do
     throwError "~[{r}]~>: the rule for{indentExpr a}\nis not {r}"
   return l
 
-/-- `stepBy% φ r ψ`: `φ ~[r]~> ψ`, with `φ` elaborated once.  In a `calc` step
-`φ` is not known yet: the label is left to the proof, and checked after it. -/
-elab "stepBy% " a:term:max r:ident b:term:max : term => do
-  let a ← elabTerm a none
-  let ty ← whnfR (← instantiateMVars (← inferType a))
-  let_expr Fml C := ty | throwError "~[{r}]~>: not a formula{indentExpr a}"
-  let b ← elabTermEnsuringType b ty
+/-- `φ ~[r]~> ψ` for a rule of the strategy, `φ : Fml C` and `ψ` elaborated.
+In a `calc` step `φ` is not known yet: the label is left to the proof, and
+checked after it. -/
+def stepByRule (C a b : Lean.Expr) (r : Ident) : TermElabM Lean.Expr := do
   let rty := mkApp (mkConst ``StepRule) C
   let lbl ← if (← instantiateMVars a).hasExprMVar then
       let l ← mkFreshExprMVar rty
@@ -295,6 +310,14 @@ elab "stepBy% " a:term:max r:ident b:term:max : term => do
 
 end Elab
 end Chain
+
+/-- `stepBy% φ r ψ`: `φ ~[r]~> ψ`, with `φ` elaborated once: a rule of the
+strategy (`Fml.StepBy`) or a rewrite (`Fml.RwBy`).  Elaborated at the end of
+the module, after `sol_chain`'s search. -/
+syntax "stepBy% " term:max ident term:max : term
+
+/-- `link% φ r ψ`: the `Link` of `φ ~[r]~> ψ` in a chain. -/
+syntax "link% " term:max ident term:max : term
 
 declare_syntax_cat chain_arrow
 syntax "~> " : chain_arrow
@@ -317,7 +340,7 @@ open Lean in
       | `(chain_arrow| ~>) => pure (← `(Link.one), app ``Fml.OneStep #[prev, b])
       | `(chain_arrow| ~*>) => pure (← `(Link.many), app ``Fml.Steps #[prev, b])
       | `(chain_arrow| ~[ $r:ident ]~>) =>
-        pure (← `(Link.rule (rule% ($prev) $r)), ← `(stepBy% ($prev) $r ($b)))
+        pure (← `(link% ($prev) $r ($b)), ← `(stepBy% ($prev) $r ($b)))
       | _ => Macro.throwUnsupported
     links := links.push (link.1, link.2, b)
     prev := b
@@ -344,6 +367,9 @@ def arrowOf (l : Lean.Expr) : MetaM (TSyntax `chain_arrow) := do
   else if l.isAppOfArity ``Link.rule 2 then
     let some n ← ruleName? l.appArg! | failure
     `(chain_arrow| ~[$(mkIdent n):ident]~>)
+  else if l.isAppOfArity ``Link.rw 3 then
+    let .lit (.strVal n) := l.getArg! 1 | failure
+    `(chain_arrow| ~[$(mkIdent n.toName):ident]~>)
   else failure
 
 def chainNode (a : Lean.Term) (arrows : Array (TSyntax `chain_arrow × Lean.Term)) : Lean.Term :=
@@ -371,6 +397,15 @@ def delabStepBy : Delab := do
   let some n ← ruleName? (e.getArg! 1) | failure
   return chainNode (← withNaryArg 2 delab)
     #[(← `(chain_arrow| ~[$(mkIdent n):ident]~>), ← withNaryArg 3 delab)]
+
+/-- `Fml.RwBy n r φ ψ`: `φ ~[n]~> ψ`. -/
+@[delab app.Solidity.Fml.RwBy]
+def delabRwBy : Delab := do
+  let e ← getExpr
+  guard (e.getAppNumArgs == 5)
+  let .lit (.strVal n) := e.getArg! 1 | failure
+  return chainNode (← withNaryArg 3 delab)
+    #[(← `(chain_arrow| ~[$(mkIdent n.toName):ident]~>), ← withNaryArg 4 delab)]
 
 /-- `Fml.Via φ [(l₁, φ₁), …]`: `φ l₁ φ₁ …`. -/
 @[delab app.Solidity.Fml.Via]
@@ -437,18 +472,8 @@ theorem Fml.OneStep.stepBy {φ ψ : Fml C} (h : φ ~> ψ) : ∃ r, Fml.StepBy r 
 def Fml.StepBy.steps {r : StepRule C} {φ ψ : Fml C} (h : Fml.StepBy r φ ψ) : φ ~*> ψ :=
   .single h.oneStep
 
-/-- A chain, composed: from its first line to its last. -/
-def Fml.Via.steps : {φ : Fml C} → {ws : List (Link C × Fml C)} → Fml.Via φ ws →
-    φ ~*> Fml.Via.last φ ws
-  | _, [], _ => .refl _
-  | _, [(.one, _)], ⟨s⟩ => .single s
-  | _, [(.many, _)], c => c
-  | _, [(.rule _, _)], ⟨h⟩ => h.steps
-  | _, (.one, _) :: _ :: _, (⟨s⟩, v) => .cons s v.steps
-  | _, (.many, _) :: _ :: _, (c, v) => c.trans v.steps
-  | _, (.rule _, _) :: _ :: _, (⟨h⟩, v) => .cons h.oneStep v.steps
-
-/-! `calc` chains `~>`, `~*>` and `~[r]~>`; the result is a derivation `~*>`. -/
+/-! `calc` chains `~>`, `~*>` and `~[r]~>`; the result is a derivation `~*>`.
+With a rewrite among them it is `~~>` (the instances after `Fml.Leads.valid`). -/
 
 instance : @Trans (Fml C) (Fml C) (Fml C) Fml.Steps Fml.Steps Fml.Steps := ⟨Fml.Steps.trans⟩
 instance : @Trans (Fml C) (Fml C) (Fml C) Fml.OneStep Fml.Steps Fml.Steps := ⟨.cons⟩
@@ -515,6 +540,28 @@ theorem Fml.Steps.sound {φ ψ : Fml C} : φ ~*> ψ → ∀ σ, holds σ ψ → 
   | .refl _, _, h => h
   | .cons s c, σ, h => s.sound σ (c.sound σ h)
 
+/-- A rewrite is sound: where the line after it holds, the line before holds.
+
+Example: `{ se1 := 10 } { sp1 := alice.account } ⟨ sp1.balance = se1; ⟩ φ
+~[sequentialToParallel]~> { se1 := 10 ‖ sp1 := alice.account } ⟨ sp1.balance = se1; ⟩ φ`. -/
+theorem Fml.RwBy.sound {n : String} {r : LineRw C} {φ ψ : Fml C} (h : Fml.RwBy n r φ ψ) :
+    φ ~~> ψ :=
+  r.sound h
+
+/-- A chain is sound state by state: where its last line holds, its first
+line holds, whatever its arrows. -/
+theorem Fml.Via.sound : {φ : Fml C} → {ws : List (Link C × Fml C)} → Fml.Via φ ws →
+    φ ~~> Fml.Via.last φ ws
+  | _, [], _ => fun _ h => h
+  | _, [(.one, _)], ⟨s⟩ => s.sound
+  | _, [(.many, _)], c => Fml.Steps.sound c
+  | _, [(.rule _, _)], ⟨h⟩ => h.oneStep.sound
+  | _, [(.rw _ _, _)], ⟨h⟩ => h.sound
+  | _, (.one, _) :: _ :: _, (⟨s⟩, v) => fun σ h => s.sound σ (Fml.Via.sound v σ h)
+  | _, (.many, _) :: _ :: _, (c, v) => fun σ h => Fml.Steps.sound c σ (Fml.Via.sound v σ h)
+  | _, (.rule _, _) :: _ :: _, (⟨s⟩, v) => fun σ h => s.oneStep.sound σ (Fml.Via.sound v σ h)
+  | _, (.rw _ _, _) :: _ :: _, (⟨s⟩, v) => fun σ h => s.sound σ (Fml.Via.sound v σ h)
+
 /-- **A derivation is a proof**: to prove `φ`, prove any line it reaches.
 
 Example: `[ alice.age = v; ] alice.age == v ~*>
@@ -543,7 +590,34 @@ Example: the chain `⟨ alice.account.balance = 10; ⟩ … ~*> … ~[storageLoc
 of `Examples/Chains.lean` proves its first line from its last. -/
 theorem Fml.Via.valid {φ : Fml C} {ws : List (Link C × Fml C)} (v : Fml.Via φ ws)
     (h : ⊨ Fml.Via.last φ ws) : ⊨ φ :=
-  v.steps.valid h
+  fun σ => v.sound σ (h σ)
+
+/-- A chain with rewrites is a proof: to prove its first line, prove its last.
+
+Example: `headlineNamed .box φ` of `Examples/Chains.lean`, down to the
+last line, proves `[ alice.account.balance = 10; ] φ` from
+`{ se1 := 10 ‖ sp1 := alice.account ‖ storage := save(storage, alice.account.balance, 10) } φ`. -/
+theorem Fml.Leads.valid {φ ψ : Fml C} (h : φ ~~> ψ) (hψ : ⊨ ψ) : ⊨ φ :=
+  fun σ => h σ (hψ σ)
+
+universe u v
+
+/-- A relation between lines whose evidence carries the second line's truth
+back to the first: every arrow of a chain, and `~~>` itself. -/
+class Fml.SoundRel (R : Fml C → Fml C → Sort u) : Prop where
+  leads : ∀ {φ ψ : Fml C}, R φ ψ → φ ~~> ψ
+
+instance : Fml.SoundRel (@Fml.OneStep C) := ⟨fun s => s.sound⟩
+instance : Fml.SoundRel (@Fml.Steps C) := ⟨fun c => c.sound⟩
+instance {r : StepRule C} : Fml.SoundRel (Fml.StepBy r) := ⟨fun h => h.oneStep.sound⟩
+instance {n : String} {r : LineRw C} : Fml.SoundRel (Fml.RwBy n r) := ⟨fun h => h.sound⟩
+instance : Fml.SoundRel (@Fml.Leads C) := ⟨id⟩
+
+/-- A `calc` with a rewrite in it composes to `~~>`; one of steps alone still
+composes to `~*>`, whose instances come first. -/
+instance (priority := low) {R : Fml C → Fml C → Sort u} {S : Fml C → Fml C → Sort v}
+    [Fml.SoundRel R] [Fml.SoundRel S] : @Trans (Fml C) (Fml C) (Fml C) R S Fml.Leads :=
+  ⟨fun a b σ h => Fml.SoundRel.leads a σ (Fml.SoundRel.leads b σ h)⟩
 
 /-! ## Determinism: the evidence is unique -/
 
@@ -682,6 +756,10 @@ def Fml.linesQuoted (c : Lean.Expr) : Nat → Fml C → List Chain.Line
   | n + 1, φ => match φ.step with
     | some ψ => ⟨ψ.quote c, φ.fresh, φ.stepOpenOk⟩ :: Fml.linesQuoted c n ψ
     | none => []
+
+/-- Each rewrite of `rs` on `φ`: the line after, quoted, or `none`. -/
+def Fml.rwQuoted (c : Lean.Expr) (φ : Fml C) (rs : List (LineRw C)) : List (Option Lean.Expr) :=
+  rs.map fun r => (r.apply φ).map (Fml.quote c)
 
 namespace Chain
 section Tactic
@@ -886,9 +964,239 @@ def stepsProof (C : Lean.Expr) (sp : Splice) (A : Lean.Expr) (ls : List Line) :
       pure (mkAppN (mkConst ``Fml.Steps.cons) #[C, A, B.fml, Z, s, ← go B.fml ls])
   go A ls
 
+/-! ### Rewrite links
+
+`~[n]~>` names a rewrite when `n` is no rule of the strategy: an update rule
+of `Calculus/ChainRewrites.lean`'s table, or a Theory law, a constant whose
+statement is a `Term.Theq`.  The name stands for several rewrites, which the
+line before tells apart: the position on the update spine, and for a law its
+instance, found in the line as `rw` finds one.  They are tried in a fixed
+order (`rwCandidates`), and the label is the first that gives the line after
+— or, with the line after left `_`, the first that applies.  So the next
+line is computed, as for a step, and the kernel checks `r.apply φ = some ψ`
+by `rfl`. -/
+
+/-- What `~[n]~>` names past the strategy. -/
+inductive RwArrow where
+  /-- An update rule of the table (`rwTable`). -/
+  | table (n : Lean.Name)
+  /-- A Theory law: a constant whose statement is a `Term.Theq`. -/
+  | law (c : Lean.Name)
+
+/-- The update rules an arrow names, KeY's names: `sequentialToParallel`
+merges, `simplifyUpdate` drops, `applySkip` and the `applyOnRigid…` apply. -/
+def rwTable : List Lean.Name :=
+  [`sequentialToParallel, `simplifyUpdate, `applySkip, `applyOnRigid, `applyOnRigidBox,
+    `applyStorageBox]
+
+/-- Whether the constant `c` states a `Term.Theq`, under its arguments. -/
+def isLaw (c : Lean.Name) : MetaM Bool := do
+  let some info := (← getEnv).find? c | return false
+  forallTelescope info.type fun _ ty => return (← whnfR ty).isAppOf ``Term.Theq
+
+/-- What `~[r]~>` names: `none` for a rule of the strategy (a `Taclet` or
+`LeanTaclet` constructor, `emptyModality`), else a rewrite; any other name is
+an error, and so is a name that resolves to more than one constant. -/
+def rwArrow? (r : Ident) : MetaM (Option RwArrow) := do
+  let n := r.getId
+  let env ← getEnv
+  if n == `emptyModality || env.contains (``Taclet ++ n) || env.contains (``LeanTaclet ++ n) then
+    return none
+  if rwTable.contains n then return some (.table n)
+  let cs := ((← resolveGlobalName n).filterMap fun (c, fs) =>
+    if fs.isEmpty then some c else none).eraseDups
+  match cs with
+  | [c] => if ← isLaw c then return some (.law c)
+  | [] => pure ()
+  | cs => throwError "~[{r}]~>: ambiguous, {r} may be any of {cs}"
+  throwError "~[{r}]~>: {r} is no rule: not a `Taclet` or `LeanTaclet` constructor, not an \
+    update rule ({", ".intercalate (rwTable.map toString)}), not a Theory law (`Term.Theq`)"
+
+/-- The number of updates in front of a line. -/
+partial def spineLen (e : Lean.Expr) : MetaM Nat := do
+  let e ← whnf e
+  if e.isAppOfArity ``Fml.upd 4 then return (← spineLen e.appArg!) + 1 else return 0
+
+/-- The subterms of `e` with the head of `p`, outermost and leftmost first. -/
+partial def subtermsLike (p e : Lean.Expr) : Array Lean.Expr :=
+  let rec go (e : Lean.Expr) (acc : Array Lean.Expr) : Array Lean.Expr :=
+    let acc := if !e.hasLooseBVars && e.toHeadIndex == p.toHeadIndex &&
+        e.headNumArgs == p.headNumArgs then acc.push e else acc
+    match e with
+    | .app f x => go x (go f acc)
+    | .mdata _ e => go e acc
+    | _ => acc
+  go e #[]
+
+/-- The law `c` at the subterm `e`: `(t, t', h)` when `e` is its left side,
+its arguments found there and its side conditions (`hp : p.hasSeg = true`,
+…) closed by `rfl` or `decide`, as `sol_rw` closes them (`solRwSide`); else
+why not, if a side condition is why. -/
+def lawAt (c : Lean.Name) (e : Lean.Expr) :
+    TermElabM (Except (Option MessageData) (Lean.Expr × Lean.Expr × Lean.Expr)) := do
+  let pf ← mkConstWithFreshMVarLevels c
+  let (args, _, ty) ← forallMetaTelescope (← inferType pf)
+  let ty ← whnfR (← instantiateMVars ty)
+  let_expr Term.Theq _ lhs rhs := ty | return .error none
+  unless ← isDefEq lhs e do return .error none
+  for a in args do
+    let g := a.mvarId!
+    if (← g.isAssigned) || !(← isProp (← g.getType)) then continue
+    let ty := (← instantiateMVars (← g.getType)).cleanupAnnotations
+    let g ← g.replaceTargetDefEq ty
+    let closed ← try
+        pure (← Term.withoutErrToSorry <|
+          Tactic.run g (evalTactic (← `(tactic| first | rfl | decide)))).isEmpty
+      catch _ => pure false
+    unless closed do
+      return .error (some m!"the side condition{indentExpr ty}\nof {lastName c} closes by neither \
+        `rfl` nor `decide`")
+  let pf ← instantiateMVars (mkAppN pf args)
+  let t' ← instantiateMVars rhs
+  if pf.hasExprMVar || t'.hasExprMVar then return .error none
+  return .ok (← instantiateMVars lhs, t', pf)
+
+/-- The instances `(t, t', h)` of the law `c` in the line `φ`, outermost and
+leftmost first (`lawAt`), and the first side condition that did not close. -/
+def lawInstances (c : Lean.Name) (φ : Lean.Expr) :
+    TermElabM (Array (Lean.Expr × Lean.Expr × Lean.Expr) × Option MessageData) := do
+  let lhs0 ← withoutModifyingState do
+    let (_, _, ty) ← forallMetaTelescope (← inferType (← mkConstWithFreshMVarLevels c))
+    let ty ← whnfR (← instantiateMVars ty)
+    let_expr Term.Theq _ lhs _ := ty | throwError "not a law: {c}"
+    instantiateMVars lhs
+  let mut out := #[]
+  let mut failed := none
+  for e in subtermsLike lhs0 φ do
+    let s ← saveState
+    let r ← try lawAt c e catch _ => pure (.error none)
+    s.restore
+    match r with
+    | .ok i => unless out.any (·.2.2 == i.2.2) do out := out.push i
+    | .error m => if failed.isNone then failed := m
+  return (out, failed)
+
+/-- The rewrites `~[r]~>` stands for on the line `φ`, in the order they are
+tried, and why a law found no instance.  `sequentialToParallel`: the whole
+spine merged, then fewer updates, then one pair further in; the others at
+each position of the spine, outermost first.  A law: at each instance, on
+the equations, then in each box update's right-hand sides when its result
+cannot halt. -/
+def rwCandidates (C φ : Lean.Expr) : RwArrow → TermElabM (Array Lean.Expr × Option MessageData)
+  | .table n => do
+    let k ← spineLen φ
+    let atPos (f : Lean.Name) (is : List Nat) : Array Lean.Expr :=
+      (is.map fun i => mkApp2 (mkConst f) C (toExpr i)).toArray
+    let upd (r : Lean.Name) : Array Lean.Expr := ((List.range k).map fun i =>
+      mkApp3 (mkConst ``LineRw.updRule) C (mkConst r) (toExpr i)).toArray
+    let rs :=
+      if n == `sequentialToParallel then
+        atPos ``LineRw.mergeSpine ((List.range (k - 1)).reverse.map (· + 1)) ++
+          atPos ``LineRw.mergeAt ((List.range (k - 1)).drop 1)
+      else if n == `simplifyUpdate then
+        upd ``UpdRuleName.simplifyUpdate ++ atPos ``LineRw.dropShadowed (List.range k)
+      else if n == `applySkip then upd ``UpdRuleName.applySkip
+      else if n == `applyOnRigid then upd ``UpdRuleName.applyOnRigid
+      else if n == `applyOnRigidBox then atPos ``LineRw.applyOnRigidBox (List.range k)
+      else if n == `applyStorageBox then atPos ``LineRw.applyStorageBox (List.range k)
+      else #[]
+    return (rs, none)
+  | .law c => do
+    let (is, failed) ← lawInstances c φ
+    let k ← spineLen φ
+    let mut out := #[]
+    for (t, t', pf) in is do
+      out := out.push (mkAppN (mkConst ``LineRw.law) #[C, t, t', pf])
+      if ← isDefEq (mkApp2 (mkConst ``Term.total) C t') (mkConst ``Bool.true) then
+        let ht ← mkEqRefl (mkConst ``Bool.true)
+        for i in List.range k do
+          out := out.push (mkAppN (mkConst ``LineRw.lawUpd) #[C, t, t', pf, ht, toExpr i])
+    return (out, failed)
+
+/-- Each of the rewrites `rs` on the line `φ`, computed: the line after, with
+the line's modality and postconditions put back, or `none`.  Under a
+modality `m` a rewrite runs at the diamond and at the box, and gives a line
+only where the two agree but for `m`. -/
+def rwResults (C φ : Lean.Expr) (rs : Array Lean.Expr) :
+    MetaM (List (Option Lean.Expr) × Option Lean.Expr) := do
+  let some n := (← whnfR C).constName?
+    | throwError "sol_chain: the contract is not a named constant: {C}"
+  let (φ', sp) ← (punch C φ).run {}
+  let ty := mkApp (mkConst ``List [0]) (mkApp (mkConst ``Option [0]) (mkConst ``Lean.Expr))
+  let list ← mkListLit (mkApp (mkConst ``LineRw) C) rs.toList
+  let eval (φ : Lean.Expr) : MetaM (List (Option Lean.Expr)) :=
+    unsafe evalExpr (List (Option Lean.Expr)) ty
+      (mkApp4 (mkConst ``Fml.rwQuoted) C (quoteConstName n) φ list)
+  let fill (m? : Option Lean.Expr) (d b : Lean.Expr) : Option Lean.Expr :=
+    (fillSlots m? sp.fmls d b).toOption
+  match ← modalityOf? φ' with
+  | none =>
+    let qs ← eval φ'
+    return (if sp.fmls.isEmpty then qs else qs.map (·.bind fun q => fill none q q), none)
+  | some m =>
+    let ds ← eval (φ'.replaceFVar m (mkConst ``Modality.diamond))
+    let bs ← eval (φ'.replaceFVar m (mkConst ``Modality.box))
+    let parts := (ds.zip bs).any fun (d, b) => d.isSome != b.isSome
+    return ((ds.zip bs).map fun
+      | (some d, some b) => fill m d b
+      | _ => none, if parts then some m else none)
+
+/-- The rewrite `~[n]~>` names on `φ`, among `rs`, and the line after it: the
+first that gives `ψ`, or, with `ψ` left `_`, the first that applies.  On a
+line with a modality `m` or a postcondition `φ : Post C`, the rewrite must
+compute over them (`r.apply φ = some ψ` by the kernel, on the line itself):
+`simplifyUpdate`, say, asks the postcondition which variables it reads. -/
+def rwSelect (C φ ψ : Lean.Expr) (n : String) (rs : Array Lean.Expr)
+    (failed : Option MessageData := none) : TermElabM (Lean.Expr × Lean.Expr) := do
+  let φ ← instantiateMVars φ
+  let ψ ← instantiateMVars ψ
+  let (qs, parts) ← rwResults C φ rs
+  let mut gives := #[]
+  let mut stuck := false
+  for (r, q?) in rs.toList.zip qs do
+    let some q := q? | continue
+    if φ.hasFVar then
+      let lhs := mkApp2 (mkApp (mkConst ``LineRw.apply) C) r φ
+      unless ← isDefEq lhs (mkApp2 (mkConst ``Option.some [0]) (mkApp (mkConst ``Fml) C) q) do
+        stuck := true
+        continue
+    unless ψ.isMVar || q == ψ || (← withReducible (isDefEq q ψ)) do
+      gives := gives.push q
+      continue
+    return (r, q)
+  if !gives.isEmpty then
+    let ls := gives.toList.map fun q => m!"{indentExpr q}"
+    throwError "~[{n}]~>: on{indentExpr φ}\nit gives{MessageData.joinSep ls ""}\nnot{indentExpr ψ}"
+  if stuck then
+    throwError "~[{n}]~>: on{indentExpr φ}\nit looks at the line's modality or postcondition, \
+      which are not known: state the line for a concrete one"
+  let note := match failed, parts with
+    | some m, _ => m!"\n({m})"
+    | none, some m => m!"\n(it applies under one modality only: go on after `cases {m}`)"
+    | none, none => m!""
+  throwError "~[{n}]~>: {n} does not apply to{indentExpr φ}{note}"
+
+/-- The label of `φ ~[r]~> ψ` for a rewrite, `φ` known, and the line after. -/
+def rwLabel (C φ ψ : Lean.Expr) (r : Ident) (a : RwArrow) : TermElabM (Lean.Expr × Lean.Expr) := do
+  let (rs, failed) ← rwCandidates C (← instantiateMVars φ) a
+  rwSelect C φ ψ r.getId.toString rs failed
+
 partial def solveChain (g : MVarId) : TermElabM Unit := do
   let ty ← instantiateMVars (← g.getType)
-  if ty.isAppOfArity ``Fml.StepBy 4 then
+  if ty.isAppOfArity ``Fml.RwBy 5 then
+    let #[C, n, r, φ, ψ] := ty.getAppArgs | unreachable!
+    let .lit (.strVal n) := n | throwError "sol_chain: the arrow's name is not known{indentExpr ty}"
+    let φ ← instantiateMVars φ
+    if φ.hasExprMVar then throwError "sol_chain: ~[{n}]~>: the line before it is not known{indentExpr φ}"
+    let r ← instantiateMVars r
+    let (r', q) ← if r.isMVar then
+        let some a ← rwArrow? (mkIdent n.toName) | throwError "sol_chain: {n} is a rule of the strategy"
+        rwLabel C φ ψ (mkIdent n.toName) a
+      else rwSelect C φ ψ n #[r]
+    unless ← isDefEq r r' do throwError "sol_chain: ~[{n}]~>: the label is not {r'}"
+    unless ← isDefEq ψ q do throwError "sol_chain: ~[{n}]~>: the line after is not{indentExpr q}"
+    g.assign (someRefl C q)
+  else if ty.isAppOfArity ``Fml.StepBy 4 then
     let #[C, r, φ, ψ] := ty.getAppArgs | unreachable!
     let (run, q) ← nextLine C φ ψ
     if run.splice.fmls.isEmpty then
@@ -937,8 +1245,8 @@ partial def solveChain (g : MVarId) : TermElabM Unit := do
       solveChain p.mvarId!
       g.assign (← mkAppM ``PLift.up #[p])
     | Fml.Steps _ _ _ => solveChain (← g.replaceTargetDefEq (← whnf ty))
-    | _ => throwError "sol_chain: expected `φ ~> ψ`, `φ ~[r]~> ψ`, `φ ~*> ψ` or a chain of them\
-        {indentExpr ty}"
+    | _ => throwError "sol_chain: expected `φ ~> ψ`, `φ ~[r]~> ψ` (a rule or a rewrite), `φ ~*> ψ` \
+        or a chain of them{indentExpr ty}"
 
 /-- `sol_chain`: prove `φ ~> ψ`, `φ ~[r]~> ψ`, `φ ~*> ψ` or a chain of them by
 running the strategy; the kernel checks the lines it found. -/
@@ -959,6 +1267,67 @@ elab "#derivation " t:term : command => Command.runTermElabM fun _ => do
   logInfo ((← showLines φ (run.lines.map (·.fml))) ++ stuckNote run)
 
 end Tactic
+
+section Elab
+open Lean Elab Term Meta
+
+/-- `rwLabel% l φ r ψ`: `l`, once `φ` is known, the label of `φ ~[r]~> ψ`
+for a rewrite, unless `sol_chain` found it first.  A line before that a
+tactic still has to find (a `calc` step's `_` after `by sol_chain`) leaves the
+label to the step's own `sol_chain`. -/
+elab "rwLabel% " l:term:max a:term:max r:ident b:term:max : term => do
+  let l ← elabTerm l none
+  if (← instantiateMVars l).isMVar then
+    let a' ← instantiateMVars (← elabTerm a none)
+    if a'.hasExprMVar then
+      tryPostpone
+      return l
+    let some arrow ← rwArrow? r | throwError "~[{r}]~>: not a rewrite"
+    let ty ← whnfR (← inferType a')
+    let_expr Fml C := ty | throwError "~[{r}]~>: not a formula{indentExpr a'}"
+    let (lbl, _) ← rwLabel C a' (← elabTerm b none) r arrow
+    unless ← isDefEq l lbl do throwError "~[{r}]~>: the rewrite on{indentExpr a'}\nis not {l}"
+  return l
+
+/-- The label of a rewrite arrow after the line `a`: computed when `a` is
+known; otherwise left to the proof, `rwLabel%` filling it once `a` is known. -/
+def rwLabelOf (C a b : Lean.Expr) (r : Ident) (arrow : RwArrow) : TermElabM Lean.Expr := do
+  if !(← instantiateMVars a).hasExprMVar then return (← rwLabel C a b r arrow).1
+  let lty := mkApp (mkConst ``LineRw) C
+  let l ← mkFreshExprMVar lty
+  discard <| elabTermEnsuringType (← `(rwLabel% $(← exprToSyntax l) $(← exprToSyntax a) $r
+    $(← exprToSyntax b))) lty
+  return l
+
+/-- The contract of a line, `Fml C`. -/
+def lineContract (a : Lean.Expr) (r : Ident) : TermElabM Lean.Expr := do
+  let ty ← whnfR (← instantiateMVars (← inferType a))
+  if let some C := ty.app1? ``Fml then return C
+  let C ← mkFreshExprMVar (mkConst ``Contract)
+  unless ← isDefEq ty (mkApp (mkConst ``Fml) C) do throwError "~[{r}]~>: not a formula{indentExpr a}"
+  return C
+
+elab_rules : term
+  | `(stepBy% $a $r $b) => do
+    let a ← elabTerm a none
+    let C ← lineContract a r
+    let b ← elabTermEnsuringType b (mkApp (mkConst ``Fml) C)
+    match ← rwArrow? r with
+    | none => stepByRule C a b r
+    | some arrow =>
+      let l ← rwLabelOf C a b r arrow
+      return mkAppN (mkConst ``Fml.RwBy) #[C, toExpr r.getId.toString, l, a, b]
+  | `(link% $a $r $b) => do
+    match ← rwArrow? r with
+    | none => elabTerm (← `(Link.rule (rule% $a $r))) none
+    | some arrow =>
+      let a ← elabTerm a none
+      let C ← lineContract a r
+      let b ← elabTermEnsuringType b (mkApp (mkConst ``Fml) C)
+      let l ← rwLabelOf C a b r arrow
+      return mkApp3 (mkConst ``Link.rw) C (toExpr r.getId.toString) l
+
+end Elab
 end Chain
 
 end Solidity
