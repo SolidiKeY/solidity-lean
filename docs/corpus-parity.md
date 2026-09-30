@@ -49,7 +49,7 @@ None.
 | exponentiation `**` is not in the sol_expr grammar | 8 | TestSuite 3, SolcExpressions 5 |
 | Solidity elaboration failed: `delete` in memory is not a statement yet | 7 | TestSuite 7 |
 | KeY loader/taclet machinery: ad-hoc taclets over `\problem { true }`, a sort condition, a list declaration or an empty problem — there is no identity and no judgment to state | 7 | Rules 7 |
-| `b.push() = v` (a push as an lvalue) is not in the grammar | 6 | TestSuite 5, SolcArrays 1 |
+| `b.push() = v` (a push used as a target): the grammar has it, the port does not translate it yet | 6 | TestSuite 5, SolcArrays 1 |
 | the function asserts that the program reverts (a box-only obligation): the obligation is a diamond, which proves the opposite | 5 | TestSuite 5 |
 | needs `transferWithCallback`: the typed syntax has no calls (docs/kernel-port.md, Port later) | 5 | Net 5 |
 | Solidity elaboration failed: a uint where a int is expected | 4 | TestSuite 4 |

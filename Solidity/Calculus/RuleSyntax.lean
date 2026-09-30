@@ -66,7 +66,8 @@ decrement), with its proofs.  A declaration binds its name for the
 statements after it; in a taclet's `\replacewith` a declared `se`, `sp`,
 `ie`, `mv` is **fresh**, `seV k` and the like (KeY's `\newLocalVars`).
 
-`‹t›` puts any Lean term in any position.
+`‹t›` puts any Lean term in any position; where a formula stands, so does a
+bare name (`φ`, the postcondition).
 -/
 
 namespace Solidity
@@ -138,6 +139,9 @@ syntax:max "⟨ " sol_block " ⟩ " dl_fml:50 : dl_fml
 syntax:max "[ " sol_block " ] " dl_fml:50 : dl_fml
 syntax:max "(" dl_fml ")" : dl_fml
 syntax:max "‹" term "›" : dl_fml
+/-- A formula by its Lean name, `‹φ›`: the postcondition `φ`.  Below
+`true` and `false`, which are names too. -/
+syntax:max (name := dlFmlVar) (priority := low) ident : dl_fml
 /-- A comparison of program values, as in Solidity: `alice.age == 10` is
 `find(storage, alice.age) = 10`. -/
 syntax:55 dl_term:56 " == " dl_term:56 : dl_fml
@@ -1020,15 +1024,16 @@ def schemaUpd (Γ : Scope) (U : TSyntax `dl_upd) : MacroM Lean.Term := do
   `(([$elems,*] : Upd _))
 
 /-- The modality of the formula under an update: an update is judged as the
-goal it came from. -/
-partial def fmlModality? : TSyntax `dl_fml → MacroM (Option Lean.Term)
+goal it came from.  `⟨[ ]⟩` is `either`: the taclet's `m` in `dl{ … }`, the
+formula's modality in `dl![m]{ … }` (`Notation.lean`). -/
+partial def fmlModality? (either : Lean.Term) : TSyntax `dl_fml → MacroM (Option Lean.Term)
   | `(dl_fml| ⟨ $[$_:sol_stmt;]* ⟩ $_:dl_fml) | `(dl_fml| ⟨ $_:sol_block ⟩ $_:dl_fml) =>
     some <$> `(Modality.diamond)
   | `(dl_fml| [ $[$_:sol_stmt;]* ] $_:dl_fml) | `(dl_fml| [ $_:sol_block ] $_:dl_fml) =>
     some <$> `(Modality.box)
-  | `(dl_fml| ⟨[ $[$_:sol_stmt;]* ]⟩ $_:dl_fml) => pure (some (schemaIdent "m"))
-  | `(dl_fml| $_:dl_upd $φ:dl_fml) | `(dl_fml| { havoc } $φ:dl_fml) => fmlModality? φ
-  | `(dl_fml| ( $φ:dl_fml )) => fmlModality? φ
+  | `(dl_fml| ⟨[ $[$_:sol_stmt;]* ]⟩ $_:dl_fml) => pure (some either)
+  | `(dl_fml| $_:dl_upd $φ:dl_fml) | `(dl_fml| { havoc } $φ:dl_fml) => fmlModality? either φ
+  | `(dl_fml| ( $φ:dl_fml )) => fmlModality? either φ
   | _ => pure none
 
 partial def schemaFml : TSyntax `dl_fml → MacroM Lean.Term
@@ -1049,7 +1054,7 @@ partial def schemaFml : TSyntax `dl_fml → MacroM Lean.Term
     `(Fml.and (Fml.imp $φ $ψ) (Fml.imp $ψ $φ))
   | `(dl_fml| { havoc } $φ:dl_fml) => do `(Fml.havoc $(← schemaFml φ))
   | `(dl_fml| $U:dl_upd $φ:dl_fml) => do
-    let m ← match ← fmlModality? φ with
+    let m ← match ← fmlModality? (schemaIdent "m") φ with
       | some m => pure m
       | none => `(Modality.diamond)
     `(Fml.upd $m $(← schemaUpd [] U) $(← schemaFml φ))
@@ -1068,6 +1073,7 @@ partial def schemaFml : TSyntax `dl_fml → MacroM Lean.Term
     `(Fml.modal .box $(← schemaBlock false [] b) $(← schemaFml φ))
   | `(dl_fml| ( $φ:dl_fml )) => schemaFml φ
   | `(dl_fml| ‹ $t:term ›) => pure t
+  | `(dl_fml| $x:ident) => pure x
   | stx@`(dl_fml| $_:dl_term == $_:dl_term) | stx@`(dl_fml| $_:dl_term != $_:dl_term) =>
     Macro.throwErrorAt stx "a program comparison is read against a contract: write `dl{ … }`"
   | `(dl_fml| $a:dl_term <= $b:dl_term) => do
@@ -1634,6 +1640,14 @@ def dotTerm (b : TSyntax `dl_term) (f : String) : MetaM (TSyntax `dl_term) :=
   | `(dl_term| $x:ident) => `(dl_term| $(mkIdent (x.getId.str f)):ident)
   | _ => `(dl_term| $b . $(nameIdent f):ident)
 
+/-- The struct a concrete allocation carries (`S` of `RefTy.struct "S"`), which
+`dl!{ … }` needs to read `addM(m, S)` back.  A rule's `R` and an array type give
+none: the rule table writes `addM(m)`, the type being the statement's. -/
+def allocStruct? (R : Lean.Expr) : MetaM (Option Ident) := do
+  let_expr RefTy.struct s := (← whnf (← instantiateMVars R)) | return none
+  let .lit (.strVal s) := (← whnf (← instantiateMVars s)).consumeMData | return none
+  return some (nameIdent s)
+
 /-- A program expression lowered to a term (`se.lower`): the notation writes
 the expression itself. -/
 def loweredExpr? (e : Lean.Expr) : MetaM (Option (TSyntax `dl_term)) := do
@@ -1795,7 +1809,11 @@ partial def ppITerm (e : Lean.Expr) : MetaM (TSyntax `dl_term) := do
     let some x ← ppVar? x | escapeDl e
     `(dl_term| $x:ident)
   | ITerm.read _ m a => `(dl_term| read($(← ppMTerm m), $(← ppMAddr a)))
-  | ITerm.alloc _ m _ => `(dl_term| freshId(addM($(← ppMTerm m))))
+  | ITerm.alloc _ m R =>
+    let m ← ppMTerm m
+    match ← allocStruct? R with
+    | some S => `(dl_term| freshId(addM($m, $S:ident)))
+    | none => `(dl_term| freshId(addM($m)))
   | ITerm.copy _ m v => `(dl_term| freshId(copySt($(← ppMTerm m), $(← ppSVal v))))
   | _ => escapeDl e
 
@@ -1812,7 +1830,11 @@ partial def ppMTerm (e : Lean.Expr) : MetaM (TSyntax `dl_term) := do
   match_expr (← whnf e) with
   | MTerm.memory _ => `(dl_term| memory)
   | MTerm.write _ m a v => `(dl_term| write($(← ppMTerm m), $(← ppMAddr a), $(← ppMVal v)))
-  | MTerm.addM _ m _ => `(dl_term| addM($(← ppMTerm m)))
+  | MTerm.addM _ m R =>
+    let m ← ppMTerm m
+    match ← allocStruct? R with
+    | some S => `(dl_term| addM($m, $S:ident))
+    | none => `(dl_term| addM($m))
   | MTerm.copySt _ m v => `(dl_term| copySt($(← ppMTerm m), $(← ppSVal v)))
   | _ => escapeDl e
 
@@ -1939,8 +1961,25 @@ def iffParts? (e : Lean.Expr) : MetaM (Option (Lean.Expr × Lean.Expr)) := do
     ← instantiateMVars ψ')
   return if φ == φ' && ψ == ψ' then some (φ, ψ) else none
 
+/-- A formula that is a Lean variable, or the coercion of one (`↑φ` for
+`φ : Post C`, `Chains.lean`): its name, which reads back as `‹φ›` does.  Not
+an inaccessible one (`φ✝`): its bare name would read back as another variable,
+so it stays `‹φ✝›`. -/
+def fmlVar? (e : Lean.Expr) : MetaM (Option Ident) := do
+  let e := (← instantiateMVars e).consumeMData
+  let x ← match e.getAppFn with
+    | .const f _ => match ← getCoeFnInfo? f with
+      | some i => pure (if e.getAppNumArgs == i.numArgs then e.getArg! i.coercee else e)
+      | none => pure e
+    | _ => pure e
+  let .fvar fv := x.consumeMData | return none
+  let n : Lean.Name ← fv.getUserName
+  if n.hasMacroScopes || n.isInaccessibleUserName then return none
+  return (← fvarName? x).map nameIdent
+
 partial def ppFml (e : Lean.Expr) : MetaM (TSyntax `dl_fml) := do
   let e ← instantiateMVars e
+  if let some x ← fmlVar? e then return ← `(dl_fml| $x:ident)
   let escape := do `(dl_fml| ‹$(← escapeTerm e):term›)
   let arg (φ : Lean.Expr) : MetaM (TSyntax `dl_fml) := do
     let s ← ppFml φ
@@ -1997,10 +2036,13 @@ partial def ppFml (e : Lean.Expr) : MetaM (TSyntax `dl_fml) := do
 /-! ### The delaborators
 
 Each stands aside (`failure`, and Lean prints the term its own way) when all
-it would print is one `‹…›`. -/
+it would print is one `‹…›`, and `⊨`, `⊧` when it is a name: `⊨ φ`. -/
 
 /-- Printed as `‹…›` as a whole. -/
 def isEscape (s : Syntax) : Bool := s[0].isToken "‹"
+
+/-- Printed as `‹…›` or as a name (`fmlVar?`): what Lean prints as well. -/
+def isEscapeOrVar (s : Syntax) : Bool := isEscape s || s.isOfKind ``dlFmlVar
 
 /-- Only a full application: `Fml.modal m P` alone is a function. -/
 def fullApp : DelabM Unit := do
@@ -2032,7 +2074,7 @@ def delabValid : Delab := do
   let e ← getExpr
   guard (e.getAppNumArgs == 2)
   let φ ← ppFml e.appArg!
-  guard !(isEscape φ)
+  guard !(isEscapeOrVar φ)
   `(⊨ dl{ $φ:dl_fml })
 
 /-- `holds σ φ`: `σ ⊧ φ`, what `Valid` leaves once its state is introduced. -/
@@ -2042,7 +2084,7 @@ def delabHolds : Delab := do
   let e ← getExpr
   guard (e.getAppNumArgs == 3)
   let φ ← ppFml e.appArg!
-  guard !(isEscape φ)
+  guard !(isEscapeOrVar φ)
   let σ ← withNaryArg 1 delab
   `($σ ⊧ dl{ $φ:dl_fml })
 

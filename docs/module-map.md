@@ -41,6 +41,7 @@ proof of its own (`Calculus/TermRules.lean`, `Proves.theoryRw`).
 | `KeySort.lean` | solkey's sort lattice as one type. Imports nothing. |
 | `AST.lean` | Types (`PrimTy`/`Ty`/`RefTy`, `RefTy.fixed`), the struct table, operators, `Var`. |
 | `Syntax.lean` | The typed syntax (`Val C p`, `SPath`, `Loc`, `MPath`, `Stmt C`), `Contract`/`FunDecl`, and the elaborator behind `sol[C]{…}` and `contract!{…}`. |
+| `FreshNames.lean` | `FreshNames.ofTable`: the examples' names for the rules' fresh variables, one table per example; `FreshNames.clashes`. |
 | `SpecSyntax.lean` | The specification language (`SolSpec.g4`: `SpecExpr`, `spec!(…)`) and a function's clauses (`FunSpec`). |
 | `Semantics.lean` | The interpreter `Stmt.run`, following solc where KeY is more liberal (`docs/solc-alignment.md`). |
 | `Semantics/Properties.lean` | Read-after-write, frame and result-monad lemmas about the state operations, shared by every later layer. |
@@ -77,10 +78,11 @@ proof of its own (`Calculus/TermRules.lean`, `Proves.theoryRw`).
 | `Calculus/Decide.lean` | `sol_decide`: reads of writes as case trees on key equalities, over the live storage. |
 | `Calculus/DecideComplete.lean` | The starting storage's reads are realizable; `Fml.valid_iff_cons`. |
 | `Calculus/Spec.lean` | Specifications compiled to dynamic logic as solkey's `SpecCompiler` does; `spec[C]{f}`, `sol_spec`. |
-| `Calculus/Notation.lean` | `dl[C]{ … }` and `dl!{ … }`: concrete formulas read against a contract. |
+| `Calculus/Notation.lean` | `dl[C]{ … }` and `dl!{ … }`: concrete formulas read against a contract; `dl![m]{ … }`, `⟨[ ]⟩` at a modality `m`; a Lean formula where a formula stands; `Γ ⟹ φ` lines. |
 | `Calculus/Quote.lean` | Quoters from formulas back to terms, so the kernel re-checks a computed goal. |
-| `Calculus/Chains.lean` | Derivations as values: `~>`, `~*>`, `calc` chains, `sol_chain`, `#derivation`. |
+| `Calculus/Chains.lean` | Derivations as values: `~>`, `~*>`, `calc` chains, `sol_chain`, `#derivation`; lines at a modality `m` over a postcondition `φ : Post C`; rewrite links (`~[sequentialToParallel]~>`, `~[findOnSave]~>`). |
 | `Calculus/UpdateRules.lean` | KeY's update simplification as `UpdRule`s, and the semantics of the update constructors. |
+| `Calculus/ChainRewrites.lean` | The lines after a chain's program as rewrites of the line with their soundness (`LineRw`): update merges, update rules, Theory laws. |
 | `Calculus/TermRules.lean` | Theory equations as rewrite rules: `Term.Theq`, `Fml.rwEq` and its soundness. |
 | `Calculus/TheoryLaws.lean` | The Theory's read-back laws as `Term.Theq` rules. |
 | `Calculus/TheoryRewrite.lean` | A Theory lemma as a rewrite rule (`theoryRewrite`, `sol_rw`). |
@@ -172,14 +174,18 @@ derivation `⊢ φ` built one `apply` per taclet.
 | `Examples/StorageSteps.lean` | One storage statement form at a time; the worked derivations as `apply` walks. |
 | `Examples/StorageSuite.lean`, `Examples/StorageDelete.lean`, `LedgerDelete.lean` | solkey's taclet suite on storage; `delete`; a struct holding a mapping deleted. |
 | `Examples/Branch.lean`, `Revert.lean` | Two-goal splits; box and diamond on `revert`, `require`, `assert`, `transfer`. |
+| `Examples/Payment.lean` | The payment examples as chains in sequent lines. |
 | `Examples/Values.lean`, `Operators.lean` | Operators, checked arithmetic, `−−`, bitwise, shifts, `unchecked`; the same on the machine. |
 | `Examples/Calls.lean` | Internal calls: inlined bodies, early returns, calls in expressions, what cannot be written. |
+| `Examples/CallOperands.lean` | Call-valued operands, and push as a target. |
 | `Examples/Callback.lean` | Checks-effects-interactions with and without callbacks (`ProvesC`). |
 | `Examples/Memory.lean`, `Examples/CrossDomain.lean`, `Examples/Net.lean`, `Examples/Theory.lean` | Memory, storage↔memory copies, `transfer`, the theory's rewriting. |
 | `Examples/SelectOnSaveConsr.lean` | Reading a write back through a `consr` path, by hand and in solkey's order. |
 | `Examples/Notation.lean` | What taclets, premises and sequents print, pinned. |
 | `Examples/ApplySteps.lean` | The proof style: every `Proves` constructor once, and a refused rule. |
-| `Examples/Chains.lean`, `Examples/UpdateRules.lean`, `Examples/Decide.lean` | Derivation chains, update simplification, `sol_decide`. |
+| `Examples/Chains.lean`, `Examples/UpdateRules.lean`, `Examples/ChainRewrites.lean`, `Examples/Decide.lean` | Derivation chains, update simplification, the headline trace (`headlineNamed`), `sol_decide`. |
+| `Examples/MemoryChains.lean` | The memory traces as chains. |
+| `Examples/ExampleNames.lean` | Chains in the examples' names for fresh variables (`pv`, `acc`, `aliceTok`). |
 | `Examples/Specs.lean` | Clauses as obligations (`spec!{f}`, `sol_spec`) beyond the benchmarks. |
 | `Examples/Verify.lean`, `Tools.lean` | `#verify`, `#counterexample` and the other commands, pinned. |
 | `Examples/Benchmark/*.lean` | solkey's benchmark contracts with their `@custom:key` clauses proved (`Counter`, `SimpleStorage`, `Mapping`, `Purchase`, `Coin`, `EtherWallet`, `ERC20`), and `Syntax`, which pins what elaborates away (units, casts, events, errors, enums, struct constructors, modifiers). |

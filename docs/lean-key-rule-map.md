@@ -338,9 +338,9 @@ them as KeY's `\replacewith` updates do.
 | `Path[storage]` | `PTerm` | a state variable (`.root`), an alias (`.pv`), `.field`/`.at` |
 | `Storage` | `STerm` | `.storage`, `.save`, `.delAt`; `.push`/`.pushSlot`/`.pop`/`.shrink`/`.extend` for the array writes |
 | what a storage `save` writes | `SValT` | a value (`.val`), a subtree read from a storage (`.find`), or a memory object copied back (`.copyMem`, KeY's `copyMem(mtSt, m, i)`) |
-| `Identity` | `ITerm` | a memory local (`.pv`), a reference read out of memory (`.read`), `freshId(addM(m))` (`.alloc`, carrying the `RefTy`), `freshId(copySt(m, v))` (`.copy`) |
+| `Identity` | `ITerm` | a memory local (`.pv`), a reference read out of memory (`.read`), `freshId(addM(m))` (`.alloc`, carrying the `RefTy`; a concrete struct's prints `freshId(addM(m, S))`), `freshId(copySt(m, v))` (`.copy`) |
 | a member or element of a memory object | `MAddr` | `.field`/`.at` |
-| `Memory` | `MTerm` | `.memory`, `.write(m, a, v)`, `.addM` (eager: the type rides along), `.copySt(m, v)` |
+| `Memory` | `MTerm` | `.memory`, `.write(m, a, v)`, `.addM` (eager: the type rides along; a concrete struct's prints `addM(m, S)`, KeY's `addM(mem, idp)`), `.copySt(m, v)` |
 | what a memory `write` writes | `MValT` | a value (`.val`) or a reference (`.ref`) |
 | one elementary update | `UpdElem` | `.val`, `.path`, `.mref`, `.storage`, `.memory`; `.store` for `old := storage`; `.selfBalance`/`.net` for a transfer's `selfBalance := selfBalance ± a` and `net := store(net, at(r), net(r) ± a)` (the two written together); `.saveNet` for `oldNet := net` |
 

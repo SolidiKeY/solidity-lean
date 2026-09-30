@@ -44,9 +44,10 @@ return variable and the body, every local of the callee renamed fresh for
 this call (`elabCall`), as KeY's `FunctionBodyStatement` carries the function
 it stands for.  A call is a statement or a whole right-hand side, as KeY
 writes it (`res = f(a)@C;`); one inside an expression is captured before its
-statement.  A body's `return e;` ends it: an assignment to the return variable, the
-statements after it moved into the branches that do not return
-(`lowerReturns`).
+statement.  A push used as a target, `values.push() = e;`, is the push
+`values.push(e);`, as the front end normalises it.  A body's
+`return e;` ends it: an assignment to the return variable, the statements
+after it moved into the branches that do not return (`lowerReturns`).
 -/
 
 namespace Solidity
@@ -873,6 +874,10 @@ syntax sol_expr ".push(" sol_expr ")" : sol_stmt
 syntax sol_expr ".push()" : sol_stmt
 syntax sol_expr ".pop()" : sol_stmt
 syntax sol_expr " = " sol_expr ".push()" : sol_stmt
+/-- `values .push() = e;`, `a[i].push() = e;`: a push used as a target spelt
+with the `.push()` token; on a name or a member chain it is the push
+`b.push(e);`, on another receiver refused (`expandStmt.pushTarget`). -/
+syntax (name := solPushTarget) sol_expr ".push()" " = " sol_expr : sol_stmt
 syntax sol_ty &"storage" ident " = " sol_expr ".push()" : sol_stmt
 syntax sol_expr ".transfer(" sol_expr ")" : sol_stmt
 syntax sol_expr:max "(" ")" : sol_stmt
@@ -1049,6 +1054,10 @@ def preferReading (s : Syntax) (good : Syntax → Bool) : Syntax :=
 /-- What a call's callee must be. -/
 def callMsg : String := "a call's callee is a function's name"
 
+/-- What a push used as a target is written on. -/
+def pushTargetMsg : String :=
+  "`b.push() = e;` is written on a name or a member chain, `bucket.tokens`"
+
 /-- The expressions and blocks of a node, its atoms and groupings dropped. -/
 partial def payload (s : Syntax) : Array Syntax :=
   if s.isAtom then #[]
@@ -1131,6 +1140,8 @@ partial def expandStmt (s : TSyntax `sol_stmt) : MacroM Term := do
   | ``solRequireErr => `(RawStmt.requireWith $(← expandExpr ⟨s.raw[2]⟩) [$(← exprs s.raw[6]),*])
   | ``solRevertErr | ``solRevertMsg => `(RawStmt.revert)
   | ``solHole => Macro.throwErrorAt s "`_;` stands once, at the top level of a modifier's body"
+  | ``solPushTarget =>
+    expandStmt.pushTarget s ⟨s.raw[0]⟩ (← expandExpr ⟨s.raw[0]⟩) (← expandExpr ⟨s.raw[3]⟩)
   | ``solUnchecked => `(RawStmt.unchecked $(← expandStmt.expandBlock ⟨s.raw[1]⟩))
   | ``solIfChain =>
     -- `if (c₀) b₀ else if (c₁) b₁ … else e`: nested, from the last branch out
@@ -1147,16 +1158,15 @@ where
   /-- The expressions of a `sol_expr,*`. -/
   exprs (as : Syntax) : MacroM (Array Term) := as.getSepArgs.mapM (expandExpr ⟨·⟩)
   expandStmt1 : TSyntax `sol_stmt → MacroM Term
-  | `(sol_stmt| $l:sol_expr = $r:sol_expr) => do
-      `(RawStmt.assign $(← expandExpr l) $(← expandExpr r))
+  | `(sol_stmt| $l:sol_expr = $r:sol_expr) => do assignTo l (← expandExpr r)
   | `(sol_stmt| $l:sol_expr = $b:sol_expr .push()) => do
       `(RawStmt.assignPush $(← expandExpr l) $(← expandExpr b))
   | `(sol_stmt| $l:sol_expr = $f:sol_expr ( )) => do
       match funName? f with
-      | some g => `(RawStmt.assign $(← expandExpr l) (RawExpr.call $(quote g) []))
+      | some g => assignTo l (← `(RawExpr.call $(quote g) []))
       | none => `(RawStmt.assignPush $(← expandExpr l) $(← pushRecv f))
   | `(sol_stmt| $l:sol_expr = $f:sol_expr ( $as:sol_expr,* )) => do
-      `(RawStmt.assign $(← expandExpr l) $(← expandExpr.expandCall f as.getElems callMsg))
+      assignTo l (← expandExpr.expandCall f as.getElems callMsg)
   | `(sol_stmt| $T:sol_ty $x:ident = $f:sol_expr ( $as:sol_expr,* )) => do
       `(RawStmt.decl $(← expandTy T) $(strLit x) (some $(← expandExpr.expandCall f as.getElems callMsg)))
   | `(sol_stmt| $f:sol_expr ( $a:sol_expr, $as:sol_expr,* )) => do
@@ -1201,17 +1211,47 @@ where
   | _ => Macro.throwUnsupported
   /-- A struct constructor's callee. -/
   ctorMsg : String := "a constructor's name is a struct's name"
-  /-- `values.push` (one identifier) or `e.push`: the receiver `values`, `e`. -/
-  pushRecv (f : TSyntax `sol_expr) : MacroM Term := do
+  /-- `values.push`, `bucket.tokens.push` (one identifier) or `e.tokens.push`:
+  the receiver `values`, `bucket.tokens`, `e.tokens`; none for another callee. -/
+  pushRecv? (f : TSyntax `sol_expr) : MacroM (Option Term) := do
     match f with
     | `(sol_expr| $x:ident) =>
-      match (nameParts x.getId).reverse with
-      | "push" :: r :: rs => fieldChain (← `(RawExpr.name $(quote r))) rs.reverse
-      | _ => Macro.throwErrorAt f "only `b.push()` is a call on the right of `=`"
+      match x.getId with
+      | .str p "push" => if p.isAnonymous then pure none else some <$> expandIdent (mkIdent p)
+      | _ => pure none
     | `(sol_expr| $e:sol_expr . $g:ident) =>
-      if g.getId.toString == "push" then expandExpr ⟨e.raw⟩
-      else Macro.throwErrorAt f "only `b.push()` is a call on the right of `=`"
-    | _ => Macro.throwErrorAt f "only `b.push()` is a call on the right of `=`"
+      match (nameParts g.getId).reverse with
+      | "push" :: fs => some <$> fieldChain (← expandExpr e) fs.reverse
+      | _ => pure none
+    | _ => pure none
+  /-- The receiver of `b.push` (`pushRecv?`). -/
+  pushRecv (f : TSyntax `sol_expr) : MacroM Term := do
+    match ← pushRecv? f with
+    | some b => pure b
+    | none => Macro.throwErrorAt f "only `b.push()` is a call on the right of `=`"
+  /-- `l = r;`, `r` expanded: the assignment, or, when `l` is `b.push()`, the
+  push `b.push(r);` (the front end normalises a push used as a target
+  so).  solc evaluates `r` before the push's receiver; `b` is a name or a
+  member chain, which no effect of `r` moves and which cannot revert, so
+  evaluating it first, as `b.push(r)` does, is the same run, and the slot the
+  push adds is written once either way. -/
+  assignTo (l : TSyntax `sol_expr) (r : Term) : MacroM Term := do
+    if let `(sol_expr| $f:sol_expr ( $as:sol_expr,* )) := l then
+      if as.getElems.isEmpty then
+        if let some b ← pushRecv? f then return ← pushTarget l f b r
+    `(RawStmt.assign $(← expandExpr l) $r)
+  /-- `b.push() = r;`, `b` and `r` expanded: the push `b.push(r);` when the
+  receiver, spelt `chain` (`b` or `b.push`), is a name or a member chain
+  (`assignTo` says why the order is solc's); refused at `ref` otherwise. -/
+  pushTarget (ref : Syntax) (chain : TSyntax `sol_expr) (b r : Term) : MacroM Term := do
+    unless nameChain chain do Macro.throwErrorAt ref pushTargetMsg
+    `(RawStmt.call (.field $b "push") [$r])
+  /-- A name or a member chain of names: `values`, `bucket.tokens`,
+  `bucket .tokens.push`. -/
+  nameChain : TSyntax `sol_expr → Bool
+    | `(sol_expr| $_:ident) => true
+    | `(sol_expr| $e:sol_expr . $_:ident) => nameChain e
+    | _ => false
   expandBlock : TSyntax `sol_block → MacroM Term
     | `(sol_block| { $[$ss:sol_stmt;]* }) => do `([$(← ss.mapM expandStmt),*])
     | _ => Macro.throwUnsupported
@@ -1702,11 +1742,12 @@ def RawExpr.uncheck : RawExpr → Except String RawExpr :=
     | .incDec .. => throw "`++` or `−−` inside an expression in `unchecked`"
     | e => pure e
 
-/-- The largest index among the fresh variables an expression writes. -/
-def RawExpr.maxIdx (e : RawExpr) : Nat :=
+/-- The largest index among the fresh variables an expression writes, as the
+`FreshNames` in scope reads them (a file may spell `ie1` as `idx`). -/
+def RawExpr.maxIdx [FreshNames] (e : RawExpr) : Nat :=
   e.names.foldl (fun n x => max n (Var.ofName x).idx) 0
 
-def RawExpr.maxIdxs (es : List RawExpr) : Nat :=
+def RawExpr.maxIdxs [FreshNames] (es : List RawExpr) : Nat :=
   es.foldl (fun n e => max n e.maxIdx) 0
 
 /-- A statement's own expressions, in the order it is written (not those of
@@ -1789,11 +1830,11 @@ end
 mutual
 
 /-- The largest index among the fresh variables a raw statement writes. -/
-partial def RawStmt.maxIdx (s : RawStmt) : Nat :=
+partial def RawStmt.maxIdx [FreshNames] (s : RawStmt) : Nat :=
   max ((s.declared?.map fun x => (Var.ofName x).idx).getD 0)
     (max (RawExpr.maxIdxs s.exprs) ((s.blocks.map RawStmt.maxIdxs).foldl max 0))
 
-partial def RawStmt.maxIdxs (ss : List RawStmt) : Nat :=
+partial def RawStmt.maxIdxs [FreshNames] (ss : List RawStmt) : Nat :=
   ss.foldl (fun n s => max n s.maxIdx) 0
 
 end
@@ -2194,6 +2235,10 @@ partial def uncheckStmts : List RawStmt → Except String (List RawStmt)
       | s => s.mapExprsM RawExpr.uncheck
     pure (s' :: (← uncheckStmts ss))
 
+/-- Why a call of `f`, returning a `T` that is a reference, is refused. -/
+def refReturnMsg (f : String) (T : Ty) : String :=
+  s!"{f} returns a reference ({T}): a call's value is a value type"
+
 mutual
 
 /-- **Captures before a statement**: an `++`/`−−` inside an expression, and a
@@ -2308,7 +2353,10 @@ partial def hoist : RawExpr → ElabM (Prog C × RawExpr)
     -- a call inside an expression runs before the statement, into a fresh local
     let (P, args) ← hoistArgs args
     let some (_, d) := (← read).find? (·.1 == f) | throw s!"{f} is not a function declared before this one"
-    let some (_, .prim p) := d.ret | throw s!"{f} returns no value"
+    let p ← match d.ret with
+      | some (_, .prim p) => pure p
+      | some (_, T) => throw (refReturnMsg f T)
+      | none => throw s!"{f} returns no value"
     let x ← freshCapture "se"
     let Q ← elabCall f args (some (x, p))
     declare C (toString x) (.val p)
@@ -2354,7 +2402,7 @@ partial def elabCall (f : String) (args : List RawExpr) (res : Option (Var × Pr
     | none, none => pure CallRet.none
     | none, some _ => throw s!"{f} returns no value"
     | some (n, T), res => do
-      let .prim p := T | throw s!"{f} returns a reference type"
+      let .prim p := T | throw (refReturnMsg f T)
       if let some (_, q) := res then
         unless q = p do throw s!"{f} returns a {primName p}, not a {primName q}"
       let r ← freshCapture "se"

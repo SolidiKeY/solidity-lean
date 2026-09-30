@@ -6,9 +6,9 @@ import Solidity.Calculus.Close
 `a.transfer(v);` books a debit of `v` on the `net` ledger at `a`, with no
 callback (`transferNoCallback`, solkey's `netHeader.key`), and reverts when
 the contract's own funds do not cover `v` — the EVM's value-transfer check
-that solc's `transfer` inherits (`Semantics.transferAt`).  The rules, and the
-two modalities parting company at the funds check, are `Revert.lean`'s
-"Payment" section; the single-statement walks (`transferSimple`,
+that solc's `transfer` inherits (`Semantics.transferAt`).  The rule, the
+two modalities parting company at the funds check, and the examples
+are `Payment.lean`'s; the single-statement walks (`transferSimple`,
 `transferRootReceiver`) are `StorageSteps.lean`'s.
 
 What a formula can observe of a transfer is its **frame**: no term reads the
@@ -127,7 +127,7 @@ theorem netUntouched :
 /-! ## 3 · The funds check, run
 
 With `3` wei the contract cannot pay `5`: the run reverts, so the diamond of
-the transfer is false there and the box holds (`Revert.lean`).  With exactly
+the transfer is false there and the box holds (`Payment.lean`).  With exactly
 `5` it pays once, and a second payment of the same size reverts. -/
 
 /-- Unfunded: a revert. -/

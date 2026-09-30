@@ -28,7 +28,13 @@ a total function over the typed syntax, and it is the only rule that can:
   change the syntax (`Syntax.lean`) so it cannot be written. Never add a
   well-formedness hypothesis.
 - One rule, one constructor; the modality is a parameter (`⟨[ ]⟩`), not a
-  box/diamond twin. Only `revertBox`/`revertDiamond` tell them apart.
+  box/diamond twin. Only `revertBox`/`revertDiamond` tell them apart (and a
+  branch's `Premise.cover`). `sol_chain` relies on it: it runs a line under a
+  modality `m` as the diamond and as the box and keeps the lines they share
+  (`Chains.runChain`), so a rule that cases on `m` must give premises that
+  differ elsewhere than in the modality (as revert's `true`/`false` do);
+  otherwise `sol_chain` writes a line under `m` the kernel rejects
+  (`Chains.checkStep` stops it).
   `CallbackTaclet` (the other `transferSemantics`, sound for `holdsC`, not
   for `Stmt.run`) is a separate inductive and keeps solkey's box/diamond pair.
 - Every theorem has a docstring with a small Solidity example.
