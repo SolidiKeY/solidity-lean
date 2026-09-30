@@ -35,6 +35,7 @@ import Solidity.Calculus.Uniqueness
 import Solidity.Calculus.Progress
 import Solidity.Calculus.Termination
 import Solidity.Calculus.Chains
+import Solidity.Calculus.Sequents
 import Solidity.Calculus.UpdateRules
 import Solidity.Calculus.ChainRewrites
 import Solidity.Calculus.Rewrite

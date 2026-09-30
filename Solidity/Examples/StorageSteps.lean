@@ -1,4 +1,4 @@
-import Solidity.Calculus.Close
+import Solidity.Calculus.Sequents
 
 /-!
 # Storage, one statement form at a time
@@ -15,7 +15,9 @@ is a theorem `⊨ dl!{ … }`, proved one of two ways:
   is built one `apply` per taclet, so each rule the derivation names is named here —
   `unfold r` for Steps 1 and 2, `update r` for Step 3, `empty` for
   `emptyModality`, `intro` for a precondition.  Put the cursor after an `apply`
-  to see the next line as a sequent `dl{ Γ ⟹ φ }`.  `refine close ?_` leaves the
+  to see the next line as a sequent `dl{ Γ ⟹ φ }`, which the headline states
+  as a checked line, `show sequent!{ Γ ⟹ φ }` (`Calculus/Sequents.lean`).
+  `refine close ?_` leaves the
   calculus; the `sol_symex` after it runs nothing, it only normalises the goal
   for `sol_close`.  The headline is proved both ways.
 
@@ -57,16 +59,21 @@ theorem deepFieldWrite :
     ⊨ dl!{ [ alice.account.balance = 10; ] alice.account.balance == 10 } := by
   apply Proves.valid
   apply unfold .storageFieldWrite_unfold_leftFst
-  -- dl{ ⟹ [ uint se1 = 10; Account storage sp1 = alice.account; sp1.balance = se1; ] … }
+  show sequent!{ ⟹ [ uint se1 = 10; Account storage sp1 = alice.account; sp1.balance = se1; ]
+    alice.account.balance == 10 }
   apply unfold .localValueDeclInitDrop
   apply update .localValueAssign
+  show sequent!{ { se1 := 10 } ⟹
+    [ Account storage sp1 = alice.account; sp1.balance = se1; ] alice.account.balance == 10 }
   apply unfold .storageLocalDeclInitDrop
   apply update .storageFieldReadBindLocalRoot
+  show sequent!{ { se1 := 10 }, { sp1 := alice.account } ⟹
+    [ sp1.balance = se1; ] alice.account.balance == 10 }
   -- Step 3: `sp1.balance = se1;` has only simple parts
   apply update .storageFieldWriteSave
   apply empty
-  -- dl{ { se1 := 10 }, { sp1 := alice.account }, { storage := save(storage, sp1.balance, se1) } ⟹
-  --     find(storage, alice.account.balance) = 10 }
+  show sequent!{ { se1 := 10 }, { sp1 := alice.account },
+    { storage := save(storage, sp1.balance, se1) } ⟹ find(storage, alice.account.balance) = 10 }
   refine close ?_
   sol_symex
   sol_close

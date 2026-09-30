@@ -81,6 +81,7 @@ proof of its own (`Calculus/TermRules.lean`, `Proves.theoryRw`).
 | `Calculus/Notation.lean` | `dl[C]{ … }` and `dl!{ … }`: concrete formulas read against a contract; `dl![m]{ … }`, `⟨[ ]⟩` at a modality `m`; a Lean formula where a formula stands; `Γ ⟹ φ` lines. |
 | `Calculus/Quote.lean` | Quoters from formulas back to terms, so the kernel re-checks a computed goal. |
 | `Calculus/Chains.lean` | Derivations as values: `~>`, `~*>`, `calc` chains, `sol_chain`, `#derivation`; lines at a modality `m` over a postcondition `φ : Post C`; rewrite links (`~[sequentialToParallel]~>`, `~[findOnSave]~>`). |
+| `Calculus/Sequents.lean` | `sequent!{ Γ ⟹ φ }`: the goals of a `⊢` walk (`Proves`) read back, for checked `show` lines; a chain under a context (`Fml.Steps.valid_in`). |
 | `Calculus/UpdateRules.lean` | KeY's update simplification as `UpdRule`s, and the semantics of the update constructors. |
 | `Calculus/ChainRewrites.lean` | The lines after a chain's program as rewrites of the line with their soundness (`LineRw`): update merges, update rules, Theory laws. |
 | `Calculus/TermRules.lean` | Theory equations as rewrite rules: `Term.Theq`, `Fml.rwEq` and its soundness. |
@@ -174,7 +175,7 @@ derivation `⊢ φ` built one `apply` per taclet.
 | `Examples/StorageSteps.lean` | One storage statement form at a time; the worked derivations as `apply` walks. |
 | `Examples/StorageSuite.lean`, `Examples/StorageDelete.lean`, `LedgerDelete.lean` | solkey's taclet suite on storage; `delete`; a struct holding a mapping deleted. |
 | `Examples/Branch.lean`, `Revert.lean` | Two-goal splits; box and diamond on `revert`, `require`, `assert`, `transfer`. |
-| `Examples/Payment.lean` | The payment examples as chains in sequent lines. |
+| `Examples/Payment.lean` | The payment examples as chains in sequent lines, `⊢` walks with checked sequents, and the funded diamonds' validity. |
 | `Examples/Values.lean`, `Operators.lean` | Operators, checked arithmetic, `−−`, bitwise, shifts, `unchecked`; the same on the machine. |
 | `Examples/Calls.lean` | Internal calls: inlined bodies, early returns, calls in expressions, what cannot be written. |
 | `Examples/CallOperands.lean` | Call-valued operands, push as a target, calls returning a memory reference. |
