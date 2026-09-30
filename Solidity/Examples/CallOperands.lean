@@ -22,11 +22,11 @@ receiver that is a name or a member chain (`bucket.tokens`).
 
 A line holding a call not yet inlined reads back only if it writes no fresh
 index above the callee's: reading it back numbers the callee's locals past
-the largest index the line writes, so `⟨ se1 = makeValue(); uint se3; se3 =
-++i; … ⟩` would give the callee `se4`, not `se2`.  The first step of
-`carolValues[++i] = makeValue();` is therefore written with its `++i` left in
-place, and the memory programs are pinned (`Prog.toStr`) and proved by the
-strategy rather than drawn line by line.
+the largest index the line writes, so
+`⟨ se1 = makeValue(); uint se3; se3 = ++i; … ⟩` would give the callee `se4`,
+not `se2`.  The first step of `carolValues[++i] = makeValue();` is therefore
+written with its `++i` left in place, and the memory programs are pinned
+(`Prog.toStr`) and proved by the strategy rather than drawn line by line.
 -/
 
 namespace Solidity.Examples.CallOperands
@@ -56,13 +56,16 @@ example : dl!{ ⟨ values.push(makeValue()); ⟩ true } =
     dl!{ ⟨ uint se1 = makeValue(); values.push(se1); ⟩ true } := rfl
 
 /-- `values.push(makeValue());`: the capture, the call
-run, the push. -/
+inlined and run, the push. -/
 def pushCallValue : dl!{ ⟨ values.push(makeValue()); ⟩ true }
     ~*> dl!{ { se1 := 0 } { se2 := 0 } { se2 := select(storage, seed) } { se1 := se2 }
             { storage := save(save(storage, values[values.length], se1), values.length,
                 values.length + 1) } true } :=
   calc dl!{ ⟨ values.push(makeValue()); ⟩ true }
     _ = dl!{ ⟨ uint se1 = makeValue(); values.push(se1); ⟩ true } := rfl
+    _ ~[valueDeclSkip]~> dl!{ { se1 := 0 } ⟨ se1 = makeValue(); values.push(se1); ⟩ true } := rfl
+    _ ~[functionBodyExpand]~>
+        dl!{ { se1 := 0 } ⟨ uint se2; se2 = seed; se1 = se2; values.push(se1); ⟩ true } := rfl
     _ ~*> dl!{ { se1 := 0 } { se2 := 0 } { se2 := select(storage, seed) } { se1 := se2 }
             ⟨ values.push(se1); ⟩ true } := by sol_chain
     _ ~[storagePushValueSave]~>
@@ -184,8 +187,9 @@ theorem memoryIndexWriteCall :
 
 solc's order: the right-hand side, then the index.  The printed chain also re-aliases
 the receiver (`uint[] memory mv1 = carolValues;`), since in KeY evaluating the
-index may rebind it; here an `++` cannot rebind a memory local, so there is
-no re-alias (`captureExpr`). -/
+index may rebind it; here no operand rebinds a local (an assignment is no
+expression, and a callee's locals are its own), so there is no re-alias
+(`captureExpr`). -/
 
 example : Prog.toStr (sol{ uint i = 0; uint[] memory carolValues = values;
     carolValues[++i] = makeValue(); } : Prog Operands) =
