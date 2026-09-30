@@ -19,15 +19,15 @@ spellings only: a formula read under it is the term its default spelling
 gives, since freshness is by index.
 
 A printed line reads back when the table round-trips, which
-`FreshNames.clashes` checks: every row renames a default spelling, the names
-are distinct and none is itself a default spelling (`se2`), and none is a
-name the readers resolve before a variable — a state variable or an enum of
-the contract, a word of `FreshNames.reserved`, or a `k1` of
-`Calculus/Spec.lean`.  An example guards its table with
+`FreshNames.clashes` checks: every row renames a default spelling to an
+identifier, the names are distinct and none is itself a default spelling
+(`se2`), and none is a name the readers resolve before a variable — a state
+variable or an enum of the contract, a word of `FreshNames.reserved`, or a
+`k1` of `Calculus/Spec.lean`.  An example guards its table with
 `#guard (FreshNames.clashes C rows).isEmpty`.  What it cannot check: a table
 name must not be a name of the example's own program (a local `pv` would
 read as the fresh one), nor a token of the grammar (`if`, `uint`).  A table
-is scoped to its example by a `namespace`.
+is scoped to its example by a `namespace` or a `section`.
 -/
 
 namespace Solidity
@@ -52,12 +52,16 @@ def FreshNames.ofTable (rows : FreshTable) (base : FreshNames := inferInstance) 
 
 /-- The words a reader resolves before a variable: `storage` and `memory`
 (`tStor`, `tMem`), `true` and `false` (`tVal`), `this`, `msg` and `block`
-(the environment), and the names `Calculus/Spec.lean` fixes. -/
+(the environment), `selfBalance` (the environment's, and the left side of
+`{ selfBalance := selfBalance - a }`), `net` (the ledger: `{ x := net }`
+saves it), and the names `Calculus/Spec.lean` fixes. -/
 def FreshNames.reserved : List String :=
-  ["storage", "memory", "true", "false", "this", "msg", "block", "old", "oldNet", "result"]
+  ["storage", "memory", "true", "false", "this", "msg", "block", "selfBalance", "net",
+   "old", "oldNet", "result"]
 
 /-- What keeps `rows` from reading back against `C`, one line per row that
-breaks it; `[]` when a printed line reads back as itself. -/
+fails a check below; `[]` when none does.  The module docstring says what the
+checks cannot see. -/
 def FreshNames.clashes (C : Contract) (rows : FreshTable)
     (base : FreshNames := inferInstance) : List String :=
   let fn : FreshNames := .ofTable rows base
@@ -65,6 +69,7 @@ def FreshNames.clashes (C : Contract) (rows : FreshTable)
     match base.parse d with
     | some (b, k) =>
       if base.name b k != d then some s!"{d} is not a fresh variable's spelling"
+      else if n.isEmpty then some s!"{d} is given the empty name"
       else if !(n.all Lean.isIdRest && n.front.isAlpha) then some s!"{n} is not a name"
       else if (base.parse n).isSome then some s!"{n} is itself a fresh variable's spelling"
       else if fn.parse n != some (b, k) then some s!"{n} names two variables"

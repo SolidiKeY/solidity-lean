@@ -2,7 +2,7 @@ import Solidity.FreshNames
 import Solidity.Calculus.Chains
 
 /-!
-# Chains in printed names for the rules' fresh variables
+# Printed names for the rules' fresh variables
 
 `#derivation` spells a rule's fresh variables `se1`, `sp1`; the examples name
 each after what it holds, and per example.  Each example here is a namespace
@@ -11,7 +11,9 @@ with its own table (`FreshNames.lean`), and every line in it — `dl!{ … }`,
 printed names:
 
 * `Headline` — `alice.account.balance = 10;`: the value `pv`, the alias
-  `acc`;
+  `acc`, and the table's tests: a line is the term
+  its default spelling gives, a capture is numbered past `pv`, an error
+  prints `pv`;
 * `Token` — `alice.account.token.value = 5;`: `aliceTok`, then `aliceAcc`,
   the alias the second unfolding declares;
 * `Memory` — `carol.account.balance = 10;`: `acc` again, now a memory
@@ -49,12 +51,15 @@ example : (FreshNames.ofTable []).name "sp" 2 = "sp2" := rfl
 /--
 info: ["se2 is itself a fresh variable's spelling", "alice is a state variable or an enum of the contract",
   "sp9x is not a fresh variable's spelling", "pv names two variables", "se3 has two names",
-  "storage is a word the readers resolve first", "k2 is a word the readers resolve first", "my var is not a name"]
+  "storage is a word the readers resolve first", "k2 is a word the readers resolve first", "my var is not a name",
+  "selfBalance is a word the readers resolve first", "net is a word the readers resolve first",
+  "ie6 is given the empty name"]
 -/
 #guard_msgs in
 #eval FreshNames.clashes StandardExample
   [("se2", "se1"), ("alice", "sp1"), ("x", "sp9x"), ("pv", "se2"), ("pv", "se4"), ("y", "se3"),
-   ("z", "se3"), ("storage", "ie1"), ("k2", "ie2"), ("my var", "ie3")]
+   ("z", "se3"), ("storage", "ie1"), ("k2", "ie2"), ("my var", "ie3"), ("selfBalance", "ie4"),
+   ("net", "ie5"), ("", "ie6")]
 
 namespace Headline
 
@@ -275,9 +280,15 @@ local instance : FreshNames := .ofTable names
 
 #guard (FreshNames.clashes StandardExample names).isEmpty
 
--- the increments are captured before the write, in solc's order: the first
--- line is `⟨ uint idx1; idx1 = i++; uint[] storage sp = matrix[idx1]; … ⟩`
-example : dl!{ ⟨ matrix[i++][i++] = 77; ⟩ true }
+-- the increments are captured before the write, in solc's order
+example : dl!{ ⟨ matrix[i++][i++] = 77; ⟩ true } = dl!{ ⟨ uint idx1; idx1 = i++;
+    uint[] storage sp = matrix[idx1]; uint idx2; idx2 = i++; sp[idx2] = 77; ⟩ true } := rfl
+
+/-- `matrix[i++][i++] = 77;`, Lean's derivation of
+it in the printed names.  The lines are not the printed ones: the elaborator
+captures both increments before the write (above), where the printed rules
+capture them as they unfold it. -/
+def matrix : dl!{ ⟨ matrix[i++][i++] = 77; ⟩ true }
     ~*> dl!{ { idx1 := 0 } { i := i + 1 ‖ idx1 := i } { sp := matrix[idx1] } { idx2 := 0 }
               { i := i + 1 ‖ idx2 := i } ⟨ sp[idx2] = 77; ⟩ true } := by
   sol_chain

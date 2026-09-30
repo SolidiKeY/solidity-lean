@@ -198,7 +198,7 @@ went.
 | `Examples/Notation.lean` | What taclets, premises and sequents print, pinned. |
 | `Examples/ApplySteps.lean` | The proof style: every `Proves` constructor once, and a refused rule. |
 | `Examples/Chains.lean`, `Examples/UpdateRules.lean`, `Examples/Decide.lean` | Derivation chains, update simplification, `sol_decide`. |
-| `Examples/ExampleNames.lean` | Chains in the examples' names for the fresh variables: the headline with `pv`/`acc`, the token example with `aliceTok`/`aliceAcc`, `acc` as a memory reference, `matrix[i++][i++]`, a `sol{ … }` capture past a table name. |
+| `Examples/ExampleNames.lean` | Chains in the examples' names for the fresh variables: the headline with `pv`/`acc`, the token example with `aliceTok`/`aliceAcc`, `acc` as a memory reference, `matrix[i++][i++]`; the tests of a table (a line is its default spelling's term, a capture numbered past a table name). |
 | `Examples/Specs.lean` | Clauses as obligations (`spec!{f}`) beyond the benchmarks, proved by `sol_spec`: ERC20 over `msg.sender` (`approve`, `_mint`) and `Tally`. The benchmark contracts carry their own clauses and `spec!` theorems in `Examples/Benchmark/`. |
 | `Examples/Benchmark/Syntax.lean` | What elaborates away, pinned by what it prints: units, `payable`/`address` casts, events and `emit`, errors and `require`/`revert` with a message or an error, enums, struct constructors, modifiers. |
 | `Examples/Benchmark/Counter.lean`, `Examples/Benchmark/SimpleStorage.lean`, `Examples/Benchmark/Mapping.lean` | solkey's benchmark contracts `Counter`, `SimpleStorage`, `Mapping` and `NestedMapping` as published, with their `@custom:key` clauses as members, proved both as `dl!` formulas and as `spec!{f}` obligations. |
