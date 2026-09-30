@@ -1,4 +1,5 @@
 import Solidity.Calculus.Close
+import Solidity.Calculus.Rewrite
 
 /-!
 # `delete`, rule by rule
@@ -15,7 +16,9 @@ extent, a struct its mapping members).  Reading it back:
 | read at | closes by | example |
 |---|---|---|
 | `p` itself, after a write to `p` | `sol_close` | `deleteThenRead` |
+| `p` itself, in the sequent | the Theory's lemmas (`sol_rw`) | `deleteReadDeep_theory` |
 | a path apart from `p` | `sol_close` | `deleteThenReadBeside` |
+| a path apart from `p`, in the sequent | the Theory's lemmas (`rw`) | `deleteFrame_theory` |
 | a member below `p` | a run from the initial store | the `#eval`s at the end |
 | `p`, with nothing known of it | not valid | `deleteRootUnknown` |
 
@@ -127,6 +130,67 @@ theorem deleteBoolThenRead :
     ⊨ dl!{ [ flags[3] = true; delete flags[3]; bool result = flags[3]; ] result == false } := by
   sol_symex
   sol_close
+
+/-! ## Reading after a delete, in the sequent
+
+The same reads, closed as KeY closes them: the calculus steps
+(`sol_derive`), the updates merged into one parallel update (`Proves.merge`
+for the locals, `Proves.mergeStorage` for a storage write), the comparison
+split and the merged update applied (`sol_apply_upd`), and the read that is
+left rewritten by the Theory's own lemmas — `find_delAt_same`,
+`find_copyTo_same`, `find_delAt_frame` of `Theory/Storage.lean` and
+`Theory/Copy.lean`, named directly, not lifted to `Term.Theq` by hand
+(`sol_rw`, `Calculus/TheoryRewrite.lean`). -/
+
+open Theory Theory.StValue in
+/-- `alice.account.balance = 5; delete alice.account.balance;` read two
+members down: `find_delAt_same` reads the delete, `find_copyTo_same` and
+`copyVal` the write under it, and `delValueDefault`/`primDefault` reset the
+word, in one step, since `delValue (findSt …)` alone is no term. -/
+theorem deleteReadDeep_theory :
+    ⊢ dl!{ [ alice.account.balance = 5; delete alice.account.balance;
+      uint x = alice.account.balance; ] x == 0 } := by
+  sol_derive
+  -- dl{ { se1 := 5 }, { sp1 := alice.account }, { storage := save(storage, sp1.balance, se1) },
+  --     { sp2 := alice.account }, { storage := delAt(storage, sp2.balance) },
+  --     { sp3 := alice.account }, { x := find(storage, sp3.balance) } ⟹ x = 0 }
+  refine Proves.merge rfl ?_
+  refine Proves.mergeStorage ?_
+  refine Proves.merge rfl ?_
+  refine Proves.mergeStorage ?_
+  refine Proves.merge rfl ?_
+  refine Proves.merge rfl ?_
+  -- dl{ { se1 := 5 ‖ … ‖ x := find(delAt(save(storage, alice.account.balance, 5),
+  --       alice.account.balance), alice.account.balance) } ⟹ x = 0 }
+  refine Proves.eqDSplit ?_ ?_ ?_
+  · exact Proves.definedWritten
+  · exact Proves.definedLit
+  · sol_apply_upd
+    -- dl{ ⟹ find(delAt(save(storage, alice.account.balance, 5), alice.account.balance),
+    --       alice.account.balance) ≐ 0 }
+    sol_rw [find_delAt_same, find_copyTo_same, copyVal, delValueDefault, primDefault]
+    -- dl{ ⟹ 0 ≐ 0 }
+    exact Proves.eqRefl
+
+open Theory Theory.StValue in
+/-- `bob.age = 7; delete alice;` read at `bob.age`: the delete is off the
+path (`find_delAt_frame`, its `diverges` decided on the two literal paths),
+and the write is read back (`find_copyTo_same`, `copyVal`). -/
+theorem deleteFrame_theory :
+    ⊢ dl!{ [ bob.age = 7; delete alice; uint x = bob.age; ] x == 7 } := by
+  sol_derive
+  -- dl{ { storage := save(storage, bob.age, 7) }, { storage := delAt(storage, alice) },
+  --     { x := find(storage, bob.age) } ⟹ x = 7 }
+  refine Proves.mergeStorage ?_
+  refine Proves.mergeStorage ?_
+  refine Proves.eqDSplit ?_ ?_ ?_
+  · exact Proves.definedWritten
+  · exact Proves.definedLit
+  · sol_apply_upd
+    -- dl{ ⟹ find(delAt(save(storage, bob.age, 7), alice), bob.age) ≐ 7 }
+    rw [find_delAt_frame, find_copyTo_same, copyVal]
+    -- dl{ ⟹ 7 ≐ 7 }
+    exact Proves.eqRefl
 
 set_option maxHeartbeats 1000000 in
 /-- `k != j → balances[k] = 5; balances[j] = 6; delete balances[j];` — the entry

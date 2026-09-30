@@ -13,7 +13,8 @@ terms with the same Theory value in every state (`Term.Theq`) may replace
 each other in every equation of a sequent.  A law proved in
 `Theory/Storage.lean` is such a fact about the terms that denote its sides,
 so it is a rewrite rule for free; `Proves.theoryRw` (`Calculus/Logic.lean`)
-applies one.
+applies one, and `Term.Theq.of_eq` with the `denote_*` lemmas below is how
+`sol_rw` lifts a named Theory lemma (`Calculus/TheoryRewrite.lean`).
 
 **Where a rewrite reaches** (`Fml.rwEq`): every total equation, at any depth
 — under a connective, behind an update, inside a modality's postcondition,
@@ -58,6 +59,38 @@ theorem Term.Theq.trans {t₁ t₂ t₃ : Term C} (h₁ : Term.Theq t₁ t₂) (
 /-- Terms up to their Theory value: `t ≈ t'` is `Term.Theq t t'`. -/
 instance Term.setoid : Setoid (Term C) :=
   ⟨Term.Theq, ⟨Term.Theq.refl, Term.Theq.symm, Term.Theq.trans⟩⟩
+
+/-- Terms whose Theory values are equal are equal in the Theory: how a law of
+the Theory, an `=` of its values, becomes a rewrite rule (`sol_rw`,
+`Calculus/TheoryRewrite.lean`). -/
+theorem Term.Theq.of_eq {t t' : Term C} (h : ∀ σ, t.denote σ = t'.denote σ) : Term.Theq t t' :=
+  fun σ => h σ ▸ StValue.Equiv.refl _
+
+/-! ### One constructor's denotation
+
+The arms of `denote` that `sol_rw` unfolds before a Theory law is applied,
+one lemma each: the terms it can read back (`Calculus/TheoryRewrite.lean`).
+Any other term stays folded, `t.denote σ`, and reads back as itself. -/
+
+theorem Term.denote_lit (σ : State) (v : Value) : (Term.lit v : Term C).denote σ = .prim v := rfl
+theorem Term.denote_find (σ : State) (s : STerm C) (p : PTerm C) :
+    (Term.find s p).denote σ = StValue.findSt (s.denote σ) (p.denote σ) := rfl
+theorem Term.denote_len (σ : State) (s : STerm C) (p : PTerm C) :
+    (Term.len s p).denote σ = StValue.findSt (s.denote σ) (p.denote σ ++ [StValue.lengthSeg]) := rfl
+theorem STerm.denote_storage (σ : State) : (STerm.storage : STerm C).denote σ = σ.abs := rfl
+theorem STerm.denote_save (σ : State) (s : STerm C) (p : PTerm C) (v : SValT C) :
+    (STerm.save s p v).denote σ = StValue.copyTo (s.denote σ) (p.denote σ) (v.denote σ) := rfl
+theorem STerm.denote_delAt (σ : State) (s : STerm C) (p : PTerm C) :
+    (STerm.delAt s p).denote σ = StValue.delAt (s.denote σ) (p.denote σ) := rfl
+theorem SValT.denote_val (σ : State) (t : Term C) : (SValT.val t).denote σ = t.denote σ := rfl
+theorem SValT.denote_find (σ : State) (s : STerm C) (p : PTerm C) :
+    (SValT.find s p).denote σ = StValue.findSt (s.denote σ) (p.denote σ) := rfl
+theorem PTerm.denote_root (σ : State) (r : Name) :
+    (PTerm.root r : PTerm C).denote σ = [.field r] := rfl
+theorem PTerm.denote_field (σ : State) (p : PTerm C) (f : Name) :
+    (PTerm.field p f).denote σ = p.denote σ ++ [.field f] := rfl
+theorem PTerm.denote_at (σ : State) (p : PTerm C) (i : Term C) :
+    (PTerm.at p i).denote σ = p.denote σ ++ [.at (StValue.asInt (i.denote σ))] := rfl
 
 instance : Trans (@Term.Theq C) (@Term.Theq C) (@Term.Theq C) := ⟨Term.Theq.trans⟩
 

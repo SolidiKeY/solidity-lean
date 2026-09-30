@@ -31,6 +31,13 @@ after, by `rfl` or `decide`, and names the one that does not close.
 itself only for a word, so `findOnSave` takes a literal.  A read of a delete
 is the reset of what was there, which a term can name only when what was
 there is a known word (`findOnDelAt`).
+
+**Or name the Theory's lemma.**  A law with no premise on the state needs no
+lifting here: `rw [find_delAt_frame]` or `sol_rw [find_delAt_same,
+find_copyTo_same, copyVal, delValueDefault, primDefault]` lifts it on the
+spot (`Calculus/TheoryRewrite.lean`), as the examples at the end show.  The
+laws of this file stay for the premises a term states (`findOnDelAt`'s
+`hw`) and as the names the chains use.
 -/
 
 namespace Solidity
@@ -193,8 +200,28 @@ example {R : RuleSet} :
     Proves R ([] : List (Hyp C))
       (.eq (.find (.delAt (.save .storage (.field (.root "alice") "age") (.val (.lit (.int 42))))
           (.field (.root "alice") "age")) (.field (.root "alice") "age")) (.lit (.int 0))) := by
-  sol_rw findOnDelAtSave
+  sol_rw [findOnDelAtSave]
   exact Proves.eqClose
+
+/-- The same, with the Theory's own lemmas named instead of `findOnDelAtSave`:
+the read of the delete (`find_delAt_same`), of the write under it
+(`find_copyTo_same`, `copyVal`) and the reset of the word (`delValueDefault`,
+`primDefault`), one step, since `delValue (findSt …)` alone is no term. -/
+example {R : RuleSet} :
+    Proves R ([] : List (Hyp C))
+      (.eq (.find (.delAt (.save .storage (.field (.root "alice") "age") (.val (.lit (.int 42))))
+          (.field (.root "alice") "age")) (.field (.root "alice") "age")) (.lit (.int 0))) := by
+  sol_rw [find_delAt_same, find_copyTo_same, copyVal, delValueDefault, primDefault]
+  exact Proves.eqClose
+
+/-- A Theory frame lemma: a read off the deleted path, `alice` against
+`bob.age`, whose `diverges` closes on the two literal paths. -/
+example {R : RuleSet} :
+    Proves R ([] : List (Hyp C))
+      (.eq (.find (.delAt .storage (.root "alice")) (.field (.root "bob") "age"))
+        (.find .storage (.field (.root "bob") "age"))) := by
+  rw [find_delAt_frame]
+  exact Proves.eqRefl
 
 /- A frame law whose side condition fails: `alice` and `alice.age` do not
 diverge, so `sol_rw` stops at the condition, and `rw` reports it. -/

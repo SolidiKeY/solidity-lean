@@ -19,6 +19,7 @@ import Solidity.Calculus.SoundUpdate
 import Solidity.Calculus.SoundUnfold
 import Solidity.Calculus.RuleSoundness
 import Solidity.Calculus.TermRules
+import Solidity.Calculus.TheoryRewrite
 import Solidity.Calculus.Logic
 import Solidity.Calculus.Callback
 import Solidity.Calculus.Symex
