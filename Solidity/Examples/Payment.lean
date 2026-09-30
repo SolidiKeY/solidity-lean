@@ -1,5 +1,4 @@
-import Solidity.Calculus.Chains
-import Solidity.Calculus.Close
+import Solidity.Calculus.Sequents
 
 /-!
 # Payment: `transfer`, in the calculus's lines
@@ -30,10 +29,18 @@ prints with `→`).  Where the Lean line differs:
 * past the split a line is at `.box` or `.diamond`, not `m`: the revert is
   the one rule that looks at it.
 
+The sequents themselves, each with its whole context, are the goals
+of a `⊢` walk (`transferBox`, `transferDiamond`): there each goal is a
+checked line `show sequent!{ Γ ⟹ ψ }` (`Calculus/Sequents.lean`).
+
 **Valid means every state.**  A free local may be unbound (a program
 variable of KeY always has a value), and the booking's `at(to)` is stuck
 where `to` is: so the funded diamond is valid with `to >= 0` among its
-assumptions, which binds `to` to a number.  The box needs nothing.
+assumptions, which binds `to` to a number, and `owner >= 0` binds the
+storage's `owner` the same way.  The funds must cover the amount, the
+`0 <= x + 2 <= selfBalance`, which also binds `x`: a diamond's
+chain is the plain one, with no assumption, and its validity closes the last
+line under them (`Fml.Steps.valid_in`).  The box needs nothing.
 
 The frame of a transfer and the ledger's runs are `Net.lean`'s; the
 callback rules are `Callback.lean`'s.
@@ -95,17 +102,43 @@ def transfer5Box :
       sol_chain
 
 /-- `[ to.transfer(5); ] true` as a `⊢` walk: one rule, two goals — the
-derivation of `transfer5Box` at `true`, the goals of each branch in its
-comments. -/
+derivation of `transfer5Box` at `true`, each goal a checked sequent
+(`Calculus/Sequents.lean`). -/
 theorem transferBox : ⊢ dl!{ [ to.transfer(5); ] true } := by
   apply guard .transferNoCallback
-  · -- dl{ 0 <= 5 ∧ 5 <= selfBalance, { selfBalance := selfBalance - 5 ‖ … } ⟹ [ ] true }
+  · show sequent!{ 0 <= 5 <= selfBalance,
+      { selfBalance := selfBalance - 5 ‖ net := store(net, at(to), select(net, at(to)) - 5) }
+        ⟹ [ ] true }
+    apply empty
+    show sequent!{ 0 <= 5 <= selfBalance,
+      { selfBalance := selfBalance - 5 ‖ net := store(net, at(to), select(net, at(to)) - 5) }
+        ⟹ true }
+    refine close ?_
+    sol_symex
+    sol_close
+  · show sequent!{ ¬(0 <= 5 <= selfBalance) ⟹ [ revert(); ] true }
+    apply done .revertBox
+    show sequent!{ ¬(0 <= 5 <= selfBalance) ⟹ true }
+    refine close ?_
+    sol_symex
+    sol_close
+
+/-- The funded diamond as a `⊢` walk, two sequents: the context
+`to >= 0, 5 <= selfBalance` is in front of both goals, and the `false` the
+revert leaves is proved from it. -/
+theorem transferDiamond :
+    sequent!{ to >= 0, 5 <= selfBalance ⟹ ⟨ to.transfer(5); ⟩ true } := by
+  apply guard .transferNoCallback
+  · show sequent!{ to >= 0, 5 <= selfBalance, 0 <= 5 <= selfBalance,
+      { selfBalance := selfBalance - 5 ‖ net := store(net, at(to), select(net, at(to)) - 5) }
+        ⟹ ⟨ ⟩ true }
     apply empty
     refine close ?_
     sol_symex
     sol_close
-  · -- dl{ ¬(0 <= 5 ∧ 5 <= selfBalance) ⟹ [ revert(); ] true }
-    apply done .revertBox
+  · show sequent!{ to >= 0, 5 <= selfBalance, ¬(0 <= 5 <= selfBalance) ⟹ ⟨ revert(); ⟩ true }
+    apply done .revertDiamond
+    show sequent!{ to >= 0, 5 <= selfBalance, ¬(0 <= 5 <= selfBalance) ⟹ false }
     refine close ?_
     sol_symex
     sol_close
@@ -195,6 +228,14 @@ def transferSumDiamond :
 theorem transferCapturedAmount : ⊨ dl!{ [ to.transfer(x + 2); ] true } :=
   (transferSumBox { fml := dl!{ true } }).valid (by sol_close)
 
+/-- `⟨ to.transfer(x + 2); ⟩ true`, funded: `transferSumDiamond`'s last line
+at `true`, closed under the funds check `0 <= x + 2 <= selfBalance`
+(and `to >= 0`, which binds `to`). -/
+theorem transferSumDiamond_valid :
+    ⊨ dl!{ to >= 0, 0 <= x + 2 <= selfBalance ⟹ ⟨ to.transfer(x + 2); ⟩ true } :=
+  (transferSumDiamond { fml := dl!{ true } }).valid_in
+    [.pre dl!{ to >= 0 }, .pre dl!{ 0 <= x + 2 <= selfBalance }] (by sol_close)
+
 /-! ## 4 · `owner.transfer(5);` — a storage receiver
 
 The receiver is the nonsimple part (`transfer_unfold_leftFstReceiver`).  The
@@ -221,14 +262,40 @@ def transferOwner :
             (¬(0 <= 5 <= selfBalance) ⟹ ⟨[ revert(); ]⟩ φ)) } := by
       sol_chain
 
-/-- trace: ⊢ ⊨ dl{ [ uint se1 = owner; se1 .transfer(5); ] true } -/
-#guard_msgs in
-/-- `[ owner.transfer(5); ] true`, by the strategy. -/
-theorem transferStorageReceiver : ⊨ dl!{ [ owner.transfer(5); ] true } := by
-  sol_step
-  trace_state
-  sol_symex
-  sol_close
+/-- `[ owner.transfer(5); ] φ`: the box closes the second goal. -/
+def transferOwnerBox :
+    dl![.box]{ ⟨[ owner.transfer(5); ]⟩ φ }
+    ~*> dl![.box]{ { se1 := select(storage, owner) }
+          ((0 <= 5 <= selfBalance ⟹
+              { selfBalance := selfBalance - 5 ‖ net := store(net, at(se1), select(net, at(se1)) - 5) } φ) ∧
+            (¬(0 <= 5 <= selfBalance) ⟹ true)) } :=
+  calc dl![.box]{ ⟨[ owner.transfer(5); ]⟩ φ }
+    _ ~*> _ := transferOwner .box φ
+    _ ~*> _ := by sol_chain
+
+/-- `⟨ owner.transfer(5); ⟩ φ`: the diamond is left with the funds
+obligation, under the capture. -/
+def transferOwnerDiamond :
+    dl![.diamond]{ ⟨[ owner.transfer(5); ]⟩ φ }
+    ~*> dl![.diamond]{ { se1 := select(storage, owner) }
+          ((0 <= 5 <= selfBalance ⟹
+              { selfBalance := selfBalance - 5 ‖ net := store(net, at(se1), select(net, at(se1)) - 5) } φ) ∧
+            (¬(0 <= 5 <= selfBalance) ⟹ false)) } :=
+  calc dl![.diamond]{ ⟨[ owner.transfer(5); ]⟩ φ }
+    _ ~*> _ := transferOwner .diamond φ
+    _ ~*> _ := by sol_chain
+
+/-- `[ owner.transfer(5); ] true`: `transferOwnerBox`'s last line, at `true`. -/
+theorem transferStorageReceiver : ⊨ dl!{ [ owner.transfer(5); ] true } :=
+  (transferOwnerBox { fml := dl!{ true } }).valid (by sol_close)
+
+/-- `⟨ owner.transfer(5); ⟩ true`, funded: `transferOwnerDiamond`'s last line
+at `true`, under `5 <= selfBalance`; `owner >= 0` says the storage holds a
+number at `owner`, which the capture reads. -/
+theorem transferOwnerDiamond_valid :
+    ⊨ dl!{ owner >= 0, 5 <= selfBalance ⟹ ⟨ owner.transfer(5); ⟩ true } :=
+  (transferOwnerDiamond { fml := dl!{ true } }).valid_in
+    [.pre dl!{ owner >= 0 }, .pre dl!{ 5 <= selfBalance }] (by sol_close)
 
 end Lines
 

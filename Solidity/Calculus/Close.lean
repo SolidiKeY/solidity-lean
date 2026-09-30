@@ -736,7 +736,8 @@ attribute [close_rw]
   PrimVal.bool.injEq
   MVal.prim.injEq MVal.ref.injEq SVal.prim.injEq Prod.mk.injEq Seg.field.injEq Seg.at.injEq
   Var.user.injEq Var.fresh.injEq Int.ofNat.injEq
-  forall_eq' forall_eq exists_eq_left' exists_eq_left forall_exists_index and_imp
+  forall_eq' forall_eq exists_eq_left' exists_eq_left exists_eq' exists_eq forall_exists_index
+  and_imp
   true_and and_true and_self implies_true forall_const ne_eq not_false_eq_true not_true_eq_false
   true_or or_true or_false false_or not_and not_exists Classical.not_not true_implies
   false_implies decide_eq_true_eq decide_eq_false_iff_not
