@@ -23,8 +23,57 @@ So a rule is wrong about Solidity only through one of four links:
 4. **The trusted base leaks**: a `sorry`, `native_decide`, `implemented_by`,
    or a `side_cond` that proves more than it should.
 
+`Stmt.complete` (`Calculus/Completeness.lean`) is coverage, every statement
+has a rule, not logical completeness: it says nothing about link 3.
+
 Links 1 and 2 are the unproved square of `docs/solc-validation.md`. The
 checks below cover all four.
+
+## What the compiler theorem checks
+
+`compile_correct` (`Evm/Correctness.lean`, `docs/compiler-verification.md`)
+looks like a check of link 1: the interpreter and the compiled code both end
+in `Sim`-related states, or both revert. Lean checks the proof against the
+definitions, not the definitions against the EVM, so the theorem pins
+`Stmt.run` down only as far as three trusted definitions are right:
+
+| Trusted | Must match | If it does not |
+|---|---|---|
+| `Instr.step` (`Evm/Machine.lean`) | the EVM (Yellow Paper, conformance tests) | the theorem proves agreement with a fictional EVM |
+| `compileStmt` (`Evm/Compile.lean`) | what solc emits | the theorem proves agreement with another language |
+| `Sim` and the theorem's shape | what a proof should guarantee | a wrong behaviour `Sim` does not relate goes through |
+
+With all three right, a wrong `Stmt.run` clause makes `compile_correct`
+false, and so unprovable. A definition of the machine written *from the
+interpreter* makes the theorem hold by construction, and so checks nothing.
+`transfer` is the case in point: the machine's `CALL` is `transferAt`
+re-spelled (the same funds guard, the same debit, a `net` field no EVM has, no
+recipient), so its proof case matches `if` with `if`.
+
+### K. The machine against a real EVM
+
+- **`CALL` from the Yellow Paper**: a world state (`balances : Nat → Nat`, the
+  contract's own address) in place of `net`; the value moves from the
+  contract to the recipient, and a transfer to itself moves nothing; the
+  callee is a parameter, and `compile_correct` quantifies over every callee
+  (for all, never there exists, or an always-accepting callee hides the
+  revert). With `transfer`'s 2300-gas stipend a callee cannot `SSTORE` or send
+  value (EIP-2200), so accept-or-revert is all it can do; that is an
+  assumption on the gas schedule, stated or modelled.
+- **`Sim` relates real quantities**: `σ.selfBalance` to the machine's balance
+  at its own address. `net` is a ghost the machine cannot hold, so a wrong
+  `net` update passes the theorem; a separate lemma pins it (the sum of the
+  changes to `net` is the change to `selfBalance`, on a run with no incoming
+  funds).
+- **Every instruction tested against a real EVM**: the same bytecode on
+  `Machine` and on revm/evmone (or Ethereum's `GeneralStateTests`),
+  compared. `Tools/DiffTest.lean` compares the interpreter with the machine;
+  this compares the machine with the EVM. EVMYulLean would do it as a
+  `[[require]]`, which this package cannot have.
+- **`compileStmt` against solc**: each compiled statement beside what
+  `solc --ir` emits for it (for `transfer`: the stipend, and the revert when
+  `CALL` fails; compiled as `send`, with an interpreter that did not revert,
+  the theorem would still hold).
 
 ## Deterministic checks
 
@@ -148,6 +197,26 @@ write a program that tells the mutant from the original.
 - **Struct and array sources are not right-hand-side first** in solc: it
   resolves the target before copying member by member, while the interpreter
   is value-first (`docs/solc-alignment.md`, "Known divergence").
+- **`transfer` assumes its recipient.** `transferAt` succeeds whenever the
+  funds cover the amount, and debits them whoever the recipient is. That is
+  two unstated assumptions: the recipient never reverts (no `receive`, an
+  explicit `revert`, more than 2300 gas), and it is never the contract itself
+  (on the EVM that moves nothing and runs the contract's own `receive`).
+  `address(this).transfer(v)` does not parse, but any `uint` holding the
+  contract's address is a receiver, since the model has no address of its
+  own. `Rule.sound` and `compile_correct` both hold, against the interpreter
+  and a machine that share the assumptions; the diamond `transferNoCallback`
+  then promises termination the EVM does not give. The receiver is also a
+  `uint`, not an address below `2^160`. Two fixes: state the assumptions as
+  hypotheses of `compile_correct` and the diamond rule, or give the
+  interpreter a recipient oracle and a `this` address (the diamond rule then
+  owes the recipient's acceptance, and solkey's rule changes with it). K
+  exposes both cases either way.
+- **The callback reading belongs to `call{value:}`**, not `transfer`: under
+  the 2300-gas stipend a re-entrant callee cannot change storage, `net` or
+  `selfBalance`, so for `transfer` the right reading is no callback, the
+  recipient free to revert. `Semantics/Callback.lean`'s havoc is the reading
+  of `a.call{value: v}("")`, which the syntax does not have.
 
 ## Lean projects online
 
@@ -234,7 +303,10 @@ in ACL2.
 
 ## Order of work
 
-1. **A**, and **B** with the two known gaps as its first facts.
+1. **A**, and **B** with the known gaps as its first facts.
+   **K**'s `CALL` with the `transfer` assumptions as hypotheses of
+   `compile_correct`: a small change to `Evm/Machine.lean` and one proof
+   case, and it turns the hidden assumptions into stated ones.
 2. Triage SolidCore's divergence log against the fragment, one agent: each
    relevant row a B fact or a `Counterexamples/` entry, saying whether this
    model already matches.

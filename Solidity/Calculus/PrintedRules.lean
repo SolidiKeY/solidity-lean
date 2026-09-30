@@ -181,8 +181,7 @@ inductive PrintedRule where
   -- payment
   | transfer_unfold_leftFstReceiver
   | transfer_unfold_rightSndArgument
-  | transferNoCallbackBox
-  | transferNoCallbackDiamond
+  | transferNoCallback
   | transferWithCallbackBox
   | transferWithCallbackDiamond
   -- arithmetic
@@ -380,7 +379,7 @@ def printedOrigins : List (Lean.Name × PrintedOrigin) := [
   -- Transfer
   (``Taclet.transfer_unfold_leftFstReceiver, .printed .transfer_unfold_leftFstReceiver),
   (``Taclet.transfer_unfold_rightSndArgument, .printed .transfer_unfold_rightSndArgument),
-  (``Taclet.transferNoCallback, .merged [.transferNoCallbackBox, .transferNoCallbackDiamond]),
+  (``Taclet.transferNoCallback, .printed .transferNoCallback),
   -- Memory
   (``Taclet.memoryFieldRead_unfold_rightFst, .printed .memoryFieldRead_unfold_rightFst),
   (``Taclet.memoryIndexRead_unfold_rightFst, .printed .memoryIndexRead_unfold_rightFst),
@@ -487,9 +486,9 @@ theorem printed_rules_partitioned :
       (fun p => claims p != (p.kind != .rule || unclaimedRules.contains p)) = true := by
   decide +kernel
 
-theorem printedRules_count : PrintedRule.all.length = 136 := by decide +kernel
+theorem printedRules_count : PrintedRule.all.length = 135 := by decide +kernel
 
-theorem claimedPrintedRules_count : claimedPrintedRules.length = 119 := by decide +kernel
+theorem claimedPrintedRules_count : claimedPrintedRules.length = 118 := by decide +kernel
 
 theorem unclaimedRules_count : unclaimedRules.length = 7 := by decide +kernel
 
