@@ -172,7 +172,7 @@ theorem Fml.active_and_true_left {φ ψ : Fml C} (h : φ.active = true) :
     (Fml.and φ ψ).active = true := by
   simp only [Fml.active, h, Bool.true_or]
 
-theorem Fml.active_and_true {φ ψ : Fml C} (h : ψ.active = true) :
+theorem Fml.active_and_true_right {φ ψ : Fml C} (h : ψ.active = true) :
     (Fml.and φ ψ).active = true := by
   simp only [Fml.active, h, Bool.or_true]
 
@@ -286,23 +286,30 @@ def stepTaclet (C k m s : Lean.Expr) : MetaM (Lean.Expr × Option Lean.Name) := 
 /-- Whether a quoted line holds a postcondition `↑φ`. -/
 def hasPost (e : Lean.Expr) : Bool := (e.find? (·.isAppOfArity ``Post.fml 2)).isSome
 
+/-- Whether `Fml.active` and `Fml.stepAt` look through the head of `e` into
+a formula below it: an update, a precondition, a havoc or the goals of a
+branch.  On any other constructor they answer without looking at what is
+below it (a `⟨ P ⟩ ↑φ` is active whatever `φ` is). -/
+def isConnective (e : Lean.Expr) : Bool :=
+  e.isAppOfArity ``Fml.upd 4 || e.isAppOfArity ``Fml.imp 3 || e.isAppOfArity ``Fml.havoc 2 ||
+    e.isAppOfArity ``Fml.and 3
+
 /-- `e.active = b`: the postconditions' `Post.inactive`, put together along
 the connectives `Fml.active` looks through; the kernel's `rfl` where no
-postcondition is left.  `none` when that is not how it goes. -/
+postcondition is left below one.  `none` when that is not how it goes. -/
 partial def activeProof (C e : Lean.Expr) (b : Bool) : MetaM (Option Lean.Expr) := do
   let e := e.consumeMData
   let goal := mkApp2 (mkConst ``Fml.active) C e
   let ty ← mkEq goal (toExpr b)
   if e.isAppOfArity ``Post.fml 2 then
     return if b then none else some (mkApp2 (mkConst ``Post.inactive) (e.getArg! 0) (e.getArg! 1))
-  if !hasPost e then
+  if !isConnective e || !hasPost e then
     unless ← isDefEq goal (toExpr b) do return none
     return some (← mkExpectedTypeHint (← mkEqRefl (toExpr b)) ty)
   let a := e.getAppArgs
   if e.isAppOfArity ``Fml.upd 4 || e.isAppOfArity ``Fml.imp 3 || e.isAppOfArity ``Fml.havoc 2 then
     let some h ← activeProof C a.back! b | return none
     return some (← mkExpectedTypeHint h ty)
-  unless e.isAppOfArity ``Fml.and 3 do return none
   if !b then
     let some h ← activeProof C a[1]! false | return none
     let some h' ← activeProof C a[2]! false | return none
@@ -310,7 +317,7 @@ partial def activeProof (C e : Lean.Expr) (b : Bool) : MetaM (Option Lean.Expr) 
   if let some h ← activeProof C a[1]! true then
     return some (mkAppN (mkConst ``Fml.active_and_true_left) #[C, a[1]!, a[2]!, h])
   let some h ← activeProof C a[2]! true | return none
-  return some (mkAppN (mkConst ``Fml.active_and_true) #[C, a[1]!, a[2]!, h])
+  return some (mkAppN (mkConst ``Fml.active_and_true_right) #[C, a[1]!, a[2]!, h])
 
 /-- The goal of `φ` the strategy steps in, and `φ.ruleAt k = ψ.ruleAt k` for
 it: through the connectives `Fml.ruleAt` looks through, past a goal that is
@@ -977,10 +984,12 @@ partial def stepAtProof (C : Lean.Expr) (sp : Splice) (k : Nat) (A B : Lean.Expr
   let B := B.consumeMData
   let kE := toExpr k
   let leaf : MetaM Lean.Expr := do
-    if let some m := sp.modality then
-      let st := mkApp3 (mkConst ``Fml.stepAt) C kE A
-      unless ← isDefEq st (mkApp2 (mkConst ``Option.some [0]) (mkApp (mkConst ``Fml) C) B) do
-        throwError "sol_chain: the line after{indentExpr A}\n{modalityStop m}"
+    let st := mkApp3 (mkConst ``Fml.stepAt) C kE A
+    unless ← isDefEq st (mkApp2 (mkConst ``Option.some [0]) (mkApp (mkConst ``Fml) C) B) do
+      match sp.modality with
+      | some m => throwError "sol_chain: the line after{indentExpr A}\n{modalityStop m}"
+      | none => throwError "sol_chain: the step after{indentExpr A}\nasks a postcondition \
+          whether it has a modality left, along a path the step is not taken apart on"
     return someRefl C B
   unless hasPost A do return ← leaf
   let a := A.getAppArgs

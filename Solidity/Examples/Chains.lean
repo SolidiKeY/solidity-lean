@@ -330,6 +330,24 @@ info:     dl{ ⟨[ if (true) {x = 2;} else {x = 1;}; ]⟩ x = 1 }
 
 end Modality
 
+-- A line holds no other Lean term than a modality and postconditions…
+/--
+error: sol_chain: n is free in the line: only a modality `m` and postconditions `φ : Post C` may be
+  dl{ { y := ‹Term.lit (Semantics.PrimVal.int n)› } ⟨ x = 1; ⟩ true }
+-/
+#guard_msgs in
+example (n : Int) : ∃ ψ, Fml.upd .diamond [.val (.user "y") (.lit (.int n))]
+    dl!{ ⟨ x = 1; ⟩ true } ~> ψ := ⟨_, by sol_chain⟩
+
+-- … and one modality.
+/--
+error: sol_chain: the line is under two modalities: take `cases` on one
+  dl{ ⟨[ x = 1; ]⟩ true ∧ ⟨[ x = 2; ]⟩ true }
+-/
+#guard_msgs in
+example (m m' : Modality) : ∃ ψ, Fml.and dl![m]{ ⟨[ x = 1; ]⟩ true } dl![m']{ ⟨[ x = 2; ]⟩ true }
+    ~> ψ := ⟨_, by sol_chain⟩
+
 /-! ## 9 · Past a finished goal
 
 Once the first goal of a branch is done, `(c → {U} φ) ∧ …`, the step on the
@@ -392,24 +410,49 @@ example : dl![.box]{ ⟨[ if (true) { x = 2; } else { x = 1; }; ]⟩ φ }
     ~[emptyModality]~> dl![.box]{ (true ≐ true → { x := 2 } φ) ∧ (true ≐ false → { x := 1 } φ) ∧ true } := by
   sol_chain
 
+-- Nested: past the done goal of the inner branch, the next step asks the
+-- goal `[ x = 1; ] φ`, active whatever `φ` is.
+/--
+info:     dl{ [ if (true) {if (true) {x = 2;} else {x = 1;};} else {x = 1;}; ] φ }
+  ~[ifElseSplit]~>
+    dl{ (true ≐ true → [ if (true) {x = 2;} else {x = 1;}; ] φ) ∧ (true ≐ false → [ x = 1; ] φ) ∧ true }
+  ~[ifElseSplit]~>
+    dl{
+  (true ≐ true → (true ≐ true → [ x = 2; ] φ) ∧ (true ≐ false → [ x = 1; ] φ) ∧ true) ∧
+    (true ≐ false → [ x = 1; ] φ) ∧ true }
+  ~[localValueAssign]~>
+    dl{
+  (true ≐ true → (true ≐ true → { x := 2 } [ ] φ) ∧ (true ≐ false → [ x = 1; ] φ) ∧ true) ∧
+    (true ≐ false → [ x = 1; ] φ) ∧ true }
+  ~[emptyModality]~>
+    dl{
+  (true ≐ true → (true ≐ true → { x := 2 } φ) ∧ (true ≐ false → [ x = 1; ] φ) ∧ true) ∧
+    (true ≐ false → [ x = 1; ] φ) ∧ true }
+  ~[localValueAssign]~>
+    dl{
+  (true ≐ true → (true ≐ true → { x := 2 } φ) ∧ (true ≐ false → { x := 1 } [ ] φ) ∧ true) ∧
+    (true ≐ false → [ x = 1; ] φ) ∧ true }
+  ~[emptyModality]~>
+    dl{
+  (true ≐ true → (true ≐ true → { x := 2 } φ) ∧ (true ≐ false → { x := 1 } φ) ∧ true) ∧
+    (true ≐ false → [ x = 1; ] φ) ∧ true }
+  ~[localValueAssign]~>
+    dl{
+  (true ≐ true → (true ≐ true → { x := 2 } φ) ∧ (true ≐ false → { x := 1 } φ) ∧ true) ∧
+    (true ≐ false → { x := 1 } [ ] φ) ∧ true }
+  ~[emptyModality]~>
+    dl{
+  (true ≐ true → (true ≐ true → { x := 2 } φ) ∧ (true ≐ false → { x := 1 } φ) ∧ true) ∧
+    (true ≐ false → { x := 1 } φ) ∧ true }
+-/
+#guard_msgs in
+#derivation dl![.box]{ ⟨[ if (true) { if (true) { x = 2; } else { x = 1; } } else { x = 1; }; ]⟩ φ }
+
+example : dl![.box]{ ⟨[ if (true) { if (true) { x = 2; } else { x = 1; } } else { x = 1; }; ]⟩ φ }
+    ~*> dl![.box]{ (true ≐ true → (true ≐ true → { x := 2 } φ) ∧ (true ≐ false → { x := 1 } φ) ∧ true) ∧
+          (true ≐ false → { x := 1 } φ) ∧ true } := by
+  sol_chain
+
 end Past
-
--- A line holds no other Lean term than a modality and postconditions…
-/--
-error: sol_chain: n is free in the line: only a modality `m` and postconditions `φ : Post C` may be
-  dl{ { y := ‹Term.lit (Semantics.PrimVal.int n)› } ⟨ x = 1; ⟩ true }
--/
-#guard_msgs in
-example (n : Int) : ∃ ψ, Fml.upd .diamond [.val (.user "y") (.lit (.int n))]
-    dl!{ ⟨ x = 1; ⟩ true } ~> ψ := ⟨_, by sol_chain⟩
-
--- … and one modality.
-/--
-error: sol_chain: the line is under two modalities: take `cases` on one
-  dl{ ⟨[ x = 1; ]⟩ true ∧ ⟨[ x = 2; ]⟩ true }
--/
-#guard_msgs in
-example (m m' : Modality) : ∃ ψ, Fml.and dl![m]{ ⟨[ x = 1; ]⟩ true } dl![m']{ ⟨[ x = 2; ]⟩ true }
-    ~> ψ := ⟨_, by sol_chain⟩
 
 end Solidity.Examples.Chains

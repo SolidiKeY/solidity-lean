@@ -36,6 +36,12 @@ modality as the difference between two readings, one at the diamond and one
 at the box — the reading never looks at a modality, so they differ exactly
 where `m` goes.
 
+**The arrow `⟹` has two readings.**  In `dl!{ Γ ⟹ φ }` (and `dl[C]{ … }`,
+`dl![m]{ … }`) it is a line of a chain, one formula `a₁ → … → φ` that prints
+with `→` ("Chain-only spellings" below).  In `dl{ Γ ⟹ φ }`, and in the
+goals a `⊢` derivation prints, it is a sequent, a `Proves` with its context
+apart, which no `dl!{ … }` reads back.
+
 **Two equations.**  `a = b` here is the interpreter's equation, `Fml.eqD`:
 both sides return, with one value — what `==` means, and what `a = b`
 meant before `holds` read an equation in the Theory.  `a ≐ b` is the total

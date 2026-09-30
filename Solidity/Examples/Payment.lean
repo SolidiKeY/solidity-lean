@@ -94,7 +94,9 @@ def transfer5Box :
             (¬(0 <= 5 <= selfBalance) ⟹ true) } := by
       sol_chain
 
-/-- `[ to.transfer(5); ] true` as a walk: one rule, two goals. -/
+/-- `[ to.transfer(5); ] true` as a `⊢` walk: one rule, two goals — the
+derivation of `transfer5Box` at `true`, the goals of each branch in its
+comments. -/
 theorem transferBox : ⊢ dl!{ [ to.transfer(5); ] true } := by
   apply guard .transferNoCallback
   · -- dl{ 0 <= 5 ∧ 5 <= selfBalance, { selfBalance := selfBalance - 5 ‖ … } ⟹ [ ] true }
@@ -189,20 +191,9 @@ def transferSumDiamond :
     _ ~*> _ := transferSum .diamond φ
     _ ~*> _ := by sol_chain
 
-/--
-trace: ⊢ ⊨
-    dl{
-      { se1 := x + 2 }
-        (((0 <= se1 ∧ se1 <= selfBalance) →
-                { selfBalance := selfBalance - se1 ‖ net := store(net, at(to), net(to) - se1) } true) ∧
-            (¬(0 <= se1 ∧ se1 <= selfBalance) → true)) }
--/
-#guard_msgs in
-/-- `[ to.transfer(x + 2); ] true`, by the strategy. -/
-theorem transferCapturedAmount : ⊨ dl!{ [ to.transfer(x + 2); ] true } := by
-  sol_symex
-  trace_state
-  sol_close
+/-- `[ to.transfer(x + 2); ] true`: `transferSumBox`'s last line, at `true`. -/
+theorem transferCapturedAmount : ⊨ dl!{ [ to.transfer(x + 2); ] true } :=
+  (transferSumBox { fml := dl!{ true } }).valid (by sol_close)
 
 /-! ## 4 · `owner.transfer(5);` — a storage receiver
 
