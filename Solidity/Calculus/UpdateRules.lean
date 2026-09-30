@@ -267,6 +267,7 @@ def STerm.subst (U : Upd C) : STerm C → STerm C
   | .pop s p => .pop (s.subst U) (p.subst U)
   | .shrink s p => .shrink (s.subst U) (p.subst U)
   | .extend s p E => .extend (s.subst U) (p.subst U) E
+  | .select s r => .select (s.subst U) r
 
 def SValT.subst (U : Upd C) : SValT C → SValT C
   | .val t => .val (t.subst U)
@@ -427,6 +428,16 @@ theorem STerm.subst_eval (h : SubstAgree U ns σ τ) :
     refine ResultsAgree.bind (s.subst_eval h) fun _ _ h' => ?_
     refine bindPureResults_agree _ fun _ => ?_
     exact ResAgree.bindState (pushPlaceAt_agree h' _ _ _) fun _ _ _ h'' => h''
+  | .select s r => by
+    simp only [STerm.subst, STerm.eval]
+    refine ResultsAgree.bind (s.subst_eval h) fun _ τ' h' => ?_
+    simp only [findStorage_congr h']
+    rcases τ'.findStorage r [] with _ | w
+    · exact ResultsAgree.refl _ _
+    · cases w
+      all_goals first
+        | exact ResultsAgree.refl _ _
+        | exact ⟨rfl, h'.heap, h'.nextId, h'.net, h'.env, h'.selfBalance, h'.tx⟩
 
 /-- Example: `{ se1 := 10 }se1`, a stored value, is `10`. -/
 theorem SValT.subst_eval (h : SubstAgree U ns σ τ) : (v : SValT C) → (v.subst U).eval σ = v.eval τ
@@ -1066,6 +1077,7 @@ def STerm.sortedFor (U : Upd C) : STerm C → Bool
   | .save s p v | .push s p v => s.sortedFor U && p.sortedFor U && v.sortedFor U
   | .delAt s p | .pop s p | .shrink s p | .pushSlot s p _ | .extend s p _ =>
     s.sortedFor U && p.sortedFor U
+  | .select s _ => s.sortedFor U
 
 def SValT.sortedFor (U : Upd C) : SValT C → Bool
   | .val t | .newArr _ t => t.sortedFor U
@@ -1287,6 +1299,10 @@ theorem STerm.subst_denote (h : SubstAgree U ns σ τ) :
     simp only [STerm.sortedFor, Bool.and_eq_true] at hs
     simp only [STerm.subst, STerm.denote, PTerm.subst_denote h p hs.2]
     exact Struct.Equiv.shrinkT (STerm.subst_denote h s hs.1) _
+  | .select s _, hs => by
+    simp only [STerm.sortedFor] at hs
+    simp only [STerm.subst, STerm.denote]
+    exact Equiv.asStruct (Equiv.findSt (STerm.subst_denote h s hs) [_])
 
 /-- A substituted stored value denotes before the update, up to `Equiv`, what
 it denotes after it. -/
@@ -2158,6 +2174,13 @@ theorem STerm.eval_keeps {σ τ : State} : (s : STerm C) → s.eval σ = .ok τ 
     obtain ⟨⟨τ', _⟩, hp, h⟩ := bind_ok_inv h
     cases h
     exact (s.eval_keeps h₀).trans (pushPlaceAt_keeps hp)
+  | .select s r, h => by
+    simp only [STerm.eval] at h
+    obtain ⟨τ₀, h₀, h⟩ := bind_ok_inv h
+    obtain ⟨w, -, h⟩ := bind_ok_inv h
+    cases w with
+    | struct fs => cases h; exact (s.eval_keeps h₀).trans rfl
+    | prim _ | array _ _ _ | map _ _ => cases h
 
 /-! ### Substituting a storage term for `storage` -/
 
@@ -2201,6 +2224,7 @@ def STerm.withSt (w : StWrite C) : STerm C → STerm C
   | .pop s' p => .pop (s'.withSt w) (p.withSt w)
   | .shrink s' p => .shrink (s'.withSt w) (p.withSt w)
   | .extend s' p E => .extend (s'.withSt w) (p.withSt w) E
+  | .select s' r => .select (s'.withSt w) r
 
 def SValT.withSt (w : StWrite C) : SValT C → SValT C
   | .val t => .val (t.withSt w)
@@ -2232,6 +2256,7 @@ def STerm.stExplicit : STerm C → Bool
   | .save s p v | .push s p v => s.stExplicit && p.stExplicit && v.stExplicit
   | .delAt s p | .pop s p | .shrink s p | .pushSlot s p _ | .extend s p _ =>
     s.stExplicit && p.stExplicit
+  | .select s _ => s.stExplicit
 
 def SValT.stExplicit : SValT C → Bool
   | .val t | .newArr _ t => t.stExplicit
@@ -2292,6 +2317,9 @@ theorem STerm.withSt_eval (hs : w.s.eval σ = .ok τ) (hk : σ.Keeps τ) :
   | .extend s' p _, he => by
     simp only [STerm.stExplicit, Bool.and_eq_true] at he
     simp only [STerm.withSt, STerm.eval, STerm.withSt_eval hs hk s' he.1, PTerm.withSt_eval hs hk p he.2]
+  | .select s' _, he => by
+    simp only [STerm.stExplicit] at he
+    simp only [STerm.withSt, STerm.eval, STerm.withSt_eval hs hk s' he]
 
 theorem SValT.withSt_eval (hs : w.s.eval σ = .ok τ) (hk : σ.Keeps τ) :
     (v : SValT C) → v.stExplicit = true → (v.withSt w).eval σ = v.eval τ
@@ -2514,6 +2542,10 @@ theorem STerm.withSt_denote (hs : w.s.eval σ = .ok τ) (hk : σ.Keeps τ) :
     simp only [STerm.stExplicit, Bool.and_eq_true] at he
     simp only [STerm.withSt, STerm.denote, PTerm.withSt_denote hs hk p he.2]
     exact Struct.Equiv.shrinkT (STerm.withSt_denote hs hk s' he.1) _
+  | .select s' _, he => by
+    simp only [STerm.stExplicit] at he
+    simp only [STerm.withSt, STerm.denote]
+    exact Equiv.asStruct (Equiv.findSt (STerm.withSt_denote hs hk s' he) [_])
 
 /-- Read before `{storage := s}`, the substituted stored value denotes, up
 to `Equiv`, what it denotes after it. -/
@@ -2727,6 +2759,7 @@ theorem STerm.rw_eval (hq : Term.EvalRefines q.1 q.2) :
   | .push s p v, σ =>
     Res.Le.bind (STerm.rw_eval hq s σ) fun _ => Res.Le.bind (PTerm.rw_eval hq p σ) fun _ =>
       pushAt_le fun _ => Res.Le.bind (SValT.rw_eval hq v σ) fun _ => Res.Le.refl _
+  | .select s _, σ => Res.Le.bind (STerm.rw_eval hq s σ) fun _ => Res.Le.refl _
 
 theorem SValT.rw_eval (hq : Term.EvalRefines q.1 q.2) :
     (v : SValT C) → ∀ σ, Res.Le (v.eval σ) ((v.rw q).eval σ)

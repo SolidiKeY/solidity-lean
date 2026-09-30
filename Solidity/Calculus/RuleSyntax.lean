@@ -1871,6 +1871,9 @@ partial def ppSTerm (e : Lean.Expr) : MetaM (TSyntax `dl_term) := do
   | STerm.shrink _ s p =>
     let (len, _) ← lenTerms (← ppPTerm p)
     `(dl_term| save($(← ppSTerm s), $len, $len - 1))
+  | STerm.select _ s r =>
+    let some r ← nameOf? r | escapeDl e
+    `(dl_term| select($(← ppSTerm s), $(nameIdent r):ident))
   | _ => escapeDl e
 
 partial def ppSVal (e : Lean.Expr) : MetaM (TSyntax `dl_term) := do

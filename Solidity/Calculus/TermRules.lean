@@ -136,6 +136,7 @@ def STerm.rw (q : Term C × Term C) : STerm C → STerm C
   | .pop s p => .pop (s.rw q) (p.rw q)
   | .shrink s p => .shrink (s.rw q) (p.rw q)
   | .extend s p E => .extend (s.rw q) (p.rw q) E
+  | .select s r => .select (s.rw q) r
 
 /-- A `copyMem` is left whole: it denotes through `eval`. -/
 def SValT.rw (q : Term C × Term C) : SValT C → SValT C
@@ -249,6 +250,9 @@ theorem STerm.rw_denote (hd : StValue.Equiv (q.1.denote σ) (q.2.denote σ)) :
   | .shrink s p => by
     simp only [STerm.rw, STerm.denote, p.rw_denote hd]
     exact Struct.Equiv.shrinkT (s.rw_denote hd) _
+  | .select s _ => by
+    simp only [STerm.rw, STerm.denote]
+    exact StValue.Equiv.asStruct (StValue.Equiv.findSt (s.rw_denote hd) [_])
 
 theorem SValT.rw_denote (hd : StValue.Equiv (q.1.denote σ) (q.2.denote σ)) :
     (v : SValT C) → StValue.Equiv ((v.rw q).denote σ) (v.denote σ)

@@ -336,7 +336,7 @@ them as KeY's `\replacewith` updates do.
 | --- | --- | --- |
 | a value | `Term` | a constant, a stack local, `a ⊕ b`, `find(s, p)`, `read(m, a)`, `select(s, r)` (`Term.find` at a state variable), an array's length (`Term.len`, `Term.mlen`), `c ? a : b`, `selectSt(net, at(a))` (`Term.net`), `selectSt(oldNet, at(a))` (`Term.netOf`) |
 | `Path[storage]` | `PTerm` | a state variable (`.root`), an alias (`.pv`), `.field`/`.at` |
-| `Storage` | `STerm` | `.storage`, `.save`, `.delAt`; `.push`/`.pushSlot`/`.pop`/`.shrink`/`.extend` for the array writes |
+| `Storage` | `STerm` | `.storage`, `.save`, `.delAt`; `.push`/`.pushSlot`/`.pop`/`.shrink`/`.extend` for the array writes; `.select` for `selectSt<[Struct]>(s, r)`, the struct at a member, written `select(s, r)` |
 | what a storage `save` writes | `SValT` | a value (`.val`), a subtree read from a storage (`.find`), a memory object copied back (`.copyMem`, KeY's `copyMem(mtSt, m, i)`), or a fresh array (`.newArr`; a concrete one prints `newArr(T, n)`, `T` the array type) |
 | `Identity` | `ITerm` | a memory local (`.pv`), a reference read out of memory (`.read`), `freshId(addM(m))` (`.alloc`, carrying the `RefTy`; a concrete one prints it, `freshId(addM(m, Person))`, `freshId(addM(m, uint[]))`), `freshId(copySt(m, v))` (`.copy`) |
 | a member or element of a memory object | `MAddr` | `.field`/`.at` |
@@ -389,7 +389,9 @@ a time. `Theory/Storage.lean` packages the cases over `save` —
 composes reads along `++`. Over `delAt`: `find_delAt_same`,
 `find_delAt_field` (`findDelAt`), `find_delAt_frame`, `find_delAt_extends`,
 `find_delAt_member` and `find_delAt_below` (a read below a deleted path is the
-reset of the read before it, on a node with no kinds in it).
+reset of the read before it, on a node with no kinds in it). On a sequent,
+`findMemberCons` and `selectOnSaveMember` (`Calculus/TheoryLaws.lean`) take
+solkey's walk a member at a time, over `select(s, r)` (`STerm.select`).
 
 `save` recurses on the path over `storeAt`, the one-segment walk, and stores
 the value verbatim at the last segment (the supersort argument again); `delAt`
@@ -449,6 +451,8 @@ they are the rules `Theory/Rewrite.lean` lists as Lean-only, stated on terms.
 | --- | --- | --- | --- |
 | `findOnSave` | `find_copyTo_same` (`Theory/Copy.lean`) | `findOnSave` | `find(save(s, p, v), p) ≐ v` for a literal word `v`: a copy reads back the new value laid over the old, which is `v` only for a word |
 | `findOnSaveFrame` | `find_copyTo_frame` | `findOnSaveDifferent` | any written value, `p` diverging from `q` |
+| `findMemberCons` | `findSt` on `[r] ++ [f]` | — | solkey's `consRcons`, `consRnil`, `findDefinitionMemberCons`/`Prim`: `find(s, r.f) ≐ select(select(s, r), f)` |
+| `selectOnSaveMember` | `StValue.selectOnSaveCons` | — | solkey's `selectOnSaveCons` at `a1 = a2`: `select(select(save(s, r.f, v), r), q) ≐ select(store(select(s, r), f, v), q)` |
 | `findOnDelAt` | `find_delAt_same`, `delValueDefault` | `findDelAt` | where `find(s, p) ≐ w` for a word `w`, the delete reads its default |
 | `findOnDelAtSave` | `findOnDelAt` over `findOnSave` | `findDelAt` | a delete over a written word |
 | `findOnDelAtFrame` | `find_delAt_frame` | `findDelAtOutside` | |

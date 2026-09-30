@@ -541,7 +541,7 @@ def _root_.Solidity.STerm.toL (ρ : Sym) : STerm C → LStor
   | .pv _ => .init
   | .save s p v => .save (s.toL ρ) (p.toL ρ) (v.toL ρ)
   | .delAt s p => .del (s.toL ρ) (p.toL ρ)
-  | .push .. | .pushSlot .. | .pop .. | .shrink .. | .extend .. => .init
+  | .push .. | .pushSlot .. | .pop .. | .shrink .. | .extend .. | .select .. => .init
 
 /-- What a write stores, pushed in: the `5` of `balances[k] = 5;`. -/
 def _root_.Solidity.SValT.toL (ρ : Sym) : SValT C → LTerm
@@ -613,7 +613,7 @@ def _root_.Solidity.STerm.inL (ρ : Sym) : STerm C → Bool
   | .save .storage p v => p.inL ρ && v.inL ρ
   | .delAt .storage p => p.inL ρ
   | .save .. | .delAt .. => false
-  | .push .. | .pushSlot .. | .pop .. | .shrink .. | .extend .. => false
+  | .push .. | .pushSlot .. | .pop .. | .shrink .. | .extend .. | .select .. => false
 
 /-- A stored value in the fragment: a word, not a copy (`alice = bob;`). -/
 def _root_.Solidity.SValT.inL (ρ : Sym) : SValT C → Bool
@@ -1311,11 +1311,12 @@ theorem STerm.toL_eval (h : Rel σ ρ τ) :
     simp [STerm.inL, SValT.inL] at hf
   | .save (.save ..) .., hf | .save (.delAt ..) .., hf | .save (.push ..) .., hf
   | .save (.pushSlot ..) .., hf | .save (.pop ..) .., hf | .save (.shrink ..) .., hf
-  | .save (.extend ..) .., hf => by simp [STerm.inL] at hf
+  | .save (.extend ..) .., hf | .save (.select ..) .., hf => by simp [STerm.inL] at hf
   | .delAt (.save ..) _, hf | .delAt (.delAt ..) _, hf | .delAt (.push ..) _, hf
   | .delAt (.pushSlot ..) _, hf | .delAt (.pop ..) _, hf | .delAt (.shrink ..) _, hf
-  | .delAt (.extend ..) _, hf => by simp [STerm.inL] at hf
+  | .delAt (.extend ..) _, hf | .delAt (.select ..) _, hf => by simp [STerm.inL] at hf
   | .push .., hf | .pushSlot .., hf | .pop .., hf | .shrink .., hf | .extend .., hf
+  | .select .., hf
   | .pv _, hf => by
     simp [STerm.inL] at hf
 

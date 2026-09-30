@@ -306,6 +306,21 @@ not
 #guard_msgs in
 example : dl!{ find(save(storage, alice.age, 42), alice.age) ≐ 42 } ~[findOnSave]~> dl!{ 43 ≐ 42 } := rfl
 
+-- `~=>` names no rewrite: a line no rewrite gives shows what those that apply give.
+/--
+error: ~=>: no rewrite gives
+  dl{ 43 ≐ 42 }
+from
+  dl{ find(save(storage, alice.age, 42), alice.age) ≐ 42 }
+findOnSave gives
+  dl{ 42 ≐ 42 }
+findMemberCons gives
+  dl{ select(select(save(storage, alice.age, 42), alice), age) ≐ 42 }
+-/
+#guard_msgs in
+example : dl!{ find(save(storage, alice.age, 42), alice.age) ≐ 42 } ~=> dl!{ 43 ≐ 42 } := by
+  sol_chain
+
 -- A law whose side condition fails: `alice.age` does not leave itself.
 /--
 error: ~[findOnSaveFrame]~>: findOnSaveFrame does not apply to

@@ -122,6 +122,10 @@ inductive STerm (C : Contract) where
   | shrink (s : STerm C) (p : PTerm C)
   /-- The extent write of `lsv = p.push()`: `save(s, p.length, p.length + 1)`. -/
   | extend (s : STerm C) (p : PTerm C) (E : Ty)
+  /-- `select(s, r)`: the struct at member `r` of `s`, KeY's
+  `selectSt<[Struct]>(s, r)`.  No program writes it: it is a line of a read
+  taken head first, as solkey reads `find(s, cons(r, flds))`. -/
+  | select (s : STerm C) (r : Name)
 
 /-- What a storage `save` writes: a value, a subtree read out of a storage,
 or a memory object copied back (`copyMem(mtSt, m, i)`). -/
@@ -259,6 +263,11 @@ def STerm.eval (σ : State) : STerm C → Res State
     let (r, segs) ← p.eval σ
     let cur ← τ.findStorage r segs
     τ.saveStorage r segs cur.defaultOf
+  | .select s r => do
+    let τ ← s.eval σ
+    match ← τ.findStorage r [] with
+    | .struct fields => pure { τ with storage := fields }
+    | .prim _ | .array .. | .map .. => .error .stuck
   | .push s p v => do
     let τ ← s.eval σ
     let (r, segs) ← p.eval σ
@@ -416,6 +425,7 @@ def STerm.denote (σ : State) : STerm C → Struct
       pushSlotT E.isPrimitive (defaultForTy E).abs (s.denote σ) (p.denote σ)
   | .pop s p => popT (s.denote σ) (p.denote σ)
   | .shrink s p => shrinkT (s.denote σ) (p.denote σ)
+  | .select s r => asStruct (selectSt (s.denote σ) (.field r))
 
 /-- What a storage `save` writes, in the Theory. -/
 def SValT.denote (σ : State) : SValT C → StValue
@@ -638,6 +648,7 @@ def STerm.vars : STerm C → List Var
   | .pv x => [x]
   | .save s p v | .push s p v => s.vars ++ p.vars ++ v.vars
   | .delAt s p | .pushSlot s p _ | .pop s p | .shrink s p | .extend s p _ => s.vars ++ p.vars
+  | .select s _ => s.vars
 
 def SValT.vars : SValT C → List Var
   | .val t => t.vars
@@ -799,6 +810,16 @@ theorem STerm.eval_frame {σ τ : State} (hag : EnvAgreeExcept ns σ τ) :
     refine ResultsAgree.bind (s.eval_frame hag h.left) fun _ _ h' => ?_
     refine bindPureResults_agree _ fun _ => ?_
     exact ResAgree.bindState (pushPlaceAt_agree h' _ _ _) fun _ _ _ h'' => h''
+  | .select s r, h => by
+    simp only [STerm.eval]
+    refine ResultsAgree.bind (s.eval_frame hag h) fun _ τ' h' => ?_
+    simp only [findStorage_congr h']
+    rcases τ'.findStorage r [] with _ | w
+    · exact ResultsAgree.refl _ _
+    · cases w
+      all_goals first
+        | exact ResultsAgree.refl _ _
+        | exact ⟨rfl, h'.heap, h'.nextId, h'.net, h'.env, h'.selfBalance, h'.tx⟩
 
 theorem SValT.eval_frame {σ τ : State} (hag : EnvAgreeExcept ns σ τ) :
     (v : SValT C) → Avoids v.vars ns → v.eval σ = v.eval τ
@@ -901,6 +922,7 @@ theorem STerm.denote_frame {σ τ : State} (hag : EnvAgreeExcept ns σ τ) :
       v.denote_frame hag h.right]
   | .delAt s p, h | .pushSlot s p _, h | .pop s p, h | .shrink s p, h | .extend s p _, h => by
     simp only [STerm.denote, s.denote_frame hag h.left, p.denote_frame hag h.right]
+  | .select s _, h => by simp only [STerm.denote, s.denote_frame hag h]
 
 theorem SValT.denote_frame {σ τ : State} (hag : EnvAgreeExcept ns σ τ) :
     (v : SValT C) → Avoids v.vars ns → v.denote σ = v.denote τ

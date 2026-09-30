@@ -377,6 +377,9 @@ def RawTerm.names : RawTerm → List String
   | .app "defVal" _ => []
   | .app "copyMem" (_ :: ts) => RawTerm.namesList ts
   | .app "addM" [m, _] => m.names
+  -- a member, not a name read: `select(s, r)`, `store(s, r, v)`
+  | .app "select" [s, .name _] => s.names
+  | .app "store" [s, .name _, v] => s.names ++ v.names
   | .app _ ts => RawTerm.namesList ts
   | .num _ | .env _ => []
 
@@ -554,6 +557,7 @@ partial def tVal (Γ : ECtx) : RawTerm → Except String (Term C)
   | t@(.field ..) | t@(.at ..) => do
     if isMemTerm C Γ t then pure (.read .memory (← tAddr Γ t))
     else pure (.find .storage (← tPath Γ t))
+  | .app "select" [s, .name r] => do pure (.find (← tStor Γ s) (.root r))
   | .app "select" [s, r] | .app "find" [s, r] => do pure (.find (← tStor Γ s) (← tPath Γ r))
   | .app "read" [m, a] => do pure (.read (← tMem Γ m) (← tAddr Γ a))
   | .app "net" [a] => do pure (.net (← tVal Γ a))
@@ -601,7 +605,9 @@ partial def tStor (Γ : ECtx) : RawTerm → Except String (STerm C)
     | _, _ => throw "the length of an array is written by a push or a pop"
   | .app "save" [s, p, v] => do pure (.save (← tStor Γ s) (← tPath Γ p) (← tSVal Γ v))
   | .app "delAt" [s, p] => do pure (.delAt (← tStor Γ s) (← tPath Γ p))
-  | _ => throw "not a storage: `storage`, `store(s, r, v)`, `save(s, p, v)` or `delAt(s, p)`"
+  | .app "select" [s, .name r] => do pure (.select (← tStor Γ s) r)
+  | _ => throw "not a storage: `storage`, `store(s, r, v)`, `save(s, p, v)`, `delAt(s, p)` or \
+      `select(s, r)`"
 
 /-- What a storage `save` writes. -/
 partial def tSVal (Γ : ECtx) : RawTerm → Except String (SValT C)

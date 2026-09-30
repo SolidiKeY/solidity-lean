@@ -1,4 +1,5 @@
 import Solidity.Calculus.TheoryLaws
+import Solidity.Calculus.Chains
 
 /-!
 # Select on save meets a `consr` path
@@ -50,6 +51,19 @@ derivation still sees of it is the side condition `p.hasSeg`, that a
 has fixed `p`, so the law is named bare.  The context too is
 `consr`-shaped, `[] ++ [h₁] ++ [h₂]`; the rules take it as
 `Γ ++ [.upd .box U]`.
+
+`ageWriteReadKeYChain` is `ageWriteReadKeY`'s lines as one chain
+(`Calculus/Chains.lean`), proved by one `sol_chain`: the program in one
+`~*>` link, then `~=>` links, each line picking the rewrite that reaches it.
+It is at `x ≐ 42`, since a chain has no link that splits `==`
+(`Proves.eqDSplit`).  Past `find(save(storage, alice.age, 42), alice.age)`
+it opens `findOnSave` into solkey's read of the write, a member at a time
+(`Calculus/TheoryLaws.lean`): `findMemberCons` reads `alice.age` from its
+head, `select(select(…, alice), age)` — the `consr` path turned into `cons`
+form inside its proof, solkey's `consRcons` and `consRnil`, then
+`findDefinitionMemberCons` — and `selectOnSaveMember`, solkey's
+`selectOnSaveCons`, pushes the write into `alice`; the read of the write at
+the last member is `findOnSave` again.
 -/
 
 namespace Solidity.Examples.SelectOnSaveConsr
@@ -152,5 +166,21 @@ theorem ageWriteReadKeY : ⊢ dl!{ [ alice.age = 42; uint x = alice.age; ] x == 
     rw [findOnSave]
     -- findOnSave: dl{ ⟹ 42 ≐ 42 }
     exact Proves.eqRefl
+
+/-- `ageWriteReadKeY`'s lines as one chain: the program in one link, then
+the read-back, each line picking its rewrite, down to solkey's read of the
+write one member at a time. -/
+def ageWriteReadKeYChain :
+    dl!{ [ alice.age = 42; uint x = alice.age; ] x ≐ 42 }
+    ~*> dl![.box]{ { storage := save(storage, alice.age, 42) } { x := find(storage, alice.age) } x ≐ 42 }
+    ~=> dl![.box]{ { storage := save(storage, alice.age, 42)
+          ‖ x := find(save(storage, alice.age, 42), alice.age) } x ≐ 42 }   -- sequentialToParallel
+    ~=> dl!{ find(save(storage, alice.age, 42), alice.age) ≐ 42 }           -- applyOnRigidBox
+    ~=> dl!{ select(select(save(storage, alice.age, 42), alice), age) ≐ 42 }
+                                  -- consRcons, consRnil, findDefinitionMemberCons/Prim
+    ~=> dl!{ select(store(select(storage, alice), age, 42), age) ≐ 42 }
+                                  -- selectOnSaveCons, alice = alice
+    ~=> dl!{ 42 ≐ 42 } := by      -- selectOnSaveCons, age = age, at the end of the path
+  sol_chain
 
 end Solidity.Examples.SelectOnSaveConsr

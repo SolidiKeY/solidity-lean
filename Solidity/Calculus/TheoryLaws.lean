@@ -130,6 +130,35 @@ theorem findOnSaveFrame {s : STerm C} {p q : PTerm C} {v : SValT C}
   simp only [Term.denote, STerm.denote, find_copyTo_frame _ _ _ _ (PTerm.diverges_denote h σ)]
   exact Equiv.refl _
 
+/-! ## Reading a write back, head first
+
+solkey has no `find(save(…), …)` taclet: it reads a write a member at a
+time, from the head of the path.  A path is built by `consr`, so the read
+first turns it into `cons` form (`consRcons`, `consRnil`), then takes the
+head (`findDefinitionMemberCons`, `findDefinitionMemberPrim`), and each
+`selectSt` of a write pushes the write one member down (`selectOnSaveCons`).
+`select(s, r)` is the struct at the member `r` (`STerm.select`). -/
+
+/-- **`findMemberCons`**: `find(s, r.f) ≐ select(select(s, r), f)` — the path
+`consr(consr(nil, r), f)` turned into `cons(r, cons(f, nil))` (`consRcons`,
+`consRnil`) and read from its head (`findDefinitionMemberCons`,
+`findDefinitionMemberPrim`). -/
+theorem findMemberCons {s : STerm C} {r f : Name} :
+    Term.Theq (.find s (.field (.root r) f)) (.find (.select s r) (.root f)) := fun σ => by
+  simp only [Term.denote, STerm.denote, PTerm.denote, List.cons_append, List.nil_append]
+  exact Equiv.refl _
+
+/-- **`selectOnSaveMember`**: `select(select(save(s, r.f, v), r), q) ≐
+select(store(select(s, r), f, v), q)` — solkey's `selectOnSaveCons` at
+`a1 = a2`: the write at `r.f`, seen from `r`, is a write at `f`. -/
+theorem selectOnSaveMember {s : STerm C} {r f : Name} {v : SValT C} {q : PTerm C} :
+    Term.Theq (.find (.select (.save s (.field (.root r) f) v) r) q)
+      (.find (.save (.select s r) (.root f) v) q) := fun σ => by
+  simp only [Term.denote, STerm.denote, PTerm.denote, List.cons_append, List.nil_append, copyTo,
+    StValue.selectOnSaveCons, if_true, List.isEmpty_cons, Bool.false_eq_true, if_false,
+    asStruct_st]
+  exact Equiv.refl _
+
 /-! ## Reading a delete back -/
 
 /-- **`findOnDelAt`**: where `s` holds the word `w` at `p`, the delete leaves

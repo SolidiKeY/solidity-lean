@@ -118,7 +118,7 @@ def solRwApply (pf : Expr) (h : MessageData) (upd : Bool := false) : TacticM Uni
       Term.net.injEq, Term.netOf.injEq, PTerm.root.injEq, PTerm.pv.injEq, PTerm.field.injEq,
       PTerm.at.injEq, PTerm.next.injEq, STerm.pv.injEq, STerm.save.injEq, STerm.delAt.injEq,
       STerm.push.injEq, STerm.pushSlot.injEq, STerm.pop.injEq, STerm.shrink.injEq,
-      STerm.extend.injEq, SValT.val.injEq, SValT.find.injEq, SValT.copyMem.injEq,
+      STerm.extend.injEq, STerm.select.injEq, SValT.val.injEq, SValT.find.injEq, SValT.copyMem.injEq,
       SValT.newArr.injEq]))
   let after ← instantiateMVars (← getMainTarget)
   if after == before then

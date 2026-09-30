@@ -256,6 +256,19 @@ theorem STerm.denote_eval {σ τ : State} {s : STerm C} (h : s.eval σ = .ok τ)
       τ'.abs
     rw [e2, e4]
     exact Struct.Equiv.pushSlotT _ _ e1 _
+  | .select s r, h =>
+    obtain ⟨τ0, hs, h⟩ := bind_ok_inv h
+    obtain ⟨w, hw, h⟩ := bind_ok_inv h
+    match w, hw, h with
+    | .struct fs, hw, h =>
+      cases h
+      have e1 : Struct.Equiv (s.denote σ) τ0.abs := STerm.denote_eval hs
+      have e3 : findSt τ0.abs (rootPath r []) = (SVal.struct fs).abs := State.abs_findStorage hw
+      have e5 : Struct.Equiv (asStruct (findSt (s.denote σ) (rootPath r [])))
+          (asStruct (findSt τ0.abs (rootPath r []))) := Equiv.asStruct (Equiv.findSt e1 _)
+      rw [e3] at e5
+      exact e5
+    | .prim _, _, h | .array .., _, h | .map .., _, h => cases h
 
 /-- A stored value that returns denotes it, up to `Equiv`. -/
 theorem SValT.denote_eval {σ : State} {v : SValT C} {w : SVal} (h : v.eval σ = .ok w) :

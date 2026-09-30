@@ -59,6 +59,7 @@ def STerm.quote : STerm C → Lean.Expr
   | .pop s p => mkAppN (mkConst ``STerm.pop) #[c, STerm.quote s, PTerm.quote p]
   | .shrink s p => mkAppN (mkConst ``STerm.shrink) #[c, STerm.quote s, PTerm.quote p]
   | .extend s p E => mkAppN (mkConst ``STerm.extend) #[c, STerm.quote s, PTerm.quote p, toExpr E]
+  | .select s r => mkAppN (mkConst ``STerm.select) #[c, STerm.quote s, toExpr r]
 
 def SValT.quote : SValT C → Lean.Expr
   | .val t => mkAppN (mkConst ``SValT.val) #[c, Term.quote t]
