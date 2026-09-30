@@ -61,13 +61,19 @@ What a name is:
   that declaration's scope it is unknown (`checkFresh` would refuse the
   declaration of a parameter), so a free name and a declared one differ;
 * `x := p` in an update, for a path `p` of reference type, binds `x` as an
-  alias of that type for the formula under it; `sp1`, `mv1` (`FreshNames`)
-  are an alias and a memory local wherever nothing else says otherwise.
+  alias of that type for the formula under it, and `x := i`, for a memory
+  object `i` of a type the scope gives (`freshId(addM(memory, Person))`,
+  `read(memory, carol.account)`), as a memory local of that type; so does a
+  program's `x = carol.account;` for a name it does not declare (`memHints`,
+  what `memoryLocalDeclInitDrop` leaves of a memory declaration); `sp1`,
+  `mv1` (`FreshNames`) are an alias and a memory local wherever nothing else
+  says otherwise.
 
 What does not read back: `‹…›` in a term or an update (a Lean term, which is also how a
 conditional and an operator other than `+`, `-` print), the operator schema variables
-`⊕ ⊖ ± ⊕⊕` (taclets only), and the terms whose printing drops a type —
-`freshId(addM(m))`, `addM(m)`, `newArr(n)`, `defVal(T)` for a non-primitive `T`.  A
+`⊕ ⊖ ± ⊕⊕` (taclets only), and the terms whose printing drops a type — an
+allocation of an array, `freshId(addM(m))` and `addM(m)` (a struct's is
+`addM(m, S)`), `newArr(n)`, `defVal(T)` for a non-primitive `T`.  A
 concrete `defVal(uint)` reads as the default value itself.
 -/
 
@@ -315,6 +321,7 @@ def RawTerm.names : RawTerm → List String
   | .at a b | .add a b | .sub a b => a.names ++ b.names
   | .app "defVal" _ => []
   | .app "copyMem" (_ :: ts) => RawTerm.namesList ts
+  | .app "addM" [m, _] => m.names
   | .app _ ts => RawTerm.namesList ts
   | .num _ | .env _ => []
 
@@ -431,6 +438,34 @@ def elemTy (Γ : ECtx) (t : RawTerm) : Except String Ty :=
   | some (.ref (.array E)) => pure E
   | _ => throw "a push or a pop on a path the contract does not type as an array"
 
+/-- The struct `addM(m, S)` allocates. -/
+def allocTy (S : String) : Except String RefTy := do
+  let .ref (.struct s) ← elabTy C (.named S)
+    | throw s!"`addM(m, {S})`: {S} is not a struct; an array allocation does not read back"
+  pure (.struct s)
+
+/-- The type of the memory object a term names, when the scope says: a memory
+local, a reference member or element of one, a reference read, a fresh
+identity. -/
+def memTy (Γ : ECtx) : RawTerm → Option RefTy
+  | .name x => match lookupBy x Γ with
+    | some (.mem R) => some R
+    | _ => none
+  | .field t f => do
+    let .struct s ← memTy Γ t | none
+    let .ref R ← C.fieldType s f | none
+    some R
+  | .at t _ => do
+    match ← memTy Γ t with
+    | .array (.ref R) | .fixed (.ref R) _ => some R
+    | _ => none
+  | .app "read" [_, a] => memTy Γ a
+  | .app "freshId" [.app "addM" [_, .name S]] => (allocTy C S).toOption
+  | .app "freshId" [.app "copySt" [_, .app "find" [_, p]]] => do
+    let .ref R ← pathTy C Γ p | none
+    some R
+  | _ => none
+
 mutual
 
 /-- A term at the value sort. -/
@@ -518,8 +553,10 @@ partial def tIdent (Γ : ECtx) : RawTerm → Except String (ITerm C)
   | .field t f => do pure (.read .memory (.field (← tIdent Γ t) f))
   | .at t k => do pure (.read .memory (.at (← tIdent Γ t) (← tVal Γ k)))
   | .app "read" [m, a] => do pure (.read (← tMem Γ m) (← tAddr Γ a))
+  | .app "freshId" [.app "addM" [m, .name S]] => do pure (.alloc (← tMem Γ m) (← allocTy C S))
   | .app "freshId" [.app "copySt" [m, v]] => do pure (.copy (← tMem Γ m) (← tSVal Γ v))
-  | .app "freshId" _ => throw "`freshId(addM(m))` does not say what it allocates: write it as a Lean term"
+  | .app "freshId" _ =>
+    throw "not a fresh identity: `freshId(addM(m, S))` for a struct `S`, or `freshId(copySt(m, v))`"
   | _ => throw "not a memory reference"
 
 /-- A term at the memory-location sort: a member or an element. -/
@@ -533,16 +570,18 @@ partial def tMem (Γ : ECtx) : RawTerm → Except String (MTerm C)
   | .name "memory" => pure .memory
   | .app "write" [m, a, v] => do pure (.write (← tMem Γ m) (← tAddr Γ a) (← tMVal Γ v))
   | .app "copySt" [m, v] => do pure (.copySt (← tMem Γ m) (← tSVal Γ v))
-  | .app "addM" _ => throw "`addM(m)` does not say what it allocates: write it as a Lean term"
-  | _ => throw "not a memory: `memory`, `write(m, a, v)` or `copySt(m, v)`"
+  | .app "addM" [m, .name S] => do pure (.addM (← tMem Γ m) (← allocTy C S))
+  | .app "addM" _ => throw "`addM(m)` does not say what it allocates: write `addM(m, S)` for a struct `S`"
+  | _ => throw "not a memory: `memory`, `write(m, a, v)`, `addM(m, S)` or `copySt(m, v)`"
 
-/-- What a memory `write` writes: a memory local or a fresh identity is a
-reference, anything else a value. -/
+/-- What a memory `write` writes: a memory local, a fresh identity or a read
+of a reference (`memTy`) is a reference, anything else a value. -/
 partial def tMVal (Γ : ECtx) : RawTerm → Except String (MValT C)
   | t@(.name x) => do
     if nameKind C Γ x matches .mem then pure (.ref (← tIdent Γ t)) else pure (.val (← tVal Γ t))
   | t@(.app "freshId" _) => do pure (.ref (← tIdent Γ t))
-  | t => do pure (.val (← tVal Γ t))
+  | t => do
+    if (memTy C Γ t).isSome then pure (.ref (← tIdent Γ t)) else pure (.val (← tVal Γ t))
 
 end
 
@@ -574,8 +613,10 @@ def RawStmt.aliasHints : RawStmt → List (String × RefTy)
   | _ => []
 
 /-- A parallel update, and the scope under it: `x := p` for a path `p` of
-reference type binds `x` as an alias of that type.  Every right-hand side is
-read in the scope in front of the update. -/
+reference type binds `x` as an alias of that type, and `x := i` for a memory
+object `i` whose type the scope gives (`memTy`: `freshId(addM(memory, S))`,
+`read(memory, carol.account)`, `carol`) binds it as a memory local of that
+type.  Every right-hand side is read in the scope in front of the update. -/
 def elabUpd (Γ : ECtx) : List RawUpdElem → Except String (Upd C × ECtx)
   | [] => pure ([], Γ)
   | .selfBalance op a :: U => do
@@ -595,6 +636,9 @@ def elabUpd (Γ : ECtx) : List RawUpdElem → Except String (Upd C × ECtx)
     if isStorTerm t then return (.store (Var.ofName x) (← tStor C Γ t) :: U', setBy x .store Γ')
     if let some (.ref R) := pathTy C Γ t then
       return (.path (Var.ofName x) (← tPath C Γ t) :: U', setBy x (.alias R) Γ')
+    if (C.rootType x).isNone then
+      if let some R := memTy C Γ t then
+        return (.mref (Var.ofName x) (← tIdent C Γ t) :: U', setBy x (.mem R) Γ')
     if t matches .app "freshId" _ then return (.mref (Var.ofName x) (← tIdent C Γ t) :: U', Γ')
     match nameKind C Γ x with
     | .alias => return (.path (Var.ofName x) (← tPath C Γ t) :: U', Γ')
@@ -609,6 +653,34 @@ where
     | .name y => (nameKind C Γ y matches .store)
     | .app "store" _ | .app "save" _ | .app "delAt" _ => true
     | _ => false
+
+/-- The memory locals a program binds without declaring them
+(`carolAcc = carol.account;`, what `memoryLocalDeclInitDrop` leaves of
+`Account memory carolAcc = carol.account;`), at the type their right-hand
+side has: the memory side of `RawStmt.aliasHints`, which types a storage alias
+from the contract alone.  A right-hand side is typed in the scope in front of
+the program, with the memory locals the program declares before it; a
+statement of either branch of an `if` counts.  A name the program declares,
+or one in scope as anything but a parameter (a `uint`), is left alone. -/
+partial def memHints (Γ : ECtx) (P : List RawStmt) : ECtx :=
+  (go (RawStmt.declsList P) P (Γ, Γ)).1
+where
+  /-- The scope with the hints so far, and the one a right-hand side is typed in. -/
+  go (decls : List String) : List RawStmt → ECtx × ECtx → ECtx × ECtx
+    | [], acc => acc
+    | s :: ss, (Γ, Δ) =>
+      let acc : ECtx × ECtx := match s with
+        | .assign (.name x) r =>
+          if decls.contains x || !(lookupBy x Γ matches none | some (.val .uint)) then (Γ, Δ)
+          else match synth C Δ r with
+            | .ok (.mpath (.ref R) _) => (setBy x (.mem R) Γ, setBy x (.mem R) Δ)
+            | _ => (Γ, Δ)
+        | .declMemory T x _ => match elabTy C T with
+          | .ok (.ref R) => (Γ, setBy x (.mem R) Δ)
+          | _ => (Γ, Δ)
+        | .ite _ t e => go decls e (go decls t (Γ, Δ))
+        | _ => (Γ, Δ)
+      go decls ss acc
 
 /-- `a == b`: the operands typed as Solidity types them (the first that is
 not a literal gives the type), then lowered. -/
@@ -660,6 +732,7 @@ def elabFml : RawFml → ElabM (Fml C)
     set (Γ', k)
     pure (.upd m U' (← elabFml φ))
   | .modal m P φ => inScope do
+    modify fun (Γ, k) => (memHints C Γ P, k)
     let P' ← elabStmts C P
     pure (.modal m P' (← elabFml φ))
   | .lean i => pure (Fml.slot i)
@@ -866,6 +939,53 @@ example : dl!{ a ≐ 1 } = Fml.eq (.pv (.user "a")) (.lit (.int 1)) := rfl
 
 /-- error: Solidity elaboration failed: unknown name y -/
 #guard_msgs in #check dl!{ ⟨ uint y = 1; ⟩ true ∧ y == 1 }
+
+/-! ### Memory objects -/
+
+/-- What `Person memory carol;` leaves reads back, and binds `carol` as a
+`Person` in memory under it. -/
+example : (dl!{ ⟨ Person memory carol; carol.age = 5; ⟩ true }).step =
+    some dl!{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
+      ⟨ carol.age = 5; ⟩ true } := rfl
+
+/--
+info: dl{
+  { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
+    ⟨ carol.age = 5; ⟩ true } : Fml StandardExample
+-/
+#guard_msgs in
+#check dl!{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
+  ⟨ carol.age = 5; ⟩ true }
+
+/-- A dropped memory declaration: `carolAcc` is typed from `carol.account`
+(`memHints`), and a read of a reference binds a memory local. -/
+example : Fml StandardExample :=
+  dl!{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
+       ⟨ carolAcc = carol.account; carolAcc.balance = 1; ⟩ true }
+example : Fml StandardExample :=
+  dl!{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
+       { carolAcc := read(memory, carol.account) } ⟨ carolAcc.balance = 1; ⟩ true }
+
+/-- … with the memory locals the program declares before it, in a branch too. -/
+example : Fml StandardExample :=
+  dl!{ ⟨ Person memory d; if (a == 1) { acc = d.account; } else { acc = d.account; }; acc.balance = 1; ⟩
+       true }
+
+/-- A name the program declares is left to its declaration. -/
+example : Fml StandardExample :=
+  dl!{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
+       ⟨ Person memory d; d = carol; ⟩ true }
+
+-- An allocation reads back at a struct only.
+/--
+error: Solidity elaboration failed: `addM(m, uint)`: uint is not a struct; an array allocation does not read back
+-/
+#guard_msgs in #check dl!{ { memory := addM(memory, uint) } true }
+
+/--
+error: Solidity elaboration failed: `addM(m)` does not say what it allocates: write `addM(m, S)` for a struct `S`
+-/
+#guard_msgs in #check dl!{ { memory := addM(memory) } true }
 
 /-! ### At a modality: `dl![m]{ … }` -/
 
