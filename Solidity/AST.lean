@@ -632,7 +632,8 @@ inductive Var where
 /-- How fresh variables are spelled: `name b k` spells `.fresh b k`, and
 `parse` reads a spelling back, so a printed line can be pasted back.  The
 default is `se1`, `sp1`, `ie1`, `mv1`; a file picks its own with
-`local instance : FreshNames := .ofPrefixes "tmp" "ref" "idx" "mref"`. -/
+`local instance : FreshNames := .ofPrefixes "tmp" "ref" "idx" "mref"`, or
+names them one by one (`.ofTable`, `FreshNames.lean`). -/
 class FreshNames where
   name : String → Nat → String
   parse : String → Option (String × Nat)

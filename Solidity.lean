@@ -3,6 +3,7 @@ import Solidity.KeySort
 import Solidity.AST
 import Solidity.SpecSyntax
 import Solidity.Syntax
+import Solidity.FreshNames
 import Solidity.Semantics
 import Solidity.Semantics.DecEq
 import Solidity.Semantics.Properties
@@ -57,6 +58,7 @@ import Solidity.Examples.ApplySteps
 import Solidity.Examples.Chains
 import Solidity.Examples.UpdateRules
 import Solidity.Examples.Decide
+import Solidity.Examples.ExampleNames
 import Solidity.Examples.Specs
 import Solidity.Examples.SelectOnSaveConsr
 import Solidity.Examples.Benchmark.Syntax

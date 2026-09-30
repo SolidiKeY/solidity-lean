@@ -1702,11 +1702,12 @@ def RawExpr.uncheck : RawExpr → Except String RawExpr :=
     | .incDec .. => throw "`++` or `−−` inside an expression in `unchecked`"
     | e => pure e
 
-/-- The largest index among the fresh variables an expression writes. -/
-def RawExpr.maxIdx (e : RawExpr) : Nat :=
+/-- The largest index among the fresh variables an expression writes, as the
+`FreshNames` in scope reads them (a file may spell `ie1` as `idx`). -/
+def RawExpr.maxIdx [FreshNames] (e : RawExpr) : Nat :=
   e.names.foldl (fun n x => max n (Var.ofName x).idx) 0
 
-def RawExpr.maxIdxs (es : List RawExpr) : Nat :=
+def RawExpr.maxIdxs [FreshNames] (es : List RawExpr) : Nat :=
   es.foldl (fun n e => max n e.maxIdx) 0
 
 /-- A statement's own expressions, in the order it is written (not those of
@@ -1789,11 +1790,11 @@ end
 mutual
 
 /-- The largest index among the fresh variables a raw statement writes. -/
-partial def RawStmt.maxIdx (s : RawStmt) : Nat :=
+partial def RawStmt.maxIdx [FreshNames] (s : RawStmt) : Nat :=
   max ((s.declared?.map fun x => (Var.ofName x).idx).getD 0)
     (max (RawExpr.maxIdxs s.exprs) ((s.blocks.map RawStmt.maxIdxs).foldl max 0))
 
-partial def RawStmt.maxIdxs (ss : List RawStmt) : Nat :=
+partial def RawStmt.maxIdxs [FreshNames] (ss : List RawStmt) : Nat :=
   ss.foldl (fun n s => max n s.maxIdx) 0
 
 end
