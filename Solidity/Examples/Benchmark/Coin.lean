@@ -14,8 +14,8 @@ own (`ctor`), since a contract here has no constructor.
 
 solkey's `@custom:key` clauses are written above the functions, as its
 file has them.  `spec!{ mint }`, the obligation solkey synthesizes
-(`Calculus/Spec.lean`), is proved by `sol_spec` (`spec_mint`); `send`'s is
-not (below).  Before it, the clauses by hand, as `dl{}` obligations over
+(`Calculus/Spec.lean`), is proved by `sol_spec`'s steps (`spec_mint`); `send`'s
+is not (below).  Before it, the clauses by hand, as `dl{}` obligations over
 every state, one per clause; `\old(e)` is a local declared before the call (`uint b =
 balances[r];`), and `msg.sender` is the transaction's (`Simple.env`), the
 same before and after.  `requires amount >= 0` holds of a `uint`.
@@ -89,11 +89,20 @@ theorem mintOthers :
   sol_symex
   sol_close
 
-set_option maxHeartbeats 510000 in
+set_option maxHeartbeats 400000 in
 /-- `mint(receiver, amount)`'s obligation: only the minter mints, the
-receiver credited, every other balance kept. -/
+receiver credited, every other balance kept.  `sol_spec` with its reads done
+once, over the premises taken in (`sol_close_reads_all`), without
+`sol_close_facts` and `sol_close_reads` on the goal before them: the same
+proof in three quarters of the heartbeats. -/
 theorem spec_mint : ⊨ spec!{ mint } := by
-  sol_spec
+  sol_symex
+  sol_close_unwrap
+  intro σ
+  sol_close_eval
+  intros
+  sol_close_reads_all
+  all_goals sol_spec_finish
 
 /-! ## `send` -/
 
