@@ -660,8 +660,9 @@ where
 side has: the memory side of `RawStmt.aliasHints`, which types a storage alias
 from the contract alone.  A right-hand side is typed in the scope in front of
 the program, with the memory locals the program declares before it; a
-statement of either branch of an `if` counts.  A name the program declares,
-or one in scope as anything but a parameter (a `uint`), is left alone. -/
+statement of either branch of an `if` counts.  A state variable, a name the
+program declares, or one in scope as anything but a parameter (a `uint`), is
+left alone: `alice = carol;` copies to storage. -/
 partial def memHints (Γ : ECtx) (P : List RawStmt) : ECtx :=
   (go (RawStmt.declsList P) P (Γ, Γ)).1
 where
@@ -671,7 +672,8 @@ where
     | s :: ss, (Γ, Δ) =>
       let acc : ECtx × ECtx := match s with
         | .assign (.name x) r =>
-          if decls.contains x || !(lookupBy x Γ matches none | some (.val .uint)) then (Γ, Δ)
+          if decls.contains x || (C.rootType x).isSome ||
+              !(lookupBy x Γ matches none | some (.val .uint)) then (Γ, Δ)
           else match synth C Δ r with
             | .ok (.mpath (.ref R) _) => (setBy x (.mem R) Γ, setBy x (.mem R) Δ)
             | _ => (Γ, Δ)
@@ -970,6 +972,12 @@ example : Fml StandardExample :=
 example : Fml StandardExample :=
   dl!{ ⟨ Person memory d; if (a == 1) { acc = d.account; } else { acc = d.account; }; acc.balance = 1; ⟩
        true }
+
+/-- A state variable is no memory local: `alice = carol;` copies to storage. -/
+example : (dl!{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
+    ⟨ alice = carol; ⟩ true }).step =
+    some dl!{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
+      { storage := store(storage, alice, copyMem(mtSt, memory, carol)) } ⟨⟩ true } := rfl
 
 /-- A name the program declares is left to its declaration. -/
 example : Fml StandardExample :=
