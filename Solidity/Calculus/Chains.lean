@@ -215,11 +215,13 @@ def ruleOfLine (φ : Lean.Expr) : MetaM (Option (Lean.Expr × Lean.Name)) := do
   if r.isAppOfArity ``StepRule.emptyModality 1 then return some (r, `emptyModality)
   unless r.isAppOfArity ``StepRule.taclet 6 do return none
   let #[C, k, m, s, p, _] := r.getAppArgs | return none
-  let (d', c?) ← try stepTaclet C k m s catch ex => do
-    -- a revert, under a modality that is a variable
-    if (← whnfR m).isConst then throw ex
-    throwError "the rule on{indentExpr φ}\ndepends on its modality {m} (`revertBox`, \
-      `revertDiamond`): go on after `cases {m}`"
+  let (d', c?) ← try stepTaclet C k m s catch
+    | ex@(.error ..) => do
+      -- a revert, under a modality that is a variable
+      if (← whnfR m).isConst || !(← whnfR s).isAppOf ``Stmt.revert then throw ex
+      throwError "the rule on{indentExpr φ}\ndepends on its modality {m} (`revertBox`, \
+        `revertDiamond`): go on after `cases {m}`"
+    | ex => throw ex
   let some c := c? | return some (r, `taclet)
   return some (mkAppN (mkConst ``StepRule.taclet) #[C, k, m, s, p, d'], lastName c)
 
@@ -839,6 +841,18 @@ def proveFresh (C A : Lean.Expr) (K : Nat) (hs : Array Lean.Expr) : TermElabM Le
   if p.hasSyntheticSorry || p.hasExprMVar then throwError (fail m!"not closed{indentExpr p}")
   return p
 
+/-- Under a modality `m`, that `A` steps to the line `B` the diamond and the
+box runs share (`Fml.stepAt`, at the index the runs used).  It fails for a
+rule that looks at `m` and leaves premises that differ only in the modality:
+`fillSlots` puts them together under `m`, and the kernel would refuse the
+line at the end of the declaration. -/
+def checkStep (C : Lean.Expr) (sp : Splice) (A : Lean.Expr) (B : Line) : MetaM Unit := do
+  let some m := sp.modality | return
+  let st := mkApp3 (mkConst ``Fml.stepAt) C (toExpr B.fresh) A
+  let sB := mkApp2 (mkConst ``Option.some [0]) (mkApp (mkConst ``Fml) C) B.fml
+  unless ← isDefEq st sB do
+    throwError "sol_chain: the line after{indentExpr A}\n{modalityStop m}"
+
 /-- `A ~> B`, for the line `B` computed after `A`: `rfl`, or, over a
 postcondition, `Fml.OneStep.ofFresh` at the index the run used.
 
@@ -852,6 +866,7 @@ postconditions' `Post.inactive`, and the kernel's `rfl` for `ψ.stepAt k`:
 a proof built as `proveFresh`'s is. -/
 def oneStepProof (C : Lean.Expr) (sp : Splice) (A : Lean.Expr) (B : Line) :
     TermElabM Lean.Expr := do
+  checkStep C sp A B
   let refl := someRefl C B.fml
   if sp.fmls.isEmpty then return refl
   unless B.decided do
@@ -877,6 +892,7 @@ partial def solveChain (g : MVarId) : TermElabM Unit := do
     let #[C, r, φ, ψ] := ty.getAppArgs | unreachable!
     let (run, q) ← nextLine C φ ψ
     if run.splice.fmls.isEmpty then
+      checkStep C run.splice φ q
       let pair ← mkAppM ``Prod.mk #[← mkAppM ``Option.some #[r], ← mkAppM ``Option.some #[q.fml]]
       g.assign (← mkEqRefl pair)
     else
@@ -900,6 +916,9 @@ partial def solveChain (g : MVarId) : TermElabM Unit := do
         | some i => pure i
         | none => notReached φ ψ run lines
     if run.splice.fmls.isEmpty then
+      discard <| (run.lines.take i).foldlM (init := φ) fun A B => do
+        checkStep C run.splice A B
+        pure B.fml
       let q := if i = 0 then φ else lines[i - 1]!
       g.assign (mkAppN (mkConst ``Fml.Steps.ofRun) #[C, φ, q, toExpr i, someRefl C q])
     else

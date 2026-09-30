@@ -106,6 +106,11 @@ example : dl![m]{ ⟨[ alice.account.balance = 10; ]⟩ φ }
     ~*> dl![m]{ { se1 := 10 } { sp1 := alice.account } { storage := save(storage, sp1.balance, se1) } φ } := by
   sol_chain
 
+/-- At a modality the formula names, `φ` alone is open. -/
+example : dl!{ ⟨ alice.account.balance = 10; ⟩ φ }
+    ~*> dl!{ { se1 := 10 } { sp1 := alice.account } { storage := save(storage, sp1.balance, se1) } φ } := by
+  sol_chain
+
 /-- A step whose rule declares nothing fresh is `rfl` over `φ`; one that does
 needs its fresh index, which `rfl` cannot compute over `φ`, and `sol_chain`
 proves it from `Post.noFresh`. -/
@@ -324,5 +329,42 @@ info:     dl{ ⟨[ if (true) {x = 2;} else {x = 1;}; ]⟩ x = 1 }
 #derivation dl![m]{ ⟨[ if (true) { x = 2; } else { x = 1; }; ]⟩ x == 1 }
 
 end Modality
+
+-- Past the first goal of a branch, once it is done, the step asks whether the
+-- postcondition has a modality left: not written yet (`Chains.oneStepProof`).
+/--
+error: sol_chain: the step on
+  dl{
+    { se1 := x + 2 }
+      (((0 <= se1 ∧ se1 <= selfBalance) →
+              { selfBalance := selfBalance - se1 ‖ net := store(net, at(to), net(to) - se1) } φ) ∧
+          (¬(0 <= se1 ∧ se1 <= selfBalance) → ⟨ revert(); ⟩ φ)) }
+asks whether a postcondition has a modality left (the first goal of a branch is done): not supported yet
+-/
+#guard_msgs in
+example (φ : Post StandardExample) : dl!{ ⟨ to.transfer(x + 2); ⟩ φ }
+    ~*> dl!{ { se1 := x + 2 }
+          (((0 <= se1 ∧ se1 <= selfBalance) →
+              { selfBalance := selfBalance - se1 ‖ net := store(net, at(to), net(to) - se1) } φ) ∧
+            (¬(0 <= se1 ∧ se1 <= selfBalance) → false)) } := by
+  sol_chain
+
+-- A line holds no other Lean term than a modality and postconditions…
+/--
+error: sol_chain: n is free in the line: only a modality `m` and postconditions `φ : Post C` may be
+  dl{ { y := ‹Term.lit (Semantics.PrimVal.int n)› } ⟨ x = 1; ⟩ true }
+-/
+#guard_msgs in
+example (n : Int) : ∃ ψ, Fml.upd .diamond [.val (.user "y") (.lit (.int n))]
+    dl!{ ⟨ x = 1; ⟩ true } ~> ψ := ⟨_, by sol_chain⟩
+
+-- … and one modality.
+/--
+error: sol_chain: the line is under two modalities: take `cases` on one
+  dl{ ⟨[ x = 1; ]⟩ true ∧ ⟨[ x = 2; ]⟩ true }
+-/
+#guard_msgs in
+example (m m' : Modality) : ∃ ψ, Fml.and dl![m]{ ⟨[ x = 1; ]⟩ true } dl![m']{ ⟨[ x = 2; ]⟩ true }
+    ~> ψ := ⟨_, by sol_chain⟩
 
 end Solidity.Examples.Chains
