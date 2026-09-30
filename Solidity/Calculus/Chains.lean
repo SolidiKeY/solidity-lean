@@ -840,7 +840,16 @@ def proveFresh (C A : Lean.Expr) (K : Nat) (hs : Array Lean.Expr) : TermElabM Le
   return p
 
 /-- `A ~> B`, for the line `B` computed after `A`: `rfl`, or, over a
-postcondition, `Fml.OneStep.ofFresh` at the index the run used. -/
+postcondition, `Fml.OneStep.ofFresh` at the index the run used.
+
+Not yet: a step that asks a postcondition whether it has a modality
+(`Line.decided` false), past the first goal of a branch once it is done,
+`(c → {U} φ) ∧ ψ`.  `Fml.stepAt`'s `.and` arm reads `(c → {U} ↑φ).active`,
+which is `(↑φ).active` and stuck.  It would be a lemma `φ.active = false →
+(φ.and ψ).stepAt k = (ψ.stepAt k).map φ.and` (`Fml.stepAt` unfolded), its
+hypothesis by `simp only [Fml.active, Bool.or_false]` and the
+postconditions' `Post.inactive`, and the kernel's `rfl` for `ψ.stepAt k`:
+a proof built as `proveFresh`'s is. -/
 def oneStepProof (C : Lean.Expr) (sp : Splice) (A : Lean.Expr) (B : Line) :
     TermElabM Lean.Expr := do
   let refl := someRefl C B.fml

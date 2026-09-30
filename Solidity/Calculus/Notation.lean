@@ -908,6 +908,10 @@ example (m : Modality) (φ : Fml StandardExample) :
 /-- info: fun m φ => dl{ ⟨[ x = 1; ]⟩ φ } : Modality → Fml StandardExample → Fml StandardExample -/
 #guard_msgs in #check fun (m : Modality) (φ : Fml StandardExample) => dl![m]{ ⟨[ x = 1; ]⟩ φ }
 
+-- `⊨` and `⊧` of a name alone are Lean's to print.
+/-- info: fun φ => Valid φ ∧ ∀ (σ : State), holds σ φ : Fml StandardExample → Prop -/
+#guard_msgs in #check fun (φ : Fml StandardExample) => (⊨ φ) ∧ ∀ σ, holds σ φ
+
 end Examples
 
 end Solidity

@@ -2015,10 +2015,13 @@ partial def ppFml (e : Lean.Expr) : MetaM (TSyntax `dl_fml) := do
 /-! ### The delaborators
 
 Each stands aside (`failure`, and Lean prints the term its own way) when all
-it would print is one `‹…›`. -/
+it would print is one `‹…›`, and `⊨`, `⊧` when it is a name: `⊨ φ`. -/
 
 /-- Printed as `‹…›` as a whole. -/
 def isEscape (s : Syntax) : Bool := s[0].isToken "‹"
+
+/-- Printed as `‹…›` or as a name (`fmlVar?`): what Lean prints as well. -/
+def isEscapeOrVar (s : Syntax) : Bool := isEscape s || s.isOfKind ``dlFmlVar
 
 /-- Only a full application: `Fml.modal m P` alone is a function. -/
 def fullApp : DelabM Unit := do
@@ -2050,7 +2053,7 @@ def delabValid : Delab := do
   let e ← getExpr
   guard (e.getAppNumArgs == 2)
   let φ ← ppFml e.appArg!
-  guard !(isEscape φ)
+  guard !(isEscapeOrVar φ)
   `(⊨ dl{ $φ:dl_fml })
 
 /-- `holds σ φ`: `σ ⊧ φ`, what `Valid` leaves once its state is introduced. -/
@@ -2060,7 +2063,7 @@ def delabHolds : Delab := do
   let e ← getExpr
   guard (e.getAppNumArgs == 3)
   let φ ← ppFml e.appArg!
-  guard !(isEscape φ)
+  guard !(isEscapeOrVar φ)
   let σ ← withNaryArg 1 delab
   `($σ ⊧ dl{ $φ:dl_fml })
 
