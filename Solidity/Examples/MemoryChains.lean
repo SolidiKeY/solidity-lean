@@ -355,19 +355,16 @@ def storageCopy (m : Modality) (φ : Post StandardExample) :
                   memory := copySt(memory, find(storage, alice)) }
                 { v := read(memory, carol.age) } φ } := rfl
 
-/-- `alice.account.balance = 10; Account memory acc = alice.account;
-v = acc.balance;` — a member copied: its path is bound to a storage alias
-first (`sp2`). -/
-def storageFieldCopy (m : Modality) (φ : Post StandardExample) :
-    dl![m]{ ⟨[ alice.account.balance = 10; Account memory acc = alice.account; v = acc.balance; ]⟩ φ }
+/-- `Account memory acc = alice.account;` after `alice.account.balance = 10;`:
+the declaration dropped, and the member's path bound to a storage alias
+(`sp2`, printed `sp`). -/
+def storageFieldAlias (m : Modality) (φ : Post StandardExample) :
+    dl![m]{ { se1 := 10 } { sp1 := alice.account } { storage := save(storage, sp1.balance, se1) }
+            ⟨[ Account memory acc = alice.account; v = acc.balance; ]⟩ φ }
     ~*> dl![m]{ { se1 := 10 } { sp1 := alice.account } { storage := save(storage, sp1.balance, se1) }
-                { sp2 := alice.account }
-                { acc := freshId(copySt(memory, find(storage, sp2))) ‖
-                  memory := copySt(memory, find(storage, sp2)) }
-                { v := read(memory, acc.balance) } φ } :=
-  calc dl![m]{ ⟨[ alice.account.balance = 10; Account memory acc = alice.account; v = acc.balance; ]⟩ φ }
-    _ ~*> dl![m]{ { se1 := 10 } { sp1 := alice.account } { storage := save(storage, sp1.balance, se1) }
-                  ⟨[ Account memory acc = alice.account; v = acc.balance; ]⟩ φ } := by sol_chain
+                { sp2 := alice.account } ⟨[ acc = sp2; v = acc.balance; ]⟩ φ where Account memory acc } :=
+  calc dl![m]{ { se1 := 10 } { sp1 := alice.account } { storage := save(storage, sp1.balance, se1) }
+               ⟨[ Account memory acc = alice.account; v = acc.balance; ]⟩ φ }
     _ ~[memoryLocalDeclInitDrop]~>
         dl![m]{ { se1 := 10 } { sp1 := alice.account } { storage := save(storage, sp1.balance, se1) }
                 ⟨[ acc = alice.account; v = acc.balance; ]⟩ φ where Account memory acc } := rfl
@@ -382,6 +379,19 @@ def storageFieldCopy (m : Modality) (φ : Post StandardExample) :
         dl![m]{ { se1 := 10 } { sp1 := alice.account } { storage := save(storage, sp1.balance, se1) }
                 { sp2 := alice.account } ⟨[ acc = sp2; v = acc.balance; ]⟩ φ where Account memory acc } :=
       rfl
+
+/-- … then `acc` a copy of the object `sp2` names, and `v = acc.balance;` a
+read of the copy. -/
+def storageFieldRead (m : Modality) (φ : Post StandardExample) :
+    dl![m]{ { se1 := 10 } { sp1 := alice.account } { storage := save(storage, sp1.balance, se1) }
+            { sp2 := alice.account } ⟨[ acc = sp2; v = acc.balance; ]⟩ φ where Account memory acc }
+    ~*> dl![m]{ { se1 := 10 } { sp1 := alice.account } { storage := save(storage, sp1.balance, se1) }
+                { sp2 := alice.account }
+                { acc := freshId(copySt(memory, find(storage, sp2))) ‖
+                  memory := copySt(memory, find(storage, sp2)) }
+                { v := read(memory, acc.balance) } φ } :=
+  calc dl![m]{ { se1 := 10 } { sp1 := alice.account } { storage := save(storage, sp1.balance, se1) }
+               { sp2 := alice.account } ⟨[ acc = sp2; v = acc.balance; ]⟩ φ where Account memory acc }
     _ ~[memoryStorageCopy]~>
         dl![m]{ { se1 := 10 } { sp1 := alice.account } { storage := save(storage, sp1.balance, se1) }
                 { sp2 := alice.account }
@@ -400,6 +410,22 @@ def storageFieldCopy (m : Modality) (φ : Post StandardExample) :
                 { acc := freshId(copySt(memory, find(storage, sp2))) ‖
                   memory := copySt(memory, find(storage, sp2)) }
                 { v := read(memory, acc.balance) } φ } := rfl
+
+/-- `alice.account.balance = 10; Account memory acc = alice.account;
+v = acc.balance;` — a member copied: the write, then `storageFieldAlias` and
+`storageFieldRead`.  One `calc` of the eleven lines is past the heartbeat
+budget: each line is read at compile time (`elabAgainst`). -/
+def storageFieldCopy (m : Modality) (φ : Post StandardExample) :
+    dl![m]{ ⟨[ alice.account.balance = 10; Account memory acc = alice.account; v = acc.balance; ]⟩ φ }
+    ~*> dl![m]{ { se1 := 10 } { sp1 := alice.account } { storage := save(storage, sp1.balance, se1) }
+                { sp2 := alice.account }
+                { acc := freshId(copySt(memory, find(storage, sp2))) ‖
+                  memory := copySt(memory, find(storage, sp2)) }
+                { v := read(memory, acc.balance) } φ } :=
+  calc dl![m]{ ⟨[ alice.account.balance = 10; Account memory acc = alice.account; v = acc.balance; ]⟩ φ }
+    _ ~*> dl![m]{ { se1 := 10 } { sp1 := alice.account } { storage := save(storage, sp1.balance, se1) }
+                  ⟨[ Account memory acc = alice.account; v = acc.balance; ]⟩ φ } := by sol_chain
+    _ ~*> _ := (storageFieldAlias m φ).trans (storageFieldRead m φ)
 
 /-- `Token memory t = alice.account.token;` — a nonsimple source is aliased
 (`sp1`, printed `aliceTok`), and the alias resolved one selector at a

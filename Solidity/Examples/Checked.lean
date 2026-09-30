@@ -18,8 +18,8 @@ check before the statement (`narrowCapture`), `unchecked` wraps modulo `2^N`,
 and a cast is a capture at its type.  What is not modelled is in
 `docs/solc-alignment.md`.
 
-* §1 — the printed trace as a chain: for any modality to the check, then the
-  box's two goals, and the updates merged to the printed last line;
+* §1 — the printed trace as a chain: for any modality up to the revert, then
+  one chain per modality, and the updates merged to the printed last line;
 * §2 — the runs: overflow and underflow revert, in range and `unchecked` do not;
 * §3 — state variables and functions of a narrow type;
 * §4 — what the elaborator writes, and what it refuses.
@@ -68,34 +68,47 @@ def overflowToCheck :
     _ ~*> dl![m]{ { x := 250 } { x := x + 10 } ‹.upd m capX (.modal m [requireSe1] φ)› } := by
       sol_chain
 
-/-- `[ uint8 x = 250; x += 10; ] φ`: the check splits (`requireSimple`), the
-out-of-range goal is a revert, which the box closes to `true`. -/
+/-- The printed trace under every modality, up to the revert: the check splits
+(`requireSimple`), its cover `⟨[ revert(); ]⟩ false ∨ c ∨ c'` the same under
+either modality, and the in-range goal runs to its end.  The out-of-range goal
+is left at `⟨[ revert(); ]⟩ φ`, where the modalities part. -/
+def overflowTrace :
+    dl![m]{ ⟨[ uint8 x = 250; x += 10; ]⟩ φ }
+    ~*> dl![m]{ { x := 250 } { x := x + 10 }
+          ‹.upd m capX dl![m]{ (se1 ≐ true → φ) ∧ (se1 ≐ false → ⟨[ revert(); ]⟩ φ) ∧
+            (⟨[ revert(); ]⟩ false ∨ se1 ≐ true ∨ se1 ≐ false) }› } :=
+  calc dl![m]{ ⟨[ uint8 x = 250; x += 10; ]⟩ φ }
+    _ ~*> _ := overflowToCheck m φ
+    _ ~[requireSimple]~> dl![m]{ { x := 250 } { x := x + 10 }
+          ‹.upd m capX dl![m]{ (se1 ≐ true → ⟨[ ]⟩ φ) ∧ (se1 ≐ false → ⟨[ revert(); ]⟩ φ) ∧
+            (⟨[ revert(); ]⟩ false ∨ se1 ≐ true ∨ se1 ≐ false) }› } := by
+      sol_chain
+    _ ~[emptyModality]~> dl![m]{ { x := 250 } { x := x + 10 }
+          ‹.upd m capX dl![m]{ (se1 ≐ true → φ) ∧ (se1 ≐ false → ⟨[ revert(); ]⟩ φ) ∧
+            (⟨[ revert(); ]⟩ false ∨ se1 ≐ true ∨ se1 ≐ false) }› } := by
+      sol_chain
+
+/-- `[ uint8 x = 250; x += 10; ] φ`: the out-of-range goal is a revert, which
+the box closes to `true`. -/
 def overflowBoxChain :
     dl![.box]{ ⟨[ uint8 x = 250; x += 10; ]⟩ φ }
     ~*> dl![.box]{ { x := 250 } { x := x + 10 }
-          ‹.upd .box capX dl![.box]{ (se1 ≐ true → φ) ∧ (se1 ≐ false → true) ∧ true }› } :=
+          ‹.upd .box capX dl![.box]{ (se1 ≐ true → φ) ∧ (se1 ≐ false → true) ∧
+            ([ revert(); ] false ∨ se1 ≐ true ∨ se1 ≐ false) }› } :=
   calc dl![.box]{ ⟨[ uint8 x = 250; x += 10; ]⟩ φ }
-    _ ~*> _ := overflowToCheck .box φ
-    _ ~[requireSimple]~> dl![.box]{ { x := 250 } { x := x + 10 }
-          ‹.upd .box capX dl![.box]{ (se1 ≐ true → ⟨[ ]⟩ φ) ∧ (se1 ≐ false → ⟨[ revert(); ]⟩ φ) ∧ true }› } := by
-      sol_chain
-    _ ~[emptyModality]~> dl![.box]{ { x := 250 } { x := x + 10 }
-          ‹.upd .box capX dl![.box]{ (se1 ≐ true → φ) ∧ (se1 ≐ false → ⟨[ revert(); ]⟩ φ) ∧ true }› } := by
-      sol_chain
+    _ ~*> _ := overflowTrace .box φ
     _ ~[revertBox]~> dl![.box]{ { x := 250 } { x := x + 10 }
-          ‹.upd .box capX dl![.box]{ (se1 ≐ true → φ) ∧ (se1 ≐ false → true) ∧ true }› } := by
+          ‹.upd .box capX dl![.box]{ (se1 ≐ true → φ) ∧ (se1 ≐ false → true) ∧
+            ([ revert(); ] false ∨ se1 ≐ true ∨ se1 ≐ false) }› } := by
       sol_chain
 
-/-- The diamond's revert goal is `false`, and its cover owes that the check's
-condition has a value. -/
+/-- The diamond's revert goal is `false`: the check must pass. -/
 def overflowDiamondChain :
     dl![.diamond]{ ⟨[ uint8 x = 250; x += 10; ]⟩ φ }
     ~*> dl![.diamond]{ { x := 250 } { x := x + 10 }
-          ‹.upd .diamond capX
-            dl![.diamond]{ (se1 ≐ true → φ) ∧ (se1 ≐ false → false) ∧ (se1 ≐ true ∨ se1 ≐ false) }› } :=
-  calc dl![.diamond]{ ⟨[ uint8 x = 250; x += 10; ]⟩ φ }
-    _ ~*> _ := overflowToCheck .diamond φ
-    _ ~*> _ := by sol_chain
+          ‹.upd .diamond capX dl![.diamond]{ (se1 ≐ true → φ) ∧ (se1 ≐ false → false) ∧
+            (⟨ revert(); ⟩ false ∨ se1 ≐ true ∨ se1 ≐ false) }› } :=
+  (overflowTrace .diamond φ).trans (by sol_chain)
 
 /-- `250 + 10`, the printed `260`. -/
 abbrev t260 : Term StandardExample := .binop .add .uint (.lit (.int 250)) (.lit (.int 10))
@@ -106,12 +119,14 @@ overwritten `x := 250` dropped (`simplifyUpdate`). -/
 theorem overflowLastLine :
     dl![.box]{ ⟨[ uint8 x = 250; x += 10; ]⟩ φ }
     ~~> .upd .box [.val (.user "x") t260, .val (.fresh "se" 1) (inTy8 t260)]
-          dl![.box]{ (se1 ≐ true → φ) ∧ (se1 ≐ false → true) ∧ true } :=
+          dl![.box]{ (se1 ≐ true → φ) ∧ (se1 ≐ false → true) ∧
+            ([ revert(); ] false ∨ se1 ≐ true ∨ se1 ≐ false) } :=
   calc dl![.box]{ ⟨[ uint8 x = 250; x += 10; ]⟩ φ }
     _ ~*> _ := overflowBoxChain φ
     _ ~[sequentialToParallel]~> _ := by sol_chain
     _ ~[simplifyUpdate]~> .upd .box [.val (.user "x") t260, .val (.fresh "se" 1) (inTy8 t260)]
-          dl![.box]{ (se1 ≐ true → φ) ∧ (se1 ≐ false → true) ∧ true } := by sol_chain
+          dl![.box]{ (se1 ≐ true → φ) ∧ (se1 ≐ false → true) ∧
+            ([ revert(); ] false ∨ se1 ≐ true ∨ se1 ≐ false) } := by sol_chain
 
 end Lines
 
