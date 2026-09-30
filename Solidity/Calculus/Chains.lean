@@ -823,20 +823,21 @@ def nextLine (C φ ψ : Lean.Expr) : MetaM (Run × Line) := do
 /-- `A.fresh = K`, from the postconditions' `Post.noFresh`: `simp` takes the
 line's variables apart (`maxIdx_append`), `decide` computes the rest. -/
 def proveFresh (C A : Lean.Expr) (K : Nat) (hs : Array Lean.Expr) : TermElabM Lean.Expr := do
-  let ty ← mkEq (mkApp2 (mkConst ``Fml.fresh) C A) (toExpr K)
+  let g ← mkFreshExprMVar (← mkEq (mkApp2 (mkConst ``Fml.fresh) C A) (toExpr K))
   let names := #[``Fml.fresh, ``Fml.vars, ``maxIdx, ``maxIdx_append]
   let ts : Array Lean.Term := names.map fun n => mkCIdent n
   let ts := ts ++ (← hs.mapM Term.exprToSyntax)
   let args ← ts.mapM fun t => `(Lean.Parser.Tactic.simpLemma| $t:term)
-  let tac ← `(by simp only [$args,*] <;> decide)
-  try
-    Term.withoutErrToSorry do
-      let p ← Term.elabTermEnsuringType tac ty
-      Term.synthesizeSyntheticMVarsNoPostponing
-      instantiateMVars p
-  catch
-    | .error _ msg => throwError "sol_chain: cannot compute the fresh index of{indentExpr A}\n{msg}"
-    | ex => throw ex
+  let fail (msg : MessageData) : MessageData :=
+    m!"sol_chain: cannot compute the fresh index of{indentExpr A}\n{msg}"
+  let left ← try Tactic.run g.mvarId! (evalTactic (← `(tactic| simp only [$args,*] <;> decide)))
+    catch
+      | .error _ msg => throwError (fail msg)
+      | ex => throw ex
+  unless left.isEmpty do throwError (fail m!"goals left: {left}")
+  let p ← instantiateMVars g
+  if p.hasSyntheticSorry || p.hasExprMVar then throwError (fail m!"not closed{indentExpr p}")
+  return p
 
 /-- `A ~> B`, for the line `B` computed after `A`: `rfl`, or, over a
 postcondition, `Fml.OneStep.ofFresh` at the index the run used. -/
