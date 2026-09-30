@@ -40,7 +40,8 @@ def toStr : PrimTy → String
 
 /-- A primitive type by its Solidity name: the one table of them.  An
 `address` (and an `address payable`) is a `uint`; `uint256` and `int256` are
-`uint` and `int`.  The other widths are not modelled (`unknownTyMsg`). -/
+`uint` and `int`.  The narrower widths are not types: a `uint8` local is a
+`uint` whose width the elaborator carries (`narrowTy?`, `Syntax.lean`). -/
 def ofName? : String → Option PrimTy
   | "uint" | "uint256" | "address" => some .uint
   | "int" | "int256" => some .int
@@ -54,7 +55,7 @@ of `Semantics.structDef`, nor an enum of the contract. -/
 def unknownTyMsg (s : String) : String :=
   let hint :=
     if s.startsWith "uint" || s.startsWith "int" then
-      ": only the 256-bit integers are modelled, write `uint` or `int`"
+      ": the integer types are `uint8` … `uint256` and `int8` … `int256`, in steps of 8"
     else if s.startsWith "bytes" || s == "string" || s == "byte" then
       ": `bytes` and `string` are not modelled"
     else ""

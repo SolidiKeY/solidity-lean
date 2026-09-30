@@ -175,7 +175,7 @@ example : WithCtor.vars.map (·.1) = ["limit", "owner", "total"] := rfl
 /-- Its body, an enum local and an `else if` in it, inlined where it is called. -/
 example : Prog.toStr (C := WithCtor) (sol[WithCtor]{ init(5); }) = "init(5);" := rfl
 
-/-- error: unknown type uint8: only the 256-bit integers are modelled, write `uint` or `int` -/
-#guard_msgs (error, drop info) in #check contract!{ uint8 small; }
+/-- error: unknown type uint7: the integer types are `uint8` … `uint256` and `int8` … `int256`, in steps of 8 -/
+#guard_msgs (error, drop info) in #check contract!{ uint7 small; }
 
 end Solidity.Examples.Benchmark.Syntax
