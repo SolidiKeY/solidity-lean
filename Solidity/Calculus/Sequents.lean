@@ -24,13 +24,13 @@ one formula `a₁ → … → φ` (`Notation.lean`), which the chains of
   program declares is a parameter of the whole sequent, and an update binds
   its aliases (`{ sp1 := alice.account }`) for the entries after it.  So
   `h.sound` states `⊨ dl!{ Γ ⟹ φ }` for `h : sequent!{ Γ ⟹ φ }`.
-* **An entry's modality** is the one of the goal it was produced under:
-  that of `φ` when `φ` has one at its head (`fmlModality?`), and otherwise,
-  after `emptyModality`, a metavariable that `show` fills from the goal.  It
-  is found the way `dl![m]{ … }` finds `m` (`elabDlWith`): the sequent is
-  read at the diamond and at the box, and where the two readings differ the
-  metavariable goes.  `sequent![m]{ … }` gives it, and then `⟨[ ]⟩` in `φ`
-  is `m` too; a Lean formula `φ : Post C` stands where a formula does.
+* **An entry's modality** is the one of the goal it was produced under.
+  The sequent is read as `dl![?m]{ … }` would read it (`elabDlAt`), at a
+  metavariable `?m`: `φ`'s modality fixes it when `φ` has one at its head,
+  and otherwise, after `emptyModality`, `show` fills it from the goal.  So
+  `⟨[ ]⟩` in a sequent, and an update with no modality under it, are the
+  goal's modality too.  `sequent![m]{ … }` gives it; a Lean formula
+  `φ : Post C` stands where a formula does.
 * **The context is built by appending** (`[] ++ [h₁] ++ … ++ [hₙ]`), the
   shape the rules leave (`Γ ++ [.pre c, .upd m U]` after `guard`), so a
   rule stated on `Γ ++ [.upd m U]` (`Proves.merge`, `Proves.simplify`,
@@ -70,19 +70,15 @@ syntax "sequent![" term "]{ " sepBy(dl_hyp, ", ") seq_arrow dl_fml " }" : term
 
 section Expand
 
-/-- The sequent's formula `Hyp.wrap Γ φ`, raw, at the reading `μ`: an
-update entry at `φ`'s modality, else at `μ`'s. -/
-def expandSequent (explicit : Bool) (holes : Array Syntax) (hs : Array (TSyntax `dl_hyp))
-    (φ : TSyntax `dl_fml) (μ : Option Lean.Name) : MacroM Lean.Term := do
-  let here : Lean.Term := mkCIdent (μ.getD ``Modality.diamond)
-  let r : Reading := { either := if explicit then some here else none, holes }
-  let em := (← fmlModality? (r.either.getD here) φ).getD here
-  hs.foldrM (init := ← expandFml r φ) fun h acc => do
+/-- The sequent's formula `Hyp.wrap Γ φ`, written: `a → …` for a
+precondition, `{U} …` for an update. -/
+def sequentFml (hs : Array (TSyntax `dl_hyp)) (φ : TSyntax `dl_fml) : MacroM (TSyntax `dl_fml) :=
+  hs.foldrM (init := φ) fun h acc => do
     match h with
     | `(dl_hyp| { havoc }) =>
       Macro.throwErrorAt h "`{ havoc }` is what a callback rule leaves, not an entry to write"
-    | `(dl_hyp| $U:dl_upd) => `(RawFml.upd $em:term $(← expandUpd U):term $acc:term)
-    | `(dl_hyp| $a:dl_fml) => `(RawFml.imp $(← expandFml r a):term $acc:term)
+    | `(dl_hyp| $U:dl_upd) => `(dl_fml| $U:dl_upd ($acc))
+    | `(dl_hyp| $a:dl_fml) => `(dl_fml| ($a) → ($acc))
     | _ => Macro.throwUnsupported
 
 end Expand
@@ -103,29 +99,43 @@ def peelHyps (C : Expr) : Nat → Expr → MetaM (List Expr × Expr)
       return (mkApp3 (mkConst ``Hyp.upd) C (e.getArg! 1) (e.getArg! 2) :: hs, φ)
     throwError "sequent: not a context entry{indentExpr e}"
 
+/-- The modality at the head of a quoted formula, through its updates. -/
+partial def headModality? (e : Expr) : Option Expr :=
+  if e.isAppOfArity ``Fml.modal 4 then some (e.getArg! 1)
+  else if e.isAppOfArity ``Fml.upd 4 then headModality? (e.getArg! 3)
+  else none
+
 /-- `sequent[C, m]{ Γ ⟹ φ }`, `m` optional: `Proves R Γ φ`, the context built
-by appending. -/
+by appending.  Without `m` the sequent is read at a metavariable, which `φ`'s
+modality fixes when it has one. -/
 def elabSequent (c : Lean.Term) (m? : Option Lean.Term) (arrow : TSyntax `seq_arrow)
     (hs : Array (TSyntax `dl_hyp)) (φ : TSyntax `dl_fml) : TermElabM Expr := do
   let R ← match arrow with
     | `(seq_arrow| ⟹ₖ) => pure (Lean.mkConst ``RuleSet.solkey)
     | _ => pure (Lean.mkConst ``RuleSet.all)
-  let holes := fmlHoles φ (hs.foldl (fun acc h => fmlHoles h acc) #[])
-  let m ← match m? with
-    | some m => instantiateMVars (← elabTermEnsuringType m (Lean.mkConst ``Modality))
+  let F ← liftMacroM (sequentFml hs φ)
+  let (m, e) ← match m? with
+    | some m => pure (none, ← elabDlAt c (some m) F)
     | none => do
       let m ← mkFreshExprMVar (Lean.mkConst ``Modality) (userName := `modality)
       registerMVarErrorCustomInfo m.mvarId! (← getRef) (.ofFormat <|
         "sequent: the modality of the updates in the context is not fixed by the formula " ++
           "after `⟹`: write `sequent![m]{ … }`, or use the sequent where a goal fixes it (`show`)")
-      pure m
-  let e ← elabDlWith c (some m) holes (expandSequent m?.isSome holes hs φ)
+      -- read at a local standing for `m`, which is then replaced by it
+      let n ← MonadQuotation.addMacroScope `modality
+      let e ← withLocalDeclD n (Lean.mkConst ``Modality) fun x => do
+        pure ((← elabDlAt c (some (mkIdent n)) F).replaceFVar x m)
+      pure (some m, e)
   let C := e.getAppArgs[0]!
   let (entries, φ') ← peelHyps C hs.size e
+  if let some m := m then
+    if let some m' := headModality? φ' then
+      if m'.isConstOf ``Modality.diamond || m'.isConstOf ``Modality.box then
+        discard <| isDefEq m m'
   let hyp := mkApp (Lean.mkConst ``Hyp) C
   let Γ ← entries.foldlM (fun acc h => do mkAppM ``HAppend.hAppend #[acc, ← mkListLit hyp [h]])
     (← mkListLit hyp [])
-  return mkApp4 (Lean.mkConst ``Proves) C R Γ φ'
+  return mkApp4 (Lean.mkConst ``Proves) C R Γ (← instantiateMVars φ')
 
 elab_rules : term
   | `(sequent[ $c ]{ $[$hs:dl_hyp],* $a:seq_arrow $φ:dl_fml }) => elabSequent c none a hs φ
@@ -181,6 +191,8 @@ example : sequent!{ { x := 1 } ⟹ [ ] true } =
     Proves .all ([] ++ [.upd .box [.val (.user "x") (.lit (.int 1))]]) dl!{ [ ] true } := rfl
 example : sequent![.box]{ { x := 1 } ⟹ true } =
     Proves .all ([] ++ [.upd .box [.val (.user "x") (.lit (.int 1))]]) dl!{ true } := rfl
+example (m : Modality) (φ : Fml StandardExample) : sequent![m]{ { x := 1 } ⟹ ⟨[ ]⟩ φ } =
+    Proves .all ([] ++ [.upd m [.val (.user "x") (.lit (.int 1))]]) (.modal m [] φ) := rfl
 
 /-- A walk, every goal a checked line. -/
 example : ⊢ dl!{ [ x = 1; ] x == 1 } := by

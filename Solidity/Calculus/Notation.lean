@@ -40,7 +40,7 @@ where `m` goes.
 `dl![m]{ … }`) it is a line of a chain, one formula `a₁ → … → φ` that prints
 with `→` ("Chain-only spellings" below).  In `dl{ Γ ⟹ φ }`, and in the
 goals a `⊢` derivation prints, it is a sequent, a `Proves` with its context
-apart, which `sequent!{ Γ ⟹ φ }` reads back (`Calculus/Sequents.lean`).
+apart, which no `dl!{ … }` reads back.
 
 **Two equations.**  `a = b` here is the interpreter's equation, `Fml.eqD`:
 both sides return, with one value — what `==` means, and what `a = b`
@@ -152,9 +152,8 @@ for, so they are `dl[C]{ … }`'s alone:
 * a sequent line `Γ ⟹ φ`, the formula `a₁ → … → φ`: at the top of a line
   (`dl!{ 5 <= selfBalance ⟹ ⟨ to.transfer(5); ⟩ φ }`) or in parentheses, so
   that the two goals of a split are `(c ⟹ ψ₁) ∧ (¬c ⟹ ψ₂)`.  A goal of a
-  `⊢` derivation (`dl{ Γ ⟹ φ }`, a `Proves`, read by `sequent!{ … }`) is
-  the other reading of the arrow, with its context apart; a line is one
-  formula, and prints with `→`;
+  `⊢` derivation (`dl{ Γ ⟹ φ }`, a `Proves`) is the other reading of the
+  arrow, with its context apart; a line is one formula, and prints with `→`;
 * `a <= b <= c`, as in `0 ≤ se ≤ selfBalance`: `a <= b ∧ b <= c`;
 * `select(net, at(r))`, the read of the ledger: `net(r)`, KeY's
   (`netHeader.key`), which is how it prints. -/
@@ -862,16 +861,18 @@ syntax (name := dlSeq) "dl[" term "]{ " sepBy1(dl_fml, ", ") " ⟹ " dl_fml " }"
 @[inherit_doc dlSeq] syntax "dl![" term "]{ " sepBy1(dl_fml, ", ") " ⟹ " dl_fml " }" : term
 
 open Lean Elab Term Meta in
-/-- A formula read against `C` at the modality `m` (none: read once, as
-`dl[C]{ … }`), `read μ` giving its raw formula at the reading `μ`.  A
-constructor is read as itself, any other modality twice, at the diamond and at
-the box, in one evaluation (the two sides of a conjunction); `fillSlots` then
-puts `m` and the Lean formulas `holes` back.  `Calculus/Sequents.lean` reads a
-sequent through it too. -/
-def elabDlWith (c : Lean.Term) (m? : Option Lean.Expr) (holes : Array Syntax)
-    (read : Option Lean.Name → MacroM Lean.Term) : TermElabM Lean.Expr := do
+/-- `dl[C, m]{ φ }`, `m` optional.  A constructor is read as itself, any other
+modality twice, at the diamond and at the box, in one evaluation (the two
+sides of a conjunction); `fillSlots` then puts `m` and the Lean formulas
+back. -/
+def elabDlAt (c : Lean.Term) (m? : Option Lean.Term) (φ : TSyntax `dl_fml) :
+    TermElabM Lean.Expr := do
+  let holes := fmlHoles φ
+  let m? ← m?.mapM fun m => do instantiateMVars (← elabTermEnsuringType m (mkConst ``Modality))
+  let read (μ : Option Lean.Name) : TermElabM Lean.Term :=
+    liftMacroM (expandFml { either := μ.map fun n => (mkCIdent n : Lean.Term), holes } φ)
   let once (μ : Option Lean.Name) : TermElabM Lean.Expr := do
-    let raw ← liftMacroM (read μ)
+    let raw ← read μ
     elabAgainst c fun q => `((elabDl $c $raw).map (Fml.quote $q))
   let (d, b) ← match m? with
     | none => do let e ← once none; pure (e, e)
@@ -880,8 +881,8 @@ def elabDlWith (c : Lean.Term) (m? : Option Lean.Expr) (holes : Array Syntax)
         let e ← once m.constName?
         pure (e, e)
       else
-        let rd ← liftMacroM (read ``Modality.diamond)
-        let rb ← liftMacroM (read ``Modality.box)
+        let rd ← read ``Modality.diamond
+        let rb ← read ``Modality.box
         let e ← elabAgainst c fun q =>
           `((do pure (Fml.and (← elabDl $c $rd) (← elabDl $c $rb))).map (Fml.quote $q))
         let #[_, d, b] := e.getAppArgs | throwError "dl[C, m]: not two readings{indentExpr e}"
@@ -899,15 +900,6 @@ def elabDlWith (c : Lean.Term) (m? : Option Lean.Expr) (holes : Array Syntax)
   match fillSlots m? φs d b with
   | .ok e => return e
   | .error msg => throwError "dl[C, m]: {msg}"
-
-open Lean Elab Term Meta in
-/-- `dl[C, m]{ φ }`, `m` optional (`elabDlWith`). -/
-def elabDlAt (c : Lean.Term) (m? : Option Lean.Term) (φ : TSyntax `dl_fml) :
-    TermElabM Lean.Expr := do
-  let holes := fmlHoles φ
-  let m? ← m?.mapM fun m => do instantiateMVars (← elabTermEnsuringType m (mkConst ``Modality))
-  elabDlWith c m? holes fun μ =>
-    expandFml { either := μ.map fun n => (mkCIdent n : Lean.Term), holes } φ
 
 open Lean Elab Term Meta in
 elab_rules : term
