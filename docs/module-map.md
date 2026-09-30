@@ -188,7 +188,8 @@ went.
 | `Examples/StorageSteps.lean` | One example per storage statement form, the worked derivations as `apply` walks. |
 | `Examples/StorageSuite.lean` | solkey's taclet suite on storage, deduplicated. |
 | `Examples/StorageDelete.lean`, `Examples/LedgerDelete.lean` | `delete`, and a struct holding a mapping deleted. |
-| `Examples/Branch.lean`, `Examples/Revert.lean` | The two-goal split, a conditional of references; box and diamond on `revert`, `require`, `assert`, `transfer`. |
+| `Examples/Branch.lean`, `Examples/Revert.lean` | The two-goal split, a conditional of references; box and diamond on `revert`, `require`, `assert`. |
+| `Examples/Payment.lean` | The payment examples as chains in sequent lines (`Γ ⟹ φ`): `transfer` under the box and the diamond, a captured amount and receiver, the unfunded transfer, what the box proves. |
 | `Examples/Values.lean` | Operators, short-circuits, checked arithmetic, `−−`, `++` inside an expression, negative literals. |
 | `Examples/Operators.lean` | Bitwise `& \| ^ ~`, shifts, their compound assignments, `unchecked { … }`; the same on the machine. |
 | `Examples/Calls.lean` | Internal calls: inlined bodies, captured arguments, nested calls, early returns (in a branch, in a callee), calls inside expressions, effects on storage; what cannot be written (recursion, a call under `&&`/`\|\|` or in a conditional's branch). |

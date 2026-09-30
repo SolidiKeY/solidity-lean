@@ -1,7 +1,7 @@
 import Solidity.Calculus.Close
 
 /-!
-# The two modalities: `revert();`, `require`, `assert`, `transfer`
+# The two modalities: `revert();`, `require`, `assert`
 
 `⟨ P ⟩ φ` (the diamond) says that `P` runs to the end and `φ` holds after;
 `[ P ] φ` (the box) says only that *if* `P` runs to the end, `φ` holds after.
@@ -48,6 +48,8 @@ does (`Branch.lean`), a non-simple condition captured first
 (`requireConditionCapture`): the first goal goes on with the rest of the
 program, the second reverts.  Under `⊢` the revert rules are
 `apply done .revertBox` and `apply done .revertDiamond` (`Proves.done`).
+A `transfer` the contract cannot fund reverts too, through the guard of
+`transferNoCallback`: `Payment.lean`.
 -/
 
 namespace Solidity.Examples.Revert
@@ -245,80 +247,5 @@ theorem branchDiamond :
     refine close ?_
     sol_symex
     sol_close
-
-/-! ## Payment: `transfer`
-
-The transfer rule could be stated twice, since the modalities part company at
-it: the box books the payment unconditionally, the diamond owes a
-*sufficient funds* obligation beside it.  Here there is one rule,
-`transferNoCallback`, with the funds check as its guard: where
-`0 <= se ∧ se <= selfBalance` the booking, KeY's
-`{ selfBalance := selfBalance - se ‖ net := store(net, at(sadr), net(sadr) - se) }`,
-and where not a `revert();`.  Under the box that branch closes to `true`
-(`revertBox`); under the diamond to `false` (`revertDiamond`), so what is
-left to prove is the guard: the funds obligation. -/
-
-/--
-info: @Taclet.transferNoCallback : ∀ {C : Contract} {k : Nat} {m : Modality} {sadr se : Simple C PrimTy.uint},
-  dl{ ⟨[ sadr .transfer(se); ]⟩ ⇝
-    0 <= se ∧ se <= selfBalance ⟹
-        { selfBalance := selfBalance - se ‖ net := store(net, at(sadr), net(sadr) - se) } ⟨[ ]⟩ ;
-      ¬(0 <= se ∧ se <= selfBalance) ⟹ ⟨[ revert(); ]⟩ }
--/
-#guard_msgs in #check @Taclet.transferNoCallback
-
-/-- `[ to.transfer(5); ] true`: one rule, two goals. -/
-theorem transferBox : ⊢ dl!{ [ to.transfer(5); ] true } := by
-  apply guard .transferNoCallback
-  · -- dl{ 0 <= 5 ∧ 5 <= selfBalance, { selfBalance := selfBalance - 5 ‖ … } ⟹ [ ] true }
-    apply empty
-    refine close ?_
-    sol_symex
-    sol_close
-  · -- dl{ ¬(0 <= 5 ∧ 5 <= selfBalance) ⟹ [ revert(); ] true }
-    apply done .revertBox
-    refine close ?_
-    sol_symex
-    sol_close
-
-/-- The diamond is not valid: `exampleStore` holds `1000000000` wei, and
-`to.transfer(2000000000)` reverts there. -/
-example : ¬ (⊨ dl!{ to == 1 → ⟨ to.transfer(2000000000); ⟩ true }) := fun h =>
-  h (Semantics.State.exampleStore.setEnv (.user "to") (.val (.int 1)))
-    (holds_eqD_iff.2 ⟨_, rfl, rfl⟩)
-
-/-! ### `to.transfer(x + 2);` — a nonsimple amount
-
-The amount is captured into `se1` first (`transfer_unfold_rightSndArgument`),
-and the booking is read under that capture. -/
-
-/--
-trace: ⊢ ⊨
-    dl{
-      { se1 := x + 2 }
-        (((0 <= se1 ∧ se1 <= selfBalance) →
-                { selfBalance := selfBalance - se1 ‖ net := store(net, at(to), net(to) - se1) } true) ∧
-            (¬(0 <= se1 ∧ se1 <= selfBalance) → true)) }
--/
-#guard_msgs in
-/-- `[ to.transfer(x + 2); ] true`. -/
-theorem transferCapturedAmount : ⊨ dl!{ [ to.transfer(x + 2); ] true } := by
-  sol_symex
-  trace_state
-  sol_close
-
-/-! ### `owner.transfer(5);` — a storage receiver
-
-A state variable is not a simple expression here, so the receiver is
-captured (`transfer_unfold_leftFstReceiver`). -/
-
-/-- trace: ⊢ ⊨ dl{ [ uint se1 = owner; se1 .transfer(5); ] true } -/
-#guard_msgs in
-/-- `[ owner.transfer(5); ] true`. -/
-theorem transferStorageReceiver : ⊨ dl!{ [ owner.transfer(5); ] true } := by
-  sol_step
-  trace_state
-  sol_symex
-  sol_close
 
 end Solidity.Examples.Revert

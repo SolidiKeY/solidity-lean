@@ -128,6 +128,26 @@ inductive RawFml where
   | lean (i : Nat)
   deriving Repr, Inhabited
 
+/-! ## Chain-only spellings
+
+Three spellings that the schema reading (`dl{ … }`) has no use
+for, so they are `dl[C]{ … }`'s alone:
+
+* a sequent line `Γ ⟹ φ`, the formula `a₁ → … → φ`: at the top of a line
+  (`dl!{ 5 <= selfBalance ⟹ ⟨ to.transfer(5); ⟩ φ }`) or in parentheses, so
+  that the two goals of a split are `(c ⟹ ψ₁) ∧ (¬c ⟹ ψ₂)`.  A goal of a
+  `⊢` derivation (`dl{ Γ ⟹ φ }`, a `Proves`) is the other reading of the
+  arrow, with its context apart; a line is one formula, and prints with `→`;
+* `a <= b <= c`, as in `0 ≤ se ≤ selfBalance`: `a <= b ∧ b <= c`;
+* `select(net, at(r))`, the read of the ledger: `net(r)`, KeY's
+  (`netHeader.key`), which is how it prints. -/
+
+/-- A sequent where a formula stands: `(Γ ⟹ φ)`, the formula `a₁ → … → φ`. -/
+syntax:max "(" sepBy1(dl_fml, ", ") " ⟹ " dl_fml ")" : dl_fml
+
+/-- `a <= b <= c`: `a <= b ∧ b <= c`. -/
+syntax:55 dl_term:56 " <= " dl_term:56 " <= " dl_term:56 : dl_fml
+
 section Expand
 open Lean
 
@@ -172,6 +192,7 @@ partial def expandTerm : TSyntax `dl_term → MacroM Lean.Term
   | `(dl_term| $a:dl_term - $b:dl_term) => do `(RawTerm.sub $(← expandTerm a) $(← expandTerm b))
   | `(dl_term| ( $t:dl_term )) => expandTerm t
   | `(dl_term| ! $t:dl_term) => do `(RawTerm.app "!" [$(← expandTerm t)])
+  | `(dl_term| select(net, at($a))) => do `(RawTerm.app "net" [$(← expandTerm a)])
   | `(dl_term| $f:ident($args,*)) => do
       `(RawTerm.app $(quote f.getId.toString) [$(← args.getElems.mapM expandTerm),*])
   | stx@`(dl_term| ‹ $_:term ›) => noEscape stx
@@ -217,6 +238,10 @@ def expandUpd (U : TSyntax `dl_upd) : MacroM Lean.Term := do
         match r with
         | `(dl_term| store(net, at($a), net($a') - $v)) => return ← net a a' v (← `(IntOp.sub))
         | `(dl_term| store(net, at($a), net($a') + $v)) => return ← net a a' v (← `(IntOp.add))
+        | `(dl_term| store(net, at($a), select(net, at($a')) - $v)) =>
+          return ← net a a' v (← `(IntOp.sub))
+        | `(dl_term| store(net, at($a), select(net, at($a')) + $v)) =>
+          return ← net a a' v (← `(IntOp.add))
         | _ => pure ()
       `(RawUpdElem.assign $(quote n) $(← expandTerm r))
     | _ => Macro.throwUnsupported
@@ -253,6 +278,8 @@ partial def expandFml (r : Reading) : TSyntax `dl_fml → MacroM Lean.Term
       `(RawFml.pne $(← expandOperand a) $(← expandOperand b))
   | `(dl_fml| $a:dl_term < $b:dl_term) => cmp ``BinOp.lt a b
   | `(dl_fml| $a:dl_term <= $b:dl_term) => cmp ``BinOp.le a b
+  | `(dl_fml| $a:dl_term <= $b:dl_term <= $c:dl_term) => do
+      `(RawFml.and $(← cmp ``BinOp.le a b) $(← cmp ``BinOp.le b c))
   | `(dl_fml| $a:dl_term > $b:dl_term) => cmp ``BinOp.gt a b
   | `(dl_fml| $a:dl_term >= $b:dl_term) => cmp ``BinOp.ge a b
   | `(dl_fml| ∀ $T:ident $x:ident; $φ:dl_fml) => do
@@ -291,6 +318,8 @@ partial def expandFml (r : Reading) : TSyntax `dl_fml → MacroM Lean.Term
   | stx@`(dl_fml| ⟨ $_:sol_block ⟩ $_:dl_fml) | stx@`(dl_fml| [ $_:sol_block ] $_:dl_fml) =>
       Macro.throwErrorAt stx "a program that is a schema variable belongs to `dl{ … }`"
   | `(dl_fml| ( $φ:dl_fml )) => expandFml r φ
+  | `(dl_fml| ( $[$as:dl_fml],* ⟹ $φ:dl_fml )) => do
+      as.foldrM (init := ← expandFml r φ) fun a acc => do `(RawFml.imp $(← expandFml r a) $acc)
   | stx@`(dl_fml| $_:ident) | stx@`(dl_fml| ‹ $_:term ›) => do
       let some i := r.holes.findIdx? (·.structEq stx) | Macro.throwUnsupported
       `(RawFml.lean $(quote i))
@@ -739,6 +768,13 @@ syntax "dl!{ " dl_fml " }" : term
 /-- `dl![m]{ φ }`: `dl[C, m]{ φ }` for the file's `InContract` contract. -/
 syntax "dl![" term "]{ " dl_fml " }" : term
 
+/-- A sequent line, `dl[C]{ Γ ⟹ φ }` (and at a modality, and for the file's
+contract): the formula `a₁ → … → φ` (`dl[C]{ (Γ ⟹ φ) }`). -/
+syntax (name := dlSeq) "dl[" term "]{ " sepBy1(dl_fml, ", ") " ⟹ " dl_fml " }" : term
+@[inherit_doc dlSeq] syntax "dl[" term ", " term "]{ " sepBy1(dl_fml, ", ") " ⟹ " dl_fml " }" : term
+@[inherit_doc dlSeq] syntax "dl!{ " sepBy1(dl_fml, ", ") " ⟹ " dl_fml " }" : term
+@[inherit_doc dlSeq] syntax "dl![" term "]{ " sepBy1(dl_fml, ", ") " ⟹ " dl_fml " }" : term
+
 open Lean Elab Term Meta in
 /-- `dl[C, m]{ φ }`, `m` optional.  A constructor is read as itself, any other
 modality twice, at the diamond and at the box, in one evaluation (the two
@@ -788,6 +824,11 @@ elab_rules : term
 macro_rules
   | `(dl!{ $φ:dl_fml }) => `(dl[InContract.contract]{ $φ })
   | `(dl![ $m ]{ $φ:dl_fml }) => `(dl[InContract.contract, $m]{ $φ })
+  | `(dl[ $c ]{ $[$as:dl_fml],* ⟹ $φ:dl_fml }) => `(dl[$c]{ ($[$as],* ⟹ $φ) })
+  | `(dl[ $c, $m ]{ $[$as:dl_fml],* ⟹ $φ:dl_fml }) => `(dl[$c, $m]{ ($[$as],* ⟹ $φ) })
+  | `(dl!{ $[$as:dl_fml],* ⟹ $φ:dl_fml }) => `(dl[InContract.contract]{ ($[$as],* ⟹ $φ) })
+  | `(dl![ $m ]{ $[$as:dl_fml],* ⟹ $φ:dl_fml }) =>
+    `(dl[InContract.contract, $m]{ ($[$as],* ⟹ $φ) })
 
 /-! ## Examples -/
 
@@ -933,6 +974,28 @@ example : ∀ φ : Fml StandardExample, dl!{ ⟨ x = 1; ⟩ φ } = dl!{ ⟨ x = 
 -- `⊨` and `⊧` of a name alone are Lean's to print.
 /-- info: fun φ => Valid φ ∧ ∀ (σ : State), holds σ φ : Fml StandardExample → Prop -/
 #guard_msgs in #check fun (φ : Fml StandardExample) => (⊨ φ) ∧ ∀ σ, holds σ φ
+
+/-! ### Chain-only spellings -/
+
+/-- A sequent line is its formula: its antecedents imply its succedent. -/
+example : dl!{ 5 <= selfBalance ⟹ ⟨ to.transfer(5); ⟩ true } =
+    dl!{ 5 <= selfBalance → ⟨ to.transfer(5); ⟩ true } := rfl
+example : dl!{ a == 1, b == 2 ⟹ a == b } = dl!{ a == 1 → b == 2 → a == b } := rfl
+
+/-- The two goals of a split, and a line at a modality. -/
+example : dl!{ (a == 1 ⟹ ⟨ x = 1; ⟩ true) ∧ (¬a == 1, b == 1 ⟹ false) } =
+    dl!{ (a == 1 → ⟨ x = 1; ⟩ true) ∧ (¬a == 1 → b == 1 → false) } := rfl
+example (m : Modality) : dl![m]{ a == 1 ⟹ ⟨[ x = 1; ]⟩ true } =
+    dl![m]{ a == 1 → ⟨[ x = 1; ]⟩ true } := rfl
+
+-- It prints as the formula it is.
+/-- info: dl{ 5 <= selfBalance → ⟨ to .transfer(5); ⟩ true } : Fml StandardExample -/
+#guard_msgs in #check dl!{ 5 <= selfBalance ⟹ ⟨ to.transfer(5); ⟩ true }
+
+/-- `0 <= se <= selfBalance`, and the read of the ledger. -/
+example : dl!{ 0 <= 5 <= selfBalance } = dl!{ 0 <= 5 ∧ 5 <= selfBalance } := rfl
+example : dl!{ { net := store(net, at(to), select(net, at(to)) - 5) } select(net, at(to)) = x } =
+    dl!{ { net := store(net, at(to), net(to) - 5) } net(to) = x } := rfl
 
 end Examples
 
