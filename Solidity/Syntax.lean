@@ -207,6 +207,9 @@ structure FunDecl where
   /-- Declared `payable`: its obligation assumes `msg.value >= 0` where
   another's assumes `msg.value == 0`, as solkey's does. -/
   payable : Bool := false
+  /-- Its parameters and return variable of a narrow integer type (`uint8 x`),
+  with their width: each is a `uint` or an `int` in `params`/`ret`. -/
+  widths : List (Name × Nat) := []
   deriving Repr, Inhabited
 
 /-! ## The contract
@@ -230,6 +233,9 @@ structure Contract where
   enums : List (Name × List Name) := []
   /-- Its `invariant` clauses, as read: solkey's `CInv`. -/
   inv : List SpecExpr := []
+  /-- Its state variables of a narrow integer type (`uint8 small;`), with their
+  width: each is a `uint` or an `int` in `vars`. -/
+  widths : List (Name × Nat) := []
   deriving Repr, Inhabited
 
 namespace Contract
@@ -247,6 +253,50 @@ end Contract
 `local instance : InContract := ⟨StandardExample⟩`. -/
 class InContract where
   contract : Contract
+
+/-! ## Narrow integer types
+
+`uint8` … `uint248` and `int8` … `int248` are not types of the syntax: a local,
+a parameter, a return variable or a state variable declared at one is a `uint`
+or an `int`, and the elaborator carries its width (`LocalTy.val`,
+`Contract.widths`, `FunDecl.widths`).  What leaves the width is checked where it
+happens, as solc checks it: an operation at a narrow type is followed by
+`require(inTy)` on where its result lands (`narrowPost`, `narrowCapture`); an
+implicit narrowing is refused (`fitCheck`); under `unchecked` the wrapping
+operators are taken modulo `2^N` (`narrowWrapNode`); a cast is a capture at its
+type (`castCapture`).  The range predicate `inTy(uintN, e)` is the
+condition `inTyCond` writes. -/
+
+/-- `uintN`/`intN` for `N` in `8, 16, …, 248`: the primitive type and the width.
+`uint256` and `int256` are `PrimTy.ofName?`'s. -/
+def narrowTy? (s : String) : Option (PrimTy × Nat) :=
+  let (p, ds) :=
+    if s.startsWith "uint" then (PrimTy.uint, s.drop 4)
+    else if s.startsWith "int" then (PrimTy.int, s.drop 3)
+    else (PrimTy.bool, "")
+  match ds.toNat? with
+  | some n =>
+    if p != .bool && 8 ≤ n && n < 256 && n % 8 == 0 && toString n == ds then some (p, n)
+    else none
+  | none => none
+
+/-- The type a cast `T(e)` converts to: a narrow type, or `uint`/`int` at `256`. -/
+def castTy? (f : String) : Option (PrimTy × Nat) :=
+  match narrowTy? f with
+  | some t => some t
+  | none =>
+    match f with
+    | "uint" | "uint256" => some (.uint, 256)
+    | "int" | "int256" => some (.int, 256)
+    | _ => none
+
+/-- The Solidity spelling of `p` at `n` bits. -/
+def tyName (p : PrimTy) (n : Nat) : String := if n < 256 then s!"{p.toStr}{n}" else p.toStr
+
+/-- Why a narrow type is refused where it stands. -/
+def narrowNestedMsg (s : String) : String :=
+  s!"{s}: a narrow integer type is the type of a local, a parameter, a return value or a " ++
+  "state variable only, not of an array's element, a mapping's key or value, or a struct's member"
 
 declare_syntax_cat sol_ty (behavior := both)
 syntax:max ident : sol_ty
@@ -268,8 +318,10 @@ macro_rules
       | some .int => `(Ty.int)
       | some .bool => `(Ty.bool)
       | none =>
-        -- a struct of the table; an enum never reaches here (`expandMemberTy`)
-        if (structDef s).isEmpty then Lean.Macro.throwErrorAt x (unknownTyMsg s)
+        -- a struct of the table; an enum never reaches here (`expandMemberTy`),
+        -- nor does a narrow type where one may stand (`expandMemberTyW`)
+        if (narrowTy? s).isSome then Lean.Macro.throwErrorAt x (narrowNestedMsg s)
+        else if (structDef s).isEmpty then Lean.Macro.throwErrorAt x (unknownTyMsg s)
         else `(Ty.struct $(Lean.quote s))
   | `(ty!(address payable)) => `(Ty.uint)
   | `(ty!(mapping($K => $V))) => `(Ty.mapping ty!($K) ty!($V))
@@ -1405,6 +1457,29 @@ def expandParams (enums : List String) (ps : Array (TSyntax `sol_param)) : Macro
     | `(sol_param| $T:sol_ty $x:ident) => do `(($(strLit x), $(← expandMemberTy enums T)))
     | _ => Macro.throwUnsupported
 
+/-- `expandMemberTy` where a narrow type may stand: a `uint8` is `Ty.uint` and
+its width. -/
+def expandMemberTyW (enums : List String) (T : TSyntax `sol_ty) : MacroM (Term × Option Nat) :=
+  match T with
+  | `(sol_ty| $x:ident) =>
+    match narrowTy? x.getId.toString with
+    | some (.int, n) => do pure (← `(Ty.int), some n)
+    | some (_, n) => do pure (← `(Ty.uint), some n)
+    | none => do pure (← expandMemberTy enums T, none)
+  | _ => do pure (← expandMemberTy enums T, none)
+
+/-- A function's parameters, and the rows of `FunDecl.widths` for the narrow ones. -/
+def expandParamsW (enums : List String) (ps : Array (TSyntax `sol_param)) :
+    MacroM (Array Term × Array Term) := do
+  let mut rows := #[]
+  let mut ws := #[]
+  for p in ps do
+    let `(sol_param| $T:sol_ty $x:ident) := p | Macro.throwUnsupported
+    let (t, w) ← expandMemberTyW enums T
+    rows := rows.push (← `(($(strLit x), $t)))
+    if let some n := w then ws := ws.push (← `(($(strLit x), $(quote n))))
+  pure (rows, ws)
+
 /-- A modifier: its name, its parameters, and its body before and after its
 `_;`, which stands once, at the top level. -/
 def expandModifier (enums : List String) (m : Ident) (ps : Array (TSyntax `sol_param))
@@ -1423,7 +1498,8 @@ modifiers read off its attributes. -/
 def expandFun (enums : List String) (mods : List (String × Array Term × Term × Term)) (f : Ident)
     (ps : Array (TSyntax `sol_param)) (attrs : Array (TSyntax `sol_fattr))
     (b : TSyntax `sol_block) (spec : Term) : MacroM Term := do
-  let ps ← expandParams enums ps
+  let (ps, ws) ← expandParamsW enums ps
+  let mut ws := ws
   -- `payable` is an atom of the keyword reading and an identifier of the
   -- modifier reading
   let payable := attrs.any fun a => (a.raw.find? fun s =>
@@ -1439,7 +1515,9 @@ def expandFun (enums : List String) (mods : List (String × Array Term × Term �
     if a.isOfKind ``solAttrReturns then
       -- `returns ( T memory? r? )`
       let n := (a[4].getOptional?.map (·.getId.toString)).getD "_ret"
-      ret ← `(some ($(quote n), $(← expandMemberTy enums ⟨a[2]⟩)))
+      let (t, w) ← expandMemberTyW enums ⟨a[2]⟩
+      if let some b := w then ws := ws.push (← `(($(quote n), $(quote b))))
+      ret ← `(some ($(quote n), $t))
       retMem := !a[3].isNone
       continue
     match (⟨a⟩ : TSyntax `sol_fattr) with
@@ -1456,7 +1534,8 @@ def expandFun (enums : List String) (mods : List (String × Array Term × Term �
   let body ← expandStmt.expandBlock b
   `(($(strLit f),
     ({ params := [$ps,*], ret := $ret, retMem := $(quote retMem), body := $body,
-       mods := [$apps,*], spec := $spec, payable := $(quote payable) } : FunDecl)))
+       mods := [$apps,*], spec := $spec, payable := $(quote payable),
+       widths := [$ws,*] } : FunDecl)))
 
 end
 
@@ -1479,6 +1558,7 @@ macro_rules
           mods := mods ++ [← expandModifier enums f ((ps.map (·.getElems)).getD #[]) b]
         | _ => pure ()
       let mut rows := #[]
+      let mut widthRows : Array Lean.Term := #[]
       let mut funs := #[]
       -- the clauses read since the last function: they specify the next one
       let mut reqs : Array Lean.Term := #[]
@@ -1504,7 +1584,9 @@ macro_rules
           asg := some (← expandSpecLocs ls)
         | `(sol_member| invariant $e:spec_expr ;) => invs := invs.push (← expandSpec e)
         | `(sol_member| $T:sol_ty $_:sol_vis* $x:ident ;) =>
-          rows := rows.push (← `(($(strLit x), $(← expandMemberTy enums T))))
+          let (t, w) ← expandMemberTyW enums T
+          rows := rows.push (← `(($(strLit x), $t)))
+          if let some n := w then widthRows := widthRows.push (← `(($(strLit x), $(Lean.quote n))))
         | `(sol_member| function $f:ident ( $ps:sol_param,* ) $as:sol_fattr* $b:sol_block) =>
           let asgT ← match asg with
             | some ls => `(some $ls)
@@ -1521,7 +1603,8 @@ macro_rules
       unless reqs.isEmpty && enss.isEmpty && !skip && asg.isNone do
         Lean.Macro.throwError
           "a `requires`, `ensures`, `assignable` or `skip` clause after the last function"
-      `(({ vars := [$rows,*], funs := [$funs,*], enums := [$enumRows,*], inv := [$invs,*] } : Contract))
+      `(({ vars := [$rows,*], funs := [$funs,*], enums := [$enumRows,*], inv := [$invs,*],
+           widths := [$widthRows,*] } : Contract))
 /-! ### The contracts
 
 One per store of `Semantics.lean`, under the store's renames, with
@@ -1637,7 +1720,8 @@ local in scope or of a state variable. -/
 
 /-- What a local in scope holds. -/
 inductive LocalTy where
-  | val (p : PrimTy)
+  /-- A stack local of type `p`, `bits` wide (`uint8 x` is a `uint` 8 bits wide). -/
+  | val (p : PrimTy) (bits : Nat := 256)
   | alias (R : RefTy)
   | mem (R : RefTy)
   /-- A storage variable, `old`: only a formula binds one (`old := storage`),
@@ -1657,11 +1741,21 @@ def elabTy (C : Contract) : RawTy → Except String Ty
     | some p => pure (.prim p)
     | none =>
       if (lookupBy s C.enums).isSome then pure .uint
+      else if (narrowTy? s).isSome then throw (narrowNestedMsg s)
       else if (structDef s).isEmpty then throw (unknownTyMsg s)
       else pure (.struct s)
   | .mapping k v => do pure (.mapping (← elabTy C k) (← elabTy C v))
   | .array t => do pure (.array (← elabTy C t))
   | .fixed t n => do pure (.fixed (← elabTy C t) n)
+
+/-- A declared variable's type: `elabTy`'s, or a narrow integer type
+(`narrowTy?`) as its primitive type; and its width. -/
+def elabDeclTy (C : Contract) : RawTy → Except String (Ty × Nat)
+  | .named s =>
+    match narrowTy? s with
+    | some (p, n) => pure (.prim p, n)
+    | none => do pure (← elabTy C (.named s), 256)
+  | T => do pure (← elabTy C T, 256)
 
 /-- `PrimTy.toStr`, under the name `Calculus/Spec.lean` uses. -/
 abbrev primName (p : PrimTy) : String := p.toStr
@@ -1769,9 +1863,36 @@ bounds check although the length is a literal, so `hoist` captures it. -/
 def RawExpr.hasIdxLen : RawExpr → Bool :=
   RawExpr.any fun | .field b "length" => b.hasIndex | _ => false
 
-/-- Whether an effect occurs in the expression: an `++` or `−−`, or a call. -/
+/-- Whether an effect occurs in the expression: an `++` or `−−`, or a call
+(a cast `uint8(e)` is not one). -/
 def RawExpr.hasIncDec : RawExpr → Bool :=
-  RawExpr.any (· matches .incDec .. | .call .. | .named ..)
+  RawExpr.any fun
+    | .incDec .. | .named .. => true
+    | .call f _ => (castTy? f).isNone
+    | _ => false
+
+/-- Whether a cast `uint8(e)` occurs in the expression: `hoist` captures it. -/
+def RawExpr.hasCast : RawExpr → Bool :=
+  RawExpr.any fun | .call f _ => (castTy? f).isSome | _ => false
+
+/-- A literal's value: `5`, `-5`. -/
+def RawExpr.litVal? : RawExpr → Option Int
+  | .num n => some n
+  | .unop .neg (.num n) => some (-(n : Int))
+  | _ => none
+
+/-- The range of `p` at `n` bits. -/
+def intRange (p : PrimTy) (n : Nat) : Int × Int :=
+  if p = .int then (-((2 ^ (n - 1) : Nat) : Int), ((2 ^ (n - 1) - 1 : Nat) : Int))
+  else (0, ((2 ^ n - 1 : Nat) : Int))
+
+/-- The range predicate `inTy(T, e)`, as a condition: `e` lies in `p`'s range at `n`
+bits.  At `uint` only the upper bound is written: the operation's own
+256-bit check has reverted below `0`. -/
+def inTyCond (p : PrimTy) (n : Nat) (e : RawExpr) : RawExpr :=
+  if p = .int then
+    .binop .and (.binop .le (.unop .neg (.num (2 ^ (n - 1)))) e) (.binop .le e (.num (2 ^ (n - 1) - 1)))
+  else .binop .le e (.num (2 ^ n - 1))
 
 /-- Whether a call occurs in the expression. -/
 def RawExpr.hasCall : RawExpr → Bool :=
@@ -1915,7 +2036,7 @@ def synth (Γ : ECtx) : RawExpr → Except String (TExpr C)
   | .bool b => pure (.val .bool (.simple (.bool b)))
   | .name x =>
     match lookupBy x Γ with
-    | some (.val p) => pure (.val p (.simple (.local (Var.ofName x))))
+    | some (.val p _) => pure (.val p (.simple (.local (Var.ofName x))))
     | some (.alias R) => pure (.path (.ref R) (.alias (Var.ofName x)))
     | some (.mem R) => pure (.mpath (.ref R) (.var (Var.ofName x)))
     | some .store => throw s!"{x} is a storage variable, not a program value"
@@ -2160,6 +2281,159 @@ def elabNewTy (T : RawTy) : ElabM ((R : RefTy) ×' R.newArrOk = true) := do
   | true => pure ⟨R, h⟩
   | false => throw "`new` of an array whose elements a memory array cannot hold"
 
+/-! ### Narrow widths -/
+
+/-- Two operands' type: a literal takes the other's, and the wider wins (solc
+converts a `uint8` to a `uint16` implicitly). -/
+def joinIT : Option (PrimTy × Nat) → Option (PrimTy × Nat) → Option (PrimTy × Nat)
+  | none, t => t
+  | t, none => t
+  | some (p, n), some (_, m) => some (p, max n m)
+
+/-- The integer type solc gives `e`: `some (p, n)` for `n` bits (a value not
+built from a narrow variable or a cast is 256 bits wide), `none` for a literal,
+which takes the type of what it meets.  `a ** b`, `a << b` and `a >> b` have
+`a`'s type (a literal base is 256 bits wide, solc ≥ 0.7). -/
+def intTyOf (Γ : ECtx) : RawExpr → Option (PrimTy × Nat)
+  | .num _ => none
+  | .name x =>
+    match lookupBy x Γ with
+    | some (.val p n) => some (p, n)
+    | some _ => some (.uint, 256)
+    | none =>
+      match C.rootType x with
+      | some (.prim p) => some (p, (lookupBy x C.widths).getD 256)
+      | _ => some (.uint, 256)
+  | .unop .not _ => some (.bool, 256)
+  | .unop _ a => intTyOf Γ a
+  | .binop op a b =>
+    if !op.isArith then some (.bool, 256)
+    else if op matches .pow | .powW | .shl | .shr then
+      match a.litVal? with
+      | some v => some (if v < 0 then .int else .uint, 256)
+      | none => intTyOf Γ a
+    else joinIT (intTyOf Γ a) (intTyOf Γ b)
+  | .ternary _ a b => joinIT (intTyOf Γ a) (intTyOf Γ b)
+  | .incDec _ e => intTyOf Γ e
+  | .call f _ => some ((castTy? f).getD (.uint, 256))
+  | .bool _ => some (.bool, 256)
+  | _ => some (.uint, 256)
+
+/-- `e`'s width in bits: `intTyOf`'s, `256` for a literal. -/
+def widthIn (Γ : ECtx) (e : RawExpr) : Nat := ((intTyOf C Γ e).map (·.2)).getD 256
+
+/-- `e`, an operation that can leave its narrow type — `+ - * **`, and `/` and
+unary `-` at `int` (`-128 / -1` at `int8`) — with that type. -/
+def checkedNarrow? (Γ : ECtx) (e : RawExpr) : Option (PrimTy × Nat) :=
+  match e, intTyOf C Γ e with
+  | .binop op _ _, some (p, n) =>
+    if n < 256 && ((op matches .add | .sub | .mul | .pow) || (op == .div && p == .int))
+    then some (p, n) else none
+  | .unop .neg _, some (.int, n) => if n < 256 then some (.int, n) else none
+  | _, _ => none
+
+/-- Whether a narrow operation (`checkedNarrow?`) occurs in `e`. -/
+def hasNarrow (Γ : ECtx) (e : RawExpr) : Bool :=
+  e.any fun n => (checkedNarrow? C Γ n).isSome
+
+/-- `r` may be written where a `p` of `n` bits is expected: a literal fits it,
+and a value is not wider (solc converts only to a wider type implicitly). -/
+def fitCheck (Γ : ECtx) (p : PrimTy) (n : Nat) (r : RawExpr) : Except String Unit := do
+  if 256 ≤ n then return
+  match r.litVal?, intTyOf C Γ r with
+  | some v, _ =>
+    let (lo, hi) := intRange p n
+    unless lo ≤ v && v ≤ hi do throw s!"{v} does not fit {tyName p n}"
+  | none, some (q, m) =>
+    if q != .bool && n < m then
+      throw s!"a {tyName q m} where a {tyName p n} is expected: write {tyName p n}(…)"
+  | none, none => pure ()
+
+/-- One node at a narrow `uintN`, read as solc reads it: the wrapping
+`+% -% *% **%` of `unchecked` and `<<` are taken modulo `2^N` (solc truncates
+them to the type), `~a` is `(2^N - 1) -% a`; and a literal operand must fit the
+type. -/
+def narrowWrapNode (Γ : ECtx) (e : RawExpr) : Except String RawExpr := do
+  let some (p, n) := intTyOf C Γ e | return e
+  if 256 ≤ n then return e
+  match e with
+  | .binop op a b =>
+    -- `%` too: the modulus this rewrite writes may meet it again
+    unless op matches .pow | .powW | .shl | .shr | .mod do
+      for l in [a, b] do
+        if let some v := l.litVal? then
+          let (lo, hi) := intRange p n
+          unless lo ≤ v && v ≤ hi do throw s!"{v} does not fit {tyName p n}"
+    if op matches .addW | .subW | .mulW | .powW | .shl then
+      return .binop .mod e (.num (2 ^ n))
+    return e
+  | .unop .bnot a => return .binop .subW (.num (2 ^ n - 1)) a
+  | _ => return e
+
+/-- `narrowWrapNode` at every node of `e`, bottom up. -/
+partial def narrowPure (Γ : ECtx) : RawExpr → Except String RawExpr
+  | .binop op a b => do narrowWrapNode C Γ (.binop op (← narrowPure Γ a) (← narrowPure Γ b))
+  | .unop op a => do narrowWrapNode C Γ (.unop op (← narrowPure Γ a))
+  | .field e f => do pure (.field (← narrowPure Γ e) f)
+  | .index e k => do pure (.index (← narrowPure Γ e) (← narrowPure Γ k))
+  | .ternary c a b => do pure (.ternary (← narrowPure Γ c) (← narrowPure Γ a) (← narrowPure Γ b))
+  | .incDec op e => do pure (.incDec op (← narrowPure Γ e))
+  | .newArr T e => do pure (.newArr T (← narrowPure Γ e))
+  | .call f as => do pure (.call f (← as.mapM (narrowPure Γ)))
+  | .named f ns as => do pure (.named f ns (← as.mapM (narrowPure Γ)))
+  | e => pure e
+
+/-- `require(inTy)` of `e` at `p`'s `n` bits, when `n` is narrow. -/
+def narrowCheck (p : PrimTy) (n : Nat) (e : RawExpr) : ElabM (Prog C) := do
+  if 256 ≤ n then return []
+  pure [.require (← checkM C .bool (inTyCond p n e))]
+
+/-- What follows a write of `r` to the variable `l`: the check of `r`'s narrow
+operation, on `l` (`c = a + b;` at `uint8` is `c = a + b; require(c <= 255);`:
+a revert discards the write, so checking after it is checking before it); and,
+when `l` is narrow, `r` fitting it (`fitCheck`) and arithmetic on literals
+alone checked at `l`'s type (solc folds it at compile time). -/
+def narrowPost (l r : RawExpr) : ElabM (Prog C) := do
+  let Γ ← ctx
+  let tl := intTyOf C Γ l
+  if let some (p, n) := tl then ElabM.lift (fitCheck C Γ p n r)
+  match checkedNarrow? C Γ r, tl, intTyOf C Γ r, r.litVal? with
+  | some (p, n), _, _, _ => narrowCheck C p n l
+  | none, some (p, n), none, none => narrowCheck C p n l
+  | _, _, _, _ => pure []
+
+/-- A narrow operation inside an expression, its operands' captures made:
+held in a fresh local and checked there, before the statement
+(`x = a + b > c;` at `uint8` is `uint se1 = a + b; require(se1 <= 255);
+x = se1 > c;`). -/
+def narrowCapture (e : RawExpr) : ElabM (Prog C × RawExpr) := do
+  let some (p, n) := checkedNarrow? C (← ctx) e | return ([], e)
+  let v ← checkM C p e
+  let x ← captureAs C "se" (.val p n)
+  let e' : RawExpr := .name (toString x)
+  pure (.declLocal p x (some v) :: (← narrowCheck C p n e'), e')
+
+/-- A cast `T(e)`, `e`'s captures made: a fresh local of type `T` holding `e`.
+Narrowing a `uint` keeps the low bits (`e % 2^N`, as solc truncates); a cast
+between `uint` and `int`, and one narrowing an `int`, are refused. -/
+def castCapture (f : String) (e : RawExpr) : ElabM (Prog C × RawExpr) := do
+  let some (p, n) := castTy? f | throw s!"{f} is not a type"
+  let Γ ← ctx
+  let r ← match intTyOf C Γ e, e.litVal? with
+    | _, some _ => do ElabM.lift (fitCheck C Γ p n e); pure e
+    | some (q, m), none =>
+      if q != p then throw s!"{f}({e.toStr}): a cast between uint and int is not modelled"
+      else if m ≤ n then pure e
+      else if p == .int then throw s!"{f}({e.toStr}): a cast narrowing an int is not modelled"
+      else pure (.binop .mod e (.num (2 ^ n)))
+    | none, none =>
+      if 256 ≤ n then pure e
+      else if p == .int then throw s!"{f}({e.toStr}): a cast narrowing an int is not modelled"
+      else pure (.binop .mod e (.num (2 ^ n)))
+  let v ← checkM C p r
+  let x ← captureAs C "se" (.val p n)
+  pure ([.declLocal p x (some v)], .name (toString x))
+
 /-- `e`'s value, or the reference it names, held in a fresh local before a
 later operand's effect: `x = i++ + i;` reads the right `i` first (solc
 evaluates a binary operator's right operand first), so it is
@@ -2181,7 +2455,7 @@ def captureExpr (e : RawExpr) : ElabM (Prog C × RawExpr) := do
     return ([.declMem R x (some (.alias mp)) rfl], .name (toString x))
   | _, t =>
     let some ⟨p, v⟩ := t.toVal? | throw s!"{e.toStr}: a value or a reference is expected"
-    let x ← captureAs C "se" (.val p)
+    let x ← captureAs C "se" (.val p (widthIn C (← ctx) e))
     return ([.declLocal p x (some v)], .name (toString x))
 
 /-! ### Inlining a call -/
@@ -2328,7 +2602,7 @@ partial def hoist : RawExpr → ElabM (Prog C × RawExpr)
       let (Pc, e) ← captureExpr C e
       let (Q, k) ← hoist k
       pure (P ++ Pc ++ Q, .index e k)
-    else if k.hasIdxLen then
+    else if k.hasIdxLen || k.hasCast || hasNarrow C (← ctx) k then
       let (Q, k) ← hoist k
       pure (P ++ Q, .index e k)
     else pure (P, .index e k)
@@ -2337,26 +2611,23 @@ partial def hoist : RawExpr → ElabM (Prog C × RawExpr)
       let (P, a) ← hoist a
       if b.hasCall then throw "a call under a short-circuit operator"
       if b.hasIncDec then throw "`++` or `−−` under a short-circuit operator"
+      if hasNarrow C (← ctx) b then
+        throw "narrow arithmetic under a short-circuit operator: its check would run where the program does not evaluate it"
       pure (P, .binop op a b)
     else
-      -- solc evaluates the right operand first: `i++ + i` is `1 + 1`
-      let (Q, b) ← hoist b
-      if a.hasIncDec then
-        let (Qc, b) ← captureExpr C b
-        let (P, a) ← hoist a
-        pure (Q ++ Qc ++ P, .binop op a b)
-      else if a.hasIdxLen then
-        -- a capture that may only revert: the right operand need not be held
-        let (P, a) ← hoist a
-        pure (Q ++ P, .binop op a b)
-      else pure (Q, .binop op a b)
+      let (P, e) ← hoistBinop op a b
+      let (Q, e) ← narrowCapture C e
+      pure (P ++ Q, e)
   | .unop op a => do
     let (P, a) ← hoist a
-    pure (P, .unop op a)
+    let (Q, e) ← narrowCapture C (.unop op a)
+    pure (P ++ Q, e)
   | .ternary c a b => do
     let (P, c) ← hoist c
     if a.hasCall || b.hasCall then throw "a call in a conditional's branch"
     if a.hasIncDec || b.hasIncDec then throw "`++` or `−−` in a conditional's branch"
+    if hasNarrow C (← ctx) a || hasNarrow C (← ctx) b then
+      throw "narrow arithmetic in a conditional's branch: its check would run where the program does not evaluate it"
     let Γ ← ctx
     match synth C Γ a, synth C Γ b with
     | .ok (.path (.ref R) pa), .ok (.path (.ref R') pb) =>
@@ -2381,8 +2652,10 @@ partial def hoist : RawExpr → ElabM (Prog C × RawExpr)
     let (pre, ⟨p, t, hs⟩) ← elabIncTarget C e
     match hp : p.isNumeric with
     | true =>
-      let x ← captureAs C "se" (.val p)
-      pure (P ++ pre ++ [.declLocal p x none, .assignIncDec x op hp t hs], .name (toString x))
+      let n := widthIn C (← ctx) e
+      let x ← captureAs C "se" (.val p n)
+      pure (P ++ pre ++ [.declLocal p x none, .assignIncDec x op hp t hs] ++ (← narrowCheck C p n e),
+        .name (toString x))
     | false => throw s!"++ or −− at {primName p}"
   | .named f ns args => do
     -- the members' order; an effect may not move
@@ -2394,6 +2667,11 @@ partial def hoist : RawExpr → ElabM (Prog C × RawExpr)
       throw s!"{f}(\{…}): an argument with an effect, out of the members' order"
     hoist (.call f (flds.map fun g => (lookupBy g (ns.zip args)).getD (.num 0)))
   | .call f args => do
+    if (castTy? f).isSome then
+      let [a] := args | throw s!"a cast {f}(…) takes one argument"
+      let (P, a) ← hoist a
+      let (Q, e) ← castCapture C f a
+      return (P ++ Q, e)
     -- a struct's constructor (no function of that name): a fresh memory
     -- object, its members written in order, after the arguments are evaluated
     -- left to right (`T memory mv1; mv1.a = x; mv1.b = y;`)
@@ -2410,10 +2688,11 @@ partial def hoist : RawExpr → ElabM (Prog C × RawExpr)
     let (P, args) ← hoistArgs args
     let some (_, d) := (← read).find? (·.1 == f) | throw s!"{f} is not a function declared before this one"
     match d.ret with
-      | some (_, .prim p) =>
+      | some (r, .prim p) =>
+        let n := (lookupBy r d.widths).getD 256
         let x ← freshCapture "se"
-        let Q ← elabCall f args (some (x, p))
-        declare C (toString x) (.val p)
+        let Q ← elabCall f args (some (x, p)) n
+        declare C (toString x) (.val p n)
         pure (P ++ [.declLocal p x none] ++ Q, .name (toString x))
       | some (_, .ref R) =>
         -- `Account memory mv1 = makeAccount();`
@@ -2423,6 +2702,38 @@ partial def hoist : RawExpr → ElabM (Prog C × RawExpr)
         pure (P ++ Q, .name (toString x))
       | none => throw s!"{f} returns no value"
   | e => pure ([], e)
+
+/-- `a ⊕ b`'s captures: the right operand first (solc evaluates it first: `i++ +
+i` is `1 + 1`), the left one's after it, and the right one held before an
+effect of the left. -/
+partial def hoistBinop (op : BinOp) (a b : RawExpr) : ElabM (Prog C × RawExpr) := do
+  let (Q, b) ← hoist b
+  if a.hasIncDec then
+    let (Qc, b) ← captureExpr C b
+    let (P, a) ← hoist a
+    pure (Q ++ Qc ++ P, .binop op a b)
+  else if a.hasIdxLen || a.hasCast || hasNarrow C (← ctx) a then
+    -- captures that may only revert: the right operand need not be held
+    let (P, a) ← hoist a
+    pure (Q ++ P, .binop op a b)
+  else pure (Q, .binop op a b)
+
+/-- `hoist`, but an operation at the top is left to the statement, which
+checks its narrow width after the write (`narrowPost`). -/
+partial def hoistTop : RawExpr → ElabM (Prog C × RawExpr)
+  | .binop op a b => if op.shortCircuits then hoist (.binop op a b) else hoistBinop op a b
+  | .unop op a => do
+    let (P, a) ← hoist a
+    pure (P, .unop op a)
+  | e => hoist e
+
+/-- `l = r;`: the right-hand side's captures, then the target's; an operation at
+the top of `r` stays there when `l` is a variable (`hoistTop`). -/
+partial def hoistAssign (l r : RawExpr) : ElabM (Prog C × RawStmt) := do
+  let (P, r) ← if l matches .name _ then hoistTop r else hoist r
+  let (Pc, r) ← if l.hasIncDec then captureExpr C r else pure ([], r)
+  let (Q, l) ← hoist l
+  pure (P ++ Pc ++ Q, .assign l r)
 
 /-- A call's arguments, left to right: one read before a later argument's
 effect is captured first, as a binary operator's operand is. -/
@@ -2441,9 +2752,9 @@ a scope of its own — its parameters and its return variable, every local
 renamed fresh (`renameStmts`), then its `return`s lowered (`lowerReturns`) — with
 the functions declared before `f`, so no call recurses.  `res` is the local
 the returned value lands in, with its type. -/
-partial def elabCall (f : String) (args : List RawExpr) (res : Option (Var × PrimTy)) :
-    ElabM (Prog C) := do
-  pure (← elabCallRet f args res).1
+partial def elabCall (f : String) (args : List RawExpr) (res : Option (Var × PrimTy))
+    (resW : Nat := 256) : ElabM (Prog C) := do
+  pure (← elabCallRet f args res resW).1
 
 /-- A call of `f`, which returns a memory reference of type `R`, and `bind r`,
 the statement that binds the callee's return variable `r` where the call
@@ -2461,8 +2772,8 @@ partial def elabMemCall (f : String) (args : List RawExpr) (R : RefTy) (bind : V
 memory reference, with its type: the body's first statement declares it (a
 fresh default object) and the call returns nothing (`CallRet.none`), the
 caller binding it after the call (`elabMemCall`). -/
-partial def elabCallRet (f : String) (args : List RawExpr) (res : Option (Var × PrimTy)) :
-    ElabM (Prog C × Option (RefTy × Var)) := do
+partial def elabCallRet (f : String) (args : List RawExpr) (res : Option (Var × PrimTy))
+    (resW : Nat := 256) : ElabM (Prog C × Option (RefTy × Var)) := do
   let funs ← read
   let some i := funs.findIdx? (·.1 == f) | throw s!"{f} is not a function declared before this one"
   let d := (funs[i]?.map (·.2)).getD default
@@ -2474,11 +2785,13 @@ partial def elabCallRet (f : String) (args : List RawExpr) (res : Option (Var ×
   let mut Γf : ECtx := []
   for ((n, T), a) in d.params.zip args do
     let .prim p := T | throw s!"{f}: the parameter {n} has a reference type"
+    let w := (lookupBy n d.widths).getD 256
+    ElabM.lift (fitCheck C Γ p w a)
     let e ← ElabM.lift (check C Γ p a)
     let x ← freshCapture "se"
     targs := targs ++ [⟨p, x, e⟩]
     ρ := (n, toString x) :: ρ
-    Γf := setBy (toString x) (.val p) Γf
+    Γf := setBy (toString x) (.val p w) Γf
   let mut mret : Option (RefTy × Var) := none
   let ret ← match d.ret, res with
     | none, none => pure CallRet.none
@@ -2495,9 +2808,11 @@ partial def elabCallRet (f : String) (args : List RawExpr) (res : Option (Var ×
       if d.retMem then throw s!"{f}: `memory` on its return of value type {primName p}"
       if let some (_, q) := res then
         unless q = p do throw s!"{f} returns a {primName p}, not a {primName q}"
+      let w := (lookupBy n d.widths).getD 256
+      if resW < w then throw s!"{f} returns a {tyName p w}, where a {tyName p resW} is expected"
       let r ← freshCapture "se"
       ρ := (n, toString r) :: ρ
-      Γf := setBy (toString r) (.val p) Γf
+      Γf := setBy (toString r) (.val p w) Γf
       pure (CallRet.val p r (res.map (·.1)))
   let body ← renameStmts ρ d.body
   let body ← ElabM.lift (lowerReturns (d.ret.map fun (n, _) => (lookupBy n ρ).getD n) body)
@@ -2535,17 +2850,20 @@ partial def hoistStmt : RawStmt → ElabM (Prog C × RawStmt)
       let (Q, l) ← hoist l
       pure (Q, .assign l (.newArr T n))
     | .call f args, .ok (.val _ (.simple (.local _))) =>
-      let (P, args) ← hoistArgs args
-      pure (P, .assign l (.call f args))
-    | _, _ =>
-      -- the right-hand side first, then the target
-      let (P, r) ← hoist r
-      let (Pc, r) ← if l.hasIncDec then captureExpr C r else pure ([], r)
-      let (Q, l) ← hoist l
-      pure (P ++ Pc ++ Q, .assign l r)
+      if (castTy? f).isSome then hoistAssign l r
+      else
+        let (P, args) ← hoistArgs args
+        pure (P, .assign l (.call f args))
+    | _, _ => hoistAssign l r
   | .decl T x (some (.call f args)) => do
+    if (castTy? f).isSome then
+      let (P, r) ← hoist (.call f args)
+      return (P, .decl T x (some r))
     let (P, args) ← hoistArgs args
     pure (P, .decl T x (some (.call f args)))
+  | .decl T x (some r) => do
+    let (P, r) ← hoistTop r
+    pure (P, .decl T x (some r))
   | .declMemory T x (some (.newArr T' n)) => pure ([], .declMemory T x (some (.newArr T' n)))
   -- a statement of one expression: its captures, then the statement
   | s@(.decl ..) | s@(.declStorage ..) | s@(.declMemory ..) | s@(.declStoragePush ..)
@@ -2597,9 +2915,11 @@ partial def hoistStmt : RawStmt → ElabM (Prog C × RawStmt)
     pure (Q, .eval [])
   | s => pure ([], s)
 
-/-- A statement, as a block: its captures (`hoistStmt`), then the statement,
+/-- A statement, as a block: its narrow rewrites (`narrowPure`), its captures
+(`hoistStmt`), then the statement,
 whose compound target may need a capture of its own. -/
 partial def elabStmt (s : RawStmt) : ElabM (Prog C) := do
+  let s ← ElabM.lift (s.mapExprsM (narrowPure C (← ctx)))
   let (P, s) ← hoistStmt s
   pure (P ++ (← elabStmt1 s))
 
@@ -2622,38 +2942,43 @@ partial def elabStmt1 : RawStmt → ElabM (Prog C)
     | .val .. => throw "`new` assigned to a value"
   | .assign l (.call f args) => do
     match ← synthM C l with
-    | .val p (.simple (.local x)) => elabCall f args (some (x, p))
+    | .val p (.simple (.local x)) => elabCall f args (some (x, p)) (widthIn C (← ctx) l)
     | .mpath (.ref R) (.var x) => elabMemCall f args R fun r => .rebindMem (R := R) x (.alias (.var r))
     | _ => throw "a call's value is assigned to a stack local"
   | .assign l r => do
+    let post ← narrowPost C l r
     let Γ ← ctx
-    match ← synthM C l with
-    | .val p (.simple (.local x)) => pure [.assignLocal x (← checkM C p r)]
-    | .val p _ => throw s!"{l.toStr} is a {p.toStr} value, not a place to assign to"
-    | .path (.prim p) (.loc l) => pure [.assign l (.val (← checkM C p r))]
-    | .path (.ref R) (.loc l) =>
-      match ← synthM C r with
-      | .mpath T mp =>
-        if hT : T = .ref R then pure [.assignFromMem l (hT ▸ mp)]
-        else throw s!"{r.toStr}: a memory reference to a {T} where a {Ty.ref R} is expected"
-      | _ =>
-        match h : (Ty.ref R).mapFree with
-        | true => pure [.assign l (.copy (← checkPath C Γ (.ref R) r) h)]
-        | false => throw "a storage copy of a type that holds a mapping"
-    | .path (.ref R) (.alias x) => pure [.rebind x (.path (← checkPath C Γ (.ref R) r))]
-    | .mpath (.ref R) (.var x) => pure [.rebindMem x (← elabMRhs C Γ R r)]
-    | .mpath (.prim p) (.loc l) => pure [.assignMem l (.val (← checkM C p r))]
-    | .mpath (.ref R) (.loc l) => pure [.assignMem l (.ref (← checkMPath C Γ (.ref R) r))]
+    let P : Prog C ← match ← synthM C l with
+      | .val p (.simple (.local x)) => do pure [.assignLocal x (← checkM C p r)]
+      | .val p _ => throw s!"{l.toStr} is a {p.toStr} value, not a place to assign to"
+      | .path (.prim p) (.loc l) => do pure [.assign l (.val (← checkM C p r))]
+      | .path (.ref R) (.loc l) => do
+        match ← synthM C r with
+        | .mpath T mp =>
+          if hT : T = .ref R then pure [.assignFromMem l (hT ▸ mp)]
+          else throw s!"{r.toStr}: a memory reference to a {T} where a {Ty.ref R} is expected"
+        | _ =>
+          match h : (Ty.ref R).mapFree with
+          | true => do pure [.assign l (.copy (← checkPath C Γ (.ref R) r) h)]
+          | false => throw "a storage copy of a type that holds a mapping"
+      | .path (.ref R) (.alias x) => do pure [.rebind x (.path (← checkPath C Γ (.ref R) r))]
+      | .mpath (.ref R) (.var x) => do pure [.rebindMem x (← elabMRhs C Γ R r)]
+      | .mpath (.prim p) (.loc l) => do pure [.assignMem l (.val (← checkM C p r))]
+      | .mpath (.ref R) (.loc l) => do pure [.assignMem l (.ref (← checkMPath C Γ (.ref R) r))]
+    pure (P ++ post)
   | .decl T x (some (.call f args)) => do
-    let .prim p ← ElabM.lift (elabTy C T) | throw s!"{x}: a reference type needs a data location"
-    let P ← elabCall f args (some (Var.ofName x, p))
-    declare C x (.val p)
+    let (.prim p, n) ← ElabM.lift (elabDeclTy C T) | throw s!"{x}: a reference type needs a data location"
+    let P ← elabCall f args (some (Var.ofName x, p)) n
+    declare C x (.val p n)
     pure (.declLocal p (Var.ofName x) none :: P)
   | .decl T x init => do
-    let .prim p ← ElabM.lift (elabTy C T) | throw s!"{x}: a reference type needs a data location"
-    let init ← init.mapM (checkM C p)
-    declare C x (.val p)
-    pure [.declLocal p (Var.ofName x) init]
+    let (.prim p, n) ← ElabM.lift (elabDeclTy C T) | throw s!"{x}: a reference type needs a data location"
+    let v ← init.mapM (checkM C p)
+    declare C x (.val p n)
+    let post ← match init with
+      | some r => narrowPost C (.name x) r
+      | none => pure []
+    pure (.declLocal p (Var.ofName x) v :: post)
   | .declStorage T x init => do
     let .ref R ← ElabM.lift (elabTy C T) | throw s!"{x}: `storage` on a value type"
     let Γ ← ctx
@@ -2709,23 +3034,30 @@ partial def elabStmt1 : RawStmt → ElabM (Prog C)
     -- `&= |= ^= <<= >>=` and a wrapping `+=`: `l = l ⊕ r`, the target's
     -- effects already captured (`hoistStmt`), so reading it twice is safe
     if op.isArith && !op.hasCompoundAssign && op != .pow then
-      return ← elabStmt1 (.assign l (.binop op l r))
+      return ← elabStmt1 (.assign l (← ElabM.lift (narrowWrapNode C (← ctx) (.binop op l r))))
     let (pre, ⟨p, t⟩) ← elabOpTarget C l
+    -- at a narrow target, what `l ⊕ r` may leave the type by is checked after
+    let n := widthIn C (← ctx) l
+    ElabM.lift (fitCheck C (← ctx) p n r)
+    let post ← if (op matches .add | .sub | .mul) || (op == .div && p == .int) then
+      narrowCheck C p n l else pure []
     match hop : op.hasCompoundAssign, hp : p.isNumeric with
-    | true, true => pure (pre ++ [.opAssign op hop hp t (← checkM C p r)])
+    | true, true => pure (pre ++ [.opAssign op hop hp t (← checkM C p r)] ++ post)
     | false, _ => throw s!"no compound assignment for {BinOp.sym op}"
     | _, false => throw s!"a compound assignment at {primName p}"
   | .incDec op l => do
     let (pre, ⟨p, t⟩) ← elabOpTarget C l
     match hp : p.isNumeric with
-    | true => pure (pre ++ [.incDec op hp t])
+    | true => pure (pre ++ [.incDec op hp t] ++ (← narrowCheck C p (widthIn C (← ctx) l) l))
     | false => throw s!"++ or −− at {primName p}"
   | .assignIncDec x op l => do
     let (pre, ⟨p, t, hs⟩) ← elabIncTarget C l
     match ← synthM C x with
     | .val q (.simple (.local y)) =>
+      ElabM.lift (fitCheck C (← ctx) q (widthIn C (← ctx) x) l)
       match hp : p.isNumeric with
-      | true => if q = p then pure (pre ++ [.assignIncDec y op hp t hs])
+      | true => if q = p then
+                  pure (pre ++ [.assignIncDec y op hp t hs] ++ (← narrowCheck C p (widthIn C (← ctx) l) l))
                 else throw s!"a {primName p} assigned to a {primName q}"
       | false => throw s!"++ or −− at {primName p}"
     | _ => throw "the result of ++ or −− goes to a stack local"
@@ -3194,8 +3526,13 @@ example : Prog.toStr (sol{ address payable a = owner; }) = "uint a = owner;" := 
 /-- error: Solidity elaboration failed: unknown type Foo -/
 #guard_msgs in #check sol{ Foo x; }
 
-/-- error: Solidity elaboration failed: unknown type uint8: only the 256-bit integers are modelled, write `uint` or `int` -/
-#guard_msgs in #check sol{ uint8 x = 1; }
+/-- A `uint8` is a `uint` whose arithmetic is checked at 8 bits (`narrowPost`);
+`Examples/Checked.lean` has the rest. -/
+example : Prog.toStr (sol{ uint8 x = 250; x += 10; }) =
+    "uint x = 250; x += 10; require(x <= 255);" := rfl
+
+/-- error: Solidity elaboration failed: unknown type uint7: the integer types are `uint8` … `uint256` and `int8` … `int256`, in steps of 8 -/
+#guard_msgs in #check sol{ uint7 x = 1; }
 
 /-- error: Solidity elaboration failed: total is indexed, but it is a uint, not a mapping or an array -/
 #guard_msgs in #check sol{ total[1] = 2; }

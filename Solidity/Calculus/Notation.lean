@@ -455,7 +455,7 @@ inductive NameKind where
 `sp1`/`mv1` by its spelling; anything else is a stack local. -/
 def nameKind (Γ : ECtx) (x : String) : NameKind :=
   match lookupBy x Γ with
-  | some (.val _) => .local
+  | some (.val ..) => .local
   | some (.alias _) => .alias
   | some (.mem _) => .mem
   | some .store => .store

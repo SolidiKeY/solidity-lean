@@ -177,6 +177,7 @@ derivation `⊢ φ` built one `apply` per taclet.
 | `Examples/Branch.lean`, `Revert.lean` | Two-goal splits; box and diamond on `revert`, `require`, `assert`, `transfer`. |
 | `Examples/Payment.lean` | The payment examples as chains in sequent lines, `⊢` walks with checked sequents, and the funded diamonds' validity. |
 | `Examples/Values.lean`, `Operators.lean` | Operators, checked arithmetic, `−−`, bitwise, shifts, `unchecked`; the same on the machine. |
+| `Examples/Checked.lean` | `uint8` … `int248`: the overflow trace as a chain, narrow runs, casts, `unchecked`. |
 | `Examples/Calls.lean` | Internal calls: inlined bodies, early returns, calls in expressions, what cannot be written. |
 | `Examples/CallOperands.lean` | Call-valued operands, push as a target, calls returning a memory reference. |
 | `Examples/Callback.lean` | Checks-effects-interactions with and without callbacks (`ProvesC`). |
