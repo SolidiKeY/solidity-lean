@@ -243,7 +243,7 @@ write reverts, which satisfies the formula.
 | `storage-push-empty` | `StorageSuite.lean`'s `#eval` of `values[2]` |
 | `storage-push-value` | `StorageSuite.pushValue` |
 | `storage-push-nonsimple-arg` | `StorageSuite.pushNonsimpleArg` |
-| `storage-push-return-assign` | `CallOperands.pushLvaluePrimitive` — `values.push() = 42;` is `values.push(42);`, a chain: `sol_close` does not read the pushed slot back (`Close.lean`) |
+| `storage-push-return-assign` | not expressible (`values.push() = 42;`: `push()` is not an assignment target) |
 | `storage-push-local-bind` | `StorageSuite.lean`'s `#eval` of `persons[2].age` |
 | `storage-pop-nonempty` | `StorageSuite.lean`'s `#eval` of `values[0]`, and `StorageSuite.popNonemptyGone` |
 | `storage-pop-empty-box` | `StorageSuite.popEmpty` |

@@ -874,8 +874,9 @@ syntax sol_expr ".push(" sol_expr ")" : sol_stmt
 syntax sol_expr ".push()" : sol_stmt
 syntax sol_expr ".pop()" : sol_stmt
 syntax sol_expr " = " sol_expr ".push()" : sol_stmt
-/-- `a[i].push() = e;`: a push used as a target on a receiver that is not a
-name or a member chain, refused (`expandStmt`). -/
+/-- `values .push() = e;`, `a[i].push() = e;`: a push used as a target spelt
+with the `.push()` token; on a name or a member chain it is the push
+`b.push(e);` (`assignTo`), on another receiver refused (`expandStmt`). -/
 syntax (name := solPushTarget) sol_expr ".push()" " = " sol_expr : sol_stmt
 syntax sol_ty &"storage" ident " = " sol_expr ".push()" : sol_stmt
 syntax sol_expr ".transfer(" sol_expr ")" : sol_stmt
@@ -1139,7 +1140,10 @@ partial def expandStmt (s : TSyntax `sol_stmt) : MacroM Term := do
   | ``solRequireErr => `(RawStmt.requireWith $(← expandExpr ⟨s.raw[2]⟩) [$(← exprs s.raw[6]),*])
   | ``solRevertErr | ``solRevertMsg => `(RawStmt.revert)
   | ``solHole => Macro.throwErrorAt s "`_;` stands once, at the top level of a modifier's body"
-  | ``solPushTarget => Macro.throwErrorAt s pushTargetMsg
+  | ``solPushTarget =>
+    if expandStmt.nameChain ⟨s.raw[0]⟩ then
+      `(RawStmt.call (.field $(← expandExpr ⟨s.raw[0]⟩) "push") [$(← expandExpr ⟨s.raw[3]⟩)])
+    else Macro.throwErrorAt s pushTargetMsg
   | ``solUnchecked => `(RawStmt.unchecked $(← expandStmt.expandBlock ⟨s.raw[1]⟩))
   | ``solIfChain =>
     -- `if (c₀) b₀ else if (c₁) b₁ … else e`: nested, from the last branch out
@@ -1237,9 +1241,15 @@ where
     if let `(sol_expr| $f:sol_expr ( $as:sol_expr,* )) := l then
       if as.getElems.isEmpty then
         if let some b ← pushRecv? f then
-          let `(sol_expr| $_:ident) := f | Macro.throwErrorAt l pushTargetMsg
+          unless nameChain f do Macro.throwErrorAt l pushTargetMsg
           return ← `(RawStmt.call (.field $b "push") [$r])
     `(RawStmt.assign $(← expandExpr l) $r)
+  /-- A name or a member chain of names: `values`, `bucket.tokens`,
+  `bucket .tokens.push`. -/
+  nameChain : TSyntax `sol_expr → Bool
+    | `(sol_expr| $_:ident) => true
+    | `(sol_expr| $e:sol_expr . $_:ident) => nameChain e
+    | _ => false
   expandBlock : TSyntax `sol_block → MacroM Term
     | `(sol_block| { $[$ss:sol_stmt;]* }) => do `([$(← ss.mapM expandStmt),*])
     | _ => Macro.throwUnsupported
@@ -2222,6 +2232,10 @@ partial def uncheckStmts : List RawStmt → Except String (List RawStmt)
       | s => s.mapExprsM RawExpr.uncheck
     pure (s' :: (← uncheckStmts ss))
 
+/-- Why a call of `f`, returning a `T` that is a reference, is refused. -/
+def refReturnMsg (f : String) (T : Ty) : String :=
+  s!"{f} returns a reference ({T}): a call's value is a value type"
+
 mutual
 
 /-- **Captures before a statement**: an `++`/`−−` inside an expression, and a
@@ -2338,7 +2352,7 @@ partial def hoist : RawExpr → ElabM (Prog C × RawExpr)
     let some (_, d) := (← read).find? (·.1 == f) | throw s!"{f} is not a function declared before this one"
     let p ← match d.ret with
       | some (_, .prim p) => pure p
-      | some (_, T) => throw s!"{f} returns a reference ({T}): a call's value is a value type"
+      | some (_, T) => throw (refReturnMsg f T)
       | none => throw s!"{f} returns no value"
     let x ← freshCapture "se"
     let Q ← elabCall f args (some (x, p))
@@ -2385,7 +2399,7 @@ partial def elabCall (f : String) (args : List RawExpr) (res : Option (Var × Pr
     | none, none => pure CallRet.none
     | none, some _ => throw s!"{f} returns no value"
     | some (n, T), res => do
-      let .prim p := T | throw s!"{f} returns a reference ({T}): a call's value is a value type"
+      let .prim p := T | throw (refReturnMsg f T)
       if let some (_, q) := res then
         unless q = p do throw s!"{f} returns a {primName p}, not a {primName q}"
       let r ← freshCapture "se"

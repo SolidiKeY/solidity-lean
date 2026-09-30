@@ -25,8 +25,10 @@ index above the callee's: reading it back numbers the callee's locals past
 the largest index the line writes, so
 `⟨ se1 = makeValue(); uint se3; se3 = ++i; … ⟩` would give the callee `se4`,
 not `se2`.  The first step of `carolValues[++i] = makeValue();` is therefore
-written with its `++i` left in place, and the memory programs are pinned
+written with its `++i` left in place, and that program is pinned
 (`Prog.toStr`) and proved by the strategy rather than drawn line by line.
+`carolValues[i] = makeValue();` is a chain from its first step to its last
+line (`memoryIndexWriteCallChain` says why not every line between).
 -/
 
 namespace Solidity.Examples.CallOperands
@@ -77,6 +79,35 @@ def pushCallValue : dl!{ ⟨ values.push(makeValue()); ⟩ true }
             { storage := save(save(storage, values[values.length], se1), values.length,
                 values.length + 1) } true } := rfl
 
+/--
+info:     dl{ ⟨ uint se1; se1 = makeValue(); values .push(se1); ⟩ true }
+  ~[valueDeclSkip]~>
+    dl{ { se1 := 0 } ⟨ se1 = makeValue(); values .push(se1); ⟩ true }
+  ~[functionBodyExpand]~>
+    dl{ { se1 := 0 } ⟨ uint se2; se2 = seed; se1 = se2; values .push(se1); ⟩ true }
+  ~[valueDeclSkip]~>
+    dl{ { se1 := 0 } { se2 := 0 } ⟨ se2 = seed; se1 = se2; values .push(se1); ⟩ true }
+  ~[storageRootReadSelect]~>
+    dl{ { se1 := 0 } { se2 := 0 } { se2 := select(storage, seed) } ⟨ se1 = se2; values .push(se1); ⟩ true }
+  ~[localValueAssign]~>
+    dl{ { se1 := 0 } { se2 := 0 } { se2 := select(storage, seed) } { se1 := se2 } ⟨ values .push(se1); ⟩ true }
+  ~[storagePushValueSave]~>
+    dl{
+  { se1 := 0 }
+    { se2 := 0 }
+      { se2 := select(storage, seed) }
+        { se1 := se2 }
+          { storage := save(save(storage, values[values.length], se1), values.length, values.length + 1) } ⟨ ⟩ true }
+  ~[emptyModality]~>
+    dl{
+  { se1 := 0 }
+    { se2 := 0 }
+      { se2 := select(storage, seed) }
+        { se1 := se2 }
+          { storage := save(save(storage, values[values.length], se1), values.length, values.length + 1) } true }
+-/
+#guard_msgs in #derivation dl!{ ⟨ values.push(makeValue()); ⟩ true }
+
 /-! ## 2 · `values.push() = makeValue();`
 
 The push used as a target is the push of its right-hand side: the same
@@ -85,12 +116,28 @@ formula as §1, so the same chain. -/
 example : dl!{ ⟨ values.push() = makeValue(); ⟩ true } =
     dl!{ ⟨ values.push(makeValue()); ⟩ true } := rfl
 
-/-- `values.push() = makeValue();` — §1's chain, whose first line this is. -/
+/-- `values.push() = makeValue();`: the first
+step to `uint pv = makeValue(); values.push(pv);`, then §1's chain. -/
 def pushLvalueCallValue : dl!{ ⟨ values.push() = makeValue(); ⟩ true }
     ~*> dl!{ { se1 := 0 } { se2 := 0 } { se2 := select(storage, seed) } { se1 := se2 }
             { storage := save(save(storage, values[values.length], se1), values.length,
                 values.length + 1) } true } :=
-  pushCallValue
+  calc dl!{ ⟨ values.push() = makeValue(); ⟩ true }
+    _ = dl!{ ⟨ uint se1 = makeValue(); values.push(se1); ⟩ true } := rfl
+    _ ~*> dl!{ { se1 := 0 } { se2 := 0 } { se2 := select(storage, seed) } { se1 := se2 }
+            { storage := save(save(storage, values[values.length], se1), values.length,
+                values.length + 1) } true } := pushCallValue
+
+-- Spelt with the `.push()` token, as the printer spaces it: the same push.
+example : dl!{ ⟨ values .push() = makeValue(); ⟩ true } =
+    dl!{ ⟨ values.push(makeValue()); ⟩ true } := rfl
+
+/-- `values.push() = 42; uint result = values[0];` from the example store,
+whose `values` is empty: the push used as a target appends `42`. -/
+theorem pushLvalueRun :
+    Prog.localAfter Semantics.State.exampleStore
+      sol{ values.push() = 42; uint result = values[0]; } "result" =
+      .ok (.val (.int 42)) := rfl
 
 /-- `values.push() = 42;` (solkey's `storage-push-return-assign`): one rule. -/
 def pushLvaluePrimitive : dl!{ ⟨ values.push() = 42; ⟩ true }
@@ -109,6 +156,11 @@ example : Prog.toStr (sol[TestSuite]{ Token storage tokRef = bob.account.token;
     bucket.tokens.push() = tokRef; } : Prog TestSuite) =
     "Token storage tokRef = bob.account.token; bucket.tokens.push(tokRef);" := rfl
 
+-- The member chain spelt with the `.push()` token: the same push.
+example : Prog.toStr (sol[TestSuite]{ Token storage tokRef = bob.account.token;
+    bucket .tokens.push() = tokRef; } : Prog TestSuite) =
+    "Token storage tokRef = bob.account.token; bucket.tokens.push(tokRef);" := rfl
+
 /-- `Token storage tokRef = bob.account.token; tokens.push() = tokRef;` -/
 def pushLvalueRefSource :
     dl[TestSuite]{ ⟨ Token storage tokRef = bob.account.token; tokens.push() = tokRef; ⟩ true }
@@ -118,7 +170,8 @@ def pushLvalueRefSource :
   sol_chain
 
 /-- `Token storage tokRef = bob.account.token; bucket.tokens.push() = tokRef;` —
-the receiver aliased to `sp2` first. -/
+the receiver aliased to `sp2` first.  The last line keeps the aliases `sp2`
+and `tokRef`, where the printed chain writes the paths they are bound to. -/
 def bucketPushLvalueRefSource :
     dl[TestSuite]{ ⟨ Token storage tokRef = bob.account.token;
       bucket.tokens.push() = tokRef; ⟩ true }
@@ -126,6 +179,11 @@ def bucketPushLvalueRefSource :
           { storage := save(save(storage, sp2[sp2.length], find(storage, tokRef)), sp2.length,
               sp2.length + 1) } true } := by
   sol_chain
+
+-- A dotted push bound by an assignment, the alias rebound to the new slot.
+example : Prog.toStr (sol[TestSuite]{ Token storage t = bucket.tokens[0];
+    t = bucket.tokens.push(); } : Prog TestSuite) =
+    "Token storage t = bucket.tokens[0]; t = bucket.tokens.push();" := rfl
 
 /-- `Token storage t = bucket.tokens.push(); t.value = 11;` — the slot a push
 on a member chain returns, bound and written (the printed
@@ -164,7 +222,7 @@ theorem rootWriteCall : ⊨ dl!{ [ total = makeValue(); ] total == seed } := by
 
 A memory array's element written with a call's value
 (`memoryIndexWriteStore`); `carolValues` is declared first, a copy of
-`values`. -/
+`values`: a chain, and the box theorem that the element holds the value. -/
 
 example : Prog.toStr (sol{ uint i = 0; uint[] memory carolValues = values;
     carolValues[i] = makeValue(); } : Prog Operands) =
@@ -175,6 +233,26 @@ example : Prog.toStr (sol{ uint i = 0; uint[] memory carolValues = values;
 example : dl!{ ⟨ uint[] memory carolValues = values; carolValues[i] = makeValue(); ⟩ true } =
     dl!{ ⟨ uint[] memory carolValues = values; uint se1 = makeValue(); carolValues[i] = se1; ⟩
       true } := rfl
+
+/-- `uint[] memory carolValues = values; carolValues[i] = makeValue();`: the
+capture, then the copy (`memoryStorageCopy`), the call inlined and run, and
+the write (`memoryIndexWriteStore`), left to `sol_chain`.  The lines between
+do not read back: with its declaration dropped, `carolValues` is a free name
+in the program, which reads as a `uint` (`Calculus/Notation.lean`), and the
+update `carolValues := freshId(…)` does not type the program under it. -/
+def memoryIndexWriteCallChain :
+    dl!{ ⟨ uint[] memory carolValues = values; carolValues[i] = makeValue(); ⟩ true }
+    ~*> dl!{ { carolValues := freshId(copySt(memory, find(storage, values))) ‖
+              memory := copySt(memory, find(storage, values)) }
+          { se1 := 0 } { se2 := 0 } { se2 := select(storage, seed) } { se1 := se2 }
+          { memory := write(memory, carolValues[i], se1) } true } :=
+  calc dl!{ ⟨ uint[] memory carolValues = values; carolValues[i] = makeValue(); ⟩ true }
+    _ = dl!{ ⟨ uint[] memory carolValues = values; uint se1 = makeValue();
+            carolValues[i] = se1; ⟩ true } := rfl
+    _ ~*> dl!{ { carolValues := freshId(copySt(memory, find(storage, values))) ‖
+              memory := copySt(memory, find(storage, values)) }
+          { se1 := 0 } { se2 := 0 } { se2 := select(storage, seed) } { se1 := se2 }
+          { memory := write(memory, carolValues[i], se1) } true } := by sol_chain
 
 /-- `carolValues[i] = makeValue();` — the element holds `makeValue()`'s value. -/
 theorem memoryIndexWriteCall :
@@ -232,9 +310,11 @@ example : Prog.toStr (sol{ uint i = 0; uint[] memory carolValues = values;
 A function returning a memory reference, as in
 `choosePersonMem().account = makeAccount();`: a call's value is a value type
 (`CallRet`), and `returns (Account memory)` reads `memory` as the return
-variable's name. -/
+variable's name, so no memory return is declared either. -/
 
-/-- A function returning a memory struct. -/
+/-- A function whose return is a struct (`memory` read as the return
+variable's name): a call of it is refused, a call's value being a value
+type. -/
 def MemReturn : Contract := contract!{
   uint seed;
   function makeAccount() returns (Account memory) { Account memory a; return a; }

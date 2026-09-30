@@ -814,7 +814,7 @@ function translateFunction(fn, contract, sol, leanVars, unportedVars) {
     }
     const text = s.text;
     if (/\.push\(\)\s*=(?!=)/.test(text)) {
-      throw new Unsupported("`b.push() = v` (a push as an lvalue) is not in the grammar");
+      throw new Unsupported("`b.push() = v` (a push used as a target): the grammar has it, the port does not translate it yet");
     }
     if (/^return\b/.test(text)) {
       throw new Unsupported("`return` ends only a declared function's body (`contract!{ function … }`)");
