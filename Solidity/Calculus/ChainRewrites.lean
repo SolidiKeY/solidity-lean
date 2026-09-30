@@ -119,35 +119,33 @@ def Fml.atSpine (f : Modality → Upd C → Fml C → Option (Fml C)) : Nat → 
 theorem Fml.atSpine_sound {f : Modality → Upd C → Fml C → Option (Fml C)}
     (hf : ∀ {m U φ ψ}, f m U φ = some ψ → ∀ σ, holds σ ψ → holds σ (.upd m U φ)) :
     (i : Nat) → (φ : Fml C) → ∀ {ψ : Fml C}, φ.atSpine f i = some ψ → ∀ σ, holds σ ψ → holds σ φ
-  | 0, .upd m U φ, _, h, σ, hψ => hf h σ hψ
-  | i + 1, .upd m U φ, _, h, σ, hψ => by
-    simp only [Fml.atSpine, Option.map_eq_some_iff] at h
-    obtain ⟨φ', h', rfl⟩ := h
-    exact m.after_mono (fun τ => Fml.atSpine_sound hf i φ h' τ) _ hψ
-  | 0, .tt, _, h, _, _ | 0, .eq .., _, h, _, _ | 0, .defined _, _, h, _, _
-  | 0, .not _, _, h, _, _ | 0, .and .., _, h, _, _ | 0, .imp .., _, h, _, _
-  | 0, .modal .., _, h, _, _ | 0, .havoc _, _, h, _, _ | 0, .all .., _, h, _, _
-  | _ + 1, .tt, _, h, _, _ | _ + 1, .eq .., _, h, _, _ | _ + 1, .defined _, _, h, _, _
-  | _ + 1, .not _, _, h, _, _ | _ + 1, .and .., _, h, _, _ | _ + 1, .imp .., _, h, _, _
-  | _ + 1, .modal .., _, h, _, _ | _ + 1, .havoc _, _, h, _, _ | _ + 1, .all .., _, h, _, _ =>
-    nomatch h
+  | 0, φ, _, h, σ, hψ => by
+    cases φ with
+    | upd m U φ => exact hf h σ hψ
+    | _ => nomatch h
+  | i + 1, φ, _, h, σ, hψ => by
+    cases φ with
+    | upd m U φ =>
+      simp only [Fml.atSpine, Option.map_eq_some_iff] at h
+      obtain ⟨φ', h', rfl⟩ := h
+      exact m.after_mono (fun τ => Fml.atSpine_sound hf i φ h' τ) _ hψ
+    | _ => nomatch h
 
 /-- A rewrite of one update that is an equivalence is one of the line. -/
 theorem Fml.atSpine_holds {f : Modality → Upd C → Fml C → Option (Fml C)}
     (hf : ∀ {m U φ ψ}, f m U φ = some ψ → ∀ σ, (holds σ ψ ↔ holds σ (.upd m U φ))) :
     (i : Nat) → (φ : Fml C) → ∀ {ψ : Fml C}, φ.atSpine f i = some ψ → ∀ σ, (holds σ ψ ↔ holds σ φ)
-  | 0, .upd m U φ, _, h, σ => hf h σ
-  | i + 1, .upd m U φ, _, h, σ => by
-    simp only [Fml.atSpine, Option.map_eq_some_iff] at h
-    obtain ⟨φ', h', rfl⟩ := h
-    exact m.after_congr (fun τ => Fml.atSpine_holds hf i φ h' τ) _
-  | 0, .tt, _, h, _ | 0, .eq .., _, h, _ | 0, .defined _, _, h, _
-  | 0, .not _, _, h, _ | 0, .and .., _, h, _ | 0, .imp .., _, h, _
-  | 0, .modal .., _, h, _ | 0, .havoc _, _, h, _ | 0, .all .., _, h, _
-  | _ + 1, .tt, _, h, _ | _ + 1, .eq .., _, h, _ | _ + 1, .defined _, _, h, _
-  | _ + 1, .not _, _, h, _ | _ + 1, .and .., _, h, _ | _ + 1, .imp .., _, h, _
-  | _ + 1, .modal .., _, h, _ | _ + 1, .havoc _, _, h, _ | _ + 1, .all .., _, h, _ =>
-    nomatch h
+  | 0, φ, _, h, σ => by
+    cases φ with
+    | upd m U φ => exact hf h σ
+    | _ => nomatch h
+  | i + 1, φ, _, h, σ => by
+    cases φ with
+    | upd m U φ =>
+      simp only [Fml.atSpine, Option.map_eq_some_iff] at h
+      obtain ⟨φ', h', rfl⟩ := h
+      exact m.after_congr (fun τ => Fml.atSpine_holds hf i φ h' τ) _
+    | _ => nomatch h
 
 /-! ## `sequentialToParallel` -/
 
@@ -238,21 +236,20 @@ def Fml.mergeSpine : Nat → Fml C → Option (Fml C)
 
 theorem Fml.mergeSpine_holds :
     (n : Nat) → (φ : Fml C) → ∀ {ψ : Fml C}, φ.mergeSpine n = some ψ → ∀ σ, (holds σ ψ ↔ holds σ φ)
-  | 1, .upd m U φ, _, h, σ => Fml.mergeInto_holds h σ
-  | n + 2, .upd m U φ, _, h, σ => by
-    simp only [Fml.mergeSpine, Option.bind_eq_some_iff] at h
-    obtain ⟨χ, hχ, h⟩ := h
-    rw [Fml.mergeInto_holds h σ]
-    simp only [holds]
-    exact m.after_congr (fun τ => Fml.mergeSpine_holds (n + 1) φ hχ τ) _
   | 0, _, _, h, _ => nomatch h
-  | 1, .tt, _, h, _ | 1, .eq .., _, h, _ | 1, .defined _, _, h, _
-  | 1, .not _, _, h, _ | 1, .and .., _, h, _ | 1, .imp .., _, h, _
-  | 1, .modal .., _, h, _ | 1, .havoc _, _, h, _ | 1, .all .., _, h, _
-  | _ + 2, .tt, _, h, _ | _ + 2, .eq .., _, h, _ | _ + 2, .defined _, _, h, _
-  | _ + 2, .not _, _, h, _ | _ + 2, .and .., _, h, _ | _ + 2, .imp .., _, h, _
-  | _ + 2, .modal .., _, h, _ | _ + 2, .havoc _, _, h, _ | _ + 2, .all .., _, h, _ =>
-    nomatch h
+  | 1, φ, _, h, σ => by
+    cases φ with
+    | upd m U φ => exact Fml.mergeInto_holds h σ
+    | _ => nomatch h
+  | n + 2, φ, _, h, σ => by
+    cases φ with
+    | upd m U φ =>
+      simp only [Fml.mergeSpine, Option.bind_eq_some_iff] at h
+      obtain ⟨χ, hχ, h⟩ := h
+      rw [Fml.mergeInto_holds h σ]
+      simp only [holds]
+      exact m.after_congr (fun τ => Fml.mergeSpine_holds (n + 1) φ hχ τ) _
+    | _ => nomatch h
 
 /-- An update rule (`UpdRuleName.top`) on the update at position `i`:
 `simplifyUpdate`, `applySkip`, `applyOnRigid`, each an equivalence.

@@ -22,6 +22,12 @@ validity of the last line back to the first.
 * §5 — a rebound alias: the overwritten capture dropped, as the printed line
   has it.
 
+The traces picked up: `StorageSteps.deepFieldWrite` to its last line
+(`headlineLastLine`, `headlineLastLineAny`) and read back
+(`headlineValue`, `readBackValue`), `SelectOnSaveConsr.ageWriteReadKeY`
+(`ageWriteReadKeYValue`; `ageWriteReadValue` in the printed order), and
+`StorageSteps.localRebindThenWrite`'s aliases (`localRebindLastLine`).
+
 **Writing the lines.**  A line with no modality left reads as a diamond in
 `dl!{}` (`fmlModality?`), and `dl!{}` has no modality variable and no
 formula variable.  So those lines are written `over m φ dl!{ … true }`: the
