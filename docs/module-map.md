@@ -192,6 +192,7 @@ went.
 | `Examples/Values.lean` | Operators, short-circuits, checked arithmetic, `−−`, `++` inside an expression, negative literals. |
 | `Examples/Operators.lean` | Bitwise `& \| ^ ~`, shifts, their compound assignments, `unchecked { … }`; the same on the machine. |
 | `Examples/Calls.lean` | Internal calls: inlined bodies, captured arguments, nested calls, early returns (in a branch, in a callee), calls inside expressions, effects on storage; what cannot be written (recursion, a call under `&&`/`\|\|` or in a conditional's branch). |
+| `Examples/CallOperands.lean` | Call-valued operands (`makeValue()`): the capture is the elaborator's, the first step an `rfl` equality; push used as a target (`values.push() = e;`, `bucket.tokens.push() = tokRef;`); chains and box theorems; a call returning a memory reference refused. |
 | `Examples/Callback.lean` | The callback semantics: a checks-effects-interactions withdrawal proved with callbacks (`ProvesC`, `transferWithCallbackBox`), an interaction-first one proved without and refuted with, the diamond's funds. |
 | `Examples/Memory.lean`, `Examples/CrossDomain.lean`, `Examples/Net.lean`, `Examples/Theory.lean` | Memory (memory `delete`, `new T[](n)`, `.length` included), copies between storage and memory, `transfer`, the theory's rewriting. |
 | `Examples/Notation.lean` | What taclets, premises and sequents print, pinned. |
