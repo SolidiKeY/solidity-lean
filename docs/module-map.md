@@ -177,7 +177,7 @@ derivation `⊢ φ` built one `apply` per taclet.
 | `Examples/Payment.lean` | The payment examples as chains in sequent lines. |
 | `Examples/Values.lean`, `Operators.lean` | Operators, checked arithmetic, `−−`, bitwise, shifts, `unchecked`; the same on the machine. |
 | `Examples/Calls.lean` | Internal calls: inlined bodies, early returns, calls in expressions, what cannot be written. |
-| `Examples/CallOperands.lean` | Call-valued operands, and push as a target. |
+| `Examples/CallOperands.lean` | Call-valued operands, push as a target, calls returning a memory reference. |
 | `Examples/Callback.lean` | Checks-effects-interactions with and without callbacks (`ProvesC`). |
 | `Examples/Memory.lean`, `Examples/CrossDomain.lean`, `Examples/Net.lean`, `Examples/Theory.lean` | Memory, storage↔memory copies, `transfer`, the theory's rewriting. |
 | `Examples/SelectOnSaveConsr.lean` | Reading a write back through a `consr` path, by hand and in solkey's order. |
