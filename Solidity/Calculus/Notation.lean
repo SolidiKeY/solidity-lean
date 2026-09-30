@@ -80,7 +80,11 @@ conditional and an operator other than `+`, `-` print), the operator schema vari
 `⊕ ⊖ ± ⊕⊕` (taclets only), and the terms whose printing drops a type — an
 allocation of an array, `freshId(addM(m))` and `addM(m)` (a struct's is
 `addM(m, S)`), `newArr(n)`, `defVal(T)` for a non-primitive `T`.  A
-concrete `defVal(uint)` reads as the default value itself.
+concrete `defVal(uint)` reads as the default value itself.  Nor does an
+alias assigned from another alias's path: a parameter becomes an alias only
+from a state variable's (`r = alice.account.token;`), so `Account storage q
+= alice.account; r = q.token; r.value = v;` — a line of the derivation of
+`alice.account.token.value = v;` — is refused, `r` being read as a `uint`.
 -/
 
 namespace Solidity
