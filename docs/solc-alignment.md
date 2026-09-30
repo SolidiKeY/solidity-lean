@@ -16,6 +16,7 @@ the plan to test these claims against solc is `docs/solc-validation.md`.
 | Unary minus | checked at `int` only; solc rejects it on `uint` | `unopCheck` | |
 | `**` | reverts on overflow (`2 ** 256`), `0 ** 0` is `1`, a negative exponent is `.stuck` | `applyBinOp` | `Evm/Examples.lean` |
 | `unchecked { }`, shifts | `+ - * **` in `unchecked` wrap modulo `2^256` (`+%` …); `~`, `<<`, `>>` are solc's at `uint256` | `applyBinOp`, `RawExpr.uncheck` | |
+| Narrow integers | `uint8` … `uint248`, `int8` … `int248`: an operation at a narrow type reverts outside its range, `unchecked` and `<<` wrap modulo `2^N`, an implicit narrowing is refused, a `uint` cast truncates (below) | `narrowTy?`, `narrowPost`, `narrowCapture`, `narrowWrapNode`, `castCapture` (`Syntax.lean`) | `Examples/Checked.lean` |
 | Division | `/` and `%` by zero revert (KeY agrees) | `applyBinOp` | |
 | `assert` | a failing `assert` reverts like `require`; KeY's "violated" goal is an obligation instead, and the rule table follows the interpreter | `Taclet.assertSimple` | `Examples/Revert.lean` |
 | Assignment order | right-hand side first, target resolved once | `Stmt.run` (`.assign`, `.opAssign`, `.incDec`) | `Semantics.lean` examples |
@@ -83,6 +84,67 @@ se2; se2 = p.age++; persons[se2] = mv1;`), so its members are read at copy
 time, after the increment, as solc reads them. What remains is only the
 order of two failing reads (the source's and the target index's bounds
 check), and both are `.revert`.
+
+## Narrow integer types
+
+solc gives each operation the type of its operands (the wider, a literal
+taking the other's; `a ** b`, `a << b`, `a >> b` the base's) and checks it
+there: `uint8 a = 200; uint c = a + a;` reverts although `c` is a `uint256`.
+The model keeps `PrimTy` at `bool | uint | int`, 256 bits, and carries the
+width in the elaborator: a local, a parameter, a return variable or a state
+variable declared at `uintN`/`intN` is a `uint`/`int` of `N` bits
+(`LocalTy.val`, `FunDecl.widths`, `Contract.widths`), and every other value is
+256 bits wide (`intTyOf`).  So nothing below the elaborator changed: the
+interpreter, the calculus, the soundness proofs and the compiler see ordinary
+programs, and the check is a statement the rules already run.
+
+- **An operation that can leave its type** (`+ - * **`, `/` and unary `-` at
+  `int`, `++`/`−−`, `op=`) is followed by `require` of
+  `inTy(T, e)` on where its result lands: `x += 10;` at `uint8` is
+  `x += 10; require(x <= 255);`, `y -= 50;` at `int8` is
+  `y -= 50; require((-128 <= y) && (y <= 127));` (`narrowPost`).  The check
+  follows the write, where solc's precedes it; a revert discards the write,
+  so the runs agree.  At `uint` only the upper bound is written: the 256-bit
+  check has reverted below `0`.  An operation inside an expression (an
+  operand, a condition, an index, an argument) is captured with its check
+  before the statement, as an `++` is (`narrowCapture`): the capture can
+  only revert, so moving it changes no effect's order.
+- **Implicit conversions** are solc's: a value may be written where a type at
+  least as wide is expected, and a literal where it fits; `uint8 x = total;`
+  and `uint8 x = 300;` are elaboration errors (`fitCheck`), as they are
+  compile errors.  So a narrow variable only ever holds a value of its range.
+- **Casts.**  `uintN(e)` of a `uint` keeps the low `N` bits (`e % 2^N`), a
+  widening cast keeps the value; either is a capture at its type, so the
+  operations after it are checked at the cast's width (`castCapture`).
+- **`unchecked`** wraps `+ - * **` and `<<` modulo `2^N` (`(x +% 1) % 256`),
+  and `~x` at `uint8` is `255 -% x` (`narrowWrapNode`).
+- **Storage packing** is not observable here: a state variable is a value of
+  its own in the interpreter and a slot of its own in the compiler, and it
+  holds a value of its range; solc packs several narrow variables into one
+  slot, which only an `sload` or inline assembly would see.
+- **Comparisons** compare the values, which solc's conversion to the common
+  type preserves: nothing to check.
+
+What is not modelled, each an elaboration error unless said otherwise:
+
+- a narrow type inside a type: an array's element, a mapping's key or value,
+  a struct's member (`narrowNestedMsg`); and a modifier's narrow parameter;
+- a cast between `uint` and `int`, and one narrowing an `int`;
+- signed arithmetic in `unchecked` (as at `int256`: `+%` takes `uint` only);
+  `-128 / -1` and `-(-128)` at `int8` revert inside `unchecked` too, where
+  solc wraps them, as at `int256` already;
+- a narrow operation under the right operand of `&&`/`||` or in a branch of
+  `c ? a : b`: its capture would run where the program does not evaluate it;
+- constant folding: arithmetic on literals alone written to a narrow variable
+  (`uint8 z = 200 + 100;`), which solc refuses at compile time, is checked
+  at run time instead and reverts;
+- `type(uint8).max` and the other type members;
+- a public function's ABI decoding, which reverts on an out-of-range
+  argument: a specification's precondition (`Calculus/Spec.lean`) does not
+  assume a narrow parameter's range, which is weaker, not unsound.
+
+The printed program has `uint`/`int` where the source has `uint8`/`int8`
+(`Stmt.declLocal` holds a `PrimTy`), and the checks are visible statements.
 
 ## Storage-to-storage copies of mapping-carrying types
 
@@ -180,12 +242,12 @@ they would in a frame of their own.
 
 - **Error classification.** All failures collapse into `Halt.revert` and
   `Halt.stuck`; solc distinguishes `Panic(uint256)` codes, `Error(string)`
-  and empty revert data. Checked overflow (Panic 0x11), an out-of-range index
+  and empty revert data. Checked overflow (Panic 0x11, at a narrow width too), an out-of-range index
   (0x32), an empty `pop` (0x31), a zero divisor (0x12) and a failing `assert`
   (0x01) are all `.revert`; "rejected at compile time" and "outside the
   fragment" are `.stuck`.
-- **Fragment width.** No loops (`docs/loops.md` plans them), no `uintN`/`intN`
-  for `N < 256`, no `address`/`bytes`/`string`, no external calls beyond
+- **Fragment width.** No loops (`docs/loops.md` plans them), `uintN`/`intN`
+  for `N < 256` only as above, no `address`/`bytes`/`string`, no external calls beyond
   `transfer` and the `net` ledger, no gas. These constructs do not occur
   rather than silently diverge.
 - **`transfer` assumes its recipient.** It never reverts and is never the

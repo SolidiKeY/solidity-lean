@@ -251,7 +251,7 @@ happens, as solc checks it: an operation at a narrow type is followed by
 implicit narrowing is refused (`fitCheck`); under `unchecked` the wrapping
 operators are taken modulo `2^N` (`narrowWrapNode`); a cast is a capture at its
 type (`castCapture`).  The range predicate `inTy(uintN, e)` is the
-condition `inRange` writes. -/
+condition `inTyCond` writes. -/
 
 /-- `uintN`/`intN` for `N` in `8, 16, …, 248`: the primitive type and the width.
 `uint256` and `int256` are `PrimTy.ofName?`'s. -/
@@ -1832,7 +1832,7 @@ def intRange (p : PrimTy) (n : Nat) : Int × Int :=
 /-- The range predicate `inTy(T, e)`, as a condition: `e` lies in `p`'s range at `n`
 bits.  At `uint` only the upper bound is written: the operation's own
 256-bit check has reverted below `0`. -/
-def inRange (p : PrimTy) (n : Nat) (e : RawExpr) : RawExpr :=
+def inTyCond (p : PrimTy) (n : Nat) (e : RawExpr) : RawExpr :=
   if p = .int then
     .binop .and (.binop .le (.unop .neg (.num (2 ^ (n - 1)))) e) (.binop .le e (.num (2 ^ (n - 1) - 1)))
   else .binop .le e (.num (2 ^ n - 1))
@@ -2329,7 +2329,7 @@ partial def narrowPure (Γ : ECtx) : RawExpr → Except String RawExpr
 /-- `require(inTy)` of `e` at `p`'s `n` bits, when `n` is narrow. -/
 def narrowCheck (p : PrimTy) (n : Nat) (e : RawExpr) : ElabM (Prog C) := do
   if 256 ≤ n then return []
-  pure [.require (← checkM C .bool (inRange p n e))]
+  pure [.require (← checkM C .bool (inTyCond p n e))]
 
 /-- What follows a write of `r` to the variable `l`: the check of `r`'s narrow
 operation, on `l` (`c = a + b;` at `uint8` is `c = a + b; require(c <= 255);`:
