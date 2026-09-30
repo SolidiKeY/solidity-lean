@@ -164,7 +164,7 @@ theorem Fml.Steps.valid_in {φ ψ : Fml C} (c : φ ~*> ψ) (Γ : List (Hyp C))
 section Examples
 open Proves
 
-local instance : InContract := ⟨StandardExample⟩
+local instance instInContractSequents : InContract := ⟨StandardExample⟩
 
 /-- A sequent is its formula, split back. -/
 example (h : sequent!{ 5 <= selfBalance ⟹ ⟨ to.transfer(5); ⟩ true }) :
