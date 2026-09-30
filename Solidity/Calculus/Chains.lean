@@ -146,6 +146,15 @@ structure Post (C : Contract) where
 
 attribute [coe] Post.fml
 
+/-- A postcondition names no fresh variable: `simplifyUpdate` over it drops
+a capture of the rules (`LineRw.simplifyFresh`). -/
+theorem Post.freshVars_eq_nil (φ : Post C) : φ.fml.freshVars = [] := by
+  rw [Fml.freshVars_eq, List.filter_eq_nil_iff]
+  intro x hx
+  have : x.idx ≤ 0 := φ.noFresh ▸ le_maxIdx hx
+  simp only [bne_iff_ne, ne_eq, Decidable.not_not]
+  omega
+
 instance : Coe (Post C) (Fml C) := ⟨Post.fml⟩
 
 /-! ## Past a finished goal
@@ -1139,7 +1148,9 @@ instance, found in the line as `rw` finds one.  They are tried in a fixed
 order (`rwCandidates`), and the label is the first that gives the line after
 — or, with the line after left `_`, the first that applies.  So the next
 line is computed, as for a step, and the kernel checks `r.apply φ = some ψ`
-by `rfl`. -/
+by `rfl` — or, where the rewrite asks a postcondition `φ : Post C` what it
+reads (`LineRw.simplifyFresh`), `sol_chain` proves it from `Post.noFresh`
+(`proveRw`), as it proves a step's fresh index (`proveFresh`). -/
 
 /-- What `~[n]~>` names past the strategy. -/
 inductive RwArrow where
@@ -1259,7 +1270,7 @@ def rwCandidates (C φ : Lean.Expr) : RwArrow → TermElabM (Array Lean.Expr × 
         atPos ``LineRw.mergeSpine ((List.range (k - 1)).reverse.map (· + 1)) ++
           atPos ``LineRw.mergeAt ((List.range (k - 1)).drop 1)
       else if n == `simplifyUpdate then
-        upd ``UpdRuleName.simplifyUpdate ++ atPos ``LineRw.dropShadowed (List.range k)
+        atPos ``LineRw.simplify (List.range k) ++ atPos ``LineRw.simplifyFresh (List.range k)
       else if n == `applySkip then upd ``UpdRuleName.applySkip
       else if n == `applyOnRigid then upd ``UpdRuleName.applyOnRigid
       else if n == `applyOnRigidBox then atPos ``LineRw.applyOnRigidBox (List.range k)
@@ -1283,7 +1294,7 @@ the line's modality and postconditions put back, or `none`.  Under a
 modality `m` a rewrite runs at the diamond and at the box, and gives a line
 only where the two agree but for `m`. -/
 def rwResults (C φ : Lean.Expr) (rs : Array Lean.Expr) :
-    MetaM (List (Option Lean.Expr) × Option Lean.Expr) := do
+    MetaM (List (Option Lean.Expr) × Option (Lean.Expr × Bool)) := do
   let some n := (← whnfR C).constName?
     | throwError "sol_chain: the contract is not a named constant: {C}"
   let (φ', sp) ← (punch C φ).run {}
@@ -1302,17 +1313,40 @@ def rwResults (C φ : Lean.Expr) (rs : Array Lean.Expr) :
     let ds ← eval (φ'.replaceFVar m (mkConst ``Modality.diamond))
     let bs ← eval (φ'.replaceFVar m (mkConst ``Modality.box))
     let parts := (ds.zip bs).any fun (d, b) => d.isSome != b.isSome
+    let boxOnly := (ds.zip bs).all fun (d, b) => d.isNone || b.isSome
     return ((ds.zip bs).map fun
       | (some d, some b) => fill m d b
-      | _ => none, if parts then some m else none)
+      | _ => none, if parts then some (m, boxOnly) else none)
 
-/-- The rewrite `~[n]~>` names on `φ`, among `rs`, and the line after it: the
-first that gives `ψ`, or, with `ψ` left `_`, the first that applies.  On a
-line with a modality `m` or a postcondition `φ : Post C`, the rewrite must
-compute over them (`r.apply φ = some ψ` by the kernel, on the line itself):
-`simplifyUpdate`, say, asks the postcondition which variables it reads. -/
+/-- `r.apply A = some B` over a postcondition, where the kernel cannot
+compute what the rewrite asks of it: `simp` takes the rewrite and the line's
+fresh variables apart, `Post.freshVars_eq_nil` says the postcondition has
+none, and `rfl` computes the rest (`LineRw.simplifyFresh`).  `none` if that
+does not close it. -/
+def proveRw (C r A B : Lean.Expr) : TermElabM (Option Lean.Expr) := do
+  let g ← mkFreshExprMVar (← mkEq (mkApp2 (mkApp (mkConst ``LineRw.apply) C) r A)
+    (mkApp2 (mkConst ``Option.some [0]) (mkApp (mkConst ``Fml) C) B))
+  let ok ← try
+      pure (← Term.withoutErrToSorry <| Tactic.run g.mvarId! (evalTactic (← `(tactic|
+        (simp only [LineRw.simplifyFresh, Fml.simplifyFreshAt, Fml.atSpine, Option.map_some,
+          Fml.simplifyFreshTop, Fml.freshVars, Post.freshVars_eq_nil, List.append_nil,
+          List.nil_append]; rfl))))).isEmpty
+    catch _ => pure false
+  unless ok do return none
+  let p ← instantiateMVars g
+  if p.hasSyntheticSorry || p.hasExprMVar then return none
+  return some p
+
+/-- The rewrite `~[n]~>` names on `φ`, among `rs`, the line after it, and its
+proof when `rfl` is not one: the first that gives `ψ`, or, with `ψ` left
+`_`, the first that applies.  On a line with a modality `m` or a
+postcondition `φ : Post C`, the rewrite must compute over them
+(`r.apply φ = some ψ` by the kernel, on the line itself), or be proved from
+`Post.noFresh` (`proveRw`): `simplifyUpdate`, say, asks the postcondition
+which variables it reads, and it is asked only which fresh ones. -/
 def rwSelect (C φ ψ : Lean.Expr) (n : String) (rs : Array Lean.Expr)
-    (failed : Option MessageData := none) : TermElabM (Lean.Expr × Lean.Expr) := do
+    (failed : Option MessageData := none) :
+    TermElabM (Lean.Expr × Lean.Expr × Option Lean.Expr) := do
   let φ ← instantiateMVars φ
   let ψ ← instantiateMVars ψ
   let (qs, parts) ← rwResults C φ rs
@@ -1320,29 +1354,34 @@ def rwSelect (C φ ψ : Lean.Expr) (n : String) (rs : Array Lean.Expr)
   let mut stuck := false
   for (r, q?) in rs.toList.zip qs do
     let some q := q? | continue
-    if φ.hasFVar then
-      let lhs := mkApp2 (mkApp (mkConst ``LineRw.apply) C) r φ
-      unless ← isDefEq lhs (mkApp2 (mkConst ``Option.some [0]) (mkApp (mkConst ``Fml) C) q) do
-        stuck := true
-        continue
     unless ψ.isMVar || q == ψ || (← withReducible (isDefEq q ψ)) do
       gives := gives.push q
       continue
-    return (r, q)
-  if !gives.isEmpty then
-    let ls := gives.toList.map fun q => m!"{indentExpr q}"
-    throwError "~[{n}]~>: on{indentExpr φ}\nit gives{MessageData.joinSep ls ""}\nnot{indentExpr ψ}"
+    let mut pf := none
+    if φ.hasFVar then
+      let lhs := mkApp2 (mkApp (mkConst ``LineRw.apply) C) r φ
+      unless ← isDefEq lhs (mkApp2 (mkConst ``Option.some [0]) (mkApp (mkConst ``Fml) C) q) do
+        let some p ← proveRw C r φ q | stuck := true; continue
+        pf := some p
+    return (r, q, pf)
   if stuck then
     throwError "~[{n}]~>: on{indentExpr φ}\nit looks at the line's modality or postcondition, \
       which are not known: state the line for a concrete one"
+  if !gives.isEmpty then
+    let ls := gives.toList.map fun q => m!"{indentExpr q}"
+    throwError "~[{n}]~>: on{indentExpr φ}\nit gives{MessageData.joinSep ls ""}\nnot{indentExpr ψ}"
   let note := match failed, parts with
     | some m, _ => m!"\n({m})"
-    | none, some m => m!"\n(it applies under one modality only: go on after `cases {m}`)"
+    | none, some (m, true) => m!"\n(it applies under the box only, where an update that halts \
+        makes the line true: go on after `cases {m}`)"
+    | none, some (m, false) => m!"\n(it applies under one modality only: go on after `cases {m}`)"
     | none, none => m!""
   throwError "~[{n}]~>: {n} does not apply to{indentExpr φ}{note}"
 
-/-- The label of `φ ~[r]~> ψ` for a rewrite, `φ` known, and the line after. -/
-def rwLabel (C φ ψ : Lean.Expr) (r : Ident) (a : RwArrow) : TermElabM (Lean.Expr × Lean.Expr) := do
+/-- The label of `φ ~[r]~> ψ` for a rewrite, `φ` known, the line after, and
+its proof when `rfl` is not one. -/
+def rwLabel (C φ ψ : Lean.Expr) (r : Ident) (a : RwArrow) :
+    TermElabM (Lean.Expr × Lean.Expr × Option Lean.Expr) := do
   let (rs, failed) ← rwCandidates C (← instantiateMVars φ) a
   rwSelect C φ ψ r.getId.toString rs failed
 
@@ -1354,13 +1393,13 @@ partial def solveChain (g : MVarId) : TermElabM Unit := do
     let φ ← instantiateMVars φ
     if φ.hasExprMVar then throwError "sol_chain: ~[{n}]~>: the line before it is not known{indentExpr φ}"
     let r ← instantiateMVars r
-    let (r', q) ← if r.isMVar then
+    let (r', q, pf) ← if r.isMVar then
         let some a ← rwArrow? (mkIdent n.toName) | throwError "sol_chain: {n} is a rule of the strategy"
         rwLabel C φ ψ (mkIdent n.toName) a
       else rwSelect C φ ψ n #[r]
     unless ← isDefEq r r' do throwError "sol_chain: ~[{n}]~>: the label is not {r'}"
     unless ← isDefEq ψ q do throwError "sol_chain: ~[{n}]~>: the line after is not{indentExpr q}"
-    g.assign (someRefl C q)
+    g.assign (pf.getD (someRefl C q))
   else if ty.isAppOfArity ``Fml.StepBy 4 then
     let #[C, r, φ, ψ] := ty.getAppArgs | unreachable!
     let (run, q) ← nextLine C φ ψ
@@ -1454,7 +1493,7 @@ elab "rwLabel% " l:term:max a:term:max r:ident b:term:max : term => do
     let some arrow ← rwArrow? r | throwError "~[{r}]~>: not a rewrite"
     let ty ← whnfR (← inferType a')
     let_expr Fml C := ty | throwError "~[{r}]~>: not a formula{indentExpr a'}"
-    let (lbl, _) ← rwLabel C a' (← elabTerm b none) r arrow
+    let (lbl, _, _) ← rwLabel C a' (← elabTerm b none) r arrow
     unless ← isDefEq l lbl do throwError "~[{r}]~>: the rewrite on{indentExpr a'}\nis not {l}"
   return l
 

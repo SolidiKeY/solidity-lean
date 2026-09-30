@@ -16,7 +16,8 @@ and a chain with one composes to `~~>`, a proof of its first line from its
 last (`Fml.Leads.valid`).
 
 * §1 — the headline as the calculus draws it, for any
-  modality `m` and postcondition `φ`, down to its last line;
+  modality `m` and postcondition `φ`, down to its last line, and on to the
+  write alone (`headlineWrite`), the captures dropped;
 * §2 — on to the value under the box: `simplifyUpdate`, `applyStorageBox`,
   `findOnSave`, and `⊨`;
 * §3 — `alice.age = 42; uint x = alice.age;` read back two ways: the law in
@@ -28,7 +29,7 @@ last (`Fml.Leads.valid`).
 * §5 — what is refused, and what is printed.
 
 The traces picked up: `StorageSteps.deepFieldWrite` to its last line
-(`headlineNamed`) and read back (`headlineValue`, `readBackValue`),
+(`headlineNamed`, `headlineWrite`) and read back (`headlineValue`, `readBackValue`),
 `SelectOnSaveConsr.ageWriteReadKeY` (`ageWriteReadKeYValue`;
 `ageWriteReadValue` in the printed order), and
 `StorageSteps.localRebindThenWrite`'s aliases (`localRebindLastLine`).
@@ -37,13 +38,24 @@ The traces picked up: `StorageSteps.deepFieldWrite` to its last line
 spine, and a law at any instance; the elaborator takes the first that gives
 the line written (with the line left `_`, the first that applies:
 `sequentialToParallel` then merges the whole spine).  Over `m` and `φ` a
-rewrite must compute without them: the merges and a dropped overwritten
-capture do; `simplifyUpdate` of a capture asks `φ` what it reads, and the
-`…Box` rules ask `m`, so those links are written at the instance.
+rewrite must compute without them.  The merges do.  `simplifyUpdate` asks
+`φ` only whether it reads a fresh variable, which `Post.noFresh` denies, so
+it drops the rules' captures (`pv`, `acc`, `se1`) over `φ` by `sol_chain`,
+not `rfl`; a user variable `φ` may read stays.  `applyOnRigidBox` asks `m`
+nothing where the update cannot halt; `applyStorageBox`, `applyOnRigidBox`
+of an update that may halt, and a law in an update's right-hand side are the
+box's (a halting update makes the box line true), written after `cases m`.
+An update `simplifyUpdate` empties goes with it (KeY's `applySkip`), since
+`dl!{}` has no spelling for `skip`.
 
-**In a `calc`** the line before a step is `_` until the step before it is
-done, so a rewrite step is proved `by sol_chain` or `by rfl`, which run
-after it; the term `rfl` would run before its rewrite is known.
+**In a `calc`** a step's line before is `_` when its arrow is read, so the
+rewrite the arrow names (its label) is found only once the step is
+elaborated, after its proof: a rewrite step is proved `by sol_chain` or
+`by rfl`, which run after it, not by the term `rfl`, which meets the label
+unknown.  A rule of the strategy has no such label: `Fml.StepBy` computes
+its rule from the line by unification.  A rewrite's cannot be so computed,
+since a law is any theorem stating a `Term.Theq`, which no function
+enumerates.
 -/
 
 namespace Solidity.Examples.ChainRewrites
@@ -87,6 +99,19 @@ theorem headlineNamed :
         dl![m]{ { pv := 10 ‖ acc := alice.account ‖ storage := save(storage, alice.account.balance, 10) } φ } := by
       sol_chain
 
+/-- `alice.account.balance = 10;` past the printed last line, for every
+modality and postcondition: `φ` names no fresh variable (`Post.noFresh`), so
+it reads neither `pv` nor `acc`, and `simplifyUpdate` drops both, leaving the
+write.  The printed trace stops at the merged line; KeY goes on so. -/
+theorem headlineWrite :
+    dl![m]{ ⟨[ alice.account.balance = 10; ]⟩ φ }
+    ~~> dl![m]{ { storage := save(storage, alice.account.balance, 10) } φ } :=
+  calc dl![m]{ ⟨[ alice.account.balance = 10; ]⟩ φ }
+    _ ~~> dl![m]{ { pv := 10 ‖ acc := alice.account ‖ storage := save(storage, alice.account.balance, 10) } φ } :=
+      headlineNamed m φ
+    _ ~[simplifyUpdate]~> dl![m]{ { storage := save(storage, alice.account.balance, 10) } φ } := by
+      sol_chain
+
 end ExampleNames
 
 /-- The three updates `headline` (`Examples/Chains.lean`) ends with merge in one
@@ -114,6 +139,24 @@ example : dl![m]{ { se1 := 10 } { sp1 := alice.account } ⟨[ sp1.balance = se1;
 /-- `y = 3;` applied to a first-order postcondition, under either modality:
 `{ y := 3 }` cannot halt (`applyOnRigid`, an equivalence). -/
 example : dl![m]{ { y := 3 } y ≐ 3 } ~[applyOnRigid]~> dl!{ 3 ≐ 3 } := rfl
+
+/-- `applyOnRigidBox` too applies under `m` where the update cannot halt. -/
+example : dl![m]{ { y := 3 } y ≐ 3 } ~[applyOnRigidBox]~> dl!{ 3 ≐ 3 } := rfl
+
+/-- A capture dropped over `φ`, and the update it empties with it (KeY's
+`applySkip`): the line after has no `{}`. -/
+example : dl![m]{ { se1 := 10 } φ } ~[simplifyUpdate]~> dl!{ φ } := by sol_chain
+
+/-- A capture dropped over `φ` behind a user variable, which stays: `φ` may
+read `x`. -/
+example : dl![m]{ { x := 1 ‖ se1 := 10 } { sp1 := alice.account } φ }
+    ~[simplifyUpdate]~> dl![m]{ { x := 1 ‖ se1 := 10 } φ } := by sol_chain
+
+/-- Over a concrete postcondition a user variable it does not read goes too,
+and the update it empties: `{ x := 10 } y ≐ 1 ⇝ y ≐ 1`. -/
+example : dl![m]{ { x := 10 } { y := 1 } y ≐ 1 } ~[simplifyUpdate]~> dl![m]{ { y := 1 } y ≐ 1 } := rfl
+
+example : dl![m]{ { x := 10 } y ≐ 1 } ~[simplifyUpdate]~> dl!{ y ≐ 1 } := rfl
 
 end Headline
 
@@ -284,15 +327,35 @@ it looks at the line's modality or postcondition, which are not known: state the
 #guard_msgs in
 example : dl![m]{ { x := 10 } { y := 1 } φ } ~[simplifyUpdate]~> dl![m]{ { y := 1 } φ } := rfl
 
--- A `…Box` rule asks the modality.
+-- A storage write may halt: `applyStorageBox` is the box's.
 /--
 error: ~[applyStorageBox]~>: applyStorageBox does not apply to
   dl{ { storage := save(storage, alice.age, 10) } find(storage, alice.age) ≐ 10 }
-(it applies under one modality only: go on after `cases m`)
+(it applies under the box only, where an update that halts makes the line true: go on after `cases m`)
 -/
 #guard_msgs in
 example : dl![m]{ { storage := save(storage, alice.age, 10) } alice.age ≐ 10 }
     ~[applyStorageBox]~> dl!{ find(save(storage, alice.age, 10), alice.age) ≐ 10 } := rfl
+
+-- So is `applyOnRigidBox` of an update that may halt.
+/--
+error: ~[applyOnRigidBox]~>: applyOnRigidBox does not apply to
+  dl{ { x := find(storage, alice.age) } x ≐ 42 }
+(it applies under the box only, where an update that halts makes the line true: go on after `cases m`)
+-/
+#guard_msgs in
+example : dl![m]{ { x := find(storage, alice.age) } x ≐ 42 }
+    ~[applyOnRigidBox]~> dl!{ find(storage, alice.age) ≐ 42 } := rfl
+
+-- And a law in an update's right-hand side: `{ x := 42 }` runs where the read halts.
+/--
+error: ~[findOnSave]~>: findOnSave does not apply to
+  dl{ { x := find(save(storage, alice.age, 42), alice.age) } x ≐ 42 }
+(it applies under the box only, where an update that halts makes the line true: go on after `cases m`)
+-/
+#guard_msgs in
+example : dl![m]{ { x := find(save(storage, alice.age, 42), alice.age) } x ≐ 42 }
+    ~[findOnSave]~> dl![m]{ { x := 42 } x ≐ 42 } := rfl
 
 /-- `findOnSave`, twice under one name. -/
 theorem Laws.readBack {s : STerm StandardExample} {p : PTerm StandardExample} {v : Semantics.Value}
