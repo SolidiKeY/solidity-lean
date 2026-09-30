@@ -411,7 +411,7 @@ def specPieces (f : String) :
   let res ← match d.ret with
     | none => pure none
     | some (_, .prim p) => pure (some p)
-    | some _ => throw s!"{f} returns a reference type"
+    | some (_, T) => throw (refReturnMsg f T)
   let pre : SpecCtx C := { storage := .storage, ensures := false, locals := ps, result := none }
   let post : SpecCtx C := { pre with ensures := true, result := res }
   let inv ← C.inv.mapM (SpecExpr.fml C { pre with locals := [] })

@@ -54,6 +54,7 @@ import Solidity.Examples.Revert
 import Solidity.Examples.Values
 import Solidity.Examples.Operators
 import Solidity.Examples.Calls
+import Solidity.Examples.CallOperands
 import Solidity.Examples.Callback
 import Solidity.Examples.Notation
 import Solidity.Examples.ApplySteps

@@ -164,7 +164,7 @@ taclets	TestSuite	storagePushLengthPositive	unsupported		`.length` is not a prog
 taclets	TestSuite	storagePushLocalBind	unsupported		`.length` is not a program expression
 taclets	TestSuite	storagePushNonsimpleArg	unsupported		`.length` is not a program expression
 taclets	TestSuite	storagePushReadBack	unsupported		`.length` is not a program expression
-taclets	TestSuite	storagePushReturnAssign	unsupported		`b.push() = v` (a push as an lvalue) is not in the grammar
+taclets	TestSuite	storagePushReturnAssign	unsupported		`b.push() = v` (a push used as a target): the grammar has it, the port does not translate it yet
 taclets	TestSuite	storageRootAddAssign	proved		
 taclets	TestSuite	storageRootCopySource	proved		
 taclets	TestSuite	storageRootCopyStruct	proved		
@@ -223,7 +223,7 @@ taclets	TestSuite	testNestedStorageWrites	proved
 taclets	TestSuite	testStorageAliases	proved		
 taclets	TestSuite	testStorageArrayReadWrite	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
 taclets	TestSuite	testStorageComplexReceiverPushFieldLvalue	unsupported		`.length` is not a program expression
-taclets	TestSuite	testStorageComplexReceiverPushLvalueCopy	unsupported		`b.push() = v` (a push as an lvalue) is not in the grammar
+taclets	TestSuite	testStorageComplexReceiverPushLvalueCopy	unsupported		`b.push() = v` (a push used as a target): the grammar has it, the port does not translate it yet
 taclets	TestSuite	testStorageDeleteCase	proved		
 taclets	TestSuite	testStorageIndexWriteImpureIndexPrimitiveRhs	unsupported		`++` inside an expression: the grammar has it as a statement only
 taclets	TestSuite	testStorageIndexWriteImpureIndexRefRhs	unsupported		`++` inside an expression: the grammar has it as a statement only
@@ -233,8 +233,8 @@ taclets	TestSuite	testStorageMapReadWriteAndDelete	proved
 taclets	TestSuite	testStorageMapStructCopy	proved		
 taclets	TestSuite	testStorageNestedPushReturnAlias	unsupported		`.length` is not a program expression
 taclets	TestSuite	testStoragePushFieldLvalue	unsupported		`.length` is not a program expression
-taclets	TestSuite	testStoragePushLvalueCopiesStorageSource	unsupported		`b.push() = v` (a push as an lvalue) is not in the grammar
-taclets	TestSuite	testStoragePushLvaluePrimitive	unsupported		`b.push() = v` (a push as an lvalue) is not in the grammar
+taclets	TestSuite	testStoragePushLvalueCopiesStorageSource	unsupported		`b.push() = v` (a push used as a target): the grammar has it, the port does not translate it yet
+taclets	TestSuite	testStoragePushLvaluePrimitive	unsupported		`b.push() = v` (a push used as a target): the grammar has it, the port does not translate it yet
 taclets	TestSuite	testStoragePushReturnAlias	unsupported		`.length` is not a program expression
 taclets	TestSuite	testDanglingReferenceSurvivesPush	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
 taclets	TestSuite	testArrayCopyClearsOldElements	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
@@ -299,7 +299,7 @@ taclets	TestSuite	testCopyArrayMemberElements	unsupported		`.length` is not a pr
 taclets	TestSuite	testCopyPrimitiveRoot	proved		
 taclets	TestSuite	testCopyStoreRootFromField	proved		
 taclets	TestSuite	testCopyStoreRootFromIndex	proved		
-taclets	TestSuite	testPushCopyThenDeleteTarget	unsupported		`b.push() = v` (a push as an lvalue) is not in the grammar
+taclets	TestSuite	testPushCopyThenDeleteTarget	unsupported		`b.push() = v` (a push used as a target): the grammar has it, the port does not translate it yet
 taclets	TestSuite	indexWriteBothImpureStorageRef	unsupported		`++` inside an expression: the grammar has it as a statement only
 taclets	TestSuite	indexWriteBothImpureMemToStorage	unsupported		`++` inside an expression: the grammar has it as a statement only
 taclets	TestSuite	indexWriteBothImpureMemoryValue	unsupported		`new T[](n)` array allocation is not in the fragment
@@ -442,7 +442,7 @@ solc	SolcStructs	structCopyViaMemoryLocal	evaluated		the run needs a well-founde
 solc	SolcStructs	structCopyFromStorageIsDeep	proved		
 solc	SolcStructs	structArrayElementCopy	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
 solc	SolcStructs	structArrayElementCopyMemberwise	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
-solc	SolcArrays	pushLvalueAssignsAndGrows	unsupported		`b.push() = v` (a push as an lvalue) is not in the grammar
+solc	SolcArrays	pushLvalueAssignsAndGrows	unsupported		`b.push() = v` (a push used as a target): the grammar has it, the port does not translate it yet
 solc	SolcArrays	pushWithArgument	unsupported		`.length` is not a program expression
 solc	SolcArrays	pushThenPopRestoresLength	unsupported		`.length` is not a program expression
 solc	SolcArrays	pushEmptyGrowsLength	unsupported		`.length` is not a program expression

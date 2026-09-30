@@ -47,6 +47,12 @@ What does not close, and why:
 * two memory objects: nothing says that two allocations are different
   objects, since `⊨` includes states whose heap already holds an object at
   `nextId`;
+* a read of an array a push wrote, the array known only by its shape:
+  `[ uint n = values.length; values.push(42); ] values.length == n + 1`
+  stays open, since the push's write is left as `saveStorage … = .ok τ`
+  with none of the facts `wp_box_saveStorage` names
+  (`Examples/CallOperands.lean` pins it open, and writes its push rows as
+  chains for this);
 * a default read out of a fresh memory object (`Person memory m;
   uint x = m.age;`): the default of a struct type is a well-founded
   definition (`defaultForTy`) that `simp` does not unfold;
