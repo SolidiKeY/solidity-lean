@@ -12,9 +12,11 @@ at any step.  Here a taclet needs no soundness proof of its own: an equation
 terms with the same Theory value in every state (`Term.Theq`) may replace
 each other in every equation of a sequent.  A law proved in
 `Theory/Storage.lean` is such a fact about the terms that denote its sides,
-so it is a rewrite rule for free; `Proves.theoryRw` (`Calculus/Logic.lean`)
-applies one, and `Term.Theq.of_eq` with the `denote_*` lemmas below is how
-`sol_rw` lifts a named Theory lemma (`Calculus/TheoryRewrite.lean`).
+so it is a sound rewrite.  A derivation names the rule instead
+(`TermTaclet`, `Calculus/TermTaclets.lean`, applied by `Proves.rewrite`),
+and `TermTaclet.sound` is where this module's `Term.Theq` comes in;
+`Term.Theq.of_eq` with the `denote_*` lemmas below is how `sol_rw` lifts a
+Theory lemma on the spot (`TermTaclet.theory`, `Calculus/TheoryRewrite.lean`).
 
 **Where a rewrite reaches** (`Fml.rwEq`): every total equation, at any depth
 — under a connective, behind an update, inside a modality's postcondition,

@@ -1,5 +1,5 @@
 import Solidity.Calculus.Chains
-import Solidity.Calculus.TheoryLaws
+import Solidity.Calculus.Rewrite
 import Solidity.Examples.ExampleNames
 
 /-!
@@ -54,7 +54,7 @@ elaborated, after its proof: a rewrite step is proved `by sol_chain` or
 `by rfl`, which run after it, not by the term `rfl`, which meets the label
 unknown.  A rule of the strategy has no such label: `Fml.StepBy` computes
 its rule from the line by unification.  A rewrite's cannot be so computed,
-since a law is any theorem stating a `Term.Theq`, which no function
+since a law is any theorem stating a `TermTaclet`, which no function
 enumerates.
 -/
 
@@ -280,7 +280,7 @@ section Refused
 variable (m : Modality) (φ : Post StandardExample)
 
 /--
-error: ~[fooBar]~>: fooBar is no rule: not a `Taclet` or `LeanTaclet` constructor, not an update rule (sequentialToParallel, simplifyUpdate, applySkip, applyOnRigid, applyOnRigidBox, applyStorageBox), not a Theory law (`Term.Theq`)
+error: ~[fooBar]~>: fooBar is no rule: not a `Taclet` or `LeanTaclet` constructor, not an update rule (sequentialToParallel, simplifyUpdate, applySkip, applyOnRigid, applyOnRigidBox, applyStorageBox), not a term taclet (`TermTaclet`)
 -/
 #guard_msgs in
 example : dl!{ true } ~[fooBar]~> dl!{ true } := rfl
@@ -374,13 +374,13 @@ example : dl![m]{ { x := find(save(storage, alice.age, 42), alice.age) } x ≐ 4
 
 /-- `findOnSave`, twice under one name. -/
 theorem Laws.readBack {s : STerm StandardExample} {p : PTerm StandardExample} {v : Semantics.Value}
-    (hp : p.hasSeg = true := by rfl) : Term.Theq (.find (.save s p (.val (.lit v))) p) (.lit v) :=
-  findOnSave hp
+    (hp : p.hasSeg = true := by rfl) : TermTaclet (.find (.save s p (.val (.lit v))) p) (.lit v) :=
+  .findOnSave hp
 
 @[inherit_doc Laws.readBack]
 theorem Laws'.readBack {s : STerm StandardExample} {p : PTerm StandardExample} {v : Semantics.Value}
-    (hp : p.hasSeg = true := by rfl) : Term.Theq (.find (.save s p (.val (.lit v))) p) (.lit v) :=
-  findOnSave hp
+    (hp : p.hasSeg = true := by rfl) : TermTaclet (.find (.save s p (.val (.lit v))) p) (.lit v) :=
+  .findOnSave hp
 
 -- Two laws by one name: the arrow says so rather than pick one.
 /--

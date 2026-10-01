@@ -4,7 +4,8 @@ import Solidity.Calculus.Quote
 /-!
 # A Theory lemma as a rewrite rule
 
-`Proves.theoryRw` rewrites a sequent with any `Term.Theq t t'`, and a law of
+`Proves.rewrite` rewrites a sequent with a term taclet, and
+`TermTaclet.theory` makes one of any `Term.Theq t t'`; a law of
 the Theory (`Theory/Storage.lean`, `Theory/Copy.lean`) is an `=` between
 values of the algebra — `findSt (copyTo s p v) p = copyVal (findSt s p) v` —
 not between terms.  This module turns one into the other, as mini-solkey's

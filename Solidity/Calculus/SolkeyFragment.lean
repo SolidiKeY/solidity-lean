@@ -196,8 +196,8 @@ theorem Proves.toSolkey {R : RuleSet} {Γ : List (Hyp C)} {φ : Fml C} (h : Prov
   | done d _ ih =>
     exact .done d (ih (by rename_i b _; cases b <;> rfl))
   | empty _ ih => exact .empty (ih (by simp_all [Fml.inSolkey]))
-  | theoryRw h _ ih => exact .theoryRw h (ih (by rw [Fml.rwEq_inSolkey]; exact hφ))
-  | updRw h _ ih => exact .updRw h (ih hφ)
+  | rewrite r _ ih => exact .rewrite r (ih (by rw [Fml.rwEq_inSolkey]; exact hφ))
+  | updRw r ht _ ih => exact .updRw r ht (ih hφ)
   | merge hU _ ih => exact .merge hU (ih hφ)
   | mergeStorage _ hV ih => exact .mergeStorage (ih hφ) hV
   | simplify _ ih => exact .simplify (ih hφ)
@@ -262,8 +262,8 @@ theorem Proves.solkey_not_call {Γ : List (Hyp C)} {f : Name} {args : List (Arg 
     cases hψ; simp [d.call_simple rfl] at ha
   | unfoldLean => cases hR
   | intro _ _ | empty _ _ => cases hψ
-  | theoryRw _ _ ih => exact ih hR (by rw [← hψ]; rfl)
-  | updRw _ _ ih | merge _ _ ih | mergeStorage _ _ ih | simplify _ ih => exact ih hR hψ
+  | rewrite _ _ ih => exact ih hR (by rw [← hψ]; rfl)
+  | updRw _ _ _ ih | merge _ _ ih | mergeStorage _ _ ih | simplify _ ih => exact ih hR hψ
   | applyOnRigidBox _ _ hr _ _ | applyStorageBox _ hr _ _ =>
     subst hψ; simp only [Fml.rigid, Bool.false_eq_true] at hr
   | close _ hm => subst hψ; exact absurd (Hyp.modalFree_wrap _ hm) (by simp [Fml.modalFree])

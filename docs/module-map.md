@@ -31,8 +31,9 @@ interpreter, but `a ≐ b` (`Fml.eq`) compares `Term.denote`s over `State.abs`,
 the state as a Theory term, and is total as KeY's `=` is. A program comparison
 `a == b` is `Fml.eqD`, `defined(a) ∧ defined(b) ∧ a ≐ b`. `Theory/Bridge/`
 proves once that the interpreter's reads and writes are the Theory's on `abs`
-(up to `StValue.Equiv`), so a Theory law is a calculus rule with no soundness
-proof of its own (`Calculus/TermRules.lean`, `Proves.theoryRw`).
+(up to `StValue.Equiv`). A derivation rewrites terms by named term taclets
+(`Calculus/TermTaclets.lean`, `Proves.rewrite`), each sound by its Theory
+lemma (`TermTaclet.sound`).
 
 ## The language
 
@@ -85,7 +86,7 @@ proof of its own (`Calculus/TermRules.lean`, `Proves.theoryRw`).
 | `Calculus/UpdateRules.lean` | KeY's update simplification as `UpdRule`s, and the semantics of the update constructors. |
 | `Calculus/ChainRewrites.lean` | The lines after a chain's program as rewrites of the line with their soundness (`LineRw`): update merges, update rules, Theory laws. |
 | `Calculus/TermRules.lean` | Theory equations as rewrite rules: `Term.Theq`, `Fml.rwEq` and its soundness. |
-| `Calculus/TheoryLaws.lean` | The Theory's read-back laws as `Term.Theq` rules. |
+| `Calculus/TermTaclets.lean` | `TermTaclet`: the Theory's read-back rules on terms, their side conditions, and `TermTaclet.sound`. |
 | `Calculus/TheoryRewrite.lean` | A Theory lemma as a rewrite rule (`theoryRewrite`, `sol_rw`). |
 | `Calculus/Rewrite.lean` | The steps after the program: `rw [h]`, `eqDSplit`, `andSplit`, `sol_apply_upd`, `sol_upd`, `sol_merge`. |
 

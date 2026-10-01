@@ -1,5 +1,6 @@
 import Solidity.Calculus.RuleSoundness
 import Solidity.Calculus.UpdateRules
+import Solidity.Calculus.TermTaclets
 
 /-!
 # The calculus as a judgement: `Γ ⊢ φ`
@@ -306,19 +307,20 @@ inductive Proves : RuleSet → List (Hyp C) → Fml C → Prop
   /-- `emptyModality`: `⟨⟩ φ` and `[] φ` are `φ`. -/
   | empty {R : RuleSet} {Γ : List (Hyp C)} {m : Modality} {φ : Fml C} (h : Proves R Γ φ) :
       Proves R Γ (.modal m [] φ)
-  /-- A Theory equation as a rewrite rule: `t` and `t'` have one Theory value
-  in every state (`Term.Theq`), so `t` becomes `t'` in every equation of the
-  sequent, at any depth (`Hyp.rwEq`, `Fml.rwEq`).  Any law of the Theory is
-  one; its soundness is `Fml.rwEq_holds`, proved once. -/
-  | theoryRw {R : RuleSet} {Γ : List (Hyp C)} {φ : Fml C} {t t' : Term C}
-      (h : Term.Theq t t') (d : Proves R (Hyp.rwEq (t, t') Γ) (Fml.rwEq (t, t') φ)) :
+  /-- A term taclet as a rewrite rule (`TermTaclet`, `Calculus/TermTaclets.lean`):
+  `t` becomes `t'` in every equation of the sequent, at any depth
+  (`Hyp.rwEq`, `Fml.rwEq`).  The derivation names the taclet; why it is
+  sound is `TermTaclet.sound`, on the `⊨` side. -/
+  | rewrite {R : RuleSet} {Γ : List (Hyp C)} {φ : Fml C} {t t' : Term C}
+      (r : TermTaclet t t') (d : Proves R (Hyp.rwEq (t, t') Γ) (Fml.rwEq (t, t') φ)) :
       Proves R Γ φ
-  /-- A rewrite inside the context's updates: `t` becomes `t'` in the
-  right-hand sides of every box update (`Hyp.rwUpd`), where `t'` returns
-  whatever `t` returns (`Term.EvalRefines`).  With `theoryRw` it reaches the
-  whole sequent, as mini-solkey's `rewrite` does. -/
+  /-- A term taclet inside the context's updates: `t` becomes `t'` in the
+  right-hand sides of every box update (`Hyp.rwUpd`), where `t'` cannot halt
+  (`Term.total`), so returns whatever `t` returns.  With `rewrite` it reaches
+  the whole sequent, as mini-solkey's `rewrite` does. -/
   | updRw {R : RuleSet} {Γ : List (Hyp C)} {φ : Fml C} {t t' : Term C}
-      (h : Term.EvalRefines t t') (d : Proves R (Hyp.rwUpd (t, t') Γ) φ) : Proves R Γ φ
+      (r : TermTaclet t t') (ht : t'.total = true) (d : Proves R (Hyp.rwUpd (t, t') Γ) φ) :
+      Proves R Γ φ
   /-- `sequentialToParallel`: the last two updates of the context merge into
   one parallel update, the first substituted into the second, when the first
   writes only locals (`UpdRule.sequentialToParallel`). -/
@@ -491,7 +493,7 @@ theorem Hyp.wrap_rwEq (q : Term C × Term C) (φ : Fml C) :
     simp only [Hyp.rwEq, Hyp.wrap, Fml.rwEq, Hyp.wrap_rwEq q φ Γ]
 
 /-- A sequent rewritten by a Theory equation holds where the sequent does. -/
-theorem Proves.theoryRw_sound {Γ : List (Hyp C)} {φ : Fml C} {t t' : Term C}
+theorem Proves.rewrite_sound {Γ : List (Hyp C)} {φ : Fml C} {t t' : Term C}
     (h : Term.Theq t t') (d : Valid (Hyp.wrap (Hyp.rwEq (t, t') Γ) (Fml.rwEq (t, t') φ))) :
     Valid (Hyp.wrap Γ φ) := fun σ => by
   have hσ : holds σ (Hyp.wrap (Hyp.rwEq (t, t') Γ) (Fml.rwEq (t, t') φ)) := d σ
@@ -582,8 +584,8 @@ theorem Proves.sound {R : RuleSet} {Γ : List (Hyp C)} {φ : Fml C} (h : Proves 
   | @empty _ Γ m φ _ ih =>
     exact fun σ => Hyp.wrap_mono (ψ := φ) (φ := .modal m [] φ)
       (fun _ h => by cases m <;> exact h) Γ σ (ih σ)
-  | theoryRw h _ ih => exact Proves.theoryRw_sound h ih
-  | updRw h _ ih => exact fun σ => Hyp.rwUpd_wrap h _ σ (ih σ)
+  | rewrite r _ ih => exact Proves.rewrite_sound r.sound ih
+  | updRw r ht _ ih => exact fun σ => Hyp.rwUpd_wrap (Term.EvalRefines.of_theq r.sound ht) _ σ (ih σ)
   | merge hU _ ih => exact Proves.merge_sound hU ih
   | mergeStorage _ hV ih => exact Proves.mergeStorage_sound hV ih
   | simplify _ ih => exact Proves.simplify_sound ih
@@ -616,8 +618,8 @@ theorem Proves.toAll {R : RuleSet} {Γ : List (Hyp C)} {φ : Fml C} (h : Proves 
   | guard d _ _ ih₁ ih₂ => exact .guard d ih₁ ih₂
   | done d _ ih => exact .done d ih
   | empty _ ih => exact .empty ih
-  | theoryRw h _ ih => exact .theoryRw h ih
-  | updRw h _ ih => exact .updRw h ih
+  | rewrite r _ ih => exact .rewrite r ih
+  | updRw r ht _ ih => exact .updRw r ht ih
   | merge hU _ ih => exact .merge hU ih
   | mergeStorage _ hV ih => exact .mergeStorage ih hV
   | simplify _ ih => exact .simplify ih

@@ -10,16 +10,16 @@ merged, the terms rewritten inside the sequent, the goal closed.  The
 merging, applying and rewriting are rules of the calculus, constructors of
 `Proves` (`Calculus/Logic.lean`): `Proves.merge`, `Proves.mergeStorage`,
 `Proves.applyOnRigidBox`, `Proves.applyStorageBox`, and the rewrites
-`Proves.theoryRw` (a Theory equation `Term.Theq`, in every equation of the
-sequent) and `Proves.updRw` (the same, in the right-hand sides of the box
-updates, when the result cannot halt).  Each is sound once, and the laws are
-the Theory's own read-backs (`Calculus/TheoryLaws.lean`: `findOnSave`,
-`findOnDelAt`, the frames), not taclets with a soundness proof each.  So a
+`Proves.rewrite` (a term taclet, in every equation of the sequent) and
+`Proves.updRw` (the same, in the right-hand sides of the box updates, when
+the result cannot halt).  Each is sound once; the term taclets
+(`Calculus/TermTaclets.lean`: `findOnSave`, `findOnDelAt`, the frames) are
+sound by the Theory's own lemmas (`TermTaclet.sound`).  So a
 derivation may merge and rewrite with a modality still in the goal, as in
 mini-solkey.  This module adds
 
-* `rw [h]`/`sol_rw [h]` on a sequent, `h` a Theory equation or a law of the
-  Theory itself: the sequent rewritten by `Proves.theoryRw` and
+* `rw [h]`/`sol_rw [h]` on a sequent, `h` a term taclet or a law of the
+  Theory itself: the sequent rewritten by `Proves.rewrite` and
   `Proves.updRw`, and computed;
 * `sol_apply_upd`: the last update applied to a first-order goal and dropped;
 * `Proves.eqClose`, `v ≐ v` behind a context with no diamond, and
@@ -65,10 +65,11 @@ theorem Proves.eqDClose {R : RuleSet} {Γ : List (Hyp C)} {v : Value}
 
 /-! ## `rw` on a sequent
 
-`rw [h]`, with `h : Term.Theq t t'` rather than an `=`, is `Proves.theoryRw
-h`: `t` becomes `t'` in every equation of the sequent at once, so there is no
-position to find.  It fails when the sequent does not change.  `rw [← h]` is
-`Term.Theq.symm h`, and `rw [h₁, h₂]` is one rewrite after the other.  Scoped
+`rw [r]`, with `r` a term taclet (`findOnSave`, named bare, is
+`TermTaclet.findOnSave`) or `h : Term.Theq t t'` rather than an `=`, is
+`Proves.rewrite r`: `t` becomes `t'` in every equation of the sequent at
+once, so there is no position to find.  It fails when the sequent does not
+change.  `rw [← r]` is `TermTaclet.symm r`, and `rw [h₁, h₂]` is one rewrite after the other.  Scoped
 to `Proves`, where the derivations are written; elsewhere, and for an `=`,
 `rw` is Lean's.
 
@@ -97,19 +98,27 @@ def solRwSide (h : Lean.Term) (g : MVarId) : TacticM Unit := do
       `rfl` nor `decide`"
 
 open Lean Elab Tactic Meta in
-/-- Apply the Theory equation `pf : Term.Theq t t'` to the main goal, a
-sequent, and compute the rewritten sequent; `h` names it in the error.
-With `upd`, the rewrite is the one of the context's box updates
-(`Proves.updRw`), which asks `t'` to be a term that cannot halt
-(`Term.EvalRefines.of_theq`). -/
+/-- `pf` as a term taclet: itself, or, for a Theory equation
+`Term.Theq t t'`, the rule `TermTaclet.theory` makes of it. -/
+def asTaclet (pf : Expr) : MetaM Expr := do
+  if (← whnfR (← instantiateMVars (← inferType pf))).isAppOf ``Term.Theq then
+    mkAppM ``TermTaclet.theory #[pf]
+  else pure pf
+
+open Lean Elab Tactic Meta in
+/-- Apply the term taclet `pf : TermTaclet t t'` (or a Theory equation,
+`asTaclet`) to the main goal, a sequent, and compute the rewritten sequent;
+`h` names it in the error.  With `upd`, the rewrite is the one of the
+context's box updates (`Proves.updRw`), which asks `t'` to be a term that
+cannot halt. -/
 def solRwApply (pf : Expr) (h : MessageData) (upd : Bool := false) : TacticM Unit :=
     withMainContext do
   let before ← instantiateMVars (← getMainTarget)
-  let pf ← Term.exprToSyntax pf
+  let pf ← Term.exprToSyntax (← asTaclet pf)
   -- without recovery, an elaboration error is thrown rather than logged
   withoutRecover <| evalTactic <| ← if upd
-    then `(tactic| refine Proves.updRw (Term.EvalRefines.of_theq $pf rfl) ?_)
-    else `(tactic| refine Proves.theoryRw $pf ?_)
+    then `(tactic| refine Proves.updRw $pf rfl ?_)
+    else `(tactic| refine Proves.rewrite $pf ?_)
   evalTactic (← `(tactic| simp (config := { decide := true }) only
     [Hyp.rwEq, Fml.rwEq, Hyp.rwUpd, Upd.rw, UpdElem.rw, List.map_cons, List.map_nil, Term.rw, PTerm.rw, STerm.rw, SValT.rw, Term.pick, ↓reduceIte,
       reduceCtorEq, and_true, true_and, and_false, false_and, and_self,
@@ -144,9 +153,23 @@ def solRwBoth (pf t' : Expr) (h : MessageData) : TacticM Unit := do
     catch _ => saved.restore
   unless done do throwError "sol_rw: {h} rewrites nothing in the sequent"
 
+open Lean Elab Term Meta in
+/-- A term taclet named bare: `findOnSave` is `TermTaclet.findOnSave`, in
+`h` or at the head of an application `h a`.  Any other term is left as it
+is. -/
+def qualifyTaclet (h : Lean.Term) : TermElabM Lean.Term := do
+  let qual (id : Syntax) : TermElabM (Option Syntax) := do
+    unless id.isIdent do return none
+    let n := ``TermTaclet ++ id.getId
+    if (← getEnv).contains n then return some (mkCIdentFrom id n) else return none
+  if let some q ← qual h.raw then return ⟨q⟩
+  if h.raw.isOfKind ``Lean.Parser.Term.app then
+    if let some q ← qual h.raw[0] then return ⟨h.raw.setArg 0 q⟩
+  return h
+
 open Lean Elab Tactic Meta in
-/-- Rewrite the main goal, a sequent, with the Theory equation `h` (right to
-left if `symm`).  An argument of `h` left open is found as Lean's `rw` finds
+/-- Rewrite the main goal, a sequent, with the term taclet `h` (right to
+left if `symm`), or a Theory equation `Term.Theq t t'` (`asTaclet`).  An argument of `h` left open is found as Lean's `rw` finds
 it: at the first instance of the left-hand side in the sequent (`kabstract`).
 So a bare law's name is elaborated as `@h`, every argument open, and its
 side conditions (`hp : p.hasSeg = true`, whose default `by rfl` could not
@@ -161,14 +184,16 @@ def solRw (h : Lean.Term) (symm : Bool) : TacticM Unit := withMainContext do
   let before ← instantiateMVars (← getMainTarget)
   unless (← whnfR before).isAppOf ``Proves do
     throwError "sol_rw: the goal is not a sequent `Γ ⟹ φ`"
-  let pf ← match h with
+  let h' ← qualifyTaclet h
+  let pf ← match h' with
     | `($id:ident) => elabTerm (← `(@$id)) none (mayPostpone := true)
-    | _ => elabTerm h none (mayPostpone := true)
-  let (args, _, ty) ← forallMetaTelescope (← instantiateMVars (← inferType pf))
-  let pf ← if symm then mkAppM ``Term.Theq.symm #[mkAppN pf args] else pure (mkAppN pf args)
-  let ty ← if symm then inferType pf else pure ty
-  let_expr Term.Theq _ lhs rhs ← (← whnfR (← instantiateMVars ty))
-    | throwError "sol_rw: {h} is not a Theory equation `Term.Theq t t'`"
+    | _ => elabTerm h' none (mayPostpone := true)
+  let (args, _, _) ← forallMetaTelescope (← instantiateMVars (← inferType pf))
+  let pf ← asTaclet (mkAppN pf args)
+  let pf ← if symm then mkAppM ``TermTaclet.symm #[pf] else pure pf
+  let_expr TermTaclet _ lhs rhs ← (← whnfR (← instantiateMVars (← inferType pf)))
+    | throwError "sol_rw: {h} is not a term taclet `TermTaclet t t'` or a Theory equation \
+        `Term.Theq t t'`"
   let lhs ← instantiateMVars lhs
   if lhs.hasMVar then
     let abst ← kabstract before lhs
@@ -188,7 +213,7 @@ open Lean Elab Tactic Meta in
 /-- Rewrite the main goal, a sequent, with the Theory lemmas `thms`
 (`theoryRewrite`, `Calculus/TheoryRewrite.lean`): every `find` of the sequent
 they rewrite to a term, one after the other, until none changes: in the
-equations (`Proves.theoryRw`), and in the right-hand sides of the box updates
+equations (`Proves.rewrite`), and in the right-hand sides of the box updates
 when the result is a literal (`Proves.updRw`).  Fails when nothing is
 rewritten. -/
 def solRwTheory (thms : SimpTheorems) (names : Array Lean.Term) : TacticM Unit := do
@@ -215,8 +240,8 @@ def solRwTheory (thms : SimpTheorems) (names : Array Lean.Term) : TacticM Unit :
   replaceMainGoal [← snocProves (← getMainGoal)]
 
 open Lean Elab Tactic Meta in
-/-- `sol_rw`'s and `rw`'s rules, in order: a Theory equation `Term.Theq t t'`
-is `solRw`; a run of Theory lemmas is one `solRwTheory`, so that a lemma
+/-- `sol_rw`'s and `rw`'s rules, in order: a term taclet `TermTaclet t t'`
+or a Theory equation `Term.Theq t t'` is `solRw`; a run of Theory lemmas is one `solRwTheory`, so that a lemma
 whose result is not yet a term (`find_delAt_same`) is followed by the one
 that makes it one (`delValueDefault`) in the same step.  A definition among
 them is unfolded. -/
@@ -226,14 +251,17 @@ def solRwRules (rs : Array Syntax) : TacticM Unit := do
   for r in rs do
     let h : Lean.Term := ⟨r[1]⟩
     let symm := !r[0].isNone
-    -- a global constant is a Theory lemma unless it states a `Term.Theq`;
-    -- a local hypothesis or an application is a Theory equation
+    -- a global constant is a Theory lemma unless it states a `TermTaclet`
+    -- or a `Term.Theq`; a term taclet named bare, a local hypothesis or an
+    -- application is a rule
     let isTheq ← withMainContext do
       unless h.raw.isIdent do return true
+      if (← getEnv).contains (``TermTaclet ++ h.raw.getId) then return true
       let some n ← (try some <$> realizeGlobalConstNoOverloadWithInfo h
           catch _ => pure none) | return true
-      forallTelescope (← getConstInfo n).type fun _ ty =>
-        return (← whnfR ty).isAppOf ``Solidity.Term.Theq
+      forallTelescope (← getConstInfo n).type fun _ ty => do
+        let ty ← whnfR ty
+        return ty.isAppOf ``Solidity.Term.Theq || ty.isAppOf ``Solidity.TermTaclet
     if isTheq then
       unless names.isEmpty do
         solRwTheory thms names
@@ -248,8 +276,9 @@ def solRwRules (rs : Array Syntax) : TacticM Unit := do
   unless names.isEmpty do solRwTheory thms names
 
 /-- `sol_rw [h₁, ← h₂, …]`: rewrite a sequent with each rule in turn.  A rule
-is a Theory equation `h : Term.Theq t t'`, which rewrites every equation of
-the sequent (`Proves.theoryRw`), or a law of the Theory itself — an `=` of
+is a term taclet (`findOnSave`, `TermTaclet`) or a Theory equation
+`h : Term.Theq t t'`, which rewrites every equation of the sequent
+(`Proves.rewrite`), or a law of the Theory itself — an `=` of
 its values, `find_copyTo_same` — which rewrites every term it turns into a
 term (`Calculus/TheoryRewrite.lean`). -/
 syntax "sol_rw " "[" Lean.Parser.Tactic.rwRule,+ "]" : tactic

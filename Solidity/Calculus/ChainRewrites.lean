@@ -1,4 +1,5 @@
 import Solidity.Calculus.UpdateRules
+import Solidity.Calculus.TermTaclets
 
 /-!
 # The rewrites of a chain's line
@@ -29,13 +30,13 @@ nothing, so a link never repeats its line.
 | `simplifyFresh i` | `Fml.simplifyFreshAt` | the same, `ψ` asked its fresh variables only | `Upd.dropEffectless_holds_of` (iff) | — |
 | `applyOnRigidBox i` | `Fml.applyOnRigidBoxAt` | `[{U}] φ ⇝ φ[U]`, `φ` first-order; any modality if `U` cannot halt | `Fml.subst_box(_st)` | `applyOnRigidBox` |
 | `applyStorageBox i` | `Fml.applyStorageBoxAt` | `[{storage := s}] φ ⇝ φ[s/storage]` | `Fml.withSt_box` | `applyStorageBox` |
-| `law h` | `Fml.rwLaw` | `t ⇝ t'` in every equation | `Fml.rwEq_holds` (iff) | `theoryRw` |
-| `lawUpd h ht i` | `Fml.rwUpdAt` | `t ⇝ t'` in `[{Uᵢ}]`'s right-hand sides | `Upd.rw_box` | `updRw` |
+| `law r` | `Fml.rwLaw` | `t ⇝ t'` in every equation | `Fml.rwEq_holds` (iff) | `rewrite` |
+| `lawUpd r ht i` | `Fml.rwUpdAt` | `t ⇝ t'` in `[{Uᵢ}]`'s right-hand sides | `Upd.rw_box` | `updRw` |
 
 KeY's names: the merges are `sequentialToParallel`, the two `simplify…` are
 `simplifyUpdate` (with `applySkip` when they empty the update), the two
-`apply…Box` are `applyOnRigidFormula`, and a law is the theory taclet it
-names.
+`apply…Box` are `applyOnRigidFormula`, and a law is the term taclet it
+names (`TermTaclet`).
 
 **Where.**  A line is an update prefix, its *spine* `{U₀}{U₁}…{Uₙ} ψ`, over
 a body `ψ`: a program still to run, or the postcondition.  A chain rewrites
@@ -449,9 +450,9 @@ theorem Fml.applyStorageBoxTop_sound {m : Modality} {U : Upd C} {φ ψ : Fml C}
 /-- `applyOnRigidFormula` on the box storage write at position `i`. -/
 def Fml.applyStorageBoxAt (i : Nat) : Fml C → Option (Fml C) := Fml.atSpine Fml.applyStorageBoxTop i
 
-/-! ## Theory laws
+/-! ## Term taclets
 
-A law `h : Term.Theq t t'` rewrites `t` to `t'` where `Fml.rwEq` does: in
+A term taclet `r : TermTaclet t t'` (`Calculus/TermTaclets.lean`) rewrites `t` to `t'` where `Fml.rwEq` does: in
 every equation, at any depth, never in `defined(…)`, an update's
 right-hand side or a program (`Calculus/TermRules.lean` says why).  In the
 right-hand sides of a box update it rewrites too when `t'` cannot halt
@@ -536,15 +537,15 @@ def applyOnRigidBox (i : Nat) : LineRw C :=
 def applyStorageBox (i : Nat) : LineRw C :=
   ⟨Fml.applyStorageBoxAt i, Fml.atSpine_sound Fml.applyStorageBoxTop_sound i _⟩
 
-/-- The law `h` on every equation of the line. -/
-def law {t t' : Term C} (h : Term.Theq t t') : LineRw C :=
-  ⟨Fml.rwLaw (t, t'), fun hl σ => (Fml.rwLaw_holds h hl σ).1⟩
+/-- The term taclet `r` on every equation of the line. -/
+def law {t t' : Term C} (r : TermTaclet t t') : LineRw C :=
+  ⟨Fml.rwLaw (t, t'), fun hl σ => (Fml.rwLaw_holds r.sound hl σ).1⟩
 
-/-- The law `h`, onto a term that cannot halt, on the right-hand sides of the
-box update at position `i`. -/
-def lawUpd {t t' : Term C} (h : Term.Theq t t') (ht : t'.total = true) (i : Nat) : LineRw C :=
+/-- The term taclet `r`, onto a term that cannot halt, on the right-hand
+sides of the box update at position `i`. -/
+def lawUpd {t t' : Term C} (r : TermTaclet t t') (ht : t'.total = true) (i : Nat) : LineRw C :=
   ⟨Fml.rwUpdAt (t, t') i,
-    Fml.atSpine_sound (Fml.rwUpdTop_sound (Term.EvalRefines.of_theq h ht)) i _⟩
+    Fml.atSpine_sound (Fml.rwUpdTop_sound (Term.EvalRefines.of_theq r.sound ht)) i _⟩
 
 end LineRw
 

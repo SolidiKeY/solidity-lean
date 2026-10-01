@@ -38,8 +38,8 @@ import Solidity.Calculus.Chains
 import Solidity.Calculus.Sequents
 import Solidity.Calculus.UpdateRules
 import Solidity.Calculus.ChainRewrites
+import Solidity.Calculus.TermTaclets
 import Solidity.Calculus.Rewrite
-import Solidity.Calculus.TheoryLaws
 import Solidity.Examples.Tour
 import Solidity.Examples.StorageSteps
 import Solidity.Examples.StorageSuite
@@ -50,6 +50,7 @@ import Solidity.Examples.CrossDomain
 import Solidity.Examples.Net
 import Solidity.Examples.Payment
 import Solidity.Examples.Theory
+import Solidity.Examples.TermTaclets
 import Solidity.Examples.Branch
 import Solidity.Examples.Revert
 import Solidity.Examples.Values

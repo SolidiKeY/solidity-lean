@@ -1,4 +1,4 @@
-import Solidity.Calculus.TheoryLaws
+import Solidity.Calculus.Rewrite
 import Solidity.Calculus.Chains
 
 /-!
@@ -35,13 +35,13 @@ nothing (`Proves.definedLit`).  The merged update is applied to the
 equation and dropped in one step (`Proves.applyOnRigidBox`, through
 `sol_apply_upd`); it writes the storage too, which it may because `x ≐ 42`
 reads no storage (`Fml.stFree`).  The one storage step, the read of the
-write, is `findOnSave` (`Calculus/TheoryLaws.lean`), the Theory's
-`find_copyTo_same`, a rewrite rule for free through `Proves.theoryRw` with
-no soundness proof of its own.  `42 ≐ 42` closes by `Proves.eqRefl`.
+write, is the term taclet `findOnSave` (`Calculus/TermTaclets.lean`),
+applied by `Proves.rewrite`; its soundness is the Theory's
+`find_copyTo_same` (`TermTaclet.sound`).  `42 ≐ 42` closes by `Proves.eqRefl`.
 
 The `consr` path has not gone away, it has moved into the Theory.
 `alice.age` still denotes `[.field "alice"] ++ [.field "age"]`
-(`PTerm.denote` of `.field`), and the laws are stated at a list path:
+(`PTerm.denote` of `.field`), and the Theory's laws are stated at a list path:
 `find_copyTo_same` at any `p ≠ []`, and the rule-shaped `findDelAt` at
 `p ++ [a]` (`find_delAt_field`, which splits the read with `find_append`).
 The reassociation happens once, inside the proof of the law
@@ -58,7 +58,7 @@ has fixed `p`, so the law is named bare.  The context too is
 It is at `x ≐ 42`, since a chain has no link that splits `==`
 (`Proves.eqDSplit`).  Past `find(save(storage, alice.age, 42), alice.age)`
 it opens `findOnSave` into solkey's read of the write, a member at a time
-(`Calculus/TheoryLaws.lean`): `findMemberCons` reads `alice.age` from its
+(`Calculus/TermTaclets.lean`): `findMemberCons` reads `alice.age` from its
 head, `select(select(…, alice), age)` — the `consr` path turned into `cons`
 form inside its proof, solkey's `consRcons` and `consRnil`, then
 `findDefinitionMemberCons` — and `selectOnSaveMember`, solkey's

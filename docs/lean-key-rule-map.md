@@ -300,7 +300,7 @@ diamond (`Hyp.boxOnly`). A program comparison produces `Fml.eqD a b` —
 | — | `Proves.eqDSplit` | Lean only | `a = b` from `defined(a)`, `defined(b)`, `a ≐ b`: `Fml.eqD` unfolded |
 | — | `Proves.definedWritten` | Lean only | `defined(x)` behind a box update whose last binder of `x` is `x := t`: what `applyOnRigidBox` forgets |
 | — | `Proves.definedLit` | Lean only | a literal is defined |
-| any theory taclet on a sequent | `Proves.theoryRw` (`Calculus/Logic.lean`), `rw [h]`/`sol_rw` (`Calculus/Rewrite.lean`) | done | a Theory equation `h : Term.Theq t t'` rewrites every total equation of the sequent (`Fml.rwEq`), with no soundness proof per rule |
+| any theory taclet on a sequent | `Proves.rewrite` (`Calculus/Logic.lean`), `rw [r]`/`sol_rw` (`Calculus/Rewrite.lean`) | done | a term taclet `r : TermTaclet t t'` rewrites every total equation of the sequent (`Fml.rwEq`); `TermTaclet.sound` proves each rule once, from its Theory lemma |
 | the same, inside an update | `Proves.updRw`, `sol_rw` | done | an update's right-hand side runs in the interpreter, so the rewrite asks `Term.EvalRefines t t'`, which a Theory equation onto a literal gives (`Term.EvalRefines.of_theq`); box updates only |
 
 ## The data-structure theories
@@ -390,7 +390,7 @@ composes reads along `++`. Over `delAt`: `find_delAt_same`,
 `find_delAt_field` (`findDelAt`), `find_delAt_frame`, `find_delAt_extends`,
 `find_delAt_member` and `find_delAt_below` (a read below a deleted path is the
 reset of the read before it, on a node with no kinds in it). On a sequent,
-`findMemberCons` and `selectOnSaveMember` (`Calculus/TheoryLaws.lean`) take
+`findMemberCons` and `selectOnSaveMember` (`Calculus/TermTaclets.lean`) take
 solkey's walk a member at a time, over `select(s, r)` (`STerm.select`).
 
 `save` recurses on the path over `storeAt`, the one-segment walk, and stores
@@ -438,16 +438,16 @@ which makes `Struct`, `StValue` and `Memory` one mutual inductive
 its copied struct with `findSt`, which stops at a view and keeps every
 definition structural; no example nests one and no taclet rewrites under one.
 
-### The Theory's laws as rules (`Calculus/TheoryLaws.lean`)
+### The Theory's laws as term taclets (`Calculus/TermTaclets.lean`)
 
-A law of the two storage modules, read through `Term.denote`, is a
-`Term.Theq` between the terms that denote its sides, hence a rule on a
-sequent (`rw [findOnSave]`) with no soundness proof of its own. Side
-conditions are syntactic `Bool`s on the `PTerm`s, closed by `rfl`
+A rule on terms is a constructor of `TermTaclet`, applied on a sequent by
+name (`rw [findOnSave]`, `Proves.rewrite`); `TermTaclet.sound` reads its two
+terms through `Term.denote` and closes the case by the Theory lemma below.
+Side conditions are syntactic `Bool`s on the `PTerm`s, closed by `rfl`
 (`PTerm.hasSeg`, `PTerm.diverges`). solkey has none of these as a taclet;
 they are the rules `Theory/Rewrite.lean` lists as Lean-only, stated on terms.
 
-| Law | Theory lemma | Printed rule (`TheoryRule`) | Notes |
+| Term taclet | Theory lemma | Printed rule (`TheoryRule`) | Notes |
 | --- | --- | --- | --- |
 | `findOnSave` | `find_copyTo_same` (`Theory/Copy.lean`) | `findOnSave` | `find(save(s, p, v), p) ≐ v` for a literal word `v`: a copy reads back the new value laid over the old, which is `v` only for a word |
 | `findOnSaveFrame` | `find_copyTo_frame` | `findOnSaveDifferent` | any written value, `p` diverging from `q` |

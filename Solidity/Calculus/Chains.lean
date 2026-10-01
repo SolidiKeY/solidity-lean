@@ -1176,8 +1176,9 @@ def stepsProof (C : Lean.Expr) (sp : Splice) (A : Lean.Expr) (ls : List Line) :
 /-! ### Rewrite links
 
 `~[n]~>` names a rewrite when `n` is no rule of the strategy: an update rule
-of `Calculus/ChainRewrites.lean`'s table, or a Theory law, a constant whose
-statement is a `Term.Theq`.  The name stands for several rewrites, which the
+of `Calculus/ChainRewrites.lean`'s table, or a law: a term taclet
+(`TermTaclet`, `Calculus/TermTaclets.lean`) or a constant whose statement is
+one.  The name stands for several rewrites, which the
 line before tells apart: the position on the update spine, and for a law its
 instance, found in the line as `rw` finds one.  They are tried in a fixed
 order (`rwCandidates`), and the label is the first that gives the line after
@@ -1191,7 +1192,7 @@ reads (`LineRw.simplifyFresh`), `sol_chain` proves it from `Post.noFresh`
 inductive RwArrow where
   /-- An update rule of the table (`rwTable`). -/
   | table (n : Lean.Name)
-  /-- A Theory law: a constant whose statement is a `Term.Theq`. -/
+  /-- A law: a term taclet, or a constant whose statement is one. -/
   | law (c : Lean.Name)
 
 /-- The update rules an arrow names, KeY's names: `sequentialToParallel`
@@ -1200,10 +1201,10 @@ def rwTable : List Lean.Name :=
   [`sequentialToParallel, `simplifyUpdate, `applySkip, `applyOnRigid, `applyOnRigidBox,
     `applyStorageBox]
 
-/-- Whether the constant `c` states a `Term.Theq`, under its arguments. -/
+/-- Whether the constant `c` states a `TermTaclet`, under its arguments. -/
 def isLaw (c : Lean.Name) : MetaM Bool := do
   let some info := (← getEnv).find? c | return false
-  forallTelescope info.type fun _ ty => return (← whnfR ty).isAppOf ``Term.Theq
+  forallTelescope info.type fun _ ty => return (← whnfR ty).isAppOf ``TermTaclet
 
 /-- What `~[r]~>` names: `none` for a rule of the strategy (a `Taclet` or
 `LeanTaclet` constructor, `emptyModality`), else a rewrite; any other name is
@@ -1214,6 +1215,7 @@ def rwArrow? (r : Ident) : MetaM (Option RwArrow) := do
   if n == `emptyModality || env.contains (``Taclet ++ n) || env.contains (``LeanTaclet ++ n) then
     return none
   if rwTable.contains n then return some (.table n)
+  if env.contains (``TermTaclet ++ n) then return some (.law (``TermTaclet ++ n))
   let cs := ((← resolveGlobalName n).filterMap fun (c, fs) =>
     if fs.isEmpty then some c else none).eraseDups
   match cs with
@@ -1221,7 +1223,7 @@ def rwArrow? (r : Ident) : MetaM (Option RwArrow) := do
   | [] => pure ()
   | cs => throwError "~[{r}]~>: ambiguous, {r} may be {", ".intercalate (cs.map toString)}"
   throwError "~[{r}]~>: {r} is no rule: not a `Taclet` or `LeanTaclet` constructor, not an \
-    update rule ({", ".intercalate (rwTable.map toString)}), not a Theory law (`Term.Theq`)"
+    update rule ({", ".intercalate (rwTable.map toString)}), not a term taclet (`TermTaclet`)"
 
 /-- The number of updates in front of a line. -/
 partial def spineLen (e : Lean.Expr) : MetaM Nat := do
@@ -1248,7 +1250,7 @@ def lawAt (c : Lean.Name) (e : Lean.Expr) :
   let pf ← mkConstWithFreshMVarLevels c
   let (args, _, ty) ← forallMetaTelescope (← inferType pf)
   let ty ← whnfR (← instantiateMVars ty)
-  let_expr Term.Theq _ lhs rhs := ty | return .error none
+  let_expr TermTaclet _ lhs rhs := ty | return .error none
   unless ← isDefEq lhs e do return .error none
   for a in args do
     let g := a.mvarId!
@@ -1274,7 +1276,7 @@ def lawInstances (c : Lean.Name) (φ : Lean.Expr) :
   let lhs0 ← withoutModifyingState do
     let (_, _, ty) ← forallMetaTelescope (← inferType (← mkConstWithFreshMVarLevels c))
     let ty ← whnfR (← instantiateMVars ty)
-    let_expr Term.Theq _ lhs _ := ty | throwError "not a law: {c}"
+    let_expr TermTaclet _ lhs _ := ty | throwError "not a law: {c}"
     instantiateMVars lhs
   let mut out := #[]
   let mut failed := none
@@ -1420,13 +1422,12 @@ def rwLabel (C φ ψ : Lean.Expr) (r : Ident) (a : RwArrow) :
   let (rs, failed) ← rwCandidates C (← instantiateMVars φ) a
   rwSelect C φ ψ r.getId.toString rs failed
 
-/-- The Theory laws `~=>` tries, after the update rules of `rwTable`: those
-of `Calculus/TheoryLaws.lean`.  Names only, so that this module need not
-import them; one not in scope where the chain is written is skipped. -/
+/-- The term taclets `~=>` tries, after the update rules of `rwTable`: the
+named rules of `TermTaclet`, and `findOnDelAtSave`. -/
 def rwLaws : List Lean.Name :=
-  [`Solidity.findOnSave, `Solidity.findOnSaveFrame, `Solidity.findMemberCons,
-    `Solidity.selectOnSaveMember, `Solidity.findOnDelAt, `Solidity.findOnDelAtSave,
-    `Solidity.findOnDelAtFrame, `Solidity.findOnPushFrame, `Solidity.findOnPopFrame]
+  [``TermTaclet.findOnSave, ``TermTaclet.findOnSaveFrame, ``TermTaclet.findMemberCons,
+    ``TermTaclet.selectOnSaveMember, ``TermTaclet.findOnDelAt, ``TermTaclet.findOnDelAtSave,
+    ``TermTaclet.findOnDelAtFrame, ``TermTaclet.findOnPushFrame, ``TermTaclet.findOnPopFrame]
 
 /-- What `~=>` tries, in order: the update rules, then the laws in scope. -/
 def rwAnyArrows : MetaM (List (String × RwArrow)) := do
