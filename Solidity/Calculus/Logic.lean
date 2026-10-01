@@ -316,7 +316,7 @@ inductive Proves : RuleSet → List (Hyp C) → Fml C → Prop
       Proves R Γ φ
   /-- A term taclet inside the context's updates: `t` becomes `t'` in the
   right-hand sides of every box update (`Hyp.rwUpd`), where `t'` cannot halt
-  (`Term.total`), so returns whatever `t` returns.  With `rewrite` it reaches
+  (`Tm.total`), so returns whatever `t` returns.  With `rewrite` it reaches
   the whole sequent, as mini-solkey's `rewrite` does. -/
   | updRw {R : RuleSet} {Γ : List (Hyp C)} {φ : Fml C} {t t' : Term C}
       (r : TermTaclet t t') (ht : t'.total = true) (d : Proves R (Hyp.rwUpd (t, t') Γ) φ) :

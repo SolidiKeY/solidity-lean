@@ -418,7 +418,7 @@ theorem pushSlot_isPrim {elemTy : Ty} {shadow : List SVal}
 /-! A path's segments address *slots*: `Seg.at i` into an array is its
 `i`-th slot, a live element or one past the end (the `shadow`).  Whether an
 index is in bounds is checked where the program takes it (`State.checkIndex`,
-in `Loc.resolve` and `PTerm.eval`), not here, so that a reference bound to an
+in `Loc.resolve` and `Tm.eval`), not here, so that a reference bound to an
 element keeps addressing its slot after a `pop` (solc). -/
 
 def SVal.find : SVal -> List Seg -> Res SVal

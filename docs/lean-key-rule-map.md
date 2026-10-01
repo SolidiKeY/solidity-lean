@@ -396,7 +396,7 @@ solkey's walk a member at a time, over `select(s, r)` (`STerm.select`).
 `save` recurses on the path over `storeAt`, the one-segment walk, and stores
 the value verbatim at the last segment (the supersort argument again); `delAt`
 is eager over the same walk, down to the lazy leaf `delNode`. Storage terms
-denote in this algebra (`Term.denote`, over `State.abs`), and `Theory/Bridge/`
+denote in this algebra (`Tm.denote`, over `State.abs`), and `Theory/Bridge/`
 relates every write to the interpreter's: a word write and a push literally, a
 copy, a delete and a pop up to `StValue.Equiv`.
 
@@ -442,7 +442,7 @@ definition structural; no example nests one and no taclet rewrites under one.
 
 A rule on terms is a constructor of `TermTaclet`, applied on a sequent by
 name (`rw [findOnSave]`, `Proves.rewrite`); `TermTaclet.sound` reads its two
-terms through `Term.denote` and closes the case by the Theory lemma below.
+terms through `Tm.denote` and closes the case by the Theory lemma below.
 Side conditions are syntactic `Bool`s on the `PTerm`s, closed by `rfl`
 (`PTerm.hasSeg`, `PTerm.diverges`). solkey has none of these as a taclet;
 they are the rules `Theory/Rewrite.lean` lists as Lean-only, stated on terms.

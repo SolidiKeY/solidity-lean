@@ -1320,7 +1320,7 @@ def rwCandidates (C φ : Lean.Expr) : RwArrow → TermElabM (Array Lean.Expr × 
     let mut out := #[]
     for (t, t', pf) in is do
       out := out.push (mkAppN (mkConst ``LineRw.law) #[C, t, t', pf])
-      if ← isDefEq (mkApp2 (mkConst ``Term.total) C t') (mkConst ``Bool.true) then
+      if ← isDefEq (mkApp3 (mkConst ``Tm.total) C (mkConst ``Srt.val) t') (mkConst ``Bool.true) then
         let ht ← mkEqRefl (mkConst ``Bool.true)
         for i in List.range k do
           out := out.push (mkAppN (mkConst ``LineRw.lawUpd) #[C, t, t', pf, ht, toExpr i])

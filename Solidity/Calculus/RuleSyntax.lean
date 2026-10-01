@@ -1755,6 +1755,97 @@ def termOpSym? (op : Lean.Expr) : MetaM (Option String) := do
   | BinOp.sub => return "-"
   | _ => return none
 
+/-- A term's head symbol folded back to its constructor's name:
+`Tm.app2 C Op2.find s p` is `Term.find C s p` (`Update.lean`).  Reduction
+unfolds the constructor abbreviations; the printers and `rw` match on them. -/
+def foldTmHead (e : Lean.Expr) : MetaM Lean.Expr := do
+  let mk (n : Lean.Name) (args : Array Lean.Expr) : Lean.Expr := mkAppN (mkConst n) args
+  let args := e.getAppArgs
+  let some f := e.getAppFn.constName? | return e
+  if f == ``Tm.pvV && args.size == 2 then return mk ``Term.pv args
+  if f == ``Tm.pvP && args.size == 2 then return mk ``PTerm.pv args
+  if f == ``Tm.pvS && args.size == 2 then return mk ``STerm.pv args
+  if f == ``Tm.pvI && args.size == 2 then return mk ``ITerm.pv args
+  let opOf (o : Lean.Expr) : MetaM (Option (Lean.Name × Array Lean.Expr)) := do
+    let o ← whnf o
+    let some n := o.getAppFn.constName? | return none
+    return some (n, o.getAppArgs)
+  if f == ``Tm.app0 && args.size == 3 then
+    let C := args[0]!
+    let some (n, oa) ← opOf args[2]! | return e
+    return match n with
+      | ``Op0.lit => mk ``Term.lit (#[C] ++ oa)
+      | ``Op0.env => mk ``Term.env (#[C] ++ oa)
+      | ``Op0.root => mk ``PTerm.root (#[C] ++ oa)
+      | ``Op0.storage => mk ``STerm.storage #[C]
+      | ``Op0.memory => mk ``MTerm.memory #[C]
+      | _ => e
+  if f == ``Tm.app1 && args.size == 5 then
+    let C := args[0]!
+    let x := args[4]!
+    let some (n, oa) ← opOf args[3]! | return e
+    return match n with
+      | ``Op1.unop => mk ``Term.unop (#[C] ++ oa ++ #[x])
+      | ``Op1.net => mk ``Term.net #[C, x]
+      | ``Op1.netOf => mk ``Term.netOf (#[C] ++ oa ++ #[x])
+      | ``Op1.field => mk ``PTerm.field (#[C, x] ++ oa)
+      | ``Op1.next => mk ``PTerm.next #[C, x]
+      | ``Op1.select => mk ``STerm.select (#[C, x] ++ oa)
+      | ``Op1.sval => mk ``SValT.val #[C, x]
+      | ``Op1.newArr => mk ``SValT.newArr (#[C] ++ oa ++ #[x])
+      | ``Op1.alloc => mk ``ITerm.alloc (#[C, x] ++ oa)
+      | ``Op1.mfield => mk ``MAddr.field (#[C, x] ++ oa)
+      | ``Op1.addM => mk ``MTerm.addM (#[C, x] ++ oa)
+      | ``Op1.mval => mk ``MValT.val #[C, x]
+      | ``Op1.ref => mk ``MValT.ref #[C, x]
+      | _ => e
+  if f == ``Tm.app2 && args.size == 7 then
+    let C := args[0]!
+    let x := args[5]!
+    let y := args[6]!
+    let some (n, oa) ← opOf args[4]! | return e
+    return match n with
+      | ``Op2.binop => mk ``Term.binop (#[C] ++ oa ++ #[x, y])
+      | ``Op2.find => mk ``Term.find #[C, x, y]
+      | ``Op2.len => mk ``Term.len #[C, x, y]
+      | ``Op2.read => mk ``Term.read #[C, x, y]
+      | ``Op2.mlen => mk ``Term.mlen #[C, x, y]
+      | ``Op2.at => mk ``PTerm.at #[C, x, y]
+      | ``Op2.delAt => mk ``STerm.delAt #[C, x, y]
+      | ``Op2.pushSlot => mk ``STerm.pushSlot (#[C, x, y] ++ oa)
+      | ``Op2.pop => mk ``STerm.pop #[C, x, y]
+      | ``Op2.shrink => mk ``STerm.shrink #[C, x, y]
+      | ``Op2.extend => mk ``STerm.extend (#[C, x, y] ++ oa)
+      | ``Op2.sfind => mk ``SValT.find #[C, x, y]
+      | ``Op2.copyMem => mk ``SValT.copyMem #[C, x, y]
+      | ``Op2.iread => mk ``ITerm.read #[C, x, y]
+      | ``Op2.copy => mk ``ITerm.copy #[C, x, y]
+      | ``Op2.mat => mk ``MAddr.at #[C, x, y]
+      | ``Op2.copySt => mk ``MTerm.copySt #[C, x, y]
+      | _ => e
+  if f == ``Tm.app3 && args.size == 9 then
+    let C := args[0]!
+    let some (n, _) ← opOf args[5]! | return e
+    let xs := #[C, args[6]!, args[7]!, args[8]!]
+    return match n with
+      | ``Op3.ite => mk ``Term.ite xs
+      | ``Op3.save => mk ``STerm.save xs
+      | ``Op3.push => mk ``STerm.push xs
+      | ``Op3.write => mk ``MTerm.write xs
+      | _ => e
+  return e
+
+/-- `whnf`, then the head folded back to its constructor's name
+(`foldTmHead`): what the printers match on. -/
+def whnfTm (e : Lean.Expr) : MetaM Lean.Expr := do
+  foldTmHead (← whnf e)
+
+/-- Every term of `e` folded back to its constructors' names: what a `simp`
+over the generic `Tm` functions leaves (`Tm.app2 C Op2.find s p`) read as it
+was written (`Term.find C s p`), so that `rw` finds it and it prints. -/
+def foldTms (e : Lean.Expr) : MetaM Lean.Expr :=
+  Meta.transform e (post := fun e => return .done (← foldTmHead e))
+
 mutual
 
 partial def ppTerm (e : Lean.Expr) : MetaM (TSyntax `dl_term) := do
@@ -1762,14 +1853,14 @@ partial def ppTerm (e : Lean.Expr) : MetaM (TSyntax `dl_term) := do
   let e ← instantiateMVars e
   if e.isAppOfArity ``Term.bumped 4 && (← fvarName? (e.getArg! 1)).isSome then
     return ← `(dl_term| $(← ppTerm e.appArg!):dl_term ⊕⊕)
-  match_expr (← whnf e) with
+  match_expr (← whnfTm e) with
   | Term.lit _ v =>
-    match_expr (← whnf v) with
+    match_expr (← whnfTm v) with
     | Semantics.PrimVal.int n =>
       let some n ← intOf? n | escapeDl e
       `(dl_term| $(Syntax.mkNumLit (toString n)):num)
     | Semantics.PrimVal.bool b =>
-      match_expr (← whnf b) with
+      match_expr (← whnfTm b) with
       | Bool.true => `(dl_term| true)
       | Bool.false => `(dl_term| false)
       | _ => escapeDl e
@@ -1789,7 +1880,7 @@ partial def ppTerm (e : Lean.Expr) : MetaM (TSyntax `dl_term) := do
     escapeDl e
   | Term.find _ s p =>
     let s' ← ppSTerm s
-    match_expr (← whnf p) with
+    match_expr (← whnfTm p) with
     | PTerm.root _ r =>
       let some r ← nameOf? r | escapeDl e
       `(dl_term| select($s', $(nameIdent r):ident))
@@ -1801,7 +1892,7 @@ partial def ppTerm (e : Lean.Expr) : MetaM (TSyntax `dl_term) := do
     `(dl_term| $(mkIdent (x.getId.str "length")):ident)
   | Term.read _ m a => `(dl_term| read($(← ppMTerm m), $(← ppMAddr a)))
   | Term.mlen _ m i =>
-    unless (← whnf m).isAppOfArity ``MTerm.memory 1 do return ← escapeDl e
+    unless (← whnfTm m).isAppOfArity ``MTerm.memory 1 do return ← escapeDl e
     let `(dl_term| $x:ident) ← ppITerm i | escapeDl e
     `(dl_term| $(mkIdent (x.getId.str "length")):ident)
   | Term.env _ k =>
@@ -1819,7 +1910,7 @@ partial def ppTerm (e : Lean.Expr) : MetaM (TSyntax `dl_term) := do
 
 partial def ppPTerm (e : Lean.Expr) : MetaM (TSyntax `dl_term) := do
   if let some x ← loweredExpr? e then return x
-  match_expr (← whnf e) with
+  match_expr (← whnfTm e) with
   | PTerm.root _ r =>
     let some r ← nameOf? r | escapeDl e
     `(dl_term| $(nameIdent r):ident)
@@ -1842,14 +1933,14 @@ partial def lenTerms (p : TSyntax `dl_term) : MetaM (TSyntax `dl_term × TSyntax
 
 partial def ppSTerm (e : Lean.Expr) : MetaM (TSyntax `dl_term) := do
   if let some n ← fvarName? e then return ← `(dl_term| $(nameIdent n):ident)
-  match_expr (← whnf e) with
+  match_expr (← whnfTm e) with
   | STerm.storage _ => `(dl_term| storage)
   | STerm.pv _ x =>
     let some x ← ppVar? x | escapeDl e
     `(dl_term| $x:ident)
   | STerm.save _ s p v =>
     let s ← ppSTerm s
-    match_expr (← whnf p) with
+    match_expr (← whnfTm p) with
     | PTerm.root _ r =>
       let some r ← nameOf? r | escapeDl e
       `(dl_term| store($s, $(nameIdent r):ident, $(← ppSVal v)))
@@ -1877,7 +1968,7 @@ partial def ppSTerm (e : Lean.Expr) : MetaM (TSyntax `dl_term) := do
   | _ => escapeDl e
 
 partial def ppSVal (e : Lean.Expr) : MetaM (TSyntax `dl_term) := do
-  match_expr (← whnf e) with
+  match_expr (← whnfTm e) with
   | SValT.val _ t => ppTerm t
   | SValT.find _ s p => `(dl_term| find($(← ppSTerm s), $(← ppPTerm p)))
   | SValT.copyMem _ m i => `(dl_term| copyMem(mtSt, $(← ppMTerm m), $(← ppITerm i)))
@@ -1889,7 +1980,7 @@ partial def ppSVal (e : Lean.Expr) : MetaM (TSyntax `dl_term) := do
 
 partial def ppITerm (e : Lean.Expr) : MetaM (TSyntax `dl_term) := do
   if let some x ← loweredExpr? e then return x
-  match_expr (← whnf e) with
+  match_expr (← whnfTm e) with
   | ITerm.pv _ x =>
     let some x ← ppVar? x | escapeDl e
     `(dl_term| $x:ident)
@@ -1903,7 +1994,7 @@ partial def ppITerm (e : Lean.Expr) : MetaM (TSyntax `dl_term) := do
   | _ => escapeDl e
 
 partial def ppMAddr (e : Lean.Expr) : MetaM (TSyntax `dl_term) := do
-  match_expr (← whnf e) with
+  match_expr (← whnfTm e) with
   | MAddr.field _ i f =>
     let some f ← nameOf? f | escapeDl e
     dotTerm (← ppITerm i) f
@@ -1912,7 +2003,7 @@ partial def ppMAddr (e : Lean.Expr) : MetaM (TSyntax `dl_term) := do
 
 partial def ppMTerm (e : Lean.Expr) : MetaM (TSyntax `dl_term) := do
   if let some n ← fvarName? e then return ← `(dl_term| $(nameIdent n):ident)
-  match_expr (← whnf e) with
+  match_expr (← whnfTm e) with
   | MTerm.memory _ => `(dl_term| memory)
   | MTerm.write _ m a v => `(dl_term| write($(← ppMTerm m), $(← ppMAddr a), $(← ppMVal v)))
   | MTerm.addM _ m R =>
@@ -1924,7 +2015,7 @@ partial def ppMTerm (e : Lean.Expr) : MetaM (TSyntax `dl_term) := do
   | _ => escapeDl e
 
 partial def ppMVal (e : Lean.Expr) : MetaM (TSyntax `dl_term) := do
-  match_expr (← whnf e) with
+  match_expr (← whnfTm e) with
   | MValT.val _ t => ppTerm t
   | MValT.ref _ i => ppITerm i
   | _ => escapeDl e
@@ -2001,10 +2092,10 @@ def isConnective (e : Lean.Expr) : MetaM Bool := do
 /-- `a < b = true`, a comparison as the specification writes one: its
 operator and operands. -/
 def cmpParts? (a b : Lean.Expr) : MetaM (Option (String × Lean.Expr × Lean.Expr)) := do
-  let some (_, v) := (← whnf b).app2? ``Term.lit | return none
+  let some (_, v) := (← whnfTm b).app2? ``Term.lit | return none
   unless (← whnf v).isAppOfArity ``Semantics.PrimVal.bool 1 &&
     (← whnf (← whnf v).appArg!).isConstOf ``Bool.true do return none
-  let a ← whnf a
+  let a ← whnfTm a
   unless a.isAppOfArity ``Term.binop 5 do return none
   let sym ← match_expr (← whnf (a.getArg! 1)) with
     | BinOp.lt => pure "<"

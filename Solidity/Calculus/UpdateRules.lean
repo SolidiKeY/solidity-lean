@@ -99,15 +99,12 @@ substitution. -/
 /-- `old`, bound to a number by `{ old := 1 }`, halts as a storage; so does its substitution. -/
 @[simp] theorem STerm.stuck_eval (σ : State) : (STerm.stuck : STerm C).eval σ = .error .stuck := rfl
 
-/-- A value term that cannot halt: a literal. -/
-def Term.total : Term C → Bool
-  | .lit _ => true
-  | _ => false
-
-/-- A path that cannot halt: a state variable, and members of it. -/
-def PTerm.total : PTerm C → Bool
-  | .root _ => true
-  | .field p _ => p.total
+/-- A term that cannot halt: a literal value, a state variable and members
+of it. -/
+def Tm.total : Tm C s → Bool
+  | .app0 (.lit _) => true
+  | .app0 (.root _) => true
+  | .app1 (.field _) p => p.total
   | _ => false
 
 /-- A literal does not halt: `10` in `{ se1 := 10 }` reads `10` in every state. -/
@@ -120,7 +117,7 @@ theorem PTerm.total_eval (σ : State) : {p : PTerm C} → p.total = true → ∃
   | .root r, _ => ⟨(r, []), rfl⟩
   | .field p f, h => by
     obtain ⟨⟨r, segs⟩, hp⟩ := PTerm.total_eval σ (p := p) h
-    exact ⟨(r, segs ++ [.field f]), by simp only [eval, bind, Except.bind, hp, pure, Except.pure]⟩
+    exact ⟨(r, segs ++ [.field f]), by simp only [tm_eval, bind, Except.bind, hp, pure, Except.pure]⟩
 
 /-! ## What an element writes -/
 
@@ -229,73 +226,21 @@ def Upd.storOf (U : Upd C) (x : Var) : STerm C :=
   | some _ => STerm.stuck
   | none => .pv x
 
-mutual
-
-/-- `{U}t`: KeY's `applyOnPV`/`applyOnDifferentPV`, through every operator. -/
-def Term.subst (U : Upd C) : Term C → Term C
-  | .lit v => .lit v
-  | .pv x => U.valOf x
-  | .binop op p a b => .binop op p (a.subst U) (b.subst U)
-  | .unop op p a => .unop op p (a.subst U)
-  | .find s p => .find (s.subst U) (p.subst U)
-  | .len s p => .len (s.subst U) (p.subst U)
-  | .read m a => .read (m.subst U) (a.subst U)
-  | .ite c a b => .ite (c.subst U) (a.subst U) (b.subst U)
-  | .mlen m i => .mlen (m.subst U) (i.subst U)
-  | .env k => .env k
-  | .net a => .net (a.subst U)
-  | .netOf x a =>
-    -- `U` binds no ledger (`Upd.envOnly`): a ledger variable it writes halts
+/-- `{U}t`: KeY's `applyOnPV`/`applyOnDifferentPV`, through every symbol.
+A ledger variable `U` writes halts (`U` binds no ledger, `Upd.envOnly`). -/
+def Tm.subst (U : Upd C) : Tm C s → Tm C s
+  | .pvV x => U.valOf x
+  | .pvP x => U.pathOf x
+  | .pvS x => U.storOf x
+  | .pvI x => U.refOf x
+  | .app0 o => .app0 o
+  | .app1 (.netOf x) a =>
     match U.lastWrite x with
     | some _ => Term.stuck
-    | none => .netOf x (a.subst U)
-
-def PTerm.subst (U : Upd C) : PTerm C → PTerm C
-  | .root r => .root r
-  | .pv x => U.pathOf x
-  | .field p f => .field (p.subst U) f
-  | .at p i => .at (p.subst U) (i.subst U)
-  | .next p => .next (p.subst U)
-
-def STerm.subst (U : Upd C) : STerm C → STerm C
-  | .storage => .storage
-  | .pv x => U.storOf x
-  | .save s p v => .save (s.subst U) (p.subst U) (v.subst U)
-  | .delAt s p => .delAt (s.subst U) (p.subst U)
-  | .push s p v => .push (s.subst U) (p.subst U) (v.subst U)
-  | .pushSlot s p E => .pushSlot (s.subst U) (p.subst U) E
-  | .pop s p => .pop (s.subst U) (p.subst U)
-  | .shrink s p => .shrink (s.subst U) (p.subst U)
-  | .extend s p E => .extend (s.subst U) (p.subst U) E
-  | .select s r => .select (s.subst U) r
-
-def SValT.subst (U : Upd C) : SValT C → SValT C
-  | .val t => .val (t.subst U)
-  | .find s p => .find (s.subst U) (p.subst U)
-  | .copyMem m i => .copyMem (m.subst U) (i.subst U)
-  | .newArr R n => .newArr R (n.subst U)
-
-def ITerm.subst (U : Upd C) : ITerm C → ITerm C
-  | .pv x => U.refOf x
-  | .read m a => .read (m.subst U) (a.subst U)
-  | .alloc m R => .alloc (m.subst U) R
-  | .copy m v => .copy (m.subst U) (v.subst U)
-
-def MAddr.subst (U : Upd C) : MAddr C → MAddr C
-  | .field i f => .field (i.subst U) f
-  | .at i k => .at (i.subst U) (k.subst U)
-
-def MTerm.subst (U : Upd C) : MTerm C → MTerm C
-  | .memory => .memory
-  | .write m a v => .write (m.subst U) (a.subst U) (v.subst U)
-  | .addM m R => .addM (m.subst U) R
-  | .copySt m v => .copySt (m.subst U) (v.subst U)
-
-def MValT.subst (U : Upd C) : MValT C → MValT C
-  | .val t => .val (t.subst U)
-  | .ref i => .ref (i.subst U)
-
-end
+    | none => .app1 (.netOf x) (a.subst U)
+  | .app1 o a => .app1 o (a.subst U)
+  | .app2 o a b => .app2 o (a.subst U) (b.subst U)
+  | .app3 o a b c => .app3 o (a.subst U) (b.subst U) (c.subst U)
 
 /-- `{U}(x := t)` is `x := {U}t`: KeY's `applyOnElementary`. -/
 def UpdElem.subst (U : Upd C) : UpdElem C → UpdElem C
@@ -337,170 +282,55 @@ section Subst
 
 variable {U : Upd C} {ns : List Var} {σ τ : State}
 
-mutual
+/-- **Substitution is evaluation after the update**: a substituted term read
+in `σ` is the term read in `τ` — a storage or memory to states that agree
+off the variables `U` writes.  A symbol is `OpN.eval_agree`; only a variable
+and a ledger `netOf` reads are `U`'s.
 
-/-- Example: after `x = 1;`, `{ x := 1 }(x + 1)` is `1 + 1`, which reads
-`2` before the update as `x + 1` reads it after. -/
-theorem Term.subst_eval (h : SubstAgree U ns σ τ) : (t : Term C) → (t.subst U).eval σ = t.eval τ
-  | .lit _ => rfl
-  | .pv x => h.val x
-  | .binop _ _ a b => by
-    simp only [Term.subst, Term.eval, a.subst_eval h, b.subst_eval h]
-  | .unop _ _ a => by simp only [Term.subst, Term.eval, a.subst_eval h]
-  | .find s p => by
-    simp only [Term.subst, Term.eval, p.subst_eval h]
-    exact ResultsAgree.bindEq (s.subst_eval h) fun _ _ h' => by
-      simp only [findStorage_congr h']
-  | .len s p => by
-    simp only [Term.subst, Term.eval, p.subst_eval h]
-    exact ResultsAgree.bindEq (s.subst_eval h) fun _ _ h' => by
-      simp only [arrayLen_congr h']
-  | .read m a => by
-    simp only [Term.subst, Term.eval, a.subst_eval h]
-    exact ResultsAgree.bindEq (m.subst_eval h) fun _ _ h' => by
-      simp only [readAddr_congr h']
-  | .ite c a b => by
-    simp only [Term.subst, Term.eval, c.subst_eval h, a.subst_eval h, b.subst_eval h]
-  | .mlen m i => by
-    simp only [Term.subst, Term.eval, i.subst_eval h]
-    exact ResultsAgree.bindEq (m.subst_eval h) fun _ _ h' => by
-      simp only [memArrayLen, getObj_congr h']
-  | .env k => by simp only [Term.subst, Term.eval, State.envVal_congr h.agree]
-  | .net a => by simp only [Term.subst, Term.eval, a.subst_eval h, State.getNet, h.agree.net]
-  | .netOf x a => by
-    simp only [Term.subst]
-    split
-    · rename_i e hx
-      obtain ⟨b, hb, hnl⟩ := h.written x e hx
-      simp only [Term.stuck_eval, Term.eval, hb, bind, Except.bind]
-      cases b with
-      | ledger l => exact absurd rfl (hnl l)
-      | _ => rfl
-    · rename_i hx
-      simp only [Term.eval, h.unwritten x hx, a.subst_eval h]
+Example: after `x = 1;`, `{ x := 1 }(x + 1)` is `1 + 1`, which reads `2`
+before the update as `x + 1` reads it after. -/
+theorem Tm.subst_eval (h : SubstAgree U ns σ τ) :
+    (t : Tm C s) → Srt.Agree ns s ((t.subst U).eval σ) (t.eval τ)
+  | .pvV x => h.val x
+  | .pvP x => h.path x
+  | .pvS x => h.stor x
+  | .pvI x => h.ref x
+  | .app0 o => o.eval_agree h.agree
+  | .app1 o a => by
+    have ih := a.subst_eval h
+    cases o
+    case netOf x =>
+      have ha : (a.subst U).eval σ = a.eval τ := ih
+      simp only [Tm.subst]
+      split
+      · rename_i e hx
+        obtain ⟨b, hb, hnl⟩ := h.written x e hx
+        simp only [Srt.Agree, Term.stuck_eval, tm_eval, hb, bind, Except.bind]
+        cases b with
+        | ledger l => exact absurd rfl (hnl l)
+        | _ => rfl
+      · rename_i hx
+        simp only [Srt.Agree, tm_eval, h.unwritten x hx, ha]
+    all_goals exact Op1.eval_agree h.agree _ (by intro _ hx; cases hx) ih
+  | .app2 o a b => o.eval_agree h.agree (a.subst_eval h) (b.subst_eval h)
+  | .app3 o a b c => o.eval_agree (a.subst_eval h) (b.subst_eval h) (c.subst_eval h)
 
-/-- Example: after `Person storage p = alice;`, `{ p := alice }(p.age)` is
-`alice.age`. -/
-theorem PTerm.subst_eval (h : SubstAgree U ns σ τ) : (p : PTerm C) → (p.subst U).eval σ = p.eval τ
-  | .root _ => rfl
-  | .pv x => h.path x
-  | .field p _ => by simp only [PTerm.subst, PTerm.eval, p.subst_eval h]
-  | .at p i => by
-    simp only [PTerm.subst, PTerm.eval, p.subst_eval h, i.subst_eval h, checkIndex_congr h.agree]
-  | .next p => by simp only [PTerm.subst, PTerm.eval, p.subst_eval h, findStorage_congr h.agree]
-
-/-- Example: after `uint se1 = 10;`, `{ se1 := 10 }save(storage, alice.age, se1)` is
-`save(storage, alice.age, 10)`: the same storage, the rest of the state
-agreeing off `se1`. -/
-theorem STerm.subst_eval (h : SubstAgree U ns σ τ) :
-    (s : STerm C) → ResultsAgree ns ((s.subst U).eval σ) (s.eval τ)
-  | .storage => h.agree
-  | .pv x => h.stor x
-  | .save s p v => by
-    simp only [STerm.subst, STerm.eval, v.subst_eval h, p.subst_eval h]
-    refine bindPureResults_agree _ fun _ => ?_
-    refine ResultsAgree.bind (s.subst_eval h) fun _ _ h' => ?_
-    agree_run h'
-  | .delAt s p => by
-    simp only [STerm.subst, STerm.eval, p.subst_eval h]
-    refine ResultsAgree.bind (s.subst_eval h) fun _ _ h' => ?_
-    simp only [findStorage_congr h']
-    agree_run h'
-  | .push s p v => by
-    simp only [STerm.subst, STerm.eval, p.subst_eval h]
-    refine ResultsAgree.bind (s.subst_eval h) fun _ _ h' => ?_
-    refine bindPureResults_agree _ fun _ => pushAt_agree h' _ _ _ fun _ => ?_
-    simp only [v.subst_eval h]
-  | .pushSlot s p _ => by
-    simp only [STerm.subst, STerm.eval, p.subst_eval h]
-    refine ResultsAgree.bind (s.subst_eval h) fun _ _ h' => ?_
-    exact bindPureResults_agree _ fun _ => pushAt_agree h' _ _ _ fun _ => rfl
-  | .pop s p => by
-    simp only [STerm.subst, STerm.eval, p.subst_eval h]
-    refine ResultsAgree.bind (s.subst_eval h) fun _ _ h' => ?_
-    agree_run h'
-  | .shrink s p => by
-    simp only [STerm.subst, STerm.eval, p.subst_eval h]
-    refine ResultsAgree.bind (s.subst_eval h) fun _ _ h' => ?_
-    agree_run h'
-  | .extend s p _ => by
-    simp only [STerm.subst, STerm.eval, p.subst_eval h]
-    refine ResultsAgree.bind (s.subst_eval h) fun _ _ h' => ?_
-    refine bindPureResults_agree _ fun _ => ?_
-    exact ResAgree.bindState (pushPlaceAt_agree h' _ _ _) fun _ _ _ h'' => h''
-  | .select s r => by
-    simp only [STerm.subst, STerm.eval]
-    refine ResultsAgree.bind (s.subst_eval h) fun _ τ' h' => ?_
-    simp only [findStorage_congr h']
-    rcases τ'.findStorage r [] with _ | w
-    · exact ResultsAgree.refl _ _
-    · cases w
-      all_goals first
-        | exact ResultsAgree.refl _ _
-        | exact ⟨rfl, h'.heap, h'.nextId, h'.net, h'.env, h'.selfBalance, h'.tx⟩
-
-/-- Example: `{ se1 := 10 }se1`, a stored value, is `10`. -/
-theorem SValT.subst_eval (h : SubstAgree U ns σ τ) : (v : SValT C) → (v.subst U).eval σ = v.eval τ
-  | .val t => by simp only [SValT.subst, SValT.eval, t.subst_eval h]
-  | .find s p => by
-    simp only [SValT.subst, SValT.eval, p.subst_eval h]
-    exact ResultsAgree.bindEq (s.subst_eval h) fun _ _ h' => by
-      simp only [findStorage_congr h']
-  | .copyMem m i => by
-    simp only [SValT.subst, SValT.eval, i.subst_eval h]
-    exact ResultsAgree.bindEq (m.subst_eval h) fun _ _ h' => by
-      simp only [copyMem_congr h']
-  | .newArr _ n => by simp only [SValT.subst, SValT.eval, n.subst_eval h]
-
-/-- Example: after `Person memory m = n;` (`n` a memory local), `{ m := n }m` is `n`. -/
-theorem ITerm.subst_eval (h : SubstAgree U ns σ τ) : (i : ITerm C) → (i.subst U).eval σ = i.eval τ
-  | .pv x => h.ref x
-  | .read m a => by
-    simp only [ITerm.subst, ITerm.eval, a.subst_eval h]
-    exact ResultsAgree.bindEq (m.subst_eval h) fun _ _ h' => by
-      simp only [readAddr_congr h']
-  | .alloc m R => by
-    simp only [ITerm.subst, ITerm.eval]
-    refine ResultsAgree.bindEq (m.subst_eval h) fun _ _ h' => ?_
-    rcases (allocDefault_agree h' R).cases with ⟨e, h₁, h₂⟩ | ⟨_, _, a, h₁, h₂, _⟩ <;>
-      simp only [h₁, h₂] <;> rfl
-  | .copy m v => by
-    simp only [ITerm.subst, ITerm.eval, v.subst_eval h]
-    refine congrArg (_ >>= ·) (funext fun sv => ?_)
-    refine ResultsAgree.bindEq (m.subst_eval h) fun _ _ h' => ?_
-    rcases (copyStToM_agree h' sv).cases with ⟨e, h₁, h₂⟩ | ⟨_, _, a, h₁, h₂, _⟩ <;>
-      simp only [h₁, h₂] <;> rfl
-
-/-- Example: `{ ie1 := 2 }(m[ie1])` is the address `m[2]`. -/
-theorem MAddr.subst_eval (h : SubstAgree U ns σ τ) : (a : MAddr C) → (a.subst U).eval σ = a.eval τ
-  | .field i _ => by simp only [MAddr.subst, MAddr.eval, i.subst_eval h]
-  | .at i k => by simp only [MAddr.subst, MAddr.eval, i.subst_eval h, k.subst_eval h]
-
-/-- Example: `{ ie1 := 2 }write(memory, m[ie1], 5)` is `write(memory, m[2], 5)`. -/
-theorem MTerm.subst_eval (h : SubstAgree U ns σ τ) :
-    (m : MTerm C) → ResultsAgree ns ((m.subst U).eval σ) (m.eval τ)
-  | .memory => h.agree
-  | .write m a v => by
-    simp only [MTerm.subst, MTerm.eval, v.subst_eval h, a.subst_eval h]
-    refine bindPureResults_agree _ fun _ => ?_
-    refine ResultsAgree.bind (m.subst_eval h) fun _ _ h' => ?_
-    exact bindPureResults_agree _ fun _ => writeAddr_agree h' _ _
-  | .addM m R => by
-    simp only [MTerm.subst, MTerm.eval]
-    refine ResultsAgree.bind (m.subst_eval h) fun _ _ h' => ?_
-    exact ResAgree.bindState (allocDefault_agree h' R) fun _ _ _ h'' => h''
-  | .copySt m v => by
-    simp only [MTerm.subst, MTerm.eval, v.subst_eval h]
-    refine bindPureResults_agree _ fun sv => ?_
-    refine ResultsAgree.bind (m.subst_eval h) fun _ _ h' => ?_
-    exact ResAgree.bindState (copyStToM_agree h' sv) fun _ _ _ h'' => h''
-
-/-- Example: `{ se1 := 5 }se1`, a value written to memory, is `5`. -/
-theorem MValT.subst_eval (h : SubstAgree U ns σ τ) : (v : MValT C) → (v.subst U).eval σ = v.eval τ
-  | .val t => by simp only [MValT.subst, MValT.eval, t.subst_eval h]
-  | .ref i => by simp only [MValT.subst, MValT.eval, i.subst_eval h]
-
-end
+theorem Term.subst_eval (h : SubstAgree U ns σ τ) (t : Term C) :
+    (t.subst U).eval σ = t.eval τ := Tm.subst_eval h t
+theorem PTerm.subst_eval (h : SubstAgree U ns σ τ) (p : PTerm C) :
+    (p.subst U).eval σ = p.eval τ := Tm.subst_eval h p
+theorem STerm.subst_eval (h : SubstAgree U ns σ τ) (s : STerm C) :
+    ResultsAgree ns ((s.subst U).eval σ) (s.eval τ) := Tm.subst_eval h s
+theorem SValT.subst_eval (h : SubstAgree U ns σ τ) (v : SValT C) :
+    (v.subst U).eval σ = v.eval τ := Tm.subst_eval h v
+theorem ITerm.subst_eval (h : SubstAgree U ns σ τ) (i : ITerm C) :
+    (i.subst U).eval σ = i.eval τ := Tm.subst_eval h i
+theorem MAddr.subst_eval (h : SubstAgree U ns σ τ) (a : MAddr C) :
+    (a.subst U).eval σ = a.eval τ := Tm.subst_eval h a
+theorem MTerm.subst_eval (h : SubstAgree U ns σ τ) (m : MTerm C) :
+    ResultsAgree ns ((m.subst U).eval σ) (m.eval τ) := Tm.subst_eval h m
+theorem MValT.subst_eval (h : SubstAgree U ns σ τ) (v : MValT C) :
+    (v.subst U).eval σ = v.eval τ := Tm.subst_eval h v
 
 /-- Writing `{U}e` reads its right-hand side before `U`; that is writing `e`
 with its right-hand side read after `U`.
@@ -661,12 +491,12 @@ theorem Upd.substAgree {U : Upd C} (hU : U.envOnly = true) {σ τ : State}
           split at hb <;> simp only [pure, Except.pure, Except.ok.injEq, reduceCtorEq] at hb
         | storage | memory | selfBalance | net | store | saveNet => simp only [UpdElem.var?,
             reduceCtorEq] at hvar
-      simp only [STerm.stuck_eval, STerm.eval, hτ, bind, Except.bind]
+      simp only [STerm.stuck_eval, tm_eval, hτ, bind, Except.bind]
       cases b with
       | store st => exact absurd rfl (hb' st)
       | _ => rfl
     · rename_i hx
-      simp only [STerm.eval, getEnv_eq x hx, bind, Except.bind]
+      simp only [tm_eval, getEnv_eq x hx, bind, Except.bind]
       cases σ.getEnv x with
       | error => rfl
       | ok b =>
@@ -683,7 +513,7 @@ theorem Upd.substAgree {U : Upd C} (hU : U.envOnly = true) {σ τ : State}
       | ok v =>
         simp only [ht, pure, Except.pure, Except.ok.injEq] at hb
         subst hb
-        simp only [Term.eval, bind, Except.bind, State.getEnv, hl, pure, Except.pure]
+        simp only [tm_eval, bind, Except.bind, State.getEnv, hl, pure, Except.pure]
     · rename_i e hnv hx
       obtain ⟨b, hb, hl⟩ := hsome x _ hx
       have hvar := Upd.lastWrite_var hx
@@ -696,7 +526,7 @@ theorem Upd.substAgree {U : Upd C} (hU : U.envOnly = true) {σ τ : State}
         | ok r =>
           simp only [hp, pure, Except.pure, Except.ok.injEq] at hb
           subst hb
-          simp only [Term.stuck_eval, Term.eval, bind, Except.bind, State.getEnv, hl]
+          simp only [Term.stuck_eval, tm_eval, bind, Except.bind, State.getEnv, hl]
       | mref _ i =>
         simp only [UpdElem.binding, bind, Except.bind] at hb
         cases hi : i.eval σ with
@@ -704,11 +534,11 @@ theorem Upd.substAgree {U : Upd C} (hU : U.envOnly = true) {σ τ : State}
         | ok r =>
           simp only [hi, pure, Except.pure, Except.ok.injEq] at hb
           subst hb
-          simp only [Term.stuck_eval, Term.eval, bind, Except.bind, State.getEnv, hl]
+          simp only [Term.stuck_eval, tm_eval, bind, Except.bind, State.getEnv, hl]
       | storage | memory | selfBalance | net | store | saveNet => simp only [UpdElem.var?,
           reduceCtorEq] at hvar
     · rename_i hx
-      simp only [Term.eval, getEnv_eq x hx]
+      simp only [tm_eval, getEnv_eq x hx]
   · unfold Upd.pathOf
     split
     · rename_i y p hx
@@ -719,7 +549,7 @@ theorem Upd.substAgree {U : Upd C} (hU : U.envOnly = true) {σ τ : State}
       | ok r =>
         simp only [hp, pure, Except.pure, Except.ok.injEq] at hb
         subst hb
-        simp only [PTerm.eval, aliasPath, bind, Except.bind, State.getEnv, hl, pure, Except.pure]
+        simp only [tm_eval, aliasPath, bind, Except.bind, State.getEnv, hl, pure, Except.pure]
     · rename_i e hnp hx
       obtain ⟨b, hb, hl⟩ := hsome x _ hx
       have hvar := Upd.lastWrite_var hx
@@ -732,7 +562,7 @@ theorem Upd.substAgree {U : Upd C} (hU : U.envOnly = true) {σ τ : State}
         | ok r =>
           simp only [ht, pure, Except.pure, Except.ok.injEq] at hb
           subst hb
-          simp only [PTerm.stuck_eval, PTerm.eval, aliasPath, bind, Except.bind, State.getEnv, hl]
+          simp only [PTerm.stuck_eval, tm_eval, aliasPath, bind, Except.bind, State.getEnv, hl]
       | mref _ i =>
         simp only [UpdElem.binding, bind, Except.bind] at hb
         cases hi : i.eval σ with
@@ -740,11 +570,11 @@ theorem Upd.substAgree {U : Upd C} (hU : U.envOnly = true) {σ τ : State}
         | ok r =>
           simp only [hi, pure, Except.pure, Except.ok.injEq] at hb
           subst hb
-          simp only [PTerm.stuck_eval, PTerm.eval, aliasPath, bind, Except.bind, State.getEnv, hl]
+          simp only [PTerm.stuck_eval, tm_eval, aliasPath, bind, Except.bind, State.getEnv, hl]
       | storage | memory | selfBalance | net | store | saveNet => simp only [UpdElem.var?,
           reduceCtorEq] at hvar
     · rename_i hx
-      simp only [PTerm.eval, aliasPath, getEnv_eq x hx]
+      simp only [tm_eval, aliasPath, getEnv_eq x hx]
   · unfold Upd.refOf
     split
     · rename_i y i hx
@@ -755,7 +585,7 @@ theorem Upd.substAgree {U : Upd C} (hU : U.envOnly = true) {σ τ : State}
       | ok r =>
         simp only [hi, pure, Except.pure, Except.ok.injEq] at hb
         subst hb
-        simp only [ITerm.eval, bind, Except.bind, State.getEnv, hl, pure, Except.pure]
+        simp only [tm_eval, bind, Except.bind, State.getEnv, hl, pure, Except.pure]
     · rename_i e hnr hx
       obtain ⟨b, hb, hl⟩ := hsome x _ hx
       have hvar := Upd.lastWrite_var hx
@@ -768,7 +598,7 @@ theorem Upd.substAgree {U : Upd C} (hU : U.envOnly = true) {σ τ : State}
         | ok r =>
           simp only [ht, pure, Except.pure, Except.ok.injEq] at hb
           subst hb
-          simp only [ITerm.stuck_eval, ITerm.eval, bind, Except.bind, State.getEnv, hl]
+          simp only [ITerm.stuck_eval, tm_eval, bind, Except.bind, State.getEnv, hl]
       | path _ p =>
         simp only [UpdElem.binding, bind, Except.bind] at hb
         cases hp : p.eval σ with
@@ -776,11 +606,11 @@ theorem Upd.substAgree {U : Upd C} (hU : U.envOnly = true) {σ τ : State}
         | ok r =>
           simp only [hp, pure, Except.pure, Except.ok.injEq] at hb
           subst hb
-          simp only [ITerm.stuck_eval, ITerm.eval, bind, Except.bind, State.getEnv, hl]
+          simp only [ITerm.stuck_eval, tm_eval, bind, Except.bind, State.getEnv, hl]
       | storage | memory | selfBalance | net | store | saveNet => simp only [UpdElem.var?,
           reduceCtorEq] at hvar
     · rename_i hx
-      simp only [ITerm.eval, getEnv_eq x hx]
+      simp only [tm_eval, getEnv_eq x hx]
 
 /-- **Running `U` then `V` is running `U ‖ {U}V`**, for `U` an update of locals.
 
@@ -995,12 +825,10 @@ theorem UpdElem.write_self {σ τ : State} :
     subst h
     cases hl : lookupBy x σ.env with
     | none =>
-      simp only [write, bind, Except.bind, Term.eval, PTerm.eval, aliasPath, ITerm.eval,
-        State.getEnv, hl, reduceCtorEq] at hw
+      simp only [write, bind, Except.bind, tm_eval, aliasPath, State.getEnv, hl, reduceCtorEq] at hw
     | some b =>
       cases b <;>
-        simp only [write, bind, Except.bind, Term.eval, PTerm.eval, aliasPath, ITerm.eval,
-          State.getEnv, hl, pure, Except.pure, Except.ok.injEq, reduceCtorEq] at hw <;>
+        simp only [write, bind, Except.bind, tm_eval, aliasPath, State.getEnv, hl, pure, Except.pure, Except.ok.injEq, reduceCtorEq] at hw <;>
         subst hw <;> exact State.setEnv_same hl
 
 /-- `{x := x ‖ U} φ` is `{U} φ` when `x := x` does not halt. -/
@@ -1046,7 +874,7 @@ update.  A value variable is fine (`Term.stuck` and an unbound value both
 denote `st mtSt`); a path or storage variable written at another sort is not:
 `find(x, a)` after `{ x := 1 }` denotes `st mtSt`, its substitution
 `find(STerm.stuck, a)` reads `a` in the storage.  KeY's terms are sorted and
-cannot say it; here `Term.sortedFor U` excludes it. -/
+cannot say it; here `Tm.sortedFor U` excludes it. -/
 
 /-- `U` writes `x`, if at all, as an alias. -/
 def Upd.pathSorted (U : Upd C) (x : Var) : Bool :=
@@ -1054,43 +882,23 @@ def Upd.pathSorted (U : Upd C) (x : Var) : Bool :=
   | some (.path ..) | none => true
   | some _ => false
 
-mutual
-
 /-- Every alias the term reads `U` writes, if at all, as an alias, and every
-storage variable it reads `U` does not write. -/
-def Term.sortedFor (U : Upd C) : Term C → Bool
-  | .lit _ | .pv _ | .env _ | .read .. | .mlen .. => true
-  | .binop _ _ a b => a.sortedFor U && b.sortedFor U
-  | .unop _ _ a | .net a | .netOf _ a => a.sortedFor U
-  | .find s p | .len s p => s.sortedFor U && p.sortedFor U
-  | .ite c a b => c.sortedFor U && a.sortedFor U && b.sortedFor U
-
-def PTerm.sortedFor (U : Upd C) : PTerm C → Bool
-  | .root _ => true
-  | .pv x => U.pathSorted x
-  | .field p _ | .next p => p.sortedFor U
-  | .at p i => p.sortedFor U && i.sortedFor U
-
-def STerm.sortedFor (U : Upd C) : STerm C → Bool
-  | .storage => true
-  | .pv x => (U.lastWrite x).isNone
-  | .save s p v | .push s p v => s.sortedFor U && p.sortedFor U && v.sortedFor U
-  | .delAt s p | .pop s p | .shrink s p | .pushSlot s p _ | .extend s p _ =>
-    s.sortedFor U && p.sortedFor U
-  | .select s _ => s.sortedFor U
-
-def SValT.sortedFor (U : Upd C) : SValT C → Bool
-  | .val t | .newArr _ t => t.sortedFor U
-  | .find s p => s.sortedFor U && p.sortedFor U
-  | .copyMem .. => true
-
-end
+storage variable it reads `U` does not write.  A memory read is not looked
+into: it denotes its evaluation. -/
+def Tm.sortedFor (U : Upd C) : Tm C s → Bool
+  | .pvV _ | .pvI _ => true
+  | .pvP x => U.pathSorted x
+  | .pvS x => (U.lastWrite x).isNone
+  | .app0 _ => true
+  | .app1 _ a => a.sortedFor U
+  | .app2 o a b => o.opaque || (a.sortedFor U && b.sortedFor U)
+  | .app3 _ a b c => a.sortedFor U && b.sortedFor U && c.sortedFor U
 
 /-- A value variable that does not read denotes nothing. -/
 theorem Term.pv_denote_of_error {σ : State} {x : Var} {e : Halt}
     (h : (Term.pv x : Term C).eval σ = .error e) : (Term.pv x : Term C).denote σ = .st .mtSt := by
-  simp only [Term.eval, bind, Except.bind] at h
-  simp only [Term.denote]
+  simp only [tm_eval, bind, Except.bind] at h
+  simp only [tm_denote]
   split at h
   · rename_i he
     simp only [he]
@@ -1102,7 +910,7 @@ theorem Term.pv_denote_of_error {σ : State} {x : Var} {e : Halt}
 theorem PTerm.pv_denote_of_error {σ : State} {x : Var} {e : Halt}
     (h : (PTerm.pv x : PTerm C).eval σ = .error e) : (PTerm.pv x : PTerm C).denote σ = [] := by
   have h' : aliasPath σ x = .error e := h
-  simp only [PTerm.denote, h']
+  simp only [tm_denote, h']
 
 section SubstDenote
 
@@ -1168,162 +976,83 @@ theorem SubstAgree.path_denote (h : SubstAgree U ns σ τ) {x : Var} (hs : U.pat
       rw [hx] at hp
       exact PTerm.pv_denote_of_error hp
 
-mutual
+/-- A memory read denotes its evaluation, whatever its arguments denote. -/
+theorem Op2.denote_irrel {σ : State} : (o : Op2 a b s) → o.opaque = true → {ra : a.Ev} →
+    {rb : b.Ev} → (d d' : a.Den) → (e e' : b.Den) → o.denote σ ra rb d e = o.denote σ ra rb d' e'
+  | .read, _, _, _, _, _, _, _ | .mlen, _, _, _, _, _, _, _ | .copyMem, _, _, _, _, _, _, _ => rfl
 
-/-- A substituted term denotes before the update, up to `Equiv`, what the
-term denotes after it.
+theorem Srt.DEquiv.of_eq {s : Srt} {d d' e : s.Den} (h : d = d') (he : Srt.DEquiv s d' e) :
+    Srt.DEquiv s d e := h ▸ he
+
+/-- **Substitution is denotation after the update**, up to `Equiv`: a
+substituted term denotes in `σ` what the term denotes in `τ`.  A symbol is
+`OpN.denote_agree` across the two states, then `OpN.denote_congr` across
+the arguments.
 
 Example: after `y = 3;`, `{ y := 3 }(y + 1)` is `3 + 1`, which denotes `4`
 before the update as `y + 1` does after it. -/
-theorem Term.subst_denote (h : SubstAgree U ns σ τ) :
-    (t : Term C) → t.sortedFor U = true → Equiv ((t.subst U).denote σ) (t.denote τ)
-  | .lit _, _ => Equiv.refl _
-  | .pv x, _ => h.val_denote x
-  | .binop op p a b, hs => by
-    simp only [Term.sortedFor, Bool.and_eq_true] at hs
-    simp only [Term.subst, Term.denote, (Term.subst_denote h a hs.1).toRes,
-      (Term.subst_denote h b hs.2).toRes]
+theorem Tm.subst_denote (h : SubstAgree U ns σ τ) :
+    (t : Tm C s) → t.sortedFor U = true → Srt.DEquiv s ((t.subst U).denote σ) (t.denote τ)
+  | .pvV x, _ => h.val_denote x
+  | .pvP _, hs => h.path_denote hs
+  | .pvS x, hs => by
+    simp only [Tm.sortedFor, Option.isNone_iff_eq_none] at hs
+    simp only [Srt.DEquiv, Tm.subst, Upd.storOf, hs, tm_denote, h.unwritten x hs]
     exact Equiv.refl _
-  | .unop op p a, hs => by
-    simp only [Term.subst, Term.denote, (Term.subst_denote h a hs).toRes]
-    exact Equiv.refl _
-  | .find s p, hs => by
-    simp only [Term.sortedFor, Bool.and_eq_true] at hs
-    simp only [Term.subst, Term.denote, PTerm.subst_denote h p hs.2]
-    exact Equiv.findSt (STerm.subst_denote h s hs.1) _
-  | .len s p, hs => by
-    simp only [Term.sortedFor, Bool.and_eq_true] at hs
-    simp only [Term.subst, Term.denote, PTerm.subst_denote h p hs.2]
-    exact Equiv.findSt (STerm.subst_denote h s hs.1) _
-  | .read m a, _ => by
-    show Equiv (Res.toSt (((Term.read m a).subst U).eval σ)) (Res.toSt ((Term.read m a).eval τ))
-    rw [Term.subst_eval h]
-    exact Equiv.refl _
-  | .mlen m i, _ => by
-    show Equiv (Res.toSt (((Term.mlen m i).subst U).eval σ)) (Res.toSt ((Term.mlen m i).eval τ))
-    rw [Term.subst_eval h]
-    exact Equiv.refl _
-  | .ite c a b, hs => by
-    simp only [Term.sortedFor, Bool.and_eq_true] at hs
-    have ea : Equiv ((a.subst U).denote σ) (a.denote τ) := Term.subst_denote h a hs.1.2
-    have eb : Equiv ((b.subst U).denote σ) (b.denote τ) := Term.subst_denote h b hs.2
-    simp only [Term.subst, Term.denote]
-    rcases (Term.subst_denote h c hs.1.1).eq_or_st with hc | ⟨s, t, hc, hc'⟩
-    · rw [hc]
+  | .pvI _, _ => trivial
+  | .app0 o, _ => by
+    simp only [Tm.subst, Tm.denote]
+    exact Srt.DEquiv.of_eq (o.denote_agree h.agree) (Srt.DEquiv.refl _ _)
+  | .app1 o a, hs => by
+    simp only [Tm.sortedFor] at hs
+    have ih := a.subst_denote h hs
+    cases o
+    case netOf x =>
+      simp only [Tm.subst]
       split
-      · exact ea
-      · exact eb
-      · exact Equiv.refl _
-    · rw [hc, hc']
-      exact Equiv.refl _
-  | .env k, _ => by
-    simp only [Term.subst, Term.denote, State.envVal_congr h.agree]
-    exact Equiv.refl _
-  | .net a, hs => by
-    simp only [Term.subst, Term.denote, State.getNet, h.agree.net]
-    rcases (Term.subst_denote h a hs).eq_or_st with ha | ⟨s, t, ha, ha'⟩
-    · rw [ha]
-      exact Equiv.refl _
-    · rw [ha, ha']
-      exact Equiv.refl _
-  | .netOf x a, hs => by
-    simp only [Term.subst]
-    split
-    · rename_i e hx
-      obtain ⟨b, hb, hnl⟩ := h.written x e hx
-      show Equiv (Term.stuck.denote σ) _
-      simp only [Term.denote, hb]
-      cases b with
-      | ledger l => exact absurd rfl (hnl l)
-      | _ => exact Equiv.refl _
-    · rename_i hx
-      simp only [Term.denote, h.unwritten x hx]
-      rcases (Term.subst_denote h a hs).eq_or_st with ha | ⟨s, t, ha, ha'⟩
-      · rw [ha]
-        exact Equiv.refl _
-      · rw [ha, ha']
-        rcases τ.getEnv x with _ | b
-        · exact Equiv.refl _
-        · cases b <;> exact Equiv.refl _
+      · rename_i e hx
+        obtain ⟨b, hb, hnl⟩ := h.written x e hx
+        show Equiv (Term.stuck.denote σ) _
+        simp only [tm_denote, hb]
+        cases b with
+        | ledger l => exact absurd rfl (hnl l)
+        | _ => exact Equiv.refl _
+      · rename_i hx
+        simp only [Srt.DEquiv] at ih
+        simp only [Srt.DEquiv, tm_denote, h.unwritten x hx]
+        rcases ih.eq_or_st with ha | ⟨s, t, ha, ha'⟩
+        · rw [ha]
+          exact Equiv.refl _
+        · rw [ha, ha']
+          rcases τ.getEnv x with _ | b
+          · exact Equiv.refl _
+          · cases b <;> exact Equiv.refl _
+    all_goals
+      exact Srt.DEquiv.of_eq (Op1.denote_agree h.agree _ (by intro _ hx; cases hx) _)
+        (Op1.denote_congr _ ih)
+  | .app2 o a b, hs => by
+    have ea := a.subst_eval h
+    have eb := b.subst_eval h
+    simp only [Tm.subst, Tm.denote]
+    refine Srt.DEquiv.of_eq (o.denote_agree h.agree ea eb _ _) ?_
+    cases ho : o.opaque
+    · simp only [Tm.sortedFor, ho, Bool.false_or, Bool.and_eq_true] at hs
+      exact o.denote_congr ho (a.subst_denote h hs.1) (b.subst_denote h hs.2)
+    · rw [o.denote_irrel ho _ (a.denote τ) _ (b.denote τ)]
+      exact Srt.DEquiv.refl _ _
+  | .app3 o a b c, hs => by
+    simp only [Tm.sortedFor, Bool.and_eq_true] at hs
+    exact o.denote_congr (a.subst_denote h hs.1.1) (b.subst_denote h hs.1.2)
+      (c.subst_denote h hs.2)
 
-/-- A substituted path denotes before the update the path it denotes after it. -/
-theorem PTerm.subst_denote (h : SubstAgree U ns σ τ) :
-    (p : PTerm C) → p.sortedFor U = true → (p.subst U).denote σ = p.denote τ
-  | .root _, _ => rfl
-  | .pv _, hs => h.path_denote hs
-  | .field p _, hs => by simp only [PTerm.subst, PTerm.denote, PTerm.subst_denote h p hs]
-  | .at p i, hs => by
-    simp only [PTerm.sortedFor, Bool.and_eq_true] at hs
-    simp only [PTerm.subst, PTerm.denote, PTerm.subst_denote h p hs.1,
-      (Term.subst_denote h i hs.2).asInt]
-  | .next p, hs => by
-    simp only [PTerm.subst, PTerm.denote, PTerm.subst_denote h p hs, h.abs_eq]
-
-/-- A substituted storage denotes before the update, up to `Equiv`, the
-storage it denotes after it. -/
-theorem STerm.subst_denote (h : SubstAgree U ns σ τ) :
-    (s : STerm C) → s.sortedFor U = true → Struct.Equiv ((s.subst U).denote σ) (s.denote τ)
-  | .storage, _ => by
-    simp only [STerm.subst, STerm.denote, h.abs_eq]
-    exact Equiv.refl _
-  | .pv x, hs => by
-    simp only [STerm.sortedFor, Option.isNone_iff_eq_none] at hs
-    simp only [STerm.subst, Upd.storOf, hs, STerm.denote, h.unwritten x hs]
-    exact Equiv.refl _
-  | .save s p v, hs => by
-    simp only [STerm.sortedFor, Bool.and_eq_true] at hs
-    simp only [STerm.subst, STerm.denote, PTerm.subst_denote h p hs.1.2]
-    exact Struct.Equiv.copyTo (STerm.subst_denote h s hs.1.1) (SValT.subst_denote h v hs.2) _
-  | .delAt s p, hs => by
-    simp only [STerm.sortedFor, Bool.and_eq_true] at hs
-    simp only [STerm.subst, STerm.denote, PTerm.subst_denote h p hs.2]
-    exact Struct.Equiv.delAt (STerm.subst_denote h s hs.1) _
-  | .push s p v, hs => by
-    simp only [STerm.sortedFor, Bool.and_eq_true] at hs
-    simp only [STerm.subst, STerm.denote, PTerm.subst_denote h p hs.1.2]
-    exact Struct.Equiv.pushT (STerm.subst_denote h s hs.1.1)
-      (Equiv.stripVal (SValT.subst_denote h v hs.2)) _
-  | .pushSlot s p _, hs => by
-    simp only [STerm.sortedFor, Bool.and_eq_true] at hs
-    simp only [STerm.subst, STerm.denote, PTerm.subst_denote h p hs.2]
-    exact Struct.Equiv.pushSlotT _ _ (STerm.subst_denote h s hs.1) _
-  | .extend s p _, hs => by
-    simp only [STerm.sortedFor, Bool.and_eq_true] at hs
-    simp only [STerm.subst, STerm.denote, PTerm.subst_denote h p hs.2]
-    exact Struct.Equiv.pushSlotT _ _ (STerm.subst_denote h s hs.1) _
-  | .pop s p, hs => by
-    simp only [STerm.sortedFor, Bool.and_eq_true] at hs
-    simp only [STerm.subst, STerm.denote, PTerm.subst_denote h p hs.2]
-    exact Struct.Equiv.popT (STerm.subst_denote h s hs.1) _
-  | .shrink s p, hs => by
-    simp only [STerm.sortedFor, Bool.and_eq_true] at hs
-    simp only [STerm.subst, STerm.denote, PTerm.subst_denote h p hs.2]
-    exact Struct.Equiv.shrinkT (STerm.subst_denote h s hs.1) _
-  | .select s _, hs => by
-    simp only [STerm.sortedFor] at hs
-    simp only [STerm.subst, STerm.denote]
-    exact Equiv.asStruct (Equiv.findSt (STerm.subst_denote h s hs) [_])
-
-/-- A substituted stored value denotes before the update, up to `Equiv`, what
-it denotes after it. -/
-theorem SValT.subst_denote (h : SubstAgree U ns σ τ) :
-    (v : SValT C) → v.sortedFor U = true → Equiv ((v.subst U).denote σ) (v.denote τ)
-  | .val t, hs => Term.subst_denote h t hs
-  | .find s p, hs => by
-    simp only [SValT.sortedFor, Bool.and_eq_true] at hs
-    simp only [SValT.subst, SValT.denote, PTerm.subst_denote h p hs.2]
-    exact Equiv.findSt (STerm.subst_denote h s hs.1) _
-  | .copyMem m i, _ => by
-    show Equiv (match ((SValT.copyMem m i).subst U).eval σ with
-      | .ok w => w.abs
-      | .error _ => .st .mtSt) _
-    rw [SValT.subst_eval h]
-    exact Equiv.refl _
-  | .newArr R n, hs => by
-    simp only [SValT.subst, SValT.denote, (Term.subst_denote h n hs).asInt]
-    exact Equiv.refl _
-
-end
+theorem Term.subst_denote (h : SubstAgree U ns σ τ) (t : Term C) (hs : t.sortedFor U = true) :
+    Equiv ((t.subst U).denote σ) (t.denote τ) := Tm.subst_denote h t hs
+theorem PTerm.subst_denote (h : SubstAgree U ns σ τ) (p : PTerm C) (hs : p.sortedFor U = true) :
+    (p.subst U).denote σ = p.denote τ := Tm.subst_denote h p hs
+theorem STerm.subst_denote (h : SubstAgree U ns σ τ) (s : STerm C) (hs : s.sortedFor U = true) :
+    Struct.Equiv ((s.subst U).denote σ) (s.denote τ) := Tm.subst_denote h s hs
+theorem SValT.subst_denote (h : SubstAgree U ns σ τ) (v : SValT C) (hs : v.sortedFor U = true) :
+    Equiv ((v.subst U).denote σ) (v.denote τ) := Tm.subst_denote h v hs
 
 end SubstDenote
 
@@ -1347,7 +1076,7 @@ def Fml.subst (U : Upd C) : Fml C → Fml C
   | φ => φ
 
 /-- Every equation of `φ` reads its variables at the sorts `U` writes them
-(`Term.sortedFor`). -/
+(`Tm.sortedFor`). -/
 def Fml.sortedFor (U : Upd C) : Fml C → Bool
   | .eq a b => a.sortedFor U && b.sortedFor U
   | .not φ => φ.sortedFor U
@@ -1717,14 +1446,15 @@ def Upd.locals (U : Upd C) : Upd C := U.filter (·.var?.isSome)
 
 /-- A value term with no storage, path or memory subterm: `x + 1`, not
 `find(storage, alice.age)`. -/
-def Term.stFree : Term C → Bool
-  | .lit _ | .pv _ | .env _ => true
-  | .binop _ _ a b => a.stFree && b.stFree
-  | .unop _ _ a | .net a | .netOf _ a => a.stFree
-  | .ite c a b => c.stFree && a.stFree && b.stFree
-  | .find .. | .len .. | .read .. | .mlen .. => false
+def Tm.stFree : Tm C s → Bool
+  | .pvV _ => true
+  | .app0 (.lit _) | .app0 (.env _) => true
+  | .app1 (.unop ..) a | .app1 .net a | .app1 (.netOf _) a => a.stFree
+  | .app2 (.binop ..) a b => a.stFree && b.stFree
+  | .app3 .ite c a b => c.stFree && a.stFree && b.stFree
+  | _ => false
 
-/-- A first-order formula whose terms are `Term.stFree`: `x ≐ 42`. -/
+/-- A first-order formula whose terms are `Tm.stFree`: `x ≐ 42`. -/
 def Fml.stFree : Fml C → Bool
   | .tt => true
   | .eq a b => a.stFree && b.stFree
@@ -1842,39 +1572,36 @@ theorem Term.eval_withStorage (σ : State) (st : List (Name × SVal)) :
     (t : Term C) → t.stFree = true → t.eval { σ with storage := st } = t.eval σ
   | .lit _, _ | .pv _, _ | .env _, _ => rfl
   | .binop _ _ a b, h => by
-    simp only [Term.stFree, Bool.and_eq_true] at h
-    simp only [Term.eval, Term.eval_withStorage σ st a h.1, Term.eval_withStorage σ st b h.2]
-  | .unop _ _ a, h => by simp only [Term.eval, Term.eval_withStorage σ st a h]
+    simp only [Tm.stFree, Bool.and_eq_true] at h
+    simp only [tm_eval, Term.eval_withStorage σ st a h.1, Term.eval_withStorage σ st b h.2]
+  | .unop _ _ a, h => by simp only [tm_eval, Term.eval_withStorage σ st a h]
   | .net a, h => by
-    simp only [Term.eval, Term.eval_withStorage σ st a h]
+    simp only [tm_eval, Term.eval_withStorage σ st a h]
     rfl
   | .netOf _ a, h => by
-    simp only [Term.eval, Term.eval_withStorage σ st a h]
+    simp only [tm_eval, Term.eval_withStorage σ st a h]
     rfl
   | .ite c a b, h => by
-    simp only [Term.stFree, Bool.and_eq_true] at h
-    simp only [Term.eval, Term.eval_withStorage σ st c h.1.1, Term.eval_withStorage σ st a h.1.2,
-      Term.eval_withStorage σ st b h.2]
+    simp only [Tm.stFree, Bool.and_eq_true] at h
+    simp only [tm_eval, Term.eval_withStorage σ st c h.1.1, Term.eval_withStorage σ st a h.1.2, Term.eval_withStorage σ st b h.2]
 
 /-- A storage-free term denotes alike in two states that differ in the storage. -/
 theorem Term.denote_withStorage (σ : State) (st : List (Name × SVal)) :
     (t : Term C) → t.stFree = true → t.denote { σ with storage := st } = t.denote σ
   | .lit _, _ | .pv _, _ | .env _, _ => rfl
   | .binop _ _ a b, h => by
-    simp only [Term.stFree, Bool.and_eq_true] at h
-    simp only [Term.denote, Term.denote_withStorage σ st a h.1,
-      Term.denote_withStorage σ st b h.2]
-  | .unop _ _ a, h => by simp only [Term.denote, Term.denote_withStorage σ st a h]
+    simp only [Tm.stFree, Bool.and_eq_true] at h
+    simp only [tm_denote, Term.denote_withStorage σ st a h.1, Term.denote_withStorage σ st b h.2]
+  | .unop _ _ a, h => by simp only [tm_denote, Term.denote_withStorage σ st a h]
   | .net a, h => by
-    simp only [Term.denote, Term.denote_withStorage σ st a h]
+    simp only [tm_denote, Term.denote_withStorage σ st a h]
     rfl
   | .netOf _ a, h => by
-    simp only [Term.denote, Term.denote_withStorage σ st a h]
+    simp only [tm_denote, Term.denote_withStorage σ st a h]
     rfl
   | .ite c a b, h => by
-    simp only [Term.stFree, Bool.and_eq_true] at h
-    simp only [Term.denote, Term.denote_withStorage σ st c h.1.1,
-      Term.denote_withStorage σ st a h.1.2, Term.denote_withStorage σ st b h.2]
+    simp only [Tm.stFree, Bool.and_eq_true] at h
+    simp only [tm_denote, Term.denote_withStorage σ st c h.1.1, Term.denote_withStorage σ st a h.1.2, Term.denote_withStorage σ st b h.2]
 
 /-- A storage-free formula holds alike in two states that differ in the storage. -/
 theorem Fml.holds_withStorage (σ : State) (st : List (Name × SVal)) :
@@ -2012,7 +1739,7 @@ theorem Upd.defined_box {U : Upd C} {x : Var} (hw : U.bindsVal x = true) (σ : S
   | error _ => trivial
   | ok τ =>
     obtain ⟨v, hv⟩ := (Upd.foldl_getEnv σ U hτ).2 hw
-    exact ⟨v, by simp only [Term.eval, hv, bind, Except.bind, pure, Except.pure]⟩
+    exact ⟨v, by simp only [tm_eval, hv, bind, Except.bind, pure, Except.pure]⟩
 
 /-! ## Tactics -/
 
@@ -2130,52 +1857,52 @@ theorem pushPlaceAt_keeps {σ τ : State} {E : Ty} {r : Name} {segs : List Seg} 
 theorem STerm.eval_keeps {σ τ : State} : (s : STerm C) → s.eval σ = .ok τ → σ.Keeps τ
   | .storage, h => by cases h; exact State.Keeps.refl σ
   | .pv x, h => by
-    simp only [STerm.eval] at h
+    simp only [tm_eval] at h
     obtain ⟨b, -, h⟩ := bind_ok_inv h
     cases b with
     | store st => cases h; rfl
     | val _ | spath _ _ | mref _ | ledger _ => cases h
   | .save s p v, h => by
-    simp only [STerm.eval] at h
+    simp only [tm_eval] at h
     obtain ⟨_, -, h⟩ := bind_ok_inv h
     obtain ⟨τ₀, h₀, h⟩ := bind_ok_inv h
     obtain ⟨⟨_, _⟩, -, h⟩ := bind_ok_inv h
     exact (s.eval_keeps h₀).trans (State.writeStorage_keeps h)
   | .delAt s p, h => by
-    simp only [STerm.eval] at h
+    simp only [tm_eval] at h
     obtain ⟨τ₀, h₀, h⟩ := bind_ok_inv h
     obtain ⟨⟨_, _⟩, -, h⟩ := bind_ok_inv h
     obtain ⟨_, -, h⟩ := bind_ok_inv h
     exact (s.eval_keeps h₀).trans (State.saveStorage_keeps h)
   | .push s p v, h => by
-    simp only [STerm.eval] at h
+    simp only [tm_eval] at h
     obtain ⟨τ₀, h₀, h⟩ := bind_ok_inv h
     obtain ⟨⟨_, _⟩, -, h⟩ := bind_ok_inv h
     exact (s.eval_keeps h₀).trans (pushAt_keeps h)
   | .pushSlot s p E, h => by
-    simp only [STerm.eval] at h
+    simp only [tm_eval] at h
     obtain ⟨τ₀, h₀, h⟩ := bind_ok_inv h
     obtain ⟨⟨_, _⟩, -, h⟩ := bind_ok_inv h
     exact (s.eval_keeps h₀).trans (pushAt_keeps h)
   | .pop s p, h => by
-    simp only [STerm.eval] at h
+    simp only [tm_eval] at h
     obtain ⟨τ₀, h₀, h⟩ := bind_ok_inv h
     obtain ⟨⟨_, _⟩, -, h⟩ := bind_ok_inv h
     exact (s.eval_keeps h₀).trans (popAt_keeps h)
   | .shrink s p, h => by
-    simp only [STerm.eval] at h
+    simp only [tm_eval] at h
     obtain ⟨τ₀, h₀, h⟩ := bind_ok_inv h
     obtain ⟨⟨_, _⟩, -, h⟩ := bind_ok_inv h
     exact (s.eval_keeps h₀).trans (popAt_keeps h)
   | .extend s p E, h => by
-    simp only [STerm.eval] at h
+    simp only [tm_eval] at h
     obtain ⟨τ₀, h₀, h⟩ := bind_ok_inv h
     obtain ⟨⟨_, _⟩, -, h⟩ := bind_ok_inv h
     obtain ⟨⟨τ', _⟩, hp, h⟩ := bind_ok_inv h
     cases h
     exact (s.eval_keeps h₀).trans (pushPlaceAt_keeps hp)
   | .select s r, h => by
-    simp only [STerm.eval] at h
+    simp only [tm_eval] at h
     obtain ⟨τ₀, h₀, h⟩ := bind_ok_inv h
     obtain ⟨w, -, h⟩ := bind_ok_inv h
     cases w with
@@ -2190,148 +1917,91 @@ structural recursion on the term alone.) -/
 structure StWrite (C : Contract) where
   s : STerm C
 
-mutual
+/-- `{storage := s}e`: `s` for every `storage` in `e`, not looking inside a
+memory read (`Op2.opaque`). -/
+def Tm.withSt (w : StWrite C) : Tm C s → Tm C s
+  | .pvV x => .pvV x
+  | .pvP x => .pvP x
+  | .pvS x => .pvS x
+  | .pvI x => .pvI x
+  | .app0 .storage => w.s
+  | .app0 o => .app0 o
+  | .app1 o a => .app1 o (a.withSt w)
+  | .app2 o a b => if o.opaque then .app2 o a b else .app2 o (a.withSt w) (b.withSt w)
+  | .app3 o a b c => .app3 o (a.withSt w) (b.withSt w) (c.withSt w)
 
-/-- `{storage := s}e`: `s` for every `storage` in `e`. -/
-def Term.withSt (w : StWrite C) : Term C → Term C
-  | .binop op p a b => .binop op p (a.withSt w) (b.withSt w)
-  | .unop op p a => .unop op p (a.withSt w)
-  | .find s' p => .find (s'.withSt w) (p.withSt w)
-  | .len s' p => .len (s'.withSt w) (p.withSt w)
-  | .ite c a b => .ite (c.withSt w) (a.withSt w) (b.withSt w)
-  | .lit v => .lit v
-  | .pv x => .pv x
-  | .env k => .env k
-  | .read m a => .read m a
-  | .mlen m i => .mlen m i
-  | .net a => .net (a.withSt w)
-  | .netOf x a => .netOf x (a.withSt w)
+/-- A symbol that reads no storage of the state: not `memory`, a push slot
+(`next`), an index check (`at`) or a memory read. -/
+def Op0.stExplicit : Op0 s → Bool
+  | .memory => false
+  | _ => true
 
-def PTerm.withSt (w : StWrite C) : PTerm C → PTerm C
-  | .root r => .root r
-  | .pv x => .pv x
-  | .field p f => .field (p.withSt w) f
-  | .at p i => .at (p.withSt w) (i.withSt w)
-  | .next p => .next (p.withSt w)
+def Op1.stExplicit : Op1 a s → Bool
+  | .next => false
+  | _ => true
 
-def STerm.withSt (w : StWrite C) : STerm C → STerm C
-  | .storage => w.s
-  | .pv x => .pv x
-  | .save s' p v => .save (s'.withSt w) (p.withSt w) (v.withSt w)
-  | .delAt s' p => .delAt (s'.withSt w) (p.withSt w)
-  | .push s' p v => .push (s'.withSt w) (p.withSt w) (v.withSt w)
-  | .pushSlot s' p E => .pushSlot (s'.withSt w) (p.withSt w) E
-  | .pop s' p => .pop (s'.withSt w) (p.withSt w)
-  | .shrink s' p => .shrink (s'.withSt w) (p.withSt w)
-  | .extend s' p E => .extend (s'.withSt w) (p.withSt w) E
-  | .select s' r => .select (s'.withSt w) r
-
-def SValT.withSt (w : StWrite C) : SValT C → SValT C
-  | .val t => .val (t.withSt w)
-  | .find s' p => .find (s'.withSt w) (p.withSt w)
-  | .copyMem m i => .copyMem m i
-  | .newArr R n => .newArr R (n.withSt w)
-
-end
-
-mutual
+def Op2.stExplicit (o : Op2 a b s) : Bool :=
+  match o with
+  | .at => false
+  | _ => !o.opaque
 
 /-- Every storage read of the term is a `storage` term: no index check, no
 push slot, no memory. -/
-def Term.stExplicit : Term C → Bool
-  | .lit _ | .pv _ | .env _ => true
-  | .binop _ _ a b => a.stExplicit && b.stExplicit
-  | .unop _ _ a | .net a | .netOf _ a => a.stExplicit
-  | .find s p | .len s p => s.stExplicit && p.stExplicit
-  | .ite c a b => c.stExplicit && a.stExplicit && b.stExplicit
-  | .read .. | .mlen .. => false
-
-def PTerm.stExplicit : PTerm C → Bool
-  | .root _ | .pv _ => true
-  | .field p _ => p.stExplicit
-  | .at .. | .next _ => false
-
-def STerm.stExplicit : STerm C → Bool
-  | .storage | .pv _ => true
-  | .save s p v | .push s p v => s.stExplicit && p.stExplicit && v.stExplicit
-  | .delAt s p | .pop s p | .shrink s p | .pushSlot s p _ | .extend s p _ =>
-    s.stExplicit && p.stExplicit
-  | .select s _ => s.stExplicit
-
-def SValT.stExplicit : SValT C → Bool
-  | .val t | .newArr _ t => t.stExplicit
-  | .find s p => s.stExplicit && p.stExplicit
-  | .copyMem .. => false
-
-end
+def Tm.stExplicit : Tm C s → Bool
+  | .pvV _ | .pvP _ | .pvS _ | .pvI _ => true
+  | .app0 o => o.stExplicit
+  | .app1 o a => o.stExplicit && a.stExplicit
+  | .app2 o a b => o.stExplicit && a.stExplicit && b.stExplicit
+  | .app3 _ a b c => a.stExplicit && b.stExplicit && c.stExplicit
 
 section WithSt
 
 variable {w : StWrite C} {σ τ : State}
 
-mutual
+theorem Op2.opaque_of_stExplicit : {o : Op2 a b s} → o.stExplicit = true → o.opaque = false := by
+  intro o h; cases o <;> simp_all only [Op2.stExplicit, Op2.opaque, Bool.not_true, reduceCtorEq]
 
-/-- Read before `{storage := s}`, the substituted term reads what the term
-reads after it. -/
-theorem Term.withSt_eval (hs : w.s.eval σ = .ok τ) (hk : σ.Keeps τ) :
-    (e : Term C) → e.stExplicit = true → (e.withSt w).eval σ = e.eval τ
-  | .lit _, _ => rfl
-  | .pv _, _ | .env _, _ => by rw [← hk]; rfl
-  | .binop _ _ a b, he => by
-    simp only [Term.stExplicit, Bool.and_eq_true] at he
-    simp only [Term.withSt, Term.eval, Term.withSt_eval hs hk a he.1, Term.withSt_eval hs hk b he.2]
-  | .unop _ _ a, he => by
-    simp only [Term.stExplicit] at he
-    simp only [Term.withSt, Term.eval, Term.withSt_eval hs hk a he]
-  | .find s' p, he | .len s' p, he => by
-    simp only [Term.stExplicit, Bool.and_eq_true] at he
-    simp only [Term.withSt, Term.eval, STerm.withSt_eval hs hk s' he.1, PTerm.withSt_eval hs hk p he.2]
-  | .ite c a b, he => by
-    simp only [Term.stExplicit, Bool.and_eq_true] at he
-    simp only [Term.withSt, Term.eval, Term.withSt_eval hs hk c he.1.1, Term.withSt_eval hs hk a he.1.2,
-      Term.withSt_eval hs hk b he.2]
-  | .read .., he | .mlen .., he => by simp only [Term.stExplicit, Bool.false_eq_true] at he
-  | .net a, he | .netOf _ a, he => by
-    simp only [Term.stExplicit] at he
-    simp only [Term.withSt, Term.eval, Term.withSt_eval hs hk a he]
-    rw [← hk]; rfl
+/-- A unary symbol that reads no storage reads alike before and after a
+write that keeps everything but the storage. -/
+theorem Op1.eval_keeps (hk : σ.Keeps τ) :
+    (o : Op1 a s) → o.stExplicit = true → (r : a.Ev) → o.eval σ r = o.eval τ r := by
+  intro o he r
+  cases o <;> first | rfl | (rw [← hk]; rfl) | simp only [Op1.stExplicit, Bool.false_eq_true] at he
 
-theorem PTerm.withSt_eval (hs : w.s.eval σ = .ok τ) (hk : σ.Keeps τ) :
-    (p : PTerm C) → p.stExplicit = true → (p.withSt w).eval σ = p.eval τ
-  | .root _, _ => rfl
-  | .pv _, _ => by rw [← hk]; rfl
-  | .field p _, he => by
-    simp only [PTerm.stExplicit] at he
-    simp only [PTerm.withSt, PTerm.eval, PTerm.withSt_eval hs hk p he]
-  | .at .., he | .next _, he => by simp only [PTerm.stExplicit, Bool.false_eq_true] at he
+theorem Op2.eval_keeps (_hk : σ.Keeps τ) :
+    (o : Op2 a b s) → o.stExplicit = true → (ra : a.Ev) → (rb : b.Ev) →
+      o.eval σ ra rb = o.eval τ ra rb := by
+  intro o he ra rb
+  cases o <;> first | rfl | simp only [Op2.stExplicit, Bool.false_eq_true] at he
 
-theorem STerm.withSt_eval (hs : w.s.eval σ = .ok τ) (hk : σ.Keeps τ) :
-    (s' : STerm C) → s'.stExplicit = true → (s'.withSt w).eval σ = s'.eval τ
-  | .storage, _ => hs
-  | .pv _, _ => by rw [← hk]; rfl
-  | .save s' p v, he | .push s' p v, he => by
-    simp only [STerm.stExplicit, Bool.and_eq_true] at he
-    simp only [STerm.withSt, STerm.eval, STerm.withSt_eval hs hk s' he.1.1, PTerm.withSt_eval hs hk p he.1.2,
-      SValT.withSt_eval hs hk v he.2]
-  | .delAt s' p, he | .pop s' p, he | .shrink s' p, he | .pushSlot s' p _, he
-  | .extend s' p _, he => by
-    simp only [STerm.stExplicit, Bool.and_eq_true] at he
-    simp only [STerm.withSt, STerm.eval, STerm.withSt_eval hs hk s' he.1, PTerm.withSt_eval hs hk p he.2]
-  | .select s' _, he => by
-    simp only [STerm.stExplicit] at he
-    simp only [STerm.withSt, STerm.eval, STerm.withSt_eval hs hk s' he]
-
-theorem SValT.withSt_eval (hs : w.s.eval σ = .ok τ) (hk : σ.Keeps τ) :
-    (v : SValT C) → v.stExplicit = true → (v.withSt w).eval σ = v.eval τ
-  | .val t, he | .newArr _ t, he => by
-    simp only [SValT.stExplicit] at he
-    simp only [SValT.withSt, SValT.eval, Term.withSt_eval hs hk t he]
-  | .find s' p, he => by
-    simp only [SValT.stExplicit, Bool.and_eq_true] at he
-    simp only [SValT.withSt, SValT.eval, STerm.withSt_eval hs hk s' he.1, PTerm.withSt_eval hs hk p he.2]
-  | .copyMem .., he => by simp only [SValT.stExplicit, Bool.false_eq_true] at he
-
-end
+/-- **Read before `{storage := s}`, the substituted term reads what the
+term reads after it**, where every storage read is a `storage` term. -/
+theorem Tm.withSt_eval (hs : w.s.eval σ = .ok τ) (hk : σ.Keeps τ) :
+    (e : Tm C s) → e.stExplicit = true → (e.withSt w).eval σ = e.eval τ
+  | .pvV _, _ | .pvP _, _ | .pvS _, _ | .pvI _, _ => by rw [← hk]; rfl
+  | .app0 o, he => by
+    cases o with
+    | storage => exact hs
+    | memory => simp only [Tm.stExplicit, Op0.stExplicit, Bool.false_eq_true] at he
+    | lit _ | root _ => rfl
+    | env _ => rw [← hk]; rfl
+  | .app1 o a, he => by
+    simp only [Tm.stExplicit, Bool.and_eq_true] at he
+    have ih := a.withSt_eval hs hk he.2
+    simp only [Tm.withSt, Tm.eval, ih]
+    exact o.eval_keeps hk he.1 _
+  | .app2 o a b, he => by
+    simp only [Tm.stExplicit, Bool.and_eq_true] at he
+    have ha := a.withSt_eval hs hk he.1.2
+    have hb := b.withSt_eval hs hk he.2
+    simp only [Tm.withSt, Op2.opaque_of_stExplicit he.1.1, Bool.false_eq_true, ↓reduceIte, Tm.eval,
+      ha, hb]
+    exact o.eval_keeps hk he.1.1 _ _
+  | .app3 o a b c, he => by
+    simp only [Tm.stExplicit, Bool.and_eq_true] at he
+    simp only [Tm.withSt, Tm.eval, a.withSt_eval hs hk he.1.1, b.withSt_eval hs hk he.1.2,
+      c.withSt_eval hs hk he.2]
+    rfl
 
 end WithSt
 
@@ -2364,19 +2034,19 @@ theorem UpdElem.withSt_write {s : STerm C} {σ τ : State} (hs : s.eval σ = .ok
     (hk : σ.Keeps τ) (ρ : State) :
     (e : UpdElem C) → e.stExplicit = true → (e.withSt s).write σ ρ = e.write τ ρ
   | .val _ t, he => by
-    simp only [UpdElem.withSt, UpdElem.write, Term.withSt_eval (w := ⟨s⟩) hs hk t he]
+    simp only [UpdElem.withSt, UpdElem.write, Tm.withSt_eval (w := ⟨s⟩) hs hk t he]
   | .path _ p, he => by
-    simp only [UpdElem.withSt, UpdElem.write, PTerm.withSt_eval (w := ⟨s⟩) hs hk p he]
+    simp only [UpdElem.withSt, UpdElem.write, Tm.withSt_eval (w := ⟨s⟩) hs hk p he]
   | .storage s', he | .store _ s', he => by
-    simp only [UpdElem.withSt, UpdElem.write, STerm.withSt_eval (w := ⟨s⟩) hs hk s' he]
+    simp only [UpdElem.withSt, UpdElem.write, Tm.withSt_eval (w := ⟨s⟩) hs hk s' he]
   | .selfBalance _ a, he => by
     simp only [UpdElem.stExplicit] at he
-    simp only [UpdElem.withSt, UpdElem.write, Term.withSt_eval (w := ⟨s⟩) hs hk a he]
+    simp only [UpdElem.withSt, UpdElem.write, Tm.withSt_eval (w := ⟨s⟩) hs hk a he]
     rw [← hk]
   | .net r _ a, he => by
     simp only [UpdElem.stExplicit, Bool.and_eq_true] at he
-    simp only [UpdElem.withSt, UpdElem.write, Term.withSt_eval (w := ⟨s⟩) hs hk r he.1,
-      Term.withSt_eval (w := ⟨s⟩) hs hk a he.2]
+    simp only [UpdElem.withSt, UpdElem.write, Tm.withSt_eval (w := ⟨s⟩) hs hk r he.1,
+      Tm.withSt_eval (w := ⟨s⟩) hs hk a he.2]
     rw [← hk]; rfl
   | .saveNet _, _ => by simp only [UpdElem.withSt, UpdElem.write]; rw [← hk]
   | .mref .., he | .memory _, he => by simp only [UpdElem.stExplicit, Bool.false_eq_true] at he
@@ -2427,142 +2097,53 @@ variable {w : StWrite C} {σ τ : State}
 theorem Semantics.State.Keeps.getEnv (hk : σ.Keeps τ) (x : Var) : τ.getEnv x = σ.getEnv x := by
   rw [← hk]; rfl
 
-mutual
+theorem Op1.denote_keeps (hk : σ.Keeps τ) :
+    (o : Op1 a s) → o.stExplicit = true → (d : a.Den) → o.denote σ d = o.denote τ d := by
+  intro o he d
+  cases o <;> first | rfl | (rw [← hk]; rfl) | simp only [Op1.stExplicit, Bool.false_eq_true] at he
 
-/-- Read before `{storage := s}`, the substituted term denotes, up to
-`Equiv`, what the term denotes after it. -/
-theorem Term.withSt_denote (hs : w.s.eval σ = .ok τ) (hk : σ.Keeps τ) :
-    (e : Term C) → e.stExplicit = true → Equiv ((e.withSt w).denote σ) (e.denote τ)
-  | .lit _, _ => Equiv.refl _
-  | .pv x, _ => by
-    simp only [Term.withSt, Term.denote, hk.getEnv x]
-    exact Equiv.refl _
-  | .env k, _ => by
-    rw [← hk]
-    exact Equiv.refl _
-  | .binop op p a b, he => by
-    simp only [Term.stExplicit, Bool.and_eq_true] at he
-    simp only [Term.withSt, Term.denote, (Term.withSt_denote hs hk a he.1).toRes,
-      (Term.withSt_denote hs hk b he.2).toRes]
-    exact Equiv.refl _
-  | .unop op p a, he => by
-    simp only [Term.stExplicit] at he
-    simp only [Term.withSt, Term.denote, (Term.withSt_denote hs hk a he).toRes]
-    exact Equiv.refl _
-  | .find s' p, he => by
-    simp only [Term.stExplicit, Bool.and_eq_true] at he
-    simp only [Term.withSt, Term.denote, PTerm.withSt_denote hs hk p he.2]
-    exact Equiv.findSt (STerm.withSt_denote hs hk s' he.1) _
-  | .len s' p, he => by
-    simp only [Term.stExplicit, Bool.and_eq_true] at he
-    simp only [Term.withSt, Term.denote, PTerm.withSt_denote hs hk p he.2]
-    exact Equiv.findSt (STerm.withSt_denote hs hk s' he.1) _
-  | .ite c a b, he => by
-    simp only [Term.stExplicit, Bool.and_eq_true] at he
-    have ea : Equiv ((a.withSt w).denote σ) (a.denote τ) := Term.withSt_denote hs hk a he.1.2
-    have eb : Equiv ((b.withSt w).denote σ) (b.denote τ) := Term.withSt_denote hs hk b he.2
-    simp only [Term.withSt, Term.denote]
-    rcases (Term.withSt_denote hs hk c he.1.1).eq_or_st with hc | ⟨s, t, hc, hc'⟩
-    · rw [hc]
-      split
-      · exact ea
-      · exact eb
-      · exact Equiv.refl _
-    · rw [hc, hc']
-      exact Equiv.refl _
-  | .read .., he | .mlen .., he => by simp only [Term.stExplicit, Bool.false_eq_true] at he
-  | .net a, he => by
-    simp only [Term.stExplicit] at he
-    have hn : τ.net = σ.net := by rw [← hk]
-    simp only [Term.withSt, Term.denote, State.getNet, hn]
-    rcases (Term.withSt_denote hs hk a he).eq_or_st with ha | ⟨s, t, ha, ha'⟩
-    · rw [ha]
-      exact Equiv.refl _
-    · rw [ha, ha']
-      exact Equiv.refl _
-  | .netOf x a, he => by
-    simp only [Term.stExplicit] at he
-    simp only [Term.withSt, Term.denote, hk.getEnv x]
-    rcases (Term.withSt_denote hs hk a he).eq_or_st with ha | ⟨s, t, ha, ha'⟩
-    · rw [ha]
-      exact Equiv.refl _
-    · rw [ha, ha']
-      rcases σ.getEnv x with _ | b
-      · exact Equiv.refl _
-      · cases b <;> exact Equiv.refl _
+theorem Op2.denote_keeps (_hk : σ.Keeps τ) :
+    (o : Op2 a b s) → o.stExplicit = true → (ra ra' : a.Ev) → (rb rb' : b.Ev) → (d : a.Den) →
+      (e : b.Den) → o.denote σ ra rb d e = o.denote τ ra' rb' d e := by
+  intro o he ra ra' rb rb' d e
+  cases o <;> first | rfl | simp only [Op2.stExplicit, Op2.opaque, Bool.not_true,
+    Bool.false_eq_true] at he
 
-/-- Read before `{storage := s}`, the substituted path denotes the path the
-path denotes after it. -/
-theorem PTerm.withSt_denote (hs : w.s.eval σ = .ok τ) (hk : σ.Keeps τ) :
-    (p : PTerm C) → p.stExplicit = true → (p.withSt w).denote σ = p.denote τ
-  | .root _, _ => rfl
-  | .pv x, _ => by
-    simp only [PTerm.withSt, PTerm.denote, aliasPath, hk.getEnv x]
-  | .field p _, he => by
-    simp only [PTerm.stExplicit] at he
-    simp only [PTerm.withSt, PTerm.denote, PTerm.withSt_denote hs hk p he]
-  | .at .., he | .next _, he => by simp only [PTerm.stExplicit, Bool.false_eq_true] at he
-
-/-- Read before `{storage := s}`, the substituted storage denotes, up to
-`Equiv`, what the storage term denotes after it; `storage` itself becomes
-`s`, which denotes the storage its run leaves (`STerm.denote_eval`). -/
-theorem STerm.withSt_denote (hs : w.s.eval σ = .ok τ) (hk : σ.Keeps τ) :
-    (s' : STerm C) → s'.stExplicit = true → Struct.Equiv ((s'.withSt w).denote σ) (s'.denote τ)
-  | .storage, _ => STerm.denote_eval hs
-  | .pv x, _ => by
-    simp only [STerm.withSt, STerm.denote, hk.getEnv x]
+/-- **Read before `{storage := s}`, the substituted term denotes, up to
+`Equiv`, what the term denotes after it**; `storage` itself becomes `s`,
+which denotes the storage its run leaves (`STerm.denote_eval`). -/
+theorem Tm.withSt_denote (hs : w.s.eval σ = .ok τ) (hk : σ.Keeps τ) :
+    (e : Tm C s) → e.stExplicit = true → Srt.DEquiv s ((e.withSt w).denote σ) (e.denote τ)
+  | .pvV x, _ | .pvS x, _ => by
+    simp only [Srt.DEquiv, Tm.withSt, Tm.denote, hk.getEnv x]
     exact Equiv.refl _
-  | .save s' p v, he => by
-    simp only [STerm.stExplicit, Bool.and_eq_true] at he
-    simp only [STerm.withSt, STerm.denote, PTerm.withSt_denote hs hk p he.1.2]
-    exact Struct.Equiv.copyTo (STerm.withSt_denote hs hk s' he.1.1)
-      (SValT.withSt_denote hs hk v he.2) _
-  | .delAt s' p, he => by
-    simp only [STerm.stExplicit, Bool.and_eq_true] at he
-    simp only [STerm.withSt, STerm.denote, PTerm.withSt_denote hs hk p he.2]
-    exact Struct.Equiv.delAt (STerm.withSt_denote hs hk s' he.1) _
-  | .push s' p v, he => by
-    simp only [STerm.stExplicit, Bool.and_eq_true] at he
-    simp only [STerm.withSt, STerm.denote, PTerm.withSt_denote hs hk p he.1.2]
-    exact Struct.Equiv.pushT (STerm.withSt_denote hs hk s' he.1.1)
-      (Equiv.stripVal (SValT.withSt_denote hs hk v he.2)) _
-  | .pushSlot s' p _, he => by
-    simp only [STerm.stExplicit, Bool.and_eq_true] at he
-    simp only [STerm.withSt, STerm.denote, PTerm.withSt_denote hs hk p he.2]
-    exact Struct.Equiv.pushSlotT _ _ (STerm.withSt_denote hs hk s' he.1) _
-  | .extend s' p _, he => by
-    simp only [STerm.stExplicit, Bool.and_eq_true] at he
-    simp only [STerm.withSt, STerm.denote, PTerm.withSt_denote hs hk p he.2]
-    exact Struct.Equiv.pushSlotT _ _ (STerm.withSt_denote hs hk s' he.1) _
-  | .pop s' p, he => by
-    simp only [STerm.stExplicit, Bool.and_eq_true] at he
-    simp only [STerm.withSt, STerm.denote, PTerm.withSt_denote hs hk p he.2]
-    exact Struct.Equiv.popT (STerm.withSt_denote hs hk s' he.1) _
-  | .shrink s' p, he => by
-    simp only [STerm.stExplicit, Bool.and_eq_true] at he
-    simp only [STerm.withSt, STerm.denote, PTerm.withSt_denote hs hk p he.2]
-    exact Struct.Equiv.shrinkT (STerm.withSt_denote hs hk s' he.1) _
-  | .select s' _, he => by
-    simp only [STerm.stExplicit] at he
-    simp only [STerm.withSt, STerm.denote]
-    exact Equiv.asStruct (Equiv.findSt (STerm.withSt_denote hs hk s' he) [_])
+  | .pvP x, _ => by simp only [Srt.DEquiv, Tm.withSt, Tm.denote, aliasPath, hk.getEnv x]
+  | .pvI _, _ => trivial
+  | .app0 o, he => by
+    cases o with
+    | storage => exact STerm.denote_eval hs
+    | memory => simp only [Tm.stExplicit, Op0.stExplicit, Bool.false_eq_true] at he
+    | lit _ | root _ => exact Srt.DEquiv.refl _ _
+    | env _ => rw [← hk]; exact Srt.DEquiv.refl _ _
+  | .app1 o a, he => by
+    simp only [Tm.stExplicit, Bool.and_eq_true] at he
+    simp only [Tm.withSt, Tm.denote]
+    exact Srt.DEquiv.of_eq (o.denote_keeps hk he.1 _) (o.denote_congr (a.withSt_denote hs hk he.2))
+  | .app2 o a b, he => by
+    simp only [Tm.stExplicit, Bool.and_eq_true] at he
+    simp only [Tm.withSt, Op2.opaque_of_stExplicit he.1.1, Bool.false_eq_true, ↓reduceIte,
+      Tm.denote]
+    exact Srt.DEquiv.of_eq (o.denote_keeps hk he.1.1 _ (a.eval τ) _ (b.eval τ) _ _)
+      (o.denote_congr (Op2.opaque_of_stExplicit he.1.1) (a.withSt_denote hs hk he.1.2)
+        (b.withSt_denote hs hk he.2))
+  | .app3 o a b c, he => by
+    simp only [Tm.stExplicit, Bool.and_eq_true] at he
+    exact o.denote_congr (a.withSt_denote hs hk he.1.1) (b.withSt_denote hs hk he.1.2)
+      (c.withSt_denote hs hk he.2)
 
-/-- Read before `{storage := s}`, the substituted stored value denotes, up
-to `Equiv`, what it denotes after it. -/
-theorem SValT.withSt_denote (hs : w.s.eval σ = .ok τ) (hk : σ.Keeps τ) :
-    (v : SValT C) → v.stExplicit = true → Equiv ((v.withSt w).denote σ) (v.denote τ)
-  | .val t, he => Term.withSt_denote hs hk t he
-  | .newArr R n, he => by
-    simp only [SValT.stExplicit] at he
-    simp only [SValT.withSt, SValT.denote, (Term.withSt_denote hs hk n he).asInt]
-    exact Equiv.refl _
-  | .find s' p, he => by
-    simp only [SValT.stExplicit, Bool.and_eq_true] at he
-    simp only [SValT.withSt, SValT.denote, PTerm.withSt_denote hs hk p he.2]
-    exact Equiv.findSt (STerm.withSt_denote hs hk s' he.1) _
-  | .copyMem .., he => by simp only [SValT.stExplicit, Bool.false_eq_true] at he
-
-end
+theorem Term.withSt_denote (hs : w.s.eval σ = .ok τ) (hk : σ.Keeps τ) (e : Term C)
+    (he : e.stExplicit = true) : Equiv ((e.withSt w).denote σ) (e.denote τ) :=
+  Tm.withSt_denote hs hk e he
 
 end WithStDenote
 
@@ -2577,7 +2158,7 @@ def Fml.withSt (s : STerm C) : Fml C → Fml C
   | φ => φ
 
 /-- Every storage read of the formula's terms is a `storage` term
-(`Term.stExplicit`). -/
+(`Tm.stExplicit`). -/
 def Fml.stExplicit : Fml C → Bool
   | .eq a b => a.stExplicit && b.stExplicit
   | .defined t => t.stExplicit
@@ -2602,7 +2183,7 @@ theorem Fml.withSt_holds {s : STerm C} {σ τ : State} (hs : s.eval σ = .ok τ)
   | .defined t, _, he => by
     simp only [Fml.stExplicit] at he
     simp only [Fml.withSt, holds,
-      Term.withSt_eval (w := ⟨s⟩) hs (STerm.eval_keeps s hs) t he]
+      Tm.withSt_eval (w := ⟨s⟩) hs (STerm.eval_keeps s hs) t he]
   | .not φ, hr, he => by
     simp only [Fml.rigid] at hr
     simp only [Fml.stExplicit] at he
@@ -2716,64 +2297,92 @@ theorem Term.pick_eval (hq : Term.EvalRefines q.1 q.2) {e d : Term C}
     exact hq σ
   · exact hd σ
 
-mutual
+/-- Where the first reading returns, the second returns the same. -/
+def Srt.Le : (s : Srt) → s.Ev → s.Ev → Prop
+  | .val => Res.Le
+  | .path => Res.Le
+  | .st => Res.Le
+  | .sv => Res.Le
+  | .ident => Res.Le
+  | .addr => Res.Le
+  | .mem => Res.Le
+  | .mv => Res.Le
 
-/-- Replacing `q.1` by a term that refines it keeps every value a term returns. -/
-theorem Term.rw_eval (hq : Term.EvalRefines q.1 q.2) :
-    (e : Term C) → ∀ σ, Res.Le (e.eval σ) ((e.rw q).eval σ)
-  | .lit _ | .pv _ | .read .. | .mlen .. | .env _ => Term.pick_eval hq fun _ => Res.Le.refl _
-  | .binop _ _ a b => Term.pick_eval hq fun σ =>
-      Res.Le.bind (Term.rw_eval hq a σ) fun _ => evalBinop_le (Term.rw_eval hq b σ)
-  | .unop _ _ a => Term.pick_eval hq fun σ =>
-      Res.Le.bind (Term.rw_eval hq a σ) fun _ => Res.Le.refl _
-  | .find s p | .len s p => Term.pick_eval hq fun σ =>
-      Res.Le.bind (STerm.rw_eval hq s σ) fun _ =>
-        Res.Le.bind (PTerm.rw_eval hq p σ) fun _ => Res.Le.refl _
-  | .ite c a b => Term.pick_eval hq fun σ =>
-      Res.Le.bind (Term.rw_eval hq c σ) fun _ => pickBranch_le (Term.rw_eval hq a σ) (Term.rw_eval hq b σ)
-  | .net a => Term.pick_eval hq fun σ =>
-      Res.Le.bind (Term.rw_eval hq a σ) fun _ => Res.Le.refl _
-  | .netOf _ a => Term.pick_eval hq fun σ =>
-      Res.Le.bind (Res.Le.refl _) fun b => by
-        cases b <;> first
-          | exact Res.Le.refl _
-          | exact Res.Le.bind (Term.rw_eval hq a σ) fun _ => Res.Le.refl _
+theorem Srt.Le.refl : (s : Srt) → (r : s.Ev) → Srt.Le s r r
+  | .val, r | .path, r | .st, r | .sv, r | .ident, r | .addr, r | .mem, r | .mv, r =>
+    Res.Le.refl r
 
-theorem PTerm.rw_eval (hq : Term.EvalRefines q.1 q.2) :
-    (p : PTerm C) → ∀ σ, Res.Le (p.eval σ) ((p.rw q).eval σ)
-  | .root _, _ | .pv _, _ => Res.Le.refl _
-  | .field p _, σ => Res.Le.bind (PTerm.rw_eval hq p σ) fun _ => Res.Le.refl _
-  | .at p i, σ => Res.Le.bind (PTerm.rw_eval hq p σ) fun _ =>
-      Res.Le.bind (Term.rw_eval hq i σ) fun _ => Res.Le.refl _
-  | .next p, σ => Res.Le.bind (PTerm.rw_eval hq p σ) fun _ => Res.Le.refl _
+/-- A symbol keeps every value its arguments return: its reading is binds
+on theirs. -/
+theorem Op1.eval_le {σ : State} : (o : Op1 a s) → {r r' : a.Ev} → Srt.Le a r r' →
+    Srt.Le s (o.eval σ r) (o.eval σ r')
+  | .netOf _, _, _, h => Res.Le.bind (Res.Le.refl _) fun b => by
+      cases b <;> first
+        | exact Res.Le.refl _
+        | exact Res.Le.bind h fun _ => Res.Le.refl _
+  | .unop .., _, _, h | .net, _, _, h | .field _, _, _, h | .next, _, _, h
+  | .select _, _, _, h | .sval, _, _, h | .newArr _, _, _, h | .alloc _, _, _, h
+  | .mfield _, _, _, h | .addM _, _, _, h | .mval, _, _, h | .ref, _, _, h =>
+    Res.Le.bind h fun _ => Res.Le.refl _
 
-theorem STerm.rw_eval (hq : Term.EvalRefines q.1 q.2) :
-    (s : STerm C) → ∀ σ, Res.Le (s.eval σ) ((s.rw q).eval σ)
-  | .storage, _ | .pv _, _ => Res.Le.refl _
-  | .save s p v, σ =>
-    Res.Le.bind (SValT.rw_eval hq v σ) fun _ => Res.Le.bind (STerm.rw_eval hq s σ) fun _ =>
-      Res.Le.bind (PTerm.rw_eval hq p σ) fun _ => Res.Le.refl _
-  | .delAt s p, σ | .pushSlot s p _, σ | .pop s p, σ | .shrink s p, σ | .extend s p _, σ =>
-    Res.Le.bind (STerm.rw_eval hq s σ) fun _ => Res.Le.bind (PTerm.rw_eval hq p σ) fun _ =>
-      Res.Le.refl _
-  | .push s p v, σ =>
-    Res.Le.bind (STerm.rw_eval hq s σ) fun _ => Res.Le.bind (PTerm.rw_eval hq p σ) fun _ =>
-      pushAt_le fun _ => Res.Le.bind (SValT.rw_eval hq v σ) fun _ => Res.Le.refl _
-  | .select s _, σ => Res.Le.bind (STerm.rw_eval hq s σ) fun _ => Res.Le.refl _
+theorem Op2.eval_le {σ : State} : (o : Op2 a b s) → {ra ra' : a.Ev} → {rb rb' : b.Ev} →
+    Srt.Le a ra ra' → Srt.Le b rb rb' → Srt.Le s (o.eval σ ra rb) (o.eval σ ra' rb')
+  | .binop .., _, _, _, _, ha, hb => Res.Le.bind ha fun _ => evalBinop_le hb
+  | .copy, _, _, _, _, ha, hb | .copySt, _, _, _, _, ha, hb =>
+    Res.Le.bind hb fun _ => Res.Le.bind ha fun _ => Res.Le.refl _
+  | .find, _, _, _, _, ha, hb | .len, _, _, _, _, ha, hb | .read, _, _, _, _, ha, hb
+  | .mlen, _, _, _, _, ha, hb | .at, _, _, _, _, ha, hb | .delAt, _, _, _, _, ha, hb
+  | .pushSlot _, _, _, _, _, ha, hb | .pop, _, _, _, _, ha, hb | .shrink, _, _, _, _, ha, hb
+  | .extend _, _, _, _, _, ha, hb | .sfind, _, _, _, _, ha, hb | .copyMem, _, _, _, _, ha, hb
+  | .iread, _, _, _, _, ha, hb | .mat, _, _, _, _, ha, hb =>
+    Res.Le.bind ha fun _ => Res.Le.bind hb fun _ => Res.Le.refl _
 
-theorem SValT.rw_eval (hq : Term.EvalRefines q.1 q.2) :
-    (v : SValT C) → ∀ σ, Res.Le (v.eval σ) ((v.rw q).eval σ)
-  | .val t, σ => Res.Le.bind (Term.rw_eval hq t σ) fun _ => Res.Le.refl _
-  | .find s p, σ => Res.Le.bind (STerm.rw_eval hq s σ) fun _ =>
-      Res.Le.bind (PTerm.rw_eval hq p σ) fun _ => Res.Le.refl _
-  | .copyMem .., _ => Res.Le.refl _
-  | .newArr _ n, σ =>
-    Res.Le.bind (Term.rw_eval hq n σ) fun _ => Res.Le.refl _
+theorem Op3.eval_le {σ : State} : (o : Op3 a b c s) → {ra ra' : a.Ev} → {rb rb' : b.Ev} →
+    {rc rc' : c.Ev} → Srt.Le a ra ra' → Srt.Le b rb rb' → Srt.Le c rc rc' →
+    Srt.Le s (o.eval σ ra rb rc) (o.eval σ ra' rb' rc')
+  | .ite, _, _, _, _, _, _, hc, ha, hb => Res.Le.bind hc fun _ => pickBranch_le ha hb
+  | .save, _, _, _, _, _, _, hs, hp, hv =>
+    Res.Le.bind hv fun _ => Res.Le.bind hs fun _ => Res.Le.bind hp fun _ => Res.Le.refl _
+  | .push, _, _, _, _, _, _, hs, hp, hv =>
+    Res.Le.bind hs fun _ => Res.Le.bind hp fun _ =>
+      pushAt_le fun _ => Res.Le.bind hv fun _ => Res.Le.refl _
+  | .write, _, _, _, _, _, _, hm, ha, hv =>
+    Res.Le.bind hv fun _ => Res.Le.bind hm fun _ => Res.Le.bind ha fun _ => Res.Le.refl _
 
-end
+theorem Tm.pickAt_eval (hq : Term.EvalRefines q.1 q.2) :
+    {s : Srt} → {e d : Tm C s} → (∀ σ, Srt.Le s (e.eval σ) (d.eval σ)) → (σ : State) →
+      Srt.Le s (e.eval σ) ((Tm.pickAt q e d).eval σ)
+  | .val, _, _, hd, σ => Term.pick_eval hq hd σ
+  | .path, _, _, hd, σ | .st, _, _, hd, σ | .sv, _, _, hd, σ | .ident, _, _, hd, σ
+  | .addr, _, _, hd, σ | .mem, _, _, hd, σ | .mv, _, _, hd, σ => hd σ
+
+/-- **Replacing `q.1` by a term that refines it keeps every value a term
+returns.** -/
+theorem Tm.rw_eval (hq : Term.EvalRefines q.1 q.2) :
+    (e : Tm C s) → ∀ σ, Srt.Le s (e.eval σ) ((e.rw q).eval σ)
+  | .pvV _ | .app0 _ => Tm.pickAt_eval hq fun _ => Srt.Le.refl _ _
+  | .pvP _ | .pvS _ | .pvI _ => fun _ => Srt.Le.refl _ _
+  | .app1 o a => Tm.pickAt_eval hq fun σ => o.eval_le (a.rw_eval hq σ)
+  | .app2 o a b => Tm.pickAt_eval hq fun σ => by
+    cases ho : o.opaque
+    · simp only [Bool.false_eq_true, ↓reduceIte]
+      exact o.eval_le (a.rw_eval hq σ) (b.rw_eval hq σ)
+    · simp only [↓reduceIte]
+      exact Srt.Le.refl _ _
+  | .app3 o a b c => Tm.pickAt_eval hq fun σ =>
+    o.eval_le (a.rw_eval hq σ) (b.rw_eval hq σ) (c.rw_eval hq σ)
+
+theorem Term.rw_eval (hq : Term.EvalRefines q.1 q.2) (e : Term C) (σ : State) :
+    Res.Le (e.eval σ) ((e.rw q).eval σ) := Tm.rw_eval hq e σ
+theorem PTerm.rw_eval (hq : Term.EvalRefines q.1 q.2) (p : PTerm C) (σ : State) :
+    Res.Le (p.eval σ) ((p.rw q).eval σ) := Tm.rw_eval hq p σ
+theorem STerm.rw_eval (hq : Term.EvalRefines q.1 q.2) (s : STerm C) (σ : State) :
+    Res.Le (s.eval σ) ((s.rw q).eval σ) := Tm.rw_eval hq s σ
+theorem SValT.rw_eval (hq : Term.EvalRefines q.1 q.2) (v : SValT C) (σ : State) :
+    Res.Le (v.eval σ) ((v.rw q).eval σ) := Tm.rw_eval hq v σ
 
 /-- Every occurrence of `q.1` in an element's right-hand side, replaced by
-`q.2`; a memory right-hand side is left alone, as `Term.rw` leaves a memory term. -/
+`q.2`; a memory right-hand side is left alone, as `Tm.rw` leaves a memory term. -/
 def UpdElem.rw (q : Term C × Term C) : UpdElem C → UpdElem C
   | .val x t => .val x (t.rw q)
   | .path x p => .path x (p.rw q)

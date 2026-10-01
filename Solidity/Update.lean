@@ -1,4 +1,5 @@
 import Solidity.Semantics.Agree
+import Solidity.TermSimp
 import Solidity.Theory.Abs
 
 /-!
@@ -56,118 +57,238 @@ def Modality.after (m : Modality) (p : State → Prop) : Res State → Prop
   | .ok τ => p τ
   | .error _ => m.onHalt
 
-/-! ## Terms -/
+/-! ## Terms
 
-mutual
+One signature, KeY's: a sort (`Srt`) per kind of term, and function symbols
+by arity (`Op0` … `Op3`), each indexed by the sorts of its arguments and of
+its result.  A term (`Tm C s`) is a variable of a sort that has them, or a
+symbol applied to terms of its argument sorts.  So every traversal — what a
+term reads (`Tm.vars`), substitution, replacing a subterm — is written once,
+for the four arities, and a new symbol is a constructor of an `Op` and its
+meaning (`OpN.eval`, `OpN.denote`), nothing more.
 
-/-- A value term. -/
-inductive Term (C : Contract) where
-  | lit (v : Value)
-  | pv (x : Var)
-  /-- `a ⊕ b`, range-checked at `p` as the interpreter checks it. -/
-  | binop (op : BinOp) (p : PrimTy) (a b : Term C)
-  | unop (op : UnOp) (p : PrimTy) (a : Term C)
-  /-- `find(s, p)`, and at a state variable KeY's `select(s, r)`. -/
-  | find (s : STerm C) (p : PTerm C)
-  /-- `s[p].length`: KeY's `find(s, p.size)`. -/
-  | len (s : STerm C) (p : PTerm C)
-  /-- `read(m, a)`: a value in memory. -/
-  | read (m : MTerm C) (a : MAddr C)
-  /-- `c ? a : b`, KeY's `if c then a else b`. -/
-  | ite (c a b : Term C)
-  /-- `m[i].length`: KeY's `read(m, i, size)`. -/
-  | mlen (m : MTerm C) (i : ITerm C)
+The sorts keep their names: `Term C` is `Tm C .val`, `STerm C` is
+`Tm C .st`, and every symbol has its old constructor name as a pattern
+(`Term.find s p` is `.app2 .find s p`), so `.find s p` builds and matches a
+term as before. -/
+
+/-- The sorts of terms. -/
+inductive Srt where
+  /-- `Term`: a value. -/
+  | val
+  /-- `PTerm`: a storage path. -/
+  | path
+  /-- `STerm`: a storage. -/
+  | st
+  /-- `SValT`: what a storage `save` writes. -/
+  | sv
+  /-- `ITerm`: a memory identity. -/
+  | ident
+  /-- `MAddr`: a member or an element of a memory object. -/
+  | addr
+  /-- `MTerm`: a memory. -/
+  | mem
+  /-- `MValT`: what a memory `write` writes. -/
+  | mv
+  deriving DecidableEq, Repr
+
+/-- Constants. -/
+inductive Op0 : Srt → Type where
+  | lit (v : Value) : Op0 .val
   /-- `msgSender`, `msgValue`, `selfBalance`: KeY's program variables of
   `netHeader.key`, and `block.timestamp`. -/
-  | env (k : EnvKey)
+  | env (k : EnvKey) : Op0 .val
+  | root (r : Name) : Op0 .path
+  | storage : Op0 .st
+  | memory : Op0 .mem
+  deriving DecidableEq, Repr
+
+/-- Unary symbols. -/
+inductive Op1 : Srt → Srt → Type where
+  | unop (op : UnOp) (p : PrimTy) : Op1 .val .val
   /-- `net(a)`: what the ledger holds for the address `a`, KeY's
   `selectSt(net, at(a))`; `0` where it never booked `a`. -/
-  | net (a : Term C)
+  | net : Op1 .val .val
   /-- `x[a]`: what the ledger bound at `x` holds for `a`, KeY's
   `selectSt(oldNet, at(a))`, which a specification's `\old(net(a))` reads. -/
-  | netOf (x : Var) (a : Term C)
-
-/-- A storage path. -/
-inductive PTerm (C : Contract) where
-  | root (r : Name)
-  | pv (x : Var)
-  | field (p : PTerm C) (f : Name)
-  /-- `p[i]`, the index checked against `p`'s length where it is taken
-  (`State.checkIndex`), as the program checks it. -/
-  | at (p : PTerm C) (i : Term C)
+  | netOf (x : Var) : Op1 .val .val
+  | field (f : Name) : Op1 .path .path
   /-- `p[p.length]`: the slot one past the end, where `lsv = p.push()` binds
   its alias (KeY's `consr(p, at(find(storage, consr(p, size))))`).  No bounds
   check: it is past them by construction. -/
-  | next (p : PTerm C)
-
-/-- A storage. -/
-inductive STerm (C : Contract) where
-  | storage
-  /-- A storage variable: KeY's `old`, of sort `Struct`, bound by the update
-  `old := storage` in front of a specification's modality. -/
-  | pv (x : Var)
-  /-- `save(s, p, v)`; at a state variable, KeY's `store(s, r, v)`. -/
-  | save (s : STerm C) (p : PTerm C) (v : SValT C)
-  /-- `delAt(s, p)`: the value at `p` reset to its default. -/
-  | delAt (s : STerm C) (p : PTerm C)
-  /-- `save(save(s, p[p.length], v), p.length, p.length + 1)`. -/
-  | push (s : STerm C) (p : PTerm C) (v : SValT C)
-  /-- `save(delAt(s, p[p.length]), p.length, p.length + 1)`: the slot a bare
-  `push()` lands on, recycled or the default of `E`. -/
-  | pushSlot (s : STerm C) (p : PTerm C) (E : Ty)
-  /-- `save(delAt(s, p[p.length - 1]), p.length, p.length - 1)`. -/
-  | pop (s : STerm C) (p : PTerm C)
-  /-- `save(s, p.length, p.length - 1)`: a pop that leaves the element as it
-  is, an array of mappings'. -/
-  | shrink (s : STerm C) (p : PTerm C)
-  /-- The extent write of `lsv = p.push()`: `save(s, p.length, p.length + 1)`. -/
-  | extend (s : STerm C) (p : PTerm C) (E : Ty)
+  | next : Op1 .path .path
   /-- `select(s, r)`: the struct at member `r` of `s`, KeY's
   `selectSt<[Struct]>(s, r)`.  No program writes it: it is a line of a read
   taken head first, as solkey reads `find(s, cons(r, flds))`. -/
-  | select (s : STerm C) (r : Name)
-
-/-- What a storage `save` writes: a value, a subtree read out of a storage,
-or a memory object copied back (`copyMem(mtSt, m, i)`). -/
-inductive SValT (C : Contract) where
-  | val (t : Term C)
-  | find (s : STerm C) (p : PTerm C)
-  | copyMem (m : MTerm C) (i : ITerm C)
+  | select (r : Name) : Op1 .st .st
+  /-- `SValT.val`: a value written. -/
+  | sval : Op1 .val .sv
   /-- `newArr(n)`: an array of `n` defaults of `R`'s element type, what
   `new R(n)` copies into memory (`newArrVal`). -/
-  | newArr (R : RefTy) (n : Term C)
-
-/-- A memory identity. -/
-inductive ITerm (C : Contract) where
-  | pv (x : Var)
-  /-- The reference held at a memory location. -/
-  | read (m : MTerm C) (a : MAddr C)
+  | newArr (R : RefTy) : Op1 .val .sv
   /-- `freshId(addM(m))`: the identity allocating a default `R` takes. -/
-  | alloc (m : MTerm C) (R : RefTy)
-  /-- `freshId(copySt(m, v))`: the identity a copy of `v` takes. -/
-  | copy (m : MTerm C) (v : SValT C)
-
-/-- A member or an element of a memory object. -/
-inductive MAddr (C : Contract) where
-  | field (i : ITerm C) (f : Name)
-  | at (i : ITerm C) (k : Term C)
-
-/-- A memory. -/
-inductive MTerm (C : Contract) where
-  | memory
-  /-- `write(m, a, v)`. -/
-  | write (m : MTerm C) (a : MAddr C) (v : MValT C)
+  | alloc (R : RefTy) : Op1 .mem .ident
+  /-- `MAddr.field`: a member of a memory object. -/
+  | mfield (f : Name) : Op1 .ident .addr
   /-- `addM(m)`: a default `R` allocated. -/
-  | addM (m : MTerm C) (R : RefTy)
+  | addM (R : RefTy) : Op1 .mem .mem
+  /-- `MValT.val`: a value written. -/
+  | mval : Op1 .val .mv
+  /-- `MValT.ref`: a reference written. -/
+  | ref : Op1 .ident .mv
+  deriving DecidableEq, Repr
+
+/-- Binary symbols. -/
+inductive Op2 : Srt → Srt → Srt → Type where
+  /-- `a ⊕ b`, range-checked at `p` as the interpreter checks it. -/
+  | binop (op : BinOp) (p : PrimTy) : Op2 .val .val .val
+  /-- `find(s, p)`, and at a state variable KeY's `select(s, r)`. -/
+  | find : Op2 .st .path .val
+  /-- `s[p].length`: KeY's `find(s, p.size)`. -/
+  | len : Op2 .st .path .val
+  /-- `read(m, a)`: a value in memory. -/
+  | read : Op2 .mem .addr .val
+  /-- `m[i].length`: KeY's `read(m, i, size)`. -/
+  | mlen : Op2 .mem .ident .val
+  /-- `p[i]`, the index checked against `p`'s length where it is taken
+  (`State.checkIndex`), as the program checks it. -/
+  | at : Op2 .path .val .path
+  /-- `delAt(s, p)`: the value at `p` reset to its default. -/
+  | delAt : Op2 .st .path .st
+  /-- `save(delAt(s, p[p.length]), p.length, p.length + 1)`: the slot a bare
+  `push()` lands on, recycled or the default of `E`. -/
+  | pushSlot (E : Ty) : Op2 .st .path .st
+  /-- `save(delAt(s, p[p.length - 1]), p.length, p.length - 1)`. -/
+  | pop : Op2 .st .path .st
+  /-- `save(s, p.length, p.length - 1)`: a pop that leaves the element as it
+  is, an array of mappings'. -/
+  | shrink : Op2 .st .path .st
+  /-- The extent write of `lsv = p.push()`: `save(s, p.length, p.length + 1)`. -/
+  | extend (E : Ty) : Op2 .st .path .st
+  /-- `SValT.find`: a subtree read out of a storage. -/
+  | sfind : Op2 .st .path .sv
+  /-- `copyMem(mtSt, m, i)`: a memory object copied back. -/
+  | copyMem : Op2 .mem .ident .sv
+  /-- `ITerm.read`: the reference held at a memory location. -/
+  | iread : Op2 .mem .addr .ident
+  /-- `freshId(copySt(m, v))`: the identity a copy of `v` takes. -/
+  | copy : Op2 .mem .sv .ident
+  /-- `MAddr.at`: an element of a memory array. -/
+  | mat : Op2 .ident .val .addr
   /-- `copySt(m, v)`: a storage value copied in. -/
-  | copySt (m : MTerm C) (v : SValT C)
+  | copySt : Op2 .mem .sv .mem
+  deriving DecidableEq, Repr
 
+/-- Ternary symbols. -/
+inductive Op3 : Srt → Srt → Srt → Srt → Type where
+  /-- `c ? a : b`, KeY's `if c then a else b`. -/
+  | ite : Op3 .val .val .val .val
+  /-- `save(s, p, v)`; at a state variable, KeY's `store(s, r, v)`. -/
+  | save : Op3 .st .path .sv .st
+  /-- `save(save(s, p[p.length], v), p.length, p.length + 1)`. -/
+  | push : Op3 .st .path .sv .st
+  /-- `write(m, a, v)`. -/
+  | write : Op3 .mem .addr .mv .mem
+  deriving DecidableEq, Repr
+
+/-- A term of sort `s`: a variable, or a symbol applied to terms. -/
+inductive Tm (C : Contract) : Srt → Type where
+  /-- A stack local. -/
+  | pvV (x : Var) : Tm C .val
+  /-- A storage alias. -/
+  | pvP (x : Var) : Tm C .path
+  /-- A storage variable: KeY's `old`, of sort `Struct`, bound by the update
+  `old := storage` in front of a specification's modality. -/
+  | pvS (x : Var) : Tm C .st
+  /-- A memory local. -/
+  | pvI (x : Var) : Tm C .ident
+  | app0 {s : Srt} (o : Op0 s) : Tm C s
+  | app1 {a s : Srt} (o : Op1 a s) (x : Tm C a) : Tm C s
+  | app2 {a b s : Srt} (o : Op2 a b s) (x : Tm C a) (y : Tm C b) : Tm C s
+  | app3 {a b c s : Srt} (o : Op3 a b c s) (x : Tm C a) (y : Tm C b) (z : Tm C c) : Tm C s
+  deriving DecidableEq, Repr
+
+/-- A value term. -/
+abbrev Term (C : Contract) := Tm C .val
+/-- A storage path. -/
+abbrev PTerm (C : Contract) := Tm C .path
+/-- A storage. -/
+abbrev STerm (C : Contract) := Tm C .st
+/-- What a storage `save` writes: a value, a subtree read out of a storage,
+or a memory object copied back (`copyMem(mtSt, m, i)`). -/
+abbrev SValT (C : Contract) := Tm C .sv
+/-- A memory identity. -/
+abbrev ITerm (C : Contract) := Tm C .ident
+/-- A member or an element of a memory object. -/
+abbrev MAddr (C : Contract) := Tm C .addr
+/-- A memory. -/
+abbrev MTerm (C : Contract) := Tm C .mem
 /-- What a memory `write` writes: a value or a reference. -/
-inductive MValT (C : Contract) where
-  | val (t : Term C)
-  | ref (i : ITerm C)
+abbrev MValT (C : Contract) := Tm C .mv
 
-end
+section Ctors
+
+variable {C : Contract}
+
+@[match_pattern, reducible] def Term.lit (v : Value) : Term C := .app0 (.lit v)
+@[match_pattern, reducible] def Term.pv (x : Var) : Term C := .pvV x
+@[match_pattern, reducible] def Term.binop (op : BinOp) (p : PrimTy) (a b : Term C) : Term C :=
+  .app2 (.binop op p) a b
+@[match_pattern, reducible] def Term.unop (op : UnOp) (p : PrimTy) (a : Term C) : Term C :=
+  .app1 (.unop op p) a
+@[match_pattern, reducible] def Term.find (s : STerm C) (p : PTerm C) : Term C := .app2 .find s p
+@[match_pattern, reducible] def Term.len (s : STerm C) (p : PTerm C) : Term C := .app2 .len s p
+@[match_pattern, reducible] def Term.read (m : MTerm C) (a : MAddr C) : Term C := .app2 .read m a
+@[match_pattern, reducible] def Term.ite (c a b : Term C) : Term C := .app3 .ite c a b
+@[match_pattern, reducible] def Term.mlen (m : MTerm C) (i : ITerm C) : Term C := .app2 .mlen m i
+@[match_pattern, reducible] def Term.env (k : EnvKey) : Term C := .app0 (.env k)
+@[match_pattern, reducible] def Term.net (a : Term C) : Term C := .app1 .net a
+@[match_pattern, reducible] def Term.netOf (x : Var) (a : Term C) : Term C := .app1 (.netOf x) a
+
+@[match_pattern, reducible] def PTerm.root (r : Name) : PTerm C := .app0 (.root r)
+@[match_pattern, reducible] def PTerm.pv (x : Var) : PTerm C := .pvP x
+@[match_pattern, reducible] def PTerm.field (p : PTerm C) (f : Name) : PTerm C := .app1 (.field f) p
+@[match_pattern, reducible] def PTerm.at (p : PTerm C) (i : Term C) : PTerm C := .app2 .at p i
+@[match_pattern, reducible] def PTerm.next (p : PTerm C) : PTerm C := .app1 .next p
+
+@[match_pattern, reducible] def STerm.storage : STerm C := .app0 .storage
+@[match_pattern, reducible] def STerm.pv (x : Var) : STerm C := .pvS x
+@[match_pattern, reducible] def STerm.save (s : STerm C) (p : PTerm C) (v : SValT C) : STerm C :=
+  .app3 .save s p v
+@[match_pattern, reducible] def STerm.delAt (s : STerm C) (p : PTerm C) : STerm C := .app2 .delAt s p
+@[match_pattern, reducible] def STerm.push (s : STerm C) (p : PTerm C) (v : SValT C) : STerm C :=
+  .app3 .push s p v
+@[match_pattern, reducible] def STerm.pushSlot (s : STerm C) (p : PTerm C) (E : Ty) : STerm C :=
+  .app2 (.pushSlot E) s p
+@[match_pattern, reducible] def STerm.pop (s : STerm C) (p : PTerm C) : STerm C := .app2 .pop s p
+@[match_pattern, reducible] def STerm.shrink (s : STerm C) (p : PTerm C) : STerm C := .app2 .shrink s p
+@[match_pattern, reducible] def STerm.extend (s : STerm C) (p : PTerm C) (E : Ty) : STerm C :=
+  .app2 (.extend E) s p
+@[match_pattern, reducible] def STerm.select (s : STerm C) (r : Name) : STerm C := .app1 (.select r) s
+
+@[match_pattern, reducible] def SValT.val (t : Term C) : SValT C := .app1 .sval t
+@[match_pattern, reducible] def SValT.find (s : STerm C) (p : PTerm C) : SValT C := .app2 .sfind s p
+@[match_pattern, reducible] def SValT.copyMem (m : MTerm C) (i : ITerm C) : SValT C := .app2 .copyMem m i
+@[match_pattern, reducible] def SValT.newArr (R : RefTy) (n : Term C) : SValT C := .app1 (.newArr R) n
+
+@[match_pattern, reducible] def ITerm.pv (x : Var) : ITerm C := .pvI x
+@[match_pattern, reducible] def ITerm.read (m : MTerm C) (a : MAddr C) : ITerm C := .app2 .iread m a
+@[match_pattern, reducible] def ITerm.alloc (m : MTerm C) (R : RefTy) : ITerm C := .app1 (.alloc R) m
+@[match_pattern, reducible] def ITerm.copy (m : MTerm C) (v : SValT C) : ITerm C := .app2 .copy m v
+
+@[match_pattern, reducible] def MAddr.field (i : ITerm C) (f : Name) : MAddr C := .app1 (.mfield f) i
+@[match_pattern, reducible] def MAddr.at (i : ITerm C) (k : Term C) : MAddr C := .app2 .mat i k
+
+@[match_pattern, reducible] def MTerm.memory : MTerm C := .app0 .memory
+@[match_pattern, reducible] def MTerm.write (m : MTerm C) (a : MAddr C) (v : MValT C) : MTerm C :=
+  .app3 .write m a v
+@[match_pattern, reducible] def MTerm.addM (m : MTerm C) (R : RefTy) : MTerm C := .app1 (.addM R) m
+@[match_pattern, reducible] def MTerm.copySt (m : MTerm C) (v : SValT C) : MTerm C := .app2 .copySt m v
+
+@[match_pattern, reducible] def MValT.val (t : Term C) : MValT C := .app1 .mval t
+@[match_pattern, reducible] def MValT.ref (i : ITerm C) : MValT C := .app1 .ref i
+
+end Ctors
 
 /-- The value `t++` has: the bumped value for `++t`, the old one for `t++`. -/
 def Term.bumped {C : Contract} (op : IncDec) (p : PrimTy) (t : Term C) : Term C :=
@@ -198,155 +319,168 @@ def readAddr (σ : State) : Addr → Res MVal
       else .error .revert
     | .struct _ => .error .stuck
 
-mutual
+/-- What a term of each sort reads to in the interpreter. -/
+@[reducible] def Srt.Ev : Srt → Type
+  | .val => Res Value
+  | .path => Res (Name × List Seg)
+  | .st => Res State
+  | .sv => Res SVal
+  | .ident => Res Nat
+  | .addr => Res Addr
+  | .mem => Res State
+  | .mv => Res MVal
 
-def Term.eval (σ : State) : Term C → Res Value
+/-- A constant read in `σ`. -/
+def Op0.eval (σ : State) : Op0 s → s.Ev
   | .lit v => pure v
-  | .pv x => do
-    match ← σ.getEnv x with
-    | .val v => pure v
-    | .spath .. | .mref _ | .store _ | .ledger _ => .error .stuck
-  | .binop op p a b => do evalBinop op p (← a.eval σ) (b.eval σ)
-  | .unop op p a => do unopCheck op p (← applyUnOp op (← a.eval σ))
-  | .find s p => do
-    let τ ← s.eval σ
-    let (r, segs) ← p.eval σ
-    (← τ.findStorage r segs).asValue
-  | .len s p => do
-    let τ ← s.eval σ
-    let (r, segs) ← p.eval σ
-    arrayLen τ r segs
-  | .read m a => do
-    let τ ← m.eval σ
-    (← readAddr τ (← a.eval σ)).asValue
-  | .ite c a b => do pickBranch (← c.eval σ) (a.eval σ) (b.eval σ)
-  | .mlen m i => do
-    let τ ← m.eval σ
-    memArrayLen τ (← i.eval σ)
   | .env k => pure (.int (σ.envVal k))
-  | .net a => do pure (.int (σ.getNet (← (← a.eval σ).asInt)))
-  | .netOf x a => do
-    match ← σ.getEnv x with
-    | .ledger l => pure (.int ((lookupBy (← (← a.eval σ).asInt) l).getD 0))
-    | .val _ | .spath .. | .mref _ | .store _ => .error .stuck
-
-def PTerm.eval (σ : State) : PTerm C → Res (Name × List Seg)
   | .root r => pure (r, [])
-  | .pv x => aliasPath σ x
-  | .field p f => do
-    let (r, segs) ← p.eval σ
+  | .storage => pure σ
+  | .memory => pure σ
+
+/-- A unary symbol read in `σ`, its argument's reading given. -/
+def Op1.eval (σ : State) : Op1 a s → a.Ev → s.Ev
+  | .unop op p, ra => do unopCheck op p (← applyUnOp op (← ra))
+  | .net, ra => do pure (.int (σ.getNet (← (← ra).asInt)))
+  | .netOf x, ra => do
+    match ← σ.getEnv x with
+    | .ledger l => pure (.int ((lookupBy (← (← ra).asInt) l).getD 0))
+    | .val _ | .spath .. | .mref _ | .store _ => .error .stuck
+  | .field f, rp => do
+    let (r, segs) ← rp
     pure (r, segs ++ [.field f])
-  | .at p i => do
-    let (r, segs) ← p.eval σ
-    let i ← (← i.eval σ).asInt
-    σ.checkIndex r segs i
-    pure (r, segs ++ [.at i])
-  | .next p => do
-    let (r, segs) ← p.eval σ
+  | .next, rp => do
+    let (r, segs) ← rp
     match ← σ.findStorage r segs with
     | .array elems _ _ => pure (r, segs ++ [.at elems.length])
     | .prim _ | .struct _ | .map _ _ => .error .stuck
-
-def STerm.eval (σ : State) : STerm C → Res State
-  | .storage => pure σ
-  | .pv x => do
-    match ← σ.getEnv x with
-    | .store st => pure { σ with storage := st }
-    | .val _ | .spath .. | .mref _ | .ledger _ => .error .stuck
-  | .save s p v => do
-    let sv ← v.eval σ
-    let τ ← s.eval σ
-    let (r, segs) ← p.eval σ
-    τ.writeStorage r segs sv
-  | .delAt s p => do
-    let τ ← s.eval σ
-    let (r, segs) ← p.eval σ
-    let cur ← τ.findStorage r segs
-    τ.saveStorage r segs cur.defaultOf
-  | .select s r => do
-    let τ ← s.eval σ
+  | .select r, rs => do
+    let τ ← rs
     match ← τ.findStorage r [] with
     | .struct fields => pure { τ with storage := fields }
     | .prim _ | .array .. | .map .. => .error .stuck
-  | .push s p v => do
-    let τ ← s.eval σ
-    let (r, segs) ← p.eval σ
-    pushAt τ .uint r segs fun _ => do pure (← v.eval σ).strip
-  | .pushSlot s p E => do
-    let τ ← s.eval σ
-    let (r, segs) ← p.eval σ
+  | .sval, rt => do pure (← rt).toSVal
+  | .newArr R, rn => do pure (newArrVal R (← (← rn).asInt))
+  | .alloc R, rm => do
+    let τ ← rm
+    return (← allocDefault τ R).2
+  | .mfield f, ri => do pure (.memoryField (← ri) f)
+  | .addM R, rm => do
+    let τ ← rm
+    return (← allocDefault τ R).1
+  | .mval, rt => do pure (← rt).toMVal
+  | .ref, ri => do pure (.ref (← ri))
+
+/-- A binary symbol read in `σ`, its arguments' readings given. -/
+def Op2.eval (σ : State) : Op2 a b s → a.Ev → b.Ev → s.Ev
+  | .binop op p, ra, rb => do evalBinop op p (← ra) rb
+  | .find, rs, rp => do
+    let τ ← rs
+    let (r, segs) ← rp
+    (← τ.findStorage r segs).asValue
+  | .len, rs, rp => do
+    let τ ← rs
+    let (r, segs) ← rp
+    arrayLen τ r segs
+  | .read, rm, ra => do
+    let τ ← rm
+    (← readAddr τ (← ra)).asValue
+  | .mlen, rm, ri => do
+    let τ ← rm
+    memArrayLen τ (← ri)
+  | .at, rp, ri => do
+    let (r, segs) ← rp
+    let i ← (← ri).asInt
+    σ.checkIndex r segs i
+    pure (r, segs ++ [.at i])
+  | .delAt, rs, rp => do
+    let τ ← rs
+    let (r, segs) ← rp
+    let cur ← τ.findStorage r segs
+    τ.saveStorage r segs cur.defaultOf
+  | .pushSlot E, rs, rp => do
+    let τ ← rs
+    let (r, segs) ← rp
     pushAt τ E r segs pure
-  | .pop s p => do
-    let τ ← s.eval σ
-    let (r, segs) ← p.eval σ
+  | .pop, rs, rp => do
+    let τ ← rs
+    let (r, segs) ← rp
     popAt τ false r segs
-  | .shrink s p => do
-    let τ ← s.eval σ
-    let (r, segs) ← p.eval σ
+  | .shrink, rs, rp => do
+    let τ ← rs
+    let (r, segs) ← rp
     popAt τ true r segs
-  | .extend s p E => do
-    let τ ← s.eval σ
-    let (r, segs) ← p.eval σ
+  | .extend E, rs, rp => do
+    let τ ← rs
+    let (r, segs) ← rp
     return (← pushPlaceAt τ E r segs).1
-
-def SValT.eval (σ : State) : SValT C → Res SVal
-  | .val t => do pure (← t.eval σ).toSVal
-  | .find s p => do
-    let τ ← s.eval σ
-    let (r, segs) ← p.eval σ
+  | .sfind, rs, rp => do
+    let τ ← rs
+    let (r, segs) ← rp
     τ.findStorage r segs
-  | .copyMem m i => do
-    let τ ← m.eval σ
-    copyMem τ (.ref (← i.eval σ))
-  | .newArr R n => do pure (newArrVal R (← (← n.eval σ).asInt))
+  | .copyMem, rm, ri => do
+    let τ ← rm
+    Semantics.copyMem τ (.ref (← ri))
+  | .iread, rm, ra => do
+    let τ ← rm
+    (← readAddr τ (← ra)).asRef
+  | .copy, rm, rv => do
+    let sv ← rv
+    let τ ← rm
+    (← copyStToM τ sv).2.asRef
+  | .mat, ri, rk => do
+    let id ← ri
+    pure (.memoryIndex id (← (← rk).asInt))
+  | .copySt, rm, rv => do
+    let sv ← rv
+    let τ ← rm
+    return (← copyStToM τ sv).1
 
-def ITerm.eval (σ : State) : ITerm C → Res Nat
-  | .pv x => do
+/-- A ternary symbol read in `σ`, its arguments' readings given. -/
+def Op3.eval (_σ : State) : Op3 a b c s → a.Ev → b.Ev → c.Ev → s.Ev
+  | .ite, rc, ra, rb => do pickBranch (← rc) ra rb
+  | .save, rs, rp, rv => do
+    let sv ← rv
+    let τ ← rs
+    let (r, segs) ← rp
+    τ.writeStorage r segs sv
+  | .push, rs, rp, rv => do
+    let τ ← rs
+    let (r, segs) ← rp
+    pushAt τ .uint r segs fun _ => do pure (← rv).strip
+  | .write, rm, ra, rv => do
+    let mv ← rv
+    let τ ← rm
+    writeAddr τ mv (← ra)
+
+/-- A term read in `σ` by the interpreter: a storage or memory term reads to
+the state with that storage or memory. -/
+def Tm.eval (σ : State) : Tm C s → s.Ev
+  | .pvV x => do
+    match ← σ.getEnv x with
+    | .val v => pure v
+    | .spath .. | .mref _ | .store _ | .ledger _ => .error .stuck
+  | .pvP x => aliasPath σ x
+  | .pvS x => do
+    match ← σ.getEnv x with
+    | .store st => pure { σ with storage := st }
+    | .val _ | .spath .. | .mref _ | .ledger _ => .error .stuck
+  | .pvI x => do
     match ← σ.getEnv x with
     | .mref id => pure id
     | .val _ | .spath .. | .store _ | .ledger _ => .error .stuck
-  | .read m a => do
-    let τ ← m.eval σ
-    (← readAddr τ (← a.eval σ)).asRef
-  | .alloc m R => do
-    let τ ← m.eval σ
-    return (← allocDefault τ R).2
-  | .copy m v => do
-    let sv ← v.eval σ
-    let τ ← m.eval σ
-    (← copyStToM τ sv).2.asRef
+  | .app0 o => o.eval σ
+  | .app1 o a => o.eval σ (a.eval σ)
+  | .app2 o a b => o.eval σ (a.eval σ) (b.eval σ)
+  | .app3 o a b c => o.eval σ (a.eval σ) (b.eval σ) (c.eval σ)
 
-def MAddr.eval (σ : State) : MAddr C → Res Addr
-  | .field i f => do pure (.memoryField (← i.eval σ) f)
-  | .at i k => do
-    let id ← i.eval σ
-    pure (.memoryIndex id (← (← k.eval σ).asInt))
-
-def MTerm.eval (σ : State) : MTerm C → Res State
-  | .memory => pure σ
-  | .write m a v => do
-    let mv ← v.eval σ
-    let τ ← m.eval σ
-    writeAddr τ mv (← a.eval σ)
-  | .addM m R => do
-    let τ ← m.eval σ
-    return (← allocDefault τ R).1
-  | .copySt m v => do
-    let sv ← v.eval σ
-    let τ ← m.eval σ
-    return (← copyStToM τ sv).1
-
-def MValT.eval (σ : State) : MValT C → Res MVal
-  | .val t => do pure (← t.eval σ).toMVal
-  | .ref i => do pure (.ref (← i.eval σ))
-
-end
+attribute [tm_eval] Tm.eval Op0.eval Op1.eval Op2.eval Op3.eval
 
 /-! ## What a term denotes in the Theory
 
-`Term.denote` reads a formula's terms in the Theory algebra over the storage
+`Tm.denote` reads a formula's terms in the Theory algebra over the storage
 node `State.abs σ`, total, as KeY reads them: a read off the end of what is
-there is a node, not a halt.  `Term.eval` is the interpreter's reading; the
+there is a node, not a halt.  `Tm.eval` is the interpreter's reading; the
 term bridge (`Theory/Bridge/Denote.lean`) says the two agree wherever `eval`
 returns.  An equation is read through `denote` (`holds`).
 
@@ -359,7 +493,7 @@ returns.  An equation is read through `denote` (`holds`).
   no `denote`.
 - A path is not bounds-checked (`PTerm.at`): that is KeY's guard, a premise
   of the laws, not a halt.  `PTerm.next` reads the length in `σ`, as
-  `PTerm.eval` does.
+  `Tm.eval` does.
 -/
 
 section Denote
@@ -376,67 +510,94 @@ def Res.toSt : Res Value → StValue
   | .ok v => .prim v
   | .error _ => .st .mtSt
 
-mutual
+/-- What a term of each sort denotes in the Theory: the memory sorts denote
+nothing of their own (a memory read denotes the interpreter's value). -/
+@[reducible] def Srt.Den : Srt → Type
+  | .val => StValue
+  | .path => List Seg
+  | .st => Struct
+  | .sv => StValue
+  | .ident | .addr | .mem | .mv => Unit
 
-/-- A value term in the Theory, over `State.abs σ`. -/
-def Term.denote (σ : State) : Term C → StValue
+/-- A constant in the Theory. -/
+def Op0.denote (σ : State) : Op0 s → s.Den
   | .lit v => .prim v
-  | .pv x => match σ.getEnv x with
-    | .ok (.val v) => .prim v
-    | _ => .st .mtSt
-  | .binop op p a b => Res.toSt (do evalBinop op p (← (a.denote σ).toRes) (b.denote σ).toRes)
-  | .unop op p a => Res.toSt (do unopCheck op p (← applyUnOp op (← (a.denote σ).toRes)))
-  | .find s p => findSt (s.denote σ) (p.denote σ)
-  | .len s p => findSt (s.denote σ) (p.denote σ ++ [lengthSeg])
-  | .read m a => Res.toSt ((Term.read m a).eval σ)
-  | .ite c a b => match c.denote σ with
-    | .prim (.bool true) => a.denote σ
-    | .prim (.bool false) => b.denote σ
-    | _ => .st .mtSt
-  | .mlen m i => Res.toSt ((Term.mlen m i).eval σ)
   | .env k => .prim (.int (σ.envVal k))
-  | .net a => match a.denote σ with
+  | .root r => [.field r]
+  | .storage => σ.abs
+  | .memory => ()
+
+/-- A unary symbol in the Theory, its argument's denotation given. -/
+def Op1.denote (σ : State) : Op1 a s → a.Den → s.Den
+  | .unop op p, da => Res.toSt (do unopCheck op p (← applyUnOp op (← da.toRes)))
+  | .net, da => match da with
     | .prim (.int n) => .prim (.int (σ.getNet n))
     | _ => .st .mtSt
-  | .netOf x a => match σ.getEnv x, a.denote σ with
+  | .netOf x, da => match σ.getEnv x, da with
     | .ok (.ledger l), .prim (.int n) => .prim (.int ((lookupBy n l).getD 0))
     | _, _ => .st .mtSt
+  | .field f, dp => dp ++ [.field f]
+  | .next, dp => dp ++ [.at (lenAt σ.abs dp)]
+  | .select r, ds => asStruct (selectSt ds (.field r))
+  | .sval, dt => dt
+  | .newArr R, dn => (newArrVal R (asInt dn)).abs
+  | .alloc _, _ => ()
+  | .mfield _, _ => ()
+  | .addM _, _ => ()
+  | .mval, _ => ()
+  | .ref, _ => ()
 
-/-- A path from the storage node; indices are not bounds-checked (KeY's guard). -/
-def PTerm.denote (σ : State) : PTerm C → List Seg
-  | .root r => [.field r]
-  | .pv x => match aliasPath σ x with
-    | .ok (r, segs) => rootPath r segs
-    | .error _ => []
-  | .field p f => p.denote σ ++ [.field f]
-  | .at p i => p.denote σ ++ [.at (asInt (i.denote σ))]
-  | .next p => p.denote σ ++ [.at (lenAt σ.abs (p.denote σ))]
-
-/-- A storage term in the Theory: the storage node it denotes. -/
-def STerm.denote (σ : State) : STerm C → Struct
-  | .storage => σ.abs
-  | .pv x => match σ.getEnv x with
-    | .ok (.store roots) => SVal.abs.fields roots
-    | _ => .mtSt
-  | .save s p v => copyTo (s.denote σ) (p.denote σ) (v.denote σ)
-  | .delAt s p => delAt (s.denote σ) (p.denote σ)
-  | .push s p v => pushT (s.denote σ) (p.denote σ) (stripVal (v.denote σ))
-  | .pushSlot s p E | .extend s p E =>
-      pushSlotT E.isPrimitive (defaultForTy E).abs (s.denote σ) (p.denote σ)
-  | .pop s p => popT (s.denote σ) (p.denote σ)
-  | .shrink s p => shrinkT (s.denote σ) (p.denote σ)
-  | .select s r => asStruct (selectSt (s.denote σ) (.field r))
-
-/-- What a storage `save` writes, in the Theory. -/
-def SValT.denote (σ : State) : SValT C → StValue
-  | .val t => t.denote σ
-  | .find s p => findSt (s.denote σ) (p.denote σ)
-  | .copyMem m i => match (SValT.copyMem m i).eval σ with
+/-- A binary symbol in the Theory, its arguments' readings and denotations
+given. -/
+def Op2.denote (σ : State) : Op2 a b s → a.Ev → b.Ev → a.Den → b.Den → s.Den
+  | .binop op p, _, _, da, db => Res.toSt (do evalBinop op p (← da.toRes) db.toRes)
+  | .find, _, _, ds, dp => findSt ds dp
+  | .sfind, _, _, ds, dp => findSt ds dp
+  | .len, _, _, ds, dp => findSt ds (dp ++ [lengthSeg])
+  | .read, rm, ra, _, _ => Res.toSt (Op2.eval σ .read rm ra)
+  | .mlen, rm, ri, _, _ => Res.toSt (Op2.eval σ .mlen rm ri)
+  | .at, _, _, dp, di => dp ++ [.at (asInt di)]
+  | .delAt, _, _, ds, dp => Theory.StValue.delAt ds dp
+  | .pushSlot E, _, _, ds, dp | .extend E, _, _, ds, dp =>
+    pushSlotT E.isPrimitive (defaultForTy E).abs ds dp
+  | .pop, _, _, ds, dp => popT ds dp
+  | .shrink, _, _, ds, dp => shrinkT ds dp
+  | .copyMem, rm, ri, _, _ => match Op2.eval σ .copyMem rm ri with
     | .ok w => w.abs
     | .error _ => .st .mtSt
-  | .newArr R n => (newArrVal R (asInt (n.denote σ))).abs
+  | .iread, _, _, _, _ => ()
+  | .copy, _, _, _, _ => ()
+  | .mat, _, _, _, _ => ()
+  | .copySt, _, _, _, _ => ()
 
-end
+/-- A ternary symbol in the Theory, its arguments' denotations given. -/
+def Op3.denote : Op3 a b c s → a.Den → b.Den → c.Den → s.Den
+  | .ite, dc, da, db => match dc with
+    | .prim (.bool true) => da
+    | .prim (.bool false) => db
+    | _ => .st .mtSt
+  | .save, ds, dp, dv => copyTo ds dp dv
+  | .push, ds, dp, dv => pushT ds dp (stripVal dv)
+  | .write, _, _, _ => ()
+
+/-- A term in the Theory, over `State.abs σ`. -/
+def Tm.denote (σ : State) : Tm C s → s.Den
+  | .pvV x => match σ.getEnv x with
+    | .ok (.val v) => .prim v
+    | _ => .st .mtSt
+  | .pvP x => match aliasPath σ x with
+    | .ok (r, segs) => rootPath r segs
+    | .error _ => []
+  | .pvS x => match σ.getEnv x with
+    | .ok (.store roots) => SVal.abs.fields roots
+    | _ => .mtSt
+  | .pvI _ => ()
+  | .app0 o => o.denote σ
+  | .app1 o a => o.denote σ (a.denote σ)
+  | .app2 o a b => o.denote σ (a.eval σ) (b.eval σ) (a.denote σ) (b.denote σ)
+  | .app3 o a b c => o.denote (a.denote σ) (b.denote σ) (c.denote σ)
+
+attribute [tm_denote] Tm.denote Op0.denote Op1.denote Op2.denote Op3.denote
 
 
 /-- A binop that returns on a halting right operand short-circuited, so it
@@ -553,7 +714,7 @@ theorem Semantics.EnvAgreeExcept.havoc {ns : List Var} {σ τ : State} (h : EnvA
 /-- A formula about programs of the contract `C`. -/
 inductive Fml (C : Contract) where
   | tt
-  /-- `a = b`, read in the Theory (`Term.denote`): total, so it may hold
+  /-- `a = b`, read in the Theory (`Tm.denote`): total, so it may hold
   of terms that halt. -/
   | eq (a b : Term C)
   /-- `t` returns: the interpreter's `eval` does not halt on it. -/
@@ -621,62 +782,14 @@ What a formula does not mention, it does not see: two states that agree off
 declare a fresh `se1` in front of the rest of the program and the
 postcondition. -/
 
-mutual
-
-def Term.vars : Term C → List Var
-  | .lit _ => []
-  | .pv x => [x]
-  | .binop _ _ a b => a.vars ++ b.vars
-  | .unop _ _ a => a.vars
-  | .find s p | .len s p => s.vars ++ p.vars
-  | .read m a => m.vars ++ a.vars
-  | .ite c a b => c.vars ++ a.vars ++ b.vars
-  | .mlen m i => m.vars ++ i.vars
-  | .env _ => []
-  | .net a => a.vars
-  | .netOf x a => x :: a.vars
-
-def PTerm.vars : PTerm C → List Var
-  | .root _ => []
-  | .pv x => [x]
-  | .field p _ => p.vars
-  | .at p i => p.vars ++ i.vars
-  | .next p => p.vars
-
-def STerm.vars : STerm C → List Var
-  | .storage => []
-  | .pv x => [x]
-  | .save s p v | .push s p v => s.vars ++ p.vars ++ v.vars
-  | .delAt s p | .pushSlot s p _ | .pop s p | .shrink s p | .extend s p _ => s.vars ++ p.vars
-  | .select s _ => s.vars
-
-def SValT.vars : SValT C → List Var
-  | .val t => t.vars
-  | .find s p => s.vars ++ p.vars
-  | .copyMem m i => m.vars ++ i.vars
-  | .newArr _ n => n.vars
-
-def ITerm.vars : ITerm C → List Var
-  | .pv x => [x]
-  | .read m a => m.vars ++ a.vars
-  | .alloc m _ => m.vars
-  | .copy m v => m.vars ++ v.vars
-
-def MAddr.vars : MAddr C → List Var
-  | .field i _ => i.vars
-  | .at i k => i.vars ++ k.vars
-
-def MTerm.vars : MTerm C → List Var
-  | .memory => []
-  | .write m a v => m.vars ++ a.vars ++ v.vars
-  | .addM m _ => m.vars
-  | .copySt m v => m.vars ++ v.vars
-
-def MValT.vars : MValT C → List Var
-  | .val t => t.vars
-  | .ref i => i.vars
-
-end
+/-- The variables a term reads. -/
+def Tm.vars : Tm C s → List Var
+  | .pvV x | .pvP x | .pvS x | .pvI x => [x]
+  | .app0 _ => []
+  | .app1 (.netOf x) a => x :: a.vars
+  | .app1 _ a => a.vars
+  | .app2 _ a b => a.vars ++ b.vars
+  | .app3 _ a b c => a.vars ++ b.vars ++ c.vars
 
 def UpdElem.vars : UpdElem C → List Var
   | .val x t => x :: t.vars
@@ -726,93 +839,59 @@ theorem ResultsAgree.bindEq {α : Type} {x₁ x₂ : Res State} (hx : ResultsAgr
   | .error _, .error _, hx => subst hx; rfl
   | .ok s₁, .ok s₂, hs => exact hf s₁ s₂ hs
 
-mutual
+/-! ### Reading a term off its variables
 
-theorem Term.eval_frame {σ τ : State} (hag : EnvAgreeExcept ns σ τ) :
-    (t : Term C) → Avoids t.vars ns → t.eval σ = t.eval τ
-  | .lit _, _ => rfl
-  | .pv x, h => by simp only [Term.eval, getEnv_congr hag (h.head)]
-  | .binop _ _ a b, h => by
-    simp only [Term.eval, a.eval_frame hag h.left, b.eval_frame hag h.right]
-  | .unop _ _ a, h => by simp only [Term.eval, a.eval_frame hag h]
-  | .find s p, h => by
-    simp only [Term.eval, p.eval_frame hag h.right]
-    exact ResultsAgree.bindEq (s.eval_frame hag h.left) fun _ _ h' => by
-      simp only [findStorage_congr h']
-  | .len s p, h => by
-    simp only [Term.eval, p.eval_frame hag h.right]
-    exact ResultsAgree.bindEq (s.eval_frame hag h.left) fun _ _ h' => by
-      simp only [arrayLen_congr h']
-  | .read m a, h => by
-    simp only [Term.eval, a.eval_frame hag h.right]
-    exact ResultsAgree.bindEq (m.eval_frame hag h.left) fun _ _ h' => by
-      simp only [readAddr_congr h']
-  | .ite c a b, h => by
-    simp only [Term.eval, c.eval_frame hag h.left.left, a.eval_frame hag h.left.right,
-      b.eval_frame hag h.right]
-  | .mlen m i, h => by
-    simp only [Term.eval, i.eval_frame hag h.right]
-    exact ResultsAgree.bindEq (m.eval_frame hag h.left) fun _ _ h' => by
-      simp only [memArrayLen, getObj_congr h']
-  | .env k, _ => by simp only [Term.eval, State.envVal_congr hag]
-  | .net a, h => by simp only [Term.eval, a.eval_frame hag h, State.getNet, hag.net]
-  | .netOf x a, h => by simp only [Term.eval, a.eval_frame hag h.tail, getEnv_congr hag h.head]
+A symbol reads its arguments and, at most, the state's environment, ledger
+and storage.  So two states that agree off `ns` read a symbol alike once its
+arguments read alike (`OpN.eval_agree`), and a term that avoids `ns` reads
+alike (`Tm.eval_frame`): a value equal, a storage or memory to states that
+agree off `ns` (`Srt.Agree`).  Substitution (`Calculus/UpdateRules.lean`)
+reuses the per-symbol lemmas, with the variables read after the update. -/
 
-theorem PTerm.eval_frame {σ τ : State} (hag : EnvAgreeExcept ns σ τ) :
-    (p : PTerm C) → Avoids p.vars ns → p.eval σ = p.eval τ
-  | .root _, _ => rfl
-  | .pv x, h => aliasPath_frame hag (h.head)
-  | .field p _, h => by simp only [PTerm.eval, p.eval_frame hag h]
-  | .at p i, h => by
-    simp only [PTerm.eval, p.eval_frame hag h.left, i.eval_frame hag h.right, checkIndex_congr hag]
-  | .next p, h => by simp only [PTerm.eval, p.eval_frame hag h, findStorage_congr hag]
+/-- Two readings of a sort agree off `ns`: equal, and for a storage or a
+memory, states that agree off `ns`. -/
+def Srt.Agree (ns : List Var) : (s : Srt) → s.Ev → s.Ev → Prop
+  | .val => Eq
+  | .path => Eq
+  | .st => ResultsAgree ns
+  | .sv => Eq
+  | .ident => Eq
+  | .addr => Eq
+  | .mem => ResultsAgree ns
+  | .mv => Eq
 
-theorem STerm.eval_frame {σ τ : State} (hag : EnvAgreeExcept ns σ τ) :
-    (s : STerm C) → Avoids s.vars ns → ResultsAgree ns (s.eval σ) (s.eval τ)
-  | .storage, _ => hag
-  | .pv x, h => by
-    simp only [STerm.eval, getEnv_congr hag (h.head)]
-    rcases τ.getEnv x with _ | b
-    · exact ResultsAgree.refl _ _
-    · cases b
-      all_goals first
-        | exact ResultsAgree.refl _ _
-        | exact ⟨rfl, hag.heap, hag.nextId, hag.net, hag.env, hag.selfBalance, hag.tx⟩
-  | .save s p v, h => by
-    simp only [STerm.eval, v.eval_frame hag h.right, p.eval_frame hag h.left.right]
-    refine bindPureResults_agree _ fun _ => ?_
-    refine ResultsAgree.bind (s.eval_frame hag h.left.left) fun _ _ h' => ?_
-    agree_run h'
-  | .delAt s p, h => by
-    simp only [STerm.eval, p.eval_frame hag h.right]
-    refine ResultsAgree.bind (s.eval_frame hag h.left) fun _ _ h' => ?_
-    simp only [findStorage_congr h']
-    agree_run h'
-  | .push s p v, h => by
-    simp only [STerm.eval, p.eval_frame hag h.left.right]
-    refine ResultsAgree.bind (s.eval_frame hag h.left.left) fun _ _ h' => ?_
-    refine bindPureResults_agree _ fun _ => pushAt_agree h' _ _ _ fun _ => ?_
-    simp only [v.eval_frame hag h.right]
-  | .pushSlot s p _, h => by
-    simp only [STerm.eval, p.eval_frame hag h.right]
-    refine ResultsAgree.bind (s.eval_frame hag h.left) fun _ _ h' => ?_
-    exact bindPureResults_agree _ fun _ => pushAt_agree h' _ _ _ fun _ => rfl
-  | .pop s p, h => by
-    simp only [STerm.eval, p.eval_frame hag h.right]
-    refine ResultsAgree.bind (s.eval_frame hag h.left) fun _ _ h' => ?_
-    agree_run h'
-  | .shrink s p, h => by
-    simp only [STerm.eval, p.eval_frame hag h.right]
-    refine ResultsAgree.bind (s.eval_frame hag h.left) fun _ _ h' => ?_
-    agree_run h'
-  | .extend s p _, h => by
-    simp only [STerm.eval, p.eval_frame hag h.right]
-    refine ResultsAgree.bind (s.eval_frame hag h.left) fun _ _ h' => ?_
-    refine bindPureResults_agree _ fun _ => ?_
-    exact ResAgree.bindState (pushPlaceAt_agree h' _ _ _) fun _ _ _ h'' => h''
-  | .select s r, h => by
-    simp only [STerm.eval]
-    refine ResultsAgree.bind (s.eval_frame hag h) fun _ τ' h' => ?_
+/-- The variable a symbol carries: `netOf`'s ledger. -/
+def Op1.vars : Op1 a s → List Var
+  | .netOf x => [x]
+  | _ => []
+
+theorem Tm.vars_app1 (o : Op1 a s) (t : Tm C a) : (Tm.app1 o t).vars = o.vars ++ t.vars := by
+  cases o <;> rfl
+
+theorem Op0.eval_agree {σ τ : State} (hag : EnvAgreeExcept ns σ τ) :
+    (o : Op0 s) → Srt.Agree ns s (o.eval σ) (o.eval τ)
+  | .lit _ | .root _ => rfl
+  | .env _ => by simp only [Srt.Agree, Op0.eval, State.envVal_congr hag]
+  | .storage | .memory => hag
+
+theorem Op1.eval_agree {σ τ : State} (hag : EnvAgreeExcept ns σ τ) :
+    (o : Op1 a s) → Avoids o.vars ns → {x₁ x₂ : a.Ev} → Srt.Agree ns a x₁ x₂ →
+      Srt.Agree ns s (o.eval σ x₁) (o.eval τ x₂)
+  | .unop .., _, _, _, hx | .field _, _, _, _, hx | .sval, _, _, _, hx | .newArr _, _, _, _, hx
+  | .mfield _, _, _, _, hx | .mval, _, _, _, hx | .ref, _, _, _, hx => by
+    simp only [Srt.Agree] at hx ⊢; subst hx; rfl
+  | .net, _, _, _, hx => by
+    simp only [Srt.Agree] at hx ⊢; subst hx
+    simp only [Op1.eval, State.getNet, hag.net]
+  | .netOf _, ho, _, _, hx => by
+    simp only [Srt.Agree] at hx ⊢; subst hx
+    simp only [Op1.eval, getEnv_congr hag ho.head]
+  | .next, _, _, _, hx => by
+    simp only [Srt.Agree] at hx ⊢; subst hx
+    simp only [Op1.eval, findStorage_congr hag]
+  | .select r, _, _, _, hx => by
+    simp only [Srt.Agree, Op1.eval] at hx ⊢
+    refine ResultsAgree.bind hx fun _ τ' h' => ?_
     simp only [findStorage_congr h']
     rcases τ'.findStorage r [] with _ | w
     · exact ResultsAgree.refl _ _
@@ -820,119 +899,185 @@ theorem STerm.eval_frame {σ τ : State} (hag : EnvAgreeExcept ns σ τ) :
       all_goals first
         | exact ResultsAgree.refl _ _
         | exact ⟨rfl, h'.heap, h'.nextId, h'.net, h'.env, h'.selfBalance, h'.tx⟩
-
-theorem SValT.eval_frame {σ τ : State} (hag : EnvAgreeExcept ns σ τ) :
-    (v : SValT C) → Avoids v.vars ns → v.eval σ = v.eval τ
-  | .val t, h => by simp only [SValT.eval, t.eval_frame hag h]
-  | .find s p, h => by
-    simp only [SValT.eval, p.eval_frame hag h.right]
-    exact ResultsAgree.bindEq (s.eval_frame hag h.left) fun _ _ h' => by
-      simp only [findStorage_congr h']
-  | .copyMem m i, h => by
-    simp only [SValT.eval, i.eval_frame hag h.right]
-    exact ResultsAgree.bindEq (m.eval_frame hag h.left) fun _ _ h' => by
-      simp only [copyMem_congr h']
-  | .newArr _ n, h => by simp only [SValT.eval, n.eval_frame hag h]
-
-theorem ITerm.eval_frame {σ τ : State} (hag : EnvAgreeExcept ns σ τ) :
-    (i : ITerm C) → Avoids i.vars ns → i.eval σ = i.eval τ
-  | .pv x, h => by simp only [ITerm.eval, getEnv_congr hag (h.head)]
-  | .read m a, h => by
-    simp only [ITerm.eval, a.eval_frame hag h.right]
-    exact ResultsAgree.bindEq (m.eval_frame hag h.left) fun _ _ h' => by
-      simp only [readAddr_congr h']
-  | .alloc m R, h => by
-    simp only [ITerm.eval]
-    refine ResultsAgree.bindEq (m.eval_frame hag h) fun _ _ h' => ?_
+  | .alloc R, _, _, _, hx => by
+    simp only [Srt.Agree, Op1.eval] at hx ⊢
+    refine ResultsAgree.bindEq hx fun _ _ h' => ?_
     rcases (allocDefault_agree h' R).cases with ⟨e, h₁, h₂⟩ | ⟨_, _, a, h₁, h₂, _⟩ <;>
       simp only [h₁, h₂] <;> rfl
-  | .copy m v, h => by
-    simp only [ITerm.eval, v.eval_frame hag h.right]
+  | .addM R, _, _, _, hx => by
+    simp only [Srt.Agree, Op1.eval] at hx ⊢
+    refine ResultsAgree.bind hx fun _ _ h' => ?_
+    exact ResAgree.bindState (allocDefault_agree h' R) fun _ _ _ h'' => h''
+
+theorem Op2.eval_agree {σ τ : State} (hag : EnvAgreeExcept ns σ τ) :
+    (o : Op2 a b s) → {x₁ x₂ : a.Ev} → {y₁ y₂ : b.Ev} → Srt.Agree ns a x₁ x₂ →
+      Srt.Agree ns b y₁ y₂ → Srt.Agree ns s (o.eval σ x₁ y₁) (o.eval τ x₂ y₂)
+  | .binop .., _, _, _, _, hx, hy | .mat, _, _, _, _, hx, hy => by
+    simp only [Srt.Agree] at hx hy ⊢; subst hx hy; rfl
+  | .at, _, _, _, _, hx, hy => by
+    simp only [Srt.Agree] at hx hy ⊢; subst hx hy
+    simp only [Op2.eval, checkIndex_congr hag]
+  | .find, _, _, _, _, hx, hy => by
+    simp only [Srt.Agree, Op2.eval] at hx hy ⊢; subst hy
+    exact ResultsAgree.bindEq hx fun _ _ h' => by simp only [findStorage_congr h']
+  | .sfind, _, _, _, _, hx, hy => by
+    simp only [Srt.Agree, Op2.eval] at hx hy ⊢; subst hy
+    exact ResultsAgree.bindEq hx fun _ _ h' => by simp only [findStorage_congr h']
+  | .len, _, _, _, _, hx, hy => by
+    simp only [Srt.Agree, Op2.eval] at hx hy ⊢; subst hy
+    exact ResultsAgree.bindEq hx fun _ _ h' => by simp only [arrayLen_congr h']
+  | .read, _, _, _, _, hx, hy => by
+    simp only [Srt.Agree, Op2.eval] at hx hy ⊢; subst hy
+    exact ResultsAgree.bindEq hx fun _ _ h' => by simp only [readAddr_congr h']
+  | .iread, _, _, _, _, hx, hy => by
+    simp only [Srt.Agree, Op2.eval] at hx hy ⊢; subst hy
+    exact ResultsAgree.bindEq hx fun _ _ h' => by simp only [readAddr_congr h']
+  | .mlen, _, _, _, _, hx, hy => by
+    simp only [Srt.Agree, Op2.eval] at hx hy ⊢; subst hy
+    exact ResultsAgree.bindEq hx fun _ _ h' => by simp only [memArrayLen, getObj_congr h']
+  | .copyMem, _, _, _, _, hx, hy => by
+    simp only [Srt.Agree, Op2.eval] at hx hy ⊢; subst hy
+    exact ResultsAgree.bindEq hx fun _ _ h' => by simp only [copyMem_congr h']
+  | .delAt, _, _, _, _, hx, hy => by
+    simp only [Srt.Agree, Op2.eval] at hx hy ⊢; subst hy
+    refine ResultsAgree.bind hx fun _ _ h' => ?_
+    simp only [findStorage_congr h']
+    agree_run h'
+  | .pushSlot _, _, _, _, _, hx, hy => by
+    simp only [Srt.Agree, Op2.eval] at hx hy ⊢; subst hy
+    refine ResultsAgree.bind hx fun _ _ h' => ?_
+    exact bindPureResults_agree _ fun _ => pushAt_agree h' _ _ _ fun _ => rfl
+  | .pop, _, _, _, _, hx, hy | .shrink, _, _, _, _, hx, hy => by
+    simp only [Srt.Agree, Op2.eval] at hx hy ⊢; subst hy
+    refine ResultsAgree.bind hx fun _ _ h' => ?_
+    agree_run h'
+  | .extend _, _, _, _, _, hx, hy => by
+    simp only [Srt.Agree, Op2.eval] at hx hy ⊢; subst hy
+    refine ResultsAgree.bind hx fun _ _ h' => ?_
+    refine bindPureResults_agree _ fun _ => ?_
+    exact ResAgree.bindState (pushPlaceAt_agree h' _ _ _) fun _ _ _ h'' => h''
+  | .copy, _, _, _, _, hx, hy => by
+    simp only [Srt.Agree, Op2.eval] at hx hy ⊢; subst hy
     refine congrArg (_ >>= ·) (funext fun sv => ?_)
-    refine ResultsAgree.bindEq (m.eval_frame hag h.left) fun _ _ h' => ?_
+    refine ResultsAgree.bindEq hx fun _ _ h' => ?_
     rcases (copyStToM_agree h' sv).cases with ⟨e, h₁, h₂⟩ | ⟨_, _, a, h₁, h₂, _⟩ <;>
       simp only [h₁, h₂] <;> rfl
-
-theorem MAddr.eval_frame {σ τ : State} (hag : EnvAgreeExcept ns σ τ) :
-    (a : MAddr C) → Avoids a.vars ns → a.eval σ = a.eval τ
-  | .field i _, h => by simp only [MAddr.eval, i.eval_frame hag h]
-  | .at i k, h => by simp only [MAddr.eval, i.eval_frame hag h.left, k.eval_frame hag h.right]
-
-theorem MTerm.eval_frame {σ τ : State} (hag : EnvAgreeExcept ns σ τ) :
-    (m : MTerm C) → Avoids m.vars ns → ResultsAgree ns (m.eval σ) (m.eval τ)
-  | .memory, _ => hag
-  | .write m a v, h => by
-    simp only [MTerm.eval, v.eval_frame hag h.right, a.eval_frame hag h.left.right]
-    refine bindPureResults_agree _ fun _ => ?_
-    refine ResultsAgree.bind (m.eval_frame hag h.left.left) fun _ _ h' => ?_
-    exact bindPureResults_agree _ fun _ => writeAddr_agree h' _ _
-  | .addM m R, h => by
-    simp only [MTerm.eval]
-    refine ResultsAgree.bind (m.eval_frame hag h) fun _ _ h' => ?_
-    exact ResAgree.bindState (allocDefault_agree h' R) fun _ _ _ h'' => h''
-  | .copySt m v, h => by
-    simp only [MTerm.eval, v.eval_frame hag h.right]
+  | .copySt, _, _, _, _, hx, hy => by
+    simp only [Srt.Agree, Op2.eval] at hx hy ⊢; subst hy
     refine bindPureResults_agree _ fun sv => ?_
-    refine ResultsAgree.bind (m.eval_frame hag h.left) fun _ _ h' => ?_
+    refine ResultsAgree.bind hx fun _ _ h' => ?_
     exact ResAgree.bindState (copyStToM_agree h' sv) fun _ _ _ h'' => h''
 
-theorem MValT.eval_frame {σ τ : State} (hag : EnvAgreeExcept ns σ τ) :
-    (v : MValT C) → Avoids v.vars ns → v.eval σ = v.eval τ
-  | .val t, h => by simp only [MValT.eval, t.eval_frame hag h]
-  | .ref i, h => by simp only [MValT.eval, i.eval_frame hag h]
+theorem Op3.eval_agree {σ τ : State} :
+    (o : Op3 a b c s) → {x₁ x₂ : a.Ev} → {y₁ y₂ : b.Ev} → {z₁ z₂ : c.Ev} →
+      Srt.Agree ns a x₁ x₂ → Srt.Agree ns b y₁ y₂ → Srt.Agree ns c z₁ z₂ →
+      Srt.Agree ns s (o.eval σ x₁ y₁ z₁) (o.eval τ x₂ y₂ z₂)
+  | .ite, _, _, _, _, _, _, hx, hy, hz => by
+    simp only [Srt.Agree] at hx hy hz ⊢; subst hx hy hz; rfl
+  | .save, _, _, _, _, _, _, hx, hy, hz => by
+    simp only [Srt.Agree, Op3.eval] at hx hy hz ⊢; subst hy hz
+    refine bindPureResults_agree _ fun _ => ?_
+    refine ResultsAgree.bind hx fun _ _ h' => ?_
+    agree_run h'
+  | .push, _, _, _, _, _, _, hx, hy, hz => by
+    simp only [Srt.Agree, Op3.eval] at hx hy hz ⊢; subst hy hz
+    refine ResultsAgree.bind hx fun _ _ h' => ?_
+    exact bindPureResults_agree _ fun _ => pushAt_agree h' _ _ _ fun _ => rfl
+  | .write, _, _, _, _, _, _, hx, hy, hz => by
+    simp only [Srt.Agree, Op3.eval] at hx hy hz ⊢; subst hy hz
+    refine bindPureResults_agree _ fun _ => ?_
+    refine ResultsAgree.bind hx fun _ _ h' => ?_
+    exact bindPureResults_agree _ fun _ => writeAddr_agree h' _ _
 
-end
+/-- A term that avoids `ns` reads alike in two states that agree off `ns`. -/
+theorem Tm.eval_frame {σ τ : State} (hag : EnvAgreeExcept ns σ τ) :
+    (t : Tm C s) → Avoids t.vars ns → Srt.Agree ns s (t.eval σ) (t.eval τ)
+  | .pvV x, h | .pvI x, h => by simp only [Srt.Agree, Tm.eval, getEnv_congr hag h.head]
+  | .pvP x, h => aliasPath_frame hag h.head
+  | .pvS x, h => by
+    simp only [Srt.Agree, Tm.eval, getEnv_congr hag h.head]
+    rcases τ.getEnv x with _ | b
+    · exact ResultsAgree.refl _ _
+    · cases b
+      all_goals first
+        | exact ResultsAgree.refl _ _
+        | exact ⟨rfl, hag.heap, hag.nextId, hag.net, hag.env, hag.selfBalance, hag.tx⟩
+  | .app0 o, _ => o.eval_agree hag
+  | .app1 o a, h => by
+    rw [Tm.vars_app1] at h
+    exact o.eval_agree hag h.left (a.eval_frame hag h.right)
+  | .app2 o a b, h => o.eval_agree hag (a.eval_frame hag h.left) (b.eval_frame hag h.right)
+  | .app3 o a b c, h =>
+    o.eval_agree (a.eval_frame hag h.left.left) (b.eval_frame hag h.left.right)
+      (c.eval_frame hag h.right)
 
-mutual
+theorem Term.eval_frame {σ τ : State} (hag : EnvAgreeExcept ns σ τ) (t : Term C)
+    (h : Avoids t.vars ns) : t.eval σ = t.eval τ := Tm.eval_frame hag t h
+theorem PTerm.eval_frame {σ τ : State} (hag : EnvAgreeExcept ns σ τ) (p : PTerm C)
+    (h : Avoids p.vars ns) : p.eval σ = p.eval τ := Tm.eval_frame hag p h
+theorem STerm.eval_frame {σ τ : State} (hag : EnvAgreeExcept ns σ τ) (s : STerm C)
+    (h : Avoids s.vars ns) : ResultsAgree ns (s.eval σ) (s.eval τ) := Tm.eval_frame hag s h
+theorem SValT.eval_frame {σ τ : State} (hag : EnvAgreeExcept ns σ τ) (v : SValT C)
+    (h : Avoids v.vars ns) : v.eval σ = v.eval τ := Tm.eval_frame hag v h
+theorem ITerm.eval_frame {σ τ : State} (hag : EnvAgreeExcept ns σ τ) (i : ITerm C)
+    (h : Avoids i.vars ns) : i.eval σ = i.eval τ := Tm.eval_frame hag i h
+theorem MAddr.eval_frame {σ τ : State} (hag : EnvAgreeExcept ns σ τ) (a : MAddr C)
+    (h : Avoids a.vars ns) : a.eval σ = a.eval τ := Tm.eval_frame hag a h
+theorem MTerm.eval_frame {σ τ : State} (hag : EnvAgreeExcept ns σ τ) (m : MTerm C)
+    (h : Avoids m.vars ns) : ResultsAgree ns (m.eval σ) (m.eval τ) := Tm.eval_frame hag m h
+theorem MValT.eval_frame {σ τ : State} (hag : EnvAgreeExcept ns σ τ) (v : MValT C)
+    (h : Avoids v.vars ns) : v.eval σ = v.eval τ := Tm.eval_frame hag v h
 
-theorem Term.denote_frame {σ τ : State} (hag : EnvAgreeExcept ns σ τ) :
-    (t : Term C) → Avoids t.vars ns → t.denote σ = t.denote τ
-  | .lit _, _ => rfl
-  | .pv x, h => by simp only [Term.denote, getEnv_congr hag (h.head)]
-  | .binop _ _ a b, h => by
-    simp only [Term.denote, a.denote_frame hag h.left, b.denote_frame hag h.right]
-  | .unop _ _ a, h => by simp only [Term.denote, a.denote_frame hag h]
-  | .find s p, h | .len s p, h => by
-    simp only [Term.denote, s.denote_frame hag h.left, p.denote_frame hag h.right]
-  | .read m a, h => by simp only [Term.denote, (Term.read m a).eval_frame hag h]
-  | .ite c a b, h => by
-    simp only [Term.denote, c.denote_frame hag h.left.left, a.denote_frame hag h.left.right,
-      b.denote_frame hag h.right]
-  | .mlen m i, h => by simp only [Term.denote, (Term.mlen m i).eval_frame hag h]
-  | .env k, _ => by simp only [Term.denote, State.envVal_congr hag]
-  | .net a, h => by simp only [Term.denote, a.denote_frame hag h, State.getNet, hag.net]
-  | .netOf x a, h => by
-    simp only [Term.denote, a.denote_frame hag h.tail, getEnv_congr hag h.head]
+theorem Op0.denote_agree {σ τ : State} (hag : EnvAgreeExcept ns σ τ) :
+    (o : Op0 s) → o.denote σ = o.denote τ
+  | .lit _ | .root _ | .memory => rfl
+  | .env _ => by simp only [Op0.denote, State.envVal_congr hag]
+  | .storage => by simp only [Op0.denote, State.abs, hag.storage]
 
-theorem PTerm.denote_frame {σ τ : State} (hag : EnvAgreeExcept ns σ τ) :
-    (p : PTerm C) → Avoids p.vars ns → p.denote σ = p.denote τ
-  | .root _, _ => rfl
-  | .pv x, h => by simp only [PTerm.denote, aliasPath_frame hag (h.head)]
-  | .field p _, h => by simp only [PTerm.denote, p.denote_frame hag h]
-  | .at p i, h => by
-    simp only [PTerm.denote, p.denote_frame hag h.left, i.denote_frame hag h.right]
-  | .next p, h => by simp only [PTerm.denote, p.denote_frame hag h, State.abs, hag.storage]
+theorem Op1.denote_agree {σ τ : State} (hag : EnvAgreeExcept ns σ τ) :
+    (o : Op1 a s) → Avoids o.vars ns → (d : a.Den) → o.denote σ d = o.denote τ d
+  | .net, _, _ => by simp only [Op1.denote, State.getNet, hag.net]
+  | .netOf _, ho, _ => by simp only [Op1.denote, getEnv_congr hag ho.head]
+  | .next, _, _ => by simp only [Op1.denote, State.abs, hag.storage]
+  | .unop .., _, _ | .field _, _, _ | .select _, _, _ | .sval, _, _ | .newArr _, _, _
+  | .alloc _, _, _ | .mfield _, _, _ | .addM _, _, _ | .mval, _, _ | .ref, _, _ => rfl
 
-theorem STerm.denote_frame {σ τ : State} (hag : EnvAgreeExcept ns σ τ) :
-    (s : STerm C) → Avoids s.vars ns → s.denote σ = s.denote τ
-  | .storage, _ => by simp only [STerm.denote, State.abs, hag.storage]
-  | .pv x, h => by simp only [STerm.denote, getEnv_congr hag (h.head)]
-  | .save s p v, h | .push s p v, h => by
-    simp only [STerm.denote, s.denote_frame hag h.left.left, p.denote_frame hag h.left.right,
-      v.denote_frame hag h.right]
-  | .delAt s p, h | .pushSlot s p _, h | .pop s p, h | .shrink s p, h | .extend s p _, h => by
-    simp only [STerm.denote, s.denote_frame hag h.left, p.denote_frame hag h.right]
-  | .select s _, h => by simp only [STerm.denote, s.denote_frame hag h]
+theorem Op2.denote_agree {σ τ : State} (hag : EnvAgreeExcept ns σ τ) :
+    (o : Op2 a b s) → {x₁ x₂ : a.Ev} → {y₁ y₂ : b.Ev} → Srt.Agree ns a x₁ x₂ →
+      Srt.Agree ns b y₁ y₂ → (d : a.Den) → (e : b.Den) →
+      o.denote σ x₁ y₁ d e = o.denote τ x₂ y₂ d e
+  | .read, _, _, _, _, hx, hy, _, _ => by
+    simp only [Op2.denote]; rw [show Op2.eval σ .read _ _ = _ from Op2.eval_agree hag .read hx hy]
+  | .mlen, _, _, _, _, hx, hy, _, _ => by
+    simp only [Op2.denote]; rw [show Op2.eval σ .mlen _ _ = _ from Op2.eval_agree hag .mlen hx hy]
+  | .copyMem, _, _, _, _, hx, hy, _, _ => by
+    simp only [Op2.denote]
+    rw [show Op2.eval σ .copyMem _ _ = _ from Op2.eval_agree hag .copyMem hx hy]
+  | .binop .., _, _, _, _, _, _, _, _ | .find, _, _, _, _, _, _, _, _
+  | .len, _, _, _, _, _, _, _, _ | .at, _, _, _, _, _, _, _, _ | .delAt, _, _, _, _, _, _, _, _
+  | .pushSlot _, _, _, _, _, _, _, _, _ | .pop, _, _, _, _, _, _, _, _
+  | .shrink, _, _, _, _, _, _, _, _ | .extend _, _, _, _, _, _, _, _, _
+  | .sfind, _, _, _, _, _, _, _, _ | .iread, _, _, _, _, _, _, _, _
+  | .copy, _, _, _, _, _, _, _, _ | .mat, _, _, _, _, _, _, _, _
+  | .copySt, _, _, _, _, _, _, _, _ => rfl
 
-theorem SValT.denote_frame {σ τ : State} (hag : EnvAgreeExcept ns σ τ) :
-    (v : SValT C) → Avoids v.vars ns → v.denote σ = v.denote τ
-  | .val t, h => t.denote_frame hag h
-  | .find s p, h => by
-    simp only [SValT.denote, s.denote_frame hag h.left, p.denote_frame hag h.right]
-  | .copyMem m i, h => by simp only [SValT.denote, (SValT.copyMem m i).eval_frame hag h]
-  | .newArr _ n, h => by simp only [SValT.denote, n.denote_frame hag h]
-
-end
+/-- A term that avoids `ns` denotes alike in two states that agree off `ns`. -/
+theorem Tm.denote_frame {σ τ : State} (hag : EnvAgreeExcept ns σ τ) :
+    (t : Tm C s) → Avoids t.vars ns → t.denote σ = t.denote τ
+  | .pvV x, h | .pvS x, h => by simp only [Tm.denote, getEnv_congr hag h.head]
+  | .pvP x, h => by simp only [Tm.denote, aliasPath_frame hag h.head]
+  | .pvI _, _ => rfl
+  | .app0 o, _ => o.denote_agree hag
+  | .app1 o a, h => by
+    rw [Tm.vars_app1] at h
+    simp only [Tm.denote, a.denote_frame hag h.right]
+    exact o.denote_agree hag h.left _
+  | .app2 o a b, h => by
+    simp only [Tm.denote, a.denote_frame hag h.left, b.denote_frame hag h.right]
+    exact o.denote_agree hag (a.eval_frame hag h.left) (b.eval_frame hag h.right) _ _
+  | .app3 o a b c, h => by
+    simp only [Tm.denote, a.denote_frame hag h.left.left, b.denote_frame hag h.left.right,
+      c.denote_frame hag h.right]
 
 theorem UpdElem.write_frame {σ₀ σ₀' τ τ' : State} (h₀ : EnvAgreeExcept ns σ₀ σ₀')
     (h : EnvAgreeExcept ns τ τ') : (e : UpdElem C) → Avoids e.vars ns →
@@ -1103,29 +1248,27 @@ theorem Loc.lower_eval (σ : State) : {T : Ty} → (l : Loc C T) →
     l.lower.eval σ = l.resolve σ
   | _, .root .. => rfl
   | _, .field b f _ => by
-    simp only [Loc.lower, PTerm.eval, Loc.resolve, b.lower_eval σ]
+    simp only [Loc.lower, tm_eval, Loc.resolve, b.lower_eval σ]
   | _, .index _ b i => by
-    simp only [Loc.lower, PTerm.eval, Loc.resolve, b.lower_eval σ, i.lower_eval σ]
+    simp only [Loc.lower, tm_eval, Loc.resolve, b.lower_eval σ, i.lower_eval σ]
 
 theorem MPath.lower_eval (σ : State) : {T : Ty} → (p : MPath C T) →
     p.lower.eval σ = (do (← p.mval σ).asRef)
   | _, .var x => by
-    simp only [MPath.lower, ITerm.eval, MPath.mval, bind, Except.bind]
+    simp only [MPath.lower, tm_eval, MPath.mval, bind, Except.bind]
     cases σ.getEnv x with
     | error _ => rfl
     | ok b => cases b <;> rfl
   | _, .loc l => by
-    simp only [MPath.lower, ITerm.eval, MTerm.eval, MPath.mval, ← l.lower_eval σ, bind_assoc,
-      pure_bind]
+    simp only [MPath.lower, tm_eval, MPath.mval, ← l.lower_eval σ, bind_assoc, pure_bind]
 
 theorem MLoc.lower_eval (σ : State) : {T : Ty} → (l : MLoc C T) →
     (do readAddr σ (← l.lower.eval σ)) = l.read σ
   | _, .field b f _ => by
-    simp only [MLoc.lower, MAddr.eval, MLoc.read, b.lower_eval σ, bind_assoc, pure_bind]
+    simp only [MLoc.lower, tm_eval, MLoc.read, b.lower_eval σ, bind_assoc, pure_bind]
     rfl
   | _, .index _ b i => by
-    simp only [MLoc.lower, MAddr.eval, MLoc.read, b.lower_eval σ, i.lower_eval σ, bind_assoc,
-      pure_bind]
+    simp only [MLoc.lower, tm_eval, MLoc.read, b.lower_eval σ, i.lower_eval σ, bind_assoc, pure_bind]
     rfl
 
 /-- A value's term reads what it does: `alice.age + 1` lowers to
@@ -1134,19 +1277,19 @@ theorem Val.lower_eval (σ : State) : {p : PrimTy} → (v : Val C p) →
     v.lower.eval σ = v.eval σ
   | _, .simple s => s.lower_eval σ
   | _, .read l => by
-    simp only [Val.lower, Term.eval, STerm.eval, Val.eval, l.lower_eval σ, pure_bind]
+    simp only [Val.lower, tm_eval, Val.eval, l.lower_eval σ, pure_bind]
   | _, .binop _ _ _ a b => by
-    simp only [Val.lower, Term.eval, Val.eval, a.lower_eval σ, b.lower_eval σ]
+    simp only [Val.lower, tm_eval, Val.eval, a.lower_eval σ, b.lower_eval σ]
   | _, .unop _ _ _ a => by
-    simp only [Val.lower, Term.eval, Val.eval, a.lower_eval σ]
+    simp only [Val.lower, tm_eval, Val.eval, a.lower_eval σ]
   | _, .ternary c a b => by
-    simp only [Val.lower, Term.eval, Val.eval, c.lower_eval σ, a.lower_eval σ, b.lower_eval σ]
+    simp only [Val.lower, tm_eval, Val.eval, c.lower_eval σ, a.lower_eval σ, b.lower_eval σ]
   | _, .readMem l => by
-    simp only [Val.lower, Term.eval, MTerm.eval, Val.eval, ← l.lower_eval σ, bind_assoc, pure_bind]
+    simp only [Val.lower, tm_eval, Val.eval, ← l.lower_eval σ, bind_assoc, pure_bind]
   | _, .len b _ => by
-    simp only [Val.lower, Term.eval, STerm.eval, Val.eval, b.lower_eval σ, pure_bind]
+    simp only [Val.lower, tm_eval, Val.eval, b.lower_eval σ, pure_bind]
   | _, .mlen b _ => by
-    simp only [Val.lower, Term.eval, MTerm.eval, Val.eval, b.lower_eval σ, bind_assoc, pure_bind]
+    simp only [Val.lower, tm_eval, Val.eval, b.lower_eval σ, bind_assoc, pure_bind]
 
 end
 

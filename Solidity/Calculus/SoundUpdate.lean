@@ -353,7 +353,6 @@ theorem upd_memoryLengthRead {p : PrimTy} {E : Ty} (v mv : Var) (hlen : p = .uin
     SameOk [] (Upd.apply (C := C) [UpdElem.val v (Term.mlen MTerm.memory (ITerm.pv mv))] σ)
       (Stmt.run σ (Stmt.assignLocal v (Val.mlen (C := C) (E := E) (MPath.var mv) hlen))) := by
   mem_unfold
-  simp only [Term.eval_mlen', MTerm.eval, ITerm.eval_pv, bind_assoc, pure_bind]
   res_split
 
 theorem upd_memoryDeletePrimitive {p : PrimTy} (l : MLoc C (Ty.prim p)) (a : MAddr C)
@@ -377,7 +376,7 @@ theorem upd_memoryDeleteReference {R : RefTy} (l : MLoc C (Ty.ref R)) (a : MAddr
 theorem MLoc.addr_field_var (mv : Var) {s f : Name} {T : Ty} (hf : C.fieldType s f = some T)
     (σ : State) :
     (MAddr.field (ITerm.pv mv) f : MAddr C).eval σ = (MLoc.field (MPath.var mv) f hf).addr σ := by
-  simp only [MAddr.eval, ITerm.eval, MLoc.addr, MPath.mval, bind_assoc]
+  simp only [tm_eval, MLoc.addr, MPath.mval, bind_assoc]
   cases σ.getEnv mv with
   | error _ => rfl
   | ok b => cases b <;> rfl
@@ -386,7 +385,7 @@ theorem MLoc.addr_index_var (mv : Var) {R : RefTy} {E : Ty} {a : ArrTy R E}
     (ie : Simple C PrimTy.uint) (σ : State) :
     (MAddr.at (ITerm.pv mv) ie.lower : MAddr C).eval σ =
       (MLoc.index a (MPath.var mv) (Val.simple ie)).addr σ := by
-  simp only [MAddr.eval, ITerm.eval, MLoc.addr, MPath.mval, Val.eval, Simple.lower_eval, bind_assoc]
+  simp only [tm_eval, MLoc.addr, MPath.mval, Val.eval, Simple.lower_eval, bind_assoc]
   cases σ.getEnv mv with
   | error _ => rfl
   | ok b => cases b <;> rfl

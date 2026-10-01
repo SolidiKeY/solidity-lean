@@ -57,15 +57,26 @@ def PTerm.hasSeg : PTerm C → Bool
   | .pv _ => false
   | _ => true
 
+/-- An integer literal. -/
+def Term.litInt? : Term C → Option Int
+  | .lit (.int i) => some i
+  | _ => none
+
+theorem Term.eq_of_litInt? {t : Term C} {i : Int} (h : t.litInt? = some i) : t = .lit (.int i) := by
+  unfold Term.litInt? at h
+  split at h
+  · cases h; rfl
+  · cases h
+
 /-- A path built from a root by members and literal indices: its segments,
 the same in every state. -/
-def PTerm.segs? : PTerm C → Option (List Seg)
-  | .root r => some [.field r]
-  | .pv _ => none
-  | .field p f => p.segs?.map (· ++ [.field f])
-  | .at p (.lit (.int i)) => p.segs?.map (· ++ [.at i])
-  | .at _ _ => none
-  | .next _ => none
+def Tm.segs? : Tm C s → Option (List Seg)
+  | .app0 (.root r) => some [.field r]
+  | .app1 (.field f) p => p.segs?.map (· ++ [.field f])
+  | .app2 .at p i => match Term.litInt? i with
+    | some k => p.segs?.map (· ++ [Seg.at k])
+    | none => none
+  | _ => none
 
 /-- The two paths are closed (`segs?`) and leave each other (`diverges`):
 the syntactic form of the Theory's `diverges p q`.  A read through an alias
@@ -78,29 +89,34 @@ def PTerm.diverges (p q : PTerm C) : Bool :=
 /-- `hasSeg` gives the Theory's `p ≠ []` in every state. -/
 theorem PTerm.denote_ne_nil {p : PTerm C} (hp : p.hasSeg = true) (σ : State) :
     p.denote σ ≠ [] := by
-  cases p <;> simp only [hasSeg, Bool.false_eq_true, denote, ne_eq, List.cons_ne_nil,
-    List.append_eq_nil_iff, and_false, not_false_eq_true] at hp ⊢
+  match p, hp with
+  | .pvP _, hp => nomatch hp
+  | .app0 (.root _), _ => simp only [tm_denote, ne_eq, List.cons_ne_nil, not_false_eq_true]
+  | .app1 (.field _) _, _ | .app1 .next _, _ | .app2 .at _ _, _ =>
+    simp only [tm_denote, ne_eq, List.append_eq_nil_iff, List.cons_ne_nil, and_false,
+      not_false_eq_true]
 
 /-- A closed path denotes its segments in every state. -/
 theorem PTerm.denote_of_segs? (σ : State) : (p : PTerm C) → {l : List Seg} →
     p.segs? = some l → p.denote σ = l
-  | .root _, _, h => by
-    simp only [segs?, Option.some.injEq] at h
-    simp only [denote, h]
-  | .pv _, _, h => nomatch h
-  | .field p _, _, h => by
-    simp only [segs?, Option.map_eq_some_iff] at h
+  | .pvP _, _, h => nomatch h
+  | .app0 (.root _), _, h => by
+    simp only [Tm.segs?, Option.some.injEq] at h
+    simp only [tm_denote, h]
+  | .app1 (.field _) p, _, h => by
+    simp only [Tm.segs?, Option.map_eq_some_iff] at h
     obtain ⟨a, ha, rfl⟩ := h
-    simp only [denote, p.denote_of_segs? σ ha]
-  | .at p (.lit (.int _)), _, h => by
-    simp only [segs?, Option.map_eq_some_iff] at h
-    obtain ⟨a, ha, rfl⟩ := h
-    simp only [denote, p.denote_of_segs? σ ha, Term.denote, asInt]
-  | .at _ (.lit (.bool _)), _, h | .at _ (.pv _), _, h | .at _ (.binop ..), _, h
-  | .at _ (.unop ..), _, h | .at _ (.find ..), _, h | .at _ (.len ..), _, h
-  | .at _ (.read ..), _, h | .at _ (.ite ..), _, h | .at _ (.mlen ..), _, h
-  | .at _ (.env _), _, h | .at _ (.net _), _, h | .at _ (.netOf ..), _, h
-  | .next _, _, h => nomatch h
+    simp only [tm_denote, PTerm.denote_of_segs? σ p ha]
+  | .app1 .next _, _, h => nomatch h
+  | .app2 .at p i, _, h => by
+    simp only [Tm.segs?] at h
+    split at h
+    · rename_i k hk
+      simp only [Option.map_eq_some_iff] at h
+      obtain ⟨a, ha, rfl⟩ := h
+      rw [Term.eq_of_litInt? hk]
+      simp only [tm_denote, PTerm.denote_of_segs? σ p ha, asInt]
+    · cases h
 
 /-- `PTerm.diverges` gives the Theory's `diverges` in every state. -/
 theorem PTerm.diverges_denote {p q : PTerm C} (h : p.diverges q = true) (σ : State) :
@@ -176,33 +192,29 @@ theorem TermTaclet.findOnDelAtSave {s : STerm C} {p : PTerm C} {v : Value}
 every state.  A case is `denote` unfolded and the Theory's lemma. -/
 theorem TermTaclet.sound {t t' : Term C} : TermTaclet t t' → Term.Theq t t'
   | .findOnSave hp => fun σ => by
-    simp only [Term.denote, STerm.denote, SValT.denote,
-      find_copyTo_same _ (PTerm.denote_ne_nil hp σ), copyVal]
+    simp only [tm_denote, find_copyTo_same _ (PTerm.denote_ne_nil hp σ), copyVal]
     exact Equiv.refl _
   | .findOnSaveFrame h => fun σ => by
-    simp only [Term.denote, STerm.denote, find_copyTo_frame _ _ _ _ (PTerm.diverges_denote h σ)]
+    simp only [tm_denote, find_copyTo_frame _ _ _ _ (PTerm.diverges_denote h σ)]
     exact Equiv.refl _
   | .findMemberCons => fun σ => by
-    simp only [Term.denote, STerm.denote, PTerm.denote, List.cons_append, List.nil_append]
+    simp only [tm_denote, List.cons_append, List.nil_append]
     exact Equiv.refl _
   | .selectOnSaveMember => fun σ => by
-    simp only [Term.denote, STerm.denote, PTerm.denote, List.cons_append, List.nil_append, copyTo,
-      StValue.selectOnSaveCons, if_true, List.isEmpty_cons, Bool.false_eq_true, if_false,
-      asStruct_st]
+    simp only [tm_denote, List.cons_append, List.nil_append, copyTo, StValue.selectOnSaveCons, if_true, List.isEmpty_cons, Bool.false_eq_true, if_false, asStruct_st]
     exact Equiv.refl _
   | @findOnDelAt _ s p w hw hp => fun σ => by
     have hr : findSt (s.denote σ) (p.denote σ) = .prim w := Equiv.prim_iff.1 (hw.sound σ)
-    simp only [Term.denote, STerm.denote, find_delAt_same _ (PTerm.denote_ne_nil hp σ), hr,
-      delValueDefault]
+    simp only [tm_denote, find_delAt_same _ (PTerm.denote_ne_nil hp σ), hr, delValueDefault]
     exact Equiv.refl _
   | .findOnDelAtFrame h => fun σ => by
-    simp only [Term.denote, STerm.denote, find_delAt_frame _ (PTerm.diverges_denote h σ)]
+    simp only [tm_denote, find_delAt_frame _ (PTerm.diverges_denote h σ)]
     exact Equiv.refl _
   | .findOnPushFrame h => fun σ => by
-    simp only [Term.denote, STerm.denote, find_pushT_frame _ _ (PTerm.diverges_denote h σ)]
+    simp only [tm_denote, find_pushT_frame _ _ (PTerm.diverges_denote h σ)]
     exact Equiv.refl _
   | .findOnPopFrame h => fun σ => by
-    simp only [Term.denote, STerm.denote, find_popT_frame _ (PTerm.diverges_denote h σ)]
+    simp only [tm_denote, find_popT_frame _ (PTerm.diverges_denote h σ)]
     exact Equiv.refl _
   | .theory h => h
   | .symm r => r.sound.symm

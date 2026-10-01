@@ -303,13 +303,32 @@ theorem MPath.mval_loc (σ : State) {T : Ty} (l : MLoc C T) : (MPath.loc l).mval
 @[simp] theorem Src.pushVal_none (σ : State) {T : Ty} :
     Src.pushVal (C := C) (T := T) σ none = fun slot => pure slot := rfl
 
+section
+variable (σ : State)
+/-! A term's reading, one step, but for a value or memory local, which stays
+`envVal`/`envRef` (`Term.eval_pv`, `ITerm.eval_pv`). -/
+theorem Tm.eval_pvP (x : Var) : (Tm.pvP x : PTerm C).eval σ = aliasPath σ x := rfl
+theorem Tm.eval_pvS (x : Var) : (Tm.pvS x : STerm C).eval σ = (do
+    match ← σ.getEnv x with
+    | .store st => pure { σ with storage := st }
+    | .val _ | .spath .. | .mref _ | .ledger _ => .error .stuck) := rfl
+theorem Tm.eval_app0 {s : Srt} (o : Op0 s) : (Tm.app0 o : Tm C s).eval σ = o.eval σ := rfl
+theorem Tm.eval_app1 {a s : Srt} (o : Op1 a s) (x : Tm C a) :
+    (Tm.app1 o x).eval σ = o.eval σ (x.eval σ) := rfl
+theorem Tm.eval_app2 {a b s : Srt} (o : Op2 a b s) (x : Tm C a) (y : Tm C b) :
+    (Tm.app2 o x y).eval σ = o.eval σ (x.eval σ) (y.eval σ) := rfl
+theorem Tm.eval_app3 {a b c s : Srt} (o : Op3 a b c s) (x : Tm C a) (y : Tm C b) (z : Tm C c) :
+    (Tm.app3 o x y z).eval σ = o.eval σ (x.eval σ) (y.eval σ) (z.eval σ) := rfl
+end
+
 open Lean Parser.Tactic in
 /-- The simp set that unfolds an update and a statement to their reads and
 writes; `extra` says how terms are evaluated and writes are named. -/
 macro "upd_unfold_with" "[" extra:simpArg,* "]" : tactic => do
   let extra : Array (TSyntax [``simpStar, ``simpErase, ``simpLemma]) := extra.getElems.map (⟨·.raw⟩)
-  `(tactic| simp only [Upd.apply, List.foldlM, UpdElem.write,
-    STerm.eval, SValT.eval, Term.eval_pv, PTerm.eval, ITerm.eval_pv, MTerm.eval, MValT.eval,
+  `(tactic| simp only [Upd.apply, List.foldlM, UpdElem.write, Tm.eval_app0, Tm.eval_app1,
+    Tm.eval_app2, Tm.eval_app3, Tm.eval_pvP, Tm.eval_pvS, Op0.eval, Op1.eval, Op2.eval, Op3.eval,
+    Term.eval_pv, ITerm.eval_pv,
     SPath.lower_eval, Loc.lower_eval, Val.lower_eval, Simple.lower_eval, Stmt.run, Src.value,
     Val.eval, Simple.eval_local, bind_assoc, pure_bind, bind_pure, State.writeStorage_toSVal,
     OpLoc.store, OpLoc.bump, opStore, bumpStore, opLocal_eq, bumpLocal_eq, opMem, bumpMem,
@@ -319,7 +338,7 @@ macro "upd_unfold_with" "[" extra:simpArg,* "]" : tactic => do
 
 /-- `upd_unfold_with`, evaluating terms whole and keeping the rest of the state
 through each write. -/
-macro "upd_unfold" : tactic => `(tactic| upd_unfold_with [Term.eval, ITerm.eval, MAddr.eval,
-    State.saveStorage_with, State.writeStorage_with, writeAddr_with, Term.bumped])
+macro "upd_unfold" : tactic => `(tactic| upd_unfold_with [State.saveStorage_with,
+    State.writeStorage_with, writeAddr_with, Term.bumped])
 
 end Solidity

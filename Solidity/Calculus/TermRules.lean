@@ -8,7 +8,7 @@ import Solidity.Theory.Bridge.Denote
 KeY closes the first-order goal a program leaves by rewriting its terms with
 theory taclets — `find(save(storage, p, v), p) ⇝ v` — inside the sequent,
 at any step.  Here a taclet needs no soundness proof of its own: an equation
-`a ≐ b` reads its sides in the Theory (`Term.denote`, `holds`), so any two
+`a ≐ b` reads its sides in the Theory (`Tm.denote`, `holds`), so any two
 terms with the same Theory value in every state (`Term.Theq`) may replace
 each other in every equation of a sequent.  A law proved in
 `Theory/Storage.lean` is such a fact about the terms that denote its sides,
@@ -30,7 +30,7 @@ the state a subformula is judged in does not matter.  It does not reach:
   returns, `Calculus/UpdateRules.lean`);
 * a memory term (`read`, `mlen`, `copyMem`), which `denote`s through `eval`:
   an equality of denotations says nothing about its subterms' evaluations.
-  `Term.rw` replaces such a term as a whole, but never looks inside it.
+  `Tm.rw` replaces such a term as a whole, but never looks inside it.
 
 So the congruence (`Term.rw_denote`) needs only the equivalence of the
 replaced term's denotations, and holds up to `StValue.Equiv`, the Theory's
@@ -42,8 +42,6 @@ namespace Solidity
 open Semantics SemanticsProperties Theory
 
 variable {C : Contract}
-
-deriving instance DecidableEq for Term, PTerm, STerm, SValT, ITerm, MAddr, MTerm, MValT
 
 /-! ## Terms equal in the Theory -/
 
@@ -103,51 +101,30 @@ instance : Trans (@Term.Theq C) (@Term.Theq C) (@Term.Theq C) := ⟨Term.Theq.tr
 /-- `q.2` where the term is `q.1`, and `d` elsewhere. -/
 def Term.pick (q : Term C × Term C) (e d : Term C) : Term C := if e = q.1 then q.2 else d
 
-mutual
+/-- `q.2` where the term is `q.1`, at a value term; any other sort is left as
+it is. -/
+def Tm.pickAt (q : Term C × Term C) : {s : Srt} → Tm C s → Tm C s → Tm C s
+  | .val, e, d => Term.pick q e d
+  | .path, _, d | .st, _, d | .sv, _, d | .ident, _, d | .addr, _, d | .mem, _, d | .mv, _, d => d
+
+/-- A memory read (`read`, `mlen`, `copyMem`): its denotation is its
+evaluation, so a rewrite never looks inside it. -/
+def Op2.opaque : Op2 a b s → Bool
+  | .read | .mlen | .copyMem => true
+  | _ => false
 
 /-- Every occurrence of `q.1` in a term, replaced by `q.2` — not looking
-inside a memory term (`read`, `mlen`), whose denotation is its evaluation. -/
-def Term.rw (q : Term C × Term C) : Term C → Term C
-  | .lit v => Term.pick q (.lit v) (.lit v)
-  | .pv x => Term.pick q (.pv x) (.pv x)
-  | .binop op p a b => Term.pick q (.binop op p a b) (.binop op p (a.rw q) (b.rw q))
-  | .unop op p a => Term.pick q (.unop op p a) (.unop op p (a.rw q))
-  | .find s p => Term.pick q (.find s p) (.find (s.rw q) (p.rw q))
-  | .len s p => Term.pick q (.len s p) (.len (s.rw q) (p.rw q))
-  | .read m a => Term.pick q (.read m a) (.read m a)
-  | .ite c a b => Term.pick q (.ite c a b) (.ite (c.rw q) (a.rw q) (b.rw q))
-  | .mlen m i => Term.pick q (.mlen m i) (.mlen m i)
-  | .env k => Term.pick q (.env k) (.env k)
-  | .net a => Term.pick q (.net a) (.net (a.rw q))
-  | .netOf x a => Term.pick q (.netOf x a) (.netOf x (a.rw q))
-
-def PTerm.rw (q : Term C × Term C) : PTerm C → PTerm C
-  | .root r => .root r
-  | .pv x => .pv x
-  | .field p f => .field (p.rw q) f
-  | .at p i => .at (p.rw q) (i.rw q)
-  | .next p => .next (p.rw q)
-
-def STerm.rw (q : Term C × Term C) : STerm C → STerm C
-  | .storage => .storage
-  | .pv x => .pv x
-  | .save s p v => .save (s.rw q) (p.rw q) (v.rw q)
-  | .delAt s p => .delAt (s.rw q) (p.rw q)
-  | .push s p v => .push (s.rw q) (p.rw q) (v.rw q)
-  | .pushSlot s p E => .pushSlot (s.rw q) (p.rw q) E
-  | .pop s p => .pop (s.rw q) (p.rw q)
-  | .shrink s p => .shrink (s.rw q) (p.rw q)
-  | .extend s p E => .extend (s.rw q) (p.rw q) E
-  | .select s r => .select (s.rw q) r
-
-/-- A `copyMem` is left whole: it denotes through `eval`. -/
-def SValT.rw (q : Term C × Term C) : SValT C → SValT C
-  | .val e => .val (e.rw q)
-  | .find s p => .find (s.rw q) (p.rw q)
-  | .copyMem m i => .copyMem m i
-  | .newArr R n => .newArr R (n.rw q)
-
-end
+inside a memory read (`Op2.opaque`), whose denotation is its evaluation. -/
+def Tm.rw (q : Term C × Term C) : Tm C s → Tm C s
+  | .pvV x => Tm.pickAt q (.pvV x) (.pvV x)
+  | .pvP x => .pvP x
+  | .pvS x => .pvS x
+  | .pvI x => .pvI x
+  | .app0 o => Tm.pickAt q (.app0 o) (.app0 o)
+  | .app1 o a => Tm.pickAt q (.app1 o a) (.app1 o (a.rw q))
+  | .app2 o a b =>
+    Tm.pickAt q (.app2 o a b) (if o.opaque then .app2 o a b else .app2 o (a.rw q) (b.rw q))
+  | .app3 o a b c => Tm.pickAt q (.app3 o a b c) (.app3 o (a.rw q) (b.rw q) (c.rw q))
 
 /-! ### Replacing an equivalent term keeps the denotation
 
@@ -183,91 +160,144 @@ theorem Term.pick_denote (hd : StValue.Equiv (q.1.denote σ) (q.2.denote σ)) {e
   · next he => rw [he]; exact hd.symm
   · exact h
 
-mutual
+/-- Two denotations of a sort agree in the Theory: `Equiv` for a value or a
+storage, equal paths. -/
+def Srt.DEquiv : (s : Srt) → s.Den → s.Den → Prop
+  | .val => StValue.Equiv
+  | .path => Eq
+  | .st => Struct.Equiv
+  | .sv => StValue.Equiv
+  | .ident | .addr | .mem | .mv => fun _ _ => True
 
-theorem Term.rw_denote (hd : StValue.Equiv (q.1.denote σ) (q.2.denote σ)) :
-    (e : Term C) → StValue.Equiv ((e.rw q).denote σ) (e.denote σ)
-  | .lit _ | .pv _ | .env _ | .read _ _ | .mlen _ _ => Term.pick_denote hd (StValue.Equiv.refl _)
-  | .binop _ _ a b => Term.pick_denote hd (by
-      simp only [Term.denote, (a.rw_denote hd).toRes, (b.rw_denote hd).toRes]
-      exact StValue.Equiv.refl _)
-  | .unop _ _ a => Term.pick_denote hd (by
-      simp only [Term.denote, (a.rw_denote hd).toRes]
-      exact StValue.Equiv.refl _)
-  | .net a => Term.pick_denote hd (by
-      rcases (a.rw_denote hd).eq_or_st with h | ⟨s, t, hs, ht⟩
-      · simp only [Term.denote, h]
-        exact StValue.Equiv.refl _
-      · simp only [Term.denote, hs, ht]
-        exact StValue.Equiv.refl _)
-  | .netOf x a => Term.pick_denote hd (by
-      rcases (a.rw_denote hd).eq_or_st with h | ⟨s, t, hs, ht⟩
-      · simp only [Term.denote, h]
-        exact StValue.Equiv.refl _
-      · simp only [Term.denote, hs, ht]
-        rcases σ.getEnv x with _ | b
-        · exact StValue.Equiv.refl _
-        · cases b <;> exact StValue.Equiv.refl _)
-  | .find s p => Term.pick_denote hd (by
-      simp only [Term.denote, p.rw_denote hd]
-      exact StValue.Equiv.findSt (s.rw_denote hd) _)
-  | .len s p => Term.pick_denote hd (by
-      simp only [Term.denote, p.rw_denote hd]
-      exact StValue.Equiv.findSt (s.rw_denote hd) _)
-  | .ite c a b => Term.pick_denote hd (by
-      rcases (c.rw_denote hd).eq_or_st with h | ⟨s, t, hs, ht⟩
-      · simp only [Term.denote, h]
-        split
-        · exact a.rw_denote hd
-        · exact b.rw_denote hd
-        · exact StValue.Equiv.refl _
-      · simp only [Term.denote, hs, ht]
-        exact StValue.Equiv.refl _)
+theorem Srt.DEquiv.refl : (s : Srt) → (d : s.Den) → Srt.DEquiv s d d
+  | .val, _ | .st, _ | .sv, _ => StValue.Equiv.refl _
+  | .path, _ => rfl
+  | .ident, _ | .addr, _ | .mem, _ | .mv, _ => trivial
 
-theorem PTerm.rw_denote (hd : StValue.Equiv (q.1.denote σ) (q.2.denote σ)) :
-    (p : PTerm C) → (p.rw q).denote σ = p.denote σ
-  | .root _ | .pv _ => rfl
-  | .field p _ => by simp only [PTerm.rw, PTerm.denote, p.rw_denote hd]
-  | .at p i => by simp only [PTerm.rw, PTerm.denote, p.rw_denote hd, (i.rw_denote hd).asInt]
-  | .next p => by simp only [PTerm.rw, PTerm.denote, p.rw_denote hd]
+theorem Tm.pickAt_denote (hd : StValue.Equiv (q.1.denote σ) (q.2.denote σ)) :
+    {s : Srt} → {e d : Tm C s} → Srt.DEquiv s (d.denote σ) (e.denote σ) →
+      Srt.DEquiv s ((Tm.pickAt q e d).denote σ) (e.denote σ)
+  | .val, _, _, h => Term.pick_denote hd h
+  | .path, _, _, h | .st, _, _, h | .sv, _, _, h | .ident, _, _, h | .addr, _, _, h
+  | .mem, _, _, h | .mv, _, _, h => h
 
-theorem STerm.rw_denote (hd : StValue.Equiv (q.1.denote σ) (q.2.denote σ)) :
-    (s : STerm C) → Struct.Equiv ((s.rw q).denote σ) (s.denote σ)
-  | .storage | .pv _ => StValue.Equiv.refl _
-  | .save s p v => by
-    simp only [STerm.rw, STerm.denote, p.rw_denote hd]
-    exact Struct.Equiv.copyTo (s.rw_denote hd) (v.rw_denote hd) _
-  | .delAt s p => by
-    simp only [STerm.rw, STerm.denote, p.rw_denote hd]
-    exact Struct.Equiv.delAt (s.rw_denote hd) _
-  | .push s p v => by
-    simp only [STerm.rw, STerm.denote, p.rw_denote hd]
-    exact Struct.Equiv.pushT (s.rw_denote hd) (StValue.Equiv.stripVal (v.rw_denote hd)) _
-  | .pushSlot s p _ | .extend s p _ => by
-    simp only [STerm.rw, STerm.denote, p.rw_denote hd]
-    exact Struct.Equiv.pushSlotT _ _ (s.rw_denote hd) _
-  | .pop s p => by
-    simp only [STerm.rw, STerm.denote, p.rw_denote hd]
-    exact Struct.Equiv.popT (s.rw_denote hd) _
-  | .shrink s p => by
-    simp only [STerm.rw, STerm.denote, p.rw_denote hd]
-    exact Struct.Equiv.shrinkT (s.rw_denote hd) _
-  | .select s _ => by
-    simp only [STerm.rw, STerm.denote]
-    exact StValue.Equiv.asStruct (StValue.Equiv.findSt (s.rw_denote hd) [_])
-
-theorem SValT.rw_denote (hd : StValue.Equiv (q.1.denote σ) (q.2.denote σ)) :
-    (v : SValT C) → StValue.Equiv ((v.rw q).denote σ) (v.denote σ)
-  | .val e => e.rw_denote hd
-  | .find s p => by
-    simp only [SValT.rw, SValT.denote, p.rw_denote hd]
-    exact StValue.Equiv.findSt (s.rw_denote hd) _
-  | .copyMem _ _ => StValue.Equiv.refl _
-  | .newArr _ n => by
-    simp only [SValT.rw, SValT.denote, (n.rw_denote hd).asInt]
+/-- A unary symbol respects `Equiv` of its argument's denotation. -/
+theorem Op1.denote_congr : (o : Op1 a s) → {d d' : a.Den} →
+    Srt.DEquiv a d d' → Srt.DEquiv s (o.denote σ d) (o.denote σ d')
+  | .unop .., _, _, h => by
+    simp only [Srt.DEquiv, Op1.denote] at h ⊢
+    rw [h.toRes]
     exact StValue.Equiv.refl _
+  | .net, _, _, h => by
+    simp only [Srt.DEquiv] at h ⊢
+    rcases h.eq_or_st with h | ⟨s, t, hs, ht⟩
+    · rw [h]; exact StValue.Equiv.refl _
+    · simp only [Op1.denote, hs, ht]; exact StValue.Equiv.refl _
+  | .netOf x, _, _, h => by
+    simp only [Srt.DEquiv] at h ⊢
+    rcases h.eq_or_st with h | ⟨s, t, hs, ht⟩
+    · rw [h]; exact StValue.Equiv.refl _
+    · simp only [Op1.denote, hs, ht]
+      rcases σ.getEnv x with _ | b
+      · exact StValue.Equiv.refl _
+      · cases b <;> exact StValue.Equiv.refl _
+  | .field _, _, _, h | .next, _, _, h => by
+    simp only [Srt.DEquiv] at h ⊢; rw [h]
+  | .select _, _, _, h => by
+    simp only [Srt.DEquiv, Op1.denote] at h ⊢
+    exact StValue.Equiv.asStruct (StValue.Equiv.findSt h [_])
+  | .sval, _, _, h => h
+  | .newArr _, _, _, h => by
+    simp only [Srt.DEquiv, Op1.denote] at h ⊢
+    rw [h.asInt]
+    exact StValue.Equiv.refl _
+  | .alloc _, _, _, _ | .mfield _, _, _, _ | .addM _, _, _, _
+  | .mval, _, _, _ | .ref, _, _, _ => trivial
 
-end
+/-- A binary symbol that is no memory read respects `Equiv` of its
+arguments' denotations, whatever their readings. -/
+theorem Op2.denote_congr : (o : Op2 a b s) → o.opaque = false → {ra ra' : a.Ev} →
+    {rb rb' : b.Ev} → {da da' : a.Den} → {db db' : b.Den} → Srt.DEquiv a da da' →
+    Srt.DEquiv b db db' → Srt.DEquiv s (o.denote σ ra rb da db) (o.denote σ ra' rb' da' db')
+  | .binop .., _, _, _, _, _, _, _, _, _, ha, hb => by
+    simp only [Srt.DEquiv, Op2.denote] at ha hb ⊢
+    rw [ha.toRes, hb.toRes]
+    exact StValue.Equiv.refl _
+  | .find, _, _, _, _, _, _, _, _, _, hs, hp | .sfind, _, _, _, _, _, _, _, _, _, hs, hp
+  | .len, _, _, _, _, _, _, _, _, _, hs, hp => by
+    simp only [Srt.DEquiv, Op2.denote] at hs hp ⊢
+    rw [hp]
+    exact StValue.Equiv.findSt hs _
+  | .at, _, _, _, _, _, _, _, _, _, hp, hi => by
+    simp only [Srt.DEquiv, Op2.denote] at hp hi ⊢
+    rw [hp, hi.asInt]
+  | .delAt, _, _, _, _, _, _, _, _, _, hs, hp => by
+    simp only [Srt.DEquiv, Op2.denote] at hs hp ⊢
+    rw [hp]
+    exact Struct.Equiv.delAt hs _
+  | .pushSlot _, _, _, _, _, _, _, _, _, _, hs, hp
+  | .extend _, _, _, _, _, _, _, _, _, _, hs, hp => by
+    simp only [Srt.DEquiv, Op2.denote] at hs hp ⊢
+    rw [hp]
+    exact Struct.Equiv.pushSlotT _ _ hs _
+  | .pop, _, _, _, _, _, _, _, _, _, hs, hp => by
+    simp only [Srt.DEquiv, Op2.denote] at hs hp ⊢
+    rw [hp]
+    exact Struct.Equiv.popT hs _
+  | .shrink, _, _, _, _, _, _, _, _, _, hs, hp => by
+    simp only [Srt.DEquiv, Op2.denote] at hs hp ⊢
+    rw [hp]
+    exact Struct.Equiv.shrinkT hs _
+  | .iread, _, _, _, _, _, _, _, _, _, _, _ | .copy, _, _, _, _, _, _, _, _, _, _, _
+  | .mat, _, _, _, _, _, _, _, _, _, _, _ | .copySt, _, _, _, _, _, _, _, _, _, _, _ => trivial
+
+/-- A ternary symbol respects `Equiv` of its arguments' denotations. -/
+theorem Op3.denote_congr : (o : Op3 a b c s) → {da da' : a.Den} → {db db' : b.Den} →
+    {dc dc' : c.Den} → Srt.DEquiv a da da' → Srt.DEquiv b db db' → Srt.DEquiv c dc dc' →
+    Srt.DEquiv s (o.denote da db dc) (o.denote da' db' dc')
+  | .ite, _, _, _, _, _, _, hc, ha, hb => by
+    simp only [Srt.DEquiv, Op3.denote] at hc ha hb ⊢
+    rcases hc.eq_or_st with h | ⟨s, t, hs, ht⟩
+    · rw [h]
+      split
+      · exact ha
+      · exact hb
+      · exact StValue.Equiv.refl _
+    · simp only [hs, ht]
+      exact StValue.Equiv.refl _
+  | .save, _, _, _, _, _, _, hs, hp, hv => by
+    simp only [Srt.DEquiv, Op3.denote] at hs hp hv ⊢
+    rw [hp]
+    exact Struct.Equiv.copyTo hs hv _
+  | .push, _, _, _, _, _, _, hs, hp, hv => by
+    simp only [Srt.DEquiv, Op3.denote] at hs hp hv ⊢
+    rw [hp]
+    exact Struct.Equiv.pushT hs (StValue.Equiv.stripVal hv) _
+  | .write, _, _, _, _, _, _, _, _, _ => trivial
+
+/-- **Replacing an equivalent term keeps the denotation**, up to `Equiv`. -/
+theorem Tm.rw_denote (hd : StValue.Equiv (q.1.denote σ) (q.2.denote σ)) :
+    (e : Tm C s) → Srt.DEquiv s ((e.rw q).denote σ) (e.denote σ)
+  | .pvV _ | .app0 _ => Tm.pickAt_denote hd (Srt.DEquiv.refl _ _)
+  | .pvP _ | .pvS _ | .pvI _ => Srt.DEquiv.refl _ _
+  | .app1 o a => Tm.pickAt_denote hd (o.denote_congr (a.rw_denote hd))
+  | .app2 o a b => Tm.pickAt_denote hd (by
+      cases ho : o.opaque
+      · simp only [Bool.false_eq_true, ↓reduceIte, Tm.denote]
+        exact o.denote_congr ho (a.rw_denote hd) (b.rw_denote hd)
+      · simp only [↓reduceIte]
+        exact Srt.DEquiv.refl _ _)
+  | .app3 o a b c => Tm.pickAt_denote hd
+      (o.denote_congr (a.rw_denote hd) (b.rw_denote hd) (c.rw_denote hd))
+
+theorem Term.rw_denote (hd : StValue.Equiv (q.1.denote σ) (q.2.denote σ)) (e : Term C) :
+    StValue.Equiv ((e.rw q).denote σ) (e.denote σ) := Tm.rw_denote hd e
+theorem PTerm.rw_denote (hd : StValue.Equiv (q.1.denote σ) (q.2.denote σ)) (p : PTerm C) :
+    (p.rw q).denote σ = p.denote σ := Tm.rw_denote hd p
+theorem STerm.rw_denote (hd : StValue.Equiv (q.1.denote σ) (q.2.denote σ)) (s : STerm C) :
+    Struct.Equiv ((s.rw q).denote σ) (s.denote σ) := Tm.rw_denote hd s
+theorem SValT.rw_denote (hd : StValue.Equiv (q.1.denote σ) (q.2.denote σ)) (v : SValT C) :
+    StValue.Equiv ((v.rw q).denote σ) (v.denote σ) := Tm.rw_denote hd v
 
 end Denote
 

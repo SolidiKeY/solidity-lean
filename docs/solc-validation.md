@@ -234,7 +234,7 @@ so a changed verdict fails CI.
 **G. Each rule against solc directly**, bypassing `Stmt.run`. For each
 `Taclet`/`LeanTaclet` constructor (`#enum_ctors`, `Calculus/RuleShapes.lean`): a
 canonical instance and start state; evaluate the rule's premise through the updates and
-`Term.denote` over `State.abs` (a different path from the interpreter); compile the
+`Tm.denote` over `State.abs` (a different path from the interpreter); compile the
 instance with solc and run it. Three independent computations, so a disagreement says
 which is wrong. Runner: `solc --ir` with `test/tools/yulInterpreter/`, or evmone.
 

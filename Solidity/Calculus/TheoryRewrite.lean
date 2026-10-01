@@ -45,10 +45,12 @@ def theoryUnfoldLemmas : List Lean.Name :=
 
 /-! ## Reading a value back as a term -/
 
-/-- `e`, a `denote` of a term of the sort `f` at `σ`, is that term. -/
-def reifyFolded? (f : Lean.Name) (σ e : Expr) : MetaM (Option Expr) := do
-  unless e.isAppOfArity f 3 do return none
-  if ← isDefEq e.appFn!.appArg! σ then return some e.appArg! else return none
+/-- `e`, a `denote` of a term of the sort `srt` at `σ` (`Tm.denote σ t`),
+is that term. -/
+def reifyFolded? (srt : Lean.Name) (σ e : Expr) : MetaM (Option Expr) := do
+  unless e.isAppOfArity ``Tm.denote 4 do return none
+  unless (← whnf (e.getArg! 1)).isConstOf srt do return none
+  if ← isDefEq (e.getArg! 2) σ then return some e.appArg! else return none
 
 /-- The elements of a list literal `[a, b, …]`. -/
 partial def listLit? (e : Expr) : Option (List Expr) :=
@@ -69,11 +71,11 @@ def lengthOf? (e : Expr) : MetaM (Option Expr) := do
 
 mutual
 
-/-- A value of the Theory, written as a term: the inverse of `Term.denote σ`,
+/-- A value of the Theory, written as a term: the inverse of `Tm.denote σ`,
 for the values it gives. -/
 partial def reifyTerm (C σ e : Expr) : MetaM Expr := do
   let e ← instantiateMVars e
-  if let some t ← reifyFolded? ``Term.denote σ e then return t
+  if let some t ← reifyFolded? ``Srt.val σ e then return t
   match_expr e with
   | StValue.prim v => return mkApp2 (mkConst ``Term.lit) C v
   | StValue.int n => return mkApp2 (mkConst ``Term.lit) C (mkApp (mkConst ``PrimVal.int) n)
@@ -88,7 +90,7 @@ partial def reifyTerm (C σ e : Expr) : MetaM Expr := do
 /-- A storage node, written as a storage term. -/
 partial def reifySTerm (C σ e : Expr) : MetaM Expr := do
   let e ← instantiateMVars e
-  if let some s ← reifyFolded? ``STerm.denote σ e then return s
+  if let some s ← reifyFolded? ``Srt.st σ e then return s
   match_expr e with
   | State.abs σ' =>
     unless ← isDefEq σ σ' do throwError "not a storage term: {e}"
@@ -103,7 +105,7 @@ partial def reifySTerm (C σ e : Expr) : MetaM Expr := do
 /-- A value stored by a `save`, written as its right-hand side. -/
 partial def reifySValT (C σ e : Expr) : MetaM Expr := do
   let e ← instantiateMVars e
-  if let some v ← reifyFolded? ``SValT.denote σ e then return v
+  if let some v ← reifyFolded? ``Srt.sv σ e then return v
   match_expr e with
   | findSt s p =>
     return mkApp3 (mkConst ``SValT.find) C (← reifySTerm C σ s) (← reifyPTerm C σ p)
@@ -114,7 +116,7 @@ and indices, whether appended one at a time (`denote`'s `p ++ [a]`) or
 written out (`[a, b]`). -/
 partial def reifyPTerm (C σ e : Expr) : MetaM Expr := do
   let e ← instantiateMVars e
-  if let some p ← reifyFolded? ``PTerm.denote σ e then return p
+  if let some p ← reifyFolded? ``Srt.path σ e then return p
   if let some (p, q) := append? e then
     let some segs := listLit? q | throwError "not a path term: {e}"
     return ← segs.foldlM (extend C σ) (← reifyPTerm C σ p)
@@ -159,7 +161,7 @@ def dischargeTheory : Simp.Discharge := fun e => do
 term. -/
 def theoryRewrite (thms : SimpTheorems) (C u : Expr) : MetaM (Option (Expr × Expr)) :=
   withLocalDeclD `σ (mkConst ``Semantics.State) fun σ => do
-    let denote (t : Expr) : Expr := mkApp3 (mkConst ``Term.denote) C σ t
+    let denote (t : Expr) : Expr := mkApp4 (mkConst ``Tm.denote) C (mkConst ``Srt.val) σ t
     let lhs := denote u
     let mut unfold : SimpTheorems := {}
     for n in theoryUnfoldLemmas do unfold ← unfold.addConst n
@@ -230,7 +232,10 @@ def snocProves (g : MVarId) : MetaM MVarId := do
 /-- The terms of `e` a Theory law may rewrite (`find` and `len` reads),
 outermost first, each once. -/
 partial def theoryCandidates (e : Expr) (acc : Array Expr := #[]) : Array Expr :=
-  let acc := if (e.isAppOfArity ``Term.find 3 || e.isAppOfArity ``Term.len 3)
+  let read := e.isAppOfArity ``Term.find 3 || e.isAppOfArity ``Term.len 3 ||
+    (e.isAppOfArity ``Tm.app2 7 &&
+      ((e.getArg! 4).isConstOf ``Op2.find || (e.getArg! 4).isConstOf ``Op2.len))
+  let acc := if read
       && !e.hasLooseBVars && !e.hasMVar && !acc.contains e
     then acc.push e else acc
   e.getAppArgs.foldl (fun acc a => theoryCandidates a acc) acc

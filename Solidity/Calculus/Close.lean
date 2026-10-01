@@ -7,7 +7,7 @@ import Solidity.Theory.Bridge.Denote
 
 `sol_symex` leaves `{U₁} … {Uₙ} φ` with no modality in it.  Its updates are
 not rewritten away, as mini-solkey's `Ch14_Updates` does: a term here *is* a
-call of the interpreter (`Term.eval`, `STerm.eval`), so applying an update
+call of the interpreter (`Tm.eval`), so applying an update
 in an arbitrary state `σ` is running it, and what remains is a statement
 about what `saveStorage`, `findStorage`, `readAddr` and `getEnv` return on a
 `σ` nobody knows.  `sol_close` proves that statement with one contextual
@@ -395,7 +395,7 @@ theorem Term.eval_find (s : STerm C) (p : PTerm C) : (Term.find s p).eval σ =
 /-- `values.length`: the array there, counted. -/
 theorem Term.eval_len (s : STerm C) (p : PTerm C) : (Term.len s p).eval σ =
     s.eval σ >>= fun τ => p.eval σ >>= fun rs => τ.findStorage rs.1 rs.2 >>= arrLen := by
-  simp only [Term.eval, bind, Except.bind]
+  simp only [tm_eval, bind, Except.bind]
   cases s.eval σ <;> try rfl
   all_goals cases p.eval σ <;> try rfl
   all_goals exact arrayLen_eq _ _ _
@@ -411,13 +411,13 @@ theorem Term.eval_env (k : EnvKey) :
 /-- `net(a)`: the address, then the ledger's entry for it. -/
 theorem Term.eval_net (a : Term C) : (Term.net a).eval σ =
     a.eval σ >>= Value.asInt >>= fun n => .ok (.int (σ.getNet n)) := by
-  simp only [Term.eval, bind, Except.bind]
+  simp only [tm_eval, bind, Except.bind]
   cases a.eval σ <;> rfl
 /-- `net(oldNet, a)`: the ledger `oldNet` holds, then its entry for the address. -/
 theorem Term.eval_netOf (x : Var) (a : Term C) : (Term.netOf x a).eval σ =
     σ.getEnv x >>= bindingLedger >>= fun l => a.eval σ >>= Value.asInt >>= fun n =>
       .ok (.int ((lookupBy n l).getD 0)) := by
-  simp only [Term.eval, bind, Except.bind]
+  simp only [tm_eval, bind, Except.bind]
   cases σ.getEnv x with
   | error _ => rfl
   | ok b =>
@@ -436,20 +436,20 @@ the array's length where the receiver is one. -/
 theorem PTerm.eval_at (p : PTerm C) (i : Term C) : (PTerm.at p i).eval σ =
     p.eval σ >>= fun rs => i.eval σ >>= Value.asInt >>= fun k =>
       σ.checkIndex rs.1 rs.2 k >>= fun _ => .ok (rs.1, rs.2 ++ [.at k]) := by
-  simp only [PTerm.eval, bind, Except.bind]
+  simp only [tm_eval, bind, Except.bind]
   cases p.eval σ <;> try rfl
   cases i.eval σ <;> rfl
 /-- `values[values.length]`: the slot one past the end. -/
 theorem PTerm.eval_next (p : PTerm C) : (PTerm.next p).eval σ =
     p.eval σ >>= fun rs => σ.findStorage rs.1 rs.2 >>= Close.pastEnd rs := by
-  simp only [PTerm.eval, bind, Except.bind]
+  simp only [tm_eval, bind, Except.bind]
   cases p.eval σ <;> rfl
 /-- `storage` is the storage of the state it is read in. -/
 theorem STerm.eval_storage : (STerm.storage : STerm C).eval σ = .ok σ := rfl
 /-- `old` is the storage it was bound to, in the state it is read in. -/
 theorem STerm.eval_pv (x : Var) : (STerm.pv x : STerm C).eval σ =
     σ.getEnv x >>= bindingStore >>= fun st => .ok { σ with storage := st } := by
-  simp only [STerm.eval, bind, Except.bind]
+  simp only [tm_eval, bind, Except.bind]
   cases σ.getEnv x with
   | error _ => rfl
   | ok b => cases b <;> rfl
@@ -459,21 +459,21 @@ theorem STerm.eval_save (s : STerm C) (p : PTerm C) (t : Term C) :
     (STerm.save s p (.val t)).eval σ =
     t.eval σ >>= fun x => s.eval σ >>= fun τ => p.eval σ >>= fun rs =>
       τ.saveStorage rs.1 rs.2 x.toSVal := by
-  simp only [STerm.eval, SValT.eval, bind_assoc, pure_bind, State.writeStorage_toSVal]
+  simp only [tm_eval, bind_assoc, pure_bind, State.writeStorage_toSVal]
 /-- `save(storage, alice, find(storage, bob))`: `bob`'s tree laid over
 `alice`'s (`SVal.overlay`). -/
 theorem STerm.eval_save_find (s s' : STerm C) (p p' : PTerm C) :
     (STerm.save s p (.find s' p')).eval σ =
     (SValT.find s' p').eval σ >>= fun sv => s.eval σ >>= fun τ => p.eval σ >>= fun rs =>
       τ.findStorage rs.1 rs.2 >>= fun cur => τ.saveStorage rs.1 rs.2 (cur.overlay sv) := by
-  simp only [STerm.eval, Close.writeStorage_eq]
+  simp only [tm_eval, Close.writeStorage_eq]
 /-- `save(storage, alice, copyMem(mtSt, memory, m))`: the memory object laid
 over `alice`'s tree. -/
 theorem STerm.eval_save_copyMem (s : STerm C) (p : PTerm C) (m : MTerm C) (i : ITerm C) :
     (STerm.save s p (.copyMem m i)).eval σ =
     (SValT.copyMem m i).eval σ >>= fun sv => s.eval σ >>= fun τ => p.eval σ >>= fun rs =>
       τ.findStorage rs.1 rs.2 >>= fun cur => τ.saveStorage rs.1 rs.2 (cur.overlay sv) := by
-  simp only [STerm.eval, Close.writeStorage_eq]
+  simp only [tm_eval, Close.writeStorage_eq]
 /-- `delAt(storage, alice.age)`: the word there, reset to its default. -/
 theorem STerm.eval_delAt (s : STerm C) (p : PTerm C) : (STerm.delAt s p).eval σ =
     s.eval σ >>= fun τ => p.eval σ >>= fun rs => τ.findStorage rs.1 rs.2 >>= fun cur =>
@@ -483,7 +483,7 @@ theorem STerm.eval_push (s : STerm C) (p : PTerm C) (v : SValT C) : (STerm.push 
     s.eval σ >>= fun τ => p.eval σ >>= fun rs =>
       τ.findStorage rs.1 rs.2 >>=
         pushOn τ .uint rs.1 rs.2 (fun _ => v.eval σ >>= fun sv => pure sv.strip) := by
-  simp only [STerm.eval, bind, Except.bind]
+  simp only [tm_eval, bind, Except.bind]
   cases s.eval σ <;> try rfl
   all_goals cases p.eval σ <;> try rfl
   all_goals exact pushAt_eq _ _ _ _ _
@@ -491,7 +491,7 @@ theorem STerm.eval_push (s : STerm C) (p : PTerm C) (v : SValT C) : (STerm.push 
 theorem STerm.eval_pushSlot (s : STerm C) (p : PTerm C) (E : Ty) :
     (STerm.pushSlot s p E).eval σ = s.eval σ >>= fun τ => p.eval σ >>= fun rs =>
       τ.findStorage rs.1 rs.2 >>= pushOn τ E rs.1 rs.2 pure := by
-  simp only [STerm.eval, bind, Except.bind]
+  simp only [tm_eval, bind, Except.bind]
   cases s.eval σ <;> try rfl
   all_goals cases p.eval σ <;> try rfl
   all_goals exact pushAt_eq _ _ _ _ _
@@ -499,7 +499,7 @@ theorem STerm.eval_pushSlot (s : STerm C) (p : PTerm C) (E : Ty) :
 theorem STerm.eval_pop (s : STerm C) (p : PTerm C) : (STerm.pop s p).eval σ =
     s.eval σ >>= fun τ => p.eval σ >>= fun rs =>
       τ.findStorage rs.1 rs.2 >>= popOn τ false rs.1 rs.2 := by
-  simp only [STerm.eval, bind, Except.bind]
+  simp only [tm_eval, bind, Except.bind]
   cases s.eval σ <;> try rfl
   all_goals cases p.eval σ <;> try rfl
   all_goals exact popAt_eq _ _ _ _
@@ -508,7 +508,7 @@ kept. -/
 theorem STerm.eval_shrink (s : STerm C) (p : PTerm C) : (STerm.shrink s p).eval σ =
     s.eval σ >>= fun τ => p.eval σ >>= fun rs =>
       τ.findStorage rs.1 rs.2 >>= popOn τ true rs.1 rs.2 := by
-  simp only [STerm.eval, bind, Except.bind]
+  simp only [tm_eval, bind, Except.bind]
   cases s.eval σ <;> try rfl
   all_goals cases p.eval σ <;> try rfl
   all_goals exact popAt_eq _ _ _ _
@@ -539,7 +539,7 @@ theorem MAddr.eval_field (i : ITerm C) (f : Name) : (MAddr.field i f).eval σ =
 /-- `xs[k]` is the element `k` of the object `xs` holds. -/
 theorem MAddr.eval_at (i : ITerm C) (k : Term C) : (MAddr.at i k).eval σ =
     i.eval σ >>= fun id => k.eval σ >>= Value.asInt >>= fun j => .ok (.memoryIndex id j) := by
-  simp only [MAddr.eval, bind, Except.bind]
+  simp only [tm_eval, bind, Except.bind]
   cases i.eval σ <;> try rfl
   cases k.eval σ <;> rfl
 /-- `memory` is the memory of the state it is read in. -/

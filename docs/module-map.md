@@ -27,7 +27,7 @@ module goes in `Solidity.lean` (`scripts/check-orphans.mjs` fails on a module
 nothing imports).
 
 **Formulas read storage through the Theory.** Programs and updates run in the
-interpreter, but `a ≐ b` (`Fml.eq`) compares `Term.denote`s over `State.abs`,
+interpreter, but `a ≐ b` (`Fml.eq`) compares `Tm.denote`s over `State.abs`,
 the state as a Theory term, and is total as KeY's `=` is. A program comparison
 `a == b` is `Fml.eqD`, `defined(a) ∧ defined(b) ∧ a ≐ b`. `Theory/Bridge/`
 proves once that the interpreter's reads and writes are the Theory's on `abs`
@@ -49,7 +49,8 @@ lemma (`TermTaclet.sound`).
 | `Semantics/Agree.lean` | `EnvAgreeExcept`: states agreeing off scratch names, and a frame lemma per evaluator. |
 | `Semantics/DecEq.lean` | `DecidableEq SVal`. |
 | `Semantics/Callback.lean` | The callback reading of `transfer`: `ExecS`/`ExecP`, `holdsC`, `TransferSem`. |
-| `Update.lean` | Terms, parallel updates, formulas with both modalities (`Fml`, `holds`, `Valid`), lowering of program expressions to terms. |
+| `TermSimp.lean` | The simp sets `tm_eval` and `tm_denote` of the generic term functions. |
+| `Update.lean` | Terms as one signature (`Srt`, `Op0`…`Op3`, `Tm`; `Term`, `STerm`, … are its sorts, the old constructors abbreviations), their reading (`Tm.eval`, `Tm.denote`) and frame lemmas, parallel updates, formulas with both modalities (`Fml`, `holds`, `Valid`), lowering of program expressions to terms. |
 | `Theorems.lean` | The headline theorems in notation. |
 
 ## The calculus

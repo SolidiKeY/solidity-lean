@@ -81,6 +81,14 @@ sequent computed first (`normProves`).  `sol_rw [h₁, …]` is the same with no
 fallback to Lean's `rw`. -/
 
 open Lean Elab Tactic Meta in
+/-- The goal with its terms folded back to their constructors' names
+(`foldTms`, `Calculus/RuleSyntax.lean`): a `simp` over the generic term
+functions leaves `Tm.app2 C Op2.find s p`, which `rw` would not find. -/
+elab "sol_fold_terms" : tactic => withMainContext do
+  let g ← getMainGoal
+  replaceMainGoal [← g.replaceTargetDefEq (← foldTms (← instantiateMVars (← g.getType)))]
+
+open Lean Elab Tactic Meta in
 /-- Close a side condition of a law, `h : p.hasSeg = true` and the like, by
 `rfl` and then `decide`: once the law's terms are known the condition is a
 closed `Bool` computation.  A failure is `sol_rw`'s, naming the condition,
@@ -120,15 +128,14 @@ def solRwApply (pf : Expr) (h : MessageData) (upd : Bool := false) : TacticM Uni
     then `(tactic| refine Proves.updRw $pf rfl ?_)
     else `(tactic| refine Proves.rewrite $pf ?_)
   evalTactic (← `(tactic| simp (config := { decide := true }) only
-    [Hyp.rwEq, Fml.rwEq, Hyp.rwUpd, Upd.rw, UpdElem.rw, List.map_cons, List.map_nil, Term.rw, PTerm.rw, STerm.rw, SValT.rw, Term.pick, ↓reduceIte,
-      reduceCtorEq, and_true, true_and, and_false, false_and, and_self,
-      Term.lit.injEq, Term.pv.injEq, Term.binop.injEq, Term.unop.injEq, Term.find.injEq,
-      Term.len.injEq, Term.read.injEq, Term.ite.injEq, Term.mlen.injEq, Term.env.injEq,
-      Term.net.injEq, Term.netOf.injEq, PTerm.root.injEq, PTerm.pv.injEq, PTerm.field.injEq,
-      PTerm.at.injEq, PTerm.next.injEq, STerm.pv.injEq, STerm.save.injEq, STerm.delAt.injEq,
-      STerm.push.injEq, STerm.pushSlot.injEq, STerm.pop.injEq, STerm.shrink.injEq,
-      STerm.extend.injEq, STerm.select.injEq, SValT.val.injEq, SValT.find.injEq, SValT.copyMem.injEq,
-      SValT.newArr.injEq]))
+    [Hyp.rwEq, Fml.rwEq, Hyp.rwUpd, Upd.rw, UpdElem.rw, List.map_cons, List.map_nil, Tm.rw,
+      Tm.pickAt, Op2.opaque, Term.pick, ↓reduceIte, Bool.false_eq_true, reduceCtorEq, and_true,
+      true_and, and_false, false_and, and_self, heq_eq_eq, Tm.pvV.injEq, Tm.pvP.injEq,
+      Tm.pvS.injEq, Tm.pvI.injEq, Tm.app0.injEq, Tm.app1.injEq, Tm.app2.injEq, Tm.app3.injEq,
+      Op0.lit.injEq, Op0.env.injEq, Op0.root.injEq, Op1.unop.injEq, Op1.netOf.injEq,
+      Op1.field.injEq, Op1.select.injEq, Op1.newArr.injEq, Op2.binop.injEq, Op2.pushSlot.injEq,
+      Op2.extend.injEq]))
+  evalTactic (← `(tactic| sol_fold_terms))
   let after ← instantiateMVars (← getMainTarget)
   if after == before then
     throwError "sol_rw: {h} rewrites nothing in the sequent"
@@ -145,7 +152,7 @@ def solRwBoth (pf t' : Expr) (h : MessageData) : TacticM Unit := do
     solRwApply pf h
     done := true
   catch _ => saved.restore
-  if (← instantiateMVars t').isAppOf ``Term.lit then
+  if (← whnfTm (← instantiateMVars t')).isAppOf ``Term.lit then
     let saved ← saveState
     try
       solRwApply pf h (upd := true)
@@ -369,11 +376,10 @@ macro "sol_apply_upd" : tactic => `(tactic| (
   first
     | refine Proves.applyStorageBox ?_
     | refine Proves.applyOnRigidBox ?_
-  simp (config := { decide := true }) only [Fml.withSt, Term.withSt, PTerm.withSt, STerm.withSt,
-    SValT.withSt, Fml.subst, Term.subst, PTerm.subst, STerm.subst, SValT.subst, ITerm.subst,
-    MAddr.subst, MTerm.subst, MValT.subst, Upd.valOf, Upd.pathOf, Upd.refOf, Upd.storOf,
-    Upd.lastWrite, UpdElem.var?, Upd.withSt, UpdElem.withSt, List.map_cons, List.map_nil,
-    ↓reduceIte]))
+  simp (config := { decide := true }) only [Fml.withSt, Tm.withSt, Op2.opaque, Fml.subst,
+    Tm.subst, Upd.valOf, Upd.pathOf, Upd.refOf, Upd.storOf, Upd.lastWrite, UpdElem.var?,
+    Upd.withSt, UpdElem.withSt, List.map_cons, List.map_nil, ↓reduceIte, Bool.false_eq_true]
+  sol_fold_terms))
 
 /-- **`defined(x)` after `x := t`**: behind a box update whose last binder of
 `x` is `x := t`, in a context with no diamond, `x` is defined.  This keeps
