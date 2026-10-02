@@ -18,8 +18,8 @@ Two directories, by proof style:
   tactics, and interpreter runs.
 
 The notation's own tests (`ChainNotation`, `ChainRewrites`, `ExampleNames`,
-`Notation`, `Tools`, `Verify`) stay at the root. A program is shown once per
-style: before adding one, `rg` for it.
+`Notation`, `ProofTree`, `Tools`, `Verify`) stay at the root. A program is
+shown once per style: before adding one, `rg` for it.
 
 A tactic example is over a named contract
 (`local instance : InContract := ⟨StandardExample⟩`), proved one of two ways:
@@ -30,6 +30,8 @@ A tactic example is over a named contract
   one `apply` per taclet (`unfold r`, `update r`, `split r`, `done r`,
   `empty`, `intro`), and `apply close; sol_close` at the end. Each rule the
   walk takes is named in the proof, so renaming a rule breaks the example.
+  `sol_derive?` writes the walk out (`Calculus/ProofTree.lean`), as
+  `sol_chain?` writes a chain's `calc`.
 
 Every theorem has a docstring with its Solidity. Every file has its own
 namespace `Solidity.Examples.<Dir>.<File>`: an anonymous `local instance` gets a
