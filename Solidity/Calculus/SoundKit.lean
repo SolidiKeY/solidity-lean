@@ -88,8 +88,6 @@ def Premise.Correct (k : Nat) (m : Modality) (s : Stmt C) : Premise C → Prop
       (holds σ c → SameOk (freshVars k) (Prog.run σ P) (s.run σ)) ∧
       (holds σ c' → SameOk (freshVars k) (Prog.run σ Q) (s.run σ)) ∧
       (¬ holds σ c → ¬ holds σ c' → ∃ e, s.run σ = .error e)
-  | .guard c U => ∀ σ,
-      (holds σ c → SameOk [] (U.apply σ) (s.run σ)) ∧ (¬ holds σ c → ∃ e, s.run σ = .error e)
   | .done b => b = true → m = .box ∧ ∀ σ, ∃ e, s.run σ = .error e
   | .branches bs => ∀ σ, (m = .box ∧ ∃ e, s.run σ = .error e) ∨
       ∃ b ∈ bs, ∃ σ', Binds b.1 σ σ' ∧ Prog.run σ' b.2 = s.run σ

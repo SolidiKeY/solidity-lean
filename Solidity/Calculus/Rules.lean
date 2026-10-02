@@ -239,9 +239,9 @@ elab "clear_side" : tactic => withMainContext do
 
 /-- What a taclet leaves: an update in front of the rest (`{U} ⟨[ ]⟩`),
 statements in its place (`⟨[ s₁; …; sₙ; ]⟩`), two goals (a branch, one
-condition assumed in each: `se = true` and `se = false`), a guarded update
-(`c ⟹ {U} ⟨[ ]⟩ ; ¬(c) ⟹ ⟨[ revert(); ]⟩`), or the whole modality closed
-(`true`, `false`), or a goal per way an external call may end (`try`).
+condition assumed in each: `se = true` and `se = false`), or the whole
+modality closed (`true`, `false`), or a goal per way an external call may
+end (`try`).
 A condition can be stuck (a local read
 before it is bound), so a branch's two conditions need not cover every
 state: a box goal is true of a stuck run anyway, and a diamond goal owes
@@ -250,7 +250,6 @@ inductive Premise (C : Contract) where
   | update (U : Upd C)
   | unfold (P : Prog C)
   | split (c c' : Fml C) (P Q : Prog C)
-  | guard (c : Fml C) (U : Upd C)
   | done (b : Bool)
   /-- One goal per block, each in the statement's place, for every value of
   the locals it binds: `∀ xs. ⟨[ P ]⟩` (KeY's `T v;` with no initializer,
@@ -501,15 +500,12 @@ inductive Taclet (C : Contract) (k : Nat) : Modality → Stmt C → Premise C �
       dl{ ⟨[ nadr.transfer(e); ]⟩ ⇝ ⟨[ uint se = nadr; se.transfer(e); ]⟩ }
   | transfer_unfold_rightSndArgument :
       dl{ ⟨[ sadr.transfer(nse); ]⟩ ⇝ ⟨[ uint se = nse; sadr.transfer(se); ]⟩ }
-  /-- The payment on the ledger, at both ends: `sadr`'s entry down by `se`,
-  the contract's own (`this`) up by `se`, so a payment to `this` books
-  nothing; nothing else changes. -/
-  | transferNoCallback :
-      dl{ ⟨[ sadr.transfer(se); ]⟩ ⇝
-          0 <= se ⟹
-            { net := store(net, at(sadr), net(sadr) - se) ‖ net := store(net, at(this), net(this) + se) }
-              ⟨[ ]⟩ ;
-          ¬(0 <= se) ⟹ ⟨[ revert(); ]⟩ }
+  /-- The payment on the ledger, under the box: `sadr`'s entry down by `se`,
+  unless `sadr` is the contract itself (`this`), which books nothing; nothing
+  else changes.  The box only: the diamond has no rule (`LeanTaclet.transferDiamond`). -/
+  | transferNoCallbackBox :
+      dl{ [ sadr.transfer(se); ] ⇝
+          { net := if(sadr = this) then net else store(net, at(sadr), net(sadr) - se) } ⟨[ ]⟩ }
   -- Memory ---------------------------------------------------------------
   | memoryFieldRead_unfold_rightFst :
       dl{ ⟨[ lhs = nmp.fld; ]⟩ ⇝ ⟨[ T memory mv = nmp; lhs = mv.fld; ]⟩ }
@@ -670,6 +666,13 @@ inductive LeanTaclet (C : Contract) (k : Nat) : Modality → Stmt C → Premise 
       {code : Option Var} {pnc other : List (Stmt C)} :
       LeanTaclet C k .diamond (.tryCall call rets ok err code pnc other) (.done false)
 
+  /-- A payment under the diamond closes to `false`.  solkey books a payment
+  under the box only (`transferNoCallbackBox`): whether the world pays is not
+  the calculus's (`Evm.compile_correct`, where a refused payment reverts the
+  machine alone), so no diamond over a payment is derived. -/
+  | transferDiamond {sadr se : Simple C .uint} :
+      LeanTaclet C k .diamond (.transfer (.simple sadr) (.simple se)) (.done false)
+
 /-- A rule of the calculus: solkey's, or one it does not have. -/
 inductive Rule (C : Contract) (k : Nat) (m : Modality) (s : Stmt C) (p : Premise C) : Prop where
   | key (d : Taclet C k m s p)
@@ -678,18 +681,16 @@ inductive Rule (C : Contract) (k : Nat) (m : Modality) (s : Stmt C) (p : Premise
 /-! ## The callback taclets
 
 `transferSemantics:withCallback`: `sadr.transfer(se);` when the recipient may
-call back into the contract.  Their premise has `transferNoCallback`'s shape,
-the amount a word, `0 <= se`, and the booking
-`{net := store(net, at(sadr), net(sadr) - se) ‖ net := store(net, at(this), net(this) + se)}`,
-read differently
-(`Calculus/Callback.lean`): the contract invariant after the booking
-("invariant on exit"), and the rest of the program resumed from any state
-the callee may leave in which the invariant holds ("resume after
-callback").
+call back into the contract.  Its premise is `transferNoCallbackBox`'s, the
+booking `{net := if(sadr = this) then net else store(net, at(sadr), net(sadr) - se)}`,
+read differently (`Calculus/Callback.lean`): the contract invariant after
+the booking ("invariant on exit"), and the rest of the program resumed from
+any state the callee may leave in which the invariant holds ("resume after
+callback").  The box only, as solkey's calculus of payments is.
 
 They are not `Taclet` constructors: `Taclet` is sound for `Stmt.run`, which
 books a transfer and returns, and these are sound for the callback reading
-(`holdsC`), in which the other semantics' `transferNoCallback` is not. -/
+(`holdsC`), in which the other semantics' `transferNoCallbackBox` is not. -/
 
 /-- The callback taclets: the statement they fire on, under the modality
 they are for, and their premise: a transfer's booking, a
@@ -699,16 +700,7 @@ it holds). -/
 inductive CallbackTaclet (C : Contract) : Modality → Stmt C → Premise C → Prop where
   | transferWithCallbackBox {sadr se : Simple C .uint} :
       CallbackTaclet C .box (.transfer (.simple sadr) (.simple se))
-        dl{ 0 <= se ⟹
-              { net := store(net, at(sadr), net(sadr) - se) ‖ net := store(net, at(this), net(this) + se) }
-                ⟨[ ]⟩ ;
-            ¬(0 <= se) ⟹ ⟨[ revert(); ]⟩ }
-  | transferWithCallbackDiamond {sadr se : Simple C .uint} :
-      CallbackTaclet C .diamond (.transfer (.simple sadr) (.simple se))
-        dl{ 0 <= se ⟹
-              { net := store(net, at(sadr), net(sadr) - se) ‖ net := store(net, at(this), net(this) + se) }
-                ⟨[ ]⟩ ;
-            ¬(0 <= se) ⟹ ⟨[ revert(); ]⟩ }
+        dl{ { net := if(sadr = this) then net else store(net, at(sadr), net(sadr) - se) } ⟨[ ]⟩ }
   | tryCallWithCallbackBox {call : ExtCall C} {rets : List (PrimTy × Var)} {ok err : List (Stmt C)}
       {code : Option Var} {pnc other : List (Stmt C)} :
       CallbackTaclet C .box (.tryCall call rets ok err code pnc other)
@@ -740,10 +732,6 @@ def ppPremise? (e : Lean.Expr) : MetaM (Option (TSyntax `dl_premise)) := do
         return some (← `(dl_premise| $c:dl_fml ⟹ ⟨[ $(← ppBlock P) ]⟩ ; $c':dl_fml ⟹ ⟨[ $(← ppBlock Q) ]⟩))
     | _, _ =>
       return some (← `(dl_premise| $c:dl_fml ⟹ ⟨[ $(← ppBlock P) ]⟩ ; $c':dl_fml ⟹ ⟨[ $(← ppBlock Q) ]⟩))
-  | Premise.guard _ c U =>
-    let c ← ppFml c
-    return some (← `(dl_premise| $c:dl_fml ⟹ $(← ppUpd U):dl_upd ⟨[ ]⟩ ;
-      ¬($c) ⟹ ⟨[ revert(); ]⟩))
   | Premise.done _ b =>
     match_expr (← whnf b) with
     | Bool.true => return some (← `(dl_premise| true))
@@ -773,8 +761,7 @@ def delabPremise : Delab := do
   `(dl{ $p:dl_premise })
 
 attribute [delab app.Solidity.Premise.update, delab app.Solidity.Premise.unfold,
-  delab app.Solidity.Premise.split, delab app.Solidity.Premise.guard,
-  delab app.Solidity.Premise.done] delabPremise
+  delab app.Solidity.Premise.split, delab app.Solidity.Premise.done] delabPremise
 
 /-- The type without its `autoParam` hypotheses (a taclet's side conditions),
 which nothing after them depends on. -/

@@ -4,11 +4,10 @@ import Solidity.Calculus.Close
 # Payment: what a `transfer` changes
 
 `a.transfer(v);` books a debit of `v` on the `net` ledger at `a`, with no
-callback (`transferNoCallback`, solkey's `netHeader.key`), and does nothing
-else (`Semantics.transferAt`): `to`'s entry down by `v`, the contract's own
-(`this`, `address(this)`) up by `v`, so a payment to the contract itself
-books nothing.  The rule and its single-statement walk are
-`Payment.lean`'s.
+callback (`transferNoCallbackBox`, solkey's `netHeader.key`), and does
+nothing else (`Semantics.transferAt`): `to`'s entry down by `v`, unless
+`to` is the contract itself (`this`, `address(this)`), which books nothing.
+The rule and its single-statement walk are `Payment.lean`'s.
 
 What a transfer changes is the ledger, `net(to)` `5` less after
 `to.transfer(5);` (§2), and nothing else: its **frame**, storage, locals and
@@ -30,7 +29,7 @@ local instance : InContract := ⟨StandardExample⟩
 
 /-- `alice.age = 1; to.transfer(x + 2); uint y = alice.age;` — a storage write
 before a transfer reads the same after it.  The amount is captured first
-(`transfer_unfold_rightSndArgument`), then booked (`transferNoCallback`). -/
+(`transfer_unfold_rightSndArgument`), then booked (`transferNoCallbackBox`). -/
 theorem transferFrameStorage :
     ⊨ dl!{ [ alice.age = 1; to.transfer(x + 2); uint y = alice.age; ] y == 1 } := by
   apply Proves.valid
@@ -38,19 +37,14 @@ theorem transferFrameStorage :
   apply unfold .transfer_unfold_rightSndArgument
   apply unfold .localValueDeclInitDrop
   apply update .binopAssignment
-  apply guard .transferNoCallback
-  · -- { net := store(net, at(to), net(to) - se1) }
-    apply unfold .localValueDeclInitDrop
-    apply update .storageFieldReadFind
-    apply empty
-    refine close ?_
-    sol_symex
-    sol_close
-  · -- ¬(0 <= se1): the transfer halts
-    apply done .revertBox
-    refine close ?_
-    sol_symex
-    sol_close
+  apply update .transferNoCallbackBox
+  -- { net := if(to = this) then net else store(net, at(to), net(to) - se1) }
+  apply unfold .localValueDeclInitDrop
+  apply update .storageFieldReadFind
+  apply empty
+  refine close ?_
+  sol_symex
+  sol_close
 
 /-- `uint z = total; owner.transfer(5);` — a state variable as the receiver is
 captured (`transfer_unfold_leftFstReceiver`), and the transfer leaves it, and
@@ -63,15 +57,11 @@ theorem transferFrameRoot :
   apply unfold .transfer_unfold_leftFstReceiver
   apply unfold .localValueDeclInitDrop
   apply update .storageRootReadSelect
-  apply guard .transferNoCallback
-  · apply empty
-    refine close ?_
-    sol_symex
-    sol_close
-  · apply done .revertBox
-    refine close ?_
-    sol_symex
-    sol_close
+  apply update .transferNoCallbackBox
+  apply empty
+  refine close ?_
+  sol_symex
+  sol_close
 
 /-- `uint z = balances[k]; to.transfer(5); uint y = balances[k];` — a mapping
 entry, read before and after. -/
@@ -96,9 +86,10 @@ theorem transferFrameMemory :
 
 /-! ## 2 · The ledger, as formulas
 
-A payment is booked at both ends: `to`'s entry down, the contract's own
-(`this`) up.  So a claim about `to` alone needs `to != this`: paying the
-contract itself moves nothing, and books nothing (`netSelfTransfer`). -/
+A payment is booked at `to`'s end alone, and only when `to` is not the
+contract itself.  So a claim about `to` needs `to != this`: paying the
+contract itself moves nothing, and books nothing (`netSelfTransfer`), and
+the contract's own entry is never moved (`netTransferThis`). -/
 
 /-- `net(to) = 7 → [ to.transfer(5); ] net(to) = 2`: the booking, at every
 state where `to` is not the contract (`net-transfer-simple.key`). -/
@@ -107,9 +98,9 @@ theorem netTransfer :
   sol_symex
   sol_close
 
-/-- …and the contract's own entry is `5` more. -/
+/-- …and the contract's own entry is as it was. -/
 theorem netTransferThis :
-    ⊨ dl!{ to != this → net(this) = 1 → [ to.transfer(5); ] net(this) = 6 } := by
+    ⊨ dl!{ to != this → net(this) = 1 → [ to.transfer(5); ] net(this) = 1 } := by
   sol_symex
   sol_close
 
@@ -158,9 +149,9 @@ theorem netTransferStorageReceiverRun :
 theorem netUntouched :
     netAfter State.exampleStore sol{ uint to = 9; to.transfer(5); } 2 = .ok 0 := rfl
 
-/-- …and the contract, at `0` in `State.exampleStore`, is `5` up. -/
+/-- …and so does the contract's own entry, at `0` in `State.exampleStore`. -/
 theorem netThis :
-    netAfter State.exampleStore sol{ uint to = 9; to.transfer(5); } 0 = .ok 5 := rfl
+    netAfter State.exampleStore sol{ uint to = 9; to.transfer(5); } 0 = .ok 0 := rfl
 
 /-- A payment to the contract itself books nothing. -/
 theorem netSelfRun :

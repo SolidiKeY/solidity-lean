@@ -38,9 +38,9 @@ from a start where its hypotheses hold:
   on both sides by construction); every value local the final context types
   (`Γ'`) holds the local's word in its memory cell (`Sim.vals`: the value
   returned, in `_r`, among them); the ledger is the money that moved
-  (`Sim.net`), at every address the ledger holds, the contract's own
-  included, the contract at an address drawn among the senders, so some
-  payments are to itself.  The
+  (`Sim.net`), at every address the ledger holds but the contract's own,
+  whose entry is `0` (`Sim.netSelf`), the contract at an address drawn
+  among the senders, so some payments are to itself.  The
   aliases' cells (`Sim.aliases`) are not compared, and neither are the slots
   the final storage no longer occupies (a popped element), which
   `ReprStore` leaves free.
@@ -231,7 +231,9 @@ def differences [FreshNames] (C : Contract) (Γ' : TyCtx) (keys : List Nat) (σ'
       else some s!"local {x}: interpreter {Value.fmt v}, machine {m'.mem x}"
     | _, _ => none
   let net := σ'.net.filterMap fun (a, n) =>
-    if 0 ≤ a ∧ a < (W : Int) ∧ n != (m'.bal₀ a.toNat : Int) - m'.bal a.toNat then
+    if a = m'.self then
+      (if n != 0 then some s!"net {a}: interpreter {n} at the contract itself, expected 0" else none)
+    else if 0 ≤ a ∧ a < (W : Int) ∧ n != (m'.bal₀ a.toNat : Int) - m'.bal a.toNat then
       some s!"net {a}: interpreter {n}, account {m'.bal₀ a.toNat} → {m'.bal a.toNat}"
     else none
   let stack := if m'.stack.isEmpty then [] else [s!"stack left: {m'.stack}"]

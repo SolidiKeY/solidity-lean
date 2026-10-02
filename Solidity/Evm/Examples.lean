@@ -205,8 +205,8 @@ theorem payOwner_wt : compiles payOwner := by decide
 there and `30` in `5`'s, which held nothing. -/
 theorem payOwner_run :
     (match run (compileProg payOwner) (fresh 100) with
-      | .ok m 0 => some (m.bal 0, m.bal 5, m.bal₀ 0, m.bal₀ 5)
-      | _ => none) = some (70, 30, 100, 0) := by
+      | .ok m 0 => some (m.bal 0, m.bal 5, m.bal₀ 0, m.bal₀ 5, m.self)
+      | _ => none) = some (70, 30, 100, 0, 0) := by
   decide
 
 /-- The world refuses: `200` is more than the account holds, and a
@@ -518,13 +518,13 @@ theorem overflow_interpreter :
     cases this
   · exact h
 
-/-- **`owner.transfer(30);` books `-30` at `5` and `+30` at the contract in
-the interpreter**, because the machine moved `30` from the contract's
+/-- **`owner.transfer(30);` books `-30` at `5` and nothing at the contract
+in the interpreter**, because the machine moved `30` from the contract's
 account into `5`'s: `compile_net` reads the interpreter's ledger off the
-balances, at both ends. -/
+balances at `5`, and the contract's own entry stays `0`. -/
 theorem payOwner_interpreter :
     ∃ σ', Prog.run (State.fresh StandardExample 0) payOwner = .ok σ' ∧
-      σ'.getNet 5 = -30 ∧ σ'.getNet 0 = 30 := by
+      σ'.getNet 5 = -30 ∧ σ'.getNet 0 = 0 := by
   have hr := payOwner_run
   cases h : run (compileProg payOwner) (fresh 100) with
   | ok m k =>
@@ -532,15 +532,14 @@ theorem payOwner_interpreter :
     cases k with
     | zero =>
       simp only [Option.some.injEq, Prod.mk.injEq] at hr
-      obtain ⟨h0, h5, h00, h50⟩ := hr
-      obtain ⟨σ', h1, hnet⟩ := compile_net (Option.some_get payOwner_wt).symm
+      obtain ⟨h0, h5, h00, h50, hs⟩ := hr
+      obtain ⟨σ', h1, hnet, hself⟩ := compile_net (Option.some_get payOwner_wt).symm
         (Sim.init StandardExample 0 _ 0 W_pos) (by decide) h
       refine ⟨σ', h1, ?_⟩
-      have h := hnet 5 (by decide)
-      have h' := hnet 0 W_pos
+      have h := hnet 5 (by decide) (by rw [hs]; decide)
       rw [h5, h50] at h
-      rw [h0, h00] at h'
-      exact ⟨h, h'⟩
+      rw [hs] at hself
+      exact ⟨h, hself⟩
     | succ => simp at hr
   | revert => rw [h] at hr; simp at hr
   | fault => rw [h] at hr; simp at hr

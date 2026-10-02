@@ -831,7 +831,7 @@ theorem transferAt (hwt : RunWT C Γ H σ) {addr amt : Int}
   unfold Solidity.transferAt at h
   split at h
   · exact nomatch h
-  · cases h; exact ⟨hwt.1, hwt.2, hwt.3, hwt.4, hwt.5, hwt.6⟩
+  · cases h; rw [State.pay_eq]; exact ⟨hwt.1, hwt.2, hwt.3, hwt.4, hwt.5, hwt.6⟩
 
 end RunWT
 

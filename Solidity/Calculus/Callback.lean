@@ -4,19 +4,18 @@ import Solidity.Semantics.Callback
 /-!
 # The calculus with callbacks
 
-The callback taclets (`Rules.lean`'s `CallbackTaclet`, solkey's
-`transferWithCallbackBox`/`transferWithCallbackDiamond`) are sound for the
-callback reading of the modalities (`Semantics/Callback.lean`), and this
-module proves it (`CallbackTaclet.sound`).  Their premise is the guard `F`
-(`0 <= se`, the amount a word) and the booking `U` of the transfer
-(`{net := store(net, at(sadr), net(sadr) - se)}`), read as solkey's goals:
+The callback taclet (`Rules.lean`'s `CallbackTaclet`, solkey's
+`transferWithCallbackBox`) is sound for the callback reading of the
+modalities (`Semantics/Callback.lean`), and this module proves it
+(`CallbackTaclet.sound`).  Its premise is the booking `U` of the transfer
+(`{net := if(sadr = this) then net else store(net, at(sadr), net(sadr) - se)}`),
+read as solkey's goals:
 
 ```
-  Γ ⟹ F                                       (diamond only)
-  Γ, F ⟹ {U} I                                ("invariant on exit")
-  Γ, F ⟹ {U} {havoc} (I → ⟨[ ω ]⟩ φ)           ("resume after callback")
+  Γ ⟹ {U} I                                ("invariant on exit")
+  Γ ⟹ {U} {havoc} (I → [ ω ] φ)             ("resume after callback")
   ─────────────────────────────────────────
-  Γ ⟹ ⟨[ sadr.transfer(se); ω ]⟩ φ
+  Γ ⟹ [ sadr.transfer(se); ω ] φ
 ```
 
 `{havoc}` is KeY's anonymising update (`Fml.havoc`, `Hyp.havoc`): what
@@ -24,8 +23,8 @@ follows it holds for any storage, ledger and funds the callee may leave, as
 KeY's fresh skolem symbols make it hold for any interpretation of them.  Both
 goals are sequents, derived like any other; `CbResume` is what the last
 means (`CbResume.of_holdsC`).  Where the amount is not a word the transfer
-halts: nothing to show under the box, and under the diamond the first goal
-rules it out.
+halts, and so does the booking: nothing to show under the box, the one
+modality a payment has a rule for.
 
 `ProvesC I Γ φ` is the calculus under the callback semantics: the ordinary
 taclets on a statement that pays nothing and runs no other (`update`,
@@ -50,17 +49,11 @@ def CbResume (I : Fml C) (m : Modality) (U : Upd C) (ω : Prog C) (φ : Fml C) (
   m.after (fun τ => ∀ st nt bal, holds (τ.havoc st nt bal) I →
     holdsC I (τ.havoc st nt bal) (.modal m ω φ)) (U.apply σ)
 
-/-- A callback taclet's booking is the transfer's own debit where the amount
-is a word, and the transfer halts where it is not. -/
-theorem CallbackTaclet.booking {m : Modality} {s : Stmt C} {c : Fml C} {U : Upd C}
-    (d : CallbackTaclet C m s (.guard c U)) (σ : State) :
-    (holds σ c → U.apply σ = s.run σ) ∧ (¬ holds σ c → ∃ e, s.run σ = .error e) := by
-  cases d <;> exact Taclet.guard_run (.transferNoCallback (k := 0) (m := .box)) σ
-
-/-- The guard has no transfer in it. -/
-theorem CallbackTaclet.funds_noTransfer {m : Modality} {s : Stmt C} {c : Fml C} {U : Upd C}
-    (d : CallbackTaclet C m s (.guard c U)) : c.hasTransfer = false := by
-  cases d <;> rfl
+/-- A callback taclet's booking is the transfer's own debit, exactly: both
+halt where the amount is not a word. -/
+theorem CallbackTaclet.booking {m : Modality} {s : Stmt C} {U : Upd C}
+    (d : CallbackTaclet C m s (.update U)) (σ : State) : U.apply σ = s.run σ := by
+  cases d; exact upd_transferNoCallbackBox_eq ..
 
 /-- The runs of a transfer with callbacks: it halts, or leaves the invariant
 broken, or resumes from a state the callee may leave. -/
@@ -76,62 +69,41 @@ theorem ExecS.transfer_inv {I : Fml C} {σ : State} {r a : Val C .uint} {o : COu
   | transferViolated h hn => exact .inr (.inl ⟨_, h, hn, rfl⟩)
   | transferResume h _ h₂ => exact .inr (.inr ⟨_, _, _, _, h, h₂, rfl⟩)
 
-/-- **The callback taclets are sound**: under the diamond the guard, and
-where it holds, the invariant after the booking and the rest
-resumed from every state the callee may leave, give the transfer and the
-rest under the callback reading.
+/-- **The callback taclet is sound**: the invariant after the booking and
+the rest resumed from every state the callee may leave give the transfer and
+the rest under the callback reading.
 
 Example: `to.transfer(amt);` with `balance + paidOut == deposited` kept at
 the exit, and `[ ]` of it after any callback that keeps it, proves
 `[ to.transfer(amt); ] balance + paidOut == deposited`. -/
-theorem CallbackTaclet.sound {I : Fml C} {m : Modality} {s : Stmt C} {c : Fml C} {U : Upd C}
-    (d : CallbackTaclet C m s (.guard c U)) {ω : Prog C} {φ : Fml C} {σ : State}
-    (hfunds : m = .diamond → holds σ c) (hexit : holds σ c → holds σ (.upd m U I))
-    (hres : holds σ c → CbResume I m U ω φ σ) :
+theorem CallbackTaclet.sound {I : Fml C} {m : Modality} {s : Stmt C} {U : Upd C}
+    (d : CallbackTaclet C m s (.update U)) {ω : Prog C} {φ : Fml C} {σ : State}
+    (hexit : holds σ (.upd m U I)) (hres : CbResume I m U ω φ σ) :
     holdsC I σ (.modal m (s :: ω) φ) := by
   have hrun := d.booking σ
   simp only [holdsC]
   intro o he
-  by_cases hc : holds σ c
-  · have hx := hexit hc
-    have hr := hres hc
-    simp only [holds] at hx
-    simp only [CbResume] at hr
-    rw [hrun.1 hc] at hx hr
-    clear hexit hres hfunds hrun
-    cases d with
-    | transferWithCallbackBox | transferWithCallbackDiamond =>
-      cases he with
-      | cons hs hω =>
-        rcases ExecS.transfer_inv hs with ⟨_, _, h⟩ | ⟨_, _, _, h⟩ | ⟨σ₁, st, nt, bal, h, h₂, ho⟩
-        · cases h
-        · cases h
-        · cases ho
-          rw [h] at hr
-          exact hr _ _ _ h₂ _ hω
-      | stop hs ho =>
-        rcases ExecS.transfer_inv hs with ⟨_, h, rfl⟩ | ⟨_, h, hn, rfl⟩ | ⟨_, _, _, _, _, _, rfl⟩
-        · rw [h] at hx
-          simp_all [Modality.after, COut.after]
-        · rw [h] at hx
-          exact (hn hx).elim
-        · simp [COut.isOk] at ho
-  · obtain ⟨e, hr⟩ := hrun.2 hc
-    cases d with
-    | transferWithCallbackBox | transferWithCallbackDiamond =>
-      cases he with
-      | cons hs _ =>
-        rcases ExecS.transfer_inv hs with ⟨_, _, h⟩ | ⟨_, h, _, _⟩ | ⟨_, _, _, _, h, _, _⟩
-        · cases h
-        · rw [hr] at h; cases h
-        · rw [hr] at h; cases h
-      | stop hs _ =>
-        rcases ExecS.transfer_inv hs with ⟨_, _, rfl⟩ | ⟨_, h, _, _⟩ | ⟨_, _, _, _, h, _, _⟩
-        · first
-            | exact trivial
-            | exact absurd (hfunds rfl) hc
-        · rw [hr] at h; cases h
-        · rw [hr] at h; cases h
+  simp only [holds] at hexit
+  simp only [CbResume] at hres
+  rw [hrun] at hexit hres
+  clear hrun
+  cases d with
+  | transferWithCallbackBox =>
+    cases he with
+    | cons hs hω =>
+      rcases ExecS.transfer_inv hs with ⟨_, _, h⟩ | ⟨_, _, _, h⟩ | ⟨σ₁, st, nt, bal, h, h₂, ho⟩
+      · cases h
+      · cases h
+      · cases ho
+        rw [h] at hres
+        exact hres _ _ _ h₂ _ hω
+    | stop hs ho =>
+      rcases ExecS.transfer_inv hs with ⟨_, h, rfl⟩ | ⟨_, h, hn, rfl⟩ | ⟨_, _, _, _, _, _, rfl⟩
+      · rw [h] at hexit
+        simp_all [Modality.after, COut.after]
+      · rw [h] at hexit
+        exact (hn hexit).elim
+      · simp [COut.isOk] at ho
 
 /-! ## Contexts, read with callbacks -/
 
@@ -429,16 +401,14 @@ inductive ProvesC (I : Invariant C) : List (Hyp C) → Fml C → Prop
       {P : Prog C} (d : LeanTaclet C (Hyp.fresh Γ (.and I.fml (.modal m (s :: ω) φ))) m s (.unfold P))
       (hs : s.forks = false) (hP : Prog.hasTransfer P = false)
       (h : ProvesC I Γ (.modal m (P ++ ω) φ)) : ProvesC I Γ (.modal m (s :: ω) φ)
-  /-- **A callback taclet**: under the diamond the guard (`F`), and under
-  it the invariant on exit (`{U} I`) and the rest resumed after the
-  callback, from any state the callee may leave in which the invariant
-  holds (`{U} {havoc} (I → ⟨[ ω ]⟩ φ)`). -/
+  /-- **A callback taclet**: the invariant on exit (`{U} I`) and the rest
+  resumed after the callback, from any state the callee may leave in which
+  the invariant holds (`{U} {havoc} (I → [ ω ] φ)`). -/
   | callback {Γ : List (Hyp C)} {m : Modality} {s : Stmt C} {ω : Prog C} {φ : Fml C}
-      {c : Fml C} {U : Upd C}
-      (d : CallbackTaclet C m s (.guard c U))
-      (funds : m = .diamond → ProvesC I Γ c)
-      (exit : ProvesC I (Γ ++ [.pre c]) (.upd m U I.fml))
-      (resume : ProvesC I (Γ ++ [.pre c, .upd m U, .havoc, .pre I.fml]) (.modal m ω φ)) :
+      {U : Upd C}
+      (d : CallbackTaclet C m s (.update U))
+      (exit : ProvesC I Γ (.upd m U I.fml))
+      (resume : ProvesC I (Γ ++ [.upd m U, .havoc, .pre I.fml]) (.modal m ω φ)) :
       ProvesC I Γ (.modal m (s :: ω) φ)
   /-- **`tryCallWithCallbackBox`**: the invariant where control leaves
   ("invariant on exit"); the call's success, from any state the callee may
@@ -498,30 +468,20 @@ theorem ProvesC.sound {I : Invariant C} {Γ : List (Hyp C)} {φ : Fml C} (h : Pr
     rw [Hyp.holdsC_wrap] at ih ⊢
     exact Hyp.withC_mono (fun τ => Premise.soundC_unfold I.closed
       (d.sound Taclet.avoids_in.1) hs hP ω φ Taclet.avoids_in.2 τ) Γ σ ih
-  | @callback Γ m s ω φ c U d _ _ _ ihf ih ihr =>
+  | @callback Γ m s ω φ U d _ _ ih ihr =>
     intro σ
     have ih := ih σ
     have ihr := ihr σ
-    rw [Hyp.wrap_append] at ih ihr
-    simp only [Hyp.wrap] at ih ihr
+    rw [Hyp.wrap_append] at ihr
+    simp only [Hyp.wrap] at ihr
     rw [Hyp.holdsC_wrap] at ih ihr ⊢
-    have hc : ∀ τ, holdsC I.fml τ c ↔ holds τ c := fun τ => holdsC_iff_holds c d.funds_noTransfer
-    have hf : Hyp.withC I.fml Γ σ (fun τ => m = .diamond → holds τ c) := by
-      by_cases hm : m = .diamond
-      · have := ihf hm σ
-        rw [Hyp.holdsC_wrap] at this
-        exact Hyp.withC_mono (fun τ h _ => (hc τ).1 h) Γ σ this
-      · exact Hyp.withC_mono (fun _ _ h => absurd h hm) Γ σ ih
-    have hx := Hyp.withC_mono₂ (fun _ hx hr => And.intro hx hr) Γ σ ih ihr
-    exact Hyp.withC_mono₂ (fun τ hf' ⟨hx, hr⟩ => d.sound hf'
-      (fun hcτ => by
-        have hx := hx ((hc τ).2 hcτ)
+    exact Hyp.withC_mono₂ (fun τ hx hr => d.sound
+      (by
         simp only [holdsC] at hx; simp only [holds]
         cases hu : U.apply τ with
         | error _ => rw [hu] at hx; exact hx
         | ok a => rw [hu] at hx; exact (holdsC_iff_holds I.fml I.noTransfer).1 hx)
-      (fun hcτ => CbResume.of_holdsC I.noTransfer (hr ((hc τ).2 hcτ))))
-      Γ σ hf hx
+      (CbResume.of_holdsC I.noTransfer hr)) Γ σ ih ihr
   | allIntro _ ih => simpa [Hyp.wrap_append, Hyp.wrap] using ih
   | @tryCall Γ s ω φ xs P bs d _ _ _ ihx iho ihc =>
     intro σ

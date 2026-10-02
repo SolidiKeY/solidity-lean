@@ -57,56 +57,6 @@ theorem Taclet.sound_split {k : Nat} {m : Modality} {s : Stmt C} {c c' : Fml C} 
         simp only
         rcases v with _ | (_ | _) <;> simp [SameOk.self])
 
-/-- `0 <= se`, the guard of a transfer: `se` is a word. -/
-theorem holds_amount {σ : State} (se : Simple C .uint) :
-    holds σ (.eqD (.binop .le .uint (.lit (.int 0)) se.lower) (.lit (.bool true))) ↔
-      ∃ n : Int, se.lower.eval σ = .ok (.int n) ∧ 0 ≤ n := by
-  rw [holds_eqD_iff]
-  cases h : se.lower.eval σ with
-  | error e =>
-    simp only [tm_eval, bind, Except.bind, pure, Except.pure, evalBinop, h, reduceCtorEq,
-      false_and, exists_false]
-  | ok v =>
-    rcases v with _ | (_ | _) <;>
-      simp only [tm_eval, bind, Except.bind, pure, Except.pure, evalBinop, h, applyBinOp, Value.asInt, checkArith, Except.ok.injEq, exists_eq_left', PrimVal.bool.injEq, true_eq_decide_iff, PrimVal.int.injEq, reduceCtorEq, false_and, exists_false]
-
-/-- `transferNoCallback`: where the amount is a word the booking is the
-transfer, where it is not it halts. -/
-theorem Taclet.guard_run {k : Nat} {m : Modality} {s : Stmt C} {c : Fml C} {U : Upd C}
-    (d : Taclet C k m s (.guard c U)) (σ : State) :
-    (holds σ c → U.apply σ = s.run σ) ∧ (¬ holds σ c → ∃ e, s.run σ = .error e) := by
-  cases d with
-  | transferNoCallback =>
-    rename_i sadr se
-    rw [holds_amount]
-    simp only [Simple.lower_eval]
-    constructor
-    · rintro ⟨n, hn, h0⟩
-      have hn0 : ¬ n < 0 := Int.not_lt.2 h0
-      simp only [Upd.apply, List.foldlM_cons, List.foldlM_nil, UpdElem.write, Stmt.run, Val.eval,
-        Simple.lower_eval, hn, transferAt, hn0, if_false, bind, Except.bind, pure,
-        Except.pure, Value.asInt]
-      cases sadr.eval σ with
-      | error => rfl
-      | ok w =>
-        rcases w with a | _
-        · simp only [IntOp.apply, State.pay, State.setNet, State.getNet, tm_eval, State.envVal]
-          rfl
-        · rfl
-    · intro hn
-      simp only [Stmt.run, Val.eval]
-      rcases sadr.eval σ with e | (a | b) <;> rcases hs : se.eval σ with e' | (n | b') <;>
-        simp only [bind, Except.bind, Value.asInt, transferAt, Except.error.injEq, exists_eq']
-      by_cases h0 : n < 0
-      · exact ⟨_, if_pos h0⟩
-      exact absurd ⟨n, hs, Int.not_lt.1 h0⟩ hn
-
-theorem Taclet.sound_guard {k : Nat} {m : Modality} {s : Stmt C} {c : Fml C} {U : Upd C}
-    (d : Taclet C k m s (.guard c U)) :
-    ∀ σ, (holds σ c → SameOk [] (U.apply σ) (s.run σ)) ∧
-      (¬ holds σ c → ∃ e, s.run σ = .error e) := fun σ =>
-  ⟨fun hc => by rw [(d.guard_run σ).1 hc]; exact SameOk.self _ _, (d.guard_run σ).2⟩
-
 theorem Taclet.sound_done {k : Nat} {m : Modality} {s : Stmt C} {b : Bool}
     (d : Taclet C k m s (.done b)) :
     b = true → m = .box ∧ ∀ σ, ∃ e, s.run σ = .error e := by
@@ -159,7 +109,6 @@ theorem Taclet.sound {k : Nat} {m : Modality} {s : Stmt C} {pr : Premise C}
   | update U => exact Taclet.sound_update d
   | unfold P => exact Taclet.sound_unfold d hs
   | split c c' P Q => exact Taclet.sound_split d
-  | guard c U => exact Taclet.sound_guard d
   | done b => exact Taclet.sound_done d
   | branches bs => exact Taclet.sound_branches d
 
@@ -169,7 +118,7 @@ theorem LeanTaclet.sound {k : Nat} {m : Modality} {s : Stmt C} {pr : Premise C}
     (d : LeanTaclet C k m s pr) (hs : Avoids s.vars (freshVars k)) : pr.Correct k m s := by
   cases d with
   | functionCallArgCapture h => exact Stmt.call_capture_sound h hs
-  | tryCallDiamond => exact fun h => nomatch h
+  | tryCallDiamond | transferDiamond => exact fun h => nomatch h
 
 /-- **Every rule of the calculus is sound**, solkey's and the ones it lacks. -/
 theorem Rule.sound {k : Nat} {m : Modality} {s : Stmt C} {pr : Premise C}

@@ -24,7 +24,7 @@ The other direction is `taclets_partitioned`: every taclet of
 typed syntax is narrower than solkey's, the places it is coarser (a memory path is a source as it stands,
 so nothing captures one), and the places the calculus has no strategy to
 express (the literal-condition `if` rules).  The callback semantics of
-`transfer` is a table of its own (`callbackOrigins`), its taclets being sound
+`transfer` is a table of its own (`callbackOrigins`), its taclet being sound
 for another reading of the modalities.
 
 What this module does *not* say is whether a constructor's premise is
@@ -293,7 +293,7 @@ def tacletOrigins : List (Lean.Name × KeyOrigin) := [
   -- Transfer
   (``Taclet.transfer_unfold_leftFstReceiver, .taclet .transfer_unfold_leftFstReceiver),
   (``Taclet.transfer_unfold_rightSndArgument, .taclet .transfer_unfold_rightSndArgument),
-  (``Taclet.transferNoCallback, .merged [.transferNoCallbackBox, .transferNoCallbackDiamond]),
+  (``Taclet.transferNoCallbackBox, .taclet .transferNoCallbackBox),
   -- Memory: `msrc` is a value or a memory reference, so a row covers `…MemRef…` except
   -- for the index captures, which KeY and the table split by the source
   (``Taclet.memoryFieldRead_unfold_rightFst, .taclet .memoryFieldRead_unfold_rightFst),
@@ -363,7 +363,6 @@ def tacletOrigins : List (Lean.Name × KeyOrigin) := [
 `transferSemantics`), and the solkey taclets they transcribe. -/
 def callbackOrigins : List (Lean.Name × KeyOrigin) := [
   (``CallbackTaclet.transferWithCallbackBox, .taclet .transferWithCallbackBox),
-  (``CallbackTaclet.transferWithCallbackDiamond, .taclet .transferWithCallbackDiamond),
   (``CallbackTaclet.tryCallWithCallbackBox, .taclet .tryCallWithCallbackBox) ]
 
 #check_constructor_table CallbackTaclet, callbackOrigins.map Prod.fst
@@ -394,14 +393,20 @@ def claimedTaclets : List KeyTaclet := KeyTaclet.all.filter claims
   simple, so `ifElseSplit` applies and one of its goals assumes `true = false`;
   `!se` is not simple, so `ifElseUnfold` captures it.  They are strategy, and
   the table has no strategy.
+* `transferNoCallbackDiamond`, `transferWithCallbackDiamond` — a payment
+  under the diamond.  solkey's diamond rules owe a "non-negative amount" goal
+  and book the payment; here a payment has a rule under the box only, and the
+  diamond closes to `false` (`LeanTaclet.transferDiamond`): whether the world
+  pays is the compiler theorem's, not the calculus's.
 
-The other semantics of `transfer`, `transferWithCallbackBox` and
-`transferWithCallbackDiamond`, are claimed by `callbackOrigins`. -/
+The other semantics of `transfer`, `transferWithCallbackBox`, is claimed by
+`callbackOrigins`. -/
 def unclaimedTaclets : List KeyTaclet :=
   [ .emptyModality, .blockEmpty,
     .memoryFieldRead_unfold_rightSndResult, .memoryIndexRead_unfold_rightSndResult,
     .memoryFieldWriteCaptureSrc, .memoryIndexWriteMemRefRhsCapture,
-    .ifTrue, .ifFalse, .ifElseTrue, .ifElseFalse, .ifElseNegated ]
+    .ifTrue, .ifFalse, .ifElseTrue, .ifElseFalse, .ifElseNegated,
+    .transferNoCallbackDiamond, .transferWithCallbackDiamond ]
 
 /-- **The coverage fact**: the corpus splits into what the table claims and
 what this file excuses, with nothing in both and nothing in neither.  A taclet
@@ -411,25 +416,27 @@ theorem taclets_partitioned :
     KeyTaclet.all.all (fun t => claims t != unclaimedTaclets.contains t) = true := by
   decide +kernel
 
-theorem claimedTaclets_count : claimedTaclets.length = 302 := by decide +kernel
+theorem claimedTaclets_count : claimedTaclets.length = 300 := by decide +kernel
 
-theorem unclaimedTaclets_count : unclaimedTaclets.length = 11 := by decide +kernel
+theorem unclaimedTaclets_count : unclaimedTaclets.length = 13 := by decide +kernel
 
 /-! ## The rules with no taclet
 
 A rule upstream has no counterpart for is a `LeanTaclet`, not a `Taclet`, so
-every row above claims a taclet.  There are two:
+every row above claims a taclet.  There are three:
 `functionCallArgCapture`, printed as `unfoldArgument`, which solkey's
 `docs/net.md` lists as missing (its `ExpandFunctionBody` binds the parameters
 to the arguments as they are; here a parameter is bound to a ready argument
-only, so that inlining is exact); and `tryCallDiamond`, a `try` under the
+only, so that inlining is exact); `tryCallDiamond`, a `try` under the
 diamond closed to `false`, where solkey has no rule (a call may revert in the
-caller, which no formula rules out).  The list is checked against the
-constructors, so one added later has to say so here. -/
+caller, which no formula rules out); and `transferDiamond`, a payment under
+the diamond closed to `false`, where solkey's diamond rules are not ported.
+The list is checked against the constructors, so one added later has to say
+so here. -/
 
 /-- Every `LeanTaclet` constructor. -/
 def leanTaclets : List Lean.Name :=
-  [``LeanTaclet.functionCallArgCapture, ``LeanTaclet.tryCallDiamond]
+  [``LeanTaclet.functionCallArgCapture, ``LeanTaclet.tryCallDiamond, ``LeanTaclet.transferDiamond]
 
 #check_constructor_table LeanTaclet, leanTaclets
 

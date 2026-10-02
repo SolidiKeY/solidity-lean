@@ -559,6 +559,30 @@ theorem upd_storageLocalRootPushBind {R : RefTy} (lsv : Var) (sp : SPath C (Ty.r
         | ok st => simp
       | _ => trivial
 
+/-- `transferNoCallbackBox`: the booking is the transfer, exactly.  Both read
+the receiver, then the amount as a word (halting where it is not), and book
+nothing at `this`. -/
+theorem upd_transferNoCallbackBox_eq (sadr se : Simple C .uint) (σ : State) :
+    Upd.apply [UpdElem.pay sadr.lower se.lower] σ =
+      (Stmt.transfer (.simple sadr) (.simple se)).run σ := by
+  simp only [Upd.apply, List.foldlM_cons, List.foldlM_nil, UpdElem.write, Stmt.run, Val.eval,
+    Simple.lower_eval, transferAt, State.pay, bind, Except.bind, pure, Except.pure, Value.asInt]
+  cases sadr.eval σ with
+  | error _ => rfl
+  | ok v =>
+    cases v with
+    | bool _ => rfl
+    | int _ =>
+      cases se.eval σ with
+      | error _ => rfl
+      | ok w => cases w <;> (try rfl) <;> dsimp only <;> split <;> rename_i heq <;> exact heq.symm
+
+theorem upd_transferNoCallbackBox (sadr se : Simple C .uint) (σ : State) :
+    SameOk [] (Upd.apply [UpdElem.pay sadr.lower se.lower] σ)
+      ((Stmt.transfer (.simple sadr) (.simple se)).run σ) := by
+  rw [upd_transferNoCallbackBox_eq]
+  exact SameOk.self _ _
+
 set_option maxHeartbeats 1000000 in
 theorem Taclet.sound_update {k : Nat} {m : Modality} {s : Stmt C} {U : Upd C}
     (d : Taclet C k m s (.update U)) : ∀ σ, SameOk [] (U.apply σ) (s.run σ) := by
@@ -589,6 +613,7 @@ theorem Taclet.sound_update {k : Nat} {m : Modality} {s : Stmt C} {U : Upd C}
   case storagePushLengthSaveReferenceElement => exact upd_storagePushLengthSaveReferenceElement ..
   case storageLocalRootPushBind => exact upd_storageLocalRootPushBind ..
   case storageLocalRootPushBindMappingElement => exact upd_storageLocalRootPushBind ..
+  case transferNoCallbackBox => exact upd_transferNoCallbackBox ..
   case memoryFieldReadHeap => exact upd_memoryFieldReadHeap ..
   case memoryIndexReadHeap => exact upd_memoryIndexReadHeap ..
   case memoryRootAlias => exact upd_memoryRootAlias ..

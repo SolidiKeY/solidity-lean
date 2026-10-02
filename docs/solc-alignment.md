@@ -24,7 +24,7 @@ the plan to test these claims against solc is `docs/solc-validation.md`.
 | Mapping-carrying copy | a storage copy of a type containing a mapping cannot be written | `Src.copy` (`mapFree`), `tyHasMapping` | |
 | Arrays past their end | `pop`, `delete`, `push` and copies keep the slots past the length; an index is checked when the path is taken | `SVal.array`, `State.checkIndex`, `SVal.overlay` | `testDanglingReferenceSurvivesPush` and three more |
 | Fixed-size arrays | `delete` resets in place, the length is the literal `n`, a literal index `≥ n` is a compile error | `SVal.array … fixed`, `MObj.array` | |
-| `transfer` | books `net(a) - v` and nothing else; whether the world pays is the EVM's (a refused payment reverts the machine alone) | `transferAt`; `Evm.compile_correct` | `Semantics.lean` |
+| `transfer` | books `net(a) - v` unless `a` is the contract itself, and nothing else; whether the world pays is the EVM's (a refused payment reverts the machine alone) | `transferAt`; `Evm.compile_correct` | `Semantics.lean` |
 | Call arguments | all read, left to right, before the callee runs | `Arg.bindSeq`, `Arg.separatedFrom` | |
 | `try` | a call to an address with no code, and returned data that does not decode, revert in the caller and no `catch` catches them; KeY leaves both out (they are vacuous in its box rule) | `Stmt.run` (`.tryCall`), `bindData` | `Examples/Tactics/TryCatch.lean` |
 
@@ -217,19 +217,22 @@ On the EVM a value transfer fails, and with `transfer` reverts, when the
 sending contract's balance does not cover the amount or the recipient
 refuses it (its code reverts, or runs out of the 2300 gas). `transferAt`
 does neither check: a negative amount is `.stuck` (unrepresentable in the
-unsigned value field), and otherwise the payment is booked at both ends of
-the ledger, `net(addr) := net(addr) - amt` and `net(this) := net(this) +
-amt` (`State.pay`; `this` is `address(this)`, `TxEnv.selfAddress`), and
-nothing else: a payment to the contract itself books nothing. `State.selfBalance`
+unsigned value field), and otherwise the payment is booked at the
+recipient's end of the ledger, `net(addr) := net(addr) - amt`, unless the
+recipient is the contract itself (`State.pay`; `this` is `address(this)`,
+`TxEnv.selfAddress`), which books nothing, as solkey's
+`\if(sadr = self) \then(net)` does; and nothing else. `State.selfBalance`
 (`address(this).balance`) is the funds the transaction found, which a
 `transfer` leaves; solkey's box rule books the debit unconditionally too
-(`333cc7b353`). The interpreter thus assumes the world pays, and the
-compiler theorem says what that costs: in code that pays, the machine may
-revert where the interpreter succeeds (`Evm.compile_correct`'s third
-outcome), so what the interpreter proves under the box holds of every run
-the machine completes (`Evm.compile_box`), and there `net(a)` is what `a`'s
-account lost (`Evm.compile_net`), at every address, the contract's own
-included.
+(`333cc7b353`), and the diamond has no rule here. The interpreter thus
+assumes the world pays, and the compiler theorem says what that costs: in
+code that pays, the machine may revert where the interpreter succeeds
+(`Evm.compile_correct`'s third outcome), so what the interpreter proves
+under the box holds of every run the machine completes (`Evm.compile_box`),
+and there `net(a)` is what `a`'s account lost (`Evm.compile_net`), at every
+address but the contract's own, whose entry stays `0`: without the `if` in
+`State.pay`, a payment to itself would move that entry and the simulation
+(`Evm.Sim.netSelf`) would fail.
 
 The callback semantics (`Semantics/Callback.lean`) is a relation over this
 one: after the debit `State.havoc` replaces storage, ledger and balance, so

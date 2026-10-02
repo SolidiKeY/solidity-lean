@@ -284,6 +284,22 @@ theorem UpdElem.write_setStorage (σ₀ : State) (st : List (Name × SVal)) (ρ 
         cases a.eval σ₀ with
         | error _ => rfl
         | ok w => cases w <;> rfl
+  | .pay r a => by
+    simp only [UpdElem.write, UpdElem.isStorage, Bool.false_eq_true, ↓reduceIte]
+    cases r.eval σ₀ with
+    | error _ => rfl
+    | ok v =>
+      cases v with
+      | bool _ => rfl
+      | int _ =>
+        cases a.eval σ₀ with
+        | error _ => rfl
+        | ok w =>
+          cases w with
+          | bool _ => rfl
+          | int _ =>
+            simp only [bind, Except.bind, Value.asInt, pure, Except.pure]
+            split <;> rfl
   | .saveNet _ => rfl
 
 /-- An update run from a state with another storage: the same run, if some
@@ -1975,7 +1991,8 @@ theorem Upd.holdsWrite_eval {U : Upd C} {w : STerm C} (h : U.holdsWrite w = true
         obtain ⟨e'', hS'⟩ := Tm.onSpine_error hbe S hs
         rw [hS'] at hS
         cases hS
-    | val _ _ | path _ _ | mref _ _ | store _ _ | memory _ | selfBalance _ _ | net _ _ _ | saveNet _ =>
+    | val _ _ | path _ _ | mref _ _ | store _ _ | memory _ | selfBalance _ _ | net _ _ _ | pay _ _
+    | saveNet _ =>
       nomatch hs
   · nomatch h
 
@@ -2405,7 +2422,8 @@ theorem Upd.holdsMem_eval {U : Upd C} {w : MTerm C} (h : U.holdsMem w = true) {�
       obtain ⟨e'', hM'⟩ := Tm.onMemSpine_error hw M hs
       rw [hM'] at hM
       cases hM
-  | val _ _ | path _ _ | mref _ _ | storage _ | store _ _ | selfBalance _ _ | net _ _ _ | saveNet _ =>
+  | val _ _ | path _ _ | mref _ _ | storage _ | store _ _ | selfBalance _ _ | net _ _ _ | pay _ _
+  | saveNet _ =>
     nomatch hs
 
 /-- `U` returns only where the memory law is exact: `q.1` reads back a

@@ -48,8 +48,9 @@ does (`Branch.lean`), a non-simple condition captured first
 (`requireConditionCapture`): the first goal goes on with the rest of the
 program, the second reverts.  Under `⊢` the revert rules are
 `apply done .revertBox` and `apply done .revertDiamond` (`Proves.done`).
-A `transfer` the contract cannot fund reverts too, through the guard of
-`transferNoCallback`: `Payment.lean`.
+A `transfer` the contract cannot fund is the EVM's to refuse, which the box
+does not see (`Evm.compile_box`); the rule books it (`transferNoCallbackBox`,
+`Payment.lean`).
 
 The same programs as chains, at every modality and postcondition, are in
 `Examples/ChainNotation.lean` (§9).

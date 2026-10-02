@@ -735,6 +735,7 @@ def UpdElem.mapTm (F : {u : Srt} → Tm C u → Tm C u) : UpdElem C → UpdElem 
   | .memory m => .memory (F m)
   | .selfBalance op a => .selfBalance op (F a)
   | .net r op a => .net (F r) op (F a)
+  | .pay r a => .pay (F r) (F a)
   | .saveNet x => .saveNet x
 
 /-- `P` of the element's right-hand side. -/
@@ -747,6 +748,7 @@ def UpdElem.allTm (P : {u : Srt} → Tm C u → Bool) : UpdElem C → Bool
   | .memory m => P m
   | .selfBalance _ a => P a
   | .net r _ a => P r && P a
+  | .pay r a => P r && P a
   | .saveNet _ => true
 
 section MapTm
@@ -801,6 +803,12 @@ theorem UpdElem.mapTm_write (hr : σ.Rest τ)
     have h2 := hF a he.2
     simp only [Srt.AgreePart] at h1 h2
     simp only [UpdElem.mapTm, UpdElem.write, h1, h2, State.getNet, hr.net]
+  | .pay r a, he => by
+    simp only [UpdElem.allTm, Bool.and_eq_true] at he
+    have h1 := hF r he.1
+    have h2 := hF a he.2
+    simp only [Srt.AgreePart] at h1 h2
+    simp only [UpdElem.mapTm, UpdElem.write, h1, h2, State.getNet, hr.tx]
   | .saveNet _, _ => by simp only [UpdElem.mapTm, UpdElem.write, hr.net]
 
 theorem Upd.mapTm_foldl (hr : σ.Rest τ)

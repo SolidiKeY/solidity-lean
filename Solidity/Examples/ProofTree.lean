@@ -144,24 +144,18 @@ info: Try this:
     apply unfold .transfer_unfold_rightSndArgument
     apply unfold .localValueDeclInitDrop
     apply update .binopAssignment
-    apply Proves.guard .transferNoCallback
-    case thn =>
-      apply unfold .localValueDeclInitDrop
-      apply update .storageFieldReadFind
-      apply empty
-      refine close ?_
-      sol_symex
-      sol_close
-    case els =>
-      apply done .revertBox
-      refine close ?_
-      sol_symex
-      sol_close
+    apply update .transferNoCallbackBox
+    apply unfold .localValueDeclInitDrop
+    apply update .storageFieldReadFind
+    apply empty
+    refine close ?_
+    sol_symex
+    sol_close
 -/
 #guard_msgs in
 /-- `alice.age = 1; to.transfer(x + 2); uint y = alice.age;`: on `⊨ φ` the
-walk starts with `apply Proves.valid`, and a guarded update
-(`transferNoCallback`) has two goals, `thn` and `els`. -/
+walk starts with `apply Proves.valid`; the payment, once its amount is
+captured, is one update (`transferNoCallbackBox`). -/
 theorem transferFrameStorage :
     ⊨ dl!{ [ alice.age = 1; to.transfer(x + 2); uint y = alice.age; ] y == 1 } := by
   sol_derive?

@@ -289,7 +289,6 @@ def Premise.Smaller (s : Stmt C) : Premise C → Prop
   | .update _ | .done _ => True
   | .unfold P => Prog.weight P < s.weight
   | .split _ _ P Q => Prog.weight P + 2 ≤ s.weight ∧ Prog.weight Q + 2 ≤ s.weight
-  | .guard _ _ => 2 ≤ s.weight
   | .branches bs => (bs.map fun b => 2 ^ Prog.weight b.2).sum < 2 ^ s.weight
 
 /-- The rule leaves a premise smaller than its statement. -/
@@ -695,7 +694,7 @@ theorem popStep_small {E : Ty} (b : SPath C (.array E)) : (popStep (k := k) (m :
 Example: `people[i].wallet.transfer(x);` captures the receiver:
 `uint se = people[i].wallet; se.transfer(x);`. -/
 theorem transferStep_small : ∀ r a : Val C .uint, (transferStep (k := k) (m := m) r a).Small
-  | .simple _, .simple _ => by simp only [transferStep]; weigh
+  | .simple _, .simple _ => by cases m <;> simp only [transferStep] <;> trivial
   | .simple _, .read _ | .simple _, .binop .. | .simple _, .unop .. | .simple _, .ternary ..
   | .simple _, .readMem _ | .simple _, .len .. | .simple _, .mlen .. => by
     simp only [transferStep]; weigh
@@ -1013,21 +1012,6 @@ theorem Premise.measure_lt {m : Modality} {s : Stmt C} {p : Premise C} (h : p.Sm
     simp only [Premise.Smaller] at h
     simp only [Premise.fml, Fml.measure, Prog.weight, Prog.weight_append]
     exact Nat.mul_lt_mul_of_pos_right (Nat.pow_lt_pow_right (by decide) (by omega)) hM
-  | guard c U =>
-    simp only [Premise.Smaller] at h
-    simp only [Premise.fml, Fml.measure, Prog.weight]
-    -- the two goals are `X` and `2 X`, the statement at least `4 X`
-    generalize Prog.weight ω = a
-    have h4 : 4 * 2 ^ a ≤ 2 ^ (s.weight + a) := by
-      rw [show s.weight + a = s.weight - 2 + a + 2 by omega, Nat.pow_succ, Nat.pow_succ]
-      have := Nat.pow_le_pow_right (n := 2) (by decide) (Nat.le_add_left a (s.weight - 2))
-      omega
-    rw [show (Stmt.revert : Stmt C).weight + a = a + 1 from Nat.add_comm _ _, Nat.pow_succ]
-    have hXM : 0 < 2 ^ a * (φ.measure + 1) := Nat.mul_pos (Nat.pow_pos (by decide)) hM
-    calc 2 ^ a * (φ.measure + 1) + 2 ^ a * 2 * (φ.measure + 1)
-        < 4 * 2 ^ a * (φ.measure + 1) := by
-          rw [Nat.mul_comm (2 ^ a) 2, Nat.mul_assoc, Nat.mul_assoc]; omega
-      _ ≤ 2 ^ (s.weight + a) * (φ.measure + 1) := Nat.mul_le_mul_right _ h4
   | split c c' P Q =>
     simp only [Premise.Smaller] at h
     simp only [Premise.fml, Fml.measure, Prog.weight, Prog.weight_append,

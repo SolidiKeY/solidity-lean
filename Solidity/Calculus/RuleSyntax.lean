@@ -99,12 +99,16 @@ syntax:max dl_term:max "⊕⊕" : dl_term
 syntax:65 dl_term:65 " - " dl_term:66 : dl_term
 /-- `at(r)`: the ledger's key for the address `r` (`net := store(net, at(r), …)`). -/
 syntax:max "at" noWs "(" dl_term ")" : dl_term
+/-- `if(r = this) then net else …`: KeY's `\if … \then … \else`, the form of a
+payment's booking (`UpdElem.pay`), and read only there. -/
+syntax:max "if" noWs "(" dl_term " = " dl_term ")" " then " dl_term " else " dl_term : dl_term
 syntax:max "(" dl_term ")" : dl_term
 syntax:max "‹" term "›" : dl_term
 
 /-- One elementary update `x := t`.  The funds and the ledger are written
 `selfBalance := selfBalance - a` and `net := store(net, at(r), net(r) - a)`
-(`+` as well), their arithmetic KeY's `int`. -/
+(`+` as well), their arithmetic KeY's `int`; a payment
+`net := if(r = this) then net else store(net, at(r), net(r) - a)`. -/
 declare_syntax_cat dl_upd_elem (behavior := both)
 syntax dl_term " := " dl_term : dl_upd_elem
 
@@ -180,9 +184,6 @@ syntax "⟨" "[ " (sol_stmt "; ")* "]" "⟩" : dl_premise
 syntax dl_fml " ⟹ " "⟨" "[ " sol_block " ]" "⟩" " ; " dl_fml " ⟹ " "⟨" "[ " sol_block " ]" "⟩" :
   dl_premise
 syntax dl_fml " ⟹ " "⟨" "[ " (sol_stmt "; ")* "]" "⟩" " ; "
-  dl_fml " ⟹ " "⟨" "[ " (sol_stmt "; ")* "]" "⟩" : dl_premise
-/-- A guarded update: under `c` the update and the rest, else a revert. -/
-syntax dl_fml " ⟹" ppIndent(ppLine ppGroup(dl_upd " ⟨" "[ " "]" "⟩")) " ;" ppLine
   dl_fml " ⟹ " "⟨" "[ " (sol_stmt "; ")* "]" "⟩" : dl_premise
 syntax &"true" : dl_premise
 syntax &"false" : dl_premise
@@ -1015,7 +1016,14 @@ def schemaUpdElem (Γ : Scope) : TSyntax `dl_upd_elem → MacroM Lean.Term
           if a.raw.structEq a'.raw then do
             `(UpdElem.net $(← schemaTerm Γ .val a) IntOp.add $(← schemaTerm Γ .val v))
           else Macro.throwErrorAt a' "the entry read is the one written"
-        | _ => Macro.throwErrorAt r "`store(net, at(r), net(r) - a)` or `… + a`"
+        | `(dl_term| if($a = $t:ident) then $n':ident else store(net, at($a'), net($a'') - $v)) => do
+          unless t.getId.toString == "this" do Macro.throwErrorAt t "a payment compares with `this`"
+          unless n'.getId.toString == "net" do Macro.throwErrorAt n' "a payment to `this` leaves `net`"
+          unless a.raw.structEq a'.raw && a.raw.structEq a''.raw do
+            Macro.throwErrorAt a' "the entry read is the one written, and the one compared"
+          `(UpdElem.pay $(← schemaTerm Γ .val a) $(← schemaTerm Γ .val v))
+        | _ => Macro.throwErrorAt r "`store(net, at(r), net(r) - a)`, `… + a`, or \
+            `if(r = this) then net else store(net, at(r), net(r) - a)`"
     if n == "storage" then return ← `(UpdElem.storage $(← schemaTerm Γ .storage r))
     if n == "memory" then return ← `(UpdElem.memory $(← schemaTerm Γ .memory r))
     match headOf Γ x with
@@ -1111,17 +1119,6 @@ def schemaPremise (fresh : Bool) (Γ : Scope) : TSyntax `dl_premise → MacroM L
     let (fs, _) ← schemaProg fresh Γ fs
     `($(mkIdent `Solidity.Premise.split) $(← schemaFml c) $(← schemaFml nc)
         ([$ts,*] : List (Stmt _)) ([$fs,*] : List (Stmt _)))
-  | `(dl_premise| $c:dl_fml ⟹ $U:dl_upd ⟨[ ]⟩ ; $nc:dl_fml ⟹ ⟨[ $[$fs:sol_stmt;]* ]⟩) => do
-    -- the other branch is the guard's negation, and reverts
-    let neg := match nc with
-      | `(dl_fml| ¬ ( $c':dl_fml )) | `(dl_fml| ¬ $c':dl_fml) => c'.raw.structEq c.raw
-      | _ => false
-    unless neg do Macro.throwErrorAt nc "the other branch's condition is `¬(c)`"
-    let isRevert (x : Lean.Syntax) := x.getKind == ``solRevert ||
-      (x.getKind == Lean.choiceKind && x.getArgs.any (·.getKind == ``solRevert))
-    unless fs.size == 1 && isRevert fs[0]!.raw do
-      Macro.throwErrorAt nc "the other branch is `⟨[ revert(); ]⟩`"
-    `($(mkIdent `Solidity.Premise.guard) $(← schemaFml c) $(← schemaUpd Γ U))
   | `(dl_premise| true) => `($(mkIdent `Solidity.Premise.done) true)
   | `(dl_premise| false) => `($(mkIdent `Solidity.Premise.done) false)
   | _ => Macro.throwUnsupported
@@ -2102,6 +2099,12 @@ def ppUpdElem? (e : Lean.Expr) : MetaM (Option (TSyntax `dl_upd_elem)) := do
     | IntOp.sub => return some (← `(dl_upd_elem| net := store(net, at($r), net($r) - $a)))
     | IntOp.add => return some (← `(dl_upd_elem| net := store(net, at($r), net($r) + $a)))
     | _ => return none
+  | UpdElem.pay _ r a =>
+    let r ← ppTerm r
+    let a ← ppTerm a
+    return some (← `(dl_upd_elem|
+      net := if($r = $(mkIdent `this):ident) then $(mkIdent `net):ident
+        else store(net, at($r), net($r) - $a)))
   | UpdElem.saveNet _ x =>
     let some x ← var x | return none
     return some (← `(dl_upd_elem| $x:dl_term := net))

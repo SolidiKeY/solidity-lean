@@ -88,7 +88,7 @@ into a fresh local. It is on solkey's own backlog (`docs/net.md` §4 item 1;
 `LeanTaclet.sound` (`Calculus/RuleSoundness.lean`). Its hypotheses are the
 taclet's side conditions: the captured argument mentions no callee parameter,
 and the callee body and result are free of the fresh `pv`. On programs whose
-calls take simple arguments (`Stmt.inSolkey`, `Calculus/SolkeyFragment.lean`)
+calls take simple arguments and, under the diamond, pay no one (`Stmt.inSolkey m`, `Calculus/SolkeyFragment.lean`)
 solkey's rules alone derive what the whole calculus does (`Proves.toSolkey`).
 
 **Fix.** Add the rule with those side conditions. Until then a program with a complex

@@ -78,7 +78,7 @@ derivation, to copy a line from.
 postcondition `φ : Post C`.  Every rule but a revert is the same under
 either modality — a branch's cover too, `⟨[ revert(); ]⟩ false ∨ c ∨ c'`
 (`Premise.coverFml`) — so `sol_chain` runs such a line as the diamond and
-as the box and keeps the lines the two share, through branches and guards,
+as the box and keeps the lines the two share, through branches,
 up to the first `revert();` the strategy steps: `revertBox` leaves `true`
 and `revertDiamond` `false`, as the calculus's traces part at
 `⟨[ revert(); ]⟩ φ`.  That line ends the chain under `m`; after `cases m`

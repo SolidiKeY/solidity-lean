@@ -101,6 +101,7 @@ def UpdElem.quote : UpdElem C → Lean.Expr
   | .selfBalance op a => mkAppN (mkConst ``UpdElem.selfBalance) #[c, IntOp.quote op, Tm.quote c a]
   | .net r op a =>
     mkAppN (mkConst ``UpdElem.net) #[c, Tm.quote c r, IntOp.quote op, Tm.quote c a]
+  | .pay r a => mkAppN (mkConst ``UpdElem.pay) #[c, Tm.quote c r, Tm.quote c a]
   | .saveNet x => mkAppN (mkConst ``UpdElem.saveNet) #[c, toExpr x]
 
 def Upd.quote : List (UpdElem C) → Lean.Expr

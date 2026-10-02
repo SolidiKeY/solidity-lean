@@ -9,9 +9,11 @@ a taclet of solkey, and `LeanTaclet`, the rules solkey does not have.  Both
 are sound (`Rule.sound`), for everything the typed syntax can write.
 
 This module is the other half of the claim, about solkey itself.  A
-statement is **in solkey's fragment** (`Stmt.inSolkey`) when no rule of
-`LeanTaclet` is ever needed to run it: every call's arguments are simple, in
-its branches and in the bodies it inlines too.  On the fragment:
+statement is **in solkey's fragment** under a modality (`Stmt.inSolkey m`)
+when no rule of `LeanTaclet` is ever needed to run it there: every call's
+arguments are simple, in its branches and in the bodies it inlines too, and
+under the diamond it pays no one (a payment has a rule under the box only).
+On the fragment:
 
 * every statement has a rule of solkey's (`Stmt.step_taclet`), and no Lean
   rule fires (`LeanTaclet.not_inSolkey`);
@@ -36,44 +38,47 @@ variable {C : Contract} {k : Nat} {m : Modality}
 
 mutual
 
-/-- No call of `s`, however deep, has an argument to capture, and there is
-no `try`: solkey has a rule for it under the box only
-(`tryCallNoCallbackBox`), and the fragment is one under either modality. -/
-def Stmt.inSolkey : Stmt C → Bool
-  | .ite _ thn els => Prog.inSolkey thn && Prog.inSolkey els
-  | .call _ args _ _ body => (Arg.firstNonSimple args).isNone && Prog.inSolkey body
+/-- No call of `s`, however deep, has an argument to capture; a payment is
+under the box, where solkey books it (`transferNoCallbackBox`), the diamond
+closing to `false` (`LeanTaclet.transferDiamond`); and there is no `try`:
+solkey has a rule for it under the box only (`tryCallNoCallbackBox`), with
+its blocks outside the fragment's claim. -/
+def Stmt.inSolkey (m : Modality) : Stmt C → Bool
+  | .ite _ thn els => Prog.inSolkey m thn && Prog.inSolkey m els
+  | .call _ args _ _ body => (Arg.firstNonSimple args).isNone && Prog.inSolkey m body
+  | .transfer .. => m == .box
   | .tryCall .. => false
   | _ => true
 
 /-- Every statement of the block is in the fragment. -/
-def Prog.inSolkey : List (Stmt C) → Bool
+def Prog.inSolkey (m : Modality) : List (Stmt C) → Bool
   | [] => true
-  | s :: P => s.inSolkey && Prog.inSolkey P
+  | s :: P => s.inSolkey m && Prog.inSolkey m P
 
 end
 
-/-- Every program under a modality of `φ` is in the fragment. -/
+/-- Every program under a modality of `φ` is in the fragment, under that
+modality. -/
 def Fml.inSolkey : Fml C → Bool
   | .tt | .eq .. | .defined _ => true
   | .not φ | .upd _ _ φ | .havoc φ | .all _ _ φ => φ.inSolkey
   | .and φ ψ | .imp φ ψ => φ.inSolkey && ψ.inSolkey
-  | .modal _ P φ => Prog.inSolkey P && φ.inSolkey
+  | .modal m P φ => Prog.inSolkey m P && φ.inSolkey
 
 /-- The programs and conditions of a premise are in the fragment. -/
-def Premise.inSolkey : Premise C → Bool
+def Premise.inSolkey (m : Modality) : Premise C → Bool
   | .update _ | .done _ => true
-  | .unfold P => Prog.inSolkey P
-  | .split c c' P Q => c.inSolkey && c'.inSolkey && Prog.inSolkey P && Prog.inSolkey Q
-  | .guard c _ => c.inSolkey
-  | .branches bs => bs.all fun b => Prog.inSolkey b.2
+  | .unfold P => Prog.inSolkey m P
+  | .split c c' P Q => c.inSolkey && c'.inSolkey && Prog.inSolkey m P && Prog.inSolkey m Q
+  | .branches bs => bs.all fun b => Prog.inSolkey m b.2
 
-@[simp] theorem Prog.inSolkey_nil : Prog.inSolkey ([] : Prog C) = true := rfl
+@[simp] theorem Prog.inSolkey_nil : Prog.inSolkey m ([] : Prog C) = true := rfl
 
 @[simp] theorem Prog.inSolkey_cons {s : Stmt C} {P : Prog C} :
-    Prog.inSolkey (s :: P) = (s.inSolkey && Prog.inSolkey P) := rfl
+    Prog.inSolkey m (s :: P) = (s.inSolkey m && Prog.inSolkey m P) := rfl
 
 @[simp] theorem Prog.inSolkey_append {P Q : Prog C} :
-    Prog.inSolkey (P ++ Q) = (Prog.inSolkey P && Prog.inSolkey Q) := by
+    Prog.inSolkey m (P ++ Q) = (Prog.inSolkey m P && Prog.inSolkey m Q) := by
   induction P with
   | nil => rfl
   | cons s P ih => simp [ih, Bool.and_assoc]
@@ -81,36 +86,37 @@ def Premise.inSolkey : Premise C → Bool
 /-! ## Solkey's rules keep the fragment -/
 
 @[simp] theorem Hole.fill_inSolkey {T : Ty} (h : Hole C T) (p : SPath C T) :
-    (h.fill p).inSolkey = true := by
+    (h.fill p).inSolkey m = true := by
   cases h <;> cases p <;> rfl
 
 @[simp] theorem MHole.fill_inSolkey {T : Ty} (h : MHole C T) (l : MLoc C T) :
-    (h.fill l).inSolkey = true := by
+    (h.fill l).inSolkey m = true := by
   cases h <;> rfl
 
 @[simp] theorem VHole.fill_inSolkey {p : PrimTy} (h : VHole C p) (v : Val C p) :
-    (h.fill v).inSolkey = true := by
+    (h.fill v).inSolkey m = true := by
   cases h <;> rfl
 
 @[simp] theorem NewLhs.fill_inSolkey {R : RefTy} (l : NewLhs C R) (p : MPath C (.ref R)) :
-    (l.fill p).inSolkey = true := by
+    (l.fill p).inSolkey m = true := by
   cases l <;> rfl
 
 @[simp] theorem Premise.cover_inSolkey {c c' : Fml C} :
     (Premise.cover m c c').inSolkey = (m = .box || c.inSolkey && c'.inSolkey) := by
   cases m <;> simp [Premise.cover, Fml.inSolkey]
 
-theorem Arg.decls_inSolkey (args : List (Arg C)) :
-    Prog.inSolkey (args.map Arg.decl) = true := by
+theorem Arg.decls_inSolkey (m : Modality) (args : List (Arg C)) :
+    Prog.inSolkey m (args.map Arg.decl) = true := by
   induction args with
   | nil => rfl
   | cons a as ih => simpa [Arg.decl, Stmt.inSolkey] using ih
 
-theorem CallRet.decl_inSolkey (ret : CallRet) : Prog.inSolkey (ret.decl : Prog C) = true := by
+theorem CallRet.decl_inSolkey (m : Modality) (ret : CallRet) :
+    Prog.inSolkey m (ret.decl : Prog C) = true := by
   cases ret <;> rfl
 
-theorem CallRet.result_inSolkey (ret : CallRet) :
-    Prog.inSolkey (ret.result : Prog C) = true := by
+theorem CallRet.result_inSolkey (m : Modality) (ret : CallRet) :
+    Prog.inSolkey m (ret.result : Prog C) = true := by
   rcases ret with _ | ⟨p, r, _ | x⟩ <;> rfl
 
 set_option maxHeartbeats 4000000 in
@@ -119,7 +125,7 @@ is in it.  Only three rules put a call or a branch in their premise: the two
 that run an `if` hand on its branches, and `functionBodyExpand` inlines a body
 that is in the fragment with its simple arguments. -/
 theorem Taclet.premise_inSolkey {s : Stmt C} {p : Premise C} (d : Taclet C k m s p)
-    (h : s.inSolkey = true) : p.inSolkey = true := by
+    (h : s.inSolkey m = true) : p.inSolkey m = true := by
   cases d <;> (try cases ‹Hole _ _›) <;> (try cases ‹MHole _ _›) <;> (try cases ‹VHole _ _›) <;>
     simp_all [Premise.inSolkey, Stmt.inSolkey, Fml.inSolkey, Stmt.expandBody,
       Arg.decls_inSolkey, CallRet.decl_inSolkey, CallRet.result_inSolkey]
@@ -128,14 +134,14 @@ theorem Taclet.premise_inSolkey {s : Stmt C} {p : Premise C} (d : Taclet C k m s
 
 /-- A rule solkey does not have fires only outside the fragment. -/
 theorem LeanTaclet.not_inSolkey {s : Stmt C} {p : Premise C} (d : LeanTaclet C k m s p) :
-    s.inSolkey = false := by
+    s.inSolkey m = false := by
   cases d with
   | functionCallArgCapture h => simp [Stmt.inSolkey, h]
-  | tryCallDiamond => rfl
+  | tryCallDiamond | transferDiamond => rfl
 
 /-- **solkey's rules are complete on the fragment**: the rule `Stmt.step`
 fires on a statement of the fragment is one of solkey's. -/
-theorem Stmt.step_taclet {s : Stmt C} (h : s.inSolkey = true) :
+theorem Stmt.step_taclet {s : Stmt C} (h : s.inSolkey m = true) :
     Taclet C k m s (s.step k m).premise := by
   cases (s.step k m).rule with
   | key d => exact d
@@ -197,12 +203,6 @@ theorem Proves.toSolkey {R : RuleSet} {Γ : List (Hyp C)} {φ : Fml C} (h : Prov
     simp only [Premise.inSolkey, Bool.and_eq_true] at this
     exact .split d (ih₁ (by simp_all [Fml.inSolkey])) (ih₂ (by simp_all [Fml.inSolkey]))
       (ih₃ (by simp_all))
-  | guard d _ _ ih₁ ih₂ =>
-    simp only [Fml.inSolkey, Prog.inSolkey_cons, Bool.and_eq_true] at hφ
-    have := d.premise_inSolkey hφ.1.1
-    simp only [Premise.inSolkey] at this
-    exact .guard d (ih₁ (by simp_all [Fml.inSolkey]))
-      (ih₂ (by simp_all [Fml.inSolkey, Stmt.inSolkey]))
   | done d _ ih =>
     exact .done d (ih (by rename_i b _; cases b <;> rfl))
   | empty _ ih => exact .empty (ih (by simp_all [Fml.inSolkey]))
@@ -229,10 +229,19 @@ theorem Proves.solkey_valid {φ : Fml C} (h : ⊢ₖ φ) : Valid φ := h.sound
 `x + 1`.  `y = f(x);` is in it. -/
 
 example : (Stmt.call (C := C) "f" [⟨.uint, .user "a", .binop .add rfl rfl
-    (.simple (.local (.user "x"))) (.simple (.lit 1 rfl))⟩] rfl .none []).inSolkey = false := rfl
+    (.simple (.local (.user "x"))) (.simple (.lit 1 rfl))⟩] rfl .none []).inSolkey m = false := rfl
 
 example : (Stmt.call (C := C) "f" [⟨.uint, .user "a", .simple (.local (.user "x"))⟩] rfl
-    .none []).inSolkey = true := rfl
+    .none []).inSolkey m = true := rfl
+
+/-! `to.transfer(5);` is in the fragment under the box, where
+`transferNoCallbackBox` books it, and not under the diamond. -/
+
+example : (Stmt.transfer (C := C) (.simple (.local (.user "to")))
+    (.simple (.lit 5 rfl))).inSolkey .box = true := rfl
+
+example : (Stmt.transfer (C := C) (.simple (.local (.user "to")))
+    (.simple (.lit 5 rfl))).inSolkey .diamond = false := rfl
 
 /-! ## Off the fragment the two differ
 
@@ -268,7 +277,7 @@ theorem Proves.solkey_not_call {Γ : List (Hyp C)} {f : Name} {args : List (Arg 
   generalize hR : RuleSet.solkey = R at h
   generalize hψ : Fml.modal m (.call f args hsep ret body :: ω) φ = ψ at h
   induction h generalizing φ with
-  | update d _ _ | unfold d _ _ | split d _ _ _ _ _ _ | guard d _ _ _ _ | done d _ _ =>
+  | update d _ _ | unfold d _ _ | split d _ _ _ _ _ _ | done d _ _ =>
     cases hψ; simp [d.call_simple rfl] at ha
   | branches d _ _ => cases hψ; simp [d.call_simple rfl] at ha
   | unfoldLean | doneLean => cases hR

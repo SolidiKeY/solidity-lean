@@ -731,7 +731,7 @@ def _root_.Solidity.UpdElem.toL (ρ : Sym) : UpdElem C → LTerm × Sym
     (guardPath ρ.stor (p.toL ρ), { ρ with env := (x, .path (p.toL ρ)) :: ρ.env })
   | .storage s =>
     (.sok (s.toL ρ), { stor := s.toL ρ, env := ρ.env.map fun b => (b.1, b.2.onWrite) })
-  | .mref .. | .memory .. | .selfBalance .. | .net .. | .store .. | .saveNet .. => (.err, ρ)
+  | .mref .. | .memory .. | .selfBalance .. | .net .. | .pay .. | .store .. | .saveNet .. => (.err, ρ)
 
 /-- An update in the fragment: a local, an alias or the storage; no memory,
 no funds or ledger. -/
@@ -739,7 +739,7 @@ def _root_.Solidity.UpdElem.inL (ρ : Sym) : UpdElem C → Bool
   | .val _ t => t.inL ρ
   | .path _ p => p.inL ρ
   | .storage s => s.inL ρ
-  | .mref .. | .memory .. | .selfBalance .. | .net .. | .store .. | .saveNet .. => false
+  | .mref .. | .memory .. | .selfBalance .. | .net .. | .pay .. | .store .. | .saveNet .. => false
 
 /-- The update's term as a premise (box) or a conjunct (diamond). -/
 def guardM : Modality → LTerm → LFml → LFml
@@ -1570,7 +1570,7 @@ theorem Fml.toL_holds :
       refine Fml.toL_holds φ ⟨(hs _).2 (by rw [h₁]; rfl), fun y => ?_⟩ hf.2
       simp only [UpdElem.toL, lookupBy_onWrite]
       exact (h.env y).onWrite rfl
-    | mref _ _ | memory _ | selfBalance _ _ | net _ _ _ | store _ _ | saveNet _ =>
+    | mref _ _ | memory _ | selfBalance _ _ | net _ _ _ | pay _ _ | store _ _ | saveNet _ =>
       simp [UpdElem.inL] at hf
   | .modal m P φ, _, _, _, _, hf => by
     obtain ⟨ω, rfl⟩ := Prog.reverts_eq hf

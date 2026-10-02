@@ -188,7 +188,7 @@ conjunct) can halt.
 **In Lean.** A new `Premise` constructor `inv` whose `Premise.fml` is the
 conjunction above (`Fml.stepAt` reads premises through `Premise.fml`, so
 `sol_symex` needs no change), one `Proves` constructor per new shape (`inv`,
-`exit`), and two cases in `LeanTaclet.sound`. `Stmt.inSolkey (.loop …) =
+`exit`), and two cases in `LeanTaclet.sound`. `Stmt.inSolkey m (.loop …) =
 false` (`Calculus/SolkeyFragment.lean`), so `Proves.toSolkey` is untouched
 and `Proves.solkey_lt_calculus` gains a witness.
 

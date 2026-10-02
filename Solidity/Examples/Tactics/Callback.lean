@@ -61,17 +61,16 @@ theorem withdrawSafe :
   apply ProvesC.update .storageRootReadSelect rfl
   apply ProvesC.update .storageRootWriteStore rfl
   apply ProvesC.update .storageRootOpAssign rfl
-  -- the box owes no guard
-  apply ProvesC.callback .transferWithCallbackBox nofun
-  · -- invariant on exit: `0 <= amt → {U} I`
+  apply ProvesC.callback .transferWithCallbackBox
+  · -- invariant on exit: `{U} I`
     apply ProvesC.plain _ rfl
     refine close ?_
     sol_symex
     sol_close
-  · -- resume after callback: `0 <= amt → {U} {havoc} (I → [ ] I)`
+  · -- resume after callback: `{U} {havoc} (I → [ ] I)`
     apply ProvesC.plain _ rfl
     apply empty
-    rw [show ∀ (Γ : List (Hyp Vault)) a b c d, Γ ++ [a, b, c, d] = (Γ ++ [a, b, c]) ++ [d] by simp]
+    rw [show ∀ (Γ : List (Hyp Vault)) a b c, Γ ++ [a, b, c] = (Γ ++ [a, b]) ++ [c] by simp]
     exact close (Hyp.wrap_assumption _ rfl)
 
 /-- What is safe with callbacks is safe without: the deterministic run is one
@@ -140,10 +139,7 @@ theorem withdrawUnsafe_withCallback : ¬ ValidT (.withCallback vaultInv) withdra
 /--
 info: @CallbackTaclet.transferWithCallbackBox : ∀ {C : Contract} {sadr se : Simple C PrimTy.uint},
   CallbackTaclet C Modality.box (stmt{ sadr .transfer(se); })
-    (dl{
-      0 <= se ⟹
-          { net := store(net, at(sadr), net(sadr) - se) ‖ net := store(net, at(this), net(this) + se) } ⟨[ ]⟩ ;
-        ¬(0 <= se) ⟹ ⟨[ revert(); ]⟩ })
+    (dl{ { net := if(sadr = this) then net else store(net, at(sadr), net(sadr) - se) } ⟨[ ]⟩ })
 -/
 #guard_msgs in #check @CallbackTaclet.transferWithCallbackBox
 

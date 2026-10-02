@@ -11,9 +11,9 @@ checks the correspondence: `tacletOrigins` gives every constructor a typed
 fails the build), `unclaimedTaclets` excuses the rest with a reason,
 `callbackOrigins` does the same for `CallbackTaclet`, and `taclets_partitioned`
 says every taclet is claimed or excused, never both
-(`claimedTaclets_count = 302`, `unclaimedTaclets_count = 11`). A rule that
-transcribes no taclet is a `LeanTaclet` (`leanTaclets`); there are two,
-`functionCallArgCapture` and `tryCallDiamond`. A taclet may be claimed by two constructors (the
+(`claimedTaclets_count = 300`, `unclaimedTaclets_count = 13`). A rule that
+transcribes no taclet is a `LeanTaclet` (`leanTaclets`); there are three,
+`functionCallArgCapture`, `tryCallDiamond` and `transferDiamond`. A taclet may be claimed by two constructors (the
 member reads by their `.length` rules, since KeY reads `sp.length` as the
 member `length`; `memoryFieldWrite`/`memoryIndexWriteArray` by the value and
 reference writes). What stays prose here is what a `KeyOrigin` cannot say:
@@ -258,9 +258,10 @@ receiver kind, Lean does not.
 | KeY taclet | `Taclet` constructor | Status | Notes |
 | --- | --- | --- | --- |
 | `transfer_unfold_leftFstReceiver`, `transfer_unfold_rightSndArgument` | same names | same | |
-| `transferNoCallbackBox`, `transferNoCallbackDiamond` | `transferNoCallback` | merged | one terminal rule for both modalities, a guarded update (`Premise.guard`): `0 <= se ⟹ { net := store(net, at(sadr), net(sadr) - se) ‖ net := store(net, at(this), net(this) + se) } ⟨[ ]⟩`, else `⟨[ revert(); ]⟩`; the ledger only, at both ends, where KeY books `sadr`'s end alone: the contract is an account of the ledger (`this`, `address(this)`), so a payment to it books nothing. The two `net` elements add up (`UpdElem.net` moves the entry on the ledger written so far), where KeY's parallel update would keep the last The arithmetic is KeY's `int` (`IntOp`). KeY's diamond "sufficient funds" goal has no counterpart: whether the world pays is the compiler theorem's (`Evm.compile_correct`), where a refused payment is a revert of the machine alone |
-| `transferWithCallbackBox` | `CallbackTaclet.transferWithCallbackBox` | same | a constructor of `CallbackTaclet`, sound for the callback reading (`holdsC`), not of `Taclet`. The premise has `transferNoCallback`'s shape (guard `F`, `0 <= se`; booking `U`, the ledger), read as KeY's goals (`CallbackTaclet.sound`): `F → {U} I` ("invariant on exit") and `F → {U} {havoc} (I → ⟨[ ω ]⟩ φ)` ("resume after callback"; `{havoc}` is KeY's anonymising update, read by `CbResume`). The box assumes `F` where KeY does not, which only weakens its goals. Used by `ProvesC` |
-| `transferWithCallbackDiamond` | `CallbackTaclet.transferWithCallbackDiamond` | same | as the box, plus the guard `F` (`ProvesC.callback`'s `funds`); KeY's "sufficient funds" has no counterpart |
+| `transferNoCallbackBox` | same name | same | the box only, one terminal update (`UpdElem.pay`): `{ net := if(sadr = this) then net else store(net, at(sadr), net(sadr) - se) } ⟨[ ]⟩`, solkey's `\if(sadr = self) \then(net) \else(storeSt(…))`, with no guard: the amount is read as a word by the element itself, which halts where it is not, as the interpreter does (`transferAt`). The arithmetic is KeY's `int`. Whether the world pays is the compiler theorem's (`Evm.compile_correct`), where a refused payment is a revert of the machine alone; the contract's own entry is never moved (`Evm.Sim.netSelf`) |
+| `transferNoCallbackDiamond` | — | not ported | a payment under the diamond closes to `false` (`LeanTaclet.transferDiamond`); KeY's "non-negative amount" goal and its diamond booking have no counterpart |
+| `transferWithCallbackBox` | `CallbackTaclet.transferWithCallbackBox` | same | a constructor of `CallbackTaclet`, sound for the callback reading (`holdsC`), not of `Taclet`. The premise is `transferNoCallbackBox`'s booking `U`, read as KeY's two goals (`CallbackTaclet.sound`): `{U} I` ("invariant on exit") and `{U} {havoc} (I → [ ω ] φ)` ("resume after callback"; `{havoc}` is KeY's anonymising update, read by `CbResume`). Used by `ProvesC` |
+| `transferWithCallbackDiamond` | — | not ported | as `transferNoCallbackDiamond`: no diamond over a payment is derived |
 
 ## External calls (`try`/`catch`)
 
@@ -269,6 +270,7 @@ receiver kind, Lean does not.
 | `tryCallNoCallbackBox` | same | same | one goal per clause (`Premise.branches`, `Proves.branches`): "call succeeded", "Error caught", "Panic caught", "other failure caught". KeY declares the return locals and the `Panic` code without an initializer, leaving them unconstrained; here they are bound under `∀` (`Fml.alls`, `Hyp.all`), since a Lean declaration is its default. `s#call` is an `ExtCall`, whose receiver and arguments are simple: the elaborator captures any other before the `try` |
 | `tryCallWithCallbackBox` | `CallbackTaclet.tryCallWithCallbackBox` | same | read by `ProvesC.tryCall` (`CallbackTaclet.sound_branches`): `I` where control leaves ("invariant on exit"), the success block after `{havoc}` and `I` ("call succeeded"), each `catch` block from where the call was made |
 | — | `LeanTaclet.tryCallDiamond` | Lean only | a diamond `try` closes to `false`; solkey has no rule. The call may revert in the caller (no code at the address, data that does not decode), which no clause catches and no formula rules out |
+| — | `LeanTaclet.transferDiamond` | Lean only | a diamond payment closes to `false`; solkey's diamond rules are not ported. Whether the world pays is the compiler theorem's, not the calculus's |
 
 ## Update algebra (`updateRules.key`)
 
@@ -350,7 +352,7 @@ them as KeY's `\replacewith` updates do.
 | a member or element of a memory object | `MAddr` | `.field`/`.at` |
 | `Memory` | `MTerm` | `.memory`, `.write(m, a, v)`, `.addM` (eager: the type rides along; a concrete one prints `addM(m, T)`, `T` a struct `Person` or an array type `uint[]`, `Token[3]`, where KeY writes `addM(mem, shaped(idp, #shapeOf(mv)))`: the type in place of its shape), `.copySt(m, v)` |
 | what a memory `write` writes | `MValT` | a value (`.val`) or a reference (`.ref`) |
-| one elementary update | `UpdElem` | `.val`, `.path`, `.mref`, `.storage`, `.memory`; `.store` for `old := storage`; `.net` for a transfer's two ends `net := store(net, at(r), net(r) - a)` (which add up in one update), and with `.selfBalance` for a `payable` function's booking of `msg.value` (`selfBalance := selfBalance + a`); `.saveNet` for `oldNet := net` |
+| one elementary update | `UpdElem` | `.val`, `.path`, `.mref`, `.storage`, `.memory`; `.store` for `old := storage`; `.pay` for a transfer's booking `net := if(r = this) then net else store(net, at(r), net(r) - a)`; `.net` for `net := store(net, at(r), net(r) ± a)`, with `.selfBalance` for a `payable` function's booking of `msg.value` (`selfBalance := selfBalance + a`); `.saveNet` for `oldNet := net` |
 
 ### `structRules.key` → `Theory/Storage.lean` (`Struct`, `StValue`)
 

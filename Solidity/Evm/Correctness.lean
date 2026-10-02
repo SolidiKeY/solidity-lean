@@ -583,9 +583,12 @@ structure Sim (C : Contract) (L : Nat) (Γ : TyCtx) (σ : State) (m : Machine) :
   aliases : ∀ x R, Γ x = some (.alias R) →
     ∃ r segs s, lookupBy x σ.env = some (.spath r segs) ∧ m.mem x = .slot s ∧
       PathSlot C true r segs (.ref R) s
-  /-- `net(a)` is what `a`'s account lost, at every address, the contract's
-  own included. -/
-  net : ∀ a : Nat, a < W → σ.getNet a = (m.bal₀ a : Int) - m.bal a
+  /-- `net(a)` is what `a`'s account lost, at every address but the
+  contract's own. -/
+  net : ∀ a : Nat, a < W → a ≠ m.self → σ.getNet a = (m.bal₀ a : Int) - m.bal a
+  /-- The contract's own entry is never moved: a payment to itself books
+  nothing, and nothing else writes it. -/
+  netSelf : σ.getNet m.self = 0
   /-- The bound on the arrays is at most solc's. -/
   bound : L ≤ Lmax
   /-- A fragile alias: its cell holds the slot of a path that indexes an
@@ -599,34 +602,30 @@ structure Sim (C : Contract) (L : Nat) (Γ : TyCtx) (σ : State) (m : Machine) :
 /-- `Sim` does not look at the stack. -/
 theorem Sim.stack {C : Contract} {L : Nat} {Γ : TyCtx} {σ : State} {m : Machine} (h : Sim C L Γ σ m)
     (st : List Word) : Sim C L Γ σ { m with stack := st } :=
-  ⟨h.store, h.vals, h.aliases, h.net, h.bound, h.fragile, h.env⟩
+  ⟨h.store, h.vals, h.aliases, h.net, h.netSelf, h.bound, h.fragile, h.env⟩
 
-/-- A payment booked: the ledger moved from `this` to `x`, and the balances
-moved to match.  Example: `to.transfer(5);` books `net(to) - 5` and
-`net(this) + 5`, and moves `5` from the contract's account to `to`'s. -/
+/-- A payment booked: the ledger down at `x`, and the balances moved to
+match.  Example: `to.transfer(5);` books `net(to) - 5` and moves `5` from
+the contract's account to `to`'s. -/
 theorem Sim.book {C : Contract} {L : Nat} {Γ : TyCtx} {σ : State} {m : Machine} (h : Sim C L Γ σ m)
     (x y : Int) (b b₀ : Nat → Nat)
-    (hn : ∀ a : Nat, a < W → (σ.pay x y).getNet a = (b₀ a : Int) - b a) :
-    Sim C L Γ (σ.pay x y) { m with bal := b, bal₀ := b₀ } :=
-  ⟨h.store, h.vals, h.aliases, hn, h.bound, h.fragile, h.env⟩
+    (hn : ∀ a : Nat, a < W → a ≠ m.self → (σ.pay x y).getNet a = (b₀ a : Int) - b a)
+    (hself : (σ.pay x y).getNet m.self = 0) :
+    Sim C L Γ (σ.pay x y) { m with bal := b, bal₀ := b₀ } := by
+  rw [State.pay_eq] at hn hself ⊢
+  exact ⟨h.store, h.vals, h.aliases, hn, hself, h.bound, h.fragile, h.env⟩
 
-/-- The ledger after a payment of `y` to `x`: `x`'s entry down by `y`, then the
-contract's own up by `y`. -/
+/-- The ledger after a payment of `y` to `x`: as it was when `x` is the
+contract itself, else `x`'s entry down by `y`. -/
 theorem getNet_pay (τ : State) (x y a : Int) : (τ.pay x y).getNet a =
-    if a = τ.tx.selfAddress then
-      (if τ.tx.selfAddress = x then τ.getNet x - y else τ.getNet τ.tx.selfAddress) + y
+    if x = τ.tx.selfAddress then τ.getNet a
     else if a = x then τ.getNet x - y else τ.getNet a := by
-  simp only [State.pay, State.getNet, State.setNet]
-  by_cases h1 : a = τ.tx.selfAddress
-  · subst h1
-    rw [lookupBy_setBy_self, if_pos rfl, Option.getD_some]
-    by_cases h2 : τ.tx.selfAddress = x
-    · rw [h2, lookupBy_setBy_self, if_pos rfl, Option.getD_some]
-    · rw [lookupBy_setBy_ne h2, if_neg h2]
-  · rw [lookupBy_setBy_ne h1, if_neg h1]
+  by_cases h1 : x = τ.tx.selfAddress
+  · simp only [State.pay, State.getNet, h1, ↓reduceIte]
+  · simp only [State.pay, State.getNet, h1, ↓reduceIte]
     by_cases h2 : a = x
-    · subst h2; rw [lookupBy_setBy_self, if_pos rfl, Option.getD_some]
-    · rw [lookupBy_setBy_ne h2, if_neg h2]
+    · subst h2; simp only [lookupBy_setBy_self, ↓reduceIte, Option.getD_some]
+    · simp only [lookupBy_setBy_ne h2, h2, ↓reduceIte]
 
 /-- Pushing a word keeps `Sim`: `total + 1` pushes `total`'s word, then `1`. -/
 theorem Sim.push {C : Contract} {L : Nat} {Γ : TyCtx} {σ : State} {m : Machine} (h : Sim C L Γ σ m)
@@ -1050,13 +1049,13 @@ inductive StmtOut (C : Contract) (L : Nat) (Γ' : TyCtx) (pays : Bool) (res : Re
 theorem Sim.weaken {Γ' : TyCtx} {m : Machine} (h : Sim C L Γ σ m)
     (hΓ : ∀ x t, Γ' x = some t → Γ x = some t) : Sim C L Γ' σ m :=
   ⟨h.store, fun x p hx => h.vals x p (hΓ x _ hx), fun x R hx => h.aliases x R (hΓ x _ hx),
-    h.net, h.bound, fun x R hx => h.fragile x R (hΓ x _ hx), h.env⟩
+    h.net, h.netSelf, h.bound, fun x R hx => h.fragile x R (hΓ x _ hx), h.env⟩
 
 /-- `uint x = e;`: the cell of `x` and the binding of `x` change together. -/
 theorem Sim.bindVal {m : Machine} (h : Sim C L Γ σ m) (x : Var) {p : PrimTy} {v : Value} {w : Word}
     (hv : ReprV p v w) :
     Sim C L (Γ.set x (some (.val p))) (σ.setEnv x (.val v)) { m with mem := upd m.mem x w } := by
-  refine ⟨h.store, fun y q hy => ?_, fun y R hy => ?_, h.net, h.bound,
+  refine ⟨h.store, fun y q hy => ?_, fun y R hy => ?_, h.net, h.netSelf, h.bound,
     fun y R hy => ?_, h.env⟩
   · by_cases hyx : y = x
     · subst hyx
@@ -1084,7 +1083,7 @@ theorem Sim.bindAlias {m : Machine} (h : Sim C L Γ σ m) (x : Var) {R : RefTy} 
     {segs : List Seg} {s : Slot} (hp : PathSlot C true r segs (.ref R) s) :
     Sim C L (Γ.set x (some (.alias R))) (σ.setEnv x (.spath r segs))
       { m with mem := upd m.mem x (.slot s) } := by
-  refine ⟨h.store, fun y q hy => ?_, fun y R' hy => ?_, h.net, h.bound,
+  refine ⟨h.store, fun y q hy => ?_, fun y R' hy => ?_, h.net, h.netSelf, h.bound,
     fun y R' hy => ?_, h.env⟩
   · by_cases hyx : y = x
     · subst hyx; simp [TyCtx.set] at hy
@@ -1114,7 +1113,7 @@ theorem Sim.bindFragile {m : Machine} (h : Sim C L Γ σ m) (x : Var) {R : RefTy
     (hlive : ∃ sv, σ.findLive r segs = .ok sv) :
     Sim C L (Γ.set x (some (.falias R))) (σ.setEnv x (.spath r segs))
       { m with mem := upd m.mem x (.slot s) } := by
-  refine ⟨h.store, fun y q hy => ?_, fun y R' hy => ?_, h.net, h.bound,
+  refine ⟨h.store, fun y q hy => ?_, fun y R' hy => ?_, h.net, h.netSelf, h.bound,
     fun y R' hy => ?_, h.env⟩
   · by_cases hyx : y = x
     · subst hyx; simp [TyCtx.set] at hy
@@ -1143,7 +1142,7 @@ and no array's length slot lower (so the fragile aliases stay in bounds,
 theorem Sim.store' {m : Machine} (h : Sim C L Γ σ m) {st' : Slot → Nat} {stor : List (Name × SVal)}
     (hs : ReprStore C L st' stor) (hlen : ∀ x, LenSlot C x → m.store x ≤ st' x) :
     Sim C L Γ { σ with storage := stor } { m with store := st' } :=
-  ⟨hs, h.vals, h.aliases, h.net, h.bound, fun x R hx => by
+  ⟨hs, h.vals, h.aliases, h.net, h.netSelf, h.bound, fun x R hx => by
     obtain ⟨r, segs, s, h1, h2, h3, h4⟩ := h.fragile x R hx
     exact ⟨r, segs, s, h1, h2, h3, live_mono (σ' := { σ with storage := stor }) h.store hs hlen h3 h4⟩, h.env⟩
 
@@ -1152,7 +1151,7 @@ aliases forgotten. -/
 theorem Sim.storeDrop {m : Machine} (h : Sim C L Γ σ m) {st' : Slot → Nat}
     {stor : List (Name × SVal)} (hs : ReprStore C L st' stor) :
     Sim C L Γ.dropFragile { σ with storage := stor } { m with store := st' } := by
-  refine ⟨hs, fun x p hx => h.vals x p ?_, fun x R hx => h.aliases x R ?_, h.net, h.bound,
+  refine ⟨hs, fun x p hx => h.vals x p ?_, fun x R hx => h.aliases x R ?_, h.net, h.netSelf, h.bound,
     fun x R hx => ?_, h.env⟩ <;> simp only [TyCtx.dropFragile] at hx <;> split at hx <;> simp_all
 
 /-- A write to a primitive leaves every array's length. -/
@@ -1536,7 +1535,7 @@ theorem args_sim : ∀ (args : List (Arg C)) {Δ Δ' : TyCtx} {τ : State} {m : 
 /-- `Sim` under a looser bound on the arrays. -/
 theorem Sim.mono {Γ : TyCtx} {m : Machine} {L' : Nat} (h : Sim C L Γ σ m) (hL : L ≤ L')
     (hL' : L' ≤ Lmax) : Sim C L' Γ σ m :=
-  ⟨h.store.mono hL, h.vals, h.aliases, h.net, hL', h.fragile, h.env⟩
+  ⟨h.store.mono hL, h.vals, h.aliases, h.net, h.netSelf, hL', h.fragile, h.env⟩
 
 /-- `StmtOut` under a looser bound. -/
 theorem StmtOut.mono {Γ' : TyCtx} {b : Bool} {res : Res State} {out : Out} {m : Machine} {L' : Nat}
@@ -1919,9 +1918,11 @@ theorem leave_sim {Δ : TyCtx} {τ : State} {m : Machine} (ret : CallRet)
 
 /-- **A payment**: `to.transfer(5);` books `net(to) - 5` in the interpreter;
 the machine's `CALL` moves `5` from the contract's account to `to`'s, or
-moves nothing when `to` is the contract, or is refused (the account cannot
-cover it, `to` does not accept it) and reverts, the interpreter's state then
-represented by the world that paid. -/
+moves nothing when `to` is the contract (and the interpreter books nothing:
+without that `if` in `State.pay`, the contract's own entry would move and
+`Sim.netSelf` fail), or is refused (the account cannot cover it, `to` does
+not accept it) and reverts, the interpreter's state then represented by the
+world that paid. -/
 theorem transfer_sim {Δ : TyCtx} {τ : State} {m : Machine} (r a : Val C .uint)
     (hm : Sim C L Δ τ m) (hwr : wtVal Δ r = true) (hwa : wtVal Δ a = true) :
     StmtOut C L Δ true ((Stmt.transfer r a).run τ) (run (compileStmt (Stmt.transfer r a)) m) m := by
@@ -1937,58 +1938,51 @@ theorem transfer_sim {Δ : TyCtx} {τ : State} {m : Machine} (r a : Val C .uint)
         rw [if_neg (by omega)]
       simp only [hvr, hva, Value.asInt, Res.ok_bind, hsrc]
       obtain ⟨-, -, -, hself, -, -, -, hsw⟩ := hm.env
-      have h2 := hm.net x hx
-      have h3 := hm.net m.self hsw
-      -- the ledger after the payment, at a word `a`, from the three entries it reads
-      have hpay : ∀ a : Nat, a < W → (τ.pay x y).getNet a =
-          if a = m.self then (if m.self = x then τ.getNet x - y else τ.getNet m.self) + y
-          else if a = x then τ.getNet x - y else τ.getNet a := by
-        intro a _
+      -- the ledger after the payment: as it was when it pays `this`, else `x`'s entry down
+      have hpay : ∀ a : Nat, (τ.pay x y).getNet a =
+          if x = m.self then τ.getNet a else if a = x then τ.getNet x - y else τ.getNet a := by
+        intro a
         rw [getNet_pay, hself]
         simp only [Int.ofNat_inj]
+      -- the contract's own entry is never moved
+      have hns : (τ.pay x y).getNet m.self = 0 := by
+        rw [hpay m.self]
+        split
+        · exact hm.netSelf
+        · rename_i hxs
+          rw [if_neg (fun h => hxs h.symm)]
+          exact hm.netSelf
       by_cases hrf : m.bal m.self < y ∨ m.accepts x y = false
       · -- refused: the machine reverts; the world that paid is the phantom
         refine .refused rfl ⟨by simp [run, Instr.step, Machine.next, Machine.push, hrf, assertTop],
-          _, { m with bal := upd m.bal x (m.bal x + y), bal₀ := upd m.bal₀ m.self (m.bal₀ m.self + y) },
-          rfl, hm.book x y _ _ fun b hb => ?_⟩
-        have h1 := hm.net b hb
-        rw [hpay b hb]
+          _, { m with bal := upd m.bal x (m.bal x + y) }, rfl,
+          hm.book x y _ _ (fun b hb hbs => ?_) hns⟩
+        have h1 := hm.net b hb hbs
+        rw [hpay b]
         simp only [upd]
         by_cases hxs : x = m.self
         · subst hxs
-          by_cases hbs : b = m.self
-          · subst hbs; simp only [↓reduceIte]; push_cast; omega
-          · simp only [hbs, ↓reduceIte]; exact h1
-        · by_cases hbs : b = m.self
-          · subst hbs
-            simp only [Ne.symm hxs, ↓reduceIte]; omega
-          · by_cases hbx : b = x
-            · subst hbx; simp only [hbs, ↓reduceIte]; omega
-            · simp only [hbs, hbx, ↓reduceIte]; exact h1
+          simp only [hbs, ↓reduceIte]; exact h1
+        · by_cases hbx : b = x
+          · subst hbx; simp only [hxs, ↓reduceIte]; omega
+          · simp only [hxs, hbx, ↓reduceIte]; exact h1
       · by_cases hxe : x = m.self
         · -- a payment to itself moves nothing, and books nothing
           subst hxe
-          refine .inl ⟨_, m, rfl, ?_, rfl, hm.book _ _ m.bal m.bal₀ fun b hb => ?_⟩
+          refine .inl ⟨_, m, rfl, ?_, rfl, hm.book _ _ m.bal m.bal₀ (fun b hb hbs => ?_) hns⟩
           · simp [run, Instr.step, Machine.next, Machine.push, hrf, assertTop]
-          · have h1 := hm.net b hb
-            rw [hpay b hb]
-            by_cases hbs : b = m.self
-            · subst hbs; simp only [↓reduceIte]; omega
-            · simp only [hbs, ↓reduceIte]; exact h1
+          · rw [hpay b]
+            simp only [↓reduceIte]; exact hm.net b hb hbs
         · simp only [not_or, Bool.not_eq_false] at hrf
-          have hle : y ≤ m.bal m.self := Nat.le_of_not_lt hrf.1
           refine .inl ⟨_, { m with bal := pay m.bal m.self x y }, rfl, ?_, rfl,
-            hm.book x y _ m.bal₀ fun b hb => ?_⟩
+            hm.book x y _ m.bal₀ (fun b hb hbs => ?_) hns⟩
           · simp [run, Instr.step, Machine.push, hrf, hxe, assertTop]
-          · have h1 := hm.net b hb
-            rw [hpay b hb]
-            simp only [pay, upd]
-            by_cases hbs : b = m.self
-            · subst hbs
-              simp only [Ne.symm hxe, ↓reduceIte]; omega
-            · by_cases hbx : b = x
-              · subst hbx; simp only [hbs, ↓reduceIte]; omega
-              · simp only [hbs, hbx, ↓reduceIte]; exact h1
+          · have h1 := hm.net b hb hbs
+            rw [hpay b]
+            simp only [pay, upd, hxe, ↓reduceIte]
+            by_cases hbx : b = x
+            · subst hbx; simp only [↓reduceIte]; omega
+            · simp only [hbx, hbs, ↓reduceIte]; exact h1
     · exact .inr ⟨by simp [hvr, hva, Value.asInt], run_append_revert hruna⟩
   · exact .inr ⟨by simp [hvr], run_append_revert hrunr⟩
 
@@ -2426,8 +2420,8 @@ theorem compile_box {P : Prog C} {Γ Γ' : TyCtx} {σ : State} {m m' : Machine}
 
 /-- **The ledger is the money that moved.**  Where the compiled code
 succeeds, the interpreter's `net(a)` is what `a`'s account lost since the
-transaction began, at every address but the contract's own, and the
-contract's account gained what the ledger sums.
+transaction began, at every address but the contract's own, whose entry
+stays at `0`: a payment to itself moves nothing, and books nothing.
 
 Example: `to.transfer(5);` from an empty ledger, completed by the machine,
 leaves `net(to) = -5` and `to`'s account `5` richer. -/
@@ -2435,9 +2429,10 @@ theorem compile_net {P : Prog C} {Γ Γ' : TyCtx} {σ : State} {m m' : Machine}
     (hP : wtProg Γ P = some Γ') (hm : Sim C L Γ σ m) (hL : L + pushesP P ≤ Lmax)
     (hrun : run (compileProg P) m = .ok m' 0) :
     ∃ σ', Prog.run σ P = .ok σ' ∧
-      ∀ a : Nat, a < W → σ'.getNet a = (m'.bal₀ a : Int) - m'.bal a := by
+      (∀ a : Nat, a < W → a ≠ m'.self → σ'.getNet a = (m'.bal₀ a : Int) - m'.bal a) ∧
+      σ'.getNet m'.self = 0 := by
   obtain ⟨σ', h1, h2⟩ := compile_box hP hm hL hrun
-  exact ⟨σ', h1, h2.net⟩
+  exact ⟨σ', h1, h2.net, h2.netSelf⟩
 
 /-- The interpreter is never stuck on the fragment: `wtProg` is a type system
 for it.
@@ -2459,7 +2454,8 @@ moved, whatever the world's balances and the contract's address. -/
 theorem Sim.init (C : Contract) (balance : Nat) (bal : Nat → Nat) (self : Nat) (hs : self < W) :
     Sim C 1 (fun _ => none) (State.fresh C balance self) (Machine.init bal self) :=
   ⟨initStorage_repr C Nat.one_pos, fun _ _ h => (by cases h), fun _ _ h => (by cases h),
-    fun _ _ => by simp [State.getNet, State.fresh, lookupBy, Machine.init],
+    fun _ _ _ => by simp [State.getNet, State.fresh, lookupBy, Machine.init],
+    by simp [State.getNet, State.fresh, lookupBy, Machine.init],
     by unfold Lmax; decide, fun _ _ h => (by cases h),
     ⟨rfl, rfl, rfl, rfl, W_pos, W_pos, W_pos, hs⟩⟩
 

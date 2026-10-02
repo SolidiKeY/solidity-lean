@@ -389,7 +389,9 @@ def popStep {E : Ty} (b : SPath C (.array E)) : Step k m (.pop b) :=
 /-- `people[i].wallet.transfer(x + 1);`: the receiver first, then the
 amount. -/
 def transferStep : (r a : Val C .uint) → Step k m (.transfer r a)
-  | .simple _, .simple _ => ⟨_, .key .transferNoCallback⟩
+  | .simple _, .simple _ => match m with
+    | .box => ⟨_, .key .transferNoCallbackBox⟩
+    | .diamond => ⟨_, .lean .transferDiamond⟩
   | .simple _, .read _ | .simple _, .binop .. | .simple _, .unop .. | .simple _, .ternary ..
   | .simple _, .readMem _ | .simple _, .len .. | .simple _, .mlen .. =>
     ⟨_, .key .transfer_unfold_rightSndArgument⟩

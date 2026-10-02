@@ -32,7 +32,7 @@ one formula `a₁ → … → φ` (`Notation.lean`), which the chains of
   goal's modality too.  `sequent![m]{ … }` gives it; a Lean formula
   `φ : Post C` stands where a formula does.
 * **The context is built by appending** (`[] ++ [h₁] ++ … ++ [hₙ]`), the
-  shape the rules leave (`Γ ++ [.pre c, .upd m U]` after `guard`), so a
+  shape the rules leave (`Γ ++ [.pre c]` after `split`), so a
   rule stated on `Γ ++ [.upd m U]` (`Proves.merge`, `Proves.simplify`,
   `Proves.applyOnRigidBox`) still finds its `Γ` after a `show`
   (`snocProves`, `Calculus/TheoryRewrite.lean`).
@@ -221,17 +221,12 @@ example : ⊢ dl!{ [ to.transfer(x + 2); ] true } := by
   apply unfold .localValueDeclInitDrop
   apply update .binopAssignment
   show sequent!{ { se1 := x + 2 } ⟹ [ to.transfer(se1); ] true }
-  apply guard .transferNoCallback
-  · show sequent!{ { se1 := x + 2 }, 0 <= se1,
-      { net := store(net, at(to), net(to) - se1) ‖ net := store(net, at(this), net(this) + se1) }
-        ⟹ [ ] true }
-    apply empty
-    refine close ?_
-    sol_close
-  · show sequent!{ { se1 := x + 2 }, ¬(0 <= se1) ⟹ [ revert(); ] true }
-    apply done .revertBox
-    refine close ?_
-    sol_close
+  apply update .transferNoCallbackBox
+  show sequent!{ { se1 := x + 2 },
+      { net := if(to = this) then net else store(net, at(to), net(to) - se1) } ⟹ [ ] true }
+  apply empty
+  refine close ?_
+  sol_close
 
 end Examples
 

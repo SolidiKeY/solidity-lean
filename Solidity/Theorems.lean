@@ -22,7 +22,7 @@ so that it reads as it would in print; the proof is the original's name.
 | `s ⇝ₖ[k, m] p` | a rule of solkey's does | `Taclet C k m s p` |
 | `p ≃[k, m] s` | the premise `p` does what `s` does | `Premise.Correct k m s p` |
 | `k ♯ s` | the names a rule numbers `k` are fresh for `s` | `Avoids s.vars (freshVars k)` |
-| `x ∈ SolKey` | `x`'s calls take simple arguments, and it has no `try` | `Stmt.inSolkey`, `Fml.inSolkey` |
+| `φ ∈ SolKey`, `s ∈ SolKey[m]` | the calls take simple arguments, there is no `try`, and a payment is under the box | `Fml.inSolkey`, `Stmt.inSolkey m` |
 | `⊢[I] φ`, `⊨[I] φ` | the same, when `transfer` may call back into a contract with invariant `I` | `ProvesC`, `ValidC` |
 | `(P, σ) ⇓ σ'` | `P` run from `σ` ends in `σ'` | `Prog.run σ P = .ok σ'` |
 | `(P, σ) ↯` | `P` run from `σ` reverts | `Prog.run σ P = .error .revert` |
@@ -72,16 +72,19 @@ runs modalities in positive positions only, so one under `¬` or left of `→`
 may remain (`Fml.active`). -/
 abbrev FirstOrder {C : Contract} (φ : Fml C) : Prop := φ.active = false
 
-/-- Membership in solkey's fragment, for statements, programs and formulas. -/
+/-- Membership in solkey's fragment, for formulas (each program under its
+own modality). -/
 class InSolkey (α : Type) where
   inSolkey : α → Bool
 
-instance {C : Contract} : InSolkey (Stmt C) := ⟨Stmt.inSolkey⟩
-instance {C : Contract} : InSolkey (Prog C) := ⟨Prog.inSolkey⟩
 instance {C : Contract} : InSolkey (Fml C) := ⟨Fml.inSolkey⟩
 
-/-- `x ∈ SolKey`: every call of `x` takes simple arguments, and `x` has no `try`. -/
+/-- `x ∈ SolKey`: every call of `x` takes simple arguments, `x` has no `try`,
+and it pays no one under the diamond. -/
 abbrev InFragment {α : Type} [InSolkey α] (x : α) : Prop := InSolkey.inSolkey x = true
+
+/-- `s ∈ SolKey[m]`: the same of a statement under the modality `m`. -/
+abbrev InFragmentAt {C : Contract} (m : Modality) (s : Stmt C) : Prop := s.inSolkey m = true
 
 /-- `(P, σ) ⇓ σ'`: `P` run from `σ` ends normally in `σ'`. -/
 abbrev Runs {C : Contract} (c : Prog C × State) (σ' : State) : Prop :=
@@ -114,6 +117,7 @@ scoped notation:50 s:51 " ⇝ₖ[" k ", " m "] " p:51 => RewritesK s k m p
 scoped notation:50 p:51 " ≃[" k ", " m "] " s:51 => DoesAs p k m s
 scoped notation:50 k:51 " ♯ " s:51 => FreshFor k s
 scoped notation:50 x:51 " ∈ " "SolKey" => InFragment x
+scoped notation:50 s:51 " ∈ " "SolKey[" m "]" => InFragmentAt m s
 scoped notation:25 "⊢[" I "] " φ:26 => ProvesC I [] φ
 scoped notation:25 "⊨[" I "] " φ:26 => ValidC I φ
 scoped notation:50 c:51 " ⇓ " σ':51 => Runs c σ'
@@ -177,7 +181,7 @@ theorem solkey_lt_calculus : ∃ φ : Fml C, (⊢ φ) ∧ ¬ (⊢ₖ φ) :=
 
 /-- **On the fragment, solkey has the rule**: the rule the strategy fires is
 one of solkey's. -/
-theorem solkey_rule_exists (h : s ∈ SolKey) : s ⇝ₖ[k, m] (s.step k m).premise :=
+theorem solkey_rule_exists (h : s ∈ SolKey[m]) : s ⇝ₖ[k, m] (s.step k m).premise :=
   Stmt.step_taclet h
 
 /-- **With callbacks**: when every `transfer` may call back into a contract
@@ -217,12 +221,13 @@ theorem compiler_correct {P : Prog C} {Γ Γ' : TyCtx} {σ : State} {mc : Machin
 open Evm in
 /-- **The box reaches the EVM**: where the compiled code succeeds, the
 interpreter did too, and `net(a)` is what `a`'s account lost, at every
-address, the contract's own included. -/
+address but the contract's own, whose entry stays `0`. -/
 theorem compiler_net {P : Prog C} {Γ Γ' : TyCtx} {σ : State} {mc mc' : Machine} {L : Nat}
     (hP : Γ ⊩ P ⊣ Γ') (hm : σ ≈[C, L, Γ] mc) (hL : L + pushesP P ≤ Lmax)
     (hrun : (⟦P⟧, mc) ⇓ₘ mc') :
     ∃ σ', (P, σ) ⇓ σ' ∧
-      ∀ a : Nat, a < W → σ'.getNet a = (mc'.bal₀ a : Int) - mc'.bal a :=
+      (∀ a : Nat, a < W → a ≠ mc'.self → σ'.getNet a = (mc'.bal₀ a : Int) - mc'.bal a) ∧
+      σ'.getNet mc'.self = 0 :=
   compile_net hP hm hL hrun
 
 open Evm in

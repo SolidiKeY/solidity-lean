@@ -47,8 +47,9 @@ needs.  Instruction meanings follow the EVM as Nethermind's
   `bal a` for every address `a`, the contract's own at `self`
   (`SELFBALANCE` reads it, `ADDRESS` pushes `self`).  There is no ledger:
   KeY's `net` is a ghost of the interpreter, what each account lost since the
-  transaction began, `bal₀ a - bal a`, the contract's own included
-  (`Sim.net`, `Evm/Correctness.lean`).  A recipient's code is
+  transaction began, `bal₀ a - bal a`, at every account but the contract's
+  own, whose entry is never moved (`Sim.net`, `Sim.netSelf`,
+  `Evm/Correctness.lean`).  A recipient's code is
   not run; whether it accepts a payment is `accepts`, which no instruction
   changes, and the compiler theorem holds for every one.  `caller`,
   `callvalue`, `timestamp` are the transaction's (`CALLER`, `CALLVALUE`,

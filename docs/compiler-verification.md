@@ -39,29 +39,28 @@ on the fragment (`not_stuck`), so `wtProg` is a type system for it.
 interpreter: the machine has no ledger, only every account's balance `bal`
 (the Yellow Paper's `σ[a].b`), the balances `bal₀` when the transaction
 began (a ghost no instruction touches), and the contract's address `self`.
-`Sim` ties them: `net(a) = bal₀ a - bal a` at every word `a`, the
-contract's own address included (what `a`'s account lost). That makes the
-ledger double-entry: a payment of `v` to `a` books `net(a) - v` and
-`net(this) + v` (`State.pay`), since the contract's account loses what `a`'s
-gains, and a payment to the contract itself books nothing, since nothing
-moves. So a wrong booking (a `+` for a `-`, the wrong address, a debit the
-machine does not make, a payment to itself that books something) breaks
-the proof, where the ledger the machine used to carry beside the
-interpreter's would have matched it whatever it was. An earlier version
-left `self` out of the relation, and the rule booked a payment to the
-contract itself as a debit no account made; the proof did not see it,
-because nothing compared that entry. Read off a run that succeeds:
+`Sim` ties them: `net(a) = bal₀ a - bal a` at every word `a` but the
+contract's own address (what `a`'s account lost), and the contract's own
+entry is `0` (`Sim.netSelf`): it is never moved. A payment of `v` to `a`
+books `net(a) - v` unless `a` is the contract itself, which books nothing
+(`State.pay`, solkey's `\if(sadr = self) \then(net)`), since nothing moves.
+So a wrong booking (a `+` for a `-`, the wrong address, a debit the machine
+does not make) breaks the proof, where the ledger the machine used to carry
+beside the interpreter's would have matched it whatever it was; and so does
+dropping the `if`: a payment to the contract itself would then move its own
+entry, which `Sim.netSelf` pins. Read off a run that succeeds:
 
 ```lean
 theorem compile_net (hP : wtProg Γ P = some Γ') (hm : Sim C L Γ σ m)
     (hL : L + pushesP P ≤ Lmax) (hrun : run (compileProg P) m = .ok m' 0) :
     ∃ σ', Prog.run σ P = .ok σ' ∧
-      ∀ a : Nat, a < W → σ'.getNet a = (m'.bal₀ a : Int) - m'.bal a
+      (∀ a : Nat, a < W → a ≠ m'.self → σ'.getNet a = (m'.bal₀ a : Int) - m'.bal a) ∧
+      σ'.getNet m'.self = 0
 ```
 
 `Evm/Examples.lean` runs `owner = 5; owner.transfer(30);` on a contract
 holding `100` (`payOwner_run`: `70` left, `30` in `5`'s account) and reads the
-interpreter's `net(5) = -30` and `net(this) = 30` off it
+interpreter's `net(5) = -30` and `net(this) = 0` off it
 (`payOwner_interpreter`).
 
 From a fresh contract (`Sim.init`, every slot `0`, `L = 1`, any balances, at

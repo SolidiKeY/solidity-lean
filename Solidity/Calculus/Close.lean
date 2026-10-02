@@ -602,11 +602,35 @@ theorem UpdElem.write_net (σ₀ τ : State) (r : Term C) (op : IntOp) (a : Term
       | error => rfl
       | ok w => cases w <;> rfl
 
+/-- `{net := if(to = this) then net else store(net, at(to), net(to) - 5)}`: the
+address, the amount (a word, else the update halts), then the entry down,
+unless `to` is the contract itself. -/
+theorem UpdElem.write_pay (σ₀ τ : State) (r a : Term C) :
+    (UpdElem.pay r a).write σ₀ τ =
+      r.eval σ₀ >>= Value.asInt >>= fun addr => a.eval σ₀ >>= Value.asInt >>= fun amt =>
+        if amt < 0 then .error .stuck
+        else .ok { τ with
+          net := if addr = σ₀.tx.selfAddress then τ.net else setBy addr (τ.getNet addr - amt) τ.net } := by
+  simp only [UpdElem.write, bind, Except.bind]
+  cases r.eval σ₀ with
+  | error => rfl
+  | ok v =>
+    cases v with
+    | bool b => rfl
+    | int addr =>
+      cases a.eval σ₀ with
+      | error => rfl
+      | ok w => cases w <;> rfl
+
 /-- `{oldNet := net}` binds the ledger variable `oldNet` to the ledger. -/
 theorem UpdElem.write_saveNet (σ₀ τ : State) (x : Var) :
     (UpdElem.saveNet x : UpdElem C).write σ₀ τ = .ok (τ.setEnv x (.ledger σ₀.net)) := rfl
 /-- Binding a local leaves the ledger. -/
 theorem net_setEnv (σ : State) (x : Var) (b : Binding) : (σ.setEnv x b).net = σ.net := rfl
+/-- A ledger entry after a payment: the entry of the ledger the payment chose. -/
+theorem lookupBy_ite (c : Prop) [Decidable c] (k : Int) (l l' : List (Int × Int)) :
+    lookupBy k (if c then l else l') = if c then lookupBy k l else lookupBy k l' := by
+  split <;> rfl
 /-- A ledger entry after a write: the written amount at that address, the old
 one elsewhere. -/
 theorem lookupBy_setBy_int (k k' v : Int) (l : List (Int × Int)) :
@@ -686,7 +710,8 @@ attribute [close_rw]
   Hyp.wrap Upd.apply List.foldlM_cons List.foldlM_nil
   Close.UpdElem.write_val Close.UpdElem.write_path Close.UpdElem.write_mref
   Close.UpdElem.write_storage Close.UpdElem.write_store Close.UpdElem.write_memory
-  Close.UpdElem.write_selfBalance Close.UpdElem.write_net Close.UpdElem.write_saveNet IntOp.apply
+  Close.UpdElem.write_selfBalance Close.UpdElem.write_net Close.UpdElem.write_pay
+  Close.UpdElem.write_saveNet IntOp.apply
   -- terms
   Close.Term.eval_lit Close.Term.eval_pv Close.Term.eval_binop Close.Term.eval_unop
   Close.Term.eval_find Close.Term.eval_len Close.Term.eval_read Close.Term.eval_ite
@@ -726,8 +751,8 @@ attribute [close_rw]
   State.findStorage_setEnv State.checkIndex_setEnv Close.checkIndex_mk
   State.getEnv_setEnv_self State.getEnv_setEnv_ne Close.findStorage_mk
   Close.getEnv_mk Close.readAddr_mk Close.readVal_mk Close.readAddr_setEnv Close.readVal_setEnv
-  Close.tx_setEnv Close.selfBalance_setEnv Close.net_setEnv Close.lookupBy_setBy_int
-  State.pay State.setNet
+  Close.tx_setEnv Close.selfBalance_setEnv Close.net_setEnv Close.lookupBy_ite
+  Close.lookupBy_setBy_int State.pay State.setNet
   -- paths, arrays, copies
   Close.diverge_cons' Close.not_diverge_nil_left Close.not_diverge_nil_right Close.prefix_nil
   Close.prefix_cons Close.prefix_cons_nil Close.after_nil Close.after_cons SVal.find_nil

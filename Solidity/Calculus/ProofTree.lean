@@ -28,7 +28,7 @@ proof term the tree's tactics build.
   it as a `calc`, every line written and every step named, `~[r]~>`.
 
 The branch labels are the goals' case names (`thn`, `els`, `cov` of
-`Proves.split`, the same of `Proves.guard`), where solkey prints the taclet's
+`Proves.split`), where solkey prints the taclet's
 (`"if se true"`): they are what the suggested walk names.  The commands that
 print the tree (`#proof_tree`, `#proof_node`, `#proof_tree_json`) are in
 `Tools/ProofTree.lean`.
@@ -208,7 +208,6 @@ def provesCtor (premise : Lean.Name) (lean : Bool) : Option (Lean.Name × Lean.N
   else if premise == ``Premise.unfold then
     some (if lean then ``Proves.unfoldLean else ``Proves.unfold, ``Proves.unfoldRule)
   else if premise == ``Premise.split then some (``Proves.split, ``Proves.splitRule)
-  else if premise == ``Premise.guard then some (``Proves.guard, ``Proves.guardRule)
   else if premise == ``Premise.done then
     some (if lean then ``Proves.doneLean else ``Proves.done, ``Proves.doneRule)
   else if premise == ``Premise.branches then some (``Proves.branches, ``Proves.branchesRule)

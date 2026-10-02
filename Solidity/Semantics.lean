@@ -19,10 +19,10 @@ Semantic conventions mirrored from KeY:
 - array reads and writes out of bounds revert; `pop()` on an empty array
   reverts; `/` and `%` revert on a zero divisor; a failing `assert`
   reverts;
-- `a.transfer(v)` books `net(a) := net(a) - v` and `net(this) := net(this)
-  + v`, the ledger's two ends, with no callback (the callback reading is
-  `Semantics/Callback.lean`'s, a relation over this one), and nothing else
-  (a payment to `this` books nothing): the contract is assumed able to pay, and its funds
+- `a.transfer(v)` books `net(a) := net(a) - v` unless `a` is the contract
+  itself, which books nothing (solkey's `\if(a = self)`), with no callback
+  (the callback reading is `Semantics/Callback.lean`'s, a relation over this
+  one), and nothing else: the contract is assumed able to pay, and its funds
   (`State.selfBalance`) are not the transfer's to change.  Whether the EVM
   pays is the compiler theorem's business (`Evm/Correctness.lean`, where a
   refused payment is a revert of the machine alone);
@@ -1439,11 +1439,17 @@ def popAt (σ : State) (keep : Bool) (root : Name) (segs : List Seg) : Res State
         (.array restRev.reverse ((if keep then last else last.defaultOf) :: shadow) fx)
   | .prim _ | .struct _ | .map _ _ => .error .stuck
 
-/-- `v` moved from the contract to `a`, on the ledger: `a`'s entry down by `v`,
-the contract's own (`this`) up by `v`.  A payment to `this` books nothing. -/
+/-- `v` paid by the contract to `a`, on the ledger: `a`'s entry down by `v`,
+solkey's `\if(a = self) \then(net) \else(storeSt(net, at(a), selectSt(net, at(a)) - v))`.
+A payment to `this` (`address(this)`, `TxEnv.selfAddress`) books nothing: the
+contract's own entry is never moved. -/
 def Semantics.State.pay (σ : State) (addr amt : Int) : State :=
-  let σ₁ := σ.setNet addr (σ.getNet addr - amt)
-  σ₁.setNet σ.tx.selfAddress (σ₁.getNet σ.tx.selfAddress + amt)
+  { σ with net := if addr = σ.tx.selfAddress then σ.net else setBy addr (σ.getNet addr - amt) σ.net }
+
+/-- A payment as one record update: the ledger alone changes. -/
+theorem Semantics.State.pay_eq (σ : State) (addr amt : Int) : σ.pay addr amt =
+    { σ with net := if addr = σ.tx.selfAddress then σ.net
+      else setBy addr (σ.getNet addr - amt) σ.net } := rfl
 
 /-- `a.transfer(v)` with both evaluated: book the payment on the ledger. -/
 def transferAt (σ : State) (addr amt : Int) : Res State :=

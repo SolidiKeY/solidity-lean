@@ -3,11 +3,12 @@ import Solidity.Calculus.Sequents
 /-!
 # Payment: `transfer`, as `⊢` walks
 
-`sadr.transfer(se);` has one rule for both modalities, `transferNoCallback`,
-which books the payment on the ledger and nothing else: where `0 <= se`, the
-amount a word, the update `{ net := store(net, at(sadr), net(sadr) - se) ‖
-net := store(net, at(this), net(this) + se) }`, the payment at both ends, so
-one to `this` books nothing; and where not a `revert();`, which the box closes to `true` (`revertBox`).
+`sadr.transfer(se);` has one rule, under the box, `transferNoCallbackBox`,
+which books the payment on the ledger and nothing else: the update
+`{ net := if(sadr = this) then net else store(net, at(sadr), net(sadr) - se) }`,
+`sadr`'s entry down by the amount unless `sadr` is the contract itself,
+which books nothing (solkey's `\if(sadr = self)`).  Under the diamond a
+payment has no rule (`LeanTaclet.transferDiamond` closes it to `false`).
 Whether the world pays is not the rule's: on the EVM a refused payment
 reverts, which the box does not see (`Evm.compile_box`).  The worked
 examples' traces are `Examples/Chains/Payment.lean`'s; here the sequents
@@ -27,34 +28,25 @@ local instance : InContract := ⟨StandardExample⟩
 /-! ## 1 · The rule -/
 
 /--
-info: @Taclet.transferNoCallback : ∀ {C : Contract} {k : Nat} {m : Modality} {sadr se : Simple C PrimTy.uint},
-  dl{ ⟨[ sadr .transfer(se); ]⟩ ⇝
-    0 <= se ⟹
-        { net := store(net, at(sadr), net(sadr) - se) ‖ net := store(net, at(this), net(this) + se) } ⟨[ ]⟩ ;
-      ¬(0 <= se) ⟹ ⟨[ revert(); ]⟩ }
+info: @Taclet.transferNoCallbackBox : ∀ {C : Contract} {k : Nat} {sadr se : Simple C PrimTy.uint},
+  dl{ [ sadr .transfer(se); ] ⇝ { net := if(sadr = this) then net else store(net, at(sadr), net(sadr) - se) } ⟨[ ]⟩ }
 -/
-#guard_msgs in #check @Taclet.transferNoCallback
+#guard_msgs in #check @Taclet.transferNoCallbackBox
 
 /-! ## 2 · The walk -/
 
-/-- `[ to.transfer(5); ] true` as a `⊢` walk: one rule, two goals, each a
-checked sequent (`Calculus/Sequents.lean`); the chain is
+/-- `[ to.transfer(5); ] true` as a `⊢` walk: one rule, one goal, a checked
+sequent (`Calculus/Sequents.lean`); the chain is
 `Chains.Payment.Transfer5.box`. -/
 theorem transferBox : ⊢ dl!{ [ to.transfer(5); ] true } := by
-  apply guard .transferNoCallback
-  · show sequent!{ 0 <= 5, { net := store(net, at(to), select(net, at(to)) - 5) ‖
-        net := store(net, at(this), select(net, at(this)) + 5) } ⟹ [ ] true }
-    apply empty
-    show sequent!{ 0 <= 5, { net := store(net, at(to), select(net, at(to)) - 5) ‖
-        net := store(net, at(this), select(net, at(this)) + 5) } ⟹ true }
-    refine close ?_
-    sol_symex
-    sol_close
-  · show sequent!{ ¬(0 <= 5) ⟹ [ revert(); ] true }
-    apply done .revertBox
-    show sequent!{ ¬(0 <= 5) ⟹ true }
-    refine close ?_
-    sol_symex
-    sol_close
+  apply update .transferNoCallbackBox
+  show sequent!{ { net := if(to = this) then net else store(net, at(to), select(net, at(to)) - 5) }
+      ⟹ [ ] true }
+  apply empty
+  show sequent!{ { net := if(to = this) then net else store(net, at(to), select(net, at(to)) - 5) }
+      ⟹ true }
+  refine close ?_
+  sol_symex
+  sol_close
 
 end Solidity.Examples.Tactics.Payment

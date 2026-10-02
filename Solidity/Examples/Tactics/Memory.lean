@@ -253,8 +253,8 @@ theorem memoryRootRebind :
 
 A memory array element is read and written with `read`/`write` at an index
 (`memoryIndexReadHeap`, `memoryIndexWriteStore`).  The bounds check is inside
-the term, as `transfer`'s guard is (`Payment.lean`): an index out of
-bounds halts the update, which the box accepts. -/
+the term, as a payment's amount is read as a word (`Payment.lean`): an index
+out of bounds halts the update, which the box accepts. -/
 
 /-- `uint[] memory v;` — a fresh array is one allocation, as a struct is
 (`memoryReferenceDeclFreshAlloc`); it is empty, so every access to it

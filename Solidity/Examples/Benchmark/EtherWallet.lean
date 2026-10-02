@@ -17,7 +17,7 @@ back (`getBalance`).
 
 `@custom:key ensures net(owner) == \old(net(owner)) - _amount` is
 `withdrawNet`, at a value of the old entry, and a run (`withdrawRunNet`).
-The payment runs with `transferNoCallback`, as solkey's net rules do, which
+The payment runs with `transferNoCallbackBox`, as solkey's net rules do, which
 books the ledger and leaves `address(this).balance`; with callbacks the
 recipient could change the ledger before control returns
 (`Semantics/Callback.lean`).

@@ -379,7 +379,7 @@ def printedOrigins : List (Lean.Name × PrintedOrigin) := [
   -- Transfer
   (``Taclet.transfer_unfold_leftFstReceiver, .printed .transfer_unfold_leftFstReceiver),
   (``Taclet.transfer_unfold_rightSndArgument, .printed .transfer_unfold_rightSndArgument),
-  (``Taclet.transferNoCallback, .printed .transferNoCallback),
+  (``Taclet.transferNoCallbackBox, .printed .transferNoCallback),
   -- Memory
   (``Taclet.memoryFieldRead_unfold_rightFst, .printed .memoryFieldRead_unfold_rightFst),
   (``Taclet.memoryIndexRead_unfold_rightFst, .printed .memoryIndexRead_unfold_rightFst),
@@ -445,19 +445,19 @@ def printedOrigins : List (Lean.Name × PrintedOrigin) := [
 #check_constructor_table Taclet, printedOrigins.map Prod.fst
 
 /-- The rules solkey does not have (`LeanTaclet`), and the printed rule each is.
-The capture of an argument (`unfoldArgument`) and a `try` under the diamond
-have no taclet and no printed rule. -/
+The capture of an argument (`unfoldArgument`), a `try` and a payment under
+the diamond have no taclet and no printed rule. -/
 def leanPrintedOrigins : List (Lean.Name × PrintedOrigin) := [
   (``LeanTaclet.functionCallArgCapture, .leanOnly .calculus),
-  (``LeanTaclet.tryCallDiamond, .leanOnly .calculus) ]
+  (``LeanTaclet.tryCallDiamond, .leanOnly .calculus),
+  (``LeanTaclet.transferDiamond, .leanOnly .calculus) ]
 
 #check_constructor_table LeanTaclet, leanPrintedOrigins.map Prod.fst
 
-/-- The callback taclets and the two printed `transferWithCallback` rules;
+/-- The callback taclets and the printed `transferWithCallbackBox` rule;
 solkey's `tryCallWithCallbackBox` is not printed. -/
 def callbackPrintedOrigins : List (Lean.Name × PrintedOrigin) := [
   (``CallbackTaclet.transferWithCallbackBox, .printed .transferWithCallbackBox),
-  (``CallbackTaclet.transferWithCallbackDiamond, .printed .transferWithCallbackDiamond),
   (``CallbackTaclet.tryCallWithCallbackBox, .leanOnly .keyTier) ]
 
 #check_constructor_table CallbackTaclet, callbackPrintedOrigins.map Prod.fst
@@ -474,13 +474,14 @@ def claimedPrintedRules : List PrintedRule := PrintedRule.all.filter claims
 /-- The printed rules of kind `rule` that **no** constructor claims.  The
 reasons are `RuleShapes.unclaimedTaclets`', rule for rule: the printed rules are
 what solkey runs, and the typed syntax takes a memory path
-as a source in place, so nothing captures one (four); and has no strategy for the
-literal-condition `if` shortcuts (three).  The callback `transfer` rules are
-`callbackPrintedOrigins`'. -/
+as a source in place, so nothing captures one (four); has no strategy for the
+literal-condition `if` shortcuts (three); and books a payment under the box
+only, the diamond closing to `false` (`transferWithCallbackDiamond`).  The
+callback `transfer` rule is `callbackPrintedOrigins`'. -/
 def unclaimedRules : List PrintedRule :=
   [ .memoryFieldRead_unfold_rightSndResult, .memoryIndexRead_unfold_rightSndResult,
     .memoryFieldWriteCaptureSrc, .memoryIndexWriteMemRefRhsCapture,
-    .ifElseTrue, .ifElseFalse, .ifElseNegated ]
+    .ifElseTrue, .ifElseFalse, .ifElseNegated, .transferWithCallbackDiamond ]
 
 /-- **The coverage fact**: a printed rule is claimed exactly when it is of kind
 `rule` and not excused above.  A printed rule Lean never ports
@@ -493,9 +494,9 @@ theorem printed_rules_partitioned :
 
 theorem printedRules_count : PrintedRule.all.length = 135 := by decide +kernel
 
-theorem claimedPrintedRules_count : claimedPrintedRules.length = 118 := by decide +kernel
+theorem claimedPrintedRules_count : claimedPrintedRules.length = 117 := by decide +kernel
 
-theorem unclaimedRules_count : unclaimedRules.length = 7 := by decide +kernel
+theorem unclaimedRules_count : unclaimedRules.length = 8 := by decide +kernel
 
 /-! ## The constructors with no printed rule -/
 
@@ -505,7 +506,7 @@ def leanOnlyRows (why : LeanOnlyReason) : List Lean.Name :=
 
 theorem leanOnly_keyTier_count : (leanOnlyRows .keyTier).length = 34 := by decide +kernel
 
-theorem leanOnly_calculus_count : (leanOnlyRows .calculus).length = 2 := by decide +kernel
+theorem leanOnly_calculus_count : (leanOnlyRows .calculus).length = 3 := by decide +kernel
 
 end PrintedRules
 end Solidity

@@ -125,6 +125,8 @@ inductive RawUpdElem where
   | selfBalance (op : IntOp) (a : RawTerm)
   /-- `net := store(net, at(r), net(r) ± a)` -/
   | net (r : RawTerm) (op : IntOp) (a : RawTerm)
+  /-- `net := if(r = this) then net else store(net, at(r), net(r) - a)`, a payment. -/
+  | pay (r a : RawTerm)
   deriving Repr, Inhabited
 
 /-- A formula as written.  `peq`/`pne` compare program expressions (`==`, `!=`). -/
@@ -273,6 +275,14 @@ def expandUpd (U : TSyntax `dl_upd) : MacroM Lean.Term := do
           return ← net a a' v (← `(IntOp.sub))
         | `(dl_term| store(net, at($a), select(net, at($a')) + $v)) =>
           return ← net a a' v (← `(IntOp.add))
+        | `(dl_term| if($a = $t:ident) then $n':ident else store(net, at($a'), net($a'') - $v))
+        | `(dl_term| if($a = $t:ident) then $n':ident
+              else store(net, at($a'), select(net, at($a'')) - $v)) =>
+          unless t.getId.toString == "this" do Macro.throwErrorAt t "a payment compares with `this`"
+          unless n'.getId.toString == "net" do Macro.throwErrorAt n' "a payment to `this` leaves `net`"
+          unless a.raw.structEq a'.raw && a.raw.structEq a''.raw do
+            Macro.throwErrorAt a' "the entry read is the one written, and the one compared"
+          return ← `(RawUpdElem.pay $(← expandTerm a) $(← expandTerm v))
         | _ => pure ()
       `(RawUpdElem.assign $(quote n) $(← expandTerm r))
     | _ => Macro.throwUnsupported
@@ -418,6 +428,7 @@ def RawUpdElem.names : RawUpdElem → List String
   | .assign x t => if x = "storage" || x = "memory" then t.names else x :: t.names
   | .selfBalance _ a => a.names
   | .net r _ a => r.names ++ a.names
+  | .pay r a => r.names ++ a.names
 
 /-- The names a raw formula mentions, and those its programs declare. -/
 def RawFml.names : RawFml → List String × List String
@@ -785,6 +796,9 @@ def elabUpd (Γ : ECtx) : List RawUpdElem → Except String (Upd C × ECtx)
   | .net r op a :: U => do
     let (U', Γ') ← elabUpd Γ U
     pure (.net (← tVal C Γ r) op (← tVal C Γ a) :: U', Γ')
+  | .pay r a :: U => do
+    let (U', Γ') ← elabUpd Γ U
+    pure (.pay (← tVal C Γ r) (← tVal C Γ a) :: U', Γ')
   | .assign x t :: U => do
     let (U', Γ') ← elabUpd Γ U
     if x = "storage" then return (.storage (← tStor C Γ t) :: U', Γ')

@@ -146,7 +146,7 @@ theorem transferAt_setEnv (addr amt : Int) :
   unfold transferAt
   by_cases h1 : amt < 0
   · simp only [h1, if_true]; rfl
-  · simp only [h1, if_false]; rfl
+  · simp only [h1, if_false, State.pay_eq]; rfl
 
 theorem copyMem_setEnv (v : MVal) : copyMem (σ.setEnv x b) v = copyMem σ v :=
   copyMem_congr (agree_setEnv σ x b) v

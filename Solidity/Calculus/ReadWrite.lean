@@ -1106,6 +1106,7 @@ theorem transferAt_frame {σ τ : State} {addr amt : Int} (h : transferAt σ add
   · simp at h
   · simp only [Except.ok.injEq] at h
     subst h
+    rw [State.pay_eq]
     refine ⟨fun _ _ => rfl, fun _ => rfl, fun a => ?_⟩
     cases a <;> rfl
 
@@ -1113,10 +1114,10 @@ theorem transferAt_frame {σ τ : State} {addr amt : Int} (h : transferAt σ add
 
 `msg.sender`, `msg.value`, `block.timestamp` and the funds are the
 transaction's, and nothing a program does changes them; the ledger only a
-`transfer` changes, at the address it pays and at `this`. -/
+`transfer` changes, at the address it pays. -/
 
-/-- After `to.transfer(5);` the ledger has moved `5` from `this` to `to`, and
-`msg.sender` and `address(this).balance` are as they were. -/
+/-- After `to.transfer(5);` the ledger is `5` down at `to`, and `msg.sender`
+and `address(this).balance` are as they were. -/
 theorem transferAt_env {σ τ : State} {addr amt : Int} (h : transferAt σ addr amt = .ok τ) :
     τ.tx = σ.tx ∧ τ.selfBalance = σ.selfBalance ∧ τ.net = (σ.pay addr amt).net := by
   unfold transferAt at h
@@ -1124,6 +1125,7 @@ theorem transferAt_env {σ τ : State} {addr amt : Int} (h : transferAt σ addr 
   · simp at h
   · simp only [Except.ok.injEq] at h
     subst h
+    rw [State.pay_eq]
     exact ⟨rfl, rfl, rfl⟩
 
 /-- A storage write leaves the environment. -/

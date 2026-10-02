@@ -657,9 +657,14 @@ inductive UpdElem (C : Contract) where
   /-- `net := store(net, at(r), net(r) ± a)`: the ledger's entry for `r`
   moved by `a`, in KeY's `int`.  The address and the amount are read in the
   pre-state, as every right-hand side is; the move is made on the ledger the
-  update has written so far, so two in one update add up — a payment's two
-  ends, `net(sadr) - se ‖ net(this) + se`, cancel when `sadr` is `this`. -/
+  update has written so far, so two in one update add up. -/
   | net (r : Term C) (op : IntOp) (a : Term C)
+  /-- `net := if(r = this) then net else store(net, at(r), net(r) - a)`: a
+  payment of `a` to `r`, solkey's
+  `\if(sadr = self) \then(net) \else(storeSt(net, at(sadr), selectSt(net, at(sadr)) - se))`.
+  The amount is read as a word, so the update halts where it is negative, as
+  the transfer does; a payment to the contract itself books nothing. -/
+  | pay (r a : Term C)
   /-- `oldNet := net`: a ledger variable binds the ledger, which
   `\old(net(a))` reads. -/
   | saveNet (x : Var)
@@ -687,6 +692,12 @@ def UpdElem.write (σ₀ : State) : UpdElem C → State → Res State
     let addr ← (← r.eval σ₀).asInt
     let amt ← (← a.eval σ₀).asInt
     pure { τ with net := setBy addr (op.apply (τ.getNet addr) amt) τ.net }
+  | .pay r a, τ => do
+    let addr ← (← r.eval σ₀).asInt
+    let amt ← (← a.eval σ₀).asInt
+    if amt < 0 then .error .stuck
+    else pure { τ with
+      net := if addr = σ₀.tx.selfAddress then τ.net else setBy addr (τ.getNet addr - amt) τ.net }
   | .saveNet x, τ => pure (τ.setEnv x (.ledger σ₀.net))
 
 /-- The state an update leaves, from `σ`. -/
@@ -850,6 +861,7 @@ def UpdElem.vars : UpdElem C → List Var
   | .memory m => m.vars
   | .selfBalance _ a => a.vars
   | .net r _ a => r.vars ++ a.vars
+  | .pay r a => r.vars ++ a.vars
   | .saveNet x => [x]
 
 def Upd.vars : Upd C → List Var
@@ -1168,6 +1180,10 @@ theorem UpdElem.write_frame {σ₀ σ₀' τ τ' : State} (h₀ : EnvAgreeExcept
     simp only [UpdElem.write, r.eval_frame h₀ hv.left, a.eval_frame h₀ hv.right, State.getNet]
     agree_run h
     exact ⟨h.storage, h.heap, h.nextId, by rw [h.net], h.env, h.selfBalance, h.tx⟩
+  | .pay r a, hv => by
+    simp only [UpdElem.write, r.eval_frame h₀ hv.left, a.eval_frame h₀ hv.right, h₀.tx]
+    agree_run h
+    exact ⟨h.storage, h.heap, h.nextId, by simp only [State.getNet, h.net], h.env, h.selfBalance, h.tx⟩
   | .saveNet x, _ => by
     show ResultsAgree ns (.ok (τ.setEnv x (.ledger σ₀.net))) (.ok (τ'.setEnv x (.ledger σ₀'.net)))
     rw [h₀.net]

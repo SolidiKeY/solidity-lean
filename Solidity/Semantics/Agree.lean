@@ -764,9 +764,9 @@ theorem transferAt_agree (hag : EnvAgreeExcept ns σ τ) (addr amt : Int) :
   simp only [transferAt]
   split
   · rfl
+  rw [State.pay_eq, State.pay_eq]
   exact ⟨hag.storage, hag.heap, hag.nextId,
-    by simp only [State.pay, State.setNet, State.getNet, hag.net, hag.tx], hag.env,
-    hag.selfBalance, hag.tx⟩
+    by simp only [State.getNet, hag.net, hag.tx], hag.env, hag.selfBalance, hag.tx⟩
 
 theorem ARhs.bind_frame (hag : EnvAgreeExcept ns σ τ) (x : Var) {R : RefTy} :
     (r : ARhs C R) → Avoids r.vars ns → ResultsAgree ns (r.bind σ x) (r.bind τ x)

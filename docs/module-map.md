@@ -72,7 +72,7 @@ lemma (`TermTaclet.sound`).
 | `Calculus/RuleSoundness.lean` | `Taclet.sound`, `LeanTaclet.sound`, `Rule.sound`. |
 | `Calculus/Logic.lean` | The sequent calculus `Proves` (`⊢` all rules, `⊢ₖ` solkey's) and `Proves.sound`; the update, rewrite and close rules. |
 | `Calculus/Callback.lean` | `CallbackTaclet.sound`, `ProvesC` and `ProvesC.sound`. |
-| `Calculus/SolkeyFragment.lean` | `Stmt.inSolkey`, where solkey's rules alone are the calculus; and where they fall short. |
+| `Calculus/SolkeyFragment.lean` | `Stmt.inSolkey m`, where solkey's rules alone are the calculus under a modality; and where they fall short. |
 | `Calculus/Symex.lean` | `Fml.step`, `symex`, `symex_sound`; `sol_step`, `sol_symex`, `sol_derive`. |
 | `Calculus/Close.lean` | `sol_close`: first-order goals by weakest preconditions. Its docstring lists what it does not close. |
 | `Calculus/CloseTests.lean` | What `sol_close` closes, pinned. |
