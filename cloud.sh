@@ -43,7 +43,8 @@ lake --version
 
 # solkey checkout beside the repo, for `lake exe solkeycheck` (allowed to fail if private)
 if [ ! -d ../solkey ]; then
-  git clone --depth 1 https://github.com/SolidiKeY/solkey ../solkey || echo "solkey clone skipped"
+  GIT_TERMINAL_PROMPT=0 git clone --depth 1 https://github.com/SolidiKeY/solkey ../solkey \
+    || echo "solkey clone skipped"
 fi
 
 # Lean MCP server venv (same pin as scripts/run-lean-mcp.sh)
