@@ -17,9 +17,29 @@ if [ -z "$REPO" ] || [ ! -f "$REPO/lakefile.toml" ]; then
 fi
 cd "$REPO"
 
-# Install the toolchain pinned in lean-toolchain
-elan toolchain install "$(cat lean-toolchain)" || true
+# Install the toolchain pinned in lean-toolchain. elan downloads from
+# release.lean-lang.org, which the cloud network policy blocks (403), so fall
+# back to the same release on GitHub and register it under the pinned name.
+TOOLCHAIN="$(tr -d '[:space:]' < lean-toolchain)"   # leanprover/lean4:v4.24.0
+if ! elan toolchain list | cut -d" " -f1 | grep -qxF "$TOOLCHAIN"; then
+  if ! elan toolchain install "$TOOLCHAIN"; then
+    VERSION="${TOOLCHAIN##*:v}"                      # 4.24.0
+    case "$(uname -m)" in
+      aarch64|arm64) ASSET="lean-$VERSION-linux_aarch64" ;;
+      *)             ASSET="lean-$VERSION-linux" ;;
+    esac
+    DIST="$HOME/.elan/dist"
+    mkdir -p "$DIST"
+    curl -sSfL -o "$DIST/$ASSET.zip" \
+      "https://github.com/leanprover/lean4/releases/download/v$VERSION/$ASSET.zip"
+    rm -rf "${DIST:?}/$ASSET"
+    unzip -q "$DIST/$ASSET.zip" -d "$DIST"
+    rm -f "$DIST/$ASSET.zip"
+    elan toolchain link "$TOOLCHAIN" "$DIST/$ASSET"
+  fi
+fi
 lean --version
+lake --version
 
 # solkey checkout beside the repo, for `lake exe solkeycheck` (allowed to fail if private)
 if [ ! -d ../solkey ]; then
@@ -30,5 +50,5 @@ fi
 python3 -m venv .venv
 PIP_DISABLE_PIP_VERSION_CHECK=1 .venv/bin/python -m pip install --quiet -r scripts/lean-mcp-requirements.txt
 
-# Cache: build the oleans now so sessions start warm (~24 min cold)
-lake build Solidity 2>&1 | tail -n 40
+# No `lake build` here: setup is cut off after about five minutes and a cold
+# `lake build Solidity` takes about 24, so the session fails to start.
