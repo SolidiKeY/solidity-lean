@@ -50,5 +50,5 @@ fi
 python3 -m venv .venv
 PIP_DISABLE_PIP_VERSION_CHECK=1 .venv/bin/python -m pip install --quiet -r scripts/lean-mcp-requirements.txt
 
-# Cache: build the oleans now so sessions start warm (~24 min cold)
-lake build Solidity 2>&1 | tail -n 40 || echo "lake build failed; sessions start cold"
+# No `lake build` here: setup is cut off after about five minutes and a cold
+# `lake build Solidity` takes about 24, so the session fails to start.
