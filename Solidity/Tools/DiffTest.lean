@@ -38,8 +38,9 @@ from a start where its hypotheses hold:
   on both sides by construction); every value local the final context types
   (`Γ'`) holds the local's word in its memory cell (`Sim.vals`: the value
   returned, in `_r`, among them); the ledger is the money that moved
-  (`Sim.net`, `Sim.funds`), the contract at an address drawn among the
-  senders, so some payments are to itself.  The
+  (`Sim.net`), at every address the ledger holds, the contract's own
+  included, the contract at an address drawn among the senders, so some
+  payments are to itself.  The
   aliases' cells (`Sim.aliases`) are not compared, and neither are the slots
   the final storage no longer occupies (a popped element), which
   `ReprStore` leaves free.
@@ -189,7 +190,7 @@ structure Start where
 def Start.state (s : Start) : State where
   storage := s.storage
   selfBalance := s.balance
-  tx := { msgSender := s.sender, msgValue := s.value, timestamp := s.time }
+  tx := { msgSender := s.sender, msgValue := s.value, timestamp := s.time, selfAddress := s.self }
 
 /-- The start of a run, drawn: the storage, the arguments and the
 transaction; `none` if a parameter has no value type. -/
@@ -229,15 +230,12 @@ def differences [FreshNames] (C : Contract) (Γ' : TyCtx) (keys : List Nat) (σ'
       if wordOf p v == some (m'.mem x) then none
       else some s!"local {x}: interpreter {Value.fmt v}, machine {m'.mem x}"
     | _, _ => none
-  let sum := netSum (Payee m'.self) σ'.net
-  let bal := if (m'.bal m'.self : Int) == m'.bal₀ m'.self + sum then [] else
-    [s!"funds: the ledger sums {sum}, the contract's account went {m'.bal₀ m'.self} → {m'.bal m'.self}"]
   let net := σ'.net.filterMap fun (a, n) =>
-    if 0 ≤ a ∧ a < (W : Int) ∧ a != m'.self ∧ n != (m'.bal₀ a.toNat : Int) - m'.bal a.toNat then
+    if 0 ≤ a ∧ a < (W : Int) ∧ n != (m'.bal₀ a.toNat : Int) - m'.bal a.toNat then
       some s!"net {a}: interpreter {n}, account {m'.bal₀ a.toNat} → {m'.bal a.toNat}"
     else none
   let stack := if m'.stack.isEmpty then [] else [s!"stack left: {m'.stack}"]
-  store ++ vals ++ bal ++ net ++ stack
+  store ++ vals ++ net ++ stack
 
 /-- One run of `P` from `s`: whether both reverted when the two agree, else
 the lines of the mismatch. -/

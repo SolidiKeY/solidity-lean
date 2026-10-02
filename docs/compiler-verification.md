@@ -39,39 +39,46 @@ on the fragment (`not_stuck`), so `wtProg` is a type system for it.
 interpreter: the machine has no ledger, only every account's balance `bal`
 (the Yellow Paper's `σ[a].b`), the balances `bal₀` when the transaction
 began (a ghost no instruction touches), and the contract's address `self`.
-`Sim` ties them: `net(a) = bal₀ a - bal a` at every word `a` but `self` (what
-`a`'s account lost), and `bal self - bal₀ self` is the ledger summed over
-those addresses (`netSum`, each address once). So a wrong booking (a `+`
-for a `-`, the wrong address, a debit the machine does not make) breaks the
-proof, where the ledger the machine used to carry beside the interpreter's
-would have matched it whatever it was. Read off a run that succeeds:
+`Sim` ties them: `net(a) = bal₀ a - bal a` at every word `a`, the
+contract's own address included (what `a`'s account lost). That makes the
+ledger double-entry: a payment of `v` to `a` books `net(a) - v` and
+`net(this) + v` (`State.pay`), since the contract's account loses what `a`'s
+gains, and a payment to the contract itself books nothing, since nothing
+moves. So a wrong booking (a `+` for a `-`, the wrong address, a debit the
+machine does not make, a payment to itself that books something) breaks
+the proof, where the ledger the machine used to carry beside the
+interpreter's would have matched it whatever it was. An earlier version
+left `self` out of the relation, and the rule booked a payment to the
+contract itself as a debit no account made; the proof did not see it,
+because nothing compared that entry. Read off a run that succeeds:
 
 ```lean
 theorem compile_net (hP : wtProg Γ P = some Γ') (hm : Sim C L Γ σ m)
     (hL : L + pushesP P ≤ Lmax) (hrun : run (compileProg P) m = .ok m' 0) :
     ∃ σ', Prog.run σ P = .ok σ' ∧
-      (∀ a : Nat, a < W → a ≠ m'.self → σ'.getNet a = (m'.bal₀ a : Int) - m'.bal a) ∧
-      (m'.bal m'.self : Int) = m'.bal₀ m'.self + netSum (Payee m'.self) σ'.net
+      ∀ a : Nat, a < W → σ'.getNet a = (m'.bal₀ a : Int) - m'.bal a
 ```
 
 `Evm/Examples.lean` runs `owner = 5; owner.transfer(30);` on a contract
 holding `100` (`payOwner_run`: `70` left, `30` in `5`'s account) and reads the
-interpreter's `net(5) = -30` off it (`payOwner_interpreter`).
+interpreter's `net(5) = -30` and `net(this) = 30` off it
+(`payOwner_interpreter`).
 
-From a fresh contract (`Sim.init`, every slot `0`, `L = 1`, any balances and
-address):
+From a fresh contract (`Sim.init`, every slot `0`, `L = 1`, any balances, at
+any address `self < 2^256`, which `address(this)` reads and `ADDRESS`
+pushes):
 
 ```lean
 theorem compile_storage (hP : wtProg (fun _ => none) P = some Γ')
-    (hL : pushesP P < Lmax) (balance : Nat) (bal : Nat → Nat) (self : Nat) :
-    (∃ σ' m', Prog.run (State.fresh C balance) P = .ok σ' ∧
+    (hL : pushesP P < Lmax) (balance : Nat) (bal : Nat → Nat) (self : Nat) (hs : self < W) :
+    (∃ σ' m', Prog.run (State.fresh C balance self) P = .ok σ' ∧
       run (compileProg P) (Machine.init bal self) = .ok m' 0 ∧
       ∀ r segs s n, PathSlot C false r segs (.prim .uint) s →
         σ'.findLive r segs = .ok (.prim (.int n)) → m'.store s = n.toNat) ∨
-    (Prog.run (State.fresh C balance) P = .error .revert ∧
+    (Prog.run (State.fresh C balance self) P = .error .revert ∧
       run (compileProg P) (Machine.init bal self) = .revert) ∨
     (paysP P = true ∧ run (compileProg P) (Machine.init bal self) = .revert ∧
-      ∃ σ', Prog.run (State.fresh C balance) P = .ok σ')
+      ∃ σ', Prog.run (State.fresh C balance self) P = .ok σ')
 ```
 
 every `uint` path the interpreter reads, the machine holds at its slot.
@@ -146,7 +153,8 @@ by the elaborator); `=` of a value into storage, a copy of a *static* value
 through members, keys and indices, `op=`, `x++;`/`total++;`, `v = x++;` and
 `v = ++x;`, `push()` of a primitive element, `push(e)`, `push(sp)` of a static
 element, `delete` at any type, `pop()`, `transfer`, `if`, `require`,
-`assert`, `revert();`, `msg.sender`, `msg.value`, `block.timestamp`, and a call of an internal function, compiled inlined
+`assert`, `revert();`, `msg.sender`, `msg.value`, `block.timestamp`,
+`address(this)`, and a call of an internal function, compiled inlined
 (its arguments stored in its parameters' cells, its return variable zeroed,
 its body, the result copied: `argsCode`), when its parameters, return variable
 and body are in.
@@ -191,5 +199,6 @@ they do, so the proof needs no argument about it.
 
 `lake build Solidity.Evm.Examples` builds the seven modules. `Correctness` is
 the slow one (`stmt_sim` is one mutual declaration, over the default
-heartbeats since the third outcome; the payment itself is `transfer_sim`); `Examples` runs the
+heartbeats since the third outcome, most of it compiling and checking the
+match itself; the payment itself is `transfer_sim`); `Examples` runs the
 unrolled `**` code under `decide` with a raised `maxRecDepth`.

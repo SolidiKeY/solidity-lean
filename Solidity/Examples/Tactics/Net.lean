@@ -5,7 +5,9 @@ import Solidity.Calculus.Close
 
 `a.transfer(v);` books a debit of `v` on the `net` ledger at `a`, with no
 callback (`transferNoCallback`, solkey's `netHeader.key`), and does nothing
-else (`Semantics.transferAt`).  The rule and its single-statement walk are
+else (`Semantics.transferAt`): `to`'s entry down by `v`, the contract's own
+(`this`, `address(this)`) up by `v`, so a payment to the contract itself
+books nothing.  The rule and its single-statement walk are
 `Payment.lean`'s.
 
 What a transfer changes is the ledger, `net(to)` `5` less after
@@ -92,31 +94,48 @@ theorem transferFrameMemory :
   sol_symex
   sol_close
 
-/-! ## 2 · The ledger, as formulas -/
+/-! ## 2 · The ledger, as formulas
+
+A payment is booked at both ends: `to`'s entry down, the contract's own
+(`this`) up.  So a claim about `to` alone needs `to != this`: paying the
+contract itself moves nothing, and books nothing (`netSelfTransfer`). -/
 
 /-- `net(to) = 7 → [ to.transfer(5); ] net(to) = 2`: the booking, at every
-state (`net-transfer-simple.key`). -/
+state where `to` is not the contract (`net-transfer-simple.key`). -/
 theorem netTransfer :
-    ⊨ dl!{ net(to) = 7 → [ to.transfer(5); ] net(to) = 2 } := by
+    ⊨ dl!{ to != this → net(to) = 7 → [ to.transfer(5); ] net(to) = 2 } := by
+  sol_symex
+  sol_close
+
+/-- …and the contract's own entry is `5` more. -/
+theorem netTransferThis :
+    ⊨ dl!{ to != this → net(this) = 1 → [ to.transfer(5); ] net(this) = 6 } := by
+  sol_symex
+  sol_close
+
+/-- **A payment to the contract itself books nothing**: `net(this)` is as it
+was. -/
+theorem netSelfTransfer :
+    ⊨ dl!{ net(this) = 7 → [ address(this).transfer(5); ] net(this) = 7 } := by
   sol_symex
   sol_close
 
 /-- `owner.transfer(5);` — a storage receiver, captured first
 (`net-transfer-capture-receiver.key`). -/
 theorem netTransferStorageReceiver :
-    ⊨ dl!{ net(owner) = 7 → [ owner.transfer(5); ] net(owner) = 2 } := by
+    ⊨ dl!{ owner != this → net(owner) = 7 → [ owner.transfer(5); ] net(owner) = 2 } := by
   sol_symex
   sol_close
 
 /-- `to.transfer(x + 2);` — a captured amount (`net-transfer-capture-argument.key`). -/
 theorem netTransferCapturedAmount :
-    ⊨ dl!{ x = 3 → net(to) = 7 → [ to.transfer(x + 2); ] net(to) = 2 } := by
+    ⊨ dl!{ x = 3 → to != this → net(to) = 7 → [ to.transfer(x + 2); ] net(to) = 2 } := by
   sol_symex
   sol_close
 
 /-- Two transfers to one address accumulate. -/
 theorem netTransfersAccumulate :
-    ⊨ dl!{ net(to) = 9 → [ to.transfer(5); to.transfer(2); ] net(to) = 2 } := by
+    ⊨ dl!{ to != this → net(to) = 9 → [ to.transfer(5); to.transfer(2); ] net(to) = 2 } := by
   sol_symex
   sol_close
 
@@ -135,9 +154,17 @@ theorem netTransferSimple :
 theorem netTransferStorageReceiverRun :
     netAfter State.exampleStore sol{ owner = 7; owner.transfer(5); } 7 = .ok (-5) := rfl
 
-/-- An address nobody paid stays at zero. -/
+/-- An address nobody paid stays at zero… -/
 theorem netUntouched :
     netAfter State.exampleStore sol{ uint to = 9; to.transfer(5); } 2 = .ok 0 := rfl
+
+/-- …and the contract, at `0` in `State.exampleStore`, is `5` up. -/
+theorem netThis :
+    netAfter State.exampleStore sol{ uint to = 9; to.transfer(5); } 0 = .ok 5 := rfl
+
+/-- A payment to the contract itself books nothing. -/
+theorem netSelfRun :
+    netAfter State.exampleStore sol{ uint to = 0; to.transfer(5); } 0 = .ok 0 := rfl
 
 /-- The funds are not the transfer's: `address(this).balance` reads `3`
 after a payment of `5` from `3`. -/

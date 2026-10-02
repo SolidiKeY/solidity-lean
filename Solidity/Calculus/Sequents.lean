@@ -223,7 +223,8 @@ example : ⊢ dl!{ [ to.transfer(x + 2); ] true } := by
   show sequent!{ { se1 := x + 2 } ⟹ [ to.transfer(se1); ] true }
   apply guard .transferNoCallback
   · show sequent!{ { se1 := x + 2 }, 0 <= se1,
-      { net := store(net, at(to), net(to) - se1) } ⟹ [ ] true }
+      { net := store(net, at(to), net(to) - se1) ‖ net := store(net, at(this), net(this) + se1) }
+        ⟹ [ ] true }
     apply empty
     refine close ?_
     sol_close

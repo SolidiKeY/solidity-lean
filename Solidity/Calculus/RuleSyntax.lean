@@ -786,6 +786,7 @@ def headTerm (Γ : Scope) (pos : TPos) (x : Ident) : MacroM Lean.Term := do
   if n == "storage" && pos == .storage then return ← `(STerm.storage)
   if n == "memory" && pos == .memory then return ← `(MTerm.memory)
   if n == "selfBalance" && pos == .val then return ← `(Term.env EnvKey.selfBalance)
+  if n == "this" && pos == .val then return ← `(Term.env EnvKey.selfAddress)
   match headOf Γ x, pos with
   | .local v, .val => `(Term.pv $v)
   | .local v, .svalue => `(SValT.val (Term.pv $v))
@@ -1450,6 +1451,7 @@ partial def ppExpr (e : Lean.Expr) : MetaM (TSyntax `sol_expr) := do
     | EnvKey.msgValue => `(sol_expr| msg.value)
     | EnvKey.timestamp => `(sol_expr| block.timestamp)
     | EnvKey.selfBalance => `(sol_expr| address(this).balance)
+    | EnvKey.selfAddress => `(sol_expr| address(this))
     | _ => escape
   | SPath.alias _ _ x => var x
   | SPath.loc _ _ l => ppExpr l
@@ -1944,6 +1946,7 @@ partial def ppTerm (e : Lean.Expr) : MetaM (TSyntax `dl_term) := do
     | EnvKey.msgValue => `(dl_term| msg.value)
     | EnvKey.timestamp => `(dl_term| block.timestamp)
     | EnvKey.selfBalance => `(dl_term| selfBalance)
+    | EnvKey.selfAddress => `(dl_term| this)
     | _ => escapeDl e
   | Term.net _ a => `(dl_term| net($(← ppTerm a)))
   | Term.netOf _ x a =>

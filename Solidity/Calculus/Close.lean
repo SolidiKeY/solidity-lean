@@ -221,7 +221,7 @@ theorem Modality.wp_box_copyMem {σ : State} {id : Nat} {P : SVal → Prop} :
 
 /-- **A transfer under the box**: `to.transfer(5);` leaves the storage, the
 locals, the heap, `msg.sender` and `address(this).balance` as they were, and
-takes `5` off the ledger's entry for `to`. -/
+moves `5` on the ledger from `this` to `to` (`State.pay`). -/
 theorem Modality.wp_box_transferAt {σ : State} {addr amt : Int} {P : State → Prop} :
     Modality.box.wp (transferAt σ addr amt) P ↔
       ∀ τ, transferAt σ addr amt = .ok τ →
@@ -229,7 +229,7 @@ theorem Modality.wp_box_transferAt {σ : State} {addr amt : Int} {P : State → 
         (∀ r q k, τ.checkIndex r q k = σ.checkIndex r q k) → (∀ x, τ.getEnv x = σ.getEnv x) →
         (∀ a, readAddr τ a = readAddr σ a) → (∀ a, Close.readVal τ a = Close.readVal σ a) →
         τ.tx = σ.tx → τ.selfBalance = σ.selfBalance →
-        τ.net = setBy addr (σ.getNet addr - amt) σ.net → P τ := by
+        τ.net = (σ.pay addr amt).net → P τ := by
   rw [Modality.wp_box]
   refine ⟨fun h τ hs _ _ _ _ _ _ _ _ => h τ hs, fun h τ hs => ?_⟩
   obtain ⟨h₁, h₂, h₃⟩ := Close.transferAt_frame hs
@@ -586,11 +586,11 @@ theorem UpdElem.write_selfBalance (σ₀ τ : State) (op : IntOp) (a : Term C) :
   simp only [UpdElem.write, bind, Except.bind]
   cases a.eval σ₀ <;> rfl
 /-- `{net := store(net, at(to), net(to) - 5)}`: the address, the amount, then
-the entry. -/
+the entry, moved on the ledger written so far. -/
 theorem UpdElem.write_net (σ₀ τ : State) (r : Term C) (op : IntOp) (a : Term C) :
     (UpdElem.net r op a).write σ₀ τ =
       r.eval σ₀ >>= Value.asInt >>= fun addr => a.eval σ₀ >>= Value.asInt >>= fun amt =>
-        .ok { τ with net := setBy addr (op.apply (σ₀.getNet addr) amt) σ₀.net } := by
+        .ok { τ with net := setBy addr (op.apply (τ.getNet addr) amt) τ.net } := by
   simp only [UpdElem.write, bind, Except.bind]
   cases r.eval σ₀ with
   | error => rfl
@@ -727,6 +727,7 @@ attribute [close_rw]
   State.getEnv_setEnv_self State.getEnv_setEnv_ne Close.findStorage_mk
   Close.getEnv_mk Close.readAddr_mk Close.readVal_mk Close.readAddr_setEnv Close.readVal_setEnv
   Close.tx_setEnv Close.selfBalance_setEnv Close.net_setEnv Close.lookupBy_setBy_int
+  State.pay State.setNet
   -- paths, arrays, copies
   Close.diverge_cons' Close.not_diverge_nil_left Close.not_diverge_nil_right Close.prefix_nil
   Close.prefix_cons Close.prefix_cons_nil Close.after_nil Close.after_cons SVal.find_nil

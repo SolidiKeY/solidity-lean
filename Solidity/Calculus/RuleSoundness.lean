@@ -90,7 +90,8 @@ theorem Taclet.guard_run {k : Nat} {m : Modality} {s : Stmt C} {c : Fml C} {U : 
       | error => rfl
       | ok w =>
         rcases w with a | _
-        · simp only [IntOp.apply, State.setNet]
+        · simp only [IntOp.apply, State.pay, State.setNet, State.getNet, tm_eval, State.envVal]
+          rfl
         · rfl
     · intro hn
       simp only [Stmt.run, Val.eval]

@@ -53,9 +53,9 @@ theorem withdrawOwner :
 
 /-- `ensures net(owner) == \old(net(owner)) - _amount`, the old entry `40`:
 the owner's entry is `10` after `withdraw(30)`, and anyone else's call
-reverts. -/
+reverts.  An owner that is the wallet itself pays itself, and books nothing. -/
 theorem withdrawNet :
-    ⊨ dl!{ net(owner) = 40 → [ withdraw(30); ] net(owner) = 10 } := by
+    ⊨ dl!{ owner != this → net(owner) = 40 → [ withdraw(30); ] net(owner) = 10 } := by
   sol_symex
   sol_close
 

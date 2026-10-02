@@ -9,8 +9,9 @@ import Solidity.FreshNames
 The calculus's worked examples of `transfer` under the box, each a `calc`
 (`Calculus/Chains.lean`).  `transferNoCallback` books the payment on the
 ledger and nothing else: under `0 <= se`, the amount a word, the update
-`{ net := store(net, at(sadr), net(sadr) - se) }`, else a `revert();`, which
-the box closes; the two goals are one formula, `(c ⟹ ψ₁) ∧ (¬c ⟹ ψ₂)`.
+`{ net := store(net, at(sadr), net(sadr) - se) ‖ net := store(net, at(this), net(this) + se) }`,
+the payment at both ends of the ledger, else a `revert();`, which the box
+closes; the two goals are one formula, `(c ⟹ ψ₁) ∧ (¬c ⟹ ψ₂)`.
 Where a chain differs from the printed lines: the rule leaves `⟨[ ]⟩` after
 the booking, which `emptyModality` drops; a capture `{ pv := x + 2 }` stays in
 front of both goals instead of being applied; the receiver's capture is a
@@ -36,17 +37,17 @@ variable (φ : Post StandardExample)
 closes. -/
 def box :
     dl![.box]{ ⟨[ to.transfer(5); ]⟩ φ }
-    ~*> dl![.box]{ (0 <= 5 ⟹ { net := store(net, at(to), select(net, at(to)) - 5) } φ) ∧
+    ~*> dl![.box]{ (0 <= 5 ⟹ { net := store(net, at(to), select(net, at(to)) - 5) ‖ net := store(net, at(this), select(net, at(this)) + 5) } φ) ∧
             (¬(0 <= 5) ⟹ true) } :=
   calc dl![.box]{ ⟨[ to.transfer(5); ]⟩ φ }
     _ ~[transferNoCallback]~>
-        dl![.box]{ (0 <= 5 ⟹ { net := store(net, at(to), select(net, at(to)) - 5) } ⟨[ ]⟩ φ) ∧
+        dl![.box]{ (0 <= 5 ⟹ { net := store(net, at(to), select(net, at(to)) - 5) ‖ net := store(net, at(this), select(net, at(this)) + 5) } ⟨[ ]⟩ φ) ∧
             (¬(0 <= 5) ⟹ ⟨[ revert(); ]⟩ φ) } := rfl
     _ ~[emptyModality]~>
-        dl![.box]{ (0 <= 5 ⟹ { net := store(net, at(to), select(net, at(to)) - 5) } φ) ∧
+        dl![.box]{ (0 <= 5 ⟹ { net := store(net, at(to), select(net, at(to)) - 5) ‖ net := store(net, at(this), select(net, at(this)) + 5) } φ) ∧
             (¬(0 <= 5) ⟹ ⟨[ revert(); ]⟩ φ) } := rfl
     _ ~[revertBox]~>
-        dl![.box]{ (0 <= 5 ⟹ { net := store(net, at(to), select(net, at(to)) - 5) } φ) ∧
+        dl![.box]{ (0 <= 5 ⟹ { net := store(net, at(to), select(net, at(to)) - 5) ‖ net := store(net, at(this), select(net, at(this)) + 5) } φ) ∧
             (¬(0 <= 5) ⟹ true) } := by
       sol_chain
 
@@ -64,7 +65,7 @@ capture. -/
 def split :
     dl![.box]{ ⟨[ to.transfer(x + 2); ]⟩ φ }
     ~*> dl![.box]{ { pv := x + 2 }
-          ((0 <= pv ⟹ { net := store(net, at(to), select(net, at(to)) - pv) } ⟨[ ]⟩ φ) ∧
+          ((0 <= pv ⟹ { net := store(net, at(to), select(net, at(to)) - pv) ‖ net := store(net, at(this), select(net, at(this)) + pv) } ⟨[ ]⟩ φ) ∧
             (¬(0 <= pv) ⟹ ⟨[ revert(); ]⟩ φ)) } :=
   calc dl![.box]{ ⟨[ to.transfer(x + 2); ]⟩ φ }
     _ ~[transfer_unfold_rightSndArgument]~> dl![.box]{ ⟨[ uint pv = x + 2; to.transfer(pv); ]⟩ φ } := by
@@ -72,7 +73,7 @@ def split :
     _ ~*> dl![.box]{ { pv := x + 2 } ⟨[ to.transfer(pv); ]⟩ φ } := by sol_chain
     _ ~[transferNoCallback]~>
         dl![.box]{ { pv := x + 2 }
-          ((0 <= pv ⟹ { net := store(net, at(to), select(net, at(to)) - pv) } ⟨[ ]⟩ φ) ∧
+          ((0 <= pv ⟹ { net := store(net, at(to), select(net, at(to)) - pv) ‖ net := store(net, at(this), select(net, at(this)) + pv) } ⟨[ ]⟩ φ) ∧
             (¬(0 <= pv) ⟹ ⟨[ revert(); ]⟩ φ)) } := by
       sol_chain
 
@@ -80,7 +81,7 @@ def split :
 def box :
     dl![.box]{ ⟨[ to.transfer(x + 2); ]⟩ φ }
     ~*> dl![.box]{ { pv := x + 2 }
-          ((0 <= pv ⟹ { net := store(net, at(to), select(net, at(to)) - pv) } φ) ∧
+          ((0 <= pv ⟹ { net := store(net, at(to), select(net, at(to)) - pv) ‖ net := store(net, at(this), select(net, at(this)) + pv) } φ) ∧
             (¬(0 <= pv) ⟹ true)) } :=
   calc dl![.box]{ ⟨[ to.transfer(x + 2); ]⟩ φ }
     _ ~*> _ := split φ
@@ -103,7 +104,7 @@ variable (φ : Post StandardExample)
 def split :
     dl![.box]{ ⟨[ owner.transfer(5); ]⟩ φ }
     ~*> dl![.box]{ { pv := select(storage, owner) }
-          ((0 <= 5 ⟹ { net := store(net, at(pv), select(net, at(pv)) - 5) } ⟨[ ]⟩ φ) ∧
+          ((0 <= 5 ⟹ { net := store(net, at(pv), select(net, at(pv)) - 5) ‖ net := store(net, at(this), select(net, at(this)) + 5) } ⟨[ ]⟩ φ) ∧
             (¬(0 <= 5) ⟹ ⟨[ revert(); ]⟩ φ)) } :=
   calc dl![.box]{ ⟨[ owner.transfer(5); ]⟩ φ }
     _ ~[transfer_unfold_leftFstReceiver]~> dl![.box]{ ⟨[ uint pv = owner; pv.transfer(5); ]⟩ φ } := by
@@ -111,7 +112,7 @@ def split :
     _ ~*> dl![.box]{ { pv := select(storage, owner) } ⟨[ pv.transfer(5); ]⟩ φ } := by sol_chain
     _ ~[transferNoCallback]~>
         dl![.box]{ { pv := select(storage, owner) }
-          ((0 <= 5 ⟹ { net := store(net, at(pv), select(net, at(pv)) - 5) } ⟨[ ]⟩ φ) ∧
+          ((0 <= 5 ⟹ { net := store(net, at(pv), select(net, at(pv)) - 5) ‖ net := store(net, at(this), select(net, at(this)) + 5) } ⟨[ ]⟩ φ) ∧
             (¬(0 <= 5) ⟹ ⟨[ revert(); ]⟩ φ)) } := by
       sol_chain
 
@@ -119,7 +120,7 @@ def split :
 def box :
     dl![.box]{ ⟨[ owner.transfer(5); ]⟩ φ }
     ~*> dl![.box]{ { pv := select(storage, owner) }
-          ((0 <= 5 ⟹ { net := store(net, at(pv), select(net, at(pv)) - 5) } φ) ∧
+          ((0 <= 5 ⟹ { net := store(net, at(pv), select(net, at(pv)) - 5) ‖ net := store(net, at(this), select(net, at(this)) + 5) } φ) ∧
             (¬(0 <= 5) ⟹ true)) } :=
   calc dl![.box]{ ⟨[ owner.transfer(5); ]⟩ φ }
     _ ~*> _ := split φ

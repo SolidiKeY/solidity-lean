@@ -20,9 +20,9 @@ added):
   (`live_mono`), and those make the fragment forget it;
 * KeY's `net` ledger, a ghost of the interpreter, by how the world's balances
   moved since the transaction began: `net(a)` is what `a`'s account lost,
-  `bal₀ a - bal a`, at every address but the contract's own; and the
-  contract's account gained what the ledger sums, `bal self - bal₀ self`
-  (`netSum`), so a payment is booked on both sides or neither.
+  `bal₀ a - bal a`, at every address, the contract's own (`this`) included.
+  A payment is booked at both ends, and one the contract makes to itself
+  moves nothing and books nothing.
 
 **The headline** (`compile_correct`): for a program of the fragment
 (`wtProg Γ P = some Γ'`), a machine representing the state it starts in, and
@@ -569,10 +569,11 @@ theorem fixedSlot_run (m : Machine) (st : List Word) (i z : Nat) (s : Slot) :
 /-! ## The simulation relation -/
 
 /-- The machine's environment is the state's: `CALLER` pushes `msg.sender`,
-and each of them, the funds included, is a word. -/
+`ADDRESS` the contract's address, `address(this)`, and each of them is a word. -/
 def EnvSim (σ : State) (m : Machine) : Prop :=
   σ.tx.msgSender = m.caller ∧ σ.tx.msgValue = m.callvalue ∧ σ.tx.timestamp = m.timestamp ∧
-    m.caller < W ∧ m.callvalue < W ∧ m.timestamp < W
+    σ.tx.selfAddress = m.self ∧
+    m.caller < W ∧ m.callvalue < W ∧ m.timestamp < W ∧ m.self < W
 
 /-- The machine `m` represents the interpreter state `σ`, whose locals `Γ` types. -/
 structure Sim (C : Contract) (L : Nat) (Γ : TyCtx) (σ : State) (m : Machine) : Prop where
@@ -582,10 +583,9 @@ structure Sim (C : Contract) (L : Nat) (Γ : TyCtx) (σ : State) (m : Machine) :
   aliases : ∀ x R, Γ x = some (.alias R) →
     ∃ r segs s, lookupBy x σ.env = some (.spath r segs) ∧ m.mem x = .slot s ∧
       PathSlot C true r segs (.ref R) s
-  /-- The contract's account gained what the ledger sums. -/
-  funds : (m.bal m.self : Int) = m.bal₀ m.self + netSum (Payee m.self) σ.net
-  /-- `net(a)` is what `a`'s account lost. -/
-  net : ∀ a : Nat, a < W → a ≠ m.self → σ.getNet a = (m.bal₀ a : Int) - m.bal a
+  /-- `net(a)` is what `a`'s account lost, at every address, the contract's
+  own included. -/
+  net : ∀ a : Nat, a < W → σ.getNet a = (m.bal₀ a : Int) - m.bal a
   /-- The bound on the arrays is at most solc's. -/
   bound : L ≤ Lmax
   /-- A fragile alias: its cell holds the slot of a path that indexes an
@@ -593,24 +593,40 @@ structure Sim (C : Contract) (L : Nat) (Γ : TyCtx) (σ : State) (m : Machine) :
   fragile : ∀ x R, Γ x = some (.falias R) →
     ∃ r segs s, lookupBy x σ.env = some (.spath r segs) ∧ m.mem x = .slot s ∧
       PathSlot C false r segs (.ref R) s ∧ ∃ sv, σ.findLive r segs = .ok sv
-  /-- `msg.sender`, `msg.value`, `block.timestamp`. -/
+  /-- `msg.sender`, `msg.value`, `block.timestamp`, `address(this)`. -/
   env : EnvSim σ m
 
 /-- `Sim` does not look at the stack. -/
 theorem Sim.stack {C : Contract} {L : Nat} {Γ : TyCtx} {σ : State} {m : Machine} (h : Sim C L Γ σ m)
     (st : List Word) : Sim C L Γ σ { m with stack := st } :=
-  ⟨h.store, h.vals, h.aliases, h.funds, h.net, h.bound, h.fragile, h.env⟩
+  ⟨h.store, h.vals, h.aliases, h.net, h.bound, h.fragile, h.env⟩
 
-/-- A payment booked: the ledger set at `x`, and the balances moved to match.
-Example: `to.transfer(5);` books `net(to) - 5` and moves `5` from the
-contract's account to `to`'s. -/
+/-- A payment booked: the ledger moved from `this` to `x`, and the balances
+moved to match.  Example: `to.transfer(5);` books `net(to) - 5` and
+`net(this) + 5`, and moves `5` from the contract's account to `to`'s. -/
 theorem Sim.book {C : Contract} {L : Nat} {Γ : TyCtx} {σ : State} {m : Machine} (h : Sim C L Γ σ m)
-    (x n : Int) (b b₀ : Nat → Nat)
-    (hf : (b m.self : Int) = b₀ m.self + netSum (Payee m.self) (setBy x n σ.net))
-    (hn : ∀ a : Nat, a < W → a ≠ m.self →
-      (lookupBy (a : Int) (setBy x n σ.net)).getD 0 = (b₀ a : Int) - b a) :
-    Sim C L Γ (σ.setNet x n) { m with bal := b, bal₀ := b₀ } :=
-  ⟨h.store, h.vals, h.aliases, hf, hn, h.bound, h.fragile, h.env⟩
+    (x y : Int) (b b₀ : Nat → Nat)
+    (hn : ∀ a : Nat, a < W → (σ.pay x y).getNet a = (b₀ a : Int) - b a) :
+    Sim C L Γ (σ.pay x y) { m with bal := b, bal₀ := b₀ } :=
+  ⟨h.store, h.vals, h.aliases, hn, h.bound, h.fragile, h.env⟩
+
+/-- The ledger after a payment of `y` to `x`: `x`'s entry down by `y`, then the
+contract's own up by `y`. -/
+theorem getNet_pay (τ : State) (x y a : Int) : (τ.pay x y).getNet a =
+    if a = τ.tx.selfAddress then
+      (if τ.tx.selfAddress = x then τ.getNet x - y else τ.getNet τ.tx.selfAddress) + y
+    else if a = x then τ.getNet x - y else τ.getNet a := by
+  simp only [State.pay, State.getNet, State.setNet]
+  by_cases h1 : a = τ.tx.selfAddress
+  · subst h1
+    rw [lookupBy_setBy_self, if_pos rfl, Option.getD_some]
+    by_cases h2 : τ.tx.selfAddress = x
+    · rw [h2, lookupBy_setBy_self, if_pos rfl, Option.getD_some]
+    · rw [lookupBy_setBy_ne h2, if_neg h2]
+  · rw [lookupBy_setBy_ne h1, if_neg h1]
+    by_cases h2 : a = x
+    · subst h2; rw [lookupBy_setBy_self, if_pos rfl, Option.getD_some]
+    · rw [lookupBy_setBy_ne h2, if_neg h2]
 
 /-- Pushing a word keeps `Sim`: `total + 1` pushes `total`'s word, then `1`. -/
 theorem Sim.push {C : Contract} {L : Nat} {Γ : TyCtx} {σ : State} {m : Machine} (h : Sim C L Γ σ m)
@@ -661,7 +677,7 @@ theorem simple_sim {m : Machine} (hm : Sim C L Γ σ m) : ∀ {p : PrimTy} (s : 
     exact .inl ⟨v, m.mem x, by simp [Simple.eval, State.getEnv, henv]; rfl, hv, rfl⟩
   | _, .env k hp, hw => by
     subst hp
-    obtain ⟨h1, h2, h3, w1, w2, w3⟩ := hm.env
+    obtain ⟨h1, h2, h3, h4, w1, w2, w3, w4⟩ := hm.env
     have hn : ∀ n : Nat, n < W → ReprV .uint (.int n) (.val n) := fun n h =>
       ⟨by omega, by exact_mod_cast h, by simp⟩
     cases k
@@ -669,6 +685,7 @@ theorem simple_sim {m : Machine} (hm : Sim C L Γ σ m) : ∀ {p : PrimTy} (s : 
     · exact .inl ⟨_, _, by simp [Simple.eval, State.envVal, h2]; rfl, hn _ w2, rfl⟩
     · exact .inl ⟨_, _, by simp [Simple.eval, State.envVal, h3]; rfl, hn _ w3, rfl⟩
     · simp [wtSimple] at hw
+    · exact .inl ⟨_, _, by simp [Simple.eval, State.envVal, h4]; rfl, hn _ w4, rfl⟩
 
 /-- An operator other than `&&`/`||` evaluates both operands: `a + b` evaluates `b` even when `a =
 0`. -/
@@ -1033,13 +1050,13 @@ inductive StmtOut (C : Contract) (L : Nat) (Γ' : TyCtx) (pays : Bool) (res : Re
 theorem Sim.weaken {Γ' : TyCtx} {m : Machine} (h : Sim C L Γ σ m)
     (hΓ : ∀ x t, Γ' x = some t → Γ x = some t) : Sim C L Γ' σ m :=
   ⟨h.store, fun x p hx => h.vals x p (hΓ x _ hx), fun x R hx => h.aliases x R (hΓ x _ hx),
-    h.funds, h.net, h.bound, fun x R hx => h.fragile x R (hΓ x _ hx), h.env⟩
+    h.net, h.bound, fun x R hx => h.fragile x R (hΓ x _ hx), h.env⟩
 
 /-- `uint x = e;`: the cell of `x` and the binding of `x` change together. -/
 theorem Sim.bindVal {m : Machine} (h : Sim C L Γ σ m) (x : Var) {p : PrimTy} {v : Value} {w : Word}
     (hv : ReprV p v w) :
     Sim C L (Γ.set x (some (.val p))) (σ.setEnv x (.val v)) { m with mem := upd m.mem x w } := by
-  refine ⟨h.store, fun y q hy => ?_, fun y R hy => ?_, h.funds, h.net, h.bound,
+  refine ⟨h.store, fun y q hy => ?_, fun y R hy => ?_, h.net, h.bound,
     fun y R hy => ?_, h.env⟩
   · by_cases hyx : y = x
     · subst hyx
@@ -1067,7 +1084,7 @@ theorem Sim.bindAlias {m : Machine} (h : Sim C L Γ σ m) (x : Var) {R : RefTy} 
     {segs : List Seg} {s : Slot} (hp : PathSlot C true r segs (.ref R) s) :
     Sim C L (Γ.set x (some (.alias R))) (σ.setEnv x (.spath r segs))
       { m with mem := upd m.mem x (.slot s) } := by
-  refine ⟨h.store, fun y q hy => ?_, fun y R' hy => ?_, h.funds, h.net, h.bound,
+  refine ⟨h.store, fun y q hy => ?_, fun y R' hy => ?_, h.net, h.bound,
     fun y R' hy => ?_, h.env⟩
   · by_cases hyx : y = x
     · subst hyx; simp [TyCtx.set] at hy
@@ -1097,7 +1114,7 @@ theorem Sim.bindFragile {m : Machine} (h : Sim C L Γ σ m) (x : Var) {R : RefTy
     (hlive : ∃ sv, σ.findLive r segs = .ok sv) :
     Sim C L (Γ.set x (some (.falias R))) (σ.setEnv x (.spath r segs))
       { m with mem := upd m.mem x (.slot s) } := by
-  refine ⟨h.store, fun y q hy => ?_, fun y R' hy => ?_, h.funds, h.net, h.bound,
+  refine ⟨h.store, fun y q hy => ?_, fun y R' hy => ?_, h.net, h.bound,
     fun y R' hy => ?_, h.env⟩
   · by_cases hyx : y = x
     · subst hyx; simp [TyCtx.set] at hy
@@ -1126,7 +1143,7 @@ and no array's length slot lower (so the fragile aliases stay in bounds,
 theorem Sim.store' {m : Machine} (h : Sim C L Γ σ m) {st' : Slot → Nat} {stor : List (Name × SVal)}
     (hs : ReprStore C L st' stor) (hlen : ∀ x, LenSlot C x → m.store x ≤ st' x) :
     Sim C L Γ { σ with storage := stor } { m with store := st' } :=
-  ⟨hs, h.vals, h.aliases, h.funds, h.net, h.bound, fun x R hx => by
+  ⟨hs, h.vals, h.aliases, h.net, h.bound, fun x R hx => by
     obtain ⟨r, segs, s, h1, h2, h3, h4⟩ := h.fragile x R hx
     exact ⟨r, segs, s, h1, h2, h3, live_mono (σ' := { σ with storage := stor }) h.store hs hlen h3 h4⟩, h.env⟩
 
@@ -1135,7 +1152,7 @@ aliases forgotten. -/
 theorem Sim.storeDrop {m : Machine} (h : Sim C L Γ σ m) {st' : Slot → Nat}
     {stor : List (Name × SVal)} (hs : ReprStore C L st' stor) :
     Sim C L Γ.dropFragile { σ with storage := stor } { m with store := st' } := by
-  refine ⟨hs, fun x p hx => h.vals x p ?_, fun x R hx => h.aliases x R ?_, h.funds, h.net, h.bound,
+  refine ⟨hs, fun x p hx => h.vals x p ?_, fun x R hx => h.aliases x R ?_, h.net, h.bound,
     fun x R hx => ?_, h.env⟩ <;> simp only [TyCtx.dropFragile] at hx <;> split at hx <;> simp_all
 
 /-- A write to a primitive leaves every array's length. -/
@@ -1519,7 +1536,7 @@ theorem args_sim : ∀ (args : List (Arg C)) {Δ Δ' : TyCtx} {τ : State} {m : 
 /-- `Sim` under a looser bound on the arrays. -/
 theorem Sim.mono {Γ : TyCtx} {m : Machine} {L' : Nat} (h : Sim C L Γ σ m) (hL : L ≤ L')
     (hL' : L' ≤ Lmax) : Sim C L' Γ σ m :=
-  ⟨h.store.mono hL, h.vals, h.aliases, h.funds, h.net, hL', h.fragile, h.env⟩
+  ⟨h.store.mono hL, h.vals, h.aliases, h.net, hL', h.fragile, h.env⟩
 
 /-- `StmtOut` under a looser bound. -/
 theorem StmtOut.mono {Γ' : TyCtx} {b : Bool} {res : Res State} {out : Out} {m : Machine} {L' : Nat}
@@ -1915,78 +1932,70 @@ theorem transfer_sim {Δ : TyCtx} {τ : State} {m : Machine} (r a : Val C .uint)
     rcases val_sim a (hm.push _) hwa with ⟨va, wa, hva, hra, hruna⟩ | ⟨hva, hruna⟩
     · obtain ⟨y, hy, rfl, rfl⟩ := hra.uint_inv
       rw [run_append_ok hruna]
-      have hsrc : transferAt τ x y = .ok (τ.setNet x (τ.getNet x - y)) := by
+      have hsrc : transferAt τ x y = .ok (τ.pay x y) := by
         unfold transferAt
         rw [if_neg (by omega)]
       simp only [hvr, hva, Value.asInt, Res.ok_bind, hsrc]
-      have hxs : Payee m.self x ↔ x ≠ m.self := by
-        simp only [Payee]; omega
-      have hget : ∀ a : Nat, (lookupBy (a : Int) τ.net).getD 0 = τ.getNet a := fun _ => rfl
+      obtain ⟨-, -, -, hself, -, -, -, hsw⟩ := hm.env
+      have h2 := hm.net x hx
+      have h3 := hm.net m.self hsw
+      -- the ledger after the payment, at a word `a`, from the three entries it reads
+      have hpay : ∀ a : Nat, a < W → (τ.pay x y).getNet a =
+          if a = m.self then (if m.self = x then τ.getNet x - y else τ.getNet m.self) + y
+          else if a = x then τ.getNet x - y else τ.getNet a := by
+        intro a _
+        rw [getNet_pay, hself]
+        simp only [Int.ofNat_inj]
       by_cases hrf : m.bal m.self < y ∨ m.accepts x y = false
       · -- refused: the machine reverts; the world that paid is the phantom
         refine .refused rfl ⟨by simp [run, Instr.step, Machine.next, Machine.push, hrf, assertTop],
           _, { m with bal := upd m.bal x (m.bal x + y), bal₀ := upd m.bal₀ m.self (m.bal₀ m.self + y) },
-          rfl, hm.book x _ _ _ ?_ ?_⟩
-        · show ((upd m.bal x (m.bal x + y) m.self : Nat) : Int) =
-            (upd m.bal₀ m.self (m.bal₀ m.self + y) m.self : Nat) +
-              netSum (Payee m.self) (setBy (x : Int) (τ.getNet x - y) τ.net)
-          rw [netSum_setBy, upd_same, ← hget]
-          have hf := hm.funds
-          by_cases hxe : x = m.self
-          · subst hxe
-            simp only [upd_same, hxs, ne_eq, not_true_eq_false, if_false]
-            push_cast; omega
-          · simp only [upd_other _ _ (Ne.symm hxe), hxs, ne_eq, hxe, not_false_eq_true, if_true]
-            omega
-        · intro a ha has
-          show (lookupBy (a : Int) (setBy (x : Int) (τ.getNet x - y) τ.net)).getD 0 =
-            ((upd m.bal₀ m.self (m.bal₀ m.self + y) a : Nat) : Int) - (upd m.bal x (m.bal x + y) a : Nat)
-          rw [upd_other _ _ has]
-          have hn := hm.net a ha has
-          by_cases hax : a = x
-          · subst hax
-            rw [lookupBy_setBy_self, upd_same]
-            push_cast; simp only [Option.getD_some]; omega
-          · rw [lookupBy_setBy_ne (by omega), upd_other _ _ hax]
-            exact hn
+          rfl, hm.book x y _ _ fun b hb => ?_⟩
+        have h1 := hm.net b hb
+        rw [hpay b hb]
+        simp only [upd]
+        by_cases hxs : x = m.self
+        · subst hxs
+          by_cases hbs : b = m.self
+          · subst hbs; simp only [↓reduceIte]; push_cast; omega
+          · simp only [hbs, ↓reduceIte]; exact h1
+        · by_cases hbs : b = m.self
+          · subst hbs
+            simp only [Ne.symm hxs, ↓reduceIte]; omega
+          · by_cases hbx : b = x
+            · subst hbx; simp only [hbs, ↓reduceIte]; omega
+            · simp only [hbs, hbx, ↓reduceIte]; exact h1
       · by_cases hxe : x = m.self
-        · -- a payment to itself moves nothing
+        · -- a payment to itself moves nothing, and books nothing
           subst hxe
-          refine .inl ⟨_, m, rfl, ?_, rfl, hm.book _ _ m.bal m.bal₀ ?_ ?_⟩
+          refine .inl ⟨_, m, rfl, ?_, rfl, hm.book _ _ m.bal m.bal₀ fun b hb => ?_⟩
           · simp [run, Instr.step, Machine.next, Machine.push, hrf, assertTop]
-          · rw [netSum_setBy, if_neg (by rw [hxs]; exact fun h => h rfl), Int.add_zero]
-            exact hm.funds
-          · intro a ha has
-            rw [lookupBy_setBy_ne (by omega)]
-            exact hm.net a ha has
-        · refine .inl ⟨_, { m with bal := pay m.bal m.self x y }, rfl, ?_, rfl,
-            hm.book x _ _ m.bal₀ ?_ ?_⟩
+          · have h1 := hm.net b hb
+            rw [hpay b hb]
+            by_cases hbs : b = m.self
+            · subst hbs; simp only [↓reduceIte]; omega
+            · simp only [hbs, ↓reduceIte]; exact h1
+        · simp only [not_or, Bool.not_eq_false] at hrf
+          have hle : y ≤ m.bal m.self := Nat.le_of_not_lt hrf.1
+          refine .inl ⟨_, { m with bal := pay m.bal m.self x y }, rfl, ?_, rfl,
+            hm.book x y _ m.bal₀ fun b hb => ?_⟩
           · simp [run, Instr.step, Machine.push, hrf, hxe, assertTop]
-          · show ((pay m.bal m.self x y m.self : Nat) : Int) = (m.bal₀ m.self : Int) +
-              netSum (Payee m.self) (setBy (x : Int) (τ.getNet x - y) τ.net)
-            simp only [not_or, Bool.not_eq_false] at hrf
-            rw [netSum_setBy, if_pos (hxs.2 hxe), ← hget]
-            simp only [pay, upd_other _ _ (Ne.symm hxe), upd_same]
-            have hf := hm.funds
-            omega
-          · intro a ha has
-            show (lookupBy (a : Int) (setBy (x : Int) (τ.getNet x - y) τ.net)).getD 0 =
-              (m.bal₀ a : Int) - (pay m.bal m.self x y a : Nat)
-            have hn := hm.net a ha has
-            by_cases hax : a = x
-            · subst hax
-              rw [lookupBy_setBy_self]
-              simp only [pay, upd_same, Option.getD_some]
-              push_cast; omega
-            · rw [lookupBy_setBy_ne (by omega)]
-              simp only [pay, upd_other _ _ hax, upd_other _ _ has]
-              exact hn
+          · have h1 := hm.net b hb
+            rw [hpay b hb]
+            simp only [pay, upd]
+            by_cases hbs : b = m.self
+            · subst hbs
+              simp only [Ne.symm hxe, ↓reduceIte]; omega
+            · by_cases hbx : b = x
+              · subst hbx; simp only [hbs, ↓reduceIte]; omega
+              · simp only [hbs, hbx, ↓reduceIte]; exact h1
     · exact .inr ⟨by simp [hvr, hva, Value.asInt], run_append_revert hruna⟩
   · exact .inr ⟨by simp [hvr], run_append_revert hrunr⟩
 
--- `stmt_sim` is one declaration with a case per statement; the third outcome
--- (`StmtOut.refused`) takes it past the default budget.
-set_option maxHeartbeats 230000 in
+-- `stmt_sim` is one declaration with a case per statement, past the default
+-- budget since the third outcome (`StmtOut.refused`): most of it goes on
+-- compiling and checking the match itself (`Meta.check` of its motive).
+set_option maxHeartbeats 470000 in
 mutual
 
 /-- **A statement's code does what the statement does**: both succeed, the
@@ -2426,10 +2435,9 @@ theorem compile_net {P : Prog C} {Γ Γ' : TyCtx} {σ : State} {m m' : Machine}
     (hP : wtProg Γ P = some Γ') (hm : Sim C L Γ σ m) (hL : L + pushesP P ≤ Lmax)
     (hrun : run (compileProg P) m = .ok m' 0) :
     ∃ σ', Prog.run σ P = .ok σ' ∧
-      (∀ a : Nat, a < W → a ≠ m'.self → σ'.getNet a = (m'.bal₀ a : Int) - m'.bal a) ∧
-      (m'.bal m'.self : Int) = m'.bal₀ m'.self + netSum (Payee m'.self) σ'.net := by
+      ∀ a : Nat, a < W → σ'.getNet a = (m'.bal₀ a : Int) - m'.bal a := by
   obtain ⟨σ', h1, h2⟩ := compile_box hP hm hL hrun
-  exact ⟨σ', h1, h2.net, h2.funds⟩
+  exact ⟨σ', h1, h2.net⟩
 
 /-- The interpreter is never stuck on the fragment: `wtProg` is a type system
 for it.
@@ -2441,20 +2449,19 @@ theorem not_stuck {P : Prog C} {Γ Γ' : TyCtx} {σ : State} {m : Machine}
     Prog.run σ P ≠ .error .stuck := by
   rcases compile_correct hP hm hL with ⟨_, _, h, _⟩ | ⟨h, _⟩ | ⟨_, _, _, _, h, _⟩ <;> rw [h] <;> nofun
 
-/-- A fresh contract: its storage at every type's default, nothing bound,
-nothing sent, `balance` in funds. -/
-def State.fresh (C : Contract) (balance : Nat) : State :=
-  { storage := C.initStorage, selfBalance := balance }
+/-- A fresh contract at address `self`: its storage at every type's default,
+nothing bound, nothing sent, `balance` in funds. -/
+def State.fresh (C : Contract) (balance : Nat) (self : Nat := 0) : State :=
+  { storage := C.initStorage, selfBalance := balance, tx := { selfAddress := self } }
 
 /-- A fresh machine represents a fresh contract: every slot `0`, nothing
 moved, whatever the world's balances and the contract's address. -/
-theorem Sim.init (C : Contract) (balance : Nat) (bal : Nat → Nat) (self : Nat) :
-    Sim C 1 (fun _ => none) (State.fresh C balance) (Machine.init bal self) :=
+theorem Sim.init (C : Contract) (balance : Nat) (bal : Nat → Nat) (self : Nat) (hs : self < W) :
+    Sim C 1 (fun _ => none) (State.fresh C balance self) (Machine.init bal self) :=
   ⟨initStorage_repr C Nat.one_pos, fun _ _ h => (by cases h), fun _ _ h => (by cases h),
-    by simp [State.fresh, Machine.init, netSum],
-    fun _ _ _ => by simp [State.getNet, State.fresh, lookupBy, Machine.init],
+    fun _ _ => by simp [State.getNet, State.fresh, lookupBy, Machine.init],
     by unfold Lmax; decide, fun _ _ h => (by cases h),
-    ⟨rfl, rfl, rfl, W_pos, W_pos, W_pos⟩⟩
+    ⟨rfl, rfl, rfl, rfl, W_pos, W_pos, W_pos, hs⟩⟩
 
 /-- **The EVM agrees with the interpreter's storage.**  From a fresh contract,
 a program of the fragment either reverts in both, or runs in both, and then
@@ -2465,16 +2472,16 @@ or the world refuses a payment, and the machine alone reverts.
 Example: `alice.age = 10;` leaves `10` at slot `13` of `StandardExample`
 (`Evm/Examples.lean` derives it from this theorem). -/
 theorem compile_storage {P : Prog C} {Γ' : TyCtx} (hP : wtProg (fun _ => none) P = some Γ')
-    (hL : pushesP P < Lmax) (balance : Nat) (bal : Nat → Nat) (self : Nat) :
-    (∃ σ' m', Prog.run (State.fresh C balance) P = .ok σ' ∧
+    (hL : pushesP P < Lmax) (balance : Nat) (bal : Nat → Nat) (self : Nat) (hs : self < W) :
+    (∃ σ' m', Prog.run (State.fresh C balance self) P = .ok σ' ∧
       run (compileProg P) (Machine.init bal self) = .ok m' 0 ∧
       ∀ r segs s n, PathSlot C false r segs (.prim .uint) s →
         σ'.findLive r segs = .ok (.prim (.int n)) → m'.store s = n.toNat) ∨
-    (Prog.run (State.fresh C balance) P = .error .revert ∧
+    (Prog.run (State.fresh C balance self) P = .error .revert ∧
       run (compileProg P) (Machine.init bal self) = .revert) ∨
     (paysP P = true ∧ run (compileProg P) (Machine.init bal self) = .revert ∧
-      ∃ σ', Prog.run (State.fresh C balance) P = .ok σ') := by
-  rcases compile_correct hP (Sim.init C balance bal self) (by omega) with
+      ∃ σ', Prog.run (State.fresh C balance self) P = .ok σ') := by
+  rcases compile_correct hP (Sim.init C balance bal self hs) (by omega) with
     ⟨σ', m', h1, h2, _, hm⟩ | h | ⟨hp, h1, σ', _, h2, _⟩
   · refine .inl ⟨σ', m', h1, h2, fun r segs s n hp hf => ?_⟩
     rcases find_repr hm.store hp with ⟨sv, hsv, hr⟩ | ⟨_, hsv⟩

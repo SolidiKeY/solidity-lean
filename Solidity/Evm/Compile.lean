@@ -744,6 +744,7 @@ def envInstr : EnvKey → Instr
   | .msgValue => .callvalue
   | .timestamp => .timestamp
   | .selfBalance => .selfbalance
+  | .selfAddress => .address
 
 def compileSimple : {p : PrimTy} → Simple C p → List Instr
   | _, .lit n _ => [.push (.val (toWord n))]

@@ -19,9 +19,10 @@ Semantic conventions mirrored from KeY:
 - array reads and writes out of bounds revert; `pop()` on an empty array
   reverts; `/` and `%` revert on a zero divisor; a failing `assert`
   reverts;
-- `a.transfer(v)` books `net(a) := net(a) - v` with no callback (the
-  callback reading is `Semantics/Callback.lean`'s, a relation over this one),
-  and nothing else: the contract is assumed able to pay, and its funds
+- `a.transfer(v)` books `net(a) := net(a) - v` and `net(this) := net(this)
+  + v`, the ledger's two ends, with no callback (the callback reading is
+  `Semantics/Callback.lean`'s, a relation over this one), and nothing else
+  (a payment to `this` books nothing): the contract is assumed able to pay, and its funds
   (`State.selfBalance`) are not the transfer's to change.  Whether the EVM
   pays is the compiler theorem's business (`Evm/Correctness.lean`, where a
   refused payment is a revert of the machine alone);
@@ -256,6 +257,8 @@ reads none of `ext`: a `try` has a goal for every way its call may end
 (`tryCallNoCallbackBox`), so a proof holds whatever the table says. -/
 structure TxEnv where
   msgSender : Int := 0
+  /-- The contract's own address, `address(this)`: the ledger's own account. -/
+  selfAddress : Int := 0
   msgValue : Int := 0
   timestamp : Int := 0
   ext : List (ExtKey × ExtResult) := []
@@ -613,6 +616,7 @@ def envVal (s : State) : EnvKey → Int
   | .msgValue => s.tx.msgValue
   | .timestamp => s.tx.timestamp
   | .selfBalance => s.selfBalance
+  | .selfAddress => s.tx.selfAddress
 
 end State
 
@@ -1435,10 +1439,16 @@ def popAt (σ : State) (keep : Bool) (root : Name) (segs : List Seg) : Res State
         (.array restRev.reverse ((if keep then last else last.defaultOf) :: shadow) fx)
   | .prim _ | .struct _ | .map _ _ => .error .stuck
 
-/-- `a.transfer(v)` with both evaluated: book the debit on the ledger. -/
+/-- `v` moved from the contract to `a`, on the ledger: `a`'s entry down by `v`,
+the contract's own (`this`) up by `v`.  A payment to `this` books nothing. -/
+def Semantics.State.pay (σ : State) (addr amt : Int) : State :=
+  let σ₁ := σ.setNet addr (σ.getNet addr - amt)
+  σ₁.setNet σ.tx.selfAddress (σ₁.getNet σ.tx.selfAddress + amt)
+
+/-- `a.transfer(v)` with both evaluated: book the payment on the ledger. -/
 def transferAt (σ : State) (addr amt : Int) : Res State :=
   if amt < 0 then .error .stuck
-  else .ok (σ.setNet addr (σ.getNet addr - amt))
+  else .ok (σ.pay addr amt)
 
 /-- An alias bound to what `r` names: a path, or the slot a push appends. -/
 def ARhs.bind (σ : State) (x : Var) {R : RefTy} : ARhs C R → Res State

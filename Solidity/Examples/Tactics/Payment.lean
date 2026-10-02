@@ -5,8 +5,9 @@ import Solidity.Calculus.Sequents
 
 `sadr.transfer(se);` has one rule for both modalities, `transferNoCallback`,
 which books the payment on the ledger and nothing else: where `0 <= se`, the
-amount a word, the update `{ net := store(net, at(sadr), net(sadr) - se) }`,
-and where not a `revert();`, which the box closes to `true` (`revertBox`).
+amount a word, the update `{ net := store(net, at(sadr), net(sadr) - se) ‖
+net := store(net, at(this), net(this) + se) }`, the payment at both ends, so
+one to `this` books nothing; and where not a `revert();`, which the box closes to `true` (`revertBox`).
 Whether the world pays is not the rule's: on the EVM a refused payment
 reverts, which the box does not see (`Evm.compile_box`).  The worked
 examples' traces are `Examples/Chains/Payment.lean`'s; here the sequents
@@ -29,7 +30,7 @@ local instance : InContract := ⟨StandardExample⟩
 info: @Taclet.transferNoCallback : ∀ {C : Contract} {k : Nat} {m : Modality} {sadr se : Simple C PrimTy.uint},
   dl{ ⟨[ sadr .transfer(se); ]⟩ ⇝
     0 <= se ⟹
-        { net := store(net, at(sadr), net(sadr) - se) } ⟨[ ]⟩ ;
+        { net := store(net, at(sadr), net(sadr) - se) ‖ net := store(net, at(this), net(this) + se) } ⟨[ ]⟩ ;
       ¬(0 <= se) ⟹ ⟨[ revert(); ]⟩ }
 -/
 #guard_msgs in #check @Taclet.transferNoCallback
@@ -41,9 +42,11 @@ checked sequent (`Calculus/Sequents.lean`); the chain is
 `Chains.Payment.Transfer5.box`. -/
 theorem transferBox : ⊢ dl!{ [ to.transfer(5); ] true } := by
   apply guard .transferNoCallback
-  · show sequent!{ 0 <= 5, { net := store(net, at(to), select(net, at(to)) - 5) } ⟹ [ ] true }
+  · show sequent!{ 0 <= 5, { net := store(net, at(to), select(net, at(to)) - 5) ‖
+        net := store(net, at(this), select(net, at(this)) + 5) } ⟹ [ ] true }
     apply empty
-    show sequent!{ 0 <= 5, { net := store(net, at(to), select(net, at(to)) - 5) } ⟹ true }
+    show sequent!{ 0 <= 5, { net := store(net, at(to), select(net, at(to)) - 5) ‖
+        net := store(net, at(this), select(net, at(this)) + 5) } ⟹ true }
     refine close ?_
     sol_symex
     sol_close

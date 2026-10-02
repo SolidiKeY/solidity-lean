@@ -501,10 +501,14 @@ inductive Taclet (C : Contract) (k : Nat) : Modality → Stmt C → Premise C �
       dl{ ⟨[ nadr.transfer(e); ]⟩ ⇝ ⟨[ uint se = nadr; se.transfer(e); ]⟩ }
   | transfer_unfold_rightSndArgument :
       dl{ ⟨[ sadr.transfer(nse); ]⟩ ⇝ ⟨[ uint se = nse; sadr.transfer(se); ]⟩ }
-  /-- The booking on the ledger; nothing else changes. -/
+  /-- The payment on the ledger, at both ends: `sadr`'s entry down by `se`,
+  the contract's own (`this`) up by `se`, so a payment to `this` books
+  nothing; nothing else changes. -/
   | transferNoCallback :
       dl{ ⟨[ sadr.transfer(se); ]⟩ ⇝
-          0 <= se ⟹ { net := store(net, at(sadr), net(sadr) - se) } ⟨[ ]⟩ ;
+          0 <= se ⟹
+            { net := store(net, at(sadr), net(sadr) - se) ‖ net := store(net, at(this), net(this) + se) }
+              ⟨[ ]⟩ ;
           ¬(0 <= se) ⟹ ⟨[ revert(); ]⟩ }
   -- Memory ---------------------------------------------------------------
   | memoryFieldRead_unfold_rightFst :
@@ -676,7 +680,8 @@ inductive Rule (C : Contract) (k : Nat) (m : Modality) (s : Stmt C) (p : Premise
 `transferSemantics:withCallback`: `sadr.transfer(se);` when the recipient may
 call back into the contract.  Their premise has `transferNoCallback`'s shape,
 the amount a word, `0 <= se`, and the booking
-`{net := store(net, at(sadr), net(sadr) - se)}`, read differently
+`{net := store(net, at(sadr), net(sadr) - se) ‖ net := store(net, at(this), net(this) + se)}`,
+read differently
 (`Calculus/Callback.lean`): the contract invariant after the booking
 ("invariant on exit"), and the rest of the program resumed from any state
 the callee may leave in which the invariant holds ("resume after
@@ -694,11 +699,15 @@ it holds). -/
 inductive CallbackTaclet (C : Contract) : Modality → Stmt C → Premise C → Prop where
   | transferWithCallbackBox {sadr se : Simple C .uint} :
       CallbackTaclet C .box (.transfer (.simple sadr) (.simple se))
-        dl{ 0 <= se ⟹ { net := store(net, at(sadr), net(sadr) - se) } ⟨[ ]⟩ ;
+        dl{ 0 <= se ⟹
+              { net := store(net, at(sadr), net(sadr) - se) ‖ net := store(net, at(this), net(this) + se) }
+                ⟨[ ]⟩ ;
             ¬(0 <= se) ⟹ ⟨[ revert(); ]⟩ }
   | transferWithCallbackDiamond {sadr se : Simple C .uint} :
       CallbackTaclet C .diamond (.transfer (.simple sadr) (.simple se))
-        dl{ 0 <= se ⟹ { net := store(net, at(sadr), net(sadr) - se) } ⟨[ ]⟩ ;
+        dl{ 0 <= se ⟹
+              { net := store(net, at(sadr), net(sadr) - se) ‖ net := store(net, at(this), net(this) + se) }
+                ⟨[ ]⟩ ;
             ¬(0 <= se) ⟹ ⟨[ revert(); ]⟩ }
   | tryCallWithCallbackBox {call : ExtCall C} {rets : List (PrimTy × Var)} {ok err : List (Stmt C)}
       {code : Option Var} {pnc other : List (Stmt C)} :

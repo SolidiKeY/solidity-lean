@@ -692,7 +692,7 @@ theorem UpdElem.write_agree {A : List Var} {σ₀ τ₁ τ₂ : State} (h : EnvA
   | .net .. => by
     simp only [UpdElem.write]
     agree_run h
-    exact ⟨h.storage, h.heap, h.nextId, rfl, h.env, h.selfBalance, h.tx⟩
+    exact ⟨h.storage, h.heap, h.nextId, by simp only [State.getNet, h.net], h.env, h.selfBalance, h.tx⟩
 
 /-- The invariant of dropping: the two runs agree off `A`, and every variable
 of `A` is either one the formula does not read (`G`) or one the rest of the
@@ -2047,7 +2047,6 @@ theorem UpdElem.withSt_write {s : STerm C} {σ τ : State} (hs : s.eval σ = .ok
     simp only [UpdElem.stExplicit, Bool.and_eq_true] at he
     simp only [UpdElem.withSt, UpdElem.write, Tm.withSt_eval (w := ⟨s⟩) hs hk r he.1,
       Tm.withSt_eval (w := ⟨s⟩) hs hk a he.2]
-    rw [← hk]; rfl
   | .saveNet _, _ => by simp only [UpdElem.withSt, UpdElem.write]; rw [← hk]
   | .mref .., he | .memory _, he => by simp only [UpdElem.stExplicit, Bool.false_eq_true] at he
 

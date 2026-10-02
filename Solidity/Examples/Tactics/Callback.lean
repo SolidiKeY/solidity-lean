@@ -142,7 +142,7 @@ info: @CallbackTaclet.transferWithCallbackBox : ∀ {C : Contract} {sadr se : Si
   CallbackTaclet C Modality.box (stmt{ sadr .transfer(se); })
     (dl{
       0 <= se ⟹
-          { net := store(net, at(sadr), net(sadr) - se) } ⟨[ ]⟩ ;
+          { net := store(net, at(sadr), net(sadr) - se) ‖ net := store(net, at(this), net(this) + se) } ⟨[ ]⟩ ;
         ¬(0 <= se) ⟹ ⟨[ revert(); ]⟩ })
 -/
 #guard_msgs in #check @CallbackTaclet.transferWithCallbackBox

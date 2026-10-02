@@ -122,10 +122,8 @@ lemma set for I.
   `accepts`), and `compile_correct` states the difference as a third outcome,
   the machine reverting alone in code that pays, so the box carries over
   (`compile_box`) and the diamond does not: the diamond `transferNoCallback`
-  still promises a termination the EVM does not give. A payment to the
-  contract itself moves nothing on the machine and books `net(this)` in the
-  interpreter, which `Sim` does not compare. Receivers are `uint`, not cut to
-  160 bits.
+  still promises a termination the EVM does not give. Receivers are `uint`,
+  not cut to 160 bits.
 - *The callback reading belongs to `call{value:}`.* Under the 2300-gas stipend a
   callee cannot change storage, `net` or `selfBalance` (EIP-2200), so for `transfer`
   the right reading is no callback, the recipient free to revert.
@@ -151,9 +149,10 @@ citations when re-pinning.
   contract's address `self`) in place of `net`; a transfer to itself moves nothing;
   the callee's acceptance is a parameter (`accepts`) and the theorem quantifies over
   every one. The stipend is not modelled: a refusal stands for it.
-- *Done:* `Sim` relates real quantities: `net(a) = bal₀ a - bal a` off the contract,
-  and the contract's account gained the ledger's sum (`Sim.funds`, `netSum`), so a
-  wrong `net` update fails the theorem; `compile_net` reads the ledger off a run.
+- *Done:* `Sim` relates real quantities: `net(a) = bal₀ a - bal a` at every address,
+  the contract's own included, so the ledger is double-entry (a payment books
+  `net(this) + v` too) and a wrong `net` update fails the theorem; `compile_net`
+  reads the ledger off a run.
 - Every instruction against a real EVM (revm/evmone or Ethereum's
   `GeneralStateTests`): `#difftest` compares interpreter with machine, this compares
   machine with EVM.

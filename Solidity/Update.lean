@@ -654,8 +654,11 @@ inductive UpdElem (C : Contract) where
   | memory (m : MTerm C)
   /-- `selfBalance := selfBalance ± a`: the contract's funds, in KeY's `int`. -/
   | selfBalance (op : IntOp) (a : Term C)
-  /-- `net := store(net, at(r), net(r) ± a)`: the ledger's entry for `r`, in
-  KeY's `int`. -/
+  /-- `net := store(net, at(r), net(r) ± a)`: the ledger's entry for `r`
+  moved by `a`, in KeY's `int`.  The address and the amount are read in the
+  pre-state, as every right-hand side is; the move is made on the ledger the
+  update has written so far, so two in one update add up — a payment's two
+  ends, `net(sadr) - se ‖ net(this) + se`, cancel when `sadr` is `this`. -/
   | net (r : Term C) (op : IntOp) (a : Term C)
   /-- `oldNet := net`: a ledger variable binds the ledger, which
   `\old(net(a))` reads. -/
@@ -683,7 +686,7 @@ def UpdElem.write (σ₀ : State) : UpdElem C → State → Res State
   | .net r op a, τ => do
     let addr ← (← r.eval σ₀).asInt
     let amt ← (← a.eval σ₀).asInt
-    pure { τ with net := setBy addr (op.apply (σ₀.getNet addr) amt) σ₀.net }
+    pure { τ with net := setBy addr (op.apply (τ.getNet addr) amt) τ.net }
   | .saveNet x, τ => pure (τ.setEnv x (.ledger σ₀.net))
 
 /-- The state an update leaves, from `σ`. -/
@@ -1162,10 +1165,9 @@ theorem UpdElem.write_frame {σ₀ σ₀' τ τ' : State} (h₀ : EnvAgreeExcept
     agree_run h
     exact ⟨h.storage, h.heap, h.nextId, h.net, h.env, rfl, h.tx⟩
   | .net r _ a, hv => by
-    simp only [UpdElem.write, r.eval_frame h₀ hv.left, a.eval_frame h₀ hv.right, State.getNet,
-      h₀.net]
+    simp only [UpdElem.write, r.eval_frame h₀ hv.left, a.eval_frame h₀ hv.right, State.getNet]
     agree_run h
-    exact ⟨h.storage, h.heap, h.nextId, rfl, h.env, h.selfBalance, h.tx⟩
+    exact ⟨h.storage, h.heap, h.nextId, by rw [h.net], h.env, h.selfBalance, h.tx⟩
   | .saveNet x, _ => by
     show ResultsAgree ns (.ok (τ.setEnv x (.ledger σ₀.net))) (.ok (τ'.setEnv x (.ledger σ₀'.net)))
     rw [h₀.net]

@@ -217,8 +217,10 @@ On the EVM a value transfer fails, and with `transfer` reverts, when the
 sending contract's balance does not cover the amount or the recipient
 refuses it (its code reverts, or runs out of the 2300 gas). `transferAt`
 does neither check: a negative amount is `.stuck` (unrepresentable in the
-unsigned value field), and otherwise the ledger is debited,
-`net(addr) := net(addr) - amt`, and nothing else. `State.selfBalance`
+unsigned value field), and otherwise the payment is booked at both ends of
+the ledger, `net(addr) := net(addr) - amt` and `net(this) := net(this) +
+amt` (`State.pay`; `this` is `address(this)`, `TxEnv.selfAddress`), and
+nothing else: a payment to the contract itself books nothing. `State.selfBalance`
 (`address(this).balance`) is the funds the transaction found, which a
 `transfer` leaves; solkey's box rule books the debit unconditionally too
 (`333cc7b353`). The interpreter thus assumes the world pays, and the
@@ -226,9 +228,8 @@ compiler theorem says what that costs: in code that pays, the machine may
 revert where the interpreter succeeds (`Evm.compile_correct`'s third
 outcome), so what the interpreter proves under the box holds of every run
 the machine completes (`Evm.compile_box`), and there `net(a)` is what `a`'s
-account lost (`Evm.compile_net`). A payment to the contract itself books
-`net(this)` and moves nothing on the EVM; the theorem compares the ledger at
-every other address.
+account lost (`Evm.compile_net`), at every address, the contract's own
+included.
 
 The callback semantics (`Semantics/Callback.lean`) is a relation over this
 one: after the debit `State.havoc` replaces storage, ledger and balance, so

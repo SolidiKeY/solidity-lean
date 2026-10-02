@@ -1113,12 +1113,12 @@ theorem transferAt_frame {σ τ : State} {addr amt : Int} (h : transferAt σ add
 
 `msg.sender`, `msg.value`, `block.timestamp` and the funds are the
 transaction's, and nothing a program does changes them; the ledger only a
-`transfer` changes, at the address it pays. -/
+`transfer` changes, at the address it pays and at `this`. -/
 
-/-- After `to.transfer(5);` the ledger's entry for `to` is `5` less, and
+/-- After `to.transfer(5);` the ledger has moved `5` from `this` to `to`, and
 `msg.sender` and `address(this).balance` are as they were. -/
 theorem transferAt_env {σ τ : State} {addr amt : Int} (h : transferAt σ addr amt = .ok τ) :
-    τ.tx = σ.tx ∧ τ.selfBalance = σ.selfBalance ∧ τ.net = setBy addr (σ.getNet addr - amt) σ.net := by
+    τ.tx = σ.tx ∧ τ.selfBalance = σ.selfBalance ∧ τ.net = (σ.pay addr amt).net := by
   unfold transferAt at h
   split at h
   · simp at h

@@ -45,9 +45,10 @@ needs.  Instruction meanings follow the EVM as Nethermind's
   itself (as Vyper does); solc keeps them on the stack.
 * **The world is the accounts' balances** (the Yellow Paper's `σ[a].b`):
   `bal a` for every address `a`, the contract's own at `self`
-  (`SELFBALANCE` reads it).  There is no ledger: KeY's `net` is a ghost of
-  the interpreter, related to how the balances moved since the transaction
-  began, `bal₀` (`Sim.net`, `Evm/Correctness.lean`).  A recipient's code is
+  (`SELFBALANCE` reads it, `ADDRESS` pushes `self`).  There is no ledger:
+  KeY's `net` is a ghost of the interpreter, what each account lost since the
+  transaction began, `bal₀ a - bal a`, the contract's own included
+  (`Sim.net`, `Evm/Correctness.lean`).  A recipient's code is
   not run; whether it accepts a payment is `accepts`, which no instruction
   changes, and the compiler theorem holds for every one.  `caller`,
   `callvalue`, `timestamp` are the transaction's (`CALLER`, `CALLVALUE`,
@@ -151,6 +152,8 @@ inductive Instr where
   (`msg.value`), `TIMESTAMP` (`block.timestamp`), `SELFBALANCE`
   (`address(this).balance`). -/
   | caller | callvalue | timestamp | selfbalance
+  /-- `ADDRESS` (`address(this)`). -/
+  | address
   deriving DecidableEq, Repr, Inhabited
 
 instance : ToString Instr where
@@ -174,6 +177,7 @@ instance : ToString Instr where
     | .xor => "XOR" | .not => "NOT" | .shl => "SHL" | .shr => "SHR" | .exp => "EXP"
     | .caller => "CALLER" | .callvalue => "CALLVALUE" | .timestamp => "TIMESTAMP"
     | .selfbalance => "SELFBALANCE"
+    | .address => "ADDRESS"
 
 /-- `f` with `x` sent to `v`. -/
 def upd {α : Type} {β : Type} [DecidableEq α] (f : α → β) (x : α) (v : β) : α → β :=
@@ -216,38 +220,6 @@ def Machine.init (bal : Nat → Nat := fun _ => 0) (self : Nat := 0) : Machine :
 /-- `v` moved from `s`'s account to `a`'s, another. -/
 def pay (bal : Nat → Nat) (s a v : Nat) : Nat → Nat :=
   upd (upd bal s (bal s - v)) a (bal a + v)
-
-section Ledger
-open Semantics
-
-/-- The addresses KeY's ledger is compared at, against the balances: the words,
-but the contract's own. -/
-def Payee (self : Nat) (a : Int) : Prop := 0 ≤ a ∧ a < W ∧ a ≠ self
-
-instance (self : Nat) : DecidablePred (Payee self) := fun _ => by unfold Payee; infer_instance
-
-/-- What the ledger `l` sums over the addresses `p` admits, each once, at its
-first entry, where `lookupBy` reads it. -/
-def netSum (p : Int → Prop) [DecidablePred p] : List (Int × Int) → Int
-  | [] => 0
-  | (a, n) :: l => (if p a then n else 0) + netSum (fun b => p b ∧ b ≠ a) l
-
-/-- Booking `v` at `k` changes the sum by the change at `k`, if `p` admits it. -/
-theorem netSum_setBy (k v : Int) : ∀ (l : List (Int × Int)) (p : Int → Prop) [DecidablePred p],
-    netSum p (setBy k v l) = netSum p l + (if p k then v - (lookupBy k l).getD 0 else 0)
-  | [], p, _ => by simp only [setBy, netSum, lookupBy, Option.getD_none]; split <;> omega
-  | (a, n) :: l, p, _ => by
-    simp only [setBy]
-    by_cases hk : k = a
-    · subst hk
-      simp only [if_true, netSum, lookupBy, Option.getD_some]
-      split <;> omega
-    · simp only [hk, if_false, netSum, lookupBy]
-      rw [netSum_setBy k v l]
-      by_cases hp : p k <;> simp only [hp, hk, ne_eq, not_false_eq_true, and_self, and_true,
-        if_true, if_false] <;> omega
-
-end Ledger
 
 def Machine.push (m : Machine) (w : Word) : Machine := { m with stack := w :: m.stack }
 
@@ -391,6 +363,7 @@ def Instr.step : Instr → Machine → Out
   | .callvalue, m => m.next (.val m.callvalue :: m.stack)
   | .timestamp, m => m.next (.val m.timestamp :: m.stack)
   | .selfbalance, m => m.next (.val (m.bal m.self) :: m.stack)
+  | .address, m => m.next (.val m.self :: m.stack)
 
 /-- Run code, skipping `k` instructions first (a jump still pending). -/
 def exec : List Instr → Nat → Machine → Out

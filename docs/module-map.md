@@ -135,7 +135,7 @@ The map from taclet to theorem is `docs/lean-key-rule-map.md`.
 
 | Module | What it defines |
 |---|---|
-| `Evm/Machine.lean` | A straight-line EVM: slots as terms, wrapping words, relative forward jumps, the accounts' balances; `netSum`. |
+| `Evm/Machine.lean` | A straight-line EVM: slots as terms, wrapping words, relative forward jumps, the accounts' balances. |
 | `Evm/Compile.lean` | The compiler for the fragment `wtStmt`, with solc's guards. |
 | `Evm/Repr.lean` | The storage layout and the representation relation. |
 | `Evm/Signed.lean` | The signed guard sequences, exact on two's complement. |

@@ -217,14 +217,13 @@ theorem compiler_correct {P : Prog C} {Γ Γ' : TyCtx} {σ : State} {mc : Machin
 open Evm in
 /-- **The box reaches the EVM**: where the compiled code succeeds, the
 interpreter did too, and `net(a)` is what `a`'s account lost, at every
-address but the contract's own. -/
+address, the contract's own included. -/
 theorem compiler_net {P : Prog C} {Γ Γ' : TyCtx} {σ : State} {mc mc' : Machine} {L : Nat}
     (hP : Γ ⊩ P ⊣ Γ') (hm : σ ≈[C, L, Γ] mc) (hL : L + pushesP P ≤ Lmax)
     (hrun : (⟦P⟧, mc) ⇓ₘ mc') :
     ∃ σ', (P, σ) ⇓ σ' ∧
-      ∀ a : Nat, a < W → a ≠ mc'.self → σ'.getNet a = (mc'.bal₀ a : Int) - mc'.bal a :=
-  let ⟨σ', h, hn, _⟩ := compile_net hP hm hL hrun
-  ⟨σ', h, hn⟩
+      ∀ a : Nat, a < W → σ'.getNet a = (mc'.bal₀ a : Int) - mc'.bal a :=
+  compile_net hP hm hL hrun
 
 open Evm in
 /-- **The fragment never gets stuck**: a program the compiler takes ends or
