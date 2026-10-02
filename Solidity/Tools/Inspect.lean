@@ -205,7 +205,8 @@ a `Taclet` by its premise's kind; with the per-rule update lemma
 def soundLine (n : Lean.Name) (ty : Lean.Expr) : MetaM String := do
   let env ← getEnv
   let family := n.getPrefix
-  let thm ← if family == ``CallbackTaclet then pure ``CallbackTaclet.sound
+  let thm ← if n == ``CallbackTaclet.tryCallWithCallbackBox then pure ``CallbackTaclet.sound_branches
+    else if family == ``CallbackTaclet then pure ``CallbackTaclet.sound
     else if family == ``LeanTaclet then pure ``LeanTaclet.sound
     else forallTelescopeReducing ty fun _ concl => do
       let p := concl.getAppArgs.back?.getD concl
@@ -215,6 +216,7 @@ def soundLine (n : Lean.Name) (ty : Lean.Expr) : MetaM String := do
         | some ``Premise.split => ``Taclet.sound_split
         | some ``Premise.guard => ``Taclet.sound_guard
         | some ``Premise.done => ``Taclet.sound_done
+        | some ``Premise.branches => ``Taclet.sound_branches
         | _ => ``Taclet.sound
   let upd := Name.mkStr `Solidity ("upd_" ++ n.getString!)
   let extra := if env.contains upd then s!", {upd}" else ""

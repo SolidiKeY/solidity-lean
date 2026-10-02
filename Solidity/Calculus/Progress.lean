@@ -7,8 +7,8 @@ import Solidity.Calculus.Notation
 `Stmt.step` (`Completeness.lean`) is total, so a statement at the front of a
 modality always has a rule; this module lifts that to formulas (the second
 half of mini-solkey's `Ch11_Completeness`).  A modality can sit under an
-update, right of an implication, or in either conjunct of a branch's goals,
-and `Fml.stepAt` looks through all three, so the strategy of `Symex.lean`
+update, right of an implication, under a `havoc` or a `∀`, or in either
+conjunct of a branch's goals, and `Fml.stepAt` looks through all of them, so the strategy of `Symex.lean`
 stops **exactly** when no modality is left: `Fml.active_iff_step`.
 
 That it does stop is `Termination.lean`.
@@ -24,7 +24,7 @@ Example: `dl!{ [ x = 1; ] x == 1 }` steps by `localValueAssign`;
 `dl!{ { x := 1 } x = 1 }` has no modality, and nothing steps it. -/
 theorem Fml.stepAt_active {k : Nat} :
     ∀ {φ ψ : Fml C}, φ.stepAt k = some ψ → φ.active = true
-  | .upd _ _ φ, _, h | .imp _ φ, _, h | .havoc φ, _, h => by
+  | .upd _ _ φ, _, h | .imp _ φ, _, h | .havoc φ, _, h | .all _ _ φ, _, h => by
     simp only [Fml.stepAt, Option.map_eq_some_iff] at h
     obtain ⟨_, h, -⟩ := h
     simpa [Fml.active] using Fml.stepAt_active h
@@ -52,6 +52,9 @@ theorem Fml.stepAt_of_active (k : Nat) :
   | .havoc φ, h => by
     obtain ⟨ψ, hs⟩ := Fml.stepAt_of_active k (φ := φ) (by simpa [Fml.active] using h)
     exact ⟨.havoc ψ, by simp [Fml.stepAt, hs]⟩
+  | .all x p φ, h => by
+    obtain ⟨ψ, hs⟩ := Fml.stepAt_of_active k (φ := φ) (by simpa [Fml.active] using h)
+    exact ⟨.all x p ψ, by simp [Fml.stepAt, hs]⟩
   | .and φ₁ φ₂, h => by
     by_cases h₁ : φ₁.active = true
     · obtain ⟨ψ, hs⟩ := Fml.stepAt_of_active k h₁

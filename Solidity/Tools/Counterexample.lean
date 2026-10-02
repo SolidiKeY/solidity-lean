@@ -548,6 +548,8 @@ deriving instance ToExpr for Semantics.MVal
 deriving instance ToExpr for Semantics.MObj
 deriving instance ToExpr for Semantics.Seg
 deriving instance ToExpr for Semantics.Binding
+deriving instance ToExpr for Semantics.ExtKey
+deriving instance ToExpr for Semantics.ExtResult
 deriving instance ToExpr for Semantics.TxEnv
 deriving instance ToExpr for Semantics.State
 

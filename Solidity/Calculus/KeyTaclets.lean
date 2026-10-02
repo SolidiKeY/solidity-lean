@@ -1,8 +1,8 @@
 /-!
 # The KeY taclets, as a Lean type
 
-`solidityProgramRules.key` is the calculus solkey actually runs: 311 named
-taclets (solkey `f2eb3d98eb`).  This module is that list of names, one constructor each, plus the
+`solidityProgramRules.key` is the calculus solkey actually runs: 313 named
+taclets (solkey `323dc7faa5`).  This module is that list of names, one constructor each, plus the
 `\heuristics` annotation each one carries.  It exists so that
 `RuleShapes.lean` can say *which* KeY taclet each rule transcribes with a
 typed `KeyOrigin` rather than a string — a misspelling is then a type error, and
@@ -30,11 +30,11 @@ and rebuild the three tables below in that order.  The `SolKey` reader's
 than going unnoticed.
 
 `name` is deliberately a `match` and not a lookup in `all`: the corpus check is
-a `native_decide` over 311 strings, and a lookup would make it quadratic.
+a `native_decide` over 313 strings, and a lookup would make it quadratic.
 
 ## `\heuristics` is documentary
 
-Four values occur in the corpus — `simplify_prog` (217 taclets),
+Four values occur in the corpus — `simplify_prog` (219 taclets),
 `simplify_expression` (87), `concrete_solidity` (5, the literal-condition
 `if` rules) and `simplify_prog_expensive` (2, the memory-to-storage index
 writes that capture everything).  They are KeY's *strategy* annotations: which
@@ -50,7 +50,7 @@ namespace Solidity
 
 /-- A KeY `\heuristics(...)` rule set.  The corpus uses exactly these four. -/
 inductive Heuristic where
-  /-- `simplify_prog`: the program-rewriting rule set (217 taclets). -/
+  /-- `simplify_prog`: the program-rewriting rule set (219 taclets). -/
   | simplifyProg
   /-- `simplify_expression`: the eager expression rule set (87 taclets). -/
   | simplifyExpression
@@ -374,8 +374,10 @@ inductive KeyTaclet where
   | memoryIndexWriteMemRefCaptureAllNonSimpleIndex
   | transferNoCallbackBox
   | transferNoCallbackDiamond
+  | tryCallNoCallbackBox
   | transferWithCallbackBox
   | transferWithCallbackDiamond
+  | tryCallWithCallbackBox
   deriving DecidableEq, Repr
 
 namespace KeyTaclet
@@ -691,8 +693,10 @@ def name : KeyTaclet -> String
   | memoryIndexWriteMemRefCaptureAllNonSimpleIndex => "memoryIndexWriteMemRefCaptureAllNonSimpleIndex"
   | transferNoCallbackBox => "transferNoCallbackBox"
   | transferNoCallbackDiamond => "transferNoCallbackDiamond"
+  | tryCallNoCallbackBox => "tryCallNoCallbackBox"
   | transferWithCallbackBox => "transferWithCallbackBox"
   | transferWithCallbackDiamond => "transferWithCallbackDiamond"
+  | tryCallWithCallbackBox => "tryCallWithCallbackBox"
 
 /-- The `\heuristics` rule set the taclet is filed under. -/
 def heuristic : KeyTaclet -> Heuristic
@@ -1005,8 +1009,10 @@ def heuristic : KeyTaclet -> Heuristic
   | memoryIndexWriteMemRefCaptureAllNonSimpleIndex => Heuristic.simplifyProg
   | transferNoCallbackBox => Heuristic.simplifyProg
   | transferNoCallbackDiamond => Heuristic.simplifyProg
+  | tryCallNoCallbackBox => Heuristic.simplifyProg
   | transferWithCallbackBox => Heuristic.simplifyProg
   | transferWithCallbackDiamond => Heuristic.simplifyProg
+  | tryCallWithCallbackBox => Heuristic.simplifyProg
 
 /-- Every taclet, in the order `solidityProgramRules.key` declares them. -/
 def all : List KeyTaclet := [
@@ -1319,8 +1325,10 @@ def all : List KeyTaclet := [
   KeyTaclet.memoryIndexWriteMemRefCaptureAllNonSimpleIndex,
   KeyTaclet.transferNoCallbackBox,
   KeyTaclet.transferNoCallbackDiamond,
+  KeyTaclet.tryCallNoCallbackBox,
   KeyTaclet.transferWithCallbackBox,
-  KeyTaclet.transferWithCallbackDiamond
+  KeyTaclet.transferWithCallbackDiamond,
+  KeyTaclet.tryCallWithCallbackBox
 ]
 
 end KeyTaclet

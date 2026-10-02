@@ -75,17 +75,18 @@ def COut.after (m : Modality) (p : State → Prop) : COut → Prop
 /-! ## Which statements the callback reading sees -/
 
 /-- The statements the relation does not take from `Stmt.run`: a `transfer`,
-and the two that run others (`if`, a call). -/
+a `try`, and the two that run others (`if`, a call). -/
 def Stmt.forks : Stmt C → Bool
-  | .transfer .. | .ite .. | .call .. => true
+  | .transfer .. | .tryCall .. | .ite .. | .call .. => true
   | _ => false
 
 mutual
 
-/-- Whether a `transfer` occurs in the statement, in a branch or a callee
-included. -/
+/-- Whether a `transfer` or a `try` occurs in the statement, in a branch or a
+callee included: a point where control leaves the contract, and the callee
+may call back. -/
 def Stmt.hasTransfer : Stmt C → Bool
-  | .transfer .. => true
+  | .transfer .. | .tryCall .. => true
   | .ite _ thn els => Prog.hasTransfer thn || Prog.hasTransfer els
   | .call _ _ _ _ body => Prog.hasTransfer body
   | _ => false
@@ -151,6 +152,41 @@ inductive ExecS (I : Fml C) : State → Stmt C → COut → Prop where
       {hsep : Arg.separatedFrom [] args = true} {ret : CallRet} {body : List (Stmt C)} {o : COut} :
       Arg.bindSeq args σ = .ok σ₁ → ExecP I (ret.enter σ₁) body o → o.isOk = false →
         ExecS I σ (.call f args hsep ret body) o
+  /-- A `try` whose call cannot be made halts. -/
+  | tryHalt {σ : State} {c : ExtCall C} {rets : List (PrimTy × Var)} {ok err : List (Stmt C)}
+      {code : Option Var} {pnc other : List (Stmt C)} {e : Halt} :
+      c.key σ = .error e → ExecS I σ (.tryCall c rets ok err code pnc other) (.halt e)
+  /-- The call reverts in the caller: no code at the address, or data that
+  does not decode. -/
+  | tryRevert {σ : State} {c : ExtCall C} {rets : List (PrimTy × Var)} {ok err : List (Stmt C)}
+      {code : Option Var} {pnc other : List (Stmt C)} {k : ExtKey} :
+      c.key σ = .ok k → ExecS I σ (.tryCall c rets ok err code pnc other) (.halt .revert)
+  /-- KeY's "invariant on exit": control leaves with `I` broken. -/
+  | tryViolated {σ : State} {c : ExtCall C} {rets : List (PrimTy × Var)} {ok err : List (Stmt C)}
+      {code : Option Var} {pnc other : List (Stmt C)} {k : ExtKey} :
+      c.key σ = .ok k → ¬ holds σ I → ExecS I σ (.tryCall c rets ok err code pnc other) .violated
+  /-- KeY's "call succeeded": control leaves with `I` kept, comes back to any
+  state the callee may leave in which `I` holds, and the return data binds
+  `rets`. -/
+  | tryOk {σ σ₁ : State} {c : ExtCall C} {rets : List (PrimTy × Var)} {ok err : List (Stmt C)}
+      {code : Option Var} {pnc other : List (Stmt C)} {k : ExtKey} {st : List (Name × SVal)}
+      {nt : List (Int × Int)} {bal : Int} {o : COut} :
+      c.key σ = .ok k → holds σ I → holds (σ.havoc st nt bal) I →
+        Binds rets (σ.havoc st nt bal) σ₁ → ExecP I σ₁ ok o →
+          ExecS I σ (.tryCall c rets ok err code pnc other) o
+  /-- "Error caught": the call reverted, and its effects with it. -/
+  | tryError {σ : State} {c : ExtCall C} {rets : List (PrimTy × Var)} {ok err : List (Stmt C)}
+      {code : Option Var} {pnc other : List (Stmt C)} {k : ExtKey} {o : COut} :
+      c.key σ = .ok k → ExecP I σ err o → ExecS I σ (.tryCall c rets ok err code pnc other) o
+  /-- "Panic caught", with the code bound. -/
+  | tryPanic {σ σ₁ : State} {c : ExtCall C} {rets : List (PrimTy × Var)} {ok err : List (Stmt C)}
+      {code : Option Var} {pnc other : List (Stmt C)} {k : ExtKey} {o : COut} :
+      c.key σ = .ok k → Binds (codeBinders code) σ σ₁ → ExecP I σ₁ pnc o →
+        ExecS I σ (.tryCall c rets ok err code pnc other) o
+  /-- "other failure caught". -/
+  | tryOther {σ : State} {c : ExtCall C} {rets : List (PrimTy × Var)} {ok err : List (Stmt C)}
+      {code : Option Var} {pnc other : List (Stmt C)} {k : ExtKey} {o : COut} :
+      c.key σ = .ok k → ExecP I σ other o → ExecS I σ (.tryCall c rets ok err code pnc other) o
 
 /-- `ExecP I σ P o`: the same, for a block. -/
 inductive ExecP (I : Fml C) : State → List (Stmt C) → COut → Prop where
@@ -200,6 +236,17 @@ theorem validT_noCallback {φ : Fml C} : ValidT .noCallback φ ↔ Valid φ := I
 
 theorem validT_withCallback {I : Invariant C} {φ : Fml C} :
     ValidT (.withCallback I) φ ↔ ValidC I φ := Iff.rfl
+
+/-- Decoding fails only by reverting. -/
+theorem bindData_error : {xs : List (PrimTy × Var)} → {vs : List Value} → {σ : State} →
+    {e : Halt} → bindData xs vs σ = .error e → e = .revert
+  | [], _, _, _, h => by simp [bindData, pure, Except.pure] at h
+  | _ :: _, [], _, _, h => by simp [bindData] at h; exact h.symm
+  | (p, x) :: xs, v :: vs, σ, _, h => by
+    simp only [bindData] at h
+    split at h
+    · exact bindData_error h
+    · cases h; rfl
 
 /-! ## The deterministic run is a run with callbacks -/
 
@@ -266,6 +313,49 @@ theorem Stmt.exec_run (I : Fml C) :
             simp [Stmt.run, hb, hr, bind, Except.bind]
           rw [this]; exact .callDone hb h
       · exact .inr (.callStop hb h rfl)
+  | .tryCall c rets ok err code pnc other, σ => by
+    cases hk : c.key σ with
+    | error e =>
+      left
+      have : (Stmt.tryCall c rets ok err code pnc other).run σ = .error e := by
+        simp [Stmt.run, hk, bind, Except.bind]
+      rw [this]; exact .tryHalt hk
+    | ok k =>
+      simp only [Stmt.run, hk, bind, Except.bind]
+      rcases lookupBy k σ.tx.ext with _ | (vs | _ | v | _)
+      · exact .inl (.tryRevert hk)
+      · cases hb : bindData rets vs σ with
+        | error e =>
+          simp only [hb]
+          rw [bindData_error hb]
+          exact .inl (.tryRevert hk)
+        | ok σ₁ =>
+          simp only [hb]
+          by_cases hI : holds σ I
+          · have hb' : Binds rets (σ.havoc σ.storage σ.net σ.selfBalance) σ₁ := by
+              rw [State.havoc_self]; exact ⟨vs, hb⟩
+            have hI' : holds (σ.havoc σ.storage σ.net σ.selfBalance) I := by
+              rw [State.havoc_self]; exact hI
+            rcases Prog.exec_run I ok σ₁ with h | h
+            · exact .inl (.tryOk hk hI hI' hb' h)
+            · exact .inr (.tryOk hk hI hI' hb' h)
+          · exact .inr (.tryViolated hk hI)
+      · rcases Prog.exec_run I err σ with h | h
+        · exact .inl (.tryError hk h)
+        · exact .inr (.tryError hk h)
+      · cases hb : bindData (codeBinders code) [v] σ with
+        | error e =>
+          simp only [hb]
+          rw [bindData_error hb]
+          exact .inl (.tryRevert hk)
+        | ok σ₁ =>
+          simp only [hb]
+          rcases Prog.exec_run I pnc σ₁ with h | h
+          · exact .inl (.tryPanic hk ⟨[v], hb⟩ h)
+          · exact .inr (.tryPanic hk ⟨[v], hb⟩ h)
+      · rcases Prog.exec_run I other σ with h | h
+        · exact .inl (.tryOther hk h)
+        · exact .inr (.tryOther hk h)
   | .assign .., σ | .rebind .., σ | .assignLocal .., σ | .declLocal .., σ | .declStorage .., σ
   | .opAssign .., σ | .incDec .., σ | .assignIncDec .., σ | .push .., σ | .pop .., σ
   | .declMem .., σ | .rebindMem .., σ | .assignFromMem .., σ | .assignMem .., σ | .delete .., σ
@@ -302,7 +392,9 @@ mutual
 theorem ExecS.eq_run {I : Fml C} {σ : State} {s : Stmt C} {o : COut} :
     ExecS I σ s o → s.hasTransfer = false → o = .ofRes (s.run σ)
   | .det _, _ => rfl
-  | .transferHalt _, h | .transferViolated _ _, h | .transferResume _ _ _, h => by
+  | .transferHalt _, h | .transferViolated _ _, h | .transferResume _ _ _, h
+  | .tryHalt _, h | .tryRevert _, h | .tryViolated _ _, h | .tryOk _ _ _ _ _, h
+  | .tryError _ _, h | .tryPanic _ _ _, h | .tryOther _ _, h => by
     simp [Stmt.hasTransfer] at h
   | .iteHalt hc, _ => by simp [Stmt.run, hc, bind, Except.bind, COut.ofRes]
   | .iteStuck hc, _ => by simp [Stmt.run, hc, bind, Except.bind, COut.ofRes]
@@ -465,6 +557,16 @@ theorem COut.Agree.after {o o' : COut} (h : COut.Agree ns o o') (m : Modality)
   · exact hpq _ _ h
   all_goals simp_all
 
+/-- The locals an outcome binds, bound in a state that agrees. -/
+theorem Binds.frame {xs : List (PrimTy × Var)} {σ τ τ₁ : State} (hag : EnvAgreeExcept ns σ τ)
+    (h : Binds xs τ τ₁) : ∃ σ₁, Binds xs σ σ₁ ∧ EnvAgreeExcept ns σ₁ τ₁ := by
+  obtain ⟨vs, h⟩ := h
+  have := bindData_frame (ns := ns) xs vs hag
+  rw [h] at this
+  cases h' : bindData xs vs σ with
+  | error _ => rw [h'] at this; exact this.elim
+  | ok σ₁ => rw [h'] at this; exact ⟨σ₁, ⟨vs, h'⟩, this⟩
+
 theorem holds_I_frame {I : Fml C} (hI : I.vars = []) {σ τ : State}
     (h : EnvAgreeExcept ns σ τ) : holds σ I ↔ holds τ I :=
   holds_frame I (fun x hx => by simp [hI] at hx) h
@@ -547,6 +649,34 @@ theorem ExecS.frame {I : Fml C} (hI : I.vars = []) {σ τ : State} {s : Stmt C} 
       rw [hb'] at this
       obtain ⟨o, ho', hag'⟩ := ExecP.frame hI hp hs.right (CallRet.enter_frame this ret)
       exact ⟨o, .callStop hb' ho' (by rw [hag'.isOk]; exact ho), hag'⟩
+  | .tryHalt (c := c) hk, hs, hag => by
+    rw [← c.key_frame hag hs.left.left.left.left.left.left] at hk
+    exact ⟨_, .tryHalt hk, rfl⟩
+  | .tryRevert (c := c) hk, hs, hag => by
+    rw [← c.key_frame hag hs.left.left.left.left.left.left] at hk
+    exact ⟨_, .tryRevert hk, rfl⟩
+  | .tryViolated (c := c) hk hn, hs, hag => by
+    rw [← c.key_frame hag hs.left.left.left.left.left.left] at hk
+    exact ⟨_, .tryViolated hk (fun h' => hn ((holds_I_frame hI hag).1 h')), trivial⟩
+  | .tryOk (c := c) (st := st) (nt := nt) (bal := bal) hk h₁ h₂ hb hp, hs, hag => by
+    rw [← c.key_frame hag hs.left.left.left.left.left.left] at hk
+    obtain ⟨σ₁, hb', hag₁⟩ := Binds.frame (hag.havoc st nt bal) hb
+    obtain ⟨o, ho, hag'⟩ := ExecP.frame hI hp hs.left.left.left.left.right hag₁
+    exact ⟨o, .tryOk hk ((holds_I_frame hI hag).2 h₁) ((holds_I_frame hI (hag.havoc st nt bal)).2 h₂)
+      hb' ho, hag'⟩
+  | .tryError (c := c) hk hp, hs, hag => by
+    rw [← c.key_frame hag hs.left.left.left.left.left.left] at hk
+    obtain ⟨o, ho, hag'⟩ := ExecP.frame hI hp hs.left.left.left.right hag
+    exact ⟨o, .tryError hk ho, hag'⟩
+  | .tryPanic (c := c) hk hb hp, hs, hag => by
+    rw [← c.key_frame hag hs.left.left.left.left.left.left] at hk
+    obtain ⟨σ₁, hb', hag₁⟩ := Binds.frame hag hb
+    obtain ⟨o, ho, hag'⟩ := ExecP.frame hI hp hs.left.right hag₁
+    exact ⟨o, .tryPanic hk hb' ho, hag'⟩
+  | .tryOther (c := c) hk hp, hs, hag => by
+    rw [← c.key_frame hag hs.left.left.left.left.left.left] at hk
+    obtain ⟨o, ho, hag'⟩ := ExecP.frame hI hp hs.right hag
+    exact ⟨o, .tryOther hk ho, hag'⟩
 
 /-- **Frame, for blocks with callbacks.** -/
 theorem ExecP.frame {I : Fml C} (hI : I.vars = []) {σ τ : State} {P : List (Stmt C)}

@@ -2532,6 +2532,10 @@ theorem Arg.bindSeq_tight {args : List (Arg C)} {σ σ' : State} (ht : Tight C �
     (h : Arg.bindSeq args σ = .ok σ') : Tight C σ' :=
   Arg.bindSeq_induct (fun _ x _ ht => ht.setEnv x (fun _ _ h => Binding.noConfusion h)) ht h
 
+theorem bindData_tight {xs : List (PrimTy × Var)} {vs : List Value} {σ σ' : State}
+    (ht : Tight C σ) (h : bindData xs vs σ = .ok σ') : Tight C σ' :=
+  bindData_induct (fun _ x _ ht => ht.setEnv x (fun _ _ h => Binding.noConfusion h)) ht h
+
 theorem CallRet.enter_tight (ht : Tight C σ) : (ret : CallRet) → Tight C (ret.enter σ)
   | .none => ht
   | .val _ _ _ => ht.setEnv _ (fun _ _ h => Binding.noConfusion h)
@@ -2890,6 +2894,28 @@ theorem Stmt.run_tight (hd : DeepOk C) : ∀ (s : Stmt C) {Γ Γ' : Ctx} {H : He
         have ht₂ := Prog.run_tight hd body (CallRet.enter_wt (Arg.bindSeq_wt hwt h₁ hσ₁) ret) hcn₁
           (CallRet.enter_tight (Arg.bindSeq_tight ht hσ₁) ret) h₂ hσ₂
         exact CallRet.leave_tight ht₂ ret h
+      · exact nomatch hs
+    · exact nomatch hs
+  | .tryCall c rets ok err code pnc other, Γ, Γ', H, σ, σ', hwt, hcn, ht, hs, h => by
+    simp only [Stmt.wt] at hs
+    split at hs
+    · split at hs
+      · rename_i Γ₁ Γ₂ Γ₃ Γ₄ h₁ h₂ h₃ h₄
+        obtain ⟨_, rfl⟩ := wt_if hs
+        simp only [Stmt.run] at h
+        obtain ⟨k, _, h⟩ := bind_ok_inv h
+        split at h
+        · exact nomatch h
+        · obtain ⟨σ₁, hb, h⟩ := bind_ok_inv h
+          obtain ⟨hs₁, hh₁⟩ := bindData_locals hb
+          exact Prog.run_tight hd ok (bindData_wt hwt hb) (hcn.of_eq hs₁ hh₁)
+            (bindData_tight ht hb) h₁ h
+        · exact Prog.run_tight hd err hwt hcn ht h₂ h
+        · obtain ⟨σ₁, hb, h⟩ := bind_ok_inv h
+          obtain ⟨hs₁, hh₁⟩ := bindData_locals hb
+          exact Prog.run_tight hd pnc (bindData_wt hwt hb) (hcn.of_eq hs₁ hh₁)
+            (bindData_tight ht hb) h₃ h
+        · exact Prog.run_tight hd other hwt hcn ht h₄ h
       · exact nomatch hs
     · exact nomatch hs
 

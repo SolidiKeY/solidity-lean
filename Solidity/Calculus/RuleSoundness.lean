@@ -113,8 +113,45 @@ theorem Taclet.sound_guard {k : Nat} {m : Modality} {s : Stmt C} {c : Fml C} {U 
 
 theorem Taclet.sound_done {k : Nat} {m : Modality} {s : Stmt C} {b : Bool}
     (d : Taclet C k m s (.done b)) :
-    ∀ σ, (∃ e, s.run σ = .error e) ∧ (b = true → m = .box) := by
-  cases d <;> intro σ <;> simp [Stmt.run]
+    b = true → m = .box ∧ ∀ σ, ∃ e, s.run σ = .error e := by
+  cases d <;> simp [Stmt.run]
+
+/-- `tryCallNoCallbackBox`: the run of a `try` is the run of one of its
+clauses, from the state with the locals its outcome binds, or it halts. -/
+theorem Taclet.sound_branches {k : Nat} {m : Modality} {s : Stmt C}
+    {bs : List (List (PrimTy × Var) × Prog C)} (d : Taclet C k m s (.branches bs)) :
+    ∀ σ, (m = .box ∧ ∃ e, s.run σ = .error e) ∨
+      ∃ b ∈ bs, ∃ σ', Binds b.1 σ σ' ∧ Prog.run σ' b.2 = s.run σ := by
+  cases d with
+  | tryCallNoCallbackBox =>
+    rename_i call rets ok err code pnc other
+    intro σ
+    have halt : ∀ e, (Stmt.tryCall call rets ok err code pnc other).run σ = .error e →
+        (Modality.box = .box ∧ ∃ e, (Stmt.tryCall call rets ok err code pnc other).run σ = .error e) ∨
+        ∃ b ∈ [(rets, ok), ([], err), (codeBinders code, pnc), ([], other)], ∃ σ', Binds b.1 σ σ' ∧
+          Prog.run σ' b.2 = (Stmt.tryCall call rets ok err code pnc other).run σ :=
+      fun e he => .inl ⟨rfl, e, he⟩
+    cases hk : call.key σ with
+    | error e => exact halt e (by simp [Stmt.run, hk, bind, Except.bind])
+    | ok key =>
+      cases hl : lookupBy key σ.tx.ext with
+      | none => exact halt .revert (by simp [Stmt.run, hk, hl, bind, Except.bind])
+      | some r =>
+        cases r with
+        | ok vs =>
+          cases hb : bindData rets vs σ with
+          | error e => exact halt e (by simp [Stmt.run, hk, hl, hb, bind, Except.bind])
+          | ok σ' => exact .inr ⟨_, List.mem_cons_self, σ', ⟨vs, hb⟩,
+              by simp [Stmt.run, hk, hl, hb, bind, Except.bind]⟩
+        | error => exact .inr ⟨([], err), by simp, σ, ⟨[], rfl⟩,
+              by simp [Stmt.run, hk, hl, bind, Except.bind]⟩
+        | panic c =>
+          cases hb : bindData (codeBinders code) [c] σ with
+          | error e => exact halt e (by simp [Stmt.run, hk, hl, hb, bind, Except.bind])
+          | ok σ' => exact .inr ⟨(codeBinders code, pnc), by simp, σ', ⟨[c], hb⟩,
+              by simp [Stmt.run, hk, hl, hb, bind, Except.bind]⟩
+        | other => exact .inr ⟨([], other), by simp, σ, ⟨[], rfl⟩,
+              by simp [Stmt.run, hk, hl, bind, Except.bind]⟩
 
 /-- **The taclets are sound.**  `alice.age = 10;` is `storageFieldWriteSave`,
 and its update saves `10` at `alice.age` as running the statement does;
@@ -128,6 +165,7 @@ theorem Taclet.sound {k : Nat} {m : Modality} {s : Stmt C} {pr : Premise C}
   | split c c' P Q => exact Taclet.sound_split d
   | guard c U => exact Taclet.sound_guard d
   | done b => exact Taclet.sound_done d
+  | branches bs => exact Taclet.sound_branches d
 
 /-- The rules solkey does not have are sound: `functionCallArgCapture` reads
 the argument where the call would (`Stmt.call_capture_sound`). -/
@@ -135,6 +173,7 @@ theorem LeanTaclet.sound {k : Nat} {m : Modality} {s : Stmt C} {pr : Premise C}
     (d : LeanTaclet C k m s pr) (hs : Avoids s.vars (freshVars k)) : pr.Correct k m s := by
   cases d with
   | functionCallArgCapture h => exact Stmt.call_capture_sound h hs
+  | tryCallDiamond => exact fun h => nomatch h
 
 /-- **Every rule of the calculus is sound**, solkey's and the ones it lacks. -/
 theorem Rule.sound {k : Nat} {m : Modality} {s : Stmt C} {pr : Premise C}

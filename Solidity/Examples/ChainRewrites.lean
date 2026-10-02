@@ -1,6 +1,6 @@
 import Solidity.Calculus.Chains
 import Solidity.Calculus.Rewrite
-import Solidity.Examples.ExampleNames
+import Solidity.Examples.Chains.Storage
 
 /-!
 # The lines after the program, as chain links
@@ -15,24 +15,23 @@ link `~[r]~>` of a chain (`Calculus/Chains.lean`), `r` the rule KeY names
 and a chain with one composes to `~~>`, a proof of its first line from its
 last (`Fml.Leads.valid`).
 
-* §1 — the headline as the calculus draws it, for any
-  modality `m` and postcondition `φ`, down to its last line, and on to the
-  write alone (`headlineWrite`), the captures dropped;
+* §1 — the headline as the calculus draws it (`Chains.Storage.BalanceWrite.chain`),
+  for any modality `m` and postcondition `φ`, down to its last line, and on to
+  the write alone (`headlineWrite`), the captures dropped;
 * §2 — on to the value under the box: `simplifyUpdate`, `applyStorageBox`,
   `findOnSave`, and `⊨`;
 * §3 — `alice.age = 42; uint x = alice.age;` read back two ways: the law in
   the update's right-hand side, and the update applied
-  first, then the law (`SelectOnSaveConsr.ageWriteReadKeY`'s order); and the
-  headline's write read back;
-* §4 — a rebound alias: the overwritten capture dropped, as the printed line
-  has it;
-* §5 — what is refused, and what is printed.
+  first, then the law (`SelectOnSaveConsr.ageWriteReadKeY`'s order, which goes
+  on to solkey's read of the write a member at a time, `ageReadMembers`); and
+  the headline's write read back;
+* §4 — what is refused, and what is printed.
 
 The traces picked up: `StorageSteps.deepFieldWrite` to its last line
-(`headlineNamed`, `headlineWrite`) and read back (`headlineValue`, `readBackValue`),
-`SelectOnSaveConsr.ageWriteReadKeY` (`ageWriteReadKeYValue`;
-`ageWriteReadValue` in the printed order), and
-`StorageSteps.localRebindThenWrite`'s aliases (`localRebindLastLine`).
+(`headlineWrite`) and read back (`headlineValue`, `readBackValue`),
+and `SelectOnSaveConsr.ageWriteReadKeY` (`ageWriteReadKeYValue`;
+`ageWriteReadValue` in the printed order).  The rebound alias of
+`Chains.Storage.Rebind.chain` already ends in its merge and its `simplifyUpdate`.
 
 **Which rewrite.**  A name stands for a rule at any position of the update
 spine, and a law at any instance; the elaborator takes the first that gives
@@ -64,40 +63,18 @@ local instance : InContract := ⟨StandardExample⟩
 
 /-! ## 1 · The headline
 
-`alice.account.balance = 10;` unfolds (Step 2), runs to the two captures,
-which are shown merged (the `⇝*` line), writes, and ends: the write
-merges into the captures, its right-hand side substituted — the printed last
-line, in the printed names for the rules' fresh variables (`pv`, `acc` for
-`se1`, `sp1`). -/
+`Chains.Storage.BalanceWrite.chain` is `alice.account.balance = 10;` unfolded
+(Step 2), run to the two captures, written, and ended: the write merges into
+the captures, its right-hand side substituted — the printed last line, in the
+printed names for the rules' fresh variables (`pv`, `acc` for `se1`, `sp1`).
+What follows is past it. -/
 
 section Headline
 variable (m : Modality) (φ : Post StandardExample)
 
 section ExampleNames
 
-local instance : FreshNames := .ofTable ExampleNames.Headline.names
-
-/-- `alice.account.balance = 10;`, for every modality and postcondition: the
-printed trace, line by line, in its names `pv` and `acc`
-(`ExampleNames.Headline.names`). -/
-theorem headlineNamed :
-    dl![m]{ ⟨[ alice.account.balance = 10; ]⟩ φ }
-    ~~> dl![m]{ { pv := 10 ‖ acc := alice.account ‖ storage := save(storage, alice.account.balance, 10) } φ } :=
-  calc dl![m]{ ⟨[ alice.account.balance = 10; ]⟩ φ }
-    _ ~[storageFieldWrite_unfold_leftFst]~>
-        dl![m]{ ⟨[ uint pv = 10; Account storage acc = alice.account; acc.balance = pv; ]⟩ φ } := by
-      sol_chain
-    _ ~*> dl![m]{ { pv := 10 } { acc := alice.account } ⟨[ acc.balance = pv; ]⟩ φ } := by sol_chain
-    _ ~[sequentialToParallel]~>
-        dl![m]{ { pv := 10 ‖ acc := alice.account } ⟨[ acc.balance = pv; ]⟩ φ } := by sol_chain
-    _ ~[storageFieldWriteSave]~>
-        dl![m]{ { pv := 10 ‖ acc := alice.account } { storage := save(storage, acc.balance, pv) } ⟨[ ]⟩ φ } :=
-      rfl
-    _ ~[emptyModality]~>
-        dl![m]{ { pv := 10 ‖ acc := alice.account } { storage := save(storage, acc.balance, pv) } φ } := rfl
-    _ ~[sequentialToParallel]~>
-        dl![m]{ { pv := 10 ‖ acc := alice.account ‖ storage := save(storage, alice.account.balance, 10) } φ } := by
-      sol_chain
+local instance : FreshNames := .ofTable Chains.Storage.BalanceWrite.names
 
 /-- `alice.account.balance = 10;` past the printed last line, for every
 modality and postcondition: `φ` names no fresh variable (`Post.noFresh`), so
@@ -108,14 +85,14 @@ theorem headlineWrite :
     ~~> dl![m]{ { storage := save(storage, alice.account.balance, 10) } φ } :=
   calc dl![m]{ ⟨[ alice.account.balance = 10; ]⟩ φ }
     _ ~~> dl![m]{ { pv := 10 ‖ acc := alice.account ‖ storage := save(storage, alice.account.balance, 10) } φ } :=
-      headlineNamed m φ
+      Chains.Storage.BalanceWrite.chain m φ
     _ ~[simplifyUpdate]~> dl![m]{ { storage := save(storage, alice.account.balance, 10) } φ } := by
       sol_chain
 
 end ExampleNames
 
-/-- The three updates `headline` (`Examples/Chains.lean`) ends with merge in one
-link: the whole spine, the innermost pair first. -/
+/-- The three updates the headline's write leaves (`Chains.Storage.BalanceWrite.chain`,
+before its merge) merge in one link: the whole spine, the innermost pair first. -/
 example : dl![m]{ { se1 := 10 } { sp1 := alice.account } { storage := save(storage, sp1.balance, se1) } φ }
     ~[sequentialToParallel]~>
       dl![m]{ { se1 := 10 ‖ sp1 := alice.account ‖ storage := save(storage, alice.account.balance, 10) } φ } :=
@@ -175,7 +152,7 @@ theorem headlineValueChain :
   calc dl!{ [ alice.account.balance = 10; ] alice.account.balance ≐ 10 }
     _ ~~> dl![.box]{ { se1 := 10 ‖ sp1 := alice.account ‖ storage := save(storage, alice.account.balance, 10) }
           alice.account.balance ≐ 10 } :=
-      headlineNamed .box { fml := dl!{ alice.account.balance ≐ 10 } }
+      Chains.Storage.BalanceWrite.chain .box { fml := dl!{ alice.account.balance ≐ 10 } }
     _ ~[simplifyUpdate]~>
         dl![.box]{ { storage := save(storage, alice.account.balance, 10) } alice.account.balance ≐ 10 } := by
       sol_chain
@@ -204,7 +181,7 @@ def headlineEqD :
 `alice.age = 42; uint x = alice.age;`, against `x ≐ 42`.  Two orders from
 the merged line:
 
-* `ageWriteReadValue`, the in-update reading (`Examples/Theory.lean`):
+* `ageWriteReadValue`, the in-update reading (`Examples/Tactics/Theory.lean`):
   `findOnSave` inside the update (onto a literal, so the rewrite of a box
   update's right-hand side, `Proves.updRw`), then the update applied
   (`applyOnRigidBox`: `x ≐ 42` reads no storage);
@@ -237,6 +214,20 @@ theorem ageWriteReadKeYValue : ⊨ dl!{ [ alice.age = 42; uint x = alice.age; ] 
     _ ~[findOnSave]~> dl!{ 42 ≐ 42 } := by sol_chain)
     fun _ => Theory.StValue.Equiv.refl _
 
+/-- The read of the write, one member at a time instead of `findOnSave`: solkey's
+`findMemberCons` reads `alice.age` from its head, `select(select(…, alice), age)`
+(the `consr` path turned into `cons` form inside its proof, `consRcons` and
+`consRnil`, then `findDefinitionMemberCons`), and `selectOnSaveMember`,
+`selectOnSaveCons`, pushes the write into `alice`; the read of the write at the
+last member is `findOnSave` again.  From the line `ageWriteReadKeYValue` reaches
+before its law (`SelectOnSaveConsr.lean` has the `consr` path). -/
+def ageReadMembers :
+    dl!{ find(save(storage, alice.age, 42), alice.age) ≐ 42 }
+    ~=> dl!{ select(select(save(storage, alice.age, 42), alice), age) ≐ 42 }
+    ~=> dl!{ select(store(select(storage, alice), age, 42), age) ≐ 42 }
+    ~=> dl!{ 42 ≐ 42 } := by
+  sol_chain
+
 /-- `alice.account.balance = 10; uint x = alice.account.balance;` reads back
 `10`: five updates merged inside out, the read over the write first
 (`withSt`), then the captures; the law in the update; the update applied. -/
@@ -256,25 +247,7 @@ theorem readBackValue :
     _ ~[applyOnRigidBox]~> dl!{ 10 ≐ 10 } := by sol_chain)
     fun _ => Theory.StValue.Equiv.refl _
 
-/-! ## 4 · A rebound alias
-
-`Account storage acc = alice.account; acc = bob.account; acc.balance = 10;`
-(`StorageSteps.localRebindThenWrite` without its first capture): the printed
-line keeps `acc := bob.account` and drops the capture it overwrites.
-Dropping an overwritten element needs nothing of the postcondition, so it
-computes over `φ` and `m`. -/
-
-/-- `Account storage acc = alice.account; acc = bob.account; acc.balance = 10;`:
-the stack the strategy leaves, merged, then the printed line. -/
-def localRebindLastLine (m : Modality) (φ : Post StandardExample) :
-    dl![m]{ { acc := alice.account } { acc := bob.account } { storage := save(storage, acc.balance, 10) } φ }
-    ~[sequentialToParallel]~>
-      dl![m]{ { acc := alice.account ‖ acc := bob.account ‖ storage := save(storage, bob.account.balance, 10) } φ }
-    ~[simplifyUpdate]~>
-      dl![m]{ { acc := bob.account ‖ storage := save(storage, bob.account.balance, 10) } φ } := by
-  sol_chain
-
-/-! ## 5 · What is refused, and what is printed -/
+/-! ## 4 · What is refused, and what is printed -/
 
 section Refused
 variable (m : Modality) (φ : Post StandardExample)
@@ -399,13 +372,5 @@ info: dl{ { se1 := 10 } { sp1 := alice.account } true }
 #guard_msgs in
 #check dl!{ { se1 := 10 } { sp1 := alice.account } true }
     ~[sequentialToParallel]~> dl!{ { se1 := 10 ‖ sp1 := alice.account } true }
-
-/--
-info: Solidity.Examples.ChainRewrites.headlineNamed (m : Modality) (φ : Post StandardExample) :
-  dl{ ⟨[ alice.account.balance = 10; ]⟩ φ } ~~>
-    dl{ { se1 := 10 ‖ sp1 := alice.account ‖ storage := save(storage, alice.account.balance, 10) } φ }
--/
-#guard_msgs in
-#check headlineNamed
 
 end Solidity.Examples.ChainRewrites

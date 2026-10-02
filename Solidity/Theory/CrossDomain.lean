@@ -29,7 +29,7 @@ and upstream has no taclet that rewrites under one.
 
 `readCopyStIdentity` is a *corollary* here rather than a recursion of its own:
 `StValue.toMemValue` sends a struct to `dflt`, so the cast at the `Identity`
-sort manufactures `idC(r, flds·a)` by `defaultDefIdentity` — a reference member
+sort manufactures `idC(r, flds·a)` by `initIdentity` — a reference member
 of a copied struct exists as soon as its parent does, exactly as a reference
 member of a fresh root does.
 -/

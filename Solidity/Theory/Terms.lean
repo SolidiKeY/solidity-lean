@@ -170,7 +170,7 @@ meet and `toNat` is the only place the number is visible. -/
 inductive IdentityPrim where
   | ofNat (n : Nat)
   /-- `\unique IdentityPrim shaped(IdentityPrim, Shape)`: a root tagged with
-  its declared shape, which is how `defaultSize` finds a fixed-size array's
+  its declared shape, which is how `initSize` finds a fixed-size array's
   length.  `\unique`, so a shaped root is not the root it tags. -/
   | shaped (idp : IdentityPrim) (sh : Shape)
   deriving Repr, DecidableEq
@@ -236,21 +236,21 @@ namespace MemValue
 
 /-! ### Casts
 
-`default<[α]>(idC(idp, flds), a)` is resolved by the sort the read is taken
+`init<[α]>(idC(idp, flds), a)` is resolved by the sort the read is taken
 at, and the two sorts answer differently: a primitive member of a fresh root
 reads as the primitive default, a *reference* member reads as the identity one
 field further down.  That second one is the whole of the statement "a reference
 member of a fresh root reads as the identity reached by extending the path, so
 the struct it points to exists as soon as its parent does". -/
 
-/-- `default<[prim]>(idC(idp, flds), a) ⇝ defaultValue<[prim]>` — the cast
+/-- `init<[prim]>(idC(idp, flds), a) ⇝ defaultValue<[prim]>` — the cast
 that resolves a sort-free default at a primitive sort. -/
 def asPrim : MemValue -> MVal
   | prim p => .prim p
   | ident _ => MVal.int 0
   | dflt => MVal.int 0
 
-/-- `default<[Identity]>(idC(idp, flds), a) ⇝ idC(idp, consr(flds, a))` — the
+/-- `init<[Identity]>(idC(idp, flds), a) ⇝ idC(idp, consr(flds, a))` — the
 cast at the `Identity` sort, which needs the location the read was taken at
 and is why it takes `loc` and `a`. -/
 def asIdentity : MemValue -> Identity -> Seg -> Identity
@@ -362,7 +362,7 @@ def asBool : StValue -> Bool
 
 Both algebras are sort-free with the cast resolving the read, so these two
 conversions are where the sort index goes.  A struct becomes `dflt` so
-that `defaultDefIdentity` manufactures `idC(r, flds·a)` on the read — which is
+that `initIdentity` manufactures `idC(r, flds·a)` on the read — which is
 `readCopyStIdentity`, without a recursion of its own. -/
 
 /-- A storage value as a memory slot. -/
@@ -379,7 +379,7 @@ location `loc`/`a` it was read from.  A primitive is itself
 (`selectOnCopyMemPrim`); anything else is the view one field down, over the
 identity the slot names (`selectOnCopyMemRef`'s
 `copyMem(mtSt, mem, read<[Identity]>(mem, id, a))`).  That includes a
-never-written slot: its identity is `defaultDefIdentity`'s `idC(r, flds·a)`,
+never-written slot: its identity is `initIdentity`'s `idC(r, flds·a)`,
 so a member struct that memory created implicitly is still read *through*,
 and a write below it is seen. -/
 def ofViewAt (mem : Memory) (loc : Identity) (a : Seg) : MemValue -> StValue

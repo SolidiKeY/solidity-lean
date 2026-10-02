@@ -143,6 +143,7 @@ def Hyp.withC (I : Fml C) : List (Hyp C) → State → (State → Prop) → Prop
   | .pre a :: Γ, σ, P => holdsC I σ a → Hyp.withC I Γ σ P
   | .upd m U :: Γ, σ, P => m.after (fun τ => Hyp.withC I Γ τ P) (U.apply σ)
   | .havoc :: Γ, σ, P => ∀ st nt bal, Hyp.withC I Γ (σ.havoc st nt bal) P
+  | .all x p :: Γ, σ, P => ∀ v, p.admits v → Hyp.withC I Γ (σ.setEnv x (.val v)) P
 
 theorem Hyp.holdsC_wrap {I : Fml C} {φ : Fml C} :
     (Γ : List (Hyp C)) → ∀ σ, holdsC I σ (Hyp.wrap Γ φ) ↔ Hyp.withC I Γ σ (holdsC I · φ)
@@ -156,6 +157,9 @@ theorem Hyp.holdsC_wrap {I : Fml C} {φ : Fml C} :
   | .havoc :: Γ, σ => by
     simp only [Hyp.wrap, holdsC, Hyp.withC]
     exact forall_congr' fun _ => forall_congr' fun _ => forall_congr' fun _ => Hyp.holdsC_wrap Γ _
+  | .all x p :: Γ, σ => by
+    simp only [Hyp.wrap, holdsC, Hyp.withC]
+    exact forall_congr' fun _ => imp_congr_right fun _ => Hyp.holdsC_wrap Γ _
 
 theorem Hyp.withC_mono {I : Fml C} {P Q : State → Prop} (h : ∀ τ, P τ → Q τ) :
     (Γ : List (Hyp C)) → ∀ σ, Hyp.withC I Γ σ P → Hyp.withC I Γ σ Q
@@ -167,6 +171,7 @@ theorem Hyp.withC_mono {I : Fml C} {P Q : State → Prop} (h : ∀ τ, P τ → 
     | error _ => exact id
     | ok τ => exact Hyp.withC_mono h Γ τ
   | .havoc :: Γ => fun σ hP st nt bal => Hyp.withC_mono h Γ _ (hP st nt bal)
+  | .all _ _ :: Γ => fun σ hP v hv => Hyp.withC_mono h Γ _ (hP v hv)
 
 theorem Hyp.withC_mono₂ {I : Fml C} {P Q R : State → Prop} (h : ∀ τ, P τ → Q τ → R τ) :
     (Γ : List (Hyp C)) → ∀ σ, Hyp.withC I Γ σ P → Hyp.withC I Γ σ Q → Hyp.withC I Γ σ R
@@ -178,6 +183,36 @@ theorem Hyp.withC_mono₂ {I : Fml C} {P Q R : State → Prop} (h : ∀ τ, P τ
     | error _ => exact fun h _ => h
     | ok τ => exact Hyp.withC_mono₂ h Γ τ
   | .havoc :: Γ => fun σ hP hQ st nt bal => Hyp.withC_mono₂ h Γ _ (hP st nt bal) (hQ st nt bal)
+  | .all _ _ :: Γ => fun σ hP hQ v hv => Hyp.withC_mono₂ h Γ _ (hP v hv) (hQ v hv)
+
+/-- `Hyp.withC_mono₂` for a list of premises besides one. -/
+theorem Hyp.withC_forall {I : Fml C} {α : Type} {Q : State → Prop} {R : α → State → Prop}
+    (Γ : List (Hyp C)) (σ : State) :
+    (l : List α) → Hyp.withC I Γ σ Q → (∀ a ∈ l, Hyp.withC I Γ σ (R a)) →
+      Hyp.withC I Γ σ (fun τ => Q τ ∧ ∀ a ∈ l, R a τ)
+  | [], hQ, _ => Hyp.withC_mono (fun _ h => ⟨h, by simp⟩) Γ σ hQ
+  | a :: l, hQ, hR =>
+    Hyp.withC_mono₂ (fun _ ⟨hq, hl⟩ ha => ⟨hq, List.forall_mem_cons.2 ⟨ha, hl⟩⟩) Γ σ
+      (Hyp.withC_forall Γ σ l hQ (fun b hb => hR b (List.mem_cons_of_mem _ hb)))
+      (hR a List.mem_cons_self)
+
+/-- `holds_alls`, read with callbacks. -/
+theorem holdsC_alls {I φ : Fml C} : {xs : List (PrimTy × Var)} → {σ : State} →
+    (holdsC I σ (Fml.alls xs φ) ↔ ∀ σ', Binds xs σ σ' → holdsC I σ' φ)
+  | [], σ => by
+    simp only [Fml.alls, Binds, bindData]
+    exact ⟨fun h σ' ⟨_, he⟩ => by cases he; exact h, fun h => h σ ⟨[], rfl⟩⟩
+  | (p, x) :: xs, σ => by
+    simp only [Fml.alls, holdsC, holdsC_alls (xs := xs), Binds, PrimTy.admits_iff_fits]
+    constructor
+    · rintro h σ' ⟨_ | ⟨v, vs⟩, he⟩
+      · simp [bindData] at he
+      · simp only [bindData] at he
+        split at he
+        · exact h v (by assumption) σ' ⟨vs, he⟩
+        · cases he
+    · intro h v hv σ' ⟨vs, he⟩
+      exact h σ' ⟨v :: vs, by simp only [bindData, hv, if_true]; exact he⟩
 
 /-- "Resume after callback" as a formula: `{U} {havoc} (I → ⟨[ ω ]⟩ φ)`, read
 with callbacks, is `CbResume`. -/
@@ -306,6 +341,66 @@ theorem Premise.soundC_unfold {I : Fml C} (hI : I.vars = []) {k : Nat} {m : Moda
         have := H _ (ExecP.append_stop (Q := ω) (ExecP.of_run_error hP hp) rfl)
         exact this
 
+/-- The runs of a `try` with callbacks: it halts, leaves the invariant
+broken, returns to a state the callee may leave and runs its success block,
+or runs a clause's block from where it was made. -/
+theorem ExecS.tryCall_inv {I : Fml C} {σ : State} {c : ExtCall C} {rets : List (PrimTy × Var)}
+    {ok err : List (Stmt C)} {code : Option Var} {pnc other : List (Stmt C)} {o : COut}
+    (h : ExecS I σ (.tryCall c rets ok err code pnc other) o) :
+    (∃ e, o = .halt e) ∨ (¬ holds σ I ∧ o = .violated) ∨
+    (∃ st nt bal σ₁, holds (σ.havoc st nt bal) I ∧ Binds rets (σ.havoc st nt bal) σ₁ ∧
+      ExecP I σ₁ ok o) ∨
+    ExecP I σ err o ∨ (∃ σ₁, Binds (codeBinders code) σ σ₁ ∧ ExecP I σ₁ pnc o) ∨
+    ExecP I σ other o := by
+  cases h with
+  | det hf => simp [Stmt.forks] at hf
+  | tryHalt _ | tryRevert _ => exact .inl ⟨_, rfl⟩
+  | tryViolated _ hn => exact .inr (.inl ⟨hn, rfl⟩)
+  | tryOk _ _ h₂ hb hp => exact .inr (.inr (.inl ⟨_, _, _, _, h₂, hb, hp⟩))
+  | tryError _ hp => exact .inr (.inr (.inr (.inl hp)))
+  | tryPanic _ hb hp => exact .inr (.inr (.inr (.inr (.inl ⟨_, hb, hp⟩))))
+  | tryOther _ hp => exact .inr (.inr (.inr (.inr (.inr hp))))
+
+/-- **`tryCallWithCallbackBox` is sound**: with the invariant where control
+leaves, the call's success from every state the callee may leave in which the
+invariant holds, and each clause's block from where the call was made, the
+`try` and the rest hold under the callback reading.  A call that reverts in
+the caller satisfies the box. -/
+theorem CallbackTaclet.sound_branches {I : Fml C} {s : Stmt C} {xs : List (PrimTy × Var)}
+    {P : Prog C} {bs : List (List (PrimTy × Var) × Prog C)}
+    (d : CallbackTaclet C .box s (.branches ((xs, P) :: bs))) {ω : Prog C} {φ : Fml C}
+    {σ : State} (hexit : holds σ I)
+    (hok : ∀ st nt bal, holds (σ.havoc st nt bal) I → ∀ σ₁, Binds xs (σ.havoc st nt bal) σ₁ →
+      holdsC I σ₁ (.modal .box (P ++ ω) φ))
+    (hcaught : ∀ b ∈ bs, ∀ σ₁, Binds b.1 σ σ₁ → holdsC I σ₁ (.modal .box (b.2 ++ ω) φ)) :
+    holdsC I σ (.modal .box (s :: ω) φ) := by
+  cases d
+  rename_i err code pnc other
+  simp only [holdsC] at hok hcaught ⊢
+  have hE := hcaught ([], err) (by simp) σ ⟨[], rfl⟩
+  have hP := fun σ₁ hb => hcaught (codeBinders code, pnc) (by simp) σ₁ hb
+  have hO := hcaught ([], other) (by simp) σ ⟨[], rfl⟩
+  intro o he
+  cases he with
+  | cons hs hω =>
+    rcases ExecS.tryCall_inv hs with ⟨_, h⟩ | ⟨_, h⟩ | ⟨_, _, _, _, h₂, hb, hp⟩ | hp |
+      ⟨_, hb, hp⟩ | hp
+    · cases h
+    · cases h
+    · exact hok _ _ _ h₂ _ hb o (ExecP.append_ok hp hω)
+    · exact hE o (ExecP.append_ok hp hω)
+    · exact hP _ hb o (ExecP.append_ok hp hω)
+    · exact hO o (ExecP.append_ok hp hω)
+  | stop hs ho =>
+    rcases ExecS.tryCall_inv hs with ⟨_, rfl⟩ | ⟨hn, _⟩ | ⟨_, _, _, _, h₂, hb, hp⟩ | hp |
+      ⟨_, hb, hp⟩ | hp
+    · exact trivial
+    · exact absurd hexit hn
+    · exact hok _ _ _ h₂ _ hb o (ExecP.append_stop hp ho)
+    · exact hE o (ExecP.append_stop hp ho)
+    · exact hP _ hb o (ExecP.append_stop hp ho)
+    · exact hO o (ExecP.append_stop hp ho)
+
 /-! ## The judgement -/
 
 /-- `ProvesC I Γ φ`: the calculus proves `φ` in the context `Γ` when every
@@ -346,6 +441,21 @@ inductive ProvesC (I : Invariant C) : List (Hyp C) → Fml C → Prop
       (exit : ProvesC I (Γ ++ [.pre c]) (.upd m U I.fml))
       (resume : ProvesC I (Γ ++ [.pre c, .upd m U, .havoc, .pre I.fml]) (.modal m ω φ)) :
       ProvesC I Γ (.modal m (s :: ω) φ)
+  /-- **`tryCallWithCallbackBox`**: the invariant where control leaves
+  ("invariant on exit"); the call's success, from any state the callee may
+  leave in which the invariant holds, for every value of its return data
+  ("call succeeded"); and each clause's block where the call reverted, which
+  undid whatever the callee did. -/
+  | tryCall {Γ : List (Hyp C)} {s : Stmt C} {ω : Prog C} {φ : Fml C}
+      {xs : List (PrimTy × Var)} {P : Prog C} {bs : List (List (PrimTy × Var) × Prog C)}
+      (d : CallbackTaclet C .box s (.branches ((xs, P) :: bs)))
+      (exit : ProvesC I Γ I.fml)
+      (ok : ProvesC I (Γ ++ [.havoc, .pre I.fml]) (.alls xs (.modal .box (P ++ ω) φ)))
+      (caught : ∀ b ∈ bs, ProvesC I Γ (.alls b.1 (.modal .box (b.2 ++ ω) φ))) :
+      ProvesC I Γ (.modal .box (s :: ω) φ)
+  /-- `allRight`. -/
+  | allIntro {Γ : List (Hyp C)} {x : Var} {p : PrimTy} {φ : Fml C}
+      (h : ProvesC I (Γ ++ [.all x p]) φ) : ProvesC I Γ (.all x p φ)
   /-- Leave the calculus: with no modality left anywhere in the sequent, what
   is left is proved about the callback reading. -/
   | close {Γ : List (Hyp C)} {φ : Fml C} (h : ValidC I (Hyp.wrap Γ φ))
@@ -413,6 +523,22 @@ theorem ProvesC.sound {I : Invariant C} {Γ : List (Hyp C)} {φ : Fml C} (h : Pr
         | ok a => rw [hu] at hx; exact (holdsC_iff_holds I.fml I.noTransfer).1 hx)
       (fun hcτ => CbResume.of_holdsC I.noTransfer (hr ((hc τ).2 hcτ))))
       Γ σ hf hx
+  | allIntro _ ih => simpa [Hyp.wrap_append, Hyp.wrap] using ih
+  | @tryCall Γ s ω φ xs P bs d _ _ _ ihx iho ihc =>
+    intro σ
+    have hx := ihx σ
+    have ho := iho σ
+    rw [Hyp.wrap_append] at ho
+    simp only [Hyp.wrap] at ho
+    rw [Hyp.holdsC_wrap] at hx ho ⊢
+    have hc := Hyp.withC_forall (R := fun b τ => holdsC I.fml τ (.alls b.1 (.modal .box (b.2 ++ ω) φ)))
+      Γ σ bs (Hyp.withC_mono₂ (fun _ h₁ h₂ => And.intro h₁ h₂) Γ σ hx ho)
+      (fun b hb => by have := ihc b hb σ; rwa [Hyp.holdsC_wrap] at this)
+    refine Hyp.withC_mono (fun τ ⟨⟨hx, ho⟩, hc⟩ => d.sound_branches
+      ((holdsC_iff_holds I.fml I.noTransfer).1 hx) (fun st nt bal hI σ₁ hb => ?_)
+      (fun b hb σ₁ hb' => holdsC_alls.1 (hc b hb) σ₁ hb')) Γ σ hc
+    simp only [holdsC] at ho
+    exact holdsC_alls.1 (ho st nt bal ((holdsC_iff_holds I.fml I.noTransfer).2 hI)) σ₁ hb
   | close h _ => exact h
 
 /-- A derivation from the empty context proves validity with callbacks. -/

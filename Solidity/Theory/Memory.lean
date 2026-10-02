@@ -21,7 +21,7 @@ from the `.key` source directly.
 
 A memory location is named the way KeY names it: `idC(idp, flds)`, a root of
 sort `IdentityPrim` together with the field path that reaches the location
-from it.  `idCC(idp)` is `idC(idp, [])`, and `defaultDefIdentity` manufactures
+from it.  `idCC(idp)` is `idC(idp, [])`, and `initIdentity` manufactures
 `idC(idp, flds · a)` on the fly, which is what makes a reference member of a
 freshly added root *exist* without anything being allocated for it — the
 point: "this is how Solidity's implicit creations are modelled without
@@ -37,22 +37,22 @@ resolves anything, exactly as KeY's does not.
 
 `readR` walks a whole path one field at a time, resolving each field to the
 identity it names before reading the next, so the chain-walking layer —
-`readR`, `readREmpty`, `readRCons`, `idCCDef`, `defaultDefIdentity` — is here
+`readR`, `readREmpty`, `readRCons`, `idCCDef`, `initIdentity` — is here
 and proved.
 
 `addM` carries two things: KeY's own root, which is what lets `readOnAddM` and
 `newFromAdd` branch on it exactly as the taclets do, and the allocated type,
 which KeY does not carry.  The type is the one place this is eager where KeY
 is lazy, for the same reason as the storage side: KeY resolves a never-written
-slot of a fresh object to `default<[α]>` at whatever sort the reader asks for,
+slot of a fresh object to `init<[α]>` at whatever sort the reader asks for,
 while `Semantics.allocDefault` materializes the object when it is allocated,
 so the term has to know its type to denote.
 
 ## Shaped roots
 
 A root may be `shaped(idp, sh)` (`Theory/Terms.lean`): solkey tags every fresh
-root with its declared shape so that `default<[int]>` at its `size` is the
-declared length of a fixed-size array (`defaultSize`).  The shape algebra
+root with its declared shape so that `init<[int]>` at its `size` is the
+declared length of a fixed-size array (`initSize`).  The shape algebra
 that answers it — `sizeOf`, `shapeAt`, `idShape` — is the last section here.
 -/
 
@@ -80,12 +80,12 @@ open MemValue
     readIn (write mem id1 a1 v) id2 a2 =
       if id1 = id2 ∧ a1 = a2 then v else readIn mem id2 a2 := rfl
 
-/-- `read<[α]>(mtMem, id, a) ⇝ default<[α]>(id, a)`. -/
+/-- `read<[α]>(mtMem, id, a) ⇝ init<[α]>(id, a)`. -/
 @[simp] theorem readFromEmptyMemory (id : Identity)
     (a : Seg) : readIn mtMem id a = dflt := rfl
 
 /-- `read<[α]>(addM(mem, idp1), idC(idp2, flds), a)`: KeY splits on
-`idp1 = idp2` and answers `default<[α]>` on the fresh root, reading through
+`idp1 = idp2` and answers `init<[α]>` on the fresh root, reading through
 otherwise.  This is that taclet. -/
 @[simp] theorem readOnAddM (mem : Memory) (idp : IdentityPrim)
     (ty : RefTy) (id : Identity) (a : Seg) :
@@ -107,13 +107,13 @@ theorem readAddDifferent (mem : Memory) (r1 r2 : IdentityPrim)
 
 /-- `defaultValueInt`: a primitive default is `0`, wherever it is read — the
 location-free cast.  Where the location matters (a shaped root's length) the
-cast is `MemValue.asIntAt`, and `defaultDefElement`/`defaultDefMember`/
-`defaultSize` below are its three rules. -/
+cast is `MemValue.asIntAt`, and `initElement`/`initMember`/
+`initSize` below are its three rules. -/
 @[simp] theorem defaultDefInt : MemValue.asPrim dflt = MVal.int 0 := rfl
 
-/-- **`defaultDefIdentity`** — `default<[Identity]>(idC(idp, flds), a)` is
+/-- **`initIdentity`** — `init<[Identity]>(idC(idp, flds), a)` is
 `idC(idp, consr(flds, a))`.  The taclet that gives a fresh root its members. -/
-@[simp] theorem defaultDefIdentity (r : IdentityPrim) (flds : List Seg) (a : Seg) :
+@[simp] theorem initIdentity (r : IdentityPrim) (flds : List Seg) (a : Seg) :
     MemValue.asIdentity dflt (.idC r flds) a = .idC r (flds ++ [a]) := rfl
 
 /-- `idCCDef`: `idCC(idp) ⇝ idC(idp, nil)`. -/
@@ -168,7 +168,7 @@ def isPrimitive (t : Ty) : Bool := t.isPrimitive
 
 `readRCons` is stated upstream with `firsts`/`last`: resolve all but the last
 field, then read there.  The definition here recurses from the front, because
-that is what keeps it structural and every chain in `Examples/Theory.lean`
+that is what keeps it structural and every chain in `Examples/Tactics/Theory.lean`
 steps through `readREmpty`/`readRCons` by `rfl`.  This is the same rule in
 KeY's spelling, as a theorem. -/
 
@@ -232,7 +232,7 @@ end Memory
 
 `memoryRules.key`'s shape algebra: `sizeOf`, `shapeAt`, `idShape` over the
 `Shape` sort of `Theory/Terms.lean`, and the one cast that reads a shape,
-`default<[int]>` at a shaped root's length.  All of it is free terms — no
+`init<[int]>` at a shaped root's length.  All of it is free terms — no
 struct, no memory — so all of it is stated; a declared `uint[3]` has the
 shape `fixedArr(3, leaf)` (`Shape.ofTy_fixed`).
 
@@ -327,12 +327,12 @@ theorem shapeAtMember (decl : Name -> Ty) (sh : Shape) (m : Name) (xs : List Seg
 @[simp] theorem idShapeDef (decl : Name -> Ty) (r : IdentityPrim) (sh : Shape) (flds : List Seg) :
     idShape decl (.idC (.shaped r sh) flds) = shapeAt decl sh flds := rfl
 
-/-! ### `default<[int]>` at its location
+/-! ### `init<[int]>` at its location
 
-`default<[α]>(idC(idp, flds), a)` is split three ways by the field since
+`init<[α]>(idC(idp, flds), a)` is split three ways by the field since
 solkey `8c5c69ca25`: an element and a named member read the flat default
-(`defaultDefElement`, `defaultDefMember`, the old single `defaultDef`), and
-the length of a *shaped* root reads its shape's size (`defaultSize`).  So the
+(`initElement`, `initMember`, the old single `defaultDef`), and
+the length of a *shaped* root reads its shape's size (`initSize`).  So the
 cast needs the location, as `MemValue.asIdentity` already does. -/
 
 /-- `read<[int]>` of a memory slot read at `loc`/`a`: the slot's integer, `0`
@@ -347,29 +347,29 @@ def MemValue.asIntAt (decl : Name -> Ty) : MemValue -> Identity -> Seg -> Int
 
 namespace Memory
 
-/-- **`defaultDefElement`** — `default<[prim]>(idC(idp, flds), at(pk)) ⇝
+/-- **`initElement`** — `init<[prim]>(idC(idp, flds), at(pk)) ⇝
 defaultValue<[prim]>`. -/
-@[simp] theorem defaultDefElement (decl : Name -> Ty) (r : IdentityPrim) (flds : List Seg) (i : Int) :
+@[simp] theorem initElement (decl : Name -> Ty) (r : IdentityPrim) (flds : List Seg) (i : Int) :
     MemValue.asIntAt decl .dflt (.idC r flds) (.at i) = 0 := by
   cases r <;> rfl
 
-/-- **`defaultDefMember`** — `default<[prim]>(idC(idp, flds), m) ⇝
+/-- **`initMember`** — `init<[prim]>(idC(idp, flds), m) ⇝
 defaultValue<[prim]>`, for a named member: `size` is not one. -/
-theorem defaultDefMember (decl : Name -> Ty) (r : IdentityPrim) (flds : List Seg) (m : Name)
+theorem initMember (decl : Name -> Ty) (r : IdentityPrim) (flds : List Seg) (m : Name)
     (hm : m ≠ "length") :
     MemValue.asIntAt decl .dflt (.idC r flds) (.field m) = 0 := by
   cases r <;> simp [MemValue.asIntAt, hm]
 
-/-- **`defaultSize`** — `default<[int]>(idC(shaped(idp, sh), flds), size) ⇝
+/-- **`initSize`** — `init<[int]>(idC(shaped(idp, sh), flds), size) ⇝
 sizeOf(shapeAt(sh, flds))`: a fixed-size array's length is its declared one
 the moment anything reads it. -/
-@[simp] theorem defaultSize (decl : Name -> Ty) (r : IdentityPrim) (sh : Shape) (flds : List Seg) :
+@[simp] theorem initSize (decl : Name -> Ty) (r : IdentityPrim) (sh : Shape) (flds : List Seg) :
     MemValue.asIntAt decl .dflt (.idC (.shaped r sh) flds) (.field "length") =
       shapeSize (shapeAt decl sh flds) := rfl
 
-/-- An unshaped root's length defaults to the flat `0`, the case `defaultSize`
+/-- An unshaped root's length defaults to the flat `0`, the case `initSize`
 leaves to `defaultValue<[int]>`. -/
-@[simp] theorem defaultSizeUnshaped (decl : Name -> Ty) (n : Nat) (flds : List Seg) :
+@[simp] theorem initSizeUnshaped (decl : Name -> Ty) (n : Nat) (flds : List Seg) :
     MemValue.asIntAt decl .dflt (.idC (.ofNat n) flds) (.field "length") = 0 := rfl
 
 end Memory

@@ -17,7 +17,7 @@ back (`getBalance`).
 
 `@custom:key ensures net(owner) == \old(net(owner)) - _amount`: no term
 reads the `net` ledger (`Close.lean`), so the clause is shown as a run of
-the interpreter (`withdrawRunNet`), as `Examples/Net.lean` shows the ledger.
+the interpreter (`withdrawRunNet`), as `Examples/Tactics/Net.lean` shows the ledger.
 What a formula does read is the funds, `address(this).balance`, which the
 same `transfer` spends: `withdrawFunds` is that clause's other half.  The
 payment runs with `transferNoCallback`, as solkey's net rules do; with

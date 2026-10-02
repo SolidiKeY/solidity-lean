@@ -464,6 +464,10 @@ def Arg.vars : List (Arg C) → List Var
   | [] => []
   | a :: as => a.x :: a.e.vars ++ Arg.vars as
 
+/-- The variables an external call reads. -/
+def ExtCall.vars (c : ExtCall C) : List Var :=
+  c.addr.vars ++ c.args.flatMap fun a => a.2.vars
+
 /-- The return variable of a call, and the local it lands in. -/
 def CallRet.vars : CallRet → List Var
   | .none => []
@@ -497,6 +501,9 @@ def Stmt.vars : Stmt C → List Var
   | .assert c => c.vars
   | .revert => []
   | .call _ args _ ret body => Arg.vars args ++ ret.vars ++ Prog.vars body
+  | .tryCall c rets ok err code pnc other =>
+    c.vars ++ rets.map (·.2) ++ Prog.vars ok ++ Prog.vars err ++ code.toList ++ Prog.vars pnc ++
+      Prog.vars other
 
 def Prog.vars : List (Stmt C) → List Var
   | [] => []
@@ -821,6 +828,34 @@ theorem Arg.bindSeq_frame :
     exact Arg.bindSeq_frame as (fun x hx => h x (by simp [Arg.vars, hx]))
       (EnvAgreeExcept.setEnv_both hag _ _)
 
+/-- An external call is made alike from two states that agree off what it
+reads. -/
+theorem ExtCall.key_frame {σ τ : State} (hag : EnvAgreeExcept ns σ τ) (c : ExtCall C)
+    (h : Avoids c.vars ns) : c.key σ = c.key τ := by
+  have hargs : ∀ as : List (ExtArg C), Avoids (as.flatMap fun a => a.2.vars) ns →
+      as.mapM (fun a => a.2.eval σ) = as.mapM (fun a => a.2.eval τ) := by
+    intro as
+    induction as with
+    | nil => intro _; rfl
+    | cons a as ih =>
+      intro h
+      simp only [List.mapM_cons, a.2.eval_frame hag (h.left (ws := _) |> fun h' => by
+        simpa [List.flatMap_cons] using fun x hx => h x (by simp [List.flatMap_cons, hx])),
+        ih (fun x hx => h x (by simp only [List.flatMap_cons]; exact List.mem_append_right _ hx))]
+  simp only [ExtCall.key, c.addr.eval_frame hag h.left, hargs c.args h.right]
+
+/-- The locals an outcome binds, bound alike in two states that agree. -/
+theorem bindData_frame :
+    (xs : List (PrimTy × Var)) → (vs : List Value) → ∀ {σ τ : State}, EnvAgreeExcept ns σ τ →
+      ResultsAgree ns (bindData xs vs σ) (bindData xs vs τ)
+  | [], _, _, _, hag => hag
+  | _ :: _, [], _, _, _ => rfl
+  | (p, x) :: xs, v :: vs, _, _, hag => by
+    simp only [bindData]
+    split
+    · exact bindData_frame xs vs (EnvAgreeExcept.setEnv_both hag _ _)
+    · rfl
+
 theorem CallRet.enter_frame {σ τ : State} (hag : EnvAgreeExcept ns σ τ) (ret : CallRet) :
     EnvAgreeExcept ns (ret.enter σ) (ret.enter τ) := by
   cases ret with
@@ -935,6 +970,17 @@ theorem Stmt.run_frame {σ τ : State} (hag : EnvAgreeExcept ns σ τ) :
     refine ResultsAgree.bind (Prog.run_frame (CallRet.enter_frame h₁ ret) body h.right)
       fun _ _ h₂ => ?_
     exact CallRet.leave_frame h₂ ret h.left.right
+  | .tryCall c rets ok err code pnc other, h => by
+    simp only [Stmt.run, c.key_frame hag h.left.left.left.left.left.left, hag.tx]
+    refine bindPureResults_agree _ fun k => ?_
+    rcases lookupBy k τ.tx.ext with _ | (vs | _ | v | _)
+    · rfl
+    · exact ResultsAgree.bind (bindData_frame rets vs hag) fun _ _ h' =>
+        Prog.run_frame h' ok h.left.left.left.left.right
+    · exact Prog.run_frame hag err h.left.left.left.right
+    · exact ResultsAgree.bind (bindData_frame _ [v] hag) fun _ _ h' =>
+        Prog.run_frame h' pnc h.left.right
+    · exact Prog.run_frame hag other h.right
 
 theorem Prog.run_frame {σ τ : State} (hag : EnvAgreeExcept ns σ τ) :
     (P : List (Stmt C)) → Avoids (Prog.vars P) ns → ResultsAgree ns (Prog.run σ P) (Prog.run τ P)

@@ -110,12 +110,6 @@ def SpecExpr.isNum : SpecExpr → Bool
   | .num _ => true
   | _ => false
 
-/-- The conjunction of the clauses, `true` for none. -/
-def Fml.conj : List (Fml C) → Fml C
-  | [] => .tt
-  | [φ] => φ
-  | φ :: ψs => .and φ (Fml.conj ψs)
-
 /-- `t` is a value of its type: `0 <= t <= 2^256 - 1` for a `uint`, `!t`
 defined for a `bool`. -/
 def rangeFml (t : Term C) : PrimTy → Fml C

@@ -109,7 +109,7 @@ inductive StepRule (C : Contract) : Type where
 /-- The rule the strategy fires on a formula, fresh names at index `k`:
 `Fml.stepAt`'s choice, with its derivation. -/
 def Fml.ruleAt (k : Nat) : Fml C → Option (StepRule C)
-  | .upd _ _ φ | .imp _ φ | .havoc φ => φ.ruleAt k
+  | .upd _ _ φ | .imp _ φ | .havoc φ | .all _ _ φ => φ.ruleAt k
   | .and φ ψ => if φ.active then φ.ruleAt k else ψ.ruleAt k
   | .modal _ [] _ => some .emptyModality
   | .modal m (s :: _) _ => some (.taclet k m s (s.step k m).premise (s.step k m).rule)
@@ -124,12 +124,13 @@ Example: on `⟨ x = 1; ⟩ x == 1` both `localValueAssign` and the step to
 `{ x := 1 } ⟨⟩ x == 1` exist; on `x == 1` neither does. -/
 theorem Fml.ruleAt_isSome {k : Nat} :
     ∀ φ : Fml C, (φ.ruleAt k).isSome = (φ.stepAt k).isSome
-  | .upd _ _ φ | .imp _ φ | .havoc φ => by simp [Fml.ruleAt, Fml.stepAt, Fml.ruleAt_isSome φ]
+  | .upd _ _ φ | .imp _ φ | .havoc φ | .all _ _ φ => by
+    simp [Fml.ruleAt, Fml.stepAt, Fml.ruleAt_isSome φ]
   | .and φ ψ => by
     simp only [Fml.ruleAt, Fml.stepAt]
     split <;> simp [Fml.ruleAt_isSome]
   | .modal _ [] _ | .modal _ (_ :: _) _ => rfl
-  | .tt | .eq .. | .defined _ | .not _ | .all .. => rfl
+  | .tt | .eq .. | .defined _ | .not _ => rfl
 
 /-! ## An abstract postcondition
 
@@ -182,6 +183,10 @@ theorem Fml.stepAt_imp_of {k : Nat} {a φ ψ : Fml C}
 
 theorem Fml.stepAt_havoc_of {k : Nat} {φ ψ : Fml C}
     (h : φ.stepAt k = some ψ) : (Fml.havoc φ).stepAt k = some (.havoc ψ) := by
+  simp only [Fml.stepAt, h, Option.map_some]
+
+theorem Fml.stepAt_all_of {k : Nat} {x : Var} {p : PrimTy} {φ ψ : Fml C}
+    (h : φ.stepAt k = some ψ) : (Fml.all x p φ).stepAt k = some (.all x p ψ) := by
   simp only [Fml.stepAt, h, Option.map_some]
 
 /-- The first goal steps while it is active. -/
@@ -342,12 +347,12 @@ def stepTaclet (C k m s : Lean.Expr) : MetaM (Lean.Expr × Option Lean.Name) := 
 def hasPost (e : Lean.Expr) : Bool := (e.find? (·.isAppOfArity ``Post.fml 2)).isSome
 
 /-- Whether `Fml.active` and `Fml.stepAt` look through the head of `e` into
-a formula below it: an update, a precondition, a havoc or the goals of a
-branch.  On any other constructor they answer without looking at what is
+a formula below it: an update, a precondition, a havoc, a quantified local
+or the goals of a branch.  On any other constructor they answer without looking at what is
 below it (a `⟨ P ⟩ ↑φ` is active whatever `φ` is). -/
 def isConnective (e : Lean.Expr) : Bool :=
   e.isAppOfArity ``Fml.upd 4 || e.isAppOfArity ``Fml.imp 3 || e.isAppOfArity ``Fml.havoc 2 ||
-    e.isAppOfArity ``Fml.and 3
+    e.isAppOfArity ``Fml.all 4 || e.isAppOfArity ``Fml.and 3
 
 /-- `e.active = b`: the postconditions' `Post.inactive`, put together along
 the connectives `Fml.active` looks through; the kernel's `rfl` where no
@@ -362,7 +367,8 @@ partial def activeProof (C e : Lean.Expr) (b : Bool) : MetaM (Option Lean.Expr) 
     unless ← isDefEq goal (toExpr b) do return none
     return some (← mkExpectedTypeHint (← mkEqRefl (toExpr b)) ty)
   let a := e.getAppArgs
-  if e.isAppOfArity ``Fml.upd 4 || e.isAppOfArity ``Fml.imp 3 || e.isAppOfArity ``Fml.havoc 2 then
+  if e.isAppOfArity ``Fml.upd 4 || e.isAppOfArity ``Fml.imp 3 || e.isAppOfArity ``Fml.havoc 2 ||
+      e.isAppOfArity ``Fml.all 4 then
     let some h ← activeProof C a.back! b | return none
     return some (← mkExpectedTypeHint h ty)
   if !b then
@@ -390,7 +396,8 @@ partial def ruleFocus (C k φ : Lean.Expr) : MetaM (Lean.Expr × Lean.Expr) := d
       | none => mkExpectedTypeHint h (← mkEq (mkApp3 (mkConst ``Fml.ruleAt) C k φ)
           (mkApp3 (mkConst ``Fml.ruleAt) C k χ))
     return (χ, h)
-  if φ.isAppOfArity ``Fml.upd 4 || φ.isAppOfArity ``Fml.imp 3 || φ.isAppOfArity ``Fml.havoc 2 then
+  if φ.isAppOfArity ``Fml.upd 4 || φ.isAppOfArity ``Fml.imp 3 || φ.isAppOfArity ``Fml.havoc 2 ||
+      φ.isAppOfArity ``Fml.all 4 then
     return ← into a.back! none
   if φ.isAppOfArity ``Fml.and 3 then
     if let some ha ← activeProof C a[1]! false then
@@ -784,15 +791,15 @@ theorem Fml.StepBy.valid {r : StepRule C} {φ ψ : Fml C} (h : Fml.StepBy r φ �
 
 /-- A chain is a proof: to prove its first line, prove its last.
 
-Example: the chain `⟨ alice.account.balance = 10; ⟩ … ~*> … ~[storageLocalDeclInitDrop]~> … ~*> …`
-of `Examples/Chains.lean` proves its first line from its last. -/
+Example: the chain `⟨ alice.age = ageVal; ⟩ … ~[storageFieldWriteSave]~> … ~[emptyModality]~> …`
+of `Examples/Chains/Storage.lean`'s `AgeWrite.chain` proves its first line from its last. -/
 theorem Fml.Via.valid {φ : Fml C} {ws : List (Link C × Fml C)} (v : Fml.Via φ ws)
     (h : ⊨ Fml.Via.last φ ws) : ⊨ φ :=
   fun σ => v.sound σ (h σ)
 
 /-- A chain with rewrites is a proof: to prove its first line, prove its last.
 
-Example: `headlineNamed .box φ` of `Examples/ChainRewrites.lean`, down to the
+Example: `BalanceWrite.chain .box φ` of `Examples/Chains/Storage.lean`, down to the
 last line, proves `[ alice.account.balance = 10; ] φ` from
 `{ se1 := 10 ‖ sp1 := alice.account ‖ storage := save(storage, alice.account.balance, 10) } φ`. -/
 theorem Fml.Leads.valid {φ ψ : Fml C} (h : φ ~~> ψ) (hψ : ⊨ ψ) : ⊨ φ :=
@@ -837,8 +844,8 @@ theorem Fml.StepBy.unique {r r' : StepRule C} {φ ψ χ : Fml C} (h : Fml.StepBy
 /-- Two derivations of the same length between the same ends are equal: each
 step is determined.
 
-Example: any two seven-step derivations of `alice.account.balance = 10;`
-are the `calc` chain `headline` of `Examples/Chains.lean`. -/
+Example: any two two-step derivations of `alice.age = ageVal;`
+are `AgeWrite.chain` of `Examples/Chains/Storage.lean`. -/
 theorem Fml.Steps.eq_of_length {φ ψ : Fml C} :
     (c d : φ ~*> ψ) → c.length = d.length → c = d
   | .refl _, .refl _, _ => rfl
@@ -861,8 +868,8 @@ theorem Fml.Steps.measure_le (μ : Fml C → Nat) (hμ : ∀ {φ ψ : Fml C}, φ
 decreases: it cannot come back to where it started.  (The termination
 measure is such a `μ`; with it this is `Subsingleton (φ ~*> ψ)`.)
 
-Example: every derivation from `⟨ alice.account.balance = 10; ⟩ …` to its
-line with three updates is `headline`. -/
+Example: every derivation from `⟨ alice.age = ageVal; ⟩ …` to its
+line with its write is `AgeWrite.chain` of `Examples/Chains/Storage.lean`. -/
 theorem Fml.Steps.eq_of_measure (μ : Fml C → Nat) (hμ : ∀ {φ ψ : Fml C}, φ ~> ψ → μ ψ < μ φ) :
     {φ ψ : Fml C} → (c d : φ ~*> ψ) → c = d
   | _, _, .refl _, .refl _ => rfl
@@ -910,7 +917,7 @@ structure Chain.Line where
 /-- `Fml.active`, `none` where a slot decides it: a slot has no modality,
 but the kernel does not know that of the postcondition put back in it. -/
 def Fml.activeOpen : Fml C → Option Bool
-  | .upd _ _ φ | .imp _ φ | .havoc φ => φ.activeOpen
+  | .upd _ _ φ | .imp _ φ | .havoc φ | .all _ _ φ => φ.activeOpen
   | .and φ ψ => match φ.activeOpen with
     | some false => ψ.activeOpen
     | r => r
@@ -920,7 +927,7 @@ def Fml.activeOpen : Fml C → Option Bool
 /-- Whether the step on `φ` is taken without asking a slot whether it has a
 modality: past the first goal of a branch, once it is done, it asks. -/
 def Fml.stepOpenOk : Fml C → Bool
-  | .upd _ _ φ | .imp _ φ | .havoc φ => φ.stepOpenOk
+  | .upd _ _ φ | .imp _ φ | .havoc φ | .all _ _ φ => φ.stepOpenOk
   | .and φ ψ => match φ.activeOpen with
     | some true => φ.stepOpenOk
     | some false => ψ.stepOpenOk
@@ -1137,6 +1144,9 @@ partial def stepAtProof (C : Lean.Expr) (sp : Splice) (k : Nat) (A B : Lean.Expr
       #[C, kE, a[1]!, a[2]!, b[2]!, ← stepAtProof C sp k a[2]! b[2]!]
   if A.isAppOfArity ``Fml.havoc 2 && B.isAppOfArity ``Fml.havoc 2 then
     return mkAppN (mkConst ``Fml.stepAt_havoc_of) #[C, kE, a[1]!, b[1]!, ← stepAtProof C sp k a[1]! b[1]!]
+  if A.isAppOfArity ``Fml.all 4 && B.isAppOfArity ``Fml.all 4 then
+    return mkAppN (mkConst ``Fml.stepAt_all_of)
+      #[C, kE, a[1]!, a[2]!, a[3]!, b[3]!, ← stepAtProof C sp k a[3]! b[3]!]
   if A.isAppOfArity ``Fml.and 3 && B.isAppOfArity ``Fml.and 3 then
     if let some ha ← activeProof C a[1]! false then
       return mkAppN (mkConst ``Fml.stepAt_and_right)

@@ -39,7 +39,11 @@ specifications (`Calculus/Spec.lean`), the solkey corpus (`SolidityCorpus`,
 ## Still open
 
 - **Calls.** Parameters and return values of reference type (`Person storage
-  p`, `uint[] memory xs`) are elaboration errors (`Syntax.lean`); external calls are not modelled.
+  p`, `uint[] memory xs`) are elaboration errors (`Syntax.lean`).  An external
+  call is a `try` only (`Stmt.tryCall`): a bare `I(a).f();`, `try new C()`,
+  `{value: v}`, an `Error`'s message and a catch-all's `bytes` are not
+  modelled, and a `try` is outside the EVM fragment.  A diamond `try` closes
+  to `false` (`tryCallDiamond`).
 - **Callbacks.** The ordinary taclets lift to `ProvesC` only on a statement
   that pays nothing and runs no other (`Stmt.forks = false`).  A branch or a
   call around a transfer, and the capture rules of a transfer
@@ -147,6 +151,7 @@ their names.
 | Callback taclets | A second inductive `CallbackTaclet`, not `Taclet` constructors: `Taclet.sound` is against `Stmt.run`, and one-rule-per-statement would break.  Two constructors as in solkey; the resume premise is a second sequent under `{havoc}` (KeY's anonymising update). |
 | The invariant | An `Invariant C` is a formula with no local and no transfer (solkey's `CInv(storage, net)`); the frame lemmas need it closed.  It may read the ledger and `address(this).balance`, which the callback semantics havocs before assuming it. |
 | `ProvesC` | The ordinary taclets lift on a statement that pays nothing and runs no other, and whose premise pays nothing; a goal with no transfer left is `Proves`'s (`holdsC_iff_holds`).  Validity with callbacks implies validity without (`valid_of_validC`). |
+| External calls (`try`) | The callee is never run.  Without callbacks how a call ends is the transaction's (`TxEnv.ext`, a table read by `Stmt.run`, which no formula reads); a call with no entry reaches an address with no code and reverts in the caller, and so does data that does not decode (`bindData`).  `tryCallNoCallbackBox` has a goal per clause, for every value of the locals it binds (`Premise.branches`, `Fml.alls`), so a proof holds whatever the table says.  With callbacks a `try` is a point where control leaves (`Stmt.hasTransfer`), and `ExecS` runs it nondeterministically, its success from a `havoc`ked state keeping the invariant. |
 
 ### Specifications
 

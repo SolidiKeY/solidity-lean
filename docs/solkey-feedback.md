@@ -5,11 +5,11 @@ The only outbound document: what the Lean model shows solkey (`~/projects/solkey
 direction, solkey rules the Lean calculus lacks, is tracked as `planned` rows in
 `docs/lean-key-rule-map.md`.
 
-**Pinned to solkey `f2eb3d98eb`** (311 taclets, the `solkeycheck` baseline in
-`AGENTS.md`). Every item was re-checked against the checkout's HEAD
-(`cf1c25551e`); the fourteen commits between the two touch no `.key` rule file
-(`git diff f2eb3d98eb HEAD -- keyext.solidity.core/src/main/resources/…/rules`
-is empty), so the pin and HEAD agree on everything below.
+**Pinned to solkey `323dc7faa5`** (313 taclets, the `solkeycheck` baseline in
+`AGENTS.md`). The items were checked against `f2eb3d98eb`; the commits since
+add `try`/`catch` (`tryCallNoCallbackBox`, `tryCallWithCallbackBox`) and
+rename memory's `default` to `init`, and touch no rule an item below is
+about.
 
 **Ranking.** Items that let KeY close a goal that is false on the chain come
 first, then missing rules and missing invariants, then refusals, then

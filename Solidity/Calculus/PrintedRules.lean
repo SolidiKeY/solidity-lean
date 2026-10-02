@@ -438,22 +438,27 @@ def printedOrigins : List (Lean.Name × PrintedOrigin) := [
   (``Taclet.revertBox, .printed .revertBox),
   (``Taclet.revertDiamond, .printed .revertDiamond),
   -- Calls: none printed; solkey has `functionBodyExpand`
-  (``Taclet.functionBodyExpand, .leanOnly .keyTier) ]
+  (``Taclet.functionBodyExpand, .leanOnly .keyTier),
+  -- External calls: none printed; solkey has `tryCallNoCallbackBox`
+  (``Taclet.tryCallNoCallbackBox, .leanOnly .keyTier) ]
 
 #check_constructor_table Taclet, printedOrigins.map Prod.fst
 
 /-- The rules solkey does not have (`LeanTaclet`), and the printed rule each is.
-The capture of an argument (`unfoldArgument`) has no taclet and
-no printed rule. -/
+The capture of an argument (`unfoldArgument`) and a `try` under the diamond
+have no taclet and no printed rule. -/
 def leanPrintedOrigins : List (Lean.Name × PrintedOrigin) := [
-  (``LeanTaclet.functionCallArgCapture, .leanOnly .calculus) ]
+  (``LeanTaclet.functionCallArgCapture, .leanOnly .calculus),
+  (``LeanTaclet.tryCallDiamond, .leanOnly .calculus) ]
 
 #check_constructor_table LeanTaclet, leanPrintedOrigins.map Prod.fst
 
-/-- The callback taclets and the two printed `transferWithCallback` rules. -/
+/-- The callback taclets and the two printed `transferWithCallback` rules;
+solkey's `tryCallWithCallbackBox` is not printed. -/
 def callbackPrintedOrigins : List (Lean.Name × PrintedOrigin) := [
   (``CallbackTaclet.transferWithCallbackBox, .printed .transferWithCallbackBox),
-  (``CallbackTaclet.transferWithCallbackDiamond, .printed .transferWithCallbackDiamond) ]
+  (``CallbackTaclet.transferWithCallbackDiamond, .printed .transferWithCallbackDiamond),
+  (``CallbackTaclet.tryCallWithCallbackBox, .leanOnly .keyTier) ]
 
 #check_constructor_table CallbackTaclet, callbackPrintedOrigins.map Prod.fst
 
@@ -498,9 +503,9 @@ theorem unclaimedRules_count : unclaimedRules.length = 7 := by decide +kernel
 def leanOnlyRows (why : LeanOnlyReason) : List Lean.Name :=
   ((printedOrigins ++ leanPrintedOrigins).filter fun r => r.2 == .leanOnly why).map Prod.fst
 
-theorem leanOnly_keyTier_count : (leanOnlyRows .keyTier).length = 33 := by decide +kernel
+theorem leanOnly_keyTier_count : (leanOnlyRows .keyTier).length = 34 := by decide +kernel
 
-theorem leanOnly_calculus_count : (leanOnlyRows .calculus).length = 1 := by decide +kernel
+theorem leanOnly_calculus_count : (leanOnlyRows .calculus).length = 2 := by decide +kernel
 
 end PrintedRules
 end Solidity

@@ -157,6 +157,11 @@ inductive RawStmt where
   | eval (args : List RawExpr)
   /-- `unchecked { … }`: a scope whose `+ - * **` wrap (`uncheckStmts`). -/
   | unchecked (body : List RawStmt)
+  /-- `try e.f(a) returns (T v) { … } catch …`: the receiver, the function,
+  the arguments, the return locals, and the clauses normalised as
+  `Stmt.tryCall`'s, with the name of the `Panic` code. -/
+  | tryCall (recv : RawExpr) (f : String) (args : List RawExpr) (rets : List (RawTy × String))
+      (ok err : List RawStmt) (code : Option String) (panic other : List RawStmt)
   deriving Repr, Inhabited
 
 /-- Evaluating `e` can neither revert nor have an effect: a literal, a name,
@@ -584,6 +589,18 @@ def Arg.separatedFrom {C : Contract} : List Var → List (Arg C) → Bool
   | bound, a :: as =>
     (a.e.isSimple || a.e.vars.all fun y => !bound.contains y) && Arg.separatedFrom (a.x :: bound) as
 
+/-- An argument of an external call, at its type. -/
+abbrev ExtArg (C : Contract) := (p : PrimTy) × Simple C p
+
+/-- `a.f(e₁, …, eₙ)`, a call of the function `f` of the contract at the
+address `a`: solkey's `ExternalCall`, whose receiver and arguments cannot
+revert or have an effect.  Here they are simple, `sol{ … }` capturing any
+other first; a contract conversion `I(a)` elaborates away to `a`. -/
+structure ExtCall (C : Contract) where
+  addr : Simple C .uint
+  fn : Name
+  args : List (ExtArg C)
+
 
 /-! ## Statements -/
 
@@ -647,9 +664,22 @@ inductive Stmt (C : Contract) where
   arguments bound to its parameters, its body inlined (see `Arg`). -/
   | call (f : Name) (args : List (Arg C)) (hsep : Arg.separatedFrom [] args = true) (ret : CallRet)
       (body : List (Stmt C))
+  /-- `try a.f(e) returns (uint v) { ok } catch Error(string memory) { err }
+  catch Panic(uint c) { panic } catch { other }`: an external call, and a
+  block per way it may end.  As solkey's `TryStatement.of` normalises it,
+  every clause is present: a missing `Error` or `Panic` clause is the
+  catch-all's block, a missing catch-all `revert();`.  `rets` are the locals
+  the call's return data binds in `ok`, `code` the `Panic` code's in `panic`;
+  an `Error`'s message and a catch-all's data are not modelled. -/
+  | tryCall (call : ExtCall C) (rets : List (PrimTy × Var)) (ok err : List (Stmt C))
+      (code : Option Var) (panic other : List (Stmt C))
 
 /-- A block. -/
 abbrev Prog (C : Contract) := List (Stmt C)
+
+/-- The locals the `Panic` code binds: `code`, a `uint`, if the clause names it. -/
+def codeBinders (code : Option Var) : List (PrimTy × Var) :=
+  code.toList.map fun x => (.uint, x)
 
 /-- `T x = e;`: a parameter bound to its argument. -/
 def Arg.decl {C : Contract} (a : Arg C) : Stmt C := .declLocal a.p a.x (some a.e)
@@ -815,6 +845,17 @@ def Stmt.toStr : Stmt C → String
     match ret with
     | .val _ _ (some y) => s!"{y} = {call}"
     | _ => call
+  | .tryCall c rets ok err code pnc other =>
+    let args := ", ".intercalate (c.args.map fun a => a.2.toStr)
+    let rets := if rets.isEmpty then "" else
+      s!" returns ({", ".intercalate (rets.map fun (p, x) => s!"{Ty.toStr (.prim p)} {x}")})"
+    let code := match code with
+      | some x => s!"uint {x}"
+      | none => "uint"
+    s!"try address({c.addr.toStr}).{c.fn}({args}){rets} \{ {" ".intercalate (Prog.toStrs false ok)} } \
+      catch Error(string memory) \{ {" ".intercalate (Prog.toStrs false err)} } \
+      catch Panic({code}) \{ {" ".intercalate (Prog.toStrs false pnc)} } \
+      catch \{ {" ".intercalate (Prog.toStrs false other)} }"
 
 /-- The statements of a block, one string each; a memory call and the
 statement binding its result are one (`Stmt.memCallStr?`), the second
@@ -1034,6 +1075,19 @@ syntax (name := solRevertErr) &"revert" ident "(" sol_expr,* ")" : sol_stmt
 syntax (name := solRevertMsg) &"revert" "(" str ")" : sol_stmt
 /-- `_;`: where a modifier's body runs the function's (`contract!{ … }`). -/
 syntax (name := solHole) "_" : sol_stmt
+/-! `try e.f(a) returns (uint v) { … } catch Error(string memory m) { … }
+catch Panic(uint c) { … } catch (bytes memory d) { … } catch { … }`: an
+external call.  A clause's parameter is `sol_tparam`: a type, `memory` for
+`string`/`bytes`, an optional name. -/
+declare_syntax_cat sol_tparam (behavior := both)
+syntax sol_ty (ppSpace &"memory")? (ppSpace ident)? : sol_tparam
+declare_syntax_cat sol_catch (behavior := both)
+syntax (name := solCatchError) "catch " &"Error" "(" sol_tparam ") " sol_block : sol_catch
+syntax (name := solCatchPanic) "catch " &"Panic" "(" sol_tparam ") " sol_block : sol_catch
+syntax (name := solCatchData) "catch " "(" sol_tparam ") " sol_block : sol_catch
+syntax (name := solCatchAll) "catch " sol_block : sol_catch
+syntax (name := solTry) "try " sol_expr (ppSpace &"returns" " (" sol_tparam,* ")")? ppSpace sol_block
+  (ppSpace sol_catch)+ : sol_stmt
 /-- `T memory t = T(a, b);`: a struct constructor declared. -/
 syntax sol_ty &"memory" ident " = " sol_expr "(" sol_expr,* ")" : sol_stmt
 /-- `todos.push(Todo(a, b));`: a struct constructor pushed. -/
@@ -1238,6 +1292,7 @@ partial def expandStmt (s : TSyntax `sol_stmt) : MacroM Term := do
   | ``solRevert => `(RawStmt.revert)
   | ``solReturn => `(RawStmt.ret (some $(← expandExpr ⟨s.raw[1]⟩)))
   | ``solReturnNone => `(RawStmt.ret none)
+  | ``solTry => expandTry s
   | ``solEmit => `(RawStmt.eval [$(← exprs s.raw[3]),*])
   | ``solRequireMsg => `(RawStmt.require $(← expandExpr ⟨s.raw[2]⟩))
   | ``solRequireErr => `(RawStmt.requireWith $(← expandExpr ⟨s.raw[2]⟩) [$(← exprs s.raw[6]),*])
@@ -1358,6 +1413,69 @@ where
   expandBlock : TSyntax `sol_block → MacroM Term
     | `(sol_block| { $[$ss:sol_stmt;]* }) => do `([$(← ss.mapM expandStmt),*])
     | _ => Macro.throwUnsupported
+  /-- A clause's parameter: its type and its name, if it has one. -/
+  tparam (p : Syntax) : MacroM (Term × Option String) := do
+    let T ← expandTy ⟨p[0]⟩
+    pure (T, if p[2].getNumArgs > 0 then some p[2][0].getId.toString else none)
+  /-- The receiver of an external call: `I(a)` and `address(a)` are `a`. -/
+  extRecv (r : TSyntax `sol_expr) : MacroM Term := do
+    match r with
+    | `(sol_expr| $_:ident ( $a:sol_expr )) => expandExpr a
+    | _ => expandExpr r
+  /-- `e.f(a₁, …)`: the receiver `e`, the name `f`, the arguments. -/
+  extCall (e : TSyntax `sol_expr) : MacroM (Term × String × Array Term) := do
+    let `(sol_expr| $f:sol_expr ( $as:sol_expr,* )) := e
+      | Macro.throwErrorAt e "`try` takes an external call `e.f(…)`"
+    let args ← as.getElems.mapM expandExpr
+    match f with
+    | `(sol_expr| $x:ident) =>
+      match (nameParts x.getId).reverse with
+      | g :: r :: rs => do
+        let rs := (r :: rs).reverse
+        pure (← fieldChain (← expandIdent (mkIdent (.mkSimple rs.head!))) rs.tail, g, args)
+      | _ => Macro.throwErrorAt e "`try` takes an external call `e.f(…)`"
+    | `(sol_expr| $r:sol_expr . $g:ident) =>
+      match (nameParts g.getId).reverse with
+      | h :: fs => do pure (← fieldChain (← extRecv r) fs.reverse, h, args)
+      | [] => Macro.throwUnsupported
+    | `(sol_expr| $c:sol_expr ( $bs:sol_expr,* ) . $g:ident) => do
+      let r ← match bs.getElems with
+        | #[b] => if (funName? c).isSome then expandExpr b else expandExpr.expandCall c bs.getElems callMsg
+        | _ => expandExpr.expandCall c bs.getElems callMsg
+      match (nameParts g.getId).reverse with
+      | h :: fs => do pure (← fieldChain r fs.reverse, h, args)
+      | [] => Macro.throwUnsupported
+    | _ => Macro.throwErrorAt e "`try` takes an external call `e.f(…)`"
+  /-- `try …`, its clauses normalised as solkey's `TryStatement.of` does. -/
+  expandTry (s : TSyntax `sol_stmt) : MacroM Term := do
+    let r := s.raw
+    let (recv, f, args) ← extCall ⟨r[1]⟩
+    let mut rets : Array Term := #[]
+    if r[2].getNumArgs > 0 then
+      for p in r[2][2].getSepArgs do
+        let (T, x) ← tparam p
+        let some x := x | Macro.throwErrorAt p "an external call's return value is named"
+        rets := rets.push (← `(($T, $(quote x))))
+    let ok ← expandBlock ⟨r[3]⟩
+    let mut err : Option Term := none
+    let mut pnc : Option Term := none
+    let mut code : Option String := none
+    let mut other : Option Term := none
+    for c in r[4].getArgs do
+      let c := if c.getKind == nullKind && c.getNumArgs == 1 then c[0] else c
+      match c.getKind with
+      | ``solCatchError => err := some (← expandBlock ⟨c[5]⟩)
+      | ``solCatchPanic =>
+        pnc := some (← expandBlock ⟨c[5]⟩)
+        code := (← tparam c[3]).2
+      | ``solCatchData => other := some (← expandBlock ⟨c[4]⟩)
+      | ``solCatchAll => other := some (← expandBlock ⟨c[1]⟩)
+      | _ => Macro.throwErrorAt c "a `catch` clause"
+    let otherB ← match other with
+      | some b => pure b
+      | none => `([RawStmt.revert])
+    `(RawStmt.tryCall $recv $(quote f) [$args,*] [$rets,*] $ok $(err.getD otherB)
+        $(quote code) $(pnc.getD otherB) $otherB)
 
 macro_rules
   | `(sol_raw!{ $[$ss:sol_stmt;]* }) => do `([$(← ss.mapM expandStmt),*])
@@ -1691,7 +1809,7 @@ def SolcMappings : Contract := contract!{
   Ledger ledger;
 }
 
-/-- Internal functions (`Examples/Calls.lean`): a function may call the ones
+/-- Internal functions (`Examples/Tactics/Calls.lean`): a function may call the ones
 declared before it. -/
 def CallsExample : Contract := contract!{
   uint total; uint count;
@@ -1935,12 +2053,14 @@ def RawStmt.exprs : RawStmt → List RawExpr
   | .declStoragePush _ _ b | .delete b | .incDec _ b | .require b | .assert b | .ite b _ _ => [b]
   | .call f as => f :: as
   | .eval as => as
+  | .tryCall r _ as .. => r :: as
   | .revert | .unchecked _ => []
 
 /-- A statement's blocks: an `if`'s branches, an `unchecked` block's body. -/
 def RawStmt.blocks : RawStmt → List (List RawStmt)
   | .ite _ t e => [t, e]
   | .unchecked b => [b]
+  | .tryCall _ _ _ _ ok err _ pnc other => [ok, err, pnc, other]
   | _ => []
 
 /-- A statement with its own expressions rewritten by `f`, left to right (its
@@ -1965,11 +2085,19 @@ def RawStmt.mapExprsM {m : Type → Type} [Monad m] (f : RawExpr → m RawExpr) 
   | .eval as => return .eval (← as.mapM f)
   | .revert => pure .revert
   | .unchecked b => pure (.unchecked b)
+  | .tryCall r g as rets ok err code pnc other =>
+    return .tryCall (← f r) g (← as.mapM f) rets ok err code pnc other
 
 /-- The name a statement declares in its own block. -/
 def RawStmt.declared? : RawStmt → Option String
   | .decl _ x _ | .declStorage _ x _ | .declMemory _ x _ | .declStoragePush _ x _ => some x
   | _ => none
+
+/-- The names a statement binds in its blocks: a `try`'s return locals and
+`Panic` code. -/
+def RawStmt.binds : RawStmt → List String
+  | .tryCall _ _ _ rets _ _ code _ _ => rets.map (·.2) ++ code.toList
+  | _ => []
 
 /-- Whether a `return` occurs in the statement. -/
 partial def RawStmt.hasReturn (s : RawStmt) : Bool :=
@@ -1977,7 +2105,8 @@ partial def RawStmt.hasReturn (s : RawStmt) : Bool :=
 
 /-- Whether the name `x` occurs in the statement, read, written or declared. -/
 partial def RawStmt.mentions (x : String) (s : RawStmt) : Bool :=
-  s.declared? == some x || s.exprs.any (·.mentions x) || s.blocks.any (·.any (·.mentions x))
+  s.declared? == some x || s.binds.contains x || s.exprs.any (·.mentions x) ||
+    s.blocks.any (·.any (·.mentions x))
 
 mutual
 
@@ -1997,7 +2126,7 @@ mutual
 
 /-- The names a raw statement declares, in either branch of an `if`. -/
 partial def RawStmt.decls (s : RawStmt) : List String :=
-  s.declared?.toList ++ s.blocks.flatMap RawStmt.declsList
+  s.declared?.toList ++ s.binds ++ s.blocks.flatMap RawStmt.declsList
 
 partial def RawStmt.declsList (ss : List RawStmt) : List String :=
   ss.flatMap RawStmt.decls
@@ -2008,7 +2137,7 @@ mutual
 
 /-- The largest index among the fresh variables a raw statement writes. -/
 partial def RawStmt.maxIdx [FreshNames] (s : RawStmt) : Nat :=
-  max ((s.declared?.map fun x => (Var.ofName x).idx).getD 0)
+  max (((s.declared?.toList ++ s.binds).map fun x => (Var.ofName x).idx).foldl max 0)
     (max (RawExpr.maxIdxs s.exprs) ((s.blocks.map RawStmt.maxIdxs).foldl max 0))
 
 partial def RawStmt.maxIdxs [FreshNames] (ss : List RawStmt) : Nat :=
@@ -2274,6 +2403,16 @@ def elabSize (n : RawExpr) : ElabM (Prog C × Simple C .uint) := do
     let x ← freshCapture "se"
     pure ([.declLocal .uint x (some v)], .local x)
 
+/-- `e` as a simple value of type `p`, captured into a fresh local first
+when it is not one. -/
+def simpleOf (p : PrimTy) (e : RawExpr) : ElabM (Prog C × Simple C p) := do
+  let v ← checkM C p e
+  match v.toSimple? with
+  | some se => pure ([], se)
+  | none =>
+    let x ← captureAs C "se" (.val p)
+    pure ([.declLocal p x (some v)], .local x)
+
 /-- The array type `new T(n)` allocates, if it may be allocated. -/
 def elabNewTy (T : RawTy) : ElabM ((R : RefTy) ×' R.newArrOk = true) := do
   let .ref R ← ElabM.lift (elabTy C T) | throw "`new` of a value type"
@@ -2487,6 +2626,18 @@ partial def renameStmts (ρ : List (String × String)) : List RawStmt → ElabM 
     | .ite c t e =>
       pure (.ite (r c) (← renameStmts ρ t) (← renameStmts ρ e) :: (← renameStmts ρ ss))
     | .unchecked b => pure (.unchecked (← renameStmts ρ b) :: (← renameStmts ρ ss))
+    | .tryCall e g as rets ok err code pnc other =>
+      let mut ρok := ρ
+      let mut rets' := []
+      for (T, x) in rets do
+        let y := toString (← freshCapture "se")
+        ρok := (x, y) :: ρok
+        rets' := rets' ++ [(T, y)]
+      let (code', ρp) ← match code with
+        | some x => fresh "se" x >>= fun (y, ρ') => pure (some y, ρ')
+        | none => pure (none, ρ)
+      pure (.tryCall (r e) g (as.map r) rets' (← renameStmts ρok ok) (← renameStmts ρ err) code'
+        (← renameStmts ρp pnc) (← renameStmts ρ other) :: (← renameStmts ρ ss))
     | s => pure ((Id.run (s.mapExprsM (pure ∘ r))) :: (← renameStmts ρ ss))
 
 /-- **A body's `return`s, lowered** to assignments to its return variable
@@ -2514,6 +2665,17 @@ partial def lowerReturns (r : Option String) : List RawStmt → Except String (L
       pure [.ite c (← lowerReturns r (t ++ ss)) (← lowerReturns r (e ++ ss))]
     else
       pure (.ite c (← lowerReturns r t) (← lowerReturns r e) :: (← lowerReturns r ss))
+  | .tryCall e g as rets ok err code pnc other :: ss => do
+    let bs := [ok, err, pnc, other]
+    if bs.any (·.any RawStmt.hasReturn) && !ss.isEmpty then
+      for x in (bs.flatten.filterMap RawStmt.declared? ++ rets.map (·.2) ++ code.toList) do
+        if ss.any (·.mentions x) then
+          throw s!"`return` in a clause declaring {x}, which the statements after it name"
+      pure [.tryCall e g as rets (← lowerReturns r (ok ++ ss)) (← lowerReturns r (err ++ ss)) code
+        (← lowerReturns r (pnc ++ ss)) (← lowerReturns r (other ++ ss))]
+    else
+      pure (.tryCall e g as rets (← lowerReturns r ok) (← lowerReturns r err) code
+        (← lowerReturns r pnc) (← lowerReturns r other) :: (← lowerReturns r ss))
   | .unchecked b :: ss => do
     -- the statements after it would move into the block, and be unchecked
     if b.any RawStmt.hasReturn && !ss.isEmpty then
@@ -2562,6 +2724,9 @@ partial def uncheckStmts : List RawStmt → Except String (List RawStmt)
       | .assignIncDec .. => throw "`v = x++;` inside `unchecked`: write `v = x; x += 1;`"
       | .ite c t e => do pure (.ite (← c.uncheck) (← uncheckStmts t) (← uncheckStmts e))
       | .unchecked b => do pure (.unchecked (← uncheckStmts b))
+      | .tryCall e g as rets ok err code pnc other => do
+        pure (.tryCall (← e.uncheck) g (← as.mapM RawExpr.uncheck) rets (← uncheckStmts ok)
+          (← uncheckStmts err) code (← uncheckStmts pnc) (← uncheckStmts other))
       | s => s.mapExprsM RawExpr.uncheck
     pure (s' :: (← uncheckStmts ss))
 
@@ -2867,7 +3032,8 @@ partial def hoistStmt : RawStmt → ElabM (Prog C × RawStmt)
   | .declMemory T x (some (.newArr T' n)) => pure ([], .declMemory T x (some (.newArr T' n)))
   -- a statement of one expression: its captures, then the statement
   | s@(.decl ..) | s@(.declStorage ..) | s@(.declMemory ..) | s@(.declStoragePush ..)
-  | s@(.delete _) | s@(.incDec ..) | s@(.ite ..) | s@(.require _) | s@(.assert _) => do
+  | s@(.delete _) | s@(.incDec ..) | s@(.ite ..) | s@(.require _) | s@(.assert _)
+  | s@(.tryCall ..) => do
     -- `T memory x = f(a);`: its arguments only (`elabStmt1`)
     if let .declMemory T x (some (.call f args)) := s then
       if (← read).any (·.1 == f) then
@@ -3102,6 +3268,37 @@ partial def elabStmt1 : RawStmt → ElabM (Prog C)
   | .revert => pure [.revert]
   | .eval _ => pure []
   | .unchecked ss => do elabBranch (← ElabM.lift (uncheckStmts ss))
+  | .tryCall e g as rets ok err code pnc other => do
+    -- `I(a)` is `a`
+    let funs ← read
+    let e := match e with
+      | .call h [a] => if funs.any (·.1 == h) then e else a
+      | e => e
+    let (P, addr) ← simpleOf C .uint e
+    let mut Q := P
+    let mut args : List (ExtArg C) := []
+    for a in as do
+      let some ⟨p, _⟩ := (← synthM C a).toVal? | throw s!"{a.toStr}: an external call's argument is a value"
+      let (Q', se) ← simpleOf C p a
+      Q := Q ++ Q'
+      args := args ++ [⟨p, se⟩]
+    let mut rets' : List (PrimTy × Var) := []
+    for (T, x) in rets do
+      let (.prim p, n) ← ElabM.lift (elabDeclTy C T) | throw s!"{x}: an external call returns a value"
+      unless n == 256 do throw s!"{x}: a narrow return value of an external call"
+      rets' := rets' ++ [(p, Var.ofName x)]
+    let (Γ, _) ← get
+    for (p, x) in rets' do declare C (toString x) (.val p)
+    let ok ← elabStmts ok
+    let (_, k) ← get
+    set (Γ, k)
+    let err ← elabBranch err
+    if let some c := code then declare C c (.val .uint)
+    let pnc ← elabStmts pnc
+    let (_, k) ← get
+    set (Γ, k)
+    let other ← elabBranch other
+    pure (Q ++ [.tryCall ⟨addr, g, args⟩ rets' ok err (code.map Var.ofName) pnc other])
 
 /-- A block. -/
 partial def elabStmts : List RawStmt → ElabM (Prog C)
@@ -3283,6 +3480,15 @@ def CallRet.quote : CallRet → Lean.Expr
   | .none => mkConst ``CallRet.none
   | .val p r res => mkAppN (mkConst ``CallRet.val) #[toExpr p, toExpr r, toExpr res]
 
+/-- An external call, each argument a `Sigma.mk` of its type and value. -/
+def ExtCall.quote (call : ExtCall C) : Lean.Expr :=
+  let argTy := mkAppN (mkConst ``ExtArg) #[c]
+  let args := call.args.foldr (fun a acc => mkAppN (mkConst ``List.cons [0]) #[argTy,
+      mkAppN (mkConst ``Sigma.mk [0, 0]) #[mkConst ``PrimTy, mkAppN (mkConst ``Simple) #[c], toExpr a.1,
+        Simple.quote c a.1 a.2], acc])
+    (mkAppN (mkConst ``List.nil [0]) #[argTy])
+  mkAppN (mkConst ``ExtCall.mk) #[c, Simple.quote c .uint call.addr, toExpr call.fn, args]
+
 mutual
 
 def Stmt.quote : Stmt C → Lean.Expr
@@ -3330,6 +3536,10 @@ def Stmt.quote : Stmt C → Lean.Expr
   | .call f args _ ret body =>
     mkAppN (mkConst ``Stmt.call)
       #[c, toExpr f, Arg.quoteList c args, rflTrue, CallRet.quote ret, Prog.quote body]
+  | .tryCall call rets ok err code pnc other =>
+    mkAppN (mkConst ``Stmt.tryCall)
+      #[c, ExtCall.quote c call, toExpr rets, Prog.quote ok, Prog.quote err, toExpr code,
+        Prog.quote pnc, Prog.quote other]
 
 def Prog.quote : List (Stmt C) → Lean.Expr
   | [] => mkAppN (mkConst ``List.nil [0]) #[mkAppN (mkConst ``Stmt) #[c]]
@@ -3527,7 +3737,7 @@ example : Prog.toStr (sol{ address payable a = owner; }) = "uint a = owner;" := 
 #guard_msgs in #check sol{ Foo x; }
 
 /-- A `uint8` is a `uint` whose arithmetic is checked at 8 bits (`narrowPost`);
-`Examples/Checked.lean` has the rest. -/
+`Examples/Tactics/Checked.lean` has the rest. -/
 example : Prog.toStr (sol{ uint8 x = 250; x += 10; }) =
     "uint x = 250; x += 10; require(x <= 255);" := rfl
 

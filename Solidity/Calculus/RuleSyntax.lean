@@ -1660,7 +1660,50 @@ partial def ppStmt (e : Lean.Expr) : MetaM (TSyntax `sol_stmt) := do
     | none, a :: bs => `(sol_stmt| $fe:sol_expr ( $a:sol_expr, $(bs.toArray),* ))
     | some y, [] => `(sol_stmt| $y:ident = $fe:sol_expr ( ))
     | some y, bs => `(sol_stmt| $y:ident = $fe:sol_expr ( $(bs.toArray),* ))
+  | Stmt.tryCall _ c rets ok err code pnc other =>
+    let some call ← ppExtCall? c | escape
+    let some rs ← listElems? rets | escape
+    let some ps := (← rs.mapM ppRet?).mapM id | escape
+    let some code ← ppCode? code | escape
+    let catches : Array (TSyntax `sol_catch) := #[
+      ← `(sol_catch| catch Error(string memory) $(← ppBlock err):sol_block),
+      ← `(sol_catch| catch Panic($code) $(← ppBlock pnc):sol_block),
+      ← `(sol_catch| catch $(← ppBlock other):sol_block)]
+    if ps.isEmpty then
+      `(sol_stmt| try $call:sol_expr $(← ppBlock ok):sol_block $catches:sol_catch*)
+    else
+      `(sol_stmt| try $call:sol_expr returns ($ps,*) $(← ppBlock ok):sol_block $catches:sol_catch*)
   | _ => escape
+
+/-- A return local of a `try`: `uint v`. -/
+partial def ppRet? (r : Lean.Expr) : MetaM (Option (TSyntax `sol_tparam)) := do
+  let r ← whnf r
+  unless r.isAppOfArity ``Prod.mk 4 do return none
+  let some x ← ppVar? r.getAppArgs[3]! | return none
+  return some (← `(sol_tparam| $(← ppTy.ppPrim r.getAppArgs[2]!):sol_ty $x:ident))
+
+/-- The `Panic` clause's parameter: `uint c`, or `uint` with no name. -/
+partial def ppCode? (code : Lean.Expr) : MetaM (Option (TSyntax `sol_tparam)) := do
+  match_expr (← whnf code) with
+  | Option.some _ x =>
+    let some x ← ppVar? x | return none
+    return some (← `(sol_tparam| uint $x:ident))
+  | _ => return some (← `(sol_tparam| uint))
+
+/-- `address(a).f(e₁, …)`: an external call. -/
+partial def ppExtCall? (c : Lean.Expr) : MetaM (Option (TSyntax `sol_expr)) := do
+  let c ← whnf c
+  unless c.isAppOfArity ``ExtCall.mk 4 do return none
+  let a := c.getAppArgs
+  let some f ← nameOf? a[2]! | return none
+  let some args ← listElems? a[3]! | return none
+  let mut es : Array (TSyntax `sol_expr) := #[]
+  for x in args do
+    let x ← whnf x
+    unless x.isAppOfArity ``Sigma.mk 4 do return none
+    es := es.push (← ppExpr x.getAppArgs[3]!)
+  let recv ← `(sol_expr| address($(← ppExpr a[1]!)))
+  return some (← `(sol_expr| $recv:sol_expr . $(nameIdent f):ident ( $es,* )))
 
 partial def ppProg? (e : Lean.Expr) : MetaM (Option (Array (TSyntax `sol_stmt))) := do
   let some ss ← listElems? e | return none

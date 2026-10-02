@@ -497,10 +497,10 @@ net	Net	escrow_placeInEscrow_invariant	unsupported		assumes an uninterpreted CIn
 net	Net	escrow_releaseEscrow_invariant	unsupported		assumes an uninterpreted CInv over a symbolic ledger and books msg.value/msg.sender before the call; the fragment has no msg.*
 net	Net	escrow_withdrawFrom_invariant	unsupported		assumes an uninterpreted CInv over a symbolic ledger and books msg.value/msg.sender before the call; the fragment has no msg.*
 net	Net	net_msg_value	unsupported		`msg.value` is not a program expression
-net	Net	net_transfer_capture_argument	proved	solkey net-transfer-capture-argument.key	`Examples/Net.lean` `Net.netTransferCapturedAmount`
-net	Net	net_transfer_capture_receiver	proved	solkey net-transfer-capture-receiver.key	`Examples/Net.lean` `Net.netTransferStorageReceiver`
+net	Net	net_transfer_capture_argument	proved	solkey net-transfer-capture-argument.key	`Examples/Tactics/Net.lean` `Net.netTransferCapturedAmount`
+net	Net	net_transfer_capture_receiver	proved	solkey net-transfer-capture-receiver.key	`Examples/Tactics/Net.lean` `Net.netTransferStorageReceiver`
 net	Net	net_transfer_diamond_funded	unsupported		assumes an uninterpreted CInv over a symbolic ledger and books msg.value/msg.sender before the call; the fragment has no msg.*
-net	Net	net_transfer_simple	proved	solkey net-transfer-simple.key	`Examples/Net.lean` `Net.netTransferSimple`
+net	Net	net_transfer_simple	proved	solkey net-transfer-simple.key	`Examples/Tactics/Net.lean` `Net.netTransferSimple`
 net	Net	net_transfer_unfunded	unsupported		assumes an uninterpreted CInv over a symbolic ledger and books msg.value/msg.sender before the call; the fragment has no msg.*
 net	Net	net_transfer_withcallback_diamond_funded	unsupported		needs `transferWithCallback`: the typed syntax has no calls (docs/kernel-port.md, Port later)
 net	Net	net_transfer_withcallback_simple	unsupported		needs `transferWithCallback`: the typed syntax has no calls (docs/kernel-port.md, Port later)

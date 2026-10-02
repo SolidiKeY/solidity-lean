@@ -22,7 +22,7 @@ so that it reads as it would in print; the proof is the original's name.
 | `s ⇝ₖ[k, m] p` | a rule of solkey's does | `Taclet C k m s p` |
 | `p ≃[k, m] s` | the premise `p` does what `s` does | `Premise.Correct k m s p` |
 | `k ♯ s` | the names a rule numbers `k` are fresh for `s` | `Avoids s.vars (freshVars k)` |
-| `x ∈ SolKey` | `x`'s calls take simple arguments | `Stmt.inSolkey`, `Fml.inSolkey` |
+| `x ∈ SolKey` | `x`'s calls take simple arguments, and it has no `try` | `Stmt.inSolkey`, `Fml.inSolkey` |
 | `⊢[I] φ`, `⊨[I] φ` | the same, when `transfer` may call back into a contract with invariant `I` | `ProvesC`, `ValidC` |
 | `(P, σ) ⇓ σ'` | `P` run from `σ` ends in `σ'` | `Prog.run σ P = .ok σ'` |
 | `(P, σ) ↯` | `P` run from `σ` reverts | `Prog.run σ P = .error .revert` |
@@ -80,7 +80,7 @@ instance {C : Contract} : InSolkey (Stmt C) := ⟨Stmt.inSolkey⟩
 instance {C : Contract} : InSolkey (Prog C) := ⟨Prog.inSolkey⟩
 instance {C : Contract} : InSolkey (Fml C) := ⟨Fml.inSolkey⟩
 
-/-- `x ∈ SolKey`: every call of `x` takes simple arguments. -/
+/-- `x ∈ SolKey`: every call of `x` takes simple arguments, and `x` has no `try`. -/
 abbrev InFragment {α : Type} [InSolkey α] (x : α) : Prop := InSolkey.inSolkey x = true
 
 /-- `(P, σ) ⇓ σ'`: `P` run from `σ` ends normally in `σ'`. -/

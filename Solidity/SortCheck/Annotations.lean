@@ -5,8 +5,9 @@ import Solidity.AST
 
 A machine-checked transcription of the *read-sort annotations* carried
 by the read-bearing taclets of solkey's `solidityProgramRules.key`
-(transcribed at solkey commit `f2eb3d98eb`: 311 taclets, 115 of them
-read-bearing, one row each). The sort-relevant history is
+(transcribed at solkey commit `f2eb3d98eb`, re-checked at `323dc7faa5`: 313
+taclets, 115 of them read-bearing, one row each; the two `try` taclets read
+nothing). The sort-relevant history is
 `12e72a1b4b` "removed find<int> to be more generic", `52c9c2477a`
 "removed valAt", `0f9b99ad55` "removed different fields" (which
 dropped the `Field[primitive]`/`Field[reference]` schema sorts in favour

@@ -241,7 +241,8 @@ elab "clear_side" : tactic => withMainContext do
 statements in its place (`⟨[ s₁; …; sₙ; ]⟩`), two goals (a branch, one
 condition assumed in each: `se = true` and `se = false`), a guarded update
 (`c ⟹ {U} ⟨[ ]⟩ ; ¬(c) ⟹ ⟨[ revert(); ]⟩`), or the whole modality closed
-(`true`, `false`).  A condition can be stuck (a local read
+(`true`, `false`), or a goal per way an external call may end (`try`).
+A condition can be stuck (a local read
 before it is bound), so a branch's two conditions need not cover every
 state: a box goal is true of a stuck run anyway, and a diamond goal owes
 that one of them holds (`Proves.split`). -/
@@ -251,6 +252,10 @@ inductive Premise (C : Contract) where
   | split (c c' : Fml C) (P Q : Prog C)
   | guard (c : Fml C) (U : Upd C)
   | done (b : Bool)
+  /-- One goal per block, each in the statement's place, for every value of
+  the locals it binds: `∀ xs. ⟨[ P ]⟩` (KeY's `T v;` with no initializer,
+  which leaves `v` unconstrained). -/
+  | branches (bs : List (List (PrimTy × Var) × Prog C))
 
 /-! ## The rule table -/
 
@@ -623,6 +628,16 @@ inductive Taclet (C : Contract) (k : Nat) : Modality → Stmt C → Premise C �
       {ret : CallRet} {body : List (Stmt C)}
       (hexp : Arg.firstNonSimple args = none := by side_cond) :
       Taclet C k m (.call f args hsep ret body) (.unfold (Stmt.expandBody args ret body))
+  -- External calls -------------------------------------------------------
+  /-- A `try` without callbacks: a goal for each way the call may end, the
+  block of its clause in the statement's place, for every value of the
+  locals the outcome binds.  The callee runs no code of this contract, so
+  the state is the caller's; a call that reverts in the caller (no code at
+  the address, data that does not decode) satisfies the box. -/
+  | tryCallNoCallbackBox {call : ExtCall C} {rets : List (PrimTy × Var)} {ok err : List (Stmt C)}
+      {code : Option Var} {pnc other : List (Stmt C)} :
+      Taclet C k .box (.tryCall call rets ok err code pnc other)
+        (.branches [(rets, ok), ([], err), (codeBinders code, pnc), ([], other)])
 
 /-! ## The rules solkey does not have
 
@@ -645,6 +660,13 @@ inductive LeanTaclet (C : Contract) (k : Nat) : Modality → Stmt C → Premise 
           .call f (Arg.captureFirst (.fresh "se" k) args) (Arg.separatedFrom_captureFirst hsep)
             ret body])
 
+  /-- A `try` under the diamond closes to `false`.  solkey has no diamond
+  rule: the call may revert in the caller (no code at the address, data that
+  does not decode), which no clause catches and no formula rules out. -/
+  | tryCallDiamond {call : ExtCall C} {rets : List (PrimTy × Var)} {ok err : List (Stmt C)}
+      {code : Option Var} {pnc other : List (Stmt C)} :
+      LeanTaclet C k .diamond (.tryCall call rets ok err code pnc other) (.done false)
+
 /-- A rule of the calculus: solkey's, or one it does not have. -/
 inductive Rule (C : Contract) (k : Nat) (m : Modality) (s : Stmt C) (p : Premise C) : Prop where
   | key (d : Taclet C k m s p)
@@ -666,8 +688,11 @@ They are not `Taclet` constructors: `Taclet` is sound for `Stmt.run`, which
 books a transfer and returns, and these are sound for the callback reading
 (`holdsC`), in which the other semantics' `transferNoCallback` is not. -/
 
-/-- The two callback taclets: the statement they fire on, under the modality
-they are for, and the funds check and booking of their premise. -/
+/-- The callback taclets: the statement they fire on, under the modality
+they are for, and their premise: a transfer's funds check and booking, a
+`try`'s blocks (read in `Calculus/Callback.lean` with the invariant on exit,
+and the call's success resumed from any state the callee may leave in which
+it holds). -/
 inductive CallbackTaclet (C : Contract) : Modality → Stmt C → Premise C → Prop where
   | transferWithCallbackBox {sadr se : Simple C .uint} :
       CallbackTaclet C .box (.transfer (.simple sadr) (.simple se))
@@ -679,6 +704,10 @@ inductive CallbackTaclet (C : Contract) : Modality → Stmt C → Premise C → 
         dl{ 0 <= se ∧ se <= selfBalance ⟹
               { selfBalance := selfBalance - se ‖ net := store(net, at(sadr), net(sadr) - se) } ⟨[ ]⟩ ;
             ¬(0 <= se ∧ se <= selfBalance) ⟹ ⟨[ revert(); ]⟩ }
+  | tryCallWithCallbackBox {call : ExtCall C} {rets : List (PrimTy × Var)} {ok err : List (Stmt C)}
+      {code : Option Var} {pnc other : List (Stmt C)} :
+      CallbackTaclet C .box (.tryCall call rets ok err code pnc other)
+        (.branches [(rets, ok), ([], err), (codeBinders code, pnc), ([], other)])
 
 /-! ## Printing taclets and premises
 

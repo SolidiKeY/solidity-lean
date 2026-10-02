@@ -126,7 +126,7 @@ cannot close as goals.
 runs every function with an obligation. Pinned in `Examples/Verify.lean`.
 
 **What is proved.** With `sol_spec`: `Examples/Benchmark/{Counter,
-SimpleStorage,Mapping,Coin}.lean` (`Coin.mint` only), and `Examples/Specs.lean` (ERC20 with `msg.sender` itself, and `Tally`,
+SimpleStorage,Mapping,Coin}.lean` (`Coin.mint` only), and `Examples/Tactics/Specs.lean` (ERC20 with `msg.sender` itself, and `Tally`,
 which exercises `assignable` and a `payable` function's `net(a)` clause).
 `Coin.send` and ERC20's `transfer` (a debit and a credit to two keys that
 may be equal) do not close, as in the benchmark. `Examples/Benchmark/{ERC20,

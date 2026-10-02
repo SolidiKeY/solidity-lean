@@ -48,7 +48,7 @@ lemma (`TermTaclet.sound`).
 | `Semantics/Properties.lean` | Read-after-write, frame and result-monad lemmas about the state operations, shared by every later layer. |
 | `Semantics/Agree.lean` | `EnvAgreeExcept`: states agreeing off scratch names, and a frame lemma per evaluator. |
 | `Semantics/DecEq.lean` | `DecidableEq SVal`. |
-| `Semantics/Callback.lean` | The callback reading of `transfer`: `ExecS`/`ExecP`, `holdsC`, `TransferSem`. |
+| `Semantics/Callback.lean` | The callback reading of `transfer` and `try`: `ExecS`/`ExecP`, `holdsC`, `TransferSem`. |
 | `TermSimp.lean` | The simp sets `tm_eval` and `tm_denote` of the generic term functions. |
 | `Update.lean` | Terms as one signature (`Srt`, `Op0`…`Op3`, `Tm`; `Term`, `STerm`, … are its sorts, the old constructors abbreviations), their reading (`Tm.eval`, `Tm.denote`) and frame lemmas, parallel updates, formulas with both modalities (`Fml`, `holds`, `Valid`), lowering of program expressions to terms. |
 | `Theorems.lean` | The headline theorems in notation. |
@@ -59,7 +59,7 @@ lemma (`TermTaclet.sound`).
 |---|---|
 | `Calculus/RuleSyntax.lean` | The `dl{ … }` notation: schemas and the printers for taclets, premises, goals. |
 | `Calculus/Rules.lean` | `Taclet` (solkey's rules), `LeanTaclet` (rules solkey lacks), `Rule`, `CallbackTaclet`. |
-| `Calculus/KeyTaclets.lean` | The 311 taclets of `solidityProgramRules.key` as one type, with `KeyOrigin`. |
+| `Calculus/KeyTaclets.lean` | The 313 taclets of `solidityProgramRules.key` as one type, with `KeyOrigin`. |
 | `Calculus/RuleShapes.lean` | Which solkey taclets each constructor transcribes, checked (`taclets_partitioned`). |
 | `Calculus/PrintedRules.lean` | The printed rules and the constructor for each. |
 | `Calculus/Completeness.lean` | `Stmt.step`, the rule for every statement, and `Stmt.complete`. |
@@ -168,28 +168,45 @@ at the contract's initial store and decided by the kernel.
 
 ## Examples
 
-Each example is a theorem `⊨ dl!{ … }` proved by `sol_symex; sol_close`, or a
-derivation `⊢ φ` built one `apply` per taclet.
+Two directories, by proof style (`.claude/rules/derivations.md`).
+
+`Examples/Chains/` — the calculus's worked examples, one file per section in
+its order, each example a chain in its printed lines and fresh names:
+
+| Module | Its examples |
+|---|---|
+| `Examples/Chains/Storage.lean` | Storage writes and reads, roots, rebinding, index, `push`/`pop`, nonsimple paths, side effects in receiver and index. |
+| `Examples/Chains/StorageArrays.lean`, `StorageDelete.lean` | The further storage array cases; storage `delete`. |
+| `Examples/Chains/StorageCoverage.lean` | One step per storage rule. |
+| `Examples/Chains/Arithmetic.lean` | The compound storage update. |
+| `Examples/Chains/Memory.lean`, `MemoryDelete.lean`, `MemoryArrays.lean` | Memory aliasing, writes and reads; memory `delete`; memory arrays. |
+| `Examples/Chains/MemoryCoverage.lean` | One step per memory rule. |
+| `Examples/Chains/StorageToMemory.lean`, `MemoryToStorage.lean` | The copies between the two, with lazy reads. |
+| `Examples/Chains/Payment.lean` | `transfer`: funded, nonsimple amount, storage receiver, unfunded. |
+| `Examples/Chains/CheckedArithmetic.lean`, `EvaluationOrder.lean` | Overflow reverts; the evaluation order of an indexed write. |
+
+`Examples/Tactics/` — theorems `⊨ dl!{ … }` proved by `sol_symex; sol_close`
+or `sol_decide`, derivations `⊢ φ` built one `apply` per taclet, and runs:
 
 | Module | What it shows |
 |---|---|
-| `Examples/Tour.lean` | The running example end to end. |
-| `Examples/StorageSteps.lean` | One storage statement form at a time; the worked derivations as `apply` walks. |
-| `Examples/StorageSuite.lean`, `Examples/StorageDelete.lean`, `LedgerDelete.lean` | solkey's taclet suite on storage; `delete`; a struct holding a mapping deleted. |
-| `Examples/Branch.lean`, `Revert.lean` | Two-goal splits; box and diamond on `revert`, `require`, `assert`, `transfer`. |
-| `Examples/Payment.lean` | The payment examples as chains in sequent lines, `⊢` walks with checked sequents, and the funded diamonds' validity. |
-| `Examples/Values.lean`, `Operators.lean` | Operators, checked arithmetic, `−−`, bitwise, shifts, `unchecked`; the same on the machine. |
-| `Examples/Checked.lean` | `uint8` … `int248`: the overflow trace as a chain, narrow runs, casts, `unchecked`. |
-| `Examples/Calls.lean` | Internal calls: inlined bodies, early returns, calls in expressions, what cannot be written. |
-| `Examples/CallOperands.lean` | Call-valued operands, push as a target, calls returning a memory reference. |
-| `Examples/Callback.lean` | Checks-effects-interactions with and without callbacks (`ProvesC`). |
-| `Examples/Memory.lean`, `Examples/CrossDomain.lean`, `Examples/Net.lean`, `Examples/Theory.lean` | Memory, storage↔memory copies, `transfer`, the theory's rewriting. |
-| `Examples/SelectOnSaveConsr.lean` | Reading a write back through a `consr` path, by hand and in solkey's order. |
+| `Examples/Tactics/Tour.lean` | The running example end to end. |
+| `Examples/Tactics/StorageSteps.lean` | One storage statement form at a time, as `apply` walks. |
+| `Examples/Tactics/StorageSuite.lean`, `StorageDelete.lean`, `LedgerDelete.lean` | solkey's taclet suite on storage; `delete`; a struct holding a mapping deleted. |
+| `Examples/Tactics/Branch.lean`, `Revert.lean` | Two-goal splits; box and diamond on `revert`, `require`, `assert`. |
+| `Examples/Tactics/Payment.lean`, `Net.lean` | `transfer` as `⊢` walks with checked sequents; its frame and the ledger's runs. |
+| `Examples/Tactics/Values.lean`, `Operators.lean`, `Checked.lean` | Operators, checked arithmetic, `−−`, bitwise, shifts, `unchecked`, `uint8` … `int248`, casts. |
+| `Examples/Tactics/Calls.lean`, `CallOperands.lean`, `Callback.lean`, `TryCatch.lean` | Internal calls, call-valued operands, callbacks (`ProvesC`), `try`/`catch`. |
+| `Examples/Tactics/Memory.lean`, `CrossDomain.lean`, `Theory.lean` | Memory, storage↔memory copies, the theory's rewriting. |
+| `Examples/Tactics/SelectOnSaveConsr.lean` | Reading a write back through a `consr` path, by hand and in solkey's order. |
+| `Examples/Tactics/ApplySteps.lean`, `UpdateRules.lean`, `Decide.lean`, `TermTaclets.lean` | The proof style, update simplification, `sol_decide`, term taclets. |
+| `Examples/Tactics/Specs.lean` | Clauses as obligations (`spec!{f}`, `sol_spec`) beyond the benchmarks. |
+
+At the root, the notation's own tests:
+
+| Module | What it shows |
+|---|---|
+| `Examples/ChainNotation.lean`, `ChainRewrites.lean`, `ExampleNames.lean` | How a chain is written and checked, its rewrite links, the printed names of fresh variables. |
 | `Examples/Notation.lean` | What taclets, premises and sequents print, pinned. |
-| `Examples/ApplySteps.lean` | The proof style: every `Proves` constructor once, and a refused rule. |
-| `Examples/Chains.lean`, `Examples/UpdateRules.lean`, `Examples/ChainRewrites.lean`, `Examples/Decide.lean` | Derivation chains, update simplification, the headline trace (`headlineNamed`), `sol_decide`. |
-| `Examples/MemoryChains.lean` | The memory traces as chains. |
-| `Examples/ExampleNames.lean` | Chains in the examples' names for fresh variables (`pv`, `acc`, `aliceTok`). |
-| `Examples/Specs.lean` | Clauses as obligations (`spec!{f}`, `sol_spec`) beyond the benchmarks. |
 | `Examples/Verify.lean`, `Tools.lean` | `#verify`, `#counterexample` and the other commands, pinned. |
 | `Examples/Benchmark/*.lean` | solkey's benchmark contracts with their `@custom:key` clauses proved (`Counter`, `SimpleStorage`, `Mapping`, `Purchase`, `Coin`, `EtherWallet`, `ERC20`), and `Syntax`, which pins what elaborates away (units, casts, events, errors, enums, struct constructors, modifiers). |

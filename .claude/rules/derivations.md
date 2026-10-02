@@ -1,6 +1,6 @@
 ---
 paths:
-  - "Solidity/Examples/*.lean"
+  - "Solidity/Examples/**/*.lean"
   - "Solidity/Theory/*.lean"
   - "Solidity/Update.lean"
   - "Solidity/Calculus/Notation.lean"
@@ -8,10 +8,21 @@ paths:
 
 # Examples and the notation
 
-An example is written as the calculus writes it: a formula in its
-notation, `⊨ dl!{ pre → [ program ] post }`, over a named contract
-(`local instance : InContract := ⟨StandardExample⟩`). It is proved one of two
-ways:
+Two directories, by proof style:
+
+- `Examples/Chains/` — the calculus's worked examples, one file per section in
+  its order, each a chain (`calc` of `dl![m]{ … }` lines, `~[r]~>` for a
+  printed `⇝`, `~*>` for a `⇝*`) in the printed fresh names (a `FreshNames`
+  table per example). Only those examples go there, once each.
+- `Examples/Tactics/` — formulas `⊨ dl!{ pre → [ program ] post }` proved by
+  tactics, and interpreter runs.
+
+The notation's own tests (`ChainNotation`, `ChainRewrites`, `ExampleNames`,
+`Notation`, `Tools`, `Verify`) stay at the root. A program is shown once per
+style: before adding one, `rg` for it.
+
+A tactic example is over a named contract
+(`local instance : InContract := ⟨StandardExample⟩`), proved one of two ways:
 
 - **by the strategy**: `sol_symex` fires the one rule each statement has,
   `sol_close` finishes the first-order goal in an arbitrary state;
@@ -21,7 +32,7 @@ ways:
   walk takes is named in the proof, so renaming a rule breaks the example.
 
 Every theorem has a docstring with its Solidity. Every file has its own
-namespace `Solidity.Examples.<File>`: an anonymous `local instance` gets a
+namespace `Solidity.Examples.<Dir>.<File>`: an anonymous `local instance` gets a
 generated name, and two files in one namespace clash when both are imported.
 
 **Do not spell a formula out as raw constructors.** If `dl!{ … }` cannot say

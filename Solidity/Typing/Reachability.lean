@@ -1433,6 +1433,25 @@ theorem Arg.bindSeq_locals {args : List (Arg C)} {σ σ' : State} (h : Arg.bindS
   Arg.bindSeq_induct (P := fun τ => τ.storage = σ.storage ∧ τ.heap = σ.heap)
     (fun _ _ _ hp => hp) ⟨rfl, rfl⟩ h
 
+/-- Binding the locals an outcome of an external call binds only binds
+locals to values. -/
+theorem bindData_induct {P : State → Prop} (hset : ∀ τ x w, P τ → P (τ.setEnv x (.val w))) :
+    ∀ {xs : List (PrimTy × Var)} {vs : List Value} {σ σ' : State}, P σ →
+      bindData xs vs σ = .ok σ' → P σ'
+  | [], _, _, _, hp, h => by cases h; exact hp
+  | _ :: _, [], _, _, _, h => by simp [bindData] at h
+  | (_, x) :: _, w :: _, σ, _, hp, h => by
+    simp only [bindData] at h
+    split at h
+    · exact bindData_induct hset (hset σ x w hp) h
+    · cases h
+
+/-- The locals an outcome of an external call binds are only locals. -/
+theorem bindData_locals {xs : List (PrimTy × Var)} {vs : List Value} {σ σ' : State}
+    (h : bindData xs vs σ = .ok σ') : σ'.storage = σ.storage ∧ σ'.heap = σ.heap :=
+  bindData_induct (P := fun τ => τ.storage = σ.storage ∧ τ.heap = σ.heap)
+    (fun _ _ _ hp => hp) ⟨rfl, rfl⟩ h
+
 theorem CallRet.leave_locals {σ σ' : State} (ret : CallRet)
     (h : CallRet.leave (C := C) σ ret = .ok σ') : σ'.storage = σ.storage ∧ σ'.heap = σ.heap :=
   CallRet.leave_induct (P := fun τ => τ.storage = σ.storage ∧ τ.heap = σ.heap)
@@ -1696,6 +1715,33 @@ theorem Stmt.run_canon : ∀ (s : Stmt C) {Γ Γ' : Ctx} {H : HeapTy} {σ σ' : 
           Prog.run_canon body (CallRet.enter_wt (Arg.bindSeq_wt hwt h₁ hσ₁) ret) hcn₁ h₂ hσ₂
         obtain ⟨hs₃, hh₃⟩ := CallRet.leave_locals ret h
         exact ⟨H', hext, CallRet.leave_wt hwt₂ ret hr h, hcn₂.of_eq hs₃ hh₃⟩
+      · exact nomatch hs
+    · exact nomatch hs
+  | .tryCall c rets ok err code pnc other, Γ, Γ', H, σ, σ', hwt, hcn, hs, h => by
+    simp only [Stmt.wt] at hs
+    split at hs
+    · split at hs
+      · rename_i Γ₁ Γ₂ Γ₃ Γ₄ h₁ h₂ h₃ h₄
+        obtain ⟨hle, rfl⟩ := wt_if hs
+        simp only [Bool.and_eq_true] at hle
+        simp only [Stmt.run] at h
+        obtain ⟨k, _, h⟩ := bind_ok_inv h
+        split at h
+        · exact nomatch h
+        · obtain ⟨σ₁, hb, h⟩ := bind_ok_inv h
+          obtain ⟨hs₁, hh₁⟩ := bindData_locals hb
+          obtain ⟨H', hext, hwt', hcn'⟩ :=
+            Prog.run_canon ok (bindData_wt hwt hb) (hcn.of_eq hs₁ hh₁) h₁ h
+          exact ⟨H', hext, hwt'.weaken hle.1.1.1, hcn'⟩
+        · obtain ⟨H', hext, hwt', hcn'⟩ := Prog.run_canon err hwt hcn h₂ h
+          exact ⟨H', hext, hwt'.weaken hle.1.1.2, hcn'⟩
+        · obtain ⟨σ₁, hb, h⟩ := bind_ok_inv h
+          obtain ⟨hs₁, hh₁⟩ := bindData_locals hb
+          obtain ⟨H', hext, hwt', hcn'⟩ :=
+            Prog.run_canon pnc (bindData_wt hwt hb) (hcn.of_eq hs₁ hh₁) h₃ h
+          exact ⟨H', hext, hwt'.weaken hle.1.2, hcn'⟩
+        · obtain ⟨H', hext, hwt', hcn'⟩ := Prog.run_canon other hwt hcn h₄ h
+          exact ⟨H', hext, hwt'.weaken hle.2, hcn'⟩
       · exact nomatch hs
     · exact nomatch hs
 

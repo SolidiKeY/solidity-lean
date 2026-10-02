@@ -1,5 +1,6 @@
 import Solidity.FreshNames
 import Solidity.Calculus.Chains
+import Solidity.Examples.Chains.Storage
 
 /-!
 # Printed names for the rules' fresh variables
@@ -10,27 +11,15 @@ with its own table (`FreshNames.lean`), and every line in it — `dl!{ … }`,
 `sol{ … }`, `#derivation`, `sol_chain`'s errors — reads and prints the
 printed names:
 
-* `Headline` — `alice.account.balance = 10;`: the value `pv`, the alias
-  `acc`.  Its chain, the calculus's trace, is
-  `headlineNamed` of `Examples/ChainRewrites.lean`, which reads this table;
-  here are its tests: a
-  line is the term its default spelling gives, a capture is numbered past
-  `pv`, an error prints `pv`;
-* `Token` — `alice.account.token.value = 5;`: `aliceTok`, then `aliceAcc`,
-  the alias the second unfolding declares;
-* `Memory` — `carol.account.balance = 10;`: `acc` again, now a memory
-  reference;
-* `Matrix` — `matrix[i++][i++] = 77;`: `idx1`, `sp`, `idx2`, captured by the
-  elaborator in solc's order;
-* `Snapshot` — `m[i++] = i;`: the value `a` captured before the index `b`
-  runs;
+* `Headline` — `alice.account.balance = 10;`, whose table is
+  `Chains.Storage.BalanceWrite.names` (the value `pv`, the alias `acc`; the
+  chain itself is `BalanceWrite.chain`): a line is the term its default
+  spelling gives, a capture is numbered past `pv`, an error prints `pv`;
 * `Capture` — a `sol{ … }` capture numbered past a table name.
 
 A table changes spellings only: each line is the term its default spelling
-gives (`headlineLast`, `captured`), so the chains check as they do in
-the default spelling.  The printed `int pv` is `uint pv` here (the
-type of the place written), and its last lines, with the updates applied,
-are not drawn.
+gives (`headlineLast`, `captured`), so the chains of `Examples/Chains/` check
+as they do in the default spelling.
 -/
 
 namespace Solidity.Examples.ExampleNames
@@ -67,12 +56,7 @@ info: ["se2 is itself a fresh variable's spelling", "alice is a state variable o
 
 namespace Headline
 
-/-- `alice.account.balance = 10;`: the value `pv`, the alias `acc`. -/
-def names : FreshTable := [("pv", "se1"), ("acc", "sp1")]
-
-local instance : FreshNames := .ofTable names
-
-#guard (FreshNames.clashes StandardExample names).isEmpty
+local instance : FreshNames := .ofTable Chains.Storage.BalanceWrite.names
 
 -- `acc` reads as `sp1`, and `se1` prints as `pv`
 #guard Var.ofName "acc" == .fresh "sp" 1 && toString (Var.fresh "se" 1) == "pv"
@@ -105,198 +89,6 @@ example : dl!{ ⟨ alice.account.balance = 10; ⟩ alice.account.balance == 10 }
   sol_chain
 
 end Headline
-
-namespace Token
-
-/-- `alice.account.token.value = 5;`: `aliceAcc` is the second alias, `sp2`. -/
-def names : FreshTable := [("pv", "se1"), ("aliceTok", "sp1"), ("aliceAcc", "sp2")]
-
-local instance : FreshNames := .ofTable names
-
-#guard (FreshNames.clashes StandardExample names).isEmpty
-
-/--
-info:     dl{ ⟨ alice.account.token.value = 5; ⟩ find(storage, alice.account.token.value) = 5 }
-  ~[storageFieldWrite_unfold_leftFst]~>
-    dl{
-  ⟨ uint pv = 5; Token storage aliceTok = alice.account.token; aliceTok.value = pv; ⟩
-    find(storage, alice.account.token.value) = 5 }
-  ~[localValueDeclInitDrop]~>
-    dl{
-  ⟨ pv = 5; Token storage aliceTok = alice.account.token; aliceTok.value = pv; ⟩
-    find(storage, alice.account.token.value) = 5 }
-  ~[localValueAssign]~>
-    dl{
-  { pv := 5 }
-    ⟨ Token storage aliceTok = alice.account.token; aliceTok.value = pv; ⟩
-      find(storage, alice.account.token.value) = 5 }
-  ~[storageLocalDeclInitDrop]~>
-    dl{
-  { pv := 5 } ⟨ aliceTok = alice.account.token; aliceTok.value = pv; ⟩ find(storage, alice.account.token.value) = 5 }
-  ~[storageFieldRead_unfold_rightFst]~>
-    dl{
-  { pv := 5 }
-    ⟨ Account storage aliceAcc = alice.account; aliceTok = aliceAcc.token; aliceTok.value = pv; ⟩
-      find(storage, alice.account.token.value) = 5 }
-  ~[storageLocalDeclInitDrop]~>
-    dl{
-  { pv := 5 }
-    ⟨ aliceAcc = alice.account; aliceTok = aliceAcc.token; aliceTok.value = pv; ⟩
-      find(storage, alice.account.token.value) = 5 }
-  ~[storageFieldReadBindLocalRoot]~>
-    dl{
-  { pv := 5 }
-    { aliceAcc := alice.account }
-      ⟨ aliceTok = aliceAcc.token; aliceTok.value = pv; ⟩ find(storage, alice.account.token.value) = 5 }
-  ~[storageFieldReadBindLocalRoot]~>
-    dl{
-  { pv := 5 }
-    { aliceAcc := alice.account }
-      { aliceTok := aliceAcc.token } ⟨ aliceTok.value = pv; ⟩ find(storage, alice.account.token.value) = 5 }
-  ~[storageFieldWriteSave]~>
-    dl{
-  { pv := 5 }
-    { aliceAcc := alice.account }
-      { aliceTok := aliceAcc.token }
-        { storage := save(storage, aliceTok.value, pv) } ⟨ ⟩ find(storage, alice.account.token.value) = 5 }
-  ~[emptyModality]~>
-    dl{
-  { pv := 5 }
-    { aliceAcc := alice.account }
-      { aliceTok := aliceAcc.token }
-        { storage := save(storage, aliceTok.value, pv) } find(storage, alice.account.token.value) = 5 }
--/
-#guard_msgs in
-#derivation dl!{ ⟨ alice.account.token.value = 5; ⟩ alice.account.token.value == 5 }
-
-/-- The printed chain.  The line `storageFieldRead_unfold_rightFst` reaches is
-left `_`: `dl!{ … }` does not read it back in any spelling (`sp1 =
-sp2.token` is refused as well), since it types an alias bound by an
-assignment only from a state variable's path (`aliceTok =
-alice.account.token`), not from another alias's (`aliceTok =
-aliceAcc.token`); `Calculus/Notation.lean` lists the gap.  The
-`#derivation` above shows the line. -/
-def token : dl!{ ⟨ alice.account.token.value = 5; ⟩ alice.account.token.value == 5 }
-    ~*> dl!{ { pv := 5 } { aliceAcc := alice.account } { aliceTok := aliceAcc.token }
-              { storage := save(storage, aliceTok.value, pv) } alice.account.token.value == 5 } :=
-  calc dl!{ ⟨ alice.account.token.value = 5; ⟩ alice.account.token.value == 5 }
-    _ ~[storageFieldWrite_unfold_leftFst]~>
-        dl!{ ⟨ uint pv = 5; Token storage aliceTok = alice.account.token; aliceTok.value = pv; ⟩
-            alice.account.token.value == 5 } := rfl
-    _ ~*> dl!{ { pv := 5 } ⟨ aliceTok = alice.account.token; aliceTok.value = pv; ⟩
-            alice.account.token.value == 5 } := by sol_chain
-    _ ~[storageFieldRead_unfold_rightFst]~> _ := rfl
-    _ ~*> dl!{ { pv := 5 } { aliceAcc := alice.account } { aliceTok := aliceAcc.token }
-              ⟨ aliceTok.value = pv; ⟩ alice.account.token.value == 5 } := by sol_chain
-    _ ~*> dl!{ { pv := 5 } { aliceAcc := alice.account } { aliceTok := aliceAcc.token }
-              { storage := save(storage, aliceTok.value, pv) } alice.account.token.value == 5 } := by
-      sol_chain
-
-end Token
-
-namespace Memory
-
-/-- `carol.account.balance = 10;`: `acc` is a memory reference here, `mv1`. -/
-def names : FreshTable := [("acc", "mv1")]
-
-local instance : FreshNames := .ofTable names
-
-#guard (FreshNames.clashes StandardExample names).isEmpty
-
-/--
-info:     dl{ ⟨ Person memory carol; carol.account.balance = 10; ⟩ true }
-  ~[memoryReferenceDeclFreshAlloc]~>
-    dl{
-  { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) } ⟨ carol.account.balance = 10; ⟩ true }
-  ~[memoryFieldWrite_unfold_leftFst]~>
-    dl{
-  { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
-    ⟨ Account memory acc = carol.account; acc.balance = 10; ⟩ true }
-  ~[memoryLocalDeclInitDrop]~>
-    dl{
-  { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
-    ⟨ acc = carol.account; acc.balance = 10; ⟩ true }
-  ~[memoryFieldReadAliasRoot]~>
-    dl{
-  { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
-    { acc := read(memory, carol.account) } ⟨ acc.balance = 10; ⟩ true }
-  ~[memoryFieldWriteStore]~>
-    dl{
-  { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
-    { acc := read(memory, carol.account) } { memory := write(memory, acc.balance, 10) } ⟨ ⟩ true }
-  ~[emptyModality]~>
-    dl{
-  { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
-    { acc := read(memory, carol.account) } { memory := write(memory, acc.balance, 10) } true }
--/
-#guard_msgs in
-#derivation dl!{ ⟨ Person memory carol; carol.account.balance = 10; ⟩ true }
-
-end Memory
-
-namespace Matrix
-
-/-- `matrix[i++][i++] = 77;`: the receiver's index `idx1`, the row `sp`, the
-index `idx2`. -/
-def names : FreshTable := [("idx1", "se1"), ("sp", "sp2"), ("idx2", "se3")]
-
-local instance : FreshNames := .ofTable names
-
-#guard (FreshNames.clashes StandardExample names).isEmpty
-
-/-- `matrix[i++][i++] = 77;`, Lean's derivation of
-it in the printed names, down to the in-bounds write.  The lines are not the
-printed ones: the elaborator captures both increments before the write (the first
-step, an equality), where the printed rules capture them as they unfold it;
-the printed `pv` is not declared, since `77` is already a value. -/
-def matrix : dl!{ ⟨ matrix[i++][i++] = 77; ⟩ matrix[0][1] == 77 }
-    ~*> dl!{ { idx1 := 0 } { i := i + 1 ‖ idx1 := i } { sp := matrix[idx1] } { idx2 := 0 }
-              { i := i + 1 ‖ idx2 := i } { storage := save(storage, sp[idx2], 77) }
-              matrix[0][1] == 77 } :=
-  calc dl!{ ⟨ matrix[i++][i++] = 77; ⟩ matrix[0][1] == 77 }
-    _ = dl!{ ⟨ uint idx1; idx1 = i++; uint[] storage sp = matrix[idx1]; uint idx2; idx2 = i++;
-            sp[idx2] = 77; ⟩ matrix[0][1] == 77 } := rfl
-    _ ~*> dl!{ { idx1 := 0 } { i := i + 1 ‖ idx1 := i } { sp := matrix[idx1] } { idx2 := 0 }
-              { i := i + 1 ‖ idx2 := i } ⟨ sp[idx2] = 77; ⟩ matrix[0][1] == 77 } := by sol_chain
-    _ ~[storageIndexWriteArraySave]~>
-        dl!{ { idx1 := 0 } { i := i + 1 ‖ idx1 := i } { sp := matrix[idx1] } { idx2 := 0 }
-              { i := i + 1 ‖ idx2 := i } { storage := save(storage, sp[idx2], 77) } ⟨⟩
-              matrix[0][1] == 77 } := rfl
-    _ ~[emptyModality]~>
-        dl!{ { idx1 := 0 } { i := i + 1 ‖ idx1 := i } { sp := matrix[idx1] } { idx2 := 0 }
-              { i := i + 1 ‖ idx2 := i } { storage := save(storage, sp[idx2], 77) }
-              matrix[0][1] == 77 } := rfl
-
-end Matrix
-
-namespace Snapshot
-
-/-- `m[i++] = i;`: the value `a`, then the index `b`. -/
-def names : FreshTable := [("a", "se1"), ("b", "se2")]
-
-local instance : FreshNames := .ofTable names
-
-#guard (FreshNames.clashes StandardExample names).isEmpty
-
-/-- `m[i++] = i;`, as `balances[i++] = i;`:
-the elaborator snapshots the value `a` before the index `b` runs `i++`, so
-the write stores the old `i`.  Lean declares `b` and then assigns it, where
-the printed chain initialises it. -/
-def snapshot : dl!{ ⟨ balances[i++] = i; ⟩ balances[0] == 0 }
-    ~*> dl!{ { a := i } { b := 0 } { i := i + 1 ‖ b := i } { storage := save(storage, balances[b], a) }
-              balances[0] == 0 } :=
-  calc dl!{ ⟨ balances[i++] = i; ⟩ balances[0] == 0 }
-    _ = dl!{ ⟨ uint a = i; uint b; b = i++; balances[b] = a; ⟩ balances[0] == 0 } := rfl
-    _ ~*> dl!{ { a := i } { b := 0 } { i := i + 1 ‖ b := i } ⟨ balances[b] = a; ⟩
-            balances[0] == 0 } := by sol_chain
-    _ ~[storageIndexWriteMappingSave]~>
-        dl!{ { a := i } { b := 0 } { i := i + 1 ‖ b := i } { storage := save(storage, balances[b], a) }
-            ⟨⟩ balances[0] == 0 } := rfl
-    _ ~[emptyModality]~>
-        dl!{ { a := i } { b := 0 } { i := i + 1 ‖ b := i } { storage := save(storage, balances[b], a) }
-            balances[0] == 0 } := rfl
-
-end Snapshot
 
 namespace Capture
 

@@ -354,7 +354,8 @@ def tacletOrigins : List (Lean.Name × KeyOrigin) := [
   (``Taclet.revertBox, .taclet .revertBox),
   (``Taclet.revertDiamond, .taclet .revertDiamond),
   -- Calls
-  (``Taclet.functionBodyExpand, .taclet .functionBodyExpand) ]
+  (``Taclet.functionBodyExpand, .taclet .functionBodyExpand),
+  (``Taclet.tryCallNoCallbackBox, .taclet .tryCallNoCallbackBox) ]
 
 #check_constructor_table Taclet, tacletOrigins.map Prod.fst
 
@@ -362,7 +363,8 @@ def tacletOrigins : List (Lean.Name × KeyOrigin) := [
 `transferSemantics`), and the solkey taclets they transcribe. -/
 def callbackOrigins : List (Lean.Name × KeyOrigin) := [
   (``CallbackTaclet.transferWithCallbackBox, .taclet .transferWithCallbackBox),
-  (``CallbackTaclet.transferWithCallbackDiamond, .taclet .transferWithCallbackDiamond) ]
+  (``CallbackTaclet.transferWithCallbackDiamond, .taclet .transferWithCallbackDiamond),
+  (``CallbackTaclet.tryCallWithCallbackBox, .taclet .tryCallWithCallbackBox) ]
 
 #check_constructor_table CallbackTaclet, callbackOrigins.map Prod.fst
 
@@ -409,22 +411,25 @@ theorem taclets_partitioned :
     KeyTaclet.all.all (fun t => claims t != unclaimedTaclets.contains t) = true := by
   decide +kernel
 
-theorem claimedTaclets_count : claimedTaclets.length = 300 := by decide +kernel
+theorem claimedTaclets_count : claimedTaclets.length = 302 := by decide +kernel
 
 theorem unclaimedTaclets_count : unclaimedTaclets.length = 11 := by decide +kernel
 
 /-! ## The rules with no taclet
 
 A rule upstream has no counterpart for is a `LeanTaclet`, not a `Taclet`, so
-every row above claims a taclet.  There is one:
+every row above claims a taclet.  There are two:
 `functionCallArgCapture`, printed as `unfoldArgument`, which solkey's
 `docs/net.md` lists as missing (its `ExpandFunctionBody` binds the parameters
 to the arguments as they are; here a parameter is bound to a ready argument
-only, so that inlining is exact).  The list is checked against the
+only, so that inlining is exact); and `tryCallDiamond`, a `try` under the
+diamond closed to `false`, where solkey has no rule (a call may revert in the
+caller, which no formula rules out).  The list is checked against the
 constructors, so one added later has to say so here. -/
 
 /-- Every `LeanTaclet` constructor. -/
-def leanTaclets : List Lean.Name := [``LeanTaclet.functionCallArgCapture]
+def leanTaclets : List Lean.Name :=
+  [``LeanTaclet.functionCallArgCapture, ``LeanTaclet.tryCallDiamond]
 
 #check_constructor_table LeanTaclet, leanTaclets
 

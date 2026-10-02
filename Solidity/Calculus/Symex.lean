@@ -31,7 +31,7 @@ variable {C : Contract}
 
 /-- A modality is left: a statement to run, or a `⟨⟩` (or `[]`) to drop. -/
 def Fml.active : Fml C → Bool
-  | .upd _ _ φ | .imp _ φ | .havoc φ => φ.active
+  | .upd _ _ φ | .imp _ φ | .havoc φ | .all _ _ φ => φ.active
   | .and φ ψ => φ.active || ψ.active
   | .modal .. => true
   | _ => false
@@ -42,6 +42,7 @@ def Fml.stepAt (k : Nat) : Fml C → Option (Fml C)
   | .upd m U φ => (φ.stepAt k).map (.upd m U)
   | .imp a φ => (φ.stepAt k).map (.imp a)
   | .havoc φ => (φ.stepAt k).map .havoc
+  | .all x p φ => (φ.stepAt k).map (.all x p)
   | .and φ ψ =>
     if φ.active then (φ.stepAt k).map (.and · ψ) else (ψ.stepAt k).map (.and φ)
   | .modal _ [] φ => some φ
@@ -80,6 +81,11 @@ theorem Fml.stepAt_sound {k : Nat} :
     obtain ⟨ψ', h', rfl⟩ := h
     have := maxIdx_lt_of_sub (φ := φ) (fun x hx => by simp [Fml.vars, hx]) hk
     exact fun hψ st nt bal => Fml.stepAt_sound this h' _ (hψ st nt bal)
+  | .all x p φ, ψ, hk, h, σ => by
+    simp only [Fml.stepAt, Option.map_eq_some_iff] at h
+    obtain ⟨ψ', h', rfl⟩ := h
+    have := maxIdx_lt_of_sub (φ := φ) (fun x hx => by simp [Fml.vars, hx]) hk
+    exact fun hψ v hv => Fml.stepAt_sound this h' _ (hψ v hv)
   | .and φ₁ φ₂, ψ, hk, h, σ => by
     have h₁ := maxIdx_lt_of_sub (φ := φ₁) (fun x hx => by simp [Fml.vars, hx]) hk
     have h₂ := maxIdx_lt_of_sub (φ := φ₂) (fun x hx => by simp [Fml.vars, hx]) hk
@@ -227,14 +233,24 @@ theorem doneRule {b : Bool} (d : Rule C (Hyp.fresh Γ (.modal m (s :: ω) φ)) m
     (h : Proves .all Γ ((Premise.done b).fml m ω φ)) : Proves .all Γ (.modal m (s :: ω) φ) := by
   rcases d with d | d
   · exact .done d h
+  · exact .doneLean d h
+
+/-- `branches` by whichever rule `Rule` names. -/
+theorem branchesRule {bs : List (List (PrimTy × Var) × Prog C)}
+    (d : Rule C (Hyp.fresh Γ (.modal m (s :: ω) φ)) m s (.branches bs))
+    (h : ∀ b ∈ bs, Proves .all Γ (.alls b.1 (.modal m (b.2 ++ ω) φ))) :
+    Proves .all Γ (.modal m (s :: ω) φ) := by
+  rcases d with d | d
+  · exact .branches d h
   · cases d
 
 end Proves
 
 /-- `sol_derive`: run the strategy as a derivation.  On every goal it drops
 an empty modality, fires the rule `Stmt.step` picks (as `update`, `unfold`,
-`split`, `guard` or `done`), or moves a precondition into the context, until no goal
-has a modality left; what is left is for `close`. -/
+`split`, `guard`, `done` or `branches`), or moves a precondition or a
+quantified local into the context, until no goal has a modality left; what
+is left is for `close`. -/
 macro "sol_derive" : tactic => `(tactic| repeat (first
   | apply Proves.empty
   | apply Proves.updateRule (Stmt.step _ _ _).rule
@@ -242,6 +258,11 @@ macro "sol_derive" : tactic => `(tactic| repeat (first
   | apply Proves.splitRule (Stmt.step _ _ _).rule
   | apply Proves.guardRule (Stmt.step _ _ _).rule
   | apply Proves.doneRule (Stmt.step _ _ _).rule
-  | apply Proves.intro))
+  | (apply Proves.branchesRule (Stmt.step _ _ _).rule
+     simp only [List.forall_mem_cons, List.not_mem_nil, false_implies, implies_true, and_true,
+       Fml.alls, codeBinders, Option.toList, List.map]
+     refine ⟨?_, ?_, ?_, ?_⟩)
+  | apply Proves.intro
+  | apply Proves.allIntro))
 
 end Solidity

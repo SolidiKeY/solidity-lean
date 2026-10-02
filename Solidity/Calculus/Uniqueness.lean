@@ -139,13 +139,14 @@ theorem Taclet.eq_step {s : Stmt C} {p : Premise C} (d : Taclet C k m s p) :
     all_goals rfl
 
 /-- The rules solkey lacks are `Stmt.step`'s too: a call with an argument
-that is not ready captures it. -/
+that is not ready captures it, and a `try` under the diamond closes. -/
 theorem LeanTaclet.eq_step {s : Stmt C} {p : Premise C} (d : LeanTaclet C k m s p) :
     p = (s.step k m).premise := by
   cases d with
   | functionCallArgCapture h =>
     simp only [Stmt.step, callStep]
     split <;> simp_all <;> subst_vars <;> rfl
+  | tryCallDiamond => rfl
 
 theorem Rule.eq_step {s : Stmt C} {p : Premise C} (d : Rule C k m s p) :
     p = (s.step k m).premise := by

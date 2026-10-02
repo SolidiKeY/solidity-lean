@@ -766,6 +766,53 @@ def holds (σ : State) : Fml C → Prop
 /-- Valid: true in every state. -/
 def Valid (φ : Fml C) : Prop := ∀ σ, holds σ φ
 
+/-! ## Goals over bound locals
+
+A `try` has a goal per way its call may end, each for every value of the
+locals the outcome binds (`Premise.branches`): `∀ xs. φ`, with `xs` bound
+as the run decodes them (`bindData`). -/
+
+/-- `∀ p₁ x₁. … ∀ pₙ xₙ. φ`. -/
+def Fml.alls : List (PrimTy × Var) → Fml C → Fml C
+  | [], φ => φ
+  | (p, x) :: xs, φ => .all x p (Fml.alls xs φ)
+
+/-- `φ₁ ∧ … ∧ φₙ`, `true` when there are none. -/
+def Fml.conj : List (Fml C) → Fml C
+  | [] => .tt
+  | [φ] => φ
+  | φ :: ψs => .and φ (Fml.conj ψs)
+
+/-- A value of the type is one decoding accepts. -/
+theorem PrimTy.admits_iff_fits (p : PrimTy) (v : Value) : p.admits v ↔ v.fits p = true := by
+  cases p <;> cases v <;> simp [PrimTy.admits, PrimVal.fits]
+
+/-- `σ'` is `σ` with the locals `xs` bound to values of their types, as an
+outcome's data binds them. -/
+def Binds (xs : List (PrimTy × Var)) (σ σ' : State) : Prop := ∃ vs, bindData xs vs σ = .ok σ'
+
+theorem holds_conj {σ : State} : {φs : List (Fml C)} → (holds σ (Fml.conj φs) ↔ ∀ φ ∈ φs, holds σ φ)
+  | [] => by simp [Fml.conj, holds]
+  | [φ] => by simp [Fml.conj]
+  | φ :: ψ :: φs => by simp [Fml.conj, holds, holds_conj (φs := ψ :: φs)]
+
+theorem holds_alls {φ : Fml C} : {xs : List (PrimTy × Var)} → {σ : State} →
+    (holds σ (Fml.alls xs φ) ↔ ∀ σ', Binds xs σ σ' → holds σ' φ)
+  | [], σ => by
+    simp only [Fml.alls, Binds, bindData]
+    exact ⟨fun h σ' ⟨_, he⟩ => by cases he; exact h, fun h => h σ ⟨[], rfl⟩⟩
+  | (p, x) :: xs, σ => by
+    simp only [Fml.alls, holds, holds_alls (xs := xs), Binds, PrimTy.admits_iff_fits]
+    constructor
+    · rintro h σ' ⟨_ | ⟨v, vs⟩, he⟩
+      · simp [bindData] at he
+      · simp only [bindData] at he
+        split at he
+        · exact h v (by assumption) σ' ⟨vs, he⟩
+        · cases he
+    · intro h v hv σ' ⟨vs, he⟩
+      exact h σ' ⟨v :: vs, by simp only [bindData, hv, if_true]; exact he⟩
+
 /-- No modality anywhere, under a negation and on the left of an implication
 included: a formula of the logic, which the calculus leaves to `Valid`. -/
 def Fml.modalFree : Fml C → Bool

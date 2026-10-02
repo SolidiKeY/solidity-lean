@@ -174,6 +174,16 @@ def CallRet.wt (Γ : Ctx) : CallRet → Bool
   | .val p r (some y) => Ctx.has Γ r (.stack (.prim p)) && Ctx.has Γ y (.stack (.prim p))
   | _ => true
 
+/-- The context the locals an outcome of an external call binds leave, each
+at its type, in the order `bindData` binds them. -/
+def bindCtx : List (PrimTy × Var) → Ctx → Ctx
+  | [], Γ => Γ
+  | (p, x) :: xs, Γ => bindCtx xs (setBy x (.stack (.prim p)) Γ)
+
+/-- An external call's receiver and arguments read locals as declared. -/
+def ExtCall.wt (Γ : Ctx) (c : ExtCall C) : Bool :=
+  c.addr.wt Γ && c.args.all fun a => a.2.wt Γ
+
 mutual
 
 /-- The context a statement leaves, if its locals are used as declared:
@@ -224,6 +234,14 @@ def Stmt.wt (Γ : Ctx) : Stmt C → Option Ctx
       | some Γ₂ => if ret.wt Γ₂ then some Γ₂ else none
       | none => none
     | none => none
+  | .tryCall c rets ok err code pnc other =>
+    if c.wt Γ then
+      match Prog.wt (bindCtx rets Γ) ok, Prog.wt Γ err, Prog.wt (bindCtx (codeBinders code) Γ) pnc,
+          Prog.wt Γ other with
+      | some Γ₁, some Γ₂, some Γ₃, some Γ₄ =>
+        if Ctx.le Γ Γ₁ && Ctx.le Γ Γ₂ && Ctx.le Γ Γ₃ && Ctx.le Γ Γ₄ then some Γ else none
+      | _, _, _, _ => none
+    else none
 
 /-- The context a block leaves. -/
 def Prog.wt (Γ : Ctx) : List (Stmt C) → Option Ctx
@@ -1296,6 +1314,21 @@ theorem CallRet.leave_wt (hwt : RunWT C Γ H σ) {σ' : State} :
     have := Simple.eval_wt hwt hw hv
     exact hwt.setEnv_same hr.2 (by simpa [BTy.matchesB] using this)
 
+/-- The locals an outcome of an external call binds, each a value of its
+type: decoding checked it. -/
+theorem bindData_wt : ∀ {xs : List (PrimTy × Var)} {vs : List Value} {Γ : Ctx} {σ σ' : State},
+    RunWT C Γ H σ → bindData xs vs σ = .ok σ' → RunWT C (bindCtx xs Γ) H σ'
+  | [], _, _, _, _, hwt, h => by cases h; exact hwt
+  | _ :: _, [], _, _, _, _, h => by simp [bindData] at h
+  | (p, x) :: xs, v :: vs, Γ, σ, σ', hwt, h => by
+    simp only [bindData] at h
+    split at h
+    · rename_i hv
+      show RunWT C (bindCtx xs (setBy x (.stack (.prim p)) Γ)) H σ'
+      refine bindData_wt (hwt.setEnv ?_) h
+      cases p <;> cases v <;> simp_all [PrimVal.fits, BTy.matchesB, Value.toSVal, SVal.hasTy]
+    · cases h
+
 end Effects
 
 /-! ## The headline -/
@@ -1521,6 +1554,29 @@ theorem Stmt.run_wt : ∀ (s : Stmt C) {Γ Γ' : Ctx} {H : HeapTy} {σ σ' : Sta
         obtain ⟨H', hext, hwt₂⟩ :=
           Prog.run_wt body (CallRet.enter_wt (Arg.bindSeq_wt hwt h₁ hσ₁) ret) h₂ hσ₂
         exact ⟨H', hext, CallRet.leave_wt hwt₂ ret hr h⟩
+      · exact nomatch hs
+    · exact nomatch hs
+  | .tryCall c rets ok err code pnc other, Γ, Γ', H, σ, σ', hwt, hs, h => by
+    simp only [Stmt.wt] at hs
+    split at hs
+    · split at hs
+      · rename_i Γ₁ Γ₂ Γ₃ Γ₄ h₁ h₂ h₃ h₄
+        obtain ⟨hle, rfl⟩ := wt_if hs
+        simp only [Bool.and_eq_true] at hle
+        simp only [Stmt.run] at h
+        obtain ⟨k, _, h⟩ := bind_ok_inv h
+        split at h
+        · exact nomatch h
+        · obtain ⟨σ₁, hb, h⟩ := bind_ok_inv h
+          obtain ⟨H', hext, hwt'⟩ := Prog.run_wt ok (bindData_wt hwt hb) h₁ h
+          exact ⟨H', hext, hwt'.weaken hle.1.1.1⟩
+        · obtain ⟨H', hext, hwt'⟩ := Prog.run_wt err hwt h₂ h
+          exact ⟨H', hext, hwt'.weaken hle.1.1.2⟩
+        · obtain ⟨σ₁, hb, h⟩ := bind_ok_inv h
+          obtain ⟨H', hext, hwt'⟩ := Prog.run_wt pnc (bindData_wt hwt hb) h₃ h
+          exact ⟨H', hext, hwt'.weaken hle.1.2⟩
+        · obtain ⟨H', hext, hwt'⟩ := Prog.run_wt other hwt h₄ h
+          exact ⟨H', hext, hwt'.weaken hle.2⟩
       · exact nomatch hs
     · exact nomatch hs
 

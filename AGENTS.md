@@ -91,8 +91,8 @@ import changes and final confirmation. The `lean-verify` skill in
 | `lake exe solkeycheck` | sort annotations against solkey's `.key` |
 | `./scripts/check-corpus.sh` | the solkey corpus (`SolidityCorpus`) against `tests/solkey/expected.tsv` |
 
-`solkeycheck` is at zero against solkey `f2eb3d98eb` (311 taclets,
-2026-09-27). Re-pinning to a newer checkout is its own change: it regenerates
+`solkeycheck` is at zero against solkey `323dc7faa5` (313 taclets,
+2026-10-02). Re-pinning to a newer checkout is its own change: it regenerates
 `Calculus/KeyTaclets.lean`, moves `SortCheck/Annotations.lean`, and
 re-partitions `RuleShapes.taclets_partitioned`.
 

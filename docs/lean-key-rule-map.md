@@ -3,7 +3,7 @@
 The name-by-name map from solkey's `solidityProgramRules.key` (plus
 `ifThenElseRules.key`) to `Solidity.Taclet` (`Calculus/Rules.lean`), then the
 symbol table for updates and the data-structure theories. **Pinned to solkey
-`f2eb3d98eb`**: 311 program taclets, enumerated in `Calculus/KeyTaclets.lean`.
+`323dc7faa5`**: 313 program taclets, enumerated in `Calculus/KeyTaclets.lean`.
 
 These tables are the prose companion of `Calculus/RuleShapes.lean`, which
 checks the correspondence: `tacletOrigins` gives every constructor a typed
@@ -11,9 +11,9 @@ checks the correspondence: `tacletOrigins` gives every constructor a typed
 fails the build), `unclaimedTaclets` excuses the rest with a reason,
 `callbackOrigins` does the same for `CallbackTaclet`, and `taclets_partitioned`
 says every taclet is claimed or excused, never both
-(`claimedTaclets_count = 300`, `unclaimedTaclets_count = 11`). A rule that
-transcribes no taclet is a `LeanTaclet` (`leanTaclets`); there is one,
-`functionCallArgCapture`. A taclet may be claimed by two constructors (the
+(`claimedTaclets_count = 302`, `unclaimedTaclets_count = 11`). A rule that
+transcribes no taclet is a `LeanTaclet` (`leanTaclets`); there are two,
+`functionCallArgCapture` and `tryCallDiamond`. A taclet may be claimed by two constructors (the
 member reads by their `.length` rules, since KeY reads `sp.length` as the
 member `length`; `memoryFieldWrite`/`memoryIndexWriteArray` by the value and
 reference writes). What stays prose here is what a `KeyOrigin` cannot say:
@@ -262,6 +262,14 @@ receiver kind, Lean does not.
 | `transferWithCallbackBox` | `CallbackTaclet.transferWithCallbackBox` | same | a constructor of `CallbackTaclet`, sound for the callback reading (`holdsC`), not of `Taclet`. The premise has `transferNoCallback`'s shape (funds check `F`, booking `U`), read as KeY's goals (`CallbackTaclet.sound`): `F → {U} I` ("invariant on exit") and `F → {U} {havoc} (I → ⟨[ ω ]⟩ φ)` ("resume after callback"; `{havoc}` is KeY's anonymising update, read by `CbResume`). The box assumes `F` where KeY does not, which only weakens its goals. Used by `ProvesC` |
 | `transferWithCallbackDiamond` | `CallbackTaclet.transferWithCallbackDiamond` | same | as the box, plus KeY's "sufficient funds" goal `F` (`ProvesC.callback`'s `funds`) |
 
+## External calls (`try`/`catch`)
+
+| KeY taclet | `Taclet` constructor | Status | Notes |
+| --- | --- | --- | --- |
+| `tryCallNoCallbackBox` | same | same | one goal per clause (`Premise.branches`, `Proves.branches`): "call succeeded", "Error caught", "Panic caught", "other failure caught". KeY declares the return locals and the `Panic` code without an initializer, leaving them unconstrained; here they are bound under `∀` (`Fml.alls`, `Hyp.all`), since a Lean declaration is its default. `s#call` is an `ExtCall`, whose receiver and arguments are simple: the elaborator captures any other before the `try` |
+| `tryCallWithCallbackBox` | `CallbackTaclet.tryCallWithCallbackBox` | same | read by `ProvesC.tryCall` (`CallbackTaclet.sound_branches`): `I` where control leaves ("invariant on exit"), the success block after `{havoc}` and `I` ("call succeeded"), each `catch` block from where the call was made |
+| — | `LeanTaclet.tryCallDiamond` | Lean only | a diamond `try` closes to `false`; solkey has no rule. The call may revert in the caller (no code at the address, data that does not decode), which no clause catches and no formula rules out |
+
 ## Update algebra (`updateRules.key`)
 
 An update is a term (`Upd C`, a list of `UpdElem`s read against the
@@ -408,10 +416,10 @@ root it allocates, which may be `shaped(idp, sh)` (`IdentityPrim.shaped`,
 
 | KeY taclet | Lean theorem | Status |
 | --- | --- | --- |
-| `readOnWrite`, `readFromEmptyMemory`, `readOnAddM`, `newFromEmptyMemory`, `newFromWrite`, `newFromAdd`, `idCCDef`, `shapeAtNil`, `shapeAtMap`, `idShapeDef`, `defaultDefIdentity` | same names | done (`defaultDefIdentity` through `MemValue.asIdentity`) |
+| `readOnWrite`, `readFromEmptyMemory`, `readOnAddM`, `newFromEmptyMemory`, `newFromWrite`, `newFromAdd`, `idCCDef`, `shapeAtNil`, `shapeAtMap`, `idShapeDef`, `initIdentity` | same names | done (`initIdentity` through `MemValue.asIdentity`) |
 | `defaultValueInt`, `defaultValueBool`, `defValResolve` | `MemValue.asPrim`, `defaultDefInt`, `defValResolvePrim` | done as casts |
-| `defaultDefElement`, `defaultDefMember` | same names (`MemValue.asIntAt`) | done: split by field so `defaultSize` has the length to itself; the cast takes the location |
-| `defaultSize` | `defaultSize` (`defaultSizeUnshaped` for a bare root) | done |
+| `initElement`, `initMember` | same names (`MemValue.asIntAt`) | done: split by field so `initSize` has the length to itself; the cast takes the location |
+| `initSize` | `initSize` (`initSizeUnshaped` for a bare root) | done |
 | `readREmpty`, `readRCons` | same names (`Memory.readR`, `readRId`) | done |
 | `sizeOfFixed`, `sizeOfDyn`, `sizeOfLeaf` | same names (`shapeSize`: `sizeOf` is Lean's own) | done; `mapOf` has no taclet and is `0` |
 | `shapeAtFixed`, `shapeAtFixedMapElement` | `shapeAtFixed` | done: `atMap(i)` is `Seg.at i` |
@@ -426,7 +434,7 @@ root it allocates, which may be `shaped(idp, sh)` (`IdentityPrim.shaped`,
 | --- | --- | --- |
 | `findOnCopy` | `StValue.findCopyMem`, `StValue.findCopyMem_asBool` | done, at the primitive sorts, as the taclet is |
 | `selectOnCopyMemPrim` | `StValue.selectOnCopyMemPrim` (`_asBool`) | done, through `find`: `selectSt` on a view stays structural |
-| `selectOnCopyMemRef` | `StValue.selectOnCopyMemRef`, `StValue.findCopyMemStruct` | done, for a non-primitive slot; a never-written slot is the view at `defaultDefIdentity`'s identity |
+| `selectOnCopyMemRef` | `StValue.selectOnCopyMemRef`, `StValue.findCopyMemStruct` | done, for a non-primitive slot; a never-written slot is the view at `initIdentity`'s identity |
 | `readFromCopyToStorage` | `Memory.readCopySt` | done |
 | `readFromCopyToStorageIdentity` | `Memory.readCopyStIdentity` | done |
 | — | `Memory.readCopyStOther` | Lean only: the split form of the frame |
@@ -473,7 +481,7 @@ listed as not implemented — are excused in `Theory/Rewrite.lean` by name.
 Where the theory or a taclet differs from KeY, each stated once at its row:
 
 - **Eager against lazy.** `MTerm.addM` carries the allocated `RefTy` (KeY's
-  `readOnAddM` resolves a fresh object's slot to `default<[α]>` at the
+  `readOnAddM` resolves a fresh object's slot to `init<[α]>` at the
   reader's sort; `Semantics.allocDefault` materializes the object), and
   `defaultValue<[α]>` is `st mtSt`, resolved by the caller's cast.
 - **A push is one term.** `STerm.push s p v` *is* `save(save(s, p[p.length], v),

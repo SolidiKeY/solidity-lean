@@ -36,10 +36,13 @@ variable {C : Contract} {k : Nat} {m : Modality}
 
 mutual
 
-/-- No call of `s`, however deep, has an argument to capture. -/
+/-- No call of `s`, however deep, has an argument to capture, and there is
+no `try`: solkey has a rule for it under the box only
+(`tryCallNoCallbackBox`), and the fragment is one under either modality. -/
 def Stmt.inSolkey : Stmt C → Bool
   | .ite _ thn els => Prog.inSolkey thn && Prog.inSolkey els
   | .call _ args _ _ body => (Arg.firstNonSimple args).isNone && Prog.inSolkey body
+  | .tryCall .. => false
   | _ => true
 
 /-- Every statement of the block is in the fragment. -/
@@ -62,6 +65,7 @@ def Premise.inSolkey : Premise C → Bool
   | .unfold P => Prog.inSolkey P
   | .split c c' P Q => c.inSolkey && c'.inSolkey && Prog.inSolkey P && Prog.inSolkey Q
   | .guard c _ => c.inSolkey
+  | .branches bs => bs.all fun b => Prog.inSolkey b.2
 
 @[simp] theorem Prog.inSolkey_nil : Prog.inSolkey ([] : Prog C) = true := rfl
 
@@ -127,6 +131,7 @@ theorem LeanTaclet.not_inSolkey {s : Stmt C} {p : Premise C} (d : LeanTaclet C k
     s.inSolkey = false := by
   cases d with
   | functionCallArgCapture h => simp [Stmt.inSolkey, h]
+  | tryCallDiamond => rfl
 
 /-- **solkey's rules are complete on the fragment**: the rule `Stmt.step`
 fires on a statement of the fragment is one of solkey's. -/
@@ -178,9 +183,14 @@ theorem Proves.toSolkey {R : RuleSet} {Γ : List (Hyp C)} {φ : Fml C} (h : Prov
     simp only [Fml.inSolkey, Prog.inSolkey_cons, Bool.and_eq_true] at hφ
     have := d.premise_inSolkey hφ.1.1
     exact .unfold d (ih (by simp_all [Fml.inSolkey, Premise.inSolkey]))
-  | unfoldLean d _ _ =>
+  | unfoldLean d _ _ | doneLean d _ _ =>
     simp only [Fml.inSolkey, Prog.inSolkey_cons, Bool.and_eq_true] at hφ
     exact absurd hφ.1.1 (by simp [d.not_inSolkey])
+  | branches d _ _ =>
+    simp only [Fml.inSolkey, Prog.inSolkey_cons, Bool.and_eq_true] at hφ
+    cases d
+    simp [Stmt.inSolkey] at hφ
+  | allIntro _ ih => exact .allIntro (ih (by simp_all [Fml.inSolkey]))
   | split d _ _ _ ih₁ ih₂ ih₃ =>
     simp only [Fml.inSolkey, Prog.inSolkey_cons, Bool.and_eq_true] at hφ
     have := d.premise_inSolkey hφ.1.1
@@ -246,7 +256,7 @@ theorem Hyp.modalFree_wrap {φ : Fml C} :
   | .pre _ :: Γ, h => by
     simp only [Hyp.wrap, Fml.modalFree, Bool.and_eq_true] at h
     exact Hyp.modalFree_wrap Γ h.2
-  | .upd _ _ :: Γ, h | .havoc :: Γ, h => Hyp.modalFree_wrap Γ h
+  | .upd _ _ :: Γ, h | .havoc :: Γ, h | .all _ _ :: Γ, h => Hyp.modalFree_wrap Γ h
 
 /-- **solkey's rules derive nothing about a call whose argument is not
 simple**, in any context. -/
@@ -260,8 +270,9 @@ theorem Proves.solkey_not_call {Γ : List (Hyp C)} {f : Name} {args : List (Arg 
   induction h generalizing φ with
   | update d _ _ | unfold d _ _ | split d _ _ _ _ _ _ | guard d _ _ _ _ | done d _ _ =>
     cases hψ; simp [d.call_simple rfl] at ha
-  | unfoldLean => cases hR
-  | intro _ _ | empty _ _ => cases hψ
+  | branches d _ _ => cases hψ; simp [d.call_simple rfl] at ha
+  | unfoldLean | doneLean => cases hR
+  | intro _ _ | empty _ _ | allIntro _ _ => cases hψ
   | rewrite _ _ ih => exact ih hR (by rw [← hψ]; rfl)
   | updRw _ _ _ ih | merge _ _ ih | mergeStorage _ _ ih | simplify _ ih => exact ih hR hψ
   | applyOnRigidBox _ _ hr _ _ | applyStorageBox _ hr _ _ =>

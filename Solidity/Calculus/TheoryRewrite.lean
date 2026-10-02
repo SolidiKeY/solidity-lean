@@ -194,6 +194,7 @@ def Hyp.quote : Hyp C → Expr
   | .pre a => mkAppN (mkConst ``Hyp.pre) #[c, Fml.quote c a]
   | .upd m U => mkAppN (mkConst ``Hyp.upd) #[c, toExpr m, Upd.quote c U]
   | .havoc => mkAppN (mkConst ``Hyp.havoc) #[c]
+  | .all x p => mkAppN (mkConst ``Hyp.all) #[c, toExpr x, toExpr p]
 
 /-- A context as the list literal that builds it. -/
 def Hyp.quoteList : List (Hyp C) → Expr

@@ -125,17 +125,6 @@ info: @Taclet.memoryStorageCopy : ∀ {C : Contract} {k : Nat} {m : Modality} {m
 -/
 #guard_msgs in #check @Taclet.memoryStorageCopy
 
-/-! ### Control flow: two goals, or the modality closed -/
-
-/--
-info: @Taclet.ifElseSplit : ∀ {C : Contract} {k : Nat} {m : Modality} {se : Simple C PrimTy.bool} {thn els : List (Stmt C)},
-  dl{ ⟨[ if (se) thn else els; ]⟩ ⇝ se ≐ true ⟹ ⟨[ thn ]⟩ ; se ≐ false ⟹ ⟨[ els ]⟩ }
--/
-#guard_msgs in #check @Taclet.ifElseSplit
-
-/-- info: @Taclet.revertBox : ∀ {C : Contract} {k : Nat}, dl{ [ revert(); ] ⇝ true } -/
-#guard_msgs in #check @Taclet.revertBox
-
 /-! ### With the notation off: the constructors it stands for
 
 and the side condition the line leaves out: `sp` is simple (`Rules.lean`,

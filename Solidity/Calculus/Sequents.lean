@@ -13,7 +13,7 @@ KeY writes a problem the same way, `\problem { Γ ==> φ }`: a keyword around
 the sequent, the arrow between antecedent and succedent.  The keyword is
 needed here because `dl!{ Γ ⟹ φ }` is taken: it is a line of a chain, the
 one formula `a₁ → … → φ` (`Notation.lean`), which the chains of
-`Examples/Payment.lean` are written in.
+`Examples/Tactics/Payment.lean` are written in.
 
 * `sequent!{ Γ ⟹ φ }` is `Γ ⊢ φ`, `sequent!{ Γ ⟹ₖ φ }` is `Γ ⊢ₖ φ`, for the
   file's `InContract`; `sequent[C]{ … }` names the contract.  An entry of

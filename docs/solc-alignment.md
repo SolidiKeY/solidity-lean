@@ -16,9 +16,9 @@ the plan to test these claims against solc is `docs/solc-validation.md`.
 | Unary minus | checked at `int` only; solc rejects it on `uint` | `unopCheck` | |
 | `**` | reverts on overflow (`2 ** 256`), `0 ** 0` is `1`, a negative exponent is `.stuck` | `applyBinOp` | `Evm/Examples.lean` |
 | `unchecked { }`, shifts | `+ - * **` in `unchecked` wrap modulo `2^256` (`+%` …); `~`, `<<`, `>>` are solc's at `uint256` | `applyBinOp`, `RawExpr.uncheck` | |
-| Narrow integers | `uint8` … `uint248`, `int8` … `int248`: an operation at a narrow type reverts outside its range, `unchecked` and `<<` wrap modulo `2^N`, an implicit narrowing is refused, a `uint` cast truncates (below) | `narrowTy?`, `narrowPost`, `narrowCapture`, `narrowWrapNode`, `castCapture` (`Syntax.lean`) | `Examples/Checked.lean` |
+| Narrow integers | `uint8` … `uint248`, `int8` … `int248`: an operation at a narrow type reverts outside its range, `unchecked` and `<<` wrap modulo `2^N`, an implicit narrowing is refused, a `uint` cast truncates (below) | `narrowTy?`, `narrowPost`, `narrowCapture`, `narrowWrapNode`, `castCapture` (`Syntax.lean`) | `Examples/Tactics/Checked.lean` |
 | Division | `/` and `%` by zero revert (KeY agrees) | `applyBinOp` | |
-| `assert` | a failing `assert` reverts like `require`; KeY's "violated" goal is an obligation instead, and the rule table follows the interpreter | `Taclet.assertSimple` | `Examples/Revert.lean` |
+| `assert` | a failing `assert` reverts like `require`; KeY's "violated" goal is an obligation instead, and the rule table follows the interpreter | `Taclet.assertSimple` | `Examples/Tactics/Revert.lean` |
 | Assignment order | right-hand side first, target resolved once | `Stmt.run` (`.assign`, `.opAssign`, `.incDec`) | `Semantics.lean` examples |
 | Effects in an expression | captured before the statement in solc's order (table below) | `hoist`, `captureExpr` | `Semantics.lean` examples |
 | Mapping-carrying copy | a storage copy of a type containing a mapping cannot be written | `Src.copy` (`mapFree`), `tyHasMapping` | |
@@ -26,6 +26,7 @@ the plan to test these claims against solc is `docs/solc-validation.md`.
 | Fixed-size arrays | `delete` resets in place, the length is the literal `n`, a literal index `≥ n` is a compile error | `SVal.array … fixed`, `MObj.array` | |
 | `transfer` | reverts unless the contract's funds cover the amount, and debits them | `transferAt`, `State.selfBalance` | `Semantics.lean` |
 | Call arguments | all read, left to right, before the callee runs | `Arg.bindSeq`, `Arg.separatedFrom` | |
+| `try` | a call to an address with no code, and returned data that does not decode, revert in the caller and no `catch` catches them; KeY leaves both out (they are vacuous in its box rule) | `Stmt.run` (`.tryCall`), `bindData` | `Examples/Tactics/TryCatch.lean` |
 
 ## Evaluation order
 
@@ -248,7 +249,7 @@ they would in a frame of their own.
   fragment" are `.stuck`.
 - **Fragment width.** No loops (`docs/loops.md` plans them), `uintN`/`intN`
   for `N < 256` only as above, no `address`/`bytes`/`string`, no external calls beyond
-  `transfer` and the `net` ledger, no gas. These constructs do not occur
+  `transfer`, the `net` ledger and `try` (whose callee is not run), no gas. These constructs do not occur
   rather than silently diverge.
 - **`transfer` assumes its recipient.** It never reverts and is never the
   contract itself (`docs/solc-validation.md`).

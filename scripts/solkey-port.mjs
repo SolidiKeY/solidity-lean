@@ -1233,7 +1233,7 @@ async function main() {
       if (ported[name]) {
         const [fn, example] = ported[name];
         rows.push([suite, contract, fn, "proved", `solkey ${name}.key`,
-                   `\`Examples/Net.lean\` \`${example}\``]);
+                   `\`Examples/Tactics/Net.lean\` \`${example}\``]);
       } else if (unported[name]) {
         rows.push([suite, contract, unported[name], "unported", `solkey ${name}.key`, UNPORTED_REASON]);
       } else {

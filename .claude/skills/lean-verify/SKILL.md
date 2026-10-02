@@ -75,7 +75,7 @@ general. The build cache works: an unchanged file re-checks in 1–4 s.
 - **Batch edits.** One multi-hunk `Edit` or script beats ten `sed` one-liners;
   every tool call is a model round trip.
 - **Know the slow checks.** `Calculus/Uniqueness.lean` ~150 s,
-  `Examples/CrossDomain.lean` and `Examples/Memory.lean` ~75–90 s,
+  `Examples/Tactics/CrossDomain.lean` and `Examples/Tactics/Memory.lean` ~75–90 s,
   `Calculus/Termination.lean` and `Calculus/SoundUnfold.lean` ~25–60 s,
   `Calculus/Decide.lean` ~60 s. Check them once, at the end of a change, not
   after every edit elsewhere.

@@ -10,7 +10,7 @@
 #   2. relative to `Solidity/`                      (`Theory/Storage.lean`)
 #   3. relative to the repository root              (`Solidity/AST.lean`)
 #   4. by unique basename anywhere in the package   (`KeyTaclets.lean` cited
-#                                                     from `Examples/Values.lean`,
+#                                                     from `Examples/Tactics/Values.lean`,
 #                                                     which is not in `Calculus/`)
 #
 # A basename that matches more than one file resolves, but is reported with

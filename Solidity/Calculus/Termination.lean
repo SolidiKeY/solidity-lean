@@ -171,6 +171,8 @@ def Stmt.weight : Stmt C → Nat
   | .require c | .assert c => c.cost + c.pen + 2
   | .revert => 1
   | .call _ args _ ret body => Arg.weight args + ret.weight + Prog.weight body + 1
+  | .tryCall _ _ ok err _ pnc other =>
+    max (max (Prog.weight ok) (Prog.weight err)) (max (Prog.weight pnc) (Prog.weight other)) + 3
 
 /-- The weight of a block: the sum of its statements'. -/
 def Prog.weight : List (Stmt C) → Nat
@@ -288,6 +290,7 @@ def Premise.Smaller (s : Stmt C) : Premise C → Prop
   | .unfold P => Prog.weight P < s.weight
   | .split _ _ P Q => Prog.weight P + 2 ≤ s.weight ∧ Prog.weight Q + 2 ≤ s.weight
   | .guard _ _ => 2 ≤ s.weight
+  | .branches bs => (bs.map fun b => 2 ^ Prog.weight b.2).sum < 2 ^ s.weight
 
 /-- The rule leaves a premise smaller than its statement. -/
 def Step.Small {k : Nat} {m : Modality} {s : Stmt C} (st : Step k m s) : Prop :=
@@ -881,6 +884,25 @@ theorem Stmt.step_smaller (k : Nat) (m : Modality) :
     simp only [Stmt.step]; weigh
   | .revert => by cases m <;> trivial
   | .call f args hsep ret body => callStep_small f args hsep ret body
+  | .tryCall _ _ ok err _ pnc other => by
+    cases m with
+    | diamond => trivial
+    | box =>
+      simp only [Stmt.step, Premise.Smaller, Stmt.weight, List.map_cons, List.map_nil,
+        List.sum_cons, List.sum_nil]
+      generalize Prog.weight ok = a, Prog.weight err = b, Prog.weight pnc = c,
+        Prog.weight other = d
+      have ha := Nat.pow_le_pow_right (n := 2) (by decide)
+        (Nat.le_trans (Nat.le_max_left a b) (Nat.le_max_left _ (max c d)))
+      have hb := Nat.pow_le_pow_right (n := 2) (by decide)
+        (Nat.le_trans (Nat.le_max_right a b) (Nat.le_max_left _ (max c d)))
+      have hc := Nat.pow_le_pow_right (n := 2) (by decide)
+        (Nat.le_trans (Nat.le_max_left c d) (Nat.le_max_right (max a b) _))
+      have hd := Nat.pow_le_pow_right (n := 2) (by decide)
+        (Nat.le_trans (Nat.le_max_right c d) (Nat.le_max_right (max a b) _))
+      have hp : 0 < 2 ^ max (max a b) (max c d) := Nat.pow_pos (by decide)
+      rw [Nat.pow_succ, Nat.pow_succ, Nat.pow_succ]
+      omega
 
 /-- **Every rule makes the program smaller**, as a fact about the rules
 rather than the dispatcher: any derivation of `s` is the one `Stmt.step`
@@ -935,9 +957,33 @@ implication and a negated formula cost nothing (no rule steps inside them).
 Example: `dl!{ [ total = 1; ] total == 1 }` measures `2 ^ 4 * 1 = 16`. -/
 def Fml.measure : Fml C → Nat
   | .modal _ P φ => 2 ^ Prog.weight P * (φ.measure + 1)
-  | .upd _ _ φ | .imp _ φ | .havoc φ => φ.measure
+  | .upd _ _ φ | .imp _ φ | .havoc φ | .all _ _ φ => φ.measure
   | .and φ ψ => φ.measure + ψ.measure
-  | .tt | .eq .. | .defined _ | .not _ | .all .. => 0
+  | .tt | .eq .. | .defined _ | .not _ => 0
+
+/-- A quantified local costs nothing. -/
+theorem Fml.measure_alls (φ : Fml C) : (xs : List (PrimTy × Var)) → (Fml.alls xs φ).measure = φ.measure
+  | [] => rfl
+  | _ :: xs => Fml.measure_alls φ xs
+
+/-- A conjunction measures the sum of its conjuncts. -/
+theorem Fml.measure_conj : (φs : List (Fml C)) → (Fml.conj φs).measure = (φs.map Fml.measure).sum
+  | [] => rfl
+  | [φ] => by simp [Fml.conj]
+  | φ :: ψ :: φs => by
+    simp only [Fml.conj, Fml.measure, Fml.measure_conj (ψ :: φs), List.map_cons, List.sum_cons]
+
+/-- A `try`'s goals measure the sum of their blocks' `2 ^ weight`, times what
+the rest of the program and the postcondition cost. -/
+theorem Premise.branches_measure (m : Modality) (ω : Prog C) (φ : Fml C) :
+    (bs : List (List (PrimTy × Var) × Prog C)) → ((Premise.branches bs).fml m ω φ).measure =
+      (bs.map fun b => 2 ^ Prog.weight b.2).sum * (2 ^ Prog.weight ω * (φ.measure + 1))
+  | [] => by simp [Premise.fml, Fml.conj, Fml.measure]
+  | b :: bs => by
+    have ih := Premise.branches_measure m ω φ bs
+    simp only [Premise.fml, Fml.measure_conj, List.map_map, List.map_cons, List.sum_cons] at ih ⊢
+    rw [ih, Nat.add_mul]
+    simp only [Fml.measure_alls, Fml.measure, Prog.weight_append, Nat.pow_add, Nat.mul_assoc]
 
 /-- What a branch owes besides its goals measures nothing: its revert sits
 under a negation, which the strategy does not step into.
@@ -1004,6 +1050,11 @@ theorem Premise.measure_lt {m : Modality} {s : Stmt C} {p : Premise C} (h : p.Sm
     have : 0 < 2 ^ (s.weight + Prog.weight ω) * (φ.measure + 1) :=
       Nat.mul_pos (Nat.pow_pos (by decide)) hM
     cases b <;> simpa [Premise.fml, Fml.measure, Prog.weight] using this
+  | branches bs =>
+    simp only [Premise.Smaller] at h
+    rw [Premise.branches_measure]
+    simp only [Fml.measure, Prog.weight, Nat.pow_add, Nat.mul_assoc]
+    exact Nat.mul_lt_mul_of_pos_right h (Nat.mul_pos (Nat.pow_pos (by decide)) hM)
 
 /-- Every step decreases the measure, whatever index its fresh names get.
 
@@ -1012,7 +1063,7 @@ Example: `dl!{ [ total = 1; ] total == 1 }` (measure `16`) steps to
 (measure `1`). -/
 theorem Fml.stepAt_decreases {k : Nat} :
     ∀ {φ ψ : Fml C}, φ.stepAt k = some ψ → ψ.measure < φ.measure
-  | .upd _ _ φ, _, h | .imp _ φ, _, h | .havoc φ, _, h => by
+  | .upd _ _ φ, _, h | .imp _ φ, _, h | .havoc φ, _, h | .all _ _ φ, _, h => by
     simp only [Fml.stepAt, Option.map_eq_some_iff] at h
     obtain ⟨_, h, rfl⟩ := h
     simpa [Fml.measure] using Fml.stepAt_decreases h
@@ -1029,7 +1080,7 @@ theorem Fml.stepAt_decreases {k : Nat} :
     simp only [Fml.stepAt, Option.some.injEq] at h
     subst h
     exact Premise.measure_lt (Stmt.step_smaller k m s) ω φ
-  | .tt, _, h | .eq .., _, h | .defined _, _, h | .not _, _, h | .all .., _, h => by
+  | .tt, _, h | .eq .., _, h | .defined _, _, h | .not _, _, h => by
     simp [Fml.stepAt] at h
 
 /-- `Fml.measure` is a termination certificate: every step lowers it.
@@ -1060,12 +1111,12 @@ Example: `{ x := 1 } [ ] x = 1` still has the empty modality and measures
 `1`; a formula of measure `0`, such as `{ x := 1 } x = 1`, is first order. -/
 theorem Fml.measure_pos : ∀ {φ : Fml C}, φ.active = true → 0 < φ.measure
   | .modal .., _ => Nat.mul_pos (Nat.pow_pos (by decide)) (Nat.succ_pos _)
-  | .upd _ _ φ, h | .imp _ φ, h | .havoc φ, h =>
+  | .upd _ _ φ, h | .imp _ φ, h | .havoc φ, h | .all _ _ φ, h =>
     Fml.measure_pos (φ := φ) (by simpa [Fml.active] using h)
   | .and φ ψ, h => by
     simp only [Fml.active, Bool.or_eq_true] at h
     rcases h with h | h <;> have := Fml.measure_pos h <;> simp only [Fml.measure] <;> omega
-  | .tt, h | .eq .., h | .defined _, h | .not _, h | .all .., h => by simp [Fml.active] at h
+  | .tt, h | .eq .., h | .defined _, h | .not _, h => by simp [Fml.active] at h
 
 /-- **Normalization.**  Given as much fuel as its measure, the strategy leaves
 no modality in a formula: symbolic execution always runs to the end.

@@ -24,7 +24,7 @@ function headers (inlined, the first listed outermost), the errors and
 
 solkey's clauses about `state` and `buyer` are the theorems below.  Its
 clauses about `net(seller)` and `net(buyer)` have no counterpart yet: a
-formula reads the ledger now (`net(a)`, `Tally.pay` in `Examples/Specs.lean`),
+formula reads the ledger now (`net(a)`, `Tally.pay` in `Examples/Tactics/Specs.lean`),
 but these clauses are not tried (`docs/function-specs.md`, "Still open").  A `requires msg.sender ==
 seller` is a premise on `msgSender`.
 

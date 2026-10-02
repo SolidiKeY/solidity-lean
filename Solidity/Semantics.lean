@@ -23,7 +23,14 @@ Semantic conventions mirrored from KeY:
   callback reading is `Semantics/Callback.lean`'s, a relation over this one);
 - a call runs its inlined body (`Stmt.call`, KeY's `functionBodyExpand`):
   its arguments read in the caller's state, bound to its parameters, its
-  return variable declared, the body run, the result assigned.
+  return variable declared, the body run, the result assigned;
+- an external call (`try`) runs no callee: how it ends is the transaction's
+  (`TxEnv.ext`), and its clause's block runs in the caller's state, the
+  returned data or the `Panic` code bound first.
+
+Where solc and KeY differ on an external call, this follows solc: a call to an
+address with no code, and returned data that does not decode, revert in the
+caller, which no `catch` clause catches.
 
 Semantic conventions mirrored from solc, where KeY was more liberal
 (`docs/solc-alignment.md`):
@@ -219,15 +226,37 @@ inductive Binding where
   | ledger (l : List (Int × Int))
   deriving Repr, DecidableEq
 
+/-- How an external call ends, as its caller sees it: it returns this data,
+or it reverts with `Error(string)`, with `Panic(uint)` and this code, or in
+another way. -/
+inductive ExtResult where
+  | ok (data : List Value)
+  | error
+  | panic (code : Value)
+  | other
+  deriving Repr, DecidableEq
+
+/-- An external call as it is made: the callee's address, the function, the
+arguments' values. -/
+structure ExtKey where
+  addr : Int
+  fn : String
+  args : List Value
+  deriving Repr, DecidableEq
+
 /-- What the transaction running the program was sent with: KeY's program
 variables `msgSender` and `msgValue` (`netHeader.key`) and the block's
-timestamp.  No statement changes them, and a callback leaves them as they
-were (`State.havoc`): a re-entrant call runs in its own transaction, which
-the caller never sees. -/
+timestamp; and how each external call it makes ends (`ext`), a call it has
+no entry for reaching an address with no code.  No statement changes them,
+and a callback leaves them as they were (`State.havoc`): a re-entrant call
+runs in its own transaction, which the caller never sees.  The calculus
+reads none of `ext`: a `try` has a goal for every way its call may end
+(`tryCallNoCallbackBox`), so a proof holds whatever the table says. -/
 structure TxEnv where
   msgSender : Int := 0
   msgValue : Int := 0
   timestamp : Int := 0
+  ext : List (ExtKey × ExtResult) := []
   deriving Repr, DecidableEq
 
 structure State where
@@ -1442,6 +1471,30 @@ def CallRet.leave (σ : State) : CallRet → Res State
   | .val p r (some res) => do pure (σ.setEnv res (.val (← (Simple.local r : Simple C p).eval σ)))
   | _ => pure σ
 
+/-- Whether `v` is a value of the type `p`: what decoding a word of returned
+data at `p` accepts. -/
+def Semantics.PrimVal.fits : Value → PrimTy → Bool
+  | .bool _, .bool => true
+  | .int n, .uint => decide (0 ≤ n ∧ n < uintBound)
+  | .int n, .int => decide (-intBound ≤ n ∧ n < intBound)
+  | _, _ => false
+
+/-- The locals an external call's outcome binds, from its data in order, as
+the caller decodes it: data too short, or a word that is not a value of its
+local's type, reverts (in the caller: no `catch` clause catches it).  Data
+past the last local is not read. -/
+def bindData : List (PrimTy × Var) → List Value → State → Res State
+  | [], _, σ => pure σ
+  | (p, x) :: xs, v :: vs, σ =>
+    if v.fits p then bindData xs vs (σ.setEnv x (.val v)) else .error .revert
+  | _ :: _, [], _ => .error .revert
+
+/-- The call as it is made, its receiver and arguments evaluated. -/
+def ExtCall.key (σ : State) (c : ExtCall C) : Res ExtKey := do
+  let a ← (← c.addr.eval σ).asInt
+  let vs ← c.args.mapM fun a => a.2.eval σ
+  pure ⟨a, c.fn, vs⟩
+
 /-- A condition's outcome: `true` goes on, `false` reverts. -/
 def guardOk (v : Value) (σ : State) : Res State :=
   match v with
@@ -1528,6 +1581,13 @@ def Stmt.run (σ : State) : Stmt C → Res State
     let σ₁ ← Arg.bindSeq args σ
     let σ₂ ← Prog.run (ret.enter σ₁) body
     CallRet.leave (C := C) σ₂ ret
+  | .tryCall call rets ok err code pnc other => do
+    match lookupBy (← call.key σ) σ.tx.ext with
+    | none => .error .revert
+    | some (.ok vs) => Prog.run (← bindData rets vs σ) ok
+    | some .error => Prog.run σ err
+    | some (.panic c) => Prog.run (← bindData (codeBinders code) [c] σ) pnc
+    | some .other => Prog.run σ other
 
 /-- The state a block leaves. -/
 def Prog.run (σ : State) : List (Stmt C) → Res State

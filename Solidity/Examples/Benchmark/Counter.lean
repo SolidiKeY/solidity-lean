@@ -9,7 +9,7 @@ Source: <https://raw.githubusercontent.com/Cyfrin/solidity-by-example.github.io/
 Changes: none but the spelling of `contract!{ … }` (the comments are Lean's)
 and solkey's `@custom:key` clauses, written above the functions as its file
 has them.  The functions are internal functions here, and a call inlines one
-(`Examples/Calls.lean`).
+(`Examples/Tactics/Calls.lean`).
 
 The clauses are proved twice.  `spec!{f}` is the obligation solkey's
 `SolidityProblemSynthesizer` builds from them (`Calculus/Spec.lean`), proved
