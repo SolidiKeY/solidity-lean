@@ -76,6 +76,55 @@ authority for the name-by-name map to solkey's taclets (do not restate it in
 module docstrings); `docs/solc-alignment.md` for where the interpreter follows
 solc over KeY.
 
+## Using the calculus
+
+A formula is written in `dl!{ … }` over a named contract (`local instance :
+InContract := ⟨StandardExample⟩`, `Calculus/Notation.lean`). Import
+`Solidity.Calculus.Close` for the tactics, `Solidity.Calculus.Chains` for
+chains, `Solidity.Tools.ProofTree` for the tree. `Examples/` shows each of
+these once; `.claude/rules/derivations.md` is the convention.
+
+**The taclets.** A taclet is one constructor of `Taclet C k m s p`
+(`Calculus/Rules.lean`), named as solkey names it, typed `dl{ ⟨[ s; ]⟩ ⇝ p }`.
+`#taclet storageFieldWriteSave` (or a KeY name as a string) prints it with the
+solkey taclets it transcribes and its soundness theorem. Every statement has
+exactly one rule (`Stmt.step`), so the strategy never chooses. To prove
+`⊨ dl!{ pre → [ program ] post }`:
+
+- **by the strategy**: `sol_symex; sol_close` (`sol_decide` for reads of
+  writes; `sol_spec` for a `spec!{f}` obligation). `#wp φ` prints what
+  `sol_symex` leaves, `#step φ` one step and the rule it fired.
+- **by a walk**: `apply Proves.valid`, then one `apply` per rule — `intro`,
+  `update r`, `unfold r`, `split r` (goals `thn`/`els`/`cov`), `done r`,
+  `empty` — and `refine close ?_; sol_symex; sol_close` at each leaf.
+  `apply` refuses a rule whose `\find` or side conditions do not match.
+  `sol_derive` runs the walk; `sol_derive?` prints it as a `Try this`.
+- **by a chain**: `(chain .box φ).valid h`, with `h` proving its last line
+  (`Fml.Steps.valid`, `Fml.Leads.valid`).
+
+**Chains** (`Calculus/Chains.lean`) state a derivation with both ends
+written, as a `calc` of one link per line: `φ ~[r]~> ψ` (rule `r` fires;
+`rfl`, and a wrong name is an elaboration error), `φ ~> ψ` (one step),
+`φ ~*> ψ` (several; `by sol_chain`), and past the program the rewrite links
+`~[sequentialToParallel]~>`, `~[findOnSave]~>`, … (`Calculus/ChainRewrites.lean`),
+`~~>` for their composition. `#derivation φ` prints the lines to copy from, in
+the rules' fresh names (`se1`, `sp1`); `sol_chain?` writes the `calc` of a
+`~*>` goal. A line keeps a modality open with `dl![m]{ ⟨[ p ]⟩ φ }` and a
+postcondition with `φ : Post C`; a box chain's last line is `dl![.box]{ … }`.
+When a line is not reached, `sol_chain`'s error shows the derivation it
+computed.
+
+**The proof tree API** (`Calculus/ProofTree.lean`, `Tools/ProofTree.lean`) is
+solkey's view of `⊢ φ`, a tree of sequents grown by running the strategy as a
+walk; every node is an elaborated `apply`, nothing is trusted.
+`ProofTree.ofFormula C φ : TermElabM Tree`; `Tree.rows` are solkey's
+`[serial, parent, name, branchLabel, state]`, `Tree.toJson` the web prover's
+shape, `Tree.openGoals`/`Tree.closed` its state. Branch labels are the case
+names `thn`/`els`/`cov`. The commands: `#proof_tree φ` (the GUI layout and a
+summary), `#proof_node n φ` (sequent, rule, parent, children, tactics),
+`#proof_tree_json φ`. `Examples/ProofTree.lean` pins their output: a change
+to the strategy or a printer fails there.
+
 ## Checking your work
 
 Prefer the Lean MCP server (diagnostics, goals, hover, outline) over the
