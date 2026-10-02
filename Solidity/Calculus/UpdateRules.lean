@@ -2434,6 +2434,98 @@ theorem Upd.rw_box (hq : Term.EvalRefines q.1 q.2) {U : Upd C} {ψ ψ' : Fml C}
     rw [Upd.rw_apply hq U σ τ hU] at hσ
     exact h τ hσ
 
+/-! ### The other direction, at one state
+
+Where the replacement returns what the replaced term does, the rewritten
+term returns what the term does: the mirror of `Tm.rw_eval`, at the one state
+the right-hand sides are read in.  With both, an update and its rewrite halt
+in the same states, so a rewrite is an equivalence under either modality
+(`Upd.rw_holds`) wherever the replacement returns where the rewritten update
+does — which is what `Calculus/ChainRewrites.lean`'s `Upd.covers` checks. -/
+
+theorem Term.pick_eval_rev {σ : State} (hq : Res.Le (q.2.eval σ) (q.1.eval σ)) {e d : Term C}
+    (hd : Res.Le (d.eval σ) (e.eval σ)) : Res.Le ((Term.pick q e d).eval σ) (e.eval σ) := by
+  unfold Term.pick
+  split
+  · rename_i h
+    subst h
+    exact hq
+  · exact hd
+
+theorem Tm.pickAt_eval_rev {σ : State} (hq : Res.Le (q.2.eval σ) (q.1.eval σ)) :
+    {s : Srt} → {e d : Tm C s} → Srt.Le s (d.eval σ) (e.eval σ) →
+      Srt.Le s ((Tm.pickAt q e d).eval σ) (e.eval σ)
+  | .val, _, _, hd => Term.pick_eval_rev hq hd
+  | .path, _, _, hd | .st, _, _, hd | .sv, _, _, hd | .ident, _, _, hd
+  | .addr, _, _, hd | .mem, _, _, hd | .mv, _, _, hd => hd
+
+/-- **Replacing `q.1` by a term that returns what it returns at `σ` keeps
+every value the rewritten term returns there.** -/
+theorem Tm.rw_eval_rev {σ : State} (hq : Res.Le (q.2.eval σ) (q.1.eval σ)) :
+    (e : Tm C s) → Srt.Le s ((e.rw q).eval σ) (e.eval σ)
+  | .pvV _ | .app0 _ => Tm.pickAt_eval_rev hq (Srt.Le.refl _ _)
+  | .pvP _ | .pvS _ | .pvI _ => Srt.Le.refl _ _
+  | .app1 o a => Tm.pickAt_eval_rev hq (o.eval_le (a.rw_eval_rev hq))
+  | .app2 o a b => Tm.pickAt_eval_rev hq (by
+    cases ho : o.opaque
+    · simp only [Bool.false_eq_true, ↓reduceIte]
+      exact o.eval_le (a.rw_eval_rev hq) (b.rw_eval_rev hq)
+    · simp only [↓reduceIte]
+      exact Srt.Le.refl _ _)
+  | .app3 o a b c =>
+    Tm.pickAt_eval_rev hq (o.eval_le (a.rw_eval_rev hq) (b.rw_eval_rev hq) (c.rw_eval_rev hq))
+
+theorem Term.rw_eval_rev {σ : State} (hq : Res.Le (q.2.eval σ) (q.1.eval σ)) (e : Term C) :
+    Res.Le ((e.rw q).eval σ) (e.eval σ) := Tm.rw_eval_rev hq e
+theorem PTerm.rw_eval_rev {σ : State} (hq : Res.Le (q.2.eval σ) (q.1.eval σ)) (p : PTerm C) :
+    Res.Le ((p.rw q).eval σ) (p.eval σ) := Tm.rw_eval_rev hq p
+theorem STerm.rw_eval_rev {σ : State} (hq : Res.Le (q.2.eval σ) (q.1.eval σ)) (s : STerm C) :
+    Res.Le ((s.rw q).eval σ) (s.eval σ) := Tm.rw_eval_rev hq s
+
+theorem UpdElem.rw_write_rev {σ₀ : State} (hq : Res.Le (q.2.eval σ₀) (q.1.eval σ₀)) (τ : State) :
+    (e : UpdElem C) → Res.Le ((e.rw q).write σ₀ τ) (e.write σ₀ τ)
+  | .val _ t => Res.Le.bind (Term.rw_eval_rev hq t) fun _ => Res.Le.refl _
+  | .path _ p => Res.Le.bind (PTerm.rw_eval_rev hq p) fun _ => Res.Le.refl _
+  | .storage s | .store _ s => Res.Le.bind (STerm.rw_eval_rev hq s) fun _ => Res.Le.refl _
+  | .net r _ a =>
+    Res.Le.bind (Term.rw_eval_rev hq r) fun _ => Res.Le.bind (Res.Le.refl _) fun _ =>
+      Res.Le.bind (Term.rw_eval_rev hq a) fun _ => Res.Le.refl _
+  | .selfBalance _ a =>
+    Res.Le.bind (Term.rw_eval_rev hq a) fun _ => Res.Le.refl _
+  | .mref .. | .memory _ | .saveNet _ => Res.Le.refl _
+
+theorem Upd.rw_foldl_rev {σ₀ : State} (hq : Res.Le (q.2.eval σ₀) (q.1.eval σ₀)) :
+    (U : Upd C) → ∀ ρ, Res.Le ((U.rw q).foldlM (fun τ e => e.write σ₀ τ) ρ)
+      (U.foldlM (fun τ e => e.write σ₀ τ) ρ)
+  | [], _ => Res.Le.refl _
+  | e :: U, ρ => by
+    simp only [Upd.rw, List.map_cons, List.foldlM_cons]
+    exact Res.Le.bind (UpdElem.rw_write_rev hq ρ e) fun ρ' => Upd.rw_foldl_rev hq U ρ'
+
+/-- Where the replacement returns what the replaced term does at `σ`, the
+update ends where its rewrite does, wherever the rewrite returns. -/
+theorem Upd.rw_apply_rev {σ : State} (hq : Res.Le (q.2.eval σ) (q.1.eval σ)) (U : Upd C) :
+    Res.Le ((U.rw q).apply σ) (U.apply σ) :=
+  Upd.rw_foldl_rev hq U σ
+
+/-- **A rewrite inside an update, under any modality**: `t'` returns what `t`
+returns, and wherever the rewritten update returns, `t` returns what `t'`
+does — so the two updates return the same state and halt in the same states,
+and a halt reads alike under a modality whatever it is (`Modality.after`). -/
+theorem Upd.rw_holds (hq : Term.EvalRefines q.1 q.2) {U : Upd C}
+    (hb : ∀ σ τ, (U.rw q).apply σ = .ok τ → Res.Le (q.2.eval σ) (q.1.eval σ))
+    (m : Modality) (ψ : Fml C) (σ : State) :
+    holds σ (.upd m (U.rw q) ψ) ↔ holds σ (.upd m U ψ) := by
+  simp only [holds]
+  cases hU : U.apply σ with
+  | ok τ => rw [Upd.rw_apply hq U σ τ hU]
+  | error e =>
+    cases hU' : (U.rw q).apply σ with
+    | ok τ' =>
+      rw [Upd.rw_apply_rev (hb σ τ' hU') U τ' hU'] at hU
+      cases hU
+    | error e' => exact Iff.rfl
+
 end RwEval
 
 end Solidity

@@ -53,8 +53,8 @@ elaborated, after its proof: a rewrite step is proved `by sol_chain` or
 `by rfl`, which run after it, not by the term `rfl`, which meets the label
 unknown.  A rule of the strategy has no such label: `Fml.StepBy` computes
 its rule from the line by unification.  A rewrite's cannot be so computed,
-since a law is any theorem stating a `TermTaclet`, which no function
-enumerates.
+since a law is any theorem stating a `TermTaclet` or an `EvalLaw`, which no
+function enumerates.
 -/
 
 namespace Solidity.Examples.ChainRewrites
@@ -247,13 +247,149 @@ theorem readBackValue :
     _ ~[applyOnRigidBox]~> dl!{ 10 ≐ 10 } := by sol_chain)
     fun _ => Theory.StValue.Equiv.refl _
 
+/-! ## 3′ · Under any modality
+
+A law in an update's right-hand side is the box's where the rewritten update
+may run where the read halts.  Where the update itself holds the write the
+law reads back — `{ storage := save(storage, alice.age, 42) ‖ x := find(save(storage, alice.age, 42), alice.age) }`,
+the merged line of every write-then-read — the two updates halt alike, and
+the law applies under `m` (`LineRw.lawUpdAny`, `Upd.covers`).  Two storage
+writes merge under `m` too, into one element (`Upd.mergeSt`): the merge
+compares the modalities, which `sol_chain` decides by `cases m`. -/
+
+section AnyModality
+variable (m : Modality) (φ : Post StandardExample)
+
+/-- `findOnSave` in the update under `m`: the update holds the write it reads back. -/
+example : dl![m]{ { storage := save(storage, alice.age, 42) ‖
+      x := find(save(storage, alice.age, 42), alice.age) } x ≐ 42 }
+    ~[findOnSave]~> dl![m]{ { storage := save(storage, alice.age, 42) ‖ x := 42 } x ≐ 42 } := rfl
+
+/-- `findOnDelAtSave` likewise: the delete over the write, read at its path. -/
+example : dl![m]{ { storage := delAt(save(storage, alice.age, 42), alice.age) ‖
+      x := find(delAt(save(storage, alice.age, 42), alice.age), alice.age) } φ }
+    ~[findOnDelAtSave]~>
+      dl![m]{ { storage := delAt(save(storage, alice.age, 42), alice.age) ‖ x := 0 } φ } := rfl
+
+/-- `findOnDelAtBelow` under `m`, its premise a hypothesis of the chain: after
+`alice.account.balance = 100;` and `delete alice.account;`, the balance reads its
+default, the account being no mapping (which would keep its members).  The update
+holds the delete the read goes through, so the law applies under `m`. -/
+example (hk : STerm.KindFreeAt st!{ save(storage, alice.account.balance, 100) } pt!{ alice.account }) :
+    dl![m]{ { storage := delAt(save(storage, alice.account.balance, 100), alice.account) ‖
+      b := find(delAt(save(storage, alice.account.balance, 100), alice.account), alice.account.balance) } φ }
+    ~[findOnDelAtBelow]~>
+      dl![m]{ { storage := delAt(save(storage, alice.account.balance, 100), alice.account) ‖ b := 0 } φ } :=
+  rfl
+
+/-- The read of the write, member-wise, inside the update under `m`: solkey's
+`findMemberCons`, `selectOnSaveMember`, then `findOnSave` at the member.  Each
+intermediate form reads what the first does (`Term.base_eval`), so the steps
+need no modality. -/
+example : dl![m]{ { storage := save(storage, alice.age, 42) ‖
+      x := find(save(storage, alice.age, 42), alice.age) } φ }
+    ~[findMemberCons]~>
+      dl![m]{ { storage := save(storage, alice.age, 42) ‖
+        x := select(select(save(storage, alice.age, 42), alice), age) } φ }
+    ~[selectOnSaveMember]~>
+      dl![m]{ { storage := save(storage, alice.age, 42) ‖
+        x := select(save(select(storage, alice), age, 42), age) } φ }
+    ~[findOnSave]~> dl![m]{ { storage := save(storage, alice.age, 42) ‖ x := 42 } φ } := by
+  sol_chain
+
+/-- Two storage writes merge under `m` into one: the shadowed write goes. -/
+example : dl![m]{ { storage := save(storage, alice.age, 1) } { storage := save(storage, alice.age, 2) } φ }
+    ~[sequentialToParallel]~>
+      dl![m]{ { storage := save(save(storage, alice.age, 1), alice.age, 2) } φ } := by
+  sol_chain
+
+/-- `alice.age = 42; uint x = alice.age;` read back to `42` inside the chain,
+for every modality and postcondition. -/
+example : dl![m]{ ⟨[ alice.age = 42; uint x = alice.age; ]⟩ φ }
+    ~~> dl![m]{ { storage := save(storage, alice.age, 42) ‖ x := 42 } φ } :=
+  calc dl![m]{ ⟨[ alice.age = 42; uint x = alice.age; ]⟩ φ }
+    _ ~*> dl![m]{ { storage := save(storage, alice.age, 42) } { x := find(storage, alice.age) } φ } := by
+      sol_chain
+    _ ~[sequentialToParallel]~>
+        dl![m]{ { storage := save(storage, alice.age, 42) ‖
+          x := find(save(storage, alice.age, 42), alice.age) } φ } := by sol_chain
+    _ ~[findOnSave]~> dl![m]{ { storage := save(storage, alice.age, 42) ‖ x := 42 } φ } := by rfl
+
+end AnyModality
+
+/-! ## 3″ · Memory reads
+
+A memory read denotes its run, so its laws are refinements of the
+interpreter (`EvalLaw`): `readOnWrite`, `findCopyMem` (a member of a memory
+object copied into storage is read out of memory), `readCopySt` (a member of
+a copy of a storage struct is read out of storage).  Each applies in an
+update under `m` where the update holds the write it reads back
+(`Upd.coversEval`).  The merges feed them: a memory write merges into the
+update after it (`Upd.mergeMem`), and a storage write into one with memory
+terms (`withStM`). -/
+
+section MemoryReads
+variable (m : Modality) (φ : Post StandardExample)
+
+/-- A memory write merged into the storage write and the read after it. -/
+example : dl![m]{ { memory := write(memory, carol.age, 42) }
+      { storage := save(storage, alice, copyMem(mtSt, memory, carol)) ‖
+        v := find(save(storage, alice, copyMem(mtSt, memory, carol)), alice.age) } φ }
+    ~[sequentialToParallel]~>
+      dl![m]{ { memory := write(memory, carol.age, 42) ‖
+        storage := save(storage, alice, copyMem(mtSt, write(memory, carol.age, 42), carol)) ‖
+        v := find(save(storage, alice, copyMem(mtSt, write(memory, carol.age, 42), carol)), alice.age) } φ } := by
+  sol_chain
+
+/-- `findCopyMem` then `readOnWrite`, under `m`: the update holds the storage
+write the first reads back and the memory write the second does. -/
+example : dl![m]{ { memory := write(memory, carol.age, 42) ‖
+        storage := save(storage, alice, copyMem(mtSt, write(memory, carol.age, 42), carol)) ‖
+        v := find(save(storage, alice, copyMem(mtSt, write(memory, carol.age, 42), carol)), alice.age) } φ }
+    ~[findCopyMem]~>
+      dl![m]{ { memory := write(memory, carol.age, 42) ‖
+        storage := save(storage, alice, copyMem(mtSt, write(memory, carol.age, 42), carol)) ‖
+        v := read(write(memory, carol.age, 42), carol.age) } φ }
+    ~[readOnWrite]~>
+      dl![m]{ { memory := write(memory, carol.age, 42) ‖
+        storage := save(storage, alice, copyMem(mtSt, write(memory, carol.age, 42), carol)) ‖
+        v := 42 } φ } := by
+  sol_chain
+
+set_option maxHeartbeats 2000000 in
+/-- A storage-to-memory copy read back: the three updates merged into one
+(the copy's identity and memory into the read, the storage write into the
+copy), then `readCopySt`, then `findOnSave`. -/
+example : dl![m]{ { storage := save(storage, alice.age, 25) }
+      { carol := freshId(copySt(memory, find(storage, alice))) ‖ memory := copySt(memory, find(storage, alice)) }
+      { v := read(memory, carol.age) } φ }
+    ~[sequentialToParallel]~>
+      dl![m]{ { storage := save(storage, alice.age, 25) ‖
+        carol := freshId(copySt(memory, find(save(storage, alice.age, 25), alice))) ‖
+        memory := copySt(memory, find(save(storage, alice.age, 25), alice)) ‖
+        v := read(copySt(memory, find(save(storage, alice.age, 25), alice)),
+                  freshId(copySt(memory, find(save(storage, alice.age, 25), alice))).age) } φ }
+    ~[readCopySt]~>
+      dl![m]{ { storage := save(storage, alice.age, 25) ‖
+        carol := freshId(copySt(memory, find(save(storage, alice.age, 25), alice))) ‖
+        memory := copySt(memory, find(save(storage, alice.age, 25), alice)) ‖
+        v := find(save(storage, alice.age, 25), alice.age) } φ }
+    ~[findOnSave]~>
+      dl![m]{ { storage := save(storage, alice.age, 25) ‖
+        carol := freshId(copySt(memory, find(save(storage, alice.age, 25), alice))) ‖
+        memory := copySt(memory, find(save(storage, alice.age, 25), alice)) ‖
+        v := 25 } φ } := by
+  sol_chain
+
+end MemoryReads
+
 /-! ## 4 · What is refused, and what is printed -/
 
 section Refused
 variable (m : Modality) (φ : Post StandardExample)
 
 /--
-error: ~[fooBar]~>: fooBar is no rule: not a `Taclet` or `LeanTaclet` constructor, not an update rule (sequentialToParallel, simplifyUpdate, applySkip, applyOnRigid, applyOnRigidBox, applyStorageBox), not a term taclet (`TermTaclet`)
+error: ~[fooBar]~>: fooBar is no rule: not a `Taclet` or `LeanTaclet` constructor, not an update rule (sequentialToParallel, simplifyUpdate, applySkip, applyOnRigid, applyOnRigidBox, applyStorageBox), not a term taclet (`TermTaclet`), not a law of a memory read (`EvalLaw`)
 -/
 #guard_msgs in
 example : dl!{ true } ~[fooBar]~> dl!{ true } := rfl
@@ -300,7 +436,7 @@ error: ~[findOnSaveFrame]~>: findOnSaveFrame does not apply to
   dl{ find(save(storage, alice.age, 1), alice.age) ≐ 0 }
 (the side condition
   ((PTerm.root "alice").field "age").diverges ((PTerm.root "alice").field "age") = true
-of findOnSaveFrame closes by neither `rfl` nor `decide`)
+of findOnSaveFrame closes by neither `rfl`, `decide` nor a hypothesis)
 -/
 #guard_msgs in
 example : dl!{ find(save(storage, alice.age, 1), alice.age) ≐ 0 }

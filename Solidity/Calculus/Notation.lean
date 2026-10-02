@@ -116,7 +116,7 @@ inductive RawTerm where
   /-- `msg.sender`, `address(this).balance`, …: KeY's program variables
   `msgSender`, `selfBalance`, …. -/
   | env (k : EnvKey)
-  deriving Repr, Inhabited
+  deriving Repr, Inhabited, BEq
 
 /-- One elementary update as written. -/
 inductive RawUpdElem where
@@ -377,15 +377,39 @@ def RawTerm.names : RawTerm → List String
   | .app "defVal" _ => []
   | .app "copyMem" (_ :: ts) => RawTerm.namesList ts
   | .app "addM" [m, _] => m.names
-  -- a member, not a name read: `select(s, r)`, `store(s, r, v)`
+  -- a member, not a name read: `select(s, r)`, `store(s, r, v)`; and in the
+  -- frame of a `select`, a path's root is a member too
   | .app "select" [s, .name _] => s.names
   | .app "store" [s, .name _, v] => s.names ++ v.names
+  | .app "find" [s, p] => s.names ++ (if s.hasSelect then p.frameNames else p.names)
+  | .app "save" [s, p, v] => s.names ++ (if s.hasSelect then p.frameNames else p.names) ++ v.names
+  | .app "delAt" [s, p] => s.names ++ (if s.hasSelect then p.frameNames else p.names)
   | .app _ ts => RawTerm.namesList ts
   | .num _ | .env _ => []
 
 def RawTerm.namesList : List RawTerm → List String
   | [] => []
   | t :: ts => t.names ++ RawTerm.namesList ts
+
+/-- The names of a path in the frame of a `select`: its root is a member, not
+a name. -/
+def RawTerm.frameNames : RawTerm → List String
+  | .name _ => []
+  | .field t _ => t.frameNames
+  | .at t i => t.frameNames ++ i.names
+  | t => t.names
+
+/-- The term reads through a `select`: its paths are in a frame. -/
+def RawTerm.hasSelect : RawTerm → Bool
+  | .app "select" _ => true
+  | .app _ ts => RawTerm.hasSelectList ts
+  | .field t _ => t.hasSelect
+  | .at a b | .add a b | .sub a b => a.hasSelect || b.hasSelect
+  | .num _ | .name _ | .env _ => false
+
+def RawTerm.hasSelectList : List RawTerm → Bool
+  | [] => false
+  | t :: ts => t.hasSelect || RawTerm.hasSelectList ts
 
 end
 
@@ -454,8 +478,6 @@ variable [FreshNames] (C : Contract)
 inductive NameKind where
   | local | alias | mem | root | store
 
-/-- A local in scope by what it holds, then a state variable, then a fresh
-`sp1`/`mv1` by its spelling; anything else is a stack local. -/
 def nameKind (Γ : ECtx) (x : String) : NameKind :=
   match lookupBy x Γ with
   | some (.val ..) => .local
@@ -543,6 +565,9 @@ size. -/
 structure Readers (C : Contract) where
   val : RawTerm → Except String (Term C)
   path : RawTerm → Except String (PTerm C)
+  /-- A path in the frame of a `select`: its root a member (`account.balance`
+  under `select(storage, alice)`), where `path` would read a name. -/
+  fpath : RawTerm → Except String (PTerm C)
   stor : RawTerm → Except String (STerm C)
   sval : RawTerm → Except String (SValT C)
   ident : RawTerm → Except String (ITerm C)
@@ -551,7 +576,7 @@ structure Readers (C : Contract) where
   mval : RawTerm → Except String (MValT C)
 
 instance : Inhabited (Readers C) :=
-  ⟨⟨fun _ => throw "", fun _ => throw "", fun _ => throw "", fun _ => throw "",
+  ⟨⟨fun _ => throw "", fun _ => throw "", fun _ => throw "", fun _ => throw "", fun _ => throw "",
     fun _ => throw "", fun _ => throw "", fun _ => throw "", fun _ => throw ""⟩⟩
 
 /-- A term at the value sort. -/
@@ -575,7 +600,8 @@ def rVal (R : Readers C) (Γ : ECtx) : RawTerm → Except String (Term C)
     if isMemTerm C Γ t then pure (.read .memory (← R.addr t))
     else pure (.find .storage (← R.path t))
   | .app "select" [s, .name r] => do pure (.find (← R.stor s) (.root r))
-  | .app "select" [s, r] | .app "find" [s, r] => do pure (.find (← R.stor s) (← R.path r))
+  | .app "select" [s, r] | .app "find" [s, r] => do
+    pure (.find (← R.stor s) (← (if s.hasSelect then R.fpath else R.path) r))
   | .app "read" [m, a] => do pure (.read (← R.mem m) (← R.addr a))
   | .app "net" [a] => do pure (.net (← R.val a))
   | .app "net" [.name x, a] => do pure (.netOf (Var.ofName x) (← R.val a))
@@ -595,11 +621,27 @@ def rPath (R : Readers C) (Γ : ECtx) : RawTerm → Except String (PTerm C)
     | _ => pure (.pv (Var.ofName x))
   | .field t f => do pure (.field (← R.path t) f)
   | .at t i => do
-    -- `p[p.length]`, the slot one past the end: no bounds check
-    match t, i with
-    | .name x, .field (.name y) "length" =>
-      if x == y then pure (.next (← R.path t)) else pure (.at (← R.path t) (← R.val i))
-    | _, _ => pure (.at (← R.path t) (← R.val i))
+    -- `p[p.length]`, the slot one past the end (a push's alias): no bounds check
+    match i with
+    | .field t' "length" =>
+      if t == t' then pure (.next (← R.path t)) else pure (.at (← R.path t) (← R.val i))
+    | _ => pure (.at (← R.path t) (← R.val i))
+  | _ => throw "not a storage path: a name, `p.f` or `p[t]`"
+
+/-- `rPath` in the frame of a `select`: a name that is no alias is a member, the frame's root. -/
+def rPathFrame (R : Readers C) (Γ : ECtx) : RawTerm → Except String (PTerm C)
+  | .name x =>
+    match nameKind C Γ x with
+    | .mem => throw s!"`{x}` is a memory reference, not a storage path"
+    | .alias | .store => pure (.pv (Var.ofName x))
+    | _ => pure (.root x)
+  | .field t f => do pure (.field (← R.fpath t) f)
+  | .at t i => do
+    -- `p[p.length]`, the slot one past the end (a push's alias): no bounds check
+    match i with
+    | .field t' "length" =>
+      if t == t' then pure (.next (← R.fpath t)) else pure (.at (← R.fpath t) (← R.val i))
+    | _ => pure (.at (← R.fpath t) (← R.val i))
   | _ => throw "not a storage path: a name, `p.f` or `p[t]`"
 
 /-- A term at the storage sort; a push and a pop are nested
@@ -620,15 +662,16 @@ def rStor (R : Readers C) (Γ : ECtx) : RawTerm → Except String (STerm C)
     | _, .add _ (.num 1) => pure (.extend (← R.stor s) (← R.path b) (← elemTy C Γ b))
     | _, .sub _ (.num 1) => pure (.shrink (← R.stor s) (← R.path b))
     | _, _ => throw "the length of an array is written by a push or a pop"
-  | .app "save" [s, p, v] => do pure (.save (← R.stor s) (← R.path p) (← R.sval v))
-  | .app "delAt" [s, p] => do pure (.delAt (← R.stor s) (← R.path p))
+  | .app "save" [s, p, v] => do
+    pure (.save (← R.stor s) (← (if s.hasSelect then R.fpath else R.path) p) (← R.sval v))
+  | .app "delAt" [s, p] => do pure (.delAt (← R.stor s) (← (if s.hasSelect then R.fpath else R.path) p))
   | .app "select" [s, .name r] => do pure (.select (← R.stor s) r)
   | _ => throw "not a storage: `storage`, `store(s, r, v)`, `save(s, p, v)`, `delAt(s, p)` or \
       `select(s, r)`"
 
 /-- What a storage `save` writes. -/
 def rSVal (R : Readers C) (_Γ : ECtx) : RawTerm → Except String (SValT C)
-  | .app "find" [s, p] => do pure (.find (← R.stor s) (← R.path p))
+  | .app "find" [s, p] => do pure (.find (← R.stor s) (← (if s.hasSelect then R.fpath else R.path) p))
   | .app "copyMem" [_, m, i] => do pure (.copyMem (← R.mem m) (← R.ident i))
   | .app "newArr" [T, n] => do pure (.newArr (← allocTy C T) (← R.val n))
   | .app "newArr" _ => throw "`newArr(n)` does not say what it allocates: write `newArr(T, n)`"
@@ -677,6 +720,7 @@ def rMVal (R : Readers C) (Γ : ECtx) : RawTerm → Except String (MValT C)
 /-- The readers, each calling the others through this record. -/
 partial def readers (Γ : ECtx) : Readers C :=
   { val := fun t => rVal C (readers Γ) Γ t, path := fun t => rPath C (readers Γ) Γ t,
+    fpath := fun t => rPathFrame C (readers Γ) Γ t,
     stor := fun t => rStor C (readers Γ) Γ t, sval := fun t => rSVal C (readers Γ) Γ t,
     ident := fun t => rIdent C (readers Γ) Γ t, addr := fun t => rAddr C (readers Γ) Γ t,
     mem := fun t => rMem C (readers Γ) Γ t, mval := fun t => rMVal C (readers Γ) Γ t }
@@ -685,6 +729,8 @@ partial def readers (Γ : ECtx) : Readers C :=
 def tVal (Γ : ECtx) (t : RawTerm) : Except String (Term C) := (readers C Γ).val t
 /-- A term at the storage-path sort. -/
 def tPath (Γ : ECtx) (t : RawTerm) : Except String (PTerm C) := (readers C Γ).path t
+/-- A path in the frame of a `select`, its root a member. -/
+def tFPath (Γ : ECtx) (t : RawTerm) : Except String (PTerm C) := (readers C Γ).fpath t
 /-- A term at the storage sort. -/
 def tStor (Γ : ECtx) (t : RawTerm) : Except String (STerm C) := (readers C Γ).stor t
 /-- What a storage `save` writes. -/
@@ -1007,11 +1053,30 @@ elab_rules : term
 macro_rules
   | `(dl!{ $φ:dl_fml }) => `(dl[InContract.contract]{ $φ })
   | `(dl![ $m ]{ $φ:dl_fml }) => `(dl[InContract.contract, $m]{ $φ })
+
   | `(dl[ $c ]{ $[$as:dl_fml],* ⟹ $φ:dl_fml }) => `(dl[$c]{ ($[$as],* ⟹ $φ) })
   | `(dl[ $c, $m ]{ $[$as:dl_fml],* ⟹ $φ:dl_fml }) => `(dl[$c, $m]{ ($[$as],* ⟹ $φ) })
   | `(dl!{ $[$as:dl_fml],* ⟹ $φ:dl_fml }) => `(dl[InContract.contract]{ ($[$as],* ⟹ $φ) })
   | `(dl![ $m ]{ $[$as:dl_fml],* ⟹ $φ:dl_fml }) =>
     `(dl[InContract.contract, $m]{ ($[$as],* ⟹ $φ) })
+
+/-- `st!{ s }`, `pt!{ p }`: a storage term and a storage path read against the
+file's contract, as `dl!{ … }` reads them: the operands of a law's premise
+(`STerm.KindFreeAt st!{ save(storage, alice.age, 1) } pt!{ alice }`).  The path
+is read as in the frame of a `select`: its root may be a member (`account`). -/
+syntax "st!{ " dl_term " }" : term
+@[inherit_doc «termSt!{_}»] syntax "pt!{ " dl_term " }" : term
+
+open Lean Elab Term Meta in
+elab_rules : term
+  | `(st!{ $t:dl_term }) => do
+    let raw ← liftMacroM (expandTerm t)
+    let c ← `(InContract.contract)
+    elabAgainst c fun q => `((tStor $c [] $raw).map (Tm.quote $q))
+  | `(pt!{ $t:dl_term }) => do
+    let raw ← liftMacroM (expandTerm t)
+    let c ← `(InContract.contract)
+    elabAgainst c fun q => `((tFPath $c [] $raw).map (Tm.quote $q))
 
 /-! ## Examples -/
 

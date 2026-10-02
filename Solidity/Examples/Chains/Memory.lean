@@ -19,10 +19,11 @@ formulas `dl![m]{ … }` for every modality `m` and postcondition `φ`: a printe
   reference is bound without a value capture where the value is simple
   (`carol.account.balance = 10;`), and `memoryFieldWriteCopy` is one rule where
   the printed trace unfolds a source path into a local.
-* Not drawn: the printed lines that merge the updates and resolve a memory read
-  through the identity (`memReadIn`, `idConstructor(ρ, [account])`).  A merge that
-  substitutes into a memory term needs the modality, and no rewrite link states a
-  memory law, so each chain stops at the last line Lean reaches.
+* Not drawn: the printed lines that resolve a memory read through the identity
+  (`memReadIn`, `idConstructor(ρ, [account])`): no rewrite link states a memory
+  law yet (a memory read denotes its run, so a law of it is a refinement of the
+  interpreter, not a Theory equation), so each chain stops at the updates the
+  program leaves, merged where the merge computes.
 -/
 
 namespace Solidity.Examples.Chains.Memory

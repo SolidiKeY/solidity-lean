@@ -13,7 +13,22 @@ Two directories, by proof style:
 - `Examples/Chains/` — the calculus's worked examples, one file per section in
   its order, each a chain (`calc` of `dl![m]{ … }` lines, `~[r]~>` for a
   printed `⇝`, `~*>` for a `⇝*`) in the printed fresh names (a `FreshNames`
-  table per example). Only those examples go there, once each.
+  table per example). Only those examples go there, once each. A written
+  line binds an alias to its path as the printed line does: a line of the
+  strategy that binds an alias through another alias (`{ tokRef := bobAcc.token }`),
+  indexes by a capture (`sp[idx]`) or binds a callee's local is crossed
+  unwritten (`_ ~> _ := by sol_chain`, one per step, or `_ ~*> _` to the end
+  of the program), the next written line being its `~[sequentialToParallel]~>`.
+  A read the printed trace resolves is resolved by its own link, in the
+  update's right-hand side, a member at a time as solkey reads it
+  (`~[findMemberCons]~>`, `~[selectOnSaveMember]~>`, `~[selectOnDelAtMember]~>`,
+  then `~[findOnSave]~>` or `~[findOnDelAtBelow]~>`), the premise it needs a
+  hypothesis of the chain written with `st!{ … }` and `pt!{ … }`; a member
+  name alone (`age`, `account.balance`) is a path in the frame of a `select`.
+  A copy read back goes through the laws of memory reads
+  (`~[findCopyMem]~>` then `~[readOnWrite]~>`; `~[readCopySt]~>` then
+  `~[findOnSave]~>`), after one `~[sequentialToParallel]~>` that merges the
+  memory write and the locals beside it into the update after.
 - `Examples/Tactics/` — formulas `⊨ dl!{ pre → [ program ] post }` proved by
   tactics, and interpreter runs.
 

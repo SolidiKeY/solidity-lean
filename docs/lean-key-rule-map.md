@@ -452,19 +452,46 @@ A rule on terms is a constructor of `TermTaclet`, applied on a sequent by
 name (`rw [findOnSave]`, `Proves.rewrite`); `TermTaclet.sound` reads its two
 terms through `Tm.denote` and closes the case by the Theory lemma below.
 Side conditions are syntactic `Bool`s on the `PTerm`s, closed by `rfl`
-(`PTerm.hasSeg`, `PTerm.diverges`). solkey has none of these as a taclet;
+(`PTerm.hasSeg`, `PTerm.diverges`), or a hypothesis of the chain
+(`STerm.KindFreeAt`). solkey has none of these as a taclet;
 they are the rules `Theory/Rewrite.lean` lists as Lean-only, stated on terms.
 
 | Term taclet | Theory lemma | Printed rule (`TheoryRule`) | Notes |
 | --- | --- | --- | --- |
 | `findOnSave` | `find_copyTo_same` (`Theory/Copy.lean`) | `findOnSave` | `find(save(s, p, v), p) ≐ v` for a literal word `v`: a copy reads back the new value laid over the old, which is `v` only for a word |
 | `findOnSaveFrame` | `find_copyTo_frame` | `findOnSaveDifferent` | any written value, `p` diverging from `q` |
-| `findMemberCons` | `findSt` on `[r] ++ [f]` | — | solkey's `consRcons`, `consRnil`, `findDefinitionMemberCons`/`Prim`: `find(s, r.f) ≐ select(select(s, r), f)` |
-| `selectOnSaveMember` | `StValue.selectOnSaveCons` | — | solkey's `selectOnSaveCons` at `a1 = a2`: `select(select(save(s, r.f, v), r), q) ≐ select(store(select(s, r), f, v), q)` |
+| `findMemberCons` | `find_cons` | — | solkey's `consRcons`, `consRnil`, `findDefinitionMemberCons`/`Prim`: `find(s, r.p) ≐ find(select(s, r), p)`, the path read from its head (`PTerm.shift?`), at any depth |
+| `selectOnSaveMember` | `StValue.selectOnSaveCons` | — | solkey's `selectOnSaveCons` at `a1 = a2`: `find(select(save(s, r.p, v), r), q) ≐ find(save(select(s, r), p, v), q)` |
+| `selectOnSaveFrame` | `StValue.selectOnSaveCons` | — | solkey's `selectOnSaveCons` at `a1 ≠ a2`: a write under another root is not seen from `r` |
+| `selectOnDelAtMember`, `selectOnDelAtFrame` | `StValue.selectOnSaveCons`, `find_cons` | — | the same for a delete, `delAt(s, p)` being `save(s, p, delValue(find(s, p)))` |
+| `selectOnSaveMemberIn`, `selectOnSaveFrameIn`, `selectOnDelAtMemberIn`, `selectOnDelAtFrameIn` | the same, `SCtx.fill_denote` | — | the four in a storage context `K` of saves, deletes and selects (`SCtx`), which the arrow finds: solkey rewrites a storage term wherever it stands |
 | `findOnDelAt` | `find_delAt_same`, `delValueDefault` | `findDelAt` | where `find(s, p) ≐ w` for a word `w`, the delete reads its default |
 | `findOnDelAtSave` | `findOnDelAt` over `findOnSave` | `findDelAt` | a delete over a written word |
+| `findOnDelAtBelow` | `find_delAt_below`, `delValueDefault` | `findDelAtFields` | a word at or below a deleted node reads its default, where the deleted storage writes the word there (`STerm.findLit?`) and the node is no mapping (`STerm.KindFreeAt`, a premise of the chain: a mapping keeps its members) |
 | `findOnDelAtFrame` | `find_delAt_frame` | `findDelAtOutside` | |
 | `findOnPushFrame`, `findOnPopFrame` | `find_pushT_frame`, `find_popT_frame` (`Theory/Copy.lean`) | — | a push or pop is one term here, not two saves |
+
+### The laws of memory reads (`EvalLaw`, `Calculus/ChainRewrites.lean`)
+
+A memory read (`read`, `copyMem`, `copySt`) denotes its run, so a law of one
+is no Theory equation but a refinement of the interpreter: where the read
+returns, its replacement returns the same (`EvalLaw.sound`,
+`Term.EvalRefines`).  A chain applies one in an update's right-hand side
+under any modality where the update holds the write the law reads back
+(`Upd.coversEval`, `LineRw.lawUpdEval`).
+
+| Law | Interpreter lemma | KeY taclet | Notes |
+| --- | --- | --- | --- |
+| `readOnWrite` | `readAddr_writeAddr_same` (`Calculus/ReadWrite.lean`) | `readOnWrite` | `read(write(m, a, v), a) ⇝ v` for a literal `v` |
+| `findCopyMem` | `copyMem_member` | `findOnCopy` over `findOnSave` | `find(save(s, p, copyMem(mtSt, m, i)), p.f) ⇝ read(m, i.f)`: the paper's one step from the `find` into memory |
+| `readCopySt` | `copyStToM_member` | `readFromCopyToStorage` | `read(copySt(m, find(s, p)), freshId(copySt(m, find(s, p))).f) ⇝ find(s, p.f)` |
+
+The merges that feed them (`Calculus/StateParts.lean`): `{memory := M}{V}`
+substitutes `M` for `memory` in `V` (`Upd.mergeMem`, with the locals of a
+`{carol := freshId(copySt(…)) ‖ memory := copySt(…)}`), and `{storage := s}{V}`
+substitutes into memory reads too (`withStM`), which `applyStorageBox`'s
+`withSt` keeps out of.  A frame at the `Identity` sort (`read(write(m, i.f, v), j)`
+with `f` not read) has no term rewrite: a rewrite replaces value terms.
 
 ### The names
 

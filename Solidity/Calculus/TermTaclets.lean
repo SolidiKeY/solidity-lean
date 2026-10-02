@@ -86,6 +86,145 @@ def PTerm.diverges (p q : PTerm C) : Bool :=
   | some a, some b => Theory.StValue.diverges a b
   | _, _ => false
 
+/-- `f` of some path on the way down to `t`'s root: `t` itself, the path it
+selects from, and so on.  Generic in the sort, as structural recursion over
+`Tm` asks. -/
+def Tm.extendsAny (f : PTerm C → Bool) : Tm C u → Bool
+  | .app1 (.field _) q => f q || q.extendsAny f
+  | .app2 .at q _ => f q || q.extendsAny f
+  | _ => false
+
+/-- `q` goes on below `p`: `q` is `p` with one or more selectors after it. -/
+def PTerm.extends (q p : PTerm C) : Bool := q.extendsAny (· == p)
+
+/-- `q.extends p` gives the Theory's `q = p ++ r`, `r ≠ []`, in every state. -/
+theorem PTerm.extends_denote {p : PTerm C} (σ : State) :
+    (q : PTerm C) → q.extends p = true → ∃ r, r ≠ [] ∧ q.denote σ = p.denote σ ++ r
+  | .app1 (.field f) q, h => by
+    simp only [PTerm.extends, Tm.extendsAny, Bool.or_eq_true, beq_iff_eq] at h
+    rcases h with rfl | h
+    · exact ⟨[.field f], List.cons_ne_nil _ _, by simp only [tm_denote]⟩
+    · obtain ⟨r, hr, hq⟩ := PTerm.extends_denote σ q h
+      exact ⟨r ++ [.field f], by simp, by simp only [tm_denote, hq, List.append_assoc]⟩
+  | .app2 .at q i, h => by
+    simp only [PTerm.extends, Tm.extendsAny, Bool.or_eq_true, beq_iff_eq] at h
+    rcases h with rfl | h
+    · exact ⟨[.at (asInt (i.denote σ))], List.cons_ne_nil _ _, by simp only [tm_denote]⟩
+    · obtain ⟨r, hr, hq⟩ := PTerm.extends_denote σ q h
+      exact ⟨r ++ [.at (asInt (i.denote σ))], by simp, by simp only [tm_denote, hq, List.append_assoc]⟩
+  | .pvP _, h | .app0 (.root _), h | .app1 .next _, h => nomatch h
+
+/-- A path read from its head, as solkey reads it: the root, and the rest of
+the path rooted at its first member — `alice.account.balance` is `alice` and
+`account.balance`.  `none` for a root alone or a path through an alias. -/
+def Tm.shift? : Tm C u → Option (Name × PTerm C)
+  | .app1 (.field f) (.app0 (.root r)) => some (r, .root f)
+  | .app1 (.field f) p => (Tm.shift? p).map fun (r, p') => (r, .field p' f)
+  | .app2 .at (.app0 (.root _)) _ => none
+  | .app2 .at p i => (Tm.shift? p).map fun (r, p') => (r, .at p' i)
+  | _ => none
+
+@[inherit_doc Tm.shift?]
+def PTerm.shift? (p : PTerm C) : Option (Name × PTerm C) := Tm.shift? p
+
+/-- `shift?` splits the Theory's path at its head, in every state. -/
+theorem PTerm.shift?_denote (σ : State) : (p : PTerm C) → {r : Name} → {p' : PTerm C} →
+    p.shift? = some (r, p') → p.denote σ = .field r :: p'.denote σ
+  | .app1 (.field f) (.app0 (.root r)), _, _, h => by
+    simp only [PTerm.shift?, Tm.shift?, Option.some.injEq, Prod.mk.injEq] at h
+    obtain ⟨rfl, rfl⟩ := h
+    simp only [tm_denote, List.singleton_append]
+  | .app1 (.field f) (.app1 (.field g) p), _, _, h => by
+    simp only [PTerm.shift?, Tm.shift?, Option.map_eq_some_iff] at h
+    obtain ⟨⟨r, p'⟩, hp, h⟩ := h
+    simp only [Prod.mk.injEq] at h
+    obtain ⟨rfl, rfl⟩ := h
+    have ih := PTerm.shift?_denote σ (.app1 (.field g) p) (by simpa only [PTerm.shift?] using hp)
+    simp only [tm_denote] at ih ⊢
+    rw [ih]
+    rfl
+  | .app1 (.field f) (.app2 .at p i), _, _, h => by
+    simp only [PTerm.shift?, Tm.shift?, Option.map_eq_some_iff] at h
+    obtain ⟨⟨r, p'⟩, hp, h⟩ := h
+    simp only [Prod.mk.injEq] at h
+    obtain ⟨rfl, rfl⟩ := h
+    have ih := PTerm.shift?_denote σ (.app2 .at p i) (by simpa only [PTerm.shift?] using hp)
+    simp only [tm_denote] at ih ⊢
+    rw [ih]
+    rfl
+  | .app2 .at (.app1 (.field g) p) i, _, _, h => by
+    simp only [PTerm.shift?, Tm.shift?, Option.map_eq_some_iff] at h
+    obtain ⟨⟨r, p'⟩, hp, h⟩ := h
+    simp only [Prod.mk.injEq] at h
+    obtain ⟨rfl, rfl⟩ := h
+    have ih := PTerm.shift?_denote σ (.app1 (.field g) p) (by simpa only [PTerm.shift?] using hp)
+    simp only [tm_denote] at ih ⊢
+    rw [ih]
+    rfl
+  | .app2 .at (.app2 .at p j) i, _, _, h => by
+    simp only [PTerm.shift?, Tm.shift?, Option.map_eq_some_iff] at h
+    obtain ⟨⟨r, p'⟩, hp, h⟩ := h
+    simp only [Prod.mk.injEq] at h
+    obtain ⟨rfl, rfl⟩ := h
+    have ih := PTerm.shift?_denote σ (.app2 .at p j) (by simpa only [PTerm.shift?] using hp)
+    simp only [tm_denote] at ih ⊢
+    rw [ih]
+    rfl
+  | .app1 (.field _) (.pvP _), _, _, h | .app1 (.field _) (.app1 .next _), _, _, h
+  | .app2 .at (.app0 (.root _)) _, _, _, h | .app2 .at (.pvP _) _, _, _, h
+  | .app2 .at (.app1 .next _) _, _, _, h | .pvP _, _, _, h | .app0 (.root _), _, _, h
+  | .app1 .next _, _, _, h => nomatch h
+
+/-- The rest `shift?` leaves has a segment: it is rooted at the first member. -/
+theorem PTerm.shift?_hasSeg : (p : PTerm C) → {r : Name} → {p' : PTerm C} →
+    p.shift? = some (r, p') → p'.hasSeg = true
+  | .app1 (.field f) (.app0 (.root r)), _, _, h => by
+    simp only [PTerm.shift?, Tm.shift?, Option.some.injEq, Prod.mk.injEq] at h
+    obtain ⟨rfl, rfl⟩ := h
+    rfl
+  | .app1 (.field f) (.app1 (.field g) p), _, _, h | .app1 (.field f) (.app2 .at p i), _, _, h => by
+    simp only [PTerm.shift?, Tm.shift?, Option.map_eq_some_iff] at h
+    obtain ⟨⟨r, p'⟩, -, h⟩ := h
+    simp only [Prod.mk.injEq] at h
+    obtain ⟨rfl, rfl⟩ := h
+    rfl
+  | .app2 .at (.app1 (.field g) p) i, _, _, h | .app2 .at (.app2 .at p j) i, _, _, h => by
+    simp only [PTerm.shift?, Tm.shift?, Option.map_eq_some_iff] at h
+    obtain ⟨⟨r, p'⟩, -, h⟩ := h
+    simp only [Prod.mk.injEq] at h
+    obtain ⟨rfl, rfl⟩ := h
+    rfl
+  | .app1 (.field _) (.pvP _), _, _, h | .app1 (.field _) (.app1 .next _), _, _, h
+  | .app2 .at (.app0 (.root _)) _, _, _, h | .app2 .at (.pvP _) _, _, _, h
+  | .app2 .at (.app1 .next _) _, _, _, h | .pvP _, _, _, h | .app0 (.root _), _, _, h
+  | .app1 .next _, _, _, h => nomatch h
+
+
+def SValT.lit? : SValT C → Option Value
+  | .val (.lit v) => some v
+  | _ => none
+
+theorem SValT.lit?_eq : (v : SValT C) → {w : Value} → v.lit? = some w → v = .val (.lit w)
+  | .val (.lit _), _, h => by cases h; rfl
+
+/-- The word a storage term reads at a path, read off its writes: through a
+`save` at that path of a word, and past a `save` at a path that leaves it.
+`eq` and `div` are the path's `(· == q)` and `(·.diverges q)`, functions so
+that the recursion is structural. -/
+def Tm.findLitBy (eq div : PTerm C → Bool) : Tm C u → Option Value
+  | .app3 .save s p v => if eq p then SValT.lit? v else if div p then s.findLitBy eq div else none
+  | _ => none
+
+/-- The word `s` reads at `q`, read off its writes (`Tm.findLitBy`); `none`
+where its writes do not decide it. -/
+def STerm.findLit? (s : STerm C) (q : PTerm C) : Option Value :=
+  if q.hasSeg then s.findLitBy (· == q) (·.diverges q) else none
+
+/-- The node at `p` in `s` is not a mapping, in every state (`kindFree`): what
+a read below a delete needs, since a delete keeps a mapping's members. -/
+def STerm.KindFreeAt (s : STerm C) (p : PTerm C) : Prop :=
+  ∀ σ, (findSt (s.denote σ) (p.denote σ)).kindFree = true
+
 /-- `hasSeg` gives the Theory's `p ≠ []` in every state. -/
 theorem PTerm.denote_ne_nil {p : PTerm C} (hp : p.hasSeg = true) (σ : State) :
     p.denote σ ≠ [] := by
@@ -128,6 +267,38 @@ theorem PTerm.diverges_denote {p q : PTerm C} (h : p.diverges q = true) (σ : St
     exact h
   · exact absurd h Bool.false_ne_true
 
+/-! ## A storage term with a hole
+
+solkey's `selectOnSaveCons` rewrites a storage term wherever it stands; a
+term taclet here rewrites a value, so the member-wise laws take the storage
+context the rewritten term stands in: `find(K[select(save(s, r.p, v), r)], q)`
+for a context `K` of saves, deletes and selects around the hole, which the
+arrow `~[selectOnSaveMemberIn]~>` finds (`Calculus/Chains.lean`). -/
+
+/-- A storage term with a hole: the storage argument of saves, deletes and
+selects, down to the hole. -/
+inductive SCtx (C : Contract) where
+  | hole
+  | save (K : SCtx C) (p : PTerm C) (v : SValT C)
+  | delAt (K : SCtx C) (p : PTerm C)
+  | select (K : SCtx C) (r : Name)
+  deriving DecidableEq, Repr
+
+/-- The hole filled. -/
+def SCtx.fill : SCtx C → STerm C → STerm C
+  | .hole, s => s
+  | .save K p v, s => .save (K.fill s) p v
+  | .delAt K p, s => .delAt (K.fill s) p
+  | .select K r, s => .select (K.fill s) r
+
+/-- Two storages that denote alike fill a context alike. -/
+theorem SCtx.fill_denote {s s' : STerm C} (h : ∀ σ, s.denote σ = s'.denote σ) :
+    (K : SCtx C) → ∀ σ, (K.fill s).denote σ = (K.fill s').denote σ
+  | .hole, σ => h σ
+  | .save K p v, σ => by simp only [SCtx.fill, tm_denote, SCtx.fill_denote h K σ]
+  | .delAt K p, σ => by simp only [SCtx.fill, tm_denote, SCtx.fill_denote h K σ]
+  | .select K r, σ => by simp only [SCtx.fill, tm_denote, SCtx.fill_denote h K σ]
+
 /-! ## The rules -/
 
 /-- `t ⇝ t'`: a rule of the Theory rewrites `t` to `t'`. -/
@@ -141,24 +312,67 @@ inductive TermTaclet : Term C → Term C → Prop
   | findOnSaveFrame {s : STerm C} {p q : PTerm C} {v : SValT C}
       (h : p.diverges q = true := by rfl) :
       TermTaclet (.find (.save s p v) q) (.find s q)
-  /-- **`findMemberCons`**: `find(s, r.f) ⇝ find(select(s, r), f)`.  solkey
-  reads a path from its head: the path `consr(consr(nil, r), f)` turned into
-  `cons(r, cons(f, nil))` (`consRcons`, `consRnil`), then
+  /-- **`findMemberCons`**: `find(s, r.p) ⇝ find(select(s, r), p)`, the path read
+  from its head (`shift?`), as solkey does: the path `consr(consr(nil, r), f)`
+  turned into `cons(r, cons(f, nil))` (`consRcons`, `consRnil`), then
   `findDefinitionMemberCons`. -/
-  | findMemberCons {s : STerm C} {r f : Name} :
-      TermTaclet (.find s (.field (.root r) f)) (.find (.select s r) (.root f))
-  /-- **`selectOnSaveMember`**: the write at `r.f`, seen from `r`, is a write
-  at `f`: `find(select(save(s, r.f, v), r), q) ⇝ find(save(select(s, r), f, v), q)`
+  | findMemberCons {s : STerm C} {p : PTerm C} {r : Name} {p' : PTerm C}
+      (h : p.shift? = some (r, p') := by rfl) :
+      TermTaclet (.find s p) (.find (.select s r) p')
+  /-- **`selectOnSaveMember`**: the write at `r.p`, seen from `r`, is a write
+  at `p`: `find(select(save(s, r.p, v), r), q) ⇝ find(save(select(s, r), p, v), q)`
   — solkey's `selectOnSaveCons` at `a1 = a2`. -/
-  | selectOnSaveMember {s : STerm C} {r f : Name} {v : SValT C} {q : PTerm C} :
-      TermTaclet (.find (.select (.save s (.field (.root r) f) v) r) q)
-        (.find (.save (.select s r) (.root f) v) q)
+  | selectOnSaveMember {s : STerm C} {p : PTerm C} {r : Name} {p' : PTerm C} {v : SValT C}
+      {q : PTerm C} (h : p.shift? = some (r, p') := by rfl) :
+      TermTaclet (.find (.select (.save s p v) r) q) (.find (.save (.select s r) p' v) q)
+  /-- **`selectOnSaveFrame`**: a write under another root is not seen from `r`:
+  `find(select(save(s, r'.p, v), r), q) ⇝ find(select(s, r), q)` — solkey's
+  `selectOnSaveCons` at `a1 ≠ a2`. -/
+  | selectOnSaveFrame {s : STerm C} {p : PTerm C} {r r' : Name} {p' : PTerm C} {v : SValT C}
+      {q : PTerm C} (h : p.shift? = some (r', p') := by rfl) (hr : r' ≠ r := by decide) :
+      TermTaclet (.find (.select (.save s p v) r) q) (.find (.select s r) q)
+  /-- **`selectOnDelAtMember`**: the delete at `r.p`, seen from `r`, is a delete
+  at `p`: `find(select(delAt(s, r.p), r), q) ⇝ find(delAt(select(s, r), p), q)`. -/
+  | selectOnDelAtMember {s : STerm C} {p : PTerm C} {r : Name} {p' : PTerm C} {q : PTerm C}
+      (h : p.shift? = some (r, p') := by rfl) :
+      TermTaclet (.find (.select (.delAt s p) r) q) (.find (.delAt (.select s r) p') q)
+  /-- **`selectOnDelAtFrame`**: a delete under another root is not seen from `r`. -/
+  | selectOnDelAtFrame {s : STerm C} {p : PTerm C} {r r' : Name} {p' : PTerm C} {q : PTerm C}
+      (h : p.shift? = some (r', p') := by rfl) (hr : r' ≠ r := by decide) :
+      TermTaclet (.find (.select (.delAt s p) r) q) (.find (.select s r) q)
+  /-- **`selectOnSaveMemberIn`**: `selectOnSaveMember` in a storage context `K`:
+  `find(K[select(save(s, r.p, v), r)], q) ⇝ find(K[save(select(s, r), p, v)], q)`. -/
+  | selectOnSaveMemberIn (K : SCtx C) {s : STerm C} {p : PTerm C} {r : Name} {p' : PTerm C}
+      {v : SValT C} {q : PTerm C} (h : p.shift? = some (r, p') := by rfl) :
+      TermTaclet (.find (K.fill (.select (.save s p v) r)) q)
+        (.find (K.fill (.save (.select s r) p' v)) q)
+  /-- **`selectOnSaveFrameIn`**: `selectOnSaveFrame` in a storage context. -/
+  | selectOnSaveFrameIn (K : SCtx C) {s : STerm C} {p : PTerm C} {r r' : Name} {p' : PTerm C}
+      {v : SValT C} {q : PTerm C} (h : p.shift? = some (r', p') := by rfl) (hr : r' ≠ r := by decide) :
+      TermTaclet (.find (K.fill (.select (.save s p v) r)) q) (.find (K.fill (.select s r)) q)
+  /-- **`selectOnDelAtMemberIn`**: `selectOnDelAtMember` in a storage context. -/
+  | selectOnDelAtMemberIn (K : SCtx C) {s : STerm C} {p : PTerm C} {r : Name} {p' : PTerm C}
+      {q : PTerm C} (h : p.shift? = some (r, p') := by rfl) :
+      TermTaclet (.find (K.fill (.select (.delAt s p) r)) q) (.find (K.fill (.delAt (.select s r) p')) q)
+  /-- **`selectOnDelAtFrameIn`**: `selectOnDelAtFrame` in a storage context. -/
+  | selectOnDelAtFrameIn (K : SCtx C) {s : STerm C} {p : PTerm C} {r r' : Name} {p' : PTerm C}
+      {q : PTerm C} (h : p.shift? = some (r', p') := by rfl) (hr : r' ≠ r := by decide) :
+      TermTaclet (.find (K.fill (.select (.delAt s p) r)) q) (.find (K.fill (.select s r)) q)
   /-- **`findOnDelAt`**: where `s` reads the word `w` at `p`, the delete
   leaves its default, `find(delAt(s, p), p) ⇝ default(w)` (`find_delAt_same`,
   `delValueDefault`). -/
   | findOnDelAt {s : STerm C} {p : PTerm C} {w : Value}
       (hw : TermTaclet (.find s p) (.lit w)) (hp : p.hasSeg = true := by rfl) :
       TermTaclet (.find (.delAt s p) p) (.lit (primDefault w))
+  /-- **`findOnDelAtBelow`**: below a deleted node that is not a mapping,
+  every word reads its default, `find(delAt(s, p), q) ⇝ default(w)`, where `q`
+  goes on below `p` and `s` reads the word `w` at `q` off its writes
+  (`STerm.findLit?`; `find_delAt_below`, `delValueDefault`).  `hk`, that the
+  node is not a mapping (which keeps its members), is the chain's premise. -/
+  | findOnDelAtBelow {s : STerm C} {p q : PTerm C} {w : Value} (hk : s.KindFreeAt p)
+      (hw : s.findLit? q = some w := by rfl) (hp : p.hasSeg = true := by rfl)
+      (hq : q.extends p = true := by rfl) :
+      TermTaclet (.find (.delAt s p) q) (.lit (primDefault w))
   /-- **`findOnDelAtFrame`**: a read off the deleted path does not see the
   delete (`find_delAt_frame`). -/
   | findOnDelAtFrame {s : STerm C} {p q : PTerm C} (h : p.diverges q = true := by rfl) :
@@ -188,6 +402,72 @@ theorem TermTaclet.findOnDelAtSave {s : STerm C} {p : PTerm C} {v : Value}
 
 /-! ## Soundness -/
 
+/-- The write at `r.p`, seen from `r`, is the write at `p`: the storages are
+one Struct. -/
+theorem STerm.selectOnSaveMember_denote {s : STerm C} {p : PTerm C} {r : Name} {p' : PTerm C}
+    {v : SValT C} (h : p.shift? = some (r, p')) (σ : State) :
+    (STerm.select (.save s p v) r).denote σ = (STerm.save (.select s r) p' v).denote σ := by
+  have hne := PTerm.denote_ne_nil (PTerm.shift?_hasSeg p h) σ
+  simp only [tm_denote, PTerm.shift?_denote σ p h, copyTo, StValue.selectOnSaveCons, if_true,
+    List.isEmpty_iff, hne, if_false, asStruct_st, find_cons _ _ hne]
+
+theorem STerm.selectOnSaveFrame_denote {s : STerm C} {p : PTerm C} {r r' : Name} {p' : PTerm C}
+    {v : SValT C} (h : p.shift? = some (r', p')) (hr : r' ≠ r) (σ : State) :
+    (STerm.select (.save s p v) r).denote σ = (STerm.select s r).denote σ := by
+  simp only [tm_denote, PTerm.shift?_denote σ p h, copyTo, StValue.selectOnSaveCons]
+  rw [if_neg (fun e => hr (Seg.field.inj e))]
+
+theorem STerm.selectOnDelAtMember_denote {s : STerm C} {p : PTerm C} {r : Name} {p' : PTerm C}
+    (h : p.shift? = some (r, p')) (σ : State) :
+    (STerm.select (.delAt s p) r).denote σ = (STerm.delAt (.select s r) p').denote σ := by
+  have hne := PTerm.denote_ne_nil (PTerm.shift?_hasSeg p h) σ
+  simp only [tm_denote, PTerm.shift?_denote σ p h, Theory.StValue.delAt, StValue.selectOnSaveCons,
+    if_true, List.isEmpty_iff, hne, if_false, asStruct_st, find_cons _ _ hne]
+
+theorem STerm.selectOnDelAtFrame_denote {s : STerm C} {p : PTerm C} {r r' : Name} {p' : PTerm C}
+    (h : p.shift? = some (r', p')) (hr : r' ≠ r) (σ : State) :
+    (STerm.select (.delAt s p) r).denote σ = (STerm.select s r).denote σ := by
+  simp only [tm_denote, PTerm.shift?_denote σ p h, Theory.StValue.delAt, StValue.selectOnSaveCons]
+  rw [if_neg (fun e => hr (Seg.field.inj e))]
+
+/-- Two storages that denote alike are read alike, in any context. -/
+theorem Term.find_fill_theq {s s' : STerm C} (h : ∀ σ, s.denote σ = s'.denote σ) (K : SCtx C)
+    (q : PTerm C) : Term.Theq (.find (K.fill s) q) (.find (K.fill s') q) := fun σ => by
+  simp only [tm_denote, SCtx.fill_denote h K σ]
+  exact Equiv.refl _
+
+/-- The word read off the writes is the word read: `findOnSave` at the write
+of `q`, `findOnSaveFrame` past the others. -/
+theorem Tm.findLitBy_theq {q : PTerm C} (hq : q.hasSeg = true) :
+    (s : STerm C) → {w : Value} → s.findLitBy (· == q) (·.diverges q) = some w →
+      Term.Theq (.find s q) (.lit w)
+  | .app3 .save s p v, w, h => fun σ => by
+    simp only [Tm.findLitBy] at h
+    split at h
+    · rename_i hpq
+      simp only [beq_iff_eq] at hpq
+      subst hpq
+      obtain rfl := SValT.lit?_eq v h
+      simp only [tm_denote, find_copyTo_same _ (PTerm.denote_ne_nil hq σ), copyVal]
+      exact Equiv.refl _
+    · split at h
+      · rename_i hd
+        have ih := Tm.findLitBy_theq hq s h σ
+        simp only [tm_denote] at ih ⊢
+        rw [find_copyTo_frame _ _ _ _ (PTerm.diverges_denote hd σ)]
+        exact ih
+      · nomatch h
+  | .pvS _, _, h | .app0 .storage, _, h | .app1 (.select _) _, _, h | .app2 .delAt _ _, _, h
+  | .app2 (.pushSlot _) _ _, _, h | .app2 .pop _ _, _, h | .app2 .shrink _ _, _, h
+  | .app2 (.extend _) _ _, _, h | .app3 .push _ _ _, _, h => nomatch h
+
+theorem STerm.findLit?_theq {s : STerm C} {q : PTerm C} {w : Value} (h : s.findLit? q = some w) :
+    Term.Theq (.find s q) (.lit w) := by
+  unfold STerm.findLit? at h
+  split at h
+  · exact Tm.findLitBy_theq ‹_› s h
+  · nomatch h
+
 /-- **Each term taclet is sound**: its two terms have one Theory value in
 every state.  A case is `denote` unfolded and the Theory's lemma. -/
 theorem TermTaclet.sound {t t' : Term C} : TermTaclet t t' → Term.Theq t t'
@@ -197,15 +477,36 @@ theorem TermTaclet.sound {t t' : Term C} : TermTaclet t t' → Term.Theq t t'
   | .findOnSaveFrame h => fun σ => by
     simp only [tm_denote, find_copyTo_frame _ _ _ _ (PTerm.diverges_denote h σ)]
     exact Equiv.refl _
-  | .findMemberCons => fun σ => by
-    simp only [tm_denote, List.cons_append, List.nil_append]
+  | @findMemberCons _ s p r p' h => fun σ => by
+    simp only [tm_denote, PTerm.shift?_denote σ p h,
+      find_cons _ _ (PTerm.denote_ne_nil (PTerm.shift?_hasSeg p h) σ)]
     exact Equiv.refl _
-  | .selectOnSaveMember => fun σ => by
-    simp only [tm_denote, List.cons_append, List.nil_append, copyTo, StValue.selectOnSaveCons, if_true, List.isEmpty_cons, Bool.false_eq_true, if_false, asStruct_st]
-    exact Equiv.refl _
+  | @selectOnSaveMember _ s p r p' v q h =>
+    Term.find_fill_theq (STerm.selectOnSaveMember_denote h) .hole q
+  | @selectOnSaveFrame _ s p r r' p' v q h hr =>
+    Term.find_fill_theq (STerm.selectOnSaveFrame_denote h hr) .hole q
+  | @selectOnDelAtMember _ s p r p' q h =>
+    Term.find_fill_theq (STerm.selectOnDelAtMember_denote h) .hole q
+  | @selectOnDelAtFrame _ s p r r' p' q h hr =>
+    Term.find_fill_theq (STerm.selectOnDelAtFrame_denote h hr) .hole q
+  | @selectOnSaveMemberIn _ K s p r p' v q h =>
+    Term.find_fill_theq (STerm.selectOnSaveMember_denote h) K q
+  | @selectOnSaveFrameIn _ K s p r r' p' v q h hr =>
+    Term.find_fill_theq (STerm.selectOnSaveFrame_denote h hr) K q
+  | @selectOnDelAtMemberIn _ K s p r p' q h =>
+    Term.find_fill_theq (STerm.selectOnDelAtMember_denote h) K q
+  | @selectOnDelAtFrameIn _ K s p r r' p' q h hr =>
+    Term.find_fill_theq (STerm.selectOnDelAtFrame_denote h hr) K q
   | @findOnDelAt _ s p w hw hp => fun σ => by
     have hr : findSt (s.denote σ) (p.denote σ) = .prim w := Equiv.prim_iff.1 (hw.sound σ)
     simp only [tm_denote, find_delAt_same _ (PTerm.denote_ne_nil hp σ), hr, delValueDefault]
+    exact Equiv.refl _
+  | @findOnDelAtBelow _ s p q w hk hw hp hq => fun σ => by
+    obtain ⟨r, hr, hqr⟩ := PTerm.extends_denote σ q hq
+    have hw' := STerm.findLit?_theq hw σ
+    simp only [tm_denote] at hw' ⊢
+    rw [hqr, find_delAt_below _ (PTerm.denote_ne_nil hp σ) hr (hk σ), ← hqr,
+      Equiv.prim_iff.1 hw', delValueDefault]
     exact Equiv.refl _
   | .findOnDelAtFrame h => fun σ => by
     simp only [tm_denote, find_delAt_frame _ (PTerm.diverges_denote h σ)]

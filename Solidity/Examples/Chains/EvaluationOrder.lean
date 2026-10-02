@@ -36,19 +36,22 @@ local instance : FreshNames := .ofTable names
 
 /-- `balances[i++] = i;` as `uint a = i; uint b = i++; balances[b] = a;`: the
 write stores the old `i`.  Lean declares `b` and then assigns it, where the
-printed lines initialise it, so its update is `{ i := i + 1 ‖ b := i }`. -/
+printed lines initialise it, so its update is `{ i := i + 1 ‖ b := i }`.  The
+write by the captured index (`balances[b]`) is crossed unwritten; the merge
+resolves it to `balances[i]` and the value to `i`, and the dead `b := 0` goes. -/
 def snapshot (m : Modality) (φ : Post StandardExample) :
     dl![m]{ ⟨[ balances[i++] = i; ]⟩ φ }
-    ~*> dl![m]{ { a := i } { b := 0 } { i := i + 1 ‖ b := i } { storage := save(storage, balances[b], a) } φ } :=
+    ~~> dl![m]{ { a := i ‖ i := i + 1 ‖ b := i ‖ storage := save(storage, balances[i], i) } φ } :=
   calc dl![m]{ ⟨[ balances[i++] = i; ]⟩ φ }
     _ = dl![m]{ ⟨[ uint a = i; uint b; b = i++; balances[b] = a; ]⟩ φ } := rfl
     _ ~*> dl![m]{ { a := i } { b := 0 } { i := i + 1 ‖ b := i } ⟨[ balances[b] = a; ]⟩ φ } := by sol_chain
-    _ ~[storageIndexWriteMappingSave]~>
-        dl![m]{ { a := i } { b := 0 } { i := i + 1 ‖ b := i } { storage := save(storage, balances[b], a) }
-            ⟨[ ]⟩ φ } := rfl
-    _ ~[emptyModality]~>
-        dl![m]{ { a := i } { b := 0 } { i := i + 1 ‖ b := i } { storage := save(storage, balances[b], a) }
-            φ } := rfl
+    _ ~[storageIndexWriteMappingSave]~> _ := by sol_chain
+    _ ~> _ := by sol_chain
+    _ ~[sequentialToParallel]~>
+        dl![m]{ { a := i ‖ b := 0 ‖ i := i + 1 ‖ b := i ‖ storage := save(storage, balances[i], i) } φ } := by
+      sol_chain
+    _ ~[simplifyUpdate]~>
+        dl![m]{ { a := i ‖ i := i + 1 ‖ b := i ‖ storage := save(storage, balances[i], i) } φ } := by sol_chain
 
 end Repair1
 
