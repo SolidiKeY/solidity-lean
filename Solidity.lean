@@ -36,6 +36,7 @@ import Solidity.Calculus.Progress
 import Solidity.Calculus.Termination
 import Solidity.Calculus.Chains
 import Solidity.Calculus.Sequents
+import Solidity.Calculus.ProofTree
 import Solidity.Calculus.UpdateRules
 import Solidity.Calculus.ChainRewrites
 import Solidity.Calculus.TermTaclets
@@ -128,6 +129,8 @@ import Solidity.Tools.Inspect
 import Solidity.Tools.DiffTest
 import Solidity.Tools.Counterexample
 import Solidity.Tools.Verify
+import Solidity.Tools.ProofTree
 import Solidity.Examples.Tools
 import Solidity.Examples.Verify
+import Solidity.Examples.ProofTree
 import Solidity.Theorems
