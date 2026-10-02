@@ -942,8 +942,9 @@ def Fml.linesQuoted (c : Lean.Expr) : Nat → Fml C → List Chain.Line
     | none => []
 
 /-- Each rewrite of `rs` on `φ`: the line after, quoted, or `none`. -/
-def Fml.rwQuoted (c : Lean.Expr) (φ : Fml C) (rs : List (LineRw C)) : List (Option Lean.Expr) :=
-  rs.map fun r => (r.apply φ).map (Fml.quote c)
+def Fml.rwQuoted (c : Lean.Expr) (φ : Fml C) (rs : List (Fml C → Option (Fml C))) :
+    List (Option Lean.Expr) :=
+  rs.map fun r => (r φ).map (Fml.quote c)
 
 namespace Chain
 section Tactic
@@ -1187,7 +1188,8 @@ def stepsProof (C : Lean.Expr) (sp : Splice) (A : Lean.Expr) (ls : List Line) :
 
 `~[n]~>` names a rewrite when `n` is no rule of the strategy: an update rule
 of `Calculus/ChainRewrites.lean`'s table, or a law: a term taclet
-(`TermTaclet`, `Calculus/TermTaclets.lean`) or a constant whose statement is
+(`TermTaclet`, `Calculus/TermTaclets.lean`), a law of a memory read
+(`EvalLaw`, `Calculus/ChainRewrites.lean`), or a constant whose statement is
 one.  The name stands for several rewrites, which the
 line before tells apart: the position on the update spine, and for a law its
 instance, found in the line as `rw` finds one.  They are tried in a fixed
@@ -1204,6 +1206,8 @@ inductive RwArrow where
   | table (n : Lean.Name)
   /-- A law: a term taclet, or a constant whose statement is one. -/
   | law (c : Lean.Name)
+  /-- A law of a memory read (`EvalLaw`), or a constant whose statement is one. -/
+  | evalLaw (c : Lean.Name)
 
 /-- The update rules an arrow names, KeY's names: `sequentialToParallel`
 merges, `simplifyUpdate` drops, `applySkip` and the `applyOnRigid…` apply. -/
@@ -1211,10 +1215,29 @@ def rwTable : List Lean.Name :=
   [`sequentialToParallel, `simplifyUpdate, `applySkip, `applyOnRigid, `applyOnRigidBox,
     `applyStorageBox]
 
-/-- Whether the constant `c` states a `TermTaclet`, under its arguments. -/
-def isLaw (c : Lean.Name) : MetaM Bool := do
-  let some info := (← getEnv).find? c | return false
-  forallTelescope info.type fun _ ty => return (← whnfR ty).isAppOf ``TermTaclet
+/-- The kind of law the constant `c` states under its arguments:
+`TermTaclet`, `EvalLaw`, or neither. -/
+def lawKind? (c : Lean.Name) : MetaM (Option Lean.Name) := do
+  let some info := (← getEnv).find? c | return none
+  forallTelescope info.type fun _ ty => do
+    let ty ← whnfR ty
+    if ty.isAppOf ``TermTaclet then return some ``TermTaclet
+    if ty.isAppOf ``EvalLaw then return some ``EvalLaw
+    return none
+
+/-- Whether the constant `c` states a `TermTaclet` or an `EvalLaw`, under its
+arguments. -/
+def isLaw (c : Lean.Name) : MetaM Bool := return (← lawKind? c).isSome
+
+/-- The two sides of a law's statement, `TermTaclet C t t'` or `EvalLaw C t t'`. -/
+def lawSides? (ty : Lean.Expr) : Option (Lean.Expr × Lean.Expr) :=
+  if ty.isAppOfArity ``TermTaclet 3 || ty.isAppOfArity ``EvalLaw 3 then
+    let args := ty.getAppArgs
+    some (args[1]!, args[2]!)
+  else none
+
+/-- The arrow for the law `c` of kind `k`. -/
+def RwArrow.ofLaw (k c : Lean.Name) : RwArrow := if k == ``EvalLaw then .evalLaw c else .law c
 
 /-- What `~[r]~>` names: `none` for a rule of the strategy (a `Taclet` or
 `LeanTaclet` constructor, `emptyModality`), else a rewrite; any other name is
@@ -1226,14 +1249,16 @@ def rwArrow? (r : Ident) : MetaM (Option RwArrow) := do
     return none
   if rwTable.contains n then return some (.table n)
   if env.contains (``TermTaclet ++ n) then return some (.law (``TermTaclet ++ n))
+  if env.contains (``EvalLaw ++ n) then return some (.evalLaw (``EvalLaw ++ n))
   let cs := ((← resolveGlobalName n).filterMap fun (c, fs) =>
     if fs.isEmpty then some c else none).eraseDups
   match cs with
-  | [c] => if ← isLaw c then return some (.law c)
+  | [c] => if let some k ← lawKind? c then return some (.ofLaw k c)
   | [] => pure ()
   | cs => throwError "~[{r}]~>: ambiguous, {r} may be {", ".intercalate (cs.map toString)}"
   throwError "~[{r}]~>: {r} is no rule: not a `Taclet` or `LeanTaclet` constructor, not an \
-    update rule ({", ".intercalate (rwTable.map toString)}), not a term taclet (`TermTaclet`)"
+    update rule ({", ".intercalate (rwTable.map toString)}), not a term taclet (`TermTaclet`), \
+    not a law of a memory read (`EvalLaw`)"
 
 /-- The number of updates in front of a line. -/
 partial def spineLen (e : Lean.Expr) : MetaM Nat := do
@@ -1251,17 +1276,53 @@ partial def subtermsLike (p e : Lean.Expr) : Array Lean.Expr :=
     | _ => acc
   go e #[]
 
+/-- The positions on the spine of the storage term `S`: each storage subterm
+reached through the storage argument of a save, a delete or a select, with
+the context (`SCtx`) a hole there stands in. -/
+partial def spinePositions (C S : Lean.Expr) (mk : Lean.Expr → Lean.Expr := id) :
+    MetaM (Array (Lean.Expr × Lean.Expr)) := do
+  let here := (S, mk (mkApp (mkConst ``SCtx.hole) C))
+  if S.isAppOfArity ``STerm.save 4 then
+    let #[_, S', p, v] := S.getAppArgs | return #[here]
+    return #[here] ++ (← spinePositions C S' fun K => mk (mkAppN (mkConst ``SCtx.save) #[C, K, p, v]))
+  else if S.isAppOfArity ``STerm.delAt 3 then
+    let #[_, S', p] := S.getAppArgs | return #[here]
+    return #[here] ++ (← spinePositions C S' fun K => mk (mkAppN (mkConst ``SCtx.delAt) #[C, K, p]))
+  else if S.isAppOfArity ``STerm.select 3 then
+    let #[_, S', r] := S.getAppArgs | return #[here]
+    return #[here] ++ (← spinePositions C S' fun K => mk (mkAppN (mkConst ``SCtx.select) #[C, K, r]))
+  else return #[here]
+
+/-- `lhs` matched against `e`: by unification, or, for a law in a storage
+context (`find(K[X], q)` with `K` to find), `X` against a position on the
+spine of `e`'s storage and `K` the context there. -/
+def matchLaw (lhs e : Lean.Expr) : MetaM Bool := do
+  if lhs.isAppOfArity ``Term.find 3 then
+    let #[C, st, q] := lhs.getAppArgs | return ← isDefEq lhs e
+    if st.isAppOfArity ``SCtx.fill 3 then
+      let #[_, K, X] := st.getAppArgs | return ← isDefEq lhs e
+      if (← instantiateMVars K).isMVar then
+        unless e.isAppOfArity ``Term.find 3 do return false
+        let #[_, S, q'] := e.getAppArgs | return false
+        for (T, Kpos) in ← spinePositions C S do
+          let s ← saveState
+          if (← isDefEq X T) && (← isDefEq K Kpos) && (← isDefEq q q') then return true
+          s.restore
+        return false
+  isDefEq lhs e
+
 /-- The law `c` at the subterm `e`: `(t, t', h)` when `e` is its left side,
 its arguments found there and its side conditions (`hp : p.hasSeg = true`,
-…) closed by `rfl` or `decide`, as `sol_rw` closes them (`solRwSide`); else
-why not, if a side condition is why. -/
+…) closed by `rfl` or `decide`, as `sol_rw` closes them (`solRwSide`), or by
+a hypothesis of the chain (`findOnDelAtBelow`'s `hk`); else why not, if a
+side condition is why. -/
 def lawAt (c : Lean.Name) (e : Lean.Expr) :
     TermElabM (Except (Option MessageData) (Lean.Expr × Lean.Expr × Lean.Expr)) := do
   let pf ← mkConstWithFreshMVarLevels c
   let (args, _, ty) ← forallMetaTelescope (← inferType pf)
   let ty ← whnfR (← instantiateMVars ty)
-  let_expr TermTaclet _ lhs rhs := ty | return .error none
-  unless ← isDefEq lhs e do return .error none
+  let some (lhs, rhs) := lawSides? ty | return .error none
+  unless ← matchLaw lhs e do return .error none
   for a in args do
     let g := a.mvarId!
     if (← g.isAssigned) || !(← isProp (← g.getType)) then continue
@@ -1269,11 +1330,11 @@ def lawAt (c : Lean.Name) (e : Lean.Expr) :
     let g ← g.replaceTargetDefEq ty
     let closed ← try
         pure (← Term.withoutErrToSorry <|
-          Tactic.run g (evalTactic (← `(tactic| first | rfl | decide)))).isEmpty
+          Tactic.run g (evalTactic (← `(tactic| first | rfl | decide | assumption)))).isEmpty
       catch _ => pure false
     unless closed do
       return .error (some m!"the side condition{indentExpr ty}\nof {lastName c} closes by neither \
-        `rfl` nor `decide`")
+        `rfl`, `decide` nor a hypothesis")
   let pf ← instantiateMVars (mkAppN pf args)
   let t' ← instantiateMVars rhs
   if pf.hasExprMVar || t'.hasExprMVar then return .error none
@@ -1286,7 +1347,7 @@ def lawInstances (c : Lean.Name) (φ : Lean.Expr) :
   let lhs0 ← withoutModifyingState do
     let (_, _, ty) ← forallMetaTelescope (← inferType (← mkConstWithFreshMVarLevels c))
     let ty ← whnfR (← instantiateMVars ty)
-    let_expr TermTaclet _ lhs _ := ty | throwError "not a law: {c}"
+    let some (lhs, _) := lawSides? ty | throwError "not a law: {c}"
     instantiateMVars lhs
   let mut out := #[]
   let mut failed := none
@@ -1301,10 +1362,12 @@ def lawInstances (c : Lean.Name) (φ : Lean.Expr) :
 
 /-- The rewrites `~[r]~>` stands for on the line `φ`, in the order they are
 tried, and why a law found no instance.  `sequentialToParallel`: the whole
-spine merged, then fewer updates, then one pair further in; the others at
+spine merged, then fewer updates, then a run of updates further in (the
+longest first), then one pair further in; the others at
 each position of the spine, outermost first.  A law: at each instance, on
-the equations, then in each box update's right-hand sides when its result
-cannot halt. -/
+the equations, then in each update's right-hand sides when its result cannot
+halt — under any modality where the update holds the write the law reads
+back (`LineRw.lawUpdAny`), else under the box. -/
 def rwCandidates (C φ : Lean.Expr) : RwArrow → TermElabM (Array Lean.Expr × Option MessageData)
   | .table n => do
     let k ← spineLen φ
@@ -1315,6 +1378,9 @@ def rwCandidates (C φ : Lean.Expr) : RwArrow → TermElabM (Array Lean.Expr × 
     let rs :=
       if n == `sequentialToParallel then
         atPos ``LineRw.mergeSpine ((List.range (k - 1)).reverse.map (· + 1)) ++
+          ((List.range (k - 1)).drop 1).toArray.flatMap (fun i =>
+            ((List.range (k - 1 - i)).reverse.map (· + 2)).toArray.map fun n =>
+              mkApp3 (mkConst ``LineRw.mergeRun) C (toExpr i) (toExpr n)) ++
           atPos ``LineRw.mergeAt ((List.range (k - 1)).drop 1)
       else if n == `simplifyUpdate then
         atPos ``LineRw.simplify (List.range k) ++ atPos ``LineRw.simplifyFresh (List.range k)
@@ -1333,7 +1399,19 @@ def rwCandidates (C φ : Lean.Expr) : RwArrow → TermElabM (Array Lean.Expr × 
       if ← isDefEq (mkApp3 (mkConst ``Tm.total) C (mkConst ``Srt.val) t') (mkConst ``Bool.true) then
         let ht ← mkEqRefl (mkConst ``Bool.true)
         for i in List.range k do
+          out := out.push (mkAppN (mkConst ``LineRw.lawUpdAny) #[C, t, t', pf, ht, toExpr i])
+        for i in List.range k do
           out := out.push (mkAppN (mkConst ``LineRw.lawUpd) #[C, t, t', pf, ht, toExpr i])
+      for i in List.range k do
+        out := out.push (mkAppN (mkConst ``LineRw.lawUpdEq) #[C, t, t', pf, toExpr i])
+    return (out, failed)
+  | .evalLaw c => do
+    let (is, failed) ← lawInstances c φ
+    let k ← spineLen φ
+    let mut out := #[]
+    for (t, t', pf) in is do
+      for i in List.range k do
+        out := out.push (mkAppN (mkConst ``LineRw.lawUpdEval) #[C, t, t', pf, toExpr i])
     return (out, failed)
 
 /-- Each of the rewrites `rs` on the line `φ`, computed: the line after, with
@@ -1346,7 +1424,12 @@ def rwResults (C φ : Lean.Expr) (rs : Array Lean.Expr) :
     | throwError "sol_chain: the contract is not a named constant: {C}"
   let (φ', sp) ← (punch C φ).run {}
   let ty := mkApp (mkConst ``List [0]) (mkApp (mkConst ``Option [0]) (mkConst ``Lean.Expr))
-  let list ← mkListLit (mkApp (mkConst ``LineRw) C) rs.toList
+  -- the rewrites' functions alone: a law closed by a hypothesis of the chain
+  -- carries that variable in its proof, which a compiled evaluation cannot
+  -- take, and the projection drops the proof
+  let fs ← rs.mapM fun r => whnf (mkApp2 (mkConst ``LineRw.apply) C r)
+  let fml := mkApp (mkConst ``Fml) C
+  let list ← mkListLit (← mkArrow fml (mkApp (mkConst ``Option [0]) fml)) fs.toList
   let eval (φ : Lean.Expr) : MetaM (List (Option Lean.Expr)) :=
     unsafe evalExpr (List (Option Lean.Expr)) ty
       (mkApp4 (mkConst ``Fml.rwQuoted) C (quoteConstName n) φ list)
@@ -1365,24 +1448,38 @@ def rwResults (C φ : Lean.Expr) (rs : Array Lean.Expr) :
       | (some d, some b) => fill m d b
       | _ => none, if parts then some (m, boxOnly) else none)
 
-/-- `r.apply A = some B` over a postcondition, where the kernel cannot
-compute what the rewrite asks of it: `simp` takes the rewrite and the line's
-fresh variables apart, `Post.freshVars_eq_nil` says the postcondition has
-none, and `rfl` computes the rest (`LineRw.simplifyFresh`).  `none` if that
-does not close it. -/
+/-- `r.apply A = some B` over a postcondition or a modality, where the kernel
+cannot compute what the rewrite asks of them: `simp` takes the rewrite and the
+line's fresh variables apart, `Post.freshVars_eq_nil` says the postcondition
+has none, and `rfl` computes the rest (`LineRw.simplifyFresh`); a merge of two
+updates that may halt compares the line's modalities (`Upd.merge`), which
+`cases m` decides, one `rfl` per modality.  `none` if that does not close it. -/
 def proveRw (C r A B : Lean.Expr) : TermElabM (Option Lean.Expr) := do
-  let g ← mkFreshExprMVar (← mkEq (mkApp2 (mkApp (mkConst ``LineRw.apply) C) r A)
-    (mkApp2 (mkConst ``Option.some [0]) (mkApp (mkConst ``Fml) C) B))
-  let ok ← try
-      pure (← Term.withoutErrToSorry <| Tactic.run g.mvarId! (evalTactic (← `(tactic|
-        (simp only [LineRw.simplifyFresh, Fml.simplifyFreshAt, Fml.atSpine, Option.map_some,
-          Fml.simplifyFreshTop, Fml.freshVars, Post.freshVars_eq_nil, List.append_nil,
-          List.nil_append]; rfl))))).isEmpty
-    catch _ => pure false
-  unless ok do return none
-  let p ← instantiateMVars g
-  if p.hasSyntheticSorry || p.hasExprMVar then return none
-  return some p
+  let ty ← mkEq (mkApp2 (mkApp (mkConst ``LineRw.apply) C) r A)
+    (mkApp2 (mkConst ``Option.some [0]) (mkApp (mkConst ``Fml) C) B)
+  let simps ← `(tactic| simp only [LineRw.simplifyFresh, Fml.simplifyFreshAt, Fml.atSpine,
+    Option.map_some, Fml.simplifyFreshTop, Fml.freshVars, Post.freshVars_eq_nil, List.append_nil,
+    List.nil_append])
+  -- the line's modality variable, if any: a merge of two updates that may
+  -- halt compares modalities, which `cases m` decides
+  let m? ← (collectFVars {} A).fvarIds.findM? fun f => do
+    return (← whnfR (← f.getType)).isConstOf ``Modality
+  let mut tacs := #[← `(tactic| ($simps:tactic; rfl))]
+  if let some m := m? then
+    let mId := mkIdent (← m.getUserName)
+    tacs := tacs.push (← `(tactic| (cases $mId:ident <;> first | rfl | ($simps:tactic; rfl))))
+  for tac in tacs do
+    let s ← saveState
+    let g ← mkFreshExprMVar ty
+    let ok ← try
+        pure (← Term.withoutErrToSorry <| Tactic.run g.mvarId!
+          (Tactic.withoutRecover (evalTactic tac))).isEmpty
+      catch _ => pure false
+    if ok then
+      let p ← instantiateMVars g
+      unless p.hasSyntheticSorry || p.hasExprMVar do return some p
+    s.restore
+  return none
 
 /-- The rewrite `~[n]~>` names on `φ`, among `rs`, the line after it, and its
 proof when `rfl` is not one: the first that gives `ψ`, or, with `ψ` left
@@ -1436,15 +1533,25 @@ def rwLabel (C φ ψ : Lean.Expr) (r : Ident) (a : RwArrow) :
 named rules of `TermTaclet`, and `findOnDelAtSave`. -/
 def rwLaws : List Lean.Name :=
   [``TermTaclet.findOnSave, ``TermTaclet.findOnSaveFrame, ``TermTaclet.findMemberCons,
-    ``TermTaclet.selectOnSaveMember, ``TermTaclet.findOnDelAt, ``TermTaclet.findOnDelAtSave,
-    ``TermTaclet.findOnDelAtFrame, ``TermTaclet.findOnPushFrame, ``TermTaclet.findOnPopFrame]
+    ``TermTaclet.selectOnSaveMember, ``TermTaclet.selectOnSaveFrame, ``TermTaclet.selectOnDelAtMember,
+    ``TermTaclet.selectOnDelAtFrame, ``TermTaclet.selectOnSaveMemberIn, ``TermTaclet.selectOnSaveFrameIn,
+    ``TermTaclet.selectOnDelAtMemberIn, ``TermTaclet.selectOnDelAtFrameIn,
+    ``TermTaclet.findOnDelAt, ``TermTaclet.findOnDelAtSave,
+    ``TermTaclet.findOnDelAtBelow, ``TermTaclet.findOnDelAtFrame, ``TermTaclet.findOnPushFrame,
+    ``TermTaclet.findOnPopFrame]
+
+/-- The laws of memory reads `~=>` tries, after the term taclets. -/
+def rwEvalLaws : List Lean.Name :=
+  [``EvalLaw.readOnWrite, ``EvalLaw.findCopyMem, ``EvalLaw.readCopySt]
 
 /-- What `~=>` tries, in order: the update rules, then the laws in scope. -/
 def rwAnyArrows : MetaM (List (String × RwArrow)) := do
   let env ← getEnv
   let laws ← rwLaws.filterM fun c => if env.contains c then isLaw c else pure false
+  let evalLaws := rwEvalLaws.filter env.contains
   return rwTable.map (fun n => (n.toString, .table n)) ++
-    laws.map fun c => ((lastName c).toString, .law c)
+    laws.map (fun c => ((lastName c).toString, .law c)) ++
+    evalLaws.map fun c => ((lastName c).toString, .evalLaw c)
 
 /-- The rewrite of `φ ~=> ψ`: the first of `rwAnyArrows` that gives `ψ`, the
 line after, and its proof when `rfl` is not one; else an error with what

@@ -11,10 +11,13 @@ The printed `memoryStorageCopyRoot` is `memoryStorageCopy` here.  The root `r`
 the copy allocates is `freshId(copySt(memory, …))`, and the update stays as
 the rules leave it.
 
-Not drawn: the lines after the copy, where the printed trace merges the
-storage write over the memory updates and reads the copy back
-(`readCopySt`, `findOnSave`).  `sequentialToParallel` does not substitute
-into a memory term, and `readCopySt` is no chain rewrite yet.
+After the copy the updates merge into one — the copy's identity and memory
+substituted into the read, the storage write into the copy — and the read
+is resolved by the laws of memory reads (`EvalLaw`,
+`Calculus/ChainRewrites.lean`): `readCopySt` reads the copy out of the
+storage it copied, then `findOnSave` the write.  A line that binds an alias
+through another alias is crossed unwritten, the next written line being its
+merge.
 -/
 
 namespace Solidity.Examples.Chains.StorageToMemory
@@ -27,15 +30,18 @@ namespace RootCopy
 
 variable (m : Modality) (φ : Post StandardExample)
 
+set_option maxHeartbeats 4000000 in
 /-- `alice.age = 25; Person memory carol = alice; v = carol.age;` — the copy is
 a fresh object holding a snapshot of `alice`, and the read is a read of it.
-The line the declaration leaves says `carol` is a memory local. -/
+The line the declaration leaves says `carol` is a memory local.  The updates
+merged, the read of the copy is a read of the storage copied (`readCopySt`),
+which the write answers (`findOnSave`). -/
 def chain :
     dl![m]{ ⟨[ alice.age = 25; Person memory carol = alice; v = carol.age; ]⟩ φ }
-    ~*> dl![m]{ { storage := save(storage, alice.age, 25) }
-                { carol := freshId(copySt(memory, find(storage, alice))) ‖
-                  memory := copySt(memory, find(storage, alice)) }
-                { v := read(memory, carol.age) } φ } :=
+    ~~> dl![m]{ { storage := save(storage, alice.age, 25) ‖
+                  carol := freshId(copySt(memory, find(save(storage, alice.age, 25), alice))) ‖
+                  memory := copySt(memory, find(save(storage, alice.age, 25), alice)) ‖
+                  v := 25 } φ } :=
   calc dl![m]{ ⟨[ alice.age = 25; Person memory carol = alice; v = carol.age; ]⟩ φ }
     _ ~[storageFieldWriteSave]~>
         dl![m]{ { storage := save(storage, alice.age, 25) }
@@ -58,6 +64,23 @@ def chain :
                 { carol := freshId(copySt(memory, find(storage, alice))) ‖
                   memory := copySt(memory, find(storage, alice)) }
                 { v := read(memory, carol.age) } φ } := rfl
+    _ ~[sequentialToParallel]~>
+        dl![m]{ { storage := save(storage, alice.age, 25) ‖
+                  carol := freshId(copySt(memory, find(save(storage, alice.age, 25), alice))) ‖
+                  memory := copySt(memory, find(save(storage, alice.age, 25), alice)) ‖
+                  v := read(copySt(memory, find(save(storage, alice.age, 25), alice)),
+                            freshId(copySt(memory, find(save(storage, alice.age, 25), alice))).age) } φ } := by
+      sol_chain
+    _ ~[readCopySt]~>
+        dl![m]{ { storage := save(storage, alice.age, 25) ‖
+                  carol := freshId(copySt(memory, find(save(storage, alice.age, 25), alice))) ‖
+                  memory := copySt(memory, find(save(storage, alice.age, 25), alice)) ‖
+                  v := find(save(storage, alice.age, 25), alice.age) } φ } := by sol_chain
+    _ ~[findOnSave]~>
+        dl![m]{ { storage := save(storage, alice.age, 25) ‖
+                  carol := freshId(copySt(memory, find(save(storage, alice.age, 25), alice))) ‖
+                  memory := copySt(memory, find(save(storage, alice.age, 25), alice)) ‖
+                  v := 25 } φ } := by sol_chain
 
 end RootCopy
 
@@ -115,16 +138,18 @@ def source :
                   sp := alice.account } ⟨[ acc = sp; v = acc.balance; ]⟩ φ where Account memory acc } := by
       sol_chain
 
+set_option maxHeartbeats 4000000 in
 /-- … then `acc` a copy of the object `sp` names, and `v = acc.balance;` a read
-of the copy. -/
+of the copy: the updates merged, the read of the copy a read of the storage
+copied (`readCopySt`), which the write answers (`findOnSave`). -/
 def install :
     dl![m]{ { pv := 10 ‖ aliceAcc := alice.account ‖ storage := save(storage, alice.account.balance, 10) ‖
               sp := alice.account } ⟨[ acc = sp; v = acc.balance; ]⟩ φ where Account memory acc }
-    ~*> dl![m]{ { pv := 10 ‖ aliceAcc := alice.account ‖ storage := save(storage, alice.account.balance, 10) ‖
-                  sp := alice.account }
-                { acc := freshId(copySt(memory, find(storage, sp))) ‖
-                  memory := copySt(memory, find(storage, sp)) }
-                { v := read(memory, acc.balance) } φ } :=
+    ~~> dl![m]{ { pv := 10 ‖ aliceAcc := alice.account ‖ storage := save(storage, alice.account.balance, 10) ‖
+                  sp := alice.account ‖
+                  acc := freshId(copySt(memory, find(save(storage, alice.account.balance, 10), alice.account))) ‖
+                  memory := copySt(memory, find(save(storage, alice.account.balance, 10), alice.account)) ‖
+                  v := 10 } φ } :=
   calc dl![m]{ { pv := 10 ‖ aliceAcc := alice.account ‖ storage := save(storage, alice.account.balance, 10) ‖
                  sp := alice.account } ⟨[ acc = sp; v = acc.balance; ]⟩ φ where Account memory acc }
     _ ~[memoryStorageCopy]~>
@@ -145,22 +170,43 @@ def install :
                 { acc := freshId(copySt(memory, find(storage, sp))) ‖
                   memory := copySt(memory, find(storage, sp)) }
                 { v := read(memory, acc.balance) } φ } := rfl
+    _ ~[sequentialToParallel]~>
+        dl![m]{ { pv := 10 ‖ aliceAcc := alice.account ‖ storage := save(storage, alice.account.balance, 10) ‖
+                  sp := alice.account ‖
+                  acc := freshId(copySt(memory, find(save(storage, alice.account.balance, 10), alice.account))) ‖
+                  memory := copySt(memory, find(save(storage, alice.account.balance, 10), alice.account)) ‖
+                  v := read(copySt(memory, find(save(storage, alice.account.balance, 10), alice.account)),
+                            freshId(copySt(memory, find(save(storage, alice.account.balance, 10),
+                              alice.account))).balance) } φ } := by sol_chain
+    _ ~[readCopySt]~>
+        dl![m]{ { pv := 10 ‖ aliceAcc := alice.account ‖ storage := save(storage, alice.account.balance, 10) ‖
+                  sp := alice.account ‖
+                  acc := freshId(copySt(memory, find(save(storage, alice.account.balance, 10), alice.account))) ‖
+                  memory := copySt(memory, find(save(storage, alice.account.balance, 10), alice.account)) ‖
+                  v := find(save(storage, alice.account.balance, 10), alice.account.balance) } φ } := by
+      sol_chain
+    _ ~[findOnSave]~>
+        dl![m]{ { pv := 10 ‖ aliceAcc := alice.account ‖ storage := save(storage, alice.account.balance, 10) ‖
+                  sp := alice.account ‖
+                  acc := freshId(copySt(memory, find(save(storage, alice.account.balance, 10), alice.account))) ‖
+                  memory := copySt(memory, find(save(storage, alice.account.balance, 10), alice.account)) ‖
+                  v := 10 } φ } := by sol_chain
 
 /-- `alice.account.balance = 10; Account memory acc = alice.account;
 v = acc.balance;` — the write unfolds through the alias `aliceAcc`, and the
 member source of the copy is captured in a second alias `sp`; the updates the
-program left merge once `sp` is bound. -/
+program left merge once `sp` is bound, and the read resolves to `10`. -/
 def chain :
     dl![m]{ ⟨[ alice.account.balance = 10; Account memory acc = alice.account; v = acc.balance; ]⟩ φ }
     ~~> dl![m]{ { pv := 10 ‖ aliceAcc := alice.account ‖ storage := save(storage, alice.account.balance, 10) ‖
-                  sp := alice.account }
-                { acc := freshId(copySt(memory, find(storage, sp))) ‖
-                  memory := copySt(memory, find(storage, sp)) }
-                { v := read(memory, acc.balance) } φ } :=
+                  sp := alice.account ‖
+                  acc := freshId(copySt(memory, find(save(storage, alice.account.balance, 10), alice.account))) ‖
+                  memory := copySt(memory, find(save(storage, alice.account.balance, 10), alice.account)) ‖
+                  v := 10 } φ } :=
   calc dl![m]{ ⟨[ alice.account.balance = 10; Account memory acc = alice.account; v = acc.balance; ]⟩ φ }
     _ ~*> _ := write m φ
     _ ~~> _ := source m φ
-    _ ~*> _ := install m φ
+    _ ~~> _ := install m φ
 
 end FieldCopy
 
@@ -177,7 +223,9 @@ local instance : FreshNames := .ofTable names
 variable (m : Modality) (φ : Post StandardExample)
 
 /-- `Token memory t = alice.account.token;` — the declaration dropped, the
-source captured in `aliceTok`; `aliceAcc` is dead once the two aliases merge. -/
+source captured in `aliceTok`, through `aliceAcc` (the steps binding them are
+crossed unwritten; the merge binds `aliceTok` to `alice.account.token`);
+`aliceAcc` is dead once the two aliases merge. -/
 def source :
     dl![m]{ ⟨[ Token memory t = alice.account.token; ]⟩ φ }
     ~~> dl![m]{ { aliceTok := alice.account.token } ⟨[ t = aliceTok; ]⟩ φ where Token memory t } :=
@@ -187,8 +235,12 @@ def source :
     _ ~[memoryStorageCopyUnfold]~>
         dl![m]{ ⟨[ Token storage aliceTok = alice.account.token; t = aliceTok; ]⟩ φ where Token memory t } :=
       by sol_chain
-    _ ~*> dl![m]{ { aliceAcc := alice.account } { aliceTok := aliceAcc.token } ⟨[ t = aliceTok; ]⟩ φ
-                  where Token memory t } := by sol_chain
+    _ ~*> dl![m]{ ⟨[ aliceTok = alice.account.token; t = aliceTok; ]⟩ φ where Token memory t } := by
+      sol_chain
+    _ ~[storageFieldRead_unfold_rightFst]~> _ := by sol_chain
+    _ ~> _ := by sol_chain
+    _ ~> _ := by sol_chain
+    _ ~> _ := by sol_chain
     _ ~[sequentialToParallel]~>
         dl![m]{ { aliceAcc := alice.account ‖ aliceTok := alice.account.token } ⟨[ t = aliceTok; ]⟩ φ
                 where Token memory t } := by sol_chain

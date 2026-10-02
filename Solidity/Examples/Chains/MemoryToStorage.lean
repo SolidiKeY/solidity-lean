@@ -13,10 +13,14 @@ where the printed trace starts from an object it does not declare.  A read
 of the copied storage is unfolded through aliases (`sp`, …), one rule per
 selector, where the printed trace reads the path at once.
 
-Not drawn: the lines after the program, where the printed trace merges the
-memory write with the storage copy and reads it back (`findCopyMem`,
-`readRSingleton`, `readWriteEqual`).  `sequentialToParallel` does not merge
-an update that writes memory, and those laws are no chain rewrites yet.
+After the program the updates merge into one — the memory write
+substituted for `memory` in the storage write, as the printed `S₁` reads
+`copyMem(mtSt, M₁, carol)` — and the read is resolved by the laws of memory
+reads (`EvalLaw`, `Calculus/ChainRewrites.lean`): `findCopyMem` sends the
+`find` back into memory, `readOnWrite` reads the write.  A line that binds
+an alias through another alias is crossed unwritten, the next written line
+being its merge.  The identity-level step of the member-source example
+(`i_rhs` and `i_acc` one identity) has no term rewrite at that sort.
 -/
 
 namespace Solidity.Examples.Chains.MemoryToStorage
@@ -29,15 +33,18 @@ namespace RootCopy
 
 variable (m : Modality) (φ : Post StandardExample)
 
+set_option maxHeartbeats 4000000 in
 /-- `carol.age = 42; alice = carol; v = alice.age;` — a memory object copied
-into a storage root (`copyMem`), and read back from storage. -/
+into a storage root (`copyMem`), and read back from storage: the updates
+merged, the read sent back into memory (`findCopyMem`), the write read
+(`readOnWrite`). -/
 def chain :
     dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
             ⟨[ carol.age = 42; alice = carol; v = alice.age; ]⟩ φ }
-    ~*> dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
-                { memory := write(memory, carol.age, 42) }
-                { storage := store(storage, alice, copyMem(mtSt, memory, carol)) }
-                { v := find(storage, alice.age) } φ } :=
+    ~~> dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
+                { memory := write(memory, carol.age, 42) ‖
+                  storage := store(storage, alice, copyMem(mtSt, write(memory, carol.age, 42), carol)) ‖
+                  v := 42 } φ } :=
   calc dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
                ⟨[ carol.age = 42; alice = carol; v = alice.age; ]⟩ φ }
     _ ~[memoryFieldWriteStore]~>
@@ -58,6 +65,22 @@ def chain :
                 { memory := write(memory, carol.age, 42) }
                 { storage := store(storage, alice, copyMem(mtSt, memory, carol)) }
                 { v := find(storage, alice.age) } φ } := rfl
+    _ ~[sequentialToParallel]~>
+        dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
+                { memory := write(memory, carol.age, 42) ‖
+                  storage := store(storage, alice, copyMem(mtSt, write(memory, carol.age, 42), carol)) ‖
+                  v := find(store(storage, alice, copyMem(mtSt, write(memory, carol.age, 42), carol)),
+                            alice.age) } φ } := by sol_chain
+    _ ~[findCopyMem]~>
+        dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
+                { memory := write(memory, carol.age, 42) ‖
+                  storage := store(storage, alice, copyMem(mtSt, write(memory, carol.age, 42), carol)) ‖
+                  v := read(write(memory, carol.age, 42), carol.age) } φ } := by sol_chain
+    _ ~[readOnWrite]~>
+        dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
+                { memory := write(memory, carol.age, 42) ‖
+                  storage := store(storage, alice, copyMem(mtSt, write(memory, carol.age, 42), carol)) ‖
+                  v := 42 } φ } := by sol_chain
 
 end RootCopy
 
@@ -72,15 +95,18 @@ local instance : FreshNames := .ofTable names
 
 variable (m : Modality) (φ : Post StandardExample)
 
+set_option maxHeartbeats 4000000 in
 /-- `carolAcc.balance = 50; alice.account = carolAcc; v = alice.account.balance;`
-— into a member of a storage root. -/
+— into a member of a storage root, read back through the alias `acc`: the
+updates merged, the read sent back into memory, the write read. -/
 def chain :
     dl![m]{ { carolAcc := freshId(addM(memory, Account)) ‖ memory := addM(memory, Account) }
             ⟨[ carolAcc.balance = 50; alice.account = carolAcc; v = alice.account.balance; ]⟩ φ }
-    ~*> dl![m]{ { carolAcc := freshId(addM(memory, Account)) ‖ memory := addM(memory, Account) }
-                { memory := write(memory, carolAcc.balance, 50) }
-                { storage := save(storage, alice.account, copyMem(mtSt, memory, carolAcc)) }
-                { acc := alice.account } { v := find(storage, acc.balance) } φ } :=
+    ~~> dl![m]{ { carolAcc := freshId(addM(memory, Account)) ‖ memory := addM(memory, Account) }
+                { memory := write(memory, carolAcc.balance, 50) ‖
+                  storage := save(storage, alice.account,
+                    copyMem(mtSt, write(memory, carolAcc.balance, 50), carolAcc)) ‖
+                  acc := alice.account ‖ v := 50 } φ } :=
   calc dl![m]{ { carolAcc := freshId(addM(memory, Account)) ‖ memory := addM(memory, Account) }
                ⟨[ carolAcc.balance = 50; alice.account = carolAcc; v = alice.account.balance; ]⟩ φ }
     _ ~[memoryFieldWriteStore]~>
@@ -101,6 +127,28 @@ def chain :
                   { memory := write(memory, carolAcc.balance, 50) }
                   { storage := save(storage, alice.account, copyMem(mtSt, memory, carolAcc)) }
                   { acc := alice.account } { v := find(storage, acc.balance) } φ } := by sol_chain
+    _ ~[sequentialToParallel]~>
+        dl![m]{ { carolAcc := freshId(addM(memory, Account)) ‖ memory := addM(memory, Account) }
+                { memory := write(memory, carolAcc.balance, 50) ‖
+                  storage := save(storage, alice.account,
+                    copyMem(mtSt, write(memory, carolAcc.balance, 50), carolAcc)) ‖
+                  acc := alice.account ‖
+                  v := find(save(storage, alice.account,
+                              copyMem(mtSt, write(memory, carolAcc.balance, 50), carolAcc)),
+                            alice.account.balance) } φ } := by sol_chain
+    _ ~[findCopyMem]~>
+        dl![m]{ { carolAcc := freshId(addM(memory, Account)) ‖ memory := addM(memory, Account) }
+                { memory := write(memory, carolAcc.balance, 50) ‖
+                  storage := save(storage, alice.account,
+                    copyMem(mtSt, write(memory, carolAcc.balance, 50), carolAcc)) ‖
+                  acc := alice.account ‖
+                  v := read(write(memory, carolAcc.balance, 50), carolAcc.balance) } φ } := by sol_chain
+    _ ~[readOnWrite]~>
+        dl![m]{ { carolAcc := freshId(addM(memory, Account)) ‖ memory := addM(memory, Account) }
+                { memory := write(memory, carolAcc.balance, 50) ‖
+                  storage := save(storage, alice.account,
+                    copyMem(mtSt, write(memory, carolAcc.balance, 50), carolAcc)) ‖
+                  acc := alice.account ‖ v := 50 } φ } := by sol_chain
 
 end FieldCopy
 
@@ -116,16 +164,29 @@ local instance : FreshNames := .ofTable names
 
 variable (m : Modality) (φ : Post StandardExample)
 
+set_option maxHeartbeats 4000000 in
 /-- `carol.account.balance = 50; alice.account = carol.account;
 v = alice.account.balance;` — the source a member of a memory object: its
-identity is read from memory, and what is copied. -/
+identity is read from memory, and what is copied.  The updates merge and
+`findCopyMem` sends the read back into memory, at the identity the copy read
+after the write, `read(write(memory, read(memory, carol.account).balance, 50), carol.account)`.
+The printed trace reads the write through it as `50` because that identity
+is the one written, `read(memory, carol.account)` — the write at `balance`
+does not touch `account` — a frame law at the `Identity` sort, which no
+term rewrite applies: a rewrite replaces value terms (`Tm.rw`). -/
 def chain :
     dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
             ⟨[ carol.account.balance = 50; alice.account = carol.account; v = alice.account.balance; ]⟩ φ }
-    ~*> dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
-                { carolAcc := read(memory, carol.account) } { memory := write(memory, carolAcc.balance, 50) }
-                { storage := save(storage, alice.account, copyMem(mtSt, memory, read(memory, carol.account))) }
-                { sp := alice.account } { v := find(storage, sp.balance) } φ } :=
+    ~~> dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
+                { carolAcc := read(memory, carol.account) ‖
+                  memory := write(memory, read(memory, carol.account).balance, 50) ‖
+                  storage := save(storage, alice.account,
+                    copyMem(mtSt, write(memory, read(memory, carol.account).balance, 50),
+                      read(write(memory, read(memory, carol.account).balance, 50), carol.account))) ‖
+                  sp := alice.account ‖
+                  v := read(write(memory, read(memory, carol.account).balance, 50),
+                            read(write(memory, read(memory, carol.account).balance, 50),
+                              carol.account).balance) } φ } :=
   calc dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
                ⟨[ carol.account.balance = 50; alice.account = carol.account;
                   v = alice.account.balance; ]⟩ φ }
@@ -156,6 +217,30 @@ def chain :
                   { storage := save(storage, alice.account,
                       copyMem(mtSt, memory, read(memory, carol.account))) }
                   { sp := alice.account } { v := find(storage, sp.balance) } φ } := by sol_chain
+    _ ~[sequentialToParallel]~>
+        dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
+                { carolAcc := read(memory, carol.account) ‖
+                  memory := write(memory, read(memory, carol.account).balance, 50) ‖
+                  storage := save(storage, alice.account,
+                    copyMem(mtSt, write(memory, read(memory, carol.account).balance, 50),
+                      read(write(memory, read(memory, carol.account).balance, 50), carol.account))) ‖
+                  sp := alice.account ‖
+                  v := find(save(storage, alice.account,
+                              copyMem(mtSt, write(memory, read(memory, carol.account).balance, 50),
+                                read(write(memory, read(memory, carol.account).balance, 50),
+                                  carol.account))),
+                            alice.account.balance) } φ } := by sol_chain
+    _ ~[findCopyMem]~>
+        dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
+                { carolAcc := read(memory, carol.account) ‖
+                  memory := write(memory, read(memory, carol.account).balance, 50) ‖
+                  storage := save(storage, alice.account,
+                    copyMem(mtSt, write(memory, read(memory, carol.account).balance, 50),
+                      read(write(memory, read(memory, carol.account).balance, 50), carol.account))) ‖
+                  sp := alice.account ‖
+                  v := read(write(memory, read(memory, carol.account).balance, 50),
+                            read(write(memory, read(memory, carol.account).balance, 50),
+                              carol.account).balance) } φ } := by sol_chain
 
 end PathCopy
 
@@ -213,56 +298,82 @@ def copy :
                 { storage := save(storage, aliceAcc.token, copyMem(mtSt, memory, carolToken)) }
                 ⟨[ v = alice.account.token.value; ]⟩ φ } := rfl
 
+set_option maxHeartbeats 4000000 in
 /-- … and `v = alice.account.token.value;` read through two more aliases, one
-per selector. -/
+per selector (`sp`, then `aliceTok` through it: lines crossed unwritten), the
+two merged with the read, which the merge resolves to
+`find(storage, alice.account.token.value)`; then the updates the program
+left merged into one, the read sent back into memory, the write read. -/
 def read :
     dl![m]{ { carolToken := freshId(addM(memory, Token)) ‖ memory := addM(memory, Token) }
             { memory := write(memory, carolToken.value, 99) }
             { aliceAcc := alice.account }
             { storage := save(storage, aliceAcc.token, copyMem(mtSt, memory, carolToken)) }
             ⟨[ v = alice.account.token.value; ]⟩ φ }
-    ~*> dl![m]{ { carolToken := freshId(addM(memory, Token)) ‖ memory := addM(memory, Token) }
-                { memory := write(memory, carolToken.value, 99) }
-                { aliceAcc := alice.account }
-                { storage := save(storage, aliceAcc.token, copyMem(mtSt, memory, carolToken)) }
-                { sp := alice.account } { aliceTok := sp.token } { v := find(storage, aliceTok.value) } φ } :=
+    ~~> dl![m]{ { carolToken := freshId(addM(memory, Token)) ‖ memory := addM(memory, Token) }
+                { memory := write(memory, carolToken.value, 99) ‖ aliceAcc := alice.account ‖
+                  storage := save(storage, alice.account.token,
+                    copyMem(mtSt, write(memory, carolToken.value, 99), carolToken)) ‖
+                  sp := alice.account ‖ aliceTok := alice.account.token ‖ v := 99 } φ } :=
   calc dl![m]{ { carolToken := freshId(addM(memory, Token)) ‖ memory := addM(memory, Token) }
                { memory := write(memory, carolToken.value, 99) }
                { aliceAcc := alice.account }
                { storage := save(storage, aliceAcc.token, copyMem(mtSt, memory, carolToken)) }
                ⟨[ v = alice.account.token.value; ]⟩ φ }
-    _ ~*> dl![m]{ { carolToken := freshId(addM(memory, Token)) ‖ memory := addM(memory, Token) }
-                  { memory := write(memory, carolToken.value, 99) }
-                  { aliceAcc := alice.account }
-                  { storage := save(storage, aliceAcc.token, copyMem(mtSt, memory, carolToken)) }
-                  { sp := alice.account } { aliceTok := sp.token } ⟨[ v = aliceTok.value; ]⟩ φ } := by
-      sol_chain
-    _ ~[storageFieldReadFind]~>
+    _ ~*> _ := by sol_chain
+    _ ~[sequentialToParallel]~>
         dl![m]{ { carolToken := freshId(addM(memory, Token)) ‖ memory := addM(memory, Token) }
                 { memory := write(memory, carolToken.value, 99) }
                 { aliceAcc := alice.account }
                 { storage := save(storage, aliceAcc.token, copyMem(mtSt, memory, carolToken)) }
-                { sp := alice.account } { aliceTok := sp.token } { v := find(storage, aliceTok.value) }
-                ⟨[ ]⟩ φ } := rfl
-    _ ~[emptyModality]~>
+                { sp := alice.account ‖ aliceTok := alice.account.token }
+                { v := find(storage, aliceTok.value) } φ } := by sol_chain
+    _ ~[sequentialToParallel]~>
         dl![m]{ { carolToken := freshId(addM(memory, Token)) ‖ memory := addM(memory, Token) }
                 { memory := write(memory, carolToken.value, 99) }
                 { aliceAcc := alice.account }
                 { storage := save(storage, aliceAcc.token, copyMem(mtSt, memory, carolToken)) }
-                { sp := alice.account } { aliceTok := sp.token } { v := find(storage, aliceTok.value) } φ } := rfl
+                { sp := alice.account ‖ aliceTok := alice.account.token ‖
+                  v := find(storage, alice.account.token.value) } φ } := by sol_chain
+    _ ~[sequentialToParallel]~>
+        dl![m]{ { carolToken := freshId(addM(memory, Token)) ‖ memory := addM(memory, Token) }
+                { memory := write(memory, carolToken.value, 99) ‖ aliceAcc := alice.account ‖
+                  storage := save(storage, alice.account.token,
+                    copyMem(mtSt, write(memory, carolToken.value, 99), carolToken)) ‖
+                  sp := alice.account ‖ aliceTok := alice.account.token ‖
+                  v := find(save(storage, alice.account.token,
+                              copyMem(mtSt, write(memory, carolToken.value, 99), carolToken)),
+                            alice.account.token.value) } φ } := by sol_chain
+    _ ~[findCopyMem]~>
+        dl![m]{ { carolToken := freshId(addM(memory, Token)) ‖ memory := addM(memory, Token) }
+                { memory := write(memory, carolToken.value, 99) ‖ aliceAcc := alice.account ‖
+                  storage := save(storage, alice.account.token,
+                    copyMem(mtSt, write(memory, carolToken.value, 99), carolToken)) ‖
+                  sp := alice.account ‖ aliceTok := alice.account.token ‖
+                  v := read(write(memory, carolToken.value, 99), carolToken.value) } φ } := by sol_chain
+    _ ~[readOnWrite]~>
+        dl![m]{ { carolToken := freshId(addM(memory, Token)) ‖ memory := addM(memory, Token) }
+                { memory := write(memory, carolToken.value, 99) ‖ aliceAcc := alice.account ‖
+                  storage := save(storage, alice.account.token,
+                    copyMem(mtSt, write(memory, carolToken.value, 99), carolToken)) ‖
+                  sp := alice.account ‖ aliceTok := alice.account.token ‖ v := 99 } φ } := by sol_chain
 
 /-- `carolToken.value = 99; alice.account.token = carolToken;
-v = alice.account.token.value;` — the copy, then the read. -/
+v = alice.account.token.value;` — the copy, then the read, to `99`. -/
 def chain :
     dl![m]{ { carolToken := freshId(addM(memory, Token)) ‖ memory := addM(memory, Token) }
             ⟨[ carolToken.value = 99; alice.account.token = carolToken;
                v = alice.account.token.value; ]⟩ φ }
-    ~*> dl![m]{ { carolToken := freshId(addM(memory, Token)) ‖ memory := addM(memory, Token) }
-                { memory := write(memory, carolToken.value, 99) }
-                { aliceAcc := alice.account }
-                { storage := save(storage, aliceAcc.token, copyMem(mtSt, memory, carolToken)) }
-                { sp := alice.account } { aliceTok := sp.token } { v := find(storage, aliceTok.value) } φ } :=
-  (copy m φ).trans (read m φ)
+    ~~> dl![m]{ { carolToken := freshId(addM(memory, Token)) ‖ memory := addM(memory, Token) }
+                { memory := write(memory, carolToken.value, 99) ‖ aliceAcc := alice.account ‖
+                  storage := save(storage, alice.account.token,
+                    copyMem(mtSt, write(memory, carolToken.value, 99), carolToken)) ‖
+                  sp := alice.account ‖ aliceTok := alice.account.token ‖ v := 99 } φ } :=
+  calc dl![m]{ { carolToken := freshId(addM(memory, Token)) ‖ memory := addM(memory, Token) }
+               ⟨[ carolToken.value = 99; alice.account.token = carolToken;
+                  v = alice.account.token.value; ]⟩ φ }
+    _ ~*> _ := copy m φ
+    _ ~~> _ := read m φ
 
 end NonsimplePath
 
