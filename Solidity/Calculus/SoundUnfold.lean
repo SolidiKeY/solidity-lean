@@ -143,14 +143,10 @@ theorem popAt_setEnv (keep : Bool) (r : Name) (segs : List Seg) :
 
 theorem transferAt_setEnv (addr amt : Int) :
     transferAt (σ.setEnv x b) addr amt = (do let τ ← transferAt σ addr amt; pure (τ.setEnv x b)) := by
-  have e : (σ.setEnv x b).selfBalance = σ.selfBalance := rfl
   unfold transferAt
-  rw [e]
   by_cases h1 : amt < 0
   · simp only [h1, if_true]; rfl
-  by_cases h2 : σ.selfBalance < amt
-  · simp only [h1, h2, if_true, if_false]; rfl
-  · simp only [h1, h2, if_false]; rfl
+  · simp only [h1, if_false]; rfl
 
 theorem copyMem_setEnv (v : MVal) : copyMem (σ.setEnv x b) v = copyMem σ v :=
   copyMem_congr (agree_setEnv σ x b) v

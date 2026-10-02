@@ -1104,31 +1104,27 @@ theorem transferAt_frame {σ τ : State} {addr amt : Int} (h : transferAt σ add
   unfold transferAt at h
   split at h
   · simp at h
-  · split at h
-    · simp at h
-    · simp only [Except.ok.injEq] at h
-      subst h
-      refine ⟨fun _ _ => rfl, fun _ => rfl, fun a => ?_⟩
-      cases a <;> rfl
+  · simp only [Except.ok.injEq] at h
+    subst h
+    refine ⟨fun _ _ => rfl, fun _ => rfl, fun a => ?_⟩
+    cases a <;> rfl
 
-/-! ## The environment: `msg.sender`, `address(this).balance`
+/-! ## The environment: `msg.sender`, `address(this).balance`, and the ledger
 
-`msg.sender`, `msg.value` and `block.timestamp` are the transaction's, and
-nothing a program does changes them; the funds only a `transfer` changes, by
-the amount it pays. -/
+`msg.sender`, `msg.value`, `block.timestamp` and the funds are the
+transaction's, and nothing a program does changes them; the ledger only a
+`transfer` changes, at the address it pays and at `this`. -/
 
-/-- `address(this).balance` after `to.transfer(5);` is `5` less, and
-`msg.sender` is as it was. -/
+/-- After `to.transfer(5);` the ledger has moved `5` from `this` to `to`, and
+`msg.sender` and `address(this).balance` are as they were. -/
 theorem transferAt_env {σ τ : State} {addr amt : Int} (h : transferAt σ addr amt = .ok τ) :
-    τ.tx = σ.tx ∧ τ.selfBalance = σ.selfBalance - amt := by
+    τ.tx = σ.tx ∧ τ.selfBalance = σ.selfBalance ∧ τ.net = (σ.pay addr amt).net := by
   unfold transferAt at h
   split at h
   · simp at h
-  · split at h
-    · simp at h
-    · simp only [Except.ok.injEq] at h
-      subst h
-      exact ⟨rfl, rfl⟩
+  · simp only [Except.ok.injEq] at h
+    subst h
+    exact ⟨rfl, rfl, rfl⟩
 
 /-- A storage write leaves the environment. -/
 theorem env_saveStorage {σ τ : State} {r : Name} {p : List Seg} {v : SVal}

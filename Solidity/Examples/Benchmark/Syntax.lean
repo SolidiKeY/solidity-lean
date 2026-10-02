@@ -55,12 +55,8 @@ example : Prog.toStr (sol{ total = 2 ether + 3 days; total = 1 gwei; }) =
 example : Prog.toStr (sol{ owner = payable(address(total)); owner = address(0); }) =
     "owner = total; owner = 0;" := rfl
 
-/--
-error: `address(this)` is not a value here
----
-error: cannot evaluate code because 'sorryAx' uses 'sorry' and/or contains errors
--/
-#guard_msgs in #check sol{ owner = address(this); }
+/-- `address(this)` is the contract's own address, an environment value. -/
+example : Prog.toStr (sol{ owner = address(this); }) = "owner = address(this);" := rfl
 
 /--
 error: a unit is one of wei gwei ether seconds minutes hours days weeks

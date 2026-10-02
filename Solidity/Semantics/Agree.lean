@@ -761,12 +761,12 @@ theorem popAt_agree (hag : EnvAgreeExcept ns σ τ) (keep : Bool) (r : Name) (se
 
 theorem transferAt_agree (hag : EnvAgreeExcept ns σ τ) (addr amt : Int) :
     ResultsAgree ns (transferAt σ addr amt) (transferAt τ addr amt) := by
-  simp only [transferAt, hag.selfBalance, getNet_congr hag]
+  simp only [transferAt]
   split
   · rfl
-  split
-  · rfl
-  exact ⟨hag.storage, hag.heap, hag.nextId, by simp [State.setNet, hag.net], hag.env, rfl, hag.tx⟩
+  exact ⟨hag.storage, hag.heap, hag.nextId,
+    by simp only [State.pay, State.setNet, State.getNet, hag.net, hag.tx], hag.env,
+    hag.selfBalance, hag.tx⟩
 
 theorem ARhs.bind_frame (hag : EnvAgreeExcept ns σ τ) (x : Var) {R : RefTy} :
     (r : ARhs C R) → Avoids r.vars ns → ResultsAgree ns (r.bind σ x) (r.bind τ x)

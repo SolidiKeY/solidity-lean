@@ -308,7 +308,7 @@ Once the first goal of a branch is done, `(c → {U} φ) ∧ …`, the step on t
 next one asks `φ` whether a modality is left, which only `Post.inactive`
 knows (`Chains.stepAtProof`): a `require`, an `assert` and an `if`, each to its
 end, at a modality and over any postcondition.  (A `transfer` does too:
-`Chains.Payment.TransferSum.diamond`.)  These are the calculus's traces: every
+`Chains.Payment.TransferSum.box`.)  These are the calculus's traces: every
 rule of a `require`, an `assert` and an `if` is the same under either modality,
 the cover of the split included (`⟨[ revert(); ]⟩ false ∨ c ∨ c'`,
 `Premise.coverFml`), so the lines are written once, up to the `revert();` of a

@@ -1568,9 +1568,7 @@ theorem Stmt.run_canon : ∀ (s : Stmt C) {Γ Γ' : Ctx} {H : HeapTy} {σ σ' : 
     unfold transferAt at h
     split at h
     · exact nomatch h
-    · split at h
-      · exact nomatch h
-      · cases h; exact hcn.of_eq rfl rfl
+    · cases h; exact hcn.of_eq rfl rfl
   | .declMem R x init hd, Γ, Γ', H, σ, σ', hwt, hcn, hs, h => by
     obtain ⟨hc, rfl⟩ := wt_if hs
     cases init with

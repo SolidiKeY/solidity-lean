@@ -209,6 +209,7 @@ partial def expandTerm : TSyntax `dl_term → MacroM Lean.Term
           | none => pure (← `(RawTerm.name $(quote root)), flds)
         | [] =>
           if root == "selfBalance" then pure (← `(RawTerm.env EnvKey.selfBalance), flds)
+          else if root == "this" then pure (← `(RawTerm.env EnvKey.selfAddress), flds)
           else pure (← `(RawTerm.name $(quote root)), flds)
       flds.foldlM (init := base) fun acc f =>
         `(RawTerm.field $acc $(quote f))

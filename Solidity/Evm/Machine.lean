@@ -20,8 +20,10 @@ needs.  Instruction meanings follow the EVM as Nethermind's
 * `SLOAD`/`SSTORE` read and write storage, and a fresh contract's storage is
   all zeroes;
 * `JUMPI` jumps iff the popped word is non-zero, `REVERT` aborts;
-* `CALL` with a value the contract cannot cover fails and pushes `0`, else
-  moves the value and pushes `1` (solc's `transfer` reverts on the `0`).
+* `CALL` fails and pushes `0` when the contract cannot cover the value or
+  the recipient refuses it (`accepts`), else moves the value from the
+  contract's account to the recipient's and pushes `1` (solc's `transfer`
+  reverts on the `0`); a payment to the contract itself moves nothing.
 
 **What is simplified, on purpose.**
 
@@ -41,11 +43,17 @@ needs.  Instruction meanings follow the EVM as Nethermind's
   in two forms: `keccakMap` for a mapping entry, `keccakArr` for array data.
 * **Locals live in memory**, one cell per variable, addressed by the variable
   itself (as Vyper does); solc keeps them on the stack.
-* **The world is one ledger**: `net a` is what KeY's `net` records for address
-  `a`, the value the contract has sent there, negated; `balance` is
-  `address(this).balance` (`SELFBALANCE`), and `caller`, `callvalue`,
-  `timestamp` the transaction's (`CALLER`, `CALLVALUE`, `TIMESTAMP`).  `CALL` takes only an address and a value — no gas,
-  no calldata, no callee code.
+* **The world is the accounts' balances** (the Yellow Paper's `σ[a].b`):
+  `bal a` for every address `a`, the contract's own at `self`
+  (`SELFBALANCE` reads it, `ADDRESS` pushes `self`).  There is no ledger:
+  KeY's `net` is a ghost of the interpreter, what each account lost since the
+  transaction began, `bal₀ a - bal a`, the contract's own included
+  (`Sim.net`, `Evm/Correctness.lean`).  A recipient's code is
+  not run; whether it accepts a payment is `accepts`, which no instruction
+  changes, and the compiler theorem holds for every one.  `caller`,
+  `callvalue`, `timestamp` are the transaction's (`CALLER`, `CALLVALUE`,
+  `TIMESTAMP`).  `CALL` takes only an address and a value — no gas, no
+  calldata — and an address is a word, not cut to 160 bits.
 * No gas, no stack-depth limit.
 -/
 
@@ -144,6 +152,8 @@ inductive Instr where
   (`msg.value`), `TIMESTAMP` (`block.timestamp`), `SELFBALANCE`
   (`address(this).balance`). -/
   | caller | callvalue | timestamp | selfbalance
+  /-- `ADDRESS` (`address(this)`). -/
+  | address
   deriving DecidableEq, Repr, Inhabited
 
 instance : ToString Instr where
@@ -167,6 +177,7 @@ instance : ToString Instr where
     | .xor => "XOR" | .not => "NOT" | .shl => "SHL" | .shr => "SHR" | .exp => "EXP"
     | .caller => "CALLER" | .callvalue => "CALLVALUE" | .timestamp => "TIMESTAMP"
     | .selfbalance => "SELFBALANCE"
+    | .address => "ADDRESS"
 
 /-- `f` with `x` sent to `v`. -/
 def upd {α : Type} {β : Type} [DecidableEq α] (f : α → β) (x : α) (v : β) : α → β :=
@@ -184,18 +195,31 @@ structure Machine where
   stack : List Word
   store : Slot → Nat
   mem : Var → Word
-  balance : Nat
-  net : Nat → Int
+  /-- Every account's balance. -/
+  bal : Nat → Nat
+  /-- The balances when the transaction began: a ghost, which no
+  instruction reads or writes. -/
+  bal₀ : Nat → Nat
+  /-- The contract's own address. -/
+  self : Nat := 0
+  /-- Whether the account at `a` accepts a payment of `v`: one whose code
+  reverts, or runs out of the 2300 gas `transfer` forwards, does not. -/
+  accepts : Nat → Nat → Bool := fun _ _ => true
   /-- The transaction's sender, value and block time, as `CALLER`,
   `CALLVALUE`, `TIMESTAMP` push them. -/
   caller : Nat := 0
   callvalue : Nat := 0
   timestamp : Nat := 0
 
-/-- A fresh contract holding `balance`: empty stack, storage and memory all
-zeroes, nothing sent anywhere, called by `0` with nothing at time `0`. -/
-def Machine.init (balance : Nat := 0) : Machine :=
-  { stack := [], store := fun _ => 0, mem := fun _ => .val 0, balance, net := fun _ => 0 }
+/-- A fresh contract at `self` in a world whose balances are `bal`: empty
+stack, storage and memory all zeroes, nothing moved yet, called by `0` with
+nothing at time `0`, every payment accepted. -/
+def Machine.init (bal : Nat → Nat := fun _ => 0) (self : Nat := 0) : Machine :=
+  { stack := [], store := fun _ => 0, mem := fun _ => .val 0, bal, bal₀ := bal, self }
+
+/-- `v` moved from `s`'s account to `a`'s, another. -/
+def pay (bal : Nat → Nat) (s a v : Nat) : Nat → Nat :=
+  upd (upd bal s (bal s - v)) a (bal a + v)
 
 def Machine.push (m : Machine) (w : Word) : Machine := { m with stack := w :: m.stack }
 
@@ -315,9 +339,9 @@ def Instr.step : Instr → Machine → Out
     | _ => .fault
   | .call, m => match m.stack with
     | .val v :: .val a :: st =>
-      if m.balance < v then m.next (.val 0 :: st)
-      else .ok { m with stack := .val 1 :: st, balance := m.balance - v,
-                        net := upd m.net a (m.net a - v) } 0
+      if m.bal m.self < v ∨ m.accepts a v = false then m.next (.val 0 :: st)
+      else if a = m.self then m.next (.val 1 :: st)
+      else .ok { m with stack := .val 1 :: st, bal := pay m.bal m.self a v } 0
     | _ => .fault
   | .revert, _ => .revert
   | .xor, m => match m.stack with
@@ -338,7 +362,8 @@ def Instr.step : Instr → Machine → Out
   | .caller, m => m.next (.val m.caller :: m.stack)
   | .callvalue, m => m.next (.val m.callvalue :: m.stack)
   | .timestamp, m => m.next (.val m.timestamp :: m.stack)
-  | .selfbalance, m => m.next (.val m.balance :: m.stack)
+  | .selfbalance, m => m.next (.val (m.bal m.self) :: m.stack)
+  | .address, m => m.next (.val m.self :: m.stack)
 
 /-- Run code, skipping `k` instructions first (a jump still pending). -/
 def exec : List Instr → Nat → Machine → Out

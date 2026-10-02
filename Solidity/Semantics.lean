@@ -19,8 +19,13 @@ Semantic conventions mirrored from KeY:
 - array reads and writes out of bounds revert; `pop()` on an empty array
   reverts; `/` and `%` revert on a zero divisor; a failing `assert`
   reverts;
-- `a.transfer(v)` books `net(a) := net(a) - v` with no callback (the
-  callback reading is `Semantics/Callback.lean`'s, a relation over this one);
+- `a.transfer(v)` books `net(a) := net(a) - v` and `net(this) := net(this)
+  + v`, the ledger's two ends, with no callback (the callback reading is
+  `Semantics/Callback.lean`'s, a relation over this one), and nothing else
+  (a payment to `this` books nothing): the contract is assumed able to pay, and its funds
+  (`State.selfBalance`) are not the transfer's to change.  Whether the EVM
+  pays is the compiler theorem's business (`Evm/Correctness.lean`, where a
+  refused payment is a revert of the machine alone);
 - a call runs its inlined body (`Stmt.call`, KeY's `functionBodyExpand`):
   its arguments read in the caller's state, bound to its parameters, its
   return variable declared, the body run, the result assigned;
@@ -39,8 +44,6 @@ Semantic conventions mirrored from solc, where KeY was more liberal
 - an assignment evaluates its **right-hand side before resolving the
   left-hand side**, and `++`/`--` and `op=` resolve their target exactly
   once;
-- `a.transfer(v)` reverts unless the contract's own funds
-  (`State.selfBalance`) cover `v`, and debits them.
 
 A run ends in a state or halts: `revert` (the program reverted) or `stuck`
 (a state that does not fit the program, e.g. a local read before it is
@@ -254,6 +257,8 @@ reads none of `ext`: a `try` has a goal for every way its call may end
 (`tryCallNoCallbackBox`), so a proof holds whatever the table says. -/
 structure TxEnv where
   msgSender : Int := 0
+  /-- The contract's own address, `address(this)`: the ledger's own account. -/
+  selfAddress : Int := 0
   msgValue : Int := 0
   timestamp : Int := 0
   ext : List (ExtKey × ExtResult) := []
@@ -265,11 +270,10 @@ structure State where
   nextId : Nat := 0
   env : List (Var × Binding) := []
   net : List (Int × Int) := []
-  /-- The contract's own funds (`address(this).balance`): `transfer`
-  reverts when the amount exceeds this and debits it otherwise — the
-  EVM's value-transfer balance check that solc-compiled `transfer`
-  inherits. Example stores that exercise `transfer` start it high
-  enough for their payments. -/
+  /-- The contract's own funds (`address(this).balance`), as the
+  transaction found them, `msg.value` booked by a `payable` function's
+  specification (`Calculus/Spec.lean`).  A `transfer` books `net` only and
+  leaves them. -/
   selfBalance : Int := 0
   /-- `msg.sender`, `msg.value`, `block.timestamp`. -/
   tx : TxEnv := {}
@@ -612,6 +616,7 @@ def envVal (s : State) : EnvKey → Int
   | .msgValue => s.tx.msgValue
   | .timestamp => s.tx.timestamp
   | .selfBalance => s.selfBalance
+  | .selfAddress => s.tx.selfAddress
 
 end State
 
@@ -933,10 +938,8 @@ def writeLoc (s : State) (loc : Addr) (v : Value) : Res State :=
 One store per ported contract (`Syntax.lean`), in its roots' order. -/
 
 /-- The globals of `StandardExample.sol` plus the `people` array used by the
-existing worked examples. The contract starts with funds
-(`selfBalance`) so the ported payment examples' transfers are covered;
-insufficient-balance behavior is exercised by explicitly smaller
-balances. -/
+existing worked examples, with funds (`selfBalance`) for
+`address(this).balance` to read. -/
 def State.exampleStore : State :=
   { selfBalance := 1000000000,
     storage :=
@@ -1436,12 +1439,16 @@ def popAt (σ : State) (keep : Bool) (root : Name) (segs : List Seg) : Res State
         (.array restRev.reverse ((if keep then last else last.defaultOf) :: shadow) fx)
   | .prim _ | .struct _ | .map _ _ => .error .stuck
 
-/-- `a.transfer(v)` with both evaluated: revert when the contract's funds
-cannot cover `v`, else book the debit. -/
+/-- `v` moved from the contract to `a`, on the ledger: `a`'s entry down by `v`,
+the contract's own (`this`) up by `v`.  A payment to `this` books nothing. -/
+def Semantics.State.pay (σ : State) (addr amt : Int) : State :=
+  let σ₁ := σ.setNet addr (σ.getNet addr - amt)
+  σ₁.setNet σ.tx.selfAddress (σ₁.getNet σ.tx.selfAddress + amt)
+
+/-- `a.transfer(v)` with both evaluated: book the payment on the ledger. -/
 def transferAt (σ : State) (addr amt : Int) : Res State :=
   if amt < 0 then .error .stuck
-  else if σ.selfBalance < amt then .error .revert
-  else .ok { σ.setNet addr (σ.getNet addr - amt) with selfBalance := σ.selfBalance - amt }
+  else .ok (σ.pay addr amt)
 
 /-- An alias bound to what `r` names: a path, or the slot a push appends. -/
 def ARhs.bind (σ : State) (x : Var) {R : RefTy} : ARhs C R → Res State

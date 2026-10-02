@@ -308,8 +308,8 @@ def tacletReadAnns : List TacletReadAnn :=
     { keyName := "memoryIndexDeleteReference"
       reads := [mlen, mlen] },
     -- Payments. solkey `333cc7b353` split each rule by modality: the box
-    -- rule books the debit unconditionally, the diamond rule additionally
-    -- owes the EVM funding check as a "sufficient funds" goal. The ledger
+    -- rule books the debit unconditionally (as `transferNoCallback` does), the
+    -- diamond rule additionally owes a "sufficient funds" goal. The ledger
     -- read is the same `selectSt<[int]>(net, at(a))` in all four.
     { keyName := "transferNoCallbackBox"
       reads := [⟨.net, .net, .fixed .int⟩] },

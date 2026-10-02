@@ -136,12 +136,12 @@ The map from taclet to theorem is `docs/lean-key-rule-map.md`.
 
 | Module | What it defines |
 |---|---|
-| `Evm/Machine.lean` | A straight-line EVM: slots as terms, wrapping words, relative forward jumps. |
+| `Evm/Machine.lean` | A straight-line EVM: slots as terms, wrapping words, relative forward jumps, the accounts' balances. |
 | `Evm/Compile.lean` | The compiler for the fragment `wtStmt`, with solc's guards. |
 | `Evm/Repr.lean` | The storage layout and the representation relation. |
 | `Evm/Signed.lean` | The signed guard sequences, exact on two's complement. |
 | `Evm/Exp.lean` | `**`: solc's `checked_exp_unsigned`, unrolled. |
-| `Evm/Correctness.lean` | `compile_correct`, `compile_storage`, `not_stuck`. |
+| `Evm/Correctness.lean` | `compile_correct`, `compile_box`, `compile_net`, `compile_exact`, `compile_storage`, `not_stuck`. |
 | `Evm/Examples.lean` | Compiled programs run by `decide`. |
 
 ## Tools
@@ -183,7 +183,7 @@ its order, each example a chain in its printed lines and fresh names:
 | `Examples/Chains/Memory.lean`, `MemoryDelete.lean`, `MemoryArrays.lean` | Memory aliasing, writes and reads; memory `delete`; memory arrays. |
 | `Examples/Chains/MemoryCoverage.lean` | One step per memory rule. |
 | `Examples/Chains/StorageToMemory.lean`, `MemoryToStorage.lean` | The copies between the two, with lazy reads. |
-| `Examples/Chains/Payment.lean` | `transfer`: funded, nonsimple amount, storage receiver, unfunded. |
+| `Examples/Chains/Payment.lean` | `transfer` under the box: a literal amount, a nonsimple amount, a storage receiver. |
 | `Examples/Chains/CheckedArithmetic.lean`, `EvaluationOrder.lean` | Overflow reverts; the evaluation order of an indexed write. |
 
 `Examples/Tactics/` — theorems `⊨ dl!{ … }` proved by `sol_symex; sol_close`
@@ -195,7 +195,7 @@ or `sol_decide`, derivations `⊢ φ` built one `apply` per taclet, and runs:
 | `Examples/Tactics/StorageSteps.lean` | One storage statement form at a time, as `apply` walks. |
 | `Examples/Tactics/StorageSuite.lean`, `StorageDelete.lean`, `LedgerDelete.lean` | solkey's taclet suite on storage; `delete`; a struct holding a mapping deleted. |
 | `Examples/Tactics/Branch.lean`, `Revert.lean` | Two-goal splits; box and diamond on `revert`, `require`, `assert`. |
-| `Examples/Tactics/Payment.lean`, `Net.lean` | `transfer` as `⊢` walks with checked sequents; its frame and the ledger's runs. |
+| `Examples/Tactics/Payment.lean`, `Net.lean` | `transfer` as a `⊢` walk with checked sequents; its frame, the ledger's postconditions and its runs. |
 | `Examples/Tactics/Values.lean`, `Operators.lean`, `Checked.lean` | Operators, checked arithmetic, `−−`, bitwise, shifts, `unchecked`, `uint8` … `int248`, casts. |
 | `Examples/Tactics/Calls.lean`, `CallOperands.lean`, `Callback.lean`, `TryCatch.lean` | Internal calls, call-valued operands, callbacks (`ProvesC`), `try`/`catch`. |
 | `Examples/Tactics/Memory.lean`, `CrossDomain.lean`, `Theory.lean` | Memory, storage↔memory copies, the theory's rewriting. |

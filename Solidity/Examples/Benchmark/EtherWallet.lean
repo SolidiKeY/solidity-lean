@@ -15,13 +15,11 @@ written without the conversion (stream A's `payable(x)`); the `payable`
 solkey's copy drops because `address(this).balance` crashed its parser, is
 back (`getBalance`).
 
-`@custom:key ensures net(owner) == \old(net(owner)) - _amount`: no term
-reads the `net` ledger (`Close.lean`), so the clause is shown as a run of
-the interpreter (`withdrawRunNet`), as `Examples/Tactics/Net.lean` shows the ledger.
-What a formula does read is the funds, `address(this).balance`, which the
-same `transfer` spends: `withdrawFunds` is that clause's other half.  The
-payment runs with `transferNoCallback`, as solkey's net rules do; with
-callbacks the recipient could change the funds before control returns
+`@custom:key ensures net(owner) == \old(net(owner)) - _amount` is
+`withdrawNet`, at a value of the old entry, and a run (`withdrawRunNet`).
+The payment runs with `transferNoCallback`, as solkey's net rules do, which
+books the ledger and leaves `address(this).balance`; with callbacks the
+recipient could change the ledger before control returns
 (`Semantics/Callback.lean`).
 -/
 
@@ -53,12 +51,11 @@ theorem withdrawOwner :
   sol_symex
   sol_close
 
-/-- The funds are less by the amount paid: `address(this).balance` after
-`withdraw(x)` is `f`, computed as `address(this).balance - x` before it (a
-`uint` subtraction, which reverts where the funds do not cover `x`, as the
-payment does). -/
-theorem withdrawFunds :
-    ⊨ dl!{ [ uint f = address(this).balance - x; withdraw(x); ] address(this).balance == f } := by
+/-- `ensures net(owner) == \old(net(owner)) - _amount`, the old entry `40`:
+the owner's entry is `10` after `withdraw(30)`, and anyone else's call
+reverts.  An owner that is the wallet itself pays itself, and books nothing. -/
+theorem withdrawNet :
+    ⊨ dl!{ owner != this → net(owner) = 40 → [ withdraw(30); ] net(owner) = 10 } := by
   sol_symex
   sol_close
 
@@ -78,15 +75,17 @@ def store : Semantics.State :=
     tx := { msgSender := 7 } }
 
 /-- `ensures net(owner) == \old(net(owner)) - _amount`: `7`'s entry is `30`
-less, and the funds are `70`. -/
+less, and the funds as the transaction found them. -/
 theorem withdrawRunNet :
     (do let σ ← Prog.run store (sol{ owner = msg.sender; withdraw(30); } : Prog EtherWallet)
-        pure (σ.getNet 7, σ.selfBalance)) = .ok (-30, 70) := rfl
+        pure (σ.getNet 7, σ.selfBalance)) = .ok (-30, 100) := rfl
 
-/-- More than the funds: the payment reverts. -/
-theorem withdrawRunUnfunded :
-    Prog.run store (sol{ owner = msg.sender; withdraw(130); } : Prog EtherWallet) =
-      .error .revert := rfl
+/-- More than the funds: the ledger books it all the same.  That the contract
+can pay is not the ledger's to check; on the EVM the payment is refused and
+the call reverts (`Evm.compile_correct`). -/
+theorem withdrawRunOverdrawn :
+    (do let σ ← Prog.run store (sol{ owner = msg.sender; withdraw(130); } : Prog EtherWallet)
+        pure (σ.getNet 7)) = .ok (-130) := rfl
 
 /-- Anyone but the owner: `withdraw` reverts. -/
 theorem withdrawRunOther :

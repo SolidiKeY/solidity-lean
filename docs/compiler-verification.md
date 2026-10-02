@@ -19,23 +19,66 @@ theorem compile_correct (hP : wtProg Γ P = some Γ') (hm : Sim C L Γ σ m)
     (hL : L + pushesP P ≤ Lmax) :
     (∃ σ' m', Prog.run σ P = .ok σ' ∧ run (compileProg P) m = .ok m' 0 ∧
       m'.stack = m.stack ∧ Sim C (L + pushesP P) Γ' σ' m') ∨
-    (Prog.run σ P = .error .revert ∧ run (compileProg P) m = .revert)
+    (Prog.run σ P = .error .revert ∧ run (compileProg P) m = .revert) ∨
+    (paysP P = true ∧ run (compileProg P) m = .revert ∧
+      ∃ σ' m', Prog.run σ P = .ok σ' ∧ Sim C (L + pushesP P) Γ' σ' m')
 ```
 
-Both succeed, the machine's stack as it was and its storage, locals, funds and
-ledger representing the interpreter's final state; or both revert. The
-interpreter is never stuck on the fragment (`not_stuck`), so `wtProg` is a type
-system for it. From a fresh contract (`Sim.init`, every slot `0`, `L = 1`):
+Both succeed, the machine's stack as it was and its storage, locals and
+balances representing the interpreter's final state; or both revert; or the
+program pays (`paysP`), the world refuses a payment, and the machine alone
+reverts. The third is the price of a `transfer` that books `net` and nothing
+else (`Semantics.transferAt`): the interpreter does not know whether the
+contract's account covers the amount or whether the recipient accepts it,
+and the machine does. So the theorem is for the box: what the machine does
+when it succeeds, the interpreter did (`compile_box`), and a program that
+pays no one agrees exactly (`compile_exact`). The interpreter is never stuck
+on the fragment (`not_stuck`), so `wtProg` is a type system for it.
+
+**The ledger is the money that moved.** KeY's `net` is a ghost of the
+interpreter: the machine has no ledger, only every account's balance `bal`
+(the Yellow Paper's `σ[a].b`), the balances `bal₀` when the transaction
+began (a ghost no instruction touches), and the contract's address `self`.
+`Sim` ties them: `net(a) = bal₀ a - bal a` at every word `a`, the
+contract's own address included (what `a`'s account lost). That makes the
+ledger double-entry: a payment of `v` to `a` books `net(a) - v` and
+`net(this) + v` (`State.pay`), since the contract's account loses what `a`'s
+gains, and a payment to the contract itself books nothing, since nothing
+moves. So a wrong booking (a `+` for a `-`, the wrong address, a debit the
+machine does not make, a payment to itself that books something) breaks
+the proof, where the ledger the machine used to carry beside the
+interpreter's would have matched it whatever it was. An earlier version
+left `self` out of the relation, and the rule booked a payment to the
+contract itself as a debit no account made; the proof did not see it,
+because nothing compared that entry. Read off a run that succeeds:
+
+```lean
+theorem compile_net (hP : wtProg Γ P = some Γ') (hm : Sim C L Γ σ m)
+    (hL : L + pushesP P ≤ Lmax) (hrun : run (compileProg P) m = .ok m' 0) :
+    ∃ σ', Prog.run σ P = .ok σ' ∧
+      ∀ a : Nat, a < W → σ'.getNet a = (m'.bal₀ a : Int) - m'.bal a
+```
+
+`Evm/Examples.lean` runs `owner = 5; owner.transfer(30);` on a contract
+holding `100` (`payOwner_run`: `70` left, `30` in `5`'s account) and reads the
+interpreter's `net(5) = -30` and `net(this) = 30` off it
+(`payOwner_interpreter`).
+
+From a fresh contract (`Sim.init`, every slot `0`, `L = 1`, any balances, at
+any address `self < 2^256`, which `address(this)` reads and `ADDRESS`
+pushes):
 
 ```lean
 theorem compile_storage (hP : wtProg (fun _ => none) P = some Γ')
-    (hL : pushesP P < Lmax) (balance : Nat) :
-    (∃ σ' m', Prog.run (State.fresh C balance) P = .ok σ' ∧
-      run (compileProg P) (Machine.init balance) = .ok m' 0 ∧
+    (hL : pushesP P < Lmax) (balance : Nat) (bal : Nat → Nat) (self : Nat) (hs : self < W) :
+    (∃ σ' m', Prog.run (State.fresh C balance self) P = .ok σ' ∧
+      run (compileProg P) (Machine.init bal self) = .ok m' 0 ∧
       ∀ r segs s n, PathSlot C false r segs (.prim .uint) s →
         σ'.findLive r segs = .ok (.prim (.int n)) → m'.store s = n.toNat) ∨
-    (Prog.run (State.fresh C balance) P = .error .revert ∧
-      run (compileProg P) (Machine.init balance) = .revert)
+    (Prog.run (State.fresh C balance self) P = .error .revert ∧
+      run (compileProg P) (Machine.init bal self) = .revert) ∨
+    (paysP P = true ∧ run (compileProg P) (Machine.init bal self) = .revert ∧
+      ∃ σ', Prog.run (State.fresh C balance self) P = .ok σ')
 ```
 
 every `uint` path the interpreter reads, the machine holds at its slot.
@@ -59,7 +102,8 @@ formalises it: arithmetic on words below `2^256` wraps, `DIV`/`MOD` by `0` give
 `0`, comparisons push `1`/`0`, `SLT`/`SGT`/`SDIV`/`SMOD` read words as two's
 complement (`SDIV` truncates, `-2^255 / -1` wraps, `SMOD` takes the dividend's
 sign), `JUMPI` jumps on non-zero, `REVERT` aborts, `CALL` with a value the
-contract cannot cover pushes `0`. Deliberately simplified (`Evm/Machine.lean`
+contract cannot cover, or the recipient refuses, pushes `0`, and one to the
+contract itself moves nothing. Deliberately simplified (`Evm/Machine.lean`
 says why):
 
 - **slots are terms** — `root o`, `hash k s o` (`keccak256(k ‖ s) + o`),
@@ -70,8 +114,10 @@ says why):
   `checked_exp_helper`'s, is unrolled: it runs at most 255 times);
 - **locals in memory cells** addressed by the variable (solc keeps them on the
   stack); `KECCAK256` takes its inputs from the stack;
-- **one ledger for the world**: `balance` and `net`, which is KeY's `net`;
-  `CALL` takes an address and a value only;
+- **the world is the accounts' balances** (`bal`, `self`); a recipient's code
+  is not run, and whether it accepts a payment is `accepts`, which no
+  instruction changes and the theorem quantifies over; `CALL` takes an
+  address and a value only, and an address is a word, not cut to 160 bits;
 - no gas, no stack limit.
 
 ## The layout, and why it is injective
@@ -107,7 +153,8 @@ by the elaborator); `=` of a value into storage, a copy of a *static* value
 through members, keys and indices, `op=`, `x++;`/`total++;`, `v = x++;` and
 `v = ++x;`, `push()` of a primitive element, `push(e)`, `push(sp)` of a static
 element, `delete` at any type, `pop()`, `transfer`, `if`, `require`,
-`assert`, `revert();`, and a call of an internal function, compiled inlined
+`assert`, `revert();`, `msg.sender`, `msg.value`, `block.timestamp`,
+`address(this)`, and a call of an internal function, compiled inlined
 (its arguments stored in its parameters' cells, its return variable zeroed,
 its body, the result copied: `argsCode`), when its parameters, return variable
 and body are in.
@@ -117,7 +164,7 @@ is solc's `a == 0 || (a·b)/a == b`, `mul_ok_iff`; the signed ones are
 `checked_add_t_int256` and its siblings, the `*` one dividing the wrapped
 product back with `SDIV`, `smul_ok`), `/` and `%` by zero, `-2^255 / -1`,
 `-(-2^255)`, `**` on overflow (`checked_exp_unsigned`), array bounds, `pop` on
-an empty array, `push` at `2^64` elements, an unfunded `transfer`.
+an empty array, `push` at `2^64` elements, a refused `transfer`.
 
 An alias bound through an array index (`Person storage p = persons[i];`) is
 *fragile* (`LTy.falias`): the interpreter checks the index once, when `p` is
@@ -137,6 +184,7 @@ Out, and why:
 | storage copies of a value holding a dynamic array (`basketA = basketB;`, `matrix = …`) | solc copies element by element and clears the old tail: a loop over a run-time length; the machine has no loops. Copies of static values (`staticF`) are in. |
 | `push()` of a struct or an array element | solc does not clear the slot it grows into (a `pop` cleared it), and the interpreter revives the popped value there (`pushSlot`); the representation does not relate slots past the end (relating them would need `delete` and `pop` to clear them, which for a dynamic array is a loop). `push()` of a primitive (solc writes `0`) and `push(e)`/`push(sp)` (every slot written) are in. |
 | a fragile alias used after a `pop` or `delete` | See above: it may name a slot past the end, which the representation does not relate. |
+| `address(this).balance` | The interpreter's is the funds the transaction found, which a `transfer` leaves (it books `net` only); `SELFBALANCE` reads the account a `CALL` debits. The two part at the first payment. |
 | mappings keyed by `bool`/`int` | `ReprAt` claims nothing for them (the interpreter indexes by `Int`, and reads a `bool` key as stuck). |
 
 The interpreter evaluates an `op=`'s right-hand side before its target; the
@@ -150,5 +198,7 @@ they do, so the proof needs no argument about it.
 ## Build cost
 
 `lake build Solidity.Evm.Examples` builds the seven modules. `Correctness` is
-the slow one (`stmt_sim` is one mutual declaration); `Examples` runs the
+the slow one (`stmt_sim` is one mutual declaration, over the default
+heartbeats since the third outcome, most of it compiling and checking the
+match itself; the payment itself is `transfer_sim`); `Examples` runs the
 unrolled `**` code under `decide` with a raised `maxRecDepth`.

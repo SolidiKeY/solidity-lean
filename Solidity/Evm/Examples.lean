@@ -39,8 +39,10 @@ def reverted : Out → Bool
 theorem reverted_eq {o : Out} (h : reverted o = true) : o = .revert := by
   cases o <;> simp_all [reverted]
 
-/-- A fresh `StandardExample` holding `balance` in funds. -/
-abbrev fresh (balance : Nat := 0) : Machine := Machine.init balance
+/-- A fresh `StandardExample` at address `0`, its account holding `balance`,
+every other account empty. -/
+abbrev fresh (balance : Nat := 0) : Machine :=
+  Machine.init (fun a => if a = 0 then balance else 0) 0
 
 def code (P : Prog StandardExample) : String := "; ".intercalate ((compileProg P).map toString)
 
@@ -194,24 +196,48 @@ theorem arrays_run :
     storeAt o (.data (.root 4) 1) = some 7 ∧ storeAt o (.root 4) = some 1 := by
   decide
 
-/-- `owner = 5; owner.transfer(30);` with `100` in funds leaves `70` and records
-`-30` for address `5`; `owner.transfer(200);` reverts. -/
-theorem transfer_run :
-    (match run (compileProg sol{ owner = 5; owner.transfer(30); }) (fresh 100) with
-      | .ok m _ => some (m.balance, m.net 5)
-      | _ => none) = some (70, -30) ∧
-    reverts sol{ owner.transfer(200); } (fresh 100) = true := by
+/-- `owner = 5; owner.transfer(30);` -/
+def payOwner : Prog StandardExample := sol{ owner = 5; owner.transfer(30); }
+
+theorem payOwner_wt : compiles payOwner := by decide
+
+/-- With `100` in the contract's account (at `0`), `payOwner` leaves `70`
+there and `30` in `5`'s, which held nothing. -/
+theorem payOwner_run :
+    (match run (compileProg payOwner) (fresh 100) with
+      | .ok m 0 => some (m.bal 0, m.bal 5, m.bal₀ 0, m.bal₀ 5)
+      | _ => none) = some (70, 30, 100, 0) := by
   decide
 
-/-- `owner = msg.sender; total = address(this).balance;`, called by `7` with
-`100` in funds: `CALLER` and `SELFBALANCE` push them. -/
-def envReads : Prog StandardExample := sol{ owner = msg.sender; total = address(this).balance; }
+/-- The world refuses: `200` is more than the account holds, and a
+recipient that does not accept the payment is refused whatever it holds. -/
+theorem transfer_refused :
+    reverts sol{ owner.transfer(200); } (fresh 100) = true ∧
+    reverts payOwner { fresh 100 with accepts := fun a _ => a != 5 } = true := by
+  decide
+
+/-- A payment to the contract itself moves nothing. -/
+theorem transfer_self :
+    (match run (compileProg sol{ owner = 0; owner.transfer(30); }) (fresh 100) with
+      | .ok m 0 => some (m.bal 0)
+      | _ => none) = some 100 := by
+  decide
+
+/-- `owner = msg.sender; total = msg.value;`, called by `7` with `100`:
+`CALLER` and `CALLVALUE` push them. -/
+def envReads : Prog StandardExample := sol{ owner = msg.sender; total = msg.value; }
 
 theorem envReads_wt : compiles envReads := by decide
 
 theorem envReads_run :
-    let o := run (compileProg envReads) { fresh 100 with caller := 7 }
+    let o := run (compileProg envReads) { fresh with caller := 7, callvalue := 100 }
     storeAt o (rootSlot StandardExample "owner") = some 7 ∧ storeAt o (.root 0) = some 100 := by
+  decide
+
+/-- `address(this).balance` is not compiled: the interpreter's is the funds
+the transaction found, `SELFBALANCE` the account a payment debits. -/
+theorem selfBalance_out :
+    compiles (sol{ total = address(this).balance; } : Prog StandardExample) = false := by
   decide
 
 /-! ## Lengths, `v = x++`, copies, `push` -/
@@ -338,8 +364,9 @@ the machine run, through `compile_storage`. -/
 theorem callTwice_interpreter :
     ∃ σ', Prog.run (State.fresh CallsExample 0) callTwice = .ok σ' ∧
       ∀ n, σ'.findLive "total" [] = .ok (.prim (.int n)) → n = 5 := by
-  rcases compile_storage (P := callTwice) (Option.some_get callTwice_wt).symm (by decide) 0 W_pos with
-    ⟨σ', m', h1, h2, h3⟩ | ⟨_, h2⟩
+  rcases compile_storage (P := callTwice) (Option.some_get callTwice_wt).symm (by decide) 0
+      (fresh).bal 0 W_pos with
+    ⟨σ', m', h1, h2, h3⟩ | ⟨_, h2⟩ | ⟨hp, _⟩
   · refine ⟨σ', h1, fun n hn => ?_⟩
     have hp : PathSlot CallsExample false "total" [] (.prim .uint) (.root 0) := PathSlot.root rfl
     have hs := h3 _ _ _ n hp hn
@@ -353,6 +380,7 @@ theorem callTwice_interpreter :
     unfold slotAfter at this
     rw [show run (compileProg callTwice) fresh = _ from h2] at this
     cases this
+  · exact absurd hp (by decide)
 
 /-! ## Signed arithmetic
 
@@ -461,8 +489,8 @@ interpreter's read to slot `13`, and the machine run holds `10` there. -/
 theorem setAge_interpreter :
     ∃ σ', Prog.run (State.fresh StandardExample 0) setAge = .ok σ' ∧
       ∀ n, σ'.findLive "alice" [.field "age"] = .ok (.prim (.int n)) → n = 10 := by
-  rcases compile_storage (P := setAge) (Γ' := fun _ => none) rfl (by decide) 0 W_pos with
-    ⟨σ', m', h1, h2, h3⟩ | ⟨_, h2⟩
+  rcases compile_storage (P := setAge) (Γ' := fun _ => none) rfl (by decide) 0 (fresh).bal 0 W_pos with
+    ⟨σ', m', h1, h2, h3⟩ | ⟨_, h2⟩ | ⟨hp, _⟩
   · refine ⟨σ', h1, fun n hn => ?_⟩
     have hp : PathSlot StandardExample false "alice" [.field "age"] (.prim .uint) (.root 13) :=
       PathSlot.field (segs := []) (PathSlot.root (T := .ref (.struct "Person")) rfl) rfl
@@ -476,17 +504,46 @@ theorem setAge_interpreter :
     unfold slotAfter at this
     rw [show run (compileProg setAge) fresh = _ from h2] at this
     cases this
+  · exact absurd hp (by decide)
 
 /-- **`total += 1;` at `2^256 - 1` reverts in the interpreter**, because it
-reverts on the machine: `compile_correct` makes the two revert together. -/
+reverts on the machine: it pays no one, and `compile_exact` makes the two
+revert together. -/
 theorem overflow_interpreter :
     Prog.run (State.fresh StandardExample 0) overflow = .error .revert := by
-  rcases compile_correct (P := overflow) (Γ' := fun _ => none) rfl
-      (Sim.init StandardExample 0 W_pos) (by decide) with ⟨_, _, _, h, _⟩ | ⟨h, _⟩
+  rcases compile_exact (P := overflow) (Γ' := fun _ => none) rfl
+      (Sim.init StandardExample 0 (fresh).bal 0 W_pos) (by decide) (by decide) with ⟨_, _, _, h, _⟩ | ⟨h, _⟩
   · have := reverted_eq overflow_run
-    rw [show run (compileProg overflow) (Machine.init 0) = _ from h] at this
+    rw [show run (compileProg overflow) fresh = _ from h] at this
     cases this
   · exact h
+
+/-- **`owner.transfer(30);` books `-30` at `5` and `+30` at the contract in
+the interpreter**, because the machine moved `30` from the contract's
+account into `5`'s: `compile_net` reads the interpreter's ledger off the
+balances, at both ends. -/
+theorem payOwner_interpreter :
+    ∃ σ', Prog.run (State.fresh StandardExample 0) payOwner = .ok σ' ∧
+      σ'.getNet 5 = -30 ∧ σ'.getNet 0 = 30 := by
+  have hr := payOwner_run
+  cases h : run (compileProg payOwner) (fresh 100) with
+  | ok m k =>
+    rw [h] at hr
+    cases k with
+    | zero =>
+      simp only [Option.some.injEq, Prod.mk.injEq] at hr
+      obtain ⟨h0, h5, h00, h50⟩ := hr
+      obtain ⟨σ', h1, hnet⟩ := compile_net (Option.some_get payOwner_wt).symm
+        (Sim.init StandardExample 0 _ 0 W_pos) (by decide) h
+      refine ⟨σ', h1, ?_⟩
+      have h := hnet 5 (by decide)
+      have h' := hnet 0 W_pos
+      rw [h5, h50] at h
+      rw [h0, h00] at h'
+      exact ⟨h, h'⟩
+    | succ => simp at hr
+  | revert => rw [h] at hr; simp at hr
+  | fault => rw [h] at hr; simp at hr
 
 end Examples
 end Evm

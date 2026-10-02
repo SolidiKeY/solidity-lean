@@ -55,11 +55,7 @@ What does not close, and why:
   chains for this);
 * a default read out of a fresh memory object (`Person memory m;
   uint x = m.age;`): the default of a struct type is a well-founded
-  definition (`defaultForTy`) that `simp` does not unfold;
-* the ledger a `transfer` books: no term reads `net`, so what is observable
-  of it is its frame — a write before it reads the same after — and the
-  funds it spends, `address(this).balance`, `5` less after
-  `to.transfer(5);` (`Modality.wp_box_transferAt`).
+  definition (`defaultForTy`) that `simp` does not unfold.
 -/
 
 namespace Solidity
@@ -224,20 +220,22 @@ theorem Modality.wp_box_copyMem {σ : State} {id : Nat} {P : SVal → Prop} :
   exact ⟨fun h v hs _ => h v hs, fun h v hs => h v hs (fun _ hf => Close.copyMem_member hs hf)⟩
 
 /-- **A transfer under the box**: `to.transfer(5);` leaves the storage, the
-locals, the heap and `msg.sender` as they were, and takes `5` off
-`address(this).balance`. -/
+locals, the heap, `msg.sender` and `address(this).balance` as they were, and
+moves `5` on the ledger from `this` to `to` (`State.pay`). -/
 theorem Modality.wp_box_transferAt {σ : State} {addr amt : Int} {P : State → Prop} :
     Modality.box.wp (transferAt σ addr amt) P ↔
       ∀ τ, transferAt σ addr amt = .ok τ →
         (∀ r q, τ.findStorage r q = σ.findStorage r q) →
         (∀ r q k, τ.checkIndex r q k = σ.checkIndex r q k) → (∀ x, τ.getEnv x = σ.getEnv x) →
         (∀ a, readAddr τ a = readAddr σ a) → (∀ a, Close.readVal τ a = Close.readVal σ a) →
-        τ.tx = σ.tx → τ.selfBalance = σ.selfBalance - amt → P τ := by
+        τ.tx = σ.tx → τ.selfBalance = σ.selfBalance →
+        τ.net = (σ.pay addr amt).net → P τ := by
   rw [Modality.wp_box]
-  refine ⟨fun h τ hs _ _ _ _ _ _ _ => h τ hs, fun h τ hs => ?_⟩
+  refine ⟨fun h τ hs _ _ _ _ _ _ _ _ => h τ hs, fun h τ hs => ?_⟩
   obtain ⟨h₁, h₂, h₃⟩ := Close.transferAt_frame hs
+  obtain ⟨h₄, h₅, h₆⟩ := Close.transferAt_env hs
   exact h τ hs h₁ (Close.checkIndex_of_findStorage h₁) h₂ h₃ (fun a => by simp [Close.readVal, h₃])
-    (Close.transferAt_env hs).1 (Close.transferAt_env hs).2
+    h₄ h₅ h₆
 
 end WP
 
@@ -588,11 +586,11 @@ theorem UpdElem.write_selfBalance (σ₀ τ : State) (op : IntOp) (a : Term C) :
   simp only [UpdElem.write, bind, Except.bind]
   cases a.eval σ₀ <;> rfl
 /-- `{net := store(net, at(to), net(to) - 5)}`: the address, the amount, then
-the entry. -/
+the entry, moved on the ledger written so far. -/
 theorem UpdElem.write_net (σ₀ τ : State) (r : Term C) (op : IntOp) (a : Term C) :
     (UpdElem.net r op a).write σ₀ τ =
       r.eval σ₀ >>= Value.asInt >>= fun addr => a.eval σ₀ >>= Value.asInt >>= fun amt =>
-        .ok { τ with net := setBy addr (op.apply (σ₀.getNet addr) amt) σ₀.net } := by
+        .ok { τ with net := setBy addr (op.apply (τ.getNet addr) amt) τ.net } := by
   simp only [UpdElem.write, bind, Except.bind]
   cases r.eval σ₀ with
   | error => rfl
@@ -729,6 +727,7 @@ attribute [close_rw]
   State.getEnv_setEnv_self State.getEnv_setEnv_ne Close.findStorage_mk
   Close.getEnv_mk Close.readAddr_mk Close.readVal_mk Close.readAddr_setEnv Close.readVal_setEnv
   Close.tx_setEnv Close.selfBalance_setEnv Close.net_setEnv Close.lookupBy_setBy_int
+  State.pay State.setNet
   -- paths, arrays, copies
   Close.diverge_cons' Close.not_diverge_nil_left Close.not_diverge_nil_right Close.prefix_nil
   Close.prefix_cons Close.prefix_cons_nil Close.after_nil Close.after_cons SVal.find_nil

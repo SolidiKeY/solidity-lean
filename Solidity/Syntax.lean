@@ -78,7 +78,9 @@ inductive RawTy where
   deriving Repr, Inhabited
 
 /-- The environment a transaction runs in, read as values: `msg.sender`,
-`msg.value`, `block.timestamp`, `address(this).balance`.  solkey's
+`msg.value`, `block.timestamp`, `address(this).balance`, and the contract's
+own address `address(this)` (`this` where an address stands).  `this` is
+the ledger's own account: a payment books `net` at both ends.  solkey's
 `netHeader.key` declares the first two and the last as the program variables
 `msgSender`, `msgValue`, `selfBalance`; `block.timestamp` it has not (its
 benchmark reads a `timeNow` state variable instead), so its name here is the
@@ -88,6 +90,7 @@ inductive EnvKey where
   | msgValue
   | timestamp
   | selfBalance
+  | selfAddress
   deriving Repr, DecidableEq, Inhabited
 
 /-- The Solidity spelling. -/
@@ -96,6 +99,7 @@ def EnvKey.toStr : EnvKey → String
   | .msgValue => "msg.value"
   | .timestamp => "block.timestamp"
   | .selfBalance => "address(this).balance"
+  | .selfAddress => "address(this)"
 
 /-- `msg.sender`, `msg.value`, `block.timestamp` by their two parts. -/
 def EnvKey.ofParts : String → String → Option EnvKey
@@ -1153,6 +1157,7 @@ def EnvKey.ident : EnvKey → Ident
   | .msgValue => mkIdent ``EnvKey.msgValue
   | .timestamp => mkIdent ``EnvKey.timestamp
   | .selfBalance => mkIdent ``EnvKey.selfBalance
+  | .selfAddress => mkIdent ``EnvKey.selfAddress
 
 /-- A name, as a string literal. -/
 def strLit (x : Ident) : Term := quote x.getId.toString
@@ -1168,6 +1173,7 @@ def expandIdent (x : Ident) : MacroM Term := do
   | [] => Macro.throwError "empty identifier"
   | ["true"] => `(RawExpr.bool true)
   | ["false"] => `(RawExpr.bool false)
+  | ["this"] => `(RawExpr.env .selfAddress)
   | root :: f :: flds =>
     match EnvKey.ofParts root f with
     | some k => fieldChain (← `(RawExpr.env $(k.ident))) flds
@@ -1247,10 +1253,7 @@ where
         Macro.throwErrorAt u "a unit is one of wei gwei ether seconds minutes hours days weeks"
       `(RawExpr.num $(quote (n.getNat * k)))
   | `(sol_expr| payable ( $e:sol_expr )) => expandExpr e
-  | `(sol_expr| address ( $e:sol_expr )) => do
-      if let `(sol_expr| $x:ident) := e then
-        if x.getId.toString == "this" then Macro.throwErrorAt e "`address(this)` is not a value here"
-      expandExpr e
+  | `(sol_expr| address ( $e:sol_expr )) => expandExpr e
   | `(sol_expr| $f:ident ( { $[$ns:ident : $as:sol_expr],* } )) => do
       `(RawExpr.named $(strLit f) [$(ns.map strLit),*] [$(← as.mapM expandExpr),*])
   | `(sol_expr| $f:sol_expr ( $as:sol_expr,* ) . $g:ident) => do

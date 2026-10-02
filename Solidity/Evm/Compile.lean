@@ -41,7 +41,7 @@ complement, with `SLT`/`SGT`/`SDIV`/`SMOD`), `/`/`%` on a zero divisor and
 `-2^255 / -1`, `-x` on `-2^255` (`negCode`), `**` on overflow (`expCode`,
 solc's `checked_exp_unsigned` with its loop unrolled), an array index out of
 bounds (`boundsCheck`), `pop` on an empty array, `push` at `2^64` elements
-(`pushSlotCode`), a `transfer` the balance cannot cover; `&&`/`||`, `?:` and
+(`pushSlotCode`), a `transfer` the world refuses; `&&`/`||`, `?:` and
 `if` jump.
 
 **The fragment** is what `wtStmt` accepts, so a program outside it has no
@@ -51,7 +51,8 @@ claim (see `docs/compiler-verification.md` for why each exclusion):
   by `uint`;
 * expressions: literals (a `uint` below `2^256`, an `int` in `[-2^255,
   2^255)`), locals, storage reads, every operator (`-x` at `int`), `?:`,
-  `.length` of a storage array.  Not memory reads;
+  `.length` of a storage array, `msg.sender`, `msg.value`, `block.timestamp`.
+  Not memory reads, not `address(this).balance`;
 * statements: `=` of a value into storage, a copy of a *static* value
   (`staticF`: no dynamic array, no mapping; `bob = alice;`), `=` to a local,
   `uint x = e;`, storage aliases (bound through an array index too: a
@@ -489,14 +490,16 @@ def static (T : Ty) : Bool := staticF (tyRank T + 1) T
 variable {C : Contract}
 
 /-- A literal is a `uint` below `2^256` or an `int` in `[-2^255, 2^255)`,
-a local is read at its type. -/
+a local is read at its type.  `address(this).balance` is out: the
+interpreter's is the funds the transaction found, which a `transfer` leaves,
+and `SELFBALANCE` reads the account a `CALL` debits. -/
 def wtSimple (Γ : TyCtx) : {p : PrimTy} → Simple C p → Bool
   | p, .lit n _ =>
     (p == .uint && decide (0 ≤ n) && decide (n < (W : Int))) ||
       (p == .int && decide (-(H : Int) ≤ n) && decide (n < (H : Int)))
   | _, .bool _ => true
   | p, .local x => Γ x == some (.val p)
-  | _, .env .. => true
+  | _, .env k _ => k != .selfBalance
 
 mutual
 /-- `free`: the path indexes no array (what an alias may be bound to). -/
@@ -741,6 +744,7 @@ def envInstr : EnvKey → Instr
   | .msgValue => .callvalue
   | .timestamp => .timestamp
   | .selfBalance => .selfbalance
+  | .selfAddress => .address
 
 def compileSimple : {p : PrimTy} → Simple C p → List Instr
   | _, .lit n _ => [.push (.val (toWord n))]
@@ -900,6 +904,21 @@ def pushes : Stmt C → Nat
 def pushesP : List (Stmt C) → Nat
   | [] => 0
   | s :: P => pushes s + pushesP P
+end
+
+mutual
+/-- Whether a statement pays: a `transfer`, or one in a branch or a called
+body.  Only a payment can be refused by the world, so code that does not pay
+reverts exactly where the interpreter does. -/
+def pays : Stmt C → Bool
+  | .transfer .. => true
+  | .ite _ t e => paysP t || paysP e
+  | .call _ _ _ _ body => paysP body
+  | _ => false
+/-- `pays` of a block. -/
+def paysP : List (Stmt C) → Bool
+  | [] => false
+  | s :: P => pays s || paysP P
 end
 
 end Evm
