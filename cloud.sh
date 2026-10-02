@@ -17,13 +17,18 @@ if [ -z "$REPO" ] || [ ! -f "$REPO/lakefile.toml" ]; then
 fi
 cd "$REPO"
 
-# Install the toolchain pinned in lean-toolchain
-elan toolchain install "$(cat lean-toolchain)" || true
+# Install the toolchain pinned in lean-toolchain. elan downloads it from
+# release.lean-lang.org, which the environment's network policy must allow.
+if ! elan toolchain install "$(cat lean-toolchain)"; then
+  echo "error: could not download $(cat lean-toolchain); allow release.lean-lang.org in the environment's network access" >&2
+  exit 1
+fi
 lean --version
 
 # solkey checkout beside the repo, for `lake exe solkeycheck` (allowed to fail if private)
 if [ ! -d ../solkey ]; then
-  git clone --depth 1 https://github.com/SolidiKeY/solkey ../solkey || echo "solkey clone skipped"
+  GIT_TERMINAL_PROMPT=0 git clone --depth 1 https://github.com/SolidiKeY/solkey ../solkey \
+    || echo "solkey clone skipped"
 fi
 
 # Lean MCP server venv (same pin as scripts/run-lean-mcp.sh)
