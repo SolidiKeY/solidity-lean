@@ -55,11 +55,7 @@ What does not close, and why:
   chains for this);
 * a default read out of a fresh memory object (`Person memory m;
   uint x = m.age;`): the default of a struct type is a well-founded
-  definition (`defaultForTy`) that `simp` does not unfold;
-* the ledger a `transfer` books: no term reads `net`, so what is observable
-  of it is its frame — a write before it reads the same after — and the
-  funds it spends, `address(this).balance`, `5` less after
-  `to.transfer(5);` (`Modality.wp_box_transferAt`).
+  definition (`defaultForTy`) that `simp` does not unfold.
 -/
 
 namespace Solidity
@@ -224,20 +220,22 @@ theorem Modality.wp_box_copyMem {σ : State} {id : Nat} {P : SVal → Prop} :
   exact ⟨fun h v hs _ => h v hs, fun h v hs => h v hs (fun _ hf => Close.copyMem_member hs hf)⟩
 
 /-- **A transfer under the box**: `to.transfer(5);` leaves the storage, the
-locals, the heap and `msg.sender` as they were, and takes `5` off
-`address(this).balance`. -/
+locals, the heap, `msg.sender` and `address(this).balance` as they were, and
+takes `5` off the ledger's entry for `to`. -/
 theorem Modality.wp_box_transferAt {σ : State} {addr amt : Int} {P : State → Prop} :
     Modality.box.wp (transferAt σ addr amt) P ↔
       ∀ τ, transferAt σ addr amt = .ok τ →
         (∀ r q, τ.findStorage r q = σ.findStorage r q) →
         (∀ r q k, τ.checkIndex r q k = σ.checkIndex r q k) → (∀ x, τ.getEnv x = σ.getEnv x) →
         (∀ a, readAddr τ a = readAddr σ a) → (∀ a, Close.readVal τ a = Close.readVal σ a) →
-        τ.tx = σ.tx → τ.selfBalance = σ.selfBalance - amt → P τ := by
+        τ.tx = σ.tx → τ.selfBalance = σ.selfBalance →
+        τ.net = setBy addr (σ.getNet addr - amt) σ.net → P τ := by
   rw [Modality.wp_box]
-  refine ⟨fun h τ hs _ _ _ _ _ _ _ => h τ hs, fun h τ hs => ?_⟩
+  refine ⟨fun h τ hs _ _ _ _ _ _ _ _ => h τ hs, fun h τ hs => ?_⟩
   obtain ⟨h₁, h₂, h₃⟩ := Close.transferAt_frame hs
+  obtain ⟨h₄, h₅, h₆⟩ := Close.transferAt_env hs
   exact h τ hs h₁ (Close.checkIndex_of_findStorage h₁) h₂ h₃ (fun a => by simp [Close.readVal, h₃])
-    (Close.transferAt_env hs).1 (Close.transferAt_env hs).2
+    h₄ h₅ h₆
 
 end WP
 

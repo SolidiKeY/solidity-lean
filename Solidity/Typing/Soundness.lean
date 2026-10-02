@@ -825,15 +825,13 @@ theorem setObj (hwt : RunWT C Γ H σ) {id : Nat} {ty : Ty} {obj obj₀ : MObj}
   heap := heapTypedB_setObj hwt.heapTyNodup hwt.heap hclaim hobj
   heapWf := HeapWellFormed.setObj' hwt.heapWf (by simp [hpresent])
 
-/-- `a.transfer(v)` books the ledger and the contract's funds only. -/
+/-- `a.transfer(v)` books the ledger only. -/
 theorem transferAt (hwt : RunWT C Γ H σ) {addr amt : Int}
     (h : Solidity.transferAt σ addr amt = .ok σ') : RunWT C Γ H σ' := by
   unfold Solidity.transferAt at h
   split at h
   · exact nomatch h
-  · split at h
-    · exact nomatch h
-    · cases h; exact ⟨hwt.1, hwt.2, hwt.3, hwt.4, hwt.5, hwt.6⟩
+  · cases h; exact ⟨hwt.1, hwt.2, hwt.3, hwt.4, hwt.5, hwt.6⟩
 
 end RunWT
 

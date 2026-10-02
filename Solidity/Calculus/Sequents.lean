@@ -153,8 +153,7 @@ end Elab
 
 variable {C : Contract} in
 /-- A chain `φ ~*> ψ` proves `φ` in any context `Γ` in which `ψ` holds:
-a funded diamond is its unfunded chain, closed under the funds
-check. -/
+a diamond is its chain, closed under the context's assumptions. -/
 theorem Fml.Steps.valid_in {φ ψ : Fml C} (c : φ ~*> ψ) (Γ : List (Hyp C))
     (h : ⊨ Hyp.wrap Γ ψ) : ⊨ Hyp.wrap Γ φ :=
   fun σ => Hyp.wrap_mono c.sound Γ σ (h σ)
@@ -223,12 +222,12 @@ example : ⊢ dl!{ [ to.transfer(x + 2); ] true } := by
   apply update .binopAssignment
   show sequent!{ { se1 := x + 2 } ⟹ [ to.transfer(se1); ] true }
   apply guard .transferNoCallback
-  · show sequent!{ { se1 := x + 2 }, 0 <= se1 <= selfBalance,
-      { selfBalance := selfBalance - se1 ‖ net := store(net, at(to), net(to) - se1) } ⟹ [ ] true }
+  · show sequent!{ { se1 := x + 2 }, 0 <= se1,
+      { net := store(net, at(to), net(to) - se1) } ⟹ [ ] true }
     apply empty
     refine close ?_
     sol_close
-  · show sequent!{ { se1 := x + 2 }, ¬(0 <= se1 <= selfBalance) ⟹ [ revert(); ] true }
+  · show sequent!{ { se1 := x + 2 }, ¬(0 <= se1) ⟹ [ revert(); ] true }
     apply done .revertBox
     refine close ?_
     sol_close

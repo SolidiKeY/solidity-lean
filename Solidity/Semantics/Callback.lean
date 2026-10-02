@@ -121,7 +121,7 @@ may call back into a contract with invariant `I`. -/
 inductive ExecS (I : Fml C) : State → Stmt C → COut → Prop where
   /-- A statement that runs no other and pays nothing runs as `Stmt.run`. -/
   | det {σ : State} {s : Stmt C} : s.forks = false → ExecS I σ s (.ofRes (s.run σ))
-  /-- A transfer that halts (an unfunded one reverts). -/
+  /-- A transfer that halts (an amount that is not a word). -/
   | transferHalt {σ : State} {r a : Val C .uint} {e : Halt} :
       (Stmt.transfer r a).run σ = .error e → ExecS I σ (.transfer r a) (.halt e)
   /-- KeY's "invariant on exit": control leaves with `I` broken. -/

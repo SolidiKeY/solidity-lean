@@ -24,7 +24,7 @@ the plan to test these claims against solc is `docs/solc-validation.md`.
 | Mapping-carrying copy | a storage copy of a type containing a mapping cannot be written | `Src.copy` (`mapFree`), `tyHasMapping` | |
 | Arrays past their end | `pop`, `delete`, `push` and copies keep the slots past the length; an index is checked when the path is taken | `SVal.array`, `State.checkIndex`, `SVal.overlay` | `testDanglingReferenceSurvivesPush` and three more |
 | Fixed-size arrays | `delete` resets in place, the length is the literal `n`, a literal index `≥ n` is a compile error | `SVal.array … fixed`, `MObj.array` | |
-| `transfer` | reverts unless the contract's funds cover the amount, and debits them | `transferAt`, `State.selfBalance` | `Semantics.lean` |
+| `transfer` | books `net(a) - v` and nothing else; whether the world pays is the EVM's (a refused payment reverts the machine alone) | `transferAt`; `Evm.compile_correct` | `Semantics.lean` |
 | Call arguments | all read, left to right, before the callee runs | `Arg.bindSeq`, `Arg.separatedFrom` | |
 | `try` | a call to an address with no code, and returned data that does not decode, revert in the caller and no `catch` catches them; KeY leaves both out (they are vacuous in its box rule) | `Stmt.run` (`.tryCall`), `bindData` | `Examples/Tactics/TryCatch.lean` |
 
@@ -214,20 +214,25 @@ the bind.
 ## `transfer`
 
 On the EVM a value transfer fails, and with `transfer` reverts, when the
-sending contract's balance does not cover the amount. `State.selfBalance`
-holds the executing contract's funds, and `transferAt`: a negative amount is
-`.stuck` (unrepresentable in the unsigned value field); `amt > selfBalance`
-reverts; otherwise `selfBalance -= amt` and the ledger is debited,
-`net(addr) := net(addr) - amt`. The example stores (`exampleStore`,
-`testSuiteStore`) fund the contract with a large balance so the ported KeY
-tests keep their meaning.
+sending contract's balance does not cover the amount or the recipient
+refuses it (its code reverts, or runs out of the 2300 gas). `transferAt`
+does neither check: a negative amount is `.stuck` (unrepresentable in the
+unsigned value field), and otherwise the ledger is debited,
+`net(addr) := net(addr) - amt`, and nothing else. `State.selfBalance`
+(`address(this).balance`) is the funds the transaction found, which a
+`transfer` leaves; solkey's box rule books the debit unconditionally too
+(`333cc7b353`). The interpreter thus assumes the world pays, and the
+compiler theorem says what that costs: in code that pays, the machine may
+revert where the interpreter succeeds (`Evm.compile_correct`'s third
+outcome), so what the interpreter proves under the box holds of every run
+the machine completes (`Evm.compile_box`), and there `net(a)` is what `a`'s
+account lost (`Evm.compile_net`). A payment to the contract itself books
+`net(this)` and moves nothing on the EVM; the theorem compares the ledger at
+every other address.
 
 The callback semantics (`Semantics/Callback.lean`) is a relation over this
 one: after the debit `State.havoc` replaces storage, ledger and balance, so
-the callee may move funds into or out of the contract. solkey agrees since
-`084de89677`/`333cc7b353`: its `transfer` taclets update `selfBalance`, and
-the diamond rule owes `0 <= se & se <= selfBalance`, which is the revert
-condition above.
+the callee may move funds into or out of the contract.
 
 ## Calls
 
@@ -251,8 +256,9 @@ they would in a frame of their own.
   for `N < 256` only as above, no `address`/`bytes`/`string`, no external calls beyond
   `transfer`, the `net` ledger and `try` (whose callee is not run), no gas. These constructs do not occur
   rather than silently diverge.
-- **`transfer` assumes its recipient.** It never reverts and is never the
-  contract itself (`docs/solc-validation.md`).
+- **`transfer` assumes the world pays.** It never reverts for funds or a
+  refusing recipient; the EVM may, which `Evm.compile_correct` states as the
+  machine reverting alone (`docs/compiler-verification.md`).
 - **`push` over a recycled slot.** `arr.push(v)` of a struct or array value
   lays it on fresh slots (`SVal.strip`), not over the recycled slot it lands
   on, so what a reference wrote into that slot's own arrays past their ends is

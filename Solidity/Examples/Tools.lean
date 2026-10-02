@@ -153,8 +153,9 @@ no Lean rule claims it (`RuleShapes.unclaimedTaclets` says why)
 /-! ## `#difftest`
 
 Every function of the contract, called `runs` times from random storages,
-in the interpreter and on the machine; they agree, the reverts included.
-`#difftest C.f` tests one function, on the same runs as `#difftest C`. -/
+in the interpreter and on the machine; they agree, the reverts included, a
+payment the world refuses among them (`pay`).  `#difftest C.f` tests one
+function, on the same runs as `#difftest C`. -/
 
 /--
 info: addOne: 50 runs agree (0 revert)
@@ -221,7 +222,7 @@ setFolk: 50 runs agree (11 revert)
 fix: 50 runs agree (37 revert)
 flip: 50 runs agree (1 revert)
 stash: 50 runs agree (3 revert)
-pay: 50 runs agree (9 revert)
+pay: 50 runs agree (14 revert)
 guard: 50 runs agree (26 revert)
 copy: 50 runs agree (13 revert)
 skipped: viaMemory (outside the compiled fragment)

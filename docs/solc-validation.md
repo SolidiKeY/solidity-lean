@@ -49,9 +49,10 @@ outside solc's language.
 the proof against the definitions, not the definitions against the EVM. It pins
 `Stmt.run` only as far as three trusted definitions are right: `Instr.step`
 (the EVM), `compileStmt` (what solc emits), and `Sim` with the theorem's shape.
-A machine written *from the interpreter* makes it hold by construction:
-`transfer`'s `CALL` is `transferAt` re-spelled (same guard and debit, a `net`
-field no EVM has, no recipient), so the proof case matches `if` with `if`.
+A machine written *from the interpreter* makes it hold by construction. That
+was `transfer`'s case until `CALL` moved real balances (check C below): it
+was `transferAt` re-spelled, a `net` field no EVM has beside the
+interpreter's.
 
 ## What exists
 
@@ -116,16 +117,15 @@ lemma set for I.
 - *Struct and array sources are not right-hand-side first* in solc (target
   resolved, then member-by-member copy); the interpreter is value-first
   (`solc-alignment.md`, "Known divergence").
-- *`transfer` assumes its recipient.* `transferAt` succeeds whenever the funds
-  cover the amount: two unstated assumptions, that the recipient never reverts (no
-  `receive`, an explicit `revert`, more than 2300 gas) and that it is never the
-  contract itself (no own address in the model, so any `uint` holding it is a
-  receiver; receivers are `uint`, not below `2^160`). `Rule.sound` and
-  `compile_correct` hold against an interpreter and machine that share them, and the
-  diamond `transferNoCallback` promises termination the EVM does not give. Fixes:
-  state them as hypotheses of `compile_correct` and the diamond rule, or give the
-  interpreter a recipient oracle and a `this` address (the diamond rule then owes the
-  recipient's acceptance, and solkey's rule changes with it).
+- *`transfer` assumes the world pays.* `transferAt` books `net` and nothing
+  else: no funds check, no refusing recipient. The machine has both (`bal`,
+  `accepts`), and `compile_correct` states the difference as a third outcome,
+  the machine reverting alone in code that pays, so the box carries over
+  (`compile_box`) and the diamond does not: the diamond `transferNoCallback`
+  still promises a termination the EVM does not give. A payment to the
+  contract itself moves nothing on the machine and books `net(this)` in the
+  interpreter, which `Sim` does not compare. Receivers are `uint`, not cut to
+  160 bits.
 - *The callback reading belongs to `call{value:}`.* Under the 2300-gas stipend a
   callee cannot change storage, `net` or `selfBalance` (EIP-2200), so for `transfer`
   the right reading is no callback, the recipient free to revert.
@@ -147,14 +147,13 @@ via IR; `pop` zeroes the slot it frees; `delete` keeps a mapping. Re-check the
 citations when re-pinning.
 
 **C. The machine and compiler against reality (L1 via `compile_correct`).**
-- `CALL` from the Yellow Paper: a world state (`balances : Nat → Nat`, the contract's
-  address) in place of `net`; a transfer to itself moves nothing; the callee is a
-  parameter and the theorem quantifies over every callee (an always-accepting one
-  would hide the revert); the stipend is stated or modelled. The `transfer`
-  assumptions become hypotheses here.
-- `Sim` relates real quantities: `σ.selfBalance` to the machine's balance. `net` is a
-  ghost, so a wrong `net` update passes the theorem; pin it by a lemma (the changes to
-  `net` sum to the change to `selfBalance`, with no incoming funds).
+- *Done:* `CALL` from the Yellow Paper: a world state (`bal : Nat → Nat`, the
+  contract's address `self`) in place of `net`; a transfer to itself moves nothing;
+  the callee's acceptance is a parameter (`accepts`) and the theorem quantifies over
+  every one. The stipend is not modelled: a refusal stands for it.
+- *Done:* `Sim` relates real quantities: `net(a) = bal₀ a - bal a` off the contract,
+  and the contract's account gained the ledger's sum (`Sim.funds`, `netSum`), so a
+  wrong `net` update fails the theorem; `compile_net` reads the ledger off a run.
 - Every instruction against a real EVM (revm/evmone or Ethereum's
   `GeneralStateTests`): `#difftest` compares interpreter with machine, this compares
   machine with EVM.
@@ -376,8 +375,8 @@ use them as data, as external programs, or from a sibling repository.
 Each step is useful alone and fans out to parallel agents.
 
 1. **A**; **B** seeded with the open decisions; decide the operand order and fix
-   `solc-alignment.md`; **C**'s `CALL` with the `transfer` assumptions as hypotheses of
-   `compile_correct` (a small change to `Evm/Machine.lean` and one proof case).
+   `solc-alignment.md`; **C**'s `CALL` (done: real balances, `compile_correct`'s
+   third outcome).
 2. Triage SolidCore's divergence log against the fragment, one agent: each relevant row a
    B fact or a `Counterexamples/` entry.
 3. **J** and **K**, one agent per rule family.

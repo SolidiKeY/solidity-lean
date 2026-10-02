@@ -7,13 +7,12 @@ import Solidity.Semantics.Callback
 The callback taclets (`Rules.lean`'s `CallbackTaclet`, solkey's
 `transferWithCallbackBox`/`transferWithCallbackDiamond`) are sound for the
 callback reading of the modalities (`Semantics/Callback.lean`), and this
-module proves it (`CallbackTaclet.sound`).  Their premise is the funds check
-`F` (`0 <= se ∧ se <= selfBalance`) and the booking `U` of the transfer
-(`{selfBalance := selfBalance - se ‖ net := store(net, at(sadr), net(sadr) - se)}`),
-read as solkey's goals:
+module proves it (`CallbackTaclet.sound`).  Their premise is the guard `F`
+(`0 <= se`, the amount a word) and the booking `U` of the transfer
+(`{net := store(net, at(sadr), net(sadr) - se)}`), read as solkey's goals:
 
 ```
-  Γ ⟹ F                                       ("sufficient funds", diamond only)
+  Γ ⟹ F                                       (diamond only)
   Γ, F ⟹ {U} I                                ("invariant on exit")
   Γ, F ⟹ {U} {havoc} (I → ⟨[ ω ]⟩ φ)           ("resume after callback")
   ─────────────────────────────────────────
@@ -24,9 +23,9 @@ read as solkey's goals:
 follows it holds for any storage, ledger and funds the callee may leave, as
 KeY's fresh skolem symbols make it hold for any interpretation of them.  Both
 goals are sequents, derived like any other; `CbResume` is what the last
-means (`CbResume.of_holdsC`).  Where the funds do not cover the amount the
-transfer reverts: nothing to show under the box, and under the diamond the
-first goal rules it out.
+means (`CbResume.of_holdsC`).  Where the amount is not a word the transfer
+halts: nothing to show under the box, and under the diamond the first goal
+rules it out.
 
 `ProvesC I Γ φ` is the calculus under the callback semantics: the ordinary
 taclets on a statement that pays nothing and runs no other (`update`,
@@ -51,14 +50,14 @@ def CbResume (I : Fml C) (m : Modality) (U : Upd C) (ω : Prog C) (φ : Fml C) (
   m.after (fun τ => ∀ st nt bal, holds (τ.havoc st nt bal) I →
     holdsC I (τ.havoc st nt bal) (.modal m ω φ)) (U.apply σ)
 
-/-- A callback taclet's booking is the transfer's own debit where the funds
-cover it, and the transfer halts where they do not. -/
+/-- A callback taclet's booking is the transfer's own debit where the amount
+is a word, and the transfer halts where it is not. -/
 theorem CallbackTaclet.booking {m : Modality} {s : Stmt C} {c : Fml C} {U : Upd C}
     (d : CallbackTaclet C m s (.guard c U)) (σ : State) :
     (holds σ c → U.apply σ = s.run σ) ∧ (¬ holds σ c → ∃ e, s.run σ = .error e) := by
   cases d <;> exact Taclet.guard_run (.transferNoCallback (k := 0) (m := .box)) σ
 
-/-- The funds check has no transfer in it. -/
+/-- The guard has no transfer in it. -/
 theorem CallbackTaclet.funds_noTransfer {m : Modality} {s : Stmt C} {c : Fml C} {U : Upd C}
     (d : CallbackTaclet C m s (.guard c U)) : c.hasTransfer = false := by
   cases d <;> rfl
@@ -77,8 +76,8 @@ theorem ExecS.transfer_inv {I : Fml C} {σ : State} {r a : Val C .uint} {o : COu
   | transferViolated h hn => exact .inr (.inl ⟨_, h, hn, rfl⟩)
   | transferResume h _ h₂ => exact .inr (.inr ⟨_, _, _, _, h, h₂, rfl⟩)
 
-/-- **The callback taclets are sound**: under the diamond the funds, and
-where they cover the amount, the invariant after the booking and the rest
+/-- **The callback taclets are sound**: under the diamond the guard, and
+where it holds, the invariant after the booking and the rest
 resumed from every state the callee may leave, give the transfer and the
 rest under the callback reading.
 
@@ -430,8 +429,8 @@ inductive ProvesC (I : Invariant C) : List (Hyp C) → Fml C → Prop
       {P : Prog C} (d : LeanTaclet C (Hyp.fresh Γ (.and I.fml (.modal m (s :: ω) φ))) m s (.unfold P))
       (hs : s.forks = false) (hP : Prog.hasTransfer P = false)
       (h : ProvesC I Γ (.modal m (P ++ ω) φ)) : ProvesC I Γ (.modal m (s :: ω) φ)
-  /-- **A callback taclet**: under the diamond the funds (`F`), and under
-  them the invariant on exit (`{U} I`) and the rest resumed after the
+  /-- **A callback taclet**: under the diamond the guard (`F`), and under
+  it the invariant on exit (`{U} I`) and the rest resumed after the
   callback, from any state the callee may leave in which the invariant
   holds (`{U} {havoc} (I → ⟨[ ω ]⟩ φ)`). -/
   | callback {Γ : List (Hyp C)} {m : Modality} {s : Stmt C} {ω : Prog C} {φ : Fml C}

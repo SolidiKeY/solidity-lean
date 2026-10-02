@@ -2503,9 +2503,7 @@ theorem transferAt_se {addr amt : Int} (h : transferAt σ addr amt = .ok σ') : 
   unfold transferAt at h
   split at h
   · exact nomatch h
-  · split at h
-    · exact nomatch h
-    · cases h; exact ⟨rfl, rfl⟩
+  · cases h; exact ⟨rfl, rfl⟩
 
 theorem MRhs.bind_se {x : Var} {R : RefTy} {r : MRhs C R} (h : r.bind σ x = .ok σ') :
     ∃ σ₁ id, SE σ σ₁ ∧ σ' = σ₁.setEnv x (.mref id) := by

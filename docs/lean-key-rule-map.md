@@ -258,9 +258,9 @@ receiver kind, Lean does not.
 | KeY taclet | `Taclet` constructor | Status | Notes |
 | --- | --- | --- | --- |
 | `transfer_unfold_leftFstReceiver`, `transfer_unfold_rightSndArgument` | same names | same | |
-| `transferNoCallbackBox`, `transferNoCallbackDiamond` | `transferNoCallback` | merged | one terminal rule for both modalities, a guarded update (`Premise.guard`): funds check `0 <= se ∧ se <= selfBalance ⟹ { selfBalance := selfBalance - se ‖ net := store(net, at(sadr), net(sadr) - se) } ⟨[ ]⟩`, else `⟨[ revert(); ]⟩`. The arithmetic is KeY's `int` (`IntOp`); the modalities part at `revert();` (`revertBox`, `revertDiamond`), so the diamond's "sufficient funds" goal is what is left of it |
-| `transferWithCallbackBox` | `CallbackTaclet.transferWithCallbackBox` | same | a constructor of `CallbackTaclet`, sound for the callback reading (`holdsC`), not of `Taclet`. The premise has `transferNoCallback`'s shape (funds check `F`, booking `U`), read as KeY's goals (`CallbackTaclet.sound`): `F → {U} I` ("invariant on exit") and `F → {U} {havoc} (I → ⟨[ ω ]⟩ φ)` ("resume after callback"; `{havoc}` is KeY's anonymising update, read by `CbResume`). The box assumes `F` where KeY does not, which only weakens its goals. Used by `ProvesC` |
-| `transferWithCallbackDiamond` | `CallbackTaclet.transferWithCallbackDiamond` | same | as the box, plus KeY's "sufficient funds" goal `F` (`ProvesC.callback`'s `funds`) |
+| `transferNoCallbackBox`, `transferNoCallbackDiamond` | `transferNoCallback` | merged | one terminal rule for both modalities, a guarded update (`Premise.guard`): `0 <= se ⟹ { net := store(net, at(sadr), net(sadr) - se) } ⟨[ ]⟩`, else `⟨[ revert(); ]⟩`; the ledger only, as KeY's box rule books it. The arithmetic is KeY's `int` (`IntOp`). KeY's diamond "sufficient funds" goal has no counterpart: whether the world pays is the compiler theorem's (`Evm.compile_correct`), where a refused payment is a revert of the machine alone |
+| `transferWithCallbackBox` | `CallbackTaclet.transferWithCallbackBox` | same | a constructor of `CallbackTaclet`, sound for the callback reading (`holdsC`), not of `Taclet`. The premise has `transferNoCallback`'s shape (guard `F`, `0 <= se`; booking `U`, the ledger), read as KeY's goals (`CallbackTaclet.sound`): `F → {U} I` ("invariant on exit") and `F → {U} {havoc} (I → ⟨[ ω ]⟩ φ)` ("resume after callback"; `{havoc}` is KeY's anonymising update, read by `CbResume`). The box assumes `F` where KeY does not, which only weakens its goals. Used by `ProvesC` |
+| `transferWithCallbackDiamond` | `CallbackTaclet.transferWithCallbackDiamond` | same | as the box, plus the guard `F` (`ProvesC.callback`'s `funds`); KeY's "sufficient funds" has no counterpart |
 
 ## External calls (`try`/`catch`)
 
@@ -350,7 +350,7 @@ them as KeY's `\replacewith` updates do.
 | a member or element of a memory object | `MAddr` | `.field`/`.at` |
 | `Memory` | `MTerm` | `.memory`, `.write(m, a, v)`, `.addM` (eager: the type rides along; a concrete one prints `addM(m, T)`, `T` a struct `Person` or an array type `uint[]`, `Token[3]`, where KeY writes `addM(mem, shaped(idp, #shapeOf(mv)))`: the type in place of its shape), `.copySt(m, v)` |
 | what a memory `write` writes | `MValT` | a value (`.val`) or a reference (`.ref`) |
-| one elementary update | `UpdElem` | `.val`, `.path`, `.mref`, `.storage`, `.memory`; `.store` for `old := storage`; `.selfBalance`/`.net` for a transfer's `selfBalance := selfBalance ± a` and `net := store(net, at(r), net(r) ± a)` (the two written together); `.saveNet` for `oldNet := net` |
+| one elementary update | `UpdElem` | `.val`, `.path`, `.mref`, `.storage`, `.memory`; `.store` for `old := storage`; `.net` for a transfer's `net := store(net, at(r), net(r) - a)`, and with `.selfBalance` for a `payable` function's booking of `msg.value` (`selfBalance := selfBalance + a`); `.saveNet` for `oldNet := net` |
 
 ### `structRules.key` → `Theory/Storage.lean` (`Struct`, `StValue`)
 

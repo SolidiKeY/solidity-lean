@@ -203,13 +203,28 @@ theorem symex_terminates (n : Nat) (h : φ.measure ≤ n) : FirstOrder (symex n 
 open Evm in
 /-- **The compiler is correct**: from a machine that represents the state,
 the program and its compiled code both end, in states the machine still
-represents, or both revert.  `L` bounds every array's length, which solc
+represents, or both revert, or the world refuses a payment the program makes
+and the machine alone reverts.  `L` bounds every array's length, which solc
 caps at `2^64`. -/
 theorem compiler_correct {P : Prog C} {Γ Γ' : TyCtx} {σ : State} {mc : Machine} {L : Nat}
     (hP : Γ ⊩ P ⊣ Γ') (hm : σ ≈[C, L, Γ] mc) (hL : L + pushesP P ≤ Lmax) :
     (∃ σ' mc', (P, σ) ⇓ σ' ∧ (⟦P⟧, mc) ⇓ₘ mc' ∧ σ' ≈[C, L + pushesP P, Γ'] mc') ∨
-      ((P, σ) ↯ ∧ (⟦P⟧, mc) ↯ₘ) :=
-  (compile_correct hP hm hL).imp (fun ⟨σ', mc', h, h', _, hs⟩ => ⟨σ', mc', h, h', hs⟩) id
+      ((P, σ) ↯ ∧ (⟦P⟧, mc) ↯ₘ) ∨
+      (paysP P = true ∧ (⟦P⟧, mc) ↯ₘ ∧ ∃ σ', (P, σ) ⇓ σ') :=
+  (compile_correct hP hm hL).imp (fun ⟨σ', mc', h, h', _, hs⟩ => ⟨σ', mc', h, h', hs⟩)
+    (Or.imp id fun ⟨hp, h, σ', _, h', _⟩ => ⟨hp, h, σ', h'⟩)
+
+open Evm in
+/-- **The box reaches the EVM**: where the compiled code succeeds, the
+interpreter did too, and `net(a)` is what `a`'s account lost, at every
+address but the contract's own. -/
+theorem compiler_net {P : Prog C} {Γ Γ' : TyCtx} {σ : State} {mc mc' : Machine} {L : Nat}
+    (hP : Γ ⊩ P ⊣ Γ') (hm : σ ≈[C, L, Γ] mc) (hL : L + pushesP P ≤ Lmax)
+    (hrun : (⟦P⟧, mc) ⇓ₘ mc') :
+    ∃ σ', (P, σ) ⇓ σ' ∧
+      ∀ a : Nat, a < W → a ≠ mc'.self → σ'.getNet a = (mc'.bal₀ a : Int) - mc'.bal a :=
+  let ⟨σ', h, hn, _⟩ := compile_net hP hm hL hrun
+  ⟨σ', h, hn⟩
 
 open Evm in
 /-- **The fragment never gets stuck**: a program the compiler takes ends or

@@ -37,13 +37,18 @@ from a start where its hypotheses hold:
   either storage mentions: the keys of a mapping entry nobody wrote are `0`
   on both sides by construction); every value local the final context types
   (`Γ'`) holds the local's word in its memory cell (`Sim.vals`: the value
-  returned, in `_r`, among them); the funds and the ledger agree.  The
+  returned, in `_r`, among them); the ledger is the money that moved
+  (`Sim.net`, `Sim.funds`), the contract at an address drawn among the
+  senders, so some payments are to itself.  The
   aliases' cells (`Sim.aliases`) are not compared, and neither are the slots
   the final storage no longer occupies (a popped element), which
   `ReprStore` leaves free.
 
-A stuck interpreter or a faulting machine is a disagreement: on the
-fragment, `compile_correct` excludes both.
+The machine reverting where the interpreter succeeds agrees only in code
+that pays (`paysP`): the world refused a payment, which the draw makes
+happen, the contract's account holding less than `100` and the recipient
+`3` refusing every payment.  A stuck interpreter or a faulting machine is a
+disagreement: on the fragment, `compile_correct` excludes both.
 
 The generator is `GenSpec.sval` (`Tools/Common.lean`) over Lean core's
 `StdGen`.  Run `i` of the `j`-th function draws from a seed of its own,
@@ -175,7 +180,10 @@ structure Start where
   sender : Nat
   value : Nat
   time : Nat
+  /-- The contract's account. -/
   balance : Nat
+  /-- The contract's address. -/
+  self : Nat
 
 /-- The interpreter's start state. -/
 def Start.state (s : Start) : State where
@@ -192,8 +200,9 @@ def genStart (C : Contract) (d : FunDecl) : Gen (Option (Start × List RawExpr))
   let value ← randBelow 3
   let time ← randBelow 100
   let balance ← randBelow 100
+  let self ← randBelow 4
   pure <| (args.mapM id).map fun args =>
-    ({ storage := st, args := args.map (·.2), sender, value, time, balance }, args.map (·.1))
+    ({ storage := st, args := args.map (·.2), sender, value, time, balance, self }, args.map (·.1))
 
 /-- A run's outcome, for the report. -/
 def fmtRes : Res State → String
@@ -220,11 +229,12 @@ def differences [FreshNames] (C : Contract) (Γ' : TyCtx) (keys : List Nat) (σ'
       if wordOf p v == some (m'.mem x) then none
       else some s!"local {x}: interpreter {Value.fmt v}, machine {m'.mem x}"
     | _, _ => none
-  let bal := if σ'.selfBalance == (m'.balance : Int) then [] else
-    [s!"balance: interpreter {σ'.selfBalance}, machine {m'.balance}"]
+  let sum := netSum (Payee m'.self) σ'.net
+  let bal := if (m'.bal m'.self : Int) == m'.bal₀ m'.self + sum then [] else
+    [s!"funds: the ledger sums {sum}, the contract's account went {m'.bal₀ m'.self} → {m'.bal m'.self}"]
   let net := σ'.net.filterMap fun (a, n) =>
-    if 0 ≤ a ∧ a < (W : Int) ∧ n != m'.net a.toNat then
-      some s!"net {a}: interpreter {n}, machine {m'.net a.toNat}"
+    if 0 ≤ a ∧ a < (W : Int) ∧ a != m'.self ∧ n != (m'.bal₀ a.toNat : Int) - m'.bal a.toNat then
+      some s!"net {a}: interpreter {n}, account {m'.bal₀ a.toNat} → {m'.bal a.toNat}"
     else none
   let stack := if m'.stack.isEmpty then [] else [s!"stack left: {m'.stack}"]
   store ++ vals ++ bal ++ net ++ stack
@@ -239,7 +249,8 @@ def runOnce [FreshNames] (C : Contract) (P : Prog C) (Γ' : TyCtx) (s : Start) :
   | .error e => throw [s!"the start storage is not representable: {e}"]
   | .ok ws =>
     let m : Machine :=
-      { Machine.init s.balance with
+      { Machine.init (fun a => if a = s.self then s.balance else 0) s.self with
+        accepts := fun a _ => a != 3
         store := storeOf ws
         caller := s.sender
         callvalue := s.value
@@ -248,6 +259,8 @@ def runOnce [FreshNames] (C : Contract) (P : Prog C) (Γ' : TyCtx) (s : Start) :
     let out := Evm.run (compileProg P) m
     match res, out with
     | .error .revert, .revert => pure true
+    | .ok _, .revert => if paysP P then pure true
+      else throw ["interpreter ok, machine revert, and no payment to refuse"]
     | .ok σ', .ok m' 0 =>
       let keys := (keys0 ++ σ'.storage.flatMap (SVal.mapKeys ·.2)).eraseDups
       match differences C Γ' keys σ' m' with

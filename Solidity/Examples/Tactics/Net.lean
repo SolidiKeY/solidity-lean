@@ -4,20 +4,18 @@ import Solidity.Calculus.Close
 # Payment: what a `transfer` changes
 
 `a.transfer(v);` books a debit of `v` on the `net` ledger at `a`, with no
-callback (`transferNoCallback`, solkey's `netHeader.key`), and reverts when
-the contract's own funds do not cover `v` — the EVM's value-transfer check
-that solc's `transfer` inherits (`Semantics.transferAt`).  The rule, the
-two modalities parting company at the funds check, and the examples
-are `Payment.lean`'s, the single-statement walks included.
+callback (`transferNoCallback`, solkey's `netHeader.key`), and does nothing
+else (`Semantics.transferAt`).  The rule and its single-statement walk are
+`Payment.lean`'s.
 
-What a formula can observe of a transfer is its **frame**: no term reads the
-ledger (`Close.lean`), so a claim about it is a claim that everything else is
-as it was — storage, locals and memory.  Those are theorems for every state.
-The ledger itself, and the revert when the contract is unfunded, are runs of
-the interpreter from `State.exampleStore` (which holds `10⁹` wei), checked by
-`rfl` (solkey's `net-*.key` files; `net-manual-update.key`, a raw update with
-no program, has no counterpart).  `net-msg-value.key` reads `msg.value` and
+What a transfer changes is the ledger, `net(to)` `5` less after
+`to.transfer(5);` (§2), and nothing else: its **frame**, storage, locals and
+memory as they were (§1).  Both are theorems for every state.  §3 runs the
+interpreter from `State.exampleStore`, checked by `rfl` (solkey's
+`net-*.key` files; `net-manual-update.key`, a raw update with no program,
+has no counterpart).  `net-msg-value.key` reads `msg.value` and
 `msg.sender`, the transaction's values (`Simple.env`), into storage (§4).
+On the EVM the ledger is the money that moved (`Evm.compile_net`).
 -/
 
 namespace Solidity.Examples.Tactics.Net
@@ -39,14 +37,14 @@ theorem transferFrameStorage :
   apply unfold .localValueDeclInitDrop
   apply update .binopAssignment
   apply guard .transferNoCallback
-  · -- { selfBalance := selfBalance - se1 ‖ net := store(net, at(to), net(to) - se1) }
+  · -- { net := store(net, at(to), net(to) - se1) }
     apply unfold .localValueDeclInitDrop
     apply update .storageFieldReadFind
     apply empty
     refine close ?_
     sol_symex
     sol_close
-  · -- ¬(0 <= se1 ∧ se1 <= selfBalance): the transfer reverts
+  · -- ¬(0 <= se1): the transfer halts
     apply done .revertBox
     refine close ?_
     sol_symex
@@ -94,7 +92,35 @@ theorem transferFrameMemory :
   sol_symex
   sol_close
 
-/-! ## 2 · The ledger, run -/
+/-! ## 2 · The ledger, as formulas -/
+
+/-- `net(to) = 7 → [ to.transfer(5); ] net(to) = 2`: the booking, at every
+state (`net-transfer-simple.key`). -/
+theorem netTransfer :
+    ⊨ dl!{ net(to) = 7 → [ to.transfer(5); ] net(to) = 2 } := by
+  sol_symex
+  sol_close
+
+/-- `owner.transfer(5);` — a storage receiver, captured first
+(`net-transfer-capture-receiver.key`). -/
+theorem netTransferStorageReceiver :
+    ⊨ dl!{ net(owner) = 7 → [ owner.transfer(5); ] net(owner) = 2 } := by
+  sol_symex
+  sol_close
+
+/-- `to.transfer(x + 2);` — a captured amount (`net-transfer-capture-argument.key`). -/
+theorem netTransferCapturedAmount :
+    ⊨ dl!{ x = 3 → net(to) = 7 → [ to.transfer(x + 2); ] net(to) = 2 } := by
+  sol_symex
+  sol_close
+
+/-- Two transfers to one address accumulate. -/
+theorem netTransfersAccumulate :
+    ⊨ dl!{ net(to) = 9 → [ to.transfer(5); to.transfer(2); ] net(to) = 2 } := by
+  sol_symex
+  sol_close
+
+/-! ## 3 · The ledger, run -/
 
 /-- The ledger at `a` after `P` runs from the store `σ`. -/
 def netAfter {C : Contract} (σ : State) (P : Prog C) (a : Int) : Res Int := do
@@ -106,44 +132,19 @@ theorem netTransferSimple :
 
 /-- `owner = 7; owner.transfer(5);` — a storage receiver
 (`net-transfer-capture-receiver.key`, its `owner = 7` premise inlined). -/
-theorem netTransferStorageReceiver :
+theorem netTransferStorageReceiverRun :
     netAfter State.exampleStore sol{ owner = 7; owner.transfer(5); } 7 = .ok (-5) := rfl
-
-/-- `to.transfer(x + 2);` — a captured amount (`net-transfer-capture-argument.key`). -/
-theorem netTransferCapturedAmount :
-    netAfter State.exampleStore sol{ uint to = 9; uint x = 3; to.transfer(x + 2); } 9 =
-      .ok (-5) := rfl
-
-/-- Two transfers accumulate. -/
-theorem netTransfersAccumulate :
-    netAfter State.exampleStore sol{ uint to = 9; to.transfer(5); to.transfer(2); } 9 =
-      .ok (-7) := rfl
 
 /-- An address nobody paid stays at zero. -/
 theorem netUntouched :
     netAfter State.exampleStore sol{ uint to = 9; to.transfer(5); } 2 = .ok 0 := rfl
 
-/-! ## 3 · The funds check, run
-
-With `3` wei the contract cannot pay `5`: the run reverts, so the diamond of
-the transfer is false there and the box holds (`Payment.lean`).  With exactly
-`5` it pays once, and a second payment of the same size reverts. -/
-
-/-- Unfunded: a revert. -/
-theorem transferUnfunded :
-    Prog.run { State.exampleStore with selfBalance := 3 }
-      (sol{ uint to = 9; to.transfer(5); } : Prog StandardExample) = .error .revert := rfl
-
-/-- Exactly funded: the debit is booked. -/
-theorem transferExactlyFunded :
-    netAfter { State.exampleStore with selfBalance := 5 } sol{ uint to = 9; to.transfer(5); } 9 =
-      .ok (-5) := rfl
-
-/-- …and the funds are spent: a second payment reverts. -/
-theorem transferDrained :
-    Prog.run { State.exampleStore with selfBalance := 5 }
-      (sol{ uint to = 9; to.transfer(3); to.transfer(3); } : Prog StandardExample) =
-      .error .revert := rfl
+/-- The funds are not the transfer's: `address(this).balance` reads `3`
+after a payment of `5` from `3`. -/
+theorem transferLeavesFunds :
+    (do let σ ← Prog.run { State.exampleStore with selfBalance := 3 }
+          (sol{ uint to = 9; to.transfer(5); } : Prog StandardExample)
+        pure (σ.getNet 9, σ.selfBalance)) = .ok (-5, 3) := rfl
 
 /-! ## 4 · `msg.value`, `msg.sender`
 
