@@ -1,5 +1,6 @@
 import Solidity.FreshNames
 import Solidity.Calculus.Chains
+import Solidity.Calculus.LastLine
 
 /-!
 # Evaluation order of indexed writes
@@ -53,6 +54,7 @@ def snapshot (m : Modality) (φ : Post StandardExample) :
     _ ~[simplifyUpdate]~>
         dl![m]{ { a := i ‖ i := i + 1 ‖ b := i ‖ storage := save(storage, balances[i], i) } φ } := by sol_chain
 
+#last_line snapshot
 end Repair1
 
 /-! ## Repair 2: Settle the Value, Then Reuse the Existing Rule

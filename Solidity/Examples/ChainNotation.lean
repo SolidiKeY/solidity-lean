@@ -1,4 +1,5 @@
 import Solidity.Calculus.Chains
+import Solidity.Calculus.LastLine
 import Solidity.Calculus.Close
 import Solidity.Examples.Chains.Storage
 import Solidity.Examples.Chains.Payment
@@ -493,5 +494,58 @@ example : dl![m]{ ⟨[ if (true) { if (true) { x = 2; } else { x = 1; } } else {
   sol_chain
 
 end Past
+
+/-! ## A chain ends
+
+`#last_line chain` (`Calculus/LastLine.lean`): the chain's end is a last line — no
+program left, one parallel update in front of each goal, and no rewrite `~=>`
+tries still applies to it.  Silent where it is; a stack of updates and an
+unresolved read are reported with the rewrite that goes on. -/
+
+section Ends
+variable (m : Modality) (φ : Post StandardExample)
+
+#guard_msgs in
+#last_line Chains.Storage.AgeWriteRead.chain
+
+/-- `alice.age = 42; uint x = alice.age;`, stopped at the stack the program leaves. -/
+def stacked : dl![m]{ ⟨[ alice.age = 42; uint x = alice.age; ]⟩ φ }
+    ~*> dl![m]{ { storage := save(storage, alice.age, 42) } { x := find(storage, alice.age) } φ } := by
+  sol_chain
+
+/--
+error: #last_line: stacked does not end at a last line:
+  dl{ { storage := save(storage, alice.age, 42) } { x := find(storage, alice.age) } φ }
+2 updates stand in front of
+  ↑φ
+(one parallel update does: `~[sequentialToParallel]~>`)
+sequentialToParallel still applies (under either modality), and gives
+  dl{ { storage := save(storage, alice.age, 42) ‖ x := find(save(storage, alice.age, 42), alice.age) } φ }
+-/
+#guard_msgs in
+#last_line stacked
+
+/-- The stack merged, the read of the write not yet resolved. -/
+theorem unresolved : dl![m]{ ⟨[ alice.age = 42; uint x = alice.age; ]⟩ φ }
+    ~~> dl![m]{ { storage := save(storage, alice.age, 42) ‖
+          x := find(save(storage, alice.age, 42), alice.age) } φ } :=
+  calc dl![m]{ ⟨[ alice.age = 42; uint x = alice.age; ]⟩ φ }
+    _ ~*> _ := by sol_chain
+    _ ~[sequentialToParallel]~>
+        dl![m]{ { storage := save(storage, alice.age, 42) ‖
+          x := find(save(storage, alice.age, 42), alice.age) } φ } := by sol_chain
+
+/--
+error: #last_line: unresolved does not end at a last line:
+  dl{ { storage := save(storage, alice.age, 42) ‖ x := find(save(storage, alice.age, 42), alice.age) } φ }
+findOnSave still applies (under either modality), and gives
+  dl{ { storage := save(storage, alice.age, 42) ‖ x := 42 } φ }
+findMemberCons still applies (under either modality), and gives
+  dl{ { storage := save(storage, alice.age, 42) ‖ x := select(select(save(storage, alice.age, 42), alice), age) } φ }
+-/
+#guard_msgs in
+#last_line unresolved
+
+end Ends
 
 end Solidity.Examples.ChainNotation

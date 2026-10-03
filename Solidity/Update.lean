@@ -112,6 +112,9 @@ inductive Op1 : Srt → Srt → Type where
   /-- `x[a]`: what the ledger bound at `x` holds for `a`, KeY's
   `selectSt(oldNet, at(a))`, which a specification's `\old(net(a))` reads. -/
   | netOf (x : Var) : Op1 .val .val
+  /-- `delValue(t)`: the default of the word `t`, KeY's `delValue<[α]>`, what
+  a delete leaves at a word (`Theory.delValue`). -/
+  | delValue : Op1 .val .val
   | field (f : Name) : Op1 .path .path
   /-- `p[p.length]`: the slot one past the end, where `lsv = p.push()` binds
   its alias (KeY's `consr(p, at(find(storage, consr(p, size))))`).  No bounds
@@ -153,6 +156,10 @@ inductive Op2 : Srt → Srt → Srt → Type where
   /-- `p[i]`, the index checked against `p`'s length where it is taken
   (`State.checkIndex`), as the program checks it. -/
   | at : Op2 .path .val .path
+  /-- `p[p.length]@S`: the slot one past the end, its length read in the
+  storage `S` instead of the state's — `p[p.length]` merged under a storage
+  write (`Tm.substSt`). -/
+  | nextIn : Op2 .st .path .path
   /-- `delAt(s, p)`: the value at `p` reset to its default. -/
   | delAt : Op2 .st .path .st
   /-- `save(delAt(s, p[p.length]), p.length, p.length + 1)`: the slot a bare
@@ -187,6 +194,9 @@ inductive Op3 : Srt → Srt → Srt → Srt → Type where
   | save : Op3 .st .path .sv .st
   /-- `save(save(s, p[p.length], v), p.length, p.length + 1)`. -/
   | push : Op3 .st .path .sv .st
+  /-- `p[i]@S`: `p[i]` with its index checked in the storage `S` instead of
+  the state's — `p[i]` merged under a storage write (`Tm.substSt`). -/
+  | atIn : Op3 .st .path .val .path
   /-- `write(m, a, v)`. -/
   | write : Op3 .mem .addr .mv .mem
   deriving DecidableEq, Repr
@@ -244,12 +254,16 @@ variable {C : Contract}
 @[match_pattern, reducible] def Term.env (k : EnvKey) : Term C := .app0 (.env k)
 @[match_pattern, reducible] def Term.net (a : Term C) : Term C := .app1 .net a
 @[match_pattern, reducible] def Term.netOf (x : Var) (a : Term C) : Term C := .app1 (.netOf x) a
+@[match_pattern, reducible] def Term.delValue (t : Term C) : Term C := .app1 .delValue t
 
 @[match_pattern, reducible] def PTerm.root (r : Name) : PTerm C := .app0 (.root r)
 @[match_pattern, reducible] def PTerm.pv (x : Var) : PTerm C := .pvP x
 @[match_pattern, reducible] def PTerm.field (p : PTerm C) (f : Name) : PTerm C := .app1 (.field f) p
 @[match_pattern, reducible] def PTerm.at (p : PTerm C) (i : Term C) : PTerm C := .app2 .at p i
 @[match_pattern, reducible] def PTerm.next (p : PTerm C) : PTerm C := .app1 .next p
+@[match_pattern, reducible] def PTerm.nextIn (s : STerm C) (p : PTerm C) : PTerm C := .app2 .nextIn s p
+@[match_pattern, reducible] def PTerm.atIn (s : STerm C) (p : PTerm C) (i : Term C) : PTerm C :=
+  .app3 .atIn s p i
 
 @[match_pattern, reducible] def STerm.storage : STerm C := .app0 .storage
 @[match_pattern, reducible] def STerm.pv (x : Var) : STerm C := .pvS x
@@ -346,6 +360,7 @@ def Op1.eval (σ : State) : Op1 a s → a.Ev → s.Ev
     match ← σ.getEnv x with
     | .ledger l => pure (.int ((lookupBy (← (← ra).asInt) l).getD 0))
     | .val _ | .spath .. | .mref _ | .store _ => .error .stuck
+  | .delValue, ra => do pure (Theory.StValue.primDefault (← ra))
   | .field f, rp => do
     let (r, segs) ← rp
     pure (r, segs ++ [.field f])
@@ -393,6 +408,12 @@ def Op2.eval (σ : State) : Op2 a b s → a.Ev → b.Ev → s.Ev
     let i ← (← ri).asInt
     σ.checkIndex r segs i
     pure (r, segs ++ [.at i])
+  | .nextIn, rs, rp => do
+    let τ ← rs
+    let (r, segs) ← rp
+    match ← τ.findStorage r segs with
+    | .array elems _ _ => pure (r, segs ++ [.at elems.length])
+    | .prim _ | .struct _ | .map _ _ => .error .stuck
   | .delAt, rs, rp => do
     let τ ← rs
     let (r, segs) ← rp
@@ -448,6 +469,12 @@ def Op3.eval (_σ : State) : Op3 a b c s → a.Ev → b.Ev → c.Ev → s.Ev
     let τ ← rs
     let (r, segs) ← rp
     pushAt τ .uint r segs fun _ => do pure (← rv).strip
+  | .atIn, rs, rp, ri => do
+    let τ ← rs
+    let (r, segs) ← rp
+    let i ← (← ri).asInt
+    τ.checkIndex r segs i
+    pure (r, segs ++ [.at i])
   | .write, rm, ra, rv => do
     let mv ← rv
     let τ ← rm
@@ -493,7 +520,8 @@ returns.  An equation is read through `denote` (`holds`).
   no `denote`.
 - A path is not bounds-checked (`PTerm.at`): that is KeY's guard, a premise
   of the laws, not a halt.  `PTerm.next` reads the length in `σ`, as
-  `Tm.eval` does.
+  `Tm.eval` does; `PTerm.nextIn` reads it in its storage term, and
+  `PTerm.atIn` is `PTerm.at` (the check is `eval`'s alone).
 -/
 
 section Denote
@@ -536,6 +564,7 @@ def Op1.denote (σ : State) : Op1 a s → a.Den → s.Den
   | .netOf x, da => match σ.getEnv x, da with
     | .ok (.ledger l), .prim (.int n) => .prim (.int ((lookupBy n l).getD 0))
     | _, _ => .st .mtSt
+  | .delValue, da => Theory.StValue.delValue da
   | .field f, dp => dp ++ [.field f]
   | .next, dp => dp ++ [.at (lenAt σ.abs dp)]
   | .select r, ds => asStruct (selectSt ds (.field r))
@@ -557,6 +586,7 @@ def Op2.denote (σ : State) : Op2 a b s → a.Ev → b.Ev → a.Den → b.Den �
   | .read, rm, ra, _, _ => Res.toSt (Op2.eval σ .read rm ra)
   | .mlen, rm, ri, _, _ => Res.toSt (Op2.eval σ .mlen rm ri)
   | .at, _, _, dp, di => dp ++ [.at (asInt di)]
+  | .nextIn, _, _, ds, dp => dp ++ [.at (lenAt ds dp)]
   | .delAt, _, _, ds, dp => Theory.StValue.delAt ds dp
   | .pushSlot E, _, _, ds, dp | .extend E, _, _, ds, dp =>
     pushSlotT E.isPrimitive (defaultForTy E).abs ds dp
@@ -578,6 +608,7 @@ def Op3.denote : Op3 a b c s → a.Den → b.Den → c.Den → s.Den
     | _ => .st .mtSt
   | .save, ds, dp, dv => copyTo ds dp dv
   | .push, ds, dp, dv => pushT ds dp (stripVal dv)
+  | .atIn, _, dp, di => dp ++ [.at (asInt di)]
   | .write, _, _, _ => ()
 
 /-- A term in the Theory, over `State.abs σ`. -/
@@ -939,8 +970,8 @@ theorem Op0.eval_agree {σ τ : State} (hag : EnvAgreeExcept ns σ τ) :
 theorem Op1.eval_agree {σ τ : State} (hag : EnvAgreeExcept ns σ τ) :
     (o : Op1 a s) → Avoids o.vars ns → {x₁ x₂ : a.Ev} → Srt.Agree ns a x₁ x₂ →
       Srt.Agree ns s (o.eval σ x₁) (o.eval τ x₂)
-  | .unop .., _, _, _, hx | .field _, _, _, _, hx | .sval, _, _, _, hx | .newArr _, _, _, _, hx
-  | .mfield _, _, _, _, hx | .mval, _, _, _, hx | .ref, _, _, _, hx => by
+  | .unop .., _, _, _, hx | .delValue, _, _, _, hx | .field _, _, _, _, hx | .sval, _, _, _, hx
+  | .newArr _, _, _, _, hx | .mfield _, _, _, _, hx | .mval, _, _, _, hx | .ref, _, _, _, hx => by
     simp only [Srt.Agree] at hx ⊢; subst hx; rfl
   | .net, _, _, _, hx => by
     simp only [Srt.Agree] at hx ⊢; subst hx
@@ -979,6 +1010,9 @@ theorem Op2.eval_agree {σ τ : State} (hag : EnvAgreeExcept ns σ τ) :
   | .at, _, _, _, _, hx, hy => by
     simp only [Srt.Agree] at hx hy ⊢; subst hx hy
     simp only [Op2.eval, checkIndex_congr hag]
+  | .nextIn, _, _, _, _, hx, hy => by
+    simp only [Srt.Agree, Op2.eval] at hx hy ⊢; subst hy
+    exact ResultsAgree.bindEq hx fun _ _ h' => by simp only [findStorage_congr h']
   | .find, _, _, _, _, hx, hy => by
     simp only [Srt.Agree, Op2.eval] at hx hy ⊢; subst hy
     exact ResultsAgree.bindEq hx fun _ _ h' => by simp only [findStorage_congr h']
@@ -1036,6 +1070,9 @@ theorem Op3.eval_agree {σ τ : State} :
       Srt.Agree ns s (o.eval σ x₁ y₁ z₁) (o.eval τ x₂ y₂ z₂)
   | .ite, _, _, _, _, _, _, hx, hy, hz => by
     simp only [Srt.Agree] at hx hy hz ⊢; subst hx hy hz; rfl
+  | .atIn, _, _, _, _, _, _, hx, hy, hz => by
+    simp only [Srt.Agree, Op3.eval] at hx hy hz ⊢; subst hy hz
+    exact ResultsAgree.bindEq hx fun _ _ h' => by simp only [checkIndex_congr h']
   | .save, _, _, _, _, _, _, hx, hy, hz => by
     simp only [Srt.Agree, Op3.eval] at hx hy hz ⊢; subst hy hz
     refine bindPureResults_agree _ fun _ => ?_
@@ -1101,8 +1138,9 @@ theorem Op1.denote_agree {σ τ : State} (hag : EnvAgreeExcept ns σ τ) :
   | .net, _, _ => by simp only [Op1.denote, State.getNet, hag.net]
   | .netOf _, ho, _ => by simp only [Op1.denote, getEnv_congr hag ho.head]
   | .next, _, _ => by simp only [Op1.denote, State.abs, hag.storage]
-  | .unop .., _, _ | .field _, _, _ | .select _, _, _ | .sval, _, _ | .newArr _, _, _
-  | .alloc _, _, _ | .mfield _, _, _ | .addM _, _, _ | .mval, _, _ | .ref, _, _ => rfl
+  | .unop .., _, _ | .delValue, _, _ | .field _, _, _ | .select _, _, _ | .sval, _, _
+  | .newArr _, _, _ | .alloc _, _, _ | .mfield _, _, _ | .addM _, _, _ | .mval, _, _
+  | .ref, _, _ => rfl
 
 theorem Op2.denote_agree {σ τ : State} (hag : EnvAgreeExcept ns σ τ) :
     (o : Op2 a b s) → {x₁ x₂ : a.Ev} → {y₁ y₂ : b.Ev} → Srt.Agree ns a x₁ x₂ →
@@ -1116,7 +1154,8 @@ theorem Op2.denote_agree {σ τ : State} (hag : EnvAgreeExcept ns σ τ) :
     simp only [Op2.denote]
     rw [show Op2.eval σ .copyMem _ _ = _ from Op2.eval_agree hag .copyMem hx hy]
   | .binop .., _, _, _, _, _, _, _, _ | .find, _, _, _, _, _, _, _, _
-  | .len, _, _, _, _, _, _, _, _ | .at, _, _, _, _, _, _, _, _ | .delAt, _, _, _, _, _, _, _, _
+  | .len, _, _, _, _, _, _, _, _ | .at, _, _, _, _, _, _, _, _ | .nextIn, _, _, _, _, _, _, _, _
+  | .delAt, _, _, _, _, _, _, _, _
   | .pushSlot _, _, _, _, _, _, _, _, _ | .pop, _, _, _, _, _, _, _, _
   | .shrink, _, _, _, _, _, _, _, _ | .extend _, _, _, _, _, _, _, _, _
   | .sfind, _, _, _, _, _, _, _, _ | .iread, _, _, _, _, _, _, _, _

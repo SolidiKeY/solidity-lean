@@ -530,6 +530,160 @@ theorem allocDefault_nextId_lt {s t : State} {ref : RefTy} {n : Nat}
           exact h.1 ▸ copyStToM_nextId_lt hc
 
 
+/-! ## Heap extension
+
+A memory allocation changes the heap only above the counter: every object
+below it reads as it did (`State.HeapExt`).  `copyStToM` and `allocDefault`
+extend the heap, and the reference a copy returns is below the counter it
+leaves — what the laws of memory reads over a fresh allocation rest on
+(`Calculus/ChainRewrites.lean`). -/
+
+/-- `τ` extends the heap of `σ`: the counter has not gone back, and every
+object below `σ`'s counter reads as it did. -/
+def _root_.Solidity.Semantics.State.HeapExt (σ τ : State) : Prop :=
+  σ.nextId ≤ τ.nextId ∧ ∀ id, id < σ.nextId → lookupBy id τ.heap = lookupBy id σ.heap
+
+theorem _root_.Solidity.Semantics.State.HeapExt.refl (σ : State) : σ.HeapExt σ := ⟨Nat.le_refl _, fun _ _ => rfl⟩
+
+theorem _root_.Solidity.Semantics.State.HeapExt.trans {σ τ ρ : State} (h₁ : σ.HeapExt τ) (h₂ : τ.HeapExt ρ) : σ.HeapExt ρ :=
+  ⟨Nat.le_trans h₁.1 h₂.1, fun id hid => (h₂.2 id (Nat.lt_of_lt_of_le hid h₁.1)).trans (h₁.2 id hid)⟩
+
+theorem _root_.Solidity.Semantics.State.HeapExt.alloc (σ : State) (obj : MObj) : σ.HeapExt (σ.alloc obj).1 :=
+  ⟨Nat.le_succ _, fun _ hid => lookupBy_setBy_ne (Nat.ne_of_lt hid) obj σ.heap⟩
+
+/-- A computation leaves a state extending `s`'s heap. -/
+def HeapExtR (s : State) (r : Res (State × α)) : Prop :=
+  ∀ t a, r = .ok (t, a) → s.HeapExt t
+
+namespace HeapExtR
+
+theorem pure (s : State) (a : α) : HeapExtR s (.ok (s, a)) := by
+  intro t b h; cases h; exact State.HeapExt.refl s
+
+theorem bind {s : State} {x : Res (State × α)} {f : State × α → Res (State × β)}
+    (hx : HeapExtR s x) (hf : ∀ t a, HeapExtR t (f (t, a))) : HeapExtR s (x >>= f) := by
+  intro u b h
+  cases hxv : x with
+  | error e => rw [hxv] at h; contradiction
+  | ok ta =>
+      obtain ⟨t, a⟩ := ta
+      have hfu : f (t, a) = .ok (u, b) := by simpa [hxv] using h
+      exact (hx t a hxv).trans (hf t a u b hfu)
+
+theorem alloc_ref (s : State) (obj : MObj) :
+    HeapExtR s (let (t, id) := s.alloc obj; .ok (t, MVal.ref id)) := by
+  intro t mv h; cases h; exact State.HeapExt.alloc s obj
+
+end HeapExtR
+
+mutual
+
+/-- A storage-to-memory copy extends the heap. -/
+theorem copyStToM_heapExt (s : State) (v : SVal) : HeapExtR s (copyStToM s v) := by
+  cases v with
+  | prim p =>
+      cases p with
+      | int v => exact HeapExtR.pure s (MVal.int v)
+      | bool b => exact HeapExtR.pure s (MVal.bool b)
+  | map entries dflt => intro t mv h; simp [copyStToM] at h
+  | struct fields =>
+      rw [copyStToM]
+      apply HeapExtR.bind (copyStFields_heapExt s fields)
+      intro t mfields
+      exact HeapExtR.alloc_ref t (.struct mfields)
+  | array elems _ fx =>
+      rw [copyStToM]
+      apply HeapExtR.bind (copyStElems_heapExt s elems)
+      intro t melems
+      exact HeapExtR.alloc_ref t (.array melems fx)
+
+theorem copyStFields_heapExt (s : State) (fields : List (Name × SVal)) :
+    HeapExtR s (copyStFields s fields) := by
+  cases fields with
+  | nil => exact HeapExtR.pure s []
+  | cons field rest =>
+      obtain ⟨name, v⟩ := field
+      rw [copyStFields]
+      apply HeapExtR.bind (copyStToM_heapExt s v)
+      intro t mv
+      apply HeapExtR.bind (copyStFields_heapExt t rest)
+      intro u mrest
+      exact HeapExtR.pure u ((name, mv) :: mrest)
+
+theorem copyStElems_heapExt (s : State) (elems : List SVal) :
+    HeapExtR s (copyStElems s elems) := by
+  cases elems with
+  | nil => exact HeapExtR.pure s []
+  | cons v rest =>
+      rw [copyStElems]
+      apply HeapExtR.bind (copyStToM_heapExt s v)
+      intro t mv
+      apply HeapExtR.bind (copyStElems_heapExt t rest)
+      intro u mrest
+      exact HeapExtR.pure u (mv :: mrest)
+
+end
+
+/-- A fresh default allocation extends the heap. -/
+theorem allocDefault_heapExt {s t : State} {R : RefTy} {n : Nat}
+    (h : allocDefault s R = .ok (t, n)) : s.HeapExt t := by
+  unfold allocDefault at h
+  cases hc : copyStToM s (defaultForRef R) with
+  | error e => rw [hc] at h; exact absurd h (by simp)
+  | ok tv =>
+      obtain ⟨t', mv⟩ := tv
+      rw [hc] at h
+      cases mv with
+      | prim p => exact absurd h (by simp)
+      | ref m =>
+          simp only [Except.ok.injEq, Prod.mk.injEq] at h
+          exact h.1 ▸ copyStToM_heapExt s _ t' _ hc
+
+/-- The reference a copy returns is below the counter it leaves. -/
+theorem copyStToM_ref_lt {s t : State} {v : SVal} {n : Nat}
+    (h : copyStToM s v = .ok (t, .ref n)) : n < t.nextId := by
+  cases v with
+  | prim p => cases p <;> exact absurd h (by simp)
+  | map entries dflt => exact absurd h (by simp)
+  | struct fields =>
+      rw [copyStToM] at h
+      cases hf : copyStFields s fields with
+      | error e => rw [hf] at h; exact absurd h (by simp [bind, Except.bind])
+      | ok tf =>
+          obtain ⟨t', mfields⟩ := tf
+          rw [hf] at h
+          simp only [bind, Except.bind, Except.ok.injEq, Prod.mk.injEq, State.alloc,
+            MVal.ref.injEq] at h
+          obtain ⟨rfl, rfl⟩ := h
+          exact Nat.lt_succ_self _
+  | array elems =>
+      rw [copyStToM] at h
+      cases he : copyStElems s elems with
+      | error e => rw [he] at h; exact absurd h (by simp [bind, Except.bind])
+      | ok te =>
+          obtain ⟨t', melems⟩ := te
+          rw [he] at h
+          simp only [bind, Except.bind, Except.ok.injEq, Prod.mk.injEq, State.alloc,
+            MVal.ref.injEq] at h
+          obtain ⟨rfl, rfl⟩ := h
+          exact Nat.lt_succ_self _
+
+/-- The identity a fresh default allocation returns is below the counter it leaves. -/
+theorem allocDefault_id_lt {s t : State} {R : RefTy} {n : Nat}
+    (h : allocDefault s R = .ok (t, n)) : n < t.nextId := by
+  unfold allocDefault at h
+  cases hc : copyStToM s (defaultForRef R) with
+  | error e => rw [hc] at h; exact absurd h (by simp)
+  | ok tv =>
+      obtain ⟨t', mv⟩ := tv
+      rw [hc] at h
+      cases mv with
+      | prim p => exact absurd h (by simp)
+      | ref m =>
+          simp only [Except.ok.injEq, Prod.mk.injEq] at h
+          obtain ⟨rfl, rfl⟩ := h
+          exact copyStToM_ref_lt hc
+
 /-! ## State-update algebra (`updateRules.key` analogues)
 
 KeY's update calculus applies parallel updates at the point of use

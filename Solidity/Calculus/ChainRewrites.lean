@@ -78,16 +78,15 @@ same holds of `applyOnRigidBox`: under the box, or where `U` cannot halt.
 a right-hand side a law rewrites can halt; they match `.box`.
 
 **Merging, innermost first.**  `{U}{V}` merges when `U` writes only locals
-(`Upd.envOnly`, substituted into `V`), or is one storage write over a `V`
-whose storage reads are all `storage` terms (`withStM`,
-`Calculus/StateParts.lean`: memory reads included), or is locals and a
-memory write, `{carol := freshId(copySt(memory, v)) ‖ memory := copySt(memory, v)}`,
-the write substituted for `memory` in `V` and the locals after it
-(`Upd.mergeMem`).  So `{a := t ‖ storage := S}{x := u}` does not merge (a
-parallel update of locals and the storage over another is KeY's general
-case, whose substitution is simultaneous), but inside out every merge of a
-stack the program leaves is one of the three: `{storage := S}{x := u}` first,
-then `{a := t}` into the result.  `Fml.mergeSpine` merges that way.  It takes
+(`Upd.envOnly`, substituted into `V`), or is one storage write
+(`withStM`, `Calculus/StateParts.lean`: memory reads included, an index
+check carried over as `p[i]@S`), or is locals and a memory write,
+`{carol := freshId(copySt(memory, v)) ‖ memory := copySt(memory, v)}`, the
+write substituted for `memory` in `V` and the locals after it
+(`Upd.mergeMem`), or is locals and a storage write, substituted into `V` in
+one pass (`Upd.mergeStL`, `Tm.substSt`), the write dropped where `V` writes
+the storage over it.  Inside out every merge of a stack the program leaves
+is one of the four.  `Fml.mergeSpine` merges that way.  It takes
 the count from the chain: whether the body is one more update is a question
 about the body.
 -/
@@ -233,6 +232,46 @@ theorem Tm.onSpine_error {s : STerm C} {σ : State} {e : Halt} (hs : s.eval σ =
     simp only [Tm.onSpine, Tm.spineAny, beq_iff_eq] at h
     exact ⟨e, h ▸ hs⟩
 
+/-- `t` is read before anything else of `s` on the memory spine: `s` is `t`,
+or a memory operation over a term on the spine of `t`. -/
+def Tm.memSpineAny (f : MTerm C → Bool) : Tm C u → Bool
+  | .app1 (.addM R) a => f (.app1 (.addM R) a) || a.memSpineAny f
+  | .app2 .copySt a v => f (.app2 .copySt a v) || a.memSpineAny f
+  | .app3 .write a p v => f (.app3 .write a p v) || a.memSpineAny f
+  | t => match u, t with
+    | .mem, t => f t
+    | _, _ => false
+
+@[inherit_doc Tm.memSpineAny]
+def Tm.onMemSpine (t s : MTerm C) : Bool := t.memSpineAny (· == s)
+
+/-- A term on the memory spine of `s` halts wherever `s` does. -/
+theorem Tm.onMemSpine_error {s : MTerm C} {σ : State} {e : Halt} (hs : s.eval σ = .error e) :
+    (t : MTerm C) → t.onMemSpine s = true → ∃ e', t.eval σ = .error e'
+  | .app1 (.addM _) a, h => by
+    simp only [Tm.onMemSpine, Tm.memSpineAny, Bool.or_eq_true, beq_iff_eq] at h
+    rcases h with rfl | h
+    · exact ⟨e, hs⟩
+    · obtain ⟨e', ha⟩ := Tm.onMemSpine_error hs a h
+      exact ⟨e', by rw [Tm.app1_eval, ha]; rfl⟩
+  | .app2 .copySt a v, h => by
+    simp only [Tm.onMemSpine, Tm.memSpineAny, Bool.or_eq_true, beq_iff_eq] at h
+    rcases h with rfl | h
+    · exact ⟨e, hs⟩
+    · obtain ⟨e', ha⟩ := Tm.onMemSpine_error hs a h
+      rw [Tm.app2_eval, ha]
+      cases v.eval σ <;> exact ⟨_, rfl⟩
+  | .app3 .write a p v, h => by
+    simp only [Tm.onMemSpine, Tm.memSpineAny, Bool.or_eq_true, beq_iff_eq] at h
+    rcases h with rfl | h
+    · exact ⟨e, hs⟩
+    · obtain ⟨e', ha⟩ := Tm.onMemSpine_error hs a h
+      rw [Tm.app3_eval, ha]
+      cases v.eval σ <;> exact ⟨_, rfl⟩
+  | .app0 .memory, h => by
+    simp only [Tm.onMemSpine, Tm.memSpineAny, beq_iff_eq] at h
+    exact ⟨e, h ▸ hs⟩
+
 /-- The element writes the storage with a term on the spine of `s`. -/
 def UpdElem.onSpine (s : STerm C) : UpdElem C → Bool
   | .storage t => t.onSpine s
@@ -344,25 +383,29 @@ theorem Upd.foldl_error_of_storage (σ₀ : State) {t : STerm C} {e : Halt} (ht 
       | error e' => exact ⟨e', rfl⟩
       | ok ρ' => exact Upd.foldl_error_of_storage σ₀ ht W h ρ'
 
-/-- **The shadowed storage write goes**: `{storage := s ‖ W}` is `{W}` where
-`W` writes the storage with a term on the spine of `s`. -/
+/-- **The shadowed storage write goes**: `{L ‖ storage := s ‖ W}` is
+`{L ‖ W}` where `W` writes the storage with a term on the spine of `s`. -/
 theorem Upd.dropStorage_holds {s : STerm C} {W : Upd C} (hW : W.any (·.onSpine s) = true)
-    (m : Modality) (ψ : Fml C) (σ : State) :
-    holds σ (.upd m W ψ) ↔ holds σ (.upd m (.storage s :: W) ψ) := by
+    (m : Modality) (L : Upd C) (ψ : Fml C) (σ : State) :
+    holds σ (.upd m (L ++ W) ψ) ↔ holds σ (.upd m (L ++ .storage s :: W) ψ) := by
   obtain ⟨d, hd, hd'⟩ := List.any_eq_true.1 hW
   obtain ⟨t, rfl, ht⟩ := UpdElem.onSpine_eq d hd'
-  simp only [holds, Upd.apply, List.foldlM_cons, UpdElem.storage_write]
-  cases hs : s.eval σ with
-  | error e =>
-    obtain ⟨e', ht'⟩ := Tm.onSpine_error hs t ht
-    obtain ⟨e'', h⟩ := Upd.foldl_error_of_storage σ ht' W hd σ
-    rw [h]
-    exact Iff.rfl
-  | ok τ =>
-    have hst : W.any (·.isStorage) = true := List.any_eq_true.2 ⟨_, hd, rfl⟩
-    have h := Upd.foldl_storage_irrel σ hst τ.storage σ
+  simp only [holds, Upd.apply, List.foldlM_append, List.foldlM_cons, UpdElem.storage_write]
+  cases L.foldlM (fun τ e => e.write σ τ) σ with
+  | error _ => exact Iff.rfl
+  | ok ρ =>
     simp only [bind, Except.bind]
-    rw [h]
+    cases hs : s.eval σ with
+    | error e =>
+      obtain ⟨e', ht'⟩ := Tm.onSpine_error hs t ht
+      obtain ⟨e'', h⟩ := Upd.foldl_error_of_storage σ ht' W hd ρ
+      dsimp only
+      rw [h]
+      exact Iff.rfl
+    | ok τ =>
+      have hst : W.any (·.isStorage) = true := List.any_eq_true.2 ⟨_, hd, rfl⟩
+      dsimp only
+      rw [Upd.foldl_storage_irrel σ hst τ.storage ρ]
 
 /-- `{storage := s}{V}` as one update: `V` over the write (`withStM`, memory
 reads included), and the write itself unless `V` writes the storage over it
@@ -374,8 +417,149 @@ theorem Upd.mergeSt_holds (s : STerm C) (V : Upd C) (m : Modality) (ψ : Fml C) 
     holds σ (.upd m (Upd.mergeSt s V) ψ) ↔ holds σ (.upd m (.storage s :: V.withStM s) ψ) := by
   unfold Upd.mergeSt
   split
-  · exact Upd.dropStorage_holds ‹_› m ψ σ
+  · exact Upd.dropStorage_holds ‹_› m [] ψ σ
   · exact Iff.rfl
+
+/-- The element writes the memory with a term on the memory spine of `M`. -/
+def UpdElem.onMemSpine (M : MTerm C) : UpdElem C → Bool
+  | .memory N => N.onMemSpine M
+  | _ => false
+
+theorem UpdElem.onMemSpine_eq {M : MTerm C} : (e : UpdElem C) → e.onMemSpine M = true →
+    ∃ N, e = .memory N ∧ N.onMemSpine M = true
+  | .memory N, h => ⟨N, rfl, h⟩
+
+/-- The element writes the memory: `memory := M`. -/
+def UpdElem.isMemory : UpdElem C → Bool
+  | .memory _ => true
+  | _ => false
+
+/-- An element run from a state with another memory: the memory write
+writes the same, every other element leaves that memory where it is
+(`UpdElem.write_setStorage`'s mirror). -/
+theorem UpdElem.write_setMem (σ₀ : State) (hp : List (Nat × MObj)) (n : Nat) (ρ : State) :
+    (e : UpdElem C) → e.write σ₀ { ρ with heap := hp, nextId := n } =
+      if e.isMemory then e.write σ₀ ρ
+      else (e.write σ₀ ρ).map fun τ => { τ with heap := hp, nextId := n }
+  | .val _ t => by
+    simp only [UpdElem.write, UpdElem.isMemory, Bool.false_eq_true, ↓reduceIte]
+    cases t.eval σ₀ <;> rfl
+  | .path _ p => by
+    simp only [UpdElem.write, UpdElem.isMemory, Bool.false_eq_true, ↓reduceIte]
+    cases p.eval σ₀ with
+    | error _ => rfl
+    | ok rs => cases rs; rfl
+  | .mref _ i => by
+    simp only [UpdElem.write, UpdElem.isMemory, Bool.false_eq_true, ↓reduceIte]
+    cases i.eval σ₀ <;> rfl
+  | .storage s => by
+    simp only [UpdElem.write, UpdElem.isMemory, Bool.false_eq_true, ↓reduceIte]
+    cases s.eval σ₀ <;> rfl
+  | .store _ s => by
+    simp only [UpdElem.write, UpdElem.isMemory, Bool.false_eq_true, ↓reduceIte]
+    cases s.eval σ₀ <;> rfl
+  | .memory μ => by
+    simp only [UpdElem.write, UpdElem.isMemory, ↓reduceIte]
+  | .selfBalance _ a => by
+    simp only [UpdElem.write, UpdElem.isMemory, Bool.false_eq_true, ↓reduceIte]
+    cases a.eval σ₀ with
+    | error _ => rfl
+    | ok v => cases v <;> rfl
+  | .net r _ a => by
+    simp only [UpdElem.write, UpdElem.isMemory, Bool.false_eq_true, ↓reduceIte]
+    cases r.eval σ₀ with
+    | error _ => rfl
+    | ok v =>
+      cases v with
+      | bool _ => rfl
+      | int _ =>
+        cases a.eval σ₀ with
+        | error _ => rfl
+        | ok w => cases w <;> rfl
+  | .pay r a => by
+    simp only [UpdElem.write, UpdElem.isMemory, Bool.false_eq_true, ↓reduceIte]
+    cases r.eval σ₀ with
+    | error _ => rfl
+    | ok v =>
+      cases v with
+      | bool _ => rfl
+      | int _ =>
+        cases a.eval σ₀ with
+        | error _ => rfl
+        | ok w =>
+          cases w with
+          | bool _ => rfl
+          | int _ =>
+            simp only [bind, Except.bind, Value.asInt, pure, Except.pure]
+            split <;> rfl
+  | .saveNet _ => rfl
+
+/-- An update run from a state with another memory: the same run, if some
+element writes the memory; else the run with that memory put back. -/
+theorem Upd.foldl_setMem (σ₀ : State) (hp : List (Nat × MObj)) (n : Nat) :
+    (W : Upd C) → ∀ ρ, W.foldlM (fun τ e => e.write σ₀ τ) { ρ with heap := hp, nextId := n } =
+      if W.any (·.isMemory) then W.foldlM (fun τ (e : UpdElem C) => e.write σ₀ τ) ρ
+      else (W.foldlM (fun τ (e : UpdElem C) => e.write σ₀ τ) ρ).map
+        fun τ => { τ with heap := hp, nextId := n }
+  | [], ρ => rfl
+  | e :: W, ρ => by
+    simp only [List.foldlM_cons, List.any_cons, UpdElem.write_setMem σ₀ hp n ρ e]
+    cases he : e.isMemory
+    · simp only [Bool.false_eq_true, ↓reduceIte, Bool.false_or]
+      cases e.write σ₀ ρ with
+      | error _ => cases W.any (·.isMemory) <;> rfl
+      | ok ρ' =>
+        show W.foldlM (fun τ e => e.write σ₀ τ) { ρ' with heap := hp, nextId := n } = _
+        rw [Upd.foldl_setMem σ₀ hp n W ρ']
+        cases W.any (·.isMemory) <;> rfl
+    · simp only [↓reduceIte, Bool.true_or]
+
+/-- A run of an update with a memory element does not see the memory it
+starts from. -/
+theorem Upd.foldl_mem_irrel (σ₀ : State) {W : Upd C} (hW : W.any (·.isMemory) = true)
+    (hp : List (Nat × MObj)) (n : Nat) (ρ : State) :
+    W.foldlM (fun τ e => e.write σ₀ τ) { ρ with heap := hp, nextId := n } =
+      W.foldlM (fun τ e => e.write σ₀ τ) ρ := by
+  rw [Upd.foldl_setMem, if_pos hW]
+
+/-- A run of an update halts where a memory write of it halts. -/
+theorem Upd.foldl_error_of_memory (σ₀ : State) {t : MTerm C} {e : Halt} (ht : t.eval σ₀ = .error e) :
+    (W : Upd C) → UpdElem.memory t ∈ W → ∀ ρ,
+      ∃ e', W.foldlM (fun τ d => d.write σ₀ τ) ρ = .error e'
+  | [], h, _ => nomatch h
+  | d :: W, h, ρ => by
+    simp only [List.foldlM_cons]
+    rcases List.mem_cons.1 h with rfl | h
+    · refine ⟨e, ?_⟩
+      rw [UpdElem.memory_write, ht]
+      rfl
+    · cases d.write σ₀ ρ with
+      | error e' => exact ⟨e', rfl⟩
+      | ok ρ' => exact Upd.foldl_error_of_memory σ₀ ht W h ρ'
+
+/-- **The shadowed memory write goes**: `{L ‖ memory := M ‖ W}` is `{L ‖ W}`
+where `W` writes the memory with a term on the memory spine of `M`
+(`Upd.dropStorage_holds`'s mirror, with the elements before the write). -/
+theorem Upd.dropMemory_holds {M : MTerm C} {W : Upd C} (hW : W.any (·.onMemSpine M) = true)
+    (m : Modality) (L : Upd C) (ψ : Fml C) (σ : State) :
+    holds σ (.upd m (L ++ W) ψ) ↔ holds σ (.upd m (L ++ .memory M :: W) ψ) := by
+  obtain ⟨d, hd, hd'⟩ := List.any_eq_true.1 hW
+  obtain ⟨N, rfl, hN⟩ := UpdElem.onMemSpine_eq d hd'
+  simp only [holds, Upd.apply, List.foldlM_append, List.foldlM_cons, UpdElem.memory_write]
+  cases L.foldlM (fun τ e => e.write σ τ) σ with
+  | error _ => exact Iff.rfl
+  | ok ρ =>
+    simp only [bind, Except.bind]
+    cases hs : M.eval σ with
+    | error e =>
+      obtain ⟨e', hN'⟩ := Tm.onMemSpine_error hs N hN
+      obtain ⟨e'', h⟩ := Upd.foldl_error_of_memory σ hN' W hd ρ
+      rw [h]
+      exact Iff.rfl
+    | ok μ =>
+      have hmem : W.any (·.isMemory) = true := List.any_eq_true.2 ⟨_, hd, rfl⟩
+      dsimp only
+      rw [Upd.foldl_mem_irrel σ hmem μ.heap μ.nextId ρ]
 
 /-! ## `sequentialToParallel` -/
 
@@ -390,9 +574,12 @@ theorem Upd.holds_total {U : Upd C} (hU : U.total = true) (m m' : Modality) (φ 
 `memory` in `V` (`withMem`), then the locals (`subst`), after the write.
 `{L ‖ memory := M}` is `{L}{memory := M}` where `M` reads none of `L`'s
 variables (`M.subst L = M`), and the two merges are `Upd.mergeMemory_holds`
-and `sequentialToParallel`. -/
+and `sequentialToParallel`.  The write itself goes where `V` writes the
+memory over it (`Upd.dropMemory_holds`), so a merged line has one
+`memory :=`. -/
 def Upd.mergeMem (L : Upd C) (M : MTerm C) (V : Upd C) : Upd C :=
-  L ++ (.memory M :: Upd.subst (V.withMem M) L)
+  if (Upd.subst (V.withMem M) L).any (·.onMemSpine M) then L ++ Upd.subst (V.withMem M) L
+  else L ++ (.memory M :: Upd.subst (V.withMem M) L)
 
 theorem Upd.mergeMem_holds {L : Upd C} (hL : L.envOnly = true) {M : MTerm C} (hM : M.subst L = M)
     (V : Upd C) (m : Modality) (ψ : Fml C) (σ : State) :
@@ -402,8 +589,12 @@ theorem Upd.mergeMem_holds {L : Upd C} (hL : L.envOnly = true) {M : MTerm C} (hM
   have h2 : Upd.subst [UpdElem.memory M] L = [.memory M] := by
     simp only [Upd.subst, List.map_cons, List.map_nil, UpdElem.subst, hM]
   calc holds σ (.upd m (Upd.mergeMem L M V) ψ)
-      ↔ holds σ (.upd m L (.upd m (.memory M :: V.withMem M) ψ)) := by
+      ↔ holds σ (.upd m (L ++ (.memory M :: Upd.subst (V.withMem M) L)) ψ) := by
         unfold Upd.mergeMem
+        split
+        · exact Upd.dropMemory_holds ‹_› m L ψ σ
+        · exact Iff.rfl
+    _ ↔ holds σ (.upd m L (.upd m (.memory M :: V.withMem M) ψ)) := by
         rw [← h1]
         exact (UpdRule.sequentialToParallel hL).sound σ
     _ ↔ holds σ (.upd m L (.upd m [.memory M] (.upd m V ψ))) := by
@@ -465,48 +656,73 @@ theorem Upd.storage_perm_holds (m : Modality) (L₁ : Upd C) (S : STerm C) {L₂
       | error _ => simp only [Except.map, Modality.after]
       | ok ρ₂ => simp only [Except.map]
 
-/-- `{L₁ ‖ storage := S ‖ L₂}{V}` as one update, `L₁`, `L₂` locals: `S`
-substituted for `storage` in `V` (`withStM`), then the locals (`subst`),
-after the write; the write stays where it was. -/
-def Upd.mergeStL (L₁ : Upd C) (S : STerm C) (L₂ : Upd C) (V : Upd C) : Upd C :=
-  L₁ ++ .storage S :: (L₂ ++ Upd.subst (V.withStM S) (L₁ ++ L₂))
+/-- An update of locals writes no storage. -/
+theorem Upd.envOnly_isStorage {L : Upd C} (h : L.envOnly = true) : L.any (·.isStorage) = false := by
+  simp only [Upd.envOnly, List.all_eq_true] at h
+  simp only [List.any_eq_false]
+  intro e he
+  have := h e he
+  cases e <;> simp_all [UpdElem.var?, UpdElem.isStorage]
 
-theorem Upd.mergeStL_holds {L₁ L₂ : Upd C} (h₁ : L₁.envOnly = true) (h₂ : L₂.envOnly = true)
-    {S : STerm C} (hS : S.subst (L₁ ++ L₂) = S) {V : Upd C}
-    (hV : V.all (·.allTm Tm.stExplicitM) = true) (m : Modality) (ψ : Fml C) (σ : State) :
-    holds σ (.upd m (Upd.mergeStL L₁ S L₂ V) ψ) ↔
+/-- `{L₁ ‖ storage := S ‖ L₂}{V}` as one update, `L₁`, `L₂` locals: the
+locals and `S` substituted into `V` (`Upd.substSt`), after the three; the
+write stays where it was unless `V` writes the storage over it
+(`Upd.dropStorage_holds`). -/
+def Upd.mergeStL (L₁ : Upd C) (S : STerm C) (L₂ : Upd C) (V : Upd C) : Upd C :=
+  let V' := Upd.substSt (L₁ ++ L₂) S V
+  if V'.any (·.onSpine S) then L₁ ++ (L₂ ++ V') else L₁ ++ .storage S :: (L₂ ++ V')
+
+/-- The merge with the write kept, `L` locals: every element of
+`{L ‖ storage := S ‖ {L ‖ storage := S}V}` reads the pre-state, and `V`'s
+substituted right-hand sides read there what `V`'s read after the two
+(`Tm.substSt_eval`). -/
+theorem Upd.mergeStL_core {L : Upd C} (hL : L.envOnly = true) (S : STerm C) (V : Upd C)
+    (m : Modality) (ψ : Fml C) (σ : State) :
+    holds σ (.upd m (L ++ .storage S :: Upd.substSt L S V) ψ) ↔
+      holds σ (.upd m (L ++ [.storage S]) (.upd m V ψ)) := by
+  simp only [holds, Upd.apply, List.foldlM_append, List.foldlM_cons, List.foldlM_nil,
+    UpdElem.storage_write]
+  cases hL' : L.foldlM (fun τ e => e.write σ τ) σ with
+  | error _ => exact Iff.rfl
+  | ok σ₁ =>
+    simp only [bind, Except.bind]
+    cases hs : S.eval σ with
+    | error _ => exact Iff.rfl
+    | ok τ =>
+      have h := Upd.substAgree hL hL'
+      have hr : σ.Rest { σ₁ with storage := τ.storage } :=
+        ⟨h.agree.net, h.agree.selfBalance, h.agree.tx⟩
+      dsimp only
+      simp only [pure, Except.pure, Modality.after]
+      rw [Upd.substSt, Upd.mapTm_foldl (P := fun {_} _ => true) hr
+        (fun t _ => Tm.substSt_eval h hs t) V (List.all_eq_true.2 fun e _ => by cases e <;> rfl)]
+
+/-- `Upd.mergeStL_core` with the write between the locals, where
+`Upd.splitWrite` finds it. -/
+theorem Upd.mergeStL_keep_holds {L₁ L₂ : Upd C} (h₁ : L₁.envOnly = true) (h₂ : L₂.envOnly = true)
+    (S : STerm C) (V : Upd C) (m : Modality) (ψ : Fml C) (σ : State) :
+    holds σ (.upd m (L₁ ++ .storage S :: (L₂ ++ Upd.substSt (L₁ ++ L₂) S V)) ψ) ↔
       holds σ (.upd m (L₁ ++ .storage S :: L₂) (.upd m V ψ)) := by
   have hL : (L₁ ++ L₂).envOnly = true := by simp only [Upd.envOnly, List.all_append] at *; simp [h₁, h₂]
-  have hL₂ : L₂.any (·.isStorage) = false := by
-    simp only [Upd.envOnly, List.all_eq_true] at h₂
-    simp only [List.any_eq_false]
-    intro e he
-    have := h₂ e he
-    cases e <;> simp_all [UpdElem.var?, UpdElem.isStorage]
-  have hs1 : Upd.subst (UpdElem.storage S :: V.withStM S) (L₁ ++ L₂) =
-      .storage S :: Upd.subst (V.withStM S) (L₁ ++ L₂) := by
-    simp only [Upd.subst, List.map_cons, UpdElem.subst, hS]
-  have hs2 : Upd.subst [UpdElem.storage S] (L₁ ++ L₂) = [.storage S] := by
-    simp only [Upd.subst, List.map_cons, List.map_nil, UpdElem.subst, hS]
-  calc holds σ (.upd m (Upd.mergeStL L₁ S L₂ V) ψ)
-      ↔ holds σ (.upd m (L₁ ++ L₂ ++ (.storage S :: Upd.subst (V.withStM S) (L₁ ++ L₂))) ψ) := by
-        unfold Upd.mergeStL
-        rw [List.append_assoc]
-        exact Upd.storage_perm_holds m L₁ S hL₂ _ ψ σ
-    _ ↔ holds σ (.upd m (L₁ ++ L₂) (.upd m (.storage S :: V.withStM S) ψ)) := by
-        rw [← hs1]
-        exact (UpdRule.sequentialToParallel hL).sound σ
-    _ ↔ holds σ (.upd m (L₁ ++ L₂) (.upd m [.storage S] (.upd m V ψ))) := by
-        simp only [holds]
-        exact m.after_congr (fun τ => Upd.mergeStorageM_holds m S V hV ψ τ) _
-    _ ↔ holds σ (.upd m (L₁ ++ L₂ ++ [.storage S]) (.upd m V ψ)) := by
-        conv => rhs; rw [← hs2]
-        exact ((UpdRule.sequentialToParallel hL).sound σ).symm
-    _ ↔ holds σ (.upd m (L₁ ++ .storage S :: L₂) (.upd m V ψ)) := by
-        have := Upd.storage_perm_holds m L₁ S hL₂ [] (.upd m V ψ) σ
-        simp only [List.append_nil] at this
-        rw [List.append_assoc]
-        exact this.symm
+  have hL₂ := Upd.envOnly_isStorage h₂
+  rw [Upd.storage_perm_holds m L₁ S hL₂ _ ψ σ]
+  have hperm := Upd.storage_perm_holds m L₁ S hL₂ [] (.upd m V ψ) σ
+  simp only [List.append_nil] at hperm
+  rw [hperm, ← List.append_assoc, ← List.append_assoc]
+  exact Upd.mergeStL_core hL S V m ψ σ
+
+theorem Upd.mergeStL_holds {L₁ L₂ : Upd C} (h₁ : L₁.envOnly = true) (h₂ : L₂.envOnly = true)
+    {S : STerm C} {V : Upd C} (m : Modality) (ψ : Fml C) (σ : State) :
+    holds σ (.upd m (Upd.mergeStL L₁ S L₂ V) ψ) ↔
+      holds σ (.upd m (L₁ ++ .storage S :: L₂) (.upd m V ψ)) := by
+  rw [← Upd.mergeStL_keep_holds h₁ h₂ S V m ψ σ]
+  dsimp only [Upd.mergeStL]
+  split
+  · rename_i hW
+    rw [Upd.storage_perm_holds m L₁ S (Upd.envOnly_isStorage h₂) _ ψ σ, ← List.append_assoc,
+      ← List.append_assoc]
+    exact Upd.dropStorage_holds hW m (L₁ ++ L₂) ψ σ
+  · exact Iff.rfl
 
 /-- The update's last element, and the rest. -/
 def Upd.splitLast : Upd C → Option (Upd C × UpdElem C)
@@ -539,9 +755,7 @@ def Upd.merge (m : Modality) (U : Upd C) (m' : Modality) (V : Upd C) :
   if (U.envOnly && (U.total || decide (m' = m))) = true then some (m', U ++ V.subst U)
   else match U with
     | [.storage s] =>
-      if (V.all (·.allTm Tm.stExplicitM) && (V.total || decide (m' = m))) = true then
-        some (m, Upd.mergeSt s V)
-      else none
+      if (V.total || decide (m' = m)) = true then some (m, Upd.mergeSt s V) else none
     | _ => match U.splitLast with
       | some (L, .memory M) =>
         if (L.envOnly && (M.subst L == M) && (V.total || decide (m' = m))) = true then
@@ -549,10 +763,7 @@ def Upd.merge (m : Modality) (U : Upd C) (m' : Modality) (V : Upd C) :
         else none
       | _ => match U.splitWrite with
         | some (L₁, .storage S, L₂) =>
-          if (S.subst (L₁ ++ L₂) == S && V.all (·.allTm Tm.stExplicitM) &&
-              (V.total || decide (m' = m))) = true then
-            some (m, Upd.mergeStL L₁ S L₂ V)
-          else none
+          if (V.total || decide (m' = m)) = true then some (m, Upd.mergeStL L₁ S L₂ V) else none
         | _ => none
 
 /-- **`sequentialToParallel`**: the merged update holds exactly where the
@@ -580,11 +791,11 @@ theorem Upd.merge_holds {m m' m'' : Modality} {U V W : Upd C}
       · rename_i s _ hc
         simp only [Option.some.injEq, Prod.mk.injEq] at h
         obtain ⟨rfl, rfl⟩ := h
-        simp only [Bool.and_eq_true, Bool.or_eq_true, decide_eq_true_eq] at hc
-        rw [Upd.mergeSt_holds, Upd.mergeStorageM_holds m s V hc.1 φ σ]
+        simp only [Bool.or_eq_true, decide_eq_true_eq] at hc
+        rw [Upd.mergeSt_holds, Upd.mergeStorageM_holds m s V φ σ]
         simp only [holds]
         refine m.after_congr (fun τ => ?_) _
-        rcases hc.2 with ht | rfl
+        rcases hc with ht | rfl
         · exact Upd.holds_total ht m m' φ τ
         · exact Iff.rfl
       · nomatch h
@@ -606,12 +817,12 @@ theorem Upd.merge_holds {m m' m'' : Modality} {U V W : Upd C}
           · rename_i L₁ S L₂ hsplit hc
             simp only [Option.some.injEq, Prod.mk.injEq] at h
             obtain ⟨rfl, rfl⟩ := h
-            simp only [Bool.and_eq_true, Bool.or_eq_true, decide_eq_true_eq, beq_iff_eq] at hc
+            simp only [Bool.or_eq_true, decide_eq_true_eq] at hc
             obtain ⟨heq, h₁, h₂⟩ := Upd.splitWrite_eq U hsplit
-            rw [heq, Upd.mergeStL_holds h₁ h₂ hc.1.1 hc.1.2 m φ σ]
+            rw [heq, Upd.mergeStL_holds h₁ h₂ m φ σ]
             simp only [holds]
             refine m.after_congr (fun τ => ?_) _
-            rcases hc.2 with ht | rfl
+            rcases hc with ht | rfl
             · exact Upd.holds_total ht m m' φ τ
             · exact Iff.rfl
           · nomatch h
@@ -1031,7 +1242,8 @@ theorem PTerm.fieldsBelow_eval {p : PTerm C} {σ : State} {r : Name} {segs : Lis
       · rw [Tm.app1_eval, hq]
         show Except.ok (r, (segs ++ tail) ++ [Seg.field f]) = _
         rw [List.append_assoc]
-  | .pvP _, h | .app0 (.root _), h | .app1 .next _, h | .app2 .at _ _, h => nomatch h
+  | .pvP _, h | .app0 (.root _), h | .app1 .next _, h | .app2 .at _ _, h | .app2 .nextIn _ _, h
+  | .app3 .atIn _ _ _, h => nomatch h
 
 /-- `q` is `p`, or goes on below it through members: a read at or below `p`
 that no index check can halt. -/
@@ -1073,8 +1285,8 @@ theorem PTerm.fields?_eval (σ : State) : (q : PTerm C) → {l : List Seg} → q
         rfl
       · nomatch h
     · nomatch h
-  | .pvP _, _, h | .app1 .next _, _, h => nomatch h
-  | .app2 .at q i, _, h => by
+  | .pvP _, _, h | .app1 .next _, _, h | .app2 .nextIn _ _, _, h => nomatch h
+  | .app2 .at q i, _, h | .app3 .atIn _ q i, _, h => by
     simp only [PTerm.fields?, Tm.segs?] at h
     split at h
     · rename_i l' hl'
@@ -1126,9 +1338,9 @@ theorem PTerm.diverges_eval {p q : PTerm C} {σ : State} {r r' : Name} {segs seg
   simp only [Except.ok.injEq, Prod.mk.injEq] at ep eq
   obtain ⟨rfl, rfl⟩ := ep
   obtain ⟨rfl, rfl⟩ := eq
-  unfold PTerm.diverges at hd
-  rw [hs, hs'] at hd
-  rcases Diverge_of_diverges _ _ hd with h | h
+  have hd' := PTerm.diverges_denote hd σ
+  rw [PTerm.denote_of_segs? σ p hs, PTerm.denote_of_segs? σ q hs'] at hd'
+  rcases Diverge_of_diverges _ _ hd' with h | h
   · exact Or.inl fun e => h (by rw [e])
   · exact Or.inr h
 
@@ -1499,7 +1711,8 @@ theorem Tm.isFields_eval (σ : State) : (p : PTerm C) → Tm.isFields p = true �
     refine ⟨f, segs ++ [.field g], ?_, ?_⟩
     · rw [Tm.app1_eval, hp]; rfl
     · simp only [List.all_append, hf, List.all_cons, List.all_nil, Seg.isField, Bool.and_self]
-  | .pvP _, h | .app1 .next _, h | .app2 .at _ _, h => nomatch h
+  | .pvP _, h | .app1 .next _, h | .app2 .at _ _, h | .app2 .nextIn _ _, h
+  | .app3 .atIn _ _ _, h => nomatch h
 
 /-- The path under the root `r`: `age` under `alice` is `alice.age`.  A path
 through an alias is left as it is. -/
@@ -1513,7 +1726,8 @@ theorem Tm.prefixRoot_isFields (r : Name) : (p : PTerm C) → Tm.isFields p = tr
     Tm.isFields (p.prefixRoot r) = true
   | .app0 (.root _), _ => rfl
   | .app1 (.field _) p, h => Tm.prefixRoot_isFields r p h
-  | .pvP _, h | .app1 .next _, h | .app2 .at _ _, h => nomatch h
+  | .pvP _, h | .app1 .next _, h | .app2 .at _ _, h | .app2 .nextIn _ _, h
+  | .app3 .atIn _ _ _, h => nomatch h
 
 /-- `r.p` resolves as the member path `p` does, one segment on. -/
 theorem Tm.prefixRoot_eval {σ : State} (r : Name) : (p : PTerm C) → Tm.isFields p = true →
@@ -1535,7 +1749,8 @@ theorem Tm.prefixRoot_eval {σ : State} (r : Name) : (p : PTerm C) → Tm.isFiel
       show (Tm.app1 (.field g) (p.prefixRoot r)).eval σ = _
       rw [Tm.app1_eval, Tm.prefixRoot_eval r p hf hp]
       rfl
-  | .pvP _, hf, _, _, _ | .app1 .next _, hf, _, _, _ | .app2 .at _ _, hf, _, _, _ => nomatch hf
+  | .pvP _, hf, _, _, _ | .app1 .next _, hf, _, _, _ | .app2 .at _ _, hf, _, _, _
+  | .app2 .nextIn _ _, hf, _, _, _ | .app3 .atIn _ _ _, hf, _, _, _ => nomatch hf
 
 /-- The member path `p` under the frame `F`: `p` itself at the top, else
 `F.p`, which resolves as `p` does in the frame.  `none` for a path through
@@ -1588,7 +1803,6 @@ def Term.base? : Term C → Option (Term C)
 theorem Res.bind_assoc {α β γ : Type} (x : Res α) (f : α → Res β) (g : β → Res γ) :
     ((x >>= f) >>= g) = (x >>= fun a => f a >>= g) := by cases x <;> rfl
 
-theorem Res.ok_bind' {α β : Type} (a : α) (f : α → Res β) : ((Except.ok a : Res α) >>= f) = f a := rfl
 
 /-- A member path's root. -/
 theorem Tm.rootName?_eval {σ : State} : (p : PTerm C) → Tm.isFields p = true →
@@ -1607,7 +1821,8 @@ theorem Tm.rootName?_eval {σ : State} : (p : PTerm C) → Tm.isFields p = true 
       simp only [Op1.eval, bind, Except.bind, pure, Except.pure, Except.ok.injEq, Prod.mk.injEq] at h
       obtain ⟨rfl, -⟩ := h
       exact Tm.rootName?_eval p hf hp
-  | .pvP _, hf, _, _, _ | .app1 .next _, hf, _, _, _ | .app2 .at _ _, hf, _, _, _ => nomatch hf
+  | .pvP _, hf, _, _, _ | .app1 .next _, hf, _, _, _ | .app2 .at _ _, hf, _, _, _
+  | .app2 .nextIn _ _, hf, _, _, _ | .app3 .atIn _ _ _, hf, _, _, _ => nomatch hf
 
 /-- A read of a word through a node that is no struct halts, but at the
 `length` of an array with nothing after it. -/
@@ -2144,6 +2359,22 @@ theorem PTerm.field_eval (p : PTerm C) (f : Name) : (PTerm.field p f).eval σ = 
     let (r, segs) ← p.eval σ
     pure (r, segs ++ [.field f])) := rfl
 
+theorem ITerm.alloc_eval (m : MTerm C) (R : RefTy) : (ITerm.alloc m R).eval σ = (do
+    let τ ← m.eval σ
+    return (← allocDefault τ R).2) := rfl
+theorem MTerm.addM_eval (m : MTerm C) (R : RefTy) : (MTerm.addM m R).eval σ = (do
+    let τ ← m.eval σ
+    return (← allocDefault τ R).1) := rfl
+theorem ITerm.read_eval (m : MTerm C) (a : MAddr C) : (ITerm.read m a).eval σ = (do
+    let τ ← m.eval σ
+    let ad ← a.eval σ
+    (← readAddr τ ad).asRef) := rfl
+theorem MAddr.at_eval (i : ITerm C) (k : Term C) : (MAddr.at i k).eval σ = (do
+    let id ← i.eval σ
+    pure (.memoryIndex id (← (← k.eval σ).asInt))) := rfl
+theorem MValT.ref_eval (i : ITerm C) : (MValT.ref i).eval σ = (do pure (.ref (← i.eval σ))) := rfl
+
+
 end EvalLaws
 
 theorem Value.toMVal_asValue (v : Value) : v.toMVal.asValue = .ok v := by cases v <;> rfl
@@ -2219,25 +2450,521 @@ theorem Close.copyLeaf_asValue (σ : State) (id : Nat) (mv : MVal) (x : Value) :
       · simp [bind, Except.bind] at h
     · intro h; cases h
 
-/-- A law of a memory read: where the read returns, the replacement
-returns the same (`EvalLaw.sound`). -/
-inductive EvalLaw : Term C → Term C → Prop
+/-! ### A rewrite at any sort, in every right-hand side
+
+`Upd.rw` rewrites value terms and never enters a memory read, which is what
+a Theory equation licenses.  A law of a memory read licenses more: it is a
+refinement of the interpreter at its own sort, so it rewrites inside a
+memory read and in a memory or identity right-hand side too (`Tm.rwEv`),
+with the same two directions as `Upd.rw_holds`. -/
+
+section RwEvUpd
+
+variable {u : Srt} {q : Tm C u × Tm C u}
+
+/-- Every right-hand side of an update, rewritten at the sort of `q` (`Tm.rwEv`). -/
+def Upd.rwEv (q : Tm C u × Tm C u) (U : Upd C) : Upd C :=
+  U.map (·.mapTm fun {_} t => t.rwEv q)
+
+theorem UpdElem.mapTm_write_le (hq : Tm.EvalRefinesAt q.1 q.2) (σ₀ τ : State) :
+    (e : UpdElem C) → Res.Le (e.write σ₀ τ) ((e.mapTm fun {_} t => t.rwEv q).write σ₀ τ)
+  | .val _ t | .path _ t | .mref _ t | .storage t | .store _ t | .memory t =>
+    Res.Le.bind (Tm.rwEv_eval hq t σ₀) fun _ => Res.Le.refl _
+  | .net r _ a | .pay r a =>
+    Res.Le.bind (Tm.rwEv_eval hq r σ₀) fun _ => Res.Le.bind (Res.Le.refl _) fun _ =>
+      Res.Le.bind (Tm.rwEv_eval hq a σ₀) fun _ => Res.Le.refl _
+  | .selfBalance _ a => Res.Le.bind (Tm.rwEv_eval hq a σ₀) fun _ => Res.Le.refl _
+  | .saveNet _ => Res.Le.refl _
+
+theorem UpdElem.mapTm_write_rev {σ₀ : State} (hq : Srt.Le u (q.2.eval σ₀) (q.1.eval σ₀))
+    (τ : State) :
+    (e : UpdElem C) → Res.Le ((e.mapTm fun {_} t => t.rwEv q).write σ₀ τ) (e.write σ₀ τ)
+  | .val _ t | .path _ t | .mref _ t | .storage t | .store _ t | .memory t =>
+    Res.Le.bind (Tm.rwEv_eval_rev hq t) fun _ => Res.Le.refl _
+  | .net r _ a | .pay r a =>
+    Res.Le.bind (Tm.rwEv_eval_rev hq r) fun _ => Res.Le.bind (Res.Le.refl _) fun _ =>
+      Res.Le.bind (Tm.rwEv_eval_rev hq a) fun _ => Res.Le.refl _
+  | .selfBalance _ a => Res.Le.bind (Tm.rwEv_eval_rev hq a) fun _ => Res.Le.refl _
+  | .saveNet _ => Res.Le.refl _
+
+theorem Upd.rwEv_foldl (hq : Tm.EvalRefinesAt q.1 q.2) (σ₀ : State) :
+    (U : Upd C) → ∀ ρ, Res.Le (U.foldlM (fun τ e => e.write σ₀ τ) ρ)
+      ((U.rwEv q).foldlM (fun τ e => e.write σ₀ τ) ρ)
+  | [], _ => Res.Le.refl _
+  | e :: U, ρ => by
+    simp only [Upd.rwEv, List.map_cons, List.foldlM_cons]
+    exact Res.Le.bind (UpdElem.mapTm_write_le hq σ₀ ρ e) fun ρ' => Upd.rwEv_foldl hq σ₀ U ρ'
+
+theorem Upd.rwEv_foldl_rev {σ₀ : State} (hq : Srt.Le u (q.2.eval σ₀) (q.1.eval σ₀)) :
+    (U : Upd C) → ∀ ρ, Res.Le ((U.rwEv q).foldlM (fun τ e => e.write σ₀ τ) ρ)
+      (U.foldlM (fun τ e => e.write σ₀ τ) ρ)
+  | [], _ => Res.Le.refl _
+  | e :: U, ρ => by
+    simp only [Upd.rwEv, List.map_cons, List.foldlM_cons]
+    exact Res.Le.bind (UpdElem.mapTm_write_rev hq ρ e) fun ρ' => Upd.rwEv_foldl_rev hq U ρ'
+
+theorem Upd.rwEv_apply (hq : Tm.EvalRefinesAt q.1 q.2) (U : Upd C) (σ : State) :
+    Res.Le (U.apply σ) ((U.rwEv q).apply σ) :=
+  Upd.rwEv_foldl hq σ U σ
+
+theorem Upd.rwEv_apply_rev {σ : State} (hq : Srt.Le u (q.2.eval σ) (q.1.eval σ)) (U : Upd C) :
+    Res.Le ((U.rwEv q).apply σ) (U.apply σ) :=
+  Upd.rwEv_foldl_rev hq U σ
+
+/-- **A rewrite at any sort inside an update, under any modality**
+(`Upd.rw_holds` for `Tm.rwEv`): `q.2` returns what `q.1` returns, and
+wherever the rewritten update returns, `q.1` returns what `q.2` does. -/
+theorem Upd.rwEv_holds (hq : Tm.EvalRefinesAt q.1 q.2) {U : Upd C}
+    (hb : ∀ σ τ, (U.rwEv q).apply σ = .ok τ → Srt.Le u (q.2.eval σ) (q.1.eval σ))
+    (m : Modality) (ψ : Fml C) (σ : State) :
+    holds σ (.upd m (U.rwEv q) ψ) ↔ holds σ (.upd m U ψ) := by
+  simp only [holds]
+  cases hU : U.apply σ with
+  | ok τ => rw [Upd.rwEv_apply hq U σ τ hU]
+  | error e =>
+    cases hU' : (U.rwEv q).apply σ with
+    | ok τ' =>
+      rw [Upd.rwEv_apply_rev (hb σ τ' hU') U τ' hU'] at hU
+      cases hU
+    | error e' => exact Iff.rfl
+
+end RwEvUpd
+
+/-! ### The side conditions of the memory laws
+
+A read below a fresh allocation `addM(m, R)` resolves syntactically: the
+path at which the address reads below the fresh root (`Tm.freshPath?`)
+names the member, and the declared type at that path (`RefTy.memberTy`)
+says what the default copy holds there (`copyStToM_default_readPath`,
+`Calculus/ReadWrite.lean`).  A read that does not look into the fresh
+object is one whose identity was allocated strictly earlier on the memory
+spine (`Tm.boundedIn`), and a read past a write at an address that never
+meets it (`MAddr.apart?`).  Each is a `Bool`, so that `rfl` decides it where
+a law is applied, with a soundness lemma by sort. -/
+
+/-- The path at which a term reads below the root `addM(m, R)` allocates:
+`freshId(addM(m, R))` is the root, `read(addM(m, R), i.f)` the member `f` of
+what `i` reads, `i.f` and `i[k]` (a literal `k`) the path one step down. -/
+def Tm.freshPath? : Tm C u → MTerm C → RefTy → Option (List Seg)
+  | .app1 (.alloc R') m', m, R => if m' == m && R' == R then some [] else none
+  | .app2 .iread M a, m, R => if M == MTerm.addM m R then a.freshPath? m R else none
+  | .app1 (.mfield f) i, m, R => (i.freshPath? m R).map (· ++ [.field f])
+  | .app2 .mat i (.app0 (.lit (.int k))), m, R => (i.freshPath? m R).map (· ++ [.at k])
+  | _, _, _ => none
+
+/-- What a term at a fresh path reads, by sort: an identity is what the path
+reads in the fresh object, and it reads where the declared type is a
+reference; an address reads what the path reads, and it reads where the
+path is declared. -/
+def FreshRead (σ μ₁ : State) (root : Nat) (R : RefTy) (p : List Seg) : {u : Srt} → Tm C u → Prop
+  | .ident, t => (∀ id, t.eval σ = .ok id → μ₁.readPath root p = .ok (.ref id)) ∧
+      (∀ R', (Ty.ref R).memberTy p = some (.ref R') → ∃ id, t.eval σ = .ok id)
+  | .addr, t => (∀ ad, t.eval σ = .ok ad → readAddr μ₁ ad = μ₁.readPath root p) ∧
+      (∀ T', (Ty.ref R).memberTy p = some T' → ∃ ad, t.eval σ = .ok ad)
+  | _, _ => True
+
+theorem Ty.memberTy_snoc_some {T T' : Ty} {p : List Seg} {s : Seg}
+    (h : T.memberTy (p ++ [s]) = some T') : ∃ R', T.memberTy p = some (.ref R') := by
+  rw [Ty.memberTy_append] at h
+  cases hp : T.memberTy p with
+  | none => simp [hp] at h
+  | some T'' =>
+    cases T'' with
+    | prim q => simp [hp, Ty.memberTy, Ty.at_prim] at h
+    | ref R' => exact ⟨R', rfl⟩
+
+theorem Tm.freshPath_eval {m : MTerm C} {R : RefTy} {σ μ₀ μ₁ : State} {root : Nat}
+    (hm : m.eval σ = .ok μ₀) (ha : allocDefault μ₀ R = .ok (μ₁, root)) (t : Tm C u) :
+    ∀ {p : List Seg}, t.freshPath? m R = some p → FreshRead σ μ₁ root R p t := by
+  induction t with
+  | pvV x | pvP x | pvS x | pvI x | app0 o | app3 o a b c =>
+    intro p h
+    simp only [Tm.freshPath?] at h <;> nomatch h
+  | app1 o a ih =>
+    intro p h
+    cases o with
+    | alloc R' =>
+      simp only [Tm.freshPath?] at h
+      split at h
+      · rename_i hmR
+        simp only [Bool.and_eq_true, beq_iff_eq] at hmR
+        obtain ⟨rfl, rfl⟩ := hmR
+        cases h
+        refine ⟨fun id hid => ?_, fun R' _ => ?_⟩
+        · rw [ITerm.alloc_eval, hm, Res.ok_bind', ha] at hid
+          cases hid
+          rfl
+        · exact ⟨root, by rw [ITerm.alloc_eval, hm, Res.ok_bind', ha]; rfl⟩
+      · nomatch h
+    | mfield f =>
+      simp only [Tm.freshPath?, Option.map_eq_some_iff] at h
+      obtain ⟨p', hp', rfl⟩ := h
+      obtain ⟨ih1, ih2⟩ := ih hp'
+      refine ⟨fun ad had => ?_, fun T' hT' => ?_⟩
+      · rw [MAddr.field_eval] at had
+        obtain ⟨id, hid, had⟩ := bind_ok_inv had
+        simp only [pure, Except.pure, Except.ok.injEq] at had
+        subst had
+        have h1 : MVal.readPath μ₁ (.ref root) p' = .ok (.ref id) := ih1 id hid
+        simp only [State.readPath, MVal.readPath_snoc, h1, Res.ok_bind']
+        rfl
+      · obtain ⟨R'', hR''⟩ := Ty.memberTy_snoc_some hT'
+        obtain ⟨id, hid⟩ := ih2 R'' hR''
+        exact ⟨_, by rw [MAddr.field_eval, hid]; rfl⟩
+    | unop _ _ | net | netOf _ | field _ | next | select _ | sval | newArr _ | addM _ | mval | ref =>
+      simp only [Tm.freshPath?] at h <;> nomatch h
+  | app2 o a b iha ihb =>
+    intro p h
+    cases o with
+    | iread =>
+      simp only [Tm.freshPath?] at h
+      split at h
+      · rename_i hM
+        simp only [beq_iff_eq] at hM
+        subst hM
+        obtain ⟨ih1, ih2⟩ := ihb h
+        have hμ : (MTerm.addM m R).eval σ = .ok μ₁ := by
+          rw [MTerm.addM_eval, hm, Res.ok_bind', ha]; rfl
+        refine ⟨fun id hid => ?_, fun R' hR' => ?_⟩
+        · rw [ITerm.read_eval, hμ, Res.ok_bind'] at hid
+          obtain ⟨ad, had, hid⟩ := bind_ok_inv hid
+          rw [ih1 ad had] at hid
+          obtain ⟨mv, hmv, hid⟩ := bind_ok_inv hid
+          cases mv with
+          | prim _ => simp [MVal.asRef] at hid
+          | ref id' =>
+            simp only [MVal.asRef, pure, Except.pure, Except.ok.injEq] at hid
+            subst hid
+            exact hmv
+        · obtain ⟨ad, had⟩ := ih2 _ hR'
+          obtain ⟨mv', hmv', hd⟩ :=
+            (copyStToM_default_readPath p (Close.allocDefault_copy ha) (State.HeapExt.refl μ₁)).2 _ hR'
+          obtain ⟨id, rfl, -⟩ := hd
+          refine ⟨id, ?_⟩
+          rw [ITerm.read_eval, hμ, Res.ok_bind', had, Res.ok_bind', ih1 ad had]
+          simp only [State.readPath]
+          rw [hmv']
+          rfl
+      · nomatch h
+    | mat =>
+      cases b with
+      | app0 o' =>
+        cases o' with
+        | lit v =>
+          cases v with
+          | int k =>
+            simp only [Tm.freshPath?, Option.map_eq_some_iff] at h
+            obtain ⟨p', hp', rfl⟩ := h
+            obtain ⟨ih1, ih2⟩ := iha hp'
+            refine ⟨fun ad had => ?_, fun T' hT' => ?_⟩
+            · rw [MAddr.at_eval] at had
+              obtain ⟨id, hid, had⟩ := bind_ok_inv had
+              simp only [Term.lit_eval, Res.ok_bind', Value.asInt, pure, Except.pure,
+                Except.ok.injEq] at had
+              subst had
+              have h1 : MVal.readPath μ₁ (.ref root) p' = .ok (.ref id) := ih1 id hid
+              simp only [State.readPath, MVal.readPath_snoc, h1, Res.ok_bind']
+              rfl
+            · obtain ⟨R'', hR''⟩ := Ty.memberTy_snoc_some hT'
+              obtain ⟨id, hid⟩ := ih2 R'' hR''
+              exact ⟨_, by rw [MAddr.at_eval, hid]; rfl⟩
+          | bool _ => simp only [Tm.freshPath?] at h <;> nomatch h
+        | env _ => simp only [Tm.freshPath?] at h <;> nomatch h
+      | pvV _ | app1 _ _ | app2 _ _ _ | app3 _ _ _ _ => simp only [Tm.freshPath?] at h <;> nomatch h
+    | binop _ _ | find | len | read | mlen | «at» | delAt | pushSlot _ | pop | shrink | extend _
+    | sfind | copyMem | copy | copySt =>
+      simp only [Tm.freshPath?] at h <;> nomatch h
+
+/-- A memory term on the memory spine of `t` leaves a counter `t` only advances. -/
+theorem Tm.onMemSpine_nextId_le {s : MTerm C} {σ μs : State} (hs : s.eval σ = .ok μs) :
+    (t : MTerm C) → t.onMemSpine s = true → ∀ {μt : State}, t.eval σ = .ok μt →
+      μs.nextId ≤ μt.nextId
+  | .app1 (.addM R) a, h, μt, ht => by
+    simp only [Tm.onMemSpine, Tm.memSpineAny, Bool.or_eq_true, beq_iff_eq] at h
+    rcases h with rfl | h
+    · rw [hs] at ht; cases ht; exact Nat.le_refl _
+    · rw [MTerm.addM_eval] at ht
+      obtain ⟨τ, hτ, ht⟩ := bind_ok_inv ht
+      obtain ⟨⟨μ', id⟩, hal, ht⟩ := bind_ok_inv ht
+      cases ht
+      exact Nat.le_trans (Tm.onMemSpine_nextId_le hs a h hτ) (allocDefault_nextId hal)
+  | .app2 .copySt a v, h, μt, ht => by
+    simp only [Tm.onMemSpine, Tm.memSpineAny, Bool.or_eq_true, beq_iff_eq] at h
+    rcases h with rfl | h
+    · rw [hs] at ht; cases ht; exact Nat.le_refl _
+    · rw [MTerm.copySt_eval] at ht
+      obtain ⟨sv, -, ht⟩ := bind_ok_inv ht
+      obtain ⟨τ, hτ, ht⟩ := bind_ok_inv ht
+      obtain ⟨⟨μ', mv⟩, hc, ht⟩ := bind_ok_inv ht
+      cases ht
+      exact Nat.le_trans (Tm.onMemSpine_nextId_le hs a h hτ) (copyStToM_nextId τ sv _ _ hc)
+  | .app3 .write a p v, h, μt, ht => by
+    simp only [Tm.onMemSpine, Tm.memSpineAny, Bool.or_eq_true, beq_iff_eq] at h
+    rcases h with rfl | h
+    · rw [hs] at ht; cases ht; exact Nat.le_refl _
+    · rw [MTerm.write_eval] at ht
+      obtain ⟨mv, -, ht⟩ := bind_ok_inv ht
+      obtain ⟨τ, hτ, ht⟩ := bind_ok_inv ht
+      obtain ⟨ad, -, ht⟩ := bind_ok_inv ht
+      rw [Close.writeAddr_nextId ht]
+      exact Tm.onMemSpine_nextId_le hs a h hτ
+  | .app0 .memory, h, μt, ht => by
+    simp only [Tm.onMemSpine, Tm.memSpineAny, beq_iff_eq] at h
+    subst h
+    rw [hs] at ht; cases ht; exact Nat.le_refl _
+
+/-- The identity a term reads is allocated strictly earlier on `M`'s memory
+spine: a root `freshId(addM(m₀, R₀))` or `freshId(copySt(m₀, v))` whose
+allocation `M` performs, or a reference member of a fresh root read out of
+that allocation; an address is bounded where its identity is. -/
+def Tm.boundedIn : Tm C u → MTerm C → Bool
+  | .app1 (.alloc R₀) m₀, M => M.onMemSpine (.addM m₀ R₀)
+  | .app2 .copy m₀ v, M => M.onMemSpine (.copySt m₀ v)
+  | .app2 .iread (.app1 (.addM R₀) m₀) (.app1 (.mfield _) i), M =>
+    M.onMemSpine (.addM m₀ R₀) && (i.freshPath? m₀ R₀).isSome
+  | .app2 .iread (.app1 (.addM R₀) m₀) (.app2 .mat i _), M =>
+    M.onMemSpine (.addM m₀ R₀) && (i.freshPath? m₀ R₀).isSome
+  | .app1 (.mfield _) i, M => i.boundedIn M
+  | .app2 .mat i _, M => i.boundedIn M
+  | _, _ => false
+
+/-- What a bounded term reads, by sort: an identity below the counter `M` leaves. -/
+def BoundedRead (σ μ : State) : {u : Srt} → Tm C u → Prop
+  | .ident, t => ∀ id, t.eval σ = .ok id → id < μ.nextId
+  | .addr, t => ∀ ad, t.eval σ = .ok ad → ad.id < μ.nextId
+  | _, _ => True
+
+/-- A reference member of a fresh root, read out of the allocation, is below
+the counter the allocation leaves. -/
+theorem freshRoot_read_lt {m₀ : MTerm C} {R₀ : RefTy} {i : ITerm C} {σ μ₁ : State}
+    (hp : (i.freshPath? m₀ R₀).isSome = true) (hμ : (MTerm.addM m₀ R₀).eval σ = .ok μ₁)
+    {id₀ : Nat} (hi : i.eval σ = .ok id₀) {s : Seg} {id : Nat}
+    (hr : readAddr μ₁ (.ofSeg id₀ s) = .ok (.ref id)) : id < μ₁.nextId := by
+  rw [MTerm.addM_eval] at hμ
+  obtain ⟨μ₀, hm, hμ⟩ := bind_ok_inv hμ
+  obtain ⟨⟨μ₁', root⟩, ha, hμ⟩ := bind_ok_inv hμ
+  cases hμ
+  obtain ⟨p, hp⟩ := Option.isSome_iff_exists.1 hp
+  have h1 := (Tm.freshPath_eval hm ha i hp).1 id₀ hi
+  have hpath : μ₁'.readPath root (p ++ [s]) = .ok (.ref id) := by
+    simp only [State.readPath, MVal.readPath_snoc] at h1 ⊢
+    rw [h1, Res.ok_bind']
+    exact hr
+  obtain ⟨T', -, hd⟩ :=
+    (copyStToM_default_readPath (p ++ [s]) (Close.allocDefault_copy ha) (State.HeapExt.refl μ₁')).1 _ hpath
+  cases T' with
+  | prim q => cases q <;> simp [DefaultMVal, PrimTy.default, Value.toMVal] at hd
+  | ref _ =>
+    obtain ⟨id', hid', hlt⟩ := hd
+    cases hid'
+    exact hlt
+
+theorem Tm.boundedIn_eval {M : MTerm C} {σ μ : State} (hM : M.eval σ = .ok μ) (t : Tm C u) :
+    t.boundedIn M = true → BoundedRead σ μ t := by
+  induction t with
+  | pvV x | pvP x | pvS x | pvI x | app0 o | app3 o a b c =>
+    intro h
+    simp only [Tm.boundedIn] at h <;> nomatch h
+  | app1 o a ih =>
+    intro h
+    cases o with
+    | alloc R₀ =>
+      intro id hid
+      simp only [Tm.boundedIn] at h
+      rw [ITerm.alloc_eval] at hid
+      obtain ⟨μ₀, hm, hid⟩ := bind_ok_inv hid
+      obtain ⟨⟨μ₁, id'⟩, ha, hid⟩ := bind_ok_inv hid
+      cases hid
+      have hμ₁ : (MTerm.addM a R₀).eval σ = .ok μ₁ := by
+        rw [MTerm.addM_eval, hm, Res.ok_bind', ha]; rfl
+      exact Nat.lt_of_lt_of_le (allocDefault_id_lt ha) (Tm.onMemSpine_nextId_le hμ₁ M h hM)
+    | mfield f =>
+      intro ad had
+      simp only [Tm.boundedIn] at h
+      rw [MAddr.field_eval] at had
+      obtain ⟨id, hi, had⟩ := bind_ok_inv had
+      simp only [pure, Except.pure, Except.ok.injEq] at had
+      subst had
+      exact ih h id hi
+    | unop _ _ | net | netOf _ | field _ | next | select _ | sval | newArr _ | addM _ | mval | ref =>
+      simp only [Tm.boundedIn] at h <;> nomatch h
+  | app2 o a b iha ihb =>
+    intro h
+    cases o with
+    | copy =>
+      intro id hid
+      simp only [Tm.boundedIn] at h
+      rw [ITerm.copy_eval] at hid
+      obtain ⟨sv, hv, hid⟩ := bind_ok_inv hid
+      obtain ⟨μ₀, hm, hid⟩ := bind_ok_inv hid
+      obtain ⟨⟨μ₁, mv⟩, hc, hid⟩ := bind_ok_inv hid
+      cases mv with
+      | prim _ => simp [MVal.asRef] at hid
+      | ref id' =>
+        simp only [MVal.asRef, pure, Except.pure, Except.ok.injEq] at hid
+        subst hid
+        have hμ₁ : (MTerm.copySt a b).eval σ = .ok μ₁ := by
+          rw [MTerm.copySt_eval, hv, Res.ok_bind', hm, Res.ok_bind', hc]; rfl
+        exact Nat.lt_of_lt_of_le (copyStToM_ref_lt hc) (Tm.onMemSpine_nextId_le hμ₁ M h hM)
+    | mat =>
+      intro ad had
+      simp only [Tm.boundedIn] at h
+      rw [MAddr.at_eval] at had
+      obtain ⟨id, hi, had⟩ := bind_ok_inv had
+      obtain ⟨kv, -, had⟩ := bind_ok_inv had
+      obtain ⟨kn, -, had⟩ := bind_ok_inv had
+      simp only [pure, Except.pure, Except.ok.injEq] at had
+      subst had
+      exact iha h id hi
+    | iread =>
+      intro id hid
+      cases a with
+      | app1 o₁ m₀ =>
+        cases o₁ with
+        | addM R₀ =>
+          rw [ITerm.read_eval] at hid
+          obtain ⟨μ₁, hμ₁, hid⟩ := bind_ok_inv hid
+          obtain ⟨ad, had, hid⟩ := bind_ok_inv hid
+          obtain ⟨mv, hmv, hid⟩ := bind_ok_inv hid
+          cases mv with
+          | prim _ => simp [MVal.asRef] at hid
+          | ref id' =>
+            simp only [MVal.asRef, pure, Except.pure, Except.ok.injEq] at hid
+            subst hid
+            cases b with
+            | app0 o₀ => nomatch o₀
+            | app3 o₃ _ _ _ => nomatch o₃
+            | app1 o₂ i =>
+              cases o₂ with
+              | mfield f =>
+                simp only [Tm.boundedIn, Bool.and_eq_true] at h
+                rw [MAddr.field_eval] at had
+                obtain ⟨id₀, hi, had⟩ := bind_ok_inv had
+                simp only [pure, Except.pure, Except.ok.injEq] at had
+                subst had
+                exact Nat.lt_of_lt_of_le (freshRoot_read_lt h.2 hμ₁ hi (s := .field f) hmv)
+                  (Tm.onMemSpine_nextId_le hμ₁ M h.1 hM)
+            | app2 o₂ i k =>
+              cases o₂ with
+              | mat =>
+                simp only [Tm.boundedIn, Bool.and_eq_true] at h
+                rw [MAddr.at_eval] at had
+                obtain ⟨id₀, hi, had⟩ := bind_ok_inv had
+                obtain ⟨kv, -, had⟩ := bind_ok_inv had
+                obtain ⟨kn, -, had⟩ := bind_ok_inv had
+                simp only [pure, Except.pure, Except.ok.injEq] at had
+                subst had
+                exact Nat.lt_of_lt_of_le (freshRoot_read_lt h.2 hμ₁ hi (s := .at kn) hmv)
+                  (Tm.onMemSpine_nextId_le hμ₁ M h.1 hM)
+      | app0 _ | app2 _ _ _ | app3 _ _ _ _ => simp only [Tm.boundedIn] at h <;> nomatch h
+    | binop _ _ | find | len | read | mlen | «at» | delAt | pushSlot _ | pop | shrink | extend _
+    | sfind | copyMem | copySt =>
+      simp only [Tm.boundedIn] at h <;> nomatch h
+
+/-- Two memory addresses that never meet: different members, a member and
+an element, elements of one object at different literal indices. -/
+def MAddr.apart? : MAddr C → MAddr C → Bool
+  | .app1 (.mfield f) _, .app1 (.mfield g) _ => f != g
+  | .app1 (.mfield _) _, .app2 .mat _ _ => true
+  | .app2 .mat _ _, .app1 (.mfield _) _ => true
+  | .app2 .mat i (.app0 (.lit (.int k))), .app2 .mat j (.app0 (.lit (.int k'))) => i == j && k != k'
+  | _, _ => false
+
+theorem MAddr.apart?_eval {σ : State} (a b : MAddr C) (h : a.apart? b = true) {ad bd : Addr}
+    (ha : a.eval σ = .ok ad) (hb : b.eval σ = .ok bd) : Close.Apart ad bd := by
+  unfold MAddr.apart? at h
+  split at h
+  · rename_i f i g j
+    simp only [bne_iff_ne, ne_eq] at h
+    rw [MAddr.field_eval] at ha hb
+    obtain ⟨id, -, ha⟩ := bind_ok_inv ha
+    obtain ⟨id', -, hb⟩ := bind_ok_inv hb
+    simp only [pure, Except.pure, Except.ok.injEq] at ha hb
+    subst ha hb
+    exact Or.inr fun h' => h h'.symm
+  · rename_i f i j k
+    rw [MAddr.field_eval] at ha
+    rw [MAddr.at_eval] at hb
+    obtain ⟨id, -, ha⟩ := bind_ok_inv ha
+    obtain ⟨id', -, hb⟩ := bind_ok_inv hb
+    obtain ⟨kv, -, hb⟩ := bind_ok_inv hb
+    obtain ⟨kn, -, hb⟩ := bind_ok_inv hb
+    simp only [pure, Except.pure, Except.ok.injEq] at ha hb
+    subst ha hb
+    trivial
+  · rename_i i k g j
+    rw [MAddr.at_eval] at ha
+    rw [MAddr.field_eval] at hb
+    obtain ⟨id, -, ha⟩ := bind_ok_inv ha
+    obtain ⟨kv, -, ha⟩ := bind_ok_inv ha
+    obtain ⟨kn, -, ha⟩ := bind_ok_inv ha
+    obtain ⟨id', -, hb⟩ := bind_ok_inv hb
+    simp only [pure, Except.pure, Except.ok.injEq] at ha hb
+    subst ha hb
+    trivial
+  · rename_i i k j k'
+    simp only [Bool.and_eq_true, beq_iff_eq, bne_iff_ne, ne_eq] at h
+    obtain ⟨rfl, hk⟩ := h
+    rw [MAddr.at_eval] at ha hb
+    obtain ⟨id, hi, ha⟩ := bind_ok_inv ha
+    obtain ⟨id', hi', hb⟩ := bind_ok_inv hb
+    rw [hi] at hi'
+    cases hi'
+    simp only [Term.lit_eval, Res.ok_bind', Value.asInt, pure, Except.pure, Except.ok.injEq] at ha hb
+    subst ha hb
+    exact Or.inr fun h' => hk h'.symm
+  · nomatch h
+
+/-- A law of a memory read, at the value or the identity sort: where the
+read returns, the replacement returns the same (`EvalLaw.sound`). -/
+inductive EvalLaw : {u : Srt} → Tm C u → Tm C u → Prop
   /-- **`readOnWrite`**: `read(write(m, a, v), a) ⇝ v` (`readAddr_writeAddr_same`). -/
   | readOnWrite {m : MTerm C} {a : MAddr C} {v : Value} :
-      EvalLaw (.read (.write m a (.val (.lit v))) a) (.lit v)
+      EvalLaw (Term.read (.write m a (.val (.lit v))) a) (Term.lit v)
   /-- **`findCopyMem`**: a member read out of a memory object copied into
   storage is read out of memory,
   `find(save(s, p, copyMem(mtSt, m, i)), p.f) ⇝ read(m, i.f)` (`copyMem_member`). -/
   | findCopyMem {s : STerm C} {p : PTerm C} {m : MTerm C} {i : ITerm C} {f : Name}
       (hf : (f == "length") = false := by rfl) :
-      EvalLaw (.find (.save s p (.copyMem m i)) (.field p f)) (.read m (.field i f))
+      EvalLaw (Term.find (.save s p (.copyMem m i)) (.field p f)) (Term.read m (.field i f))
   /-- **`readCopySt`**: a member read out of a copy of a storage struct is
   read out of storage,
   `read(copySt(m, find(s, p)), freshId(copySt(m, find(s, p))).f) ⇝ find(s, p.f)`
   (`copyStToM_member`). -/
   | readCopySt {m : MTerm C} {s : STerm C} {p : PTerm C} {f : Name}
       (hf : (f == "length") = false := by rfl) :
-      EvalLaw (.read (.copySt m (.find s p)) (.field (.copy m (.find s p)) f)) (.find s (.field p f))
+      EvalLaw (Term.read (.copySt m (.find s p)) (.field (.copy m (.find s p)) f))
+        (Term.find s (.field p f))
+  /-- **`readAddEqual`**: a primitive member or fixed element of a fresh
+  object holds its type's default, `read(addM(m, R), a) ⇝ default`, where
+  `a` reads at a fresh path of the allocation whose declared type is the
+  primitive (`copyStToM_default_readPath`). -/
+  | readAddEqual {m : MTerm C} {R : RefTy} {a : MAddr C} {q : PrimTy}
+      (h : (a.freshPath? m R).bind (Ty.ref R).memberTy = some (.prim q) := by rfl) :
+      EvalLaw (Term.read (.addM m R) a) (Term.lit (PrimTy.default q))
+  /-- **`readAddDifferent`**: an allocation leaves every object allocated
+  before it, `read(addM(m, R), a) ⇝ read(m, a)` where `a`'s identity is
+  allocated strictly earlier on `m`'s spine (`Tm.boundedIn`, `readAddr_heapExt`). -/
+  | readAddDifferent {m : MTerm C} {R : RefTy} {a : MAddr C} (h : a.boundedIn m = true := by rfl) :
+      EvalLaw (Term.read (.addM m R) a) (Term.read m a)
+  /-- **`readAddDifferentIdentity`**: `readAddDifferent` at the identity sort. -/
+  | readAddDifferentIdentity {m : MTerm C} {R : RefTy} {a : MAddr C}
+      (h : a.boundedIn m = true := by rfl) :
+      EvalLaw (ITerm.read (.addM m R) a) (ITerm.read m a)
+  /-- **`readWriteDifferent`**: a write leaves every other address,
+  `read(write(m, a, v), b) ⇝ read(m, b)` where `a` and `b` never meet
+  (`MAddr.apart?`, `writeAddr_setObj`). -/
+  | readWriteDifferent {m : MTerm C} {a b : MAddr C} {v : MValT C}
+      (h : a.apart? b = true := by rfl) :
+      EvalLaw (Term.read (.write m a v) b) (Term.read m b)
+  /-- **`readWriteDifferentIdentity`**: `readWriteDifferent` at the identity sort. -/
+  | readWriteDifferentIdentity {m : MTerm C} {a b : MAddr C} {v : MValT C}
+      (h : a.apart? b = true := by rfl) :
+      EvalLaw (ITerm.read (.write m a v) b) (ITerm.read m b)
+  /-- **`readOnWriteIdentity`**: `readOnWrite` at the identity sort,
+  `read(write(m, a, ref(i)), a) ⇝ i` (`readAddr_writeAddr_same`). -/
+  | readOnWriteIdentity {m : MTerm C} {a : MAddr C} {i : ITerm C} :
+      EvalLaw (ITerm.read (.write m a (.ref i)) a) i
 
 section EvalLawSound
 
@@ -2332,67 +3059,157 @@ theorem EvalLaw.readCopySt_eval {m : MTerm C} {s : STerm C} {p : PTerm C} {f : N
     rw [this']
     exact ⟨Res.Le.refl _, Res.Le.refl _⟩
 
+theorem EvalLaw.readAddEqual_eval {m : MTerm C} {R : RefTy} {a : MAddr C} {q : PrimTy}
+    (h : (a.freshPath? m R).bind (Ty.ref R).memberTy = some (.prim q)) {μ₁ : State}
+    (hw : (MTerm.addM m R).eval σ = .ok μ₁) :
+    (Term.read (.addM m R) a).eval σ = .ok (PrimTy.default q) := by
+  have hμ := hw
+  rw [MTerm.addM_eval] at hw
+  obtain ⟨μ₀, hm, hw⟩ := bind_ok_inv hw
+  obtain ⟨⟨μ₁', root⟩, ha, hw⟩ := bind_ok_inv hw
+  cases hw
+  cases hp : a.freshPath? m R with
+  | none => simp [hp] at h
+  | some p =>
+    simp only [hp, Option.bind] at h
+    obtain ⟨h1, h2⟩ := Tm.freshPath_eval hm ha a hp
+    obtain ⟨ad, had⟩ := h2 _ h
+    obtain ⟨mv', hmv', hd⟩ :=
+      (copyStToM_default_readPath p (Close.allocDefault_copy ha) (State.HeapExt.refl _)).2 _ h
+    simp only [DefaultMVal] at hd
+    subst hd
+    rw [Term.read_eval, hμ, Res.ok_bind', had, Res.ok_bind', h1 ad had]
+    simp only [State.readPath]
+    rw [hmv', Res.ok_bind', Value.toMVal_asValue]
+
+theorem EvalLaw.readAddDifferent_eval {m : MTerm C} {R : RefTy} {a : MAddr C}
+    (h : a.boundedIn m = true) {μ₁ : State} (hw : (MTerm.addM m R).eval σ = .ok μ₁) :
+    (Term.read (.addM m R) a).eval σ = (Term.read m a).eval σ := by
+  have hμ := hw
+  rw [MTerm.addM_eval] at hw
+  obtain ⟨μ₀, hm, hw⟩ := bind_ok_inv hw
+  obtain ⟨⟨μ₁', root⟩, ha, hw⟩ := bind_ok_inv hw
+  cases hw
+  rw [Term.read_eval, Term.read_eval, hμ, hm, Res.ok_bind', Res.ok_bind']
+  cases had : a.eval σ with
+  | error _ => rfl
+  | ok ad =>
+    simp only [Res.ok_bind']
+    rw [readAddr_heapExt (allocDefault_heapExt ha) (Tm.boundedIn_eval hm a h ad had)]
+
+theorem EvalLaw.readAddDifferentIdentity_eval {m : MTerm C} {R : RefTy} {a : MAddr C}
+    (h : a.boundedIn m = true) {μ₁ : State} (hw : (MTerm.addM m R).eval σ = .ok μ₁) :
+    (ITerm.read (.addM m R) a).eval σ = (ITerm.read m a).eval σ := by
+  have hμ := hw
+  rw [MTerm.addM_eval] at hw
+  obtain ⟨μ₀, hm, hw⟩ := bind_ok_inv hw
+  obtain ⟨⟨μ₁', root⟩, ha, hw⟩ := bind_ok_inv hw
+  cases hw
+  rw [ITerm.read_eval, ITerm.read_eval, hμ, hm, Res.ok_bind', Res.ok_bind']
+  cases had : a.eval σ with
+  | error _ => rfl
+  | ok ad =>
+    simp only [Res.ok_bind']
+    rw [readAddr_heapExt (allocDefault_heapExt ha) (Tm.boundedIn_eval hm a h ad had)]
+
+theorem EvalLaw.readWriteDifferent_eval {m : MTerm C} {a b : MAddr C} {v : MValT C}
+    (h : a.apart? b = true) {τ : State} (hw : (MTerm.write m a v).eval σ = .ok τ) :
+    (Term.read (.write m a v) b).eval σ = (Term.read m b).eval σ := by
+  have hμ := hw
+  rw [MTerm.write_eval] at hw
+  obtain ⟨mv, hv, hw⟩ := bind_ok_inv hw
+  obtain ⟨μ, hm, hw⟩ := bind_ok_inv hw
+  obtain ⟨ad, had, hw⟩ := bind_ok_inv hw
+  rw [Term.read_eval, Term.read_eval, hμ, hm, Res.ok_bind', Res.ok_bind']
+  cases hbd : b.eval σ with
+  | error _ => rfl
+  | ok bd =>
+    simp only [Res.ok_bind']
+    obtain ⟨-, -, -, hfr⟩ := Close.writeAddr_setObj hw
+    rw [hfr bd (MAddr.apart?_eval a b h had hbd)]
+
+theorem EvalLaw.readWriteDifferentIdentity_eval {m : MTerm C} {a b : MAddr C} {v : MValT C}
+    (h : a.apart? b = true) {τ : State} (hw : (MTerm.write m a v).eval σ = .ok τ) :
+    (ITerm.read (.write m a v) b).eval σ = (ITerm.read m b).eval σ := by
+  have hμ := hw
+  rw [MTerm.write_eval] at hw
+  obtain ⟨mv, hv, hw⟩ := bind_ok_inv hw
+  obtain ⟨μ, hm, hw⟩ := bind_ok_inv hw
+  obtain ⟨ad, had, hw⟩ := bind_ok_inv hw
+  rw [ITerm.read_eval, ITerm.read_eval, hμ, hm, Res.ok_bind', Res.ok_bind']
+  cases hbd : b.eval σ with
+  | error _ => rfl
+  | ok bd =>
+    simp only [Res.ok_bind']
+    obtain ⟨-, -, -, hfr⟩ := Close.writeAddr_setObj hw
+    rw [hfr bd (MAddr.apart?_eval a b h had hbd)]
+
+theorem EvalLaw.readOnWriteIdentity_eval {m : MTerm C} {a : MAddr C} {i : ITerm C} {τ : State}
+    (hw : (MTerm.write m a (.ref i)).eval σ = .ok τ) :
+    (ITerm.read (.write m a (.ref i)) a).eval σ = i.eval σ := by
+  have hμ := hw
+  rw [MTerm.write_eval, MValT.ref_eval] at hw
+  obtain ⟨mv, hmv, hw⟩ := bind_ok_inv hw
+  obtain ⟨id, hi, hmv⟩ := bind_ok_inv hmv
+  simp only [pure, Except.pure, Except.ok.injEq] at hmv
+  subst hmv
+  obtain ⟨μ, hm, hw⟩ := bind_ok_inv hw
+  obtain ⟨ad, had, hw⟩ := bind_ok_inv hw
+  rw [ITerm.read_eval, hμ, Res.ok_bind', had, Res.ok_bind', Close.readAddr_writeAddr_same hw, hi]
+  rfl
+
 /-- **A law of a memory read refines evaluation**: where the read returns,
 its replacement returns the same. -/
-theorem EvalLaw.sound {t t' : Term C} : EvalLaw t t' → Term.EvalRefines t t'
-  | .readOnWrite, σ, x, hx => by
+theorem EvalLaw.sound {u : Srt} {t t' : Tm C u} : EvalLaw t t' → Tm.EvalRefinesAt t t'
+  | .readOnWrite => fun σ x hx => by
     have hx0 := hx
     rw [Term.read_eval] at hx
     obtain ⟨τ, hτ, -⟩ := bind_ok_inv hx
     rw [EvalLaw.readOnWrite_le hτ] at hx0
     obtain rfl := Res.ok_inj hx0
     rfl
-  | .findCopyMem hf, σ, x, hx => by
+  | .findCopyMem hf => fun σ x hx => by
     have hx0 := hx
     rw [Term.find_eval] at hx
     obtain ⟨τ, hτ, -⟩ := bind_ok_inv hx
     exact (EvalLaw.findCopyMem_eval hf hτ).1 x hx0
-  | .readCopySt hf, σ, x, hx => by
+  | .readCopySt hf => fun σ x hx => by
     rw [Term.read_eval] at hx
     obtain ⟨μ, hμ, hx'⟩ := bind_ok_inv hx
     exact (EvalLaw.readCopySt_eval hf hμ).1 x hx
+  | .readAddEqual h => fun σ x hx => by
+    have hx0 := hx
+    rw [Term.read_eval] at hx
+    obtain ⟨μ₁, hμ, -⟩ := bind_ok_inv hx
+    rw [EvalLaw.readAddEqual_eval h hμ] at hx0
+    exact hx0.symm ▸ rfl
+  | .readAddDifferent h => fun σ x hx => by
+    have hx0 := hx
+    rw [Term.read_eval] at hx
+    obtain ⟨μ₁, hμ, -⟩ := bind_ok_inv hx
+    rwa [EvalLaw.readAddDifferent_eval h hμ] at hx0
+  | .readAddDifferentIdentity h => fun σ x hx => by
+    have hx0 := hx
+    rw [ITerm.read_eval] at hx
+    obtain ⟨μ₁, hμ, -⟩ := bind_ok_inv hx
+    rwa [EvalLaw.readAddDifferentIdentity_eval h hμ] at hx0
+  | .readWriteDifferent h => fun σ x hx => by
+    have hx0 := hx
+    rw [Term.read_eval] at hx
+    obtain ⟨τ, hτ, -⟩ := bind_ok_inv hx
+    rwa [EvalLaw.readWriteDifferent_eval h hτ] at hx0
+  | .readWriteDifferentIdentity h => fun σ x hx => by
+    have hx0 := hx
+    rw [ITerm.read_eval] at hx
+    obtain ⟨τ, hτ, -⟩ := bind_ok_inv hx
+    rwa [EvalLaw.readWriteDifferentIdentity_eval h hτ] at hx0
+  | .readOnWriteIdentity => fun σ x hx => by
+    have hx0 := hx
+    rw [ITerm.read_eval] at hx
+    obtain ⟨τ, hτ, -⟩ := bind_ok_inv hx
+    rwa [EvalLaw.readOnWriteIdentity_eval hτ] at hx0
 
 end EvalLawSound
-
-/-- `t` is read before anything else of `s` on the memory spine: `s` is `t`,
-or a memory operation over a term on the spine of `t`. -/
-def Tm.memSpineAny (f : MTerm C → Bool) : Tm C u → Bool
-  | .app1 (.addM R) a => f (.app1 (.addM R) a) || a.memSpineAny f
-  | .app2 .copySt a v => f (.app2 .copySt a v) || a.memSpineAny f
-  | .app3 .write a p v => f (.app3 .write a p v) || a.memSpineAny f
-  | t => match u, t with
-    | .mem, t => f t
-    | _, _ => false
-
-@[inherit_doc Tm.memSpineAny]
-def Tm.onMemSpine (t s : MTerm C) : Bool := t.memSpineAny (· == s)
-
-/-- A term on the memory spine of `s` halts wherever `s` does. -/
-theorem Tm.onMemSpine_error {s : MTerm C} {σ : State} {e : Halt} (hs : s.eval σ = .error e) :
-    (t : MTerm C) → t.onMemSpine s = true → ∃ e', t.eval σ = .error e'
-  | .app1 (.addM _) a, h => by
-    simp only [Tm.onMemSpine, Tm.memSpineAny, Bool.or_eq_true, beq_iff_eq] at h
-    rcases h with rfl | h
-    · exact ⟨e, hs⟩
-    · obtain ⟨e', ha⟩ := Tm.onMemSpine_error hs a h
-      exact ⟨e', by rw [Tm.app1_eval, ha]; rfl⟩
-  | .app2 .copySt a v, h => by
-    simp only [Tm.onMemSpine, Tm.memSpineAny, Bool.or_eq_true, beq_iff_eq] at h
-    rcases h with rfl | h
-    · exact ⟨e, hs⟩
-    · obtain ⟨e', ha⟩ := Tm.onMemSpine_error hs a h
-      rw [Tm.app2_eval, ha]
-      cases v.eval σ <;> exact ⟨_, rfl⟩
-  | .app3 .write a p v, h => by
-    simp only [Tm.onMemSpine, Tm.memSpineAny, Bool.or_eq_true, beq_iff_eq] at h
-    rcases h with rfl | h
-    · exact ⟨e, hs⟩
-    · obtain ⟨e', ha⟩ := Tm.onMemSpine_error hs a h
-      rw [Tm.app3_eval, ha]
-      cases v.eval σ <;> exact ⟨_, rfl⟩
-  | .app0 .memory, h => by
-    simp only [Tm.onMemSpine, Tm.memSpineAny, beq_iff_eq] at h
-    exact ⟨e, h ▸ hs⟩
 
 /-- `U` writes the memory with a term on whose spine the write `w` lies: `w`
 returns wherever `U` does. -/
@@ -2427,30 +3244,64 @@ theorem Upd.holdsMem_eval {U : Upd C} {w : MTerm C} (h : U.holdsMem w = true) {�
     nomatch hs
 
 /-- `U` returns only where the memory law is exact: `q.1` reads back a
-write `U` holds — the memory write of `readOnWrite` and `readCopySt`
+write `U` holds — the memory write or allocation the read looks past
 (`Upd.holdsMem`), the storage write of `findCopyMem` (`Upd.holdsWrite`).
-Syntactic, so that `rfl` decides it. -/
-def Upd.coversEval (U : Upd C) : Term C × Term C → Bool
-  | (.read (.write m a (.val (.lit v))) a', _) =>
-    a' == a && U.holdsMem (.write m a (.val (.lit v)))
-  | (.find (.save s p (.copyMem m i)) (.field p' _), _) =>
+By the sort of the law, then the shape of its read.  Syntactic, so that
+`rfl` decides it. -/
+def Upd.coversEval (U : Upd C) : {u : Srt} → Tm C u × Tm C u → Bool
+  | .val, (Term.read (.write m a v) _, _) => U.holdsMem (.write m a v)
+  | .val, (Term.find (.save s p (.copyMem m i)) (.field p' _), _) =>
     p' == p && U.holdsWrite (.save s p (.copyMem m i))
-  | (.read (.copySt m v) (.field (.copy m' v') _), _) =>
+  | .val, (Term.read (.copySt m v) (.field (.copy m' v') _), _) =>
     m == m' && v == v' && U.holdsMem (.copySt m v)
-  | _ => false
+  | .val, (Term.read (.addM m R) _, _) => U.holdsMem (.addM m R)
+  | .ident, (ITerm.read (.write m a v) _, _) => U.holdsMem (.write m a v)
+  | .ident, (ITerm.read (.addM m R) _, _) => U.holdsMem (.addM m R)
+  | _, _ => false
 
 /-- Where the update returns, a covered memory law is exact: its replacement
 returns what the replaced term returns. -/
-theorem EvalLaw.back {t t' : Term C} (r : EvalLaw t t') {U : Upd C}
+theorem EvalLaw.back {u : Srt} {t t' : Tm C u} (r : EvalLaw t t') {U : Upd C}
     (hc : U.coversEval (t, t') = true) {σ τ : State} (hU : U.apply σ = .ok τ) :
-    Res.Le (t'.eval σ) (t.eval σ) := by
+    Srt.Le u (t'.eval σ) (t.eval σ) := by
   cases r with
   | readOnWrite =>
-    simp only [Upd.coversEval, Bool.and_eq_true, beq_iff_eq] at hc
-    obtain ⟨τw, hw⟩ := Upd.holdsMem_eval hc.2 hU
+    simp only [Upd.coversEval] at hc
+    obtain ⟨τw, hw⟩ := Upd.holdsMem_eval hc hU
     intro x hx
     cases hx
     exact EvalLaw.readOnWrite_le hw
+  | readAddEqual h =>
+    simp only [Upd.coversEval] at hc
+    obtain ⟨μ₁, hw⟩ := Upd.holdsMem_eval hc hU
+    intro x hx
+    cases hx
+    exact EvalLaw.readAddEqual_eval h hw
+  | readAddDifferent h =>
+    simp only [Upd.coversEval] at hc
+    obtain ⟨μ₁, hw⟩ := Upd.holdsMem_eval hc hU
+    rw [EvalLaw.readAddDifferent_eval h hw]
+    exact Res.Le.refl _
+  | readAddDifferentIdentity h =>
+    simp only [Upd.coversEval] at hc
+    obtain ⟨μ₁, hw⟩ := Upd.holdsMem_eval hc hU
+    rw [EvalLaw.readAddDifferentIdentity_eval h hw]
+    exact Res.Le.refl _
+  | readWriteDifferent h =>
+    simp only [Upd.coversEval] at hc
+    obtain ⟨τw, hw⟩ := Upd.holdsMem_eval hc hU
+    rw [EvalLaw.readWriteDifferent_eval h hw]
+    exact Res.Le.refl _
+  | readWriteDifferentIdentity h =>
+    simp only [Upd.coversEval] at hc
+    obtain ⟨τw, hw⟩ := Upd.holdsMem_eval hc hU
+    rw [EvalLaw.readWriteDifferentIdentity_eval h hw]
+    exact Res.Le.refl _
+  | readOnWriteIdentity =>
+    simp only [Upd.coversEval] at hc
+    obtain ⟨τw, hw⟩ := Upd.holdsMem_eval hc hU
+    rw [EvalLaw.readOnWriteIdentity_eval hw]
+    exact Res.Le.refl _
   | findCopyMem hf =>
     simp only [Upd.coversEval, Bool.and_eq_true, beq_iff_eq] at hc
     obtain ⟨b, F, hb, τ₁, hbe⟩ := Upd.holdsWrite_eval hc.2 hU
@@ -2463,11 +3314,11 @@ theorem EvalLaw.back {t t' : Term C} (r : EvalLaw t t') {U : Upd C}
 
 /-- The memory law on the right-hand sides of `{U}_m φ` under any `m`, if it
 rewrites one and the rewritten update holds the write the law reads back. -/
-def Fml.rwUpdEvalTop (q : Term C × Term C) (m : Modality) (U : Upd C) (φ : Fml C) :
+def Fml.rwUpdEvalTop {u : Srt} (q : Tm C u × Tm C u) (m : Modality) (U : Upd C) (φ : Fml C) :
     Option (Fml C) :=
-  if (U.rw q != U && (U.rw q).coversEval q) = true then some (.upd m (U.rw q) φ) else none
+  if (U.rwEv q != U && (U.rwEv q).coversEval q) = true then some (.upd m (U.rwEv q) φ) else none
 
-theorem Fml.rwUpdEvalTop_sound {q : Term C × Term C} (r : EvalLaw q.1 q.2)
+theorem Fml.rwUpdEvalTop_sound {u : Srt} {q : Tm C u × Tm C u} (r : EvalLaw q.1 q.2)
     {m : Modality} {U : Upd C} {φ ψ : Fml C} (h : Fml.rwUpdEvalTop q m U φ = some ψ)
     (σ : State) (hψ : holds σ ψ) : holds σ (.upd m U φ) := by
   unfold Fml.rwUpdEvalTop at h
@@ -2475,12 +3326,12 @@ theorem Fml.rwUpdEvalTop_sound {q : Term C × Term C} (r : EvalLaw q.1 q.2)
   · rename_i hc
     cases h
     simp only [Bool.and_eq_true] at hc
-    exact (Upd.rw_holds r.sound (fun _ _ hU => r.back hc.2 hU) m φ σ).1 hψ
+    exact (Upd.rwEv_holds r.sound (fun _ _ hU => r.back hc.2 hU) m φ σ).1 hψ
   · nomatch h
 
 /-- The memory law on the right-hand sides of the update at position `i`,
 under any modality, where that update holds the write the law reads back. -/
-def Fml.rwUpdEvalAt (q : Term C × Term C) (i : Nat) : Fml C → Option (Fml C) :=
+def Fml.rwUpdEvalAt {u : Srt} (q : Tm C u × Tm C u) (i : Nat) : Fml C → Option (Fml C) :=
   Fml.atSpine (Fml.rwUpdEvalTop q) i
 
 /-! ## The rewrites, bundled -/
@@ -2549,7 +3400,7 @@ def lawUpdEq {t t' : Term C} (_r : TermTaclet t t') (i : Nat) : LineRw C :=
 /-- The memory law `r` on the right-hand sides of the update at position `i`
 under any modality, where that update holds the write `r` reads back
 (`Upd.coversEval`). -/
-def lawUpdEval {t t' : Term C} (r : EvalLaw t t') (i : Nat) : LineRw C :=
+def lawUpdEval {u : Srt} {t t' : Tm C u} (r : EvalLaw t t') (i : Nat) : LineRw C :=
   ⟨Fml.rwUpdEvalAt (t, t') i, Fml.atSpine_sound (Fml.rwUpdEvalTop_sound r) i _⟩
 
 end LineRw

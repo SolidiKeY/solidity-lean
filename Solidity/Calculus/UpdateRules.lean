@@ -2343,7 +2343,7 @@ theorem Op1.eval_le {σ : State} : (o : Op1 a s) → {r r' : a.Ev} → Srt.Le a 
       cases b <;> first
         | exact Res.Le.refl _
         | exact Res.Le.bind h fun _ => Res.Le.refl _
-  | .unop .., _, _, h | .net, _, _, h | .field _, _, _, h | .next, _, _, h
+  | .unop .., _, _, h | .net, _, _, h | .delValue, _, _, h | .field _, _, _, h | .next, _, _, h
   | .select _, _, _, h | .sval, _, _, h | .newArr _, _, _, h | .alloc _, _, _, h
   | .mfield _, _, _, h | .addM _, _, _, h | .mval, _, _, h | .ref, _, _, h =>
     Res.Le.bind h fun _ => Res.Le.refl _
@@ -2354,8 +2354,8 @@ theorem Op2.eval_le {σ : State} : (o : Op2 a b s) → {ra ra' : a.Ev} → {rb r
   | .copy, _, _, _, _, ha, hb | .copySt, _, _, _, _, ha, hb =>
     Res.Le.bind hb fun _ => Res.Le.bind ha fun _ => Res.Le.refl _
   | .find, _, _, _, _, ha, hb | .len, _, _, _, _, ha, hb | .read, _, _, _, _, ha, hb
-  | .mlen, _, _, _, _, ha, hb | .at, _, _, _, _, ha, hb | .delAt, _, _, _, _, ha, hb
-  | .pushSlot _, _, _, _, _, ha, hb | .pop, _, _, _, _, ha, hb | .shrink, _, _, _, _, ha, hb
+  | .mlen, _, _, _, _, ha, hb | .at, _, _, _, _, ha, hb | .nextIn, _, _, _, _, ha, hb
+  | .delAt, _, _, _, _, ha, hb | .pushSlot _, _, _, _, _, ha, hb | .pop, _, _, _, _, ha, hb | .shrink, _, _, _, _, ha, hb
   | .extend _, _, _, _, _, ha, hb | .sfind, _, _, _, _, ha, hb | .copyMem, _, _, _, _, ha, hb
   | .iread, _, _, _, _, ha, hb | .mat, _, _, _, _, ha, hb =>
     Res.Le.bind ha fun _ => Res.Le.bind hb fun _ => Res.Le.refl _
@@ -2364,6 +2364,9 @@ theorem Op3.eval_le {σ : State} : (o : Op3 a b c s) → {ra ra' : a.Ev} → {rb
     {rc rc' : c.Ev} → Srt.Le a ra ra' → Srt.Le b rb rb' → Srt.Le c rc rc' →
     Srt.Le s (o.eval σ ra rb rc) (o.eval σ ra' rb' rc')
   | .ite, _, _, _, _, _, _, hc, ha, hb => Res.Le.bind hc fun _ => pickBranch_le ha hb
+  | .atIn, _, _, _, _, _, _, hs, hp, hi =>
+    Res.Le.bind hs fun _ => Res.Le.bind hp fun _ => Res.Le.bind hi fun _ =>
+      Res.Le.bind (Res.Le.refl _) fun _ => Res.Le.refl _
   | .save, _, _, _, _, _, _, hs, hp, hv =>
     Res.Le.bind hv fun _ => Res.Le.bind hs fun _ => Res.Le.bind hp fun _ => Res.Le.refl _
   | .push, _, _, _, _, _, _, hs, hp, hv =>
@@ -2552,6 +2555,95 @@ theorem Upd.rw_holds (hq : Term.EvalRefines q.1 q.2) {U : Upd C}
       rw [Upd.rw_apply_rev (hb σ τ' hU') U τ' hU'] at hU
       cases hU
     | error e' => exact Iff.rfl
+
+/-! ### The rewrite at any one sort
+
+A law of a memory read may be stated at the identity sort
+(`read(write(m, a, ref(i)), a) ⇝ i`), and its right-hand side may sit
+inside a memory read — so `Tm.rwEv` takes its two terms at any one sort `u`
+and replaces every subterm equal to the first, inside a memory read too
+(`Tm.rw` never enters one, since it rewrites by the denotation).  What the
+replacement must satisfy is `Tm.EvalRefinesAt`, `Term.EvalRefines` at the
+sort of the law. -/
+
+/-- Where `t` returns, `t'` returns the same, at the sort `u`. -/
+def Tm.EvalRefinesAt {u : Srt} (t t' : Tm C u) : Prop := ∀ σ, Srt.Le u (t.eval σ) (t'.eval σ)
+
+theorem Term.EvalRefines.at {t t' : Term C} (h : Term.EvalRefines t t') : Tm.EvalRefinesAt t t' := h
+
+/-- `q.2` where the term is `q.1`, at the sort of `q`; a term of any other
+sort is left as it is. -/
+def Tm.pickAtSort {u : Srt} (q : Tm C u × Tm C u) {s : Srt} (e d : Tm C s) : Tm C s :=
+  if h : u = s then (if cast (congrArg (Tm C) h) q.1 = e then cast (congrArg (Tm C) h) q.2 else d)
+  else d
+
+/-- Every occurrence of `q.1` in a term, replaced by `q.2`, a memory read
+looked into. -/
+def Tm.rwEv {u : Srt} (q : Tm C u × Tm C u) : Tm C s → Tm C s
+  | .pvV x => Tm.pickAtSort q (.pvV x) (.pvV x)
+  | .pvP x => Tm.pickAtSort q (.pvP x) (.pvP x)
+  | .pvS x => Tm.pickAtSort q (.pvS x) (.pvS x)
+  | .pvI x => Tm.pickAtSort q (.pvI x) (.pvI x)
+  | .app0 o => Tm.pickAtSort q (.app0 o) (.app0 o)
+  | .app1 o a => Tm.pickAtSort q (.app1 o a) (.app1 o (a.rwEv q))
+  | .app2 o a b => Tm.pickAtSort q (.app2 o a b) (.app2 o (a.rwEv q) (b.rwEv q))
+  | .app3 o a b c => Tm.pickAtSort q (.app3 o a b c) (.app3 o (a.rwEv q) (b.rwEv q) (c.rwEv q))
+
+section RwEvAt
+
+variable {u : Srt} {qu : Tm C u × Tm C u}
+
+theorem Tm.pickAtSort_eval (hq : Tm.EvalRefinesAt qu.1 qu.2) {s : Srt} {e d : Tm C s}
+    (hd : ∀ σ, Srt.Le s (e.eval σ) (d.eval σ)) (σ : State) :
+    Srt.Le s (e.eval σ) ((Tm.pickAtSort qu e d).eval σ) := by
+  unfold Tm.pickAtSort
+  split
+  · rename_i h
+    subst h
+    simp only [cast_eq]
+    split
+    · rename_i he
+      subst he
+      exact hq σ
+    · exact hd σ
+  · exact hd σ
+
+/-- **Replacing `qu.1` by a term that refines it keeps every value a term
+returns**, a memory read looked into. -/
+theorem Tm.rwEv_eval (hq : Tm.EvalRefinesAt qu.1 qu.2) :
+    (e : Tm C s) → ∀ σ, Srt.Le s (e.eval σ) ((e.rwEv qu).eval σ)
+  | .pvV _ | .pvP _ | .pvS _ | .pvI _ | .app0 _ => Tm.pickAtSort_eval hq fun _ => Srt.Le.refl _ _
+  | .app1 o a => Tm.pickAtSort_eval hq fun σ => o.eval_le (a.rwEv_eval hq σ)
+  | .app2 o a b => Tm.pickAtSort_eval hq fun σ => o.eval_le (a.rwEv_eval hq σ) (b.rwEv_eval hq σ)
+  | .app3 o a b c => Tm.pickAtSort_eval hq fun σ =>
+    o.eval_le (a.rwEv_eval hq σ) (b.rwEv_eval hq σ) (c.rwEv_eval hq σ)
+
+theorem Tm.pickAtSort_eval_rev {σ : State} (hq : Srt.Le u (qu.2.eval σ) (qu.1.eval σ)) {s : Srt}
+    {e d : Tm C s} (hd : Srt.Le s (d.eval σ) (e.eval σ)) :
+    Srt.Le s ((Tm.pickAtSort qu e d).eval σ) (e.eval σ) := by
+  unfold Tm.pickAtSort
+  split
+  · rename_i h
+    subst h
+    simp only [cast_eq]
+    split
+    · rename_i he
+      subst he
+      exact hq
+    · exact hd
+  · exact hd
+
+/-- **Replacing `qu.1` by a term that returns what it returns at `σ` keeps
+every value the rewritten term returns there.** -/
+theorem Tm.rwEv_eval_rev {σ : State} (hq : Srt.Le u (qu.2.eval σ) (qu.1.eval σ)) :
+    (e : Tm C s) → Srt.Le s ((e.rwEv qu).eval σ) (e.eval σ)
+  | .pvV _ | .pvP _ | .pvS _ | .pvI _ | .app0 _ => Tm.pickAtSort_eval_rev hq (Srt.Le.refl _ _)
+  | .app1 o a => Tm.pickAtSort_eval_rev hq (o.eval_le (a.rwEv_eval_rev hq))
+  | .app2 o a b => Tm.pickAtSort_eval_rev hq (o.eval_le (a.rwEv_eval_rev hq) (b.rwEv_eval_rev hq))
+  | .app3 o a b c => Tm.pickAtSort_eval_rev hq
+    (o.eval_le (a.rwEv_eval_rev hq) (b.rwEv_eval_rev hq) (c.rwEv_eval_rev hq))
+
+end RwEvAt
 
 end RwEval
 

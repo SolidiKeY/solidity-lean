@@ -82,6 +82,10 @@ syntax:max num : dl_term
 syntax:max ident : dl_term
 syntax:max dl_term:max "." ident : dl_term
 syntax:max dl_term:max "[" dl_term "]" : dl_term
+/-- `p[i]@S`: the index `p[i]` checked in the storage `S` instead of the
+state's, what `p[i]` becomes merged under a storage write; `p[p.length]@S`
+is the slot past the end, its length read in `S`. -/
+syntax:max dl_term:max "[" dl_term "]" "@" dl_term:max : dl_term
 /-- `T[]`: a dynamic array type, where a term names what an allocation makes
 (`addM(m, uint[])`, `newArr(Person[], n)`); `uint[3]` is the index form. -/
 syntax:max dl_term:max "[" "]" : dl_term
@@ -111,6 +115,11 @@ syntax:max "‹" term "›" : dl_term
 `net := if(r = this) then net else store(net, at(r), net(r) - a)`. -/
 declare_syntax_cat dl_upd_elem (behavior := both)
 syntax dl_term " := " dl_term : dl_upd_elem
+/-- `x := a <= b`, `x := a < b`: a comparison captured.  A comparison has
+no term spelling of its own (`a <= b` standing alone is a formula), so the
+element carries it. -/
+syntax dl_term " := " dl_term:56 " <= " dl_term:56 : dl_upd_elem
+syntax dl_term " := " dl_term:56 " < " dl_term:56 : dl_upd_elem
 
 /-- A parallel update `{ a ‖ b }`. -/
 declare_syntax_cat dl_upd (behavior := both)
@@ -1830,6 +1839,7 @@ def foldTmHead (e : Lean.Expr) : MetaM Lean.Expr := do
       | ``Op1.unop => mk ``Term.unop (#[C] ++ oa ++ #[x])
       | ``Op1.net => mk ``Term.net #[C, x]
       | ``Op1.netOf => mk ``Term.netOf (#[C] ++ oa ++ #[x])
+      | ``Op1.delValue => mk ``Term.delValue #[C, x]
       | ``Op1.field => mk ``PTerm.field (#[C, x] ++ oa)
       | ``Op1.next => mk ``PTerm.next #[C, x]
       | ``Op1.select => mk ``STerm.select (#[C, x] ++ oa)
@@ -1853,6 +1863,7 @@ def foldTmHead (e : Lean.Expr) : MetaM Lean.Expr := do
       | ``Op2.read => mk ``Term.read #[C, x, y]
       | ``Op2.mlen => mk ``Term.mlen #[C, x, y]
       | ``Op2.at => mk ``PTerm.at #[C, x, y]
+      | ``Op2.nextIn => mk ``PTerm.nextIn #[C, x, y]
       | ``Op2.delAt => mk ``STerm.delAt #[C, x, y]
       | ``Op2.pushSlot => mk ``STerm.pushSlot (#[C, x, y] ++ oa)
       | ``Op2.pop => mk ``STerm.pop #[C, x, y]
@@ -1873,6 +1884,7 @@ def foldTmHead (e : Lean.Expr) : MetaM Lean.Expr := do
       | ``Op3.ite => mk ``Term.ite xs
       | ``Op3.save => mk ``STerm.save xs
       | ``Op3.push => mk ``STerm.push xs
+      | ``Op3.atIn => mk ``PTerm.atIn xs
       | ``Op3.write => mk ``MTerm.write xs
       | _ => e
   return e
@@ -1928,10 +1940,10 @@ partial def ppTerm (e : Lean.Expr) : MetaM (TSyntax `dl_term) := do
       `(dl_term| select($s', $(nameIdent r):ident))
     | _ => `(dl_term| find($s', $(← ppPTerm p)))
   | Term.len _ s p =>
-    let p ← ppPTerm p
-    let `(dl_term| $x:ident) := p | escapeDl e
-    let _ := s
-    `(dl_term| $(mkIdent (x.getId.str "length")):ident)
+    let (len, _) ← lenTerms (← ppPTerm p)
+    if (← whnfTm s).isAppOfArity ``STerm.storage 1 then return len
+    `(dl_term| find($(← ppSTerm s), $len))
+  | Term.delValue _ t => `(dl_term| delValue($(← ppTerm t)))
   | Term.read _ m a => `(dl_term| read($(← ppMTerm m), $(← ppMAddr a)))
   | Term.mlen _ m i =>
     unless (← whnfTm m).isAppOfArity ``MTerm.memory 1 do return ← escapeDl e
@@ -1965,6 +1977,12 @@ partial def ppPTerm (e : Lean.Expr) : MetaM (TSyntax `dl_term) := do
     dotTerm (← ppPTerm p) f
   | PTerm.at _ p i => `(dl_term| $(← ppPTerm p):dl_term[$(← ppTerm i):dl_term])
   | PTerm.next _ p => return (← lenTerms (← ppPTerm p)).2
+  | PTerm.atIn _ s p i =>
+    `(dl_term| $(← ppPTerm p):dl_term[$(← ppTerm i):dl_term]@$(← ppSTerm s):dl_term)
+  | PTerm.nextIn _ s p =>
+    let p ← ppPTerm p
+    let (len, _) ← lenTerms p
+    `(dl_term| $p:dl_term[$len:dl_term]@$(← ppSTerm s):dl_term)
   | _ => escapeDl e
 
 /-- `p.length`, and `p[p.length]`, the push positions. -/
@@ -2074,6 +2092,14 @@ def ppUpdElem? (e : Lean.Expr) : MetaM (Option (TSyntax `dl_upd_elem)) := do
   match_expr (← whnf (← instantiateMVars e)) with
   | UpdElem.val _ x t =>
     let some x ← var x | return none
+    let t' ← whnfTm t
+    if t'.isAppOfArity ``Term.binop 5 then
+      let a ← ppTerm (t'.getArg! 3)
+      let b ← ppTerm (t'.getArg! 4)
+      match_expr (← whnf (t'.getArg! 1)) with
+      | BinOp.le => return some (← `(dl_upd_elem| $x:dl_term := $a:dl_term <= $b:dl_term))
+      | BinOp.lt => return some (← `(dl_upd_elem| $x:dl_term := $a:dl_term < $b:dl_term))
+      | _ => pure ()
     return some (← `(dl_upd_elem| $x:dl_term := $(← ppTerm t):dl_term))
   | UpdElem.path _ x p =>
     let some x ← var x | return none

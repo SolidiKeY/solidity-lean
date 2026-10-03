@@ -1,4 +1,5 @@
 import Solidity.Calculus.Chains
+import Solidity.Calculus.LastLine
 import Solidity.FreshNames
 
 /-!
@@ -36,7 +37,7 @@ a fresh object holding a snapshot of `alice`, and the read is a read of it.
 The line the declaration leaves says `carol` is a memory local.  The updates
 merged, the read of the copy is a read of the storage copied (`readCopySt`),
 which the write answers (`findOnSave`). -/
-def chain :
+theorem chain :
     dl![m]{ ⟨[ alice.age = 25; Person memory carol = alice; v = carol.age; ]⟩ φ }
     ~~> dl![m]{ { storage := save(storage, alice.age, 25) ‖
                   carol := freshId(copySt(memory, find(save(storage, alice.age, 25), alice))) ‖
@@ -82,6 +83,7 @@ def chain :
                   memory := copySt(memory, find(save(storage, alice.age, 25), alice)) ‖
                   v := 25 } φ } := by sol_chain
 
+#last_line chain
 end RootCopy
 
 /-! ## Example: Symbolic Execution of Storage-to-Memory Field Copy with Lazy Read -/
@@ -116,7 +118,7 @@ def write :
 /-- `Account memory acc = alice.account;` — the declaration dropped, the member
 source captured in the alias `sp`, and the three updates the program left
 merged. -/
-def source :
+theorem source :
     dl![m]{ { pv := 10 } { aliceAcc := alice.account } { storage := save(storage, aliceAcc.balance, pv) }
             ⟨[ Account memory acc = alice.account; v = acc.balance; ]⟩ φ }
     ~~> dl![m]{ { pv := 10 ‖ aliceAcc := alice.account ‖ storage := save(storage, alice.account.balance, 10) ‖
@@ -142,7 +144,7 @@ set_option maxHeartbeats 4000000 in
 /-- … then `acc` a copy of the object `sp` names, and `v = acc.balance;` a read
 of the copy: the updates merged, the read of the copy a read of the storage
 copied (`readCopySt`), which the write answers (`findOnSave`). -/
-def install :
+theorem install :
     dl![m]{ { pv := 10 ‖ aliceAcc := alice.account ‖ storage := save(storage, alice.account.balance, 10) ‖
               sp := alice.account } ⟨[ acc = sp; v = acc.balance; ]⟩ φ where Account memory acc }
     ~~> dl![m]{ { pv := 10 ‖ aliceAcc := alice.account ‖ storage := save(storage, alice.account.balance, 10) ‖
@@ -196,10 +198,9 @@ def install :
 v = acc.balance;` — the write unfolds through the alias `aliceAcc`, and the
 member source of the copy is captured in a second alias `sp`; the updates the
 program left merge once `sp` is bound, and the read resolves to `10`. -/
-def chain :
+theorem chain :
     dl![m]{ ⟨[ alice.account.balance = 10; Account memory acc = alice.account; v = acc.balance; ]⟩ φ }
-    ~~> dl![m]{ { pv := 10 ‖ aliceAcc := alice.account ‖ storage := save(storage, alice.account.balance, 10) ‖
-                  sp := alice.account ‖
+    ~~> dl![m]{ { storage := save(storage, alice.account.balance, 10) ‖
                   acc := freshId(copySt(memory, find(save(storage, alice.account.balance, 10), alice.account))) ‖
                   memory := copySt(memory, find(save(storage, alice.account.balance, 10), alice.account)) ‖
                   v := 10 } φ } :=
@@ -207,6 +208,12 @@ def chain :
     _ ~*> _ := write m φ
     _ ~~> _ := source m φ
     _ ~~> _ := install m φ
+    _ ~[simplifyUpdate]~>
+        dl![m]{ { storage := save(storage, alice.account.balance, 10) ‖
+                  acc := freshId(copySt(memory, find(save(storage, alice.account.balance, 10), alice.account))) ‖
+                  memory := copySt(memory, find(save(storage, alice.account.balance, 10), alice.account)) ‖
+                  v := 10 } φ } := by sol_chain
+#last_line chain
 
 end FieldCopy
 
@@ -226,7 +233,7 @@ variable (m : Modality) (φ : Post StandardExample)
 source captured in `aliceTok`, through `aliceAcc` (the steps binding them are
 crossed unwritten; the merge binds `aliceTok` to `alice.account.token`);
 `aliceAcc` is dead once the two aliases merge. -/
-def source :
+theorem source :
     dl![m]{ ⟨[ Token memory t = alice.account.token; ]⟩ φ }
     ~~> dl![m]{ { aliceTok := alice.account.token } ⟨[ t = aliceTok; ]⟩ φ where Token memory t } :=
   calc dl![m]{ ⟨[ Token memory t = alice.account.token; ]⟩ φ }
@@ -248,7 +255,7 @@ def source :
         dl![m]{ { aliceTok := alice.account.token } ⟨[ t = aliceTok; ]⟩ φ where Token memory t } := by sol_chain
 
 /-- … then `t` a copy of the object `aliceTok` names, and the updates merged. -/
-def install :
+theorem install :
     dl![m]{ { aliceTok := alice.account.token } ⟨[ t = aliceTok; ]⟩ φ where Token memory t }
     ~~> dl![m]{ { aliceTok := alice.account.token ‖
                   t := freshId(copySt(memory, find(storage, alice.account.token))) ‖
@@ -270,14 +277,17 @@ def install :
 /-- `Token memory t = alice.account.token;` — the declaration dropped, the
 nonsimple source captured in `aliceTok`, which resolves through `aliceAcc`,
 and the copy installed. -/
-def chain :
+theorem chain :
     dl![m]{ ⟨[ Token memory t = alice.account.token; ]⟩ φ }
-    ~~> dl![m]{ { aliceTok := alice.account.token ‖
-                  t := freshId(copySt(memory, find(storage, alice.account.token))) ‖
+    ~~> dl![m]{ { t := freshId(copySt(memory, find(storage, alice.account.token))) ‖
                   memory := copySt(memory, find(storage, alice.account.token)) } φ } :=
   calc dl![m]{ ⟨[ Token memory t = alice.account.token; ]⟩ φ }
     _ ~~> _ := source m φ
     _ ~~> _ := install m φ
+    _ ~[simplifyUpdate]~>
+        dl![m]{ { t := freshId(copySt(memory, find(storage, alice.account.token))) ‖
+                  memory := copySt(memory, find(storage, alice.account.token)) } φ } := by sol_chain
+#last_line chain
 
 end TokenCopy
 

@@ -9,20 +9,24 @@ the next identity (`UpdElem.write`).  Two readings *agree on the part* a
 write looks at (`Srt.AgreePart`) when they halt alike or return states of
 one storage (sort `st`), of one heap (sort `mem`), or one value (every other
 sort).  Every symbol reads its arguments on that part only, and of the state
-it runs in only the locals, the ledger, the funds and the transaction
-(`State.Rest`) — but `next` and `at`, which read the storage of the state
-they run in, and `storage` and `memory` themselves (`OpN.eval_part`).
+it runs in only the ledger, the funds and the transaction (`State.Rest`), a
+ledger variable (`netOf`) — but `next` and `at`, which read the storage of
+the state they run in, and `storage` and `memory` themselves
+(`OpN.eval_part`).
 
 That is what the merges of a chain need.  `{memory := M}{V}` is
 `{memory := M ‖ V[M/memory]}`: `V`'s terms read after the write, in a state
 of the same storage and locals and the heap `M` leaves, and `V[M/memory]`
 reads before it (`Tm.withMem_eval`) — the storage terms of `V` read to states
-of another heap, which a storage write does not look at.  `{storage := s}{V}`
-is `{storage := s ‖ V[s/storage]}` where `V` reads the storage through
-`storage` only (`Tm.stExplicitM`: no `next`, no `at`), its memory terms
-allowed (`Tm.withStM_eval`): `Calculus/UpdateRules.lean`'s `withSt` keeps
-out of memory reads, whose Theory denotation is their run, which a merge
-does not need.
+of another heap, which a storage write does not look at.
+`{L ‖ storage := s}{V}`, `L` locals, is `{L ‖ storage := s ‖ V[L, s/storage]}`
+(`Tm.substSt`): the locals and `storage` substituted in one pass, memory
+terms included, and a push slot `p[p.length]` or an index check `p[i]`,
+which read the storage of the state they run in, carried over as
+`p[p.length]@s` and `p[i]@s`, their check performed in `s`
+(`Tm.substSt_eval`).  `Calculus/UpdateRules.lean`'s `withSt` keeps out of
+memory reads, whose Theory denotation is their run, which a merge does not
+need.
 -/
 
 namespace Solidity
@@ -33,15 +37,14 @@ variable {C : Contract}
 
 /-! ## The part a write looks at -/
 
-/-- The parts of a state no storage or memory term writes: the locals, the
-ledger, the funds and the transaction. -/
+/-- The parts of a state neither a storage or memory term nor a local
+writes: the ledger, the funds and the transaction. -/
 structure Semantics.State.Rest (σ τ : State) : Prop where
-  env : σ.env = τ.env
   net : σ.net = τ.net
   selfBalance : σ.selfBalance = τ.selfBalance
   tx : σ.tx = τ.tx
 
-theorem Semantics.State.Rest.refl (σ : State) : σ.Rest σ := ⟨rfl, rfl, rfl, rfl⟩
+theorem Semantics.State.Rest.refl (σ : State) : σ.Rest σ := ⟨rfl, rfl, rfl⟩
 
 /-- Two states of one storage, and of one heap and next identity. -/
 def Semantics.State.HeapEq (σ τ : State) : Prop := σ.heap = τ.heap ∧ σ.nextId = τ.nextId
@@ -375,23 +378,28 @@ def Op2.stDirect : Op2 a b s → Bool
 
 variable {σ τ : State}
 
+/-- A unary symbol reads its argument where a write looks, and of the state
+the ledger (`net`) and a ledger variable it carries (`netOf`, bound alike
+in the two states: `he`). -/
 theorem Op1.eval_part (hr : σ.Rest τ) :
-    (o : Op1 a s) → (o.stDirect = false ∨ σ.storage = τ.storage) → {x₁ x₂ : a.Ev} →
+    (o : Op1 a s) → (∀ x, o.vars = [x] → σ.getEnv x = τ.getEnv x) →
+      (o.stDirect = false ∨ σ.storage = τ.storage) → {x₁ x₂ : a.Ev} →
       Srt.AgreePart a x₁ x₂ → Srt.AgreePart s (o.eval σ x₁) (o.eval τ x₂)
-  | .unop .., _, _, _, hx | .field _, _, _, _, hx | .sval, _, _, _, hx | .newArr _, _, _, _, hx
-  | .mfield _, _, _, _, hx | .mval, _, _, _, hx | .ref, _, _, _, hx => by
+  | .unop .., _, _, _, _, hx | .delValue, _, _, _, _, hx | .field _, _, _, _, _, hx
+  | .sval, _, _, _, _, hx | .newArr _, _, _, _, _, hx | .mfield _, _, _, _, _, hx
+  | .mval, _, _, _, _, hx | .ref, _, _, _, _, hx => by
     simp only [Srt.AgreePart] at hx ⊢; subst hx; rfl
-  | .net, _, _, _, hx => by
+  | .net, _, _, _, _, hx => by
     simp only [Srt.AgreePart] at hx ⊢; subst hx
     simp only [Op1.eval, State.getNet, hr.net]
-  | .netOf _, _, _, _, hx => by
+  | .netOf x, he, _, _, _, hx => by
     simp only [Srt.AgreePart] at hx ⊢; subst hx
-    simp only [Op1.eval, State.getEnv, hr.env]
-  | .next, ho, _, _, hx => by
+    simp only [Op1.eval, he x rfl]
+  | .next, _, ho, _, _, hx => by
     simp only [Srt.AgreePart] at hx ⊢; subst hx
     have hst := ho.resolve_left (by simp [Op1.stDirect])
     simp only [Op1.eval, State.findStorage_of_storage hst]
-  | .select r, _, _, _, hx => by
+  | .select r, _, _, _, _, hx => by
     simp only [Srt.AgreePart, Op1.eval] at hx ⊢
     rcases Res.stPart_cases hx.eq with ⟨e, rfl, rfl⟩ | ⟨τ₁, τ₂, rfl, rfl, h⟩
     · exact ⟨rfl⟩
@@ -402,14 +410,14 @@ theorem Op1.eval_part (hr : σ.Rest τ) :
         cases w with
         | struct fields => exact Res.stPart_ok rfl
         | prim _ | array _ _ _ | map _ _ => exact ⟨rfl⟩
-  | .alloc R, _, _, _, hx => by
+  | .alloc R, _, _, _, _, hx => by
     simp only [Srt.AgreePart, Op1.eval] at hx ⊢
     rcases Res.memPart_cases hx.eq with ⟨e, rfl, rfl⟩ | ⟨τ₁, τ₂, rfl, rfl, h⟩
     · rfl
     · simp only [bind, Except.bind]
       rcases (allocDefault_heap h R).cases with ⟨e, h₁, h₂⟩ | ⟨_, _, a, h₁, h₂, _⟩ <;>
         simp only [h₁, h₂] <;> rfl
-  | .addM R, _, _, _, hx => by
+  | .addM R, _, _, _, _, hx => by
     simp only [Srt.AgreePart, Op1.eval] at hx ⊢
     rcases Res.memPart_cases hx.eq with ⟨e, rfl, rfl⟩ | ⟨τ₁, τ₂, rfl, rfl, h⟩
     · exact ⟨rfl⟩
@@ -428,7 +436,8 @@ theorem Op2.eval_part :
     simp only [Srt.AgreePart] at hx hy ⊢; subst hx hy
     have hst := ho.resolve_left (by simp [Op2.stDirect])
     simp only [Op2.eval, State.checkIndex_of_storage hst]
-  | .find, _, _, _, _, _, hx, hy | .sfind, _, _, _, _, _, hx, hy => by
+  | .find, _, _, _, _, _, hx, hy | .sfind, _, _, _, _, _, hx, hy
+  | .nextIn, _, _, _, _, _, hx, hy => by
     simp only [Srt.AgreePart, Op2.eval] at hx hy ⊢; subst hy
     rcases Res.stPart_cases hx.eq with ⟨e, rfl, rfl⟩ | ⟨τ₁, τ₂, rfl, rfl, h⟩
     · rfl
@@ -517,6 +526,11 @@ theorem Op3.eval_part :
       Srt.AgreePart s (o.eval σ x₁ y₁ z₁) (o.eval τ x₂ y₂ z₂)
   | .ite, _, _, _, _, _, _, hx, hy, hz => by
     simp only [Srt.AgreePart] at hx hy hz ⊢; subst hx hy hz; rfl
+  | .atIn, _, _, _, _, _, _, hx, hy, hz => by
+    simp only [Srt.AgreePart, Op3.eval] at hx hy hz ⊢; subst hy hz
+    rcases Res.stPart_cases hx.eq with ⟨e, rfl, rfl⟩ | ⟨τ₁, τ₂, rfl, rfl, h⟩
+    · rfl
+    · simp only [bind, Except.bind, State.checkIndex_of_storage h]
   | .save, _, _, y, _, z, _, hx, hy, hz => by
     simp only [Srt.AgreePart, Op3.eval] at hx hy hz ⊢; subst hy hz
     cases z with
@@ -640,88 +654,142 @@ theorem Tm.withMem_eval (hM : M.eval σ = .ok μ) (hμ : μ = { σ with heap := 
     | lit _ | root _ => rfl
     | env _ => show Srt.AgreePart .val _ _; rw [hμ]; rfl
   | .app1 o a => by
-    have hr : σ.Rest μ := by rw [hμ]; exact ⟨rfl, rfl, rfl, rfl⟩
-    exact Op1.eval_part hr o (Or.inr (by rw [hμ])) (a.withMem_eval hM hμ)
+    have hr : σ.Rest μ := by rw [hμ]; exact ⟨rfl, rfl, rfl⟩
+    exact Op1.eval_part hr o (fun _ _ => by rw [hμ]; rfl) (Or.inr (by rw [hμ]))
+      (a.withMem_eval hM hμ)
   | .app2 o a b => by
-    have hr : σ.Rest μ := by rw [hμ]; exact ⟨rfl, rfl, rfl, rfl⟩
     exact Op2.eval_part o (Or.inr (by rw [hμ])) (a.withMem_eval hM hμ) (b.withMem_eval hM hμ)
   | .app3 o a b c =>
     Op3.eval_part o (a.withMem_eval hM hμ) (b.withMem_eval hM hμ) (c.withMem_eval hM hμ)
 
 end WithMem
 
-/-! ## `{storage := s}` substituted, memory reads included -/
+/-! ## `{L ‖ storage := S}` substituted, memory reads included -/
 
-/-- `{storage := s}e`: `s` for every `storage` in `e`, memory reads included
-(`Tm.withSt` keeps out of them). -/
-def Tm.withStM (s : STerm C) : Tm C u → Tm C u
-  | .pvV x => .pvV x
-  | .pvP x => .pvP x
-  | .pvS x => .pvS x
-  | .pvI x => .pvI x
-  | .app0 .storage => s
+/-- `{L ‖ storage := S}e`, `L` locals: the locals substituted as `Tm.subst`
+does and `S` for every `storage`, memory reads included (`Tm.withSt` keeps
+out of them), in one pass — `S` reads the pre-state as `L` does, so it is
+not substituted into.  A push slot `p[p.length]` and an index check `p[i]`
+read the storage of the state they run in, which after the write is `S`'s:
+they become `p[p.length]@S` and `p[i]@S`. -/
+def Tm.substSt (L : Upd C) (S : STerm C) : Tm C u → Tm C u
+  | .pvV x => L.valOf x
+  | .pvP x => L.pathOf x
+  | .pvS x => L.storOf x
+  | .pvI x => L.refOf x
+  | .app0 .storage => S
   | .app0 o => .app0 o
-  | .app1 o a => .app1 o (Tm.withStM s a)
-  | .app2 o a b => .app2 o (Tm.withStM s a) (Tm.withStM s b)
-  | .app3 o a b c => .app3 o (Tm.withStM s a) (Tm.withStM s b) (Tm.withStM s c)
+  | .app1 (.netOf x) a =>
+    match L.lastWrite x with
+    | some _ => Term.stuck
+    | none => .app1 (.netOf x) (Tm.substSt L S a)
+  | .app1 .next p => .app2 .nextIn S (Tm.substSt L S p)
+  | .app1 o a => .app1 o (Tm.substSt L S a)
+  | .app2 .at p i => .app3 .atIn S (Tm.substSt L S p) (Tm.substSt L S i)
+  | .app2 o a b => .app2 o (Tm.substSt L S a) (Tm.substSt L S b)
+  | .app3 o a b c => .app3 o (Tm.substSt L S a) (Tm.substSt L S b) (Tm.substSt L S c)
 
-/-- Every storage read of the term is through a storage term: no push slot
-(`next`), no index check (`at`), which read the storage of the state they
-run in.  Memory terms, which `Tm.stExplicit` keeps out, are allowed. -/
-def Tm.stExplicitM : Tm C u → Bool
-  | .pvV _ | .pvP _ | .pvS _ | .pvI _ | .app0 _ => true
-  | .app1 o a => !o.stDirect && a.stExplicitM
-  | .app2 o a b => !o.stDirect && a.stExplicitM && b.stExplicitM
-  | .app3 _ a b c => a.stExplicitM && b.stExplicitM && c.stExplicitM
+/-- `{storage := s}e`: `Tm.substSt` with no locals. -/
+def Tm.withStM (s : STerm C) (e : Tm C u) : Tm C u := Tm.substSt [] s e
 
-section WithStM
+section SubstSt
 
-variable {s : STerm C} {σ τ : State}
+variable {L : Upd C} {ns : List Var} {S : STerm C} {σ σ₁ τ : State}
 
 theorem Semantics.State.Keeps.rest (hk : σ.Keeps τ) : σ.Rest τ := by
-  rw [← hk]; exact ⟨rfl, rfl, rfl, rfl⟩
+  rw [← hk]; exact ⟨rfl, rfl, rfl⟩
 
 theorem Semantics.State.Keeps.heapEq (hk : σ.Keeps τ) : σ.HeapEq τ := by
   rw [← hk]; exact ⟨rfl, rfl⟩
 
-/-- **Read before `{storage := s}`, the substituted term reads as the term
-after it**, on the part a write looks at, where every storage read is a
-`storage` term: a memory term reads to a state of another storage, which a
-memory write does not look at. -/
-theorem Tm.withStM_eval (hs : s.eval σ = .ok τ) (hk : σ.Keeps τ) :
-    (e : Tm C u) → e.stExplicitM = true → Srt.AgreePart u ((Tm.withStM s e).eval σ) (e.eval τ)
-  | .pvV _, _ | .pvP _, _ | .pvI _, _ => by rw [← hk]; rfl
-  | .pvS _, _ => by
-    show Srt.AgreePart .st _ _
-    simp only [Srt.AgreePart, Tm.withStM, Tm.eval, hk.getEnv, bind, Except.bind]
-    cases σ.getEnv _ with
-    | error e => exact ⟨rfl⟩
-    | ok b => cases b <;> first | exact ⟨rfl⟩ | exact Res.stPart_ok rfl
-  | .app0 o, _ => by
+/-- Two storage readings that agree off some locals are of one storage. -/
+theorem StPartEq.of_agree {a b : Res State} (h : ResultsAgree ns a b) : StPartEq a b := by
+  match a, b, h with
+  | .error _, .error _, h => subst h; exact ⟨rfl⟩
+  | .ok _, .ok _, h => exact Res.stPart_ok h.storage
+
+/-- **Read before `{L ‖ storage := S}`, the substituted term reads as the
+term after it**, on the part a write looks at: `σ₁` is what `L` leaves of
+`σ` (`SubstAgree`) and `S` reads to `τ`, so the state after is `σ₁` with
+`τ`'s storage.  A variable reads what `L` binds it to; `storage` reads `S`;
+a push slot or an index check reads the storage of `S`, where the term
+after reads it in the state; every other symbol reads its arguments
+(`OpN.eval_part`). -/
+theorem Tm.substSt_eval (h : SubstAgree L ns σ σ₁) (hs : S.eval σ = .ok τ) :
+    (e : Tm C u) → Srt.AgreePart u ((Tm.substSt L S e).eval σ) (e.eval { σ₁ with storage := τ.storage })
+  | .pvV x => h.val x
+  | .pvP x => h.path x
+  | .pvI x => h.ref x
+  | .pvS x => by
+    have hx := StPartEq.of_agree (h.stor x)
+    show StPartEq _ _
+    simp only [Tm.substSt]
+    refine ⟨hx.eq.trans ?_⟩
+    simp only [Tm.eval, State.getEnv, bind, Except.bind]
+  | .app0 o => by
     cases o with
     | storage =>
-      show Srt.AgreePart .st _ _
-      simp only [Srt.AgreePart, Tm.withStM, Tm.eval, Op0.eval, hs]
-      exact ⟨rfl⟩
+      show StPartEq _ _
+      simp only [Tm.substSt, Tm.eval, Op0.eval, hs]
+      exact Res.stPart_ok rfl
     | memory =>
-      show Srt.AgreePart .mem _ _
-      simp only [Srt.AgreePart, Tm.withStM, Tm.eval, Op0.eval]
-      exact Res.memPart_ok hk.heapEq
+      show MemPartEq _ _
+      exact Res.memPart_ok ⟨h.agree.heap, h.agree.nextId⟩
     | lit _ | root _ => rfl
-    | env _ => show Srt.AgreePart .val _ _; rw [← hk]; rfl
-  | .app1 o a, he => by
-    simp only [Tm.stExplicitM, Bool.and_eq_true] at he
-    exact Op1.eval_part hk.rest o (Or.inl (by simpa using he.1)) (a.withStM_eval hs hk he.2)
-  | .app2 o a b, he => by
-    simp only [Tm.stExplicitM, Bool.and_eq_true] at he
-    exact Op2.eval_part o (Or.inl (by simpa using he.1.1)) (a.withStM_eval hs hk he.1.2)
-      (b.withStM_eval hs hk he.2)
-  | .app3 o a b c, he => by
-    simp only [Tm.stExplicitM, Bool.and_eq_true] at he
-    exact Op3.eval_part o (a.withStM_eval hs hk he.1.1) (b.withStM_eval hs hk he.1.2)
-      (c.withStM_eval hs hk he.2)
+    | env _ =>
+      show Srt.AgreePart .val _ _
+      simp only [Srt.AgreePart, Tm.substSt, Tm.eval, Op0.eval, State.envVal_congr h.agree]
+      rfl
+  | .app1 o a => by
+    have ih := a.substSt_eval h hs
+    have hr : σ.Rest { σ₁ with storage := τ.storage } := ⟨h.agree.net, h.agree.selfBalance, h.agree.tx⟩
+    cases o with
+    | netOf x =>
+      have ha : (Tm.substSt L S a).eval σ = a.eval { σ₁ with storage := τ.storage } := ih
+      simp only [Tm.substSt]
+      split
+      · rename_i e hx
+        obtain ⟨b, hb, hnl⟩ := h.written x e hx
+        show Srt.AgreePart .val _ _
+        simp only [Srt.AgreePart, Term.stuck_eval, Tm.eval, Op1.eval, bind, Except.bind]
+        rw [show State.getEnv { σ₁ with storage := τ.storage } x = .ok b from hb]
+        cases b with
+        | ledger l => exact absurd rfl (hnl l)
+        | _ => rfl
+      · rename_i hx
+        show Srt.AgreePart .val _ _
+        simp only [Srt.AgreePart, Tm.eval, Op1.eval, ha]
+        rw [show State.getEnv { σ₁ with storage := τ.storage } x = σ.getEnv x from
+          (h.unwritten x hx).symm]
+    | next =>
+      have hp : (Tm.substSt L S a).eval σ = a.eval { σ₁ with storage := τ.storage } := ih
+      show Srt.AgreePart .path _ _
+      simp only [Srt.AgreePart, Tm.substSt, Tm.eval, Op1.eval, Op2.eval, hs, hp, Res.ok_bind]
+      rfl
+    | _ => exact Op1.eval_part hr _ (fun _ hx => by cases hx) (Or.inl rfl) ih
+  | .app2 o a b => by
+    have iha := a.substSt_eval h hs
+    have ihb := b.substSt_eval h hs
+    cases o with
+    | «at» =>
+      have hp : (Tm.substSt L S a).eval σ = a.eval { σ₁ with storage := τ.storage } := iha
+      have hi : (Tm.substSt L S b).eval σ = b.eval { σ₁ with storage := τ.storage } := ihb
+      show Srt.AgreePart .path _ _
+      simp only [Srt.AgreePart, Tm.substSt, Tm.eval, Op2.eval, Op3.eval, hs, hp, hi, Res.ok_bind]
+      rfl
+    | _ => exact Op2.eval_part _ (Or.inl rfl) iha ihb
+  | .app3 o a b c =>
+    Op3.eval_part o (a.substSt_eval h hs) (b.substSt_eval h hs) (c.substSt_eval h hs)
 
-end WithStM
+/-- `Tm.substSt_eval` with no locals: read before `{storage := s}`, the
+substituted term reads as the term after it. -/
+theorem Tm.withStM_eval {s : STerm C} (hs : s.eval σ = .ok τ) (hk : σ.Keeps τ) (e : Tm C u) :
+    Srt.AgreePart u ((Tm.withStM s e).eval σ) (e.eval τ) := by
+  have h : SubstAgree ([] : Upd C) (Upd.targets ([] : Upd C)) σ σ := Upd.substAgree rfl rfl
+  have := Tm.substSt_eval h hs e
+  rwa [show { σ with storage := τ.storage } = τ from hk] at this
+
+end SubstSt
 
 /-! ## The elements of an update, substituted -/
 
@@ -802,7 +870,7 @@ theorem UpdElem.mapTm_write (hr : σ.Rest τ)
     have h1 := hF r he.1
     have h2 := hF a he.2
     simp only [Srt.AgreePart] at h1 h2
-    simp only [UpdElem.mapTm, UpdElem.write, h1, h2, State.getNet, hr.net]
+    simp only [UpdElem.mapTm, UpdElem.write, h1, h2, State.getNet]
   | .pay r a, he => by
     simp only [UpdElem.allTm, Bool.and_eq_true] at he
     have h1 := hF r he.1
@@ -832,6 +900,10 @@ def Upd.withMem (M : MTerm C) (V : Upd C) : Upd C := V.map (·.mapTm (Tm.withMem
 memory reads included. -/
 def Upd.withStM (s : STerm C) (V : Upd C) : Upd C := V.map (·.mapTm (Tm.withStM s))
 
+/-- `{L ‖ storage := S}V`: `L`'s locals and `S` substituted into `V`'s
+right-hand sides (`Tm.substSt`). -/
+def Upd.substSt (L : Upd C) (S : STerm C) (V : Upd C) : Upd C := V.map (·.mapTm (Tm.substSt L S))
+
 theorem UpdElem.memory_write (σ₀ τ : State) (M : MTerm C) : (UpdElem.memory M).write σ₀ τ =
     M.eval σ₀ >>= fun μ => .ok { τ with heap := μ.heap, nextId := μ.nextId } := rfl
 
@@ -844,17 +916,15 @@ theorem Upd.mergeMemory_holds (m : Modality) (M : MTerm C) (V : Upd C) (ψ : Fml
   | error _ => exact Iff.rfl
   | ok μ =>
     have hμ := MTerm.eval_setsMem M hM
-    have hr : σ.Rest μ := by rw [hμ]; exact ⟨rfl, rfl, rfl, rfl⟩
+    have hr : σ.Rest μ := by rw [hμ]; exact ⟨rfl, rfl, rfl⟩
     simp only [Res.ok_bind]
     rw [← hμ, Upd.withMem, Upd.mapTm_foldl (P := fun {_} _ => true) hr
       (fun t _ => Tm.withMem_eval hM hμ t) V (List.all_eq_true.2 fun e _ => by cases e <;> rfl) μ]
     exact Iff.rfl
 
 /-- **`sequentialToParallel`** over a storage write, memory reads included:
-`{storage := s}{V} ψ ⟺ {storage := s ‖ {storage := s}V} ψ`, where every
-storage read of `V` is a `storage` term. -/
-theorem Upd.mergeStorageM_holds (m : Modality) (s : STerm C) (V : Upd C)
-    (hV : V.all (·.allTm Tm.stExplicitM) = true) (ψ : Fml C) (σ : State) :
+`{storage := s}{V} ψ ⟺ {storage := s ‖ {storage := s}V} ψ`. -/
+theorem Upd.mergeStorageM_holds (m : Modality) (s : STerm C) (V : Upd C) (ψ : Fml C) (σ : State) :
     holds σ (.upd m (.storage s :: V.withStM s) ψ) ↔ holds σ (.upd m [.storage s] (.upd m V ψ)) := by
   simp only [holds, Upd.apply, List.foldlM_cons, List.foldlM_nil, UpdElem.storage_write]
   cases hs : s.eval σ with
@@ -862,7 +932,8 @@ theorem Upd.mergeStorageM_holds (m : Modality) (s : STerm C) (V : Upd C)
   | ok τ =>
     have hk : σ.Keeps τ := STerm.eval_keeps s hs
     simp only [Res.ok_bind]
-    rw [hk, Upd.withStM, Upd.mapTm_foldl hk.rest (fun t ht => Tm.withStM_eval hs hk t ht) V hV τ]
+    rw [hk, Upd.withStM, Upd.mapTm_foldl (P := fun {_} _ => true) hk.rest
+      (fun t _ => Tm.withStM_eval hs hk t) V (List.all_eq_true.2 fun e _ => by cases e <;> rfl) τ]
     exact Iff.rfl
 
 end Solidity

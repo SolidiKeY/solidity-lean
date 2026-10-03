@@ -1,5 +1,6 @@
 import Solidity.Calculus.Chains
 import Solidity.Calculus.ChainRewrites
+import Solidity.Calculus.LastLine
 import Solidity.Calculus.Close
 import Solidity.FreshNames
 
@@ -14,9 +15,9 @@ value, `Token storage sp = tokens.push(); … sp.value` for `tokens.push().value
 refused.  A call is inlined, so `makeValue()` leaves its callee's local `se2` where the printed line has the
 call itself.  A line of the strategy that binds an alias through another alias (`{ tokRef := bobAcc.token }`),
 or a callee's local (`{ pv := se2 }`), is crossed unwritten, the next written line being its merge, which
-binds the alias to its path as the printed line does.  Not drawn: merges of a push's alias
-`{ storage := … ‖ sp := … }` under another update, which do not merge (a parallel update of locals and the
-storage over another).
+binds the alias to its path as the printed line does.  A push's alias `{ storage := … ‖ sp := p[p.length] }`
+merges with the update after it (`Upd.mergeStL`), the alias standing for the pre-state slot.  Every chain
+ends at one parallel update, its dead captures dropped last (`~[simplifyUpdate]~>`), checked by `#last_line`.
 -/
 
 namespace Solidity.Examples.Chains.StorageArrays
@@ -37,7 +38,7 @@ def names : FreshTable := [("pv", "se1")]
 local instance : FreshNames := .ofTable names
 #guard (FreshNames.clashes Pushes names).isEmpty
 /-- `values.push(makeValue());`: the argument is captured (`pv`), the call inlined and run (its local `se2` is the printed `makeValue()`), then the value pushed; the length is `values.length`.  The merge resolves the pushed value to `select(storage, seed)`, and the dead captures go. -/
-def chain :
+theorem chain :
     dl![m]{ ⟨[ values.push(makeValue()); ]⟩ φ }
     ~~> dl![m]{ { se2 := select(storage, seed) ‖ pv := select(storage, seed) ‖
           storage := save(save(storage, values[values.length], select(storage, seed)), values.length, values.length + 1) } φ } :=
@@ -50,16 +51,17 @@ def chain :
     _ ~[simplifyUpdate]~>
         dl![m]{ { se2 := select(storage, seed) ‖ pv := select(storage, seed) ‖
           storage := save(save(storage, values[values.length], select(storage, seed)), values.length, values.length + 1) } φ } := by sol_chain
+#last_line chain
 end PushCall
 
 namespace PushStorageSource
 def names : FreshTable := [("bobAcc", "sp1")]
 local instance : FreshNames := .ofTable names
 #guard (FreshNames.clashes Pushes names).isEmpty
-/-- `Token storage tokRef = bob.account.token; tokens.push(tokRef);`: the element appended is the value found at the alias path.  The nested initialiser is aliased one member at a time (`bobAcc`, then `tokRef` through it), lines crossed unwritten; the merge binds `tokRef` to `bob.account.token`, as printed, and the pushed value to `find(storage, bob.account.token)`. -/
-def chain :
+/-- `Token storage tokRef = bob.account.token; tokens.push(tokRef);`: the element appended is the value found at the alias path.  The nested initialiser is aliased one member at a time (`bobAcc`, then `tokRef` through it), lines crossed unwritten; the merge binds `tokRef` to `bob.account.token`, as printed, and the pushed value to `find(storage, bob.account.token)`; the dead `bobAcc` goes last. -/
+theorem chain :
     dl![m]{ ⟨[ Token storage tokRef = bob.account.token; tokens.push(tokRef); ]⟩ φ }
-    ~~> dl![m]{ { bobAcc := bob.account ‖ tokRef := bob.account.token ‖
+    ~~> dl![m]{ { tokRef := bob.account.token ‖
           storage := save(save(storage, tokens[tokens.length], find(storage, bob.account.token)),
             tokens.length, tokens.length + 1) } φ } :=
   calc dl![m]{ ⟨[ Token storage tokRef = bob.account.token; tokens.push(tokRef); ]⟩ φ }
@@ -68,17 +70,21 @@ def chain :
         dl![m]{ { bobAcc := bob.account ‖ tokRef := bob.account.token ‖
           storage := save(save(storage, tokens[tokens.length], find(storage, bob.account.token)),
             tokens.length, tokens.length + 1) } φ } := by sol_chain
+    _ ~[simplifyUpdate]~>
+        dl![m]{ { tokRef := bob.account.token ‖
+          storage := save(save(storage, tokens[tokens.length], find(storage, bob.account.token)),
+            tokens.length, tokens.length + 1) } φ } := by sol_chain
+#last_line chain
 end PushStorageSource
 
 namespace PushNonsimple
 def names : FreshTable := [("sp", "sp1")]
 local instance : FreshNames := .ofTable names
 #guard (FreshNames.clashes Pushes names).isEmpty
-/-- `bucket.tokens.push(tok);`: a nonsimple array path is first shortened to a storage alias `sp`. -/
-def chain :
+/-- `bucket.tokens.push(tok);`: a nonsimple array path is first shortened to a storage alias `sp`, dead once the push is on its path. -/
+theorem chain :
     dl![m]{ ⟨[ bucket.tokens.push(tok); ]⟩ φ }
-    ~~> dl![m]{ { sp := bucket.tokens ‖
-          storage := save(save(storage, bucket.tokens[bucket.tokens.length], find(storage, tok)),
+    ~~> dl![m]{ { storage := save(save(storage, bucket.tokens[bucket.tokens.length], find(storage, tok)),
             bucket.tokens.length, bucket.tokens.length + 1) } φ } :=
   calc dl![m]{ ⟨[ bucket.tokens.push(tok); ]⟩ φ }
     _ ~[storagePushValue_unfold_leftFstReceiver]~>
@@ -94,6 +100,10 @@ def chain :
         dl![m]{ { sp := bucket.tokens ‖
           storage := save(save(storage, bucket.tokens[bucket.tokens.length], find(storage, tok)),
             bucket.tokens.length, bucket.tokens.length + 1) } φ } := by rfl
+    _ ~[simplifyUpdate]~>
+        dl![m]{ { storage := save(save(storage, bucket.tokens[bucket.tokens.length], find(storage, tok)),
+            bucket.tokens.length, bucket.tokens.length + 1) } φ } := by sol_chain
+#last_line chain
 end PushNonsimple
 
 namespace EmptyPush
@@ -105,12 +115,13 @@ def bare :
     _ ~[storagePushLengthSaveReferenceElement]~>
         dl![m]{ { storage := save(storage, tokens.length, tokens.length + 1) } ⟨[ ]⟩ φ } := rfl
     _ ~[emptyModality]~> dl![m]{ { storage := save(storage, tokens.length, tokens.length + 1) } φ } := rfl
+#last_line bare
 
-/-- `uint i = tokens.push().value;`, as `Token storage sp = tokens.push(); uint i = sp.value;`: the old-length slot bound by `storageLocalRootPushBind`, then read.  Stops at the stack: the printed line reads `i` as `find` over the pushed storage, a merge over the push's alias `sp` (`tokens[tokens.length]`), which checks the length in the state it runs in and so does not merge. -/
-def bound :
+/-- `uint i = tokens.push().value;`, as `Token storage sp = tokens.push(); uint i = sp.value;`: the old-length slot bound by `storageLocalRootPushBind`, then read; the read merges under the push, the alias standing for the pre-state slot, and stays a read of that slot (recycled, whatever it holds). -/
+theorem bound :
     dl![m]{ ⟨[ Token storage sp = tokens.push(); uint i = sp.value; ]⟩ φ }
-    ~*> dl![m]{ { storage := save(storage, tokens.length, tokens.length + 1) ‖ sp := tokens[tokens.length] }
-          { i := find(storage, sp.value) } φ } :=
+    ~~> dl![m]{ { storage := save(storage, tokens.length, tokens.length + 1) ‖ sp := tokens[tokens.length] ‖
+          i := find(save(storage, tokens.length, tokens.length + 1), tokens[tokens.length].value) } φ } :=
   calc dl![m]{ ⟨[ Token storage sp = tokens.push(); uint i = sp.value; ]⟩ φ }
     _ ~[storageLocalDeclInitDrop]~> dl![m]{ ⟨[ sp = tokens.push(); uint i = sp.value; ]⟩ φ } := rfl
     _ ~[storageLocalRootPushBind]~>
@@ -118,9 +129,13 @@ def bound :
           ⟨[ uint i = sp.value; ]⟩ φ } := rfl
     _ ~*> dl![m]{ { storage := save(storage, tokens.length, tokens.length + 1) ‖ sp := tokens[tokens.length] }
           { i := find(storage, sp.value) } φ } := by sol_chain
+    _ ~[sequentialToParallel]~>
+        dl![m]{ { storage := save(storage, tokens.length, tokens.length + 1) ‖ sp := tokens[tokens.length] ‖
+          i := find(save(storage, tokens.length, tokens.length + 1), tokens[tokens.length].value) } φ } := by sol_chain
+#last_line bound
 
 /-- `values.push() = makeValue();`: a push used as a target is the push of its right-hand side (the first step, an equality), then as for `values.push(makeValue())`; the element is written before the length. -/
-def lvalue :
+theorem lvalue :
     dl![m]{ ⟨[ values.push() = makeValue(); ]⟩ φ }
     ~~> dl![m]{ { se2 := select(storage, seed) ‖ se1 := select(storage, seed) ‖
           storage := save(save(storage, values[values.length], select(storage, seed)), values.length, values.length + 1) } φ } :=
@@ -133,21 +148,23 @@ def lvalue :
     _ ~[simplifyUpdate]~>
         dl![m]{ { se2 := select(storage, seed) ‖ se1 := select(storage, seed) ‖
           storage := save(save(storage, values[values.length], select(storage, seed)), values.length, values.length + 1) } φ } := by sol_chain
+#last_line lvalue
 end EmptyPush
 
 namespace PushLvalue
 local instance : FreshNames := .ofTable PushStorageSource.names
 /-- `Token storage tokRef = bob.account.token; tokens.push() = tokRef;`: the push lvalue normalises to `tokens.push(tokRef)`, which copies the value the alias finds.  The element is written before the length, the printed order reversed. -/
-def refSource :
+theorem refSource :
     dl![m]{ ⟨[ Token storage tokRef = bob.account.token; tokens.push() = tokRef; ]⟩ φ }
-    ~~> dl![m]{ { bobAcc := bob.account ‖ tokRef := bob.account.token ‖
+    ~~> dl![m]{ { tokRef := bob.account.token ‖
           storage := save(save(storage, tokens[tokens.length], find(storage, bob.account.token)),
             tokens.length, tokens.length + 1) } φ } :=
   calc dl![m]{ ⟨[ Token storage tokRef = bob.account.token; tokens.push() = tokRef; ]⟩ φ }
     _ = dl![m]{ ⟨[ Token storage tokRef = bob.account.token; tokens.push(tokRef); ]⟩ φ } := rfl
-    _ ~~> dl![m]{ { bobAcc := bob.account ‖ tokRef := bob.account.token ‖
+    _ ~~> dl![m]{ { tokRef := bob.account.token ‖
           storage := save(save(storage, tokens[tokens.length], find(storage, bob.account.token)),
             tokens.length, tokens.length + 1) } φ } := PushStorageSource.chain m φ
+#last_line refSource
 
 /-- `tokens.push().value = 11;`, from its first step `uint pv = 11; Token storage sp = tokens.push(); sp.value = pv;` (the member of a call is refused): the slot bound, then written. -/
 def field :
@@ -173,11 +190,10 @@ namespace BucketPush
 def names : FreshTable := [("sp", "sp1")]
 local instance : FreshNames := .ofTable names
 #guard (FreshNames.clashes Pushes names).isEmpty
-/-- `bucket.tokens.push();`: the receiver is aliased (`sp`), then the bare push. -/
-def bare :
+/-- `bucket.tokens.push();`: the receiver is aliased (`sp`), then the bare push; the alias goes last. -/
+theorem bare :
     dl![m]{ ⟨[ bucket.tokens.push(); ]⟩ φ }
-    ~~> dl![m]{ { sp := bucket.tokens ‖
-          storage := save(storage, bucket.tokens.length, bucket.tokens.length + 1) } φ } :=
+    ~~> dl![m]{ { storage := save(storage, bucket.tokens.length, bucket.tokens.length + 1) } φ } :=
   calc dl![m]{ ⟨[ bucket.tokens.push(); ]⟩ φ }
     _ ~[storagePush_unfold_leftFstReceiver]~>
         dl![m]{ ⟨[ Token[] storage sp = bucket.tokens; sp.push(); ]⟩ φ } := by sol_chain
@@ -189,6 +205,9 @@ def bare :
     _ ~[sequentialToParallel]~>
         dl![m]{ { sp := bucket.tokens ‖
           storage := save(storage, bucket.tokens.length, bucket.tokens.length + 1) } φ } := by rfl
+    _ ~[simplifyUpdate]~>
+        dl![m]{ { storage := save(storage, bucket.tokens.length, bucket.tokens.length + 1) } φ } := by sol_chain
+#last_line bare
 end BucketPush
 
 namespace BucketPushRef
@@ -196,10 +215,10 @@ def names : FreshTable := [("bobAcc", "sp1"), ("sp", "sp2")]
 local instance : FreshNames := .ofTable names
 #guard (FreshNames.clashes Pushes names).isEmpty
 set_option maxHeartbeats 300000 in
-/-- `Token storage tokRef = bob.account.token; bucket.tokens.push() = tokRef;`: the source is snapshotted, the receiver aliased (`sp`); the final storage update uses the original path, not the temporary alias.  The strategy's lines bind `tokRef` through `bobAcc` and are crossed unwritten; the merge binds it to `bob.account.token`. -/
-def chain :
+/-- `Token storage tokRef = bob.account.token; bucket.tokens.push() = tokRef;`: the source is snapshotted, the receiver aliased (`sp`); the final storage update uses the original path, not the temporary alias.  The strategy's lines bind `tokRef` through `bobAcc` and are crossed unwritten; the merge binds it to `bob.account.token`; the dead aliases go last. -/
+theorem chain :
     dl![m]{ ⟨[ Token storage tokRef = bob.account.token; bucket.tokens.push() = tokRef; ]⟩ φ }
-    ~~> dl![m]{ { bobAcc := bob.account ‖ tokRef := bob.account.token ‖ sp := bucket.tokens ‖
+    ~~> dl![m]{ { tokRef := bob.account.token ‖
           storage := save(save(storage, bucket.tokens[bucket.tokens.length], find(storage, bob.account.token)),
             bucket.tokens.length, bucket.tokens.length + 1) } φ } :=
   calc dl![m]{ ⟨[ Token storage tokRef = bob.account.token; bucket.tokens.push() = tokRef; ]⟩ φ }
@@ -209,6 +228,11 @@ def chain :
         dl![m]{ { bobAcc := bob.account ‖ tokRef := bob.account.token ‖ sp := bucket.tokens ‖
           storage := save(save(storage, bucket.tokens[bucket.tokens.length], find(storage, bob.account.token)),
             bucket.tokens.length, bucket.tokens.length + 1) } φ } := by sol_chain
+    _ ~[simplifyUpdate]~>
+        dl![m]{ { tokRef := bob.account.token ‖
+          storage := save(save(storage, bucket.tokens[bucket.tokens.length], find(storage, bob.account.token)),
+            bucket.tokens.length, bucket.tokens.length + 1) } φ } := by sol_chain
+#last_line chain
 
 /-- `bucket.tokens.push().value = valueVal;`, from its first step (the member of a call is refused): `pv` snapshotted, the receiver aliased (`sp1`), the slot bound (`tokSlot`) and written.  The printed line with `Token[] storage sp1 = bucket.tokens; tokSlot = sp1.push();` is left `_`, as `dl!{ … }` cannot read an alias assigned from a push, and so are the steps to the slot bound through `sp1`; the merge binds it to `bucket.tokens[bucket.tokens.length]`.  The write does not merge over the push's parallel update (locals and the storage over another). -/
 def field :

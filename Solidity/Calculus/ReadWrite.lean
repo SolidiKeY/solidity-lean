@@ -52,6 +52,332 @@ namespace Solidity
 
 open Semantics SemanticsProperties
 
+theorem Res.ok_bind' {α β : Type} (a : α) (f : α → Res β) : ((Except.ok a : Res α) >>= f) = f a := rfl
+
+/-! ## A fresh default object, read along a path
+
+`addM(m, R)` copies the default of `R` into memory (`allocDefault`), so what
+a path below the fresh root reads is what the declared type at that path
+says (`copyStToM_default_readPath`): a primitive's default, or a reference
+the copy allocated, below the counter it leaves.  `Ty.memberTy` is the
+declared type at a path; `MVal.readPath` follows a path through memory. -/
+
+/-- The object a memory address is in. -/
+def Semantics.Addr.id : Addr → Nat
+  | .memoryField id _ | .memoryIndex id _ => id
+
+/-- The address of a path step from the object `id`. -/
+def Semantics.Addr.ofSeg (id : Nat) : Seg → Addr
+  | .field f => .memoryField id f
+  | .at k => .memoryIndex id k
+
+theorem Semantics.Addr.ofSeg_id (id : Nat) : (s : Seg) → (Addr.ofSeg id s).id = id
+  | .field _ | .at _ => rfl
+
+theorem Semantics.State.getObj_heapExt {σ τ : State} (h : σ.HeapExt τ) {id : Nat} (hid : id < σ.nextId) :
+    τ.getObj id = σ.getObj id := by
+  unfold State.getObj
+  rw [h.2 id hid]
+
+/-- An object below the counter reads the same in a heap extension. -/
+theorem readAddr_heapExt {σ τ : State} (h : σ.HeapExt τ) {a : Addr} (ha : a.id < σ.nextId) :
+    readAddr τ a = readAddr σ a := by
+  cases a with
+  | memoryField id f => simp only [readAddr, State.getObj_heapExt h (id := id) ha]
+  | memoryIndex id i => simp only [readAddr, State.getObj_heapExt h (id := id) ha]
+
+/-- The slot at the end of a path from a memory value: a reference is
+followed, a primitive ends it. -/
+def Semantics.MVal.readPath (τ : State) : MVal → List Seg → Res MVal
+  | mv, [] => .ok mv
+  | .ref id, s :: rest => readAddr τ (.ofSeg id s) >>= fun mv => mv.readPath τ rest
+  | .prim _, _ :: _ => .error .stuck
+
+/-- The slot at the end of a path from the object `id`. -/
+def Semantics.State.readPath (τ : State) (id : Nat) (p : List Seg) : Res MVal :=
+  MVal.readPath τ (.ref id) p
+
+theorem Semantics.MVal.readPath_snoc (τ : State) : (mv : MVal) → (p : List Seg) → (s : Seg) →
+    mv.readPath τ (p ++ [s]) = mv.readPath τ p >>= fun mv' => match mv' with
+      | .ref id => readAddr τ (.ofSeg id s)
+      | .prim _ => .error .stuck
+  | .ref id, [], s => by
+    simp only [List.nil_append, MVal.readPath, Res.ok_bind']
+    cases readAddr τ (.ofSeg id s) <;> rfl
+  | .prim _, [], _ => rfl
+  | .ref id, s' :: p, s => by
+    simp only [List.cons_append, MVal.readPath]
+    cases readAddr τ (.ofSeg id s') with
+    | error _ => rfl
+    | ok mv => simp only [Res.ok_bind', MVal.readPath_snoc τ mv p s]
+  | .prim _, _ :: _, _ => rfl
+
+/-- The declared type of a member or a fixed element: a struct's member, a
+fixed array's element in range. -/
+def Ty.at : Ty → Seg → Option Ty
+  | .ref (.struct sn), .field f => lookupBy f (structDef sn)
+  | .ref (.fixed E n), .at k => if 0 ≤ k ∧ k < n then some E else none
+  | _, _ => none
+
+/-- The declared type at the end of a path, member by member. -/
+def Ty.memberTy : Ty → List Seg → Option Ty
+  | T, [] => some T
+  | T, s :: rest => (T.at s).bind (·.memberTy rest)
+
+/-- The declared type at a path below a reference type. -/
+def RefTy.memberTy (R : RefTy) (p : List Seg) : Option Ty := (Ty.ref R).memberTy p
+
+theorem Ty.memberTy_append (T : Ty) : (p q : List Seg) →
+    T.memberTy (p ++ q) = (T.memberTy p).bind (·.memberTy q)
+  | [], q => rfl
+  | s :: p, q => by
+    simp only [List.cons_append, Ty.memberTy]
+    cases T.at s <;> simp only [Option.bind, Ty.memberTy_append]
+
+theorem Ty.at_prim (q : PrimTy) (s : Seg) : (Ty.prim q).at s = none := by
+  cases s <;> rfl
+
+/-- The memory value a default of `T` copies to: the primitive default, or a
+reference below the counter `n`. -/
+def DefaultMVal : Ty → MVal → Nat → Prop
+  | .prim q, mv, _ => mv = (PrimTy.default q).toMVal
+  | .ref _, mv, n => ∃ id, mv = .ref id ∧ id < n
+
+theorem DefaultMVal.mono {T : Ty} {mv : MVal} {n n' : Nat} (h : DefaultMVal T mv n) (hn : n ≤ n') :
+    DefaultMVal T mv n' := by
+  cases T with
+  | prim q => exact h
+  | ref R =>
+    obtain ⟨id, rfl, hid⟩ := h
+    exact ⟨id, rfl, Nat.lt_of_lt_of_le hid hn⟩
+
+theorem copyStToM_default_prim {σ τ : State} {q : PrimTy} {mv : MVal}
+    (h : copyStToM σ (defaultForTy (.prim q)) = .ok (τ, mv)) :
+    τ = σ ∧ mv = (PrimTy.default q).toMVal := by
+  cases q <;> simp [defaultForTy] at h <;> obtain ⟨rfl, rfl⟩ := h <;> exact ⟨rfl, rfl⟩
+
+theorem copyStToM_struct_ref {σ τ : State} {fields : List (Name × SVal)} {mv : MVal}
+    (h : copyStToM σ (.struct fields) = .ok (τ, mv)) : ∃ id, mv = .ref id := by
+  rw [copyStToM] at h
+  cases hf : copyStFields σ fields with
+  | error e => rw [hf] at h; exact absurd h (by simp [bind, Except.bind])
+  | ok tf =>
+    obtain ⟨t', mfields⟩ := tf
+    rw [hf] at h
+    simp only [bind, Except.bind, Except.ok.injEq, Prod.mk.injEq, State.alloc] at h
+    exact ⟨_, h.2.symm⟩
+
+theorem copyStToM_array_ref {σ τ : State} {elems shadow : List SVal} {fx : Bool} {mv : MVal}
+    (h : copyStToM σ (.array elems shadow fx) = .ok (τ, mv)) : ∃ id, mv = .ref id := by
+  rw [copyStToM] at h
+  cases he : copyStElems σ elems with
+  | error e => rw [he] at h; exact absurd h (by simp [bind, Except.bind])
+  | ok te =>
+    obtain ⟨t', melems⟩ := te
+    rw [he] at h
+    simp only [bind, Except.bind, Except.ok.injEq, Prod.mk.injEq, State.alloc] at h
+    exact ⟨_, h.2.symm⟩
+
+theorem copyStToM_default_ref {σ τ : State} {R : RefTy} {mv : MVal}
+    (h : copyStToM σ (defaultForTy (.ref R)) = .ok (τ, mv)) : ∃ id, mv = .ref id ∧ id < τ.nextId := by
+  have hr : ∃ id, mv = .ref id := by
+    cases R with
+    | struct sn => rw [defaultForTy] at h; exact copyStToM_struct_ref h
+    | array E => rw [defaultForTy] at h; exact copyStToM_array_ref h
+    | fixed E n => rw [defaultForTy] at h; exact copyStToM_array_ref h
+    | mapping K V => rw [defaultForTy] at h; simp [copyStToM] at h
+  obtain ⟨id, rfl⟩ := hr
+  exact ⟨id, rfl, copyStToM_ref_lt h⟩
+
+/-- The members of a struct copy of defaults: each the copy of its member's
+default, into a heap the copy of the struct extends. -/
+theorem copyStFields_default_lookup :
+    ∀ {σ τ : State} {L : List (Name × Ty)} {mfields : List (Name × MVal)},
+      copyStFields σ (defaultForFields L) = .ok (τ, mfields) → ∀ f,
+        (∀ mv, lookupBy f mfields = some mv → ∃ T σ₁ σ₂, lookupBy f L = some T ∧
+          copyStToM σ₁ (defaultForTy T) = .ok (σ₂, mv) ∧ σ₂.HeapExt τ) ∧
+        (∀ T, lookupBy f L = some T → ∃ mv σ₁ σ₂, lookupBy f mfields = some mv ∧
+          copyStToM σ₁ (defaultForTy T) = .ok (σ₂, mv) ∧ σ₂.HeapExt τ)
+  | σ, τ, [], mfields, h, f => by
+    rw [defaultForFields] at h
+    simp [copyStFields] at h
+    obtain ⟨rfl, rfl⟩ := h
+    exact ⟨fun mv hmv => by simp [lookupBy] at hmv, fun T hT => by simp [lookupBy] at hT⟩
+  | σ, τ, (n, T) :: L, mfields, h, f => by
+    rw [defaultForFields, copyStFields] at h
+    cases h1 : copyStToM σ (defaultForTy T) with
+    | error e => simp [h1, bind, Except.bind] at h
+    | ok p =>
+      obtain ⟨σ₁, mv⟩ := p
+      cases h2 : copyStFields σ₁ (defaultForFields L) with
+      | error e => simp [h1, h2, bind, Except.bind] at h
+      | ok q =>
+        obtain ⟨σ₂, mrest⟩ := q
+        simp only [h1, h2, bind, Except.bind, Except.ok.injEq, Prod.mk.injEq] at h
+        obtain ⟨rfl, rfl⟩ := h
+        have hext : σ₁.HeapExt _ := copyStFields_heapExt σ₁ _ _ _ h2
+        by_cases hf : f = n
+        · subst hf
+          simp only [lookupBy, if_true]
+          exact ⟨fun mv' hmv' => by cases hmv'; exact ⟨T, σ, σ₁, rfl, h1, hext⟩,
+            fun T' hT' => by cases hT'; exact ⟨mv, σ, σ₁, rfl, h1, hext⟩⟩
+        · simp only [lookupBy, hf, if_false]
+          exact copyStFields_default_lookup h2 f
+
+/-- The elements of a copy of `n` defaults: each the copy of the default. -/
+theorem copyStElems_replicate {v : SVal} :
+    ∀ {n : Nat} {σ τ : State} {melems : List MVal},
+      copyStElems σ (List.replicate n v) = .ok (τ, melems) →
+      melems.length = n ∧ ∀ j (hj : j < melems.length), ∃ σ₁ σ₂,
+        copyStToM σ₁ v = .ok (σ₂, melems[j]) ∧ σ₂.HeapExt τ
+  | 0, σ, τ, melems, h => by
+    simp [List.replicate, copyStElems] at h
+    obtain ⟨rfl, rfl⟩ := h
+    exact ⟨rfl, fun j hj => absurd hj (by simp)⟩
+  | n + 1, σ, τ, melems, h => by
+    rw [List.replicate_succ, copyStElems] at h
+    cases h1 : copyStToM σ v with
+    | error e => simp [h1, bind, Except.bind] at h
+    | ok p =>
+      obtain ⟨σ₁, mv⟩ := p
+      cases h2 : copyStElems σ₁ (List.replicate n v) with
+      | error e => simp [h1, h2, bind, Except.bind] at h
+      | ok q =>
+        obtain ⟨σ₂, mrest⟩ := q
+        simp only [h1, h2, bind, Except.bind, Except.ok.injEq, Prod.mk.injEq] at h
+        obtain ⟨rfl, rfl⟩ := h
+        obtain ⟨hlen, hrest⟩ := copyStElems_replicate h2
+        refine ⟨by simp [hlen], fun j hj => ?_⟩
+        cases j with
+        | zero => exact ⟨σ, σ₁, h1, copyStElems_heapExt σ₁ _ _ _ h2⟩
+        | succ j => exact hrest j (by simpa using hj)
+
+/-- **A fresh default object, read along a path**: what is there is what the
+declared type at the path says — a primitive's default, or a reference
+allocated by the copy — and it is there exactly at the declared paths. -/
+theorem copyStToM_default_readPath : (p : List Seg) → ∀ {T : Ty} {σ τ : State} {mv : MVal},
+    copyStToM σ (defaultForTy T) = .ok (τ, mv) → ∀ {τ' : State}, τ.HeapExt τ' →
+    (∀ mv', mv.readPath τ' p = .ok mv' → ∃ T', T.memberTy p = some T' ∧ DefaultMVal T' mv' τ.nextId) ∧
+    (∀ T', T.memberTy p = some T' → ∃ mv', mv.readPath τ' p = .ok mv' ∧ DefaultMVal T' mv' τ.nextId)
+  | [], T, σ, τ, mv, h, τ', hext => by
+    have hd : DefaultMVal T mv τ.nextId := by
+      cases T with
+      | prim q => exact (copyStToM_default_prim h).2
+      | ref R => exact copyStToM_default_ref h
+    exact ⟨fun mv' hmv' => by simp only [MVal.readPath] at hmv'; cases hmv'; exact ⟨T, rfl, hd⟩,
+      fun T' hT' => by cases hT'; exact ⟨mv, by simp only [MVal.readPath], hd⟩⟩
+  | s :: rest, T, σ, τ, mv, h, τ', hext => by
+    cases T with
+    | prim q =>
+      obtain ⟨rfl, rfl⟩ := copyStToM_default_prim h
+      refine ⟨fun mv' hmv' => ?_, fun T' hT' => ?_⟩
+      · cases q <;> simp [PrimTy.default, Value.toMVal, MVal.readPath] at hmv'
+      · simp [Ty.memberTy, Ty.at_prim] at hT'
+    | ref R =>
+      cases R with
+      | mapping K V => rw [defaultForTy] at h; simp [copyStToM] at h
+      | array E =>
+        rw [defaultForTy, copyStToM] at h
+        simp only [copyStElems, Res.ok_bind', State.alloc, Except.ok.injEq, Prod.mk.injEq] at h
+        obtain ⟨rfl, rfl⟩ := h
+        have hobj : τ'.getObj σ.nextId = .ok (.array [] false) := by
+          rw [State.getObj_heapExt hext (Nat.lt_succ_self _)]
+          exact State.alloc_fresh σ (.array [] false)
+        refine ⟨fun mv' hmv' => ?_, fun T' hT' => ?_⟩
+        · cases s <;> simp [MVal.readPath, Addr.ofSeg, readAddr, hobj, bind, Except.bind] at hmv'
+        · cases s <;> simp [Ty.memberTy, Ty.at] at hT'
+      | struct sn =>
+        rw [defaultForTy, copyStToM] at h
+        cases hf : copyStFields σ (defaultForFields (structDef sn)) with
+        | error e => rw [hf] at h; exact absurd h (by simp [bind, Except.bind])
+        | ok tf =>
+          obtain ⟨τ₁, mfields⟩ := tf
+          rw [hf] at h
+          simp only [bind, Except.bind, Except.ok.injEq, Prod.mk.injEq, State.alloc] at h
+          obtain ⟨rfl, rfl⟩ := h
+          have hobj : τ'.getObj τ₁.nextId = .ok (.struct mfields) := by
+            rw [State.getObj_heapExt hext (Nat.lt_succ_self _)]
+            exact State.alloc_fresh τ₁ (.struct mfields)
+          have hext' : ∀ {σ₂ : State}, σ₂.HeapExt τ₁ → σ₂.HeapExt τ' :=
+            fun h₂ => h₂.trans ((State.HeapExt.alloc τ₁ (.struct mfields)).trans hext)
+          cases s with
+          | «at» k =>
+            refine ⟨fun mv' hmv' => ?_, fun T' hT' => ?_⟩
+            · simp [MVal.readPath, Addr.ofSeg, readAddr, hobj, bind, Except.bind] at hmv'
+            · simp [Ty.memberTy, Ty.at] at hT'
+          | field f =>
+            have hread : readAddr τ' (.ofSeg τ₁.nextId (.field f)) =
+                match lookupBy f mfields with | some v => .ok v | none => .error .stuck := by
+              simp [Addr.ofSeg, readAddr, hobj, bind, Except.bind, pure, Except.pure] <;> rfl
+            have hlk := copyStFields_default_lookup hf f
+            refine ⟨fun mv' hmv' => ?_, fun T' hT' => ?_⟩
+            · simp only [MVal.readPath, hread] at hmv'
+              cases hl : lookupBy f mfields with
+              | none => simp [hl, bind, Except.bind] at hmv'
+              | some mv₁ =>
+                simp only [hl, Res.ok_bind'] at hmv'
+                obtain ⟨T₁, σ₁, σ₂, hT₁, hc, hext₁⟩ := hlk.1 mv₁ hl
+                obtain ⟨T', hT', hd⟩ := (copyStToM_default_readPath rest hc (hext' hext₁)).1 mv' hmv'
+                refine ⟨T', ?_, hd.mono (Nat.le_trans hext₁.1 (Nat.le_succ _))⟩
+                simp [Ty.memberTy, Ty.at, hT₁, hT']
+            · simp only [Ty.memberTy, Ty.at] at hT'
+              cases hT₁ : lookupBy f (structDef sn) with
+              | none => simp [hT₁] at hT'
+              | some T₁ =>
+                simp only [hT₁, Option.bind] at hT'
+                obtain ⟨mv₁, σ₁, σ₂, hl, hc, hext₁⟩ := hlk.2 T₁ hT₁
+                obtain ⟨mv', hmv', hd⟩ := (copyStToM_default_readPath rest hc (hext' hext₁)).2 T' hT'
+                refine ⟨mv', ?_, hd.mono (Nat.le_trans hext₁.1 (Nat.le_succ _))⟩
+                simp only [MVal.readPath, hread, hl, Res.ok_bind']
+                exact hmv'
+      | fixed E n =>
+        rw [defaultForTy, copyStToM] at h
+        cases he : copyStElems σ (List.replicate n (defaultForTy E)) with
+        | error e => rw [he] at h; exact absurd h (by simp [bind, Except.bind])
+        | ok te =>
+          obtain ⟨τ₁, melems⟩ := te
+          rw [he] at h
+          simp only [bind, Except.bind, Except.ok.injEq, Prod.mk.injEq, State.alloc] at h
+          obtain ⟨rfl, rfl⟩ := h
+          have hobj : τ'.getObj τ₁.nextId = .ok (.array melems true) := by
+            rw [State.getObj_heapExt hext (Nat.lt_succ_self _)]
+            exact State.alloc_fresh τ₁ (.array melems true)
+          have hext' : ∀ {σ₂ : State}, σ₂.HeapExt τ₁ → σ₂.HeapExt τ' :=
+            fun h₂ => h₂.trans ((State.HeapExt.alloc τ₁ (.array melems true)).trans hext)
+          obtain ⟨hlen, helems⟩ := copyStElems_replicate he
+          cases s with
+          | field f =>
+            refine ⟨fun mv' hmv' => ?_, fun T' hT' => ?_⟩
+            · simp [MVal.readPath, Addr.ofSeg, readAddr, hobj, bind, Except.bind] at hmv'
+            · simp [Ty.memberTy, Ty.at] at hT'
+          | «at» k =>
+            have hread : readAddr τ' (.ofSeg τ₁.nextId (.at k)) =
+                if hk : 0 ≤ k ∧ k.toNat < melems.length then .ok melems[k.toNat]
+                else .error .revert := by
+              simp [Addr.ofSeg, readAddr, hobj, bind, Except.bind, pure, Except.pure]
+            refine ⟨fun mv' hmv' => ?_, fun T' hT' => ?_⟩
+            · simp only [MVal.readPath, hread] at hmv'
+              split at hmv'
+              · rename_i hk
+                simp only [Res.ok_bind'] at hmv'
+                obtain ⟨σ₁, σ₂, hc, hext₁⟩ := helems k.toNat hk.2
+                obtain ⟨T', hT', hd⟩ := (copyStToM_default_readPath rest hc (hext' hext₁)).1 mv' hmv'
+                refine ⟨T', ?_, hd.mono (Nat.le_trans hext₁.1 (Nat.le_succ _))⟩
+                have hk' : 0 ≤ k ∧ k < n := ⟨hk.1, by rw [← hlen]; omega⟩
+                simp [Ty.memberTy, Ty.at, hk', hT']
+              · simp [bind, Except.bind] at hmv'
+            · simp only [Ty.memberTy, Ty.at] at hT'
+              split at hT'
+              · rename_i hk
+                simp only [Option.bind] at hT'
+                have hk' : 0 ≤ k ∧ k.toNat < melems.length := ⟨hk.1, by rw [hlen]; omega⟩
+                obtain ⟨σ₁, σ₂, hc, hext₁⟩ := helems k.toNat hk'.2
+                obtain ⟨mv', hmv', hd⟩ := (copyStToM_default_readPath rest hc (hext' hext₁)).2 T' hT'
+                refine ⟨mv', ?_, hd.mono (Nat.le_trans hext₁.1 (Nat.le_succ _))⟩
+                simp only [MVal.readPath, hread, hk']
+                exact hmv'
+              · simp at hT'
+
 namespace Close
 
 /-! ## Paths: apart, below -/
@@ -862,6 +1188,12 @@ theorem writeAddr_setObj {σ τ : State} {mv : MVal} {a : Addr} (h : writeAddr �
               simp [hg]
             · simp [readAddr, State.getObj, State.setObj, lookupBy_setBy_ne hid]
         · simp at h
+
+/-- A write into memory leaves the counter. -/
+theorem writeAddr_nextId {σ τ : State} {mv : MVal} {a : Addr} (h : writeAddr σ mv a = .ok τ) :
+    τ.nextId = σ.nextId := by
+  obtain ⟨id, obj, rfl, -⟩ := writeAddr_setObj h
+  rfl
 
 /-- The update `{memory := write(memory, m.age, 5)}` is the write: the state
 it builds from `σ` is the one `writeAddr` returns. -/

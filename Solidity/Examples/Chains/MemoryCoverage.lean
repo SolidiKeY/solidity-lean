@@ -14,6 +14,7 @@ A memory object is declared by a `where` clause, `Person memory carol`, as the p
 Stand-ins: `carol.account.values` and `carol.account.tokens` are `basket.items` and
 `bucket.tokens` (`Account` has neither member).  A statement holding a call (`makeValue()`)
 is the elaborator's first step, an equation, not a rule; so is a `++` in an operand.
+Rows are single links, not chains: the ends-merged convention and `#last_line` do not apply here.
 -/
 
 namespace Solidity.Examples.Chains.MemoryCoverage

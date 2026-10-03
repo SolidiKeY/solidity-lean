@@ -37,6 +37,7 @@ def Op1.quote : Op1 a s → Lean.Expr → Lean.Expr
   | .unop op p, x => mkAppN (mkConst ``Term.unop) #[c, toExpr op, toExpr p, x]
   | .net, x => mkAppN (mkConst ``Term.net) #[c, x]
   | .netOf y, x => mkAppN (mkConst ``Term.netOf) #[c, toExpr y, x]
+  | .delValue, x => mkAppN (mkConst ``Term.delValue) #[c, x]
   | .field f, x => mkAppN (mkConst ``PTerm.field) #[c, x, toExpr f]
   | .next, x => mkAppN (mkConst ``PTerm.next) #[c, x]
   | .select r, x => mkAppN (mkConst ``STerm.select) #[c, x, toExpr r]
@@ -56,6 +57,7 @@ def Op2.quote : Op2 a b s → Lean.Expr → Lean.Expr → Lean.Expr
   | .read, x, y => mkAppN (mkConst ``Term.read) #[c, x, y]
   | .mlen, x, y => mkAppN (mkConst ``Term.mlen) #[c, x, y]
   | .at, x, y => mkAppN (mkConst ``PTerm.at) #[c, x, y]
+  | .nextIn, x, y => mkAppN (mkConst ``PTerm.nextIn) #[c, x, y]
   | .delAt, x, y => mkAppN (mkConst ``STerm.delAt) #[c, x, y]
   | .pushSlot E, x, y => mkAppN (mkConst ``STerm.pushSlot) #[c, x, y, toExpr E]
   | .pop, x, y => mkAppN (mkConst ``STerm.pop) #[c, x, y]
@@ -73,6 +75,7 @@ def Op3.quote : Op3 a b d s → Lean.Expr → Lean.Expr → Lean.Expr → Lean.E
   | .ite, x, y, z => mkAppN (mkConst ``Term.ite) #[c, x, y, z]
   | .save, x, y, z => mkAppN (mkConst ``STerm.save) #[c, x, y, z]
   | .push, x, y, z => mkAppN (mkConst ``STerm.push) #[c, x, y, z]
+  | .atIn, x, y, z => mkAppN (mkConst ``PTerm.atIn) #[c, x, y, z]
   | .write, x, y, z => mkAppN (mkConst ``MTerm.write) #[c, x, y, z]
 
 /-- A term, quoted under its constructors' names (`Term.find`, …), so that

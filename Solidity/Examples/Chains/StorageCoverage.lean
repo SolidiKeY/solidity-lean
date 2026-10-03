@@ -14,6 +14,7 @@ a write of a `uint` into `basket.items`; `tokVal`, `pVal` are `uint` where the r
 value (a `Token` or `Person` value is no source here).  A statement holding a call
 (`makeValue()`) is the elaborator's first step, an equation, not a rule; so is a `++` in an operand.
 A literal or negated condition has no rule here (`if (true)` is `ifElseSplit`).
+Rows are single links, not chains: the ends-merged convention and `#last_line` do not apply here.
 -/
 
 namespace Solidity.Examples.Chains.StorageCoverage

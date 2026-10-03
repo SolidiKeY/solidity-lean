@@ -160,6 +160,14 @@ info: dl{ ¬a = b → [ balances[a] = 1; balances[b] = 2; ] find(storage, balanc
 -/
 #guard_msgs in #check dl!{ a != b → [ balances[a] = 1; balances[b] = 2; ] balances[a] == 1 }
 
+/-! A comparison captured by a check, `{ se1 := x <= 255 }`, has no term
+spelling of its own: the update element carries it, and prints as it reads. -/
+
+/--
+info: dl{ { x := 250 + 10 ‖ se1 := 250 + 10 <= 255 ‖ se2 := 1 < 2 } true } : Fml StandardExample
+-/
+#guard_msgs in #check dl!{ { x := 250 + 10 ‖ se1 := 250 + 10 <= 255 ‖ se2 := 1 < 2 } true }
+
 /-- What a rule leaves reads back through `dl!{ … }` as the term it is. -/
 example : (dl!{ [ balances[a] = 1; ] balances[a] == 1 }).step =
     some dl!{ { storage := save(storage, balances[a], 1) } [ ] find(storage, balances[a]) = 1 } :=

@@ -284,14 +284,14 @@ changes").
 
 | KeY rule | Lean | Status | Notes |
 | --- | --- | --- | --- |
-| `sequentialToParallel1-3` | `UpdRule.sequentialToParallel`, `Proves.merge`; `Proves.mergeStorage` | done | `{u}{u2}φ ⇝ {u ‖ {u}u2}φ` for `u` of locals (`Upd.envOnly`); `mergeStorage` over a storage write, for terms whose every storage read is a `storage` term (`stExplicit`) |
+| `sequentialToParallel1-3` | `UpdRule.sequentialToParallel`, `Proves.merge`; `Proves.mergeStorage`; + under a branch (`LineRw.mergeIn`, `Calculus/ChainBranches.lean`) | done | `{u}{u2}φ ⇝ {u ‖ {u}u2}φ` for `u` of locals (`Upd.envOnly`); `mergeStorage` over a storage write, for terms whose every storage read is a `storage` term (`stExplicit`); in a chain also at the first spine under `∧`, `→`, `¬` |
 | `applyOnElementary`, `applyOnParallel` | `UpdElem.subst`, `Upd.subst` | functions | `{u}` pushed into right-hand sides |
 | `applyOnPV`, `applyOnPVLastInParallel`, `applyOnDifferentPV`, `applyOnDifferentPVLastInParallel` | `Fml.subst` (`Upd.lastWrite`) | functions | the last write of a local wins; an unwritten local is kept |
 | `simplifyUpdate1-3` | `UpdRule.simplifyUpdate`, `Upd.dropEffectless`, `Proves.simplify` | done | only elements that cannot halt are dropped (`UpdElem.total`) |
 | `applySkip1-3`, `applyOnSkip` | `UpdRule.applySkip` | done | `skip` is `[]` |
 | `parallelWithSkip1-2` | — | arch | `‖` is `++`, `skip` is `[]`: nothing to rewrite |
-| `applyOnRigidFormula` | `UpdRule.applyOnRigid` | done | an equivalence, for an update that cannot halt (`Upd.total`) and a formula reading no variable at another sort than the update writes it (`Fml.sortedFor`) |
-| `applyOnRigidFormula`, under the box | `Proves.applyOnRigidBox`, `Proves.applyStorageBox` (`{storage := s}`); `sol_apply_upd` | done | one direction, **no totality premise**: the last update of the context is applied to a first-order goal and dropped; a halting box update proves what follows |
+| `applyOnRigidFormula` | `UpdRule.applyOnRigid`; + through `∧`, `→`, `¬` (`Fml.push`, `Calculus/ChainBranches.lean`) | done | an equivalence, for an update that cannot halt (`Upd.total`) and a formula reading no variable at another sort than the update writes it (`Fml.sortedFor`); `Fml.push` substitutes each rigid leaf and keeps any other part under the update |
+| `applyOnRigidFormula`, under the box | `Proves.applyOnRigidBox`, `Proves.applyStorageBox` (`{storage := s}`); `sol_apply_upd`; + through `∧`, `→`, `¬` (`Fml.pushBox`) | done | one direction, **no totality premise**: the last update of the context is applied to a first-order goal and dropped; a halting box update proves what follows; `Fml.pushBox` keeps an antecedent and a negated part whole under the box, where no direction holds with the update substituted |
 | `elimSelfUpdate*` | `UpdElem.elimSelf_box`, `UpdElem.elimSelf_diamond` | done, one direction each | commented out in KeY; `x := x` halts when `x` holds no value, so it is no equivalence |
 | `simplifyIfThenElseUpdate1-4`, `commuteSimpleUpdates` | — | arch | commented-out dead code in KeY |
 
@@ -305,11 +305,12 @@ diamond (`Hyp.boxOnly`). A program comparison produces `Fml.eqD a b` —
 
 | KeY rule | Lean | Status | Notes |
 | --- | --- | --- | --- |
-| `eqClose` | `Proves.eqRefl`; `Proves.eqClose` (`v ≐ v`), `Proves.eqDClose` (`v = v`) | done | `t ≐ t` for any term, halting or not (`StValue.Equiv.refl`) |
+| `eqClose` | `Proves.eqRefl`; `Proves.eqClose` (`v ≐ v`), `Proves.eqDClose` (`v = v`); on two literals in a chain, `Fml.concrete` (`Calculus/ChainBranches.lean`) | done | `t ≐ t` for any term, halting or not (`StValue.Equiv.refl`); `v ≐ w` for distinct literals folds to `false` |
+| `concrete_and_1-4`, `concrete_impl_1-4`, `concrete_not_2` | `Fml.concrete`, `LineRw.concrete` (`Calculus/ChainBranches.lean`) | done | `true ∧ A ⇝ A`, `false → A ⇝ true`, `A → false ⇝ ¬A`, `¬false ⇝ true`, …, bottom-up through `¬`, `∧`, `→`; `concrete_not_1` (`¬true ⇝ false`) rewrites nothing, `false` being `¬true` |
 | `andRight` | `Proves.andSplit`, `Proves.andSplitUpd` (behind an update) | done | |
 | — | `Proves.eqDSplit` | Lean only | `a = b` from `defined(a)`, `defined(b)`, `a ≐ b`: `Fml.eqD` unfolded |
 | — | `Proves.definedWritten` | Lean only | `defined(x)` behind a box update whose last binder of `x` is `x := t`: what `applyOnRigidBox` forgets |
-| — | `Proves.definedLit` | Lean only | a literal is defined |
+| — | `Proves.definedLit`; `Fml.concrete` (`defined(v) ⇝ true`) | Lean only | a literal is defined |
 | any theory taclet on a sequent | `Proves.rewrite` (`Calculus/Logic.lean`), `rw [r]`/`sol_rw` (`Calculus/Rewrite.lean`) | done | a term taclet `r : TermTaclet t t'` rewrites every total equation of the sequent (`Fml.rwEq`); `TermTaclet.sound` proves each rule once, from its Theory lemma |
 | the same, inside an update | `Proves.updRw`, `sol_rw` | done | an update's right-hand side runs in the interpreter, so the rewrite asks `Term.EvalRefines t t'`, which a Theory equation onto a literal gives (`Term.EvalRefines.of_theq`); box updates only |
 
@@ -344,8 +345,8 @@ them as KeY's `\replacewith` updates do.
 
 | KeY sort | Here | Notes |
 | --- | --- | --- |
-| a value | `Term` | a constant, a stack local, `a ⊕ b`, `find(s, p)`, `read(m, a)`, `select(s, r)` (`Term.find` at a state variable), an array's length (`Term.len`, `Term.mlen`), `c ? a : b`, `selectSt(net, at(a))` (`Term.net`), `selectSt(oldNet, at(a))` (`Term.netOf`) |
-| `Path[storage]` | `PTerm` | a state variable (`.root`), an alias (`.pv`), `.field`/`.at` |
+| a value | `Term` | a constant, a stack local, `a ⊕ b`, `find(s, p)`, `read(m, a)`, `select(s, r)` (`Term.find` at a state variable), an array's length (`Term.len`, printed `p.length` at `storage` and `find(s, p.length)` elsewhere; `Term.mlen`), `c ? a : b`, `selectSt(net, at(a))` (`Term.net`), `selectSt(oldNet, at(a))` (`Term.netOf`), `delValue(t)` (`Term.delValue`, KeY's `delValue<[α]>`) |
+| `Path[storage]` | `PTerm` | a state variable (`.root`), an alias (`.pv`), `.field`/`.at`; `p[i]@S` (`.atIn`) and `p[p.length]@S` (`.nextIn`) for an index check or a push slot merged under a storage write, their check performed in `S` (no KeY counterpart: KeY's `at(i)` is unchecked) |
 | `Storage` | `STerm` | `.storage`, `.save`, `.delAt`; `.push`/`.pushSlot`/`.pop`/`.shrink`/`.extend` for the array writes; `.select` for `selectSt<[Struct]>(s, r)`, the struct at a member, written `select(s, r)` |
 | what a storage `save` writes | `SValT` | a value (`.val`), a subtree read from a storage (`.find`), a memory object copied back (`.copyMem`, KeY's `copyMem(mtSt, m, i)`), or a fresh array (`.newArr`; a concrete one prints `newArr(T, n)`, `T` the array type) |
 | `Identity` | `ITerm` | a memory local (`.pv`), a reference read out of memory (`.read`), `freshId(addM(m))` (`.alloc`, carrying the `RefTy`; a concrete one prints it, `freshId(addM(m, Person))`, `freshId(addM(m, uint[]))`), `freshId(copySt(m, v))` (`.copy`) |
@@ -460,18 +461,21 @@ they are the rules `Theory/Rewrite.lean` lists as Lean-only, stated on terms.
 
 | Term taclet | Theory lemma | Printed rule (`TheoryRule`) | Notes |
 | --- | --- | --- | --- |
-| `findOnSave` | `find_copyTo_same` (`Theory/Copy.lean`) | `findOnSave` | `find(save(s, p, v), p) ≐ v` for a literal word `v`: a copy reads back the new value laid over the old, which is `v` only for a word |
+| `findOnSave` | `find_copyTo_same` (`Theory/Copy.lean`) | `findOnSave` | `find(save(s, p, v), q) ≐ v` for a literal word `v`, `q` the path `p` its checks aside (`PTerm.sameSegs`: `p[i]@S` is `p[i]`): a copy reads back the new value laid over the old, which is `v` only for a word |
 | `findOnSaveFrame` | `find_copyTo_frame` | `findOnSaveDifferent` | any written value, `p` diverging from `q` |
 | `findMemberCons` | `find_cons` | — | solkey's `consRcons`, `consRnil`, `findDefinitionMemberCons`/`Prim`: `find(s, r.p) ≐ find(select(s, r), p)`, the path read from its head (`PTerm.shift?`), at any depth |
 | `selectOnSaveMember` | `StValue.selectOnSaveCons` | — | solkey's `selectOnSaveCons` at `a1 = a2`: `find(select(save(s, r.p, v), r), q) ≐ find(save(select(s, r), p, v), q)` |
 | `selectOnSaveFrame` | `StValue.selectOnSaveCons` | — | solkey's `selectOnSaveCons` at `a1 ≠ a2`: a write under another root is not seen from `r` |
 | `selectOnDelAtMember`, `selectOnDelAtFrame` | `StValue.selectOnSaveCons`, `find_cons` | — | the same for a delete, `delAt(s, p)` being `save(s, p, delValue(find(s, p)))` |
 | `selectOnSaveMemberIn`, `selectOnSaveFrameIn`, `selectOnDelAtMemberIn`, `selectOnDelAtFrameIn` | the same, `SCtx.fill_denote` | — | the four in a storage context `K` of saves, deletes and selects (`SCtx`), which the arrow finds: solkey rewrites a storage term wherever it stands |
-| `findOnDelAt` | `find_delAt_same`, `delValueDefault` | `findDelAt` | where `find(s, p) ≐ w` for a word `w`, the delete reads its default |
-| `findOnDelAtSave` | `findOnDelAt` over `findOnSave` | `findDelAt` | a delete over a written word |
+| `findOnDelAt` | `find_delAt_same`, `delValueDefault` | `findDelAt` | where `find(s, p) ≐ w` for a word `w`, the delete reads its default at `p` (`sameSegs`) |
+| `findOnDelAtSave` | `findOnDelAt` over `findOnSave` | `findDelAt` | a delete over a written word, the three paths one path their checks aside |
+| `findOnDelAtValue` | `find_delAt_same` | `findDelAt` | `find(delAt(s, p), q) ≐ delValue(find(s, q))`, `q` the path `p` its checks aside: the delete's effect at its own path, the value left for a later law (`delValueLit`, or a read below a mapping member) |
+| `delValueLit` | `delValueDefault` | `delValueDefault` | `delValue(w) ≐ default(w)` for a literal word |
 | `findOnDelAtBelow` | `find_delAt_below`, `delValueDefault` | `findDelAtFields` | a word at or below a deleted node reads its default, where the deleted storage writes the word there (`STerm.findLit?`) and the node is no mapping (`STerm.KindFreeAt`, a premise of the chain: a mapping keeps its members) |
 | `findOnDelAtFrame` | `find_delAt_frame` | `findDelAtOutside` | |
 | `findOnPushFrame`, `findOnPopFrame` | `find_pushT_frame`, `find_popT_frame` (`Theory/Copy.lean`) | — | a push or pop is one term here, not two saves |
+| `lenOnSaveFrame`, `lenOnDelAtFrame` | `find_copyTo_frame`, `find_delAt_frame` | `findOnSaveDifferent`, `findDelAtOutside` at `p.size` | `len(save(s, q, v), p) ≐ len(s, p)`, `len(delAt(s, q), p) ≐ len(s, p)` where `q` leaves `p.length` (`PTerm.divergesLen`): a length is a read at `p.length`, one term here (`Term.len`) |
 
 ### The laws of memory reads (`EvalLaw`, `Calculus/ChainRewrites.lean`)
 
@@ -485,15 +489,42 @@ under any modality where the update holds the write the law reads back
 | Law | Interpreter lemma | KeY taclet | Notes |
 | --- | --- | --- | --- |
 | `readOnWrite` | `readAddr_writeAddr_same` (`Calculus/ReadWrite.lean`) | `readOnWrite` | `read(write(m, a, v), a) ⇝ v` for a literal `v` |
-| `findCopyMem` | `copyMem_member` | `findOnCopy` over `findOnSave` | `find(save(s, p, copyMem(mtSt, m, i)), p.f) ⇝ read(m, i.f)`: the paper's one step from the `find` into memory |
+| `findCopyMem` | `copyMem_member` | `findOnCopy` over `findOnSave` | `find(save(s, p, copyMem(mtSt, m, i)), p.f) ⇝ read(m, i.f)`: the printed trace's one step from the `find` into memory |
 | `readCopySt` | `copyStToM_member` | `readFromCopyToStorage` | `read(copySt(m, find(s, p)), freshId(copySt(m, find(s, p))).f) ⇝ find(s, p.f)` |
+| `readAddEqual` | `copyStToM_default_readPath` (`Calculus/ReadWrite.lean`) | `readAddEqual` | `read(addM(m, R), a) ⇝ default` for a primitive member or fixed element at a fresh path of the allocation (`Tm.freshPath?`, `RefTy.memberTy`) |
+| `readAddDifferent` | `readAddr_heapExt`, `allocDefault_heapExt` | `readAddDifferent` | `read(addM(m, R), a) ⇝ read(m, a)` where `a`'s identity is allocated strictly earlier on `m`'s spine (`Tm.boundedIn`) |
+| `readAddDifferentIdentity` | the same | `readAddDifferent` at `Identity` | the twin at the identity sort |
+| `readWriteDifferent` | `writeAddr_setObj` | `readWriteDifferent` | `read(write(m, a, v), b) ⇝ read(m, b)` where `a` and `b` never meet (`MAddr.apart?`: different members, a member and an element, one object at different literal indices) |
+| `readWriteDifferentIdentity` | the same | `readWriteDifferent` at `Identity` | the twin at the identity sort |
+| `readOnWriteIdentity` | `readAddr_writeAddr_same` | `readOnWrite` at `Identity` | `read(write(m, a, ref(i)), a) ⇝ i` |
+| — | — | `idC(ρ, [account])` | no law: a reference member of a fresh root, `read(addM(m, R), freshId(addM(m, R)).account)`, is the normal form, since KeY's `idC` has no `ITerm` counterpart |
 
 The merges that feed them (`Calculus/StateParts.lean`): `{memory := M}{V}`
 substitutes `M` for `memory` in `V` (`Upd.mergeMem`, with the locals of a
-`{carol := freshId(copySt(…)) ‖ memory := copySt(…)}`), and `{storage := s}{V}`
-substitutes into memory reads too (`withStM`), which `applyStorageBox`'s
-`withSt` keeps out of.  A frame at the `Identity` sort (`read(write(m, i.f, v), j)`
-with `f` not read) has no term rewrite: a rewrite replaces value terms.
+`{carol := freshId(copySt(…)) ‖ memory := copySt(…)}`), and
+`{L ‖ storage := s}{V}` substitutes the locals and `s` in one pass, into
+memory reads too (`Tm.substSt`, `Upd.mergeStL`), which `applyStorageBox`'s
+`withSt` keeps out of; the shadowed `storage := s` goes where `V` writes the
+storage over it.  A law is stated at the value or the identity sort
+(`EvalLaw : Tm C u → Tm C u → Prop`) and rewrites at that sort inside every
+right-hand side, memory reads included (`Tm.rwEv`, `Upd.rwEv_holds`).
+
+### The literal laws (`LitLaw`, `Calculus/Literals.lean`)
+
+KeY's `*_literals` taclets (`integerSimplificationRules.key`) fold an
+operation on two literals.  Each is a constructor of `LitLaw`, stated as the
+interpreter computes it, and exact (`LitLaw.exact`): its left side returns
+the literal on the right in every state.  So a chain applies one anywhere,
+under any modality: in an update's right-hand sides (`LineRw.lit`, no premise
+on the update) and in the equations and `defined(…)`s of the line's
+propositional skeleton (`LineRw.litEq`).
+
+| Law | KeY taclet | Notes |
+| --- | --- | --- |
+| `add_literals` | `add_literals` | `a + b ⇝ a + b` folded, where the sum is in `uint` range (`checkArith`; out of range the sum reverts and is its own normal form) |
+| `sub_literals` | `sub_literals` | `a - b ⇝ a - b` folded, in `uint` range |
+| `leq_literals` | `leq_literals` | `a <= b ⇝ true`/`false` |
+| `less_literals` | `less_literals` | `a < b ⇝ true`/`false` |
 
 ### The names
 
@@ -513,6 +544,13 @@ Where the theory or a taclet differs from KeY, each stated once at its row:
   `readOnAddM` resolves a fresh object's slot to `init<[α]>` at the
   reader's sort; `Semantics.allocDefault` materializes the object), and
   `defaultValue<[α]>` is `st mtSt`, resolved by the caller's cast.
+- **An index check is explicit after a merge.** KeY's `at(i)` is unchecked
+  and `p[p.length]` reads the length in the state; here `p[i]` and
+  `p[p.length]` check against the storage of the state they run in, so merged
+  under `{storage := S}` they become `p[i]@S` and `p[p.length]@S`
+  (`Tm.substSt`), the check performed in `S`.  The laws read them as `p[i]`
+  (`PTerm.sameSegs`, `PTerm.diverges` on shapes); `p[p.length]@S` is its own
+  path.
 - **A push is one term.** `STerm.push s p v` *is* `save(save(s, p[p.length], v),
   p.length, p.length + 1)`, where KeY writes two parallel `save`s: a program
   can perform neither write alone. The slot it lands on is recycled or a

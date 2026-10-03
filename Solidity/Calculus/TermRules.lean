@@ -203,6 +203,9 @@ theorem Op1.denote_congr : (o : Op1 a s) → {d d' : a.Den} →
       · cases b <;> exact StValue.Equiv.refl _
   | .field _, _, _, h | .next, _, _, h => by
     simp only [Srt.DEquiv] at h ⊢; rw [h]
+  | .delValue, _, _, h => by
+    simp only [Srt.DEquiv, Op1.denote] at h ⊢
+    exact StValue.Equiv.delValue h
   | .select _, _, _, h => by
     simp only [Srt.DEquiv, Op1.denote] at h ⊢
     exact StValue.Equiv.asStruct (StValue.Equiv.findSt h [_])
@@ -231,6 +234,9 @@ theorem Op2.denote_congr : (o : Op2 a b s) → o.opaque = false → {ra ra' : a.
   | .at, _, _, _, _, _, _, _, _, _, hp, hi => by
     simp only [Srt.DEquiv, Op2.denote] at hp hi ⊢
     rw [hp, hi.asInt]
+  | .nextIn, _, _, _, _, _, _, _, _, _, hs, hp => by
+    simp only [Srt.DEquiv, Op2.denote] at hs hp ⊢
+    rw [hp, Struct.Equiv.lenAt hs]
   | .delAt, _, _, _, _, _, _, _, _, _, hs, hp => by
     simp only [Srt.DEquiv, Op2.denote] at hs hp ⊢
     rw [hp]
@@ -265,6 +271,9 @@ theorem Op3.denote_congr : (o : Op3 a b c s) → {da da' : a.Den} → {db db' : 
       · exact StValue.Equiv.refl _
     · simp only [hs, ht]
       exact StValue.Equiv.refl _
+  | .atIn, _, _, _, _, _, _, _, hp, hi => by
+    simp only [Srt.DEquiv, Op3.denote] at hp hi ⊢
+    rw [hp, hi.asInt]
   | .save, _, _, _, _, _, _, hs, hp, hv => by
     simp only [Srt.DEquiv, Op3.denote] at hs hp hv ⊢
     rw [hp]

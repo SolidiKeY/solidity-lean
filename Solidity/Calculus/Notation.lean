@@ -110,8 +110,13 @@ inductive RawTerm where
   | name (x : String)
   | field (t : RawTerm) (f : String)
   | at (t i : RawTerm)
+  /-- `p[i]@S`: the index checked in the storage `S`. -/
+  | atIn (t i S : RawTerm)
   | add (a b : RawTerm)
   | sub (a b : RawTerm)
+  /-- `a <= b`, `a < b` as a term: the right-hand side of a captured
+  comparison, `x := a <= b`. -/
+  | cmp (op : BinOp) (a b : RawTerm)
   | app (f : String) (args : List RawTerm)
   /-- `msg.sender`, `address(this).balance`, …: KeY's program variables
   `msgSender`, `selfBalance`, …. -/
@@ -220,6 +225,8 @@ partial def expandTerm : TSyntax `dl_term → MacroM Lean.Term
       (nameParts f.getId).foldlM (init := ← expandTerm t) fun acc c =>
         `(RawTerm.field $acc $(quote c))
   | `(dl_term| $t:dl_term [ $i:dl_term ]) => do `(RawTerm.at $(← expandTerm t) $(← expandTerm i))
+  | `(dl_term| $t:dl_term [ $i:dl_term ] @ $S:dl_term) => do
+    `(RawTerm.atIn $(← expandTerm t) $(← expandTerm i) $(← expandTerm S))
   | `(dl_term| $t:dl_term []) => do `(RawTerm.app "[]" [$(← expandTerm t)])
   | `(dl_term| $a:dl_term + $b:dl_term) => do `(RawTerm.add $(← expandTerm a) $(← expandTerm b))
   | `(dl_term| $a:dl_term - $b:dl_term) => do `(RawTerm.sub $(← expandTerm a) $(← expandTerm b))
@@ -285,8 +292,16 @@ def expandUpd (U : TSyntax `dl_upd) : MacroM Lean.Term := do
           return ← `(RawUpdElem.pay $(← expandTerm a) $(← expandTerm v))
         | _ => pure ()
       `(RawUpdElem.assign $(quote n) $(← expandTerm r))
+    | `(dl_upd_elem| $l:dl_term := $a:dl_term <= $b:dl_term) => assignCmp l ``BinOp.le a b
+    | `(dl_upd_elem| $l:dl_term := $a:dl_term < $b:dl_term) => assignCmp l ``BinOp.lt a b
     | _ => Macro.throwUnsupported
   `([$elems,*])
+where
+  /-- `x := a <= b`: the comparison, a term (`RawTerm.cmp`). -/
+  assignCmp (l : TSyntax `dl_term) (op : Lean.Name) (a b : TSyntax `dl_term) : MacroM Lean.Term := do
+    let `(dl_term| $x:ident) := l | Macro.throwErrorAt l "an update assigns a variable"
+    let [n] := nameParts x.getId | Macro.throwErrorAt l "an update assigns a variable"
+    `(RawUpdElem.assign $(quote n) (RawTerm.cmp $(mkIdent op) $(← expandTerm a) $(← expandTerm b)))
 
 /-- The Lean term of a formula that is one: a name `φ`, or `‹t›`. -/
 def fmlHole? (stx : Syntax) : Option Lean.Term :=
@@ -384,7 +399,8 @@ mutual
 def RawTerm.names : RawTerm → List String
   | .name x => if ["storage", "memory", "true", "false"].contains x then [] else [x]
   | .field t _ => t.names
-  | .at a b | .add a b | .sub a b => a.names ++ b.names
+  | .at a b | .add a b | .sub a b | .cmp _ a b => a.names ++ b.names
+  | .atIn a b s => a.names ++ b.names ++ s.names
   | .app "defVal" _ => []
   | .app "copyMem" (_ :: ts) => RawTerm.namesList ts
   | .app "addM" [m, _] => m.names
@@ -408,6 +424,7 @@ def RawTerm.frameNames : RawTerm → List String
   | .name _ => []
   | .field t _ => t.frameNames
   | .at t i => t.frameNames ++ i.names
+  | .atIn t i s => t.frameNames ++ i.names ++ s.names
   | t => t.names
 
 /-- The term reads through a `select`: its paths are in a frame. -/
@@ -415,7 +432,8 @@ def RawTerm.hasSelect : RawTerm → Bool
   | .app "select" _ => true
   | .app _ ts => RawTerm.hasSelectList ts
   | .field t _ => t.hasSelect
-  | .at a b | .add a b | .sub a b => a.hasSelect || b.hasSelect
+  | .at a b | .add a b | .sub a b | .cmp _ a b => a.hasSelect || b.hasSelect
+  | .atIn a b _ => a.hasSelect || b.hasSelect
   | .num _ | .name _ | .env _ => false
 
 def RawTerm.hasSelectList : List RawTerm → Bool
@@ -520,7 +538,7 @@ def pathTy (Γ : ECtx) : RawTerm → Option Ty
   | .field t f => do
     let .ref (.struct s) ← pathTy Γ t | none
     C.fieldType s f
-  | .at t _ => do
+  | .at t _ | .atIn t _ _ => do
     match ← pathTy Γ t with
     | .ref (.mapping _ V) => some V
     | .ref (.array E) => some E
@@ -605,12 +623,16 @@ def rVal (R : Readers C) (Γ : ECtx) : RawTerm → Except String (Term C)
     | .store => throw s!"`{x}` is a storage, not a value: read it with `find({x}, …)`"
   | .add a b => do pure (.binop .add .uint (← R.val a) (← R.val b))
   | .sub a b => do pure (.binop .sub .uint (← R.val a) (← R.val b))
+  | .cmp op a b => do pure (.binop op .uint (← R.val a) (← R.val b))
   | .field p "length" => do
     if isMemTerm C Γ p then pure (.mlen .memory (← R.ident p))
     else pure (.len .storage (← R.path p))
-  | t@(.field ..) | t@(.at ..) => do
+  | t@(.field ..) | t@(.at ..) | t@(.atIn ..) => do
     if isMemTerm C Γ t then pure (.read .memory (← R.addr t))
     else pure (.find .storage (← R.path t))
+  | .app "find" [s, .field p "length"] => do
+    pure (.len (← R.stor s) (← (if s.hasSelect then R.fpath else R.path) p))
+  | .app "delValue" [t] => do pure (.delValue (← R.val t))
   | .app "select" [s, .name r] => do pure (.find (← R.stor s) (.root r))
   | .app "select" [s, r] | .app "find" [s, r] => do
     pure (.find (← R.stor s) (← (if s.hasSelect then R.fpath else R.path) r))
@@ -638,7 +660,14 @@ def rPath (R : Readers C) (Γ : ECtx) : RawTerm → Except String (PTerm C)
     | .field t' "length" =>
       if t == t' then pure (.next (← R.path t)) else pure (.at (← R.path t) (← R.val i))
     | _ => pure (.at (← R.path t) (← R.val i))
-  | _ => throw "not a storage path: a name, `p.f` or `p[t]`"
+  | .atIn t i S => do
+    -- `p[i]@S`, the index checked in `S`; `p[p.length]@S` the slot past the end
+    match i with
+    | .field t' "length" =>
+      if t == t' then pure (.nextIn (← R.stor S) (← R.path t))
+      else pure (.atIn (← R.stor S) (← R.path t) (← R.val i))
+    | _ => pure (.atIn (← R.stor S) (← R.path t) (← R.val i))
+  | _ => throw "not a storage path: a name, `p.f`, `p[t]` or `p[t]@S`"
 
 /-- `rPath` in the frame of a `select`: a name that is no alias is a member, the frame's root. -/
 def rPathFrame (R : Readers C) (Γ : ECtx) : RawTerm → Except String (PTerm C)
@@ -654,7 +683,13 @@ def rPathFrame (R : Readers C) (Γ : ECtx) : RawTerm → Except String (PTerm C)
     | .field t' "length" =>
       if t == t' then pure (.next (← R.fpath t)) else pure (.at (← R.fpath t) (← R.val i))
     | _ => pure (.at (← R.fpath t) (← R.val i))
-  | _ => throw "not a storage path: a name, `p.f` or `p[t]`"
+  | .atIn t i S => do
+    match i with
+    | .field t' "length" =>
+      if t == t' then pure (.nextIn (← R.stor S) (← R.fpath t))
+      else pure (.atIn (← R.stor S) (← R.fpath t) (← R.val i))
+    | _ => pure (.atIn (← R.stor S) (← R.fpath t) (← R.val i))
+  | _ => throw "not a storage path: a name, `p.f`, `p[t]` or `p[t]@S`"
 
 /-- A term at the storage sort; a push and a pop are nested
 `save`s over the length. -/

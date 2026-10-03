@@ -29,6 +29,18 @@ Two directories, by proof style:
   (`~[findCopyMem]~>` then `~[readOnWrite]~>`; `~[readCopySt]~>` then
   `~[findOnSave]~>`), after one `~[sequentialToParallel]~>` that merges the
   memory write and the locals beside it into the update after.
+  **Every chain ends at one parallel update**: past the program the stack
+  merges (`~[sequentialToParallel]~>`), each read is resolved by its law, and
+  the fresh captures that cannot halt and nothing reads go in a last
+  `~[simplifyUpdate]~>` (a user local stays; `pv := x + 2` stays, it may halt).
+  `#last_line chain` (`Calculus/LastLine.lean`) follows every chain that is a
+  whole trace, not a segment composed into one: it is silent at a last line
+  and otherwise says which rewrite still applies and what it gives — the
+  worklist for the line to write next. A read of the state as the program
+  found it (`find(storage, p)`) is a last line. A `FreshNames` table is
+  written only where the printed trace renames a capture; the elaborator's
+  own `se1`, `sp1` need none. A chain over ten updates is split into
+  segments composed in a `calc`, never given a bigger `maxHeartbeats`.
 - `Examples/Tactics/` — formulas `⊨ dl!{ pre → [ program ] post }` proved by
   tactics, and interpreter runs.
 

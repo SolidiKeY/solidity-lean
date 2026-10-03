@@ -35,10 +35,13 @@ import Solidity.Calculus.Uniqueness
 import Solidity.Calculus.Progress
 import Solidity.Calculus.Termination
 import Solidity.Calculus.Chains
+import Solidity.Calculus.LastLine
 import Solidity.Calculus.Sequents
 import Solidity.Calculus.ProofTree
 import Solidity.Calculus.UpdateRules
 import Solidity.Calculus.ChainRewrites
+import Solidity.Calculus.ChainBranches
+import Solidity.Calculus.Literals
 import Solidity.Calculus.TermTaclets
 import Solidity.Calculus.Rewrite
 import Solidity.Examples.Chains.Storage

@@ -1,4 +1,5 @@
 import Solidity.Calculus.Chains
+import Solidity.Calculus.LastLine
 import Solidity.Calculus.Close
 
 /-!
@@ -34,4 +35,5 @@ def compoundStorageUpdate :
 
 end CompoundStorageUpdate
 
+#last_line compoundStorageUpdate
 end Solidity.Examples.Chains.Arithmetic

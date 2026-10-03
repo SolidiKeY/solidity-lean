@@ -526,6 +526,7 @@ def _root_.Solidity.Op1.toL : Op1 a s → a.LTy → s.LTy
   | .unop op p, x => .unop op p x
   | .net, _ => .err
   | .netOf _, _ => .err
+  | .delValue, _ => .err
   | .field f, x => .field x f
   | .next, _ => .stuck
   | .select _, _ => .init
@@ -545,6 +546,7 @@ def _root_.Solidity.Op2.toL : Op2 a b s → a.LTy → b.LTy → s.LTy
   | .read, _, _ => .err
   | .mlen, _, _ => .err
   | .at, x, y => .at x y
+  | .nextIn, _, _ => .stuck
   | .delAt, x, y => .del x y
   | .pushSlot _, _, _ => .init
   | .pop, _, _ => .init
@@ -562,6 +564,7 @@ def _root_.Solidity.Op3.toL : Op3 a b c s → a.LTy → b.LTy → c.LTy → s.LT
   | .ite, x, y, z => .ite x y z
   | .save, x, y, z => .save x y z
   | .push, _, _, _ => .init
+  | .atIn, _, _, _ => .stuck
   | .write, _, _, _ => ()
 
 /-- A term with the updates `ρ` pushed in: after `{ y := find(storage,
@@ -1299,6 +1302,8 @@ theorem PTerm.toL_chk (h : Rel σ ρ τ) :
       rw [hrs, Res.ok_bind, (hi v).1 hv, Res.ok_bind, hk, Res.ok_bind, Close.checkIndex_eq,
         hfs, Res.ok_bind, (idx_iff c k).2 ⟨c', hck⟩, Res.ok_bind]
   | .next _, hf, _ => by simp [Tm.inL, Op1.inL] at hf
+  | .nextIn _ _, hf, _ => by simp [Tm.inL, Op2.inL] at hf
+  | .atIn _ _ _, hf, _ => by simp [Tm.inL, Op3.inL] at hf
 
 end
 

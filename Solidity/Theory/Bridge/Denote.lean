@@ -77,6 +77,12 @@ theorem Op1.denote_eval {σ : State} :
     cases h
     simp only [Op1.denote, hd _ _ hq]
     rfl
+  | .delValue, _, _, hd => by
+    intro x h
+    obtain ⟨va, ha, h⟩ := bind_ok_inv h
+    cases h
+    simp only [Op1.denote, hd _ ha]
+    rfl
   | .next, _, _, hd => by
     intro r segs h
     obtain ⟨⟨r0, s0⟩, hq, h⟩ := bind_ok_inv h
@@ -219,6 +225,18 @@ theorem Op2.denote_eval {σ : State} :
     simp only [Op2.denote]
     rw [hq' _ _ hq, ← State.abs_findStorage h]
     exact Equiv.findSt (hs' τ0 hs) _
+  | .nextIn, _, _, _, _, hs', hq' => by
+    intro r segs h
+    obtain ⟨τ0, hs, h⟩ := bind_ok_inv h
+    obtain ⟨⟨r0, s0⟩, hq, h⟩ := bind_ok_inv h
+    obtain ⟨w, hw, h⟩ := bind_ok_inv h
+    match w, hw, h with
+    | .array es sh fx, hw, h =>
+      cases h
+      simp only [Op2.denote]
+      rw [hq' _ _ hq, Struct.Equiv.lenAt (hs' τ0 hs), State.abs_lenAt_of_array hw]
+      rfl
+    | .prim _, _, h | .struct _, _, h | .map .., _, h => cases h
   | .copyMem, _, _, _, _, _, _ => by
     intro w h
     simp only [Op2.denote, h]
@@ -241,6 +259,17 @@ theorem Op3.denote_eval {σ : State} :
       simp only [Op3.denote, hc' _ hc]
       exact hb' x h
     | .int _, h => cases h
+  | .atIn, _, _, _, _, _, _, _, hq', hi' => by
+    intro r segs h
+    obtain ⟨τ0, hs, h⟩ := bind_ok_inv h
+    obtain ⟨⟨r0, s0⟩, hq, h⟩ := bind_ok_inv h
+    obtain ⟨vi, hi, h⟩ := bind_ok_inv h
+    obtain ⟨k, hk, h⟩ := bind_ok_inv h
+    obtain ⟨u, hu, h⟩ := bind_ok_inv h
+    cases h
+    simp only [Op3.denote]
+    rw [hq' _ _ hq, hi' vi hi, Denote.asInt_prim_of_asInt hk]
+    rfl
   | .save, _, _, rv, _, _, _, hs', hq', hv' => by
     intro τ h
     obtain ⟨sv, hv, h⟩ := bind_ok_inv h

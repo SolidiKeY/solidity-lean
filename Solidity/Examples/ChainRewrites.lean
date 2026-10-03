@@ -303,6 +303,18 @@ example : dl![m]{ { storage := save(storage, alice.age, 1) } { storage := save(s
       dl![m]{ { storage := save(save(storage, alice.age, 1), alice.age, 2) } φ } := by
   sol_chain
 
+/-- A storage write among locals merged into the update after it, which
+writes the storage over it: the locals are substituted into the update after,
+the shadowed write goes (`Upd.mergeStL`), and an index check moves with the
+storage it is performed in, `balances[10]@S`. -/
+example : dl![m]{ { se1 := 10 ‖ storage := save(storage, alice.age, 1) ‖ sp1 := alice.account }
+      { storage := save(storage, balances[se1], 2) ‖ x := find(storage, balances[se1]) } φ }
+    ~[sequentialToParallel]~>
+      dl![m]{ { se1 := 10 ‖ sp1 := alice.account ‖
+        storage := save(save(storage, alice.age, 1), balances[10]@save(storage, alice.age, 1), 2) ‖
+        x := find(save(storage, alice.age, 1), balances[10]@save(storage, alice.age, 1)) } φ } := by
+  sol_chain
+
 /-- `alice.age = 42; uint x = alice.age;` read back to `42` inside the chain,
 for every modality and postcondition. -/
 example : dl![m]{ ⟨[ alice.age = 42; uint x = alice.age; ]⟩ φ }
@@ -322,11 +334,16 @@ end AnyModality
 A memory read denotes its run, so its laws are refinements of the
 interpreter (`EvalLaw`): `readOnWrite`, `findCopyMem` (a member of a memory
 object copied into storage is read out of memory), `readCopySt` (a member of
-a copy of a storage struct is read out of storage).  Each applies in an
-update under `m` where the update holds the write it reads back
-(`Upd.coversEval`).  The merges feed them: a memory write merges into the
-update after it (`Upd.mergeMem`), and a storage write into one with memory
-terms (`withStM`). -/
+a copy of a storage struct is read out of storage), `readAddEqual` (a
+primitive member of a fresh object is its default), `readAddDifferent` and
+`readWriteDifferent` (an allocation, a write, leaves every other slot), and
+their twins at the identity sort (`…Identity`, with `readOnWriteIdentity`).
+Each applies in an update under `m` where the update holds the write or
+allocation it reads back (`Upd.coversEval`), at the sort of the law
+(`Tm.rwEv`).  The merges feed them: a memory write merges into the update
+after it (`Upd.mergeMem`), and a storage write into one with memory terms
+(`withStM`).  A reference member of a fresh root,
+`read(addM(m, R), freshId(addM(m, R)).account)`, is the normal form. -/
 
 section MemoryReads
 variable (m : Modality) (φ : Post StandardExample)
@@ -381,7 +398,152 @@ example : dl![m]{ { storage := save(storage, alice.age, 25) }
         v := 25 } φ } := by
   sol_chain
 
+/-- `readAddEqual`: a primitive member of a fresh object is its default,
+under `m` where the update holds the allocation. -/
+example : dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) ‖
+        v := read(addM(memory, Person), freshId(addM(memory, Person)).age) } φ }
+    ~[readAddEqual]~>
+      dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) ‖
+        v := 0 } φ } := by
+  sol_chain
+
+/-- `readAddDifferent` then `readAddEqual`: a second allocation leaves the
+first object, whose member then reads its default. -/
+example : dl![m]{ { carol := freshId(addM(memory, Person)) ‖
+        david := freshId(addM(addM(memory, Person), Person)) ‖
+        memory := addM(addM(memory, Person), Person) ‖
+        v := read(addM(addM(memory, Person), Person), freshId(addM(memory, Person)).age) } φ }
+    ~[readAddDifferent]~>
+      dl![m]{ { carol := freshId(addM(memory, Person)) ‖
+        david := freshId(addM(addM(memory, Person), Person)) ‖
+        memory := addM(addM(memory, Person), Person) ‖
+        v := read(addM(memory, Person), freshId(addM(memory, Person)).age) } φ }
+    ~[readAddEqual]~>
+      dl![m]{ { carol := freshId(addM(memory, Person)) ‖
+        david := freshId(addM(addM(memory, Person), Person)) ‖
+        memory := addM(addM(memory, Person), Person) ‖
+        v := 0 } φ } := by
+  sol_chain
+
+/-- `readAddDifferentIdentity`: the reference member of the first object,
+read past the second allocation; the read of the fresh root's member is the
+normal form. -/
+example : dl![m]{ { carol := freshId(addM(memory, Person)) ‖
+        david := freshId(addM(addM(memory, Person), Person)) ‖
+        memory := addM(addM(memory, Person), Person) ‖
+        carolAcc := read(addM(addM(memory, Person), Person), freshId(addM(memory, Person)).account) } φ }
+    ~[readAddDifferentIdentity]~>
+      dl![m]{ { carol := freshId(addM(memory, Person)) ‖
+        david := freshId(addM(addM(memory, Person), Person)) ‖
+        memory := addM(addM(memory, Person), Person) ‖
+        carolAcc := read(addM(memory, Person), freshId(addM(memory, Person)).account) } φ } := by
+  sol_chain
+
+/-- `readWriteDifferent` and `readWriteDifferentIdentity`: a write to
+`carol.age` leaves `carol.account.balance` and `carol.account`, under `m`
+where the update holds the write. -/
+example : dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
+      { memory := write(memory, carol.age, 42) ‖
+        v := read(write(memory, carol.age, 42), carol.account.balance) ‖
+        carolAcc := read(write(memory, carol.age, 42), carol.account) } φ }
+    ~[readWriteDifferent]~>
+      dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
+      { memory := write(memory, carol.age, 42) ‖
+        v := read(memory, carol.account.balance) ‖
+        carolAcc := read(write(memory, carol.age, 42), carol.account) } φ }
+    ~[readWriteDifferentIdentity]~>
+      dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
+      { memory := write(memory, carol.age, 42) ‖
+        v := read(memory, carol.account.balance) ‖
+        carolAcc := read(memory, carol.account) } φ } := by
+  sol_chain
+
+/-- `readOnWriteIdentity`: a reference written is read back as its identity. -/
+example : dl![m]{ { carol := freshId(addM(memory, Person)) ‖
+        acc := freshId(addM(addM(memory, Person), Account)) ‖
+        memory := addM(addM(memory, Person), Account) }
+      { memory := write(memory, carol.account, acc) ‖
+        carolAcc := read(write(memory, carol.account, acc), carol.account) } φ }
+    ~[readOnWriteIdentity]~>
+      dl![m]{ { carol := freshId(addM(memory, Person)) ‖
+        acc := freshId(addM(addM(memory, Person), Account)) ‖
+        memory := addM(addM(memory, Person), Account) }
+      { memory := write(memory, carol.account, acc) ‖ carolAcc := acc } φ } := by
+  sol_chain
+
 end MemoryReads
+
+/-! ## 3‴ · Literals and branches
+
+A check leaves its goals behind one update, as a conjunction of implications
+over the captured condition.  The literals fold (`add_literals`, `leq_literals`,
+`Calculus/Literals.lean`: exact laws, so in an update's right-hand side under
+any modality and with no premise), the update is pushed through the
+connectives (`applyOnRigid`, `Fml.push`, `Calculus/ChainBranches.lean`), the
+literal connectives fold (`concrete`), and a merge finds the first spine
+under a branch (`sequentialToParallel`, `LineRw.mergeIn`).  Each rewrite
+under a branch reads the skeleton of the line the elaborator wrote for it, so
+the postcondition `φ` is a part it never looks at, and the line is proved by
+`rfl` over it. -/
+
+section Literals
+variable (m : Modality) (φ : Post StandardExample)
+
+/-- `add_literals` in an update's right-hand side under `m`: the sum is exact. -/
+example : dl![m]{ { x := 250 + 10 } φ } ~[add_literals]~> dl![m]{ { x := 260 } φ } := rfl
+
+/-- `leq_literals` in an update: the comparison a check captured, `uint8`'s
+range read as `x <= 255`. -/
+example : dl![m]{ { x := 260 ‖ se1 := 260 <= 255 } φ }
+    ~[leq_literals]~> dl![m]{ { x := 260 ‖ se1 := false } φ } := rfl
+
+/-- `add_literals` in an equation of the line, and under `defined(…)`. -/
+example : dl!{ defined(250 + 10) ∧ 250 + 10 ≐ 260 }
+    ~[add_literals]~> dl!{ defined(260) ∧ 260 ≐ 260 } := rfl
+
+/-- `applyOnRigid` through a conjunction under `m`: the update cannot halt,
+each rigid leaf is substituted, and the goals keep the update in front. -/
+example : dl![m]{ { se1 := false } ((se1 ≐ true → φ) ∧ (se1 ≐ false → ⟨[ revert(); ]⟩ φ)) }
+    ~[applyOnRigid]~>
+      dl![m]{ (false ≐ true → { se1 := false } φ) ∧
+        (false ≐ false → { se1 := false } ⟨[ revert(); ]⟩ φ) } := rfl
+
+/-- `concrete`: the literal equations close (`eqClose`), the connectives
+fold (`concrete_impl_2`, `concrete_impl_1`, `concrete_and_1`). -/
+example : dl![m]{ (false ≐ true → { se1 := false } φ) ∧
+      (false ≐ false → { se1 := false } ⟨[ revert(); ]⟩ φ) }
+    ~[concrete]~> dl![m]{ { se1 := false } ⟨[ revert(); ]⟩ φ } := rfl
+
+/-- `sequentialToParallel` under a branch: the first spine the skeleton finds. -/
+example : dl![m]{ (x ≐ 1 → { x := 1 } { y := x } φ) ∧ (x ≐ 2 → φ) }
+    ~[sequentialToParallel]~> dl![m]{ (x ≐ 1 → { x := 1 ‖ y := 1 } φ) ∧ (x ≐ 2 → φ) } := rfl
+
+set_option maxHeartbeats 300000 in
+/-- The check's trace, folded: the captured comparison, the update pushed
+through, the branch closed, and the capture dropped. -/
+example : dl![m]{ { x := 260 ‖ se1 := 260 <= 255 } ((se1 ≐ true → φ) ∧ (se1 ≐ false → ⟨[ revert(); ]⟩ φ)) }
+    ~[leq_literals]~> dl![m]{ { x := 260 ‖ se1 := false } ((se1 ≐ true → φ) ∧ (se1 ≐ false → ⟨[ revert(); ]⟩ φ)) }
+    ~[applyOnRigid]~>
+      dl![m]{ (false ≐ true → { x := 260 ‖ se1 := false } φ) ∧
+        (false ≐ false → { x := 260 ‖ se1 := false } ⟨[ revert(); ]⟩ φ) }
+    ~[concrete]~> dl![m]{ { x := 260 ‖ se1 := false } ⟨[ revert(); ]⟩ φ }
+    ~[simplifyUpdate]~> dl![m]{ { x := 260 } ⟨[ revert(); ]⟩ φ } := by
+  sol_chain
+
+-- `add_literals` out of range: the sum reverts, and is its own normal form.
+/--
+error: ~[add_literals]~>: add_literals does not apply to
+  dl{ { x := 115792089237316195423570985008687907853269984665640564039457584007913129639935 + 1 } φ }
+(the side condition
+  0 ≤ 115792089237316195423570985008687907853269984665640564039457584007913129639935 + 1 ∧
+    115792089237316195423570985008687907853269984665640564039457584007913129639935 + 1 < Semantics.uintBound
+of add_literals closes by neither `rfl`, `decide` nor a hypothesis)
+-/
+#guard_msgs in
+example : dl![m]{ { x := 115792089237316195423570985008687907853269984665640564039457584007913129639935 + 1 } φ }
+    ~[add_literals]~> dl![m]{ { x := 0 } φ } := rfl
+
+end Literals
 
 /-! ## 4 · What is refused, and what is printed -/
 
@@ -389,7 +551,7 @@ section Refused
 variable (m : Modality) (φ : Post StandardExample)
 
 /--
-error: ~[fooBar]~>: fooBar is no rule: not a `Taclet` or `LeanTaclet` constructor, not an update rule (sequentialToParallel, simplifyUpdate, applySkip, applyOnRigid, applyOnRigidBox, applyStorageBox), not a term taclet (`TermTaclet`), not a law of a memory read (`EvalLaw`)
+error: ~[fooBar]~>: fooBar is no rule: not a `Taclet` or `LeanTaclet` constructor, not an update rule (sequentialToParallel, simplifyUpdate, applySkip, applyOnRigid, applyOnRigidBox, applyStorageBox, concrete), not a term taclet (`TermTaclet`), not a law of a memory read (`EvalLaw`), not a literal law (`LitLaw`)
 -/
 #guard_msgs in
 example : dl!{ true } ~[fooBar]~> dl!{ true } := rfl

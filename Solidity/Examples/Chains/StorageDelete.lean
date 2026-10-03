@@ -1,4 +1,5 @@
 import Solidity.Calculus.Chains
+import Solidity.Calculus.LastLine
 import Solidity.Calculus.ChainRewrites
 import Solidity.Calculus.Close
 import Solidity.FreshNames
@@ -83,17 +84,18 @@ def chain (hk : STerm.KindFreeAt st!{ save(save(select(storage, alice), account.
         dl![m]{ { storage := delAt(save(save(storage, alice.account.balance, 100), alice.account.token.value, 7), alice.account) ‖ b := 0 ‖
           v := find(delAt(save(save(select(storage, alice), account.balance, 100), account.token.value, 7), account), account.token.value) } φ } := by sol_chain
     _ ~[findOnDelAtBelow]~> dl![m]{ { storage := delAt(save(save(storage, alice.account.balance, 100), alice.account.token.value, 7), alice.account) ‖ b := 0 ‖ v := 0 } φ } := by sol_chain
+#last_line chain
 end SubtreeDelete
 
 namespace IndexDelete
 def names : FreshTable := [("toks", "sp1"), ("idx", "se2"), ("arr", "sp3")]
 local instance : FreshNames := .ofTable names
 #guard (FreshNames.clashes TestSuite names).isEmpty
-/-- `delete bucket.tokens[++i]; len = bucket.tokens.length;`: the index captured by the elaborator (an equality), the captures merged and the dead `idx := 0` dropped, `storageIndexArrayDelete` writing `delAt` at the element (the in-bounds branch only; the line indexes by the capture, so it is crossed unwritten, and its merge resolves the element to `bucket.tokens[i + 1]`), then the length read through `arr`, merged.  The read does not merge under the delete (a parallel update of locals and the storage over another), so the printed `len := find(S₃, bucket.tokens.length)` is not reached. -/
-def chain :
+/-- `delete bucket.tokens[++i]; len = bucket.tokens.length;`: the index captured by the elaborator (an equality), the captures merged and the dead `idx := 0` dropped, `storageIndexArrayDelete` writing `delAt` at the element (the in-bounds branch only; the line indexes by the capture, so it is crossed unwritten, and its merge resolves the element to `bucket.tokens[i + 1]`), then the length read through `arr`, left as the stack of its updates. -/
+def stack :
     dl![m]{ ⟨[ delete bucket.tokens[++i]; len = bucket.tokens.length; ]⟩ φ }
     ~~> dl![m]{ { toks := bucket.tokens ‖ i := i + 1 ‖ idx := i + 1 ‖ storage := delAt(storage, bucket.tokens[i + 1]) }
-          { arr := bucket.tokens ‖ len := bucket.tokens.length } φ } :=
+          { arr := bucket.tokens } { len := arr.length } φ } :=
   calc dl![m]{ ⟨[ delete bucket.tokens[++i]; len = bucket.tokens.length; ]⟩ φ }
     _ = dl![m]{ ⟨[ Token[] storage toks = bucket.tokens; uint idx; idx = ++i; delete toks[idx];
           len = bucket.tokens.length; ]⟩ φ } := rfl
@@ -110,9 +112,27 @@ def chain :
     _ ~[sequentialToParallel]~>
         dl![m]{ { toks := bucket.tokens ‖ i := i + 1 ‖ idx := i + 1 ‖ storage := delAt(storage, bucket.tokens[i + 1]) }
           { arr := bucket.tokens } { len := arr.length } φ } := by sol_chain
-    _ ~[sequentialToParallel]~>
+
+/-- The alias `arr` merged with the length read through it. -/
+def merged :
+    dl![m]{ { toks := bucket.tokens ‖ i := i + 1 ‖ idx := i + 1 ‖ storage := delAt(storage, bucket.tokens[i + 1]) }
+          { arr := bucket.tokens } { len := arr.length } φ }
+    ~[sequentialToParallel]~>
         dl![m]{ { toks := bucket.tokens ‖ i := i + 1 ‖ idx := i + 1 ‖ storage := delAt(storage, bucket.tokens[i + 1]) }
           { arr := bucket.tokens ‖ len := bucket.tokens.length } φ } := by sol_chain
+
+/-- The two segments (one chain is over the budget of a single
+declaration).  The read under the delete merges too (`Upd.mergeStL`), to
+`len := find(delAt(storage, bucket.tokens[i + 1]), bucket.tokens.length)`,
+which `lenOnDelAtFrame` resolves to `bucket.tokens.length`: the lines after
+this one. -/
+def chain :
+    dl![m]{ ⟨[ delete bucket.tokens[++i]; len = bucket.tokens.length; ]⟩ φ }
+    ~~> dl![m]{ { toks := bucket.tokens ‖ i := i + 1 ‖ idx := i + 1 ‖ storage := delAt(storage, bucket.tokens[i + 1]) }
+          { arr := bucket.tokens ‖ len := bucket.tokens.length } φ } :=
+  calc dl![m]{ ⟨[ delete bucket.tokens[++i]; len = bucket.tokens.length; ]⟩ φ }
+    _ ~~> _ := stack m φ
+    _ ~[sequentialToParallel]~> _ := merged m φ
 end IndexDelete
 
 namespace MappingDelete
