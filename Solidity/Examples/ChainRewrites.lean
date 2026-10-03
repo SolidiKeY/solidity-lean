@@ -76,18 +76,14 @@ section ExampleNames
 
 local instance : FreshNames := .ofTable Chains.Storage.BalanceWrite.names
 
-/-- `alice.account.balance = 10;` past the printed last line, for every
-modality and postcondition: `φ` names no fresh variable (`Post.noFresh`), so
-it reads neither `pv` nor `acc`, and `simplifyUpdate` drops both, leaving the
-write.  The printed trace stops at the merged line; KeY goes on so. -/
+/-- `alice.account.balance = 10;` to its last line, for every modality and
+postcondition: `φ` names no fresh variable (`Post.noFresh`), so it reads
+neither `pv` nor `acc`, and the chain's last link, `simplifyUpdate`, drops
+both, leaving the write. -/
 theorem headlineWrite :
     dl![m]{ ⟨[ alice.account.balance = 10; ]⟩ φ }
     ~~> dl![m]{ { storage := save(storage, alice.account.balance, 10) } φ } :=
-  calc dl![m]{ ⟨[ alice.account.balance = 10; ]⟩ φ }
-    _ ~~> dl![m]{ { pv := 10 ‖ acc := alice.account ‖ storage := save(storage, alice.account.balance, 10) } φ } :=
-      Chains.Storage.BalanceWrite.chain m φ
-    _ ~[simplifyUpdate]~> dl![m]{ { storage := save(storage, alice.account.balance, 10) } φ } := by
-      sol_chain
+  Chains.Storage.BalanceWrite.chain m φ
 
 end ExampleNames
 
@@ -150,12 +146,8 @@ where it halts. -/
 theorem headlineValueChain :
     dl!{ [ alice.account.balance = 10; ] alice.account.balance ≐ 10 } ~~> dl!{ 10 ≐ 10 } :=
   calc dl!{ [ alice.account.balance = 10; ] alice.account.balance ≐ 10 }
-    _ ~~> dl![.box]{ { se1 := 10 ‖ sp1 := alice.account ‖ storage := save(storage, alice.account.balance, 10) }
-          alice.account.balance ≐ 10 } :=
+    _ ~~> dl![.box]{ { storage := save(storage, alice.account.balance, 10) } alice.account.balance ≐ 10 } :=
       Chains.Storage.BalanceWrite.chain .box { fml := dl!{ alice.account.balance ≐ 10 } }
-    _ ~[simplifyUpdate]~>
-        dl![.box]{ { storage := save(storage, alice.account.balance, 10) } alice.account.balance ≐ 10 } := by
-      sol_chain
     _ ~[applyStorageBox]~>
         dl!{ find(save(storage, alice.account.balance, 10), alice.account.balance) ≐ 10 } := by sol_chain
     _ ~[findOnSave]~> dl!{ 10 ≐ 10 } := by rfl

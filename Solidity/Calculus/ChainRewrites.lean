@@ -2611,7 +2611,8 @@ theorem Tm.freshPath_eval {m : MTerm C} {R : RefTy} {σ μ₀ μ₁ : State} {ro
       · obtain ⟨R'', hR''⟩ := Ty.memberTy_snoc_some hT'
         obtain ⟨id, hid⟩ := ih2 R'' hR''
         exact ⟨_, by rw [MAddr.field_eval, hid]; rfl⟩
-    | unop _ _ | net | netOf _ | field _ | next | select _ | sval | newArr _ | addM _ | mval | ref =>
+    | unop _ _ | net | netOf _ | field _ | next | select _ | sval | newArr _ | addM _ | mval | ref
+    | delValue =>
       simp only [Tm.freshPath?] at h <;> nomatch h
   | app2 o a b iha ihb =>
     intro p h
@@ -2672,7 +2673,7 @@ theorem Tm.freshPath_eval {m : MTerm C} {R : RefTy} {σ μ₀ μ₁ : State} {ro
         | env _ => simp only [Tm.freshPath?] at h <;> nomatch h
       | pvV _ | app1 _ _ | app2 _ _ _ | app3 _ _ _ _ => simp only [Tm.freshPath?] at h <;> nomatch h
     | binop _ _ | find | len | read | mlen | «at» | delAt | pushSlot _ | pop | shrink | extend _
-    | sfind | copyMem | copy | copySt =>
+    | sfind | copyMem | copy | copySt | nextIn =>
       simp only [Tm.freshPath?] at h <;> nomatch h
 
 /-- A memory term on the memory spine of `t` leaves a counter `t` only advances. -/
@@ -2786,7 +2787,8 @@ theorem Tm.boundedIn_eval {M : MTerm C} {σ μ : State} (hM : M.eval σ = .ok μ
       simp only [pure, Except.pure, Except.ok.injEq] at had
       subst had
       exact ih h id hi
-    | unop _ _ | net | netOf _ | field _ | next | select _ | sval | newArr _ | addM _ | mval | ref =>
+    | unop _ _ | net | netOf _ | field _ | next | select _ | sval | newArr _ | addM _ | mval | ref
+    | delValue =>
       simp only [Tm.boundedIn] at h <;> nomatch h
   | app2 o a b iha ihb =>
     intro h
@@ -2858,7 +2860,7 @@ theorem Tm.boundedIn_eval {M : MTerm C} {σ μ : State} (hM : M.eval σ = .ok μ
                   (Tm.onMemSpine_nextId_le hμ₁ M h.1 hM)
       | app0 _ | app2 _ _ _ | app3 _ _ _ _ => simp only [Tm.boundedIn] at h <;> nomatch h
     | binop _ _ | find | len | read | mlen | «at» | delAt | pushSlot _ | pop | shrink | extend _
-    | sfind | copyMem | copySt =>
+    | sfind | copyMem | copySt | nextIn =>
       simp only [Tm.boundedIn] at h <;> nomatch h
 
 /-- Two memory addresses that never meet: different members, a member and

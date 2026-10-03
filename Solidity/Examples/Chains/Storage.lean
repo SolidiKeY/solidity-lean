@@ -60,9 +60,9 @@ namespace BalanceWrite
 def names : FreshTable := [("pv", "se1"), ("acc", "sp1")]
 local instance : FreshNames := .ofTable names
 #guard (FreshNames.clashes StandardExample names).isEmpty
+set_option maxHeartbeats 400000 in
 /-- `alice.account.balance = 10;`.  The printed `int pv` is `uint pv` here, the type of the
 place written; the captures, dead once the write holds them, go last. -/
-set_option maxHeartbeats 400000 in
 theorem chain :
     dl![m]{ ⟨[ alice.account.balance = 10; ]⟩ φ }
     ~~> dl![m]{ { storage := save(storage, alice.account.balance, 10) } φ } :=
