@@ -88,16 +88,27 @@ local instance : FreshNames := .ofTable names
 /-- `Person memory carol; Account memory carolAcc = carol.account;
 carolAcc.balance = 100; delete carol.account; oldBal = carolAcc.balance;
 newBal = carol.account.balance;` — the member gets a fresh default object, and
-`carolAcc` keeps the old one. -/
-def chain (m : Modality) (φ : Post StandardExample) :
+`carolAcc` keeps the old one: the reads resolve to `100` through `carolAcc`
+and to the default `0` through `carol.account`. -/
+theorem chain (m : Modality) (φ : Post StandardExample) :
     dl![m]{ ⟨[ Person memory carol; Account memory carolAcc = carol.account; carolAcc.balance = 100;
                delete carol.account; oldBal = carolAcc.balance; newBal = carol.account.balance; ]⟩ φ }
-    ~*> dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
-                { carolAcc := read(memory, carol.account) }
-                { memory := write(memory, carolAcc.balance, 100) }
-                { memory := write(addM(memory, Account), carol.account, freshId(addM(memory, Account))) }
-                { oldBal := read(memory, carolAcc.balance) }
-                { acc := read(memory, carol.account) } { newBal := read(memory, acc.balance) } φ } :=
+    ~~> dl![m]{ { carol := freshId(addM(memory, Person)) ‖
+          carolAcc := read(addM(memory, Person), freshId(addM(memory, Person)).account) ‖
+          memory :=
+            write(addM(write(addM(memory, Person),
+                  read(addM(memory, Person), freshId(addM(memory, Person)).account).balance, 100),
+                Account),
+              freshId(addM(memory, Person)).account,
+              freshId(addM(write(addM(memory, Person),
+                    read(addM(memory, Person), freshId(addM(memory, Person)).account).balance, 100),
+                  Account))) ‖
+          oldBal := 100 ‖
+          acc :=
+            freshId(addM(write(addM(memory, Person),
+                  read(addM(memory, Person), freshId(addM(memory, Person)).account).balance, 100),
+                Account)) ‖
+          newBal := 0 } φ } :=
   calc dl![m]{ ⟨[ Person memory carol; Account memory carolAcc = carol.account; carolAcc.balance = 100;
                   delete carol.account; oldBal = carolAcc.balance; newBal = carol.account.balance; ]⟩ φ }
     _ ~[memoryReferenceDeclFreshAlloc]~>
@@ -128,6 +139,26 @@ def chain (m : Modality) (φ : Post StandardExample) :
                   { oldBal := read(memory, carolAcc.balance) }
                   { acc := read(memory, carol.account) } { newBal := read(memory, acc.balance) } φ } :=
       by sol_chain
+    _ ~[sequentialToParallel]~> _ := by sol_chain
+    _ ~~> dl![m]{ { carol := freshId(addM(memory, Person)) ‖
+          carolAcc := read(addM(memory, Person), freshId(addM(memory, Person)).account) ‖
+          memory :=
+            write(addM(write(addM(memory, Person),
+                  read(addM(memory, Person), freshId(addM(memory, Person)).account).balance, 100),
+                Account),
+              freshId(addM(memory, Person)).account,
+              freshId(addM(write(addM(memory, Person),
+                    read(addM(memory, Person), freshId(addM(memory, Person)).account).balance, 100),
+                  Account))) ‖
+          oldBal := 100 ‖
+          acc :=
+            freshId(addM(write(addM(memory, Person),
+                  read(addM(memory, Person), freshId(addM(memory, Person)).account).balance, 100),
+                Account)) ‖
+          newBal := 0 } φ } := by
+      sol_rws [readWriteDifferent, readAddDifferent, readOnWrite, readWriteDifferent,
+        readOnWriteIdentity, readAddEqual]
+#last_line chain
 
 end FieldDeleteRef
 
@@ -146,20 +177,40 @@ overwritten with a fresh default object, and `tk` keeps the old one.  Lean's
 first lines fold the printed second and third (the declaration dropped, the
 receiver and the index captured); the stack the strategy leaves binds `tk` by
 the captured index (`toks[idx]`), so it is crossed unwritten, and the merge of
-the capture with the bind resolves the element read to `toks[i + 1]`. -/
-def chain (m : Modality) (φ : Post TestSuite) :
+the capture with the bind resolves the element read to `toks[i + 1]`.  Merged,
+the reads resolve to `9` through `tk` and to the default `0` at the
+overwritten position. -/
+theorem chain (m : Modality) (φ : Post TestSuite) :
     dl![m]{ { b := freshId(addM(memory, TokenBucket)) ‖ memory := addM(memory, TokenBucket) }
             ⟨[ Token memory tk = b.tokens[++i]; tk.value = 9; delete b.tokens[i];
                oldValue = tk.value; newValue = b.tokens[i].value; ]⟩ φ }
-    ~~> dl![m]{ { b := freshId(addM(memory, TokenBucket)) ‖ memory := addM(memory, TokenBucket) }
-                { toks := read(memory, b.tokens) } { idx := 0 }
-                { i := i + 1 ‖ idx := i + 1 ‖ tk := read(memory, toks[i + 1]) }
-                { memory := write(memory, tk.value, 9) }
-                { mv3 := read(memory, b.tokens) }
-                { memory := write(addM(memory, Token), mv3[i], freshId(addM(memory, Token))) }
-                { oldValue := read(memory, tk.value) }
-                { mv5 := read(memory, b.tokens) }
-                { mv4 := read(memory, mv5[i]) } { newValue := read(memory, mv4.value) } φ } :=
+    ~~> dl![m]{ { b := freshId(addM(memory, TokenBucket)) ‖
+          toks := read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens) ‖ i := i + 1 ‖
+          idx := i + 1 ‖
+          tk :=
+            read(addM(memory, TokenBucket),
+              read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens)[i + 1]) ‖
+          mv3 := read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens) ‖
+          memory :=
+            write(addM(write(addM(memory, TokenBucket),
+                  read(addM(memory, TokenBucket),
+                      read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens)[i + 1]).value,
+                  9),
+                Token),
+              read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens)[i + 1],
+              freshId(addM(write(addM(memory, TokenBucket),
+                    read(addM(memory, TokenBucket),
+                        read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens)[i + 1]).value,
+                    9),
+                  Token))) ‖
+          oldValue := 9 ‖ mv5 := read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens) ‖
+          mv4 :=
+            freshId(addM(write(addM(memory, TokenBucket),
+                  read(addM(memory, TokenBucket),
+                      read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens)[i + 1]).value,
+                  9),
+                Token)) ‖
+          newValue := 0 } φ } :=
   calc dl![m]{ { b := freshId(addM(memory, TokenBucket)) ‖ memory := addM(memory, TokenBucket) }
                ⟨[ Token memory tk = b.tokens[++i]; tk.value = 9; delete b.tokens[i];
                   oldValue = tk.value; newValue = b.tokens[i].value; ]⟩ φ }
@@ -175,6 +226,38 @@ def chain (m : Modality) (φ : Post TestSuite) :
                 { mv5 := read(memory, b.tokens) }
                 { mv4 := read(memory, mv5[i]) } { newValue := read(memory, mv4.value) } φ } := by
       sol_chain
+    _ ~[sequentialToParallel]~> _ := by sol_chain
+    _ ~~> dl![m]{ { b := freshId(addM(memory, TokenBucket)) ‖
+          toks := read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens) ‖ i := i + 1 ‖
+          idx := i + 1 ‖
+          tk :=
+            read(addM(memory, TokenBucket),
+              read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens)[i + 1]) ‖
+          mv3 := read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens) ‖
+          memory :=
+            write(addM(write(addM(memory, TokenBucket),
+                  read(addM(memory, TokenBucket),
+                      read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens)[i + 1]).value,
+                  9),
+                Token),
+              read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens)[i + 1],
+              freshId(addM(write(addM(memory, TokenBucket),
+                    read(addM(memory, TokenBucket),
+                        read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens)[i + 1]).value,
+                    9),
+                  Token))) ‖
+          oldValue := 9 ‖ mv5 := read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens) ‖
+          mv4 :=
+            freshId(addM(write(addM(memory, TokenBucket),
+                  read(addM(memory, TokenBucket),
+                      read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens)[i + 1]).value,
+                  9),
+                Token)) ‖
+          newValue := 0 } φ } := by
+      sol_rws [readWriteDifferent, readAddDifferent, readOnWrite, readWriteDifferent,
+        readWriteDifferentIdentity, readWriteDifferentIdentity, readAddDifferentIdentity,
+        readWriteDifferentIdentity, readOnWriteIdentity, readAddEqual, simplifyUpdate]
+#last_line chain
 
 end IndexedDelete
 

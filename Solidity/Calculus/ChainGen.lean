@@ -79,7 +79,7 @@ def generate (C φ : Expr) : TermElabM Gen := do
   let mut prev := φ
   for l in run.lines do
     let n ← try
-        match ← ruleOfLine prev with
+        match ← withCurrHeartbeats (ruleOfLine prev) with
         | some (_, n) => pure (if n == `taclet then "" else n.toString)
         | none => pure ""
       catch _ => pure ""
@@ -98,9 +98,19 @@ def generate (C φ : Expr) : TermElabM Gen := do
       stop := some m!"the rewrites came back to a line they had left"
       break
     seen := seen.insert prev
-    let some (n, q) ← nextRewrite C prev | break
-    rws := rws.push (n, q)
-    prev := q
+    -- each step has its own heartbeats, and one that runs out ends the chain
+    -- there instead of losing it
+    let next : Except Exception (Option (String × Expr)) ←
+      tryCatchRuntimeEx (.ok <$> withCurrHeartbeats (nextRewrite C prev))
+      fun e => pure (.error e)
+    match next with
+    | .ok none => break
+    | .ok (some (n, q)) =>
+      rws := rws.push (n, q)
+      prev := q
+    | .error e =>
+      stop := some m!"the search for the next rewrite failed: {e.toMessageData}"
+      break
   if rws.size == genFuel then stop := some m!"stopped after {genFuel} rewrites"
   return { splice := run.splice, steps, rewrites := rws, stop }
 
@@ -129,10 +139,10 @@ the kernel computes a link on its own, `by sol_chain` elsewhere. -/
 def Gen.calcLines (g : Gen) (C φ : Expr) : TermElabM (Array String) := do
   let m? := g.splice.modality
   let closed := g.splice.fmls.isEmpty && m?.isNone
-  let first ← ProofTree.termLines (← ProofTree.writeLine C φ m?)
+  let first ← ProofTree.termLines (← withCurrHeartbeats (ProofTree.writeLine C φ m?))
   let mut out := #["calc " ++ first[0]!] ++ (first.extract 1 first.size).map ("    " ++ ·)
   let link (arrow : String) (pf : String) (l : Expr) : TermElabM (Array String) := do
-    let line ← ProofTree.termLines (← ProofTree.writeLine C l m?)
+    let line ← ProofTree.termLines (← withCurrHeartbeats (ProofTree.writeLine C l m?))
     let line := line.modify (line.size - 1) (· ++ s!" := {pf}")
     return #[s!"  _ {arrow} {line[0]!}"] ++ (line.extract 1 line.size).map ("      " ++ ·)
   for (n, l) in g.steps do
@@ -167,7 +177,7 @@ elab "#chain " t:term : command => runTermElabM fun _ => do
   unless ty.isAppOfArity ``Fml 1 do throwError "#chain: not a formula{indentExpr φ}"
   let C := ty.appArg!
   let g ← generate C φ
-  let last ← ProofTree.termLines (← ProofTree.writeLine C (g.last φ) g.splice.modality)
+  let last ← ProofTree.termLines (← withCurrHeartbeats (ProofTree.writeLine C (g.last φ) g.splice.modality))
   let rows := g.tableRows φ
   let table := if rows.isEmpty then m!"" else
     m!"\n\nfresh variables (a `FreshNames` table renames them):\n  [{", ".intercalate rows.toList}]"
