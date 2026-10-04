@@ -988,10 +988,23 @@ def modalityOf? (φ : Lean.Expr) : MetaM (Option Lean.Expr) := do
         postconditions `φ : Post C` may be{indentExpr φ}"
   throwError "sol_chain: the line is under two modalities: take `cases` on one{indentExpr φ}"
 
+/-- The most lines a run computes. -/
+def runFuel : Nat := 200
+
 /-- The lines of the derivation of the closed formula `φ`, computed. -/
 def closedLines (n : Lean.Name) (C φ : Lean.Expr) : MetaM (List Line) := do
   unsafe evalExpr (List Line) (mkApp (mkConst ``List [0]) (mkConst ``Line))
-    (mkApp4 (mkConst ``Fml.linesQuoted) C (quoteConstName n) (toExpr 200) φ)
+    (mkApp4 (mkConst ``Fml.linesQuoted) C (quoteConstName n) (toExpr runFuel) φ)
+
+/-- The runs of this declaration, by every line they pass: the lines of the
+run, where the rest after that line starts, and whether the run is stuck.
+A `calc` asks for the line after each of its lines, and the run from a line
+is the rest of the run that reached it, so the strategy is compiled and run
+once per chain, not once per link.  The state is local to the environment
+branch, dropped with the declaration: an edited contract never meets an old
+run, and the kernel checks every line anyway. -/
+initialize runCache : EnvExtension (Std.HashMap Lean.Expr (Array Line × Nat × Bool)) ←
+  registerEnvExtension (pure {}) (asyncMode := .local)
 
 /-- A derivation as `sol_chain` computed it: the Lean terms of its first
 line, its lines with them put back, and whether they stop because the next
@@ -1019,20 +1032,32 @@ def runChain (C φ : Lean.Expr) : MetaM Run := do
   let φ ← instantiateMVars φ
   if φ.hasMVar then throwError "sol_chain: the formula is not known{indentExpr φ}"
   let (φ', sp) ← (punch C φ).run {}
+  let m? ← modalityOf? φ'
+  let sp := { sp with modality := m? }
+  if let some (ls, i, stuck) := (runCache.getState (← getEnv))[φ]? then
+    return { splice := sp, lines := (ls.extract i ls.size).toList, stuck }
   let fill (m? : Option Lean.Expr) (d b : Line) : Option Line :=
     match fillSlots m? sp.fmls d.fml b.fml with
     | .ok e => some { d with fml := e, decided := d.decided && b.decided }
     | .error _ => none
-  match ← modalityOf? φ' with
-  | none =>
-    let ls ← closedLines n C φ'
-    let ls := if sp.fmls.isEmpty then ls else ls.map fun l => (fill none l l).getD l
-    return { splice := sp, lines := ls, stuck := false }
-  | some m =>
-    let ds ← closedLines n C (φ'.replaceFVar m (mkConst ``Modality.diamond))
-    let bs ← closedLines n C (φ'.replaceFVar m (mkConst ``Modality.box))
-    let (ls, stuck) := shared (fill m) ds bs
-    return { splice := { sp with modality := m }, lines := ls, stuck }
+  let (ls, stuck) ← match m? with
+    | none =>
+      let ls ← closedLines n C φ'
+      pure (if sp.fmls.isEmpty then ls else ls.map fun l => (fill none l l).getD l, false)
+    | some m =>
+      let ds ← closedLines n C (φ'.replaceFVar m (mkConst ``Modality.diamond))
+      let bs ← closedLines n C (φ'.replaceFVar m (mkConst ``Modality.box))
+      pure (shared (fill m) ds bs)
+  -- a run that used up its fuel may go on past its last line: the lines
+  -- near its end start runs of their own
+  let arr := ls.toArray
+  let keep := if arr.size < runFuel then arr.size else arr.size / 2
+  modifyEnv fun env => runCache.modifyState env fun c => Id.run do
+    let mut c := c.insert φ (arr, 0, stuck)
+    for (l, j) in arr.zipIdx do
+      if j < keep then c := c.insert l.fml (arr, j + 1, stuck)
+    return c
+  return { splice := sp, lines := ls, stuck }
 
 /-- Why a line is not written under the modality `m`. -/
 def modalityStop (m : Lean.Expr) : MessageData :=

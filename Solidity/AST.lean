@@ -638,6 +638,11 @@ class FreshNames where
   name : String → Nat → String
   parse : String → Option (String × Nat)
 
+/- Not a parameter to specialize on: `dl!{ … }` and `sol{ … }` evaluate a call
+of the elaborator at the file's instance, and specializing it there compiles
+the whole elaborator again at every line (half a second each). -/
+attribute [nospecialize] FreshNames
+
 /-- The `k`-th fresh variable of each kind is a prefix and `k`.  The four
 prefixes must be distinct identifiers that do not end in a digit. -/
 def FreshNames.ofPrefixes (se sp ie mv : String) : FreshNames where
