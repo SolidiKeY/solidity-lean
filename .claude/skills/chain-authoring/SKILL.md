@@ -11,8 +11,9 @@ Generate, then edit. Never search for a chain line by line.
    `FreshNames` in scope and `variable (m : Modality) (φ : Post C)`, write
    `#chain dl![m]{ … first line … }` and read the info message
    (`lean_diagnostic_messages` on that file, that line): the last line, the
-   `calc`, and the fresh variables as table rows. On an existing statement
-   `A ~~> B`, `by sol_chain?` does the same and offers the `calc`
+   `calc`, and the fresh variables as table rows. A chain `c` that stops
+   short: `#chain_rest c` prints the links to append and its new last line.
+   On an existing statement `A ~~> B`, `by sol_chain?` does the same and offers the `calc`
    (`lean_code_actions` applies it).
 2. **Paste** the `calc` and state the last line as the chain's right end
    (`theorem chain … : A ~~> B`); add `#last_line chain` after it.
