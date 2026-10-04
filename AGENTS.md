@@ -49,6 +49,11 @@ here is a clone every consumer has to pay for. Anything a proof needs from
 Mathlib is a sign the proof should be done differently, or the lemma stated
 locally.
 
+**Warn before a refactor that may slow checking.** When asked to change a
+representation (shallow ↔ deep embedding, one taclet for another), say first
+if it could make elaboration slower, and whether `git log` shows it undoes an
+earlier change made for speed.
+
 ## Where things are
 
 `docs/module-map.md` — one line per module. Read it instead of searching
