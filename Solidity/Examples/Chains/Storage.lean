@@ -382,33 +382,61 @@ def chain :
 end Pop
 
 namespace PushAfterPop
-/-- `tokens.push(); tokens[0].value = 7; tokens.pop(); Token storage sp = tokens.push(); uint i = sp.value;`: the push, the write, the pop, then a bound push (`storageLocalRootPushBind`, which only bumps the length).  Stand-in: the printed `tokens.push().value` is a member of a call, which is refused; `sp` binds the slot.  The chain stops at the updates the program leaves: the push's alias `sp` (`tokens[tokens.length]`) checks the length in the state it runs in, so no storage write merges over it, and reading `i` through the cleared slot stays the Theory's (`delAt`, `findOnSave`).  -/
-def chain :
-    dl![m]{ ⟨[ tokens.push(); tokens[0].value = 7; tokens.pop(); Token storage sp = tokens.push(); uint i = sp.value; ]⟩ φ }
-    ~*> dl![m]{
-      { storage := save(storage, tokens.length, tokens.length + 1) }
-      { se1 := 7 }
-      { sp1 := tokens[0] }
-      { storage := save(storage, sp1.value, se1) }
-      { storage := save(delAt(storage, tokens[tokens.length - 1]), tokens.length, tokens.length - 1) }
-      { storage := save(storage, tokens.length, tokens.length + 1) ‖ sp := tokens[tokens.length] }
-      { i := find(storage, sp.value) } φ } :=
-  calc dl![m]{ ⟨[ tokens.push(); tokens[0].value = 7; tokens.pop(); Token storage sp = tokens.push(); uint i = sp.value; ]⟩ φ }
+local instance : InContract := ⟨TestSuite⟩
+/-- `tokens.push(); tokens[0].value = 7; tokens.pop(); Token storage sp = tokens.push(); uint i = sp.value;`: the push, the write, the pop, then a bound push (`storageLocalRootPushBind`, which only bumps the length).  Stand-in: the printed `tokens.push().value` is a member of a call, which is refused; `sp` binds the slot.  The seven updates merge into one; the explicit-check paths record the storage term in which each index was checked. -/
+theorem chain (mt : Modality) (ψ : Post TestSuite) :
+    dl[TestSuite, mt]{ ⟨[ tokens.push(); tokens[0].value = 7; tokens.pop(); Token storage sp = tokens.push(); uint i = sp.value; ]⟩ ψ }
+    ~~> dl[TestSuite, mt]{
+      { sp1 := tokens[0]@save(storage, tokens.length, tokens.length + 1) ‖
+        storage := save(save(delAt(save(save(storage, tokens.length, tokens.length + 1),
+                (tokens[0]@save(storage, tokens.length, tokens.length + 1)).value, 7),
+              tokens[tokens.length - 1]), tokens.length, tokens.length - 1),
+            tokens.length, tokens.length + 1) ‖
+        sp := tokens[tokens.length]@save(delAt(save(save(storage, tokens.length, tokens.length + 1),
+                (tokens[0]@save(storage, tokens.length, tokens.length + 1)).value, 7),
+              tokens[tokens.length - 1]), tokens.length, tokens.length - 1) ‖
+        i := find(save(save(delAt(save(save(storage, tokens.length, tokens.length + 1),
+                  (tokens[0]@save(storage, tokens.length, tokens.length + 1)).value, 7),
+                tokens[tokens.length - 1]), tokens.length, tokens.length - 1),
+              tokens.length, tokens.length + 1),
+            (tokens[tokens.length]@save(delAt(save(save(storage, tokens.length, tokens.length + 1),
+                    (tokens[0]@save(storage, tokens.length, tokens.length + 1)).value, 7),
+                  tokens[tokens.length - 1]), tokens.length, tokens.length - 1)).value) } ψ } :=
+  calc dl[TestSuite, mt]{ ⟨[ tokens.push(); tokens[0].value = 7; tokens.pop(); Token storage sp = tokens.push(); uint i = sp.value; ]⟩ ψ }
     _ ~[storagePushLengthSaveReferenceElement]~>
-        dl![m]{ { storage := save(storage, tokens.length, tokens.length + 1) }
-          ⟨[ tokens[0].value = 7; tokens.pop(); Token storage sp = tokens.push(); uint i = sp.value; ]⟩ φ } := rfl
-    _ ~*> dl![m]{ { storage := save(storage, tokens.length, tokens.length + 1) } { se1 := 7 } { sp1 := tokens[0] }
+        dl[TestSuite, mt]{ { storage := save(storage, tokens.length, tokens.length + 1) }
+          ⟨[ tokens[0].value = 7; tokens.pop(); Token storage sp = tokens.push(); uint i = sp.value; ]⟩ ψ } := rfl
+    _ ~*> dl[TestSuite, mt]{ { storage := save(storage, tokens.length, tokens.length + 1) } { se1 := 7 } { sp1 := tokens[0] }
           { storage := save(storage, sp1.value, se1) }
           { storage := save(delAt(storage, tokens[tokens.length - 1]), tokens.length, tokens.length - 1) }
-          ⟨[ Token storage sp = tokens.push(); uint i = sp.value; ]⟩ φ } := by sol_chain
-    _ ~*> dl![m]{
+          ⟨[ Token storage sp = tokens.push(); uint i = sp.value; ]⟩ ψ } := by sol_chain
+    _ ~*> dl[TestSuite, mt]{
       { storage := save(storage, tokens.length, tokens.length + 1) }
       { se1 := 7 }
       { sp1 := tokens[0] }
       { storage := save(storage, sp1.value, se1) }
       { storage := save(delAt(storage, tokens[tokens.length - 1]), tokens.length, tokens.length - 1) }
       { storage := save(storage, tokens.length, tokens.length + 1) ‖ sp := tokens[tokens.length] }
-      { i := find(storage, sp.value) } φ } := by sol_chain
+      { i := find(storage, sp.value) } ψ } := by sol_chain
+    _ ~[sequentialToParallel]~> dl[TestSuite, mt]{
+      { se1 := 7 ‖ sp1 := tokens[0]@save(storage, tokens.length, tokens.length + 1) ‖
+        storage := save(save(delAt(save(save(storage, tokens.length, tokens.length + 1),
+                (tokens[0]@save(storage, tokens.length, tokens.length + 1)).value, 7),
+              tokens[tokens.length - 1]), tokens.length, tokens.length - 1),
+            tokens.length, tokens.length + 1) ‖
+        sp := tokens[tokens.length]@save(delAt(save(save(storage, tokens.length, tokens.length + 1),
+                (tokens[0]@save(storage, tokens.length, tokens.length + 1)).value, 7),
+              tokens[tokens.length - 1]), tokens.length, tokens.length - 1) ‖
+        i := find(save(save(delAt(save(save(storage, tokens.length, tokens.length + 1),
+                  (tokens[0]@save(storage, tokens.length, tokens.length + 1)).value, 7),
+                tokens[tokens.length - 1]), tokens.length, tokens.length - 1),
+              tokens.length, tokens.length + 1),
+            (tokens[tokens.length]@save(delAt(save(save(storage, tokens.length, tokens.length + 1),
+                    (tokens[0]@save(storage, tokens.length, tokens.length + 1)).value, 7),
+                  tokens[tokens.length - 1]), tokens.length, tokens.length - 1)).value) } ψ } := by
+      sol_chain
+    _ ~[simplifyUpdate]~> _ := by sol_chain
+#last_line chain
 end PushAfterPop
 
 /-! ## Example: Pop After Push -/

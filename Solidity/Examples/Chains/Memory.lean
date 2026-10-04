@@ -1,5 +1,6 @@
 import Solidity.Calculus.Chains
 import Solidity.Calculus.ChainRewrites
+import Solidity.Calculus.LastLine
 import Solidity.Calculus.Close
 import Solidity.FreshNames
 
@@ -37,12 +38,13 @@ namespace Aliasing
 /-- `Person memory carol; Account memory carolAcc = carol.account;
 carolAcc.balance = 100;` — the alias binds the identity `carol.account` holds,
 and the write goes through it. -/
-def chain (m : Modality) (φ : Post StandardExample) :
+theorem chain (m : Modality) (φ : Post StandardExample) :
     dl![m]{ ⟨[ Person memory carol; Account memory carolAcc = carol.account;
                carolAcc.balance = 100; ]⟩ φ }
-    ~*> dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
-                { carolAcc := read(memory, carol.account) }
-                { memory := write(memory, carolAcc.balance, 100) } φ } :=
+    ~~> dl![m]{ { carol := freshId(addM(memory, Person)) ‖
+          carolAcc := read(addM(memory, Person), freshId(addM(memory, Person)).account) ‖
+          memory := write(addM(memory, Person),
+            read(addM(memory, Person), freshId(addM(memory, Person)).account).balance, 100) } φ } :=
   calc dl![m]{ ⟨[ Person memory carol; Account memory carolAcc = carol.account;
                   carolAcc.balance = 100; ]⟩ φ }
     _ ~[memoryReferenceDeclFreshAlloc]~>
@@ -63,6 +65,8 @@ def chain (m : Modality) (φ : Post StandardExample) :
         dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
                 { carolAcc := read(memory, carol.account) }
                 { memory := write(memory, carolAcc.balance, 100) } φ } := by sol_chain
+    _ ~[sequentialToParallel]~> _ := by sol_chain
+#last_line chain
 
 end Aliasing
 
@@ -73,13 +77,16 @@ namespace FieldCopy
 /-- `carol.account = david.account;` — the source is a memory path, so the
 identity it holds is written, not a copy.  One rule where the printed trace
 unfolds the source into a local `acc` first. -/
-def chain (m : Modality) (φ : Post StandardExample) :
+theorem chain (m : Modality) (φ : Post StandardExample) :
     dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
             { david := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
             ⟨[ carol.account = david.account; ]⟩ φ }
-    ~*> dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
-                { david := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
-                { memory := write(memory, carol.account, read(memory, david.account)) } φ } :=
+    ~~> dl![m]{ { carol := freshId(addM(memory, Person)) ‖
+          david := freshId(addM(addM(memory, Person), Person)) ‖
+          memory := write(addM(addM(memory, Person), Person),
+            freshId(addM(memory, Person)).account,
+            read(addM(addM(memory, Person), Person),
+              freshId(addM(addM(memory, Person), Person)).account)) } φ } :=
   calc dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
                { david := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
                ⟨[ carol.account = david.account; ]⟩ φ }
@@ -91,6 +98,8 @@ def chain (m : Modality) (φ : Post StandardExample) :
         dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
                 { david := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
                 { memory := write(memory, carol.account, read(memory, david.account)) } φ } := rfl
+    _ ~[sequentialToParallel]~> _ := by sol_chain
+#last_line chain
 
 end FieldCopy
 
@@ -105,12 +114,13 @@ local instance : FreshNames := .ofTable names
 
 /-- `carol.account.balance = 10;` — the receiver is bound to a memory local
 `acc`, then written through.  The value `10` is simple, so no `pv` is declared. -/
-def chain (m : Modality) (φ : Post StandardExample) :
+theorem chain (m : Modality) (φ : Post StandardExample) :
     dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
             ⟨[ carol.account.balance = 10; ]⟩ φ }
-    ~*> dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
-                { acc := read(memory, carol.account) }
-                { memory := write(memory, acc.balance, 10) } φ } :=
+    ~~> dl![m]{ { carol := freshId(addM(memory, Person)) ‖
+          acc := read(addM(memory, Person), freshId(addM(memory, Person)).account) ‖
+          memory := write(addM(memory, Person),
+            read(addM(memory, Person), freshId(addM(memory, Person)).account).balance, 10) } φ } :=
   calc dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
                ⟨[ carol.account.balance = 10; ]⟩ φ }
     _ ~[memoryFieldWrite_unfold_leftFst]~>
@@ -126,6 +136,8 @@ def chain (m : Modality) (φ : Post StandardExample) :
         dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
                 { acc := read(memory, carol.account) }
                 { memory := write(memory, acc.balance, 10) } φ } := by sol_chain
+    _ ~[sequentialToParallel]~> _ := by sol_chain
+#last_line chain
 
 end DeepWrite
 
@@ -139,11 +151,12 @@ local instance : FreshNames := .ofTable names
 
 /-- `v = carol.account.balance;` — the receiver is bound first, then the
 member read out of the heap.  The printed `v` is a parameter of the formula. -/
-def chain (m : Modality) (φ : Post StandardExample) :
+theorem chain (m : Modality) (φ : Post StandardExample) :
     dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
             ⟨[ v = carol.account.balance; ]⟩ φ }
-    ~*> dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
-                { acc := read(memory, carol.account) } { v := read(memory, acc.balance) } φ } :=
+    ~~> dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) ‖
+          acc := read(addM(memory, Person), freshId(addM(memory, Person)).account) ‖
+          v := 0 } φ } :=
   calc dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
                ⟨[ v = carol.account.balance; ]⟩ φ }
     _ ~[memoryFieldRead_unfold_rightFst]~>
@@ -162,6 +175,9 @@ def chain (m : Modality) (φ : Post StandardExample) :
         dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
                 { acc := read(memory, carol.account) } { v := read(memory, acc.balance) } φ } := by
       sol_chain
+    _ ~[sequentialToParallel]~> _ := by sol_chain
+    _ ~[readAddEqual]~> _ := by sol_chain
+#last_line chain
 
 end FieldRead
 

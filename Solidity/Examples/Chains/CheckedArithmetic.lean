@@ -1,4 +1,4 @@
-import Solidity.Calculus.Chains
+import Solidity.Calculus.LastLine
 import Solidity.Calculus.Close
 
 /-!
@@ -12,10 +12,11 @@ the write (`narrowPost`), so the printed `arithCheckedLocalCompoundAssign` is
 `localOpAssign` followed by `requireSimple`'s two goals.
 
 The printed `inTy(uint8, 260)` is `x <= 255` read after the two updates, held
-in the capture `se1` that the `require` makes; a comparison is not a line of
-`dl{ … }`, so those lines write the capture as a Lean term (`inTy8`, `capX`).
-The printed `260` is `250 + 10` (`t260`); nothing folds it.  The expansion of
-`inTy` and the closing of the two goals are not drawn.
+in the capture `se1` that the `require` makes.  Past the program, the updates
+merge, `add_literals` and `leq_literals` fold the two literal operations one
+line at a time, `applyOnRigid` exposes the branches, and `concrete` selects the
+revert.  The box and diamond then close separately, each checked by
+`#last_line`.
 -/
 
 namespace Solidity.Examples.Chains.CheckedArithmetic
@@ -100,20 +101,52 @@ def overflowDiamondChain :
 /-- `250 + 10`, the printed `260`. -/
 abbrev t260 : Term StandardExample := .binop .add .uint (.lit (.int 250)) (.lit (.int 10))
 
-/-- The printed last line under the box, `inTy(uint8, 260) ⊢ {x := 260} φ ;
-¬inTy(uint8, 260) ⊢ ⊤`: the updates merged (`sequentialToParallel`), the
-overwritten `x := 250` dropped (`simplifyUpdate`). -/
-theorem overflowLastLine :
-    dl![.box]{ ⟨[ uint8 x = 250; x += 10; ]⟩ φ }
-    ~~> .upd .box [.val (.user "x") t260, .val (.fresh "se" 1) (inTy8 t260)]
-          dl![.box]{ (se1 ≐ true → φ) ∧ (se1 ≐ false → true) ∧
-            ([ revert(); ] false ∨ se1 ≐ true ∨ se1 ≐ false) } :=
-  calc dl![.box]{ ⟨[ uint8 x = 250; x += 10; ]⟩ φ }
-    _ ~*> _ := overflowBoxChain φ
+/-- The modality-independent part of the trace: merge the updates, drop the
+overwritten assignment, fold `250 + 10` and `260 <= 255`, push the exact
+update through the split, and select its failing branch. -/
+theorem overflowMerged :
+    dl![m]{ ⟨[ uint8 x = 250; x += 10; ]⟩ φ }
+    ~~> dl![m]{ { x := 260 ‖ se1 := false } ⟨[ revert(); ]⟩ φ } :=
+  calc dl![m]{ ⟨[ uint8 x = 250; x += 10; ]⟩ φ }
+    _ ~*> _ := overflowTrace m φ
     _ ~[sequentialToParallel]~> _ := by sol_chain
-    _ ~[simplifyUpdate]~> .upd .box [.val (.user "x") t260, .val (.fresh "se" 1) (inTy8 t260)]
-          dl![.box]{ (se1 ≐ true → φ) ∧ (se1 ≐ false → true) ∧
-            ([ revert(); ] false ∨ se1 ≐ true ∨ se1 ≐ false) } := by sol_chain
+    _ ~[simplifyUpdate]~> dl![m]{ { x := 250 + 10 ‖ se1 := 250 + 10 <= 255 }
+          ((se1 ≐ true → φ) ∧ (se1 ≐ false → ⟨[ revert(); ]⟩ φ) ∧
+            (⟨[ revert(); ]⟩ false ∨ se1 ≐ true ∨ se1 ≐ false)) } := by
+      sol_chain
+    _ ~[add_literals]~> dl![m]{ { x := 260 ‖ se1 := 260 <= 255 }
+          ((se1 ≐ true → φ) ∧ (se1 ≐ false → ⟨[ revert(); ]⟩ φ) ∧
+            (⟨[ revert(); ]⟩ false ∨ se1 ≐ true ∨ se1 ≐ false)) } := by
+      sol_chain
+    _ ~[leq_literals]~> dl![m]{ { x := 260 ‖ se1 := false }
+          ((se1 ≐ true → φ) ∧ (se1 ≐ false → ⟨[ revert(); ]⟩ φ) ∧
+            (⟨[ revert(); ]⟩ false ∨ se1 ≐ true ∨ se1 ≐ false)) } := by
+      sol_chain
+    _ ~[applyOnRigid]~> _ := by sol_chain
+    _ ~[concrete]~> dl![m]{ { x := 260 ‖ se1 := false } ⟨[ revert(); ]⟩ φ } := by
+      sol_chain
+
+/-- Under the box the failing branch closes to `true`; its now-unused update
+then disappears. -/
+theorem overflowBox :
+    dl![.box]{ ⟨[ uint8 x = 250; x += 10; ]⟩ φ } ~~> dl!{ true } :=
+  calc dl![.box]{ ⟨[ uint8 x = 250; x += 10; ]⟩ φ }
+    _ ~~> _ := overflowMerged .box φ
+    _ ~[revertBox]~> dl![.box]{ { x := 260 ‖ se1 := false } true } := by sol_chain
+    _ ~[simplifyUpdate]~> dl!{ true } := by sol_chain
+
+#last_line overflowBox
+
+/-- Under the diamond the failing branch closes to `false`; its update then
+disappears as well. -/
+theorem overflowDiamond :
+    dl!{ ⟨ uint8 x = 250; x += 10; ⟩ φ } ~~> dl!{ false } :=
+  calc dl!{ ⟨ uint8 x = 250; x += 10; ⟩ φ }
+    _ ~~> _ := overflowMerged .diamond φ
+    _ ~[revertDiamond]~> dl!{ { x := 260 ‖ se1 := false } false } := by sol_chain
+    _ ~[simplifyUpdate]~> dl!{ false } := by sol_chain
+
+#last_line overflowDiamond
 
 end Lines
 

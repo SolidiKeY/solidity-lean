@@ -122,31 +122,45 @@ def merged :
           { arr := bucket.tokens ‖ len := bucket.tokens.length } φ } := by sol_chain
 
 /-- The two segments (one chain is over the budget of a single
-declaration).  The read under the delete merges too (`Upd.mergeStL`), to
-`len := find(delAt(storage, bucket.tokens[i + 1]), bucket.tokens.length)`,
-which `lenOnDelAtFrame` resolves to `bucket.tokens.length`: the lines after
-this one. -/
-def chain :
+declaration), followed by the merge of the delete and length read.  The
+delete does not affect the array's length (`lenOnDelAtFrame`), and the dead
+path captures then drop. -/
+theorem chain :
     dl![m]{ ⟨[ delete bucket.tokens[++i]; len = bucket.tokens.length; ]⟩ φ }
-    ~~> dl![m]{ { toks := bucket.tokens ‖ i := i + 1 ‖ idx := i + 1 ‖ storage := delAt(storage, bucket.tokens[i + 1]) }
-          { arr := bucket.tokens ‖ len := bucket.tokens.length } φ } :=
+    ~~> dl![m]{ { i := i + 1 ‖ idx := i + 1 ‖ storage := delAt(storage, bucket.tokens[i + 1]) ‖
+          len := bucket.tokens.length } φ } :=
   calc dl![m]{ ⟨[ delete bucket.tokens[++i]; len = bucket.tokens.length; ]⟩ φ }
     _ ~~> _ := stack m φ
     _ ~[sequentialToParallel]~> _ := merged m φ
+    _ ~[sequentialToParallel]~> _ := by sol_chain
+    _ ~[lenOnDelAtFrame]~> _ := by sol_chain
+    _ ~[simplifyUpdate]~> _ := by sol_chain
+#last_line chain
 end IndexDelete
 
 namespace MappingDelete
 set_option maxHeartbeats 1000000 in
-/-- the ledger program: two writes, `delete ledger;` (`storageRootDelete`), the read of `kept`, the keyed delete (`storageIndexDelete`, no bounds branch), then `nonce` and `gone`.  The indexed write is crossed unwritten (it indexes by the capture `ie1`) and merged with its captures; past it the reads and writes at an index check their bound in the state they run in, so no storage write merges over them: the chain ends at the stack, each alias merged with the read or write through it. -/
-def chain :
+/-- the ledger program: two writes, `delete ledger;` (`storageRootDelete`), the read of `kept`, the keyed delete (`storageIndexDelete`, no bounds branch), then `nonce` and `gone`.  The indexed write is crossed unwritten (it indexes by the capture `ie1`) and merged with its captures; the whole update spine then merges so the frame and delete-value laws can resolve the final reads. -/
+theorem chain :
     dl![m]{ ⟨[ ledger.nonce = 5; ledger.balances[1] = 10; delete ledger; kept = ledger.balances[1];
         delete ledger.balances[1]; nonce = ledger.nonce; gone = ledger.balances[1]; ]⟩ φ }
-    ~~> dl![m]{ { storage := save(storage, ledger.nonce, 5) }
-          { se1 := 10 ‖ sp1 := ledger.balances ‖ ie1 := 1 ‖ storage := save(storage, ledger.balances[1], 10) }
-          { storage := delAt(storage, ledger) }
-          { sp2 := ledger.balances ‖ kept := find(storage, ledger.balances[1]) }
-          { sp3 := ledger.balances ‖ storage := delAt(storage, ledger.balances[1]) }
-          { nonce := find(storage, ledger.nonce) ‖ sp4 := ledger.balances ‖ gone := find(storage, ledger.balances[1]) } φ } :=
+    ~~> dl![m]{
+      { kept := find(delAt(save(save(storage, ledger.nonce, 5),
+              ledger.balances[1]@save(storage, ledger.nonce, 5), 10), ledger),
+            ledger.balances[1]@delAt(save(save(storage, ledger.nonce, 5),
+                ledger.balances[1]@save(storage, ledger.nonce, 5), 10), ledger)) ‖
+        storage := delAt(delAt(save(save(storage, ledger.nonce, 5),
+              ledger.balances[1]@save(storage, ledger.nonce, 5), 10), ledger),
+            ledger.balances[1]@delAt(save(save(storage, ledger.nonce, 5),
+                ledger.balances[1]@save(storage, ledger.nonce, 5), 10), ledger)) ‖
+        nonce := select(select(delAt(save(save(storage, ledger.nonce, 5),
+                ledger.balances[1]@save(storage, ledger.nonce, 5), 10), ledger), ledger), nonce) ‖
+        gone := delValue(find(delAt(save(save(storage, ledger.nonce, 5),
+                ledger.balances[1]@save(storage, ledger.nonce, 5), 10), ledger),
+            ledger.balances[1]@delAt(delAt(save(save(storage, ledger.nonce, 5),
+                    ledger.balances[1]@save(storage, ledger.nonce, 5), 10), ledger),
+                ledger.balances[1]@delAt(save(save(storage, ledger.nonce, 5),
+                    ledger.balances[1]@save(storage, ledger.nonce, 5), 10), ledger)))) } φ } :=
   calc dl![m]{ ⟨[ ledger.nonce = 5; ledger.balances[1] = 10; delete ledger; kept = ledger.balances[1];
         delete ledger.balances[1]; nonce = ledger.nonce; gone = ledger.balances[1]; ]⟩ φ }
     _ ~[storageFieldWriteSave]~>
@@ -195,6 +209,12 @@ def chain :
           { sp3 := ledger.balances ‖ storage := delAt(storage, ledger.balances[1]) }
           { nonce := find(storage, ledger.nonce) ‖ sp4 := ledger.balances ‖ gone := find(storage, ledger.balances[1]) } φ } := by
       sol_chain
+    _ ~[sequentialToParallel]~> _ := by sol_chain
+    _ ~[findOnDelAtFrame]~> _ := by sol_chain
+    _ ~[findOnDelAtValue]~> _ := by sol_chain
+    _ ~[simplifyUpdate]~> _ := by sol_chain
+    _ ~[findMemberCons]~> _ := by sol_chain
+#last_line chain
 end MappingDelete
 
 end

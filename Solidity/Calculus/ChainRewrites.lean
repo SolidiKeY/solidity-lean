@@ -35,6 +35,7 @@ nothing, so a link never repeats its line.
 | `law r` | `Fml.rwLaw` | `t ⇝ t'` in every equation | `Fml.rwEq_holds` (iff) | `rewrite` |
 | `lawUpd r ht i` | `Fml.rwUpdAt` | `t ⇝ t'` in `[{Uᵢ}]`'s right-hand sides | `Upd.rw_box` | `updRw` |
 | `lawUpdAny r ht i` | `Fml.rwUpdCoveredAt` | `t ⇝ t'` in `{Uᵢ}`'s right-hand sides, `Uᵢ` holding the write `t` reads back | `Upd.rw_holds` (iff) | `updRw` |
+| `lawUpdRef r hr i` | `Fml.rwUpdRefAt` | a frame or delete-value law in `{Uᵢ}`'s right-hand sides, `Uᵢ` holding its storage operation | `Upd.rw_holds`, `TermTaclet.RefLaw.evalRefines` (iff) | `updRw` |
 | `lawUpdEq r i` | `Fml.rwUpdEqAt` | `t ⇝ t'` in `{Uᵢ}`'s right-hand sides, `t` and `t'` one read member-wise | `Upd.rw_holds`, `Term.base_eval` (iff) | `updRw` |
 | `lawUpdEval r i` | `Fml.rwUpdEvalAt` | a memory law `t ⇝ t'` (`EvalLaw`) in `{Uᵢ}`'s right-hand sides, `Uᵢ` holding the write `t` reads back | `Upd.rw_holds`, `EvalLaw.sound` (iff) | `updRw` |
 
@@ -1656,6 +1657,289 @@ theorem STerm.delAt_eval' (σ : State) (s : STerm C) (p : PTerm C) :
       let (r, segs) ← p.eval σ
       τ.delAtAt r segs) := rfl
 
+/-- Two paths whose shapes diverge, when both resolve, have different roots
+or divergent tails.  Unlike `PTerm.diverges_eval`, the paths may contain
+index checks. -/
+theorem PTerm.diverges_eval_any {p q : PTerm C} {σ : State} {r r' : Name}
+    {segs segs' : List Seg} (hd : p.diverges q = true)
+    (hp : p.eval σ = .ok (r, segs)) (hq : q.eval σ = .ok (r', segs')) :
+    r' ≠ r ∨ Close.Diverge segs segs' := by
+  have hd' := PTerm.diverges_denote hd σ
+  rw [PTerm.denote_eval hp, PTerm.denote_eval hq] at hd'
+  rcases Diverge_of_diverges _ _ hd' with h | h
+  · exact Or.inl fun e => h (by rw [e])
+  · exact Or.inr h
+
+/-- Paths equal with their explicit checks erased resolve alike whenever both
+resolve. -/
+theorem PTerm.sameSegs_eval {p q : PTerm C} {σ : State} {r r' : Name}
+    {segs segs' : List Seg} (heq : p.sameSegs q = true)
+    (hp : p.eval σ = .ok (r, segs)) (hq : q.eval σ = .ok (r', segs')) :
+    r = r' ∧ segs = segs' := by
+  have heq' := PTerm.sameSegs_denote σ p q heq
+  rw [PTerm.denote_eval hp, PTerm.denote_eval hq] at heq'
+  exact ⟨Seg.field.inj (List.cons.inj heq').1, (List.cons.inj heq').2⟩
+
+/-- A storage word and its default either both fail to be words, or read as
+the value and its primitive default. -/
+theorem SVal.defaultOf_asValue_primDefault (v : SVal) :
+    v.defaultOf.asValue = (do pure (Theory.StValue.primDefault (← v.asValue))) := by
+  cases v with
+  | prim p => cases p <;> rfl
+  | struct _ | map _ _ => rfl
+  | array _ _ fx => cases fx <;> rfl
+
+/-- A write below an array keeps its length. -/
+theorem Close.arrLen_save_cons {a : Seg} {rest : List Seg} {old new upd : SVal}
+    (h : old.save (a :: rest) new = .ok upd) : Close.arrLen upd = Close.arrLen old := by
+  cases old with
+  | prim _ => cases a <;> simp [SVal.save] at h
+  | struct fields =>
+    cases a with
+    | «at» _ => simp [SVal.save] at h
+    | field n =>
+      simp only [SVal.save] at h
+      split at h
+      · obtain ⟨u, _, h⟩ := bind_ok_inv h
+        cases h
+        rfl
+      · simp at h
+  | array elems shadow fx =>
+    cases a with
+    | field _ => simp [SVal.save] at h
+    | «at» i =>
+      simp only [SVal.save] at h
+      split at h
+      · obtain ⟨u, _, h⟩ := bind_ok_inv h
+        cases h
+        have hlen : (((elems ++ shadow).set i.toNat u).take elems.length).length =
+            elems.length := by simp
+        simp only [Close.arrLen, hlen]
+      · simp at h
+  | map entries dflt =>
+    cases a with
+    | field _ => simp [SVal.save] at h
+    | «at» i =>
+      simp only [SVal.save] at h
+      split at h <;> (obtain ⟨u, _, h⟩ := bind_ok_inv h; cases h; rfl)
+
+/-- Reading an array length above or apart from a write gives its old
+length. -/
+theorem Close.find_save_arrLen : ∀ {p q : List Seg} {old new upd : SVal},
+    old.save p new = .ok upd → ¬ Close.Prefix p q →
+      (upd.find q >>= Close.arrLen) = (old.find q >>= Close.arrLen)
+  | [], _, _, _, _, _, hq => (hq trivial).elim
+  | _ :: _, [], _, _, _, hs, _ => by
+      simp only [SVal.find_nil, bind, Except.bind]
+      exact Close.arrLen_save_cons hs
+  | a :: p, b :: q, old, upd, new, hs, hq => by
+      by_cases hab : a = b
+      · subst hab
+        have hq' : ¬ Close.Prefix p q := fun h => hq ⟨rfl, h⟩
+        obtain ⟨c, u, hu, hf⟩ := Close.save_cons_find hs
+        rw [(hf q).1, (hf q).2]
+        exact Close.find_save_arrLen hu hq'
+      · rw [Close.find_save_diverge (show Close.Diverge (a :: p) (b :: q) from Or.inl hab) hs]
+
+/-- `find_save_arrLen` at a root of the storage. -/
+theorem Close.arrayLen_saveStorage_frame {σ τ : State} {r r' : Name} {p q : List Seg}
+    {v : SVal} (h : σ.saveStorage r p v = .ok τ)
+    (hq : r' ≠ r ∨ ¬ Close.Prefix p q) : arrayLen τ r' q = arrayLen σ r' q := by
+  rw [Close.arrayLen_eq, Close.arrayLen_eq]
+  unfold State.saveStorage at h
+  split at h
+  · rename_i old hl
+    obtain ⟨u, hu, h⟩ := bind_ok_inv h
+    cases h
+    by_cases hr : r' = r
+    · subst hr
+      simp only [State.findStorage, lookupBy_setBy_self, hl]
+      exact Close.find_save_arrLen hu (hq.resolve_left (· rfl))
+    · simp only [State.findStorage, lookupBy_setBy_ne hr]
+  · simp at h
+
+/-- A divergent path is not a prefix of the path it diverges from. -/
+theorem Close.Diverge.not_prefix : ∀ {p q : List Seg}, Close.Diverge p q → ¬ Close.Prefix p q
+  | _ :: _, _ :: _, h => fun hp => by
+      rcases h with h | h
+      · exact h hp.1
+      · exact h.not_prefix hp.2
+
+/-- A prefix remains a prefix when the path on the right is extended. -/
+theorem Close.Prefix.right_append : ∀ {p q : List Seg}, Close.Prefix p q → (tail : List Seg) →
+    Close.Prefix p (q ++ tail)
+  | [], _, _, _ => trivial
+  | _ :: _, _ :: _, h, tail => ⟨h.1, h.2.right_append tail⟩
+
+/-- `q` leaving `p.length`, when both paths resolve, says that the write at
+`q` is at another root or is not above `p`. -/
+theorem PTerm.divergesLen_eval {q p : PTerm C} {σ : State} {r r' : Name}
+    {segs segs' : List Seg} (hd : q.divergesLen p = true)
+    (hq : q.eval σ = .ok (r, segs)) (hp : p.eval σ = .ok (r', segs')) :
+    r' ≠ r ∨ ¬ Close.Prefix segs segs' := by
+  have hd' := PTerm.divergesLen_denote hd σ
+  rw [PTerm.denote_eval hq, PTerm.denote_eval hp] at hd'
+  rcases Diverge_of_diverges _ _ hd' with h | h
+  · exact Or.inl fun e => h (by rw [e])
+  · exact Or.inr fun hp' => h.not_prefix (hp'.right_append [.field "length"])
+
+theorem Term.len_eval (σ : State) (s : STerm C) (p : PTerm C) :
+    (Term.len s p).eval σ = (do
+      let τ ← s.eval σ
+      let (r, segs) ← p.eval σ
+      arrayLen τ r segs) := rfl
+
+/-- A length read away from a returned write evaluates exactly as the read
+before the write. -/
+theorem Term.len_save_frame_eval {s : STerm C} {q p : PTerm C} {v : SValT C} {σ τ : State}
+    (hd : q.divergesLen p = true) (he : (STerm.save s q v).eval σ = .ok τ) :
+    (Term.len (.save s q v) p).eval σ = (Term.len s p).eval σ := by
+  have hterm := he
+  simp only [tm_eval] at he
+  obtain ⟨sv, -, he⟩ := bind_ok_inv he
+  obtain ⟨τs, hs, he⟩ := bind_ok_inv he
+  obtain ⟨⟨r, segs⟩, hq, hsave⟩ := bind_ok_inv he
+  obtain ⟨x, hsave'⟩ := State.writeStorage_ok hsave
+  rw [Term.len_eval, Term.len_eval, hterm, hs, Res.ok_bind', Res.ok_bind']
+  cases hp : p.eval σ with
+  | error _ => rfl
+  | ok rp =>
+    obtain ⟨r', segs'⟩ := rp
+    simp only [bind, Except.bind]
+    rw [Close.arrayLen_saveStorage_frame hsave' (PTerm.divergesLen_eval hd hq hp)]
+
+/-- A length read away from a returned delete evaluates exactly as the read
+before the delete. -/
+theorem Term.len_delAt_frame_eval {s : STerm C} {q p : PTerm C} {σ τ : State}
+    (hd : q.divergesLen p = true) (he : (STerm.delAt s q).eval σ = .ok τ) :
+    (Term.len (.delAt s q) p).eval σ = (Term.len s p).eval σ := by
+  have hterm := he
+  rw [STerm.delAt_eval'] at he
+  obtain ⟨τs, hs, he⟩ := bind_ok_inv he
+  obtain ⟨⟨r, segs⟩, hq, he⟩ := bind_ok_inv he
+  unfold State.delAtAt at he
+  obtain ⟨cur, -, hsave⟩ := bind_ok_inv he
+  rw [Term.len_eval, Term.len_eval, hterm, hs, Res.ok_bind', Res.ok_bind']
+  cases hp : p.eval σ with
+  | error _ => rfl
+  | ok rp =>
+    obtain ⟨r', segs'⟩ := rp
+    simp only [bind, Except.bind]
+    rw [Close.arrayLen_saveStorage_frame hsave (PTerm.divergesLen_eval hd hq hp)]
+
+/-- A read away from a returned delete evaluates exactly as the read before
+the delete. -/
+theorem Term.find_delAt_frame_eval {s : STerm C} {p q : PTerm C} {σ τ : State}
+    (hd : p.diverges q = true) (he : (STerm.delAt s p).eval σ = .ok τ) :
+    (Term.find (.delAt s p) q).eval σ = (Term.find s q).eval σ := by
+  have hterm := he
+  rw [STerm.delAt_eval'] at he
+  obtain ⟨τs, hs, he⟩ := bind_ok_inv he
+  obtain ⟨⟨r, segs⟩, hp, he⟩ := bind_ok_inv he
+  unfold State.delAtAt at he
+  obtain ⟨cur, -, hsave⟩ := bind_ok_inv he
+  rw [Term.find_eval, Term.find_eval, hterm, hs, Res.ok_bind', Res.ok_bind']
+  cases hq : q.eval σ with
+  | error _ => rfl
+  | ok rq =>
+    obtain ⟨r', segs'⟩ := rq
+    simp only [bind, Except.bind]
+    rw [Close.findStorage_saveStorage_apart hsave (PTerm.diverges_eval_any hd hp hq)]
+
+/-- A read away from a returned write evaluates exactly as the read before
+the write. -/
+theorem Term.find_save_frame_eval {s : STerm C} {p q : PTerm C} {v : SValT C} {σ τ : State}
+    (hd : p.diverges q = true) (he : (STerm.save s p v).eval σ = .ok τ) :
+    (Term.find (.save s p v) q).eval σ = (Term.find s q).eval σ := by
+  have hterm := he
+  simp only [tm_eval] at he
+  obtain ⟨sv, -, he⟩ := bind_ok_inv he
+  obtain ⟨τs, hs, he⟩ := bind_ok_inv he
+  obtain ⟨⟨r, segs⟩, hp, hsave⟩ := bind_ok_inv he
+  obtain ⟨x, hsave'⟩ := State.writeStorage_ok hsave
+  rw [Term.find_eval, Term.find_eval, hterm, hs, Res.ok_bind', Res.ok_bind']
+  cases hq : q.eval σ with
+  | error _ => rfl
+  | ok rq =>
+    obtain ⟨r', segs'⟩ := rq
+    simp only [bind, Except.bind]
+    rw [Close.findStorage_saveStorage_apart hsave' (PTerm.diverges_eval_any hd hp hq)]
+
+/-- A read at a returned delete evaluates as the primitive default of the
+word before the delete, even when its path carries another explicit check. -/
+theorem Term.find_delAt_value_eval {s : STerm C} {p q : PTerm C} {σ τ : State}
+    (heq : p.sameSegs q = true) (he : (STerm.delAt s p).eval σ = .ok τ) :
+    (Term.find (.delAt s p) q).eval σ = (Term.delValue (Term.find s q)).eval σ := by
+  have hterm := he
+  rw [STerm.delAt_eval'] at he
+  obtain ⟨τs, hs, he⟩ := bind_ok_inv he
+  obtain ⟨⟨r, segs⟩, hp, he⟩ := bind_ok_inv he
+  unfold State.delAtAt at he
+  obtain ⟨cur, hcur, hsave⟩ := bind_ok_inv he
+  rw [Term.find_eval, hterm, Res.ok_bind']
+  simp only [tm_eval, Op1.eval, hs, Res.ok_bind']
+  cases hq : q.eval σ with
+  | error _ => rfl
+  | ok rq =>
+    obtain ⟨r', segs'⟩ := rq
+    obtain ⟨rfl, rfl⟩ := PTerm.sameSegs_eval heq hp hq
+    simp only [bind, Except.bind]
+    rw [State.findStorage_saveStorage_same hsave, hcur]
+    change cur.defaultOf.asValue = (do pure (Theory.StValue.primDefault (← cur.asValue)))
+    exact SVal.defaultOf_asValue_primDefault cur
+
+/-- The storage laws whose two sides evaluate alike once their storage
+operation returns.  These are the laws that may rewrite a covered update
+under either modality even though their right side is not total. -/
+inductive TermTaclet.RefLaw : {t t' : Term C} → TermTaclet t t' → Prop where
+  | findOnSaveFrame {s : STerm C} {p q : PTerm C} {v : SValT C}
+      (hd : p.diverges q = true) :
+      RefLaw (TermTaclet.findOnSaveFrame (s := s) (p := p) (q := q) (v := v) hd)
+  | findOnDelAtValue {s : STerm C} {p q : PTerm C} (hp : p.hasSeg = true)
+      (hq : p.sameSegs q = true) :
+      RefLaw (TermTaclet.findOnDelAtValue (s := s) (p := p) (q := q) hp hq)
+  | findOnDelAtFrame {s : STerm C} {p q : PTerm C} (hd : p.diverges q = true) :
+      RefLaw (TermTaclet.findOnDelAtFrame (s := s) (p := p) (q := q) hd)
+  | lenOnSaveFrame {s : STerm C} {q p : PTerm C} {v : SValT C}
+      (hd : q.divergesLen p = true) :
+      RefLaw (TermTaclet.lenOnSaveFrame (s := s) (q := q) (p := p) (v := v) hd)
+  | lenOnDelAtFrame {s : STerm C} {q p : PTerm C} (hd : q.divergesLen p = true) :
+      RefLaw (TermTaclet.lenOnDelAtFrame (s := s) (q := q) (p := p) hd)
+
+/-- A reference law keeps every value returned by its left side. -/
+theorem TermTaclet.RefLaw.evalRefines {r : TermTaclet t t'} : RefLaw r →
+    Term.EvalRefines t t'
+  | .findOnSaveFrame hd => fun σ x hx => by
+      have hx' := hx
+      rw [Term.find_eval] at hx
+      obtain ⟨τ, hτ, -⟩ := bind_ok_inv hx
+      rw [Term.find_save_frame_eval hd hτ] at hx'
+      exact hx'
+  | .findOnDelAtValue _ hq => fun σ x hx => by
+      have hx' := hx
+      rw [Term.find_eval] at hx
+      obtain ⟨τ, hτ, -⟩ := bind_ok_inv hx
+      rw [Term.find_delAt_value_eval hq hτ] at hx'
+      exact hx'
+  | .findOnDelAtFrame hd => fun σ x hx => by
+      have hx' := hx
+      rw [Term.find_eval] at hx
+      obtain ⟨τ, hτ, -⟩ := bind_ok_inv hx
+      rw [Term.find_delAt_frame_eval hd hτ] at hx'
+      exact hx'
+  | .lenOnSaveFrame hd => fun σ x hx => by
+      have hx' := hx
+      rw [Term.len_eval] at hx
+      obtain ⟨τ, hτ, -⟩ := bind_ok_inv hx
+      rw [Term.len_save_frame_eval hd hτ] at hx'
+      exact hx'
+  | .lenOnDelAtFrame hd => fun σ x hx => by
+      have hx' := hx
+      rw [Term.len_eval] at hx
+      obtain ⟨τ, hτ, -⟩ := bind_ok_inv hx
+      rw [Term.len_delAt_frame_eval hd hτ] at hx'
+      exact hx'
+
 /-- In the frame at `r`, a delete at `g.rest` is the delete at `r.g.rest`
 outside it, the frame taken after. -/
 theorem State.delAtAt_selectRoot (r : Name) (τ : State) (g : Name) (rest : List Seg) :
@@ -2278,6 +2562,79 @@ theorem Fml.rwUpdCoveredTop_sound {q : Term C × Term C} (hq : Term.EvalRefines 
 modality, where that update holds the write the law reads back. -/
 def Fml.rwUpdCoveredAt (q : Term C × Term C) (i : Nat) : Fml C → Option (Fml C) :=
   Fml.atSpine (Fml.rwUpdCoveredTop q) i
+
+/-! ### A reference law in an update's right-hand side
+
+The frame and delete-value laws may leave a storage read on their right.
+That read is not total, but once the update returns its storage operation
+has returned; the two sides then evaluate identically. -/
+
+/-- A covered reference law's storage operation is held by the update. -/
+def Upd.coversRef (U : Upd C) : Term C × Term C → Bool
+  | (.find (.save s p v) _, _) => U.holdsWrite (.save s p v)
+  | (.find (.delAt s p) _, _) => U.holdsWrite (.delAt s p)
+  | (.len (.save s p v) _, _) => U.holdsWrite (.save s p v)
+  | (.len (.delAt s p) _, _) => U.holdsWrite (.delAt s p)
+  | _ => false
+
+/-- Wherever a covered update returns, a reference law also refines in the
+reverse direction. -/
+theorem TermTaclet.RefLaw.back {r : TermTaclet t t'} (hr : RefLaw r) {U : Upd C}
+    (hc : U.coversRef (t, t') = true) {σ τ : State} (hU : U.apply σ = .ok τ) :
+    Res.Le (t'.eval σ) (t.eval σ) := by
+  cases hr with
+  | findOnSaveFrame hd =>
+      simp only [Upd.coversRef] at hc
+      obtain ⟨b, F, hb, τ₁, hbe⟩ := Upd.holdsWrite_eval hc hU
+      obtain ⟨τ', hs⟩ := STerm.save_returns_of_base hb hbe
+      rw [Term.find_save_frame_eval hd hs]
+      exact Res.Le.refl _
+  | findOnDelAtValue _ hq =>
+      simp only [Upd.coversRef] at hc
+      obtain ⟨b, F, hb, τ₁, hbe⟩ := Upd.holdsWrite_eval hc hU
+      obtain ⟨τ', hs⟩ := STerm.delAt_returns_of_base hb hbe
+      rw [Term.find_delAt_value_eval hq hs]
+      exact Res.Le.refl _
+  | findOnDelAtFrame hd =>
+      simp only [Upd.coversRef] at hc
+      obtain ⟨b, F, hb, τ₁, hbe⟩ := Upd.holdsWrite_eval hc hU
+      obtain ⟨τ', hs⟩ := STerm.delAt_returns_of_base hb hbe
+      rw [Term.find_delAt_frame_eval hd hs]
+      exact Res.Le.refl _
+  | lenOnSaveFrame hd =>
+      simp only [Upd.coversRef] at hc
+      obtain ⟨b, F, hb, τ₁, hbe⟩ := Upd.holdsWrite_eval hc hU
+      obtain ⟨τ', hs⟩ := STerm.save_returns_of_base hb hbe
+      rw [Term.len_save_frame_eval hd hs]
+      exact Res.Le.refl _
+  | lenOnDelAtFrame hd =>
+      simp only [Upd.coversRef] at hc
+      obtain ⟨b, F, hb, τ₁, hbe⟩ := Upd.holdsWrite_eval hc hU
+      obtain ⟨τ', hs⟩ := STerm.delAt_returns_of_base hb hbe
+      rw [Term.len_delAt_frame_eval hd hs]
+      exact Res.Le.refl _
+
+/-- A reference law in the right-hand sides of `{U}_m φ`, when the
+rewritten update holds its storage operation. -/
+def Fml.rwUpdRefTop (q : Term C × Term C) (m : Modality) (U : Upd C) (φ : Fml C) :
+    Option (Fml C) :=
+  if (U.rw q != U && (U.rw q).coversRef q) = true then some (.upd m (U.rw q) φ) else none
+
+theorem Fml.rwUpdRefTop_sound {q : Term C × Term C} {r : TermTaclet q.1 q.2}
+    (hr : TermTaclet.RefLaw r) {m : Modality} {U : Upd C} {φ ψ : Fml C}
+    (h : Fml.rwUpdRefTop q m U φ = some ψ) (σ : State) (hψ : holds σ ψ) :
+    holds σ (.upd m U φ) := by
+  unfold Fml.rwUpdRefTop at h
+  split at h
+  · rename_i hc
+    cases h
+    simp only [Bool.and_eq_true] at hc
+    exact (Upd.rw_holds hr.evalRefines (fun _ _ hU => hr.back hc.2 hU) m φ σ).1 hψ
+  · nomatch h
+
+/-- A reference law in the update at position `i`. -/
+def Fml.rwUpdRefAt (q : Term C × Term C) (i : Nat) : Fml C → Option (Fml C) :=
+  Fml.atSpine (Fml.rwUpdRefTop q) i
 
 /-- The law on the right-hand sides of `{U}_m φ` under any `m`, if it rewrites
 one and both its terms read member-wise what one read is (`Term.base?`): the
@@ -3390,6 +3747,12 @@ holds the write `r` reads back (`Upd.covers`). -/
 def lawUpdAny {t t' : Term C} (r : TermTaclet t t') (ht : t'.total = true) (i : Nat) : LineRw C :=
   ⟨Fml.rwUpdCoveredAt (t, t') i,
     Fml.atSpine_sound (Fml.rwUpdCoveredTop_sound (Term.EvalRefines.of_theq r.sound ht)) i _⟩
+
+/-- A reference law on the right-hand sides of the update at position `i`
+under any modality, where that update holds the storage operation. -/
+def lawUpdRef {t t' : Term C} (r : TermTaclet t t') (hr : TermTaclet.RefLaw r)
+    (i : Nat) : LineRw C :=
+  ⟨Fml.rwUpdRefAt (t, t') i, Fml.atSpine_sound (Fml.rwUpdRefTop_sound hr) i _⟩
 
 /-- The term taclet `r` on the right-hand sides of the update at position
 `i` under any modality, where its two terms are one read member-wise

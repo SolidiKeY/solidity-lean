@@ -1,4 +1,4 @@
-import Solidity.Calculus.Chains
+import Solidity.Calculus.LastLine
 import Solidity.Calculus.Close
 import Solidity.Calculus.Sequents
 import Solidity.FreshNames
@@ -13,9 +13,9 @@ ledger and nothing else: the update
 `sadr`'s entry down by the amount unless `sadr` is the contract itself,
 which books nothing.
 Where a chain differs from the printed lines: the rule leaves `⟨[ ]⟩` after
-the booking, which `emptyModality` drops; a capture `{ pv := x + 2 }` stays in
-front of the goal instead of being applied; the receiver's capture is a
-`uint pv`, not an `address payable`.
+the booking, which `emptyModality` drops; the capture and booking then merge
+into one parallel update.  The receiver's capture is a `uint pv`, not an
+`address payable`.
 -/
 
 namespace Solidity.Examples.Chains.Payment
@@ -43,6 +43,8 @@ def box :
     _ ~[emptyModality]~>
         dl![.box]{ { net := if(to = this) then net else store(net, at(to), select(net, at(to)) - 5) } φ } := rfl
 
+#last_line box
+
 end Transfer5
 
 /-! ## Example: Symbolic Execution of `to.transfer(x + 2)` -/
@@ -66,14 +68,22 @@ def split :
           { net := if(to = this) then net else store(net, at(to), select(net, at(to)) - pv) } ⟨[ ]⟩ φ } := by
       sol_chain
 
-/-- `[ to.transfer(x + 2); ] φ`: the booking, then `emptyModality`. -/
-def box :
+/-- `[ to.transfer(x + 2); ] φ`: the booking, `emptyModality`, then the
+capture and booking merged into one update. -/
+theorem box :
     dl![.box]{ ⟨[ to.transfer(x + 2); ]⟩ φ }
-    ~*> dl![.box]{ { pv := x + 2 }
-          { net := if(to = this) then net else store(net, at(to), select(net, at(to)) - pv) } φ } :=
+    ~~> dl![.box]{ { pv := x + 2 ‖
+          net := if(to = this) then net else store(net, at(to), select(net, at(to)) - (x + 2)) } φ } :=
   calc dl![.box]{ ⟨[ to.transfer(x + 2); ]⟩ φ }
     _ ~*> _ := split φ
-    _ ~*> _ := by sol_chain
+    _ ~[emptyModality]~> dl![.box]{ { pv := x + 2 }
+          { net := if(to = this) then net else store(net, at(to), select(net, at(to)) - pv) } φ } := by
+      sol_chain
+    _ ~[sequentialToParallel]~> dl![.box]{ { pv := x + 2 ‖
+          net := if(to = this) then net else store(net, at(to), select(net, at(to)) - (x + 2)) } φ } := by
+      sol_chain
+
+#last_line box
 
 /-- `[ to.transfer(x + 2); ] true`: the box chain's last line, at `true`. -/
 theorem box_valid : ⊨ dl!{ [ to.transfer(x + 2); ] true } :=
@@ -102,14 +112,24 @@ def split :
           { net := if(pv = this) then net else store(net, at(pv), select(net, at(pv)) - 5) } ⟨[ ]⟩ φ } := by
       sol_chain
 
-/-- `[ owner.transfer(5); ] φ`: the booking, then `emptyModality`. -/
-def box :
+/-- `[ owner.transfer(5); ] φ`: the booking, `emptyModality`, then the
+receiver capture and booking merged into one update. -/
+theorem box :
     dl![.box]{ ⟨[ owner.transfer(5); ]⟩ φ }
-    ~*> dl![.box]{ { pv := select(storage, owner) }
-          { net := if(pv = this) then net else store(net, at(pv), select(net, at(pv)) - 5) } φ } :=
+    ~~> dl![.box]{ { pv := select(storage, owner) ‖
+          net := if(select(storage, owner) = this) then net else
+            store(net, at(select(storage, owner)), select(net, at(select(storage, owner))) - 5) } φ } :=
   calc dl![.box]{ ⟨[ owner.transfer(5); ]⟩ φ }
     _ ~*> _ := split φ
-    _ ~*> _ := by sol_chain
+    _ ~[emptyModality]~> dl![.box]{ { pv := select(storage, owner) }
+          { net := if(pv = this) then net else store(net, at(pv), select(net, at(pv)) - 5) } φ } := by
+      sol_chain
+    _ ~[sequentialToParallel]~> dl![.box]{ { pv := select(storage, owner) ‖
+          net := if(select(storage, owner) = this) then net else
+            store(net, at(select(storage, owner)), select(net, at(select(storage, owner))) - 5) } φ } := by
+      sol_chain
+
+#last_line box
 
 /-- `[ owner.transfer(5); ] true`: the box chain's last line, at `true`. -/
 theorem box_valid : ⊨ dl!{ [ owner.transfer(5); ] true } :=

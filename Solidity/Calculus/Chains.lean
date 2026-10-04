@@ -1500,6 +1500,18 @@ def rwCandidatesWith (keep : Lean.Expr → Bool) (C φ : Lean.Expr) :
           out := out.push (mkAppN (mkConst ``LineRw.lawUpdAny) #[C, t, t', pf, ht, toExpr i])
         for i in List.range k do
           out := out.push (mkAppN (mkConst ``LineRw.lawUpd) #[C, t, t', pf, ht, toExpr i])
+      let refCtor? :=
+        if c == ``TermTaclet.findOnSaveFrame then some ``TermTaclet.RefLaw.findOnSaveFrame
+        else if c == ``TermTaclet.findOnDelAtValue then some ``TermTaclet.RefLaw.findOnDelAtValue
+        else if c == ``TermTaclet.findOnDelAtFrame then some ``TermTaclet.RefLaw.findOnDelAtFrame
+        else if c == ``TermTaclet.lenOnSaveFrame then some ``TermTaclet.RefLaw.lenOnSaveFrame
+        else if c == ``TermTaclet.lenOnDelAtFrame then some ``TermTaclet.RefLaw.lenOnDelAtFrame
+        else none
+      if let some refCtor := refCtor? then
+        let hr := mkAppN (mkConst refCtor) pf.getAppArgs
+        discard <| inferType hr
+        for i in List.range k do
+          out := out.push (mkAppN (mkConst ``LineRw.lawUpdRef) #[C, t, t', pf, hr, toExpr i])
       for i in List.range k do
         out := out.push (mkAppN (mkConst ``LineRw.lawUpdEq) #[C, t, t', pf, toExpr i])
     return (out, failed)
@@ -1616,14 +1628,16 @@ def rwSelect (C φ ψ : Lean.Expr) (n : String) (rs : Array Lean.Expr)
   let mut stuck := false
   for (r, q?) in rs.toList.zip qs do
     let some q := q? | continue
+    let st ← saveState
     unless ψ.isMVar || q == ψ || (← withReducible (isDefEq q ψ)) do
+      st.restore
       gives := gives.push q
       continue
     let mut pf := none
     if φ.hasFVar then
       let lhs := mkApp2 (mkApp (mkConst ``LineRw.apply) C) r φ
       unless ← isDefEq lhs (mkApp2 (mkConst ``Option.some [0]) (mkApp (mkConst ``Fml) C) q) do
-        let some p ← proveRw C r φ q | stuck := true; continue
+        let some p ← proveRw C r φ q | stuck := true; st.restore; continue
         pf := some p
     return (r, q, pf)
   if stuck then
