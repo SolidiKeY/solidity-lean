@@ -188,10 +188,10 @@ namespace DeclDrop
 
 /-- `Person memory carol; Person memory carolAlias = carol;` — the alias binds
 `carol`'s identity, and nothing is written. -/
-def chain (m : Modality) (φ : Post StandardExample) :
+theorem chain (m : Modality) (φ : Post StandardExample) :
     dl![m]{ ⟨[ Person memory carol; Person memory carolAlias = carol; ]⟩ φ }
-    ~*> dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
-                { carolAlias := carol } φ } :=
+    ~~> dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) ‖
+          carolAlias := freshId(addM(memory, Person)) } φ } :=
   calc dl![m]{ ⟨[ Person memory carol; Person memory carolAlias = carol; ]⟩ φ }
     _ ~[memoryReferenceDeclFreshAlloc]~>
         dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
@@ -206,6 +206,8 @@ def chain (m : Modality) (φ : Post StandardExample) :
         dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
                 { carolAlias := carol } φ } := rfl
 
+    _ ~[sequentialToParallel]~> _ := by sol_chain
+#last_line chain
 end DeclDrop
 
 /-! ## Example: Symbolic Execution of `Token memory t = carol.account.token` -/
@@ -219,11 +221,12 @@ local instance : FreshNames := .ofTable names
 
 /-- `Token memory t = carol.account.token;` — the declaration dropped, then
 each receiver bound by a read of the identity it holds. -/
-def chain (m : Modality) (φ : Post StandardExample) :
+theorem chain (m : Modality) (φ : Post StandardExample) :
     dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
             ⟨[ Token memory t = carol.account.token; ]⟩ φ }
-    ~*> dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
-                { carolAcc := read(memory, carol.account) } { t := read(memory, carolAcc.token) } φ } :=
+    ~~> dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) ‖
+          carolAcc := read(addM(memory, Person), freshId(addM(memory, Person)).account) ‖
+          t := read(addM(memory, Person), read(addM(memory, Person), freshId(addM(memory, Person)).account).token) } φ } :=
   calc dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
                ⟨[ Token memory t = carol.account.token; ]⟩ φ }
     _ ~[memoryLocalDeclInitDrop]~>
@@ -246,6 +249,8 @@ def chain (m : Modality) (φ : Post StandardExample) :
         dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
                 { carolAcc := read(memory, carol.account) } { t := read(memory, carolAcc.token) } φ } := rfl
 
+    _ ~[sequentialToParallel]~> _ := by sol_chain
+#last_line chain
 end TokenAlias
 
 /-! ## Example: Symbolic Execution of `v = carol` -/
@@ -254,10 +259,10 @@ namespace RootAlias
 
 /-- `v = carol;` — a memory local assigned a memory local is rebound to its
 identity (`v` is a `Person` by what the program assigns it). -/
-def chain (m : Modality) (φ : Post StandardExample) :
+theorem chain (m : Modality) (φ : Post StandardExample) :
     dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) } ⟨[ v = carol; ]⟩ φ }
-    ~*> dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
-                { v := carol } φ } :=
+    ~~> dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) ‖
+          v := freshId(addM(memory, Person)) } φ } :=
   calc dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) } ⟨[ v = carol; ]⟩ φ }
     _ ~[memoryRootAlias]~>
         dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
@@ -266,6 +271,8 @@ def chain (m : Modality) (φ : Post StandardExample) :
         dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
                 { v := carol } φ } := rfl
 
+    _ ~[sequentialToParallel]~> _ := by sol_chain
+#last_line chain
 end RootAlias
 
 /-! ## Example: Symbolic Execution of `carol = david` -/
@@ -274,13 +281,12 @@ namespace RootAssign
 
 /-- `carol = david;` — the same rule, with a memory target: `carol` is
 rebound to `david`'s identity, and the heap is untouched. -/
-def chain (m : Modality) (φ : Post StandardExample) :
+theorem chain (m : Modality) (φ : Post StandardExample) :
     dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
             { david := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
             ⟨[ carol = david; ]⟩ φ }
-    ~*> dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
-                { david := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
-                { carol := david } φ } :=
+    ~~> dl![m]{ { carol := freshId(addM(memory, Person)) ‖ david := freshId(addM(addM(memory, Person), Person)) ‖
+          memory := addM(addM(memory, Person), Person) ‖ carol := freshId(addM(addM(memory, Person), Person)) } φ } :=
   calc dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
                { david := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
                ⟨[ carol = david; ]⟩ φ }
@@ -293,6 +299,8 @@ def chain (m : Modality) (φ : Post StandardExample) :
                 { david := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
                 { carol := david } φ } := rfl
 
+    _ ~[sequentialToParallel]~> _ := by sol_chain
+#last_line chain
 end RootAssign
 
 /-! ## Example: Additional Memory Write Cases -/
@@ -305,11 +313,11 @@ local instance : FreshNames := .ofTable names
 #guard (FreshNames.clashes StandardExample names).isEmpty
 
 /-- `carol.age = a + b;` — a computed value is captured before the write. -/
-def chain (m : Modality) (φ : Post StandardExample) :
+theorem chain (m : Modality) (φ : Post StandardExample) :
     dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
             ⟨[ carol.age = a + b; ]⟩ φ }
-    ~*> dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
-                { pv := a + b } { memory := write(memory, carol.age, pv) } φ } :=
+    ~~> dl![m]{ { carol := freshId(addM(memory, Person)) ‖ pv := a + b ‖
+          memory := write(addM(memory, Person), freshId(addM(memory, Person)).age, a + b) } φ } :=
   calc dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
                ⟨[ carol.age = a + b; ]⟩ φ }
     _ ~[memoryFieldWriteUnfoldSource]~>
@@ -324,19 +332,21 @@ def chain (m : Modality) (φ : Post StandardExample) :
         dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
                 { pv := a + b } { memory := write(memory, carol.age, pv) } φ } := by sol_chain
 
+    _ ~[sequentialToParallel]~> _ := by sol_chain
+#last_line chain
 end CapturedRhs
 
 namespace Rebind
 
 /-- `carolAcc = david.account;` — a memory field on the right rebinds the
 local to the identity the member holds. -/
-def chain (m : Modality) (φ : Post StandardExample) :
+theorem chain (m : Modality) (φ : Post StandardExample) :
     dl![m]{ { david := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
             { carolAcc := freshId(addM(memory, Account)) ‖ memory := addM(memory, Account) }
             ⟨[ carolAcc = david.account; ]⟩ φ }
-    ~*> dl![m]{ { david := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
-                { carolAcc := freshId(addM(memory, Account)) ‖ memory := addM(memory, Account) }
-                { carolAcc := read(memory, david.account) } φ } :=
+    ~~> dl![m]{ { david := freshId(addM(memory, Person)) ‖ carolAcc := freshId(addM(addM(memory, Person), Account)) ‖
+          memory := addM(addM(memory, Person), Account) ‖
+          carolAcc := read(addM(memory, Person), freshId(addM(memory, Person)).account) } φ } :=
   calc dl![m]{ { david := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
                { carolAcc := freshId(addM(memory, Account)) ‖ memory := addM(memory, Account) }
                ⟨[ carolAcc = david.account; ]⟩ φ }
@@ -349,6 +359,9 @@ def chain (m : Modality) (φ : Post StandardExample) :
                 { carolAcc := freshId(addM(memory, Account)) ‖ memory := addM(memory, Account) }
                 { carolAcc := read(memory, david.account) } φ } := rfl
 
+    _ ~[sequentialToParallel]~> _ := by sol_chain
+    _ ~[readAddDifferentIdentity]~> _ := by sol_chain
+#last_line chain
 end Rebind
 
 namespace CallWrite
@@ -379,15 +392,31 @@ line.  The printed first line is the elaborator's capture (above); a line naming
 inlined: `makeAccount`'s body (`mv2`), its result bound (`pv := mv2`),
 `choosePersonMem`'s copy of `alice` (`mv4`), bound (`mv := mv4`), and the member
 written. -/
-def chain (m : Modality) (φ : Post Calls) :
+theorem chain (m : Modality) (φ : Post Calls) :
     dl![m]{ ⟨[ choosePersonMem().account = makeAccount(); ]⟩ φ }
-    ~*> dl![m]{ { mv2 := freshId(addM(memory, Account)) ‖ memory := addM(memory, Account) }
+    ~~> dl![m]{ { mv2 := freshId(addM(memory, Account)) ‖ pv := freshId(addM(memory, Account)) ‖
+          mv4 := freshId(addM(write(addM(memory, Account), freshId(addM(memory, Account)).balance, 100), Person)) ‖
+          mv4 :=
+            freshId(copySt(addM(write(addM(memory, Account), freshId(addM(memory, Account)).balance, 100), Person),
+              find(storage, alice))) ‖
+          mv :=
+            freshId(copySt(addM(write(addM(memory, Account), freshId(addM(memory, Account)).balance, 100), Person),
+              find(storage, alice))) ‖
+          memory :=
+            write(copySt(addM(write(addM(memory, Account), freshId(addM(memory, Account)).balance, 100), Person),
+                find(storage, alice)),
+              freshId(copySt(addM(write(addM(memory, Account), freshId(addM(memory, Account)).balance, 100), Person),
+                  find(storage, alice))).account,
+              freshId(addM(memory, Account))) } φ } :=
+  calc dl![m]{ ⟨[ choosePersonMem().account = makeAccount(); ]⟩ φ }
+    _ ~*> dl![m]{ { mv2 := freshId(addM(memory, Account)) ‖ memory := addM(memory, Account) }
           { memory := write(memory, mv2.balance, 100) } { pv := mv2 }
           { mv4 := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
           { mv4 := freshId(copySt(memory, find(storage, alice))) ‖
             memory := copySt(memory, find(storage, alice)) }
-          { mv := mv4 } { memory := write(memory, mv.account, pv) } φ } := by
-  sol_chain
+          { mv := mv4 } { memory := write(memory, mv.account, pv) } φ } := by sol_chain
+    _ ~[sequentialToParallel]~> _ := by sol_chain
+#last_line chain
 
 end CallWrite
 
