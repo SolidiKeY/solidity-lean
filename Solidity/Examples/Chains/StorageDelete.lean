@@ -53,39 +53,10 @@ def chain (hk : STerm.KindFreeAt st!{ save(save(select(storage, alice), account.
         dl![m]{ { storage := delAt(save(save(storage, alice.account.balance, 100), alice.account.token.value, 7), alice.account) ‖
           b := find(delAt(save(save(storage, alice.account.balance, 100), alice.account.token.value, 7), alice.account), alice.account.balance) ‖
           v := find(delAt(save(save(storage, alice.account.balance, 100), alice.account.token.value, 7), alice.account), alice.account.token.value) } φ } := by sol_chain
-    _ ~[findMemberCons]~>
-        dl![m]{ { storage := delAt(save(save(storage, alice.account.balance, 100), alice.account.token.value, 7), alice.account) ‖
-          b := find(select(delAt(save(save(storage, alice.account.balance, 100), alice.account.token.value, 7), alice.account), alice), account.balance) ‖
-          v := find(delAt(save(save(storage, alice.account.balance, 100), alice.account.token.value, 7), alice.account), alice.account.token.value) } φ } := by sol_chain
-    _ ~[selectOnDelAtMember]~>
-        dl![m]{ { storage := delAt(save(save(storage, alice.account.balance, 100), alice.account.token.value, 7), alice.account) ‖
-          b := find(delAt(select(save(save(storage, alice.account.balance, 100), alice.account.token.value, 7), alice), account), account.balance) ‖
-          v := find(delAt(save(save(storage, alice.account.balance, 100), alice.account.token.value, 7), alice.account), alice.account.token.value) } φ } := by sol_chain
-    _ ~[selectOnSaveMemberIn]~>
-        dl![m]{ { storage := delAt(save(save(storage, alice.account.balance, 100), alice.account.token.value, 7), alice.account) ‖
-          b := find(delAt(save(select(save(storage, alice.account.balance, 100), alice), account.token.value, 7), account), account.balance) ‖
-          v := find(delAt(save(save(storage, alice.account.balance, 100), alice.account.token.value, 7), alice.account), alice.account.token.value) } φ } := by sol_chain
-    _ ~[selectOnSaveMemberIn]~>
-        dl![m]{ { storage := delAt(save(save(storage, alice.account.balance, 100), alice.account.token.value, 7), alice.account) ‖
-          b := find(delAt(save(save(select(storage, alice), account.balance, 100), account.token.value, 7), account), account.balance) ‖
-          v := find(delAt(save(save(storage, alice.account.balance, 100), alice.account.token.value, 7), alice.account), alice.account.token.value) } φ } := by sol_chain
-    _ ~[findOnDelAtBelow]~>
-        dl![m]{ { storage := delAt(save(save(storage, alice.account.balance, 100), alice.account.token.value, 7), alice.account) ‖ b := 0 ‖
-          v := find(delAt(save(save(storage, alice.account.balance, 100), alice.account.token.value, 7), alice.account), alice.account.token.value) } φ } := by sol_chain
-    _ ~[findMemberCons]~>
-        dl![m]{ { storage := delAt(save(save(storage, alice.account.balance, 100), alice.account.token.value, 7), alice.account) ‖ b := 0 ‖
-          v := find(select(delAt(save(save(storage, alice.account.balance, 100), alice.account.token.value, 7), alice.account), alice), account.token.value) } φ } := by sol_chain
-    _ ~[selectOnDelAtMember]~>
-        dl![m]{ { storage := delAt(save(save(storage, alice.account.balance, 100), alice.account.token.value, 7), alice.account) ‖ b := 0 ‖
-          v := find(delAt(select(save(save(storage, alice.account.balance, 100), alice.account.token.value, 7), alice), account), account.token.value) } φ } := by sol_chain
-    _ ~[selectOnSaveMemberIn]~>
-        dl![m]{ { storage := delAt(save(save(storage, alice.account.balance, 100), alice.account.token.value, 7), alice.account) ‖ b := 0 ‖
-          v := find(delAt(save(select(save(storage, alice.account.balance, 100), alice), account.token.value, 7), account), account.token.value) } φ } := by
-      sol_chain
-    _ ~[selectOnSaveMemberIn]~>
-        dl![m]{ { storage := delAt(save(save(storage, alice.account.balance, 100), alice.account.token.value, 7), alice.account) ‖ b := 0 ‖
-          v := find(delAt(save(save(select(storage, alice), account.balance, 100), account.token.value, 7), account), account.token.value) } φ } := by sol_chain
-    _ ~[findOnDelAtBelow]~> dl![m]{ { storage := delAt(save(save(storage, alice.account.balance, 100), alice.account.token.value, 7), alice.account) ‖ b := 0 ‖ v := 0 } φ } := by sol_chain
+    _ ~~> dl![m]{ { storage := delAt(save(save(storage, alice.account.balance, 100), alice.account.token.value, 7), alice.account) ‖ b := 0 ‖ v := 0 } φ } := by
+      sol_rws [findMemberCons, selectOnDelAtMember, selectOnSaveMemberIn, selectOnSaveMemberIn,
+        findOnDelAtBelow, findMemberCons, selectOnDelAtMember, selectOnSaveMemberIn,
+        selectOnSaveMemberIn, findOnDelAtBelow]
 #last_line chain
 end SubtreeDelete
 
@@ -177,43 +148,9 @@ theorem chain :
             gone = ledger.balances[1]; ]⟩ φ } := by sol_chain
     _ ~[storageIndexWriteMappingSave]~> _ := by sol_chain
     _ ~*> _ := by sol_chain
-    _ ~[sequentialToParallel]~>
-        dl![m]{ { storage := save(storage, ledger.nonce, 5) }
-          { se1 := 10 ‖ sp1 := ledger.balances ‖ ie1 := 1 ‖ storage := save(storage, ledger.balances[1], 10) }
-          { storage := delAt(storage, ledger) }
-          { sp2 := ledger.balances } { kept := find(storage, sp2[1]) }
-          { sp3 := ledger.balances } { storage := delAt(storage, sp3[1]) }
-          { nonce := find(storage, ledger.nonce) }
-          { sp4 := ledger.balances } { gone := find(storage, sp4[1]) } φ } := by sol_chain
-    _ ~[sequentialToParallel]~>
-        dl![m]{ { storage := save(storage, ledger.nonce, 5) }
-          { se1 := 10 ‖ sp1 := ledger.balances ‖ ie1 := 1 ‖ storage := save(storage, ledger.balances[1], 10) }
-          { storage := delAt(storage, ledger) }
-          { sp2 := ledger.balances ‖ kept := find(storage, ledger.balances[1]) }
-          { sp3 := ledger.balances } { storage := delAt(storage, sp3[1]) }
-          { nonce := find(storage, ledger.nonce) }
-          { sp4 := ledger.balances } { gone := find(storage, sp4[1]) } φ } := by sol_chain
-    _ ~[sequentialToParallel]~>
-        dl![m]{ { storage := save(storage, ledger.nonce, 5) }
-          { se1 := 10 ‖ sp1 := ledger.balances ‖ ie1 := 1 ‖ storage := save(storage, ledger.balances[1], 10) }
-          { storage := delAt(storage, ledger) }
-          { sp2 := ledger.balances ‖ kept := find(storage, ledger.balances[1]) }
-          { sp3 := ledger.balances ‖ storage := delAt(storage, ledger.balances[1]) }
-          { nonce := find(storage, ledger.nonce) }
-          { sp4 := ledger.balances } { gone := find(storage, sp4[1]) } φ } := by sol_chain
-    _ ~[sequentialToParallel]~>
-        dl![m]{ { storage := save(storage, ledger.nonce, 5) }
-          { se1 := 10 ‖ sp1 := ledger.balances ‖ ie1 := 1 ‖ storage := save(storage, ledger.balances[1], 10) }
-          { storage := delAt(storage, ledger) }
-          { sp2 := ledger.balances ‖ kept := find(storage, ledger.balances[1]) }
-          { sp3 := ledger.balances ‖ storage := delAt(storage, ledger.balances[1]) }
-          { nonce := find(storage, ledger.nonce) ‖ sp4 := ledger.balances ‖ gone := find(storage, ledger.balances[1]) } φ } := by
-      sol_chain
-    _ ~[sequentialToParallel]~> _ := by sol_chain
-    _ ~[findOnDelAtFrame]~> _ := by sol_chain
-    _ ~[findOnDelAtValue]~> _ := by sol_chain
-    _ ~[simplifyUpdate]~> _ := by sol_chain
-    _ ~[findMemberCons]~> _ := by sol_chain
+    _ ~~> _ := by
+      sol_rws [sequentialToParallel, findOnDelAtValue, findOnDelAtFrame, findMemberCons,
+        simplifyUpdate]
 #last_line chain
 end MappingDelete
 

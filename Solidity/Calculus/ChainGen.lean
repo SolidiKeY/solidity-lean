@@ -28,8 +28,11 @@ every check:
 
 The rewrites are not confluent — the same line may leave by several — so the
 generator fixes an order: `sequentialToParallel` first, `simplifyUpdate` last,
-the rest as `~=>` tries them (`rwAnyArrows`).  It stops after `genFuel`
-rewrites, or at a line it has seen.
+the rest as `~=>` tries them (`rwAnyArrows`).  It does not commit to that
+order: a greedy run can end early, at a line no rewrite applies to that a
+later choice would have resolved, so the rewrites are searched depth first in
+that order (`searchRewrites`), each line once, at most `genNodes` of them, and
+the smallest last line wins (`sol_rws?`: the first path to its goal).
 -/
 
 namespace Solidity
@@ -43,24 +46,77 @@ namespace Chain
 
 open Lean Elab Term Meta
 
-/-- The most rewrites a generated chain takes past the program. -/
-def genFuel : Nat := 64
-
 /-- Where a rewrite comes in the generator's order: the merge first, the
 dropping of dead captures last. -/
 def genRank (n : String) : Nat :=
   if n == "sequentialToParallel" then 0 else if n == "simplifyUpdate" then 2 else 1
 
-/-- The rewrite the generator takes on the line `L`, and the line it gives. -/
-def nextRewrite (C L : Expr) : TermElabM (Option (String × Expr)) := do
+/-- The most lines the search past the program tries. -/
+def genNodes : Nat := 150
+
+/-- The rewrites that apply to the line `L`, each with the line it gives, in
+the generator's order (`genRank`, then the order `~=>` tries them). -/
+def rewritesOn (C L : Expr) : TermElabM (Array (String × Expr)) := do
   let cands ← stillApplies C L
-  let mut best : Option (Nat × String × Expr) := none
-  for (n, q) in cands do
-    let k := genRank n
-    match best with
-    | some (k', _, _) => if k < k' then best := some (k, n, q)
-    | none => best := some (k, n, q)
-  return best.map fun (_, n, q) => (n, q)
+  return (List.range 3).toArray.flatMap fun k => cands.filter (genRank ·.1 == k)
+
+/-- The size of a line, which the search minimises: the smaller last line is
+the one with more reads resolved. -/
+partial def lineSize : Expr → Nat
+  | .app f a => lineSize f + lineSize a + 1
+  | .lam _ t b _ | .forallE _ t b _ => lineSize t + lineSize b + 1
+  | .letE _ t v b _ => lineSize t + lineSize v + lineSize b + 1
+  | .mdata _ e | .proj _ _ e => lineSize e + 1
+  | _ => 1
+
+/-- What the search keeps: the lines tried, the smallest last line found and
+the path to it, the path to the goal once found, and a search step that
+failed. -/
+structure Search where
+  nodes : Nat := 0
+  seen : Std.HashSet Expr := {}
+  best : Option (Nat × Array (String × Expr)) := none
+  found : Option (Array (String × Expr)) := none
+  failed : Option MessageData := none
+
+/-- Depth first from `L`, in the generator's order: a line no rewrite
+applies to is a last line, and the smallest wins; with a goal, the first
+path to it ends the search.  Each line has its own heartbeats, and one whose
+search fails is a leaf. -/
+partial def searchFrom (C : Expr) (goal? : Option Expr) (path : Array (String × Expr))
+    (L : Expr) : StateRefT Search TermElabM Unit := do
+  let s ← get
+  if s.found.isSome || s.nodes ≥ genNodes || s.seen.contains L then return
+  set { s with nodes := s.nodes + 1, seen := s.seen.insert L }
+  if let some g := goal? then
+    if L == g || (← withReducible (isDefEq L g)) then
+      modify fun s => { s with found := some path }
+      return
+  let r : Except Exception (Array (String × Expr)) ←
+    tryCatchRuntimeEx (.ok <$> withCurrHeartbeats (rewritesOn C L)) fun e => pure (.error e)
+  match r with
+  | .error e => modify fun s => { s with failed := s.failed <|> some e.toMessageData }
+  | .ok cands =>
+    if cands.isEmpty then
+      let n := lineSize L
+      modify fun s => match s.best with
+        | some (b, _) => if n < b then { s with best := some (n, path) } else s
+        | none => { s with best := some (n, path) }
+    else
+      for (n, q) in cands do
+        searchFrom C goal? (path.push (n, q)) q
+
+/-- The rewrites from `L` to a last line (`goal? = none`) or to the goal, and
+a note when the search did not finish. -/
+def searchRewrites (C L : Expr) (goal? : Option Expr := none) :
+    TermElabM (Option (Array (String × Expr)) × Option MessageData) := do
+  let ((), s) ← (searchFrom C goal? #[] L).run {}
+  let note := if s.nodes ≥ genNodes then
+      some m!"the search stopped after {genNodes} lines; this is the best it found"
+    else s.failed.map fun m => m!"a step of the search failed: {m}"
+  match goal? with
+  | some _ => return (s.found, note)
+  | none => return (s.best.map (·.2), note)
 
 /-- A generated chain: the lines of the strategy with the rule that reached
 each, the rewrites after with theirs, and why it stopped early, if it did. -/
@@ -92,29 +148,8 @@ def generate (C φ : Expr) : TermElabM Gen := do
   if steps.size ≥ runFuel then
     return { splice := run.splice, steps, rewrites := #[],
              stop := some m!"the strategy ran {runFuel} steps: go on from the last line" }
-  let mut rws := #[]
-  let mut seen : Std.HashSet Expr := {}
-  let mut stop := none
-  for _ in [0:genFuel] do
-    if seen.contains prev then
-      stop := some m!"the rewrites came back to a line they had left"
-      break
-    seen := seen.insert prev
-    -- each step has its own heartbeats, and one that runs out ends the chain
-    -- there instead of losing it
-    let next : Except Exception (Option (String × Expr)) ←
-      tryCatchRuntimeEx (.ok <$> withCurrHeartbeats (nextRewrite C prev))
-      fun e => pure (.error e)
-    match next with
-    | .ok none => break
-    | .ok (some (n, q)) =>
-      rws := rws.push (n, q)
-      prev := q
-    | .error e =>
-      stop := some m!"the search for the next rewrite failed: {e.toMessageData}"
-      break
-  if rws.size == genFuel then stop := some m!"stopped after {genFuel} rewrites"
-  return { splice := run.splice, steps, rewrites := rws, stop }
+  let (rws, stop) ← searchRewrites C prev
+  return { splice := run.splice, steps, rewrites := rws.getD #[], stop }
 
 /-- The fresh variables written in `e`, by their default spellings (`se1`):
 the left column of a `FreshNames` table is the name to give each. -/
@@ -304,14 +339,11 @@ elab_rules : tactic
   | `(tactic| sol_rws?%$tk) => withMainContext do
     let g ← getMainGoal
     let (C, φ, ψ) ← leadsGoal g
-    let mut cur := φ
-    let mut ns : Array Lean.Name := #[]
-    for _ in [0:genFuel] do
-      if cur == ψ || (← withReducible (isDefEq cur ψ)) then break
-      let some (n, q) ← nextRewrite C cur
-        | throwError "sol_rws?: no rewrite applies to{indentExpr cur}\nshort of{indentExpr ψ}"
-      ns := ns.push (Lean.Name.mkSimple n)
-      cur := q
+    let (path, note) ← searchRewrites C φ (some ψ)
+    let some path := path
+      | throwError "sol_rws?: no run of rewrites from{indentExpr φ}\nreaches{indentExpr ψ}\
+          {(note.map (m!"\n" ++ ·)).getD m!""}"
+    let ns := path.map (Lean.Name.mkSimple ·.1)
     proveRws g ns
     replaceMainGoal []
     let ids := ns.map (mkIdent ·)

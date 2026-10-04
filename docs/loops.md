@@ -162,12 +162,12 @@ statement of the modality, so `{U}` is the context's update, as in
 `CallbackTaclet` (`Calculus/Callback.lean`).
 
 **The anonymising update `{anon F}`** generalises `Fml.havoc`/`Hyp.havoc`,
-which replace storage, ledger and funds and keep locals and memory. A body
+which replace storage and ledger and keep locals, memory and funds. A body
 also writes locals and memory, so `F` is a frame computed from its syntax
 (`Prog.frame body`): the locals it assigns or declares, storage if it writes
-storage, the heap and `nextId` if it touches memory, the ledger and funds if
-it transfers. `holds σ (.anon F φ)` quantifies over every state agreeing
-with `σ` off `F`; `Fml.havoc` is `anon` at storage + ledger + funds. A
+storage, the heap and `nextId` if it touches memory, the ledger if it
+transfers. `holds σ (.anon F φ)` quantifies over every state agreeing
+with `σ` off `F`; `Fml.havoc` is `anon` at storage + ledger. A
 syntactic frame needs one lemma, `Prog.run_frameOff` (a run changes nothing
 outside `Prog.frame body`), proved beside `Prog.run_frame`.
 

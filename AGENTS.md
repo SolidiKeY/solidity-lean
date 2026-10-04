@@ -112,9 +112,10 @@ the rules' fresh names (`se1`, `sp1`); `sol_chain?` writes the `calc` of a
 `~*>` goal. `#chain φ` (`Calculus/ChainGen.lean`) writes the whole chain, the
 program and then the rewrites to a last line, as a `calc` to paste and prune
 (`sol_chain?` does it on a `φ ~~> ψ` goal, `#chain_rest c` from the end of the
-chain `c`); `sol_rws [r₁, …]` is one `~~>`
-link for several rewrite lines, `sol_rws?` finds them. A line keeps a modality open with `dl![m]{ ⟨[ p ]⟩ φ }` and a
-postcondition with `φ : Post C`; a box chain's last line is `dl![.box]{ … }`.
+chain `c`); `sol_rws [r₁, …]` is one `~~>` link for several rewrite lines,
+`sol_rws?` finds them. A line keeps a modality open with `dl![m]{ ⟨[ p ]⟩ φ }`
+and a postcondition with `φ : Post C`; a box chain's last line is
+`dl![.box]{ … }`.
 When a line is not reached, `sol_chain`'s error shows the derivation it
 computed.
 
@@ -128,6 +129,39 @@ names `thn`/`els`/`cov`. The commands: `#proof_tree φ` (the GUI layout and a
 summary), `#proof_node n φ` (sequent, rule, parent, children, tactics),
 `#proof_tree_json φ`. `Examples/ProofTree.lean` pins their output: a change
 to the strategy or a printer fails there.
+
+## Writing or fixing a tactic
+
+1. **Search once, replay cheaply.** A tactic that searches (`sol_chain`,
+   `sol_derive`, `sol_rws`) gets a `?` twin that runs the search, then offers
+   the explicit proof as a `Try this` (`sol_chain?`, `sol_derive?`, `sol_rws?`).
+   The file keeps the replay, which must not search on every re-check.
+   Nothing the tactic computes is trusted: the kernel checks every line.
+2. **Bound every search.** Use a node budget, give each step its own
+   heartbeats (`withCurrHeartbeats`), and catch timeouts per step
+   (`tryCatchRuntimeEx`; a plain `try` does not catch them). A step that
+   fails ends the search with a note, not with an error. Greedy choices can
+   dead-end: search depth first in a fixed order and keep the best leaf
+   (`ChainGen.searchRewrites`).
+3. **Measure before optimising.** In a scratch module under
+   `Solidity/Scratch/` (never committed), time one term or tactic with an
+   `IO.monoNanosNow` wrapper, or set `trace.profiler` on one declaration. A
+   cost in `compilation (LCNF …)` comes from `evalExpr`. The usual cause is an
+   instance parameter that the compiler specializes at every call: mark its
+   class `attribute [nospecialize]` (as `FreshNames` is). Put a cache in an
+   `EnvExtension` with `asyncMode := .local` (`Chain.runCache`), so it ends
+   with the declaration and cannot go stale.
+4. **Pin the output.** Add a `#guard_msgs` example of the suggestion to
+   `Examples/ProofTree.lean`, and a regression example for each shape a
+   review found broken.
+5. **Verify.** Check one file at a time (`lean_diagnostic_messages`). The
+   machine has no RAM for parallel Lean checks. Then run one read-only review
+   pass, a finder and a skeptic per area, that never calls the Lean server.
+   Fix what it confirms.
+
+If changing a module's imports leaves its language-server worker stuck
+("still elaborating" forever), run the command from a fresh scratch module
+that imports the module instead.
 
 ## Checking your work
 
@@ -144,8 +178,8 @@ import changes and final confirmation. The `lean-verify` skill in
 | `lake exe solkeycheck` | sort annotations against solkey's `.key` |
 | `./scripts/check-corpus.sh` | the solkey corpus (`SolidityCorpus`) against `tests/solkey/expected.tsv` |
 
-`solkeycheck` is at zero against solkey `323dc7faa5` (313 taclets,
-2026-10-02). Re-pinning to a newer checkout is its own change: it regenerates
+`solkeycheck` is at zero against solkey `100f7f24c3` (313 taclets,
+2026-10-04). Re-pinning to a newer checkout is its own change: it regenerates
 `Calculus/KeyTaclets.lean`, moves `SortCheck/Annotations.lean`, and
 re-partitions `RuleShapes.taclets_partitioned`.
 

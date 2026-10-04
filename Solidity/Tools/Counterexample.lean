@@ -103,9 +103,9 @@ theorem _root_.Solidity.PrimTy.admitsB_iff :
       Bool.false_eq_true]
 
 /-- The callee states `{havoc} φ` is tried at: none, and an emptied
-ledger and funds. -/
-def havocSamples (σ : State) : List (List (Name × SVal) × List (Int × Int) × Int) :=
-  [(σ.storage, σ.net, σ.selfBalance), (σ.storage, [], 0)]
+ledger. -/
+def havocSamples (σ : State) : List (List (Name × SVal) × List (Int × Int)) :=
+  [(σ.storage, σ.net), (σ.storage, [])]
 
 variable {C : Contract}
 
@@ -127,7 +127,7 @@ def _root_.Solidity.Fml.eval3 (dom : PrimTy → List Value) (σ : State) : Fml C
   | .upd m U φ => Tri.after m (fun τ => φ.eval3 dom τ) (U.apply σ)
   | .modal m P φ => Tri.after m (fun τ => φ.eval3 dom τ) (Prog.run σ P)
   | .havoc φ =>
-    if (havocSamples σ).any fun (st, nt, bal) => φ.eval3 dom (σ.havoc st nt bal) = .ff then .ff
+    if (havocSamples σ).any fun (st, nt) => φ.eval3 dom (σ.havoc st nt) = .ff then .ff
     else .unknown
   | .all x p φ =>
     let rs := ((dom p).filter p.admitsB).map fun v => (v, φ.eval3 dom (σ.setEnv x (.val v)))
@@ -187,9 +187,9 @@ theorem _root_.Solidity.Fml.eval3_sound (dom : PrimTy → List Value) : (φ : Fm
     simp only [Fml.eval3, holds]
     split
     · rename_i h
-      obtain ⟨⟨st, nt, bal⟩, _, hff⟩ := List.any_eq_true.mp h
+      obtain ⟨⟨st, nt⟩, _, hff⟩ := List.any_eq_true.mp h
       exact ⟨nofun, fun _ hall =>
-        (Fml.eval3_sound dom φ _).2 (of_decide_eq_true hff) (hall st nt bal)⟩
+        (Fml.eval3_sound dom φ _).2 (of_decide_eq_true hff) (hall st nt)⟩
     · exact ⟨nofun, nofun⟩
   | .all x p φ, σ => by
     simp only [Fml.eval3, holds]

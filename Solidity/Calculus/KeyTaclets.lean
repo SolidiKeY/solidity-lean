@@ -2,7 +2,7 @@
 # The KeY taclets, as a Lean type
 
 `solidityProgramRules.key` is the calculus solkey actually runs: 313 named
-taclets (solkey `323dc7faa5`).  This module is that list of names, one constructor each, plus the
+taclets (solkey `100f7f24c3`).  This module is that list of names, one constructor each, plus the
 `\heuristics` annotation each one carries.  It exists so that
 `RuleShapes.lean` can say *which* KeY taclet each rule transcribes with a
 typed `KeyOrigin` rather than a string — a misspelling is then a type error, and

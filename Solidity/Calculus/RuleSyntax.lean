@@ -142,7 +142,7 @@ syntax:max "¬" dl_fml:50 : dl_fml
 syntax:35 dl_fml:36 " ∧ " dl_fml:35 : dl_fml
 syntax:25 dl_fml:26 " → " dl_fml:25 : dl_fml
 syntax:max dl_upd ppSpace dl_fml:50 : dl_fml
-/-- `{ havoc } φ`: `φ` after any storage, ledger and funds a callee may leave. -/
+/-- `{ havoc } φ`: `φ` after any storage and ledger a callee may leave. -/
 syntax:max "{ " &"havoc" " } " dl_fml:50 : dl_fml
 /-- The diamond: `P` runs to the end, and `φ` holds after. -/
 syntax:max "⟨ " (sol_stmt "; ")* "⟩ " dl_fml:50 : dl_fml

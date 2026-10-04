@@ -737,22 +737,23 @@ def Upd.apply (U : Upd C) (σ : State) : Res State :=
 
 /-! ## States a callee may leave -/
 
-/-- The state after a callback: storage, ledger and funds replaced by what
-the callee left (KeY's `{storage := storageSk ‖ net := netSk ‖ selfBalance
-:= selfBalanceSk}`), the locals and memory of the caller kept. -/
-def Semantics.State.havoc (σ : State) (st : List (Name × SVal)) (nt : List (Int × Int))
-    (bal : Int) : State :=
-  { σ with storage := st, net := nt, selfBalance := bal }
+/-- The state after a callback: storage and ledger replaced by what the
+callee left (KeY's `{storage := storageSk ‖ net := netSk}`, fresh skolem
+constants), the locals, memory and funds of the caller kept: the funds are
+not a transfer's to change. -/
+def Semantics.State.havoc (σ : State) (st : List (Name × SVal)) (nt : List (Int × Int)) :
+    State :=
+  { σ with storage := st, net := nt }
 
 /-- A callee that changes nothing. -/
 @[simp] theorem Semantics.State.havoc_self (σ : State) :
-    σ.havoc σ.storage σ.net σ.selfBalance = σ := by
+    σ.havoc σ.storage σ.net = σ := by
   cases σ; rfl
 
 theorem Semantics.EnvAgreeExcept.havoc {ns : List Var} {σ τ : State} (h : EnvAgreeExcept ns σ τ)
-    (st : List (Name × SVal)) (nt : List (Int × Int)) (bal : Int) :
-    EnvAgreeExcept ns (σ.havoc st nt bal) (τ.havoc st nt bal) :=
-  ⟨rfl, h.heap, h.nextId, rfl, h.env, rfl, h.tx⟩
+    (st : List (Name × SVal)) (nt : List (Int × Int)) :
+    EnvAgreeExcept ns (σ.havoc st nt) (τ.havoc st nt) :=
+  ⟨rfl, h.heap, h.nextId, rfl, h.env, h.selfBalance, h.tx⟩
 
 /-! ## Formulas -/
 
@@ -771,7 +772,7 @@ inductive Fml (C : Contract) where
   | upd (m : Modality) (U : Upd C) (φ : Fml C)
   /-- `⟨ P ⟩ φ` or `[ P ] φ`. -/
   | modal (m : Modality) (P : Prog C) (φ : Fml C)
-  /-- `{havoc} φ`: `φ` after any storage, ledger and funds a callee may
+  /-- `{havoc} φ`: `φ` after any storage and ledger a callee may
   leave — KeY's anonymising update with fresh skolem symbols. -/
   | havoc (φ : Fml C)
   /-- `∀ p x. φ`: `φ` for every value of the type `p` the local `x` may
@@ -805,7 +806,7 @@ def holds (σ : State) : Fml C → Prop
   | .imp φ ψ => holds σ φ → holds σ ψ
   | .upd m U φ => m.after (holds · φ) (U.apply σ)
   | .modal m P φ => m.after (holds · φ) (Prog.run σ P)
-  | .havoc φ => ∀ st nt bal, holds (σ.havoc st nt bal) φ
+  | .havoc φ => ∀ st nt, holds (σ.havoc st nt) φ
   | .all x p φ => ∀ v, p.admits v → holds (σ.setEnv x (.val v)) φ
 
 /-- Valid: true in every state. -/
@@ -1270,8 +1271,8 @@ theorem holds_frame : (φ : Fml C) → Avoids φ.vars ns → ∀ {σ τ : State}
     exact m.after_frame (Prog.run_frame hag P h.left) fun _ _ h' => holds_frame φ h.right h'
   | .havoc φ, h, _, _, hag => by
     simp only [holds]
-    exact forall_congr' fun st => forall_congr' fun nt => forall_congr' fun bal =>
-      holds_frame φ h (hag.havoc st nt bal)
+    exact forall_congr' fun st => forall_congr' fun nt =>
+      holds_frame φ h (hag.havoc st nt)
   | .all x _ φ, h, _, _, hag => by
     simp only [holds]
     exact forall_congr' fun v => imp_congr_right fun _ =>

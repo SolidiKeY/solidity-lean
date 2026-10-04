@@ -218,7 +218,7 @@ inductive Hyp (C : Contract) where
   | pre (a : Fml C)
   /-- `{U} …`, produced under the modality `m` -/
   | upd (m : Modality) (U : Upd C)
-  /-- `{havoc} …`: any storage, ledger and funds a callee may leave, as
+  /-- `{havoc} …`: any storage and ledger a callee may leave, as
   KeY's anonymising update with fresh skolem symbols. -/
   | havoc
   /-- `∀ p x. …`: the local `x` holds any value of the type `p`, as KeY's
@@ -386,12 +386,12 @@ theorem Hyp.wrap_append (Γ Δ : List (Hyp C)) (φ : Fml C) :
 
 /-- `Reaches Γ σ τ`: running the context `Γ` from `σ` ends in `τ` — every
 update returns, every precondition holds where it is met, and a `havoc`
-leaves any storage, ledger and funds. -/
+leaves any storage and ledger. -/
 def Hyp.Reaches : List (Hyp C) → State → State → Prop
   | [], σ, τ => τ = σ
   | .pre a :: Γ, σ, τ => holds σ a ∧ Hyp.Reaches Γ σ τ
   | .upd _ U :: Γ, σ, τ => ∃ ρ, U.apply σ = .ok ρ ∧ Hyp.Reaches Γ ρ τ
-  | .havoc :: Γ, σ, τ => ∃ st nt bal, Hyp.Reaches Γ (σ.havoc st nt bal) τ
+  | .havoc :: Γ, σ, τ => ∃ st nt, Hyp.Reaches Γ (σ.havoc st nt) τ
   | .all x p :: Γ, σ, τ => ∃ v, p.admits v ∧ Hyp.Reaches Γ (σ.setEnv x (.val v)) τ
 
 /-- What follows a context is judged only in the states it leads to. -/
@@ -405,8 +405,8 @@ theorem Hyp.wrap_reach {A B : Fml C} : (Γ : List (Hyp C)) → ∀ σ,
     cases hU : U.apply σ with
     | error _ => exact id
     | ok ρ => exact Hyp.wrap_reach Γ ρ (fun τ hr => h τ ⟨ρ, hU, hr⟩)
-  | .havoc :: Γ, σ, h => fun hA st nt bal =>
-    Hyp.wrap_reach Γ _ (fun τ hr => h τ ⟨st, nt, bal, hr⟩) (hA st nt bal)
+  | .havoc :: Γ, σ, h => fun hA st nt =>
+    Hyp.wrap_reach Γ _ (fun τ hr => h τ ⟨st, nt, hr⟩) (hA st nt)
   | .all _ _ :: Γ, σ, h => fun hA v hv =>
     Hyp.wrap_reach Γ _ (fun τ hr => h τ ⟨v, hv, hr⟩) (hA v hv)
 
@@ -426,9 +426,9 @@ theorem Hyp.reaches_append : (Γ Δ : List (Hyp C)) → ∀ σ τ,
   | .upd _ _ :: Γ, Δ, _, τ, ⟨ρ', hU, h⟩ =>
     let ⟨ρ, h₁, h₂⟩ := Hyp.reaches_append Γ Δ ρ' τ h
     ⟨ρ, ⟨ρ', hU, h₁⟩, h₂⟩
-  | .havoc :: Γ, Δ, _, τ, ⟨st, nt, bal, h⟩ =>
+  | .havoc :: Γ, Δ, _, τ, ⟨st, nt, h⟩ =>
     let ⟨ρ, h₁, h₂⟩ := Hyp.reaches_append Γ Δ _ τ h
-    ⟨ρ, ⟨st, nt, bal, h₁⟩, h₂⟩
+    ⟨ρ, ⟨st, nt, h₁⟩, h₂⟩
   | .all _ _ :: Γ, Δ, _, τ, ⟨v, hv, h⟩ =>
     let ⟨ρ, h₁, h₂⟩ := Hyp.reaches_append Γ Δ _ τ h
     ⟨ρ, ⟨v, hv, h₁⟩, h₂⟩
@@ -451,8 +451,8 @@ theorem Hyp.wrap_of_reaches {φ : Fml C} : (Γ : List (Hyp C)) → Hyp.boxOnly �
     | error _ => trivial
     | ok ρ => exact Hyp.wrap_of_reaches Γ hb ρ (fun τ hr => h τ ⟨ρ, hU, hr⟩)
   | .upd .diamond _ :: _, hb, _, _ => by cases hb
-  | .havoc :: Γ, hb, σ, h => fun st nt bal =>
-    Hyp.wrap_of_reaches Γ hb _ (fun τ hr => h τ ⟨st, nt, bal, hr⟩)
+  | .havoc :: Γ, hb, σ, h => fun st nt =>
+    Hyp.wrap_of_reaches Γ hb _ (fun τ hr => h τ ⟨st, nt, hr⟩)
   | .all _ _ :: Γ, hb, σ, h => fun v hv =>
     Hyp.wrap_of_reaches Γ hb _ (fun τ hr => h τ ⟨v, hv, hr⟩)
 
@@ -466,7 +466,7 @@ theorem Hyp.valid_wrap {φ : Fml C} {Γ : List (Hyp C)} (hb : Hyp.boxOnly Γ = t
 theorem Hyp.valid_after_havoc {φ : Fml C} {Γ Δ : List (Hyp C)} (hb : Hyp.boxOnly Γ = true)
     (h : Valid (Hyp.wrap Δ φ)) : Valid (Hyp.wrap (Γ ++ .havoc :: Δ) φ) := by
   rw [Hyp.wrap_append]
-  exact Hyp.valid_wrap hb fun σ _ _ _ => h _
+  exact Hyp.valid_wrap hb fun σ _ _ => h _
 
 /-- `Hyp.wrap_mono` for three premises, as a branch has. -/
 theorem Hyp.wrap_mono₃ {ψ₁ ψ₂ ψ₃ φ : Fml C}
@@ -480,8 +480,8 @@ theorem Hyp.wrap_mono₃ {ψ₁ ψ₂ ψ₃ φ : Fml C}
     cases U.apply σ with
     | error _ => exact fun h _ _ => h
     | ok τ => exact Hyp.wrap_mono₃ h Γ τ
-  | .havoc :: Γ => fun σ h₁ h₂ h₃ st nt bal =>
-    Hyp.wrap_mono₃ h Γ _ (h₁ st nt bal) (h₂ st nt bal) (h₃ st nt bal)
+  | .havoc :: Γ => fun σ h₁ h₂ h₃ st nt =>
+    Hyp.wrap_mono₃ h Γ _ (h₁ st nt) (h₂ st nt) (h₃ st nt)
   | .all _ _ :: Γ => fun σ h₁ h₂ h₃ v hv =>
     Hyp.wrap_mono₃ h Γ _ (h₁ v hv) (h₂ v hv) (h₃ v hv)
 
@@ -555,7 +555,7 @@ theorem Hyp.rwUpd_wrap {q : Term C × Term C} (hq : Term.EvalRefines q.1 q.2) {�
     cases hU : U.apply σ with
     | error _ => rw [hU] at h; exact h
     | ok τ => rw [hU] at h; exact Hyp.rwUpd_wrap hq Γ τ h
-  | .havoc :: Γ, σ, h => fun st nt bal => Hyp.rwUpd_wrap hq Γ _ (h st nt bal)
+  | .havoc :: Γ, σ, h => fun st nt => Hyp.rwUpd_wrap hq Γ _ (h st nt)
   | .all _ _ :: Γ, σ, h => fun v hv => Hyp.rwUpd_wrap hq Γ _ (h v hv)
 
 theorem Proves.merge_sound {Γ : List (Hyp C)} {m : Modality} {U V : Upd C} {φ : Fml C}

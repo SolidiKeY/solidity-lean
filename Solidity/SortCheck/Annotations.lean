@@ -5,7 +5,7 @@ import Solidity.AST
 
 A machine-checked transcription of the *read-sort annotations* carried
 by the read-bearing taclets of solkey's `solidityProgramRules.key`
-(transcribed at solkey commit `f2eb3d98eb`, re-checked at `323dc7faa5`: 313
+(transcribed at solkey commit `f2eb3d98eb`, re-checked at `100f7f24c3`: 313
 taclets, 115 of them read-bearing, one row each; the two `try` taclets read
 nothing). The sort-relevant history is
 `12e72a1b4b` "removed find<int> to be more generic", `52c9c2477a`

@@ -5,7 +5,7 @@ The only outbound document: what the Lean model shows solkey (`~/projects/solkey
 direction, solkey rules the Lean calculus lacks, is tracked as `planned` rows in
 `docs/lean-key-rule-map.md`.
 
-**Pinned to solkey `323dc7faa5`** (313 taclets, the `solkeycheck` baseline in
+**Pinned to solkey `100f7f24c3`** (313 taclets, the `solkeycheck` baseline in
 `AGENTS.md`). The items were checked against `f2eb3d98eb`; the commits since
 add `try`/`catch` (`tryCallNoCallbackBox`, `tryCallWithCallbackBox`) and
 rename memory's `default` to `init`, and touch no rule an item below is
@@ -202,7 +202,12 @@ Each was found by the Lean side and is fixed in solkey; git has the details.
   `ifElseNegated`), and `BoolLiteral.equals`/`hashCode`: `444f029579`.
 - Balance-checked `transfer`: `transferNoCallbackDiamond` and the callback
   diamond owe `0 <= se & se <= selfBalance`; the boxes book unconditionally,
-  which is sound for partial correctness (`333cc7b353`).
+  which is sound for partial correctness (`333cc7b353`).  Then `100f7f24c3`
+  removed `selfBalance` from every transfer rule (no debit, no
+  `selfBalanceSk` after a callback), added the `\if(sadr = self)` booking, and
+  left the diamonds owing `0 <= se` only; Lean has no diamond rule for a
+  payment (`LeanTaclet.transferDiamond`), and its callback leaves the funds as
+  they were (`State.havoc`).
 - The four `*IndexedReceiver_unfold_leftFst` taclets that did not fire (a null
   proposal in `VariableNamer`).
 - Determinism under the block modality: no box/diamond twin pairs remain.

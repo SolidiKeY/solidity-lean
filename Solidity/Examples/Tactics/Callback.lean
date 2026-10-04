@@ -126,7 +126,7 @@ theorem withdrawUnsafe_withCallback : ¬ ValidT (.withCallback vaultInv) withdra
   -- `balance = 0`; `paidOut += 5`
   have H := h hI _
     (.cons (ExecS.of_run rfl rfl)
-      (.cons (ExecS.transferResume (st := reentered) (nt := []) (bal := 0) rfl
+      (.cons (ExecS.transferResume (st := reentered) (nt := []) rfl
         (holds_eqD_iff.2 ⟨_, rfl, rfl⟩) (holds_eqD_iff.2 ⟨_, rfl, rfl⟩))
         (.cons (ExecS.of_run rfl rfl)
           (.cons (ExecS.of_run rfl rfl) .nil))))

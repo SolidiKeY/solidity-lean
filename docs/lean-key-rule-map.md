@@ -3,7 +3,7 @@
 The name-by-name map from solkey's `solidityProgramRules.key` (plus
 `ifThenElseRules.key`) to `Solidity.Taclet` (`Calculus/Rules.lean`), then the
 symbol table for updates and the data-structure theories. **Pinned to solkey
-`323dc7faa5`**: 313 program taclets, enumerated in `Calculus/KeyTaclets.lean`.
+`100f7f24c3`**: 313 program taclets, enumerated in `Calculus/KeyTaclets.lean`.
 
 These tables are the prose companion of `Calculus/RuleShapes.lean`, which
 checks the correspondence: `tacletOrigins` gives every constructor a typed

@@ -7,8 +7,9 @@ KeY offers two semantics of `a.transfer(v);` (`transferSemantics`, solkey's
 `docs/net.md`).  Without callbacks the recipient cannot run code, and the
 transfer is the debit `Stmt.run` books.  **With callbacks** the recipient
 may call back into the contract before control returns: the contract's
-storage, its ledger `net` and its funds `selfBalance` are then whatever the
-re-entrant code left, and all that is known of them is the **contract
+storage and its ledger `net` are then whatever the re-entrant code left
+(solkey's skolem constants `storageSk`, `netSk`; its funds are not a
+transfer's to change), and all that is known of them is the **contract
 invariant** `I`, which the contract owes whenever control leaves it (after
 the debit) and may assume whenever control comes back.
 
@@ -18,7 +19,7 @@ This module is a *relational* layer over it (the removed untyped layer's
 `ExecS I σ s o` runs `s` exactly as `Stmt.run` does, except at a `transfer`,
 where the run either leaves the contract with `I` broken (`violated`, an
 outcome no formula accepts) or resumes in any state the callee may leave
-(`State.havoc`: storage, ledger and funds replaced, locals and memory kept)
+(`State.havoc`: storage and ledger replaced, locals, memory and funds kept)
 that satisfies `I`.  `holdsC I` reads the modalities over it; everything else
 is `holds`.  `TransferSem` names the two semantics, and `holdsT` is the
 judgement parameterised by it.
@@ -130,9 +131,9 @@ inductive ExecS (I : Fml C) : State → Stmt C → COut → Prop where
   /-- KeY's "resume after callback": control leaves with `I` kept and comes
   back to any state the callee may leave in which `I` holds. -/
   | transferResume {σ σ₁ : State} {r a : Val C .uint} {st : List (Name × SVal)}
-      {nt : List (Int × Int)} {bal : Int} :
-      (Stmt.transfer r a).run σ = .ok σ₁ → holds σ₁ I → holds (σ₁.havoc st nt bal) I →
-        ExecS I σ (.transfer r a) (.ok (σ₁.havoc st nt bal))
+      {nt : List (Int × Int)} :
+      (Stmt.transfer r a).run σ = .ok σ₁ → holds σ₁ I → holds (σ₁.havoc st nt) I →
+        ExecS I σ (.transfer r a) (.ok (σ₁.havoc st nt))
   | iteHalt {σ : State} {c : Val C .bool} {thn els : List (Stmt C)} {e : Halt} :
       c.eval σ = .error e → ExecS I σ (.ite c thn els) (.halt e)
   | iteStuck {σ : State} {c : Val C .bool} {thn els : List (Stmt C)} {n : Int} :
@@ -170,9 +171,9 @@ inductive ExecS (I : Fml C) : State → Stmt C → COut → Prop where
   `rets`. -/
   | tryOk {σ σ₁ : State} {c : ExtCall C} {rets : List (PrimTy × Var)} {ok err : List (Stmt C)}
       {code : Option Var} {pnc other : List (Stmt C)} {k : ExtKey} {st : List (Name × SVal)}
-      {nt : List (Int × Int)} {bal : Int} {o : COut} :
-      c.key σ = .ok k → holds σ I → holds (σ.havoc st nt bal) I →
-        Binds rets (σ.havoc st nt bal) σ₁ → ExecP I σ₁ ok o →
+      {nt : List (Int × Int)} {o : COut} :
+      c.key σ = .ok k → holds σ I → holds (σ.havoc st nt) I →
+        Binds rets (σ.havoc st nt) σ₁ → ExecP I σ₁ ok o →
           ExecS I σ (.tryCall c rets ok err code pnc other) o
   /-- "Error caught": the call reverted, and its effects with it. -/
   | tryError {σ : State} {c : ExtCall C} {rets : List (PrimTy × Var)} {ok err : List (Stmt C)}
@@ -212,7 +213,7 @@ def holdsC (I : Fml C) (σ : State) : Fml C → Prop
   | .imp φ ψ => holdsC I σ φ → holdsC I σ ψ
   | .upd m U φ => m.after (holdsC I · φ) (U.apply σ)
   | .modal m P φ => ∀ o, ExecP I σ P o → o.after m (holdsC I · φ)
-  | .havoc φ => ∀ st nt bal, holdsC I (σ.havoc st nt bal) φ
+  | .havoc φ => ∀ st nt, holdsC I (σ.havoc st nt) φ
   | .all x p φ => ∀ v, p.admits v → holdsC I (σ.setEnv x (.val v)) φ
 
 /-- Valid with callbacks: true in every state. -/
@@ -263,7 +264,7 @@ theorem Stmt.exec_run (I : Fml C) :
       by_cases hI : holds σ₁ I
       · left
         have := ExecS.transferResume (I := I) (st := σ₁.storage) (nt := σ₁.net)
-          (bal := σ₁.selfBalance) h hI (by simpa using hI)
+          h hI (by simpa using hI)
         simpa using this
       · exact .inr (.transferViolated h hI)
   | .ite c thn els, σ => by
@@ -332,9 +333,9 @@ theorem Stmt.exec_run (I : Fml C) :
         | ok σ₁ =>
           simp only [hb]
           by_cases hI : holds σ I
-          · have hb' : Binds rets (σ.havoc σ.storage σ.net σ.selfBalance) σ₁ := by
+          · have hb' : Binds rets (σ.havoc σ.storage σ.net) σ₁ := by
               rw [State.havoc_self]; exact ⟨vs, hb⟩
-            have hI' : holds (σ.havoc σ.storage σ.net σ.selfBalance) I := by
+            have hI' : holds (σ.havoc σ.storage σ.net) I := by
               rw [State.havoc_self]; exact hI
             rcases Prog.exec_run I ok σ₁ with h | h
             · exact .inl (.tryOk hk hI hI' hb' h)
@@ -490,8 +491,7 @@ theorem holdsC_iff_holds {I : Fml C} : (φ : Fml C) → φ.hasTransfer = false �
       | ok τ => rw [hr] at H; exact (holdsC_iff_holds φ h.2).2 H
   | .havoc φ, h, _ => by
     simp only [holdsC, holds]
-    exact forall_congr' fun _ => forall_congr' fun _ => forall_congr' fun _ =>
-      holdsC_iff_holds φ h
+    exact forall_congr' fun _ => forall_congr' fun _ => holdsC_iff_holds φ h
   | .all _ _ φ, h, _ => by
     simp only [holdsC, holds]
     exact forall_congr' fun _ => imp_congr_right fun _ => holdsC_iff_holds φ h
@@ -594,7 +594,7 @@ theorem ExecS.frame {I : Fml C} (hI : I.vars = []) {σ τ : State} {s : Stmt C} 
     | ok σ₁ =>
       rw [hr] at this
       exact ⟨_, .transferViolated hr (fun h' => hn ((holds_I_frame hI this).1 h')), trivial⟩
-  | .transferResume (r := r) (a := a) (st := st) (nt := nt) (bal := bal) h h₁ h₂, hs, hag => by
+  | .transferResume (r := r) (a := a) (st := st) (nt := nt) h h₁ h₂, hs, hag => by
     have := Stmt.run_frame hag (.transfer r a) hs
     rw [h] at this
     cases hr : (Stmt.transfer r a).run σ with
@@ -602,7 +602,7 @@ theorem ExecS.frame {I : Fml C} (hI : I.vars = []) {σ τ : State} {s : Stmt C} 
     | ok σ₁ =>
       rw [hr] at this
       exact ⟨_, .transferResume hr ((holds_I_frame hI this).2 h₁)
-        ((holds_I_frame hI (this.havoc st nt bal)).2 h₂), this.havoc st nt bal⟩
+        ((holds_I_frame hI (this.havoc st nt)).2 h₂), this.havoc st nt⟩
   | .iteHalt (c := c) hc, hs, hag => by
     have hc' : c.eval σ = c.eval _ := c.eval_frame hag hs.left.left
     rw [hc] at hc'
@@ -658,11 +658,11 @@ theorem ExecS.frame {I : Fml C} (hI : I.vars = []) {σ τ : State} {s : Stmt C} 
   | .tryViolated (c := c) hk hn, hs, hag => by
     rw [← c.key_frame hag hs.left.left.left.left.left.left] at hk
     exact ⟨_, .tryViolated hk (fun h' => hn ((holds_I_frame hI hag).1 h')), trivial⟩
-  | .tryOk (c := c) (st := st) (nt := nt) (bal := bal) hk h₁ h₂ hb hp, hs, hag => by
+  | .tryOk (c := c) (st := st) (nt := nt) hk h₁ h₂ hb hp, hs, hag => by
     rw [← c.key_frame hag hs.left.left.left.left.left.left] at hk
-    obtain ⟨σ₁, hb', hag₁⟩ := Binds.frame (hag.havoc st nt bal) hb
+    obtain ⟨σ₁, hb', hag₁⟩ := Binds.frame (hag.havoc st nt) hb
     obtain ⟨o, ho, hag'⟩ := ExecP.frame hI hp hs.left.left.left.left.right hag₁
-    exact ⟨o, .tryOk hk ((holds_I_frame hI hag).2 h₁) ((holds_I_frame hI (hag.havoc st nt bal)).2 h₂)
+    exact ⟨o, .tryOk hk ((holds_I_frame hI hag).2 h₁) ((holds_I_frame hI (hag.havoc st nt)).2 h₂)
       hb' ho, hag'⟩
   | .tryError (c := c) hk hp, hs, hag => by
     rw [← c.key_frame hag hs.left.left.left.left.left.left] at hk
@@ -724,8 +724,8 @@ theorem holdsC_frame {I : Fml C} (hI : I.vars = []) :
       exact (hag'.after m fun _ _ h' => holdsC_frame hI φ h.right h').1 (H o' he')
   | .havoc φ, h, _, _, hag => by
     simp only [holdsC]
-    exact forall_congr' fun st => forall_congr' fun nt => forall_congr' fun bal =>
-      holdsC_frame hI φ h (hag.havoc st nt bal)
+    exact forall_congr' fun st => forall_congr' fun nt =>
+      holdsC_frame hI φ h (hag.havoc st nt)
   | .all x _ φ, h, _, _, hag => by
     simp only [holdsC]
     exact forall_congr' fun v => imp_congr_right fun _ =>

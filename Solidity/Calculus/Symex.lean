@@ -80,7 +80,7 @@ theorem Fml.stepAt_sound {k : Nat} :
     simp only [Fml.stepAt, Option.map_eq_some_iff] at h
     obtain ⟨ψ', h', rfl⟩ := h
     have := maxIdx_lt_of_sub (φ := φ) (fun x hx => by simp [Fml.vars, hx]) hk
-    exact fun hψ st nt bal => Fml.stepAt_sound this h' _ (hψ st nt bal)
+    exact fun hψ st nt => Fml.stepAt_sound this h' _ (hψ st nt)
   | .all x p φ, ψ, hk, h, σ => by
     simp only [Fml.stepAt, Option.map_eq_some_iff] at h
     obtain ⟨ψ', h', rfl⟩ := h

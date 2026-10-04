@@ -1296,7 +1296,7 @@ theorem Fml.updAt_sound {r : UpdRuleName} :
   | .havoc φ, ψ, h, σ => by
     simp only [Fml.updAt, Option.map_eq_some_iff] at h
     obtain ⟨φ', h', rfl⟩ := h
-    exact forall_congr' fun _ => forall_congr' fun _ => forall_congr' fun _ =>
+    exact forall_congr' fun _ => forall_congr' fun _ =>
       Fml.updAt_sound φ h' _
   | .all _ _ φ, ψ, h, σ => by
     simp only [Fml.updAt, Option.map_eq_some_iff] at h
@@ -1383,7 +1383,7 @@ theorem Fml.simpUpds_holds : (φ : Fml C) → ∀ σ, (holds σ φ.simpUpds ↔ 
     exact m.after_congr (fun τ => Fml.simpUpds_holds φ τ) _
   | .havoc φ, σ => by
     simp only [Fml.simpUpds, holds]
-    exact forall_congr' fun _ => forall_congr' fun _ => forall_congr' fun _ =>
+    exact forall_congr' fun _ => forall_congr' fun _ =>
       Fml.simpUpds_holds φ _
   | .all _ _ φ, σ => by
     simp only [Fml.simpUpds, holds]

@@ -25,7 +25,7 @@ def Coverage : Contract := contract!{
   uint total; uint age; bool flag; uint[] values; mapping(uint => uint) balances;
   Person alice; Person bob; Person[] people; mapping(uint => Person) personById;
   Token[] tokens; mapping(uint => Token) tokenById; mapping(uint => uint)[] ledgers;
-  TokenBucket bucket; Basket basket;
+  TokenBucket bucket; Basket basket; Account account;
   function makeValue() returns (uint) { return total; }
   function checkBalance() returns (bool) { return true; }
   function checkInvariant() returns (bool) { return true; }
@@ -80,9 +80,9 @@ example : dl!{ ⟨ acc = bob.account; ⟩ true where Account storage acc }
     ~[storageFieldReadBindLocalRoot]~>
       dl!{ { acc := bob.account } ⟨⟩ true where Account storage acc } := rfl
 
-example : dl!{ ⟨ account = bob.account; ⟩ true where Account storage account }
-    ~[storageFieldReadBindLocalRoot]~>
-      dl!{ { account := bob.account } ⟨⟩ true where Account storage account } := rfl
+example : dl!{ ⟨ account = bob.account; ⟩ true }
+    ~[storageFieldReadStoreRoot]~>
+      dl!{ { storage := store(storage, account, find(storage, bob.account)) } ⟨⟩ true } := rfl
 
 example : dl!{ ⟨ v = alice.age; ⟩ true }
     ~[storageFieldReadFind]~> dl!{ { v := find(storage, alice.age) } ⟨⟩ true } := rfl
@@ -176,9 +176,9 @@ example : dl!{ ⟨ tokenById[id] = tokRef; ⟩ true where Token storage tokRef }
 example : dl!{ ⟨ values[i] = tokVal; ⟩ true }
     ~[storageIndexWriteArraySave]~> dl!{ { storage := save(storage, values[i], tokVal) } ⟨⟩ true } := rfl
 
-example : dl!{ ⟨ balances[account] = amount; ⟩ true }
+example : dl!{ ⟨ balances[addr] = amount; ⟩ true }
     ~[storageIndexWriteMappingSave]~>
-      dl!{ { storage := save(storage, balances[account], amount) } ⟨⟩ true } := rfl
+      dl!{ { storage := save(storage, balances[addr], amount) } ⟨⟩ true } := rfl
 
 /-! ### Reads at an index -/
 
@@ -212,8 +212,8 @@ example : dl!{ ⟨ alice = personById[id]; ⟩ true }
 example : dl!{ ⟨ v = values[i]; ⟩ true }
     ~[storageIndexReadArrayFind]~> dl!{ { v := find(storage, values[i]) } ⟨⟩ true } := rfl
 
-example : dl!{ ⟨ v = balances[account]; ⟩ true }
-    ~[storageIndexReadMappingFind]~> dl!{ { v := find(storage, balances[account]) } ⟨⟩ true } := rfl
+example : dl!{ ⟨ v = balances[addr]; ⟩ true }
+    ~[storageIndexReadMappingFind]~> dl!{ { v := find(storage, balances[addr]) } ⟨⟩ true } := rfl
 
 /-! ### `push` -/
 
