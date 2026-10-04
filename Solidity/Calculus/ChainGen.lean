@@ -16,6 +16,8 @@ every check:
   rule of the strategy (`~[r]~>`), then one per rewrite, picked by
   `LastLine.stillApplies` until none applies, and the fresh variables the lines
   write, as the rows of a `FreshNames` table to fill in;
+* `#chain_rest c` does the same from the last line of the chain `c`, as the
+  links to append to it;
 * `sol_chain?` on a goal `φ ~~> ψ` checks that this chain ends at `ψ`, proves
   the goal with it and suggests the `calc`;
 * `sol_rws [r₁, …, rₙ]` proves a link `φ ~~> ψ` by the named rewrites in turn,
@@ -186,6 +188,37 @@ elab "#chain " t:term : command => runTermElabM fun _ => do
     | none => m!""
   logInfo (m!"last line:\n  {"\n  ".intercalate last.toList}\n\n\
     {"\n".intercalate (← g.calcLines C φ).toList}" ++ table ++ note)
+
+/-- `#chain_rest c`: what the chain `c` still lacks — from the last line of its
+statement (`A ~*> B` or `A ~~> B`), the strategy's steps and then the
+rewrites to a last line, as links to append (`_ ~[r]~> _ := by sol_chain`,
+the statement pinning every line) and the new last line to state.  The
+statement's binders (a modality `m`, postconditions `φ : Post C`) are opened,
+as `#last_line` opens them. -/
+elab "#chain_rest " c:ident : command => runTermElabM fun _ => do
+  let n ← realizeGlobalConstNoOverloadWithInfo c
+  let info ← getConstInfo n
+  forallTelescope info.type fun _ ty => do
+    let ty ← instantiateMVars ty
+    let (C, B) ← match ty.getAppFnArgs with
+      | (``Fml.Steps, #[C, _, B]) | (``Fml.Leads, #[C, _, B]) => pure (C, B)
+      | _ => throwError "#chain_rest: {c} is no chain: its statement is not `A ~*> B` \
+          or `A ~~> B`{indentExpr ty}"
+    let B ← instantiateMVars B
+    let g ← generate C B
+    if g.steps.isEmpty && g.rewrites.isEmpty then
+      logInfo m!"{c} ends at a last line"
+      return
+    let last ← ProofTree.termLines
+      (← withCurrHeartbeats (ProofTree.writeLine C (g.last B) g.splice.modality))
+    let arrow (n : String) := if n.isEmpty then "~>" else s!"~[{n}]~>"
+    let links := (g.steps.map (·.1) ++ g.rewrites.map (·.1)).map fun n =>
+      s!"    _ {arrow n} _ := by sol_chain"
+    let note := match g.stop with
+      | some m => m!"\n\nthe chain stops early: {m}"
+      | none => m!""
+    logInfo (m!"last line:\n  {"\n  ".intercalate last.toList}\n\nlinks to append:\n\
+      {"\n".intercalate links.toList}" ++ note)
 
 end Chain
 

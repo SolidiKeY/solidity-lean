@@ -1,4 +1,5 @@
 import Solidity.Calculus.Chains
+import Solidity.Calculus.LastLine
 import Solidity.Calculus.Close
 import Solidity.FreshNames
 
@@ -25,6 +26,9 @@ printed trace does not declare is bound by the update its declaration leaves).
 * A line that reads or writes by a captured index (`carolValues[idx]`) is crossed
   unwritten, the next written line being its merge, which resolves the index
   (`carolValues[i + 1]`) as the printed line does.
+* Every chain ends merged with the update its declaration leaves
+  (`~[sequentialToParallel]~>`), `#last_line` after it; a read of an element of
+  a fresh array stays as it is, since no law reads one.
 -/
 
 namespace Solidity.Examples.Chains.MemoryArrays
@@ -36,27 +40,33 @@ local instance : InContract := ⟨StandardExample⟩
 namespace IndexRead
 
 /-- `v = carolValues[i];` — read out of the heap at the index. -/
-def chain (m : Modality) (φ : Post StandardExample) :
+theorem chain (m : Modality) (φ : Post StandardExample) :
     dl![m]{ { carolValues := freshId(addM(memory, uint[])) ‖ memory := addM(memory, uint[]) } ⟨[ v = carolValues[i]; ]⟩ φ }
-    ~*> dl![m]{ { carolValues := freshId(addM(memory, uint[])) ‖ memory := addM(memory, uint[]) } { v := read(memory, carolValues[i]) } φ } :=
+    ~~> dl![m]{ { carolValues := freshId(addM(memory, uint[])) ‖ memory := addM(memory, uint[]) ‖
+          v := read(addM(memory, uint[]), freshId(addM(memory, uint[]))[i]) } φ } :=
   calc dl![m]{ { carolValues := freshId(addM(memory, uint[])) ‖ memory := addM(memory, uint[]) } ⟨[ v = carolValues[i]; ]⟩ φ }
     _ ~[memoryIndexReadHeap]~>
         dl![m]{ { carolValues := freshId(addM(memory, uint[])) ‖ memory := addM(memory, uint[]) } { v := read(memory, carolValues[i]) } ⟨[ ]⟩ φ } := rfl
     _ ~[emptyModality]~> dl![m]{ { carolValues := freshId(addM(memory, uint[])) ‖ memory := addM(memory, uint[]) } { v := read(memory, carolValues[i]) } φ } := rfl
 
+    _ ~[sequentialToParallel]~> _ := by sol_chain
+#last_line chain
 end IndexRead
 
 namespace IndexWrite
 
 /-- `carolValues[i] = 100;` — written into the heap at the index. -/
-def chain (m : Modality) (φ : Post StandardExample) :
+theorem chain (m : Modality) (φ : Post StandardExample) :
     dl![m]{ { carolValues := freshId(addM(memory, uint[])) ‖ memory := addM(memory, uint[]) } ⟨[ carolValues[i] = 100; ]⟩ φ }
-    ~*> dl![m]{ { carolValues := freshId(addM(memory, uint[])) ‖ memory := addM(memory, uint[]) } { memory := write(memory, carolValues[i], 100) } φ } :=
+    ~~> dl![m]{ { carolValues := freshId(addM(memory, uint[])) ‖
+          memory := write(addM(memory, uint[]), freshId(addM(memory, uint[]))[i], 100) } φ } :=
   calc dl![m]{ { carolValues := freshId(addM(memory, uint[])) ‖ memory := addM(memory, uint[]) } ⟨[ carolValues[i] = 100; ]⟩ φ }
     _ ~[memoryIndexWriteStore]~>
         dl![m]{ { carolValues := freshId(addM(memory, uint[])) ‖ memory := addM(memory, uint[]) } { memory := write(memory, carolValues[i], 100) } ⟨[ ]⟩ φ } := rfl
     _ ~[emptyModality]~> dl![m]{ { carolValues := freshId(addM(memory, uint[])) ‖ memory := addM(memory, uint[]) } { memory := write(memory, carolValues[i], 100) } φ } := rfl
 
+    _ ~[sequentialToParallel]~> _ := by sol_chain
+#last_line chain
 end IndexWrite
 
 /-! ## Example: A Fixed-Size Memory Array -/
@@ -66,10 +76,10 @@ namespace FixedArray
 /-- `uint[3] memory x; x[1] = 5;` — the declaration tags the fresh root with the
 shape of `uint[3]` (`addM(memory, uint[3])`), which holds the length; the write is
 an element write. -/
-def chain (m : Modality) (φ : Post StandardExample) :
+theorem chain (m : Modality) (φ : Post StandardExample) :
     dl![m]{ ⟨[ uint[3] memory x; x[1] = 5; ]⟩ φ }
-    ~*> dl![m]{ { x := freshId(addM(memory, uint[3])) ‖ memory := addM(memory, uint[3]) }
-                { memory := write(memory, x[1], 5) } φ } :=
+    ~~> dl![m]{ { x := freshId(addM(memory, uint[3])) ‖
+          memory := write(addM(memory, uint[3]), freshId(addM(memory, uint[3]))[1], 5) } φ } :=
   calc dl![m]{ ⟨[ uint[3] memory x; x[1] = 5; ]⟩ φ }
     _ ~[memoryReferenceDeclFreshAlloc]~>
         dl![m]{ { x := freshId(addM(memory, uint[3])) ‖ memory := addM(memory, uint[3]) }
@@ -81,6 +91,8 @@ def chain (m : Modality) (φ : Post StandardExample) :
         dl![m]{ { x := freshId(addM(memory, uint[3])) ‖ memory := addM(memory, uint[3]) }
                 { memory := write(memory, x[1], 5) } φ } := by sol_chain
 
+    _ ~[sequentialToParallel]~> _ := by sol_chain
+#last_line chain
 end FixedArray
 
 /-! ## Example: Additional Memory Array Cases -/
@@ -95,9 +107,11 @@ local instance : FreshNames := .ofTable names
 /-- `v = carolValues[++i];` — the index captured, then read at: the read by the
 captured index is crossed unwritten, the merge resolves it to `carolValues[i + 1]`,
 and the dead `idx := 0` goes. -/
-def chain (m : Modality) (φ : Post StandardExample) :
+theorem chain (m : Modality) (φ : Post StandardExample) :
     dl![m]{ { carolValues := freshId(addM(memory, uint[])) ‖ memory := addM(memory, uint[]) } ⟨[ v = carolValues[++i]; ]⟩ φ }
-    ~~> dl![m]{ { carolValues := freshId(addM(memory, uint[])) ‖ memory := addM(memory, uint[]) } { i := i + 1 ‖ idx := i + 1 ‖ v := read(memory, carolValues[i + 1]) } φ } :=
+    ~~> dl![m]{ { carolValues := freshId(addM(memory, uint[])) ‖ memory := addM(memory, uint[]) ‖
+          i := i + 1 ‖ idx := i + 1 ‖
+          v := read(addM(memory, uint[]), freshId(addM(memory, uint[]))[i + 1]) } φ } :=
   calc dl![m]{ { carolValues := freshId(addM(memory, uint[])) ‖ memory := addM(memory, uint[]) } ⟨[ v = carolValues[++i]; ]⟩ φ }
     _ = dl![m]{ { carolValues := freshId(addM(memory, uint[])) ‖ memory := addM(memory, uint[]) } ⟨[ uint idx; idx = ++i; v = carolValues[idx]; ]⟩ φ } := rfl
     _ ~*> dl![m]{ { carolValues := freshId(addM(memory, uint[])) ‖ memory := addM(memory, uint[]) } { idx := 0 } { i := i + 1 ‖ idx := i + 1 }
@@ -113,6 +127,8 @@ def chain (m : Modality) (φ : Post StandardExample) :
     _ ~[simplifyUpdate]~>
         dl![m]{ { carolValues := freshId(addM(memory, uint[])) ‖ memory := addM(memory, uint[]) } { i := i + 1 ‖ idx := i + 1 ‖ v := read(memory, carolValues[i + 1]) } φ } := by sol_chain
 
+    _ ~[sequentialToParallel]~> _ := by sol_chain
+#last_line chain
 end IndexReadCaptured
 
 namespace IndexWriteCaptured
@@ -126,9 +142,10 @@ local instance : FreshNames := .ofTable names
 runs; the receiver, simple, is not re-aliased (no `mv1`).  The write by the captured
 index is crossed unwritten; the merge resolves it to `carolValues[i + 1]` and the
 value to `val`, and the dead `idx := 0` goes. -/
-def chain (m : Modality) (φ : Post StandardExample) :
+theorem chain (m : Modality) (φ : Post StandardExample) :
     dl![m]{ { carolValues := freshId(addM(memory, uint[])) ‖ memory := addM(memory, uint[]) } ⟨[ carolValues[++i] = val; ]⟩ φ }
-    ~~> dl![m]{ { carolValues := freshId(addM(memory, uint[])) ‖ memory := addM(memory, uint[]) } { pv := val ‖ i := i + 1 ‖ idx := i + 1 ‖ memory := write(memory, carolValues[i + 1], val) } φ } :=
+    ~~> dl![m]{ { carolValues := freshId(addM(memory, uint[])) ‖ pv := val ‖ i := i + 1 ‖ idx := i + 1 ‖
+          memory := write(addM(memory, uint[]), freshId(addM(memory, uint[]))[i + 1], val) } φ } :=
   calc dl![m]{ { carolValues := freshId(addM(memory, uint[])) ‖ memory := addM(memory, uint[]) } ⟨[ carolValues[++i] = val; ]⟩ φ }
     _ = dl![m]{ { carolValues := freshId(addM(memory, uint[])) ‖ memory := addM(memory, uint[]) } ⟨[ uint pv = val; uint idx; idx = ++i; carolValues[idx] = pv; ]⟩ φ } := rfl
     _ ~*> dl![m]{ { carolValues := freshId(addM(memory, uint[])) ‖ memory := addM(memory, uint[]) } { pv := val } { idx := 0 } { i := i + 1 ‖ idx := i + 1 }
@@ -148,6 +165,8 @@ def chain (m : Modality) (φ : Post StandardExample) :
         dl![m]{ { carolValues := freshId(addM(memory, uint[])) ‖ memory := addM(memory, uint[]) } { pv := val ‖ i := i + 1 ‖ idx := i + 1 ‖ memory := write(memory, carolValues[i + 1], val) } φ } := by
       sol_chain
 
+    _ ~[sequentialToParallel]~> _ := by sol_chain
+#last_line chain
 end IndexWriteCaptured
 
 namespace ElementFromField
@@ -160,14 +179,18 @@ local instance : FreshNames := .ofTable names
 /-- `carolTokens[i] = david.account.token;` — the source's receiver is bound
 (`acc`), and the element is written with the identity the member holds (the printed
 `tok` is not declared). -/
-def chain (m : Modality) (φ : Post StandardExample) :
+theorem chain (m : Modality) (φ : Post StandardExample) :
     dl![m]{ { carolTokens := freshId(addM(memory, Token[])) ‖ memory := addM(memory, Token[]) }
             { david := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
             ⟨[ carolTokens[i] = david.account.token; ]⟩ φ }
-    ~*> dl![m]{ { carolTokens := freshId(addM(memory, Token[])) ‖ memory := addM(memory, Token[]) }
-                { david := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
-                { acc := read(memory, david.account) }
-                { memory := write(memory, carolTokens[i], read(memory, acc.token)) } φ } :=
+    ~~> dl![m]{ { carolTokens := freshId(addM(memory, Token[])) ‖
+          david := freshId(addM(addM(memory, Token[]), Person)) ‖
+          acc := read(addM(addM(memory, Token[]), Person), freshId(addM(addM(memory, Token[]), Person)).account) ‖
+          memory :=
+            write(addM(addM(memory, Token[]), Person), freshId(addM(memory, Token[]))[i],
+              read(addM(addM(memory, Token[]), Person),
+                read(addM(addM(memory, Token[]), Person),
+                  freshId(addM(addM(memory, Token[]), Person)).account).token)) } φ } :=
   calc dl![m]{ { carolTokens := freshId(addM(memory, Token[])) ‖ memory := addM(memory, Token[]) }
                { david := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
                ⟨[ carolTokens[i] = david.account.token; ]⟩ φ }
@@ -191,6 +214,8 @@ def chain (m : Modality) (φ : Post StandardExample) :
                 { acc := read(memory, david.account) }
                 { memory := write(memory, carolTokens[i], read(memory, acc.token)) } φ } := rfl
 
+    _ ~[sequentialToParallel]~> _ := by sol_chain
+#last_line chain
 end ElementFromField
 
 namespace FieldFromElement
@@ -203,14 +228,17 @@ local instance : FreshNames := .ofTable names
 /-- `carol.account.token = davidTokens[i];` — the target's receiver is bound
 (`mv`), and the member is written with the element's identity (the printed `tok`
 is not declared). -/
-def chain (m : Modality) (φ : Post StandardExample) :
+theorem chain (m : Modality) (φ : Post StandardExample) :
     dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
             { davidTokens := freshId(addM(memory, Token[])) ‖ memory := addM(memory, Token[]) }
             ⟨[ carol.account.token = davidTokens[i]; ]⟩ φ }
-    ~*> dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
-                { davidTokens := freshId(addM(memory, Token[])) ‖ memory := addM(memory, Token[]) }
-                { mv := read(memory, carol.account) }
-                { memory := write(memory, mv.token, read(memory, davidTokens[i])) } φ } :=
+    ~~> dl![m]{ { carol := freshId(addM(memory, Person)) ‖
+          davidTokens := freshId(addM(addM(memory, Person), Token[])) ‖
+          mv := read(addM(memory, Person), freshId(addM(memory, Person)).account) ‖
+          memory :=
+            write(addM(addM(memory, Person), Token[]),
+              read(addM(memory, Person), freshId(addM(memory, Person)).account).token,
+              read(addM(addM(memory, Person), Token[]), freshId(addM(addM(memory, Person), Token[]))[i])) } φ } :=
   calc dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
                { davidTokens := freshId(addM(memory, Token[])) ‖ memory := addM(memory, Token[]) }
                ⟨[ carol.account.token = davidTokens[i]; ]⟩ φ }
@@ -233,6 +261,9 @@ def chain (m : Modality) (φ : Post StandardExample) :
                 { mv := read(memory, carol.account) }
                 { memory := write(memory, mv.token, read(memory, davidTokens[i])) } φ } := rfl
 
+    _ ~[sequentialToParallel]~> _ := by sol_chain
+    _ ~[readAddDifferentIdentity]~> _ := by sol_chain
+#last_line chain
 end FieldFromElement
 
 namespace ElementAlias
@@ -246,9 +277,11 @@ local instance : FreshNames := .ofTable names
 declaration dropped, and `tok` bound to the element's identity: the bind by the
 captured index is crossed unwritten, the merge resolves it to `carolTokens[i + 1]`,
 and the dead `idx := 0` goes. -/
-def chain (m : Modality) (φ : Post StandardExample) :
+theorem chain (m : Modality) (φ : Post StandardExample) :
     dl![m]{ { carolTokens := freshId(addM(memory, Token[])) ‖ memory := addM(memory, Token[]) } ⟨[ Token memory tok = carolTokens[++i]; ]⟩ φ }
-    ~~> dl![m]{ { carolTokens := freshId(addM(memory, Token[])) ‖ memory := addM(memory, Token[]) } { i := i + 1 ‖ idx := i + 1 ‖ tok := read(memory, carolTokens[i + 1]) } φ } :=
+    ~~> dl![m]{ { carolTokens := freshId(addM(memory, Token[])) ‖ memory := addM(memory, Token[]) ‖
+          i := i + 1 ‖ idx := i + 1 ‖
+          tok := read(addM(memory, Token[]), freshId(addM(memory, Token[]))[i + 1]) } φ } :=
   calc dl![m]{ { carolTokens := freshId(addM(memory, Token[])) ‖ memory := addM(memory, Token[]) } ⟨[ Token memory tok = carolTokens[++i]; ]⟩ φ }
     _ = dl![m]{ { carolTokens := freshId(addM(memory, Token[])) ‖ memory := addM(memory, Token[]) } ⟨[ uint idx; idx = ++i; Token memory tok = carolTokens[idx]; ]⟩ φ } := rfl
     _ ~*> dl![m]{ { carolTokens := freshId(addM(memory, Token[])) ‖ memory := addM(memory, Token[]) } { idx := 0 } { i := i + 1 ‖ idx := i + 1 }
@@ -267,6 +300,8 @@ def chain (m : Modality) (φ : Post StandardExample) :
     _ ~[simplifyUpdate]~>
         dl![m]{ { carolTokens := freshId(addM(memory, Token[])) ‖ memory := addM(memory, Token[]) } { i := i + 1 ‖ idx := i + 1 ‖ tok := read(memory, carolTokens[i + 1]) } φ } := by sol_chain
 
+    _ ~[sequentialToParallel]~> _ := by sol_chain
+#last_line chain
 end ElementAlias
 
 namespace CallValue
@@ -289,10 +324,11 @@ local instance : FreshNames := .ofTable names
 the element written.  The receiver is not re-aliased, as the printed first line does
 with `mv1`.  The stack binds `pv` to the callee's local and writes by the captured
 index, so it is crossed unwritten; the merge resolves both, and the dead captures go. -/
-def incrementIndex (m : Modality) (φ : Post Calls) :
+theorem incrementIndex (m : Modality) (φ : Post Calls) :
     dl![m]{ { carolValues := freshId(addM(memory, uint[])) ‖ memory := addM(memory, uint[]) } ⟨[ carolValues[++i] = makeValue(); ]⟩ φ }
-    ~~> dl![m]{ { carolValues := freshId(addM(memory, uint[])) ‖ memory := addM(memory, uint[]) } { se2 := select(storage, seed) ‖ pv := select(storage, seed) ‖ i := i + 1 ‖ idx := i + 1 ‖
-                  memory := write(memory, carolValues[i + 1], select(storage, seed)) } φ } :=
+    ~~> dl![m]{ { carolValues := freshId(addM(memory, uint[])) ‖ se2 := select(storage, seed) ‖
+          pv := select(storage, seed) ‖ i := i + 1 ‖ idx := i + 1 ‖
+          memory := write(addM(memory, uint[]), freshId(addM(memory, uint[]))[i + 1], select(storage, seed)) } φ } :=
   calc dl![m]{ { carolValues := freshId(addM(memory, uint[])) ‖ memory := addM(memory, uint[]) } ⟨[ carolValues[++i] = makeValue(); ]⟩ φ }
     _ = dl![m]{ { carolValues := freshId(addM(memory, uint[])) ‖ memory := addM(memory, uint[]) } ⟨[ uint pv = makeValue(); carolValues[++i] = pv; ]⟩ φ } := rfl
     _ ~*> _ := by sol_chain
@@ -303,14 +339,17 @@ def incrementIndex (m : Modality) (φ : Post Calls) :
     _ ~[simplifyUpdate]~>
         dl![m]{ { carolValues := freshId(addM(memory, uint[])) ‖ memory := addM(memory, uint[]) } { se2 := select(storage, seed) ‖ pv := select(storage, seed) ‖ i := i + 1 ‖ idx := i + 1 ‖
                   memory := write(memory, carolValues[i + 1], select(storage, seed)) } φ } := by sol_chain
+    _ ~[sequentialToParallel]~> _ := by sol_chain
+#last_line incrementIndex
 
 /-- `carolValues[i] = makeValue();` — the call captured, inlined, and written; the
 stack (`pv` bound to the callee's local) crossed unwritten, merged, the dead
 captures gone. -/
-def simpleIndex (m : Modality) (φ : Post Calls) :
+theorem simpleIndex (m : Modality) (φ : Post Calls) :
     dl![m]{ { carolValues := freshId(addM(memory, uint[])) ‖ memory := addM(memory, uint[]) } ⟨[ carolValues[i] = makeValue(); ]⟩ φ }
-    ~~> dl![m]{ { carolValues := freshId(addM(memory, uint[])) ‖ memory := addM(memory, uint[]) } { se2 := select(storage, seed) ‖ pv := select(storage, seed) ‖
-                  memory := write(memory, carolValues[i], select(storage, seed)) } φ } :=
+    ~~> dl![m]{ { carolValues := freshId(addM(memory, uint[])) ‖ se2 := select(storage, seed) ‖
+          pv := select(storage, seed) ‖
+          memory := write(addM(memory, uint[]), freshId(addM(memory, uint[]))[i], select(storage, seed)) } φ } :=
   calc dl![m]{ { carolValues := freshId(addM(memory, uint[])) ‖ memory := addM(memory, uint[]) } ⟨[ carolValues[i] = makeValue(); ]⟩ φ }
     _ = dl![m]{ { carolValues := freshId(addM(memory, uint[])) ‖ memory := addM(memory, uint[]) } ⟨[ uint pv = makeValue(); carolValues[i] = pv; ]⟩ φ } := rfl
     _ ~*> _ := by sol_chain
@@ -321,6 +360,8 @@ def simpleIndex (m : Modality) (φ : Post Calls) :
         dl![m]{ { carolValues := freshId(addM(memory, uint[])) ‖ memory := addM(memory, uint[]) } { se2 := select(storage, seed) ‖ pv := select(storage, seed) ‖
                   memory := write(memory, carolValues[i], select(storage, seed)) } φ } := by sol_chain
 
+    _ ~[sequentialToParallel]~> _ := by sol_chain
+#last_line simpleIndex
 end CallValue
 
 namespace ElementOfField
@@ -336,10 +377,12 @@ local instance : FreshNames := .ofTable names
 (`Basket memory b` for `carol.account`) — the right-hand side, the receiver and the
 index are each bound, and the element is written; the write by the captured index
 is crossed unwritten, and its merge with the capture resolves it to `mv[i]`. -/
-def valueWrite (m : Modality) (φ : Post TestSuite) :
+theorem valueWrite (m : Modality) (φ : Post TestSuite) :
     dl![m]{ { b := freshId(addM(memory, Basket)) ‖ memory := addM(memory, Basket) } ⟨[ b.items[i] = val; ]⟩ φ }
-    ~~> dl![m]{ { b := freshId(addM(memory, Basket)) ‖ memory := addM(memory, Basket) } { pv := val } { mv := read(memory, b.items) }
-                { idx := i ‖ memory := write(memory, mv[i], pv) } φ } :=
+    ~~> dl![m]{ { b := freshId(addM(memory, Basket)) ‖ pv := val ‖
+          mv := read(addM(memory, Basket), freshId(addM(memory, Basket)).items) ‖ idx := i ‖
+          memory :=
+            write(addM(memory, Basket), read(addM(memory, Basket), freshId(addM(memory, Basket)).items)[i], val) } φ } :=
   calc dl![m]{ { b := freshId(addM(memory, Basket)) ‖ memory := addM(memory, Basket) } ⟨[ b.items[i] = val; ]⟩ φ }
     _ ~[memoryIndexWriteCaptureAllComplexRecv]~>
         dl![m]{ { b := freshId(addM(memory, Basket)) ‖ memory := addM(memory, Basket) } ⟨[ uint pv = val; uint[] memory mv = b.items; uint idx = i; mv[idx] = pv; ]⟩ φ } := by
@@ -348,14 +391,19 @@ def valueWrite (m : Modality) (φ : Post TestSuite) :
     _ ~[sequentialToParallel]~>
         dl![m]{ { b := freshId(addM(memory, Basket)) ‖ memory := addM(memory, Basket) } { pv := val } { mv := read(memory, b.items) }
                 { idx := i ‖ memory := write(memory, mv[i], pv) } φ } := by sol_chain
+    _ ~[sequentialToParallel]~> _ := by sol_chain
+#last_line valueWrite
 
 /-- `Token memory tk = b.tokens[i];`, for the printed
 `Token memory tok = carol.account.tokens[i];` (`TokenBucket memory b` for
 `carol.account`) — the declaration dropped, the receiver bound (`mv`), then the
 element read. -/
-def tokenRead (m : Modality) (φ : Post TestSuite) :
+theorem tokenRead (m : Modality) (φ : Post TestSuite) :
     dl![m]{ { b := freshId(addM(memory, TokenBucket)) ‖ memory := addM(memory, TokenBucket) } ⟨[ Token memory tk = b.tokens[i]; ]⟩ φ }
-    ~*> dl![m]{ { b := freshId(addM(memory, TokenBucket)) ‖ memory := addM(memory, TokenBucket) } { mv := read(memory, b.tokens) } { tk := read(memory, mv[i]) } φ } :=
+    ~~> dl![m]{ { b := freshId(addM(memory, TokenBucket)) ‖ memory := addM(memory, TokenBucket) ‖
+          mv := read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens) ‖
+          tk := read(addM(memory, TokenBucket),
+            read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens)[i]) } φ } :=
   calc dl![m]{ { b := freshId(addM(memory, TokenBucket)) ‖ memory := addM(memory, TokenBucket) } ⟨[ Token memory tk = b.tokens[i]; ]⟩ φ }
     _ ~[memoryLocalDeclInitDrop]~> dl![m]{ { b := freshId(addM(memory, TokenBucket)) ‖ memory := addM(memory, TokenBucket) } ⟨[ tk = b.tokens[i]; ]⟩ φ } := by sol_chain
     _ ~[memoryIndexRead_unfold_rightFst]~>
@@ -364,6 +412,8 @@ def tokenRead (m : Modality) (φ : Post TestSuite) :
     _ ~*> dl![m]{ { b := freshId(addM(memory, TokenBucket)) ‖ memory := addM(memory, TokenBucket) } { mv := read(memory, b.tokens) } { tk := read(memory, mv[i]) } φ } := by
       sol_chain
 
+    _ ~[sequentialToParallel]~> _ := by sol_chain
+#last_line tokenRead
 end ElementOfField
 
 end Solidity.Examples.Chains.MemoryArrays
