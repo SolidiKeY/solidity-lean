@@ -38,7 +38,10 @@ Two directories, by proof style:
   and otherwise says which rewrite still applies and what it gives — the
   worklist for the line to write next. Generate a chain with `#chain φ`
   rather than writing it line by line, then prune: strategy lines collapse
-  into `~*>`, rewrite lines into `_ ~~> ψ := by sol_rws [r₁, …]`. A read of the state as the program
+  into `~*>` (a rule and its `emptyModality` always: the printed trace never
+  shows the `⟨[ ]⟩` line), rewrite lines into `_ ~~> ψ := by sol_rws [r₁, …]`
+  (each rewrite at its first place, so a run through a partial merge stays
+  written link by link). A read of the state as the program
   found it (`find(storage, p)`) is a last line. A `FreshNames` table is
   written only where the printed trace renames a capture; the elaborator's
   own `se1`, `sp1` need none. A chain over ten updates is split into
