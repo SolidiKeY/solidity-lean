@@ -195,26 +195,38 @@ end
 
 /-! ## `#chain`, `sol_rws`: past the program
 
-`#chain φ` goes on where `sol_chain?` on `~*>` stops: after the program, the
-rewrites until the line is last, so the whole `calc` is written once. A run
-of rewrite lines can then be one link, `sol_rws [r₁, …]`, which `sol_rws?`
-writes. -/
+`#chain φ` goes on where `sol_chain?` on `~*>` stops: after the program, one
+rewrite a link until the line is last, written as one chain term to paste.
+The strategy's steps are grouped as the paper prints them
+(`ChainGen.groupSteps`): a rule with the `emptyModality` after it, and a
+declaration with the binding or read it leaves, are one `~*>`. -/
 
 section
 variable (m : Modality) (φ : Post StandardExample)
 
 /--
-info: last line:
-  dl![m]{ { storage := save(storage, alice.age, v) ‖ x := 1 } φ }
-
-calc dl![m]{ ⟨[ alice.age = v; x = 1; ]⟩ φ }
-  _ ~[storageFieldWriteSave]~> dl![m]{ { storage := save(storage, alice.age, v) } ⟨[ x = 1; ]⟩ φ } := by sol_chain
-  _ ~[localValueAssign]~> dl![m]{ { storage := save(storage, alice.age, v) } { x := 1 } ⟨[ ]⟩ φ } := by sol_chain
-  _ ~[emptyModality]~> dl![m]{ { storage := save(storage, alice.age, v) } { x := 1 } φ } := by sol_chain
-  _ ~[sequentialToParallel]~> dl![m]{ { storage := save(storage, alice.age, v) ‖ x := 1 } φ } := by sol_chain
+info: theorem chain :
+    dl![m]{ ⟨[ alice.age = v; x = 1; ]⟩ φ }
+    ~[storageFieldWriteSave]~> dl![m]{ { storage := save(storage, alice.age, v) } ⟨[ x = 1; ]⟩ φ }
+    ~*> dl![m]{ { storage := save(storage, alice.age, v) } { x := 1 } φ }
+    ~[sequentialToParallel]~> dl![m]{ { storage := save(storage, alice.age, v) ‖ x := 1 } φ } := by
+  sol_chain
 -/
 #guard_msgs in
 #chain dl![m]{ ⟨[ alice.age = v; x = 1; ]⟩ φ }
+
+-- A concrete starting state in front of the program: the declaration and
+-- its read are one `~*>`, and the read resolves to the literal.
+/--
+info: theorem chain :
+    dl![m]{ { storage := save(storage, alice.age, 42) } ⟨[ uint x = alice.age; ]⟩ φ }
+    ~*> dl![m]{ { storage := save(storage, alice.age, 42) } { x := find(storage, alice.age) } φ }
+    ~[sequentialToParallel]~> dl![m]{ { storage := save(storage, alice.age, 42) ‖ x := find(save(storage, alice.age, 42), alice.age) } φ }
+    ~[findOnSave]~> dl![m]{ { storage := save(storage, alice.age, 42) ‖ x := 42 } φ } := by
+  sol_chain
+-/
+#guard_msgs in
+#chain dl![m]{ { storage := save(storage, alice.age, 42) } ⟨[ uint x = alice.age; ]⟩ φ }
 
 /-- The program by the strategy, then the merge and the read of the fresh
 `Person` in one link. -/

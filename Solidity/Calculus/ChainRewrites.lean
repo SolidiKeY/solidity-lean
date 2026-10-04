@@ -34,7 +34,7 @@ nothing, so a link never repeats its line.
 | `applyStorageBox i` | `Fml.applyStorageBoxAt` | `[{storage := s}] φ ⇝ φ[s/storage]` | `Fml.withSt_box` | `applyStorageBox` |
 | `law r` | `Fml.rwLaw` | `t ⇝ t'` in every equation | `Fml.rwEq_holds` (iff) | `rewrite` |
 | `lawUpd r ht i` | `Fml.rwUpdAt` | `t ⇝ t'` in `[{Uᵢ}]`'s right-hand sides | `Upd.rw_box` | `updRw` |
-| `lawUpdAny r ht i` | `Fml.rwUpdCoveredAt` | `t ⇝ t'` in `{Uᵢ}`'s right-hand sides, `Uᵢ` holding the write `t` reads back | `Upd.rw_holds` (iff) | `updRw` |
+| `lawUpdAny r ht i` | `Fml.rwUpdCoveredAt` | `t ⇝ t'` in `{Uᵢ}`'s right-hand sides, memory terms included, `Uᵢ` holding the write `t` reads back | `Upd.rwEv_holds` (iff) | `updRw` |
 | `lawUpdRef r hr i` | `Fml.rwUpdRefAt` | a frame or delete-value law in `{Uᵢ}`'s right-hand sides, `Uᵢ` holding its storage operation | `Upd.rw_holds`, `TermTaclet.RefLaw.evalRefines` (iff) | `updRw` |
 | `lawUpdEq r i` | `Fml.rwUpdEqAt` | `t ⇝ t'` in `{Uᵢ}`'s right-hand sides, `t` and `t'` one read member-wise | `Upd.rw_holds`, `Term.base_eval` (iff) | `updRw` |
 | `lawUpdEval r i` | `Fml.rwUpdEvalAt` | a memory law `t ⇝ t'` (`EvalLaw`) in `{Uᵢ}`'s right-hand sides, `Uᵢ` holding the write `t` reads back | `Upd.rw_holds`, `EvalLaw.sound` (iff) | `updRw` |
@@ -2541,28 +2541,6 @@ theorem Upd.covers_le {q : Term C × Term C} (hq : Term.EvalRefines q.1 q.2) {U 
   obtain rfl := Except.ok.inj hx
   exact hy
 
-/-- The law on the right-hand sides of `{U}_m φ` under any `m`, if it rewrites
-one and the rewritten update holds the write the law reads back. -/
-def Fml.rwUpdCoveredTop (q : Term C × Term C) (m : Modality) (U : Upd C) (φ : Fml C) :
-    Option (Fml C) :=
-  if (U.rw q != U && (U.rw q).covers q) = true then some (.upd m (U.rw q) φ) else none
-
-theorem Fml.rwUpdCoveredTop_sound {q : Term C × Term C} (hq : Term.EvalRefines q.1 q.2)
-    {m : Modality} {U : Upd C} {φ ψ : Fml C} (h : Fml.rwUpdCoveredTop q m U φ = some ψ)
-    (σ : State) (hψ : holds σ ψ) : holds σ (.upd m U φ) := by
-  unfold Fml.rwUpdCoveredTop at h
-  split at h
-  · rename_i hc
-    cases h
-    simp only [Bool.and_eq_true] at hc
-    exact (Upd.rw_holds hq (fun _ _ hU => Upd.covers_le hq hc.2 hU) m φ σ).1 hψ
-  · nomatch h
-
-/-- The law on the right-hand sides of the update at position `i`, under any
-modality, where that update holds the write the law reads back. -/
-def Fml.rwUpdCoveredAt (q : Term C × Term C) (i : Nat) : Fml C → Option (Fml C) :=
-  Fml.atSpine (Fml.rwUpdCoveredTop q) i
-
 /-! ### A reference law in an update's right-hand side
 
 The frame and delete-value laws may leave a storage read on their right.
@@ -2886,6 +2864,29 @@ theorem Upd.rwEv_holds (hq : Tm.EvalRefinesAt q.1 q.2) {U : Upd C}
     | error e' => exact Iff.rfl
 
 end RwEvUpd
+
+/-- The law on the right-hand sides of `{U}_m φ` under any `m`, inside a memory
+term too (`Upd.rwEv`), if it rewrites one and the rewritten update holds the
+write the law reads back. -/
+def Fml.rwUpdCoveredTop (q : Term C × Term C) (m : Modality) (U : Upd C) (φ : Fml C) :
+    Option (Fml C) :=
+  if (U.rwEv q != U && (U.rwEv q).covers q) = true then some (.upd m (U.rwEv q) φ) else none
+
+theorem Fml.rwUpdCoveredTop_sound {q : Term C × Term C} (hq : Term.EvalRefines q.1 q.2)
+    {m : Modality} {U : Upd C} {φ ψ : Fml C} (h : Fml.rwUpdCoveredTop q m U φ = some ψ)
+    (σ : State) (hψ : holds σ ψ) : holds σ (.upd m U φ) := by
+  unfold Fml.rwUpdCoveredTop at h
+  split at h
+  · rename_i hc
+    cases h
+    simp only [Bool.and_eq_true] at hc
+    exact (Upd.rwEv_holds (u := .val) hq.at (fun _ _ hU => Upd.covers_le hq hc.2 hU) m φ σ).1 hψ
+  · nomatch h
+
+/-- The law on the right-hand sides of the update at position `i`, under any
+modality, where that update holds the write the law reads back. -/
+def Fml.rwUpdCoveredAt (q : Term C × Term C) (i : Nat) : Fml C → Option (Fml C) :=
+  Fml.atSpine (Fml.rwUpdCoveredTop q) i
 
 /-! ### The side conditions of the memory laws
 

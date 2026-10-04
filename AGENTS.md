@@ -100,22 +100,22 @@ exactly one rule (`Stmt.step`), so the strategy never chooses. To prove
   `apply` refuses a rule whose `\find` or side conditions do not match.
   `sol_derive` runs the walk; `sol_derive?` prints it as a `Try this`.
 - **by a chain**: `(chain .box φ).valid h`, with `h` proving its last line
-  (`Fml.Steps.valid`, `Fml.Leads.valid`).
+  (`Fml.Via.valid`, `Fml.Steps.valid`, `Fml.Leads.valid`).
 
-**Chains** (`Calculus/Chains.lean`) state a derivation with both ends
-written, as a `calc` of one link per line: `φ ~[r]~> ψ` (rule `r` fires;
-`rfl`, and a wrong name is an elaboration error), `φ ~> ψ` (one step),
-`φ ~*> ψ` (several; `by sol_chain`), and past the program the rewrite links
-`~[sequentialToParallel]~>`, `~[findOnSave]~>`, … (`Calculus/ChainRewrites.lean`),
-`~~>` for their composition. `#derivation φ` prints the lines to copy from, in
-the rules' fresh names (`se1`, `sp1`); `sol_chain?` writes the `calc` of a
-`~*>` goal. `#chain φ` (`Calculus/ChainGen.lean`) writes the whole chain, the
-program and then the rewrites to a last line, as a `calc` to paste and prune
-(`sol_chain?` does it on a `φ ~~> ψ` goal, `#chain_rest c` from the end of the
-chain `c`); `sol_rws [r₁, …]` is one `~~>` link for several rewrite lines,
-`sol_rws?` finds them. A line keeps a modality open with `dl![m]{ ⟨[ p ]⟩ φ }`
-and a postcondition with `φ : Post C`; a box chain's last line is
-`dl![.box]{ … }`.
+**Chains** (`Calculus/Chains.lean`) state a derivation with every line
+written, as one chain term proved `by sol_chain`:
+`A ~[r]~> B ~*> C ~[sequentialToParallel]~> D ~[findOnSave]~> E` — `~[r]~>`
+a rule of the strategy (a wrong name is an elaboration error), `~>` one
+step, `~*>` several, and past the program the rewrite links
+`~[sequentialToParallel]~>`, `~[findOnSave]~>`, … (`Calculus/ChainRewrites.lean`).
+`Fml.Via.leads` makes a chain `A ~~> E`, and `Fml.Leads.via` composes
+segments of a long one. `#derivation φ` prints the strategy's lines, in the
+rules' fresh names (`se1`, `sp1`); `#chain φ` (`Calculus/ChainGen.lean`)
+writes the whole chain, the program and then one rewrite a link to a last
+line, as the declaration to paste (`#chain_rest c` from the end of the chain
+`c`; `sol_chain?` on a `φ ~~> ψ` goal). A line keeps a modality open with
+`dl![m]{ ⟨[ p ]⟩ φ }` and a postcondition with `φ : Post C`; a box chain's
+last line is `dl![.box]{ … }`.
 When a line is not reached, `sol_chain`'s error shows the derivation it
 computed.
 

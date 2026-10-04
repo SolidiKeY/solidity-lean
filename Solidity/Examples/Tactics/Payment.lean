@@ -36,8 +36,8 @@ info: @Taclet.transferNoCallbackBox : ∀ {C : Contract} {k : Nat} {sadr se : Si
 /-! ## 2 · The walk -/
 
 /-- `[ to.transfer(5); ] true` as a `⊢` walk: one rule, one goal, a checked
-sequent (`Calculus/Sequents.lean`); the chain is
-`Chains.Payment.Transfer5.box`. -/
+sequent (`Calculus/Sequents.lean`); the chain, from the receiver `3`, is
+`Chains.Payment.Transfer5.chain`. -/
 theorem transferBox : ⊢ dl!{ [ to.transfer(5); ] true } := by
   apply update .transferNoCallbackBox
   show sequent!{ { net := if(to = this) then net else store(net, at(to), select(net, at(to)) - 5) }
@@ -46,6 +46,21 @@ theorem transferBox : ⊢ dl!{ [ to.transfer(5); ] true } := by
   show sequent!{ { net := if(to = this) then net else store(net, at(to), select(net, at(to)) - 5) }
       ⟹ true }
   refine close ?_
+  sol_symex
+  sol_close
+
+/-! ## 3 · Valid for every receiver and amount
+
+The worked chains (`Chains/Payment.lean`) start from one concrete receiver
+and amount; the strategy proves the boxes for all of them. -/
+
+/-- `[ to.transfer(x + 2); ] true`, for every `to` and `x`. -/
+theorem transferSumValid : ⊨ dl!{ [ to.transfer(x + 2); ] true } := by
+  sol_symex
+  sol_close
+
+/-- `[ owner.transfer(5); ] true`, in every storage. -/
+theorem transferOwnerValid : ⊨ dl!{ [ owner.transfer(5); ] true } := by
   sol_symex
   sol_close
 

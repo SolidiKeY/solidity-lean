@@ -3,11 +3,12 @@ import Solidity.Calculus.Chains
 /-!
 # `#last_line`: a chain ends at a last line
 
-A worked chain (`Examples/Chains/`) ends where the printed trace ends: the
-program consumed, one parallel update in front of each goal, every read
-resolved and every dead capture dropped.  `#last_line chain` checks the end of
-the chain named, and is silent when it is one; otherwise one error says what
-is left.  Two things are checked:
+A worked chain (`Examples/Chains/`) ends at the last step of symbolic
+execution: the program consumed, one parallel update in front of each goal,
+and every read resolved — with every binding kept, the fresh captures
+included.  `#last_line chain` checks the end of the chain named (a chain of
+links, `Fml.Via`, a single link, or `~~>`), and is silent when it is one;
+otherwise one error says what is left.  Two things are checked:
 
 * **the shape**: no `⟨[ … ]⟩` is left, and no path from the line to a goal
   passes two updates (`{U}{V} φ` wants its `~[sequentialToParallel]~>`), the
@@ -17,7 +18,8 @@ is left.  Two things are checked:
   either modality when the chain is over a modality variable.  "Applies" is
   what `~=>` accepts (`Chain.rwSelect`): a rewrite that computes a line over
   an opaque postcondition but cannot be proved of it does not count, as it
-  would not close a `~[…]~>` either.
+  would not close a `~[…]~>` either.  `simplifyUpdate` is not among them: it
+  drops bindings, and a chain keeps them all (`chainRewrite`).
 
 The check runs on the chain's statement with its binders opened — a modality
 `m`, postconditions `φ : Post C`, a premise of the chain — so it reads the
@@ -31,13 +33,15 @@ namespace Chain
 open Lean Elab Command Term Meta
 
 /-- The goals of a line, each with the number of updates on the path to it:
-through `{U}`, both sides of `∧`, the consequent of `→`, `havoc` and `∀`. -/
+through `{U}`, both sides of `∧`, the consequent of `→`, `¬` (so the parts of
+a branch's cover, `⟨[ revert(); ]⟩ false ∨ …`), `havoc` and `∀`. -/
 partial def goalsOf (e : Expr) (n : Nat) : MetaM (Array (Nat × Expr)) := do
   let e ← instantiateMVars e
   match e.getAppFnArgs with
   | (``Fml.upd, #[_, _, _, ψ]) => goalsOf ψ (n + 1)
   | (``Fml.and, #[_, φ, ψ]) => return (← goalsOf φ n) ++ (← goalsOf ψ n)
   | (``Fml.imp, #[_, _, ψ]) => goalsOf ψ n
+  | (``Fml.not, #[_, ψ]) => goalsOf ψ n
   | (``Fml.havoc, #[_, ψ]) => goalsOf ψ n
   | (``Fml.all, #[_, _, _, ψ]) => goalsOf ψ n
   | _ => return #[(n, e)]
@@ -69,12 +73,21 @@ def plainRead (t : Expr) : Bool :=
   | (``Term.find, #[_, s, _]) => plainStorage s
   | _ => false
 
-/-- The rewrites `~=>` would accept on the line `L`, each with the line it
-gives: the ones `rwSelect` selects with the line after left open, a law at
+/-- A rewrite a chain takes past the program: every one `~=>` tries but
+`simplifyUpdate`, which drops the bindings nothing reads.  A chain keeps every
+binding to its last line, the fresh captures (`se1`, `sp1`) included, so a
+reader sees where each value went. -/
+def chainRewrite (n : String) : Bool := n != "simplifyUpdate"
+
+/-- The rewrites a chain takes (`chainRewrite`; with `all`, every one `~=>`
+tries, `simplifyUpdate` too) that `~=>` would accept on the line `L`, each
+with the line it gives and the hypotheses of the chain its side conditions
+use: the ones `rwSelect` selects with the line after left open, a law at
 every instance but a read of the state as found. -/
-def stillApplies (C L : Expr) : TermElabM (Array (String × Expr)) := do
+def stillAppliesUsing (C L : Expr) (all : Bool := false) :
+    TermElabM (Array (String × Expr × Array FVarId)) := do
   let mut out := #[]
-  for (n, a) in ← rwAnyArrows do
+  for (n, a) in (← rwAnyArrows).filter (all || chainRewrite ·.1) do
     let st ← saveState
     try
       let (rs, failed) ← rwCandidatesWith (fun t => !plainRead t) C L a
@@ -82,13 +95,36 @@ def stillApplies (C L : Expr) : TermElabM (Array (String × Expr)) := do
         st.restore
         continue
       let ψ ← mkFreshExprMVar (mkApp (mkConst ``Fml) C)
-      let (_, q, _) ← rwSelect C L ψ n rs failed
+      let (r, q, pf) ← rwSelect C L ψ n rs failed
       let q ← instantiateMVars q
+      let uses ← (collectFVars (collectFVars {} (← instantiateMVars r))
+        (← instantiateMVars (pf.getD r))).fvarIds.filterM fun x => do isProp (← x.getType)
       st.restore
-      out := out.push (n, q)
+      out := out.push (n, q, uses)
     catch _ =>
       st.restore
   return out
+
+/-- `stillAppliesUsing`, the lines alone. -/
+def stillApplies (C L : Expr) : TermElabM (Array (String × Expr)) := do
+  return (← stillAppliesUsing C L).map fun (n, q, _) => (n, q)
+
+/-- The contract and the two ends of a chain's statement: one link (`~>`,
+`~[r]~>`, `~*>`, `~=>`), `~~>`, or a chain of links (`Fml.Via`), whose end is
+its last line. -/
+def chainEnds? (ty : Expr) : MetaM (Option (Expr × Expr × Expr)) := do
+  let ty ← instantiateMVars ty
+  match ty.getAppFnArgs with
+  | (``Fml.Steps, #[C, A, B]) | (``Fml.Leads, #[C, A, B]) | (``Fml.OneStep, #[C, A, B])
+  | (``Fml.RwAny, #[C, A, B]) | (``Fml.StepBy, #[C, _, A, B]) | (``Fml.RwBy, #[C, _, _, A, B]) =>
+    return some (C, A, B)
+  | (``Fml.Via, #[C, A, ws]) =>
+    let some ws ← listElems? ws | return none
+    let some w := ws.back? | return some (C, A, A)
+    let w ← whnfR w
+    unless w.isAppOfArity ``Prod.mk 4 do return none
+    return some (C, A, w.getArg! 3)
+  | _ => return none
 
 /-- The modality variables of a line. -/
 def modalityVars (e : Expr) : MetaM (Array FVarId) := do
@@ -98,18 +134,18 @@ def modalityVars (e : Expr) : MetaM (Array FVarId) := do
   return out
 
 /-- `#last_line c`: the chain `c` ends at a last line — no program left, one
-parallel update in front of each goal, and no rewrite still applies to it
-(under either modality, for a chain over a modality variable).  Silent when
-it does; one error listing what is left otherwise. -/
+parallel update in front of each goal, and no rewrite a chain takes
+(`chainRewrite`) still applies to it (under either modality, for a chain
+over a modality variable).  Silent when it does; one error listing what is
+left otherwise. -/
 elab "#last_line " c:ident : command => Command.runTermElabM fun _ => do
   let n ← realizeGlobalConstNoOverloadWithInfo c
   let info ← getConstInfo n
   forallTelescope info.type fun _ ty => do
     let ty ← instantiateMVars ty
-    let (C, B) ← match ty.getAppFnArgs with
-      | (``Fml.Steps, #[C, _, B]) | (``Fml.Leads, #[C, _, B]) => pure (C, B)
-      | _ => throwError "#last_line: {c} is no chain: its statement is not `A ~*> B` \
-          or `A ~~> B`{indentExpr ty}"
+    let some (C, _, B) ← chainEnds? ty
+      | throwError "#last_line: {c} is no chain: its statement is not a chain \
+          `A ~[r]~> B ~*> …` or `A ~~> B`{indentExpr ty}"
     let B ← instantiateMVars B
     let mut problems ← shapeProblems B
     let ms ← modalityVars B

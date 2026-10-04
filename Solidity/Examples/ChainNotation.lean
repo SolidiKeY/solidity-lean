@@ -38,8 +38,8 @@ local instance : InContract := ⟨StandardExample⟩
 
 /-! ## 1 · One step: `~[r]~>` and `~>`
 
-The first link of `Chains.Storage.AgeWrite.chain`, and the strategy's `~>` where its
-rule is left unnamed (§3). -/
+The write that `Chains.Storage.AgeWrite.chain`'s first link runs, and the strategy's `~>`
+where its rule is left unnamed (§3). -/
 
 example : dl!{ ⟨ alice.age = v; ⟩ alice.age == v }
     ~[storageFieldWriteSave]~> dl!{ { storage := save(storage, alice.age, v) } ⟨⟩ alice.age == v } :=
@@ -150,14 +150,20 @@ example : dl!{ ⟨ alice.account.balance = 10; ⟩ alice.account.balance == 10 }
 
 /-! ## 4 · A chain is a proof
 
-The headline, `Chains.Storage.BalanceWrite.chain` (a `calc`, for every modality `m`
-and postcondition `φ`), proves its first line from its last
-(`Fml.Leads.valid`).  Here under the box, where the write is valid, at the
-postcondition the statement is written for. -/
+The headline, `Chains.Storage.BalanceWrite.chain` (one chain term, for every modality
+`m` and postcondition `φ`), proves its first line from its last
+(`Fml.Via.leads`, `Fml.Leads.valid`).  Here under the box, where the write is valid, at
+the postcondition the statement is written for.  The chain keeps its captures, which
+`sol_close` does not drop: `simplifyUpdate` drops them first. -/
 
 theorem headline_valid : ⊨ dl!{ [ alice.account.balance = 10; ] alice.account.balance == 10 } :=
-  (Chains.Storage.BalanceWrite.chain .box { fml := dl!{ alice.account.balance == 10 } }).valid
-    (by sol_close)
+  have drop : dl![.box]{ { se1 := 10 ‖ sp1 := alice.account ‖ storage := save(storage, alice.account.balance, 10) }
+        alice.account.balance == 10 }
+      ~[simplifyUpdate]~> dl![.box]{ { storage := save(storage, alice.account.balance, 10) }
+        alice.account.balance == 10 } := by
+    sol_chain
+  ((Chains.Storage.BalanceWrite.chain .box { fml := dl!{ alice.account.balance == 10 } }).leads.comp
+    (Fml.SoundRel.leads drop)).valid (by sol_close)
 
 /-- A box derivation's last line, written: an update with no modality under
 it is judged at the box in `dl![.box]{ … }` (in `dl!{ … }`, at the diamond). -/
@@ -197,12 +203,27 @@ example : dl!{ ⟨ balances[a] = 1; if (true) { x = 2; } else { x = 1; }; ⟩ ba
 
 A formula has one next line and one rule (`Fml.StepBy.unique`), so two
 derivations of the same length between the same ends are one: every
-two-step derivation of `alice.age = ageVal;` is `Chains.Storage.AgeWrite.chain`,
-at the diamond and any postcondition. -/
+two-step derivation of the first link of `Chains.Storage.AgeWrite.chain`
+(`alice.age = ageVal;` with `ageVal` 42) is `ageWrite`, at the diamond and
+any postcondition. -/
+
+/-- The first link of `Chains.Storage.AgeWrite.chain`, as data: `alice.age = ageVal;` with `ageVal`
+42, the write and the empty program. -/
+def ageWrite (φ : Post StandardExample) :
+    dl!{ { ageVal := 42 } ⟨ alice.age = ageVal; ⟩ φ }
+    ~*> dl!{ { ageVal := 42 } { storage := save(storage, alice.age, ageVal) } φ } := by
+  sol_chain
+
+/-- It is that link: the worked chain states it. -/
+example (φ : Post StandardExample) :
+    Nonempty (dl!{ { ageVal := 42 } ⟨ alice.age = ageVal; ⟩ φ }
+      ~*> dl!{ { ageVal := 42 } { storage := save(storage, alice.age, ageVal) } φ }) :=
+  (Chains.Storage.AgeWrite.chain .diamond φ).1
 
 example (φ : Post StandardExample)
-    (d : dl!{ ⟨ alice.age = ageVal; ⟩ φ } ~*> dl!{ { storage := save(storage, alice.age, ageVal) } φ })
-    (h : d.length = 2) : d = Chains.Storage.AgeWrite.chain .diamond φ :=
+    (d : dl!{ { ageVal := 42 } ⟨ alice.age = ageVal; ⟩ φ }
+      ~*> dl!{ { ageVal := 42 } { storage := save(storage, alice.age, ageVal) } φ })
+    (h : d.length = 2) : d = ageWrite φ :=
   Fml.Steps.eq_of_length d _ (h.trans rfl)
 
 /-- The strategy of `Symex.lean` is a chain, of the same seven steps. -/
@@ -373,15 +394,25 @@ example : dl!{ ⟨ require(flags[a]); y = 1; ⟩ φ }
   (requireTrace .diamond φ).trans (by sol_chain)
 
 /-- `assert` has `require`'s trace (the table's `assertSimple`). -/
-def assertTrace : dl![m]{ ⟨[ assert(flags[a]); y = 1; ]⟩ φ }
+theorem assertTrace : dl![m]{ ⟨[ assert(flags[a]); y = 1; ]⟩ φ }
     ~[assertConditionCapture]~> dl![m]{ ⟨[ bool se1 = flags[a]; assert(se1); y = 1; ]⟩ φ }
     ~*> dl![m]{ { se1 := find(storage, flags[a]) }
           ((se1 ≐ true → { y := 1 } φ) ∧ (se1 ≐ false → ⟨[ revert(); y = 1; ]⟩ φ) ∧
             (⟨[ revert(); ]⟩ false ∨ se1 ≐ true ∨ se1 ≐ false)) } := by
   sol_chain
 
+/-- A split behind a stack of updates, under `m`: the overflow of `Chains.CheckedArithmetic`, the lines
+its box and diamond chains share, up to the revert where the two modalities part. -/
+example : dl![m]{ ⟨[ uint8 x = 250; x += 10; ]⟩ φ }
+    ~*> dl![m]{ { x := 250 } ⟨[ x += 10; require(x <= 255); ]⟩ φ }
+    ~[localOpAssign]~> dl![m]{ { x := 250 } { x := x + 10 } ⟨[ require(x <= 255); ]⟩ φ }
+    ~*> dl![m]{ { x := 250 } { x := x + 10 } { se1 := x <= 255 }
+          ((se1 ≐ true → φ) ∧ (se1 ≐ false → ⟨[ revert(); ]⟩ φ) ∧
+            (⟨[ revert(); ]⟩ false ∨ se1 ≐ true ∨ se1 ≐ false)) } := by
+  sol_chain
+
 /-- The `ifElseSplit` trace: both goals to their end, under `m`. -/
-def ifTrace : dl![m]{ ⟨[ if (flags[a]) { y = 1; } else { y = 2; }; ]⟩ φ }
+theorem ifTrace : dl![m]{ ⟨[ if (flags[a]) { y = 1; } else { y = 2; }; ]⟩ φ }
     ~[ifElseUnfold]~> dl![m]{ ⟨[ bool se1 = flags[a]; if (se1) { y = 1; } else { y = 2; }; ]⟩ φ }
     ~*> dl![m]{ { se1 := find(storage, flags[a]) }
           ((se1 ≐ true → ⟨[ y = 1; ]⟩ φ) ∧ (se1 ≐ false → ⟨[ y = 2; ]⟩ φ) ∧
@@ -545,6 +576,40 @@ findMemberCons still applies (under either modality), and gives
 -/
 #guard_msgs in
 #last_line unresolved
+
+/-! A chain term ends at its last line; a long one is cut into segments, the
+second starting where the first ends, composed by `Fml.Leads.via`. -/
+
+/-- `uint x = alice.age;` over `alice.age` at `42`: the program and the merge. -/
+theorem readSeg :
+    dl![m]{ { storage := save(storage, alice.age, 42) } ⟨[ uint x = alice.age; ]⟩ φ }
+    ~*> dl![m]{ { storage := save(storage, alice.age, 42) } { x := find(storage, alice.age) } φ }
+    ~[sequentialToParallel]~> dl![m]{ { storage := save(storage, alice.age, 42) ‖
+          x := find(save(storage, alice.age, 42), alice.age) } φ } := by
+  sol_chain
+
+/-- The read of the write resolved a member at a time. -/
+theorem resolveSeg :
+    dl![m]{ { storage := save(storage, alice.age, 42) ‖
+          x := find(save(storage, alice.age, 42), alice.age) } φ }
+    ~[findMemberCons]~> dl![m]{ { storage := save(storage, alice.age, 42) ‖
+          x := select(select(save(storage, alice.age, 42), alice), age) } φ }
+    ~[selectOnSaveMember]~> dl![m]{ { storage := save(storage, alice.age, 42) ‖
+          x := select(save(select(storage, alice), age, 42), age) } φ }
+    ~[findOnSave]~> dl![m]{ { storage := save(storage, alice.age, 42) ‖ x := 42 } φ } := by
+  sol_chain
+
+/-- The two segments composed. -/
+theorem composed :
+    dl![m]{ { storage := save(storage, alice.age, 42) } ⟨[ uint x = alice.age; ]⟩ φ }
+    ~~> dl![m]{ { storage := save(storage, alice.age, 42) ‖ x := 42 } φ } :=
+  (readSeg ..).leads.via (resolveSeg ..)
+
+#guard_msgs in
+#last_line resolveSeg
+
+#guard_msgs in
+#last_line composed
 
 end Ends
 

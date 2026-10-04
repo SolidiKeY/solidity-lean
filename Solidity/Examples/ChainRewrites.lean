@@ -31,7 +31,7 @@ The traces picked up: `StorageSteps.deepFieldWrite` to its last line
 (`headlineWrite`) and read back (`headlineValue`, `readBackValue`),
 and `SelectOnSaveConsr.ageWriteReadKeY` (`ageWriteReadKeYValue`;
 `ageWriteReadValue` in the printed order).  The rebound alias of
-`Chains.Storage.Rebind.chain` already ends in its merge and its `simplifyUpdate`.
+`Chains.Storage.Rebind.chain` already ends in its merge, both bindings of `acc` kept.
 
 **Which rewrite.**  A name stands for a rule at any position of the update
 spine, and a law at any instance; the elaborator takes the first that gives
@@ -77,13 +77,16 @@ section ExampleNames
 local instance : FreshNames := .ofTable Chains.Storage.BalanceWrite.names
 
 /-- `alice.account.balance = 10;` to its last line, for every modality and
-postcondition: `φ` names no fresh variable (`Post.noFresh`), so it reads
-neither `pv` nor `acc`, and the chain's last link, `simplifyUpdate`, drops
-both, leaving the write. -/
+postcondition, and on to the write alone: `φ` names no fresh variable
+(`Post.noFresh`), so it reads neither `pv` nor `acc`, which the chain keeps,
+and `simplifyUpdate` drops both. -/
 theorem headlineWrite :
     dl![m]{ ⟨[ alice.account.balance = 10; ]⟩ φ }
     ~~> dl![m]{ { storage := save(storage, alice.account.balance, 10) } φ } :=
-  Chains.Storage.BalanceWrite.chain m φ
+  calc dl![m]{ ⟨[ alice.account.balance = 10; ]⟩ φ }
+    _ ~~> dl![m]{ { pv := 10 ‖ acc := alice.account ‖ storage := save(storage, alice.account.balance, 10) } φ } :=
+      (Chains.Storage.BalanceWrite.chain m φ).leads
+    _ ~[simplifyUpdate]~> dl![m]{ { storage := save(storage, alice.account.balance, 10) } φ } := by sol_chain
 
 end ExampleNames
 
@@ -147,7 +150,7 @@ theorem headlineValueChain :
     dl!{ [ alice.account.balance = 10; ] alice.account.balance ≐ 10 } ~~> dl!{ 10 ≐ 10 } :=
   calc dl!{ [ alice.account.balance = 10; ] alice.account.balance ≐ 10 }
     _ ~~> dl![.box]{ { storage := save(storage, alice.account.balance, 10) } alice.account.balance ≐ 10 } :=
-      Chains.Storage.BalanceWrite.chain .box { fml := dl!{ alice.account.balance ≐ 10 } }
+      headlineWrite .box { fml := dl!{ alice.account.balance ≐ 10 } }
     _ ~[applyStorageBox]~>
         dl!{ find(save(storage, alice.account.balance, 10), alice.account.balance) ≐ 10 } := by sol_chain
     _ ~[findOnSave]~> dl!{ 10 ≐ 10 } := by rfl
@@ -543,7 +546,7 @@ section Refused
 variable (m : Modality) (φ : Post StandardExample)
 
 /--
-error: ~[fooBar]~>: fooBar is no rule: not a `Taclet` or `LeanTaclet` constructor, not an update rule (sequentialToParallel, simplifyUpdate, applySkip, applyOnRigid, applyOnRigidBox, applyStorageBox, concrete), not a term taclet (`TermTaclet`), not a law of a memory read (`EvalLaw`), not a literal law (`LitLaw`)
+error: ~[fooBar]~>: fooBar is no rule: not a `Taclet` or `LeanTaclet` constructor, not an update rule (sequentialToParallel, simplifyUpdate, applySkip, applyOnRigid, applyOnRigidBox, applyStorageBox, applyOnPV, concrete), not a term taclet (`TermTaclet`), not a law of a memory read (`EvalLaw`), not a literal law (`LitLaw`)
 -/
 #guard_msgs in
 example : dl!{ true } ~[fooBar]~> dl!{ true } := rfl

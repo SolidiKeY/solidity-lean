@@ -11,41 +11,54 @@ paths:
 Two directories, by proof style:
 
 - `Examples/Chains/` — the calculus's worked examples, one file per section in
-  its order, each a chain (`calc` of `dl![m]{ … }` lines, `~[r]~>` for a
-  printed `⇝`, `~*>` for a `⇝*`) in the printed fresh names (a `FreshNames`
-  table per example). Only those examples go there, once each. A written
-  line binds an alias to its path as the printed line does: a line of the
-  strategy that binds an alias through another alias (`{ tokRef := bobAcc.token }`),
-  indexes by a capture (`sp[idx]`) or binds a callee's local is crossed
-  unwritten (`_ ~> _ := by sol_chain`, one per step, or `_ ~*> _` to the end
-  of the program), the next written line being its `~[sequentialToParallel]~>`.
-  A read the printed trace resolves is resolved by its own link, in the
-  update's right-hand side, a member at a time as solkey reads it
-  (`~[findMemberCons]~>`, `~[selectOnSaveMember]~>`, `~[selectOnDelAtMember]~>`,
-  then `~[findOnSave]~>` or `~[findOnDelAtBelow]~>`), the premise it needs a
-  hypothesis of the chain written with `st!{ … }` and `pt!{ … }`; a member
-  name alone (`age`, `account.balance`) is a path in the frame of a `select`.
-  A copy read back goes through the laws of memory reads
-  (`~[findCopyMem]~>` then `~[readOnWrite]~>`; `~[readCopySt]~>` then
-  `~[findOnSave]~>`), after one `~[sequentialToParallel]~>` that merges the
-  memory write and the locals beside it into the update after.
-  **Every chain ends at one parallel update**: past the program the stack
-  merges (`~[sequentialToParallel]~>`), each read is resolved by its law, and
-  the fresh captures that cannot halt and nothing reads go in a last
-  `~[simplifyUpdate]~>` (a user local stays; `pv := x + 2` stays, it may halt).
-  `#last_line chain` (`Calculus/LastLine.lean`) follows every chain that is a
-  whole trace, not a segment composed into one: it is silent at a last line
-  and otherwise says which rewrite still applies and what it gives — the
-  worklist for the line to write next. Generate a chain with `#chain φ`
-  rather than writing it line by line, then prune: strategy lines collapse
-  into `~*>` (a rule and its `emptyModality` always: the printed trace never
-  shows the `⟨[ ]⟩` line), rewrite lines into `_ ~~> ψ := by sol_rws [r₁, …]`
-  (each rewrite at its first place, so a run through a partial merge stays
-  written link by link). A read of the state as the program
-  found it (`find(storage, p)`) is a last line. A `FreshNames` table is
-  written only where the printed trace renames a capture; the elaborator's
-  own `se1`, `sp1` need none. A chain over ten updates is split into
-  segments composed in a `calc`, never given a bigger `maxHeartbeats`.
+  its order (`~/projects/Pre-licenciate-paper/sections/*.tex`), each one chain
+  term in the printed fresh names (a `FreshNames` table per example where
+  the trace renames a capture). Only those examples go there, once each.
+  The convention:
+  1. **One chain term, every line written.** A worked chain is
+     `theorem chain : A ~[r]~> B ~*> C ~[findOnSave]~> D … := by sol_chain`
+     (`Fml.Via`, a proposition, `Calculus/Chains.lean`): no `calc`, no `_`
+     line, the statement shows the whole trace. `Fml.Via.leads` makes it
+     `A ~~> Z`. (A lone `~*>` is the derivation itself, data: a `def`.)
+  2. **No binding is dropped.** No `~[simplifyUpdate]~>`: the fresh captures
+     (`se1`, `sp1`, `pv`, `acc`, …) stay in the update to the last line.
+  3. **To the last step.** Past the program the stack merges
+     (`~[sequentialToParallel]~>`) and every read is resolved by its laws,
+     until no rewrite but `simplifyUpdate` applies. `#last_line chain`
+     (`Calculus/LastLine.lean`) follows every chain and is silent exactly
+     there; otherwise it says which rewrite still applies and what it gives.
+  4. **One link per rewrite**: `~[findMemberCons]~>`,
+     `~[selectOnSaveMember]~>`, `~[selectOnDelAtMember]~>`,
+     `~[findOnSave]~>`, `~[findOnDelAtBelow]~>`, `~[readOnWrite]~>`, a literal
+     folded, … each with its line. No `sol_rws [..]` link in a chain. A
+     premise a law needs is a hypothesis of the chain (`st!{ … }`,
+     `pt!{ … }`); a member name alone (`age`, `account.balance`) is a path in
+     the frame of a `select`.
+  5. **Strategy steps as the paper prints them.** A run the paper prints as
+     `⇝*` is one `~*>`; a step it prints as `⇝` is its own `~[rule]~>`, or
+     one `~*>` where Lean takes several rules for it (an alias bound and read,
+     a capture and its binding).  `#chain` groups the steps
+     (`ChainGen.groupSteps`): declarations dropped with the bindings they
+     leave are one `~*>`, and so is a rule with the `emptyModality` after it
+     (the paper never shows the `⟨[ ]⟩` line).  The paper's grouping wins over
+     `#chain`'s: where it folds more, join links into one `~*>`; where it
+     prints a step `#chain` folded (a declaration dropped, `⇝`, before the
+     `⇝*` that binds it), split it out as its own `~[rule]~>`.
+  6. **Concrete values.** The program stays the paper's; the first line puts
+     a concrete starting state in front of it as an update, and gives each
+     free parameter (`ageVal`, `v`, `i`, …) a small distinct int there:
+     `dl![m]{ { ageVal := 42 ‖ storage := save(storage, alice.account.balance, 10) } ⟨[ … ]⟩ φ }`,
+     so every read resolves to a literal and arithmetic folds at the last
+     line.
+  7. **Fast.** A file checks in the time it did before or faster. A chain
+     over `ChainGen.segLinks` (ten) links is split into segments, each a
+     `theorem` of its own, composed into `theorem chain : A ~~> Z` by
+     `Fml.Leads.via` — never given a bigger `maxHeartbeats`.
+
+  Generate a chain with `#chain φ` (the `chain-authoring` skill) rather than
+  writing it line by line: it prints the statement in this form, segments
+  included. A read of the state as the program found it (`find(storage, p)`)
+  is a last line.
 - `Examples/Tactics/` — formulas `⊨ dl!{ pre → [ program ] post }` proved by
   tactics, and interpreter runs.
 
@@ -63,7 +76,7 @@ A tactic example is over a named contract
   `empty`, `intro`), and `apply close; sol_close` at the end. Each rule the
   walk takes is named in the proof, so renaming a rule breaks the example.
   `sol_derive?` writes the walk out (`Calculus/ProofTree.lean`), as
-  `sol_chain?` writes a chain's `calc`.
+  `#chain` writes a chain.
 
 Every theorem has a docstring with its Solidity. Every file has its own
 namespace `Solidity.Examples.<Dir>.<File>`: an anonymous `local instance` gets a

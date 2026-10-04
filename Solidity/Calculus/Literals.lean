@@ -6,14 +6,16 @@ import Solidity.Calculus.ChainBranches
 KeY folds an operation on two literals by its `*_literals` taclets
 (`integerSimplificationRules.key`): `250 + 10 ⇝ 260`, `260 <= 255 ⇝ false`.
 Here each is a constructor of `LitLaw`, stated as the interpreter computes
-it: a sum or a difference folds where it stays in `uint` range
-(`checkArith`; out of range the operation reverts, and the term is its own
-normal form), a comparison always.
+it: a sum, a difference or a quotient folds where it stays in `uint` range
+(`checkArith`; out of range, or divided by zero, the operation reverts, and
+the term is its own normal form), a comparison always.
 
 A literal law is **exact** (`LitLaw.exact`): its left side returns the
 literal on the right in every state.  So it rewrites anywhere, under any
-modality — in an update's right-hand side (`LineRw.lit`, with no premise
-about what the update holds, unlike `LineRw.lawUpdAny`), and in the
+modality — in an update's right-hand side, a memory term included, since
+the law is about what a term returns, not what it denotes (`LineRw.lit`,
+`Upd.rwEv`, with no premise about what the update holds, unlike
+`LineRw.lawUpdAny`), and in the
 equations and `defined(…)`s of the propositional skeleton of a line
 (`LineRw.litEq`, through `¬`, `∧`, `→`; never inside a modality, an update
 or a quantifier, whose formulas are read elsewhere).  Both are
@@ -45,6 +47,16 @@ inductive LitLaw : Term C → Term C → Prop
   /-- **`less_literals`**: `a < b ⇝ true` or `false`. -/
   | less_literals {a b : Int} :
       LitLaw (.binop .lt .uint (.lit (.int a)) (.lit (.int b))) (.lit (.bool (decide (a < b))))
+  /-- **`greater_literals`**: `a > b ⇝ true` or `false`. -/
+  | greater_literals {a b : Int} :
+      LitLaw (.binop .gt .uint (.lit (.int a)) (.lit (.int b))) (.lit (.bool (decide (b < a))))
+  /-- **`geq_literals`**: `a >= b ⇝ true` or `false`. -/
+  | geq_literals {a b : Int} :
+      LitLaw (.binop .ge .uint (.lit (.int a)) (.lit (.int b))) (.lit (.bool (decide (b ≤ a))))
+  /-- **`div_literals`**: `a / b ⇝ a / b` folded (truncated, as Solidity divides), the divisor not
+  zero and the quotient in `uint` range. -/
+  | div_literals {a b : Int} (h : b ≠ 0 ∧ 0 ≤ a.tdiv b ∧ a.tdiv b < uintBound := by decide) :
+      LitLaw (.binop .div .uint (.lit (.int a)) (.lit (.int b))) (.lit (.int (a.tdiv b)))
 
 /-- An operation on two integer literals is the interpreter's, applied and
 range-checked (no `&&`/`||` short-circuit reads an integer). -/
@@ -68,6 +80,16 @@ theorem LitLaw.exact {t t' : Term C} : LitLaw t t' → ∃ v, t' = .lit v ∧ �
       rw [if_pos h]⟩
   | .leq_literals => ⟨_, rfl, fun σ => by rw [LitLaw.binop_lit_eval]; rfl⟩
   | .less_literals => ⟨_, rfl, fun σ => by rw [LitLaw.binop_lit_eval]; rfl⟩
+  | .greater_literals => ⟨_, rfl, fun σ => by rw [LitLaw.binop_lit_eval]; rfl⟩
+  | .geq_literals => ⟨_, rfl, fun σ => by rw [LitLaw.binop_lit_eval]; rfl⟩
+  | @LitLaw.div_literals _ a b h => ⟨_, rfl, fun σ => by
+      rw [LitLaw.binop_lit_eval]
+      show (if b = 0 then (Except.error .revert : Res Value) else .ok (Value.int (a.tdiv b))) >>=
+        checkArith (.prim .uint) = _
+      rw [if_neg h.1]
+      show (if 0 ≤ a.tdiv b ∧ a.tdiv b < uintBound then (Except.ok (Value.int (a.tdiv b)) : Res Value)
+        else .error .revert) = _
+      rw [if_pos h.2]⟩
 
 /-- Where the left side returns, the right returns the same. -/
 theorem LitLaw.refines {t t' : Term C} (r : LitLaw t t') : Term.EvalRefines t t' := by
@@ -97,14 +119,14 @@ theorem LitLaw.theq {t t' : Term C} (r : LitLaw t t') : Term.Theq t t' := by
 /-- The literal law on the right-hand sides of `{U}_m φ`, if it rewrites
 one: under any modality, and with no premise on `U`, since the law is exact. -/
 def Fml.rwLitTop (q : Term C × Term C) (m : Modality) (U : Upd C) (φ : Fml C) : Option (Fml C) :=
-  if (U.rw q != U) = true then some (.upd m (U.rw q) φ) else none
+  if (U.rwEv q != U) = true then some (.upd m (U.rwEv q) φ) else none
 
 theorem Fml.rwLitTop_holds {q : Term C × Term C} (r : LitLaw q.1 q.2) {m : Modality} {U : Upd C}
     {φ ψ : Fml C} (h : Fml.rwLitTop q m U φ = some ψ) (σ : State) :
     holds σ ψ ↔ holds σ (.upd m U φ) := by
   unfold Fml.rwLitTop at h
   split at h
-  · cases h; exact Upd.rw_holds r.refines (fun σ _ _ => r.refines_rev σ) m φ σ
+  · cases h; exact Upd.rwEv_holds (u := .val) r.refines.at (fun σ _ _ => r.refines_rev σ) m φ σ
   · nomatch h
 
 /-- The literal law on the right-hand sides of the update at position `i`. -/

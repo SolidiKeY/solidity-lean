@@ -101,6 +101,8 @@ syntax:65 dl_term:65 " ± " dl_term:66 : dl_term
 /-- The value `t⊕⊕` has: the new one for `++t`, the old one for `t++`. -/
 syntax:max dl_term:max "⊕⊕" : dl_term
 syntax:65 dl_term:65 " - " dl_term:66 : dl_term
+/-- `a / b`: a quotion, truncated, as Solidity divides. -/
+syntax:70 dl_term:70 " / " dl_term:71 : dl_term
 /-- `at(r)`: the ledger's key for the address `r` (`net := store(net, at(r), …)`). -/
 syntax:max "at" noWs "(" dl_term ")" : dl_term
 /-- `if(r = this) then net else …`: KeY's `\if … \then … \else`, the form of a
@@ -115,11 +117,13 @@ syntax:max "‹" term "›" : dl_term
 `net := if(r = this) then net else store(net, at(r), net(r) - a)`. -/
 declare_syntax_cat dl_upd_elem (behavior := both)
 syntax dl_term " := " dl_term : dl_upd_elem
-/-- `x := a <= b`, `x := a < b`: a comparison captured.  A comparison has
+/-- `x := a <= b`, `x := a < b` (and `>`, `>=`): a comparison captured.  A comparison has
 no term spelling of its own (`a <= b` standing alone is a formula), so the
 element carries it. -/
 syntax dl_term " := " dl_term:56 " <= " dl_term:56 : dl_upd_elem
 syntax dl_term " := " dl_term:56 " < " dl_term:56 : dl_upd_elem
+syntax dl_term " := " dl_term:56 " > " dl_term:56 : dl_upd_elem
+syntax dl_term " := " dl_term:56 " >= " dl_term:56 : dl_upd_elem
 
 /-- A parallel update `{ a ‖ b }`. -/
 declare_syntax_cat dl_upd (behavior := both)
@@ -948,6 +952,8 @@ partial def schemaTerm0 (Γ : Scope) (pos : TPos) : TSyntax `dl_term → MacroM 
     `(Term.binop BinOp.add PrimTy.uint $(← schemaTerm Γ .val a) $(← schemaTerm Γ .val b))
   | `(dl_term| $a:dl_term - $b:dl_term) => do
     `(Term.binop BinOp.sub PrimTy.uint $(← schemaTerm Γ .val a) $(← schemaTerm Γ .val b))
+  | `(dl_term| $a:dl_term / $b:dl_term) => do
+    `(Term.binop BinOp.div PrimTy.uint $(← schemaTerm Γ .val a) $(← schemaTerm Γ .val b))
   | `(dl_term| ( $t:dl_term )) => schemaTerm Γ pos t
   | `(dl_term| ‹ $t:term ›) => pure t
   | stx@`(dl_term| $f:ident($args,*)) => do
@@ -1740,11 +1746,18 @@ end
 
 def escapeDl (e : Lean.Expr) : MetaM (TSyntax `dl_term) := do `(dl_term| ‹$(← escapeTerm e):term›)
 
+/-- `p` where a member or an index follows it: `p[i]@S` in parentheses, since
+its storage `S` would take the `.f` or `[j]` after it. -/
+def recvTerm (b : TSyntax `dl_term) : MetaM (TSyntax `dl_term) :=
+  match b with
+  | `(dl_term| $_:dl_term[$_:dl_term]@$_:dl_term) => `(dl_term| ($b))
+  | _ => pure b
+
 /-- `p.f`, dotted when `p` is a name. -/
-def dotTerm (b : TSyntax `dl_term) (f : String) : MetaM (TSyntax `dl_term) :=
+def dotTerm (b : TSyntax `dl_term) (f : String) : MetaM (TSyntax `dl_term) := do
   match b with
   | `(dl_term| $x:ident) => `(dl_term| $(mkIdent (x.getId.str f)):ident)
-  | _ => `(dl_term| $b . $(nameIdent f):ident)
+  | _ => `(dl_term| $(← recvTerm b) . $(nameIdent f):ident)
 
 /-- The type a concrete allocation carries, which `dl!{ … }` needs to read
 `addM(m, T)` and `newArr(T, n)` back: `Person`, `uint[]`, `Token[3]`.  A rule's
@@ -1791,7 +1804,7 @@ def loweredExpr? (e : Lean.Expr) : MetaM (Option (TSyntax `dl_term)) := do
 
 def mkBinTerm (sym : String) (a b : TSyntax `dl_term) : MetaM (TSyntax `dl_term) :=
   match sym with
-  | "+" => `(dl_term| $a + $b) | "-" => `(dl_term| $a - $b)
+  | "+" => `(dl_term| $a + $b) | "-" => `(dl_term| $a - $b) | "/" => `(dl_term| $a / $b)
   | "±" => `(dl_term| $a ± $b)
   | _ => `(dl_term| $a ⊕ $b)
 
@@ -1804,6 +1817,7 @@ def termOpSym? (op : Lean.Expr) : MetaM (Option String) := do
   match_expr (← whnf op) with
   | BinOp.add => return "+"
   | BinOp.sub => return "-"
+  | BinOp.div => return "/"
   | _ => return none
 
 /-- A term's head symbol folded back to its constructor's name:
@@ -1975,18 +1989,19 @@ partial def ppPTerm (e : Lean.Expr) : MetaM (TSyntax `dl_term) := do
   | PTerm.field _ p f =>
     let some f ← nameOf? f | escapeDl e
     dotTerm (← ppPTerm p) f
-  | PTerm.at _ p i => `(dl_term| $(← ppPTerm p):dl_term[$(← ppTerm i):dl_term])
+  | PTerm.at _ p i => `(dl_term| $(← recvTerm (← ppPTerm p)):dl_term[$(← ppTerm i):dl_term])
   | PTerm.next _ p => return (← lenTerms (← ppPTerm p)).2
   | PTerm.atIn _ s p i =>
-    `(dl_term| $(← ppPTerm p):dl_term[$(← ppTerm i):dl_term]@$(← ppSTerm s):dl_term)
+    `(dl_term| $(← recvTerm (← ppPTerm p)):dl_term[$(← ppTerm i):dl_term]@$(← ppSTerm s):dl_term)
   | PTerm.nextIn _ s p =>
-    let p ← ppPTerm p
+    let p ← recvTerm (← ppPTerm p)
     let (len, _) ← lenTerms p
     `(dl_term| $p:dl_term[$len:dl_term]@$(← ppSTerm s):dl_term)
   | _ => escapeDl e
 
 /-- `p.length`, and `p[p.length]`, the push positions. -/
 partial def lenTerms (p : TSyntax `dl_term) : MetaM (TSyntax `dl_term × TSyntax `dl_term) := do
+  let p ← recvTerm p
   let len ← match p with
     | `(dl_term| $x:ident) => `(dl_term| $(mkIdent (x.getId.str "length")):ident)
     | _ => `(dl_term| $p . $(nameIdent "length"):ident)
@@ -2099,6 +2114,8 @@ def ppUpdElem? (e : Lean.Expr) : MetaM (Option (TSyntax `dl_upd_elem)) := do
       match_expr (← whnf (t'.getArg! 1)) with
       | BinOp.le => return some (← `(dl_upd_elem| $x:dl_term := $a:dl_term <= $b:dl_term))
       | BinOp.lt => return some (← `(dl_upd_elem| $x:dl_term := $a:dl_term < $b:dl_term))
+      | BinOp.gt => return some (← `(dl_upd_elem| $x:dl_term := $a:dl_term > $b:dl_term))
+      | BinOp.ge => return some (← `(dl_upd_elem| $x:dl_term := $a:dl_term >= $b:dl_term))
       | _ => pure ()
     return some (← `(dl_upd_elem| $x:dl_term := $(← ppTerm t):dl_term))
   | UpdElem.path _ x p =>

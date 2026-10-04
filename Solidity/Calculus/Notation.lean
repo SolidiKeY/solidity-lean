@@ -70,11 +70,24 @@ What a name is:
   alias of that type for the formula under it, and `x := i`, for a memory
   object `i` of a type the scope gives (`freshId(addM(memory, Person))`,
   `freshId(addM(memory, uint[]))`, `read(memory, carol.account)`), as a
-  memory local of that type; so does a program's `x = carol.account;` or
-  `x = new uint[](n);` for a name it does not declare (`memHints`, what
-  `memoryLocalDeclInitDrop` leaves of a memory declaration); `sp1`, `mv1`
-  (`FreshNames`) are an alias and a memory local wherever nothing else says
-  otherwise;
+  memory local of that type, and `x := t`, for a `bool` term `t`
+  (`se1 := x <= 255`), as a `bool` local;
+* a program binds the names it assigns without declaring them, at the type
+  of the right-hand side, for the program and its postcondition
+  (`scopeHints`): what a rule leaves of a declaration it drops.  `x =
+  carol.account;` and `x = new uint[](n);` bind a memory local
+  (`memoryLocalDeclInitDrop`), `r = q.token;` and `sp = sp1.push();` a
+  storage alias, `q` being an alias the program declares or an update binds
+  (`storageLocalDeclInitDrop`), and `se1 = x <= 255;` a `bool` local
+  (`localValueDeclInitDrop`).  `sp1`, `mv1` (`FreshNames`) are an alias and a
+  memory local wherever nothing else says otherwise;
+* a capture the reading makes — a call statement carries its callee's body
+  with every local renamed fresh — takes the least index that no fresh
+  variable the formula writes has, so a line of a derivation, where the
+  callee's locals are the gaps between the captures it shows, reads back
+  with the same names — past every written index where a Lean formula other
+  than a postcondition stands in the formula (`‹…›`), whose fresh variables
+  the reading cannot see;
 * `φ where Person memory carol` declares `carol` for `φ` (KeY's
   `\programVariables`: a program variable's kind is its declaration's, not
   the program's).  A copy out of storage needs it once its declaration is
@@ -88,14 +101,13 @@ A type where a term stands — what `addM(m, T)` and `newArr(T, n)` allocate —
 is written as Solidity writes it: `Person`, `uint[]`, `Token[3]`.
 
 What does not read back: `‹…›` in a term or an update (a Lean term, which is also how a
-conditional and an operator other than `+`, `-` print), the operator schema variables
+conditional and an operator other than `+`, `-`, `/` print), the operator schema variables
 `⊕ ⊖ ± ⊕⊕` (taclets only), and `defVal(T)` for a non-primitive `T`, whose
 printing drops the type.  A concrete `defVal(uint)` reads as the default value
-itself.  Nor does an
-alias assigned from another alias's path: a parameter becomes an alias only
-from a state variable's (`r = alice.account.token;`), so `Account storage q
-= alice.account; r = q.token; r.value = v;` — a line of the derivation of
-`alice.account.token.value = v;` — is refused, `r` being read as a `uint`.
+itself.  The gaps a line leaves are filled a statement at a time: a statement
+whose captures do not fit in the gap in front of it (an `if` whose branch
+writes a capture between two calls) is numbered past every written index,
+and does not read back as the derivation's line.
 -/
 
 namespace Solidity
@@ -117,6 +129,8 @@ inductive RawTerm where
   /-- `a <= b`, `a < b` as a term: the right-hand side of a captured
   comparison, `x := a <= b`. -/
   | cmp (op : BinOp) (a b : RawTerm)
+  /-- `a / b`: an operation on two `uint`s other than `+` and `-`. -/
+  | arith (op : BinOp) (a b : RawTerm)
   | app (f : String) (args : List RawTerm)
   /-- `msg.sender`, `address(this).balance`, …: KeY's program variables
   `msgSender`, `selfBalance`, …. -/
@@ -230,6 +244,8 @@ partial def expandTerm : TSyntax `dl_term → MacroM Lean.Term
   | `(dl_term| $t:dl_term []) => do `(RawTerm.app "[]" [$(← expandTerm t)])
   | `(dl_term| $a:dl_term + $b:dl_term) => do `(RawTerm.add $(← expandTerm a) $(← expandTerm b))
   | `(dl_term| $a:dl_term - $b:dl_term) => do `(RawTerm.sub $(← expandTerm a) $(← expandTerm b))
+  | `(dl_term| $a:dl_term / $b:dl_term) => do
+    `(RawTerm.arith BinOp.div $(← expandTerm a) $(← expandTerm b))
   | `(dl_term| ( $t:dl_term )) => expandTerm t
   | `(dl_term| ! $t:dl_term) => do `(RawTerm.app "!" [$(← expandTerm t)])
   | `(dl_term| select(net, at($a))) => do `(RawTerm.app "net" [$(← expandTerm a)])
@@ -294,6 +310,8 @@ def expandUpd (U : TSyntax `dl_upd) : MacroM Lean.Term := do
       `(RawUpdElem.assign $(quote n) $(← expandTerm r))
     | `(dl_upd_elem| $l:dl_term := $a:dl_term <= $b:dl_term) => assignCmp l ``BinOp.le a b
     | `(dl_upd_elem| $l:dl_term := $a:dl_term < $b:dl_term) => assignCmp l ``BinOp.lt a b
+    | `(dl_upd_elem| $l:dl_term := $a:dl_term > $b:dl_term) => assignCmp l ``BinOp.gt a b
+    | `(dl_upd_elem| $l:dl_term := $a:dl_term >= $b:dl_term) => assignCmp l ``BinOp.ge a b
     | _ => Macro.throwUnsupported
   `([$elems,*])
 where
@@ -399,7 +417,7 @@ mutual
 def RawTerm.names : RawTerm → List String
   | .name x => if ["storage", "memory", "true", "false"].contains x then [] else [x]
   | .field t _ => t.names
-  | .at a b | .add a b | .sub a b | .cmp _ a b => a.names ++ b.names
+  | .at a b | .add a b | .sub a b | .cmp _ a b | .arith _ a b => a.names ++ b.names
   | .atIn a b s => a.names ++ b.names ++ s.names
   | .app "defVal" _ => []
   | .app "copyMem" (_ :: ts) => RawTerm.namesList ts
@@ -432,7 +450,7 @@ def RawTerm.hasSelect : RawTerm → Bool
   | .app "select" _ => true
   | .app _ ts => RawTerm.hasSelectList ts
   | .field t _ => t.hasSelect
-  | .at a b | .add a b | .sub a b | .cmp _ a b => a.hasSelect || b.hasSelect
+  | .at a b | .add a b | .sub a b | .cmp _ a b | .arith _ a b => a.hasSelect || b.hasSelect
   | .atIn a b _ => a.hasSelect || b.hasSelect
   | .num _ | .name _ | .env _ => false
 
@@ -623,7 +641,7 @@ def rVal (R : Readers C) (Γ : ECtx) : RawTerm → Except String (Term C)
     | .store => throw s!"`{x}` is a storage, not a value: read it with `find({x}, …)`"
   | .add a b => do pure (.binop .add .uint (← R.val a) (← R.val b))
   | .sub a b => do pure (.binop .sub .uint (← R.val a) (← R.val b))
-  | .cmp op a b => do pure (.binop op .uint (← R.val a) (← R.val b))
+  | .cmp op a b | .arith op a b => do pure (.binop op .uint (← R.val a) (← R.val b))
   | .field p "length" => do
     if isMemTerm C Γ p then pure (.mlen .memory (← R.ident p))
     else pure (.len .storage (← R.path p))
@@ -819,10 +837,11 @@ def RawStmt.aliasHints : RawStmt → List (String × RefTy)
   | _ => []
 
 /-- A parallel update, and the scope under it: `x := p` for a path `p` of
-reference type binds `x` as an alias of that type, and `x := i` for a memory
+reference type binds `x` as an alias of that type, `x := i` for a memory
 object `i` whose type the scope gives (`memTy`: `freshId(addM(memory, S))`,
 `read(memory, carol.account)`, `carol`) binds it as a memory local of that
-type.  Every right-hand side is read in the scope in front of the update. -/
+type, and `x := t` for a `bool` term `t` (`se1 := x <= 255`) as a `bool`
+local, where `x` is a parameter.  Every right-hand side is read in the scope in front of the update. -/
 def elabUpd (Γ : ECtx) : List RawUpdElem → Except String (Upd C × ECtx)
   | [] => pure ([], Γ)
   | .selfBalance op a :: U => do
@@ -854,8 +873,17 @@ def elabUpd (Γ : ECtx) : List RawUpdElem → Except String (Upd C × ECtx)
     | .mem => return (.mref (Var.ofName x) (← tIdent C Γ t) :: U', Γ')
     | .root => throw s!"`{x}` is a state variable: an update writes it through `storage := …`"
     | .store => throw s!"`{x}` is a storage variable: its right-hand side is a storage"
-    | .local => return (.val (Var.ofName x) (← tVal C Γ t) :: U', Γ')
+    | .local =>
+      -- `se1 := x <= 255`: a `bool` capture, which a program under it reads as one
+      let Γ' := if isBool t && (lookupBy x Γ' matches none | some (.val .uint 256)) then
+        setBy x (.val .bool) Γ' else Γ'
+      return (.val (Var.ofName x) (← tVal C Γ t) :: U', Γ')
 where
+  /-- A `bool` term: a comparison, a negation, a literal, a `bool` local. -/
+  isBool : RawTerm → Bool
+    | .cmp .. | .app "!" _ | .name "true" | .name "false" => true
+    | .name y => (lookupBy y Γ matches some (.val .bool _))
+    | _ => false
   /-- A storage term: `storage`, a storage variable, or a write over one. -/
   isStorTerm : RawTerm → Bool
     | .name "storage" => true
@@ -863,44 +891,76 @@ where
     | .app "store" _ | .app "save" _ | .app "delAt" _ => true
     | _ => false
 
-/-- The memory locals a program binds without declaring them
-(`carolAcc = carol.account;`, what `memoryLocalDeclInitDrop` leaves of
-`Account memory carolAcc = carol.account;`), at the type their right-hand
-side has: the memory side of `RawStmt.aliasHints`, which types a storage alias
-from the contract alone.  A right-hand side is typed in the scope in front of
-the program, with the memory locals the program declares before it; a
-statement of either branch of an `if` counts.  A state variable, a name the
-program declares, or one in scope as anything but a parameter (a `uint`), is
-left alone: `alice = carol;` copies to storage. -/
-partial def memHints (Γ : ECtx) (P : List RawStmt) : ECtx :=
+/-- The locals a program binds without declaring them, at the type their
+right-hand side has: what symbolic execution leaves of a declaration once it
+is dropped.  `carolAcc = carol.account;` (`memoryLocalDeclInitDrop` of
+`Account memory carolAcc = carol.account;`) binds a memory local, `x = new
+uint[](n);` one of the type it allocates; `sp1 = sp2.token;`
+(`storageLocalDeclInitDrop`) and `sp = sp1.push();` a storage alias, through
+another alias as well as from a state variable; `se1 = x <= 255;`
+(`localValueDeclInitDrop` of a `bool` capture) a value local of the
+expression's type, when that is not `uint`.  A right-hand side is typed in the
+scope in front of the program, with the locals the program declares and binds
+before it; a statement of either branch of an `if` counts.  A state variable,
+a name the program declares, or one in scope as anything but a parameter (a
+`uint`), is left alone: `alice = carol;` copies to storage, and `acc =
+bob.account;` rebinds the alias `acc`.  (`RawStmt.aliasHints` types a
+parameter from the contract alone, for the whole formula.) -/
+partial def scopeHints (Γ : ECtx) (P : List RawStmt) : ECtx :=
   (go (RawStmt.declsList P) P (Γ, Γ)).1
 where
+  /-- What the program binds `x` to, if it may: none for a declared name, a
+  state variable, or a local in scope that is no parameter. -/
+  free (decls : List String) (Γ : ECtx) (x : String) : Bool :=
+    !decls.contains x && (C.rootType x).isNone &&
+      (lookupBy x Γ matches none | some (.val .uint 256))
+  /-- The type `x = r;` gives `x`, `r` typed in `Δ`. -/
+  ofRhs (Δ : ECtx) (r : RawExpr) : Option LocalTy :=
+    match r with
+    -- `x = new uint[](n);` says its type
+    | .newArr T _ => match elabTy C T with
+      | .ok (.ref R) => some (.mem R)
+      | _ => none
+    | _ => match synth C Δ r with
+      | .ok (.mpath (.ref R) _) => some (.mem R)
+      | .ok (.path (.ref R) _) => some (.alias R)
+      | .ok (.val p _) => if p == .uint then none else some (.val p)
+      | _ => none
   /-- The scope with the hints so far, and the one a right-hand side is typed in. -/
   go (decls : List String) : List RawStmt → ECtx × ECtx → ECtx × ECtx
     | [], acc => acc
     | s :: ss, (Γ, Δ) =>
+      let hint (x : String) (t? : Option LocalTy) : ECtx × ECtx :=
+        match t? with
+        | some t => if free decls Γ x then (setBy x t Γ, setBy x t Δ) else (Γ, Δ)
+        | none => (Γ, Δ)
+      let declared (x : String) (T : RawTy) (mk : RefTy → LocalTy) : ECtx × ECtx :=
+        match elabTy C T with
+        | .ok (.ref R) => (Γ, setBy x (mk R) Δ)
+        | _ => (Γ, Δ)
       let acc : ECtx × ECtx := match s with
-        | .assign (.name x) r =>
-          if decls.contains x || (C.rootType x).isSome ||
-              !(lookupBy x Γ matches none | some (.val .uint)) then (Γ, Δ)
-          else
-            -- `x = new uint[](n);` says its type; any other right-hand side is typed
-            let R? : Option RefTy := match r with
-              | .newArr T _ => match elabTy C T with
-                | .ok (.ref R) => some R
-                | _ => none
-              | _ => match synth C Δ r with
-                | .ok (.mpath (.ref R) _) => some R
-                | _ => none
-            match R? with
-            | some R => (setBy x (.mem R) Γ, setBy x (.mem R) Δ)
-            | none => (Γ, Δ)
-        | .declMemory T x _ => match elabTy C T with
-          | .ok (.ref R) => (Γ, setBy x (.mem R) Δ)
+        | .assign (.name x) r => hint x (ofRhs Δ r)
+        -- `sp = sp1.push();`: the slot appended, an element of the array
+        | .assignPush (.name x) b => hint x (match synth C Δ b with
+          | .ok (.path (.ref (.array (.ref R))) _) => some (.alias R)
+          | _ => none)
+        | .declMemory T x _ => declared x T .mem
+        | .declStorage T x _ | .declStoragePush T x _ => declared x T .alias
+        | .decl T x _ => match elabDeclTy C T with
+          | .ok (.prim p, n) => (Γ, setBy x (.val p n) Δ)
           | _ => (Γ, Δ)
         | .ite _ t e => go decls e (go decls t (Γ, Δ))
         | _ => (Γ, Δ)
       go decls ss acc
+
+/-- The least index `k` or above that the formula does not write: what a
+capture is numbered while a formula is read (`elabDl`). -/
+def nextFree (taken : List Nat) (k : Nat) : Nat :=
+  go taken.length k
+where
+  go : Nat → Nat → Nat
+    | 0, k => k
+    | n + 1, k => if taken.contains k then go n (k + 1) else k
 
 /-- `a == b`: the operands typed as Solidity types them (the first that is
 not a literal gives the type), then lowered. -/
@@ -917,8 +977,12 @@ def inScope (x : ElabM α) : ElabM α := do
   pure r
 
 /-- A formula: a program elaborates in the scope in front of it, and its
-declarations are in scope in its postcondition. -/
-def elabFml : RawFml → ElabM (Fml C)
+declarations are in scope in its postcondition.  `taken` are the indices of
+the fresh variables the formula writes: a capture the program makes while it
+is read takes the least index above the last that none of them has
+(`nextFree`), statement by statement; a statement whose captures would run
+into a written index is numbered past them all. -/
+def elabFml (taken : List Nat) : RawFml → ElabM (Fml C)
   | .tt => pure .tt
   | .eq a b => do
     let (Γ, _) ← get
@@ -942,19 +1006,30 @@ def elabFml : RawFml → ElabM (Fml C)
     pure (cmpFml op .uint (← tVal C Γ a) (← tVal C Γ b))
   | .all p x φ => inScope do
     modify fun (Γ, k) => (setBy x (.val p) Γ, k)
-    pure (.all (Var.ofName x) p (← elabFml φ))
-  | .not φ => do pure (.not (← inScope (elabFml φ)))
-  | .and φ ψ => do pure (.and (← inScope (elabFml φ)) (← inScope (elabFml ψ)))
-  | .imp φ ψ => do pure (.imp (← inScope (elabFml φ)) (← inScope (elabFml ψ)))
+    pure (.all (Var.ofName x) p (← elabFml taken φ))
+  | .not φ => do pure (.not (← inScope (elabFml taken φ)))
+  | .and φ ψ => do pure (.and (← inScope (elabFml taken φ)) (← inScope (elabFml taken ψ)))
+  | .imp φ ψ => do pure (.imp (← inScope (elabFml taken φ)) (← inScope (elabFml taken ψ)))
   | .upd m U φ => inScope do
     let (Γ, k) ← get
     let (U', Γ') ← elabUpd C Γ U
     set (Γ', k)
-    pure (.upd m U' (← elabFml φ))
+    pure (.upd m U' (← elabFml taken φ))
   | .modal m P φ => inScope do
-    modify fun (Γ, k) => (memHints C Γ P, k)
-    let P' ← elabStmts C P
-    pure (.modal m P' (← elabFml φ))
+    modify fun (Γ, k) => (scopeHints C Γ P, k)
+    let mut P' : Prog C := []
+    for s in P do
+      let (Γ, k) ← get
+      let k₀ := nextFree taken k
+      set (Γ, k₀)
+      let mut Q ← elabStmt C s
+      let (_, k₁) ← get
+      -- captures that would run into a written index: past them all
+      if (List.range' k₀ (k₁ - k₀)).any taken.contains then
+        set (Γ, max k (taken.foldl max 0 + 1))
+        Q ← elabStmt C s
+      P' := P' ++ Q
+    pure (.modal m P' (← elabFml taken φ))
   | .lean i => pure (Fml.slot i)
   | .decl ds φ => inScope do
     for d in ds do
@@ -970,13 +1045,17 @@ def elabFml : RawFml → ElabM (Fml C)
           pure (x, LocalTy.val p)
         | _ => throw "`where` declares locals: `Person memory carol`, `Account storage p`, `uint v`"
       modify fun (Γ, k) => (setBy x t Γ, k)
-    elabFml φ
+    elabFml taken φ
 
 /-- Elaborate a formula against `C`.  Its parameters (the names nothing
 declares) are in scope from the start: an alias if a program binds one to a
-storage path, else a `uint` local.  A capture is numbered past every fresh
-variable the formula writes. -/
-def elabDl (φ : RawFml) : Except String (Fml C) :=
+storage path, else a `uint` local.  A capture takes the least index no fresh
+variable the formula writes has (`elabFml`): a line of a derivation leaves a
+gap exactly where the elaborator numbered a capture it does not show, the
+locals of a callee its call statement carries.  With `pastAll`, a capture
+is numbered past every written index instead: a Lean formula in the formula
+(`‹…›`) may write fresh variables the reading does not see (`elabDlAt`). -/
+def elabDl (φ : RawFml) (pastAll : Bool := false) : Except String (Fml C) :=
   let (used, declared) := φ.names
   let hints := φ.stmts.flatMap (RawStmt.aliasHints C)
   -- an enum's name (`State` in `State.Locked`) is no parameter
@@ -987,8 +1066,9 @@ def elabDl (φ : RawFml) : Except String (Fml C) :=
     | some R, _ => some (x, LocalTy.alias R)
     | none, .fresh "sp" _ | none, .fresh "mv" _ => none
     | none, _ => some (x, LocalTy.val .uint)
-  let k := (used ++ declared).foldl (fun k x => max k (Var.ofName x).idx) 0 + 1
-  ((elabFml C φ).run C.funs).run' (params, k)
+  let taken := ((used ++ declared).map fun x => (Var.ofName x).idx).filter (· > 0)
+  let taken := if pastAll then List.range' 1 (taken.foldl max 0) else taken
+  ((elabFml C taken φ).run C.funs).run' (params, 1)
 
 end Read
 
@@ -1063,11 +1143,22 @@ def elabDlAt (c : Lean.Term) (m? : Option Lean.Term) (φ : TSyntax `dl_fml) :
     TermElabM Lean.Expr := do
   let holes := fmlHoles φ
   let m? ← m?.mapM fun m => do instantiateMVars (← elabTermEnsuringType m (mkConst ``Modality))
+  -- a hole that is no postcondition (`φ : Post C` writes no fresh variable)
+  -- may write fresh variables the reading cannot see: captures are then
+  -- numbered past every written index
+  let opaqueHole ← holes.anyM fun h => do
+    let some t := fmlHole? h | return true
+    withoutModifyingState do
+      try
+        let e ← withoutErrToSorry <| withoutAutoBoundImplicit <| elabTerm t none
+        return !(← whnfR (← inferType e)).isAppOf `Solidity.Post
+      catch _ => return true
+  let pastAll := quote opaqueHole
   let read (μ : Option Lean.Name) : TermElabM Lean.Term :=
     liftMacroM (expandFml { either := μ.map fun n => (mkCIdent n : Lean.Term), holes } φ)
   let once (μ : Option Lean.Name) : TermElabM Lean.Expr := do
     let raw ← read μ
-    elabAgainst c fun q => `((elabDl $c $raw).map (Fml.quote $q))
+    elabAgainst c fun q => `((elabDl $c $raw $pastAll).map (Fml.quote $q))
   let (d, b) ← match m? with
     | none => do let e ← once none; pure (e, e)
     | some m =>
@@ -1078,7 +1169,8 @@ def elabDlAt (c : Lean.Term) (m? : Option Lean.Term) (φ : TSyntax `dl_fml) :
         let rd ← read ``Modality.diamond
         let rb ← read ``Modality.box
         let e ← elabAgainst c fun q =>
-          `((do pure (Fml.and (← elabDl $c $rd) (← elabDl $c $rb))).map (Fml.quote $q))
+          `((do pure (Fml.and (← elabDl $c $rd $pastAll) (← elabDl $c $rb $pastAll))).map
+              (Fml.quote $q))
         let #[_, d, b] := e.getAppArgs | throwError "dl[C, m]: not two readings{indentExpr e}"
         pure (d, b)
   if holes.isEmpty && d == b then return d
@@ -1175,9 +1267,11 @@ example : (dl!{ [ alice.age = 10; uint y = alice.age; ] y == 10 }).step =
 example : (dl!{ ⟨ Person storage p = alice; p.age = 3; ⟩ p.age == 3 }).step =
     some dl!{ ⟨ p = alice; p.age = 3; ⟩ find(storage, p.age) = 3 } := rfl
 
-/-- A capture is numbered past the fresh variables the formula writes. -/
+/-- A capture takes the least index the formula's fresh variables leave. -/
+example : dl!{ ⟨ values[total + 1] += 2; ⟩ ie1 == 0 } =
+    dl!{ ⟨ uint ie2 = total + 1; values[ie2] += 2; ⟩ ie1 == 0 } := rfl
 example : dl!{ ⟨ values[total + 1] += 2; ⟩ ie3 == 0 } =
-    dl!{ ⟨ uint ie4 = total + 1; values[ie4] += 2; ⟩ ie3 == 0 } := rfl
+    dl!{ ⟨ uint ie1 = total + 1; values[ie1] += 2; ⟩ ie3 == 0 } := rfl
 
 /-- `∨`, `↔` and `∃` are the connectives they stand for, and print back. -/
 example : dl!{ a == 1 ∨ a == 2 } = dl!{ ¬(¬a == 1 ∧ ¬a == 2) } := rfl
@@ -1224,7 +1318,7 @@ info: dl{
   ⟨ carol.age = 5; ⟩ true }
 
 /-- A dropped memory declaration: `carolAcc` is typed from `carol.account`
-(`memHints`), and a read of a reference binds a memory local. -/
+(`scopeHints`), and a read of a reference binds a memory local. -/
 example : Fml StandardExample :=
   dl!{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
        ⟨ carolAcc = carol.account; carolAcc.balance = 1; ⟩ true }
@@ -1258,7 +1352,7 @@ example : (dl!{ ⟨ uint[] memory xs; xs[0] = 5; ⟩ true }).step =
 #check dl!{ { ts := freshId(addM(memory, Token[3])) ‖ memory := addM(memory, Token[3]) } true }
 
 /-- `new` says what it allocates, so its local is a memory array
-(`memHints`), and the copy it leaves says so too. -/
+(`scopeHints`), and the copy it leaves says so too. -/
 example : (dl!{ ⟨ uint[] memory xs = new uint[](3); ⟩ true }).step =
     some dl!{ ⟨ xs = new uint[](3); ⟩ true } := rfl
 example : symex 3 dl!{ ⟨ uint[] memory xs = new uint[](3); ⟩ true } =

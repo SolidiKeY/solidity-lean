@@ -26,6 +26,7 @@ kept whole), and the versions without one (`Fml.push`, `Fml.concrete`,
 |---|---|---|---|
 | `applyOnRigidIn i s` | `Fml.pushTop` | `{U}(A ∧ B) ⇝ A[U] ∧ B[U]` at spine position `i`, `U` total | `Fml.pushAlong_holds` (iff) |
 | `applyOnRigidBoxIn i s` | `Fml.pushBoxTop` | `[U](A ∧ B) ⇐ [U]A ∧ [U]B`, a rigid leaf substituted | `Fml.pushBoxAlong_sound` |
+| `applyOnPV i s` | `Fml.applyOnPVTop` | `{U}(x ≐ c → A) ⇝ {U}(v ≐ c → A)`, `U` binding `x` last to the literal `v` | `Fml.applyOnPVTop_holds` (iff) |
 | `concrete n s` | `Fml.concreteBelow` | `true ∧ A ⇝ A`, `v ≐ v ⇝ true`, … below `n` updates | `Fml.concreteAlong_holds` (iff) |
 | `mergeIn n s` | `Fml.inSkeletonAlong` | `sequentialToParallel` on the first spine found under a branch | `Fml.mergeSpine_holds` (iff) |
 
@@ -587,6 +588,144 @@ theorem Fml.inSkeleton_holds {f : Fml C → Option (Fml C)}
     (h : φ.inSkeleton f = some ψ) (σ : State) : holds σ ψ ↔ holds σ φ :=
   Fml.inSkeletonAlong_holds hf φ.skel φ h σ
 
+/-! ## A local's literal under its update: `applyOnPV`
+
+KeY's `applyOnPV` reads a program variable behind an update as the update
+binds it, `{x := v} x ⇝ v`.  A chain needs it where the update cannot be
+applied whole: `{ storage := S ‖ se1 := true } ((se1 ≐ true → φ) ∧ …)`
+writes the storage, so `applyOnRigid` does not fire, and the branch would
+not fold.  Here a local the update binds last to a literal `v` is that
+literal in every equation of the skeleton below (`true ≐ true`, which
+`concrete` folds), the update kept in front.  Wherever `U` returns, the
+state it leaves holds `v` at `x` (`SubstAgree.val`); where it halts, nothing
+below it is read.  So the two lines are equivalent under either modality.
+`U` binds locals and writes the storage only (`Upd.localsOrStorage`), what
+a merged stack is. -/
+
+/-- A literal term's value. -/
+def Term.litOf? : Term C → Option Value
+  | .app0 (.lit v) => some v
+  | _ => none
+
+/-- The locals `U` binds last to a literal, as the rewrites `x ⇝ v`. -/
+def Upd.litPVs (U : Upd C) : List (Term C × Term C) :=
+  U.filterMap fun e => match e with
+    | .val x t => match t.litOf? with
+      | some v => if U.valOf x = .lit v then some (.pv x, .lit v) else none
+      | none => none
+    | _ => none
+
+theorem Upd.litPVs_mem {U : Upd C} {q : Term C × Term C} (h : q ∈ U.litPVs) :
+    ∃ x v, q = (.pv x, .lit v) ∧ U.valOf x = .lit v := by
+  simp only [Upd.litPVs, List.mem_filterMap] at h
+  obtain ⟨e, -, he⟩ := h
+  cases e with
+  | val x t =>
+    simp only at he
+    split at he
+    · split at he
+      · cases he
+        exact ⟨_, _, rfl, by assumption⟩
+      · cases he
+    · cases he
+  | _ => simp only [reduceCtorEq] at he
+
+/-- After an update of locals and storage writes, a local it binds last to a
+literal holds that literal. -/
+theorem Upd.pv_eval_of_valOf {U : Upd C} (hU : U.localsOrStorage = true) {x : Var} {v : Value}
+    (hx : U.valOf x = .lit v) {σ τ : State} (h : U.apply σ = .ok τ) :
+    (Term.pv x : Term C).eval τ = .ok v := by
+  obtain ⟨τ', hτ', st', rfl⟩ := Upd.foldl_locals σ U hU (ρ := σ) (st := σ.storage) h
+  have hA : SubstAgree U U.locals.targets σ τ' :=
+    (Upd.substAgree (Upd.locals_envOnly U) hτ').of_lastWrite
+      fun x => (Upd.lastWrite_locals x U).symm
+  have hv := hA.val x
+  rw [hx] at hv
+  rw [Term.eval_withStorage τ' st' (.pv x) rfl, ← hv]
+  rfl
+
+/-- The rewrites `qs` in turn. -/
+def Term.rws (qs : List (Term C × Term C)) (t : Term C) : Term C :=
+  qs.foldl (fun t q => t.rw q) t
+
+theorem Term.rws_denote {σ : State} :
+    (qs : List (Term C × Term C)) → (∀ q ∈ qs, Theory.StValue.Equiv (q.1.denote σ) (q.2.denote σ)) →
+      (t : Term C) → Theory.StValue.Equiv ((t.rws qs).denote σ) (t.denote σ)
+  | [], _, _ => Theory.StValue.Equiv.refl _
+  | q :: qs, h, t =>
+    (Term.rws_denote qs (fun q' hq' => h q' (List.mem_cons_of_mem _ hq')) (t.rw q)).trans
+      (t.rw_denote (h q (by simp)))
+
+/-- The rewrites `qs` in both sides of every equation along the skeleton `s`. -/
+def Fml.rwEqsAlong (qs : List (Term C × Term C)) : Skel → Fml C → Fml C
+  | .and _ _ l r, .and φ ψ => .and (φ.rwEqsAlong qs l) (ψ.rwEqsAlong qs r)
+  | .imp _ _ l r, .imp φ ψ => .imp (φ.rwEqsAlong qs l) (ψ.rwEqsAlong qs r)
+  | .not _ s, .not φ => .not (φ.rwEqsAlong qs s)
+  | .lit, .eq a b => .eq (a.rws qs) (b.rws qs)
+  | _, φ => φ
+
+/-- Whether the rewrites `qs` change an equation along `s`. -/
+def Fml.eqsRewrite (qs : List (Term C × Term C)) : Skel → Fml C → Bool
+  | .and _ _ l r, .and φ ψ | .imp _ _ l r, .imp φ ψ => φ.eqsRewrite qs l || ψ.eqsRewrite qs r
+  | .not _ s, .not φ => φ.eqsRewrite qs s
+  | .lit, .eq a b => a.rws qs != a || b.rws qs != b
+  | _, _ => false
+
+theorem Fml.rwEqsAlong_holds {qs : List (Term C × Term C)} {σ : State}
+    (h : ∀ q ∈ qs, Theory.StValue.Equiv (q.1.denote σ) (q.2.denote σ)) :
+    (s : Skel) → (φ : Fml C) → (holds σ (φ.rwEqsAlong qs s) ↔ holds σ φ)
+  | .opaque, _ | .upd _, _ => Iff.rfl
+  | .lit, φ => by
+    cases φ with
+    | eq a b =>
+      have ha := Term.rws_denote qs h a
+      have hb := Term.rws_denote qs h b
+      exact ⟨fun e => ha.symm.trans (e.trans hb), fun e => ha.trans (e.trans hb.symm)⟩
+    | _ => exact Iff.rfl
+  | .and _ _ l r, φ => by
+    cases φ with
+    | and a b =>
+      show holds σ (a.rwEqsAlong qs l) ∧ holds σ (b.rwEqsAlong qs r) ↔ holds σ a ∧ holds σ b
+      rw [Fml.rwEqsAlong_holds h l a, Fml.rwEqsAlong_holds h r b]
+    | _ => exact Iff.rfl
+  | .imp _ _ l r, φ => by
+    cases φ with
+    | imp a b =>
+      show (holds σ (a.rwEqsAlong qs l) → holds σ (b.rwEqsAlong qs r)) ↔ (holds σ a → holds σ b)
+      rw [Fml.rwEqsAlong_holds h l a, Fml.rwEqsAlong_holds h r b]
+    | _ => exact Iff.rfl
+  | .not _ s, φ => by
+    cases φ with
+    | not a =>
+      show ¬ holds σ (a.rwEqsAlong qs s) ↔ ¬ holds σ a
+      rw [Fml.rwEqsAlong_holds h s a]
+    | _ => exact Iff.rfl
+
+/-- `applyOnPV` under the update `{U}_m φ`, `φ` of skeleton `s`: each local `U`
+binds last to a literal, read as it in the equations of `φ`, if one is. -/
+def Fml.applyOnPVTop (s : Skel) (m : Modality) (U : Upd C) (φ : Fml C) : Option (Fml C) :=
+  if (U.localsOrStorage && φ.eqsRewrite U.litPVs s) = true then
+    some (.upd m U (φ.rwEqsAlong U.litPVs s))
+  else none
+
+theorem Fml.applyOnPVTop_holds {s : Skel} {m : Modality} {U : Upd C} {φ ψ : Fml C}
+    (h : Fml.applyOnPVTop s m U φ = some ψ) (σ : State) : holds σ ψ ↔ holds σ (.upd m U φ) := by
+  unfold Fml.applyOnPVTop at h
+  split at h
+  · rename_i hc
+    cases h
+    simp only [Bool.and_eq_true] at hc
+    simp only [holds]
+    cases hτ : U.apply σ with
+    | error _ => exact Iff.rfl
+    | ok τ =>
+      refine Fml.rwEqsAlong_holds (fun q hq => ?_) s φ
+      obtain ⟨x, v, rfl, hx⟩ := Upd.litPVs_mem hq
+      show Theory.StValue.Equiv ((Term.pv x : Term C).denote τ) ((Term.lit v : Term C).denote τ)
+      rw [Term.denote_eval (Upd.pv_eval_of_valOf hc.1 hx hτ)]
+      exact Theory.StValue.Equiv.refl _
+  · nomatch h
+
 /-! ## The rewrites, bundled -/
 
 namespace LineRw
@@ -600,6 +739,12 @@ def applyOnRigidIn (i : Nat) (s : Skel) : LineRw C :=
 update at position `i`, whose skeleton is `s`: one direction, any update. -/
 def applyOnRigidBoxIn (i : Nat) (s : Skel) : LineRw C :=
   ⟨Fml.atSpine (Fml.pushBoxTop s) i, Fml.atSpine_sound Fml.pushBoxTop_sound i _⟩
+
+/-- KeY's `applyOnPV` under the update at position `i`, whose formula has
+the skeleton `s`: a local it binds last to a literal, read as it. -/
+def applyOnPV (i : Nat) (s : Skel) : LineRw C :=
+  ⟨Fml.atSpine (Fml.applyOnPVTop s) i,
+    Fml.atSpine_sound (fun h σ => (Fml.applyOnPVTop_holds h σ).1) i _⟩
 
 /-- KeY's `concrete` folds below `n` updates, along the skeleton `s`. -/
 def concrete (n : Nat) (s : Skel) : LineRw C :=

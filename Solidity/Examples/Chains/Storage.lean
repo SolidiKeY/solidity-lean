@@ -7,17 +7,18 @@ import Solidity.FreshNames
 /-!
 # The storage worked examples as chains
 
-The calculus's storage examples, in order, each a chain over any modality `m` and postcondition `φ`
-(`Calculus/Chains.lean`): a printed `⇝` is `~[r]~>`, a `⇝*` a `~*>`, and where a printed line merges its
-updates into one parallel update the chain reaches it with `~[sequentialToParallel]~>` (`~~>`), in the
-printed names (`FreshNames` tables).  Stand-ins are named at the declaration: `total`, `basketA.items`,
-`tokens`, `bucket.tokens` for `pVal`, `alice.accounts`, `alice.account.tokens`.
-A line of the strategy that binds an alias through another alias (`{ aliceTok := aliceAcc.token }`) or
-indexes by a capture (`sp[idx]`) is crossed unwritten (`_ ~> _`, `_ ~*> _`), the next written line being
-its merge, which binds the alias to its path as the printed line does.  Every chain ends at one parallel
-update, its reads resolved and its dead captures dropped (`~[simplifyUpdate]~>`, the last link), which
-`#last_line` checks after it.  Not drawn: the bounds branches (an out-of-range index reverts in the path's
-own check).
+The calculus's storage examples, in order, each one chain term over any modality `m` (the box where a step
+needs it) and postcondition `φ` (`Calculus/Chains.lean`, `.claude/rules/derivations.md`), in the printed
+names (`FreshNames` tables).  Stand-ins are named at the declaration: `total`, `basketA.items`, `tokens`,
+`bucket.tokens` for `pVal`, `alice.accounts`, `alice.account.tokens`.  Not drawn: the bounds branches (an
+out-of-range index reverts in the path's own check).
+
+Every line is written, a printed `⇝` is a `~[r]~>` and a `⇝*` a `~*>`; past the program the stack merges
+(`~[sequentialToParallel]~>`) and each read is resolved one law a link, every capture kept to the last line,
+which `#last_line` checks.  A free parameter (`ageVal`, `i`, `a`) and the storage a program reads get a
+concrete value in an update on the first line, so the reads end at literals where a law reads them.  Where
+none does (a struct read, a read at a symbolic length, a read past an index check under any modality but the
+box) the declaration says what is missing; a starting length has no spelling at all.
 -/
 
 namespace Solidity.Examples.Chains.Storage
@@ -30,25 +31,32 @@ variable (m : Modality) (φ : Post StandardExample)
 /-! ## Example: Symbolic Execution of `alice.age = ageVal` -/
 
 namespace AgeWrite
-/-- `alice.age = ageVal;`: the field write, then the empty program. -/
-def chain :
-    dl![m]{ ⟨[ alice.age = ageVal; ]⟩ φ }
-    ~*> dl![m]{ { storage := save(storage, alice.age, ageVal) } φ } :=
-  calc dl![m]{ ⟨[ alice.age = ageVal; ]⟩ φ }
-    _ ~*> dl![m]{ { storage := save(storage, alice.age, ageVal) } φ } := by sol_chain
+/-- `alice.age = ageVal;` with `ageVal` 42: the field write, then the empty program; the merge puts the
+value in the write. -/
+theorem chain :
+    dl![m]{ { ageVal := 42 } ⟨[ alice.age = ageVal; ]⟩ φ }
+    ~*> dl![m]{ { ageVal := 42 } { storage := save(storage, alice.age, ageVal) } φ }
+    ~[sequentialToParallel]~> dl![m]{ { ageVal := 42 ‖ storage := save(storage, alice.age, 42) } φ } := by
+  sol_chain
 #last_line chain
 end AgeWrite
 
 /-! ## Example: Symbolic Execution of `alice.account = acc` -/
 
 namespace AccountCopy
-/-- `Account storage acc = bob.account; alice.account = acc;`: the write stores the value found at the alias's path (`find(storage, acc)`), not the alias path; the last line has the alias substituted. -/
+/-- `Account storage acc = bob.account; alice.account = acc;` from a storage where `bob.account.balance` is
+10: the write stores the value found at the alias's path (`find(storage, acc)`), not the alias path.  The
+paper's one `⇝*`; the merge substitutes the alias and reads `bob.account` in the starting storage.  A
+struct read has no literal: no law reads `bob.account` through the write below it. -/
 theorem chain :
-    dl![m]{ ⟨[ Account storage acc = bob.account; alice.account = acc; ]⟩ φ }
-    ~~> dl![m]{ { acc := bob.account ‖ storage := save(storage, alice.account, find(storage, bob.account)) } φ } :=
-  calc dl![m]{ ⟨[ Account storage acc = bob.account; alice.account = acc; ]⟩ φ }
-    _ ~*> _ := by sol_chain
-    _ ~[sequentialToParallel]~> dl![m]{ { acc := bob.account ‖ storage := save(storage, alice.account, find(storage, bob.account)) } φ } := by sol_chain
+    dl![m]{ { storage := save(storage, bob.account.balance, 10) }
+        ⟨[ Account storage acc = bob.account; alice.account = acc; ]⟩ φ }
+    ~*> dl![m]{ { storage := save(storage, bob.account.balance, 10) }
+        { acc := bob.account } { storage := save(storage, alice.account, find(storage, acc)) } φ }
+    ~[sequentialToParallel]~> dl![m]{ { acc := bob.account ‖
+        storage := save(save(storage, bob.account.balance, 10), alice.account,
+          find(save(storage, bob.account.balance, 10), bob.account)) } φ } := by
+  sol_chain
 #last_line chain
 end AccountCopy
 
@@ -58,24 +66,17 @@ namespace BalanceWrite
 def names : FreshTable := [("pv", "se1"), ("acc", "sp1")]
 local instance : FreshNames := .ofTable names
 #guard (FreshNames.clashes StandardExample names).isEmpty
-set_option maxHeartbeats 400000 in
-/-- `alice.account.balance = 10;`.  The printed `int pv` is `uint pv` here, the type of the
-place written; the captures, dead once the write holds them, go last. -/
+/-- `alice.account.balance = 10;`: the value captured (`pv`) and the receiver aliased (`acc`), the write
+through the alias; the merge puts both in it. -/
 theorem chain :
     dl![m]{ ⟨[ alice.account.balance = 10; ]⟩ φ }
-    ~~> dl![m]{ { storage := save(storage, alice.account.balance, 10) } φ } :=
-  calc dl![m]{ ⟨[ alice.account.balance = 10; ]⟩ φ }
-    _ ~[storageFieldWrite_unfold_leftFst]~>
-        dl![m]{ ⟨[ uint pv = 10; Account storage acc = alice.account; acc.balance = pv; ]⟩ φ } := by
-      sol_chain
-    _ ~*> dl![m]{ { pv := 10 } { acc := alice.account } ⟨[ acc.balance = pv; ]⟩ φ } := by sol_chain
-    _ ~[sequentialToParallel]~>
-        dl![m]{ { pv := 10 ‖ acc := alice.account } ⟨[ acc.balance = pv; ]⟩ φ } := by rfl
-    _ ~*>
-        dl![m]{ { pv := 10 ‖ acc := alice.account } { storage := save(storage, acc.balance, pv) } φ } := by sol_chain
-    _ ~[sequentialToParallel]~>
-        dl![m]{ { pv := 10 ‖ acc := alice.account ‖ storage := save(storage, alice.account.balance, 10) } φ } := by rfl
-    _ ~[simplifyUpdate]~> dl![m]{ { storage := save(storage, alice.account.balance, 10) } φ } := by sol_chain
+    ~[storageFieldWrite_unfold_leftFst]~>
+      dl![m]{ ⟨[ uint pv = 10; Account storage acc = alice.account; acc.balance = pv; ]⟩ φ }
+    ~*> dl![m]{ { pv := 10 } { acc := alice.account } ⟨[ acc.balance = pv; ]⟩ φ }
+    ~*> dl![m]{ { pv := 10 } { acc := alice.account } { storage := save(storage, acc.balance, pv) } φ }
+    ~[sequentialToParallel]~>
+      dl![m]{ { pv := 10 ‖ acc := alice.account ‖ storage := save(storage, alice.account.balance, 10) } φ } := by
+  sol_chain
 #last_line chain
 end BalanceWrite
 
@@ -85,19 +86,21 @@ namespace BalanceRead
 def names : FreshTable := [("acc", "sp1")]
 local instance : FreshNames := .ofTable names
 #guard (FreshNames.clashes StandardExample names).isEmpty
-/-- `v = alice.account.balance;`: the receiver is aliased (`acc`), the alias bound, the field read into `v`, and the updates merged. -/
+/-- `v = alice.account.balance;` from a storage where it is 10: the receiver is aliased (`acc`), the alias
+bound, the field read into `v`, the updates merged, and the read of the write resolved (`findOnSave`). -/
 theorem chain :
-    dl![m]{ ⟨[ v = alice.account.balance; ]⟩ φ }
-    ~~> dl![m]{ { v := find(storage, alice.account.balance) } φ } :=
-  calc dl![m]{ ⟨[ v = alice.account.balance; ]⟩ φ }
-    _ ~[storageFieldRead_unfold_rightFst]~>
-        dl![m]{ ⟨[ Account storage acc = alice.account; v = acc.balance; ]⟩ φ } := by sol_chain
-    _ ~*> dl![m]{ { acc := alice.account } ⟨[ v = acc.balance; ]⟩ φ } := by sol_chain
-    _ ~*>
-        dl![m]{ { acc := alice.account } { v := find(storage, acc.balance) } φ } := by sol_chain
-    _ ~[sequentialToParallel]~>
-        dl![m]{ { acc := alice.account ‖ v := find(storage, alice.account.balance) } φ } := by rfl
-    _ ~[simplifyUpdate]~> dl![m]{ { v := find(storage, alice.account.balance) } φ } := by sol_chain
+    dl![m]{ { storage := save(storage, alice.account.balance, 10) } ⟨[ v = alice.account.balance; ]⟩ φ }
+    ~[storageFieldRead_unfold_rightFst]~> dl![m]{ { storage := save(storage, alice.account.balance, 10) }
+        ⟨[ Account storage acc = alice.account; v = acc.balance; ]⟩ φ }
+    ~*> dl![m]{ { storage := save(storage, alice.account.balance, 10) } { acc := alice.account }
+        ⟨[ v = acc.balance; ]⟩ φ }
+    ~*> dl![m]{ { storage := save(storage, alice.account.balance, 10) } { acc := alice.account }
+        { v := find(storage, acc.balance) } φ }
+    ~[sequentialToParallel]~> dl![m]{ { storage := save(storage, alice.account.balance, 10) ‖
+        acc := alice.account ‖ v := find(save(storage, alice.account.balance, 10), alice.account.balance) } φ }
+    ~[findOnSave]~>
+      dl![m]{ { storage := save(storage, alice.account.balance, 10) ‖ acc := alice.account ‖ v := 10 } φ } := by
+  sol_chain
 #last_line chain
 end BalanceRead
 
@@ -107,55 +110,42 @@ namespace TokenWrite
 def names : FreshTable := [("pv", "se1"), ("aliceTok", "sp1"), ("aliceAcc", "sp2")]
 local instance : FreshNames := .ofTable names
 #guard (FreshNames.clashes StandardExample names).isEmpty
-set_option maxHeartbeats 300000 in
-/-- `alice.account.token.value = 5;`: two aliases, `aliceTok` and `aliceAcc`.  The printed line with `Account storage aliceAcc = alice.account;` is left `_`: `dl!{ … }` cannot read an alias typed from another alias's path (`Calculus/Notation.lean`); so is the step binding `aliceTok` through `aliceAcc`, whose merge binds it to `alice.account.token`. -/
+/-- `alice.account.token.value = 5;`: two aliases, `aliceTok`, then `aliceAcc` for its initialiser's
+receiver, `aliceTok` bound through `aliceAcc`; the merge binds it to `alice.account.token`. -/
 theorem chain :
     dl![m]{ ⟨[ alice.account.token.value = 5; ]⟩ φ }
-    ~~> dl![m]{ { storage := save(storage, alice.account.token.value, 5) } φ } :=
-  calc dl![m]{ ⟨[ alice.account.token.value = 5; ]⟩ φ }
-    _ ~[storageFieldWrite_unfold_leftFst]~>
-        dl![m]{ ⟨[ uint pv = 5; Token storage aliceTok = alice.account.token; aliceTok.value = pv; ]⟩ φ } := by sol_chain
-    _ ~*> dl![m]{ { pv := 5 } ⟨[ aliceTok = alice.account.token; aliceTok.value = pv; ]⟩ φ } := by sol_chain
-    _ ~[storageFieldRead_unfold_rightFst]~> _ := by sol_chain
-    _ ~> _ := by sol_chain
-    _ ~> _ := by sol_chain
-    _ ~> _ := by sol_chain
-    _ ~[sequentialToParallel]~>
-        dl![m]{ { pv := 5 ‖ aliceAcc := alice.account ‖ aliceTok := alice.account.token }
-          ⟨[ aliceTok.value = pv; ]⟩ φ } := by sol_chain
-    _ ~*>
-        dl![m]{ { pv := 5 ‖ aliceAcc := alice.account ‖ aliceTok := alice.account.token }
-          { storage := save(storage, aliceTok.value, pv) } φ } := by sol_chain
-    _ ~[sequentialToParallel]~>
-        dl![m]{ { pv := 5 ‖ aliceAcc := alice.account ‖ aliceTok := alice.account.token ‖
-          storage := save(storage, alice.account.token.value, 5) } φ } := by rfl
-    _ ~[simplifyUpdate]~> dl![m]{ { storage := save(storage, alice.account.token.value, 5) } φ } := by sol_chain
+    ~[storageFieldWrite_unfold_leftFst]~>
+      dl![m]{ ⟨[ uint pv = 5; Token storage aliceTok = alice.account.token; aliceTok.value = pv; ]⟩ φ }
+    ~*> dl![m]{ { pv := 5 } ⟨[ aliceTok = alice.account.token; aliceTok.value = pv; ]⟩ φ }
+    ~[storageFieldRead_unfold_rightFst]~>
+      dl![m]{ { pv := 5 } ⟨[ Account storage aliceAcc = alice.account; aliceTok = aliceAcc.token; aliceTok.value = pv; ]⟩ φ }
+    ~*> dl![m]{ { pv := 5 } { aliceAcc := alice.account } { aliceTok := aliceAcc.token } ⟨[ aliceTok.value = pv; ]⟩ φ }
+    ~*> dl![m]{ { pv := 5 } { aliceAcc := alice.account } { aliceTok := aliceAcc.token }
+        { storage := save(storage, aliceTok.value, pv) } φ }
+    ~[sequentialToParallel]~> dl![m]{ { pv := 5 ‖ aliceAcc := alice.account ‖ aliceTok := alice.account.token ‖
+        storage := save(storage, alice.account.token.value, 5) } φ } := by
+  sol_chain
 #last_line chain
 end TokenWrite
 
 /-! ## Example: A write read back, member by member -/
 
 namespace AgeWriteRead
-set_option maxHeartbeats 2000000 in
 /-- `alice.age = 42; uint x = alice.age;`: the write, the read, merged; then the read of the write resolved as
 solkey reads a path, from its head (`findMemberCons`), the write seen from `alice` (`selectOnSaveMember`),
 and the word read back at the member (`findOnSave`). -/
 theorem chain :
     dl![m]{ ⟨[ alice.age = 42; uint x = alice.age; ]⟩ φ }
-    ~~> dl![m]{ { storage := save(storage, alice.age, 42) ‖ x := 42 } φ } :=
-  calc dl![m]{ ⟨[ alice.age = 42; uint x = alice.age; ]⟩ φ }
-    _ ~*> dl![m]{ { storage := save(storage, alice.age, 42) } { x := find(storage, alice.age) } φ } := by
-      sol_chain
-    _ ~[sequentialToParallel]~>
-        dl![m]{ { storage := save(storage, alice.age, 42) ‖
-          x := find(save(storage, alice.age, 42), alice.age) } φ } := by sol_chain
-    _ ~[findMemberCons]~>
-        dl![m]{ { storage := save(storage, alice.age, 42) ‖
-          x := select(select(save(storage, alice.age, 42), alice), age) } φ } := by sol_chain
-    _ ~[selectOnSaveMember]~>
-        dl![m]{ { storage := save(storage, alice.age, 42) ‖
-          x := select(save(select(storage, alice), age, 42), age) } φ } := by sol_chain
-    _ ~[findOnSave]~> dl![m]{ { storage := save(storage, alice.age, 42) ‖ x := 42 } φ } := by sol_chain
+    ~[storageFieldWriteSave]~> dl![m]{ { storage := save(storage, alice.age, 42) } ⟨[ uint x = alice.age; ]⟩ φ }
+    ~*> dl![m]{ { storage := save(storage, alice.age, 42) } { x := find(storage, alice.age) } φ }
+    ~[sequentialToParallel]~>
+      dl![m]{ { storage := save(storage, alice.age, 42) ‖ x := find(save(storage, alice.age, 42), alice.age) } φ }
+    ~[findMemberCons]~>
+      dl![m]{ { storage := save(storage, alice.age, 42) ‖ x := select(select(save(storage, alice.age, 42), alice), age) } φ }
+    ~[selectOnSaveMember]~>
+      dl![m]{ { storage := save(storage, alice.age, 42) ‖ x := select(save(select(storage, alice), age, 42), age) } φ }
+    ~[findOnSave]~> dl![m]{ { storage := save(storage, alice.age, 42) ‖ x := 42 } φ } := by
+  sol_chain
 #last_line chain
 end AgeWriteRead
 
@@ -163,75 +153,101 @@ namespace BalanceWriteRead
 def names : FreshTable := [("pv", "se1"), ("acc", "sp1"), ("acc2", "sp2")]
 local instance : FreshNames := .ofTable names
 #guard (FreshNames.clashes StandardExample names).isEmpty
-set_option maxHeartbeats 2000000 in
-/-- `alice.account.balance = 10; uint x = alice.account.balance;`: the write and the read through their
-aliases, merged, the dead captures dropped; then the read of the write resolved a member at a time, `alice`
-then `account`, to `10`. -/
+/-- `alice.account.balance = 10; uint x = alice.account.balance;` run: the write through its alias `acc`, the
+read through its alias `acc2`, and the merge. -/
+theorem run :
+    dl![m]{ ⟨[ alice.account.balance = 10; uint x = alice.account.balance; ]⟩ φ }
+    ~[storageFieldWrite_unfold_leftFst]~> dl![m]{
+        ⟨[ uint pv = 10; Account storage acc = alice.account; acc.balance = pv; uint x = alice.account.balance; ]⟩ φ }
+    ~*> dl![m]{ { pv := 10 } { acc := alice.account } ⟨[ acc.balance = pv; uint x = alice.account.balance; ]⟩ φ }
+    ~[storageFieldWriteSave]~> dl![m]{
+        { pv := 10 } { acc := alice.account } { storage := save(storage, acc.balance, pv) }
+          ⟨[ uint x = alice.account.balance; ]⟩ φ }
+    ~[localValueDeclInitDrop]~> dl![m]{
+        { pv := 10 } { acc := alice.account } { storage := save(storage, acc.balance, pv) }
+          ⟨[ x = alice.account.balance; ]⟩ φ }
+    ~[storageFieldRead_unfold_rightFst]~> dl![m]{
+        { pv := 10 } { acc := alice.account } { storage := save(storage, acc.balance, pv) }
+          ⟨[ Account storage acc2 = alice.account; x = acc2.balance; ]⟩ φ }
+    ~*> dl![m]{
+        { pv := 10 } { acc := alice.account } { storage := save(storage, acc.balance, pv) } { acc2 := alice.account }
+          ⟨[ x = acc2.balance; ]⟩ φ }
+    ~*> dl![m]{
+        { pv := 10 } { acc := alice.account } { storage := save(storage, acc.balance, pv) } { acc2 := alice.account }
+          { x := find(storage, acc2.balance) } φ }
+    ~[sequentialToParallel]~> dl![m]{
+        { pv := 10 ‖ acc := alice.account ‖ storage := save(storage, alice.account.balance, 10) ‖ acc2 := alice.account ‖
+            x := find(save(storage, alice.account.balance, 10), alice.account.balance) } φ } := by
+  sol_chain
+
+/-- The read of the merged line resolved a member at a time, as solkey reads a path: from its head
+(`findMemberCons`), the write seen from `alice` (`selectOnSaveMember`), again from `account`, and the word read
+back at the member (`findOnSave`). -/
+theorem reads :
+    dl![m]{
+        { pv := 10 ‖ acc := alice.account ‖ storage := save(storage, alice.account.balance, 10) ‖ acc2 := alice.account ‖
+            x := find(save(storage, alice.account.balance, 10), alice.account.balance) } φ }
+    ~[findMemberCons]~> dl![m]{
+        { pv := 10 ‖ acc := alice.account ‖ storage := save(storage, alice.account.balance, 10) ‖ acc2 := alice.account ‖
+            x := find(select(save(storage, alice.account.balance, 10), alice), account.balance) } φ }
+    ~[selectOnSaveMember]~> dl![m]{
+        { pv := 10 ‖ acc := alice.account ‖ storage := save(storage, alice.account.balance, 10) ‖ acc2 := alice.account ‖
+            x := find(save(select(storage, alice), account.balance, 10), account.balance) } φ }
+    ~[findMemberCons]~> dl![m]{
+        { pv := 10 ‖ acc := alice.account ‖ storage := save(storage, alice.account.balance, 10) ‖ acc2 := alice.account ‖
+            x := select(select(save(select(storage, alice), account.balance, 10), account), balance) } φ }
+    ~[selectOnSaveMember]~> dl![m]{
+        { pv := 10 ‖ acc := alice.account ‖ storage := save(storage, alice.account.balance, 10) ‖ acc2 := alice.account ‖
+            x := select(save(select(select(storage, alice), account), balance, 10), balance) } φ }
+    ~[findOnSave]~> dl![m]{
+        { pv := 10 ‖ acc := alice.account ‖ storage := save(storage, alice.account.balance, 10) ‖ acc2 := alice.account ‖
+            x := 10 } φ } := by
+  sol_chain
+
+/-- `alice.account.balance = 10; uint x = alice.account.balance;`: `run` then `reads`. -/
 theorem chain :
     dl![m]{ ⟨[ alice.account.balance = 10; uint x = alice.account.balance; ]⟩ φ }
-    ~~> dl![m]{ { storage := save(storage, alice.account.balance, 10) ‖ x := 10 } φ } :=
-  calc dl![m]{ ⟨[ alice.account.balance = 10; uint x = alice.account.balance; ]⟩ φ }
-    _ ~*> dl![m]{ { pv := 10 } { acc := alice.account } { storage := save(storage, acc.balance, pv) }
-          { acc2 := alice.account } { x := find(storage, acc2.balance) } φ } := by sol_chain
-    _ ~[sequentialToParallel]~>
-        dl![m]{ { pv := 10 ‖ acc := alice.account ‖ storage := save(storage, alice.account.balance, 10) ‖
-          acc2 := alice.account ‖ x := find(save(storage, alice.account.balance, 10), alice.account.balance) } φ } := by
-      sol_chain
-    _ ~[simplifyUpdate]~>
-        dl![m]{ { storage := save(storage, alice.account.balance, 10) ‖
-          x := find(save(storage, alice.account.balance, 10), alice.account.balance) } φ } := by sol_chain
-    _ ~[findMemberCons]~>
-        dl![m]{ { storage := save(storage, alice.account.balance, 10) ‖
-          x := find(select(save(storage, alice.account.balance, 10), alice), account.balance) } φ } := by
-      sol_chain
-    _ ~[selectOnSaveMember]~>
-        dl![m]{ { storage := save(storage, alice.account.balance, 10) ‖
-          x := find(save(select(storage, alice), account.balance, 10), account.balance) } φ } := by sol_chain
-    _ ~[findMemberCons]~>
-        dl![m]{ { storage := save(storage, alice.account.balance, 10) ‖
-          x := select(select(save(select(storage, alice), account.balance, 10), account), balance) } φ } := by
-      sol_chain
-    _ ~[selectOnSaveMember]~>
-        dl![m]{ { storage := save(storage, alice.account.balance, 10) ‖
-          x := select(save(select(select(storage, alice), account), balance, 10), balance) } φ } := by
-      sol_chain
-    _ ~[findOnSave]~> dl![m]{ { storage := save(storage, alice.account.balance, 10) ‖ x := 10 } φ } := by
-      sol_chain
+    ~~> dl![m]{ { pv := 10 ‖ acc := alice.account ‖ storage := save(storage, alice.account.balance, 10) ‖
+          acc2 := alice.account ‖ x := 10 } φ } :=
+  (run ..).leads.via (reads ..)
 #last_line chain
 end BalanceWriteRead
 
 /-! ## Example: Symbolic Execution of reading a storage root -/
 
 namespace RootRead
-/-- `uint v = total;`: the state variable is read with `select`. -/
-def chain :
-    dl![m]{ ⟨[ uint v = total; ]⟩ φ }
-    ~*> dl![m]{ { v := select(storage, total) } φ } :=
-  calc dl![m]{ ⟨[ uint v = total; ]⟩ φ }
-    _ ~[localValueDeclInitDrop]~> dl![m]{ ⟨[ v = total; ]⟩ φ } := rfl
-    _ ~*> dl![m]{ { v := select(storage, total) } φ } := by sol_chain
+/-- `uint v = total;` from a storage where `total` is 10: the paper's one `⇝*` (the declaration dropped, the
+root read with `select`), the merge, and the read of the write resolved (`findOnSave`). -/
+theorem chain :
+    dl![m]{ { storage := store(storage, total, 10) } ⟨[ uint v = total; ]⟩ φ }
+    ~*> dl![m]{ { storage := store(storage, total, 10) } { v := select(storage, total) } φ }
+    ~[sequentialToParallel]~> dl![m]{ { storage := store(storage, total, 10) ‖ v := select(store(storage, total, 10), total) } φ }
+    ~[findOnSave]~> dl![m]{ { storage := store(storage, total, 10) ‖ v := 10 } φ } := by
+  sol_chain
 #last_line chain
 end RootRead
 
 /-! ## Example: Symbolic Execution of whole-struct write `alice = pVal` -/
 
 namespace RootWrite
-/-- `total = pVal;`: a value written to a state variable.  Stand-in: the printed `alice = pVal;` has a
-struct-valued `pVal`, which has no spelling here (a memory struct fires `memoryToStorageStoreRoot`); a
-`uint` root fires the same `storageRootWriteStore`. -/
-def store :
-    dl![m]{ ⟨[ total = pVal; ]⟩ φ }
-    ~*> dl![m]{ { storage := store(storage, total, pVal) } φ } :=
-  calc dl![m]{ ⟨[ total = pVal; ]⟩ φ }
-    _ ~*> dl![m]{ { storage := store(storage, total, pVal) } φ } := by sol_chain
+/-- `total = pVal;` with `pVal` 7: a value written to a state variable, then the merge.  Stand-in: the printed
+`alice = pVal;` has a struct-valued `pVal`, which has no spelling here (a memory struct fires
+`memoryToStorageStoreRoot`); a `uint` root fires the same `storageRootWriteStore`. -/
+theorem store :
+    dl![m]{ { pVal := 7 } ⟨[ total = pVal; ]⟩ φ }
+    ~*> dl![m]{ { pVal := 7 } { storage := store(storage, total, pVal) } φ }
+    ~[sequentialToParallel]~> dl![m]{ { pVal := 7 ‖ storage := store(storage, total, 7) } φ } := by
+  sol_chain
 
-/-- `alice = bob;`: a storage path on the right is copied by reading the value there (`find(storage, bob)`,
-the printed `select`). -/
-def copy :
-    dl![m]{ ⟨[ alice = bob; ]⟩ φ }
-    ~*> dl![m]{ { storage := store(storage, alice, find(storage, bob)) } φ } :=
-  calc dl![m]{ ⟨[ alice = bob; ]⟩ φ }
-    _ ~*> dl![m]{ { storage := store(storage, alice, find(storage, bob)) } φ } := by sol_chain
+/-- `alice = bob;` from a storage where `bob.age` is 10: a storage path on the right is copied by reading the
+value there (`find(storage, bob)`, as printed).  The merge reads `bob` in the starting storage; a
+struct read has no literal, and no law reads `bob` through the write below it. -/
+theorem copy :
+    dl![m]{ { storage := save(storage, bob.age, 10) } ⟨[ alice = bob; ]⟩ φ }
+    ~*> dl![m]{ { storage := save(storage, bob.age, 10) } { storage := store(storage, alice, find(storage, bob)) } φ }
+    ~[sequentialToParallel]~>
+      dl![m]{ { storage := store(save(storage, bob.age, 10), alice, find(save(storage, bob.age, 10), bob)) } φ } := by
+  sol_chain
 #last_line store
 #last_line copy
 end RootWrite
@@ -249,26 +265,29 @@ variable (m : Modality) (φ : Post Roots)
 
 namespace Rebind
 /-- `Account storage acc = alice.account; acc = bob.account; acc.balance = 10;`: `acc = bob.account` rebinds the
-alias; the stack the strategy leaves, merged, then the capture it overwrites dropped. -/
-def chain :
+alias.  The paper's one `⇝*` to the stack, then the merge, which writes at `bob.account.balance`; both
+bindings of `acc` stay, the later one the one that counts. -/
+theorem chain :
     dl![m]{ ⟨[ Account storage acc = alice.account; acc = bob.account; acc.balance = 10; ]⟩ φ }
-    ~~> dl![m]{ { acc := bob.account ‖ storage := save(storage, bob.account.balance, 10) } φ } :=
-  calc dl![m]{ ⟨[ Account storage acc = alice.account; acc = bob.account; acc.balance = 10; ]⟩ φ }
-    _ ~*> _ := by sol_chain
-    _ ~[sequentialToParallel]~>
-        dl![m]{ { acc := alice.account ‖ acc := bob.account ‖ storage := save(storage, bob.account.balance, 10) } φ } := by sol_chain
-    _ ~[simplifyUpdate]~>
-        dl![m]{ { acc := bob.account ‖ storage := save(storage, bob.account.balance, 10) } φ } := by sol_chain
+    ~*> dl![m]{ { acc := alice.account } { acc := bob.account } { storage := save(storage, acc.balance, 10) } φ }
+    ~[sequentialToParallel]~>
+      dl![m]{ { acc := alice.account ‖ acc := bob.account ‖ storage := save(storage, bob.account.balance, 10) } φ } := by
+  sol_chain
 #last_line chain
 end Rebind
 
 namespace GlobalCopy
-/-- `account = bob.account;` with `account` a state variable (`Roots`): a global left-hand side copies. -/
-def chain :
-    dl![m]{ ⟨[ account = bob.account; ]⟩ φ }
-    ~*> dl![m]{ { storage := store(storage, account, find(storage, bob.account)) } φ } :=
-  calc dl![m]{ ⟨[ account = bob.account; ]⟩ φ }
-    _ ~*> dl![m]{ { storage := store(storage, account, find(storage, bob.account)) } φ } := by sol_chain
+/-- `account = bob.account;` with `account` a state variable (`Roots`), from a storage where
+`bob.account.balance` is 10: a global left-hand side copies.  The merge reads `bob.account` in the starting
+storage; a struct read has no literal. -/
+theorem chain :
+    dl![m]{ { storage := save(storage, bob.account.balance, 10) } ⟨[ account = bob.account; ]⟩ φ }
+    ~*> dl![m]{ { storage := save(storage, bob.account.balance, 10) }
+        { storage := store(storage, account, find(storage, bob.account)) } φ }
+    ~[sequentialToParallel]~> dl![m]{
+        { storage := store(save(storage, bob.account.balance, 10), account,
+            find(save(storage, bob.account.balance, 10), bob.account)) } φ } := by
+  sol_chain
 #last_line chain
 end GlobalCopy
 end
@@ -279,33 +298,46 @@ section
 variable (m : Modality) (φ : Post StandardExample)
 
 namespace IndexRead
-/-- `v = values[i];`.  One normal branch: the bounds check is the path's own (`State.checkIndex`), so the
-rule does not branch and there is no `i < 0 ∨ i ≥ ℓ` sequent; `ℓ` is `values.length`. -/
-def chain :
-    dl![m]{ ⟨[ v = values[i]; ]⟩ φ }
-    ~*> dl![m]{ { v := find(storage, values[i]) } φ } :=
-  calc dl![m]{ ⟨[ v = values[i]; ]⟩ φ }
-    _ ~*> dl![m]{ { v := find(storage, values[i]) } φ } := by sol_chain
+/-- `v = values[i];` with `i` 1, from a storage where `values[1]` is 10, at the box.  One normal branch: the
+bounds check is the path's own (`State.checkIndex`, the `@S` of `values[1]@S`), so the rule does not branch
+and there is no `i < 0 ∨ i ≥ ℓ` sequent.  `findOnSave` reads the write back past the check under the box only,
+where a check that fails makes the line true.  Under any modality `m` the chain stops at the check: no law
+decides it, which needs the length in `S`, and a starting length has no spelling (the notation writes a length
+by a push or a pop only). -/
+theorem chain :
+    dl![.box]{ { i := 1 ‖ storage := save(storage, values[1], 10) } ⟨[ v = values[i]; ]⟩ φ }
+    ~*> dl![.box]{ { i := 1 ‖ storage := save(storage, values[1], 10) } { v := find(storage, values[i]) } φ }
+    ~[sequentialToParallel]~> dl![.box]{
+        { i := 1 ‖ storage := save(storage, values[1], 10) ‖
+            v := find(save(storage, values[1], 10), values[1]@save(storage, values[1], 10)) } φ }
+    ~[findOnSave]~> dl![.box]{ { i := 1 ‖ storage := save(storage, values[1], 10) ‖ v := 10 } φ } := by
+  sol_chain
 #last_line chain
 end IndexRead
 
 namespace IndexWrite
-/-- `values[i] = 100;`.  One normal branch, as for the read. -/
-def chain :
-    dl![m]{ ⟨[ values[i] = 100; ]⟩ φ }
-    ~*> dl![m]{ { storage := save(storage, values[i], 100) } φ } :=
-  calc dl![m]{ ⟨[ values[i] = 100; ]⟩ φ }
-    _ ~*> dl![m]{ { storage := save(storage, values[i], 100) } φ } := by sol_chain
+/-- `values[i] = 100;` with `i` 1.  One normal branch, as for the read. -/
+theorem chain :
+    dl![m]{ { i := 1 } ⟨[ values[i] = 100; ]⟩ φ }
+    ~*> dl![m]{ { i := 1 } { storage := save(storage, values[i], 100) } φ }
+    ~[sequentialToParallel]~> dl![m]{ { i := 1 ‖ storage := save(storage, values[1], 100) } φ } := by
+  sol_chain
 #last_line chain
 end IndexWrite
 
 namespace MappingRead
-/-- `v = balances[a];`: a mapping key, no length check. -/
-def chain :
-    dl![m]{ ⟨[ v = balances[a]; ]⟩ φ }
-    ~*> dl![m]{ { v := find(storage, balances[a]) } φ } :=
-  calc dl![m]{ ⟨[ v = balances[a]; ]⟩ φ }
-    _ ~*> dl![m]{ { v := find(storage, balances[a]) } φ } := by sol_chain
+/-- `v = balances[a];` with `a` 3, from a storage where `balances[3]` is 10, at the box: a mapping key, no
+length check.  The path records the key's check all the same (`balances[3]@S`), and `findOnSave` reads the
+write back past it under the box only.  Under any modality `m` the chain stops there: no law yet drops the
+check of a mapping key, which cannot fail. -/
+theorem chain :
+    dl![.box]{ { a := 3 ‖ storage := save(storage, balances[3], 10) } ⟨[ v = balances[a]; ]⟩ φ }
+    ~*> dl![.box]{ { a := 3 ‖ storage := save(storage, balances[3], 10) } { v := find(storage, balances[a]) } φ }
+    ~[sequentialToParallel]~> dl![.box]{
+        { a := 3 ‖ storage := save(storage, balances[3], 10) ‖
+            v := find(save(storage, balances[3], 10), balances[3]@save(storage, balances[3], 10)) } φ }
+    ~[findOnSave]~> dl![.box]{ { a := 3 ‖ storage := save(storage, balances[3], 10) ‖ v := 10 } φ } := by
+  sol_chain
 #last_line chain
 end MappingRead
 end
@@ -318,122 +350,143 @@ namespace IndexWriteStruct
 def names : FreshTable := [("bobAcc", "sp1")]
 local instance : FreshNames := .ofTable names
 #guard (FreshNames.clashes TestSuite names).isEmpty
-/-- `Token storage tokRef = bob.account.token; tokens[i] = tokRef;` (`TestSuite`): the element written is the value found at the alias path.  The nested initialiser is aliased one member at a time (`bobAcc`, then `tokRef` through it), lines crossed unwritten; the merge binds `tokRef` to `bob.account.token`, as printed. -/
+/-- `Token storage tokRef = bob.account.token; tokens[i] = tokRef;` (`TestSuite`) with `i` 1, from a storage
+where `bob.account.token.value` is 10: the element written is the value found at the alias path.  The paper's
+one `⇝*`: the nested initialiser aliased one member at a time (`bobAcc`, then `tokRef` through it), then the
+write; the merge binds `tokRef` to `bob.account.token`, as printed.  A struct read has no literal: no law
+reads `bob.account.token` through the write below it. -/
 theorem chain :
-    dl![m]{ ⟨[ Token storage tokRef = bob.account.token; tokens[i] = tokRef; ]⟩ φ }
-    ~~> dl![m]{ { tokRef := bob.account.token ‖
-          storage := save(storage, tokens[i], find(storage, bob.account.token)) } φ } :=
-  calc dl![m]{ ⟨[ Token storage tokRef = bob.account.token; tokens[i] = tokRef; ]⟩ φ }
-    _ ~*> _ := by sol_chain
-    _ ~[sequentialToParallel]~>
-        dl![m]{ { bobAcc := bob.account ‖ tokRef := bob.account.token ‖
-          storage := save(storage, tokens[i], find(storage, bob.account.token)) } φ } := by sol_chain
-    _ ~[simplifyUpdate]~>
-        dl![m]{ { tokRef := bob.account.token ‖
-          storage := save(storage, tokens[i], find(storage, bob.account.token)) } φ } := by sol_chain
+    dl![m]{ { i := 1 ‖ storage := save(storage, bob.account.token.value, 10) }
+        ⟨[ Token storage tokRef = bob.account.token; tokens[i] = tokRef; ]⟩ φ }
+    ~*> dl![m]{ { i := 1 ‖ storage := save(storage, bob.account.token.value, 10) }
+        { bobAcc := bob.account } { tokRef := bobAcc.token } { storage := save(storage, tokens[i], find(storage, tokRef)) } φ }
+    ~[sequentialToParallel]~> dl![m]{
+        { i := 1 ‖ bobAcc := bob.account ‖ tokRef := bob.account.token ‖
+            storage :=
+              save(save(storage, bob.account.token.value, 10), tokens[1]@save(storage, bob.account.token.value, 10),
+                find(save(storage, bob.account.token.value, 10), bob.account.token)) } φ } := by
+  sol_chain
 #last_line chain
 end IndexWriteStruct
 
 /-! ## Example: Push and Pop on a Storage Array -/
 
+/- A concrete starting length has no spelling: the notation writes a length by a push or a pop only
+(`Calculus/Notation.lean`, `rStor`), so the push and pop examples start from the storage as it is and keep
+its length, `values.length`, symbolic. -/
+
 namespace Push
-/-- `values.push(42);` (`TestSuite`): the element at the old length and the length in one update; `values.length` is the printed `n`. -/
+/-- `values.push(42);` (`TestSuite`): the element at the old length and the length in one update;
+`values.length` is the printed `n`.  The paper's one `⇝`, the rule and the empty program after it. -/
 def chain :
     dl![m]{ ⟨[ values.push(42); ]⟩ φ }
-    ~*> dl![m]{ { storage := save(save(storage, values[values.length], 42), values.length, values.length + 1) } φ } :=
-  calc dl![m]{ ⟨[ values.push(42); ]⟩ φ }
-    _ ~*>
-        dl![m]{ { storage := save(save(storage, values[values.length], 42), values.length, values.length + 1) } φ } := by sol_chain
+    ~*> dl![m]{ { storage := save(save(storage, values[values.length], 42), values.length, values.length + 1) } φ } := by
+  sol_chain
 #last_line chain
 end Push
 
 namespace Pop
-/-- `tokens.pop();`: the last slot cleared with `delAt` and the length decremented, `tokens.length` the printed `ℓ`.  One branch: an empty array reverts by itself, so there is no `ℓ ≤ 0` sequent. -/
+/-- `tokens.pop();`: the last slot cleared with `delAt` and the length decremented, `tokens.length` the printed
+`ℓ`.  One branch: an empty array reverts by itself, so there is no `ℓ ≤ 0` sequent. -/
 def chain :
     dl![m]{ ⟨[ tokens.pop(); ]⟩ φ }
-    ~*> dl![m]{ { storage := save(delAt(storage, tokens[tokens.length - 1]), tokens.length, tokens.length - 1) } φ } :=
-  calc dl![m]{ ⟨[ tokens.pop(); ]⟩ φ }
-    _ ~*>
-        dl![m]{ { storage := save(delAt(storage, tokens[tokens.length - 1]), tokens.length, tokens.length - 1) } φ } := by sol_chain
+    ~*> dl![m]{ { storage := save(delAt(storage, tokens[tokens.length - 1]), tokens.length, tokens.length - 1) } φ } := by
+  sol_chain
 #last_line chain
 end Pop
 
 namespace PushAfterPop
-local instance : InContract := ⟨TestSuite⟩
-/-- `tokens.push(); tokens[0].value = 7; tokens.pop(); Token storage sp = tokens.push(); uint i = sp.value;`: the push, the write, the pop, then a bound push (`storageLocalRootPushBind`, which only bumps the length).  Stand-in: the printed `tokens.push().value` is a member of a call, which is refused; `sp` binds the slot.  The seven updates merge into one; the explicit-check paths record the storage term in which each index was checked. -/
-theorem chain (mt : Modality) (ψ : Post TestSuite) :
-    dl[TestSuite, mt]{ ⟨[ tokens.push(); tokens[0].value = 7; tokens.pop(); Token storage sp = tokens.push(); uint i = sp.value; ]⟩ ψ }
-    ~~> dl[TestSuite, mt]{
-      { sp1 := tokens[0]@save(storage, tokens.length, tokens.length + 1) ‖
-        storage := save(save(delAt(save(save(storage, tokens.length, tokens.length + 1),
-                (tokens[0]@save(storage, tokens.length, tokens.length + 1)).value, 7),
-              tokens[tokens.length - 1]), tokens.length, tokens.length - 1),
-            tokens.length, tokens.length + 1) ‖
-        sp := tokens[tokens.length]@save(delAt(save(save(storage, tokens.length, tokens.length + 1),
-                (tokens[0]@save(storage, tokens.length, tokens.length + 1)).value, 7),
-              tokens[tokens.length - 1]), tokens.length, tokens.length - 1) ‖
-        i := find(save(save(delAt(save(save(storage, tokens.length, tokens.length + 1),
-                  (tokens[0]@save(storage, tokens.length, tokens.length + 1)).value, 7),
-                tokens[tokens.length - 1]), tokens.length, tokens.length - 1),
-              tokens.length, tokens.length + 1),
-            (tokens[tokens.length]@save(delAt(save(save(storage, tokens.length, tokens.length + 1),
-                    (tokens[0]@save(storage, tokens.length, tokens.length + 1)).value, 7),
-                  tokens[tokens.length - 1]), tokens.length, tokens.length - 1)).value) } ψ } :=
-  calc dl[TestSuite, mt]{ ⟨[ tokens.push(); tokens[0].value = 7; tokens.pop(); Token storage sp = tokens.push(); uint i = sp.value; ]⟩ ψ }
-    _ ~[storagePushLengthSaveReferenceElement]~>
-        dl[TestSuite, mt]{ { storage := save(storage, tokens.length, tokens.length + 1) }
-          ⟨[ tokens[0].value = 7; tokens.pop(); Token storage sp = tokens.push(); uint i = sp.value; ]⟩ ψ } := rfl
-    _ ~*> dl[TestSuite, mt]{ { storage := save(storage, tokens.length, tokens.length + 1) } { se1 := 7 } { sp1 := tokens[0] }
+/-- `tokens.push(); tokens[0].value = 7; tokens.pop(); Token storage sp = tokens.push(); uint i = sp.value;`: the
+push, the write, the pop, then a bound push (`storageLocalRootPushBind`, which only bumps the length).
+Stand-in: the printed `tokens.push().value` is a member of a call, which is refused; `sp` binds the slot.  The
+seven updates merge into one; the explicit-check paths record the storage term in which each index was
+checked.  The paper's `i == 0` is not reached: the indices are the symbolic length (`tokens[tokens.length]`),
+and the read laws read literal indices only. -/
+theorem chain :
+    dl![m]{ ⟨[ tokens.push(); tokens[0].value = 7; tokens.pop(); Token storage sp = tokens.push(); uint i = sp.value; ]⟩ φ }
+    ~[storagePushLengthSaveReferenceElement]~> dl![m]{
+        { storage := save(storage, tokens.length, tokens.length + 1) }
+          ⟨[ tokens[0].value = 7; tokens.pop(); Token storage sp = tokens.push(); uint i = sp.value; ]⟩ φ }
+    ~[storageFieldWrite_unfold_leftFst]~> dl![m]{
+        { storage := save(storage, tokens.length, tokens.length + 1) }
+          ⟨[ uint se1 = 7; Token storage sp1 = tokens[0]; sp1.value = se1; tokens.pop(); Token storage sp = tokens.push();
+            uint i = sp.value; ]⟩ φ }
+    ~*> dl![m]{
+        { storage := save(storage, tokens.length, tokens.length + 1) } { se1 := 7 } { sp1 := tokens[0] }
+          ⟨[ sp1.value = se1; tokens.pop(); Token storage sp = tokens.push(); uint i = sp.value; ]⟩ φ }
+    ~[storageFieldWriteSave]~> dl![m]{
+        { storage := save(storage, tokens.length, tokens.length + 1) } { se1 := 7 } { sp1 := tokens[0] }
+          { storage := save(storage, sp1.value, se1) }
+          ⟨[ tokens.pop(); Token storage sp = tokens.push(); uint i = sp.value; ]⟩ φ }
+    ~[storagePopSave]~> dl![m]{
+        { storage := save(storage, tokens.length, tokens.length + 1) } { se1 := 7 } { sp1 := tokens[0] }
           { storage := save(storage, sp1.value, se1) }
           { storage := save(delAt(storage, tokens[tokens.length - 1]), tokens.length, tokens.length - 1) }
-          ⟨[ Token storage sp = tokens.push(); uint i = sp.value; ]⟩ ψ } := by sol_chain
-    _ ~*> dl[TestSuite, mt]{
-      { storage := save(storage, tokens.length, tokens.length + 1) }
-      { se1 := 7 }
-      { sp1 := tokens[0] }
-      { storage := save(storage, sp1.value, se1) }
-      { storage := save(delAt(storage, tokens[tokens.length - 1]), tokens.length, tokens.length - 1) }
-      { storage := save(storage, tokens.length, tokens.length + 1) ‖ sp := tokens[tokens.length] }
-      { i := find(storage, sp.value) } ψ } := by sol_chain
-    _ ~[sequentialToParallel]~> dl[TestSuite, mt]{
-      { se1 := 7 ‖ sp1 := tokens[0]@save(storage, tokens.length, tokens.length + 1) ‖
-        storage := save(save(delAt(save(save(storage, tokens.length, tokens.length + 1),
-                (tokens[0]@save(storage, tokens.length, tokens.length + 1)).value, 7),
-              tokens[tokens.length - 1]), tokens.length, tokens.length - 1),
-            tokens.length, tokens.length + 1) ‖
-        sp := tokens[tokens.length]@save(delAt(save(save(storage, tokens.length, tokens.length + 1),
-                (tokens[0]@save(storage, tokens.length, tokens.length + 1)).value, 7),
-              tokens[tokens.length - 1]), tokens.length, tokens.length - 1) ‖
-        i := find(save(save(delAt(save(save(storage, tokens.length, tokens.length + 1),
-                  (tokens[0]@save(storage, tokens.length, tokens.length + 1)).value, 7),
-                tokens[tokens.length - 1]), tokens.length, tokens.length - 1),
-              tokens.length, tokens.length + 1),
-            (tokens[tokens.length]@save(delAt(save(save(storage, tokens.length, tokens.length + 1),
-                    (tokens[0]@save(storage, tokens.length, tokens.length + 1)).value, 7),
-                  tokens[tokens.length - 1]), tokens.length, tokens.length - 1)).value) } ψ } := by
-      sol_chain
-    _ ~[simplifyUpdate]~> _ := by sol_chain
+          ⟨[ Token storage sp = tokens.push(); uint i = sp.value; ]⟩ φ }
+    ~[storageLocalDeclInitDrop]~> dl![m]{
+        { storage := save(storage, tokens.length, tokens.length + 1) } { se1 := 7 } { sp1 := tokens[0] }
+          { storage := save(storage, sp1.value, se1) }
+          { storage := save(delAt(storage, tokens[tokens.length - 1]), tokens.length, tokens.length - 1) }
+          ⟨[ sp = tokens.push(); uint i = sp.value; ]⟩ φ }
+    ~[storageLocalRootPushBind]~> dl![m]{
+        { storage := save(storage, tokens.length, tokens.length + 1) } { se1 := 7 } { sp1 := tokens[0] }
+          { storage := save(storage, sp1.value, se1) }
+          { storage := save(delAt(storage, tokens[tokens.length - 1]), tokens.length, tokens.length - 1) }
+          { storage := save(storage, tokens.length, tokens.length + 1) ‖ sp := tokens[tokens.length] }
+          ⟨[ uint i = sp.value; ]⟩ φ }
+    ~*> dl![m]{
+        { storage := save(storage, tokens.length, tokens.length + 1) } { se1 := 7 } { sp1 := tokens[0] }
+          { storage := save(storage, sp1.value, se1) }
+          { storage := save(delAt(storage, tokens[tokens.length - 1]), tokens.length, tokens.length - 1) }
+          { storage := save(storage, tokens.length, tokens.length + 1) ‖ sp := tokens[tokens.length] }
+          { i := find(storage, sp.value) } φ }
+    ~[sequentialToParallel]~> dl![m]{
+        { se1 := 7 ‖ sp1 := tokens[0]@save(storage, tokens.length, tokens.length + 1) ‖
+            storage :=
+              save(save(delAt(save(save(storage, tokens.length, tokens.length + 1),
+                      (tokens[0]@save(storage, tokens.length, tokens.length + 1)).value, 7),
+                    tokens[tokens.length - 1]),
+                  tokens.length, tokens.length - 1),
+                tokens.length, tokens.length + 1) ‖
+            sp :=
+              tokens[tokens.length]@save(delAt(save(save(storage, tokens.length, tokens.length + 1),
+                      (tokens[0]@save(storage, tokens.length, tokens.length + 1)).value, 7),
+                    tokens[tokens.length - 1]),
+                  tokens.length, tokens.length - 1) ‖
+            i :=
+              find(save(save(delAt(save(save(storage, tokens.length, tokens.length + 1),
+                        (tokens[0]@save(storage, tokens.length, tokens.length + 1)).value, 7),
+                      tokens[tokens.length - 1]),
+                    tokens.length, tokens.length - 1),
+                  tokens.length, tokens.length + 1),
+                (tokens[tokens.length]@save(delAt(save(save(storage, tokens.length, tokens.length + 1),
+                            (tokens[0]@save(storage, tokens.length, tokens.length + 1)).value, 7),
+                          tokens[tokens.length - 1]),
+                        tokens.length, tokens.length - 1)).value) } φ } := by
+  sol_chain
 #last_line chain
 end PushAfterPop
 
 /-! ## Example: Pop After Push -/
 
 namespace PopAfterPush
-/-- `values.push(); values.pop();`: the push clears the appended slot and bumps the length (`storagePushLengthSave`), then the pop.  One branch (`n + 1 > 0`); there is no `sizeNotNegative`.  The two storage writes merge into one (a pop is one term; its `values[values.length - 1]` is printed, not a check). -/
+/-- `values.push(); values.pop();`: the push clears the appended slot and bumps the length
+(`storagePushLengthSave`, the paper's first `⇝`), then the pop (its second).  One branch (`n + 1 > 0`); there is
+no `sizeNotNegative`.  The two storage writes merge into one.  The paper's read-over-write that turns the
+popped index `ℓ − 1` into `n` is not drawn: no law reads a length through a push. -/
 theorem chain :
     dl![m]{ ⟨[ values.push(); values.pop(); ]⟩ φ }
-    ~~> dl![m]{ { storage := save(delAt(save(delAt(storage, values[values.length]), values.length, values.length + 1),
-            values[values.length - 1]), values.length, values.length - 1) } φ } :=
-  calc dl![m]{ ⟨[ values.push(); values.pop(); ]⟩ φ }
-    _ ~[storagePushLengthSave]~>
-        dl![m]{ { storage := save(delAt(storage, values[values.length]), values.length, values.length + 1) }
-          ⟨[ values.pop(); ]⟩ φ } := rfl
-    _ ~*>
-        dl![m]{ { storage := save(delAt(storage, values[values.length]), values.length, values.length + 1) }
-          { storage := save(delAt(storage, values[values.length - 1]), values.length, values.length - 1) } φ } := by sol_chain
-    _ ~[sequentialToParallel]~>
-        dl![m]{ { storage := save(delAt(save(delAt(storage, values[values.length]), values.length, values.length + 1),
-            values[values.length - 1]), values.length, values.length - 1) } φ } := by sol_chain
+    ~[storagePushLengthSave]~> dl![m]{
+        { storage := save(delAt(storage, values[values.length]), values.length, values.length + 1) } ⟨[ values.pop(); ]⟩ φ }
+    ~*> dl![m]{
+        { storage := save(delAt(storage, values[values.length]), values.length, values.length + 1) }
+          { storage := save(delAt(storage, values[values.length - 1]), values.length, values.length - 1) } φ }
+    ~[sequentialToParallel]~> dl![m]{
+        { storage :=
+            save(delAt(save(delAt(storage, values[values.length]), values.length, values.length + 1),
+                values[values.length - 1]),
+              values.length, values.length - 1) } φ } := by
+  sol_chain
 #last_line chain
 end PopAfterPush
 
@@ -443,21 +496,19 @@ namespace AccountsWrite
 def names : FreshTable := [("pv", "se1"), ("sp", "sp1"), ("idx", "ie1")]
 local instance : FreshNames := .ofTable names
 #guard (FreshNames.clashes TestSuite names).isEmpty
-/-- `basketA.items[0] = 100;` (`TestSuite`), the `uint[]` member of a struct: stands for `alice.accounts[0] = 100;`, which `StandardExample` has no member for.  One normal branch. -/
+/-- `basketA.items[0] = 100;` (`TestSuite`), the `uint[]` member of a struct: stands for
+`alice.accounts[0] = 100;`, which `StandardExample` has no member for.  The paper's `⇝` (the source, receiver
+and index captured), `⇝*` (the declarations bound) and `⇝` (the write, its in-bounds branch), then the
+merge. -/
 theorem chain :
     dl![m]{ ⟨[ basketA.items[0] = 100; ]⟩ φ }
-    ~~> dl![m]{ { storage := save(storage, basketA.items[0], 100) } φ } :=
-  calc dl![m]{ ⟨[ basketA.items[0] = 100; ]⟩ φ }
-    _ ~[storageIndexWriteCaptureAllComplexRecv]~>
-        dl![m]{ ⟨[ uint pv = 100; uint[] storage sp = basketA.items; uint idx = 0; sp[idx] = pv; ]⟩ φ } := by sol_chain
-    _ ~*> dl![m]{ { pv := 100 } { sp := basketA.items } { idx := 0 } ⟨[ sp[idx] = pv; ]⟩ φ } := by sol_chain
-    _ ~[sequentialToParallel]~>
-        dl![m]{ { pv := 100 ‖ sp := basketA.items ‖ idx := 0 } ⟨[ sp[idx] = pv; ]⟩ φ } := by rfl
-    _ ~[storageIndexWriteArraySave]~> _ := by sol_chain
-    _ ~> _ := by sol_chain
-    _ ~[sequentialToParallel]~>
-        dl![m]{ { pv := 100 ‖ sp := basketA.items ‖ idx := 0 ‖ storage := save(storage, basketA.items[0], 100) } φ } := by sol_chain
-    _ ~[simplifyUpdate]~> dl![m]{ { storage := save(storage, basketA.items[0], 100) } φ } := by sol_chain
+    ~[storageIndexWriteCaptureAllComplexRecv]~>
+      dl![m]{ ⟨[ uint pv = 100; uint[] storage sp = basketA.items; uint idx = 0; sp[idx] = pv; ]⟩ φ }
+    ~*> dl![m]{ { pv := 100 } { sp := basketA.items } { idx := 0 } ⟨[ sp[idx] = pv; ]⟩ φ }
+    ~*> dl![m]{ { pv := 100 } { sp := basketA.items } { idx := 0 } { storage := save(storage, sp[idx], pv) } φ }
+    ~[sequentialToParallel]~>
+      dl![m]{ { pv := 100 ‖ sp := basketA.items ‖ idx := 0 ‖ storage := save(storage, basketA.items[0], 100) } φ } := by
+  sol_chain
 #last_line chain
 end AccountsWrite
 
@@ -467,23 +518,26 @@ namespace AccountsWriteIncrement
 def names : FreshTable := [("pv", "se1"), ("sp", "sp2"), ("idx", "se3")]
 local instance : FreshNames := .ofTable names
 #guard (FreshNames.clashes TestSuite names).isEmpty
-/-- `basketA.items[++i] = valueVal;` (stands for `alice.accounts[++i] = valueVal;`): the value snapshotted, the receiver aliased, the index captured, in that order.  The elaborator takes this step (an equality), declaring `idx` then assigning it; the chain goes on to the write and the merge, which resolves the element written, `basketA.items[i + 1]`; then the alias and the overwritten `idx := 0` go, while `pv := valueVal` and `i := i + 1` stay (a read of a local and an addition may halt). -/
+/-- `basketA.items[++i] = valueVal;` (stands for `alice.accounts[++i] = valueVal;`) with `i` 2 and `valueVal`
+42.  The paper's `⇝`, the value snapshotted, the receiver aliased and the index captured in that order, is
+the elaborator's: the program is `uint pv = valueVal; uint[] storage sp = basketA.items; uint idx;
+idx = ++i; sp[idx] = pv;`.  Then one `⇝*` binding the captures (`idx` declared, then assigned `++i`), the
+write, the merge, which resolves the element to `basketA.items[2 + 1]`, and the index folded to `3`. -/
 theorem chain :
-    dl![m]{ ⟨[ basketA.items[++i] = valueVal; ]⟩ φ }
-    ~~> dl![m]{ { pv := valueVal ‖ i := i + 1 ‖ idx := i + 1 ‖
-          storage := save(storage, basketA.items[i + 1], valueVal) } φ } :=
-  calc dl![m]{ ⟨[ basketA.items[++i] = valueVal; ]⟩ φ }
-    _ = dl![m]{ ⟨[ uint pv = valueVal; uint[] storage sp = basketA.items; uint idx; idx = ++i; sp[idx] = pv; ]⟩ φ } := rfl
-    _ ~*> dl![m]{ { pv := valueVal } { sp := basketA.items } { idx := 0 } { i := i + 1 ‖ idx := i + 1 }
-          ⟨[ sp[idx] = pv; ]⟩ φ } := by sol_chain
-    _ ~[storageIndexWriteArraySave]~> _ := by sol_chain
-    _ ~> _ := by sol_chain
-    _ ~[sequentialToParallel]~>
-        dl![m]{ { pv := valueVal ‖ sp := basketA.items ‖ idx := 0 ‖ i := i + 1 ‖ idx := i + 1 ‖
-          storage := save(storage, basketA.items[i + 1], valueVal) } φ } := by sol_chain
-    _ ~[simplifyUpdate]~>
-        dl![m]{ { pv := valueVal ‖ i := i + 1 ‖ idx := i + 1 ‖
-          storage := save(storage, basketA.items[i + 1], valueVal) } φ } := by sol_chain
+    dl![m]{ { i := 2 ‖ valueVal := 42 } ⟨[ basketA.items[++i] = valueVal; ]⟩ φ }
+    ~*> dl![m]{
+        { i := 2 ‖ valueVal := 42 } { pv := valueVal } { sp := basketA.items } { idx := 0 } { i := i + 1 ‖ idx := i + 1 }
+          ⟨[ sp[idx] = pv; ]⟩ φ }
+    ~*> dl![m]{
+        { i := 2 ‖ valueVal := 42 } { pv := valueVal } { sp := basketA.items } { idx := 0 } { i := i + 1 ‖ idx := i + 1 }
+          { storage := save(storage, sp[idx], pv) } φ }
+    ~[sequentialToParallel]~> dl![m]{
+        { i := 2 ‖ valueVal := 42 ‖ pv := 42 ‖ sp := basketA.items ‖ idx := 0 ‖ i := 2 + 1 ‖ idx := 2 + 1 ‖
+            storage := save(storage, basketA.items[2 + 1], 42) } φ }
+    ~[add_literals]~> dl![m]{
+        { i := 2 ‖ valueVal := 42 ‖ pv := 42 ‖ sp := basketA.items ‖ idx := 0 ‖ i := 3 ‖ idx := 3 ‖
+            storage := save(storage, basketA.items[3], 42) } φ } := by
+  sol_chain
 #last_line chain
 end AccountsWriteIncrement
 end
@@ -497,20 +551,29 @@ namespace MatrixRow
 def names : FreshTable := [("idx1", "se1"), ("sp", "sp2"), ("idx2", "se3")]
 local instance : FreshNames := .ofTable names
 #guard (FreshNames.clashes StandardExample names).isEmpty
-/-- `matrix[i++][i++] = 77;`, at the box.  The elaborator captures both increments before the write (the first step, an equality); `77` is a value, so `pv` is not declared.  The stack the strategy leaves indexes by the captures (`matrix[idx1]`, `sp[idx2]`) and is crossed unwritten; its merge resolves them; then the dead `idx1 := 0`, `idx2 := 0` go, while `i := i + 1` stays (an addition may halt) and `i + 1 + 1` is not shortened to `i + 2`. -/
+/-- `matrix[i++][i++] = 77;` with `i` 0, at the box.  The paper's `⇝` and first `⇝*` are the elaborator's: it
+captures both increments before the write (`uint idx1; idx1 = i++; uint[] storage sp = matrix[idx1];
+uint idx2; idx2 = i++; sp[idx2] = 77;`; `77` is a value, so `pv` is not declared).  Then the paper's second
+`⇝*`, to the stack of captures, the write, the merge, which resolves the captures, and the two additions
+folded: the write lands at `matrix[0][1]` and `i` ends at `2`, as printed. -/
 theorem chain :
-    dl![.box]{ ⟨[ matrix[i++][i++] = 77; ]⟩ φ }
-    ~~> dl![.box]{ { i := i + 1 ‖ idx1 := i ‖ sp := matrix[i] ‖ i := i + 1 + 1 ‖ idx2 := i + 1 ‖
-          storage := save(storage, matrix[i][i + 1], 77) } φ } :=
-  calc dl![.box]{ ⟨[ matrix[i++][i++] = 77; ]⟩ φ }
-    _ = dl![.box]{ ⟨[ uint idx1; idx1 = i++; uint[] storage sp = matrix[idx1]; uint idx2; idx2 = i++; sp[idx2] = 77; ]⟩ φ } := rfl
-    _ ~*> _ := by sol_chain
-    _ ~[sequentialToParallel]~>
-        dl![.box]{ { idx1 := 0 ‖ i := i + 1 ‖ idx1 := i ‖ sp := matrix[i] ‖ idx2 := 0 ‖ i := i + 1 + 1 ‖ idx2 := i + 1 ‖
-          storage := save(storage, matrix[i][i + 1], 77) } φ } := by sol_chain
-    _ ~[simplifyUpdate]~>
-        dl![.box]{ { i := i + 1 ‖ idx1 := i ‖ sp := matrix[i] ‖ i := i + 1 + 1 ‖ idx2 := i + 1 ‖
-          storage := save(storage, matrix[i][i + 1], 77) } φ } := by sol_chain
+    dl![.box]{ { i := 0 } ⟨[ matrix[i++][i++] = 77; ]⟩ φ }
+    ~*> dl![.box]{
+        { i := 0 } { idx1 := 0 } { i := i + 1 ‖ idx1 := i } { sp := matrix[idx1] } { idx2 := 0 } { i := i + 1 ‖ idx2 := i }
+          ⟨[ sp[idx2] = 77; ]⟩ φ }
+    ~*> dl![.box]{
+        { i := 0 } { idx1 := 0 } { i := i + 1 ‖ idx1 := i } { sp := matrix[idx1] } { idx2 := 0 } { i := i + 1 ‖ idx2 := i }
+          { storage := save(storage, sp[idx2], 77) } φ }
+    ~[sequentialToParallel]~> dl![.box]{
+        { i := 0 ‖ idx1 := 0 ‖ i := 0 + 1 ‖ idx1 := 0 ‖ sp := matrix[0] ‖ idx2 := 0 ‖ i := 0 + 1 + 1 ‖ idx2 := 0 + 1 ‖
+            storage := save(storage, matrix[0][0 + 1], 77) } φ }
+    ~[add_literals]~> dl![.box]{
+        { i := 0 ‖ idx1 := 0 ‖ i := 1 ‖ idx1 := 0 ‖ sp := matrix[0] ‖ idx2 := 0 ‖ i := 1 + 1 ‖ idx2 := 1 ‖
+            storage := save(storage, matrix[0][1], 77) } φ }
+    ~[add_literals]~> dl![.box]{
+        { i := 0 ‖ idx1 := 0 ‖ i := 1 ‖ idx1 := 0 ‖ sp := matrix[0] ‖ idx2 := 0 ‖ i := 2 ‖ idx2 := 1 ‖
+            storage := save(storage, matrix[0][1], 77) } φ } := by
+  sol_chain
 #last_line chain
 end MatrixRow
 end
