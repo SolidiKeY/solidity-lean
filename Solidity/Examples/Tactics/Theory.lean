@@ -206,7 +206,7 @@ theorem memoryAliasIdentity (r : IdentityPrim) (ty : RefTy) :
   calc MemValue.asIdentity (Memory.readIn (.addM .mtMem r ty) (.idC r []) account) (.idC r []) account
     _ = MemValue.asIdentity .dflt (.idC r []) account := by
         rw [Memory.readAddEqual]                                   -- readAddEqual
-    _ = Identity.idC r ([] ++ [account]) := Memory.initIdentity _ _ _  -- defaultIdentity
+    _ = Identity.idC r ([] ++ [account]) := Memory.initIdentity _ _ _  -- initIdentity
 
 /-- The read-over-write the memory examples end on
 (`Memory.memoryDeclFreshAlloc`: `carol.age = 34; x = carol.age;`). -/
@@ -320,7 +320,7 @@ theorem memoryToStorageMemberView (r : IdentityPrim) (ty : RefTy) :
               = StValue.find (.copyMem M (.idC r [])) [account] from rfl,       -- findPath
             selectOnCopyMemRef _ _ _ (by simp [M])]                           -- selectOnCopyMemRef
     _ = asInt (StValue.find (Struct.copyMem M (.idC r [account])) [balance]) := by
-        simp [M, Memory.readId]                                  -- readAddEqual, defaultIdentity
+        simp [M, Memory.readId]                                  -- readAddEqual, initIdentity
     _ = (Memory.readIn M (.idC r [account]) balance).asInt := findCopyMem _ _ [balance]
                                                                   -- findCopyMem, readRSingleton
     _ = 5 := by simp [M, MemValue.asInt]                          -- readWriteEqual

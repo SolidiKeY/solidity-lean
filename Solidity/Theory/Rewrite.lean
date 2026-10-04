@@ -162,10 +162,10 @@ inductive TheoryRule where
   | readAddDifferent
   | readEmptyMem
   -- ### Memory: defaults
-  | defaultDefElement
-  | defaultDefMember
-  | defaultSize
-  | defaultIdentity
+  | initElement
+  | initMember
+  | initSize
+  | initIdentity
   -- ### Memory: `readR`
   | readREmptyPath
   | readRSingleton
@@ -265,10 +265,10 @@ def lemmaNames : TheoryRule -> List Lean.Name
   | readAddEqual          => [``Memory.readAddEqual]
   | readAddDifferent      => [``Memory.readAddDifferent]
   | readEmptyMem          => [``Memory.readFromEmptyMemory]
-  | defaultDefElement     => [``Memory.initElement]
-  | defaultDefMember      => [``Memory.initMember]
-  | defaultSize           => [``Memory.initSize]
-  | defaultIdentity       => [``Memory.initIdentity]
+  | initElement           => [``Memory.initElement]
+  | initMember            => [``Memory.initMember]
+  | initSize              => [``Memory.initSize]
+  | initIdentity          => [``Memory.initIdentity]
   | readREmptyPath        => [``Memory.readREmptyPath]
   | readRSingleton        => [``Memory.readREmpty]
   | readRPath             => [``Memory.readRCons]
@@ -314,7 +314,7 @@ def all : List TheoryRule :=
     .selectOnDelAt,
     .defValResolve,
     .readWriteEqual, .readWriteDifferent, .readAddEqual, .readAddDifferent, .readEmptyMem,
-    .defaultDefElement, .defaultDefMember, .defaultSize, .defaultIdentity,
+    .initElement, .initMember, .initSize, .initIdentity,
     .readREmptyPath, .readRSingleton, .readRPath,
     .newAddSame, .newAddDifferent, .newWrite, .newEmptyMem,
     .fieldShapeDef, .sizeOfFixed, .sizeOfDyn, .sizeOfLeaf,
