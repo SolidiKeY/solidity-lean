@@ -13,7 +13,8 @@ The calculus's storage `delete` examples, each a chain over any modality `m` and
 crossed unwritten; the merges give the printed lines (`S₁`, `S₂`, the reads through them), and
 `findOnDelAtBelow` reads `b` and `v` back to their defaults under the chain's premise, that the deleted node
 is no mapping (a mapping keeps its members).  A read at an index (`kept`, `gone`) checks its bound in the
-state it runs in, so it does not merge under a storage write and stays as the rules leave it.
+state it runs in, so it does not merge under a storage write by itself; in `MappingDelete` the whole spine
+merges, and the frame and delete-value laws (`LineRw.lawUpdRef`) then resolve it.
 -/
 
 namespace Solidity.Examples.Chains.StorageDelete

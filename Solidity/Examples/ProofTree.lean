@@ -240,6 +240,20 @@ example : dl![m]{ { storage := save(storage, alice.age, v) } { x := 1 } φ }
     ~~> dl![m]{ { storage := save(storage, alice.age, v) ‖ x := 1 } φ } := by
   sol_rws?
 
+/-! `sol_chain?` on `~~>` at any length: one rewrite, one step, none. -/
+#guard_msgs (drop info) in
+example : dl![m]{ { storage := save(storage, alice.age, v) } { x := 1 } φ }
+    ~~> dl![m]{ { storage := save(storage, alice.age, v) ‖ x := 1 } φ } := by
+  sol_chain?
+
+#guard_msgs (drop info) in
+example : dl![m]{ { x := 1 } ⟨[ ]⟩ φ } ~~> dl![m]{ { x := 1 } φ } := by
+  sol_chain?
+
+#guard_msgs (drop info) in
+example : dl![m]{ { x := 1 } φ } ~~> dl![m]{ { x := 1 } φ } := by
+  sol_chain?
+
 end
 
 end Solidity.Examples.ProofTree

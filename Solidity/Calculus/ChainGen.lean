@@ -19,7 +19,8 @@ every check:
 * `sol_chain?` on a goal `φ ~~> ψ` checks that this chain ends at `ψ`, proves
   the goal with it and suggests the `calc`;
 * `sol_rws [r₁, …, rₙ]` proves a link `φ ~~> ψ` by the named rewrites in turn,
-  each at the first place it applies, as `~[rᵢ]~> _` would: the link that
+  each at the first place it applies but a read of the state as the program
+  found it (the places `#last_line` and `#chain` look at): the link that
   stands for several rewrite lines deleted from a chain.  `sol_rws?` finds the
   names (the order `#chain` uses) and suggests them.
 
@@ -86,6 +87,9 @@ def generate (C φ : Expr) : TermElabM Gen := do
     prev := l.fml
   if run.stuck then
     return { splice := run.splice, steps, rewrites := #[], stop := some (stuckNote run) }
+  if steps.size ≥ runFuel then
+    return { splice := run.splice, steps, rewrites := #[],
+             stop := some m!"the strategy ran {runFuel} steps: go on from the last line" }
   let mut rws := #[]
   let mut seen : Std.HashSet Expr := {}
   let mut stop := none
@@ -190,12 +194,15 @@ elab_rules : tactic
     let last := gen.last φ
     unless ← isDefEq last ψ do
       throwError "sol_chain?: the chain from the line before ends at{indentExpr last}\nnot{indentExpr ψ}"
-    let lines ← gen.calcLines C φ
-    -- a chain of steps alone is a derivation (`~*>`), not a `~~>`
-    let lines := if gen.rewrites.isEmpty then
-        #["exact Fml.Steps.sound (" ++ lines[0]!] ++ (lines.extract 1 lines.size).map ("  " ++ ·)
-          |>.modify lines.size (· ++ ")")
-      else #["exact " ++ lines[0]!] ++ (lines.extract 1 lines.size).map ("  " ++ ·)
+    -- every arrow is a `SoundRel`, so `leads` takes a `calc` of any length to
+    -- `~~>`: one link is its own relation, and steps alone compose to `~*>`
+    let lines ← if gen.steps.isEmpty && gen.rewrites.isEmpty then
+        pure #["exact Solidity.Fml.Leads.self _"]
+      else do
+        let ls ← gen.calcLines C φ
+        let body := #["exact Solidity.Fml.SoundRel.leads (" ++ ls[0]!] ++
+          (ls.extract 1 ls.size).map ("  " ++ ·)
+        pure (body.modify (body.size - 1) (· ++ ")"))
     let text := "\n".intercalate lines.toList
     let stx ← match Parser.runParserCategory (← getEnv) `tactic text with
       | .ok s => pure s
@@ -213,7 +220,10 @@ after, and `A ~~> B`. -/
 def rwStep (C A : Expr) (n : Lean.Name) : TermElabM (Expr × Expr) := do
   let some arrow ← rwArrow? (mkIdent n) | throwError "sol_rws: {n} is no rewrite"
   let ψ ← mkFreshExprMVar (mkApp (mkConst ``Fml) C)
-  let (r, q, pf) ← rwLabel C A ψ (mkIdent n) arrow
+  -- the candidates `stillApplies` chose among, so the replay meets the same
+  -- instance: never a read of the state as the program found it
+  let (rs, failed) ← rwCandidatesWith (fun t => !plainRead t) C A arrow
+  let (r, q, pf) ← rwSelect C A ψ n.toString rs failed
   let q ← instantiateMVars q
   let h := pf.getD (someRefl C q)
   return (q, mkAppN (mkConst ``Fml.RwBy.sound) #[C, mkStrLit n.toString, r, A, q, h])

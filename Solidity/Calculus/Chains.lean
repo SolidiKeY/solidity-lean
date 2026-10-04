@@ -1001,8 +1001,10 @@ run, where the rest after that line starts, and whether the run is stuck.
 A `calc` asks for the line after each of its lines, and the run from a line
 is the rest of the run that reached it, so the strategy is compiled and run
 once per chain, not once per link.  The state is local to the environment
-branch, dropped with the declaration: an edited contract never meets an old
-run, and the kernel checks every line anyway. -/
+branch: a declaration's runs end with it, a command's (`#derivation`) stay in
+the file's environment after it, and an edit re-elaborates from an environment
+before it, so an edited contract never meets an old run.  The kernel checks
+every line anyway. -/
 initialize runCache : EnvExtension (Std.HashMap Lean.Expr (Array Line × Nat × Bool)) ←
   registerEnvExtension (pure {}) (asyncMode := .local)
 
@@ -1048,14 +1050,14 @@ def runChain (C φ : Lean.Expr) : MetaM Run := do
       let ds ← closedLines n C (φ'.replaceFVar m (mkConst ``Modality.diamond))
       let bs ← closedLines n C (φ'.replaceFVar m (mkConst ``Modality.box))
       pure (shared (fill m) ds bs)
-  -- a run that used up its fuel may go on past its last line: the lines
-  -- near its end start runs of their own
+  -- a run that used up its fuel may go on past its last line, so the rest of
+  -- it from a line is shorter than a run from there: only its start is kept
   let arr := ls.toArray
-  let keep := if arr.size < runFuel then arr.size else arr.size / 2
   modifyEnv fun env => runCache.modifyState env fun c => Id.run do
     let mut c := c.insert φ (arr, 0, stuck)
-    for (l, j) in arr.zipIdx do
-      if j < keep then c := c.insert l.fml (arr, j + 1, stuck)
+    if arr.size < runFuel then
+      for (l, j) in arr.zipIdx do
+        c := c.insert l.fml (arr, j + 1, stuck)
     return c
   return { splice := sp, lines := ls, stuck }
 
@@ -1469,7 +1471,10 @@ connectives (`LineRw.applyOnRigidIn`, `LineRw.applyOnRigidBoxIn`), and
 skeleton of the formula it acts on (`skelBelow`).  A law: at each instance,
 on the equations, then in each update's right-hand sides when its result
 cannot halt — under any modality where the update holds the write the law
-reads back (`LineRw.lawUpdAny`), else under the box.  A literal law: in
+reads back (`LineRw.lawUpdAny`), else under the box; a frame or
+delete-value law (`TermTaclet.RefLaw`) under any modality where the update
+holds its storage operation (`LineRw.lawUpdRef`); and a member-wise law under
+any modality (`LineRw.lawUpdEq`).  A literal law: in
 each update's right-hand sides (`LineRw.lit`), then in the skeleton below
 each number of updates (`LineRw.litEq`). -/
 def rwCandidatesWith (keep : Lean.Expr → Bool) (C φ : Lean.Expr) :

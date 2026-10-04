@@ -20,11 +20,12 @@ formulas `dl![m]{ … }` for every modality `m` and postcondition `φ`: a printe
   reference is bound without a value capture where the value is simple
   (`carol.account.balance = 10;`), and `memoryFieldWriteCopy` is one rule where
   the printed trace unfolds a source path into a local.
-* Not drawn: the printed lines that resolve a memory read through the identity
-  (`memReadIn`, `idConstructor(ρ, [account])`): no rewrite link states a memory
-  law yet (a memory read denotes its run, so a law of it is a refinement of the
-  interpreter, not a Theory equation), so each chain stops at the updates the
-  program leaves, merged where the merge computes.
+* Past the program the updates merge (`~[sequentialToParallel]~>`), and a
+  read the merge leaves over a fresh object resolves by a law of memory reads
+  (`~[readAddEqual]~>`, `EvalLaw`): a refinement of the interpreter, applied
+  where the update holds the write it reads back.  Not drawn: the printed
+  lines that resolve a read through the identity (`memReadIn`,
+  `idConstructor(ρ, [account])`).
 -/
 
 namespace Solidity.Examples.Chains.Memory

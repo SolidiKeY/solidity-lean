@@ -98,9 +98,6 @@ def overflowDiamondChain :
             (⟨ revert(); ⟩ false ∨ se1 ≐ true ∨ se1 ≐ false) }› } :=
   (overflowTrace .diamond φ).trans (by sol_chain)
 
-/-- `250 + 10`, the printed `260`. -/
-abbrev t260 : Term StandardExample := .binop .add .uint (.lit (.int 250)) (.lit (.int 10))
-
 /-- The modality-independent part of the trace: merge the updates, drop the
 overwritten assignment, fold `250 + 10` and `260 <= 255`, push the exact
 update through the split, and select its failing branch. -/

@@ -1,4 +1,6 @@
 import Solidity.Calculus.Chains
+import Solidity.Calculus.ChainGen
+import Solidity.Calculus.LastLine
 import Solidity.Calculus.Close
 import Solidity.FreshNames
 
@@ -33,14 +35,16 @@ namespace RootDelete
 
 /-- `Person memory carol; Person memory carolAlias = carol; carol.age = 33;
 delete carol; oldAge = carolAlias.age; newAge = carol.age;` — `delete` rebinds
-`carol` to a fresh default object, and the alias keeps the old one. -/
-def chain (m : Modality) (φ : Post StandardExample) :
+`carol` to a fresh default object, and the alias keeps the old one: the
+reads resolve to `33` through the alias and to the default `0` through
+`carol`. -/
+theorem chain (m : Modality) (φ : Post StandardExample) :
     dl![m]{ ⟨[ Person memory carol; Person memory carolAlias = carol; carol.age = 33; delete carol;
                oldAge = carolAlias.age; newAge = carol.age; ]⟩ φ }
-    ~*> dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
-                { carolAlias := carol } { memory := write(memory, carol.age, 33) }
-                { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
-                { oldAge := read(memory, carolAlias.age) } { newAge := read(memory, carol.age) } φ } :=
+    ~~> dl![m]{ { carol := freshId(addM(memory, Person)) ‖ carolAlias := freshId(addM(memory, Person)) ‖
+          carol := freshId(addM(write(addM(memory, Person), freshId(addM(memory, Person)).age, 33), Person)) ‖
+          memory := addM(write(addM(memory, Person), freshId(addM(memory, Person)).age, 33), Person) ‖
+          oldAge := 33 ‖ newAge := 0 } φ } :=
   calc dl![m]{ ⟨[ Person memory carol; Person memory carolAlias = carol; carol.age = 33; delete carol;
                   oldAge = carolAlias.age; newAge = carol.age; ]⟩ φ }
     _ ~[memoryReferenceDeclFreshAlloc]~>
@@ -64,6 +68,13 @@ def chain (m : Modality) (φ : Post StandardExample) :
                   { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
                   { oldAge := read(memory, carolAlias.age) } { newAge := read(memory, carol.age) } φ } :=
       by sol_chain
+    _ ~[sequentialToParallel]~> _ := by sol_chain
+    _ ~~> dl![m]{ { carol := freshId(addM(memory, Person)) ‖ carolAlias := freshId(addM(memory, Person)) ‖
+          carol := freshId(addM(write(addM(memory, Person), freshId(addM(memory, Person)).age, 33), Person)) ‖
+          memory := addM(write(addM(memory, Person), freshId(addM(memory, Person)).age, 33), Person) ‖
+          oldAge := 33 ‖ newAge := 0 } φ } := by
+      sol_rws [readAddEqual, readAddDifferent, readOnWrite]
+#last_line chain
 
 end RootDelete
 
