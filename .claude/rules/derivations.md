@@ -36,7 +36,9 @@ Two directories, by proof style:
   `#last_line chain` (`Calculus/LastLine.lean`) follows every chain that is a
   whole trace, not a segment composed into one: it is silent at a last line
   and otherwise says which rewrite still applies and what it gives — the
-  worklist for the line to write next. A read of the state as the program
+  worklist for the line to write next. Generate a chain with `#chain φ`
+  rather than writing it line by line, then prune: strategy lines collapse
+  into `~*>`, rewrite lines into `_ ~~> ψ := by sol_rws [r₁, …]`. A read of the state as the program
   found it (`find(storage, p)`) is a last line. A `FreshNames` table is
   written only where the printed trace renames a capture; the elaborator's
   own `se1`, `sp1` need none. A chain over ten updates is split into

@@ -109,7 +109,10 @@ written, as a `calc` of one link per line: `φ ~[r]~> ψ` (rule `r` fires;
 `~[sequentialToParallel]~>`, `~[findOnSave]~>`, … (`Calculus/ChainRewrites.lean`),
 `~~>` for their composition. `#derivation φ` prints the lines to copy from, in
 the rules' fresh names (`se1`, `sp1`); `sol_chain?` writes the `calc` of a
-`~*>` goal. A line keeps a modality open with `dl![m]{ ⟨[ p ]⟩ φ }` and a
+`~*>` goal. `#chain φ` (`Calculus/ChainGen.lean`) writes the whole chain, the
+program and then the rewrites to a last line, as a `calc` to paste and prune
+(`sol_chain?` does it on a `φ ~~> ψ` goal); `sol_rws [r₁, …]` is one `~~>`
+link for several rewrite lines, `sol_rws?` finds them. A line keeps a modality open with `dl![m]{ ⟨[ p ]⟩ φ }` and a
 postcondition with `φ : Post C`; a box chain's last line is `dl![.box]{ … }`.
 When a line is not reached, `sol_chain`'s error shows the derivation it
 computed.

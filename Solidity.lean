@@ -36,6 +36,7 @@ import Solidity.Calculus.Progress
 import Solidity.Calculus.Termination
 import Solidity.Calculus.Chains
 import Solidity.Calculus.LastLine
+import Solidity.Calculus.ChainGen
 import Solidity.Calculus.Sequents
 import Solidity.Calculus.ProofTree
 import Solidity.Calculus.UpdateRules

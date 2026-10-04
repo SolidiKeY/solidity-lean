@@ -1,4 +1,5 @@
 import Solidity.Tools.ProofTree
+import Solidity.Calculus.ChainGen
 
 /-!
 # The proof tree, pinned
@@ -189,6 +190,55 @@ info: Try this:
 #guard_msgs in
 example : dl![m]{ ⟨[ alice.age = v; ]⟩ φ } ~*> dl![m]{ { storage := save(storage, alice.age, v) } φ } := by
   sol_chain?
+
+end
+
+/-! ## `#chain`, `sol_rws`: past the program
+
+`#chain φ` goes on where `sol_chain?` on `~*>` stops: after the program, the
+rewrites until the line is last, so the whole `calc` is written once. A run
+of rewrite lines can then be one link, `sol_rws [r₁, …]`, which `sol_rws?`
+writes. -/
+
+section
+variable (m : Modality) (φ : Post StandardExample)
+
+/--
+info: last line:
+  dl![m]{ { storage := save(storage, alice.age, v) ‖ x := 1 } φ }
+
+calc dl![m]{ ⟨[ alice.age = v; x = 1; ]⟩ φ }
+  _ ~[storageFieldWriteSave]~> dl![m]{ { storage := save(storage, alice.age, v) } ⟨[ x = 1; ]⟩ φ } := by sol_chain
+  _ ~[localValueAssign]~> dl![m]{ { storage := save(storage, alice.age, v) } { x := 1 } ⟨[ ]⟩ φ } := by sol_chain
+  _ ~[emptyModality]~> dl![m]{ { storage := save(storage, alice.age, v) } { x := 1 } φ } := by sol_chain
+  _ ~[sequentialToParallel]~> dl![m]{ { storage := save(storage, alice.age, v) ‖ x := 1 } φ } := by sol_chain
+-/
+#guard_msgs in
+#chain dl![m]{ ⟨[ alice.age = v; x = 1; ]⟩ φ }
+
+/-- The program by the strategy, then the merge and the read of the fresh
+`Person` in one link. -/
+example :
+    dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
+            ⟨[ v = carol.account.balance; ]⟩ φ }
+    ~~> dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) ‖
+          mv1 := read(addM(memory, Person), freshId(addM(memory, Person)).account) ‖ v := 0 } φ } :=
+  calc dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
+               ⟨[ v = carol.account.balance; ]⟩ φ }
+    _ ~*> dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
+          { mv1 := read(memory, carol.account) } { v := read(memory, mv1.balance) } φ } := by sol_chain
+    _ ~~> dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) ‖
+          mv1 := read(addM(memory, Person), freshId(addM(memory, Person)).account) ‖ v := 0 } φ } := by
+      sol_rws [sequentialToParallel, readAddEqual]
+
+/--
+info: Try this:
+  sol_rws [sequentialToParallel]
+-/
+#guard_msgs in
+example : dl![m]{ { storage := save(storage, alice.age, v) } { x := 1 } φ }
+    ~~> dl![m]{ { storage := save(storage, alice.age, v) ‖ x := 1 } φ } := by
+  sol_rws?
 
 end
 
