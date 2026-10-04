@@ -38,10 +38,8 @@ def box :
     dl![.box]{ ⟨[ to.transfer(5); ]⟩ φ }
     ~*> dl![.box]{ { net := if(to = this) then net else store(net, at(to), select(net, at(to)) - 5) } φ } :=
   calc dl![.box]{ ⟨[ to.transfer(5); ]⟩ φ }
-    _ ~[transferNoCallbackBox]~>
-        dl![.box]{ { net := if(to = this) then net else store(net, at(to), select(net, at(to)) - 5) } ⟨[ ]⟩ φ } := rfl
-    _ ~[emptyModality]~>
-        dl![.box]{ { net := if(to = this) then net else store(net, at(to), select(net, at(to)) - 5) } φ } := rfl
+    _ ~*>
+        dl![.box]{ { net := if(to = this) then net else store(net, at(to), select(net, at(to)) - 5) } φ } := by sol_chain
 
 #last_line box
 

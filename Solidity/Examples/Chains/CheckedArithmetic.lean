@@ -67,14 +67,9 @@ def overflowTrace :
             (⟨[ revert(); ]⟩ false ∨ se1 ≐ true ∨ se1 ≐ false) }› } :=
   calc dl![m]{ ⟨[ uint8 x = 250; x += 10; ]⟩ φ }
     _ ~*> _ := overflowToCheck m φ
-    _ ~[requireSimple]~> dl![m]{ { x := 250 } { x := x + 10 }
-          ‹.upd m capX dl![m]{ (se1 ≐ true → ⟨[ ]⟩ φ) ∧ (se1 ≐ false → ⟨[ revert(); ]⟩ φ) ∧
-            (⟨[ revert(); ]⟩ false ∨ se1 ≐ true ∨ se1 ≐ false) }› } := by
-      sol_chain
-    _ ~[emptyModality]~> dl![m]{ { x := 250 } { x := x + 10 }
+    _ ~*> dl![m]{ { x := 250 } { x := x + 10 }
           ‹.upd m capX dl![m]{ (se1 ≐ true → φ) ∧ (se1 ≐ false → ⟨[ revert(); ]⟩ φ) ∧
-            (⟨[ revert(); ]⟩ false ∨ se1 ≐ true ∨ se1 ≐ false) }› } := by
-      sol_chain
+            (⟨[ revert(); ]⟩ false ∨ se1 ≐ true ∨ se1 ≐ false) }› } := by sol_chain
 
 /-- `[ uint8 x = 250; x += 10; ] φ`: the out-of-range goal is a revert, which
 the box closes to `true`. -/

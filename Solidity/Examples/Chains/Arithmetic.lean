@@ -26,12 +26,8 @@ def compoundStorageUpdate :
     dl![m]{ ⟨[ alice.age += 1; ]⟩ φ }
     ~*> dl![m]{ { storage := save(storage, alice.age, find(storage, alice.age) + 1) } φ } :=
   calc dl![m]{ ⟨[ alice.age += 1; ]⟩ φ }
-    _ ~[storageFieldOpAssign]~>
-        dl![m]{ { storage := save(storage, alice.age, find(storage, alice.age) + 1) } ⟨[ ]⟩ φ } := by
-      sol_chain
-    _ ~[emptyModality]~>
-        dl![m]{ { storage := save(storage, alice.age, find(storage, alice.age) + 1) } φ } := by
-      sol_chain
+    _ ~*>
+        dl![m]{ { storage := save(storage, alice.age, find(storage, alice.age) + 1) } φ } := by sol_chain
 
 end CompoundStorageUpdate
 

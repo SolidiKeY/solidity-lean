@@ -61,16 +61,11 @@ theorem chain :
                 { memory := write(memory, carol.age, 42) }
                 { storage := store(storage, alice, copyMem(mtSt, memory, carol)) }
                 ⟨[ v = alice.age; ]⟩ φ } := rfl
-    _ ~[storageFieldReadFind]~>
+    _ ~*>
         dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
                 { memory := write(memory, carol.age, 42) }
                 { storage := store(storage, alice, copyMem(mtSt, memory, carol)) }
-                { v := find(storage, alice.age) } ⟨[ ]⟩ φ } := rfl
-    _ ~[emptyModality]~>
-        dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
-                { memory := write(memory, carol.age, 42) }
-                { storage := store(storage, alice, copyMem(mtSt, memory, carol)) }
-                { v := find(storage, alice.age) } φ } := rfl
+                { v := find(storage, alice.age) } φ } := by sol_chain
     _ ~[sequentialToParallel]~>
         dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
                 { memory := write(memory, carol.age, 42) ‖

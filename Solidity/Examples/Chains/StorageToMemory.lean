@@ -55,16 +55,11 @@ theorem chain :
                 { carol := freshId(copySt(memory, find(storage, alice))) ‖
                   memory := copySt(memory, find(storage, alice)) }
                 ⟨[ v = carol.age; ]⟩ φ } := rfl
-    _ ~[memoryFieldReadHeap]~>
+    _ ~*>
         dl![m]{ { storage := save(storage, alice.age, 25) }
                 { carol := freshId(copySt(memory, find(storage, alice))) ‖
                   memory := copySt(memory, find(storage, alice)) }
-                { v := read(memory, carol.age) } ⟨[ ]⟩ φ } := rfl
-    _ ~[emptyModality]~>
-        dl![m]{ { storage := save(storage, alice.age, 25) }
-                { carol := freshId(copySt(memory, find(storage, alice))) ‖
-                  memory := copySt(memory, find(storage, alice)) }
-                { v := read(memory, carol.age) } φ } := rfl
+                { v := read(memory, carol.age) } φ } := by sol_chain
     _ ~[sequentialToParallel]~>
         dl![m]{ { storage := save(storage, alice.age, 25) ‖
                   carol := freshId(copySt(memory, find(save(storage, alice.age, 25), alice))) ‖
@@ -160,18 +155,12 @@ theorem install :
                 { acc := freshId(copySt(memory, find(storage, sp))) ‖
                   memory := copySt(memory, find(storage, sp)) }
                 ⟨[ v = acc.balance; ]⟩ φ } := rfl
-    _ ~[memoryFieldReadHeap]~>
+    _ ~*>
         dl![m]{ { pv := 10 ‖ aliceAcc := alice.account ‖ storage := save(storage, alice.account.balance, 10) ‖
                   sp := alice.account }
                 { acc := freshId(copySt(memory, find(storage, sp))) ‖
                   memory := copySt(memory, find(storage, sp)) }
-                { v := read(memory, acc.balance) } ⟨[ ]⟩ φ } := rfl
-    _ ~[emptyModality]~>
-        dl![m]{ { pv := 10 ‖ aliceAcc := alice.account ‖ storage := save(storage, alice.account.balance, 10) ‖
-                  sp := alice.account }
-                { acc := freshId(copySt(memory, find(storage, sp))) ‖
-                  memory := copySt(memory, find(storage, sp)) }
-                { v := read(memory, acc.balance) } φ } := rfl
+                { v := read(memory, acc.balance) } φ } := by sol_chain
     _ ~[sequentialToParallel]~>
         dl![m]{ { pv := 10 ‖ aliceAcc := alice.account ‖ storage := save(storage, alice.account.balance, 10) ‖
                   sp := alice.account ‖
@@ -261,11 +250,7 @@ theorem install :
                   t := freshId(copySt(memory, find(storage, alice.account.token))) ‖
                   memory := copySt(memory, find(storage, alice.account.token)) } φ } :=
   calc dl![m]{ { aliceTok := alice.account.token } ⟨[ t = aliceTok; ]⟩ φ where Token memory t }
-    _ ~[memoryStorageCopy]~>
-        dl![m]{ { aliceTok := alice.account.token }
-                { t := freshId(copySt(memory, find(storage, aliceTok))) ‖
-                  memory := copySt(memory, find(storage, aliceTok)) } ⟨[ ]⟩ φ } := by sol_chain
-    _ ~[emptyModality]~>
+    _ ~*>
         dl![m]{ { aliceTok := alice.account.token }
                 { t := freshId(copySt(memory, find(storage, aliceTok))) ‖
                   memory := copySt(memory, find(storage, aliceTok)) } φ } := by sol_chain

@@ -58,11 +58,7 @@ theorem chain (m : Modality) (φ : Post StandardExample) :
     _ ~*> dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
                   { carolAcc := read(memory, carol.account) } ⟨[ carolAcc.balance = 100; ]⟩ φ } := by
       sol_chain
-    _ ~[memoryFieldWriteStore]~>
-        dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
-                { carolAcc := read(memory, carol.account) }
-                { memory := write(memory, carolAcc.balance, 100) } ⟨[ ]⟩ φ } := by sol_chain
-    _ ~[emptyModality]~>
+    _ ~*>
         dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
                 { carolAcc := read(memory, carol.account) }
                 { memory := write(memory, carolAcc.balance, 100) } φ } := by sol_chain
@@ -91,14 +87,10 @@ theorem chain (m : Modality) (φ : Post StandardExample) :
   calc dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
                { david := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
                ⟨[ carol.account = david.account; ]⟩ φ }
-    _ ~[memoryFieldWriteCopy]~>
+    _ ~*>
         dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
                 { david := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
-                { memory := write(memory, carol.account, read(memory, david.account)) } ⟨[ ]⟩ φ } := rfl
-    _ ~[emptyModality]~>
-        dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
-                { david := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
-                { memory := write(memory, carol.account, read(memory, david.account)) } φ } := rfl
+                { memory := write(memory, carol.account, read(memory, david.account)) } φ } := by sol_chain
     _ ~[sequentialToParallel]~> _ := by sol_chain
 #last_line chain
 
@@ -129,11 +121,7 @@ theorem chain (m : Modality) (φ : Post StandardExample) :
                 ⟨[ Account memory acc = carol.account; acc.balance = 10; ]⟩ φ } := by sol_chain
     _ ~*> dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
                   { acc := read(memory, carol.account) } ⟨[ acc.balance = 10; ]⟩ φ } := by sol_chain
-    _ ~[memoryFieldWriteStore]~>
-        dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
-                { acc := read(memory, carol.account) }
-                { memory := write(memory, acc.balance, 10) } ⟨[ ]⟩ φ } := by sol_chain
-    _ ~[emptyModality]~>
+    _ ~*>
         dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
                 { acc := read(memory, carol.account) }
                 { memory := write(memory, acc.balance, 10) } φ } := by sol_chain
@@ -168,14 +156,9 @@ theorem chain (m : Modality) (φ : Post StandardExample) :
                 ⟨[ acc = carol.account; v = acc.balance; ]⟩ φ } := by sol_chain
     _ ~*> dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
                   { acc := read(memory, carol.account) } ⟨[ v = acc.balance; ]⟩ φ } := by sol_chain
-    _ ~[memoryFieldReadHeap]~>
+    _ ~*>
         dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
-                { acc := read(memory, carol.account) } { v := read(memory, acc.balance) } ⟨[ ]⟩ φ } := by
-      sol_chain
-    _ ~[emptyModality]~>
-        dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
-                { acc := read(memory, carol.account) } { v := read(memory, acc.balance) } φ } := by
-      sol_chain
+                { acc := read(memory, carol.account) } { v := read(memory, acc.balance) } φ } := by sol_chain
     _ ~[sequentialToParallel]~> _ := by sol_chain
     _ ~[readAddEqual]~> _ := by sol_chain
 #last_line chain
@@ -199,12 +182,9 @@ theorem chain (m : Modality) (φ : Post StandardExample) :
     _ ~[memoryLocalDeclInitDrop]~>
         dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
                 ⟨[ carolAlias = carol; ]⟩ φ } := rfl
-    _ ~[memoryRootAlias]~>
+    _ ~*>
         dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
-                { carolAlias := carol } ⟨[ ]⟩ φ } := rfl
-    _ ~[emptyModality]~>
-        dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
-                { carolAlias := carol } φ } := rfl
+                { carolAlias := carol } φ } := by sol_chain
 
     _ ~[sequentialToParallel]~> _ := by sol_chain
 #last_line chain
@@ -241,13 +221,9 @@ theorem chain (m : Modality) (φ : Post StandardExample) :
     _ ~*> dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
                   { carolAcc := read(memory, carol.account) } ⟨[ t = carolAcc.token; ]⟩ φ } := by
       sol_chain
-    _ ~[memoryFieldReadAliasRoot]~>
+    _ ~*>
         dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
-                { carolAcc := read(memory, carol.account) } { t := read(memory, carolAcc.token) } ⟨[ ]⟩ φ } :=
-      rfl
-    _ ~[emptyModality]~>
-        dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
-                { carolAcc := read(memory, carol.account) } { t := read(memory, carolAcc.token) } φ } := rfl
+                { carolAcc := read(memory, carol.account) } { t := read(memory, carolAcc.token) } φ } := by sol_chain
 
     _ ~[sequentialToParallel]~> _ := by sol_chain
 #last_line chain
@@ -264,12 +240,9 @@ theorem chain (m : Modality) (φ : Post StandardExample) :
     ~~> dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) ‖
           v := freshId(addM(memory, Person)) } φ } :=
   calc dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) } ⟨[ v = carol; ]⟩ φ }
-    _ ~[memoryRootAlias]~>
+    _ ~*>
         dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
-                { v := carol } ⟨[ ]⟩ φ } := rfl
-    _ ~[emptyModality]~>
-        dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
-                { v := carol } φ } := rfl
+                { v := carol } φ } := by sol_chain
 
     _ ~[sequentialToParallel]~> _ := by sol_chain
 #last_line chain
@@ -290,14 +263,10 @@ theorem chain (m : Modality) (φ : Post StandardExample) :
   calc dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
                { david := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
                ⟨[ carol = david; ]⟩ φ }
-    _ ~[memoryRootAlias]~>
+    _ ~*>
         dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
                 { david := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
-                { carol := david } ⟨[ ]⟩ φ } := rfl
-    _ ~[emptyModality]~>
-        dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
-                { david := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
-                { carol := david } φ } := rfl
+                { carol := david } φ } := by sol_chain
 
     _ ~[sequentialToParallel]~> _ := by sol_chain
 #last_line chain
@@ -325,10 +294,7 @@ theorem chain (m : Modality) (φ : Post StandardExample) :
                 ⟨[ uint pv = a + b; carol.age = pv; ]⟩ φ } := by sol_chain
     _ ~*> dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
                   { pv := a + b } ⟨[ carol.age = pv; ]⟩ φ } := by sol_chain
-    _ ~[memoryFieldWriteStore]~>
-        dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
-                { pv := a + b } { memory := write(memory, carol.age, pv) } ⟨[ ]⟩ φ } := by sol_chain
-    _ ~[emptyModality]~>
+    _ ~*>
         dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
                 { pv := a + b } { memory := write(memory, carol.age, pv) } φ } := by sol_chain
 
@@ -350,14 +316,10 @@ theorem chain (m : Modality) (φ : Post StandardExample) :
   calc dl![m]{ { david := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
                { carolAcc := freshId(addM(memory, Account)) ‖ memory := addM(memory, Account) }
                ⟨[ carolAcc = david.account; ]⟩ φ }
-    _ ~[memoryFieldReadAliasRoot]~>
+    _ ~*>
         dl![m]{ { david := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
                 { carolAcc := freshId(addM(memory, Account)) ‖ memory := addM(memory, Account) }
-                { carolAcc := read(memory, david.account) } ⟨[ ]⟩ φ } := rfl
-    _ ~[emptyModality]~>
-        dl![m]{ { david := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
-                { carolAcc := freshId(addM(memory, Account)) ‖ memory := addM(memory, Account) }
-                { carolAcc := read(memory, david.account) } φ } := rfl
+                { carolAcc := read(memory, david.account) } φ } := by sol_chain
 
     _ ~[sequentialToParallel]~> _ := by sol_chain
     _ ~[readAddDifferentIdentity]~> _ := by sol_chain

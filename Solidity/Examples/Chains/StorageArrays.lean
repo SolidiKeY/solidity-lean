@@ -90,12 +90,9 @@ theorem chain :
     _ ~[storagePushValue_unfold_leftFstReceiver]~>
         dl![m]{ ⟨[ Token[] storage sp = bucket.tokens; sp.push(tok); ]⟩ φ } := by sol_chain
     _ ~*> dl![m]{ { sp := bucket.tokens } ⟨[ sp.push(tok); ]⟩ φ } := by sol_chain
-    _ ~[storagePushValueCopySource]~>
+    _ ~*>
         dl![m]{ { sp := bucket.tokens }
-          { storage := save(save(storage, sp[sp.length], find(storage, tok)), sp.length, sp.length + 1) } ⟨[ ]⟩ φ } := rfl
-    _ ~[emptyModality]~>
-        dl![m]{ { sp := bucket.tokens }
-          { storage := save(save(storage, sp[sp.length], find(storage, tok)), sp.length, sp.length + 1) } φ } := rfl
+          { storage := save(save(storage, sp[sp.length], find(storage, tok)), sp.length, sp.length + 1) } φ } := by sol_chain
     _ ~[sequentialToParallel]~>
         dl![m]{ { sp := bucket.tokens ‖
           storage := save(save(storage, bucket.tokens[bucket.tokens.length], find(storage, tok)),
@@ -112,9 +109,7 @@ def bare :
     dl![m]{ ⟨[ tokens.push(); ]⟩ φ }
     ~*> dl![m]{ { storage := save(storage, tokens.length, tokens.length + 1) } φ } :=
   calc dl![m]{ ⟨[ tokens.push(); ]⟩ φ }
-    _ ~[storagePushLengthSaveReferenceElement]~>
-        dl![m]{ { storage := save(storage, tokens.length, tokens.length + 1) } ⟨[ ]⟩ φ } := rfl
-    _ ~[emptyModality]~> dl![m]{ { storage := save(storage, tokens.length, tokens.length + 1) } φ } := rfl
+    _ ~*> dl![m]{ { storage := save(storage, tokens.length, tokens.length + 1) } φ } := by sol_chain
 #last_line bare
 
 /-- `uint i = tokens.push().value;`, as `Token storage sp = tokens.push(); uint i = sp.value;`: the old-length slot bound by `storageLocalRootPushBind`, then read; the read merges under the push, the alias standing for the pre-state slot, and stays a read of that slot (recycled, whatever it holds). -/
@@ -134,21 +129,26 @@ theorem bound :
           i := find(save(storage, tokens.length, tokens.length + 1), tokens[tokens.length].value) } φ } := by sol_chain
 #last_line bound
 
+section
+/-- `pv`, the right-hand side snapshotted. -/
+local instance : FreshNames := .ofTable [("pv", "se1")]
+#guard (FreshNames.clashes Pushes [("pv", "se1")]).isEmpty
 /-- `values.push() = makeValue();`: a push used as a target is the push of its right-hand side (the first step, an equality), then as for `values.push(makeValue())`; the element is written before the length. -/
 theorem lvalue :
     dl![m]{ ⟨[ values.push() = makeValue(); ]⟩ φ }
-    ~~> dl![m]{ { se2 := select(storage, seed) ‖ se1 := select(storage, seed) ‖
+    ~~> dl![m]{ { se2 := select(storage, seed) ‖ pv := select(storage, seed) ‖
           storage := save(save(storage, values[values.length], select(storage, seed)), values.length, values.length + 1) } φ } :=
   calc dl![m]{ ⟨[ values.push() = makeValue(); ]⟩ φ }
-    _ = dl![m]{ ⟨[ uint se1 = makeValue(); values.push(se1); ]⟩ φ } := rfl
+    _ = dl![m]{ ⟨[ uint pv = makeValue(); values.push(pv); ]⟩ φ } := rfl
     _ ~*> _ := by sol_chain
     _ ~[sequentialToParallel]~>
-        dl![m]{ { se1 := 0 ‖ se2 := 0 ‖ se2 := select(storage, seed) ‖ se1 := select(storage, seed) ‖
+        dl![m]{ { pv := 0 ‖ se2 := 0 ‖ se2 := select(storage, seed) ‖ pv := select(storage, seed) ‖
           storage := save(save(storage, values[values.length], select(storage, seed)), values.length, values.length + 1) } φ } := by sol_chain
     _ ~[simplifyUpdate]~>
-        dl![m]{ { se2 := select(storage, seed) ‖ se1 := select(storage, seed) ‖
+        dl![m]{ { se2 := select(storage, seed) ‖ pv := select(storage, seed) ‖
           storage := save(save(storage, values[values.length], select(storage, seed)), values.length, values.length + 1) } φ } := by sol_chain
 #last_line lvalue
+end
 end EmptyPush
 
 namespace PushLvalue
@@ -175,14 +175,10 @@ theorem field :
     _ ~*> dl![m]{ { pv := 11 }
           { storage := save(storage, tokens.length, tokens.length + 1) ‖ sp := tokens[tokens.length] }
           ⟨[ sp.value = pv; ]⟩ φ } := by sol_chain
-    _ ~[storageFieldWriteSave]~>
+    _ ~*>
         dl![m]{ { pv := 11 }
           { storage := save(storage, tokens.length, tokens.length + 1) ‖ sp := tokens[tokens.length] }
-          { storage := save(storage, sp.value, pv) } ⟨[ ]⟩ φ } := rfl
-    _ ~[emptyModality]~>
-        dl![m]{ { pv := 11 }
-          { storage := save(storage, tokens.length, tokens.length + 1) ‖ sp := tokens[tokens.length] }
-          { storage := save(storage, sp.value, pv) } φ } := rfl
+          { storage := save(storage, sp.value, pv) } φ } := by sol_chain
     _ ~[sequentialToParallel]~>
         dl![m]{ { pv := 11 ‖ sp := tokens[tokens.length] ‖
           storage := save(save(storage, tokens.length, tokens.length + 1), tokens[tokens.length].value, 11) } φ } := by
@@ -202,10 +198,8 @@ theorem bare :
     _ ~[storagePush_unfold_leftFstReceiver]~>
         dl![m]{ ⟨[ Token[] storage sp = bucket.tokens; sp.push(); ]⟩ φ } := by sol_chain
     _ ~*> dl![m]{ { sp := bucket.tokens } ⟨[ sp.push(); ]⟩ φ } := by sol_chain
-    _ ~[storagePushLengthSaveReferenceElement]~>
-        dl![m]{ { sp := bucket.tokens } { storage := save(storage, sp.length, sp.length + 1) } ⟨[ ]⟩ φ } := rfl
-    _ ~[emptyModality]~>
-        dl![m]{ { sp := bucket.tokens } { storage := save(storage, sp.length, sp.length + 1) } φ } := rfl
+    _ ~*>
+        dl![m]{ { sp := bucket.tokens } { storage := save(storage, sp.length, sp.length + 1) } φ } := by sol_chain
     _ ~[sequentialToParallel]~>
         dl![m]{ { sp := bucket.tokens ‖
           storage := save(storage, bucket.tokens.length, bucket.tokens.length + 1) } φ } := by rfl
@@ -238,14 +232,17 @@ theorem chain :
             bucket.tokens.length, bucket.tokens.length + 1) } φ } := by sol_chain
 #last_line chain
 
-/-- `bucket.tokens.push().value = valueVal;`, from its first step (the member of a call is refused): `pv` snapshotted, the receiver aliased (`sp1`), the slot bound (`tokSlot`) and written.  The printed line with `Token[] storage sp1 = bucket.tokens; tokSlot = sp1.push();` is left `_`, as `dl!{ … }` cannot read an alias assigned from a push, and so are the steps to the slot bound through `sp1`; the merge binds it to `bucket.tokens[bucket.tokens.length]`, merges the final write, and drops the dead receiver alias. -/
+end BucketPushRef
+
+namespace BucketPushField
+/-- `bucket.tokens.push().value = valueVal;`, from its first step (the member of a call is refused): `pv` snapshotted, the receiver aliased (`sp1`), the slot bound (`sp`) and written.  The printed line with `Token[] storage sp1 = bucket.tokens; sp = sp1.push();` is left `_`, as `dl!{ … }` cannot read an alias assigned from a push, and so are the steps to the slot bound through `sp1`; the merge binds it to `bucket.tokens[bucket.tokens.length]`, merges the final write, and drops the dead receiver alias. -/
 theorem field :
-    dl![m]{ ⟨[ uint pv = valueVal; Token storage tokSlot = bucket.tokens.push(); tokSlot.value = pv; ]⟩ φ }
-    ~~> dl![m]{ { pv := valueVal ‖ tokSlot := bucket.tokens[bucket.tokens.length] ‖
+    dl![m]{ ⟨[ uint pv = valueVal; Token storage sp = bucket.tokens.push(); sp.value = pv; ]⟩ φ }
+    ~~> dl![m]{ { pv := valueVal ‖ sp := bucket.tokens[bucket.tokens.length] ‖
           storage := save(save(storage, bucket.tokens.length, bucket.tokens.length + 1),
             bucket.tokens[bucket.tokens.length].value, valueVal) } φ } :=
-  calc dl![m]{ ⟨[ uint pv = valueVal; Token storage tokSlot = bucket.tokens.push(); tokSlot.value = pv; ]⟩ φ }
-    _ ~*> dl![m]{ { pv := valueVal } ⟨[ tokSlot = bucket.tokens.push(); tokSlot.value = pv; ]⟩ φ } := by sol_chain
+  calc dl![m]{ ⟨[ uint pv = valueVal; Token storage sp = bucket.tokens.push(); sp.value = pv; ]⟩ φ }
+    _ ~*> dl![m]{ { pv := valueVal } ⟨[ sp = bucket.tokens.push(); sp.value = pv; ]⟩ φ } := by sol_chain
     _ ~[storageLocalRootPush_unfold_leftFstReceiver]~> _ := by sol_chain
     _ ~> _ := by sol_chain
     _ ~> _ := by sol_chain
@@ -253,25 +250,25 @@ theorem field :
     _ ~[sequentialToParallel]~>
         dl![m]{ { pv := valueVal ‖ sp1 := bucket.tokens ‖
           storage := save(storage, bucket.tokens.length, bucket.tokens.length + 1) ‖
-          tokSlot := bucket.tokens[bucket.tokens.length] }
-          ⟨[ tokSlot.value = pv; ]⟩ φ } := by sol_chain
+          sp := bucket.tokens[bucket.tokens.length] }
+          ⟨[ sp.value = pv; ]⟩ φ } := by sol_chain
     _ ~[storageFieldWriteSave]~> _ := by sol_chain
     _ ~> dl![m]{ { pv := valueVal ‖ sp1 := bucket.tokens ‖
           storage := save(storage, bucket.tokens.length, bucket.tokens.length + 1) ‖
-          tokSlot := bucket.tokens[bucket.tokens.length] }
-          { storage := save(storage, tokSlot.value, pv) } φ } := by sol_chain
+          sp := bucket.tokens[bucket.tokens.length] }
+          { storage := save(storage, sp.value, pv) } φ } := by sol_chain
     _ ~[sequentialToParallel]~>
-        dl![m]{ { pv := valueVal ‖ sp1 := bucket.tokens ‖ tokSlot := bucket.tokens[bucket.tokens.length] ‖
+        dl![m]{ { pv := valueVal ‖ sp1 := bucket.tokens ‖ sp := bucket.tokens[bucket.tokens.length] ‖
           storage := save(save(storage, bucket.tokens.length, bucket.tokens.length + 1),
             bucket.tokens[bucket.tokens.length].value, valueVal) } φ } := by
       sol_chain
     _ ~[simplifyUpdate]~>
-        dl![m]{ { pv := valueVal ‖ tokSlot := bucket.tokens[bucket.tokens.length] ‖
+        dl![m]{ { pv := valueVal ‖ sp := bucket.tokens[bucket.tokens.length] ‖
           storage := save(save(storage, bucket.tokens.length, bucket.tokens.length + 1),
             bucket.tokens[bucket.tokens.length].value, valueVal) } φ } := by
       sol_chain
 #last_line field
-end BucketPushRef
+end BucketPushField
 
 end
 end Solidity.Examples.Chains.StorageArrays

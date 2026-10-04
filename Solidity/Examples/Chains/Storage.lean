@@ -35,9 +35,7 @@ def chain :
     dl![m]{ ⟨[ alice.age = ageVal; ]⟩ φ }
     ~*> dl![m]{ { storage := save(storage, alice.age, ageVal) } φ } :=
   calc dl![m]{ ⟨[ alice.age = ageVal; ]⟩ φ }
-    _ ~[storageFieldWriteSave]~>
-        dl![m]{ { storage := save(storage, alice.age, ageVal) } ⟨[ ]⟩ φ } := rfl
-    _ ~[emptyModality]~> dl![m]{ { storage := save(storage, alice.age, ageVal) } φ } := rfl
+    _ ~*> dl![m]{ { storage := save(storage, alice.age, ageVal) } φ } := by sol_chain
 #last_line chain
 end AgeWrite
 
@@ -73,11 +71,8 @@ theorem chain :
     _ ~*> dl![m]{ { pv := 10 } { acc := alice.account } ⟨[ acc.balance = pv; ]⟩ φ } := by sol_chain
     _ ~[sequentialToParallel]~>
         dl![m]{ { pv := 10 ‖ acc := alice.account } ⟨[ acc.balance = pv; ]⟩ φ } := by rfl
-    _ ~[storageFieldWriteSave]~>
-        dl![m]{ { pv := 10 ‖ acc := alice.account } { storage := save(storage, acc.balance, pv) } ⟨[ ]⟩ φ } :=
-      rfl
-    _ ~[emptyModality]~>
-        dl![m]{ { pv := 10 ‖ acc := alice.account } { storage := save(storage, acc.balance, pv) } φ } := rfl
+    _ ~*>
+        dl![m]{ { pv := 10 ‖ acc := alice.account } { storage := save(storage, acc.balance, pv) } φ } := by sol_chain
     _ ~[sequentialToParallel]~>
         dl![m]{ { pv := 10 ‖ acc := alice.account ‖ storage := save(storage, alice.account.balance, 10) } φ } := by rfl
     _ ~[simplifyUpdate]~> dl![m]{ { storage := save(storage, alice.account.balance, 10) } φ } := by sol_chain
@@ -98,10 +93,8 @@ theorem chain :
     _ ~[storageFieldRead_unfold_rightFst]~>
         dl![m]{ ⟨[ Account storage acc = alice.account; v = acc.balance; ]⟩ φ } := by sol_chain
     _ ~*> dl![m]{ { acc := alice.account } ⟨[ v = acc.balance; ]⟩ φ } := by sol_chain
-    _ ~[storageFieldReadFind]~>
-        dl![m]{ { acc := alice.account } { v := find(storage, acc.balance) } ⟨[ ]⟩ φ } := rfl
-    _ ~[emptyModality]~>
-        dl![m]{ { acc := alice.account } { v := find(storage, acc.balance) } φ } := rfl
+    _ ~*>
+        dl![m]{ { acc := alice.account } { v := find(storage, acc.balance) } φ } := by sol_chain
     _ ~[sequentialToParallel]~>
         dl![m]{ { acc := alice.account ‖ v := find(storage, alice.account.balance) } φ } := by rfl
     _ ~[simplifyUpdate]~> dl![m]{ { v := find(storage, alice.account.balance) } φ } := by sol_chain
@@ -130,12 +123,9 @@ theorem chain :
     _ ~[sequentialToParallel]~>
         dl![m]{ { pv := 5 ‖ aliceAcc := alice.account ‖ aliceTok := alice.account.token }
           ⟨[ aliceTok.value = pv; ]⟩ φ } := by sol_chain
-    _ ~[storageFieldWriteSave]~>
+    _ ~*>
         dl![m]{ { pv := 5 ‖ aliceAcc := alice.account ‖ aliceTok := alice.account.token }
-          { storage := save(storage, aliceTok.value, pv) } ⟨[ ]⟩ φ } := rfl
-    _ ~[emptyModality]~>
-        dl![m]{ { pv := 5 ‖ aliceAcc := alice.account ‖ aliceTok := alice.account.token }
-          { storage := save(storage, aliceTok.value, pv) } φ } := rfl
+          { storage := save(storage, aliceTok.value, pv) } φ } := by sol_chain
     _ ~[sequentialToParallel]~>
         dl![m]{ { pv := 5 ‖ aliceAcc := alice.account ‖ aliceTok := alice.account.token ‖
           storage := save(storage, alice.account.token.value, 5) } φ } := by rfl
@@ -219,8 +209,7 @@ def chain :
     ~*> dl![m]{ { v := select(storage, total) } φ } :=
   calc dl![m]{ ⟨[ uint v = total; ]⟩ φ }
     _ ~[localValueDeclInitDrop]~> dl![m]{ ⟨[ v = total; ]⟩ φ } := rfl
-    _ ~[storageRootReadSelect]~> dl![m]{ { v := select(storage, total) } ⟨[ ]⟩ φ } := rfl
-    _ ~[emptyModality]~> dl![m]{ { v := select(storage, total) } φ } := rfl
+    _ ~*> dl![m]{ { v := select(storage, total) } φ } := by sol_chain
 #last_line chain
 end RootRead
 
@@ -234,8 +223,7 @@ def store :
     dl![m]{ ⟨[ total = pVal; ]⟩ φ }
     ~*> dl![m]{ { storage := store(storage, total, pVal) } φ } :=
   calc dl![m]{ ⟨[ total = pVal; ]⟩ φ }
-    _ ~[storageRootWriteStore]~> dl![m]{ { storage := store(storage, total, pVal) } ⟨[ ]⟩ φ } := rfl
-    _ ~[emptyModality]~> dl![m]{ { storage := store(storage, total, pVal) } φ } := rfl
+    _ ~*> dl![m]{ { storage := store(storage, total, pVal) } φ } := by sol_chain
 
 /-- `alice = bob;`: a storage path on the right is copied by reading the value there (`find(storage, bob)`,
 the printed `select`). -/
@@ -243,9 +231,7 @@ def copy :
     dl![m]{ ⟨[ alice = bob; ]⟩ φ }
     ~*> dl![m]{ { storage := store(storage, alice, find(storage, bob)) } φ } :=
   calc dl![m]{ ⟨[ alice = bob; ]⟩ φ }
-    _ ~[storageRootWriteCopySource]~>
-        dl![m]{ { storage := store(storage, alice, find(storage, bob)) } ⟨[ ]⟩ φ } := rfl
-    _ ~[emptyModality]~> dl![m]{ { storage := store(storage, alice, find(storage, bob)) } φ } := rfl
+    _ ~*> dl![m]{ { storage := store(storage, alice, find(storage, bob)) } φ } := by sol_chain
 #last_line store
 #last_line copy
 end RootWrite
@@ -282,9 +268,7 @@ def chain :
     dl![m]{ ⟨[ account = bob.account; ]⟩ φ }
     ~*> dl![m]{ { storage := store(storage, account, find(storage, bob.account)) } φ } :=
   calc dl![m]{ ⟨[ account = bob.account; ]⟩ φ }
-    _ ~[storageFieldReadStoreRoot]~>
-        dl![m]{ { storage := store(storage, account, find(storage, bob.account)) } ⟨[ ]⟩ φ } := rfl
-    _ ~[emptyModality]~> dl![m]{ { storage := store(storage, account, find(storage, bob.account)) } φ } := rfl
+    _ ~*> dl![m]{ { storage := store(storage, account, find(storage, bob.account)) } φ } := by sol_chain
 #last_line chain
 end GlobalCopy
 end
@@ -301,8 +285,7 @@ def chain :
     dl![m]{ ⟨[ v = values[i]; ]⟩ φ }
     ~*> dl![m]{ { v := find(storage, values[i]) } φ } :=
   calc dl![m]{ ⟨[ v = values[i]; ]⟩ φ }
-    _ ~[storageIndexReadArrayFind]~> dl![m]{ { v := find(storage, values[i]) } ⟨[ ]⟩ φ } := rfl
-    _ ~[emptyModality]~> dl![m]{ { v := find(storage, values[i]) } φ } := rfl
+    _ ~*> dl![m]{ { v := find(storage, values[i]) } φ } := by sol_chain
 #last_line chain
 end IndexRead
 
@@ -312,8 +295,7 @@ def chain :
     dl![m]{ ⟨[ values[i] = 100; ]⟩ φ }
     ~*> dl![m]{ { storage := save(storage, values[i], 100) } φ } :=
   calc dl![m]{ ⟨[ values[i] = 100; ]⟩ φ }
-    _ ~[storageIndexWriteArraySave]~> dl![m]{ { storage := save(storage, values[i], 100) } ⟨[ ]⟩ φ } := rfl
-    _ ~[emptyModality]~> dl![m]{ { storage := save(storage, values[i], 100) } φ } := rfl
+    _ ~*> dl![m]{ { storage := save(storage, values[i], 100) } φ } := by sol_chain
 #last_line chain
 end IndexWrite
 
@@ -323,8 +305,7 @@ def chain :
     dl![m]{ ⟨[ v = balances[a]; ]⟩ φ }
     ~*> dl![m]{ { v := find(storage, balances[a]) } φ } :=
   calc dl![m]{ ⟨[ v = balances[a]; ]⟩ φ }
-    _ ~[storageIndexReadMappingFind]~> dl![m]{ { v := find(storage, balances[a]) } ⟨[ ]⟩ φ } := rfl
-    _ ~[emptyModality]~> dl![m]{ { v := find(storage, balances[a]) } φ } := rfl
+    _ ~*> dl![m]{ { v := find(storage, balances[a]) } φ } := by sol_chain
 #last_line chain
 end MappingRead
 end
@@ -361,10 +342,8 @@ def chain :
     dl![m]{ ⟨[ values.push(42); ]⟩ φ }
     ~*> dl![m]{ { storage := save(save(storage, values[values.length], 42), values.length, values.length + 1) } φ } :=
   calc dl![m]{ ⟨[ values.push(42); ]⟩ φ }
-    _ ~[storagePushValueSave]~>
-        dl![m]{ { storage := save(save(storage, values[values.length], 42), values.length, values.length + 1) } ⟨[ ]⟩ φ } := rfl
-    _ ~[emptyModality]~>
-        dl![m]{ { storage := save(save(storage, values[values.length], 42), values.length, values.length + 1) } φ } := rfl
+    _ ~*>
+        dl![m]{ { storage := save(save(storage, values[values.length], 42), values.length, values.length + 1) } φ } := by sol_chain
 #last_line chain
 end Push
 
@@ -374,10 +353,8 @@ def chain :
     dl![m]{ ⟨[ tokens.pop(); ]⟩ φ }
     ~*> dl![m]{ { storage := save(delAt(storage, tokens[tokens.length - 1]), tokens.length, tokens.length - 1) } φ } :=
   calc dl![m]{ ⟨[ tokens.pop(); ]⟩ φ }
-    _ ~[storagePopSave]~>
-        dl![m]{ { storage := save(delAt(storage, tokens[tokens.length - 1]), tokens.length, tokens.length - 1) } ⟨[ ]⟩ φ } := rfl
-    _ ~[emptyModality]~>
-        dl![m]{ { storage := save(delAt(storage, tokens[tokens.length - 1]), tokens.length, tokens.length - 1) } φ } := rfl
+    _ ~*>
+        dl![m]{ { storage := save(delAt(storage, tokens[tokens.length - 1]), tokens.length, tokens.length - 1) } φ } := by sol_chain
 #last_line chain
 end Pop
 
@@ -451,12 +428,9 @@ theorem chain :
     _ ~[storagePushLengthSave]~>
         dl![m]{ { storage := save(delAt(storage, values[values.length]), values.length, values.length + 1) }
           ⟨[ values.pop(); ]⟩ φ } := rfl
-    _ ~[storagePopSave]~>
+    _ ~*>
         dl![m]{ { storage := save(delAt(storage, values[values.length]), values.length, values.length + 1) }
-          { storage := save(delAt(storage, values[values.length - 1]), values.length, values.length - 1) } ⟨[ ]⟩ φ } := rfl
-    _ ~[emptyModality]~>
-        dl![m]{ { storage := save(delAt(storage, values[values.length]), values.length, values.length + 1) }
-          { storage := save(delAt(storage, values[values.length - 1]), values.length, values.length - 1) } φ } := rfl
+          { storage := save(delAt(storage, values[values.length - 1]), values.length, values.length - 1) } φ } := by sol_chain
     _ ~[sequentialToParallel]~>
         dl![m]{ { storage := save(delAt(save(delAt(storage, values[values.length]), values.length, values.length + 1),
             values[values.length - 1]), values.length, values.length - 1) } φ } := by sol_chain
