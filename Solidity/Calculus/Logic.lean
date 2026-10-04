@@ -307,6 +307,12 @@ inductive Proves : RuleSet → List (Hyp C) → Fml C → Prop
   its type. -/
   | allIntro {R : RuleSet} {Γ : List (Hyp C)} {x : Var} {p : PrimTy} {φ : Fml C}
       (h : Proves R (Γ ++ [.all x p]) φ) : Proves R Γ (.all x p φ)
+  /-- An update in front of the formula joins the context: `⟹ {U} φ` is
+  `{U} ⟹ φ`, the sequent KeY writes with the update on the formula.  The
+  snapshot `{ old := storage }` of a specification (`Calculus/Spec.lean`)
+  enters the derivation so. -/
+  | updIntro {R : RuleSet} {Γ : List (Hyp C)} {m : Modality} {U : Upd C} {φ : Fml C}
+      (h : Proves R (Γ ++ [.upd m U]) φ) : Proves R Γ (.upd m U φ)
   /-- A rule solkey does not have, closing the modality (`tryCallDiamond`). -/
   | doneLean {Γ : List (Hyp C)} {m : Modality} {s : Stmt C} {ω : Prog C} {φ : Fml C} {b : Bool}
       (d : LeanTaclet C (Hyp.fresh Γ (.modal m (s :: ω) φ)) m s (.done b))
@@ -623,6 +629,7 @@ theorem Proves.sound {R : RuleSet} {Γ : List (Hyp C)} {φ : Fml C} (h : Proves 
         obtain ⟨b, hb, rfl⟩ := List.mem_map.1 hψ
         exact ih b hb) (by simpa using hne) σ)
   | allIntro _ ih => simpa [Hyp.wrap_append, Hyp.wrap] using ih
+  | updIntro _ ih => simpa [Hyp.wrap_append, Hyp.wrap] using ih
   | split d _ _ _ ih₁ ih₂ ih₃ =>
     rw [Hyp.wrap_append] at ih₁ ih₂
     exact fun σ => Hyp.wrap_mono₃ (fun τ h₁ h₂ h₃ => d.sound_in τ ⟨h₁, h₂, (Premise.coverFml_holds _ _ _ τ).2 h₃⟩) _ σ
@@ -663,6 +670,7 @@ theorem Proves.toAll {R : RuleSet} {Γ : List (Hyp C)} {φ : Fml C} (h : Proves 
   | doneLean d h _ => exact .doneLean d h
   | branches d _ ih => exact .branches d ih
   | allIntro _ ih => exact .allIntro ih
+  | updIntro _ ih => exact .updIntro ih
   | split d _ _ _ ih₁ ih₂ ih₃ => exact .split d ih₁ ih₂ ih₃
   | done d _ ih => exact .done d ih
   | empty _ ih => exact .empty ih

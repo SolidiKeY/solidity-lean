@@ -197,6 +197,7 @@ theorem Proves.toSolkey {R : RuleSet} {Γ : List (Hyp C)} {φ : Fml C} (h : Prov
     cases d
     simp [Stmt.inSolkey] at hφ
   | allIntro _ ih => exact .allIntro (ih (by simp_all [Fml.inSolkey]))
+  | updIntro _ ih => exact .updIntro (ih (by simp_all [Fml.inSolkey]))
   | split d _ _ _ ih₁ ih₂ ih₃ =>
     simp only [Fml.inSolkey, Prog.inSolkey_cons, Bool.and_eq_true] at hφ
     have := d.premise_inSolkey hφ.1.1
@@ -281,7 +282,7 @@ theorem Proves.solkey_not_call {Γ : List (Hyp C)} {f : Name} {args : List (Arg 
     cases hψ; simp [d.call_simple rfl] at ha
   | branches d _ _ => cases hψ; simp [d.call_simple rfl] at ha
   | unfoldLean | doneLean => cases hR
-  | intro _ _ | empty _ _ | allIntro _ _ => cases hψ
+  | intro _ _ | empty _ _ | allIntro _ _ | updIntro _ _ => cases hψ
   | rewrite _ _ ih => exact ih hR (by rw [← hψ]; rfl)
   | updRw _ _ _ ih | merge _ _ ih | mergeStorage _ _ ih | simplify _ ih => exact ih hR hψ
   | applyOnRigidBox _ _ hr _ _ | applyStorageBox _ hr _ _ =>

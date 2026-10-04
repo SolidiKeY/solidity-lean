@@ -1,4 +1,4 @@
-import Solidity.Calculus.Decide
+import Solidity.Calculus.DecideSyn
 
 /-!
 # The reads are realizable: `sol_decide` decides
@@ -26,7 +26,9 @@ them, and nothing is lost.
   constraints are local — each read path against the one above it — because
   the read paths include every prefix (`LTerm.reads`).
 * **Completeness** (`LFml.valid_iff_cons`, `Fml.valid_iff_cons`): for a
-  reduction that reads the starting storage only (`LFml.initOnly`),
+  reduction that reads the starting storage only, and no value of the
+  transaction (`LFml.initOnly`; `msg.sender` is decided by `LFml.syn` or the
+  heuristic finish),
   `∀ σ, ψ.holds σ` is exactly `ψ` over free reads `o` under the
   constraints of its read paths (`consAll`).
 * **`sol_decide`** rewrites by both equivalences, splits on the locals and
@@ -409,7 +411,8 @@ def LTerm.evalA (E : Var → Res Value) (o : List Seg → Obs) : LTerm → Res V
     (a.evalA E o >>= Value.asInt) >>= fun i => (b.evalA E o >>= Value.asInt) >>= fun j =>
       if i = j then t.evalA E o else e.evalA E o
   | .zero a => a.evalA E o >>= fun v => .ok (zeroV v)
-  | .err | .find _ _ | .has _ _ | .kmap _ _ _ | .len _ _ | .sok _ => .error .stuck
+  | .err | .env _ | .findP _ _ | .find _ _ | .has _ _ | .kmap _ _ _ | .len _ _ | .sok _ =>
+    .error .stuck
 
 /-- A path over the locals `E` and the reads `o`. -/
 def LPath.evalA (E : Var → Res Value) (o : List Seg → Obs) : LPath → Res (List Seg)
@@ -429,6 +432,8 @@ def LFml.holdsA (E : Var → Res Value) (o : List Seg → Obs) : LFml → Prop
   | .not φ => ¬ φ.holdsA E o
   | .and φ ψ => φ.holdsA E o ∧ ψ.holdsA E o
   | .imp φ ψ => φ.holdsA E o → ψ.holdsA E o
+  -- outside `initOnly`: the free reads do not decide a quantifier
+  | .all .. => True
 
 mutual
 
@@ -436,7 +441,7 @@ mutual
 def LTerm.initOnly : LTerm → Bool
   | .lit _ | .var _ | .err | .sok .init => true
   | .find .init q | .has .init q | .kmap _ .init q | .len .init q | .pok q => q.initOnly
-  | .find _ _ | .has _ _ | .kmap _ _ _ | .len _ _ | .sok _ => false
+  | .find _ _ | .has _ _ | .kmap _ _ _ | .len _ _ | .sok _ | .env _ | .findP _ _ => false
   | .binop _ _ a b | .seq a b | .orElse a b => a.initOnly && b.initOnly
   | .unop _ _ a | .zero a => a.initOnly
   | .ite c a b => c.initOnly && a.initOnly && b.initOnly
@@ -456,6 +461,7 @@ def LFml.initOnly : LFml → Bool
   | .eq a b => a.initOnly && b.initOnly
   | .not φ => φ.initOnly
   | .and φ ψ | .imp φ ψ => φ.initOnly && ψ.initOnly
+  | .all .. => false
 
 /-- The locals of a state, as values. -/
 def envOf (σ : State) : Var → Res Value := fun x => σ.getEnv x >>= Close.bindingVal
@@ -496,6 +502,7 @@ theorem LTerm.evalA_sim (σ : State) :
   | .lit _, _ => Sim.refl _
   | .var _, _ => Sim.refl _
   | .err, _ => Sim.refl _
+  | .env _, h | .findP _ _, h => by simp [LTerm.initOnly] at h
   | .binop _ _ a b, h => by
     simp only [LTerm.initOnly, Bool.and_eq_true] at h
     exact Sim.bind (LTerm.evalA_sim σ a h.1) fun _ => evalBinop_sim (LTerm.evalA_sim σ b h.2)
@@ -545,6 +552,7 @@ end
 theorem LFml.holdsA_iff (σ : State) :
     (φ : LFml) → φ.initOnly = true → (φ.holdsA (envOf σ) (obsAt σ) ↔ φ.holds σ)
   | .tt, _ => Iff.rfl
+  | .all .., h => by simp [LFml.initOnly] at h
   | .eq a b, h => by
     simp only [LFml.initOnly, Bool.and_eq_true] at h
     have ha := LTerm.evalA_sim σ a h.1
@@ -577,7 +585,7 @@ mutual
 `balances[people[a].age]` reads `balances[people[a].age]`, `balances`,
 `people[a].age`, `people[a]` and `people`. -/
 def LTerm.reads : LTerm → List LPath
-  | .lit _ | .var _ | .err | .sok _ => []
+  | .lit _ | .var _ | .err | .sok _ | .env _ | .findP _ _ => []
   | .find _ q | .has _ q | .kmap _ _ q | .len _ q => q.reads
   | .pok q => q.keyReads
   | .binop _ _ a b | .seq a b | .orElse a b => a.reads ++ b.reads
@@ -605,6 +613,7 @@ def LFml.reads : LFml → List LPath
   | .eq a b => a.reads ++ b.reads
   | .not φ => φ.reads
   | .and φ ψ | .imp φ ψ => φ.reads ++ ψ.reads
+  | .all .. => []
 
 theorem LPath.mem_reads_self : (q : LPath) → q ∈ q.reads
   | .root _ | .field _ _ | .at _ _ => List.mem_cons_self
@@ -649,7 +658,7 @@ mutual
 them give it the same value. -/
 theorem LTerm.evalA_agree {E : Var → Res Value} {o o' : List Seg → Obs} :
     (t : LTerm) → Agree E o o' t.reads → t.evalA E o' = t.evalA E o
-  | .lit _, _ | .var _, _ | .err, _ => rfl
+  | .lit _, _ | .var _, _ | .err, _ | .env _, _ | .findP _ _, _ => rfl
   | .sok .init, _ | .sok (.save ..), _ | .sok (.del ..), _ => rfl
   | .find (.save ..) _, _ | .find (.del ..) _, _ | .has (.save ..) _, _ | .has (.del ..) _, _
   | .kmap _ (.save ..) _, _ | .kmap _ (.del ..) _, _ | .len (.save ..) _, _
@@ -702,6 +711,7 @@ theorem LFml.holdsA_agree {E : Var → Res Value} {o o' : List Seg → Obs} :
   | .not φ, h => not_congr (LFml.holdsA_agree φ h)
   | .and φ ψ, h => and_congr (LFml.holdsA_agree φ h.append_left) (LFml.holdsA_agree ψ h.append_right)
   | .imp φ ψ, h => imp_congr (LFml.holdsA_agree φ h.append_left) (LFml.holdsA_agree ψ h.append_right)
+  | .all .., _ => Iff.rfl
 
 /-- **The constraint a read path puts on the reads**: the location it names
 stands to the one above it as `ChildOk` says.  Example: for `balances[k]`,
@@ -764,7 +774,7 @@ theorem ParentClosed.append {R R' : List LPath} (h : ParentClosed R) (h' : Paren
 mutual
 
 theorem LTerm.reads_closed : (t : LTerm) → ParentClosed t.reads
-  | .lit _ | .var _ | .err | .sok _ => by intro Q h; simp [LTerm.reads] at h
+  | .lit _ | .var _ | .err | .sok _ | .env _ | .findP _ _ => by intro Q h; simp [LTerm.reads] at h
   | .find _ q | .has _ q | .kmap _ _ q | .len _ q => LPath.reads_closed q
   | .pok q => LPath.keyReads_closed q
   | .binop _ _ a b | .seq a b | .orElse a b =>
@@ -806,6 +816,7 @@ theorem LFml.reads_closed : (φ : LFml) → ParentClosed φ.reads
   | .eq a b => (LTerm.reads_closed a).append (LTerm.reads_closed b)
   | .not φ => LFml.reads_closed φ
   | .and φ ψ | .imp φ ψ => (LFml.reads_closed φ).append (LFml.reads_closed ψ)
+  | .all .. => by intro Q h; simp [LFml.reads] at h
 
 /-- A path starts at a root. -/
 theorem LPath.evalA_root {E o} : (q : LPath) → ∀ {K : List Seg}, q.evalA E o = .ok K →
@@ -1138,7 +1149,8 @@ macro "sol_decide_unconstrained" : tactic => `(tactic|
 
 /-- `sol_decide`: prove `⊨ φ` for a `φ` whose modalities are gone (run
 `sol_symex` first) and which is in the fragment (`Fml.inL`).  It rewrites
-the goal by `Fml.valid_iff_reduce`, computes the reduction, and, where the
+the goal by `Fml.valid_iff_reduce`, computes the reduction, closes it by its terms where it can (`LFml.syn`,
+`Calculus/DecideSyn.lean`: KeY's syntactic closing), and otherwise, where the
 reduction reads the initial storage only, rewrites it once more by
 `LFml.valid_iff_cons`: a statement about free reads under the constraints
 the storage puts on them, which it closes by splitting on the locals and on
@@ -1152,10 +1164,11 @@ macro "sol_decide" : tactic => `(tactic|
   all_goals
    (refine (Fml.valid_iff_reduce _ (by
       first
-      | decide
+      | decide +kernel
       | fail "sol_decide: the formula is outside the fragment (a modality, memory, a push or pop, a copy between locations, an alias no update binds, or one through an index used after a write)")).2 ?_
     sol_reduce
     first
+    | exact LFml.syn_valid _ (by decide +kernel)
     | sol_decide_cons
     | sol_decide_heuristic))
 

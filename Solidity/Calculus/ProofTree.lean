@@ -244,6 +244,8 @@ def movesAt (g : MVarId) : MetaM (Array Move) := g.withContext do
   | Fml.imp _ _ _ => return #[{ name := `impRight, tacs := #[← `(tactic| apply $(← short ``Proves.intro))] }]
   | Fml.all _ _ _ _ =>
     return #[{ name := `allRight, tacs := #[← `(tactic| apply $(← short ``Proves.allIntro))] }]
+  | Fml.upd _ _ _ _ =>
+    return #[{ name := `updIntro, tacs := #[← `(tactic| apply $(← short ``Proves.updIntro))] }]
   | Fml.modal _ m P _ =>
     let P ← whnf P
     if P.isAppOf ``List.nil then

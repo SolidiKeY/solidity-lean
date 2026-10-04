@@ -79,14 +79,19 @@ the box, `false` under the diamond), one
 element per update, a local, an alias or the storage updated; an equation
 as `eqD a b`, both sides defined (a bare `a ≐ b` compares the Theory
 values, and a term that halts still denotes one: `Fml.eqDView`), or a bare
-`a ≐ b` of a literal and a literal or a local, where the two readings agree
-(`Term.eqLit`: the branch condition `se1 ≐ true` of an `if`); literals,
-locals, operators, conditionals, reads of `storage` and an array's length
+`a ≐ b` of a literal (or `msg.sender`) and a literal or a local, where the
+two readings agree (`Term.eqLit`: the branch condition `se1 ≐ true` of an
+`if`); literals, values of the transaction (`msg.sender`, which no update
+changes: `Rel.tx`), locals, operators, conditionals, reads of `storage` and an array's length
 (`values.length`, `LStor.lenU`); one write of a value
 or one `delete` over `storage` per update; every alias bound by an update
-and, through an index, used before the next write to the storage.  Outside it: memory (`read`,
+and, through an index, used before the next write to the storage; a storage
+variable bound to the storage (`old` of a specification, read as a snapshot:
+`LTerm.findP`); a ledger entry or a payment (`transfer`'s), which no term of
+the fragment reads; a quantifier over a local the updates before it do not
+read (`LFml.all`, a specification's `\forall`).  Outside it: memory (`read`,
 `write`, allocation, the copies `copySt`/`copyMem`), a copy between storage
-locations (`alice = bob;`), `push`/`pop`, `transfer`.  Of the gaps `Close.lean` lists, this closes the keys the
+locations (`alice = bob;`), `push`/`pop`, a read of the ledger (`net(a)`).  Of the gaps `Close.lean` lists, this closes the keys the
 formula does not separate and the reads below a deleted struct; the memory
 defaults and the distinct allocations stay open.
 -/
@@ -321,6 +326,9 @@ inductive KShape where
   | fixed
   deriving Inhabited, Repr, DecidableEq, Lean.ToExpr
 
+deriving instance Lean.ToExpr for EnvKey
+deriving instance Lean.ToExpr for PrimTy
+
 mutual
 
 /-- A value, read in the initial state. -/
@@ -352,6 +360,12 @@ inductive LTerm where
   /-- The default of the word `a` returns: `0` or `false`. -/
   | zero (a : LTerm)
   | err
+  /-- A value of the transaction: `msg.sender`.  No update changes it. -/
+  | env (k : EnvKey)
+  /-- The word at `q` in the storage `s`, read as a snapshot is: past the
+  live length too (`SVal.find`), its path checked elsewhere.  `\old(e)` of a
+  specification reads `old` so. -/
+  | findP (s : LStor) (q : LPath)
   deriving Inhabited, Repr, Lean.ToExpr
 
 /-- A storage path, the root first; built from the right as `PTerm` is. -/
@@ -377,6 +391,9 @@ inductive LFml where
   | not (φ : LFml)
   | and (φ ψ : LFml)
   | imp (φ ψ : LFml)
+  /-- For every value of the type, `x` holding it: a quantifier of a
+  specification, `\forall address a`. -/
+  | all (x : Var) (p : PrimTy) (φ : LFml)
   deriving Inhabited, Repr, Lean.ToExpr
 
 /-- Two keys are the same integer: `k == j` in `balances[k]` against
@@ -441,6 +458,8 @@ def LTerm.eval (σ : State) : LTerm → Res Value
       if i = j then t.eval σ else e.eval σ
   | .zero a => a.eval σ >>= fun v => .ok (zeroV v)
   | .err => .error .stuck
+  | .env k => .ok (.int (σ.envVal k))
+  | .findP s q => s.eval σ >>= fun v => q.eval σ >>= fun qs => v.find qs >>= SVal.asValue
 
 /-- The path a term names, root first: `balances[k]` is `[balances, at k]`. -/
 def LPath.eval (σ : State) : LPath → Res (List Seg)
@@ -459,6 +478,98 @@ def LStor.eval (σ : State) : LStor → Res SVal
 
 end
 
+mutual
+
+/-- The free locals of a term: those the initial state is asked for. -/
+def LTerm.vars : LTerm → List Var
+  | .lit _ | .err | .env _ => []
+  | .var x => [x]
+  | .binop _ _ a b | .seq a b => a.vars ++ b.vars
+  | .unop _ _ a | .zero a => a.vars
+  | .orElse a b => a.vars ++ b.vars
+  | .ite c a b => c.vars ++ a.vars ++ b.vars
+  | .find s q | .has s q | .kmap _ s q | .len s q | .findP s q => s.vars ++ q.vars
+  | .sok s => s.vars
+  | .pok q => q.vars
+  | .kite a b t e => a.vars ++ b.vars ++ t.vars ++ e.vars
+
+/-- The free locals of a path: the `k` of `balances[k]`. -/
+def LPath.vars : LPath → List Var
+  | .root _ => []
+  | .field q _ => q.vars
+  | .at q k => q.vars ++ k.vars
+
+/-- The free locals of a storage: the `k` of `save(init, balances[k], 5)`. -/
+def LStor.vars : LStor → List Var
+  | .init => []
+  | .save s q w => s.vars ++ q.vars ++ w.vars
+  | .del s q => s.vars ++ q.vars
+
+end
+
+
+/-- Rebinding a local the term does not mention leaves what it returns:
+`balances[k]` is read alike whatever `a` holds. -/
+theorem State.envVal_setEnv (σ : State) (x : Var) (b : Binding) (k : EnvKey) :
+    (σ.setEnv x b).envVal k = σ.envVal k := by
+  cases k <;> rfl
+
+mutual
+
+theorem LTerm.eval_setEnv {σ : State} {x : Var} {b : Binding} :
+    (t : LTerm) → x ∉ t.vars → t.eval (σ.setEnv x b) = t.eval σ
+  | .lit _, _ | .err, _ => rfl
+  | .env k, _ => by simp only [LTerm.eval, State.envVal_setEnv]
+  | .var y, h => by
+    have hy : y ≠ x := fun e => h (by simp [LTerm.vars, e])
+    simp only [LTerm.eval, State.getEnv_setEnv_ne hy]
+  | .binop _ _ a b', h | .seq a b', h | .orElse a b', h => by
+    simp only [LTerm.vars, List.mem_append, not_or] at h
+    simp only [LTerm.eval, LTerm.eval_setEnv a h.1, LTerm.eval_setEnv b' h.2]
+  | .unop _ _ a, h | .zero a, h => by
+    simp only [LTerm.vars] at h
+    simp only [LTerm.eval, LTerm.eval_setEnv a h]
+  | .ite c a b', h => by
+    simp only [LTerm.vars, List.mem_append, not_or] at h
+    simp only [LTerm.eval, LTerm.eval_setEnv c h.1.1, LTerm.eval_setEnv a h.1.2,
+      LTerm.eval_setEnv b' h.2]
+  | .find s q, h | .has s q, h | .kmap _ s q, h | .len s q, h | .findP s q, h => by
+    simp only [LTerm.vars, List.mem_append, not_or] at h
+    simp only [LTerm.eval, LStor.eval_setEnv s h.1, LPath.eval_setEnv q h.2]
+  | .sok s, h => by
+    simp only [LTerm.vars] at h
+    simp only [LTerm.eval, LStor.eval_setEnv s h]
+  | .pok q, h => by
+    simp only [LTerm.vars] at h
+    simp only [LTerm.eval, LPath.eval_setEnv q h]
+  | .kite a b' t e, h => by
+    simp only [LTerm.vars, List.mem_append, not_or] at h
+    simp only [LTerm.eval, LTerm.eval_setEnv a h.1.1.1, LTerm.eval_setEnv b' h.1.1.2,
+      LTerm.eval_setEnv t h.1.2, LTerm.eval_setEnv e h.2]
+
+theorem LPath.eval_setEnv {σ : State} {x : Var} {b : Binding} :
+    (q : LPath) → x ∉ q.vars → q.eval (σ.setEnv x b) = q.eval σ
+  | .root _, _ => rfl
+  | .field q _, h => by
+    simp only [LPath.vars] at h
+    simp only [LPath.eval, LPath.eval_setEnv q h]
+  | .at q k, h => by
+    simp only [LPath.vars, List.mem_append, not_or] at h
+    simp only [LPath.eval, LPath.eval_setEnv q h.1, LTerm.eval_setEnv k h.2]
+
+theorem LStor.eval_setEnv {σ : State} {x : Var} {b : Binding} :
+    (s : LStor) → x ∉ s.vars → s.eval (σ.setEnv x b) = s.eval σ
+  | .init, _ => rfl
+  | .save s q w, h => by
+    simp only [LStor.vars, List.mem_append, not_or] at h
+    simp only [LStor.eval, LStor.eval_setEnv s h.1.1, LPath.eval_setEnv q h.1.2,
+      LTerm.eval_setEnv w h.2]
+  | .del s q, h => by
+    simp only [LStor.vars, List.mem_append, not_or] at h
+    simp only [LStor.eval, LStor.eval_setEnv s h.1, LPath.eval_setEnv q h.2]
+
+end
+
 /-- A formula holds when, as in `holds` of `eqD`, both sides of each equation
 return and agree. -/
 def LFml.holds (σ : State) : LFml → Prop
@@ -470,6 +581,7 @@ def LFml.holds (σ : State) : LFml → Prop
   | .not φ => ¬ φ.holds σ
   | .and φ ψ => φ.holds σ ∧ ψ.holds σ
   | .imp φ ψ => φ.holds σ → ψ.holds σ
+  | .all x p φ => ∀ v, p.admits v → φ.holds (σ.setEnv x (.val v))
 
 /-! ## Pushing the updates in
 
@@ -488,6 +600,8 @@ inductive SymB where
   /-- An alias through an index, bound before the storage last changed: it
   was checked against a storage that is gone, and is outside the fragment. -/
   | stale
+  /-- A storage variable bound to a storage: `old` of `{ old := storage }`. -/
+  | stor (s : LStor)
   deriving Inhabited
 
 /-- The updates so far: the names bound, newest first, and the storage. -/
@@ -516,7 +630,7 @@ path an `LPath`, a storage an `LStor`; the memory sorts are outside. -/
 /-- A constant with the updates `ρ` pushed in. -/
 def _root_.Solidity.Op0.toL (ρ : Sym) : Op0 s → s.LTy
   | .lit v => .lit v
-  | .env _ => .err
+  | .env k => .env k
   | .root r => .root r
   | .storage => ρ.stor
   | .memory => ()
@@ -567,27 +681,6 @@ def _root_.Solidity.Op3.toL : Op3 a b c s → a.LTy → b.LTy → c.LTy → s.LT
   | .atIn, _, _, _ => .stuck
   | .write, _, _, _ => ()
 
-/-- A term with the updates `ρ` pushed in: after `{ y := find(storage,
-balances[k]) }`, `y` is that read; after `{ sp1 := alice.account }`,
-`sp1.balance` is `alice.account.balance`; after `{ storage := save(storage,
-balances[k], 5) }`, `storage` is that write. -/
-def _root_.Solidity.Tm.toL (ρ : Sym) : Tm C s → s.LTy
-  | .pvV x =>
-    match lookupBy x ρ.env with
-    | some (.val t) => t
-    | some (.path _) | some .stale => .err
-    | none => .var x
-  | .pvP x =>
-    match lookupBy x ρ.env with
-    | some (.path q) => q
-    | _ => .stuck
-  | .pvS _ => .init
-  | .pvI _ => ()
-  | .app0 o => o.toL ρ
-  | .app1 o a => o.toL (a.toL ρ)
-  | .app2 o a b => o.toL (a.toL ρ) (b.toL ρ)
-  | .app3 o a b c => o.toL (a.toL ρ) (b.toL ρ) (c.toL ρ)
-
 /-- The path has no index: `alice.account`, not `people[i]`. -/
 def LPath.noAt : LPath → Bool
   | .root _ => true
@@ -610,11 +703,77 @@ def guardPath (s : LStor) (q : LPath) : LTerm :=
   | none => .pok q
   | some q' => .seq (.pok q) (.has s q')
 
+/-- The storage a storage variable is bound to: `old` of `{ old := storage }`. -/
+def _root_.Solidity.Tm.storLocal? (ρ : Sym) : Tm C .st → Option LStor
+  | .pvS x =>
+    match lookupBy x ρ.env with
+    | some (.stor s) => some s
+    | _ => none
+  | _ => none
+
+/-- A binary symbol over its arguments' `toL`, a read of a storage variable
+apart: `find(old, p)` is the path checked against the storage the updates
+left (`guardPath`), then the snapshot read there (`LTerm.findP`), as the
+program's read is. -/
+def _root_.Solidity.Op2.toLAt (ρ : Sym) : Op2 a b s → Tm C a → a.LTy → b.LTy → s.LTy
+  | .find, t, x, y =>
+    match t.storLocal? ρ with
+    | some st => .seq (guardPath ρ.stor y) (.findP st y)
+    | none => .find x y
+  | o, _, x, y => o.toL x y
+
+theorem _root_.Solidity.Tm.storLocal?_isSome {ρ : Sym} {s : Tm C .st}
+    (h : (s.storLocal? ρ).isSome = true) :
+    ∃ x S, s = .pvS x ∧ lookupBy x ρ.env = some (.stor S) := by
+  unfold Tm.storLocal? at h
+  split at h
+  · rename_i x
+    split at h
+    · rename_i S hl
+      exact ⟨x, S, rfl, hl⟩
+    · simp at h
+  · simp at h
+
+/-- A term with the updates `ρ` pushed in: after `{ y := find(storage,
+balances[k]) }`, `y` is that read; after `{ sp1 := alice.account }`,
+`sp1.balance` is `alice.account.balance`; after `{ storage := save(storage,
+balances[k], 5) }`, `storage` is that write. -/
+def _root_.Solidity.Tm.toL (ρ : Sym) : Tm C s → s.LTy
+  | .pvV x =>
+    match lookupBy x ρ.env with
+    | some (.val t) => t
+    | some (.path _) | some .stale | some (.stor _) => .err
+    | none => .var x
+  | .pvP x =>
+    match lookupBy x ρ.env with
+    | some (.path q) => q
+    | _ => .stuck
+  | .pvS _ => .init
+  | .pvI _ => ()
+  | .app0 o => o.toL ρ
+  | .app1 o a => o.toL (a.toL ρ)
+  | .app2 o a b => Op2.toLAt ρ o a (a.toL ρ) (b.toL ρ)
+  | .app3 o a b c => o.toL (a.toL ρ) (b.toL ρ) (c.toL ρ)
+
 /-- A write to the storage leaves an alias through an index stale: the
 program checked it against the storage before. -/
 def SymB.onWrite : SymB → SymB
   | .path q => if q.noAt then .path q else .stale
   | b => b
+
+/-- The locals a symbol reads. -/
+def SymB.vars : SymB → List Var
+  | .val t => t.vars
+  | .path q => q.vars
+  | .stale => []
+  | .stor s => s.vars
+
+/-- The locals the updates so far read: a quantifier may bind none of them. -/
+def Sym.vars (ρ : Sym) : List Var := ρ.stor.vars ++ ρ.env.flatMap fun b => b.2.vars
+
+/-- The updates so far, with `x` free again: bound by a quantifier, `x` is
+the local itself. -/
+def Sym.free (ρ : Sym) (x : Var) : Sym := { ρ with env := (x, .val (.var x)) :: ρ.env }
 
 /-- The storage the updates left, `storage`. -/
 def _root_.Solidity.Tm.isStorage : Tm C s → Bool
@@ -628,10 +787,11 @@ theorem _root_.Solidity.STerm.isStorage_eq {s : STerm C} (h : s.isStorage = true
   · rfl
   · cases h
 
-/-- A constant in the fragment: a literal, a root, `storage`. -/
+/-- A constant in the fragment: a literal, a value of the transaction, a
+root, `storage`. -/
 def _root_.Solidity.Op0.inL : Op0 s → Bool
-  | .lit _ | .root _ | .storage => true
-  | .env _ | .memory => false
+  | .lit _ | .env _ | .root _ | .storage => true
+  | .memory => false
 
 /-- A unary symbol in the fragment, its argument in it (`hb`). -/
 def _root_.Solidity.Op1.inL : Op1 a s → Bool → Bool
@@ -640,9 +800,10 @@ def _root_.Solidity.Op1.inL : Op1 a s → Bool → Bool
 
 /-- A binary symbol in the fragment, its arguments in it (`ha`, `hb`); a
 read or a delete is of `storage` itself. -/
-def _root_.Solidity.Op2.inL : Op2 a b s → Tm C a → Bool → Bool → Bool
+def _root_.Solidity.Op2.inL (ρ : Sym) : Op2 a b s → Tm C a → Bool → Bool → Bool
   | .binop .., _, ha, hb | .at, _, ha, hb => ha && hb
-  | .find, s, _, hb | .len, s, _, hb | .delAt, s, _, hb => s.isStorage && hb
+  | .find, s, _, hb => (s.isStorage || (s.storLocal? ρ).isSome) && hb
+  | .len, s, _, hb | .delAt, s, _, hb => s.isStorage && hb
   | _, _, _, _ => false
 
 /-- A ternary symbol in the fragment: a conditional, or a write over
@@ -657,19 +818,20 @@ update.  A read is of the storage the updates left, `find(storage, p)`: its
 path is checked against that storage, and read there.  A path's alias only
 where an update bound it (`Person storage p = alice;` does), and to a path
 with no index.  A storage: one write of a word, or one `delete`, over the
-storage the updates left; no push or pop, and no storage variable (`old`,
-read at the current storage's paths: `sol_close` reads it).  A stored value:
+storage the updates left; no push or pop.  A storage variable (`old`) bound
+by an update, read at a path the storage the updates left checks.  A stored
+value:
 a word, not a copy (`alice = bob;`). -/
 def _root_.Solidity.Tm.inL (ρ : Sym) : Tm C s → Bool
   | .pvV _ => true
   | .pvP x =>
     match lookupBy x ρ.env with
     | some (.path _) | some (.val _) => true
-    | some .stale | none => false
+    | some .stale | some (.stor _) | none => false
   | .pvS _ | .pvI _ => false
   | .app0 o => o.inL
   | .app1 o a => o.inL (a.inL ρ)
-  | .app2 o a b => o.inL a (a.inL ρ) (b.inL ρ)
+  | .app2 o a b => o.inL ρ a (a.inL ρ) (b.inL ρ)
   | .app3 o a b c => o.inL a (a.inL ρ) (b.inL ρ) (c.inL ρ)
 
 
@@ -678,19 +840,27 @@ def _root_.Solidity.Op1.shape : Op1 a s → Bool → Bool
   | .unop .., b | .field _, b => b
   | _, _ => false
 
-/-- A binary symbol of `sameShape`: an operator, an index, a read of `storage`. -/
+/-- A storage variable: `old`. -/
+def _root_.Solidity.Tm.isPvS : Tm C .st → Bool
+  | .pvS _ => true
+  | _ => false
+
+/-- A binary symbol of `sameShape`: an operator, an index, a read of `storage`
+or of a storage variable. -/
 def _root_.Solidity.Op2.shape : Op2 a b s → Tm C a → Bool → Bool → Bool
   | .binop .., _, x, y | .at, _, x, y => x && y
-  | .find, s, _, y | .len, s, _, y => s.isStorage && y
+  | .find, s, _, y => (s.isStorage || s.isPvS) && y
+  | .len, s, _, y => s.isStorage && y
   | _, _, _, _ => false
 
-/-- The terms `sameL` compares: literals, locals, operators, conditionals and
-reads of `storage`, over paths of roots, aliases, members and indices. -/
+/-- The terms `sameL` compares: literals, values of the transaction, locals,
+operators, conditionals and reads of `storage`, over paths of roots, aliases,
+members and indices. -/
 def _root_.Solidity.Tm.sameShape : Tm C s → Bool
   | .pvV _ | .pvP _ => true
   | .pvS _ | .pvI _ => false
   | .app0 o => match o with
-    | .lit _ | .root _ => true
+    | .lit _ | .env _ | .root _ => true
     | _ => false
   | .app1 o a => o.shape a.sameShape
   | .app2 o a b => o.shape a a.sameShape b.sameShape
@@ -718,14 +888,36 @@ def _root_.Solidity.Term.isAtom : Term C → Bool
   | .lit _ | .pv _ => true
   | _ => false
 
-/-- A total equation `a ≐ b` the fragment takes: a literal against a literal
-or a local, `se1 ≐ true` of a symbolically executed `if`.  There the total
-reading is the partial one (`Fml.toL_holds`); `x ≐ y` of two unbound locals
-is not, since both denote the empty struct. -/
-def _root_.Solidity.Term.eqLit : Term C → Term C → Bool
-  | .lit _, b => b.isAtom
-  | a, .lit _ => a.isAtom
-  | _, _ => false
+/-- A literal, or a value of the transaction (`msg.sender`): a term that
+returns one value, the same in every state the updates reach. -/
+def _root_.Solidity.Term.isLitLike : Term C → Bool
+  | .lit _ | .env _ => true
+  | _ => false
+
+/-- A total equation `a ≐ b` the fragment takes: a literal (or `msg.sender`)
+against a literal or a local, `se1 ≐ true` of a symbolically executed `if`,
+`msg.sender ≐ r` of a precondition.  There the total reading is the partial
+one (`Fml.toL_holds`); `x ≐ y` of two unbound locals is not, since both
+denote the empty struct. -/
+def _root_.Solidity.Term.eqLit (a b : Term C) : Bool :=
+  (a.isLitLike && b.isAtom) || (b.isLitLike && a.isAtom)
+
+/-- What returns exactly where the amount `a` of a payment is not
+negative: `a < 0 ? err : true`. -/
+def payGuard (a : LTerm) : LTerm :=
+  .ite (.binop .lt .uint a (.lit (.int 0))) .err (.lit (.bool true))
+
+theorem payGuard_eval (σ : State) (a : LTerm) {y : Value} {j : Int} (ha : a.eval σ = .ok y)
+    (hj : y.asInt = .ok j) : (payGuard a).eval σ =
+      if j < 0 then .error .stuck else .ok (.bool true) := by
+  cases y with
+  | bool b => simp [Value.asInt] at hj
+  | int n =>
+    simp only [Value.asInt, Except.ok.injEq] at hj
+    subst hj
+    by_cases hn : n < 0 <;>
+      simp [payGuard, LTerm.eval, ha, evalBinop, applyBinOp, Value.asInt, checkArith,
+        pickBranch, hn, bind, Except.bind]
 
 /-- One update: the term that has to return, and the names it binds. -/
 def _root_.Solidity.UpdElem.toL (ρ : Sym) : UpdElem C → LTerm × Sym
@@ -734,15 +926,23 @@ def _root_.Solidity.UpdElem.toL (ρ : Sym) : UpdElem C → LTerm × Sym
     (guardPath ρ.stor (p.toL ρ), { ρ with env := (x, .path (p.toL ρ)) :: ρ.env })
   | .storage s =>
     (.sok (s.toL ρ), { stor := s.toL ρ, env := ρ.env.map fun b => (b.1, b.2.onWrite) })
-  | .mref .. | .memory .. | .selfBalance .. | .net .. | .pay .. | .store .. | .saveNet .. => (.err, ρ)
+  | .store x s => (.sok (s.toL ρ), { ρ with env := (x, .stor (s.toL ρ)) :: ρ.env })
+  -- a ledger entry: it returns where the address and the amount are integers,
+  -- which `kite` asks; the ledger itself is not pushed in (nothing reads it)
+  | .net r _ a => (.kite (r.toL ρ) (a.toL ρ) (.lit (.bool true)) (.lit (.bool true)), ρ)
+  -- a payment: the same, and the amount not negative
+  | .pay r a => (.kite (r.toL ρ) (a.toL ρ) (payGuard (a.toL ρ)) (payGuard (a.toL ρ)), ρ)
+  | .mref .. | .memory .. | .selfBalance .. | .saveNet .. => (.err, ρ)
 
-/-- An update in the fragment: a local, an alias or the storage; no memory,
-no funds or ledger. -/
+/-- An update in the fragment: a local, an alias, the storage, a storage
+variable bound to it, or a ledger entry (`transfer`'s, which no term of the
+fragment reads); no memory, no funds. -/
 def _root_.Solidity.UpdElem.inL (ρ : Sym) : UpdElem C → Bool
   | .val _ t => t.inL ρ
   | .path _ p => p.inL ρ
-  | .storage s => s.inL ρ
-  | .mref .. | .memory .. | .selfBalance .. | .net .. | .pay .. | .store .. | .saveNet .. => false
+  | .storage s | .store _ s => s.inL ρ
+  | .net r _ a | .pay r a => r.inL ρ && a.inL ρ
+  | .mref .. | .memory .. | .selfBalance .. | .saveNet .. => false
 
 /-- The update's term as a premise (box) or a conjunct (diamond). -/
 def guardM : Modality → LTerm → LFml → LFml
@@ -776,7 +976,8 @@ def _root_.Solidity.Fml.toL : Sym → Fml C → LFml
   | ρ, .upd m [e] φ => guardM m (e.toL ρ).1 (φ.toL (e.toL ρ).2)
   | _, .modal .box _ _ => .tt
   | _, .modal .diamond _ _ => .not .tt
-  | _, .upd _ (_ :: _ :: _) _ | _, .havoc _ | _, .all .. => .tt
+  | ρ, .all x p φ => .all x p (φ.toL (ρ.free x))
+  | _, .upd _ (_ :: _ :: _) _ | _, .havoc _ => .tt
 
 /-- The fragment `Fml.toL` is exact on: no modality, one element per update,
 no memory, no push or pop, no copy between locations, and every alias bound
@@ -794,7 +995,8 @@ def _root_.Solidity.Fml.inL : Sym → Fml C → Bool
   | ρ, .upd _ [] φ => φ.inL ρ
   | ρ, .upd _ [e] φ => e.inL ρ && φ.inL (e.toL ρ).2
   | _, .modal _ P _ => P.reverts
-  | _, .upd _ (_ :: _ :: _) _ | _, .havoc _ | _, .all .. => false
+  | ρ, .all x _ φ => !ρ.vars.contains x && φ.inL (ρ.free x)
+  | _, .upd _ (_ :: _ :: _) _ | _, .havoc _ => false
 
 
 /-! ### The updates pushed in keep the meaning -/
@@ -832,6 +1034,7 @@ def EnvRel (σ τ : State) (x : Var) : Option SymB → Prop
   | some (.path q) => ∃ r segs, q.eval σ = .ok (.field r :: segs) ∧
       τ.getEnv x = .ok (.spath r segs) ∧ LiveTo (.struct τ.storage) (.field r :: segs)
   | some .stale => ∃ r segs, τ.getEnv x = .ok (.spath r segs)
+  | some (.stor s) => ∃ st, s.eval σ = .ok (.struct st) ∧ τ.getEnv x = .ok (.store st)
 
 /-- `τ` is what the updates `ρ` stand for, applied in `σ`: its storage is the
 stack of writes read in `σ`, and each name holds what its symbol reads in
@@ -839,16 +1042,17 @@ stack of writes read in `σ`, and each name holds what its symbol reads in
 structure Rel (σ : State) (ρ : Sym) (τ : State) : Prop where
   stor : ρ.stor.eval σ = .ok (.struct τ.storage)
   env : ∀ x, EnvRel σ τ x (lookupBy x ρ.env)
+  tx : ∀ k, τ.envVal k = σ.envVal k
 
 /-- Before any update, the state is itself. -/
-theorem Rel.empty (σ : State) : Rel σ Sym.empty σ := ⟨rfl, fun _ => rfl⟩
+theorem Rel.empty (σ : State) : Rel σ Sym.empty σ := ⟨rfl, fun _ => rfl, fun _ => rfl⟩
 
 /-- Binding a name keeps the relation: after `uint y = balances[k];`, `y`
 holds what `balances[k]` reads. -/
 theorem Rel.bind {σ τ : State} {ρ : Sym} (h : Rel σ ρ τ) (x : Var) (b : SymB) (bd : Binding)
     (hb : EnvRel σ (τ.setEnv x bd) x (some b)) :
     Rel σ { ρ with env := (x, b) :: ρ.env } (τ.setEnv x bd) := by
-  refine ⟨h.stor, fun y => ?_⟩
+  refine ⟨h.stor, fun y => ?_, fun k => by rw [← h.tx k]; cases k <;> rfl⟩
   by_cases hy : y = x
   · subst hy; simpa [lookupBy] using hb
   · have := h.env y
@@ -857,6 +1061,50 @@ theorem Rel.bind {σ τ : State} {ρ : Sym} (h : Rel σ ρ τ) (x : Var) (b : Sy
     have hst : (τ.setEnv x bd).storage = τ.storage := rfl
     rcases lookupBy y ρ.env with _ | ⟨t⟩ | ⟨q⟩ | _ <;>
       simp [EnvRel, State.getEnv_setEnv_ne hy, hst]
+
+/-- A symbol the updates bound reads only what the updates read. -/
+theorem lookupBy_vars {x y : Var} {b : SymB} : (env : List (Var × SymB)) →
+    lookupBy y env = some b → x ∉ env.flatMap (fun b => b.2.vars) → x ∉ b.vars
+  | [], h, _ => by simp [lookupBy] at h
+  | (z, c) :: rest, h, hx => by
+    simp only [List.flatMap_cons, List.mem_append, not_or] at hx
+    by_cases hz : y = z
+    · simp only [lookupBy, hz, if_true, Option.some.injEq] at h
+      subst h; exact hx.1
+    · simp only [lookupBy, hz, if_false] at h
+      exact lookupBy_vars rest h hx.2
+
+/-- Rebinding a local the updates do not read keeps the relation, the local
+now free: what a quantifier does. -/
+theorem Rel.free {σ τ : State} {ρ : Sym} (h : Rel σ ρ τ) {x : Var} (hx : x ∉ ρ.vars)
+    (v : Value) : Rel (σ.setEnv x (.val v)) (ρ.free x) (τ.setEnv x (.val v)) := by
+  simp only [Sym.vars, List.mem_append, not_or] at hx
+  refine ⟨?_, fun y => ?_, fun k => by
+    rw [State.envVal_setEnv, State.envVal_setEnv, h.tx k]⟩
+  · show LStor.eval (σ.setEnv x (.val v)) ρ.stor = _
+    rw [LStor.eval_setEnv _ hx.1]; exact h.stor
+  · by_cases hy : y = x
+    · subst hy
+      simp only [Sym.free, lookupBy, if_true, EnvRel, LTerm.eval]
+      exact ⟨v, by simp only [State.getEnv_setEnv_self]; rfl, by simp⟩
+    · have hl : lookupBy y (ρ.free x).env = lookupBy y ρ.env := by
+        simp [Sym.free, lookupBy, hy]
+      rw [hl]
+      have he := h.env y
+      rcases hb : lookupBy y ρ.env with _ | ⟨t⟩ | ⟨q⟩ | _ | ⟨S⟩ <;> rw [hb] at he <;>
+        simp only [EnvRel] at he ⊢ <;>
+        simp only [State.getEnv_setEnv_ne hy]
+      · exact he
+      · have hv := lookupBy_vars (x := x) ρ.env hb hx.2
+        simp only [SymB.vars] at hv
+        rw [LTerm.eval_setEnv _ hv]; exact he
+      · have hv := lookupBy_vars (x := x) ρ.env hb hx.2
+        simp only [SymB.vars] at hv
+        rw [LPath.eval_setEnv _ hv]; exact he
+      · exact he
+      · have hv := lookupBy_vars (x := x) ρ.env hb hx.2
+        simp only [SymB.vars] at hv
+        rw [LStor.eval_setEnv _ hv]; exact he
 
 /-! ### Checked paths, slot reads and live reads
 
@@ -1128,7 +1376,7 @@ theorem lookupBy_onWrite (y : Var) : ∀ (env : List (Var × SymB)),
 /-- A write to the storage keeps the relation of each name. -/
 theorem EnvRel.onWrite {σ τ τ' : State} {y : Var} {o : Option SymB}
     (h : EnvRel σ τ y o) (he : τ'.getEnv y = τ.getEnv y) : EnvRel σ τ' y (o.map SymB.onWrite) := by
-  rcases o with _ | ⟨t⟩ | ⟨q⟩ | _
+  rcases o with _ | ⟨t⟩ | ⟨q⟩ | _ | ⟨s⟩
   · simp only [EnvRel, Option.map] at h ⊢; rw [he]; exact h
   · simp only [EnvRel, Option.map, SymB.onWrite] at h ⊢; rw [he]; exact h
   · simp only [EnvRel] at h
@@ -1138,6 +1386,7 @@ theorem EnvRel.onWrite {σ τ τ' : State} {y : Var} {o : Option SymB}
       exact ⟨r, segs, h₁, by rw [he]; exact h₂, LiveTo.of_noAt _ (LPath.noAt_eval σ hn h₁)⟩
     · simp only [Option.map, SymB.onWrite, hn, if_false, EnvRel, Bool.false_eq_true]
       exact ⟨r, segs, by rw [he]; exact h₂⟩
+  · simp only [EnvRel, Option.map, SymB.onWrite] at h ⊢; rw [he]; exact h
   · simp only [EnvRel, Option.map, SymB.onWrite] at h ⊢; rw [he]; exact h
 
 section
@@ -1152,20 +1401,24 @@ before the write. -/
 theorem Term.toL_eval (h : Rel σ ρ τ) :
     (t : Term C) → t.inL ρ = true → Sim ((t.toL ρ).eval σ) (t.eval τ)
   | .lit _, _ => Sim.refl _
+  | .env k, _ => by
+    rw [Close.Term.eval_env, h.tx k]
+    exact Sim.refl _
   | .pv x, _ => by
     have hx := h.env x
     rw [Close.Term.eval_pv]
     apply Sim.of_eq
-    rcases hl : lookupBy x ρ.env with _ | ⟨t⟩ | ⟨q⟩ | _ <;> rw [hl] at hx <;>
+    rcases hl : lookupBy x ρ.env with _ | ⟨t⟩ | ⟨q⟩ | _ | ⟨S⟩ <;> rw [hl] at hx <;>
       simp only [EnvRel] at hx <;> simp only [Tm.toL, hl]
     · rw [hx]; rfl
     · obtain ⟨v, h₁, h₂⟩ := hx; rw [h₁, h₂]; rfl
     · obtain ⟨r, segs, _, h₂, _⟩ := hx; rw [h₂]; rfl
     · obtain ⟨r, segs, h₂⟩ := hx; rw [h₂]; rfl
+    · obtain ⟨st, -, h₂⟩ := hx; rw [h₂]; rfl
   | .binop op p a b, hf => by
     simp only [Tm.inL, Op2.inL, Bool.and_eq_true] at hf
     rw [Close.Term.eval_binop]
-    simp only [Tm.toL, Op2.toL, LTerm.eval]
+    simp only [Tm.toL, Op2.toLAt, Op2.toL, LTerm.eval]
     exact Sim.bind (Term.toL_eval h a hf.1) fun _ => evalBinop_sim (Term.toL_eval h b hf.2)
   | .unop op p a, hf => by
     simp only [Tm.inL, Op1.inL] at hf
@@ -1173,28 +1426,55 @@ theorem Term.toL_eval (h : Rel σ ρ τ) :
     simp only [Tm.toL, Op1.toL, LTerm.eval]
     exact Sim.bind (Term.toL_eval h a hf) fun _ => Sim.refl _
   | .find s p, hf => by
-    simp only [Tm.inL, Op2.inL, Bool.and_eq_true] at hf
-    obtain ⟨hs, hf⟩ := hf
-    obtain rfl := STerm.isStorage_eq hs
-    have hb := live_bridge (PTerm.toL_chk h p hf)
-    rw [Close.Term.eval_find]
-    simp only [Tm.toL, Op0.toL, Op2.toL, LTerm.eval, h.stor, Res.ok_bind]
-    intro a
-    simp only [Res.bind_eq_ok, Close.STerm.eval_storage, Res.ok_bind]
-    constructor
-    · rintro ⟨qs, hq, c, hc, ha⟩
-      obtain ⟨rs, hrs, rfl, hfs⟩ := (hb qs c).1 ⟨hq, hc⟩
-      exact ⟨rs, hrs, c, hfs, ha⟩
-    · rintro ⟨rs, hrs, c, hfs, ha⟩
-      obtain ⟨hq, hc⟩ := (hb _ c).2 ⟨rs, hrs, rfl, hfs⟩
-      exact ⟨_, hq, c, hc, ha⟩
+    simp only [Tm.inL, Op2.inL, Bool.and_eq_true, Bool.or_eq_true] at hf
+    obtain ⟨hs | hs, hf⟩ := hf
+    · obtain rfl := STerm.isStorage_eq hs
+      have hb := live_bridge (PTerm.toL_chk h p hf)
+      rw [Close.Term.eval_find]
+      simp only [Tm.toL, Tm.storLocal?, Op2.toLAt, Op0.toL, LTerm.eval, h.stor, Res.ok_bind]
+      intro a
+      simp only [Res.bind_eq_ok, Close.STerm.eval_storage, Res.ok_bind]
+      constructor
+      · rintro ⟨qs, hq, c, hc, ha⟩
+        obtain ⟨rs, hrs, rfl, hfs⟩ := (hb qs c).1 ⟨hq, hc⟩
+        exact ⟨rs, hrs, c, hfs, ha⟩
+      · rintro ⟨rs, hrs, c, hfs, ha⟩
+        obtain ⟨hq, hc⟩ := (hb _ c).2 ⟨rs, hrs, rfl, hfs⟩
+        exact ⟨_, hq, c, hc, ha⟩
+    · -- `find(old, p)`: the path checked against the storage the updates left,
+      -- the snapshot read there
+      obtain ⟨x, S, rfl, hl⟩ := Tm.storLocal?_isSome hs
+      have hx := h.env x
+      rw [hl] at hx
+      obtain ⟨st, hS, hst⟩ := hx
+      have hA := PTerm.toL_chk h p hf
+      have hg := guardPath_ok h.stor (p.toL ρ)
+      rw [Close.Term.eval_find, Close.STerm.eval_pv, hst]
+      simp only [Tm.toL, Tm.storLocal?, hl, Op2.toLAt, LTerm.eval, hS, Res.ok_bind,
+        Close.bindingStore_store]
+      intro a
+      constructor
+      · intro H
+        obtain ⟨g, hgv, H⟩ := Res.bind_eq_ok.1 H
+        obtain ⟨qs, hq, hlive⟩ := hg.1 ⟨g, hgv⟩
+        obtain ⟨rs, hrs, rfl⟩ := (hA _).2 ⟨hq, hlive⟩
+        rw [hq, Res.ok_bind] at H
+        rw [hrs, Res.ok_bind, ← find_root]
+        exact H
+      · intro H
+        obtain ⟨rs, hrs, H⟩ := Res.bind_eq_ok.1 H
+        obtain ⟨hq, hlive⟩ := (hA _).1 ⟨rs, hrs, rfl⟩
+        obtain ⟨g, hgv⟩ := hg.2 ⟨_, hq, hlive⟩
+        rw [hgv, Res.ok_bind, hq, Res.ok_bind]
+        rw [← find_root] at H
+        exact H
   | .len s p, hf => by
     simp only [Tm.inL, Op2.inL, Bool.and_eq_true] at hf
     obtain ⟨hs, hf⟩ := hf
     obtain rfl := STerm.isStorage_eq hs
     have hb := live_bridge (PTerm.toL_chk h p hf)
     rw [Close.Term.eval_len]
-    simp only [Tm.toL, Op0.toL, Op2.toL, LTerm.eval, h.stor, Res.ok_bind]
+    simp only [Tm.toL, Op0.toL, Op2.toLAt, Op2.toL, LTerm.eval, h.stor, Res.ok_bind]
     intro a
     simp only [Res.bind_eq_ok, Close.STerm.eval_storage, Res.ok_bind]
     constructor
@@ -1233,7 +1513,7 @@ theorem PTerm.toL_chk (h : Rel σ ρ τ) :
     have hx := h.env x
     rw [Close.PTerm.eval_pv]
     simp only [Tm.inL] at hf
-    rcases hl : lookupBy x ρ.env with _ | ⟨t⟩ | ⟨q⟩ | _ <;> rw [hl] at hx hf <;>
+    rcases hl : lookupBy x ρ.env with _ | ⟨t⟩ | ⟨q⟩ | _ | ⟨S⟩ <;> rw [hl] at hx hf <;>
       simp only [EnvRel, Bool.false_eq_true] at hx hf <;>
       simp only [Tm.toL, hl]
     · obtain ⟨v, _, h₂⟩ := hx
@@ -1271,7 +1551,7 @@ theorem PTerm.toL_chk (h : Rel σ ρ τ) :
     simp only [Tm.inL, Op2.inL, Bool.and_eq_true] at hf
     have hi := Term.toL_eval h i hf.2
     rw [Close.PTerm.eval_at]
-    simp only [Tm.toL, Op2.toL, LPath.eval]
+    simp only [Tm.toL, Op2.toLAt, Op2.toL, LPath.eval]
     constructor
     · rintro ⟨rs', hrs', rfl⟩
       obtain ⟨rs, hrs, hr⟩ := Res.bind_eq_ok.1 hrs'
@@ -1348,7 +1628,7 @@ theorem STerm.toL_eval (h : Rel σ ρ τ) :
     obtain rfl := STerm.isStorage_eq hs
     have hb := live_bridge (PTerm.toL_chk h p hf)
     rw [Close.STerm.eval_delAt]
-    simp only [Tm.toL, Op0.toL, Op2.toL, LStor.eval, h.stor, Res.ok_bind, Close.STerm.eval_storage]
+    simp only [Tm.toL, Op0.toL, Op2.toLAt, Op2.toL, LStor.eval, h.stor, Res.ok_bind, Close.STerm.eval_storage]
     intro a
     simp only [Res.bind_eq_ok]
     constructor
@@ -1394,12 +1674,18 @@ theorem Fml.eqDView_some {φ ψ : Fml C} {a b : Term C} (h : Fml.eqDView φ ψ =
   · cases h
 
 theorem Term.eqLit_cases {a b : Term C} (h : a.eqLit b = true) :
-    (∃ w, a = .lit w ∧ b.isAtom = true) ∨ (∃ w, b = .lit w ∧ a.isAtom = true) := by
-  unfold Term.eqLit at h
-  split at h
-  · exact .inl ⟨_, rfl, h⟩
-  · exact .inr ⟨_, rfl, h⟩
-  · cases h
+    (a.isLitLike = true ∧ b.isAtom = true) ∨ (b.isLitLike = true ∧ a.isAtom = true) := by
+  simpa only [Term.eqLit, Bool.or_eq_true, Bool.and_eq_true] using h
+
+/-- A literal or `msg.sender` denotes the value it returns, pushed in or not. -/
+theorem Term.litLike_val {σ τ : State} {ρ : Sym} (h : Rel σ ρ τ) {a : Term C}
+    (ha : a.isLitLike = true) : ∃ w, a.denote τ = .prim w ∧ (a.toL ρ).eval σ = .ok w := by
+  unfold Term.isLitLike at ha
+  split at ha
+  · exact ⟨_, rfl, rfl⟩
+  · rename_i k
+    exact ⟨.int (τ.envVal k), rfl, by simp only [Tm.toL, Op0.toL, LTerm.eval, h.tx k]⟩
+  · cases ha
 
 theorem Term.inL_of_isAtom {t : Term C} {ρ : Sym} (h : t.isAtom = true) : t.inL ρ = true := by
   unfold Term.isAtom at h
@@ -1482,14 +1768,17 @@ theorem Fml.toL_holds :
     simp only [Fml.inL] at hf
     simp only [holds, Fml.toL]
     rw [LFml.holds_eq_iff]
-    rcases Term.eqLit_cases hf with ⟨w, rfl, hb⟩ | ⟨w, rfl, ha⟩
-    · have hs : Sim ((b.toL _).eval _) (b.eval τ) := Term.toL_eval h b (Term.inL_of_isAtom hb)
-      rw [Close.Term.denote_lit, Close.equiv_prim_left_iff, eq_comm, ← Theory.StValue.Equiv.prim_iff, Term.atom_equiv_prim hb]
-      simp only [Tm.toL, Op0.toL, LTerm.eval, Except.ok.injEq, exists_eq_left']
+    rcases Term.eqLit_cases hf with ⟨hla, hb⟩ | ⟨hlb, ha⟩
+    · obtain ⟨w, hd, hl⟩ := Term.litLike_val h hla
+      have hs : Sim ((b.toL _).eval _) (b.eval τ) := Term.toL_eval h b (Term.inL_of_isAtom hb)
+      rw [hd, Close.equiv_prim_left_iff, eq_comm, ← Theory.StValue.Equiv.prim_iff,
+        Term.atom_equiv_prim hb]
+      simp only [hl, Except.ok.injEq, exists_eq_left']
       exact (hs w).symm
-    · have hs : Sim ((a.toL _).eval _) (a.eval τ) := Term.toL_eval h a (Term.inL_of_isAtom ha)
-      rw [Close.Term.denote_lit, Term.atom_equiv_prim ha]
-      simp only [Tm.toL, Op0.toL, LTerm.eval, Except.ok.injEq, exists_eq_right']
+    · obtain ⟨w, hd, hl⟩ := Term.litLike_val h hlb
+      have hs : Sim ((a.toL _).eval _) (a.eval τ) := Term.toL_eval h a (Term.inL_of_isAtom ha)
+      rw [hd, Term.atom_equiv_prim ha]
+      simp only [hl, Except.ok.injEq, exists_eq_right']
       exact (hs w).symm
   | .defined t, _, _, _, h, hf => by
     have ht := Term.toL_eval h t hf
@@ -1572,17 +1861,96 @@ theorem Fml.toL_holds :
           exact ⟨_, _, (hs _).2 (by rw [h₁]; rfl), rfl⟩) fun τ' hτ => ?_
       obtain ⟨τ₁, h₁, he⟩ := Res.bind_eq_ok.1 hτ
       cases he
-      refine Fml.toL_holds φ ⟨(hs _).2 (by rw [h₁]; rfl), fun y => ?_⟩ hf.2
+      refine Fml.toL_holds φ ⟨(hs _).2 (by rw [h₁]; rfl), fun y => ?_,
+        fun k => by rw [← h.tx k]; cases k <;> rfl⟩ hf.2
       simp only [UpdElem.toL, lookupBy_onWrite]
       exact (h.env y).onWrite rfl
-    | mref _ _ | memory _ | selfBalance _ _ | net _ _ _ | pay _ _ | store _ _ | saveNet _ =>
+    | store x s =>
+      have hs := STerm.toL_eval h s hf.1
+      rw [Close.UpdElem.write_store]
+      refine after_guardM (by
+        simp only [UpdElem.toL, LTerm.eval, Res.bind_eq_ok]
+        constructor
+        · rintro ⟨_, v, hv, -⟩
+          obtain ⟨τ₁, h₁, -⟩ := Res.bind_eq_ok.1 ((hs v).1 hv)
+          exact ⟨_, τ₁, h₁, rfl⟩
+        · rintro ⟨_, τ₁, h₁, -⟩
+          exact ⟨_, _, (hs _).2 (by rw [h₁]; rfl), rfl⟩) fun τ' hτ => ?_
+      obtain ⟨τ₁, h₁, he⟩ := Res.bind_eq_ok.1 hτ
+      cases he
+      refine Fml.toL_holds φ (h.bind x _ _ ?_) hf.2
+      exact ⟨τ₁.storage, (hs _).2 (by rw [h₁]; rfl), by simp⟩
+    | net r op a =>
+      have hra : r.inL ρ = true ∧ a.inL ρ = true := by simpa [UpdElem.inL] using hf.1
+      have hr := Term.toL_eval h r hra.1
+      have ha := Term.toL_eval h a hra.2
+      rw [Close.UpdElem.write_net]
+      refine after_guardM ?_ fun τ' hτ => ?_
+      · simp only [UpdElem.toL, LTerm.eval]
+        constructor
+        · rintro ⟨_, hv⟩
+          obtain ⟨i, hi, hv⟩ := Res.bind_eq_ok.1 hv
+          obtain ⟨x, hx, hi⟩ := Res.bind_eq_ok.1 hi
+          obtain ⟨j, hj, -⟩ := Res.bind_eq_ok.1 hv
+          obtain ⟨y, hy, hj⟩ := Res.bind_eq_ok.1 hj
+          exact ⟨_, by simp only [(hr x).1 hx, (ha y).1 hy, Res.ok_bind, hi, hj]; rfl⟩
+        · rintro ⟨τ', hτ⟩
+          obtain ⟨i, hi, hτ⟩ := Res.bind_eq_ok.1 hτ
+          obtain ⟨x, hx, hi⟩ := Res.bind_eq_ok.1 hi
+          obtain ⟨j, hj, -⟩ := Res.bind_eq_ok.1 hτ
+          obtain ⟨y, hy, hj⟩ := Res.bind_eq_ok.1 hj
+          refine ⟨.bool true, ?_⟩
+          simp only [(hr x).2 hx, (ha y).2 hy, Res.ok_bind, hi, hj]
+          split <;> rfl
+      · obtain ⟨i, -, hτ⟩ := Res.bind_eq_ok.1 hτ
+        obtain ⟨j, -, hτ⟩ := Res.bind_eq_ok.1 hτ
+        cases hτ
+        exact Fml.toL_holds φ ⟨h.stor, fun y => h.env y, fun k => h.tx k⟩ hf.2
+    | pay r a =>
+      have hra : r.inL ρ = true ∧ a.inL ρ = true := by simpa [UpdElem.inL] using hf.1
+      have hr := Term.toL_eval h r hra.1
+      have ha := Term.toL_eval h a hra.2
+      rw [Close.UpdElem.write_pay]
+      refine after_guardM ?_ fun τ' hτ => ?_
+      · simp only [UpdElem.toL, LTerm.eval]
+        constructor
+        · rintro ⟨_, hv⟩
+          obtain ⟨i, hi, hv⟩ := Res.bind_eq_ok.1 hv
+          obtain ⟨x, hx, hi⟩ := Res.bind_eq_ok.1 hi
+          obtain ⟨j, hj, hv⟩ := Res.bind_eq_ok.1 hv
+          obtain ⟨y, hy, hj⟩ := Res.bind_eq_ok.1 hj
+          have hn : ¬ j < 0 := by
+            intro hn
+            rw [payGuard_eval σ _ hy hj, if_pos hn] at hv
+            split at hv <;> cases hv
+          exact ⟨_, by simp only [(hr x).1 hx, (ha y).1 hy, Res.ok_bind, hi, hj, if_neg hn]; rfl⟩
+        · rintro ⟨τ', hτ⟩
+          obtain ⟨i, hi, hτ⟩ := Res.bind_eq_ok.1 hτ
+          obtain ⟨x, hx, hi⟩ := Res.bind_eq_ok.1 hi
+          obtain ⟨j, hj, hτ⟩ := Res.bind_eq_ok.1 hτ
+          obtain ⟨y, hy, hj⟩ := Res.bind_eq_ok.1 hj
+          have hn : ¬ j < 0 := by intro hn; rw [if_pos hn] at hτ; cases hτ
+          refine ⟨.bool true, ?_⟩
+          simp only [(hr x).2 hx, (ha y).2 hy, Res.ok_bind, hi, hj]
+          split <;> rw [payGuard_eval σ _ ((ha y).2 hy) hj, if_neg hn]
+      · obtain ⟨i, -, hτ⟩ := Res.bind_eq_ok.1 hτ
+        obtain ⟨j, -, hτ⟩ := Res.bind_eq_ok.1 hτ
+        split at hτ
+        · cases hτ
+        · cases hτ
+          exact Fml.toL_holds φ ⟨h.stor, fun y => h.env y, fun k => h.tx k⟩ hf.2
+    | mref _ _ | memory _ | selfBalance _ _ | saveNet _ =>
       simp [UpdElem.inL] at hf
   | .modal m P φ, _, _, _, _, hf => by
     obtain ⟨ω, rfl⟩ := Prog.reverts_eq hf
     cases m <;> simp only [holds, Prog.run, Stmt.run, bind, Except.bind, Modality.after,
       Modality.onHalt, Fml.toL, LFml.holds, not_true_eq_false]
-  | .upd _ (_ :: _ :: _) _, _, _, _, _, hf | .havoc _, _, _, _, _, hf
-  | .all .., _, _, _, _, hf => by
+  | .all x p φ, σ, τ, ρ, h, hf => by
+    simp only [Fml.inL, Bool.and_eq_true, Bool.not_eq_true'] at hf
+    have hx : x ∉ ρ.vars := by simpa using hf.1
+    simp only [holds, Fml.toL, LFml.holds]
+    exact forall_congr' fun v => imp_congr_right fun _ => Fml.toL_holds φ (h.free hx v) hf.2
+  | .upd _ (_ :: _ :: _) _, _, _, _, _, hf | .havoc _, _, _, _, _, hf => by
     simp [Fml.inL] at hf
 
 /-- `⊨ φ` is the formula with its updates pushed in, true in every state. -/
@@ -1913,15 +2281,58 @@ theorem CaseTree.toTerm_eval {α : Type} (σ : State) (f : α → LTerm) :
     · exact CaseTree.toTerm_eval σ f t ht
     · exact CaseTree.toTerm_eval σ f e he
 
+/-- Two keys the terms alone compare, as KeY's `select(store(…))` does
+before it splits: the same local, literal or value of the transaction is
+the same key (`some true`),
+two different integer literals are different ones (`some false`); anything
+else is for the state to settle (`none`).  Not recursive, so the kernel
+re-checking a reduction pays one comparison of names. -/
+def keyCmp : LTerm → LTerm → Option Bool
+  | .var x, .var y => if x = y then some true else none
+  | .env k, .env k' => if k = k' then some true else none
+  | .lit (.int a), .lit (.int b) => some (decide (a = b))
+  | _, _ => none
+
+/-- What `keyCmp` settles holds in every state where both keys are integers. -/
+theorem keyCmp_spec {σ : State} {i j : LTerm} {c : Bool} {a b : Int}
+    (hk : keyCmp i j = some c) (ha : (i.eval σ >>= Value.asInt) = .ok a)
+    (hb : (j.eval σ >>= Value.asInt) = .ok b) : decide (a = b) = c := by
+  unfold keyCmp at hk
+  split at hk
+  · split at hk
+    · cases hk
+      subst_vars
+      rw [ha] at hb
+      cases hb
+      simp
+    · cases hk
+  · split at hk
+    · cases hk
+      subst_vars
+      rw [ha] at hb
+      cases hb
+      simp
+    · cases hk
+  · cases hk
+    simp only [LTerm.eval, Res.ok_bind, Value.asInt] at ha hb
+    cases ha
+    cases hb
+    rfl
+  · cases hk
+
 /-- `cmpSegs P Q`: how the read `Q` stands to the write `P`.
 
-Example: `balances[j]` against `balances[k]` is `ite j k eq diverge`. -/
+Example: `balances[j]` against `balances[k]` is `ite j k eq diverge`, and
+`balances[k]` against `balances[k]` is `eq` (`keyCmp`). -/
 def cmpSegs : List SSeg → List SSeg → CaseTree PathRel
   | [], [] => .leaf .eq
   | [], q => .leaf (.below q)
   | _, [] => .leaf .above
   | .field f :: p, .field g :: q => if f = g then cmpSegs p q else .leaf .diverge
-  | .key i :: p, .key j :: q => .ite i j (cmpSegs p q) (.leaf .diverge)
+  | .key i :: p, .key j :: q => match keyCmp i j with
+    | some true => cmpSegs p q
+    | some false => .leaf .diverge
+    | none => .ite i j (cmpSegs p q) (.leaf .diverge)
   | .field _ :: _, .key _ :: _ | .key _ :: _, .field _ :: _ => .leaf .diverge
 
 /-- A common first segment keeps the relation. -/
@@ -1977,12 +2388,19 @@ theorem cmpSegs_holds (σ : State) : ∀ (P Q : List SSeg) {ps qs : List Seg},
     obtain ⟨as, has, he⟩ := Res.bind_eq_ok.1 hp; cases he
     obtain ⟨b, hb, hq⟩ := Res.bind_eq_ok.1 hq
     obtain ⟨bs, hbs, he⟩ := Res.bind_eq_ok.1 hq; cases he
-    simp only [cmpSegs, CaseTree.get, ha, hb, keyEq]
-    by_cases hab : a = b
-    · subst hab
-      simpa using (cmpSegs_holds σ xs ys has hbs).cons (.at a)
-    · simp only [hab, decide_false, Bool.false_eq_true, if_false]
+    rcases hk : keyCmp i j with _ | _ | _
+    · simp only [cmpSegs, hk, CaseTree.get, ha, hb, keyEq]
+      by_cases hab : a = b
+      · subst hab
+        simpa using (cmpSegs_holds σ xs ys has hbs).cons (.at a)
+      · simp only [hab, decide_false, Bool.false_eq_true, if_false]
+        exact .inl (by simpa using hab)
+    · have hab : a ≠ b := by simpa using keyCmp_spec hk ha hb
+      simp only [cmpSegs, hk, CaseTree.get]
       exact .inl (by simpa using hab)
+    · have hab : a = b := by simpa using keyCmp_spec hk ha hb
+      subst hab
+      simpa [cmpSegs, hk] using (cmpSegs_holds σ xs ys has hbs).cons (.at a)
   | .field f :: xs, .key j :: ys, ps, qs, hp, hq => by
     obtain ⟨a, ha, he⟩ := Res.bind_eq_ok.1 hp; cases he
     obtain ⟨b, hb, hq⟩ := Res.bind_eq_ok.1 hq
@@ -2012,7 +2430,11 @@ theorem cmpSegs_testsOk (σ : State) : ∀ (P Q : List SSeg) {ps qs : List Seg},
     obtain ⟨_, has, -⟩ := Res.bind_eq_ok.1 hp
     obtain ⟨b, hb, hq⟩ := Res.bind_eq_ok.1 hq
     obtain ⟨_, hbs, -⟩ := Res.bind_eq_ok.1 hq
-    exact ⟨⟨a, ha⟩, ⟨b, hb⟩, cmpSegs_testsOk σ xs ys has hbs, trivial⟩
+    simp only [cmpSegs]
+    split
+    · exact cmpSegs_testsOk σ xs ys has hbs
+    · trivial
+    · exact ⟨⟨a, ha⟩, ⟨b, hb⟩, cmpSegs_testsOk σ xs ys has hbs, trivial⟩
   | .field _ :: _, .key _ :: _, _, _, _, _ => trivial
   | .key _ :: _, .field _ :: _, _, _, _, _ => trivial
 
@@ -2123,6 +2545,8 @@ def LTerm.elim : LTerm → LTerm
   | .kite a b t e => .kite a.elim b.elim t.elim e.elim
   | .zero a => .zero a.elim
   | .err => .err
+  | .env k => .env k
+  | .findP s q => .findP s q.elim
 termination_by structural t => t
 
 /-- A path with the reads in its keys eliminated: `people[balances[a]]`. -/
@@ -2186,6 +2610,7 @@ def LFml.elim : LFml → LFml
   | .not φ => .not φ.elim
   | .and φ ψ => .and φ.elim ψ.elim
   | .imp φ ψ => .imp φ.elim ψ.elim
+  | .all x p φ => .all x p φ.elim
 
 /-! ### Eliminating keeps what returns -/
 
@@ -2442,6 +2867,8 @@ theorem LTerm.elim_sim (σ : State) : (t : LTerm) → Sim (t.elim.eval σ) (t.ev
   | .lit _ => Sim.refl _
   | .var _ => Sim.refl _
   | .err => Sim.refl _
+  | .env _ => Sim.refl _
+  | .findP _ q => Sim.bind (Sim.refl _) fun _ => Sim.bind (LPath.elim_sim σ q) fun _ => Sim.refl _
   | .binop _ _ a b =>
     Sim.bind (LTerm.elim_sim σ a) fun _ => evalBinop_sim (LTerm.elim_sim σ b)
   | .unop _ _ a => Sim.bind (LTerm.elim_sim σ a) fun _ => Sim.refl _
@@ -2823,6 +3250,9 @@ theorem LFml.elim_holds (σ : State) : (φ : LFml) → (φ.elim.holds σ ↔ φ.
   | .not φ => by simp only [LFml.elim, LFml.holds, LFml.elim_holds σ φ]
   | .and φ ψ => by simp only [LFml.elim, LFml.holds, LFml.elim_holds σ φ, LFml.elim_holds σ ψ]
   | .imp φ ψ => by simp only [LFml.elim, LFml.holds, LFml.elim_holds σ φ, LFml.elim_holds σ ψ]
+  | .all x p φ => by
+    simp only [LFml.elim, LFml.holds]
+    exact forall_congr' fun v => imp_congr_right fun _ => LFml.elim_holds _ φ
 
 /-! ## The reduction -/
 
@@ -2892,34 +3322,6 @@ open Lean Elab Tactic in
 /-- Replace `Fml.reduce φ` by the formula it computes to. -/
 elab "sol_reduce" : tactic => do replaceMainGoal [← reduceGoal (← getMainGoal)]
 
-mutual
-
-/-- The free locals of a term: those the initial state is asked for. -/
-def LTerm.vars : LTerm → List Var
-  | .lit _ | .err => []
-  | .var x => [x]
-  | .binop _ _ a b | .seq a b => a.vars ++ b.vars
-  | .unop _ _ a | .zero a => a.vars
-  | .orElse a b => a.vars ++ b.vars
-  | .ite c a b => c.vars ++ a.vars ++ b.vars
-  | .find s q | .has s q | .kmap _ s q | .len s q => s.vars ++ q.vars
-  | .sok s => s.vars
-  | .pok q => q.vars
-  | .kite a b t e => a.vars ++ b.vars ++ t.vars ++ e.vars
-
-/-- The free locals of a path: the `k` of `balances[k]`. -/
-def LPath.vars : LPath → List Var
-  | .root _ => []
-  | .field q _ => q.vars
-  | .at q k => q.vars ++ k.vars
-
-/-- The free locals of a storage: the `k` of `save(init, balances[k], 5)`. -/
-def LStor.vars : LStor → List Var
-  | .init => []
-  | .save s q w => s.vars ++ q.vars ++ w.vars
-  | .del s q => s.vars ++ q.vars
-
-end
 
 /-- The free locals of a formula. -/
 def LFml.vars : LFml → List Var
@@ -2927,6 +3329,7 @@ def LFml.vars : LFml → List Var
   | .eq a b => a.vars ++ b.vars
   | .not φ => φ.vars
   | .and φ ψ | .imp φ ψ => φ.vars ++ ψ.vars
+  | .all _ _ φ => φ.vars
 
 /-- A local read as a value halts, is an integer, or is a boolean. -/
 theorem value_cases (r : Res Value) :
@@ -2985,6 +3388,10 @@ theorem LTerm.eval_zero (σ : State) (a : LTerm) :
     (LTerm.zero a).eval σ = a.eval σ >>= fun v => .ok (zeroV v) := rfl
 /-- A read above a write: `alice` after `alice.age = 3;` is no word. -/
 theorem LTerm.eval_err (σ : State) : LTerm.err.eval σ = .error .stuck := rfl
+theorem LTerm.eval_env (σ : State) (k : EnvKey) :
+    (LTerm.env k).eval σ = .ok (.int (σ.envVal k)) := rfl
+theorem LTerm.eval_findP (σ : State) (s : LStor) (q : LPath) : (LTerm.findP s q).eval σ =
+    s.eval σ >>= fun v => q.eval σ >>= fun qs => v.find qs >>= SVal.asValue := rfl
 
 open Lean Elab Tactic Meta in
 /-- Split on every local of the reduced formula: it halts, is an integer,
@@ -3042,7 +3449,9 @@ elab "sol_decide_reads" : tactic => withMainContext do
 attribute [decide_eval] LFml.holds_tt LFml.holds_not LFml.holds_and LFml.holds_imp
   LFml.holds_eq LTerm.eval_lit LTerm.eval_binop LTerm.eval_unop LTerm.eval_ite LTerm.eval_find
   LTerm.eval_has LTerm.eval_kmap LTerm.eval_len LTerm.eval_sok LTerm.eval_pok LTerm.eval_seq
-  LTerm.eval_kite LTerm.eval_zero LTerm.eval_err LTerm.eval_orElse LPath.eval LStor.eval
+  LTerm.eval_kite LTerm.eval_zero LTerm.eval_err LTerm.eval_env LTerm.eval_findP
+  LTerm.eval_orElse LPath.eval
+  LStor.eval State.envVal
   zeroV_int zeroV_bool KShape.test kmapF isMapV isFixV orElseR_ok orElseR_error
 
 /-- The first pass of `sol_decide` after the split: unfold the reduced

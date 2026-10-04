@@ -1,4 +1,5 @@
 import Solidity.Calculus.Spec
+import Solidity.Calculus.DecideComplete
 
 /-!
 # Benchmark: `Coin`
@@ -14,18 +15,14 @@ own (`ctor`), since a contract here has no constructor.
 
 solkey's `@custom:key` clauses are written above the functions, as its
 file has them.  `spec!{ mint }`, the obligation solkey synthesizes
-(`Calculus/Spec.lean`), is proved by `sol_spec`'s steps (`spec_mint`); `send`'s
-is not (below).  Before it, the clauses by hand, as `dl{}` obligations over
-every state, one per clause; `\old(e)` is a local declared before the call (`uint b =
-balances[r];`), and `msg.sender` is the transaction's (`Simple.env`), the
-same before and after.  `requires amount >= 0` holds of a `uint`.
-
-Two clauses of `send` are not proved symbolically: `msg.sender != receiver
-→ balances[msg.sender] == \old(…) - amount && balances[receiver] == \old(…)
-+ amount`.  `send` reads `balances[msg.sender]` twice (in the `require` and
-in the `-=`) before writing it, and `sol_close`'s `simp` does not terminate
-on two reads of one key followed by a write there, with any key, a local
-included.  They are shown instead as runs of the interpreter (`sendRun`).
+(`Calculus/Spec.lean`), is derived as `⊢`, its leaves closed by `sol_spec`'s
+steps (`spec_mint`); `send`'s is not.  Before it, the clauses by hand, as `⊢ dl{}` obligations, one per
+clause: the calculus's steps (`sol_derive`), then each leaf closed by
+`sol_decide`, which reads the writes back by their terms (`LFml.syn`);
+`\old(e)` is a local declared before the call (`uint b = balances[r];`), and
+`msg.sender` is the transaction's (`Simple.env`), the same before and after.
+`requires amount >= 0` holds of a `uint`.  The runs of the interpreter
+(`sendRun`) show the same debit and credit on a concrete state.
 -/
 
 namespace Solidity.Examples.Benchmark.Coin
@@ -61,9 +58,12 @@ local instance : InContract := ⟨Coin⟩
 /-! ## The constructor -/
 
 /-- `minter = msg.sender;` — the constructor's body. -/
-theorem ctor : ⊨ dl!{ [ minter = msg.sender; ] minter == msg.sender } := by
-  sol_symex
-  sol_close
+theorem ctor : ⊢ dl!{ [ minter = msg.sender; ] minter == msg.sender } := by
+  sol_derive
+  all_goals
+    refine close ?_
+    sol_symex
+    sol_decide
 
 /-! ## `mint`
 
@@ -71,69 +71,108 @@ theorem ctor : ⊨ dl!{ [ minter = msg.sender; ] minter == msg.sender } := by
 anyone but the minter reverts, so under the box the caller is the minter. -/
 
 theorem mintMinter :
-    ⊨ dl!{ [ uint m = minter; mint(r, a); ] m == msg.sender && minter == m } := by
-  sol_symex
-  sol_close
+    ⊢ dl!{ [ uint m = minter; mint(r, a); ] m == msg.sender && minter == m } := by
+  sol_derive
+  all_goals
+    refine close ?_
+    sol_symex
+    sol_decide
 
-set_option maxHeartbeats 2000000 in
 /-- `ensures balances[receiver] == \old(balances[receiver]) + amount`. -/
 theorem mintReceiver :
-    ⊨ dl!{ [ uint b = balances[r]; mint(r, a); uint c = balances[r]; ] c == b + a } := by
-  sol_symex
-  sol_close
+    ⊢ dl!{ [ uint b = balances[r]; mint(r, a); uint c = balances[r]; ] c == b + a } := by
+  sol_derive
+  all_goals
+    refine close ?_
+    sol_symex
+    sol_decide
 
-set_option maxHeartbeats 2000000 in
 /-- `ensures \forall address a; a != receiver -> balances[a] == \old(balances[a])`. -/
 theorem mintOthers :
-    ⊨ dl!{ k != r → [ uint b = balances[k]; mint(r, a); ] balances[k] == b } := by
-  sol_symex
-  sol_close
+    ⊢ dl!{ k != r → [ uint b = balances[k]; mint(r, a); ] balances[k] == b } := by
+  sol_derive
+  all_goals
+    refine close ?_
+    sol_symex
+    sol_decide
 
 set_option maxHeartbeats 400000 in
 /-- `mint(receiver, amount)`'s obligation: only the minter mints, the
-receiver credited, every other balance kept.  `sol_spec` with its reads done
-once, over the premises taken in (`sol_close_reads_all`), without
-`sol_close_facts` and `sol_close_reads` on the goal before them: the same
-proof in three quarters of the heartbeats. -/
-theorem spec_mint : ⊨ spec!{ mint } := by
-  sol_symex
-  sol_close_unwrap
-  intro σ
-  sol_close_eval
-  intros
-  sol_close_reads_all
-  all_goals sol_spec_finish
+receiver credited, every other balance kept.  Each leaf by `sol_spec`'s steps
+with its reads done once, over the premises taken in (`sol_close_reads_all`),
+without `sol_close_facts` and `sol_close_reads` on the goal before them: the
+same proof in three quarters of the heartbeats.  Not by `sol_decide`: the
+frame clause needs the layout premise instantiated at the quantified key. -/
+theorem spec_mint : ⊢ spec!{ mint } := by
+  sol_derive
+  all_goals
+    refine close ?_
+    sol_symex
+    sol_close_unwrap
+    intro σ
+    sol_close_eval
+    intros
+    sol_close_reads_all
+    all_goals sol_spec_finish
 
 /-! ## `send` -/
 
-set_option maxHeartbeats 2000000 in
 /-- `ensures \old(balances[msg.sender]) >= amount`: a formula has no `>=`,
 so the comparison is a `bool` local of the pre-state. -/
 theorem sendCovered :
-    ⊨ dl!{ [ bool ok = a <= balances[msg.sender]; send(r, a); ] ok == true } := by
-  sol_symex
-  sol_close
+    ⊢ dl!{ [ bool ok = a <= balances[msg.sender]; send(r, a); ] ok == true } := by
+  sol_derive
+  all_goals
+    refine close ?_
+    sol_symex
+    sol_decide
 
-set_option maxHeartbeats 2000000 in
 /-- `ensures msg.sender == receiver -> balances[msg.sender] == \old(balances[msg.sender])`. -/
 theorem sendSelf :
-    ⊨ dl!{ msg.sender == r → [ uint b = balances[msg.sender]; send(r, a); ]
+    ⊢ dl!{ msg.sender == r → [ uint b = balances[msg.sender]; send(r, a); ]
       balances[msg.sender] == b } := by
-  sol_symex
-  sol_close
+  sol_derive
+  all_goals
+    refine close ?_
+    sol_symex
+    sol_decide
 
-set_option maxHeartbeats 2000000 in
+/-- `ensures msg.sender != receiver -> balances[msg.sender] ==
+\old(balances[msg.sender]) - amount && …`. -/
+theorem sendMovesSender :
+    ⊢ dl!{ msg.sender != r → [ uint b = balances[msg.sender]; send(r, a); ]
+      balances[msg.sender] == b - a } := by
+  sol_derive
+  all_goals
+    refine close ?_
+    sol_symex
+    sol_decide
+
+/-- `ensures msg.sender != receiver -> … && balances[receiver] ==
+\old(balances[receiver]) + amount`. -/
+theorem sendMovesReceiver :
+    ⊢ dl!{ msg.sender != r → [ uint c = balances[r]; send(r, a); ]
+      balances[r] == c + a } := by
+  sol_derive
+  all_goals
+    refine close ?_
+    sol_symex
+    sol_decide
+
 /-- `ensures \forall address a; a != msg.sender && a != receiver -> balances[a] == \old(balances[a])`. -/
 theorem sendOthers :
-    ⊨ dl!{ k != msg.sender && k != r → [ uint b = balances[k]; send(r, a); ] balances[k] == b } := by
-  sol_symex
-  sol_close
+    ⊢ dl!{ k != msg.sender && k != r → [ uint b = balances[k]; send(r, a); ] balances[k] == b } := by
+  sol_derive
+  all_goals
+    refine close ?_
+    sol_symex
+    sol_decide
 
 /-! ## Runs
 
 `7` deploys and mints `10` to itself, then sends `4` to `9`: the debit and
-the credit of `send` when the two differ, which the box above does not
-close. -/
+the credit of `send` when the two differ (`sendMovesSender`,
+`sendMovesReceiver`), on one state. -/
 
 /-- A fresh `Coin`, called by `7`. -/
 def store : Semantics.State :=

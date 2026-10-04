@@ -35,11 +35,13 @@ precondition, which here only rules the revert out; `\old(e)` is a local
 read before the call.  The frame condition's `\forall address a` is a free
 name, which the formula reads as a parameter in scope everywhere.  The
 arithmetic is the specification's own (`b1 == b0 - amount`, not
-`b1 + amount == b0`): `⊨` ranges over storages whose words need not be in
-range, and there the second form overflows.
+`b1 + amount == b0`): what `⊢` proves holds over storages whose words need
+not be in range, and there the second form overflows.
 -/
 
 namespace Solidity.Examples.Benchmark.ERC20
+
+open Proves
 
 /-- ERC20, with `msg.sender` passed as a parameter. -/
 def ERC20 : Contract := contract!{
@@ -85,165 +87,151 @@ local instance : InContract := ⟨ERC20⟩
 
 /-! ## `transfer` -/
 
-set_option maxHeartbeats 4000000 in
-set_option maxRecDepth 100000 in
 /-- `ensures \result && totalSupply == \old(totalSupply)`. -/
 theorem transfer_result :
-    ⊨ dl!{ [ uint t0 = totalSupply; bool ok = transfer(s, r, amount); uint t1 = totalSupply; ]
+    ⊢ dl!{ [ uint t0 = totalSupply; bool ok = transfer(s, r, amount); uint t1 = totalSupply; ]
       (ok == true ∧ t1 == t0) } := by
-  sol_symex
-  sol_decide
+  sol_derive
+  all_goals
+    refine close ?_
+    sol_symex
+    sol_decide
 
-set_option maxHeartbeats 4000000 in
-set_option maxRecDepth 100000 in
 /-- `ensures msg.sender != recipient -> balanceOf[msg.sender] ==
 \old(balanceOf[msg.sender]) - amount && …`. -/
 theorem transfer_moves_sender :
-    ⊨ dl!{ s != r → [ uint b0 = balanceOf[s]; bool ok = transfer(s, r, amount);
+    ⊢ dl!{ s != r → [ uint b0 = balanceOf[s]; bool ok = transfer(s, r, amount);
       uint b1 = balanceOf[s]; ] b1 == b0 - amount } := by
-  sol_symex
-  sol_decide
+  sol_derive
+  all_goals
+    refine close ?_
+    sol_symex
+    sol_decide
 
-set_option maxHeartbeats 4000000 in
-set_option maxRecDepth 100000 in
 /-- `ensures msg.sender != recipient -> … && balanceOf[recipient] ==
 \old(balanceOf[recipient]) + amount`. -/
 theorem transfer_moves_recipient :
-    ⊨ dl!{ s != r → [ uint c0 = balanceOf[r]; bool ok = transfer(s, r, amount);
+    ⊢ dl!{ s != r → [ uint c0 = balanceOf[r]; bool ok = transfer(s, r, amount);
       uint c1 = balanceOf[r]; ] c1 == c0 + amount } := by
-  sol_symex
-  sol_decide
+  sol_derive
+  all_goals
+    refine close ?_
+    sol_symex
+    sol_decide
 
-set_option maxHeartbeats 4000000 in
-set_option maxRecDepth 100000 in
 /-- `ensures msg.sender == recipient -> balanceOf[msg.sender] ==
 \old(balanceOf[msg.sender])`. -/
 theorem transfer_self :
-    ⊨ dl!{ [ uint b0 = balanceOf[s]; bool ok = transfer(s, s, amount); uint b1 = balanceOf[s]; ]
+    ⊢ dl!{ [ uint b0 = balanceOf[s]; bool ok = transfer(s, s, amount); uint b1 = balanceOf[s]; ]
       b1 == b0 } := by
-  sol_symex
-  sol_decide
+  sol_derive
+  all_goals
+    refine close ?_
+    sol_symex
+    sol_decide
 
-set_option maxHeartbeats 4000000 in
-set_option maxRecDepth 100000 in
 /-- `ensures \forall address a; a != msg.sender && a != recipient ->
 balanceOf[a] == \old(balanceOf[a])`. -/
 theorem transfer_frame :
-    ⊨ dl!{ a != s ∧ a != r → [ uint x0 = balanceOf[a]; bool ok = transfer(s, r, amount);
+    ⊢ dl!{ a != s ∧ a != r → [ uint x0 = balanceOf[a]; bool ok = transfer(s, r, amount);
       uint x1 = balanceOf[a]; ] x1 == x0 } := by
-  sol_symex
-  sol_decide
+  sol_derive
+  all_goals
+    refine close ?_
+    sol_symex
+    sol_decide
 
 /-! ## `approve` -/
 
-set_option maxHeartbeats 4000000 in
-set_option maxRecDepth 100000 in
 /-- `ensures \result && allowance[msg.sender][spender] == amount`. -/
 theorem approve_sets :
-    ⊨ dl!{ [ bool ok = approve(s, p, amount); uint x = allowance[s][p]; ]
+    ⊢ dl!{ [ bool ok = approve(s, p, amount); uint x = allowance[s][p]; ]
       (ok == true ∧ x == amount) } := by
-  sol_symex
-  sol_decide
+  sol_derive
+  all_goals
+    refine close ?_
+    sol_symex
+    sol_decide
 
-/-! ## `transferFrom`
+/-! ## `transferFrom` -/
 
-Three writes take the reduced formula past `simp`'s default step bound, in
-the step of `sol_decide` that unfolds it: `sol_decide_big` is the same
-steps with the bound raised. -/
-
-open Solidity.Decide Semantics SemanticsProperties in
-/-- `sol_decide`'s steps (`Calculus/DecideComplete.lean`), with `simp`'s
-step bound raised in the unfolding. -/
-local macro "sol_decide_big" : tactic => `(tactic| (
-    refine (Fml.valid_iff_reduce _ (by decide)).2 ?_
-    sol_reduce
-    refine (LFml.valid_iff_cons _ (by decide)).2 ?_
-    sol_reads
-    intro σ o hc
-    sol_cons_split hc
-    sol_decide_splitA
-    all_goals
-      set_option linter.unusedSimpArgs false in
-      simp (config := { maxSteps := 2000000 }) only [LFml.holdsA_tt, LFml.holdsA_not,
-        LFml.holdsA_and, LFml.holdsA_imp, LFml.holdsA_eq, LTerm.evalA_lit, LTerm.evalA_binop,
-        LTerm.evalA_unop, LTerm.evalA_ite, LTerm.evalA_find, LTerm.evalA_has, LTerm.evalA_kmap,
-        LTerm.evalA_len, LTerm.evalA_sok, LTerm.evalA_pok, LTerm.evalA_seq, LTerm.evalA_orElse,
-        LTerm.evalA_kite, LTerm.evalA_zero, LTerm.evalA_err, LTerm.evalA_var, LPath.evalA,
-        LPath.consA, zeroV_int, zeroV_bool, orElseR_ok, orElseR_error, close_rw, forall_eq',
-        List.cons_append, List.nil_append, Obs.find_eq_ok, Obs.has_eq_ok, Obs.test_map_eq_ok,
-        Obs.test_fixed_eq_ok, Obs.len_eq_ok, and_assoc, *] at *
-    all_goals first | omega | grind))
-
-set_option maxHeartbeats 4000000 in
-set_option maxRecDepth 100000 in
 /-- `ensures \result && totalSupply == \old(totalSupply)`. -/
 theorem transferFrom_result :
-    ⊨ dl!{ [ uint t0 = totalSupply; bool ok = transferFrom(c, s, r, amount); uint t1 = totalSupply; ]
+    ⊢ dl!{ [ uint t0 = totalSupply; bool ok = transferFrom(c, s, r, amount); uint t1 = totalSupply; ]
       (ok == true ∧ t1 == t0) } := by
-  sol_symex
-  sol_decide
+  sol_derive
+  all_goals
+    refine close ?_
+    sol_symex
+    sol_decide
 
-set_option maxHeartbeats 20000000 in
-set_option maxRecDepth 100000 in
 /-- `ensures allowance[sender][msg.sender] ==
 \old(allowance[sender][msg.sender]) - amount`. -/
 theorem transferFrom_allowance :
-    ⊨ dl!{ [ uint w0 = allowance[s][c]; bool ok = transferFrom(c, s, r, amount);
+    ⊢ dl!{ [ uint w0 = allowance[s][c]; bool ok = transferFrom(c, s, r, amount);
       uint w1 = allowance[s][c]; ] w1 == w0 - amount } := by
-  sol_symex
-  sol_decide_big
+  sol_derive
+  all_goals
+    refine close ?_
+    sol_symex
+    sol_decide
 
-set_option maxHeartbeats 20000000 in
-set_option maxRecDepth 100000 in
 /-- `ensures sender != recipient -> balanceOf[sender] ==
 \old(balanceOf[sender]) - amount && …`. -/
 theorem transferFrom_moves_sender :
-    ⊨ dl!{ s != r → [ uint b0 = balanceOf[s]; bool ok = transferFrom(c, s, r, amount);
+    ⊢ dl!{ s != r → [ uint b0 = balanceOf[s]; bool ok = transferFrom(c, s, r, amount);
       uint b1 = balanceOf[s]; ] b1 == b0 - amount } := by
-  sol_symex
-  sol_decide_big
+  sol_derive
+  all_goals
+    refine close ?_
+    sol_symex
+    sol_decide
 
-set_option maxHeartbeats 20000000 in
-set_option maxRecDepth 100000 in
 /-- `ensures sender != recipient -> … && balanceOf[recipient] ==
 \old(balanceOf[recipient]) + amount`. -/
 theorem transferFrom_moves_recipient :
-    ⊨ dl!{ s != r → [ uint c0 = balanceOf[r]; bool ok = transferFrom(c, s, r, amount);
+    ⊢ dl!{ s != r → [ uint c0 = balanceOf[r]; bool ok = transferFrom(c, s, r, amount);
       uint c1 = balanceOf[r]; ] c1 == c0 + amount } := by
-  sol_symex
-  sol_decide_big
+  sol_derive
+  all_goals
+    refine close ?_
+    sol_symex
+    sol_decide
 
-set_option maxHeartbeats 20000000 in
-set_option maxRecDepth 100000 in
 /-- `ensures sender == recipient -> balanceOf[sender] == \old(balanceOf[sender])`. -/
 theorem transferFrom_self :
-    ⊨ dl!{ [ uint b0 = balanceOf[s]; bool ok = transferFrom(c, s, s, amount);
+    ⊢ dl!{ [ uint b0 = balanceOf[s]; bool ok = transferFrom(c, s, s, amount);
       uint b1 = balanceOf[s]; ] b1 == b0 } := by
-  sol_symex
-  sol_decide_big
+  sol_derive
+  all_goals
+    refine close ?_
+    sol_symex
+    sol_decide
 
 /-! ## `mint` and `burn`: an internal call inlined in an external one -/
 
-set_option maxHeartbeats 4000000 in
-set_option maxRecDepth 100000 in
 /-- `ensures balanceOf[to] == \old(balanceOf[to]) + amount && totalSupply ==
 \old(totalSupply) + amount`: `mint` calls `_mint`, both inlined. -/
 theorem mint_adds :
-    ⊨ dl!{ [ uint b0 = balanceOf[t]; uint t0 = totalSupply; mint(t, amount);
+    ⊢ dl!{ [ uint b0 = balanceOf[t]; uint t0 = totalSupply; mint(t, amount);
       uint b1 = balanceOf[t]; uint t1 = totalSupply; ]
       (b1 == b0 + amount ∧ t1 == t0 + amount) } := by
-  sol_symex
-  sol_decide
+  sol_derive
+  all_goals
+    refine close ?_
+    sol_symex
+    sol_decide
 
-set_option maxHeartbeats 4000000 in
-set_option maxRecDepth 100000 in
 /-- `ensures balanceOf[from] == \old(balanceOf[from]) - amount && totalSupply
 == \old(totalSupply) - amount`. -/
 theorem burn_subtracts :
-    ⊨ dl!{ [ uint b0 = balanceOf[h]; uint t0 = totalSupply; burn(h, amount);
+    ⊢ dl!{ [ uint b0 = balanceOf[h]; uint t0 = totalSupply; burn(h, amount);
       uint b1 = balanceOf[h]; uint t1 = totalSupply; ]
       (b1 == b0 - amount ∧ t1 == t0 - amount) } := by
-  sol_symex
-  sol_decide
+  sol_derive
+  all_goals
+    refine close ?_
+    sol_symex
+    sol_decide
 
 end Solidity.Examples.Benchmark.ERC20

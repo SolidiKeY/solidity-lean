@@ -1,3 +1,4 @@
+import Solidity.Calculus.DecideComplete
 import Solidity.Calculus.Spec
 
 /-!
@@ -12,8 +13,10 @@ has them.  The functions are internal functions here, and a call inlines one
 (`Examples/Tactics/Calls.lean`).
 
 The clauses are proved twice.  `spec!{f}` is the obligation solkey's
-`SolidityProblemSynthesizer` builds from them (`Calculus/Spec.lean`), proved
-by `sol_spec` (`spec_inc`, `spec_dec`).  Before it, the same clauses by hand:
+`SolidityProblemSynthesizer` builds from them (`Calculus/Spec.lean`), derived
+as `⊢` (`spec_inc`, `spec_dec`): the snapshot `{ old := storage }` joins the
+context (`Proves.updIntro`), the program runs (`sol_derive`), and each leaf
+closes by `sol_decide`.  Before it, the same clauses by hand:
 `ensures count == \old(count) + 1` with a parameter `c` for the old value,
 and no `requires count >= 1`, which the box does not need (a `dec()` that
 underflows reverts, and a reverted run satisfies every box formula).
@@ -65,19 +68,28 @@ def Counter : Contract := contract!{
 local instance : InContract := ⟨Counter⟩
 
 /-- `inc()`: `ensures count == \old(count) + 1`. -/
-theorem inc_spec : ⊨ dl!{ c == count → [ inc(); ] count == c + 1 } := by
-  sol_symex
-  sol_close
+theorem inc_spec : ⊢ dl!{ c == count → [ inc(); ] count == c + 1 } := by
+  sol_derive
+  all_goals
+    refine close ?_
+    sol_symex
+    sol_decide
 
 /-- `dec()`: `ensures count == \old(count) - 1` (when it does not revert). -/
-theorem dec_spec : ⊨ dl!{ c == count → [ dec(); ] count == c - 1 } := by
-  sol_symex
-  sol_close
+theorem dec_spec : ⊢ dl!{ c == count → [ dec(); ] count == c - 1 } := by
+  sol_derive
+  all_goals
+    refine close ?_
+    sol_symex
+    sol_decide
 
 /-- `get()` returns `count`. -/
-theorem get_spec : ⊨ dl!{ [ uint y = get(); ] y == count } := by
-  sol_symex
-  sol_close
+theorem get_spec : ⊢ dl!{ [ uint y = get(); ] y == count } := by
+  sol_derive
+  all_goals
+    refine close ?_
+    sol_symex
+    sol_decide
 
 /-! ## The clauses as obligations
 
@@ -95,8 +107,18 @@ info: dl{
 #guard_msgs in #check spec!{ dec }
 
 /-- `inc()`: `ensures count == \old(count) + 1`. -/
-theorem spec_inc : ⊨ spec!{ inc } := by sol_spec
+theorem spec_inc : ⊢ spec!{ inc } := by
+  sol_derive
+  all_goals
+    refine close ?_
+    sol_symex
+    sol_decide
 /-- `dec()`: `requires count >= 1`, `ensures count == \old(count) - 1`. -/
-theorem spec_dec : ⊨ spec!{ dec } := by sol_spec
+theorem spec_dec : ⊢ spec!{ dec } := by
+  sol_derive
+  all_goals
+    refine close ?_
+    sol_symex
+    sol_decide
 
 end Solidity.Examples.Benchmark.Counter

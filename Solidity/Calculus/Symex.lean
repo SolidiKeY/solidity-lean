@@ -238,10 +238,10 @@ end Proves
 
 /-- `sol_derive`: run the strategy as a derivation.  On every goal it drops
 an empty modality, fires the rule `Stmt.step` picks (as `update`, `unfold`,
-`split`, `done` or `branches`), or moves a precondition or a
-quantified local into the context, until no goal has a modality left; what
+`split`, `done` or `branches`), or moves a precondition, a quantified local
+or an update in front of the formula into the context, until no goal has a modality left; what
 is left is for `close`. -/
-macro "sol_derive" : tactic => `(tactic| repeat (first
+macro "sol_derive" : tactic => `(tactic| repeat' (first
   | apply Proves.empty
   | apply Proves.updateRule (Stmt.step _ _ _).rule
   | apply Proves.unfoldRule (Stmt.step _ _ _).rule
@@ -252,6 +252,7 @@ macro "sol_derive" : tactic => `(tactic| repeat (first
        Fml.alls, codeBinders, Option.toList, List.map]
      refine ⟨?_, ?_, ?_, ?_⟩)
   | apply Proves.intro
-  | apply Proves.allIntro))
+  | apply Proves.allIntro
+  | apply Proves.updIntro))
 
 end Solidity

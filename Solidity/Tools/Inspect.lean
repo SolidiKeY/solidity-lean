@@ -54,7 +54,7 @@ def LPath.total : LPath → Bool
 /-- A guard that always returns, and is not printed: a literal, or the keys
 of a path with literal keys (`ok(alice.age)`). -/
 def LTerm.total : LTerm → Bool
-  | .lit _ => true
+  | .lit _ | .env _ => true
   | .pok q => LPath.total q
   | _ => false
 
@@ -90,6 +90,8 @@ partial def LTerm.fmt [FreshNames] : LTerm → String
   | .kite a b t e => s!"({LTerm.fmt a} ≡ {LTerm.fmt b} ? {LTerm.fmt t} : {LTerm.fmt e})"
   | .zero a => s!"zero({LTerm.fmt a})"
   | .err => "err"
+  | .env k => k.toStr
+  | .findP s q => s!"find({LStor.fmt s}, {LPath.fmt q})"
 
 /-- A term as an operand: parenthesised unless it is atomic. -/
 partial def LTerm.fmtArg [FreshNames] : LTerm → String
@@ -117,6 +119,7 @@ partial def LFml.fmt [FreshNames] : LFml → String
   | .not φ => s!"¬{atom φ}"
   | .and φ ψ => s!"{conj φ} ∧ {conj ψ}"
   | .imp φ ψ => s!"{atom' φ} → {LFml.fmt ψ}"
+  | .all x p φ => s!"∀ {p.toStr} {x}, {LFml.fmt φ}"
 where
   atom : LFml → String
     | φ@(.tt) | φ@(.not _) => LFml.fmt φ
