@@ -1,5 +1,6 @@
 import Solidity.Calculus.Chains
 import Solidity.Calculus.LastLine
+import Solidity.Calculus.ChainGen
 import Solidity.Calculus.ChainRewrites
 import Solidity.Calculus.Close
 import Solidity.FreshNames
@@ -102,12 +103,10 @@ def stack :
           len = bucket.tokens.length; ]⟩ φ } := rfl
     _ ~*> dl![m]{ { toks := bucket.tokens } { idx := 0 } { i := i + 1 ‖ idx := i + 1 }
           ⟨[ delete toks[idx]; len = bucket.tokens.length; ]⟩ φ } := by sol_chain
-    _ ~[sequentialToParallel]~>
-        dl![m]{ { toks := bucket.tokens ‖ idx := 0 ‖ i := i + 1 ‖ idx := i + 1 }
-          ⟨[ delete toks[idx]; len = bucket.tokens.length; ]⟩ φ } := by sol_chain
-    _ ~[simplifyUpdate]~>
+    _ ~~>
         dl![m]{ { toks := bucket.tokens ‖ i := i + 1 ‖ idx := i + 1 }
-          ⟨[ delete toks[idx]; len = bucket.tokens.length; ]⟩ φ } := by sol_chain
+          ⟨[ delete toks[idx]; len = bucket.tokens.length; ]⟩ φ } := by
+      sol_rws [sequentialToParallel, simplifyUpdate]
     _ ~[storageIndexArrayDelete]~> _ := by sol_chain
     _ ~*> _ := by sol_chain
     _ ~[sequentialToParallel]~>

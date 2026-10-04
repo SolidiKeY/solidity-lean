@@ -1,5 +1,6 @@
 import Solidity.Calculus.Chains
 import Solidity.Calculus.LastLine
+import Solidity.Calculus.ChainGen
 import Solidity.Calculus.Close
 import Solidity.FreshNames
 
@@ -315,14 +316,8 @@ theorem incrementIndex (m : Modality) (φ : Post Calls) :
   calc dl![m]{ { carolValues := freshId(addM(memory, uint[])) ‖ memory := addM(memory, uint[]) } ⟨[ carolValues[++i] = makeValue(); ]⟩ φ }
     _ = dl![m]{ { carolValues := freshId(addM(memory, uint[])) ‖ memory := addM(memory, uint[]) } ⟨[ uint pv = makeValue(); carolValues[++i] = pv; ]⟩ φ } := rfl
     _ ~*> _ := by sol_chain
-    _ ~[sequentialToParallel]~>
-        dl![m]{ { carolValues := freshId(addM(memory, uint[])) ‖ memory := addM(memory, uint[]) } { pv := 0 ‖ se2 := 0 ‖ se2 := select(storage, seed) ‖ pv := select(storage, seed) ‖ idx := 0 ‖
-                  i := i + 1 ‖ idx := i + 1 ‖ memory := write(memory, carolValues[i + 1], select(storage, seed)) } φ } := by
-      sol_chain
-    _ ~[simplifyUpdate]~>
-        dl![m]{ { carolValues := freshId(addM(memory, uint[])) ‖ memory := addM(memory, uint[]) } { se2 := select(storage, seed) ‖ pv := select(storage, seed) ‖ i := i + 1 ‖ idx := i + 1 ‖
-                  memory := write(memory, carolValues[i + 1], select(storage, seed)) } φ } := by sol_chain
-    _ ~[sequentialToParallel]~> _ := by sol_chain
+    _ ~~> _ := by
+      sol_rws [sequentialToParallel, simplifyUpdate]
 #last_line incrementIndex
 
 /-- `carolValues[i] = makeValue();` — the call captured, inlined, and written; the
@@ -371,10 +366,8 @@ theorem valueWrite (m : Modality) (φ : Post TestSuite) :
         dl![m]{ { b := freshId(addM(memory, Basket)) ‖ memory := addM(memory, Basket) } ⟨[ uint pv = val; uint[] memory mv = b.items; uint idx = i; mv[idx] = pv; ]⟩ φ } := by
       sol_chain
     _ ~*> _ := by sol_chain
-    _ ~[sequentialToParallel]~>
-        dl![m]{ { b := freshId(addM(memory, Basket)) ‖ memory := addM(memory, Basket) } { pv := val } { mv := read(memory, b.items) }
-                { idx := i ‖ memory := write(memory, mv[i], pv) } φ } := by sol_chain
-    _ ~[sequentialToParallel]~> _ := by sol_chain
+    _ ~~> _ := by
+      sol_rws [sequentialToParallel]
 #last_line valueWrite
 
 /-- `Token memory tk = b.tokens[i];`, for the printed
