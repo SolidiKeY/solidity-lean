@@ -230,9 +230,24 @@ inside expressions, units) already elaborates.  Most of the corpus's
 the grammar spells differently: folded literals and units, `payable(…)`
 and contract conversions stripped, `−−`, `bool` keys as `b ? 1 : 0` (the
 mapping declared with a `uint` key), `x.push().f` read through a
-`T storage pushRef1 = x.push();`, and locals named like a state variable
-renamed with a trailing `_` (5 names: `balance`, `age`, `balances`,
-`ledger`, `tokens`).
+`T storage pushRef1 = x.push();` (the three sites are an assignment of a
+constant and a declaration's whole initial value, the only positions where
+that is solc's order).  The printer also renames a local named like a state
+variable or a Lean keyword with a trailing `_`, but no local or parameter of
+TestSuite is so named (`balance`, `age`, `balances`, `ledger`, `tokens` are
+struct members, left alone): the fixture does not exercise that path.
+
+After the M2 review, the import refuses what it used to read past and would
+change a function's meaning: a modifier, a `constant` or `immutable` state
+variable, an overloaded name or one named `report`, an inheriting contract;
+expressions of literals only are folded in exact rational arithmetic, as
+solc does (`7 / 2 * 2` is `7`); named arguments go in parameter order; a
+pushed member is hoisted only where that keeps solc's order; a struct
+recursive through an array is `unsupported`, not `excluded`.  None of these
+occurs in TestSuite: the fixture and its hash are unchanged.  A body that
+exhausts its heartbeats or recursion depth is a row, not a failed import.
+`./run-lean.sh` now builds `SolkeyTestSuite` too (about 8 s, the import's
+cost below), so its pinned report is checked.
 
 Cross-check against the old corpus: of the 212 corpus bodies that were not
 concretized, 182 print the same program (`Prog.toStr`, up to spacing,

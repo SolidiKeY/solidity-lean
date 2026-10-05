@@ -17,7 +17,9 @@
  * `referencedDeclaration` and the `id` of a declaration it points to,
  * documentation text, and `src` with the 1-based source `line` it starts at
  * on every statement and declaration.  The rest (`isPure`, name locations,
- * `typeIdentifier`, …) is noise that changes with unrelated edits.
+ * `typeIdentifier`, …) is noise that changes with unrelated edits.  A
+ * function's `modifiers` and a contract's `baseContracts` are kept when they
+ * are not empty: the import refuses what it would otherwise drop.
  *
  * The fixture starts with a header `{solcVersion, sourceSha256,
  * solkeyCommit, source}`.  Lake does not track a data file, so the module
@@ -112,9 +114,11 @@ const NOISE = new Set([
   "functionSelector", "implemented", "virtual", "exportedSymbols", "contractDependencies",
   "linearizedBaseContracts", "usedErrors", "usedEvents", "canonicalName", "fullyImplemented",
   "argumentTypes", "overloadedDeclarations", "hexValue", "assignments",
-  "functionReturnParameters", "abstract", "baseContracts", "license", "absolutePath",
-  "commonType", "tryCall", "modifiers",
+  "functionReturnParameters", "abstract", "license", "absolutePath",
+  "commonType", "tryCall",
 ]);
+// Kept only when not empty, so a fixture without them does not change.
+const KEPT_IF_ANY = new Set(["modifiers", "baseContracts"]);
 // The declarations an `id` is kept on: what `referencedDeclaration` points to.
 const DECLS = new Set([
   "VariableDeclaration", "StructDefinition", "FunctionDefinition", "ContractDefinition",
@@ -133,6 +137,7 @@ function trim(n, parentKey) {
   const out = {};
   for (const [k, v] of Object.entries(n)) {
     if (NOISE.has(k)) continue;
+    if (KEPT_IF_ANY.has(k) && Array.isArray(v) && v.length === 0) continue;
     if (k === "id" && !DECLS.has(n.nodeType)) continue;
     if (k === "src") {
       if (located(n, parentKey)) {
@@ -196,9 +201,12 @@ const hash = `0x${h.toString(16).padStart(16, "0")}`;
 
 if (!args.includes("--no-wrapper") && existsSync(WRAPPER)) {
   const w = readFileSync(WRAPPER, "utf8");
-  const w2 = w.replace(/(solc_import\s+"[^"]*"\s+hash\s+)0x[0-9a-f]+/, `$1${hash}`);
+  // the import's literal, and the stale-fixture test's expected message
+  const w2 = w.replace(/(solc_import\s+"[^"]*"\s+hash\s+)0x[0-9a-f]+/, `$1${hash}`)
+    .replace(/(has the hash )0x[0-9a-f]+/g, `$1${hash}`);
   if (w2 !== w) writeFileSync(WRAPPER, w2);
 }
+let cacheDiffers = false;
 if (args.includes("--compare-cache")) {
   // `SolcOutputCache`: the directory is the soljson's sha256 prefix, the file
   // the sha256 of the standard-JSON input `SolcWrapper` sends, whose unit name
@@ -222,12 +230,16 @@ if (args.includes("--compare-cache")) {
     const cached = JSON.parse(readFileSync(file, "utf8")).sources?.[unit]?.ast;
     if (!cached) continue;
     if (JSON.stringify(trim(cached, "")) !== JSON.stringify(fixture.ast)) {
-      fail(`the AST differs from solkey's cached solc output ${file}`);
+      // reported after the hash line, so a caller still reads the hash
+      console.error(`solc-ast: the AST differs from solkey's cached solc output ${file}`);
+      cacheDiffers = true;
+    } else {
+      console.log(`solc-ast: same AST as solkey's cached output ${file}`);
     }
-    console.log(`solc-ast: same AST as solkey's cached output ${file}`);
     compared = true;
   }
   if (!compared) console.log("solc-ast: solkey has no cached output for this source (run solkey on it once)");
 }
 
 console.log(`solc-ast: ${OUT} (${text.length} bytes, hash ${hash}, solc ${version})`);
+if (cacheDiffers) process.exit(1);

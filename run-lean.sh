@@ -10,6 +10,10 @@ cd "$repo_root"
 export PATH="$HOME/.elan/bin:$repo_root/scripts/lean-vscode/bin:$PATH"
 
 lake build
+# solkey's TestSuite through the solc import: not a default target, and the
+# import reports a function that stops elaborating as a row, so only its
+# pinned report (`#guard_msgs` in Solidity/Solkey/TestSuite.lean) catches it.
+lake build SolkeyTestSuite
 # Keep the sort-annotation table honest against the solkey taclet file:
 # drift fails the build. Skipped with a warning when no checkout is beside
 # this repository -- see scripts/check-solkey.sh.

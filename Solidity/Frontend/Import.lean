@@ -28,7 +28,11 @@ writes the fixture rewrites the literal, which makes Lake re-check the
 importing module.
 
 A function that does not elaborate is a row, not an error: the import
-never fails on one function.
+never fails on one function.  Each body's elaboration has its own
+heartbeats and catches runtime exceptions too (`tryCatchRuntimeEx`), so a
+body that exhausts its budget is a row as well.  A row is found by its
+index, not its name, and the reader refuses an overloaded name or one named
+`report` before any constant is made.
 -/
 
 namespace Solidity.Frontend
@@ -82,6 +86,11 @@ def ImportRow.summary (rows : List ImportRow) : String :=
 def fnv1a64 (b : ByteArray) : UInt64 :=
   b.foldl (fun h x => (h ^^^ x.toUInt64) * 0x100000001b3) 0xcbf29ce484222325
 
+/-- `0x` and 16 hex digits, as `scripts/solc-ast.mjs` writes the hash. -/
+def hex16 (h : UInt64) : String :=
+  let d := (Nat.toDigits 16 h.toNat).asString
+  "0x" ++ "".pushn '0' (16 - d.length) ++ d
+
 /-- Every position of `stx` moved to `ref`'s, so a parsed text never
 points into a string the file does not have. -/
 partial def atRef (ref : Syntax) (stx : Syntax) : Syntax :=
@@ -120,7 +129,7 @@ def elabSolcImport : CommandElab := fun stx => do
   let bytes ← IO.FS.readBinFile fixture
   let h := fnv1a64 bytes
   unless h.toNat == expected do
-    throwError "{path} has the hash {(Nat.toDigits 16 h.toNat).asString}, not the one named: \
+    throwError "{path} has the hash {hex16 h}, not the one named: \
       re-run scripts/solc-ast.mjs, which rewrites the literal"
   let some text := String.fromUTF8? bytes | throwError "{path} is not UTF-8"
   let j ← ofExcept (Json.parse text)
@@ -140,7 +149,7 @@ def elabSolcImport : CommandElab := fun stx => do
   -- each body, read by the macros to a `List RawStmt` term
   let rawTy := mkApp (mkConst ``List [0]) (mkConst ``RawStmt)
   let mut rows : Array ImportRow := #[]
-  let mut raws : Array (SolcFun × List (Nat × String) × Expr) := #[]
+  let mut raws : Array (Nat × SolcFun × List (Nat × String) × Expr) := #[]
   let at_ (f : SolcFun) (line : Nat) (msg : String) : String :=
     s!"{srcName}:{if line == 0 then f.line else line}: {msg}"
   for f in c.funs do
@@ -158,29 +167,28 @@ def elabSolcImport : CommandElab := fun stx => do
       | .error e => rows := rows.push (row .unsupported (at_ f 0 s!"the printed text does not parse: {e}"))
       | .ok s =>
         let r ← liftTermElabM <| withoutErrToSorry do
-          try
-            let e ← elabTermEnsuringType s rawTy
-            synthesizeSyntheticMVarsNoPostponing
-            let e ← instantiateMVars e
-            if e.hasMVar then pure (Except.error "the macros leave a hole")
-            else pure (.ok e)
-          catch ex => pure (.error (← ex.toMessageData.toString))
+          tryCatchRuntimeEx (withCurrHeartbeats do
+              let e ← elabTermEnsuringType s rawTy
+              synthesizeSyntheticMVarsNoPostponing
+              let e ← instantiateMVars e
+              if e.hasMVar then pure (Except.error "the macros leave a hole")
+              else pure (.ok e))
+            fun ex => do pure (.error (← ex.toMessageData.toString))
         match r with
         | .error m => rows := rows.push (row .unsupported (at_ f 0 m))
         | .ok e =>
+          raws := raws.push (rows.size, f, ss, e)
           rows := rows.push (row .elaborated "")
-          raws := raws.push (f, ss, e)
   -- the contract and every body, evaluated once
   let pairTy := mkApp2 (mkConst ``Prod [0, 0]) (mkConst ``Contract)
     (mkApp (mkConst ``List [0]) rawTy)
   let val := mkApp4 (mkConst ``Prod.mk [0, 0]) (mkConst ``Contract)
-    (mkApp (mkConst ``List [0]) rawTy) (mkConst N) (← liftTermElabM <| mkListLit rawTy (raws.map (·.2.2)).toList)
+    (mkApp (mkConst ``List [0]) rawTy) (mkConst N) (← liftTermElabM <| mkListLit rawTy (raws.map (·.2.2.2)).toList)
   let (C, bodies) ← liftTermElabM <| unsafe evalExpr (Contract × List (List RawStmt)) pairTy val
   -- the typed elaborator on each, the program quoted back and checked
   let progTy := mkApp (mkConst ``Prog) (mkConst N)
   let mut defined : Array Lean.Name := #[]
-  for ((f, ss, _), raw) in raws.toList.zip bodies do
-    let some k := rows.findIdx? (·.name == f.name) | continue
+  for ((k, f, ss, _), raw) in raws.toList.zip bodies do
     let fail (msg : String) : Array ImportRow :=
       rows.set! k { rows[k]! with status := .unsupported, reason := msg }
     match paramCtx f.params with
@@ -193,11 +201,16 @@ def elabSolcImport : CommandElab := fun stx => do
         let decl := Declaration.defnDecl {
           name := n, levelParams := [], type := progTy, value := Prog.quote (mkConst N) P,
           hints := .abbrev, safety := .safe }
-        try
-          liftCoreM <| addDecl decl
-          defined := defined.push n
-        catch ex => rows := fail (at_ f 0 s!"the kernel rejects the program: {← ex.toMessageData.toString}")
-  liftCoreM <| compileDecls defined
+        let ok ← liftCoreM <| tryCatchRuntimeEx (do addDecl decl; pure (Except.ok ()))
+          fun ex => do pure (.error (← ex.toMessageData.toString))
+        match ok with
+        | .ok () => defined := defined.push n
+        | .error m => rows := fail (at_ f 0 s!"the kernel rejects the program: {m}")
+  -- compiled for `sol_prove`; a failure here leaves the definitions, uncompiled
+  let compiled ← liftCoreM <| tryCatchRuntimeEx (do compileDecls defined; pure none)
+    fun ex => do pure (some (← ex.toMessageData.toString))
+  if let some m := compiled then
+    logWarning m!"solc_import: the programs are defined but not compiled: {m}"
   let rowsTy := mkApp (mkConst ``List [0]) (mkConst ``ImportRow)
   let rep : Lean.Name := N ++ `report
   liftCoreM <| addAndCompile <| .defnDecl {

@@ -5,7 +5,8 @@ import Solidity.Frontend.Import
 
 The fixture is `tests/solc/TestSuite.ast.json`, written by
 `scripts/solc-ast.mjs` with the soljson solkey pins and checked by
-`scripts/check-solc-ast.sh`; the script rewrites the hash below.  The struct
+`scripts/check-solc-ast.sh`; the script rewrites the hash below, in the
+import and in the stale-fixture test's expected message.  The struct
 `Triple { uint[3] items; uint tag; }` is the table's `FixedTriple`
 (`Semantics.structDef`: `Triple` is another contract's).
 -/
@@ -28,7 +29,7 @@ skipped tryCalleePing: TestSuite.sol:3488: tagged `@custom:key skip`
 /-! A fixture of another hash is refused: the module would be stale. -/
 
 /--
-error: ../../tests/solc/TestSuite.ast.json has the hash 4610a0af28d984e0, not the one named: re-run scripts/solc-ast.mjs, which rewrites the literal
+error: ../../tests/solc/TestSuite.ast.json has the hash 0x4610a0af28d984e0, not the one named: re-run scripts/solc-ast.mjs, which rewrites the literal
 -/
 #guard_msgs in
 solc_import "../../tests/solc/TestSuite.ast.json" hash 0x1 as Solkey.Stale
