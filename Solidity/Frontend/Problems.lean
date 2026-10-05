@@ -24,10 +24,10 @@ elaborated function with no statement, is listed apart, never derived.
   (`Problem.text`), to compare with `--print-problem`.
 * `#solkey_scan N` runs `sol_prove`'s walk on every statement with compiled
   code and lists what it leaves, with times: a search, to choose the
-  theorems to state.  It is not used in a checked file.  The closer is not
-  bounded (`Derive.budget` bounds the walk only), so `#solkey_scan N walk`
-  first lists the leaves without closing them: a leaf whose updates write
-  the storage many times can make the closer's reduction blow up.
+  theorems to state.  It is not used in a checked file.  `#solkey_scan N
+  walk` lists the leaves without closing them; the closer skips a leaf
+  past `Derive.closeSize` nodes, whose reduction doubles with each write
+  of the storage that reads it.
 -/
 
 namespace Solidity.Frontend

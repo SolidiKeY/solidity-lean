@@ -49,11 +49,6 @@ theorem ctor : ⊢ dl!{ [ owner = msg.sender; ] owner == msg.sender } := by
 theorem withdrawOwner :
     ⊢ dl!{ [ uint o = owner; withdraw(x); ] msg.sender == o && owner == o } := by
   sol_prove
-  refine close ?_
-  sol_symex
-  refine (Fml.valid_iff_reduce _ (by decide +kernel)).2 ?_
-  sol_reduce
-  sol_decide_heuristic
 
 /-- `ensures net(owner) == \old(net(owner)) - _amount`, the old entry `40`:
 the owner's entry is `10` after `withdraw(30)`, and anyone else's call

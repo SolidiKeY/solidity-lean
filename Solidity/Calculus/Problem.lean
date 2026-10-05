@@ -37,9 +37,10 @@ read by the interpreter as a test of the storage it is given, and stated
 as `defined(wt(storage))`: it returns exactly on a well-formed storage.  An
 expanded layout (`∀` over every root and member) would make every leaf a
 quantified formula the closer has to instantiate; one atom costs one
-constructor of `Op1` and nothing in `Fml`.  The closer sets it aside
-(`Derive.dropWt`), which only weakens a leaf; a fact derived from it is the
-closer's to add.
+constructor of `Op1` and nothing in `Fml`.  The closer sets it aside as a
+formula (`Derive.dropWt`, only a weakening) and reads it as the layout the
+storage holds (`Derive.topWt`, `Decide.LayoutOk`): a read at a path the
+layout types returns.
 
 The argument `vs` of `wt` is the contract's roots, carried by the symbol
 since a symbol does not know its contract (`Fml.wt` fills it in).

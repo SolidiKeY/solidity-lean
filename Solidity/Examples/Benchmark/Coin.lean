@@ -19,9 +19,7 @@ file has them.  `spec!{ mint }`, the obligation solkey synthesizes
 (`Calculus/Spec.lean`), is derived as `⊢`, its leaves closed by `sol_spec`'s
 steps (`spec_mint`); `send`'s is not.  Before it, the clauses by hand, as `⊢ dl{}` obligations, one per
 clause, each by `sol_prove` (`Calculus/Derive.lean`): the calculus's steps
-and each leaf closed by its terms (`LFml.syn`), in one kernel evaluation.
-`mintMinter` leaves one leaf `LFml.syn` does not close, closed after it by
-`sol_decide`'s heuristic step (`sol_decide_heuristic`).
+and each leaf closed by the closer (`LFml.close`), in one kernel evaluation.
 `\old(e)` is a local declared before the call (`uint b = balances[r];`), and
 `msg.sender` is the transaction's (`Simple.env`), the same before and after.
 `requires amount >= 0` holds of a `uint`.  The runs of the interpreter
@@ -72,11 +70,6 @@ anyone but the minter reverts, so under the box the caller is the minter. -/
 theorem mintMinter :
     ⊢ dl!{ [ uint m = minter; mint(r, a); ] m == msg.sender && minter == m } := by
   sol_prove
-  refine close ?_
-  sol_symex
-  refine (Fml.valid_iff_reduce _ (by decide +kernel)).2 ?_
-  sol_reduce
-  sol_decide_heuristic
 
 /-- `ensures balances[receiver] == \old(balances[receiver]) + amount`. -/
 theorem mintReceiver :

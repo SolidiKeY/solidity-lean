@@ -85,7 +85,8 @@ lemma (`TermTaclet.sound`).
 | `Calculus/Decide.lean` | `sol_decide`: reads of writes as case trees on key equalities, over the live storage. |
 | `Calculus/DecideSyn.lean` | `LFml.syn`: a reduction closed by its terms, KeY's syntactic closing; `sol_decide`'s first try. |
 | `Calculus/DecideComplete.lean` | The starting storage's reads are realizable; `Fml.valid_iff_cons`. |
-| `Calculus/Derive.lean` | The strategy as one kernel evaluation: `Derive.residue` (per-goal fresh names, any number of branches, a step budget over the whole derivation, leaves closed by `LFml.syn`, `wt` premises set aside), `Proves.of_residue`, `Proves.close_dropWt`; `sol_prove`, `sol_prove?`. |
+| `Calculus/Closer.lean` | `LFml.close`: the closer, KeY's first-order and arithmetic taclets as clauses of one `Bool` (ground evaluation, `applyEq`, `bool` case splits, reads typed by `wt`'s layout), `LFml.close_holds`; `LFml.fits`, the size bound. |
+| `Calculus/Derive.lean` | The strategy as one kernel evaluation: `Derive.residue` (per-goal fresh names, any number of branches, a step budget over the whole derivation, leaves closed by `LFml.close` with `wt` read as a layout, parallel updates split, `Derive.closeSize`), `Proves.of_residue`, `Proves.close_dropWt`; `sol_prove`, `sol_prove?`. |
 | `Calculus/Problem.lean` | solkey's obligation forms (`Problem.fml`: `∀x̄. wt(storage) → [f] true` or `⟨f⟩ true`), `Fml.wt`, `shape_iff_reachable`, `wt_iff_reachable`, `initStorage_wt`; `Problem.text` in solkey's syntax. |
 | `Calculus/Spec.lean` | Specifications compiled to dynamic logic as solkey's `SpecCompiler` does; `spec[C]{f}`, `sol_spec`. |
 | `Calculus/Notation.lean` | `dl[C]{ … }` and `dl!{ … }`: concrete formulas read against a contract; `dl![m]{ … }`, `⟨[ ]⟩` at a modality `m`; a Lean formula where a formula stands; `Γ ⟹ φ` lines; `st!{ … }`, `pt!{ … }` for a storage term and a path. |
@@ -195,7 +196,7 @@ diffs it).  `docs/testsuite-proofs.md` has the counts and timings.
 | `Solkey/TestSuite.lean` | `Solkey.TestSuite`, its 417 programs and the report, pinned. |
 | `Frontend/Problems.lean` | `solc_problems N` (`N.f.problem : Fml N` per program), `#solkey_problem`, `#solkey_scan`, `#solkey_derive?` (the replays to paste), `#solkey_obligations` (derived, checked against `⊢ N.f.problem` / pending). |
 | `TestSuite/Problems.lean` | The 417 statements of `Solkey.TestSuite`, two pinned in solkey's syntax, `initState_wt`. |
-| `TestSuite/Derived1.lean`, `TestSuite/Derived2.lean`, `TestSuite/Derived3.lean` | `Solkey.TestSuite.f.proved : ⊢ Solkey.TestSuite.f.problem`, 37 per module, by `sol_prove` and explicit leaf tactics. |
+| `TestSuite/Derived1.lean` … `TestSuite/Derived6.lean` | `Solkey.TestSuite.f.proved : ⊢ Solkey.TestSuite.f.problem`, 40 per module (237 in all), by `sol_prove` and explicit leaf tactics. |
 | `TestSuite/Report.lean` | The pinned count: derived, pending (named), and the three with no statement. |
 
 ## Examples

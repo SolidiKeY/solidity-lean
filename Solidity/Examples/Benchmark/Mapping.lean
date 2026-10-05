@@ -172,21 +172,11 @@ held `true` (as `remove_spec`). -/
 theorem nested_remove_spec_true :
     ⊢ dl!{ nested[a][i] == true → [ remove(a, i); ] nested[a][i] == false } := by
   sol_prove
-  refine close ?_
-  sol_symex
-  refine (Fml.valid_iff_reduce _ (by decide +kernel)).2 ?_
-  sol_reduce
-  sol_decide_heuristic
 
 /-- `remove(a, i)`: the same, where `nested[a][i]` held `false`. -/
 theorem nested_remove_spec_false :
     ⊢ dl!{ nested[a][i] == false → [ remove(a, i); ] nested[a][i] == false } := by
   sol_prove
-  refine close ?_
-  sol_symex
-  refine (Fml.valid_iff_reduce _ (by decide +kernel)).2 ?_
-  sol_reduce
-  sol_decide_heuristic
 
 /-- `set(_addr1, _i, _boo)`'s obligation: `ensures nested[_addr1][_i] ==
 _boo`, an `<->`. -/

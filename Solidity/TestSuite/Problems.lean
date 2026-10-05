@@ -50,12 +50,23 @@ theorem Solkey.TestSuite.initState_wt :
     holds Solkey.TestSuite.initState (Fml.wt Solkey.TestSuite) :=
   initStorage_wt (by decide +kernel) (by decide +kernel)
 
-/-! The suggestion `#solkey_derive?` prints, pinned: a leaf under the `wt`
-premise is closed with it set aside (`Derive.searchLeaf`), and several
-leaves each go under their `case`. -/
+/-! The suggestion `#solkey_derive?` prints, pinned: a statement the
+closer proves in the residue is `sol_prove` alone; a leaf it leaves (an
+array written past a `push`, outside its fragment) is closed with the `wt`
+premise set aside (`Derive.searchLeaf`), and several leaves each go under
+their `case`. -/
 
 /--
 info: theorem Solkey.TestSuite.additionStorageWrite.proved : ⊢ Solkey.TestSuite.additionStorageWrite.problem := by
+  sol_prove
+
+additionStorageWrite: derived
+-/
+#guard_msgs in
+#solkey_derive? Solkey.TestSuite from 0 count 1
+
+/--
+info: theorem Solkey.TestSuite.testStorageArrayReadWrite.proved : ⊢ Solkey.TestSuite.testStorageArrayReadWrite.problem := by
   sol_prove
   case leaf1 =>
     refine Proves.close_dropWt ?_
@@ -66,7 +77,7 @@ info: theorem Solkey.TestSuite.additionStorageWrite.proved : ⊢ Solkey.TestSuit
     sol_symex
     sol_close
 
-additionStorageWrite: derived
+testStorageArrayReadWrite: derived
 -/
 #guard_msgs in
-#solkey_derive? Solkey.TestSuite from 0 count 1
+#solkey_derive? Solkey.TestSuite from 222 count 1

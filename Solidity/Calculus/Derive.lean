@@ -1,4 +1,5 @@
 import Solidity.Calculus.DecideComplete
+import Solidity.Calculus.Closer
 import Solidity.Calculus.TheoryRewrite
 import Solidity.Calculus.Spec
 import Solidity.Calculus.ProofTree
@@ -22,9 +23,12 @@ sequent (`Hyp.fresh Γ φ`), as the `Proves` constructors ask; `symex`
 numbers them over the whole formula, sibling branches included, so the two
 part ways after the first branch.
 
-The default closer (`Derive.synClose`) is `sol_decide`'s first try,
-`LFml.syn` on the reduction (`Calculus/DecideSyn.lean`): it closes a leaf
-inside the `Bool`.  A leaf it does not close is left for a tactic.
+The default closer (`Derive.synClose`) is `LFml.close` on the reduction
+(`Calculus/Closer.lean`): it closes a leaf inside the `Bool`, reading an
+obligation's `wt(storage)` premise as the layout the storage holds
+(`Derive.topWt`).  A parallel update is split first (`Fml.seqUpd`), and a
+leaf past `Derive.closeSize` nodes is not attempted.  A leaf it does not
+close is left for a tactic.
 
 Neither the compiled run nor the kernel check heeds `maxHeartbeats`, so
 the walk carries its own budget, the steps of the whole derivation
@@ -40,7 +44,7 @@ whose `if`s double its paths stops there, with an error.
   elaborator: `Proves` is an inductive, and the proof term is assembled
   directly.
 * `sol_prove?` runs `sol_prove`, tries `sol_decide`'s steps after
-  `LFml.syn` (which the closer has already tried), then `sol_close`, then
+  `LFml.syn` (which the closer subsumes), then `sol_close`, then
   `sol_spec_close` (`omega`, `grind`) on each leaf, each try with its own
   heartbeats, and suggests the replay: `sol_prove` and one `case` per leaf.
   A leaf none of them closes stays a goal and is reported.
@@ -111,10 +115,10 @@ def closes (n : Nat) (close : List (Hyp C) → Fml C → Bool) (b : Nat) (Γ : L
   | some ([], _) => true
   | _ => false
 
-/-- A precondition the closer sets aside: `wt(storage)`, an
-obligation's premise (`Calculus/Problem.lean`), which `LFml.syn` does not
-read.  Dropping a precondition only weakens what is to be shown
-(`Derive.wrap_dropWt`). -/
+/-- A precondition the closer sets aside as a formula: `wt(storage)`, an
+obligation's premise (`Calculus/Problem.lean`), which the fragment does not
+read (the closer reads it as a layout, `Derive.topWt`).  Dropping a
+precondition only weakens what is to be shown (`Derive.wrap_dropWt`). -/
 def isWt : Hyp C → Bool
   | .pre (.defined (.app1 (.wt _) _)) => true
   | _ => false
@@ -122,12 +126,211 @@ def isWt : Hyp C → Bool
 /-- The context without its `wt` premises. -/
 def dropWt (Γ : List (Hyp C)) : List (Hyp C) := Γ.filter (!isWt ·)
 
-/-- The default closer: no modality left, in `sol_decide`'s fragment, and
-its reduction closed by its terms (`LFml.syn`), the `wt` premises set
-aside. -/
+/-! ### Parallel updates, one element at a time
+
+A rule may leave a parallel update, `{ x := x + 1 ‖ r := x + 1 }` of
+`r = ++x;`, which `Fml.toL` does not read.  Where its last element binds a
+local the others neither read nor write, it is the same as that element
+first and the others after it (KeY's `sequentialToParallel`, read
+backwards): `{ r := x + 1 }{ x := x + 1 }`.  `Fml.seqUpd` splits every such
+update before the closer runs; it only has to imply the leaf. -/
+
+/-- The local an update element binds, for the two kinds the split moves. -/
+def _root_.Solidity.UpdElem.target? : UpdElem C → Option Var
+  | .val x _ | .path x _ => some x
+  | _ => none
+
+/-- A parallel update, its elements reversed (`rs`), as one update per
+element from the last, while the last binds a local the rest does not
+mention; the rest as one parallel update. -/
+def seqRev (m : Modality) (ψ : Fml C) : List (UpdElem C) → Fml C
+  | [] => .upd m [] ψ
+  | [e] => .upd m [e] ψ
+  | e :: rest =>
+    match e.target? with
+    | some x => if x ∈ Upd.vars rest.reverse then .upd m (e :: rest).reverse ψ
+      else .upd m [e] (seqRev m ψ rest)
+    | none => .upd m (e :: rest).reverse ψ
+
+/-- Every parallel update split where `seqRev` can, in the positions a leaf
+proves (not in a premise). -/
+def _root_.Solidity.Fml.seqUpd : Fml C → Fml C
+  | .upd m U φ => seqRev m φ.seqUpd U.reverse
+  | .imp a φ => .imp a φ.seqUpd
+  | .and φ ψ => .and φ.seqUpd ψ.seqUpd
+  | .all x p φ => .all x p φ.seqUpd
+  | φ => φ
+
+theorem UpdElem.write_lookup {σ₀ τ τ' : State} {x : Var} :
+    (e : UpdElem C) → x ∉ e.vars → e.write σ₀ τ = .ok τ' → lookupBy x τ'.env = lookupBy x τ.env
+  | .val y t, hx, h | .path y t, hx, h | .mref y t, hx, h | .store y t, hx, h => by
+    have hy : x ≠ y := fun e => hx (by simp [UpdElem.vars, e])
+    simp only [UpdElem.write, bind, Except.bind, pure, Except.pure] at h
+    repeat' split at h
+    all_goals first
+      | (cases h; simp only [State.setEnv, SemanticsProperties.lookupBy_setBy_ne hy])
+      | cases h
+  | .saveNet y, hx, h => by
+    have hy : x ≠ y := fun e => hx (by simp [UpdElem.vars, e])
+    simp only [UpdElem.write, pure, Except.pure] at h
+    cases h; simp only [State.setEnv, SemanticsProperties.lookupBy_setBy_ne hy]
+  | .storage s, _, h | .memory s, _, h | .selfBalance _ s, _, h | .net _ _ s, _, h
+  | .pay _ s, _, h => by
+    simp only [UpdElem.write, bind, Except.bind, pure, Except.pure] at h
+    repeat' split at h
+    all_goals first | (cases h; rfl) | cases h
+
+theorem Upd.foldl_lookup {σ₀ : State} {x : Var} :
+    (U : Upd C) → x ∉ Upd.vars U → ∀ {τ ρ : State},
+      U.foldlM (fun τ e => e.write σ₀ τ) τ = .ok ρ → lookupBy x ρ.env = lookupBy x τ.env
+  | [], _, _, _, h => by cases h; rfl
+  | e :: U, hx, τ, ρ, h => by
+    simp only [Upd.vars, List.mem_append, not_or] at hx
+    simp only [List.foldlM_cons] at h
+    obtain ⟨τ', h₁, h₂⟩ := SemanticsProperties.Res.bind_eq_ok.1 h
+    rw [Upd.foldl_lookup U hx.2 h₂, UpdElem.write_lookup e hx.1 h₁]
+
+theorem afterImp {m : Modality} {p q : State → Prop} {r : Res State} (h : ∀ τ, p τ → q τ) :
+    m.after p r → m.after q r := by
+  cases r with
+  | ok τ => exact h τ
+  | error _ => exact id
+
+theorem Upd.apply_single (e : UpdElem C) (σ : State) : Upd.apply [e] σ = e.write σ σ := by
+  simp only [Upd.apply, List.foldlM_cons, List.foldlM_nil, bind_pure]
+
+theorem Upd.apply_append_single (P : Upd C) (e : UpdElem C) (σ : State) :
+    Upd.apply (P ++ [e]) σ = Upd.apply P σ >>= fun ρ => e.write σ ρ := by
+  simp only [Upd.apply, List.foldlM_append, List.foldlM_cons, List.foldlM_nil, bind_pure]
+
+/-- **The last element first**: `{e}{P}ψ` implies `{P ‖ e}ψ` where `e`
+binds a local `P` does not mention. -/
+theorem peel_sound {m : Modality} {P : Upd C} {e : UpdElem C} {x : Var}
+    (he : e.target? = some x) (hx : x ∉ Upd.vars P) {ψ : Fml C} {σ : State}
+    (h : holds σ (.upd m [e] (.upd m P ψ))) : holds σ (.upd m (P ++ [e]) ψ) := by
+  -- the element writes `x := b`, `b` read in the state it starts from
+  obtain ⟨bnd, hw⟩ : ∃ bnd : State → Res Binding, ∀ σ₀ τ,
+      e.write σ₀ τ = bnd σ₀ >>= fun b => .ok (τ.setEnv x b) := by
+    unfold UpdElem.target? at he
+    split at he
+    · rename_i y t
+      cases he
+      exact ⟨fun σ₀ => t.eval σ₀ >>= fun v => .ok (.val v), fun σ₀ τ => by
+        simp only [UpdElem.write, bind, Except.bind, pure, Except.pure]
+        split <;> rfl⟩
+    · rename_i y p
+      cases he
+      exact ⟨fun σ₀ => p.eval σ₀ >>= fun rs => .ok (.spath rs.1 rs.2), fun σ₀ τ => by
+        simp only [UpdElem.write, bind, Except.bind, pure, Except.pure]
+        split <;> rfl⟩
+    · cases he
+  have h' : m.after (fun τ => m.after (fun ρ => holds ρ ψ) (Upd.apply P τ)) (Upd.apply [e] σ) := h
+  change m.after (fun ρ => holds ρ ψ) (Upd.apply (P ++ [e]) σ)
+  rw [Upd.apply_single, hw] at h'
+  rw [Upd.apply_append_single]
+  simp only [hw]
+  cases hb : bnd σ with
+  | error eb =>
+    rw [hb] at h'
+    cases Upd.apply P σ with
+    | error _ => exact h'
+    | ok _ => exact h'
+  | ok b =>
+    rw [hb] at h'
+    have h'' : m.after (fun ρ => holds ρ ψ) (Upd.apply P (σ.setEnv x b)) := h'
+    have hag : EnvAgreeExcept [x] σ (σ.setEnv x b) :=
+      EnvAgreeExcept.setEnv_right ⟨rfl, rfl, rfl, rfl, fun _ _ => rfl, rfl, rfl⟩
+        (List.mem_singleton_self x) b
+    have hr := Upd.apply_frame hag P (fun y hy hm => by
+      rw [List.mem_singleton] at hm; subst hm; exact hx hy)
+    have hl : ∀ ρ₁, Upd.apply P (σ.setEnv x b) = .ok ρ₁ →
+        lookupBy x ρ₁.env = lookupBy x (σ.setEnv x b).env :=
+      fun ρ₁ h₁ => Upd.foldl_lookup P hx h₁
+    revert h'' hr hl
+    generalize Upd.apply P σ = r₀
+    generalize Upd.apply P (σ.setEnv x b) = r₁
+    intro h'' hr hl
+    match r₀, r₁, hr with
+    | .error _, .error _, _ => exact h''
+    | .ok _, .error _, hr | .error _, .ok _, hr => exact (nomatch hr)
+    | .ok ρ₀, .ok ρ₁, hr =>
+      have hl₁ := hl ρ₁ rfl
+      have hag' : EnvAgreeExcept [] ρ₁ (ρ₀.setEnv x b) :=
+        ⟨hr.storage.symm, hr.heap.symm, hr.nextId.symm, hr.net.symm, fun n _ => by
+          by_cases hn : n = x
+          · subst hn
+            simp only [hl₁, State.setEnv, SemanticsProperties.lookupBy_setBy_self]
+          · simp only [State.setEnv, SemanticsProperties.lookupBy_setBy_ne hn]
+            exact (hr.env n (by simpa using hn)).symm,
+          hr.selfBalance.symm, hr.tx.symm⟩
+      exact (holds_frame ψ (by intro _ _ hm; simp at hm) hag').1 h''
+
+theorem seqRev_sound {m : Modality} {ψ ψ' : Fml C} (hψ : ∀ σ, holds σ ψ' → holds σ ψ) :
+    (rs : List (UpdElem C)) → ∀ σ, holds σ (seqRev m ψ' rs) → holds σ (.upd m rs.reverse ψ)
+  | [], σ, h => by
+    simp only [seqRev, holds, Upd.apply, List.reverse_nil, List.foldlM_nil] at h ⊢
+    exact hψ σ h
+  | [e], σ, h => by
+    simp only [seqRev, holds, List.reverse_cons, List.reverse_nil, List.nil_append] at h ⊢
+    exact afterImp (fun τ => hψ τ) h
+  | e :: e' :: rest, σ, h => by
+    simp only [seqRev] at h
+    split at h
+    · rename_i x hx
+      split at h
+      · exact Hyp.wrap_mono hψ [.upd m _] σ h
+      · rename_i hm
+        rw [List.reverse_cons]
+        refine peel_sound hx hm ?_
+        simp only [holds] at h ⊢
+        exact afterImp (fun τ hτ => seqRev_sound hψ (e' :: rest) τ hτ) h
+    · exact Hyp.wrap_mono hψ [.upd m _] σ h
+
+theorem Fml.seqUpd_sound : (φ : Fml C) → ∀ σ, holds σ φ.seqUpd → holds σ φ
+  | .upd m U φ, σ, h => by
+    have := seqRev_sound (m := m) (fun τ => Fml.seqUpd_sound φ τ) U.reverse σ h
+    rwa [List.reverse_reverse] at this
+  | .imp a φ, σ, h => fun ha => Fml.seqUpd_sound φ σ (h ha)
+  | .and φ ψ, σ, h => ⟨Fml.seqUpd_sound φ σ h.1, Fml.seqUpd_sound ψ σ h.2⟩
+  | .all x p φ, σ, h => fun v hv => Fml.seqUpd_sound φ _ (h v hv)
+  | .tt, _, h | .eq .., _, h | .defined _, _, h | .not _, _, h | .modal .., _, h
+  | .havoc _, _, h => h
+
+/-- The roots `wt(storage)` names. -/
+def wtRoots? : Fml C → Option (List (Name × Ty))
+  | .defined (.wt vs .storage) => some vs
+  | _ => none
+
+/-- The roots a leaf's first `wt(storage)` premise holds, where only
+quantifiers and preconditions come before it (so it speaks of the storage
+the leaf starts from); none otherwise. -/
+def topWt : List (Hyp C) → List (Name × Ty)
+  | [] => []
+  | .pre a :: Γ =>
+    match wtRoots? a with
+    | some vs => vs
+    | none => topWt Γ
+  | .all _ _ :: Γ => topWt Γ
+  | .upd _ _ :: _ | .havoc :: _ => []
+
+/-- The most nodes the closer takes in a leaf's formula with its updates
+pushed in, counted as a tree (`LFml.fits`).  A storage written from a read
+of the one before it appears twice in the next, so the tree, and the
+reduction after it, double with each such write: a leaf of four `count +=
+1;` has 1374 nodes and closes in 0.8 s, one of six 5678 nodes; the largest
+leaf of solkey's `TestSuite` has 950. -/
+def closeSize : Nat := 2000
+
+/-- The default closer: no modality left, in `sol_decide`'s fragment,
+parallel updates split (`Fml.seqUpd`), at most `closeSize` nodes, and its
+reduction closed by `LFml.close` (`Calculus/Closer.lean`), the `wt`
+premises set aside as formulas and read as the layout their storage holds
+(`topWt`).  A leaf past the bound is left open, not attempted. -/
 def synClose (Γ : List (Hyp C)) (φ : Fml C) : Bool :=
-  let w := Hyp.wrap (dropWt Γ) φ
-  w.modalFree && w.inL Decide.Sym.empty && w.reduce.syn [] []
+  let w := (Hyp.wrap (dropWt Γ) φ).seqUpd
+  let l := w.toL Decide.Sym.empty
+  (Hyp.wrap (dropWt Γ) φ).modalFree && w.inL Decide.Sym.empty &&
+    (l.fits closeSize).isSome && Decide.LFml.close (topWt Γ) l.elim
 
 /-- The steps `sol_prove` allows, over the whole derivation and so down any
 one path: a runaway (a program whose `if`s double the paths) stops here, in
@@ -202,14 +405,79 @@ theorem _root_.Solidity.Proves.close_dropWt {R : RuleSet} {Γ : List (Hyp C)} {�
     Proves R Γ φ :=
   Proves.close (fun σ => (wrap_dropWt Γ).2 σ (h σ)) ((wrap_dropWt Γ).1 hφ)
 
+/-- A `wt(storage)` premise holds of a storage that holds its layout. -/
+theorem layoutOk_of_wt {σ : State} {vs : List (Name × Ty)}
+    (h : holds σ (.defined (Term.wt vs (C := C) .storage))) : Decide.LayoutOk vs σ := by
+  have hw : storageWtB vs σ.storage = true := by
+    simp only [holds, Tm.eval, Op1.eval, Op0.eval, pure, Except.pure, bind, Except.bind] at h
+    revert h
+    cases storageWtB vs σ.storage with
+    | true => exact fun _ => rfl
+    | false => exact fun ⟨_, h⟩ => (nomatch h)
+  simp only [storageWtB, storageShapeB, Bool.and_eq_true, List.all_eq_true] at hw
+  intro r T hT
+  have := hw.1.2 (r, T) (SemanticsProperties.lookupBy_eq_some_mem hT)
+  revert this
+  split
+  · rename_i v hv
+    simp only [Bool.and_eq_true]
+    exact fun h => ⟨v, hv, h.1⟩
+  · exact fun h => nomatch h
+
+theorem wtRoots?_isWt {a : Fml C} {vs : List (Name × Ty)} (h : wtRoots? a = some vs) :
+    isWt (C := C) (.pre a) = true := by
+  unfold wtRoots? at h
+  split at h
+  · rfl
+  · cases h
+
+theorem wtRoots?_layout {a : Fml C} {vs : List (Name × Ty)} (h : wtRoots? a = some vs) {σ : State}
+    (ha : holds σ a) : Decide.LayoutOk vs σ := by
+  unfold wtRoots? at h
+  split at h
+  · cases h; exact layoutOk_of_wt ha
+  · cases h
+
+/-- Reading the `wt` premise as a layout: a leaf whose context without them
+holds wherever the storage holds the layout holds. -/
+theorem wrap_topWt {φ : Fml C} : (Γ : List (Hyp C)) → ∀ σ,
+    (Decide.LayoutOk (topWt Γ) σ → holds σ (Hyp.wrap (dropWt Γ) φ)) → holds σ (Hyp.wrap Γ φ)
+  | [], σ, h => h fun _ _ hT => nomatch hT
+  | .pre a :: Γ, σ, h => by
+    simp only [topWt] at h
+    cases hr : wtRoots? a with
+    | some vs =>
+      have hd : dropWt (.pre a :: Γ) = dropWt Γ := by
+        simp only [dropWt, List.filter_cons, wtRoots?_isWt hr, Bool.not_true,
+          Bool.false_eq_true, ↓reduceIte]
+      rw [hr, hd] at h
+      exact fun ha => (wrap_dropWt Γ).2 σ (h (wtRoots?_layout hr ha))
+    | none =>
+      rw [hr] at h
+      cases hw : isWt (C := C) (.pre a) with
+      | true =>
+        have hd : dropWt (.pre a :: Γ) = dropWt Γ := by
+          simp only [dropWt, List.filter_cons, hw, Bool.not_true, Bool.false_eq_true, ↓reduceIte]
+        rw [hd] at h
+        exact fun _ => wrap_topWt Γ σ h
+      | false =>
+        have hd : dropWt (.pre a :: Γ) = .pre a :: dropWt Γ := by
+          simp only [dropWt, List.filter_cons, hw, Bool.not_false, ↓reduceIte]
+        rw [hd] at h
+        exact fun ha => wrap_topWt Γ σ fun hL => h hL ha
+  | .all x p :: Γ, σ, h => fun v hv => wrap_topWt Γ _ fun hL => h hL v hv
+  | .upd m U :: Γ, σ, h => (wrap_dropWt (.upd m U :: Γ)).2 σ (h fun _ _ hT => nomatch hT)
+  | .havoc :: Γ, σ, h => (wrap_dropWt (.havoc :: Γ)).2 σ (h fun _ _ hT => nomatch hT)
+
 /-- The default closer is sound: what it accepts, `Proves.close` proves. -/
 theorem synClose_sound {Γ : List (Hyp C)} {φ : Fml C} (h : synClose Γ φ = true) :
     Proves .all Γ φ := by
   simp only [synClose, Bool.and_eq_true] at h
-  obtain ⟨⟨hm, hf⟩, hs⟩ := h
-  have hv : Valid (Hyp.wrap (dropWt Γ) φ) :=
-    (Fml.valid_iff_reduce _ hf).2 (Decide.LFml.syn_valid _ hs)
-  exact Proves.close (fun σ => (wrap_dropWt Γ).2 σ (hv σ)) ((wrap_dropWt Γ).1 hm)
+  obtain ⟨⟨⟨hm, hf⟩, -⟩, hs⟩ := h
+  refine Proves.close (fun σ => wrap_topWt Γ σ fun hL => Fml.seqUpd_sound _ σ ?_)
+    ((wrap_dropWt Γ).1 hm)
+  rw [Decide.Fml.toL_holds _ (Decide.Rel.empty σ) hf, ← Decide.LFml.elim_holds σ]
+  exact Decide.LFml.close_holds hL hs
 
 section
 variable {r : Nat → List (Hyp C) → Fml C → Option (List (Leaf C) × Nat)}
@@ -386,8 +654,8 @@ def prove (g : MVarId) : MetaM (List MVarId) := do
 
 /-- The tactics `sol_prove?` tries on a leaf, in order, each a sequence of
 lines: `sol_decide`'s two steps after its `LFml.syn` try, which the closer
-has already made, each on its own so that the replay does not try the
-other; then `sol_close` and `sol_spec_close` (`omega`, `grind`). -/
+subsumes, each on its own so that the replay does not try the other; then
+`sol_close` and `sol_spec_close` (`omega`, `grind`). -/
 def leafTacs (wt : Bool := false) : Array (Array String) :=
   let pre := #[if wt then "refine Proves.close_dropWt ?_" else "refine Proves.close ?_",
     "sol_symex"]

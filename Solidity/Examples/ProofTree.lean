@@ -166,7 +166,7 @@ theorem transferFrameStorage :
 
 /-! ## `sol_prove?`: the walk in one evaluation
 
-A write read back: the leaf closes by its terms (`LFml.syn`) inside the
+A write read back: the leaf closes by the closer (`LFml.close`) inside the
 residue, and the replay is `sol_prove` alone. -/
 
 /--
@@ -177,34 +177,31 @@ info: Try this:
 example : ⊢ dl!{ [ alice.age = v; uint y = alice.age; ] y == v } := by
   sol_prove?
 
-/-! `guardedCopy`'s three leaves do not close by their terms alone
-(`LFml.syn`): each is left, a `case` of its own, and closed by `sol_decide`'s
-next step. -/
+/-! `guardedCopy` closes inside the residue too: its premise `a == 1`
+gives `a` the value `1` (KeY's `applyEq`), and `x == 1` folds to `true`. -/
 
 /--
 info: Try this:
   sol_prove
-    case leaf1 =>
-      refine Proves.close ?_
-      sol_symex
-      refine (Fml.valid_iff_reduce _ (by decide +kernel)).2 ?_
-      sol_reduce
-      sol_decide_cons
-    case leaf2 =>
-      refine Proves.close ?_
-      sol_symex
-      refine (Fml.valid_iff_reduce _ (by decide +kernel)).2 ?_
-      sol_reduce
-      sol_decide_cons
-    case leaf3 =>
-      refine Proves.close ?_
-      sol_symex
-      refine (Fml.valid_iff_reduce _ (by decide +kernel)).2 ?_
-      sol_reduce
-      sol_decide_cons
 -/
 #guard_msgs in
 example : ⊢ dl!{ a == 1 → ⟨ uint x = a; require(x == 1); ⟩ x == 1 } := by
+  sol_prove?
+
+/-! Two writes at keys the premises do not separate: the leaf is left, and
+closed by `sol_decide`'s next step, which splits on `k == j`. -/
+
+/--
+info: Try this:
+  sol_prove
+    refine Proves.close ?_
+    sol_symex
+    refine (Fml.valid_iff_reduce _ (by decide +kernel)).2 ?_
+    sol_reduce
+    sol_decide_cons
+-/
+#guard_msgs in
+example : ⊢ dl!{ [ balances[k] = 5; balances[j] = 5; ] balances[k] == 5 } := by
   sol_prove?
 
 /-! ## A failed `assert`
@@ -258,11 +255,6 @@ example : ⊢ dl!{ a == 1 → [ uint x = a; assert(x == 1); ] x == 1 } := by
 /--
 info: Try this:
   sol_prove
-    refine Proves.close ?_
-    sol_symex
-    refine (Fml.valid_iff_reduce _ (by decide +kernel)).2 ?_
-    sol_reduce
-    sol_decide_cons
 -/
 #guard_msgs in
 example : ⊢ dl!{ a == 1 → [ uint x = a; assert(x == 1); ] x == 1 } := by
