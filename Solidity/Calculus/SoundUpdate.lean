@@ -298,6 +298,15 @@ theorem allocDefault_frame (σ : State) (R : RefTy) : FramePreserving σ (allocD
 def allocHN (σ : State) (R : RefTy) : Res (List (Nat × MObj) × Nat × Nat) :=
   (allocDefault σ R).map fun p => (p.1.heap, p.1.nextId, p.2)
 
+@[simp] theorem allocHN_noPanic (σ : State) (R : RefTy) : NoPanic (allocHN σ R) := by
+  simp only [allocHN]
+  cases h : allocDefault σ R with
+  | error e =>
+    have h' : NoPanic (allocDefault σ R) := allocDefault_noPanic σ R
+    rw [h] at h'
+    simpa [Except.map] using h'
+  | ok _ => simp [Except.map]
+
 theorem allocDefault_eq (σ : State) (R : RefTy) :
     allocDefault σ R = (allocHN σ R >>= fun q => pure ({ σ with heap := q.1, nextId := q.2.1 }, q.2.2)) :=
   res_frame_eq (allocDefault_frame σ R)

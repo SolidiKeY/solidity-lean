@@ -10,10 +10,11 @@ rewrites (`Premise.Correct`), against the interpreter `Stmt.run`, from every
 state, with no hypothesis but that the rule's fresh names are fresh for the
 statement.  An update has the statement's effect; new statements have its
 effect off the fresh names; a branch runs the goal its condition picks, and
-halts where neither condition holds; a closed goal is a halt, closed as the
-modality says.
+halts where neither condition holds (not in a panic); a check (`assert`) runs
+on where its condition holds; a closed goal is a halt, not a panic, closed as
+the modality says.
 
-The five premise kinds are proved apart: `SoundUpdate.lean`,
+The six premise kinds are proved apart: `SoundUpdate.lean`,
 `SoundUnfold.lean`, and the branches and closed goals here.  The rules solkey
 does not have are `LeanTaclet.sound`, and `Rule.sound` is both lists.
 -/
@@ -48,52 +49,76 @@ theorem Taclet.sound_split {k : Nat} {m : Modality} {s : Stmt C} {c c' : Fml C} 
     (d : Taclet C k m s (.split c c' P Q)) :
     ∀ σ, (holds σ c → SameOk (freshVars k) (Prog.run σ P) (s.run σ)) ∧
       (holds σ c' → SameOk (freshVars k) (Prog.run σ Q) (s.run σ)) ∧
-      (¬ holds σ c → ¬ holds σ c' → ∃ e, s.run σ = .error e) := by
+      (¬ holds σ c → ¬ holds σ c' → ∃ e, s.run σ = .error e ∧ e ≠ .panic) := by
   cases d <;> intro σ <;>
     simp only [holds, tm_denote, Theory.StValue.Equiv.prim_iff, Simple.lower_denote, Res.toSt_eq_prim, Simple.lower_eval, Stmt.run, Val.eval, guardOk, Prog.run, bind, Except.bind, pure, Except.pure] <;>
-    (rename_i se; cases se.eval σ with
-      | error e => simp
+    (rename_i se; cases h : se.eval σ with
+      | error e =>
+        have hn : NoPanic (se.eval σ) := Simple.eval_noPanic σ se
+        rw [h] at hn
+        simp only [reduceCtorEq, false_imp_iff, Except.error.injEq, exists_eq_left', true_and,
+          imp_self, and_self, ne_eq]
+        exact fun _ _ hp => hn (by rw [hp])
       | ok v =>
         simp only
         rcases v with _ | (_ | _) <;> simp [SameOk.self])
 
+/-- `assertSimple`: where the condition holds, the assertion passes. -/
+theorem Taclet.sound_check {k : Nat} {m : Modality} {s : Stmt C} {c : Fml C} {P : Prog C}
+    (d : Taclet C k m s (.check c P)) :
+    ∀ σ, holds σ c → SameOk (freshVars k) (Prog.run σ P) (s.run σ) := by
+  cases d; intro σ
+  simp only [holds, tm_denote, Theory.StValue.Equiv.prim_iff, Simple.lower_denote, Res.toSt_eq_prim, Simple.lower_eval, Stmt.run, Val.eval, assertOk, Prog.run, bind, Except.bind, pure, Except.pure]
+  rename_i se
+  intro h
+  rw [h]
+  exact SameOk.self _ _
+
 theorem Taclet.sound_done {k : Nat} {m : Modality} {s : Stmt C} {b : Bool}
     (d : Taclet C k m s (.done b)) :
-    b = true → m = .box ∧ ∀ σ, ∃ e, s.run σ = .error e := by
+    b = true → m = .box ∧ ∀ σ, ∃ e, s.run σ = .error e ∧ e ≠ .panic := by
   cases d <;> simp [Stmt.run]
 
 /-- `tryCallNoCallbackBox`: the run of a `try` is the run of one of its
 clauses, from the state with the locals its outcome binds, or it halts. -/
 theorem Taclet.sound_branches {k : Nat} {m : Modality} {s : Stmt C}
     {bs : List (List (PrimTy × Var) × Prog C)} (d : Taclet C k m s (.branches bs)) :
-    ∀ σ, (m = .box ∧ ∃ e, s.run σ = .error e) ∨
+    ∀ σ, (m = .box ∧ ∃ e, s.run σ = .error e ∧ e ≠ .panic) ∨
       ∃ b ∈ bs, ∃ σ', Binds b.1 σ σ' ∧ Prog.run σ' b.2 = s.run σ := by
   cases d with
   | tryCallNoCallbackBox =>
     rename_i call rets ok err code pnc other
     intro σ
-    have halt : ∀ e, (Stmt.tryCall call rets ok err code pnc other).run σ = .error e →
-        (Modality.box = .box ∧ ∃ e, (Stmt.tryCall call rets ok err code pnc other).run σ = .error e) ∨
+    have halt : ∀ e, e ≠ .panic → (Stmt.tryCall call rets ok err code pnc other).run σ = .error e →
+        (Modality.box = .box ∧ ∃ e, (Stmt.tryCall call rets ok err code pnc other).run σ = .error e ∧
+          e ≠ .panic) ∨
         ∃ b ∈ [(rets, ok), ([], err), (codeBinders code, pnc), ([], other)], ∃ σ', Binds b.1 σ σ' ∧
           Prog.run σ' b.2 = (Stmt.tryCall call rets ok err code pnc other).run σ :=
-      fun e he => .inl ⟨rfl, e, he⟩
+      fun e hp he => .inl ⟨rfl, e, he, hp⟩
+    have noPanic : ∀ {α : Type} {x : Res α} {e : Halt}, NoPanic x → x = .error e → e ≠ .panic :=
+      fun hx hxe hp => hx (by rw [hxe, hp])
     cases hk : call.key σ with
-    | error e => exact halt e (by simp [Stmt.run, hk, bind, Except.bind])
+    | error e =>
+      exact halt e (noPanic (ExtCall.key_noPanic σ call) hk) (by simp [Stmt.run, hk, bind, Except.bind])
     | ok key =>
       cases hl : lookupBy key σ.tx.ext with
-      | none => exact halt .revert (by simp [Stmt.run, hk, hl, bind, Except.bind])
+      | none => exact halt .revert nofun (by simp [Stmt.run, hk, hl, bind, Except.bind])
       | some r =>
         cases r with
         | ok vs =>
           cases hb : bindData rets vs σ with
-          | error e => exact halt e (by simp [Stmt.run, hk, hl, hb, bind, Except.bind])
+          | error e =>
+            exact halt e (noPanic (bindData_noPanic rets vs σ) hb)
+              (by simp [Stmt.run, hk, hl, hb, bind, Except.bind])
           | ok σ' => exact .inr ⟨_, List.mem_cons_self, σ', ⟨vs, hb⟩,
               by simp [Stmt.run, hk, hl, hb, bind, Except.bind]⟩
         | error => exact .inr ⟨([], err), by simp, σ, ⟨[], rfl⟩,
               by simp [Stmt.run, hk, hl, bind, Except.bind]⟩
         | panic c =>
           cases hb : bindData (codeBinders code) [c] σ with
-          | error e => exact halt e (by simp [Stmt.run, hk, hl, hb, bind, Except.bind])
+          | error e =>
+            exact halt e (noPanic (bindData_noPanic _ _ σ) hb)
+              (by simp [Stmt.run, hk, hl, hb, bind, Except.bind])
           | ok σ' => exact .inr ⟨(codeBinders code, pnc), by simp, σ', ⟨[c], hb⟩,
               by simp [Stmt.run, hk, hl, hb, bind, Except.bind]⟩
         | other => exact .inr ⟨([], other), by simp, σ, ⟨[], rfl⟩,
@@ -109,6 +134,7 @@ theorem Taclet.sound {k : Nat} {m : Modality} {s : Stmt C} {pr : Premise C}
   | update U => exact Taclet.sound_update d
   | unfold P => exact Taclet.sound_unfold d hs
   | split c c' P Q => exact Taclet.sound_split d
+  | check c P => exact Taclet.sound_check d
   | done b => exact Taclet.sound_done d
   | branches bs => exact Taclet.sound_branches d
 

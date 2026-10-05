@@ -1943,8 +1943,9 @@ theorem Fml.toL_holds :
       simp [UpdElem.inL] at hf
   | .modal m P φ, _, _, _, _, hf => by
     obtain ⟨ω, rfl⟩ := Prog.reverts_eq hf
-    cases m <;> simp only [holds, Prog.run, Stmt.run, bind, Except.bind, Modality.after,
-      Modality.onHalt, Fml.toL, LFml.holds, not_true_eq_false]
+    cases m <;> simp only [holds, Prog.run, Stmt.run, bind, Except.bind, Modality.afterRun,
+      Modality.after, Modality.onHalt, Fml.toL, LFml.holds, not_true_eq_false, ne_eq,
+      Except.error.injEq, reduceCtorEq, not_false_eq_true, and_true]
   | .all x p φ, σ, τ, ρ, h, hf => by
     simp only [Fml.inL, Bool.and_eq_true, Bool.not_eq_true'] at hf
     have hx : x ∉ ρ.vars := by simpa using hf.1

@@ -62,16 +62,16 @@ def COut.isOk : COut → Bool
   | .ok _ => true
   | _ => false
 
-/-- `p` after a run under `m`: of the state it ends in, `m.onHalt` of a halt,
-and never of a broken invariant. -/
+/-- `p` after a run under `m`: of the state it ends in, `m.onHalt` of a halt
+that is not a panic, and never of a panic or of a broken invariant. -/
 def COut.after (m : Modality) (p : State → Prop) : COut → Prop
   | .ok τ => p τ
-  | .halt _ => m.onHalt
+  | .halt e => m.onHalt ∧ e ≠ .panic
   | .violated => False
 
 @[simp] theorem COut.after_ofRes (m : Modality) (p : State → Prop) (r : Res State) :
-    (COut.ofRes r).after m p = m.after p r := by
-  cases r <;> rfl
+    (COut.ofRes r).after m p ↔ m.afterRun p r := by
+  cases r <;> simp [COut.ofRes, COut.after, Modality.afterRun, Modality.after]
 
 /-! ## Which statements the callback reading sees -/
 
@@ -481,14 +481,14 @@ theorem holdsC_iff_holds {I : Fml C} : (φ : Fml C) → φ.hasTransfer = false �
         rw [COut.after_ofRes] at this
         cases hr : Prog.run σ P with
         | error _ => rw [hr] at this; exact this
-        | ok τ => rw [hr] at this; exact (holdsC_iff_holds φ h.2).1 this
+        | ok τ => rw [hr] at this; exact ⟨(holdsC_iff_holds φ h.2).1 this.1, this.2⟩
       · have := ExecP.eq_run he h.1
         cases hr : Prog.run σ P <;> rw [hr] at this <;> cases this
     · intro H o he
       rw [ExecP.eq_run he h.1, COut.after_ofRes]
       cases hr : Prog.run σ P with
       | error _ => rw [hr] at H; exact H
-      | ok τ => rw [hr] at H; exact (holdsC_iff_holds φ h.2).2 H
+      | ok τ => rw [hr] at H; exact ⟨(holdsC_iff_holds φ h.2).2 H.1, H.2⟩
   | .havoc φ, h, _ => by
     simp only [holdsC, holds]
     exact forall_congr' fun _ => forall_congr' fun _ => holdsC_iff_holds φ h
@@ -508,7 +508,7 @@ theorem holds_of_holdsC_modal {I : Fml C} {σ : State} {m : Modality} {P : Prog 
     rw [COut.after_ofRes] at this
     cases hr : Prog.run σ P with
     | error _ => rw [hr] at this; exact this
-    | ok τ => rw [hr] at this; exact (holdsC_iff_holds φ hφ).1 this
+    | ok τ => rw [hr] at this; exact ⟨(holdsC_iff_holds φ hφ).1 this.1, this.2⟩
   · exact (H _ he).elim
 
 /-- A precondition and a modal formula, true with callbacks, are true without

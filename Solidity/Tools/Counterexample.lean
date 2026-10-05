@@ -86,6 +86,11 @@ def after (m : Modality) (k : State → Tri) : Res State → Tri
     | .box => tt
     | .diamond => ff
 
+/-- `after` for a program's run: a panic satisfies neither modality. -/
+def afterRun (m : Modality) (k : State → Tri) : Res State → Tri
+  | .error .panic => ff
+  | r => after m k r
+
 end Tri
 
 /-- `PrimTy.admits`, decided. -/
@@ -125,7 +130,7 @@ def _root_.Solidity.Fml.eval3 (dom : PrimTy → List Value) (σ : State) : Fml C
   | .and φ ψ => (φ.eval3 dom σ).and (ψ.eval3 dom σ)
   | .imp φ ψ => (φ.eval3 dom σ).imp (ψ.eval3 dom σ)
   | .upd m U φ => Tri.after m (fun τ => φ.eval3 dom τ) (U.apply σ)
-  | .modal m P φ => Tri.after m (fun τ => φ.eval3 dom τ) (Prog.run σ P)
+  | .modal m P φ => Tri.afterRun m (fun τ => φ.eval3 dom τ) (Prog.run σ P)
   | .havoc φ =>
     if (havocSamples σ).any fun (st, nt) => φ.eval3 dom (σ.havoc st nt) = .ff then .ff
     else .unknown
@@ -180,9 +185,13 @@ theorem _root_.Solidity.Fml.eval3_sound (dom : PrimTy → List Value) : (φ : Fm
   | .modal m P φ, σ => by
     simp only [Fml.eval3, holds]
     cases Prog.run σ P with
-    | ok τ => exact Fml.eval3_sound dom φ τ
-    | error _ => cases m <;> simp only [Tri.after, Modality.after, Modality.onHalt,
-      reduceCtorEq, imp_self, not_true_eq_false, not_false_eq_true, and_self]
+    | ok τ =>
+      have ih := Fml.eval3_sound dom φ τ
+      exact ⟨fun h => ⟨ih.1 h, nofun⟩, fun h hh => ih.2 h hh.1⟩
+    | error e => cases e <;> cases m <;> simp only [Tri.afterRun, Tri.after, Modality.afterRun,
+      Modality.after, Modality.onHalt, ne_eq, Except.error.injEq, reduceCtorEq, imp_self,
+      not_true_eq_false, not_false_eq_true, and_self, and_true, and_false, false_implies,
+      true_implies, implies_true]
   | .havoc φ, σ => by
     simp only [Fml.eval3, holds]
     split

@@ -12,8 +12,10 @@ rule at a time with `apply` — the way PLFA builds a typing derivation
 * `update r` — the taclet `r` turns the first statement into an update,
   which moves into the context `Γ`;
 * `unfold r` — the taclet `r` replaces the first statement by new ones;
-* `split r` — the taclet `r` branches (`ifElseSplit`, `requireSimple`,
-  `assertSimple`): goals `thn`, `els`, and `cov` (`Branch.lean`);
+* `split r` — the taclet `r` branches (`ifElseSplit`, `requireSimple`):
+  goals `thn`, `els`, and `cov` (`Branch.lean`);
+* `check r` — the taclet `r` checks (`assertSimple`): goals `thn`, the rest
+  with the condition assumed, and `els`, the condition (`Revert.lean`);
 * `done r` — the taclet `r` closes the modality (`revertBox` to `true`,
   `revertDiamond` to `false`; `Revert.lean`);
 * `empty` — `⟨⟩ φ` (or `[] φ`) is `φ`;

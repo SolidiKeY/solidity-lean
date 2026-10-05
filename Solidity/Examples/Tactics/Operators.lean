@@ -107,7 +107,7 @@ theorem uncheckedWrap :
 
 /-- Division inside `unchecked` still reverts on a zero divisor. -/
 example : ¬ (⊨ dl!{ ⟨ uint x = 1; uint y = 0; unchecked { x = x / y; }; ⟩ true }) :=
-  fun h => h Semantics.State.exampleStore
+  fun h => (h Semantics.State.exampleStore).1
 
 /-! ## What the elaborator writes -/
 

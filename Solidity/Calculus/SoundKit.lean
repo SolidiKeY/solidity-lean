@@ -1,11 +1,13 @@
 import Solidity.Calculus.Rules
+import Solidity.Calculus.NoPanic
 
 /-!
 # The soundness kit
 
 What the per-taclet soundness proofs are made of (`SoundUpdate.lean`,
 `SoundUnfold.lean`, `RuleSoundness.lean`): `SameOk`, the agreement an
-unfolding rule owes (two runs end alike off the fresh names, or both halt);
+unfolding rule owes (two runs end alike off the fresh names, or both halt,
+both or neither in a panic);
 `Premise.Correct`, what a premise means for the statement it replaces; and
 the lemmas and tactics that put an update and a statement, or a premise's
 statements and the original, into the same shape.  Most of them name a read
@@ -27,7 +29,7 @@ def freshVars (k : Nat) : List Var :=
 
 def SameOk (ns : List Var) : Res State → Res State → Prop
   | .ok a, .ok b => EnvAgreeExcept ns a b
-  | .error _, .error _ => True
+  | .error a, .error b => (a = .panic ↔ b = .panic)
   | _, _ => False
 
 theorem SameOk.of_agree {ns : List Var} {x y : Res State} (h : ResultsAgree ns x y) :
@@ -87,9 +89,10 @@ def Premise.Correct (k : Nat) (m : Modality) (s : Stmt C) : Premise C → Prop
   | .split c c' P Q => ∀ σ,
       (holds σ c → SameOk (freshVars k) (Prog.run σ P) (s.run σ)) ∧
       (holds σ c' → SameOk (freshVars k) (Prog.run σ Q) (s.run σ)) ∧
-      (¬ holds σ c → ¬ holds σ c' → ∃ e, s.run σ = .error e)
-  | .done b => b = true → m = .box ∧ ∀ σ, ∃ e, s.run σ = .error e
-  | .branches bs => ∀ σ, (m = .box ∧ ∃ e, s.run σ = .error e) ∨
+      (¬ holds σ c → ¬ holds σ c' → ∃ e, s.run σ = .error e ∧ e ≠ .panic)
+  | .check c P => ∀ σ, holds σ c → SameOk (freshVars k) (Prog.run σ P) (s.run σ)
+  | .done b => b = true → m = .box ∧ ∀ σ, ∃ e, s.run σ = .error e ∧ e ≠ .panic
+  | .branches bs => ∀ σ, (m = .box ∧ ∃ e, s.run σ = .error e ∧ e ≠ .panic) ∨
       ∃ b ∈ bs, ∃ σ', Binds b.1 σ σ' ∧ Prog.run σ' b.2 = s.run σ
 
 /-! ### Writes as a new storage or heap, the rest of the state kept -/
@@ -169,7 +172,7 @@ theorem evalBinop_compound {op : BinOp} (hop : op.hasCompoundAssign = true) (p :
 @[simp] theorem SameOk.self (ns : List Var) (x : Res State) : SameOk ns x x := by
   cases x <;> simp [SameOk, EnvAgreeExcept.refl]
 @[simp] theorem SameOk.error_error (ns : List Var) (a b : Halt) :
-    SameOk ns (.error a : Res State) (.error b) := trivial
+    SameOk ns (.error a : Res State) (.error b) ↔ (a = .panic ↔ b = .panic) := Iff.rfl
 @[simp] theorem SameOk.ok_ok (ns : List Var) (a b : State) :
     SameOk ns (.ok a) (.ok b) ↔ EnvAgreeExcept ns a b := Iff.rfl
 @[simp] theorem SameOk.ok_error (ns : List Var) (a : State) (b : Halt) :
@@ -177,12 +180,18 @@ theorem evalBinop_compound {op : BinOp} (hop : op.hasCompoundAssign = true) (p :
 @[simp] theorem SameOk.error_ok (ns : List Var) (a : Halt) (b : State) :
     ¬ SameOk ns (.error a) (.ok b) := id
 
+/-- Two halts reached through different reads, neither a panic
+(`Calculus/NoPanic.lean`): `e₁ = panic ↔ e₂ = panic` holds as both sides
+are false. -/
+macro "no_panic_iff" : tactic => `(tactic| (apply iff_of_false <;> (rintro rfl; simp_all)))
+
 /-- Close `SameOk ns x y` between two runs made of the same pure reads and one
 write: split every `Except` match, and compare. -/
 macro "res_split" : tactic => `(tactic| (
   simp only [bind, Except.bind, pure, Except.pure]
   repeat' split
-  all_goals (try simp_all [EnvAgreeExcept.refl])))
+  all_goals (try simp_all [EnvAgreeExcept.refl])
+  all_goals (try no_panic_iff)))
 
 theorem evalBinop_bump (op : IncDec) (p : PrimTy) (lv : Value) (b : Res Value) :
     evalBinop op.binOp p lv b = (do
@@ -235,6 +244,11 @@ def envVal (σ : State) (x : Var) : Res Value := σ.getEnv x >>= Close.bindingVa
 
 /-- A memory local's identity. -/
 def envRef (σ : State) (x : Var) : Res Nat := σ.getEnv x >>= Close.bindingRef
+
+@[simp] theorem envVal_noPanic (σ : State) (x : Var) : NoPanic (envVal σ x) := by
+  unfold envVal Close.bindingVal; no_panic
+@[simp] theorem envRef_noPanic (σ : State) (x : Var) : NoPanic (envRef σ x) := by
+  unfold envRef Close.bindingRef; no_panic
 
 @[simp] theorem Term.eval_pv (σ : State) (x : Var) : (Term.pv x : Term C).eval σ = envVal σ x := rfl
 @[simp] theorem Simple.eval_local (σ : State) {p : PrimTy} (x : Var) :

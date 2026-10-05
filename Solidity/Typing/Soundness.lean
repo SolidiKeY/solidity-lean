@@ -1533,7 +1533,7 @@ theorem Stmt.run_wt : ∀ (s : Stmt C) {Γ Γ' : Ctx} {H : HeapTy} {σ σ' : Sta
   | .assert c, Γ, Γ', H, σ, σ', hwt, hs, h => by
     obtain ⟨_, rfl⟩ := wt_if hs
     obtain ⟨cv, _, h⟩ := bind_ok_inv h
-    unfold guardOk at h
+    unfold assertOk at h
     split at h
     · cases h; exact ⟨H, .refl H, hwt⟩
     · exact nomatch h

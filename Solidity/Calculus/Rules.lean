@@ -239,7 +239,9 @@ elab "clear_side" : tactic => withMainContext do
 
 /-- What a taclet leaves: an update in front of the rest (`{U} ⟨[ ]⟩`),
 statements in its place (`⟨[ s₁; …; sₙ; ]⟩`), two goals (a branch, one
-condition assumed in each: `se = true` and `se = false`), or the whole
+condition assumed in each: `se = true` and `se = false`), a goal and a check
+(an `assert`: the rest with `se = true` assumed, and `se = true` itself,
+KeY's "Holds" and "Violated" branches), or the whole
 modality closed (`true`, `false`), or a goal per way an external call may
 end (`try`).
 A condition can be stuck (a local read
@@ -250,6 +252,8 @@ inductive Premise (C : Contract) where
   | update (U : Upd C)
   | unfold (P : Prog C)
   | split (c c' : Fml C) (P Q : Prog C)
+  /-- `c ⟹ ⟨[ P ]⟩ ; c`: the goal with `c` assumed, and `c` to prove. -/
+  | check (c : Fml C) (P : Prog C)
   | done (b : Bool)
   /-- One goal per block, each in the statement's place, for every value of
   the locals it binds: `∀ xs. ⟨[ P ]⟩` (KeY's `T v;` with no initializer,
@@ -611,8 +615,10 @@ inductive Taclet (C : Contract) (k : Nat) : Modality → Stmt C → Premise C �
       dl{ ⟨[ require(se); ]⟩ ⇝ se = true ⟹ ⟨[ ]⟩ ; se = false ⟹ ⟨[ revert(); ]⟩ }
   | assertConditionCapture :
       dl{ ⟨[ assert(nse); ]⟩ ⇝ ⟨[ bool se = nse; assert(se); ]⟩ }
+  /-- A check: if `se` holds the program goes on, and `se` must hold, under
+  either modality — a failed `assert` panics, which no modality accepts. -/
   | assertSimple :
-      dl{ ⟨[ assert(se); ]⟩ ⇝ se = true ⟹ ⟨[ ]⟩ ; se = false ⟹ ⟨[ revert(); ]⟩ }
+      dl{ ⟨[ assert(se); ]⟩ ⇝ se = true ⟹ ⟨[ ]⟩ ; se = true }
   /-- A reverted run satisfies every box formula: the box closes to `true`. -/
   | revertBox :
       dl{ [ revert(); ] ⇝ true }
@@ -732,6 +738,10 @@ def ppPremise? (e : Lean.Expr) : MetaM (Option (TSyntax `dl_premise)) := do
         return some (← `(dl_premise| $c:dl_fml ⟹ ⟨[ $(← ppBlock P) ]⟩ ; $c':dl_fml ⟹ ⟨[ $(← ppBlock Q) ]⟩))
     | _, _ =>
       return some (← `(dl_premise| $c:dl_fml ⟹ ⟨[ $(← ppBlock P) ]⟩ ; $c':dl_fml ⟹ ⟨[ $(← ppBlock Q) ]⟩))
+  | Premise.check _ c P =>
+    let c ← ppFml c
+    let some ts ← ppProg? P | return none
+    return some (← `(dl_premise| $c:dl_fml ⟹ ⟨[ $[$ts;]* ]⟩ ; $c:dl_fml))
   | Premise.done _ b =>
     match_expr (← whnf b) with
     | Bool.true => return some (← `(dl_premise| true))
@@ -761,7 +771,8 @@ def delabPremise : Delab := do
   `(dl{ $p:dl_premise })
 
 attribute [delab app.Solidity.Premise.update, delab app.Solidity.Premise.unfold,
-  delab app.Solidity.Premise.split, delab app.Solidity.Premise.done] delabPremise
+  delab app.Solidity.Premise.split, delab app.Solidity.Premise.check,
+  delab app.Solidity.Premise.done] delabPremise
 
 /-- The type without its `autoParam` hypotheses (a taclet's side conditions),
 which nothing after them depends on. -/

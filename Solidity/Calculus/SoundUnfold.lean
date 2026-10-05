@@ -74,6 +74,10 @@ theorem guardOk_setEnv (v : Value) :
     guardOk v (σ.setEnv x b) = (do let τ ← guardOk v σ; pure (τ.setEnv x b)) := by
   unfold guardOk; split <;> rfl
 
+theorem assertOk_setEnv (v : Value) :
+    assertOk v (σ.setEnv x b) = (do let τ ← assertOk v σ; pure (τ.setEnv x b)) := by
+  unfold assertOk; split <;> rfl
+
 theorem memWriteField_setEnv (id : Nat) (f : Name) (mv : MVal) :
     memWriteField (σ.setEnv x b) id f mv = (do let τ ← memWriteField σ id f mv; pure (τ.setEnv x b)) := by
   simp only [memWriteField, State.getObj_setEnv, bind, Except.bind, pure, Except.pure]
@@ -163,12 +167,15 @@ theorem aliasPath_setEnv_ne' (σ : State) {x y : Var} (h : x ≠ y) (b : Binding
 
 /-- A push whose element fails fails. -/
 @[simp] theorem SameOk.error_pushAt (ns : List Var) (σ : State) (E : Ty) (r : Name)
-    (segs : List Seg) (e e' : Halt) :
+    (segs : List Seg) {e e' : Halt} (he : e ≠ .panic) (he' : e' ≠ .panic) :
     SameOk ns (.error e') (pushAt σ E r segs fun _ => .error e) := by
   unfold pushAt
-  cases σ.findStorage r segs with
-  | error _ => trivial
-  | ok v => cases v <;> trivial
+  cases h : σ.findStorage r segs with
+  | error x =>
+    have hx : NoPanic (σ.findStorage r segs) := State.findStorage_noPanic σ r segs
+    rw [h] at hx
+    exact iff_of_false he' fun hx' => hx (by rw [hx'])
+  | ok v => cases v <;> simp [bind, Except.bind, he, he']
 
 theorem evalBinop_noShort {op : BinOp} (h : op.shortCircuits = false) (p : PrimTy) (lv : Value)
     (b : Res Value) :
@@ -196,7 +203,9 @@ theorem copyStToM_bind_agree {ns : List Var} {σ τ : State} (hag : EnvAgreeExce
   have h := copyStToM_agree hag sv
   revert h
   cases copyStToM σ sv with
-  | error _ => cases copyStToM τ sv <;> simp [ResAgree, SameOk, bind, Except.bind]
+  | error _ =>
+    cases copyStToM τ sv <;> simp only [ResAgree, SameOk, bind, Except.bind] <;>
+      first | (rintro rfl; exact Iff.rfl) | simp
   | ok a =>
     cases copyStToM τ sv with
     | error _ => simp [ResAgree]
@@ -247,7 +256,7 @@ macro "unf_simp" : tactic => `(tactic|
       State.writeStorage_setEnv, State.checkIndex_setEnv, State.writeStorage_toSVal,
       Val.eval_setEnv, SPath.resolve_setEnv, Loc.resolve_setEnv, MPath.mval_setEnv,
       MLoc.read_setEnv, Src.value_setEnv, MSrc.mval_setEnv, State.findStorage_setEnv,
-      State.getObj_setEnv, Simple.eval_setEnv, OpLoc.store, OpLoc.bump, guardOk_setEnv,
+      State.getObj_setEnv, Simple.eval_setEnv, OpLoc.store, OpLoc.bump, guardOk_setEnv, assertOk_setEnv,
       memWriteField_setEnv, memWriteIndex_setEnv, readLoc_setEnv, writeLoc_setEnv, opMem_setEnv,
       bumpMem_setEnv, opStore_setEnv, bumpStore_setEnv, pushAt_setEnv, pushPlaceAt_setEnv,
       popAt_setEnv, transferAt_setEnv, copyMem_setEnv, Src.pushVal_none, Src.pushVal_some,
@@ -416,7 +425,8 @@ theorem Stmt.call_capture_sound {k : Nat} {f : Name} {args : List (Arg C)}
   cases hev : a.e.eval σ with
   | error e =>
     obtain ⟨e', he'⟩ := Arg.bindSeq_error hsep h hev
-    simp [bind, Except.bind, he']
+    simp only [bind, Except.bind, he', SameOk]
+    no_panic_iff
   | ok v =>
     simp only [Res.ok_bind]
     have hag : EnvAgreeExcept (freshVars k) (σ.setEnv (.fresh "se" k) (.val v)) σ :=
@@ -446,16 +456,27 @@ theorem Taclet.sound_unfold {k : Nat} {m : Modality} {s : Stmt C} {P : Prog C}
   all_goals repeat' cases_holes
   all_goals vars_simp
   all_goals (try (unf_simp; res_split; all_goals agree_tac; done))
+  -- the element fails to evaluate: the same halt, not a panic, on both sides
+  case storagePushValue_unfold_rightSndArgument =>
+    unf_simp
+    res_split
+    all_goals first
+      | (agree_tac; done)
+      | (apply SameOk.error_pushAt <;> (rintro rfl; simp_all))
   case logicalAndShortCircuitRhs =>
     rename_i v se nse
     unf_simp
-    rcases Simple.eval σ se with _ | (_ | (_ | _)) <;> rcases Val.eval σ nse with _ | (_ | (_ | _)) <;>
-      simp [bind, Except.bind, pure, Except.pure, evalBinop, applyBinOp, checkArith, Value.asBool]
+    rcases h₁ : Simple.eval σ se with _ | (_ | (_ | _)) <;>
+      rcases h₂ : Val.eval σ nse with _ | (_ | (_ | _)) <;>
+      simp [bind, Except.bind, pure, Except.pure, evalBinop, applyBinOp, checkArith, Value.asBool] <;>
+      (rintro rfl; simp_all)
   case logicalOrShortCircuitRhs =>
     rename_i v se nse
     unf_simp
-    rcases Simple.eval σ se with _ | (_ | (_ | _)) <;> rcases Val.eval σ nse with _ | (_ | (_ | _)) <;>
-      simp [bind, Except.bind, pure, Except.pure, evalBinop, applyBinOp, checkArith, Value.asBool]
+    rcases h₁ : Simple.eval σ se with _ | (_ | (_ | _)) <;>
+      rcases h₂ : Val.eval σ nse with _ | (_ | (_ | _)) <;>
+      simp [bind, Except.bind, pure, Except.pure, evalBinop, applyBinOp, checkArith, Value.asBool] <;>
+      (rintro rfl; simp_all)
   case memoryStorageCopyUnfold =>
     unf_simp
     cases SPath.resolve σ ‹SPath C _› with
@@ -479,9 +500,11 @@ theorem Taclet.sound_unfold {k : Nat} {m : Modality} {s : Stmt C} {P : Prog C}
       SameOk.bind_same _ fun _ => SameOk.of_agree (memClear_agree (by agree_tac) _ _)
   case memoryIndexDeleteNonSimpleIndexCapture =>
     unf_simp
-    cases Val.eval σ ‹Val C .uint› with
+    cases h₁ : Val.eval σ ‹Val C .uint› with
     | error _ =>
-      cases envRef σ ‹Var› <;> trivial
+      cases h₂ : envRef σ ‹Var›
+      · simp only [bind, Except.bind, SameOk]; no_panic_iff
+      · trivial
     | ok v =>
       simp only [Res.ok_bind]
       cases envRef σ ‹Var› with

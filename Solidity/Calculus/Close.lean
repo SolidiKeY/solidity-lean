@@ -689,8 +689,9 @@ theorem holds_all (x : Var) (p : PrimTy) (φ : Fml C) :
 the run halts, so it holds under the box and not under the diamond. -/
 theorem holds_revert (m : Modality) (ω : Prog C) (φ : Fml C) :
     holds σ (.modal m (.revert :: ω) φ) ↔ m.onHalt := by
-  cases m <;> simp only [holds, Prog.run, Stmt.run, bind, Except.bind, Modality.after,
-    Modality.onHalt]
+  cases m <;> simp only [holds, Prog.run, Stmt.run, bind, Except.bind, Modality.afterRun,
+    Modality.after, Modality.onHalt, ne_eq, Except.error.injEq, reduceCtorEq, not_false_eq_true,
+    and_true]
 
 end Eval
 

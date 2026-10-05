@@ -34,8 +34,11 @@ about Solidity only through one of four links:
   order, what it captures, what it accepts.
 - **L3. The rule is sound but too strong**: its premise asks for more than the
   program needs. `Stmt.complete` is coverage, not logical completeness. The
-  `assert` rule was the known case; it now mirrors `require` and solc's revert
-  (`Taclet.assertSimple`), so none is known.
+  `assert` rule was the known case the other way round: it mirrored `require`,
+  so a failed `assert` satisfied every box formula and a box obligation proved
+  nothing. A failed `assert` now panics (`Halt.panic`, solc's `Panic(0x01)`),
+  which no modality accepts, and `Taclet.assertSimple` owes its condition under
+  both, as KeY's "Violated" branch does; none is known.
 - **L4. The trusted base leaks**: `sorry`, `native_decide`, `implemented_by`, or
   a side condition that proves too much.
 

@@ -17,8 +17,11 @@ Why not a validity `⊨`, which is what `sol_symex` and `sol_close` prove:
 * `⊨ ⟨ P ⟩ true` quantifies over every state, including those without the
   contract's roots, where the first storage write is stuck; it is not valid
   for any `P` that touches storage (`Close.lean`'s first gap).
-* `⊨ [ P ] true` is valid for every `P`: `assert` and `require` halt alike,
-  and a halt satisfies the box.  It says nothing solkey says.
+* `⊨ [ P ] true` says that no `assert` of `P` fails, from any state: a
+  failed `assert` panics, which the box does not accept, while a failed
+  `require` reverts, which it does (solkey's `assertSimple`).  Over every
+  state it is stronger than what a store-bound run checks, and `sol_close`
+  meets the same storage gap as for the diamond.
 * `⊨ pre → ⟨ P ⟩ true` with `pre` describing the store would be the faithful
   validity, but `sol_close` does not close a storage write under the
   diamond, so it would prove nothing more than this form while failing on
@@ -100,17 +103,18 @@ abbrev Diamond {C : Contract} (σ : State) (P : Prog C) : Prop :=
 /-- A run that returns proves the diamond. -/
 theorem diamond_of_isOk {C : Contract} {σ : State} {P : Prog C}
     (h : (Prog.run σ P).isOk = true) : Diamond σ P := by
-  unfold Diamond holds Modality.after
+  unfold Diamond holds Modality.afterRun Modality.after
   cases hr : Prog.run σ P with
-  | ok τ => exact trivial
+  | ok τ => exact ⟨trivial, nofun⟩
   | error e => simp [hr, Except.isOk, Except.toBool] at h
 
-/-- How the run of `P` from `σ` ends: `"ok"`, `"revert"` or `"stuck"`.  What
+/-- How the run of `P` from `σ` ends: `"ok"`, `"revert"`, `"panic"` or `"stuck"`.  What
 `#eval` pins where the kernel cannot decide `Diamond σ P`. -/
 def outcome {C : Contract} (σ : State) (P : Prog C) : String :=
   match Prog.run σ P with
   | .ok _ => "ok"
   | .error .revert => "revert"
+  | .error .panic => "panic"
   | .error .stuck => "stuck"
 
 /-- `corpus_decide h`: rewrite the store with its unfolding `h`, then let the

@@ -188,8 +188,9 @@ not otherwise written (`copyDecls`). -/
 syntax:10 dl_fml:11 " where " sepBy1(sol_stmt, ", ") : dl_fml
 
 /-- What a taclet leaves: an update in front of the rest, statements, two
-goals (a branch, each with its condition), or — for a revert — `true` or
-`false` in place of the whole modality.  The modality of the premise is the
+goals (a branch, each with its condition), a goal and a check (an `assert`:
+the rest with the condition assumed, and the condition), or — for a
+revert — `true` or `false` in place of the whole modality.  The modality of the premise is the
 taclet's own, so it is written `⟨[ ]⟩`. -/
 declare_syntax_cat dl_premise (behavior := both)
 syntax dl_upd " ⟨" "[ " "]" "⟩" : dl_premise
@@ -198,6 +199,7 @@ syntax dl_fml " ⟹ " "⟨" "[ " sol_block " ]" "⟩" " ; " dl_fml " ⟹ " "⟨"
   dl_premise
 syntax dl_fml " ⟹ " "⟨" "[ " (sol_stmt "; ")* "]" "⟩" " ; "
   dl_fml " ⟹ " "⟨" "[ " (sol_stmt "; ")* "]" "⟩" : dl_premise
+syntax dl_fml " ⟹ " "⟨" "[ " (sol_stmt "; ")* "]" "⟩" " ; " dl_fml : dl_premise
 syntax &"true" : dl_premise
 syntax &"false" : dl_premise
 
@@ -1134,6 +1136,11 @@ def schemaPremise (fresh : Bool) (Γ : Scope) : TSyntax `dl_premise → MacroM L
     let (fs, _) ← schemaProg fresh Γ fs
     `($(mkIdent `Solidity.Premise.split) $(← schemaFml c) $(← schemaFml nc)
         ([$ts,*] : List (Stmt _)) ([$fs,*] : List (Stmt _)))
+  | `(dl_premise| $c:dl_fml ⟹ ⟨[ $[$ts:sol_stmt;]* ]⟩ ; $c':dl_fml) => do
+    unless c.raw.structEq c'.raw do
+      Macro.throwErrorAt c' "a check assumes the condition it checks: write it on both sides"
+    let (ts, _) ← schemaProg fresh Γ ts
+    `($(mkIdent `Solidity.Premise.check) $(← schemaFml c) ([$ts,*] : List (Stmt _)))
   | `(dl_premise| true) => `($(mkIdent `Solidity.Premise.done) true)
   | `(dl_premise| false) => `($(mkIdent `Solidity.Premise.done) false)
   | _ => Macro.throwUnsupported

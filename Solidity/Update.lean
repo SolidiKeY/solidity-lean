@@ -46,16 +46,23 @@ inductive Modality where
   | box
   deriving DecidableEq, Repr, Inhabited, Lean.ToExpr
 
-/-- What a modality says of a run that halts: every box formula holds of it,
-no diamond formula does. -/
+/-- What a modality says of a run that reverts (or is stuck): every box
+formula holds of it, no diamond formula does. -/
 def Modality.onHalt : Modality → Prop
   | .diamond => False
   | .box => True
 
-/-- `p` after a run under `m`: `p` of the state it ends in, or `m.onHalt`. -/
+/-- `p` after a run under `m`: `p` of the state it ends in, or `m.onHalt`.
+An update reads so: a term never panics (`Upd.apply_ne_panic`). -/
 def Modality.after (m : Modality) (p : State → Prop) : Res State → Prop
   | .ok τ => p τ
   | .error _ => m.onHalt
+
+/-- `p` after a program's run under `m`: as `after`, and the run did not
+panic.  A failed `assert` satisfies neither modality: KeY's `assertSimple`
+leaves its condition as a goal under both. -/
+def Modality.afterRun (m : Modality) (p : State → Prop) (r : Res State) : Prop :=
+  m.after p r ∧ r ≠ .error .panic
 
 /-! ## Terms
 
@@ -805,7 +812,7 @@ def holds (σ : State) : Fml C → Prop
   | .and φ ψ => holds σ φ ∧ holds σ ψ
   | .imp φ ψ => holds σ φ → holds σ ψ
   | .upd m U φ => m.after (holds · φ) (U.apply σ)
-  | .modal m P φ => m.after (holds · φ) (Prog.run σ P)
+  | .modal m P φ => m.afterRun (holds · φ) (Prog.run σ P)
   | .havoc φ => ∀ st nt, holds (σ.havoc st nt) φ
   | .all x p φ => ∀ v, p.admits v → holds (σ.setEnv x (.val v)) φ
 
@@ -1250,6 +1257,15 @@ theorem Modality.after_frame (m : Modality) {p q : State → Prop} {r r' : Res S
   | .error _, .error _, _ => exact Iff.rfl
   | .ok a, .ok b, h => exact hpq a b h
 
+theorem Modality.afterRun_frame (m : Modality) {p q : State → Prop} {r r' : Res State}
+    (hr : ResultsAgree ns r r') (hpq : ∀ a b, EnvAgreeExcept ns a b → (p a ↔ q b)) :
+    m.afterRun p r ↔ m.afterRun q r' := by
+  match r, r', hr with
+  | .error _, .error _, h => cases h; exact Iff.rfl
+  | .ok a, .ok b, h =>
+    simp only [Modality.afterRun, ne_eq, reduceCtorEq, not_false_eq_true, and_true]
+    exact hpq a b h
+
 /-- **Frame, for formulas**: two states that agree off `ns` satisfy a formula
 that avoids `ns` alike. -/
 theorem holds_frame : (φ : Fml C) → Avoids φ.vars ns → ∀ {σ τ : State},
@@ -1268,7 +1284,7 @@ theorem holds_frame : (φ : Fml C) → Avoids φ.vars ns → ∀ {σ τ : State}
     exact m.after_frame (Upd.apply_frame hag U h.left) fun _ _ h' => holds_frame φ h.right h'
   | .modal m P φ, h, _, _, hag => by
     simp only [holds]
-    exact m.after_frame (Prog.run_frame hag P h.left) fun _ _ h' => holds_frame φ h.right h'
+    exact m.afterRun_frame (Prog.run_frame hag P h.left) fun _ _ h' => holds_frame φ h.right h'
   | .havoc φ, h, _, _, hag => by
     simp only [holds]
     exact forall_congr' fun st => forall_congr' fun nt =>

@@ -1690,7 +1690,7 @@ theorem Stmt.run_canon : ∀ (s : Stmt C) {Γ Γ' : Ctx} {H : HeapTy} {σ σ' : 
   | .assert c, Γ, Γ', H, σ, σ', hwt, hcn, hs, h => by
     obtain ⟨_, rfl⟩ := wt_if hs
     obtain ⟨cv, _, h⟩ := bind_ok_inv h
-    unfold guardOk at h
+    unfold assertOk at h
     split at h
     · cases h; exact ⟨H, .refl H, hwt, hcn⟩
     · exact nomatch h

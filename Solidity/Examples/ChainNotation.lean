@@ -393,12 +393,13 @@ example : dl!{ ⟨ require(flags[a]); y = 1; ⟩ φ }
             (⟨ revert(); ⟩ false ∨ se1 ≐ true ∨ se1 ≐ false)) } :=
   (requireTrace .diamond φ).trans (by sol_chain)
 
-/-- `assert` has `require`'s trace (the table's `assertSimple`). -/
+/-- `assert` checks instead (the table's `assertSimple`, KeY's): the rest
+with the condition assumed, and the condition itself, under either modality —
+no revert, so no goal the box closes. -/
 theorem assertTrace : dl![m]{ ⟨[ assert(flags[a]); y = 1; ]⟩ φ }
     ~[assertConditionCapture]~> dl![m]{ ⟨[ bool se1 = flags[a]; assert(se1); y = 1; ]⟩ φ }
     ~*> dl![m]{ { se1 := find(storage, flags[a]) }
-          ((se1 ≐ true → { y := 1 } φ) ∧ (se1 ≐ false → ⟨[ revert(); y = 1; ]⟩ φ) ∧
-            (⟨[ revert(); ]⟩ false ∨ se1 ≐ true ∨ se1 ≐ false)) } := by
+          ((se1 ≐ true → { y := 1 } φ) ∧ se1 ≐ true) } := by
   sol_chain
 
 /-- A split behind a stack of updates, under `m`: the overflow of `Chains.CheckedArithmetic`, the lines

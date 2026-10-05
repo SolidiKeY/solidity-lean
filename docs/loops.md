@@ -122,8 +122,8 @@ optional variant) or `.unwind (k : Nat)`. `Stmt.step`
 | `.unwind 0` | `loopExit`: premise `c = false ∧ ⟨[ ω ]⟩ φ` (a new `Premise` shape) | same |
 | `.inv I dec` | `loopInvariant`, below | `loopInvariantTotal` with `dec = some v`; with `none`, the premise is `done false` (sound, unprovable) |
 
-`.unwind 0` cannot be `assert(!c)`, which is unsound under the box (it
-accepts the halt).
+`.unwind 0` is not `assert(!c)`: a failed `assert` panics, so running out of
+unwindings would be a failure of the program rather than of the bound.
 
 **The annotation is a `Val`, not a `Fml`**: `Fml` (`Update.lean`) contains
 `Prog`, so a `Stmt` carrying one would make `Stmt`, `Term` and `Fml` one

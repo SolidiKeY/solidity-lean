@@ -99,7 +99,9 @@ theorem CallbackTaclet.sound {I : Fml C} {m : Modality} {s : Stmt C} {U : Upd C}
         exact hres _ _ h₂ _ hω
     | stop hs ho =>
       rcases ExecS.transfer_inv hs with ⟨_, h, rfl⟩ | ⟨_, h, hn, rfl⟩ | ⟨_, _, _, _, _, rfl⟩
-      · rw [h] at hexit
+      · have hp : _ ≠ Halt.panic := fun hp =>
+          Stmt.run_transfer_noPanic _ _ _ (h.trans (congrArg Except.error hp))
+        rw [h] at hexit
         simp_all [Modality.after, COut.after]
       · rw [h] at hexit
         exact (hn hexit).elim
@@ -271,7 +273,9 @@ theorem Premise.soundC_update {I : Fml C} (hI : I.vars = []) {k : Nat} {m : Moda
       rw [hr] at hc
       cases hu : U.apply σ with
       | ok _ => rw [hu] at hc; exact hc.elim
-      | error _ => rw [hu] at H; exact H
+      | error e =>
+        rw [hu] at H hc
+        exact ⟨H, fun hp => Upd.apply_ne_panic U σ (by rw [hu, hc.2 hp])⟩
 
 /-- An unfold premise under the callback reading: the statement and its
 premise pay nothing, so each has its one run, and they agree off the fresh
@@ -310,7 +314,9 @@ theorem Premise.soundC_unfold {I : Fml C} (hI : I.vars = []) {k : Nat} {m : Moda
       | ok _ => rw [hp] at hc; exact hc.elim
       | error e =>
         have := H _ (ExecP.append_stop (Q := ω) (ExecP.of_run_error hP hp) rfl)
-        exact this
+        rw [hp] at hc
+        simp only [COut.ofRes, COut.after] at this ⊢
+        exact ⟨this.1, fun h' => this.2 (hc.2 h')⟩
 
 /-- The runs of a `try` with callbacks: it halts, leaves the invariant
 broken, returns to a state the callee may leave and runs its success block,
@@ -318,14 +324,18 @@ or runs a clause's block from where it was made. -/
 theorem ExecS.tryCall_inv {I : Fml C} {σ : State} {c : ExtCall C} {rets : List (PrimTy × Var)}
     {ok err : List (Stmt C)} {code : Option Var} {pnc other : List (Stmt C)} {o : COut}
     (h : ExecS I σ (.tryCall c rets ok err code pnc other) o) :
-    (∃ e, o = .halt e) ∨ (¬ holds σ I ∧ o = .violated) ∨
+    (∃ e, o = .halt e ∧ e ≠ .panic) ∨ (¬ holds σ I ∧ o = .violated) ∨
     (∃ st nt σ₁, holds (σ.havoc st nt) I ∧ Binds rets (σ.havoc st nt) σ₁ ∧
       ExecP I σ₁ ok o) ∨
     ExecP I σ err o ∨ (∃ σ₁, Binds (codeBinders code) σ σ₁ ∧ ExecP I σ₁ pnc o) ∨
     ExecP I σ other o := by
   cases h with
   | det hf => simp [Stmt.forks] at hf
-  | tryHalt _ | tryRevert _ => exact .inl ⟨_, rfl⟩
+  | tryHalt h =>
+    have hp : NoPanic (c.key σ) := ExtCall.key_noPanic σ c
+    rw [h] at hp
+    exact .inl ⟨_, rfl, fun h' => hp (by rw [h'])⟩
+  | tryRevert _ => exact .inl ⟨_, rfl, nofun⟩
   | tryViolated _ hn => exact .inr (.inl ⟨hn, rfl⟩)
   | tryOk _ _ h₂ hb hp => exact .inr (.inr (.inl ⟨_, _, _, h₂, hb, hp⟩))
   | tryError _ hp => exact .inr (.inr (.inr (.inl hp)))
@@ -354,7 +364,7 @@ theorem CallbackTaclet.sound_branches {I : Fml C} {s : Stmt C} {xs : List (PrimT
   intro o he
   cases he with
   | cons hs hω =>
-    rcases ExecS.tryCall_inv hs with ⟨_, h⟩ | ⟨_, h⟩ | ⟨_, _, _, h₂, hb, hp⟩ | hp |
+    rcases ExecS.tryCall_inv hs with ⟨_, h, _⟩ | ⟨_, h⟩ | ⟨_, _, _, h₂, hb, hp⟩ | hp |
       ⟨_, hb, hp⟩ | hp
     · cases h
     · cases h
@@ -363,9 +373,9 @@ theorem CallbackTaclet.sound_branches {I : Fml C} {s : Stmt C} {xs : List (PrimT
     · exact hP _ hb o (ExecP.append_ok hp hω)
     · exact hO o (ExecP.append_ok hp hω)
   | stop hs ho =>
-    rcases ExecS.tryCall_inv hs with ⟨_, rfl⟩ | ⟨hn, _⟩ | ⟨_, _, _, h₂, hb, hp⟩ | hp |
+    rcases ExecS.tryCall_inv hs with ⟨_, rfl, hne⟩ | ⟨hn, _⟩ | ⟨_, _, _, h₂, hb, hp⟩ | hp |
       ⟨_, hb, hp⟩ | hp
-    · exact trivial
+    · exact ⟨trivial, hne⟩
     · exact absurd hexit hn
     · exact hok _ _ h₂ _ hb o (ExecP.append_stop hp ho)
     · exact hE o (ExecP.append_stop hp ho)

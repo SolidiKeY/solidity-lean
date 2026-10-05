@@ -25,7 +25,7 @@ so that it reads as it would in print; the proof is the original's name.
 | `φ ∈ SolKey`, `s ∈ SolKey[m]` | the calls take simple arguments, there is no `try`, and a payment is under the box | `Fml.inSolkey`, `Stmt.inSolkey m` |
 | `⊢[I] φ`, `⊨[I] φ` | the same, when `transfer` may call back into a contract with invariant `I` | `ProvesC`, `ValidC` |
 | `(P, σ) ⇓ σ'` | `P` run from `σ` ends in `σ'` | `Prog.run σ P = .ok σ'` |
-| `(P, σ) ↯` | `P` run from `σ` reverts | `Prog.run σ P = .error .revert` |
+| `(P, σ) ↯` | `P` run from `σ` reverts, or panics (a failed `assert`) | `Prog.run σ P = .error .revert ∨ … .panic` |
 | `⟦P⟧` | `P` compiled | `Evm.compileProg P` |
 | `(c, m) ⇓ₘ m'`, `(c, m) ↯ₘ` | the machine runs `c` from `m` to `m'`, or reverts | `Evm.run c m` |
 | `Γ ⊩ P ⊣ Γ'` | `P` is in the compiled fragment, locals typed `Γ` then `Γ'` | `Evm.wtProg Γ P = some Γ'` |
@@ -90,9 +90,10 @@ abbrev InFragmentAt {C : Contract} (m : Modality) (s : Stmt C) : Prop := s.inSol
 abbrev Runs {C : Contract} (c : Prog C × State) (σ' : State) : Prop :=
   Prog.run c.2 c.1 = .ok σ'
 
-/-- `(P, σ) ↯`: `P` run from `σ` reverts. -/
+/-- `(P, σ) ↯`: `P` run from `σ` reverts, or panics: a failed `assert` is a
+revert with `Panic(0x01)` data on the EVM. -/
 abbrev Reverts {C : Contract} (c : Prog C × State) : Prop :=
-  Prog.run c.2 c.1 = .error .revert
+  Prog.run c.2 c.1 = .error .revert ∨ Prog.run c.2 c.1 = .error .panic
 
 /-- `(c, m) ⇓ₘ m'`: the machine runs the code `c` from `m` to the end, in `m'`. -/
 abbrev MRuns (c : List Evm.Instr × Evm.Machine) (m' : Evm.Machine) : Prop :=

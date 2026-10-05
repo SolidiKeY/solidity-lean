@@ -89,7 +89,8 @@ What they say:
   checked-in fixture, `solc_import` defining the whole TestSuite contract
   with one `evalExpr`.
 - **M3.** Obligation forms: diamond under `wt(storage)`, box with the Panic
-  halt, parameters as `∀` over their type's range.
+  halt, parameters as `∀` over their type's range.  **M3a** (the Panic halt)
+  is done, below; M3b (`wt`, the obligation statements) is next.
 - **M4.** Closer for locals, plain storage and `try`/`transfer`: ground
   arithmetic, `applyEq`, bool case splits, difference bounds, `wt` facts.
 - **M5.** Push, pop, `delete` and storage copies in the closer.
@@ -273,3 +274,53 @@ evaluates its sequent with compiled code; if the obligations of M3 do not
 name the program constants, the 3.6 s can go.  The default build is not
 slowed: `SolkeyTestSuite` is its own library, and `Frontend/` is two small
 modules.
+
+## M3a results (2026-10-05): a failed `assert` panics
+
+Decision A is in: a failed `assert` is `Halt.panic` (`assertOk`,
+`Semantics.lean`), solc's `Panic(0x01)`, distinct from `require`'s revert.
+solc's other panics (overflow, a zero divisor, an index out of bounds, `pop`
+of an empty array) stay reverts, as in KeY, where a box accepts them.
+
+- **Meaning.** A program's formula reads its run with `Modality.afterRun`
+  (`Update.lean`): `Modality.after` and the run is not a panic.  So no
+  modality holds of a panic; `revert` and `stuck` keep their meaning (box
+  true, diamond false).  An update keeps `Modality.after`: a term never
+  panics (`Calculus/NoPanic.lean`, `Upd.apply_ne_panic`), so the two
+  readings agree on it, and the closers, `Decide` and the chains, which read
+  updates, did not change.  Only an `assert` panics
+  (`Semantics/NoPanic.lean`: `Prog.run_noPanic` for a program with no
+  `assert`, by a lemma per operation and the `no_panic` tactic).
+- **The taclet.** `Taclet.assertSimple` is KeY's: `⟨[ assert(se); ]⟩ ⇝
+  se = true ⟹ ⟨[ ]⟩ ; se = true`, "Holds" and "Violated" (the new premise
+  `Premise.check`, `Proves.check` with goals `thn` and `els`, `checkRule`,
+  in `sol_derive`, `Derive.residue`, the proof tree, `SolkeyFragment`,
+  `Termination`).  Its soundness is `Taclet.sound_check`.
+- **Soundness.** `SameOk` now asks two halts to agree on whether they are a
+  panic; an update rule's premise and its statement reach their halts
+  through different reads, which `res_split` closes by `no_panic_iff`
+  (neither is a panic).  `Premise.Correct` asks a branch's uncovered halt,
+  a closed goal and a `try`'s halt not to be a panic.  `Proves.sound` holds
+  with only `propext`, `Classical.choice`, `Quot.sound`.
+- **Callbacks.** `COut.after` of a panic is false; a `transfer` and a `try`'s
+  call never panic.
+- **EVM.** `StmtOut.panic`: the interpreter panics where the machine
+  reverts.  `compile_correct`'s second case is "both revert", the
+  interpreter's halt a revert or a panic; `Theorems.lean`'s `(P, σ) ↯` says
+  the same.
+- **Regression** (`Examples/Tactics/Revert.lean`): `¬ ⊨ [ assert(false); ] true`
+  and so `¬ ⊢` (`assertFalse_box_not_valid`, `assertFalse_box_not_derivable`),
+  while `⊢ [ require(false); ] true` (`requireFalse_box`).  The examples that
+  relied on the old reading now state the precondition the box needs
+  (`assertBox`, `assertConditionCaptured`) or the refutation
+  (`StorageSuite.assertFails`); the `assert` chains run under any modality
+  (`ChainNotation.assertTrace`, `StorageCoverage.assert*`).
+
+Cost: no new `maxHeartbeats` and none raised.  The default build passes; the
+slowest modules take what they took before (`Examples/Tactics/Calls.lean`
+81 s, `Memory.lean` 78 s, `CrossDomain.lean` 77 s, `Decide.lean` 66 s, wall
+clock with the build's parallelism), so no slowdown was measured.  A modal
+formula's meaning has one more conjunct, which `decide +kernel` never meets:
+the kernel decides runs (`corpus_decide`) and the `LFml` reduction, not
+`holds` of a modality.
+

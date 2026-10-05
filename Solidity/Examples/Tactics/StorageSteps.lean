@@ -260,7 +260,7 @@ theorem arrayIndexRead : ⊨ dl!{ [ uint v = values[i]; ] v == values[i] } := by
 /-- `uint v = values[i];` under the diamond is not valid: in `StandardExample`'s
 initial store `values` is empty (and `i` unbound), so the read halts. -/
 theorem arrayIndexReadDiamond : ¬ (⊨ dl!{ ⟨ uint v = values[i]; ⟩ true }) :=
-  fun h => h State.exampleStore
+  fun h => (h State.exampleStore).1
 
 /-- `values[i] = 100;` -/
 theorem arrayIndexWrite : ⊨ dl!{ [ values[i] = 100; ] values[i] == 100 } := by
@@ -411,7 +411,7 @@ theorem arrayPop : ⊨ dl!{ [ people.pop(); ] true } := by
 /-- `people.pop();` under the diamond is not valid: `people` starts empty, and
 a `pop` of an empty array reverts. -/
 theorem arrayPopDiamond : ¬ (⊨ dl!{ ⟨ people.pop(); ⟩ true }) :=
-  fun h => h State.exampleStore
+  fun h => (h State.exampleStore).1
 
 /-- `Person storage p = bob; people.push(p);` — the pushed element is a copy of
 what the alias finds (`storagePushValueCopySource`). -/
@@ -664,8 +664,9 @@ theorem addResultCaptured :
   sol_close
 
 /-- `assert(a == b);` — the condition is captured, then asserted
-(`assertConditionCapture`, `assertSimple`); past it, it holds. -/
-theorem assertConditionCaptured : ⊨ dl!{ [ assert(a == b); ] a == b } := by
+(`assertConditionCapture`, `assertSimple`); past it, it holds.  The box owes
+the assertion, so it needs `a == b` as the diamond does. -/
+theorem assertConditionCaptured : ⊨ dl!{ a == b → [ assert(a == b); ] a == b } := by
   sol_symex
   sol_close
 

@@ -18,7 +18,7 @@ Semantic conventions mirrored from KeY:
   (`copySt`/`copyMem`);
 - array reads and writes out of bounds revert; `pop()` on an empty array
   reverts; `/` and `%` revert on a zero divisor; a failing `assert`
-  reverts;
+  panics (below);
 - `a.transfer(v)` books `net(a) := net(a) - v` unless `a` is the contract
   itself, which books nothing (solkey's `\if(a = self)`), with no callback
   (the callback reading is `Semantics/Callback.lean`'s, a relation over this
@@ -45,9 +45,12 @@ Semantic conventions mirrored from solc, where KeY was more liberal
   left-hand side**, and `++`/`--` and `op=` resolve their target exactly
   once;
 
-A run ends in a state or halts: `revert` (the program reverted) or `stuck`
-(a state that does not fit the program, e.g. a local read before it is
-bound).  The copy from memory back to storage terminates on the visited-set
+A run ends in a state or halts: `revert` (the program reverted), `panic`
+(an `assert` failed: solc's `Panic(0x01)`, KeY's `assertSimple` "Violated"
+branch, which no modality accepts), or `stuck` (a state that does not fit the
+program, e.g. a local read before it is bound).  solc's other panics
+(overflow, a zero divisor, an index out of bounds, `pop()` on an empty array)
+are reverts here, as in KeY, where a box accepts them.  The copy from memory back to storage terminates on the visited-set
 complement `rem` (`copyMToSt`); everything else is structural.
 -/
 
@@ -282,6 +285,7 @@ structure State where
 inductive Halt where
   | revert
   | stuck
+  | panic
   deriving Repr, DecidableEq, Inhabited
 
 abbrev Res (α : Type) := Except Halt α
@@ -1515,6 +1519,13 @@ def guardOk (v : Value) (σ : State) : Res State :=
   | .bool false => .error .revert
   | .int _ => .error .stuck
 
+/-- An assertion's outcome: `true` goes on, `false` panics. -/
+def assertOk (v : Value) (σ : State) : Res State :=
+  match v with
+  | .bool true => pure σ
+  | .bool false => .error .panic
+  | .int _ => .error .stuck
+
 mutual
 
 /-- The state a statement leaves, from `σ`: `alice.age = 10;` saves `10` at
@@ -1588,7 +1599,7 @@ def Stmt.run (σ : State) : Stmt C → Res State
     | .bool false => Prog.run σ els
     | .int _ => .error .stuck
   | .require c => do guardOk (← c.eval σ) σ
-  | .assert c => do guardOk (← c.eval σ) σ
+  | .assert c => do assertOk (← c.eval σ) σ
   | .revert => .error .revert
   | .call _ args _ ret body => do
     let σ₁ ← Arg.bindSeq args σ
@@ -1684,6 +1695,10 @@ def aliasWrite : Prog StandardExample := sol{
 /-- A failing guard reverts. -/
 example : (Prog.run State.exampleStore (sol{ require(age > 3); } : Prog StandardExample)) =
     .error .revert := rfl
+
+/-- A failing assertion panics. -/
+example : (Prog.run State.exampleStore (sol{ assert(age > 3); } : Prog StandardExample)) =
+    .error .panic := rfl
 
 /-! The order an `++` inside an expression is captured in is solc's, as
 solkey's `TestSuite.sol` pins it: a binary operator's right operand first

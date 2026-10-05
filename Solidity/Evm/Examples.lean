@@ -1,4 +1,5 @@
 import Solidity.Evm.Correctness
+import Solidity.Semantics.NoPanic
 
 /-!
 # The compiler at work
@@ -512,11 +513,13 @@ revert together. -/
 theorem overflow_interpreter :
     Prog.run (State.fresh StandardExample 0) overflow = .error .revert := by
   rcases compile_exact (P := overflow) (Γ' := fun _ => none) rfl
-      (Sim.init StandardExample 0 (fresh).bal 0 W_pos) (by decide) (by decide) with ⟨_, _, _, h, _⟩ | ⟨h, _⟩
+      (Sim.init StandardExample 0 (fresh).bal 0 W_pos) (by decide) (by decide) with
+    ⟨_, _, _, h, _⟩ | ⟨h | h, _⟩
   · have := reverted_eq overflow_run
     rw [show run (compileProg overflow) fresh = _ from h] at this
     cases this
   · exact h
+  · exact absurd h (Prog.run_noPanic _ overflow rfl)
 
 /-- **`owner.transfer(30);` books `-30` at `5` and nothing at the contract
 in the interpreter**, because the machine moved `30` from the contract's

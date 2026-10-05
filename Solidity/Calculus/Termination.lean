@@ -284,11 +284,13 @@ theorem Val.cost_pos : {p : PrimTy} → (v : Val C p) → 1 ≤ v.cost
 end
 
 /-- What a rule's premise owes the statement it replaces: new statements
-weigh less, and each goal of a branch at least `2` less. -/
+weigh less, each goal of a branch at least `2` less, and a check's condition
+has no modality. -/
 def Premise.Smaller (s : Stmt C) : Premise C → Prop
   | .update _ | .done _ => True
   | .unfold P => Prog.weight P < s.weight
   | .split _ _ P Q => Prog.weight P + 2 ≤ s.weight ∧ Prog.weight Q + 2 ≤ s.weight
+  | .check c P => Prog.weight P < s.weight ∧ c.modalFree = true
   | .branches bs => (bs.map fun b => 2 ^ Prog.weight b.2).sum < 2 ^ s.weight
 
 /-- The rule leaves a premise smaller than its statement. -/
@@ -872,8 +874,10 @@ theorem Stmt.step_smaller (k : Nat) (m : Modality) :
   | .delete l => deleteStep_small l
   | .deleteMem p hd => deleteMemStep_small p hd
   | .assignNew l _ _ => by cases l <;> (simp only [Stmt.step]; weigh)
-  | .ite (.simple _) _ _ | .require (.simple _) | .assert (.simple _) => by
+  | .ite (.simple _) _ _ | .require (.simple _) => by
     simp only [Stmt.step]; weigh
+  | .assert (.simple _) => by
+    simp only [Stmt.step]; exact ⟨by weigh, rfl⟩
   | .ite (.read _) .. | .ite (.binop ..) .. | .ite (.unop ..) .. | .ite (.ternary ..) ..
   | .ite (.readMem _) .. | .require (.read _) | .require (.binop ..) | .require (.unop ..)
   | .require (.ternary ..) | .require (.readMem _) | .assert (.read _) | .assert (.binop ..)
@@ -960,6 +964,18 @@ def Fml.measure : Fml C → Nat
   | .and φ ψ => φ.measure + ψ.measure
   | .tt | .eq .. | .defined _ | .not _ => 0
 
+/-- A formula with no modality measures nothing. -/
+theorem Fml.measure_of_modalFree : (φ : Fml C) → φ.modalFree = true → φ.measure = 0
+  | .tt, _ | .eq .., _ | .defined _, _ | .not _, _ => rfl
+  | .upd _ _ φ, h | .havoc φ, h | .all _ _ φ, h => Fml.measure_of_modalFree φ h
+  | .and φ ψ, h => by
+    simp only [Fml.modalFree, Bool.and_eq_true] at h
+    simp only [Fml.measure, Fml.measure_of_modalFree φ h.1, Fml.measure_of_modalFree ψ h.2]
+  | .imp _ ψ, h => by
+    simp only [Fml.modalFree, Bool.and_eq_true] at h
+    exact Fml.measure_of_modalFree ψ h.2
+  | .modal .., h => by simp [Fml.modalFree] at h
+
 /-- A quantified local costs nothing. -/
 theorem Fml.measure_alls (φ : Fml C) : (xs : List (PrimTy × Var)) → (Fml.alls xs φ).measure = φ.measure
   | [] => rfl
@@ -1030,6 +1046,11 @@ theorem Premise.measure_lt {m : Modality} {s : Stmt C} {p : Premise C} (h : p.Sm
           Nat.add_le_add (Nat.mul_le_mul_right _ hP) (Nat.mul_le_mul_right _ hQ)
       _ < 4 * X * (φ.measure + 1) := by rw [Nat.mul_assoc]; omega
       _ = 2 ^ (s.weight + a) * (φ.measure + 1) := by rw [h4]
+  | check c P =>
+    simp only [Premise.Smaller] at h
+    simp only [Premise.fml, Fml.measure, Prog.weight, Prog.weight_append,
+      Fml.measure_of_modalFree c h.2, Nat.add_zero]
+    exact Nat.mul_lt_mul_of_pos_right (Nat.pow_lt_pow_right (by decide) (by omega)) hM
   | done b =>
     have : 0 < 2 ^ (s.weight + Prog.weight ω) * (φ.measure + 1) :=
       Nat.mul_pos (Nat.pow_pos (by decide)) hM

@@ -121,8 +121,8 @@ stuck, which is safe. Three things are not syntax and a solkey proof can be
 wrong on the chain without them: checked arithmetic (item 1), a `delete` that
 keeps a struct's mapping members (`docs/solc-alignment.md`), and well-formed
 storage (item 2). Rules whose premise differs from their taclet's without
-changing the syntax (bounds as a revert inside the update, `assertSimple`'s
-branch) are in `docs/lean-key-rule-map.md`.
+changing the syntax (bounds as a revert inside the update) are in
+`docs/lean-key-rule-map.md`.
 
 ## 5. The `save` leaf should collapse
 

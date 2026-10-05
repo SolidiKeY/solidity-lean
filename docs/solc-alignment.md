@@ -18,7 +18,7 @@ the plan to test these claims against solc is `docs/solc-validation.md`.
 | `unchecked { }`, shifts | `+ - * **` in `unchecked` wrap modulo `2^256` (`+%` …); `~`, `<<`, `>>` are solc's at `uint256` | `applyBinOp`, `RawExpr.uncheck` | |
 | Narrow integers | `uint8` … `uint248`, `int8` … `int248`: an operation at a narrow type reverts outside its range, `unchecked` and `<<` wrap modulo `2^N`, an implicit narrowing is refused, a `uint` cast truncates (below) | `narrowTy?`, `narrowPost`, `narrowCapture`, `narrowWrapNode`, `castCapture` (`Syntax.lean`) | `Examples/Tactics/Checked.lean` |
 | Division | `/` and `%` by zero revert (KeY agrees) | `applyBinOp` | |
-| `assert` | a failing `assert` reverts like `require`; KeY's "violated" goal is an obligation instead, and the rule table follows the interpreter | `Taclet.assertSimple` | `Examples/Tactics/Revert.lean` |
+| `assert` | a failing `assert` panics (`Panic(0x01)`), a halt distinct from `require`'s revert that neither modality accepts; KeY's "Violated" goal, an obligation under the box too | `assertOk`, `Modality.afterRun`, `Taclet.assertSimple` | `Examples/Tactics/Revert.lean` |
 | Assignment order | right-hand side first, target resolved once | `Stmt.run` (`.assign`, `.opAssign`, `.incDec`) | `Semantics.lean` examples |
 | Effects in an expression | captured before the statement in solc's order (table below) | `hoist`, `captureExpr` | `Semantics.lean` examples |
 | Mapping-carrying copy | a storage copy of a type containing a mapping cannot be written | `Src.copy` (`mapFree`), `tyHasMapping` | |

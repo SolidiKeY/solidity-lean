@@ -72,8 +72,8 @@ def allRes (r : Nat → List (Hyp C) → Fml C → Option (List (Leaf C) × Nat)
 
 /-- The goals of a rule's premise, fired on `⟨[ s; ω ]⟩ ψ` in the context `Γ`,
 handed to `r` with the budget `b`: the goals of `Proves.updateRule`,
-`unfoldRule`, `splitRule` (`thn`, `els`, `cov`), `doneRule`, `branchesRule`
-(one per outcome). -/
+`unfoldRule`, `splitRule` (`thn`, `els`, `cov`), `checkRule` (`thn`, `els`),
+`doneRule`, `branchesRule` (one per outcome). -/
 def premiseRes (r : Nat → List (Hyp C) → Fml C → Option (List (Leaf C) × Nat)) (b : Nat)
     (Γ : List (Hyp C)) (m : Modality) (ω : Prog C) (ψ : Fml C) :
     Premise C → Option (List (Leaf C) × Nat)
@@ -82,6 +82,7 @@ def premiseRes (r : Nat → List (Hyp C) → Fml C → Option (List (Leaf C) × 
   | .split c c' P Q =>
     allRes r b [(Γ ++ [.pre c], .modal m (P ++ ω) ψ), (Γ ++ [.pre c'], .modal m (Q ++ ω) ψ),
       (Γ, Premise.cover m c c')]
+  | .check c P => allRes r b [(Γ ++ [.pre c], .modal m (P ++ ω) ψ), (Γ, c)]
   | .done d => r b Γ ((Premise.done d).fml m ω ψ)
   | .branches bs => allRes r b (bs.map fun o => (Γ, .alls o.1 (.modal m (o.2 ++ ω) ψ)))
 
@@ -186,6 +187,9 @@ theorem premiseRes_sound {b : Nat} {Γ : List (Hyp C)} {m : Modality} {s : Stmt 
     have hg := allRes_sound hr h hl
     exact Proves.splitRule d (hg _ (.head _)) (hg _ (.tail _ (.head _)))
       (hg _ (.tail _ (.tail _ (.head _))))
+  | check c P =>
+    have hg := allRes_sound hr h hl
+    exact Proves.checkRule d (hg _ (.head _)) (hg _ (.tail _ (.head _)))
   | done e => exact Proves.doneRule d (hr _ _ _ _ _ h hl)
   | branches bs =>
     have hg := allRes_sound hr h hl

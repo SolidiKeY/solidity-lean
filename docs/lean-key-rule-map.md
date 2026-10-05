@@ -244,7 +244,8 @@ receiver kind, Lean does not.
 
 | KeY taclet | `Taclet` constructor | Status | Notes |
 | --- | --- | --- | --- |
-| `assertConditionCapture`, `assertSimple` | same names | same | terminal; the box/diamond split on a reverted run is the modality semantics, not a rule |
+| `assertConditionCapture` | same | same | |
+| `assertSimple` | same | same | KeY's two branches: "Holds" `se = true ⟹ ⟨[ ]⟩` and "Violated" `se = true` (`Premise.check`, `Proves.check`); a failed `assert` panics (`Halt.panic`), which neither modality accepts (`Modality.afterRun`) |
 | `requireConditionCapture` | same | same | the assert capture over `Stmt.require` |
 | `requireSimple` | same | same | `require(se); ⇝ se = true ⟹ ⟨[ ]⟩ ; se = false ⟹ ⟨[ revert(); ]⟩` |
 | `ifElseUnfold` | same | same | also claims `ifUnfold` |

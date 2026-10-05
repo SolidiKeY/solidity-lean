@@ -161,7 +161,7 @@ theorem branchDiamond :
 /-- Without the precondition the diamond is not valid: in a state that does
 not bind `a`, the condition is stuck and the program never ends. -/
 example : ¬ (⊨ dl!{ ⟨ if (a == b) { x = 2; } else { x = 1; }; ⟩ x != 0 }) :=
-  fun h => h Semantics.State.exampleStore
+  fun h => (h Semantics.State.exampleStore).1
 
 /-! ## A literal condition
 

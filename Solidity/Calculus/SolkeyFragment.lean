@@ -70,6 +70,7 @@ def Premise.inSolkey (m : Modality) : Premise C → Bool
   | .update _ | .done _ => true
   | .unfold P => Prog.inSolkey m P
   | .split c c' P Q => c.inSolkey && c'.inSolkey && Prog.inSolkey m P && Prog.inSolkey m Q
+  | .check c P => c.inSolkey && Prog.inSolkey m P
   | .branches bs => bs.all fun b => Prog.inSolkey m b.2
 
 @[simp] theorem Prog.inSolkey_nil : Prog.inSolkey m ([] : Prog C) = true := rfl
@@ -204,6 +205,11 @@ theorem Proves.toSolkey {R : RuleSet} {Γ : List (Hyp C)} {φ : Fml C} (h : Prov
     simp only [Premise.inSolkey, Bool.and_eq_true] at this
     exact .split d (ih₁ (by simp_all [Fml.inSolkey])) (ih₂ (by simp_all [Fml.inSolkey]))
       (ih₃ (by simp_all))
+  | check d _ _ ih₁ ih₂ =>
+    simp only [Fml.inSolkey, Prog.inSolkey_cons, Bool.and_eq_true] at hφ
+    have := d.premise_inSolkey hφ.1.1
+    simp only [Premise.inSolkey, Bool.and_eq_true] at this
+    exact .check d (ih₁ (by simp_all [Fml.inSolkey])) (ih₂ (by simp_all))
   | done d _ ih =>
     exact .done d (ih (by rename_i b _; cases b <;> rfl))
   | empty _ ih => exact .empty (ih (by simp_all [Fml.inSolkey]))
@@ -278,7 +284,7 @@ theorem Proves.solkey_not_call {Γ : List (Hyp C)} {f : Name} {args : List (Arg 
   generalize hR : RuleSet.solkey = R at h
   generalize hψ : Fml.modal m (.call f args hsep ret body :: ω) φ = ψ at h
   induction h generalizing φ with
-  | update d _ _ | unfold d _ _ | split d _ _ _ _ _ _ | done d _ _ =>
+  | update d _ _ | unfold d _ _ | split d _ _ _ _ _ _ | check d _ _ _ _ | done d _ _ =>
     cases hψ; simp [d.call_simple rfl] at ha
   | branches d _ _ => cases hψ; simp [d.call_simple rfl] at ha
   | unfoldLean | doneLean => cases hR

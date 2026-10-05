@@ -2870,7 +2870,7 @@ theorem Stmt.run_tight (hd : DeepOk C) : ∀ (s : Stmt C) {Γ Γ' : Ctx} {H : He
     · exact nomatch h
   | .assert c, Γ, Γ', H, σ, σ', hwt, hcn, ht, hs, h => by
     obtain ⟨cv, _, h⟩ := bind_ok_inv h
-    unfold guardOk at h
+    unfold assertOk at h
     split at h
     · cases h; exact ht
     · exact nomatch h

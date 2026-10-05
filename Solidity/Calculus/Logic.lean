@@ -28,7 +28,7 @@ Fresh names are numbered above every index in sight (`Hyp.fresh`), which is
 what discharges the freshness hypothesis of `Taclet.sound`: no rule of a
 derivation carries a side condition.
 
-A branch (`ifElseSplit`, `requireSimple`, `assertSimple`) has two goals, one
+A branch (`ifElseSplit`, `requireSimple`) has two goals, one
 per condition.  A condition can be stuck (a local read before it is bound),
 so the two conditions need not cover every state: a box goal is true of a
 stuck run anyway, and a diamond goal owes that one of them holds
@@ -37,6 +37,13 @@ says the same without looking at the modality, `⟨[ revert(); ]⟩ false ∨ c 
 (`Premise.coverFml`): so every premise but a revert's is one formula under
 either modality, and a line of a derivation at a
 modality `m` goes on through a branch.
+
+A check (`assertSimple`) has two goals too, KeY's: the rest with the
+condition assumed, and the condition itself.  A failed `assert` panics, and a
+panic satisfies neither modality (`Modality.afterRun`), so the condition is
+owed under the box as well.  An update never panics (`Upd.apply_ne_panic`),
+which is what lets an update rule's premise read a halt as the box reads a
+revert.
 -/
 
 namespace Solidity
@@ -66,7 +73,8 @@ def Premise.coverFml (m : Modality) (c c' : Fml C) : Fml C :=
 theorem Premise.coverFml_holds (m : Modality) (c c' : Fml C) (σ : State) :
     holds σ (Premise.coverFml m c c') ↔ holds σ (Premise.cover m c c') := by
   cases m <;> simp only [Premise.coverFml, Premise.cover, holds, Prog.run, Stmt.run, bind,
-    Except.bind, Modality.after, Modality.onHalt, not_and,
+    Except.bind, Modality.afterRun, Modality.after, Modality.onHalt, not_and, ne_eq,
+    reduceCtorEq, Except.error.injEq, and_true, and_false,
     Classical.not_not, not_true_eq_false, not_false_eq_true, false_implies, true_implies]
 
 /-- The premise as one formula, under the modality `m` the rule found, in
@@ -77,6 +85,7 @@ def Premise.fml (m : Modality) : Premise C → Prog C → Fml C → Fml C
   | .split c c' P Q, ω, φ =>
     .and (.imp c (.modal m (P ++ ω) φ))
       (.and (.imp c' (.modal m (Q ++ ω) φ)) (Premise.coverFml m c c'))
+  | .check c P, ω, φ => .and (.imp c (.modal m (P ++ ω) φ)) c
   | .done true, _, _ => .tt
   | .done false, _, _ => .ff
   | .branches bs, ω, φ => .conj (bs.map fun b => .alls b.1 (.modal m (b.2 ++ ω) φ))
@@ -85,11 +94,20 @@ def Premise.fml (m : Modality) : Premise C → Prog C → Fml C → Fml C
 neither the rest of the program nor the postcondition mentions `ns`. -/
 theorem Modality.after_sameOk (m : Modality) {ns : List Var} {r r' : Res State}
     (hr : SameOk ns r r') {ω : Prog C} {φ : Fml C} (hω : Avoids (Prog.vars ω ++ φ.vars) ns) :
-    m.after (holds · φ) (do Prog.run (← r) ω) ↔ m.after (holds · φ) (do Prog.run (← r') ω) := by
+    m.afterRun (holds · φ) (do Prog.run (← r) ω) ↔ m.afterRun (holds · φ) (do Prog.run (← r') ω) := by
   match r, r', hr with
-  | .error _, .error _, _ => exact Iff.rfl
+  | .error a, .error b, h =>
+    simp only [bind, Except.bind, Modality.afterRun, Modality.after, ne_eq, Except.error.injEq]
+    exact and_congr_right' (not_congr h)
   | .ok a, .ok b, h =>
-    exact m.after_frame (Prog.run_frame h ω hω.left) fun _ _ h' => holds_frame φ hω.right h'
+    exact m.afterRun_frame (Prog.run_frame h ω hω.left) fun _ _ h' => holds_frame φ hω.right h'
+
+/-- A run that halts, not in a panic, satisfies what its modality says of a
+revert: every box formula. -/
+theorem Modality.afterRun_error {m : Modality} {p : State → Prop} {e : Halt} (he : e ≠ .panic) :
+    m.afterRun p (.error e) ↔ m.onHalt := by
+  simp only [Modality.afterRun, Modality.after, ne_eq, Except.error.injEq, he, not_false_eq_true,
+    and_true]
 
 /-- **A premise implies its rule's conclusion**: in front of any rest `ω` and
 postcondition `φ` that do not mention the rule's fresh names.
@@ -106,8 +124,25 @@ theorem Premise.sound {k : Nat} {m : Modality} {s : Stmt C} {pr : Premise C}
   have h₀ : Avoids (Prog.vars ω ++ φ.vars) [] := fun _ _ h => by simp at h
   cases pr with
   | update U =>
-    simp only [Premise.fml, holds, Prog.run, Modality.after_bind]
-    exact (m.after_sameOk (h σ) h₀).1
+    simp only [Premise.fml, holds]
+    intro hU
+    have hs := h σ
+    cases hu : U.apply σ with
+    | error e =>
+      have hp : e ≠ .panic := fun hp => Upd.apply_ne_panic U σ (by rw [hu, hp])
+      rw [hu] at hs
+      cases hr : s.run σ with
+      | ok _ => rw [hr] at hs; exact hs.elim
+      | error e' =>
+        rw [hr] at hs
+        have hp' : e' ≠ .panic := fun hp' => hp (hs.2 hp')
+        rw [hu] at hU
+        simp only [Prog.run, hr, bind, Except.bind, Modality.afterRun_error hp']
+        exact hU
+    | ok τ =>
+      rw [hu] at hU hs
+      have hk := (m.after_sameOk (r := .ok τ) (r' := s.run σ) hs h₀ (ω := ω) (φ := φ)).1 hU
+      simpa only [Prog.run, bind, Except.bind] using hk
   | unfold P =>
     simp only [Premise.fml, holds, Prog.run, SemanticsProperties.Prog.run_append]
     exact (m.after_sameOk (h σ) hω).1
@@ -118,26 +153,31 @@ theorem Premise.sound {k : Nat} {m : Modality} {s : Stmt C} {pr : Premise C}
     · exact (m.after_sameOk ((h σ).1 hc) hω).1 (hP hc)
     by_cases hc' : holds σ c'
     · exact (m.after_sameOk ((h σ).2.1 hc') hω).1 (hQ hc')
-    obtain ⟨e, he⟩ := (h σ).2.2 hc hc'
+    obtain ⟨e, he, hp⟩ := (h σ).2.2 hc hc'
     cases m with
-    | box => simp only [Prog.run, he, bind, Except.bind, Modality.after, Modality.onHalt]
+    | box => simp only [Prog.run, he, bind, Except.bind, Modality.afterRun_error hp, Modality.onHalt]
     | diamond =>
       rw [Premise.coverFml_holds] at hcov
       simp only [Premise.cover, holds, not_and, Classical.not_not] at hcov
       exact absurd (hcov hc) hc'
+  | check c P =>
+    simp only [Premise.fml, holds, SemanticsProperties.Prog.run_append]
+    intro ⟨hP, hc⟩
+    exact (m.after_sameOk (h σ hc) hω).1 (hP hc)
   | done b =>
     cases b with
     | true =>
       obtain ⟨rfl, hb⟩ := h rfl
-      obtain ⟨e, he⟩ := hb σ
+      obtain ⟨e, he, hp⟩ := hb σ
       simp only [holds, Prog.run, he, bind, Except.bind]
-      exact fun _ => by simp [Modality.after, Modality.onHalt]
+      exact fun _ => by simp [Modality.afterRun_error hp, Modality.onHalt]
     | false => exact fun hf => absurd trivial (by simp [Premise.fml, holds] at hf)
   | branches bs =>
     simp only [Premise.fml, holds_conj, List.mem_map]
     intro hb
-    rcases h σ with ⟨rfl, e, he⟩ | ⟨b, hmem, σ', hbind, hrun⟩
-    · simp only [holds, Prog.run, he, bind, Except.bind, Modality.after, Modality.onHalt]
+    rcases h σ with ⟨rfl, e, he, hp⟩ | ⟨b, hmem, σ', hbind, hrun⟩
+    · simp only [holds, Prog.run, he, bind, Except.bind, Modality.afterRun_error hp,
+        Modality.onHalt, implies_true]
     · have hφ := holds_alls.1 (hb _ ⟨b, hmem, rfl⟩) σ' hbind
       simp only [holds, SemanticsProperties.Prog.run_append, hrun] at hφ
       simpa only [holds, Prog.run] using hφ
@@ -289,6 +329,13 @@ inductive Proves : RuleSet → List (Hyp C) → Fml C → Prop
       (thn : Proves R (Γ ++ [.pre c]) (.modal m (P ++ ω) φ))
       (els : Proves R (Γ ++ [.pre c']) (.modal m (Q ++ ω) φ))
       (cov : Proves R Γ (Premise.cover m c c')) : Proves R Γ (.modal m (s :: ω) φ)
+  /-- A taclet that checks (`assertSimple`): the goal with the condition
+  assumed, and the condition — KeY's "Holds" and "Violated". -/
+  | check {R : RuleSet} {Γ : List (Hyp C)} {m : Modality} {s : Stmt C} {ω : Prog C} {φ : Fml C}
+      {c : Fml C} {P : Prog C}
+      (d : Taclet C (Hyp.fresh Γ (.modal m (s :: ω) φ)) m s (.check c P))
+      (thn : Proves R (Γ ++ [.pre c]) (.modal m (P ++ ω) φ))
+      (els : Proves R Γ c) : Proves R Γ (.modal m (s :: ω) φ)
   /-- A taclet that closes the modality (`revertBox`, `revertDiamond`): what
   is left is `true` or `false`. -/
   | done {R : RuleSet} {Γ : List (Hyp C)} {m : Modality} {s : Stmt C} {ω : Prog C} {φ : Fml C}
@@ -634,9 +681,12 @@ theorem Proves.sound {R : RuleSet} {Γ : List (Hyp C)} {φ : Fml C} (h : Proves 
     rw [Hyp.wrap_append] at ih₁ ih₂
     exact fun σ => Hyp.wrap_mono₃ (fun τ h₁ h₂ h₃ => d.sound_in τ ⟨h₁, h₂, (Premise.coverFml_holds _ _ _ τ).2 h₃⟩) _ σ
       (ih₁ σ) (ih₂ σ) (ih₃ σ)
+  | check d _ _ ih₁ ih₂ =>
+    rw [Hyp.wrap_append] at ih₁
+    exact fun σ => Hyp.wrap_mono₂ (fun τ h₁ h₂ => d.sound_in τ ⟨h₁, h₂⟩) _ σ (ih₁ σ) (ih₂ σ)
   | @empty _ Γ m φ _ ih =>
     exact fun σ => Hyp.wrap_mono (ψ := φ) (φ := .modal m [] φ)
-      (fun _ h => by cases m <;> exact h) Γ σ (ih σ)
+      (fun _ h => ⟨by cases m <;> exact h, nofun⟩) Γ σ (ih σ)
   | rewrite r _ ih => exact Proves.rewrite_sound r.sound ih
   | updRw r ht _ ih => exact fun σ => Hyp.rwUpd_wrap (Term.EvalRefines.of_theq r.sound ht) _ σ (ih σ)
   | merge hU _ ih => exact Proves.merge_sound hU ih
@@ -672,6 +722,7 @@ theorem Proves.toAll {R : RuleSet} {Γ : List (Hyp C)} {φ : Fml C} (h : Proves 
   | allIntro _ ih => exact .allIntro ih
   | updIntro _ ih => exact .updIntro ih
   | split d _ _ _ ih₁ ih₂ ih₃ => exact .split d ih₁ ih₂ ih₃
+  | check d _ _ ih₁ ih₂ => exact .check d ih₁ ih₂
   | done d _ ih => exact .done d ih
   | empty _ ih => exact .empty ih
   | rewrite r _ ih => exact .rewrite r ih

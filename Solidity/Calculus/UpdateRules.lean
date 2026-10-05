@@ -1253,6 +1253,10 @@ theorem Modality.after_congr (m : Modality) {p q : State → Prop} (h : ∀ τ, 
   | .ok τ => h τ
   | .error _ => Iff.rfl
 
+theorem Modality.afterRun_congr (m : Modality) {p q : State → Prop} (h : ∀ τ, p τ ↔ q τ)
+    (r : Res State) : m.afterRun p r ↔ m.afterRun q r :=
+  and_congr_left' (m.after_congr h r)
+
 /-- Applying an update rule wherever it fits first gives an equivalent formula.
 
 Example: for `alice.account.balance = 10;`, `sequentialToParallel` on
@@ -1292,7 +1296,7 @@ theorem Fml.updAt_sound {r : UpdRuleName} :
   | .modal m P φ, ψ, h, σ => by
     simp only [Fml.updAt, Option.map_eq_some_iff] at h
     obtain ⟨φ', h', rfl⟩ := h
-    exact m.after_congr (fun τ => Fml.updAt_sound φ h' τ) _
+    exact m.afterRun_congr (fun τ => Fml.updAt_sound φ h' τ) _
   | .havoc φ, ψ, h, σ => by
     simp only [Fml.updAt, Option.map_eq_some_iff] at h
     obtain ⟨φ', h', rfl⟩ := h
@@ -1380,7 +1384,7 @@ theorem Fml.simpUpds_holds : (φ : Fml C) → ∀ σ, (holds σ φ.simpUpds ↔ 
     simp only [Fml.simpUpds, holds, Fml.simpUpds_holds φ σ, Fml.simpUpds_holds ψ σ]
   | .modal m P φ, σ => by
     simp only [Fml.simpUpds, holds]
-    exact m.after_congr (fun τ => Fml.simpUpds_holds φ τ) _
+    exact m.afterRun_congr (fun τ => Fml.simpUpds_holds φ τ) _
   | .havoc φ, σ => by
     simp only [Fml.simpUpds, holds]
     exact forall_congr' fun _ => forall_congr' fun _ =>

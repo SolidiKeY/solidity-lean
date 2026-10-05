@@ -346,15 +346,14 @@ theorem assertHolds : ⊨ dl!{ [ age = 10; assert(age == 10); result = 1; ] resu
   sol_symex
   sol_close
 
-/-- `assert(false); result = 1;` — a failing `assert` reverts: the box holds of
-anything … -/
-theorem assertFails : ⊨ dl!{ [ assert(false); result = 1; ] false } := by
-  sol_symex
-  sol_close
+/-- `assert(false); result = 1;` — a failing `assert` panics: unlike a
+`require`, the box does not hold … -/
+theorem assertFails : ¬ (⊨ dl!{ [ assert(false); result = 1; ] true }) :=
+  fun h => (h State.exampleStore).2 rfl
 
 /-- … and the diamond of nothing. -/
 theorem assertFailsDiamond : ¬ (⊨ dl!{ ⟨ assert(false); result = 1; ⟩ result == 1 }) :=
-  fun h => h State.exampleStore
+  fun h => (h State.exampleStore).1
 
 /-- `age = 10; require(age == 10); result = 1;` -/
 theorem requireHolds : ⊨ dl!{ [ age = 10; require(age == 10); result = 1; ] result == 1 } := by
@@ -368,7 +367,7 @@ theorem requireFails : ⊨ dl!{ [ require(false); result = 1; ] false } := by
 
 /-- … the diamond `c ∧ φ` (solkey `docs/require-assert.md`). -/
 theorem requireFailsDiamond : ¬ (⊨ dl!{ ⟨ require(false); result = 1; ⟩ result == 1 }) :=
-  fun h => h State.exampleStore
+  fun h => (h State.exampleStore).1
 
 /-! ## 7 · Fixed-size arrays
 

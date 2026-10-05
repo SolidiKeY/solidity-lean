@@ -1035,14 +1035,16 @@ end
 /-! ## Statements -/
 
 /-- A statement's outcome: both succeed, the machine's stack as it was and the
-states related; or both revert; or the machine reverts because the world
-refused a payment — only code that `pays` has one — and the interpreter
-succeeds in a state some machine represents, the one where the world had
-paid. -/
+states related; or both revert; or the interpreter panics (a failed `assert`,
+solc's `Panic(0x01)`) where the machine reverts; or the machine reverts
+because the world refused a payment — only code that `pays` has one — and the
+interpreter succeeds in a state some machine represents, the one where the
+world had paid. -/
 inductive StmtOut (C : Contract) (L : Nat) (Γ' : TyCtx) (pays : Bool) (res : Res State) (out : Out)
     (m : Machine) : Prop where
   | inl (h : ∃ σ' m', res = .ok σ' ∧ out = .ok m' 0 ∧ m'.stack = m.stack ∧ Sim C L Γ' σ' m')
   | inr (h : res = .error .revert ∧ out = .revert)
+  | panic (h : res = .error .panic ∧ out = .revert)
   | refused (hp : pays = true) (h : out = .revert ∧ ∃ σ' m', res = .ok σ' ∧ Sim C L Γ' σ' m')
 
 /-- Forgetting locals keeps `Sim`: after `if`, only what both branches agree on. -/
@@ -1541,9 +1543,10 @@ theorem Sim.mono {Γ : TyCtx} {m : Machine} {L' : Nat} (h : Sim C L Γ σ m) (hL
 theorem StmtOut.mono {Γ' : TyCtx} {b : Bool} {res : Res State} {out : Out} {m : Machine} {L' : Nat}
     (h : StmtOut C L Γ' b res out m) (hL : L ≤ L') (hL' : L' ≤ Lmax) :
     StmtOut C L' Γ' b res out m := by
-  rcases h with ⟨σ', m', h1, h2, h3, h4⟩ | h | ⟨hp, h1, σ', m', h2, h4⟩
+  rcases h with ⟨σ', m', h1, h2, h3, h4⟩ | h | h | ⟨hp, h1, σ', m', h2, h4⟩
   · exact .inl ⟨σ', m', h1, h2, h3, h4.mono hL hL'⟩
   · exact .inr h
+  · exact .panic h
   · exact .refused hp ⟨h1, σ', m', h2, h4.mono hL hL'⟩
 
 /-- `v = total++;`: the target bumped, `v` given the old or the new word. -/
@@ -2168,18 +2171,20 @@ theorem stmt_sim : ∀ (s : Stmt C) {L : Nat} {Δ Δ' : TyCtx} {τ : State} {m :
                 run (compileProg e) m from rfl]
             simp only [Res.ok_bind]
             rcases ihe hm he with ⟨τ', m', hτ', hrun', hst', hm'⟩ | ⟨hτ', hrun'⟩ |
-                ⟨hp, hrun', τ', m', hτ', hm'⟩
+                ⟨hτ', hrun'⟩ | ⟨hp, hrun', τ', m', hτ', hm'⟩
             · exact .inl ⟨τ', m', hτ', hrun', hst', hm'.weaken wk₂⟩
             · exact .inr ⟨hτ', hrun'⟩
+            · exact .panic ⟨hτ', hrun'⟩
             · exact .refused (by simp [pays, hp]) ⟨hrun', τ', m', hτ', hm'.weaken wk₂⟩
           · rw [run_append_skip (m' := m) (k := 0) rfl]
             rcases iht hm ht with ⟨τ', m', hτ', hrun', hst', hm'⟩ | ⟨hτ', hrun'⟩ |
-                ⟨hp, hrun', τ', m', hτ', hm'⟩
+                ⟨hτ', hrun'⟩ | ⟨hp, hrun', τ', m', hτ', hm'⟩
             · refine .inl ⟨τ', m', hτ', ?_, hst', hm'.weaken wk₁⟩
               change run _ m = _
               rw [run_append_skip (k := 0) hrun']
               exact exec_length (.jump (compileProg e).length :: compileProg e) m' |>.trans rfl
             · exact .inr ⟨hτ', run_append_revert hrun'⟩
+            · exact .panic ⟨hτ', run_append_revert hrun'⟩
             · exact .refused (by simp [pays, hp]) ⟨run_append_revert hrun', τ', m', hτ', hm'.weaken wk₁⟩
         · exact .inr ⟨by simp [hvc], run_append_revert hrunc⟩
       · cases hw
@@ -2202,8 +2207,8 @@ theorem stmt_sim : ∀ (s : Stmt C) {L : Nat} {Δ Δ' : TyCtx} {τ : State} {m :
     rcases val_sim c hm hwc with ⟨vc, wc, hvc, hrc, hrunc⟩ | ⟨hvc, hrunc⟩
     · obtain ⟨x, rfl, rfl⟩ := hrc.bool_inv
       cases x
-      · exact .inr ⟨by simp [hvc, guardOk], by rw [run_append_skip hrunc]; rfl⟩
-      · exact .inl ⟨τ, m, by simp [hvc, guardOk]; rfl, by rw [run_append_skip hrunc]; rfl, rfl,
+      · exact .panic ⟨by simp [hvc, assertOk], by rw [run_append_skip hrunc]; rfl⟩
+      · exact .inl ⟨τ, m, by simp [hvc, assertOk]; rfl, by rw [run_append_skip hrunc]; rfl, rfl,
           hm⟩
     · exact .inr ⟨by simp [hvc], run_append_revert hrunc⟩
   | .revert, L, Δ, Δ', τ, m, hm, hw, hL => .inr ⟨rfl, rfl⟩
@@ -2240,13 +2245,14 @@ theorem stmt_sim : ∀ (s : Stmt C) {L : Nat} {Δ Δ' : TyCtx} {τ : State} {m :
                   hm₁.bindVal r (ReprV.default p)⟩
             rw [run_append_ok hrun₂]
             rcases ihb hm₂ hwb with ⟨τ₃, m₃, hτ₃, hrun₃, hst₃, hm₃⟩ | ⟨hτ₃, hrun₃⟩ |
-                ⟨hp, hrun₃, τ₃, m₃, hτ₃, hm₃⟩
+                ⟨hτ₃, hrun₃⟩ | ⟨hp, hrun₃, τ₃, m₃, hτ₃, hm₃⟩
             · rw [run_append_ok hrun₃, hτ₃]
               simp only [Res.ok_bind]
               obtain ⟨τ₄, m₄, h₁, h₂, h₃, h₄⟩ := leave_sim ret hwl hm₃
               rw [h₁, h₂]
               exact .inl ⟨τ₄, m₄, rfl, rfl, h₃.trans (hst₃.trans (hst₂.trans hst₁)), h₄⟩
             · exact .inr ⟨by simp [hτ₃], run_append_revert hrun₃⟩
+            · exact .panic ⟨by simp [hτ₃], run_append_revert hrun₃⟩
             · -- the body's payment refused: the result read in the world that paid
               refine .refused hp ⟨run_append_revert hrun₃, ?_⟩
               rw [hτ₃]
@@ -2340,20 +2346,24 @@ theorem prog_sim : ∀ (P : List (Stmt C)) {L : Nat} {Δ Δ' : TyCtx} {τ : Stat
     split at hw
     · rename_i Δ₁ hs
       simp only [Prog.run, compileProg, pushesP, ← Nat.add_assoc]
-      rcases ihs hm hs with ⟨τ₁, m₁, hτ₁, hrun₁, hst₁, hm₁⟩ | ⟨hτ₁, hrun₁⟩ |
+      rcases ihs hm hs with ⟨τ₁, m₁, hτ₁, hrun₁, hst₁, hm₁⟩ | ⟨hτ₁, hrun₁⟩ | ⟨hτ₁, hrun₁⟩ |
           ⟨hp₁, hrun₁, τ₁, m₁, hτ₁, hm₁⟩
       · rw [run_append_ok hrun₁, hτ₁]
-        rcases ihP hm₁ hw with ⟨τ₂, m₂, hτ₂, hrun₂, hst₂, hm₂⟩ | ⟨hτ₂, hrun₂⟩ |
+        rcases ihP hm₁ hw with ⟨τ₂, m₂, hτ₂, hrun₂, hst₂, hm₂⟩ | ⟨hτ₂, hrun₂⟩ | ⟨hτ₂, hrun₂⟩ |
             ⟨hp₂, hrun₂, τ₂, m₂, hτ₂, hm₂⟩
         · exact .inl ⟨τ₂, m₂, by simpa using hτ₂, hrun₂, hst₂.trans hst₁, hm₂⟩
         · exact .inr ⟨by simpa using hτ₂, hrun₂⟩
+        · exact .panic ⟨by simpa using hτ₂, hrun₂⟩
         · exact .refused (by simp [paysP, hp₂]) ⟨hrun₂, τ₂, m₂, by simpa using hτ₂, hm₂⟩
       · exact .inr ⟨by simp [hτ₁], run_append_revert hrun₁⟩
+      · exact .panic ⟨by simp [hτ₁], run_append_revert hrun₁⟩
       · -- the machine stopped at a refused payment; the interpreter goes on
         rw [run_append_revert hrun₁, hτ₁]
-        rcases ihP hm₁ hw with ⟨τ₂, m₂, hτ₂, -, -, hm₂⟩ | ⟨hτ₂, -⟩ | ⟨-, -, τ₂, m₂, hτ₂, hm₂⟩
+        rcases ihP hm₁ hw with ⟨τ₂, m₂, hτ₂, -, -, hm₂⟩ | ⟨hτ₂, -⟩ | ⟨hτ₂, -⟩ |
+            ⟨-, -, τ₂, m₂, hτ₂, hm₂⟩
         · exact .refused (by simp [paysP, hp₁]) ⟨rfl, τ₂, m₂, by simpa using hτ₂, hm₂⟩
         · exact .inr ⟨by simpa using hτ₂, rfl⟩
+        · exact .panic ⟨by simpa using hτ₂, rfl⟩
         · exact .refused (by simp [paysP, hp₁]) ⟨rfl, τ₂, m₂, by simpa using hτ₂, hm₂⟩
     · cases hw
 
@@ -2365,8 +2375,9 @@ end
 representing the state it starts in, the interpreter and the compiled code
 agree: both succeed — the machine's stack as it was, its storage, locals and
 balances representing the interpreter's final state and ledger — or both
-revert, or, in code that pays, the world refuses a payment and the machine
-alone reverts.
+revert (a panic, a failed `assert`, is solc's revert with `Panic(0x01)` data),
+or, in code that pays, the world refuses a payment and the machine alone
+reverts.
 
 Example: from a state where `total = 3`,
 ```solidity
@@ -2378,12 +2389,14 @@ theorem compile_correct {P : Prog C} {Γ Γ' : TyCtx} {σ : State} {m : Machine}
     (hP : wtProg Γ P = some Γ') (hm : Sim C L Γ σ m) (hL : L + pushesP P ≤ Lmax) :
     (∃ σ' m', Prog.run σ P = .ok σ' ∧ run (compileProg P) m = .ok m' 0 ∧ m'.stack = m.stack ∧
       Sim C (L + pushesP P) Γ' σ' m') ∨
-    (Prog.run σ P = .error .revert ∧ run (compileProg P) m = .revert) ∨
+    ((Prog.run σ P = .error .revert ∨ Prog.run σ P = .error .panic) ∧
+      run (compileProg P) m = .revert) ∨
     (paysP P = true ∧ run (compileProg P) m = .revert ∧ ∃ σ' m', Prog.run σ P = .ok σ' ∧
       Sim C (L + pushesP P) Γ' σ' m') := by
-  rcases prog_sim P hm hP hL with h | h | ⟨hp, h⟩
+  rcases prog_sim P hm hP hL with h | ⟨h₁, h₂⟩ | ⟨h₁, h₂⟩ | ⟨hp, h⟩
   · exact .inl h
-  · exact .inr (.inl h)
+  · exact .inr (.inl ⟨.inl h₁, h₂⟩)
+  · exact .inr (.inl ⟨.inr h₁, h₂⟩)
   · exact .inr (.inr ⟨hp, h⟩)
 
 /-- **Code that pays no one agrees exactly**: with no `transfer`, nothing can
@@ -2395,7 +2408,8 @@ theorem compile_exact {P : Prog C} {Γ Γ' : TyCtx} {σ : State} {m : Machine}
     (hpay : paysP P = false) :
     (∃ σ' m', Prog.run σ P = .ok σ' ∧ run (compileProg P) m = .ok m' 0 ∧ m'.stack = m.stack ∧
       Sim C (L + pushesP P) Γ' σ' m') ∨
-    (Prog.run σ P = .error .revert ∧ run (compileProg P) m = .revert) := by
+    ((Prog.run σ P = .error .revert ∨ Prog.run σ P = .error .panic) ∧
+      run (compileProg P) m = .revert) := by
   rcases compile_correct hP hm hL with h | h | ⟨hp, _⟩
   · exact .inl h
   · exact .inr h
@@ -2442,7 +2456,8 @@ Example: `x = 1;` with `x` never declared is stuck in the interpreter, and
 theorem not_stuck {P : Prog C} {Γ Γ' : TyCtx} {σ : State} {m : Machine}
     (hP : wtProg Γ P = some Γ') (hm : Sim C L Γ σ m) (hL : L + pushesP P ≤ Lmax) :
     Prog.run σ P ≠ .error .stuck := by
-  rcases compile_correct hP hm hL with ⟨_, _, h, _⟩ | ⟨h, _⟩ | ⟨_, _, _, _, h, _⟩ <;> rw [h] <;> nofun
+  rcases compile_correct hP hm hL with ⟨_, _, h, _⟩ | ⟨h | h, _⟩ | ⟨_, _, _, _, h, _⟩ <;>
+    rw [h] <;> nofun
 
 /-- A fresh contract at address `self`: its storage at every type's default,
 nothing bound, nothing sent, `balance` in funds. -/
@@ -2473,7 +2488,8 @@ theorem compile_storage {P : Prog C} {Γ' : TyCtx} (hP : wtProg (fun _ => none) 
       run (compileProg P) (Machine.init bal self) = .ok m' 0 ∧
       ∀ r segs s n, PathSlot C false r segs (.prim .uint) s →
         σ'.findLive r segs = .ok (.prim (.int n)) → m'.store s = n.toNat) ∨
-    (Prog.run (State.fresh C balance self) P = .error .revert ∧
+    ((Prog.run (State.fresh C balance self) P = .error .revert ∨
+        Prog.run (State.fresh C balance self) P = .error .panic) ∧
       run (compileProg P) (Machine.init bal self) = .revert) ∨
     (paysP P = true ∧ run (compileProg P) (Machine.init bal self) = .revert ∧
       ∃ σ', Prog.run (State.fresh C balance self) P = .ok σ') := by

@@ -50,6 +50,7 @@ lemma (`TermTaclet.sound`).
 | `Semantics/Properties.lean` | Read-after-write, frame and result-monad lemmas about the state operations, shared by every later layer. |
 | `Semantics/Agree.lean` | `EnvAgreeExcept`: states agreeing off scratch names, and a frame lemma per evaluator. |
 | `Semantics/DecEq.lean` | `DecidableEq SVal`. |
+| `Semantics/NoPanic.lean` | Only an `assert` panics: `NoPanic` of every operation, `Stmt.mayPanic`, `Prog.run_noPanic`; the `no_panic` tactic. |
 | `Semantics/Callback.lean` | The callback reading of `transfer` and `try`: `ExecS`/`ExecP`, `holdsC`, `TransferSem`. |
 | `TermSimp.lean` | The simp sets `tm_eval` and `tm_denote` of the generic term functions. |
 | `Update.lean` | Terms as one signature (`Srt`, `Op0`…`Op3`, `Tm`; `Term`, `STerm`, … are its sorts, the old constructors abbreviations), their reading (`Tm.eval`, `Tm.denote`) and frame lemmas, parallel updates, formulas with both modalities (`Fml`, `holds`, `Valid`), lowering of program expressions to terms. |
@@ -68,6 +69,7 @@ lemma (`TermTaclet.sound`).
 | `Calculus/Uniqueness.lean` | One rule per statement: every derivation's premise is `Stmt.step`'s. |
 | `Calculus/Progress.lean` | A formula with a modality always steps. |
 | `Calculus/Termination.lean` | Weights, `Fml.measure`, `symex_normalizes`. |
+| `Calculus/NoPanic.lean` | A term never panics: `Tm.eval_noPanic`, `Upd.apply_ne_panic`. |
 | `Calculus/SoundKit.lean` | `SameOk`, `Premise.Correct` and the tactics the soundness proofs use. |
 | `Calculus/SoundUpdate.lean` | Every taclet with an update premise has the statement's effect. |
 | `Calculus/SoundUnfold.lean` | Every unfolding taclet runs like its statement off the fresh names. |
@@ -217,7 +219,7 @@ or `sol_decide`, derivations `⊢ φ` built one `apply` per taclet, and runs:
 | `Examples/Tactics/Tour.lean` | The running example end to end. |
 | `Examples/Tactics/StorageSteps.lean` | One storage statement form at a time, as `apply` walks. |
 | `Examples/Tactics/StorageSuite.lean`, `StorageDelete.lean`, `LedgerDelete.lean` | solkey's taclet suite on storage; `delete`; a struct holding a mapping deleted. |
-| `Examples/Tactics/Branch.lean`, `Revert.lean` | Two-goal splits; box and diamond on `revert`, `require`, `assert`. |
+| `Examples/Tactics/Branch.lean`, `Revert.lean` | Two-goal splits; box and diamond on `revert`, `require`, `assert` (a check: `[ assert(false); ] true` is not valid). |
 | `Examples/Tactics/Payment.lean`, `Net.lean` | `transfer` as a `⊢` walk with checked sequents; its frame, the ledger's postconditions and its runs. |
 | `Examples/Tactics/Values.lean`, `Operators.lean`, `Checked.lean` | Operators, checked arithmetic, `−−`, bitwise, shifts, `unchecked`, `uint8` … `int248`, casts. |
 | `Examples/Tactics/Calls.lean`, `CallOperands.lean`, `Callback.lean`, `TryCatch.lean` | Internal calls, call-valued operands, callbacks (`ProvesC`), `try`/`catch`. |

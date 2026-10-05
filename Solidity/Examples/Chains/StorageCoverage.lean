@@ -18,8 +18,9 @@ A free parameter of the statement (`ageVal`, `i`, `id`, `tokRef`, …) and the s
 value in an update on the first line, so a value read ends at a literal.  Some reads have none: a struct
 (`find(storage, bob)`), and a length (`tokens.length`), which has no spelling as a starting state.  A read at
 an index checks its bound in the state it runs in (`values[2]@S`), which a law reads past only under the box,
-so those rows are box chains; so are `require` and `assert`, whose failing branch reverts: under `m` such a
-chain stops at the `revert();`.  A branch folds once its condition is a literal: `applyOnRigid` where the
+so those rows are box chains; so are `require`'s, whose failing branch reverts: under `m` such a chain
+stops at the `revert();`.  An `assert` reverts nowhere — its condition is owed under either modality
+(`assertSimple`) — so its rows run under `m`.  A branch folds once its condition is a literal: `applyOnRigid` where the
 update binds locals only, `applyOnPV` where it also writes the storage, then `concrete`.
 
 Stand-ins: `alice.account.tokens` is `bucket.tokens`, and `alice.account.tokens[i] = tokVal;` a write of a
@@ -785,51 +786,39 @@ theorem requireConditionCapture :
 example : dl!{ ⟨ assert(checkInvariant()); ⟩ true }
     = dl!{ ⟨ bool se1; se1 = checkInvariant(); assert(se1); ⟩ true } := rfl
 
-/-- `assert(checkInvariant());`: the call inlined, its `true` asserted. -/
+/-- `assert(checkInvariant());`: the call inlined, its `true` asserted.  An
+`assert` checks rather than branches (`assertSimple`): no revert, so the chain
+runs under any `m`. -/
 theorem assertConditionCapture_call :
-    dl![.box]{ ⟨[ assert(checkInvariant()); ]⟩ φ }
-    ~[valueDeclSkip]~> dl![.box]{ { se1 := false } ⟨[ se1 = checkInvariant(); assert(se1); ]⟩ φ }
-    ~[functionBodyExpand]~> dl![.box]{ { se1 := false } ⟨[ bool se2; se2 = true; se1 = se2; assert(se1); ]⟩ φ }
-    ~*> dl![.box]{ { se1 := false } { se2 := false } { se2 := true } { se1 := se2 } ⟨[ assert(se1); ]⟩ φ }
-    ~*> dl![.box]{ { se1 := false } { se2 := false } { se2 := true } { se1 := se2 }
-        ((se1 ≐ true → φ) ∧ (se1 ≐ false → ⟨[ revert(); ]⟩ φ) ∧ (⟨[ revert(); ]⟩ false ∨ se1 ≐ true ∨ se1 ≐ false)) }
-    ~[revertBox]~> dl![.box]{ { se1 := false } { se2 := false } { se2 := true } { se1 := se2 }
-        ((se1 ≐ true → φ) ∧ (se1 ≐ false → true) ∧ (⟨[ revert(); ]⟩ false ∨ se1 ≐ true ∨ se1 ≐ false)) }
-    ~[sequentialToParallel]~> dl![.box]{ { se1 := false ‖ se2 := false ‖ se2 := true ‖ se1 := true }
-        ((se1 ≐ true → φ) ∧ (se1 ≐ false → true) ∧ (⟨[ revert(); ]⟩ false ∨ se1 ≐ true ∨ se1 ≐ false)) }
-    ~[applyOnRigid]~> dl![.box]{
-        (true ≐ true → { se1 := false ‖ se2 := false ‖ se2 := true ‖ se1 := true } φ) ∧
-          (true ≐ false → true) ∧
-            ({ se1 := false ‖ se2 := false ‖ se2 := true ‖ se1 := true } ⟨[ revert(); ]⟩ false ∨ true ≐ true ∨
-              true ≐ false) }
-    ~[concrete]~> dl![.box]{ { se1 := false ‖ se2 := false ‖ se2 := true ‖ se1 := true } φ } := by
+    dl![m]{ ⟨[ assert(checkInvariant()); ]⟩ φ }
+    ~[valueDeclSkip]~> dl![m]{ { se1 := false } ⟨[ se1 = checkInvariant(); assert(se1); ]⟩ φ }
+    ~[functionBodyExpand]~> dl![m]{ { se1 := false } ⟨[ bool se2; se2 = true; se1 = se2; assert(se1); ]⟩ φ }
+    ~*> dl![m]{ { se1 := false } { se2 := false } { se2 := true } { se1 := se2 } ⟨[ assert(se1); ]⟩ φ }
+    ~*> dl![m]{ { se1 := false } { se2 := false } { se2 := true } { se1 := se2 }
+        ((se1 ≐ true → φ) ∧ se1 ≐ true) }
+    ~[sequentialToParallel]~> dl![m]{ { se1 := false ‖ se2 := false ‖ se2 := true ‖ se1 := true }
+        ((se1 ≐ true → φ) ∧ se1 ≐ true) }
+    ~[applyOnRigid]~> dl![m]{
+        (true ≐ true → { se1 := false ‖ se2 := false ‖ se2 := true ‖ se1 := true } φ) ∧ true ≐ true }
+    ~[concrete]~> dl![m]{ { se1 := false ‖ se2 := false ‖ se2 := true ‖ se1 := true } φ } := by
   sol_chain
 #last_line assertConditionCapture_call
 
-/-- `assert(flag);` from a storage where `flag` is `true`, as `requireConditionCapture`. -/
+/-- `assert(flag);` from a storage where `flag` is `true`: the condition owed and assumed, then folded. -/
 theorem assertConditionCapture :
-    dl![.box]{ { storage := store(storage, flag, true) } ⟨[ assert(flag); ]⟩ φ }
+    dl![m]{ { storage := store(storage, flag, true) } ⟨[ assert(flag); ]⟩ φ }
     ~[assertConditionCapture]~>
-      dl![.box]{ { storage := store(storage, flag, true) } ⟨[ bool se1 = flag; assert(se1); ]⟩ φ }
-    ~*> dl![.box]{ { storage := store(storage, flag, true) } { se1 := select(storage, flag) } ⟨[ assert(se1); ]⟩ φ
+      dl![m]{ { storage := store(storage, flag, true) } ⟨[ bool se1 = flag; assert(se1); ]⟩ φ }
+    ~*> dl![m]{ { storage := store(storage, flag, true) } { se1 := select(storage, flag) } ⟨[ assert(se1); ]⟩ φ
         where bool se1 }
-    ~*> dl![.box]{ { storage := store(storage, flag, true) } { se1 := select(storage, flag) }
-        ((se1 ≐ true → φ) ∧ (se1 ≐ false → ⟨[ revert(); ]⟩ φ) ∧ (⟨[ revert(); ]⟩ false ∨ se1 ≐ true ∨ se1 ≐ false)) }
-    ~[revertBox]~> dl![.box]{ { storage := store(storage, flag, true) } { se1 := select(storage, flag) }
-        ((se1 ≐ true → φ) ∧ (se1 ≐ false → true) ∧ (⟨[ revert(); ]⟩ false ∨ se1 ≐ true ∨ se1 ≐ false)) }
-    ~[sequentialToParallel]~> dl![.box]{
+    ~*> dl![m]{ { storage := store(storage, flag, true) } { se1 := select(storage, flag) }
+        ((se1 ≐ true → φ) ∧ se1 ≐ true) }
+    ~[sequentialToParallel]~> dl![m]{
         { storage := store(storage, flag, true) ‖ se1 := select(store(storage, flag, true), flag) }
-          ((se1 ≐ true → φ) ∧ (se1 ≐ false → true) ∧ (⟨[ revert(); ]⟩ false ∨ se1 ≐ true ∨ se1 ≐ false)) }
-    ~[concrete]~> dl![.box]{
-        { storage := store(storage, flag, true) ‖ se1 := select(store(storage, flag, true), flag) }
-          ((se1 ≐ true → φ) ∧ ([ revert(); ] false ∨ se1 ≐ true ∨ se1 ≐ false)) }
-    ~[findOnSave]~> dl![.box]{
-        { storage := store(storage, flag, true) ‖ se1 := true }
-          ((se1 ≐ true → φ) ∧ ([ revert(); ] false ∨ se1 ≐ true ∨ se1 ≐ false)) }
-    ~[applyOnPV]~> dl![.box]{
-        { storage := store(storage, flag, true) ‖ se1 := true }
-          ((true ≐ true → φ) ∧ ([ revert(); ] false ∨ true ≐ true ∨ true ≐ false)) }
-    ~[concrete]~> dl![.box]{ { storage := store(storage, flag, true) ‖ se1 := true } φ } := by
+          ((se1 ≐ true → φ) ∧ se1 ≐ true) }
+    ~[findOnSave]~> dl![m]{ { storage := store(storage, flag, true) ‖ se1 := true } ((se1 ≐ true → φ) ∧ se1 ≐ true) }
+    ~[applyOnPV]~> dl![m]{ { storage := store(storage, flag, true) ‖ se1 := true } ((true ≐ true → φ) ∧ true ≐ true) }
+    ~[concrete]~> dl![m]{ { storage := store(storage, flag, true) ‖ se1 := true } φ } := by
   sol_chain
 #last_line assertConditionCapture
 
@@ -848,17 +837,12 @@ theorem requireSimple :
   sol_chain
 #last_line requireSimple
 
-/-- `assert(ok);` with `ok` `true`, as `requireSimple`. -/
+/-- `assert(ok);` with `ok` `true`: the two goals, the condition assumed and owed, folded. -/
 theorem assertSimple :
-    dl![.box]{ { ok := true } ⟨[ assert(ok); ]⟩ φ }
-    ~*> dl![.box]{ { ok := true }
-        ((ok ≐ true → φ) ∧ (ok ≐ false → ⟨[ revert(); ]⟩ φ) ∧ (⟨[ revert(); ]⟩ false ∨ ok ≐ true ∨ ok ≐ false)) }
-    ~[revertBox]~> dl![.box]{ { ok := true }
-        ((ok ≐ true → φ) ∧ (ok ≐ false → true) ∧ (⟨[ revert(); ]⟩ false ∨ ok ≐ true ∨ ok ≐ false)) }
-    ~[applyOnRigid]~> dl![.box]{
-        (true ≐ true → { ok := true } φ) ∧
-          (true ≐ false → true) ∧ ({ ok := true } ⟨[ revert(); ]⟩ false ∨ true ≐ true ∨ true ≐ false) }
-    ~[concrete]~> dl![.box]{ { ok := true } φ } := by
+    dl![m]{ { ok := true } ⟨[ assert(ok); ]⟩ φ }
+    ~*> dl![m]{ { ok := true } ((ok ≐ true → φ) ∧ ok ≐ true) }
+    ~[applyOnRigid]~> dl![m]{ (true ≐ true → { ok := true } φ) ∧ true ≐ true }
+    ~[concrete]~> dl![m]{ { ok := true } φ } := by
   sol_chain
 #last_line assertSimple
 
