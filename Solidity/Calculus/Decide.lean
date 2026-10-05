@@ -2,6 +2,7 @@ import Solidity.Calculus.Close
 import Solidity.Calculus.DecideMem
 import Solidity.Calculus.MemRead
 import Solidity.Theory.Bridge.Denote
+import Solidity.Typing.CanonTest
 
 /-!
 # Deciding the storage goals: `sol_decide`
@@ -3627,6 +3628,54 @@ def LPath.addFields : LPath → List SSeg → LPath
   | q, .field f :: r => LPath.addFields (q.field f) r
   | q, _ => q
 
+/-! ### The run guard of a memory (Lean only)
+
+KeY's memory operations are total; the interpreter's halt: an allocation of
+a type with a mapping, a copy of a word or of a subtree with a mapping, a
+write outside a struct or past the length, a name that denotes nothing.  The
+guard `LMem.okU` returns exactly where the run does, from tests the closer
+reads off the layout and the memory; it says nothing (`none`) where an
+allocation's ordinal or type is not one it can check statically. -/
+
+/-- The ordinal the next allocation of the memory takes (`freshIdp`). -/
+def LMem.nAlloc : LMem → Nat
+  | .init => 0
+  | .addM m _ _ | .newArr m _ _ _ | .copySt m _ _ _ => m.nAlloc + 1
+  | .write m _ _ _ => m.nAlloc
+
+/-- A fresh `R` copies into memory: no mapping, and a well-formed default
+(both decided by the kernel: `Ty.mapFree`, `Ty.okDeep`). -/
+def allocOk (R : RefTy) : Bool := (Ty.ref R).mapFree && (Ty.ref R).okDeep
+
+/-- The guard of a write's slot from the memory below it: a member in a
+struct (`S`), an element at the index `t` below the length (`L`). -/
+def wrGuard (S L : Unit → Option LTerm) (t : LTerm) : LSel → Option LTerm
+  | .fld _ => S ()
+  | .idx _ => (L ()).map (ltR t)
+  | .size => none
+
+/-- The name a memory value refers to. -/
+def LMV.refId? : LMV → Option LId
+  | .word _ => none
+  | .ref j => some j
+
+/-- The guard of a write's value: the word returns (`W`), the name denotes (`N`). -/
+def valGuard (W : LTerm) (N : Unit → Option LTerm) : LMV → Option LTerm
+  | .word _ => some W
+  | .ref _ => N ()
+
+/-- The memory below runs (`G`), and so do the slot's and the value's guards. -/
+def okWrite (G : Option LTerm) (W V : Unit → Option LTerm) : Option LTerm :=
+  G.bind fun g => (W ()).bind fun w => (V ()).map fun x =>
+    .seq g (.seq w (.seq x (.lit (.bool true))))
+
+/-- A view's guard: the memory runs and the name denotes; `d` where either
+is not known. -/
+def okView (G N : Option LTerm) (d : LTerm) : LTerm :=
+  match G, N with
+  | some g, some n => .seq g (.seq n (.lit (.bool true)))
+  | _, _ => d
+
 mutual
 
 /-- Every read of a write eliminated. -/
@@ -3675,7 +3724,8 @@ def LStor.okE : LStor → LTerm
     if q.noLen then .seq src.okE (.seq (.pok sq.elim) (.seq (src.hasU sq.elim)
       (.seq s.okE (.seq (.pok q.elim) (s.hasU q.elim)))))
     else .sok (.copy s q src sq)
-  | .view m i => .sok (.view m i)
+  | .view m i => if m.refDesc then okView m.okU (m.objU false i) (.sok (.view m i))
+    else .sok (.view m i)
 termination_by structural s => s
 
 /-- The word at `Q` in `s`, where `s` and `Q` return. -/
@@ -3853,6 +3903,27 @@ def LMem.objU (str : Bool) : LMem → LId → Option LTerm
   | .write m _ _ _, i => m.objU str i
 termination_by structural m => m
 
+/-- **The run guard of a memory** (Lean only): it returns exactly where the
+run does.  An allocation at its ordinal, of a type `allocOk` admits (a
+`new T[](n)` with an integer `n`); a copy from storage of a subtree that
+copies and is no word; a write whose slot and value pass `writeG`'s and
+`nameG`'s tests.  The guards' reads are the elimination's. -/
+def LMem.okU : LMem → Option LTerm
+  | .init => some (.lit (.bool true))
+  | .addM m k R => if k = m.nAlloc ∧ allocOk R = true then m.okU else none
+  | .newArr m k R n =>
+    if k = m.nAlloc ∧ allocOk R = true then m.okU.map fun G => .seq G (isIntL n.elim) else none
+  | .copySt m k s q =>
+    if k = m.nAlloc then
+      m.okU.map fun G => .seq G (.seq (.seq s.okE (.seq (.pok q.elim) (s.cpokU q.elim)))
+        (.ite (isT (.seq s.okE (.seq (.pok q.elim) (s.readU q.elim)))) .err (.lit (.bool true))))
+    else none
+  | .write m j b v =>
+    okWrite m.okU (fun _ => wrGuard (fun _ => m.objU true j) (fun _ => m.readU j .size) b.idxU b)
+      fun _ => valGuard (.seq v.wordU (.lit (.bool true)))
+        (fun _ => v.refId?.bind fun j' => m.objU false j') v
+termination_by structural m => m
+
 end
 
 /-! ### The elimination as compiled code
@@ -3946,7 +4017,8 @@ def LStor.okEF : LStor → LTerm
     if q.noLen then .seq src.okEF (.seq (.pok sq.elimF) (.seq (src.hasUF sq.elimF)
       (.seq s.okEF (.seq (.pok q.elimF) (s.hasUF q.elimF)))))
     else .sok (.copy s q src sq)
-  | .view m i => .sok (.view m i)
+  | .view m i => if m.refDesc then okView m.okUF (m.objUF false i) (.sok (.view m i))
+    else .sok (.view m i)
 termination_by structural s => s
 
 /-- `LStor.readU` as compiled code runs it: an operation on an array reads
@@ -4126,6 +4198,26 @@ def LMem.objUF (str : Bool) : LMem → LId → Option LTerm
     else m.objUF str i
   | .write m _ _ _, i => m.objUF str i
 termination_by structural m => m
+
+/-- `LMem.okU` as compiled code runs it. -/
+def LMem.okUF : LMem → Option LTerm
+  | .init => some (.lit (.bool true))
+  | .addM m k R => if k = m.nAlloc ∧ allocOk R = true then m.okUF else none
+  | .newArr m k R n =>
+    if k = m.nAlloc ∧ allocOk R = true then m.okUF.map fun G => .seq G (isIntL n.elimF) else none
+  | .copySt m k s q =>
+    if k = m.nAlloc then
+      m.okUF.map fun G => .seq G (.seq (.seq s.okEF (.seq (.pok q.elimF) (s.cpokUF q.elimF)))
+        (.ite (isT (.seq s.okEF (.seq (.pok q.elimF) (s.readUF q.elimF)))) .err
+          (.lit (.bool true))))
+    else none
+  | .write m j b v =>
+    okWrite m.okUF
+      (fun _ => wrGuard (fun _ => m.objUF true j) (fun _ => m.readUF j .size) b.idxUF b)
+      fun _ => valGuard (.seq v.wordUF (.lit (.bool true)))
+        (fun _ => v.refId?.bind fun j' => m.objUF false j') v
+termination_by structural m => m
+
 end
 
 /-- `arrRead` ignores the old length and value where it does not read them. -/
@@ -4200,7 +4292,7 @@ theorem LStor.okEF_eq : (s : LStor) → s.okEF = s.okE
   | .copy s q src sq => by
     simp only [LStor.okEF, LStor.okE, LStor.okEF_eq s, LStor.okEF_eq src, LPath.elimF_eq q,
       LPath.elimF_eq sq, LStor.hasUF_eq s, LStor.hasUF_eq src]
-  | .view _ _ => rfl
+  | .view m _ => by simp only [LStor.okEF, LStor.okE, LMem.okUF_eq m, LMem.objUF_eq _ m]
 termination_by structural s => s
 
 theorem LStor.readUF_eq : (s : LStor) → ∀ Q, s.readUF Q = s.readU Q
@@ -4315,6 +4407,18 @@ theorem LMem.objUF_eq (str : Bool) : (m : LMem) → ∀ i, m.objUF str i = m.obj
   | .write m _ _ _, i => by simp only [LMem.objUF, LMem.objU, LMem.objUF_eq str m]
 termination_by structural m => m
 
+theorem LMem.okUF_eq : (m : LMem) → m.okUF = m.okU
+  | .init => rfl
+  | .addM m _ _ => by simp only [LMem.okUF, LMem.okU, LMem.okUF_eq m]
+  | .newArr m _ _ n => by simp only [LMem.okUF, LMem.okU, LMem.okUF_eq m, LTerm.elimF_eq n]
+  | .copySt m _ s q => by
+    simp only [LMem.okUF, LMem.okU, LMem.okUF_eq m, LPath.elimF_eq q, LStor.okEF_eq s,
+      LStor.cpokUF_eq s, LStor.readUF_eq s]
+  | .write m _ b v => by
+    simp only [LMem.okUF, LMem.okU, LMem.okUF_eq m, LMem.objUF_eq _ m, LMem.readUF_eq m,
+      LSel.idxUF_eq b, LMV.wordUF_eq v]
+termination_by structural m => m
+
 end
 
 @[csimp] theorem LSel.idxU_csimp : @LSel.idxU = @LSel.idxUF :=
@@ -4325,6 +4429,9 @@ end
 
 @[csimp] theorem LMem.readU_csimp : @LMem.readU = @LMem.readUF :=
   funext fun m => funext fun i => funext fun a => (LMem.readUF_eq m i a).symm
+
+@[csimp] theorem LMem.okU_csimp : @LMem.okU = @LMem.okUF :=
+  funext fun m => (LMem.okUF_eq m).symm
 
 @[csimp] theorem LMem.objU_csimp : @LMem.objU = @LMem.objUF :=
   funext fun str => funext fun m => funext fun i => (LMem.objUF_eq str m i).symm
@@ -6231,6 +6338,24 @@ a read below a view is a read of memory along the same path
 section CopyOk
 open MemNames
 
+/-- **`mapFree` decides `tyHasMapping`** on the structs `mapFreeStructs`
+lists, checked once each: the kernel evaluates the first, not the second
+(well-founded through `structDef`). -/
+theorem _root_.Solidity.Ty.mapFree_sound : ∀ {T : Ty}, T.mapFree = true → tyHasMapping T = false
+  | .prim _, _ => by rw [tyHasMapping]
+  | .ref (.mapping ..), h => by simp only [Ty.mapFree, Bool.false_eq_true] at h
+  | .ref (.struct s), h => by
+    simp only [Ty.mapFree, mapFreeStructs, List.mem_cons, List.not_mem_nil, or_false,
+      decide_eq_true_eq] at h
+    rcases h with rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl |
+        rfl | rfl | rfl | rfl
+    all_goals simp only [tyHasMapping, structDef, String.reduceEq, imp_self, fieldsHaveMapping,
+      Bool.or_self]
+  | .ref (.array e), h => by
+    rw [tyHasMapping]; exact Ty.mapFree_sound (by simpa only [Ty.mapFree] using h)
+  | .ref (.fixed e _), h => by
+    rw [tyHasMapping]; exact Ty.mapFree_sound (by simpa only [Ty.mapFree] using h)
+
 /-- The value copies into memory: `copyStToM` returns, in one state and so
 in every one (`copyStToM_ok_any`). -/
 def Cps (v : SVal) : Prop := ∃ σ r, copyStToM σ v = .ok r
@@ -6636,6 +6761,312 @@ theorem view_mapU_sim {σ : State} {m : LMem} {i : LId} (sh : KShape) {Q : LPath
             reduceCtorEq] at h
       | «at» k => simp only [SVal.findLive, bind, Except.bind, reduceCtorEq] at h
 
+/-! ### The run guard of a memory: soundness -/
+
+section RunGuard
+open MemNames
+
+theorem seq_rets (σ : State) (d a : LTerm) :
+    Rets ((LTerm.seq d a).eval σ) ↔ Rets (d.eval σ) ∧ Rets (a.eval σ) := by
+  constructor
+  · rintro ⟨v, h⟩
+    obtain ⟨x, hx, ha⟩ := Res.bind_eq_ok.1 h
+    exact ⟨⟨x, hx⟩, ⟨v, ha⟩⟩
+  · rintro ⟨⟨x, hx⟩, ⟨v, ha⟩⟩
+    exact ⟨v, by simp only [LTerm.eval, hx, Res.ok_bind, ha]⟩
+
+theorem lit_rets (σ : State) (v : Value) : Rets ((LTerm.lit v).eval σ) := ⟨v, rfl⟩
+
+/-- A run's births are as many as its allocations. -/
+theorem LMem.run_nAlloc (σ : State) : (m : LMem) → ∀ {μ : State} {B : Births},
+    m.run σ = .ok (μ, B) → B.length = m.nAlloc
+  | .init, μ, B, h => by
+    simp only [LMem.run, Except.ok.injEq, Prod.mk.injEq] at h
+    obtain ⟨-, rfl⟩ := h
+    rfl
+  | .addM m k R, μ, B, h => by
+    obtain ⟨μ', B', id, hr, -, -, rfl⟩ := LMem.run_addM h
+    simp only [List.length_append, List.length_singleton, LMem.nAlloc, LMem.run_nAlloc σ m hr]
+  | .newArr m k R n, μ, B, h => by
+    obtain ⟨μ', B', id, c, hr, -, -, -, rfl⟩ := LMem.run_newArr h
+    simp only [List.length_append, List.length_singleton, LMem.nAlloc, LMem.run_nAlloc σ m hr]
+  | .copySt m k s q, μ, B, h => by
+    obtain ⟨μ', B', id, hr, -, -, rfl⟩ := LMem.run_copySt h
+    simp only [List.length_append, List.length_singleton, LMem.nAlloc, LMem.run_nAlloc σ m hr]
+  | .write m j b v, μ, B, h => by
+    obtain ⟨μ', n', ad, mv, hr, -⟩ := LMem.run_write h
+    exact LMem.run_nAlloc σ m hr
+
+theorem copy_ref {σ τ : State} {v : SVal} {mv : MVal} (h : copyStToM σ v = .ok (τ, mv))
+    (hv : ∀ p, v ≠ .prim p) : ∃ id, mv = .ref id := by
+  cases v with
+  | prim p => exact absurd rfl (hv p)
+  | struct fs =>
+    obtain ⟨τ₁, _, _, _, rfl⟩ := copyStToM_struct_inv h
+    exact ⟨_, rfl⟩
+  | array es sh fx =>
+    obtain ⟨τ₁, _, _, _, rfl⟩ := copyStToM_array_inv h
+    exact ⟨_, rfl⟩
+  | map e d => exact (copyStToM_map_inv h).elim
+
+theorem defaultForTy_ref_ne (R : RefTy) (p : PrimVal) : defaultForTy (.ref R) ≠ .prim p := by
+  cases R <;> simp only [defaultForTy, ne_eq, reduceCtorEq, not_false_eq_true]
+
+theorem Cps.default {T : Ty} (hm : T.mapFree = true) (hd : T.okDeep = true) :
+    Cps (defaultForTy T) := by
+  obtain ⟨τ, mv, h⟩ := copyStToM_ok_noMap { storage := [] } (defaultForTy T) T
+    (defaultForTy_canonB hd) (Ty.mapFree_sound hm)
+  exact ⟨_, _, h⟩
+
+theorem allocOk_cps {R : RefTy} (h : allocOk R = true) : Cps (defaultForTy (.ref R)) := by
+  simp only [allocOk, Bool.and_eq_true] at h
+  exact Cps.default h.1 h.2
+
+theorem allocOk_newArr {R : RefTy} (h : allocOk R = true) (c : Int) :
+    Cps (newArrVal R c) ∧ ∀ p, newArrVal R c ≠ .prim p := by
+  cases R with
+  | array E =>
+    simp only [allocOk, Bool.and_eq_true, Ty.mapFree, Ty.okDeep] at h
+    refine ⟨(Cps.array_iff _ _ _).2 fun x hx => ?_, fun p => by
+      simp only [newArrVal, ne_eq, reduceCtorEq, not_false_eq_true]⟩
+    rw [List.eq_of_mem_replicate hx]
+    exact Cps.default h.1 h.2
+  | struct _ | fixed _ _ | mapping _ _ => exact ⟨allocOk_cps h, defaultForTy_ref_ne _⟩
+
+theorem init_okU_rets {σ : State} {g : LTerm} (h : LMem.init.okU = some g) :
+    Rets (g.eval σ) ↔ ∃ r, LMem.init.run σ = .ok r := by
+  simp only [LMem.okU, Option.some.injEq] at h
+  subst h
+  exact iff_of_true (lit_rets σ _) ⟨_, rfl⟩
+
+theorem addM_okU_rets {σ : State} {m : LMem} {k : Nat} {R : RefTy} {g : LTerm}
+    (ih : ∀ {G : LTerm}, m.okU = some G → (Rets (G.eval σ) ↔ ∃ r, m.run σ = .ok r))
+    (h : (LMem.addM m k R).okU = some g) :
+    Rets (g.eval σ) ↔ ∃ r, (LMem.addM m k R).run σ = .ok r := by
+  simp only [LMem.okU] at h
+  split at h
+  · rename_i hc
+    obtain ⟨hk, hR⟩ := hc
+    rw [ih h]
+    constructor
+    · rintro ⟨⟨μ', B'⟩, hr⟩
+      have hl := LMem.run_nAlloc σ m hr
+      obtain ⟨⟨τ, mv⟩, hcp⟩ := (allocOk_cps hR).at μ'
+      obtain ⟨id, rfl⟩ := copy_ref hcp (defaultForTy_ref_ne R)
+      have hkl : k = B'.length := by omega
+      exact ⟨_, by simp only [LMem.run, hr, Res.ok_bind, hkl, if_true, allocDefault,
+        defaultForRef, hcp] <;> rfl⟩
+    · rintro ⟨r, hr⟩
+      obtain ⟨x, hx, -⟩ := Res.bind_eq_ok.1 hr
+      exact ⟨x, hx⟩
+  · cases h
+
+theorem newArr_okU_rets {σ : State} {m : LMem} {k : Nat} {R : RefTy} {n : LTerm} {g : LTerm}
+    (ih : ∀ {G : LTerm}, m.okU = some G → (Rets (G.eval σ) ↔ ∃ r, m.run σ = .ok r))
+    (hn : Sim (n.elim.eval σ) (n.eval σ))
+    (h : (LMem.newArr m k R n).okU = some g) :
+    Rets (g.eval σ) ↔ ∃ r, (LMem.newArr m k R n).run σ = .ok r := by
+  simp only [LMem.okU] at h
+  split at h
+  · rename_i hc
+    obtain ⟨hk, hR⟩ := hc
+    obtain ⟨G, hG, rfl⟩ := Option.map_eq_some_iff.1 h
+    have hi : Rets ((isIntL n.elim).eval σ) ↔ ∃ i, n.eval σ = .ok (.int i) :=
+      (isIntL_ret σ _).trans ⟨fun ⟨i, h⟩ => ⟨i, (hn _).1 h⟩, fun ⟨i, h⟩ => ⟨i, (hn _).2 h⟩⟩
+    rw [seq_rets, ih hG, hi]
+    constructor
+    · rintro ⟨⟨⟨μ', B'⟩, hr⟩, c, hc⟩
+      have hl := LMem.run_nAlloc σ m hr
+      obtain ⟨hcp, hnp⟩ := allocOk_newArr hR c
+      obtain ⟨⟨τ, mv⟩, hcopy⟩ := hcp.at μ'
+      obtain ⟨id, rfl⟩ := copy_ref hcopy hnp
+      have hkl : k = B'.length := by omega
+      exact ⟨_, by simp only [LMem.run, hc, hr, Res.ok_bind, Value.asInt, hkl, if_true, hcopy,
+        MVal.asRef] <;> rfl⟩
+    · rintro ⟨r, hr⟩
+      obtain ⟨μ', B', id, c, hr', -, hn', -, -⟩ := LMem.run_newArr (μ := r.1) (B := r.2) hr
+      exact ⟨⟨_, hr'⟩, c, hn'⟩
+  · cases h
+
+theorem copySt_okU_rets {σ : State} {m : LMem} {k : Nat} {s : LStor} {q : LPath} {g : LTerm}
+    (ih : ∀ {G : LTerm}, m.okU = some G → (Rets (G.eval σ) ↔ ∃ r, m.run σ = .ok r))
+    (hC : Sim ((LTerm.seq s.okE (.seq (.pok q.elim) (s.cpokU q.elim))).eval σ)
+      ((LTerm.cpok s q).eval σ))
+    (hF : Sim ((LTerm.seq s.okE (.seq (.pok q.elim) (s.readU q.elim))).eval σ)
+      ((LTerm.find s q).eval σ))
+    (h : (LMem.copySt m k s q).okU = some g) :
+    Rets (g.eval σ) ↔ ∃ r, (LMem.copySt m k s q).run σ = .ok r := by
+  simp only [LMem.okU] at h
+  split at h
+  · rename_i hk
+    obtain ⟨G, hG, rfl⟩ := Option.map_eq_some_iff.1 h
+    rw [seq_rets, seq_rets, ih hG, rets_of_sim hC, ite_isT_rets, rets_of_sim hF]
+    simp only [lit_rets, and_true]
+    constructor
+    · rintro ⟨⟨⟨μ', B'⟩, hr⟩, ⟨a, hc⟩, hf⟩
+      rw [cpok_eval] at hc
+      obtain ⟨v, hv, hc⟩ := Res.bind_eq_ok.1 hc
+      obtain ⟨qs, hq, hc⟩ := Res.bind_eq_ok.1 hc
+      obtain ⟨-, sv, hsv, hcps⟩ := cpR_ok.1 hc
+      have hnp : ∀ p, sv ≠ .prim p := by
+        rintro p rfl
+        obtain ⟨a, ha⟩ : ∃ a, (SVal.prim p).asValue = .ok a := by cases p <;> exact ⟨_, rfl⟩
+        exact hf ⟨a, by simp only [LTerm.eval, hv, hq, hsv, Res.ok_bind, ha]⟩
+      obtain ⟨⟨τ, mv⟩, hcopy⟩ := hcps.at μ'
+      obtain ⟨id, rfl⟩ := copy_ref hcopy hnp
+      have hkl : k = B'.length := by have := LMem.run_nAlloc σ m hr; omega
+      exact ⟨_, by simp only [LMem.run, hv, hq, hsv, hr, Res.ok_bind, hkl, if_true, hcopy,
+        MVal.asRef] <;> rfl⟩
+    · rintro ⟨r, hrun⟩
+      obtain ⟨μ', B', id, hr', -, ⟨c, rfl⟩, -⟩ := LMem.run_copySt (μ := r.1) (B := r.2) hrun
+      obtain ⟨v, qs, w, μ', hv, hq, hw, hc⟩ := c
+      refine ⟨⟨_, hr'⟩, ⟨.bool true, ?_⟩, ?_⟩
+      · rw [cpok_eval, hv, Res.ok_bind, hq, Res.ok_bind]
+        exact cpR_ok.2 ⟨rfl, w, hw, μ', _, hc⟩
+      · rintro ⟨a, ha⟩
+        simp only [LTerm.eval, hv, hq, hw, Res.ok_bind] at ha
+        cases w with
+        | prim p => cases p <;> simp only [copyStToM, Except.ok.injEq, Prod.mk.injEq,
+            reduceCtorEq, and_false] at hc
+        | struct _ | array _ _ _ | map _ _ => simp only [SVal.asValue, reduceCtorEq] at ha
+  · cases h
+
+theorem wrGuard_sim {σ : State} {m : LMem} {j : LId} {b : LSel} {W : LTerm}
+    (ihO : ∀ (str : Bool) (i : LId) {g : LTerm}, m.objU str i = some g →
+      ∃ g', (if str then m.structG i else m.nameG i) = some g' ∧
+        (Rets (g.eval σ) ↔ Rets (g'.eval σ)))
+    (ihR : ∀ (i : LId) (a : LSel) {u : LTerm}, m.readU i a = some u →
+      ∃ t, m.readT i a = some t ∧ Sim (u.eval σ) (t.eval σ))
+    (hb : ∀ w, b = .idx w → Sim (b.idxU.eval σ) (w.eval σ))
+    (h : wrGuard (fun _ => m.objU true j) (fun _ => m.readU j .size) b.idxU b = some W) :
+    ∃ g', m.writeG j b = some g' ∧ (Rets (W.eval σ) ↔ Rets (g'.eval σ)) := by
+  cases b with
+  | fld f =>
+    obtain ⟨g', hg', hr⟩ := ihO true j h
+    exact ⟨g', by simpa only [LMem.writeG, ↓reduceIte] using hg', hr⟩
+  | idx t =>
+    simp only [wrGuard, Option.map_eq_some_iff] at h
+    obtain ⟨u, hu, rfl⟩ := h
+    obtain ⟨t', ht', hs⟩ := ihR j .size hu
+    have hk := hb t rfl
+    refine ⟨ltR t t', by simp only [LMem.writeG, LMem.lenT, ht', Option.map_some], ?_⟩
+    rw [ltR_rets, ltR_rets]
+    constructor
+    · rintro ⟨c, d, hc, hd, h0, h1⟩; exact ⟨c, d, (hk _).1 hc, (hs _).1 hd, h0, h1⟩
+    · rintro ⟨c, d, hc, hd, h0, h1⟩; exact ⟨c, d, (hk _).2 hc, (hs _).2 hd, h0, h1⟩
+  | size => simp only [wrGuard, reduceCtorEq] at h
+
+theorem valGuard_sim {σ : State} {m : LMem} {μ : State} {B : Births} {v : LMV} {V : LTerm}
+    (hr : m.run σ = .ok (μ, B))
+    (ihO : ∀ (str : Bool) (i : LId) {g : LTerm}, m.objU str i = some g →
+      ∃ g', (if str then m.structG i else m.nameG i) = some g' ∧
+        (Rets (g.eval σ) ↔ Rets (g'.eval σ)))
+    (hv : Sim (v.wordU.eval σ) (v.wordT.eval σ))
+    (h : valGuard (.seq v.wordU (.lit (.bool true)))
+      (fun _ => v.refId?.bind fun j' => m.objU false j') v = some V) :
+    Rets (V.eval σ) ↔ ∃ mv, v.eval σ B = .ok mv := by
+  cases v with
+  | word t =>
+    simp only [valGuard, Option.some.injEq] at h
+    subst h
+    rw [seq_rets, rets_of_sim hv]
+    simp only [lit_rets, and_true, LMV.wordT, LMV.eval]
+    constructor
+    · rintro ⟨x, hx⟩; exact ⟨_, by rw [hx]; rfl⟩
+    · rintro ⟨mv, h⟩
+      obtain ⟨x, hx, -⟩ := Res.bind_eq_ok.1 h
+      exact ⟨x, hx⟩
+  | ref j' =>
+    simp only [valGuard, LMV.refId?, Option.bind_some] at h
+    obtain ⟨g', hg', hrg⟩ := ihO false j' h
+    simp only [Bool.false_eq_true, ↓reduceIte] at hg'
+    rw [hrg, LMem.nameG_sim σ m j' hr hg']
+    simp only [LMV.eval]
+    constructor
+    · rintro ⟨n, hn⟩; exact ⟨_, by rw [hn]; rfl⟩
+    · rintro ⟨mv, h⟩
+      obtain ⟨n, hn, -⟩ := Res.bind_eq_ok.1 h
+      exact ⟨n, hn⟩
+
+theorem write_okU_rets {σ : State} {m : LMem} {j : LId} {b : LSel} {v : LMV} {g : LTerm}
+    (ih : ∀ {G : LTerm}, m.okU = some G → (Rets (G.eval σ) ↔ ∃ r, m.run σ = .ok r))
+    (ihO : ∀ (str : Bool) (i : LId) {g : LTerm}, m.objU str i = some g →
+      ∃ g', (if str then m.structG i else m.nameG i) = some g' ∧
+        (Rets (g.eval σ) ↔ Rets (g'.eval σ)))
+    (ihR : ∀ (i : LId) (a : LSel) {u : LTerm}, m.readU i a = some u →
+      ∃ t, m.readT i a = some t ∧ Sim (u.eval σ) (t.eval σ))
+    (hv : Sim (v.wordU.eval σ) (v.wordT.eval σ))
+    (hb : ∀ w, b = .idx w → Sim (b.idxU.eval σ) (w.eval σ))
+    (h : (LMem.write m j b v).okU = some g) :
+    Rets (g.eval σ) ↔ ∃ r, (LMem.write m j b v).run σ = .ok r := by
+  simp only [LMem.okU, okWrite, Option.bind_eq_some_iff, Option.map_eq_some_iff] at h
+  obtain ⟨G, hG, W, hW, V, hV, rfl⟩ := h
+  rw [seq_rets, seq_rets, seq_rets, ih hG]
+  simp only [lit_rets, and_true]
+  obtain ⟨g', hg', hWg⟩ := wrGuard_sim ihO ihR hb hW
+  rw [hWg]
+  constructor
+  · rintro ⟨⟨⟨μ, B⟩, hr⟩, hw, hvr⟩
+    obtain ⟨mv, hmv⟩ := (valGuard_sim hr ihO hv hV).1 hvr
+    obtain ⟨n, ad, μ₁, hn, had, hwr⟩ := (LMem.writeG_sim σ hr j b hg' mv).1 hw
+    exact ⟨_, by simp only [LMem.run, hr, Res.ok_bind, hn, had, hmv, hwr] <;> rfl⟩
+  · rintro ⟨r, hrun⟩
+    obtain ⟨μ', n', ad, mv, hr, hn, had, hmv, hwr⟩ := LMem.run_write (μ := r.1) (B := r.2) hrun
+    exact ⟨⟨_, hr⟩, (LMem.writeG_sim σ hr j b hg' mv).2 ⟨n', ad, _, hn, had, hwr⟩,
+      (valGuard_sim hr ihO hv hV).2 ⟨mv, hmv⟩⟩
+
+/-- **The guard of a view returns exactly where the view does** (Lean only):
+the memory runs, the name denotes, and a memory whose references all name
+older roots holds no cycle, so the copy back returns. -/
+theorem view_okE_sim {σ : State} {m : LMem} {i : LId}
+    (ih : ∀ {G : LTerm}, m.okU = some G → (Rets (G.eval σ) ↔ ∃ r, m.run σ = .ok r))
+    (ihN : ∀ {g : LTerm}, m.objU false i = some g →
+      ∃ g', (if false then m.structG i else m.nameG i) = some g' ∧
+        (Rets (g.eval σ) ↔ Rets (g'.eval σ))) :
+    Sim ((LStor.view m i).okE.eval σ) ((LStor.view m i).eval σ >>= fun _ => .ok (.bool true)) := by
+  have hkeep : Sim ((LTerm.sok (.view m i)).eval σ)
+      ((LStor.view m i).eval σ >>= fun _ => .ok (.bool true)) := Sim.refl _
+  rw [LStor.okE]
+  split
+  · rename_i hd
+    unfold okView
+    cases hG : m.okU with
+    | none => exact hkeep
+    | some G =>
+      cases hN : m.objU false i with
+      | none => exact hkeep
+      | some N =>
+        obtain ⟨g', hg', hNg⟩ := ihN hN
+        simp only [Bool.false_eq_true, ↓reduceIte] at hg'
+        intro a
+        constructor
+        · intro he
+          have hr : Rets ((LTerm.seq G (.seq N (.lit (.bool true)))).eval σ) := ⟨a, he⟩
+          have ha : a = .bool true := by
+            simp only [LTerm.eval, Res.bind_eq_ok, Except.ok.injEq] at he
+            obtain ⟨_, _, _, _, rfl⟩ := he
+            rfl
+          subst ha
+          rw [seq_rets, seq_rets, ih hG, hNg] at hr
+          obtain ⟨⟨⟨μ, B⟩, hrun⟩, hn, -⟩ := hr
+          obtain ⟨x, hx⟩ := (LMem.nameG_sim σ m i hrun hg').1 hn
+          have hdesc := LMem.refDesc_desc σ m hrun hd
+          obtain ⟨_, -, -, -, hlo, hhi⟩ :=
+            Births.eval_interval (LMem.run_births σ m hrun) (LId.evalR_ok.1 hx)
+          obtain ⟨cv, hcv⟩ := copyMem_ok_desc hdesc hlo hhi
+          simp only [LStor.eval, hrun, Res.ok_bind, hx, hcv]
+        · intro he
+          obtain ⟨_, hv, ha⟩ := Res.bind_eq_ok.1 he
+          cases ha
+          obtain ⟨μ, B, cv, hva, -⟩ := LStor.eval_view hv
+          obtain ⟨x, hx, -⟩ := hva.obj
+          obtain ⟨_, h1⟩ := (ih hG).2 ⟨_, hva.run⟩
+          obtain ⟨_, h2⟩ := hNg.2 ((LMem.nameG_sim σ m i hva.run hg').2 ⟨x, hx⟩)
+          simp only [LTerm.eval, h1, h2, Res.ok_bind]
+  · exact hkeep
+
+end RunGuard
+
 mutual
 
 /-- **Eliminating the reads of writes keeps what a term returns.**
@@ -6700,7 +7131,8 @@ theorem LStor.okE_sim (σ : State) :
   | .copy s P src SQ => copy_okE_sim (LStor.okE_sim σ s) (LStor.okE_sim σ src) (LPath.elim_sim σ P)
       (LPath.elim_sim σ SQ) (fun hv hp => LStor.hasU_sim σ s P.elim hv hp)
       (fun hv hp => LStor.hasU_sim σ src SQ.elim hv hp)
-  | .view _ _ => Sim.refl _
+  | .view m _ => view_okE_sim (fun hG => LMem.okU_sim σ m hG)
+      fun hN => LMem.objU_sim σ m false _ hN
 termination_by structural x => x
 
 /-- **What a read after writes returns**, peeled one write at a time. -/
@@ -6923,6 +7355,22 @@ theorem LMem.objU_sim (σ : State) : (m : LMem) → ∀ (str : Bool) (i : LId) {
     simp only [LMem.objU] at h
     obtain ⟨g', hg', hr⟩ := LMem.objU_sim σ m str i h
     cases str <;> exact ⟨g', by simpa only [LMem.structG, LMem.nameG] using hg', hr⟩
+termination_by structural x => x
+
+/-- **The run guard of a memory returns exactly where the run does.** -/
+theorem LMem.okU_sim (σ : State) : (m : LMem) → ∀ {g : LTerm}, m.okU = some g →
+    (Rets (g.eval σ) ↔ ∃ r, m.run σ = .ok r)
+  | .init, _, h => init_okU_rets h
+  | .addM m _ _, _, h => addM_okU_rets (fun hG => LMem.okU_sim σ m hG) h
+  | .newArr m _ _ n, _, h => newArr_okU_rets (fun hG => LMem.okU_sim σ m hG) (LTerm.elim_sim σ n) h
+  | .copySt m _ s q, _, h => copySt_okU_rets (fun hG => LMem.okU_sim σ m hG)
+      (guard_sim (LStor.okE_sim σ s) (LPath.elim_sim σ q)
+        fun _ _ hv hq => LStor.cpokU_sim σ s q.elim hv hq)
+      (guard_sim (LStor.okE_sim σ s) (LPath.elim_sim σ q)
+        fun _ _ hv hq => LStor.readU_sim σ s q.elim hv hq) h
+  | .write m _ b v, _, h => write_okU_rets (fun hG => LMem.okU_sim σ m hG)
+      (fun str i _ h => LMem.objU_sim σ m str i h) (fun i a _ h => LMem.readU_sim σ m i a h)
+      (LMV.wordU_sim σ v) (LSel.idxU_sim σ b) h
 termination_by structural x => x
 end
 

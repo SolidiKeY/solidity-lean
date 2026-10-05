@@ -2180,11 +2180,12 @@ def Facts.shapeIs (F : Facts) (sh : KShape) (q : LPath) : Bool :=
   | _, _ => false
 
 /-- **`Facts.cpokInit`** (Lean only: `copyStToM` halts on a mapping): the
-layout types the path at a type that holds no mapping, so the canonical
-value `wt` puts there copies into memory (`MemNames.copyStToM_ok_noMap`). -/
+layout types the path at a type that holds no mapping (`Ty.mapFree`, which
+the kernel evaluates), so the canonical value `wt` puts there copies into
+memory (`MemNames.copyStToM_ok_noMap`). -/
 def Facts.cpokInit (F : Facts) (q : LPath) : Bool :=
   match F.pty q with
-  | some T => !tyHasMapping T
+  | some T => T.mapFree
   | none => false
 
 /-- The layout types the path as an array. -/
@@ -2540,8 +2541,7 @@ theorem Facts.retsW_sound {σ : State} {F : Facts} (hF : F.Ok σ) {N : LTerm →
       split at ht
       · rename_i T hT
         obtain ⟨qs, w, hq, hw, hc⟩ := F.resolve hF (Facts.keysRetW_sound hF hN q hk) hT
-        obtain ⟨τ, mv, hm⟩ := MemNames.copyStToM_ok_noMap (memBase σ) w T hc
-          (by simpa only [Bool.not_eq_eq_eq_not, Bool.not_true] using ht)
+        obtain ⟨τ, mv, hm⟩ := MemNames.copyStToM_ok_noMap (memBase σ) w T hc (Ty.mapFree_sound ht)
         exact ⟨_, by simp only [LTerm.eval, LStor.eval, hq, hw, hm, Res.ok_bind] <;> rfl⟩
       · cases ht
   | .pok q, h => by

@@ -1175,3 +1175,33 @@ The leaves are smaller than at step 0 where constants are folded:
 stays at 534. `memoryIndexWriteNse` is still the
 one figure near the 20% line, and the step-2 kernel cost of the six-type
 mutual block is all of it.
+
+### Step 3c: the copy guard and the run guard
+
+The step-3 clauses are completed by two guards that Lean needs and KeY does
+not. Nothing produces them yet.
+
+- **The copy guard.** `LTerm.cpok` is now eliminated: a word written over a
+  word keeps whether a copy into memory succeeds (`save_cpok_sim`), so
+  `LStor.cpokU` passes such writes down to `cpok init q`. The closer then
+  closes `cpok init q` where the layout types `q` at a type with no
+  mapping (`Facts.cpokInit`). It tests `Ty.mapFree`, which the kernel
+  evaluates, not `tyHasMapping`, which it cannot; `Ty.mapFree_sound` links
+  the two, one struct at a time.
+- **The run guard.** `LMem.okU` returns exactly where the memory's run does
+  (`LMem.okU_sim`). `okE` of a view is that guard plus `nameG` of the name
+  wherever every reference written names an older root (`view_okE_sim`),
+  and is kept whole elsewhere.
+
+Both have pins in `Examples/Tactics/Decide.lean`, which now imports
+`Calculus/Closer.lean` for the `Facts.cpokInit` pin.
+
+**Measured.** All 91 theorems of `Derived9`–`11` still prove. The new arms
+are not reached yet, so the times are those of step 3.
+
+| | Baseline | Step 3c | Change |
+|---|---|---|---|
+| `Derived9`, `sol_prove` total | 7.9 s | 8.2 s | +4% |
+| `Derived10` | 10.1 s | 9.5 s | −6% |
+| `Derived11` | 2.3 s | 2.2 s | −3% |
+| `memoryIndexWriteNse` | 2.48 s | 2.90 s | +17% |

@@ -486,6 +486,18 @@ private def aCopy : LMem := .addM (.copySt .init 0 .init (.root "alice")) 1 (.st
 #eval [({ lay := [("xs", .ref (.array .uint))] } : Facts).cpokInit (.root "xs"),
   ({ lay := [("m", .ref (.mapping .uint .uint))] } : Facts).cpokInit (.root "m")]
 
+/-- info: [true, true, true] -/
+#guard_msgs in -- the run guard (Lean only): an allocation at its ordinal, of a type with no
+-- mapping and a well-formed default
+#eval [pAge.okU.isSome, (LMem.addM .init 0 (.struct "Wallet")).okU.isNone,
+  (LMem.addM .init 1 (.struct "Person")).okU.isNone]
+
+/-- info: [true, true] -/
+#guard_msgs in -- a view's guard where every reference names an older root, kept whole elsewhere
+#eval [(LStor.view pAge ⟨0, []⟩).okE matches .seq _ (.seq _ _),
+  (LStor.view (LMem.write aCopy ⟨0, []⟩ (.fld "account") (.ref ⟨1, [.field "account"]⟩))
+    ⟨0, []⟩).okE matches .sok _]
+
 end MemoryClauses
 
 end Solidity.Examples.Tactics.Decide
