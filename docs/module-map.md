@@ -85,7 +85,7 @@ lemma (`TermTaclet.sound`).
 | `Calculus/Decide.lean` | `sol_decide`: reads of writes as case trees on key equalities, over the live storage. |
 | `Calculus/DecideSyn.lean` | `LFml.syn`: a reduction closed by its terms, KeY's syntactic closing; `sol_decide`'s first try. |
 | `Calculus/DecideComplete.lean` | The starting storage's reads are realizable; `Fml.valid_iff_cons`. |
-| `Calculus/Closer.lean` | `LFml.close`: the closer, KeY's first-order and arithmetic taclets as clauses of one `Bool` (ground evaluation, `applyEq`, `bool` case splits, reads typed by `wt`'s layout), `LFml.close_holds`; `LFml.fits`, the size bound. |
+| `Calculus/Closer.lean` | `LFml.close`: the closer, KeY's first-order and arithmetic taclets as clauses of one `Bool` (ground evaluation, `applyEq`, `bool` case splits, intervals by constants, reads typed by `wt`'s layout), `LFml.close_holds`; `LFml.fits`, the size bound. |
 | `Calculus/Derive.lean` | The strategy as one kernel evaluation: `Derive.residue` (per-goal fresh names, any number of branches, a step budget over the whole derivation, leaves closed by `LFml.close` with `wt` read as a layout, parallel updates split, `Derive.closeSize`), `Proves.of_residue`, `Proves.close_dropWt`; `sol_prove`, `sol_prove?`. |
 | `Calculus/Problem.lean` | solkey's obligation forms (`Problem.fml`: `∀x̄. wt(storage) → [f] true` or `⟨f⟩ true`), `Fml.wt`, `shape_iff_reachable`, `wt_iff_reachable`, `initStorage_wt`; `Problem.text` in solkey's syntax. |
 | `Calculus/Spec.lean` | Specifications compiled to dynamic logic as solkey's `SpecCompiler` does; `spec[C]{f}`, `sol_spec`. |

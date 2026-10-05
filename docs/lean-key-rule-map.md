@@ -334,7 +334,8 @@ step.  "closer clause X" names the definition the clause lives in.
 | `cut`, `cut_direct` on a `bool` | closer clause `Facts.split` | subsumed | a case split on a `bool` local or a condition compared with a literal |
 | `selectOnTypedStruct`, `selectOnTypedMember`, `selectOnTypedElement`, `selectOnTypedMapSize`, `selectOnTypedFixedSize`, `selectOnTypedLeafSize` | closer clauses `LPath.ty`, `Facts.retsW`, `Facts.halts` | subsumed | under `wt(storage)` a read at a path the layout types returns, of its type's kind; a test for a shape the layout says is not there halts |
 | `selectOnTypedDynSize` | — | open | the length of a dynamic array is not known from the layout; `push`/`pop` (M5) |
-| `inEqSimp_*`, `polySimp_*` | — | open | no difference bounds or polynomial normal form yet; `(x - a) + a` cancels (`LTerm.arith`) |
+| `inEqSimp_*` on bounds by constants | closer clauses `Facts.range`, `Facts.addCmp`, `foldCmp`, `Facts.fitsArith` | subsumed | a local's type range, a premise `t op k` narrowing `t`, intervals added through `+`, `-` |
+| `inEqSimp_*` on differences, `polySimp_*` | — | open | no bound on `y - x` for two symbolic terms, no polynomial normal form; `(x - a) + a` cancels (`LTerm.arith`) |
 
 ## The data-structure theories
 

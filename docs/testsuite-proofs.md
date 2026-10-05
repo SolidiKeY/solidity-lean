@@ -94,7 +94,8 @@ What they say:
   and **M3b** (`wt`, the 417 statements, 111 derived) are done, below.
 - **M4.** Closer for locals, plain storage and `try`/`transfer`: ground
   arithmetic, `applyEq`, bool case splits, difference bounds, `wt` facts.
-  Done but for difference bounds (below): 237 derived.
+  Done (below; bounds by constants, not differences of terms): 237
+  derived.
 - **M5.** Push, pop, `delete` and storage copies in the closer.
 - **M6.** Memory in the closer: allocation, reads and writes, `mlen`,
   defaults, copies to storage.
@@ -512,9 +513,14 @@ replaces has a row in `docs/lean-key-rule-map.md` ("The closer's clauses").
 - **Parallel updates** (`Fml.seqUpd`, `peel_sound`): `{ x := x + 1 ‖ r :=
   x + 1 }` of `r = ++x;` is split into single updates where its last
   element binds a local the others do not mention.
-- **Difference bounds: not done.**  No obligation of buckets A, B or E
-  needed them (each one the closer leaves is push, pop, memory or a copy);
-  `inEqSimp_*` stays open in the rule map.
+- **Bounds by constants** (`Facts.range`, `Facts.bnds`, `foldCmp`,
+  `Facts.fitsArith`): a local's type gives its range, a premise comparing a
+  term with a literal narrows it, `+` and `-` add intervals; a checked `+`
+  or `-` that fits returns, a comparison the intervals decide folds
+  (`Examples/ProofTree.lean` pins two).  Differences of two terms (`y - x`
+  with both symbolic) are not bounded: no obligation of buckets A, B or E
+  needed them (each one the closer leaves is push, pop, memory or a
+  copy).
 
 **The size guard.**  A leaf's formula with its updates pushed in shares
 subterms: a storage written from a read of the one before it appears

@@ -188,6 +188,26 @@ info: Try this:
 example : ⊢ dl!{ a == 1 → ⟨ uint x = a; require(x == 1); ⟩ x == 1 } := by
   sol_prove?
 
+/-! Intervals: a premise `x <= 100` bounds the `uint` local `x`, so the
+diamond's `x + 1` stays in range; under the box, `require(x >= 1 && …)`
+keeps `x - 1` in range and decides `y < 100`. -/
+
+/--
+info: Try this:
+  sol_prove
+-/
+#guard_msgs in
+example : ⊢ dl!{ ∀ uint x; x <= 100 → ⟨ uint y = x + 1; ⟩ y == x + 1 } := by
+  sol_prove?
+
+/--
+info: Try this:
+  sol_prove
+-/
+#guard_msgs in
+example : ⊢ dl!{ ∀ uint x; [ require(x >= 1 && x <= 100); uint y = x - 1; ] y < 100 } := by
+  sol_prove?
+
 /-! Two writes at keys the premises do not separate: the leaf is left, and
 closed by `sol_decide`'s next step, which splits on `k == j`. -/
 
