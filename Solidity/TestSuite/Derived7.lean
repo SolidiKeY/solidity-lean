@@ -1,7 +1,7 @@
 import Solidity.TestSuite.Problems
 
 /-!
-# solkey's `TestSuite`, derived (7 of 8)
+# solkey's `TestSuite`, derived (7 of 11)
 
 `⊢` of each obligation the closer of arrays and copies added (arrays
 pushed and popped, the slot a `push()` recycles, copies between storage

@@ -1,7 +1,7 @@
 import Solidity.TestSuite.Problems
 
 /-!
-# solkey's `TestSuite`, derived (6 of 8)
+# solkey's `TestSuite`, derived (6 of 11)
 
 `⊢` of each obligation `sol_prove` and its leaf tactics close, from
 `parenthesizedLeftOperand` to `tryCallUnmatchedFailureReverts` in the order of the source; the replays are what

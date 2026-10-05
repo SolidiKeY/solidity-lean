@@ -29,6 +29,7 @@ import Solidity.Calculus.SolkeyFragment
 import Solidity.Calculus.Notation
 import Solidity.Calculus.Close
 import Solidity.Calculus.CloseTests
+import Solidity.Calculus.DecideMem
 import Solidity.Calculus.Decide
 import Solidity.Calculus.DecideSyn
 import Solidity.Calculus.DecideComplete
