@@ -489,7 +489,8 @@ not.
 `Calculus/Closer.lean`.  `sol_prove`'s default closer (`Derive.synClose`) is
 now `LFml.close`, one `Bool` over the leaf's reduction proved sound once
 (`LFml.close_holds`); `LFml.syn` stays as `sol_decide`'s first try, which
-the new closer subsumes.  Each KeY first-order or arithmetic taclet it
+the new closer subsumes (`Facts.retsW` accepts what `LTerm.rets` does,
+an operation on operands equal to a known one's included).  Each KeY first-order or arithmetic taclet it
 replaces has a row in `docs/lean-key-rule-map.md` ("The closer's clauses").
 
 - **Ground evaluation** (`foldBin`, `foldUn`, `foldIte`, `foldKite`,
@@ -539,7 +540,13 @@ double with each such write.  Measured on `count = 0;` and `n` times
 `synClose` now refuses a leaf whose tree has more than `Derive.closeSize`
 (2000) nodes (`LFml.fits`, a count that stops at the bound, so it costs at
 most 2000 steps in compiled code and in the kernel); the leaf is left
-open for a tactic, not attempted.  The largest leaf of `TestSuite` has 950
+open for a tactic, not attempted.  `sol_prove?` (and `#solkey_derive?`,
+through `Derive.searchLeaf`) asks the same bound (`Derive.leafFits`)
+before its reducing steps (`sol_reduce`, then `sol_decide_cons` or
+`sol_decide_heuristic`), whose evaluation, quoting and kernel check heed
+no heartbeats: a leaf past it gets only `sol_close` and `sol_spec_close`.
+`Examples/ProofTree.lean` pins both sides (four writes close in the
+residue, six leave one leaf past the bound).  The largest leaf of `TestSuite` has 950
 nodes.  The doubling itself is not removed: `okE` re-guards every read by
 the writes before it, and sharing it would change `LFml.elim_holds`
 (`Calculus/Decide.lean`).

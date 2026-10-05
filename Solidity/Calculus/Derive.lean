@@ -27,8 +27,9 @@ The default closer (`Derive.synClose`) is `LFml.close` on the reduction
 (`Calculus/Closer.lean`): it closes a leaf inside the `Bool`, reading an
 obligation's `wt(storage)` premise as the layout the storage holds
 (`Derive.topWt`).  A parallel update is split first (`Fml.seqUpd`), and a
-leaf past `Derive.closeSize` nodes is not attempted.  A leaf it does not
-close is left for a tactic.
+leaf past `Derive.closeSize` nodes is not attempted, by the closer nor by
+`sol_prove?`'s reducing steps.  A leaf it does not close is left for a
+tactic.
 
 Neither the compiled run nor the kernel check heeds `maxHeartbeats`, so
 the walk carries its own budget, the steps of the whole derivation
@@ -333,6 +334,12 @@ def synClose (Γ : List (Hyp C)) (φ : Fml C) : Bool :=
   let l := w.toL Decide.Sym.empty
   (Hyp.wrap (dropWt Γ) φ).modalFree && w.inL Decide.Sym.empty &&
     (l.fits closeSize).isSome && Decide.LFml.close (topWt Γ) l.elim
+
+/-- The leaf is within `closeSize`, counted as `synClose` counts it: what
+`sol_prove?` asks before it tries a step that reduces the leaf, since the
+reduction, its quoting and its kernel check heed no heartbeats. -/
+def leafFits (Γ : List (Hyp C)) (φ : Fml C) : Bool :=
+  ((Hyp.wrap (dropWt Γ) φ).seqUpd.toL Decide.Sym.empty |>.fits closeSize).isSome
 
 /-- The steps `sol_prove` allows, over the whole derivation and so down any
 one path: a runaway (a program whose `if`s double the paths) stops here, in
@@ -657,13 +664,24 @@ def prove (g : MVarId) : MetaM (List MVarId) := do
 /-- The tactics `sol_prove?` tries on a leaf, in order, each a sequence of
 lines: `sol_decide`'s two steps after its `LFml.syn` try, which the closer
 subsumes, each on its own so that the replay does not try the other; then
-`sol_close` and `sol_spec_close` (`omega`, `grind`). -/
-def leafTacs (wt : Bool := false) : Array (Array String) :=
+`sol_close` and `sol_spec_close` (`omega`, `grind`).  A leaf past
+`closeSize` (`small = false`) gets only the last two, whose `simp`,
+`omega` and `grind` heed heartbeats. -/
+def leafTacs (wt : Bool := false) (small : Bool := true) : Array (Array String) :=
   let pre := #[if wt then "refine Proves.close_dropWt ?_" else "refine Proves.close ?_",
     "sol_symex"]
   let red := pre ++ #["refine (Fml.valid_iff_reduce _ (by decide +kernel)).2 ?_", "sol_reduce"]
-  #[red.push "sol_decide_cons", red.push "sol_decide_heuristic", pre.push "sol_close",
-    pre.push "sol_spec_close"]
+  (if small then #[red.push "sol_decide_cons", red.push "sol_decide_heuristic"] else #[]) ++
+    #[pre.push "sol_close", pre.push "sol_spec_close"]
+
+open Lean Meta in
+/-- `leafFits` on the leaf goal `l`, run as compiled code; `true` on a goal
+that is not a closed `Γ ⊢ φ`. -/
+def goalFits (l : MVarId) : MetaM Bool := do
+  let ty ← instantiateMVars (← l.getType)
+  let_expr Proves C _ Γ φ := ty | return true
+  if ty.hasFVar || ty.hasMVar then return true
+  unsafe evalExpr Bool (mkConst ``Bool) (mkAppN (mkConst ``leafFits) #[C, Γ, φ])
 
 end Derive
 
@@ -683,12 +701,12 @@ open Lean Elab Tactic Meta
 /-- The first of `leafTacs` that closes the leaf `l`, each try with its own
 heartbeats and its state rolled back when it fails; `none` when none does.
 A leaf under a `wt` premise is closed with it set aside
-(`Proves.close_dropWt`). -/
+(`Proves.close_dropWt`); one past `closeSize` is not reduced (`goalFits`). -/
 def searchLeaf (l : MVarId) : TacticM (Option (Array String)) := do
   let env ← getEnv
   let wt := ((← instantiateMVars (← l.getType)).find? fun e =>
     e.isConstOf ``Term.wt || e.isConstOf ``Op1.wt).isSome
-  for src in leafTacs wt do
+  for src in leafTacs wt (← goalFits l) do
     let t ← src.mapM fun line =>
       match Parser.runParserCategory env `tactic line with
       | .ok stx => pure (⟨stx⟩ : TSyntax `tactic)

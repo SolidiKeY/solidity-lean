@@ -196,7 +196,7 @@ diffs it).  `docs/testsuite-proofs.md` has the counts and timings.
 | `Solkey/TestSuite.lean` | `Solkey.TestSuite`, its 417 programs and the report, pinned. |
 | `Frontend/Problems.lean` | `solc_problems N` (`N.f.problem : Fml N` per program), `#solkey_problem`, `#solkey_scan`, `#solkey_derive?` (the replays to paste), `#solkey_obligations` (derived, checked against `⊢ N.f.problem` / pending). |
 | `TestSuite/Problems.lean` | The 417 statements of `Solkey.TestSuite`, two pinned in solkey's syntax, `initState_wt`. |
-| `TestSuite/Derived1.lean` … `TestSuite/Derived6.lean` | `Solkey.TestSuite.f.proved : ⊢ Solkey.TestSuite.f.problem`, 40 per module (237 in all), by `sol_prove` and explicit leaf tactics. |
+| `TestSuite/Derived1.lean` … `TestSuite/Derived6.lean` | `Solkey.TestSuite.f.proved : ⊢ Solkey.TestSuite.f.problem`, 40, 40, 40, 40, 40 and 37 (237 in all), by `sol_prove` and explicit leaf tactics. |
 | `TestSuite/Report.lean` | The pinned count: derived, pending (named), and the three with no statement. |
 
 ## Examples

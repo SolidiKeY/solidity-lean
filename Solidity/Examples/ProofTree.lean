@@ -224,6 +224,36 @@ info: Try this:
 example : ⊢ dl!{ [ balances[k] = 5; balances[j] = 5; ] balances[k] == 5 } := by
   sol_prove?
 
+/-! A parallel update: `r = ++x;` leaves `{ x := x + 1 ‖ r := x + 1 }`,
+which the closer reads only once `Fml.seqUpd` has split it. -/
+
+/--
+info: Try this:
+  sol_prove
+-/
+#guard_msgs in
+example : ⊢ dl!{ ⟨ uint x = 5; uint r = ++x; ⟩ r == 6 && x == 6 } := by
+  sol_prove?
+
+/-! The size bound (`Derive.closeSize`): a storage written from its own
+read doubles the leaf with each write.  Four `total += 1;` close inside the
+residue; six leave one leaf past the bound, which neither the closer nor
+`sol_prove?`'s reducing steps attempt (`Derive.leafFits`). -/
+
+/-- Four writes of `total` from its own read. -/
+def writes4 : Fml StandardExample :=
+  dl!{ [ total = 0; total += 1; total += 1; total += 1; total += 1; ] total == 4 }
+
+/-- Six writes of `total` from its own read. -/
+def writes6 : Fml StandardExample :=
+  dl!{ [ total = 0; total += 1; total += 1; total += 1; total += 1; total += 1;
+    total += 1; ] total == 6 }
+
+#guard Derive.proves [] writes4
+#guard (Derive.residue Derive.budget Derive.synClose Derive.budget [] writes6).map
+  (fun (ls, _) => ls.map fun (l : List (Hyp StandardExample) × Fml StandardExample) =>
+    Derive.leafFits l.1 l.2) == some [false]
+
 /-! ## A failed `assert`
 
 `assertSimple` checks its condition: two goals, `thn` (the run goes on) and

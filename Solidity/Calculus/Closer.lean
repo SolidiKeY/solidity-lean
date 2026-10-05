@@ -1318,7 +1318,7 @@ def Facts.retsW (F : Facts) (N : LTerm → LTerm) : LTerm → Bool
   | t@(.seq d a) => t.known F.known F.ne || (F.retsW N d && F.retsW N a)
   | t@(.zero a) => t.known F.known F.ne || F.retsW N a
   | t@(.orElse a b) => t.known F.known F.ne || F.retsW N a || F.retsW N b
-  | t@(.binop op p a b) => t.known F.known F.ne || (F.retsW N a && F.binRets N op p a b (F.retsW N
+  | t@(.binop op p a b) => t.rets F.known F.ne || (F.retsW N a && F.binRets N op p a b (F.retsW N
       b))
   | t@(.unop op p a) => t.known F.known F.ne || (F.retsW N a && F.unRets N op p a)
   | t@(.ite c a b) => t.known F.known F.ne || (F.retsW N c &&
@@ -1473,7 +1473,7 @@ theorem Facts.retsW_sound {σ : State} {F : Facts} (hF : F.Ok σ) {N : LTerm →
   | .binop op p a b, h => by
     simp only [Facts.retsW, Bool.or_eq_true, Bool.and_eq_true] at h
     rcases h with h | ⟨ha, hb⟩
-    · exact LTerm.known_returns hF.1 hF.2.1 _ h
+    · exact LTerm.rets_returns hF.1 hF.2.1 _ h
     · obtain ⟨x, hx⟩ := Facts.retsW_sound hF hN a ha
       obtain ⟨v, hv⟩ := F.binRets_sound hF hN hb hx (fun hr => Facts.retsW_sound hF hN b hr)
       exact ⟨v, by simp only [LTerm.eval, hx, Res.ok_bind, hv]⟩
