@@ -172,9 +172,7 @@ theorem aliasPath_setEnv_ne' (σ : State) {x y : Var} (h : x ≠ y) (b : Binding
   unfold pushAt
   cases h : σ.findStorage r segs with
   | error x =>
-    have hx : NoPanic (σ.findStorage r segs) := State.findStorage_noPanic σ r segs
-    rw [h] at hx
-    exact iff_of_false he' fun hx' => hx (by rw [hx'])
+    exact iff_of_false he' (NoPanic.ne_of_eq (State.findStorage_noPanic σ r segs) h)
   | ok v => cases v <;> simp [bind, Except.bind, he, he']
 
 theorem evalBinop_noShort {op : BinOp} (h : op.shortCircuits = false) (p : PrimTy) (lv : Value)
@@ -462,21 +460,21 @@ theorem Taclet.sound_unfold {k : Nat} {m : Modality} {s : Stmt C} {P : Prog C}
     res_split
     all_goals first
       | (agree_tac; done)
-      | (apply SameOk.error_pushAt <;> (rintro rfl; simp_all))
+      | (apply SameOk.error_pushAt <;> (rintro rfl; simp_all only [Val.eval_noPanic]))
   case logicalAndShortCircuitRhs =>
     rename_i v se nse
     unf_simp
     rcases h₁ : Simple.eval σ se with _ | (_ | (_ | _)) <;>
       rcases h₂ : Val.eval σ nse with _ | (_ | (_ | _)) <;>
       simp [bind, Except.bind, pure, Except.pure, evalBinop, applyBinOp, checkArith, Value.asBool] <;>
-      (rintro rfl; simp_all)
+      (rintro rfl; simp_all only [Val.eval_noPanic])
   case logicalOrShortCircuitRhs =>
     rename_i v se nse
     unf_simp
     rcases h₁ : Simple.eval σ se with _ | (_ | (_ | _)) <;>
       rcases h₂ : Val.eval σ nse with _ | (_ | (_ | _)) <;>
       simp [bind, Except.bind, pure, Except.pure, evalBinop, applyBinOp, checkArith, Value.asBool] <;>
-      (rintro rfl; simp_all)
+      (rintro rfl; simp_all only [Val.eval_noPanic])
   case memoryStorageCopyUnfold =>
     unf_simp
     cases SPath.resolve σ ‹SPath C _› with

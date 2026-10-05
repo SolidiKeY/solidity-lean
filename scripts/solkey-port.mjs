@@ -22,9 +22,10 @@
  *     stuck: it is invalid for any body that touches storage;
  *   - `⊨ dl[C]{ [ body ] true }` says that no `assert` fails, from any
  *     state: a failed `assert` panics, which the box does not accept, while
- *     a failed `require` reverts, which it does (solkey's `assertSimple`);
- *     over every state it is stronger than a store-bound run, and it meets
- *     the same storage gap as the diamond;
+ *     a failed `require` reverts and a stuck write stops, which it does
+ *     (solkey's `assertSimple`): it does not say that the body runs to its
+ *     end, which the diamond asks, and over every state it asks more of
+ *     `assert` than a run from the contract's store does;
  *   - `⊨ dl[C]{ pre → ⟨ body ⟩ true }` with `pre` describing the store
  *     would be the faithful validity, but `sol_close` does not close a
  *     storage write under the diamond (`Calculus/Close.lean`), so it would

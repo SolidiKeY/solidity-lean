@@ -190,8 +190,7 @@ theorem _root_.Solidity.Fml.eval3_sound (dom : PrimTy → List Value) : (φ : Fm
       exact ⟨fun h => ⟨ih.1 h, nofun⟩, fun h hh => ih.2 h hh.1⟩
     | error e => cases e <;> cases m <;> simp only [Tri.afterRun, Tri.after, Modality.afterRun,
       Modality.after, Modality.onHalt, ne_eq, Except.error.injEq, reduceCtorEq, imp_self,
-      not_true_eq_false, not_false_eq_true, and_self, and_true, and_false, false_implies,
-      true_implies, implies_true]
+      not_true_eq_false, not_false_eq_true, and_self, and_true, and_false]
   | .havoc φ, σ => by
     simp only [Fml.eval3, holds]
     split
@@ -446,19 +445,24 @@ def SpecProblem.of (C : Contract) (f : String) : Except String (SpecProblem C) :
 /-- A candidate tried: `none` unless the stated premises evaluate to `tt`;
 then the conjuncts that evaluate to `ff`, if any.  A run that panics (an
 `assert` failed) refutes the box whatever follows it, so it is a
-counterexample with no conjunct blamed: the witness's outcome names it. -/
+counterexample with no conjunct blamed: the witness's outcome names it.
+The update and the call run once, and each conjunct is read in the state
+they leave: that is `(specBody C P.upd P.prog [φ]).eval3` (`Fml.eval3`
+under the box), without a run per conjunct. -/
 def SpecProblem.try (P : SpecProblem C) (c : Cand) : Option (Option Witness) :=
   let dom := poolDom P.lits
   let σ := c.state
   if !P.checked.all (fun φ => φ.eval3 dom σ = .tt) then none else
   let outcome : Res State := P.upd.apply σ >>= fun τ => Prog.run τ P.prog
-  if outcome matches .error .panic then
+  match outcome with
+  | .error .panic =>
     some (some { state := σ, args := c.args, failing := [], outcome := some outcome })
-  else
-  let failing := ((List.range P.posts.length).zip P.posts).filterMap fun (i, φ) =>
-    if (specBody C P.upd P.prog [φ]).eval3 dom σ = .ff then some i else none
-  if failing.isEmpty then some none else
-  some (some { state := σ, args := c.args, failing, outcome := some outcome })
+  | .error _ => some none
+  | .ok τ =>
+    let failing := ((List.range P.posts.length).zip P.posts).filterMap fun (i, φ) =>
+      if φ.eval3 dom τ = .ff then some i else none
+    if failing.isEmpty then some none else
+    some (some { state := σ, args := c.args, failing, outcome := some outcome })
 
 /-- Whether a candidate is a counterexample. -/
 def SpecProblem.refutes (P : SpecProblem C) (c : Cand) : Bool :=

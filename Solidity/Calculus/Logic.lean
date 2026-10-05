@@ -74,7 +74,7 @@ theorem Premise.coverFml_holds (m : Modality) (c c' : Fml C) (σ : State) :
     holds σ (Premise.coverFml m c c') ↔ holds σ (Premise.cover m c c') := by
   cases m <;> simp only [Premise.coverFml, Premise.cover, holds, Prog.run, Stmt.run, bind,
     Except.bind, Modality.afterRun, Modality.after, Modality.onHalt, not_and, ne_eq,
-    reduceCtorEq, Except.error.injEq, and_true, and_false,
+    reduceCtorEq, Except.error.injEq, and_true,
     Classical.not_not, not_true_eq_false, not_false_eq_true, false_implies, true_implies]
 
 /-- The premise as one formula, under the modality `m` the rule found, in
@@ -129,7 +129,7 @@ theorem Premise.sound {k : Nat} {m : Modality} {s : Stmt C} {pr : Premise C}
     have hs := h σ
     cases hu : U.apply σ with
     | error e =>
-      have hp : e ≠ .panic := fun hp => Upd.apply_ne_panic U σ (by rw [hu, hp])
+      have hp : e ≠ .panic := NoPanic.ne_of_eq (Upd.apply_ne_panic U σ) hu
       rw [hu] at hs
       cases hr : s.run σ with
       | ok _ => rw [hr] at hs; exact hs.elim
@@ -177,7 +177,7 @@ theorem Premise.sound {k : Nat} {m : Modality} {s : Stmt C} {pr : Premise C}
     intro hb
     rcases h σ with ⟨rfl, e, he, hp⟩ | ⟨b, hmem, σ', hbind, hrun⟩
     · simp only [holds, Prog.run, he, bind, Except.bind, Modality.afterRun_error hp,
-        Modality.onHalt, implies_true]
+        Modality.onHalt]
     · have hφ := holds_alls.1 (hb _ ⟨b, hmem, rfl⟩) σ' hbind
       simp only [holds, SemanticsProperties.Prog.run_append, hrun] at hφ
       simpa only [holds, Prog.run] using hφ

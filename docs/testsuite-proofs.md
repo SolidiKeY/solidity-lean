@@ -300,8 +300,11 @@ of an empty array) stay reverts, as in KeY, where a box accepts them.
   modality holds of a panic; `revert` and `stuck` keep their meaning (box
   true, diamond false).  An update keeps `Modality.after`: a term never
   panics (`Calculus/NoPanic.lean`, `Upd.apply_ne_panic`), so the two
-  readings agree on it, and the closers, `Decide` and the chains, which read
-  updates, did not change.  Only an `assert` panics
+  readings agree on it.  The closers, `Decide` and the chains read updates;
+  their one change is the revert case of a modality (`holds_revert` in
+  `Calculus/Close.lean`, the modal case of `Fml.toL_holds` in
+  `Calculus/Decide.lean`), whose `simp only` now unfolds
+  `Modality.afterRun`.  Only an `assert` panics
   (`Semantics/NoPanic.lean`: `Prog.run_noPanic` for a program with no
   `assert`, by a lemma per operation and the `no_panic` tactic).
 - **The taclet.** `Taclet.assertSimple` is KeY's: `⟨[ assert(se); ]⟩ ⇝
@@ -329,13 +332,37 @@ of an empty array) stay reverts, as in KeY, where a box accepts them.
   (`StorageSuite.assertFails`); the `assert` chains run under any modality
   (`ChainNotation.assertTrace`, `StorageCoverage.assert*`).
 
-Cost: no new `maxHeartbeats` and none raised.  The default build passes; the
-slowest modules take what they took before (`Examples/Tactics/Calls.lean`
-81 s, `Memory.lean` 78 s, `CrossDomain.lean` 77 s, `Decide.lean` 66 s, wall
-clock with the build's parallelism), so no slowdown was measured.  A modal
-formula's meaning has one more conjunct, which `decide +kernel` never meets:
-the kernel decides runs (`corpus_decide`) and the `LFml` reduction, not
-`holds` of a modality.
+Cost: no new `maxHeartbeats` and none raised.  **M3a slowed the two
+soundness theorems under a heartbeat override**, measured in heartbeats (the
+`IO.getNumHeartbeats` difference around the declaration, `Elab.async`
+off, in thousands, the unit of `maxHeartbeats`), at the commit before M3a
+(`d6a4b65`), after its review (`947dd28`), and after the fixes below:
+
+| Theorem | Override | before M3a | after M3a | after the fixes |
+|---|---|---|---|---|
+| `Taclet.sound_unfold` (`Calculus/SoundUnfold.lean`) | 1000000 | 551392 | 641806 (+16%) | 631932 |
+| `Taclet.sound_update` (`Calculus/SoundUpdate.lean`) | 1000000, now none | 109127 | 119744 (+10%) | 121185 |
+
+The growth is the panic cases: `res_split`'s `no_panic_iff` on every
+split, and the new `pushAt` and short-circuit cases of `sound_unfold`.
+`sound_unfold` keeps 37% of its margin; `sound_update` fits the default
+200000, so its override is gone.  The examples did not move measurably
+(`Examples/Tactics/Calls.lean` 81 s, `Examples/Tactics/Memory.lean` 78 s,
+`Examples/Tactics/CrossDomain.lean` 77 s, `Examples/Tactics/Decide.lean`
+66 s, wall clock with the build's parallelism, against the 75–90 s the
+`lean-verify` skill records), but they do not run the soundness proofs.
+A modal formula's meaning has one more conjunct, which `decide +kernel`
+never meets: the kernel decides runs (`corpus_decide`) and the `LFml`
+reduction, not `holds` of a modality.
+
+Second review fixes: the `*_noPanic` lemmas are in the simp set
+`no_panic_simp` (`Semantics/NoPanicSimp.lean`), not the default one, and
+`Semantics/NoPanic.lean` closes with `simp only`; `no_panic`,
+`no_panic_iff` and `sound_unfold`'s panic cases use `simp only` /
+`simp_all only`.  `NoPanic.ne_of_eq` is the one proof that a halt of a
+computation that does not panic is not a panic.  `#verify` runs the
+update and the call once per candidate (`SpecProblem.try`), not once more
+per postcondition.
 
 Review fixes: `#difftest` takes an interpreter panic against a machine
 revert as agreement (`DiffTest.runOnce`, pinned by `Examples/Tools.lean`'s

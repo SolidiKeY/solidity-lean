@@ -18,7 +18,7 @@ open Semantics
 
 variable {C : Contract}
 
-@[simp] theorem readAddr_noPanic (σ : State) (a : Addr) : NoPanic (readAddr σ a) := by
+@[no_panic_simp] theorem readAddr_noPanic (σ : State) (a : Addr) : NoPanic (readAddr σ a) := by
   unfold readAddr; no_panic
 
 /-- What a term of each sort reads to does not panic. -/
@@ -33,7 +33,7 @@ def Srt.NoPanic : (s : Srt) → s.Ev → Prop
   | .mv, x => Solidity.NoPanic x
 
 theorem Op0.eval_noPanic (σ : State) {s : Srt} (o : Op0 s) : s.NoPanic (o.eval σ) := by
-  cases o <;> simp [Op0.eval, Srt.NoPanic]
+  cases o <;> simp only [Srt.NoPanic, Op0.eval, ne_eq, NoPanic.pure, not_false_eq_true]
 
 theorem Op1.eval_noPanic (σ : State) {a s : Srt} (o : Op1 a s) {ra : a.Ev} (h : a.NoPanic ra) :
     s.NoPanic (o.eval σ ra) := by
@@ -52,7 +52,7 @@ theorem Op3.eval_noPanic (σ : State) {a b c s : Srt} (o : Op3 a b c s) {ra : a.
   case ite => exact NoPanic.bind ha fun _ _ => pickBranch_noPanic _ hb hc
   case push =>
     exact NoPanic.bind ha fun _ _ => NoPanic.bind hb fun _ _ =>
-      pushAt_noPanic _ _ _ _ fun _ => by simpa using hc
+      pushAt_noPanic _ _ _ _ fun _ => by simpa only [bind_pure_comp, ne_eq, NoPanic.map] using hc
   all_goals no_panic
 
 /-- **A term never panics.** -/
@@ -83,7 +83,7 @@ theorem Upd.apply_ne_panic (U : Upd C) (σ : State) : U.apply σ ≠ .error .pan
       NoPanic (V.foldlM (fun τ e => e.write σ τ) τ) from h U σ
   intro V
   induction V with
-  | nil => intro τ; simp
+  | nil => intro τ; simp only [List.foldlM_nil, ne_eq, NoPanic.pure, not_false_eq_true]
   | cons e V ih =>
     intro τ
     simp only [List.foldlM_cons]

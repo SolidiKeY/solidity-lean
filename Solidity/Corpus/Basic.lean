@@ -19,9 +19,10 @@ Why not a validity `⊨`, which is what `sol_symex` and `sol_close` prove:
   for any `P` that touches storage (`Close.lean`'s first gap).
 * `⊨ [ P ] true` says that no `assert` of `P` fails, from any state: a
   failed `assert` panics, which the box does not accept, while a failed
-  `require` reverts, which it does (solkey's `assertSimple`).  Over every
-  state it is stronger than what a store-bound run checks, and `sol_close`
-  meets the same storage gap as for the diamond.
+  `require` reverts and a stuck write stops, which it does (solkey's
+  `assertSimple`).  So it is a different obligation: it does not say that
+  the body runs to its end, which the diamond asks, and over every state
+  it asks more of `assert` than a run from the contract's store does.
 * `⊨ pre → ⟨ P ⟩ true` with `pre` describing the store would be the faithful
   validity, but `sol_close` does not close a storage write under the
   diamond, so it would prove nothing more than this form while failing on

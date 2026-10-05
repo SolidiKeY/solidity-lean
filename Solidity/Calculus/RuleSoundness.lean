@@ -54,11 +54,9 @@ theorem Taclet.sound_split {k : Nat} {m : Modality} {s : Stmt C} {c c' : Fml C} 
     simp only [holds, tm_denote, Theory.StValue.Equiv.prim_iff, Simple.lower_denote, Res.toSt_eq_prim, Simple.lower_eval, Stmt.run, Val.eval, guardOk, Prog.run, bind, Except.bind, pure, Except.pure] <;>
     (rename_i se; cases h : se.eval σ with
       | error e =>
-        have hn : NoPanic (se.eval σ) := Simple.eval_noPanic σ se
-        rw [h] at hn
         simp only [reduceCtorEq, false_imp_iff, Except.error.injEq, exists_eq_left', true_and,
-          imp_self, and_self, ne_eq]
-        exact fun _ _ hp => hn (by rw [hp])
+          ne_eq]
+        exact fun _ _ => NoPanic.ne_of_eq (Simple.eval_noPanic σ se) h
       | ok v =>
         simp only
         rcases v with _ | (_ | _) <;> simp [SameOk.self])
@@ -95,11 +93,9 @@ theorem Taclet.sound_branches {k : Nat} {m : Modality} {s : Stmt C}
         ∃ b ∈ [(rets, ok), ([], err), (codeBinders code, pnc), ([], other)], ∃ σ', Binds b.1 σ σ' ∧
           Prog.run σ' b.2 = (Stmt.tryCall call rets ok err code pnc other).run σ :=
       fun e hp he => .inl ⟨rfl, e, he, hp⟩
-    have noPanic : ∀ {α : Type} {x : Res α} {e : Halt}, NoPanic x → x = .error e → e ≠ .panic :=
-      fun hx hxe hp => hx (by rw [hxe, hp])
     cases hk : call.key σ with
     | error e =>
-      exact halt e (noPanic (ExtCall.key_noPanic σ call) hk) (by simp [Stmt.run, hk, bind, Except.bind])
+      exact halt e (NoPanic.ne_of_eq (ExtCall.key_noPanic σ call) hk) (by simp [Stmt.run, hk, bind, Except.bind])
     | ok key =>
       cases hl : lookupBy key σ.tx.ext with
       | none => exact halt .revert nofun (by simp [Stmt.run, hk, hl, bind, Except.bind])
@@ -108,7 +104,7 @@ theorem Taclet.sound_branches {k : Nat} {m : Modality} {s : Stmt C}
         | ok vs =>
           cases hb : bindData rets vs σ with
           | error e =>
-            exact halt e (noPanic (bindData_noPanic rets vs σ) hb)
+            exact halt e (NoPanic.ne_of_eq (bindData_noPanic rets vs σ) hb)
               (by simp [Stmt.run, hk, hl, hb, bind, Except.bind])
           | ok σ' => exact .inr ⟨_, List.mem_cons_self, σ', ⟨vs, hb⟩,
               by simp [Stmt.run, hk, hl, hb, bind, Except.bind]⟩
@@ -117,7 +113,7 @@ theorem Taclet.sound_branches {k : Nat} {m : Modality} {s : Stmt C}
         | panic c =>
           cases hb : bindData (codeBinders code) [c] σ with
           | error e =>
-            exact halt e (noPanic (bindData_noPanic _ _ σ) hb)
+            exact halt e (NoPanic.ne_of_eq (bindData_noPanic _ _ σ) hb)
               (by simp [Stmt.run, hk, hl, hb, bind, Except.bind])
           | ok σ' => exact .inr ⟨(codeBinders code, pnc), by simp, σ', ⟨[c], hb⟩,
               by simp [Stmt.run, hk, hl, hb, bind, Except.bind]⟩

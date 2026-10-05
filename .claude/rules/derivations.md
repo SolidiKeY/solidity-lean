@@ -72,7 +72,7 @@ A tactic example is over a named contract
 - **by the strategy**: `sol_symex` fires the one rule each statement has,
   `sol_close` finishes the first-order goal in an arbitrary state;
 - **by a walk**, for a worked example: `apply Proves.valid`, then
-  one `apply` per taclet (`unfold r`, `update r`, `split r`, `check r`,
+  one `apply` per taclet (`unfold r`, `update r`, `split r`, `Proves.check r`,
   `done r`, `empty`, `intro`), and `apply close; sol_close` at the end. Each rule the
   walk takes is named in the proof, so renaming a rule breaks the example.
   `sol_derive?` writes the walk out (`Calculus/ProofTree.lean`), as

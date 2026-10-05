@@ -332,9 +332,7 @@ theorem ExecS.tryCall_inv {I : Fml C} {σ : State} {c : ExtCall C} {rets : List 
   cases h with
   | det hf => simp [Stmt.forks] at hf
   | tryHalt h =>
-    have hp : NoPanic (c.key σ) := ExtCall.key_noPanic σ c
-    rw [h] at hp
-    exact .inl ⟨_, rfl, fun h' => hp (by rw [h'])⟩
+    exact .inl ⟨_, rfl, NoPanic.ne_of_eq (ExtCall.key_noPanic σ c) h⟩
   | tryRevert _ => exact .inl ⟨_, rfl, nofun⟩
   | tryViolated _ hn => exact .inr (.inl ⟨hn, rfl⟩)
   | tryOk _ _ h₂ hb hp => exact .inr (.inr (.inl ⟨_, _, _, h₂, hb, hp⟩))

@@ -183,7 +183,8 @@ theorem evalBinop_compound {op : BinOp} (hop : op.hasCompoundAssign = true) (p :
 /-- Two halts reached through different reads, neither a panic
 (`Calculus/NoPanic.lean`): `e₁ = panic ↔ e₂ = panic` holds as both sides
 are false. -/
-macro "no_panic_iff" : tactic => `(tactic| (apply iff_of_false <;> (rintro rfl; simp_all)))
+macro "no_panic_iff" : tactic => `(tactic| (apply iff_of_false <;>
+  (rintro rfl; simp_all only [no_panic_simp, ne_eq, not_false_eq_true, reduceCtorEq])))
 
 /-- Close `SameOk ns x y` between two runs made of the same pure reads and one
 write: split every `Except` match, and compare. -/
@@ -245,9 +246,9 @@ def envVal (σ : State) (x : Var) : Res Value := σ.getEnv x >>= Close.bindingVa
 /-- A memory local's identity. -/
 def envRef (σ : State) (x : Var) : Res Nat := σ.getEnv x >>= Close.bindingRef
 
-@[simp] theorem envVal_noPanic (σ : State) (x : Var) : NoPanic (envVal σ x) := by
+@[no_panic_simp] theorem envVal_noPanic (σ : State) (x : Var) : NoPanic (envVal σ x) := by
   unfold envVal Close.bindingVal; no_panic
-@[simp] theorem envRef_noPanic (σ : State) (x : Var) : NoPanic (envRef σ x) := by
+@[no_panic_simp] theorem envRef_noPanic (σ : State) (x : Var) : NoPanic (envRef σ x) := by
   unfold envRef Close.bindingRef; no_panic
 
 @[simp] theorem Term.eval_pv (σ : State) (x : Var) : (Term.pv x : Term C).eval σ = envVal σ x := rfl

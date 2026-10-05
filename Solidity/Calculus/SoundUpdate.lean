@@ -298,14 +298,12 @@ theorem allocDefault_frame (σ : State) (R : RefTy) : FramePreserving σ (allocD
 def allocHN (σ : State) (R : RefTy) : Res (List (Nat × MObj) × Nat × Nat) :=
   (allocDefault σ R).map fun p => (p.1.heap, p.1.nextId, p.2)
 
-@[simp] theorem allocHN_noPanic (σ : State) (R : RefTy) : NoPanic (allocHN σ R) := by
+@[no_panic_simp] theorem allocHN_noPanic (σ : State) (R : RefTy) : NoPanic (allocHN σ R) := by
   simp only [allocHN]
   cases h : allocDefault σ R with
   | error e =>
-    have h' : NoPanic (allocDefault σ R) := allocDefault_noPanic σ R
-    rw [h] at h'
-    simpa [Except.map] using h'
-  | ok _ => simp [Except.map]
+    exact fun hp => NoPanic.ne_of_eq (allocDefault_noPanic σ R) h (Except.error.inj hp)
+  | ok _ => simp only [Except.map, ne_eq, reduceCtorEq, not_false_eq_true]
 
 theorem allocDefault_eq (σ : State) (R : RefTy) :
     allocDefault σ R = (allocHN σ R >>= fun q => pure ({ σ with heap := q.1, nextId := q.2.1 }, q.2.2)) :=
@@ -592,7 +590,6 @@ theorem upd_transferNoCallbackBox (sadr se : Simple C .uint) (σ : State) :
   rw [upd_transferNoCallbackBox_eq]
   exact SameOk.self _ _
 
-set_option maxHeartbeats 1000000 in
 theorem Taclet.sound_update {k : Nat} {m : Modality} {s : Stmt C} {U : Upd C}
     (d : Taclet C k m s (.update U)) : ∀ σ, SameOk [] (U.apply σ) (s.run σ) := by
   cases d

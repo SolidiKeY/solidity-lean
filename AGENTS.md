@@ -100,8 +100,9 @@ exactly one rule (`Stmt.step`), so the strategy never chooses. To prove
   writes; `sol_spec` for a `spec!{f}` obligation). `#wp φ` prints what
   `sol_symex` leaves, `#step φ` one step and the rule it fired.
 - **by a walk**: `apply Proves.valid`, then one `apply` per rule — `intro`,
-  `update r`, `unfold r`, `split r` (goals `thn`/`els`/`cov`), `check r`
-  (an `assert`; goals `thn`/`els`), `done r`, `empty` — and `refine close ?_; sol_symex; sol_close` at each leaf.
+  `update r`, `unfold r`, `split r` (goals `thn`/`els`/`cov`), `Proves.check r`
+  (an `assert`; goals `thn`/`els`; qualified, since `check` is also the
+  elaborator's), `done r`, `empty` — and `refine close ?_; sol_symex; sol_close` at each leaf.
   `apply` refuses a rule whose `\find` or side conditions do not match.
   `sol_derive` runs the walk; `sol_derive?` prints it as a `Try this`.
 - **by a chain**: `(chain .box φ).valid h`, with `h` proving its last line
