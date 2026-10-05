@@ -425,6 +425,11 @@ theorem Op1.eval_part (hr : σ.Rest τ) :
       rcases (allocDefault_heap h R).cases with ⟨e, h₁, h₂⟩ | ⟨_, _, a, h₁, h₂, h₃⟩
       · simp only [h₁, h₂]; exact ⟨rfl⟩
       · simp only [h₁, h₂, pure, Except.pure]; exact Res.memPart_ok h₃
+  | .wt _, _, _, _, _, hx => by
+    simp only [Srt.AgreePart, Op1.eval] at hx ⊢
+    rcases Res.stPart_cases hx.eq with ⟨e, rfl, rfl⟩ | ⟨τ₁, τ₂, rfl, rfl, h⟩
+    · rfl
+    · simp only [bind, Except.bind, h]
 
 theorem Op2.eval_part :
     (o : Op2 a b s) → (o.stDirect = false ∨ σ.storage = τ.storage) → {x₁ x₂ : a.Ev} →

@@ -216,6 +216,7 @@ theorem Op1.denote_congr : (o : Op1 a s) → {d d' : a.Den} →
     exact StValue.Equiv.refl _
   | .alloc _, _, _, _ | .mfield _, _, _, _ | .addM _, _, _, _
   | .mval, _, _, _ | .ref, _, _, _ => trivial
+  | .wt _, _, _, _ => StValue.Equiv.refl _
 
 /-- A binary symbol that is no memory read respects `Equiv` of its
 arguments' denotations, whatever their readings. -/

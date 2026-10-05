@@ -124,6 +124,12 @@ theorem Op1.denote_eval {σ : State} :
     exact StValue.Equiv.refl _
   | .alloc _, _, _, _ | .mfield _, _, _, _ | .addM _, _, _, _ | .mval, _, _, _
   | .ref, _, _, _ => trivial
+  | .wt _, _, _, _ => by
+    intro x h
+    obtain ⟨τ, _, h⟩ := bind_ok_inv h
+    split at h
+    · cases h; rfl
+    · cases h
 
 theorem Op2.denote_eval {σ : State} :
     (o : Op2 a b s) → {ra : a.Ev} → {rb : b.Ev} → {da : a.Den} → {db : b.Den} →

@@ -49,6 +49,7 @@ lemma (`TermTaclet.sound`).
 | `Semantics.lean` | The interpreter `Stmt.run`, following solc where KeY is more liberal (`docs/solc-alignment.md`). |
 | `Semantics/Properties.lean` | Read-after-write, frame and result-monad lemmas about the state operations, shared by every later layer. |
 | `Semantics/Agree.lean` | `EnvAgreeExcept`: states agreeing off scratch names, and a frame lemma per evaluator. |
+| `Semantics/WellFormed.lean` | `storageWtB`: well-formed storage (`SVal.canon ∧ SVal.tight`) as a test the term `wt(storage)` runs; `SVal.isDfltB`, a default the kernel can recognise. |
 | `Semantics/DecEq.lean` | `DecidableEq SVal`. |
 | `Semantics/NoPanic.lean` | Only an `assert` panics: `NoPanic` of every operation, `Stmt.mayPanic`, `Prog.run_noPanic`; the `no_panic` tactic. |
 | `Semantics/Callback.lean` | The callback reading of `transfer` and `try`: `ExecS`/`ExecP`, `holdsC`, `TransferSem`. |
@@ -84,7 +85,8 @@ lemma (`TermTaclet.sound`).
 | `Calculus/Decide.lean` | `sol_decide`: reads of writes as case trees on key equalities, over the live storage. |
 | `Calculus/DecideSyn.lean` | `LFml.syn`: a reduction closed by its terms, KeY's syntactic closing; `sol_decide`'s first try. |
 | `Calculus/DecideComplete.lean` | The starting storage's reads are realizable; `Fml.valid_iff_cons`. |
-| `Calculus/Derive.lean` | The strategy as one kernel evaluation: `Derive.residue` (per-goal fresh names, any number of branches, a step budget over the whole derivation, leaves closed by `LFml.syn`), `Proves.of_residue`; `sol_prove`, `sol_prove?`. |
+| `Calculus/Derive.lean` | The strategy as one kernel evaluation: `Derive.residue` (per-goal fresh names, any number of branches, a step budget over the whole derivation, leaves closed by `LFml.syn`, `wt` premises set aside), `Proves.of_residue`, `Proves.close_dropWt`; `sol_prove`, `sol_prove?`. |
+| `Calculus/Problem.lean` | solkey's obligation forms (`Problem.fml`: box `∀x̄. [f] true`, diamond `∀x̄. wt(storage) → ⟨f⟩ true`), `Fml.wt`, `wt_iff_reachable`, `initStorage_wt`; `Problem.text` in solkey's syntax. |
 | `Calculus/Spec.lean` | Specifications compiled to dynamic logic as solkey's `SpecCompiler` does; `spec[C]{f}`, `sol_spec`. |
 | `Calculus/Notation.lean` | `dl[C]{ … }` and `dl!{ … }`: concrete formulas read against a contract; `dl![m]{ … }`, `⟨[ ]⟩` at a modality `m`; a Lean formula where a formula stands; `Γ ⟹ φ` lines; `st!{ … }`, `pt!{ … }` for a storage term and a path. |
 | `Calculus/Quote.lean` | Quoters from formulas back to terms, so the kernel re-checks a computed goal. |
@@ -191,6 +193,10 @@ diffs it).  `docs/testsuite-proofs.md` has the counts and timings.
 | `Frontend/SolcJson.lean` | solc's JSON AST (`Lean.Json`) printed as `sol` text per function: `readContract`, `Gap`, `Tag`; the struct table checked member by member. |
 | `Frontend/Import.lean` | `solc_import "f.json" hash 0x… as N renaming A => B`: `N : Contract`, `N.f : Prog N` per function, `N.report : List ImportRow`; one `evalExpr`. |
 | `Solkey/TestSuite.lean` | `Solkey.TestSuite`, its 417 programs and the report, pinned. |
+| `Frontend/Problems.lean` | `solc_problems N` (`N.f.problem : Fml N` per program), `#solkey_problem`, `#solkey_scan`, `#solkey_derive?` (the replays to paste), `#solkey_obligations` (derived / pending). |
+| `TestSuite/Problems.lean` | The 417 statements of `Solkey.TestSuite`, two pinned in solkey's syntax, `initState_wt`. |
+| `TestSuite/Derived1.lean`, `TestSuite/Derived2.lean`, `TestSuite/Derived3.lean` | `Solkey.TestSuite.f.proved : ⊢ Solkey.TestSuite.f.problem`, 37 per module, by `sol_prove` and explicit leaf tactics. |
+| `TestSuite/Report.lean` | The pinned count: derived, pending (named), and the three with no statement. |
 
 ## Examples
 

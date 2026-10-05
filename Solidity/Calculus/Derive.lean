@@ -111,11 +111,23 @@ def closes (n : Nat) (close : List (Hyp C) → Fml C → Bool) (b : Nat) (Γ : L
   | some ([], _) => true
   | _ => false
 
+/-- A precondition the closer sets aside: `wt(storage)`, a diamond
+obligation's premise (`Calculus/Problem.lean`), which `LFml.syn` does not
+read.  Dropping a precondition only weakens what is to be shown
+(`Derive.wrap_dropWt`). -/
+def isWt : Hyp C → Bool
+  | .pre (.defined (.app1 (.wt _) _)) => true
+  | _ => false
+
+/-- The context without its `wt` premises. -/
+def dropWt (Γ : List (Hyp C)) : List (Hyp C) := Γ.filter (!isWt ·)
+
 /-- The default closer: no modality left, in `sol_decide`'s fragment, and
-its reduction closed by its terms (`LFml.syn`). -/
+its reduction closed by its terms (`LFml.syn`), the `wt` premises set
+aside. -/
 def synClose (Γ : List (Hyp C)) (φ : Fml C) : Bool :=
-  (Hyp.wrap Γ φ).modalFree && (Hyp.wrap Γ φ).inL Decide.Sym.empty &&
-    (Hyp.wrap Γ φ).reduce.syn [] []
+  let w := Hyp.wrap (dropWt Γ) φ
+  w.modalFree && w.inL Decide.Sym.empty && w.reduce.syn [] []
 
 /-- The steps `sol_prove` allows, over the whole derivation and so down any
 one path: a runaway (a program whose `if`s double the paths) stops here, in
@@ -145,12 +157,59 @@ theorem leaves_cons {Γ : List (Hyp C)} {φ : Fml C} {ls : List (Leaf C)} (h : P
   · exact h
   · exact t l hl
 
+/-- Setting the `wt` premises aside keeps a formula modal-free and only
+weakens it. -/
+theorem wrap_dropWt {φ : Fml C} : (Γ : List (Hyp C)) →
+    ((Hyp.wrap (dropWt Γ) φ).modalFree = true → (Hyp.wrap Γ φ).modalFree = true) ∧
+      ∀ σ, holds σ (Hyp.wrap (dropWt Γ) φ) → holds σ (Hyp.wrap Γ φ)
+  | [] => ⟨id, fun _ => id⟩
+  | h :: Γ => by
+    obtain ⟨ihm, ihh⟩ := wrap_dropWt (φ := φ) Γ
+    cases hw : isWt h with
+    | true =>
+      have hd : dropWt (h :: Γ) = dropWt Γ := by
+        simp only [dropWt, List.filter_cons, hw, Bool.not_true, Bool.false_eq_true, ↓reduceIte]
+      rw [hd]
+      match h, hw with
+      | .pre (.defined (.app1 (.wt _) _)), _ =>
+        exact ⟨fun hm => by simp only [Hyp.wrap, Fml.modalFree, ihm hm, Bool.and_self],
+          fun σ hs _ => ihh σ hs⟩
+    | false =>
+      have hd : dropWt (h :: Γ) = h :: dropWt Γ := by
+        simp only [dropWt, List.filter_cons, hw, Bool.not_false, ↓reduceIte]
+      rw [hd]
+      cases h with
+      | pre a =>
+        exact ⟨fun hm => by
+            simp only [Hyp.wrap, Fml.modalFree, Bool.and_eq_true] at hm ⊢
+            exact ⟨hm.1, ihm hm.2⟩,
+          fun σ hs ha => ihh σ (hs ha)⟩
+      | upd m U =>
+        exact ⟨fun hm => by simpa only [Hyp.wrap, Fml.modalFree] using ihm hm,
+          fun σ hs => Hyp.wrap_mono ihh [.upd m U] σ hs⟩
+      | havoc =>
+        exact ⟨fun hm => by simpa only [Hyp.wrap, Fml.modalFree] using ihm hm,
+          fun σ hs => Hyp.wrap_mono ihh [.havoc] σ hs⟩
+      | all x p =>
+        exact ⟨fun hm => by simpa only [Hyp.wrap, Fml.modalFree] using ihm hm,
+          fun σ hs => Hyp.wrap_mono ihh [.all x p] σ hs⟩
+
+/-- `Proves.close` with the `wt` premises set aside: a leaf of a diamond
+obligation, closed by a tactic that does not read `wt`. -/
+theorem _root_.Solidity.Proves.close_dropWt {R : RuleSet} {Γ : List (Hyp C)} {φ : Fml C}
+    (h : Valid (Hyp.wrap (dropWt Γ) φ))
+    (hφ : (Hyp.wrap (dropWt Γ) φ).modalFree = true := by first | rfl | decide) :
+    Proves R Γ φ :=
+  Proves.close (fun σ => (wrap_dropWt Γ).2 σ (h σ)) ((wrap_dropWt Γ).1 hφ)
+
 /-- The default closer is sound: what it accepts, `Proves.close` proves. -/
 theorem synClose_sound {Γ : List (Hyp C)} {φ : Fml C} (h : synClose Γ φ = true) :
     Proves .all Γ φ := by
   simp only [synClose, Bool.and_eq_true] at h
   obtain ⟨⟨hm, hf⟩, hs⟩ := h
-  exact Proves.close ((Fml.valid_iff_reduce _ hf).2 (Decide.LFml.syn_valid _ hs)) hm
+  have hv : Valid (Hyp.wrap (dropWt Γ) φ) :=
+    (Fml.valid_iff_reduce _ hf).2 (Decide.LFml.syn_valid _ hs)
+  exact Proves.close (fun σ => (wrap_dropWt Γ).2 σ (hv σ)) ((wrap_dropWt Γ).1 hm)
 
 section
 variable {r : Nat → List (Hyp C) → Fml C → Option (List (Leaf C) × Nat)}
@@ -329,8 +388,9 @@ def prove (g : MVarId) : MetaM (List MVarId) := do
 lines: `sol_decide`'s two steps after its `LFml.syn` try, which the closer
 has already made, each on its own so that the replay does not try the
 other; then `sol_close` and `sol_spec_close` (`omega`, `grind`). -/
-def leafTacs : Array (Array String) :=
-  let pre := #["refine Proves.close ?_", "sol_symex"]
+def leafTacs (wt : Bool := false) : Array (Array String) :=
+  let pre := #[if wt then "refine Proves.close_dropWt ?_" else "refine Proves.close ?_",
+    "sol_symex"]
   let red := pre ++ #["refine (Fml.valid_iff_reduce _ (by decide +kernel)).2 ?_", "sol_reduce"]
   #[red.push "sol_decide_cons", red.push "sol_decide_heuristic", pre.push "sol_close",
     pre.push "sol_spec_close"]
@@ -346,46 +406,65 @@ elab "sol_prove" : tactic => withMainContext do
   let leaves ← Derive.prove g
   setGoals (leaves ++ rest.erase g)
 
+namespace Derive
+
+open Lean Elab Tactic Meta
+
+/-- The first of `leafTacs` that closes the leaf `l`, each try with its own
+heartbeats and its state rolled back when it fails; `none` when none does.
+A leaf under a `wt` premise is closed with it set aside
+(`Proves.close_dropWt`). -/
+def searchLeaf (l : MVarId) : TacticM (Option (Array String)) := do
+  let env ← getEnv
+  let wt := ((← instantiateMVars (← l.getType)).find? fun e =>
+    e.isConstOf ``Term.wt || e.isConstOf ``Op1.wt).isSome
+  for src in leafTacs wt do
+    let t ← src.mapM fun line =>
+      match Parser.runParserCategory env `tactic line with
+      | .ok stx => pure (⟨stx⟩ : TSyntax `tactic)
+      | .error e => throwError "sol_prove?: {e}"
+    let s ← saveState
+    let ok ← tryCatchRuntimeEx
+      (withCurrHeartbeats do
+        setGoals [l]
+        for x in t do Term.withoutErrToSorry (evalTactic x)
+        pure (← getUnsolvedGoals).isEmpty)
+      fun _ => pure false
+    if ok then return some src
+    s.restore
+  return none
+
+/-- The replay of a `sol_prove` whose leaves are closed by `found`:
+`sol_prove`, then each leaf's lines, under `case leafᵢ =>` when there are
+several. -/
+def replayLines (found : List (Lean.Name × Array String)) : Array String :=
+  match found with
+  | [(_, body)] => #["sol_prove"] ++ body
+  | _ => found.foldl (fun ls (n, body) =>
+      (ls.push s!"case {n} =>") ++ body.map ("  " ++ ·)) #["sol_prove"]
+
+end Derive
+
 open Lean Elab Tactic Meta in
 /-- `sol_prove?`: `sol_prove`, each leaf closed by the first of
-`Derive.leafTacs` that closes it, each try with its own heartbeats;
-suggests the replay.  A leaf none closes stays a goal,
-and the first is reported. -/
+`Derive.leafTacs` that closes it (`Derive.searchLeaf`); suggests the
+replay.  A leaf none closes stays a goal, and the first is reported. -/
 elab tk:"sol_prove?" : tactic => withMainContext do
   let g ← getMainGoal
   let rest ← getUnsolvedGoals
   let leaves ← Derive.prove g
-  let env ← getEnv
-  let tacs ← Derive.leafTacs.mapM fun t => t.mapM fun l =>
-    match Parser.runParserCategory env `tactic l with
-    | .ok stx => pure (⟨stx⟩ : TSyntax `tactic)
-    | .error e => throwError "sol_prove?: {e}"
-  let mut lines : Array String := #["sol_prove"]
+  let mut found : List (Lean.Name × Array String) := []
   let mut open_ : List MVarId := []
-  let one := leaves.length == 1
   for l in leaves do
-    let mut found : Option (Array String) := none
-    for t in tacs, src in Derive.leafTacs do
-      let s ← saveState
-      let ok ← tryCatchRuntimeEx
-        (withCurrHeartbeats do
-          setGoals [l]
-          for x in t do Term.withoutErrToSorry (evalTactic x)
-          pure (← getUnsolvedGoals).isEmpty)
-        fun _ => pure false
-      if ok then found := some src; break
-      s.restore
-    let name := (← l.getTag).toString
-    let body ← match found with
-      | some t => pure t
-      | none =>
-        if open_.isEmpty then
-          logInfo m!"sol_prove?: no tactic closes {name}:{indentExpr (← l.getType)}"
-        open_ := open_ ++ [l]
-        pure #["sorry"]
-    lines := if one then lines ++ body
-      else (lines.push s!"case {name} =>") ++ body.map ("  " ++ ·)
+    let name ← l.getTag
+    match ← Derive.searchLeaf l with
+    | some t => found := found ++ [(name, t)]
+    | none =>
+      if open_.isEmpty then
+        logInfo m!"sol_prove?: no tactic closes {name}:{indentExpr (← l.getType)}"
+      open_ := open_ ++ [l]
+      found := found ++ [(name, #["sorry"])]
   setGoals (open_ ++ rest.erase g)
-  ProofTree.suggest tk lines
+  ProofTree.suggest tk (Derive.replayLines found)
 
 end Solidity

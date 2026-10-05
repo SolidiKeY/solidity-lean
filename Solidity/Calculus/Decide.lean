@@ -651,6 +651,7 @@ def _root_.Solidity.Op1.toL : Op1 a s → a.LTy → s.LTy
   | .addM _, _ => ()
   | .mval, _ => ()
   | .ref, _ => ()
+  | .wt _, _ => .err
 
 /-- A binary symbol over its arguments' `toL`. -/
 def _root_.Solidity.Op2.toL : Op2 a b s → a.LTy → b.LTy → s.LTy

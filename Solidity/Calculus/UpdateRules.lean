@@ -2349,7 +2349,8 @@ theorem Op1.eval_le {σ : State} : (o : Op1 a s) → {r r' : a.Ev} → Srt.Le a 
         | exact Res.Le.bind h fun _ => Res.Le.refl _
   | .unop .., _, _, h | .net, _, _, h | .delValue, _, _, h | .field _, _, _, h | .next, _, _, h
   | .select _, _, _, h | .sval, _, _, h | .newArr _, _, _, h | .alloc _, _, _, h
-  | .mfield _, _, _, h | .addM _, _, _, h | .mval, _, _, h | .ref, _, _, h =>
+  | .mfield _, _, _, h | .addM _, _, _, h | .mval, _, _, h | .ref, _, _, h
+  | .wt _, _, _, h =>
     Res.Le.bind h fun _ => Res.Le.refl _
 
 theorem Op2.eval_le {σ : State} : (o : Op2 a b s) → {ra ra' : a.Ev} → {rb rb' : b.Ev} →

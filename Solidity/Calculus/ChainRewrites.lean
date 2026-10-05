@@ -2970,7 +2970,7 @@ theorem Tm.freshPath_eval {m : MTerm C} {R : RefTy} {σ μ₀ μ₁ : State} {ro
         obtain ⟨id, hid⟩ := ih2 R'' hR''
         exact ⟨_, by rw [MAddr.field_eval, hid]; rfl⟩
     | unop _ _ | net | netOf _ | field _ | next | select _ | sval | newArr _ | addM _ | mval | ref
-    | delValue =>
+    | delValue | wt _ =>
       simp only [Tm.freshPath?] at h <;> nomatch h
   | app2 o a b iha ihb =>
     intro p h
@@ -3146,7 +3146,7 @@ theorem Tm.boundedIn_eval {M : MTerm C} {σ μ : State} (hM : M.eval σ = .ok μ
       subst had
       exact ih h id hi
     | unop _ _ | net | netOf _ | field _ | next | select _ | sval | newArr _ | addM _ | mval | ref
-    | delValue =>
+    | delValue | wt _ =>
       simp only [Tm.boundedIn] at h <;> nomatch h
   | app2 o a b iha ihb =>
     intro h

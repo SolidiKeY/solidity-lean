@@ -90,7 +90,7 @@ What they say:
   with one `evalExpr`.
 - **M3.** Obligation forms: diamond under `wt(storage)`, box with the Panic
   halt, parameters as `∀` over their type's range.  **M3a** (the Panic halt)
-  is done, below; M3b (`wt`, the obligation statements) is next.
+  and **M3b** (`wt`, the 417 statements, 111 derived) are done, below.
 - **M4.** Closer for locals, plain storage and `try`/`transfer`: ground
   arithmetic, `applyEq`, bool case splits, difference bounds, `wt` facts.
 - **M5.** Push, pop, `delete` and storage copies in the closer.
@@ -334,3 +334,109 @@ the old reading (`solc-alignment.md`, `compiler-verification.md`,
 `solc-validation.md`, the soundness rules, the walk steps) now state this
 one.
 
+
+## M3b results (2026-10-05): the obligations
+
+`Calculus/Problem.lean` states solkey's obligations (`Problem.fml`); the
+`SolkeyTestSuite` library states all of `TestSuite`'s and proves what
+`sol_prove` and its leaf tactics close.
+
+- **Box**: `∀x̄. [ f(x̄); ] true`.  With M3a a failed `assert` falsifies it,
+  so no cut is needed: this is KeY's "Violated" obligation; a `require`
+  that fails reverts, which the box accepts, as in KeY.
+- **Diamond**: `∀x̄. wt(storage) → ⟨ f(x̄); ⟩ true`.  solkey states no
+  premise (its storage is the contract's by construction); here the
+  storage is any state, so the premise says it is one the contract can be
+  in.
+- **Parameters**: `Fml.all` binders over the type's range: `uint`
+  `[0, 2²⁵⁶)`, `int` the signed 256-bit range, `bool`.  KeY's `int` is
+  unbounded.  The one narrow parameter (`signedUnaryMinusInRange(int8)`)
+  ranges over the 256-bit range, as its KeY sort does.  No `TestSuite`
+  function returns a value but the skipped `tryCalleeGet`.
+- **`wt` is one atomic term**, `Op1.wt vs` applied to `storage`, stated as
+  `defined(wt(storage))` (`Fml.wt`).  The interpreter reads it as a test,
+  `storageWtB` (`Semantics/WellFormed.lean`): every root there, in order,
+  each `SVal.canon` and `SVal.tight` at its type, clause for clause as
+  `canonB`/`tightB`, the default compared by `SVal.isDfltB` since the
+  kernel does not reduce the well-founded `defaultForTy`.  So
+  `wt_iff_reachable`: for `TestSuite`'s roots (no duplicate, `Ty.okDeep`)
+  a storage passes `wt` exactly when a checked program reaches it.  Why an
+  `Op1` and not a formula: a new `Fml` constructor touches every formula
+  traversal, and an expanded layout (`∀` per root and member) gives every
+  leaf quantifiers the closer has to instantiate.  The `Op1` cost one case
+  in `Op1.eval`/`denote` and their frame, bridge, refinement and
+  state-part lemmas, the quoter, the printer and the `dl{}` reader
+  (`wt(storage)`).  The closer sets the premise aside
+  (`Derive.dropWt`: only a weakening, `Derive.wrap_dropWt`); a leaf
+  tactic does the same through `Proves.close_dropWt`, which `sol_prove?`
+  picks for a leaf under `wt`.
+- **Satisfiable**: `Solkey.TestSuite.initState_wt`, the initial state passes
+  `wt`.  The plan asked for `decide +kernel` on the initial store; the
+  kernel cannot evaluate `C.initStorage` (it is built by `defaultForTy`), so
+  the theorem is `initStorage_wt` — the empty program reaches the initial
+  storage — with its two side conditions (`nodupKeysB`, `okDeep` of the
+  roots) by `decide +kernel`.
+
+**The statements.**  `solc_problems Solkey.TestSuite`
+(`Frontend/Problems.lean`) defines `Solkey.TestSuite.f.problem : Fml _` for
+each of the 417 programs, compiled for `sol_prove`.  `#solkey_problem`
+prints one in solkey's `--print-problem` syntax (same modality, same
+parameters as program variables of their KeY sort, plus `wt(storage) ->`
+on a diamond); two are pinned in `TestSuite/Problems.lean`.
+
+**The theorems.**  `#solkey_derive? N from i count k` runs `sol_prove?` on
+each statement and prints, for those whose leaves all close, the theorem
+`N.f.proved : ⊢ N.f.problem` with its replay (`sol_prove`, then one leaf
+tactic sequence per leaf; nothing searched on re-check).  The three
+`TestSuite/Derived*.lean` modules hold the 111 it found (37 each), the
+search run at `maxHeartbeats 50000` per leaf try.  `#solkey_obligations`
+reads the environment, and `TestSuite/Report.lean` pins it:
+
+| | Box | Diamond | Total |
+|---|---:|---:|---:|
+| derived | 36 | 75 | 111 |
+| pending | 66 | 240 | 306 |
+| no statement | | | 3 (1 excluded, 2 skipped) |
+
+A pending obligation is no theorem and no `sorry`.  What keeps them
+pending (from `#solkey_scan`, which lists the leaves of the walk, and the
+first leaf the search leaves open):
+
+- **Diamond storage writes and reads** (most of the 240): a diamond update
+  must return, and `store(storage, age, 34)` returns only where `age` is a
+  root; that is what `wt(storage)` gives, and the closer does not read it
+  yet (M4: "returns" facts at statically typed paths).
+- **Memory** (`memory*`, `testMemory*`): the closer has no memory layer (M6).
+- **Push, pop, copies** (`storagePush*`, `test*Push*`, `testCopy*`): M5.
+- Ground arithmetic and key splits the syntactic closer does not do (M4).
+
+Derived diamonds are the locals-only and the literal-condition ones
+(`additionSimple`, `ifElseSplit`, `requireTrueLiteral`, …); derived boxes
+include the reverting ones (`storageIndexArrayReadOutOfBoundsReverts`,
+`transferToOwner`, …).
+
+**Cost.**  Each derived theorem, elaborated alone (`Elab.async false`,
+warm): 9 ms to 2.2 s, median 380 ms; 50.4 s for all 111 (11.4, 23.4 and
+15.6 s for the three modules).  No `maxHeartbeats` override.  The walk
+alone (`#solkey_scan … walk`) takes 0–6 ms per statement; with
+`LFml.syn` on its leaves 0–110 ms.  The most storage writes in one leaf is
+9 (`testArrayCopyClearsOldElements`), so the closer's unbounded reduction
+did not blow up on this file.  The search (`#solkey_derive?`) took about
+7 minutes for the 417 statements.
+
+**What changed below.**  `Op1.wt` is a new symbol, so `Update.lean` and the
+modules that match on `Op1` (`Theory/Bridge/Denote.lean`,
+`Calculus/TermRules.lean`, `Calculus/UpdateRules.lean`,
+`Calculus/StateParts.lean`, `Calculus/Decide.lean`,
+`Calculus/ChainRewrites.lean`, `Calculus/Quote.lean`,
+`Calculus/RuleSyntax.lean`, `Calculus/Notation.lean`) gained one case each;
+`Derive.synClose` filters the context first (a `List.filter` in the kernel
+check, for every `sol_prove`).  The default build passes; the benchmark
+modules that use `sol_prove` built in 6.8 s (ERC20), 24 s (Coin) and 25 s
+(Mapping) with the build's parallelism.  The filter's own cost was not
+measured apart; it is linear in the context, beside a reduction that is
+not.
+
+`#print axioms` on `Solkey.TestSuite.additionSimple.proved`,
+`additionStorageWrite.proved`, `initState_wt`, `wt_iff_reachable` and
+`Proves.of_proves`: `propext`, `Classical.choice`, `Quot.sound`.

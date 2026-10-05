@@ -1,4 +1,5 @@
 import Solidity.Semantics.Agree
+import Solidity.Semantics.WellFormed
 import Solidity.TermSimp
 import Solidity.Theory.Abs
 
@@ -146,6 +147,11 @@ inductive Op1 : Srt → Srt → Type where
   | mval : Op1 .val .mv
   /-- `MValT.ref`: a reference written. -/
   | ref : Op1 .ident .mv
+  /-- `wt(s)`: the storage `s` holds the roots `vs`, each canonical and
+  tight (`storageWtB`): KeY's `wellFormed(heap)`, the premise of a diamond
+  obligation (`Calculus/Problem.lean`).  It returns `true` or halts, so a
+  formula states it as `defined`. -/
+  | wt (vs : List (Name × Ty)) : Op1 .st .val
   deriving DecidableEq, Repr
 
 /-- Binary symbols. -/
@@ -262,6 +268,8 @@ variable {C : Contract}
 @[match_pattern, reducible] def Term.net (a : Term C) : Term C := .app1 .net a
 @[match_pattern, reducible] def Term.netOf (x : Var) (a : Term C) : Term C := .app1 (.netOf x) a
 @[match_pattern, reducible] def Term.delValue (t : Term C) : Term C := .app1 .delValue t
+@[match_pattern, reducible] def Term.wt (vs : List (Name × Ty)) (s : STerm C) : Term C :=
+  .app1 (.wt vs) s
 
 @[match_pattern, reducible] def PTerm.root (r : Name) : PTerm C := .app0 (.root r)
 @[match_pattern, reducible] def PTerm.pv (x : Var) : PTerm C := .pvP x
@@ -392,6 +400,9 @@ def Op1.eval (σ : State) : Op1 a s → a.Ev → s.Ev
     return (← allocDefault τ R).1
   | .mval, rt => do pure (← rt).toMVal
   | .ref, ri => do pure (.ref (← ri))
+  | .wt vs, rs => do
+    let τ ← rs
+    if storageWtB vs τ.storage then pure (.bool true) else .error .stuck
 
 /-- A binary symbol read in `σ`, its arguments' readings given. -/
 def Op2.eval (σ : State) : Op2 a b s → a.Ev → b.Ev → s.Ev
@@ -582,6 +593,7 @@ def Op1.denote (σ : State) : Op1 a s → a.Den → s.Den
   | .addM _, _ => ()
   | .mval, _ => ()
   | .ref, _ => ()
+  | .wt _, _ => .prim (.bool true)
 
 /-- A binary symbol in the Theory, its arguments' readings and denotations
 given. -/
@@ -1009,6 +1021,9 @@ theorem Op1.eval_agree {σ τ : State} (hag : EnvAgreeExcept ns σ τ) :
     simp only [Srt.Agree, Op1.eval] at hx ⊢
     refine ResultsAgree.bind hx fun _ _ h' => ?_
     exact ResAgree.bindState (allocDefault_agree h' R) fun _ _ _ h'' => h''
+  | .wt _, _, _, _, hx => by
+    simp only [Srt.Agree, Op1.eval] at hx ⊢
+    exact ResultsAgree.bindEq hx fun _ _ h' => by simp only [h'.storage]
 
 theorem Op2.eval_agree {σ τ : State} (hag : EnvAgreeExcept ns σ τ) :
     (o : Op2 a b s) → {x₁ x₂ : a.Ev} → {y₁ y₂ : b.Ev} → Srt.Agree ns a x₁ x₂ →
@@ -1148,7 +1163,7 @@ theorem Op1.denote_agree {σ τ : State} (hag : EnvAgreeExcept ns σ τ) :
   | .next, _, _ => by simp only [Op1.denote, State.abs, hag.storage]
   | .unop .., _, _ | .delValue, _, _ | .field _, _, _ | .select _, _, _ | .sval, _, _
   | .newArr _, _, _ | .alloc _, _, _ | .mfield _, _, _ | .addM _, _, _ | .mval, _, _
-  | .ref, _, _ => rfl
+  | .ref, _, _ | .wt _, _, _ => rfl
 
 theorem Op2.denote_agree {σ τ : State} (hag : EnvAgreeExcept ns σ τ) :
     (o : Op2 a b s) → {x₁ x₂ : a.Ev} → {y₁ y₂ : b.Ev} → Srt.Agree ns a x₁ x₂ →

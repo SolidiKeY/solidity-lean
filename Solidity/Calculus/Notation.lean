@@ -651,6 +651,7 @@ def rVal (R : Readers C) (Γ : ECtx) : RawTerm → Except String (Term C)
   | .app "find" [s, .field p "length"] => do
     pure (.len (← R.stor s) (← (if s.hasSelect then R.fpath else R.path) p))
   | .app "delValue" [t] => do pure (.delValue (← R.val t))
+  | .app "wt" [s] => do pure (.wt C.vars (← R.stor s))
   | .app "select" [s, .name r] => do pure (.find (← R.stor s) (.root r))
   | .app "select" [s, r] | .app "find" [s, r] => do
     pure (.find (← R.stor s) (← (if s.hasSelect then R.fpath else R.path) r))

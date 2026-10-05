@@ -1871,6 +1871,7 @@ def foldTmHead (e : Lean.Expr) : MetaM Lean.Expr := do
       | ``Op1.addM => mk ``MTerm.addM (#[C, x] ++ oa)
       | ``Op1.mval => mk ``MValT.val #[C, x]
       | ``Op1.ref => mk ``MValT.ref #[C, x]
+      | ``Op1.wt => mk ``Term.wt (#[C] ++ oa ++ #[x])
       | _ => e
   if f == ``Tm.app2 && args.size == 7 then
     let C := args[0]!
@@ -1965,6 +1966,7 @@ partial def ppTerm (e : Lean.Expr) : MetaM (TSyntax `dl_term) := do
     if (← whnfTm s).isAppOfArity ``STerm.storage 1 then return len
     `(dl_term| find($(← ppSTerm s), $len))
   | Term.delValue _ t => `(dl_term| delValue($(← ppTerm t)))
+  | Term.wt _ _ s => `(dl_term| wt($(← ppSTerm s)))
   | Term.read _ m a => `(dl_term| read($(← ppMTerm m), $(← ppMAddr a)))
   | Term.mlen _ m i =>
     unless (← whnfTm m).isAppOfArity ``MTerm.memory 1 do return ← escapeDl e

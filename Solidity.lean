@@ -8,6 +8,7 @@ import Solidity.Semantics
 import Solidity.Semantics.DecEq
 import Solidity.Semantics.Properties
 import Solidity.Semantics.Agree
+import Solidity.Semantics.WellFormed
 import Solidity.Semantics.Callback
 import Solidity.Update
 import Solidity.Calculus.RuleSyntax
@@ -32,6 +33,7 @@ import Solidity.Calculus.Decide
 import Solidity.Calculus.DecideSyn
 import Solidity.Calculus.DecideComplete
 import Solidity.Calculus.Derive
+import Solidity.Calculus.Problem
 import Solidity.Calculus.Spec
 import Solidity.Calculus.Uniqueness
 import Solidity.Calculus.Progress
@@ -142,3 +144,4 @@ import Solidity.Examples.ProofTree
 import Solidity.Theorems
 import Solidity.Frontend.SolcJson
 import Solidity.Frontend.Import
+import Solidity.Frontend.Problems

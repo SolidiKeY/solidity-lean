@@ -48,6 +48,7 @@ def Op1.quote : Op1 a s → Lean.Expr → Lean.Expr
   | .addM R, x => mkAppN (mkConst ``MTerm.addM) #[c, x, toExpr R]
   | .mval, x => mkAppN (mkConst ``MValT.val) #[c, x]
   | .ref, x => mkAppN (mkConst ``MValT.ref) #[c, x]
+  | .wt vs, x => mkAppN (mkConst ``Term.wt) #[c, toExpr vs, x]
 
 /-- A binary symbol over its quoted arguments. -/
 def Op2.quote : Op2 a b s → Lean.Expr → Lean.Expr → Lean.Expr
