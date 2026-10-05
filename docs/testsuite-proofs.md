@@ -986,6 +986,78 @@ corollaries' are pinned: `diamond_of_proved` and `box_of_proved` in
 `Corpus/Imported.lean`, one corollary (for `initState_wt`) in
 `Corpus/TestSuite.lean`, and each `⊢` theorem by `Report.lean`'s pin.
 
+## Dangling aliases
+
+The five diamonds that use an alias bound through an index after a `pop`
+made it dangle (`testDanglingReferenceSurvivesPush`,
+`testArrayCopyClearsOldElements`, `testArrayCopyKeepsDestinationTail`,
+`testDeleteArrayLeavesDataPastLength`,
+`testDanglingInnerArrayReappearsAfterPush`), each obligation read through
+solkey's storage taclets: KeY's `at(i)` names any slot, so a write through
+the alias lands in the slot past the end, and a later `push()`, `delete` or
+copy makes it live again.
+
+### Step 0: the leaves (on the M6b closer, 411 derived)
+
+Measured in a scratch module: `sol_prove`'s walk without closing
+(`Derive.residue`), each leaf's context wrapped and split
+(`Fml.seqUpd`) as `synClose` does; the tree and the reduction counted by
+`LFml.fits` and `LFml.elim`'s; `#solkey_derive? … only f timed` for the
+search.  "Live variant" is the same leaf with the alias put back into the
+writes after it as the path it was bound to, to measure what a write node
+at that path costs.
+
+| Test | Leaves | Storage writes | Tree | Reduction | Live variant | Search |
+|---|---:|---:|---:|---:|---:|---:|
+| `testDanglingReferenceSurvivesPush` | 2 | 5 | 339 | 2145 | 1930 | 1.0 s |
+| `testArrayCopyClearsOldElements` | 2 | 9 | 1162 | 6394 | 6704 | 2.7 s |
+| `testArrayCopyKeepsDestinationTail` | 2 | 7 | 690 | 3513 | 4185 | 1.4 s |
+| `testDeleteArrayLeavesDataPastLength` | 2 | 6 | 395 | 4041 | 2896 | 1.3 s |
+| `testDanglingInnerArrayReappearsAfterPush` | 3 | 5 | 505, 503, 321 | 3264, 3262, 1538 | 3879, 3877, 1813 | 1.9 s |
+
+The two leaves of each are the `assert`'s goals (`thn` and the condition);
+the inner-array test has two `assert`s, so three.  Every leaf is
+modality-free and within `closeSize`; none holds `p[i]@S` (`Op3.atIn`).
+Each is refused at one place: `Fml.inL` is false on the write through the
+alias, the first storage write after the `pop`, where `SymB.onWrite` had
+made the alias `stale`: `save(storage, r.value, 5)` in the first four,
+`push(storage, ptr, 66)` in the last (`Tm.toL` gives `LPath.stuck`).  The
+search names `leaf1` open in all five.
+
+The shapes are as solkey's taclets give them: a `push()` is
+`pushSlot`, a `pop` is `save(delAt(storage, a[a.length - 1]), a.length,
+a.length - 1)`, the alias is the update `{ r := tokens[0] }`.  The copy in
+`testArrayCopyClearsOldElements` is `save(storage, bucket.tokens,
+find(storage, tokens))` and the one in `testArrayCopyKeepsDestinationTail`
+is `store(storage, tokens, find(storage, bucket.tokens))`; both
+translate to `LStor.copy`.  The write `bucket.tokens[0].value = 7` goes
+through an alias bound right after its `push()`, with no write between, so
+it is not stale.
+
+**The design against the M6b code.**  Confirmed, with these corrections:
+
+- The `LTerm`/`LPath`/`LStor` block is now in `Calculus/DecideLang.lean`,
+  with `LMem`, `LSel` and `LMV` (`LStor` at line 367, `LStor.eval` 510,
+  `LStor.vars` 582, `LStor.eval_setEnv` 664; `saveLive` 88).  The new
+  constructor goes there, before `copy`; M6b's `view` is after it.
+- `EnvRel` takes the memory's births (`EnvRel σ τ B x`).
+- M6b added `LStor.cpokU` (with its F twin, `_eq` and `_sim`): a `.stale`
+  node joins its catch-all (`.cpok s Q`, kept whole), which is exact as it
+  is.  The memory readers reach a storage only through `LMem.copySt`,
+  which calls the generic readers, so they need no arm; `slotHasU` and
+  `slotLenU` give `opq` on a `.view`.
+- `arrRead` already takes a slot reader (M5), and `readU`'s `.arr` arm
+  passes `s.slotU`.  Only `arrLength` lacks it (row 9).
+- `LTerm.findP`, a read at the slot level (`SVal.find`), already exists:
+  the deferred reads through a stale alias can use it.
+- `Calculus/Closer.lean`: `Facts.retsW`'s `.len` arm is at line 2232,
+  `LStor.fits` at 3414.
+
+**Risk.**  The copy test's reduction is 6394 already, and 6704 with a write
+node in its place; a stale node's guard adds two length reads and a
+location read, and the copy's slot reader four reads.  It is likely past
+`elimSize` (8000), and then stays pending.  The other four leave room.
+
 ## M6 results (2026-10-05): memory
 
 This memory support was reworked into solkey's `memoryRules.key`/
