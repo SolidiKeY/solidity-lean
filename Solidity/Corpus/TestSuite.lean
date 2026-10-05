@@ -1872,4 +1872,14 @@ theorem tryCallUnmatchedFailureReverts :
     Box Solkey.TestSuite.initState Solkey.TestSuite.tryCallUnmatchedFailureReverts :=
   box_of_proved Solkey.TestSuite.tryCallUnmatchedFailureReverts.proved Solkey.TestSuite.initState_wt
 
+/-! One corollary's axioms, for those of `initState_wt`: with the pins of
+`Corpus/Imported.lean` and `TestSuite/Report.lean`, every corollary here
+uses no axiom but Lean's three. -/
+
+/--
+info: 'Solidity.Corpus.TestSuite.storageRootReadWrite' depends on axioms: [propext, Classical.choice, Quot.sound]
+-/
+#guard_msgs in
+#print axioms storageRootReadWrite
+
 end Solidity.Corpus.TestSuite

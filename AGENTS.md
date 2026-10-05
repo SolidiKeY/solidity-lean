@@ -178,11 +178,12 @@ import changes and final confirmation. The `lean-verify` skill in
 
 | Command | What it covers |
 |---|---|
-| `./run-lean.sh` | `lake build` (default targets), `lake build SolkeyTestSuite` (the solc import, 417 statements, the 300 derived theorems: their only check, and the slowest part), then the solkey sort check |
+| `./run-lean.sh` | `lake build` (default targets), `lake build SolkeyTestSuite` (the solc import, 417 statements, the derived theorems `TestSuite/Report.lean` counts: the slowest part), then the solkey sort check |
 | `node scripts/check-orphans.mjs` | every module is reachable from a library root |
 | `./scripts/check-doc-paths.sh` | every backticked `*.lean` in the prose names a file that exists |
 | `lake exe solkeycheck` | sort annotations against solkey's `.key` |
 | `./scripts/check-corpus.sh` | the solkey corpus (`SolidityCorpus`) against `tests/solkey/expected.tsv` |
+| `./scripts/check-testsuite.sh` | the TestSuite rows against `Report.lean`'s pin and solkey's functions; no Lean |
 
 `solkeycheck` is at zero against solkey `100f7f24c3` (313 taclets,
 2026-10-04). Re-pinning to a newer checkout is its own change: it regenerates

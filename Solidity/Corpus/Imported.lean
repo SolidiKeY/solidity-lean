@@ -76,4 +76,20 @@ theorem box_of_proved {C : Contract} {σ : State} {P : Prog C}
     Box σ P :=
   h.valid σ hw
 
+/-! A corollary of `Corpus/TestSuite.lean` uses the axioms of its `⊢`
+theorem, which `TestSuite/Report.lean`'s pin checks, of `initState_wt`,
+pinned there on one corollary, and of these two, through `Proves.valid`. -/
+
+/--
+info: 'Solidity.Corpus.diamond_of_proved' depends on axioms: [propext, Classical.choice, Quot.sound]
+-/
+#guard_msgs in
+#print axioms diamond_of_proved
+
+/--
+info: 'Solidity.Corpus.box_of_proved' depends on axioms: [propext, Classical.choice, Quot.sound]
+-/
+#guard_msgs in
+#print axioms box_of_proved
+
 end Solidity.Corpus

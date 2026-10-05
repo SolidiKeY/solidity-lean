@@ -6,8 +6,8 @@ derived with `⊢`, checked by the kernel, at close to KeY's speed. No
 dependencies, no `native_decide`, no new `maxHeartbeats` override, and a `?`
 twin that prints a cheap replay for every searching tactic.
 
-Today the corpus (`Corpus/TestSuite.lean`) decides each function's run at one
-concrete store (`corpus_decide`); none is proved by `⊢`.
+Today 391 of the 418 are derived by `⊢` (`TestSuite/Report.lean`), and the
+corpus rows (`Corpus/TestSuite.lean`) are corollaries of those theorems.
 
 ## Decisions (2026-10-05)
 
@@ -101,9 +101,14 @@ What they say:
   (below): 300 derived; the 6 pending outside memory are listed with
   their reasons.
 - **M6.** Memory in the closer: allocation, reads and writes, `mlen`,
-  defaults, copies to storage.
+  defaults, copies to storage.  Done (below), but for the copies between
+  memory and storage: 391 derived.  Being reworked into solkey's
+  `memoryRules.key`/`structMemoryRules.key` taclets.
 - **M7.** The remaining functions; a `derived` status in the corpus table;
-  retire `corpus_decide`, the `#eval` rows and the 8M override.
+  retire `corpus_decide`, the `#eval` rows and the 8M override.  Done
+  (below), but for the remaining functions: the table reads the `Report.lean`
+  pin, and `TestSuite`'s `corpus_decide` theorems and `#eval` rows, and the
+  8M override, are gone.
 
 ## For M1
 
@@ -893,13 +898,18 @@ The old corpus and the `⊢` derivations now tell one story.
   `Solkey.TestSuite.f.proved` in `Solidity/TestSuite/`, and fails when the
   pins disagree with the source or with each other.
   - `tests/solkey/expected.tsv` has one row for each of the 420 functions:
-    300 `derived`, 116 `pending` (110 memory, 5 dangling aliases, and the
-    replay past its budget), 1 `divergent` (`storagePushReadBack`, the
-    length delta), 1 `excluded` and 2 `skip`.  Each row's note gives the
-    modality and the parameters.
+    391 `derived`, 25 `pending` (19 copies between memory and storage, 5
+    dangling aliases, and the replay past its budget), 1 `divergent`
+    (`storagePushReadBack`, the length delta), 1 `excluded` and 2 `skip`.
+    Each row's note gives the modality and the parameters.  (Before M6:
+    300 derived, 116 pending.)
   - `docs/corpus-parity.md` has a TestSuite section, by modality and by
     reason.
-  - Re-running the generator after M6 re-pins all of it with no hand edit.
+  - Re-running the generator re-pins all of it with no hand edit, as it did
+    after M6.
+  - It refuses a `TestSuite.sol` whose sha256 is not the fixture's
+    `sourceSha256` (`tests/solc/TestSuite.ast.json`), and a `DIVERGENT` or
+    `PENDING` entry that `Report.lean` does not list pending.
 - **The generator, re-synced.**  The function header now accepts
   `pure`/`view`, `external` and `returns (…)`, and reads the `skip` tag.
   The solkey checkout is at `78f42fde33`, where solkey's "fixed some
@@ -913,9 +923,11 @@ The old corpus and the `⊢` derivations now tell one story.
     `localPreincrementAssign`.  That file is the one with 420 functions
     (`scripts/solc-ast.mjs` is not this lane's).
 - **The corpus rows are corollaries.**  `Corpus/TestSuite.lean`
-  (generated) states each of the 281 derived obligations with no
+  (generated) states each of the 371 derived obligations with no
   parameters at `Solkey.TestSuite.initState`, as `diamond_of_proved` or
   `box_of_proved` of its theorem and `initState_wt` (`Corpus/Imported.lean`).
+  The 20 derived ones with parameters have no corollary; `Report.lean`'s
+  pin, which the corpus imports, checks them.
   - The 186 `corpus_decide` theorems, the 51 `#eval` pins of this module
     and its `maxHeartbeats 8000000` are gone.
   - The corollaries are not stated at `State.testSuiteStore`: that is the
@@ -923,7 +935,7 @@ The old corpus and the `⊢` derivations now tell one story.
     `boolKeyed`, so it is no storage of the imported contract and `wt`
     fails there.
   - Rows the old corpus decided at that store and `⊢` has not derived yet
-    (the memory ones) have no corpus theorem until M6.
+    (the copies between memory and storage) have no corpus theorem yet.
 - **The two contracts agree.**  `testSuite_agrees` (`decide +kernel`, no
   axioms) checks that every root of the hand-written `TestSuite` is a root of
   `Solkey.TestSuite` at the same type, up to `folks`/`people` and
@@ -937,8 +949,9 @@ The old corpus and the `⊢` derivations now tell one story.
   and those are no longer decided here.
 - **Audit.**  `scripts/check-testsuite.sh` checks three things with node
   only:
-  - no `native_decide`, `sorry`, `admit` or `maxHeartbeats` in the code
-    (comments stripped) of `Solidity/TestSuite/` and `Solidity/Solkey/`;
+  - no `native_decide`, `decide +native`, `sorry`, `admit`,
+    `maxHeartbeats` or `skipKernelTC` in the code (comments and strings
+    stripped) of `Solidity/TestSuite/` and `Solidity/Solkey/`;
   - the `Report.lean` pin lists no `unsound`/`mismatched`/`unstated` theorem
     (`#solkey_obligations` already rejects any axiom but Lean's three);
   - the parity: the stated rows are exactly solkey's `testSuiteFunctions`
@@ -946,13 +959,13 @@ The old corpus and the `⊢` derivations now tell one story.
     ones, and the table is what the generator writes today.
 
   `--complete` also fails while a row is pending.  Today:
-  `418 = 300 derived + 116 pending + 1 divergent + 1 excluded; 2 skip`.
+  `418 = 391 derived + 25 pending + 1 divergent + 1 excluded; 2 skip`.
 
 **Times** (`Elab.async false`, warm; wall clock includes the tool round trip):
 
 | Module | Time |
 |---|---:|
-| `Corpus/TestSuite.lean`, 281 corollaries | under 3 s; no declaration reaches 3 ms |
+| `Corpus/TestSuite.lean`, 281 corollaries (before M6) | under 3 s; no declaration reaches 3 ms |
 | `Corpus/Imported.lean` | about 0.4 s (`testSuite_agrees`: 218 ms in the kernel) |
 | `Corpus/SolcExpressions.lean` … `SolcControlFlow.lean`, no override | 2.6–4.6 s each |
 
@@ -960,16 +973,22 @@ Loading `Corpus/TestSuite.lean`'s imports (`TestSuite/Report.lean`, so all
 the `Derived` modules) took about 140 s the first time.  `lake build
 SolidityCorpus` now builds the `SolkeyTestSuite` derivations too.
 
-**Still to do, once M6 lands:**
+**Still to do:**
 - the final full `lean_build`;
 - the `#print axioms` sweep over `Solkey.TestSuite.*`;
-- re-running the generator, then `scripts/check-testsuite.sh --complete`,
-  for the 418-row parity.
+- `scripts/check-testsuite.sh --complete`, which fails while 25 rows are
+  pending.
 
-None of these was run here.  `#print axioms` on `testSuite_agrees` (none)
-and on two corollaries (Lean's three) was checked by hand.
+The generator was re-run after M6 (`scripts/check-testsuite.sh` passes).
+`#print axioms` on `testSuite_agrees` (none) was checked by hand; the
+corollaries' are pinned: `diamond_of_proved` and `box_of_proved` in
+`Corpus/Imported.lean`, one corollary (for `initState_wt`) in
+`Corpus/TestSuite.lean`, and each `⊢` theorem by `Report.lean`'s pin.
 
 ## M6 results (2026-10-05): memory
+
+This memory support is being reworked into solkey's `memoryRules.key`/
+`structMemoryRules.key` taclets; what follows is the closer as merged.
 
 - **The closer reads memory.**  `Calculus/DecideMem.lean` keeps the
   objects the updates allocate as `SObj`s over `sol_decide`'s terms: the
@@ -984,20 +1003,32 @@ and on two corollaries (Lean's three) was checked by hand.
   (`memAlloc?`, `peelMem_sound`), so `Fml.toL` sees the identity before the
   object.
 - **Counts.**  91 more obligations derived, in `TestSuite/Derived9.lean` to
-  `TestSuite/Derived11.lean` (40, 40, 11), all `sol_prove`: 391 derived, 26 pending,
-  one excluded, two skipped.  `Report.lean` pins it and finds no theorem
+  `TestSuite/Derived11.lean` (40, 40, 11), all `sol_prove`: 391 derived, 25 pending,
+  one divergent, one excluded, two skipped (`Report.lean` counts the
+  divergent one pending: 26).  `Report.lean` pins it and finds no theorem
   that uses an axiom beyond Lean's three.
 - **Times.**  Language-server checks with the imports built: `Derived9`
   16 s, `Derived10` and `Derived11` about 5 s each.
-- **Pending (26).**  The copies between memory and storage, in either
-  direction, through a root, a field or an index (`memoryToStorage*`,
-  `storageToMemory*`, `test*CopyComplex*`, the `*ImpureReceiver`/
-  `*ImpureIndex` copies, `storageNewIntoField`, `memoryAssignForms`,
-  `mappingEntryThroughMemoryToMappingEntry`): the closer does not
-  reduce `copySt` of a memory object or `copyStToM` of a storage path
-  inside a leaf yet.  The five dangling-alias functions
-  (`testDanglingReferenceSurvivesPush`, `testArrayCopyClearsOldElements`,
-  `testArrayCopyKeepsDestinationTail`, `testDeleteArrayLeavesDataPastLength`,
+- **Pending (25, and 1 divergent).**  The 19 copies between memory and
+  storage, in either direction, through a root, a field or an index
+  (`storageNewIntoField`, `memoryToStorage`,
+  `memoryToStorageIndexMappingCopyRootExample`,
+  `memoryToStorageIndexArrayCopyRootOutOfBoundsReverts`, `storageToMemory`,
+  `testMemoryToStorageCopyComplexSource`,
+  `testMemoryToStorageCopyComplexTarget`, `testMemoryToStorageCopyField`,
+  `testMemoryToStorageCopyRoot`, `testMemoryToStorageIndexCopyImpureIndex`,
+  `testStorageToMemoryCopyComplexPath`, `testStorageToMemoryCopyField`,
+  `testStorageToMemoryCopyRoot`, `memoryAssignForms`,
+  `storageIndexWriteRefSourceImpureIndex`,
+  `storageFieldWriteRefSourceImpureReceiver`,
+  `memoryToStorageIndexImpureReceiver`, `indexWriteBothImpureMemToStorage`,
+  `mappingEntryThroughMemoryToMappingEntry`): the closer does not reduce
+  `copySt` of a memory object or `copyStToM` of a storage path inside a
+  leaf yet.  `memoryToStorageIndexArrayCopyRootExample`: the search derives
+  it, but its replay is past the budget (M3b review 2).  The five
+  dangling-alias functions (`testDanglingReferenceSurvivesPush`,
+  `testArrayCopyClearsOldElements`, `testArrayCopyKeepsDestinationTail`,
+  `testDeleteArrayLeavesDataPastLength`,
   `testDanglingInnerArrayReappearsAfterPush`) and `storagePushReadBack`
   (divergent, M7) are as before.
 

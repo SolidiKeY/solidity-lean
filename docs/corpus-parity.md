@@ -20,6 +20,7 @@ statuses are read off `Solidity/TestSuite/Report.lean`'s pin, and
 - **pending**: stated, not derived yet;
 - **divergent**: stated, and false in the model, for the reason below;
 - **excluded**: no program: the model cannot hold its contract;
+- **unsupported**: no program: the import's printer or grammar lacks the form;
 - **skip**: tagged `@custom:key skip`, as solkey skips it.
 
 | | diamond | box | skip | total |
@@ -35,7 +36,7 @@ Not derived, by reason:
 
 | Status | Because | # | functions |
 |---|---|---:|---|
-| pending | uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6) | 19 | `storageNewIntoField`, `memoryToStorage`, `memoryToStorageIndexMappingCopyRootExample`, … |
+| pending | copies between memory and storage: the closer does not reduce `copySt` of a memory object or `copyStToM` of a storage path in a leaf yet (docs/testsuite-proofs.md, M6 results) | 19 | `storageNewIntoField`, `memoryToStorage`, `memoryToStorageIndexMappingCopyRootExample`, … |
 | pending | an alias bound through an index dangles after a `pop`: the fragment drops it at the next write (`SymB.onWrite`), and the write through it lands past the live end, which the reduction's live storage does not reach | 5 | `testDanglingReferenceSurvivesPush`, `testArrayCopyClearsOldElements`, `testArrayCopyKeepsDestinationTail`, `testDeleteArrayLeavesDataPastLength`, `testDanglingInnerArrayReappearsAfterPush` |
 | skip | tagged `@custom:key skip` | 2 | `tryCalleeGet`, `tryCalleePing` |
 | pending | the search derives it, but its replay is past maxHeartbeats as one declaration (docs/testsuite-proofs.md, M3b review 2) | 1 | `memoryToStorageIndexArrayCopyRootExample` |

@@ -21,6 +21,9 @@ statement does, and the import's verdict for the three with no statement.
 A pending obligation is no theorem and no `sorry`: most copy between
 memory and storage, which the closer does not reduce yet; the others are
 listed with their reasons in `docs/testsuite-proofs.md`.
+`storagePushReadBack` is not valid in the model (the length delta,
+`docs/solc-alignment.md`): `tests/solkey/expected.tsv` lists it
+`divergent`, so the tables count one pending fewer.
 -/
 
 /--

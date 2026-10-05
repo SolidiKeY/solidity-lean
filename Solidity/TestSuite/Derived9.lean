@@ -4,8 +4,8 @@ import Solidity.TestSuite.Problems
 # solkey's `TestSuite`, derived (9 of 11)
 
 `⊢` of each obligation the closer of memory added (objects allocated by
-the updates, read and written through members and indices, copied between
-memory and storage), from `memoryDeclDefault` to `testMemoryAliasing` in the
+the updates, read and written through members and indices, aliased
+and copied within memory), from `memoryDeclDefault` to `testMemoryAliasing` in the
 order of the source; the replays are what `#solkey_derive? … pending`
 (`Frontend/Problems.lean`) prints.
 -/

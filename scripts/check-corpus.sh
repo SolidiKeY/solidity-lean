@@ -10,12 +10,15 @@
 #      (docs/corpus-parity.md) against what the generator writes;
 #   3. build `SolidityCorpus`, which re-checks every pinned verdict: a `proved`
 #      row is a theorem, an `evaluated`/`open` row a `#guard_msgs` pin, and a
-#      `derived` TestSuite row a corollary of its `⊢` theorem, so the build
-#      also builds the `SolkeyTestSuite` derivations it imports.
+#      `derived` TestSuite row with no parameters a corollary of its `⊢`
+#      theorem; the others are checked by Solidity/TestSuite/Report.lean's
+#      pin, which the corpus imports, so the build also builds the
+#      `SolkeyTestSuite` derivations.
 #
 # Usage: scripts/check-corpus.sh [--update] [--solkey <keyext.solidity.examples>]
 #   --update  re-pin in place (modules, expected.tsv, scoreboard), then build.
-# The solkey checkout defaults to ../solkey (or SOLKEY_EXAMPLES).
+# The solkey checkout defaults to ../solkey (or SOLKEY_EXAMPLES); its TestSuite.sol
+# must be the one tests/solc/TestSuite.ast.json was imported from.
 # Exit 0 = no drift and the build passes, 1 = drift or a failing build.
 set -euo pipefail
 

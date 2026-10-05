@@ -84,7 +84,7 @@ lemma (`TermTaclet.sound`).
 | `Calculus/CloseTests.lean` | What `sol_close` closes, pinned. |
 | `Calculus/ReadWrite.lean` | Reads after writes: the four-way path comparison; the simp sets `close_rw`, `decide_eval`. |
 | `Calculus/Decide.lean` | `sol_decide`: reads of writes as case trees on key equalities, over the live storage; pushes, pops and storage copies (`LStor.arr`, `LStor.copy`). |
-| `Calculus/DecideMem.lean` | The memory the updates allocate, kept symbolically (`SObj`, `SMem`, `MemRel`): what `sol_decide` reads memory off. |
+| `Calculus/DecideMem.lean` | The memory the updates allocate, kept symbolically (`SObj`, `SMem`, `MemRel`): what `sol_decide` reads memory off. Being reworked into solkey's `memoryRules.key`/`structMemoryRules.key` taclets. |
 | `Calculus/DecideSyn.lean` | `LFml.syn`: a reduction closed by its terms, KeY's syntactic closing; `sol_decide`'s first try. |
 | `Calculus/DecideComplete.lean` | The starting storage's reads are realizable; `Fml.valid_iff_cons`. |
 | `Calculus/Closer.lean` | `LFml.close`: the closer, KeY's first-order and arithmetic taclets as clauses of one `Bool` (ground evaluation, `applyEq`, `bool` case splits, intervals by constants and bounds below, reads typed by `wt`'s layout, the slot a `push()` recycles typed by its element type), `LFml.close_holds`; `LFml.fits`, the size count; literal powers folded up to the exponent 256 (`powBig`). |

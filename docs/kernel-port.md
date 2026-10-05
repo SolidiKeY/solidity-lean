@@ -52,17 +52,18 @@ specifications (`Calculus/Spec.lean`), the solkey corpus (`SolidityCorpus`,
   callback reading is unproved.  `ProvesC` has no strategy: `sol_symex` is the
   no-callback reading's.  The corpus's `net/*-withcallback.key` problems stay
   unported (`docs/corpus-parity.md`).
-- **The corpus is not regenerated.**  `scripts/solkey-port.mjs` no longer
-  refuses `--`, `.length`, `new`, `++` inside an expression, `**` or `T[n]`,
-  but `docs/corpus-parity.md` and `tests/solkey/expected.tsv` still carry the
-  old verdicts until `--probe` re-pins them.  `TestSuite`'s `boolKeyed` (the
-  interpreter reads keys as `Int`) and `tree` (a struct recursive through a
-  mapping, which `structRank` forbids) are not declared.
+- **The hand-written `TestSuite`** declares neither `boolKeyed` (the
+  interpreter reads keys as `Int`) nor `tree` (a struct recursive through a
+  mapping, which `structRank` forbids).  The corpus's `TestSuite` rows come
+  from the imported contract, which has `boolKeyed` (`Corpus/Imported.lean`).
 - **`sol_decide`, past realizability.**  A write or `delete` through a member
   named `length` falls back to `sol_decide_heuristic`, and `omega`/`grind` are
   not proved complete on the statement realizability leaves
-  (`Calculus/DecideComplete.lean`).  Memory, copies and `push`/`pop` are
-  outside the fragment.
+  (`Calculus/DecideComplete.lean`).  Memory the updates allocate is read
+  symbolically (`Calculus/DecideMem.lean`, being reworked into solkey's
+  `memoryRules.key`/`structMemoryRules.key` taclets); copies between memory
+  and storage (`copySt` of a memory object, `copyStToM`) are outside the
+  fragment.
 - **Reachability of an ill-defaulted root** (a `BadDup[]`): that such an array
   stays empty is unproved, so `reachable_iff` asks `Ty.okDeep` of every root
   (`Typing/Constructibility.lean`).

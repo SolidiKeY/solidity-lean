@@ -128,6 +128,9 @@
  *    Lean rejects is recorded with Lean's message.
  *
  * Usage: node scripts/solkey-port.mjs [--probe] [--solkey <dir>] [--out <repo>]
+ *   --solkey  solkey's `keyext.solidity.examples` (default: $SOLKEY_EXAMPLES,
+ *             else ../solkey/keyext.solidity.examples); its `TestSuite.sol`
+ *             must be the one `tests/solc/TestSuite.ast.json` was imported from
  *   --probe   elaborate everything and re-pin expected.tsv (needs the
  *             `Solidity.Corpus.Basic` olean: `lake build Solidity.Corpus.Basic`)
  *   --out     where to write (default: this repository); pins are always
@@ -136,6 +139,7 @@
 
 import { readFileSync, readdirSync, writeFileSync, mkdirSync, existsSync, rmSync } from "node:fs";
 import { join, basename, dirname } from "node:path";
+import { createHash } from "node:crypto";
 import { spawn, execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
@@ -204,7 +208,7 @@ const DANGLING =
   "next write (`SymB.onWrite`), and the write through it lands past the live end, which " +
   "the reduction's live storage does not reach";
 
-/** Why a pending obligation is pending, where it is not the memory layer. */
+/** Why a pending obligation is pending, where it is not a copy between memory and storage. */
 const PENDING = {
   testDanglingReferenceSurvivesPush: DANGLING,
   testArrayCopyClearsOldElements: DANGLING,
@@ -216,11 +220,16 @@ const PENDING = {
     "(docs/testsuite-proofs.md, M3b review 2)",
 };
 
-const MEMORY_PENDING =
-  "uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)";
+/**
+ * The fallback reason of a pending function that uses memory: today each one
+ * copies between memory and storage (`PENDING` names the others).
+ */
+const COPY_PENDING =
+  "copies between memory and storage: the closer does not reduce `copySt` of a memory " +
+  "object or `copyStToM` of a storage path in a leaf yet (docs/testsuite-proofs.md, M6 results)";
 
 /** The statuses of an imported row, in report order. */
-const IMPORTED_STATUSES = ["derived", "pending", "divergent", "excluded", "skip"];
+const IMPORTED_STATUSES = ["derived", "pending", "divergent", "excluded", "unsupported", "skip"];
 
 /**
  * Functions that cannot be expressed, with the reason, where the reason is
@@ -1047,6 +1056,24 @@ async function probe(jobs) {
 
 // ─────────────────────────── the imported TestSuite ─────────────────────
 
+/**
+ * `TestSuite.sol` of the solkey checkout, which must be the source Lean
+ * imported: the sha256 that `tests/solc/TestSuite.ast.json` records.
+ */
+function importedSource() {
+  const path = join(SOLKEY, IMPORTED.file);
+  const source = readFileSync(path, "utf8");
+  const fixture = readFileSync(join(ROOT, "tests/solc/TestSuite.ast.json"), "utf8");
+  const pinned = fixture.match(/"sourceSha256":\s*"([0-9a-f]{64})"/)?.[1];
+  const actual = createHash("sha256").update(source, "utf8").digest("hex");
+  if (actual !== pinned) {
+    throw new Error(`${path} has sha256 ${actual}, but tests/solc/TestSuite.ast.json ` +
+      `was imported from ${pinned}: point --solkey (or SOLKEY_EXAMPLES) at that ` +
+      "checkout, or re-import it with scripts/solc-ast.mjs");
+  }
+  return source;
+}
+
 /** The text of the `info:` pin in `file` whose `#guard_msgs` checks `command`. */
 function pinnedInfo(file, command) {
   const src = readFileSync(join(ROOT, file), "utf8");
@@ -1074,7 +1101,8 @@ function readImported() {
   }));
   const pending = new Set(rest.slice(cut + 1).join(" ").split(/\s+/).filter(Boolean));
   const why = new Map();
-  const summary = pinnedInfo("Solidity/Solkey/TestSuite.lean", "#eval IO.println");
+  const summary = pinnedInfo("Solidity/Solkey/TestSuite.lean",
+    `#eval IO.println (Solidity.Frontend.ImportRow.summary ${IMPORTED.ns}.report)`);
   for (const m of summary.matchAll(/^(\w+) (\w+): (.*)$/gm)) why.set(m[2], m[3]);
   const proved = new Map();
   const dir = join(ROOT, "Solidity/TestSuite");
@@ -1100,7 +1128,8 @@ function readImported() {
 function importedRows(functions, lean) {
   const where = `${IMPORTED.file} (${functions.length} functions)`;
   if (functions.length !== lean.total) {
-    throw new Error(`${where}: Report.lean counts ${lean.total} functions`);
+    throw new Error(`${where}: Report.lean counts ${lean.total} functions ` +
+      "(is --solkey/SOLKEY_EXAMPLES the checkout TestSuite was imported from?)");
   }
   const rows = [];
   const corollaries = [];
@@ -1117,13 +1146,14 @@ function importedRows(functions, lean) {
     } else if (fn.skipped) {
       throw new Error(`${fn.name}: tagged skip, but the import did not skip it`);
     } else if (status === "excluded" || status === "unsupported") {
-      row = [status, lean.why.get(fn.name) ?? ""];
+      if (!lean.why.has(fn.name)) throw new Error(`${fn.name}: ${status}, but the import's pin gives no reason`);
+      row = [status, lean.why.get(fn.name)];
     } else if (status !== undefined) {
       throw new Error(`Report.lean lists \`${status} ${fn.name}\`: fix it in Lean first`);
     } else if (lean.pending.has(fn.name)) {
       row = DIVERGENT[fn.name] ? ["divergent", DIVERGENT[fn.name]]
         : ["pending", PENDING[fn.name] ??
-          (/\bmemory\b|\bnew\s/.test(fn.body) ? MEMORY_PENDING : "not derived yet")];
+          (/\bmemory\b|\bnew\s/.test(fn.body) ? COPY_PENDING : "not derived yet")];
     } else {
       const module = lean.proved.get(fn.name);
       if (!module) throw new Error(`${fn.name}: derived by Report.lean's pin, but no theorem`);
@@ -1131,6 +1161,12 @@ function importedRows(functions, lean) {
       if (fn.params.length === 0) corollaries.push({ fn, modality });
     }
     rows.push([IMPORTED.suite, IMPORTED.contract, fn.name, row[0], note, row[1]]);
+  }
+  for (const k of [...Object.keys(DIVERGENT), ...Object.keys(PENDING)]) {
+    if (!lean.pending.has(k)) {
+      throw new Error(`${k}: listed divergent or pending in solkey-port.mjs, ` +
+        "but Report.lean does not list it pending");
+    }
   }
   const derived = rows.filter((r) => r[3] === "derived").length;
   const pending = rows.filter((r) => ["pending", "divergent"].includes(r[3])).length;
@@ -1157,6 +1193,22 @@ function importedModule(corollaries, rows, commit) {
       `    ${Form} ${IMPORTED.ns}.initState ${f} :=\n` +
       `  ${lemma} ${f}.proved ${IMPORTED.ns}.initState_wt`;
   });
+  // One corollary's axioms, so that `initState_wt`'s are pinned too
+  // (`Corpus/Imported.lean` pins the two lemmas', `Report.lean` each theorem's).
+  const first = corollaries[0] && declName(corollaries[0].fn.name);
+  const axiomsPin = first ? [
+    "/-! One corollary's axioms, for those of `initState_wt`: with the pins of",
+    "`Corpus/Imported.lean` and `TestSuite/Report.lean`, every corollary here",
+    "uses no axiom but Lean's three. -/",
+    "",
+    "/--",
+    `info: 'Solidity.Corpus.TestSuite.${first.replace(/^«(.*)»$/, "$1")}' depends on axioms: ` +
+      "[propext, Classical.choice, Quot.sound]",
+    "-/",
+    "#guard_msgs in",
+    `#print axioms ${first}`,
+    "",
+  ] : [];
   return [
     "import Solidity.Corpus.Imported",
     "import Solidity.TestSuite.Report",
@@ -1179,6 +1231,7 @@ function importedModule(corollaries, rows, commit) {
     "",
     blocks.join("\n\n"),
     "",
+    ...axiomsPin,
     "end Solidity.Corpus.TestSuite",
     "",
   ].join("\n");
@@ -1268,7 +1321,7 @@ function parityDoc(allRows, commit) {
   const importedTable = [
     `| | ${modalities.join(" | ")} | total |`,
     `|---|${modalities.map(() => "---:").join("|")}|---:|`,
-    ...IMPORTED_STATUSES.map((st) =>
+    ...IMPORTED_STATUSES.filter((st) => count(st) > 0).map((st) =>
       `| ${st} | ${modalities.map((mo) => count(st, mo)).join(" | ")} | ${count(st)} |`),
     `| **all** | ${modalities.map((mo) => `**${importedRows.filter((r) => modalityOf(r[4]) === mo).length}**`).join(" | ")} | **${importedRows.length}** |`,
   ];
@@ -1312,6 +1365,7 @@ function parityDoc(allRows, commit) {
     "- **pending**: stated, not derived yet;",
     "- **divergent**: stated, and false in the model, for the reason below;",
     "- **excluded**: no program: the model cannot hold its contract;",
+    "- **unsupported**: no program: the import's printer or grammar lacks the form;",
     "- **skip**: tagged `@custom:key skip`, as solkey skips it.",
     "",
     ...importedTable,
@@ -1359,6 +1413,9 @@ async function main() {
   const rows = [];
   const perContract = [];
 
+  // TestSuite: read off Lean's pins, not translated; checked first, as it is cheap.
+  const imported = importedRows(parseContract(importedSource()).functions, readImported());
+
   for (const { file, suite, store } of CONTRACTS) {
     const contract = basename(file, ".sol");
     const sol = parseContract(readFileSync(join(SOLKEY, file), "utf8"));
@@ -1403,9 +1460,6 @@ async function main() {
   mkdirSync(corpusDir, { recursive: true });
   const modules = ["Solidity.Corpus.Basic", "Solidity.Corpus.Imported", "Solidity.Corpus.TestSuite"];
 
-  // TestSuite: read off Lean's pins, not translated.
-  const imported = importedRows(
-    parseContract(readFileSync(join(SOLKEY, IMPORTED.file), "utf8")).functions, readImported());
   rows.push(...imported.rows);
   writeFileSync(join(corpusDir, `${IMPORTED.contract}.lean`),
     importedModule(imported.corollaries, imported.rows, commit));

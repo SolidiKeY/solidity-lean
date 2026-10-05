@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 # Audit what is derived of solkey's `TestSuite.sol` (no Lean is run):
 #
-#   1. trust: no `native_decide`, `sorry` or `maxHeartbeats` in the code (not
-#      the comments) of Solidity/TestSuite/ and Solidity/Solkey/;
+#   1. trust: no `native_decide`, `decide +native`, `sorry`, `admit`,
+#      `maxHeartbeats` or `skipKernelTC` in the code (not the comments or
+#      strings) of Solidity/TestSuite/ and Solidity/Solkey/;
 #   2. axioms: `#solkey_obligations` (Frontend/Problems.lean, pinned in
 #      Solidity/TestSuite/Report.lean) already counts a theorem derived only
 #      when it uses no axiom but propext, Classical.choice and Quot.sound, and
@@ -10,12 +11,14 @@
 #      "mismatched" theorem;
 #   3. parity: the TestSuite rows of tests/solkey/expected.tsv are solkey's
 #      `testSuiteFunctions` (every function of TestSuite.sol not tagged
-#      `@custom:key skip`, 418 of 420) plus the skipped ones, and the table is
-#      what scripts/solkey-port.mjs writes from the pins today.
+#      `@custom:key skip`) plus the skipped ones, and the table is what
+#      scripts/solkey-port.mjs writes from the pins today.
 #
 # Usage: scripts/check-testsuite.sh [--complete] [--solkey <keyext.solidity.examples>]
+#   --solkey    the checkout TestSuite was imported from (default:
+#               $SOLKEY_EXAMPLES, else ../solkey/keyext.solidity.examples)
 #   --complete  also fail while a function is pending: the goal is
-#               418 = derived + excluded + divergent, plus 2 skip.
+#               testSuiteFunctions = derived + excluded + divergent.
 # Exit 0 = clean, 1 = a finding.
 set -euo pipefail
 
@@ -53,9 +56,17 @@ const strip = (src) => {
     if (depth > 0 && src.startsWith("-/", i)) { depth--; i++; out += "  "; continue; }
     if (depth > 0) { out += src[i] === "\n" ? "\n" : " "; continue; }
     if (src.startsWith("--", i)) { while (i < src.length && src[i] !== "\n") i++; out += "\n"; continue; }
+    // a char literal ('"', '\n') is kept, so that its quote opens no string
+    const ch = src[i] === "'" && src.slice(i, i + 4).match(/^'(\\.|[^\\'\n])'/);
+    if (ch) { out += ch[0]; i += ch[0].length - 1; continue; }
     if (src[i] === '"') {
+      // a string is blanked, but for its newlines, so line numbers stay
+      const blank = (c) => (c === "\n" ? "\n" : " ");
       out += " ";
-      for (i++; i < src.length && src[i] !== '"'; i++) { if (src[i] === "\\") i++; out += " "; }
+      for (i++; i < src.length && src[i] !== '"'; i++) {
+        if (src[i] === "\\") { out += " "; i++; }
+        out += blank(src[i]);
+      }
       out += " ";
       continue;
     }
@@ -71,20 +82,25 @@ let scanned = 0;
 for (const file of [...files("Solidity/TestSuite"), ...files("Solidity/Solkey")]) {
   scanned++;
   strip(readFileSync(file, "utf8")).split("\n").forEach((line, k) => {
-    const m = line.match(/\b(native_decide|sorry|admit|maxHeartbeats)\b/);
-    if (m) fail(`${file}:${k + 1}: \`${m[1]}\``);
+    const m = line.match(/\b(native_decide|sorry|admit|maxHeartbeats|skipKernelTC)\b|\bdecide\s*\+native\b/);
+    if (m) fail(`${file}:${k + 1}: \`${m[0]}\``);
   });
 }
 console.log(`trust: ${scanned} modules: ` +
-  (ok ? "no native_decide, sorry, admit or maxHeartbeats in code" : "FAILED"));
+  (ok ? "no native_decide, decide +native, sorry, admit, maxHeartbeats or skipKernelTC in code"
+    : "FAILED"));
 
 // 2. axioms: the pin lists no unsound or mismatched theorem
 const report = readFileSync("Solidity/TestSuite/Report.lean", "utf8");
+let axOk = true;
 for (const m of report.matchAll(/^(unsound|mismatched|unstated) (\w+)$/gm)) {
   fail(`Report.lean pins \`${m[1]} ${m[2]}\``);
+  axOk = false;
 }
-console.log("axioms: #solkey_obligations counts a theorem derived only with propext, " +
-  "Classical.choice and Quot.sound; Report.lean pins no unsound or mismatched theorem");
+console.log("axioms: " + (axOk
+  ? "#solkey_obligations counts a theorem derived only with propext, " +
+    "Classical.choice and Quot.sound; Report.lean pins no unsound or mismatched theorem"
+  : "FAILED"));
 
 // 3. parity with solkey's testSuiteFunctions
 const sol = readFileSync(join(solkey, "TestSuite.sol"), "utf8").split("\n");
