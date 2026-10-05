@@ -3649,7 +3649,7 @@ def LTerm.elim : LTerm → LTerm
   | .err => .err
   | .env k => .env k
   | .findP s q => .findP s q.elim
-  | .cpok s q => .cpok s q
+  | .cpok s q => .seq s.okE (.seq (.pok q.elim) (s.cpokU q.elim))
 termination_by structural t => t
 
 /-- A path with the reads in its keys eliminated: `people[balances[a]]`. -/
@@ -3784,6 +3784,17 @@ def LStor.mapU (sh : KShape) : LStor → LPath → LTerm
     | .fixed => .kmap sh (.view m i) Q
 termination_by structural s => s
 
+/-- Whether the subtree at `Q` of `s` copies into memory, where `s` and `Q`
+return (Lean only: `copyStToM` halts on a mapping).  A word written over a
+word keeps the shape, so the test passes the write (`save_cpok_sim`); it
+reaches `cpok init Q` for the closer's `wt` clause.  Any other write keeps
+the test whole. -/
+def LStor.cpokU : LStor → LPath → LTerm
+  | .init, Q => .cpok .init Q
+  | .save s P w, Q => .ite (isT (s.readU P.elim)) (s.cpokU Q) (.cpok (.save s P w) Q)
+  | s@(.del ..), Q | s@(.arr ..), Q | s@(.copy ..), Q | s@(.view ..), Q => .cpok s Q
+termination_by structural s => s
+
 /-- The index a selector writes at, its reads eliminated. -/
 def LSel.idxU : LSel → LTerm
   | .idx w => w.elim
@@ -3909,7 +3920,7 @@ def LTerm.elimF : LTerm → LTerm
   | .err => .err
   | .env k => .env k
   | .findP s q => .findP s q.elimF
-  | .cpok s q => .cpok s q
+  | .cpok s q => .seq s.okEF (.seq (.pok q.elimF) (s.cpokUF q.elimF))
 termination_by structural t => t
 
 /-- `LPath.elim` as compiled code runs it. -/
@@ -4054,6 +4065,12 @@ def LStor.mapUF (sh : KShape) : LStor → LPath → LTerm
     | .fixed => .kmap sh (.view m i) Q
 termination_by structural s => s
 
+/-- `LStor.cpokU` as compiled code runs it. -/
+def LStor.cpokUF : LStor → LPath → LTerm
+  | .init, Q => .cpok .init Q
+  | .save s P w, Q => .ite (isT (s.readUF P.elimF)) (s.cpokUF Q) (.cpok (.save s P w) Q)
+  | s@(.del ..), Q | s@(.arr ..), Q | s@(.copy ..), Q | s@(.view ..), Q => .cpok s Q
+termination_by structural s => s
 
 /-- `LSel.idxU` as compiled code runs it. -/
 def LSel.idxUF : LSel → LTerm
@@ -4160,7 +4177,8 @@ theorem LTerm.elimF_eq : (t : LTerm) → t.elimF = t.elim
   | .sok s => by simp only [LTerm.elimF, LTerm.elim, LStor.okEF_eq s]
   | .pok q => by simp only [LTerm.elimF, LTerm.elim, LPath.elimF_eq q]
   | .findP _ q => by simp only [LTerm.elimF, LTerm.elim, LPath.elimF_eq q]
-  | .cpok _ _ => rfl
+  | .cpok s q => by
+    simp only [LTerm.elimF, LTerm.elim, LStor.okEF_eq s, LPath.elimF_eq q, LStor.cpokUF_eq s]
 termination_by structural t => t
 
 theorem LPath.elimF_eq : (q : LPath) → q.elimF = q.elim
@@ -4257,6 +4275,13 @@ theorem LStor.mapUF_eq (sh : KShape) : (s : LStor) → ∀ Q, s.mapUF sh Q = s.m
   | .view _ _, _ => rfl
 termination_by structural s => s
 
+theorem LStor.cpokUF_eq : (s : LStor) → ∀ Q, s.cpokUF Q = s.cpokU Q
+  | .init, _ => rfl
+  | .save s P _, Q => by
+    simp only [LStor.cpokUF, LStor.cpokU, LPath.elimF_eq P, LStor.readUF_eq s, LStor.cpokUF_eq s]
+  | .del .., _ | .arr .., _ | .copy .., _ | .view .., _ => rfl
+termination_by structural s => s
+
 theorem LSel.idxUF_eq : (a : LSel) → a.idxUF = a.idxU
   | .idx w => by simp only [LSel.idxUF, LSel.idxU, LTerm.elimF_eq w]
   | .fld _ | .size => rfl
@@ -4325,6 +4350,9 @@ end
 
 @[csimp] theorem LStor.lenU_csimp : @LStor.lenU = @LStor.lenUF :=
   funext fun s => funext fun Q => (LStor.lenUF_eq s Q).symm
+
+@[csimp] theorem LStor.cpokU_csimp : @LStor.cpokU = @LStor.cpokUF :=
+  funext fun s => funext fun Q => (LStor.cpokUF_eq s Q).symm
 
 @[csimp] theorem LStor.mapU_csimp : @LStor.mapU = @LStor.mapUF :=
   funext fun sh => funext fun s => funext fun Q => (LStor.mapUF_eq sh s Q).symm
@@ -6198,6 +6226,228 @@ give, the storage they read eliminated (`LMem.readU_sim`, `LMem.objU_sim`);
 a read below a view is a read of memory along the same path
 (`view_read_sim`, `findOnCopy`). -/
 
+/-! ### Whether a copy into memory succeeds -/
+
+section CopyOk
+open MemNames
+
+/-- The value copies into memory: `copyStToM` returns, in one state and so
+in every one (`copyStToM_ok_any`). -/
+def Cps (v : SVal) : Prop := ∃ σ r, copyStToM σ v = .ok r
+
+theorem Cps.at {v : SVal} (h : Cps v) (σ : State) : ∃ r, copyStToM σ v = .ok r := by
+  obtain ⟨σ', r, h⟩ := h
+  exact copyStToM_ok_any v σ' σ r h
+
+theorem copyStFields_ok_iff : ∀ (fs : List (Name × SVal)) (σ : State),
+    (∃ r, copyStFields σ fs = .ok r) ↔ ∀ p ∈ fs, Cps p.2
+  | [], σ => iff_of_true ⟨_, rfl⟩ fun _ h => nomatch h
+  | (n, w) :: rest, σ => by
+    rw [List.forall_mem_cons]
+    constructor
+    · rintro ⟨r, h⟩
+      obtain ⟨σ₁, mv, mrest, h1, h2, -⟩ := copyStFields_cons_inv (τ := r.1) (mfs := r.2) h
+      exact ⟨⟨σ, _, h1⟩, (copyStFields_ok_iff rest σ₁).1 ⟨_, h2⟩⟩
+    · rintro ⟨hw, hr⟩
+      obtain ⟨⟨σ₁, mv⟩, h1⟩ := hw.at σ
+      obtain ⟨⟨τ, mrest⟩, h2⟩ := (copyStFields_ok_iff rest σ₁).2 hr
+      exact ⟨_, by rw [copyStFields, h1, Res.ok_bind']; dsimp only; rw [h2]; rfl⟩
+
+theorem copyStElems_ok_iff : ∀ (es : List SVal) (σ : State),
+    (∃ r, copyStElems σ es = .ok r) ↔ ∀ x ∈ es, Cps x
+  | [], σ => iff_of_true ⟨_, rfl⟩ fun _ h => nomatch h
+  | w :: rest, σ => by
+    rw [List.forall_mem_cons]
+    constructor
+    · rintro ⟨r, h⟩
+      obtain ⟨σ₁, mv, mrest, h1, h2, -⟩ := copyStElems_cons_inv (τ := r.1) (mes := r.2) h
+      exact ⟨⟨σ, _, h1⟩, (copyStElems_ok_iff rest σ₁).1 ⟨_, h2⟩⟩
+    · rintro ⟨hw, hr⟩
+      obtain ⟨⟨σ₁, mv⟩, h1⟩ := hw.at σ
+      obtain ⟨⟨τ, mrest⟩, h2⟩ := (copyStElems_ok_iff rest σ₁).2 hr
+      exact ⟨_, by rw [copyStElems, h1, Res.ok_bind']; dsimp only; rw [h2]; rfl⟩
+
+theorem Cps.struct_iff (fs : List (Name × SVal)) : Cps (.struct fs) ↔ ∀ p ∈ fs, Cps p.2 := by
+  constructor
+  · rintro ⟨σ, r, h⟩
+    obtain ⟨τ₁, mfs, hf, -, -⟩ := copyStToM_struct_inv (τ := r.1) (mv := r.2) h
+    exact (copyStFields_ok_iff fs σ).1 ⟨_, hf⟩
+  · intro h
+    obtain ⟨⟨τ, mfs⟩, hf⟩ := (copyStFields_ok_iff fs { storage := [] }).2 h
+    exact ⟨{ storage := [] }, _, by rw [copyStToM, hf]; rfl⟩
+
+theorem Cps.array_iff (es sh : List SVal) (fx : Bool) : Cps (.array es sh fx) ↔ ∀ x ∈ es, Cps x := by
+  constructor
+  · rintro ⟨σ, r, h⟩
+    obtain ⟨τ₁, mes, he, -, -⟩ := copyStToM_array_inv (τ := r.1) (mv := r.2) h
+    exact (copyStElems_ok_iff es σ).1 ⟨_, he⟩
+  · intro h
+    obtain ⟨⟨τ, mes⟩, he⟩ := (copyStElems_ok_iff es { storage := [] }).2 h
+    exact ⟨{ storage := [] }, _, by rw [copyStToM, he]; rfl⟩
+
+theorem Cps.not_map (e : List (Int × SVal)) (d : SVal) : ¬ Cps (.map e d) :=
+  fun ⟨_, r, h⟩ => (copyStToM_map_inv (τ := r.1) (mv := r.2) h).elim
+
+theorem Cps.prim (p : PrimVal) : Cps (.prim p) := ⟨{ storage := [] }, by cases p <;> exact ⟨_, rfl⟩⟩
+
+theorem cps_setBy {f : Name} {u old : SVal} (hc : Cps u ↔ Cps old) :
+    ∀ {fs : List (Name × SVal)}, lookupBy f fs = some old →
+      ((∀ p ∈ setBy f u fs, Cps p.2) ↔ ∀ p ∈ fs, Cps p.2)
+  | [], h => by simp only [lookupBy, reduceCtorEq] at h
+  | (k, w) :: rest, h => by
+    by_cases hk : f = k
+    · simp only [lookupBy, hk, if_true, Option.some.injEq] at h
+      subst h
+      simp only [setBy, hk, if_true, List.forall_mem_cons, hc]
+    · simp only [lookupBy, hk, if_false] at h
+      simp only [setBy, hk, if_false, List.forall_mem_cons, cps_setBy hc h]
+
+theorem cps_set {u : SVal} : ∀ {es : List SVal} {i : Nat} (hi : i < es.length),
+    (Cps u ↔ Cps es[i]) → ((∀ x ∈ es.set i u, Cps x) ↔ ∀ x ∈ es, Cps x)
+  | [], _, hi, _ => absurd hi (Nat.not_lt_zero _)
+  | x :: rest, 0, _, hc => by
+    simp only [List.set_cons_zero, List.forall_mem_cons, List.getElem_cons_zero] at hc ⊢
+    rw [hc]
+  | x :: rest, i + 1, hi, hc => by
+    simp only [List.getElem_cons_succ] at hc
+    simp only [List.set_cons_succ, List.forall_mem_cons,
+      cps_set (Nat.lt_of_succ_lt_succ hi) hc]
+
+theorem cps_saveLive {new : SVal} : ∀ {ps : List Seg} {v v' old : SVal},
+    v.findLive ps = .ok old → v.saveLive ps new = .ok v' → (Cps new ↔ Cps old) →
+      (Cps v' ↔ Cps v)
+  | [], v, v', old, hf, hs, hc => by
+    simp only [SVal.findLive_nil, Except.ok.injEq] at hf
+    have : v' = new := by cases v <;> simpa only [SVal.saveLive, Except.ok.injEq] using hs.symm
+    subst hf this
+    exact hc
+  | s :: _, .prim _, _, _, _, hs, _ => by cases s <;> simp only [SVal.saveLive, reduceCtorEq] at hs
+  | .field f :: ps, .struct fields, v', old, hf, hs, hc => by
+    simp only [SVal.findLive] at hf
+    simp only [SVal.saveLive] at hs
+    cases hl : lookupBy f fields with
+    | none => simp only [hl, reduceCtorEq] at hf
+    | some w =>
+      rw [hl] at hf hs
+      obtain ⟨u, hu, he⟩ := Res.bind_eq_ok.1 hs
+      cases he
+      rw [Cps.struct_iff, Cps.struct_iff]
+      exact cps_setBy (cps_saveLive hf hu hc) hl
+  | .at _ :: _, .struct _, _, _, _, hs, _ => by simp only [SVal.saveLive, reduceCtorEq] at hs
+  | .at i :: ps, .array elems shadow fx, v', old, hf, hs, hc => by
+    simp only [SVal.saveLive] at hs
+    split at hs
+    · rename_i hi
+      simp only [SVal.findLive, dif_pos hi, List.get_eq_getElem] at hf
+      obtain ⟨u, hu, he⟩ := Res.bind_eq_ok.1 hs
+      cases he
+      rw [Cps.array_iff, Cps.array_iff]
+      exact cps_set hi.2 (cps_saveLive hf hu hc)
+    · cases hs
+  | .field _ :: _, .array _ _ _, _, _, _, hs, _ => by simp only [SVal.saveLive, reduceCtorEq] at hs
+  | .at i :: ps, .map e d, v', old, hf, hs, hc => by
+    simp only [SVal.saveLive] at hs
+    split at hs <;>
+      (obtain ⟨u, hu, he⟩ := Res.bind_eq_ok.1 hs; cases he
+       exact iff_of_false (Cps.not_map _ _) (Cps.not_map _ _))
+  | .field _ :: _, .map _ _, _, _, _, hs, _ => by simp only [SVal.saveLive, reduceCtorEq] at hs
+
+theorem segs_rel : ∀ (ps qs : List Seg), qs = ps ∨ (∃ f r, ps = qs ++ f :: r) ∨
+    (∃ f r, qs = ps ++ f :: r) ∨ Close.Diverge ps qs
+  | [], [] => .inl rfl
+  | a :: p, [] => .inr (.inl ⟨a, p, rfl⟩)
+  | [], b :: q => .inr (.inr (.inl ⟨b, q, rfl⟩))
+  | a :: p, b :: q => by
+    by_cases hab : a = b
+    · subst hab
+      rcases segs_rel p q with rfl | ⟨f, r, rfl⟩ | ⟨f, r, rfl⟩ | hd
+      · exact .inl rfl
+      · exact .inr (.inl ⟨f, r, rfl⟩)
+      · exact .inr (.inr (.inl ⟨f, r, rfl⟩))
+      · exact .inr (.inr (.inr (.inr hd)))
+    · exact .inr (.inr (.inr (.inl hab)))
+
+theorem cps_findLive_savePrim {v v' : SVal} {ps : List Seg} {a b : PrimVal}
+    (hf : v.findLive ps = .ok (.prim a)) (hs : v.saveLive ps (.prim b) = .ok v') (qs : List Seg) :
+    (∃ x, v'.findLive qs = .ok x ∧ Cps x) ↔ (∃ x, v.findLive qs = .ok x ∧ Cps x) := by
+  rcases segs_rel ps qs with rfl | ⟨f, r, rfl⟩ | ⟨f, r, rfl⟩ | hd
+  · rw [findLive_saveLive_same hs, hf]
+    exact iff_of_true ⟨_, rfl, Cps.prim b⟩ ⟨_, rfl, Cps.prim a⟩
+  · obtain ⟨w, w', h₁, h₂, h₃⟩ := save_through qs (f :: r) hs
+    rw [SVal.findLive_append, h₁, Res.ok_bind] at hf
+    rw [h₃, h₁]
+    have hw := cps_saveLive hf h₂ (iff_of_true (Cps.prim b) (Cps.prim a))
+    constructor
+    · rintro ⟨x, hx, hc⟩; cases hx; exact ⟨w, rfl, hw.1 hc⟩
+    · rintro ⟨x, hx, hc⟩; cases hx; exact ⟨w', rfl, hw.2 hc⟩
+  · rw [SVal.findLive_append, SVal.findLive_append, findLive_saveLive_same hs, hf]
+    rw [Res.ok_bind', Res.ok_bind']
+    apply iff_of_false <;> (rintro ⟨x, hx, -⟩; cases f <;> cases hx)
+  · rw [findLive_saveLive_diverge hd hs]
+
+/-- What `cpok` returns on the storage `v` at the path `qs`. -/
+def cpR (σ : State) (v : SVal) (qs : List Seg) : Res Value :=
+  v.findLive qs >>= fun sv => copyStToM (memBase σ) sv >>= fun _ => .ok (.bool true)
+
+theorem cpok_eval (σ : State) (s : LStor) (q : LPath) :
+    (LTerm.cpok s q).eval σ = (s.eval σ >>= fun v => q.eval σ >>= fun qs => cpR σ v qs) := rfl
+
+theorem cpR_ok {σ : State} {v : SVal} {qs : List Seg} {a : Value} :
+    cpR σ v qs = .ok a ↔ a = .bool true ∧ ∃ x, v.findLive qs = .ok x ∧ Cps x := by
+  unfold cpR
+  constructor
+  · intro h
+    obtain ⟨x, hx, h⟩ := Res.bind_eq_ok.1 h
+    obtain ⟨r, hr, h⟩ := Res.bind_eq_ok.1 h
+    cases h
+    exact ⟨rfl, x, hx, _, _, hr⟩
+  · rintro ⟨rfl, x, hx, hc⟩
+    obtain ⟨r, hr⟩ := hc.at (memBase σ)
+    rw [hx, Res.ok_bind, hr, Res.ok_bind]
+
+/-- `cpok` kept whole is what it tests. -/
+theorem cpok_keep_sim {σ : State} {s : LStor} {Q : LPath} {v : SVal} {qs : List Seg}
+    (hv : s.eval σ = .ok v) (hq : Q.eval σ = .ok qs) :
+    Sim ((LTerm.cpok s Q).eval σ) (cpR σ v qs) := by
+  rw [cpok_eval, hv, Res.ok_bind, hq, Res.ok_bind]
+  exact Sim.refl _
+
+theorem cpR_sim {σ : State} {v v' : SVal} {qs qs' : List Seg}
+    (h : (∃ x, v.findLive qs = .ok x ∧ Cps x) ↔ ∃ x, v'.findLive qs' = .ok x ∧ Cps x) :
+    Sim (cpR σ v qs) (cpR σ v' qs') := fun _ => by rw [cpR_ok, cpR_ok, h]
+
+/-- **A word written over a word keeps whether a copy succeeds** (Lean
+only: `copyStToM` halts on a mapping, and a word is none). -/
+theorem save_cpok_sim {σ : State} {s : LStor} {P Q : LPath} {w X C : LTerm} {u : SVal}
+    {qs : List Seg} (hu : (LStor.save s P w).eval σ = .ok u) (hq : Q.eval σ = .ok qs)
+    (hP : Sim (P.elim.eval σ) (P.eval σ))
+    (hX : ∀ {v ps}, s.eval σ = .ok v → P.elim.eval σ = .ok ps →
+      Sim (X.eval σ) (v.findLive ps >>= SVal.asValue))
+    (hC : ∀ {v}, s.eval σ = .ok v → Sim (C.eval σ) (cpR σ v qs)) :
+    Sim ((LTerm.ite (isT X) C (.cpok (.save s P w) Q)).eval σ) (cpR σ u qs) := by
+  have hu' := hu
+  obtain ⟨wv, hw, hu⟩ := Res.bind_eq_ok.1 hu
+  obtain ⟨v, hv, hu⟩ := Res.bind_eq_ok.1 hu
+  obtain ⟨ps, hp, hs⟩ := Res.bind_eq_ok.1 hu
+  rw [LTerm.eval, isT_eval, Res.ok_bind]
+  cases hx : X.eval σ with
+  | error e =>
+    simp only [pickBranch, cpok_eval, hu', hq, Res.ok_bind]
+    exact Sim.refl _
+  | ok val =>
+    simp only [pickBranch]
+    obtain ⟨sv, hf, ha⟩ := Res.bind_eq_ok.1 (((hX hv ((hP ps).2 hp)) val).1 hx)
+    cases sv with
+    | prim pa =>
+      cases wv with
+      | int z =>
+        exact Sim.trans (hC hv) (cpR_sim (cps_findLive_savePrim hf hs qs).symm)
+      | bool z =>
+        exact Sim.trans (hC hv) (cpR_sim (cps_findLive_savePrim hf hs qs).symm)
+    | struct _ | array _ _ _ | map _ _ => simp only [SVal.asValue, reduceCtorEq] at ha
+
+end CopyOk
+
 /-- A read below a copy from storage, its storage reads eliminated. -/
 theorem copySelU_sim {σ : State} {s : LStor} {q q' : LPath} (p : List Seg) (a : LSel) {u : LTerm}
     (hs : Sim (s.okE.eval σ) (s.eval σ >>= fun _ => .ok (.bool true)))
@@ -6423,7 +6673,8 @@ theorem LTerm.elim_sim (σ : State) : (t : LTerm) → Sim (t.elim.eval σ) (t.ev
         · simp only [h, if_true]; exact LTerm.elim_sim σ t
         · simp only [h, if_false]; exact LTerm.elim_sim σ e
   | .zero a => Sim.bind (LTerm.elim_sim σ a) fun _ => Sim.refl _
-  | .cpok _ _ => Sim.refl _
+  | .cpok s q => guard_sim (LStor.okE_sim σ s) (LPath.elim_sim σ q)
+      fun _ _ hv hq => LStor.cpokU_sim σ s q.elim hv hq
 termination_by structural x => x
 
 /-- Eliminating keeps the path a path term names: `people[balances[a]]` after
@@ -6567,6 +6818,19 @@ theorem LStor.lenU_sim (σ : State) : (s : LStor) → ∀ (Q : LPath) {v : SVal}
       (fun Q' _ _ hv hq => LStor.mapU_sim σ src .map Q' hv hq)
   | .view m _, Q, v, qs, hv, hq =>
     view_lenU_sim hv hq fun j a _ h => LMem.readU_sim σ m j a h
+termination_by structural x => x
+
+/-- **Whether a copy into memory succeeds, after writes**, peeled one word
+write at a time. -/
+theorem LStor.cpokU_sim (σ : State) : (s : LStor) → ∀ (Q : LPath) {v : SVal} {qs : List Seg},
+    s.eval σ = .ok v → Q.eval σ = .ok qs → Sim ((s.cpokU Q).eval σ) (cpR σ v qs)
+  | .init, _, _, _, hv, hq => by rw [LStor.cpokU]; exact cpok_keep_sim hv hq
+  | .save s P _, Q, _, _, hu, hq => by
+    rw [LStor.cpokU]
+    exact save_cpok_sim hu hq (LPath.elim_sim σ P) (fun hv hp => LStor.readU_sim σ s P.elim hv hp)
+      fun hv => LStor.cpokU_sim σ s Q hv hq
+  | .del .., _, _, _, hv, hq | .arr .., _, _, _, hv, hq | .copy .., _, _, _, hv, hq
+  | .view .., _, _, _, hv, hq => by rw [LStor.cpokU]; exact cpok_keep_sim hv hq
 termination_by structural x => x
 
 /-- An index written to memory, eliminated, returns what it did. -/

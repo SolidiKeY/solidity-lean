@@ -1,4 +1,5 @@
 import Solidity.Calculus.DecideComplete
+import Solidity.Calculus.Closer
 
 /-!
 # `sol_decide`: the storage goals, decided
@@ -473,6 +474,17 @@ private def aCopy : LMem := .addM (.copySt .init 0 .init (.root "alice")) 1 (.st
 #guard_msgs in -- constants are folded where a term is built, and a big power is not
 #eval LTerm.mkBin .add .uint (.lit (.int 2)) (.lit (.int 3)) == .lit (.int 5) &&
   LTerm.mkBin .pow .uint (.lit (.int 2)) (.lit (.int 1000)) matches .binop ..
+
+/-- info: true -/
+#guard_msgs in -- a word written over a word keeps whether a copy succeeds (Lean only)
+#eval (LStor.save .init ((LPath.root "alice").field "age") (.lit (.int 30))).cpokU (.root "alice")
+  == .ite (isT (LStor.init.readU ((LPath.root "alice").field "age"))) (.cpok .init (.root "alice"))
+    (.cpok (.save .init ((LPath.root "alice").field "age") (.lit (.int 30))) (.root "alice"))
+
+/-- info: [true, false] -/
+#guard_msgs in -- `Facts.cpokInit` (Lean only): `wt` types the path, and no mapping is below it
+#eval [({ lay := [("xs", .ref (.array .uint))] } : Facts).cpokInit (.root "xs"),
+  ({ lay := [("m", .ref (.mapping .uint .uint))] } : Facts).cpokInit (.root "m")]
 
 end MemoryClauses
 

@@ -368,7 +368,8 @@ Defined and proved; the translation produces them from the switch on.
 | — (Lean only: memory holds no mapping) | `LStor.mapU .map` of a view is `.err` | `view_noMap`, `MemNames.copyMToSt_noMap` | — | defined |
 | — (Lean only: `copyMem` halts on a cycle) | `LMem.refDesc`: every reference written names an older root | `LMem.refDesc_desc`, `MemNames.copyMem_ok_desc` | — | defined; `okE` of a view still kept whole |
 | — (Lean only: the program rules' `\add(0 <= ie & ie < read(memory, mv, size))`; a member write needs a struct) | `LMem.writeG`, `structG`, `nameG` | `LMem.writeG_sim`, `structG_sim`, `nameG_sim` | — | defined |
-| — (Lean only: `copyStToM` halts on a mapping) | `LTerm.cpok` | `copyStToM_ok_any`, `MemNames.copyStToM_ok_noMap` | — | open: reduction and `Facts.cpokInit` |
+| — (Lean only: `copyStToM` halts on a mapping) | `LTerm.cpok`, reduced by `LStor.cpokU` through each word written over a word, down to `cpok init q` | `LStor.cpokU_sim`, `save_cpok_sim`, `cps_findLive_savePrim`, `copyStToM_ok_any` | — | defined |
+| — (Lean only: `wt` gives a copyable value) | `Facts.cpokInit` (`Calculus/Closer.lean`): `cpok init q` returns where the layout types `q` at a type with no mapping | `Facts.retsW_sound`, `MemNames.copyStToM_ok_noMap` | — | defined |
 
 ## The data-structure theories
 

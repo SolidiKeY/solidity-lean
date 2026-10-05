@@ -2179,6 +2179,14 @@ def Facts.shapeIs (F : Facts) (sh : KShape) (q : LPath) : Bool :=
   | .fixed, some (.ref (.fixed _ _)) => true
   | _, _ => false
 
+/-- **`Facts.cpokInit`** (Lean only: `copyStToM` halts on a mapping): the
+layout types the path at a type that holds no mapping, so the canonical
+value `wt` puts there copies into memory (`MemNames.copyStToM_ok_noMap`). -/
+def Facts.cpokInit (F : Facts) (q : LPath) : Bool :=
+  match F.pty q with
+  | some T => !tyHasMapping T
+  | none => false
+
 /-- The layout types the path as an array. -/
 def Facts.isArrPath (F : Facts) (q : LPath) : Bool :=
   match F.pty q with
@@ -2221,7 +2229,8 @@ def Facts.retsW (F : Facts) (N : LTerm → LTerm) : LTerm → Bool
   | t@(.kmap sh s q) => t.known F.known F.ne || (s.isInit && F.keysRetW N q && F.shapeIs sh q) ||
       (F.slotIn N s q && F.keysRetW N q && tyShape sh (F.slotTy s q))
   | t@(.len s q) => t.known F.known F.ne || (s.isInit && F.keysRetW N q && F.isArrPath q)
-  | t@(.sok _) | t@(.cpok _ _) => t.known F.known F.ne
+  | t@(.sok _) => t.known F.known F.ne
+  | t@(.cpok s q) => t.known F.known F.ne || (s.isInit && F.keysRetW N q && F.cpokInit q)
   | t@(.pok q) => t.known F.known F.ne || F.keysRetW N q
 
 /-- Every key of the path returns an integer. -/
@@ -2519,9 +2528,22 @@ theorem Facts.retsW_sound {σ : State} {F : Facts} (hF : F.Ok σ) {N : LTerm →
           exact ⟨_, by simp only [LTerm.eval, LStor.eval, hq, hw, Res.ok_bind,
               Close.arrLen] <;> rfl⟩
       · cases ht
-  | .sok _, h | .cpok _ _, h => by
+  | .sok _, h => by
     simp only [Facts.retsW] at h
     exact LTerm.known_returns hF.1 hF.2.1 _ h
+  | .cpok s q, h => by
+    simp only [Facts.retsW, Bool.or_eq_true, Bool.and_eq_true] at h
+    rcases h with h | ⟨⟨hs, hk⟩, ht⟩
+    · exact LTerm.known_returns hF.1 hF.2.1 _ h
+    · cases s <;> simp only [LStor.isInit, Bool.false_eq_true] at hs
+      unfold Facts.cpokInit at ht
+      split at ht
+      · rename_i T hT
+        obtain ⟨qs, w, hq, hw, hc⟩ := F.resolve hF (Facts.keysRetW_sound hF hN q hk) hT
+        obtain ⟨τ, mv, hm⟩ := MemNames.copyStToM_ok_noMap (memBase σ) w T hc
+          (by simpa only [Bool.not_eq_eq_eq_not, Bool.not_true] using ht)
+        exact ⟨_, by simp only [LTerm.eval, LStor.eval, hq, hw, hm, Res.ok_bind] <;> rfl⟩
+      · cases ht
   | .pok q, h => by
     simp only [Facts.retsW, Bool.or_eq_true] at h
     rcases h with h | hk
