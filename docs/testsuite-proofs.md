@@ -1170,8 +1170,8 @@ halves of 20.
 | `Derived11` | 2.3 s | 2.2 s | −3% |
 | `memoryIndexWriteNse` | 2.48 s | 2.90 s | +17% |
 
-The leaves are smaller than at step 0 because constants are folded. For
-example, `memoryDeclDefault` goes from 27 nodes to 21, and
-`memoryIndexWriteNse` from 534 to 534. `memoryIndexWriteNse` is still the
+The leaves are smaller than at step 0 where constants are folded:
+`memoryDeclDefault` goes from 27 nodes to 21, while `memoryIndexWriteNse`
+stays at 534. `memoryIndexWriteNse` is still the
 one figure near the 20% line, and the step-2 kernel cost of the six-type
 mutual block is all of it.
