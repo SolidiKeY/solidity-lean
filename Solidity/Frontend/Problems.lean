@@ -38,11 +38,11 @@ open Lean Elab Command Meta
 def reportRows (N : Lean.Name) : CommandElabM (List ImportRow) :=
   liftTermElabM <| unsafe evalConst (List ImportRow) (N ++ `report)
 
-/-- The modality of a tag. -/
+/-- The modality of a tag's plain obligation, if solkey states that one. -/
 def Tag.modality? : Tag → Option Modality
   | .diamond => some .diamond
   | .box => some .box
-  | .skip => none
+  | .skip | .specified | .internal | .malformed => none
 
 syntax (name := solcProblems) "solc_problems " ident : command
 
@@ -179,7 +179,8 @@ def elabSolkeyObligations : CommandElab := fun stx => do
     if r.status == .elaborated then
       let f := N ++ Lean.Name.mkSimple r.name
       if !env.contains (f ++ `problem) then
-        other := other.push s!"unstated {r.name}"
+        let why := if r.tag.modality?.isNone then r.tag.toStr else "unstated"
+        other := other.push s!"{why} {r.name}"
         continue
       let want := mkAppN (mkConst ``Proves) #[C, mkConst ``RuleSet.all,
         mkApp (mkConst ``List.nil [0]) (mkApp (mkConst ``Hyp) C), mkConst (f ++ `problem)]

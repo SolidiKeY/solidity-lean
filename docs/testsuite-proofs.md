@@ -222,12 +222,20 @@ sha256 of `SolcWrapper`'s input, was checked against an older cached
 (`Frontend/Import.lean`), and the pinned report:
 
 - 420 functions: 316 diamond, 102 box, 2 skip (solkey's tags, read from the
-  NatSpec text);
+  NatSpec text as `KeyNatspec` reads it: a `@custom:key` tag starts a line,
+  and a `requires`/`ensures`/`invariant` clause, the function's or the
+  contract's, makes the tag `specified`, a function neither `public` nor
+  `external` `internal`; neither gets a plain `N.f.problem`, and a clause
+  solkey refuses is `malformed`, an unsupported row. TestSuite has none of
+  the three, so the summary omits them);
 - **417 elaborated**: `Solkey.TestSuite.f : Prog Solkey.TestSuite` for each,
   its parameters free locals of their types (the report row carries them);
 - 2 skipped (`tryCalleeGet`, `tryCalleePing`, tagged `skip`);
 - 1 excluded: `recursiveStructMapping`, whose struct `Tree` is recursive
   through a mapping (its state variable `tree` is left out of the contract).
+
+The bodies are elaborated with info trees off: the language server would
+otherwise keep all 417 expansions, every one anchored at the command.
 
 No syntax had to be added: every construct of the file (`new T[](n)`,
 `.length`, `**`, fixed arrays, `int8`, `try`/`catch`, `transfer`, `++`/`−−`

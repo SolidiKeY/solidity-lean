@@ -69,17 +69,31 @@ def Gap.msg : Gap → String
 def Gap.line : Gap → Nat
   | .excluded _ l | .unsupported _ l => l
 
-/-- solkey's reading of a function, from its NatSpec `@custom:key` tag. -/
+/-- solkey's obligation for a function, from its `@custom:key` clauses and
+its contract's (`tagOf`). -/
 inductive Tag where
+  /-- unspecified: `⟨f⟩ true` -/
   | diamond
+  /-- unspecified, `@custom:key box`: `[f] true` -/
   | box
+  /-- `@custom:key skip`: no obligation -/
   | skip
+  /-- a `requires`, `ensures` or `invariant` clause, its own or its
+  contract's: solkey's obligation is the specification's, not stated here -/
+  | specified
+  /-- neither `public` nor `external`: solkey states no obligation -/
+  | internal
+  /-- a clause solkey refuses to read: no obligation -/
+  | malformed
   deriving Repr, DecidableEq, Inhabited
 
 def Tag.toStr : Tag → String
   | .diamond => "diamond"
   | .box => "box"
   | .skip => "skip"
+  | .specified => "specified"
+  | .internal => "internal"
+  | .malformed => "malformed"
 
 /-- A function as read: its parameters (name, `sol` type) and its body as
 statements of `sol` text, or why there is none. -/
@@ -660,12 +674,73 @@ end
 
 /-! ## A contract -/
 
-/-- The NatSpec tag of a function: `@custom:key box`, `@custom:key skip`. -/
-def tagOf (f : Json) : Tag :=
-  let t := ((J.opt f "documentation").bind fun d => (d.getObjValAs? String "text").toOption).getD ""
-  if (t.splitOn "@custom:key box").length > 1 then .box
-  else if (t.splitOn "@custom:key skip").length > 1 then .skip
-  else .diamond
+/-- The NatSpec text of a node, `""` if none. -/
+def docText (n : Json) : String :=
+  ((J.opt n "documentation").bind fun d => (d.getObjValAs? String "text").toOption).getD ""
+
+/-- One `@custom:key` clause: its directive and its text. -/
+structure KeyClause where
+  kind : String
+  text : String
+  deriving Inhabited
+
+/-- A line's leading tag (`@` and a letter, then word characters, `:` or
+`-`) and the rest of the line, after spaces and tabs. -/
+def tagWord? (l : String) : Option (String × String) :=
+  let t := l.dropWhile fun c => c == ' ' || c == '\t'
+  match t.toList with
+  | '@' :: c :: _ =>
+    if c.isAlpha then
+      let w := t.takeWhile fun c => c == '@' || c.isAlphanum || c == '_' || c == ':' || c == '-'
+      some (w, t.drop w.length)
+    else none
+  | _ => none
+
+/-- One clause's body: its directive word and the rest, whitespace collapsed. -/
+def keyClause (body : String) : Except String KeyClause := do
+  let ws := (body.split Char.isWhitespace).filter (· != "")
+  let some w := ws.head? | throw "`@custom:key` needs a directive"
+  let rest := " ".intercalate ws.tail
+  unless ["box", "skip", "invariant", "requires", "ensures", "assignable"].contains w do
+    throw s!"unknown `@custom:key` directive `{w}`"
+  if ["invariant", "requires", "ensures"].contains w && rest.isEmpty then
+    throw s!"`@custom:key {w}` needs an expression"
+  if (w == "box" || w == "skip") && !rest.isEmpty then
+    throw s!"`@custom:key {w}` takes no argument, got `{rest}`"
+  pure { kind := w, text := rest }
+
+/-- The `@custom:key` clauses of a NatSpec text, as solkey's `KeyNatspec`
+reads them: a tag starts a line, and a clause runs to the next tag, so a tag
+quoted inside a sentence is prose. -/
+def keyClauses (doc : String) : Except String (List KeyClause) := do
+  let mut out : Array KeyClause := #[]
+  let mut cur : Option String := none
+  for l in doc.splitOn "\n" do
+    match tagWord? l with
+    | some (w, rest) =>
+      if let some b := cur then out := out.push (← keyClause b)
+      cur := if w == "@custom:key" then some rest else none
+    | none => cur := cur.map (· ++ "\n" ++ l)
+  if let some b := cur then out := out.push (← keyClause b)
+  pure out.toList
+
+/-- Does a comment carry a specification proper (`KeyNatspec.isSpecified`)? -/
+def isSpecified (cs : List KeyClause) : Bool :=
+  cs.any fun c => ["invariant", "requires", "ensures"].contains c.kind
+
+/-- solkey's obligation for the function `f` of a contract whose clauses are
+`contract`, in `SolidityProblemSynthesizer`'s order: only a `public` or
+`external` function has one, `skip` drops it, a specification replaces the
+plain one, and `box` chooses its modality.  A clause solkey refuses is the
+error. -/
+def tagOf (contract : List KeyClause) (f : Json) : Except String Tag := do
+  let vis := ((f.getObjValAs? String "visibility").toOption).getD ""
+  unless vis == "public" || vis == "external" do return .internal
+  let cs ← keyClauses (docText f)
+  if cs.any (·.kind == "skip") then return .skip
+  if isSpecified contract || isSpecified cs then return .specified
+  if cs.any (·.kind == "box") then return .box
+  return .diamond
 
 /-- Every declaration of a function that must be renamed: one named like a
 state variable or a Lean keyword gets `_` until it is fresh. -/
@@ -700,6 +775,7 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) :
   let nodes := match c.getObjVal? "nodes" with
     | .ok (.arr a) => a.toList
     | _ => []
+  let cspec ← (keyClauses (docText c)).mapError fun m => s!"contract `{name}`'s NatSpec: {m}"
   let S := readStructs ren (nodes.filter (J.kind · == "StructDefinition"))
   let vars := nodes.filter fun n =>
     J.kind n == "VariableDeclaration" && (n.getObjValAs? Bool "stateVariable").toOption == some true
@@ -757,13 +833,15 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) :
         let ((t, x), _) ← (do pure ((← PM.lift (tyText S (← PM.lift (J.get p "typeName")))),
           ← nameOf p) : PM (String × String)).run st
         pure (x, t))
+    let tag := tagOf cspec f
     let body : Except Gap (List (Nat × String)) := do
+      if let .error m := tag then throw (.unsupported s!"its NatSpec: {m}" (J.line f))
       if let some m := refused then throw (.unsupported m (J.line f))
       let b ← J.get f "body"
       let (ss, _) ← ((← J.arr b "statements").flatMapM fun s => do
         pure ((← stmt s).map (J.line s, ·))).run st
       pure ss
-    { name := fname, line := J.line f, tag := tagOf f,
+    { name := fname, line := J.line f, tag := (tag.toOption).getD .malformed,
       params := (ps.toOption).getD [],
       body := do let _ ← ps; body }
   pure { name, members, dropped := droppedNames, funs }

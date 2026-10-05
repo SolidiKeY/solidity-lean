@@ -11,8 +11,11 @@ importing file) and defines
 * `N : Contract`, the contract's state variables through `contract!{ … }`;
 * `N.f : Prog N` for each function `f` that elaborates, its body read
   against `N` with its parameters as locals in scope;
-* `N.report : List ImportRow`, one row per function: its solkey tag and
-  parameters, what became of it and why, with the source line.
+* `N.report : List ImportRow`, one row per function: its solkey tag
+  (`tagOf`: which obligation solkey states, if any) and parameters, what
+  became of it and why, with the source line.  A function whose obligation
+  is a specification's, or that has none (`internal`), is still a program:
+  only its plain statement is not made (`solc_problems`).
 
 Each body is printed as `sol` text (`SolcJson.lean`), parsed as
 `sol_raw!{ … }` and elaborated to a `List RawStmt` term by the macros, the
@@ -74,8 +77,11 @@ deriving instance ToExpr for ImportRow
 /-- The counts by status, then every row that did not elaborate. -/
 def ImportRow.summary (rows : List ImportRow) : String :=
   let count (s : ImportStatus) := (rows.filter (·.status == s)).length
-  let tags := s!"{(rows.filter (·.tag == .diamond)).length} diamond, \
-    {(rows.filter (·.tag == .box)).length} box, {(rows.filter (·.tag == .skip)).length} skip"
+  let tags := ", ".intercalate <| [Tag.diamond, .box, .skip, .specified, .internal, .malformed]
+    |>.filterMap fun t =>
+      let n := (rows.filter (·.tag == t)).length
+      if n == 0 && t != .diamond && t != .box && t != .skip then none
+      else some s!"{n} {t.toStr}"
   let head := s!"{rows.length} functions ({tags}): {count .elaborated} elaborated, \
     {count .skipped} skipped, {count .excluded} excluded, {count .unsupported} unsupported"
   let rest := rows.filter (·.status != .elaborated) |>.map fun r =>
@@ -172,7 +178,8 @@ def elabSolcImport : CommandElab := fun stx => do
       match parse `term text with
       | .error e => rows := rows.push (row .unsupported (at_ f 0 s!"the printed text does not parse: {e}"))
       | .ok s =>
-        let r ← liftTermElabM <| withoutErrToSorry do
+        -- no info trees: the server would keep every expansion, all at this command
+        let r ← liftTermElabM <| withEnableInfoTree false <| withoutErrToSorry do
           tryCatchRuntimeEx (withCurrHeartbeats do
               let e ← elabTermEnsuringType s rawTy
               synthesizeSyntheticMVarsNoPostponing
