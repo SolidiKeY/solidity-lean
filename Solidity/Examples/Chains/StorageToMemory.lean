@@ -9,7 +9,7 @@ The calculus's three worked examples of a copy from storage into a fresh memory 
 over any modality `m` and postcondition `φ` (`Examples/Chains/Storage.lean` says how to read one), in the
 printed names (`FreshNames` tables).  The root `r` the copy allocates is `freshId(copySt(memory, …))`.
 
-Where the paper prints the updates merged before the copy (the alias `sp`, `aliceTok`), the chain merges
+Where the worked example prints the updates merged before the copy (the alias `sp`, `aliceTok`), the chain merges
 there too (`~[sequentialToParallel]~>` under the open modality), and again past the program.  The read of the
 copy is then resolved one law a link (`Calculus/ChainRewrites.lean`): `readCopySt` reads the copy out of the
 storage it copied, `findOnSave` the write.  Every capture stays to the last line, which `#last_line` checks.
@@ -75,7 +75,8 @@ local instance : FreshNames := .ofTable names
 
 /-- `alice.account.balance = 10; Account memory acc = alice.account;` up to the copy: the write unfolded
 through the alias `aliceAcc` and saved, the declaration dropped, the member source captured in a second alias
-`sp` (the paper's `⇝*` binds it), and the updates merged, as the paper prints them before the copy. -/
+`sp` (the worked example's `⇝*` binds it), and the updates merged, as the example prints them before the
+copy. -/
 theorem source :
     dl![m]{ ⟨[ alice.account.balance = 10; Account memory acc = alice.account; v = acc.balance; ]⟩ φ }
     ~[storageFieldWrite_unfold_leftFst]~> dl![m]{
@@ -162,7 +163,7 @@ local instance : FreshNames := .ofTable names
 #guard (FreshNames.clashes StandardExample names).isEmpty
 
 /-- `Token memory t = alice.account.token;` from a storage where `alice.account.token.value` is 5: the
-declaration dropped, the source captured in `aliceTok`, bound through `aliceAcc` (the paper's `⇝*`), the
+declaration dropped, the source captured in `aliceTok`, bound through `aliceAcc` (the example's `⇝*`), the
 updates merged, which binds `aliceTok` to `alice.account.token`, and the copy installed.  The copy holds the
 token read in the starting storage; a struct read has no literal. -/
 theorem chain :

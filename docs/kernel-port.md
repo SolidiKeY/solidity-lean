@@ -60,10 +60,10 @@ specifications (`Calculus/Spec.lean`), the solkey corpus (`SolidityCorpus`,
   named `length` falls back to `sol_decide_heuristic`, and `omega`/`grind` are
   not proved complete on the statement realizability leaves
   (`Calculus/DecideComplete.lean`).  Memory the updates allocate is read
-  symbolically (`Calculus/DecideMem.lean`, being reworked into solkey's
-  `memoryRules.key`/`structMemoryRules.key` taclets); copies between memory
-  and storage (`copySt` of a memory object, `copyStToM`) are outside the
-  fragment.
+  by solkey's `memoryRules.key`/`structMemoryRules.key` taclets
+  (`Calculus/MemRead.lean`; `docs/lean-key-rule-map.md`, "The closer's
+  memory clauses"), copies between memory and storage included; a `push`
+  of a memory object is outside the fragment.
 - **Reachability of an ill-defaulted root** (a `BadDup[]`): that such an array
   stays empty is unproved, so `reachable_iff` asks `Ty.okDeep` of every root
   (`Typing/Constructibility.lean`).

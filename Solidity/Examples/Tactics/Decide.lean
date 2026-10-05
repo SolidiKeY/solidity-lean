@@ -1,4 +1,5 @@
 import Solidity.Calculus.DecideComplete
+import Solidity.Calculus.Closer
 
 /-!
 # `sol_decide`: the storage goals, decided
@@ -387,5 +388,246 @@ theorem survivesMappingOnly :
     | ⟨_, _, he⟩ => nomatch Theory.StValue.Equiv.prim_iff.1 he
 
 end Ledger
+
+/-! ## The memory clauses
+
+A memory is read as solkey reads it (`Calculus/MemRead.lean`): the writes are
+walked from the newest down to the allocation of the name's root, every
+comparison static.  Each clause is pinned here on a memory written out, and
+on programs at the end of the file.  `alice` copied into memory is the
+allocation `0`, a fresh `Person` the allocation `1`. -/
+
+section MemoryClauses
+
+open Solidity.Decide
+
+/-- `Person memory p;` -/
+private def pNew : LMem := .addM .init 0 (.struct "Person")
+/-- `p.age = 5;` -/
+private def pAge : LMem := .write pNew ⟨0, []⟩ (.fld "age") (.word (.lit (.int 5)))
+/-- `uint[] memory xs = new uint[](3); xs[i] = 7;` -/
+private def xsNew : LMem :=
+  .write (.newArr .init 0 (.array .uint) (.lit (.int 3))) ⟨0, []⟩ (.idx (.var (.user "i")))
+    (.word (.lit (.int 7)))
+/-- `Person memory a = alice; Person memory q;` -/
+private def aCopy : LMem := .addM (.copySt .init 0 .init (.root "alice")) 1 (.struct "Person")
+
+/-- info: true -/
+#guard_msgs in -- `readOnWrite`: the slot written reads the word written
+#eval pAge.readT ⟨0, []⟩ (.fld "age") == some (.lit (.int 5))
+
+/-- info: true -/
+#guard_msgs in -- `readOnAddM`, `initMember`, `defaultValueInt`: a default member
+#eval pNew.readT ⟨0, []⟩ (.fld "age") == some (.lit (.int 0))
+
+/-- info: true -/
+#guard_msgs in -- `initIdentity`: a reference member is the name one segment longer
+#eval pAge.readI ⟨0, []⟩ (.fld "account") == some ⟨0, [.field "account"]⟩
+
+/-- info: true -/
+#guard_msgs in -- `readOnWrite` at a symbolic index: one `kite`; `initElement` below it
+#eval xsNew.readT ⟨0, []⟩ (.idx (.lit (.int 1))) ==
+  some (.kite (.lit (.int 1)) (.var (.user "i")) (.lit (.int 7)) (.lit (.int 0)))
+
+/-- info: true -/
+#guard_msgs in -- `memoryArrayFreshAlloc`: the length allocated
+#eval xsNew.lenT ⟨0, []⟩ == some (.lit (.int 3))
+
+/-- info: true -/
+#guard_msgs in -- `readFromCopyToStorage`: a member of a copy reads the storage copied
+#eval aCopy.readT ⟨0, []⟩ (.fld "age") == some (.find .init ((LPath.root "alice").field "age"))
+
+/-- info: true -/
+#guard_msgs in -- `newFromAdd`: another root is apart, `q.age` reads its default
+#eval aCopy.readT ⟨1, []⟩ (.fld "age") == some (.lit (.int 0))
+
+/-- info: true -/
+#guard_msgs in -- `readFromCopyToStorageIdentity`: a reference member of a copy is there
+-- where the storage holds no word at it
+#eval aCopy.nameG ⟨0, [.field "account"]⟩ ==
+  some (refT .init ((LPath.root "alice").field "account"))
+
+/-- info: true -/
+#guard_msgs in -- the write guard (Lean only): an index below the length
+#eval xsNew.writeG ⟨0, []⟩ (.idx (.var (.user "j"))) ==
+  some (ltG (.var (.user "j")) (.lit (.int 3)))
+
+/-- info: [true, false] -/
+#guard_msgs in -- `refDesc` (Lean only): a reference written names an older root
+#eval [(LMem.write aCopy ⟨1, []⟩ (.fld "account") (.ref ⟨0, [.field "account"]⟩)).refDesc,
+  (LMem.write aCopy ⟨0, []⟩ (.fld "account") (.ref ⟨1, [.field "account"]⟩)).refDesc]
+
+/-- info: true -/
+#guard_msgs in -- `findOnCopy`, `selectOnCopyMemPrim`: a read below a view reads memory
+#eval (LStor.view pAge ⟨0, []⟩).readU ((LPath.root viewRoot).field "age") == .lit (.int 5)
+
+/-- info: true -/
+#guard_msgs in -- `selectOnCopyMemRef`, `readRCons`: a path below a view walks the names
+#eval (LStor.view aCopy ⟨1, []⟩).readU (((LPath.root viewRoot).field "account").field "balance")
+  == .lit (.int 0)
+
+/-- info: true -/
+#guard_msgs in -- a view holds no mapping (Lean only)
+#eval (LStor.view pNew ⟨0, []⟩).mapU .map ((LPath.root viewRoot).field "age") == .err
+
+/-- info: true -/
+#guard_msgs in -- constants are folded where a term is built, and a big power is not
+#eval LTerm.mkBin .add .uint (.lit (.int 2)) (.lit (.int 3)) == .lit (.int 5) &&
+  LTerm.mkBin .pow .uint (.lit (.int 2)) (.lit (.int 1000)) matches .binop ..
+
+/-- info: true -/
+#guard_msgs in -- a word written over a word keeps whether a copy succeeds (Lean only)
+#eval (LStor.save .init ((LPath.root "alice").field "age") (.lit (.int 30))).cpokU (.root "alice")
+  == .ite (isT (LStor.init.readU ((LPath.root "alice").field "age"))) (.cpok .init (.root "alice"))
+    (.cpok (.save .init ((LPath.root "alice").field "age") (.lit (.int 30))) (.root "alice"))
+
+/-- info: [true, false] -/
+#guard_msgs in -- `Facts.cpokInit` (Lean only): `wt` types the path, and no mapping is below it
+#eval [({ lay := [("xs", .ref (.array .uint))] } : Facts).cpokInit (.root "xs"),
+  ({ lay := [("m", .ref (.mapping .uint .uint))] } : Facts).cpokInit (.root "m")]
+
+/-- info: [true, true, true] -/
+#guard_msgs in -- the run guard (Lean only): an allocation at its ordinal, of a type with no
+-- mapping and a well-formed default
+#eval [pAge.okU.isSome, (LMem.addM .init 0 (.struct "Wallet")).okU.isNone,
+  (LMem.addM .init 1 (.struct "Person")).okU.isNone]
+
+/-- info: [true, true] -/
+#guard_msgs in -- a view's guard where every reference names an older root, kept whole elsewhere
+#eval [(LStor.view pAge ⟨0, []⟩).okE matches .seq _ (.seq _ _),
+  (LStor.view (LMem.write aCopy ⟨0, []⟩ (.fld "account") (.ref ⟨1, [.field "account"]⟩))
+    ⟨0, []⟩).okE matches .sok _]
+
+/-- info: [true, true] -/
+#guard_msgs in -- `initSize`, `sizeOfFixed`, `sizeOfDyn`: a fresh member's length is its
+-- declared one, `uint[3]`'s `3` and `uint[]`'s `0`
+#eval [(LMem.addM .init 0 (.struct "FixedTriple")).lenT ⟨0, [.field "items"]⟩ ==
+    some (.lit (.int 3)),
+  (LMem.addM .init 0 (.struct "Basket")).lenT ⟨0, [.field "items"]⟩ == some (.lit (.int 0))]
+
+/-- info: true -/
+#guard_msgs in -- `initElement`: an element of a fresh `uint[3]` is `0` below the length
+#eval (LMem.addM .init 0 (.struct "FixedTriple")).readT ⟨0, [.field "items"]⟩
+    (.idx (.var (.user "i"))) ==
+  some (seqL (ltR (.var (.user "i")) (.lit (.int 3))) (.lit (.int 0)))
+
+/-- info: true -/
+#guard_msgs in -- `defaultValueBool`: a fresh `bool` member is `false`
+#eval (LMem.addM .init 0 (.struct "Toggle")).readT ⟨0, []⟩ (.fld "on") ==
+  some (.lit (.bool false))
+
+/-- info: true -/
+#guard_msgs in -- `findDefinitionSize`: a copied array's length is the storage's
+#eval (LMem.copySt .init 0 .init (.root "bk")).lenT ⟨0, [.field "items"]⟩ ==
+  some (.len .init ((LPath.root "bk").field "items"))
+
+/-- info: [true, true] -/
+#guard_msgs in -- `structG` (Lean only): a fresh struct member is a struct; below a copy, the
+-- storage holds a struct there, no array and no word
+#eval [aCopy.structG ⟨1, [.field "account"]⟩ == some (.lit (.bool true)),
+  aCopy.structG ⟨0, [.field "account"]⟩ ==
+    some (.ite (isT (.len .init ((LPath.root "alice").field "account"))) .err
+      (refT .init ((LPath.root "alice").field "account")))]
+
+/-- info: true -/
+#guard_msgs in -- `selectOnCopyMemPrim` at a length: a view's length is memory's
+#eval (LStor.view xsNew ⟨0, []⟩).lenU (LPath.root viewRoot) == .lit (.int 3)
+
+/-- info: [true, true] -/
+#guard_msgs in -- `hasU` of a view (Lean only): its root is there (`isViewRoot`), and a member
+-- below it as the view guard and `nameG` say
+#eval [(LStor.view pAge ⟨0, []⟩).hasU (LPath.root viewRoot) == .lit (.bool true),
+  (LStor.view pAge ⟨0, []⟩).hasU ((LPath.root viewRoot).field "account") ==
+    .orElse (.seq .err (.lit (.bool true))) (.seq (.lit (.bool true)) (.lit (.bool true)))]
+
+/-- info: [true, false] -/
+#guard_msgs in -- `memSize` (Lean only): 400 writes and allocations are within, 401 are not
+#eval let w (n : Nat) : LMem :=
+    (List.range n).foldl (fun m _ => .write m ⟨0, []⟩ (.fld "age") (.word (.lit (.int 1)))) pNew
+  [(w 399).within memSize, (w 400).within memSize]
+
+/-- info: [true, false] -/
+#guard_msgs in -- `memL` (Lean only): a copy of memory needs guards that are literals
+#eval [(memL (some (pNew, .lit (.bool true))) (some (⟨0, []⟩, .lit (.bool true)))).isSome,
+  (memL (some (pNew, .seq .err (.lit (.bool true)))) (some (⟨0, []⟩, .lit (.bool true)))).isSome]
+
+end MemoryClauses
+
+/-! ## Memory through the closer
+
+The updates of a memory program, pushed in, are one `LMem`
+(`Calculus/Decide.lean`): an allocation's pair is one update (`pairL`), a
+member deleted gets a fresh root (`freshRef`), and no default value is ever
+built, so a long `new` costs what a short one does. -/
+
+/-- `Person memory carol; carol.age = 5;` — the pair, a member write, and
+the read of it (`readOnWrite`). -/
+theorem memoryFieldWriteRead :
+    ⊨ dl!{ [ Person memory carol; carol.age = 5; uint x = carol.age; ] x == 5 } := by
+  sol_symex
+  sol_decide
+
+/-- A member nothing wrote is its default (`initMember`). -/
+theorem memoryFieldDefault :
+    ⊨ dl!{ [ Person memory carol; uint x = carol.age; ] x == 0 } := by
+  sol_symex
+  sol_decide
+
+/-- A write and a read at an index that is no literal: one `kite` on the
+index, the write's guard the length. -/
+theorem memoryIndexSymbolic :
+    ⊨ dl!{ [ uint[] memory xs = new uint[](3); xs[i] = 7; uint y = xs[i]; ] y == 7 } := by
+  sol_symex
+  sol_decide
+
+/-- A million elements: the length is read off `new`, nothing allocated. -/
+theorem memoryNewLarge :
+    ⊨ dl!{ [ uint[] memory xs = new uint[](1000000); xs[5] = 7; uint y = xs[5];
+             uint l = xs.length; ] (y == 7 ∧ l == 1000000) } := by
+  sol_symex
+  sol_decide
+
+/-- `delete carol.account;` writes a fresh default `Account` into the member
+(`memoryFieldDeleteReference`): its balance reads `0` again. -/
+theorem memoryDeleteRefFresh :
+    ⊨ dl!{ [ Person memory carol; Account memory acc = carol.account; acc.balance = 9;
+             delete carol.account; uint b = carol.account.balance; ] b == 0 } := by
+  sol_symex
+  sol_decide
+
+/-- `Person memory carol = alice;` copies the storage in (`memoryStorageCopy`,
+one pair under `copyG`); a later write to `alice` is not seen
+(`readFromCopyToStorage` reads the storage of the copy). -/
+theorem memoryStorageCopyRead :
+    ⊨ dl!{ [ alice.age = 27; Person memory carol = alice; alice.age = 30;
+             uint x = carol.age; ] x == 27 } := by
+  sol_symex
+  sol_decide
+
+/-- `alice = carol;` copies memory out (`memoryToStorageStoreRoot`, the
+view of `carol` laid over `alice`); the storage reads through the view
+(`findOnCopy`, `selectOnCopyMemPrim`), so a later write to `carol` is not
+seen. -/
+theorem memoryToStorageRead :
+    ⊨ dl!{ [ Person memory carol; carol.age = 42; alice = carol; carol.age = 43;
+             uint x = alice.age; ] x == 42 } := by
+  sol_symex
+  sol_decide
+
+/-- info: false -/
+#guard_msgs in -- a copy from storage outside its pair is outside the fragment
+#eval (dl!{ { memory := copySt(memory, find(storage, alice)) } true }).inL Decide.Sym.empty
+
+/-- info: false -/
+#guard_msgs in -- a memory local no update bound is outside the fragment
+#eval (dl!{ { x := read(memory, carol.age) } x == 0 }).inL Decide.Sym.empty
+
+/--
+error: sol_decide: the formula is outside the fragment (a modality, a push of a memory object, a copy of memory whose guards are not literals, a copy from storage outside its allocation's pair, a memory past memSize, a read of the ledger, an alias no update binds, or one through an index used after a write)
+⊢ Fml.inL Decide.Sym.empty dl{ [ uint x = 1; ] x = 1 } = true
+-/
+#guard_msgs in -- a modality is outside the fragment, and `sol_decide` says what is
+example : ⊨ dl!{ [ uint x = 1; ] x == 1 } := by
+  sol_decide
 
 end Solidity.Examples.Tactics.Decide

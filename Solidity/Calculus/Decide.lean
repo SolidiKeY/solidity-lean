@@ -1,6 +1,8 @@
 import Solidity.Calculus.Close
-import Solidity.Calculus.DecideMem
+import Solidity.Calculus.MemRead
+import Solidity.Calculus.StateParts
 import Solidity.Theory.Bridge.Denote
+import Solidity.Typing.CanonTest
 
 /-!
 # Deciding the storage goals: `sol_decide`
@@ -91,17 +93,25 @@ and, through an index, used before the next write to the storage; a storage
 variable bound to the storage (`old` of a specification, read as a snapshot:
 `LTerm.findP`); a ledger entry or a payment (`transfer`'s), which no term of
 the fragment reads; a quantifier over a local the updates before it do not
-read (`LFml.all`, a specification's `\forall`).  Outside it: memory (`read`,
-`write`, allocation, the copies `copySt`/`copyMem`), a read of the ledger
-(`net(a)`).  Of the gaps `Close.lean` lists, this closes the keys the
-formula does not separate and the reads below a deleted struct; the memory
-defaults and the distinct allocations stay open.
+read (`LFml.all`, a specification's `\forall`).  Memory is in it as solkey
+writes it (`LMem`): `memory`, its allocations (an identity only in the pair
+that allocates it, `pairL`, or as the reference a `delete` writes,
+`freshRef`), a copy from storage in its pair (`pairMem`), and writes,
+within `memSize` of them, and the reads the clauses of
+`Calculus/MemRead.lean` resolve; a write of a memory object into storage
+(`alice = carol;`), as a copy of its view (`memL`, `LStor.view`), where the
+memory's and the identity's guards are literals.  Outside it: a `push` of a
+memory object, a read of the ledger (`net(a)`).  Of the gaps `Close.lean`
+lists, this closes the keys the formula does not separate, the reads below
+a deleted struct, the memory defaults and the distinct allocations.
 
 **Arrays and copies** are eliminated as far as the storage before them
 says: a read below a pushed array compares its index with the old length
 (`arrKey`); a read below a copy reads the source, through its members and
 key by key (`copyKeys`, `overlay_findLive_fields`,
-`overlay_findLive_nomap`).  The slot a `push()` of a struct or an array
+`overlay_findLive_nomap`); where the source is a view of memory, it reads
+memory along the same path (`findOnCopy`), and the view has its own root
+wherever it returns (`isViewRoot`).  The slot a `push()` of a struct or an array
 recycles (`pushSlot`) is read where the storage just below says what it
 holds (`LStor.slotU`): the element a `pop` of the same array removed,
 cleared or kept, or the first element a `delete` of it cleared.  What is
@@ -119,580 +129,21 @@ namespace Decide
 
 open Semantics SemanticsProperties
 
-/-! ## Agreeing on what returns
+/-! ## Memory, as solkey writes it
 
-The terms of this module are evaluated in another order than the program's
-(a guard first, then the value), so where both halt they may halt with a
-different `Halt`.  No formula can tell: an equation holds when both sides
-return, and every other connective passes the halt on.  `Sim` is agreeing on
-what returns. -/
+The updates' memory is an `LMem` over the initial one, written as solkey
+writes it (`Calculus/DecideLang.lean`) and read by the clauses of
+`Calculus/MemRead.lean`.  An allocation takes the next ordinal
+(`LMem.nAlloc`, KeY's `freshIdp`) and is in the fragment where the kernel
+decides that its default copies (`allocOk`); a memory longer than `memSize`
+writes is left outside, since every read walks it.  Every clause is a
+taclet of solkey's `memoryRules.key` or `structMemoryRules.key`, under
+solkey's name: `docs/lean-key-rule-map.md` ("The closer's memory clauses")
+pairs each with its interpreter lemma (`Calculus/MemNames.lean`) and the
+`Theory/` lemma it transcribes. -/
 
-/-- Two runs that return the same values: `balances[k]` read directly, or
-after checking that `balances[k]` is a location. -/
-def Sim {α : Type} (x y : Res α) : Prop := ∀ a, x = .ok a ↔ y = .ok a
-
-/-- A run agrees with itself: `balances[k]` with `balances[k]`. -/
-theorem Sim.refl {α : Type} (x : Res α) : Sim x x := fun _ => Iff.rfl
-
-/-- Agreement chains: a guarded read, the read, the read after the writes. -/
-theorem Sim.trans {α : Type} {x y z : Res α} (h₁ : Sim x y) (h₂ : Sim y z) : Sim x z :=
-  fun a => (h₁ a).trans (h₂ a)
-
-/-- Equal runs agree: `balances[k]` and `balances[k]`. -/
-theorem Sim.of_eq {α : Type} {x y : Res α} (h : x = y) : Sim x y := h ▸ Sim.refl x
-
-/-- Two runs that both halt agree. -/
-theorem Sim.halt {α : Type} {x y : Res α} (hx : ∀ a, x ≠ .ok a) (hy : ∀ a, y ≠ .ok a) : Sim x y :=
-  fun a => ⟨fun h => absurd h (hx a), fun h => absurd h (hy a)⟩
-
-/-- Agreeing steps make agreeing runs. -/
-theorem Sim.bind {α β : Type} {x y : Res α} {f g : α → Res β} (hx : Sim x y)
-    (hf : ∀ a, Sim (f a) (g a)) : Sim (x >>= f) (y >>= g) := by
-  intro b
-  simp only [Res.bind_eq_ok]
-  constructor
-  · rintro ⟨a, h₁, h₂⟩; exact ⟨a, (hx a).1 h₁, (hf a b).1 h₂⟩
-  · rintro ⟨a, h₁, h₂⟩; exact ⟨a, (hx a).2 h₁, (hf a b).2 h₂⟩
-
-/-- The segment is a key or an index. -/
-def Seg.isAt : Seg → Bool
-  | .field _ => false
-  | .at _ => true
-
-/-- An operator on agreeing right operands: `a && b` reads `b` only when
-`a` is not `false`, and then as the operand does. -/
-theorem evalBinop_sim {op : BinOp} {p : PrimTy} {x : Value} {b b' : Res Value} (h : Sim b b') :
-    Sim (evalBinop op p x b) (evalBinop op p x b') := by
-  unfold evalBinop
-  split
-  · exact Sim.refl _
-  · exact Sim.refl _
-  · exact Sim.bind h fun _ => Sim.refl _
-
-/-- `c ? a : b` on agreeing branches. -/
-theorem pickBranch_sim {cv : Value} {t t' e e' : Res Value} (ht : Sim t t') (he : Sim e e') :
-    Sim (pickBranch cv t e) (pickBranch cv t' e') := by
-  cases cv with
-  | int _ => exact Sim.refl _
-  | bool b => cases b <;> assumption
-
-/-! ## The live storage
-
-A path the program takes is checked at every index against the live length
-(`State.checkIndex`), so a read or a write it makes reaches live elements
-only, and the slots past an array's end are never read.  The target language
-below reads and writes the live storage (`SVal.findLive`, `SVal.saveLive`),
-where an index past the end halts: what the program's checked paths and the
-slot-level read and write amount to (`live_bridge`). -/
-
-/-- A write through live elements only: an index past the length halts. -/
-def _root_.Solidity.Semantics.SVal.saveLive : SVal → List Seg → SVal → Res SVal
-  | _, [], new => .ok new
-  | .struct fields, .field name :: rest, new =>
-      match lookupBy name fields with
-      | some old => do
-          let updated ← old.saveLive rest new
-          .ok (.struct (setBy name updated fields))
-      | none => .error .stuck
-  | .array elems shadow fx, .at i :: rest, new =>
-      if h : 0 ≤ i ∧ i.toNat < elems.length then do
-        let updated ← (elems.get ⟨i.toNat, h.2⟩).saveLive rest new
-        .ok (.array (elems.set i.toNat updated) shadow fx)
-      else .error .revert
-  | .map entries dflt, .at i :: rest, new =>
-      match lookupBy i entries with
-      | some old => do
-          let updated ← old.saveLive rest new
-          .ok (.map (setBy i updated entries) dflt)
-      | none => do
-          let updated ← dflt.saveLive rest new
-          .ok (.map (setBy i updated entries) dflt)
-  | .prim _, _ :: _, _ => .error .stuck
-  | .struct _, .at _ :: _, _ => .error .stuck
-  | .array _ _ _, .field _ :: _, _ => .error .stuck
-  | .map _ _, .field _ :: _, _ => .error .stuck
-
-/-- A live write is read back live: `balances[k] = 5;` then `balances[k]` is `5`. -/
-theorem findLive_saveLive_same {old new updated : SVal} {path : List Seg}
-    (h : old.saveLive path new = .ok updated) :
-    updated.findLive path = .ok new := by
-  induction path generalizing old updated with
-  | nil =>
-      simp only [SVal.saveLive, Except.ok.injEq] at h
-      subst updated
-      simp only [SVal.findLive_nil]
-  | cons seg rest ih =>
-      cases seg with
-      | field name =>
-          cases old <;> try { simp only [SVal.saveLive, reduceCtorEq] at h }
-          rename_i fields
-          cases hv : lookupBy name fields with
-          | none => simp only [SVal.saveLive, hv, reduceCtorEq] at h
-          | some old =>
-              simp only [SVal.saveLive, hv] at h
-              obtain ⟨child, hs, h⟩ := Res.bind_eq_ok.1 h
-              cases h
-              simp only [SVal.findLive, lookupBy_setBy_self, ih hs]
-      | «at» i =>
-          cases old <;> try { simp only [SVal.saveLive, reduceCtorEq] at h }
-          · rename_i elems shadow fx
-            simp only [SVal.saveLive] at h
-            split at h
-            next hb =>
-              obtain ⟨child, hs, h⟩ := Res.bind_eq_ok.1 h
-              cases h
-              simp only [SVal.findLive, hb, List.length_set, and_self, ↓reduceDIte,
-                  List.get_eq_getElem, List.getElem_set_self, ih hs]
-            next hb => contradiction
-          · rename_i entries dflt
-            cases hv : lookupBy i entries with
-            | none =>
-                simp only [SVal.saveLive, hv] at h
-                obtain ⟨child, hs, h⟩ := Res.bind_eq_ok.1 h
-                cases h
-                simp only [SVal.findLive, lookupBy_setBy_self, ih hs]
-            | some old =>
-                simp only [SVal.saveLive, hv] at h
-                obtain ⟨child, hs, h⟩ := Res.bind_eq_ok.1 h
-                cases h
-                simp only [SVal.findLive, lookupBy_setBy_self, ih hs]
-
-/-- **Frame, live**: a write leaves every path apart from it as it was. -/
-theorem findLive_saveLive_diverge {new : SVal} :
-    ∀ {p q : List Seg} {old upd : SVal}, Close.Diverge p q → old.saveLive p new = .ok upd →
-      upd.findLive q = old.findLive q
-  | [], _, _, _, h, _ => h.elim
-  | _ :: _, [], _, _, h, _ => (Close.not_diverge_nil_right h).elim
-  | a :: p, b :: q, old, upd, h, hs => by
-    cases old with
-    | prim v => cases a <;> simp only [SVal.saveLive, reduceCtorEq] at hs
-    | struct fields =>
-      cases a with
-      | «at» i => simp only [SVal.saveLive, reduceCtorEq] at hs
-      | field n =>
-        simp only [SVal.saveLive] at hs
-        split at hs
-        · rename_i old' hl
-          obtain ⟨u, hu, hs⟩ := Res.bind_eq_ok.1 hs
-          cases hs
-          cases b with
-          | «at» j => simp only [SVal.findLive]
-          | field m =>
-            by_cases hnm : m = n
-            · subst hnm
-              have hd : Close.Diverge p q := by simpa only [Close.diverge_cons, ne_eq,
-                  not_true_eq_false, false_or] using h
-              simp only [SVal.findLive, lookupBy_setBy_self, findLive_saveLive_diverge hd hu, hl]
-            · simp only [SVal.findLive, lookupBy_setBy_ne hnm]
-        · simp only [reduceCtorEq] at hs
-    | array elems shadow fx =>
-      cases a with
-      | field n => simp only [SVal.saveLive, reduceCtorEq] at hs
-      | «at» i =>
-        simp only [SVal.saveLive] at hs
-        split at hs
-        · rename_i hi
-          obtain ⟨u, hu, hs⟩ := Res.bind_eq_ok.1 hs
-          simp only [List.get_eq_getElem] at hu
-          cases hs
-          cases b with
-          | field m =>
-            -- `length` reads the extent, which a write in bounds keeps
-            by_cases hm : m = "length"
-            · subst hm; cases fx <;> simp only [SVal.findLive, Bool.false_eq_true, ↓reduceIte,
-                List.length_set]
-            · simp only [SVal.findLive]
-          | «at» j =>
-            by_cases hij : j = i
-            · subst hij
-              have hd : Close.Diverge p q := by simpa only [Close.diverge_cons, ne_eq,
-                  not_true_eq_false, false_or] using h
-              simp only [SVal.findLive, hi, List.length_set, and_self, ↓reduceDIte,
-                  List.get_eq_getElem, List.getElem_set_self, findLive_saveLive_diverge hd hu]
-            · by_cases hj : 0 ≤ j ∧ j.toNat < elems.length
-              · have hne : i.toNat ≠ j.toNat := by omega
-                simp only [SVal.findLive, hj, List.length_set, and_self, ↓reduceDIte,
-                    List.get_eq_getElem, List.getElem_set_ne hne]
-              · simp only [SVal.findLive, List.length_set, hj, ↓reduceDIte]
-        · simp only [reduceCtorEq] at hs
-    | map entries dflt =>
-      cases a with
-      | field n => simp only [SVal.saveLive, reduceCtorEq] at hs
-      | «at» i =>
-        simp only [SVal.saveLive] at hs
-        -- the slot written: the entry at `i`, or the default when there is none
-        obtain ⟨old', hold, hfind⟩ : ∃ old' : SVal, (old'.saveLive p new >>= fun u =>
-            Except.ok (SVal.map (setBy i u entries) dflt)) = Except.ok upd ∧
-            (SVal.map entries dflt).findLive (.at i :: q) = old'.findLive q := by
-          split at hs <;> rename_i hl <;> exact ⟨_, hs, by simp only [SVal.findLive, hl]⟩
-        obtain ⟨u, hu, hold⟩ := Res.bind_eq_ok.1 hold
-        cases hold
-        cases b with
-        | field m => simp only [SVal.findLive]
-        | «at» j =>
-          by_cases hij : j = i
-          · subst hij
-            have hd : Close.Diverge p q := by simpa only [Close.diverge_cons, ne_eq,
-                not_true_eq_false, false_or] using h
-            simp only [SVal.findLive, lookupBy_setBy_self] at hfind ⊢
-            rw [hfind, findLive_saveLive_diverge hd hu]
-          · simp only [SVal.findLive, lookupBy_setBy_ne hij]
-
-/-! ## The target language
-
-A term here is read in the state the formula *starts* in: every update has
-been pushed into it.  A storage is a stack of writes over that state's
-storage (`LStor`), and the storage as a whole is one tree, the struct of its
-roots (`SVal.struct σ.storage`), so that a root is the first segment of a
-path and a write at a root is a write like any other. -/
-
-/-- A shape the location above a key is tested for, below a `delete`: a
-mapping keeps its entries (`delete` leaves it alone), a fixed-size array keeps
-its elements' places (`delete` resets them in place). -/
-inductive KShape where
-  | map
-  | fixed
-  deriving Inhabited, Repr, DecidableEq, Lean.ToExpr
-
-deriving instance Lean.ToExpr for EnvKey
-deriving instance Lean.ToExpr for PrimTy
-
-/-- What an operation does to the array at a path: `values.push(w)` appends
-the word and consumes the first slot past the end, `persons.push()` appends
-the slot `pushSlot E` gives (recycled, or a default), `values.pop()` moves
-the last element into the slots past the end, cleared (`keep`: as it is, an
-array of mappings').  The interpreter's `pushOn` and `popOn`, on the node
-alone. -/
-inductive AOp where
-  | push
-  | slot (E : Ty)
-  | pop (keep : Bool)
-  deriving Inhabited, Repr, DecidableEq, Lean.ToExpr
-
-/-- The array node after the operation; a word `w` for a push. -/
-def AOp.apply : AOp → Value → SVal → Res SVal
-  | .push, w, .array elems shadow fx =>
-    .ok (.array (elems ++ [w.toSVal]) (pushSlot .uint shadow).2 fx)
-  | .slot E, _, .array elems shadow fx =>
-    .ok (.array (elems ++ [(pushSlot E shadow).1]) (pushSlot E shadow).2 fx)
-  | .pop keep, _, .array elems shadow fx =>
-    match elems.reverse with
-    | [] => .error .revert
-    | last :: restRev =>
-      .ok (.array restRev.reverse ((if keep then last else last.defaultOf) :: shadow) fx)
-  | _, _, .prim _ | _, _, .struct _ | _, _, .map _ _ => .error .stuck
-
-mutual
-
-/-- A value, read in the initial state. -/
-inductive LTerm where
-  | lit (v : Value)
-  | var (x : Var)
-  | binop (op : BinOp) (p : PrimTy) (a b : LTerm)
-  | unop (op : UnOp) (p : PrimTy) (a : LTerm)
-  | ite (c a b : LTerm)
-  /-- The word at `q` in the storage `s`. -/
-  | find (s : LStor) (q : LPath)
-  /-- `true` when `q` names a location of `s`, of any shape. -/
-  | has (s : LStor) (q : LPath)
-  /-- `true` when `q` names a mapping (a fixed-size array) of `s`. -/
-  | kmap (sh : KShape) (s : LStor) (q : LPath)
-  /-- The length of the array at `q` in `s`: `values.length`. -/
-  | len (s : LStor) (q : LPath)
-  /-- `true` when the writes of `s` all succeed. -/
-  | sok (s : LStor)
-  /-- `true` when the keys of `q` are integers. -/
-  | pok (q : LPath)
-  /-- `d`, then `a`: `a` guarded by `d` returning. -/
-  | seq (d a : LTerm)
-  /-- `a`, or `b` where `a` halts. -/
-  | orElse (a b : LTerm)
-  /-- `t` when the keys `a` and `b` are the same integer, `e` when they are
-  different ones; it halts when either is no integer. -/
-  | kite (a b t e : LTerm)
-  /-- The default of the word `a` returns: `0` or `false`. -/
-  | zero (a : LTerm)
-  | err
-  /-- A value of the transaction: `msg.sender`.  No update changes it. -/
-  | env (k : EnvKey)
-  /-- The word at `q` in the storage `s`, read as a snapshot is: past the
-  live length too (`SVal.find`), its path checked elsewhere.  `\old(e)` of a
-  specification reads `old` so. -/
-  | findP (s : LStor) (q : LPath)
-  deriving Inhabited, Repr, Lean.ToExpr
-
-/-- A storage path, the root first; built from the right as `PTerm` is. -/
-inductive LPath where
-  | root (r : Name)
-  | field (q : LPath) (f : Name)
-  | at (q : LPath) (k : LTerm)
-  deriving Inhabited, Repr, Lean.ToExpr
-
-/-- A storage: the initial one, and the writes on top of it. -/
-inductive LStor where
-  | init
-  | save (s : LStor) (q : LPath) (w : LTerm)
-  | del (s : LStor) (q : LPath)
-  /-- The operation `op` on the array at `q`, with the word `w` for a push
-  (a literal otherwise). -/
-  | arr (op : AOp) (s : LStor) (q : LPath) (w : LTerm)
-  /-- The subtree at `sq` of the storage `src` copied over `q` (`alice = bob;`,
-  `SVal.overlay`). -/
-  | copy (s : LStor) (q : LPath) (src : LStor) (sq : LPath)
-  deriving Inhabited, Repr, Lean.ToExpr
-
-end
-
-deriving instance DecidableEq for LTerm, LPath, LStor
-
-/-- A first-order formula over those terms. -/
-inductive LFml where
-  | tt
-  | eq (a b : LTerm)
-  | not (φ : LFml)
-  | and (φ ψ : LFml)
-  | imp (φ ψ : LFml)
-  /-- For every value of the type, `x` holding it: a quantifier of a
-  specification, `\forall address a`. -/
-  | all (x : Var) (p : PrimTy) (φ : LFml)
-  deriving Inhabited, Repr, Lean.ToExpr
-
-/-- Two keys are the same integer: `k == j` in `balances[k]` against
-`balances[j]`.  A key that is not one is equal to nothing. -/
-def keyEq : Res Int → Res Int → Bool
-  | .ok i, .ok j => decide (i = j)
-  | _, _ => false
-
-/-- The value is a mapping. -/
-def isMapV : SVal → Bool
-  | .map _ _ => true
-  | _ => false
-
-/-- A mapping returns `true`, anything else halts. -/
-def kmapF (n : SVal) : Res Value := if isMapV n then .ok (.bool true) else .error .stuck
-
-/-- The value is a fixed-size array (marked, `SVal.array`'s `fixed`). -/
-def isFixV : SVal → Bool
-  | .array _ _ fx => fx
-  | _ => false
-
-/-- A value of the shape returns `true`, anything else halts. -/
-def KShape.test : KShape → SVal → Res Value
-  | .map, n => kmapF n
-  | .fixed, n => if isFixV n then .ok (.bool true) else .error .stuck
-
-/-- `a`'s value, or `b`'s where `a` halts. -/
-def orElseR (a b : Res Value) : Res Value :=
-  match a with
-  | .ok v => .ok v
-  | .error _ => b
-
-@[simp] theorem orElseR_ok (v : Value) (b : Res Value) : orElseR (.ok v) b = .ok v := rfl
-@[simp] theorem orElseR_error (e : Halt) (b : Res Value) : orElseR (.error e) b = b := rfl
-
-/-- The default of a word: `delete x;` leaves `0` in a `uint`, `false` in a
-`bool`. -/
-def zeroV : Value → Value
-  | .int _ => .int 0
-  | .bool _ => .bool false
-
-mutual
-
-/-- What a term returns in the initial state `σ`: `find(save(init, balances[k], 5),
-balances[k])` returns `5` where `balances[k]` is a location. -/
-def LTerm.eval (σ : State) : LTerm → Res Value
-  | .lit v => .ok v
-  | .var x => σ.getEnv x >>= Close.bindingVal
-  | .binop op p a b => a.eval σ >>= fun x => evalBinop op p x (b.eval σ)
-  | .unop op p a => a.eval σ >>= fun x => applyUnOp op x >>= unopCheck op p
-  | .ite c a b => c.eval σ >>= fun cv => pickBranch cv (a.eval σ) (b.eval σ)
-  | .find s q => s.eval σ >>= fun v => q.eval σ >>= fun qs => v.findLive qs >>= SVal.asValue
-  | .has s q => s.eval σ >>= fun v => q.eval σ >>= fun qs => v.findLive qs >>= fun _ => .ok (.bool true)
-  | .kmap sh s q => s.eval σ >>= fun v => q.eval σ >>= fun qs => v.findLive qs >>= sh.test
-  | .len s q => s.eval σ >>= fun v => q.eval σ >>= fun qs => v.findLive qs >>= Close.arrLen
-  | .sok s => s.eval σ >>= fun _ => .ok (.bool true)
-  | .pok q => q.eval σ >>= fun _ => .ok (.bool true)
-  | .seq d a => d.eval σ >>= fun _ => a.eval σ
-  | .orElse a b => orElseR (a.eval σ) (b.eval σ)
-  | .kite a b t e =>
-    (a.eval σ >>= Value.asInt) >>= fun i => (b.eval σ >>= Value.asInt) >>= fun j =>
-      if i = j then t.eval σ else e.eval σ
-  | .zero a => a.eval σ >>= fun v => .ok (zeroV v)
-  | .err => .error .stuck
-  | .env k => .ok (.int (σ.envVal k))
-  | .findP s q => s.eval σ >>= fun v => q.eval σ >>= fun qs => v.find qs >>= SVal.asValue
-
-/-- The path a term names, root first: `balances[k]` is `[balances, at k]`. -/
-def LPath.eval (σ : State) : LPath → Res (List Seg)
-  | .root r => .ok [.field r]
-  | .field q f => q.eval σ >>= fun qs => .ok (qs ++ [.field f])
-  | .at q k => q.eval σ >>= fun qs => k.eval σ >>= Value.asInt >>= fun i => .ok (qs ++ [.at i])
-
-/-- The storage the writes leave, as one tree: `save(init, balances[k], 5)` is
-the tree of `σ` after `balances[k] = 5;`. -/
-def LStor.eval (σ : State) : LStor → Res SVal
-  | .init => .ok (.struct σ.storage)
-  | .save s q w => w.eval σ >>= fun wv => s.eval σ >>= fun v => q.eval σ >>= fun qs =>
-      v.saveLive qs wv.toSVal
-  | .del s q => s.eval σ >>= fun v => q.eval σ >>= fun qs => v.findLive qs >>= fun cur =>
-      v.saveLive qs cur.defaultOf
-  | .arr op s q w => w.eval σ >>= fun wv => s.eval σ >>= fun v => q.eval σ >>= fun qs =>
-      v.findLive qs >>= fun c => op.apply wv c >>= fun c' => v.saveLive qs c'
-  | .copy s q src sq => src.eval σ >>= fun sv => sq.eval σ >>= fun sqs => sv.findLive sqs >>=
-      fun n => s.eval σ >>= fun v => q.eval σ >>= fun qs => v.findLive qs >>= fun cur =>
-        v.saveLive qs (cur.overlay n)
-
-end
-
-mutual
-
-/-- The free locals of a term: those the initial state is asked for. -/
-def LTerm.vars : LTerm → List Var
-  | .lit _ | .err | .env _ => []
-  | .var x => [x]
-  | .binop _ _ a b | .seq a b => a.vars ++ b.vars
-  | .unop _ _ a | .zero a => a.vars
-  | .orElse a b => a.vars ++ b.vars
-  | .ite c a b => c.vars ++ a.vars ++ b.vars
-  | .find s q | .has s q | .kmap _ s q | .len s q | .findP s q => s.vars ++ q.vars
-  | .sok s => s.vars
-  | .pok q => q.vars
-  | .kite a b t e => a.vars ++ b.vars ++ t.vars ++ e.vars
-
-/-- The free locals of a path: the `k` of `balances[k]`. -/
-def LPath.vars : LPath → List Var
-  | .root _ => []
-  | .field q _ => q.vars
-  | .at q k => q.vars ++ k.vars
-
-/-- The free locals of a storage: the `k` of `save(init, balances[k], 5)`. -/
-def LStor.vars : LStor → List Var
-  | .init => []
-  | .save s q w => s.vars ++ q.vars ++ w.vars
-  | .del s q => s.vars ++ q.vars
-  | .arr _ s q w => s.vars ++ q.vars ++ w.vars
-  | .copy s q src sq => s.vars ++ q.vars ++ src.vars ++ sq.vars
-
-end
-
-
-/-- Rebinding a local the term does not mention leaves what it returns:
-`balances[k]` is read alike whatever `a` holds. -/
-theorem State.envVal_setEnv (σ : State) (x : Var) (b : Binding) (k : EnvKey) :
-    (σ.setEnv x b).envVal k = σ.envVal k := by
-  cases k <;> rfl
-
-mutual
-
-theorem LTerm.eval_setEnv {σ : State} {x : Var} {b : Binding} :
-    (t : LTerm) → x ∉ t.vars → t.eval (σ.setEnv x b) = t.eval σ
-  | .lit _, _ | .err, _ => rfl
-  | .env k, _ => by simp only [LTerm.eval, State.envVal_setEnv]
-  | .var y, h => by
-    have hy : y ≠ x := fun e => h (by simp only [LTerm.vars, e, List.mem_cons, List.not_mem_nil,
-        or_false])
-    simp only [LTerm.eval, State.getEnv_setEnv_ne hy]
-  | .binop _ _ a b', h | .seq a b', h | .orElse a b', h => by
-    simp only [LTerm.vars, List.mem_append, not_or] at h
-    simp only [LTerm.eval, LTerm.eval_setEnv a h.1, LTerm.eval_setEnv b' h.2]
-  | .unop _ _ a, h | .zero a, h => by
-    simp only [LTerm.vars] at h
-    simp only [LTerm.eval, LTerm.eval_setEnv a h]
-  | .ite c a b', h => by
-    simp only [LTerm.vars, List.mem_append, not_or] at h
-    simp only [LTerm.eval, LTerm.eval_setEnv c h.1.1, LTerm.eval_setEnv a h.1.2,
-      LTerm.eval_setEnv b' h.2]
-  | .find s q, h | .has s q, h | .kmap _ s q, h | .len s q, h | .findP s q, h => by
-    simp only [LTerm.vars, List.mem_append, not_or] at h
-    simp only [LTerm.eval, LStor.eval_setEnv s h.1, LPath.eval_setEnv q h.2]
-  | .sok s, h => by
-    simp only [LTerm.vars] at h
-    simp only [LTerm.eval, LStor.eval_setEnv s h]
-  | .pok q, h => by
-    simp only [LTerm.vars] at h
-    simp only [LTerm.eval, LPath.eval_setEnv q h]
-  | .kite a b' t e, h => by
-    simp only [LTerm.vars, List.mem_append, not_or] at h
-    simp only [LTerm.eval, LTerm.eval_setEnv a h.1.1.1, LTerm.eval_setEnv b' h.1.1.2,
-      LTerm.eval_setEnv t h.1.2, LTerm.eval_setEnv e h.2]
-
-theorem LPath.eval_setEnv {σ : State} {x : Var} {b : Binding} :
-    (q : LPath) → x ∉ q.vars → q.eval (σ.setEnv x b) = q.eval σ
-  | .root _, _ => rfl
-  | .field q _, h => by
-    simp only [LPath.vars] at h
-    simp only [LPath.eval, LPath.eval_setEnv q h]
-  | .at q k, h => by
-    simp only [LPath.vars, List.mem_append, not_or] at h
-    simp only [LPath.eval, LPath.eval_setEnv q h.1, LTerm.eval_setEnv k h.2]
-
-theorem LStor.eval_setEnv {σ : State} {x : Var} {b : Binding} :
-    (s : LStor) → x ∉ s.vars → s.eval (σ.setEnv x b) = s.eval σ
-  | .init, _ => rfl
-  | .save s q w, h => by
-    simp only [LStor.vars, List.mem_append, not_or] at h
-    simp only [LStor.eval, LStor.eval_setEnv s h.1.1, LPath.eval_setEnv q h.1.2,
-      LTerm.eval_setEnv w h.2]
-  | .del s q, h => by
-    simp only [LStor.vars, List.mem_append, not_or] at h
-    simp only [LStor.eval, LStor.eval_setEnv s h.1, LPath.eval_setEnv q h.2]
-  | .arr _ s q w, h => by
-    simp only [LStor.vars, List.mem_append, not_or] at h
-    simp only [LStor.eval, LStor.eval_setEnv s h.1.1, LPath.eval_setEnv q h.1.2,
-      LTerm.eval_setEnv w h.2]
-  | .copy s q src sq, h => by
-    simp only [LStor.vars, List.mem_append, not_or] at h
-    simp only [LStor.eval, LStor.eval_setEnv s h.1.1.1, LPath.eval_setEnv q h.1.1.2,
-      LStor.eval_setEnv src h.1.2, LPath.eval_setEnv sq h.2]
-
-end
-
-/-- A formula holds when, as in `holds` of `eqD`, both sides of each equation
-return and agree. -/
-def LFml.holds (σ : State) : LFml → Prop
-  | .tt => True
-  | .eq a b =>
-    match a.eval σ, b.eval σ with
-    | .ok x, .ok y => x = y
-    | _, _ => False
-  | .not φ => ¬ φ.holds σ
-  | .and φ ψ => φ.holds σ ∧ ψ.holds σ
-  | .imp φ ψ => φ.holds σ → ψ.holds σ
-  | .all x p φ => ∀ v, p.admits v → φ.holds (σ.setEnv x (.val v))
-
-/-! ## Memory, read off the objects the updates allocated
-
-The objects the updates allocate are kept as `SObj`s over the terms of this
-language (`Calculus/DecideMem.lean`): a read is the term its slot holds, an
-index into an array a case split on the index (`kchainL`) where it is not a
-literal, and each guard returns exactly where the interpreter's operation
-does. -/
-
-/-- The value a term has in every state, built from literals by operators
-that return on them: the `1` of `xs[0 + 1]`. -/
-def LTerm.ground? : LTerm → Option Value
-  | .lit v => some v
-  | .binop op p a b =>
-    match a.ground?, b.ground? with
-    | some x, some y =>
-      match evalBinop op p x (.ok y) with
-      | .ok r => some r
-      | .error _ => none
-    | _, _ => none
-  | .unop op p a =>
-    match a.ground? with
-    | some x =>
-      match applyUnOp op x >>= unopCheck op p with
-      | .ok r => some r
-      | .error _ => none
-    | none => none
-  | _ => none
-
-/-- `a`, guarded by `g` returning; `a` alone after a literal. -/
-def seqL (g a : LTerm) : LTerm :=
-  match g with
-  | .lit _ => a
-  | g => .seq g a
+section MemBase
+open MemNames
 
 /-- What returns exactly where `t` returns an integer: the index of `xs[t]`. -/
 def isIntL (t : LTerm) : LTerm :=
@@ -700,97 +151,188 @@ def isIntL (t : LTerm) : LTerm :=
   | some (.int _) => .lit (.bool true)
   | _ => .kite t t (.lit (.bool true)) (.lit (.bool true))
 
-/-- The word a slot holds; a reference is no word. -/
-def slotT : SMV LTerm → LTerm
-  | .val t => t
-  | .ref _ => .err
+/-- The ordinal the next allocation of the memory takes (`freshIdp`).  A
+walk of the memory, not cached in `Sym`: `okU` recomputes it at each
+allocation, O(W²) over at most `memSize` nodes. -/
+def LMem.nAlloc : LMem → Nat
+  | .init => 0
+  | .addM m _ _ | .newArr m _ _ _ | .copySt m _ _ _ => m.nAlloc + 1
+  | .write m _ _ _ => m.nAlloc
 
-/-- The element at the index `t` of the slots `es`, the first at `j`; it
-halts past them. -/
-def kchainL (t : LTerm) : Nat → List (SMV LTerm) → LTerm
-  | _, [] => .err
-  | j, e :: es => .kite t (.lit (.int j)) (slotT e) (kchainL t (j + 1) es)
+/-- A fresh `R` copies into memory: no mapping, and a well-formed default
+(both decided by the kernel: `Ty.mapFree`, `Ty.okDeep`). -/
+def allocOk (R : RefTy) : Bool := (Ty.ref R).mapFree && (Ty.ref R).okDeep
 
-/-- What selects in a memory object: a member, or an index term. -/
-inductive MSel where
-  | fld (f : Name)
-  | idx (t : LTerm)
-  deriving Inhabited
+/-- The most writes and allocations a leaf's memory may hold: each read of
+memory walks them (`LMem.readT`), so the translation costs their number
+times the reads.  The bound is enforced where the memory is built, so the
+translation never walks a longer one: `UpdElem.toL` of a memory and `pairL`
+refuse a memory past it, before any read (`fitsClose` runs before `inL`).
+`TestSuite` needs at most 9. -/
+def memSize : Nat := 400
 
-/-- A slot holds a word. -/
-def SMV.isVal : SMV LTerm → Bool
-  | .val _ => true
-  | .ref _ => false
+/-- The memory holds at most `n` writes and allocations. -/
+def LMem.within : Nat → LMem → Bool
+  | _, .init => true
+  | 0, _ => false
+  | n + 1, .addM m _ _ | n + 1, .newArr m _ _ _ | n + 1, .copySt m _ _ _
+  | n + 1, .write m _ _ _ => m.within n
 
-/-- The read `read(memory, a)`: the word at the member or the index of the
-`k`-th object; none where there is no such object. -/
-def readL (M : SMem LTerm) (k : Nat) (sel : MSel) : Option LTerm :=
-  match M[k]?, sel with
-  | some (.struct fs), .fld f =>
-    some (match lookupBy f fs with
-      | some e => slotT e
-      | none => .err)
-  | some (.array es _), .idx t =>
-    some (match t.ground? with
-      | some (.int i) => if h : 0 ≤ i ∧ i.toNat < es.length then slotT es[i.toNat] else .err
-      | _ => kchainL t 0 es)
-  | some _, _ => some .err
-  | none, _ => none
+/-- The allocations of a memory's run, in order; none where it halts. -/
+def LMem.births (σ : State) (M : LMem) : Births :=
+  match M.run σ with
+  | .ok r => r.2
+  | .error _ => []
 
-/-- The length of the `k`-th object, `xs.length`. -/
-def mlenL (M : SMem LTerm) (k : Nat) : Option LTerm :=
-  match M[k]? with
-  | some (.array es _) => some (.lit (.int es.length))
-  | some (.struct _) => some .err
-  | none => none
+theorem LMem.births_of_run {σ μ : State} {M : LMem} {B : Births} (h : M.run σ = .ok (μ, B)) :
+    M.births σ = B := by
+  simp only [LMem.births, h]
 
-/-- The object a reference slot names: `carol.account`, `toks[0]` at a
-literal index. -/
-def ireadL (M : SMem LTerm) (k : Nat) (sel : MSel) : Option Nat :=
-  match M[k]?, sel with
-  | some (.struct fs), .fld f =>
-    match lookupBy f fs with
-    | some (.ref k') => some k'
-    | _ => none
-  | some (.array es _), .idx t =>
-    match t.ground? with
-    | some (.int i) =>
-      if h : 0 ≤ i ∧ i.toNat < es.length then
-        match es[i.toNat] with
-        | .ref k' => some k'
-        | .val _ => none
-      else none
-    | _ => none
-  | _, _ => none
 
-/-- The elements after a word `u` written at the index `t`, which is no
-literal: each is `u` where `t` is its index. -/
-def kwriteL (t u : LTerm) (es : List (SMV LTerm)) : List (SMV LTerm) :=
-  es.mapIdx fun j e => .val (.kite t (.lit (.int j)) u (slotT e))
+/-- **`mapFree` decides `tyHasMapping`** on the structs `mapFreeStructs`
+lists, checked once each: the kernel evaluates the first, not the second
+(well-founded through `structDef`). -/
+theorem _root_.Solidity.Ty.mapFree_sound : ∀ {T : Ty}, T.mapFree = true → tyHasMapping T = false
+  | .prim _, _ => by rw [tyHasMapping]
+  | .ref (.mapping ..), h => by simp only [Ty.mapFree, Bool.false_eq_true] at h
+  | .ref (.struct s), h => by
+    simp only [Ty.mapFree, mapFreeStructs, List.mem_cons, List.not_mem_nil, or_false,
+      decide_eq_true_eq] at h
+    rcases h with rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl |
+        rfl | rfl | rfl | rfl
+    all_goals simp only [tyHasMapping, structDef, String.reduceEq, imp_self, fieldsHaveMapping,
+      Bool.or_self]
+  | .ref (.array e), h => by
+    rw [tyHasMapping]; exact Ty.mapFree_sound (by simpa only [Ty.mapFree] using h)
+  | .ref (.fixed e _), h => by
+    rw [tyHasMapping]; exact Ty.mapFree_sound (by simpa only [Ty.mapFree] using h)
 
-/-- The write `write(memory, a, s)`: the objects after it, and what returns
-exactly where it does (an index in range); none where the object is not
-there, or a reference is written at an index that is no literal. -/
-def writeL (M : SMem LTerm) (k : Nat) (sel : MSel) (s : SMV LTerm) :
-    Option (SMem LTerm × LTerm) :=
-  match M[k]?, sel with
-  | some (.struct fs), .fld f => some (M.set k (.struct (setBy f s fs)), .lit (.bool true))
-  | some (.array es fx), .idx t =>
-    match t.ground? with
-    | some (.int i) =>
-      if 0 ≤ i ∧ i.toNat < es.length then
-        some (M.set k (.array (es.set i.toNat s) fx), .lit (.bool true))
-      else some (M, .err)
-    | _ =>
-      match s with
-      | .val u =>
-        if es.all SMV.isVal then
-          some (M.set k (.array (kwriteL t u es) fx),
-            kchainL t 0 (es.map fun _ => .val (.lit (.bool true))))
-        else none
-      | .ref _ => none
-  | some _, _ => some (M, .err)
-  | none, _ => none
+/-- The value copies into memory: `copyStToM` returns, in one state and so
+in every one (`copyStToM_ok_any`). -/
+def Cps (v : SVal) : Prop := ∃ σ r, copyStToM σ v = .ok r
+
+theorem Cps.at {v : SVal} (h : Cps v) (σ : State) : ∃ r, copyStToM σ v = .ok r := by
+  obtain ⟨σ', r, h⟩ := h
+  exact copyStToM_ok_any v σ' σ r h
+
+theorem copyStFields_ok_iff : ∀ (fs : List (Name × SVal)) (σ : State),
+    (∃ r, copyStFields σ fs = .ok r) ↔ ∀ p ∈ fs, Cps p.2
+  | [], σ => iff_of_true ⟨_, rfl⟩ fun _ h => nomatch h
+  | (n, w) :: rest, σ => by
+    rw [List.forall_mem_cons]
+    constructor
+    · rintro ⟨r, h⟩
+      obtain ⟨σ₁, mv, mrest, h1, h2, -⟩ := copyStFields_cons_inv (τ := r.1) (mfs := r.2) h
+      exact ⟨⟨σ, _, h1⟩, (copyStFields_ok_iff rest σ₁).1 ⟨_, h2⟩⟩
+    · rintro ⟨hw, hr⟩
+      obtain ⟨⟨σ₁, mv⟩, h1⟩ := hw.at σ
+      obtain ⟨⟨τ, mrest⟩, h2⟩ := (copyStFields_ok_iff rest σ₁).2 hr
+      exact ⟨_, by rw [copyStFields, h1, Res.ok_bind']; dsimp only; rw [h2]; rfl⟩
+
+theorem copyStElems_ok_iff : ∀ (es : List SVal) (σ : State),
+    (∃ r, copyStElems σ es = .ok r) ↔ ∀ x ∈ es, Cps x
+  | [], σ => iff_of_true ⟨_, rfl⟩ fun _ h => nomatch h
+  | w :: rest, σ => by
+    rw [List.forall_mem_cons]
+    constructor
+    · rintro ⟨r, h⟩
+      obtain ⟨σ₁, mv, mrest, h1, h2, -⟩ := copyStElems_cons_inv (τ := r.1) (mes := r.2) h
+      exact ⟨⟨σ, _, h1⟩, (copyStElems_ok_iff rest σ₁).1 ⟨_, h2⟩⟩
+    · rintro ⟨hw, hr⟩
+      obtain ⟨⟨σ₁, mv⟩, h1⟩ := hw.at σ
+      obtain ⟨⟨τ, mrest⟩, h2⟩ := (copyStElems_ok_iff rest σ₁).2 hr
+      exact ⟨_, by rw [copyStElems, h1, Res.ok_bind']; dsimp only; rw [h2]; rfl⟩
+
+theorem Cps.struct_iff (fs : List (Name × SVal)) : Cps (.struct fs) ↔ ∀ p ∈ fs, Cps p.2 := by
+  constructor
+  · rintro ⟨σ, r, h⟩
+    obtain ⟨τ₁, mfs, hf, -, -⟩ := copyStToM_struct_inv (τ := r.1) (mv := r.2) h
+    exact (copyStFields_ok_iff fs σ).1 ⟨_, hf⟩
+  · intro h
+    obtain ⟨⟨τ, mfs⟩, hf⟩ := (copyStFields_ok_iff fs { storage := [] }).2 h
+    exact ⟨{ storage := [] }, _, by rw [copyStToM, hf]; rfl⟩
+
+theorem Cps.array_iff (es sh : List SVal) (fx : Bool) : Cps (.array es sh fx) ↔ ∀ x ∈ es, Cps x := by
+  constructor
+  · rintro ⟨σ, r, h⟩
+    obtain ⟨τ₁, mes, he, -, -⟩ := copyStToM_array_inv (τ := r.1) (mv := r.2) h
+    exact (copyStElems_ok_iff es σ).1 ⟨_, he⟩
+  · intro h
+    obtain ⟨⟨τ, mes⟩, he⟩ := (copyStElems_ok_iff es { storage := [] }).2 h
+    exact ⟨{ storage := [] }, _, by rw [copyStToM, he]; rfl⟩
+
+theorem Cps.not_map (e : List (Int × SVal)) (d : SVal) : ¬ Cps (.map e d) :=
+  fun ⟨_, r, h⟩ => (copyStToM_map_inv (τ := r.1) (mv := r.2) h).elim
+
+theorem seq_rets (σ : State) (d a : LTerm) :
+    Rets ((LTerm.seq d a).eval σ) ↔ Rets (d.eval σ) ∧ Rets (a.eval σ) := by
+  constructor
+  · rintro ⟨v, h⟩
+    obtain ⟨x, hx, ha⟩ := Res.bind_eq_ok.1 h
+    exact ⟨⟨x, hx⟩, ⟨v, ha⟩⟩
+  · rintro ⟨⟨x, hx⟩, ⟨v, ha⟩⟩
+    exact ⟨v, by simp only [LTerm.eval, hx, Res.ok_bind, ha]⟩
+
+theorem lit_rets (σ : State) (v : Value) : Rets ((LTerm.lit v).eval σ) := ⟨v, rfl⟩
+
+/-- A run's births are as many as its allocations. -/
+theorem LMem.run_nAlloc (σ : State) : (m : LMem) → ∀ {μ : State} {B : Births},
+    m.run σ = .ok (μ, B) → B.length = m.nAlloc
+  | .init, μ, B, h => by
+    simp only [LMem.run, Except.ok.injEq, Prod.mk.injEq] at h
+    obtain ⟨-, rfl⟩ := h
+    rfl
+  | .addM m k R, μ, B, h => by
+    obtain ⟨μ', B', id, hr, -, -, rfl⟩ := LMem.run_addM h
+    simp only [List.length_append, List.length_singleton, LMem.nAlloc, LMem.run_nAlloc σ m hr]
+  | .newArr m k R n, μ, B, h => by
+    obtain ⟨μ', B', id, c, hr, -, -, -, rfl⟩ := LMem.run_newArr h
+    simp only [List.length_append, List.length_singleton, LMem.nAlloc, LMem.run_nAlloc σ m hr]
+  | .copySt m k s q, μ, B, h => by
+    obtain ⟨μ', B', id, hr, -, -, rfl⟩ := LMem.run_copySt h
+    simp only [List.length_append, List.length_singleton, LMem.nAlloc, LMem.run_nAlloc σ m hr]
+  | .write m j b v, μ, B, h => by
+    obtain ⟨μ', n', ad, mv, hr, -⟩ := LMem.run_write h
+    exact LMem.run_nAlloc σ m hr
+
+theorem copy_ref {σ τ : State} {v : SVal} {mv : MVal} (h : copyStToM σ v = .ok (τ, mv))
+    (hv : ∀ p, v ≠ .prim p) : ∃ id, mv = .ref id := by
+  cases v with
+  | prim p => exact absurd rfl (hv p)
+  | struct fs =>
+    obtain ⟨τ₁, _, _, _, rfl⟩ := copyStToM_struct_inv h
+    exact ⟨_, rfl⟩
+  | array es sh fx =>
+    obtain ⟨τ₁, _, _, _, rfl⟩ := copyStToM_array_inv h
+    exact ⟨_, rfl⟩
+  | map e d => exact (copyStToM_map_inv h).elim
+
+theorem defaultForTy_ref_ne (R : RefTy) (p : PrimVal) : defaultForTy (.ref R) ≠ .prim p := by
+  cases R <;> simp only [defaultForTy, ne_eq, reduceCtorEq, not_false_eq_true]
+
+theorem Cps.default {T : Ty} (hm : T.mapFree = true) (hd : T.okDeep = true) :
+    Cps (defaultForTy T) := by
+  obtain ⟨τ, mv, h⟩ := copyStToM_ok_noMap { storage := [] } (defaultForTy T) T
+    (defaultForTy_canonB hd) (Ty.mapFree_sound hm)
+  exact ⟨_, _, h⟩
+
+theorem allocOk_cps {R : RefTy} (h : allocOk R = true) : Cps (defaultForTy (.ref R)) := by
+  simp only [allocOk, Bool.and_eq_true] at h
+  exact Cps.default h.1 h.2
+
+theorem allocOk_newArr {R : RefTy} (h : allocOk R = true) (c : Int) :
+    Cps (newArrVal R c) ∧ ∀ p, newArrVal R c ≠ .prim p := by
+  cases R with
+  | array E =>
+    simp only [allocOk, Bool.and_eq_true, Ty.mapFree, Ty.okDeep] at h
+    refine ⟨(Cps.array_iff _ _ _).2 fun x hx => ?_, fun p => by
+      simp only [newArrVal, ne_eq, reduceCtorEq, not_false_eq_true]⟩
+    rw [List.eq_of_mem_replicate hx]
+    exact Cps.default h.1 h.2
+  | struct _ | fixed _ _ | mapping _ _ => exact ⟨allocOk_cps h, defaultForTy_ref_ne _⟩
+
+end MemBase
+
 
 /-! ## Pushing the updates in
 
@@ -811,19 +353,19 @@ inductive SymB where
   | stale
   /-- A storage variable bound to a storage: `old` of `{ old := storage }`. -/
   | stor (s : LStor)
-  /-- A memory local bound to the `k`-th object the updates allocated. -/
-  | mref (k : Nat)
+  /-- A memory local bound to the object a name denotes. -/
+  | mref (i : LId)
   deriving Inhabited
 
 /-- The updates so far: the names bound, newest first, the storage, and the
-objects allocated. -/
+memory. -/
 structure Sym where
   env : List (Var × SymB)
   stor : LStor
-  mem : SMem LTerm := []
+  mem : LMem := .init
 
 /-- No update yet. -/
-def Sym.empty : Sym := ⟨[], .init, []⟩
+def Sym.empty : Sym := ⟨[], .init, .init⟩
 
 variable {C : Contract}
 
@@ -838,27 +380,31 @@ inductive LVal where
   | sub (s : LStor) (q : LPath)
   /-- `new R(n)`'s value, copied into memory. -/
   | arr (R : RefTy) (n : LTerm)
+  /-- The object `i` of the memory `m`, copied back (`copyMem`). -/
+  | mem (m : LMem) (i : LId)
   deriving Inhabited
 
-/-- What a storage write takes: a word or a subtree, not a fresh array. -/
+/-- What a storage write takes: a word, a subtree, or a memory object (its
+view), not a fresh array. -/
 def LVal.storable : LVal → Bool
-  | .word _ | .sub _ _ => true
+  | .word _ | .sub _ _ | .mem _ _ => true
   | .arr _ _ => false
 
 /-- What `toL` gives at each sort: a value an `LTerm`, a path an `LPath`, a
 storage an `LStor`, a stored value an `LVal`; a memory sort its symbolic
 reading with the term that returns exactly where it does (none outside the
-fragment): an identity the offset of an object, an address the object and
-what selects in it, a memory the objects, a memory value the slot. -/
+fragment): an identity the name of an object (`LId`), an address the name
+and what selects in it, a memory the writes and allocations (`LMem`), a
+memory value what the slot holds. -/
 @[reducible] def _root_.Solidity.Srt.LTy : Srt → Type
   | .val => LTerm
   | .path => LPath
   | .st => LStor
   | .sv => LVal
-  | .ident => Option (Nat × LTerm)
-  | .addr => Option (Nat × MSel × LTerm)
-  | .mem => Option (SMem LTerm × LTerm)
-  | .mv => Option (SMV LTerm × LTerm)
+  | .ident => Option (LId × LTerm)
+  | .addr => Option (LId × LSel × LTerm)
+  | .mem => Option (LMem × LTerm)
+  | .mv => Option (LMV × LTerm)
 
 /-- A constant with the updates `ρ` pushed in. -/
 def _root_.Solidity.Op0.toL (ρ : Sym) : Op0 s → s.LTy
@@ -870,7 +416,7 @@ def _root_.Solidity.Op0.toL (ρ : Sym) : Op0 s → s.LTy
 
 /-- A unary symbol over its argument's `toL`. -/
 def _root_.Solidity.Op1.toL : Op1 a s → a.LTy → s.LTy
-  | .unop op p, x => .unop op p x
+  | .unop op p, x => LTerm.mkUn op p x
   | .net, _ => .err
   | .netOf _, _ => .err
   | .delValue, _ => .err
@@ -879,32 +425,81 @@ def _root_.Solidity.Op1.toL : Op1 a s → a.LTy → s.LTy
   | .select _, _ => .init
   | .sval, x => .word x
   | .newArr R, x => .arr R x
-  | .alloc R, m => m.bind fun p => (sallocR LTerm.lit p.1 R).map fun q => (q.2, p.2)
+  | .alloc _, _ => none
   | .mfield f, i => i.map fun p => (p.1, .fld f, p.2)
-  | .addM R, m => m.bind fun p => (sallocR LTerm.lit p.1 R).map fun q => (q.1, p.2)
-  | .mval, x => some (.val x, x)
+  | .addM R, m => m.bind fun p => if allocOk R then some (.addM p.1 p.1.nAlloc R, p.2) else none
+  | .mval, x => some (.word x, x)
   | .ref, i => i.map fun p => (.ref p.1, p.2)
   | .wt _, _ => .err
 
+/-- `read(m, a)` pushed in: the memory's guard, the address's, then the word
+`LMem.readT` finds (`readOnWrite`, `readOnAddM`); none where it finds none. -/
+def readM : Option (LMem × LTerm) → Option (LId × LSel × LTerm) → Option LTerm
+  | some (M, g), some (j, sel, g') => (M.readT j sel).map fun r => seqL g (seqL g' r)
+  | _, _ => none
+
+/-- `mlen(m, i)` pushed in: the length `LMem.lenT` finds (`initSize`). -/
+def lenM : Option (LMem × LTerm) → Option (LId × LTerm) → Option LTerm
+  | some (M, g), some (j, g') => (M.lenT j).map fun r => seqL g (seqL g' r)
+  | _, _ => none
+
+/-- `read(m, a)` of a reference slot pushed in: the name `LMem.readI` finds
+(`initIdentity`), guarded by the test that it denotes an object. -/
+def ireadM : Option (LMem × LTerm) → Option (LId × LSel × LTerm) → Option (LId × LTerm)
+  | some (M, g), some (j, sel, g') =>
+    (M.readI j sel).bind fun j' => (M.nameG j').map fun n => (j', seqL g (seqL g' n))
+  | _, _ => none
+
+/-- `copySt(m, new R(n))` pushed in: one node (`memoryArrayFreshAlloc`), at
+the next ordinal, where `R`'s default copies; `n` must be an integer. -/
+def newM : Option (LMem × LTerm) → LVal → Option (LMem × LTerm)
+  | some (M, g), .arr R n =>
+    if allocOk R then some (.newArr M M.nAlloc R n, seqL g (isIntL n)) else none
+  | _, _ => none
+
+/-- `write(m, a, v)` pushed in: the value's guard, the memory's, the
+address's, then the write's own (`LMem.writeG`: a member of a struct, an
+element below the length). -/
+def writeM : Option (LMem × LTerm) → Option (LId × LSel × LTerm) → Option (LMV × LTerm) →
+    Option (LMem × LTerm)
+  | some (M, g), some (j, sel, g'), some (w, g'') =>
+    (M.writeG j sel).map fun gw => (.write M j sel w, seqL g'' (seqL g (seqL g' gw)))
+  | _, _, _ => none
+
+/-- `copyMem(m, i)` pushed in: the object `i` names in `m`, read as storage
+through its view (`LStor.view`), where both guards are literals.  A view
+keeps no guard of its own, so a guard that may halt leaves the copy outside
+the fragment. -/
+def memL : Option (LMem × LTerm) → Option (LId × LTerm) → Option LVal
+  | some (M, .lit _), some (j, .lit _) => some (.mem M j)
+  | _, _ => none
+
+theorem memL_getD (x : Option (LMem × LTerm)) (y : Option (LId × LTerm)) :
+    (memL x y).getD (.word .err) = .word .err ∨
+      ∃ M j, (memL x y).getD (.word .err) = .mem M j := by
+  unfold memL
+  split
+  · exact .inr ⟨_, _, rfl⟩
+  · exact .inl rfl
+
+theorem memL_some {M : LMem} {g : LTerm} {j : LId} {g' : LTerm}
+    (h : (memL (some (M, g)) (some (j, g'))).isSome = true) :
+    (∃ c, g = .lit c) ∧ ∃ c', g' = .lit c' := by
+  cases g <;> cases g' <;> first
+    | exact ⟨⟨_, rfl⟩, _, rfl⟩
+    | simp only [memL, Option.isSome_none, Bool.false_eq_true] at h
+
+theorem newM_memL (m x : Option (LMem × LTerm)) (y : Option (LId × LTerm)) :
+    newM m ((memL x y).getD (.word .err)) = none := by
+  rcases memL_getD x y with h | ⟨M, j, h⟩ <;> rw [h] <;> rcases m with _ | ⟨_, _⟩ <;> rfl
+
 /-- A binary symbol over its arguments' `toL`. -/
 def _root_.Solidity.Op2.toL : Op2 a b s → a.LTy → b.LTy → s.LTy
-  | .binop op p, x, y => .binop op p x y
+  | .binop op p, x, y => LTerm.mkBin op p x y
   | .find, x, y => .find x y
   | .len, x, y => .len x y
-  | .read, m, a =>
-    match m, a with
-    | some (M, g), some (k, sel, g') =>
-      match readL M k sel with
-      | some r => seqL g (seqL g' r)
-      | none => .err
-    | _, _ => .err
-  | .mlen, m, i =>
-    match m, i with
-    | some (M, g), some (k, g') =>
-      match mlenL M k with
-      | some r => seqL g (seqL g' r)
-      | none => .err
-    | _, _ => .err
+  | .read, m, a => (readM m a).getD .err
+  | .mlen, m, i => (lenM m i).getD .err
   | .at, x, y => .at x y
   | .nextIn, _, _ => .stuck
   | .delAt, x, y => .del x y
@@ -913,43 +508,51 @@ def _root_.Solidity.Op2.toL : Op2 a b s → a.LTy → b.LTy → s.LTy
   | .shrink, x, y => .arr (.pop true) x y (.lit (.bool true))
   | .extend E, x, y => .arr (.slot E) x y (.lit (.bool true))
   | .sfind, x, y => .sub x y
-  | .copyMem, _, _ => .word .err
-  | .iread, m, a =>
-    match m, a with
-    | some (M, g), some (k, sel, g') => (ireadL M k sel).map fun k' => (k', seqL g g')
-    | _, _ => none
-  | .copy, m, v =>
-    match m, v with
-    | some (M, g), .arr R n =>
-      match n.ground? with
-      | some (.int c) => (sallocNew LTerm.lit M R c).map fun q => (q.2, g)
-      | _ => none
-    | _, _ => none
+  | .copyMem, m, i => (memL m i).getD (.word .err)
+  | .iread, m, a => ireadM m a
+  | .copy, _, _ => none
   | .mat, i, t => i.map fun p => (p.1, .idx t, seqL p.2 (isIntL t))
-  | .copySt, m, v =>
-    match m, v with
-    | some (M, g), .arr R n =>
-      match n.ground? with
-      | some (.int c) => (sallocNew LTerm.lit M R c).map fun q => (q.1, g)
-      | _ => none
-    | _, _ => none
+  | .copySt, m, v => newM m v
 
 /-- A ternary symbol over its arguments' `toL`. -/
 def _root_.Solidity.Op3.toL : Op3 a b c s → a.LTy → b.LTy → c.LTy → s.LTy
   | .ite, x, y, z => .ite x y z
   | .save, x, y, .word t => .save x y t
   | .save, x, y, .sub s q => .copy x y s q
+  | .save, x, y, .mem m i => .copy x y (.view m i) (.root viewRoot)
   | .save, x, _, .arr _ _ => x
   | .push, x, y, .word t => .arr .push x y t
   | .push, x, y, .sub s q =>
     .copy (.arr (.slot .uint) x y (.lit (.bool true))) (.at y (.len x y)) s q
-  | .push, x, _, .arr _ _ => x
+  | .push, x, _, .arr _ _ | .push, x, _, .mem _ _ => x
   | .atIn, _, _, _ => .stuck
-  | .write, m, a, v =>
-    match m, a, v with
-    | some (M, g), some (k, sel, g'), some (s, g'') =>
-      (writeL M k sel s).map fun q => (q.1, seqL g'' (seqL g (seqL g' q.2)))
-    | _, _, _ => none
+  | .write, m, a, v => writeM m a v
+
+/-- The type `addM(memory)` allocates. -/
+def addMOf? : MTerm C → Option RefTy
+  | .app1 (.addM R) (.app0 .memory) => some R
+  | _ => none
+
+/-- The type `freshId(addM(memory))`, written as a reference, allocates. -/
+def allocRefOf? : MValT C → Option RefTy
+  | .app1 .ref (.app1 (.alloc R) (.app0 .memory)) => some R
+  | _ => none
+
+/-- The value of `write(addM(memory), a, freshId(addM(memory)))`, a
+reference member deleted (`memoryFieldDeleteReference`): the root the
+allocation under the write takes, the next ordinal.  Elsewhere `z`. -/
+def freshRef (ρ : Sym) (m : MTerm C) (v : MValT C) (z : Option (LMV × LTerm)) :
+    Option (LMV × LTerm) :=
+  match addMOf? m, allocRefOf? v with
+  | some R, some R' => if R = R' then some (.ref ⟨ρ.mem.nAlloc, []⟩, .lit (.bool true)) else z
+  | _, _ => z
+
+/-- A ternary symbol over its arguments' `toL`, a write of a fresh root
+apart (`freshRef`). -/
+def _root_.Solidity.Op3.toLAt (ρ : Sym) : Op3 a b c s → Tm C a → Tm C c → a.LTy → b.LTy → c.LTy →
+    s.LTy
+  | .write, m, v, x, y, z => writeM x y (freshRef ρ m v z)
+  | o, _, _, x, y, z => o.toL x y z
 
 /-- The path has no index: `alice.account`, not `people[i]`. -/
 def LPath.noAt : LPath → Bool
@@ -1021,12 +624,12 @@ def _root_.Solidity.Tm.toL (ρ : Sym) : Tm C s → s.LTy
   | .pvS _ => .init
   | .pvI x =>
     match lookupBy x ρ.env with
-    | some (.mref k) => some (k, .lit (.bool true))
+    | some (.mref i) => some (i, .lit (.bool true))
     | _ => none
   | .app0 o => o.toL ρ
   | .app1 o a => o.toL (a.toL ρ)
   | .app2 o a b => Op2.toLAt ρ o a (a.toL ρ) (b.toL ρ)
-  | .app3 o a b c => o.toL (a.toL ρ) (b.toL ρ) (c.toL ρ)
+  | .app3 o a b c => Op3.toLAt ρ o a c (a.toL ρ) (b.toL ρ) (c.toL ρ)
 
 /-- A write to the storage leaves an alias through an index stale: the
 program checked it against the storage before. -/
@@ -1044,8 +647,7 @@ def SymB.vars : SymB → List Var
 
 /-- The locals the updates so far read: a quantifier may bind none of them. -/
 def Sym.vars (ρ : Sym) : List Var :=
-  ρ.stor.vars ++ ρ.env.flatMap (fun b => b.2.vars) ++
-    ρ.mem.flatMap fun o => o.leaves.flatMap LTerm.vars
+  ρ.stor.vars ++ ρ.env.flatMap (fun b => b.2.vars) ++ ρ.mem.vars
 
 /-- The updates so far, with `x` free again: bound by a quantifier, `x` is
 the local itself. -/
@@ -1069,26 +671,24 @@ def _root_.Solidity.Op0.inL : Op0 s → Bool
   | .lit _ | .env _ | .root _ | .storage | .memory => true
 
 /-- A unary symbol in the fragment, its argument in it (`hb`); an
-allocation where the default has no mapping. -/
+allocation where its default copies (`allocOk`).  The identity an allocation
+takes only with it (`allocPair?`, `freshRef`). -/
 def _root_.Solidity.Op1.inL : Op1 a s → a.LTy → Bool → Bool
   | .unop .., _, hb | .field _, _, hb | .sval, _, hb => hb
   | .newArr _, _, hb | .mfield _, _, hb | .mval, _, hb | .ref, _, hb => hb
-  | .alloc R, x, hb => hb && Option.isSome (Op1.toL (.alloc R) x)
   | .addM R, x, hb => hb && Option.isSome (Op1.toL (.addM R) x)
   | _, _, _ => false
 
-/-- The read is of an object the updates allocated. -/
-def readOk : Option (SMem LTerm × LTerm) → Option (Nat × MSel × LTerm) → Bool
-  | some (M, _), some (k, sel, _) => (readL M k sel).isSome
-  | _, _ => false
-
-/-- The length is of an object the updates allocated. -/
-def mlenOk : Option (SMem LTerm × LTerm) → Option (Nat × LTerm) → Bool
-  | some (M, _), some (k, _) => (mlenL M k).isSome
-  | _, _ => false
+/-- A name a reference slot holds, of an object the memory before the update
+already has: so it denotes the same object in every memory the update
+builds over it. -/
+def irOk (ρ : Sym) : Option (LId × LTerm) → Bool
+  | some (j, _) => decide (j.root < ρ.mem.nAlloc)
+  | none => false
 
 /-- A binary symbol in the fragment, its arguments in it (`ha`, `hb`); a
-read or a delete is of `storage` itself. -/
+read or a delete is of `storage` itself; a read of memory where the clauses
+find what it reads. -/
 def _root_.Solidity.Op2.inL (ρ : Sym) : Op2 a b s → Tm C a → a.LTy → b.LTy → Bool → Bool → Bool
   | .binop .., _, _, _, ha, hb | .at, _, _, _, ha, hb => ha && hb
   | .find, s, _, _, _, hb => (s.isStorage || (s.storLocal? ρ).isSome) && hb
@@ -1096,34 +696,38 @@ def _root_.Solidity.Op2.inL (ρ : Sym) : Op2 a b s → Tm C a → a.LTy → b.LT
   | .pushSlot _, s, _, _, _, hb | .extend _, s, _, _, _, hb | .pop, s, _, _, _, hb
   | .shrink, s, _, _, _, hb =>
     s.isStorage && hb
-  | .read, _, x, y, ha, hb => ha && hb && readOk x y
-  | .mlen, _, x, y, ha, hb => ha && hb && mlenOk x y
+  | .read, _, x, y, ha, hb => ha && hb && (readM x y).isSome
+  | .mlen, _, x, y, ha, hb => ha && hb && (lenM x y).isSome
   | .mat, _, _, _, ha, hb => ha && hb
-  | .iread, _, x, y, ha, hb => ha && hb && Option.isSome (Op2.toL .iread x y)
-  | .copy, _, x, y, ha, hb => ha && hb && Option.isSome (Op2.toL .copy x y)
-  | .copySt, _, x, y, ha, hb => ha && hb && Option.isSome (Op2.toL .copySt x y)
+  | .iread, _, x, y, ha, hb => ha && hb && irOk ρ (ireadM x y)
+  | .copySt, _, x, y, ha, hb => ha && hb && (newM x y).isSome
+  | .copyMem, _, x, y, ha, hb => ha && hb && (memL x y).isSome
   | _, _, _, _, _, _ => false
 
 /-- A ternary symbol in the fragment: a conditional, or a write or a push
-over `storage` itself; a push of a word. -/
-def _root_.Solidity.Op3.inL : Op3 a b c s → Tm C a → Tm C c → a.LTy → b.LTy → c.LTy →
+over `storage` itself; a push of a word; a write of memory where its guard
+is found, its value in the fragment or a fresh root (`freshRef`). -/
+def _root_.Solidity.Op3.inL (ρ : Sym) : Op3 a b c s → Tm C a → Tm C c → a.LTy → b.LTy → c.LTy →
     Bool → Bool → Bool → Bool
   | .ite, _, _, _, _, _, hc, ha, hb => hc && ha && hb
   | .save, s, _, _, _, z, _, hp, hv => s.isStorage && hp && hv && z.storable
   | .push, s, .app1 .sval _, _, _, _, _, hp, hv | .push, s, .app2 .sfind _ _, _, _, _, _, hp, hv =>
     s.isStorage && hp && hv
-  | .write, _, _, x, y, z, hm, ha, hv => hm && ha && hv && Option.isSome (Op3.toL .write x y z)
+  | .write, m, v, x, y, z, hm, ha, hv =>
+    hm && ha && (hv || (freshRef ρ m v none).isSome) && (writeM x y (freshRef ρ m v z)).isSome
   | _, _, _, _, _, _, _, _, _ => false
 
-/-- The fragment: storage values and paths only, every alias bound by an
-update.  A read is of the storage the updates left, `find(storage, p)`: its
+/-- The fragment: storage, and memory as the updates write it, every alias
+bound by an update.  A read is of the storage the updates left, `find(storage, p)`: its
 path is checked against that storage, and read there.  A path's alias only
 where an update bound it (`Person storage p = alice;` does), and to a path
 with no index.  A storage: one write, one `delete`, one `push` of a word or
 `push()`, or one `pop`, over the storage the updates left.  A storage
 variable (`old`) bound by an update, read at a path the storage the updates
 left checks.  A stored value: a word, or a copy of a subtree of the storage
-the updates left (`alice = bob;`). -/
+the updates left (`alice = bob;`).  A memory: `memory`, an allocation, a
+write; a read of it where its clauses find the word, the name or the length
+(`readM`, `ireadM`, `lenM`). -/
 def _root_.Solidity.Tm.inL (ρ : Sym) : Tm C s → Bool
   | .pvV _ => true
   | .pvP x =>
@@ -1138,7 +742,7 @@ def _root_.Solidity.Tm.inL (ρ : Sym) : Tm C s → Bool
   | .app0 o => o.inL
   | .app1 o a => o.inL (a.toL ρ) (a.inL ρ)
   | .app2 o a b => o.inL ρ a (a.toL ρ) (b.toL ρ) (a.inL ρ) (b.inL ρ)
-  | .app3 o a b c => o.inL a c (a.toL ρ) (b.toL ρ) (c.toL ρ) (a.inL ρ) (b.inL ρ) (c.inL ρ)
+  | .app3 o a b c => o.inL ρ a c (a.toL ρ) (b.toL ρ) (c.toL ρ) (a.inL ρ) (b.inL ρ) (c.inL ρ)
 
 
 /-- A unary symbol of `sameShape`: `¬`, a member. -/
@@ -1240,25 +844,104 @@ def _root_.Solidity.UpdElem.toL (ρ : Sym) : UpdElem C → LTerm × Sym
   | .pay r a => (.kite (r.toL ρ) (a.toL ρ) (payGuard (a.toL ρ)) (payGuard (a.toL ρ)), ρ)
   | .mref x i =>
     match i.toL ρ with
-    | some (k, g) => (g, { ρ with env := (x, .mref k) :: ρ.env })
+    | some (j, g) => (g, { ρ with env := (x, .mref j) :: ρ.env })
     | none => (.err, ρ)
   | .memory m =>
     match m.toL ρ with
-    | some (M, g) => (g, { ρ with mem := M })
+    | some (M, g) => if M.within memSize then (g, { ρ with mem := M }) else (.err, ρ)
     | none => (.err, ρ)
   | .selfBalance .. | .saveNet .. => (.err, ρ)
 
+/-- The memory an update leaves holds at most `memSize` writes and
+allocations. -/
+def memWithin : Option (LMem × LTerm) → Bool
+  | some (M, _) => M.within memSize
+  | none => false
+
 /-- An update in the fragment: a local, an alias, the storage, a storage
-variable bound to it, or a ledger entry (`transfer`'s, which no term of the
-fragment reads); no memory, no funds. -/
+variable bound to it, a ledger entry (`transfer`'s, which no term of the
+fragment reads), a memory local bound to a name, or the memory (within
+`memSize`); no funds. -/
 def _root_.Solidity.UpdElem.inL (ρ : Sym) : UpdElem C → Bool
   | .val _ t => t.inL ρ
   | .path _ p => p.inL ρ
   | .storage s | .store _ s => s.inL ρ
   | .net r _ a | .pay r a => r.inL ρ && a.inL ρ
   | .mref _ i => i.inL ρ
-  | .memory m => m.inL ρ
+  | .memory m => m.inL ρ && memWithin (m.toL ρ)
   | .selfBalance .. | .saveNet .. => false
+
+/-- `{x := freshId(addM(memory)) ‖ memory := addM(memory)}`, or the same of
+`copySt(memory, v)`: the identity is the root the memory's allocation takes
+(`memoryReferenceDeclFreshAlloc`, `memoryArrayFreshAlloc`).  The pair is
+kept whole, one Skolem for KeY's `freshIdp`: the name exists only in the
+memory after the allocation. -/
+def allocPair? (i : ITerm C) (mm : MTerm C) : Bool :=
+  match i, mm with
+  | .app1 (.alloc R) (.app0 .memory), .app1 (.addM R') (.app0 .memory) => decide (R = R')
+  | .app2 .copy (.app0 .memory) v, .app2 .copySt (.app0 .memory) v' => decide (v = v')
+  | _, _ => false
+
+/-- `copySt(memory, find(storage, p))`, a copy from storage
+(`memoryStorageCopy`): its path. -/
+def copyOf? : MTerm C → Option (PTerm C)
+  | .app2 .copySt (.app0 .memory) (.app2 .sfind (.app0 .storage) p) => some p
+  | _ => none
+
+theorem copyOf?_some {mm : MTerm C} {p : PTerm C} (h : copyOf? mm = some p) :
+    mm = .app2 .copySt (.app0 .memory) (.app2 .sfind (.app0 .storage) p) := by
+  unfold copyOf? at h
+  split at h
+  · cases h
+    rfl
+  · cases h
+
+/-- A copy from storage's guard (Lean only): the subtree copies, which
+`copyStToM` refuses on a mapping, and is no word, so the copy is an object
+(`readFromCopyToStorage` reads it). -/
+def copyG (s : LStor) (q : LPath) : LTerm :=
+  .seq (.cpok s q) (.ite (isT (.find s q)) .err (.lit (.bool true)))
+
+/-- The memory of an allocation's pair: a copy from storage is the node
+`LMem.copySt` at the next ordinal, under `copyG`; any other memory as
+`toL` gives it.  A copy from storage is in the fragment only in its pair,
+where the identity's `asRef` refuses the word `copySt` alone would copy. -/
+def pairMem (ρ : Sym) (mm : MTerm C) : Option (LMem × LTerm) :=
+  match copyOf? mm with
+  | some p => some (.copySt ρ.mem ρ.mem.nAlloc ρ.stor (p.toL ρ), copyG ρ.stor (p.toL ρ))
+  | none => mm.toL ρ
+
+/-- The pair's memory in the fragment: a copy from storage at a path in
+it, or a memory `inL` admits. -/
+def pairIn (ρ : Sym) (mm : MTerm C) : Bool :=
+  match copyOf? mm with
+  | some p => p.inL ρ
+  | none => mm.inL ρ
+
+/-- A parallel update that is an allocation's pair: `x`, its identity and
+the memory. -/
+def pairView : UpdElem C → UpdElem C → List (UpdElem C) → Option (Var × ITerm C × MTerm C)
+  | .mref x i, .memory mm, [] => some (x, i, mm)
+  | _, _, _ => none
+
+theorem pairView_some {e₁ e₂ : UpdElem C} {rest : List (UpdElem C)} {x : Var} {i : ITerm C}
+    {mm : MTerm C} (h : pairView e₁ e₂ rest = some (x, i, mm)) :
+    e₁ = .mref x i ∧ e₂ = .memory mm ∧ rest = [] := by
+  unfold pairView at h
+  split at h
+  · simp only [Option.some.injEq, Prod.mk.injEq] at h
+    obtain ⟨rfl, rfl, rfl⟩ := h
+    exact ⟨rfl, rfl, rfl⟩
+  · cases h
+
+/-- The pair pushed in: the memory's guard, and `x` bound to the root of the
+next ordinal. -/
+def pairL (ρ : Sym) (x : Var) (i : ITerm C) (mm : MTerm C) : Option (LTerm × Sym) :=
+  if allocPair? i mm then
+    (pairMem ρ mm).bind fun p => if p.1.within memSize then
+      some (p.2, { ρ with env := (x, .mref ⟨ρ.mem.nAlloc, []⟩) :: ρ.env, mem := p.1 })
+    else none
+  else none
 
 /-- The update's term as a premise (box) or a conjunct (diamond). -/
 def guardM : Modality → LTerm → LFml → LFml
@@ -1290,13 +973,20 @@ def _root_.Solidity.Fml.toL : Sym → Fml C → LFml
   | ρ, .imp φ ψ => .imp (φ.toL ρ) (ψ.toL ρ)
   | ρ, .upd _ [] φ => φ.toL ρ
   | ρ, .upd m [e] φ => guardM m (e.toL ρ).1 (φ.toL (e.toL ρ).2)
+  | ρ, .upd m (e₁ :: e₂ :: rest) φ =>
+    match pairView e₁ e₂ rest with
+    | some (x, i, mm) =>
+      match pairL ρ x i mm with
+      | some (g, ρ') => guardM m g (φ.toL ρ')
+      | none => .tt
+    | none => .tt
   | _, .modal .box _ _ => .tt
   | _, .modal .diamond _ _ => .not .tt
   | ρ, .all x p φ => .all x p (φ.toL (ρ.free x))
-  | _, .upd _ (_ :: _ :: _) _ | _, .havoc _ => .tt
+  | _, .havoc _ => .tt
 
-/-- The fragment `Fml.toL` is exact on: no modality, one element per update,
-no memory, and every alias bound by an update. -/
+/-- The fragment `Fml.toL` is exact on: no modality, one element per update
+but an allocation's pair (`pairL`), and every alias bound by an update. -/
 def _root_.Solidity.Fml.inL : Sym → Fml C → Bool
   | _, .tt => true
   | _, .eq a b => a.eqLit b
@@ -1309,9 +999,16 @@ def _root_.Solidity.Fml.inL : Sym → Fml C → Bool
   | ρ, .imp φ ψ => φ.inL ρ && ψ.inL ρ
   | ρ, .upd _ [] φ => φ.inL ρ
   | ρ, .upd _ [e] φ => e.inL ρ && φ.inL (e.toL ρ).2
+  | ρ, .upd _ (e₁ :: e₂ :: rest) φ =>
+    match pairView e₁ e₂ rest with
+    | some (x, i, mm) =>
+      match pairL ρ x i mm with
+      | some (_, ρ') => pairIn ρ mm && ρ'.mem.within memSize && φ.inL ρ'
+      | none => false
+    | none => false
   | _, .modal _ P _ => P.reverts
   | ρ, .all x _ φ => !ρ.vars.contains x && φ.inL (ρ.free x)
-  | _, .upd _ (_ :: _ :: _) _ | _, .havoc _ => false
+  | _, .havoc _ => false
 
 
 /-! ### The updates pushed in keep the meaning -/
@@ -1342,33 +1039,44 @@ the location up to the last index is there, live.  What the program's checks
 leave of a path it took (`PTerm.toL_chk`). -/
 def LiveTo (T : SVal) (qs : List Seg) : Prop := ∃ c, T.findLive (lastAtSegs qs) = .ok c
 
-/-- What a name holds after the updates, against what its symbol says. -/
-def EnvRel (σ τ : State) (x : Var) : Option SymB → Prop
+/-- What a name holds after the updates, against what its symbol says; a
+memory local's name read in the births `B` of the updates' memory. -/
+def EnvRel (σ τ : State) (B : MemNames.Births) (x : Var) : Option SymB → Prop
   | none => τ.getEnv x = σ.getEnv x
   | some (.val t) => ∃ v, t.eval σ = .ok v ∧ τ.getEnv x = .ok (.val v)
   | some (.path q) => ∃ r segs, q.eval σ = .ok (.field r :: segs) ∧
       τ.getEnv x = .ok (.spath r segs) ∧ LiveTo (.struct τ.storage) (.field r :: segs)
   | some .stale => ∃ r segs, τ.getEnv x = .ok (.spath r segs)
   | some (.stor s) => ∃ st, s.eval σ = .ok (.struct st) ∧ τ.getEnv x = .ok (.store st)
-  | some (.mref k) => τ.getEnv x = .ok (.mref (σ.nextId + k))
+  | some (.mref i) => ∃ n, LId.evalR B i = .ok n ∧ τ.getEnv x = .ok (.mref n)
+
+/-- The memory `M` runs from `σ` to the heap and the next identity of `τ`. -/
+def MemAt (σ : State) (M : LMem) (τ : State) : Prop :=
+  ∃ μ B, M.run σ = .ok (μ, B) ∧ μ.HeapEq τ
+
+/-- `MemAt` reads the heap and `nextId` only. -/
+theorem MemAt.of_heap {σ τ τ' : State} {M : LMem} (h : MemAt σ M τ) (hh : τ'.heap = τ.heap)
+    (hn : τ'.nextId = τ.nextId) : MemAt σ M τ' := by
+  obtain ⟨μ, B, hr, h₁, h₂⟩ := h
+  exact ⟨μ, B, hr, h₁.trans hh.symm, h₂.trans hn.symm⟩
 
 /-- `τ` is what the updates `ρ` stand for, applied in `σ`: its storage is the
 stack of writes read in `σ`, each name holds what its symbol reads in `σ`,
-and its heap the objects allocated, from `σ`'s `nextId` on. -/
+and its heap and next identity are what the memory's run leaves. -/
 structure Rel (σ : State) (ρ : Sym) (τ : State) : Prop where
   stor : ρ.stor.eval σ = .ok (.struct τ.storage)
-  env : ∀ x, EnvRel σ τ x (lookupBy x ρ.env)
+  env : ∀ x, EnvRel σ τ (ρ.mem.births σ) x (lookupBy x ρ.env)
   tx : ∀ k, τ.envVal k = σ.envVal k
-  mem : MemRel (fun t => t.eval σ) σ.nextId ρ.mem τ
+  mem : MemAt σ ρ.mem τ
 
 /-- Before any update, the state is itself. -/
 theorem Rel.empty (σ : State) : Rel σ Sym.empty σ :=
-  ⟨rfl, fun _ => rfl, fun _ => rfl, MemRel.empty _ σ⟩
+  ⟨rfl, fun _ => rfl, fun _ => rfl, ⟨memBase σ, [], rfl, rfl, rfl⟩⟩
 
 /-- Binding a name keeps the relation: after `uint y = balances[k];`, `y`
 holds what `balances[k]` reads. -/
 theorem Rel.bind {σ τ : State} {ρ : Sym} (h : Rel σ ρ τ) (x : Var) (b : SymB) (bd : Binding)
-    (hb : EnvRel σ (τ.setEnv x bd) x (some b)) :
+    (hb : EnvRel σ (τ.setEnv x bd) (ρ.mem.births σ) x (some b)) :
     Rel σ { ρ with env := (x, b) :: ρ.env } (τ.setEnv x bd) := by
   refine ⟨h.stor, fun y => ?_, fun k => by rw [← h.tx k]; cases k <;> rfl,
     h.mem.of_heap rfl rfl⟩
@@ -1380,12 +1088,6 @@ theorem Rel.bind {σ τ : State} {ρ : Sym} (h : Rel σ ρ τ) (x : Var) (b : Sy
     have hst : (τ.setEnv x bd).storage = τ.storage := rfl
     rcases lookupBy y ρ.env with _ | ⟨t⟩ | ⟨q⟩ | _ <;>
       simp only [EnvRel, State.getEnv_setEnv_ne hy, imp_self, hst]
-
-/-- The word terms of the heap read only what the updates read. -/
-theorem mem_vars {x : Var} {M : SMem LTerm} (hx : x ∉ M.flatMap fun o => o.leaves.flatMap LTerm.vars) :
-    ∀ o ∈ M, ∀ t ∈ o.leaves, x ∉ t.vars := by
-  intro o ho t ht hxt
-  exact hx (List.mem_flatMap.2 ⟨o, ho, List.mem_flatMap.2 ⟨t, ht, hxt⟩⟩)
 
 /-- A symbol the updates bound reads only what the updates read. -/
 theorem lookupBy_vars {x y : Var} {b : SymB} : (env : List (Var × SymB)) →
@@ -1399,19 +1101,24 @@ theorem lookupBy_vars {x y : Var} {b : SymB} : (env : List (Var × SymB)) →
     · simp only [lookupBy, hz, if_false] at h
       exact lookupBy_vars rest h hx.2
 
+theorem LMem.births_setEnv {σ : State} {x : Var} {b : Binding} {M : LMem} (hx : x ∉ M.vars) :
+    M.births (σ.setEnv x b) = M.births σ := by
+  simp only [LMem.births, LMem.run_setEnv M hx]
+
 /-- Rebinding a local the updates do not read keeps the relation, the local
 now free: what a quantifier does. -/
 theorem Rel.free {σ τ : State} {ρ : Sym} (h : Rel σ ρ τ) {x : Var} (hx : x ∉ ρ.vars)
     (v : Value) : Rel (σ.setEnv x (.val v)) (ρ.free x) (τ.setEnv x (.val v)) := by
   simp only [Sym.vars, List.mem_append, not_or] at hx
   obtain ⟨⟨hx₁, hx₂⟩, hx₃⟩ := hx
+  have hB : (ρ.free x).mem.births (σ.setEnv x (.val v)) = ρ.mem.births σ :=
+    LMem.births_setEnv hx₃
   refine ⟨?_, fun y => ?_, fun k => by
-    rw [State.envVal_setEnv, State.envVal_setEnv, h.tx k],
-    (h.mem.congr fun o ho t ht => LTerm.eval_setEnv t (mem_vars hx₃ o ho t ht)).of_heap
-      rfl rfl⟩
+    rw [State.envVal_setEnv, State.envVal_setEnv, h.tx k], ?_⟩
   · show LStor.eval (σ.setEnv x (.val v)) ρ.stor = _
     rw [LStor.eval_setEnv _ hx₁]; exact h.stor
-  · by_cases hy : y = x
+  · rw [hB]
+    by_cases hy : y = x
     · subst hy
       simp only [Sym.free, lookupBy, if_true, EnvRel, LTerm.eval]
       exact ⟨v, by simp only [State.getEnv_setEnv_self]; rfl,
@@ -1435,6 +1142,9 @@ theorem Rel.free {σ τ : State} {ρ : Sym} (h : Rel σ ρ τ) {x : Var} (hx : x
         simp only [SymB.vars] at hv
         rw [LStor.eval_setEnv _ hv]; exact he
       · exact he
+  · obtain ⟨μ, B, hr, hh⟩ := h.mem
+    exact ⟨μ, B, by rw [show (ρ.free x).mem = ρ.mem from rfl, LMem.run_setEnv _ hx₃]; exact hr,
+      hh.1, hh.2⟩
 
 /-! ### Checked paths, slot reads and live reads
 
@@ -1980,8 +1690,9 @@ theorem lookupBy_onWrite (y : Var) : ∀ (env : List (Var × SymB)),
         lookupBy_onWrite y rest]
 
 /-- A write to the storage keeps the relation of each name. -/
-theorem EnvRel.onWrite {σ τ τ' : State} {y : Var} {o : Option SymB}
-    (h : EnvRel σ τ y o) (he : τ'.getEnv y = τ.getEnv y) : EnvRel σ τ' y (o.map SymB.onWrite) := by
+theorem EnvRel.onWrite {σ τ τ' : State} {B : MemNames.Births} {y : Var} {o : Option SymB}
+    (h : EnvRel σ τ B y o) (he : τ'.getEnv y = τ.getEnv y) :
+    EnvRel σ τ' B y (o.map SymB.onWrite) := by
   rcases o with _ | ⟨t⟩ | ⟨q⟩ | _ | ⟨s⟩ | ⟨k⟩
   · simp only [EnvRel, Option.map] at h ⊢; rw [he]; exact h
   · simp only [EnvRel, Option.map, SymB.onWrite] at h ⊢; rw [he]; exact h
@@ -1998,48 +1709,120 @@ theorem EnvRel.onWrite {σ τ τ' : State} {y : Var} {o : Option SymB}
 
 /-! ### Memory, symbolically and concretely
 
-A read of an object the updates allocated is the term its slot holds
-(`readL_sim`), a write the object the interpreter writes (`writeL_rel`),
-each with the guard that returns exactly where the interpreter's operation
-does. -/
+A memory term pushed in is an `LMem` whose run from the initial state leaves
+the heap and the next identity the term leaves (`MemAt`); its births extend
+those of the updates' memory, so a name the updates bound denotes the same
+object in it (`LId.evalR_prefix`). -/
 
-/-- A ground term returns its value in every state. -/
-theorem LTerm.ground?_eval (σ : State) : (t : LTerm) → ∀ {v : Value}, t.ground? = some v →
-    t.eval σ = .ok v
-  | .lit _, v, h => by
-    simp only [LTerm.ground?, Option.some.injEq] at h
-    subst h; rfl
-  | .binop op p a b, v, h => by
-    simp only [LTerm.ground?] at h
-    split at h
-    · rename_i x y ha hb
-      split at h
-      · rename_i r hr
-        simp only [Option.some.injEq] at h
-        subst h
-        simp only [LTerm.eval, LTerm.ground?_eval σ a ha, LTerm.ground?_eval σ b hb, Res.ok_bind,
-          hr]
-      · cases h
-    · cases h
-  | .unop op p a, v, h => by
-    simp only [LTerm.ground?] at h
-    split at h
-    · rename_i x ha
-      split at h
-      · rename_i r hr
-        simp only [Option.some.injEq] at h
-        subst h
-        simp only [LTerm.eval, LTerm.ground?_eval σ a ha, Res.ok_bind, hr]
-      · cases h
-    · cases h
-  | .var _, _, h | .ite .., _, h | .find .., _, h | .has .., _, h | .kmap .., _, h
-  | .len .., _, h | .sok _, _, h | .pok _, _, h | .seq .., _, h | .orElse .., _, h
-  | .kite .., _, h | .zero _, _, h | .err, _, h | .env _, _, h | .findP .., _, h => by
-    simp only [LTerm.ground?, reduceCtorEq] at h
+open MemNames in
+/-- A name keeps its object in a run that allocates more. -/
+theorem LId.evalR_prefix {B B' : Births} (hp : B <+: B') {j : LId} {n : Nat}
+    (h : LId.evalR B j = .ok n) : LId.evalR B' j = .ok n := by
+  obtain ⟨D, rfl⟩ := hp
+  have hr := evalR_root_lt h
+  rw [LId.evalR_ok] at h ⊢
+  simpa only [Births.eval, List.getElem?_append_left hr] using h
 
-theorem seqL_eval (σ : State) (g a : LTerm) :
-    (seqL g a).eval σ = g.eval σ >>= fun _ => a.eval σ := by
-  unfold seqL; split <;> rfl
+open MemNames in
+/-- A name of an object older than the allocations a run adds denotes it
+before them too. -/
+theorem LId.evalR_prefix_lt {B B' : Births} (hp : B <+: B') {j : LId} (hj : j.root < B.length)
+    {n : Nat} (h : LId.evalR B' j = .ok n) : LId.evalR B j = .ok n := by
+  obtain ⟨D, rfl⟩ := hp
+  rw [LId.evalR_ok] at h ⊢
+  simpa only [Births.eval, List.getElem?_append_left hj] using h
+
+open MemNames in
+theorem LMV.eval_prefix {σ : State} {B B' : Births} (hp : B <+: B') {w : LMV} {mv : MVal}
+    (h : w.eval σ B = .ok mv) : w.eval σ B' = .ok mv := by
+  cases w with
+  | word t => exact h
+  | ref j =>
+    simp only [LMV.eval, Res.bind_eq_ok] at h ⊢
+    obtain ⟨n, hn, h⟩ := h
+    exact ⟨n, LId.evalR_prefix hp hn, h⟩
+
+open MemNames in
+/-- A name's relation holds in a run that allocates more. -/
+theorem EnvRel.grow {σ τ : State} {B B' : Births} (hp : B <+: B') {x : Var} {o : Option SymB}
+    (h : EnvRel σ τ B x o) : EnvRel σ τ B' x o := by
+  rcases o with _ | ⟨t⟩ | ⟨q⟩ | _ | ⟨s⟩ | ⟨j⟩
+  · exact h
+  · exact h
+  · exact h
+  · exact h
+  · exact h
+  · obtain ⟨n, hn, he⟩ := h
+    exact ⟨n, LId.evalR_prefix hp hn, he⟩
+
+open MemNames in
+/-- A name's relation reads only the name's binding and the storage. -/
+theorem EnvRel.congr {σ τ τ' : State} {B : Births} {x : Var} {o : Option SymB}
+    (h : EnvRel σ τ B x o) (he : τ'.getEnv x = τ.getEnv x) (hs : τ'.storage = τ.storage) :
+    EnvRel σ τ' B x o := by
+  rcases o with _ | ⟨t⟩ | ⟨q⟩ | _ | ⟨s⟩ | ⟨j⟩ <;> simp only [EnvRel, he, hs] <;> exact h
+
+/-- The updates' memory has as many births as allocations. -/
+theorem Rel.births_length {σ τ : State} {ρ : Sym} (h : Rel σ ρ τ) :
+    (ρ.mem.births σ).length = ρ.mem.nAlloc := by
+  obtain ⟨μ, B, hr, -⟩ := h.mem
+  rw [LMem.births_of_run hr, LMem.run_nAlloc σ _ hr]
+
+open MemNames in
+/-- **A memory update keeps the relation**: the memory `M` runs to the heap
+the update writes, and the names bound before denote the same objects. -/
+theorem Rel.setMem {σ τ μ μ' : State} {ρ : Sym} {M : LMem} {B : Births} (h : Rel σ ρ τ)
+    (hr : M.run σ = .ok (μ, B)) (hp : ρ.mem.births σ <+: B) (hh : μ.HeapEq μ') :
+    Rel σ { ρ with mem := M } { τ with heap := μ'.heap, nextId := μ'.nextId } := by
+  refine ⟨h.stor, fun y => ?_, fun k => h.tx k, μ, B, hr, hh⟩
+  show EnvRel σ _ (M.births σ) y (lookupBy y ρ.env)
+  rw [LMem.births_of_run hr]
+  exact ((h.env y).grow hp).congr rfl rfl
+
+theorem LSel.read_of_addr {σ μ : State} {n : Nat} {a : LSel} {ad : Addr}
+    (h : a.addr σ n = .ok ad) : a.read σ μ n = readAddr μ ad >>= MVal.asValue := by
+  cases a with
+  | fld f => cases h; rfl
+  | idx t =>
+    show (t.eval σ >>= Value.asInt >>= fun j => readAddr μ (.memoryIndex n j) >>= MVal.asValue) = _
+    simp only [LSel.addr] at h
+    cases hj : (t.eval σ >>= Value.asInt) with
+    | error e => rw [hj] at h; cases h
+    | ok j => rw [hj, Res.ok_bind] at h; cases h; rw [Res.ok_bind]
+  | size => cases h
+
+theorem LSel.iread_of_addr {σ μ : State} {n : Nat} {a : LSel} {ad : Addr}
+    (h : a.addr σ n = .ok ad) : a.iread σ μ n = readAddr μ ad >>= MVal.asRef := by
+  simp only [LSel.iread, h, Res.ok_bind]
+
+/-- A default of a type `allocOk` admits is allocated in any state. -/
+theorem allocDefault_ok {R : RefTy} (h : allocOk R = true) (σ : State) :
+    ∃ τ id, allocDefault σ R = .ok (τ, id) := by
+  obtain ⟨⟨τ, mv⟩, hc⟩ := (allocOk_cps h).at σ
+  obtain ⟨id, rfl⟩ := copy_ref hc (defaultForTy_ref_ne R)
+  exact ⟨τ, id, by unfold allocDefault; rw [defaultForRef, hc]⟩
+
+theorem allocDefault_of_copy {σ τ : State} {R : RefTy} {id : Nat}
+    (h : copyStToM σ (defaultForTy (.ref R)) = .ok (τ, .ref id)) :
+    allocDefault σ R = .ok (τ, id) := by
+  unfold allocDefault; rw [defaultForRef, h]
+
+/-- `new R(nt)` reads to `R`'s array of the length `nt` reads to. -/
+theorem newArr_eval_ok {τ : State} {R : RefTy} {nt : Term C} {sv : SVal} :
+    (Tm.app1 (Op1.newArr R) nt).eval τ = .ok sv ↔
+      ∃ c, nt.eval τ = .ok (.int c) ∧ sv = newArrVal R c := by
+  simp only [Tm.eval, Op1.eval]
+  cases hn : nt.eval τ with
+  | error e => simp only [bind, Except.bind, reduceCtorEq, false_and, exists_false]
+  | ok v =>
+    cases v with
+    | int c =>
+      simp only [bind, Except.bind, Value.asInt, pure, Except.pure, Except.ok.injEq,
+        PrimVal.int.injEq, exists_eq_left']
+      exact eq_comm
+    | bool b =>
+      simp only [bind, Except.bind, Value.asInt, reduceCtorEq, Except.ok.injEq, false_and,
+        exists_false]
 
 /-- The guard of an index returns exactly where the index is an integer. -/
 theorem isIntL_ret (σ : State) (t : LTerm) :
@@ -2059,374 +1842,6 @@ theorem isIntL_ret (σ : State) (t : LTerm) :
         | bool b => rw [ht] at hv; cases hv
     · rintro ⟨i, hi⟩
       exact ⟨.bool true, by simp only [LTerm.eval, hi, Res.ok_bind, Value.asInt, ite_self]⟩
-
-/-- The case split on an index: the slot at it, read where it is one. -/
-theorem kchainL_eval (σ : State) {t : LTerm} {i : Int} (ht : t.eval σ = .ok (.int i)) :
-    (es : List (SMV LTerm)) → (j : Nat) → (kchainL t j es).eval σ =
-      if (j : Int) ≤ i then
-        (match es[(i - j).toNat]? with
-          | some e => (slotT e).eval σ
-          | none => .error .stuck)
-      else .error .stuck
-  | [], j => by
-    simp only [kchainL, LTerm.eval, List.getElem?_nil, ite_self]
-  | e :: es, j => by
-    simp only [kchainL, LTerm.eval, ht, Res.ok_bind, Value.asInt]
-    by_cases hij : i = (j : Int)
-    · subst hij
-      simp only [if_true, if_pos (Int.le_refl _), Int.sub_self, Int.toNat_zero,
-        List.getElem?_cons_zero]
-    · rw [if_neg hij, kchainL_eval σ ht es (j + 1)]
-      by_cases hle : (j : Int) ≤ i
-      · have hn : (i - j).toNat = (i - (j + 1 : Nat)).toNat + 1 := by omega
-        have hle' : ((j + 1 : Nat) : Int) ≤ i := by omega
-        rw [if_pos hle, if_pos hle', hn, List.getElem?_cons_succ]
-      · have hle' : ¬ ((j + 1 : Nat) : Int) ≤ i := by omega
-        rw [if_neg hle, if_neg hle']
-
-/-- A slot read as a word, on both sides. -/
-theorem slotT_sim (σ : State) (b : Nat) :
-    (e : SMV LTerm) → e.Ok (fun t => t.eval σ) →
-      Sim ((slotT e).eval σ) ((e.conc (fun t => t.eval σ) b).asValue)
-  | .val t, ⟨v, hv⟩ => Sim.of_eq (by
-    simp only [slotT, SMV.conc_val hv, hv, Close.asValue_toMVal])
-  | .ref _, _ => Sim.of_eq rfl
-
-/-- What an address the updates' objects resolve to: the member of the
-`k`-th object, or its element at the integer the index term returns. -/
-def AddrOf (σ : State) (k : Nat) : MSel → Addr → Prop
-  | .fld f, ad => ad = .memoryField (σ.nextId + k) f
-  | .idx t, ad => ∃ i, t.eval σ = .ok (.int i) ∧ ad = .memoryIndex (σ.nextId + k) i
-
-theorem getElem?_some_lt {β : Type} {l : List β} {k : Nat} {o : β} (h : l[k]? = some o) :
-    ∃ hk : k < l.length, l[k] = o := by
-  rw [List.getElem?_eq_some_iff] at h
-  exact h
-
-/-- **A read, symbolically and concretely.** -/
-theorem readL_sim {σ μ : State} {M : SMem LTerm}
-    (hM : MemRel (fun t => t.eval σ) σ.nextId M μ) {k : Nat} {sel : MSel} {r : LTerm}
-    (hr : readL M k sel = some r) {ad : Addr} (ha : AddrOf σ k sel ad) :
-    Sim (r.eval σ) (readAddr μ ad >>= MVal.asValue) := by
-  unfold readL at hr
-  cases hk : M[k]? with
-  | none => simp only [hk, reduceCtorEq] at hr
-  | some o =>
-    obtain ⟨hlt, hget⟩ := getElem?_some_lt hk
-    have hobj := hM.obj k hlt
-    have hok := hM.ok o (hget ▸ List.getElem_mem hlt)
-    rw [hget] at hobj
-    cases o with
-    | struct fs =>
-      cases sel with
-      | fld f =>
-        simp only [hk, Option.some.injEq] at hr
-        subst hr
-        simp only [AddrOf] at ha
-        subst ha
-        simp only [readAddr, hobj, SObj.conc, bind, Except.bind, lookupBy_map_conc]
-        cases hl : lookupBy f fs with
-        | none => exact Sim.of_eq rfl
-        | some e => exact slotT_sim σ _ e (hok _ (lookupBy_mem_name fs hl))
-      | idx t =>
-        simp only [hk, Option.some.injEq] at hr
-        subst hr
-        obtain ⟨i, -, rfl⟩ := ha
-        simp only [readAddr, hobj, SObj.conc, bind, Except.bind]
-        exact Sim.of_eq rfl
-    | array es fx =>
-      cases sel with
-      | fld f =>
-        simp only [hk, Option.some.injEq] at hr
-        subst hr
-        simp only [AddrOf] at ha
-        subst ha
-        simp only [readAddr, hobj, SObj.conc, bind, Except.bind]
-        exact Sim.of_eq rfl
-      | idx t =>
-        simp only [hk, Option.some.injEq] at hr
-        subst hr
-        obtain ⟨i, hti, rfl⟩ := ha
-        have hconc : readAddr μ (.memoryIndex (σ.nextId + k) i) >>= MVal.asValue =
-            if h : 0 ≤ i ∧ i.toNat < es.length then
-              (es[i.toNat].conc (fun t => t.eval σ) σ.nextId).asValue
-            else .error .revert := by
-          by_cases hc : 0 ≤ i ∧ i.toNat < es.length
-          · have hc' : 0 ≤ i ∧ i.toNat < (es.map (SMV.conc (fun t => t.eval σ) σ.nextId)).length := by
-              simpa only [List.length_map] using hc
-            simp only [readAddr, hobj, SObj.conc, bind, Except.bind, dif_pos hc', dif_pos hc, pure,
-              Except.pure, List.get_eq_getElem, List.getElem_map]
-          · have hc' : ¬ (0 ≤ i ∧
-                i.toNat < (es.map (SMV.conc (fun t => t.eval σ) σ.nextId)).length) := by
-              simpa only [List.length_map] using hc
-            simp only [readAddr, hobj, SObj.conc, bind, Except.bind, dif_neg hc', dif_neg hc]
-        rw [hconc]
-        have hes : ∀ e ∈ es, e.Ok (fun t => t.eval σ) := hok
-        split
-        · rename_i i' hi'
-          rw [LTerm.ground?_eval σ t hi', Except.ok.injEq, PrimVal.int.injEq] at hti
-          subst hti
-          split
-          · exact slotT_sim σ _ _ (hes _ (List.getElem_mem _))
-          · exact Sim.halt (fun _ h => nomatch h) (fun _ h => nomatch h)
-        · rw [kchainL_eval σ hti es 0]
-          have h0 : ((0 : Nat) : Int) = 0 := rfl
-          simp only [h0, Int.sub_zero]
-          by_cases hc : 0 ≤ i ∧ i.toNat < es.length
-          · rw [if_pos hc.1, List.getElem?_eq_getElem hc.2, dif_pos hc]
-            exact slotT_sim σ _ _ (hes _ (List.getElem_mem _))
-          · rw [dif_neg hc]
-            refine Sim.halt (fun a ha => ?_) (fun a ha => nomatch ha)
-            by_cases h1 : 0 ≤ i
-            · rw [if_pos h1, List.getElem?_eq_none (by omega)] at ha
-              simp only [reduceCtorEq] at ha
-            · rw [if_neg h1] at ha
-              simp only [reduceCtorEq] at ha
-
-/-- `xs.length` of an allocated object, on both sides. -/
-theorem mlenL_sim {σ μ : State} {M : SMem LTerm}
-    (hM : MemRel (fun t => t.eval σ) σ.nextId M μ) {k : Nat} {r : LTerm}
-    (hr : mlenL M k = some r) : Sim (r.eval σ) (memArrayLen μ (σ.nextId + k)) := by
-  unfold mlenL at hr
-  cases hk : M[k]? with
-  | none => simp only [hk, reduceCtorEq] at hr
-  | some o =>
-    obtain ⟨hlt, hget⟩ := getElem?_some_lt hk
-    have hobj := hM.obj k hlt
-    rw [hget] at hobj
-    cases o with
-    | struct fs =>
-      simp only [hk, Option.some.injEq] at hr
-      subst hr
-      simp only [memArrayLen, hobj, SObj.conc, bind, Except.bind]
-      exact Sim.of_eq rfl
-    | array es fx =>
-      simp only [hk, Option.some.injEq] at hr
-      subst hr
-      simp only [memArrayLen, hobj, SObj.conc, bind, Except.bind, List.length_map]
-      exact Sim.of_eq rfl
-
-/-- A reference read out of an allocated object, on both sides. -/
-theorem ireadL_eq {σ μ : State} {M : SMem LTerm}
-    (hM : MemRel (fun t => t.eval σ) σ.nextId M μ) {k k' : Nat} {sel : MSel}
-    (hr : ireadL M k sel = some k') {ad : Addr} (ha : AddrOf σ k sel ad) :
-    readAddr μ ad >>= MVal.asRef = .ok (σ.nextId + k') := by
-  unfold ireadL at hr
-  cases hk : M[k]? with
-  | none => simp only [hk, reduceCtorEq] at hr
-  | some o =>
-    obtain ⟨hlt, hget⟩ := getElem?_some_lt hk
-    have hobj := hM.obj k hlt
-    rw [hget] at hobj
-    cases o with
-    | struct fs =>
-      cases sel with
-      | fld f =>
-        simp only [hk] at hr
-        simp only [AddrOf] at ha
-        subst ha
-        split at hr
-        · rename_i k₁ hl
-          simp only [Option.some.injEq] at hr
-          subst hr
-          simp only [readAddr, hobj, SObj.conc, bind, Except.bind]
-          rw [lookupBy_map_conc, hl]
-          rfl
-        · cases hr
-      | idx t => simp only [hk, reduceCtorEq] at hr
-    | array es fx =>
-      cases sel with
-      | fld f => simp only [hk, reduceCtorEq] at hr
-      | idx t =>
-        simp only [hk] at hr
-        obtain ⟨i, hti, rfl⟩ := ha
-        split at hr
-        · rename_i i' hi'
-          rw [LTerm.ground?_eval σ t hi', Except.ok.injEq, PrimVal.int.injEq] at hti
-          subst hti
-          split at hr
-          · rename_i hin
-            split at hr
-            · rename_i k₁ he
-              simp only [Option.some.injEq] at hr
-              subst hr
-              have hin' : 0 ≤ i' ∧ i'.toNat < (es.map (SMV.conc (fun t => t.eval σ) σ.nextId)).length := by
-                simpa only [List.length_map] using hin
-              simp only [readAddr, hobj, SObj.conc, bind, Except.bind, dif_pos hin', pure,
-                Except.pure]
-              simp only [List.get_eq_getElem, List.getElem_map, he]
-              rfl
-            · cases hr
-          · cases hr
-        · cases hr
-
-/-- The elements after a word written at an index that is no literal. -/
-theorem kwriteL_conc {σ : State} {b : Nat} {t u : LTerm} {es : List (SMV LTerm)}
-    (hval : es.all SMV.isVal = true) (hes : ∀ e ∈ es, e.Ok (fun t => t.eval σ))
-    {i : Int} (hti : t.eval σ = .ok (.int i)) (hi0 : 0 ≤ i) {w : Value} (hu : u.eval σ = .ok w) :
-    (kwriteL t u es).map (SMV.conc (fun t => t.eval σ) b) =
-      (es.map (SMV.conc (fun t => t.eval σ) b)).set i.toNat w.toMVal ∧
-    ∀ s ∈ kwriteL t u es, s.Ok (fun t => t.eval σ) := by
-  have helem : ∀ (j : Nat) (hj : j < es.length), ∃ v,
-      (LTerm.kite t (.lit (.int j)) u (slotT es[j])).eval σ = .ok v ∧
-      v.toMVal = if i.toNat = j then w.toMVal else es[j].conc (fun t => t.eval σ) b := by
-    intro j hj
-    have hv : es[j].isVal = true := List.all_eq_true.1 hval _ (List.getElem_mem hj)
-    obtain ⟨v', hv'⟩ : ∃ v', (slotT es[j]).eval σ = .ok v' ∧
-        es[j].conc (fun t => t.eval σ) b = v'.toMVal := by
-      have hok := hes _ (List.getElem_mem hj)
-      revert hv hok
-      cases es[j] with
-      | val t' =>
-        intro _ hok
-        obtain ⟨v', h'⟩ := hok
-        exact ⟨v', h', SMV.conc_val h'⟩
-      | ref _ => intro hv; simp only [SMV.isVal, Bool.false_eq_true] at hv
-    simp only [LTerm.eval, hti, Res.ok_bind, Value.asInt]
-    by_cases hij : i = (j : Int)
-    · rw [if_pos hij]
-      exact ⟨w, hu, by rw [if_pos (by omega)]⟩
-    · rw [if_neg hij]
-      exact ⟨v', hv'.1, by rw [if_neg (by omega), hv'.2]⟩
-  constructor
-  · apply List.ext_getElem
-    · simp only [kwriteL, List.length_map, List.length_mapIdx, List.length_set]
-    · intro j h1 h2
-      have hj : j < es.length := by simpa only [List.length_set, List.length_map] using h2
-      obtain ⟨v, hv, hc⟩ := helem j hj
-      simp only [kwriteL, List.getElem_map, List.getElem_mapIdx, List.getElem_set]
-      rw [SMV.conc_val hv, hc]
-  · intro s hs
-    simp only [kwriteL, List.mem_mapIdx] at hs
-    obtain ⟨j, hj, rfl⟩ := hs
-    obtain ⟨v, hv, -⟩ := helem j hj
-    exact ⟨v, hv⟩
-
-/-- The guard of a write at an index that is no literal returns where it is in range. -/
-theorem kchainL_true {σ : State} {t : LTerm} {i : Int} (hti : t.eval σ = .ok (.int i))
-    (es : List (SMV LTerm)) :
-    (∃ v, (kchainL t 0 (es.map fun _ => .val (.lit (.bool true)))).eval σ = .ok v) ↔
-      (0 ≤ i ∧ i.toNat < es.length) := by
-  rw [kchainL_eval σ hti]
-  have h0 : ((0 : Nat) : Int) = 0 := rfl
-  simp only [h0, Int.sub_zero]
-  by_cases h1 : 0 ≤ i
-  · rw [if_pos h1]
-    by_cases h2 : i.toNat < es.length
-    · rw [List.getElem?_eq_getElem (by simpa only [List.length_map] using h2)]
-      simp only [List.getElem_map, slotT, LTerm.eval]
-      exact ⟨fun _ => ⟨h1, h2⟩, fun _ => ⟨_, rfl⟩⟩
-    · rw [List.getElem?_eq_none (by simp only [List.length_map]; omega)]
-      simp only [reduceCtorEq, exists_false, false_iff]
-      omega
-  · rw [if_neg h1]
-    simp only [reduceCtorEq, exists_false, false_iff]
-    omega
-
-/-- **A write, symbolically and concretely.** -/
-theorem writeL_rel {σ μ : State} {M M' : SMem LTerm}
-    (hM : MemRel (fun t => t.eval σ) σ.nextId M μ) {k : Nat} {sel : MSel} {s : SMV LTerm}
-    {gw : LTerm} (hw : writeL M k sel s = some (M', gw)) (hs : s.Ok (fun t => t.eval σ))
-    {ad : Addr} (ha : AddrOf σ k sel ad) :
-    ((∃ v, gw.eval σ = .ok v) ↔ ∃ μ', writeAddr μ (s.conc (fun t => t.eval σ) σ.nextId) ad = .ok μ') ∧
-    ∀ μ', writeAddr μ (s.conc (fun t => t.eval σ) σ.nextId) ad = .ok μ' →
-      MemRel (fun t => t.eval σ) σ.nextId M' μ' := by
-  unfold writeL at hw
-  cases hk : M[k]? with
-  | none => simp only [hk, reduceCtorEq] at hw
-  | some o =>
-    obtain ⟨hlt, hget⟩ := getElem?_some_lt hk
-    have hobj := hM.obj k hlt
-    have hok := hM.ok o (hget ▸ List.getElem_mem hlt)
-    rw [hget] at hobj
-    cases o with
-    | struct fs =>
-      cases sel with
-      | fld f =>
-        simp only [hk, Option.some.injEq, Prod.mk.injEq] at hw
-        obtain ⟨rfl, rfl⟩ := hw
-        simp only [AddrOf] at ha
-        subst ha
-        obtain ⟨hw1, hrel⟩ := hM.writeField hlt hget f hs
-        refine ⟨⟨fun _ => ⟨_, by simp only [writeAddr]; exact hw1⟩, fun _ => ⟨_, rfl⟩⟩, fun μ' hμ' => ?_⟩
-        simp only [writeAddr, hw1, Except.ok.injEq] at hμ'
-        subst hμ'
-        exact hrel
-      | idx t =>
-        simp only [hk, Option.some.injEq, Prod.mk.injEq] at hw
-        obtain ⟨rfl, rfl⟩ := hw
-        obtain ⟨i, -, rfl⟩ := ha
-        have hbad : ∀ μ', writeAddr μ (s.conc (fun t => t.eval σ) σ.nextId)
-            (.memoryIndex (σ.nextId + k) i) ≠ .ok μ' := by
-          intro μ' h'
-          simp only [writeAddr, memWriteIndex, hobj, SObj.conc, bind, Except.bind,
-            reduceCtorEq] at h'
-        exact ⟨⟨(fun ⟨_, h'⟩ => nomatch h'), fun ⟨μ', h'⟩ => absurd h' (hbad μ')⟩,
-          fun μ' h' => absurd h' (hbad μ')⟩
-    | array es fx =>
-      cases sel with
-      | fld f =>
-        simp only [hk, Option.some.injEq, Prod.mk.injEq] at hw
-        obtain ⟨rfl, rfl⟩ := hw
-        simp only [AddrOf] at ha
-        subst ha
-        have hbad : ∀ μ', writeAddr μ (s.conc (fun t => t.eval σ) σ.nextId)
-            (.memoryField (σ.nextId + k) f) ≠ .ok μ' := by
-          intro μ' h'
-          simp only [writeAddr, memWriteField, hobj, SObj.conc, bind, Except.bind,
-            reduceCtorEq] at h'
-        exact ⟨⟨(fun ⟨_, h'⟩ => nomatch h'), fun ⟨μ', h'⟩ => absurd h' (hbad μ')⟩,
-          fun μ' h' => absurd h' (hbad μ')⟩
-      | idx t =>
-        obtain ⟨i, hti, rfl⟩ := ha
-        simp only [hk] at hw
-        split at hw
-        · rename_i i' hi'
-          rw [LTerm.ground?_eval σ t hi', Except.ok.injEq, PrimVal.int.injEq] at hti
-          subst hti
-          split at hw
-          · rename_i hin
-            simp only [Option.some.injEq, Prod.mk.injEq] at hw
-            obtain ⟨rfl, rfl⟩ := hw
-            obtain ⟨hw1, hrel⟩ := hM.writeIndex hlt hget hin hs
-            refine ⟨⟨fun _ => ⟨_, by simp only [writeAddr]; exact hw1⟩, fun _ => ⟨_, rfl⟩⟩,
-              fun μ' hμ' => ?_⟩
-            simp only [writeAddr, hw1, Except.ok.injEq] at hμ'
-            subst hμ'
-            exact hrel
-          · rename_i hin
-            simp only [Option.some.injEq, Prod.mk.injEq] at hw
-            obtain ⟨rfl, rfl⟩ := hw
-            have hbad := hM.writeIndex_out hlt hget hin (s.conc (fun t => t.eval σ) σ.nextId)
-            refine ⟨⟨(fun ⟨_, h'⟩ => nomatch h'), fun ⟨μ', h'⟩ => ?_⟩, fun μ' h' => ?_⟩ <;>
-              simp only [writeAddr, hbad, reduceCtorEq] at h'
-        · rename_i hng
-          split at hw
-          · rename_i u
-            split at hw
-            · rename_i hval
-              simp only [Option.some.injEq, Prod.mk.injEq] at hw
-              obtain ⟨rfl, rfl⟩ := hw
-              obtain ⟨w, hu⟩ := hs
-              have hes : ∀ e ∈ es, e.Ok (fun t => t.eval σ) := hok
-              rw [kchainL_true hti es, SMV.conc_val hu]
-              by_cases hin : 0 ≤ i ∧ i.toNat < es.length
-              · obtain ⟨hc, hko⟩ := kwriteL_conc (b := σ.nextId) hval hes hti hin.1 hu
-                have hin' : 0 ≤ i ∧ i.toNat < (es.map (SMV.conc (fun t => t.eval σ) σ.nextId)).length := by
-                  simpa only [List.length_map] using hin
-                have hw1 : writeAddr μ w.toMVal (.memoryIndex (σ.nextId + k) i) =
-                    .ok (μ.setObj (σ.nextId + k) ((SObj.array (kwriteL t u es) fx).conc
-                      (fun t => t.eval σ) σ.nextId)) := by
-                  simp only [writeAddr, memWriteIndex, hobj, SObj.conc, bind, Except.bind, if_pos hin', hc]
-                refine ⟨⟨fun _ => ⟨_, hw1⟩, fun _ => hin⟩, fun μ' hμ' => ?_⟩
-                rw [hw1, Except.ok.injEq] at hμ'
-                subst hμ'
-                exact hM.set hlt _ hko
-              · have hbad := hM.writeIndex_out hlt hget hin w.toMVal
-                refine ⟨⟨fun h' => absurd h' hin, fun ⟨μ', h'⟩ => ?_⟩, fun μ' h' => ?_⟩ <;>
-                  simp only [writeAddr, hbad, reduceCtorEq] at h'
-            · cases hw
-          · cases hw
 
 /-- The symbols of a term, the measure the proofs below recurse on. -/
 def _root_.Solidity.Tm.lsize : Tm C s → Nat
@@ -2452,29 +1867,34 @@ def PathOK (C : Contract) (σ τ : State) (ρ : Sym) (n : Nat) : Prop :=
     (∃ rs, p.eval τ = .ok rs ∧ qs = .field rs.1 :: rs.2) ↔
       ((p.toL ρ).eval σ = .ok qs ∧ LiveTo (.struct τ.storage) qs)
 
-/-- An identity, pushed in, is the offset of the object it names. -/
+/-- An identity, pushed in, is a name of the object it denotes, read in the
+births of the updates' memory, and a guard that returns exactly where it
+does. -/
 def IdOK (C : Contract) (σ τ : State) (ρ : Sym) (n : Nat) : Prop :=
-  ∀ i : ITerm C, i.lsize < n → i.inL ρ = true → ∃ k g, i.toL ρ = some (k, g) ∧
-    ∀ id, i.eval τ = .ok id ↔ (id = σ.nextId + k ∧ ∃ v, g.eval σ = .ok v)
+  ∀ i : ITerm C, i.lsize < n → i.inL ρ = true → ∃ j g, i.toL ρ = some (j, g) ∧
+    (Rets (g.eval σ) → ∃ id, i.eval τ = .ok id) ∧
+    ∀ id, i.eval τ = .ok id → Rets (g.eval σ) ∧ LId.evalR (ρ.mem.births σ) j = .ok id
 
-/-- An address, pushed in, is the object and what selects in it. -/
+/-- An address, pushed in, is the name of the object and what selects in it. -/
 def AddrOK (C : Contract) (σ τ : State) (ρ : Sym) (n : Nat) : Prop :=
-  ∀ a : MAddr C, a.lsize < n → a.inL ρ = true → ∃ k sel g, a.toL ρ = some (k, sel, g) ∧
-    ((∃ v, g.eval σ = .ok v) → ∃ ad, a.eval τ = .ok ad) ∧
-    ∀ ad, a.eval τ = .ok ad → (∃ v, g.eval σ = .ok v) ∧ AddrOf σ k sel ad
+  ∀ a : MAddr C, a.lsize < n → a.inL ρ = true → ∃ j sel g, a.toL ρ = some (j, sel, g) ∧
+    (Rets (g.eval σ) → ∃ ad, a.eval τ = .ok ad) ∧
+    ∀ ad, a.eval τ = .ok ad → Rets (g.eval σ) ∧
+      ∃ n, LId.evalR (ρ.mem.births σ) j = .ok n ∧ sel.addr σ n = .ok ad
 
-/-- A memory, pushed in, is the objects after it. -/
+/-- A memory, pushed in, runs to the heap the term leaves, allocating after
+the updates' memory. -/
 def MemOK (C : Contract) (σ τ : State) (ρ : Sym) (n : Nat) : Prop :=
   ∀ m : MTerm C, m.lsize < n → m.inL ρ = true → ∃ M g, m.toL ρ = some (M, g) ∧
-    ((∃ v, g.eval σ = .ok v) → ∃ μ, m.eval τ = .ok μ) ∧
-    ∀ μ, m.eval τ = .ok μ → (∃ v, g.eval σ = .ok v) ∧ MemRel (fun t => t.eval σ) σ.nextId M μ
+    (Rets (g.eval σ) → ∃ μ', m.eval τ = .ok μ') ∧
+    ∀ μ', m.eval τ = .ok μ' → Rets (g.eval σ) ∧
+      ∃ μ B, M.run σ = .ok (μ, B) ∧ μ.HeapEq μ' ∧ ρ.mem.births σ <+: B
 
-/-- A memory value, pushed in, is the slot it writes. -/
+/-- A memory value, pushed in, is what the slot it writes holds. -/
 def MValOK (C : Contract) (σ τ : State) (ρ : Sym) (n : Nat) : Prop :=
-  ∀ v : MValT C, v.lsize < n → v.inL ρ = true → ∃ s g, v.toL ρ = some (s, g) ∧
-    ((∃ w, g.eval σ = .ok w) → s.Ok (fun t => t.eval σ)) ∧
-    ∀ mv, v.eval τ = .ok mv ↔ ((∃ w, g.eval σ = .ok w) ∧ s.Ok (fun t => t.eval σ) ∧
-      mv = s.conc (fun t => t.eval σ) σ.nextId)
+  ∀ v : MValT C, v.lsize < n → v.inL ρ = true → ∃ w g, v.toL ρ = some (w, g) ∧
+    (Rets (g.eval σ) → ∃ mv, v.eval τ = .ok mv) ∧
+    ∀ mv, v.eval τ = .ok mv → Rets (g.eval σ) ∧ w.eval σ (ρ.mem.births σ) = .ok mv
 
 section
 variable {σ τ : State} {ρ : Sym}
@@ -2502,16 +1922,16 @@ theorem Term.toL_step (h : Rel σ ρ τ) {n : Nat}
     · obtain ⟨r, segs, _, h₂, _⟩ := hx; rw [h₂]; rfl
     · obtain ⟨r, segs, h₂⟩ := hx; rw [h₂]; rfl
     · obtain ⟨st, -, h₂⟩ := hx; rw [h₂]; rfl
-    · rw [hx]; rfl
+    · obtain ⟨n', -, h₂⟩ := hx; rw [h₂]; rfl
   | .binop op p a b, hn, hf => by
     simp only [Tm.inL, Op2.inL, Bool.and_eq_true] at hf
     rw [Close.Term.eval_binop]
-    simp only [Tm.toL, Op2.toLAt, Op2.toL, LTerm.eval]
+    simp only [Tm.toL, Op2.toLAt, Op2.toL, LTerm.mkBin_eval, LTerm.eval]
     exact Sim.bind (hT a (by lsize_tac) hf.1) fun _ => evalBinop_sim (hT b (by lsize_tac) hf.2)
   | .unop op p a, hn, hf => by
     simp only [Tm.inL, Op1.inL] at hf
     rw [Close.Term.eval_unop]
-    simp only [Tm.toL, Op1.toL, LTerm.eval]
+    simp only [Tm.toL, Op1.toL, LTerm.mkUn_eval, LTerm.eval]
     exact Sim.bind (hT a (by lsize_tac) hf) fun _ => Sim.refl _
   | .find s p, hn, hf => by
     simp only [Tm.inL, Op2.inL, Bool.and_eq_true, Bool.or_eq_true] at hf
@@ -2575,17 +1995,17 @@ theorem Term.toL_step (h : Rel σ ρ τ) {n : Nat}
   | .ite c a b, hn, hf => by
     simp only [Tm.inL, Op3.inL, Bool.and_eq_true] at hf
     rw [Close.Term.eval_ite]
-    simp only [Tm.toL, Op3.toL, LTerm.eval]
+    simp only [Tm.toL, Op3.toLAt, Op3.toL, LTerm.eval]
     exact Sim.bind (hT c (by lsize_tac) hf.1.1) fun _ =>
       pickBranch_sim (hT a (by lsize_tac) hf.1.2) (hT b (by lsize_tac) hf.2)
   | .read m a, hn, hf => by
     simp only [Tm.inL, Op2.inL, Bool.and_eq_true] at hf
     obtain ⟨⟨hm, ha⟩, hr⟩ := hf
     obtain ⟨M, g, hM, hmr, hme⟩ := hM m (by lsize_tac) hm
-    obtain ⟨k, sel, g', hA, har, hae⟩ := hA a (by lsize_tac) ha
-    simp only [hM, hA, readOk] at hr
+    obtain ⟨j, sel, g', hA, har, hae⟩ := hA a (by lsize_tac) ha
+    simp only [hM, hA, readM, Option.isSome_map] at hr
     obtain ⟨r, hrr⟩ := Option.isSome_iff_exists.1 hr
-    simp only [Tm.toL, Op2.toLAt, Op2.toL, hM, hA, hrr]
+    simp only [Tm.toL, Op2.toLAt, Op2.toL, hM, hA, readM, hrr, Option.map_some, Option.getD_some]
     rw [Close.Term.eval_read]
     intro w
     rw [seqL_eval, seqL_eval]
@@ -2593,27 +2013,31 @@ theorem Term.toL_step (h : Rel σ ρ τ) {n : Nat}
     · intro hw
       obtain ⟨_, hg, hw⟩ := Res.bind_eq_ok.1 hw
       obtain ⟨_, hg', hw⟩ := Res.bind_eq_ok.1 hw
-      obtain ⟨μ, hμ⟩ := hmr ⟨_, hg⟩
-      obtain ⟨-, hrel⟩ := hme μ hμ
+      obtain ⟨μ', hμ'⟩ := hmr ⟨_, hg⟩
+      obtain ⟨-, μ, B, hrun, hh, hp⟩ := hme μ' hμ'
       obtain ⟨ad, had⟩ := har ⟨_, hg'⟩
-      obtain ⟨-, hao⟩ := hae ad had
-      rw [hμ, Res.ok_bind, had, Res.ok_bind]
-      exact (readL_sim hrel hrr hao w).1 hw
+      obtain ⟨-, n0, hn0, hsa⟩ := hae ad had
+      have hs := LMem.readT_sim σ M j sel hrun hrr w
+      rw [LId.evalR_prefix hp hn0, Res.ok_bind, LSel.read_of_addr hsa, readAddr_of_heap hh.1] at hs
+      rw [hμ', Res.ok_bind, had, Res.ok_bind]
+      exact hs.1 hw
     · intro hw
-      obtain ⟨μ, hμ, hw⟩ := Res.bind_eq_ok.1 hw
+      obtain ⟨μ', hμ', hw⟩ := Res.bind_eq_ok.1 hw
       obtain ⟨ad, had, hw⟩ := Res.bind_eq_ok.1 hw
-      obtain ⟨⟨_, hg⟩, hrel⟩ := hme μ hμ
-      obtain ⟨⟨_, hg'⟩, hao⟩ := hae ad had
+      obtain ⟨⟨_, hg⟩, μ, B, hrun, hh, hp⟩ := hme μ' hμ'
+      obtain ⟨⟨_, hg'⟩, n0, hn0, hsa⟩ := hae ad had
+      have hs := LMem.readT_sim σ M j sel hrun hrr w
+      rw [LId.evalR_prefix hp hn0, Res.ok_bind, LSel.read_of_addr hsa, readAddr_of_heap hh.1] at hs
       rw [hg, Res.ok_bind, hg', Res.ok_bind]
-      exact (readL_sim hrel hrr hao w).2 hw
+      exact hs.2 hw
   | .app2 .mlen m i, hn, hf => by
     simp only [Tm.inL, Op2.inL, Bool.and_eq_true] at hf
     obtain ⟨⟨hm, hi⟩, hr⟩ := hf
     obtain ⟨M, g, hM, hmr, hme⟩ := hM m (by lsize_tac) hm
-    obtain ⟨k, g', hI, hie⟩ := hI i (by lsize_tac) hi
-    simp only [hM, hI, mlenOk] at hr
+    obtain ⟨j, g', hI, hir, hie⟩ := hI i (by lsize_tac) hi
+    simp only [hM, hI, lenM, Option.isSome_map] at hr
     obtain ⟨r, hrr⟩ := Option.isSome_iff_exists.1 hr
-    simp only [Tm.toL, Op2.toLAt, Op2.toL, hM, hI, hrr]
+    simp only [Tm.toL, Op2.toLAt, Op2.toL, hM, hI, lenM, hrr, Option.map_some, Option.getD_some]
     intro w
     rw [seqL_eval, seqL_eval]
     simp only [tm_eval]
@@ -2621,18 +2045,25 @@ theorem Term.toL_step (h : Rel σ ρ τ) {n : Nat}
     · intro hw
       obtain ⟨_, hg, hw⟩ := Res.bind_eq_ok.1 hw
       obtain ⟨_, hg', hw⟩ := Res.bind_eq_ok.1 hw
-      obtain ⟨μ, hμ⟩ := hmr ⟨_, hg⟩
-      obtain ⟨-, hrel⟩ := hme μ hμ
-      have hid := (hie _).2 ⟨rfl, _, hg'⟩
-      rw [hμ, Res.ok_bind, hid, Res.ok_bind]
-      exact (mlenL_sim hrel hrr w).1 hw
+      obtain ⟨μ', hμ'⟩ := hmr ⟨_, hg⟩
+      obtain ⟨-, μ, B, hrun, hh, hp⟩ := hme μ' hμ'
+      obtain ⟨id, hid⟩ := hir ⟨_, hg'⟩
+      obtain ⟨-, hj⟩ := hie id hid
+      have hs := LMem.readT_sim σ M j .size hrun hrr w
+      rw [LId.evalR_prefix hp hj, Res.ok_bind] at hs
+      simp only [LSel.read, memArrayLen_of_heap hh.1] at hs
+      rw [hμ', Res.ok_bind, hid, Res.ok_bind]
+      exact hs.1 hw
     · intro hw
-      obtain ⟨μ, hμ, hw⟩ := Res.bind_eq_ok.1 hw
+      obtain ⟨μ', hμ', hw⟩ := Res.bind_eq_ok.1 hw
       obtain ⟨id, hid, hw⟩ := Res.bind_eq_ok.1 hw
-      obtain ⟨⟨_, hg⟩, hrel⟩ := hme μ hμ
-      obtain ⟨rfl, _, hg'⟩ := (hie id).1 hid
+      obtain ⟨⟨_, hg⟩, μ, B, hrun, hh, hp⟩ := hme μ' hμ'
+      obtain ⟨⟨_, hg'⟩, hj⟩ := hie id hid
+      have hs := LMem.readT_sim σ M j .size hrun hrr w
+      rw [LId.evalR_prefix hp hj, Res.ok_bind] at hs
+      simp only [LSel.read, memArrayLen_of_heap hh.1] at hs
       rw [hg, Res.ok_bind, hg', Res.ok_bind]
-      exact (mlenL_sim hrel hrr w).2 hw
+      exact hs.2 hw
   | .net _, _, hf | .netOf _ _, _, hf => by
     simp only [Tm.inL, Bool.false_eq_true, Op1.inL] at hf
 
@@ -2730,261 +2161,331 @@ theorem PTerm.toL_step (h : Rel σ ρ τ) {n : Nat}
   | .nextIn _ _, hn, hf, _ => by simp only [Tm.inL, Op2.inL, Bool.false_eq_true] at hf
   | .atIn _ _ _, hn, hf, _ => by simp only [Tm.inL, Op3.inL, Bool.false_eq_true] at hf
 
-/-- **An identity, pushed in**: the offset of the object the term names,
-and a guard that returns exactly where the term does. -/
+theorem addMOf?_some {m : MTerm C} {R : RefTy} (h : addMOf? m = some R) :
+    m = .app1 (.addM R) (.app0 .memory) := by
+  unfold addMOf? at h
+  split at h
+  · cases h; rfl
+  · cases h
+
+theorem allocRefOf?_some {v : MValT C} {R : RefTy} (h : allocRefOf? v = some R) :
+    v = .app1 .ref (.app1 (.alloc R) (.app0 .memory)) := by
+  unfold allocRefOf? at h
+  split at h
+  · cases h; rfl
+  · cases h
+
+/-- The value of a write is its own, or the root a `delete` allocates. -/
+theorem freshRef_cases (ρ : Sym) (m : MTerm C) (v : MValT C) :
+    (∀ z, freshRef ρ m v z = z) ∨ ∃ R, m = .app1 (.addM R) (.app0 .memory) ∧
+      v = .app1 .ref (.app1 (.alloc R) (.app0 .memory)) ∧
+      ∀ z, freshRef ρ m v z = some (.ref ⟨ρ.mem.nAlloc, []⟩, .lit (.bool true)) := by
+  cases hm : addMOf? m with
+  | none => exact Or.inl fun _ => by simp only [freshRef, hm]
+  | some R =>
+    cases hv : allocRefOf? v with
+    | none => exact Or.inl fun _ => by simp only [freshRef, hm, hv]
+    | some R' =>
+      by_cases hR : R = R'
+      · subst hR
+        exact Or.inr ⟨R, addMOf?_some hm, allocRefOf?_some hv,
+          fun _ => by simp only [freshRef, hm, hv, ↓reduceIte]⟩
+      · exact Or.inl fun _ => by simp only [freshRef, hm, hv, hR, ↓reduceIte]
+
+/-- **An identity, pushed in**: a name of the object the term denotes, and
+a guard that returns exactly where the term does.  A reference slot read is
+the name `LMem.readI` finds, of an object the updates' memory has
+(`irOk`). -/
 theorem ITerm.toL_step (h : Rel σ ρ τ) {n : Nat}
-    (hT : TermOK C σ τ ρ n) (_hP : PathOK C σ τ ρ n) (_hI : IdOK C σ τ ρ n)
+    (_hT : TermOK C σ τ ρ n) (_hP : PathOK C σ τ ρ n) (_hI : IdOK C σ τ ρ n)
     (hA : AddrOK C σ τ ρ n) (hM : MemOK C σ τ ρ n) (_hV : MValOK C σ τ ρ n) :
     IdOK C σ τ ρ (n + 1) := fun i hn hf => match i, hn, hf with
   | .pvI x, hn, hf => by
     have hx := h.env x
     simp only [Tm.inL] at hf
     split at hf
-    · rename_i k hl
+    · rename_i j hl
       rw [hl] at hx
-      simp only [EnvRel] at hx
-      refine ⟨k, .lit (.bool true), by simp only [Tm.toL, hl], fun id => ?_⟩
-      rw [Close.ITerm.eval_pv, hx]
-      simp only [Res.ok_bind, Close.bindingRef_mref, Except.ok.injEq, LTerm.eval]
-      exact ⟨fun h => ⟨h.symm, _, rfl⟩, fun h => h.1.symm⟩
+      obtain ⟨n', hn', he⟩ := hx
+      refine ⟨j, .lit (.bool true), by simp only [Tm.toL, hl], fun _ => ⟨n', ?_⟩,
+        fun id hid => ?_⟩
+      · rw [Close.ITerm.eval_pv, he]; rfl
+      · rw [Close.ITerm.eval_pv, he] at hid
+        simp only [Res.ok_bind, Close.bindingRef_mref, Except.ok.injEq] at hid
+        subst hid
+        exact ⟨⟨_, rfl⟩, hn'⟩
     · cases hf
-  | .app1 (.alloc R) m, hn, hf => by
-    simp only [Tm.inL, Op1.inL, Bool.and_eq_true] at hf
-    obtain ⟨hm, hs⟩ := hf
-    obtain ⟨M, g, hM, hmr, hme⟩ := hM m (by lsize_tac) hm
-    simp only [hM, Op1.toL, Option.bind_some, Option.isSome_map] at hs
-    obtain ⟨⟨M', k⟩, hk⟩ := Option.isSome_iff_exists.1 hs
-    refine ⟨k, g, by simp only [Tm.toL, Op1.toL, hM, Option.bind_some, hk, Option.map_some],
-      fun id => ?_⟩
-    rw [Close.ITerm.eval_alloc]
-    constructor
-    · intro hid
-      obtain ⟨μ, hμ, hid⟩ := Res.bind_eq_ok.1 hid
-      obtain ⟨hg, hrel⟩ := hme μ hμ
-      obtain ⟨μ', ha, -⟩ := sallocR_rel (ev := fun t : LTerm => t.eval σ) (lit := LTerm.lit) (fun _ => rfl) hrel hk
-      rw [ha] at hid
-      cases hid
-      exact ⟨rfl, hg⟩
-    · rintro ⟨rfl, hg⟩
-      obtain ⟨μ, hμ⟩ := hmr hg
-      obtain ⟨-, hrel⟩ := hme μ hμ
-      obtain ⟨μ', ha, -⟩ := sallocR_rel (ev := fun t : LTerm => t.eval σ) (lit := LTerm.lit) (fun _ => rfl) hrel hk
-      rw [hμ, Res.ok_bind, ha]
-      rfl
+  | .app1 (.alloc _) _, hn, hf => by simp only [Tm.inL, Op1.inL, Bool.false_eq_true] at hf
+  | .app2 .copy _ _, hn, hf => by simp only [Tm.inL, Op2.inL, Bool.false_eq_true] at hf
   | .app2 .iread m a, hn, hf => by
     simp only [Tm.inL, Op2.inL, Bool.and_eq_true] at hf
     obtain ⟨⟨hm, ha⟩, hs⟩ := hf
     obtain ⟨M, g, hM, hmr, hme⟩ := hM m (by lsize_tac) hm
-    obtain ⟨k, sel, g', hA, har, hae⟩ := hA a (by lsize_tac) ha
-    simp only [hM, hA, Op2.toL, Option.isSome_map] at hs
-    obtain ⟨k', hk⟩ := Option.isSome_iff_exists.1 hs
-    refine ⟨k', seqL g g', by simp only [Tm.toL, Op2.toLAt, Op2.toL, hM, hA, hk, Option.map_some],
-      fun id => ?_⟩
-    rw [Close.ITerm.eval_read, seqL_eval]
-    constructor
-    · intro hid
-      obtain ⟨μ, hμ, hid⟩ := Res.bind_eq_ok.1 hid
-      obtain ⟨ad, had, hid⟩ := Res.bind_eq_ok.1 hid
-      obtain ⟨⟨_, hg⟩, hrel⟩ := hme μ hμ
-      obtain ⟨⟨_, hg'⟩, hao⟩ := hae ad had
-      rw [ireadL_eq hrel hk hao] at hid
-      cases hid
-      exact ⟨rfl, _, by rw [hg, Res.ok_bind, hg']⟩
-    · rintro ⟨rfl, _, hgg⟩
-      obtain ⟨_, hg, hg'⟩ := Res.bind_eq_ok.1 hgg
-      obtain ⟨μ, hμ⟩ := hmr ⟨_, hg⟩
-      obtain ⟨-, hrel⟩ := hme μ hμ
-      obtain ⟨ad, had⟩ := har ⟨_, hg'⟩
-      obtain ⟨-, hao⟩ := hae ad had
-      rw [hμ, Res.ok_bind, had, Res.ok_bind, ireadL_eq hrel hk hao]
-  | .app2 .copy m v, hn, hf => by
-    simp only [Tm.inL, Op2.inL, Bool.and_eq_true] at hf
-    obtain ⟨⟨hm, hv⟩, hs⟩ := hf
-    obtain ⟨M, g, hMm, hmr, hme⟩ := hM m (by lsize_tac) hm
-    match v, hv, hs with
-    | .app1 .sval _, _, hs | .app2 .copyMem _ _, _, hs | .app2 .sfind _ _, _, hs =>
-      simp only [Tm.toL, Op1.toL, Op2.toLAt, Op2.toL, hMm, Option.isSome_none,
-        Bool.false_eq_true] at hs
-    | .app1 (.newArr R) nt, hv, hs =>
-      simp only [Tm.inL, Op1.inL] at hv
-      have hnt := hT nt (by lsize_tac) hv
-      simp only [Tm.toL, Op1.toL, Op2.toL, hMm] at hs
-      split at hs
-      · rename_i c hgr
-        rw [Option.isSome_map] at hs
-        obtain ⟨⟨M', k⟩, hk⟩ := Option.isSome_iff_exists.1 hs
-        have hc : nt.eval τ = .ok (.int c) := (hnt _).1 (LTerm.ground?_eval σ _ hgr)
-        have hv' : (Tm.app1 (Op1.newArr R) nt).eval τ = .ok (newArrVal R c) := by
-          simp only [Tm.eval, Op1.eval, hc, bind, Except.bind, Value.asInt, pure, Except.pure]
-        refine ⟨k, g, by simp only [Tm.toL, Op2.toLAt, Op2.toL, Op1.toL, hMm, hgr, hk,
-          Option.map_some], fun id => ?_⟩
-        rw [Close.ITerm.eval_copy, hv', Res.ok_bind]
-        constructor
-        · intro hid
-          obtain ⟨μ, hμ, hid⟩ := Res.bind_eq_ok.1 hid
-          obtain ⟨hg, hrel⟩ := hme μ hμ
-          obtain ⟨μ', ha, -⟩ := sallocNew_rel (ev := fun t : LTerm => t.eval σ) (lit := LTerm.lit)
-            (fun _ => rfl) hrel hk
-          rw [ha] at hid
-          cases hid
-          exact ⟨rfl, hg⟩
-        · rintro ⟨rfl, hg⟩
-          obtain ⟨μ, hμ⟩ := hmr hg
-          obtain ⟨-, hrel⟩ := hme μ hμ
-          obtain ⟨μ', ha, -⟩ := sallocNew_rel (ev := fun t : LTerm => t.eval σ) (lit := LTerm.lit)
-            (fun _ => rfl) hrel hk
-          rw [hμ, Res.ok_bind, ha]
-          rfl
-      · simp only [Option.isSome_none, Bool.false_eq_true] at hs
+    obtain ⟨j, sel, g', hA, har, hae⟩ := hA a (by lsize_tac) ha
+    simp only [hM, hA, ireadM] at hs
+    cases hj' : M.readI j sel with
+    | none => simp only [hj', Option.bind_none, irOk, Bool.false_eq_true] at hs
+    | some j' =>
+      cases hng : M.nameG j' with
+      | none =>
+        simp only [hj', hng, Option.bind_some, Option.map_none, irOk, Bool.false_eq_true] at hs
+      | some ng =>
+        simp only [hj', hng, Option.bind_some, Option.map_some, irOk, decide_eq_true_eq] at hs
+        refine ⟨j', seqL g (seqL g' ng), by
+          simp only [Tm.toL, Op2.toLAt, Op2.toL, hM, hA, ireadM, hj', hng, Option.bind_some,
+            Option.map_some], fun hgg => ?_, fun id hid => ?_⟩
+        · obtain ⟨hg, hgg⟩ := (seqL_rets σ _ _).1 hgg
+          obtain ⟨hg', hng'⟩ := (seqL_rets σ _ _).1 hgg
+          obtain ⟨μ', hμ'⟩ := hmr hg
+          obtain ⟨-, μ, B, hrun, hh, hp⟩ := hme μ' hμ'
+          obtain ⟨ad, had⟩ := har hg'
+          obtain ⟨-, n0, hn0, hsa⟩ := hae ad had
+          obtain ⟨id, hid⟩ := (LMem.nameG_sim σ M j' hrun hng).1 hng'
+          have hs' := (LMem.readI_sim σ M j sel hrun hj').2 id
+          rw [LId.evalR_prefix hp hn0, Res.ok_bind, LSel.iread_of_addr hsa,
+            readAddr_of_heap hh.1] at hs'
+          refine ⟨id, ?_⟩
+          rw [Close.ITerm.eval_read, hμ', Res.ok_bind, had, Res.ok_bind]
+          exact hs'.1 hid
+        · rw [Close.ITerm.eval_read] at hid
+          obtain ⟨μ', hμ', hid⟩ := Res.bind_eq_ok.1 hid
+          obtain ⟨ad, had, hid⟩ := Res.bind_eq_ok.1 hid
+          obtain ⟨hg, μ, B, hrun, hh, hp⟩ := hme μ' hμ'
+          obtain ⟨hg', n0, hn0, hsa⟩ := hae ad had
+          have hs' := (LMem.readI_sim σ M j sel hrun hj').2 id
+          rw [LId.evalR_prefix hp hn0, Res.ok_bind, LSel.iread_of_addr hsa,
+            readAddr_of_heap hh.1] at hs'
+          have hB : LId.evalR B j' = .ok id := hs'.2 hid
+          refine ⟨(seqL_rets σ _ _).2 ⟨hg, (seqL_rets σ _ _).2
+            ⟨hg', (LMem.nameG_sim σ M j' hrun hng).2 ⟨id, hB⟩⟩⟩, ?_⟩
+          exact LId.evalR_prefix_lt hp (by rw [h.births_length]; exact hs) hB
 
-/-- **An address, pushed in**: the object and what selects in it. -/
+/-- **An address, pushed in**: the name and what selects in it. -/
 theorem MAddr.toL_step (_h : Rel σ ρ τ) {n : Nat}
     (hT : TermOK C σ τ ρ n) (_hP : PathOK C σ τ ρ n) (hI : IdOK C σ τ ρ n)
     (_hA : AddrOK C σ τ ρ n) (_hM : MemOK C σ τ ρ n) (_hV : MValOK C σ τ ρ n) :
     AddrOK C σ τ ρ (n + 1) := fun a hn hf => match a, hn, hf with
   | .app1 (.mfield f) i, hn, hf => by
     simp only [Tm.inL, Op1.inL] at hf
-    obtain ⟨k, g, hI, hie⟩ := hI i (by lsize_tac) hf
-    refine ⟨k, .fld f, g, by simp only [Tm.toL, Op1.toL, hI, Option.map_some], fun hg => ?_,
+    obtain ⟨j, g, hI, hir, hie⟩ := hI i (by lsize_tac) hf
+    refine ⟨j, .fld f, g, by simp only [Tm.toL, Op1.toL, hI, Option.map_some], fun hg => ?_,
       fun ad had => ?_⟩
-    · exact ⟨_, by rw [Close.MAddr.eval_field, (hie _).2 ⟨rfl, hg⟩, Res.ok_bind]⟩
+    · obtain ⟨id, hid⟩ := hir hg
+      exact ⟨_, by rw [Close.MAddr.eval_field, hid, Res.ok_bind]⟩
     · rw [Close.MAddr.eval_field] at had
       obtain ⟨id, hid, had⟩ := Res.bind_eq_ok.1 had
-      obtain ⟨rfl, hg⟩ := (hie id).1 hid
+      obtain ⟨hg, hj⟩ := hie id hid
       cases had
-      exact ⟨hg, rfl⟩
+      exact ⟨hg, id, hj, rfl⟩
   | .app2 .mat i t, hn, hf => by
     simp only [Tm.inL, Op2.inL, Bool.and_eq_true] at hf
-    obtain ⟨k, g, hI, hie⟩ := hI i (by lsize_tac) hf.1
+    obtain ⟨j, g, hI, hir, hie⟩ := hI i (by lsize_tac) hf.1
     have ht := hT t (by lsize_tac) hf.2
-    refine ⟨k, .idx (t.toL ρ), seqL g (isIntL (t.toL ρ)),
-      by simp only [Tm.toL, Op2.toLAt, Op2.toL, hI, Option.map_some], fun ⟨w, hw⟩ => ?_,
+    refine ⟨j, .idx (t.toL ρ), seqL g (isIntL (t.toL ρ)),
+      by simp only [Tm.toL, Op2.toLAt, Op2.toL, hI, Option.map_some], fun hw => ?_,
       fun ad had => ?_⟩
-    · rw [seqL_eval] at hw
-      obtain ⟨_, hg, hi⟩ := Res.bind_eq_ok.1 hw
-      obtain ⟨j, hj⟩ := (isIntL_ret σ _).1 ⟨_, hi⟩
-      refine ⟨.memoryIndex (σ.nextId + k) j, ?_⟩
-      rw [Close.MAddr.eval_at, (hie _).2 ⟨rfl, _, hg⟩, Res.ok_bind, (ht _).1 hj]
-      rfl
+    · obtain ⟨hg, hi⟩ := (seqL_rets σ _ _).1 hw
+      obtain ⟨k, hk⟩ := (isIntL_ret σ _).1 hi
+      obtain ⟨id, hid⟩ := hir hg
+      exact ⟨.memoryIndex id k, by rw [Close.MAddr.eval_at, hid, Res.ok_bind, (ht _).1 hk]; rfl⟩
     · rw [Close.MAddr.eval_at] at had
       obtain ⟨id, hid, had⟩ := Res.bind_eq_ok.1 had
-      obtain ⟨rfl, _, hg⟩ := (hie id).1 hid
-      obtain ⟨j, hj, had⟩ := Res.bind_eq_ok.1 had
-      obtain ⟨w, hw, hj⟩ := Res.bind_eq_ok.1 hj
+      obtain ⟨hg, hj⟩ := hie id hid
+      obtain ⟨k, hk, had⟩ := Res.bind_eq_ok.1 had
+      obtain ⟨w, hw, hk⟩ := Res.bind_eq_ok.1 hk
       cases w with
-      | bool b => cases hj
-      | int j' =>
-        cases hj
+      | bool b => cases hk
+      | int k' =>
+        cases hk
         cases had
         have hw' := (ht _).2 hw
-        obtain ⟨_, hi⟩ := (isIntL_ret σ _).2 ⟨_, hw'⟩
-        exact ⟨⟨_, by rw [seqL_eval, hg, Res.ok_bind, hi]⟩, j, hw', rfl⟩
+        refine ⟨(seqL_rets σ _ _).2 ⟨hg, (isIntL_ret σ _).2 ⟨_, hw'⟩⟩, id, hj, ?_⟩
+        simp only [LSel.addr, hw', Res.ok_bind, Value.asInt]
 
-/-- **A memory, pushed in**: the objects after it, and a guard that
-returns exactly where the term does. -/
+/-- The value a write writes, in every run of its memory that allocates
+after the updates': a value of the fragment, or the root a `delete`
+allocates under the write (`freshRef`). -/
+theorem writeVal_ok (h : Rel σ ρ τ) {n : Nat} (hV : MValOK C σ τ ρ n) {m : MTerm C}
+    {v : MValT C} (hvn : v.lsize < n) {M : LMem} {g : LTerm} (hM : m.toL ρ = some (M, g))
+    (hv : (v.inL ρ || (freshRef ρ m v none).isSome) = true) :
+    ∃ w gv, freshRef ρ m v (v.toL ρ) = some (w, gv) ∧
+      (Rets (gv.eval σ) → ∃ mv, v.eval τ = .ok mv) ∧
+      ∀ mv, v.eval τ = .ok mv → Rets (gv.eval σ) ∧
+        ∀ μ B, M.run σ = .ok (μ, B) → ρ.mem.births σ <+: B → w.eval σ B = .ok mv := by
+  rcases freshRef_cases ρ m v with hz | ⟨R, rfl, rfl, hfr⟩
+  · rw [hz none, Option.isSome_none, Bool.or_false] at hv
+    obtain ⟨w, gv, hw, hvr, hve⟩ := hV v hvn hv
+    refine ⟨w, gv, by rw [hz, hw], hvr, fun mv hmv => ?_⟩
+    obtain ⟨hg, hwe⟩ := hve mv hmv
+    exact ⟨hg, fun _ _ _ hp => LMV.eval_prefix hp hwe⟩
+  · simp only [Tm.toL, Op1.toL, Op0.toL, Option.bind_some] at hM
+    split at hM
+    · rename_i hR
+      simp only [Option.some.injEq, Prod.mk.injEq] at hM
+      obtain ⟨rfl, -⟩ := hM
+      have hve : ∀ mv, (MValT.ref (ITerm.alloc .memory R) : MValT C).eval τ = .ok mv ↔
+          ∃ τ₁ id, allocDefault τ R = .ok (τ₁, id) ∧ mv = .ref id := by
+        intro mv
+        rw [Close.MValT.eval_ref, Close.ITerm.eval_alloc, Close.MTerm.eval_memory, Res.ok_bind]
+        constructor
+        · intro hmv
+          obtain ⟨id, hid, hmv⟩ := Res.bind_eq_ok.1 hmv
+          obtain ⟨r, hr, hid⟩ := Res.bind_eq_ok.1 hid
+          cases hid; cases hmv
+          exact ⟨r.1, r.2, hr, rfl⟩
+        · rintro ⟨τ₁, id, hr, rfl⟩
+          rw [hr]; rfl
+      refine ⟨_, _, hfr _, fun _ => ?_, fun mv hmv => ⟨⟨_, rfl⟩, fun μ B hrun _ => ?_⟩⟩
+      · obtain ⟨τ₁, id, hr⟩ := allocDefault_ok hR τ
+        exact ⟨_, (hve _).2 ⟨τ₁, id, hr, rfl⟩⟩
+      · obtain ⟨τ₁, id, hr, rfl⟩ := (hve mv).1 hmv
+        obtain ⟨μ₀, B₀, id₀, hr₀, hk, hc, rfl⟩ := LMem.run_addM hrun
+        obtain ⟨μ₁, B₁, hr₁, hh⟩ := h.mem
+        rw [hr₁, Except.ok.injEq, Prod.mk.injEq] at hr₀
+        obtain ⟨rfl, rfl⟩ := hr₀
+        rcases (allocDefault_heap hh R).cases with ⟨e, h₁, -⟩ | ⟨t₁, t₂, id', h₁, h₂, -⟩
+        · rw [allocDefault_of_copy hc] at h₁; cases h₁
+        · rw [allocDefault_of_copy hc, Except.ok.injEq, Prod.mk.injEq] at h₁
+          rw [hr, Except.ok.injEq, Prod.mk.injEq] at h₂
+          obtain ⟨-, rfl⟩ := h₁
+          obtain ⟨-, rfl⟩ := h₂
+          simp only [LMV.eval]
+          rw [evalR_last _ _ hk]
+          rfl
+    · cases hM
+
+/-- **A memory, pushed in**: the writes and allocations, run to the heap the
+term leaves, and a guard that returns exactly where the term does. -/
 theorem MTerm.toL_step (h : Rel σ ρ τ) {n : Nat}
     (hT : TermOK C σ τ ρ n) (_hP : PathOK C σ τ ρ n) (_hI : IdOK C σ τ ρ n)
     (hA : AddrOK C σ τ ρ n) (hM : MemOK C σ τ ρ n) (hV : MValOK C σ τ ρ n) :
     MemOK C σ τ ρ (n + 1) := fun m hn hf => match m, hn, hf with
   | .app0 .memory, hn, _ => by
-    refine ⟨ρ.mem, .lit (.bool true), rfl, fun _ => ⟨τ, rfl⟩, fun μ hμ => ?_⟩
-    cases hμ
-    exact ⟨⟨_, rfl⟩, h.mem⟩
+    obtain ⟨μ, B, hr, hh⟩ := h.mem
+    refine ⟨ρ.mem, .lit (.bool true), rfl, fun _ => ⟨τ, rfl⟩, fun μ' hμ' => ?_⟩
+    cases hμ'
+    exact ⟨⟨_, rfl⟩, μ, B, hr, hh, by rw [LMem.births_of_run hr]; exact List.prefix_refl B⟩
   | .app1 (.addM R) m, hn, hf => by
     simp only [Tm.inL, Op1.inL, Bool.and_eq_true] at hf
     obtain ⟨hm, hs⟩ := hf
     obtain ⟨M, g, hM, hmr, hme⟩ := hM m (by lsize_tac) hm
-    simp only [hM, Op1.toL, Option.bind_some, Option.isSome_map] at hs
-    obtain ⟨⟨M', k⟩, hk⟩ := Option.isSome_iff_exists.1 hs
-    refine ⟨M', g, by simp only [Tm.toL, Op1.toL, hM, Option.bind_some, hk, Option.map_some],
-      fun hg => ?_, fun μ' hμ' => ?_⟩
-    · obtain ⟨μ, hμ⟩ := hmr hg
-      obtain ⟨-, hrel⟩ := hme μ hμ
-      obtain ⟨μ', ha, -⟩ := sallocR_rel (ev := fun t : LTerm => t.eval σ) (lit := LTerm.lit) (fun _ => rfl) hrel hk
-      exact ⟨μ', by rw [Close.MTerm.eval_addM, hμ, Res.ok_bind, ha]; rfl⟩
+    simp only [hM, Op1.toL, Option.bind_some] at hs
+    have hR : allocOk R = true := by
+      cases hR : allocOk R
+      · simp only [hR, Bool.false_eq_true, ↓reduceIte, Option.isSome_none] at hs
+      · rfl
+    refine ⟨.addM M M.nAlloc R, g, by
+      simp only [Tm.toL, Op1.toL, hM, Option.bind_some, hR, ↓reduceIte], fun hg => ?_,
+      fun μ' hμ' => ?_⟩
+    · obtain ⟨μ₀', hμ₀'⟩ := hmr hg
+      obtain ⟨τ₁, id, ha⟩ := allocDefault_ok hR μ₀'
+      exact ⟨τ₁, by rw [Close.MTerm.eval_addM, hμ₀', Res.ok_bind, ha]; rfl⟩
     · rw [Close.MTerm.eval_addM] at hμ'
-      obtain ⟨μ, hμ, hμ'⟩ := Res.bind_eq_ok.1 hμ'
-      obtain ⟨hg, hrel⟩ := hme μ hμ
-      obtain ⟨μ₁, ha, hrel'⟩ := sallocR_rel (ev := fun t : LTerm => t.eval σ) (lit := LTerm.lit) (fun _ => rfl) hrel hk
-      rw [ha] at hμ'
+      obtain ⟨μ₀', hμ₀', hμ'⟩ := Res.bind_eq_ok.1 hμ'
+      obtain ⟨hg, μ, B, hrun, hh, hp⟩ := hme μ₀' hμ₀'
+      obtain ⟨r, ha', hμ'⟩ := Res.bind_eq_ok.1 hμ'
       cases hμ'
-      exact ⟨hg, hrel'⟩
+      rcases (allocDefault_heap hh R).cases with ⟨e, -, h₂⟩ | ⟨t₁, t₂, id, h₁, h₂, ht⟩
+      · rw [h₂] at ha'; cases ha'
+      · rw [h₂] at ha'; cases ha'
+        refine ⟨hg, t₁, B ++ [MemNames.Birth.ofCopy μ t₁ id], ?_, ht,
+          hp.trans (List.prefix_append _ _)⟩
+        simp only [LMem.run, hrun, Res.ok_bind, LMem.run_nAlloc σ M hrun, ↓reduceIte, h₁]
   | .app2 .copySt m v, hn, hf => by
     simp only [Tm.inL, Op2.inL, Bool.and_eq_true] at hf
     obtain ⟨⟨hm, hv⟩, hs⟩ := hf
     obtain ⟨M, g, hMm, hmr, hme⟩ := hM m (by lsize_tac) hm
     match v, hv, hs with
-    | .app1 .sval _, _, hs | .app2 .copyMem _ _, _, hs | .app2 .sfind _ _, _, hs =>
-      simp only [Tm.toL, Op1.toL, Op2.toLAt, Op2.toL, hMm, Option.isSome_none,
+    | .app1 .sval _, _, hs | .app2 .sfind _ _, _, hs =>
+      simp only [Tm.toL, Op1.toL, Op2.toLAt, Op2.toL, hMm, newM, Option.isSome_none,
+        Bool.false_eq_true] at hs
+    | .app2 .copyMem _ _, _, hs =>
+      simp only [Tm.toL, Op2.toLAt, Op2.toL, newM_memL, Option.isSome_none,
         Bool.false_eq_true] at hs
     | .app1 (.newArr R) nt, hv, hs =>
       simp only [Tm.inL, Op1.inL] at hv
       have hnt := hT nt (by lsize_tac) hv
-      simp only [Tm.toL, Op1.toL, Op2.toL, hMm] at hs
-      split at hs
-      · rename_i c hgr
-        rw [Option.isSome_map] at hs
-        obtain ⟨⟨M', k⟩, hk⟩ := Option.isSome_iff_exists.1 hs
-        have hc : nt.eval τ = .ok (.int c) := (hnt _).1 (LTerm.ground?_eval σ _ hgr)
-        have hv' : (Tm.app1 (Op1.newArr R) nt).eval τ = .ok (newArrVal R c) := by
-          simp only [Tm.eval, Op1.eval, hc, bind, Except.bind, Value.asInt, pure, Except.pure]
-        refine ⟨M', g, by simp only [Tm.toL, Op2.toLAt, Op2.toL, Op1.toL, hMm, hgr, hk,
-          Option.map_some], fun hg => ?_, fun μ' hμ' => ?_⟩
-        · obtain ⟨μ, hμ⟩ := hmr hg
-          obtain ⟨-, hrel⟩ := hme μ hμ
-          obtain ⟨μ', ha, -⟩ := sallocNew_rel (ev := fun t : LTerm => t.eval σ) (lit := LTerm.lit)
-            (fun _ => rfl) hrel hk
-          exact ⟨μ', by rw [Close.MTerm.eval_copySt, hv', Res.ok_bind, hμ, Res.ok_bind, ha]; rfl⟩
-        · rw [Close.MTerm.eval_copySt, hv', Res.ok_bind] at hμ'
-          obtain ⟨μ, hμ, hμ'⟩ := Res.bind_eq_ok.1 hμ'
-          obtain ⟨hg, hrel⟩ := hme μ hμ
-          obtain ⟨μ₁, ha, hrel'⟩ := sallocNew_rel (ev := fun t : LTerm => t.eval σ)
-            (lit := LTerm.lit) (fun _ => rfl) hrel hk
-          rw [ha] at hμ'
-          cases hμ'
-          exact ⟨hg, hrel'⟩
-      · simp only [Option.isSome_none, Bool.false_eq_true] at hs
+      simp only [Tm.toL, Op1.toL, hMm, newM] at hs
+      have hR : allocOk R = true := by
+        cases hR : allocOk R
+        · simp only [hR, Bool.false_eq_true, ↓reduceIte, Option.isSome_none] at hs
+        · rfl
+      refine ⟨.newArr M M.nAlloc R (nt.toL ρ), seqL g (isIntL (nt.toL ρ)), by
+        simp only [Tm.toL, Op2.toLAt, Op2.toL, Op1.toL, hMm, newM, hR, ↓reduceIte],
+        fun hgg => ?_, fun μ' hμ' => ?_⟩
+      · obtain ⟨hg, hi⟩ := (seqL_rets σ _ _).1 hgg
+        obtain ⟨c, hc⟩ := (isIntL_ret σ _).1 hi
+        obtain ⟨μ₀', hμ₀'⟩ := hmr hg
+        obtain ⟨⟨τ₁, mv⟩, hcp⟩ := (allocOk_newArr hR c).1.at μ₀'
+        refine ⟨τ₁, ?_⟩
+        rw [Close.MTerm.eval_copySt, (newArr_eval_ok.2 ⟨c, (hnt _).1 hc, rfl⟩), Res.ok_bind,
+          hμ₀', Res.ok_bind, hcp]
+        rfl
+      · rw [Close.MTerm.eval_copySt] at hμ'
+        obtain ⟨sv, hsv, hμ'⟩ := Res.bind_eq_ok.1 hμ'
+        obtain ⟨μ₀', hμ₀', hμ'⟩ := Res.bind_eq_ok.1 hμ'
+        obtain ⟨r, hcp, hμ'⟩ := Res.bind_eq_ok.1 hμ'
+        cases hμ'
+        obtain ⟨c, hc, rfl⟩ := newArr_eval_ok.1 hsv
+        obtain ⟨hg, μ, B, hrun, hh, hp⟩ := hme μ₀' hμ₀'
+        have hc' : (nt.toL ρ).eval σ = .ok (.int c) := (hnt _).2 hc
+        rcases (copyStToM_heap hh (newArrVal R c)).cases with ⟨e, -, h₂⟩ |
+          ⟨t₁, t₂, mv, h₁, h₂, ht⟩
+        · rw [h₂] at hcp; cases hcp
+        · rw [h₂] at hcp; cases hcp
+          obtain ⟨id, rfl⟩ := copy_ref h₁ (allocOk_newArr hR c).2
+          refine ⟨(seqL_rets σ _ _).2 ⟨hg, (isIntL_ret σ _).2 ⟨c, hc'⟩⟩, t₁,
+            B ++ [MemNames.Birth.ofCopy μ t₁ id], ?_, ht, hp.trans (List.prefix_append _ _)⟩
+          simp only [LMem.run, hc', Res.ok_bind, Value.asInt, hrun, LMem.run_nAlloc σ M hrun,
+            ↓reduceIte, h₁, MVal.asRef]
+          rfl
   | .app3 .write m a v, hn, hf => by
     simp only [Tm.inL, Op3.inL, Bool.and_eq_true] at hf
     obtain ⟨⟨⟨hm, ha⟩, hv⟩, hs⟩ := hf
     obtain ⟨M, g, hM, hmr, hme⟩ := hM m (by lsize_tac) hm
-    obtain ⟨k, sel, g', hA, har, hae⟩ := hA a (by lsize_tac) ha
-    obtain ⟨sv, g'', hV, hvok, hve⟩ := hV v (by lsize_tac) hv
-    simp only [hM, hA, hV, Op3.toL, Option.isSome_map] at hs
-    obtain ⟨⟨M', gw⟩, hw⟩ := Option.isSome_iff_exists.1 hs
-    refine ⟨M', seqL g'' (seqL g (seqL g' gw)),
-      by simp only [Tm.toL, Op3.toL, hM, hA, hV, hw, Option.map_some], fun ⟨w, hgg⟩ => ?_,
-      fun μ' hμ' => ?_⟩
-    · rw [seqL_eval] at hgg
-      obtain ⟨_, hg'', hgg⟩ := Res.bind_eq_ok.1 hgg
-      rw [seqL_eval] at hgg
-      obtain ⟨_, hg, hgg⟩ := Res.bind_eq_ok.1 hgg
-      rw [seqL_eval] at hgg
-      obtain ⟨_, hg', hgw⟩ := Res.bind_eq_ok.1 hgg
-      obtain ⟨μ, hμ⟩ := hmr ⟨_, hg⟩
-      obtain ⟨-, hrel⟩ := hme μ hμ
-      obtain ⟨ad, had⟩ := har ⟨_, hg'⟩
-      obtain ⟨-, hao⟩ := hae ad had
-      have hsok := hvok ⟨_, hg''⟩
-      have hv' : v.eval τ = .ok (sv.conc (fun t => t.eval σ) σ.nextId) :=
-        (hve _).2 ⟨⟨_, hg''⟩, hsok, rfl⟩
-      obtain ⟨μ', hw'⟩ := (writeL_rel hrel hw hsok hao).1.1 ⟨_, hgw⟩
-      exact ⟨μ', by rw [Close.MTerm.eval_write, hv', Res.ok_bind, hμ, Res.ok_bind, had,
-        Res.ok_bind, hw']⟩
+    obtain ⟨j, sel, g', hA, har, hae⟩ := hA a (by lsize_tac) ha
+    obtain ⟨w, gv, hw, hvr, hve⟩ := writeVal_ok h hV (by lsize_tac) hM hv
+    simp only [hM, hA, hw, writeM, Option.isSome_map] at hs
+    obtain ⟨gw, hgw⟩ := Option.isSome_iff_exists.1 hs
+    refine ⟨.write M j sel w, seqL gv (seqL g (seqL g' gw)), by
+      simp only [Tm.toL, Op3.toLAt, hM, hA, hw, writeM, hgw, Option.map_some],
+      fun hgg => ?_, fun μ' hμ' => ?_⟩
+    · obtain ⟨hgv, hgg⟩ := (seqL_rets σ _ _).1 hgg
+      obtain ⟨hg, hgg⟩ := (seqL_rets σ _ _).1 hgg
+      obtain ⟨hg', hgw'⟩ := (seqL_rets σ _ _).1 hgg
+      obtain ⟨mv, hmv⟩ := hvr hgv
+      obtain ⟨μ₀', hμ₀'⟩ := hmr hg
+      obtain ⟨-, μ, B, hrun, hh, hp⟩ := hme μ₀' hμ₀'
+      obtain ⟨ad, had⟩ := har hg'
+      obtain ⟨-, n0, hn0, hsa⟩ := hae ad had
+      obtain ⟨n1, ad1, μ₁, hn1, hsa1, hwr⟩ := (LMem.writeG_sim σ hrun j sel hgw mv).1 hgw'
+      rw [LId.evalR_prefix hp hn0, Except.ok.injEq] at hn1
+      subst hn1
+      rw [hsa, Except.ok.injEq] at hsa1
+      subst hsa1
+      rcases Res.memPart_cases (writeAddr_of_heap hh mv ad) with ⟨e, h₁, -⟩ |
+        ⟨μ₂, μ₃, -, h₂, -⟩
+      · rw [hwr] at h₁; cases h₁
+      · exact ⟨μ₃, by rw [Close.MTerm.eval_write, hmv, Res.ok_bind, hμ₀', Res.ok_bind, had,
+          Res.ok_bind, h₂]⟩
     · rw [Close.MTerm.eval_write] at hμ'
       obtain ⟨mv, hmv, hμ'⟩ := Res.bind_eq_ok.1 hμ'
-      obtain ⟨μ, hμ, hμ'⟩ := Res.bind_eq_ok.1 hμ'
+      obtain ⟨μ₀', hμ₀', hμ'⟩ := Res.bind_eq_ok.1 hμ'
       obtain ⟨ad, had, hμ'⟩ := Res.bind_eq_ok.1 hμ'
-      obtain ⟨⟨_, hg''⟩, hsok, rfl⟩ := (hve mv).1 hmv
-      obtain ⟨⟨_, hg⟩, hrel⟩ := hme μ hμ
-      obtain ⟨⟨_, hg'⟩, hao⟩ := hae ad had
-      obtain ⟨hiff, hrel'⟩ := writeL_rel hrel hw hsok hao
-      obtain ⟨wg, hgw⟩ := hiff.2 ⟨_, hμ'⟩
-      refine ⟨⟨wg, ?_⟩, hrel' _ hμ'⟩
-      rw [seqL_eval, hg'', Res.ok_bind, seqL_eval, hg, Res.ok_bind, seqL_eval, hg', Res.ok_bind,
-        hgw]
+      obtain ⟨hgv, hwv⟩ := hve mv hmv
+      obtain ⟨hg, μ, B, hrun, hh, hp⟩ := hme μ₀' hμ₀'
+      obtain ⟨hg', n0, hn0, hsa⟩ := hae ad had
+      have hn0' := LId.evalR_prefix hp hn0
+      rcases Res.memPart_cases (writeAddr_of_heap hh mv ad) with ⟨e, -, h₂⟩ |
+        ⟨μ₂, μ₃, h₁, h₂, hh₂⟩
+      · rw [h₂] at hμ'; cases hμ'
+      · rw [h₂] at hμ'; cases hμ'
+        refine ⟨(seqL_rets σ _ _).2 ⟨hgv, (seqL_rets σ _ _).2 ⟨hg, (seqL_rets σ _ _).2
+          ⟨hg', (LMem.writeG_sim σ hrun j sel hgw mv).2 ⟨n0, ad, μ₂, hn0', hsa, h₁⟩⟩⟩⟩,
+          μ₂, B, ?_, hh₂, hp⟩
+        simp only [LMem.run, hrun, Res.ok_bind, hn0', hsa, hwv μ B hrun hp, h₁]
 
-/-- **A memory value, pushed in**: the slot it writes. -/
+/-- **A memory value, pushed in**: what the slot holds. -/
 theorem MValT.toL_step (_h : Rel σ ρ τ) {n : Nat}
     (hT : TermOK C σ τ ρ n) (_hP : PathOK C σ τ ρ n) (hI : IdOK C σ τ ρ n)
     (_hA : AddrOK C σ τ ρ n) (_hM : MemOK C σ τ ρ n) (_hV : MValOK C σ τ ρ n) :
@@ -2992,32 +2493,26 @@ theorem MValT.toL_step (_h : Rel σ ρ τ) {n : Nat}
   | .app1 .mval t, hn, hf => by
     simp only [Tm.inL, Op1.inL] at hf
     have ht := hT t (by lsize_tac) hf
-    refine ⟨.val (t.toL ρ), t.toL ρ, by simp only [Tm.toL, Op1.toL], fun hg => hg,
-      fun mv => ?_⟩
-    rw [Close.MValT.eval_val]
-    constructor
-    · intro hmv
+    refine ⟨.word (t.toL ρ), t.toL ρ, by simp only [Tm.toL, Op1.toL], fun ⟨w, hw⟩ => ?_,
+      fun mv hmv => ?_⟩
+    · exact ⟨_, by rw [Close.MValT.eval_val, (ht w).1 hw, Res.ok_bind]⟩
+    · rw [Close.MValT.eval_val] at hmv
       obtain ⟨w, hw, hmv⟩ := Res.bind_eq_ok.1 hmv
       cases hmv
       have hw' := (ht w).2 hw
-      exact ⟨⟨w, hw'⟩, ⟨w, hw'⟩, (SMV.conc_val hw').symm⟩
-    · rintro ⟨-, ⟨w, hw⟩, rfl⟩
-      rw [(ht w).1 hw, Res.ok_bind, SMV.conc_val hw]
+      exact ⟨⟨w, hw'⟩, by simp only [LMV.eval, hw', Res.ok_bind]⟩
   | .app1 .ref i, hn, hf => by
     simp only [Tm.inL, Op1.inL] at hf
-    obtain ⟨k, g, hI, hie⟩ := hI i (by lsize_tac) hf
-    refine ⟨.ref k, g, by simp only [Tm.toL, Op1.toL, hI, Option.map_some], fun _ => trivial,
-      fun mv => ?_⟩
-    rw [Close.MValT.eval_ref]
-    constructor
-    · intro hmv
+    obtain ⟨j, g, hI, hir, hie⟩ := hI i (by lsize_tac) hf
+    refine ⟨.ref j, g, by simp only [Tm.toL, Op1.toL, hI, Option.map_some], fun hg => ?_,
+      fun mv hmv => ?_⟩
+    · obtain ⟨id, hid⟩ := hir hg
+      exact ⟨_, by rw [Close.MValT.eval_ref, hid, Res.ok_bind]⟩
+    · rw [Close.MValT.eval_ref] at hmv
       obtain ⟨id, hid, hmv⟩ := Res.bind_eq_ok.1 hmv
-      obtain ⟨rfl, hg⟩ := (hie id).1 hid
       cases hmv
-      exact ⟨hg, trivial, rfl⟩
-    · rintro ⟨hg, -, rfl⟩
-      rw [(hie _).2 ⟨rfl, hg⟩]
-      rfl
+      obtain ⟨hg, hj⟩ := hie id hid
+      exact ⟨hg, by simp only [LMV.eval, hj, Res.ok_bind]⟩
 
 /-- All six at every size. -/
 theorem Rel.all_ok (h : Rel σ ρ τ) : (n : Nat) →
@@ -3042,15 +2537,14 @@ theorem PTerm.toL_chk (h : Rel σ ρ τ) (p : PTerm C) (hf : p.inL ρ = true) (q
   (h.all_ok _).2.1 p (Nat.lt_succ_self _) hf qs
 
 theorem ITerm.toL_eval (h : Rel σ ρ τ) (i : ITerm C) (hf : i.inL ρ = true) :
-    ∃ k g, i.toL ρ = some (k, g) ∧
-      ∀ id, i.eval τ = .ok id ↔ (id = σ.nextId + k ∧ ∃ v, g.eval σ = .ok v) :=
+    ∃ j g, i.toL ρ = some (j, g) ∧ (Rets (g.eval σ) → ∃ id, i.eval τ = .ok id) ∧
+      ∀ id, i.eval τ = .ok id → Rets (g.eval σ) ∧ LId.evalR (ρ.mem.births σ) j = .ok id :=
   (h.all_ok _).2.2.1 i (Nat.lt_succ_self _) hf
 
 theorem MTerm.toL_eval (h : Rel σ ρ τ) (m : MTerm C) (hf : m.inL ρ = true) :
-    ∃ M g, m.toL ρ = some (M, g) ∧
-      ((∃ v, g.eval σ = .ok v) → ∃ μ, m.eval τ = .ok μ) ∧
-      ∀ μ, m.eval τ = .ok μ → (∃ v, g.eval σ = .ok v) ∧
-        MemRel (fun t => t.eval σ) σ.nextId M μ :=
+    ∃ M g, m.toL ρ = some (M, g) ∧ (Rets (g.eval σ) → ∃ μ', m.eval τ = .ok μ') ∧
+      ∀ μ', m.eval τ = .ok μ' → Rets (g.eval σ) ∧
+        ∃ μ B, M.run σ = .ok (μ, B) ∧ μ.HeapEq μ' ∧ ρ.mem.births σ <+: B :=
   (h.all_ok _).2.2.2.2.1 m (Nat.lt_succ_self _) hf
 
 /-- A storage term, pushed in, is the write it made.  Example:
@@ -3069,7 +2563,7 @@ theorem STerm.toL_eval (h : Rel σ ρ τ) :
       have ht := Term.toL_eval h t hf.2
       have hb := live_bridge (PTerm.toL_chk h p hf.1)
       rw [Close.STerm.eval_save]
-      simp only [Tm.toL, Op0.toL, Op1.toL, Op3.toL, LStor.eval, h.stor, Res.ok_bind,
+      simp only [Tm.toL, Op0.toL, Op1.toL, Op3.toLAt, Op3.toL, LStor.eval, h.stor, Res.ok_bind,
           Close.STerm.eval_storage]
       intro a
       simp only [Res.bind_eq_ok]
@@ -3094,13 +2588,35 @@ theorem STerm.toL_eval (h : Rel σ ρ τ) :
       have hb := live_bridge (PTerm.toL_chk h p hp)
       have hb' := live_bridge (PTerm.toL_chk h p' hp')
       rw [Close.STerm.eval_save_find, Close.SValT.eval_find]
-      simp only [Tm.toL, Op0.toL, Op2.toLAt, Op2.toL, Op3.toL, LStor.eval, h.stor, Res.ok_bind,
-        Close.STerm.eval_storage, bind_assoc]
+      simp only [Tm.toL, Op0.toL, Op2.toLAt, Op2.toL, Op3.toLAt, Op3.toL, LStor.eval, h.stor,
+        Res.ok_bind, Close.STerm.eval_storage, bind_assoc]
       exact read_bridge hb' fun n => write_bridge hb fun c => .ok (c.overlay n)
     | .app1 (.newArr _) _, _ =>
       simp only [Tm.toL, Op1.toL, LVal.storable, Bool.false_eq_true] at hz
-    | .app2 .copyMem _ _, hv =>
-      simp only [Tm.inL, Bool.false_eq_true, Op2.inL] at hv
+    | .app2 .copyMem m i, hv =>
+      simp only [Tm.inL, Op2.inL, Bool.and_eq_true] at hv
+      obtain ⟨⟨hm, hi⟩, hl⟩ := hv
+      obtain ⟨M, g, hMm, hmr, hme⟩ := MTerm.toL_eval h m hm
+      obtain ⟨j, g', hIi, hir, hie⟩ := ITerm.toL_eval h i hi
+      rw [hMm, hIi] at hl
+      obtain ⟨⟨c, rfl⟩, c', rfl⟩ := memL_some hl
+      have hb := live_bridge (PTerm.toL_chk h p hp)
+      have hsrc : Sim (LMem.run σ M >>= fun r => LId.evalR r.2 j >>= fun n => copyMem r.1 (.ref n))
+          ((SValT.copyMem m i).eval τ) := by
+        rw [Close.SValT.eval_copyMem]
+        obtain ⟨μ', hm'⟩ := hmr ⟨c, rfl⟩
+        obtain ⟨id, hi'⟩ := hir ⟨c', rfl⟩
+        obtain ⟨-, μ, B, hr, hheq, hpre⟩ := hme μ' hm'
+        have hj : LId.evalR B j = .ok id := LId.evalR_prefix hpre (hie id hi').2
+        simp only [hr, hm', hi', hj, Res.ok_bind, copyMem_of_heap hheq.1]
+        exact Sim.refl _
+      rw [Close.STerm.eval_save_copyMem]
+      simp only [Tm.toL, Op0.toL, Op2.toLAt, Op2.toL, Op3.toLAt, Op3.toL, hMm, hIi, memL,
+        Option.getD_some, LStor.eval, h.stor, Res.ok_bind, Close.STerm.eval_storage, LPath.eval]
+      simp only [bind_assoc, Res.ok_bind, view_findLive, SVal.findLive_nil]
+      have key := Sim.bind hsrc fun n => write_bridge hb fun c => .ok (c.overlay n)
+      simp only [bind_assoc, Res.ok_bind] at key
+      exact key
   | .app2 .delAt s p, hf => by
     simp only [Tm.inL, Op2.inL, Bool.and_eq_true] at hf
     obtain ⟨hs, hf⟩ := hf
@@ -3131,7 +2647,7 @@ theorem STerm.toL_eval (h : Rel σ ρ τ) :
       have hb := live_bridge (PTerm.toL_chk h p hp)
       have htt := Term.toL_eval h t ht
       rw [Close.STerm.eval_push, Close.SValT.eval_val]
-      simp only [Tm.toL, Op0.toL, Op1.toL, Op3.toL, LStor.eval, h.stor, Res.ok_bind,
+      simp only [Tm.toL, Op0.toL, Op1.toL, Op3.toLAt, Op3.toL, LStor.eval, h.stor, Res.ok_bind,
         Close.STerm.eval_storage, bind_assoc]
       cases hx : t.eval τ with
       | ok x =>
@@ -3163,7 +2679,7 @@ theorem STerm.toL_eval (h : Rel σ ρ τ) :
       obtain rfl := STerm.isStorage_eq hs
       obtain rfl := STerm.isStorage_eq hs'
       rw [Close.STerm.eval_push, Close.SValT.eval_find]
-      simp only [Tm.toL, Op0.toL, Op2.toLAt, Op2.toL, Op3.toL, Close.STerm.eval_storage,
+      simp only [Tm.toL, Op0.toL, Op2.toLAt, Op2.toL, Op3.toLAt, Op3.toL, Close.STerm.eval_storage,
           Res.ok_bind,
         bind_assoc]
       exact pushCopy_bridge h.stor (live_bridge (PTerm.toL_chk h p hp))
@@ -3302,6 +2818,304 @@ theorem after_guardM {σ : State} {m : Modality} {x : Res State} {P : State → 
     have : ∃ v, g.eval σ = .ok v := by simp only [hg, Except.ok.injEq, exists_eq']
     cases m <;> simp only [Modality.after, hψ τ' rfl, guardM_diamond, this, true_and, guardM_box,
         forall_const]
+
+theorem allocPair?_cases {i : ITerm C} {mm : MTerm C} (h : allocPair? i mm = true) :
+    (∃ R, i = .app1 (.alloc R) (.app0 .memory) ∧ mm = .app1 (.addM R) (.app0 .memory)) ∨
+      ∃ v, i = .app2 .copy (.app0 .memory) v ∧ mm = .app2 .copySt (.app0 .memory) v := by
+  unfold allocPair? at h
+  split at h
+  · simp only [decide_eq_true_eq] at h
+    subst h
+    exact Or.inl ⟨_, rfl, rfl⟩
+  · simp only [decide_eq_true_eq] at h
+    subst h
+    exact Or.inr ⟨_, rfl, rfl⟩
+  · cases h
+
+theorem newM_some {M₀ M : LMem} {g₀ g : LTerm} {lv : LVal}
+    (h : newM (some (M₀, g₀)) lv = some (M, g)) :
+    ∃ R n, lv = .arr R n ∧ allocOk R = true ∧ M = .newArr M₀ M₀.nAlloc R n ∧
+      g = seqL g₀ (isIntL n) := by
+  match lv, h with
+  | .arr R n, h =>
+    simp only [newM] at h
+    split at h
+    · rename_i hR
+      simp only [Option.some.injEq, Prod.mk.injEq] at h
+      obtain ⟨rfl, rfl⟩ := h
+      exact ⟨R, n, rfl, hR, rfl, rfl⟩
+    · cases h
+  | .word _, h | .sub _ _, h | .mem _ _, h => simp only [newM, reduceCtorEq] at h
+
+/-- A stored value pushed in as `new R(n)` reads to `R`'s array of the
+length `n` returns. -/
+theorem SValT.arr_eval {σ τ : State} {ρ : Sym} (h : Rel σ ρ τ) : (v : SValT C) →
+    v.inL ρ = true → ∀ {R : RefTy} {n : LTerm}, v.toL ρ = .arr R n → ∀ sv,
+      v.eval τ = .ok sv ↔ ∃ c, n.eval σ = .ok (.int c) ∧ sv = newArrVal R c
+  | .app1 (.newArr R) nt, hv, R', n, hvt, sv => by
+    simp only [Tm.toL, Op1.toL, LVal.arr.injEq] at hvt
+    obtain ⟨rfl, rfl⟩ := hvt
+    simp only [Tm.inL, Op1.inL] at hv
+    have hnt := Term.toL_eval h nt hv
+    rw [newArr_eval_ok]
+    exact exists_congr fun c => and_congr (hnt _).symm Iff.rfl
+  | .app1 .sval _, _, _, _, hvt, _ => by simp only [Tm.toL, Op1.toL, reduceCtorEq] at hvt
+  | .app2 .sfind _ _, _, _, _, hvt, _ => by
+    simp only [Tm.toL, Op2.toLAt, Op2.toL, reduceCtorEq] at hvt
+  | .app2 .copyMem a b, _, _, _, hvt, _ => by
+    simp only [Tm.toL, Op2.toLAt, Op2.toL] at hvt
+    rcases memL_getD (a.toL ρ) (b.toL ρ) with he | ⟨_, _, he⟩ <;>
+      rw [he] at hvt <;> cases hvt
+
+/-- The pair's last step: where its guard returns exactly when both the
+identity and the memory do, and the memory's run names the identity at the
+next ordinal, the pair keeps the relation. -/
+theorem pair_tail {σ τ : State} {ρ : Sym} {x : Var} {i : ITerm C} {mm : MTerm C} {M : LMem}
+    {g : LTerm} (h : Rel σ ρ τ)
+    (H1 : Rets (g.eval σ) ↔ ∃ id μ', i.eval τ = .ok id ∧ mm.eval τ = .ok μ')
+    (H2 : ∀ id μ', i.eval τ = .ok id → mm.eval τ = .ok μ' → ∃ μ B, M.run σ = .ok (μ, B) ∧
+      μ.HeapEq μ' ∧ ρ.mem.births σ <+: B ∧ LId.evalR B ⟨ρ.mem.nAlloc, []⟩ = .ok id) :
+    (Rets (g.eval σ) ↔ ∃ τ', Upd.apply [.mref x i, .memory mm] τ = .ok τ') ∧
+      ∀ τ', Upd.apply [.mref x i, .memory mm] τ = .ok τ' →
+        Rel σ { ρ with env := (x, .mref ⟨ρ.mem.nAlloc, []⟩) :: ρ.env, mem := M } τ' := by
+  have hU : Upd.apply [.mref x i, .memory mm] τ = i.eval τ >>= fun id => mm.eval τ >>=
+      fun μ => .ok { τ.setEnv x (.mref id) with heap := μ.heap, nextId := μ.nextId } := by
+    simp only [Upd.apply, List.foldlM_cons, List.foldlM_nil, bind_pure,
+      Close.UpdElem.write_mref, Close.UpdElem.write_memory, bind_assoc, Res.ok_bind]
+  rw [hU, H1]
+  refine ⟨⟨fun ⟨id, μ', hid, hμ'⟩ => ⟨_, by rw [hid, Res.ok_bind, hμ', Res.ok_bind]⟩,
+    fun ⟨τ', hτ'⟩ => ?_⟩, fun τ' hτ' => ?_⟩
+  · obtain ⟨id, hid, hτ'⟩ := Res.bind_eq_ok.1 hτ'
+    obtain ⟨μ', hμ', -⟩ := Res.bind_eq_ok.1 hτ'
+    exact ⟨id, μ', hid, hμ'⟩
+  · obtain ⟨id, hid, hτ'⟩ := Res.bind_eq_ok.1 hτ'
+    obtain ⟨μ', hμ', he⟩ := Res.bind_eq_ok.1 hτ'
+    cases he
+    obtain ⟨μ, B, hrun, hh, hp, hB⟩ := H2 id μ' hid hμ'
+    exact (h.setMem hrun hp hh).bind x (.mref ⟨ρ.mem.nAlloc, []⟩) (.mref id)
+      ⟨id, by rw [LMem.births_of_run hrun]; exact hB, by simp only [State.getEnv_setEnv_self]⟩
+
+open MemNames in
+/-- **A copy from storage's pair** (`memoryStorageCopy`): `copyG` returns
+exactly where the identity and the memory do, and the node `LMem.copySt`
+at the next ordinal runs to the interpreter's heap, its root the identity
+(`readFromCopyToStorage` then reads the subtree in the storage of the
+copy).  The path is checked (`live_bridge`), so the live read is the
+interpreter's. -/
+theorem pairCopy_key {σ τ : State} {ρ : Sym} {p : PTerm C} (h : Rel σ ρ τ)
+    (hp : p.inL ρ = true) :
+    (Rets ((copyG ρ.stor (p.toL ρ)).eval σ) ↔
+      ∃ id μ', (Tm.app2 .copy (.app0 .memory) (.app2 .sfind (.app0 .storage) p)).eval τ = .ok id ∧
+        (Tm.app2 .copySt (.app0 .memory) (.app2 .sfind (.app0 .storage) p)).eval τ = .ok μ') ∧
+    ∀ id μ', (Tm.app2 .copy (.app0 .memory) (.app2 .sfind (.app0 .storage) p)).eval τ = .ok id →
+      (Tm.app2 .copySt (.app0 .memory) (.app2 .sfind (.app0 .storage) p)).eval τ = .ok μ' →
+      ∃ μ B, (LMem.copySt ρ.mem ρ.mem.nAlloc ρ.stor (p.toL ρ)).run σ = .ok (μ, B) ∧
+        μ.HeapEq μ' ∧ ρ.mem.births σ <+: B ∧ LId.evalR B ⟨ρ.mem.nAlloc, []⟩ = .ok id := by
+  have hb := live_bridge (PTerm.toL_chk h p hp)
+  have hv : ∀ c, (Tm.app2 (C := C) .sfind (.app0 .storage) p).eval τ = .ok c ↔
+      ∃ qs, (p.toL ρ).eval σ = .ok qs ∧ (SVal.struct τ.storage).findLive qs = .ok c := by
+    intro c
+    rw [Close.SValT.eval_find, Close.STerm.eval_storage, Res.ok_bind]
+    constructor
+    · intro hc
+      obtain ⟨rs, hrs, hc⟩ := Res.bind_eq_ok.1 hc
+      obtain ⟨hq, hl⟩ := (hb _ c).2 ⟨rs, hrs, rfl, hc⟩
+      exact ⟨_, hq, hl⟩
+    · rintro ⟨qs, hq, hl⟩
+      obtain ⟨rs, hrs, rfl, hc⟩ := (hb qs c).1 ⟨hq, hl⟩
+      rw [hrs, Res.ok_bind]
+      exact hc
+  have hi : (Tm.app2 (C := C) .copy (.app0 .memory) (.app2 .sfind (.app0 .storage) p)).eval τ =
+      (Tm.app2 (C := C) .sfind (.app0 .storage) p).eval τ >>= fun sv =>
+        copyStToM τ sv >>= fun r => r.2.asRef := by
+    rw [Close.ITerm.eval_copy, Close.MTerm.eval_memory]
+    rfl
+  have hmm : (Tm.app2 (C := C) .copySt (.app0 .memory) (.app2 .sfind (.app0 .storage) p)).eval τ =
+      (Tm.app2 (C := C) .sfind (.app0 .storage) p).eval τ >>= fun sv =>
+        copyStToM τ sv >>= fun r => .ok r.1 := by
+    rw [Close.MTerm.eval_copySt, Close.MTerm.eval_memory]
+    rfl
+  have hG : Rets ((copyG ρ.stor (p.toL ρ)).eval σ) ↔
+      ∃ c, (Tm.app2 (C := C) .sfind (.app0 .storage) p).eval τ = .ok c ∧ Cps c ∧
+        ∀ pv, c ≠ .prim pv := by
+    unfold copyG
+    rw [seq_rets, ite_isT_rets]
+    simp only [lit_rets, and_true]
+    constructor
+    · rintro ⟨⟨a, ha⟩, hf⟩
+      simp only [LTerm.eval, h.stor, Res.ok_bind] at ha
+      obtain ⟨qs, hq, ha⟩ := Res.bind_eq_ok.1 ha
+      obtain ⟨c, hc, ha⟩ := Res.bind_eq_ok.1 ha
+      obtain ⟨r, hr, -⟩ := Res.bind_eq_ok.1 ha
+      refine ⟨c, (hv c).2 ⟨qs, hq, hc⟩, ⟨_, r, hr⟩, ?_⟩
+      rintro pv rfl
+      obtain ⟨a', ha'⟩ : ∃ a', (SVal.prim pv).asValue = .ok a' := by
+        cases pv <;> exact ⟨_, rfl⟩
+      exact hf ⟨a', by simp only [LTerm.eval, h.stor, hq, hc, Res.ok_bind, ha']⟩
+    · rintro ⟨c, hc, hcp, hnp⟩
+      obtain ⟨qs, hq, hl⟩ := (hv c).1 hc
+      obtain ⟨r, hr⟩ := hcp.at (memBase σ)
+      refine ⟨⟨.bool true, by simp only [LTerm.eval, h.stor, hq, hl, Res.ok_bind, hr]⟩, ?_⟩
+      rintro ⟨a, ha⟩
+      simp only [LTerm.eval, h.stor, hq, hl, Res.ok_bind] at ha
+      cases c with
+      | prim pv => exact hnp pv rfl
+      | struct _ | array _ _ _ | map _ _ => simp only [SVal.asValue, reduceCtorEq] at ha
+  refine ⟨hG.trans ⟨fun ⟨c, hc, hcp, hnp⟩ => ?_, fun ⟨id, μ', hid, _⟩ => ?_⟩,
+    fun id μ' hid hμ' => ?_⟩
+  · obtain ⟨⟨τ₁, mv⟩, hcopy⟩ := hcp.at τ
+    obtain ⟨id, rfl⟩ := copy_ref hcopy hnp
+    exact ⟨id, τ₁, by rw [hi, hc, Res.ok_bind, hcopy]; rfl,
+      by rw [hmm, hc, Res.ok_bind, hcopy]; rfl⟩
+  · rw [hi] at hid
+    obtain ⟨c, hc, hid⟩ := Res.bind_eq_ok.1 hid
+    obtain ⟨r, hr, hid⟩ := Res.bind_eq_ok.1 hid
+    refine ⟨c, hc, ⟨τ, r, hr⟩, ?_⟩
+    rintro pv rfl
+    cases pv <;> simp only [copyStToM, Except.ok.injEq] at hr <;> subst hr <;> cases hid
+  · rw [hmm] at hμ'
+    obtain ⟨c, hc, hμ'⟩ := Res.bind_eq_ok.1 hμ'
+    obtain ⟨r, hr, hμ'⟩ := Res.bind_eq_ok.1 hμ'
+    cases hμ'
+    rw [hi, hc, Res.ok_bind, hr, Res.ok_bind] at hid
+    obtain ⟨qs, hq, hl⟩ := (hv c).1 hc
+    obtain ⟨μ₁, B₁, hr₁, hh⟩ := h.mem
+    have hk : B₁.length = ρ.mem.nAlloc := LMem.run_nAlloc σ ρ.mem hr₁
+    rcases (copyStToM_heap hh c).cases with ⟨e, -, h₂⟩ | ⟨t₁, t₂, mv, h₁, h₂, ht⟩
+    · rw [hr] at h₂
+      cases h₂
+    · rw [hr, Except.ok.injEq] at h₂
+      subst h₂
+      obtain rfl : mv = .ref id := by
+        cases mv <;> simp only [MVal.asRef, reduceCtorEq] at hid
+        cases hid
+        rfl
+      refine ⟨t₁, B₁ ++ [Birth.ofCopy μ₁ t₁ id], ?_, ht, ?_, ?_⟩
+      · simp only [LMem.run, h.stor, hq, hl, hr₁, Res.ok_bind, hk, ↓reduceIte, h₁, MVal.asRef]
+        rfl
+      · rw [LMem.births_of_run hr₁]
+        exact List.prefix_append _ _
+      · rw [evalR_last _ _ hk.symm]
+        rfl
+
+open MemNames in
+/-- **An allocation's pair, pushed in**: it runs exactly where the memory's
+guard returns, and binds `x` to the root of the next ordinal, which is the
+identity the interpreter's allocation takes. -/
+theorem pair_sound {σ τ : State} {ρ ρ' : Sym} {x : Var} {i : ITerm C} {mm : MTerm C}
+    {g : LTerm} (h : Rel σ ρ τ) (hq : pairL ρ x i mm = some (g, ρ')) (hm : pairIn ρ mm = true) :
+    (Rets (g.eval σ) ↔ ∃ τ', Upd.apply [.mref x i, .memory mm] τ = .ok τ') ∧
+      ∀ τ', Upd.apply [.mref x i, .memory mm] τ = .ok τ' → Rel σ ρ' τ' := by
+  unfold pairL at hq
+  split at hq
+  · rename_i hap
+    cases hc : copyOf? mm with
+    | some p =>
+      obtain rfl := copyOf?_some hc
+      simp only [pairIn, hc] at hm
+      simp only [pairMem, hc, Option.bind_some] at hq
+      split at hq
+      case isFalse => cases hq
+      simp only [Option.some.injEq, Prod.mk.injEq] at hq
+      obtain ⟨rfl, rfl⟩ := hq
+      rcases allocPair?_cases hap with ⟨R, -, hmm⟩ | ⟨v, rfl, hmm⟩
+      · cases hmm
+      · cases hmm
+        exact pair_tail h (pairCopy_key h hm).1 (pairCopy_key h hm).2
+    | none =>
+      simp only [pairIn, hc] at hm
+      simp only [pairMem, hc] at hq
+      obtain ⟨M, g', hM, hmr, hme⟩ := MTerm.toL_eval h mm hm
+      rw [hM, Option.bind_some] at hq
+      split at hq
+      case isFalse => cases hq
+      simp only [Option.some.injEq, Prod.mk.injEq] at hq
+      obtain ⟨rfl, rfl⟩ := hq
+      have hkey : (∀ id, i.eval τ = .ok id → ∃ μ', mm.eval τ = .ok μ') ∧
+          ∀ μ', mm.eval τ = .ok μ' → ∃ id, i.eval τ = .ok id ∧
+            LId.evalR (M.births σ) ⟨ρ.mem.nAlloc, []⟩ = .ok id := by
+        rcases allocPair?_cases hap with ⟨R, rfl, rfl⟩ | ⟨v, rfl, rfl⟩
+        · simp only [Tm.toL, Op1.toL, Op0.toL, Option.bind_some] at hM
+          split at hM
+          · simp only [Option.some.injEq, Prod.mk.injEq] at hM
+            obtain ⟨rfl, -⟩ := hM
+            have hi : (Tm.app1 (C := C) (.alloc R) (.app0 .memory)).eval τ =
+                allocDefault τ R >>= fun r => .ok r.2 := rfl
+            have hmm : (Tm.app1 (C := C) (.addM R) (.app0 .memory)).eval τ =
+                allocDefault τ R >>= fun r => .ok r.1 := rfl
+            refine ⟨fun id hid => ?_, fun μ' hμ' => ?_⟩
+            · rw [hi] at hid
+              obtain ⟨r, hr, -⟩ := Res.bind_eq_ok.1 hid
+              exact ⟨r.1, by rw [hmm, hr]; rfl⟩
+            · obtain ⟨-, μ, B, hrun, -, -⟩ := hme μ' hμ'
+              rw [hmm] at hμ'
+              obtain ⟨r, hr, -⟩ := Res.bind_eq_ok.1 hμ'
+              obtain ⟨μ₀, B₀, id₀, hr₀, hk, hc, rfl⟩ := LMem.run_addM hrun
+              obtain ⟨μ₁, B₁, hr₁, hh⟩ := h.mem
+              rw [hr₁, Except.ok.injEq, Prod.mk.injEq] at hr₀
+              obtain ⟨rfl, rfl⟩ := hr₀
+              rcases (allocDefault_heap hh R).cases with ⟨e, h₁, -⟩ | ⟨t₁, t₂, id', h₁, h₂, -⟩
+              · rw [allocDefault_of_copy hc] at h₁; cases h₁
+              · rw [allocDefault_of_copy hc, Except.ok.injEq, Prod.mk.injEq] at h₁
+                obtain ⟨-, rfl⟩ := h₁
+                rw [hr, Except.ok.injEq] at h₂
+                subst h₂
+                refine ⟨id₀, by rw [hi, hr]; rfl, ?_⟩
+                rw [LMem.births_of_run hrun, evalR_last _ _ hk]
+                rfl
+          · cases hM
+        · have hvi : v.inL ρ = true := by
+            simp only [Tm.inL, Op2.inL, Bool.and_eq_true] at hm
+            exact hm.1.2
+          obtain ⟨R, n', hvt, hR, rfl, -⟩ := newM_some (by
+            simpa only [Tm.toL, Op2.toLAt, Op2.toL, Op0.toL] using hM)
+          have hva := SValT.arr_eval h v hvi hvt
+          have hi : (Tm.app2 (C := C) .copy (.app0 .memory) v).eval τ =
+              v.eval τ >>= fun sv => copyStToM τ sv >>= fun r => r.2.asRef := by
+            rw [Close.ITerm.eval_copy, Close.MTerm.eval_memory]
+            rfl
+          have hmm : (Tm.app2 (C := C) .copySt (.app0 .memory) v).eval τ =
+              v.eval τ >>= fun sv => copyStToM τ sv >>= fun r => .ok r.1 := by
+            rw [Close.MTerm.eval_copySt, Close.MTerm.eval_memory]
+            rfl
+          refine ⟨fun id hid => ?_, fun μ' hμ' => ?_⟩
+          · rw [hi] at hid
+            obtain ⟨sv, hsv, hid⟩ := Res.bind_eq_ok.1 hid
+            obtain ⟨r, hr, -⟩ := Res.bind_eq_ok.1 hid
+            exact ⟨r.1, by rw [hmm, hsv, Res.ok_bind, hr]; rfl⟩
+          · obtain ⟨-, μ, B, hrun, -, -⟩ := hme μ' hμ'
+            rw [hmm] at hμ'
+            obtain ⟨sv, hsv, hμ'⟩ := Res.bind_eq_ok.1 hμ'
+            obtain ⟨r, hr, -⟩ := Res.bind_eq_ok.1 hμ'
+            obtain ⟨c, hc, rfl⟩ := (hva sv).1 hsv
+            obtain ⟨μ₀, B₀, id₀, c', hr₀, hk, hc', hcp, rfl⟩ := LMem.run_newArr hrun
+            rw [hc, Except.ok.injEq, PrimVal.int.injEq] at hc'
+            subst hc'
+            obtain ⟨μ₁, B₁, hr₁, hh⟩ := h.mem
+            rw [hr₁, Except.ok.injEq, Prod.mk.injEq] at hr₀
+            obtain ⟨rfl, rfl⟩ := hr₀
+            rcases (copyStToM_heap hh (newArrVal R c)).cases with ⟨e, h₁, -⟩ |
+              ⟨t₁, t₂, mv, h₁, h₂, -⟩
+            · rw [hcp] at h₁; cases h₁
+            · rw [hcp, Except.ok.injEq, Prod.mk.injEq] at h₁
+              obtain ⟨-, rfl⟩ := h₁
+              rw [hr, Except.ok.injEq] at h₂
+              subst h₂
+              refine ⟨id₀, by rw [hi, hsv, Res.ok_bind, hr]; rfl, ?_⟩
+              rw [LMem.births_of_run hrun, evalR_last _ _ hk]
+              rfl
+      refine pair_tail h ⟨fun hg => ?_, fun ⟨_, μ', _, hμ'⟩ => (hme μ' hμ').1⟩
+        fun id μ' hid hμ' => ?_
+      · obtain ⟨μ', hμ'⟩ := hmr hg
+        obtain ⟨id, hid, -⟩ := hkey.2 μ' hμ'
+        exact ⟨id, μ', hid, hμ'⟩
+      · obtain ⟨-, μ, B, hrun, hh, hp⟩ := hme μ' hμ'
+        obtain ⟨id', hid', hB⟩ := hkey.2 μ' hμ'
+        rw [hid, Except.ok.injEq] at hid'
+        subst hid'
+        exact ⟨μ, B, hrun, hh, hp, by rw [← LMem.births_of_run hrun]; exact hB⟩
+  · cases hq
+
 
 /-- **Pushing the updates in keeps the meaning**, halts included.
 
@@ -3493,26 +3307,29 @@ theorem Fml.toL_holds :
           exact Fml.toL_holds φ ⟨h.stor, fun y => h.env y, fun k => h.tx k,
           h.mem.of_heap rfl rfl⟩ hf.2
     | mref x i =>
-      obtain ⟨k, g, hI, hie⟩ := ITerm.toL_eval h i hf.1
+      obtain ⟨j, g, hI, hir, hie⟩ := ITerm.toL_eval h i hf.1
       have hf2 := hf.2
       simp only [UpdElem.toL, hI] at hf2 ⊢
       rw [Close.UpdElem.write_mref]
       refine after_guardM ?_ fun τ' hτ => ?_
       · simp only [Res.bind_eq_ok]
         constructor
-        · rintro ⟨_, hg⟩
-          exact ⟨_, _, (hie _).2 ⟨rfl, _, hg⟩, rfl⟩
+        · intro hg
+          obtain ⟨id, hid⟩ := hir hg
+          exact ⟨_, id, hid, rfl⟩
         · rintro ⟨_, id, hid, -⟩
-          exact ((hie id).1 hid).2
+          exact (hie id hid).1
       · obtain ⟨id, hid, he⟩ := Res.bind_eq_ok.1 hτ
         cases he
-        obtain ⟨rfl, -⟩ := (hie _).1 hid
         refine Fml.toL_holds φ (h.bind x _ _ ?_) hf2
-        simp only [EnvRel, State.getEnv_setEnv_self]
+        exact ⟨id, (hie id hid).2, by simp only [State.getEnv_setEnv_self]⟩
     | memory mm =>
-      obtain ⟨M, g, hM, hmr, hme⟩ := MTerm.toL_eval h mm hf.1
+      have hmm : mm.inL ρ = true ∧ memWithin (mm.toL ρ) = true := by
+        simpa only [UpdElem.inL, Bool.and_eq_true] using hf.1
+      obtain ⟨M, g, hM, hmr, hme⟩ := MTerm.toL_eval h mm hmm.1
       have hf2 := hf.2
-      simp only [UpdElem.toL, hM] at hf2 ⊢
+      have hw : M.within memSize = true := by simpa only [memWithin, hM] using hmm.2
+      simp only [UpdElem.toL, hM, hw, ↓reduceIte] at hf2 ⊢
       rw [Close.UpdElem.write_memory]
       refine after_guardM ?_ fun τ' hτ => ?_
       · constructor
@@ -3522,10 +3339,10 @@ theorem Fml.toL_holds :
         · rintro ⟨_, hτ⟩
           obtain ⟨μ, hμ, -⟩ := Res.bind_eq_ok.1 hτ
           exact (hme μ hμ).1
-      · obtain ⟨μ, hμ, he⟩ := Res.bind_eq_ok.1 hτ
+      · obtain ⟨μ', hμ', he⟩ := Res.bind_eq_ok.1 hτ
         cases he
-        exact Fml.toL_holds φ ⟨h.stor, fun y => h.env y, fun k => h.tx k,
-          (hme μ hμ).2.of_heap rfl rfl⟩ hf2
+        obtain ⟨-, μ, B, hrun, hh, hp⟩ := hme μ' hμ'
+        exact Fml.toL_holds φ (h.setMem hrun hp hh) hf2
     | selfBalance _ _ | saveNet _ =>
       simp only [UpdElem.inL, Bool.false_eq_true, false_and] at hf
   | .modal m P φ, _, _, _, _, hf => by
@@ -3538,7 +3355,22 @@ theorem Fml.toL_holds :
     have hx : x ∉ ρ.vars := by simpa only [List.contains_eq_mem, decide_eq_false_iff_not] using hf.1
     simp only [holds, Fml.toL, LFml.holds]
     exact forall_congr' fun v => imp_congr_right fun _ => Fml.toL_holds φ (h.free hx v) hf.2
-  | .upd _ (_ :: _ :: _) _, _, _, _, _, hf | .havoc _, _, _, _, _, hf => by
+  | .upd md (e₁ :: e₂ :: rest) φ, σ, τ, ρ, h, hf => by
+    cases hv : pairView e₁ e₂ rest with
+    | none => simp only [Fml.inL, hv, Bool.false_eq_true] at hf
+    | some p =>
+      obtain ⟨x, i, mm⟩ := p
+      cases hq : pairL ρ x i mm with
+      | none => simp only [Fml.inL, hv, hq, Bool.false_eq_true] at hf
+      | some q =>
+        obtain ⟨g, ρ'⟩ := q
+        simp only [Fml.inL, hv, hq, Bool.and_eq_true] at hf
+        obtain ⟨rfl, rfl, rfl⟩ := pairView_some hv
+        have hs := pair_sound h hq hf.1.1
+        show md.after (fun τ' => holds τ' φ) (Upd.apply [.mref x i, .memory mm] τ) ↔ _
+        simp only [Fml.toL, pairView, hq]
+        exact after_guardM hs.1 fun τ' hτ => Fml.toL_holds φ (hs.2 τ' hτ) hf.2
+  | .havoc _, _, _, _, _, hf => by
     simp only [Fml.inL, Bool.false_eq_true] at hf
 
 /-- `⊨ φ` is the formula with its updates pushed in, true in every state. -/
@@ -4199,9 +4031,6 @@ def arrMap (op : AOp) (L old opq : LTerm) : PathRel → LTerm
   | .below (.key k :: _) => arrKey op L k old opq .err
   | .below _ => opq
 
-/-- A test that returns `true` where `t` returns and `false` where it halts. -/
-def isT (t : LTerm) : LTerm := .orElse (.seq t (.lit (.bool true))) (.lit (.bool false))
-
 /-- A read below a copy, the segments `pre` walked: at a key, the read
 itself (`opq`) where the source has a mapping there (a mapping met in both
 keeps the target's entries; a copy of a well-typed program has none); with
@@ -4232,6 +4061,50 @@ def LPath.addFields : LPath → List SSeg → LPath
   | q, .field f :: r => LPath.addFields (q.field f) r
   | q, _ => q
 
+/-! ### The run guard of a memory (Lean only)
+
+KeY's memory operations are total; the interpreter's halt: an allocation of
+a type with a mapping, a copy of a word or of a subtree with a mapping, a
+write outside a struct or past the length, a name that denotes nothing.  The
+guard `LMem.okU` returns exactly where the run does, from tests the closer
+reads off the layout and the memory; it says nothing (`none`) where an
+allocation's ordinal or type is not one it can check statically. -/
+
+
+/-- The guard of a write's slot from the memory below it: a member in a
+struct (`S`), an element at the index `t` below the length (`L`). -/
+def wrGuard (S L : Unit → Option LTerm) (t : LTerm) : LSel → Option LTerm
+  | .fld _ => S ()
+  | .idx _ => (L ()).map (ltR t)
+  | .size => none
+
+/-- The name a memory value refers to. -/
+def LMV.refId? : LMV → Option LId
+  | .word _ => none
+  | .ref j => some j
+
+/-- The guard of a write's value: the word returns (`W`), the name denotes (`N`). -/
+def valGuard (W : LTerm) (N : Unit → Option LTerm) : LMV → Option LTerm
+  | .word _ => some W
+  | .ref _ => N ()
+
+/-- The memory below runs (`G`), and so do the slot's and the value's guards. -/
+def okWrite (G : Option LTerm) (W V : Unit → Option LTerm) : Option LTerm :=
+  G.bind fun g => (W ()).bind fun w => (V ()).map fun x =>
+    .seq g (.seq w (.seq x (.lit (.bool true))))
+
+/-- The root a view puts its object at: a view that returns has it. -/
+def isViewRoot : LPath → Bool
+  | .root r => r == viewRoot
+  | _ => false
+
+/-- A view's guard: the memory runs and the name denotes; `d` where either
+is not known. -/
+def okView (G N : Option LTerm) (d : LTerm) : LTerm :=
+  match G, N with
+  | some g, some n => .seq g (.seq n (.lit (.bool true)))
+  | _, _ => d
+
 mutual
 
 /-- Every read of a write eliminated. -/
@@ -4254,6 +4127,7 @@ def LTerm.elim : LTerm → LTerm
   | .err => .err
   | .env k => .env k
   | .findP s q => .findP s q.elim
+  | .cpok s q => .seq s.okE (.seq (.pok q.elim) (s.cpokU q.elim))
 termination_by structural t => t
 
 /-- A path with the reads in its keys eliminated: `people[balances[a]]`. -/
@@ -4279,6 +4153,8 @@ def LStor.okE : LStor → LTerm
     if q.noLen then .seq src.okE (.seq (.pok sq.elim) (.seq (src.hasU sq.elim)
       (.seq s.okE (.seq (.pok q.elim) (s.hasU q.elim)))))
     else .sok (.copy s q src sq)
+  | .view m i => if m.refDesc then okView m.okU (m.objU false i) (.sok (.view m i))
+    else .sok (.view m i)
 termination_by structural s => s
 
 /-- The word at `Q` in `s`, where `s` and `Q` return. -/
@@ -4293,6 +4169,13 @@ def LStor.readU : LStor → LPath → LTerm
   | .copy s P src SQ, Q => (cmpSegs P.elim.segs Q.segs).toTerm
       (copyLeaf (src.readU SQ.elim) .err (s.readU Q) (.find (.copy s P src SQ) Q)
         (fun pre => src.mapU .map (SQ.elim.addSegs pre)) fun rest => src.readU (SQ.elim.addSegs rest))
+  | .view m i, Q =>
+    match viewPath Q with
+    | some (p, a) =>
+      match m.walk i p with
+      | some j => (m.readU j a).getD (.find (.view m i) Q)
+      | none => .find (.view m i) Q
+    | none => .find (.view m i) Q
 termination_by structural s => s
 
 /-- What the slot a `push()` of a struct or an array takes holds at `rest`,
@@ -4315,7 +4198,7 @@ def LStor.slotU : LStor → LPath → List SSeg → LTerm → LTerm
             (fun sh q => s.mapU sh q) (if rest.isEmpty then .eq else .below rest)))
     else opq
   | .init, _, _, opq | .save .., _, _, opq | .arr .push .., _, _, opq
-  | .arr (.slot _) .., _, _, opq | .copy .., _, _, opq => opq
+  | .arr (.slot _) .., _, _, opq | .copy .., _, _, opq | .view .., _, _, opq => opq
 termination_by structural s => s
 
 /-- Whether `Q` names a location of `s`, where `s` and `Q` return. -/
@@ -4329,6 +4212,16 @@ def LStor.hasU : LStor → LPath → LTerm
   | .copy s P src SQ, Q => (cmpSegs P.elim.segs Q.segs).toTerm
       (copyLeaf (.lit (.bool true)) (.lit (.bool true)) (s.hasU Q) (.has (.copy s P src SQ) Q)
         (fun pre => src.mapU .map (SQ.elim.addSegs pre)) fun rest => src.hasU (SQ.elim.addSegs rest))
+  | .view m i, Q =>
+    match viewPath Q with
+    | some (p, a) =>
+      match m.walk i p with
+      | some j =>
+        match m.readU j a, (m.readI j a).bind fun j' => m.objU false j' with
+        | some W, some N => .orElse (.seq W (.lit (.bool true))) (.seq N (.lit (.bool true)))
+        | _, _ => .has (.view m i) Q
+      | none => .has (.view m i) Q
+    | none => if isViewRoot Q then .lit (.bool true) else .has (.view m i) Q
 termination_by structural s => s
 
 /-- The length of the array at `Q` in `s`, where `s` and `Q` return: a
@@ -4343,6 +4236,13 @@ def LStor.lenU : LStor → LPath → LTerm
   | .copy s P src SQ, Q => (cmpSegs P.elim.segs Q.segs).toTerm
       (copyLeaf (src.lenU SQ.elim) (s.lenU Q) (s.lenU Q) (.len (.copy s P src SQ) Q)
         (fun pre => src.mapU .map (SQ.elim.addSegs pre)) fun rest => src.lenU (SQ.elim.addSegs rest))
+  | .view m i, Q =>
+    match viewObj Q with
+    | some p =>
+      match m.walk i p with
+      | some j => (m.readU j .size).getD (.len (.view m i) Q)
+      | none => .len (.view m i) Q
+    | none => .len (.view m i) Q
 termination_by structural s => s
 
 /-- Whether `Q` names a mapping (`sh = .map`) or a fixed-size array
@@ -4357,7 +4257,101 @@ def LStor.mapU (sh : KShape) : LStor → LPath → LTerm
   | .copy s P src SQ, Q => (cmpSegs P.elim.segs Q.segs).toTerm
       (copyLeaf (src.mapU sh SQ.elim) (s.mapU sh Q) (s.mapU sh Q) (.kmap sh (.copy s P src SQ) Q)
         (fun pre => src.mapU .map (SQ.elim.addSegs pre)) fun rest => src.mapU sh (SQ.elim.addSegs rest))
+  | .view m i, Q =>
+    match sh with
+    | .map => .err
+    | .fixed => .kmap sh (.view m i) Q
 termination_by structural s => s
+
+/-- Whether the subtree at `Q` of `s` copies into memory, where `s` and `Q`
+return (Lean only: `copyStToM` halts on a mapping).  A word written over a
+word keeps the shape, so the test passes the write (`save_cpok_sim`); it
+reaches `cpok init Q` for the closer's `wt` clause.  Any other write keeps
+the test whole. -/
+def LStor.cpokU : LStor → LPath → LTerm
+  | .init, Q => .cpok .init Q
+  | .save s P w, Q => .ite (isT (s.readU P.elim)) (s.cpokU Q) (.cpok (.save s P w) Q)
+  | s@(.del ..), Q | s@(.arr ..), Q | s@(.copy ..), Q | s@(.view ..), Q => .cpok s Q
+termination_by structural s => s
+
+/-- The index a selector writes at, its reads eliminated. -/
+def LSel.idxU : LSel → LTerm
+  | .idx w => w.elim
+  | .fld _ | .size => .err
+termination_by structural a => a
+
+/-- A word written to memory, its reads eliminated; a reference is no word. -/
+def LMV.wordU : LMV → LTerm
+  | .word t => t.elim
+  | .ref _ => .err
+termination_by structural v => v
+
+/-- **`LMem.readT` in the elimination** (`readOnWrite`, `readOnAddM`,
+`readFromCopyToStorage`): the same walk, the words written and the storage a
+copy read eliminated. -/
+def LMem.readU : LMem → LId → LSel → Option LTerm
+  | .init, _, _ => none
+  | .addM m k R, i, a =>
+    if i.root = k then some (dfltSel ((Ty.ref R).memberTy i.path) a) else m.readU i a
+  | .newArr m k R n, i, a =>
+    if i.root = k then some (newSel R n.elim i.path a) else m.readU i a
+  | .copySt m k s q, i, a =>
+    if i.root = k then
+      copySelG (fun Q => .seq s.okE (.seq (.pok Q) (s.readU Q)))
+        (fun Q => .seq s.okE (.seq (.pok Q) (s.lenU Q))) q.elim i.path a
+    else m.readU i a
+  | .write m j b v, i, a =>
+    if i = j then
+      match selRel b a with
+      | .same => some v.wordU
+      | .apart => m.readU i a
+      | .key r _ => (m.readU i a).map (.kite r b.idxU v.wordU)
+    else m.readU i a
+termination_by structural m => m
+
+/-- `LMem.nameG` (`str = false`) and `LMem.structG` (`true`) in the
+elimination. -/
+def LMem.objU (str : Bool) : LMem → LId → Option LTerm
+  | .init, _ => none
+  | .addM m k R, i =>
+    if i.root = k then
+      some (if str then dfltStruct ((Ty.ref R).memberTy i.path) else dfltRef ((Ty.ref R).memberTy i.path))
+    else m.objU str i
+  | .newArr m k R n, i =>
+    if i.root = k then some (newObj (if str then dfltStruct else dfltRef) R n.elim i.path)
+    else m.objU str i
+  | .copySt m k s q, i =>
+    if i.root = k then
+      if noLen i.path then
+        let Q := q.elim.ext i.path
+        let H : LTerm := .ite (isT (s.readU Q)) .err (s.hasU Q)
+        some (.seq s.okE (.seq (.pok Q) (if str then .ite (isT (s.lenU Q)) .err H else H)))
+      else none
+    else m.objU str i
+  | .write m _ _ _, i => m.objU str i
+termination_by structural m => m
+
+/-- **The run guard of a memory** (Lean only): it returns exactly where the
+run does.  An allocation at its ordinal, of a type `allocOk` admits (a
+`new T[](n)` with an integer `n`); a copy from storage of a subtree that
+copies and is no word; a write whose slot and value pass `writeG`'s and
+`nameG`'s tests.  The guards' reads are the elimination's. -/
+def LMem.okU : LMem → Option LTerm
+  | .init => some (.lit (.bool true))
+  | .addM m k R => if k = m.nAlloc ∧ allocOk R = true then m.okU else none
+  | .newArr m k R n =>
+    if k = m.nAlloc ∧ allocOk R = true then m.okU.map fun G => .seq G (isIntL n.elim) else none
+  | .copySt m k s q =>
+    if k = m.nAlloc then
+      let Q := q.elim
+      m.okU.map fun G => .seq G (.seq s.okE (.seq (.pok Q) (.seq (s.cpokU Q)
+        (.ite (isT (s.readU Q)) .err (.lit (.bool true))))))
+    else none
+  | .write m j b v =>
+    okWrite m.okU (fun _ => wrGuard (fun _ => m.objU true j) (fun _ => m.readU j .size) b.idxU b)
+      fun _ => valGuard (.seq v.wordU (.lit (.bool true)))
+        (fun _ => v.refId?.bind fun j' => m.objU false j') v
+termination_by structural m => m
 
 end
 
@@ -4426,6 +4420,7 @@ def LTerm.elimF : LTerm → LTerm
   | .err => .err
   | .env k => .env k
   | .findP s q => .findP s q.elimF
+  | .cpok s q => .seq s.okEF (.seq (.pok q.elimF) (s.cpokUF q.elimF))
 termination_by structural t => t
 
 /-- `LPath.elim` as compiled code runs it. -/
@@ -4451,6 +4446,8 @@ def LStor.okEF : LStor → LTerm
     if q.noLen then .seq src.okEF (.seq (.pok sq.elimF) (.seq (src.hasUF sq.elimF)
       (.seq s.okEF (.seq (.pok q.elimF) (s.hasUF q.elimF)))))
     else .sok (.copy s q src sq)
+  | .view m i => if m.refDesc then okView m.okUF (m.objUF false i) (.sok (.view m i))
+    else .sok (.view m i)
 termination_by structural s => s
 
 /-- `LStor.readU` as compiled code runs it: an operation on an array reads
@@ -4469,6 +4466,13 @@ def LStor.readUF : LStor → LPath → LTerm
       (copyLeaf (src.readUF SQ.elimF) .err (s.readUF Q) (.find (.copy s P src SQ) Q)
         (fun pre => src.mapUF .map (SQ.elimF.addSegs pre))
         fun rest => src.readUF (SQ.elimF.addSegs rest))
+  | .view m i, Q =>
+    match viewPath Q with
+    | some (p, a) =>
+      match m.walk i p with
+      | some j => (m.readUF j a).getD (.find (.view m i) Q)
+      | none => .find (.view m i) Q
+    | none => .find (.view m i) Q
 termination_by structural s => s
 
 /-- `LStor.slotU` as compiled code runs it. -/
@@ -4488,7 +4492,7 @@ def LStor.slotUF : LStor → LPath → List SSeg → LTerm → LTerm
             (fun sh q => s.mapUF sh q) (if rest.isEmpty then .eq else .below rest)))
     else opq
   | .init, _, _, opq | .save .., _, _, opq | .arr .push .., _, _, opq
-  | .arr (.slot _) .., _, _, opq | .copy .., _, _, opq => opq
+  | .arr (.slot _) .., _, _, opq | .copy .., _, _, opq | .view .., _, _, opq => opq
 termination_by structural s => s
 
 /-- `LStor.hasU` as compiled code runs it. -/
@@ -4505,6 +4509,16 @@ def LStor.hasUF : LStor → LPath → LTerm
       (copyLeaf (.lit (.bool true)) (.lit (.bool true)) (s.hasUF Q) (.has (.copy s P src SQ) Q)
         (fun pre => src.mapUF .map (SQ.elimF.addSegs pre))
         fun rest => src.hasUF (SQ.elimF.addSegs rest))
+  | .view m i, Q =>
+    match viewPath Q with
+    | some (p, a) =>
+      match m.walk i p with
+      | some j =>
+        match m.readUF j a, (m.readI j a).bind fun j' => m.objUF false j' with
+        | some W, some N => .orElse (.seq W (.lit (.bool true))) (.seq N (.lit (.bool true)))
+        | _, _ => .has (.view m i) Q
+      | none => .has (.view m i) Q
+    | none => if isViewRoot Q then .lit (.bool true) else .has (.view m i) Q
 termination_by structural s => s
 
 /-- `LStor.lenU` as compiled code runs it. -/
@@ -4521,6 +4535,13 @@ def LStor.lenUF : LStor → LPath → LTerm
       (copyLeaf (src.lenUF SQ.elimF) (s.lenUF Q) (s.lenUF Q) (.len (.copy s P src SQ) Q)
         (fun pre => src.mapUF .map (SQ.elimF.addSegs pre))
         fun rest => src.lenUF (SQ.elimF.addSegs rest))
+  | .view m i, Q =>
+    match viewObj Q with
+    | some p =>
+      match m.walk i p with
+      | some j => (m.readUF j .size).getD (.len (.view m i) Q)
+      | none => .len (.view m i) Q
+    | none => .len (.view m i) Q
 termination_by structural s => s
 
 /-- `LStor.mapU` as compiled code runs it. -/
@@ -4539,7 +4560,91 @@ def LStor.mapUF (sh : KShape) : LStor → LPath → LTerm
         (.kmap sh (.copy s P src SQ) Q)
         (fun pre => src.mapUF .map (SQ.elimF.addSegs pre))
         fun rest => src.mapUF sh (SQ.elimF.addSegs rest))
+  | .view m i, Q =>
+    match sh with
+    | .map => .err
+    | .fixed => .kmap sh (.view m i) Q
 termination_by structural s => s
+
+/-- `LStor.cpokU` as compiled code runs it. -/
+def LStor.cpokUF : LStor → LPath → LTerm
+  | .init, Q => .cpok .init Q
+  | .save s P w, Q => .ite (isT (s.readUF P.elimF)) (s.cpokUF Q) (.cpok (.save s P w) Q)
+  | s@(.del ..), Q | s@(.arr ..), Q | s@(.copy ..), Q | s@(.view ..), Q => .cpok s Q
+termination_by structural s => s
+
+/-- `LSel.idxU` as compiled code runs it. -/
+def LSel.idxUF : LSel → LTerm
+  | .idx w => w.elimF
+  | .fld _ | .size => .err
+termination_by structural a => a
+
+/-- `LMV.wordU` as compiled code runs it. -/
+def LMV.wordUF : LMV → LTerm
+  | .word t => t.elimF
+  | .ref _ => .err
+termination_by structural v => v
+
+/-- `LMem.readU` as compiled code runs it. -/
+def LMem.readUF : LMem → LId → LSel → Option LTerm
+  | .init, _, _ => none
+  | .addM m k R, i, a =>
+    if i.root = k then some (dfltSel ((Ty.ref R).memberTy i.path) a) else m.readUF i a
+  | .newArr m k R n, i, a =>
+    if i.root = k then some (newSel R n.elimF i.path a) else m.readUF i a
+  | .copySt m k s q, i, a =>
+    if i.root = k then
+      copySelG (fun Q => .seq s.okEF (.seq (.pok Q) (s.readUF Q)))
+        (fun Q => .seq s.okEF (.seq (.pok Q) (s.lenUF Q))) q.elimF i.path a
+    else m.readUF i a
+  | .write m j b v, i, a =>
+    if i = j then
+      match selRel b a with
+      | .same => some v.wordUF
+      | .apart => m.readUF i a
+      | .key r _ => (m.readUF i a).map (.kite r b.idxUF v.wordUF)
+    else m.readUF i a
+termination_by structural m => m
+
+/-- `LMem.objU` as compiled code runs it. -/
+def LMem.objUF (str : Bool) : LMem → LId → Option LTerm
+  | .init, _ => none
+  | .addM m k R, i =>
+    if i.root = k then
+      some (if str then dfltStruct ((Ty.ref R).memberTy i.path) else dfltRef ((Ty.ref R).memberTy i.path))
+    else m.objUF str i
+  | .newArr m k R n, i =>
+    if i.root = k then some (newObj (if str then dfltStruct else dfltRef) R n.elimF i.path)
+    else m.objUF str i
+  | .copySt m k s q, i =>
+    if i.root = k then
+      if noLen i.path then
+        let Q := q.elimF.ext i.path
+        let H : LTerm := .ite (isT (s.readUF Q)) .err (s.hasUF Q)
+        some (.seq s.okEF (.seq (.pok Q) (if str then .ite (isT (s.lenUF Q)) .err H else H)))
+      else none
+    else m.objUF str i
+  | .write m _ _ _, i => m.objUF str i
+termination_by structural m => m
+
+/-- `LMem.okU` as compiled code runs it. -/
+def LMem.okUF : LMem → Option LTerm
+  | .init => some (.lit (.bool true))
+  | .addM m k R => if k = m.nAlloc ∧ allocOk R = true then m.okUF else none
+  | .newArr m k R n =>
+    if k = m.nAlloc ∧ allocOk R = true then m.okUF.map fun G => .seq G (isIntL n.elimF) else none
+  | .copySt m k s q =>
+    if k = m.nAlloc then
+      let Q := q.elimF
+      m.okUF.map fun G => .seq G (.seq s.okEF (.seq (.pok Q) (.seq (s.cpokUF Q)
+        (.ite (isT (s.readUF Q)) .err (.lit (.bool true))))))
+    else none
+  | .write m j b v =>
+    okWrite m.okUF
+      (fun _ => wrGuard (fun _ => m.objUF true j) (fun _ => m.readUF j .size) b.idxUF b)
+      fun _ => valGuard (.seq v.wordUF (.lit (.bool true)))
+        (fun _ => v.refId?.bind fun j' => m.objUF false j') v
+termination_by structural m => m
 
 end
 
@@ -4592,6 +4697,8 @@ theorem LTerm.elimF_eq : (t : LTerm) → t.elimF = t.elim
   | .sok s => by simp only [LTerm.elimF, LTerm.elim, LStor.okEF_eq s]
   | .pok q => by simp only [LTerm.elimF, LTerm.elim, LPath.elimF_eq q]
   | .findP _ q => by simp only [LTerm.elimF, LTerm.elim, LPath.elimF_eq q]
+  | .cpok s q => by
+    simp only [LTerm.elimF, LTerm.elim, LStor.okEF_eq s, LPath.elimF_eq q, LStor.cpokUF_eq s]
 termination_by structural t => t
 
 theorem LPath.elimF_eq : (q : LPath) → q.elimF = q.elim
@@ -4613,6 +4720,7 @@ theorem LStor.okEF_eq : (s : LStor) → s.okEF = s.okE
   | .copy s q src sq => by
     simp only [LStor.okEF, LStor.okE, LStor.okEF_eq s, LStor.okEF_eq src, LPath.elimF_eq q,
       LPath.elimF_eq sq, LStor.hasUF_eq s, LStor.hasUF_eq src]
+  | .view m _ => by simp only [LStor.okEF, LStor.okE, LMem.okUF_eq m, LMem.objUF_eq _ m]
 termination_by structural s => s
 
 theorem LStor.readUF_eq : (s : LStor) → ∀ Q, s.readUF Q = s.readU Q
@@ -4628,6 +4736,7 @@ theorem LStor.readUF_eq : (s : LStor) → ∀ Q, s.readUF Q = s.readU Q
   | .copy s P src SQ, Q => by
     simp only [LStor.readUF, LStor.readU, LPath.elimF_eq P, LPath.elimF_eq SQ, LStor.readUF_eq s,
       LStor.readUF_eq src, LStor.mapUF_eq _ src]
+  | .view m _, _ => by simp only [LStor.readUF, LStor.readU, LMem.readUF_eq m]
 termination_by structural s => s
 
 theorem LStor.slotUF_eq : (s : LStor) → ∀ P rest opq, s.slotUF P rest opq = s.slotU P rest opq
@@ -4638,7 +4747,7 @@ theorem LStor.slotUF_eq : (s : LStor) → ∀ P rest opq, s.slotUF P rest opq = 
     simp only [LStor.slotUF, LStor.slotU, LPath.elimF_eq P', LStor.readUF_eq s, LStor.lenUF_eq s,
       LStor.mapUF_eq _ s]
   | .init, _, _, _ | .save .., _, _, _ | .arr .push .., _, _, _
-  | .arr (.slot _) .., _, _, _ | .copy .., _, _, _ => rfl
+  | .arr (.slot _) .., _, _, _ | .copy .., _, _, _ | .view .., _, _, _ => rfl
 termination_by structural s => s
 
 theorem LStor.hasUF_eq : (s : LStor) → ∀ Q, s.hasUF Q = s.hasU Q
@@ -4653,6 +4762,7 @@ theorem LStor.hasUF_eq : (s : LStor) → ∀ Q, s.hasUF Q = s.hasU Q
   | .copy s P src SQ, Q => by
     simp only [LStor.hasUF, LStor.hasU, LPath.elimF_eq P, LPath.elimF_eq SQ, LStor.hasUF_eq s,
       LStor.hasUF_eq src, LStor.mapUF_eq _ src]
+  | .view m _, _ => by simp only [LStor.hasUF, LStor.hasU, LMem.readUF_eq m, LMem.objUF_eq _ m]
 termination_by structural s => s
 
 theorem LStor.lenUF_eq : (s : LStor) → ∀ Q, s.lenUF Q = s.lenU Q
@@ -4667,6 +4777,7 @@ theorem LStor.lenUF_eq : (s : LStor) → ∀ Q, s.lenUF Q = s.lenU Q
   | .copy s P src SQ, Q => by
     simp only [LStor.lenUF, LStor.lenU, LPath.elimF_eq P, LPath.elimF_eq SQ, LStor.lenUF_eq s,
       LStor.lenUF_eq src, LStor.mapUF_eq _ src]
+  | .view m _, _ => by simp only [LStor.lenUF, LStor.lenU, LMem.readUF_eq m]
 termination_by structural s => s
 
 theorem LStor.mapUF_eq (sh : KShape) : (s : LStor) → ∀ Q, s.mapUF sh Q = s.mapU sh Q
@@ -4681,9 +4792,77 @@ theorem LStor.mapUF_eq (sh : KShape) : (s : LStor) → ∀ Q, s.mapUF sh Q = s.m
   | .copy s P src SQ, Q => by
     simp only [LStor.mapUF, LStor.mapU, LPath.elimF_eq P, LPath.elimF_eq SQ, LStor.mapUF_eq sh s,
       LStor.mapUF_eq _ src]
+  | .view _ _, _ => rfl
 termination_by structural s => s
 
+theorem LStor.cpokUF_eq : (s : LStor) → ∀ Q, s.cpokUF Q = s.cpokU Q
+  | .init, _ => rfl
+  | .save s P _, Q => by
+    simp only [LStor.cpokUF, LStor.cpokU, LPath.elimF_eq P, LStor.readUF_eq s, LStor.cpokUF_eq s]
+  | .del .., _ | .arr .., _ | .copy .., _ | .view .., _ => rfl
+termination_by structural s => s
+
+theorem LSel.idxUF_eq : (a : LSel) → a.idxUF = a.idxU
+  | .idx w => by simp only [LSel.idxUF, LSel.idxU, LTerm.elimF_eq w]
+  | .fld _ | .size => rfl
+termination_by structural a => a
+
+theorem LMV.wordUF_eq : (v : LMV) → v.wordUF = v.wordU
+  | .word t => by simp only [LMV.wordUF, LMV.wordU, LTerm.elimF_eq t]
+  | .ref _ => rfl
+termination_by structural v => v
+
+theorem LMem.readUF_eq : (m : LMem) → ∀ i a, m.readUF i a = m.readU i a
+  | .init, _, _ => rfl
+  | .addM m _ _, i, a => by simp only [LMem.readUF, LMem.readU, LMem.readUF_eq m]
+  | .newArr m _ _ n, i, a => by
+    simp only [LMem.readUF, LMem.readU, LMem.readUF_eq m, LTerm.elimF_eq n]
+  | .copySt m _ s q, i, a => by
+    simp only [LMem.readUF, LMem.readU, LMem.readUF_eq m, LPath.elimF_eq q, LStor.okEF_eq s,
+      LStor.readUF_eq s, LStor.lenUF_eq s]
+  | .write m _ b v, i, a => by
+    simp only [LMem.readUF, LMem.readU, LMem.readUF_eq m, LMV.wordUF_eq v, LSel.idxUF_eq b]
+termination_by structural m => m
+
+theorem LMem.objUF_eq (str : Bool) : (m : LMem) → ∀ i, m.objUF str i = m.objU str i
+  | .init, _ => rfl
+  | .addM m _ _, i => by simp only [LMem.objUF, LMem.objU, LMem.objUF_eq str m]
+  | .newArr m _ _ n, i => by
+    simp only [LMem.objUF, LMem.objU, LMem.objUF_eq str m, LTerm.elimF_eq n]
+  | .copySt m _ s q, i => by
+    simp only [LMem.objUF, LMem.objU, LMem.objUF_eq str m, LPath.elimF_eq q, LStor.okEF_eq s,
+      LStor.readUF_eq s, LStor.lenUF_eq s, LStor.hasUF_eq s]
+  | .write m _ _ _, i => by simp only [LMem.objUF, LMem.objU, LMem.objUF_eq str m]
+termination_by structural m => m
+
+theorem LMem.okUF_eq : (m : LMem) → m.okUF = m.okU
+  | .init => rfl
+  | .addM m _ _ => by simp only [LMem.okUF, LMem.okU, LMem.okUF_eq m]
+  | .newArr m _ _ n => by simp only [LMem.okUF, LMem.okU, LMem.okUF_eq m, LTerm.elimF_eq n]
+  | .copySt m _ s q => by
+    simp only [LMem.okUF, LMem.okU, LMem.okUF_eq m, LPath.elimF_eq q, LStor.okEF_eq s,
+      LStor.cpokUF_eq s, LStor.readUF_eq s]
+  | .write m _ b v => by
+    simp only [LMem.okUF, LMem.okU, LMem.okUF_eq m, LMem.objUF_eq _ m, LMem.readUF_eq m,
+      LSel.idxUF_eq b, LMV.wordUF_eq v]
+termination_by structural m => m
+
 end
+
+@[csimp] theorem LSel.idxU_csimp : @LSel.idxU = @LSel.idxUF :=
+  funext fun a => (LSel.idxUF_eq a).symm
+
+@[csimp] theorem LMV.wordU_csimp : @LMV.wordU = @LMV.wordUF :=
+  funext fun v => (LMV.wordUF_eq v).symm
+
+@[csimp] theorem LMem.readU_csimp : @LMem.readU = @LMem.readUF :=
+  funext fun m => funext fun i => funext fun a => (LMem.readUF_eq m i a).symm
+
+@[csimp] theorem LMem.okU_csimp : @LMem.okU = @LMem.okUF :=
+  funext fun m => (LMem.okUF_eq m).symm
+
+@[csimp] theorem LMem.objU_csimp : @LMem.objU = @LMem.objUF :=
+  funext fun str => funext fun m => funext fun i => (LMem.objUF_eq str m i).symm
 
 @[csimp] theorem LTerm.elim_csimp : @LTerm.elim = @LTerm.elimF :=
   funext fun t => (LTerm.elimF_eq t).symm
@@ -4706,6 +4885,9 @@ end
 
 @[csimp] theorem LStor.lenU_csimp : @LStor.lenU = @LStor.lenUF :=
   funext fun s => funext fun Q => (LStor.lenUF_eq s Q).symm
+
+@[csimp] theorem LStor.cpokU_csimp : @LStor.cpokU = @LStor.cpokUF :=
+  funext fun s => funext fun Q => (LStor.cpokUF_eq s Q).symm
 
 @[csimp] theorem LStor.mapU_csimp : @LStor.mapU = @LStor.mapUF :=
   funext fun sh => funext fun s => funext fun Q => (LStor.mapUF_eq sh s Q).symm
@@ -4976,12 +5158,6 @@ theorem LPath.addSegs_eval (σ : State) : ∀ (xs : List SSeg) (q : LPath),
     rw [LPath.addSegs, LPath.addSegs_eval σ xs]
     simp only [LPath.eval, segsEval, bind_assoc, Res.ok_bind, List.append_assoc,
       List.singleton_append]
-
-theorem isT_eval (σ : State) (t : LTerm) :
-    (isT t).eval σ = .ok (.bool (match t.eval σ with | .ok _ => true | .error _ => false)) := by
-  unfold isT
-  simp only [LTerm.eval]
-  cases t.eval σ <;> rfl
 
 /-! ### Arrays and copies
 
@@ -6578,6 +6754,637 @@ theorem del_lenU_sim {σ : State} {s : LStor} {P Q : LPath} {u : SVal} {qs : Lis
       exact h
     | diverge => rw [findLive_saveLive_diverge hr hu]; exact ihL hv hq
 
+/-! ### Memory and its views in the elimination
+
+The memory readers of the elimination give what `Calculus/MemRead.lean`'s
+give, the storage they read eliminated (`LMem.readU_sim`, `LMem.objU_sim`);
+a read below a view is a read of memory along the same path
+(`view_read_sim`, `findOnCopy`). -/
+
+/-! ### Whether a copy into memory succeeds -/
+
+section CopyOk
+open MemNames
+
+
+theorem Cps.prim (p : PrimVal) : Cps (.prim p) := ⟨{ storage := [] }, by cases p <;> exact ⟨_, rfl⟩⟩
+
+theorem cps_setBy {f : Name} {u old : SVal} (hc : Cps u ↔ Cps old) :
+    ∀ {fs : List (Name × SVal)}, lookupBy f fs = some old →
+      ((∀ p ∈ setBy f u fs, Cps p.2) ↔ ∀ p ∈ fs, Cps p.2)
+  | [], h => by simp only [lookupBy, reduceCtorEq] at h
+  | (k, w) :: rest, h => by
+    by_cases hk : f = k
+    · simp only [lookupBy, hk, if_true, Option.some.injEq] at h
+      subst h
+      simp only [setBy, hk, if_true, List.forall_mem_cons, hc]
+    · simp only [lookupBy, hk, if_false] at h
+      simp only [setBy, hk, if_false, List.forall_mem_cons, cps_setBy hc h]
+
+theorem cps_set {u : SVal} : ∀ {es : List SVal} {i : Nat} (hi : i < es.length),
+    (Cps u ↔ Cps es[i]) → ((∀ x ∈ es.set i u, Cps x) ↔ ∀ x ∈ es, Cps x)
+  | [], _, hi, _ => absurd hi (Nat.not_lt_zero _)
+  | x :: rest, 0, _, hc => by
+    simp only [List.set_cons_zero, List.forall_mem_cons, List.getElem_cons_zero] at hc ⊢
+    rw [hc]
+  | x :: rest, i + 1, hi, hc => by
+    simp only [List.getElem_cons_succ] at hc
+    simp only [List.set_cons_succ, List.forall_mem_cons,
+      cps_set (Nat.lt_of_succ_lt_succ hi) hc]
+
+theorem cps_saveLive {new : SVal} : ∀ {ps : List Seg} {v v' old : SVal},
+    v.findLive ps = .ok old → v.saveLive ps new = .ok v' → (Cps new ↔ Cps old) →
+      (Cps v' ↔ Cps v)
+  | [], v, v', old, hf, hs, hc => by
+    simp only [SVal.findLive_nil, Except.ok.injEq] at hf
+    have : v' = new := by cases v <;> simpa only [SVal.saveLive, Except.ok.injEq] using hs.symm
+    subst hf this
+    exact hc
+  | s :: _, .prim _, _, _, _, hs, _ => by cases s <;> simp only [SVal.saveLive, reduceCtorEq] at hs
+  | .field f :: ps, .struct fields, v', old, hf, hs, hc => by
+    simp only [SVal.findLive] at hf
+    simp only [SVal.saveLive] at hs
+    cases hl : lookupBy f fields with
+    | none => simp only [hl, reduceCtorEq] at hf
+    | some w =>
+      rw [hl] at hf hs
+      obtain ⟨u, hu, he⟩ := Res.bind_eq_ok.1 hs
+      cases he
+      rw [Cps.struct_iff, Cps.struct_iff]
+      exact cps_setBy (cps_saveLive hf hu hc) hl
+  | .at _ :: _, .struct _, _, _, _, hs, _ => by simp only [SVal.saveLive, reduceCtorEq] at hs
+  | .at i :: ps, .array elems shadow fx, v', old, hf, hs, hc => by
+    simp only [SVal.saveLive] at hs
+    split at hs
+    · rename_i hi
+      simp only [SVal.findLive, dif_pos hi, List.get_eq_getElem] at hf
+      obtain ⟨u, hu, he⟩ := Res.bind_eq_ok.1 hs
+      cases he
+      rw [Cps.array_iff, Cps.array_iff]
+      exact cps_set hi.2 (cps_saveLive hf hu hc)
+    · cases hs
+  | .field _ :: _, .array _ _ _, _, _, _, hs, _ => by simp only [SVal.saveLive, reduceCtorEq] at hs
+  | .at i :: ps, .map e d, v', old, hf, hs, hc => by
+    simp only [SVal.saveLive] at hs
+    split at hs <;>
+      (obtain ⟨u, hu, he⟩ := Res.bind_eq_ok.1 hs; cases he
+       exact iff_of_false (Cps.not_map _ _) (Cps.not_map _ _))
+  | .field _ :: _, .map _ _, _, _, _, hs, _ => by simp only [SVal.saveLive, reduceCtorEq] at hs
+
+theorem segs_rel : ∀ (ps qs : List Seg), qs = ps ∨ (∃ f r, ps = qs ++ f :: r) ∨
+    (∃ f r, qs = ps ++ f :: r) ∨ Close.Diverge ps qs
+  | [], [] => .inl rfl
+  | a :: p, [] => .inr (.inl ⟨a, p, rfl⟩)
+  | [], b :: q => .inr (.inr (.inl ⟨b, q, rfl⟩))
+  | a :: p, b :: q => by
+    by_cases hab : a = b
+    · subst hab
+      rcases segs_rel p q with rfl | ⟨f, r, rfl⟩ | ⟨f, r, rfl⟩ | hd
+      · exact .inl rfl
+      · exact .inr (.inl ⟨f, r, rfl⟩)
+      · exact .inr (.inr (.inl ⟨f, r, rfl⟩))
+      · exact .inr (.inr (.inr (.inr hd)))
+    · exact .inr (.inr (.inr (.inl hab)))
+
+theorem cps_findLive_savePrim {v v' : SVal} {ps : List Seg} {a b : PrimVal}
+    (hf : v.findLive ps = .ok (.prim a)) (hs : v.saveLive ps (.prim b) = .ok v') (qs : List Seg) :
+    (∃ x, v'.findLive qs = .ok x ∧ Cps x) ↔ (∃ x, v.findLive qs = .ok x ∧ Cps x) := by
+  rcases segs_rel ps qs with rfl | ⟨f, r, rfl⟩ | ⟨f, r, rfl⟩ | hd
+  · rw [findLive_saveLive_same hs, hf]
+    exact iff_of_true ⟨_, rfl, Cps.prim b⟩ ⟨_, rfl, Cps.prim a⟩
+  · obtain ⟨w, w', h₁, h₂, h₃⟩ := save_through qs (f :: r) hs
+    rw [SVal.findLive_append, h₁, Res.ok_bind] at hf
+    rw [h₃, h₁]
+    have hw := cps_saveLive hf h₂ (iff_of_true (Cps.prim b) (Cps.prim a))
+    constructor
+    · rintro ⟨x, hx, hc⟩; cases hx; exact ⟨w, rfl, hw.1 hc⟩
+    · rintro ⟨x, hx, hc⟩; cases hx; exact ⟨w', rfl, hw.2 hc⟩
+  · rw [SVal.findLive_append, SVal.findLive_append, findLive_saveLive_same hs, hf]
+    rw [Res.ok_bind', Res.ok_bind']
+    apply iff_of_false <;> (rintro ⟨x, hx, -⟩; cases f <;> cases hx)
+  · rw [findLive_saveLive_diverge hd hs]
+
+/-- What `cpok` returns on the storage `v` at the path `qs`. -/
+def cpR (σ : State) (v : SVal) (qs : List Seg) : Res Value :=
+  v.findLive qs >>= fun sv => copyStToM (memBase σ) sv >>= fun _ => .ok (.bool true)
+
+theorem cpok_eval (σ : State) (s : LStor) (q : LPath) :
+    (LTerm.cpok s q).eval σ = (s.eval σ >>= fun v => q.eval σ >>= fun qs => cpR σ v qs) := rfl
+
+theorem cpR_ok {σ : State} {v : SVal} {qs : List Seg} {a : Value} :
+    cpR σ v qs = .ok a ↔ a = .bool true ∧ ∃ x, v.findLive qs = .ok x ∧ Cps x := by
+  unfold cpR
+  constructor
+  · intro h
+    obtain ⟨x, hx, h⟩ := Res.bind_eq_ok.1 h
+    obtain ⟨r, hr, h⟩ := Res.bind_eq_ok.1 h
+    cases h
+    exact ⟨rfl, x, hx, _, _, hr⟩
+  · rintro ⟨rfl, x, hx, hc⟩
+    obtain ⟨r, hr⟩ := hc.at (memBase σ)
+    rw [hx, Res.ok_bind, hr, Res.ok_bind]
+
+/-- `cpok` kept whole is what it tests. -/
+theorem cpok_keep_sim {σ : State} {s : LStor} {Q : LPath} {v : SVal} {qs : List Seg}
+    (hv : s.eval σ = .ok v) (hq : Q.eval σ = .ok qs) :
+    Sim ((LTerm.cpok s Q).eval σ) (cpR σ v qs) := by
+  rw [cpok_eval, hv, Res.ok_bind, hq, Res.ok_bind]
+  exact Sim.refl _
+
+theorem cpR_sim {σ : State} {v v' : SVal} {qs qs' : List Seg}
+    (h : (∃ x, v.findLive qs = .ok x ∧ Cps x) ↔ ∃ x, v'.findLive qs' = .ok x ∧ Cps x) :
+    Sim (cpR σ v qs) (cpR σ v' qs') := fun _ => by rw [cpR_ok, cpR_ok, h]
+
+/-- **A word written over a word keeps whether a copy succeeds** (Lean
+only: `copyStToM` halts on a mapping, and a word is none). -/
+theorem save_cpok_sim {σ : State} {s : LStor} {P Q : LPath} {w X C : LTerm} {u : SVal}
+    {qs : List Seg} (hu : (LStor.save s P w).eval σ = .ok u) (hq : Q.eval σ = .ok qs)
+    (hP : Sim (P.elim.eval σ) (P.eval σ))
+    (hX : ∀ {v ps}, s.eval σ = .ok v → P.elim.eval σ = .ok ps →
+      Sim (X.eval σ) (v.findLive ps >>= SVal.asValue))
+    (hC : ∀ {v}, s.eval σ = .ok v → Sim (C.eval σ) (cpR σ v qs)) :
+    Sim ((LTerm.ite (isT X) C (.cpok (.save s P w) Q)).eval σ) (cpR σ u qs) := by
+  have hu' := hu
+  obtain ⟨wv, hw, hu⟩ := Res.bind_eq_ok.1 hu
+  obtain ⟨v, hv, hu⟩ := Res.bind_eq_ok.1 hu
+  obtain ⟨ps, hp, hs⟩ := Res.bind_eq_ok.1 hu
+  rw [LTerm.eval, isT_eval, Res.ok_bind]
+  cases hx : X.eval σ with
+  | error e =>
+    simp only [pickBranch, cpok_eval, hu', hq, Res.ok_bind]
+    exact Sim.refl _
+  | ok val =>
+    simp only [pickBranch]
+    obtain ⟨sv, hf, ha⟩ := Res.bind_eq_ok.1 (((hX hv ((hP ps).2 hp)) val).1 hx)
+    cases sv with
+    | prim pa =>
+      cases wv with
+      | int z =>
+        exact Sim.trans (hC hv) (cpR_sim (cps_findLive_savePrim hf hs qs).symm)
+      | bool z =>
+        exact Sim.trans (hC hv) (cpR_sim (cps_findLive_savePrim hf hs qs).symm)
+    | struct _ | array _ _ _ | map _ _ => simp only [SVal.asValue, reduceCtorEq] at ha
+
+end CopyOk
+
+/-- A read below a copy from storage, its storage reads eliminated. -/
+theorem copySelU_sim {σ : State} {s : LStor} {q q' : LPath} (p : List Seg) (a : LSel) {u : LTerm}
+    (hs : Sim (s.okE.eval σ) (s.eval σ >>= fun _ => .ok (.bool true)))
+    (hrd : ∀ (Q : LPath) {v : SVal} {qs : List Seg}, s.eval σ = .ok v → Q.eval σ = .ok qs →
+      Sim ((s.readU Q).eval σ) (v.findLive qs >>= SVal.asValue))
+    (hln : ∀ (Q : LPath) {v : SVal} {qs : List Seg}, s.eval σ = .ok v → Q.eval σ = .ok qs →
+      Sim ((s.lenU Q).eval σ) (v.findLive qs >>= Close.arrLen))
+    (hq : Sim (q'.eval σ) (q.eval σ))
+    (h : copySelG (fun Q => .seq s.okE (.seq (.pok Q) (s.readU Q)))
+      (fun Q => .seq s.okE (.seq (.pok Q) (s.lenU Q))) q' p a = some u) :
+    ∃ t, copySel s q p a = some t ∧ Sim (u.eval σ) (t.eval σ) := by
+  have he := LPath.ext_congr σ hq p
+  cases a with
+  | fld f =>
+    simp only [copySelG] at h
+    split at h
+    · rename_i hl
+      cases h
+      exact ⟨LTerm.find s ((q.ext p).field f), by simp only [copySel, hl, if_true],
+        guard_sim hs (Sim.bind he fun _ => Sim.refl _) fun _ _ hv hq => hrd _ hv hq⟩
+    · cases h
+  | idx t =>
+    simp only [copySelG] at h
+    split at h
+    · rename_i hl
+      cases h
+      exact ⟨LTerm.find s ((q.ext p).at t), by simp only [copySel, hl, if_true],
+        guard_sim hs (Sim.bind he fun _ => Sim.refl _) fun _ _ hv hq => hrd _ hv hq⟩
+    · cases h
+  | size =>
+    simp only [copySelG] at h
+    split at h
+    · rename_i hl
+      cases h
+      exact ⟨LTerm.len s (q.ext p), by simp only [copySel, hl, if_true],
+        guard_sim hs he fun _ _ hv hq => hln _ hv hq⟩
+    · cases h
+
+/-- A test below a copy from storage, its guard hoisted: the storage and the
+path are tested once, before the tests below them. -/
+theorem copyObj_hoist {σ : State} {K P F H L : LTerm} {str : Bool} :
+    Rets ((LTerm.seq K (.seq P (if str then .ite (isT L) .err (.ite (isT F) .err H)
+        else .ite (isT F) .err H))).eval σ) ↔
+      Rets ((if str then LTerm.ite (isT (.seq K (.seq P L))) .err
+          (.ite (isT (.seq K (.seq P F))) .err (.seq K (.seq P H)))
+        else .ite (isT (.seq K (.seq P F))) .err (.seq K (.seq P H))).eval σ) := by
+  cases str <;> simp only [Bool.false_eq_true, ↓reduceIte, seq_rets, ite_isT_rets] <;> grind
+
+/-- A test below a copy from storage, its storage reads eliminated. -/
+theorem copyObjU_rets {σ : State} {s : LStor} {Q : LPath} {F H L : LTerm}
+    (hF : Sim (F.eval σ) ((LTerm.find s Q).eval σ)) (hH : Sim (H.eval σ) ((LTerm.has s Q).eval σ))
+    (hL : Sim (L.eval σ) ((LTerm.len s Q).eval σ)) (str : Bool) :
+    Rets ((if str then LTerm.ite (isT L) .err (.ite (isT F) .err H) else .ite (isT F) .err H).eval σ)
+      ↔ Rets ((if str then structT s Q else refT s Q).eval σ) := by
+  have href : Rets ((LTerm.ite (isT F) .err H).eval σ) ↔ Rets ((refT s Q).eval σ) := by
+    rw [refT, ite_isT_rets, ite_isT_rets, rets_of_sim hF, rets_of_sim hH]
+  cases str with
+  | false => exact href
+  | true =>
+    show Rets ((LTerm.ite (isT L) .err (.ite (isT F) .err H)).eval σ) ↔
+      Rets ((LTerm.ite (isT (.len s Q)) .err (refT s Q)).eval σ)
+    rw [ite_isT_rets σ L, ite_isT_rets σ (.len s Q), rets_of_sim hL, href]
+
+/-- A read after a write to memory, the reader of what is below given. -/
+theorem readU_write_sim {σ : State} {m : LMem} {j : LId} {b : LSel} {v : LMV} {i : LId} {a : LSel}
+    {u : LTerm}
+    (ih : ∀ (i : LId) (a : LSel) {u : LTerm}, m.readU i a = some u →
+      ∃ t, m.readT i a = some t ∧ Sim (u.eval σ) (t.eval σ))
+    (hv : Sim (v.wordU.eval σ) (v.wordT.eval σ))
+    (hb : ∀ w, b = .idx w → Sim (b.idxU.eval σ) (w.eval σ))
+    (h : (LMem.write m j b v).readU i a = some u) :
+    ∃ t, (LMem.write m j b v).readT i a = some t ∧ Sim (u.eval σ) (t.eval σ) := by
+  by_cases hij : i = j
+  · simp only [LMem.readU, LMem.readT, hij, if_true] at h ⊢
+    cases hs : selRel b a with
+    | same =>
+      simp only [hs, Option.some.injEq] at h ⊢
+      subst h
+      exact ⟨_, rfl, hv⟩
+    | apart =>
+      simp only [hs] at h ⊢
+      exact ih j a h
+    | key r w =>
+      obtain ⟨hbw, rfl⟩ := selRel_key hs
+      subst hbw
+      simp only [hs, Option.map_eq_some_iff] at h ⊢
+      obtain ⟨u', hu', rfl⟩ := h
+      obtain ⟨t', ht', hs'⟩ := ih j (.idx r) hu'
+      exact ⟨_, ⟨t', ht', rfl⟩, kite_congr σ (Sim.refl _) (hb w rfl) hv hs'⟩
+  · simp only [LMem.readU, LMem.readT, hij, if_false] at h ⊢
+    exact ih i a h
+
+/-- **A word read below a view** (`findOnCopy`, `selectOnCopyMemPrim`/`Ref`,
+`readRCons`), the reader given. -/
+theorem view_readU_sim {σ : State} {m : LMem} {i : LId} {Q : LPath} {v : SVal} {qs : List Seg}
+    (hv : (LStor.view m i).eval σ = .ok v) (hq : Q.eval σ = .ok qs)
+    (hrd : ∀ (j : LId) (a : LSel) {u : LTerm}, m.readU j a = some u →
+      ∃ t, m.readT j a = some t ∧ Sim (u.eval σ) (t.eval σ)) :
+    Sim (((LStor.view m i).readU Q).eval σ) (v.findLive qs >>= SVal.asValue) := by
+  have hkeep : Sim ((LTerm.find (.view m i) Q).eval σ) (v.findLive qs >>= SVal.asValue) := by
+    simp only [LTerm.eval, hv, hq, Res.ok_bind]
+    exact Sim.refl _
+  obtain ⟨μ, B, cv, hva, rfl⟩ := LStor.eval_view hv
+  simp only [LStor.readU]
+  split
+  · rename_i p a hQ
+    split
+    · rename_i j hw
+      cases hu : m.readU j a with
+      | none => exact hkeep
+      | some u =>
+        obtain ⟨t, ht, hut⟩ := hrd j a hu
+        exact Sim.trans hut (Sim.trans (LMem.readT_sim σ m j a hva.run ht)
+          (view_read_sim hva hQ hq hw))
+    · exact hkeep
+  · exact hkeep
+
+/-- **The length of an array below a view**, the reader given. -/
+theorem view_lenU_sim {σ : State} {m : LMem} {i : LId} {Q : LPath} {v : SVal} {qs : List Seg}
+    (hv : (LStor.view m i).eval σ = .ok v) (hq : Q.eval σ = .ok qs)
+    (hrd : ∀ (j : LId) (a : LSel) {u : LTerm}, m.readU j a = some u →
+      ∃ t, m.readT j a = some t ∧ Sim (u.eval σ) (t.eval σ)) :
+    Sim (((LStor.view m i).lenU Q).eval σ) (v.findLive qs >>= Close.arrLen) := by
+  have hkeep : Sim ((LTerm.len (.view m i) Q).eval σ) (v.findLive qs >>= Close.arrLen) := by
+    simp only [LTerm.eval, hv, hq, Res.ok_bind]
+    exact Sim.refl _
+  obtain ⟨μ, B, cv, hva, rfl⟩ := LStor.eval_view hv
+  simp only [LStor.lenU]
+  split
+  · rename_i p hQ
+    split
+    · rename_i j hw
+      cases hu : m.readU j .size with
+      | none => exact hkeep
+      | some u =>
+        obtain ⟨t, ht, hut⟩ := hrd j .size hu
+        exact Sim.trans hut (Sim.trans (LMem.readT_sim σ m j .size hva.run ht)
+          (view_len_sim hva hQ hq hw))
+    · exact hkeep
+  · exact hkeep
+
+/-- **Whether a location is there below a view**, the readers given. -/
+theorem view_hasU_sim {σ : State} {m : LMem} {i : LId} {Q : LPath} {v : SVal} {qs : List Seg}
+    (hv : (LStor.view m i).eval σ = .ok v) (hq : Q.eval σ = .ok qs)
+    (hrd : ∀ (j : LId) (a : LSel) {u : LTerm}, m.readU j a = some u →
+      ∃ t, m.readT j a = some t ∧ Sim (u.eval σ) (t.eval σ))
+    (hob : ∀ (j : LId) {g : LTerm}, m.objU false j = some g →
+      ∃ g', m.nameG j = some g' ∧ (Rets (g.eval σ) ↔ Rets (g'.eval σ))) :
+    Sim (((LStor.view m i).hasU Q).eval σ) (v.findLive qs >>= fun _ => .ok (.bool true)) := by
+  have hkeep : Sim ((LTerm.has (.view m i) Q).eval σ)
+      (v.findLive qs >>= fun _ => .ok (.bool true)) := by
+    simp only [LTerm.eval, hv, hq, Res.ok_bind]
+    exact Sim.refl _
+  obtain ⟨μ, B, cv, hva, rfl⟩ := LStor.eval_view hv
+  simp only [LStor.hasU]
+  split
+  · rename_i p a hQ
+    split
+    · rename_i j hw
+      split
+      · rename_i W N hW hN
+        obtain ⟨j', hj', hN⟩ := Option.bind_eq_some_iff.1 hN
+        obtain ⟨t, ht, hWt⟩ := hrd j a hW
+        obtain ⟨g', hg', hNg⟩ := hob j' hN
+        exact view_has_sim hva hQ hq hw (Sim.trans hWt (LMem.readT_sim σ m j a hva.run ht))
+          (LMem.readI_sim σ m j a hva.run hj').2
+          (hNg.trans (LMem.nameG_sim σ m j' hva.run hg'))
+      · exact hkeep
+    · exact hkeep
+  · split
+    · rename_i hR
+      match Q, hR, hq with
+      | .root r, hR, hq =>
+        simp only [isViewRoot, beq_iff_eq] at hR
+        subst hR
+        simp only [LPath.eval, Except.ok.injEq] at hq
+        subst hq
+        rw [view_findLive, SVal.findLive_nil]
+        exact Sim.refl _
+      | .field .., hR, _ | .at .., hR, _ => simp only [isViewRoot, Bool.false_eq_true] at hR
+    · exact hkeep
+
+/-- No mapping is below a view (Lean only). -/
+theorem view_mapU_sim {σ : State} {m : LMem} {i : LId} (sh : KShape) {Q : LPath} {v : SVal}
+    {qs : List Seg} (hv : (LStor.view m i).eval σ = .ok v) (hq : Q.eval σ = .ok qs) :
+    Sim (((LStor.view m i).mapU sh Q).eval σ) (v.findLive qs >>= sh.test) := by
+  cases sh with
+  | fixed =>
+    simp only [LStor.mapU, LTerm.eval, hv, hq, Res.ok_bind]
+    exact Sim.refl _
+  | map =>
+    obtain ⟨μ, B, cv, hva, rfl⟩ := LStor.eval_view hv
+    obtain ⟨n, -, hcv⟩ := hva.obj
+    simp only [LStor.mapU]
+    refine Sim.halt (fun _ h => by cases h) fun u h => ?_
+    cases qs with
+    | nil => simp only [SVal.findLive_nil, Res.ok_bind', KShape.test, kmapF, isMapV,
+        Bool.false_eq_true, if_false, reduceCtorEq] at h
+    | cons s rest =>
+      cases s with
+      | field f =>
+        by_cases hf : f = viewRoot
+        · subst hf
+          rw [view_findLive] at h
+          exact view_noMap hcv rest u h
+        · simp only [SVal.findLive, lookupBy, hf, if_false, bind, Except.bind,
+            reduceCtorEq] at h
+      | «at» k => simp only [SVal.findLive, bind, Except.bind, reduceCtorEq] at h
+
+/-! ### The run guard of a memory: soundness -/
+
+section RunGuard
+open MemNames
+
+
+theorem init_okU_rets {σ : State} {g : LTerm} (h : LMem.init.okU = some g) :
+    Rets (g.eval σ) ↔ ∃ r, LMem.init.run σ = .ok r := by
+  simp only [LMem.okU, Option.some.injEq] at h
+  subst h
+  exact iff_of_true (lit_rets σ _) ⟨_, rfl⟩
+
+theorem addM_okU_rets {σ : State} {m : LMem} {k : Nat} {R : RefTy} {g : LTerm}
+    (ih : ∀ {G : LTerm}, m.okU = some G → (Rets (G.eval σ) ↔ ∃ r, m.run σ = .ok r))
+    (h : (LMem.addM m k R).okU = some g) :
+    Rets (g.eval σ) ↔ ∃ r, (LMem.addM m k R).run σ = .ok r := by
+  simp only [LMem.okU] at h
+  split at h
+  · rename_i hc
+    obtain ⟨hk, hR⟩ := hc
+    rw [ih h]
+    constructor
+    · rintro ⟨⟨μ', B'⟩, hr⟩
+      have hl := LMem.run_nAlloc σ m hr
+      obtain ⟨⟨τ, mv⟩, hcp⟩ := (allocOk_cps hR).at μ'
+      obtain ⟨id, rfl⟩ := copy_ref hcp (defaultForTy_ref_ne R)
+      have hkl : k = B'.length := by omega
+      exact ⟨_, by simp only [LMem.run, hr, Res.ok_bind, hkl, if_true, allocDefault,
+        defaultForRef, hcp] <;> rfl⟩
+    · rintro ⟨r, hr⟩
+      obtain ⟨x, hx, -⟩ := Res.bind_eq_ok.1 hr
+      exact ⟨x, hx⟩
+  · cases h
+
+theorem newArr_okU_rets {σ : State} {m : LMem} {k : Nat} {R : RefTy} {n : LTerm} {g : LTerm}
+    (ih : ∀ {G : LTerm}, m.okU = some G → (Rets (G.eval σ) ↔ ∃ r, m.run σ = .ok r))
+    (hn : Sim (n.elim.eval σ) (n.eval σ))
+    (h : (LMem.newArr m k R n).okU = some g) :
+    Rets (g.eval σ) ↔ ∃ r, (LMem.newArr m k R n).run σ = .ok r := by
+  simp only [LMem.okU] at h
+  split at h
+  · rename_i hc
+    obtain ⟨hk, hR⟩ := hc
+    obtain ⟨G, hG, rfl⟩ := Option.map_eq_some_iff.1 h
+    have hi : Rets ((isIntL n.elim).eval σ) ↔ ∃ i, n.eval σ = .ok (.int i) :=
+      (isIntL_ret σ _).trans ⟨fun ⟨i, h⟩ => ⟨i, (hn _).1 h⟩, fun ⟨i, h⟩ => ⟨i, (hn _).2 h⟩⟩
+    rw [seq_rets, ih hG, hi]
+    constructor
+    · rintro ⟨⟨⟨μ', B'⟩, hr⟩, c, hc⟩
+      have hl := LMem.run_nAlloc σ m hr
+      obtain ⟨hcp, hnp⟩ := allocOk_newArr hR c
+      obtain ⟨⟨τ, mv⟩, hcopy⟩ := hcp.at μ'
+      obtain ⟨id, rfl⟩ := copy_ref hcopy hnp
+      have hkl : k = B'.length := by omega
+      exact ⟨_, by simp only [LMem.run, hc, hr, Res.ok_bind, Value.asInt, hkl, if_true, hcopy,
+        MVal.asRef] <;> rfl⟩
+    · rintro ⟨r, hr⟩
+      obtain ⟨μ', B', id, c, hr', -, hn', -, -⟩ := LMem.run_newArr (μ := r.1) (B := r.2) hr
+      exact ⟨⟨_, hr'⟩, c, hn'⟩
+  · cases h
+
+/-- The guard of a copy's run guard, hoisted: the storage and the path are
+tested once, before the copy test and the word test. -/
+theorem copyOk_hoist {σ : State} {G K P C F T : LTerm} :
+    Rets ((LTerm.seq G (.seq K (.seq P (.seq C (.ite (isT F) .err T))))).eval σ) ↔
+      Rets ((LTerm.seq G (.seq (.seq K (.seq P C))
+        (.ite (isT (.seq K (.seq P F))) .err T))).eval σ) := by
+  simp only [seq_rets, ite_isT_rets]
+  grind
+
+theorem copySt_okU_rets {σ : State} {m : LMem} {k : Nat} {s : LStor} {q : LPath} {g : LTerm}
+    (ih : ∀ {G : LTerm}, m.okU = some G → (Rets (G.eval σ) ↔ ∃ r, m.run σ = .ok r))
+    (hC : Sim ((LTerm.seq s.okE (.seq (.pok q.elim) (s.cpokU q.elim))).eval σ)
+      ((LTerm.cpok s q).eval σ))
+    (hF : Sim ((LTerm.seq s.okE (.seq (.pok q.elim) (s.readU q.elim))).eval σ)
+      ((LTerm.find s q).eval σ))
+    (h : (LMem.copySt m k s q).okU = some g) :
+    Rets (g.eval σ) ↔ ∃ r, (LMem.copySt m k s q).run σ = .ok r := by
+  simp only [LMem.okU] at h
+  split at h
+  · rename_i hk
+    obtain ⟨G, hG, rfl⟩ := Option.map_eq_some_iff.1 h
+    rw [copyOk_hoist, seq_rets, seq_rets, ih hG, rets_of_sim hC, ite_isT_rets, rets_of_sim hF]
+    simp only [lit_rets, and_true]
+    constructor
+    · rintro ⟨⟨⟨μ', B'⟩, hr⟩, ⟨a, hc⟩, hf⟩
+      rw [cpok_eval] at hc
+      obtain ⟨v, hv, hc⟩ := Res.bind_eq_ok.1 hc
+      obtain ⟨qs, hq, hc⟩ := Res.bind_eq_ok.1 hc
+      obtain ⟨-, sv, hsv, hcps⟩ := cpR_ok.1 hc
+      have hnp : ∀ p, sv ≠ .prim p := by
+        rintro p rfl
+        obtain ⟨a, ha⟩ : ∃ a, (SVal.prim p).asValue = .ok a := by cases p <;> exact ⟨_, rfl⟩
+        exact hf ⟨a, by simp only [LTerm.eval, hv, hq, hsv, Res.ok_bind, ha]⟩
+      obtain ⟨⟨τ, mv⟩, hcopy⟩ := hcps.at μ'
+      obtain ⟨id, rfl⟩ := copy_ref hcopy hnp
+      have hkl : k = B'.length := by have := LMem.run_nAlloc σ m hr; omega
+      exact ⟨_, by simp only [LMem.run, hv, hq, hsv, hr, Res.ok_bind, hkl, if_true, hcopy,
+        MVal.asRef] <;> rfl⟩
+    · rintro ⟨r, hrun⟩
+      obtain ⟨μ', B', id, hr', -, ⟨c, rfl⟩, -⟩ := LMem.run_copySt (μ := r.1) (B := r.2) hrun
+      obtain ⟨v, qs, w, μ', hv, hq, hw, hc⟩ := c
+      refine ⟨⟨_, hr'⟩, ⟨.bool true, ?_⟩, ?_⟩
+      · rw [cpok_eval, hv, Res.ok_bind, hq, Res.ok_bind]
+        exact cpR_ok.2 ⟨rfl, w, hw, μ', _, hc⟩
+      · rintro ⟨a, ha⟩
+        simp only [LTerm.eval, hv, hq, hw, Res.ok_bind] at ha
+        cases w with
+        | prim p => cases p <;> simp only [copyStToM, Except.ok.injEq, Prod.mk.injEq,
+            reduceCtorEq, and_false] at hc
+        | struct _ | array _ _ _ | map _ _ => simp only [SVal.asValue, reduceCtorEq] at ha
+  · cases h
+
+theorem wrGuard_sim {σ : State} {m : LMem} {j : LId} {b : LSel} {W : LTerm}
+    (ihO : ∀ (str : Bool) (i : LId) {g : LTerm}, m.objU str i = some g →
+      ∃ g', (if str then m.structG i else m.nameG i) = some g' ∧
+        (Rets (g.eval σ) ↔ Rets (g'.eval σ)))
+    (ihR : ∀ (i : LId) (a : LSel) {u : LTerm}, m.readU i a = some u →
+      ∃ t, m.readT i a = some t ∧ Sim (u.eval σ) (t.eval σ))
+    (hb : ∀ w, b = .idx w → Sim (b.idxU.eval σ) (w.eval σ))
+    (h : wrGuard (fun _ => m.objU true j) (fun _ => m.readU j .size) b.idxU b = some W) :
+    ∃ g', m.writeG j b = some g' ∧ (Rets (W.eval σ) ↔ Rets (g'.eval σ)) := by
+  cases b with
+  | fld f =>
+    obtain ⟨g', hg', hr⟩ := ihO true j h
+    exact ⟨g', by simpa only [LMem.writeG, ↓reduceIte] using hg', hr⟩
+  | idx t =>
+    simp only [wrGuard, Option.map_eq_some_iff] at h
+    obtain ⟨u, hu, rfl⟩ := h
+    obtain ⟨t', ht', hs⟩ := ihR j .size hu
+    have hk := hb t rfl
+    refine ⟨ltR t t', by simp only [LMem.writeG, LMem.lenT, ht', Option.map_some], ?_⟩
+    rw [ltR_rets, ltR_rets]
+    constructor
+    · rintro ⟨c, d, hc, hd, h0, h1⟩; exact ⟨c, d, (hk _).1 hc, (hs _).1 hd, h0, h1⟩
+    · rintro ⟨c, d, hc, hd, h0, h1⟩; exact ⟨c, d, (hk _).2 hc, (hs _).2 hd, h0, h1⟩
+  | size => simp only [wrGuard, reduceCtorEq] at h
+
+theorem valGuard_sim {σ : State} {m : LMem} {μ : State} {B : Births} {v : LMV} {V : LTerm}
+    (hr : m.run σ = .ok (μ, B))
+    (ihO : ∀ (str : Bool) (i : LId) {g : LTerm}, m.objU str i = some g →
+      ∃ g', (if str then m.structG i else m.nameG i) = some g' ∧
+        (Rets (g.eval σ) ↔ Rets (g'.eval σ)))
+    (hv : Sim (v.wordU.eval σ) (v.wordT.eval σ))
+    (h : valGuard (.seq v.wordU (.lit (.bool true)))
+      (fun _ => v.refId?.bind fun j' => m.objU false j') v = some V) :
+    Rets (V.eval σ) ↔ ∃ mv, v.eval σ B = .ok mv := by
+  cases v with
+  | word t =>
+    simp only [valGuard, Option.some.injEq] at h
+    subst h
+    rw [seq_rets, rets_of_sim hv]
+    simp only [lit_rets, and_true, LMV.wordT, LMV.eval]
+    constructor
+    · rintro ⟨x, hx⟩; exact ⟨_, by rw [hx]; rfl⟩
+    · rintro ⟨mv, h⟩
+      obtain ⟨x, hx, -⟩ := Res.bind_eq_ok.1 h
+      exact ⟨x, hx⟩
+  | ref j' =>
+    simp only [valGuard, LMV.refId?, Option.bind_some] at h
+    obtain ⟨g', hg', hrg⟩ := ihO false j' h
+    simp only [Bool.false_eq_true, ↓reduceIte] at hg'
+    rw [hrg, LMem.nameG_sim σ m j' hr hg']
+    simp only [LMV.eval]
+    constructor
+    · rintro ⟨n, hn⟩; exact ⟨_, by rw [hn]; rfl⟩
+    · rintro ⟨mv, h⟩
+      obtain ⟨n, hn, -⟩ := Res.bind_eq_ok.1 h
+      exact ⟨n, hn⟩
+
+theorem write_okU_rets {σ : State} {m : LMem} {j : LId} {b : LSel} {v : LMV} {g : LTerm}
+    (ih : ∀ {G : LTerm}, m.okU = some G → (Rets (G.eval σ) ↔ ∃ r, m.run σ = .ok r))
+    (ihO : ∀ (str : Bool) (i : LId) {g : LTerm}, m.objU str i = some g →
+      ∃ g', (if str then m.structG i else m.nameG i) = some g' ∧
+        (Rets (g.eval σ) ↔ Rets (g'.eval σ)))
+    (ihR : ∀ (i : LId) (a : LSel) {u : LTerm}, m.readU i a = some u →
+      ∃ t, m.readT i a = some t ∧ Sim (u.eval σ) (t.eval σ))
+    (hv : Sim (v.wordU.eval σ) (v.wordT.eval σ))
+    (hb : ∀ w, b = .idx w → Sim (b.idxU.eval σ) (w.eval σ))
+    (h : (LMem.write m j b v).okU = some g) :
+    Rets (g.eval σ) ↔ ∃ r, (LMem.write m j b v).run σ = .ok r := by
+  simp only [LMem.okU, okWrite, Option.bind_eq_some_iff, Option.map_eq_some_iff] at h
+  obtain ⟨G, hG, W, hW, V, hV, rfl⟩ := h
+  rw [seq_rets, seq_rets, seq_rets, ih hG]
+  simp only [lit_rets, and_true]
+  obtain ⟨g', hg', hWg⟩ := wrGuard_sim ihO ihR hb hW
+  rw [hWg]
+  constructor
+  · rintro ⟨⟨⟨μ, B⟩, hr⟩, hw, hvr⟩
+    obtain ⟨mv, hmv⟩ := (valGuard_sim hr ihO hv hV).1 hvr
+    obtain ⟨n, ad, μ₁, hn, had, hwr⟩ := (LMem.writeG_sim σ hr j b hg' mv).1 hw
+    exact ⟨_, by simp only [LMem.run, hr, Res.ok_bind, hn, had, hmv, hwr] <;> rfl⟩
+  · rintro ⟨r, hrun⟩
+    obtain ⟨μ', n', ad, mv, hr, hn, had, hmv, hwr⟩ := LMem.run_write (μ := r.1) (B := r.2) hrun
+    exact ⟨⟨_, hr⟩, (LMem.writeG_sim σ hr j b hg' mv).2 ⟨n', ad, _, hn, had, hwr⟩,
+      (valGuard_sim hr ihO hv hV).2 ⟨mv, hmv⟩⟩
+
+/-- **The guard of a view returns exactly where the view does** (Lean only):
+the memory runs, the name denotes, and a memory whose references all name
+older roots holds no cycle, so the copy back returns. -/
+theorem view_okE_sim {σ : State} {m : LMem} {i : LId}
+    (ih : ∀ {G : LTerm}, m.okU = some G → (Rets (G.eval σ) ↔ ∃ r, m.run σ = .ok r))
+    (ihN : ∀ {g : LTerm}, m.objU false i = some g →
+      ∃ g', (if false then m.structG i else m.nameG i) = some g' ∧
+        (Rets (g.eval σ) ↔ Rets (g'.eval σ))) :
+    Sim ((LStor.view m i).okE.eval σ) ((LStor.view m i).eval σ >>= fun _ => .ok (.bool true)) := by
+  have hkeep : Sim ((LTerm.sok (.view m i)).eval σ)
+      ((LStor.view m i).eval σ >>= fun _ => .ok (.bool true)) := Sim.refl _
+  rw [LStor.okE]
+  split
+  · rename_i hd
+    unfold okView
+    cases hG : m.okU with
+    | none => exact hkeep
+    | some G =>
+      cases hN : m.objU false i with
+      | none => exact hkeep
+      | some N =>
+        obtain ⟨g', hg', hNg⟩ := ihN hN
+        simp only [Bool.false_eq_true, ↓reduceIte] at hg'
+        intro a
+        constructor
+        · intro he
+          have hr : Rets ((LTerm.seq G (.seq N (.lit (.bool true)))).eval σ) := ⟨a, he⟩
+          have ha : a = .bool true := by
+            simp only [LTerm.eval, Res.bind_eq_ok, Except.ok.injEq] at he
+            obtain ⟨_, _, _, _, rfl⟩ := he
+            rfl
+          subst ha
+          rw [seq_rets, seq_rets, ih hG, hNg] at hr
+          obtain ⟨⟨⟨μ, B⟩, hrun⟩, hn, -⟩ := hr
+          obtain ⟨x, hx⟩ := (LMem.nameG_sim σ m i hrun hg').1 hn
+          have hdesc := LMem.refDesc_desc σ m hrun hd
+          obtain ⟨_, -, -, -, hlo, hhi⟩ :=
+            Births.eval_interval (LMem.run_births σ m hrun) (LId.evalR_ok.1 hx)
+          obtain ⟨cv, hcv⟩ := copyMem_ok_desc hdesc hlo hhi
+          simp only [LStor.eval, hrun, Res.ok_bind, hx, hcv]
+        · intro he
+          obtain ⟨_, hv, ha⟩ := Res.bind_eq_ok.1 he
+          cases ha
+          obtain ⟨μ, B, cv, hva, -⟩ := LStor.eval_view hv
+          obtain ⟨x, hx, -⟩ := hva.obj
+          obtain ⟨_, h1⟩ := (ih hG).2 ⟨_, hva.run⟩
+          obtain ⟨_, h2⟩ := hNg.2 ((LMem.nameG_sim σ m i hva.run hg').2 ⟨x, hx⟩)
+          simp only [LTerm.eval, h1, h2, Res.ok_bind]
+  · exact hkeep
+
+end RunGuard
+
 mutual
 
 /-- **Eliminating the reads of writes keeps what a term returns.**
@@ -6615,6 +7422,8 @@ theorem LTerm.elim_sim (σ : State) : (t : LTerm) → Sim (t.elim.eval σ) (t.ev
         · simp only [h, if_true]; exact LTerm.elim_sim σ t
         · simp only [h, if_false]; exact LTerm.elim_sim σ e
   | .zero a => Sim.bind (LTerm.elim_sim σ a) fun _ => Sim.refl _
+  | .cpok s q => guard_sim (LStor.okE_sim σ s) (LPath.elim_sim σ q)
+      fun _ _ hv hq => LStor.cpokU_sim σ s q.elim hv hq
 termination_by structural x => x
 
 /-- Eliminating keeps the path a path term names: `people[balances[a]]` after
@@ -6640,6 +7449,8 @@ theorem LStor.okE_sim (σ : State) :
   | .copy s P src SQ => copy_okE_sim (LStor.okE_sim σ s) (LStor.okE_sim σ src) (LPath.elim_sim σ P)
       (LPath.elim_sim σ SQ) (fun hv hp => LStor.hasU_sim σ s P.elim hv hp)
       (fun hv hp => LStor.hasU_sim σ src SQ.elim hv hp)
+  | .view m _ => view_okE_sim (fun hG => LMem.okU_sim σ m hG)
+      fun hN => LMem.objU_sim σ m false _ hN
 termination_by structural x => x
 
 /-- **What a read after writes returns**, peeled one write at a time. -/
@@ -6662,6 +7473,8 @@ theorem LStor.readU_sim (σ : State) : (s : LStor) → ∀ (Q : LPath) {v : SVal
       (LPath.elim_sim σ SQ) (fun hv hq => LStor.readU_sim σ s Q hv hq)
       (fun Q' _ _ hv hq => LStor.readU_sim σ src Q' hv hq)
       (fun Q' _ _ hv hq => LStor.mapU_sim σ src .map Q' hv hq)
+  | .view m _, Q, v, qs, hv, hq =>
+    view_readU_sim hv hq fun j a _ h => LMem.readU_sim σ m j a h
 termination_by structural x => x
 
 /-- **What the slot a `push()` recycles holds.** -/
@@ -6686,6 +7499,7 @@ theorem LStor.slotU_sim (σ : State) : (s : LStor) → ∀ (P : LPath) (rest : L
   | .arr .push .. => fun _ _ _ _ _ _ _ _ _ _ _ _ _ _ hopq => by rw [LStor.slotU]; exact hopq
   | .arr (.slot _) .. => fun _ _ _ _ _ _ _ _ _ _ _ _ _ _ hopq => by rw [LStor.slotU]; exact hopq
   | .copy .. => fun _ _ _ _ _ _ _ _ _ _ _ _ _ _ hopq => by rw [LStor.slotU]; exact hopq
+  | .view .. => fun _ _ _ _ _ _ _ _ _ _ _ _ _ _ hopq => by rw [LStor.slotU]; exact hopq
 termination_by structural x => x
 
 /-- **Whether a location is there after writes**, peeled one write at a time. -/
@@ -6707,6 +7521,9 @@ theorem LStor.hasU_sim (σ : State) : (s : LStor) → ∀ (Q : LPath) {v : SVal}
       (LPath.elim_sim σ SQ) (fun hv hq => LStor.hasU_sim σ s Q hv hq)
       (fun Q' _ _ hv hq => LStor.hasU_sim σ src Q' hv hq)
       (fun Q' _ _ hv hq => LStor.mapU_sim σ src .map Q' hv hq)
+  | .view m _, Q, v, qs, hv, hq =>
+    view_hasU_sim hv hq (fun j a _ h => LMem.readU_sim σ m j a h)
+      fun j _ h => LMem.objU_sim σ m false j h
 termination_by structural x => x
 
 /-- **Whether a mapping is there after writes**, peeled one write at a time. -/
@@ -6728,6 +7545,7 @@ theorem LStor.mapU_sim (σ : State) : (s : LStor) → ∀ (sh : KShape) (Q : LPa
       (LPath.elim_sim σ SQ) (fun hv hq => LStor.mapU_sim σ s sh Q hv hq)
       (fun Q' _ _ hv hq => LStor.mapU_sim σ src sh Q' hv hq)
       (fun Q' _ _ hv hq => LStor.mapU_sim σ src .map Q' hv hq)
+  | .view _ _, sh, Q, v, qs, hv, hq => view_mapU_sim sh hv hq
 termination_by structural x => x
 
 /-- **The length of an array after writes**, peeled one write at a time. -/
@@ -6748,6 +7566,130 @@ theorem LStor.lenU_sim (σ : State) : (s : LStor) → ∀ (Q : LPath) {v : SVal}
       (LPath.elim_sim σ SQ) (fun hv hq => LStor.lenU_sim σ s Q hv hq)
       (fun Q' _ _ hv hq => LStor.lenU_sim σ src Q' hv hq)
       (fun Q' _ _ hv hq => LStor.mapU_sim σ src .map Q' hv hq)
+  | .view m _, Q, v, qs, hv, hq =>
+    view_lenU_sim hv hq fun j a _ h => LMem.readU_sim σ m j a h
+termination_by structural x => x
+
+/-- **Whether a copy into memory succeeds, after writes**, peeled one word
+write at a time. -/
+theorem LStor.cpokU_sim (σ : State) : (s : LStor) → ∀ (Q : LPath) {v : SVal} {qs : List Seg},
+    s.eval σ = .ok v → Q.eval σ = .ok qs → Sim ((s.cpokU Q).eval σ) (cpR σ v qs)
+  | .init, _, _, _, hv, hq => by rw [LStor.cpokU]; exact cpok_keep_sim hv hq
+  | .save s P _, Q, _, _, hu, hq => by
+    rw [LStor.cpokU]
+    exact save_cpok_sim hu hq (LPath.elim_sim σ P) (fun hv hp => LStor.readU_sim σ s P.elim hv hp)
+      fun hv => LStor.cpokU_sim σ s Q hv hq
+  | .del .., _, _, _, hv, hq | .arr .., _, _, _, hv, hq | .copy .., _, _, _, hv, hq
+  | .view .., _, _, _, hv, hq => by rw [LStor.cpokU]; exact cpok_keep_sim hv hq
+termination_by structural x => x
+
+/-- An index written to memory, eliminated, returns what it did. -/
+theorem LSel.idxU_sim (σ : State) : (b : LSel) → ∀ w, b = .idx w → Sim (b.idxU.eval σ) (w.eval σ)
+  | .idx w', w, hb => by
+    simp only [LSel.idx.injEq] at hb
+    subst hb
+    exact LTerm.elim_sim σ w'
+  | .fld _, _, hb => nomatch hb
+  | .size, _, hb => nomatch hb
+termination_by structural x => x
+
+/-- A word written to memory, eliminated, returns what it did. -/
+theorem LMV.wordU_sim (σ : State) : (v : LMV) → Sim (v.wordU.eval σ) (v.wordT.eval σ)
+  | .word t => LTerm.elim_sim σ t
+  | .ref _ => Sim.refl _
+termination_by structural x => x
+
+/-- **The memory reader of the elimination gives what `LMem.readT` gives.** -/
+theorem LMem.readU_sim (σ : State) : (m : LMem) → ∀ (i : LId) (a : LSel) {u : LTerm},
+    m.readU i a = some u → ∃ t, m.readT i a = some t ∧ Sim (u.eval σ) (t.eval σ)
+  | .init, _, _, _, h => by simp only [LMem.readU, reduceCtorEq] at h
+  | .addM m k R, i, a, u, h => by
+    by_cases hk : i.root = k
+    · simp only [LMem.readU, LMem.readT, hk, if_true, Option.some.injEq] at h ⊢
+      subst h
+      exact ⟨_, rfl, Sim.refl _⟩
+    · simp only [LMem.readU, LMem.readT, hk, if_false] at h ⊢
+      exact LMem.readU_sim σ m i a h
+  | .newArr m k R n, i, a, u, h => by
+    by_cases hk : i.root = k
+    · simp only [LMem.readU, LMem.readT, hk, if_true, Option.some.injEq] at h ⊢
+      subst h
+      exact ⟨_, rfl, newSel_congr σ R (LTerm.elim_sim σ n) i.path a⟩
+    · simp only [LMem.readU, LMem.readT, hk, if_false] at h ⊢
+      exact LMem.readU_sim σ m i a h
+  | .copySt m k s q, i, a, u, h => by
+    by_cases hk : i.root = k
+    · simp only [LMem.readU, LMem.readT, hk, if_true] at h ⊢
+      exact copySelU_sim i.path a (LStor.okE_sim σ s) (fun Q _ _ hv hq => LStor.readU_sim σ s Q hv hq)
+        (fun Q _ _ hv hq => LStor.lenU_sim σ s Q hv hq) (LPath.elim_sim σ q) h
+    · simp only [LMem.readU, LMem.readT, hk, if_false] at h ⊢
+      exact LMem.readU_sim σ m i a h
+  | .write m j b v, i, a, u, h =>
+    readU_write_sim (fun i a _ h => LMem.readU_sim σ m i a h) (LMV.wordU_sim σ v)
+      (LSel.idxU_sim σ b) h
+termination_by structural x => x
+
+/-- **The tests of names in the elimination agree with `nameG` and `structG`.** -/
+theorem LMem.objU_sim (σ : State) : (m : LMem) → ∀ (str : Bool) (i : LId) {g : LTerm},
+    m.objU str i = some g → ∃ g', (if str then m.structG i else m.nameG i) = some g' ∧
+      (Rets (g.eval σ) ↔ Rets (g'.eval σ))
+  | .init, _, _, _, h => by simp only [LMem.objU, reduceCtorEq] at h
+  | .addM m k R, str, i, g, h => by
+    by_cases hk : i.root = k
+    · simp only [LMem.objU, hk, if_true, Option.some.injEq] at h
+      subst h
+      cases str <;> exact ⟨_, by simp only [LMem.structG, LMem.nameG, hk, ↓reduceIte, Bool.false_eq_true], Iff.rfl⟩
+    · simp only [LMem.objU, hk, if_false] at h
+      obtain ⟨g', hg', hr⟩ := LMem.objU_sim σ m str i h
+      cases str <;> exact ⟨g', by simpa only [LMem.structG, LMem.nameG, hk, if_false] using hg', hr⟩
+  | .newArr m k R n, str, i, g, h => by
+    by_cases hk : i.root = k
+    · simp only [LMem.objU, hk, if_true, Option.some.injEq] at h
+      subst h
+      cases str <;> exact ⟨_, by simp only [LMem.structG, LMem.nameG, hk, ↓reduceIte,
+        Bool.false_eq_true], rets_of_sim (newObj_congr σ _ R (LTerm.elim_sim σ n) i.path)⟩
+    · simp only [LMem.objU, hk, if_false] at h
+      obtain ⟨g', hg', hr⟩ := LMem.objU_sim σ m str i h
+      cases str <;> exact ⟨g', by simpa only [LMem.structG, LMem.nameG, hk, if_false] using hg', hr⟩
+  | .copySt m k s q, str, i, g, h => by
+    by_cases hk : i.root = k
+    · simp only [LMem.objU, hk, if_true] at h
+      split at h
+      · rename_i hl
+        simp only [Option.some.injEq] at h
+        subst h
+        have he := LPath.ext_congr σ (LPath.elim_sim σ q) i.path
+        refine ⟨if str then structT s (q.ext i.path) else refT s (q.ext i.path), ?_,
+          copyObj_hoist.trans <|
+          copyObjU_rets (guard_sim (LStor.okE_sim σ s) he fun _ _ hv hq => LStor.readU_sim σ s _ hv hq)
+            (guard_sim (LStor.okE_sim σ s) he fun _ _ hv hq => LStor.hasU_sim σ s _ hv hq)
+            (guard_sim (LStor.okE_sim σ s) he fun _ _ hv hq => LStor.lenU_sim σ s _ hv hq) str⟩
+        cases str <;> simp only [LMem.structG, LMem.nameG, hk, hl, if_true, Bool.false_eq_true,
+          if_false]
+      · cases h
+    · simp only [LMem.objU, hk, if_false] at h
+      obtain ⟨g', hg', hr⟩ := LMem.objU_sim σ m str i h
+      cases str <;> exact ⟨g', by simpa only [LMem.structG, LMem.nameG, hk, if_false] using hg', hr⟩
+  | .write m _ _ _, str, i, g, h => by
+    simp only [LMem.objU] at h
+    obtain ⟨g', hg', hr⟩ := LMem.objU_sim σ m str i h
+    cases str <;> exact ⟨g', by simpa only [LMem.structG, LMem.nameG] using hg', hr⟩
+termination_by structural x => x
+
+/-- **The run guard of a memory returns exactly where the run does.** -/
+theorem LMem.okU_sim (σ : State) : (m : LMem) → ∀ {g : LTerm}, m.okU = some g →
+    (Rets (g.eval σ) ↔ ∃ r, m.run σ = .ok r)
+  | .init, _, h => init_okU_rets h
+  | .addM m _ _, _, h => addM_okU_rets (fun hG => LMem.okU_sim σ m hG) h
+  | .newArr m _ _ n, _, h => newArr_okU_rets (fun hG => LMem.okU_sim σ m hG) (LTerm.elim_sim σ n) h
+  | .copySt m _ s q, _, h => copySt_okU_rets (fun hG => LMem.okU_sim σ m hG)
+      (guard_sim (LStor.okE_sim σ s) (LPath.elim_sim σ q)
+        fun _ _ hv hq => LStor.cpokU_sim σ s q.elim hv hq)
+      (guard_sim (LStor.okE_sim σ s) (LPath.elim_sim σ q)
+        fun _ _ hv hq => LStor.readU_sim σ s q.elim hv hq) h
+  | .write m _ b v, _, h => write_okU_rets (fun hG => LMem.okU_sim σ m hG)
+      (fun str i _ h => LMem.objU_sim σ m str i h) (fun i a _ h => LMem.readU_sim σ m i a h)
+      (LMV.wordU_sim σ v) (LSel.idxU_sim σ b) h
 termination_by structural x => x
 end
 

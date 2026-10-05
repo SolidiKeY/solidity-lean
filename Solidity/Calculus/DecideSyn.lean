@@ -63,7 +63,7 @@ def LTerm.strict : LTerm → List LTerm
   | t@(.sok s) => t :: s.strict
   | t@(.pok q) => t :: q.strict
   | t@(.seq d a) => t :: d.strict ++ a.strict
-  | t@(.orElse _ _) => [t]
+  | t@(.orElse _ _) | t@(.cpok _ _) => [t]
   | t@(.kite a b _ _) => t :: a.strict ++ b.strict
 
 /-- The terms a path cannot be evaluated without: its keys. -/
@@ -79,6 +79,7 @@ def LStor.strict : LStor → List LTerm
   | .del s q => s.strict ++ q.strict
   | .arr _ s q w => w.strict ++ s.strict ++ q.strict
   | .copy s q src sq => src.strict ++ sq.strict ++ s.strict ++ q.strict
+  | .view _ _ => []
 
 end
 
@@ -172,7 +173,7 @@ theorem LTerm.strict_returns {σ : State} : (t : LTerm) → Returns σ t →
     · exact ⟨v, by simp only [LTerm.eval]; exact h⟩
     · exact LTerm.strict_returns d ⟨x, hd⟩ u hu
     · exact LTerm.strict_returns a ⟨v, ha⟩ u hu
-  | .orElse _ _, h, u, hu => by
+  | .orElse _ _, h, u, hu | .cpok _ _, h, u, hu => by
     simp only [LTerm.strict, List.mem_singleton] at hu; subst hu; exact h
   | .kite a b t e, ⟨v, h⟩, u, hu => by
     simp only [LTerm.strict, List.mem_cons, List.mem_append] at hu
@@ -253,6 +254,7 @@ theorem LStor.strict_returns {σ : State} : (s : LStor) → (∃ sv, s.eval σ =
     · exact LPath.strict_returns sq ⟨b, hb⟩ u hu
     · exact LStor.strict_returns s ⟨y, hs⟩ u hu
     · exact LPath.strict_returns q ⟨z, hq⟩ u hu
+  | .view _ _, _, u, hu => by simp only [LStor.strict, List.not_mem_nil] at hu
 
 end
 
@@ -295,6 +297,7 @@ def LTerm.core (ne : Keys) : LTerm → LTerm
   | .sok s => .sok (s.core ne)
   | .pok q => .pok (q.core ne)
   | .orElse a b => .orElse a (b.core ne)
+  | .cpok s q => .cpok s q
   | .kite a b t e =>
     if (true, a, b) ∈ ne ∨ (true, b, a) ∈ ne then t.core ne
     else if (false, a, b) ∈ ne ∨ (false, b, a) ∈ ne then e.core ne
@@ -313,6 +316,7 @@ def LStor.core (ne : Keys) : LStor → LStor
   | .del s q => .del (s.core ne) (q.core ne)
   | .arr op s q w => .arr op (s.core ne) (q.core ne) (w.core ne)
   | .copy s q src sq => .copy (s.core ne) (q.core ne) (src.core ne) (sq.core ne)
+  | .view m i => .view m i
 
 end
 
@@ -337,7 +341,7 @@ mutual
 theorem LTerm.core_eval {σ : State} {ne : Keys} (hne : Apart σ ne) :
     (t : LTerm) → ∀ {v : Value}, t.eval σ = .ok v →
     (t.core ne).eval σ = .ok v
-  | .lit _, _, h | .var _, _, h | .err, _, h | .env _, _, h => h
+  | .lit _, _, h | .var _, _, h | .err, _, h | .env _, _, h | .cpok _ _, _, h => h
   | .seq d a, v, h => by
     simp only [LTerm.eval] at h
     obtain ⟨_, -, ha⟩ := Res.bind_eq_ok.1 h
@@ -486,6 +490,7 @@ theorem LStor.core_eval {σ : State} {ne : Keys} (hne : Apart σ ne) :
     simp only [LStor.core, LStor.eval, LStor.core_eval hne src ha, LPath.core_eval hne sq hb,
       LStor.core_eval hne s hs, LPath.core_eval hne q hq, Res.ok_bind, hn]
     exact h
+  | .view _ _, _, h => h
 
 end
 
@@ -612,7 +617,7 @@ theorem LTerm.arith_eval {σ : State} : (t : LTerm) → ∀ {v : Value}, t.eval 
     exact evalBinop_congr hv (fun _ hw => LTerm.arith_eval b hw)
   | .lit _, _, h | .var _, _, h | .err, _, h | .env _, _, h | .unop .., _, h | .ite .., _, h
   | .zero _, _, h | .find .., _, h | .has .., _, h | .kmap .., _, h | .len .., _, h | .sok _, _, h | .pok _, _, h
-  | .seq .., _, h | .orElse .., _, h | .kite .., _, h | .findP .., _, h => h
+  | .seq .., _, h | .orElse .., _, h | .kite .., _, h | .findP .., _, h | .cpok .., _, h => h
 
 /-- Two terms that return, with one value: equal once their guards are
 dropped and their arithmetic cancelled. -/
@@ -705,7 +710,8 @@ theorem LTerm.isIntLit_int {σ : State} : (t : LTerm) → t.isIntLit = true →
   | .env _, _ => ⟨_, rfl⟩
   | .lit (.bool _), h | .var _, h | .binop .., h | .unop .., h | .ite .., h | .find .., h
   | .has .., h | .kmap .., h | .len .., h | .sok _, h | .pok _, h | .seq .., h | .orElse .., h
-  | .kite .., h | .zero _, h | .err, h | .findP .., h => by simp [LTerm.isIntLit] at h
+  | .kite .., h | .zero _, h | .err, h | .findP .., h | .cpok .., h => by
+    simp only [LTerm.isIntLit, Bool.false_eq_true] at h
 
 /-- A term `known` shows is an integer: one whatever the state, or a key of a
 path whose `ok(q)` is known to return. -/
@@ -747,7 +753,7 @@ def LTerm.rets (known : List LTerm) (ne : Keys) : LTerm → Bool
   | .findP s q => (LTerm.findP s q).known known ne || (LTerm.find s q).known known ne
   | t@(.lit _) | t@(.var _) | t@(.unop ..) | t@(.ite ..) | t@(.find ..)
   | t@(.has ..) | t@(.kmap ..) | t@(.len ..) | t@(.sok _) | t@(.pok _) | t@(.orElse ..)
-  | t@(.zero _) | t@.err | t@(.env _) => t.known known ne
+  | t@(.zero _) | t@.err | t@(.env _) | t@(.cpok ..) => t.known known ne
 
 theorem LTerm.rets_returns {σ : State} {known : List LTerm} {ne : Keys}
     (hk : ∀ u ∈ known, Returns σ u) (hne : Apart σ ne) :
@@ -824,7 +830,7 @@ theorem LTerm.rets_returns {σ : State} {known : List LTerm} {ne : Keys}
       exact ⟨v, by simp only [LTerm.eval, hs, hq, Res.ok_bind, SVal.find_of_findLive hw, hv]⟩
   | .lit _, h | .var _, h | .unop .., h | .ite .., h | .find .., h | .has .., h
   | .kmap .., h | .len .., h | .sok _, h | .pok _, h | .orElse .., h | .zero _, h | .err, h
-  | .env _, h => LTerm.known_returns hk hne _ h
+  | .env _, h | .cpok .., h => LTerm.known_returns hk hne _ h
 
 /-- What a premise tells: the terms it shows return, the pairs it keeps
 apart.  A conjunction tells what both conjuncts do. -/

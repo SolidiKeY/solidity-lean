@@ -208,25 +208,14 @@ const DANGLING =
   "next write (`SymB.onWrite`), and the write through it lands past the live end, which " +
   "the reduction's live storage does not reach";
 
-/** Why a pending obligation is pending, where it is not a copy between memory and storage. */
+/** Why a pending obligation is pending. */
 const PENDING = {
   testDanglingReferenceSurvivesPush: DANGLING,
   testArrayCopyClearsOldElements: DANGLING,
   testArrayCopyKeepsDestinationTail: DANGLING,
   testDeleteArrayLeavesDataPastLength: DANGLING,
   testDanglingInnerArrayReappearsAfterPush: DANGLING,
-  memoryToStorageIndexArrayCopyRootExample:
-    "the search derives it, but its replay is past maxHeartbeats as one declaration " +
-    "(docs/testsuite-proofs.md, M3b review 2)",
 };
-
-/**
- * The fallback reason of a pending function that uses memory: today each one
- * copies between memory and storage (`PENDING` names the others).
- */
-const COPY_PENDING =
-  "copies between memory and storage: the closer does not reduce `copySt` of a memory " +
-  "object or `copyStToM` of a storage path in a leaf yet (docs/testsuite-proofs.md, M6 results)";
 
 /** The statuses of an imported row, in report order. */
 const IMPORTED_STATUSES = ["derived", "pending", "divergent", "excluded", "unsupported", "skip"];
@@ -1152,8 +1141,7 @@ function importedRows(functions, lean) {
       throw new Error(`Report.lean lists \`${status} ${fn.name}\`: fix it in Lean first`);
     } else if (lean.pending.has(fn.name)) {
       row = DIVERGENT[fn.name] ? ["divergent", DIVERGENT[fn.name]]
-        : ["pending", PENDING[fn.name] ??
-          (/\bmemory\b|\bnew\s/.test(fn.body) ? COPY_PENDING : "not derived yet")];
+        : ["pending", PENDING[fn.name] ?? "not derived yet"];
     } else {
       const module = lean.proved.get(fn.name);
       if (!module) throw new Error(`${fn.name}: derived by Report.lean's pin, but no theorem`);

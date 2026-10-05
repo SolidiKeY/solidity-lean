@@ -235,6 +235,42 @@ info: Try this:
 example : ⊢ dl!{ ⟨ uint x = 5; uint r = ++x; ⟩ r == 6 && x == 6 } := by
   sol_prove?
 
+/-! A replay must fit one declaration's `maxHeartbeats` (`Derive.replayFits`,
+which `#solkey_derive?` reports as pending and `sol_prove?` warns of).  A
+statement's own elaboration needs more than a limit low enough to refuse a
+small replay, so the test is pinned on its own, at a limit of 1000 raw
+heartbeats. -/
+
+/-- info: [false, true, true] -/
+#guard_msgs in
+#eval show Lean.CoreM (List Bool) from do
+  let at_ (max hb : Nat) : Lean.CoreM Bool :=
+    withTheReader Lean.Core.Context ({ · with maxHeartbeats := max }) (Derive.replayFits hb)
+  return [← at_ 1000 2000, ← at_ 1000 1000, ← at_ 0 2000]
+
+/-! Memory: `Person memory carol;` leaves the pair
+`{ carol := freshId(addM(memory)) ‖ memory := addM(memory) }`, which
+`Fml.seqUpd` keeps whole (`Derive.memAlloc?`); `alice = carol;` copies the
+memory object into storage as its view.  Both leaves close inside the
+residue. -/
+
+/--
+info: Try this:
+  sol_prove
+-/
+#guard_msgs in
+example : ⊢ dl!{ [ Person memory carol; carol.age = 5; uint x = carol.age; ] x == 5 } := by
+  sol_prove?
+
+/--
+info: Try this:
+  sol_prove
+-/
+#guard_msgs in
+example : ⊢ dl!{ [ Person memory carol; carol.age = 42; alice = carol; carol.age = 43;
+                   uint x = alice.age; ] x == 42 } := by
+  sol_prove?
+
 /-! Arrays and copies (`LStor.arr`, `LStor.copy`): a push, a `pop` after
 it and a copy close inside the residue; under `wt(storage)` the diamond of
 a push and a `pop` returns (a length is at least `0`, `Facts.lo`), and so
@@ -452,7 +488,7 @@ end
 
 `#chain φ` goes on where `sol_chain?` on `~*>` stops: after the program, one
 rewrite a link until the line is last, written as one chain term to paste.
-The strategy's steps are grouped as the paper prints them
+The strategy's steps are grouped as the worked examples print them
 (`ChainGen.groupSteps`): a rule with the `emptyModality` after it, and a
 declaration with the binding or read it leaves, are one `~*>`. -/
 

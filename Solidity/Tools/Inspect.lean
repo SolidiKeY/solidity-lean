@@ -68,6 +68,12 @@ def LTerm.guards : LTerm → List LTerm × LTerm
     (gd ++ [vd] ++ ga, va)
   | t => ([], t)
 
+/-- A memory name, its root ordinal and its literal path: `#0.account`. -/
+def LId.fmt (i : LId) : String :=
+  i.path.foldl (fun acc a => match a with
+    | .field f => s!"{acc}.{f}"
+    | .at k => s!"{acc}[{k}]") s!"#{i.root}"
+
 mutual
 /-- A term of the target language. -/
 partial def LTerm.fmt [FreshNames] : LTerm → String
@@ -92,6 +98,7 @@ partial def LTerm.fmt [FreshNames] : LTerm → String
   | .err => "err"
   | .env k => k.toStr
   | .findP s q => s!"find({LStor.fmt s}, {LPath.fmt q})"
+  | .cpok s q => s!"copyOk({LStor.fmt s}, {LPath.fmt q})"
 
 /-- A term as an operand: parenthesised unless it is atomic. -/
 partial def LTerm.fmtArg [FreshNames] : LTerm → String
@@ -113,6 +120,26 @@ partial def LStor.fmt [FreshNames] : LStor → String
   | .arr (.slot _) s q _ => s!"pushSlot({LStor.fmt s}, {LPath.fmt q})"
   | .arr (.pop _) s q _ => s!"pop({LStor.fmt s}, {LPath.fmt q})"
   | .copy s q src sq => s!"copy({LStor.fmt s}, {LPath.fmt q}, {LStor.fmt src}, {LPath.fmt sq})"
+  | .view m i => s!"copyMem({LMem.fmt m}, {LId.fmt i})"
+
+/-- A memory: `memory`, and the allocations and writes on top of it. -/
+partial def LMem.fmt [FreshNames] : LMem → String
+  | .init => "memory"
+  | .addM m k _ => s!"addM({LMem.fmt m}, #{k})"
+  | .newArr m k _ n => s!"newArr({LMem.fmt m}, #{k}, {LTerm.fmt n})"
+  | .copySt m k s q => s!"copySt({LMem.fmt m}, #{k}, {LStor.fmt s}, {LPath.fmt q})"
+  | .write m i a v => s!"write({LMem.fmt m}, {LId.fmt i}{LSel.fmt a}, {LMV.fmt v})"
+
+/-- A selector: `.f`, `[t]`, `.size`. -/
+partial def LSel.fmt [FreshNames] : LSel → String
+  | .fld f => s!".{f}"
+  | .idx t => s!"[{LTerm.fmt t}]"
+  | .size => ".size"
+
+/-- A memory value: a word, or a name. -/
+partial def LMV.fmt [FreshNames] : LMV → String
+  | .word t => LTerm.fmt t
+  | .ref i => LId.fmt i
 end
 
 /-- A reduced formula: `∧` binds tighter than `→`, which associates to the
