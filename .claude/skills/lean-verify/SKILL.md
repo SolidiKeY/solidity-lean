@@ -118,16 +118,18 @@ edit to a low module invalidates every other agent's checks.
 - **Same checkout:** give each subagent disjoint *leaf* files or
   declarations (`sorry` lemmas split out first), over a frozen upstream.
   Nobody edits `Syntax`, `Semantics` or `Rules` while they run.
-- **Separate copies:** `/home` is btrfs, so
-  `cp -r --reflink=always . /tmp/wt-N` copies the repo *with* its `.lake`
-  instantly and without extra space. The MCP server starts one Lean server per
-  project root (up to 8) when given absolute paths into the copy. Merge the
-  results back by hand or with `git diff | git apply`.
+- **Separate checkouts:** a `git worktree` per lane
+  (`git worktree add ../solidity-lean-<lane> -b <lane>`). Lake's artifact
+  cache (`AGENTS.md`, "Copies and branches") gives it every module master
+  already built, so only its own edits rebuild, and master rebuilds nothing
+  after the merge. The MCP server starts one Lean server per project root
+  when given absolute paths into the worktree (pass `lean_project_path`).
 - The MCP server keeps at most `LEAN_LSP_MAX_OPEN_FILES` files open per
   project (`scripts/run-lean-mcp.sh` sets 8), and closes the oldest beyond
-  that. Reopening is a full re-elaboration. With several agents on one
-  server, each should keep to one or two files. A worker holds 1.5–4.5 GB, and
-  the machine has 64 GB.
+  that. Reopening is a full re-elaboration. A worker holds 0.6–1.5 GB, 3–4 GB
+  on `Calculus/Decide.lean` or a `Derived*` module, so one agent can hold
+  about 16 GB: at most two Lean agents at once. When a lane is merged, stop
+  its workers and remove its worktree; idle workers stay resident.
 - A subagent prompt should say "invoke the `lean-verify` skill first" rather
   than restate these rules.
 

@@ -193,6 +193,33 @@ re-partitions `RuleShapes.taclets_partitioned`.
 Run long builds in the background and grep the log for `error` rather than
 reading it back whole.
 
+## Copies and branches
+
+Lake's artifact cache is on (`lakefile.toml`): every module is stored once,
+under the hash of its inputs, in `~/.elan/toolchains/<toolchain>/lake/cache`,
+and every checkout reads from it. A branch, a `git worktree` or a copy
+therefore rebuilds only the modules its own edits change, and master
+rebuilds nothing after merging a lane that was built elsewhere.
+
+- **A parallel lane is a `git worktree`** on its own branch
+  (`git worktree add ../solidity-lean-<lane> -b <lane>`), not a `cp -r`:
+  the cache fills its `.lake` in seconds (a file importing `Calculus/Close`
+  opened in 8 s with no build directory), and its commits are visible to
+  master without a fetch.
+- **RAM is per open file, not per build.** A Lean worker holds 0.6–1.5 GB,
+  3–4 GB on `Calculus/Decide.lean` or a `TestSuite/Derived*` module, and the
+  MCP keeps up to 8 open per checkout, so one agent can hold about 16 GB.
+  Run at most two Lean agents at once, and keep each to the files it is
+  changing.
+- **End a lane by freeing it:** after the merge, stop its workers
+  (`pkill -f 'lean --worker.*solidity-lean-<lane>/'`) and remove the
+  worktree. Idle workers of finished lanes stay resident otherwise.
+- **Edit low modules first.** A change to `Syntax`, `Semantics`, `Rules` or
+  `Decide` invalidates everything above it in that checkout; finish those
+  edits before checking the files that import them.
+- The cache only grows. `rm -rf ~/.elan/toolchains/*/lake/cache` empties it;
+  the next build refills it.
+
 ## Lean notes
 
 - Lake commands run from the project root, or use `./run-lean.sh`.

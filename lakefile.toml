@@ -1,6 +1,11 @@
 name = "solidity-lean"
 version = "0.1.0"
 defaultTargets = ["Solidity", "solkeycheck"]
+# Build products go to Lake's cache, keyed by the hash of their inputs and
+# shared by every checkout on this toolchain: a copy, a worktree or a branch
+# switched back to reuses what any of them built (`AGENTS.md`, "Copies and
+# branches").
+enableArtifactCache = true
 
 [[lean_lib]]
 name = "Solidity"
