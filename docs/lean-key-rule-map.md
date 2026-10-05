@@ -359,11 +359,17 @@ Theory term (`LMem.toTheory`: `pre(heap)` at its bottom, the `k`-th
 allocation the root `shaped(ofNat(k), sh)`), and wherever `readT` or `readI`
 answers, its answer is `Memory.readIn`'s, cast at the sort read
 (`LMem.readT_agree`, `LMem.readI_agree`; with the interpreter,
-`LMem.read_agree`).  The lemma named there rewrites with the row's Theory
-lemma, so that citation is checked.  The length below a struct member needs
-the Theory's global member table to be the declarations' (`DeclOk`).  "—"
-there means the clause is not one of the two readers (a view reader, a
-guard), or the Theory has no term for it (`new`).
+`LMem.read_agree`).  Only `readT` and `readI` are checked; the elimination
+reader `LMem.readU` (`Calculus/Decide.lean`) has no agreement theorem.  Where
+the lemma named there rewrites with the row's Theory lemma, that citation is
+checked; a cell marked "(by definition)" names the definition the lemma
+unfolds instead, of which the row's Theory lemma is an instance, and that
+citation is not checked by name.  A default below a struct member needs the
+Theory's global member table to be the declarations of the members along the
+read's path (`DeclAlong`, a hypothesis on that read alone: no one table is
+every struct's, since `Basket.items` is `uint[]` and `FixedTriple.items`
+`uint[3]`).  "—" there means the clause is not one of the two readers (a view
+reader, a guard), or the Theory has no term for it (`new`).
 
 The translation (`Calculus/Decide.lean`) builds a leaf's memory from its
 updates and reads it with these rows: a copy from storage into memory, and
@@ -372,28 +378,28 @@ see through.
 
 | KeY taclet | closer clause | interpreter lemma | Theory lemma | agreement (step 8) | status |
 | --- | --- | --- | --- | --- | --- |
-| `readOnWrite` | `LMem.readT`/`readU`, `.write` arm: same name and selector gives the word written, apart recurses, a symbolic index one `kite` | `LMem.readT_sim`, `LMem.readU_sim`, `selRel_same`, `selRel_apart`, `MemNames.Births.eval_inj` | `Memory.readOnWrite` | `LMem.readT_agree`, `.write` arm | used |
-| `readOnWrite` at an `Identity` | `LMem.readI`, `.write` arm | `LMem.readI_sim` | `Memory.readOnWrite`, `Memory.readId` | `LMem.readI_agree`, `.write` arm | used |
-| `readOnAddM` `\then` | the allocation arms at the read's root: the default (`dfltSel`), or the length and elements of `new T[](n)` (`newSel`) | `dflt_read_sim`, `new_read_sim` | `Memory.readOnAddM`, `Memory.readAddEqual` | `LMem.readT_agree`, `.addM` arm; `newSel_agree` | used |
+| `readOnWrite` | `LMem.readT`/`readU`, `.write` arm: same name and selector gives the word written, apart recurses, a symbolic index one `kite` | `LMem.readT_sim`, `LMem.readU_sim`, `selRel_same`, `selRel_apart`, `MemNames.Births.eval_inj` | `Memory.readOnWrite` | `LMem.readT_agree`, `.write` arm (`readT` only; `readU` unchecked) | used |
+| `readOnWrite` at an `Identity` | `LMem.readI`, `.write` arm; a symbolic index, or a word written at the same slot, is refused (`none`) where KeY's is an if-then-else | `LMem.readI_sim` | `Memory.readOnWrite`, `Memory.readId` | `LMem.readI_agree`, `.write` arm | used |
+| `readOnAddM` `\then` | the allocation arms at the read's root: the default (`dfltSel`), or the length and elements of `new T[](n)` (`newSel`) | `dflt_read_sim`, `new_read_sim` | `Memory.readOnAddM`, `Memory.readAddEqual` | `LMem.readT_agree`, `.addM` arm; `newSel_agree` (`readT` only) | used |
 | `readOnAddM` `\else` | the allocation arms at another root: the read passes | `alloc_frame`, `LSel.read_heapExt`, `MemNames.Births.eval_interval` | `Memory.readOnAddM`, `Memory.readAddDifferent` | `LMem.readT_agree`, `LMem.readI_agree`, `.addM` arms; `newT_other` | used |
 | `initMember` | `dfltSel`, `.fld`: the default of the member's declared type (`Ty.at`) | `dfltSel_sim`, `slot_default` | `Memory.initMember` | `dfltSel_agree` | used |
 | `initElement` | `dfltSel`, `.idx`: the element's default below a fixed length (`ltR`) | `dfltSel_sim`, `slot_default` | `Memory.initElement` | `dfltSel_agree` | used |
 | `initSize` | `dfltSel` at `.size` | `dfltSel_sim`, `MemNames.copiedTo_len` | `Memory.initSize` | `dfltSel_agree` | used |
-| `defaultValueInt` | `dfltWord`: the default of the declared primitive (`PrimTy.default`) | `dfltSel_sim` | `Memory.defaultDefInt` | `dfltWord_cast` (`castLike`, by `MemValue.asIntAt`) | subsumed |
-| `defaultValueBool` | `dfltWord`, likewise | `dfltSel_sim` | `Memory.defaultDefInt`, `MemValue.asBool` | `dfltWord_cast` (`castLike`, by `MemValue.asBool`) | subsumed |
-| `defValResolve` | none built: a default is read at the type the path declares, so `cast(defVal)` never occurs | `dfltSel_sim` | `Memory.defValResolvePrim`, `Memory.defValResolveIdentity` | `dfltWord_cast`; for an identity, `readId_fresh` | subsumed |
-| `idShapeDef` | a root's shape is its allocation's type, read down the path by `Ty.memberTy` | `dfltSel_sim` | `idShapeDef` | `LMem.readT_agree_shapes` (`LMem.shapes`: each root carries its allocation's shape) | subsumed |
+| `defaultValueInt` | `dfltWord`: the default of the declared primitive (`PrimTy.default`) | `dfltSel_sim` | `Memory.defaultDefInt` | `dfltWord_cast` (by definition: `castLike`, `MemValue.asIntAt`) | subsumed |
+| `defaultValueBool` | `dfltWord`, likewise | `dfltSel_sim` | `MemValue.asBool` | `dfltWord_cast` (by definition: `castLike`, `MemValue.asBool`) | subsumed |
+| `defValResolve` | none built: a default is read at the type the path declares, and the delete rules write the typed default `defVal(T)` where KeY's `memoryIndexDeletePrimitive` writes an untyped `defVal`, so the resolution happens at the write and `cast(defVal)` never occurs | `dfltSel_sim` | `Memory.defValResolvePrim`, `Memory.defValResolveIdentity` | `dfltWord_cast`; for an identity, `readId_fresh` (by definition) | subsumed |
+| `idShapeDef` | a root's shape is its allocation's type, read down the path by `Ty.memberTy` | `dfltSel_sim` | `idShapeDef` | `LMem.readT_agree_shapes` (by definition: `LMem.shapes`, each root carries its allocation's shape) | subsumed |
 | `sizeOfFixed` | `dfltSel` at `.size` of `T[n]`: `n` | `dfltSel_sim` | `sizeOfFixed` | `dfltSel_agree` | used |
 | `sizeOfDyn` | `dfltSel` at `.size` of `T[]`: `0` | `dfltSel_sim` | `sizeOfDyn` | `dfltSel_agree` | used |
-| `sizeOfLeaf` | `dfltSel` at `.size` of no array: the term halts | `dfltSel_sim` | `sizeOfLeaf` | vacuous: no value to agree on | used |
-| `shapeAtNil` | `Ty.memberTy` of the empty path | — | `shapeAtNil` | `shapeAt_memberTy` | subsumed |
-| `shapeAtFixed`, `shapeAtFixedMapElement` | `Ty.at` of an element of `T[n]` | — | `shapeAtFixed` | `shapeStep_at` (by `shapeStep`, of which the lemma is an instance) | subsumed |
-| `shapeAtDyn`, `shapeAtDynMapElement` | `newSel` below an element of `new T[](n)`: the element type's | — | `shapeAtDyn` | `newSel_agree` (by `shapeStep`) | subsumed |
-| `shapeAtMember` | `Ty.at` of a struct member (`structDef`) | — | `shapeAtMember` | `shapeStep_at`, under `DeclOk` | subsumed |
+| `sizeOfLeaf` | `dfltSel` at `.size` of no array: the term halts where KeY gives `0`; no well-typed program reads the length of a struct or a primitive | `dfltSel_sim` | `sizeOfLeaf` | vacuous: no value to agree on | unreached |
+| `shapeAtNil` | `Ty.memberTy` of the empty path | — | `shapeAtNil` | `shapeAt_memberTy` (by definition) | subsumed |
+| `shapeAtFixed`, `shapeAtFixedMapElement` | `Ty.at` of an element of `T[n]` | — | `shapeAtFixed` | `shapeStep_at` (by definition: `shapeStep`) | subsumed |
+| `shapeAtDyn`, `shapeAtDynMapElement` | `newSel` below an element of `new T[](n)`: the element type's | — | `shapeAtDyn` | `newSel_agree` (by definition: `shapeStep`) | subsumed |
+| `shapeAtMember` | `Ty.at` of a struct member (`structDef`) | — | `shapeAtMember` | `shapeStep_at`, under `DeclAlong` (by definition: `shapeStep`) | subsumed |
 | `shapeAtMap`, `shapeAtLeafElement`, `shapeAtLeafMapElement` | not reached: memory holds no mapping (`allocOk`), and `Ty.at` has no segment below a primitive | — | `shapeAtMap`, `shapeAtLeafElement` | — | unreached |
 | `initIdentity` | `LMem.readI` at the root's allocation: the name one segment longer | `readI_alloc`, `resolveR_snoc_sim`, `MemNames.birth_slot` | `Memory.initIdentity` | `LMem.readI_agree`, `.addM` and `.newArr` arms (`readId_fresh`) | used |
 | `idCCDef` | an allocation's root is the name `⟨k, []⟩` | `evalR_last` | `Memory.idCCDef` | `newSel_agree` (the length of `new T[](n)` is written at `idCC`) | used |
-| `readFromEmptyMemory` | the `.init` arm: no answer (every name a leaf uses names a root the leaf allocated) | — | `Memory.readFromEmptyMemory` | vacuous: `readT` and `readI` never answer at `init` | used |
+| `readFromEmptyMemory` | the `.init` arm: no answer.  The bottom of a leaf's memory is the pre-state heap `pre(heap)`, not `mtMem`, and the readers refuse there (every name a leaf uses names a root the leaf allocated) | — | `Memory.readFromEmptyMemory` | vacuous: `readT` and `readI` never answer at `init` | unreached |
 | `readREmpty` | `LMem.walk` on a one-segment path: the read itself | `LMem.walk_sim` | `Memory.readREmpty` | — (a view reader) | used |
 | `readRCons` | `LMem.walk`: `readI` for each leading segment, the read on the last | `LMem.walk_sim`, `MVal.readPath_snoc` | `Memory.readRCons`, `Memory.readR_eq_firsts_last` | — (a view reader) | used |
 | `newFromAdd` | none: a root is fresh by its ordinal (`LMem.nAlloc`), its object by its birth interval (deviation: no `new` term) | `MemNames.Births.eval_interval`, `MemNames.copyStToM_interval` | `Memory.newFromAdd`, `Memory.newAddDifferent` | — (distinct ordinals are distinct roots, `rootT_inj`) | deviation |
@@ -403,12 +409,12 @@ see through.
 | `selectOnCopyMemPrim` | the last segment of `LStor.readU`/`lenU` on a view | `view_read_sim`, `view_len_sim` | `StValue.selectOnCopyMemPrim` | — (a view reader) | used |
 | `selectOnCopyMemRef` | a leading segment of a read on a view, through `readI`; `LStor.hasU` on a view | `view_has_sim`, `MemNames.copyMToSt_readPath` | `StValue.selectOnCopyMemRef`, `StValue.findCopyMemStruct` | — (a view reader) | used |
 | `readFromCopyToStorage` | `copySel`: the storage read one segment further | `copy_read_sim`, `MemNames.copyStToM_readPath` | `Memory.readCopySt`, `Memory.readCopyStOther` | `LMem.readT_agree`, `.copySt` arm: `copySel_agree`, `copy_word`, with `SVal.abs_find` | used |
-| `readFromCopyToStorageIdentity` | `LMem.readI` below a copy; `nameG`'s `refT` | `copy_ref_rets`, `MemNames.copyStToM_readPath` | `Memory.readCopyStIdentity` | `LMem.readI_agree`, `.copySt` arm (`readCopySt`, then `readId_fresh`) | used |
-| `findDefinitionSize` (`structRules.key`) | `copySel` at `size`: `.len` of the storage subtree | `copy_read_sim`, `MemNames.copyStToM_lenPath` | `findDefinitionCons` | `copy_len` | used |
-| `memoryReferenceDeclFreshAlloc` | the pair `{x := freshId(addM(…)) ‖ memory := addM(…)}` kept whole (`Decide.pairL`, `Derive.memAlloc?`): `x` names the root `⟨nAlloc, []⟩` (deviation: KeY's two updates under one `\new`, one Skolem for `freshIdp`) | `pair_sound`, `LMem.run_addM`, `allocDefault_heap`, `evalR_last` | — | `toTheory_addM` | deviation |
+| `readFromCopyToStorageIdentity` | `LMem.readI` below a copy; `nameG`'s `refT` | `copy_ref_rets`, `MemNames.copyStToM_readPath` | `Memory.readCopyStIdentity` | `LMem.readI_agree`, `.copySt` arm (by definition: `readCopySt`, then `readId_fresh`) | used |
+| `findDefinitionSize` (`structRules.key`) | `copySel` at `size`: `.len` of the storage subtree | `copy_read_sim`, `MemNames.copyStToM_lenPath` | `findDefinitionCons` | `copy_len` (by definition: `findSt_readAt`, `SVal.abs_find`) | used |
+| `memoryReferenceDeclFreshAlloc` | the pair `{x := freshId(addM(…)) ‖ memory := addM(…)}` kept whole (`Decide.pairL`, `Derive.memAlloc?`): `x` names the root `⟨nAlloc, []⟩` (deviation: KeY's two sequential updates `{mv := idC(shaped(freshIdp, #shapeOf(mv)), nil)}{memory := addM(…)}` over one Skolem `freshIdp` (`\skolemTerm`, `\sameUpdateLevel`)) | `pair_sound`, `LMem.run_addM`, `allocDefault_heap`, `evalR_last` | — | `toTheory_addM` | deviation |
 | `memoryRootDeleteFreshRebind` | the same pair | the same | — | `toTheory_addM` | deviation |
 | `memoryArrayFreshAlloc` | the same pair over `LMem.newArr`, one node for `write(addM(…), size, n)` (deviation) | `pair_sound`, `LMem.run_newArr`, `new_read_sim`, `MemNames.copyStToM_newArr_at`, `copyStToM_newArr_len` | `Memory.readOnWrite`, `Memory.readAddEqual`, `Memory.initElement` | `toTheory_newArr` (`newT`: the `addM` and the write of its length), `newSel_agree` | deviation |
-| `memoryStorageCopy` (after `memoryStorageCopyUnfold`) | the same pair over `copySt(memory, find(storage, p))`: the node `LMem.copySt` (`Decide.pairMem`) | `pairCopy_key`, `LMem.run_copySt`, `copy_ref`, `live_bridge` | `Memory.readCopySt` | `toTheory_copySt` | used |
+| `memoryStorageCopy` (after `memoryStorageCopyUnfold`) | the same pair over KeY's `copySt(addM(memory, shaped(freshIdp, #shapeOf(mv))), shaped(freshIdp, #shapeOf(mv)), find<[Struct]>(storage, sp))`: the node `LMem.copySt` (`Decide.pairMem`).  Deviation: `LMem.toTheory` omits the `addM` (no read below the copy sees it, `readCopySt` shadows the root) and leaves the root unshaped, a copy's lengths being read from storage; `Memory.new` of the image counts the root as fresh | `pairCopy_key`, `LMem.run_copySt`, `copy_ref`, `live_bridge` | `Memory.readCopySt` | `toTheory_copySt` | deviation |
 | `memoryFieldDeleteReference` | `freshRef`: the reference `write(addM(memory), a, freshId(addM(memory)))` writes is the root the allocation under the write takes | `writeVal_ok`, `freshRef_cases` | — | — | used |
 | `memoryIndexDeleteReference` | `freshRef`, at an element | `writeVal_ok`, `freshRef_cases` | — | — | used |
 | `memoryToStorageStoreRoot` | the translation: `save(storage, p, copyMem(mtSt, m, i))` is `LStor.copy` of the view `LStor.view m i` at its root `viewRoot` (`Op3.toL`), then the copy rows of the storage closer (`copyLeaf`, `copyKeys`) | `STerm.toL_eval` (its `copyMem` arm), `Close.STerm.eval_save_copyMem`, `write_bridge`, `copyMem_of_heap` | `StValue.findCopyMem` | — | used |

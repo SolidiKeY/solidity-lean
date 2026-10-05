@@ -14,7 +14,9 @@ is `Theory.Memory.readIn`'s on that term.  Each arm of the two theorems
 closes by rewriting with the taclet's own lemma (`readOnWrite`,
 `readAddEqual`, `readAddDifferent`, `initMember`, `initElement`, `initSize`,
 `initIdentity`, `readCopySt`, `readCopyStOther`), and the copy arm reads the
-copied storage through `SVal.abs_find`.
+copied storage through `SVal.abs_find`.  The shape steps and the defaults'
+values hold by unfolding (`shapeStep`, `MemValue.asIntAt`), not by naming
+`shapeAtMember` or `defaultDefInt`.
 
 * **Roots.**  The `k`-th allocation is the root `shaped(ofNat(k), sh)`: an
   ordinal, not an object number, since the closer names an object by its
@@ -27,9 +29,17 @@ copied storage through `SVal.abs_find`.
   cast as the closer's value is (`castLike`), an `int` by
   `MemValue.asIntAt` and a `bool` by `MemValue.asBool`.
 * **Members are global in the Theory.**  `fieldShape` reads one member table,
-  so a length below a member agrees under `DeclOk`: the table is the structs'
-  declarations, and no struct names a member `length`.  Only the length arm
-  needs it.
+  which the structs' declarations are not (`Basket.items` is `uint[]`,
+  `FixedTriple.items` is `uint[3]`).  So a read's default agrees under
+  `DeclAlong`, a hypothesis on that read alone: the table is the
+  declarations of the members along its path below the allocated type, none
+  named `length`.  The instance at the end discharges it.
+* **A copy has no `addM`.**  KeY's `memoryStorageCopy` writes
+  `copySt(addM(memory, root), root, find(storage, p))`; the image here is
+  `copySt` alone, its root unshaped (`LMem.allocTy?` is `none`), since no read
+  below a copy reaches the `addM` (`readCopySt` shadows the root) and a
+  copy's lengths are read from storage.  `Theory.Memory.new` of the image
+  therefore still counts the copy's root as fresh.
 * **What the Theory term refuses.**  A write of a length, a member named
   `length`, and a value or an index that does not evaluate have no Theory
   term (`LSel.wseg`, `LSel.toSeg`): the closer never writes a length
@@ -117,10 +127,17 @@ def LMem.allocTy? : LMem → Nat → Option RefTy
 def LMem.shapes (m : LMem) (k : Nat) : Theory.Shape :=
   ((m.allocTy? k).map Theory.Shape.ofRefTy).getD .leaf
 
-/-- The member table `decl` is the structs' declarations, and no struct names
-a member `length`. -/
-def DeclOk (decl : Name → Ty) : Prop :=
-  ∀ (sn f : Name) (T : Ty), lookupBy f (structDef sn) = some T → f ≠ "length" ∧ decl f = T
+/-- The member table `decl` agrees with the structs' declarations along the
+path `p` below `T`: each member the path names is declared at `decl`'s type,
+and none is named `length`. -/
+def DeclAlong (decl : Name → Ty) : Ty → List Seg → Prop
+  | _, [] => True
+  | T, s :: rest => match T, s with
+    | .ref (.struct sn), .field f => ∀ U, lookupBy f (structDef sn) = some U →
+        f ≠ "length" ∧ decl f = U ∧ DeclAlong decl U rest
+    | .ref (.fixed E _), .at _ => DeclAlong decl E rest
+    | .ref (.array E), .at _ => DeclAlong decl E rest
+    | _, _ => True
 
 /-- A slot cast at the sort of `v`. -/
 def castLike (decl : Name → Ty) (loc : Theory.Identity) (a : Seg) (mv : Theory.MemValue) :
@@ -331,18 +348,21 @@ theorem dfltWord_cast {σ : State} {decl : Name → Ty} {loc : Theory.Identity} 
   | none, hv => simp only [dfltWord, LTerm.eval, reduceCtorEq] at hv
 
 /-- One step of `shapeAt` is `Ty.at`'s. -/
-theorem shapeStep_at {decl : Name → Ty} (hd : DeclOk decl) {T U : Ty} {s : Seg}
-    (h : T.at s = some U) :
-    Theory.shapeStep decl (Theory.Shape.ofTy T) s = Theory.Shape.ofTy U := by
+theorem shapeStep_at {decl : Name → Ty} {T U : Ty} {s : Seg} {p : List Seg}
+    (hd : DeclAlong decl T (s :: p)) (h : T.at s = some U) :
+    Theory.shapeStep decl (Theory.Shape.ofTy T) s = Theory.Shape.ofTy U ∧ DeclAlong decl U p := by
   cases T with
-  | prim p => cases s <;> simp only [Ty.at, reduceCtorEq] at h
+  | prim q => cases s <;> simp only [Ty.at, reduceCtorEq] at h
   | ref R =>
     cases R with
     | struct sn =>
       cases s with
       | field f =>
         have h' : lookupBy f (structDef sn) = some U := h
-        obtain ⟨hf, hdf⟩ := hd sn f U h'
+        have hd' : ∀ V, lookupBy f (structDef sn) = some V →
+            f ≠ "length" ∧ decl f = V ∧ DeclAlong decl V p := hd
+        obtain ⟨hf, hdf, hp⟩ := hd' U h'
+        refine ⟨?_, hp⟩
         simp only [Theory.shapeStep, Theory.Shape.ofTy, Theory.Shape.ofRefTy, hf, ↓reduceIte,
           Theory.fieldShape, hdf]
       | «at» k => simp only [Ty.at, reduceCtorEq] at h
@@ -354,26 +374,29 @@ theorem shapeStep_at {decl : Name → Ty} (hd : DeclOk decl) {T U : Ty} {s : Seg
         simp only [Ty.at] at h
         split at h
         · cases h
-          rfl
+          exact ⟨rfl, hd⟩
         · cases h
     | mapping K V => cases s <;> simp only [Ty.at, reduceCtorEq] at h
 
-/-- `shapeAt` follows `Ty.memberTy`. -/
-theorem shapeAt_memberTy {decl : Name → Ty} (hd : DeclOk decl) : ∀ (p : List Seg) (T U : Ty),
-    T.memberTy p = some U → Theory.shapeAt decl (Theory.Shape.ofTy T) p = Theory.Shape.ofTy U
-  | [], T, U, h => by
+/-- `shapeAt` follows `Ty.memberTy` where `decl` is the declarations along
+the path. -/
+theorem shapeAt_memberTy {decl : Name → Ty} : ∀ (p : List Seg) (T U : Ty),
+    DeclAlong decl T p → T.memberTy p = some U →
+    Theory.shapeAt decl (Theory.Shape.ofTy T) p = Theory.Shape.ofTy U
+  | [], T, U, _, h => by
     simp only [Ty.memberTy, Option.some.injEq] at h
     subst h
     rfl
-  | s :: p, T, U, h => by
+  | s :: p, T, U, hd, h => by
     simp only [Ty.memberTy] at h
     cases hs : T.at s with
     | none => simp only [hs, Option.bind_none, reduceCtorEq] at h
     | some V =>
       simp only [hs, Option.bind_some] at h
+      obtain ⟨hstep, hp⟩ := shapeStep_at hd hs
       show Theory.shapeAt decl (Theory.shapeStep decl (Theory.Shape.ofTy T) s) p = _
-      rw [shapeStep_at hd hs]
-      exact shapeAt_memberTy hd p V U h
+      rw [hstep]
+      exact shapeAt_memberTy p V U hp h
 
 /-- **The default of a fresh object** (`readAddEqual`'s `dflt`, then
 `initMember`, `initElement`, `initSize`): `dfltSel` is the cast of `dflt`. -/
@@ -405,9 +428,10 @@ theorem dfltSel_agree (σ : State) {decl : Name → Ty} {T : Option Ty} {r : The
 
 /-- A read of `new R(n)` (`memoryArrayFreshAlloc`: `readOnWrite` at the length
 written, `readAddEqual` below it). -/
-theorem newSel_agree (σ : State) {decl : Name → Ty} (hd : DeclOk decl) {M : Theory.Memory}
+theorem newSel_agree (σ : State) {decl : Name → Ty} {M : Theory.Memory}
     {r : Theory.IdentityPrim} {R : RefTy} {n : LTerm} {c : Int}
-    (hn : (n.eval σ >>= Value.asInt) = .ok c) {p : List Seg} {a : LSel} {sg : Seg} {v : Value}
+    (hn : (n.eval σ >>= Value.asInt) = .ok c) {p : List Seg} (hd : DeclAlong decl (.ref R) p)
+    {a : LSel} {sg : Seg} {v : Value}
     (hs : a.toSeg σ = some sg) (hv : (newSel R n p a).eval σ = .ok v) :
     let rt : Theory.IdentityPrim := .shaped r (Theory.Shape.ofRefTy R)
     v = castLike decl (.idC rt p) sg (Theory.Memory.readIn (newT M rt R c) (.idC rt p) sg) v := by
@@ -443,16 +467,16 @@ theorem newSel_agree (σ : State) {decl : Name → Ty} (hd : DeclOk decl) {M : T
         simp only [newSel] at hv
         refine dfltSel_agree σ (fun U hU => ?_) hs (seqL_ok hv)
         show Theory.shapeAt decl (Theory.Shape.ofTy E) rest = _
-        exact shapeAt_memberTy hd rest E U hU
+        exact shapeAt_memberTy rest E U hd hU
   | struct sn =>
     simp only [newT, newSel, Theory.Memory.readAddEqual] at hv ⊢
-    exact dfltSel_agree σ (fun U hU => shapeAt_memberTy hd p (.ref (.struct sn)) U hU) hs hv
+    exact dfltSel_agree σ (fun U hU => shapeAt_memberTy p (.ref (.struct sn)) U hd hU) hs hv
   | fixed E k =>
     simp only [newT, newSel, Theory.Memory.readAddEqual] at hv ⊢
-    exact dfltSel_agree σ (fun U hU => shapeAt_memberTy hd p (.ref (.fixed E k)) U hU) hs hv
+    exact dfltSel_agree σ (fun U hU => shapeAt_memberTy p (.ref (.fixed E k)) U hd hU) hs hv
   | mapping K V =>
     simp only [newT, newSel, Theory.Memory.readAddEqual] at hv ⊢
-    exact dfltSel_agree σ (fun U hU => shapeAt_memberTy hd p (.ref (.mapping K V)) U hU) hs hv
+    exact dfltSel_agree σ (fun U hU => shapeAt_memberTy p (.ref (.mapping K V)) U hd hU) hs hv
 
 /-- A read below another root passes `new R(n)` (`readOnWrite`,
 `readAddDifferent`). -/
@@ -584,11 +608,12 @@ theorem copySel_agree (σ : State) (decl : Name → Ty) (loc : Theory.Identity) 
 /-- **`readT` is `readIn`.**  Wherever the closer's word reader answers and its
 answer evaluates, the answer is the Theory's read of the memory's term, cast
 at its sort.  `hsh` asks that the read root carry its allocated shape, which
-`LMem.shapes` does (`LMem.readT_agree_shapes`). -/
-theorem LMem.readT_agree (σ : State) {decl : Name → Ty} (hd : DeclOk decl)
-    (sh : Nat → Theory.Shape) :
+`LMem.shapes` does (`LMem.readT_agree_shapes`), and that `decl` be the
+declarations along the read's path below the allocated type. -/
+theorem LMem.readT_agree (σ : State) {decl : Name → Ty} (sh : Nat → Theory.Shape) :
     (m : LMem) → ∀ (i : LId) (a : LSel) {t : LTerm} {M : Theory.Memory} {sg : Seg} {v : Value},
-    (∀ R, m.allocTy? i.root = some R → sh i.root = Theory.Shape.ofRefTy R) →
+    (∀ R, m.allocTy? i.root = some R →
+      sh i.root = Theory.Shape.ofRefTy R ∧ DeclAlong decl (.ref R) i.path) →
     m.toTheory σ sh = some M → a.toSeg σ = some sg → m.readT i a = some t → t.eval σ = .ok v →
     v = castLike decl (i.toTheory sh) sg (Theory.Memory.readIn M (i.toTheory sh) sg) v
   | .init, _, _, _, _, _, _, _, _, _, ht, _ => by simp only [LMem.readT, reduceCtorEq] at ht
@@ -598,14 +623,13 @@ theorem LMem.readT_agree (σ : State) {decl : Name → Ty} (hd : DeclOk decl)
     · subst hk
       simp only [LMem.readT, if_true, Option.some.injEq] at ht
       subst ht
-      have hR : sh i.root = Theory.Shape.ofRefTy R := hsh R (by simp only [LMem.allocTy?,
-          ↓reduceIte])
+      obtain ⟨hR, hd⟩ := hsh R (by simp only [LMem.allocTy?, ↓reduceIte])
       simp only [LId.toTheory, rootT, hR, Theory.Memory.readAddEqual]
-      exact dfltSel_agree σ (fun U hU => shapeAt_memberTy hd i.path (.ref R) U hU) hs hv
+      exact dfltSel_agree σ (fun U hU => shapeAt_memberTy i.path (.ref R) U hd hU) hs hv
     · simp only [LMem.readT, hk, if_false] at ht
       simp only [LId.toTheory]
       rw [Theory.Memory.readAddDifferent _ _ _ _ _ _ (fun h => hk (rootT_inj h).symm)]
-      exact LMem.readT_agree σ hd sh m i a
+      exact LMem.readT_agree σ sh m i a
         (fun R' h => hsh R' (by simp only [LMem.allocTy?, hk, ↓reduceIte, h])) hM' hs ht hv
   | .newArr m k R n, i, a, t, M, sg, v, hsh, hM, hs, ht, hv => by
     obtain ⟨M', c, hM', hc, rfl⟩ := toTheory_newArr hM
@@ -613,14 +637,13 @@ theorem LMem.readT_agree (σ : State) {decl : Name → Ty} (hd : DeclOk decl)
     · subst hk
       simp only [LMem.readT, if_true, Option.some.injEq] at ht
       subst ht
-      have hR : sh i.root = Theory.Shape.ofRefTy R := hsh R (by simp only [LMem.allocTy?,
-          ↓reduceIte])
+      obtain ⟨hR, hd⟩ := hsh R (by simp only [LMem.allocTy?, ↓reduceIte])
       simp only [LId.toTheory, rootT, hR]
-      exact newSel_agree σ hd hc hs hv
+      exact newSel_agree σ hc hd hs hv
     · simp only [LMem.readT, hk, if_false] at ht
       simp only [LId.toTheory]
       rw [newT_other (fun h => hk (rootT_inj h).symm)]
-      exact LMem.readT_agree σ hd sh m i a
+      exact LMem.readT_agree σ sh m i a
         (fun R' h => hsh R' (by simp only [LMem.allocTy?, hk, ↓reduceIte, h])) hM' hs ht hv
   | .copySt m k s q, i, a, t, M, sg, v, hsh, hM, hs, ht, hv => by
     obtain ⟨M', sv, hM', hsv, rfl⟩ := toTheory_copySt hM
@@ -632,12 +655,13 @@ theorem LMem.readT_agree (σ : State) {decl : Name → Ty} (hd : DeclOk decl)
     · simp only [LMem.readT, hk, if_false] at ht
       simp only [LId.toTheory]
       rw [Theory.Memory.readCopyStOther _ _ _ _ _ _ (fun h => hk (rootT_inj h).symm)]
-      exact LMem.readT_agree σ hd sh m i a
+      exact LMem.readT_agree σ sh m i a
         (fun R' h => hsh R' (by simp only [LMem.allocTy?, hk, ↓reduceIte, h])) hM' hs ht hv
   | .write m j b w, i, a, t, M, sg, v, hsh, hM, hs, ht, hv => by
     obtain ⟨M', sb, mw, hM', hb, hw, rfl⟩ := toTheory_write hM
     rw [Theory.Memory.readOnWrite]
-    have hsh' : ∀ R, m.allocTy? i.root = some R → sh i.root = Theory.Shape.ofRefTy R := hsh
+    have hsh' : ∀ R, m.allocTy? i.root = some R →
+        sh i.root = Theory.Shape.ofRefTy R ∧ DeclAlong decl (.ref R) i.path := hsh
     by_cases hij : i = j
     · subst hij
       simp only [LMem.readT, if_true] at ht
@@ -656,7 +680,7 @@ theorem LMem.readT_agree (σ : State) {decl : Name → Ty} (hd : DeclOk decl)
       | apart =>
         simp only [hr] at ht
         rw [if_neg (fun h => selRel_apart_seg hr hb hs h.2)]
-        exact LMem.readT_agree σ hd sh m i a hsh' hM' hs ht hv
+        exact LMem.readT_agree σ sh m i a hsh' hM' hs ht hv
       | key r w' =>
         simp only [hr] at ht
         obtain ⟨t0, ht0, rfl⟩ := Option.map_eq_some_iff.mp ht
@@ -675,27 +699,29 @@ theorem LMem.readT_agree (σ : State) {decl : Name → Ty} (hd : DeclOk decl)
             exact (castLike_prim decl _ _ v).symm
         · rw [if_neg (fun h => hcc (by simpa only [Seg.at.injEq] using h.2.symm))]
           simp only [hcc, if_false] at hv
-          exact LMem.readT_agree σ hd sh m i a hsh' hM' hs ht0 hv
+          exact LMem.readT_agree σ sh m i a hsh' hM' hs ht0 hv
     · simp only [LMem.readT, hij, if_false] at ht
       rw [if_neg (fun h => hij (LId.toTheory_inj h.1).symm)]
-      exact LMem.readT_agree σ hd sh m i a hsh' hM' hs ht hv
+      exact LMem.readT_agree σ sh m i a hsh' hM' hs ht hv
 
 /-- `readT_agree` with each root shaped by its allocation. -/
-theorem LMem.readT_agree_shapes (σ : State) {decl : Name → Ty} (hd : DeclOk decl) {m : LMem}
-    {i : LId} {a : LSel} {t : LTerm} {M : Theory.Memory} {sg : Seg} {v : Value}
+theorem LMem.readT_agree_shapes (σ : State) {decl : Name → Ty} {m : LMem} {i : LId}
+    (hd : ∀ R, m.allocTy? i.root = some R → DeclAlong decl (.ref R) i.path)
+    {a : LSel} {t : LTerm} {M : Theory.Memory} {sg : Seg} {v : Value}
     (hM : m.toTheory σ m.shapes = some M) (hs : a.toSeg σ = some sg) (ht : m.readT i a = some t)
     (hv : t.eval σ = .ok v) :
     v = castLike decl (i.toTheory m.shapes) sg
       (Theory.Memory.readIn M (i.toTheory m.shapes) sg) v :=
-  LMem.readT_agree σ hd m.shapes m i a (fun R h => by simp only [LMem.shapes, h, Option.map_some,
-      Option.getD_some]) hM hs ht hv
+  LMem.readT_agree σ m.shapes m i a (fun R h => ⟨by simp only [LMem.shapes, h, Option.map_some,
+      Option.getD_some], hd R h⟩) hM hs ht hv
 
 /-- **The interpreter's read is the Theory's.**  `readT_sim` and `readT_agree`
 together: what the interpreter reads at a name the closer answers for is
 `readIn` of the memory's term. -/
-theorem LMem.read_agree (σ : State) {decl : Name → Ty} (hd : DeclOk decl) {m : LMem}
-    {μ : State} {B : MemNames.Births} {i : LId} {a : LSel} {t : LTerm} {M : Theory.Memory}
-    {sg : Seg} {n : Nat} {v : Value} (hrun : m.run σ = .ok (μ, B))
+theorem LMem.read_agree (σ : State) {decl : Name → Ty} {m : LMem}
+    {μ : State} {B : MemNames.Births} {i : LId}
+    (hd : ∀ R, m.allocTy? i.root = some R → DeclAlong decl (.ref R) i.path)
+    {a : LSel} {t : LTerm} {M : Theory.Memory} {sg : Seg} {n : Nat} {v : Value} (hrun : m.run σ = .ok (μ, B))
     (hM : m.toTheory σ m.shapes = some M) (hs : a.toSeg σ = some sg) (ht : m.readT i a = some t)
     (hn : LId.evalR B i = .ok n) (hr : a.read σ μ n = .ok v) :
     v = castLike decl (i.toTheory m.shapes) sg
@@ -828,6 +854,28 @@ theorem LMem.readI_agree (σ : State) (sh : Nat → Theory.Shape) :
     · simp only [LMem.readI, hij, if_false] at hj
       rw [if_neg (fun h => hij (LId.toTheory_inj h.1).symm)]
       exact LMem.readI_agree σ sh m i a hM' hs hj
+
+/-! ## An instance
+
+`DeclAlong` asks only for the members a read passes, so it holds where the
+global struct table could not be one member table: below a `Basket`, `items`
+is `uint[]`, although `FixedTriple.items` is `uint[3]`. -/
+
+/-- The length of a fresh `Basket`'s `items` is `initSize`'s. -/
+example (σ : State) :
+    let m : LMem := .addM .init 0 (.struct "Basket")
+    let i : LId := ⟨0, [.field "items"]⟩
+    Value.int 0 = castLike (fun _ => .ref (.array Ty.uint)) (i.toTheory m.shapes)
+      (.field "length")
+      (Theory.Memory.readIn (.addM (.pre σ.heap) (rootT m.shapes 0) (.struct "Basket"))
+        (i.toTheory m.shapes) (.field "length")) (.int 0) :=
+  LMem.readT_agree_shapes σ (a := .size) (t := .lit (.int 0)) (fun R h => by
+      simp only [LMem.allocTy?, ↓reduceIte, Option.some.injEq] at h
+      subst h
+      intro U hU
+      have hU' : some (Ty.ref (.array Ty.uint)) = some U := hU
+      cases hU'
+      exact ⟨by decide, rfl, trivial⟩) rfl rfl rfl rfl
 
 end Decide
 end Solidity
