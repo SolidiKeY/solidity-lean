@@ -526,6 +526,35 @@ theorem apply_push_find {w : Value} {c c' : SVal} (h : AOp.push.apply w c = .ok 
         simp only [List.length_append, List.length_cons, List.length_nil]; omega
       simp only [SVal.findLive, dif_neg hl, dif_neg hl']
 
+/-- Below a pushed array an array is read only at an old element, as it
+was: the pushed word has nothing below it, and the one member of an array
+is its length. -/
+theorem apply_push_findLive_array {w : Value} {c c' : SVal} (h : AOp.push.apply w c = .ok c')
+    {f : Seg} {r : List Seg} {es sh : List SVal} {fx : Bool}
+    (hn : c'.findLive (f :: r) = .ok (.array es sh fx)) :
+    c.findLive (f :: r) = .ok (.array es sh fx) := by
+  obtain ⟨n, -, -, hnew, hold⟩ := apply_push_find h
+  cases f with
+  | «at» j =>
+    by_cases hj : j = n
+    · subst hj
+      exfalso
+      rw [show (Seg.at (n : Int) :: r) = [Seg.at n] ++ r from rfl, SVal.findLive_append,
+        hnew, Res.ok_bind] at hn
+      cases w <;> cases r <;> simp only [Value.toSVal, SVal.findLive, Except.ok.injEq,
+        reduceCtorEq] at hn
+    · rw [← hold j r hj]; exact hn
+  | field g =>
+    exfalso
+    obtain ⟨es0, sh0, fx0, -, rfl⟩ := AOp.apply_push_eq h
+    by_cases hg : g = "length"
+    · subst hg
+      cases fx0 <;> cases r <;> simp only [SVal.findLive, Bool.false_eq_true, ↓reduceIte,
+        Except.ok.injEq, reduceCtorEq] at hn
+    · rw [SVal.findLive.eq_def] at hn
+      split at hn <;> simp_all only [ne_eq, imp_false, SVal.array.injEq, List.cons.injEq,
+        Seg.field.injEq, reduceCtorEq, false_and]
+
 /-! ## A slot write against the slot past the end
 
 What the elimination's `.stale` arms need: a slot-level write compared with

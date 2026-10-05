@@ -1676,6 +1676,11 @@ def tyPrim : Option Ty → Bool
   | some (.prim _) => true
   | _ => false
 
+/-- The type is an array (`selectOnTypedDynSize`: it has a length). -/
+def tyArr : Option Ty → Bool
+  | some (.ref (.array _)) | some (.ref (.fixed _ _)) => true
+  | _ => false
+
 /-- The type has the shape `sh`. -/
 def tyShape : KShape → Option Ty → Bool
   | .map, some (.ref (.mapping _ _)) | .fixed, some (.ref (.fixed _ _)) => true
@@ -2401,7 +2406,8 @@ def Facts.retsW (F : Facts) (N : LTerm → LTerm) : LTerm → Bool
       (F.slotIn N s q && F.keysRetW N q && (F.slotTy s q).isSome)
   | t@(.kmap sh s q) => t.known F.known F.ne || (s.isInit && F.keysRetW N q && F.shapeIs sh q) ||
       (F.slotIn N s q && F.keysRetW N q && tyShape sh (F.slotTy s q))
-  | t@(.len s q) => t.known F.known F.ne || (s.isInit && F.keysRetW N q && F.isArrPath q)
+  | t@(.len s q) => t.known F.known F.ne || (s.isInit && F.keysRetW N q && F.isArrPath q) ||
+      (F.slotIn N s q && F.keysRetW N q && tyArr (F.slotTy s q))
   | t@(.sok _) => t.known F.known F.ne
   | t@(.cpok s q) => t.known F.known F.ne || (s.isInit && F.keysRetW N q && F.cpokInit q)
   | t@(.pok q) => t.known F.known F.ne || F.keysRetW N q
@@ -2683,8 +2689,24 @@ theorem Facts.retsW_sound {σ : State} {F : Facts} (hF : F.Ok σ) {N : LTerm →
       · cases ht
   | .len s q, h => by
     simp only [Facts.retsW, Bool.or_eq_true, Bool.and_eq_true] at h
-    rcases h with h | ⟨⟨hs, hk⟩, ht⟩
+    rcases h with (h | ⟨⟨hs, hk⟩, ht⟩) | ⟨⟨hin, hk⟩, ht⟩
     · exact LTerm.known_returns hF.1 hF.2.1 _ h
+    rotate_left
+    · cases hT : F.slotTy s q with
+      | none => simp only [hT, tyArr, Bool.false_eq_true] at ht
+      | some T =>
+        obtain ⟨v, qs, w, hv, hq, hw, hc⟩ :=
+          F.slot_resolve hF hN hT hin (Facts.keysRetW_sound hF hN q hk)
+        rw [hT] at ht
+        match T, ht with
+        | .ref (.array _), _ =>
+          match w, hc with
+          | .array _ _ _, _ =>
+            exact ⟨_, by simp only [LTerm.eval, hv, hq, hw, Res.ok_bind, Close.arrLen] <;> rfl⟩
+        | .ref (.fixed _ _), _ =>
+          match w, hc with
+          | .array _ _ _, _ =>
+            exact ⟨_, by simp only [LTerm.eval, hv, hq, hw, Res.ok_bind, Close.arrLen] <;> rfl⟩
     · cases s <;> simp only [LStor.isInit, Bool.false_eq_true] at hs
       unfold Facts.isArrPath at ht
       split at ht
@@ -2873,14 +2895,41 @@ theorem Facts.halts_sound {σ : State} {F : Facts} (hF : F.Ok σ) :
   | .sok _, hh, _, _ | .pok _, hh, _, _ | .kite .., hh, _, _ | .env _, hh, _, _
   | .findP .., hh, _, _ => by simp only [halts, Bool.false_eq_true] at hh
 
+/-- What `nfH` asks: kinds and halting, not returning (`Facts.orc`'s
+`rets` reads `nfH` back). -/
+def Facts.orcH (F : Facts) : Orc := { kind := F.kind, halts := F.halts }
+
+theorem Facts.orcH_ok {σ : State} {F : Facts} (hF : F.Ok σ) : F.orcH.Ok σ :=
+  ⟨F.kind_ok hF, fun t v h => F.halts_sound hF t h v, (Orc.ok_none σ).2.2.1,
+    (Orc.ok_none σ).2.2.2.1, (Orc.ok_none σ).2.2.2.2⟩
+
+/-- `nf0` with the halting the facts show: a conditional on a length a
+`delete` reset, `kite(k, (len; 0) + 1 - 1, …)`, gets its literal. -/
+def Facts.nfH (F : Facts) (t : LTerm) : LTerm := ((t.core F.ne).arith).simpE F.orcH F.eqs
+
+theorem Facts.nfH_keeps {σ : State} {F : Facts} (hF : F.Ok σ) (t : LTerm) : Keeps σ t (F.nfH t) :=
+  fun v h => LTerm.simpE_eval (F.orcH_ok hF) hF.2.2.1 _ v
+    (LTerm.arith_eval _ (LTerm.core_eval hF.2.1 t h))
+
+/-- A conditional on two integers (`kite`), which `nfH` may decide. -/
+def LTerm.isKite : LTerm → Bool
+  | .kite .. => true
+  | _ => false
+
 /-- What the facts tell the simplifier: kinds, halting, and returning by
-`retsW` over the untyped normal form. -/
+`retsW` over the untyped normal form; a conditional (the slot of a `push()`
+through a dangling alias, `arrLength`) also over `nfH`. -/
 def Facts.orc (F : Facts) : Orc :=
-  { kind := F.kind, halts := F.halts, rets := F.retsW F.nf0, range := F.range, lo := F.lo }
+  { kind := F.kind, halts := F.halts,
+    rets := fun t => F.retsW F.nf0 t || (t.isKite && F.retsW F.nfH t),
+    range := F.range, lo := F.lo }
 
 theorem Facts.orc_ok {σ : State} {F : Facts} (hF : F.Ok σ) : F.orc.Ok σ :=
   ⟨F.kind_ok hF, fun t v h => F.halts_sound hF t h v,
-    fun t h => F.retsW_sound hF (F.nf0_keeps hF) t h,
+    fun t h => by
+      rcases Bool.or_eq_true_iff.1 h with h | h
+      · exact F.retsW_sound hF (F.nf0_keeps hF) t h
+      · exact F.retsW_sound hF (F.nfH_keeps hF) t (Bool.and_eq_true_iff.1 h).2,
     fun t _ _ _ hr hi => F.range_sound hF t hr hi, fun t _ _ hl hi => F.lo_sound hF t hl hi⟩
 
 /-- The normal form a term is compared by: its guards dropped (`LTerm.core`),

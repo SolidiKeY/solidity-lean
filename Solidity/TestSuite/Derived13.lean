@@ -27,3 +27,7 @@ theorem Solkey.TestSuite.testArrayCopyKeepsDestinationTail.proved :
 theorem Solkey.TestSuite.testDeleteArrayLeavesDataPastLength.proved :
     ⊢ Solkey.TestSuite.testDeleteArrayLeavesDataPastLength.problem := by
   sol_prove
+
+theorem Solkey.TestSuite.testDanglingInnerArrayReappearsAfterPush.proved :
+    ⊢ Solkey.TestSuite.testDanglingInnerArrayReappearsAfterPush.problem := by
+  sol_prove
