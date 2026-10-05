@@ -85,7 +85,7 @@ lemma (`TermTaclet.sound`).
 | `Calculus/Decide.lean` | `sol_decide`: reads of writes as case trees on key equalities, over the live storage; pushes, pops and storage copies (`LStor.arr`, `LStor.copy`). |
 | `Calculus/DecideSyn.lean` | `LFml.syn`: a reduction closed by its terms, KeY's syntactic closing; `sol_decide`'s first try. |
 | `Calculus/DecideComplete.lean` | The starting storage's reads are realizable; `Fml.valid_iff_cons`. |
-| `Calculus/Closer.lean` | `LFml.close`: the closer, KeY's first-order and arithmetic taclets as clauses of one `Bool` (ground evaluation, `applyEq`, `bool` case splits, intervals by constants and bounds below, reads typed by `wt`'s layout), `LFml.close_holds`; `LFml.fits`, the size bound. |
+| `Calculus/Closer.lean` | `LFml.close`: the closer, KeY's first-order and arithmetic taclets as clauses of one `Bool` (ground evaluation, `applyEq`, `bool` case splits, intervals by constants and bounds below, reads typed by `wt`'s layout, the slot a `push()` recycles typed by its element type), `LFml.close_holds`; `LFml.fits`, the size bound. |
 | `Calculus/Derive.lean` | The strategy as one kernel evaluation: `Derive.residue` (per-goal fresh names, any number of branches, a step budget over the whole derivation, leaves closed by `LFml.close` with `wt` read as a layout, parallel updates split, a push's returned alias read after the push, `Derive.closeSize`), `Proves.of_residue`, `Proves.close_dropWt`; `sol_prove`, `sol_prove?`. |
 | `Calculus/Problem.lean` | solkey's obligation forms (`Problem.fml`: `∀x̄. wt(storage) → [f] true` or `⟨f⟩ true`), `Fml.wt`, `shape_iff_reachable`, `wt_iff_reachable`, `initStorage_wt`; `Problem.text` in solkey's syntax. |
 | `Calculus/Spec.lean` | Specifications compiled to dynamic logic as solkey's `SpecCompiler` does; `spec[C]{f}`, `sol_spec`. |
@@ -138,6 +138,7 @@ The map from taclet to theorem is `docs/lean-key-rule-map.md`.
 | `Typing/Soundness.lean` | Type soundness: `Stmt.run_wt`, `Prog.run_wt`. |
 | `Typing/Reachability.lean` | Every reachable storage is canonical. |
 | `Typing/Constructibility.lean` | The converse: reachable ⇔ canonical ∧ tight. |
+| `Typing/CanonTest.lean` | The tests `wt(storage)` runs decide `canon` and `tight` (`SVal.canonB_iff`, `SVal.tightB_iff`); a default is canonical (`defaultForTy_canonB`). |
 | `SortCheck/Annotations.lean` | The taclets' read-sort annotations, transcribed from the `.key` file. |
 | `SortCheck/Parser.lean` | Token-level `.key` scanner and the `conforms` cross-check. |
 | `SortCheck/Faithfulness.lean` | Each annotation holds of what a well-typed run reads. |
@@ -196,7 +197,7 @@ diffs it).  `docs/testsuite-proofs.md` has the counts and timings.
 | `Solkey/TestSuite.lean` | `Solkey.TestSuite`, its 417 programs and the report, pinned. |
 | `Frontend/Problems.lean` | `solc_problems N` (`N.f.problem : Fml N` per program), `#solkey_problem`, `#solkey_scan`, `#solkey_derive?` (the replays to paste), `#solkey_obligations` (derived, checked against `⊢ N.f.problem` / pending). |
 | `TestSuite/Problems.lean` | The 417 statements of `Solkey.TestSuite`, two pinned in solkey's syntax, `initState_wt`. |
-| `TestSuite/Derived1.lean` … `TestSuite/Derived8.lean` | `Solkey.TestSuite.f.proved : ⊢ Solkey.TestSuite.f.problem`, 40, 40, 40, 40, 40, 37, 40 and 14 (291 in all), by `sol_prove` and explicit leaf tactics; 7 and 8 are what pushes, pops and storage copies added. |
+| `TestSuite/Derived1.lean` … `TestSuite/Derived8.lean` | `Solkey.TestSuite.f.proved : ⊢ Solkey.TestSuite.f.problem`, 40, 40, 40, 40, 40, 37, 40 and 23 (300 in all), by `sol_prove` and explicit leaf tactics; 7 and 8 are what pushes, pops and storage copies added. |
 | `TestSuite/Report.lean` | The pinned count: derived, pending (named), and the three with no statement. |
 
 ## Examples

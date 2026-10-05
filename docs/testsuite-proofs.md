@@ -97,7 +97,7 @@ What they say:
   Done (below; bounds by constants, not differences of terms): 237
   derived.
 - **M5.** Push, pop, `delete` and storage copies in the closer.  Done
-  (below): 291 derived; the 15 pending outside memory are listed with
+  (below): 300 derived; the 6 pending outside memory are listed with
   their reasons.
 - **M6.** Memory in the closer: allocation, reads and writes, `mlen`,
   defaults, copies to storage.
@@ -607,77 +607,91 @@ storage writes, and the closer reads past them.
   `values.pop()` (`keep` for an array of mappings).  `AOp.apply` is the
   interpreter's `pushOn`/`popOn` on the node alone, so the bridge to
   `Tm.eval` is one lemma per symbol (`pushOn_slot`, `pushOn_word`,
-  `popOn_pop`, `write_bridge`).  `values.push(tok)` of a struct is a
+  `popOn_pop`, `write_bridge`).  `tokens.push(tok)` of a struct is a
   `push()` of a `uint` slot with the source copied over it
   (`pushCopy_bridge`).
 - **`LStor.copy s q src sq`**: the subtree at `sq` of `src` written over
   `q` (`alice = bob;`, `SVal.overlay`), the source read where the program
   reads it (`read_bridge`).
-- **The elimination** (`LStor.readU`, `hasU`, `lenU`, `mapU`, `okE`) peels
-  both.  Below a pushed or popped array a read compares its index with the
-  old length (`arrKey`): the pushed word, or a primitive default, at it;
-  the old element below it; nothing past it, or at the last index after a
-  `pop`.  The length is the old one plus or minus one, counted unchecked
-  (`lenSucc`, `lenPred`: `bool` arithmetic, which never reverts; a storage
-  array's length has no bound).  Through members a copy reads its source
-  (`overlay_findLive_fields`, from `find_overlay_fields`).  Two reads are
-  kept whole, as terms over the written storage: the slot a `push()` of a
-  struct, an array or a mapping recycles (an element popped or deleted
-  before, `pushSlot`), and a read below a key of a copy (a mapping met in
-  both keeps the target's entries).  Such a term is exact; the closer only
-  sees what the premises say of it.
+- **The elimination** (`LStor.readU`, `hasU`, `lenU`, `mapU`, `okE`, and
+  `slotU`) peels both.  Below a pushed or popped array a read compares its
+  index with the old length (`arrKey`): the pushed word, or a primitive
+  default, at it; the old element below it; nothing past it, or at the
+  last index after a `pop`.  The length is the old one plus or minus one,
+  counted unchecked (`lenSucc`, `lenPred`: `bool` arithmetic, which never
+  reverts; a storage array's length has no bound).  The slot a `push()` of
+  a struct, an array or a mapping recycles is read where the storage below
+  says what it is (`LStor.slotU`): after a `pop` at the same array the
+  element it popped, cleared (as below a `delete`) or kept; after a
+  `delete` of the array its old first element, cleared.  An element of
+  such a push at an index up to the old length exists exactly where the
+  index is in range (`inRange`).  A copy is read through its source key by
+  key (`copyKeys`, `overlay_findLive_nomap`): where the source has a
+  mapping at a key the read is kept whole (a mapping met in both keeps the
+  target's entries; a copy of a well-typed program has none).  A read kept
+  whole is a term over the written storage, still exact.
 - **Soundness**, case by case outside the mutual proof: the elimination's
   `save` and `delete` cases moved out too (`save_readU_sim`, …,
-  `copy_mapU_sim`), so the mutual proof dispatches.  Its override went
-  from 400000 to 300000 heartbeats (lowered; the default 200000 is not
-  enough for the mutual block's dispatch alone).
+  `copy_mapU_sim`, `pop_slotU_sim`, `del_slotU_sim`), so the mutual proof
+  only dispatches; with `termination_by structural` on each of its
+  theorems, its `maxHeartbeats 400000` override is gone (it now checks at
+  the default).
 - **The alias a push returns** (`Derive.pushAlias?`, `Calculus/Derive.lean`):
   `T storage x = arr.push();` leaves `{ storage := extend(storage, arr) ‖ x
   := arr[arr.length] }`, the alias past the old end; `Fml.seqUpd` reads it
   as the push, then `x := arr[arr.length - 1]` after it (`lastSlot`), where
   the path to the array reads the storage only to check indices
   (`Tm.stablePath`, `stable_eval`).
-- **The closer** (`Calculus/Closer.lean`): a bound below alone
-  (`Facts.lo`, `cmpDecideO`: a length is at least `0`, so `values.length >
-  0` after a `push`, and `pop` after `push` returns); unchecked `+`/`-`
-  return on integers (`Facts.fitsArith`); a key compared with itself takes
-  its first branch (`foldKite`: `values[values.length + 1 - 1]`).
+- **The closer** (`Calculus/Closer.lean`):
+  - a bound below alone (`Facts.lo`, `cmpDecideO`): a length is at least
+    `0`, so `values.length > 0` after a `push`, and `pop` after `push`
+    returns; unchecked `+`/`-` return on integers (`Facts.fitsArith`); a key
+    compared with itself takes its first branch (`foldKite`:
+    `values[values.length + 1 - 1]`);
+  - a read below the slot a `push()` of the initial storage's array takes,
+    or of that array after its `delete`, is typed by the element type
+    (`Facts.slotTy`, `Facts.slot_find`): under `wt(storage)` the elements
+    and the slots past the end are canonical (`SVal.canonB` checks the
+    shadow too), and a default is canonical where the type's structs are
+    (`defaultForTy_canonB`, in the new `Typing/CanonTest.lean`, with
+    `canonB_iff`/`tightB_iff` moved there from `Calculus/Problem.lean`).  So
+    its shape and kind follow the type, and it returns where the index is at
+    most the old length (`Facts.slotIn`).
 
 **The counts** (`TestSuite/Report.lean`, pinned):
 
 | | Total |
 |---|---:|
-| derived | 291 (237 + 54) |
-| pending | 126 |
+| derived | 300 (237 + 63) |
+| pending | 117 |
 | no statement | 3 (1 excluded, 2 skipped) |
 
-The 54 new theorems are `TestSuite/Derived7.lean` (40) and
-`TestSuite/Derived8.lean` (14); all but `testStorageNestedPushReturnAlias`
-(two leaves `sol_close` closes) are `sol_prove` alone.
-`testStorageArrayReadWrite` and `storagePopUnfold` (M4: leaves left for a
-tactic) now close in the residue.  `memoryToStorageIndexArrayCopyRootExample`
-is derived by the search (two `sol_close` leaves, 9 s) but its replay runs
-past 200000 heartbeats as one declaration; it stays pending, for M6.
+The 63 new theorems are `TestSuite/Derived7.lean` (40) and
+`TestSuite/Derived8.lean` (23), in the order of the source; all but
+`testStorageNestedPushReturnAlias` (two leaves `sol_close` closes) are
+`sol_prove` alone.  `testStorageArrayReadWrite` and `storagePopUnfold`
+(M4: leaves left for a tactic) now close in the residue.
+`memoryToStorageIndexArrayCopyRootExample` is derived by the search (two
+`sol_close` leaves, 9 s) but its replay runs past 200000 heartbeats as one
+declaration; it stays pending, for M6.
 
-Of the 126 pending, 111 use memory (M6).  The other 15, and why:
+Of the 117 pending, 111 use memory (M6).  The other 6, and why:
 
 | Function | Why it stays pending |
 |---|---|
 | `storagePushReadBack` (diamond) | `values[values.length - 1]` after `values.push(42)`: the `- 1` is a checked `uint` subtraction of a length with no bound, which reverts where the length is past `2²⁵⁶`; KeY's `int` has no range.  Not valid in the model (overflow, as the plan expects). |
-| `testDeepPopDoesNotResetMappingMember`, `testDeleteArrayDoesNotResetElementMappingMember`, `testPopKeepsMappingElementEntries`, `testDeleteKeepsMappingElementEntries` | the slot a `push()` of a struct or a mapping recycles (an element popped or deleted before) is read whole: what it holds past the end is not eliminated. |
-| `testPushBindMappingElement`, `arrayOfMappingsIndex` (diamonds) | the same recycled slot, and below the old length an element of a dynamic array, which the layout does not type (its length is not in `wt`). |
-| `testStorageDeleteImpureReceiver` | `delete matrix[0][0]` of an element of a recycled `uint[]` slot: its default is of a kind the closer does not know. |
-| `testStructWithFixedArrayCopy`, `testCopyArrayMemberElements` | a read below a key of a copied struct (`triple2.items[1]`, `basketB.items[0]`) is kept whole. |
 | `testDanglingReferenceSurvivesPush`, `testArrayCopyClearsOldElements`, `testArrayCopyKeepsDestinationTail`, `testDeleteArrayLeavesDataPastLength`, `testDanglingInnerArrayReappearsAfterPush` (diamonds) | an alias bound through an index (`Token storage r = tokens[0];`) used after a `pop` made it dangle: the fragment drops such an alias at the next write (`SymB.onWrite`), and the write through it lands past the live end, which the reduction's live storage does not reach. |
 
-**Cost.**  `Derived7.lean` (40 theorems) takes 54 s, `Derived8.lean` (14)
-16 s (`Elab.async false`, the sum of the profiler's per-declaration
+**Cost.**  `Derived7.lean` (40 theorems) takes 58 s, `Derived8.lean` (23)
+26 s (`Elab.async false`, the sum of the profiler's per-declaration
 times); the slowest theorem is `testNestedIndexWriteImpureReceiverAndIndex`
-(9.7 s: four pushes, two of them into the elements of the first two, and
+(8.3 s: four pushes, two of them into the elements of the first two, and
 two impure indices).  The closer's leaves stay within `Derive.closeSize`.
 The default build passes with the same module times as at M4 (ProofTree
-5.6 s, Coin 17 s, Mapping 18 s, `Examples/Tactics/Decide.lean` 40 s): no
-slowdown measured from the two new constructors.
+5.4 s, Coin 17 s, Mapping 18 s, `Examples/Tactics/Decide.lean` 40 s): no
+slowdown measured from the new constructors.  `Calculus/Closer.lean` now
+imports `Typing/CanonTest.lean`, so it waits for the typing modules in a
+parallel build (they were built before `Calculus/Problem.lean` anyway).
 
 `#print axioms` on `testStoragePushReturnAlias.proved`,
 `storagePushValueCopySource.proved`, `storagePushLengthPositive.proved`,

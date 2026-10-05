@@ -45,7 +45,9 @@ variables is outside linear arithmetic).
 
 **The fragment covered** is `Fml.inL`'s, all of it but a write or `delete`
 through a member named `length` (`LStor.okE` keeps such a write whole, so
-the reduction reads a written storage there and `initOnly` fails); for
+the reduction reads a written storage there and `initOnly` fails), and the
+two reads the elimination keeps whole: the slot a `push()` of a struct or
+an array recycles, and a read below a key of a copy (`Decide.lean`); for
 those `sol_decide` falls back to `sol_decide_heuristic`.  Fixed-size arrays,
 mappings, `delete` below a key, `values.length` (`Term.len`) are covered.
 -/

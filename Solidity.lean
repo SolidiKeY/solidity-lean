@@ -106,6 +106,7 @@ import Solidity.Typing.State
 import Solidity.Typing.Soundness
 import Solidity.Typing.Reachability
 import Solidity.Typing.Constructibility
+import Solidity.Typing.CanonTest
 import Solidity.Theory.Terms
 import Solidity.Theory.Storage
 import Solidity.Theory.Copy

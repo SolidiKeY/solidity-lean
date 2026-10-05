@@ -43,8 +43,6 @@ namespace Decide
 
 open Semantics SemanticsProperties
 
-deriving instance DecidableEq for LTerm, LPath, LStor
-
 /-- `t` returns in `σ`. -/
 def Returns (σ : State) (t : LTerm) : Prop := ∃ v, t.eval σ = .ok v
 

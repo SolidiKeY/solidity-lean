@@ -430,6 +430,8 @@ inductive LStor where
 
 end
 
+deriving instance DecidableEq for LTerm, LPath, LStor
+
 /-- A first-order formula over those terms. -/
 inductive LFml where
   | tt
@@ -2946,32 +2948,44 @@ def arrOk : AOp → LTerm → LTerm
 
 /-- The slot an operation appends, at an index `k` against the old length
 `L`: the word `w` or a primitive default at `k = L` (`atNew`, nothing below a
-word), an element read where the slot is a recycled struct or array
-(`opq`); the old element elsewhere.  A `pop` leaves nothing at `L - 1`. -/
+word), the old element elsewhere.  A `pop` leaves nothing at `L - 1`.  Below
+a `push()` of a struct or an array the read itself (`opq`): the closer types
+it whole, the slot and the elements alike (`Facts.slotTy`). -/
 def arrKey (op : AOp) (L k old opq : LTerm) (atNew : LTerm) : LTerm :=
   match op with
   | .push | .slot (.prim _) => .kite k L atNew old
-  | .slot (.ref _) => .kite k L opq old
+  | .slot (.ref _) => opq
   | .pop _ => .kite k (lenPred L) .err old
 
 /-- The leaf of a read after an operation on the array at `P`: no word at or
 above the array; below it, by `arrKey`; the old read apart from it. -/
-def arrRead (op : AOp) (w L old opq : LTerm) : PathRel → LTerm
+def arrRead (op : AOp) (w L old opq : LTerm) (slot : List SSeg → LTerm) : PathRel → LTerm
   | .eq | .above => .err
   | .diverge => old
   | .below (.key k :: rest) =>
-    arrKey op L k old opq (match op with
+    match op with
+    | .slot (.ref _) => .kite k L (slot rest) old
+    | _ => arrKey op L k old opq (match op with
       | .push => if rest.isEmpty then w else .err
       | .slot (.prim p) => if rest.isEmpty then .lit (dfltV p) else .err
       | _ => .err)
   | .below _ => opq
 
-/-- Whether a location is there after an operation on an array. -/
+/-- `true` where `0 ≤ k ≤ L`, halting elsewhere: an index of an array of
+length `L + 1`. -/
+def inRange (k L : LTerm) : LTerm :=
+  .ite (.binop .and .bool (.binop .le .uint (.lit (.int 0)) k) (.binop .le .uint k L))
+    (.lit (.bool true)) .err
+
+/-- Whether a location is there after an operation on an array: an element
+of a pushed struct or array at an index up to the old length. -/
 def arrHas (op : AOp) (L old opq : LTerm) : PathRel → LTerm
   | .eq | .above => .lit (.bool true)
   | .diverge => old
   | .below (.key k :: rest) =>
-    arrKey op L k old opq (if rest.isEmpty then .lit (.bool true) else .err)
+    match op with
+    | .slot (.ref _) => if rest.isEmpty then inRange k L else opq
+    | _ => arrKey op L k old opq (if rest.isEmpty then .lit (.bool true) else .err)
   | .below _ => opq
 
 /-- The length at `Q` after an operation on the array at `P`: one more or
@@ -2991,14 +3005,32 @@ def arrMap (op : AOp) (L old opq : LTerm) : PathRel → LTerm
   | .below (.key k :: _) => arrKey op L k old opq .err
   | .below _ => opq
 
-/-- The leaf of a read after a copy over `P`: at `P` and below it through
-members, what the source has there (`F`); below a key, the read itself
-(`opq`: a mapping met in both keeps the old entries); the old read apart. -/
-def copyLeaf (atEq aboveV old opq : LTerm) (F : List SSeg → LTerm) : PathRel → LTerm
+/-- A test that returns `true` where `t` returns and `false` where it halts. -/
+def isT (t : LTerm) : LTerm := .orElse (.seq t (.lit (.bool true))) (.lit (.bool false))
+
+/-- A read below a copy, the segments `pre` walked: at a key, the read
+itself (`opq`) where the source has a mapping there (a mapping met in both
+keeps the target's entries; a copy of a well-typed program has none); with
+no key left, what the source has (`F`). -/
+def copyKeys (srcMap : List SSeg → LTerm) (opq : LTerm) (F : List SSeg → LTerm) :
+    List SSeg → List SSeg → LTerm
+  | pre, [] => F pre
+  | pre, .field f :: r => copyKeys srcMap opq F (pre ++ [.field f]) r
+  | pre, .key k :: r => .ite (isT (srcMap pre)) opq (copyKeys srcMap opq F (pre ++ [.key k]) r)
+
+/-- The leaf of a read after a copy over `P`: at and below `P`, what the
+source has there (`copyKeys`); the old read apart. -/
+def copyLeaf (atEq aboveV old opq : LTerm) (srcMap F : List SSeg → LTerm) : PathRel → LTerm
   | .eq => atEq
   | .above => aboveV
   | .diverge => old
-  | .below rest => if rest.any SSeg.isKey then opq else F rest
+  | .below rest => copyKeys srcMap opq F [] rest
+
+/-- The path extended by the segments `rest`. -/
+def LPath.addSegs : LPath → List SSeg → LPath
+  | q, [] => q
+  | q, .field f :: r => LPath.addSegs (q.field f) r
+  | q, .key k :: r => LPath.addSegs (q.at k) r
 
 /-- The path extended by the members `rest` starts with, up to its first
 key: `alice` and `[account, balances, k]` make `alice.account.balances`. -/
@@ -3062,10 +3094,34 @@ def LStor.readU : LStor → LPath → LTerm
   | .del s P, Q => (cmpSegs P.elim.segs Q.segs).toTerm
       (delLeaf (s.readU Q) P.elim fun sh q => s.mapU sh q)
   | .arr op s P w, Q => (cmpSegs P.elim.segs Q.segs).toTerm
-      (arrRead op w.elim (s.lenU P.elim) (s.readU Q) (.find (.arr op s P w) Q))
+      (arrRead op w.elim (s.lenU P.elim) (s.readU Q) (.find (.arr op s P w) Q)
+        fun rest => s.slotU P.elim rest (.find (.arr op s P w) Q))
   | .copy s P src SQ, Q => (cmpSegs P.elim.segs Q.segs).toTerm
       (copyLeaf (src.readU SQ.elim) .err (s.readU Q) (.find (.copy s P src SQ) Q)
-        fun rest => src.readU (SQ.elim.addFields rest))
+        (fun pre => src.mapU .map (SQ.elim.addSegs pre)) fun rest => src.readU (SQ.elim.addSegs rest))
+termination_by structural s => s
+
+/-- What the slot a `push()` of a struct or an array takes holds at `rest`,
+the array at `P` in `s` (`pushSlot`: the first slot past the end, recycled):
+after a `pop` at `P`, the element it popped, cleared (as below a `delete`)
+or kept; after a `delete` of a dynamic array at `P`, its old first element,
+cleared, where it had one.  Elsewhere the read itself (`opq`). -/
+def LStor.slotU : LStor → LPath → List SSeg → LTerm → LTerm
+  | .arr (.pop keep) s P' _, P, rest, opq =>
+    if P'.elim == P then
+      if keep then s.readU ((P.at (lenPred (s.lenU P))).addSegs rest)
+      else delLeaf (s.readU ((P.at (lenPred (s.lenU P))).addSegs rest)) (P.at (lenPred (s.lenU P)))
+        (fun sh q => s.mapU sh q) (if rest.isEmpty then .eq else .below rest)
+    else opq
+  | .del s P', P, rest, opq =>
+    if P'.elim == P then
+      .ite (isT (s.mapU .fixed P)) opq
+        (.kite (s.lenU P) (.lit (.int 0)) opq
+          (delLeaf (s.readU ((P.at (.lit (.int 0))).addSegs rest)) (P.at (.lit (.int 0)))
+            (fun sh q => s.mapU sh q) (if rest.isEmpty then .eq else .below rest)))
+    else opq
+  | .init, _, _, opq | .save .., _, _, opq | .arr .push .., _, _, opq
+  | .arr (.slot _) .., _, _, opq | .copy .., _, _, opq => opq
 termination_by structural s => s
 
 /-- Whether `Q` names a location of `s`, where `s` and `Q` return. -/
@@ -3078,7 +3134,7 @@ def LStor.hasU : LStor → LPath → LTerm
       (arrHas op (s.lenU P.elim) (s.hasU Q) (.has (.arr op s P w) Q))
   | .copy s P src SQ, Q => (cmpSegs P.elim.segs Q.segs).toTerm
       (copyLeaf (.lit (.bool true)) (.lit (.bool true)) (s.hasU Q) (.has (.copy s P src SQ) Q)
-        fun rest => src.hasU (SQ.elim.addFields rest))
+        (fun pre => src.mapU .map (SQ.elim.addSegs pre)) fun rest => src.hasU (SQ.elim.addSegs rest))
 termination_by structural s => s
 
 /-- The length of the array at `Q` in `s`, where `s` and `Q` return: a
@@ -3092,7 +3148,7 @@ def LStor.lenU : LStor → LPath → LTerm
       (arrLength op (s.lenU P.elim) (s.lenU Q) (.len (.arr op s P w) Q))
   | .copy s P src SQ, Q => (cmpSegs P.elim.segs Q.segs).toTerm
       (copyLeaf (src.lenU SQ.elim) (s.lenU Q) (s.lenU Q) (.len (.copy s P src SQ) Q)
-        fun rest => src.lenU (SQ.elim.addFields rest))
+        (fun pre => src.mapU .map (SQ.elim.addSegs pre)) fun rest => src.lenU (SQ.elim.addSegs rest))
 termination_by structural s => s
 
 /-- Whether `Q` names a mapping (`sh = .map`) or a fixed-size array
@@ -3106,7 +3162,7 @@ def LStor.mapU (sh : KShape) : LStor → LPath → LTerm
       (arrMap op (s.lenU P.elim) (s.mapU sh Q) (.kmap sh (.arr op s P w) Q))
   | .copy s P src SQ, Q => (cmpSegs P.elim.segs Q.segs).toTerm
       (copyLeaf (src.mapU sh SQ.elim) (s.mapU sh Q) (s.mapU sh Q) (.kmap sh (.copy s P src SQ) Q)
-        fun rest => src.mapU sh (SQ.elim.addFields rest))
+        (fun pre => src.mapU .map (SQ.elim.addSegs pre)) fun rest => src.mapU sh (SQ.elim.addSegs rest))
 termination_by structural s => s
 
 end
@@ -3360,6 +3416,26 @@ theorem cmp_sim {σ : State} {P Q : LPath} {ps qs : List Seg} (hp : P.eval σ = 
   rw [CaseTree.toTerm_eval σ _ _ (cmpSegs_testsOk σ _ _ hp' hq')]
   exact h _ (cmpSegs_holds σ _ _ hp' hq')
 
+theorem LPath.addSegs_eval (σ : State) : ∀ (xs : List SSeg) (q : LPath),
+    (q.addSegs xs).eval σ = q.eval σ >>= fun qs => segsEval σ xs >>= fun r => .ok (qs ++ r)
+  | [], q => by
+    simp only [LPath.addSegs, segsEval, Res.ok_bind, List.append_nil]
+    cases q.eval σ <;> rfl
+  | .field f :: xs, q => by
+    rw [LPath.addSegs, LPath.addSegs_eval σ xs]
+    simp only [LPath.eval, segsEval, bind_assoc, Res.ok_bind, List.append_assoc,
+      List.singleton_append]
+  | .key k :: xs, q => by
+    rw [LPath.addSegs, LPath.addSegs_eval σ xs]
+    simp only [LPath.eval, segsEval, bind_assoc, Res.ok_bind, List.append_assoc,
+      List.singleton_append]
+
+theorem isT_eval (σ : State) (t : LTerm) :
+    (isT t).eval σ = .ok (.bool (match t.eval σ with | .ok _ => true | .error _ => false)) := by
+  unfold isT
+  simp only [LTerm.eval]
+  cases t.eval σ <;> rfl
+
 /-! ### Arrays and copies
 
 An operation on an array changes the node at its path alone (`AOp.apply`):
@@ -3533,11 +3609,8 @@ theorem arrKey_sim {σ : State} {op : AOp} {wv : Value} {c c' : SVal} {k L old o
         · exact hnew (dfltV p) (fun h => by cases h) (fun _ h => by cases h; rfl) (.inr ⟨p, rfl⟩)
         · exact hold
       | ref R =>
-        simp only [arrKey, kite_eval hk hL']
-        split
-        · exact hopq
-        · rename_i hne
-          rw [findLive_grow es sh _ fx _ i r, if_neg hne]; exact hold
+        simp only [arrKey]
+        exact hopq
     | prim _ | struct _ | map _ _ => simp [AOp.apply] at hap
   | pop keep =>
     obtain ⟨es, last, sh, fx, sh', rfl, rfl⟩ := AOp.apply_pop hap
@@ -3604,14 +3677,18 @@ theorem prim_err_sim {σ : State} {pv : PrimVal} {t : List Seg} {G : SVal → Re
   | nil => exact hG pv x (by simpa [SVal.findLive] using hx)
   | cons f t' => simp [find_prim_cons, Res.error_bind] at hx
 
-theorem arrRead_sim {σ : State} {op : AOp} {wv : Value} {w L old opq : LTerm} {v c c' u : SVal}
-    {ps qs : List Seg}
+theorem arrRead_sim {σ : State} {op : AOp} {wv : Value} {w L old opq : LTerm}
+    {slot : List SSeg → LTerm} {v c c' u : SVal} {ps qs : List Seg}
     (hc : v.findLive ps = .ok c) (hap : op.apply wv c = .ok c') (hu : v.saveLive ps c' = .ok u)
     (hw : w.eval σ = .ok wv) (hL : Sim (L.eval σ) (Close.arrLen c))
     (hold : Sim (old.eval σ) (v.findLive qs >>= SVal.asValue))
     (hopq : Sim (opq.eval σ) (u.findLive qs >>= SVal.asValue))
+    (hslot : ∀ es sh fx R, c = .array es sh fx → op = .slot (.ref R) → ∀ rest r,
+      segsEval σ rest = .ok r →
+      Sim (opq.eval σ) ((pushSlot (.ref R) sh).1.findLive r >>= SVal.asValue) →
+      Sim ((slot rest).eval σ) ((pushSlot (.ref R) sh).1.findLive r >>= SVal.asValue))
     (r : PathRel) (hr : r.Holds σ ps qs) :
-    Sim ((arrRead op w L old opq r).eval σ) (u.findLive qs >>= SVal.asValue) := by
+    Sim ((arrRead op w L old opq slot r).eval σ) (u.findLive qs >>= SVal.asValue) := by
   cases r with
   | eq =>
     simp only [PathRel.Holds] at hr; subst hr
@@ -3632,14 +3709,31 @@ theorem arrRead_sim {σ : State} {op : AOp} {wv : Value} {w L old opq : LTerm} {
     · simp only [arrRead]
       rw [SVal.findLive_append, findLive_saveLive_same hu, Res.ok_bind] at hopq ⊢
       rw [SVal.findLive_append, hc, Res.ok_bind] at hold
-      refine arrKey_sim hap hk hL hold hopq fun pv h1 h2 h3 => ?_
-      have hemp := segsEval_isEmpty hr'
-      rcases h3 with rfl | ⟨p, rfl⟩
-      · refine prim_leaf_sim hemp (Sim.of_eq ?_)
-        rw [h1 rfl, Close.asValue_toSVal, hw]
-      · refine prim_leaf_sim hemp (Sim.of_eq ?_)
-        rw [h2 p rfl]
-        cases p <;> rfl
+      by_cases hop : ∃ R, op = .slot (.ref R)
+      · obtain ⟨R, rfl⟩ := hop
+        cases c with
+        | array es sh fx =>
+          simp only [AOp.apply] at hap; cases hap
+          have hL' : L.eval σ = .ok (.int es.length) := (hL _).2 rfl
+          simp only [kite_eval hk hL']
+          rw [findLive_grow es sh _ fx _ i t] at hopq ⊢
+          by_cases hi : i = es.length
+          · rw [if_pos hi] at hopq
+            rw [if_pos hi, if_pos hi]
+            exact hslot es sh fx R rfl rfl rest' t hr' hopq
+          · rw [if_neg hi, if_neg hi]
+            exact hold
+        | prim _ | struct _ | map _ _ => simp [AOp.apply] at hap
+      · split
+        · rename_i R; exact absurd ⟨R, rfl⟩ hop
+        refine arrKey_sim hap hk hL hold hopq fun pv h1 h2 h3 => ?_
+        have hemp := segsEval_isEmpty hr'
+        rcases h3 with rfl | ⟨p, rfl⟩
+        · refine prim_leaf_sim hemp (Sim.of_eq ?_)
+          rw [h1 rfl, Close.asValue_toSVal, hw]
+        · refine prim_leaf_sim hemp (Sim.of_eq ?_)
+          rw [h2 p rfl]
+          cases p <;> rfl
 
 theorem arrHas_sim {σ : State} {op : AOp} {wv : Value} {L old opq : LTerm} {v c c' u : SVal}
     {ps qs : List Seg}
@@ -3665,8 +3759,49 @@ theorem arrHas_sim {σ : State} {op : AOp} {wv : Value} {L old opq : LTerm} {v c
     · simp only [arrHas]
       rw [SVal.findLive_append, findLive_saveLive_same hu, Res.ok_bind] at hopq ⊢
       rw [SVal.findLive_append, hc, Res.ok_bind] at hold
-      exact arrKey_sim hap hk hL hold hopq fun pv _ _ _ =>
-        prim_leaf_sim (segsEval_isEmpty hr') (Sim.of_eq rfl)
+      by_cases hop : ∃ R, op = .slot (.ref R)
+      · obtain ⟨R, rfl⟩ := hop
+        simp only
+        split
+        · rename_i hemp
+          have ht : t = [] := (segsEval_isEmpty hr').1 hemp
+          subst ht
+          cases c with
+          | array es sh fx =>
+            simp only [AOp.apply] at hap; cases hap
+            have hL' : L.eval σ = .ok (.int es.length) := (hL _).2 rfl
+            obtain ⟨x, hx, hxi⟩ := Res.bind_eq_ok.1 hk
+            cases x with
+            | bool b => simp [Value.asInt] at hxi
+            | int j =>
+              simp only [Value.asInt, Except.ok.injEq] at hxi
+              subst hxi
+              have hT : (inRange k L).eval σ =
+                  (if 0 ≤ j ∧ j ≤ es.length then (.ok (.bool true) : Res Value) else .error .stuck) := by
+                simp only [inRange, LTerm.eval, hx, hL', Res.ok_bind, evalBinop, applyBinOp,
+                  Value.asInt, Value.asBool, checkArith, BinOp.retTy, BinOp.isArith, pickBranch,
+                  bind, Except.bind, pure, Except.pure]
+                by_cases h0 : 0 ≤ j <;> by_cases h1 : j ≤ (es.length : Int) <;>
+                  simp [h0, h1]
+              have hR : ((SVal.array (es ++ [(pushSlot (Ty.ref R) sh).1]) (pushSlot (Ty.ref R) sh).2
+                  fx).findLive [.at j] >>= fun _ => .ok (.bool true)) =
+                  (if 0 ≤ j ∧ j ≤ es.length then (.ok (.bool true) : Res Value) else .error .revert) := by
+                simp only [SVal.findLive, List.length_append, List.length_singleton]
+                by_cases hj : 0 ≤ j ∧ j ≤ es.length
+                · have hj' : 0 ≤ j ∧ j.toNat < es.length + 1 := ⟨hj.1, by omega⟩
+                  simp [hj', hj, Res.ok_bind]
+                · have hj' : ¬(0 ≤ j ∧ j.toNat < es.length + 1) := by omega
+                  rw [dif_neg hj', if_neg hj]; rfl
+              rw [hT, hR]
+              split
+              · exact Sim.refl _
+              · exact Sim.halt (by simp) (by simp)
+          | prim _ | struct _ | map _ _ => simp [AOp.apply] at hap
+        · exact hopq
+      · split
+        · rename_i R; exact absurd ⟨R, rfl⟩ hop
+        exact arrKey_sim hap hk hL hold hopq fun pv _ _ _ =>
+          prim_leaf_sim (segsEval_isEmpty hr') (Sim.of_eq rfl)
 
 theorem arrLength_sim {σ : State} {op : AOp} {wv : Value} {L old opq : LTerm} {v c c' u : SVal}
     {ps qs : List Seg}
@@ -3738,19 +3873,257 @@ theorem arrMap_sim {σ : State} {op : AOp} {wv : Value} {sh : KShape} {L old opq
       exact arrKey_sim hap hk hL hold hopq fun pv _ _ _ =>
         prim_err_sim fun p x h => by cases sh <;> simp [KShape.test, kmapF, isMapV, isFixV] at h
 
+/-- No location the read passes an index at is a mapping: what a copy's read
+below a key needs to read the source (a mapping met keeps the target's
+entries). -/
+def NoMapAlong (y : SVal) (segs : List Seg) : Prop :=
+  ∀ pre i rest, segs = pre ++ .at i :: rest → ∀ w, y.findLive pre = .ok w → isMapV w = false
+
+theorem overlay_prim_eq (c : SVal) (p : PrimVal) : c.overlay (.prim p) = .prim p := by
+  cases c <;> rfl
+
+theorem lookupBy_overlayFields' (ofs : List (Name × SVal)) (f : Name) :
+    ∀ ns : List (Name × SVal), lookupBy f (SVal.overlay.overlayFields ofs ns) =
+      (lookupBy f ns).map (fun v => match lookupBy f ofs with
+        | some o => o.overlay v
+        | none => v.strip)
+  | [] => rfl
+  | (n, w) :: tl => by
+    simp only [SVal.overlay.overlayFields, lookupBy]
+    split
+    · rename_i h; subst h; rfl
+    · exact lookupBy_overlayFields' ofs f tl
+
+theorem lookupBy_stripFields (f : Name) : ∀ ns : List (Name × SVal),
+    lookupBy f (SVal.strip.stripFields ns) = (lookupBy f ns).map SVal.strip
+  | [] => rfl
+  | (n, w) :: tl => by
+    simp only [SVal.strip.stripFields, lookupBy]
+    split
+    · rfl
+    · exact lookupBy_stripFields f tl
+
+theorem overlayElems_getElem : ∀ (os ns : List SVal) (i : Nat) (h : i < ns.length)
+    (h' : i < (SVal.overlay.overlayElems os ns).length),
+    ∃ c : SVal, (SVal.overlay.overlayElems os ns)[i] = c.overlay ns[i]
+  | o :: os, n :: ns, 0, _, _ => ⟨o, rfl⟩
+  | o :: os, n :: ns, i + 1, h, h' => by
+    simp only [SVal.overlay.overlayElems, List.getElem_cons_succ]
+    exact overlayElems_getElem os ns i (by simpa using h) (by simpa [SVal.overlay.overlayElems] using h')
+  | [], ns, i, h, h' => by
+    simp only [SVal.overlay.overlayElems]
+    exact ⟨.prim (.int 0), by rw [prim_overlay]; exact stripElems_getElem ns i h⟩
+  | _ :: _, [], i, h, _ => absurd h (by simp)
+where
+  stripElems_getElem : ∀ (ns : List SVal) (i : Nat) (h : i < ns.length),
+      (SVal.strip.stripElems ns)[i]'(by rw [Close.stripElems_length]; exact h) = ns[i].strip
+    | n :: ns, 0, _ => rfl
+    | n :: ns, i + 1, h => by
+      simp only [SVal.strip.stripElems, List.getElem_cons_succ]
+      exact stripElems_getElem ns i (by simpa using h)
+
+theorem NoMapAlong.field {y w : SVal} {f : Name} {r : List Seg} (h : NoMapAlong y (.field f :: r))
+    (hw : y.findLive [.field f] = .ok w) : NoMapAlong w r := by
+  intro pre i rest he w' hw'
+  apply h (.field f :: pre) i rest (by simp [he])
+  rw [show Seg.field f :: pre = [Seg.field f] ++ pre from rfl, SVal.findLive_append, hw,
+    Res.ok_bind, hw']
+
+theorem NoMapAlong.at {y w : SVal} {i : Int} {r : List Seg} (h : NoMapAlong y (.at i :: r))
+    (hw : y.findLive [.at i] = .ok w) : NoMapAlong w r := by
+  intro pre j rest he w' hw'
+  apply h (.at i :: pre) j rest (by simp [he])
+  rw [show Seg.at i :: pre = [Seg.at i] ++ pre from rfl, SVal.findLive_append, hw,
+    Res.ok_bind, hw']
+
+/-- **A copy read below keys reads the source**, where no location the
+read passes a key at is a mapping. -/
+theorem overlay_findLive_nomap {G : SVal → Res Value} (hG : ∀ c y : SVal, G (c.overlay y) = G y) :
+    ∀ (segs : List Seg) (c y : SVal), NoMapAlong y segs →
+      ((c.overlay y).findLive segs >>= G) = (y.findLive segs >>= G)
+  | [], c, y, _ => by simp only [SVal.findLive_nil, Res.ok_bind, hG]
+  | .field f :: r, c, y, hy => by
+    cases y with
+    | prim p => rw [overlay_prim_eq]
+    | map ne nd => cases c <;> simp [SVal.overlay, SVal.strip, SVal.findLive]
+    | struct nfs =>
+      cases hl : lookupBy f nfs with
+      | none =>
+        cases c <;> simp [SVal.overlay, SVal.strip, SVal.findLive, lookupBy_overlayFields',
+          lookupBy_stripFields, hl]
+      | some w =>
+        have hw : (SVal.struct nfs).findLive [.field f] = .ok w := by
+          simp [SVal.findLive, hl]
+        have hy' := hy.field hw
+        have hyr : (SVal.struct nfs).findLive (.field f :: r) = w.findLive r := by
+          simp [SVal.findLive, hl]
+        rw [hyr]
+        cases c with
+        | struct ofs =>
+          simp only [SVal.overlay, SVal.findLive, lookupBy_overlayFields', hl, Option.map_some]
+          split
+          · exact overlay_findLive_nomap hG r _ w hy'
+          · rw [← prim_overlay (.int 0)]; exact overlay_findLive_nomap hG r _ w hy'
+        | prim _ | array _ _ _ | map _ _ =>
+          simp only [SVal.overlay, SVal.strip, SVal.findLive, lookupBy_stripFields, hl,
+            Option.map_some]
+          rw [← prim_overlay (.int 0)]; exact overlay_findLive_nomap hG r _ w hy'
+    | array nel nsh nfx =>
+      by_cases hf : f = "length"
+      · subst hf
+        cases c <;> simp [SVal.overlay, SVal.strip, SVal.findLive, overlayElems_length,
+          Close.stripElems_length]
+      · cases c <;> simp [SVal.overlay, SVal.strip, SVal.findLive, hf]
+  | .at i :: r, c, y, hy => by
+    have hm := hy [] i r rfl y (by cases y <;> rfl)
+    cases y with
+    | prim p => rw [overlay_prim_eq]
+    | map ne nd => simp [isMapV] at hm
+    | struct nfs => cases c <;> simp [SVal.overlay, SVal.strip, SVal.findLive]
+    | array nel nsh nfx =>
+      have hlen : ∀ os, (SVal.overlay.overlayElems os nel).length = nel.length :=
+        fun os => overlayElems_length os nel
+      by_cases hi : 0 ≤ i ∧ i.toNat < nel.length
+      · have hw : (SVal.array nel nsh nfx).findLive [.at i] = .ok nel[i.toNat] := by
+          simp [SVal.findLive, hi]
+        have hy' := hy.at hw
+        have hyr : (SVal.array nel nsh nfx).findLive (.at i :: r) = nel[i.toNat].findLive r := by
+          simp [SVal.findLive, hi]
+        rw [hyr]
+        cases c with
+        | array oel osh ofx =>
+          have hi' : 0 ≤ i ∧ i.toNat < (SVal.overlay.overlayElems (oel ++ osh) nel).length := by
+            rw [hlen]; exact hi
+          obtain ⟨c', hc'⟩ := overlayElems_getElem (oel ++ osh) nel i.toNat hi.2 hi'.2
+          simp only [SVal.overlay, SVal.findLive, dif_pos hi', List.get_eq_getElem, hc']
+          exact overlay_findLive_nomap hG r c' _ hy'
+        | prim _ | struct _ | map _ _ =>
+          have hi' : 0 ≤ i ∧ i.toNat < (SVal.strip.stripElems nel).length := by
+            rw [Close.stripElems_length]; exact hi
+          simp only [SVal.overlay, SVal.strip, SVal.findLive, dif_pos hi', List.get_eq_getElem,
+            overlayElems_getElem.stripElems_getElem nel i.toNat hi.2]
+          rw [← prim_overlay (.int 0)]; exact overlay_findLive_nomap hG r _ _ hy'
+      · have hyr : (SVal.array nel nsh nfx).findLive (.at i :: r) = .error .revert := by
+          simp [SVal.findLive, hi]
+        rw [hyr]
+        cases c with
+        | array oel osh ofx =>
+          have hi' : ¬(0 ≤ i ∧ i.toNat < (SVal.overlay.overlayElems (oel ++ osh) nel).length) := by
+            rw [hlen]; exact hi
+          simp [SVal.overlay, SVal.findLive, hi']
+        | prim _ | struct _ | map _ _ =>
+          have hi' : ¬(0 ≤ i ∧ i.toNat < (SVal.strip.stripElems nel).length) := by
+            rw [Close.stripElems_length]; exact hi
+          simp [SVal.overlay, SVal.strip, SVal.findLive, hi']
+
+theorem NoMapAlong.nil (y : SVal) : NoMapAlong y [] := by
+  intro pre i rest he
+  cases pre <;> simp at he
+
+theorem NoMapAlong.snoc_field {y : SVal} {p : List Seg} (f : Name) (h : NoMapAlong y p) :
+    NoMapAlong y (p ++ [.field f]) := by
+  intro pre i rest he w hw
+  obtain ⟨rest', rfl⟩ : ∃ rest', p = pre ++ .at i :: rest' := by
+    rcases List.eq_nil_or_concat rest with rfl | ⟨r', x, rfl⟩
+    · have := congrArg List.getLast? he
+      simp at this
+    · refine ⟨r', ?_⟩
+      have := he
+      simp only [List.concat_eq_append] at this
+      rw [show pre ++ Seg.at i :: (r' ++ [x]) = (pre ++ Seg.at i :: r') ++ [x] by simp] at this
+      exact (List.append_inj' this rfl).1
+  exact h pre i rest' rfl w hw
+
+theorem NoMapAlong.snoc_at {y : SVal} {p : List Seg} (i : Int) (h : NoMapAlong y p)
+    (hp : ∀ w, y.findLive p = .ok w → isMapV w = false) : NoMapAlong y (p ++ [.at i]) := by
+  intro pre j rest he w hw
+  rcases List.eq_nil_or_concat rest with rfl | ⟨r', x, rfl⟩
+  · have := List.append_inj' he rfl
+    obtain ⟨rfl, -⟩ := this
+    exact hp w hw
+  · have h' := he
+    simp only [List.concat_eq_append] at h'
+    rw [show pre ++ Seg.at j :: (r' ++ [x]) = (pre ++ Seg.at j :: r') ++ [x] by simp] at h'
+    exact h pre j r' (List.append_inj' h' rfl).1 w hw
+
+/-- **A read below a copy reads the source**, key by key: where the
+source has a mapping at a key, the read is kept whole. -/
+theorem copyKeys_sim {σ : State} {G : SVal → Res Value} (hG : ∀ c y : SVal, G (c.overlay y) = G y)
+    {sv n cur u : SVal} {ps sqs full : List Seg} {srcMap F : List SSeg → LTerm} {opq : LTerm}
+    (hn : sv.findLive sqs = .ok n) (hu : u.findLive ps = .ok (cur.overlay n))
+    (hM : ∀ pre rs, segsEval σ pre = .ok rs →
+      Sim ((srcMap pre).eval σ) (sv.findLive (sqs ++ rs) >>= KShape.map.test))
+    (hF : ∀ rest rs, segsEval σ rest = .ok rs → Sim ((F rest).eval σ) (sv.findLive (sqs ++ rs) >>= G))
+    (hopq : Sim (opq.eval σ) (u.findLive (ps ++ full) >>= G)) :
+    ∀ (r pre : List SSeg) (preS rS : List Seg), segsEval σ pre = .ok preS →
+      segsEval σ r = .ok rS → full = preS ++ rS → NoMapAlong n preS →
+        Sim ((copyKeys srcMap opq F pre r).eval σ) (u.findLive (ps ++ full) >>= G)
+  | [], pre, preS, rS, hpre, hr, hfull, hnm => by
+    cases hr
+    simp only [List.append_nil] at hfull
+    rw [hfull]
+    simp only [copyKeys]
+    have h := hF pre preS hpre
+    rw [SVal.findLive_append, hn, Res.ok_bind, ← overlay_findLive_nomap hG preS cur n hnm] at h
+    rw [SVal.findLive_append, hu, Res.ok_bind]
+    exact h
+  | .field f :: r, pre, preS, rS, hpre, hr, hfull, hnm => by
+    obtain ⟨rS', hr', he⟩ := Res.bind_eq_ok.1 hr
+    cases he
+    simp only [copyKeys]
+    exact copyKeys_sim hG hn hu hM hF hopq r (pre ++ [.field f]) (preS ++ [.field f]) rS'
+      (segsEval_append σ hpre rfl) hr' (by simp [hfull]) (hnm.snoc_field f)
+  | .key k :: r, pre, preS, rS, hpre, hr, hfull, hnm => by
+    obtain ⟨i, hi, hr⟩ := Res.bind_eq_ok.1 hr
+    obtain ⟨rS', hr', he⟩ := Res.bind_eq_ok.1 hr
+    cases he
+    simp only [copyKeys]
+    have hm := hM pre preS hpre
+    rw [SVal.findLive_append, hn, Res.ok_bind] at hm
+    by_cases hmap : ∃ w, n.findLive preS = .ok w ∧ isMapV w = true
+    · obtain ⟨w, hw, hwm⟩ := hmap
+      have hmt : (srcMap pre).eval σ = .ok (.bool true) := by
+        apply (hm _).2
+        rw [hw, Res.ok_bind]
+        simp [KShape.test, kmapF, hwm]
+      simp only [LTerm.eval, isT_eval, hmt, Res.ok_bind, pickBranch]
+      exact hopq
+    · have hmt : ∀ x, (srcMap pre).eval σ ≠ .ok x := by
+        intro x hx
+        have := (hm x).1 hx
+        obtain ⟨w, hw, ht⟩ := Res.bind_eq_ok.1 this
+        simp only [KShape.test, kmapF] at ht
+        split at ht
+        · exact hmap ⟨w, hw, ‹_›⟩
+        · cases ht
+      have hfalse : (isT (srcMap pre)).eval σ = .ok (.bool false) := by
+        rw [isT_eval]
+        cases hh : (srcMap pre).eval σ with
+        | ok x => exact absurd hh (hmt x)
+        | error _ => rfl
+      simp only [LTerm.eval, hfalse, Res.ok_bind, pickBranch]
+      refine copyKeys_sim hG hn hu hM hF hopq r (pre ++ [.key k]) (preS ++ [.at i]) rS'
+        (segsEval_append σ hpre (by simp only [segsEval, hi, Res.ok_bind])) hr'
+        (by simp [hfull]) (hnm.snoc_at i fun w hw => ?_)
+      cases hb : isMapV w with
+      | false => rfl
+      | true => exact absurd ⟨w, hw, hb⟩ hmap
+
 theorem copyLeaf_sim {σ : State} {G : SVal → Res Value} (hG : ∀ c y : SVal, G (c.overlay y) = G y)
     {v sv cur n u : SVal} {ps qs sqs : List Seg} {SQ : LPath} {atEq aboveV old opq : LTerm}
-    {F : List SSeg → LTerm}
+    {srcMap F : List SSeg → LTerm}
     (hn : sv.findLive sqs = .ok n) (hsq : SQ.eval σ = .ok sqs)
     (hu : v.saveLive ps (cur.overlay n) = .ok u)
     (heq : Sim (atEq.eval σ) (G n))
     (habove : ∀ f t, ps = qs ++ f :: t → Sim (aboveV.eval σ) (u.findLive qs >>= G))
     (hold : Sim (old.eval σ) (v.findLive qs >>= G))
     (hopq : Sim (opq.eval σ) (u.findLive qs >>= G))
-    (hF : ∀ rest q', (SQ.addFields rest).eval σ = .ok q' →
+    (hM : ∀ pre q', (SQ.addSegs pre).eval σ = .ok q' →
+      Sim ((srcMap pre).eval σ) (sv.findLive q' >>= KShape.map.test))
+    (hF : ∀ rest q', (SQ.addSegs rest).eval σ = .ok q' →
       Sim ((F rest).eval σ) (sv.findLive q' >>= G))
     (r : PathRel) (hr : r.Holds σ ps qs) :
-    Sim ((copyLeaf atEq aboveV old opq F r).eval σ) (u.findLive qs >>= G) := by
+    Sim ((copyLeaf atEq aboveV old opq srcMap F r).eval σ) (u.findLive qs >>= G) := by
   cases r with
   | eq =>
     simp only [PathRel.Holds] at hr; subst hr
@@ -3763,15 +4136,11 @@ theorem copyLeaf_sim {σ : State} {G : SVal → Res Value} (hG : ∀ c y : SVal,
   | below rest =>
     obtain ⟨f, t, rfl, hrest⟩ := hr
     simp only [copyLeaf]
-    split
-    · exact hopq
-    · rename_i hk
-      have hlead := segsEval_lead hrest (by simpa using hk)
-      have h := hF rest (sqs ++ leadFields rest) (by rw [LPath.addFields_eval, hsq]; rfl)
-      rw [SVal.findLive_append, hn, Res.ok_bind] at h
-      rw [SVal.findLive_append, findLive_saveLive_same hu, Res.ok_bind, hlead,
-        overlay_findLive_fields hG cur n _ (leadFields_noAt rest)]
-      exact h
+    have hseg : ∀ xs rs, segsEval σ xs = .ok rs → (SQ.addSegs xs).eval σ = .ok (sqs ++ rs) := by
+      intro xs rs h; rw [LPath.addSegs_eval, hsq, Res.ok_bind, h, Res.ok_bind]
+    exact copyKeys_sim hG hn (findLive_saveLive_same hu)
+      (fun pre rs h => hM pre _ (hseg pre rs h)) (fun rest rs h => hF rest _ (hseg rest rs h))
+      hopq rest [] [] (f :: t) rfl hrest rfl (NoMapAlong.nil n)
 
 theorem copy_eval_ok {σ : State} {s src : LStor} {P SQ : LPath} {u : SVal}
     (hu : (LStor.copy s P src SQ).eval σ = .ok u) :
@@ -3799,14 +4168,16 @@ theorem copy_readU_sim (hu : (LStor.copy s P src SQ).eval σ = .ok u) (hq : Q.ev
     (ihR : ∀ {v qs}, s.eval σ = .ok v → Q.eval σ = .ok qs →
       Sim ((s.readU Q).eval σ) (v.findLive qs >>= SVal.asValue))
     (ihS : ∀ (Q' : LPath) {v qs}, src.eval σ = .ok v → Q'.eval σ = .ok qs →
-      Sim ((src.readU Q').eval σ) (v.findLive qs >>= SVal.asValue)) :
+      Sim ((src.readU Q').eval σ) (v.findLive qs >>= SVal.asValue))
+    (ihSM : ∀ (Q' : LPath) {v qs}, src.eval σ = .ok v → Q'.eval σ = .ok qs →
+      Sim ((src.mapU .map Q').eval σ) (v.findLive qs >>= KShape.map.test)) :
     Sim (((LStor.copy s P src SQ).readU Q).eval σ) (u.findLive qs >>= SVal.asValue) := by
   obtain ⟨sv, sqs, n, v, ps, cur, hsv, hsq, hn, hv, hp, hc, hu'⟩ := copy_eval_ok hu
   have hp' : P.elim.eval σ = .ok ps := (hP ps).2 hp
   have hsq' : SQ.elim.eval σ = .ok sqs := (hSQ sqs).2 hsq
   rw [LStor.readU]
   refine cmp_sim hp' hq fun r hr => copyLeaf_sim (G := SVal.asValue) overlay_asValue hn hsq' hu'
-    ?_ ?_ (ihR hv hq) ?_ (fun rest q' hq' => ihS _ hsv hq') r hr
+    ?_ ?_ (ihR hv hq) ?_ (fun pre q' hq' => ihSM _ hsv hq') (fun rest q' hq' => ihS _ hsv hq') r hr
   · have := ihS SQ.elim hsv hsq'; rwa [hn, Res.ok_bind] at this
   · intro f t he; subst he
     obtain ⟨_, w', _, hs', hf⟩ := save_through qs (f :: t) hu'
@@ -3819,14 +4190,17 @@ theorem copy_hasU_sim (hu : (LStor.copy s P src SQ).eval σ = .ok u) (hq : Q.eva
     (ihR : ∀ {v qs}, s.eval σ = .ok v → Q.eval σ = .ok qs →
       Sim ((s.hasU Q).eval σ) (v.findLive qs >>= fun _ => .ok (.bool true)))
     (ihS : ∀ (Q' : LPath) {v qs}, src.eval σ = .ok v → Q'.eval σ = .ok qs →
-      Sim ((src.hasU Q').eval σ) (v.findLive qs >>= fun _ => .ok (.bool true))) :
+      Sim ((src.hasU Q').eval σ) (v.findLive qs >>= fun _ => .ok (.bool true)))
+    (ihSM : ∀ (Q' : LPath) {v qs}, src.eval σ = .ok v → Q'.eval σ = .ok qs →
+      Sim ((src.mapU .map Q').eval σ) (v.findLive qs >>= KShape.map.test)) :
     Sim (((LStor.copy s P src SQ).hasU Q).eval σ) (u.findLive qs >>= fun _ => .ok (.bool true)) := by
   obtain ⟨sv, sqs, n, v, ps, cur, hsv, hsq, hn, hv, hp, hc, hu'⟩ := copy_eval_ok hu
   have hp' : P.elim.eval σ = .ok ps := (hP ps).2 hp
   have hsq' : SQ.elim.eval σ = .ok sqs := (hSQ sqs).2 hsq
   rw [LStor.hasU]
   refine cmp_sim hp' hq fun r hr => copyLeaf_sim (G := fun _ => .ok (.bool true))
-    (fun _ _ => rfl) hn hsq' hu' (Sim.of_eq rfl) ?_ (ihR hv hq) ?_ (fun rest q' hq' => ihS _ hsv hq') r hr
+    (fun _ _ => rfl) hn hsq' hu' (Sim.of_eq rfl) ?_ (ihR hv hq) ?_
+    (fun pre q' hq' => ihSM _ hsv hq') (fun rest q' hq' => ihS _ hsv hq') r hr
   · intro f t he; subst he
     obtain ⟨_, w', _, _, hf⟩ := save_through qs (f :: t) hu'
     exact Sim.of_eq (by simp [LTerm.eval, hf, Res.ok_bind])
@@ -3837,14 +4211,16 @@ theorem copy_lenU_sim (hu : (LStor.copy s P src SQ).eval σ = .ok u) (hq : Q.eva
     (ihR : ∀ {v qs}, s.eval σ = .ok v → Q.eval σ = .ok qs →
       Sim ((s.lenU Q).eval σ) (v.findLive qs >>= Close.arrLen))
     (ihS : ∀ (Q' : LPath) {v qs}, src.eval σ = .ok v → Q'.eval σ = .ok qs →
-      Sim ((src.lenU Q').eval σ) (v.findLive qs >>= Close.arrLen)) :
+      Sim ((src.lenU Q').eval σ) (v.findLive qs >>= Close.arrLen))
+    (ihSM : ∀ (Q' : LPath) {v qs}, src.eval σ = .ok v → Q'.eval σ = .ok qs →
+      Sim ((src.mapU .map Q').eval σ) (v.findLive qs >>= KShape.map.test)) :
     Sim (((LStor.copy s P src SQ).lenU Q).eval σ) (u.findLive qs >>= Close.arrLen) := by
   obtain ⟨sv, sqs, n, v, ps, cur, hsv, hsq, hn, hv, hp, hc, hu'⟩ := copy_eval_ok hu
   have hp' : P.elim.eval σ = .ok ps := (hP ps).2 hp
   have hsq' : SQ.elim.eval σ = .ok sqs := (hSQ sqs).2 hsq
   rw [LStor.lenU]
   refine cmp_sim hp' hq fun r hr => copyLeaf_sim (G := Close.arrLen) overlay_arrLen hn hsq' hu'
-    ?_ ?_ (ihR hv hq) ?_ (fun rest q' hq' => ihS _ hsv hq') r hr
+    ?_ ?_ (ihR hv hq) ?_ (fun pre q' hq' => ihSM _ hsv hq') (fun rest q' hq' => ihS _ hsv hq') r hr
   · have := ihS SQ.elim hsv hsq'; rwa [hn, Res.ok_bind] at this
   · intro f t he; subst he
     obtain ⟨w₀, w', hw₀, hs', hf⟩ := save_through qs (f :: t) hu'
@@ -3860,14 +4236,16 @@ theorem copy_mapU_sim {sh : KShape} (hu : (LStor.copy s P src SQ).eval σ = .ok 
     (ihR : ∀ {v qs}, s.eval σ = .ok v → Q.eval σ = .ok qs →
       Sim ((s.mapU sh Q).eval σ) (v.findLive qs >>= sh.test))
     (ihS : ∀ (Q' : LPath) {v qs}, src.eval σ = .ok v → Q'.eval σ = .ok qs →
-      Sim ((src.mapU sh Q').eval σ) (v.findLive qs >>= sh.test)) :
+      Sim ((src.mapU sh Q').eval σ) (v.findLive qs >>= sh.test))
+    (ihSM : ∀ (Q' : LPath) {v qs}, src.eval σ = .ok v → Q'.eval σ = .ok qs →
+      Sim ((src.mapU .map Q').eval σ) (v.findLive qs >>= KShape.map.test)) :
     Sim (((LStor.copy s P src SQ).mapU sh Q).eval σ) (u.findLive qs >>= sh.test) := by
   obtain ⟨sv, sqs, n, v, ps, cur, hsv, hsq, hn, hv, hp, hc, hu'⟩ := copy_eval_ok hu
   have hp' : P.elim.eval σ = .ok ps := (hP ps).2 hp
   have hsq' : SQ.elim.eval σ = .ok sqs := (hSQ sqs).2 hsq
   rw [LStor.mapU]
   refine cmp_sim hp' hq fun r hr => copyLeaf_sim (G := sh.test) (overlay_test sh) hn hsq' hu'
-    ?_ ?_ (ihR hv hq) ?_ (fun rest q' hq' => ihS _ hsv hq') r hr
+    ?_ ?_ (ihR hv hq) ?_ (fun pre q' hq' => ihSM _ hsv hq') (fun rest q' hq' => ihS _ hsv hq') r hr
   · have := ihS SQ.elim hsv hsq'; rwa [hn, Res.ok_bind] at this
   · intro f t he; subst he
     obtain ⟨w₀, w', hw₀, hs', hf⟩ := save_through qs (f :: t) hu'
@@ -3884,7 +4262,12 @@ theorem arr_readU_sim (hu : (LStor.arr op s P w).eval σ = .ok u) (hq : Q.eval �
     (ihR : ∀ {v qs}, s.eval σ = .ok v → Q.eval σ = .ok qs →
       Sim ((s.readU Q).eval σ) (v.findLive qs >>= SVal.asValue))
     (ihL : ∀ {v ps}, s.eval σ = .ok v → P.elim.eval σ = .ok ps →
-      Sim ((s.lenU P.elim).eval σ) (v.findLive ps >>= Close.arrLen)) :
+      Sim ((s.lenU P.elim).eval σ) (v.findLive ps >>= Close.arrLen))
+    (ihS : ∀ (rest : List SSeg) (opq : LTerm) {v : SVal} {ps : List Seg} {es sh : List SVal}
+      {fx : Bool} {R : RefTy} {r : List Seg}, s.eval σ = .ok v → P.elim.eval σ = .ok ps →
+      v.findLive ps = .ok (.array es sh fx) → segsEval σ rest = .ok r →
+      Sim (opq.eval σ) ((pushSlot (.ref R) sh).1.findLive r >>= SVal.asValue) →
+      Sim ((s.slotU P.elim rest opq).eval σ) ((pushSlot (.ref R) sh).1.findLive r >>= SVal.asValue)) :
     Sim (((LStor.arr op s P w).readU Q).eval σ) (u.findLive qs >>= SVal.asValue) := by
   obtain ⟨wv, v, ps, c, c', hw₀, hv, hp, hc, hap, hu'⟩ := arr_eval_ok hu
   have hp' : P.elim.eval σ = .ok ps := (hP ps).2 hp
@@ -3892,7 +4275,8 @@ theorem arr_readU_sim (hu : (LStor.arr op s P w).eval σ = .ok u) (hq : Q.eval �
   rw [hc, Res.ok_bind] at hL
   rw [LStor.readU]
   exact cmp_sim hp' hq fun r hr => arrRead_sim hc hap hu' ((hw wv).2 hw₀) hL (ihR hv hq)
-    (Sim.of_eq (by simp only [LTerm.eval, hu, hq, Res.ok_bind])) r hr
+    (Sim.of_eq (by simp only [LTerm.eval, hu, hq, Res.ok_bind]))
+    (fun es sh fx R hce _ rest r hr hopq => ihS rest _ hv hp' (hce ▸ hc) hr hopq) r hr
 
 theorem arr_hasU_sim (hu : (LStor.arr op s P w).eval σ = .ok u) (hq : Q.eval σ = .ok qs)
     (hP : Sim (P.elim.eval σ) (P.eval σ))
@@ -4045,6 +4429,183 @@ theorem copy_okE_sim {σ : State} {s src : LStor} {P SQ : LPath}
         (hs _).2 (by simp [hv, Res.ok_bind]), .bool true, ⟨ps, h₅, rfl⟩,
         (ihH hv h₅ _).2 (by simp [hc, Res.ok_bind])⟩
   · exact Sim.refl _
+
+/-! ### The slot a `push()` recycles -/
+
+theorem pushSlot_ref_cons (R : RefTy) (c : SVal) (t : List SVal) :
+    (pushSlot (.ref R) (c :: t)).1 = c := by
+  simp [pushSlot, Ty.isPrimitive]
+
+theorem AOp.apply_pop_eq {keep : Bool} {wv : Value} {c c' : SVal}
+    (h : (AOp.pop keep).apply wv c = .ok c') :
+    ∃ es last sh fx, c = .array (es ++ [last]) sh fx ∧
+      c' = .array es ((if keep then last else last.defaultOf) :: sh) fx := by
+  cases c with
+  | array elems shadow fx =>
+    simp only [AOp.apply] at h
+    rcases hr : elems.reverse with _ | ⟨l, rr⟩ <;> simp only [hr] at h
+    · cases h
+    · cases h
+      refine ⟨rr.reverse, l, shadow, fx, ?_, rfl⟩
+      have he : elems = (l :: rr).reverse := by rw [← hr, List.reverse_reverse]
+      simp [he]
+  | prim _ | struct _ | map _ _ => simp [AOp.apply] at h
+
+/-- **The default of an element, read below it**: the leaf a `delete` of
+the element at `E` leaves, at `rest`. -/
+theorem delSlot_sim {σ : State} {s : LStor} {v e : SVal} {E : LPath} {eps : List Seg}
+    {rest : List SSeg} {r : List Seg}
+    (hE : E.eval σ = .ok eps) (he : v.findLive eps = .ok e) (hr : segsEval σ rest = .ok r)
+    (ihR : ∀ (Q : LPath) {qs}, Q.eval σ = .ok qs →
+      Sim ((s.readU Q).eval σ) (v.findLive qs >>= SVal.asValue))
+    (ihM : ∀ (sh : KShape) (Q : LPath) {qs}, Q.eval σ = .ok qs →
+      Sim ((s.mapU sh Q).eval σ) (v.findLive qs >>= sh.test)) :
+    Sim ((delLeaf (s.readU (E.addSegs rest)) E (fun sh q => s.mapU sh q)
+      (if rest.isEmpty then .eq else .below rest)).eval σ)
+      (e.defaultOf.findLive r >>= SVal.asValue) := by
+  have hQ : (E.addSegs rest).eval σ = .ok (eps ++ r) := by
+    rw [LPath.addSegs_eval, hE, Res.ok_bind, hr, Res.ok_bind]
+  have hold := ihR _ hQ
+  by_cases hemp : rest.isEmpty = true
+  · have hr0 : r = [] := (segsEval_isEmpty hr).1 hemp
+    subst hr0
+    rw [if_pos hemp]
+    simp only [delLeaf, LTerm.eval, SVal.findLive_nil, Res.ok_bind, asValue_defaultOf]
+    rw [List.append_nil, he, Res.ok_bind] at hold
+    exact Sim.bind hold fun _ => Sim.refl _
+  · rw [if_neg hemp]
+    simp only [delLeaf]
+    have hEnd : Sim ((LTerm.zero (s.readU (E.addSegs rest))).eval σ)
+        (v.findLive (eps ++ r) >>= fun w => w.defaultOf.asValue) := by
+      simp only [LTerm.eval]
+      refine (Sim.bind hold (fun _ => Sim.refl _)).trans (Sim.of_eq ?_)
+      rw [bind_assoc]; congr 1; funext w; rw [asValue_defaultOf]
+    have h := delBelow_sim (v := v) (G := SVal.asValue)
+      (fun sh q qs hq' => ihM sh q hq') hold hEnd rest E eps r hE hr rfl
+    rw [he, Res.ok_bind] at h
+    exact h
+
+theorem pop_slotU_sim {σ : State} {keep : Bool} {s : LStor} {P' P : LPath} {w' opq : LTerm}
+    {rest : List SSeg} {v : SVal} {ps : List Seg} {es sh : List SVal} {fx : Bool} {R : RefTy}
+    {r : List Seg}
+    (hu : (LStor.arr (.pop keep) s P' w').eval σ = .ok v) (hP' : Sim (P'.elim.eval σ) (P'.eval σ))
+    (hp : P.eval σ = .ok ps) (hn : v.findLive ps = .ok (.array es sh fx))
+    (hr : segsEval σ rest = .ok r)
+    (hopq : Sim (opq.eval σ) ((pushSlot (.ref R) sh).1.findLive r >>= SVal.asValue))
+    (ihR : ∀ (Q : LPath) {v qs}, s.eval σ = .ok v → Q.eval σ = .ok qs →
+      Sim ((s.readU Q).eval σ) (v.findLive qs >>= SVal.asValue))
+    (ihM : ∀ (sh : KShape) (Q : LPath) {v qs}, s.eval σ = .ok v → Q.eval σ = .ok qs →
+      Sim ((s.mapU sh Q).eval σ) (v.findLive qs >>= sh.test))
+    (ihL : ∀ {v qs}, s.eval σ = .ok v → P.eval σ = .ok qs →
+      Sim ((s.lenU P).eval σ) (v.findLive qs >>= Close.arrLen)) :
+    Sim (((LStor.arr (.pop keep) s P' w').slotU P rest opq).eval σ)
+      ((pushSlot (.ref R) sh).1.findLive r >>= SVal.asValue) := by
+  rw [LStor.slotU]
+  split
+  · rename_i heq
+    have hPe : P'.elim = P := by simpa only [beq_iff_eq] using heq
+    obtain ⟨wv, v', ps', c0, c1, -, hv', hp', hc0, hap, hu'⟩ := arr_eval_ok hu
+    have hpp : ps' = ps := by
+      have := (hP' ps').2 hp'
+      rw [hPe, hp] at this
+      cases this; rfl
+    subst hpp
+    rw [findLive_saveLive_same hu'] at hn
+    obtain ⟨es0, last, sh0, fx0, rfl, rfl⟩ := AOp.apply_pop_eq hap
+    simp only [Except.ok.injEq, SVal.array.injEq] at hn
+    obtain ⟨rfl, rfl, rfl⟩ := hn
+    rw [pushSlot_ref_cons] at hopq ⊢
+    have hL := ihL hv' hp
+    rw [hc0, Res.ok_bind] at hL
+    have hL' : (s.lenU P).eval σ = .ok (.int (es0 ++ [last]).length) := (hL _).2 rfl
+    have hE : (P.at (lenPred (s.lenU P))).eval σ = .ok (ps' ++ [.at es0.length]) := by
+      simp only [LPath.eval, hp, Res.ok_bind, lenPred_eval hL', Value.asInt]
+      simp
+    have he : v'.findLive (ps' ++ [.at es0.length]) = .ok last := by
+      rw [SVal.findLive_append, hc0, Res.ok_bind, findLive_last]
+    cases keep
+    · simp only [Bool.false_eq_true, if_false]
+      exact delSlot_sim hE he hr (fun Q _ hq => ihR Q hv' hq) (fun sh Q _ hq => ihM sh Q hv' hq)
+    · simp only [if_true]
+      have hQ : ((P.at (lenPred (s.lenU P))).addSegs rest).eval σ =
+          .ok ((ps' ++ [.at es0.length]) ++ r) := by
+        rw [LPath.addSegs_eval, hE, Res.ok_bind, hr, Res.ok_bind]
+      have := ihR _ hv' hQ
+      rw [SVal.findLive_append, he, Res.ok_bind] at this
+      exact this
+  · exact hopq
+
+theorem del_slotU_sim {σ : State} {s : LStor} {P' P : LPath} {opq : LTerm}
+    {rest : List SSeg} {v : SVal} {ps : List Seg} {es sh : List SVal} {fx : Bool} {R : RefTy}
+    {r : List Seg}
+    (hu : (LStor.del s P').eval σ = .ok v) (hP' : Sim (P'.elim.eval σ) (P'.eval σ))
+    (hp : P.eval σ = .ok ps) (hn : v.findLive ps = .ok (.array es sh fx))
+    (hr : segsEval σ rest = .ok r)
+    (hopq : Sim (opq.eval σ) ((pushSlot (.ref R) sh).1.findLive r >>= SVal.asValue))
+    (ihR : ∀ (Q : LPath) {v qs}, s.eval σ = .ok v → Q.eval σ = .ok qs →
+      Sim ((s.readU Q).eval σ) (v.findLive qs >>= SVal.asValue))
+    (ihM : ∀ (sh : KShape) (Q : LPath) {v qs}, s.eval σ = .ok v → Q.eval σ = .ok qs →
+      Sim ((s.mapU sh Q).eval σ) (v.findLive qs >>= sh.test))
+    (ihL : ∀ {v qs}, s.eval σ = .ok v → P.eval σ = .ok qs →
+      Sim ((s.lenU P).eval σ) (v.findLive qs >>= Close.arrLen)) :
+    Sim (((LStor.del s P').slotU P rest opq).eval σ)
+      ((pushSlot (.ref R) sh).1.findLive r >>= SVal.asValue) := by
+  rw [LStor.slotU]
+  split
+  · rename_i heq
+    have hPe : P'.elim = P := by simpa only [beq_iff_eq] using heq
+    obtain ⟨v', hv', hu⟩ := Res.bind_eq_ok.1 hu
+    obtain ⟨ps', hp', hu⟩ := Res.bind_eq_ok.1 hu
+    obtain ⟨c0, hc0, hu'⟩ := Res.bind_eq_ok.1 hu
+    have hpp : ps' = ps := by
+      have := (hP' ps').2 hp'
+      rw [hPe, hp] at this
+      cases this; rfl
+    subst hpp
+    rw [findLive_saveLive_same hu'] at hn
+    have hM := ihM .fixed P hv' hp
+    rw [hc0, Res.ok_bind] at hM
+    have hL := ihL hv' hp
+    rw [hc0, Res.ok_bind] at hL
+    cases c0 with
+    | array es0 sh0 fx0 =>
+      cases fx0 with
+      | true =>
+        have hm : (s.mapU .fixed P).eval σ = .ok (.bool true) := (hM _).2 rfl
+        simp only [LTerm.eval, isT_eval, hm, Res.ok_bind, pickBranch]
+        exact hopq
+      | false =>
+        have hm : ∀ x, (s.mapU .fixed P).eval σ ≠ .ok x := fun x h => by
+          have := (hM x).1 h
+          simp [KShape.test, isFixV] at this
+        have hmT : (isT (s.mapU .fixed P)).eval σ = .ok (.bool false) := by
+          rw [isT_eval]
+          cases hh : (s.mapU .fixed P).eval σ with
+          | ok x => exact absurd hh (hm x)
+          | error _ => rfl
+        have hL' : (s.lenU P).eval σ = .ok (.int es0.length) := (hL _).2 rfl
+        simp only [LTerm.eval, hmT, Res.ok_bind, pickBranch, hL', Value.asInt]
+        simp only [SVal.defaultOf, Except.ok.injEq, SVal.array.injEq] at hn
+        obtain ⟨rfl, rfl, rfl⟩ := hn
+        cases es0 with
+        | nil =>
+          simp only [List.length_nil, Int.natCast_zero, if_true]
+          exact hopq
+        | cons e et =>
+          have hne : ((e :: et).length : Int) ≠ 0 := by simp; omega
+          rw [if_neg hne]
+          simp only [SVal.defaultOf.defaultOfElems, List.cons_append] at hopq ⊢
+          rw [pushSlot_ref_cons]
+          have hE : (P.at (.lit (.int 0))).eval σ = .ok (ps' ++ [.at 0]) := by
+            simp only [LPath.eval, hp, LTerm.eval, Res.ok_bind, Value.asInt]
+          have he : v'.findLive (ps' ++ [.at 0]) = .ok e := by
+            rw [SVal.findLive_append, hc0, Res.ok_bind]
+            simp [SVal.findLive]
+          exact delSlot_sim hE he hr (fun Q _ hq => ihR Q hv' hq) (fun sh Q _ hq => ihM sh Q hv' hq)
+    | prim p => cases p <;> simp [SVal.defaultOf] at hn
+    | struct _ => simp [SVal.defaultOf] at hn
+    | map _ _ => simp [SVal.defaultOf] at hn
+  · exact hopq
 
 /-! ### Writes and deletes, one lemma per case
 
@@ -4399,7 +4960,6 @@ theorem del_lenU_sim {σ : State} {s : LStor} {P Q : LPath} {u : SVal} {qs : Lis
       exact h
     | diverge => rw [findLive_saveLive_diverge hr hu]; exact ihL hv hq
 
-set_option maxHeartbeats 300000 in
 mutual
 
 /-- **Eliminating the reads of writes keeps what a term returns.**
@@ -4437,6 +4997,7 @@ theorem LTerm.elim_sim (σ : State) : (t : LTerm) → Sim (t.elim.eval σ) (t.ev
         · simp only [h, if_true]; exact LTerm.elim_sim σ t
         · simp only [h, if_false]; exact LTerm.elim_sim σ e
   | .zero a => Sim.bind (LTerm.elim_sim σ a) fun _ => Sim.refl _
+termination_by structural x => x
 
 /-- Eliminating keeps the path a path term names: `people[balances[a]]` after
 `balances[a] = 5;` names `people[5]`. -/
@@ -4445,6 +5006,7 @@ theorem LPath.elim_sim (σ : State) : (q : LPath) → Sim (q.elim.eval σ) (q.ev
   | .field q _ => Sim.bind (LPath.elim_sim σ q) fun _ => Sim.refl _
   | .at q k => Sim.bind (LPath.elim_sim σ q) fun _ =>
       Sim.bind (Sim.bind (LTerm.elim_sim σ k) fun _ => Sim.refl _) fun _ => Sim.refl _
+termination_by structural x => x
 
 /-- The guard of a storage returns exactly when its writes do. -/
 theorem LStor.okE_sim (σ : State) :
@@ -4460,9 +5022,9 @@ theorem LStor.okE_sim (σ : State) :
   | .copy s P src SQ => copy_okE_sim (LStor.okE_sim σ s) (LStor.okE_sim σ src) (LPath.elim_sim σ P)
       (LPath.elim_sim σ SQ) (fun hv hp => LStor.hasU_sim σ s P.elim hv hp)
       (fun hv hp => LStor.hasU_sim σ src SQ.elim hv hp)
+termination_by structural x => x
 
 /-- **What a read after writes returns**, peeled one write at a time. -/
-
 theorem LStor.readU_sim (σ : State) : (s : LStor) → ∀ (Q : LPath) {v : SVal} {qs : List Seg},
     s.eval σ = .ok v → Q.eval σ = .ok qs → Sim ((s.readU Q).eval σ) (v.findLive qs >>= SVal.asValue)
   | .init, Q, v, qs, hv, hq => by
@@ -4476,12 +5038,39 @@ theorem LStor.readU_sim (σ : State) : (s : LStor) → ∀ (Q : LPath) {v : SVal
 
   | .arr _ s P w, Q, _, _, hu, hq => arr_readU_sim hu hq (LPath.elim_sim σ P) (LTerm.elim_sim σ w)
       (fun hv hq => LStor.readU_sim σ s Q hv hq) (fun hv hp => LStor.lenU_sim σ s P.elim hv hp)
+      (fun rest opq _ _ _ _ _ _ _ hv hp hn hr hopq =>
+        LStor.slotU_sim σ s P.elim rest opq hv hp hn hr hopq)
   | .copy s P src SQ, Q, _, _, hu, hq => copy_readU_sim hu hq (LPath.elim_sim σ P)
       (LPath.elim_sim σ SQ) (fun hv hq => LStor.readU_sim σ s Q hv hq)
       (fun Q' _ _ hv hq => LStor.readU_sim σ src Q' hv hq)
+      (fun Q' _ _ hv hq => LStor.mapU_sim σ src .map Q' hv hq)
+termination_by structural x => x
+
+/-- **What the slot a `push()` recycles holds.** -/
+theorem LStor.slotU_sim (σ : State) : (s : LStor) → ∀ (P : LPath) (rest : List SSeg) (opq : LTerm)
+    {v : SVal} {ps : List Seg} {es sh : List SVal} {fx : Bool} {R : RefTy} {r : List Seg},
+    s.eval σ = .ok v → P.eval σ = .ok ps → v.findLive ps = .ok (.array es sh fx) →
+    segsEval σ rest = .ok r →
+    Sim (opq.eval σ) ((pushSlot (.ref R) sh).1.findLive r >>= SVal.asValue) →
+    Sim ((s.slotU P rest opq).eval σ) ((pushSlot (.ref R) sh).1.findLive r >>= SVal.asValue)
+  | .arr (.pop _) s P' _ => fun P _ _ _ _ _ _ _ _ _ hv hp hn hr hopq =>
+    pop_slotU_sim hv (LPath.elim_sim σ P') hp hn hr hopq
+      (fun Q _ _ hv hq => LStor.readU_sim σ s Q hv hq)
+      (fun sh Q _ _ hv hq => LStor.mapU_sim σ s sh Q hv hq)
+      (fun hv hq => LStor.lenU_sim σ s P hv hq)
+  | .del s P' => fun P _ _ _ _ _ _ _ _ _ hv hp hn hr hopq =>
+    del_slotU_sim hv (LPath.elim_sim σ P') hp hn hr hopq
+      (fun Q _ _ hv hq => LStor.readU_sim σ s Q hv hq)
+      (fun sh Q _ _ hv hq => LStor.mapU_sim σ s sh Q hv hq)
+      (fun hv hq => LStor.lenU_sim σ s P hv hq)
+  | .init => fun _ _ _ _ _ _ _ _ _ _ _ _ _ _ hopq => by rw [LStor.slotU]; exact hopq
+  | .save .. => fun _ _ _ _ _ _ _ _ _ _ _ _ _ _ hopq => by rw [LStor.slotU]; exact hopq
+  | .arr .push .. => fun _ _ _ _ _ _ _ _ _ _ _ _ _ _ hopq => by rw [LStor.slotU]; exact hopq
+  | .arr (.slot _) .. => fun _ _ _ _ _ _ _ _ _ _ _ _ _ _ hopq => by rw [LStor.slotU]; exact hopq
+  | .copy .. => fun _ _ _ _ _ _ _ _ _ _ _ _ _ _ hopq => by rw [LStor.slotU]; exact hopq
+termination_by structural x => x
 
 /-- **Whether a location is there after writes**, peeled one write at a time. -/
-
 theorem LStor.hasU_sim (σ : State) : (s : LStor) → ∀ (Q : LPath) {v : SVal} {qs : List Seg},
     s.eval σ = .ok v → Q.eval σ = .ok qs →
       Sim ((s.hasU Q).eval σ) (v.findLive qs >>= fun _ => .ok (.bool true))
@@ -4499,9 +5088,10 @@ theorem LStor.hasU_sim (σ : State) : (s : LStor) → ∀ (Q : LPath) {v : SVal}
   | .copy s P src SQ, Q, _, _, hu, hq => copy_hasU_sim hu hq (LPath.elim_sim σ P)
       (LPath.elim_sim σ SQ) (fun hv hq => LStor.hasU_sim σ s Q hv hq)
       (fun Q' _ _ hv hq => LStor.hasU_sim σ src Q' hv hq)
+      (fun Q' _ _ hv hq => LStor.mapU_sim σ src .map Q' hv hq)
+termination_by structural x => x
 
 /-- **Whether a mapping is there after writes**, peeled one write at a time. -/
-
 theorem LStor.mapU_sim (σ : State) : (s : LStor) → ∀ (sh : KShape) (Q : LPath) {v : SVal}
     {qs : List Seg}, s.eval σ = .ok v → Q.eval σ = .ok qs →
       Sim ((s.mapU sh Q).eval σ) (v.findLive qs >>= sh.test)
@@ -4519,9 +5109,10 @@ theorem LStor.mapU_sim (σ : State) : (s : LStor) → ∀ (sh : KShape) (Q : LPa
   | .copy s P src SQ, sh, Q, _, _, hu, hq => copy_mapU_sim hu hq (LPath.elim_sim σ P)
       (LPath.elim_sim σ SQ) (fun hv hq => LStor.mapU_sim σ s sh Q hv hq)
       (fun Q' _ _ hv hq => LStor.mapU_sim σ src sh Q' hv hq)
+      (fun Q' _ _ hv hq => LStor.mapU_sim σ src .map Q' hv hq)
+termination_by structural x => x
 
 /-- **The length of an array after writes**, peeled one write at a time. -/
-
 theorem LStor.lenU_sim (σ : State) : (s : LStor) → ∀ (Q : LPath) {v : SVal} {qs : List Seg},
     s.eval σ = .ok v → Q.eval σ = .ok qs →
       Sim ((s.lenU Q).eval σ) (v.findLive qs >>= Close.arrLen)
@@ -4538,6 +5129,8 @@ theorem LStor.lenU_sim (σ : State) : (s : LStor) → ∀ (Q : LPath) {v : SVal}
   | .copy s P src SQ, Q, _, _, hu, hq => copy_lenU_sim hu hq (LPath.elim_sim σ P)
       (LPath.elim_sim σ SQ) (fun hv hq => LStor.lenU_sim σ s Q hv hq)
       (fun Q' _ _ hv hq => LStor.lenU_sim σ src Q' hv hq)
+      (fun Q' _ _ hv hq => LStor.mapU_sim σ src .map Q' hv hq)
+termination_by structural x => x
 end
 
 /-- Eliminating keeps the meaning of a formula: an equation holds when both

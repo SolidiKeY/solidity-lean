@@ -1,4 +1,5 @@
 import Solidity.Calculus.DecideSyn
+import Solidity.Typing.CanonTest
 
 /-!
 # The closer: KeY's first-order and arithmetic taclets as one `Bool`
@@ -901,6 +902,601 @@ theorem Facts.pty_find {σ : State} {F : Facts} (hF : F.Ok σ) {q : LPath} {T : 
     ∃ v, (SVal.struct σ.storage).findLive qs = .ok v ∧ v.canonB T = true :=
   LPath.ty_find hF.2.2.2.1 (fun _ _ h i hi => F.inB_sound hF h i hi) q ht hq
 
+/-! ## The slot a `push()` of the initial storage takes
+
+A `push()` of a struct or an array onto an array of the initial storage
+takes the first slot past its end: an element popped before, or the type's
+default.  Under `wt(storage)` both are canonical at the element type (the
+storage's shadow is checked as its elements are, `SVal.canonB`; a default is
+canonical where the type's structs are, `defaultForTy_canonB`), so a read
+below the slot, or below an element at an index up to the old length, is
+typed as a read of the initial storage is (`Facts.slotTy`): its shape and
+kind follow the type, and it returns where the index is in range
+(`Facts.slotIn`). -/
+
+deriving instance DecidableEq for SSeg
+
+/-- The segments of `q` after its prefix `p`. -/
+def segsAfter : List SSeg → List SSeg → Option (List SSeg)
+  | [], q => some q
+  | a :: p, b :: q => if a = b then segsAfter p q else none
+  | _ :: _, [] => none
+
+theorem segsAfter_spec : ∀ {p q r : List SSeg}, segsAfter p q = some r → q = p ++ r
+  | [], q, r, h => by simp only [segsAfter, Option.some.injEq] at h; subst h; rfl
+  | a :: p, b :: q, r, h => by
+    simp only [segsAfter] at h
+    split at h
+    · rename_i hab; subst hab; rw [segsAfter_spec h]; rfl
+    · cases h
+  | _ :: _, [], _, h => by simp [segsAfter] at h
+
+/-- `Q` as `P[k]` and the segments below: the index and the rest. -/
+def LPath.splitAt (P Q : LPath) : Option (LTerm × List SSeg) :=
+  match segsAfter P.segs Q.segs with
+  | some (.key k :: rest) => some (k, rest)
+  | _ => none
+
+theorem LPath.splitAt_spec {P Q : LPath} {k : LTerm} {rest : List SSeg}
+    (h : P.splitAt Q = some (k, rest)) : Q.segs = P.segs ++ .key k :: rest := by
+  unfold LPath.splitAt at h
+  split at h
+  · rename_i k' rest' hs
+    simp only [Option.some.injEq, Prod.mk.injEq] at h
+    obtain ⟨rfl, rfl⟩ := h
+    exact segsAfter_spec hs
+  · cases h
+
+theorem segsEval_append_inv (σ : State) : ∀ {xs ys : List SSeg} {zs : List Seg},
+    segsEval σ (xs ++ ys) = .ok zs →
+      ∃ a b, segsEval σ xs = .ok a ∧ segsEval σ ys = .ok b ∧ zs = a ++ b
+  | [], ys, zs, h => ⟨[], zs, rfl, h, rfl⟩
+  | .field f :: xs, ys, zs, h => by
+    obtain ⟨zs', h', he⟩ := Res.bind_eq_ok.1 h
+    cases he
+    obtain ⟨a, b, ha, hb, rfl⟩ := segsEval_append_inv σ h'
+    exact ⟨.field f :: a, b, by simp only [segsEval, ha, Res.ok_bind], hb, rfl⟩
+  | .key k :: xs, ys, zs, h => by
+    obtain ⟨i, hi, h⟩ := Res.bind_eq_ok.1 h
+    obtain ⟨zs', h', he⟩ := Res.bind_eq_ok.1 h
+    cases he
+    obtain ⟨a, b, ha, hb, rfl⟩ := segsEval_append_inv σ h'
+    exact ⟨.at i :: a, b, by simp only [segsEval, hi, ha, Res.ok_bind], hb, rfl⟩
+
+/-- The type below a value of type `T`, along members, mapping keys and
+array indices: what a read there returns, where it returns. -/
+def tyFrom : Ty → List SSeg → Option Ty
+  | T, [] => some T
+  | .ref (.struct s), .field f :: r => (lookupBy f (structDef s)).bind fun T => tyFrom T r
+  | .ref (.mapping _ V), .key _ :: r => tyFrom V r
+  | .ref (.fixed E _), .key _ :: r => tyFrom E r
+  | .ref (.array E), .key _ :: r => tyFrom E r
+  | _, _ :: _ => none
+
+/-- A read below a value of type `T` returns: through members, mapping keys
+and fixed-size indices `inB` puts in range, no dynamic array's index. -/
+def exFrom (inB : LTerm → Nat → Bool) : Ty → List SSeg → Bool
+  | _, [] => true
+  | .ref (.struct s), .field f :: r =>
+    match lookupBy f (structDef s) with
+    | some T => exFrom inB T r
+    | none => false
+  | .ref (.mapping _ V), .key _ :: r => exFrom inB V r
+  | .ref (.fixed E n), .key k :: r => inB k n && exFrom inB E r
+  | _, _ :: _ => false
+
+theorem findLive_cons (v : SVal) (s : Seg) (r : List Seg) :
+    v.findLive (s :: r) = v.findLive [s] >>= fun w => w.findLive r := by
+  rw [← SVal.findLive_append]; rfl
+
+open Semantics.SVal.canonB (canonFieldsB canonElemsB canonEntriesB) in
+/-- An index of a canonical array read: a canonical element. -/
+theorem canon_elem_find {v : SVal} {E : Ty}
+    (hv : ∃ es sh fx, v = .array es sh fx ∧ canonElemsB E es = true) {i : Int} {r : List Seg}
+    {w : SVal} (h : v.findLive (.at i :: r) = .ok w) :
+    ∃ e : SVal, e.canonB E = true ∧ e.findLive r = .ok w := by
+  obtain ⟨es, sh, fx, rfl, hes⟩ := hv
+  simp only [SVal.findLive] at h
+  split at h
+  · rename_i hr
+    exact ⟨_, canonElemsB_get hr.2 hes, h⟩
+  · cases h
+
+open Semantics.SVal.canonB (canonFieldsB canonElemsB canonEntriesB) in
+/-- **A typed read below a canonical value** returns a canonical value of its
+type, where it returns. -/
+theorem tyFrom_canon {σ : State} :
+    ∀ (rest : List SSeg) {v : SVal} {T T' : Ty} {r : List Seg}, v.canonB T = true →
+      tyFrom T rest = some T' → segsEval σ rest = .ok r →
+        ∀ w, v.findLive r = .ok w → w.canonB T' = true
+  | [], v, T, T', r, hv, ht, hr, w, hw => by
+    simp only [tyFrom, Option.some.injEq] at ht; subst ht
+    cases hr
+    have : w = v := by cases v <;> simp_all [SVal.findLive]
+    subst this; exact hv
+  | .field f :: rest, v, T, T', r, hv, ht, hr, w, hw => by
+    obtain ⟨r', hr', he⟩ := Res.bind_eq_ok.1 hr
+    cases he
+    match T, ht with
+    | .ref (.struct s), ht =>
+      simp only [tyFrom] at ht
+      obtain ⟨T₀, hT₀, ht⟩ := Option.bind_eq_some_iff.1 ht
+      obtain ⟨w₀, hw₀, hc⟩ := canon_field hv hT₀
+      rw [findLive_cons, hw₀, Res.ok_bind] at hw
+      exact tyFrom_canon rest hc ht hr' w hw
+  | .key k :: rest, v, T, T', r, hv, ht, hr, w, hw => by
+    obtain ⟨i, hi, hr⟩ := Res.bind_eq_ok.1 hr
+    obtain ⟨r', hr', he⟩ := Res.bind_eq_ok.1 hr
+    cases he
+    match T, ht with
+    | .ref (.mapping K V), ht =>
+      simp only [tyFrom] at ht
+      obtain ⟨w₀, hw₀, hc⟩ := canon_key hv i
+      rw [findLive_cons, hw₀, Res.ok_bind] at hw
+      exact tyFrom_canon rest hc ht hr' w hw
+    | .ref (.fixed E n), ht =>
+      simp only [tyFrom] at ht
+      match v, hv with
+      | .array es sh fx, hv =>
+        simp only [SVal.canonB, Bool.and_eq_true] at hv
+        obtain ⟨e, hc, he⟩ := canon_elem_find ⟨es, sh, fx, rfl, hv.1.2⟩ hw
+        exact tyFrom_canon rest hc ht hr' w he
+    | .ref (.array E), ht =>
+      simp only [tyFrom] at ht
+      match v, hv with
+      | .array es sh fx, hv =>
+        simp only [SVal.canonB, Bool.and_eq_true] at hv
+        obtain ⟨e, hc, he⟩ := canon_elem_find ⟨es, sh, fx, rfl, hv.1.2⟩ hw
+        exact tyFrom_canon rest hc ht hr' w he
+
+open Semantics.SVal.canonB (canonFieldsB canonElemsB canonEntriesB) in
+/-- **A typed read below a canonical value returns** where its indices are
+in range, and it reads no dynamic array's element. -/
+theorem tyFrom_exists {σ : State} {inB : LTerm → Nat → Bool}
+    (hB : ∀ k n, inB k n = true → ∀ i, (k.eval σ >>= Value.asInt) = .ok i → 0 ≤ i ∧ i < n) :
+    ∀ (rest : List SSeg) {v : SVal} {T : Ty} {r : List Seg}, v.canonB T = true →
+      exFrom inB T rest = true → segsEval σ rest = .ok r → ∃ w, v.findLive r = .ok w
+  | [], v, T, r, _, _, hr => by cases hr; exact ⟨v, by cases v <;> rfl⟩
+  | .field f :: rest, v, T, r, hv, he, hr => by
+    obtain ⟨r', hr', hh⟩ := Res.bind_eq_ok.1 hr
+    cases hh
+    match T, he with
+    | .ref (.struct s), he =>
+      simp only [exFrom] at he
+      split at he
+      · rename_i T₀ hT₀
+        obtain ⟨w₀, hw₀, hc⟩ := canon_field hv hT₀
+        obtain ⟨w, hw⟩ := tyFrom_exists hB rest hc he hr'
+        exact ⟨w, by rw [findLive_cons, hw₀, Res.ok_bind, hw]⟩
+      · cases he
+  | .key k :: rest, v, T, r, hv, he, hr => by
+    obtain ⟨i, hi, hr⟩ := Res.bind_eq_ok.1 hr
+    obtain ⟨r', hr', hh⟩ := Res.bind_eq_ok.1 hr
+    cases hh
+    match T, he with
+    | .ref (.mapping K V), he =>
+      simp only [exFrom] at he
+      obtain ⟨w₀, hw₀, hc⟩ := canon_key hv i
+      obtain ⟨w, hw⟩ := tyFrom_exists hB rest hc he hr'
+      exact ⟨w, by rw [findLive_cons, hw₀, Res.ok_bind, hw]⟩
+    | .ref (.fixed E n), he =>
+      simp only [exFrom, Bool.and_eq_true] at he
+      obtain ⟨h0, hn⟩ := hB k n he.1 i hi
+      obtain ⟨w₀, hw₀, hc⟩ := canon_index hv h0 hn
+      obtain ⟨w, hw⟩ := tyFrom_exists hB rest hc he.2 hr'
+      exact ⟨w, by rw [findLive_cons, hw₀, Res.ok_bind, hw]⟩
+
+/-- The storages a `push()` of a struct or an array takes its slot from, as
+far as the slot facts read them: the initial one, and the initial one with
+the array at `P` deleted (`delete values; values.push();`). -/
+def baseOk : LStor → LPath → Bool
+  | .init, _ => true
+  | .del .init P', P => P' == P
+  | _, _ => false
+
+/-- The length of the array at `P` in such a storage: the initial one's, or
+`0` after its `delete`. -/
+def baseLen : LStor → LPath → LTerm
+  | .init, P => .len .init P
+  | _, _ => .lit (.int 0)
+
+/-- The type of a read below the slot a `push()` takes (or an element
+before it), the array at `P` of such a storage: the layout's element type,
+then down the rest. -/
+def Facts.slotTy (F : Facts) : LStor → LPath → Option Ty
+  | .arr (.slot E) base P (.lit _), Q =>
+    if P.noLen && baseOk base P then
+      match F.pty P, P.splitAt Q with
+      | some (.ref (.array E')), some (_, rest) =>
+        if E = E' ∧ E.okDeep = true then tyFrom E rest else none
+      | _, _ => none
+    else none
+  | _, _ => none
+
+/-- The index of such a read is at most the old length, by the normal forms
+`N` gives: an element, or the slot; `0` always is. -/
+def Facts.slotIn (F : Facts) (N : LTerm → LTerm) : LStor → LPath → Bool
+  | .arr (.slot E) base P _, Q =>
+    match P.splitAt Q with
+    | some (k, rest) =>
+      exFrom F.inB E rest && (N k == .lit (.int 0) ||
+        match N k, N (baseLen base P) with
+        | .lit (.int i), .lit (.int n) => decide (0 ≤ i ∧ i ≤ n)
+        | a, b => a == b)
+    | none => false
+  | _, _ => false
+
+open Semantics.SVal.canonB (canonFieldsB canonElemsB canonEntriesB) in
+theorem canonElemsB_append {E : Ty} : ∀ {es fs : List SVal}, canonElemsB E es = true →
+    canonElemsB E fs = true → canonElemsB E (es ++ fs) = true
+  | [], _, _, h => h
+  | _ :: es, fs, h, h' => by
+    simp only [canonElemsB, Bool.and_eq_true, List.cons_append] at h ⊢
+    exact ⟨h.1, canonElemsB_append h.2 h'⟩
+
+open Semantics.SVal.canonB (canonFieldsB canonElemsB canonEntriesB) in
+theorem canonElemsB_defaultOf {E : Ty} : ∀ {es : List SVal}, canonElemsB E es = true →
+    canonElemsB E (SVal.defaultOf.defaultOfElems es) = true
+  | [], _ => by simp [SVal.defaultOf.defaultOfElems, canonElemsB]
+  | e :: es, h => by
+    simp only [canonElemsB, Bool.and_eq_true] at h
+    simp only [SVal.defaultOf.defaultOfElems, canonElemsB, Bool.and_eq_true]
+    exact ⟨SVal.canonB_iff.2 (SVal.defaultOf_canon (SVal.canonB_iff.1 h.1)),
+      canonElemsB_defaultOf h.2⟩
+
+open Semantics.SVal.canonB (canonFieldsB canonElemsB canonEntriesB) in
+/-- **The array a slot is taken from**: in the initial storage or after its
+`delete`, an array whose elements and slots past the end are canonical, of
+the length `baseLen` reads. -/
+theorem Facts.slot_base {σ : State} {F : Facts} (hF : F.Ok σ) {base : LStor} {P : LPath}
+    {E : Ty} (hb : baseOk base P = true) (hn : P.noLen = true)
+    (hpty : F.pty P = some (.ref (.array E))) {ps : List Seg} (hp : P.eval σ = .ok ps) :
+    ∃ v0 es sh fx, base.eval σ = .ok v0 ∧ v0.findLive ps = .ok (.array es sh fx) ∧
+      canonElemsB E es = true ∧ canonElemsB E sh = true ∧
+      (baseLen base P).eval σ = .ok (.int es.length) := by
+  obtain ⟨c0, hc0, hcan⟩ := F.pty_find hF hpty hp
+  match c0, hcan with
+  | .array es0 sh0 fx0, hcan =>
+    simp only [SVal.canonB, Bool.and_eq_true] at hcan
+    obtain ⟨⟨hfx, hes⟩, hsh⟩ := hcan
+    match base, hb with
+    | .init, _ =>
+      exact ⟨_, es0, sh0, fx0, rfl, hc0, hes, hsh, by
+        simp only [baseLen, LTerm.eval, LStor.eval, hp, hc0, Res.ok_bind, Close.arrLen]⟩
+    | .del .init P', hb =>
+      simp only [baseOk, beq_iff_eq] at hb
+      subst hb
+      simp only [Bool.not_eq_true'] at hfx
+      subst hfx
+      obtain ⟨u, hu⟩ := (save_ok_iff_find_ok (new := (SVal.array es0 sh0 false).defaultOf)
+        (LPath.noLen_eval σ hn hp)).2 ⟨_, hc0⟩
+      refine ⟨u, [], SVal.defaultOf.defaultOfElems es0 ++ sh0, false, ?_, ?_, rfl, ?_, rfl⟩
+      · simp only [LStor.eval, Res.ok_bind, hp, hc0, hu]
+      · rw [findLive_saveLive_same hu]; rfl
+      · exact canonElemsB_append (canonElemsB_defaultOf hes) hsh
+
+open Semantics.SVal.canonB (canonFieldsB canonElemsB canonEntriesB) in
+/-- The slot a `push()` takes, canonical at the element type: an element
+popped before, or the default. -/
+theorem pushSlot_canonB {E : Ty} {sh : List SVal} (hE : E.okDeep = true)
+    (hsh : canonElemsB E sh = true) : (pushSlot E sh).1.canonB E = true := by
+  cases sh with
+  | nil => exact defaultForTy_canonB hE
+  | cons c t =>
+    simp only [pushSlot]
+    split
+    · exact defaultForTy_canonB hE
+    · simp only [canonElemsB, Bool.and_eq_true] at hsh; exact hsh.1
+
+open Semantics.SVal.canonB (canonFieldsB canonElemsB canonEntriesB) in
+/-- **Below the slot or an element up to the old length** is a canonical
+element: where a read below the index returns, it reads one; where the
+index is in range, it does. -/
+theorem slotElem {E : Ty} {es sh : List SVal} {fx : Bool} (hE : E.okDeep = true)
+    (hes : canonElemsB E es = true) (hsh : canonElemsB E sh = true) (i : Int) (r : List Seg) :
+    (∀ w, (SVal.array (es ++ [(pushSlot E sh).1]) (pushSlot E sh).2 fx).findLive (.at i :: r) =
+        .ok w → ∃ e : SVal, e.canonB E = true ∧ e.findLive r = .ok w) ∧
+    (0 ≤ i ∧ i ≤ es.length → ∃ e : SVal, e.canonB E = true ∧
+      (SVal.array (es ++ [(pushSlot E sh).1]) (pushSlot E sh).2 fx).findLive (.at i :: r) =
+        e.findLive r) := by
+  rw [findLive_grow es sh _ fx _ i r]
+  by_cases hi : i = es.length
+  · rw [if_pos hi]
+    exact ⟨fun w h => ⟨_, pushSlot_canonB hE hsh, h⟩, fun _ => ⟨_, pushSlot_canonB hE hsh, rfl⟩⟩
+  · rw [if_neg hi]
+    by_cases hr : 0 ≤ i ∧ i.toNat < es.length
+    · have hc := canonElemsB_get hr.2 hes
+      have hf : (SVal.array es sh fx).findLive (.at i :: r) = (es.get ⟨i.toNat, hr.2⟩).findLive r := by
+        simp only [SVal.findLive, dif_pos hr]
+      rw [hf]
+      exact ⟨fun w h => ⟨_, hc, h⟩, fun _ => ⟨_, hc, rfl⟩⟩
+    · have hf : (SVal.array es sh fx).findLive (.at i :: r) = .error .revert := by
+        simp only [SVal.findLive, dif_neg hr]
+      rw [hf]
+      refine ⟨fun w h => (by cases h), fun h => ?_⟩
+      exfalso; apply hr; exact ⟨h.1, by omega⟩
+
+/-- **What the slot facts say holds**: a read the slot type types returns a
+canonical value of its type where it returns, and returns where its index
+is in range. -/
+theorem Facts.slot_find {σ : State} {F : Facts} (hF : F.Ok σ) {S : LStor} {Q : LPath} {T : Ty}
+    (ht : F.slotTy S Q = some T) {v : SVal} {qs : List Seg} (hS : S.eval σ = .ok v)
+    (hq : Q.eval σ = .ok qs) :
+    (∀ w, v.findLive qs = .ok w → w.canonB T = true) ∧
+    (∀ N : LTerm → LTerm, (∀ t, Keeps σ t (N t)) → F.slotIn N S Q = true →
+      ∃ w, v.findLive qs = .ok w) := by
+  match S, ht with
+  | .arr (.slot E) base P (.lit c), ht =>
+    simp only [Facts.slotTy] at ht
+    split at ht
+    · rename_i hnb
+      simp only [Bool.and_eq_true] at hnb
+      split at ht
+      · rename_i E' k rest hpty hsp
+        split at ht
+        · rename_i hEE
+          obtain ⟨rfl, hok⟩ := hEE
+          obtain ⟨wv, v0', ps, c, c', -, hv0', hp, hc, hap, hu⟩ := arr_eval_ok hS
+          obtain ⟨v0, es, sh, fx, hv0, hnode, hes, hsh, hlen⟩ :=
+            F.slot_base hF hnb.2 hnb.1 hpty hp
+          rw [hv0] at hv0'; cases hv0'
+          rw [hnode] at hc; cases hc
+          simp only [AOp.apply] at hap; cases hap
+          have hQs := LPath.segs_eval σ hq
+          rw [LPath.splitAt_spec hsp] at hQs
+          obtain ⟨a, b, ha, hb, rfl⟩ := segsEval_append_inv σ hQs
+          rw [LPath.segs_eval σ hp] at ha; cases ha
+          obtain ⟨i, hi, hb⟩ := Res.bind_eq_ok.1 hb
+          obtain ⟨r, hr, he⟩ := Res.bind_eq_ok.1 hb
+          cases he
+          have hread : v.findLive (ps ++ .at i :: r) =
+              (SVal.array (es ++ [(pushSlot E sh).1]) (pushSlot E sh).2 fx).findLive
+                (.at i :: r) := by
+            rw [SVal.findLive_append, findLive_saveLive_same hu, Res.ok_bind]
+          have hel := slotElem (fx := fx) hok hes hsh i r
+          have hB := fun k n h i hi => F.inB_sound hF (k := k) (n := n) h i hi
+          refine ⟨fun w hw => ?_, fun N hN hin => ?_⟩
+          · rw [hread] at hw
+            obtain ⟨e, hce, hew⟩ := hel.1 w hw
+            exact tyFrom_canon rest hce ht hr w hew
+          · simp only [Facts.slotIn, hsp, Bool.and_eq_true, Bool.or_eq_true] at hin
+            obtain ⟨hex, hin⟩ := hin
+            have hrange : 0 ≤ i ∧ i ≤ es.length := by
+              have hk := hN k
+              obtain ⟨x, hx, hxi⟩ := Res.bind_eq_ok.1 hi
+              have hxk := hk x hx
+              rcases hin with hin | hin
+              · simp only [beq_iff_eq] at hin
+                rw [hin] at hxk
+                simp only [LTerm.eval, Except.ok.injEq] at hxk
+                subst hxk
+                simp only [Value.asInt, Except.ok.injEq] at hxi
+                subst hxi
+                omega
+              · have hLn := hN (baseLen base P) _ hlen
+                split at hin
+                · rename_i i' n' hi' hn'
+                  rw [hi'] at hxk; rw [hn'] at hLn
+                  simp only [LTerm.eval, Except.ok.injEq] at hxk hLn
+                  subst hxk; cases hLn
+                  simp only [Value.asInt, Except.ok.injEq] at hxi
+                  subst hxi
+                  simpa only [decide_eq_true_eq] using hin
+                · simp only [beq_iff_eq] at hin
+                  rw [hin] at hxk
+                  rw [hxk] at hLn; cases hLn
+                  simp only [Value.asInt, Except.ok.injEq] at hxi
+                  subst hxi
+                  omega
+            obtain ⟨e, hce, hew⟩ := hel.2 hrange
+            obtain ⟨w', hw'⟩ := tyFrom_exists hB rest hce hex hr
+            exact ⟨w', by rw [hread, hew, hw']⟩
+        · cases ht
+      · cases ht
+    · cases ht
+
+/-- A path whose segments evaluate evaluates to them. -/
+theorem LPath.eval_of_segs (σ : State) : ∀ {q : LPath} {qs : List Seg},
+    segsEval σ q.segs = .ok qs → q.eval σ = .ok qs
+  | .root r, qs, h => by cases h; rfl
+  | .field q f, qs, h => by
+    obtain ⟨a, b, ha, hb, rfl⟩ := segsEval_append_inv σ h
+    cases hb
+    simp only [LPath.eval, LPath.eval_of_segs σ ha, Res.ok_bind]
+  | .at q k, qs, h => by
+    obtain ⟨a, b, ha, hb, rfl⟩ := segsEval_append_inv σ h
+    obtain ⟨i, hi, hb⟩ := Res.bind_eq_ok.1 hb
+    obtain ⟨_, he, hb⟩ := Res.bind_eq_ok.1 hb
+    cases he; cases hb
+    simp only [LPath.eval, LPath.eval_of_segs σ ha, Res.ok_bind, hi]
+
+/-- The storage the slot facts read returns where the read's path does. -/
+theorem Facts.slot_ret {σ : State} {F : Facts} (hF : F.Ok σ) {S : LStor} {Q : LPath} {T : Ty}
+    (ht : F.slotTy S Q = some T) {qs : List Seg} (hq : Q.eval σ = .ok qs) :
+    ∃ v, S.eval σ = .ok v := by
+  match S, ht with
+  | .arr (.slot E) base P (.lit c), ht =>
+    simp only [Facts.slotTy] at ht
+    split at ht
+    · rename_i hnb
+      simp only [Bool.and_eq_true] at hnb
+      split at ht
+      · rename_i E' k rest hpty hsp
+        have hQs := LPath.segs_eval σ hq
+        rw [LPath.splitAt_spec hsp] at hQs
+        obtain ⟨ps, b, ha, -, -⟩ := segsEval_append_inv σ hQs
+        have hp := LPath.eval_of_segs σ ha
+        obtain ⟨v0, es, sh, fx, hv0, hnode, -, -, -⟩ := F.slot_base hF hnb.2 hnb.1 hpty hp
+        obtain ⟨u, hu⟩ := (save_ok_iff_find_ok
+          (new := .array (es ++ [(pushSlot E sh).1]) (pushSlot E sh).2 fx)
+          (LPath.noLen_eval σ hnb.1 hp)).2 ⟨_, hnode⟩
+        exact ⟨u, by simp only [LStor.eval, LTerm.eval, Res.ok_bind, hv0, hp, hnode, AOp.apply, hu]⟩
+      · cases ht
+    · cases ht
+
+/-- **A read the slot facts type**, where it returns, reads a canonical
+value of its type. -/
+theorem Facts.slot_read {σ : State} {F : Facts} (hF : F.Ok σ) {S : LStor} {Q : LPath} {T : Ty}
+    (ht : F.slotTy S Q = some T) {α : Type} {G : SVal → Res α} {x : α}
+    (h : (S.eval σ >>= fun v => Q.eval σ >>= fun qs => v.findLive qs >>= G) = .ok x) :
+    ∃ w, w.canonB T = true ∧ G w = .ok x := by
+  obtain ⟨v, hv, h⟩ := Res.bind_eq_ok.1 h
+  obtain ⟨qs, hq, h⟩ := Res.bind_eq_ok.1 h
+  obtain ⟨w, hw, h⟩ := Res.bind_eq_ok.1 h
+  exact ⟨w, (F.slot_find hF ht hv hq).1 w hw, h⟩
+
+open Semantics.SVal.canonB (canonFieldsB canonElemsB canonEntriesB) in
+/-- A slot of a canonical array read past its end too (`SVal.find`): a
+canonical element, live or not. -/
+theorem canon_slot_find {E : Ty} {es sh : List SVal} {fx : Bool}
+    (hes : canonElemsB E (es ++ sh) = true) {i : Int} {r : List Seg} {w : SVal}
+    (h : (SVal.array es sh fx).find (.at i :: r) = .ok w) :
+    ∃ e : SVal, e.canonB E = true ∧ e.find r = .ok w := by
+  simp only [SVal.find] at h
+  split at h
+  · rename_i hr
+    exact ⟨_, canonElemsB_get hr.2 hes, h⟩
+  · cases h
+
+open Semantics.SVal.canonB (canonFieldsB canonElemsB canonEntriesB) in
+/-- **A typed read below a canonical value, past the live ends too**,
+returns a canonical value of its type where it returns. -/
+theorem tyFrom_canonP {σ : State} :
+    ∀ (rest : List SSeg) {v : SVal} {T T' : Ty} {r : List Seg}, v.canonB T = true →
+      tyFrom T rest = some T' → segsEval σ rest = .ok r →
+        ∀ w, v.find r = .ok w → w.canonB T' = true
+  | [], v, T, T', r, hv, ht, hr, w, hw => by
+    simp only [tyFrom, Option.some.injEq] at ht; subst ht
+    cases hr
+    have : w = v := by cases v <;> simp_all [SVal.find]
+    subst this; exact hv
+  | .field f :: rest, v, T, T', r, hv, ht, hr, w, hw => by
+    obtain ⟨r', hr', he⟩ := Res.bind_eq_ok.1 hr
+    cases he
+    match T, ht with
+    | .ref (.struct s), ht =>
+      simp only [tyFrom] at ht
+      obtain ⟨T₀, hT₀, ht⟩ := Option.bind_eq_some_iff.1 ht
+      obtain ⟨w₀, hw₀, hc⟩ := canon_field hv hT₀
+      rw [show Seg.field f :: r' = [Seg.field f] ++ r' from rfl, SVal.find_append,
+        SVal.find_of_findLive hw₀, Res.ok_bind] at hw
+      exact tyFrom_canonP rest hc ht hr' w hw
+  | .key k :: rest, v, T, T', r, hv, ht, hr, w, hw => by
+    obtain ⟨i, hi, hr⟩ := Res.bind_eq_ok.1 hr
+    obtain ⟨r', hr', he⟩ := Res.bind_eq_ok.1 hr
+    cases he
+    match T, ht with
+    | .ref (.mapping K V), ht =>
+      simp only [tyFrom] at ht
+      obtain ⟨w₀, hw₀, hc⟩ := canon_key hv i
+      rw [show Seg.at i :: r' = [Seg.at i] ++ r' from rfl, SVal.find_append,
+        SVal.find_of_findLive hw₀, Res.ok_bind] at hw
+      exact tyFrom_canonP rest hc ht hr' w hw
+    | .ref (.fixed E n), ht =>
+      simp only [tyFrom] at ht
+      match v, hv with
+      | .array es sh fx, hv =>
+        simp only [SVal.canonB, Bool.and_eq_true] at hv
+        obtain ⟨e, hc, he⟩ := canon_slot_find (canonElemsB_append hv.1.2 hv.2) hw
+        exact tyFrom_canonP rest hc ht hr' w he
+    | .ref (.array E), ht =>
+      simp only [tyFrom] at ht
+      match v, hv with
+      | .array es sh fx, hv =>
+        simp only [SVal.canonB, Bool.and_eq_true] at hv
+        obtain ⟨e, hc, he⟩ := canon_slot_find (canonElemsB_append hv.1.2 hv.2) hw
+        exact tyFrom_canonP rest hc ht hr' w he
+
+open Semantics.SVal.canonB (canonFieldsB canonElemsB canonEntriesB) in
+/-- **A snapshot read the slot facts type** reads a canonical value of its
+type where it returns: past the live ends, the slots are canonical too. -/
+theorem Facts.slot_readP {σ : State} {F : Facts} (hF : F.Ok σ) {S : LStor} {Q : LPath} {T : Ty}
+    (ht : F.slotTy S Q = some T) {α : Type} {G : SVal → Res α} {x : α}
+    (h : (S.eval σ >>= fun v => Q.eval σ >>= fun qs => v.find qs >>= G) = .ok x) :
+    ∃ w, w.canonB T = true ∧ G w = .ok x := by
+  obtain ⟨v, hS, h⟩ := Res.bind_eq_ok.1 h
+  obtain ⟨qs, hq, h⟩ := Res.bind_eq_ok.1 h
+  obtain ⟨w, hw, h⟩ := Res.bind_eq_ok.1 h
+  refine ⟨w, ?_, h⟩
+  match S, ht with
+  | .arr (.slot E) base P (.lit c), ht =>
+    simp only [Facts.slotTy] at ht
+    split at ht
+    · rename_i hnb
+      simp only [Bool.and_eq_true] at hnb
+      split at ht
+      · rename_i E' k rest hpty hsp
+        split at ht
+        · rename_i hEE
+          obtain ⟨rfl, hok⟩ := hEE
+          obtain ⟨wv, v0', ps, c, c', -, hv0', hp, hc, hap, hu⟩ := arr_eval_ok hS
+          obtain ⟨v0, es, sh, fx, hv0, hnode, hes, hsh, -⟩ := F.slot_base hF hnb.2 hnb.1 hpty hp
+          rw [hv0] at hv0'; cases hv0'
+          rw [hnode] at hc; cases hc
+          simp only [AOp.apply] at hap; cases hap
+          have hQs := LPath.segs_eval σ hq
+          rw [LPath.splitAt_spec hsp] at hQs
+          obtain ⟨a, b, ha, hb, rfl⟩ := segsEval_append_inv σ hQs
+          rw [LPath.segs_eval σ hp] at ha; cases ha
+          obtain ⟨i, hi, hb⟩ := Res.bind_eq_ok.1 hb
+          obtain ⟨r, hr, he⟩ := Res.bind_eq_ok.1 hb
+          cases he
+          rw [SVal.find_append, SVal.find_of_findLive (findLive_saveLive_same hu),
+            Res.ok_bind] at hw
+          have hall : canonElemsB E ((es ++ [(pushSlot E sh).1]) ++ (pushSlot E sh).2) = true := by
+            refine canonElemsB_append (canonElemsB_append hes ?_) ?_
+            · simp only [canonElemsB, pushSlot_canonB hok hsh, Bool.and_self]
+            · cases sh with
+              | nil => rfl
+              | cons c t =>
+                simp only [canonElemsB, Bool.and_eq_true] at hsh
+                exact hsh.2
+          obtain ⟨e, hce, hew⟩ := canon_slot_find hall hw
+          exact tyFrom_canonP rest hce ht hr w hew
+        · cases ht
+      · cases ht
+    · cases ht
+
+/-- **A read the slot facts type, at an index in range**, returns a
+canonical value of its type. -/
+theorem Facts.slot_resolve {σ : State} {F : Facts} (hF : F.Ok σ) {N : LTerm → LTerm}
+    (hN : ∀ t, Keeps σ t (N t)) {S : LStor} {Q : LPath} {T : Ty} (ht : F.slotTy S Q = some T)
+    (hin : F.slotIn N S Q = true) (hk : ∃ qs, Q.eval σ = .ok qs) :
+    ∃ v qs w, S.eval σ = .ok v ∧ Q.eval σ = .ok qs ∧ v.findLive qs = .ok w ∧
+      w.canonB T = true := by
+  obtain ⟨qs, hq⟩ := hk
+  obtain ⟨v, hv⟩ := F.slot_ret hF ht hq
+  have hs := F.slot_find hF ht hv hq
+  obtain ⟨w, hw⟩ := hs.2 N hN hin
+  exact ⟨v, qs, w, hv, hq, hw, hs.1 w hw⟩
+
+
+/-- The type is a `uint` or an `int`. -/
+def tyInt : Option Ty → Bool
+  | some (.prim .uint) | some (.prim .int) => true
+  | _ => false
+
+/-- The type is a `bool`. -/
+def tyBool : Option Ty → Bool
+  | some (.prim .bool) => true
+  | _ => false
+
+/-- The type is a word. -/
+def tyPrim : Option Ty → Bool
+  | some (.prim _) => true
+  | _ => false
+
+/-- The type has the shape `sh`. -/
+def tyShape : KShape → Option Ty → Bool
+  | .map, some (.ref (.mapping _ _)) | .fixed, some (.ref (.fixed _ _)) => true
+  | _, _ => false
+
+/-- The type does not have the shape `sh`. -/
+def tyShapeNot : KShape → Option Ty → Bool
+  | .map, some (.ref (.mapping _ _)) | .fixed, some (.ref (.fixed _ _)) => false
+  | _, some _ => true
+  | _, none => false
+
 /-- Where `t` returns, it returns an integer. -/
 def Facts.isInt (F : Facts) : LTerm → Bool
   | .lit (.int _) | .env _ | .len _ _ => true
@@ -911,6 +1507,7 @@ def Facts.isInt (F : Facts) : LTerm → Bool
     match F.pty q with
     | some (.prim .uint) | some (.prim .int) => true
     | _ => false
+  | .find (.arr op s P w) q | .findP (.arr op s P w) q => tyInt (F.slotTy (.arr op s P w) q)
   | .seq _ a | .zero a => F.isInt a
   | .ite _ a b | .orElse a b | .kite _ _ a b => F.isInt a && F.isInt b
   | _ => false
@@ -922,6 +1519,7 @@ def Facts.isBool (F : Facts) : LTerm → Bool
   | .unop op _ _ => op == .not
   | .var x => F.vars.any fun xp => xp.1 == x && xp.2 == .bool
   | .find .init q | .findP .init q => F.pty q == some (.prim .bool)
+  | .find (.arr op s P w) q | .findP (.arr op s P w) q => tyBool (F.slotTy (.arr op s P w) q)
   | .seq _ a | .zero a => F.isBool a
   | .ite _ a b | .orElse a b | .kite _ _ a b => F.isBool a && F.isBool b
   | _ => false
@@ -1054,6 +1652,28 @@ theorem Facts.isInt_sound {σ : State} {F : Facts} (hF : F.Ok σ) :
   | .find (.save ..) _, hi, _, _ | .find (.del ..) _, hi, _, _
   | .findP (.save ..) _, hi, _, _ | .findP (.del ..) _, hi, _, _ => by simp only [isInt,
       Bool.false_eq_true] at hi
+  | .find (.arr op s P w) q, hi, v, h => by
+    simp only [Facts.isInt] at hi
+    cases ht : F.slotTy (.arr op s P w) q with
+    | none => simp only [ht, tyInt, Bool.false_eq_true] at hi
+    | some T =>
+      simp only [LTerm.eval] at h
+      obtain ⟨w', hc, hw⟩ := F.slot_read hF ht h
+      rw [ht] at hi
+      match T, hi with
+      | .prim .uint, _ => obtain ⟨i, rfl⟩ := canonB_uint hc; cases hw; exact ⟨i, rfl⟩
+      | .prim .int, _ => obtain ⟨i, rfl⟩ := canonB_int hc; cases hw; exact ⟨i, rfl⟩
+  | .findP (.arr op s P w) q, hi, v, h => by
+    simp only [Facts.isInt] at hi
+    cases ht : F.slotTy (.arr op s P w) q with
+    | none => simp only [ht, tyInt, Bool.false_eq_true] at hi
+    | some T =>
+      simp only [LTerm.eval] at h
+      obtain ⟨w', hc, hw⟩ := F.slot_readP hF ht h
+      rw [ht] at hi
+      match T, hi with
+      | .prim .uint, _ => obtain ⟨i, rfl⟩ := canonB_uint hc; cases hw; exact ⟨i, rfl⟩
+      | .prim .int, _ => obtain ⟨i, rfl⟩ := canonB_int hc; cases hw; exact ⟨i, rfl⟩
   | .seq d a, hi, v, h => by
     simp only [LTerm.eval] at h
     obtain ⟨_, -, h⟩ := Res.bind_eq_ok.1 h
@@ -1146,6 +1766,26 @@ theorem Facts.isBool_sound {σ : State} {F : Facts} (hF : F.Ok σ) :
   | .find (.save ..) _, hi, _, _ | .find (.del ..) _, hi, _, _
   | .findP (.save ..) _, hi, _, _ | .findP (.del ..) _, hi, _, _ => by simp only [isBool,
       Bool.false_eq_true] at hi
+  | .find (.arr op s P w) q, hi, v, h => by
+    simp only [Facts.isBool] at hi
+    cases ht : F.slotTy (.arr op s P w) q with
+    | none => simp only [ht, tyBool, Bool.false_eq_true] at hi
+    | some T =>
+      simp only [LTerm.eval] at h
+      obtain ⟨w', hc, hw⟩ := F.slot_read hF ht h
+      rw [ht] at hi
+      match T, hi with
+      | .prim .bool, _ => obtain ⟨b, rfl⟩ := canonB_bool hc; cases hw; exact ⟨b, rfl⟩
+  | .findP (.arr op s P w) q, hi, v, h => by
+    simp only [Facts.isBool] at hi
+    cases ht : F.slotTy (.arr op s P w) q with
+    | none => simp only [ht, tyBool, Bool.false_eq_true] at hi
+    | some T =>
+      simp only [LTerm.eval] at h
+      obtain ⟨w', hc, hw⟩ := F.slot_readP hF ht h
+      rw [ht] at hi
+      match T, hi with
+      | .prim .bool, _ => obtain ⟨b, rfl⟩ := canonB_bool hc; cases hw; exact ⟨b, rfl⟩
   | .seq d a, hi, v, h => by
     simp only [LTerm.eval] at h
     obtain ⟨_, -, h⟩ := Res.bind_eq_ok.1 h
@@ -1555,10 +2195,13 @@ def Facts.retsW (F : Facts) (N : LTerm → LTerm) : LTerm → Bool
         match N a, N b with
         | .lit (.int i), .lit (.int j) => if i = j then F.retsW N x else F.retsW N y
         | _, _ => F.retsW N x && F.retsW N y)
-  | t@(.find s q) => t.known F.known F.ne || (s.isInit && F.keysRetW N q && F.isPrimPath q)
+  | t@(.find s q) => t.known F.known F.ne || (s.isInit && F.keysRetW N q && F.isPrimPath q) ||
+      (F.slotIn N s q && F.keysRetW N q && tyPrim (F.slotTy s q))
   | t@(.findP s q) => t.rets F.known F.ne || (s.isInit && F.keysRetW N q && F.isPrimPath q)
-  | t@(.has s q) => t.known F.known F.ne || (s.isInit && F.keysRetW N q && (F.pty q).isSome)
-  | t@(.kmap sh s q) => t.known F.known F.ne || (s.isInit && F.keysRetW N q && F.shapeIs sh q)
+  | t@(.has s q) => t.known F.known F.ne || (s.isInit && F.keysRetW N q && (F.pty q).isSome) ||
+      (F.slotIn N s q && F.keysRetW N q && (F.slotTy s q).isSome)
+  | t@(.kmap sh s q) => t.known F.known F.ne || (s.isInit && F.keysRetW N q && F.shapeIs sh q) ||
+      (F.slotIn N s q && F.keysRetW N q && tyShape sh (F.slotTy s q))
   | t@(.len s q) => t.known F.known F.ne || (s.isInit && F.keysRetW N q && F.isArrPath q)
   | t@(.sok _) => t.known F.known F.ne
   | t@(.pok q) => t.known F.known F.ne || F.keysRetW N q
@@ -1749,8 +2392,19 @@ theorem Facts.retsW_sound {σ : State} {F : Facts} (hF : F.Ok σ) {N : LTerm →
         · exact Facts.retsW_sound hF hN y h.2
   | .find s q, h => by
     simp only [Facts.retsW, Bool.or_eq_true, Bool.and_eq_true] at h
-    rcases h with h | ⟨⟨hs, hk⟩, ht⟩
+    rcases h with (h | ⟨⟨hs, hk⟩, ht⟩) | ⟨⟨hin, hk⟩, ht⟩
     · exact LTerm.known_returns hF.1 hF.2.1 _ h
+    rotate_left
+    · cases hT : F.slotTy s q with
+      | none => simp only [hT, tyPrim, Bool.false_eq_true] at ht
+      | some T =>
+        obtain ⟨v, qs, w, hv, hq, hw, hc⟩ :=
+          F.slot_resolve hF hN hT hin (Facts.keysRetW_sound hF hN q hk)
+        rw [hT] at ht
+        match T, ht with
+        | .prim _, _ =>
+          obtain ⟨x, hx⟩ := canonB_prim hc
+          exact ⟨x, by simp only [LTerm.eval, hv, hq, hw, Res.ok_bind, hx]⟩
     · cases s <;> simp only [LStor.isInit, Bool.false_eq_true] at hs
       unfold Facts.isPrimPath at ht
       split at ht
@@ -1774,16 +2428,41 @@ theorem Facts.retsW_sound {σ : State} {F : Facts} (hF : F.Ok σ) {N : LTerm →
       · cases ht
   | .has s q, h => by
     simp only [Facts.retsW, Bool.or_eq_true, Bool.and_eq_true] at h
-    rcases h with h | ⟨⟨hs, hk⟩, ht⟩
+    rcases h with (h | ⟨⟨hs, hk⟩, ht⟩) | ⟨⟨hin, hk⟩, ht⟩
     · exact LTerm.known_returns hF.1 hF.2.1 _ h
+    rotate_left
+    · obtain ⟨T, hT⟩ := Option.isSome_iff_exists.1 ht
+      obtain ⟨v, qs, w, hv, hq, hw, -⟩ :=
+        F.slot_resolve hF hN hT hin (Facts.keysRetW_sound hF hN q hk)
+      exact ⟨_, by simp only [LTerm.eval, hv, hq, hw, Res.ok_bind] <;> rfl⟩
     · cases s <;> simp only [LStor.isInit, Bool.false_eq_true] at hs
       obtain ⟨T, hT⟩ := Option.isSome_iff_exists.1 ht
       obtain ⟨qs, w, hq, hw, -⟩ := F.resolve hF (Facts.keysRetW_sound hF hN q hk) hT
       exact ⟨_, by simp only [LTerm.eval, LStor.eval, hq, hw, Res.ok_bind] <;> rfl⟩
   | .kmap sh s q, h => by
     simp only [Facts.retsW, Bool.or_eq_true, Bool.and_eq_true] at h
-    rcases h with h | ⟨⟨hs, hk⟩, ht⟩
+    rcases h with (h | ⟨⟨hs, hk⟩, ht⟩) | ⟨⟨hin, hk⟩, ht⟩
     · exact LTerm.known_returns hF.1 hF.2.1 _ h
+    rotate_left
+    · cases hT : F.slotTy s q with
+      | none => cases sh <;> simp only [hT, tyShape, Bool.false_eq_true] at ht
+      | some T =>
+        obtain ⟨v, qs, w, hv, hq, hw, hc⟩ :=
+          F.slot_resolve hF hN hT hin (Facts.keysRetW_sound hF hN q hk)
+        rw [hT] at ht
+        match sh, T, ht with
+        | .map, .ref (.mapping K V), _ =>
+          match w, hc with
+          | .map _ _, _ =>
+            exact ⟨_, by simp only [LTerm.eval, hv, hq, hw, Res.ok_bind, KShape.test,
+              kmapF, isMapV, if_true] <;> rfl⟩
+        | .fixed, .ref (.fixed E n), _ =>
+          match w, hc with
+          | .array _ _ fx, hc =>
+            simp only [SVal.canonB, Bool.and_eq_true] at hc
+            obtain ⟨⟨⟨hfx, -⟩, -⟩, -⟩ := hc
+            exact ⟨_, by simp only [LTerm.eval, hv, hq, hw, Res.ok_bind, KShape.test,
+              isFixV, hfx, if_true] <;> rfl⟩
     · cases s <;> simp only [LStor.isInit, Bool.false_eq_true] at hs
       unfold Facts.shapeIs at ht
       split at ht
@@ -1882,7 +2561,7 @@ def Facts.halts (F : Facts) : LTerm → Bool
   | .err => true
   | .seq d a => F.halts d || F.halts a
   | .orElse a b => F.halts a && F.halts b
-  | .kmap sh s q => s.isInit && F.shapeNot sh q
+  | .kmap sh s q => (s.isInit && F.shapeNot sh q) || tyShapeNot sh (F.slotTy s q)
   | .zero a => F.halts a
   | _ => false
 
@@ -1921,8 +2600,34 @@ theorem Facts.halts_sound {σ : State} {F : Facts} (hF : F.Ok σ) :
     obtain ⟨x, ha, -⟩ := Res.bind_eq_ok.1 h
     exact Facts.halts_sound hF a hh x ha
   | .kmap sh s q, hh, v, h => by
-    simp only [Facts.halts, Bool.and_eq_true] at hh
-    obtain ⟨hs, hn⟩ := hh
+    simp only [Facts.halts, Bool.or_eq_true, Bool.and_eq_true] at hh
+    rcases hh with ⟨hs, hn⟩ | hn
+    rotate_left
+    · cases hT : F.slotTy s q with
+      | none => cases sh <;> simp only [hT, tyShapeNot, Bool.false_eq_true] at hn
+      | some T =>
+        simp only [LTerm.eval] at h
+        obtain ⟨w, hc, hw⟩ := F.slot_read hF hT h
+        rw [hT] at hn
+        cases sh with
+        | map =>
+          simp only [KShape.test, kmapF] at hw
+          split at hw
+          · rename_i hm
+            match w, hm, hc with
+            | .map _ _, _, hc =>
+              obtain ⟨K, V, rfl⟩ := canonB_map_ty hc
+              simp only [tyShapeNot, Bool.false_eq_true] at hn
+          · cases hw
+        | fixed =>
+          simp only [KShape.test] at hw
+          split at hw
+          · rename_i hm
+            match w, hm, hc with
+            | .array _ _ true, _, hc =>
+              obtain ⟨E, n, rfl⟩ := canonB_fixed_ty hc
+              simp only [tyShapeNot, Bool.false_eq_true] at hn
+          · cases hw
     cases s <;> simp only [LStor.isInit, Bool.false_eq_true] at hs
     simp only [LTerm.eval, LStor.eval, Res.ok_bind] at h
     obtain ⟨qs, hq, h⟩ := Res.bind_eq_ok.1 h

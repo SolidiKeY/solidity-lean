@@ -3,8 +3,9 @@ import Solidity.TestSuite.Problems
 /-!
 # solkey's `TestSuite`, derived (7 of 8)
 
-`⊢` of each obligation the M5 closer added (arrays pushed and popped,
-copies between storage locations), from `storageIndexWriteComplexReceiverCopySource` to `testStoragePushLvaluePrimitive` in the
+`⊢` of each obligation the closer of arrays and copies added (arrays
+pushed and popped, the slot a `push()` recycles, copies between storage
+locations), from `storageIndexWriteComplexReceiverCopySource` to `testStorageNestedPushReturnAlias` in the
 order of the source; the replays are what `#solkey_derive? … pending`
 (`Frontend/Problems.lean`) prints.  A leaf the closer leaves sets the
 `wt(storage)` premise aside (`Proves.close_dropWt`).
@@ -78,6 +79,12 @@ theorem Solkey.TestSuite.storageRootCopyStruct.proved : ⊢ Solkey.TestSuite.sto
 theorem Solkey.TestSuite.storageRootDeleteThenCopy.proved : ⊢ Solkey.TestSuite.storageRootDeleteThenCopy.problem := by
   sol_prove
 
+theorem Solkey.TestSuite.testDeepPopDoesNotResetMappingMember.proved : ⊢ Solkey.TestSuite.testDeepPopDoesNotResetMappingMember.problem := by
+  sol_prove
+
+theorem Solkey.TestSuite.testDeleteArrayDoesNotResetElementMappingMember.proved : ⊢ Solkey.TestSuite.testDeleteArrayDoesNotResetElementMappingMember.problem := by
+  sol_prove
+
 theorem Solkey.TestSuite.testNestedIndexWriteImpureIndexPrimitiveRhs.proved : ⊢ Solkey.TestSuite.testNestedIndexWriteImpureIndexPrimitiveRhs.problem := by
   sol_prove
 
@@ -88,6 +95,9 @@ theorem Solkey.TestSuite.testNestedIndexWriteImpureReceiverAndIndex.proved : ⊢
   sol_prove
 
 theorem Solkey.TestSuite.testNestedIndexReadImpureReceiverAndIndex.proved : ⊢ Solkey.TestSuite.testNestedIndexReadImpureReceiverAndIndex.problem := by
+  sol_prove
+
+theorem Solkey.TestSuite.testStorageDeleteImpureReceiver.proved : ⊢ Solkey.TestSuite.testStorageDeleteImpureReceiver.problem := by
   sol_prove
 
 theorem Solkey.TestSuite.testStoragePushImpureReceiver.proved : ⊢ Solkey.TestSuite.testStoragePushImpureReceiver.problem := by
@@ -130,12 +140,3 @@ theorem Solkey.TestSuite.testStorageNestedPushReturnAlias.proved : ⊢ Solkey.Te
     refine Proves.close_dropWt ?_
     sol_symex
     sol_close
-
-theorem Solkey.TestSuite.testStoragePushFieldLvalue.proved : ⊢ Solkey.TestSuite.testStoragePushFieldLvalue.problem := by
-  sol_prove
-
-theorem Solkey.TestSuite.testStoragePushLvalueCopiesStorageSource.proved : ⊢ Solkey.TestSuite.testStoragePushLvalueCopiesStorageSource.problem := by
-  sol_prove
-
-theorem Solkey.TestSuite.testStoragePushLvaluePrimitive.proved : ⊢ Solkey.TestSuite.testStoragePushLvaluePrimitive.problem := by
-  sol_prove
