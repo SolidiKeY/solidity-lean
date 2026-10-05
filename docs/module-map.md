@@ -86,6 +86,7 @@ lemma (`TermTaclet.sound`).
 | `Calculus/MemNames.lean` | The interpreter facts the memory closer rests on: a copy into memory is a tree of the counters it used (`copyStToM_interval`, `copyStToM_resolve_inj`), names fixed at their birth (`Births`), copies read as their sources both ways, when a copy halts. |
 | `Calculus/DecideLang.lean` | `sol_decide`'s target language: terms, paths, storages and memories (`LTerm`, `LStor`, `LMem`, `LId`) read in the initial state, and the formulas over them. |
 | `Calculus/MemRead.lean` | The memory clauses, as solkey's memory taclets: reads walked over the writes to a name's birth (`readT`, `readI`), the guards of names and writes, each exact against the interpreter. |
+| `Calculus/SlotLemmas.lean` | The slots past an array's end, read live: a slot-level write (through a dangling alias) read at, apart from, below and above its path; the first slot past the end that a `push()` recycles; what a `delete`, a copy and a push leave there. |
 | `Calculus/Decide.lean` | `sol_decide`: reads of writes as case trees on key equalities, over the live storage; pushes, pops and storage copies (`LStor.arr`, `LStor.copy`); the updates' memory as an `LMem`, an allocation's pair kept whole (`pairL`). |
 | `Calculus/DecideSyn.lean` | `LFml.syn`: a reduction closed by its terms, KeY's syntactic closing; `sol_decide`'s first try. |
 | `Calculus/DecideComplete.lean` | The starting storage's reads are realizable; `Fml.valid_iff_cons`. |
