@@ -1086,6 +1086,35 @@ T2 6197, T3 2657, T4 2764, T5 1629/1627/922 (the twin leaf of each test is
 two nodes smaller).  `Decide`, `Derive`, `Examples/ProofTree`,
 `Examples/Tactics/Decide` and `Derived7` re-check clean.
 
+### Steps 4a and 4b: the clauses, and the first derived
+
+The elimination now reads through a stale write of a word (`.stale none`,
+`Calculus/Decide.lean`): `readU`, `hasU`, `lenU` and `mapU` compare the
+read with the written slot as after a live write (`selectOnSaveCons`),
+except that the word is guarded by the old location's presence
+(`staleRead`, `staleHas`), since the live read at the written path is
+live only where the path is.  The write's run guard (`staleOk`) returns
+where the live location does (`s.hasU`), or where the index is the array's
+length and the first slot past the end has the location (`slotHasU`, a new
+reader: its `pop` and `.stale` arms, `opq` elsewhere); everywhere else it
+is the write itself, so it is exact with a guard that is only sound
+(`slotHasU_sound`, one direction).  `slotU` reads through a stale write
+(`storagePushLengthSaveReferenceElement` then `selectOnSaveCons`): the
+word where the write is at the slot's location (opaque if the location has
+an index), nothing above or below it, the slot below the write apart
+(`stale_slotU_sim`).  The facts are `Calculus/SlotLemmas.lean`'s, with
+`find_save_diverge_tail`, `find_slot_head` and `save_ok_of_find_ok`
+added.  A push through an alias (`.stale (some _)`) stays whole.
+
+`testDanglingReferenceSurvivesPush` is derived (`TestSuite/Derived13.lean`,
+`sol_prove`): the search 0.77 s, the replay 0.77 s.  Reductions (`elim`)
+after the step: T1 3590 (closes), T2 8944 (past `elimSize`, 8000), T3
+5889, T4 4221, T5 unchanged (1629/1627/922).  The stale guard costs about
+2.4k nodes a leaf: the write itself (`.sok`) embeds the storage below it.
+`Derived7` to `Derived12` re-check clean.  `Report.lean`'s pin (412
+derived, 5 pending) is computed, not yet checked: checking it builds every
+`Derived` module.
+
 ## M6 results (2026-10-05): memory
 
 This memory support was reworked into solkey's `memoryRules.key`/

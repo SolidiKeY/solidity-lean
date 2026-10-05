@@ -10,6 +10,7 @@ import Solidity.TestSuite.Derived9
 import Solidity.TestSuite.Derived10
 import Solidity.TestSuite.Derived11
 import Solidity.TestSuite.Derived12
+import Solidity.TestSuite.Derived13
 
 /-!
 # What is derived of solkey's `TestSuite`
@@ -20,8 +21,9 @@ finds: derived when its theorem `N.f.proved` exists, states
 `native_decide`: one that does is listed "unsound"), pending when only its
 statement does, and the import's verdict for the three with no statement.
 A pending obligation is no theorem and no `sorry`: but for the one below,
-each uses an alias bound through an index after a `pop` made it dangle,
-which the fragment drops at the next write (`SymB.onWrite`); they are
+each writes through an alias bound through an index after a `pop` made it
+dangle (`SymB.stale`), and reads the slot again after a `delete`, a copy,
+or a push through the alias, which the elimination keeps whole; they are
 listed with their reasons in `docs/testsuite-proofs.md`.
 `storagePushReadBack` is not valid in the model (the length delta,
 `docs/solc-alignment.md`): `tests/solkey/expected.tsv` lists it
@@ -29,12 +31,12 @@ listed with their reasons in `docs/testsuite-proofs.md`.
 -/
 
 /--
-info: 420 functions: 411 derived, 6 pending, 3 other
+info: 420 functions: 412 derived, 5 pending, 3 other
 excluded recursiveStructMapping
 skipped tryCalleeGet
 skipped tryCalleePing
 pending:
-storagePushReadBack testDanglingReferenceSurvivesPush testArrayCopyClearsOldElements testArrayCopyKeepsDestinationTail testDeleteArrayLeavesDataPastLength testDanglingInnerArrayReappearsAfterPush
+storagePushReadBack testArrayCopyClearsOldElements testArrayCopyKeepsDestinationTail testDeleteArrayLeavesDataPastLength testDanglingInnerArrayReappearsAfterPush
 -/
 #guard_msgs in
 #solkey_obligations Solkey.TestSuite
