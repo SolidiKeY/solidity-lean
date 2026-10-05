@@ -211,7 +211,7 @@ diffs it).  `docs/testsuite-proofs.md` has the counts and timings.
 | `Frontend/Problems.lean` | `solc_problems N` (`N.f.problem : Fml N` per program), `#solkey_problem`, `#solkey_scan`, `#solkey_derive?` (the replays to paste, when they fit `maxHeartbeats`), `#solkey_obligations` (derived, checked against `⊢ N.f.problem` and Lean's three axioms / pending). |
 | `TestSuite/Problems.lean` | The 417 statements of `Solkey.TestSuite`, two pinned in solkey's syntax, `initState_wt`. |
 | `TestSuite/Derived1.lean` … `TestSuite/Derived12.lean` | `Solkey.TestSuite.f.proved : ⊢ Solkey.TestSuite.f.problem`, 40, 40, 40, 40, 40, 37, 40, 23, 40, 40, 11 and 20 (411 in all), by `sol_prove` and explicit leaf tactics; 7 and 8 are what pushes, pops and storage copies added, 9 to 11 what memory added, 12 what copies between memory and storage added. |
-| `TestSuite/Derived13.lean` | The obligations that write through an alias a `pop` made dangle (`LStor.stale`), by `sol_prove`: `testDanglingReferenceSurvivesPush` (412 in all). |
+| `TestSuite/Derived13.lean` | The obligations that write or push through an alias a `pop` made dangle (`LStor.stale`), by `sol_prove`: four of the five, the copy test pending (415 in all). |
 | `TestSuite/Report.lean` | The pinned count: derived, pending (named), and the three with no statement. |
 | `TestSuite/Suggestions.lean` | `#solkey_derive?` suggestions pinned by name, off the `Derived` modules' import path. |
 

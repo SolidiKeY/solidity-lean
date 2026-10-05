@@ -11,7 +11,9 @@ past the array's end (`LStor.stale`, KeY's plain `save` at the slot
 slot live again (`LStor.slotU`, `storagePushLengthSaveReferenceElement`
 then `selectOnSaveCons`), directly, after a `delete` of the emptied array
 (`selectStDelNodeIndexStruct`) or after a copy over it
-(`selectOnSaveEmptyIndexStruct`).
+(`selectOnSaveEmptyIndexStruct`).  A push through the alias
+(`storagePushValueSave`) lands in the recycled array, whose length the
+slot readers count (`LStor.slotLenU`, `findDefinitionSize`).
 -/
 
 open Solidity Proves

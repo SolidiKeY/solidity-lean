@@ -24,7 +24,11 @@ local normal form rewriting the other (KeY's `applyEq`).
   `intSimplification` and literal taclets), `a == a` read as `true`, a
   subterm the premises know rewritten, a default of a known kind read as
   `0` or `false`, a key compared with itself read as its first branch
-  (`foldKite`), and an `orElse` whose left side halts or returns resolved.
+  (`foldKite`), and an `orElse` whose left side halts or returns resolved:
+  returns by the normal form without the oracle (`Facts.nf0`), or, for a
+  conditional on two integers, by the one with the facts' halting
+  (`Facts.nfH`: the slot length a `push` through a dangling alias leaves,
+  `kite(k, len, len + 1, …)`, after a `delete` reset `len`).
   Each step keeps what a term returns (`Keeps`); none is trusted.
 * **What returns** (`Facts.rets`): an operation whose operands return and
   that accepts them (comparisons on integers, `&&` on `bool`s, literal
@@ -40,7 +44,8 @@ local normal form rewriting the other (KeY's `applyEq`).
   slots past the end are canonical under `wt` (`SVal.canonB` checks the
   shadow too), and so is a default where the type's structs are
   (`defaultForTy_canonB`).  Its shape and kind follow the type, and it
-  returns where the index is at most the old length (`Facts.slotIn`).
+  returns where the index is at most the old length (`Facts.slotIn`); its
+  length returns where its type is an array's (`selectOnTypedDynSize`).
 * **What halts** (`Facts.halts`): a test for a shape the layout says is
   not there (a `delete`'s guards), so `orElse` takes its other side.
 * **Intervals** (`Facts.range`, `Facts.bnds`): a `uint` or `int` local

@@ -77,7 +77,9 @@ through an index is checked then and not when used, so a write to the
 storage leaves it stale (`SymB.onWrite`).  A stale alias keeps the
 slot-level path it was bound to, as KeY's `consr(sp, at(i))` does: a write
 or a push of a word through it is the slot-level node `LStor.stale`
-(`STerm.toLS`), and a read through it is outside the fragment.
+(`STerm.toLS`), and a read through it is outside the fragment.  The slot
+readers (`LStor.slotU`, `slotHasU`, `slotLenU`) see such a write where a
+later `push()` recycles the slot it lands in.
 
 **The fragment** (`Fml.inL`): no modality (run `sol_symex` first) but the
 `⟨[ revert(); ]⟩` a branch's cover keeps (`Premise.coverFml`: `true` under

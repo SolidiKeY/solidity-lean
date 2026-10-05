@@ -1144,6 +1144,58 @@ Two more changes were needed:
 past `elimSize` (8000), and its `bucket.tokens.push()` takes the slot from
 a storage with writes at another root, which the slot facts do not read.
 
+### Step 6: a push through the alias
+
+`testDanglingInnerArrayReappearsAfterPush` pushes through the alias
+(`ptr.push(66)`, `storagePushValueSave` at the slot), then `push()`es the
+outer array and reads the recycled inner array's length and element.
+
+- **The guard** of a push through a dangling alias (`LStor.okE`, `staleOk`):
+  the live array has the operation (`arrOk` on `lenU`), or the index is
+  the length and the first slot past the end holds an array it applies to
+  (`arrOk` on a new reader, `LStor.slotLenU`); elsewhere the write itself
+  (`staleOp_okE_sim`).
+- **`lenU` through it** is `.arr`'s where the path is live
+  (`staleOp_live`), and halts on both sides at or below it where it is not
+  (`staleOp_lenU_sim`).  `readU`, `hasU` and `mapU` keep such a read whole:
+  the test reads past it only through the recycled slot, and expanding
+  them put its leaves past `elimSize`.
+- **`slotLenU`** (sound only, `LStor.slotLenU_sound`): the length of the
+  slot a `push()` recycles, after a `pop` (the popped element's, cleared:
+  `delLen`), apart from a stale write, and one more where a push through an
+  alias is at the slot.
+- **`slotU`** through such a push: at the slot, the word at the old length
+  (`slotLenU`) and the read itself elsewhere, kept by `orElse` with it
+  (`stalePush_slotU_sim`).  Recursing into the old slot instead doubled the
+  leaves (12.6k, past `elimSize`).
+- **`arrLength`** takes the slot's length below a recycled array
+  (`findDefinitionSize`, then `selectOnSaveCons` on `size`), kept by
+  `orElse` with the read itself, where the storage holds a stale write
+  (`LStor.dangles`); every other leaf's reduction is as before.
+- **The closer**: the length of an array the slot facts type returns
+  (`Facts.retsW`'s `.len`, `tyArr`: `selectOnTypedDynSize`), and an
+  `orElse` whose left side is a conditional is resolved by the normal form
+  with the facts' halting (`Facts.nfH`): the slot's length is
+  `kite(0, (len; 0) + 1 - 1, …)`, whose test only `delete`'s reset
+  `len` (`isFixed` halting) decides.
+- `Calculus/SlotLemmas.lean` gains `apply_push_findLive_array` (an array
+  below a pushed array is an old element's).
+
+`testDanglingInnerArrayReappearsAfterPush` is derived by `sol_prove`
+(`TestSuite/Derived13.lean`): three leaves, reductions 6807, 6805 and 3924
+(1629, 1627 and 922 with the push kept whole), the search 2.8 s, the kernel
+check 2.6 s.  `Derived7` to `Derived12` re-check clean.
+
+**Where the lane ends** (415 derived): four of the five are derived.
+`testArrayCopyClearsOldElements` stays pending: its reduction is 8791, past
+`elimSize` (8000), and its `bucket.tokens.push()` takes the slot from a
+storage with writes (not only `delete`s) at another root, which the slot
+facts do not read.  Deferred: reads through a stale alias (`LTerm.findP`
+with a slot-level reader), an index after one (`ptr[0] = 1`), `pop`,
+`push()` and `delete` through one, the other readers through a push
+through one, and un-gating `LStor.dangles` after measuring `Derived1` to
+`Derived12`.
+
 ## M6 results (2026-10-05): memory
 
 This memory support was reworked into solkey's `memoryRules.key`/
