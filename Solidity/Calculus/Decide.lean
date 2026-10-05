@@ -74,8 +74,10 @@ two agree where the path is checked against the storage it reads, which is
 what the fragment keeps to (`PTerm.toL_chk`, `live_bridge`).  Binding an
 alias returns where its indices are in bounds (`guardPath`); an alias
 through an index is checked then and not when used, so a write to the
-storage leaves it stale (`SymB.onWrite`) and a later use of it outside the
-fragment.
+storage leaves it stale (`SymB.onWrite`).  A stale alias keeps the
+slot-level path it was bound to, as KeY's `consr(sp, at(i))` does: a write
+or a push of a word through it is the slot-level node `LStor.stale`
+(`STerm.toLS`), and a read through it is outside the fragment.
 
 **The fragment** (`Fml.inL`): no modality (run `sol_symex` first) but the
 `⟨[ revert(); ]⟩` a branch's cover keeps (`Premise.coverFml`: `true` under
@@ -345,8 +347,10 @@ inductive SymB where
   | val (t : LTerm)
   | path (q : LPath)
   /-- An alias through an index, bound before the storage last changed: it
-  was checked against a storage that is gone, and is outside the fragment. -/
-  | stale
+  was checked against a storage that is gone.  It keeps its slot-level path
+  `q`, as KeY's `consr(sp, at(i))` does: a write through it is a slot-level
+  write (`STerm.staleWrite?`), a read through it is outside the fragment. -/
+  | stale (q : LPath)
   /-- A storage variable bound to a storage: `old` of `{ old := storage }`. -/
   | stor (s : LStor)
   /-- A memory local bound to the object a name denotes. -/
@@ -611,7 +615,7 @@ def _root_.Solidity.Tm.toL (ρ : Sym) : Tm C s → s.LTy
   | .pvV x =>
     match lookupBy x ρ.env with
     | some (.val t) => t
-    | some (.path _) | some .stale | some (.stor _) | some (.mref _) => .err
+    | some (.path _) | some (.stale _) | some (.stor _) | some (.mref _) => .err
     | none => .var x
   | .pvP x =>
     match lookupBy x ρ.env with
@@ -630,14 +634,14 @@ def _root_.Solidity.Tm.toL (ρ : Sym) : Tm C s → s.LTy
 /-- A write to the storage leaves an alias through an index stale: the
 program checked it against the storage before. -/
 def SymB.onWrite : SymB → SymB
-  | .path q => if q.noAt then .path q else .stale
+  | .path q => if q.noAt then .path q else .stale q
   | b => b
 
 /-- The locals a symbol reads. -/
 def SymB.vars : SymB → List Var
   | .val t => t.vars
   | .path q => q.vars
-  | .stale => []
+  | .stale q => q.vars
   | .stor s => s.vars
   | .mref _ => []
 
@@ -729,7 +733,7 @@ def _root_.Solidity.Tm.inL (ρ : Sym) : Tm C s → Bool
   | .pvP x =>
     match lookupBy x ρ.env with
     | some (.path _) | some (.val _) => true
-    | some .stale | some (.stor _) | some (.mref _) | none => false
+    | some (.stale _) | some (.stor _) | some (.mref _) | none => false
   | .pvS _ => false
   | .pvI x =>
     match lookupBy x ρ.env with
@@ -825,13 +829,46 @@ theorem payGuard_eval (σ : State) (a : LTerm) {y : Value} {j : Int} (ha : a.eva
       simp only [payGuard, LTerm.eval, bind, Except.bind, ha, evalBinop, applyBinOp, Value.asInt,
           hn, decide_true, checkArith, pickBranch, ↓reduceIte, decide_false]
 
+/-- The slot-level path of a stale alias, and of its members: `r.value`
+after `{ r := tokens[0] }` and a write.  KeY's `consr(r, value)` keeps the
+slot `at(0)` the alias was bound to, whether or not it is still live. -/
+def _root_.Solidity.Tm.slotPath? (ρ : Sym) : Tm C u → Option LPath
+  | .pvP x =>
+    match lookupBy x ρ.env with
+    | some (.stale q) => some q
+    | _ => none
+  | .app1 (.field f) p => (Tm.slotPath? ρ p).map fun q => .field q f
+  | _ => none
+
+/-- A write through a stale alias: a word written (`storageFieldWriteSave`)
+or pushed (`storagePushValueSave`) at its slot-level path. -/
+def _root_.Solidity.STerm.staleWrite? (ρ : Sym) : STerm C → Option (Option AOp × LPath × Term C)
+  | .app3 .save (.app0 .storage) p (.app1 .sval t) => (p.slotPath? ρ).map fun q => (none, q, t)
+  | .app3 .push (.app0 .storage) p (.app1 .sval t) =>
+    (p.slotPath? ρ).map fun q => (some .push, q, t)
+  | _ => none
+
+/-- A storage update pushed in: a write through a stale alias is the
+slot-level node `LStor.stale`, any other as `toL` gives it. -/
+def _root_.Solidity.STerm.toLS (ρ : Sym) (s : STerm C) : LStor :=
+  match s.staleWrite? ρ with
+  | some (op, q, t) => .stale op ρ.stor q (t.toL ρ)
+  | none => s.toL ρ
+
+/-- The storage updates `toLS` is exact on: a write through a stale alias
+of a word in the fragment, or a storage `inL` admits. -/
+def _root_.Solidity.STerm.inLS (ρ : Sym) (s : STerm C) : Bool :=
+  match s.staleWrite? ρ with
+  | some (_, _, t) => t.inL ρ
+  | none => s.inL ρ
+
 /-- One update: the term that has to return, and the names it binds. -/
 def _root_.Solidity.UpdElem.toL (ρ : Sym) : UpdElem C → LTerm × Sym
   | .val x t => (t.toL ρ, { ρ with env := (x, .val (t.toL ρ)) :: ρ.env })
   | .path x p =>
     (guardPath ρ.stor (p.toL ρ), { ρ with env := (x, .path (p.toL ρ)) :: ρ.env })
   | .storage s =>
-    (.sok (s.toL ρ), { ρ with stor := s.toL ρ, env := ρ.env.map fun b => (b.1, b.2.onWrite) })
+    (.sok (s.toLS ρ), { ρ with stor := s.toLS ρ, env := ρ.env.map fun b => (b.1, b.2.onWrite) })
   | .store x s => (.sok (s.toL ρ), { ρ with env := (x, .stor (s.toL ρ)) :: ρ.env })
   -- a ledger entry: it returns where the address and the amount are integers,
   -- which `kite` asks; the ledger itself is not pushed in (nothing reads it)
@@ -861,7 +898,8 @@ fragment reads), a memory local bound to a name, or the memory (within
 def _root_.Solidity.UpdElem.inL (ρ : Sym) : UpdElem C → Bool
   | .val _ t => t.inL ρ
   | .path _ p => p.inL ρ
-  | .storage s | .store _ s => s.inL ρ
+  | .storage s => s.inLS ρ
+  | .store _ s => s.inL ρ
   | .net r _ a | .pay r a => r.inL ρ && a.inL ρ
   | .mref _ i => i.inL ρ
   | .memory m => m.inL ρ && memWithin (m.toL ρ)
@@ -1040,7 +1078,8 @@ def EnvRel (σ τ : State) (B : MemNames.Births) (x : Var) : Option SymB → Pro
   | some (.val t) => ∃ v, t.eval σ = .ok v ∧ τ.getEnv x = .ok (.val v)
   | some (.path q) => ∃ r segs, q.eval σ = .ok (.field r :: segs) ∧
       τ.getEnv x = .ok (.spath r segs) ∧ LiveTo (.struct τ.storage) (.field r :: segs)
-  | some .stale => ∃ r segs, τ.getEnv x = .ok (.spath r segs)
+  | some (.stale q) => ∃ r segs, q.eval σ = .ok (.field r :: segs) ∧
+      τ.getEnv x = .ok (.spath r segs)
   | some (.stor s) => ∃ st, s.eval σ = .ok (.struct st) ∧ τ.getEnv x = .ok (.store st)
   | some (.mref i) => ∃ n, LId.evalR B i = .ok n ∧ τ.getEnv x = .ok (.mref n)
 
@@ -1121,7 +1160,7 @@ theorem Rel.free {σ τ : State} {ρ : Sym} (h : Rel σ ρ τ) {x : Var} (hx : x
         simp only [Sym.free, lookupBy, hy, ↓reduceIte]
       rw [hl]
       have he := h.env y
-      rcases hb : lookupBy y ρ.env with _ | ⟨t⟩ | ⟨q⟩ | _ | ⟨S⟩ | ⟨k⟩ <;> rw [hb] at he <;>
+      rcases hb : lookupBy y ρ.env with _ | ⟨t⟩ | ⟨q⟩ | ⟨q⟩ | ⟨S⟩ | ⟨k⟩ <;> rw [hb] at he <;>
         simp only [EnvRel] at he ⊢ <;>
         simp only [State.getEnv_setEnv_ne hy]
       · exact he
@@ -1131,7 +1170,9 @@ theorem Rel.free {σ τ : State} {ρ : Sym} (h : Rel σ ρ τ) {x : Var} (hx : x
       · have hv := lookupBy_vars (x := x) ρ.env hb hx₂
         simp only [SymB.vars] at hv
         rw [LPath.eval_setEnv _ hv]; exact he
-      · exact he
+      · have hv := lookupBy_vars (x := x) ρ.env hb hx₂
+        simp only [SymB.vars] at hv
+        rw [LPath.eval_setEnv _ hv]; exact he
       · have hv := lookupBy_vars (x := x) ρ.env hb hx₂
         simp only [SymB.vars] at hv
         rw [LStor.eval_setEnv _ hv]; exact he
@@ -1696,7 +1737,7 @@ theorem EnvRel.onWrite {σ τ τ' : State} {B : MemNames.Births} {y : Var} {o : 
     · simp only [Option.map, SymB.onWrite, hn, if_true, EnvRel]
       exact ⟨r, segs, h₁, by rw [he]; exact h₂, LiveTo.of_noAt _ (LPath.noAt_eval σ hn h₁)⟩
     · simp only [Option.map, SymB.onWrite, hn, if_false, EnvRel, Bool.false_eq_true]
-      exact ⟨r, segs, by rw [he]; exact h₂⟩
+      exact ⟨r, segs, h₁, by rw [he]; exact h₂⟩
   · simp only [EnvRel, Option.map, SymB.onWrite] at h ⊢; rw [he]; exact h
   · simp only [EnvRel, Option.map, SymB.onWrite] at h ⊢; rw [he]; exact h
   · simp only [EnvRel, Option.map, SymB.onWrite] at h ⊢; rw [he]; exact h
@@ -1914,7 +1955,7 @@ theorem Term.toL_step (h : Rel σ ρ τ) {n : Nat}
     · rw [hx]; rfl
     · obtain ⟨v, h₁, h₂⟩ := hx; rw [h₁, h₂]; rfl
     · obtain ⟨r, segs, _, h₂, _⟩ := hx; rw [h₂]; rfl
-    · obtain ⟨r, segs, h₂⟩ := hx; rw [h₂]; rfl
+    · obtain ⟨r, segs, -, h₂⟩ := hx; rw [h₂]; rfl
     · obtain ⟨st, -, h₂⟩ := hx; rw [h₂]; rfl
     · obtain ⟨n', -, h₂⟩ := hx; rw [h₂]; rfl
   | .binop op p a b, hn, hf => by
@@ -2703,6 +2744,116 @@ theorem STerm.toL_eval (h : Rel σ ρ τ) :
     simp only [Tm.toL, Op0.toL, Op2.toLAt, Op2.toL, LStor.eval, LTerm.eval, h.stor, Res.ok_bind,
       Close.STerm.eval_storage, popOn_pop _ _ _ _ (.bool true), bind_assoc]
     exact write_bridge hb _
+
+/-- A stale alias's slot-level path reads as the path the alias holds, and
+so do its members. -/
+theorem PTerm.slotPath?_eval (h : Rel σ ρ τ) : (p : PTerm C) → (q : LPath) →
+    p.slotPath? ρ = some q → ∃ r segs, q.eval σ = .ok (.field r :: segs) ∧ p.eval τ = .ok (r, segs)
+  | .pvP x, q, hq => by
+    have hx := h.env x
+    simp only [Tm.slotPath?] at hq
+    split at hq
+    · rename_i q' hl
+      cases hq
+      rw [hl] at hx
+      obtain ⟨r, segs, h₁, h₂⟩ := hx
+      refine ⟨r, segs, h₁, ?_⟩
+      rw [Close.PTerm.eval_pv, h₂]
+      rfl
+    · cases hq
+  | .app1 (.field f) p, q, hq => by
+    simp only [Tm.slotPath?, Option.map_eq_some_iff] at hq
+    obtain ⟨q', hq', rfl⟩ := hq
+    obtain ⟨r, segs, h₁, h₂⟩ := PTerm.slotPath?_eval h p q' hq'
+    refine ⟨r, segs ++ [.field f], ?_, ?_⟩
+    · simp only [LPath.eval, h₁, Res.ok_bind, List.cons_append]
+    · rw [Close.PTerm.eval_field, h₂]
+      rfl
+  | .app0 (.root _), _, hq | .app1 .next _, _, hq | .app2 .at _ _, _, hq
+  | .app2 .nextIn _ _, _, hq | .app3 .atIn _ _ _, _, hq => by
+    simp only [Tm.slotPath?, reduceCtorEq] at hq
+
+/-- What `STerm.staleWrite?` recognises: a word written or pushed at an
+alias's slot-level path. -/
+theorem STerm.staleWrite?_some {s : STerm C} {op : Option AOp} {q : LPath} {t : Term C}
+    (hw : s.staleWrite? ρ = some (op, q, t)) : ∃ p : PTerm C, p.slotPath? ρ = some q ∧
+      ((op = none ∧ s = .app3 .save (.app0 .storage) p (.app1 .sval t)) ∨
+        (op = some .push ∧ s = .app3 .push (.app0 .storage) p (.app1 .sval t))) := by
+  unfold STerm.staleWrite? at hw
+  split at hw
+  · simp only [Option.map_eq_some_iff, Prod.mk.injEq] at hw
+    obtain ⟨q', hq, rfl, rfl, rfl⟩ := hw
+    exact ⟨_, hq, .inl ⟨rfl, rfl⟩⟩
+  · simp only [Option.map_eq_some_iff, Prod.mk.injEq] at hw
+    obtain ⟨q', hq, rfl, rfl, rfl⟩ := hw
+    exact ⟨_, hq, .inr ⟨rfl, rfl⟩⟩
+  · cases hw
+
+/-- **A write through a stale alias** (`storageFieldWriteSave` with `sp` the
+alias): the slot-level write at the path it holds, live or not. -/
+theorem stale_write_bridge (h : Rel σ ρ τ) {p : PTerm C} {q : LPath}
+    (hq : p.slotPath? ρ = some q) (t : Term C) (ht : t.inL ρ = true) :
+    Sim ((LStor.stale none ρ.stor q (t.toL ρ)).eval σ)
+      ((Tm.app3 .save (.app0 .storage) p (.app1 .sval t) : STerm C).eval τ >>= fun τ' =>
+        .ok (.struct τ'.storage)) := by
+  obtain ⟨r, segs, h₁, h₂⟩ := PTerm.slotPath?_eval h p q hq
+  rw [Close.STerm.eval_save]
+  simp only [LStor.eval, h.stor, h₁, Res.ok_bind, staleSave, Close.STerm.eval_storage, h₂,
+    bind_assoc, save_root]
+  exact Sim.bind (Term.toL_eval h t ht) fun _ => Sim.refl _
+
+/-- **A push through a stale alias** (`storagePushValueSave` with `sp` the
+alias): the array at the path it holds, one longer, written back. -/
+theorem stale_push_bridge (h : Rel σ ρ τ) {p : PTerm C} {q : LPath}
+    (hq : p.slotPath? ρ = some q) (t : Term C) (ht : t.inL ρ = true) :
+    Sim ((LStor.stale (some .push) ρ.stor q (t.toL ρ)).eval σ)
+      ((Tm.app3 .push (.app0 .storage) p (.app1 .sval t) : STerm C).eval τ >>= fun τ' =>
+        .ok (.struct τ'.storage)) := by
+  obtain ⟨r, segs, h₁, h₂⟩ := PTerm.slotPath?_eval h p q hq
+  have htt := Term.toL_eval h t ht
+  rw [Close.STerm.eval_push, Close.SValT.eval_val]
+  simp only [LStor.eval, h.stor, h₁, Res.ok_bind, staleSave, Close.STerm.eval_storage, h₂,
+    bind_assoc]
+  cases hx : t.eval τ with
+  | ok x =>
+    rw [(htt x).2 hx, Res.ok_bind]
+    have hval : (fun _ : SVal => (Except.ok x : Res Value) >>= fun x =>
+        (Except.ok x.toSVal : Res SVal) >>= fun sv => pure sv.strip) =
+        fun _ => .ok x.toSVal := by
+      funext _; cases x <;> rfl
+    simp only [Res.ok_bind] at hval ⊢
+    rw [hval]
+    simp only [pushOn_word, bind_assoc, find_root, save_root]
+    exact Sim.refl _
+  | error e =>
+    refine Sim.halt (fun a ha => ?_) (fun a ha => ?_)
+    · obtain ⟨y, hy, -⟩ := Res.bind_eq_ok.1 ha
+      have := (htt y).1 hy
+      rw [hx] at this; cases this
+    · obtain ⟨c, -, ha⟩ := Res.bind_eq_ok.1 ha
+      obtain ⟨τ', hτ', -⟩ := Res.bind_eq_ok.1 ha
+      cases c with
+      | array es sh fx =>
+        simp only [Close.pushOn_array, Res.error_bind] at hτ'
+        cases hτ'
+      | prim _ | struct _ | map _ _ => cases hτ'
+
+/-- A storage update, pushed in by `toLS`, is the write it made: through a
+stale alias at the slot level, otherwise as `STerm.toL_eval` says. -/
+theorem STerm.toLS_eval (h : Rel σ ρ τ) (s : STerm C) (hf : s.inLS ρ = true) :
+    Sim ((s.toLS ρ).eval σ) (s.eval τ >>= fun τ' => .ok (.struct τ'.storage)) := by
+  unfold STerm.toLS
+  unfold STerm.inLS at hf
+  cases hw : s.staleWrite? ρ with
+  | none =>
+    simp only [hw] at hf ⊢
+    exact STerm.toL_eval h s hf
+  | some w =>
+    obtain ⟨op, q, t⟩ := w
+    simp only [hw] at hf ⊢
+    obtain ⟨p, hq, ⟨rfl, rfl⟩ | ⟨rfl, rfl⟩⟩ := STerm.staleWrite?_some hw
+    · exact stale_write_bridge h hq t hf
+    · exact stale_push_bridge h hq t hf
 end
 
 /-- `Tm.sameL` is equality. -/
@@ -3200,7 +3351,7 @@ theorem Fml.toL_holds :
       obtain ⟨hq, hl⟩ := (hA _).1 ⟨rs, hr, rfl⟩
       exact ⟨rs.1, rs.2, hq, by simp only [State.getEnv_setEnv_self], hl⟩
     | storage s =>
-      have hs := STerm.toL_eval h s hf.1
+      have hs := STerm.toLS_eval h s hf.1
       rw [Close.UpdElem.write_storage]
       refine after_guardM (by
         simp only [UpdElem.toL, LTerm.eval, Res.bind_eq_ok]

@@ -1069,6 +1069,23 @@ exact, so nothing changes until the translation produces it.  `Derived7`,
 `8`, `9` and `12` re-check clean; `Derived9` in under 30 s of wall time,
 the import rebuild and the tool's round trip included (16 s before).
 
+### Step 3: the translation
+
+An alias made stale by a write keeps its slot-level path (`SymB.stale q`,
+`Calculus/Decide.lean`); `EnvRel` relates that path in the initial state to
+the path the local holds.  A write or a push of a word through it, or
+through one of its members (`Tm.slotPath?`, `STerm.staleWrite?`), is pushed
+in as `LStor.stale` (`STerm.toLS`); `STerm.toLS_eval` is exact on it by
+`stale_write_bridge` and `stale_push_bridge` (`save_root`, `find_root`,
+`pushOn_word`), and on every other storage update it is `STerm.toL_eval`.
+A read through a stale alias stays outside the fragment.
+
+All eleven leaves of the five are now in the fragment and fit; none closes
+yet, since the guards are still opaque.  Reductions (`elim`): T1 1156,
+T2 6197, T3 2657, T4 2764, T5 1629/1627/922 (the twin leaf of each test is
+two nodes smaller).  `Decide`, `Derive`, `Examples/ProofTree`,
+`Examples/Tactics/Decide` and `Derived7` re-check clean.
+
 ## M6 results (2026-10-05): memory
 
 This memory support was reworked into solkey's `memoryRules.key`/
