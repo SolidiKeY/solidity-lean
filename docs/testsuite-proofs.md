@@ -968,3 +968,36 @@ SolidityCorpus` now builds the `SolkeyTestSuite` derivations too.
 
 None of these was run here.  `#print axioms` on `testSuite_agrees` (none)
 and on two corollaries (Lean's three) was checked by hand.
+
+## M6 results (2026-10-05): memory
+
+- **The closer reads memory.**  `Calculus/DecideMem.lean` keeps the
+  objects the updates allocate as `SObj`s over `sol_decide`'s terms: the
+  `k`-th allocation is the identity `nextId + k` of the starting state, so
+  no heap premise is needed, and `MemRel` relates the symbolic heap to the
+  interpreter's.  `Calculus/Decide.lean` runs the updates on that heap
+  (`readL`, `mlenL`, `writeL`, `kchainL` for an index that is no literal)
+  with a guard that returns exactly where the interpreter's operation does.
+- **An allocation one element at a time** (`Calculus/Derive.lean`).
+  `{ x := freshId(addM(memory)) ‖ memory := addM(memory) }` is split into
+  `x` first and then the memory where the allocation does not read `x`
+  (`memAlloc?`, `peelMem_sound`), so `Fml.toL` sees the identity before the
+  object.
+- **Counts.**  91 more obligations derived, in `TestSuite/Derived9.lean` to
+  `TestSuite/Derived11.lean` (40, 40, 11), all `sol_prove`: 391 derived, 26 pending,
+  one excluded, two skipped.  `Report.lean` pins it and finds no theorem
+  that uses an axiom beyond Lean's three.
+- **Times.**  Language-server checks with the imports built: `Derived9`
+  16 s, `Derived10` and `Derived11` about 5 s each.
+- **Pending (26).**  The copies between memory and storage, in either
+  direction, through a root, a field or an index (`memoryToStorage*`,
+  `storageToMemory*`, `test*CopyComplex*`, the `*ImpureReceiver`/
+  `*ImpureIndex` copies, `storageNewIntoField`, `memoryAssignForms`,
+  `mappingEntryThroughMemoryToMappingEntry`): the closer does not
+  reduce `copySt` of a memory object or `copyStToM` of a storage path
+  inside a leaf yet.  The five dangling-alias functions
+  (`testDanglingReferenceSurvivesPush`, `testArrayCopyClearsOldElements`,
+  `testArrayCopyKeepsDestinationTail`, `testDeleteArrayLeavesDataPastLength`,
+  `testDanglingInnerArrayReappearsAfterPush`) and `storagePushReadBack`
+  (divergent, M7) are as before.
+

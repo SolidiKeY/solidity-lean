@@ -84,6 +84,7 @@ lemma (`TermTaclet.sound`).
 | `Calculus/CloseTests.lean` | What `sol_close` closes, pinned. |
 | `Calculus/ReadWrite.lean` | Reads after writes: the four-way path comparison; the simp sets `close_rw`, `decide_eval`. |
 | `Calculus/Decide.lean` | `sol_decide`: reads of writes as case trees on key equalities, over the live storage; pushes, pops and storage copies (`LStor.arr`, `LStor.copy`). |
+| `Calculus/DecideMem.lean` | The memory the updates allocate, kept symbolically (`SObj`, `SMem`, `MemRel`): what `sol_decide` reads memory off. |
 | `Calculus/DecideSyn.lean` | `LFml.syn`: a reduction closed by its terms, KeY's syntactic closing; `sol_decide`'s first try. |
 | `Calculus/DecideComplete.lean` | The starting storage's reads are realizable; `Fml.valid_iff_cons`. |
 | `Calculus/Closer.lean` | `LFml.close`: the closer, KeY's first-order and arithmetic taclets as clauses of one `Bool` (ground evaluation, `applyEq`, `bool` case splits, intervals by constants and bounds below, reads typed by `wt`'s layout, the slot a `push()` recycles typed by its element type), `LFml.close_holds`; `LFml.fits`, the size count; literal powers folded up to the exponent 256 (`powBig`). |
@@ -206,7 +207,7 @@ diffs it).  `docs/testsuite-proofs.md` has the counts and timings.
 | `Solkey/TestSuite.lean` | `Solkey.TestSuite`, its 417 programs and the report, pinned. |
 | `Frontend/Problems.lean` | `solc_problems N` (`N.f.problem : Fml N` per program), `#solkey_problem`, `#solkey_scan`, `#solkey_derive?` (the replays to paste, when they fit `maxHeartbeats`), `#solkey_obligations` (derived, checked against `⊢ N.f.problem` and Lean's three axioms / pending). |
 | `TestSuite/Problems.lean` | The 417 statements of `Solkey.TestSuite`, two pinned in solkey's syntax, `initState_wt`. |
-| `TestSuite/Derived1.lean` … `TestSuite/Derived8.lean` | `Solkey.TestSuite.f.proved : ⊢ Solkey.TestSuite.f.problem`, 40, 40, 40, 40, 40, 37, 40 and 23 (300 in all), by `sol_prove` and explicit leaf tactics; 7 and 8 are what pushes, pops and storage copies added. |
+| `TestSuite/Derived1.lean` … `TestSuite/Derived11.lean` | `Solkey.TestSuite.f.proved : ⊢ Solkey.TestSuite.f.problem`, 40, 40, 40, 40, 40, 37, 40, 23, 40, 40 and 11 (391 in all), by `sol_prove` and explicit leaf tactics; 7 and 8 are what pushes, pops and storage copies added, 9 to 11 what memory added. |
 | `TestSuite/Report.lean` | The pinned count: derived, pending (named), and the three with no statement. |
 | `TestSuite/Suggestions.lean` | `#solkey_derive?` suggestions pinned by name, off the `Derived` modules' import path. |
 
