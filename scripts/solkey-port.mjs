@@ -222,11 +222,11 @@ const PENDING = {
 
 /**
  * The fallback reason of a pending function that uses memory: today each one
- * copies between memory and storage (`PENDING` names the others).
+ * copies from memory into storage (`PENDING` names the others).
  */
 const COPY_PENDING =
-  "copies between memory and storage: the closer does not reduce `copySt` of a memory " +
-  "object or `copyStToM` of a storage path in a leaf yet (docs/testsuite-proofs.md, M6 results)";
+  "copies from memory into storage: the closer does not reduce `copyMem` (`LVal.mem`, a " +
+  "view of memory) in a leaf yet (docs/testsuite-proofs.md, M6b)";
 
 /** The statuses of an imported row, in report order. */
 const IMPORTED_STATUSES = ["derived", "pending", "divergent", "excluded", "unsupported", "skip"];

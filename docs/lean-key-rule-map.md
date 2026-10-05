@@ -350,8 +350,9 @@ clause's soundness is the interpreter lemma, and the Theory lemma is its
 counterpart (`Theory/Memory.lean`, `Theory/CrossDomain.lean`).  A name is
 `LId`, `idC(freshIdp, flds)` with the allocation's ordinal for `freshIdp`.
 The translation (`Calculus/Decide.lean`) builds a leaf's memory from its
-updates and reads it with the rows marked *used*; the copies between storage
-and memory (the rows marked *defined*) are not produced yet.
+updates and reads it with the rows marked *used*; a copy from storage into
+memory is produced, the copies back into storage and the reads below them
+(the rows marked *defined*) are not yet.
 
 | KeY taclet | closer clause | interpreter lemma | Theory lemma | status |
 | --- | --- | --- | --- | --- |
@@ -362,7 +363,7 @@ and memory (the rows marked *defined*) are not produced yet.
 | `initSize`, `sizeOfFixed`/`Dyn`/`Leaf`, `shapeAt*`, `idShapeDef` | `dfltSel` at `.size` | `dfltSel_sim`, `MemNames.copiedTo_len` | `initSize`, `sizeOf*`, `shapeAt*`, `idShapeDef` | used |
 | `initIdentity`, `idCCDef` | `LMem.readI` at the root's allocation: the name one segment longer | `readI_alloc`, `resolveR_snoc_sim`, `MemNames.birth_slot` | `initIdentity`, `idCCDef`, `defValResolveIdentity` | used |
 | `memoryArrayFreshAlloc` then `readOnWrite` at `size`, `initElement` | `newSel`: the length `n`, an element below it the default (one node, `LMem.newArr`: deviation) | `new_read_sim`, `MemNames.copyStToM_newArr_at`, `copyStToM_newArr_len` | `readOnWrite`, `initElement` | used |
-| `readFromCopyToStorage`, `findDefinitionSize` | `copySel`: the storage read one segment further, `.len` at `size` | `copy_read_sim`, `MemNames.copyStToM_readPath`, `copyStToM_lenPath` | `readCopySt`, `readCopyStOther` | defined |
+| `readFromCopyToStorage`, `findDefinitionSize` | `copySel`: the storage read one segment further, `.len` at `size` | `copy_read_sim`, `MemNames.copyStToM_readPath`, `copyStToM_lenPath` | `readCopySt`, `readCopyStOther` | used |
 | `readFromCopyToStorageIdentity` | `LMem.readI` below a copy; `nameG`'s `refT` | `copy_ref_rets`, `MemNames.copyStToM_readPath` | `readCopyStIdentity` | defined |
 | `readFromEmptyMemory` | the `.init` arm: none (every name a leaf uses names a root of the leaf) | — | `readFromEmptyMemory` | used |
 | `readREmpty`, `readRCons` | `LMem.walk`: `readI` for each leading segment, `readU` on the last | `LMem.walk_sim`, `MVal.readPath_snoc` | `readREmpty`, `readRCons` | defined |
@@ -371,9 +372,10 @@ and memory (the rows marked *defined*) are not produced yet.
 | — (Lean only: `copyMem` halts on a cycle) | `LMem.refDesc`: every reference written names an older root; `okE` of a view is the run guard and `nameG` where it holds, kept whole elsewhere | `LMem.refDesc_desc`, `view_okE_sim`, `MemNames.copyMem_ok_desc` | — | defined |
 | — (Lean only: KeY's memory operations are total, the interpreter's halt) | `LMem.okU`, the run guard: each allocation at its ordinal (`LMem.nAlloc`) of a type `allocOk` admits, each copy from storage of a subtree that copies and is no word, each write's `writeG` and value | `LMem.okU_sim`, `MemNames.copyStToM_ok_noMap`, `Ty.mapFree_sound`, `LMem.writeG_sim` | — | defined |
 | — (Lean only: the program rules' `\add(0 <= ie & ie < read(memory, mv, size))`; a member write needs a struct) | `LMem.writeG`, `structG`, `nameG` | `LMem.writeG_sim`, `structG_sim`, `nameG_sim` | — | used |
-| — (Lean only: `copyStToM` halts on a mapping) | `LTerm.cpok`, reduced by `LStor.cpokU` through each word written over a word, down to `cpok init q` | `LStor.cpokU_sim`, `save_cpok_sim`, `cps_findLive_savePrim`, `copyStToM_ok_any` | — | defined |
-| — (Lean only: `wt` gives a copyable value) | `Facts.cpokInit` (`Calculus/Closer.lean`): `cpok init q` returns where the layout types `q` at a type with no mapping | `Facts.retsW_sound`, `MemNames.copyStToM_ok_noMap` | — | defined |
-| `memoryReferenceDeclFreshAlloc`, `memoryRootDeleteFreshRebind`, `memoryArrayFreshAlloc` | the pair `{x := freshId(…) ‖ memory := …}` kept whole (`Decide.pairL`, `Derive.memAlloc?`): `x` names the root `⟨nAlloc, []⟩` of the allocation at that ordinal, one Skolem for `freshIdp` (deviation: KeY's two updates under one `\new`) | `pair_sound`, `LMem.run_addM`, `LMem.run_newArr`, `allocDefault_heap`, `evalR_last` | — | used |
+| — (Lean only: `copyStToM` halts on a mapping) | `LTerm.cpok`, reduced by `LStor.cpokU` through each word written over a word, down to `cpok init q` | `LStor.cpokU_sim`, `save_cpok_sim`, `cps_findLive_savePrim`, `copyStToM_ok_any` | — | used |
+| — (Lean only: `wt` gives a copyable value) | `Facts.cpokInit` (`Calculus/Closer.lean`): `cpok init q` returns where the layout types `q` at a type with no mapping | `Facts.retsW_sound`, `MemNames.copyStToM_ok_noMap` | — | used |
+| `memoryReferenceDeclFreshAlloc`, `memoryRootDeleteFreshRebind`, `memoryArrayFreshAlloc`, `memoryStorageCopy` | the pair `{x := freshId(…) ‖ memory := …}` kept whole (`Decide.pairL`, `Derive.memAlloc?`): `x` names the root `⟨nAlloc, []⟩` of the allocation at that ordinal, one Skolem for `freshIdp` (deviation: KeY's two updates under one `\new`); a copy from storage, `copySt(memory, find(storage, p))`, is the node `LMem.copySt` (`Decide.pairMem`) | `pair_sound`, `pairCopy_key`, `LMem.run_addM`, `LMem.run_newArr`, `allocDefault_heap`, `evalR_last` | — | used |
+| — (Lean only: a copy from storage halts on a mapping, and a word copies to no object) | `Decide.copyG`, the guard of a copy's pair: `cpok`, and the subtree no word; a copy from storage is in the fragment only in its pair (`Decide.pairIn`), where the identity's `asRef` refuses a word | `pairCopy_key`, `copy_ref`, `live_bridge` | — | used |
 | `memoryFieldDeleteReference`, `memoryIndexDeleteReference` | `freshRef`: the reference `write(addM(memory), a, freshId(addM(memory)))` writes is the root the allocation under the write takes | `writeVal_ok`, `freshRef_cases` | — | used |
 | — (Lean only: a read walks every write) | `memSize`: a leaf whose memory holds more writes and allocations is left outside (`LMem.within`) | — | — | used |
 

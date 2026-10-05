@@ -97,10 +97,10 @@ the fragment reads; a quantifier over a local the updates before it do not
 read (`LFml.all`, a specification's `\forall`).  Memory is in it as solkey
 writes it (`LMem`): `memory`, its allocations (an identity only in the pair
 that allocates it, `pairL`, or as the reference a `delete` writes,
-`freshRef`) and writes, within `memSize` of them, and the reads the clauses of
-`Calculus/MemRead.lean` resolve.  Outside it: a copy between storage and
-memory (`copySt` of a storage value, `copyMem`), a read of the ledger
-(`net(a)`).  Of the gaps `Close.lean` lists, this closes the keys the
+`freshRef`), a copy from storage in its pair (`pairMem`), and writes,
+within `memSize` of them, and the reads the clauses of
+`Calculus/MemRead.lean` resolve.  Outside it: a copy from memory into
+storage (`copyMem`), a read of the ledger (`net(a)`).  Of the gaps `Close.lean` lists, this closes the keys the
 formula does not separate, the reads below a deleted struct, the memory
 defaults and the distinct allocations.
 
@@ -840,6 +840,42 @@ def allocPair? (i : ITerm C) (mm : MTerm C) : Bool :=
   | .app2 .copy (.app0 .memory) v, .app2 .copySt (.app0 .memory) v' => decide (v = v')
   | _, _ => false
 
+/-- `copySt(memory, find(storage, p))`, a copy from storage
+(`memoryStorageCopy`): its path. -/
+def copyOf? : MTerm C → Option (PTerm C)
+  | .app2 .copySt (.app0 .memory) (.app2 .sfind (.app0 .storage) p) => some p
+  | _ => none
+
+theorem copyOf?_some {mm : MTerm C} {p : PTerm C} (h : copyOf? mm = some p) :
+    mm = .app2 .copySt (.app0 .memory) (.app2 .sfind (.app0 .storage) p) := by
+  unfold copyOf? at h
+  split at h
+  · cases h
+    rfl
+  · cases h
+
+/-- A copy from storage's guard (Lean only): the subtree copies, which
+`copyStToM` refuses on a mapping, and is no word, so the copy is an object
+(`readFromCopyToStorage` reads it). -/
+def copyG (s : LStor) (q : LPath) : LTerm :=
+  .seq (.cpok s q) (.ite (isT (.find s q)) .err (.lit (.bool true)))
+
+/-- The memory of an allocation's pair: a copy from storage is the node
+`LMem.copySt` at the next ordinal, under `copyG`; any other memory as
+`toL` gives it.  A copy from storage is in the fragment only in its pair,
+where the identity's `asRef` refuses the word `copySt` alone would copy. -/
+def pairMem (ρ : Sym) (mm : MTerm C) : Option (LMem × LTerm) :=
+  match copyOf? mm with
+  | some p => some (.copySt ρ.mem ρ.mem.nAlloc ρ.stor (p.toL ρ), copyG ρ.stor (p.toL ρ))
+  | none => mm.toL ρ
+
+/-- The pair's memory in the fragment: a copy from storage at a path in
+it, or a memory `inL` admits. -/
+def pairIn (ρ : Sym) (mm : MTerm C) : Bool :=
+  match copyOf? mm with
+  | some p => p.inL ρ
+  | none => mm.inL ρ
+
 /-- A parallel update that is an allocation's pair: `x`, its identity and
 the memory. -/
 def pairView : UpdElem C → UpdElem C → List (UpdElem C) → Option (Var × ITerm C × MTerm C)
@@ -860,7 +896,7 @@ theorem pairView_some {e₁ e₂ : UpdElem C} {rest : List (UpdElem C)} {x : Var
 next ordinal. -/
 def pairL (ρ : Sym) (x : Var) (i : ITerm C) (mm : MTerm C) : Option (LTerm × Sym) :=
   if allocPair? i mm then
-    (mm.toL ρ).map fun p => (p.2, { ρ with env := (x, .mref ⟨ρ.mem.nAlloc, []⟩) :: ρ.env, mem := p.1 })
+    (pairMem ρ mm).map fun p => (p.2, { ρ with env := (x, .mref ⟨ρ.mem.nAlloc, []⟩) :: ρ.env, mem := p.1 })
   else none
 
 /-- The update's term as a premise (box) or a conjunct (diamond). -/
@@ -923,7 +959,7 @@ def _root_.Solidity.Fml.inL : Sym → Fml C → Bool
     match pairView e₁ e₂ rest with
     | some (x, i, mm) =>
       match pairL ρ x i mm with
-      | some (_, ρ') => mm.inL ρ && ρ'.mem.within memSize && φ.inL ρ'
+      | some (_, ρ') => pairIn ρ mm && ρ'.mem.within memSize && φ.inL ρ'
       | none => false
     | none => false
   | _, .modal _ P _ => P.reverts
@@ -2760,115 +2796,249 @@ theorem SValT.arr_eval {σ τ : State} {ρ : Sym} (h : Rel σ ρ τ) : (v : SVal
   | .app2 .copyMem _ _, _, _, _, hvt, _ => by
     simp only [Tm.toL, Op2.toLAt, Op2.toL, reduceCtorEq] at hvt
 
+/-- The pair's last step: where its guard returns exactly when both the
+identity and the memory do, and the memory's run names the identity at the
+next ordinal, the pair keeps the relation. -/
+theorem pair_tail {σ τ : State} {ρ : Sym} {x : Var} {i : ITerm C} {mm : MTerm C} {M : LMem}
+    {g : LTerm} (h : Rel σ ρ τ)
+    (H1 : Rets (g.eval σ) ↔ ∃ id μ', i.eval τ = .ok id ∧ mm.eval τ = .ok μ')
+    (H2 : ∀ id μ', i.eval τ = .ok id → mm.eval τ = .ok μ' → ∃ μ B, M.run σ = .ok (μ, B) ∧
+      μ.HeapEq μ' ∧ ρ.mem.births σ <+: B ∧ LId.evalR B ⟨ρ.mem.nAlloc, []⟩ = .ok id) :
+    (Rets (g.eval σ) ↔ ∃ τ', Upd.apply [.mref x i, .memory mm] τ = .ok τ') ∧
+      ∀ τ', Upd.apply [.mref x i, .memory mm] τ = .ok τ' →
+        Rel σ { ρ with env := (x, .mref ⟨ρ.mem.nAlloc, []⟩) :: ρ.env, mem := M } τ' := by
+  have hU : Upd.apply [.mref x i, .memory mm] τ = i.eval τ >>= fun id => mm.eval τ >>=
+      fun μ => .ok { τ.setEnv x (.mref id) with heap := μ.heap, nextId := μ.nextId } := by
+    simp only [Upd.apply, List.foldlM_cons, List.foldlM_nil, bind_pure,
+      Close.UpdElem.write_mref, Close.UpdElem.write_memory, bind_assoc, Res.ok_bind]
+  rw [hU, H1]
+  refine ⟨⟨fun ⟨id, μ', hid, hμ'⟩ => ⟨_, by rw [hid, Res.ok_bind, hμ', Res.ok_bind]⟩,
+    fun ⟨τ', hτ'⟩ => ?_⟩, fun τ' hτ' => ?_⟩
+  · obtain ⟨id, hid, hτ'⟩ := Res.bind_eq_ok.1 hτ'
+    obtain ⟨μ', hμ', -⟩ := Res.bind_eq_ok.1 hτ'
+    exact ⟨id, μ', hid, hμ'⟩
+  · obtain ⟨id, hid, hτ'⟩ := Res.bind_eq_ok.1 hτ'
+    obtain ⟨μ', hμ', he⟩ := Res.bind_eq_ok.1 hτ'
+    cases he
+    obtain ⟨μ, B, hrun, hh, hp, hB⟩ := H2 id μ' hid hμ'
+    exact (h.setMem hrun hp hh).bind x (.mref ⟨ρ.mem.nAlloc, []⟩) (.mref id)
+      ⟨id, by rw [LMem.births_of_run hrun]; exact hB, by simp only [State.getEnv_setEnv_self]⟩
+
+open MemNames in
+/-- **A copy from storage's pair** (`memoryStorageCopy`): `copyG` returns
+exactly where the identity and the memory do, and the node `LMem.copySt`
+at the next ordinal runs to the interpreter's heap, its root the identity
+(`readFromCopyToStorage` then reads the subtree in the storage of the
+copy).  The path is checked (`live_bridge`), so the live read is the
+interpreter's. -/
+theorem pairCopy_key {σ τ : State} {ρ : Sym} {p : PTerm C} (h : Rel σ ρ τ)
+    (hp : p.inL ρ = true) :
+    (Rets ((copyG ρ.stor (p.toL ρ)).eval σ) ↔
+      ∃ id μ', (Tm.app2 .copy (.app0 .memory) (.app2 .sfind (.app0 .storage) p)).eval τ = .ok id ∧
+        (Tm.app2 .copySt (.app0 .memory) (.app2 .sfind (.app0 .storage) p)).eval τ = .ok μ') ∧
+    ∀ id μ', (Tm.app2 .copy (.app0 .memory) (.app2 .sfind (.app0 .storage) p)).eval τ = .ok id →
+      (Tm.app2 .copySt (.app0 .memory) (.app2 .sfind (.app0 .storage) p)).eval τ = .ok μ' →
+      ∃ μ B, (LMem.copySt ρ.mem ρ.mem.nAlloc ρ.stor (p.toL ρ)).run σ = .ok (μ, B) ∧
+        μ.HeapEq μ' ∧ ρ.mem.births σ <+: B ∧ LId.evalR B ⟨ρ.mem.nAlloc, []⟩ = .ok id := by
+  have hb := live_bridge (PTerm.toL_chk h p hp)
+  have hv : ∀ c, (Tm.app2 (C := C) .sfind (.app0 .storage) p).eval τ = .ok c ↔
+      ∃ qs, (p.toL ρ).eval σ = .ok qs ∧ (SVal.struct τ.storage).findLive qs = .ok c := by
+    intro c
+    rw [Close.SValT.eval_find, Close.STerm.eval_storage, Res.ok_bind]
+    constructor
+    · intro hc
+      obtain ⟨rs, hrs, hc⟩ := Res.bind_eq_ok.1 hc
+      obtain ⟨hq, hl⟩ := (hb _ c).2 ⟨rs, hrs, rfl, hc⟩
+      exact ⟨_, hq, hl⟩
+    · rintro ⟨qs, hq, hl⟩
+      obtain ⟨rs, hrs, rfl, hc⟩ := (hb qs c).1 ⟨hq, hl⟩
+      rw [hrs, Res.ok_bind]
+      exact hc
+  have hi : (Tm.app2 (C := C) .copy (.app0 .memory) (.app2 .sfind (.app0 .storage) p)).eval τ =
+      (Tm.app2 (C := C) .sfind (.app0 .storage) p).eval τ >>= fun sv =>
+        copyStToM τ sv >>= fun r => r.2.asRef := by
+    rw [Close.ITerm.eval_copy, Close.MTerm.eval_memory]
+    rfl
+  have hmm : (Tm.app2 (C := C) .copySt (.app0 .memory) (.app2 .sfind (.app0 .storage) p)).eval τ =
+      (Tm.app2 (C := C) .sfind (.app0 .storage) p).eval τ >>= fun sv =>
+        copyStToM τ sv >>= fun r => .ok r.1 := by
+    rw [Close.MTerm.eval_copySt, Close.MTerm.eval_memory]
+    rfl
+  have hG : Rets ((copyG ρ.stor (p.toL ρ)).eval σ) ↔
+      ∃ c, (Tm.app2 (C := C) .sfind (.app0 .storage) p).eval τ = .ok c ∧ Cps c ∧
+        ∀ pv, c ≠ .prim pv := by
+    unfold copyG
+    rw [seq_rets, ite_isT_rets]
+    simp only [lit_rets, and_true]
+    constructor
+    · rintro ⟨⟨a, ha⟩, hf⟩
+      simp only [LTerm.eval, h.stor, Res.ok_bind] at ha
+      obtain ⟨qs, hq, ha⟩ := Res.bind_eq_ok.1 ha
+      obtain ⟨c, hc, ha⟩ := Res.bind_eq_ok.1 ha
+      obtain ⟨r, hr, -⟩ := Res.bind_eq_ok.1 ha
+      refine ⟨c, (hv c).2 ⟨qs, hq, hc⟩, ⟨_, r, hr⟩, ?_⟩
+      rintro pv rfl
+      obtain ⟨a', ha'⟩ : ∃ a', (SVal.prim pv).asValue = .ok a' := by
+        cases pv <;> exact ⟨_, rfl⟩
+      exact hf ⟨a', by simp only [LTerm.eval, h.stor, hq, hc, Res.ok_bind, ha']⟩
+    · rintro ⟨c, hc, hcp, hnp⟩
+      obtain ⟨qs, hq, hl⟩ := (hv c).1 hc
+      obtain ⟨r, hr⟩ := hcp.at (memBase σ)
+      refine ⟨⟨.bool true, by simp only [LTerm.eval, h.stor, hq, hl, Res.ok_bind, hr]⟩, ?_⟩
+      rintro ⟨a, ha⟩
+      simp only [LTerm.eval, h.stor, hq, hl, Res.ok_bind] at ha
+      cases c with
+      | prim pv => exact hnp pv rfl
+      | struct _ | array _ _ _ | map _ _ => simp only [SVal.asValue, reduceCtorEq] at ha
+  refine ⟨hG.trans ⟨fun ⟨c, hc, hcp, hnp⟩ => ?_, fun ⟨id, μ', hid, _⟩ => ?_⟩,
+    fun id μ' hid hμ' => ?_⟩
+  · obtain ⟨⟨τ₁, mv⟩, hcopy⟩ := hcp.at τ
+    obtain ⟨id, rfl⟩ := copy_ref hcopy hnp
+    exact ⟨id, τ₁, by rw [hi, hc, Res.ok_bind, hcopy]; rfl,
+      by rw [hmm, hc, Res.ok_bind, hcopy]; rfl⟩
+  · rw [hi] at hid
+    obtain ⟨c, hc, hid⟩ := Res.bind_eq_ok.1 hid
+    obtain ⟨r, hr, hid⟩ := Res.bind_eq_ok.1 hid
+    refine ⟨c, hc, ⟨τ, r, hr⟩, ?_⟩
+    rintro pv rfl
+    cases pv <;> simp only [copyStToM, Except.ok.injEq] at hr <;> subst hr <;> cases hid
+  · rw [hmm] at hμ'
+    obtain ⟨c, hc, hμ'⟩ := Res.bind_eq_ok.1 hμ'
+    obtain ⟨r, hr, hμ'⟩ := Res.bind_eq_ok.1 hμ'
+    cases hμ'
+    rw [hi, hc, Res.ok_bind, hr, Res.ok_bind] at hid
+    obtain ⟨qs, hq, hl⟩ := (hv c).1 hc
+    obtain ⟨μ₁, B₁, hr₁, hh⟩ := h.mem
+    have hk : B₁.length = ρ.mem.nAlloc := LMem.run_nAlloc σ ρ.mem hr₁
+    rcases (copyStToM_heap hh c).cases with ⟨e, -, h₂⟩ | ⟨t₁, t₂, mv, h₁, h₂, ht⟩
+    · rw [hr] at h₂
+      cases h₂
+    · rw [hr, Except.ok.injEq] at h₂
+      subst h₂
+      obtain rfl : mv = .ref id := by
+        cases mv <;> simp only [MVal.asRef, reduceCtorEq] at hid
+        cases hid
+        rfl
+      refine ⟨t₁, B₁ ++ [Birth.ofCopy μ₁ t₁ id], ?_, ht, ?_, ?_⟩
+      · simp only [LMem.run, h.stor, hq, hl, hr₁, Res.ok_bind, hk, ↓reduceIte, h₁, MVal.asRef]
+        rfl
+      · rw [LMem.births_of_run hr₁]
+        exact List.prefix_append _ _
+      · rw [evalR_last _ _ hk.symm]
+        rfl
+
 open MemNames in
 /-- **An allocation's pair, pushed in**: it runs exactly where the memory's
 guard returns, and binds `x` to the root of the next ordinal, which is the
 identity the interpreter's allocation takes. -/
 theorem pair_sound {σ τ : State} {ρ ρ' : Sym} {x : Var} {i : ITerm C} {mm : MTerm C}
-    {g : LTerm} (h : Rel σ ρ τ) (hq : pairL ρ x i mm = some (g, ρ')) (hm : mm.inL ρ = true) :
+    {g : LTerm} (h : Rel σ ρ τ) (hq : pairL ρ x i mm = some (g, ρ')) (hm : pairIn ρ mm = true) :
     (Rets (g.eval σ) ↔ ∃ τ', Upd.apply [.mref x i, .memory mm] τ = .ok τ') ∧
       ∀ τ', Upd.apply [.mref x i, .memory mm] τ = .ok τ' → Rel σ ρ' τ' := by
   unfold pairL at hq
   split at hq
   · rename_i hap
-    obtain ⟨M, g', hM, hmr, hme⟩ := MTerm.toL_eval h mm hm
-    rw [hM, Option.map_some, Option.some.injEq, Prod.mk.injEq] at hq
-    obtain ⟨rfl, rfl⟩ := hq
-    have hU : Upd.apply [.mref x i, .memory mm] τ = i.eval τ >>= fun id => mm.eval τ >>=
-        fun μ => .ok { τ.setEnv x (.mref id) with heap := μ.heap, nextId := μ.nextId } := by
-      simp only [Upd.apply, List.foldlM_cons, List.foldlM_nil, bind_pure,
-        Close.UpdElem.write_mref, Close.UpdElem.write_memory, bind_assoc, Res.ok_bind]
-    have hkey : (∀ id, i.eval τ = .ok id → ∃ μ', mm.eval τ = .ok μ') ∧
-        ∀ μ', mm.eval τ = .ok μ' → ∃ id, i.eval τ = .ok id ∧
-          LId.evalR (M.births σ) ⟨ρ.mem.nAlloc, []⟩ = .ok id := by
-      rcases allocPair?_cases hap with ⟨R, rfl, rfl⟩ | ⟨v, rfl, rfl⟩
-      · simp only [Tm.toL, Op1.toL, Op0.toL, Option.bind_some] at hM
-        split at hM
-        · simp only [Option.some.injEq, Prod.mk.injEq] at hM
-          obtain ⟨rfl, -⟩ := hM
-          have hi : (Tm.app1 (C := C) (.alloc R) (.app0 .memory)).eval τ =
-              allocDefault τ R >>= fun r => .ok r.2 := rfl
-          have hmm : (Tm.app1 (C := C) (.addM R) (.app0 .memory)).eval τ =
-              allocDefault τ R >>= fun r => .ok r.1 := rfl
+    cases hc : copyOf? mm with
+    | some p =>
+      obtain rfl := copyOf?_some hc
+      simp only [pairIn, hc] at hm
+      simp only [pairMem, hc, Option.map_some, Option.some.injEq, Prod.mk.injEq] at hq
+      obtain ⟨rfl, rfl⟩ := hq
+      rcases allocPair?_cases hap with ⟨R, -, hmm⟩ | ⟨v, rfl, hmm⟩
+      · cases hmm
+      · cases hmm
+        exact pair_tail h (pairCopy_key h hm).1 (pairCopy_key h hm).2
+    | none =>
+      simp only [pairIn, hc] at hm
+      simp only [pairMem, hc] at hq
+      obtain ⟨M, g', hM, hmr, hme⟩ := MTerm.toL_eval h mm hm
+      rw [hM, Option.map_some, Option.some.injEq, Prod.mk.injEq] at hq
+      obtain ⟨rfl, rfl⟩ := hq
+      have hkey : (∀ id, i.eval τ = .ok id → ∃ μ', mm.eval τ = .ok μ') ∧
+          ∀ μ', mm.eval τ = .ok μ' → ∃ id, i.eval τ = .ok id ∧
+            LId.evalR (M.births σ) ⟨ρ.mem.nAlloc, []⟩ = .ok id := by
+        rcases allocPair?_cases hap with ⟨R, rfl, rfl⟩ | ⟨v, rfl, rfl⟩
+        · simp only [Tm.toL, Op1.toL, Op0.toL, Option.bind_some] at hM
+          split at hM
+          · simp only [Option.some.injEq, Prod.mk.injEq] at hM
+            obtain ⟨rfl, -⟩ := hM
+            have hi : (Tm.app1 (C := C) (.alloc R) (.app0 .memory)).eval τ =
+                allocDefault τ R >>= fun r => .ok r.2 := rfl
+            have hmm : (Tm.app1 (C := C) (.addM R) (.app0 .memory)).eval τ =
+                allocDefault τ R >>= fun r => .ok r.1 := rfl
+            refine ⟨fun id hid => ?_, fun μ' hμ' => ?_⟩
+            · rw [hi] at hid
+              obtain ⟨r, hr, -⟩ := Res.bind_eq_ok.1 hid
+              exact ⟨r.1, by rw [hmm, hr]; rfl⟩
+            · obtain ⟨-, μ, B, hrun, -, -⟩ := hme μ' hμ'
+              rw [hmm] at hμ'
+              obtain ⟨r, hr, -⟩ := Res.bind_eq_ok.1 hμ'
+              obtain ⟨μ₀, B₀, id₀, hr₀, hk, hc, rfl⟩ := LMem.run_addM hrun
+              obtain ⟨μ₁, B₁, hr₁, hh⟩ := h.mem
+              rw [hr₁, Except.ok.injEq, Prod.mk.injEq] at hr₀
+              obtain ⟨rfl, rfl⟩ := hr₀
+              rcases (allocDefault_heap hh R).cases with ⟨e, h₁, -⟩ | ⟨t₁, t₂, id', h₁, h₂, -⟩
+              · rw [allocDefault_of_copy hc] at h₁; cases h₁
+              · rw [allocDefault_of_copy hc, Except.ok.injEq, Prod.mk.injEq] at h₁
+                obtain ⟨-, rfl⟩ := h₁
+                rw [hr, Except.ok.injEq] at h₂
+                subst h₂
+                refine ⟨id₀, by rw [hi, hr]; rfl, ?_⟩
+                rw [LMem.births_of_run hrun, evalR_last _ _ hk]
+                rfl
+          · cases hM
+        · have hvi : v.inL ρ = true := by
+            simp only [Tm.inL, Op2.inL, Bool.and_eq_true] at hm
+            exact hm.1.2
+          obtain ⟨R, n', hvt, hR, rfl, -⟩ := newM_some (by
+            simpa only [Tm.toL, Op2.toLAt, Op2.toL, Op0.toL] using hM)
+          have hva := SValT.arr_eval h v hvi hvt
+          have hi : (Tm.app2 (C := C) .copy (.app0 .memory) v).eval τ =
+              v.eval τ >>= fun sv => copyStToM τ sv >>= fun r => r.2.asRef := by
+            rw [Close.ITerm.eval_copy, Close.MTerm.eval_memory]
+            rfl
+          have hmm : (Tm.app2 (C := C) .copySt (.app0 .memory) v).eval τ =
+              v.eval τ >>= fun sv => copyStToM τ sv >>= fun r => .ok r.1 := by
+            rw [Close.MTerm.eval_copySt, Close.MTerm.eval_memory]
+            rfl
           refine ⟨fun id hid => ?_, fun μ' hμ' => ?_⟩
           · rw [hi] at hid
+            obtain ⟨sv, hsv, hid⟩ := Res.bind_eq_ok.1 hid
             obtain ⟨r, hr, -⟩ := Res.bind_eq_ok.1 hid
-            exact ⟨r.1, by rw [hmm, hr]; rfl⟩
+            exact ⟨r.1, by rw [hmm, hsv, Res.ok_bind, hr]; rfl⟩
           · obtain ⟨-, μ, B, hrun, -, -⟩ := hme μ' hμ'
             rw [hmm] at hμ'
+            obtain ⟨sv, hsv, hμ'⟩ := Res.bind_eq_ok.1 hμ'
             obtain ⟨r, hr, -⟩ := Res.bind_eq_ok.1 hμ'
-            obtain ⟨μ₀, B₀, id₀, hr₀, hk, hc, rfl⟩ := LMem.run_addM hrun
+            obtain ⟨c, hc, rfl⟩ := (hva sv).1 hsv
+            obtain ⟨μ₀, B₀, id₀, c', hr₀, hk, hc', hcp, rfl⟩ := LMem.run_newArr hrun
+            rw [hc, Except.ok.injEq, PrimVal.int.injEq] at hc'
+            subst hc'
             obtain ⟨μ₁, B₁, hr₁, hh⟩ := h.mem
             rw [hr₁, Except.ok.injEq, Prod.mk.injEq] at hr₀
             obtain ⟨rfl, rfl⟩ := hr₀
-            rcases (allocDefault_heap hh R).cases with ⟨e, h₁, -⟩ | ⟨t₁, t₂, id', h₁, h₂, -⟩
-            · rw [allocDefault_of_copy hc] at h₁; cases h₁
-            · rw [allocDefault_of_copy hc, Except.ok.injEq, Prod.mk.injEq] at h₁
+            rcases (copyStToM_heap hh (newArrVal R c)).cases with ⟨e, h₁, -⟩ |
+              ⟨t₁, t₂, mv, h₁, h₂, -⟩
+            · rw [hcp] at h₁; cases h₁
+            · rw [hcp, Except.ok.injEq, Prod.mk.injEq] at h₁
               obtain ⟨-, rfl⟩ := h₁
               rw [hr, Except.ok.injEq] at h₂
               subst h₂
-              refine ⟨id₀, by rw [hi, hr]; rfl, ?_⟩
+              refine ⟨id₀, by rw [hi, hsv, Res.ok_bind, hr]; rfl, ?_⟩
               rw [LMem.births_of_run hrun, evalR_last _ _ hk]
               rfl
-        · cases hM
-      · have hvi : v.inL ρ = true := by
-          simp only [Tm.inL, Op2.inL, Bool.and_eq_true] at hm
-          exact hm.1.2
-        obtain ⟨R, n', hvt, hR, rfl, -⟩ := newM_some (by
-          simpa only [Tm.toL, Op2.toLAt, Op2.toL, Op0.toL] using hM)
-        have hva := SValT.arr_eval h v hvi hvt
-        have hi : (Tm.app2 (C := C) .copy (.app0 .memory) v).eval τ =
-            v.eval τ >>= fun sv => copyStToM τ sv >>= fun r => r.2.asRef := by
-          rw [Close.ITerm.eval_copy, Close.MTerm.eval_memory]
-          rfl
-        have hmm : (Tm.app2 (C := C) .copySt (.app0 .memory) v).eval τ =
-            v.eval τ >>= fun sv => copyStToM τ sv >>= fun r => .ok r.1 := by
-          rw [Close.MTerm.eval_copySt, Close.MTerm.eval_memory]
-          rfl
-        refine ⟨fun id hid => ?_, fun μ' hμ' => ?_⟩
-        · rw [hi] at hid
-          obtain ⟨sv, hsv, hid⟩ := Res.bind_eq_ok.1 hid
-          obtain ⟨r, hr, -⟩ := Res.bind_eq_ok.1 hid
-          exact ⟨r.1, by rw [hmm, hsv, Res.ok_bind, hr]; rfl⟩
-        · obtain ⟨-, μ, B, hrun, -, -⟩ := hme μ' hμ'
-          rw [hmm] at hμ'
-          obtain ⟨sv, hsv, hμ'⟩ := Res.bind_eq_ok.1 hμ'
-          obtain ⟨r, hr, -⟩ := Res.bind_eq_ok.1 hμ'
-          obtain ⟨c, hc, rfl⟩ := (hva sv).1 hsv
-          obtain ⟨μ₀, B₀, id₀, c', hr₀, hk, hc', hcp, rfl⟩ := LMem.run_newArr hrun
-          rw [hc, Except.ok.injEq, PrimVal.int.injEq] at hc'
-          subst hc'
-          obtain ⟨μ₁, B₁, hr₁, hh⟩ := h.mem
-          rw [hr₁, Except.ok.injEq, Prod.mk.injEq] at hr₀
-          obtain ⟨rfl, rfl⟩ := hr₀
-          rcases (copyStToM_heap hh (newArrVal R c)).cases with ⟨e, h₁, -⟩ |
-            ⟨t₁, t₂, mv, h₁, h₂, -⟩
-          · rw [hcp] at h₁; cases h₁
-          · rw [hcp, Except.ok.injEq, Prod.mk.injEq] at h₁
-            obtain ⟨-, rfl⟩ := h₁
-            rw [hr, Except.ok.injEq] at h₂
-            subst h₂
-            refine ⟨id₀, by rw [hi, hsv, Res.ok_bind, hr]; rfl, ?_⟩
-            rw [LMem.births_of_run hrun, evalR_last _ _ hk]
-            rfl
-    rw [hU]
-    refine ⟨⟨fun hg => ?_, fun ⟨τ', hτ'⟩ => ?_⟩, fun τ' hτ' => ?_⟩
-    · obtain ⟨μ', hμ'⟩ := hmr hg
-      obtain ⟨id, hid, -⟩ := hkey.2 μ' hμ'
-      exact ⟨_, by rw [hid, Res.ok_bind, hμ', Res.ok_bind]⟩
-    · obtain ⟨id, -, hτ'⟩ := Res.bind_eq_ok.1 hτ'
-      obtain ⟨μ', hμ', -⟩ := Res.bind_eq_ok.1 hτ'
-      exact (hme μ' hμ').1
-    · obtain ⟨id, hid, hτ'⟩ := Res.bind_eq_ok.1 hτ'
-      obtain ⟨μ', hμ', he⟩ := Res.bind_eq_ok.1 hτ'
-      cases he
-      obtain ⟨-, μ, B, hrun, hh, hp⟩ := hme μ' hμ'
-      obtain ⟨id', hid', hB⟩ := hkey.2 μ' hμ'
-      rw [hid, Except.ok.injEq] at hid'
-      subst hid'
-      exact (h.setMem hrun hp hh).bind x (.mref ⟨ρ.mem.nAlloc, []⟩) (.mref id)
-        ⟨id, hB, by simp only [State.getEnv_setEnv_self]⟩
+      refine pair_tail h ⟨fun hg => ?_, fun ⟨_, μ', _, hμ'⟩ => (hme μ' hμ').1⟩
+        fun id μ' hid hμ' => ?_
+      · obtain ⟨μ', hμ'⟩ := hmr hg
+        obtain ⟨id, hid, -⟩ := hkey.2 μ' hμ'
+        exact ⟨id, μ', hid, hμ'⟩
+      · obtain ⟨-, μ, B, hrun, hh, hp⟩ := hme μ' hμ'
+        obtain ⟨id', hid', hB⟩ := hkey.2 μ' hμ'
+        rw [hid, Except.ok.injEq] at hid'
+        subst hid'
+        exact ⟨μ, B, hrun, hh, hp, by rw [← LMem.births_of_run hrun]; exact hB⟩
   · cases hq
+
 
 /-- **Pushing the updates in keeps the meaning**, halts included.
 

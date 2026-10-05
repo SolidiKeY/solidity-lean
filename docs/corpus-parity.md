@@ -25,8 +25,8 @@ statuses are read off `Solidity/TestSuite/Report.lean`'s pin, and
 
 | | diamond | box | skip | total |
 |---|---:|---:|---:|---:|
-| derived | 296 | 95 | 0 | 391 |
-| pending | 18 | 7 | 0 | 25 |
+| derived | 301 | 95 | 0 | 396 |
+| pending | 13 | 7 | 0 | 20 |
 | divergent | 1 | 0 | 0 | 1 |
 | excluded | 1 | 0 | 0 | 1 |
 | skip | 0 | 0 | 2 | 2 |
@@ -36,7 +36,7 @@ Not derived, by reason:
 
 | Status | Because | # | functions |
 |---|---|---:|---|
-| pending | copies between memory and storage: the closer does not reduce `copySt` of a memory object or `copyStToM` of a storage path in a leaf yet (docs/testsuite-proofs.md, M6 results) | 19 | `storageNewIntoField`, `memoryToStorage`, `memoryToStorageIndexMappingCopyRootExample`, … |
+| pending | copies from memory into storage: the closer does not reduce `copyMem` (`LVal.mem`, a view of memory) in a leaf yet (docs/testsuite-proofs.md, M6b) | 14 | `storageNewIntoField`, `memoryToStorage`, `memoryToStorageIndexMappingCopyRootExample`, … |
 | pending | an alias bound through an index dangles after a `pop`: the fragment drops it at the next write (`SymB.onWrite`), and the write through it lands past the live end, which the reduction's live storage does not reach | 5 | `testDanglingReferenceSurvivesPush`, `testArrayCopyClearsOldElements`, `testArrayCopyKeepsDestinationTail`, `testDeleteArrayLeavesDataPastLength`, `testDanglingInnerArrayReappearsAfterPush` |
 | skip | tagged `@custom:key skip` | 2 | `tryCalleeGet`, `tryCalleePing` |
 | pending | the search derives it, but its replay is past maxHeartbeats as one declaration (docs/testsuite-proofs.md, M3b review 2) | 1 | `memoryToStorageIndexArrayCopyRootExample` |

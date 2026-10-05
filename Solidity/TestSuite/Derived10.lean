@@ -1,7 +1,7 @@
 import Solidity.TestSuite.Problems
 
 /-!
-# solkey's `TestSuite`, derived (10 of 11)
+# solkey's `TestSuite`, derived (10 of 12)
 
 `⊢` of each obligation the closer of memory added (objects allocated by
 the updates, read and written through members and indices, aliased

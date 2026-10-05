@@ -542,6 +542,19 @@ theorem memoryDeleteRefFresh :
   sol_symex
   sol_decide
 
+/-- `Person memory carol = alice;` copies the storage in (`memoryStorageCopy`,
+one pair under `copyG`); a later write to `alice` is not seen
+(`readFromCopyToStorage` reads the storage of the copy). -/
+theorem memoryStorageCopyRead :
+    ⊨ dl!{ [ alice.age = 27; Person memory carol = alice; alice.age = 30;
+             uint x = carol.age; ] x == 27 } := by
+  sol_symex
+  sol_decide
+
+/-- info: false -/
+#guard_msgs in -- a copy from storage outside its pair is outside the fragment
+#eval (dl!{ { memory := copySt(memory, find(storage, alice)) } true }).inL Decide.Sym.empty
+
 /-- info: false -/
 #guard_msgs in -- a memory local no update bound is outside the fragment
 #eval (dl!{ { x := read(memory, carol.age) } x == 0 }).inL Decide.Sym.empty

@@ -9,6 +9,7 @@ import Solidity.TestSuite.Derived8
 import Solidity.TestSuite.Derived9
 import Solidity.TestSuite.Derived10
 import Solidity.TestSuite.Derived11
+import Solidity.TestSuite.Derived12
 
 /-!
 # What is derived of solkey's `TestSuite`
@@ -18,8 +19,8 @@ finds: derived when its theorem `N.f.proved` exists, states
 `⊢ N.f.problem` and uses no axiom but Lean's three (so no `sorry` and no
 `native_decide`: one that does is listed "unsound"), pending when only its
 statement does, and the import's verdict for the three with no statement.
-A pending obligation is no theorem and no `sorry`: most copy between
-memory and storage, which the closer does not reduce yet; the others are
+A pending obligation is no theorem and no `sorry`: most copy from
+memory into storage, which the closer does not reduce yet; the others are
 listed with their reasons in `docs/testsuite-proofs.md`.
 `storagePushReadBack` is not valid in the model (the length delta,
 `docs/solc-alignment.md`): `tests/solkey/expected.tsv` lists it
@@ -27,16 +28,15 @@ listed with their reasons in `docs/testsuite-proofs.md`.
 -/
 
 /--
-info: 420 functions: 391 derived, 26 pending, 3 other
+info: 420 functions: 396 derived, 21 pending, 3 other
 excluded recursiveStructMapping
 skipped tryCalleeGet
 skipped tryCalleePing
 pending:
 storageNewIntoField memoryToStorage memoryToStorageIndexMappingCopyRootExample memoryToStorageIndexArrayCopyRootExample memoryToStorageIndexArrayCopyRootOutOfBoundsReverts storagePushReadBack
-storageToMemory testMemoryToStorageCopyComplexSource testMemoryToStorageCopyComplexTarget testMemoryToStorageCopyField testMemoryToStorageCopyRoot testMemoryToStorageIndexCopyImpureIndex
-testDanglingReferenceSurvivesPush testArrayCopyClearsOldElements testArrayCopyKeepsDestinationTail testDeleteArrayLeavesDataPastLength testDanglingInnerArrayReappearsAfterPush testStorageToMemoryCopyComplexPath
-testStorageToMemoryCopyField testStorageToMemoryCopyRoot memoryAssignForms storageIndexWriteRefSourceImpureIndex storageFieldWriteRefSourceImpureReceiver memoryToStorageIndexImpureReceiver
-indexWriteBothImpureMemToStorage mappingEntryThroughMemoryToMappingEntry
+testMemoryToStorageCopyComplexSource testMemoryToStorageCopyComplexTarget testMemoryToStorageCopyField testMemoryToStorageCopyRoot testMemoryToStorageIndexCopyImpureIndex testDanglingReferenceSurvivesPush
+testArrayCopyClearsOldElements testArrayCopyKeepsDestinationTail testDeleteArrayLeavesDataPastLength testDanglingInnerArrayReappearsAfterPush storageIndexWriteRefSourceImpureIndex storageFieldWriteRefSourceImpureReceiver
+memoryToStorageIndexImpureReceiver indexWriteBothImpureMemToStorage mappingEntryThroughMemoryToMappingEntry
 -/
 #guard_msgs in
 #solkey_obligations Solkey.TestSuite

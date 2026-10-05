@@ -1,7 +1,7 @@
 import Solidity.TestSuite.Problems
 
 /-!
-# solkey's `TestSuite`, derived (2 of 11)
+# solkey's `TestSuite`, derived (2 of 12)
 
 `⊢` of each obligation `sol_prove` and its leaf tactics close, from
 `ifTrue` to `storageIndexDeleteMappingStruct` in the order of the source; the replays are what

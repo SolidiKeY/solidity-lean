@@ -6,7 +6,7 @@ derived with `⊢`, checked by the kernel, at close to KeY's speed. No
 dependencies, no `native_decide`, no new `maxHeartbeats` override, and a `?`
 twin that prints a cheap replay for every searching tactic.
 
-Today 391 of the 418 are derived by `⊢` (`TestSuite/Report.lean`), and the
+Today 396 of the 418 are derived by `⊢` (`TestSuite/Report.lean`), and the
 corpus rows (`Corpus/TestSuite.lean`) are corollaries of those theorems.
 
 ## Decisions (2026-10-05)
@@ -103,7 +103,8 @@ What they say:
 - **M6.** Memory in the closer: allocation, reads and writes, `mlen`,
   defaults, copies to storage.  Done (below), but for the copies between
   memory and storage: 391 derived.  Being reworked into solkey's
-  `memoryRules.key`/`structMemoryRules.key` taclets.
+  `memoryRules.key`/`structMemoryRules.key` taclets (M6b, below): with the
+  copies from storage into memory, 396 derived.
 - **M7.** The remaining functions; a `derived` status in the corpus table;
   retire `corpus_decide`, the `#eval` rows and the 8M override.  Done
   (below), but for the remaining functions: the table reads the `Report.lean`
@@ -1253,3 +1254,50 @@ The leaves shrink: `memoryIndexWriteNse`'s largest goes from 534 nodes to
 353, since a read at an index that is no literal is one `kite` per write to
 the same object instead of a chain over the elements. No figure is near the
 20% line.
+
+### Step 5a: copies from storage into memory
+
+`Person memory carol = alice;` is the pair `{carol := freshId(copySt(memory,
+find(storage, alice))) ‖ memory := copySt(memory, find(storage, alice))}`
+(`memoryStorageCopy`). It is now pushed in as the node `LMem.copySt` at the
+next ordinal, over the storage the updates before it left, so a later write
+to `alice` is not seen (`readFromCopyToStorage`).
+
+- **Only in its pair.** A copy from storage is in the fragment only as an
+  allocation's pair (`Decide.pairMem`, `pairIn`), not as a memory term on
+  its own. The interpreter's `copySt` alone also copies a word, which names
+  no object; in the pair, the identity's `asRef` refuses that word, so the
+  pair halts exactly where the node's run does.
+- **The guard** is `copyG`: `cpok` (the subtree copies, which a mapping
+  stops) and the subtree is no word. The closer reduces `cpok` through the
+  words written since (`LStor.cpokU`) down to `cpok init q`, which
+  `Facts.cpokInit` closes under `wt`. Its soundness is `pairCopy_key`, with
+  the path checked by `live_bridge`; `pair_sound` now ends in the shared
+  `pair_tail`.
+- **Derived:** `storageToMemory`, `testStorageToMemoryCopyComplexPath`
+  (through `memoryStorageCopyUnfold`), `testStorageToMemoryCopyField`,
+  `testStorageToMemoryCopyRoot` and `memoryAssignForms`, in
+  `TestSuite/Derived12.lean`, all `sol_prove`. `Report.lean` pins 396
+  derived and 21 pending; `tests/solkey/expected.tsv`,
+  `Corpus/TestSuite.lean` and `docs/corpus-parity.md` are regenerated, and
+  `check-testsuite.sh` passes.
+- **Pins** in `Examples/Tactics/Decide.lean`: a copy read after a later
+  storage write, by `sol_decide`, and a copy outside its pair is outside
+  the fragment.
+
+**Measured.** `Derived1`–`12` and `Report.lean` check clean, each file
+alone. The new leaves are within bounds: the largest has 246 nodes and
+an elimination of 446.
+
+| | Baseline | Step 5a | Change |
+|---|---|---|---|
+| `Derived9`, `sol_prove` total | 7.9 s | 7.2 s | −9% |
+| `Derived10` | 10.1 s | 9.1 s | −10% |
+| `Derived11` | 2.3 s | 2.2 s | −4% |
+| `memoryIndexWriteNse` | 2.48 s | 2.19 s | −12% |
+| `Derived12` (new, 5 theorems) | — | 1.3 s | — |
+
+The `Derived12` times: `storageToMemory` 0.18 s,
+`testStorageToMemoryCopyComplexPath` 0.35 s, `testStorageToMemoryCopyField`
+0.27 s, `testStorageToMemoryCopyRoot` 0.18 s, `memoryAssignForms` 0.34 s.
+No figure is near the 20% line.
