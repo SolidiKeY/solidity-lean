@@ -1093,3 +1093,11 @@ A second run was within 1% of the first.
 - **Later steps warn at 20% slower.** A later step that is more than 20%
   slower than this, per file total or on `memoryIndexWriteNse`, gets a
   warning here.
+
+### Step 1: the interpreter lemmas
+
+`Calculus/MemNames.lean` (about 1,560 lines) holds the facts the memory
+clauses rest on. It builds in 2.2 s (`lake build`), well under the 20–60 s
+the plan estimated. Nothing in `Decide`, `Closer` or `Derive` changed, so
+`Derived9`–`11` are as in the baseline. `DecideMem.lean` does not import the
+module yet; the clauses of step 3 are its first users.
