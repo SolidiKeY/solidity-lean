@@ -1131,3 +1131,47 @@ recursor now carries 6 motives and 39 minor premises where it carried 3 and
 (40%) leaves the derived `DecidableEq`/`ToExpr` in place, but
 `memoryIndexWriteNse` is 4 points from the warning: step 4 should
 re-measure it first.
+
+### Step 3: the clauses, not yet produced
+
+The memory clauses are defined and proved, and nothing produces them yet:
+
+- **Where they are.** The target language moved out of `Calculus/Decide.lean`
+  into `Calculus/DecideLang.lean`, so that the readers
+  (`Calculus/MemRead.lean`) sit between the language and the translation
+  that will use them. `docs/lean-key-rule-map.md` has one row per clause,
+  under "The closer's memory clauses".
+- **The readers, at translation.** These are `LMem.readT`, `readI`, `lenT`,
+  `nameG`, `structG`, `writeG` and `refDesc`, each exact under the run of
+  the memory (`LMem.readT_sim` and the others).
+- **The readers, in the elimination.** These are `LMem.readU`, `objU` and
+  `LSel.idxU`, with lazy `F` twins and `@[csimp]`. Each is proved to agree
+  with its translation-level reader (`LMem.readU_sim`, `LMem.objU_sim`).
+- **The view arms.** `readU`, `hasU`, `lenU` and `mapU .map` of an
+  `LStor.view` now read memory along the path (`view_read_sim` and the
+  others). `okE` of a view is still kept whole, because it needs the run
+  guard of the memory.
+- **Constants are folded where a term is built.** `Op2.toL`/`Op1.toL` build
+  `LTerm.mkBin`/`mkUn`, so `LTerm.ground?` is a test for a literal. This
+  closes the earlier review's exponential walk of shared terms. A power past
+  `powBig` is not folded.
+
+The pins are in `Examples/Tactics/Decide.lean`, section `MemoryClauses`.
+
+**Measured.** All 91 theorems of `Derived9`–`11` still prove, and so do the
+theorems of `Derived1`–`8`. `Derived7`'s language-server worker crashed
+when the file was checked whole, so its 40 theorems were checked in two
+halves of 20.
+
+| | Baseline | Step 3 | Change |
+|---|---|---|---|
+| `Derived9`, `sol_prove` total | 7.9 s | 8.2 s | +4% |
+| `Derived10` | 10.1 s | 9.5 s | −6% |
+| `Derived11` | 2.3 s | 2.2 s | −3% |
+| `memoryIndexWriteNse` | 2.48 s | 2.90 s | +17% |
+
+The leaves are smaller than at step 0 because constants are folded. For
+example, `memoryDeclDefault` goes from 27 nodes to 21, and
+`memoryIndexWriteNse` from 534 to 534. `memoryIndexWriteNse` is still the
+one figure near the 20% line, and the step-2 kernel cost of the six-type
+mutual block is all of it.
