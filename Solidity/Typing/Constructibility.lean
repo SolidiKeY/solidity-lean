@@ -54,13 +54,6 @@ variable {C : Contract}
 
 /-! ## The tight values -/
 
-/-- A key type a program can index a mapping with: `uint` and `int` keys
-evaluate to an `Int`; a `bool` key does not (`Value.asInt`), and a reference
-type is no key (`IndexTy.map`). -/
-def Ty.numericKey : Ty → Bool
-  | .prim p => p.isNumeric
-  | .ref _ => false
-
 /-- What every reachable value satisfies beyond `SVal.canon`: an array whose
 elements have no well-formed default has no slots at all, the slots past the
 end of an array of words are cleared, a fixed-size array has no slots past

@@ -111,7 +111,7 @@ def closes (n : Nat) (close : List (Hyp C) → Fml C → Bool) (b : Nat) (Γ : L
   | some ([], _) => true
   | _ => false
 
-/-- A precondition the closer sets aside: `wt(storage)`, a diamond
+/-- A precondition the closer sets aside: `wt(storage)`, an
 obligation's premise (`Calculus/Problem.lean`), which `LFml.syn` does not
 read.  Dropping a precondition only weakens what is to be shown
 (`Derive.wrap_dropWt`). -/
@@ -194,7 +194,7 @@ theorem wrap_dropWt {φ : Fml C} : (Γ : List (Hyp C)) →
         exact ⟨fun hm => by simpa only [Hyp.wrap, Fml.modalFree] using ihm hm,
           fun σ hs => Hyp.wrap_mono ihh [.all x p] σ hs⟩
 
-/-- `Proves.close` with the `wt` premises set aside: a leaf of a diamond
+/-- `Proves.close` with the `wt` premises set aside: a leaf of an
 obligation, closed by a tactic that does not read `wt`. -/
 theorem _root_.Solidity.Proves.close_dropWt {R : RuleSet} {Γ : List (Hyp C)} {φ : Fml C}
     (h : Valid (Hyp.wrap (dropWt Γ) φ))

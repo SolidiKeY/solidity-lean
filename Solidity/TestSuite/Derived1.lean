@@ -5,8 +5,8 @@ import Solidity.TestSuite.Problems
 
 `⊢` of each obligation `sol_prove` and its leaf tactics close, from
 `additionStorageWrite` to `storageIndexDivAssign` in the order of the source; the replays are what
-`#solkey_derive?` (`Frontend/Problems.lean`) prints.  A diamond's leaves
-set `wt(storage)` aside (`Proves.close_dropWt`).
+`#solkey_derive?` (`Frontend/Problems.lean`) prints.  Every leaf sets
+`wt(storage)` aside (`Proves.close_dropWt`).
 -/
 
 open Solidity Proves
@@ -14,17 +14,17 @@ open Solidity Proves
 theorem Solkey.TestSuite.additionStorageWrite.proved : ⊢ Solkey.TestSuite.additionStorageWrite.problem := by
   sol_prove
   case leaf1 =>
-    refine Proves.close ?_
+    refine Proves.close_dropWt ?_
     sol_symex
     sol_close
   case leaf2 =>
-    refine Proves.close ?_
+    refine Proves.close_dropWt ?_
     sol_symex
     sol_close
 
 theorem Solkey.TestSuite.storageIndexAddAssign.proved : ⊢ Solkey.TestSuite.storageIndexAddAssign.problem := by
   sol_prove
-  refine Proves.close ?_
+  refine Proves.close_dropWt ?_
   sol_symex
   refine (Fml.valid_iff_reduce _ (by decide +kernel)).2 ?_
   sol_reduce
@@ -32,7 +32,7 @@ theorem Solkey.TestSuite.storageIndexAddAssign.proved : ⊢ Solkey.TestSuite.sto
 
 theorem Solkey.TestSuite.storageIndexArrayAddAssignOutOfBoundsReverts.proved : ⊢ Solkey.TestSuite.storageIndexArrayAddAssignOutOfBoundsReverts.problem := by
   sol_prove
-  refine Proves.close ?_
+  refine Proves.close_dropWt ?_
   sol_symex
   refine (Fml.valid_iff_reduce _ (by decide +kernel)).2 ?_
   sol_reduce
@@ -40,7 +40,7 @@ theorem Solkey.TestSuite.storageIndexArrayAddAssignOutOfBoundsReverts.proved : �
 
 theorem Solkey.TestSuite.storageIndexArrayReadOutOfBoundsReverts.proved : ⊢ Solkey.TestSuite.storageIndexArrayReadOutOfBoundsReverts.problem := by
   sol_prove
-  refine Proves.close ?_
+  refine Proves.close_dropWt ?_
   sol_symex
   refine (Fml.valid_iff_reduce _ (by decide +kernel)).2 ?_
   sol_reduce
@@ -48,7 +48,7 @@ theorem Solkey.TestSuite.storageIndexArrayReadOutOfBoundsReverts.proved : ⊢ So
 
 theorem Solkey.TestSuite.storageIndexReadComplexReceiverBindLocalRoot.proved : ⊢ Solkey.TestSuite.storageIndexReadComplexReceiverBindLocalRoot.problem := by
   sol_prove
-  refine Proves.close ?_
+  refine Proves.close_dropWt ?_
   sol_symex
   refine (Fml.valid_iff_reduce _ (by decide +kernel)).2 ?_
   sol_reduce
@@ -701,13 +701,13 @@ theorem Solkey.TestSuite.powerSimple.proved : ⊢ Solkey.TestSuite.powerSimple.p
 
 theorem Solkey.TestSuite.requireGuardBox.proved : ⊢ Solkey.TestSuite.requireGuardBox.problem := by
   sol_prove
-  refine Proves.close ?_
+  refine Proves.close_dropWt ?_
   sol_symex
   sol_close
 
 theorem Solkey.TestSuite.storageIndexDelete.proved : ⊢ Solkey.TestSuite.storageIndexDelete.problem := by
   sol_prove
-  refine Proves.close ?_
+  refine Proves.close_dropWt ?_
   sol_symex
   refine (Fml.valid_iff_reduce _ (by decide +kernel)).2 ?_
   sol_reduce
@@ -715,7 +715,7 @@ theorem Solkey.TestSuite.storageIndexDelete.proved : ⊢ Solkey.TestSuite.storag
 
 theorem Solkey.TestSuite.storageIndexDivAssign.proved : ⊢ Solkey.TestSuite.storageIndexDivAssign.problem := by
   sol_prove
-  refine Proves.close ?_
+  refine Proves.close_dropWt ?_
   sol_symex
   refine (Fml.valid_iff_reduce _ (by decide +kernel)).2 ?_
   sol_reduce

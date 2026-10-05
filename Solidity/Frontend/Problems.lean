@@ -15,8 +15,10 @@ its sequent with compiled code.
 An obligation is proved by a theorem named `N.f.proved : ⊢ N.f.problem`,
 in a module of its own (`Solidity/TestSuite/`); one not yet proved is no
 theorem at all.  `#solkey_obligations N` reads the environment and reports
-each function as derived (its theorem exists), pending (its statement
-exists, its theorem not yet), or what the import made of it.
+each function as derived (its theorem exists and states `⊢ N.f.problem`,
+syntactically), pending (its statement exists, its theorem not yet), or what
+the import made of it.  A theorem `N.f.proved` of another type, or an
+elaborated function with no statement, is listed apart, never derived.
 
 * `#solkey_problem N.f` prints the statement in solkey's problem syntax
   (`Problem.text`), to compare with `--print-problem`.
@@ -31,13 +33,6 @@ exists, its theorem not yet), or what the import made of it.
 namespace Solidity.Frontend
 
 open Lean Elab Command Meta
-
-/-- The primitive type of a parameter, as `paramCtx` reads it. -/
-def paramPrim? (t : String) : Option PrimTy :=
-  match PrimTy.ofName? t, narrowTy? t with
-  | some p, _ => some p
-  | none, some (p, _) => some p
-  | none, none => if t == "address payable" then some .uint else none
 
 /-- The rows of `N.report`. -/
 def reportRows (N : Lean.Name) : CommandElabM (List ImportRow) :=
@@ -60,8 +55,11 @@ def elabSolcProblems : CommandElab := fun stx => do
   for r in rows do
     unless r.status == .elaborated do continue
     let some m := r.tag.modality? | continue
-    let some xs := r.params.mapM (fun (x, t) => (paramPrim? t).map (·, Var.ofName x))
-      | throwError "solc_problems: {r.name} has a parameter of no value type"
+    let some xs := r.params.mapM (fun (x, t) =>
+      (paramTy? t).map fun (pn : PrimTy × Nat) => (pn.1, Var.ofName x))
+      | logWarning m!"solc_problems: {r.name} has a parameter of no value type, so no \
+          statement"
+        continue
     let n := N ++ Lean.Name.mkSimple r.name ++ `problem
     let value := mkAppN (mkConst ``Problem.fml) #[mkConst N, toExpr m, toExpr xs,
       mkConst (N ++ Lean.Name.mkSimple r.name)]
@@ -108,17 +106,20 @@ def elabSolkeyScan : CommandElab := fun stx => do
     out := out.push s!"{r.name} {r.tag.toStr}: {res}, {t1 - t0} ms"
   logInfo ("\n".intercalate out.toList)
 
-syntax (name := solkeyDerive) "#solkey_derive? " ident (&" from " num)? (&" count " num)? : command
+syntax (name := solkeyDerive) "#solkey_derive? " ident (&" from " num)? (&" count " num)?
+  (&" timed")? : command
 
 /-- `#solkey_derive? N from i count k`: `sol_prove?` on the statements
 `i … i+k-1` (all of them by default); each one whose leaves all close is
 printed as the theorem to paste, `N.f.proved` with its replay; the others
-are named with the leaf that stays open. -/
+are named with the leaf that stays open.  With `timed`, each note says how
+long it took; without, the output is fixed, to pin. -/
 @[command_elab solkeyDerive]
 def elabSolkeyDerive : CommandElab := fun stx => do
   let N := stx[1].getId
   let start := if stx[2].isNone then 0 else stx[2][1].isNatLit?.getD 0
   let count := if stx[3].isNone then 100000 else stx[3][1].isNatLit?.getD 0
+  let timed := !stx[4].isNone
   let rows := ((← reportRows N).filter (·.status == .elaborated)).drop start |>.take count
   let C := mkConst N
   let mut thms : Array String := #[]
@@ -128,7 +129,9 @@ def elabSolkeyDerive : CommandElab := fun stx => do
     let ty := mkAppN (mkConst ``Proves) #[C, mkConst ``RuleSet.all,
       mkApp (mkConst ``List.nil [0]) (mkApp (mkConst ``Hyp) C), mkConst (f ++ `problem)]
     let t0 ← IO.monoMsNow
-    let res : Except String (Array String) ← liftTermElabM do
+    -- the tactics' names (`Proves.close_dropWt`) resolve as in a `Derived` module
+    let res : Except String (Array String) ← withScope (fun sc =>
+        { sc with openDecls := .simple `Solidity [] :: sc.openDecls }) <| liftTermElabM do
       let g ← mkFreshExprSyntheticOpaqueMVar ty
       tryCatchRuntimeEx (do
           let leaves ← Derive.prove g.mvarId!
@@ -142,36 +145,51 @@ def elabSolkeyDerive : CommandElab := fun stx => do
           return .ok (Derive.replayLines found))
         fun e => do return .error (← e.toMessageData.toString)
     let t1 ← IO.monoMsNow
+    let ms := if timed then s!", {t1 - t0} ms" else ""
     match res with
     | .ok lines =>
       thms := thms.push (s!"theorem {f}.proved : ⊢ {f}.problem := by\n" ++
         "\n".intercalate (lines.toList.map ("  " ++ ·)))
-      notes := notes.push s!"{r.name}: derived, {t1 - t0} ms"
-    | .error m => notes := notes.push s!"{r.name}: pending, {m}, {t1 - t0} ms"
+      notes := notes.push s!"{r.name}: derived{ms}"
+    | .error m => notes := notes.push s!"{r.name}: pending, {m}{ms}"
   logInfo ("\n\n".intercalate thms.toList ++ "\n\n" ++ "\n".intercalate notes.toList)
 
 syntax (name := solkeyObligations) "#solkey_obligations " ident : command
 
 /-- `#solkey_obligations N`: each function derived, pending, or what the
-import made of it, counted; the pending ones named. -/
+import made of it, counted; the pending ones named.  Derived means a
+theorem `N.f.proved` whose type is `⊢ N.f.problem` as `⊢` writes it
+(`Proves .all [] N.f.problem`), compared as an expression: a theorem of
+another statement, or of a sequent with hypotheses, is "mismatched". -/
 @[command_elab solkeyObligations]
 def elabSolkeyObligations : CommandElab := fun stx => do
   let N := stx[1].getId
   let rows ← reportRows N
   let env ← getEnv
+  let C := mkConst N
   let mut derived : Array String := #[]
   let mut pending : Array String := #[]
   let mut other : Array String := #[]
   for r in rows do
     if r.status == .elaborated then
-      if env.contains (N ++ Lean.Name.mkSimple r.name ++ `proved) then derived := derived.push r.name
-      else pending := pending.push r.name
+      let f := N ++ Lean.Name.mkSimple r.name
+      if !env.contains (f ++ `problem) then
+        other := other.push s!"unstated {r.name}"
+        continue
+      let want := mkAppN (mkConst ``Proves) #[C, mkConst ``RuleSet.all,
+        mkApp (mkConst ``List.nil [0]) (mkApp (mkConst ``Hyp) C), mkConst (f ++ `problem)]
+      match env.find? (f ++ `proved) with
+      | some (.thmInfo t) =>
+        if t.type.consumeMData == want then derived := derived.push r.name
+        else other := other.push s!"mismatched {r.name}"
+      | some _ => other := other.push s!"mismatched {r.name}"
+      | none => pending := pending.push r.name
     else other := other.push s!"{r.status.toStr} {r.name}"
   let mut lines : Array String := #[]
   for x in pending, i in [0:pending.size] do
     lines := if i % 6 == 0 then lines.push x else lines.modify (lines.size - 1) (· ++ " " ++ x)
   logInfo m!"{rows.length} functions: {derived.size} derived, {pending.size} pending, \
-    {other.size} without an obligation\n{"\n".intercalate other.toList}\npending:\n\
+    {other.size} other\n{"\n".intercalate other.toList}\npending:\n\
     {"\n".intercalate lines.toList}"
 
 end Solidity.Frontend

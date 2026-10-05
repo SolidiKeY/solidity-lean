@@ -127,6 +127,13 @@ def PrimTy.isNumeric : PrimTy -> Bool
   | .uint | .int => true
   | .bool => false
 
+/-- A key type a program can index a mapping with: `uint` and `int` keys
+evaluate to an `Int`; a `bool` key does not (`Value.asInt`), and a reference
+type is no key (`IndexTy.map`). -/
+def Ty.numericKey : Ty → Bool
+  | .prim p => p.isNumeric
+  | .ref _ => false
+
 mutual
   def Ty.allowsMemory : Ty -> Bool
     | Ty.ref ref => ref.allowsMemory
@@ -349,6 +356,12 @@ def setBy [DecidableEq κ] (k : κ) (v : α) : List (κ × α) -> List (κ × α
   | [] => [(k, v)]
   | (k', v') :: rest =>
       if k = k' then (k, v) :: rest else (k', v') :: setBy k v rest
+
+/-- No duplicate keys: a layout or storage read through `lookupBy` has one
+entry per key (`wellTypedStorageB` and `storageWtB` check each root once). -/
+def nodupKeysB [DecidableEq κ] : List (κ × α) -> Bool
+  | [] => true
+  | (k, _) :: rest => (lookupBy k rest).isNone && nodupKeysB rest
 
 end Semantics
 

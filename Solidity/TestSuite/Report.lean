@@ -6,15 +6,16 @@ import Solidity.TestSuite.Derived3
 # What is derived of solkey's `TestSuite`
 
 Every function, by what `#solkey_obligations` (`Frontend/Problems.lean`)
-finds: derived when its theorem `N.f.proved` exists, pending when only its
-statement does, and the import's verdict for the three with no statement.
-A pending obligation is no theorem and no `sorry`: it waits for the closer
-to read what `wt(storage)` gives and the storage operations it does not
-reduce yet (`docs/testsuite-proofs.md`).
+finds: derived when its theorem `N.f.proved` exists and states
+`⊢ N.f.problem`, pending when only its statement does, and the import's
+verdict for the three with no statement.  A pending obligation is no
+theorem and no `sorry`: it waits for the closer to read what `wt(storage)`
+gives and the storage operations it does not reduce yet
+(`docs/testsuite-proofs.md`).
 -/
 
 /--
-info: 420 functions: 111 derived, 306 pending, 3 without an obligation
+info: 420 functions: 111 derived, 306 pending, 3 other
 excluded recursiveStructMapping
 skipped tryCalleeGet
 skipped tryCalleePing

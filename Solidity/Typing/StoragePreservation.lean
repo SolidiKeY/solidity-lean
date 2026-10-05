@@ -620,14 +620,11 @@ theorem save_hasTy {segs : List Seg} :
 
 /-! ## Layout key uniqueness -/
 
-/-- No duplicate keys. `wellTypedStorageB` checks every layout row
+/-! `nodupKeysB` (`AST.lean`): `wellTypedStorageB` checks every layout row
 against the single stored value at its root, so a duplicated root would
 check one value against two types — see the refutation that was the
 removed `PreservationNecessity` counterexample (`docs/kernel-port.md`'s
 "Port later"). -/
-def nodupKeysB [DecidableEq κ] : List (κ × α) -> Bool
-  | [] => true
-  | (k, _) :: rest => (lookupBy k rest).isNone && nodupKeysB rest
 
 theorem lookupBy_isSome_of_mem [DecidableEq κ] {l : List (κ × α)}
     {k : κ} {v : α} (hmem : (k, v) ∈ l) :

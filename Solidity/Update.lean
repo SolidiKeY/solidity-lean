@@ -147,10 +147,10 @@ inductive Op1 : Srt → Srt → Type where
   | mval : Op1 .val .mv
   /-- `MValT.ref`: a reference written. -/
   | ref : Op1 .ident .mv
-  /-- `wt(s)`: the storage `s` holds the roots `vs`, each canonical and
-  tight (`storageWtB`): KeY's `wellFormed(heap)`, the premise of a diamond
-  obligation (`Calculus/Problem.lean`).  It returns `true` or halts, so a
-  formula states it as `defined`. -/
+  /-- `wt(s)`: the storage `s` holds the roots `vs`, each canonical, tight
+  and with its words in range (`storageWtB`): KeY's `wellFormed(heap)`, the
+  premise of an obligation (`Calculus/Problem.lean`).  It returns `true` or
+  halts, so a formula states it as `defined`. -/
   | wt (vs : List (Name × Ty)) : Op1 .st .val
   deriving DecidableEq, Repr
 

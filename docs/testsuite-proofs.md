@@ -15,7 +15,8 @@ concrete store (`corpus_decide`); none is proved by `⊢`.
   Panic halt, distinct from a `require` revert, and the box does not hold on
   it. This is a semantic change, made even though many files move.
 - **Diamond premise.** One atomic `wt(storage)` symbol (canonical and tight
-  storage, KeY's `wellFormed(heap)`), not an expanded layout.
+  storage, KeY's `wellFormed(heap)`), not an expanded layout.  The M3b
+  review put it on the box too, and added words in range.
 - **Front end.** solc's JSON AST → normalized `sol` text → the existing
   `contract!`/`sol_raw!` macros: one lowering path.
 - **Scope.** M0 and M1, then M2 (done, below).
@@ -88,7 +89,7 @@ What they say:
 - **M2.** solc JSON front end at elaboration time: pinned soljson 0.8.34, a
   checked-in fixture, `solc_import` defining the whole TestSuite contract
   with one `evalExpr`.
-- **M3.** Obligation forms: diamond under `wt(storage)`, box with the Panic
+- **M3.** Obligation forms: both under `wt(storage)`, box with the Panic
   halt, parameters as `∀` over their type's range.  **M3a** (the Panic halt)
   and **M3b** (`wt`, the 417 statements, 111 derived) are done, below.
 - **M4.** Closer for locals, plain storage and `try`/`transfer`: ground
@@ -341,13 +342,15 @@ one.
 `SolkeyTestSuite` library states all of `TestSuite`'s and proves what
 `sol_prove` and its leaf tactics close.
 
-- **Box**: `∀x̄. [ f(x̄); ] true`.  With M3a a failed `assert` falsifies it,
-  so no cut is needed: this is KeY's "Violated" obligation; a `require`
-  that fails reverts, which the box accepts, as in KeY.
+- **Box**: `∀x̄. wt(storage) → [ f(x̄); ] true`.  With M3a a failed
+  `assert` falsifies it, so no cut is needed: this is KeY's "Violated"
+  obligation; a `require` that fails reverts, which the box accepts, as in
+  KeY.
 - **Diamond**: `∀x̄. wt(storage) → ⟨ f(x̄); ⟩ true`.  solkey states no
   premise (its storage is the contract's by construction); here the
   storage is any state, so the premise says it is one the contract can be
-  in.
+  in.  Both modalities carry it (M3b review): a box over every storage is
+  stronger than solkey's and false of some (below).
 - **Parameters**: `Fml.all` binders over the type's range: `uint`
   `[0, 2²⁵⁶)`, `int` the signed 256-bit range, `bool`.  KeY's `int` is
   unbounded.  The one narrow parameter (`signedUnaryMinusInRange(int8)`)
@@ -358,9 +361,14 @@ one.
   `storageWtB` (`Semantics/WellFormed.lean`): every root there, in order,
   each `SVal.canon` and `SVal.tight` at its type, clause for clause as
   `canonB`/`tightB`, the default compared by `SVal.isDfltB` since the
-  kernel does not reduce the well-founded `defaultForTy`.  So
-  `wt_iff_reachable`: for `TestSuite`'s roots (no duplicate, `Ty.okDeep`)
-  a storage passes `wt` exactly when a checked program reaches it.  Why an
+  kernel does not reduce the well-founded `defaultForTy`; and every word in
+  its type's range, every mapping key in its key type's (`SVal.wordsB`).
+  So `shape_iff_reachable`: for `TestSuite`'s roots (no duplicate,
+  `Ty.okDeep`) a storage passes the shape test exactly when a checked
+  program reaches it; `wt_iff_reachable`: it passes `wt` exactly when it is
+  reachable and its words fit.  The words are a test of their own because
+  the AST admits unchecked literals (`.lit (i : Int)`), so a program the
+  AST runs can store a `uint` of `-1`, which solc never does.  Why an
   `Op1` and not a formula: a new `Fml` constructor touches every formula
   traversal, and an expanded layout (`∀` per root and member) gives every
   leaf quantifiers the closer has to instantiate.  The `Op1` cost one case
@@ -374,15 +382,16 @@ one.
   `wt`.  The plan asked for `decide +kernel` on the initial store; the
   kernel cannot evaluate `C.initStorage` (it is built by `defaultForTy`), so
   the theorem is `initStorage_wt` — the empty program reaches the initial
-  storage — with its two side conditions (`nodupKeysB`, `okDeep` of the
+  storage, and its words are defaults — with its two side conditions (`nodupKeysB`, `okDeep` of the
   roots) by `decide +kernel`.
 
 **The statements.**  `solc_problems Solkey.TestSuite`
 (`Frontend/Problems.lean`) defines `Solkey.TestSuite.f.problem : Fml _` for
 each of the 417 programs, compiled for `sol_prove`.  `#solkey_problem`
 prints one in solkey's `--print-problem` syntax (same modality, same
-parameters as program variables of their KeY sort, plus `wt(storage) ->`
-on a diamond); two are pinned in `TestSuite/Problems.lean`.
+parameters as program variables of their KeY sort, plus `wt(storage) ->`);
+two are pinned in `TestSuite/Problems.lean`, with one `#solkey_derive?`
+suggestion (two leaves under `wt`).
 
 **The theorems.**  `#solkey_derive? N from i count k` runs `sol_prove?` on
 each statement and prints, for those whose leaves all close, the theorem
@@ -390,7 +399,9 @@ each statement and prints, for those whose leaves all close, the theorem
 tactic sequence per leaf; nothing searched on re-check).  The three
 `TestSuite/Derived*.lean` modules hold the 111 it found (37 each), the
 search run at `maxHeartbeats 50000` per leaf try.  `#solkey_obligations`
-reads the environment, and `TestSuite/Report.lean` pins it:
+reads the environment, and `TestSuite/Report.lean` pins it; a theorem
+counts as derived only when its type is `⊢ N.f.problem`, compared as an
+expression (a `N.f.proved` of another statement is listed "mismatched"):
 
 | | Box | Diamond | Total |
 |---|---:|---:|---:|
@@ -440,3 +451,32 @@ not.
 `#print axioms` on `Solkey.TestSuite.additionSimple.proved`,
 `additionStorageWrite.proved`, `initState_wt`, `wt_iff_reachable` and
 `Proves.of_proves`: `propext`, `Classical.choice`, `Quot.sound`.
+
+## M3b review (2026-10-05)
+
+- **Box premise.**  The box obligations had no `wt(storage)`, so they
+  ranged over every storage, and some were false in the model: with the
+  `uint[3]` root `fixedValues` stored as a mapping (which fails `wt`),
+  `testFixedArrayDeleteKeepsLength` writes `7` through `delete` (a
+  `.map` has no bound to check, and `defaultOf` leaves it), so its
+  `assert(fixedValues[1] == 0)` panics.  `testStructWithFixedArrayDeleteKeepsLength`
+  and `testFixedStructArrayDeleteResetsElements` fail the same way.  Both
+  modalities now carry the premise (`Problem.fml`), so these three are
+  true and pending, like solkey's.  The 36 derived boxes' leaves set it
+  aside (`Proves.close_dropWt` in place of `Proves.close`); every replay
+  still checks and the counts are unchanged (111 / 306 / 3).  The replays'
+  times were not measured again: the change is one `List.filter` of the
+  context per leaf.
+- **Words in range.**  `wt` now asks `SVal.wordsB` too (see above); a
+  diamond such as `total = total + 0` from `total = -1` reverted, which made
+  its obligation false where solkey's holds.
+- **One copy each.**  `nodupKeysB` and `Ty.numericKey` moved to `AST.lean`,
+  below both the typing modules and `Semantics/WellFormed.lean`, which
+  had copies; `Frontend/Import.lean`'s `paramTy?` is the one reading of a
+  parameter type, for `paramCtx` and for `solc_problems`, which now warns
+  and skips a function whose parameter it cannot bind (listed "unstated")
+  instead of failing the command.
+- **Pins.**  `#solkey_derive?` prints times only with `timed`, so its
+  suggestion is pinned (`TestSuite/Problems.lean`: the `case leafᵢ =>`
+  layout and `close_dropWt`); it resolves the leaf tactics with
+  `Solidity` open, as a `Derived` module does.

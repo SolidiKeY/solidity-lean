@@ -5,8 +5,8 @@ import Solidity.TestSuite.Problems
 
 `⊢` of each obligation `sol_prove` and its leaf tactics close, from
 `localDeclPostdecrement` to `tryCallUnmatchedFailureReverts` in the order of the source; the replays are what
-`#solkey_derive?` (`Frontend/Problems.lean`) prints.  A diamond's leaves
-set `wt(storage)` aside (`Proves.close_dropWt`).
+`#solkey_derive?` (`Frontend/Problems.lean`) prints.  Every leaf sets
+`wt(storage)` aside (`Proves.close_dropWt`).
 -/
 
 open Solidity Proves
@@ -478,7 +478,7 @@ theorem Solkey.TestSuite.parenthesizedCondition.proved : ⊢ Solkey.TestSuite.pa
 
 theorem Solkey.TestSuite.storageIndexReadArrayStoreRoot.proved : ⊢ Solkey.TestSuite.storageIndexReadArrayStoreRoot.problem := by
   sol_prove
-  refine Proves.close ?_
+  refine Proves.close_dropWt ?_
   sol_symex
   refine (Fml.valid_iff_reduce _ (by decide +kernel)).2 ?_
   sol_reduce
@@ -486,7 +486,7 @@ theorem Solkey.TestSuite.storageIndexReadArrayStoreRoot.proved : ⊢ Solkey.Test
 
 theorem Solkey.TestSuite.storagePopUnfold.proved : ⊢ Solkey.TestSuite.storagePopUnfold.problem := by
   sol_prove
-  refine Proves.close ?_
+  refine Proves.close_dropWt ?_
   sol_symex
   sol_close
 
@@ -502,43 +502,43 @@ theorem Solkey.TestSuite.transferUnfoldArgument.proved : ⊢ Solkey.TestSuite.tr
 theorem Solkey.TestSuite.tryCallCatchKeepsState.proved : ⊢ Solkey.TestSuite.tryCallCatchKeepsState.problem := by
   sol_prove
   case leaf1 =>
-    refine Proves.close ?_
+    refine Proves.close_dropWt ?_
     sol_symex
     refine (Fml.valid_iff_reduce _ (by decide +kernel)).2 ?_
     sol_reduce
     sol_decide_cons
   case leaf2 =>
-    refine Proves.close ?_
+    refine Proves.close_dropWt ?_
     sol_symex
     refine (Fml.valid_iff_reduce _ (by decide +kernel)).2 ?_
     sol_reduce
     sol_decide_cons
   case leaf3 =>
-    refine Proves.close ?_
+    refine Proves.close_dropWt ?_
     sol_symex
     refine (Fml.valid_iff_reduce _ (by decide +kernel)).2 ?_
     sol_reduce
     sol_decide_cons
   case leaf4 =>
-    refine Proves.close ?_
+    refine Proves.close_dropWt ?_
     sol_symex
     refine (Fml.valid_iff_reduce _ (by decide +kernel)).2 ?_
     sol_reduce
     sol_decide_cons
   case leaf5 =>
-    refine Proves.close ?_
+    refine Proves.close_dropWt ?_
     sol_symex
     refine (Fml.valid_iff_reduce _ (by decide +kernel)).2 ?_
     sol_reduce
     sol_decide_cons
   case leaf6 =>
-    refine Proves.close ?_
+    refine Proves.close_dropWt ?_
     sol_symex
     refine (Fml.valid_iff_reduce _ (by decide +kernel)).2 ?_
     sol_reduce
     sol_decide_cons
   case leaf7 =>
-    refine Proves.close ?_
+    refine Proves.close_dropWt ?_
     sol_symex
     refine (Fml.valid_iff_reduce _ (by decide +kernel)).2 ?_
     sol_reduce
@@ -547,30 +547,30 @@ theorem Solkey.TestSuite.tryCallCatchKeepsState.proved : ⊢ Solkey.TestSuite.tr
 theorem Solkey.TestSuite.tryCallBindsReturnAndPanicCode.proved : ⊢ Solkey.TestSuite.tryCallBindsReturnAndPanicCode.problem := by
   sol_prove
   case leaf1 =>
-    refine Proves.close ?_
+    refine Proves.close_dropWt ?_
     sol_symex
     sol_close
   case leaf2 =>
-    refine Proves.close ?_
+    refine Proves.close_dropWt ?_
     sol_symex
     refine (Fml.valid_iff_reduce _ (by decide +kernel)).2 ?_
     sol_reduce
     sol_decide_cons
   case leaf3 =>
-    refine Proves.close ?_
+    refine Proves.close_dropWt ?_
     sol_symex
     sol_close
 
 theorem Solkey.TestSuite.tryCallUnmatchedFailureReverts.proved : ⊢ Solkey.TestSuite.tryCallUnmatchedFailureReverts.problem := by
   sol_prove
   case leaf1 =>
-    refine Proves.close ?_
+    refine Proves.close_dropWt ?_
     sol_symex
     refine (Fml.valid_iff_reduce _ (by decide +kernel)).2 ?_
     sol_reduce
     sol_decide_cons
   case leaf2 =>
-    refine Proves.close ?_
+    refine Proves.close_dropWt ?_
     sol_symex
     refine (Fml.valid_iff_reduce _ (by decide +kernel)).2 ?_
     sol_reduce

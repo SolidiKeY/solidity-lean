@@ -14,16 +14,23 @@ obligation is proved for every value of them.  Here the parameters are
 unbounded, and an `int8` parameter ranges over the signed 256-bit range, as
 its KeY sort does.
 
-* **Box**: `∀x̄. [ f(x̄); ] true`.  A failed `assert` panics, and no
-  modality holds of a panic (`Modality.afterRun`), so this is KeY's
+Both modalities range over a storage the contract can be in, as KeY's do:
+solkey's storage is the contract's by construction, its heap
+`wellFormed`.  Here `wt(storage)` (`Fml.wt`) says so: every root there, in
+order, canonical and tight, which is exactly reachable
+(`shape_iff_reachable`), and every word in its type's range (`storageWtB`,
+`wt_iff_reachable`).
+
+* **Box**: `∀x̄. wt(storage) → [ f(x̄); ] true`.  A failed `assert` panics,
+  and no modality holds of a panic (`Modality.afterRun`), so this is KeY's
   `assertSimple` "Violated" obligation, with no cut: a failed `require`
-  reverts, which the box accepts, as in KeY.
+  reverts, which the box accepts, as in KeY.  Without the premise the box
+  would be stronger than solkey's, and false of some: a `uint[3]` root
+  stored as a mapping keeps a write through `delete`, so an `assert` that
+  the element is reset fails.
 * **Diamond**: `∀x̄. wt(storage) → ⟨ f(x̄); ⟩ true`.  The diamond does not
-  hold of every storage: a write into a root that is not there is stuck.
-  solkey's storage is the contract's by construction; here `wt(storage)`
-  (`Fml.wt`) says it is one the contract can be in: every root there, in
-  order, canonical and tight (`storageWtB`), which is exactly reachable
-  (`wt_iff_reachable`), KeY's `wellFormed(heap)`.
+  hold of every storage: a write into a root that is not there is stuck, and
+  `total + 0` reverts on a `uint` root holding `-1`.
 
 **Why one atomic term.**  `wt` is a symbol of the term language, `Op1.wt`,
 read by the interpreter as a test of the storage it is given, and stated
@@ -51,14 +58,6 @@ variable {C : Contract}
 
 /-! ## The test decides `canon ∧ tight` -/
 
-theorem keysNodupB_eq {κ α : Type} [DecidableEq κ] :
-    ∀ (l : List (κ × α)), keysNodupB l = nodupKeysB l
-  | [] => rfl
-  | (k, _) :: rest => by simp only [keysNodupB, nodupKeysB, keysNodupB_eq rest]
-
-theorem Ty.numKeyB_eq (T : Ty) : Ty.numKeyB T = T.numericKey := by
-  cases T <;> rfl
-
 mutual
 
 theorem SVal.canonB_iff : ∀ {v : SVal} {T : Ty}, v.canonB T = true ↔ v.canon T
@@ -74,7 +73,7 @@ theorem SVal.canonB_iff : ∀ {v : SVal} {T : Ty}, v.canonB T = true ↔ v.canon
     simp only [SVal.canonB, SVal.canon, Bool.and_eq_true, decide_eq_true_eq,
       SVal.canonElemsB_iff, and_assoc]
   | SVal.map entries dflt, Ty.ref (RefTy.mapping _ V) => by
-    simp only [SVal.canonB, SVal.canon, Bool.and_eq_true, keysNodupB_eq,
+    simp only [SVal.canonB, SVal.canon, Bool.and_eq_true,
       SVal.canonEntriesB_iff, SVal.isDfltB_iff, SVal.canonB_iff (v := dflt), and_assoc]
   | SVal.prim (.int _), Ty.bool | SVal.prim (.bool _), Ty.uint | SVal.prim (.bool _), Ty.int
   | SVal.prim _, Ty.ref _
@@ -128,7 +127,7 @@ theorem SVal.tightB_iff : ∀ {v : SVal} {T : Ty}, v.tightB T = true ↔ v.tight
       SVal.tightElemsB_iff]
   | SVal.map entries _, Ty.ref (RefTy.mapping K V) => by
     simp only [SVal.tightB, SVal.tight, Bool.and_eq_true, Bool.or_eq_true, List.isEmpty_iff,
-      Ty.numKeyB_eq, SVal.tightEntriesB_iff]
+      SVal.tightEntriesB_iff]
     cases K.numericKey <;>
       simp only [true_or, false_or, Bool.false_eq_true, true_and, forall_const, reduceCtorEq,
         false_implies]
@@ -166,10 +165,10 @@ theorem SVal.tightEntriesB_iff {V : Ty} :
 
 end
 
-/-- A storage the test accepts holds the roots, canonical and tight. -/
-theorem storageWtB_sound {st : List (Name × SVal)} (h : storageWtB C.vars st = true) :
+/-- A storage the shape test accepts holds the roots, canonical and tight. -/
+theorem storageShapeB_sound {st : List (Name × SVal)} (h : storageShapeB C.vars st = true) :
     CanonStorage C st ∧ TightStorage C st := by
-  simp only [storageWtB, Bool.and_eq_true, decide_eq_true_eq, List.all_eq_true] at h
+  simp only [storageShapeB, Bool.and_eq_true, decide_eq_true_eq, List.all_eq_true] at h
   obtain ⟨hn, hall⟩ := h
   have hroot : ∀ r T, lookupBy r C.vars = some T →
       ∃ v, lookupBy r st = some v ∧ v.canonB T = true ∧ v.tightB T = true := by
@@ -190,11 +189,11 @@ theorem storageWtB_sound {st : List (Name × SVal)} (h : storageWtB C.vars st = 
     cases hw
     exact SVal.tightB_iff.1 ht
 
-/-- A storage that holds the roots, canonical and tight, passes the test,
-when no root is declared twice. -/
-theorem storageWtB_complete (hnd : nodupKeysB C.vars = true) {st : List (Name × SVal)}
-    (hc : CanonStorage C st) (ht : TightStorage C st) : storageWtB C.vars st = true := by
-  simp only [storageWtB, Bool.and_eq_true, decide_eq_true_eq, List.all_eq_true]
+/-- A storage that holds the roots, canonical and tight, passes the shape
+test, when no root is declared twice. -/
+theorem storageShapeB_complete (hnd : nodupKeysB C.vars = true) {st : List (Name × SVal)}
+    (hc : CanonStorage C st) (ht : TightStorage C st) : storageShapeB C.vars st = true := by
+  simp only [storageShapeB, Bool.and_eq_true, decide_eq_true_eq, List.all_eq_true]
   refine ⟨hc.1, fun rT hm => ?_⟩
   have hl : lookupBy rT.1 C.vars = some rT.2 := lookupBy_eq_of_nodup hnd hm
   obtain ⟨v, hv, hcv⟩ := hc.2 _ _ hl
@@ -213,45 +212,66 @@ theorem holds_wt {σ : State} : holds σ (Fml.wt C) ↔ storageWtB C.vars σ.sto
   | true => exact ⟨fun _ => rfl, fun _ => ⟨_, rfl⟩⟩
   | false => exact ⟨fun ⟨_, h⟩ => (nomatch h), fun h => (nomatch h)⟩
 
-/-- **`wt` is reachability**: for a contract whose types have well-formed
-defaults all the way down, a storage passes `wt` exactly when a checked
-program reaches it from the contract's initial state. -/
+/-- **The shape is reachability**: for a contract whose types have
+well-formed defaults all the way down, a storage passes the shape test
+exactly when a checked program reaches it from the contract's initial
+state. -/
+theorem shape_iff_reachable (hnd : nodupKeysB C.vars = true)
+    (hdeep : C.vars.all (·.2.okDeep) = true) {st : List (Name × SVal)} :
+    storageShapeB C.vars st = true ↔ Reachable C st :=
+  ⟨fun h => (reachable_iff hnd hdeep).2 (storageShapeB_sound h),
+    fun h => let ⟨hc, ht⟩ := (reachable_iff hnd hdeep).1 h; storageShapeB_complete hnd hc ht⟩
+
+/-- **`wt` is reachability with words in range**: a storage is well-formed
+exactly when a program reaches it and its words fit their types, which a
+program solc compiles keeps (`Semantics/WellFormed.lean`). -/
 theorem wt_iff_reachable (hnd : nodupKeysB C.vars = true)
     (hdeep : C.vars.all (·.2.okDeep) = true) {st : List (Name × SVal)} :
-    storageWtB C.vars st = true ↔ Reachable C st :=
-  ⟨fun h => (reachable_iff hnd hdeep).2 (storageWtB_sound h),
-    fun h => let ⟨hc, ht⟩ := (reachable_iff hnd hdeep).1 h; storageWtB_complete hnd hc ht⟩
+    storageWtB C.vars st = true ↔ Reachable C st ∧ storageWordsB C.vars st = true := by
+  rw [storageWtB, Bool.and_eq_true, shape_iff_reachable hnd hdeep]
 
-/-- Every reachable storage is well-formed: the premise excludes no state
-the contract can be in. -/
-theorem wt_of_reachable (hnd : nodupKeysB C.vars = true)
-    (hdeep : C.vars.all (·.2.okDeep) = true) {st : List (Name × SVal)} (h : Reachable C st) :
-    storageWtB C.vars st = true :=
-  (wt_iff_reachable hnd hdeep).2 h
+/-- A fresh contract's root holds its type's default. -/
+theorem lookupBy_initStorage_vars (r : Name) :
+    lookupBy r C.initStorage = (lookupBy r C.vars).map defaultForTy := by
+  simp only [Contract.initStorage]
+  induction C.vars with
+  | nil => rfl
+  | cons x l ih =>
+    obtain ⟨g, T⟩ := x
+    simp only [List.map, lookupBy]
+    split
+    · rfl
+    · exact ih
+
+/-- The words of a fresh contract fit: every root holds its default. -/
+theorem storageWordsB_init (hnd : nodupKeysB C.vars = true) :
+    storageWordsB C.vars C.initStorage = true := by
+  simp only [storageWordsB, List.all_eq_true]
+  intro rT hm
+  have hl : lookupBy rT.1 C.vars = some rT.2 := lookupBy_eq_of_nodup hnd hm
+  rw [lookupBy_initStorage_vars, hl]
+  exact SVal.wordsB_default rT.2
 
 /-- The contract's initial storage is well-formed (the empty program reaches
-it), so the premise is satisfiable. -/
+it, and its words are defaults), so the premise is satisfiable. -/
 theorem initStorage_wt (hnd : nodupKeysB C.vars = true)
     (hdeep : C.vars.all (·.2.okDeep) = true) : holds C.initState (Fml.wt C) :=
-  holds_wt.2 (wt_of_reachable hnd hdeep ⟨[], [], C.initState, rfl, rfl, rfl⟩)
+  holds_wt.2 ((wt_iff_reachable hnd hdeep).2
+    ⟨⟨[], [], C.initState, rfl, rfl, rfl⟩, storageWordsB_init hnd⟩)
 
 /-! ## The obligations -/
 
 /-- solkey's obligation for a function of body `P` and parameters `xs`
-under the modality `m`: `∀xs. [ P ] true`, or
-`∀xs. wt(storage) → ⟨ P ⟩ true`. -/
+under the modality `m`: `∀xs. wt(storage) → [ P ] true`, or the same with
+`⟨ P ⟩`. -/
 def Problem.fml (m : Modality) (xs : List (PrimTy × Var)) (P : Prog C) : Fml C :=
-  match m with
-  | .box => Fml.alls xs (.modal .box P .tt)
-  | .diamond => Fml.alls xs (.imp (Fml.wt C) (.modal .diamond P .tt))
+  Fml.alls xs (.imp (Fml.wt C) (.modal m P .tt))
 
 /-- The parameters an obligation binds, its modality and its program, read
 back off the formula: what `Problem.text` prints. -/
 def Problem.parts : Fml C → Option (List (PrimTy × Var) × Modality × Prog C)
   | .all x p φ => (Problem.parts φ).map fun (xs, r) => ((p, x) :: xs, r)
-  | .modal .box P .tt => some ([], .box, P)
-  | .imp (.defined (.app1 (.wt _) (.app0 .storage))) (.modal .diamond P .tt) =>
-    some ([], .diamond, P)
+  | .imp (.defined (.app1 (.wt _) (.app0 .storage))) (.modal m P .tt) => some ([], m, P)
   | _ => none
 
 /-- How many storage writes the context's updates hold. -/
@@ -287,7 +307,7 @@ def Problem.text (contract fn : String) (φ : Fml C) : String :=
         String.join (xs.map fun (p, x) => s!"    {p.keySort} {x};\n") ++ "}\n\n"
     let call := s!"{fn}({", ".intercalate (xs.map fun (_, x) => toString x)})@{contract};"
     let body := match m with
-      | .box => s!"\\[\{ {call} }\\](true)"
+      | .box => s!"wt(storage) -> \\[\{ {call} }\\](true)"
       | .diamond => s!"wt(storage) -> \\<\{ {call} }\\>(true)"
     vars ++ "\\problem {\n    " ++ body ++ "\n}"
 

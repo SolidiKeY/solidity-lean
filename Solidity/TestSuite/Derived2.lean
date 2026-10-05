@@ -5,15 +5,15 @@ import Solidity.TestSuite.Problems
 
 `⊢` of each obligation `sol_prove` and its leaf tactics close, from
 `storageIndexModAssign` to `localPredecrement` in the order of the source; the replays are what
-`#solkey_derive?` (`Frontend/Problems.lean`) prints.  A diamond's leaves
-set `wt(storage)` aside (`Proves.close_dropWt`).
+`#solkey_derive?` (`Frontend/Problems.lean`) prints.  Every leaf sets
+`wt(storage)` aside (`Proves.close_dropWt`).
 -/
 
 open Solidity Proves
 
 theorem Solkey.TestSuite.storageIndexModAssign.proved : ⊢ Solkey.TestSuite.storageIndexModAssign.problem := by
   sol_prove
-  refine Proves.close ?_
+  refine Proves.close_dropWt ?_
   sol_symex
   refine (Fml.valid_iff_reduce _ (by decide +kernel)).2 ?_
   sol_reduce
@@ -21,7 +21,7 @@ theorem Solkey.TestSuite.storageIndexModAssign.proved : ⊢ Solkey.TestSuite.sto
 
 theorem Solkey.TestSuite.storageIndexMulAssign.proved : ⊢ Solkey.TestSuite.storageIndexMulAssign.problem := by
   sol_prove
-  refine Proves.close ?_
+  refine Proves.close_dropWt ?_
   sol_symex
   refine (Fml.valid_iff_reduce _ (by decide +kernel)).2 ?_
   sol_reduce
@@ -29,7 +29,7 @@ theorem Solkey.TestSuite.storageIndexMulAssign.proved : ⊢ Solkey.TestSuite.sto
 
 theorem Solkey.TestSuite.storageIndexMultipleWrites.proved : ⊢ Solkey.TestSuite.storageIndexMultipleWrites.problem := by
   sol_prove
-  refine Proves.close ?_
+  refine Proves.close_dropWt ?_
   sol_symex
   refine (Fml.valid_iff_reduce _ (by decide +kernel)).2 ?_
   sol_reduce
@@ -37,7 +37,7 @@ theorem Solkey.TestSuite.storageIndexMultipleWrites.proved : ⊢ Solkey.TestSuit
 
 theorem Solkey.TestSuite.storageIndexPostdecrement.proved : ⊢ Solkey.TestSuite.storageIndexPostdecrement.problem := by
   sol_prove
-  refine Proves.close ?_
+  refine Proves.close_dropWt ?_
   sol_symex
   refine (Fml.valid_iff_reduce _ (by decide +kernel)).2 ?_
   sol_reduce
@@ -45,7 +45,7 @@ theorem Solkey.TestSuite.storageIndexPostdecrement.proved : ⊢ Solkey.TestSuite
 
 theorem Solkey.TestSuite.storageIndexPostincrement.proved : ⊢ Solkey.TestSuite.storageIndexPostincrement.problem := by
   sol_prove
-  refine Proves.close ?_
+  refine Proves.close_dropWt ?_
   sol_symex
   refine (Fml.valid_iff_reduce _ (by decide +kernel)).2 ?_
   sol_reduce
@@ -53,7 +53,7 @@ theorem Solkey.TestSuite.storageIndexPostincrement.proved : ⊢ Solkey.TestSuite
 
 theorem Solkey.TestSuite.storageIndexPredecrement.proved : ⊢ Solkey.TestSuite.storageIndexPredecrement.problem := by
   sol_prove
-  refine Proves.close ?_
+  refine Proves.close_dropWt ?_
   sol_symex
   refine (Fml.valid_iff_reduce _ (by decide +kernel)).2 ?_
   sol_reduce
@@ -61,7 +61,7 @@ theorem Solkey.TestSuite.storageIndexPredecrement.proved : ⊢ Solkey.TestSuite.
 
 theorem Solkey.TestSuite.storageIndexPreincrement.proved : ⊢ Solkey.TestSuite.storageIndexPreincrement.problem := by
   sol_prove
-  refine Proves.close ?_
+  refine Proves.close_dropWt ?_
   sol_symex
   refine (Fml.valid_iff_reduce _ (by decide +kernel)).2 ?_
   sol_reduce
@@ -69,19 +69,19 @@ theorem Solkey.TestSuite.storageIndexPreincrement.proved : ⊢ Solkey.TestSuite.
 
 theorem Solkey.TestSuite.storageIndexReadMappingStoreRoot.proved : ⊢ Solkey.TestSuite.storageIndexReadMappingStoreRoot.problem := by
   sol_prove
-  refine Proves.close ?_
+  refine Proves.close_dropWt ?_
   sol_symex
   sol_close
 
 theorem Solkey.TestSuite.storageIndexReadNseIndex.proved : ⊢ Solkey.TestSuite.storageIndexReadNseIndex.problem := by
   sol_prove
-  refine Proves.close ?_
+  refine Proves.close_dropWt ?_
   sol_symex
   sol_close
 
 theorem Solkey.TestSuite.storageIndexSubAssign.proved : ⊢ Solkey.TestSuite.storageIndexSubAssign.problem := by
   sol_prove
-  refine Proves.close ?_
+  refine Proves.close_dropWt ?_
   sol_symex
   refine (Fml.valid_iff_reduce _ (by decide +kernel)).2 ?_
   sol_reduce
@@ -89,7 +89,7 @@ theorem Solkey.TestSuite.storageIndexSubAssign.proved : ⊢ Solkey.TestSuite.sto
 
 theorem Solkey.TestSuite.storageMatrixWriteRead.proved : ⊢ Solkey.TestSuite.storageMatrixWriteRead.problem := by
   sol_prove
-  refine Proves.close ?_
+  refine Proves.close_dropWt ?_
   sol_symex
   refine (Fml.valid_iff_reduce _ (by decide +kernel)).2 ?_
   sol_reduce
@@ -112,18 +112,18 @@ theorem Solkey.TestSuite.subtractionSimple.proved : ⊢ Solkey.TestSuite.subtrac
 
 theorem Solkey.TestSuite.unaryMinusSimple.proved : ⊢ Solkey.TestSuite.unaryMinusSimple.problem := by
   sol_prove
-  refine Proves.close ?_
+  refine Proves.close_dropWt ?_
   sol_symex
   sol_close
 
 theorem Solkey.TestSuite.testStorageArrayReadWrite.proved : ⊢ Solkey.TestSuite.testStorageArrayReadWrite.problem := by
   sol_prove
   case leaf1 =>
-    refine Proves.close ?_
+    refine Proves.close_dropWt ?_
     sol_symex
     sol_close
   case leaf2 =>
-    refine Proves.close ?_
+    refine Proves.close_dropWt ?_
     sol_symex
     sol_close
 
@@ -174,7 +174,7 @@ theorem Solkey.TestSuite.testStructFixedMemberLength.proved : ⊢ Solkey.TestSui
 
 theorem Solkey.TestSuite.testFixedElementOfDynamicArrayLength.proved : ⊢ Solkey.TestSuite.testFixedElementOfDynamicArrayLength.problem := by
   sol_prove
-  refine Proves.close ?_
+  refine Proves.close_dropWt ?_
   sol_symex
   refine (Fml.valid_iff_reduce _ (by decide +kernel)).2 ?_
   sol_reduce
@@ -182,7 +182,7 @@ theorem Solkey.TestSuite.testFixedElementOfDynamicArrayLength.proved : ⊢ Solke
 
 theorem Solkey.TestSuite.storageIndexDecomposition.proved : ⊢ Solkey.TestSuite.storageIndexDecomposition.problem := by
   sol_prove
-  refine Proves.close ?_
+  refine Proves.close_dropWt ?_
   sol_symex
   refine (Fml.valid_iff_reduce _ (by decide +kernel)).2 ?_
   sol_reduce
@@ -190,7 +190,7 @@ theorem Solkey.TestSuite.storageIndexDecomposition.proved : ⊢ Solkey.TestSuite
 
 theorem Solkey.TestSuite.storageIndexRootArray.proved : ⊢ Solkey.TestSuite.storageIndexRootArray.problem := by
   sol_prove
-  refine Proves.close ?_
+  refine Proves.close_dropWt ?_
   sol_symex
   refine (Fml.valid_iff_reduce _ (by decide +kernel)).2 ?_
   sol_reduce
@@ -199,22 +199,22 @@ theorem Solkey.TestSuite.storageIndexRootArray.proved : ⊢ Solkey.TestSuite.sto
 theorem Solkey.TestSuite.localArithmeticInRange.proved : ⊢ Solkey.TestSuite.localArithmeticInRange.problem := by
   sol_prove
   case leaf1 =>
-    refine Proves.close ?_
+    refine Proves.close_dropWt ?_
     sol_symex
     sol_close
   case leaf2 =>
-    refine Proves.close ?_
+    refine Proves.close_dropWt ?_
     sol_symex
     sol_close
 
 theorem Solkey.TestSuite.signedUnaryMinusInRange.proved : ⊢ Solkey.TestSuite.signedUnaryMinusInRange.problem := by
   sol_prove
   case leaf1 =>
-    refine Proves.close ?_
+    refine Proves.close_dropWt ?_
     sol_symex
     sol_close
   case leaf2 =>
-    refine Proves.close ?_
+    refine Proves.close_dropWt ?_
     sol_symex
     sol_close
 

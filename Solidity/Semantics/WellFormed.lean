@@ -3,34 +3,29 @@ import Solidity.Semantics
 /-!
 # Well-formed storage, as a test
 
-A diamond obligation of solkey's `TestSuite` assumes its storage is one a
-contract can be in, KeY's `wellFormed(heap)`: the term `wt(storage)`
-(`Op1.wt`, `Update.lean`).  The term is read by the interpreter, so what it
-tests has to be a function, and it sits below `Update.lean`, before any
-typing module: `SVal.wfB` is `SVal.canon ∧ SVal.tight`
-(`Typing/Reachability.lean`, `Typing/Constructibility.lean`) as one `Bool`,
-clause for clause, and `storageWtB` asks it of every root.
-`Calculus/Problem.lean` proves the two readings agree, so that a storage is
-well-formed exactly when it is reachable.
+Every obligation of solkey's `TestSuite` ranges over a storage the contract
+can be in, KeY's `wellFormed(heap)`: the term `wt(storage)` (`Op1.wt`,
+`Update.lean`).  The term is read by the interpreter, so what it tests has
+to be a function, and it sits below `Update.lean`, before any typing module.
+`storageWtB` asks two things of every root:
 
-Each clause mirrors the `Prop` it decides, by the same recursion, so that
-the proof of agreement is one case per clause.
+* its shape: `SVal.canonB` and `SVal.tightB`, which decide `SVal.canon`
+  (`Typing/Reachability.lean`) and `SVal.tight`
+  (`Typing/Constructibility.lean`) clause for clause, by the same
+  recursion, so that the proof of agreement is one case per clause;
+* its words: `SVal.wordsB`, every word in its type's range and every
+  mapping key in its key type's, as solc stores them (`PrimVal.fits`).
+
+`Calculus/Problem.lean` proves that a storage passes the shape test exactly
+when it is reachable.  The words are a test of their own because the AST
+reaches more than solc does: a literal `.lit (i : Int)` is not range-checked
+below the front end (`fitCheck`), so a program the AST admits can store a
+`uint` of `-1`.  A well-formed storage is a reachable one whose words fit.
 -/
 
 namespace Solidity
 
 namespace Semantics
-
-/-- No key twice (`nodupKeysB` of `Typing/StoragePreservation.lean`, which
-this layer is below). -/
-def keysNodupB [DecidableEq κ] : List (κ × α) → Bool
-  | [] => true
-  | (k, _) :: rest => (lookupBy k rest).isNone && keysNodupB rest
-
-/-- A key type a program can index a mapping with (`Ty.numericKey`). -/
-def Ty.numKeyB : Ty → Bool
-  | .prim p => p.isNumeric
-  | .ref _ => false
 
 /-- `v` is `defaultForTy T`, by recursion on `v`: `defaultForTy` is
 well-founded, and the kernel does not reduce it. -/
@@ -153,7 +148,7 @@ def SVal.canonB : SVal → Ty → Bool
   | SVal.array elems shadow fx, Ty.ref (RefTy.fixed E n) =>
       fx && decide (elems.length = n) && canonElemsB E elems && canonElemsB E shadow
   | SVal.map entries dflt, Ty.ref (RefTy.mapping _ V) =>
-      keysNodupB entries && canonEntriesB V entries && dflt.isDfltB V &&
+      nodupKeysB entries && canonEntriesB V entries && dflt.isDfltB V &&
         dflt.canonB V
   | _, _ => false
 where
@@ -179,7 +174,7 @@ def SVal.tightB : SVal → Ty → Bool
       tightElemsB E elems && tightElemsB E shadow
   | SVal.array elems shadow _, Ty.ref (RefTy.fixed E _) => shadow.isEmpty && tightElemsB E elems
   | SVal.map entries _, Ty.ref (RefTy.mapping K V) =>
-      (Ty.numKeyB K || entries.isEmpty) && tightEntriesB V entries
+      (K.numericKey || entries.isEmpty) && tightEntriesB V entries
   | _, _ => true
 where
   tightFieldsB (s : Name) : List (Name × SVal) → Bool
@@ -195,14 +190,76 @@ where
     | [] => true
     | (_, v) :: rest => v.tightB V && tightEntriesB V rest
 
+/-- A mapping key fits its key type: a `uint` or `int` key in its range,
+any `Int` at a type no program indexes with (`Ty.numericKey`). -/
+def Ty.keyFitsB : Ty → Int → Bool
+  | .prim p, k => !p.isNumeric || PrimVal.fits (.int k) p
+  | .ref _, _ => true
+
+/-- Every word of `v` in its type's range (`PrimVal.fits`), every key of a
+mapping in its key type's (`Ty.keyFitsB`). -/
+def SVal.wordsB : SVal → Ty → Bool
+  | SVal.prim v, Ty.prim p => PrimVal.fits v p
+  | SVal.struct fields, Ty.ref (RefTy.struct s) => wordsFieldsB fields (structDef s)
+  | SVal.array elems shadow _, Ty.ref (RefTy.array E) =>
+      wordsElemsB E elems && wordsElemsB E shadow
+  | SVal.array elems shadow _, Ty.ref (RefTy.fixed E _) =>
+      wordsElemsB E elems && wordsElemsB E shadow
+  | SVal.map entries dflt, Ty.ref (RefTy.mapping K V) =>
+      wordsEntriesB K V entries && dflt.wordsB V
+  | _, _ => true
+where
+  wordsFieldsB : List (Name × SVal) → List (Name × Ty) → Bool
+    | (_, v) :: rest, (_, T) :: rest' => v.wordsB T && wordsFieldsB rest rest'
+    | _, _ => true
+  wordsElemsB (E : Ty) : List SVal → Bool
+    | [] => true
+    | v :: rest => v.wordsB E && wordsElemsB E rest
+  wordsEntriesB (K V : Ty) : List (Int × SVal) → Bool
+    | [] => true
+    | (k, v) :: rest => Ty.keyFitsB K k && v.wordsB V && wordsEntriesB K V rest
+
+open SVal.wordsB (wordsFieldsB wordsElemsB wordsEntriesB) in
+/-- A default's words fit. -/
+theorem SVal.wordsB_default (T : Ty) : (defaultForTy T).wordsB T = true := by
+  induction T using defaultForTy.induct
+    (motive2 := fun l => wordsFieldsB (defaultForFields l) l = true) with
+  | case1 => simp only [defaultForTy, SVal.wordsB]; decide
+  | case2 => simp only [defaultForTy, SVal.wordsB]; decide
+  | case3 => simp only [defaultForTy, SVal.wordsB]; decide
+  | case4 name ih => rw [defaultForTy]; exact ih
+  | case5 elem => simp only [defaultForTy, SVal.wordsB, wordsElemsB, Bool.and_self]
+  | case6 elem n ih =>
+    rw [defaultForTy]
+    simp only [SVal.wordsB, wordsElemsB, Bool.and_true]
+    induction n with
+    | zero => rfl
+    | succ k ihk => simp only [List.replicate_succ, wordsElemsB, ih, ihk, Bool.and_self]
+  | case7 key value ih => rw [defaultForTy]; simp only [SVal.wordsB, wordsEntriesB, ih,
+      Bool.and_self]
+  | case8 => simp only [defaultForFields, wordsFieldsB]
+  | case9 n t rest iht ihrest => simp only [defaultForFields, wordsFieldsB, iht, ihrest,
+      Bool.and_self]
+
 /-- The storage `st` holds the roots `vs`, in order, each canonical and
-tight at its type: what `wt(storage)` tests. -/
-def storageWtB (vs : List (Name × Ty)) (st : List (Name × SVal)) : Bool :=
+tight at its type: the shape `wt(storage)` tests. -/
+def storageShapeB (vs : List (Name × Ty)) (st : List (Name × SVal)) : Bool :=
   decide (st.map (·.1) = vs.map (·.1)) &&
     vs.all fun rT =>
       match lookupBy rT.1 st with
       | some v => v.canonB rT.2 && v.tightB rT.2
       | none => false
+
+/-- Every root of `st` holds words in range at its type in `vs`. -/
+def storageWordsB (vs : List (Name × Ty)) (st : List (Name × SVal)) : Bool :=
+  vs.all fun rT =>
+    match lookupBy rT.1 st with
+    | some v => v.wordsB rT.2
+    | none => true
+
+/-- What `wt(storage)` tests: the shape and the words. -/
+def storageWtB (vs : List (Name × Ty)) (st : List (Name × SVal)) : Bool :=
+  storageShapeB vs st && storageWordsB vs st
 
 end Semantics
 

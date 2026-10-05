@@ -101,15 +101,21 @@ partial def atRef (ref : Syntax) (stx : Syntax) : Syntax :=
   | .ident _ raw v pre => .ident info raw v pre
   | .missing => .missing
 
+/-- The value type a parameter's type names, with its width: what a
+parameter may be (`paramCtx`), and what its obligation binds
+(`solc_problems`). -/
+def paramTy? (t : String) : Option (PrimTy × Nat) :=
+  match PrimTy.ofName? t, narrowTy? t with
+  | some p, _ => some (p, 256)
+  | none, some pn => some pn
+  | none, none => if t == "address payable" then some (.uint, 256) else none
+
 /-- The parameters of a function as locals in scope, most recent first. -/
 def paramCtx (ps : List (String × String)) : Except String ECtx :=
   ps.reverse.mapM fun (x, t) =>
-    match PrimTy.ofName? t, narrowTy? t with
-    | some p, _ => pure (x, .val p)
-    | none, some (p, n) => pure (x, .val p n)
-    | none, none =>
-      if t == "address payable" then pure (x, .val .uint)
-      else throw s!"the parameter `{x}` has the type `{t}`, which is not a value type"
+    match paramTy? t with
+    | some (p, n) => pure (x, .val p n)
+    | none => throw s!"the parameter `{x}` has the type `{t}`, which is not a value type"
 
 syntax (name := solcImport) "solc_import " str " hash " num " as " ident
   (" renaming " sepBy1(ident " => " ident, ", "))? : command
