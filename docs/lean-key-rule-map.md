@@ -315,6 +315,27 @@ diamond (`Hyp.boxOnly`). A program comparison produces `Fml.eqD a b` —
 | any theory taclet on a sequent | `Proves.rewrite` (`Calculus/Logic.lean`), `rw [r]`/`sol_rw` (`Calculus/Rewrite.lean`) | done | a term taclet `r : TermTaclet t t'` rewrites every total equation of the sequent (`Fml.rwEq`); `TermTaclet.sound` proves each rule once, from its Theory lemma |
 | the same, inside an update | `Proves.updRw`, `sol_rw` | done | an update's right-hand side runs in the interpreter, so the rewrite asks `Term.EvalRefines t t'`, which a Theory equation onto a literal gives (`Term.EvalRefines.of_theq`); box updates only |
 
+### The closer's clauses (`Calculus/Closer.lean`)
+
+`sol_prove` closes a leaf inside one `Bool`, `LFml.close` over the leaf's
+reduction, proved sound once (`LFml.close_holds`): a KeY first-order or
+arithmetic taclet it subsumes is a clause of that function, not a proof
+step.  "closer clause X" names the definition the clause lives in.
+
+| KeY taclet | Lean | Status | Notes |
+| --- | --- | --- | --- |
+| `add_literals`, `sub_literals`, `mul_literals`, `div_literals`, `pow_literals` | closer clause `foldBin` | subsumed | the interpreter's checked operation on two literals, `/` and `%` truncating as solc does, out of range left unfolded (it reverts) |
+| `less_literals`, `leq_literals`, `greater_literals`, `qeq_literals`, `equal_literals` | closer clause `foldBin` | subsumed | comparisons of two literals |
+| `eqClose` (and `t <= t`, `t < t`) | closer clauses `foldSame`, `Facts.eqHolds` | subsumed | `t == t`, `t <= t` fold to `true`, `t < t` to `false`; an equation closes on equal normal forms |
+| `ifthenelse_true`, `ifthenelse_false` | closer clause `foldIte` | subsumed | a conditional on a literal |
+| `boolean_equal`, `true_to_not_false`, `concrete_not_*` | closer clauses `foldUn`, `Facts.decomp` | subsumed | `!` on a literal; a premise `!c ≐ b` gives `c ≐ !b` |
+| `applyEq`, `applyEqRigid` | closer clauses `Facts.eqnK`, `substE` | subsumed | a premise `t ≐ v` rewrites `t` to a literal or a local everywhere after it, decomposed through `&&`, `\|\|`, `==`, `!=` |
+| `closeFalse`, `replace_known_left` | closer clauses `Facts.refute`, `Facts.apart` | subsumed | a premise refuted (two literals apart, a side that halts, a pair the premises keep apart) closes the leaf |
+| `cut`, `cut_direct` on a `bool` | closer clause `Facts.split` | subsumed | a case split on a `bool` local or a condition compared with a literal |
+| `selectOnTypedStruct`, `selectOnTypedMember`, `selectOnTypedElement`, `selectOnTypedMapSize`, `selectOnTypedFixedSize`, `selectOnTypedLeafSize` | closer clauses `LPath.ty`, `Facts.retsW`, `Facts.halts` | subsumed | under `wt(storage)` a read at a path the layout types returns, of its type's kind; a test for a shape the layout says is not there halts |
+| `selectOnTypedDynSize` | — | open | the length of a dynamic array is not known from the layout; `push`/`pop` (M5) |
+| `inEqSimp_*`, `polySimp_*` | — | open | no difference bounds or polynomial normal form yet; `(x - a) + a` cancels (`LTerm.arith`) |
+
 ## The data-structure theories
 
 The rows above are the *program* calculus. Its updates are written over

@@ -94,6 +94,7 @@ What they say:
   and **M3b** (`wt`, the 417 statements, 111 derived) are done, below.
 - **M4.** Closer for locals, plain storage and `try`/`transfer`: ground
   arithmetic, `applyEq`, bool case splits, difference bounds, `wt` facts.
+  Done but for difference bounds (below): 237 derived.
 - **M5.** Push, pop, `delete` and storage copies in the closer.
 - **M6.** Memory in the closer: allocation, reads and writes, `mlen`,
   defaults, copies to storage.
@@ -480,3 +481,100 @@ not.
   suggestion is pinned (`TestSuite/Problems.lean`: the `case leafᵢ =>`
   layout and `close_dropWt`); it resolves the leaf tactics with
   `Solidity` open, as a `Derived` module does.
+
+
+## M4 results (2026-10-05): the closer
+
+`Calculus/Closer.lean`.  `sol_prove`'s default closer (`Derive.synClose`) is
+now `LFml.close`, one `Bool` over the leaf's reduction proved sound once
+(`LFml.close_holds`); `LFml.syn` stays as `sol_decide`'s first try, which
+the new closer subsumes.  Each KeY first-order or arithmetic taclet it
+replaces has a row in `docs/lean-key-rule-map.md` ("The closer's clauses").
+
+- **Ground evaluation** (`foldBin`, `foldUn`, `foldIte`, `foldKite`,
+  `foldSame`, `foldZeroT`): a node on literals is evaluated by the
+  interpreter's own checked operation (so `/`, `%` truncate and an
+  overflow is left unfolded), `t == t` is `true`.
+- **`applyEq`** (`Eqs`, `substE`, `Facts.eqnK`): a premise `t ≐ 5` or
+  `alice.age ≐ v` rewrites `t` (`alice.age`) to the literal (the local)
+  after it; a premise is decomposed through `&&`, `||`, `==`, `!=`, `!`
+  and guards (`Facts.decomp`).
+- **Case split on a `bool`** (`Facts.split`): on a `bool` parameter, or a
+  condition compared with a literal, where a branch's cover needs it
+  (`se ≐ true ∨ se ≐ false`).
+- **`wt` facts** (`LPath.ty`, `LPath.ty_find`, `Facts.retsW`,
+  `Facts.halts`): `Derive.topWt` reads the obligation's `wt(storage)` as
+  the layout a well-formed storage holds (`Decide.LayoutOk`); a read of the
+  initial storage at a path the layout types (members, mapping entries, a
+  fixed-size array's elements in range) returns, of its type's kind, and
+  a test for a shape the layout says is not there halts (the guards a
+  `delete` leaves).  Proved from `SVal.canonB` clause by clause.
+- **Parallel updates** (`Fml.seqUpd`, `peel_sound`): `{ x := x + 1 ‖ r :=
+  x + 1 }` of `r = ++x;` is split into single updates where its last
+  element binds a local the others do not mention.
+- **Difference bounds: not done.**  No obligation of buckets A, B or E
+  needed them (each one the closer leaves is push, pop, memory or a copy);
+  `inEqSimp_*` stays open in the rule map.
+
+**The size guard.**  A leaf's formula with its updates pushed in shares
+subterms: a storage written from a read of the one before it appears
+twice in the next, so the tree, and `LStor.okE`'s reduction after it,
+double with each such write.  Measured on `count = 0;` and `n` times
+`count += 1;` (kernel check of the whole `sol_prove`):
+
+| `n` | tree after `toL` | reduction | kernel |
+|---:|---:|---:|---:|
+| 2 | 310 | 1071 | |
+| 4 | 1374 | 7736 | 0.79 s |
+| 6 | 5678 | 53531 | 2.1 s |
+| 8 | 22942 | 367531 | 8.2 s |
+| 10 | 92046 | 2519836 | 49.5 s |
+
+`synClose` now refuses a leaf whose tree has more than `Derive.closeSize`
+(2000) nodes (`LFml.fits`, a count that stops at the bound, so it costs at
+most 2000 steps in compiled code and in the kernel); the leaf is left
+open for a tactic, not attempted.  The largest leaf of `TestSuite` has 950
+nodes.  The doubling itself is not removed: `okE` re-guards every read by
+the writes before it, and sharing it would change `LFml.elim_holds`
+(`Calculus/Decide.lean`).
+
+**The counts** (`TestSuite/Report.lean`, pinned):
+
+| | Box | Diamond | Total |
+|---:|---:|---:|---:|
+| derived | 51 | 186 | 237 |
+| pending | 51 | 129 | 180 |
+| no statement | | | 3 (1 excluded, 2 skipped) |
+
+233 of the 237 close inside the residue (`sol_prove` alone); 4 leave
+leaves a tactic closes (`storageIndexArrayAddAssignOutOfBoundsReverts`,
+`storageIndexArrayReadOutOfBoundsReverts`, `testStorageArrayReadWrite`,
+`storagePopUnfold`: a dynamic array's bounds, which the layout does not
+give).  No obligation derived before is pending now.
+Every pending one is outside buckets A, B and E's fragment:
+
+| Reason | Pending |
+|---|---:|
+| memory (`memory` locals, `new`): M6 | 111 |
+| `push` / `pop` on a storage array: M5 | 52 |
+| a copy between storage locations (`alice = bob;`, `a.f = tok;`): M5 | 17 |
+
+**Cost.**  The six `TestSuite/Derived*.lean` modules (40, 40, 40, 40,
+40, 37 theorems) checked in 5.5, 6.9, 17.1, 16.1, 5.3 and 8.1 s (wall
+clock, `Elab.async false`, measured with the language server running them
+side by side, so these are upper bounds); M3b's three modules of 37 took
+11.4, 23.4 and 15.6 s for 111 theorems.  The slowest single theorem is
+`storageMatrixNseIndex` (6.7 s): its `require(i == 1 && j == 2 && …)`
+splits into 43 leaves, each reduced and closed apart, about 150 ms each.
+`testStorageStructDeleteSkipsMappingMember`, the largest leaf, takes 2.4 s.
+No `maxHeartbeats` override.  The benchmark modules built in 17 s (Coin),
+18 s (Mapping), 5.0 s (ERC20), 5.4 s (Purchase), against 24, 25 and 6.8 s
+at M3b: no slowdown measured.  Four benchmark proofs and three pinned
+suggestions lost a leaf the closer now proves (`EtherWallet.withdrawOwner`,
+`Coin.mintMinter`, `Mapping.nested_remove_spec_*`; `Examples/ProofTree.lean`),
+and are now `sol_prove` alone.
+
+`#print axioms` on `Derive.synClose_sound`, `Proves.of_proves` and
+`Solkey.TestSuite.storageMatrixNseIndex.proved`,
+`testStorageArrayReadWrite.proved`, `storageFieldPostdecrementAssign.proved`:
+`propext`, `Classical.choice`, `Quot.sound`.

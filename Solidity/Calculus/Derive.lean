@@ -164,14 +164,15 @@ def _root_.Solidity.Fml.seqUpd : Fml C → Fml C
 theorem UpdElem.write_lookup {σ₀ τ τ' : State} {x : Var} :
     (e : UpdElem C) → x ∉ e.vars → e.write σ₀ τ = .ok τ' → lookupBy x τ'.env = lookupBy x τ.env
   | .val y t, hx, h | .path y t, hx, h | .mref y t, hx, h | .store y t, hx, h => by
-    have hy : x ≠ y := fun e => hx (by simp [UpdElem.vars, e])
+    have hy : x ≠ y := fun e => hx (by simp only [UpdElem.vars, e, List.mem_cons, true_or])
     simp only [UpdElem.write, bind, Except.bind, pure, Except.pure] at h
     repeat' split at h
     all_goals first
       | (cases h; simp only [State.setEnv, SemanticsProperties.lookupBy_setBy_ne hy])
       | cases h
   | .saveNet y, hx, h => by
-    have hy : x ≠ y := fun e => hx (by simp [UpdElem.vars, e])
+    have hy : x ≠ y := fun e => hx (by simp only [UpdElem.vars, e, List.mem_cons,
+      List.not_mem_nil, or_false])
     simp only [UpdElem.write, pure, Except.pure] at h
     cases h; simp only [State.setEnv, SemanticsProperties.lookupBy_setBy_ne hy]
   | .storage s, _, h | .memory s, _, h | .selfBalance _ s, _, h | .net _ _ s, _, h
@@ -261,9 +262,10 @@ theorem peel_sound {m : Modality} {P : Upd C} {e : UpdElem C} {x : Var}
           · subst hn
             simp only [hl₁, State.setEnv, SemanticsProperties.lookupBy_setBy_self]
           · simp only [State.setEnv, SemanticsProperties.lookupBy_setBy_ne hn]
-            exact (hr.env n (by simpa using hn)).symm,
+            exact (hr.env n (by
+              simpa only [List.mem_cons, List.not_mem_nil, or_false] using hn)).symm,
           hr.selfBalance.symm, hr.tx.symm⟩
-      exact (holds_frame ψ (by intro _ _ hm; simp at hm) hag').1 h''
+      exact (holds_frame ψ (by intro _ _ hm; simp only [List.not_mem_nil] at hm) hag').1 h''
 
 theorem seqRev_sound {m : Modality} {ψ ψ' : Fml C} (hψ : ∀ σ, holds σ ψ' → holds σ ψ) :
     (rs : List (UpdElem C)) → ∀ σ, holds σ (seqRev m ψ' rs) → holds σ (.upd m rs.reverse ψ)

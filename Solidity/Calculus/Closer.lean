@@ -176,14 +176,15 @@ theorem substE_keeps {σ : State} {E : Eqs} (hE : EqOk σ E) (t : LTerm) :
   split
   · rename_i q hq
     have hm := List.mem_of_find?_eq_some hq
-    have he : q.1 = t := by simpa using List.find?_some hq
+    have he : q.1 = t := by simpa only [beq_iff_eq] using List.find?_some hq
     rw [← he] at h
     exact hE q hm v h
   · exact h
 
 /-- Where `t` returns: an integer (`some true`), a `bool` (`some false`). -/
 def KindOk (σ : State) (K : LTerm → Option Bool) : Prop :=
-  ∀ t v, t.eval σ = .ok v → (K t = some true → ∃ i, v = .int i) ∧ (K t = some false → ∃ b, v = .bool b)
+  ∀ t v, t.eval σ = .ok v → (K t = some true → ∃ i, v = .int i) ∧ (K t = some false → ∃ b,
+      v = .bool b)
 
 /-- What the simplifier may ask of a term: its kind, that it halts, that it
 returns. -/
@@ -198,8 +199,10 @@ def Orc.Ok (σ : State) (O : Orc) : Prop :=
     ∀ t, O.rets t = true → Returns σ t
 
 theorem Orc.ok_none (σ : State) : Orc.Ok σ {} :=
-  ⟨fun _ _ _ => ⟨fun h => by simp at h, fun h => by simp at h⟩, fun _ _ h => by simp at h,
-    fun _ h => by simp at h⟩
+  ⟨fun _ _ _ => ⟨fun h => by simp only [reduceCtorEq] at h,
+      fun h => by simp only [reduceCtorEq] at h⟩, fun _ _ h => by simp only [Bool.false_eq_true]
+          at h,
+    fun _ h => by simp only [Bool.false_eq_true] at h⟩
 
 /-- The default of a term whose kind is known: `0` or `false`. -/
 def foldZeroT (K : LTerm → Option Bool) (a : LTerm) : LTerm :=
@@ -251,8 +254,9 @@ theorem foldSame_keeps (σ : State) (t : LTerm) : Keeps σ t (foldSame t) := by
       obtain ⟨x, hx, h⟩ := Res.bind_eq_ok.1 h
       rw [hx] at h
       split <;> first
-        | (cases x <;> simp [evalBinop, applyBinOp, checkArith, Value.asInt, bind, Except.bind,
-            BinOp.retTy, BinOp.isArith, pure, Except.pure] at h <;> subst h <;> rfl)
+        | (cases x <;> simp only [evalBinop, bind, Except.bind, applyBinOp, decide_true,
+            checkArith, Except.ok.injEq, Value.asInt, Int.le_refl, reduceCtorEq, Bool.not_true,
+            Int.lt_irrefl, decide_false] at h <;> subst h <;> rfl)
         | (simp only [LTerm.eval, hx, Res.ok_bind]; exact h)
     · exact h
   · exact h
@@ -470,7 +474,7 @@ open Semantics.SVal.canonB (canonFieldsB canonElemsB canonEntriesB) in
 theorem canonFieldsB_lookup {s f : Name} {v : SVal} :
     ∀ {fields : List (Name × SVal)}, canonFieldsB s fields = true → lookupBy f fields = some v →
       ∃ T, lookupBy f (structDef s) = some T ∧ v.canonB T = true
-  | [], _, h => by simp [lookupBy] at h
+  | [], _, h => by simp only [lookupBy, reduceCtorEq] at h
   | (n, w) :: rest, hc, h => by
     simp only [canonFieldsB, Bool.and_eq_true] at hc
     simp only [lookupBy] at h
@@ -487,18 +491,20 @@ theorem canonFieldsB_lookup {s f : Name} {v : SVal} :
 
 theorem lookupBy_isSome_iff {κ α : Type} [DecidableEq κ] {k : κ} :
     ∀ {l : List (κ × α)}, (lookupBy k l).isSome = true ↔ k ∈ l.map (·.1)
-  | [] => by simp [lookupBy]
+  | [] => by simp only [lookupBy, Option.isSome_none, Bool.false_eq_true, List.map_nil,
+      List.not_mem_nil]
   | (k', v) :: l => by
     simp only [lookupBy, List.map_cons, List.mem_cons]
     split
-    · rename_i h; simp [h]
+    · rename_i h; simp only [Option.isSome_some, h, List.mem_map, Prod.exists, exists_and_right,
+        exists_eq_right, true_or]
     · rename_i h; simp only [h, false_or]; exact lookupBy_isSome_iff
 
 open Semantics.SVal.canonB (canonFieldsB canonElemsB canonEntriesB) in
 theorem canonEntriesB_lookup {V : Ty} {i : Int} {v : SVal} :
     ∀ {es : List (Int × SVal)}, canonEntriesB V es = true → lookupBy i es = some v →
       v.canonB V = true
-  | [], _, h => by simp [lookupBy] at h
+  | [], _, h => by simp only [lookupBy, reduceCtorEq] at h
   | (n, w) :: rest, hc, h => by
     simp only [canonEntriesB, Bool.and_eq_true] at hc
     simp only [lookupBy] at h
@@ -657,7 +663,7 @@ theorem Facts.inB_sound {σ : State} {F : Facts} (hF : F.Ok σ) {k : LTerm} {n :
     cases F.nf0_lit hF hj hx
     simp only [Value.asInt, Except.ok.injEq] at hxi
     subst hxi
-    simpa using h
+    simpa only [Bool.decide_and, Bool.and_eq_true, decide_eq_true_eq] using h
   · cases h
 
 /-- The type of a path in the layout. -/
@@ -697,8 +703,8 @@ theorem evalBinop_arith_int {op : BinOp} {p : PrimTy} {x : Value} {rb : Res Valu
     (hop : op.isArith = true) (h : evalBinop op p x rb = .ok v) : ∃ i, v = .int i := by
   unfold evalBinop at h
   split at h
-  · simp [BinOp.isArith] at hop
-  · simp [BinOp.isArith] at hop
+  · simp only [BinOp.isArith, Bool.false_eq_true] at hop
+  · simp only [BinOp.isArith, Bool.false_eq_true] at hop
   · obtain ⟨y, -, h⟩ := Res.bind_eq_ok.1 h
     obtain ⟨r, hr, h⟩ := Res.bind_eq_ok.1 h
     rw [checkArith_ok_eq h]
@@ -781,7 +787,7 @@ theorem Facts.isInt_sound {σ : State} {F : Facts} (hF : F.Ok σ) :
     obtain ⟨x, -, h⟩ := Res.bind_eq_ok.1 h
     obtain ⟨y, hy, h⟩ := Res.bind_eq_ok.1 h
     cases op with
-    | not => simp [Facts.isInt] at hi
+    | not => simp only [isInt, bne_self_eq_false, Bool.false_eq_true] at hi
     | neg =>
       simp only [applyUnOp, bind, Except.bind] at hy
       split at hy
@@ -804,7 +810,8 @@ theorem Facts.isInt_sound {σ : State} {F : Facts} (hF : F.Ok σ) :
     obtain ⟨⟨y, p⟩, hm, rfl, hp⟩ := hi
     obtain ⟨w, hw, ha⟩ := hF.2.2.2.2 _ hm
     rw [hw] at h; cases h
-    cases p <;> cases v <;> simp_all [PrimTy.admits]
+    cases p <;> cases v <;> simp_all only [not_true_eq_false, reduceCtorEq, not_false_eq_true,
+        PrimTy.admits, PrimVal.int.injEq, exists_eq']
   | .find .init q, hi, v, h | .findP .init q, hi, v, h => by
     simp only [Facts.isInt] at hi
     have hv : (LTerm.find .init q).eval σ = .ok v ∨ (LTerm.findP .init q).eval σ = .ok v := by
@@ -818,7 +825,8 @@ theorem Facts.isInt_sound {σ : State} {F : Facts} (hF : F.Ok σ) :
       obtain ⟨i, rfl⟩ := canonB_int hc; cases hw; exact ⟨i, rfl⟩
     · cases hi
   | .find (.save ..) _, hi, _, _ | .find (.del ..) _, hi, _, _
-  | .findP (.save ..) _, hi, _, _ | .findP (.del ..) _, hi, _, _ => by simp [Facts.isInt] at hi
+  | .findP (.save ..) _, hi, _, _ | .findP (.del ..) _, hi, _, _ => by simp only [isInt,
+      Bool.false_eq_true] at hi
   | .seq d a, hi, v, h => by
     simp only [LTerm.eval] at h
     obtain ⟨_, -, h⟩ := Res.bind_eq_ok.1 h
@@ -853,7 +861,7 @@ theorem Facts.isInt_sound {σ : State} {F : Facts} (hF : F.Ok σ) :
     · exact Facts.isInt_sound hF x hi.1 h
     · exact Facts.isInt_sound hF y hi.2 h
   | .lit (.bool _), hi, _, _ | .err, hi, _, _ | .has .., hi, _, _ | .kmap .., hi, _, _
-  | .sok _, hi, _, _ | .pok _, hi, _, _ => by simp [Facts.isInt] at hi
+  | .sok _, hi, _, _ | .pok _, hi, _, _ => by simp only [isInt, Bool.false_eq_true] at hi
 
 theorem Facts.isBool_sound {σ : State} {F : Facts} (hF : F.Ok σ) :
     (t : LTerm) → F.isBool t = true → ∀ {v : Value}, t.eval σ = .ok v → ∃ b, v = .bool b
@@ -901,7 +909,7 @@ theorem Facts.isBool_sound {σ : State} {F : Facts} (hF : F.Ok σ) :
     obtain ⟨⟨y, p⟩, hm, rfl, rfl⟩ := hi
     obtain ⟨w, hw, ha⟩ := hF.2.2.2.2 _ hm
     rw [hw] at h; cases h
-    cases v <;> simp_all [PrimTy.admits]
+    cases v <;> simp_all only [PrimTy.admits, PrimVal.bool.injEq, exists_eq']
   | .find .init q, hi, v, h | .findP .init q, hi, v, h => by
     simp only [Facts.isBool, beq_iff_eq] at hi
     have hv : (LTerm.find .init q).eval σ = .ok v ∨ (LTerm.findP .init q).eval σ = .ok v := by
@@ -909,7 +917,8 @@ theorem Facts.isBool_sound {σ : State} {F : Facts} (hF : F.Ok σ) :
     obtain ⟨w, hc, hw⟩ := F.read_init hF hi hv
     obtain ⟨b, rfl⟩ := canonB_bool hc; cases hw; exact ⟨b, rfl⟩
   | .find (.save ..) _, hi, _, _ | .find (.del ..) _, hi, _, _
-  | .findP (.save ..) _, hi, _, _ | .findP (.del ..) _, hi, _, _ => by simp [Facts.isBool] at hi
+  | .findP (.save ..) _, hi, _, _ | .findP (.del ..) _, hi, _, _ => by simp only [isBool,
+      Bool.false_eq_true] at hi
   | .seq d a, hi, v, h => by
     simp only [LTerm.eval] at h
     obtain ⟨_, -, h⟩ := Res.bind_eq_ok.1 h
@@ -944,7 +953,7 @@ theorem Facts.isBool_sound {σ : State} {F : Facts} (hF : F.Ok σ) :
     · exact Facts.isBool_sound hF x hi.1 h
     · exact Facts.isBool_sound hF y hi.2 h
   | .lit (.int _), hi, _, _ | .err, hi, _, _ | .env _, hi, _, _ | .len .., hi, _, _ => by
-    simp [Facts.isBool] at hi
+    simp only [isBool, Bool.false_eq_true] at hi
 
 /-! ## What returns -/
 
@@ -962,7 +971,8 @@ def resOk : Res Value → Bool
   | .error _ => false
 
 theorem resOk_iff {r : Res Value} : resOk r = true ↔ ∃ v, r = .ok v := by
-  cases r <;> simp [resOk]
+  cases r <;> simp only [resOk, Bool.false_eq_true, reduceCtorEq, exists_false, Except.ok.injEq,
+      exists_eq']
 
 /-- The storage is the initial one. -/
 def LStor.isInit : LStor → Bool
@@ -1002,7 +1012,8 @@ theorem Facts.knownOp_sound {σ : State} {F : Facts} (hF : F.Ok σ) {N : LTerm �
 
 /-- What `a ⊕ b` needs to return, once `a` returns (`rb`: `b` returns):
 operands of the kinds the operator takes, or literal operands it accepts. -/
-def Facts.binRets (F : Facts) (N : LTerm → LTerm) (op : BinOp) (p : PrimTy) (a b : LTerm) (rb : Bool) : Bool :=
+def Facts.binRets (F : Facts) (N : LTerm → LTerm) (op : BinOp) (p : PrimTy) (a b : LTerm) (rb :
+    Bool) : Bool :=
   match op with
   | .and => N a == .lit (.bool false) || (F.isBool a && rb && F.isBool b)
   | .or => N a == .lit (.bool true) || (F.isBool a && rb && F.isBool b)
@@ -1057,7 +1068,8 @@ def Facts.retsW (F : Facts) (N : LTerm → LTerm) : LTerm → Bool
   | t@(.seq d a) => t.known F.known F.ne || (F.retsW N d && F.retsW N a)
   | t@(.zero a) => t.known F.known F.ne || F.retsW N a
   | t@(.orElse a b) => t.known F.known F.ne || F.retsW N a || F.retsW N b
-  | t@(.binop op p a b) => t.known F.known F.ne || (F.retsW N a && F.binRets N op p a b (F.retsW N b))
+  | t@(.binop op p a b) => t.known F.known F.ne || (F.retsW N a && F.binRets N op p a b (F.retsW N
+      b))
   | t@(.unop op p a) => t.known F.known F.ne || (F.retsW N a && F.unRets N op p a)
   | t@(.ite c a b) => t.known F.known F.ne || (F.retsW N c &&
       match N c with
@@ -1176,7 +1188,7 @@ theorem Facts.retsW_sound {σ : State} {F : Facts} (hF : F.Ok σ) {N : LTerm →
     (t : LTerm) → F.retsW N t = true → Returns σ t
   | .lit _, _ => ⟨_, rfl⟩
   | .env _, _ => ⟨_, rfl⟩
-  | .err, h => by simp [Facts.retsW] at h
+  | .err, h => by simp only [retsW, Bool.false_eq_true] at h
   | .var x, h => by
     simp only [Facts.retsW, Bool.or_eq_true, List.any_eq_true, beq_iff_eq] at h
     rcases h with h | ⟨xp, hm, rfl⟩
@@ -1326,12 +1338,14 @@ theorem Facts.retsW_sound {σ : State} {F : Facts} (hF : F.Ok σ) {N : LTerm →
         obtain ⟨qs, w, hq, hw, hc⟩ := F.resolve hF (Facts.keysRetW_sound hF hN q hk) hT
         match w, hc with
         | .array _ _ _, _ =>
-          exact ⟨_, by simp only [LTerm.eval, LStor.eval, hq, hw, Res.ok_bind, Close.arrLen] <;> rfl⟩
+          exact ⟨_, by simp only [LTerm.eval, LStor.eval, hq, hw, Res.ok_bind,
+              Close.arrLen] <;> rfl⟩
       · rename_i E n hT
         obtain ⟨qs, w, hq, hw, hc⟩ := F.resolve hF (Facts.keysRetW_sound hF hN q hk) hT
         match w, hc with
         | .array _ _ _, _ =>
-          exact ⟨_, by simp only [LTerm.eval, LStor.eval, hq, hw, Res.ok_bind, Close.arrLen] <;> rfl⟩
+          exact ⟨_, by simp only [LTerm.eval, LStor.eval, hq, hw, Res.ok_bind,
+              Close.arrLen] <;> rfl⟩
       · cases ht
   | .sok s, h => by
     simp only [Facts.retsW] at h
@@ -1406,7 +1420,8 @@ theorem canonB_fixed_ty {es sh : List SVal} {T : Ty}
     (h : (SVal.array es sh true).canonB T = true) : ∃ E n, T = .ref (.fixed E n) := by
   match T, h with
   | .ref (.fixed E n), _ => exact ⟨E, n, rfl⟩
-  | .ref (.array E), h => simp [SVal.canonB] at h
+  | .ref (.array E), h => simp only [SVal.canonB, Bool.not_true, Bool.false_and,
+      Bool.false_eq_true] at h
 
 theorem Facts.halts_sound {σ : State} {F : Facts} (hF : F.Ok σ) :
     (t : LTerm) → F.halts t = true → ∀ v, t.eval σ ≠ .ok v
@@ -1438,7 +1453,7 @@ theorem Facts.halts_sound {σ : State} {F : Facts} (hF : F.Ok σ) :
     obtain ⟨qs, hq, h⟩ := Res.bind_eq_ok.1 h
     obtain ⟨w, hw, h⟩ := Res.bind_eq_ok.1 h
     cases hp : F.pty q with
-    | none => cases sh <;> simp [Facts.shapeNot, hp] at hn
+    | none => cases sh <;> simp only [shapeNot, hp, Bool.false_eq_true] at hn
     | some T =>
       obtain ⟨w', hw', hc⟩ := F.pty_find hF hp hq
       rw [hw'] at hw; cases hw
@@ -1450,7 +1465,7 @@ theorem Facts.halts_sound {σ : State} {F : Facts} (hF : F.Ok σ) :
           match w, hm, hc with
           | .map _ _, _, hc =>
             obtain ⟨K, V, rfl⟩ := canonB_map_ty hc
-            simp [Facts.shapeNot, hp] at hn
+            simp only [shapeNot, hp, Bool.false_eq_true] at hn
         · cases h
       | fixed =>
         simp only [KShape.test] at h
@@ -1459,12 +1474,12 @@ theorem Facts.halts_sound {σ : State} {F : Facts} (hF : F.Ok σ) :
           match w, hm, hc with
           | .array _ _ true, _, hc =>
             obtain ⟨E, n, rfl⟩ := canonB_fixed_ty hc
-            simp [Facts.shapeNot, hp] at hn
+            simp only [shapeNot, hp, Bool.false_eq_true] at hn
         · cases h
   | .lit _, hh, _, _ | .var _, hh, _, _ | .binop .., hh, _, _ | .unop .., hh, _, _
   | .ite .., hh, _, _ | .find .., hh, _, _ | .has .., hh, _, _ | .len .., hh, _, _
   | .sok _, hh, _, _ | .pok _, hh, _, _ | .kite .., hh, _, _ | .env _, hh, _, _
-  | .findP .., hh, _, _ => by simp [Facts.halts] at hh
+  | .findP .., hh, _, _ => by simp only [halts, Bool.false_eq_true] at hh
 
 /-- What the facts tell the simplifier: kinds, halting, and returning by
 `retsW` over the untyped normal form. -/
@@ -1507,47 +1522,53 @@ theorem evalBinop_and_true {p : PrimTy} {x : Value} {rb : Res Value}
     (h : evalBinop .and p x rb = .ok (.bool true)) : x = .bool true ∧ rb = .ok (.bool true) := by
   cases x with
   | int i =>
-    simp [evalBinop, applyBinOp, Value.asBool, bind, Except.bind] at h
-    cases rb <;> simp at h
+    simp only [evalBinop, bind, Except.bind, applyBinOp, Value.asBool] at h
+    cases rb <;> simp only [reduceCtorEq] at h
   | bool a =>
     cases a
-    · simp [evalBinop, pure, Except.pure] at h
+    · simp only [evalBinop, pure, Except.pure, Except.ok.injEq, PrimVal.bool.injEq,
+        Bool.false_eq_true] at h
     · refine ⟨rfl, ?_⟩
       cases rb with
-      | error e => simp [evalBinop, bind, Except.bind] at h
+      | error e => simp only [evalBinop, bind, Except.bind, reduceCtorEq] at h
       | ok y =>
         cases y with
-        | int j => simp [evalBinop, applyBinOp, Value.asBool, bind, Except.bind] at h
+        | int j => simp only [evalBinop, bind, Except.bind, applyBinOp, Value.asBool,
+            reduceCtorEq] at h
         | bool c =>
           cases c
-          · simp [evalBinop, applyBinOp, Value.asBool, bind, Except.bind, checkArith] at h
+          · simp only [evalBinop, bind, Except.bind, applyBinOp, Value.asBool, Bool.and_false,
+              checkArith, Except.ok.injEq, PrimVal.bool.injEq, Bool.false_eq_true] at h
           · rfl
 
 theorem evalBinop_or_false {p : PrimTy} {x : Value} {rb : Res Value}
     (h : evalBinop .or p x rb = .ok (.bool false)) : x = .bool false ∧ rb = .ok (.bool false) := by
   cases x with
   | int i =>
-    simp [evalBinop, applyBinOp, Value.asBool, bind, Except.bind] at h
-    cases rb <;> simp at h
+    simp only [evalBinop, bind, Except.bind, applyBinOp, Value.asBool] at h
+    cases rb <;> simp only [reduceCtorEq] at h
   | bool a =>
     cases a
     · refine ⟨rfl, ?_⟩
       cases rb with
-      | error e => simp [evalBinop, bind, Except.bind] at h
+      | error e => simp only [evalBinop, bind, Except.bind, reduceCtorEq] at h
       | ok y =>
         cases y with
-        | int j => simp [evalBinop, applyBinOp, Value.asBool, bind, Except.bind] at h
+        | int j => simp only [evalBinop, bind, Except.bind, applyBinOp, Value.asBool,
+            reduceCtorEq] at h
         | bool c =>
           cases c
           · rfl
-          · simp [evalBinop, applyBinOp, Value.asBool, bind, Except.bind, checkArith] at h
-    · simp [evalBinop, pure, Except.pure] at h
+          · simp only [evalBinop, bind, Except.bind, applyBinOp, Value.asBool, Bool.or_true,
+              checkArith, Except.ok.injEq, PrimVal.bool.injEq, Bool.true_eq_false] at h
+    · simp only [evalBinop, pure, Except.pure, Except.ok.injEq, PrimVal.bool.injEq,
+        Bool.true_eq_false] at h
 
 /-- `a == b` returned `c`: `b` returned, equal to `a` exactly when `c`. -/
 theorem evalBinop_eqB_c {p : PrimTy} {x : Value} {rb : Res Value} {c : Bool}
     (h : evalBinop .eqB p x rb = .ok (.bool c)) : ∃ y, rb = .ok y ∧ decide (x = y) = c := by
   cases rb with
-  | error e => cases x <;> simp [evalBinop, bind, Except.bind] at h
+  | error e => cases x <;> simp only [evalBinop, bind, Except.bind, reduceCtorEq] at h
   | ok y =>
     refine ⟨y, rfl, ?_⟩
     cases x <;> simp only [evalBinop, applyBinOp, bind, Except.bind, checkArith,
@@ -1557,7 +1578,7 @@ theorem evalBinop_eqB_c {p : PrimTy} {x : Value} {rb : Res Value} {c : Bool}
 theorem evalBinop_neB_c {p : PrimTy} {x : Value} {rb : Res Value} {c : Bool}
     (h : evalBinop .neB p x rb = .ok (.bool c)) : ∃ y, rb = .ok y ∧ decide (x = y) = !c := by
   cases rb with
-  | error e => cases x <;> simp [evalBinop, bind, Except.bind] at h
+  | error e => cases x <;> simp only [evalBinop, bind, Except.bind, reduceCtorEq] at h
   | ok y =>
     refine ⟨y, rfl, ?_⟩
     cases x <;> simp only [evalBinop, applyBinOp, bind, Except.bind, checkArith,
@@ -1567,10 +1588,11 @@ theorem evalBinop_neB_c {p : PrimTy} {x : Value} {rb : Res Value} {c : Bool}
 theorem unop_not {p : PrimTy} {x : Value} {b : Bool}
     (h : (applyUnOp .not x >>= unopCheck .not p) = .ok (.bool b)) : x = .bool (!b) := by
   cases x with
-  | int i => simp [applyUnOp, Value.asBool, bind, Except.bind] at h
+  | int i => simp only [bind, Except.bind, applyUnOp, Value.asBool, reduceCtorEq] at h
   | bool a =>
-    simp [applyUnOp, Value.asBool, bind, Except.bind, unopCheck, pure, Except.pure] at h
-    subst h; simp
+    simp only [bind, Except.bind, applyUnOp, Value.asBool, unopCheck, pure, Except.pure,
+        Except.ok.injEq, PrimVal.bool.injEq, Bool.not_eq_eq_eq_not] at h
+    subst h; simp only
 
 /-- Record that `t` returns `v`: its normal form's value. -/
 def Facts.addEq (F : Facts) (t : LTerm) (v : Value) : Facts :=
@@ -1654,7 +1676,7 @@ theorem Facts.eqnK_ok {σ : State} {F : Facts} (hF : F.Ok σ) {a b : LTerm}
     (hka : ∀ G w, G.Ok σ → a.eval σ = .ok w → (ka G w).Ok σ)
     (hkb : ∀ G w, G.Ok σ → b.eval σ = .ok w → (kb G w).Ok σ) :
     (F.eqnK a b ka kb).Ok σ := by
-  have hG := F.withNe_ok hF ha hb (c := true) (by simp)
+  have hG := F.withNe_ok hF ha hb (c := true) (by simp only)
   unfold Facts.eqnK
   split
   · rename_i w hw
@@ -1705,19 +1727,21 @@ theorem Facts.decomp_ok {σ : State} :
     · obtain ⟨rfl, hb⟩ := evalBinop_or_false ht'
       exact Facts.decomp_ok b (Facts.decomp_ok a hG hx) hb
     · obtain ⟨y, hy, hxy⟩ := evalBinop_eqB_c ht'
-      have he : x = y := by simpa using hxy
+      have he : x = y := by simpa only [decide_eq_true_eq] using hxy
       subst he
       exact Facts.eqnK_ok hG hx hy
         (fun G w hG h => Facts.decomp_ok a hG h) (fun G w hG h => Facts.decomp_ok b hG h)
     · obtain ⟨y, hy, hxy⟩ := evalBinop_neB_c ht'
-      have he : x = y := by simpa using hxy
+      have he : x = y := by simpa only [Bool.not_false, decide_eq_true_eq] using hxy
       subst he
       exact Facts.eqnK_ok hG hx hy
         (fun G w hG h => Facts.decomp_ok a hG h) (fun G w hG h => Facts.decomp_ok b hG h)
     · obtain ⟨y, hy, hxy⟩ := evalBinop_eqB_c ht'
-      exact Facts.withNe_ok hG hx hy (by simpa using hxy)
+      exact Facts.withNe_ok hG hx hy (by simpa only [Bool.false_eq_true, iff_false,
+          decide_eq_false_iff_not] using hxy)
     · obtain ⟨y, hy, hxy⟩ := evalBinop_neB_c ht'
-      exact Facts.withNe_ok hG hx hy (by simpa using hxy)
+      exact Facts.withNe_ok hG hx hy (by simpa only [Bool.false_eq_true, iff_false, Bool.not_true,
+          decide_eq_false_iff_not] using hxy)
     · exact hG
   | .unop op p a, F, v, hF, ht => by
     have hG := F.addEq_ok hF ht
@@ -1825,16 +1849,16 @@ theorem Facts.apart_sound {σ : State} {F : Facts} (hF : F.Ok σ) {a b : LTerm}
       rw [hu] at hna; rw [hw] at hnb
       simp only [LTerm.eval, Except.ok.injEq] at hna hnb
       subst hna hnb
-      simp at h
+      simp only [bne_self_eq_false, Bool.false_eq_true] at h
     · cases h
   · simp only at hc
     subst hc
     have := hF.2.1 _ hm
     rcases hpq with ⟨hp, hq⟩ | ⟨hp, hq⟩
     · subst hp hq
-      simpa using (this x x ha hb)
+      simpa only [Bool.false_eq_true, iff_false, not_true_eq_false] using (this x x ha hb)
     · subst hp hq
-      simpa using (this x x hb ha)
+      simpa only [Bool.false_eq_true, iff_false, not_true_eq_false] using (this x x hb ha)
 
 /-- The terms an equation compares with a `bool` literal: what a case split
 on a condition takes. -/
@@ -1981,8 +2005,8 @@ theorem Facts.prove_sound : (φ : LFml) → ∀ {σ : State} {F : Facts}, F.Ok �
 
 theorem Facts.refute_sound : (φ : LFml) → ∀ {σ : State} {F : Facts}, F.Ok σ →
     F.refute φ = true → ¬ φ.holds σ
-  | .tt, _, _, _, h => by simp [Facts.refute] at h
-  | .all .., _, _, _, h => by simp [Facts.refute] at h
+  | .tt, _, _, _, h => by simp only [refute, Bool.false_eq_true] at h
+  | .all .., _, _, _, h => by simp only [refute, Bool.false_eq_true] at h
   | .eq a b, σ, F, hF, h => F.apart_sound hF h
   | .not φ, σ, F, hF, h => fun hn => hn (Facts.prove_sound φ hF h)
   | .and φ ψ, σ, F, hF, h => fun ⟨hφ, hψ⟩ => by
