@@ -235,6 +235,87 @@ info: Try this:
 example : ⊢ dl!{ ⟨ uint x = 5; uint r = ++x; ⟩ r == 6 && x == 6 } := by
   sol_prove?
 
+/-! Arrays and copies (`LStor.arr`, `LStor.copy`): a push, a `pop` after
+it and a copy close inside the residue; under `wt(storage)` the diamond of
+a push and a `pop` returns (a length is at least `0`, `Facts.lo`), and so
+does a write below the slot a `push()` of a struct takes, through an index
+or through the alias it returns (`Derive.pushAlias?`, `Facts.slotTy`). -/
+
+/--
+info: Try this:
+  sol_prove
+-/
+#guard_msgs in
+example : ⊢ dl!{ [ values.push(3); uint n = values.length; ] n > 0 } := by
+  sol_prove?
+
+/--
+info: Try this:
+  sol_prove
+-/
+#guard_msgs in
+example : ⊢ dl!{ [ uint n = values.length; values.push(3); values.pop(); uint m = values.length; ]
+    m == n } := by
+  sol_prove?
+
+/--
+info: Try this:
+  sol_prove
+-/
+#guard_msgs in
+example : ⊢ dl!{ [ alice = bob; uint x = bob.age; ] alice.age == x } := by
+  sol_prove?
+
+/-- `wt(storage)`, the premise of a diamond obligation (`Fml.wt`). -/
+def wtStd : Fml StandardExample := .defined (.wt StandardExample.vars .storage)
+
+/--
+info: Try this:
+  sol_prove
+-/
+#guard_msgs in
+example : ⊢ .imp wtStd dl!{ ⟨ values.push(3); values.pop(); ⟩ true } := by
+  sol_prove?
+
+/--
+info: Try this:
+  sol_prove
+-/
+#guard_msgs in
+example : ⊢ .imp wtStd dl!{ ⟨ persons.push(); persons[0].age = 1; ⟩ true } := by
+  sol_prove?
+
+/--
+info: Try this:
+  sol_prove
+-/
+#guard_msgs in
+example : ⊢ .imp wtStd dl!{ ⟨ Person storage p = persons.push(); p.age = 1; ⟩ true } := by
+  sol_prove?
+
+/-! The reduction's compiled code reads a pushed array's old length and
+value only where the read needs them (`CaseTree.toTermLazy`).  Run
+strictly, the work doubled with each push (twelve onto one array: 23 ms;
+twelve onto each of two, interleaved: 106 s), and `sol_prove?`'s size test
+(`Derive.leafFits`) builds the reduction before it counts it.  Here the leaf
+is within `closeSize` and its reduction past `elimSize`: refused in
+milliseconds. -/
+
+/-- Twenty-two pushes onto one array. -/
+def pushes22 : Fml StandardExample :=
+  dl!{ [
+    values.push(0); values.push(1); values.push(2); values.push(3); values.push(4);
+    values.push(5); values.push(6); values.push(7); values.push(8); values.push(9);
+    values.push(10); values.push(11); values.push(12); values.push(13); values.push(14);
+    values.push(15); values.push(16); values.push(17); values.push(18); values.push(19);
+    values.push(20); values.push(21); ]
+    values.length > 0 }
+
+#guard (Derive.residue Derive.budget Derive.synClose Derive.budget [] pushes22).map
+  (fun (ls, _) => ls.map fun (l : List (Hyp StandardExample) × Fml StandardExample) =>
+    (((Hyp.wrap (Derive.dropWt l.1) l.2).seqUpd.toL Decide.Sym.empty).fits
+      Derive.closeSize).isSome && !Derive.leafFits l.1 l.2) == some [true]
+
 /-! The size bound (`Derive.closeSize`): a storage written from its own
 read doubles the leaf with each write.  Four `total += 1;` close inside the
 residue; six leave one leaf past the bound, which neither the closer nor

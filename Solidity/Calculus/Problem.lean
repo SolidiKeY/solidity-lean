@@ -24,14 +24,20 @@ list of roots.  `wt(storage)` (`Fml.wt`) assumes most of what Solidity
 guarantees of a deployed contract's storage: every root there, in order,
 canonical and tight, which is exactly reachable (`shape_iff_reachable`),
 and every word in its type's range (`storageWtB`, `wt_iff_reachable`).
-It does not bound a dynamic array's length, which solc keeps below `2^64`
-(`push` panics there) and the model's `push` does not: a diamond that
-reads a length through checked arithmetic can fail from a storage solc
-cannot reach, so it is stronger than Solidity's and may not be derivable
-(`docs/solc-alignment.md`, "Remaining deltas").  So a derived obligation
-is Solidity's, not solkey's: where solkey's free storage can break an
-`assert` (a `uint` field below zero), the premise excludes it, so the Lean
-theorem need not imply solkey's obligation.
+It does not bound a dynamic array's length, which solc keeps at most
+`2^64` (`push` panics, 0x41, on an array already that long), and the
+model's `push` (`pushOn`) never panics.  The delta cuts both ways.  A
+diamond that reads a length through checked arithmetic can fail from a
+storage solc cannot reach, so it is stronger than Solidity's and may not be
+derivable (`storagePushReadBack`).  And a diamond over a `push` with no
+bound on the length before it asserts normal termination where solc
+panics, from a storage of length `2^64` that `wt` accepts: three derived
+ones hold only up to this delta (`storagePushLengthPositive`,
+`storagePopUnknownLength`, `arrayOfMappingsIndex`; `docs/solc-alignment.md`,
+"Remaining deltas").  They are solkey's, whose `int` is unbounded.
+Otherwise a derived obligation is Solidity's, not solkey's: where solkey's
+free storage can break an `assert` (a `uint` field below zero), the premise
+excludes it, so the Lean theorem need not imply solkey's obligation.
 
 * **Box**: `∀x̄. wt(storage) → [ f(x̄); ] true`.  A failed `assert` panics,
   and no modality holds of a panic (`Modality.afterRun`), so this is KeY's

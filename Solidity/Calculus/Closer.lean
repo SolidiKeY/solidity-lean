@@ -32,7 +32,14 @@ local normal form rewriting the other (KeY's `applyEq`).
   and a read of the initial storage at a path the layout types
   (`LPath.ty`, `LPath.ty_find`): under `wt(storage)` every root is there,
   canonical at its declared type, so a member, a mapping entry or a
-  fixed-size array's element in range is there too.
+  fixed-size array's element in range is there too.  Below the slot a
+  `push()` of such an array takes (or of that array after its `delete`),
+  and below an element of it up to the old length, a read is typed by the
+  element type (`Facts.slotTy`, `Facts.slot_find`): the elements and the
+  slots past the end are canonical under `wt` (`SVal.canonB` checks the
+  shadow too), and so is a default where the type's structs are
+  (`defaultForTy_canonB`).  Its shape and kind follow the type, and it
+  returns where the index is at most the old length (`Facts.slotIn`).
 * **What halts** (`Facts.halts`): a test for a shape the layout says is
   not there (a `delete`'s guards), so `orElse` takes its other side.
 * **Intervals** (`Facts.range`, `Facts.bnds`): a `uint` or `int` local

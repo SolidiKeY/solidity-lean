@@ -762,7 +762,7 @@ Of the 117 pending, 111 use memory (M6).  The other 6, and why:
 
 | Function | Why it stays pending |
 |---|---|
-| `storagePushReadBack` (diamond) | `values[values.length - 1]` after `values.push(42)`: the `- 1` is a checked `uint` subtraction of a length with no bound, which reverts where the length is past `2²⁵⁶`; KeY's `int` has no range.  Not valid in the model (overflow, as the plan expects): solc keeps a length below `2⁶⁴` (`push` panics, 0x41), but `wt(storage)` does not bound lengths (`docs/solc-alignment.md`, "Remaining deltas"). |
+| `storagePushReadBack` (diamond) | `values[values.length - 1]` after `values.push(42)`: the `- 1` is a checked `uint` subtraction of a length with no bound, which reverts where the length is past `2²⁵⁶`; KeY's `int` has no range.  Not valid in the model (overflow, as the plan expects): solc keeps a length at most `2⁶⁴` (`push` panics, 0x41, on an array already that long), but `wt(storage)` does not bound lengths (`docs/solc-alignment.md`, "Remaining deltas"). |
 | `testDanglingReferenceSurvivesPush`, `testArrayCopyClearsOldElements`, `testArrayCopyKeepsDestinationTail`, `testDeleteArrayLeavesDataPastLength`, `testDanglingInnerArrayReappearsAfterPush` (diamonds) | an alias bound through an index (`Token storage r = tokens[0];`) used after a `pop` made it dangle: the fragment drops such an alias at the next write (`SymB.onWrite`), and the write through it lands past the live end, which the reduction's live storage does not reach. |
 
 **Cost.**  `Derived7.lean` (40 theorems) takes 58 s, `Derived8.lean` (23)
@@ -783,6 +783,17 @@ parallel build (they were built before `Calculus/Problem.lean` anyway).
 
 `#solkey_derive? N … pending` runs the search on the statements no
 theorem derives yet.
+
+**Three diamonds hold only up to the length delta.**  The model's `push`
+never panics and `wt(storage)` does not bound a length, while solc's
+`push` panics (0x41) on an array of length `2^64`, a length a deployed
+contract can hold.  `storagePushLengthPositive`, `storagePopUnknownLength`
+(`TestSuite/Derived7.lean`) and `arrayOfMappingsIndex`
+(`TestSuite/Derived8.lean`) push with no bound on the length before them:
+derived, and true of solkey (its `int` is unbounded), but false of solc
+from that storage.  The other derived diamonds that push start with a
+`delete` of the array.  Closing the delta is a bound in `wt` and the panic
+in `pushOn` (`docs/solc-alignment.md`, "Remaining deltas").
 
 
 ## M3b review 2 (2026-10-05): what counts as derived
@@ -817,3 +828,56 @@ theorem derives yet.
   `⊢ φ` (`sol_prove`, `#solkey_derive?`, `#solkey_obligations`), and
   `Derive.proveSearch` the one leaf loop of `sol_prove?` and
   `#solkey_derive?`.
+
+
+## M5 review (2026-10-05)
+
+- **The length delta cuts both ways.**  `storagePushLengthPositive`,
+  `storagePopUnknownLength` and `arrayOfMappingsIndex` are derived diamonds
+  that solc breaks from a storage of length `2^64` (`push` panics, 0x41);
+  they hold in the model and in solkey.  `Calculus/Problem.lean`,
+  `docs/solc-alignment.md` ("No bound on a dynamic array's length") and the
+  M5 section above say so, and that solc's lengths reach `2^64` (not
+  "below").  Not fixed in the model: it needs a bound in `wt` and the panic
+  in `pushOn`, a semantic change of its own.
+- **The elimination as compiled code** (`Calculus/Decide.lean`).  The
+  `.arr` cases of `readU`, `hasU`, `lenU` and `mapU` passed the old length
+  and the old value as strict arguments: two recursive calls on the same
+  storage, so compiled code (`Derive.leafFits` through `evalExpr`, which
+  heeds no heartbeats) did `2^k` calls for `k` array operations.  Measured
+  on the reduction alone: twelve pushes onto `values`, 23 ms; twelve onto
+  each of `values` and `persons`, interleaved, 106 s.  `LTerm.elimF` and
+  its mutual copies compute a leaf's arguments only where the relation
+  reads them (`CaseTree.toTermLazy`), proved equal to the definitions
+  (`LTerm.elimF_eq`, …) and installed with `@[csimp]`: 1 ms and 7 ms on
+  the same leaves.  The kernel and the proofs see the old definitions, so
+  nothing checked changes.  Pinned in `Examples/ProofTree.lean`
+  (`pushes22`: a leaf within `closeSize` whose reduction is past
+  `elimSize`, refused in milliseconds).
+- **What stays slow.**  The closer itself (`LFml.close`) on the reduction
+  of `n` pushes onto one array, within the bounds: 0.1 s at 8, 0.9 s at 12,
+  2.0 s at 14, 4.5 s at 16; at 20 the reduction is past `elimSize` and the
+  leaf is refused (4 ms).  So `sol_prove`'s compiled residue can spend a
+  few seconds on a leaf the bounds accept; no TestSuite function comes
+  near (the most pushes and pops in one is six,
+  `testNestedIndexWriteImpureReceiverAndIndex`, over several arrays).
+- **`simp only`.**  The 336 bare `simp`/`simpa`/`simp_all` calls of
+  `Calculus/Decide.lean` (not only M5's) and the 7 of `Calculus/Derive.lean`
+  are now `simp only` with the lemmas `simp?` printed (the union, where a
+  `<;>` fan printed several), and three unused arguments the linter
+  reported are gone.
+- **Docs and pins.**  The module docstrings of `Calculus/Decide.lean`
+  (recycled slots, `copyKeys`) and `Calculus/Closer.lean` (`Facts.slotTy`)
+  and `docs/lean-key-rule-map.md` (copies below keys, recycled slots) say
+  what fd4430d added.  `Examples/Tactics/Decide.lean` had a pin that called
+  copies outside the fragment; it now proves a push, a push read back, a
+  `pop` after a `push` and a copy (`pushLength`, `pushReadBack`,
+  `pushPopLength`, `copyReadsSource`), and keeps the unguarded copy as a
+  formula that is not valid over every state.  `Examples/ProofTree.lean`
+  pins `sol_prove?` on a push, a `pop`, a copy, and under `wt(storage)` a
+  push and `pop`, a write through an index into a pushed struct, and one
+  through the alias `push()` returns: the default targets now exercise
+  the M5 closer paths.
+- **Checked.**  `Derived7.lean` and `Derived8.lean` re-check with no
+  errors after the change.
+

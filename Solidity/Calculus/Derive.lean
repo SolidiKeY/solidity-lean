@@ -212,7 +212,8 @@ theorem stable_eval {σ τ : State} {r : Name} {P : List Seg} {X : SVal}
     cases he
     rw [stable_eval hsv q hp h₀ fun hr => by
       obtain ⟨rest, hrest⟩ := hpre hr
-      exact ⟨.field f :: rest, by simp [hrest]⟩]
+      exact ⟨.field f :: rest, by simp only [hrest, List.append_assoc, List.cons_append,
+          List.nil_append]⟩]
     rfl
   | .app2 .at q k, hp, r', segs, h, hpre => by
     simp only [Tm.stablePath, Bool.and_eq_true] at hp
@@ -224,7 +225,8 @@ theorem stable_eval {σ τ : State} {r : Name} {P : List Seg} {X : SVal}
     have henv : τ.env = σ.env := by rw [saveStorage_state hsv]
     rw [stable_eval hsv q hp.1 h₀ fun hr => by
       obtain ⟨rest, hrest⟩ := hpre hr
-      exact ⟨.at i :: rest, by simp [hrest]⟩, Res.ok_bind, keyFree_eval henv k hp.2, hi,
+      exact ⟨.at i :: rest, by simp only [hrest, List.append_assoc, List.cons_append,
+          List.nil_append]⟩, Res.ok_bind, keyFree_eval henv k hp.2, hi,
       Res.ok_bind, Close.checkIndex_saveStorage_apart i hsv ?_, hc, Res.ok_bind]
     by_cases hr : r₀ = r
     · subst hr
@@ -236,7 +238,7 @@ theorem stable_eval {σ τ : State} {r : Name} {P : List Seg} {X : SVal}
       omega
     · exact .inl hr
   | .app1 .next _, h, _, _, _, _ | .app2 .nextIn _ _, h, _, _, _, _
-  | .app3 .atIn _ _ _, h, _, _, _, _ => by simp [Tm.stablePath] at h
+  | .app3 .atIn _ _ _, h, _, _, _, _ => by simp only [Tm.stablePath, Bool.false_eq_true] at h
 
 
 /-- Where `p = arr.push();` leaves its alias: the last slot, once the push
@@ -255,15 +257,17 @@ theorem lastSlot_eval {P : PTerm C} (hP : P.stablePath = true) {E : Ty} {σ τ :
   cases c with
   | array es sh fx =>
     simp only [Close.pushOn_array, pure, Except.pure, Res.ok_bind] at hs
-    have hp' := stable_eval hs P hP hp (fun _ => ⟨[], by simp⟩)
+    have hp' := stable_eval hs P hP hp (fun _ => ⟨[], by simp only [List.append_nil]⟩)
     have hf := State.findStorage_saveStorage_same hs
     rw [Close.PTerm.eval_next, hp, Res.ok_bind, hc, Res.ok_bind]
     simp only [lastSlot, Close.PTerm.eval_at, hp', Close.Term.eval_binop,
       Close.Term.eval_len, Close.STerm.eval_storage, hf, Close.arrLen, Close.Term.eval_lit,
       evalBinop, applyBinOp, Value.asInt, bind, Except.bind, checkArith, BinOp.retTy,
       BinOp.isArith, Close.checkIndex_eq, Close.pastEnd, List.length_append, List.length_singleton]
-    simp [Close.idxOk]
-  | prim _ | struct _ | map _ _ => simp [Close.pushOn] at hs
+    simp only [↓reduceIte, Int.natCast_add, Int.cast_ofNat_Int, Int.add_sub_cancel, Close.idxOk,
+      Int.ofNat_zero_le, Int.toNat_natCast, List.length_append, List.length_cons, List.length_nil,
+      Nat.zero_add, Nat.lt_add_one, and_self]
+  | prim _ | struct _ | map _ _ => simp only [Close.pushOn, reduceCtorEq] at hs
 
 /-- `{ storage := extend(storage, p) ‖ x := p[p.length] }` of
 `T storage x = p.push();`: the push, then the alias to its last slot. -/
@@ -311,7 +315,7 @@ theorem pushAlias?_sound {U : Upd C} {s : STerm C} {x : Var} {Q : PTerm C}
             | array es sh fx =>
               simp only [Close.pushOn_array, pure, Except.pure, Res.ok_bind] at hs
               rw [saveStorage_state hs]
-            | prim _ | struct _ | map _ _ => simp [Close.pushOn] at hs
+            | prim _ | struct _ | map _ _ => simp only [Close.pushOn, reduceCtorEq] at hs
           rw [hτ] at h' ⊢
           rw [lastSlot_eval hP hs] at h'
           exact h'

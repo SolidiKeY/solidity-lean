@@ -225,22 +225,53 @@ theorem diamondLocals :
   sol_symex
   sol_decide
 
-/-! ## Outside the fragment
+/-! ## Pushes, pops and copies
 
-A copy between storage locations (`alice = bob;`) writes a subtree, not a
-word, and is outside the fragment; `sol_decide` says so. -/
+A push or a pop is one write of the array (`LStor.arr`): a read below it
+compares its index with the old length, and the length after it is the old
+one plus or minus one, counted unchecked.  A copy between storage locations
+(`alice = bob;`, `LStor.copy`) writes a subtree, read through its source. -/
 
+/-- `values.push(3);` — the array is not empty after it. -/
+theorem pushLength :
+    ⊨ dl!{ [ values.push(3); uint n = values.length; ] n > 0 } := by
+  sol_symex
+  sol_decide
+
+/-- `values.push(3);` — the pushed word is the last element. -/
+theorem pushReadBack :
+    ⊨ dl!{ [ values.push(3); uint r = values[values.length - 1]; ] r == 3 } := by
+  sol_symex
+  sol_decide
+
+/-- A `pop` after a `push` gives the length back. -/
+theorem pushPopLength :
+    ⊨ dl!{ [ uint n = values.length; values.push(3); values.pop(); uint m = values.length; ]
+           m == n } := by
+  sol_symex
+  sol_decide
+
+/-- `alice = bob;` — a member of the copy is the source's. -/
+theorem copyReadsSource :
+    ⊨ dl!{ [ alice = bob; uint x = bob.age; ] alice.age == x } := by
+  sol_symex
+  sol_decide
+
+/-! ## Formulas that are not valid
+
+`sol_decide` fails on them, and it is right to: the reduction is an
+equivalence. -/
+
+/-- Over every state `bob` need not have an `age` (it may hold a word),
+and nothing in the program reads it, so the equation may compare two reads
+that halt.  With `uint x = bob.age;` in the program it is valid
+(`copyReadsSource`). -/
 example : True := by
   fail_if_success
     have : ⊨ dl!{ [ alice = bob; ] alice.age == bob.age } := by
       sol_symex
       sol_decide
   trivial
-
-/-! ## Formulas that are not valid
-
-`sol_decide` fails on them, and it is right to: the reduction is an
-equivalence. -/
 
 /-- Without `a != b` the frame fails where `a = b`. -/
 example : True := by

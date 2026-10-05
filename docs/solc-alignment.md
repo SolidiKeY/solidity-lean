@@ -270,10 +270,18 @@ they would in a frame of their own.
   on, so what a reference wrote into that slot's own arrays past their ends is
   dropped where solc keeps it. No test in the corpus reads it.
 - **No bound on a dynamic array's length.** solc's `push` panics (0x41)
-  once a length reaches `2^64`, so no deployed contract holds a longer
-  array; here `push` (`pushOn`) appends unchecked and `wt(storage)`
-  (`storageWtB`) bounds words and keys, not lengths. A diamond obligation
-  that reads a length through checked arithmetic (`storagePushReadBack`:
-  `values[values.length - 1]` after a `push`) is then false in the model
-  from a storage solc cannot reach, and stays underived
-  (`docs/testsuite-proofs.md`).
+  on an array whose length is already `2^64` (`oldLen >= 2^64`), so a
+  deployed contract holds lengths up to `2^64` and no longer; here `push`
+  (`pushOn`) appends unchecked and `wt(storage)` (`storageWtB`) bounds
+  words and keys, not lengths. The delta goes both ways for a diamond
+  obligation. One that reads a length through checked arithmetic
+  (`storagePushReadBack`: `values[values.length - 1]` after a `push`) is
+  false in the model from a storage solc cannot reach, and stays underived.
+  One that pushes with no bound on the length before it holds in the model
+  where solc panics, from a length of exactly `2^64`:
+  `storagePushLengthPositive`, `storagePopUnknownLength` and
+  `arrayOfMappingsIndex` are derived (`TestSuite/Derived7.lean`,
+  `TestSuite/Derived8.lean`) and true of solkey, whose `int` is unbounded,
+  but not of solc from that storage (`docs/testsuite-proofs.md`). Closing
+  it means a bound `≤ 2^64` on every length in `wt` and the 0x41 panic in
+  `pushOn`, which would also make `storagePushReadBack` derivable.
