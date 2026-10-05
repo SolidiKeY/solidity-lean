@@ -821,7 +821,8 @@ in `pushOn` (`docs/solc-alignment.md`, "Remaining deltas").
   `maxHeartbeats`: `#solkey_derive?` reports such a statement pending ("its
   replay is past maxHeartbeats as one declaration"), and `sol_prove?`
   warns.  `memoryToStorageIndexArrayCopyRootExample` needs about 264k
-  heartbeats against 200k and is pinned as that case.  The sum is
+  heartbeats against 200k and was pinned as that case, until M6b (step
+  5b) made it `sol_prove` alone and dropped the pin.  The sum is
   approximate: it leaves out the statement's elaboration and the `case`
   lines.
 - **Pins off the critical path.**  The `#solkey_derive?` pins moved from
@@ -1038,8 +1039,9 @@ as merged.
 
 ## M6b
 
-The memory closer is being rebuilt from solkey's `memoryRules.key` and
-`structMemoryRules.key` taclets. Each step is timed against this baseline.
+The memory closer was rebuilt from solkey's `memoryRules.key` and
+`structMemoryRules.key` taclets, one step at a time, each timed against the
+baseline below. "M6b results", at the end, is the outcome.
 
 ### Baseline (step 0, M6 closer at `8c6ac5a`)
 
@@ -1405,3 +1407,71 @@ table to be the declarations', with no member named `length` (`DeclOk`),
 and a write of a length or of a member named `length` has no Theory term.
 Nothing in the closer changed, so the derived counts and timings are step
 6's; the module checks in about 5 s and is not on any proof's path.
+
+### M6b results
+
+Every memory clause of the closer is a solkey taclet of `memoryRules.key`,
+`structMemoryRules.key` or a program rule that writes memory, named as solkey
+names it, with a row in `docs/lean-key-rule-map.md` ("The closer's memory
+clauses"): the closer clause, the interpreter lemma that is its soundness,
+the Theory lemma that transcribes the taclet, and where
+`Calculus/MemTheory.lean` checks the two agree. The guards only Lean has
+(the run and copy guards, `refDesc`, `memSize`) have rows marked "—", and
+the three deviations (an allocation's pair kept whole, `new T[](n)` one
+node, no `new` term) are rows of their own.
+
+- **Counts.** 20 more obligations derived, the copies between memory and
+  storage, in `TestSuite/Derived12.lean` (19 `sol_prove`, one with the
+  cons-closer replay): `Report.lean` pins "420 functions: 411 derived, 6
+  pending, 3 other". The 6 pending are `storagePushReadBack` (divergent)
+  and the five dangling aliases, as the plan expected. `check-testsuite.sh`
+  passes: 418 = 411 + 5 pending + 1 divergent + 1 excluded.
+- **Modules.** New: `Calculus/MemNames.lean` (the interpreter lemmas),
+  `Calculus/DecideLang.lean` (the target language, split out of
+  `Calculus/Decide.lean`), `Calculus/MemRead.lean` (the clauses),
+  `Calculus/MemTheory.lean` (agreement with the Theory). Deleted: the module
+  `DecideMem`, M6's symbolic heap.
+- **Review findings of the M6 closer.** Closed: the allocation built
+  before its size guard (gone with `DecideMem`; `new T[](n)` is one node,
+  `allocOk` decides a default without building it); the exponential
+  `LTerm.ground?` on shared terms (constants folded where a term is built,
+  `LTerm.mkBin`/`mkUn`, so `ground?` is a literal test); `synClose` testing
+  `Fml.inL` before `fitsClose` (now after); no memory path pinned in the
+  default targets (`Examples/Tactics/Decide.lean` now pins each memory
+  clause and proves seven memory programs by `sol_decide`, a `new` of a
+  million elements among them); the stale docstrings of
+  `Calculus/Decide.lean`, `Tm.inL`, `UpdElem.inL`, `Fml.inL` and
+  `DecideMem`, and the `hlit` warnings (gone with `DecideMem`); no closer
+  row for memory in the rule map (now one row per taclet). Still open: no
+  `sol_prove` pin in the default targets goes through the allocation's pair
+  (`Derive.memAlloc?`); `TestSuite/Derived9.lean` to `Derived12.lean` are
+  its only check.
+- **Bounds kept.** `closeSize`, `elimSize` and the step budget are as they
+  were; every new reader recurses once per arm, the elimination-block ones
+  with a lazy `F` twin and `@[csimp]`; `memSize` (400) bounds the memory a
+  leaf may hold, more than 40 times the largest W measured.
+
+**Times.** `sol_prove` totals, per theorem, measured at step 6, the closer as
+it now stands (step 8 added a module no proof imports):
+
+| | Baseline (M6) | M6b | Change |
+|---|---|---|---|
+| `Derived9`, 40 theorems | 7.9 s | 7.2 s | −9% |
+| `Derived10`, 40 theorems | 10.1 s | 9.0 s | −11% |
+| `Derived11`, 11 theorems | 2.3 s | 2.2 s | −6% |
+| `memoryIndexWriteNse` | 2.48 s | 2.20 s | −11% |
+| `Derived12`, the 19 by `sol_prove` (new) | — | 15.1 s | — |
+| `Calculus/MemNames.lean` (new, `lake build`) | — | 2.2 s | — |
+| `Calculus/MemTheory.lean` (new, language server) | — | about 5 s | — |
+
+Nothing is slower than the baseline, so no warning: the 20% line was
+approached only at steps 2 and 3 (`memoryIndexWriteNse` +17%, the kernel
+cost of the six-type mutual block), and the switch at step 4 more than
+paid it back, since a read at an index that is no literal is one `kite`
+per write to the object instead of a chain over its elements (the largest
+leaf of `memoryIndexWriteNse` went from 534 nodes to 353). `Derived12`'s
+time is in two theorems, `indexWriteBothImpureMemToStorage` (5.4 s) and
+`memoryToStorageIndexImpureReceiver` (4.0 s), whose impure indices are
+eliminated again in every leaf; both are within `closeSize` and `elimSize`.
+The speed commits `7541cad`, `2ff6a0f`, `16d0a9b` and `02f363b` are
+untouched.

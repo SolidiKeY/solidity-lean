@@ -452,7 +452,7 @@ end
 
 `#chain φ` goes on where `sol_chain?` on `~*>` stops: after the program, one
 rewrite a link until the line is last, written as one chain term to paste.
-The strategy's steps are grouped as the paper prints them
+The strategy's steps are grouped as the worked examples print them
 (`ChainGen.groupSteps`): a rule with the `emptyModality` after it, and a
 declaration with the binding or read it leaves, are one `~*>`. -/
 
