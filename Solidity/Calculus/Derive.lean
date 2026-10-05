@@ -153,10 +153,180 @@ def seqRev (m : Modality) (ψ : Fml C) : List (UpdElem C) → Fml C
       else .upd m [e] (seqRev m ψ rest)
     | none => .upd m (e :: rest).reverse ψ
 
+/-! ### The alias a push returns
+
+`T storage x = arr.push();` leaves `{ storage := extend(storage, arr) ‖
+x := arr[arr.length] }`: the alias names the slot past the old end, which
+the push makes live.  `pushAlias?` reads it as the push, then the alias to
+the last slot (`lastSlot`), the length read after the push; the two agree
+where the path to the array reads the storage only to check its indices
+(`Tm.stablePath`). -/
+
+section PushAlias
+
+open SemanticsProperties
+
+/-- A key that reads no storage: a local or a literal. -/
+def _root_.Solidity.Tm.keyFree {s : Srt} : Tm C s → Bool
+  | .pvV _ | .app0 (.lit _) => true
+  | _ => false
+
+/-- A path that reads the storage only to check its indices: roots,
+aliases, members, and indices by locals or literals.  A write below it
+leaves it naming the same location (`stable_eval`). -/
+def _root_.Solidity.Tm.stablePath {s : Srt} : Tm C s → Bool
+  | .app0 (.root _) | .pvP _ => true
+  | .app1 (.field _) q => q.stablePath
+  | .app2 .at q k => q.stablePath && k.keyFree
+  | _ => false
+termination_by structural t => t
+
+theorem keyFree_eval {σ τ : State} (henv : τ.env = σ.env) :
+    (k : Tm C .val) → k.keyFree = true → k.eval τ = k.eval σ
+  | .pvV x, _ => by simp only [Tm.eval, State.getEnv, henv]
+  | .app0 (.lit _), _ => rfl
+
+theorem saveStorage_state {σ τ : State} {r : Name} {P : List Seg} {X : SVal}
+    (h : σ.saveStorage r P X = .ok τ) : τ = { σ with storage := τ.storage } := by
+  unfold State.saveStorage at h
+  split at h
+  · obtain ⟨_, _, he⟩ := Res.bind_eq_ok.1 h; cases he; rfl
+  · cases h
+
+/-- **A path below which the storage was written names the same
+location**: its checks are of locations above the write. -/
+theorem stable_eval {σ τ : State} {r : Name} {P : List Seg} {X : SVal}
+    (hsv : σ.saveStorage r P X = .ok τ) :
+    (p : Tm C .path) → p.stablePath = true → ∀ {r' : Name} {segs : List Seg},
+      p.eval σ = .ok (r', segs) → (r' = r → ∃ rest, P = segs ++ rest) →
+        p.eval τ = .ok (r', segs)
+  | .app0 (.root _), _, _, _, h, _ => h
+  | .pvP x, _, _, _, h, _ => by
+    rw [saveStorage_state hsv]
+    simpa only [Tm.eval, aliasPath, State.getEnv] using h
+  | .app1 (.field f) q, hp, r', segs, h, hpre => by
+    simp only [Tm.stablePath] at hp
+    rw [Close.PTerm.eval_field] at h ⊢
+    obtain ⟨⟨r₀, segs₀⟩, h₀, he⟩ := Res.bind_eq_ok.1 h
+    cases he
+    rw [stable_eval hsv q hp h₀ fun hr => by
+      obtain ⟨rest, hrest⟩ := hpre hr
+      exact ⟨.field f :: rest, by simp [hrest]⟩]
+    rfl
+  | .app2 .at q k, hp, r', segs, h, hpre => by
+    simp only [Tm.stablePath, Bool.and_eq_true] at hp
+    rw [Close.PTerm.eval_at] at h ⊢
+    obtain ⟨⟨r₀, segs₀⟩, h₀, h⟩ := Res.bind_eq_ok.1 h
+    obtain ⟨i, hi, h⟩ := Res.bind_eq_ok.1 h
+    obtain ⟨_, hc, he⟩ := Res.bind_eq_ok.1 h
+    cases he
+    have henv : τ.env = σ.env := by rw [saveStorage_state hsv]
+    rw [stable_eval hsv q hp.1 h₀ fun hr => by
+      obtain ⟨rest, hrest⟩ := hpre hr
+      exact ⟨.at i :: rest, by simp [hrest]⟩, Res.ok_bind, keyFree_eval henv k hp.2, hi,
+      Res.ok_bind, Close.checkIndex_saveStorage_apart i hsv ?_, hc, Res.ok_bind]
+    by_cases hr : r₀ = r
+    · subst hr
+      obtain ⟨rest, hrest⟩ := hpre rfl
+      refine .inr fun hpf => ?_
+      have hl := congrArg List.length (Close.prefix_append hpf)
+      rw [hrest] at hl
+      simp only [List.length_append, List.length_cons, List.length_nil] at hl
+      omega
+    · exact .inl hr
+  | .app1 .next _, h, _, _, _, _ | .app2 .nextIn _ _, h, _, _, _, _
+  | .app3 .atIn _ _ _, h, _, _, _, _ => by simp [Tm.stablePath] at h
+
+
+/-- Where `p = arr.push();` leaves its alias: the last slot, once the push
+is made (`arr[arr.length - 1]`, the length unchecked). -/
+def lastSlot (P : PTerm C) : PTerm C :=
+  .at P (.binop .sub .bool (.len .storage P) (.lit (.int 1)))
+
+/-- **The last slot after the push is the slot past the end before it.** -/
+theorem lastSlot_eval {P : PTerm C} (hP : P.stablePath = true) {E : Ty} {σ τ : State}
+    (hs : (STerm.extend .storage P E).eval σ = .ok τ) :
+    (lastSlot P).eval τ = (PTerm.next P).eval σ := by
+  rw [Decide.STerm.eval_extend] at hs
+  simp only [Close.STerm.eval_storage, Res.ok_bind] at hs
+  obtain ⟨⟨r, segs⟩, hp, hs⟩ := Res.bind_eq_ok.1 hs
+  obtain ⟨c, hc, hs⟩ := Res.bind_eq_ok.1 hs
+  cases c with
+  | array es sh fx =>
+    simp only [Close.pushOn_array, pure, Except.pure, Res.ok_bind] at hs
+    have hp' := stable_eval hs P hP hp (fun _ => ⟨[], by simp⟩)
+    have hf := State.findStorage_saveStorage_same hs
+    rw [Close.PTerm.eval_next, hp, Res.ok_bind, hc, Res.ok_bind]
+    simp only [lastSlot, Close.PTerm.eval_at, hp', Res.ok_bind, Close.Term.eval_binop,
+      Close.Term.eval_len, Close.STerm.eval_storage, hf, Close.arrLen, Close.Term.eval_lit,
+      evalBinop, applyBinOp, Value.asInt, bind, Except.bind, checkArith, BinOp.retTy,
+      BinOp.isArith, Close.checkIndex_eq, Close.pastEnd, List.length_append, List.length_singleton]
+    simp [Close.idxOk]
+  | prim _ | struct _ | map _ _ => simp [Close.pushOn] at hs
+
+/-- `{ storage := extend(storage, p) ‖ x := p[p.length] }` of
+`T storage x = p.push();`: the push, then the alias to its last slot. -/
+def pushAlias? : Upd C → Option (STerm C × Var × PTerm C)
+  | [.storage s, .path x n] =>
+    match s, n with
+    | .app2 (.extend _) (.app0 .storage) P, .app1 .next P' =>
+      if P.stablePath && decide (P = P') then some (s, x, lastSlot P) else none
+    | _, _ => none
+  | _ => none
+
+theorem pushAlias?_sound {U : Upd C} {s : STerm C} {x : Var} {Q : PTerm C}
+    (h : pushAlias? U = some (s, x, Q)) {m : Modality} {ψ : Fml C} {σ : State}
+    (hh : holds σ (.upd m [.storage s] (.upd m [.path x Q] ψ))) : holds σ (.upd m U ψ) := by
+  unfold pushAlias? at h
+  split at h
+  · rename_i s₀ x₀ n
+    split at h
+    · rename_i E P P'
+      split at h
+      · rename_i hc
+        simp only [Bool.and_eq_true, decide_eq_true_eq] at hc
+        obtain ⟨hP, rfl⟩ := hc
+        simp only [Option.some.injEq, Prod.mk.injEq] at h
+        obtain ⟨rfl, rfl, rfl⟩ := h
+        have h' : m.after (fun τ => m.after (fun ρ => holds ρ ψ) (Upd.apply [.path x₀ (lastSlot P)] τ))
+          (Upd.apply [.storage (STerm.extend .storage P E)] σ) := hh
+        change m.after (fun ρ => holds ρ ψ) (Upd.apply [.storage (STerm.extend .storage P E),
+          .path x₀ (PTerm.next P)] σ)
+        simp only [Upd.apply, List.foldlM_cons, List.foldlM_nil, UpdElem.write, bind_pure] at h' ⊢
+        cases hs : (STerm.extend .storage P E).eval σ with
+        | error e =>
+          rw [hs] at h'
+          simp only [Res.error_bind] at h' ⊢
+          exact h'
+        | ok τ =>
+          rw [hs] at h'
+          simp only [Res.ok_bind, pure, Except.pure, Modality.after] at h' ⊢
+          have hτ : { σ with storage := τ.storage } = τ := by
+            rw [Decide.STerm.eval_extend] at hs
+            simp only [Close.STerm.eval_storage, Res.ok_bind] at hs
+            obtain ⟨_, _, hs⟩ := Res.bind_eq_ok.1 hs
+            obtain ⟨c, _, hs⟩ := Res.bind_eq_ok.1 hs
+            cases c with
+            | array es sh fx =>
+              simp only [Close.pushOn_array, pure, Except.pure, Res.ok_bind] at hs
+              rw [saveStorage_state hs]
+            | prim _ | struct _ | map _ _ => simp [Close.pushOn] at hs
+          rw [hτ] at h' ⊢
+          rw [lastSlot_eval hP hs] at h'
+          exact h'
+      · cases h
+    · cases h
+  · cases h
+
+end PushAlias
+
 /-- Every parallel update split where `seqRev` can, in the positions a leaf
 proves (not in a premise). -/
 def _root_.Solidity.Fml.seqUpd : Fml C → Fml C
-  | .upd m U φ => seqRev m φ.seqUpd U.reverse
+  | .upd m U φ =>
+    match pushAlias? U with
+    | some (s, x, Q) => .upd m [.storage s] (.upd m [.path x Q] φ.seqUpd)
+    | none => seqRev m φ.seqUpd U.reverse
   | .imp a φ => .imp a φ.seqUpd
   | .and φ ψ => .and φ.seqUpd ψ.seqUpd
   | .all x p φ => .all x p φ.seqUpd
@@ -291,8 +461,14 @@ theorem seqRev_sound {m : Modality} {ψ ψ' : Fml C} (hψ : ∀ σ, holds σ ψ'
 
 theorem Fml.seqUpd_sound : (φ : Fml C) → ∀ σ, holds σ φ.seqUpd → holds σ φ
   | .upd m U φ, σ, h => by
-    have := seqRev_sound (m := m) (fun τ => Fml.seqUpd_sound φ τ) U.reverse σ h
-    rwa [List.reverse_reverse] at this
+    simp only [Fml.seqUpd] at h
+    split at h
+    · rename_i s x Q hU
+      refine pushAlias?_sound hU ?_
+      simp only [holds] at h ⊢
+      exact afterImp (fun τ hτ => afterImp (fun ρ hρ => Fml.seqUpd_sound φ ρ hρ) hτ) h
+    · have := seqRev_sound (m := m) (fun τ => Fml.seqUpd_sound φ τ) U.reverse σ h
+      rwa [List.reverse_reverse] at this
   | .imp a φ, σ, h => fun ha => Fml.seqUpd_sound φ σ (h ha)
   | .and φ ψ, σ, h => ⟨Fml.seqUpd_sound φ σ h.1, Fml.seqUpd_sound ψ σ h.2⟩
   | .all x p φ, σ, h => fun v hv => Fml.seqUpd_sound φ _ (h v hv)

@@ -659,10 +659,14 @@ them give it the same value. -/
 theorem LTerm.evalA_agree {E : Var → Res Value} {o o' : List Seg → Obs} :
     (t : LTerm) → Agree E o o' t.reads → t.evalA E o' = t.evalA E o
   | .lit _, _ | .var _, _ | .err, _ | .env _, _ | .findP _ _, _ => rfl
-  | .sok .init, _ | .sok (.save ..), _ | .sok (.del ..), _ => rfl
+  | .sok .init, _ | .sok (.save ..), _ | .sok (.del ..), _ | .sok (.arr ..), _
+  | .sok (.copy ..), _ => rfl
   | .find (.save ..) _, _ | .find (.del ..) _, _ | .has (.save ..) _, _ | .has (.del ..) _, _
   | .kmap _ (.save ..) _, _ | .kmap _ (.del ..) _, _ | .len (.save ..) _, _
   | .len (.del ..) _, _ => rfl
+  | .find (.arr ..) _, _ | .find (.copy ..) _, _ | .has (.arr ..) _, _ | .has (.copy ..) _, _
+  | .kmap _ (.arr ..) _, _ | .kmap _ (.copy ..) _, _ | .len (.arr ..) _, _
+  | .len (.copy ..) _, _ => rfl
   | .binop _ _ a b, h => by
     simp only [LTerm.evalA, LTerm.evalA_agree a h.append_left, LTerm.evalA_agree b h.append_right]
   | .unop _ _ a, h => by simp only [LTerm.evalA, LTerm.evalA_agree a h]

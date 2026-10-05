@@ -22,7 +22,8 @@ local normal form rewriting the other (KeY's `applyEq`).
   (`foldBin`, `foldUn`, …, checked arithmetic and comparisons, KeY's
   `intSimplification` and literal taclets), `a == a` read as `true`, a
   subterm the premises know rewritten, a default of a known kind read as
-  `0` or `false`, and an `orElse` whose left side halts or returns resolved.
+  `0` or `false`, a key compared with itself read as its first branch
+  (`foldKite`), and an `orElse` whose left side halts or returns resolved.
   Each step keeps what a term returns (`Keeps`); none is trusted.
 * **What returns** (`Facts.rets`): an operation whose operands return and
   that accepts them (comparisons on integers, `&&` on `bool`s, literal
@@ -38,7 +39,10 @@ local normal form rewriting the other (KeY's `applyEq`).
   and `+`, `-` add the intervals; a checked `+` or `-` whose interval fits
   its type returns (`Facts.fitsArith`), and a comparison the intervals
   decide folds (`foldCmp`).  KeY's `inEqSimp` on bounds by constants, not
-  on differences of terms.
+  on differences of terms.  A bound below alone (`Facts.lo`) decides what
+  needs no bound above: an array's length is at least `0`, so after a
+  `push` it is at least `1` (`values.length > 0`); the length is counted
+  unchecked (`bool` arithmetic), which returns on any integers.
 * **Formulas** (`Facts.prove`, `Facts.refute`): an equation by normal
   forms, a premise refuted (literals apart, a side that halts), a case
   split on a `bool` local or condition (KeY's `cut` on a formula,
@@ -144,8 +148,10 @@ theorem foldIte_keeps (σ : State) (c a b : LTerm) : Keeps σ (.ite c a b) (fold
   · simp only [LTerm.eval, Res.ok_bind, pickBranch] at h; exact h
   · exact h
 
-/-- A key comparison on two integer literals: its branch. -/
+/-- A key comparison on two integer literals, or of a key with itself
+(`values[values.length + 1 - 1]` after a push): its branch. -/
 def foldKite (a b t e : LTerm) : LTerm :=
+  if a == b then t else
   match a, b with
   | .lit (.int i), .lit (.int j) => if i = j then t else e
   | _, _ => .kite a b t e
@@ -154,6 +160,15 @@ theorem foldKite_keeps (σ : State) (a b t e : LTerm) :
     Keeps σ (.kite a b t e) (foldKite a b t e) := by
   intro v h
   unfold foldKite
+  split
+  · rename_i hab
+    simp only [beq_iff_eq] at hab
+    subst hab
+    simp only [LTerm.eval] at h
+    obtain ⟨i, hi, h⟩ := Res.bind_eq_ok.1 h
+    obtain ⟨j, hj, h⟩ := Res.bind_eq_ok.1 h
+    rw [hi] at hj; cases hj
+    simpa only [if_true] using h
   split
   · rename_i i j
     simp only [LTerm.eval, Res.ok_bind, Value.asInt] at h
@@ -199,23 +214,29 @@ structure Orc where
   halts : LTerm → Bool := fun _ => false
   rets : LTerm → Bool := fun _ => false
   range : LTerm → Option (Int × Int) := fun _ => none
+  lo : LTerm → Option Int := fun _ => none
 
 /-- An interval holds of a term: where `t` returns an integer, it lies in
 it. -/
 def RangeOk (σ : State) (R : LTerm → Option (Int × Int)) : Prop :=
   ∀ t l h i, R t = some (l, h) → t.eval σ = .ok (.int i) → l ≤ i ∧ i ≤ h
 
+/-- A lower bound holds of a term: where `t` returns an integer, it is at
+least that. -/
+def LoOk (σ : State) (L : LTerm → Option Int) : Prop :=
+  ∀ t l i, L t = some l → t.eval σ = .ok (.int i) → l ≤ i
+
 /-- The oracle's answers hold in `σ`. -/
 def Orc.Ok (σ : State) (O : Orc) : Prop :=
   KindOk σ O.kind ∧ (∀ t v, O.halts t = true → t.eval σ ≠ .ok v) ∧
-    (∀ t, O.rets t = true → Returns σ t) ∧ RangeOk σ O.range
+    (∀ t, O.rets t = true → Returns σ t) ∧ RangeOk σ O.range ∧ LoOk σ O.lo
 
 theorem Orc.ok_none (σ : State) : Orc.Ok σ {} :=
   ⟨fun _ _ _ => ⟨fun h => by simp only [reduceCtorEq] at h,
       fun h => by simp only [reduceCtorEq] at h⟩, fun _ _ h => by simp only [Bool.false_eq_true]
           at h,
     fun _ h => by simp only [Bool.false_eq_true] at h, fun _ _ _ _ h => by
-      simp only [reduceCtorEq] at h⟩
+      simp only [reduceCtorEq] at h, fun _ _ _ h => by simp only [reduceCtorEq] at h⟩
 
 /-- The default of a term whose kind is known: `0` or `false`. -/
 def foldZeroT (K : LTerm → Option Bool) (a : LTerm) : LTerm :=
@@ -314,37 +335,127 @@ theorem evalBinop_cmp {op : BinOp} (hop : op = .lt ∨ op = .le ∨ op = .gt ∨
           Except.ok.injEq, reduceCtorEq] at h <;>
         exact ⟨_, _, rfl, rfl, by rw [← h]; rfl⟩)
 
-/-- A comparison its operands' intervals decide, as a literal. -/
-def foldCmp (R : LTerm → Option (Int × Int)) (t : LTerm) : LTerm :=
+/-- `x < y`, both bounds known. -/
+def ltO : Option Int → Option Int → Bool
+  | some x, some y => decide (x < y)
+  | _, _ => false
+
+/-- `x ≤ y`, both bounds known. -/
+def leO : Option Int → Option Int → Bool
+  | some x, some y => decide (x ≤ y)
+  | _, _ => false
+
+/-- A comparison its operands' bounds decide, a bound possibly missing: a
+length is at least `0`, with no bound above. -/
+def cmpDecideO (op : BinOp) (la ha lb hb : Option Int) : Option Bool :=
+  match op with
+  | .lt => if ltO ha lb then some true else if leO hb la then some false else none
+  | .le => if leO ha lb then some true else if ltO hb la then some false else none
+  | .gt => if ltO hb la then some true else if leO ha lb then some false else none
+  | .ge => if leO hb la then some true else if ltO ha lb then some false else none
+  | _ => none
+
+/-- A bound below holds of `i`. -/
+def LoHolds (l : Option Int) (i : Int) : Prop := ∀ x, l = some x → x ≤ i
+
+/-- A bound above holds of `i`. -/
+def HiHolds (h : Option Int) (i : Int) : Prop := ∀ x, h = some x → i ≤ x
+
+theorem cmpDecideO_sound {op : BinOp} {la ha lb hb : Option Int} {i j : Int} {c : Bool}
+    (h : cmpDecideO op la ha lb hb = some c) (hli : LoHolds la i) (hhi : HiHolds ha i)
+    (hlj : LoHolds lb j) (hhj : HiHolds hb j) : cmpOp op i j = c := by
+  have lt_ok : ∀ {x y : Option Int} {a b : Int}, ltO x y = true → HiHolds x a → LoHolds y b →
+      a < b := by
+    intro x y a b hxy hx hy
+    match x, y, hxy with
+    | some x, some y, hxy =>
+      simp only [ltO, decide_eq_true_eq] at hxy
+      have := hx x rfl; have := hy y rfl; omega
+  have le_ok : ∀ {x y : Option Int} {a b : Int}, leO x y = true → HiHolds x a → LoHolds y b →
+      a ≤ b := by
+    intro x y a b hxy hx hy
+    match x, y, hxy with
+    | some x, some y, hxy =>
+      simp only [leO, decide_eq_true_eq] at hxy
+      have := hx x rfl; have := hy y rfl; omega
+  cases op <;> simp only [cmpDecideO, reduceCtorEq] at h
+  · by_cases h₁ : ltO ha lb = true
+    · rw [if_pos h₁] at h; cases h
+      simp only [cmpOp, decide_eq_true_eq]; exact lt_ok h₁ hhi hlj
+    · rw [if_neg h₁] at h
+      by_cases h₂ : leO hb la = true
+      · rw [if_pos h₂] at h; cases h
+        simp only [cmpOp, decide_eq_false_iff_not, Int.not_lt]; exact le_ok h₂ hhj hli
+      · rw [if_neg h₂] at h; cases h
+  · by_cases h₁ : ltO hb la = true
+    · rw [if_pos h₁] at h; cases h
+      simp only [cmpOp, decide_eq_true_eq]; exact lt_ok h₁ hhj hli
+    · rw [if_neg h₁] at h
+      by_cases h₂ : leO ha lb = true
+      · rw [if_pos h₂] at h; cases h
+        simp only [cmpOp, decide_eq_false_iff_not, Int.not_lt]; exact le_ok h₂ hhi hlj
+      · rw [if_neg h₂] at h; cases h
+  · by_cases h₁ : leO ha lb = true
+    · rw [if_pos h₁] at h; cases h
+      simp only [cmpOp, decide_eq_true_eq]; exact le_ok h₁ hhi hlj
+    · rw [if_neg h₁] at h
+      by_cases h₂ : ltO hb la = true
+      · rw [if_pos h₂] at h; cases h
+        simp only [cmpOp, decide_eq_false_iff_not, Int.not_le]; exact lt_ok h₂ hhj hli
+      · rw [if_neg h₂] at h; cases h
+  · by_cases h₁ : leO hb la = true
+    · rw [if_pos h₁] at h; cases h
+      simp only [cmpOp, decide_eq_true_eq]; exact le_ok h₁ hhj hli
+    · rw [if_neg h₁] at h
+      by_cases h₂ : ltO ha lb = true
+      · rw [if_pos h₂] at h; cases h
+        simp only [cmpOp, decide_eq_false_iff_not, Int.not_le]; exact lt_ok h₂ hhi hlj
+      · rw [if_neg h₂] at h; cases h
+
+/-- The bounds of a term: its interval's, or a bound below alone. -/
+def bndsOf (R : LTerm → Option (Int × Int)) (L : LTerm → Option Int) (a : LTerm) :
+    Option Int × Option Int :=
+  match R a with
+  | some (l, h) => (some l, some h)
+  | none => (L a, none)
+
+theorem bndsOf_holds {σ : State} {R : LTerm → Option (Int × Int)} {L : LTerm → Option Int}
+    (hR : RangeOk σ R) (hL : LoOk σ L) {a : LTerm} {i : Int} (ha : a.eval σ = .ok (.int i)) :
+    LoHolds (bndsOf R L a).1 i ∧ HiHolds (bndsOf R L a).2 i := by
+  unfold bndsOf
+  split
+  · rename_i l h hr
+    have := hR a l h i hr ha
+    exact ⟨fun x hx => by cases hx; exact this.1, fun x hx => by cases hx; exact this.2⟩
+  · exact ⟨fun x hx => hL a x i hx ha, fun x hx => by cases hx⟩
+
+/-- A comparison its operands' bounds decide, as a literal. -/
+def foldCmp (R : LTerm → Option (Int × Int)) (L : LTerm → Option Int) (t : LTerm) : LTerm :=
   match t with
   | .binop op _ a b =>
-    match R a, R b with
-    | some (la, ha), some (lb, hb) =>
-      match cmpDecide op la ha lb hb with
-      | some c => .lit (.bool c)
-      | none => t
-    | _, _ => t
+    match cmpDecideO op (bndsOf R L a).1 (bndsOf R L a).2 (bndsOf R L b).1 (bndsOf R L b).2 with
+    | some c => .lit (.bool c)
+    | none => t
   | _ => t
 
-theorem foldCmp_keeps {σ : State} {R : LTerm → Option (Int × Int)} (hR : RangeOk σ R)
-    (t : LTerm) : Keeps σ t (foldCmp R t) := by
+theorem foldCmp_keeps {σ : State} {R : LTerm → Option (Int × Int)} {L : LTerm → Option Int}
+    (hR : RangeOk σ R) (hL : LoOk σ L) (t : LTerm) : Keeps σ t (foldCmp R L t) := by
   intro v h
   unfold foldCmp
   split
   · rename_i op p a b
     split
-    · rename_i la ha lb hb hra hrb
-      split
-      · rename_i c hc
-        have hop : op = .lt ∨ op = .le ∨ op = .gt ∨ op = .ge := by
-          cases op <;> simp only [cmpDecide, reduceCtorEq] at hc <;>
-            simp only [reduceCtorEq, or_self, or_false, or_true]
-        simp only [LTerm.eval] at h
-        obtain ⟨x, hx, h⟩ := Res.bind_eq_ok.1 h
-        obtain ⟨i, j, rfl, hj, rfl⟩ := evalBinop_cmp hop h
-        rw [cmpDecide_sound hc (hR a la ha i hra hx) (hR b lb hb j hrb hj)]
-        rfl
-      · exact h
+    · rename_i c hc
+      have hop : op = .lt ∨ op = .le ∨ op = .gt ∨ op = .ge := by
+        cases op <;> simp only [cmpDecideO, reduceCtorEq] at hc <;>
+          simp only [reduceCtorEq, or_self, or_false, or_true]
+      simp only [LTerm.eval] at h
+      obtain ⟨x, hx, h⟩ := Res.bind_eq_ok.1 h
+      obtain ⟨i, j, rfl, hj, rfl⟩ := evalBinop_cmp hop h
+      have ha := bndsOf_holds hR hL hx
+      have hb := bndsOf_holds hR hL hj
+      rw [cmpDecideO_sound hc ha.1 ha.2 hb.1 hb.2]
+      rfl
     · exact h
   · exact h
 
@@ -359,7 +470,7 @@ def LTerm.simpE (O : Orc) (E : Eqs) : LTerm → LTerm
   | .err => .err
   | .env k => .env k
   | .binop op p a b =>
-    substE E (foldCmp O.range (foldSame (foldBin op p (a.simpE O E) (b.simpE O E))))
+    substE E (foldCmp O.range O.lo (foldSame (foldBin op p (a.simpE O E) (b.simpE O E))))
   | .unop op p a => substE E (foldUn op p (a.simpE O E))
   | .ite c a b => substE E (foldIte (c.simpE O E) (a.simpE O E) (b.simpE O E))
   | .zero a => substE E (foldZeroT O.kind (a.simpE O E))
@@ -388,6 +499,8 @@ def LStor.simpE (O : Orc) (E : Eqs) : LStor → LStor
   | .init => .init
   | .save s q w => .save (s.simpE O E) (q.simpE O E) (w.simpE O E)
   | .del s q => .del (s.simpE O E) (q.simpE O E)
+  | .arr op s q w => .arr op (s.simpE O E) (q.simpE O E) (w.simpE O E)
+  | .copy s q src sq => .copy (s.simpE O E) (q.simpE O E) (src.simpE O E) (sq.simpE O E)
 
 end
 
@@ -399,7 +512,7 @@ theorem LTerm.simpE_eval {σ : State} {O : Orc} {E : Eqs} (hO : O.Ok σ) (hE : E
   | .lit _, _, h | .err, _, h | .env _, _, h => h
   | .var x, v, h => substE_keeps hE _ v h
   | .binop op p a b, v, h => by
-    refine substE_keeps hE _ v (foldCmp_keeps hO.2.2.2 _ v
+    refine substE_keeps hE _ v (foldCmp_keeps hO.2.2.2.1 hO.2.2.2.2 _ v
       (foldSame_keeps σ _ v (foldBin_keeps σ op p _ _ v ?_)))
     simp only [LTerm.eval] at h ⊢
     obtain ⟨x, ha, hb⟩ := Res.bind_eq_ok.1 h
@@ -527,6 +640,24 @@ theorem LStor.simpE_eval {σ : State} {O : Orc} {E : Eqs} (hO : O.Ok σ) (hE : E
     obtain ⟨z, hq, h⟩ := Res.bind_eq_ok.1 h
     simp only [LStor.simpE, LStor.eval, LStor.simpE_eval hO hE s hs, LPath.simpE_eval hO hE q hq,
       Res.ok_bind]
+    exact h
+  | .arr _ s q w, sv, h => by
+    simp only [LStor.eval] at h
+    obtain ⟨x, hw, h⟩ := Res.bind_eq_ok.1 h
+    obtain ⟨y, hs, h⟩ := Res.bind_eq_ok.1 h
+    obtain ⟨z, hq, h⟩ := Res.bind_eq_ok.1 h
+    simp only [LStor.simpE, LStor.eval, LTerm.simpE_eval hO hE w x hw, LStor.simpE_eval hO hE s hs,
+      LPath.simpE_eval hO hE q hq, Res.ok_bind]
+    exact h
+  | .copy s q src sq, sv, h => by
+    simp only [LStor.eval] at h
+    obtain ⟨a, ha, h⟩ := Res.bind_eq_ok.1 h
+    obtain ⟨b, hb, h⟩ := Res.bind_eq_ok.1 h
+    obtain ⟨n, hn, h⟩ := Res.bind_eq_ok.1 h
+    obtain ⟨y, hs, h⟩ := Res.bind_eq_ok.1 h
+    obtain ⟨z, hq, h⟩ := Res.bind_eq_ok.1 h
+    simp only [LStor.simpE, LStor.eval, LStor.simpE_eval hO hE src ha, LPath.simpE_eval hO hE sq hb,
+      LStor.simpE_eval hO hE s hs, LPath.simpE_eval hO hE q hq, Res.ok_bind, hn]
     exact h
 
 end
@@ -1160,6 +1291,93 @@ theorem Facts.range_sound {σ : State} {F : Facts} (hF : F.Ok σ) :
 
 /-! ## What returns -/
 
+/-- A bound below where no interval is known: a length is at least `0`, a
+sum at least the sum of its operands' bounds (`values.length + 1 > 0`). -/
+def Facts.lo (F : Facts) : LTerm → Option Int
+  | .len _ _ => some 0
+  | t@(.binop .add _ a b) =>
+    match F.range t with
+    | some (l, _) => some l
+    | none => (F.lo a).bind fun x => (F.lo b).map (x + ·)
+  | t@(.seq _ a) =>
+    match F.range t with
+    | some (l, _) => some l
+    | none => F.lo a
+  | t => (F.range t).map (·.1)
+
+theorem evalBinop_add_int {p : PrimTy} {x : Value} {rb : Res Value} {i : Int}
+    (h : evalBinop .add p x rb = .ok (.int i)) :
+    ∃ a b, x = .int a ∧ rb = .ok (.int b) ∧ i = a + b := by
+  cases rb with
+  | error e => cases x <;> simp only [evalBinop, bind, Except.bind, reduceCtorEq] at h
+  | ok y =>
+    cases x <;> cases y <;>
+      simp only [evalBinop, applyBinOp, Value.asInt, bind, Except.bind, reduceCtorEq] at h
+    rename_i a b
+    refine ⟨a, b, rfl, rfl, ?_⟩
+    generalize BinOp.add.retTy (Ty.prim p) = ty at h
+    cases ty with
+    | prim q =>
+      cases q <;> simp only [checkArith] at h
+      · cases h; rfl
+      · split at h
+        · cases h; rfl
+        · cases h
+      · split at h
+        · cases h; rfl
+        · cases h
+    | ref _ => simp only [checkArith] at h; cases h; rfl
+
+theorem Facts.lo_sound {σ : State} {F : Facts} (hF : F.Ok σ) :
+    (t : LTerm) → ∀ {l i : Int}, F.lo t = some l → t.eval σ = .ok (.int i) → l ≤ i
+  | .len s q, l, i, hl, hi => by
+    simp only [Facts.lo, Option.some.injEq] at hl
+    subst hl
+    simp only [LTerm.eval] at hi
+    obtain ⟨_, -, hi⟩ := Res.bind_eq_ok.1 hi
+    obtain ⟨_, -, hi⟩ := Res.bind_eq_ok.1 hi
+    obtain ⟨c, -, hi⟩ := Res.bind_eq_ok.1 hi
+    obtain ⟨es, _, _, -, he⟩ := Close.arrLen_eq_ok.1 hi
+    cases he
+    omega
+  | .binop op p a b, l, i, hl, hi => by
+    cases op
+    case add =>
+      simp only [Facts.lo] at hl
+      split at hl
+      · rename_i l' h' hr
+        cases hl
+        exact (F.range_sound hF _ hr hi).1
+      · obtain ⟨x, hx, hl⟩ := Option.bind_eq_some_iff.1 hl
+        obtain ⟨y, hy, rfl⟩ := Option.map_eq_some_iff.1 hl
+        simp only [LTerm.eval] at hi
+        obtain ⟨va, ha, hi⟩ := Res.bind_eq_ok.1 hi
+        obtain ⟨ia, ib, rfl, hb, rfl⟩ := evalBinop_add_int hi
+        have := Facts.lo_sound hF a hx ha
+        have := Facts.lo_sound hF b hy hb
+        omega
+    all_goals
+      simp only [Facts.lo] at hl
+      obtain ⟨⟨l', h'⟩, hr, rfl⟩ := Option.map_eq_some_iff.1 hl
+      exact (F.range_sound hF _ hr hi).1
+  | .seq d a, l, i, hl, hi => by
+    simp only [Facts.lo] at hl
+    split at hl
+    · rename_i l' h' hr
+      cases hl
+      exact (F.range_sound hF _ hr hi).1
+    · simp only [LTerm.eval] at hi
+      obtain ⟨_, -, hi⟩ := Res.bind_eq_ok.1 hi
+      exact Facts.lo_sound hF a hl hi
+  | .lit _, l, i, hl, hi | .var _, l, i, hl, hi | .err, l, i, hl, hi | .env _, l, i, hl, hi
+  | .unop .., l, i, hl, hi | .ite .., l, i, hl, hi | .find .., l, i, hl, hi
+  | .has .., l, i, hl, hi | .kmap .., l, i, hl, hi | .sok _, l, i, hl, hi
+  | .pok _, l, i, hl, hi | .orElse .., l, i, hl, hi | .kite .., l, i, hl, hi
+  | .zero _, l, i, hl, hi | .findP .., l, i, hl, hi => by
+    simp only [Facts.lo] at hl
+    obtain ⟨⟨l', h'⟩, hr, rfl⟩ := Option.map_eq_some_iff.1 hl
+    exact (F.range_sound hF _ hr hi).1
+
 /-- A literal a term keeps is what it returns. -/
 theorem lit_of_keeps {σ : State} {t u : LTerm} {w v : Value} (hk : Keeps σ t u)
     (hn : u = .lit w) (hv : t.eval σ = .ok v) : v = w := by
@@ -1225,9 +1443,10 @@ def inTy (p : PrimTy) (n : Int) : Bool :=
 `inEqSimp` bounds on a checked `+` or `-`. -/
 def Facts.fitsArith (F : Facts) (op : BinOp) (p : PrimTy) (a b : LTerm) : Bool :=
   F.isInt a && F.isInt b &&
+    ((p == .bool && (op == .add || op == .sub)) ||
     match rangeOp op (F.range a) (F.range b) with
     | some (l, h) => inTy p l && inTy p h
-    | none => false
+    | none => false)
 
 theorem Facts.fitsArith_sound {σ : State} {F : Facts} (hF : F.Ok σ) {op : BinOp} {p : PrimTy}
     {a b : LTerm} (h : F.fitsArith op p a b = true) {x y : Value} (ha : a.eval σ = .ok x)
@@ -1236,6 +1455,11 @@ theorem Facts.fitsArith_sound {σ : State} {F : Facts} (hF : F.Ok σ) {op : BinO
   obtain ⟨⟨hia, hib⟩, h⟩ := h
   obtain ⟨i, rfl⟩ := F.isInt_sound hF a hia ha
   obtain ⟨j, rfl⟩ := F.isInt_sound hF b hib hb
+  -- the unchecked `+` and `-` a length is counted with (`lenSucc`)
+  by_cases hu : (p == .bool && (op == .add || op == .sub)) = true
+  · simp only [Bool.and_eq_true, beq_iff_eq, Bool.or_eq_true] at hu
+    obtain ⟨rfl, rfl | rfl⟩ := hu <;> exact ⟨_, rfl⟩
+  rw [Bool.eq_false_iff.2 hu, Bool.false_or] at h
   split at h
   · rename_i l u hr
     simp only [Bool.and_eq_true] at h
@@ -1735,12 +1959,12 @@ theorem Facts.halts_sound {σ : State} {F : Facts} (hF : F.Ok σ) :
 /-- What the facts tell the simplifier: kinds, halting, and returning by
 `retsW` over the untyped normal form. -/
 def Facts.orc (F : Facts) : Orc :=
-  { kind := F.kind, halts := F.halts, rets := F.retsW F.nf0, range := F.range }
+  { kind := F.kind, halts := F.halts, rets := F.retsW F.nf0, range := F.range, lo := F.lo }
 
 theorem Facts.orc_ok {σ : State} {F : Facts} (hF : F.Ok σ) : F.orc.Ok σ :=
   ⟨F.kind_ok hF, fun t v h => F.halts_sound hF t h v,
     fun t h => F.retsW_sound hF (F.nf0_keeps hF) t h,
-    fun t _ _ _ hr hi => F.range_sound hF t hr hi⟩
+    fun t _ _ _ hr hi => F.range_sound hF t hr hi, fun t _ _ hl hi => F.lo_sound hF t hl hi⟩
 
 /-- The normal form a term is compared by: its guards dropped (`LTerm.core`),
 `(x - a) + a` cancelled (`LTerm.arith`), and simplified (`LTerm.simpE`),
@@ -2447,6 +2671,9 @@ def LStor.fits : Nat → LStor → Option Nat
   | n + 1, .init => some n
   | n + 1, .save s q w => (s.fits n).bind fun m => (q.fits m).bind fun k => w.fits k
   | n + 1, .del s q => (s.fits n).bind fun m => q.fits m
+  | n + 1, .arr _ s q w => (s.fits n).bind fun m => (q.fits m).bind fun k => w.fits k
+  | n + 1, .copy s q src sq =>
+    (s.fits n).bind fun m => (q.fits m).bind fun k => (src.fits k).bind fun j => sq.fits j
 
 end
 

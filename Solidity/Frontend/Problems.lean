@@ -107,20 +107,25 @@ def elabSolkeyScan : CommandElab := fun stx => do
   logInfo ("\n".intercalate out.toList)
 
 syntax (name := solkeyDerive) "#solkey_derive? " ident (&" from " num)? (&" count " num)?
-  (&" timed")? : command
+  (&" timed")? (&" pending")? : command
 
 /-- `#solkey_derive? N from i count k`: `sol_prove?` on the statements
 `i … i+k-1` (all of them by default); each one whose leaves all close is
 printed as the theorem to paste, `N.f.proved` with its replay; the others
 are named with the leaf that stays open.  With `timed`, each note says how
-long it took; without, the output is fixed, to pin. -/
+long it took; without, the output is fixed, to pin.  With `pending`, only
+the statements no `N.f.proved` derives yet. -/
 @[command_elab solkeyDerive]
 def elabSolkeyDerive : CommandElab := fun stx => do
   let N := stx[1].getId
   let start := if stx[2].isNone then 0 else stx[2][1].isNatLit?.getD 0
   let count := if stx[3].isNone then 100000 else stx[3][1].isNatLit?.getD 0
   let timed := !stx[4].isNone
-  let rows := ((← reportRows N).filter (·.status == .elaborated)).drop start |>.take count
+  let pendingOnly := !stx[5].isNone
+  let env ← getEnv
+  let rows := ((← reportRows N).filter fun r => r.status == .elaborated &&
+    (!pendingOnly || !env.contains (N ++ Lean.Name.mkSimple r.name ++ `proved))).drop start
+    |>.take count
   let C := mkConst N
   let mut thms : Array String := #[]
   let mut notes : Array String := #[]

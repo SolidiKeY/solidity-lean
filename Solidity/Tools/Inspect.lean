@@ -109,6 +109,10 @@ partial def LStor.fmt [FreshNames] : LStor → String
   | .init => "storage"
   | .save s q w => s!"save({LStor.fmt s}, {LPath.fmt q}, {LTerm.fmt w})"
   | .del s q => s!"del({LStor.fmt s}, {LPath.fmt q})"
+  | .arr .push s q w => s!"push({LStor.fmt s}, {LPath.fmt q}, {LTerm.fmt w})"
+  | .arr (.slot _) s q _ => s!"pushSlot({LStor.fmt s}, {LPath.fmt q})"
+  | .arr (.pop _) s q _ => s!"pop({LStor.fmt s}, {LPath.fmt q})"
+  | .copy s q src sq => s!"copy({LStor.fmt s}, {LPath.fmt q}, {LStor.fmt src}, {LPath.fmt sq})"
 end
 
 /-- A reduced formula: `∧` binds tighter than `→`, which associates to the

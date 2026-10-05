@@ -333,7 +333,10 @@ step.  "closer clause X" names the definition the clause lives in.
 | `closeFalse`, `replace_known_left` | closer clauses `Facts.refute`, `Facts.apart` | subsumed | a premise refuted (two literals apart, a side that halts, a pair the premises keep apart) closes the leaf |
 | `cut`, `cut_direct` on a `bool` | closer clause `Facts.split` | subsumed | a case split on a `bool` local or a condition compared with a literal |
 | `selectOnTypedStruct`, `selectOnTypedMember`, `selectOnTypedElement`, `selectOnTypedMapSize`, `selectOnTypedFixedSize`, `selectOnTypedLeafSize` | closer clauses `LPath.ty`, `Facts.retsW`, `Facts.halts` | subsumed | under `wt(storage)` a read at a path the layout types returns, of its type's kind; a test for a shape the layout says is not there halts |
-| `selectOnTypedDynSize` | — | open | the length of a dynamic array is not known from the layout; `push`/`pop` (M5) |
+| `selectOnTypedDynSize` | closer clause `Facts.lo` | partly | a length is at least `0` (`values.length + 1 > 0` after a `push`); no bound above, so `values.length - 1` after a `push` is not known to fit a `uint` (`storagePushReadBack` stays pending) |
+| `selectOnSaveCons` on a `size` write, `selectOnDelAtCons` past the end | `LStor.arr` with `arrKey`, `arrRead`, `arrLength` (`Calculus/Decide.lean`) | subsumed | a read below a pushed or popped array compares its index with the old length: the pushed word or default there, the old element below it; the length after is the old one plus or minus one, counted unchecked |
+| `selectOnSaveEmptyRef`, `selectOnSaveEmptyIndexStruct`, `selectOnSaveEmptyDefault` through members | `LStor.copy` with `copyLeaf`, `overlay_findLive_fields` | subsumed | a read through members of a copy reads the source, as solc's member-wise copy leaves it |
+| `selectOnSaveEmptyMap`, `selectOnSaveEmptyFixed` below a key of a copy | — | open | the read is kept whole: a mapping met in both keeps the target's entries |
 | `inEqSimp_*` on bounds by constants | closer clauses `Facts.range`, `Facts.addCmp`, `foldCmp`, `Facts.fitsArith` | subsumed | a local's type range, a premise `t op k` narrowing `t`, intervals added through `+`, `-` |
 | `inEqSimp_*` on differences, `polySimp_*` | — | open | no bound on `y - x` for two symbolic terms, no polynomial normal form; `(x - a) + a` cancels (`LTerm.arith`) |
 

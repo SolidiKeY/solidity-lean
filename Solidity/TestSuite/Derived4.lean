@@ -1,7 +1,7 @@
 import Solidity.TestSuite.Problems
 
 /-!
-# solkey's `TestSuite`, derived (4 of 6)
+# solkey's `TestSuite`, derived (4 of 8)
 
 `⊢` of each obligation `sol_prove` and its leaf tactics close, from
 `unaryMinusSimple` to `mappingReadAsKey` in the order of the source; the replays are what
@@ -23,14 +23,6 @@ theorem Solkey.TestSuite.testStorageAliases.proved : ⊢ Solkey.TestSuite.testSt
 
 theorem Solkey.TestSuite.testStorageArrayReadWrite.proved : ⊢ Solkey.TestSuite.testStorageArrayReadWrite.problem := by
   sol_prove
-  case leaf1 =>
-    refine Proves.close_dropWt ?_
-    sol_symex
-    sol_close
-  case leaf2 =>
-    refine Proves.close_dropWt ?_
-    sol_symex
-    sol_close
 
 theorem Solkey.TestSuite.testStorageDeletePaperCase.proved : ⊢ Solkey.TestSuite.testStorageDeletePaperCase.problem := by
   sol_prove

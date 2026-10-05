@@ -79,6 +79,8 @@ def LStor.strict : LStor → List LTerm
   | .init => []
   | .save s q w => w.strict ++ s.strict ++ q.strict
   | .del s q => s.strict ++ q.strict
+  | .arr _ s q w => w.strict ++ s.strict ++ q.strict
+  | .copy s q src sq => src.strict ++ sq.strict ++ s.strict ++ q.strict
 
 end
 
@@ -230,6 +232,29 @@ theorem LStor.strict_returns {σ : State} : (s : LStor) → (∃ sv, s.eval σ =
     rcases hu with hu | hu
     · exact LStor.strict_returns s ⟨y, hs⟩ u hu
     · exact LPath.strict_returns q ⟨z, hq⟩ u hu
+  | .arr _ s q w, ⟨sv, h⟩, u, hu => by
+    simp only [LStor.strict, List.mem_append] at hu
+    simp only [LStor.eval] at h
+    obtain ⟨x, hw, h⟩ := Res.bind_eq_ok.1 h
+    obtain ⟨y, hs, h⟩ := Res.bind_eq_ok.1 h
+    obtain ⟨z, hq, -⟩ := Res.bind_eq_ok.1 h
+    rcases hu with (hu | hu) | hu
+    · exact LTerm.strict_returns w ⟨x, hw⟩ u hu
+    · exact LStor.strict_returns s ⟨y, hs⟩ u hu
+    · exact LPath.strict_returns q ⟨z, hq⟩ u hu
+  | .copy s q src sq, ⟨sv, h⟩, u, hu => by
+    simp only [LStor.strict, List.mem_append] at hu
+    simp only [LStor.eval] at h
+    obtain ⟨a, ha, h⟩ := Res.bind_eq_ok.1 h
+    obtain ⟨b, hb, h⟩ := Res.bind_eq_ok.1 h
+    obtain ⟨_, _, h⟩ := Res.bind_eq_ok.1 h
+    obtain ⟨y, hs, h⟩ := Res.bind_eq_ok.1 h
+    obtain ⟨z, hq, -⟩ := Res.bind_eq_ok.1 h
+    rcases hu with ((hu | hu) | hu) | hu
+    · exact LStor.strict_returns src ⟨a, ha⟩ u hu
+    · exact LPath.strict_returns sq ⟨b, hb⟩ u hu
+    · exact LStor.strict_returns s ⟨y, hs⟩ u hu
+    · exact LPath.strict_returns q ⟨z, hq⟩ u hu
 
 end
 
@@ -288,6 +313,8 @@ def LStor.core (ne : Keys) : LStor → LStor
   | .init => .init
   | .save s q w => .save (s.core ne) (q.core ne) (w.core ne)
   | .del s q => .del (s.core ne) (q.core ne)
+  | .arr op s q w => .arr op (s.core ne) (q.core ne) (w.core ne)
+  | .copy s q src sq => .copy (s.core ne) (q.core ne) (src.core ne) (sq.core ne)
 
 end
 
@@ -442,6 +469,24 @@ theorem LStor.core_eval {σ : State} {ne : Keys} (hne : Apart σ ne) :
     obtain ⟨y, hs, h⟩ := Res.bind_eq_ok.1 h
     obtain ⟨z, hq, h⟩ := Res.bind_eq_ok.1 h
     simp only [LStor.core, LStor.eval, LStor.core_eval hne s hs, LPath.core_eval hne q hq, Res.ok_bind]
+    exact h
+  | .arr _ s q w, sv, h => by
+    simp only [LStor.eval] at h
+    obtain ⟨x, hw, h⟩ := Res.bind_eq_ok.1 h
+    obtain ⟨y, hs, h⟩ := Res.bind_eq_ok.1 h
+    obtain ⟨z, hq, h⟩ := Res.bind_eq_ok.1 h
+    simp only [LStor.core, LStor.eval, LTerm.core_eval hne w hw, LStor.core_eval hne s hs,
+      LPath.core_eval hne q hq, Res.ok_bind]
+    exact h
+  | .copy s q src sq, sv, h => by
+    simp only [LStor.eval] at h
+    obtain ⟨a, ha, h⟩ := Res.bind_eq_ok.1 h
+    obtain ⟨b, hb, h⟩ := Res.bind_eq_ok.1 h
+    obtain ⟨n, hn, h⟩ := Res.bind_eq_ok.1 h
+    obtain ⟨y, hs, h⟩ := Res.bind_eq_ok.1 h
+    obtain ⟨z, hq, h⟩ := Res.bind_eq_ok.1 h
+    simp only [LStor.core, LStor.eval, LStor.core_eval hne src ha, LPath.core_eval hne sq hb,
+      LStor.core_eval hne s hs, LPath.core_eval hne q hq, Res.ok_bind, hn]
     exact h
 
 end

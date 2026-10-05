@@ -1,7 +1,7 @@
 import Solidity.TestSuite.Problems
 
 /-!
-# solkey's `TestSuite`, derived (6 of 6)
+# solkey's `TestSuite`, derived (6 of 8)
 
 `⊢` of each obligation `sol_prove` and its leaf tactics close, from
 `parenthesizedLeftOperand` to `tryCallUnmatchedFailureReverts` in the order of the source; the replays are what
@@ -95,9 +95,6 @@ theorem Solkey.TestSuite.storageIndexReadArrayStoreRoot.proved : ⊢ Solkey.Test
 
 theorem Solkey.TestSuite.storagePopUnfold.proved : ⊢ Solkey.TestSuite.storagePopUnfold.problem := by
   sol_prove
-  refine Proves.close_dropWt ?_
-  sol_symex
-  sol_close
 
 theorem Solkey.TestSuite.storageRootPostdecrement.proved : ⊢ Solkey.TestSuite.storageRootPostdecrement.problem := by
   sol_prove

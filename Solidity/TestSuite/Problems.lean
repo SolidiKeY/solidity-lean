@@ -51,9 +51,9 @@ theorem Solkey.TestSuite.initState_wt :
   initStorage_wt (by decide +kernel) (by decide +kernel)
 
 /-! The suggestion `#solkey_derive?` prints, pinned: a statement the
-closer proves in the residue is `sol_prove` alone; a leaf it leaves (an
-array written past a `push`, outside its fragment) is closed with the `wt`
-premise set aside (`Derive.searchLeaf`), and several leaves each go under
+closer proves in the residue is `sol_prove` alone; a leaf it leaves (a
+member written through the alias a `push` returns, past what the layout
+types) is closed with the `wt` premise set aside (`Derive.searchLeaf`), and several leaves each go under
 their `case`. -/
 
 /--
@@ -66,7 +66,7 @@ additionStorageWrite: derived
 #solkey_derive? Solkey.TestSuite from 0 count 1
 
 /--
-info: theorem Solkey.TestSuite.testStorageArrayReadWrite.proved : ⊢ Solkey.TestSuite.testStorageArrayReadWrite.problem := by
+info: theorem Solkey.TestSuite.testStorageNestedPushReturnAlias.proved : ⊢ Solkey.TestSuite.testStorageNestedPushReturnAlias.problem := by
   sol_prove
   case leaf1 =>
     refine Proves.close_dropWt ?_
@@ -77,7 +77,7 @@ info: theorem Solkey.TestSuite.testStorageArrayReadWrite.proved : ⊢ Solkey.Tes
     sol_symex
     sol_close
 
-testStorageArrayReadWrite: derived
+testStorageNestedPushReturnAlias: derived
 -/
 #guard_msgs in
-#solkey_derive? Solkey.TestSuite from 222 count 1
+#solkey_derive? Solkey.TestSuite from 232 count 1
