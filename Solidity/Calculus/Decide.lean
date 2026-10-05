@@ -4281,6 +4281,17 @@ def staleOk (has : LTerm) (slot : Option (LTerm × LTerm × LTerm)) (opq : LTerm
     | some (k, L, S) => .kite k L S .err
     | none => .err)) opq
 
+/-- Whether `s` holds a write through a dangling alias (Lean only: a cost
+and regression guard).  The slot readers look past a `delete` of an empty
+array and past a copy only then (`LStor.slotU`), so every other storage's
+reduction is as before. -/
+def LStor.dangles : LStor → Bool
+  | .stale .. => true
+  | .save s .. | .del s _ | .arr _ s .. => s.dangles
+  | .copy s _ src _ => s.dangles || src.dangles
+  | .init | .view .. => false
+termination_by structural s => s
+
 mutual
 
 /-- Every read of a write eliminated. -/
@@ -4313,7 +4324,10 @@ def LPath.elim : LPath → LPath
   | .at q k => .at q.elim k.elim
 termination_by structural q => q
 
-/-- Returns exactly when the writes of `s` succeed. -/
+/-- Returns exactly when the writes of `s` succeed.  A copy within one
+storage (`tokens = bucket.tokens;`) checks it once where it holds a stale
+write (`LStor.dangles`): the guard is repeated at every read, and twice it
+would put those leaves past `Derive.elimSize`. -/
 def LStor.okE : LStor → LTerm
   | .init => .lit (.bool true)
   | .save s q w =>
@@ -4333,8 +4347,11 @@ def LStor.okE : LStor → LTerm
     else .sok (.stale none s q w)
   | .stale (some op) s q w => .sok (.stale (some op) s q w)
   | .copy s q src sq =>
-    if q.noLen then .seq src.okE (.seq (.pok sq.elim) (.seq (src.hasU sq.elim)
-      (.seq s.okE (.seq (.pok q.elim) (s.hasU q.elim)))))
+    if q.noLen then
+      if s.dangles && src == s then .seq s.okE (.seq (.pok sq.elim) (.seq (s.hasU sq.elim)
+        (.seq (.pok q.elim) (s.hasU q.elim))))
+      else .seq src.okE (.seq (.pok sq.elim) (.seq (src.hasU sq.elim)
+        (.seq s.okE (.seq (.pok q.elim) (s.hasU q.elim)))))
     else .sok (.copy s q src sq)
   | .view m i => if m.refDesc then okView m.okU (m.objU false i) (.sok (.view m i))
     else .sok (.view m i)
@@ -4368,7 +4385,12 @@ termination_by structural s => s
 the array at `P` in `s` (`pushSlot`: the first slot past the end, recycled):
 after a `pop` at `P`, the element it popped, cleared (as below a `delete`)
 or kept; after a `delete` of a dynamic array at `P`, its old first element,
-cleared, where it had one.  Elsewhere the read itself (`opq`). -/
+cleared, where it had one; through a stale write, the word where it is at
+the slot.  Where `s` holds a stale write (`LStor.dangles`) it also reads
+past a `delete` of an empty array (the slot as it was,
+`selectStDelNodeIndexStruct`) and past a copy over `P` (below the old
+length the old element there, cleared; at it the old slot;
+`selectOnSaveEmptyIndexStruct`).  Elsewhere the read itself (`opq`). -/
 def LStor.slotU : LStor → LPath → List SSeg → LTerm → LTerm
   | .arr (.pop keep) s P' _, P, rest, opq =>
     if P'.elim == P then
@@ -4379,15 +4401,23 @@ def LStor.slotU : LStor → LPath → List SSeg → LTerm → LTerm
   | .del s P', P, rest, opq =>
     if P'.elim == P then
       .ite (isT (s.mapU .fixed P)) opq
-        (.kite (s.lenU P) (.lit (.int 0)) opq
+        (.kite (s.lenU P) (.lit (.int 0)) (if s.dangles then s.slotU P rest opq else opq)
           (delLeaf (s.readU ((P.at (.lit (.int 0))).addSegs rest)) (P.at (.lit (.int 0)))
             (fun sh q => s.mapU sh q) (if rest.isEmpty then .eq else .below rest)))
     else opq
   | .stale none s P' w, P, rest, opq =>
     (cmpSegs P'.elim.segs ((P.at (s.lenU P)).addSegs rest).segs).toTerm
       (saveLeaf (if rest.any SSeg.isKey then opq else w.elim) (s.slotU P rest opq))
+  | .copy s P' src SQ, P, rest, opq =>
+    if P'.elim == P && s.dangles then
+      let L' := src.lenU SQ.elim
+      let L := s.lenU P
+      .ite (isT (.seq L' L)) (.kite L' L (s.slotU P rest opq) (.ite (.binop .lt .uint L' L)
+        (delLeaf (s.readU ((P.at L').addSegs rest)) (P.at L')
+          (fun sh q => s.mapU sh q) (if rest.isEmpty then .eq else .below rest)) opq)) opq
+    else opq
   | .init, _, _, opq | .save .., _, _, opq | .arr .push .., _, _, opq
-  | .arr (.slot _) .., _, _, opq | .stale (some _) .., _, _, opq | .copy .., _, _, opq
+  | .arr (.slot _) .., _, _, opq | .stale (some _) .., _, _, opq
   | .view .., _, _, opq => opq
 termination_by structural s => s
 
@@ -4668,8 +4698,11 @@ def LStor.okEF : LStor → LTerm
     else .sok (.stale none s q w)
   | .stale (some op) s q w => .sok (.stale (some op) s q w)
   | .copy s q src sq =>
-    if q.noLen then .seq src.okEF (.seq (.pok sq.elimF) (.seq (src.hasUF sq.elimF)
-      (.seq s.okEF (.seq (.pok q.elimF) (s.hasUF q.elimF)))))
+    if q.noLen then
+      if s.dangles && src == s then .seq s.okEF (.seq (.pok sq.elimF) (.seq (s.hasUF sq.elimF)
+        (.seq (.pok q.elimF) (s.hasUF q.elimF))))
+      else .seq src.okEF (.seq (.pok sq.elimF) (.seq (src.hasUF sq.elimF)
+        (.seq s.okEF (.seq (.pok q.elimF) (s.hasUF q.elimF)))))
     else .sok (.copy s q src sq)
   | .view m i => if m.refDesc then okView m.okUF (m.objUF false i) (.sok (.view m i))
     else .sok (.view m i)
@@ -4715,7 +4748,7 @@ def LStor.slotUF : LStor → LPath → List SSeg → LTerm → LTerm
   | .del s P', P, rest, opq =>
     if P'.elimF == P then
       .ite (isT (s.mapUF .fixed P)) opq
-        (.kite (s.lenUF P) (.lit (.int 0)) opq
+        (.kite (s.lenUF P) (.lit (.int 0)) (if s.dangles then s.slotUF P rest opq else opq)
           (delLeaf (s.readUF ((P.at (.lit (.int 0))).addSegs rest)) (P.at (.lit (.int 0)))
             (fun sh q => s.mapUF sh q) (if rest.isEmpty then .eq else .below rest)))
     else opq
@@ -4723,8 +4756,16 @@ def LStor.slotUF : LStor → LPath → List SSeg → LTerm → LTerm
     let L := s.lenUF P
     (cmpSegs P'.elimF.segs ((P.at L).addSegs rest).segs).toTerm
       (saveLeaf (if rest.any SSeg.isKey then opq else w.elimF) (s.slotUF P rest opq))
+  | .copy s P' src SQ, P, rest, opq =>
+    if P'.elimF == P && s.dangles then
+      let L' := src.lenUF SQ.elimF
+      let L := s.lenUF P
+      .ite (isT (.seq L' L)) (.kite L' L (s.slotUF P rest opq) (.ite (.binop .lt .uint L' L)
+        (delLeaf (s.readUF ((P.at L').addSegs rest)) (P.at L')
+          (fun sh q => s.mapUF sh q) (if rest.isEmpty then .eq else .below rest)) opq)) opq
+    else opq
   | .init, _, _, opq | .save .., _, _, opq | .arr .push .., _, _, opq
-  | .arr (.slot _) .., _, _, opq | .stale (some _) .., _, _, opq | .copy .., _, _, opq
+  | .arr (.slot _) .., _, _, opq | .stale (some _) .., _, _, opq
   | .view .., _, _, opq => opq
 termination_by structural s => s
 
@@ -5019,12 +5060,15 @@ theorem LStor.slotUF_eq : (s : LStor) → ∀ P rest opq, s.slotUF P rest opq = 
       LStor.mapUF_eq _ s]
   | .del s P', P, rest, opq => by
     simp only [LStor.slotUF, LStor.slotU, LPath.elimF_eq P', LStor.readUF_eq s, LStor.lenUF_eq s,
-      LStor.mapUF_eq _ s]
+      LStor.mapUF_eq _ s, LStor.slotUF_eq s]
   | .stale none s P' w, P, rest, opq => by
     simp only [LStor.slotUF, LStor.slotU, LPath.elimF_eq P', LTerm.elimF_eq w, LStor.lenUF_eq s,
       LStor.slotUF_eq s]
+  | .copy s P' src SQ, P, rest, opq => by
+    simp only [LStor.slotUF, LStor.slotU, LPath.elimF_eq P', LPath.elimF_eq SQ, LStor.lenUF_eq s,
+      LStor.lenUF_eq src, LStor.readUF_eq s, LStor.mapUF_eq _ s, LStor.slotUF_eq s]
   | .init, _, _, _ | .save .., _, _, _ | .arr .push .., _, _, _
-  | .arr (.slot _) .., _, _, _ | .stale (some _) .., _, _, _ | .copy .., _, _, _
+  | .arr (.slot _) .., _, _, _ | .stale (some _) .., _, _, _
   | .view .., _, _, _ => rfl
 termination_by structural s => s
 
@@ -6486,27 +6530,38 @@ theorem copy_okE_sim {σ : State} {s src : LStor} {P SQ : LPath}
   simp only [LStor.okE]
   split
   · rename_i hn
-    intro a
-    simp only [LTerm.eval, LStor.eval, Res.bind_eq_ok]
-    constructor
-    · rintro ⟨_, h₁, _, ⟨sqs, h₂, -⟩, _, h₃, _, h₄, _, ⟨ps, h₅, -⟩, h₆⟩
-      obtain ⟨sv, hsv, -⟩ := Res.bind_eq_ok.1 ((hsrc _).1 h₁)
-      obtain ⟨n, hn', -⟩ := Res.bind_eq_ok.1 ((ihS hsv h₂ _).1 h₃)
-      obtain ⟨v, hv, -⟩ := Res.bind_eq_ok.1 ((hs _).1 h₄)
-      obtain ⟨cur, hc, he⟩ := Res.bind_eq_ok.1 ((ihH hv h₅ _).1 h₆)
-      cases he
-      have hq := (hP ps).1 h₅
-      obtain ⟨u, hu⟩ := (save_ok_iff_find_ok (new := cur.overlay n)
-        (LPath.noLen_eval σ hn hq)).2 ⟨_, hc⟩
-      exact ⟨u, ⟨sv, hsv, sqs, (hSQ sqs).1 h₂, n, hn', v, hv, ps, hq, cur, hc, hu⟩, rfl⟩
-    · rintro ⟨u, ⟨sv, hsv, sqs, hsq, n, hn', v, hv, ps, hq, cur, hc, hu⟩, he⟩
-      cases he
-      have h₂ := (hSQ sqs).2 hsq
-      have h₅ := (hP ps).2 hq
-      exact ⟨.bool true, (hsrc _).2 (by simp only [hsv, Res.ok_bind]), .bool true, ⟨sqs, h₂, rfl⟩,
-        .bool true, (ihS hsv h₂ _).2 (by simp only [hn', Res.ok_bind]), .bool true,
-        (hs _).2 (by simp only [hv, Res.ok_bind]), .bool true, ⟨ps, h₅, rfl⟩,
-        (ihH hv h₅ _).2 (by simp only [hc, Res.ok_bind])⟩
+    have hold : Sim ((LTerm.seq src.okE (.seq (.pok SQ.elim) (.seq (src.hasU SQ.elim)
+        (.seq s.okE (.seq (.pok P.elim) (s.hasU P.elim)))))).eval σ)
+        ((LStor.copy s P src SQ).eval σ >>= fun _ => .ok (.bool true)) := by
+      intro a
+      simp only [LTerm.eval, LStor.eval, Res.bind_eq_ok]
+      constructor
+      · rintro ⟨_, h₁, _, ⟨sqs, h₂, -⟩, _, h₃, _, h₄, _, ⟨ps, h₅, -⟩, h₆⟩
+        obtain ⟨sv, hsv, -⟩ := Res.bind_eq_ok.1 ((hsrc _).1 h₁)
+        obtain ⟨n, hn', -⟩ := Res.bind_eq_ok.1 ((ihS hsv h₂ _).1 h₃)
+        obtain ⟨v, hv, -⟩ := Res.bind_eq_ok.1 ((hs _).1 h₄)
+        obtain ⟨cur, hc, he⟩ := Res.bind_eq_ok.1 ((ihH hv h₅ _).1 h₆)
+        cases he
+        have hq := (hP ps).1 h₅
+        obtain ⟨u, hu⟩ := (save_ok_iff_find_ok (new := cur.overlay n)
+          (LPath.noLen_eval σ hn hq)).2 ⟨_, hc⟩
+        exact ⟨u, ⟨sv, hsv, sqs, (hSQ sqs).1 h₂, n, hn', v, hv, ps, hq, cur, hc, hu⟩, rfl⟩
+      · rintro ⟨u, ⟨sv, hsv, sqs, hsq, n, hn', v, hv, ps, hq, cur, hc, hu⟩, he⟩
+        cases he
+        have h₂ := (hSQ sqs).2 hsq
+        have h₅ := (hP ps).2 hq
+        exact ⟨.bool true, (hsrc _).2 (by simp only [hsv, Res.ok_bind]), .bool true, ⟨sqs, h₂, rfl⟩,
+          .bool true, (ihS hsv h₂ _).2 (by simp only [hn', Res.ok_bind]), .bool true,
+          (hs _).2 (by simp only [hv, Res.ok_bind]), .bool true, ⟨ps, h₅, rfl⟩,
+          (ihH hv h₅ _).2 (by simp only [hc, Res.ok_bind])⟩
+    split
+    · rename_i hd
+      have he : src = s := by simp only [Bool.and_eq_true, beq_iff_eq] at hd; exact hd.2
+      subst he
+      refine Sim.trans (Sim.of_eq ?_) hold
+      simp only [LTerm.eval]
+      cases src.okE.eval σ <;> rfl
+    · exact hold
   · exact Sim.refl _
 
 /-! ### The slot a `push()` recycles -/
@@ -6627,7 +6682,11 @@ theorem del_slotU_sim {σ : State} {s : LStor} {P' P : LPath} {opq : LTerm}
     (ihM : ∀ (sh : KShape) (Q : LPath) {v qs}, s.eval σ = .ok v → Q.eval σ = .ok qs →
       Sim ((s.mapU sh Q).eval σ) (v.findLive qs >>= sh.test))
     (ihL : ∀ {v qs}, s.eval σ = .ok v → P.eval σ = .ok qs →
-      Sim ((s.lenU P).eval σ) (v.findLive qs >>= Close.arrLen)) :
+      Sim ((s.lenU P).eval σ) (v.findLive qs >>= Close.arrLen))
+    (ihS : ∀ {v : SVal} {es sh : List SVal} {fx : Bool}, s.eval σ = .ok v →
+      v.findLive ps = .ok (.array es sh fx) →
+      Sim (opq.eval σ) ((pushSlot (.ref R) sh).1.findLive r >>= SVal.asValue) →
+      Sim ((s.slotU P rest opq).eval σ) ((pushSlot (.ref R) sh).1.findLive r >>= SVal.asValue)) :
     Sim (((LStor.del s P').slotU P rest opq).eval σ)
       ((pushSlot (.ref R) sh).1.findLive r >>= SVal.asValue) := by
   rw [LStor.slotU]
@@ -6670,7 +6729,10 @@ theorem del_slotU_sim {σ : State} {s : LStor} {P' P : LPath} {opq : LTerm}
         cases es0 with
         | nil =>
           simp only [List.length_nil, Int.natCast_zero, if_true]
-          exact hopq
+          simp only [SVal.defaultOf.defaultOfElems, List.nil_append] at hopq ⊢
+          split
+          · exact ihS hv' hc0 hopq
+          · exact hopq
         | cons e et =>
           have hne : ((e :: et).length : Int) ≠ 0 := by simp only [List.length_cons,
               Int.natCast_add, Int.cast_ofNat_Int, ne_eq]; omega
@@ -7856,6 +7918,101 @@ theorem stale_slotHasU_sound {s : LStor} {P' P : LPath} {w opq : LTerm}
       rw [hhv] at hc
       simp only [slotHas, huc, hc, Res.ok_bind, findLive_save_diverge ht hc']
 
+/-- **The slot a `push()` recycles, after a copy over the array**
+(`storageFieldWriteCopySource`, then `selectOnSaveEmptyIndexStruct`): below
+the old length, the old element there, deleted (`selectOnCopyIndexClear`);
+at it, the old array's own (`selectOnCopyIndexKeep`); elsewhere, or where a
+length does not return, the read itself. -/
+theorem copy_slotU_sim {s src : LStor} {P' SQ P : LPath} {opq : LTerm}
+    {rest : List SSeg} {u : SVal} {ps : List Seg} {es sh : List SVal} {fx : Bool} {R : RefTy}
+    {r : List Seg}
+    (hu : (LStor.copy s P' src SQ).eval σ = .ok u) (hP' : Sim (P'.elim.eval σ) (P'.eval σ))
+    (hSQ : Sim (SQ.elim.eval σ) (SQ.eval σ))
+    (hp : P.eval σ = .ok ps) (hn : u.findLive ps = .ok (.array es sh fx))
+    (hr : segsEval σ rest = .ok r)
+    (hopq : Sim (opq.eval σ) ((pushSlot (.ref R) sh).1.findLive r >>= SVal.asValue))
+    (ihR : ∀ (Q : LPath) {v qs}, s.eval σ = .ok v → Q.eval σ = .ok qs →
+      Sim ((s.readU Q).eval σ) (v.findLive qs >>= SVal.asValue))
+    (ihM : ∀ (sh : KShape) (Q : LPath) {v qs}, s.eval σ = .ok v → Q.eval σ = .ok qs →
+      Sim ((s.mapU sh Q).eval σ) (v.findLive qs >>= sh.test))
+    (ihL : ∀ {v qs}, s.eval σ = .ok v → P.eval σ = .ok qs →
+      Sim ((s.lenU P).eval σ) (v.findLive qs >>= Close.arrLen))
+    (ihL' : ∀ {v qs}, src.eval σ = .ok v → SQ.elim.eval σ = .ok qs →
+      Sim ((src.lenU SQ.elim).eval σ) (v.findLive qs >>= Close.arrLen))
+    (ihS : ∀ {v : SVal} {es sh : List SVal} {fx : Bool}, s.eval σ = .ok v →
+      v.findLive ps = .ok (.array es sh fx) →
+      Sim (opq.eval σ) ((pushSlot (.ref R) sh).1.findLive r >>= SVal.asValue) →
+      Sim ((s.slotU P rest opq).eval σ) ((pushSlot (.ref R) sh).1.findLive r >>= SVal.asValue)) :
+    Sim (((LStor.copy s P' src SQ).slotU P rest opq).eval σ)
+      ((pushSlot (.ref R) sh).1.findLive r >>= SVal.asValue) := by
+  rw [LStor.slotU]
+  split
+  · rename_i hc
+    have hPe : P'.elim = P := by
+      simp only [Bool.and_eq_true, beq_iff_eq] at hc; exact hc.1
+    obtain ⟨sv, sqs, n, v', ps', cur, hsv, hsq, hn', hv', hp', hcur, hu'⟩ := copy_eval_ok hu
+    have hpp : ps' = ps := by
+      have := (hP' ps').2 hp'
+      rw [hPe, hp] at this
+      cases this; rfl
+    subst hpp
+    rw [findLive_saveLive_same hu'] at hn
+    have hsq' : SQ.elim.eval σ = .ok sqs := (hSQ sqs).2 hsq
+    have hL := ihL hv' hp
+    rw [hcur, Res.ok_bind] at hL
+    have hL' := ihL' hsv hsq'
+    rw [hn', Res.ok_bind] at hL'
+    simp only [LTerm.eval, isT_eval]
+    cases ha : (src.lenU SQ.elim).eval σ with
+    | error e => simp only [Res.error_bind, pickBranch]; exact hopq
+    | ok a =>
+    cases hb : (s.lenU P).eval σ with
+    | error e => simp only [Res.ok_bind, Res.error_bind, pickBranch]; exact hopq
+    | ok b =>
+    simp only [Res.ok_bind, pickBranch]
+    have ha' := (hL' a).1 ha
+    have hb' := (hL b).1 hb
+    cases n with
+    | array nel nsh nfx =>
+      cases cur with
+      | array oel osh ofx =>
+        simp only [Close.arrLen, Except.ok.injEq] at ha' hb'
+        subst ha' hb'
+        simp only [Value.asInt, Res.ok_bind]
+        by_cases hij : (nel.length : Int) = oel.length
+        · rw [if_pos hij]
+          have hlen : nel.length = oel.length := by exact_mod_cast hij
+          obtain ⟨el', hov, -⟩ :=
+            overlay_shadow_eq (osh := osh) (nsh := nsh) (ofx := ofx) (nfx := nfx) hlen
+          rw [hov] at hn
+          simp only [Except.ok.injEq, SVal.array.injEq] at hn
+          obtain ⟨-, rfl, rfl⟩ := hn
+          exact ihS hv' hcur hopq
+        · rw [if_neg hij]
+          simp only [evalBinop, applyBinOp, Value.asInt, checkArith, bind, Except.bind]
+          by_cases hlt : (nel.length : Int) < oel.length
+          · simp only [hlt, decide_true]
+            have hlt' : nel.length < oel.length := by exact_mod_cast hlt
+            obtain ⟨el', sh', hov, -⟩ :=
+              overlay_shadow_lt (osh := osh) (nsh := nsh) (ofx := ofx) (nfx := nfx) hlt'
+            rw [hov] at hn
+            simp only [Except.ok.injEq, SVal.array.injEq] at hn
+            obtain ⟨-, rfl, rfl⟩ := hn
+            rw [pushSlot_ref_cons]
+            have hE : (P.at (src.lenU SQ.elim)).eval σ = .ok (ps' ++ [.at nel.length]) := by
+              simp only [LPath.eval, hp, ha, Res.ok_bind, Value.asInt]
+            have he : v'.findLive (ps' ++ [.at nel.length]) = .ok (oel[nel.length]'hlt') := by
+              rw [SVal.findLive_append, hcur, Res.ok_bind]
+              simp only [SVal.findLive, Int.natCast_nonneg, Int.toNat_natCast, hlt', and_self,
+                ↓reduceDIte, List.get_eq_getElem, SVal.findLive_nil]
+            exact delSlot_sim hE he hr (fun Q _ hq => ihR Q hv' hq)
+              (fun sh Q _ hq => ihM sh Q hv' hq)
+          · simp only [hlt, decide_false]
+            exact hopq
+      | prim _ | struct _ | map _ _ => simp only [Close.arrLen, reduceCtorEq] at hb'
+    | prim _ | struct _ | map _ _ => simp only [Close.arrLen, reduceCtorEq] at ha'
+  · exact hopq
+
 end Stale
 
 /-- A read below a copy from storage, its storage reads eliminated. -/
@@ -8413,11 +8570,12 @@ theorem LStor.slotU_sim (σ : State) : (s : LStor) → ∀ (P : LPath) (rest : L
       (fun Q _ _ hv hq => LStor.readU_sim σ s Q hv hq)
       (fun sh Q _ _ hv hq => LStor.mapU_sim σ s sh Q hv hq)
       (fun hv hq => LStor.lenU_sim σ s P hv hq)
-  | .del s P' => fun P _ _ _ _ _ _ _ _ _ hv hp hn hr hopq =>
+  | .del s P' => fun P rest opq _ _ _ _ _ _ _ hv hp hn hr hopq =>
     del_slotU_sim hv (LPath.elim_sim σ P') hp hn hr hopq
       (fun Q _ _ hv hq => LStor.readU_sim σ s Q hv hq)
       (fun sh Q _ _ hv hq => LStor.mapU_sim σ s sh Q hv hq)
       (fun hv hq => LStor.lenU_sim σ s P hv hq)
+      (fun hv' hn' hopq' => LStor.slotU_sim σ s P rest opq hv' hp hn' hr hopq')
   | .init => fun _ _ _ _ _ _ _ _ _ _ _ _ _ _ hopq => by rw [LStor.slotU]; exact hopq
   | .save .. => fun _ _ _ _ _ _ _ _ _ _ _ _ _ _ hopq => by rw [LStor.slotU]; exact hopq
   | .arr .push .. => fun _ _ _ _ _ _ _ _ _ _ _ _ _ _ hopq => by rw [LStor.slotU]; exact hopq
@@ -8427,7 +8585,13 @@ theorem LStor.slotU_sim (σ : State) : (s : LStor) → ∀ (P : LPath) (rest : L
       (fun hv' hn' hopq' => LStor.slotU_sim σ s P rest opq hv' hp hn' hr hopq')
       (fun hv hq => LStor.lenU_sim σ s P hv hq)
   | .stale (some _) .. => fun _ _ _ _ _ _ _ _ _ _ _ _ _ _ hopq => by rw [LStor.slotU]; exact hopq
-  | .copy .. => fun _ _ _ _ _ _ _ _ _ _ _ _ _ _ hopq => by rw [LStor.slotU]; exact hopq
+  | .copy s P' src SQ => fun P rest opq _ _ _ _ _ _ _ hv hp hn hr hopq =>
+    copy_slotU_sim hv (LPath.elim_sim σ P') (LPath.elim_sim σ SQ) hp hn hr hopq
+      (fun Q _ _ hv hq => LStor.readU_sim σ s Q hv hq)
+      (fun sh Q _ _ hv hq => LStor.mapU_sim σ s sh Q hv hq)
+      (fun hv hq => LStor.lenU_sim σ s P hv hq)
+      (fun hv hq => LStor.lenU_sim σ src SQ.elim hv hq)
+      (fun hv' hn' hopq' => LStor.slotU_sim σ s P rest opq hv' hp hn' hr hopq')
   | .view .. => fun _ _ _ _ _ _ _ _ _ _ _ _ _ _ hopq => by rw [LStor.slotU]; exact hopq
 termination_by structural x => x
 

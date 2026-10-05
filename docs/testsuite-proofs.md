@@ -1115,6 +1115,35 @@ after the step: T1 3590 (closes), T2 8944 (past `elimSize`, 8000), T3
 derived, 5 pending) is computed, not yet checked: checking it builds every
 `Derived` module.
 
+### Step 5: past a `delete` and a copy
+
+`slotU` now reads the recycled slot past a `delete` of an empty dynamic
+array (the slot as it was: `selectStDelNodeIndexStruct` at `iv ≥ size`,
+`defaultOf_array_nil`) and past a copy over the array (below the old
+length the old element there, cleared; at it the old slot:
+`selectOnSaveEmptyIndexStruct`, `overlay_shadow_lt`/`overlay_shadow_eq`;
+`copy_slotU_sim`).  The copy arm is exact: where either length does not
+return, or the new one is longer, it is the read itself.  Both arms apply
+only where the storage below holds a stale write (`LStor.dangles`), so
+every other leaf's reduction is as before; `Derived1` to `Derived12`
+re-check clean.
+
+Two more changes were needed:
+- A copy within one storage (`tokens = bucket.tokens;`) has its guard
+  checked once where the storage holds a stale write (`LStor.okE`): the
+  guard is repeated at every read, and the copy test's reduction went from
+  8574 to 6605.
+- The closer's slot facts (`Facts.slotTy`) take the slot from an array
+  with `delete`s at other roots below it (`Facts.offDel`): the copy test
+  starts with `delete bucket.tokens; delete tokens;`.
+
+`testArrayCopyKeepsDestinationTail` (reduction 7030) and
+`testDeleteArrayLeavesDataPastLength` (4996) are derived by `sol_prove`
+(`TestSuite/Derived13.lean`; the kernel checks them in 1.2 s and 2.2 s).
+`testArrayCopyClearsOldElements` stays pending: its reduction is 8791,
+past `elimSize` (8000), and its `bucket.tokens.push()` takes the slot from
+a storage with writes at another root, which the slot facts do not read.
+
 ## M6 results (2026-10-05): memory
 
 This memory support was reworked into solkey's `memoryRules.key`/
