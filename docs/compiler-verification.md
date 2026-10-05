@@ -19,14 +19,16 @@ theorem compile_correct (hP : wtProg Γ P = some Γ') (hm : Sim C L Γ σ m)
     (hL : L + pushesP P ≤ Lmax) :
     (∃ σ' m', Prog.run σ P = .ok σ' ∧ run (compileProg P) m = .ok m' 0 ∧
       m'.stack = m.stack ∧ Sim C (L + pushesP P) Γ' σ' m') ∨
-    (Prog.run σ P = .error .revert ∧ run (compileProg P) m = .revert) ∨
+    ((Prog.run σ P = .error .revert ∨ Prog.run σ P = .error .panic) ∧
+      run (compileProg P) m = .revert) ∨
     (paysP P = true ∧ run (compileProg P) m = .revert ∧
       ∃ σ' m', Prog.run σ P = .ok σ' ∧ Sim C (L + pushesP P) Γ' σ' m')
 ```
 
 Both succeed, the machine's stack as it was and its storage, locals and
-balances representing the interpreter's final state; or both revert; or the
-program pays (`paysP`), the world refuses a payment, and the machine alone
+balances representing the interpreter's final state; or both halt, the
+interpreter by a revert or a panic (a failed `assert`), the machine by a
+revert, as solc's `Panic(0x01)` is one; or the program pays (`paysP`), the world refuses a payment, and the machine alone
 reverts. The third is the price of a `transfer` that books `net` and nothing
 else (`Semantics.transferAt`): the interpreter does not know whether the
 contract's account covers the amount or whether the recipient accepts it,
@@ -74,7 +76,8 @@ theorem compile_storage (hP : wtProg (fun _ => none) P = some Γ')
       run (compileProg P) (Machine.init bal self) = .ok m' 0 ∧
       ∀ r segs s n, PathSlot C false r segs (.prim .uint) s →
         σ'.findLive r segs = .ok (.prim (.int n)) → m'.store s = n.toNat) ∨
-    (Prog.run (State.fresh C balance self) P = .error .revert ∧
+    ((Prog.run (State.fresh C balance self) P = .error .revert ∨
+        Prog.run (State.fresh C balance self) P = .error .panic) ∧
       run (compileProg P) (Machine.init bal self) = .revert) ∨
     (paysP P = true ∧ run (compileProg P) (Machine.init bal self) = .revert ∧
       ∃ σ', Prog.run (State.fresh C balance self) P = .ok σ')

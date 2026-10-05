@@ -104,8 +104,9 @@ only with packed types and a low-level read).
 (`docs/internals/layout_in_storage.rst:21-28`) except for `bool` beside a packable
 neighbour, so a slot-by-slot comparison is exact only for bool-free contracts;
 D compares *decoded values* using `solc --storage-layout` instead. Panic codes
-(`libsolutil/ErrorCodes.h:25-37`) collapse to `Halt.revert` in the model; a harness
-records the code as an expected-cause tag, to catch a revert for the wrong reason.
+(`libsolutil/ErrorCodes.h:25-37`) collapse to `Halt.revert` in the model, except
+0x01 (a failed `assert`), which is `Halt.panic`; a harness records the code as an
+expected-cause tag, to catch a revert for the wrong reason.
 `unchecked` selects `wrapping_*` over `checked_*` helpers
 (`IRGeneratorForStatements.cpp:567-584`); `mod_…` checks a zero divisor in both.
 

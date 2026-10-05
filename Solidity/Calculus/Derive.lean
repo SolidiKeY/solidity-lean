@@ -10,7 +10,7 @@ import Solidity.Calculus.ProofTree
 each an elaborator unification over the whole sequent.  `Derive.residue`
 runs the same walk as a function: on a sequent `Γ ⟹ φ` it drops an empty
 modality, fires the rule `Stmt.step` picks (as `update`, `unfold`, `split`,
-`done`, or `branches` with any number of outcomes), or moves a precondition,
+`check`, `done`, or `branches` with any number of outcomes), or moves a precondition,
 a quantified local or an update into the context, in `sol_derive`'s order;
 a sequent none of these fits is a leaf, dropped when the closer accepts it.
 What is left is the residue.  `Proves.of_residue` says once that a residue

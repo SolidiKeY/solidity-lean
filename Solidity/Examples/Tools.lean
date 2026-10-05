@@ -229,4 +229,18 @@ skipped: viaMemory (outside the compiled fragment)
 -/
 #guard_msgs in #difftest Mixed (runs := 50) (seed := 3)
 
+/-- A failed `assert` panics in the interpreter and reverts on the machine:
+the two agree, and the count of reverts includes the panics. -/
+def Asserting : Contract := contract!{
+  uint count;
+  function check(uint x) { assert(x < 1000); count = x; }
+  function zero(uint x) { assert(x != 0); count = x; }
+}
+
+/--
+info: check: 50 runs agree (14 revert)
+zero: 50 runs agree (8 revert)
+-/
+#guard_msgs in #difftest Asserting (runs := 50) (seed := 1)
+
 end Solidity.Examples.Tools

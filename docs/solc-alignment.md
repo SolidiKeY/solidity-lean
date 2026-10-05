@@ -250,12 +250,14 @@ they would in a frame of their own.
 
 ## Remaining deltas (documented, intentionally out of scope)
 
-- **Error classification.** All failures collapse into `Halt.revert` and
-  `Halt.stuck`; solc distinguishes `Panic(uint256)` codes, `Error(string)`
-  and empty revert data. Checked overflow (Panic 0x11, at a narrow width too), an out-of-range index
-  (0x32), an empty `pop` (0x31), a zero divisor (0x12) and a failing `assert`
-  (0x01) are all `.revert`; "rejected at compile time" and "outside the
-  fragment" are `.stuck`.
+- **Error classification.** A failing `assert` (Panic 0x01) is `Halt.panic`,
+  a halt of its own (the table above). Every other failure collapses into
+  `Halt.revert` or `Halt.stuck`; solc distinguishes the other `Panic(uint256)`
+  codes, `Error(string)` and empty revert data. Checked overflow (Panic
+  0x11, at a narrow width too), an out-of-range index (0x32), an empty `pop`
+  (0x31) and a zero divisor (0x12) are all `.revert`; "rejected at compile
+  time" and "outside the fragment" are `.stuck`. The compiled code has no
+  panic: there a failing `assert` reverts (`compile_correct`).
 - **Fragment width.** No loops (`docs/loops.md` plans them), `uintN`/`intN`
   for `N < 256` only as above, no `address`/`bytes`/`string`, no external calls beyond
   `transfer`, the `net` ledger and `try` (whose callee is not run), no gas. These constructs do not occur

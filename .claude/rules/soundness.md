@@ -24,12 +24,19 @@ new hypothesis.
   close the case with `exact`. The update reads every right-hand side in the
   pre-state and the statement runs left to right; `upd_unfold` puts both into
   the same reads (`envVal`/`envRef` name the shared ones) and `res_split`
-  splits both runs on them.
+  splits both runs on them. Two halts must agree on whether they are a
+  panic (`SameOk`): where the two sides halt through different reads,
+  `res_split` closes `e₁ = .panic ↔ e₂ = .panic` with `no_panic_iff`, from
+  the `@[simp]` `*_noPanic` lemmas (`Semantics/NoPanic.lean`,
+  `Calculus/NoPanic.lean`, `envVal_noPanic`). A new read needs its own
+  `_noPanic` lemma, or that goal is left over.
 - **Unfold premise** (`SoundUnfold.lean`): the captured part is evaluated
   first, the fresh binding moves outward past every later read (the
   `*_setEnv` lemmas), and `agree_tac` closes the agreement off the fresh
-  names. `SameOk` only asks both runs to halt, not to halt alike, so a premise
-  may evaluate pure parts in another order.
+  names. `SameOk` asks both runs to halt, and to agree only on whether the
+  halt is a panic, so a premise may evaluate pure parts in another order:
+  no read panics (the `_noPanic` lemmas), and `no_panic_iff` closes the
+  mismatched halts.
 - Develop a case as a standalone lemma in a scratch file; the whole theorem
   elaborates in about half a minute.
 

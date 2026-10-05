@@ -324,3 +324,13 @@ formula's meaning has one more conjunct, which `decide +kernel` never meets:
 the kernel decides runs (`corpus_decide`) and the `LFml` reduction, not
 `holds` of a modality.
 
+Review fixes: `#difftest` takes an interpreter panic against a machine
+revert as agreement (`DiffTest.runOnce`, pinned by `Examples/Tools.lean`'s
+`Asserting`); `#verify` reports a panic as a counterexample with no clause
+blamed (`SpecProblem.try`, pinned by `Examples/Verify.lean`'s `Guarded`);
+the `check` paths of `#proof_tree`, `sol_derive?` and `sol_prove?` are
+pinned in `Examples/ProofTree.lean`; the docs and conventions that stated
+the old reading (`solc-alignment.md`, `compiler-verification.md`,
+`solc-validation.md`, the soundness rules, the walk steps) now state this
+one.
+

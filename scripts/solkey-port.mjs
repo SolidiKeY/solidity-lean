@@ -20,8 +20,11 @@
  *   - `⊨ dl[C]{ ⟨ body ⟩ true }` quantifies over every state, including
  *     those without the contract's roots, where the first storage write is
  *     stuck: it is invalid for any body that touches storage;
- *   - `⊨ dl[C]{ [ body ] true }` is valid for *every* body, since a failing
- *     `assert` halts like a `require` and a halt satisfies the box;
+ *   - `⊨ dl[C]{ [ body ] true }` says that no `assert` fails, from any
+ *     state: a failed `assert` panics, which the box does not accept, while
+ *     a failed `require` reverts, which it does (solkey's `assertSimple`);
+ *     over every state it is stronger than a store-bound run, and it meets
+ *     the same storage gap as the diamond;
  *   - `⊨ dl[C]{ pre → ⟨ body ⟩ true }` with `pre` describing the store
  *     would be the faithful validity, but `sol_close` does not close a
  *     storage write under the diamond (`Calculus/Close.lean`), so it would
@@ -44,8 +47,9 @@
  *   - `proved`: a theorem, kernel-checked;
  *   - `evaluated`: the run ends normally, pinned by `#eval` (reason: the
  *     well-founded definition the kernel stops at);
- *   - `open`: the run reverts or is stuck — solkey proves it, the
- *     interpreter disagrees (reason: how the run ends), pinned by `#eval`;
+ *   - `open`: the run reverts, panics (a failed `assert`) or is stuck —
+ *     solkey proves it, the interpreter disagrees (reason: how the run
+ *     ends), pinned by `#eval`;
  *   - `unsupported`: no obligation is emitted; the reason is the
  *     translator's (a construct the typed syntax lacks) or Lean's (the
  *     elaboration error, verbatim);

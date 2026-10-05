@@ -207,6 +207,67 @@ info: Try this:
 example : ⊢ dl!{ a == 1 → ⟨ uint x = a; require(x == 1); ⟩ x == 1 } := by
   sol_prove?
 
+/-! ## A failed `assert`
+
+`assertSimple` checks its condition: two goals, `thn` (the run goes on) and
+`els`, that the condition holds (a panic does not satisfy the box, so this
+goal has nothing to close but the condition).  The tree, the walk
+(`Proves.check`) and `sol_prove`'s residue each go through it once. -/
+
+/--
+info: 0: impRight
+1: localValueDeclInitDrop
+2: localValueAssign
+3: assertConditionCapture
+4: localValueDeclInitDrop
+5: binopAssignment
+6: assertSimple
+  [thn]
+    7: emptyModality
+    8: Closed goal
+  [els]
+    9: Closed goal
+closed: 0 open goal(s), 10 node(s), 2 branch(es)
+-/
+#guard_msgs in
+#proof_tree dl!{ a == 1 → [ uint x = a; assert(x == 1); ] x == 1 }
+
+/--
+info: Try this:
+  apply intro
+    apply unfold .localValueDeclInitDrop
+    apply update .localValueAssign
+    apply unfold .assertConditionCapture
+    apply unfold .localValueDeclInitDrop
+    apply update .binopAssignment
+    apply Proves.check .assertSimple
+    case thn =>
+      apply empty
+      refine close ?_
+      sol_symex
+      sol_close
+    case els =>
+      refine close ?_
+      sol_symex
+      sol_close
+-/
+#guard_msgs in
+example : ⊢ dl!{ a == 1 → [ uint x = a; assert(x == 1); ] x == 1 } := by
+  sol_derive?
+
+/--
+info: Try this:
+  sol_prove
+    refine Proves.close ?_
+    sol_symex
+    refine (Fml.valid_iff_reduce _ (by decide +kernel)).2 ?_
+    sol_reduce
+    sol_decide_cons
+-/
+#guard_msgs in
+example : ⊢ dl!{ a == 1 → [ uint x = a; assert(x == 1); ] x == 1 } := by
+  sol_prove?
+
 /-! ## `sol_chain?`: the `calc`
 
 A derivation `φ ~*> ψ` written out, every line and every rule. -/

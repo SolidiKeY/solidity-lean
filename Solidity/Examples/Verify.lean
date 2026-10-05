@@ -8,8 +8,8 @@ theorem as a `Try this:` suggestion), one refuted with a certified
 counterexample (the kernel checked `¬ ⊨ spec[C]{f}`), one refuted by its
 `assignable` frame, one refuted by a tested counterexample only (the layout
 premise of a mapping is a `\forall` over a `uint`, which the certificate
-cannot evaluate), and one stuck: true, but outside what `sol_spec_try`
-closes.  Then `#counterexample` on a formula.
+cannot evaluate), one refuted by a failed `assert`, and one stuck: true,
+but outside what `sol_spec_try` closes.  Then `#counterexample` on a formula.
 -/
 
 namespace Solidity.Examples.Verify
@@ -92,6 +92,24 @@ info: ✗ credit (tested):
   fails: ensures balances[a] == \old(balances[a]) + 1
 -/
 #guard_msgs in #verify Bank
+
+/-- A failed `assert` refutes the box with no clause to blame: the witness
+says the run panicked. -/
+def Guarded : Contract := contract!{
+  uint count;
+  function check(uint x) public {
+    assert(x != 0);
+    count = x;
+  }
+}
+
+/--
+info: ✗ check (certified):
+  x = 0, msg.sender = 1, msg.value = 0
+  before: count = 0
+  after: panic (an `assert` failed)
+-/
+#guard_msgs in #verify Guarded.check
 
 section
 local instance : InContract := ⟨Counter⟩

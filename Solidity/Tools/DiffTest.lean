@@ -240,7 +240,8 @@ def differences [FreshNames] (C : Contract) (Γ' : TyCtx) (keys : List Nat) (σ'
   store ++ vals ++ net ++ stack
 
 /-- One run of `P` from `s`: whether both reverted when the two agree, else
-the lines of the mismatch. -/
+the lines of the mismatch.  The machine has no panic: a failed `assert`
+reverts there (`compile_correct`'s panic case). -/
 def runOnce [FreshNames] (C : Contract) (P : Prog C) (Γ' : TyCtx) (s : Start) :
     Except (List String) Bool :=
   let σ := s.state
@@ -259,6 +260,7 @@ def runOnce [FreshNames] (C : Contract) (P : Prog C) (Γ' : TyCtx) (s : Start) :
     let out := Evm.run (compileProg P) m
     match res, out with
     | .error .revert, .revert => pure true
+    | .error .panic, .revert => pure true
     | .ok _, .revert => if paysP P then pure true
       else throw ["interpreter ok, machine revert, and no payment to refuse"]
     | .ok σ', .ok m' 0 =>
