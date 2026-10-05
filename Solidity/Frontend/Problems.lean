@@ -33,8 +33,8 @@ is elaborated at the width (`paramCtx`).
   code and lists what it leaves, with times: a search, to choose the
   theorems to state.  It is not used in a checked file.  `#solkey_scan N
   walk` lists the leaves without closing them; the closer skips a leaf
-  past `Derive.closeSize` nodes, whose reduction doubles with each write
-  of the storage that reads it.
+  past its bounds (`Derive.fitsClose`: the leaf's nodes and its
+  reduction's, which grows faster).
 -/
 
 namespace Solidity.Frontend

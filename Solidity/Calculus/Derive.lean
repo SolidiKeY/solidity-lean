@@ -27,8 +27,9 @@ The default closer (`Derive.synClose`) is `LFml.close` on the reduction
 (`Calculus/Closer.lean`): it closes a leaf inside the `Bool`, reading an
 obligation's `wt(storage)` premise as the layout the storage holds
 (`Derive.topWt`).  A parallel update is split first (`Fml.seqUpd`), and a
-leaf past `Derive.closeSize` nodes is not attempted, by the closer nor by
-`sol_prove?`'s reducing steps.  A leaf it does not close is left for a
+leaf past `Derive.closeSize` nodes, or whose reduction is past
+`Derive.elimSize`, is not attempted, by the closer nor by `sol_prove?`'s
+reducing steps.  A leaf it does not close is left for a
 tactic.
 
 Neither the compiled run nor the kernel check heeds `maxHeartbeats`, so
@@ -494,28 +495,50 @@ def topWt : List (Hyp C) → List (Name × Ty)
 
 /-- The most nodes the closer takes in a leaf's formula with its updates
 pushed in, counted as a tree (`LFml.fits`).  A storage written from a read
-of the one before it appears twice in the next, so the tree, and the
-reduction after it, double with each such write: a leaf of four `count +=
-1;` has 1374 nodes and closes in 0.8 s, one of six 5678 nodes; the largest
-leaf of solkey's `TestSuite` has 950. -/
+of the one before it appears twice in the next, so this tree doubles with
+each such write.  It is the cheap first test: computing the reduction of a
+leaf far past it would itself be slow. -/
 def closeSize : Nat := 2000
 
+/-- The most nodes the closer takes in the reduction (`LFml.elim`), which
+is what it walks, counted as a tree.  The reduction does not grow with the
+tree: a read below a `delete` carries the read before it two or three
+times, so `n` deletes of `ledgerUses[aᵢ]` and a read of
+`ledgerUses[k].ledger.balances[m]` give a tree of 1171 nodes at `n = 10`
+but a reduction of 5624250 (×3 per delete).  The largest reduction
+`synClose` closes in solkey's `TestSuite` has 6079 nodes. -/
+def elimSize : Nat := 8000
+
+/-- The closer's input is within bounds: the leaf `l` within `closeSize`
+nodes, and its reduction within `elimSize`.  Both counts stop at their
+bound, so the test costs at most their sum in steps; the reduction is
+built first in compiled code, but as a graph that shares the reads it
+repeats, and the kernel builds only the nodes the count visits. -/
+def fitsClose (l : Decide.LFml) : Bool :=
+  (l.fits closeSize).isSome && (l.elim.fits elimSize).isSome
+
 /-- The default closer: no modality left, in `sol_decide`'s fragment,
-parallel updates split (`Fml.seqUpd`), at most `closeSize` nodes, and its
+parallel updates split (`Fml.seqUpd`), within `fitsClose`, and its
 reduction closed by `LFml.close` (`Calculus/Closer.lean`), the `wt`
 premises set aside as formulas and read as the layout their storage holds
-(`topWt`).  A leaf past the bound is left open, not attempted. -/
+(`topWt`).  A leaf past the bounds is left open, not attempted. -/
 def synClose (Γ : List (Hyp C)) (φ : Fml C) : Bool :=
-  let w := (Hyp.wrap (dropWt Γ) φ).seqUpd
+  let v := Hyp.wrap (dropWt Γ) φ
+  let w := v.seqUpd
   let l := w.toL Decide.Sym.empty
-  (Hyp.wrap (dropWt Γ) φ).modalFree && w.inL Decide.Sym.empty &&
-    (l.fits closeSize).isSome && Decide.LFml.close (topWt Γ) l.elim
+  v.modalFree && w.inL Decide.Sym.empty && fitsClose l && Decide.LFml.close (topWt Γ) l.elim
 
-/-- The leaf is within `closeSize`, counted as `synClose` counts it: what
-`sol_prove?` asks before it tries a step that reduces the leaf, since the
-reduction, its quoting and its kernel check heed no heartbeats. -/
+/-- `synClose`'s bounds alone (`synClose_fits`): what `sol_prove?` asks
+before it tries a step that reduces the leaf, since the reduction, its
+quoting and its kernel check heed no heartbeats. -/
 def leafFits (Γ : List (Hyp C)) (φ : Fml C) : Bool :=
-  ((Hyp.wrap (dropWt Γ) φ).seqUpd.toL Decide.Sym.empty |>.fits closeSize).isSome
+  fitsClose ((Hyp.wrap (dropWt Γ) φ).seqUpd.toL Decide.Sym.empty)
+
+/-- `leafFits` measures what `synClose` measures. -/
+theorem synClose_fits {Γ : List (Hyp C)} {φ : Fml C} (h : synClose Γ φ = true) :
+    leafFits Γ φ = true := by
+  simp only [synClose, Bool.and_eq_true] at h
+  exact h.1.2
 
 /-- The steps `sol_prove` allows, over the whole derivation and so down any
 one path: a runaway (a program whose `if`s double the paths) stops here, in
@@ -847,7 +870,7 @@ def prove (g : MVarId) : MetaM (List MVarId) := do
 lines: `sol_decide`'s two steps after its `LFml.syn` try, which the closer
 subsumes, each on its own so that the replay does not try the other; then
 `sol_close` and `sol_spec_close` (`omega`, `grind`).  A leaf past
-`closeSize` (`small = false`) gets only the last two, whose `simp`,
+`fitsClose` (`small = false`) gets only the last two, whose `simp`,
 `omega` and `grind` heed heartbeats. -/
 def leafTacs (wt : Bool := false) (small : Bool := true) : Array (Array String) :=
   let pre := #[if wt then "refine Proves.close_dropWt ?_" else "refine Proves.close ?_",
@@ -884,7 +907,7 @@ open Lean Elab Tactic Meta
 heartbeats it used; `none` when none does.  Each try runs with its own
 heartbeats and its state rolled back when it fails.  A leaf under a `wt`
 premise is closed with it set aside (`Proves.close_dropWt`); one past
-`closeSize` is not reduced (`goalFits`). -/
+`fitsClose` is not reduced (`goalFits`). -/
 def searchLeaf (l : MVarId) : TacticM (Option (Array String × Nat)) := do
   let env ← getEnv
   let wt := ((← instantiateMVars (← l.getType)).find? fun e =>

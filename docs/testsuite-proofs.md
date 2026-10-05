@@ -572,11 +572,12 @@ replaces has a row in `docs/lean-key-rule-map.md` ("The closer's clauses").
 
 **The size guard.**  A leaf's formula with its updates pushed in shares
 subterms: a storage written from a read of the one before it appears
-twice in the next, so the tree, and `LStor.okE`'s reduction after it,
-double with each such write.  Measured on `count = 0;` and `n` times
-`count += 1;` (kernel check of the whole `sol_prove`):
+twice in the next.  The tree after `toL` and its reduction (`LFml.elim`,
+what the closer walks) grow at different rates, so neither bounds the
+other.  Measured on `count = 0;` and `n` times `count += 1;` (kernel check
+of the whole `sol_prove`; first two columns from M4):
 
-| `n` | tree after `toL` | reduction | kernel |
+| `n` | tree after `toL` | `okE` reduction | kernel |
 |---:|---:|---:|---:|
 | 2 | 310 | 1071 | |
 | 4 | 1374 | 7736 | 0.79 s |
@@ -584,19 +585,56 @@ double with each such write.  Measured on `count = 0;` and `n` times
 | 8 | 22942 | 367531 | 8.2 s |
 | 10 | 92046 | 2519836 | 49.5 s |
 
-`synClose` now refuses a leaf whose tree has more than `Derive.closeSize`
-(2000) nodes (`LFml.fits`, a count that stops at the bound, so it costs at
-most 2000 steps in compiled code and in the kernel); the leaf is left
-open for a tactic, not attempted.  `sol_prove?` (and `#solkey_derive?`,
-through `Derive.searchLeaf`) asks the same bound (`Derive.leafFits`)
-before its reducing steps (`sol_reduce`, then `sol_decide_cons` or
-`sol_decide_heuristic`), whose evaluation, quoting and kernel check heed
-no heartbeats: a leaf past it gets only `sol_close` and `sol_spec_close`.
-`Examples/ProofTree.lean` pins both sides (four writes close in the
-residue, six leave one leaf past the bound).  The largest leaf of `TestSuite` has 950
-nodes.  The doubling itself is not removed: `okE` re-guards every read by
+The ratio of the two grows from 3.5 to 27 there.  A `delete` widens it
+further: the tree grows linearly while the reduction triples, since a read
+below a deleted location carries the read before it two or three times
+(`delBelow`).  `n` deletes of `ledgerUses[aᵢ]` then a read of
+`ledgerUses[k].ledger.balances[m]` (`TestSuite`'s layout), counted with
+`LFml.fits`:
+
+| `n` | tree after `toL` | `LFml.elim` |
+|---:|---:|---:|
+| 2 | 131 | 1002 |
+| 4 | 295 | 8104 |
+| 6 | 523 | 68894 |
+| 8 | 815 | 619172 |
+| 10 | 1171 | 5624250 |
+
+So `synClose` asks two bounds (`Derive.fitsClose`): the tree within
+`Derive.closeSize` (2000), a cheap first test, and the reduction within
+`Derive.elimSize` (8000).  Each count stops at its bound, so the test
+costs at most their sum in steps; in compiled code the reduction is built
+first, but as a graph sharing the reads it repeats (ten deletes are
+refused in 5 ms), and the kernel builds only the nodes the count visits.
+A leaf past either is left open for a tactic, not attempted.
+`sol_prove?` (and `#solkey_derive?`, through `Derive.searchLeaf`) asks the
+same bounds (`Derive.leafFits`, which `Derive.synClose_fits` ties to
+`synClose`) before its reducing steps (`sol_reduce`, then
+`sol_decide_cons` or `sol_decide_heuristic`), whose evaluation, quoting
+and kernel check heed no heartbeats: a leaf past them gets only
+`sol_close` and `sol_spec_close`.  `Examples/ProofTree.lean` pins both
+sides (four writes close in the residue, six leave one leaf past the
+tree's bound, ten deletes one past the reduction's).  Of the leaves
+`synClose` closes in `TestSuite`, the largest tree has 1674 nodes
+(`testStorageMapStructCopy`) and the largest reduction 6079
+(`testStorageIndexWriteImpureIndexRefRhs`); the second bound refuses none
+of them.  The growth itself is not removed: `okE` re-guards every read by
 the writes before it, and sharing it would change `LFml.elim_holds`
 (`Calculus/Decide.lean`).
+
+**Cost of the second bound.**  Counting the reduction is a second walk
+of it in the kernel.  The whole residue of four obligations checked by
+`decide +kernel` (`Elab.async false`), before and after:
+`testNestedIndexWriteImpureReceiverAndIndex` 9.11 → 9.22 s,
+`testStorageStructDeleteSkipsMappingMember` 2.80 → 3.03 s,
+`testDeleteArrayDoesNotResetElementMappingMember` 5.48 → 5.83 s,
+`testStorageIndexWriteImpureIndexRefRhs` 1.52 → 2.07 s; 18.9 → 20.2 s in
+all (+7%), most on the largest reductions.
+
+**Literal powers.**  The closer folds `**` on two literals (`foldBin`)
+only with an exponent at most `256` (`Decide.powBig`): `Int.pow` recurses
+once per unit of the exponent, compiled and in the kernel, heeding no
+heartbeats.
 
 **The counts** (`TestSuite/Report.lean`, pinned):
 
@@ -724,7 +762,7 @@ Of the 117 pending, 111 use memory (M6).  The other 6, and why:
 
 | Function | Why it stays pending |
 |---|---|
-| `storagePushReadBack` (diamond) | `values[values.length - 1]` after `values.push(42)`: the `- 1` is a checked `uint` subtraction of a length with no bound, which reverts where the length is past `2²⁵⁶`; KeY's `int` has no range.  Not valid in the model (overflow, as the plan expects). |
+| `storagePushReadBack` (diamond) | `values[values.length - 1]` after `values.push(42)`: the `- 1` is a checked `uint` subtraction of a length with no bound, which reverts where the length is past `2²⁵⁶`; KeY's `int` has no range.  Not valid in the model (overflow, as the plan expects): solc keeps a length below `2⁶⁴` (`push` panics, 0x41), but `wt(storage)` does not bound lengths (`docs/solc-alignment.md`, "Remaining deltas"). |
 | `testDanglingReferenceSurvivesPush`, `testArrayCopyClearsOldElements`, `testArrayCopyKeepsDestinationTail`, `testDeleteArrayLeavesDataPastLength`, `testDanglingInnerArrayReappearsAfterPush` (diamonds) | an alias bound through an index (`Token storage r = tokens[0];`) used after a `pop` made it dangle: the fragment drops such an alias at the next write (`SymB.onWrite`), and the write through it lands past the live end, which the reduction's live storage does not reach. |
 
 **Cost.**  `Derived7.lean` (40 theorems) takes 58 s, `Derived8.lean` (23)

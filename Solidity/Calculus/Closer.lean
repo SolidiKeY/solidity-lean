@@ -49,9 +49,13 @@ local normal form rewriting the other (KeY's `applyEq`).
   split on a `bool` local or condition (KeY's `cut` on a formula,
   `Facts.split`).
 
-`LFml.fits` bounds the work: a leaf's tree doubles with each storage write
-that reads the storage before it, and `Derive.synClose` skips a leaf past
-its bound rather than let the reduction run away.
+`LFml.fits` counts a term as a tree and stops at its bound; it bounds
+the work only where it counts what the closer walks.  `Derive.synClose`
+counts both the leaf and its reduction (`Derive.fitsClose`): the
+reduction grows faster than the leaf (two to three times per write that
+reads the storage before it, and per `delete` with nothing to show in the
+leaf), and the closer's normal forms walk it as a tree.  A bound raised,
+or a new statement shape, is measured on the reduction first.
 -/
 
 namespace Solidity
@@ -70,7 +74,17 @@ theorem Keeps.refl (σ : State) (a : LTerm) : Keeps σ a a := fun _ h => h
 theorem Keeps.trans {σ : State} {a b c : LTerm} (h₁ : Keeps σ a b) (h₂ : Keeps σ b c) :
     Keeps σ a c := fun v h => h₂ v (h₁ v h)
 
-/-- `a ⊕ b` on two literals, evaluated; `false && b` and `true || b` too. -/
+/-- A power whose literal exponent is past `256`, Lean's
+`exponentiation.threshold`.  `Int.pow` recurses once per unit of the
+exponent, in compiled code and in the kernel, and neither heeds
+heartbeats, so `foldBin` leaves it unfolded: a checked power past it
+overflows anyway unless its base is `0`, `1` or `-1`. -/
+def powBig : BinOp → Value → Bool
+  | .pow, .int e | .powW, .int e => decide (256 < e)
+  | _, _ => false
+
+/-- `a ⊕ b` on two literals, evaluated (not a power past `powBig`);
+`false && b` and `true || b` too. -/
 def foldBin (op : BinOp) (p : PrimTy) (a b : LTerm) : LTerm :=
   match a with
   | .lit x =>
@@ -78,6 +92,7 @@ def foldBin (op : BinOp) (p : PrimTy) (a b : LTerm) : LTerm :=
     else if op = .or ∧ x = .bool true then .lit (.bool true)
     else match b with
       | .lit y =>
+        if powBig op y then .binop op p a b else
         match evalBinop op p x (.ok y) with
         | .ok v => .lit v
         | .error _ => .binop op p a b
@@ -103,6 +118,8 @@ theorem foldBin_keeps (σ : State) (op : BinOp) (p : PrimTy) (a b : LTerm) :
         cases h; rfl
       · split
         · rename_i y
+          split
+          · simp only [LTerm.eval, Res.ok_bind]; exact h
           split
           · rename_i w hw
             simp only [LTerm.eval] at h
@@ -929,7 +946,7 @@ theorem segsAfter_spec : ∀ {p q r : List SSeg}, segsAfter p q = some r → q =
     split at h
     · rename_i hab; subst hab; rw [segsAfter_spec h]; rfl
     · cases h
-  | _ :: _, [], _, h => by simp [segsAfter] at h
+  | _ :: _, [], _, h => by simp only [segsAfter, reduceCtorEq] at h
 
 /-- `Q` as `P[k]` and the segments below: the index and the rest. -/
 def LPath.splitAt (P Q : LPath) : Option (LTerm × List SSeg) :=
@@ -1012,7 +1029,7 @@ theorem tyFrom_canon {σ : State} :
   | [], v, T, T', r, hv, ht, hr, w, hw => by
     simp only [tyFrom, Option.some.injEq] at ht; subst ht
     cases hr
-    have : w = v := by cases v <;> simp_all [SVal.findLive]
+    have : w = v := by cases v <;> simp_all only [SVal.findLive, Except.ok.injEq]
     subst this; exact hv
   | .field f :: rest, v, T, T', r, hv, ht, hr, w, hw => by
     obtain ⟨r', hr', he⟩ := Res.bind_eq_ok.1 hr
@@ -1137,7 +1154,7 @@ theorem canonElemsB_append {E : Ty} : ∀ {es fs : List SVal}, canonElemsB E es 
 open Semantics.SVal.canonB (canonFieldsB canonElemsB canonEntriesB) in
 theorem canonElemsB_defaultOf {E : Ty} : ∀ {es : List SVal}, canonElemsB E es = true →
     canonElemsB E (SVal.defaultOf.defaultOfElems es) = true
-  | [], _ => by simp [SVal.defaultOf.defaultOfElems, canonElemsB]
+  | [], _ => by simp only [SVal.defaultOf.defaultOfElems, canonElemsB]
   | e :: es, h => by
     simp only [canonElemsB, Bool.and_eq_true] at h
     simp only [SVal.defaultOf.defaultOfElems, canonElemsB, Bool.and_eq_true]
@@ -1368,7 +1385,7 @@ theorem tyFrom_canonP {σ : State} :
   | [], v, T, T', r, hv, ht, hr, w, hw => by
     simp only [tyFrom, Option.some.injEq] at ht; subst ht
     cases hr
-    have : w = v := by cases v <;> simp_all [SVal.find]
+    have : w = v := by cases v <;> simp_all only [SVal.find, Except.ok.injEq]
     subst this; exact hv
   | .field f :: rest, v, T, T', r, hv, ht, hr, w, hw => by
     obtain ⟨r', hr', he⟩ := Res.bind_eq_ok.1 hr
@@ -3384,7 +3401,8 @@ end
 
 /-- `φ` has at most `n` nodes, counted as a tree: its terms share
 subterms, a storage written from a read of the one before it twice, so the
-tree doubles with each such write. -/
+tree doubles with each such write, and its reduction (`LFml.elim`) grows
+faster still. -/
 def LFml.fits : Nat → LFml → Option Nat
   | 0, _ => none
   | n + 1, .tt => some n

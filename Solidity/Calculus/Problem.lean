@@ -20,13 +20,18 @@ inputs.
 **The premise is the model's own.**  solkey's `storage` is a free `Struct`
 term whose integer fields are unbounded, and no solidity taclet mentions a
 well-formed heap; here the storage is a state of the interpreter, any
-list of roots.  `wt(storage)` (`Fml.wt`) assumes what Solidity guarantees
-of a deployed contract's storage: every root there, in order, canonical
-and tight, which is exactly reachable (`shape_iff_reachable`), and every
-word in its type's range (`storageWtB`, `wt_iff_reachable`).  So a derived
-obligation is Solidity's, not solkey's: where solkey's free storage can
-break an `assert` (a `uint` field below zero), the premise excludes it, so
-the Lean theorem need not imply solkey's obligation.
+list of roots.  `wt(storage)` (`Fml.wt`) assumes most of what Solidity
+guarantees of a deployed contract's storage: every root there, in order,
+canonical and tight, which is exactly reachable (`shape_iff_reachable`),
+and every word in its type's range (`storageWtB`, `wt_iff_reachable`).
+It does not bound a dynamic array's length, which solc keeps below `2^64`
+(`push` panics there) and the model's `push` does not: a diamond that
+reads a length through checked arithmetic can fail from a storage solc
+cannot reach, so it is stronger than Solidity's and may not be derivable
+(`docs/solc-alignment.md`, "Remaining deltas").  So a derived obligation
+is Solidity's, not solkey's: where solkey's free storage can break an
+`assert` (a `uint` field below zero), the premise excludes it, so the Lean
+theorem need not imply solkey's obligation.
 
 * **Box**: `∀x̄. wt(storage) → [ f(x̄); ] true`.  A failed `assert` panics,
   and no modality holds of a panic (`Modality.afterRun`), so this is KeY's

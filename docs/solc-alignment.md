@@ -269,3 +269,11 @@ they would in a frame of their own.
   lays it on fresh slots (`SVal.strip`), not over the recycled slot it lands
   on, so what a reference wrote into that slot's own arrays past their ends is
   dropped where solc keeps it. No test in the corpus reads it.
+- **No bound on a dynamic array's length.** solc's `push` panics (0x41)
+  once a length reaches `2^64`, so no deployed contract holds a longer
+  array; here `push` (`pushOn`) appends unchecked and `wt(storage)`
+  (`storageWtB`) bounds words and keys, not lengths. A diamond obligation
+  that reads a length through checked arithmetic (`storagePushReadBack`:
+  `values[values.length - 1]` after a `push`) is then false in the model
+  from a storage solc cannot reach, and stays underived
+  (`docs/testsuite-proofs.md`).

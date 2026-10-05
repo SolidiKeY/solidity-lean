@@ -254,6 +254,31 @@ def writes6 : Fml StandardExample :=
   (fun (ls, _) => ls.map fun (l : List (Hyp StandardExample) × Fml StandardExample) =>
     Derive.leafFits l.1 l.2) == some [false]
 
+/-! The reduction is bounded apart (`Derive.elimSize`): a read below a
+`delete` carries the read before it twice, so ten deletes make a leaf of
+330 nodes, within `closeSize`, whose reduction has 79587. -/
+
+/-- Ten deletes of `wallet`, then a read of its mapping member. -/
+def deletes10 : Fml StandardExample :=
+  dl!{ [ delete wallet; delete wallet; delete wallet; delete wallet; delete wallet;
+    delete wallet; delete wallet; delete wallet; delete wallet; delete wallet; ]
+    wallet.stash[owner] == 0 }
+
+#guard (Derive.residue Derive.budget Derive.synClose Derive.budget [] deletes10).map
+  (fun (ls, _) => ls.map fun (l : List (Hyp StandardExample) × Fml StandardExample) =>
+    (((Hyp.wrap (Derive.dropWt l.1) l.2).seqUpd.toL Decide.Sym.empty).fits
+      Derive.closeSize).isSome && !Derive.leafFits l.1 l.2) == some [true]
+
+/-! A power is folded only up to the exponent `256` (`Decide.powBig`):
+`Int.pow` recurses once per unit of it, heeding no heartbeats. -/
+
+#guard match Decide.foldBin .pow .uint (.lit (.int 2)) (.lit (.int 1000000000)) with
+  | .binop .. => true
+  | _ => false
+#guard match Decide.foldBin .pow .uint (.lit (.int 2)) (.lit (.int 255)) with
+  | .lit (.int v) => v == 2 ^ 255
+  | _ => false
+
 /-! ## A failed `assert`
 
 `assertSimple` checks its condition: two goals, `thn` (the run goes on) and
