@@ -140,3 +140,5 @@ import Solidity.Examples.Tools
 import Solidity.Examples.Verify
 import Solidity.Examples.ProofTree
 import Solidity.Theorems
+import Solidity.Frontend.SolcJson
+import Solidity.Frontend.Import

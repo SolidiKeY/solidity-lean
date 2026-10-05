@@ -18,7 +18,7 @@ concrete store (`corpus_decide`); none is proved by `⊢`.
   storage, KeY's `wellFormed(heap)`), not an expanded layout.
 - **Front end.** solc's JSON AST → normalized `sol` text → the existing
   `contract!`/`sol_raw!` macros: one lowering path.
-- **Scope now.** M0 and M1; report the numbers before M2.
+- **Scope.** M0 and M1, then M2 (done, below).
 
 ## Measurements (2026-10-05)
 
@@ -197,3 +197,64 @@ the limit, at about 0.5–5k heartbeats for a whole obligation.
 `Proves.of_synResidue`, Counter `spec_dec` and Counter `get_spec` gives
 `propext`, `Classical.choice` and `Quot.sound`. There is no
 `Lean.ofReduceBool` and no `sorryAx`.
+
+## M2 results (2026-10-05)
+
+The front end: `scripts/solc-ast.mjs` runs the soljson solkey pins
+(0.8.34, its sha256 checked against solkey's `build.gradle`) under node on
+`TestSuite.sol` at solkey `100f7f24c3` and writes the trimmed AST,
+`tests/solc/TestSuite.ast.json` (1.8 MB, one line per statement), with a
+header naming the compiler, the source's sha256 and the solkey commit.
+`scripts/check-solc-ast.sh` regenerates and diffs it; given
+`--compare-cache`, the script also compares it with solkey's own cached
+solc output when solkey has compiled the same source (the cache key, the
+sha256 of `SolcWrapper`'s input, was checked against an older cached
+`TestSuite.sol`: the trimmed ASTs are identical).
+
+`Solidity/Solkey/TestSuite.lean` is one command,
+`solc_import "…" hash 0x… as Solkey.TestSuite renaming Triple => FixedTriple`
+(`Frontend/Import.lean`), and the pinned report:
+
+- 420 functions: 316 diamond, 102 box, 2 skip (solkey's tags, read from the
+  NatSpec text);
+- **417 elaborated**: `Solkey.TestSuite.f : Prog Solkey.TestSuite` for each,
+  its parameters free locals of their types (the report row carries them);
+- 2 skipped (`tryCalleeGet`, `tryCalleePing`, tagged `skip`);
+- 1 excluded: `recursiveStructMapping`, whose struct `Tree` is recursive
+  through a mapping (its state variable `tree` is left out of the contract).
+
+No syntax had to be added: every construct of the file (`new T[](n)`,
+`.length`, `**`, fixed arrays, `int8`, `try`/`catch`, `transfer`, `++`/`−−`
+inside expressions, units) already elaborates.  Most of the corpus's
+`unsupported` reasons for TestSuite are stale.  The printer normalises what
+the grammar spells differently: folded literals and units, `payable(…)`
+and contract conversions stripped, `−−`, `bool` keys as `b ? 1 : 0` (the
+mapping declared with a `uint` key), `x.push().f` read through a
+`T storage pushRef1 = x.push();`, and locals named like a state variable
+renamed with a trailing `_` (5 names: `balance`, `age`, `balances`,
+`ledger`, `tokens`).
+
+Cross-check against the old corpus: of the 212 corpus bodies that were not
+concretized, 182 print the same program (`Prog.toStr`, up to spacing,
+parentheses and the old renames `folks`/`aux`); the 30 others differ only
+where the corpus discharged a `require` by pushes, or where the source
+changed since `f2eb3d98eb` (`storageLocalDeclSkip`,
+`parenthesizedCondition`).
+
+Cost of the import, one module, `Elab.async false`, warm:
+
+| Step | Time |
+|---|---:|
+| read and parse the fixture, print, elaborate the contract | 0.5 s |
+| the macros on 417 bodies (`sol_raw!{ … }` to `List RawStmt` terms) | 0.8 s |
+| one `evalExpr` of the contract and all bodies | 0.5 s |
+| the typed elaborator on each, quoting, kernel check of 417 definitions | 2.7 s |
+| compiling the 417 programs | 3.6 s |
+| **total** | about 8 s |
+
+`sol[C]{ … }` would have cost about 10 s for the elaboration alone (one
+`evalExpr` per program).  The programs are compiled because `sol_prove`
+evaluates its sequent with compiled code; if the obligations of M3 do not
+name the program constants, the 3.6 s can go.  The default build is not
+slowed: `SolkeyTestSuite` is its own library, and `Frontend/` is two small
+modules.

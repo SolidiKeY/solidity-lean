@@ -17,3 +17,11 @@ root = "SolkeyCheck"
 [[lean_lib]]
 name = "SolidityCorpus"
 weakLeanArgs = ["--tstack=131072"]
+
+# solkey's `TestSuite.sol`, imported from solc's AST at elaboration time
+# (`solc_import`, `Solidity/Frontend/Import.lean`; the fixture is
+# `tests/solc/TestSuite.ast.json`, `scripts/solc-ast.mjs` writes it). Not a
+# default target; `lake build SolkeyTestSuite` builds it and its imports only.
+[[lean_lib]]
+name = "SolkeyTestSuite"
+weakLeanArgs = ["--tstack=131072"]
