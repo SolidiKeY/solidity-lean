@@ -662,13 +662,15 @@ theorem LTerm.evalA_agree {E : Var → Res Value} {o o' : List Seg → Obs} :
     (t : LTerm) → Agree E o o' t.reads → t.evalA E o' = t.evalA E o
   | .lit _, _ | .var _, _ | .err, _ | .env _, _ | .findP _ _, _ | .cpok _ _, _ => rfl
   | .sok .init, _ | .sok (.save ..), _ | .sok (.del ..), _ | .sok (.arr ..), _
-  | .sok (.copy ..), _ | .sok (.view ..), _ => rfl
+  | .sok (.stale ..), _ | .sok (.copy ..), _ | .sok (.view ..), _ => rfl
   | .find (.save ..) _, _ | .find (.del ..) _, _ | .has (.save ..) _, _ | .has (.del ..) _, _
   | .kmap _ (.save ..) _, _ | .kmap _ (.del ..) _, _ | .len (.save ..) _, _
   | .len (.del ..) _, _ => rfl
   | .find (.arr ..) _, _ | .find (.copy ..) _, _ | .has (.arr ..) _, _ | .has (.copy ..) _, _
   | .kmap _ (.arr ..) _, _ | .kmap _ (.copy ..) _, _ | .len (.arr ..) _, _
   | .len (.copy ..) _, _ => rfl
+  | .find (.stale ..) _, _ | .has (.stale ..) _, _ | .kmap _ (.stale ..) _, _
+  | .len (.stale ..) _, _ => rfl
   | .find (.view ..) _, _ | .has (.view ..) _, _ | .kmap _ (.view ..) _, _
   | .len (.view ..) _, _ => rfl
   | .binop _ _ a b, h => by

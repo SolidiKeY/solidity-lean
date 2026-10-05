@@ -1058,6 +1058,17 @@ node in its place; a stale node's guard adds two length reads and a
 location read, and the copy's slot reader four reads.  It is likely past
 `elimSize` (8000), and then stays pending.  The other four leave room.
 
+### Step 2: the node
+
+`LStor.stale op s q w` (`Calculus/DecideLang.lean`, before `copy`) is the
+write a dangling alias makes: `staleSave`, KeY's plain `save` at the slot
+level, of the word `w` (`op = none`) or of `op` on the node there.  Every
+reader keeps it whole for now (`okE` gives `sok`, `readU`/`hasU`/`lenU`/
+`mapU` the read itself, `slotU` and `cpokU` their catch-alls), which is
+exact, so nothing changes until the translation produces it.  `Derived7`,
+`8`, `9` and `12` re-check clean; `Derived9` in under 30 s of wall time,
+the import rebuild and the tool's round trip included (16 s before).
+
 ## M6 results (2026-10-05): memory
 
 This memory support was reworked into solkey's `memoryRules.key`/

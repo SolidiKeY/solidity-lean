@@ -78,6 +78,7 @@ def LStor.strict : LStor → List LTerm
   | .save s q w => w.strict ++ s.strict ++ q.strict
   | .del s q => s.strict ++ q.strict
   | .arr _ s q w => w.strict ++ s.strict ++ q.strict
+  | .stale _ s q w => w.strict ++ s.strict ++ q.strict
   | .copy s q src sq => src.strict ++ sq.strict ++ s.strict ++ q.strict
   | .view _ _ => []
 
@@ -241,6 +242,16 @@ theorem LStor.strict_returns {σ : State} : (s : LStor) → (∃ sv, s.eval σ =
     · exact LTerm.strict_returns w ⟨x, hw⟩ u hu
     · exact LStor.strict_returns s ⟨y, hs⟩ u hu
     · exact LPath.strict_returns q ⟨z, hq⟩ u hu
+  | .stale _ s q w, ⟨sv, h⟩, u, hu => by
+    simp only [LStor.strict, List.mem_append] at hu
+    simp only [LStor.eval] at h
+    obtain ⟨x, hw, h⟩ := Res.bind_eq_ok.1 h
+    obtain ⟨y, hs, h⟩ := Res.bind_eq_ok.1 h
+    obtain ⟨z, hq, -⟩ := Res.bind_eq_ok.1 h
+    rcases hu with (hu | hu) | hu
+    · exact LTerm.strict_returns w ⟨x, hw⟩ u hu
+    · exact LStor.strict_returns s ⟨y, hs⟩ u hu
+    · exact LPath.strict_returns q ⟨z, hq⟩ u hu
   | .copy s q src sq, ⟨sv, h⟩, u, hu => by
     simp only [LStor.strict, List.mem_append] at hu
     simp only [LStor.eval] at h
@@ -315,6 +326,7 @@ def LStor.core (ne : Keys) : LStor → LStor
   | .save s q w => .save (s.core ne) (q.core ne) (w.core ne)
   | .del s q => .del (s.core ne) (q.core ne)
   | .arr op s q w => .arr op (s.core ne) (q.core ne) (w.core ne)
+  | .stale op s q w => .stale op (s.core ne) (q.core ne) (w.core ne)
   | .copy s q src sq => .copy (s.core ne) (q.core ne) (src.core ne) (sq.core ne)
   | .view m i => .view m i
 
@@ -473,6 +485,14 @@ theorem LStor.core_eval {σ : State} {ne : Keys} (hne : Apart σ ne) :
     simp only [LStor.core, LStor.eval, LStor.core_eval hne s hs, LPath.core_eval hne q hq, Res.ok_bind]
     exact h
   | .arr _ s q w, sv, h => by
+    simp only [LStor.eval] at h
+    obtain ⟨x, hw, h⟩ := Res.bind_eq_ok.1 h
+    obtain ⟨y, hs, h⟩ := Res.bind_eq_ok.1 h
+    obtain ⟨z, hq, h⟩ := Res.bind_eq_ok.1 h
+    simp only [LStor.core, LStor.eval, LTerm.core_eval hne w hw, LStor.core_eval hne s hs,
+      LPath.core_eval hne q hq, Res.ok_bind]
+    exact h
+  | .stale _ s q w, sv, h => by
     simp only [LStor.eval] at h
     obtain ⟨x, hw, h⟩ := Res.bind_eq_ok.1 h
     obtain ⟨y, hs, h⟩ := Res.bind_eq_ok.1 h

@@ -517,6 +517,7 @@ def LStor.simpE (O : Orc) (E : Eqs) : LStor → LStor
   | .save s q w => .save (s.simpE O E) (q.simpE O E) (w.simpE O E)
   | .del s q => .del (s.simpE O E) (q.simpE O E)
   | .arr op s q w => .arr op (s.simpE O E) (q.simpE O E) (w.simpE O E)
+  | .stale op s q w => .stale op (s.simpE O E) (q.simpE O E) (w.simpE O E)
   | .copy s q src sq => .copy (s.simpE O E) (q.simpE O E) (src.simpE O E) (sq.simpE O E)
   | .view m i => .view m i
 
@@ -660,6 +661,14 @@ theorem LStor.simpE_eval {σ : State} {O : Orc} {E : Eqs} (hO : O.Ok σ) (hE : E
       Res.ok_bind]
     exact h
   | .arr _ s q w, sv, h => by
+    simp only [LStor.eval] at h
+    obtain ⟨x, hw, h⟩ := Res.bind_eq_ok.1 h
+    obtain ⟨y, hs, h⟩ := Res.bind_eq_ok.1 h
+    obtain ⟨z, hq, h⟩ := Res.bind_eq_ok.1 h
+    simp only [LStor.simpE, LStor.eval, LTerm.simpE_eval hO hE w x hw, LStor.simpE_eval hO hE s hs,
+      LPath.simpE_eval hO hE q hq, Res.ok_bind]
+    exact h
+  | .stale _ s q w, sv, h => by
     simp only [LStor.eval] at h
     obtain ⟨x, hw, h⟩ := Res.bind_eq_ok.1 h
     obtain ⟨y, hs, h⟩ := Res.bind_eq_ok.1 h
@@ -3416,7 +3425,8 @@ def LStor.fits : Nat → LStor → Option Nat
   | n + 1, .init => some n
   | n + 1, .save s q w => (s.fits n).bind fun m => (q.fits m).bind fun k => w.fits k
   | n + 1, .del s q => (s.fits n).bind fun m => q.fits m
-  | n + 1, .arr _ s q w => (s.fits n).bind fun m => (q.fits m).bind fun k => w.fits k
+  | n + 1, .arr _ s q w | n + 1, .stale _ s q w =>
+    (s.fits n).bind fun m => (q.fits m).bind fun k => w.fits k
   | n + 1, .copy s q src sq =>
     (s.fits n).bind fun m => (q.fits m).bind fun k => (src.fits k).bind fun j => sq.fits j
   | n + 1, .view m _ => m.fits n
