@@ -107,6 +107,13 @@ def LSel.seg? : LSel → Option Seg
   | .idx (.lit (.int j)) => some (.at j)
   | _ => none
 
+/-- What a selector reads below a copy, its storage reads given: `find` for a
+word, `len` for the length. -/
+def copySelG (find len : LPath → LTerm) (q : LPath) (p : List Seg) : LSel → Option LTerm
+  | .fld f => if noLen (p ++ [.field f]) then some (find ((q.ext p).field f)) else none
+  | .idx t => if noLen p then some (find ((q.ext p).at t)) else none
+  | .size => if noLen p then some (len (q.ext p)) else none
+
 /-! ### What an allocation holds -/
 
 /-- The word a default of the type `T` holds: a primitive's default. -/
@@ -2097,6 +2104,528 @@ theorem LMem.refDesc_desc (σ : State) : (m : LMem) → ∀ {μ : State} {B : Bi
       obtain ⟨-, -, -, hord⟩ := hB.2 _ b' hb'
       have := hord _ b hd.2 hbb
       exact ⟨hbase', by omega⟩
+
+/-! ### Paths through a view of memory -/
+
+/-- The selector a literal segment is. -/
+def LSel.ofSeg : Seg → LSel
+  | .field f => .fld f
+  | .at j => .idx (.lit (.int j))
+
+theorem LSel.ofSeg_addr (σ : State) (n : Nat) (s : Seg) :
+    (LSel.ofSeg s).addr σ n = .ok (.ofSeg n s) := by
+  cases s <;> rfl
+
+/-- A path of a root and literal segments: its root and its segments. -/
+def LPath.lit? : LPath → Option (Name × List Seg)
+  | .root r => some (r, [])
+  | .field q f => (q.lit?).map fun rp => (rp.1, rp.2 ++ [.field f])
+  | .at q k =>
+    match k.ground? with
+    | some (.int j) => (q.lit?).map fun rp => (rp.1, rp.2 ++ [.at j])
+    | _ => none
+
+theorem LPath.lit?_eval (σ : State) : (Q : LPath) → ∀ {r : Name} {p : List Seg},
+    Q.lit? = some (r, p) → Q.eval σ = .ok (.field r :: p)
+  | .root r', r, p, h => by
+    simp only [LPath.lit?, Option.some.injEq, Prod.mk.injEq] at h
+    obtain ⟨rfl, rfl⟩ := h
+    rfl
+  | .field q f, r, p, h => by
+    simp only [LPath.lit?] at h
+    cases hq : q.lit? with
+    | none => rw [hq] at h; cases h
+    | some rp =>
+      obtain ⟨r', p'⟩ := rp
+      rw [hq] at h
+      simp only [Option.map_some, Option.some.injEq, Prod.mk.injEq] at h
+      obtain ⟨rfl, rfl⟩ := h
+      simp only [LPath.eval, LPath.lit?_eval σ q hq, Res.ok_bind', List.cons_append]
+  | .at q k, r, p, h => by
+    simp only [LPath.lit?] at h
+    split at h
+    · rename_i j hj
+      cases hq : q.lit? with
+      | none => rw [hq] at h; cases h
+      | some rp =>
+        obtain ⟨r', p'⟩ := rp
+        rw [hq] at h
+        simp only [Option.map_some, Option.some.injEq, Prod.mk.injEq] at h
+        obtain ⟨rfl, rfl⟩ := h
+        simp only [LPath.eval, LPath.lit?_eval σ q hq, Res.ok_bind', LTerm.ground?_eval σ k hj,
+          Value.asInt, List.cons_append]
+    · cases h
+
+/-- The name a literal path reaches from a name, slot by slot (`readRCons`). -/
+def LMem.walk (m : LMem) (i : LId) : List Seg → Option LId
+  | [] => some i
+  | s :: p => (m.readI i (LSel.ofSeg s)).bind fun j => m.walk j p
+
+/-- **A literal path from a name reaches the name `walk` gives** (`readREmpty`,
+`readRCons`). -/
+theorem LMem.walk_sim (σ : State) {m : LMem} {μ : State} {B : Births}
+    (h : m.run σ = .ok (μ, B)) : (p : List Seg) → ∀ {i j : LId}, m.walk i p = some j →
+    Sim (LId.evalR B j) (LId.evalR B i >>= fun n => (MVal.ref n).readPath μ p >>= MVal.asRef)
+  | [], i, j, hw => by
+    simp only [LMem.walk, Option.some.injEq] at hw
+    subst hw
+    apply Sim.of_eq
+    cases LId.evalR B i <;> rfl
+  | s :: p, i, j, hw => by
+    simp only [LMem.walk, Option.bind_eq_some_iff] at hw
+    obtain ⟨i₁, hi₁, hw⟩ := hw
+    have ih := LMem.walk_sim σ h p hw
+    have hI := (LMem.readI_sim σ m i (LSel.ofSeg s) h hi₁).2
+    refine Sim.trans ih (Sim.trans (Sim.bind hI fun _ => Sim.refl _) ?_)
+    intro u
+    simp only [LSel.iread, LSel.ofSeg_addr, Res.ok_bind', Res.bind_eq_ok, MVal.readPath]
+    constructor
+    · rintro ⟨n₁, ⟨n, hn, mv, hmv, hr⟩, hp⟩
+      refine ⟨n, hn, ?_⟩
+      cases mv with
+      | prim _ => cases hr
+      | ref c =>
+        simp only [MVal.asRef, pure, Except.pure, Except.ok.injEq] at hr
+        subst hr
+        obtain ⟨a, hpa, hra⟩ := hp
+        exact ⟨a, ⟨_, hmv, hpa⟩, hra⟩
+    · rintro ⟨n, hn, a, ⟨mv, hmv, hpa⟩, hra⟩
+      cases mv with
+      | ref c => exact ⟨c, ⟨n, hn, _, hmv, rfl⟩, a, hpa, hra⟩
+      | prim pv =>
+        cases p with
+        | nil =>
+          simp only [MVal.readPath, Except.ok.injEq] at hpa
+          subst hpa; cases hra
+        | cons _ _ => simp only [MVal.readPath, reduceCtorEq] at hpa
+
+theorem copyMToSt_asValue_sim {σ : State} {rem : List Nat} {mv : MVal} {w : SVal}
+    (h : copyMToSt σ rem mv = .ok w) : Sim w.asValue mv.asValue := by
+  cases mv with
+  | prim pv =>
+    rw [Close.copyMToSt_prim, Except.ok.injEq] at h
+    subst h
+    cases pv <;> exact Sim.refl _
+  | ref n =>
+    obtain ⟨-, ⟨_, _, -, -, rfl⟩ | ⟨_, _, _, -, -, rfl⟩⟩ := copyMToSt_ref_inv h <;>
+      exact Sim.halt (fun _ h => by cases h) (fun _ h => by cases h)
+
+/-- The view of the object `n`: what `copyMem` gives, read along `P`, against
+memory read along `P` (`findOnCopy`, `selectOnCopyMemPrim`/`Ref`). -/
+theorem view_sim {μ : State} {n : Nat} {cv : SVal} (hcv : copyMem μ (.ref n) = .ok cv)
+    {P : List Seg} (hl : noLen P = true) {β : Type} (F : SVal → Res β) (G : MVal → Res β)
+    (hFG : ∀ rem mv w, copyMToSt μ rem mv = .ok w → Sim (F w) (G mv)) :
+    Sim (cv.findLive P >>= F) ((MVal.ref n).readPath μ P >>= G) := by
+  have hc : IsCopy μ cv := ⟨_, _, hcv⟩
+  rw [IsCopy.findLive_eq P hc]
+  have hr := copyMToSt_readPath μ P (noLen_mem hl) hcv
+  intro u
+  constructor
+  · intro hu
+    rw [Res.bind_eq_ok] at hu
+    obtain ⟨w, hw, hu⟩ := hu
+    obtain ⟨mv', rem', hmv, hcw⟩ := hr.1 w hw
+    rw [hmv, Res.ok_bind']
+    exact (hFG _ _ _ hcw u).1 hu
+  · intro hu
+    rw [Res.bind_eq_ok] at hu
+    obtain ⟨mv', hmv, hu⟩ := hu
+    obtain ⟨w, rem', hw, hcw⟩ := hr.2 mv' hmv
+    rw [hw, Res.ok_bind']
+    exact (hFG _ _ _ hcw u).2 hu
+
+/-- A view holds no mapping (Lean only). -/
+theorem view_noMap {μ : State} {n : Nat} {cv : SVal} (hcv : copyMem μ (.ref n) = .ok cv)
+    (P : List Seg) (u : Value) : (cv.findLive P >>= kmapF) ≠ .ok u := by
+  intro h
+  rw [IsCopy.findLive_eq P ⟨_, _, hcv⟩, Res.bind_eq_ok] at h
+  obtain ⟨w, hw, hk⟩ := h
+  unfold kmapF at hk
+  split at hk
+  · rename_i hm
+    cases w with
+    | map e d => exact copyMToSt_noMap hcv P hw e d rfl
+    | _ => simp only [isMapV, Bool.false_eq_true] at hm
+  · cases hk
+
+theorem Sim.symm {α : Type} {x y : Res α} (h : Sim x y) : Sim y x := fun a => (h a).symm
+
+/-- A slot below a path: the object the path reaches, then the slot. -/
+theorem readPath_snoc_sim {β : Type} (μ : State) (mv : MVal) (p : List Seg) (s : Seg)
+    (G : MVal → Res β) :
+    Sim ((mv.readPath μ p >>= MVal.asRef) >>= fun n' => readAddr μ (.ofSeg n' s) >>= G)
+      (mv.readPath μ (p ++ [s]) >>= G) := by
+  rw [MVal.readPath_snoc]
+  cases mv.readPath μ p with
+  | error e => exact Sim.halt (fun _ h => by cases h) (fun _ h => by cases h)
+  | ok mv' =>
+    cases mv' with
+    | ref n' => exact Sim.refl _
+    | prim pv => exact Sim.halt (fun _ h => by cases h) (fun _ h => by cases h)
+
+/-- What a path below a view reads: the literal segments to the object and
+the last selector (`readRCons`); none where a segment asks a `length` or a
+leading index is no literal. -/
+def viewPath : LPath → Option (List Seg × LSel)
+  | .field Q f =>
+    match Q.lit? with
+    | some (r, p) => if r = viewRoot ∧ noLen (p ++ [.field f]) = true then some (p, .fld f) else none
+    | none => none
+  | .at Q t =>
+    match Q.lit? with
+    | some (r, p) => if r = viewRoot ∧ noLen p = true then some (p, .idx t) else none
+    | none => none
+  | .root _ => none
+
+/-- The literal segments to the object a path below a view names. -/
+def viewObj (Q : LPath) : Option (List Seg) :=
+  match Q.lit? with
+  | some (r, p) => if r = viewRoot ∧ noLen p = true then some p else none
+  | none => none
+
+theorem view_findLive (cv : SVal) (P : List Seg) :
+    (SVal.struct [(viewRoot, cv)]).findLive (.field viewRoot :: P) = cv.findLive P := by
+  simp only [SVal.findLive, lookupBy, if_true]
+
+/-- The slot a path below a view reads, segment by segment. -/
+theorem viewPath_eval (σ : State) {Q : LPath} {p : List Seg} {a : LSel} {qs : List Seg}
+    (hQ : viewPath Q = some (p, a)) (hq : Q.eval σ = .ok qs) :
+    ∃ s, noLen (p ++ [s]) = true ∧ qs = .field viewRoot :: (p ++ [s]) ∧
+      (∀ n μ, a.read σ μ n = readAddr μ (.ofSeg n s) >>= MVal.asValue) ∧
+      ∀ n, a.addr σ n = .ok (.ofSeg n s) := by
+  cases Q with
+  | root r => cases hQ
+  | field Q f =>
+    simp only [viewPath] at hQ
+    split at hQ
+    · rename_i r p' hl
+      split at hQ
+      · rename_i hc
+        simp only [Option.some.injEq, Prod.mk.injEq] at hQ
+        obtain ⟨rfl, rfl⟩ := hQ
+        obtain ⟨rfl, hn⟩ := hc
+        simp only [LPath.eval, LPath.lit?_eval σ Q hl, Res.ok_bind', Except.ok.injEq] at hq
+        subst hq
+        exact ⟨.field f, hn, rfl, fun _ _ => rfl, fun _ => rfl⟩
+      · cases hQ
+    · cases hQ
+  | «at» Q t =>
+    simp only [viewPath] at hQ
+    split at hQ
+    · rename_i r p' hl
+      split at hQ
+      · rename_i hc
+        simp only [Option.some.injEq, Prod.mk.injEq] at hQ
+        obtain ⟨rfl, rfl⟩ := hQ
+        obtain ⟨rfl, hn⟩ := hc
+        simp only [LPath.eval, LPath.lit?_eval σ Q hl, Res.ok_bind', Res.bind_eq_ok,
+          Except.ok.injEq] at hq
+        obtain ⟨c, ⟨x, hx, hc⟩, rfl⟩ := hq
+        have ht : t.eval σ = .ok (.int c) := by
+          cases x with
+          | int c' => cases hc; exact hx
+          | bool _ => cases hc
+        refine ⟨.at c, by rw [noLen_append, hn]; rfl, by simp only [List.cons_append], ?_, ?_⟩
+        · intro n μ
+          simp only [LSel.read, ht, Res.ok_bind', Value.asInt]
+          rfl
+        · intro n
+          simp only [LSel.addr, ht, Res.ok_bind', Value.asInt]
+          rfl
+      · cases hQ
+    · cases hQ
+
+theorem viewObj_eval (σ : State) {Q : LPath} {p : List Seg} {qs : List Seg}
+    (hQ : viewObj Q = some p) (hq : Q.eval σ = .ok qs) :
+    noLen p = true ∧ qs = .field viewRoot :: p := by
+  unfold viewObj at hQ
+  split at hQ
+  · rename_i r p' hl
+    split at hQ
+    · rename_i hc
+      cases hQ
+      obtain ⟨rfl, hn⟩ := hc
+      rw [LPath.lit?_eval σ Q hl, Except.ok.injEq] at hq
+      exact ⟨hn, hq.symm⟩
+    · cases hQ
+  · cases hQ
+
+/-- The setting of a read below a view: the memory runs, the name denotes
+`n`, and its copy out is `cv`. -/
+structure ViewAt (σ : State) (m : LMem) (i : LId) (μ : State) (B : Births) (cv : SVal) : Prop where
+  run : m.run σ = .ok (μ, B)
+  obj : ∃ n, LId.evalR B i = .ok n ∧ copyMem μ (.ref n) = .ok cv
+
+theorem LStor.eval_view {σ : State} {m : LMem} {i : LId} {v : SVal}
+    (h : (LStor.view m i).eval σ = .ok v) :
+    ∃ μ B cv, ViewAt σ m i μ B cv ∧ v = .struct [(viewRoot, cv)] := by
+  simp only [LStor.eval, Res.bind_eq_ok, Except.ok.injEq] at h
+  obtain ⟨⟨μ, B⟩, hr, n, hn, cv, hcv, rfl⟩ := h
+  exact ⟨μ, B, cv, ⟨hr, n, hn, hcv⟩, rfl⟩
+
+/-- **A word read below a view** (`findOnCopy`, `selectOnCopyMemPrim`): the
+slot the same path reads in memory. -/
+theorem view_read_sim {σ : State} {m : LMem} {i j : LId} {μ : State} {B : Births} {cv : SVal}
+    (hv : ViewAt σ m i μ B cv) {Q : LPath} {p : List Seg} {a : LSel} {qs : List Seg}
+    (hQ : viewPath Q = some (p, a)) (hq : Q.eval σ = .ok qs) (hw : m.walk i p = some j) :
+    Sim (LId.evalR B j >>= fun n' => a.read σ μ n')
+      ((SVal.struct [(viewRoot, cv)]).findLive qs >>= SVal.asValue) := by
+  obtain ⟨s, hl, rfl, hrd, -⟩ := viewPath_eval σ hQ hq
+  obtain ⟨n, hn, hcv⟩ := hv.obj
+  rw [view_findLive]
+  refine Sim.trans ?_ (Sim.symm (view_sim hcv hl SVal.asValue MVal.asValue
+    fun _ _ _ h => copyMToSt_asValue_sim h))
+  simp only [hrd]
+  have hW := LMem.walk_sim σ hv.run p hw
+  rw [hn, Res.ok_bind'] at hW
+  exact Sim.trans (Sim.bind hW fun _ => Sim.refl _) (readPath_snoc_sim μ _ p s _)
+
+/-- **The length below a view** (`selectOnCopyMemPrim` at `size`). -/
+theorem view_len_sim {σ : State} {m : LMem} {i j : LId} {μ : State} {B : Births} {cv : SVal}
+    (hv : ViewAt σ m i μ B cv) {Q : LPath} {p : List Seg} {qs : List Seg}
+    (hQ : viewObj Q = some p) (hq : Q.eval σ = .ok qs) (hw : m.walk i p = some j) :
+    Sim (LId.evalR B j >>= fun n' => memArrayLen μ n')
+      ((SVal.struct [(viewRoot, cv)]).findLive qs >>= Close.arrLen) := by
+  obtain ⟨hl, rfl⟩ := viewObj_eval σ hQ hq
+  obtain ⟨n, hn, hcv⟩ := hv.obj
+  rw [view_findLive]
+  refine Sim.trans ?_ (Sim.symm (view_sim hcv hl Close.arrLen
+    (fun mv => MVal.asRef mv >>= memArrayLen μ) fun rem mv w h => ?_))
+  · have hW := LMem.walk_sim σ hv.run p hw
+    rw [hn, Res.ok_bind'] at hW
+    refine Sim.trans (Sim.bind hW fun _ => Sim.refl _) (Sim.of_eq ?_)
+    cases (MVal.ref n).readPath μ p <;> rfl
+  · cases mv with
+    | prim pv =>
+      rw [Close.copyMToSt_prim, Except.ok.injEq] at h
+      subst h
+      exact Sim.halt (fun _ h => by cases h) (fun _ h => by cases h)
+    | ref n' =>
+      rw [copyMToSt_arrLen h]
+      exact Sim.refl _
+
+/-- **Whether a slot below a view is there**: a word is read, or a reference
+names an object. -/
+theorem view_has_sim {σ : State} {m : LMem} {i j j' : LId} {μ : State} {B : Births} {cv : SVal}
+    (hv : ViewAt σ m i μ B cv) {Q : LPath} {p : List Seg} {a : LSel} {qs : List Seg}
+    (hQ : viewPath Q = some (p, a)) (hq : Q.eval σ = .ok qs) (hw : m.walk i p = some j)
+    {W N : LTerm} (hW : Sim (W.eval σ) (LId.evalR B j >>= fun n' => a.read σ μ n'))
+    (hI : Sim (LId.evalR B j') (LId.evalR B j >>= fun n' => a.iread σ μ n'))
+    (hN : Rets (N.eval σ) ↔ ∃ x, LId.evalR B j' = .ok x) :
+    Sim ((LTerm.orElse (.seq W (.lit (.bool true))) (.seq N (.lit (.bool true)))).eval σ)
+      ((SVal.struct [(viewRoot, cv)]).findLive qs >>= fun _ => .ok (.bool true)) := by
+  obtain ⟨s, hl, rfl, hrd, had⟩ := viewPath_eval σ hQ hq
+  obtain ⟨n, hn, hcv⟩ := hv.obj
+  rw [view_findLive]
+  refine Sim.trans ?_ (Sim.symm (view_sim hcv hl (fun _ => (.ok (.bool true) : Res Value))
+    (fun _ => (.ok (.bool true) : Res Value)) fun _ _ _ _ => Sim.refl _))
+  have hWk := LMem.walk_sim σ hv.run p hw
+  rw [hn, Res.ok_bind'] at hWk
+  have hsnoc := readPath_snoc_sim μ (.ref n) p s (fun _ => (.ok (.bool true) : Res Value))
+  have hir : ∀ n', a.iread σ μ n' = readAddr μ (.ofSeg n' s) >>= MVal.asRef := by
+    intro n'; simp only [LSel.iread, had, Res.ok_bind']
+  have key : (∃ n', ((MVal.ref n).readPath μ p >>= MVal.asRef) = .ok n' ∧
+      ∃ mv, readAddr μ (.ofSeg n' s) = .ok mv) ↔ Rets (W.eval σ) ∨ Rets (N.eval σ) := by
+    rw [hN]
+    constructor
+    · rintro ⟨n', hp, mv, hmv⟩
+      have he := (hWk n').2 hp
+      cases mv with
+      | prim pv =>
+        refine .inl ⟨pv, (hW pv).2 ?_⟩
+        rw [he, Res.ok_bind', hrd, hmv, Res.ok_bind']
+        cases pv <;> rfl
+      | ref x =>
+        refine .inr ⟨x, (hI x).2 ?_⟩
+        rw [he, Res.ok_bind', hir, hmv]
+        rfl
+    · rintro (⟨w, hw'⟩ | ⟨x, hx⟩)
+      · obtain ⟨n', he, hr⟩ := Res.bind_eq_ok.1 ((hW w).1 hw')
+        rw [hrd] at hr
+        obtain ⟨mv, hmv, -⟩ := Res.bind_eq_ok.1 hr
+        exact ⟨n', (hWk n').1 he, mv, hmv⟩
+      · obtain ⟨n', he, hr⟩ := Res.bind_eq_ok.1 ((hI x).1 hx)
+        rw [hir] at hr
+        obtain ⟨mv, hmv, -⟩ := Res.bind_eq_ok.1 hr
+        exact ⟨n', (hWk n').1 he, mv, hmv⟩
+  intro u
+  have hR : ((MVal.ref n).readPath μ (p ++ [s]) >>= fun _ => (.ok (.bool true) : Res Value)) = .ok u ↔
+      u = .bool true ∧ ∃ n', ((MVal.ref n).readPath μ p >>= MVal.asRef) = .ok n' ∧
+        ∃ mv, readAddr μ (.ofSeg n' s) = .ok mv := by
+    rw [← hsnoc u]
+    simp only [Res.bind_eq_ok, Except.ok.injEq]
+    constructor
+    · rintro ⟨n', hp, mv, hmv, rfl⟩; exact ⟨rfl, n', hp, mv, hmv⟩
+    · rintro ⟨rfl, n', hp, mv, hmv⟩; exact ⟨n', hp, mv, hmv, rfl⟩
+  rw [hR, key]
+  simp only [Rets, LTerm.eval]
+  cases W.eval σ with
+  | ok w =>
+    simp only [Res.ok_bind', orElseR, Except.ok.injEq, exists_eq', true_or, and_true]
+    exact eq_comm
+  | error e =>
+    cases N.eval σ with
+    | ok x =>
+      simp only [orElseR, bind, Except.bind, Except.ok.injEq, exists_eq', or_true,
+        and_true, reduceCtorEq, exists_false]
+      exact eq_comm
+    | error e' =>
+      simp only [orElseR, bind, Except.bind, reduceCtorEq, exists_false, or_self, and_false]
+
+/-! ### Agreeing terms in the clauses -/
+
+theorem rets_of_sim {x y : Res Value} (h : Sim x y) : Rets x ↔ Rets y :=
+  ⟨fun ⟨v, hv⟩ => ⟨v, (h v).1 hv⟩, fun ⟨v, hv⟩ => ⟨v, (h v).2 hv⟩⟩
+
+theorem ltR_val {σ : State} {k n : LTerm} {v : Value} (h : (ltR k n).eval σ = .ok v) :
+    v = .bool true := by
+  unfold ltR at h
+  split at h
+  · split at h
+    · cases h; rfl
+    · cases h
+  · simp only [ltG, LTerm.eval, Res.bind_eq_ok] at h
+    obtain ⟨cv, -, h⟩ := h
+    cases cv with
+    | bool b => cases b <;> simp only [pickBranch, reduceCtorEq, Except.ok.injEq] at h
+                <;> exact h.symm
+    | int _ => cases h
+
+theorem ltR_congr (σ : State) (k : LTerm) {n n' : LTerm} (hn : Sim (n'.eval σ) (n.eval σ)) :
+    Sim ((ltR k n').eval σ) ((ltR k n).eval σ) := by
+  have hr : Rets ((ltR k n').eval σ) ↔ Rets ((ltR k n).eval σ) := by
+    rw [ltR_rets, ltR_rets]
+    constructor
+    · rintro ⟨c, d, hc, hd, h0, h1⟩; exact ⟨c, d, hc, (hn _).1 hd, h0, h1⟩
+    · rintro ⟨c, d, hc, hd, h0, h1⟩; exact ⟨c, d, hc, (hn _).2 hd, h0, h1⟩
+  intro u
+  constructor
+  · intro h
+    obtain ⟨v, hv⟩ := hr.1 ⟨u, h⟩
+    rw [ltR_val h, ← ltR_val hv]; exact hv
+  · intro h
+    obtain ⟨v, hv⟩ := hr.2 ⟨u, h⟩
+    rw [ltR_val h, ← ltR_val hv]; exact hv
+
+theorem natL_ok {σ : State} {n : LTerm} {v : Value} :
+    (natL n).eval σ = .ok v ↔ ∃ c, n.eval σ = .ok (.int c) ∧ v = .int c.toNat := by
+  constructor
+  · intro h
+    unfold natL at h
+    split at h
+    · rename_i c
+      cases h
+      exact ⟨c, rfl, rfl⟩
+    · simp only [LTerm.eval, Res.bind_eq_ok] at h
+      obtain ⟨cv, ⟨x, hx, hc⟩, h⟩ := h
+      cases x with
+      | int c =>
+        refine ⟨c, hx, ?_⟩
+        simp only [evalBinop, applyBinOp, Value.asInt, checkArith, bind, Except.bind,
+          Except.ok.injEq] at hc
+        subst hc
+        by_cases hc0 : c < 0
+        · simp only [hc0, decide_true, pickBranch, Except.ok.injEq] at h
+          subst h; congr 1; omega
+        · simp only [hc0, decide_false, pickBranch, hx, Except.ok.injEq] at h
+          subst h; congr 1; omega
+      | bool b =>
+        simp only [evalBinop, applyBinOp, Value.asInt, bind, Except.bind, reduceCtorEq] at hc
+  · rintro ⟨c, hc, rfl⟩
+    exact natL_eval σ n hc
+
+theorem natL_congr (σ : State) {n n' : LTerm} (hn : Sim (n'.eval σ) (n.eval σ)) :
+    Sim ((natL n').eval σ) ((natL n).eval σ) := by
+  intro u
+  rw [natL_ok, natL_ok]
+  exact ⟨fun ⟨c, hc, hu⟩ => ⟨c, (hn _).1 hc, hu⟩, fun ⟨c, hc, hu⟩ => ⟨c, (hn _).2 hc, hu⟩⟩
+
+theorem seqL_congr (σ : State) {g g' a a' : LTerm} (hg : Sim (g'.eval σ) (g.eval σ))
+    (ha : Sim (a'.eval σ) (a.eval σ)) : Sim ((seqL g' a').eval σ) ((seqL g a).eval σ) := by
+  rw [seqL_eval, seqL_eval]
+  exact Sim.bind hg fun _ => ha
+
+/-- `new R(n)`'s reads agree where the lengths do. -/
+theorem newSel_congr (σ : State) (R : RefTy) {n n' : LTerm} (hn : Sim (n'.eval σ) (n.eval σ))
+    (p : List Seg) (a : LSel) : Sim ((newSel R n' p a).eval σ) ((newSel R n p a).eval σ) := by
+  unfold newSel
+  split
+  · exact Sim.refl _
+  · exact seqL_congr σ (ltR_congr σ _ hn) (Sim.refl _)
+  · exact natL_congr σ hn
+  · exact seqL_congr σ (ltR_congr σ _ hn) (Sim.refl _)
+  · exact Sim.refl _
+  · exact Sim.refl _
+
+theorem newObj_congr (σ : State) (g : Option Ty → LTerm) (R : RefTy) {n n' : LTerm}
+    (hn : Sim (n'.eval σ) (n.eval σ)) (p : List Seg) :
+    Sim ((newObj g R n' p).eval σ) ((newObj g R n p).eval σ) := by
+  unfold newObj
+  split
+  · exact Sim.refl _
+  · exact seqL_congr σ (ltR_congr σ _ hn) (Sim.refl _)
+  · exact Sim.refl _
+  · exact Sim.refl _
+
+theorem kite_congr (σ : State) {a a' b b' t t' e e' : LTerm} (ha : Sim (a'.eval σ) (a.eval σ))
+    (hb : Sim (b'.eval σ) (b.eval σ)) (ht : Sim (t'.eval σ) (t.eval σ))
+    (he : Sim (e'.eval σ) (e.eval σ)) :
+    Sim ((LTerm.kite a' b' t' e').eval σ) ((LTerm.kite a b t e).eval σ) :=
+  Sim.bind (Sim.bind ha fun _ => Sim.refl _) fun i =>
+    Sim.bind (Sim.bind hb fun _ => Sim.refl _) fun j => by
+      by_cases hij : i = j
+      · simp only [hij, if_true]; exact ht
+      · simp only [hij, if_false]; exact he
+
+theorem LPath.ext_congr (σ : State) {q q' : LPath} (hq : Sim (q'.eval σ) (q.eval σ))
+    (p : List Seg) : Sim ((q'.ext p).eval σ) ((q.ext p).eval σ) := by
+  rw [LPath.ext_eval, LPath.ext_eval]
+  exact Sim.bind hq fun _ => Sim.refl _
+
+/-! ### Soundness: a copy into memory returns in any state -/
+
+mutual
+
+theorem copyStToM_ok_any (v : SVal) : ∀ (σ σ' : State) (r : State × MVal),
+    copyStToM σ v = .ok r → ∃ r', copyStToM σ' v = .ok r' := by
+  intro σ σ' r h
+  cases v with
+  | prim pv => cases pv <;> exact ⟨_, rfl⟩
+  | map e d => exact (copyStToM_map_inv (τ := r.1) (mv := r.2) h).elim
+  | struct fs =>
+    obtain ⟨τ₁, mfs, hf, -, -⟩ := copyStToM_struct_inv (τ := r.1) (mv := r.2) h
+    obtain ⟨⟨τ', mfs'⟩, hf'⟩ := copyStFields_ok_any fs σ σ' _ hf
+    exact ⟨_, by rw [copyStToM, hf']; rfl⟩
+  | array es sh fx =>
+    obtain ⟨τ₁, mes, he, -, -⟩ := copyStToM_array_inv (τ := r.1) (mv := r.2) h
+    obtain ⟨⟨τ', mes'⟩, he'⟩ := copyStElems_ok_any es σ σ' _ he
+    exact ⟨_, by rw [copyStToM, he']; rfl⟩
+
+theorem copyStFields_ok_any (fs : List (Name × SVal)) : ∀ (σ σ' : State)
+    (r : State × List (Name × MVal)), copyStFields σ fs = .ok r →
+    ∃ r', copyStFields σ' fs = .ok r' := by
+  intro σ σ' r h
+  cases fs with
+  | nil => exact ⟨_, rfl⟩
+  | cons fv rest =>
+    obtain ⟨n, v⟩ := fv
+    obtain ⟨σ₁, mv, mrest, h1, h2, -⟩ := copyStFields_cons_inv (τ := r.1) (mfs := r.2) h
+    obtain ⟨⟨σ₁', mv'⟩, h1'⟩ := copyStToM_ok_any v σ σ' _ h1
+    obtain ⟨⟨τ', mrest'⟩, h2'⟩ := copyStFields_ok_any rest σ₁ σ₁' _ h2
+    exact ⟨_, by rw [copyStFields, h1', Res.ok_bind']; dsimp only; rw [h2']; rfl⟩
+
+theorem copyStElems_ok_any (es : List SVal) : ∀ (σ σ' : State) (r : State × List MVal),
+    copyStElems σ es = .ok r → ∃ r', copyStElems σ' es = .ok r' := by
+  intro σ σ' r h
+  cases es with
+  | nil => exact ⟨_, rfl⟩
+  | cons v rest =>
+    obtain ⟨σ₁, mv, mrest, h1, h2, -⟩ := copyStElems_cons_inv (τ := r.1) (mes := r.2) h
+    obtain ⟨⟨σ₁', mv'⟩, h1'⟩ := copyStToM_ok_any v σ σ' _ h1
+    obtain ⟨⟨τ', mrest'⟩, h2'⟩ := copyStElems_ok_any rest σ₁ σ₁' _ h2
+    exact ⟨_, by rw [copyStElems, h1', Res.ok_bind']; dsimp only; rw [h2']; rfl⟩
+
+end
 
 end Decide
 end Solidity

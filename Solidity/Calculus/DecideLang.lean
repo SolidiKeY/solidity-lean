@@ -729,7 +729,74 @@ def LFml.holds (σ : State) : LFml → Prop
   | .imp φ ψ => φ.holds σ → ψ.holds σ
   | .all x p φ => ∀ v, p.admits v → φ.holds (σ.setEnv x (.val v))
 
-/-! ## Guards -/
+/-! ## Guards and folded constants -/
+
+/-- A power whose literal exponent is past `256`, Lean's
+`exponentiation.threshold`.  `Int.pow` recurses once per unit of the
+exponent, in compiled code and in the kernel, and neither heeds
+heartbeats, so no fold evaluates it: a checked power past it overflows
+anyway unless its base is `0`, `1` or `-1`. -/
+def powBig : BinOp → Value → Bool
+  | .pow, .int e | .powW, .int e => decide (256 < e)
+  | _, _ => false
+
+/-- `a ⊕ b`, evaluated where both are literals and it returns (not a power
+past `powBig`).  Constants are folded here, where a term is built, so that
+no test of a built term walks it: a local bound to `x + x` is shared, and a
+walk of the tree it makes doubles with each such binding. -/
+def LTerm.mkBin (op : BinOp) (p : PrimTy) (a b : LTerm) : LTerm :=
+  match a, b with
+  | .lit x, .lit y =>
+    if powBig op y then .binop op p a b else
+    match evalBinop op p x (.ok y) with
+    | .ok r => .lit r
+    | .error _ => .binop op p a b
+  | _, _ => .binop op p a b
+
+/-- `−a` or `!a`, evaluated where `a` is a literal and it returns. -/
+def LTerm.mkUn (op : UnOp) (p : PrimTy) (a : LTerm) : LTerm :=
+  match a with
+  | .lit x =>
+    match applyUnOp op x >>= unopCheck op p with
+    | .ok r => .lit r
+    | .error _ => .unop op p a
+  | _ => .unop op p a
+
+theorem LTerm.mkBin_eval (σ : State) (op : BinOp) (p : PrimTy) (a b : LTerm) :
+    (LTerm.mkBin op p a b).eval σ = (LTerm.binop op p a b).eval σ := by
+  unfold LTerm.mkBin
+  split
+  · split
+    · rfl
+    · split
+      · rename_i r hr
+        simp only [LTerm.eval, Res.ok_bind', hr]
+      · rfl
+  · rfl
+
+theorem LTerm.mkUn_eval (σ : State) (op : UnOp) (p : PrimTy) (a : LTerm) :
+    (LTerm.mkUn op p a).eval σ = (LTerm.unop op p a).eval σ := by
+  unfold LTerm.mkUn
+  split
+  · split
+    · rename_i r hr
+      simp only [LTerm.eval, Res.ok_bind', hr]
+    · rfl
+  · rfl
+
+/-- The value of a literal: the `1` of `xs[0 + 1]`, folded where the term
+was built (`LTerm.mkBin`). -/
+def LTerm.ground? : LTerm → Option Value
+  | .lit v => some v
+  | _ => none
+
+/-- A ground term returns its value in every state. -/
+theorem LTerm.ground?_eval (σ : State) (t : LTerm) {v : Value} (h : t.ground? = some v) :
+    t.eval σ = .ok v := by
+  unfold LTerm.ground? at h
+  split at h
+  · cases h; rfl
+  · cases h
 
 /-- `a`, guarded by `g` returning; `a` alone after a literal. -/
 def seqL (g a : LTerm) : LTerm :=
