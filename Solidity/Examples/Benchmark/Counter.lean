@@ -17,11 +17,11 @@ The clauses are proved twice.  `spec!{f}` is the obligation solkey's
 `SolidityProblemSynthesizer` builds from them (`Calculus/Spec.lean`), derived
 as `⊢` (`spec_inc`, `spec_dec`): the snapshot `{ old := storage }` joins the
 context (`Proves.updIntro`), the program runs, and each leaf closes by
-`LFml.syn`, all in one kernel evaluation (`sol_prove`, `Calculus/Derive.lean`).
-Before it, the same clauses by hand, where `sol_derive` runs the program and
-the leaf `LFml.syn` cannot close goes to `sol_decide`:
-`ensures count == \old(count) + 1` with a parameter `c` for the old value,
-and no `requires count >= 1`, which the box does not need (a `dec()` that
+the closer (`LFml.close`), all in one kernel evaluation (`sol_prove`,
+`Calculus/Derive.lean`).  Before it, the same clauses by hand, also by
+`sol_prove`, the premise `c == count` rewriting `count` to `c` (KeY's
+`applyEq`): `ensures count == \old(count) + 1` with a parameter `c` for
+the old value, and no `requires count >= 1`, which the box does not need (a `dec()` that
 underflows reverts, and a reverted run satisfies every box formula).
 
 ```solidity
@@ -72,19 +72,11 @@ local instance : InContract := ⟨Counter⟩
 
 /-- `inc()`: `ensures count == \old(count) + 1`. -/
 theorem inc_spec : ⊢ dl!{ c == count → [ inc(); ] count == c + 1 } := by
-  sol_derive
-  all_goals
-    refine close ?_
-    sol_symex
-    sol_decide
+  sol_prove
 
 /-- `dec()`: `ensures count == \old(count) - 1` (when it does not revert). -/
 theorem dec_spec : ⊢ dl!{ c == count → [ dec(); ] count == c - 1 } := by
-  sol_derive
-  all_goals
-    refine close ?_
-    sol_symex
-    sol_decide
+  sol_prove
 
 /-- `get()` returns `count`. -/
 theorem get_spec : ⊢ dl!{ [ uint y = get(); ] y == count } := by

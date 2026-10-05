@@ -578,7 +578,9 @@ No `maxHeartbeats` override.  The benchmark modules built in 17 s (Coin),
 at M3b: no slowdown measured.  Four benchmark proofs and three pinned
 suggestions lost a leaf the closer now proves (`EtherWallet.withdrawOwner`,
 `Coin.mintMinter`, `Mapping.nested_remove_spec_*`; `Examples/ProofTree.lean`),
-and are now `sol_prove` alone.
+and are now `sol_prove` alone; Counter's `inc_spec` and `dec_spec`, two of
+the six M1 kept on `sol_derive`, close by `sol_prove` alone too (the premise
+`c == count` rewrites `count`).
 
 `#print axioms` on `Derive.synClose_sound`, `Proves.of_proves` and
 `Solkey.TestSuite.storageMatrixNseIndex.proved`,
