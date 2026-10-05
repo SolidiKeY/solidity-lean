@@ -6927,4 +6927,3 @@ macro "sol_decide_heuristic" : tactic => `(tactic| (
 end Decide
 
 end Solidity
-
