@@ -504,7 +504,8 @@ theorem LTerm.evalA_sim (σ : State) :
   | .lit _, _ => Sim.refl _
   | .var _, _ => Sim.refl _
   | .err, _ => Sim.refl _
-  | .env _, h | .findP _ _, h | .cpok _ _, h => by simp [LTerm.initOnly] at h
+  | .env _, h | .findP _ _, h | .cpok _ _, h => by
+    simp only [LTerm.initOnly, Bool.false_eq_true] at h
   | .binop _ _ a b, h => by
     simp only [LTerm.initOnly, Bool.and_eq_true] at h
     exact Sim.bind (LTerm.evalA_sim σ a h.1) fun _ => evalBinop_sim (LTerm.evalA_sim σ b h.2)
@@ -783,7 +784,7 @@ mutual
 
 theorem LTerm.reads_closed : (t : LTerm) → ParentClosed t.reads
   | .lit _ | .var _ | .err | .sok _ | .env _ | .findP _ _ | .cpok _ _ => by
-    intro Q h; simp [LTerm.reads] at h
+    intro Q h; simp only [LTerm.reads, List.not_mem_nil] at h
   | .find _ q | .has _ q | .kmap _ _ q | .len _ q => LPath.reads_closed q
   | .pok q => LPath.keyReads_closed q
   | .binop _ _ a b | .seq a b | .orElse a b =>
@@ -1174,7 +1175,7 @@ macro "sol_decide" : tactic => `(tactic|
    (refine (Fml.valid_iff_reduce _ (by
       first
       | decide +kernel
-      | fail "sol_decide: the formula is outside the fragment (a modality, memory, a push or pop, a copy between locations, an alias no update binds, or one through an index used after a write)")).2 ?_
+      | fail "sol_decide: the formula is outside the fragment (a modality, a push of a memory object, a copy of memory whose guards are not literals, a copy from storage outside its allocation's pair, a memory past memSize, a read of the ledger, an alias no update binds, or one through an index used after a write)")).2 ?_
     sol_reduce
     first
     | exact LFml.syn_valid _ (by decide +kernel)

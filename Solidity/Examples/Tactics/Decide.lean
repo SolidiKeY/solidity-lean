@@ -498,6 +498,59 @@ private def aCopy : LMem := .addM (.copySt .init 0 .init (.root "alice")) 1 (.st
   (LStor.view (LMem.write aCopy ⟨0, []⟩ (.fld "account") (.ref ⟨1, [.field "account"]⟩))
     ⟨0, []⟩).okE matches .sok _]
 
+/-- info: [true, true] -/
+#guard_msgs in -- `initSize`, `sizeOfFixed`, `sizeOfDyn`: a fresh member's length is its
+-- declared one, `uint[3]`'s `3` and `uint[]`'s `0`
+#eval [(LMem.addM .init 0 (.struct "FixedTriple")).lenT ⟨0, [.field "items"]⟩ ==
+    some (.lit (.int 3)),
+  (LMem.addM .init 0 (.struct "Basket")).lenT ⟨0, [.field "items"]⟩ == some (.lit (.int 0))]
+
+/-- info: true -/
+#guard_msgs in -- `initElement`: an element of a fresh `uint[3]` is `0` below the length
+#eval (LMem.addM .init 0 (.struct "FixedTriple")).readT ⟨0, [.field "items"]⟩
+    (.idx (.var (.user "i"))) ==
+  some (seqL (ltR (.var (.user "i")) (.lit (.int 3))) (.lit (.int 0)))
+
+/-- info: true -/
+#guard_msgs in -- `defaultValueBool`: a fresh `bool` member is `false`
+#eval (LMem.addM .init 0 (.struct "Toggle")).readT ⟨0, []⟩ (.fld "on") ==
+  some (.lit (.bool false))
+
+/-- info: true -/
+#guard_msgs in -- `findDefinitionSize`: a copied array's length is the storage's
+#eval (LMem.copySt .init 0 .init (.root "bk")).lenT ⟨0, [.field "items"]⟩ ==
+  some (.len .init ((LPath.root "bk").field "items"))
+
+/-- info: [true, true] -/
+#guard_msgs in -- `structG` (Lean only): a fresh struct member is a struct; below a copy, the
+-- storage holds a struct there, no array and no word
+#eval [aCopy.structG ⟨1, [.field "account"]⟩ == some (.lit (.bool true)),
+  aCopy.structG ⟨0, [.field "account"]⟩ ==
+    some (.ite (isT (.len .init ((LPath.root "alice").field "account"))) .err
+      (refT .init ((LPath.root "alice").field "account")))]
+
+/-- info: true -/
+#guard_msgs in -- `selectOnCopyMemPrim` at a length: a view's length is memory's
+#eval (LStor.view xsNew ⟨0, []⟩).lenU (LPath.root viewRoot) == .lit (.int 3)
+
+/-- info: [true, true] -/
+#guard_msgs in -- `hasU` of a view (Lean only): its root is there (`isViewRoot`), and a member
+-- below it as the view guard and `nameG` say
+#eval [(LStor.view pAge ⟨0, []⟩).hasU (LPath.root viewRoot) == .lit (.bool true),
+  (LStor.view pAge ⟨0, []⟩).hasU ((LPath.root viewRoot).field "account") ==
+    .orElse (.seq .err (.lit (.bool true))) (.seq (.lit (.bool true)) (.lit (.bool true)))]
+
+/-- info: [true, false] -/
+#guard_msgs in -- `memSize` (Lean only): 400 writes and allocations are within, 401 are not
+#eval let w (n : Nat) : LMem :=
+    (List.range n).foldl (fun m _ => .write m ⟨0, []⟩ (.fld "age") (.word (.lit (.int 1)))) pNew
+  [(w 399).within memSize, (w 400).within memSize]
+
+/-- info: [true, false] -/
+#guard_msgs in -- `memL` (Lean only): a copy of memory needs guards that are literals
+#eval [(memL (some (pNew, .lit (.bool true))) (some (⟨0, []⟩, .lit (.bool true)))).isSome,
+  (memL (some (pNew, .seq .err (.lit (.bool true)))) (some (⟨0, []⟩, .lit (.bool true)))).isSome]
+
 end MemoryClauses
 
 /-! ## Memory through the closer
@@ -568,5 +621,13 @@ theorem memoryToStorageRead :
 /-- info: false -/
 #guard_msgs in -- a memory local no update bound is outside the fragment
 #eval (dl!{ { x := read(memory, carol.age) } x == 0 }).inL Decide.Sym.empty
+
+/--
+error: sol_decide: the formula is outside the fragment (a modality, a push of a memory object, a copy of memory whose guards are not literals, a copy from storage outside its allocation's pair, a memory past memSize, a read of the ledger, an alias no update binds, or one through an index used after a write)
+⊢ Fml.inL Decide.Sym.empty dl{ [ uint x = 1; ] x = 1 } = true
+-/
+#guard_msgs in -- a modality is outside the fragment, and `sol_decide` says what is
+example : ⊨ dl!{ [ uint x = 1; ] x == 1 } := by
+  sol_decide
 
 end Solidity.Examples.Tactics.Decide

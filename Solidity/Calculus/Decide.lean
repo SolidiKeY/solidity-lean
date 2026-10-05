@@ -151,7 +151,9 @@ def isIntL (t : LTerm) : LTerm :=
   | some (.int _) => .lit (.bool true)
   | _ => .kite t t (.lit (.bool true)) (.lit (.bool true))
 
-/-- The ordinal the next allocation of the memory takes (`freshIdp`). -/
+/-- The ordinal the next allocation of the memory takes (`freshIdp`).  A
+walk of the memory, not cached in `Sym`: `okU` recomputes it at each
+allocation, O(W²) over at most `memSize` nodes. -/
 def LMem.nAlloc : LMem → Nat
   | .init => 0
   | .addM m _ _ | .newArr m _ _ _ | .copySt m _ _ _ => m.nAlloc + 1
@@ -163,7 +165,10 @@ def allocOk (R : RefTy) : Bool := (Ty.ref R).mapFree && (Ty.ref R).okDeep
 
 /-- The most writes and allocations a leaf's memory may hold: each read of
 memory walks them (`LMem.readT`), so the translation costs their number
-times the reads.  `TestSuite` needs at most 9. -/
+times the reads.  The bound is enforced where the memory is built, so the
+translation never walks a longer one: `UpdElem.toL` of a memory and `pairL`
+refuse a memory past it, before any read (`fitsClose` runs before `inL`).
+`TestSuite` needs at most 9. -/
 def memSize : Nat := 400
 
 /-- The memory holds at most `n` writes and allocations. -/
@@ -843,7 +848,7 @@ def _root_.Solidity.UpdElem.toL (ρ : Sym) : UpdElem C → LTerm × Sym
     | none => (.err, ρ)
   | .memory m =>
     match m.toL ρ with
-    | some (M, g) => (g, { ρ with mem := M })
+    | some (M, g) => if M.within memSize then (g, { ρ with mem := M }) else (.err, ρ)
     | none => (.err, ρ)
   | .selfBalance .. | .saveNet .. => (.err, ρ)
 
@@ -933,7 +938,9 @@ theorem pairView_some {e₁ e₂ : UpdElem C} {rest : List (UpdElem C)} {x : Var
 next ordinal. -/
 def pairL (ρ : Sym) (x : Var) (i : ITerm C) (mm : MTerm C) : Option (LTerm × Sym) :=
   if allocPair? i mm then
-    (pairMem ρ mm).map fun p => (p.2, { ρ with env := (x, .mref ⟨ρ.mem.nAlloc, []⟩) :: ρ.env, mem := p.1 })
+    (pairMem ρ mm).bind fun p => if p.1.within memSize then
+      some (p.2, { ρ with env := (x, .mref ⟨ρ.mem.nAlloc, []⟩) :: ρ.env, mem := p.1 })
+    else none
   else none
 
 /-- The update's term as a premise (box) or a conjunct (diamond). -/
@@ -3006,7 +3013,10 @@ theorem pair_sound {σ τ : State} {ρ ρ' : Sym} {x : Var} {i : ITerm C} {mm : 
     | some p =>
       obtain rfl := copyOf?_some hc
       simp only [pairIn, hc] at hm
-      simp only [pairMem, hc, Option.map_some, Option.some.injEq, Prod.mk.injEq] at hq
+      simp only [pairMem, hc, Option.bind_some] at hq
+      split at hq
+      case isFalse => cases hq
+      simp only [Option.some.injEq, Prod.mk.injEq] at hq
       obtain ⟨rfl, rfl⟩ := hq
       rcases allocPair?_cases hap with ⟨R, -, hmm⟩ | ⟨v, rfl, hmm⟩
       · cases hmm
@@ -3016,7 +3026,10 @@ theorem pair_sound {σ τ : State} {ρ ρ' : Sym} {x : Var} {i : ITerm C} {mm : 
       simp only [pairIn, hc] at hm
       simp only [pairMem, hc] at hq
       obtain ⟨M, g', hM, hmr, hme⟩ := MTerm.toL_eval h mm hm
-      rw [hM, Option.map_some, Option.some.injEq, Prod.mk.injEq] at hq
+      rw [hM, Option.bind_some] at hq
+      split at hq
+      case isFalse => cases hq
+      simp only [Option.some.injEq, Prod.mk.injEq] at hq
       obtain ⟨rfl, rfl⟩ := hq
       have hkey : (∀ id, i.eval τ = .ok id → ∃ μ', mm.eval τ = .ok μ') ∧
           ∀ μ', mm.eval τ = .ok μ' → ∃ id, i.eval τ = .ok id ∧
@@ -3315,7 +3328,8 @@ theorem Fml.toL_holds :
         simpa only [UpdElem.inL, Bool.and_eq_true] using hf.1
       obtain ⟨M, g, hM, hmr, hme⟩ := MTerm.toL_eval h mm hmm.1
       have hf2 := hf.2
-      simp only [UpdElem.toL, hM] at hf2 ⊢
+      have hw : M.within memSize = true := by simpa only [memWithin, hM] using hmm.2
+      simp only [UpdElem.toL, hM, hw, ↓reduceIte] at hf2 ⊢
       rw [Close.UpdElem.write_memory]
       refine after_guardM ?_ fun τ' hτ => ?_
       · constructor
@@ -4310,9 +4324,8 @@ def LMem.objU (str : Bool) : LMem → LId → Option LTerm
     if i.root = k then
       if noLen i.path then
         let Q := q.elim.ext i.path
-        let H : LTerm := .ite (isT (.seq s.okE (.seq (.pok Q) (s.readU Q)))) .err
-          (.seq s.okE (.seq (.pok Q) (s.hasU Q)))
-        some (if str then .ite (isT (.seq s.okE (.seq (.pok Q) (s.lenU Q)))) .err H else H)
+        let H : LTerm := .ite (isT (s.readU Q)) .err (s.hasU Q)
+        some (.seq s.okE (.seq (.pok Q) (if str then .ite (isT (s.lenU Q)) .err H else H)))
       else none
     else m.objU str i
   | .write m _ _ _, i => m.objU str i
@@ -4330,8 +4343,9 @@ def LMem.okU : LMem → Option LTerm
     if k = m.nAlloc ∧ allocOk R = true then m.okU.map fun G => .seq G (isIntL n.elim) else none
   | .copySt m k s q =>
     if k = m.nAlloc then
-      m.okU.map fun G => .seq G (.seq (.seq s.okE (.seq (.pok q.elim) (s.cpokU q.elim)))
-        (.ite (isT (.seq s.okE (.seq (.pok q.elim) (s.readU q.elim)))) .err (.lit (.bool true))))
+      let Q := q.elim
+      m.okU.map fun G => .seq G (.seq s.okE (.seq (.pok Q) (.seq (s.cpokU Q)
+        (.ite (isT (s.readU Q)) .err (.lit (.bool true))))))
     else none
   | .write m j b v =>
     okWrite m.okU (fun _ => wrGuard (fun _ => m.objU true j) (fun _ => m.readU j .size) b.idxU b)
@@ -4606,9 +4620,8 @@ def LMem.objUF (str : Bool) : LMem → LId → Option LTerm
     if i.root = k then
       if noLen i.path then
         let Q := q.elimF.ext i.path
-        let H : LTerm := .ite (isT (.seq s.okEF (.seq (.pok Q) (s.readUF Q)))) .err
-          (.seq s.okEF (.seq (.pok Q) (s.hasUF Q)))
-        some (if str then .ite (isT (.seq s.okEF (.seq (.pok Q) (s.lenUF Q)))) .err H else H)
+        let H : LTerm := .ite (isT (s.readUF Q)) .err (s.hasUF Q)
+        some (.seq s.okEF (.seq (.pok Q) (if str then .ite (isT (s.lenUF Q)) .err H else H)))
       else none
     else m.objUF str i
   | .write m _ _ _, i => m.objUF str i
@@ -4622,9 +4635,9 @@ def LMem.okUF : LMem → Option LTerm
     if k = m.nAlloc ∧ allocOk R = true then m.okUF.map fun G => .seq G (isIntL n.elimF) else none
   | .copySt m k s q =>
     if k = m.nAlloc then
-      m.okUF.map fun G => .seq G (.seq (.seq s.okEF (.seq (.pok q.elimF) (s.cpokUF q.elimF)))
-        (.ite (isT (.seq s.okEF (.seq (.pok q.elimF) (s.readUF q.elimF)))) .err
-          (.lit (.bool true))))
+      let Q := q.elimF
+      m.okUF.map fun G => .seq G (.seq s.okEF (.seq (.pok Q) (.seq (s.cpokUF Q)
+        (.ite (isT (s.readUF Q)) .err (.lit (.bool true))))))
     else none
   | .write m j b v =>
     okWrite m.okUF
@@ -6952,6 +6965,16 @@ theorem copySelU_sim {σ : State} {s : LStor} {q q' : LPath} (p : List Seg) (a :
         guard_sim hs he fun _ _ hv hq => hln _ hv hq⟩
     · cases h
 
+/-- A test below a copy from storage, its guard hoisted: the storage and the
+path are tested once, before the tests below them. -/
+theorem copyObj_hoist {σ : State} {K P F H L : LTerm} {str : Bool} :
+    Rets ((LTerm.seq K (.seq P (if str then .ite (isT L) .err (.ite (isT F) .err H)
+        else .ite (isT F) .err H))).eval σ) ↔
+      Rets ((if str then LTerm.ite (isT (.seq K (.seq P L))) .err
+          (.ite (isT (.seq K (.seq P F))) .err (.seq K (.seq P H)))
+        else .ite (isT (.seq K (.seq P F))) .err (.seq K (.seq P H))).eval σ) := by
+  cases str <;> simp only [Bool.false_eq_true, ↓reduceIte, seq_rets, ite_isT_rets] <;> grind
+
 /-- A test below a copy from storage, its storage reads eliminated. -/
 theorem copyObjU_rets {σ : State} {s : LStor} {Q : LPath} {F H L : LTerm}
     (hF : Sim (F.eval σ) ((LTerm.find s Q).eval σ)) (hH : Sim (H.eval σ) ((LTerm.has s Q).eval σ))
@@ -7174,6 +7197,15 @@ theorem newArr_okU_rets {σ : State} {m : LMem} {k : Nat} {R : RefTy} {n : LTerm
       exact ⟨⟨_, hr'⟩, c, hn'⟩
   · cases h
 
+/-- The guard of a copy's run guard, hoisted: the storage and the path are
+tested once, before the copy test and the word test. -/
+theorem copyOk_hoist {σ : State} {G K P C F T : LTerm} :
+    Rets ((LTerm.seq G (.seq K (.seq P (.seq C (.ite (isT F) .err T))))).eval σ) ↔
+      Rets ((LTerm.seq G (.seq (.seq K (.seq P C))
+        (.ite (isT (.seq K (.seq P F))) .err T))).eval σ) := by
+  simp only [seq_rets, ite_isT_rets]
+  grind
+
 theorem copySt_okU_rets {σ : State} {m : LMem} {k : Nat} {s : LStor} {q : LPath} {g : LTerm}
     (ih : ∀ {G : LTerm}, m.okU = some G → (Rets (G.eval σ) ↔ ∃ r, m.run σ = .ok r))
     (hC : Sim ((LTerm.seq s.okE (.seq (.pok q.elim) (s.cpokU q.elim))).eval σ)
@@ -7186,7 +7218,7 @@ theorem copySt_okU_rets {σ : State} {m : LMem} {k : Nat} {s : LStor} {q : LPath
   split at h
   · rename_i hk
     obtain ⟨G, hG, rfl⟩ := Option.map_eq_some_iff.1 h
-    rw [seq_rets, seq_rets, ih hG, rets_of_sim hC, ite_isT_rets, rets_of_sim hF]
+    rw [copyOk_hoist, seq_rets, seq_rets, ih hG, rets_of_sim hC, ite_isT_rets, rets_of_sim hF]
     simp only [lit_rets, and_true]
     constructor
     · rintro ⟨⟨⟨μ', B'⟩, hr⟩, ⟨a, hc⟩, hf⟩
@@ -7628,6 +7660,7 @@ theorem LMem.objU_sim (σ : State) : (m : LMem) → ∀ (str : Bool) (i : LId) {
         subst h
         have he := LPath.ext_congr σ (LPath.elim_sim σ q) i.path
         refine ⟨if str then structT s (q.ext i.path) else refT s (q.ext i.path), ?_,
+          copyObj_hoist.trans <|
           copyObjU_rets (guard_sim (LStor.okE_sim σ s) he fun _ _ hv hq => LStor.readU_sim σ s _ hv hq)
             (guard_sim (LStor.okE_sim σ s) he fun _ _ hv hq => LStor.hasU_sim σ s _ hv hq)
             (guard_sim (LStor.okE_sim σ s) he fun _ _ hv hq => LStor.lenU_sim σ s _ hv hq) str⟩

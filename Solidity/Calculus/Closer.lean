@@ -40,6 +40,9 @@ local normal form rewriting the other (KeY's `applyEq`).
   shadow too), and so is a default where the type's structs are
   (`defaultForTy_canonB`).  Its shape and kind follow the type, and it
   returns where the index is at most the old length (`Facts.slotIn`).
+  A copy into memory of the initial storage (`cpok init q`) returns where
+  the layout types `q` at a type with no mapping (`Facts.cpokInit`, Lean
+  only: `copyStToM` halts on a mapping, and `wt` makes the rest copy).
 * **What halts** (`Facts.halts`): a test for a shape the layout says is
   not there (a `delete`'s guards), so `orElse` takes its other side.
 * **Intervals** (`Facts.range`, `Facts.bnds`): a `uint` or `int` local

@@ -102,7 +102,7 @@ What they say:
   their reasons.
 - **M6.** Memory in the closer: allocation, reads and writes, `mlen`,
   defaults, copies to storage.  Done (below), but for the copies between
-  memory and storage: 391 derived.  Being reworked into solkey's
+  memory and storage: 391 derived.  Reworked into solkey's
   `memoryRules.key`/`structMemoryRules.key` taclets (M6b, below): with the
   copies between memory and storage, 411 derived.
 - **M7.** The remaining functions; a `derived` status in the corpus table;
@@ -936,8 +936,9 @@ The old corpus and the `⊢` derivations now tell one story.
     hand-written contract's store, without the roots `fixedByKey` and
     `boolKeyed`, so it is no storage of the imported contract and `wt`
     fails there.
-  - Rows the old corpus decided at that store and `⊢` has not derived yet
-    (the copies between memory and storage) have no corpus theorem yet.
+  - Rows the old corpus decided at that store and `⊢` had not derived at
+    M7 (the copies between memory and storage) are derived since M6b, and
+    `Corpus/TestSuite.lean` carries their corollaries.
 - **The two contracts agree.**  `testSuite_agrees` (`decide +kernel`, no
   axioms) checks that every root of the hand-written `TestSuite` is a root of
   `Solkey.TestSuite` at the same type, up to `folks`/`people` and
@@ -960,8 +961,10 @@ The old corpus and the `⊢` derivations now tell one story.
     (418, every function not tagged skip), the skip rows are the 2 tagged
     ones, and the table is what the generator writes today.
 
-  `--complete` also fails while a row is pending.  Today:
-  `418 = 391 derived + 25 pending + 1 divergent + 1 excluded; 2 skip`.
+  `--complete` also fails while a row is pending.  At M7:
+  `418 = 391 derived + 25 pending + 1 divergent + 1 excluded; 2 skip`;
+  since M6b: `418 = 411 derived + 5 pending + 1 divergent + 1 excluded;
+  2 skip`.
 
 **Times** (`Elab.async false`, warm; wall clock includes the tool round trip):
 
@@ -978,7 +981,7 @@ SolidityCorpus` now builds the `SolkeyTestSuite` derivations too.
 **Still to do:**
 - the final full `lean_build`;
 - the `#print axioms` sweep over `Solkey.TestSuite.*`;
-- `scripts/check-testsuite.sh --complete`, which fails while 25 rows are
+- `scripts/check-testsuite.sh --complete`, which fails while 5 rows are
   pending.
 
 The generator was re-run after M6 (`scripts/check-testsuite.sh` passes).
@@ -1440,18 +1443,20 @@ node, no `new` term) are rows of their own.
   `LTerm.ground?` on shared terms (constants folded where a term is built,
   `LTerm.mkBin`/`mkUn`, so `ground?` is a literal test); `synClose` testing
   `Fml.inL` before `fitsClose` (now after); no memory path pinned in the
-  default targets (`Examples/Tactics/Decide.lean` now pins each memory
-  clause and proves seven memory programs by `sol_decide`, a `new` of a
-  million elements among them); the stale docstrings of
+  default targets (`Examples/Tactics/Decide.lean` pins the memory clauses
+  and proves seven memory programs by `sol_decide`, a `new` of a million
+  elements among them; the clauses the M6b review found unpinned were
+  added then); the stale docstrings of
   `Calculus/Decide.lean`, `Tm.inL`, `UpdElem.inL`, `Fml.inL` and
   `DecideMem`, and the `hlit` warnings (gone with `DecideMem`); no closer
-  row for memory in the rule map (now one row per taclet). Still open: no
-  `sol_prove` pin in the default targets goes through the allocation's pair
-  (`Derive.memAlloc?`); `TestSuite/Derived9.lean` to `Derived12.lean` are
-  its only check.
+  row for memory in the rule map (now one row per taclet). The `sol_prove`
+  pins through the allocation's pair (`Derive.memAlloc?`) came with the
+  M6b review (`Examples/ProofTree.lean`).
 - **Bounds kept.** `closeSize`, `elimSize` and the step budget are as they
-  were; every new reader recurses once per arm, the elimination-block ones
-  with a lazy `F` twin and `@[csimp]`; `memSize` (400) bounds the memory a
+  were; the elimination-block readers have a lazy `F` twin and `@[csimp]`
+  (several walk the memory more than once per arm: `okU`'s `.write` arm
+  calls `okU`, `objU` and `readU` on the memory below, so a guard grows with
+  the writes; see the M6b review); `memSize` (400) bounds the memory a
   leaf may hold, more than 40 times the largest W measured.
 
 **Times.** `sol_prove` totals, per theorem, measured at step 6, the closer as
@@ -1478,3 +1483,99 @@ time is in two theorems, `indexWriteBothImpureMemToStorage` (5.4 s) and
 eliminated again in every leaf; both are within `closeSize` and `elimSize`.
 The speed commits `7541cad`, `2ff6a0f`, `16d0a9b` and `02f363b` are
 untouched.
+
+### M6b review
+
+A read-only review of the branch confirmed 23 findings; what was done with
+each:
+
+- **`DeclOk` was vacuous** (blocking).  It asked one member table for every
+  struct of `structDef`, which none satisfies (`Basket.items` is `uint[]`,
+  `FixedTriple.items` is `uint[3]`), so `readT_agree`, `readT_agree_shapes`,
+  `read_agree` and `newSel_agree` held trivially.  Replaced by `DeclAlong`,
+  a hypothesis on the one read: the table is the declarations of the
+  members along its path below the allocated type.  An `example` at the end
+  of `Calculus/MemTheory.lean` instantiates `readT_agree_shapes` on a fresh
+  `Basket` (the length of `items`), discharging it.
+- **Theory citations by definition.**  About ten rows of the rule map cite
+  a Theory lemma the agreement proof never names (`shapeAt*`,
+  `idShapeDef`, `defaultDefInt`, `defValResolve*`, `findDefinitionCons`,
+  `readCopyStIdentity`).  Their agreement cells now say "(by definition)"
+  and name what the proof unfolds; the map's preamble says only a cell
+  without that mark checks its citation by name.  Only `readT` and `readI`
+  are checked; `readU` has no agreement theorem, and the rows say so.
+- **`memoryStorageCopy` is a deviation.**  `LMem.toTheory` omits the
+  `addM` under KeY's `copySt` and leaves the root unshaped; the row quotes
+  KeY's term and is marked `deviation`.
+- **Rule map status labels.**  `sizeOfLeaf` and `readFromEmptyMemory` are
+  `unreached` (Lean halts where KeY gives `0`; the bottom of a memory is
+  `pre(heap)`, never `mtMem`); `defaultValueBool` no longer cites the int
+  lemma; `defValResolve` says the delete rules write the typed `defVal(T)`;
+  the allocation rows quote KeY's sequential updates over one
+  `\skolemTerm` instead of "one `\new`"; `readI`'s refusals (a symbolic
+  index, a word at the same slot) are in its row.
+- **`memSize` enforced where the memory is built.**  Since `fitsClose`
+  runs before `inL`, the bound no longer limited the translation's walks.
+  `UpdElem.toL` of a memory and `pairL` now refuse a memory past
+  `memSize`, so no `readT` walks a longer one; `toL_holds` and `pair_sound`
+  take the bound from `inL`.
+- **Copy guards hoisted.**  `objU` and `okU` of a copy from storage emitted
+  the storage guard `s.okE` two or three times; each now tests the storage
+  and the path once, then the reads (`copyObj_hoist`, `copyOk_hoist`
+  relate the two shapes, so the `_sim` proofs are unchanged below them).
+- **`sol_decide`'s failure message** now lists what `Fml.inL` refuses
+  today, and is pinned (`Examples/Tactics/Decide.lean`).
+- **Pins.**  New `#guard_msgs` pins of `initSize`/`sizeOfFixed`/`sizeOfDyn`,
+  `initElement` below a fixed length, `defaultValueBool`,
+  `findDefinitionSize`, `structG`, a view's `lenU` and `hasU`, `memSize` at
+  400/401 and `memL`'s refusal (`Examples/Tactics/Decide.lean`); two
+  `sol_prove?` pins through an allocation's pair and a copy of memory into
+  storage, and `Derive.replayFits` at a lowered limit
+  (`Examples/ProofTree.lean`); two `#wp` pins of memory programs, printing
+  `copyOk`, `newArr`, `#k` and `copyMem` (`Examples/Tools.lean`).  The
+  `#solkey_derive?` "past maxHeartbeats" message itself stays unpinned: a
+  limit low enough to refuse a replay also stops the statement's
+  elaboration.  A `push` of a memory object was not pinned as outside the
+  fragment: `persons.push(carol)` with `true` after it decides, and with a
+  read after it `sol_symex` exceeds the default heartbeats.
+- **Docs.**  The M7 counts are marked historical (5 rows pending now, not
+  25), the Closer docstring names `Facts.cpokInit`, `powBig` and
+  `mkBin`/`mkUn` moved to the `DecideLang` row of the module map, the
+  bare `simp` of the three arms widened by `.cpok` are `simp only`.
+- **Not done (nits).**  `LMem.nAlloc` is not cached in `Sym` (plan §3): it
+  is an O(W) walk, so `okU` is O(W²) over at most `memSize` nodes; its
+  docstring says so.  `LStor.cpokU`'s `.save` arm still keeps the raw
+  storage as its fallback at every level (O(S²) in the word saves before a
+  copy), bounded by `elimSize`; an accumulator with one top-level fallback
+  would need `cpokU_sim` reworked.
+
+**Measured** (after the review; serial, `Elab.async` off, `IO.monoMsNow`
+in the language server, as the baseline was).  Every derived obligation
+still derives: `Derived1`–`8` check clean, each file alone, and the 111
+theorems of `Derived9`–`12` re-elaborate clean in a scratch module.
+
+| | Baseline (M6) | Step 6 | Review | Change vs baseline |
+|---|---|---|---|---|
+| `Derived9`, 40 theorems | 7.9 s | 7.2 s | 7.1 s | −10% |
+| `Derived10`, 40 theorems | 10.1 s | 9.0 s | 9.1 s | −10% |
+| `Derived11`, 11 theorems | 2.3 s | 2.2 s | 2.2 s | −5% |
+| `memoryIndexWriteNse` | 2.48 s | 2.20 s | 2.18 s | −12% |
+| `Derived12`, the 19 by `sol_prove` | — | 15.1 s | 15.0 s | — |
+| `Calculus/Decide.lean`, the module | 37.2 s | — | 47.1 s | **+27%** |
+| `Calculus/DecideLang.lean` (split out at step 3) | — | — | 7.0 s | — |
+| `Calculus/MemRead.lean` (split out at step 3) | — | — | 4.3 s | — |
+| `Calculus/Closer.lean` | — | — | 12.0 s | — |
+
+The module times are the elaboration of each file's own commands, timed
+from a stamp after its imports to one at its end, `Elab.async` off; step
+6's "25 s" for `Decide.lean` was a `lake build` time and is not
+comparable.  **Warning: `Calculus/Decide.lean` is 27% slower than the
+step-0 baseline**, past the 20% line, and the three modules it was split
+into take 58.4 s together against the baseline's 37.2 s for the one file
+(+57%; the baseline also had M6's `DecideMem`, not timed then, which M6b
+deleted).  The review's changes are not the cause: the same file before
+them took 48.0 s.  The cost is M6b's: the clauses and their `_sim` proofs,
+the `F` twins and the six-type mutual block step 2 found to be the
+kernel's.  The `sol_prove` times, which are what a user of the closer
+pays, are all faster than the baseline.
+

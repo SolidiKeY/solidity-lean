@@ -721,7 +721,8 @@ together: what the interpreter reads at a name the closer answers for is
 theorem LMem.read_agree (σ : State) {decl : Name → Ty} {m : LMem}
     {μ : State} {B : MemNames.Births} {i : LId}
     (hd : ∀ R, m.allocTy? i.root = some R → DeclAlong decl (.ref R) i.path)
-    {a : LSel} {t : LTerm} {M : Theory.Memory} {sg : Seg} {n : Nat} {v : Value} (hrun : m.run σ = .ok (μ, B))
+    {a : LSel} {t : LTerm} {M : Theory.Memory} {sg : Seg} {n : Nat} {v : Value}
+    (hrun : m.run σ = .ok (μ, B))
     (hM : m.toTheory σ m.shapes = some M) (hs : a.toSeg σ = some sg) (ht : m.readT i a = some t)
     (hn : LId.evalR B i = .ok n) (hr : a.read σ μ n = .ok v) :
     v = castLike decl (i.toTheory m.shapes) sg

@@ -91,6 +91,34 @@ update-free:
 -/
 #guard_msgs in #wp dl!{ [ alice.age = 42; uint x = alice.age; ] x == 42 }
 
+
+/-! Memory is pushed in as one term (`LMem`): a copy from storage under its
+guard (`copyOk`, the subtree copies), the `k`-th allocation `#k`, a
+`new T[](n)` one node (`newArr`), and a copy of memory into storage read
+through its view (`copyMem(…)` at `#view`). -/
+
+/--
+info: symbolic execution leaves:
+    dl{
+  { carol := freshId(copySt(memory, find(storage, alice))) ‖ memory := copySt(memory, find(storage, alice)) }
+    { x := read(memory, carol.age) } x = find(storage, alice.age) }
+update-free:
+    (copyOk(storage, alice); orElse((find(storage, alice); true), false) ? err : true) == (copyOk(storage, alice); orElse((find(storage, alice); true), false) ? err : true) → find(storage, alice.age) == find(storage, alice.age) → find(storage, alice.age) == find(storage, alice.age)
+-/
+#guard_msgs in #wp dl!{ [ Person memory carol = alice; uint x = carol.age; ] x == alice.age }
+
+/--
+info: symbolic execution leaves:
+    dl{
+  { xs := freshId(copySt(memory, newArr(uint[], n))) ‖ memory := copySt(memory, newArr(uint[], n)) }
+    { memory := write(memory, xs[i], 7) }
+      { storage := store(storage, values, copyMem(mtSt, memory, xs)) } find(storage, values[i]) = 7 }
+update-free:
+    (n ≡ n ? true : true) == (n ≡ n ? true : true) → ((i ≡ i ? true : true); ((0 <= i) && (i < ((n < 0) ? 0 : n))) ? true : err) == ((i ≡ i ? true : true); ((0 <= i) && (i < ((n < 0) ? 0 : n))) ? true : err) → ((n ≡ n ? true : true), ((0 <= i) && (i < ((n < 0) ? 0 : n))) ? true : err; has(storage, values)) == ((n ≡ n ? true : true), ((0 <= i) && (i < ((n < 0) ? 0 : n))) ? true : err; has(storage, values)) → ((n ≡ n ? true : true), ((0 <= i) && (i < ((n < 0) ? 0 : n))) ? true : err, has(storage, values), ok(values[i]); orElse((err; true), false) ? find(copy(storage, values, copyMem(write(newArr(memory, #0, n), #0[i], 7), #0), #view), values[i]) : (i ≡ i ? 7 : (((0 <= i) && (i < n)) ? true : err; 0))) == 7
+-/
+#guard_msgs in
+#wp dl!{ [ uint[] memory xs = new uint[](n); xs[i] = 7; values = xs; ] values[i] == 7 }
+
 /--
 info:   ~[storageFieldWriteSave]~>
     dl{ { storage := save(storage, alice.age, 42) } [ uint x = alice.age; ] x = 42 }

@@ -710,7 +710,8 @@ theorem LTerm.isIntLit_int {σ : State} : (t : LTerm) → t.isIntLit = true →
   | .env _, _ => ⟨_, rfl⟩
   | .lit (.bool _), h | .var _, h | .binop .., h | .unop .., h | .ite .., h | .find .., h
   | .has .., h | .kmap .., h | .len .., h | .sok _, h | .pok _, h | .seq .., h | .orElse .., h
-  | .kite .., h | .zero _, h | .err, h | .findP .., h | .cpok .., h => by simp [LTerm.isIntLit] at h
+  | .kite .., h | .zero _, h | .err, h | .findP .., h | .cpok .., h => by
+    simp only [LTerm.isIntLit, Bool.false_eq_true] at h
 
 /-- A term `known` shows is an integer: one whatever the state, or a key of a
 path whose `ok(q)` is known to return. -/
