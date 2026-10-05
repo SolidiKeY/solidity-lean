@@ -325,68 +325,17 @@ theorem pushAlias?_sound {U : Upd C} {s : STerm C} {x : Var} {Q : PTerm C}
 
 end PushAlias
 
-/-! ### An allocation, one element at a time
+/-! ### An allocation, kept whole
 
 `T memory x;` leaves `{ x := freshId(addM(memory)) ‖ memory :=
-addM(memory) }`: both read the memory before the allocation.  Where the
-allocation does not read `x`, binding `x` first is the same
-(`peelMem_sound`), and `Fml.toL` reads the identity the allocation will
-take off the objects so far. -/
+addM(memory) }`.  The object `x` names exists only in the memory after the
+allocation, so the pair stays one update: `Fml.toL` reads it as one
+(`Decide.pairL`), KeY's single Skolem `freshIdp`. -/
 
-/-- `{ x := i ‖ memory := m }` as `x`, `i` and `m`, where `m` does not read
-`x`. -/
-def memAlloc? : Upd C → Option (Var × ITerm C × MTerm C)
-  | [.mref x i, .memory mm] => if x ∈ mm.vars then none else some (x, i, mm)
-  | _ => none
-
-theorem memAlloc?_some {U : Upd C} {x : Var} {i : ITerm C} {mm : MTerm C}
-    (h : memAlloc? U = some (x, i, mm)) : U = [.mref x i, .memory mm] ∧ x ∉ mm.vars := by
-  unfold memAlloc? at h
-  split at h
-  · split at h
-    · cases h
-    · rename_i hx
-      simp only [Option.some.injEq, Prod.mk.injEq] at h
-      obtain ⟨rfl, rfl, rfl⟩ := h
-      exact ⟨rfl, hx⟩
-  · cases h
-
-/-- **The local of an allocation first**: `{x := i}{memory := m}ψ` implies
-`{x := i ‖ memory := m}ψ` where `m` does not read `x`. -/
-theorem peelMem_sound {m : Modality} {x : Var} {i : ITerm C} {mm : MTerm C}
-    (hx : x ∉ mm.vars) {ψ : Fml C} {σ : State}
-    (h : holds σ (.upd m [.mref x i] (.upd m [.memory mm] ψ))) :
-    holds σ (.upd m [.mref x i, .memory mm] ψ) := by
-  have h' : m.after (fun τ => m.after (fun ρ => holds ρ ψ) (Upd.apply [.memory mm] τ))
-      (Upd.apply [.mref x i] σ) := h
-  change m.after (fun ρ => holds ρ ψ) (Upd.apply [.mref x i, .memory mm] σ)
-  simp only [Upd.apply, List.foldlM_cons, List.foldlM_nil, bind_pure, Close.UpdElem.write_mref,
-    Close.UpdElem.write_memory] at h' ⊢
-  cases hi : i.eval σ with
-  | error e =>
-    simp only [hi, SemanticsProperties.Res.error_bind] at h' ⊢
-    exact h'
-  | ok id =>
-    simp only [hi, SemanticsProperties.Res.ok_bind, Modality.after] at h' ⊢
-    have hag : EnvAgreeExcept [x] σ (σ.setEnv x (.mref id)) :=
-      EnvAgreeExcept.setEnv_right ⟨rfl, rfl, rfl, rfl, fun _ _ => rfl, rfl, rfl⟩
-        (List.mem_singleton_self x) _
-    have hr : ResultsAgree [x] (mm.eval σ) (mm.eval (σ.setEnv x (.mref id))) :=
-      Tm.eval_frame hag mm fun y hy hm => by
-        rw [List.mem_singleton] at hm
-        subst hm
-        exact hx hy
-    revert h' hr
-    generalize mm.eval σ = r₀
-    generalize mm.eval (σ.setEnv x (.mref id)) = r₁
-    intro h' hr
-    match r₀, r₁, hr with
-    | .error _, .error _, _ => exact h'
-    | .ok _, .error _, hr | .error _, .ok _, hr => exact (nomatch hr)
-    | .ok μ₀, .ok μ₁, hr =>
-      simp only [SemanticsProperties.Res.ok_bind] at h' ⊢
-      rw [hr.heap, hr.nextId]
-      exact h'
+/-- `{ x := i ‖ memory := m }`: an allocation's pair, which `seqUpd` keeps. -/
+def memAlloc? : Upd C → Bool
+  | [.mref _ _, .memory _] => true
+  | _ => false
 
 /-- Every parallel update split where `seqRev` can, in the positions a leaf
 proves (not in a premise). -/
@@ -395,9 +344,7 @@ def _root_.Solidity.Fml.seqUpd : Fml C → Fml C
     match pushAlias? U with
     | some (s, x, Q) => .upd m [.storage s] (.upd m [.path x Q] φ.seqUpd)
     | none =>
-      match memAlloc? U with
-      | some (x, i, mm) => .upd m [.mref x i] (.upd m [.memory mm] φ.seqUpd)
-      | none => seqRev m φ.seqUpd U.reverse
+      if memAlloc? U then .upd m U φ.seqUpd else seqRev m φ.seqUpd U.reverse
   | .imp a φ => .imp a φ.seqUpd
   | .and φ ψ => .and φ.seqUpd ψ.seqUpd
   | .all x p φ => .all x p φ.seqUpd
@@ -539,11 +486,8 @@ theorem Fml.seqUpd_sound : (φ : Fml C) → ∀ σ, holds σ φ.seqUpd → holds
       simp only [holds] at h ⊢
       exact afterImp (fun τ hτ => afterImp (fun ρ hρ => Fml.seqUpd_sound φ ρ hρ) hτ) h
     · split at h
-      · rename_i x i mm hU
-        obtain ⟨rfl, hx⟩ := memAlloc?_some hU
-        refine peelMem_sound hx ?_
-        simp only [holds] at h ⊢
-        exact afterImp (fun τ hτ => afterImp (fun ρ hρ => Fml.seqUpd_sound φ ρ hρ) hτ) h
+      · simp only [holds] at h ⊢
+        exact afterImp (fun τ hτ => Fml.seqUpd_sound φ τ hτ) h
       · have := seqRev_sound (m := m) (fun τ => Fml.seqUpd_sound φ τ) U.reverse σ h
         rwa [List.reverse_reverse] at this
   | .imp a φ, σ, h => fun ha => Fml.seqUpd_sound φ σ (h ha)
@@ -602,7 +546,7 @@ def synClose (Γ : List (Hyp C)) (φ : Fml C) : Bool :=
   let v := Hyp.wrap (dropWt Γ) φ
   let w := v.seqUpd
   let l := w.toL Decide.Sym.empty
-  v.modalFree && w.inL Decide.Sym.empty && fitsClose l && Decide.LFml.close (topWt Γ) l.elim
+  v.modalFree && fitsClose l && w.inL Decide.Sym.empty && Decide.LFml.close (topWt Γ) l.elim
 
 /-- `synClose`'s bounds alone (`synClose_fits`): what `sol_prove?` asks
 before it tries a step that reduces the leaf, since the reduction, its
@@ -614,7 +558,7 @@ def leafFits (Γ : List (Hyp C)) (φ : Fml C) : Bool :=
 theorem synClose_fits {Γ : List (Hyp C)} {φ : Fml C} (h : synClose Γ φ = true) :
     leafFits Γ φ = true := by
   simp only [synClose, Bool.and_eq_true] at h
-  exact h.1.2
+  exact h.1.1.2
 
 /-- The steps `sol_prove` allows, over the whole derivation and so down any
 one path: a runaway (a program whose `if`s double the paths) stops here, in
@@ -757,7 +701,7 @@ theorem wrap_topWt {φ : Fml C} : (Γ : List (Hyp C)) → ∀ σ,
 theorem synClose_sound {Γ : List (Hyp C)} {φ : Fml C} (h : synClose Γ φ = true) :
     Proves .all Γ φ := by
   simp only [synClose, Bool.and_eq_true] at h
-  obtain ⟨⟨⟨hm, hf⟩, -⟩, hs⟩ := h
+  obtain ⟨⟨⟨hm, -⟩, hf⟩, hs⟩ := h
   refine Proves.close (fun σ => wrap_topWt Γ σ fun hL => Fml.seqUpd_sound _ σ ?_)
     ((wrap_dropWt Γ).1 hm)
   rw [Decide.Fml.toL_holds _ (Decide.Rel.empty σ) hf, ← Decide.LFml.elim_holds σ]

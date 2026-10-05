@@ -393,8 +393,8 @@ end Ledger
 
 A memory is read as solkey reads it (`Calculus/MemRead.lean`): the writes are
 walked from the newest down to the allocation of the name's root, every
-comparison static.  The translation does not build these memories yet; each
-clause is pinned on a memory written out.  `alice` copied into memory is the
+comparison static.  Each clause is pinned here on a memory written out, and
+on programs at the end of the file.  `alice` copied into memory is the
 allocation `0`, a fresh `Person` the allocation `1`. -/
 
 section MemoryClauses
@@ -499,5 +499,51 @@ private def aCopy : LMem := .addM (.copySt .init 0 .init (.root "alice")) 1 (.st
     ⟨0, []⟩).okE matches .sok _]
 
 end MemoryClauses
+
+/-! ## Memory through the closer
+
+The updates of a memory program, pushed in, are one `LMem`
+(`Calculus/Decide.lean`): an allocation's pair is one update (`pairL`), a
+member deleted gets a fresh root (`freshRef`), and no default value is ever
+built, so a long `new` costs what a short one does. -/
+
+/-- `Person memory carol; carol.age = 5;` — the pair, a member write, and
+the read of it (`readOnWrite`). -/
+theorem memoryFieldWriteRead :
+    ⊨ dl!{ [ Person memory carol; carol.age = 5; uint x = carol.age; ] x == 5 } := by
+  sol_symex
+  sol_decide
+
+/-- A member nothing wrote is its default (`initMember`). -/
+theorem memoryFieldDefault :
+    ⊨ dl!{ [ Person memory carol; uint x = carol.age; ] x == 0 } := by
+  sol_symex
+  sol_decide
+
+/-- A write and a read at an index that is no literal: one `kite` on the
+index, the write's guard the length. -/
+theorem memoryIndexSymbolic :
+    ⊨ dl!{ [ uint[] memory xs = new uint[](3); xs[i] = 7; uint y = xs[i]; ] y == 7 } := by
+  sol_symex
+  sol_decide
+
+/-- A million elements: the length is read off `new`, nothing allocated. -/
+theorem memoryNewLarge :
+    ⊨ dl!{ [ uint[] memory xs = new uint[](1000000); xs[5] = 7; uint y = xs[5];
+             uint l = xs.length; ] (y == 7 ∧ l == 1000000) } := by
+  sol_symex
+  sol_decide
+
+/-- `delete carol.account;` writes a fresh default `Account` into the member
+(`memoryFieldDeleteReference`): its balance reads `0` again. -/
+theorem memoryDeleteRefFresh :
+    ⊨ dl!{ [ Person memory carol; Account memory acc = carol.account; acc.balance = 9;
+             delete carol.account; uint b = carol.account.balance; ] b == 0 } := by
+  sol_symex
+  sol_decide
+
+/-- info: false -/
+#guard_msgs in -- a memory local no update bound is outside the fragment
+#eval (dl!{ { x := read(memory, carol.age) } x == 0 }).inL Decide.Sym.empty
 
 end Solidity.Examples.Tactics.Decide

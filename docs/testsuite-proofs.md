@@ -1205,3 +1205,51 @@ are not reached yet, so the times are those of step 3.
 | `Derived10` | 10.1 s | 9.5 s | −6% |
 | `Derived11` | 2.3 s | 2.2 s | −3% |
 | `memoryIndexWriteNse` | 2.48 s | 2.90 s | +17% |
+
+### Step 4: the switch
+
+The translation now builds a leaf's memory as solkey writes it, for the
+shapes M6 covered: `Sym.mem` is an `LMem`, a memory local is bound to a name
+(`SymB.mref`), and a read of memory is `LMem.readT`, `readI` or `lenT`, with
+the guards `nameG` and `writeG`. The relation (`Rel.mem`, `MemAt`) says the
+memory's run leaves the heap and the next identity of the state the updates
+reach; a name is read in the births of that run (`EnvRel`), and a memory a
+term builds allocates after it (`MemOK`), so a name keeps its object
+(`LId.evalR_prefix`).
+
+- **The allocation's pair is one update.** `{x := freshId(addM(memory)) ‖
+  memory := addM(memory)}`, and the same of `copySt(memory, newArr(…))`, is
+  pushed in whole (`pairL`, `pair_sound`): the name exists only in the memory
+  after the allocation. `Fml.seqUpd` keeps such a pair (`memAlloc?`), and
+  `peelMem_sound` is gone.
+- **A member deleted gets a fresh root.** The value of
+  `write(addM(memory), a, freshId(addM(memory)))` is the root of the
+  allocation under the write (`freshRef`, `writeVal_ok`).
+- **No default is built.** An allocation is in the fragment where the kernel
+  decides its default copies (`allocOk`); `new T[](n)` is one node for any
+  `n`, which closes the step-0 review's unbounded allocation. A memory of more
+  than `memSize` (400) writes and allocations leaves the leaf outside.
+- **`synClose` tests `fitsClose` before `Fml.inL`**, so the walk of
+  `Sym.vars` under a quantifier comes after the bounded count.
+
+The module docstring of `Calculus/Decide.lean` and the docstrings of
+`Tm.inL`, `UpdElem.inL` and `Fml.inL` now say what the fragment holds of
+memory. `Examples/Tactics/Decide.lean` proves five memory programs by
+`sol_decide` in the default targets (a member write, a default, a symbolic
+index, a `new` of a million elements, a reference member deleted) and pins a
+leaf outside the fragment.
+
+**Measured.** All 391 still prove: `Derived1`–`11` check clean, each file
+alone (`Derived7` whole, which crashed at step 3).
+
+| | Baseline | Step 4 | Change |
+|---|---|---|---|
+| `Derived9`, `sol_prove` total | 7.9 s | 7.1 s | −10% |
+| `Derived10` | 10.1 s | 9.0 s | −11% |
+| `Derived11` | 2.3 s | 2.1 s | −7% |
+| `memoryIndexWriteNse` | 2.48 s | 2.18 s | −12% |
+
+The leaves shrink: `memoryIndexWriteNse`'s largest goes from 534 nodes to
+353, since a read at an index that is no literal is one `kite` per write to
+the same object instead of a chain over the elements. No figure is near the
+20% line.
