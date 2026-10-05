@@ -349,6 +349,14 @@ solkey taclets named here.  Theory's memory has no heap denotation, so a
 clause's soundness is the interpreter lemma, and the Theory lemma is its
 counterpart (`Theory/Memory.lean`, `Theory/CrossDomain.lean`).  A name is
 `LId`, `idC(freshIdp, flds)` with the allocation's ordinal for `freshIdp`.
+`Calculus/MemTheory.lean` checks the counterpart for the two readers: a
+memory is read as a Theory term (`LMem.toTheory`, `pre(heap)` at its
+bottom), and wherever `readT` or `readI` answers, its answer is
+`Memory.readIn`'s, cast at the sort read (`LMem.readT_agree`,
+`LMem.readI_agree`; with the interpreter, `LMem.read_agree`).  Each arm
+rewrites with the Theory lemma of its row; the lemmas so used say
+"checked" in the Theory column.  The length below a struct member needs the
+Theory's global member table to be the declarations' (`DeclOk`).
 The translation (`Calculus/Decide.lean`) builds a leaf's memory from its
 updates and reads it with these rows: a copy from storage into memory, and
 a copy of memory back into storage as its view, which the reads below it
@@ -356,15 +364,15 @@ see through.
 
 | KeY taclet | closer clause | interpreter lemma | Theory lemma | status |
 | --- | --- | --- | --- | --- |
-| `readOnWrite` | `LMem.readT`/`readU`, `.write` arm: same name and selector gives the word written, apart recurses, a symbolic index one `kite` | `LMem.readT_sim`, `selRel_same`, `selRel_apart`, `MemNames.Births.eval_inj` | `readOnWrite` | used |
-| `readOnWrite` at an `Identity` | `LMem.readI`, `.write` arm | `LMem.readI_sim` | `readOnWrite`, `readId` | used |
-| `readOnAddM` `\else`, `newFromAdd`, `newFromWrite`, `newFromEmptyMemory` | the allocation arms at another root | `alloc_frame`, `LSel.read_heapExt`, `MemNames.Births.eval_interval` | `readOnAddM`, `readAddDifferent`, `newFromAdd`, `newFromWrite`, `newFromEmptyMemory`, `newAddDifferent` | used |
-| `readOnAddM` `\then`, `initMember`, `initElement`, `defaultValueInt`/`Bool`, `defValResolve` | `dfltSel`, the declared type at the path (`Ty.memberTy`); an element below a fixed length by `ltR` | `dflt_read_sim`, `dfltSel_sim`, `slot_default` | `readAddEqual`, `initMember`, `initElement`, `defaultDefInt`, `defValResolvePrim` | used |
-| `initSize`, `sizeOfFixed`/`Dyn`/`Leaf`, `shapeAt*`, `idShapeDef` | `dfltSel` at `.size` | `dfltSel_sim`, `MemNames.copiedTo_len` | `initSize`, `sizeOf*`, `shapeAt*`, `idShapeDef` | used |
-| `initIdentity`, `idCCDef` | `LMem.readI` at the root's allocation: the name one segment longer | `readI_alloc`, `resolveR_snoc_sim`, `MemNames.birth_slot` | `initIdentity`, `idCCDef`, `defValResolveIdentity` | used |
-| `memoryArrayFreshAlloc` then `readOnWrite` at `size`, `initElement` | `newSel`: the length `n`, an element below it the default (one node, `LMem.newArr`: deviation) | `new_read_sim`, `MemNames.copyStToM_newArr_at`, `copyStToM_newArr_len` | `readOnWrite`, `initElement` | used |
-| `readFromCopyToStorage`, `findDefinitionSize` | `copySel`: the storage read one segment further, `.len` at `size` | `copy_read_sim`, `MemNames.copyStToM_readPath`, `copyStToM_lenPath` | `readCopySt`, `readCopyStOther` | used |
-| `readFromCopyToStorageIdentity` | `LMem.readI` below a copy; `nameG`'s `refT` | `copy_ref_rets`, `MemNames.copyStToM_readPath` | `readCopyStIdentity` | used |
+| `readOnWrite` | `LMem.readT`/`readU`, `.write` arm: same name and selector gives the word written, apart recurses, a symbolic index one `kite` | `LMem.readT_sim`, `selRel_same`, `selRel_apart`, `MemNames.Births.eval_inj` | `readOnWrite` (checked) | used |
+| `readOnWrite` at an `Identity` | `LMem.readI`, `.write` arm | `LMem.readI_sim` | `readOnWrite`, `readId` (checked) | used |
+| `readOnAddM` `\else`, `newFromAdd`, `newFromWrite`, `newFromEmptyMemory` | the allocation arms at another root | `alloc_frame`, `LSel.read_heapExt`, `MemNames.Births.eval_interval` | `readOnAddM`, `readAddDifferent` (checked), `newFromAdd`, `newFromWrite`, `newFromEmptyMemory`, `newAddDifferent` | used |
+| `readOnAddM` `\then`, `initMember`, `initElement`, `defaultValueInt`/`Bool`, `defValResolve` | `dfltSel`, the declared type at the path (`Ty.memberTy`); an element below a fixed length by `ltR` | `dflt_read_sim`, `dfltSel_sim`, `slot_default` | `readAddEqual`, `initMember`, `initElement` (checked), `defaultDefInt`, `defValResolvePrim` | used |
+| `initSize`, `sizeOfFixed`/`Dyn`/`Leaf`, `shapeAt*`, `idShapeDef` | `dfltSel` at `.size` | `dfltSel_sim`, `MemNames.copiedTo_len` | `initSize`, `sizeOfFixed`, `sizeOfDyn` (checked), `sizeOfLeaf`, `shapeAt*`, `idShapeDef` | used |
+| `initIdentity`, `idCCDef` | `LMem.readI` at the root's allocation: the name one segment longer | `readI_alloc`, `resolveR_snoc_sim`, `MemNames.birth_slot` | `initIdentity` (checked), `idCCDef`, `defValResolveIdentity` | used |
+| `memoryArrayFreshAlloc` then `readOnWrite` at `size`, `initElement` | `newSel`: the length `n`, an element below it the default (one node, `LMem.newArr`: deviation) | `new_read_sim`, `MemNames.copyStToM_newArr_at`, `copyStToM_newArr_len` | `readOnWrite`, `readAddEqual`, `initElement` (checked) | used |
+| `readFromCopyToStorage`, `findDefinitionSize` | `copySel`: the storage read one segment further, `.len` at `size` | `copy_read_sim`, `MemNames.copyStToM_readPath`, `copyStToM_lenPath` | `readCopySt`, `readCopyStOther`, with `SVal.abs_find` (checked) | used |
+| `readFromCopyToStorageIdentity` | `LMem.readI` below a copy; `nameG`'s `refT` | `copy_ref_rets`, `MemNames.copyStToM_readPath` | `readCopySt`, then `initIdentity` (checked); `readCopyStIdentity` is the same corollary | used |
 | `readFromEmptyMemory` | the `.init` arm: none (every name a leaf uses names a root of the leaf) | — | `readFromEmptyMemory` | used |
 | `readREmpty`, `readRCons` | `LMem.walk`: `readI` for each leading segment, `readU` on the last | `LMem.walk_sim`, `MVal.readPath_snoc` | `readREmpty`, `readRCons` | used |
 | `findOnCopy`, `selectOnCopyMemPrim`, `selectOnCopyMemRef` | the `.view` arms of `LStor.readU`/`hasU`/`lenU` (`Calculus/Decide.lean`) | `view_read_sim`, `view_has_sim`, `view_len_sim`, `MemNames.copyMToSt_readPath` | `StValue.findCopyMem`, `findCopyMemStruct` | used |

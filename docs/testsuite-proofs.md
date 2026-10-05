@@ -1387,3 +1387,21 @@ The memory section of `Calculus/Decide.lean` now points at the rule map's
 | `Derived12`, the 19 by `sol_prove` | — | 15.1 s | — |
 
 As at step 5b, to within noise: no closer code changed.
+
+### Step 8: the readers against the Theory
+
+`Calculus/MemTheory.lean` reads a closer memory as a term of
+`Theory/Terms.lean` (`LMem.toTheory`: `init` is `pre(heap)`, the `k`-th
+allocation the root `shaped(ofNat(k), sh)`, `new T[](n)` an `addM` with its
+length written, a copy from storage `copySt` of the subtree's `abs`) and
+proves that wherever `readT` and `readI` answer, they answer what
+`Memory.readIn` and `readId` read (`LMem.readT_agree`, `LMem.readI_agree`),
+the word cast at its sort. Every arm, the copy included, closes by the
+taclet's own Theory lemma, so the rule map's Theory column is checked for
+those rows. `LMem.read_agree` composes it with `readT_sim`: the
+interpreter's read is the Theory's. Two hypotheses mark where the models
+differ: the length below a struct member needs the Theory's global member
+table to be the declarations', with no member named `length` (`DeclOk`),
+and a write of a length or of a member named `length` has no Theory term.
+Nothing in the closer changed, so the derived counts and timings are step
+6's; the module checks in about 5 s and is not on any proof's path.
