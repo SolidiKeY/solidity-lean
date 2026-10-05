@@ -988,10 +988,12 @@ corollaries' are pinned: `diamond_of_proved` and `box_of_proved` in
 
 ## M6 results (2026-10-05): memory
 
-This memory support is being reworked into solkey's `memoryRules.key`/
-`structMemoryRules.key` taclets; what follows is the closer as merged.
+This memory support was reworked into solkey's `memoryRules.key`/
+`structMemoryRules.key` taclets (M6b, below, which deleted the module
+`DecideMem` and the split of an allocation); what follows is the closer
+as merged.
 
-- **The closer reads memory.**  `Calculus/DecideMem.lean` keeps the
+- **The closer reads memory.**  `DecideMem` kept the
   objects the updates allocate as `SObj`s over `sol_decide`'s terms: the
   `k`-th allocation is the identity `nextId + k` of the starting state, so
   no heap premise is needed, and `MemRel` relates the symbolic heap to the
@@ -1100,7 +1102,7 @@ A second run was within 1% of the first.
 `Calculus/MemNames.lean` (about 1,560 lines) holds the facts the memory
 clauses rest on. It builds in 2.2 s (`lake build`), well under the 20–60 s
 the plan estimated. Nothing in `Decide`, `Closer` or `Derive` changed, so
-`Derived9`–`11` are as in the baseline. `DecideMem.lean` does not import the
+`Derived9`–`11` are as in the baseline. `DecideMem` does not import the
 module yet; the clauses of step 3 are its first users.
 
 ### Step 2: the syntax beside M6
@@ -1111,7 +1113,7 @@ The target language gains solkey's memory (`LMem`: `addM`, `newArr`,
 storage (`LStor.view`), the copy guard `LTerm.cpok` and `LVal.mem`.
 Nothing produces them yet; every exhaustive match keeps them whole
 (`.find (.view ..) Q`, `.sok (.view ..)`, `cpok` itself), and `fits` counts
-`LMem` nodes. `DecideMem.lean` now imports `Calculus/MemNames.lean`.
+`LMem` nodes. `DecideMem` now imports `Calculus/MemNames.lean`.
 
 **Measured.** All 91 theorems still prove; `Derived9`–`11` check clean.
 
@@ -1361,3 +1363,27 @@ with an elimination of 3445) and `memoryToStorageIndexImpureReceiver` 4.0 s
 the pushes and the copy, and each of them is eliminated again in every
 leaf. The others take 0.15–0.85 s. No figure of `Derived9`–`11` is near the
 20% line.
+
+### Step 6: M6 deleted
+
+The module `DecideMem` (the symbolic heap of M6: `SObj`, `SMem`, `MemRel`,
+the `salloc*` allocations, `newArrS`, `dfltT?`) had no user left after the
+switch, and is deleted with its imports; M6's readers (`readL`, `mlenL`,
+`kchainL`, `writeL` and the rest) went at step 4. With them go the review
+findings that lived in that code: the allocation built before its size
+guard (`sallocNew`) and the `hlit` warnings. `Calculus/Decide.lean` keeps
+`isIntL`; `ground?`, `seqL` and `isT` are in `Calculus/DecideLang.lean`.
+The memory section of `Calculus/Decide.lean` now points at the rule map's
+"The closer's memory clauses". `Calculus/Decide.lean` builds in 25 s.
+
+**Measured.** `Derived9`–`12` check clean, each file alone.
+
+| | Baseline | Step 6 | Change |
+|---|---|---|---|
+| `Derived9`, `sol_prove` total | 7.9 s | 7.2 s | −9% |
+| `Derived10` | 10.1 s | 9.0 s | −11% |
+| `Derived11` | 2.3 s | 2.2 s | −6% |
+| `memoryIndexWriteNse` | 2.48 s | 2.20 s | −11% |
+| `Derived12`, the 19 by `sol_prove` | — | 15.1 s | — |
+
+As at step 5b, to within noise: no closer code changed.

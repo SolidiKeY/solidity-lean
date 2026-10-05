@@ -1,5 +1,4 @@
 import Solidity.Calculus.Close
-import Solidity.Calculus.DecideMem
 import Solidity.Calculus.MemRead
 import Solidity.Calculus.StateParts
 import Solidity.Theory.Bridge.Denote
@@ -137,7 +136,11 @@ writes it (`Calculus/DecideLang.lean`) and read by the clauses of
 `Calculus/MemRead.lean`.  An allocation takes the next ordinal
 (`LMem.nAlloc`, KeY's `freshIdp`) and is in the fragment where the kernel
 decides that its default copies (`allocOk`); a memory longer than `memSize`
-writes is left outside, since every read walks it. -/
+writes is left outside, since every read walks it.  Every clause is a
+taclet of solkey's `memoryRules.key` or `structMemoryRules.key`, under
+solkey's name: `docs/lean-key-rule-map.md` ("The closer's memory clauses")
+pairs each with its interpreter lemma (`Calculus/MemNames.lean`) and the
+`Theory/` lemma it transcribes. -/
 
 section MemBase
 open MemNames
