@@ -1,4 +1,5 @@
 import Solidity.Calculus.Close
+import Solidity.Calculus.MemNames
 
 /-!
 # The memory the updates allocate, kept symbolically

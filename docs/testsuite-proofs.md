@@ -1101,3 +1101,33 @@ clauses rest on. It builds in 2.2 s (`lake build`), well under the 20–60 s
 the plan estimated. Nothing in `Decide`, `Closer` or `Derive` changed, so
 `Derived9`–`11` are as in the baseline. `DecideMem.lean` does not import the
 module yet; the clauses of step 3 are its first users.
+
+### Step 2: the syntax beside M6
+
+The target language gains solkey's memory (`LMem`: `addM`, `newArr`,
+`copySt`, `write`), its selectors and values (`LSel`, `LMV`), names
+(`LId`: a root ordinal and a literal path), a view of a memory object as
+storage (`LStor.view`), the copy guard `LTerm.cpok` and `LVal.mem`.
+Nothing produces them yet; every exhaustive match keeps them whole
+(`.find (.view ..) Q`, `.sok (.view ..)`, `cpok` itself), and `fits` counts
+`LMem` nodes. `DecideMem.lean` now imports `Calculus/MemNames.lean`.
+
+**Measured.** All 91 theorems still prove; `Derived9`–`11` check clean.
+
+| | Baseline | Step 2 | Change |
+|---|---|---|---|
+| `Calculus/Decide.lean`, serial (`Elab.async` off) | 37.2 s | 42.8 s | +15% |
+| `Derived9`, `sol_prove` total | 7.9 s | 9.0 s | +14% |
+| `Derived10` | 10.1 s | 11.4 s | +13% |
+| `Derived11` | 2.3 s | 2.5 s | +10% |
+| `memoryIndexWriteNse` | 2.48 s | 2.89 s | +16% |
+
+Two runs agreed within 2%. Every theorem is slower by about the same
+fraction, and `memoryIndexWriteNse` spends 2.83 s of its 2.87 s in the
+kernel (`profiler`), so the cost is the kernel's, not the search's: the
+reductions recurse over a six-type mutual block, and each step of a
+recursor now carries 6 motives and 39 minor premises where it carried 3 and
+27. No figure is past the 20% warning line, and the `Calculus/Decide.lean` gate
+(40%) leaves the derived `DecidableEq`/`ToExpr` in place, but
+`memoryIndexWriteNse` is 4 points from the warning: step 4 should
+re-measure it first.

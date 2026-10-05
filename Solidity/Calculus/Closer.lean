@@ -508,6 +508,7 @@ def LTerm.simpE (O : Orc) (E : Eqs) : LTerm → LTerm
   | .len s q => substE E (.len (s.simpE O E) (q.simpE O E))
   | .sok s => .sok (s.simpE O E)
   | .pok q => .pok (q.simpE O E)
+  | .cpok s q => .cpok s q
   | .orElse a b =>
     if O.halts a then b.simpE O E
     else if O.rets a then a.simpE O E
@@ -526,6 +527,7 @@ def LStor.simpE (O : Orc) (E : Eqs) : LStor → LStor
   | .del s q => .del (s.simpE O E) (q.simpE O E)
   | .arr op s q w => .arr op (s.simpE O E) (q.simpE O E) (w.simpE O E)
   | .copy s q src sq => .copy (s.simpE O E) (q.simpE O E) (src.simpE O E) (sq.simpE O E)
+  | .view m i => .view m i
 
 end
 
@@ -534,7 +536,7 @@ mutual
 /-- **Simplifying keeps what a term returns.** -/
 theorem LTerm.simpE_eval {σ : State} {O : Orc} {E : Eqs} (hO : O.Ok σ) (hE : EqOk σ E) :
     (t : LTerm) → Keeps σ t (t.simpE O E)
-  | .lit _, _, h | .err, _, h | .env _, _, h => h
+  | .lit _, _, h | .err, _, h | .env _, _, h | .cpok _ _, _, h => h
   | .var x, v, h => substE_keeps hE _ v h
   | .binop op p a b, v, h => by
     refine substE_keeps hE _ v (foldCmp_keeps hO.2.2.2.1 hO.2.2.2.2 _ v
@@ -684,6 +686,7 @@ theorem LStor.simpE_eval {σ : State} {O : Orc} {E : Eqs} (hO : O.Ok σ) (hE : E
     simp only [LStor.simpE, LStor.eval, LStor.simpE_eval hO hE src ha, LPath.simpE_eval hO hE sq hb,
       LStor.simpE_eval hO hE s hs, LPath.simpE_eval hO hE q hq, Res.ok_bind, hn]
     exact h
+  | .view _ _, _, h => h
 
 end
 
@@ -1950,8 +1953,8 @@ theorem Facts.range_sound {σ : State} {F : Facts} (hF : F.Ok σ) :
   | .unop .., _, _, _, hr, hi | .ite .., _, _, _, hr, hi | .find .., _, _, _, hr, hi
   | .has .., _, _, _, hr, hi | .kmap .., _, _, _, hr, hi | .len .., _, _, _, hr, hi
   | .sok _, _, _, _, hr, hi | .pok _, _, _, _, hr, hi | .orElse .., _, _, _, hr, hi
-  | .kite .., _, _, _, hr, hi | .zero _, _, _, _, hr, hi | .findP .., _, _, _, hr, hi =>
-    F.bndOf_sound hF hr hi
+  | .kite .., _, _, _, hr, hi | .zero _, _, _, _, hr, hi | .findP .., _, _, _, hr, hi
+  | .cpok .., _, _, _, hr, hi => F.bndOf_sound hF hr hi
 
 /-! ## What returns -/
 
@@ -2037,7 +2040,7 @@ theorem Facts.lo_sound {σ : State} {F : Facts} (hF : F.Ok σ) :
   | .unop .., l, i, hl, hi | .ite .., l, i, hl, hi | .find .., l, i, hl, hi
   | .has .., l, i, hl, hi | .kmap .., l, i, hl, hi | .sok _, l, i, hl, hi
   | .pok _, l, i, hl, hi | .orElse .., l, i, hl, hi | .kite .., l, i, hl, hi
-  | .zero _, l, i, hl, hi | .findP .., l, i, hl, hi => by
+  | .zero _, l, i, hl, hi | .findP .., l, i, hl, hi | .cpok .., l, i, hl, hi => by
     simp only [Facts.lo] at hl
     obtain ⟨⟨l', h'⟩, hr, rfl⟩ := Option.map_eq_some_iff.1 hl
     exact (F.range_sound hF _ hr hi).1
@@ -2227,7 +2230,7 @@ def Facts.retsW (F : Facts) (N : LTerm → LTerm) : LTerm → Bool
   | t@(.kmap sh s q) => t.known F.known F.ne || (s.isInit && F.keysRetW N q && F.shapeIs sh q) ||
       (F.slotIn N s q && F.keysRetW N q && tyShape sh (F.slotTy s q))
   | t@(.len s q) => t.known F.known F.ne || (s.isInit && F.keysRetW N q && F.isArrPath q)
-  | t@(.sok _) => t.known F.known F.ne
+  | t@(.sok _) | t@(.cpok _ _) => t.known F.known F.ne
   | t@(.pok q) => t.known F.known F.ne || F.keysRetW N q
 
 /-- Every key of the path returns an integer. -/
@@ -2525,7 +2528,7 @@ theorem Facts.retsW_sound {σ : State} {F : Facts} (hF : F.Ok σ) {N : LTerm →
           exact ⟨_, by simp only [LTerm.eval, LStor.eval, hq, hw, Res.ok_bind,
               Close.arrLen] <;> rfl⟩
       · cases ht
-  | .sok s, h => by
+  | .sok _, h | .cpok _ _, h => by
     simp only [Facts.retsW] at h
     exact LTerm.known_returns hF.1 hF.2.1 _ h
   | .pok q, h => by
@@ -3092,7 +3095,7 @@ theorem Facts.decomp_ok {σ : State} :
   | .has .., F, v, hF, ht | .kmap .., F, v, hF, ht | .len .., F, v, hF, ht | .sok _, F, v, hF, ht
   | .pok _, F, v, hF, ht | .orElse .., F, v, hF, ht | .kite .., F, v, hF, ht
   | .zero _, F, v, hF, ht | .err, F, v, hF, ht | .env _, F, v, hF, ht
-  | .findP .., F, v, hF, ht => by
+  | .findP .., F, v, hF, ht | .cpok .., F, v, hF, ht => by
     simp only [Facts.decomp]; exact F.addEq_ok hF ht
 
 /-- `a` and `b` never return one value. -/
@@ -3382,7 +3385,7 @@ def LTerm.fits : Nat → LTerm → Option Nat
   | n + 1, .kite a b t e =>
     (a.fits n).bind fun m => (b.fits m).bind fun k => (t.fits k).bind fun j => e.fits j
   | n + 1, .find s q | n + 1, .has s q | n + 1, .kmap _ s q | n + 1, .len s q
-  | n + 1, .findP s q => (s.fits n).bind fun m => q.fits m
+  | n + 1, .findP s q | n + 1, .cpok s q => (s.fits n).bind fun m => q.fits m
   | n + 1, .sok s => s.fits n
   | n + 1, .pok q => q.fits n
   | n + 1, .lit _ | n + 1, .var _ | n + 1, .err | n + 1, .env _ => some n
@@ -3403,6 +3406,29 @@ def LStor.fits : Nat → LStor → Option Nat
   | n + 1, .arr _ s q w => (s.fits n).bind fun m => (q.fits m).bind fun k => w.fits k
   | n + 1, .copy s q src sq =>
     (s.fits n).bind fun m => (q.fits m).bind fun k => (src.fits k).bind fun j => sq.fits j
+  | n + 1, .view m _ => m.fits n
+
+/-- `m` has at most `n` nodes: each allocation and write one, so a view
+of memory counts the memory under it. -/
+def LMem.fits : Nat → LMem → Option Nat
+  | 0, _ => none
+  | n + 1, .init => some n
+  | n + 1, .addM m _ _ => m.fits n
+  | n + 1, .newArr m _ _ t => (m.fits n).bind fun k => t.fits k
+  | n + 1, .copySt m _ s q => (m.fits n).bind fun k => (s.fits k).bind fun j => q.fits j
+  | n + 1, .write m _ a v => (m.fits n).bind fun k => (a.fits k).bind fun j => v.fits j
+
+/-- `a` has at most `n` nodes. -/
+def LSel.fits : Nat → LSel → Option Nat
+  | 0, _ => none
+  | n + 1, .fld _ | n + 1, .size => some n
+  | n + 1, .idx t => t.fits n
+
+/-- `v` has at most `n` nodes. -/
+def LMV.fits : Nat → LMV → Option Nat
+  | 0, _ => none
+  | n + 1, .word t => t.fits n
+  | n + 1, .ref _ => some n
 
 end
 

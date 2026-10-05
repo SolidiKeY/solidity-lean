@@ -413,8 +413,8 @@ def LTerm.evalA (E : Var → Res Value) (o : List Seg → Obs) : LTerm → Res V
     (a.evalA E o >>= Value.asInt) >>= fun i => (b.evalA E o >>= Value.asInt) >>= fun j =>
       if i = j then t.evalA E o else e.evalA E o
   | .zero a => a.evalA E o >>= fun v => .ok (zeroV v)
-  | .err | .env _ | .findP _ _ | .find _ _ | .has _ _ | .kmap _ _ _ | .len _ _ | .sok _ =>
-    .error .stuck
+  | .err | .env _ | .findP _ _ | .find _ _ | .has _ _ | .kmap _ _ _ | .len _ _ | .sok _
+  | .cpok _ _ => .error .stuck
 
 /-- A path over the locals `E` and the reads `o`. -/
 def LPath.evalA (E : Var → Res Value) (o : List Seg → Obs) : LPath → Res (List Seg)
@@ -443,7 +443,7 @@ mutual
 def LTerm.initOnly : LTerm → Bool
   | .lit _ | .var _ | .err | .sok .init => true
   | .find .init q | .has .init q | .kmap _ .init q | .len .init q | .pok q => q.initOnly
-  | .find _ _ | .has _ _ | .kmap _ _ _ | .len _ _ | .sok _ | .env _ | .findP _ _ => false
+  | .find _ _ | .has _ _ | .kmap _ _ _ | .len _ _ | .sok _ | .env _ | .findP _ _ | .cpok _ _ => false
   | .binop _ _ a b | .seq a b | .orElse a b => a.initOnly && b.initOnly
   | .unop _ _ a | .zero a => a.initOnly
   | .ite c a b => c.initOnly && a.initOnly && b.initOnly
@@ -504,7 +504,7 @@ theorem LTerm.evalA_sim (σ : State) :
   | .lit _, _ => Sim.refl _
   | .var _, _ => Sim.refl _
   | .err, _ => Sim.refl _
-  | .env _, h | .findP _ _, h => by simp [LTerm.initOnly] at h
+  | .env _, h | .findP _ _, h | .cpok _ _, h => by simp [LTerm.initOnly] at h
   | .binop _ _ a b, h => by
     simp only [LTerm.initOnly, Bool.and_eq_true] at h
     exact Sim.bind (LTerm.evalA_sim σ a h.1) fun _ => evalBinop_sim (LTerm.evalA_sim σ b h.2)
@@ -587,7 +587,7 @@ mutual
 `balances[people[a].age]` reads `balances[people[a].age]`, `balances`,
 `people[a].age`, `people[a]` and `people`. -/
 def LTerm.reads : LTerm → List LPath
-  | .lit _ | .var _ | .err | .sok _ | .env _ | .findP _ _ => []
+  | .lit _ | .var _ | .err | .sok _ | .env _ | .findP _ _ | .cpok _ _ => []
   | .find _ q | .has _ q | .kmap _ _ q | .len _ q => q.reads
   | .pok q => q.keyReads
   | .binop _ _ a b | .seq a b | .orElse a b => a.reads ++ b.reads
@@ -660,15 +660,17 @@ mutual
 them give it the same value. -/
 theorem LTerm.evalA_agree {E : Var → Res Value} {o o' : List Seg → Obs} :
     (t : LTerm) → Agree E o o' t.reads → t.evalA E o' = t.evalA E o
-  | .lit _, _ | .var _, _ | .err, _ | .env _, _ | .findP _ _, _ => rfl
+  | .lit _, _ | .var _, _ | .err, _ | .env _, _ | .findP _ _, _ | .cpok _ _, _ => rfl
   | .sok .init, _ | .sok (.save ..), _ | .sok (.del ..), _ | .sok (.arr ..), _
-  | .sok (.copy ..), _ => rfl
+  | .sok (.copy ..), _ | .sok (.view ..), _ => rfl
   | .find (.save ..) _, _ | .find (.del ..) _, _ | .has (.save ..) _, _ | .has (.del ..) _, _
   | .kmap _ (.save ..) _, _ | .kmap _ (.del ..) _, _ | .len (.save ..) _, _
   | .len (.del ..) _, _ => rfl
   | .find (.arr ..) _, _ | .find (.copy ..) _, _ | .has (.arr ..) _, _ | .has (.copy ..) _, _
   | .kmap _ (.arr ..) _, _ | .kmap _ (.copy ..) _, _ | .len (.arr ..) _, _
   | .len (.copy ..) _, _ => rfl
+  | .find (.view ..) _, _ | .has (.view ..) _, _ | .kmap _ (.view ..) _, _
+  | .len (.view ..) _, _ => rfl
   | .binop _ _ a b, h => by
     simp only [LTerm.evalA, LTerm.evalA_agree a h.append_left, LTerm.evalA_agree b h.append_right]
   | .unop _ _ a, h => by simp only [LTerm.evalA, LTerm.evalA_agree a h]
@@ -780,7 +782,8 @@ theorem ParentClosed.append {R R' : List LPath} (h : ParentClosed R) (h' : Paren
 mutual
 
 theorem LTerm.reads_closed : (t : LTerm) → ParentClosed t.reads
-  | .lit _ | .var _ | .err | .sok _ | .env _ | .findP _ _ => by intro Q h; simp [LTerm.reads] at h
+  | .lit _ | .var _ | .err | .sok _ | .env _ | .findP _ _ | .cpok _ _ => by
+    intro Q h; simp [LTerm.reads] at h
   | .find _ q | .has _ q | .kmap _ _ q | .len _ q => LPath.reads_closed q
   | .pok q => LPath.keyReads_closed q
   | .binop _ _ a b | .seq a b | .orElse a b =>
