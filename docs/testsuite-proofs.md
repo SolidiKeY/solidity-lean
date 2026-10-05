@@ -1184,7 +1184,10 @@ outer array and reads the recycled inner array's length and element.
 `testDanglingInnerArrayReappearsAfterPush` is derived by `sol_prove`
 (`TestSuite/Derived13.lean`): three leaves, reductions 6807, 6805 and 3924
 (1629, 1627 and 922 with the push kept whole), the search 2.8 s, the kernel
-check 2.6 s.  `Derived7` to `Derived12` re-check clean.
+check 2.6 s.  `Derived1` to `Derived12`, `Examples/ProofTree` and
+`Examples/Tactics/Decide` re-check clean; `Report.lean`'s pin (415 derived,
+2 pending) is computed, not yet checked: checking it builds every
+`Derived` module.
 
 **Where the lane ends** (415 derived): four of the five are derived.
 `testArrayCopyClearsOldElements` stays pending: its reduction is 8791, past
