@@ -551,6 +551,16 @@ theorem memoryStorageCopyRead :
   sol_symex
   sol_decide
 
+/-- `alice = carol;` copies memory out (`memoryToStorageStoreRoot`, the
+view of `carol` laid over `alice`); the storage reads through the view
+(`findOnCopy`, `selectOnCopyMemPrim`), so a later write to `carol` is not
+seen. -/
+theorem memoryToStorageRead :
+    ⊨ dl!{ [ Person memory carol; carol.age = 42; alice = carol; carol.age = 43;
+             uint x = alice.age; ] x == 42 } := by
+  sol_symex
+  sol_decide
+
 /-- info: false -/
 #guard_msgs in -- a copy from storage outside its pair is outside the fragment
 #eval (dl!{ { memory := copySt(memory, find(storage, alice)) } true }).inL Decide.Sym.empty

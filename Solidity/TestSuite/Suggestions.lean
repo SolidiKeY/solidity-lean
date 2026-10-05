@@ -39,14 +39,3 @@ testStorageNestedPushReturnAlias: derived
 -/
 #guard_msgs in
 #solkey_derive? Solkey.TestSuite only testStorageNestedPushReturnAlias
-
-/-! A statement whose leaves all close, each try within its own
-heartbeats, but whose replay would not fit one declaration's (about 264k
-heartbeats, `Derive.replayFits`): pending, not a theorem that fails once
-pasted. -/
-
-/--
-info: memoryToStorageIndexArrayCopyRootExample: pending, its replay is past maxHeartbeats as one declaration
--/
-#guard_msgs in
-#solkey_derive? Solkey.TestSuite only memoryToStorageIndexArrayCopyRootExample

@@ -99,16 +99,20 @@ writes it (`LMem`): `memory`, its allocations (an identity only in the pair
 that allocates it, `pairL`, or as the reference a `delete` writes,
 `freshRef`), a copy from storage in its pair (`pairMem`), and writes,
 within `memSize` of them, and the reads the clauses of
-`Calculus/MemRead.lean` resolve.  Outside it: a copy from memory into
-storage (`copyMem`), a read of the ledger (`net(a)`).  Of the gaps `Close.lean` lists, this closes the keys the
-formula does not separate, the reads below a deleted struct, the memory
-defaults and the distinct allocations.
+`Calculus/MemRead.lean` resolve; a write of a memory object into storage
+(`alice = carol;`), as a copy of its view (`memL`, `LStor.view`), where the
+memory's and the identity's guards are literals.  Outside it: a `push` of a
+memory object, a read of the ledger (`net(a)`).  Of the gaps `Close.lean`
+lists, this closes the keys the formula does not separate, the reads below
+a deleted struct, the memory defaults and the distinct allocations.
 
 **Arrays and copies** are eliminated as far as the storage before them
 says: a read below a pushed array compares its index with the old length
 (`arrKey`); a read below a copy reads the source, through its members and
 key by key (`copyKeys`, `overlay_findLive_fields`,
-`overlay_findLive_nomap`).  The slot a `push()` of a struct or an array
+`overlay_findLive_nomap`); where the source is a view of memory, it reads
+memory along the same path (`findOnCopy`), and the view has its own root
+wherever it returns (`isViewRoot`).  The slot a `push()` of a struct or an array
 recycles (`pushSlot`) is read where the storage just below says what it
 holds (`LStor.slotU`): the element a `pop` of the same array removed,
 cleared or kept, or the first element a `delete` of it cleared.  What is
@@ -372,10 +376,11 @@ inductive LVal where
   | mem (m : LMem) (i : LId)
   deriving Inhabited
 
-/-- What a storage write takes: a word or a subtree, not a fresh array. -/
+/-- What a storage write takes: a word, a subtree, or a memory object (its
+view), not a fresh array. -/
 def LVal.storable : LVal → Bool
-  | .word _ | .sub _ _ => true
-  | .arr _ _ | .mem _ _ => false
+  | .word _ | .sub _ _ | .mem _ _ => true
+  | .arr _ _ => false
 
 /-- What `toL` gives at each sort: a value an `LTerm`, a path an `LPath`, a
 storage an `LStor`, a stored value an `LVal`; a memory sort its symbolic
@@ -453,6 +458,33 @@ def writeM : Option (LMem × LTerm) → Option (LId × LSel × LTerm) → Option
     (M.writeG j sel).map fun gw => (.write M j sel w, seqL g'' (seqL g (seqL g' gw)))
   | _, _, _ => none
 
+/-- `copyMem(m, i)` pushed in: the object `i` names in `m`, read as storage
+through its view (`LStor.view`), where both guards are literals.  A view
+keeps no guard of its own, so a guard that may halt leaves the copy outside
+the fragment. -/
+def memL : Option (LMem × LTerm) → Option (LId × LTerm) → Option LVal
+  | some (M, .lit _), some (j, .lit _) => some (.mem M j)
+  | _, _ => none
+
+theorem memL_getD (x : Option (LMem × LTerm)) (y : Option (LId × LTerm)) :
+    (memL x y).getD (.word .err) = .word .err ∨
+      ∃ M j, (memL x y).getD (.word .err) = .mem M j := by
+  unfold memL
+  split
+  · exact .inr ⟨_, _, rfl⟩
+  · exact .inl rfl
+
+theorem memL_some {M : LMem} {g : LTerm} {j : LId} {g' : LTerm}
+    (h : (memL (some (M, g)) (some (j, g'))).isSome = true) :
+    (∃ c, g = .lit c) ∧ ∃ c', g' = .lit c' := by
+  cases g <;> cases g' <;> first
+    | exact ⟨⟨_, rfl⟩, _, rfl⟩
+    | simp only [memL, Option.isSome_none, Bool.false_eq_true] at h
+
+theorem newM_memL (m x : Option (LMem × LTerm)) (y : Option (LId × LTerm)) :
+    newM m ((memL x y).getD (.word .err)) = none := by
+  rcases memL_getD x y with h | ⟨M, j, h⟩ <;> rw [h] <;> rcases m with _ | ⟨_, _⟩ <;> rfl
+
 /-- A binary symbol over its arguments' `toL`. -/
 def _root_.Solidity.Op2.toL : Op2 a b s → a.LTy → b.LTy → s.LTy
   | .binop op p, x, y => LTerm.mkBin op p x y
@@ -468,7 +500,7 @@ def _root_.Solidity.Op2.toL : Op2 a b s → a.LTy → b.LTy → s.LTy
   | .shrink, x, y => .arr (.pop true) x y (.lit (.bool true))
   | .extend E, x, y => .arr (.slot E) x y (.lit (.bool true))
   | .sfind, x, y => .sub x y
-  | .copyMem, _, _ => .word .err
+  | .copyMem, m, i => (memL m i).getD (.word .err)
   | .iread, m, a => ireadM m a
   | .copy, _, _ => none
   | .mat, i, t => i.map fun p => (p.1, .idx t, seqL p.2 (isIntL t))
@@ -479,7 +511,8 @@ def _root_.Solidity.Op3.toL : Op3 a b c s → a.LTy → b.LTy → c.LTy → s.LT
   | .ite, x, y, z => .ite x y z
   | .save, x, y, .word t => .save x y t
   | .save, x, y, .sub s q => .copy x y s q
-  | .save, x, _, .arr _ _ | .save, x, _, .mem _ _ => x
+  | .save, x, y, .mem m i => .copy x y (.view m i) (.root viewRoot)
+  | .save, x, _, .arr _ _ => x
   | .push, x, y, .word t => .arr .push x y t
   | .push, x, y, .sub s q =>
     .copy (.arr (.slot .uint) x y (.lit (.bool true))) (.at y (.len x y)) s q
@@ -660,6 +693,7 @@ def _root_.Solidity.Op2.inL (ρ : Sym) : Op2 a b s → Tm C a → a.LTy → b.LT
   | .mat, _, _, _, ha, hb => ha && hb
   | .iread, _, x, y, ha, hb => ha && hb && irOk ρ (ireadM x y)
   | .copySt, _, x, y, ha, hb => ha && hb && (newM x y).isSome
+  | .copyMem, _, x, y, ha, hb => ha && hb && (memL x y).isSome
   | _, _, _, _, _, _ => false
 
 /-- A ternary symbol in the fragment: a conditional, or a write or a push
@@ -2352,8 +2386,11 @@ theorem MTerm.toL_step (h : Rel σ ρ τ) {n : Nat}
     obtain ⟨⟨hm, hv⟩, hs⟩ := hf
     obtain ⟨M, g, hMm, hmr, hme⟩ := hM m (by lsize_tac) hm
     match v, hv, hs with
-    | .app1 .sval _, _, hs | .app2 .copyMem _ _, _, hs | .app2 .sfind _ _, _, hs =>
+    | .app1 .sval _, _, hs | .app2 .sfind _ _, _, hs =>
       simp only [Tm.toL, Op1.toL, Op2.toLAt, Op2.toL, hMm, newM, Option.isSome_none,
+        Bool.false_eq_true] at hs
+    | .app2 .copyMem _ _, _, hs =>
+      simp only [Tm.toL, Op2.toLAt, Op2.toL, newM_memL, Option.isSome_none,
         Bool.false_eq_true] at hs
     | .app1 (.newArr R) nt, hv, hs =>
       simp only [Tm.inL, Op1.inL] at hv
@@ -2546,8 +2583,30 @@ theorem STerm.toL_eval (h : Rel σ ρ τ) :
       exact read_bridge hb' fun n => write_bridge hb fun c => .ok (c.overlay n)
     | .app1 (.newArr _) _, _ =>
       simp only [Tm.toL, Op1.toL, LVal.storable, Bool.false_eq_true] at hz
-    | .app2 .copyMem _ _, hv =>
-      simp only [Tm.inL, Bool.false_eq_true, Op2.inL] at hv
+    | .app2 .copyMem m i, hv =>
+      simp only [Tm.inL, Op2.inL, Bool.and_eq_true] at hv
+      obtain ⟨⟨hm, hi⟩, hl⟩ := hv
+      obtain ⟨M, g, hMm, hmr, hme⟩ := MTerm.toL_eval h m hm
+      obtain ⟨j, g', hIi, hir, hie⟩ := ITerm.toL_eval h i hi
+      rw [hMm, hIi] at hl
+      obtain ⟨⟨c, rfl⟩, c', rfl⟩ := memL_some hl
+      have hb := live_bridge (PTerm.toL_chk h p hp)
+      have hsrc : Sim (LMem.run σ M >>= fun r => LId.evalR r.2 j >>= fun n => copyMem r.1 (.ref n))
+          ((SValT.copyMem m i).eval τ) := by
+        rw [Close.SValT.eval_copyMem]
+        obtain ⟨μ', hm'⟩ := hmr ⟨c, rfl⟩
+        obtain ⟨id, hi'⟩ := hir ⟨c', rfl⟩
+        obtain ⟨-, μ, B, hr, hheq, hpre⟩ := hme μ' hm'
+        have hj : LId.evalR B j = .ok id := LId.evalR_prefix hpre (hie id hi').2
+        simp only [hr, hm', hi', hj, Res.ok_bind, copyMem_of_heap hheq.1]
+        exact Sim.refl _
+      rw [Close.STerm.eval_save_copyMem]
+      simp only [Tm.toL, Op0.toL, Op2.toLAt, Op2.toL, Op3.toLAt, Op3.toL, hMm, hIi, memL,
+        Option.getD_some, LStor.eval, h.stor, Res.ok_bind, Close.STerm.eval_storage, LPath.eval]
+      simp only [bind_assoc, Res.ok_bind, view_findLive, SVal.findLive_nil]
+      have key := Sim.bind hsrc fun n => write_bridge hb fun c => .ok (c.overlay n)
+      simp only [bind_assoc, Res.ok_bind] at key
+      exact key
   | .app2 .delAt s p, hf => by
     simp only [Tm.inL, Op2.inL, Bool.and_eq_true] at hf
     obtain ⟨hs, hf⟩ := hf
@@ -2793,8 +2852,10 @@ theorem SValT.arr_eval {σ τ : State} {ρ : Sym} (h : Rel σ ρ τ) : (v : SVal
   | .app1 .sval _, _, _, _, hvt, _ => by simp only [Tm.toL, Op1.toL, reduceCtorEq] at hvt
   | .app2 .sfind _ _, _, _, _, hvt, _ => by
     simp only [Tm.toL, Op2.toLAt, Op2.toL, reduceCtorEq] at hvt
-  | .app2 .copyMem _ _, _, _, _, hvt, _ => by
-    simp only [Tm.toL, Op2.toLAt, Op2.toL, reduceCtorEq] at hvt
+  | .app2 .copyMem a b, _, _, _, hvt, _ => by
+    simp only [Tm.toL, Op2.toLAt, Op2.toL] at hvt
+    rcases memL_getD (a.toL ρ) (b.toL ρ) with he | ⟨_, _, he⟩ <;>
+      rw [he] at hvt <;> cases hvt
 
 /-- The pair's last step: where its guard returns exactly when both the
 identity and the memory do, and the memory's run names the identity at the
@@ -4015,6 +4076,11 @@ def okWrite (G : Option LTerm) (W V : Unit → Option LTerm) : Option LTerm :=
   G.bind fun g => (W ()).bind fun w => (V ()).map fun x =>
     .seq g (.seq w (.seq x (.lit (.bool true))))
 
+/-- The root a view puts its object at: a view that returns has it. -/
+def isViewRoot : LPath → Bool
+  | .root r => r == viewRoot
+  | _ => false
+
 /-- A view's guard: the memory runs and the name denotes; `d` where either
 is not known. -/
 def okView (G N : Option LTerm) (d : LTerm) : LTerm :=
@@ -4138,7 +4204,7 @@ def LStor.hasU : LStor → LPath → LTerm
         | some W, some N => .orElse (.seq W (.lit (.bool true))) (.seq N (.lit (.bool true)))
         | _, _ => .has (.view m i) Q
       | none => .has (.view m i) Q
-    | none => .has (.view m i) Q
+    | none => if isViewRoot Q then .lit (.bool true) else .has (.view m i) Q
 termination_by structural s => s
 
 /-- The length of the array at `Q` in `s`, where `s` and `Q` return: a
@@ -4435,7 +4501,7 @@ def LStor.hasUF : LStor → LPath → LTerm
         | some W, some N => .orElse (.seq W (.lit (.bool true))) (.seq N (.lit (.bool true)))
         | _, _ => .has (.view m i) Q
       | none => .has (.view m i) Q
-    | none => .has (.view m i) Q
+    | none => if isViewRoot Q then .lit (.bool true) else .has (.view m i) Q
 termination_by structural s => s
 
 /-- `LStor.lenU` as compiled code runs it. -/
@@ -7004,7 +7070,18 @@ theorem view_hasU_sim {σ : State} {m : LMem} {i : LId} {Q : LPath} {v : SVal} {
           (hNg.trans (LMem.nameG_sim σ m j' hva.run hg'))
       · exact hkeep
     · exact hkeep
-  · exact hkeep
+  · split
+    · rename_i hR
+      match Q, hR, hq with
+      | .root r, hR, hq =>
+        simp only [isViewRoot, beq_iff_eq] at hR
+        subst hR
+        simp only [LPath.eval, Except.ok.injEq] at hq
+        subst hq
+        rw [view_findLive, SVal.findLive_nil]
+        exact Sim.refl _
+      | .field .., hR, _ | .at .., hR, _ => simp only [isViewRoot, Bool.false_eq_true] at hR
+    · exact hkeep
 
 /-- No mapping is below a view (Lean only). -/
 theorem view_mapU_sim {σ : State} {m : LMem} {i : LId} (sh : KShape) {Q : LPath} {v : SVal}

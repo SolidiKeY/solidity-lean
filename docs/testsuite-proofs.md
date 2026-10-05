@@ -6,7 +6,7 @@ derived with `⊢`, checked by the kernel, at close to KeY's speed. No
 dependencies, no `native_decide`, no new `maxHeartbeats` override, and a `?`
 twin that prints a cheap replay for every searching tactic.
 
-Today 396 of the 418 are derived by `⊢` (`TestSuite/Report.lean`), and the
+Today 411 of the 418 are derived by `⊢` (`TestSuite/Report.lean`), and the
 corpus rows (`Corpus/TestSuite.lean`) are corollaries of those theorems.
 
 ## Decisions (2026-10-05)
@@ -104,7 +104,7 @@ What they say:
   defaults, copies to storage.  Done (below), but for the copies between
   memory and storage: 391 derived.  Being reworked into solkey's
   `memoryRules.key`/`structMemoryRules.key` taclets (M6b, below): with the
-  copies from storage into memory, 396 derived.
+  copies between memory and storage, 411 derived.
 - **M7.** The remaining functions; a `derived` status in the corpus table;
   retire `corpus_decide`, the `#eval` rows and the 8M override.  Done
   (below), but for the remaining functions: the table reads the `Report.lean`
@@ -1301,3 +1301,63 @@ The `Derived12` times: `storageToMemory` 0.18 s,
 `testStorageToMemoryCopyComplexPath` 0.35 s, `testStorageToMemoryCopyField`
 0.27 s, `testStorageToMemoryCopyRoot` 0.18 s, `memoryAssignForms` 0.34 s.
 No figure is near the 20% line.
+
+### Step 5b: copies from memory into storage
+
+`alice = carol;` with `carol` in memory writes `save(storage, alice,
+copyMem(mtSt, memory, carol))` (`memoryToStorageStoreRoot`, and the
+`FieldCopyRoot`, `FieldCopyField`, `IndexMappingCopyRoot` and
+`IndexArrayCopyRoot` rules). It is now pushed in as the storage copy
+`LStor.copy s p (LStor.view m i) (root viewRoot)`: the view of the object
+laid over `alice`, as the storage closer already lays a subtree. A read
+below it goes through the copy rows (`copyLeaf`) to the view, and the
+view's arms read memory along the same path (`findOnCopy`,
+`selectOnCopyMem*`), in the memory as it was at the copy, so a later write
+to `carol` is not seen.
+
+- **Only where the guards are literals.** A view has no guard of its own,
+  so `copyMem` is in the fragment where the memory's and the identity's
+  guards are literals (`Decide.memL`). Every copy in `TestSuite` is: the
+  identity is a local, or a member of one a default allocation holds
+  (`initIdentity`). Soundness is the `copyMem` arm of `STerm.toL_eval`,
+  through `Close.STerm.eval_save_copyMem`, `write_bridge` and
+  `copyMem_of_heap`.
+- **A view has its root.** The copy's guard asks that the source path is
+  there; at the view's own root that is `true` wherever the view returns
+  (`isViewRoot` in `LStor.hasU`, `view_hasU_sim`). Before it, every one of
+  these leaves kept `has(view, #view)` whole and stayed open.
+- **Not done:** a `push` of a memory object (`tokens.push(tok)` with `tok`
+  in memory) stays outside the fragment; no `TestSuite` obligation has one.
+- **Derived:** the other 15 in `TestSuite/Derived12.lean`: all `sol_prove`
+  but `memoryToStorageIndexArrayCopyRootOutOfBoundsReverts`, whose second
+  leaf is the cons-closer replay `#solkey_derive?` prints (as for
+  `storageIndexArrayAddAssignOutOfBoundsReverts`). `Report.lean` pins 411
+  derived and 6 pending: `storagePushReadBack` (divergent) and the five
+  dangling aliases. `memoryToStorageIndexArrayCopyRootExample`, pinned in
+  `Suggestions.lean` as a replay past `maxHeartbeats` since M3b review 2,
+  is now `sol_prove` alone, so that pin is gone. `scripts/solkey-port.mjs`
+  lost its copy reason and that row; `tests/solkey/expected.tsv`,
+  `Corpus/TestSuite.lean` and `docs/corpus-parity.md` are regenerated, and
+  `check-testsuite.sh` passes.
+- **Pin** in `Examples/Tactics/Decide.lean`: `memoryToStorageRead`, a
+  memory write after the copy not seen, by `sol_decide`.
+
+**Measured.** `Derived1`–`12`, `Report.lean`, `Suggestions.lean` and
+`Corpus/TestSuite.lean` check clean, each file alone.
+
+| | Baseline | Step 5b | Change |
+|---|---|---|---|
+| `Derived9`, `sol_prove` total | 7.9 s | 7.1 s | −10% |
+| `Derived10` | 10.1 s | 9.0 s | −11% |
+| `Derived11` | 2.3 s | 2.1 s | −7% |
+| `memoryIndexWriteNse` | 2.48 s | 2.16 s | −13% |
+| `Derived12` (20 theorems) | — | 15.2 s | — |
+
+The 15 new theorems take 13.9 s, but two take most of it:
+`indexWriteBothImpureMemToStorage` 5.4 s (8 leaves, the largest 1185 nodes
+with an elimination of 3445) and `memoryToStorageIndexImpureReceiver` 4.0 s
+(7 leaves, 927 and 2580). Both are within `closeSize` (2000) and
+`elimSize` (8000); the reads of the impure index go through the captures,
+the pushes and the copy, and each of them is eliminated again in every
+leaf. The others take 0.15–0.85 s. No figure of `Derived9`–`11` is near the
+20% line.
