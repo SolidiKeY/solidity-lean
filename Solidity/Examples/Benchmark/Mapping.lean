@@ -1,3 +1,4 @@
+import Solidity.Calculus.Derive
 import Solidity.Calculus.DecideComplete
 import Solidity.Calculus.Spec
 
@@ -105,19 +106,11 @@ local instance : InContract := ⟨Mapping⟩
 
 /-- `set(a, i)`: `ensures myMap[_addr] == _i`. -/
 theorem set_spec : ⊢ dl!{ [ set(a, i); ] myMap[a] == i } := by
-  sol_derive
-  all_goals
-    refine close ?_
-    sol_symex
-    sol_decide
+  sol_prove
 
 /-- `set(a, i)`: every other key keeps its value. -/
 theorem set_frame : ⊢ dl!{ b != a && v == myMap[b] → [ set(a, i); ] myMap[b] == v } := by
-  sol_derive
-  all_goals
-    refine close ?_
-    sol_symex
-    sol_decide
+  sol_prove
 
 /-- `remove(a)`: `ensures myMap[_addr] == 0`, where `myMap[a]` held a
 `uint` (`myMap[a] + 0` evaluates).  A `delete` leaves the default of the old
@@ -125,27 +118,20 @@ value, and what `⊢` proves holds in every storage, `myMap[a]` holding a `bool`
 (`Decide.deleteWithoutWrite`): the premise is the typing every storage of
 this contract has. -/
 theorem remove_spec : ⊢ dl!{ myMap[a] + 0 == myMap[a] → [ remove(a); ] myMap[a] == 0 } := by
-  sol_derive
-  all_goals
-    refine close ?_
-    sol_symex
-    sol_decide
+  sol_prove
+  refine close ?_
+  sol_symex
+  refine (Fml.valid_iff_reduce _ (by decide +kernel)).2 ?_
+  sol_reduce
+  sol_decide_heuristic
 
 /-- `remove(a)`: every other key keeps its value. -/
 theorem remove_frame : ⊢ dl!{ b != a && v == myMap[b] → [ remove(a); ] myMap[b] == v } := by
-  sol_derive
-  all_goals
-    refine close ?_
-    sol_symex
-    sol_decide
+  sol_prove
 
 /-- `set(a, i)` then `get(a)` returns `i`. -/
 theorem set_get : ⊢ dl!{ [ set(a, i); uint y = get(a); ] y == i } := by
-  sol_derive
-  all_goals
-    refine close ?_
-    sol_symex
-    sol_decide
+  sol_prove
 
 /-- `set(_addr, _i)`'s obligation: the entry written, every other key kept.
 The leaves close by `sol_spec`: the frame clause needs the layout premise at
@@ -165,11 +151,7 @@ theorem spec_remove : ⊢ spec!{ remove } := by
     sol_spec
 /-- `get(_addr)` has no clause: the obligation is the invariant-free `true`. -/
 theorem spec_get : ⊢ spec!{ get } := by
-  sol_derive
-  all_goals
-    refine close ?_
-    sol_symex
-    sol_decide
+  sol_prove
 
 end Mapping
 
@@ -179,47 +161,37 @@ local instance : InContract := ⟨NestedMapping⟩
 
 /-- `set(a, i, true)`: `ensures nested[_addr1][_i] == _boo`. -/
 theorem nested_set_spec_true : ⊢ dl!{ [ set(a, i, true); ] nested[a][i] == true } := by
-  sol_derive
-  all_goals
-    refine close ?_
-    sol_symex
-    sol_decide
+  sol_prove
 
 /-- `set(a, i, false)`: the same, for the other `bool`. -/
 theorem nested_set_spec_false : ⊢ dl!{ [ set(a, i, false); ] nested[a][i] == false } := by
-  sol_derive
-  all_goals
-    refine close ?_
-    sol_symex
-    sol_decide
+  sol_prove
 
 /-- `remove(a, i)`: `ensures !nested[_addr1][_i]`, where `nested[a][i]`
 held `true` (as `remove_spec`). -/
 theorem nested_remove_spec_true :
     ⊢ dl!{ nested[a][i] == true → [ remove(a, i); ] nested[a][i] == false } := by
-  sol_derive
-  all_goals
-    refine close ?_
-    sol_symex
-    sol_decide
+  sol_prove
+  refine close ?_
+  sol_symex
+  refine (Fml.valid_iff_reduce _ (by decide +kernel)).2 ?_
+  sol_reduce
+  sol_decide_heuristic
 
 /-- `remove(a, i)`: the same, where `nested[a][i]` held `false`. -/
 theorem nested_remove_spec_false :
     ⊢ dl!{ nested[a][i] == false → [ remove(a, i); ] nested[a][i] == false } := by
-  sol_derive
-  all_goals
-    refine close ?_
-    sol_symex
-    sol_decide
+  sol_prove
+  refine close ?_
+  sol_symex
+  refine (Fml.valid_iff_reduce _ (by decide +kernel)).2 ?_
+  sol_reduce
+  sol_decide_heuristic
 
 /-- `set(_addr1, _i, _boo)`'s obligation: `ensures nested[_addr1][_i] ==
 _boo`, an `<->`. -/
 theorem spec_nested_set : ⊢ spec!{ set } := by
-  sol_derive
-  all_goals
-    refine close ?_
-    sol_symex
-    sol_decide
+  sol_prove
 /-- `remove(_addr1, _i)`'s obligation: `ensures !nested[_addr1][_i]` (by
 `sol_spec`, as `spec_set`). -/
 theorem spec_nested_remove : ⊢ spec!{ remove } := by

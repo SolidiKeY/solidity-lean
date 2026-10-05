@@ -80,6 +80,7 @@ lemma (`TermTaclet.sound`).
 | `Calculus/Decide.lean` | `sol_decide`: reads of writes as case trees on key equalities, over the live storage. |
 | `Calculus/DecideSyn.lean` | `LFml.syn`: a reduction closed by its terms, KeY's syntactic closing; `sol_decide`'s first try. |
 | `Calculus/DecideComplete.lean` | The starting storage's reads are realizable; `Fml.valid_iff_cons`. |
+| `Calculus/Derive.lean` | The strategy as one kernel evaluation: `Derive.residue` (per-goal fresh names, any number of branches, a step budget over the whole derivation, leaves closed by `LFml.syn`), `Proves.of_residue`; `sol_prove`, `sol_prove?`. |
 | `Calculus/Spec.lean` | Specifications compiled to dynamic logic as solkey's `SpecCompiler` does; `spec[C]{f}`, `sol_spec`. |
 | `Calculus/Notation.lean` | `dl[C]{ … }` and `dl!{ … }`: concrete formulas read against a contract; `dl![m]{ … }`, `⟨[ ]⟩` at a modality `m`; a Lean formula where a formula stands; `Γ ⟹ φ` lines; `st!{ … }`, `pt!{ … }` for a storage term and a path. |
 | `Calculus/Quote.lean` | Quoters from formulas back to terms, so the kernel re-checks a computed goal. |
@@ -217,5 +218,5 @@ At the root, the notation's own tests:
 | `Examples/ChainNotation.lean`, `ChainRewrites.lean`, `ExampleNames.lean` | How a chain is written and checked, its rewrite links, the printed names of fresh variables. |
 | `Examples/Notation.lean` | What taclets, premises and sequents print, pinned. |
 | `Examples/Verify.lean`, `Tools.lean` | `#verify`, `#counterexample` and the other commands, pinned. |
-| `Examples/ProofTree.lean` | The proof tree's commands, `sol_derive?` and `sol_chain?`, pinned. |
+| `Examples/ProofTree.lean` | The proof tree's commands, `sol_derive?`, `sol_chain?` and `sol_prove?`, pinned. |
 | `Examples/Benchmark/*.lean` | solkey's benchmark contracts with their `@custom:key` clauses proved (`Counter`, `SimpleStorage`, `Mapping`, `Purchase`, `Coin`, `EtherWallet`, `ERC20`), and `Syntax`, which pins what elaborates away (units, casts, events, errors, enums, struct constructors, modifiers). |

@@ -1,5 +1,6 @@
 import Solidity.Tools.ProofTree
 import Solidity.Calculus.ChainGen
+import Solidity.Calculus.Derive
 
 /-!
 # The proof tree, pinned
@@ -10,7 +11,9 @@ the tactics that write a proof out, as `#guard_msgs` tests:
 * `#proof_tree`, `#proof_node` and `#proof_tree_json` (`Tools/ProofTree.lean`)
   print the tree of `⊢ φ` as solkey's GUI and web prover do;
 * `sol_derive?` suggests the `apply` walk the tree is, `sol_chain?` the
-  `calc` a derivation `φ ~*> ψ` is.
+  `calc` a derivation `φ ~*> ψ` is;
+* `sol_prove?` suggests `sol_prove` (`Calculus/Derive.lean`), the same walk
+  as one kernel evaluation, and a tactic per leaf its closer leaves.
 
 If the strategy picks another rule, or a printer changes, these fail.
 -/
@@ -160,6 +163,49 @@ captured, is one update (`transferNoCallbackBox`). -/
 theorem transferFrameStorage :
     ⊨ dl!{ [ alice.age = 1; to.transfer(x + 2); uint y = alice.age; ] y == 1 } := by
   sol_derive?
+
+/-! ## `sol_prove?`: the walk in one evaluation
+
+A write read back: the leaf closes by its terms (`LFml.syn`) inside the
+residue, and the replay is `sol_prove` alone. -/
+
+/--
+info: Try this:
+  sol_prove
+-/
+#guard_msgs in
+example : ⊢ dl!{ [ alice.age = v; uint y = alice.age; ] y == v } := by
+  sol_prove?
+
+/-! `guardedCopy`'s three leaves do not close by their terms alone
+(`LFml.syn`): each is left, a `case` of its own, and closed by `sol_decide`'s
+next step. -/
+
+/--
+info: Try this:
+  sol_prove
+    case leaf1 =>
+      refine Proves.close ?_
+      sol_symex
+      refine (Fml.valid_iff_reduce _ (by decide +kernel)).2 ?_
+      sol_reduce
+      sol_decide_cons
+    case leaf2 =>
+      refine Proves.close ?_
+      sol_symex
+      refine (Fml.valid_iff_reduce _ (by decide +kernel)).2 ?_
+      sol_reduce
+      sol_decide_cons
+    case leaf3 =>
+      refine Proves.close ?_
+      sol_symex
+      refine (Fml.valid_iff_reduce _ (by decide +kernel)).2 ?_
+      sol_reduce
+      sol_decide_cons
+-/
+#guard_msgs in
+example : ⊢ dl!{ a == 1 → ⟨ uint x = a; require(x == 1); ⟩ x == 1 } := by
+  sol_prove?
 
 /-! ## `sol_chain?`: the `calc`
 

@@ -1,3 +1,4 @@
+import Solidity.Calculus.Derive
 import Solidity.Calculus.Spec
 import Solidity.Calculus.DecideComplete
 
@@ -17,8 +18,10 @@ solkey's `@custom:key` clauses are written above the functions, as its
 file has them.  `spec!{ mint }`, the obligation solkey synthesizes
 (`Calculus/Spec.lean`), is derived as `⊢`, its leaves closed by `sol_spec`'s
 steps (`spec_mint`); `send`'s is not.  Before it, the clauses by hand, as `⊢ dl{}` obligations, one per
-clause: the calculus's steps (`sol_derive`), then each leaf closed by
-`sol_decide`, which reads the writes back by their terms (`LFml.syn`);
+clause, each by `sol_prove` (`Calculus/Derive.lean`): the calculus's steps
+and each leaf closed by its terms (`LFml.syn`), in one kernel evaluation.
+`mintMinter` leaves one leaf `LFml.syn` does not close, closed after it by
+`sol_decide`'s heuristic step (`sol_decide_heuristic`).
 `\old(e)` is a local declared before the call (`uint b = balances[r];`), and
 `msg.sender` is the transaction's (`Simple.env`), the same before and after.
 `requires amount >= 0` holds of a `uint`.  The runs of the interpreter
@@ -59,11 +62,7 @@ local instance : InContract := ⟨Coin⟩
 
 /-- `minter = msg.sender;` — the constructor's body. -/
 theorem ctor : ⊢ dl!{ [ minter = msg.sender; ] minter == msg.sender } := by
-  sol_derive
-  all_goals
-    refine close ?_
-    sol_symex
-    sol_decide
+  sol_prove
 
 /-! ## `mint`
 
@@ -72,29 +71,22 @@ anyone but the minter reverts, so under the box the caller is the minter. -/
 
 theorem mintMinter :
     ⊢ dl!{ [ uint m = minter; mint(r, a); ] m == msg.sender && minter == m } := by
-  sol_derive
-  all_goals
-    refine close ?_
-    sol_symex
-    sol_decide
+  sol_prove
+  refine close ?_
+  sol_symex
+  refine (Fml.valid_iff_reduce _ (by decide +kernel)).2 ?_
+  sol_reduce
+  sol_decide_heuristic
 
 /-- `ensures balances[receiver] == \old(balances[receiver]) + amount`. -/
 theorem mintReceiver :
     ⊢ dl!{ [ uint b = balances[r]; mint(r, a); uint c = balances[r]; ] c == b + a } := by
-  sol_derive
-  all_goals
-    refine close ?_
-    sol_symex
-    sol_decide
+  sol_prove
 
 /-- `ensures \forall address a; a != receiver -> balances[a] == \old(balances[a])`. -/
 theorem mintOthers :
     ⊢ dl!{ k != r → [ uint b = balances[k]; mint(r, a); ] balances[k] == b } := by
-  sol_derive
-  all_goals
-    refine close ?_
-    sol_symex
-    sol_decide
+  sol_prove
 
 set_option maxHeartbeats 400000 in
 /-- `mint(receiver, amount)`'s obligation: only the minter mints, the
@@ -121,52 +113,32 @@ theorem spec_mint : ⊢ spec!{ mint } := by
 so the comparison is a `bool` local of the pre-state. -/
 theorem sendCovered :
     ⊢ dl!{ [ bool ok = a <= balances[msg.sender]; send(r, a); ] ok == true } := by
-  sol_derive
-  all_goals
-    refine close ?_
-    sol_symex
-    sol_decide
+  sol_prove
 
 /-- `ensures msg.sender == receiver -> balances[msg.sender] == \old(balances[msg.sender])`. -/
 theorem sendSelf :
     ⊢ dl!{ msg.sender == r → [ uint b = balances[msg.sender]; send(r, a); ]
       balances[msg.sender] == b } := by
-  sol_derive
-  all_goals
-    refine close ?_
-    sol_symex
-    sol_decide
+  sol_prove
 
 /-- `ensures msg.sender != receiver -> balances[msg.sender] ==
 \old(balances[msg.sender]) - amount && …`. -/
 theorem sendMovesSender :
     ⊢ dl!{ msg.sender != r → [ uint b = balances[msg.sender]; send(r, a); ]
       balances[msg.sender] == b - a } := by
-  sol_derive
-  all_goals
-    refine close ?_
-    sol_symex
-    sol_decide
+  sol_prove
 
 /-- `ensures msg.sender != receiver -> … && balances[receiver] ==
 \old(balances[receiver]) + amount`. -/
 theorem sendMovesReceiver :
     ⊢ dl!{ msg.sender != r → [ uint c = balances[r]; send(r, a); ]
       balances[r] == c + a } := by
-  sol_derive
-  all_goals
-    refine close ?_
-    sol_symex
-    sol_decide
+  sol_prove
 
 /-- `ensures \forall address a; a != msg.sender && a != receiver -> balances[a] == \old(balances[a])`. -/
 theorem sendOthers :
     ⊢ dl!{ k != msg.sender && k != r → [ uint b = balances[k]; send(r, a); ] balances[k] == b } := by
-  sol_derive
-  all_goals
-    refine close ?_
-    sol_symex
-    sol_decide
+  sol_prove
 
 /-! ## Runs
 

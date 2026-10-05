@@ -1,3 +1,4 @@
+import Solidity.Calculus.Derive
 import Solidity.Calculus.DecideComplete
 
 /-!
@@ -91,55 +92,35 @@ local instance : InContract := ⟨ERC20⟩
 theorem transfer_result :
     ⊢ dl!{ [ uint t0 = totalSupply; bool ok = transfer(s, r, amount); uint t1 = totalSupply; ]
       (ok == true ∧ t1 == t0) } := by
-  sol_derive
-  all_goals
-    refine close ?_
-    sol_symex
-    sol_decide
+  sol_prove
 
 /-- `ensures msg.sender != recipient -> balanceOf[msg.sender] ==
 \old(balanceOf[msg.sender]) - amount && …`. -/
 theorem transfer_moves_sender :
     ⊢ dl!{ s != r → [ uint b0 = balanceOf[s]; bool ok = transfer(s, r, amount);
       uint b1 = balanceOf[s]; ] b1 == b0 - amount } := by
-  sol_derive
-  all_goals
-    refine close ?_
-    sol_symex
-    sol_decide
+  sol_prove
 
 /-- `ensures msg.sender != recipient -> … && balanceOf[recipient] ==
 \old(balanceOf[recipient]) + amount`. -/
 theorem transfer_moves_recipient :
     ⊢ dl!{ s != r → [ uint c0 = balanceOf[r]; bool ok = transfer(s, r, amount);
       uint c1 = balanceOf[r]; ] c1 == c0 + amount } := by
-  sol_derive
-  all_goals
-    refine close ?_
-    sol_symex
-    sol_decide
+  sol_prove
 
 /-- `ensures msg.sender == recipient -> balanceOf[msg.sender] ==
 \old(balanceOf[msg.sender])`. -/
 theorem transfer_self :
     ⊢ dl!{ [ uint b0 = balanceOf[s]; bool ok = transfer(s, s, amount); uint b1 = balanceOf[s]; ]
       b1 == b0 } := by
-  sol_derive
-  all_goals
-    refine close ?_
-    sol_symex
-    sol_decide
+  sol_prove
 
 /-- `ensures \forall address a; a != msg.sender && a != recipient ->
 balanceOf[a] == \old(balanceOf[a])`. -/
 theorem transfer_frame :
     ⊢ dl!{ a != s ∧ a != r → [ uint x0 = balanceOf[a]; bool ok = transfer(s, r, amount);
       uint x1 = balanceOf[a]; ] x1 == x0 } := by
-  sol_derive
-  all_goals
-    refine close ?_
-    sol_symex
-    sol_decide
+  sol_prove
 
 /-! ## `approve` -/
 
@@ -147,11 +128,7 @@ theorem transfer_frame :
 theorem approve_sets :
     ⊢ dl!{ [ bool ok = approve(s, p, amount); uint x = allowance[s][p]; ]
       (ok == true ∧ x == amount) } := by
-  sol_derive
-  all_goals
-    refine close ?_
-    sol_symex
-    sol_decide
+  sol_prove
 
 /-! ## `transferFrom` -/
 
@@ -159,54 +136,34 @@ theorem approve_sets :
 theorem transferFrom_result :
     ⊢ dl!{ [ uint t0 = totalSupply; bool ok = transferFrom(c, s, r, amount); uint t1 = totalSupply; ]
       (ok == true ∧ t1 == t0) } := by
-  sol_derive
-  all_goals
-    refine close ?_
-    sol_symex
-    sol_decide
+  sol_prove
 
 /-- `ensures allowance[sender][msg.sender] ==
 \old(allowance[sender][msg.sender]) - amount`. -/
 theorem transferFrom_allowance :
     ⊢ dl!{ [ uint w0 = allowance[s][c]; bool ok = transferFrom(c, s, r, amount);
       uint w1 = allowance[s][c]; ] w1 == w0 - amount } := by
-  sol_derive
-  all_goals
-    refine close ?_
-    sol_symex
-    sol_decide
+  sol_prove
 
 /-- `ensures sender != recipient -> balanceOf[sender] ==
 \old(balanceOf[sender]) - amount && …`. -/
 theorem transferFrom_moves_sender :
     ⊢ dl!{ s != r → [ uint b0 = balanceOf[s]; bool ok = transferFrom(c, s, r, amount);
       uint b1 = balanceOf[s]; ] b1 == b0 - amount } := by
-  sol_derive
-  all_goals
-    refine close ?_
-    sol_symex
-    sol_decide
+  sol_prove
 
 /-- `ensures sender != recipient -> … && balanceOf[recipient] ==
 \old(balanceOf[recipient]) + amount`. -/
 theorem transferFrom_moves_recipient :
     ⊢ dl!{ s != r → [ uint c0 = balanceOf[r]; bool ok = transferFrom(c, s, r, amount);
       uint c1 = balanceOf[r]; ] c1 == c0 + amount } := by
-  sol_derive
-  all_goals
-    refine close ?_
-    sol_symex
-    sol_decide
+  sol_prove
 
 /-- `ensures sender == recipient -> balanceOf[sender] == \old(balanceOf[sender])`. -/
 theorem transferFrom_self :
     ⊢ dl!{ [ uint b0 = balanceOf[s]; bool ok = transferFrom(c, s, s, amount);
       uint b1 = balanceOf[s]; ] b1 == b0 } := by
-  sol_derive
-  all_goals
-    refine close ?_
-    sol_symex
-    sol_decide
+  sol_prove
 
 /-! ## `mint` and `burn`: an internal call inlined in an external one -/
 
@@ -216,11 +173,7 @@ theorem mint_adds :
     ⊢ dl!{ [ uint b0 = balanceOf[t]; uint t0 = totalSupply; mint(t, amount);
       uint b1 = balanceOf[t]; uint t1 = totalSupply; ]
       (b1 == b0 + amount ∧ t1 == t0 + amount) } := by
-  sol_derive
-  all_goals
-    refine close ?_
-    sol_symex
-    sol_decide
+  sol_prove
 
 /-- `ensures balanceOf[from] == \old(balanceOf[from]) - amount && totalSupply
 == \old(totalSupply) - amount`. -/
@@ -228,10 +181,6 @@ theorem burn_subtracts :
     ⊢ dl!{ [ uint b0 = balanceOf[h]; uint t0 = totalSupply; burn(h, amount);
       uint b1 = balanceOf[h]; uint t1 = totalSupply; ]
       (b1 == b0 - amount ∧ t1 == t0 - amount) } := by
-  sol_derive
-  all_goals
-    refine close ?_
-    sol_symex
-    sol_decide
+  sol_prove
 
 end Solidity.Examples.Benchmark.ERC20

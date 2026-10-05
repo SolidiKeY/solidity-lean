@@ -1,3 +1,4 @@
+import Solidity.Calculus.Derive
 import Solidity.Calculus.DecideComplete
 import Solidity.Calculus.Close
 
@@ -274,20 +275,17 @@ info: if (msgSender != seller) { revert(); } else {  } uint se1 = 0; if (state !
 `ensures state == State.Inactive`. -/
 theorem abort_spec :
     ⊢ dl!{ msgSender == seller ∧ state == State.Created → [ abort(); ] state == State.Inactive } := by
-  sol_derive
-  all_goals
-    refine close ?_
-    sol_symex
-    sol_decide
+  sol_prove
 
 /-- `abort()` by anyone but the seller reverts (`revert OnlySeller();`): no
 run of it ends. -/
 theorem abort_onlySeller : ⊢ dl!{ msgSender != seller → [ abort(); ] false } := by
-  sol_derive
-  all_goals
-    refine close ?_
-    sol_symex
-    sol_decide
+  sol_prove
+  refine close ?_
+  sol_symex
+  refine (Fml.valid_iff_reduce _ (by decide +kernel)).2 ?_
+  sol_reduce
+  sol_decide_cons
 
 /-- `confirmPurchase()`: `requires state == State.Created && msg.value ==
 2 * value` (`value + value`: a formula term has no `*`), `ensures state ==
@@ -295,32 +293,20 @@ State.Locked && buyer == msg.sender`. -/
 theorem confirmPurchase_spec :
     ⊢ dl!{ state == State.Created ∧ msgValue == value + value →
            [ confirmPurchase(); ] (state == State.Locked ∧ buyer == msgSender) } := by
-  sol_derive
-  all_goals
-    refine close ?_
-    sol_symex
-    sol_decide
+  sol_prove
 
 /-- `confirmReceived()`: `requires msg.sender == buyer && state ==
 State.Locked`, `ensures state == State.Release`. -/
 theorem confirmReceived_spec :
     ⊢ dl!{ msgSender == buyer ∧ state == State.Locked →
            [ confirmReceived(); ] state == State.Release } := by
-  sol_derive
-  all_goals
-    refine close ?_
-    sol_symex
-    sol_decide
+  sol_prove
 
 /-- `refundSeller()`: `requires msg.sender == seller && state ==
 State.Release`, `ensures state == State.Inactive`. -/
 theorem refundSeller_spec :
     ⊢ dl!{ msgSender == seller ∧ state == State.Release →
            [ refundSeller(); ] state == State.Inactive } := by
-  sol_derive
-  all_goals
-    refine close ?_
-    sol_symex
-    sol_decide
+  sol_prove
 
 end Solidity.Examples.Benchmark.Purchase

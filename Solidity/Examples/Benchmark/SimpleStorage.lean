@@ -1,3 +1,4 @@
+import Solidity.Calculus.Derive
 import Solidity.Calculus.DecideComplete
 import Solidity.Calculus.Spec
 
@@ -51,33 +52,17 @@ local instance : InContract := ⟨SimpleStorage⟩
 /-- `set(x)`: `ensures storedData == x`.  It runs to the end (no revert), so
 the diamond holds too. -/
 theorem set_spec : ⊢ dl!{ [ set(x); ] storedData == x } := by
-  sol_derive
-  all_goals
-    refine close ?_
-    sol_symex
-    sol_decide
+  sol_prove
 
 /-- `set(x)` then `get()` returns `x`. -/
 theorem set_get : ⊢ dl!{ [ set(x); uint y = get(); ] y == x } := by
-  sol_derive
-  all_goals
-    refine close ?_
-    sol_symex
-    sol_decide
+  sol_prove
 
 /-- `set(x)`'s obligation: `ensures storedData == x`. -/
 theorem spec_set : ⊢ spec!{ set } := by
-  sol_derive
-  all_goals
-    refine close ?_
-    sol_symex
-    sol_decide
+  sol_prove
 /-- `get()`'s obligation: `ensures \result == storedData`. -/
 theorem spec_get : ⊢ spec!{ get } := by
-  sol_derive
-  all_goals
-    refine close ?_
-    sol_symex
-    sol_decide
+  sol_prove
 
 end Solidity.Examples.Benchmark.SimpleStorage

@@ -1,3 +1,4 @@
+import Solidity.Calculus.Derive
 import Solidity.Calculus.DecideComplete
 import Solidity.Calculus.Spec
 
@@ -15,8 +16,10 @@ has them.  The functions are internal functions here, and a call inlines one
 The clauses are proved twice.  `spec!{f}` is the obligation solkey's
 `SolidityProblemSynthesizer` builds from them (`Calculus/Spec.lean`), derived
 as `⊢` (`spec_inc`, `spec_dec`): the snapshot `{ old := storage }` joins the
-context (`Proves.updIntro`), the program runs (`sol_derive`), and each leaf
-closes by `sol_decide`.  Before it, the same clauses by hand:
+context (`Proves.updIntro`), the program runs, and each leaf closes by
+`LFml.syn`, all in one kernel evaluation (`sol_prove`, `Calculus/Derive.lean`).
+Before it, the same clauses by hand, where `sol_derive` runs the program and
+the leaf `LFml.syn` cannot close goes to `sol_decide`:
 `ensures count == \old(count) + 1` with a parameter `c` for the old value,
 and no `requires count >= 1`, which the box does not need (a `dec()` that
 underflows reverts, and a reverted run satisfies every box formula).
@@ -85,11 +88,7 @@ theorem dec_spec : ⊢ dl!{ c == count → [ dec(); ] count == c - 1 } := by
 
 /-- `get()` returns `count`. -/
 theorem get_spec : ⊢ dl!{ [ uint y = get(); ] y == count } := by
-  sol_derive
-  all_goals
-    refine close ?_
-    sol_symex
-    sol_decide
+  sol_prove
 
 /-! ## The clauses as obligations
 
@@ -108,17 +107,9 @@ info: dl{
 
 /-- `inc()`: `ensures count == \old(count) + 1`. -/
 theorem spec_inc : ⊢ spec!{ inc } := by
-  sol_derive
-  all_goals
-    refine close ?_
-    sol_symex
-    sol_decide
+  sol_prove
 /-- `dec()`: `requires count >= 1`, `ensures count == \old(count) - 1`. -/
 theorem spec_dec : ⊢ spec!{ dec } := by
-  sol_derive
-  all_goals
-    refine close ?_
-    sol_symex
-    sol_decide
+  sol_prove
 
 end Solidity.Examples.Benchmark.Counter

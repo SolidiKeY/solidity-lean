@@ -1,3 +1,4 @@
+import Solidity.Calculus.Derive
 import Solidity.Calculus.Close
 
 /-!
@@ -42,27 +43,24 @@ local instance : InContract := ⟨EtherWallet⟩
 
 /-- `owner = msg.sender;` — the constructor's body. -/
 theorem ctor : ⊢ dl!{ [ owner = msg.sender; ] owner == msg.sender } := by
-  sol_derive
-  all_goals
-    refine close ?_
-    sol_symex
-    sol_close
+  sol_prove
 
 /-- `ensures msg.sender == owner && owner == \old(owner)`. -/
 theorem withdrawOwner :
     ⊢ dl!{ [ uint o = owner; withdraw(x); ] msg.sender == o && owner == o } := by
-  sol_derive
-  all_goals
-    refine close ?_
-    sol_symex
-    sol_close
+  sol_prove
+  refine close ?_
+  sol_symex
+  refine (Fml.valid_iff_reduce _ (by decide +kernel)).2 ?_
+  sol_reduce
+  sol_decide_heuristic
 
 /-- `ensures net(owner) == \old(net(owner)) - _amount`, the old entry `40`:
 the owner's entry is `10` after `withdraw(30)`, and anyone else's call
 reverts.  An owner that is the wallet itself pays itself, and books nothing. -/
 theorem withdrawNet :
     ⊢ dl!{ owner != this → net(owner) = 40 → [ withdraw(30); ] net(owner) = 10 } := by
-  sol_derive
+  sol_prove
   all_goals
     refine close ?_
     sol_symex
@@ -71,11 +69,7 @@ theorem withdrawNet :
 /-- `getBalance()` returns the funds. -/
 theorem getBalanceFunds :
     ⊢ dl!{ [ uint f = address(this).balance; uint g = getBalance(); ] g == f } := by
-  sol_derive
-  all_goals
-    refine close ?_
-    sol_symex
-    sol_close
+  sol_prove
 
 /-! ## Runs: the ledger
 

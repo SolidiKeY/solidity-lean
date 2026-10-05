@@ -31,6 +31,7 @@ import Solidity.Calculus.CloseTests
 import Solidity.Calculus.Decide
 import Solidity.Calculus.DecideSyn
 import Solidity.Calculus.DecideComplete
+import Solidity.Calculus.Derive
 import Solidity.Calculus.Spec
 import Solidity.Calculus.Uniqueness
 import Solidity.Calculus.Progress
