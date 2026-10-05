@@ -526,6 +526,157 @@ theorem apply_push_find {w : Value} {c c' : SVal} (h : AOp.push.apply w c = .ok 
         simp only [List.length_append, List.length_cons, List.length_nil]; omega
       simp only [SVal.findLive, dif_neg hl, dif_neg hl']
 
+/-! ## A slot write against the slot past the end
+
+What the elimination's `.stale` arms need: a slot-level write compared with
+the first slot past an array's end, read at `r` below it. -/
+
+/-- Two paths that part ways part ways either way round. -/
+theorem diverge_flip : ∀ {p q : List Seg}, Close.Diverge p q → Close.Diverge q p
+  | [], _, h => h.elim
+  | _ :: _, [], h => (Close.not_diverge_nil_right h).elim
+  | a :: p, b :: q, h => by
+    rcases (Close.diverge_cons.1 h) with hab | hd
+    · exact Close.diverge_cons.2 (.inl fun e => hab e.symm)
+    · exact Close.diverge_cons.2 (.inr (diverge_flip hd))
+
+/-- A path parting from `p ++ r` parts from `p`, or runs through `p` and
+parts from `r` below it. -/
+theorem diverge_append_split : ∀ {q p r : List Seg}, Close.Diverge q (p ++ r) →
+    Close.Diverge q p ∨ ∃ t, q = p ++ t ∧ Close.Diverge t r
+  | q, [], _, h => .inr ⟨q, rfl, h⟩
+  | [], _ :: _, _, h => h.elim
+  | b :: q, a :: p, r, h => by
+    by_cases hab : b = a
+    · subst hab
+      rcases diverge_append_split (Close.diverge_cons.1 h |>.resolve_left (fun e => e rfl))
+        with hd | ⟨t, rfl, ht⟩
+      · exact .inl (Close.diverge_cons.2 (.inr hd))
+      · exact .inr ⟨t, rfl, ht⟩
+    · exact .inl (Close.diverge_cons.2 (.inl hab))
+
+/-- A slot write succeeds only where the slot-level read of its path does. -/
+theorem find_ok_of_save_ok {v new u : SVal} {ps : List Seg} (h : v.save ps new = .ok u) :
+    ∃ c, v.find ps = .ok c := by
+  cases hf : v.find ps with
+  | ok c => exact ⟨c, rfl⟩
+  | error e => rw [Close.save_of_find_error hf] at h; cases h
+
+/-- A slot write succeeds where the slot-level read of its path does, on a
+path with no `length` member (a write has no `length` arm). -/
+theorem save_ok_of_find_ok {new : SVal} : ∀ {v c : SVal} {ps : List Seg},
+    (∀ s ∈ ps, s ≠ .field "length") → v.find ps = .ok c → ∃ u, v.save ps new = .ok u
+  | v, _, [], _, _ => ⟨new, SVal.save_nil v new⟩
+  | v, c, s :: ps, hn, h => by
+    have hn' : ∀ t ∈ ps, t ≠ .field "length" := fun t ht => hn t (.tail _ ht)
+    have hs : s ≠ .field "length" := hn s (.head _)
+    cases v with
+    | prim p => cases s <;> simp only [SVal.find, reduceCtorEq] at h
+    | struct fields =>
+      cases s with
+      | «at» _ => simp only [SVal.find, reduceCtorEq] at h
+      | field n =>
+        simp only [SVal.find] at h
+        simp only [SVal.save]
+        split at h
+        · rename_i old hl
+          obtain ⟨u, hu⟩ := save_ok_of_find_ok (new := new) hn' h
+          exact ⟨_, by rw [hu]; rfl⟩
+        · cases h
+    | array elems shadow fx =>
+      cases s with
+      | field n =>
+        have : n ≠ "length" := fun e => hs (by rw [e])
+        simp only [SVal.find, reduceCtorEq] at h
+      | «at» i =>
+        simp only [SVal.find] at h
+        simp only [SVal.save]
+        split at h
+        · rename_i hi
+          obtain ⟨u, hu⟩ := save_ok_of_find_ok (new := new) hn' h
+          exact ⟨_, by rw [dif_pos hi, hu]; rfl⟩
+        · cases h
+    | map entries dflt =>
+      cases s with
+      | field _ => simp only [SVal.find, reduceCtorEq] at h
+      | «at» i =>
+        simp only [SVal.find] at h
+        simp only [SVal.save]
+        split at h
+        · rename_i old hl
+          obtain ⟨u, hu⟩ := save_ok_of_find_ok (new := new) hn' h
+          exact ⟨_, by rw [hu]; rfl⟩
+        · rename_i hl
+          obtain ⟨u, hu⟩ := save_ok_of_find_ok (new := new) hn' h
+          exact ⟨_, by rw [hu]; rfl⟩
+
+/-- A slot write through `p` writes the node at `p`: the slot-level read
+there is the old node with the rest written. -/
+theorem find_save_append {new v u : SVal} {p t : List Seg} (h : v.save (p ++ t) new = .ok u) :
+    ∃ c c', v.find p = .ok c ∧ c.save t new = .ok c' ∧ u.find p = .ok c' := by
+  obtain ⟨y, hy⟩ := find_ok_of_save_ok h
+  rw [SVal.find_append] at hy
+  obtain ⟨c, hc, -⟩ := Res.bind_eq_ok.1 hy
+  rw [SVal.save_append v p t new c hc] at h
+  obtain ⟨c', hc', hu⟩ := Res.bind_eq_ok.1 h
+  exact ⟨c, c', hc, hc', SVal.find_save_same hu⟩
+
+/-- A slot write against a slot it does not reach, read at `r` below the
+node at `p`: either the node is as it was, or the write runs through `p` and
+parts from `r` below it. -/
+theorem find_save_diverge_tail {new v u : SVal} {qs p r : List Seg}
+    (h : v.save qs new = .ok u) (hd : Close.Diverge qs (p ++ r)) :
+    u.find p = v.find p ∨ ∃ t c c', qs = p ++ t ∧ Close.Diverge t r ∧ v.find p = .ok c ∧
+      c.save t new = .ok c' ∧ u.find p = .ok c' := by
+  rcases diverge_append_split hd with hd' | ⟨t, rfl, ht⟩
+  · exact .inl (Close.find_save_diverge hd' h)
+  · obtain ⟨c, c', hc, hc', hu⟩ := find_save_append h
+    exact .inr ⟨t, c, c', rfl, ht, hc, hc', hu⟩
+
+/-- A slot write below a live node: the node there is still live, the write
+into it returns, and it is the new live node. -/
+theorem save_prefix_ok {new v u c : SVal} {ps r : List Seg} (h : v.save (ps ++ r) new = .ok u)
+    (hc : v.findLive ps = .ok c) : ∃ c', c.save r new = .ok c' ∧ u.findLive ps = .ok c' := by
+  have hu := findLive_save_prefix r h
+  rw [SVal.save_append v ps r new c (SVal.find_of_findLive hc)] at h
+  obtain ⟨c', hc', -⟩ := Res.bind_eq_ok.1 h
+  exact ⟨c', hc', by rw [hu, hc, Res.ok_bind, hc']⟩
+
+/-- A slot write below a path keeps whether the live read there returns. -/
+theorem findLive_save_prefix_has {new v u : SVal} {ps r : List Seg} (h : v.save (ps ++ r) new = .ok u) :
+    (u.findLive ps >>= fun _ => .ok (Value.bool true)) =
+      (v.findLive ps >>= fun _ => .ok (Value.bool true)) := by
+  cases hc : v.findLive ps with
+  | error e =>
+    rw [findLive_save_prefix r h, hc]; rfl
+  | ok c =>
+    obtain ⟨c', -, hu⟩ := save_prefix_ok h hc
+    rw [hu]; rfl
+
+/-- A word written at or above a path leaves no array there. -/
+theorem save_prim_not_array {x : PrimVal} {v u : SVal} {qs : List Seg} (z : List Seg)
+    (h : v.save qs (.prim x) = .ok u) {es sh : List SVal} {fx : Bool} :
+    u.findLive (qs ++ z) ≠ .ok (.array es sh fx) := by
+  cases z with
+  | nil =>
+    rw [List.append_nil, findLive_save_live h]
+    cases v.findLive qs <;> simp only [Res.error_bind, Res.ok_bind, ne_eq, reduceCtorEq,
+      not_false_eq_true, Except.ok.injEq]
+  | cons a r => exact findLive_save_below a r h _
+
+/-- The slot past the end of a live array, as a result: its head, a halt
+where it has none. -/
+def headR : List SVal → Res SVal
+  | c :: _ => .ok c
+  | [] => .error .revert
+
+/-- The slot-level read one past the live end reads the first slot past it. -/
+theorem find_slot_head {v : SVal} {ps : List Seg} {es sh : List SVal} {fx : Bool}
+    (h : v.findLive ps = .ok (.array es sh fx)) : v.find (ps ++ [.at es.length]) = headR sh := by
+  cases sh with
+  | nil => exact find_past_end_nil h []
+  | cons c t => rw [find_past_end h [], SVal.find_nil]; rfl
+
 end Decide
 
 end Solidity
