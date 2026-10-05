@@ -31,6 +31,8 @@ import Solidity.Calculus.Close
 import Solidity.Calculus.CloseTests
 import Solidity.Calculus.MemNames
 import Solidity.Calculus.DecideMem
+import Solidity.Calculus.DecideLang
+import Solidity.Calculus.MemRead
 import Solidity.Calculus.Decide
 import Solidity.Calculus.DecideSyn
 import Solidity.Calculus.DecideComplete

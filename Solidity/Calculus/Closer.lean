@@ -81,15 +81,6 @@ theorem Keeps.refl (σ : State) (a : LTerm) : Keeps σ a a := fun _ h => h
 theorem Keeps.trans {σ : State} {a b c : LTerm} (h₁ : Keeps σ a b) (h₂ : Keeps σ b c) :
     Keeps σ a c := fun v h => h₂ v (h₁ v h)
 
-/-- A power whose literal exponent is past `256`, Lean's
-`exponentiation.threshold`.  `Int.pow` recurses once per unit of the
-exponent, in compiled code and in the kernel, and neither heeds
-heartbeats, so `foldBin` leaves it unfolded: a checked power past it
-overflows anyway unless its base is `0`, `1` or `-1`. -/
-def powBig : BinOp → Value → Bool
-  | .pow, .int e | .powW, .int e => decide (256 < e)
-  | _, _ => false
-
 /-- `a ⊕ b` on two literals, evaluated (not a power past `powBig`);
 `false && b` and `true || b` too. -/
 def foldBin (op : BinOp) (p : PrimTy) (a b : LTerm) : LTerm :=
