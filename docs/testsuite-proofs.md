@@ -881,3 +881,90 @@ in `pushOn` (`docs/solc-alignment.md`, "Remaining deltas").
 - **Checked.**  `Derived7.lean` and `Derived8.lean` re-check with no
   errors after the change.
 
+
+## M7 integration (2026-10-05)
+
+The old corpus and the `⊢` derivations now tell one story.
+
+- **The table.**  `scripts/solkey-port.mjs` no longer translates
+  `TestSuite.sol`.  It reads the rows off two pins, with no Lean run:
+  `TestSuite/Report.lean` (`#solkey_obligations`) and the import's summary
+  in `Solidity/Solkey/TestSuite.lean`.  It also finds the theorems
+  `Solkey.TestSuite.f.proved` in `Solidity/TestSuite/`, and fails when the
+  pins disagree with the source or with each other.
+  - `tests/solkey/expected.tsv` has one row for each of the 420 functions:
+    300 `derived`, 116 `pending` (110 memory, 5 dangling aliases, and the
+    replay past its budget), 1 `divergent` (`storagePushReadBack`, the
+    length delta), 1 `excluded` and 2 `skip`.  Each row's note gives the
+    modality and the parameters.
+  - `docs/corpus-parity.md` has a TestSuite section, by modality and by
+    reason.
+  - Re-running the generator after M6 re-pins all of it with no hand edit.
+- **The generator, re-synced.**  The function header now accepts
+  `pure`/`view`, `external` and `returns (…)`, and reads the `skip` tag.
+  The solkey checkout is at `78f42fde33`, where solkey's "fixed some
+  warnings" made the header refuse about half of the functions.  Run with
+  that refusal, the generator dropped them from every suite; now the `Solc*`
+  modules come out unchanged, but for the commit line.
+  - The `Net` rows follow the checkout's renamed `.key` files (unsupported,
+    as before).
+  - The fixture's header says `solkeyCommit 100f7f24c3`, but its
+    `sourceSha256` is the file at `78f42fde33`, which adds
+    `localPreincrementAssign`.  That file is the one with 420 functions
+    (`scripts/solc-ast.mjs` is not this lane's).
+- **The corpus rows are corollaries.**  `Corpus/TestSuite.lean`
+  (generated) states each of the 281 derived obligations with no
+  parameters at `Solkey.TestSuite.initState`, as `diamond_of_proved` or
+  `box_of_proved` of its theorem and `initState_wt` (`Corpus/Imported.lean`).
+  - The 186 `corpus_decide` theorems, the 51 `#eval` pins of this module
+    and its `maxHeartbeats 8000000` are gone.
+  - The corollaries are not stated at `State.testSuiteStore`: that is the
+    hand-written contract's store, without the roots `fixedByKey` and
+    `boolKeyed`, so it is no storage of the imported contract and `wt`
+    fails there.
+  - Rows the old corpus decided at that store and `⊢` has not derived yet
+    (the memory ones) have no corpus theorem until M6.
+- **The two contracts agree.**  `testSuite_agrees` (`decide +kernel`, no
+  axioms) checks that every root of the hand-written `TestSuite` is a root of
+  `Solkey.TestSuite` at the same type, up to `folks`/`people` and
+  `aux`/`a`.  Structs are the shared `structDef`.  `Syntax.lean` is
+  unchanged.
+- **No override left in the corpus.**  The `Solc*` modules check at the
+  default heartbeats: each `corpus_decide` takes about 100 ms (the
+  `rw`, the `Decidable` instance and the kernel, 30–40 ms each).  The
+  generator and its probe no longer write `maxHeartbeats`.  The 2.5 s
+  theorem of the Measurements section was a 10-statement `TestSuite` body,
+  and those are no longer decided here.
+- **Audit.**  `scripts/check-testsuite.sh` checks three things with node
+  only:
+  - no `native_decide`, `sorry`, `admit` or `maxHeartbeats` in the code
+    (comments stripped) of `Solidity/TestSuite/` and `Solidity/Solkey/`;
+  - the `Report.lean` pin lists no `unsound`/`mismatched`/`unstated` theorem
+    (`#solkey_obligations` already rejects any axiom but Lean's three);
+  - the parity: the stated rows are exactly solkey's `testSuiteFunctions`
+    (418, every function not tagged skip), the skip rows are the 2 tagged
+    ones, and the table is what the generator writes today.
+
+  `--complete` also fails while a row is pending.  Today:
+  `418 = 300 derived + 116 pending + 1 divergent + 1 excluded; 2 skip`.
+
+**Times** (`Elab.async false`, warm; wall clock includes the tool round trip):
+
+| Module | Time |
+|---|---:|
+| `Corpus/TestSuite.lean`, 281 corollaries | under 3 s; no declaration reaches 3 ms |
+| `Corpus/Imported.lean` | about 0.4 s (`testSuite_agrees`: 218 ms in the kernel) |
+| `Corpus/SolcExpressions.lean` … `SolcControlFlow.lean`, no override | 2.6–4.6 s each |
+
+Loading `Corpus/TestSuite.lean`'s imports (`TestSuite/Report.lean`, so all
+the `Derived` modules) took about 140 s the first time.  `lake build
+SolidityCorpus` now builds the `SolkeyTestSuite` derivations too.
+
+**Still to do, once M6 lands:**
+- the final full `lean_build`;
+- the `#print axioms` sweep over `Solkey.TestSuite.*`;
+- re-running the generator, then `scripts/check-testsuite.sh --complete`,
+  for the 418-row parity.
+
+None of these was run here.  `#print axioms` on `testSuite_agrees` (none)
+and on two corollaries (Lean's three) was checked by hand.

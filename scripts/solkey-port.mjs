@@ -9,6 +9,20 @@
  * obligation per function, `\<{ f(…)@C; }\>(true)`, and the whole
  * specification is the `require` and `assert` statements in the body.
  *
+ * ## TestSuite is imported, not translated
+ *
+ * `TestSuite.sol` reaches Lean through solc's AST (`solc_import`,
+ * `Solidity/Solkey/TestSuite.lean`), with its obligations stated as solkey
+ * states them and derived by `⊢` (`Solidity/TestSuite/`).  This script
+ * reads its rows off two pins, with no Lean run: `Report.lean`'s
+ * `#solkey_obligations` (derived, pending, and what the import made of the
+ * rest) and the import's own summary (why one has no program).  The
+ * statuses are `derived` (the theorem `Solkey.TestSuite.f.proved` exists),
+ * `pending`, `divergent` (pending and false in the model, `DIVERGENT`),
+ * `excluded` and `skip`.  `Corpus/TestSuite.lean` states each derived
+ * obligation with no parameters at the initial storage, as a corollary.
+ * The script fails when the pins disagree with the source or each other.
+ *
  * ## The obligation
  *
  * Each function becomes `Corpus.Diamond σ sol[C]{ body }` — the formula
@@ -144,7 +158,6 @@ const PROBE = args.includes("--probe");
  * `Contract` constant (`Syntax.lean`), and the store it starts in.
  */
 const CONTRACTS = [
-  { file: "TestSuite.sol", suite: "taclets", store: "testSuiteStore" },
   { file: "solc/SolcExpressions.sol", suite: "solc", store: "solcExpressionsStore" },
   { file: "solc/SolcStructs.sol", suite: "solc", store: "solcStructsStore" },
   { file: "solc/SolcArrays.sol", suite: "solc", store: "solcArraysStore" },
@@ -158,19 +171,56 @@ const CONTRACTS = [
  * for solkey's (`Syntax.lean`, `Semantics.lean`'s stores say why).
  */
 const RENAMES = {
-  TestSuite: { people: "folks", a: "aux" },
   SolcExpressions: { v: "counter" },
   SolcMappings: { s: "sBox", m: "sMap" },
   SolcMemory: { x: "outerX", inner: "innerS", data: "inners" },
 };
 
+/** Struct renames, keyed by contract (none since TestSuite is imported). */
+const STRUCT_RENAMES = {};
+
 /**
- * Struct renames, keyed by contract: TestSuite's `Triple { uint[3] items; uint
- * tag; }` is `FixedTriple` (`Semantics.structDef`: `Triple` is SolcStructs').
+ * `TestSuite.sol` is not translated: `solc_import` reads it from solc's AST
+ * (`Solidity/Solkey/TestSuite.lean`), `solc_problems` states each obligation
+ * as solkey does, and `Solidity/TestSuite/Report.lean` pins which are derived
+ * by `⊢`.  Its rows are read off those pins (`readImported`), so re-running
+ * this script after a new theorem lands re-pins the table with no hand edit.
  */
-const STRUCT_RENAMES = {
-  TestSuite: { Triple: "FixedTriple" },
+const IMPORTED = {
+  file: "TestSuite.sol", suite: "taclets", contract: "TestSuite", ns: "Solkey.TestSuite",
 };
+
+/** Pending obligations that are false in the model, with the reason. */
+const DIVERGENT = {
+  storagePushReadBack:
+    "`wt(storage)` does not bound array lengths, so the checked `- 1` after a push " +
+    "can overflow; solc bounds lengths at `2^64` (`docs/solc-alignment.md`, " +
+    "\"Remaining deltas\")",
+};
+
+/** An alias through an index, dangling after a `pop` (docs/testsuite-proofs.md, M5). */
+const DANGLING =
+  "an alias bound through an index dangles after a `pop`: the fragment drops it at the " +
+  "next write (`SymB.onWrite`), and the write through it lands past the live end, which " +
+  "the reduction's live storage does not reach";
+
+/** Why a pending obligation is pending, where it is not the memory layer. */
+const PENDING = {
+  testDanglingReferenceSurvivesPush: DANGLING,
+  testArrayCopyClearsOldElements: DANGLING,
+  testArrayCopyKeepsDestinationTail: DANGLING,
+  testDeleteArrayLeavesDataPastLength: DANGLING,
+  testDanglingInnerArrayReappearsAfterPush: DANGLING,
+  memoryToStorageIndexArrayCopyRootExample:
+    "the search derives it, but its replay is past maxHeartbeats as one declaration " +
+    "(docs/testsuite-proofs.md, M3b review 2)",
+};
+
+const MEMORY_PENDING =
+  "uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)";
+
+/** The statuses of an imported row, in report order. */
+const IMPORTED_STATUSES = ["derived", "pending", "divergent", "excluded", "skip"];
 
 /**
  * Functions that cannot be expressed, with the reason, where the reason is
@@ -332,6 +382,7 @@ function parseContract(source) {
   const stateVars = new Map();
   let doc = [];
   let boxed = false;
+  let skipped = false;
   let depth = 0;
 
   for (let i = 0; i < lines.length; i++) {
@@ -346,17 +397,22 @@ function parseContract(source) {
     if (trimmed.startsWith("///")) {
       const text = trimmed.slice(3).trim();
       if (text === "@custom:key box") boxed = true;
+      else if (text === "@custom:key skip") skipped = true;
       else doc.push(text);
       continue;
     }
 
-    const header = trimmed.match(/^function\s+(\w+)\s*\(([^)]*)\)\s*public\s*\{/);
+    // `public` or `external`, then any mutability and a `returns (…)`
+    const header = trimmed.match(
+      /^function\s+(\w+)\s*\(([^)]*)\)\s*(?:public|external)\b(?:\s+(?:pure|view|payable))?(?:\s+returns\s*\([^)]*\))?\s*\{/,
+    );
     if (!header) {
       const code = line.replace(/\/\/.*$/, "");
       depth += (code.match(/\{/g) || []).length - (code.match(/\}/g) || []).length;
       if (trimmed !== "") {
         doc = [];
         boxed = false;
+        skipped = false;
       }
       continue;
     }
@@ -378,12 +434,14 @@ function parseContract(source) {
         return { ty: parts[0], name: parts[parts.length - 1] };
       }),
       boxed,
+      skipped,
       doc: doc.slice(),
       body: body.map((l) => l.replace(/\/\/.*$/, "")).join("\n")
         .replace(/\/\*[\s\S]*?\*\//g, ""),
     });
     doc = [];
     boxed = false;
+    skipped = false;
   }
   const structs = new Map();
   for (const m of source.matchAll(/struct\s+(\w+)\s*\{([^}]*)\}/g)) {
@@ -915,7 +973,6 @@ async function probe(jobs) {
     const lines = [
       "import Solidity.Corpus.Basic",
       "open Solidity Solidity.Corpus Semantics",
-      "set_option maxHeartbeats 8000000",
       "",
     ];
     const ranges = [];
@@ -988,6 +1045,145 @@ async function probe(jobs) {
   return results;
 }
 
+// ─────────────────────────── the imported TestSuite ─────────────────────
+
+/** The text of the `info:` pin in `file` whose `#guard_msgs` checks `command`. */
+function pinnedInfo(file, command) {
+  const src = readFileSync(join(ROOT, file), "utf8");
+  const at = src.indexOf(`#guard_msgs in\n${command}`);
+  const open = src.lastIndexOf("/--\ninfo: ", at);
+  if (at < 0 || open < 0) throw new Error(`${file}: no pinned \`${command}\``);
+  return src.slice(open + "/--\ninfo: ".length, src.lastIndexOf("\n-/", at));
+}
+
+/**
+ * What Lean says of each imported function: `Report.lean`'s pin of
+ * `#solkey_obligations` (derived, pending, other), the import's pin of its
+ * own report (why a function has no program), and the theorems
+ * `Solkey.TestSuite.f.proved` of `Solidity/TestSuite/`, by module.
+ */
+function readImported() {
+  const [head, ...rest] = pinnedInfo("Solidity/TestSuite/Report.lean",
+    `#solkey_obligations ${IMPORTED.ns}`).split("\n");
+  const counts = head.match(/^(\d+) functions: (\d+) derived, (\d+) pending, (\d+) other$/);
+  if (!counts) throw new Error(`Report.lean: unexpected pin \`${head}\``);
+  const cut = rest.indexOf("pending:");
+  const other = new Map(rest.slice(0, cut).filter(Boolean).map((l) => {
+    const [status, name] = l.split(" ");
+    return [name, status];
+  }));
+  const pending = new Set(rest.slice(cut + 1).join(" ").split(/\s+/).filter(Boolean));
+  const why = new Map();
+  const summary = pinnedInfo("Solidity/Solkey/TestSuite.lean", "#eval IO.println");
+  for (const m of summary.matchAll(/^(\w+) (\w+): (.*)$/gm)) why.set(m[2], m[3]);
+  const proved = new Map();
+  const dir = join(ROOT, "Solidity/TestSuite");
+  for (const f of readdirSync(dir).filter((f) => f.endsWith(".lean")).sort()) {
+    if (["Problems.lean", "Report.lean", "Suggestions.lean"].includes(f)) continue;
+    const src = readFileSync(join(dir, f), "utf8");
+    for (const m of src.matchAll(/^theorem Solkey\.TestSuite\.(\S+)\.proved\b/gm)) {
+      proved.set(m[1].replace(/^«(.*)»$/, "$1"), `Solidity/TestSuite/${f}`);
+    }
+  }
+  return {
+    total: Number(counts[1]), derived: Number(counts[2]), pendingCount: Number(counts[3]),
+    otherCount: Number(counts[4]), other, pending, why, proved,
+  };
+}
+
+/**
+ * The rows of the imported `TestSuite`, in the order of the source, with
+ * the functions whose corollary `Corpus/TestSuite.lean` states.  Fails when
+ * the pins disagree with the source or with each other: a stale pin is
+ * re-pinned in Lean (`#guard_msgs`) first, then this script is re-run.
+ */
+function importedRows(functions, lean) {
+  const where = `${IMPORTED.file} (${functions.length} functions)`;
+  if (functions.length !== lean.total) {
+    throw new Error(`${where}: Report.lean counts ${lean.total} functions`);
+  }
+  const rows = [];
+  const corollaries = [];
+  for (const fn of functions) {
+    const modality = fn.skipped ? "skip" : fn.boxed ? "box" : "diamond";
+    const note = fn.params.length > 0
+      ? `${modality}; for all ${fn.params.map((p) => p.name).join(", ")}`
+      : modality;
+    const status = lean.other.get(fn.name);
+    let row;
+    if (status === "skipped") {
+      if (!fn.skipped) throw new Error(`${fn.name}: skipped by the import, not tagged skip`);
+      row = ["skip", lean.why.get(fn.name) ?? "tagged `@custom:key skip`"];
+    } else if (fn.skipped) {
+      throw new Error(`${fn.name}: tagged skip, but the import did not skip it`);
+    } else if (status === "excluded" || status === "unsupported") {
+      row = [status, lean.why.get(fn.name) ?? ""];
+    } else if (status !== undefined) {
+      throw new Error(`Report.lean lists \`${status} ${fn.name}\`: fix it in Lean first`);
+    } else if (lean.pending.has(fn.name)) {
+      row = DIVERGENT[fn.name] ? ["divergent", DIVERGENT[fn.name]]
+        : ["pending", PENDING[fn.name] ??
+          (/\bmemory\b|\bnew\s/.test(fn.body) ? MEMORY_PENDING : "not derived yet")];
+    } else {
+      const module = lean.proved.get(fn.name);
+      if (!module) throw new Error(`${fn.name}: derived by Report.lean's pin, but no theorem`);
+      row = ["derived", `\`${IMPORTED.ns}.${fn.name}.proved\` (\`${module}\`)`];
+      if (fn.params.length === 0) corollaries.push({ fn, modality });
+    }
+    rows.push([IMPORTED.suite, IMPORTED.contract, fn.name, row[0], note, row[1]]);
+  }
+  const derived = rows.filter((r) => r[3] === "derived").length;
+  const pending = rows.filter((r) => ["pending", "divergent"].includes(r[3])).length;
+  if (derived !== lean.derived || pending !== lean.pendingCount) {
+    throw new Error(`${where}: ${derived} derived and ${pending} pending, ` +
+      `Report.lean ${lean.derived} and ${lean.pendingCount}`);
+  }
+  return { rows, corollaries };
+}
+
+/** `Corpus/TestSuite.lean`: each derived obligation with no parameters, at the initial storage. */
+function importedModule(corollaries, rows, commit) {
+  const tally = IMPORTED_STATUSES.map((k) => [k, rows.filter((r) => r[3] === k).length])
+    .filter(([, n]) => n > 0).map(([k, n]) => `${n} ${k}`).join(", ");
+  const blocks = corollaries.map(({ fn, modality }) => {
+    const doc = [
+      `solkey \`TestSuite.${fn.name}\` (\`${IMPORTED.file}\`).`,
+      ...(fn.doc.length > 0
+        ? ["", ...fn.doc.map((l) => l.replace(/-\//g, "- /").replace(/\/-/g, "/ -"))] : []),
+    ];
+    const [Form, lemma] = modality === "box" ? ["Box", "box_of_proved"] : ["Diamond", "diamond_of_proved"];
+    const f = `${IMPORTED.ns}.${declName(fn.name)}`;
+    return `/-- ${doc.join("\n")} -/\ntheorem ${declName(fn.name)} :\n` +
+      `    ${Form} ${IMPORTED.ns}.initState ${f} :=\n` +
+      `  ${lemma} ${f}.proved ${IMPORTED.ns}.initState_wt`;
+  });
+  return [
+    "import Solidity.Corpus.Imported",
+    "import Solidity.TestSuite.Report",
+    "",
+    "/-!",
+    `# solkey \`${IMPORTED.file}\`, derived`,
+    "",
+    `solkey \`${commit}\`: ${rows.length} functions — ${tally}.`,
+    "",
+    "Generated by `scripts/solkey-port.mjs`; do not edit by hand.  The",
+    "obligations are the imported contract's (`Solidity/Solkey/TestSuite.lean`),",
+    "derived by `⊢` in `Solidity/TestSuite/`; each one with no parameters is",
+    "stated here at the contract's initial storage, the corpus's form, as a",
+    "corollary of its theorem (`Corpus/Imported.lean` says why that store).",
+    "The other functions, and why, are the `TestSuite` rows of",
+    "`tests/solkey/expected.tsv`; `docs/corpus-parity.md` is the scoreboard.",
+    "-/",
+    "",
+    "namespace Solidity.Corpus.TestSuite",
+    "",
+    blocks.join("\n\n"),
+    "",
+    "end Solidity.Corpus.TestSuite",
+    "",
+  ].join("\n");
+}
+
 // ───────────────────────────── emission ─────────────────────────────────
 
 function solkeyCommit() {
@@ -1024,7 +1220,9 @@ const OPEN_CAUSES = {
 };
 
 /** `docs/corpus-parity.md`: the scoreboard, generated from the rows. */
-function parityDoc(rows, commit) {
+function parityDoc(allRows, commit) {
+  const importedRows = allRows.filter((r) => r[1] === IMPORTED.contract);
+  const rows = allRows.filter((r) => r[1] !== IMPORTED.contract);
   const byContract = new Map();
   for (const [, contract, , status] of rows) {
     if (!byContract.has(contract)) byContract.set(contract, {});
@@ -1063,15 +1261,71 @@ function parityDoc(rows, commit) {
     .map(([, c, f, , , reason]) =>
       `- \`${c}.${f}\`: ${OPEN_CAUSES[`${c}.${f}`] ?? reason}.`);
 
+  // TestSuite: status by modality, and why the rest is not derived
+  const modalityOf = (note) => note.split(";")[0];
+  const modalities = ["diamond", "box", "skip"];
+  const count = (st, mo) => importedRows.filter((r) => r[3] === st && (!mo || modalityOf(r[4]) === mo)).length;
+  const importedTable = [
+    `| | ${modalities.join(" | ")} | total |`,
+    `|---|${modalities.map(() => "---:").join("|")}|---:|`,
+    ...IMPORTED_STATUSES.map((st) =>
+      `| ${st} | ${modalities.map((mo) => count(st, mo)).join(" | ")} | ${count(st)} |`),
+    `| **all** | ${modalities.map((mo) => `**${importedRows.filter((r) => modalityOf(r[4]) === mo).length}**`).join(" | ")} | **${importedRows.length}** |`,
+  ];
+  const notDerived = new Map();
+  for (const [, , f, status, , reason] of importedRows) {
+    if (status === "derived") continue;
+    const key = `${status}\t${reason.replace(/^[\w.]+\.sol:\d+: /, "")}`;
+    if (!notDerived.has(key)) notDerived.set(key, []);
+    notDerived.get(key).push(f);
+  }
+  const notDerivedTable = [
+    "| Status | Because | # | functions |",
+    "|---|---|---:|---|",
+    ...[...notDerived].sort((a, b) => b[1].length - a[1].length).map(([key, fs]) => {
+      const [status, reason] = key.split("\t");
+      const names = fs.length > 6 ? `${fs.slice(0, 3).map((f) => `\`${f}\``).join(", ")}, …` : fs.map((f) => `\`${f}\``).join(", ");
+      return `| ${status} | ${reason.replace(/\|/g, "\\|")} | ${fs.length} | ${names} |`;
+    }),
+  ];
+
   return [
     "# solkey corpus parity",
     "",
     `Generated by \`scripts/solkey-port.mjs\` from solkey \`${commit}\`; do not edit by`,
     "hand. One row per solkey obligation is in `tests/solkey/expected.tsv`;",
-    "`scripts/check-corpus.sh` re-derives the verdicts and diffs them. The",
-    "obligation form (solkey's `⟨ f() ⟩ true` at the contract's initial",
-    "store) and the statuses are explained in `Solidity/Corpus/Basic.lean`",
-    "and the script's header:",
+    "`scripts/check-corpus.sh` diffs it, the corpus modules and this page against",
+    "what the generator writes.",
+    "",
+    "## TestSuite, by `⊢`",
+    "",
+    "`TestSuite.sol` is imported from solc's AST (`Solidity/Solkey/TestSuite.lean`),",
+    "its obligations are stated as solkey states them, under `wt(storage)`",
+    "(`Calculus/Problem.lean`), and derived by `⊢` in `Solidity/TestSuite/`; the",
+    "statuses are read off `Solidity/TestSuite/Report.lean`'s pin, and",
+    "`scripts/check-testsuite.sh` checks the parity with solkey's",
+    "`testSuiteFunctions` (every function not tagged skip):",
+    "",
+    "- **derived**: `Solkey.TestSuite.f.proved : ⊢ Solkey.TestSuite.f.problem`, with no",
+    "  axiom but Lean's three; with no parameters, also stated at the initial",
+    "  storage in `Solidity/Corpus/TestSuite.lean`;",
+    "- **pending**: stated, not derived yet;",
+    "- **divergent**: stated, and false in the model, for the reason below;",
+    "- **excluded**: no program: the model cannot hold its contract;",
+    "- **skip**: tagged `@custom:key skip`, as solkey skips it.",
+    "",
+    ...importedTable,
+    "",
+    "Not derived, by reason:",
+    "",
+    ...notDerivedTable,
+    "",
+    "## The other suites",
+    "",
+    "The obligation form of the translated suites (solkey's `⟨ f() ⟩ true` at",
+    "the contract's initial store) and their statuses are explained in",
+    "`Solidity/Corpus/Basic.lean` and the script's header; `--probe` re-derives",
+    "their verdicts:",
     "",
     "- **proved**: a theorem, decided by the kernel;",
     "- **evaluated**: the run ends normally, but it needs a well-founded",
@@ -1083,15 +1337,15 @@ function parityDoc(rows, commit) {
     "- **unported**: a `.key` problem the removed untyped layer had",
     "  hand-written, not yet re-derived.",
     "",
-    "## By contract",
+    "### By contract",
     "",
     ...table,
     "",
-    "## Open",
+    "### Open",
     "",
     ...(open.length > 0 ? open : ["None."]),
     "",
-    "## Unsupported, by reason",
+    "### Unsupported, by reason",
     "",
     ...reasonTable,
     "",
@@ -1147,7 +1401,14 @@ async function main() {
 
   const corpusDir = join(OUT, "Solidity/Corpus");
   mkdirSync(corpusDir, { recursive: true });
-  const modules = ["Solidity.Corpus.Basic"];
+  const modules = ["Solidity.Corpus.Basic", "Solidity.Corpus.Imported", "Solidity.Corpus.TestSuite"];
+
+  // TestSuite: read off Lean's pins, not translated.
+  const imported = importedRows(
+    parseContract(readFileSync(join(SOLKEY, IMPORTED.file), "utf8")).functions, readImported());
+  rows.push(...imported.rows);
+  writeFileSync(join(corpusDir, `${IMPORTED.contract}.lean`),
+    importedModule(imported.corollaries, imported.rows, commit));
 
   for (const { file, suite, store, contract, entries } of perContract) {
     const blocks = [];
@@ -1216,8 +1477,6 @@ async function main() {
         `namespace Solidity.Corpus.${contract}`,
         "",
         "open Semantics",
-        "",
-        "set_option maxHeartbeats 8000000",
         "",
         blocks.join("\n\n"),
         "",

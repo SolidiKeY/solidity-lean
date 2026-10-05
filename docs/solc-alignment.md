@@ -276,7 +276,8 @@ they would in a frame of their own.
   words and keys, not lengths. The delta goes both ways for a diamond
   obligation. One that reads a length through checked arithmetic
   (`storagePushReadBack`: `values[values.length - 1]` after a `push`) is
-  false in the model from a storage solc cannot reach, and stays underived.
+  false in the model from a storage solc cannot reach, and stays underived
+  (`divergent` in `tests/solkey/expected.tsv`).
   One that pushes with no bound on the length before it holds in the model
   where solc panics, from a length of exactly `2^64`:
   `storagePushLengthPositive`, `storagePopUnknownLength` and

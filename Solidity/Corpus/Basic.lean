@@ -39,6 +39,13 @@ here: `unfoldStore` spells every root's default with the structural `dflt`,
 and `*Store_eq` proves it the same store.  A run that still needs one is
 checked by `#eval` of `outcome` under `#guard_msgs` instead, and the verdict
 table (`tests/solkey/expected.tsv`) says `evaluated` rather than `proved`.
+
+`TestSuite.sol` is the exception: its obligations are stated as solkey
+states them and derived by `⊢` (`Solidity/TestSuite/`), so its corpus rows
+are corollaries at the initial storage, not runs decided here
+(`Corpus/Imported.lean`).  The kernel decides the other suites' runs at the
+default `maxHeartbeats`: their programs are short, each theorem about
+100 ms (docs/testsuite-proofs.md, "M7 integration").
 -/
 
 namespace Solidity.Corpus

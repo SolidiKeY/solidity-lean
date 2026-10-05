@@ -1,6 +1,7 @@
 -- The root of the `SolidityCorpus` library: solkey's example suites, ported
 -- by `scripts/solkey-port.mjs` (generated; do not edit).
 import Solidity.Corpus.Basic
+import Solidity.Corpus.Imported
 import Solidity.Corpus.TestSuite
 import Solidity.Corpus.SolcExpressions
 import Solidity.Corpus.SolcStructs

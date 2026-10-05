@@ -1,416 +1,423 @@
-taclets	TestSuite	additionStorageWrite	proved	concretized: solkey proves this for all parameters; ported at x = 5, y = 7	
-taclets	TestSuite	storageRootReadWrite	proved		
-taclets	TestSuite	storageFieldWriteRead	proved		
-taclets	TestSuite	storageFieldDeepAddAssign	proved		
-taclets	TestSuite	storageFieldGlobalAge	proved		
-taclets	TestSuite	storageAliasWrite	proved		
-taclets	TestSuite	storageIndexRootMapping	proved		
-taclets	TestSuite	storageIndexAddAssign	proved		
-taclets	TestSuite	storageIndexMappingAddAssign	proved		
-taclets	TestSuite	storageIndexArrayAddAssignOutOfBoundsReverts	unsupported		the function asserts that the program reverts (a box-only obligation): the obligation is a diamond, which proves the opposite
-taclets	TestSuite	storageIndexArrayReadOutOfBoundsReverts	unsupported		the function asserts that the program reverts (a box-only obligation): the obligation is a diamond, which proves the opposite
-taclets	TestSuite	storageIndexReadComplexReceiverBindLocalRoot	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
-taclets	TestSuite	storageIndexWriteComplexReceiverCopySource	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
-taclets	TestSuite	storageFieldWriteRootRhsComplexReceiver	proved		
-taclets	TestSuite	storageIndexWriteRootRhsComplexReceiver	proved		
-taclets	TestSuite	storagePushValue	unsupported		`.length` is not a program expression
-taclets	TestSuite	storagePushComplexReceiverNonsimpleArg	evaluated	concretized: solkey proves this for all parameters; ported at x = 40, y = 2	the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
-taclets	TestSuite	storagePushValueCopySource	proved		
-taclets	TestSuite	requireTrueLiteral	proved		
-taclets	TestSuite	requireFalseLiteral	unsupported		the function asserts that the program reverts (a box-only obligation): the obligation is a diamond, which proves the opposite
-taclets	TestSuite	storageBoolRootReadWrite	proved		
-taclets	TestSuite	storageBoolRootCopy	proved		
-taclets	TestSuite	storageBoolFieldRead	proved		
-taclets	TestSuite	storageBoolMappingRead	proved		
-taclets	TestSuite	storageBoolArrayRead	proved		
-taclets	TestSuite	storageBoolFieldStoreRoot	proved		
-taclets	TestSuite	memoryDeclDefault	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
-taclets	TestSuite	memoryArrayIndex	unsupported		`new T[](n)` array allocation is not in the fragment
-taclets	TestSuite	memoryNewIntoStructField	unsupported		`new T[](n)` array allocation is not in the fragment
-taclets	TestSuite	memoryNewIntoNestedField	unsupported		`new T[](n)` array allocation is not in the fragment
-taclets	TestSuite	memoryNewIntoIndex	unsupported		`new T[](n)` array allocation is not in the fragment
-taclets	TestSuite	storageNewIntoField	unsupported		`new T[](n)` array allocation is not in the fragment
-taclets	TestSuite	testStorageComplexReceiverEmptyPush	unsupported		`.length` is not a program expression
-taclets	TestSuite	additionBothStorage	proved		
-taclets	TestSuite	additionSimple	proved		
-taclets	TestSuite	additionStorageRead	proved		
-taclets	TestSuite	divisionSimple	proved		
-taclets	TestSuite	greaterEqualSimple	proved		
-taclets	TestSuite	greaterThanSimple	proved		
-taclets	TestSuite	lessEqualSimple	proved		
-taclets	TestSuite	lessThanSimple	proved		
-taclets	TestSuite	logicalAndSimple	proved		
-taclets	TestSuite	logicalAndShortCircuitRhs	proved		
-taclets	TestSuite	logicalNotSimple	proved		
-taclets	TestSuite	logicalOrSimple	proved		
-taclets	TestSuite	logicalOrShortCircuitRhs	proved		
-taclets	TestSuite	ternaryCaptureCond	proved		
-taclets	TestSuite	ternaryToIf	proved		
-taclets	TestSuite	ifUnfold	proved		
-taclets	TestSuite	ifElseUnfold	proved		
-taclets	TestSuite	ifSplit	proved		
-taclets	TestSuite	ifElseSplit	proved		
-taclets	TestSuite	ifTrue	proved		
-taclets	TestSuite	ifFalse	proved		
-taclets	TestSuite	ifElseTrue	proved		
-taclets	TestSuite	ifElseFalse	proved		
-taclets	TestSuite	ifElseNegated	proved		
-taclets	TestSuite	memoryDeclFresh	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
-taclets	TestSuite	memoryDeepField	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
-taclets	TestSuite	memoryFieldAddAssign	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
-taclets	TestSuite	memoryFieldSubAssign	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
-taclets	TestSuite	memoryFieldMulAssign	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
-taclets	TestSuite	memoryFieldDivAssign	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
-taclets	TestSuite	memoryFieldModAssign	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
-taclets	TestSuite	memoryFieldAddAssignUnfold	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
-taclets	TestSuite	memoryFieldAddAssignNse	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
-taclets	TestSuite	memoryFieldPreincrement	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
-taclets	TestSuite	memoryFieldPostincrement	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
-taclets	TestSuite	memoryFieldPredecrement	unsupported		decrement: `--` is Lean's comment token, and the grammar has no `x--`/`--x`
-taclets	TestSuite	memoryFieldPostdecrement	unsupported		decrement: `--` is Lean's comment token, and the grammar has no `x--`/`--x`
-taclets	TestSuite	memoryFieldPreincrementAssignment	evaluated	`T r = x++;` split into `T r; r = x++;`	the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
-taclets	TestSuite	memoryFieldPostincrementAssignment	evaluated	`T r = x++;` split into `T r; r = x++;`	the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
-taclets	TestSuite	memoryFieldPredecrementAssignment	unsupported		decrement: `--` is Lean's comment token, and the grammar has no `x--`/`--x`
-taclets	TestSuite	memoryFieldPostdecrementAssignment	unsupported		decrement: `--` is Lean's comment token, and the grammar has no `x--`/`--x`
-taclets	TestSuite	memoryFieldPreincrementUnfold	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
-taclets	TestSuite	memoryFieldAlias	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
-taclets	TestSuite	memoryFieldReferenceAssign	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
-taclets	TestSuite	memoryIndexArrayAddAssign	unsupported		`new T[](n)` array allocation is not in the fragment
-taclets	TestSuite	memoryIndexArraySubAssign	unsupported		`new T[](n)` array allocation is not in the fragment
-taclets	TestSuite	memoryIndexArrayMulAssign	unsupported		`new T[](n)` array allocation is not in the fragment
-taclets	TestSuite	memoryIndexArrayDivAssign	unsupported		`new T[](n)` array allocation is not in the fragment
-taclets	TestSuite	memoryIndexArrayModAssign	unsupported		`new T[](n)` array allocation is not in the fragment
-taclets	TestSuite	memoryIndexArrayAddAssignUnfold	unsupported		`new T[](n)` array allocation is not in the fragment
-taclets	TestSuite	memoryIndexArrayPreincrementUnfold	unsupported		`new T[](n)` array allocation is not in the fragment
-taclets	TestSuite	memoryIndexArrayPreincrement	unsupported		`new T[](n)` array allocation is not in the fragment
-taclets	TestSuite	memoryIndexArrayPostdecrement	unsupported		`new T[](n)` array allocation is not in the fragment
-taclets	TestSuite	memoryIndexArrayPostincrementAssignment	unsupported		`new T[](n)` array allocation is not in the fragment
-taclets	TestSuite	memoryIndexArrayPredecrementAssignment	unsupported		`new T[](n)` array allocation is not in the fragment
-taclets	TestSuite	memoryIndexWriteNse	unsupported		`new T[](n)` array allocation is not in the fragment
-taclets	TestSuite	memoryRootAlias	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
-taclets	TestSuite	memoryRootDeleteFresh	unsupported		Solidity elaboration failed: `delete` in memory is not a statement yet
-taclets	TestSuite	memoryStructArrayIndex	unsupported		`new T[](n)` array allocation is not in the fragment
-taclets	TestSuite	memoryToStorage	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
-taclets	TestSuite	memoryToStorageIndexMappingCopyRootExample	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
-taclets	TestSuite	memoryToStorageIndexArrayCopyRootExample	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
-taclets	TestSuite	memoryToStorageIndexArrayCopyRootOutOfBoundsReverts	unsupported		the function asserts that the program reverts (a box-only obligation): the obligation is a diamond, which proves the opposite
-taclets	TestSuite	moduloSimple	proved		
-taclets	TestSuite	multiplicationSimple	proved		
-taclets	TestSuite	notEqualSimple	proved		
-taclets	TestSuite	powerSimple	unsupported		exponentiation `**` is not in the sol_expr grammar
-taclets	TestSuite	requireGuardBox	proved	concretized: solkey proves this for all parameters; ported at x = 1	
-taclets	TestSuite	requireHoldsDiamond	proved		
-taclets	TestSuite	storageAliasRebindAlias	proved		
-taclets	TestSuite	storageDeepFieldPostincrement	proved		
-taclets	TestSuite	storageDeepFieldPreincrement	proved		
-taclets	TestSuite	storageFieldAddAssign	proved		
-taclets	TestSuite	storageFieldCopyStruct	proved		
-taclets	TestSuite	storageFieldCopyValueField	proved		
-taclets	TestSuite	storageFieldDeepDivAssign	proved		
-taclets	TestSuite	storageFieldDeepModAssign	proved		
-taclets	TestSuite	storageFieldDeepMulAssign	proved		
-taclets	TestSuite	storageFieldDeepSubAssign	proved		
-taclets	TestSuite	storageFieldDeepWriteRead	proved		
-taclets	TestSuite	storageFieldDelete	proved		
-taclets	TestSuite	storageFieldDeleteThenCopy	proved		
-taclets	TestSuite	storageFieldDeleteThenCopyDeep	proved		
-taclets	TestSuite	storageFieldDivAssign	proved		
-taclets	TestSuite	storageFieldModAssign	proved		
-taclets	TestSuite	storageFieldMulAssign	proved		
-taclets	TestSuite	storageFieldPostdecrementAssign	unsupported		decrement: `--` is Lean's comment token, and the grammar has no `x--`/`--x`
-taclets	TestSuite	storageFieldPostdecrement	unsupported		decrement: `--` is Lean's comment token, and the grammar has no `x--`/`--x`
-taclets	TestSuite	storageFieldPostincrementAssign	proved	`T r = x++;` split into `T r; r = x++;`	
-taclets	TestSuite	storageFieldPostincrement	proved		
-taclets	TestSuite	storageFieldPredecrementAssign	unsupported		decrement: `--` is Lean's comment token, and the grammar has no `x--`/`--x`
-taclets	TestSuite	storageFieldPredecrement	unsupported		decrement: `--` is Lean's comment token, and the grammar has no `x--`/`--x`
-taclets	TestSuite	storageFieldPreincrementAssign	proved	`T r = x++;` split into `T r; r = x++;`	
-taclets	TestSuite	storageFieldPreincrement	proved		
-taclets	TestSuite	storageFieldReadBindLocal	proved		
-taclets	TestSuite	storageFieldReadStoreRoot	proved		
-taclets	TestSuite	storageFieldSubAssign	proved		
-taclets	TestSuite	storageFieldWriteCaptureSrc	proved		
-taclets	TestSuite	storageFieldWriteRhsCapture	proved	concretized: solkey proves this for all parameters; ported at x = 1, y = 2, z = 3	
-taclets	TestSuite	storageIndexCopyValue	proved	concretized: solkey proves this for all parameters; ported at i = 5, j = 1	
-taclets	TestSuite	storageIndexCopysourceAfterPush	unsupported		`.length` is not a program expression
-taclets	TestSuite	storageIndexDecomposeAfterPush	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
-taclets	TestSuite	storageIndexDeleteMappingBool	proved		
-taclets	TestSuite	storageIndexDeleteMappingStruct	proved		
-taclets	TestSuite	storageIndexDeleteNseIndex	proved	concretized: solkey proves this for all parameters; ported at k = 2	
-taclets	TestSuite	storageIndexDelete	proved		
-taclets	TestSuite	storageIndexDivAssign	proved		
-taclets	TestSuite	storageIndexModAssign	proved		
-taclets	TestSuite	storageIndexMulAssign	proved		
-taclets	TestSuite	storageIndexMultipleWrites	proved		
-taclets	TestSuite	storageIndexPostdecrementAssign	unsupported		decrement: `--` is Lean's comment token, and the grammar has no `x--`/`--x`
-taclets	TestSuite	storageIndexPostdecrement	unsupported		decrement: `--` is Lean's comment token, and the grammar has no `x--`/`--x`
-taclets	TestSuite	storageIndexPostincrementAssign	proved	`T r = x++;` split into `T r; r = x++;`	
-taclets	TestSuite	storageIndexPostincrement	proved		
-taclets	TestSuite	storageIndexPredecrementAssign	unsupported		decrement: `--` is Lean's comment token, and the grammar has no `x--`/`--x`
-taclets	TestSuite	storageIndexPredecrement	unsupported		decrement: `--` is Lean's comment token, and the grammar has no `x--`/`--x`
-taclets	TestSuite	storageIndexPreincrementAssign	proved	`T r = x++;` split into `T r; r = x++;`	
-taclets	TestSuite	storageIndexPreincrement	proved		
-taclets	TestSuite	storageIndexReadMappingStoreRoot	proved	concretized: solkey proves this for all parameters; ported at k = 1	
-taclets	TestSuite	storageIndexReadNseIndex	proved	concretized: solkey proves this for all parameters; ported at i = 1	
-taclets	TestSuite	storageIndexSubAssign	proved		
-taclets	TestSuite	storageIndexWriteNseChain	proved	concretized: solkey proves this for all parameters; ported at i = 2, x = 3, y = 4	
-taclets	TestSuite	storageLocalDeclSkip	proved		
-taclets	TestSuite	storageMatrixNseIndex	evaluated	concretized: solkey proves this for all parameters; ported at i = 1, j = 2, x = 5, y = 6	the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
-taclets	TestSuite	storageMatrixWriteRead	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
-taclets	TestSuite	storagePopAfterPush	unsupported		`.length` is not a program expression
-taclets	TestSuite	storagePopNonempty	unsupported		`.length` is not a program expression
-taclets	TestSuite	storagePopUnknownLength	proved		
-taclets	TestSuite	storagePushEmpty	unsupported		`.length` is not a program expression
-taclets	TestSuite	storagePushLengthPositive	unsupported		`.length` is not a program expression
-taclets	TestSuite	storagePushLocalBind	unsupported		`.length` is not a program expression
-taclets	TestSuite	storagePushNonsimpleArg	unsupported		`.length` is not a program expression
-taclets	TestSuite	storagePushReadBack	unsupported		`.length` is not a program expression
-taclets	TestSuite	storagePushReturnAssign	unsupported		`b.push() = v` (a push used as a target): the grammar has it, the port does not translate it yet
-taclets	TestSuite	storageRootAddAssign	proved		
-taclets	TestSuite	storageRootCopySource	proved		
-taclets	TestSuite	storageRootCopyStruct	proved		
-taclets	TestSuite	storageRootDeleteStruct	proved		
-taclets	TestSuite	storageRootDeleteThenCopy	proved		
-taclets	TestSuite	storageRootDelete	proved		
-taclets	TestSuite	storageRootDisjoint	proved		
-taclets	TestSuite	storageRootDivAssign	proved		
-taclets	TestSuite	storageRootModAssign	proved		
-taclets	TestSuite	storageRootMulAssign	proved		
-taclets	TestSuite	storageRootMultipleWrites	proved		
-taclets	TestSuite	storageRootPostdecrementAssign	unsupported		decrement: `--` is Lean's comment token, and the grammar has no `x--`/`--x`
-taclets	TestSuite	storageRootPostincrementAssign	proved	`T r = x++;` split into `T r; r = x++;`	
-taclets	TestSuite	storageRootPostincrement	proved		
-taclets	TestSuite	storageRootPredecrement	unsupported		decrement: `--` is Lean's comment token, and the grammar has no `x--`/`--x`
-taclets	TestSuite	storageRootPreincrementAssign	proved	`T r = x++;` split into `T r; r = x++;`	
-taclets	TestSuite	storageRootPreincrement	proved		
-taclets	TestSuite	storageRootSubAssign	proved		
-taclets	TestSuite	storageRootWriteRhsCapture	proved	concretized: solkey proves this for all parameters; ported at x = 1, y = 2, z = 3	
-taclets	TestSuite	storageToMemory	proved		
-taclets	TestSuite	subtractionSimple	proved		
-taclets	TestSuite	subtractionStorageRead	proved		
-taclets	TestSuite	unaryMinusSimple	unsupported	concretized: solkey proves this for all parameters; ported at x = 5	Solidity elaboration failed: a uint where a int is expected
-taclets	TestSuite	testDeepPopDoesNotResetMappingMember	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
-taclets	TestSuite	testDeleteArrayDoesNotResetElementMappingMember	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
-taclets	TestSuite	testMemoryAliasing	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
-taclets	TestSuite	testMemoryDeleteAlias	unsupported		Solidity elaboration failed: `delete` in memory is not a statement yet
-taclets	TestSuite	testMemoryDeleteIdentityFieldFreshensSlot	unsupported		Solidity elaboration failed: `delete` in memory is not a statement yet
-taclets	TestSuite	testMemoryDeletePrimitiveField	unsupported		Solidity elaboration failed: `delete` in memory is not a statement yet
-taclets	TestSuite	testMemoryEvaluationOrder	unsupported		`new T[](n)` array allocation is not in the fragment
-taclets	TestSuite	testMemoryFieldShallowCopy	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
-taclets	TestSuite	testMemoryIndexWriteImpureIndexPrimitiveRhs	unsupported		`new T[](n)` array allocation is not in the fragment
-taclets	TestSuite	testMemoryIndexWriteImpureIndexRefRhs	unsupported		`new T[](n)` array allocation is not in the fragment
-taclets	TestSuite	testMemoryRootAlias	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
-taclets	TestSuite	testMemoryRootDeleteRebindsOnlyLocal	unsupported		Solidity elaboration failed: `delete` in memory is not a statement yet
-taclets	TestSuite	testMemoryToStorageCopyComplexSource	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
-taclets	TestSuite	testMemoryToStorageCopyComplexTarget	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
-taclets	TestSuite	testMemoryToStorageCopyField	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
-taclets	TestSuite	testMemoryToStorageCopyRoot	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
-taclets	TestSuite	testMemoryToStorageIndexCopyImpureIndex	unsupported		`++` inside an expression: the grammar has it as a statement only
-taclets	TestSuite	testMemoryTokenArrayAuxiliaryCases	unsupported		`new T[](n)` array allocation is not in the fragment
-taclets	TestSuite	testMemoryUintArrayAuxiliaryCases	unsupported		`new T[](n)` array allocation is not in the fragment
-taclets	TestSuite	testMemoryUintArrayPostdecrement	unsupported		`new T[](n)` array allocation is not in the fragment
-taclets	TestSuite	testMemoryUintArrayPostincrement	unsupported		`new T[](n)` array allocation is not in the fragment
-taclets	TestSuite	testMemoryUintArrayPredecrement	unsupported		`new T[](n)` array allocation is not in the fragment
-taclets	TestSuite	testNestedIndexWriteImpureIndexPrimitiveRhs	unsupported		`++` inside an expression: the grammar has it as a statement only
-taclets	TestSuite	testNestedIndexReadImpureIndex	unsupported		`++` inside an expression: the grammar has it as a statement only
-taclets	TestSuite	testNestedIndexWriteImpureReceiverAndIndex	unsupported		`++` inside an expression: the grammar has it as a statement only
-taclets	TestSuite	testNestedIndexReadImpureReceiverAndIndex	unsupported		`++` inside an expression: the grammar has it as a statement only
-taclets	TestSuite	testStorageDeleteImpureReceiver	unsupported		`++` inside an expression: the grammar has it as a statement only
-taclets	TestSuite	testStoragePushImpureReceiver	unsupported		`++` inside an expression: the grammar has it as a statement only
-taclets	TestSuite	testCompoundAssignImpureReceiver	unsupported		`++` inside an expression: the grammar has it as a statement only
-taclets	TestSuite	testMemoryFieldWriteImpureReceiver	unsupported		`new T[](n)` array allocation is not in the fragment
-taclets	TestSuite	testIndexWriteReceiverReadsMutatedVar	unsupported		`++` inside an expression: the grammar has it as a statement only
-taclets	TestSuite	testNestedStorageWrites	proved		
-taclets	TestSuite	testStorageAliases	proved		
-taclets	TestSuite	testStorageArrayReadWrite	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
-taclets	TestSuite	testStorageComplexReceiverPushFieldLvalue	unsupported		`.length` is not a program expression
-taclets	TestSuite	testStorageComplexReceiverPushLvalueCopy	unsupported		`b.push() = v` (a push used as a target): the grammar has it, the port does not translate it yet
-taclets	TestSuite	testStorageDeleteCase	proved		
-taclets	TestSuite	testStorageIndexWriteImpureIndexPrimitiveRhs	unsupported		`++` inside an expression: the grammar has it as a statement only
-taclets	TestSuite	testStorageIndexWriteImpureIndexRefRhs	unsupported		`++` inside an expression: the grammar has it as a statement only
-taclets	TestSuite	testStorageEvaluationOrder	unsupported		`++` inside an expression: the grammar has it as a statement only
-taclets	TestSuite	testStorageFieldDeepCopy	proved		
-taclets	TestSuite	testStorageMapReadWriteAndDelete	proved		
-taclets	TestSuite	testStorageMapStructCopy	proved		
-taclets	TestSuite	testStorageNestedPushReturnAlias	unsupported		`.length` is not a program expression
-taclets	TestSuite	testStoragePushFieldLvalue	unsupported		`.length` is not a program expression
-taclets	TestSuite	testStoragePushLvalueCopiesStorageSource	unsupported		`b.push() = v` (a push used as a target): the grammar has it, the port does not translate it yet
-taclets	TestSuite	testStoragePushLvaluePrimitive	unsupported		`b.push() = v` (a push used as a target): the grammar has it, the port does not translate it yet
-taclets	TestSuite	testStoragePushReturnAlias	unsupported		`.length` is not a program expression
-taclets	TestSuite	testDanglingReferenceSurvivesPush	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
-taclets	TestSuite	testArrayCopyClearsOldElements	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
-taclets	TestSuite	testArrayCopyKeepsDestinationTail	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
-taclets	TestSuite	testStorageIndexDeleteOutOfBoundsReverts	unsupported		the function asserts that the program reverts (a box-only obligation): the obligation is a diamond, which proves the opposite
-taclets	TestSuite	testFixedArrayDeleteKeepsLength	unsupported		state variable `fixedValues` (`uint[3]`) is not in the Lean contract `TestSuite` (Syntax.lean)
-taclets	TestSuite	testFixedArrayLength	unsupported		`.length` is not a program expression
-taclets	TestSuite	testFixedArrayIndexInBounds	unsupported		state variable `fixedValues` (`uint[3]`) is not in the Lean contract `TestSuite` (Syntax.lean)
-taclets	TestSuite	testFixedStructArrayLength	unsupported		`.length` is not a program expression
-taclets	TestSuite	testStructFixedMemberLength	unsupported		`.length` is not a program expression
-taclets	TestSuite	testMemoryStructFixedMemberLength	unsupported		`.length` is not a program expression
-taclets	TestSuite	testFixedElementOfDynamicArrayLength	unsupported		state variable `rows` (`uint[3][]`) is not in the Lean contract `TestSuite` (Syntax.lean)
-taclets	TestSuite	testMemoryFixedArrayLength	unsupported		fixed-size array type `uint[3]` is not in the grammar
-taclets	TestSuite	testMemoryNestedFixedArrayLength	unsupported		fixed-size array type `uint[2][3]` is not in the grammar
-taclets	TestSuite	testNewArrayOfFixedElementLength	unsupported		fixed-size array type `uint[2][]` is not in the grammar
-taclets	TestSuite	testFixedStructArrayDeleteResetsElements	unsupported		state variable `fixedTokens` (`Token[2]`) is not in the Lean contract `TestSuite` (Syntax.lean)
-taclets	TestSuite	testStructWithFixedArrayDeleteKeepsLength	unsupported		state variable `triple` (`Triple`) is not in the Lean contract `TestSuite` (Syntax.lean)
-taclets	TestSuite	testStructWithFixedArrayCopy	unsupported		state variable `triple` (`Triple`) is not in the Lean contract `TestSuite` (Syntax.lean)
-taclets	TestSuite	testFixedMappingArrayDeleteKeepsEntries	unsupported		state variable `fixedMaps` (`mapping(uint => uint)[2]`) is not in the Lean contract `TestSuite` (Syntax.lean)
-taclets	TestSuite	testDeleteArrayLeavesDataPastLength	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
-taclets	TestSuite	testPopKeepsMappingElementEntries	unsupported		state variable `mapArray` (`mapping(uint => uint)[]`) is not in the Lean contract `TestSuite` (Syntax.lean)
-taclets	TestSuite	testDeleteKeepsMappingElementEntries	unsupported		state variable `mapArray` (`mapping(uint => uint)[]`) is not in the Lean contract `TestSuite` (Syntax.lean)
-taclets	TestSuite	testPushBindMappingElement	unsupported		state variable `mapArray` (`mapping(uint => uint)[]`) is not in the Lean contract `TestSuite` (Syntax.lean)
-taclets	TestSuite	testDanglingInnerArrayReappearsAfterPush	unsupported		`.length` is not a program expression
-taclets	TestSuite	testStorageRootDeepCopy	proved		
-taclets	TestSuite	testStorageStructDeleteSkipsMappingMember	proved		
-taclets	TestSuite	testStorageToMemoryCopyComplexPath	proved		
-taclets	TestSuite	testStorageToMemoryCopyField	proved		
-taclets	TestSuite	testStorageToMemoryCopyRoot	proved		
-taclets	TestSuite	testStorageWriteAndRead	proved		
-taclets	TestSuite	storageFieldDecomposition	proved		
-taclets	TestSuite	storageFieldDeepValue	proved		
-taclets	TestSuite	storageIndexDecomposition	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
-taclets	TestSuite	storageIndexRootArray	proved		
-taclets	TestSuite	storageFieldDisjointFields	proved		
-taclets	TestSuite	storageFieldDisjointRoots	proved		
-taclets	TestSuite	memoryAssignForms	unsupported		`new T[](n)` array allocation is not in the fragment
-taclets	TestSuite	memoryDelete	unsupported		Solidity elaboration failed: `delete` in memory is not a statement yet
-taclets	TestSuite	storageAliasRebindOriginal	proved		
-taclets	TestSuite	testSimpleAssert	proved		
-taclets	TestSuite	localArithmeticInRange	proved	concretized: solkey proves this for all parameters; ported at x = 1	
-taclets	TestSuite	signedUnaryMinusInRange	unsupported		type `int8` is not in the fragment
-taclets	TestSuite	storageIndexWriteRefSourceImpureIndex	unsupported		`++` inside an expression: the grammar has it as a statement only
-taclets	TestSuite	storageFieldWriteRefSourceImpureReceiver	unsupported		`++` inside an expression: the grammar has it as a statement only
-taclets	TestSuite	storageFieldWriteStorageRefImpureReceiver	unsupported		`++` inside an expression: the grammar has it as a statement only
-taclets	TestSuite	storageFieldWriteRootRefImpureReceiver	unsupported		`++` inside an expression: the grammar has it as a statement only
-taclets	TestSuite	memoryFieldWriteMemRefImpureReceiver	unsupported		`new T[](n)` array allocation is not in the fragment
-taclets	TestSuite	storageIndexWriteRootRefImpureReceiver	unsupported		`++` inside an expression: the grammar has it as a statement only
-taclets	TestSuite	storageIndexWriteStorageRefImpureReceiver	unsupported		`++` inside an expression: the grammar has it as a statement only
-taclets	TestSuite	memoryToStorageIndexImpureReceiver	unsupported		`++` inside an expression: the grammar has it as a statement only
-taclets	TestSuite	memoryIndexWriteMemRefImpureReceiver	unsupported		`new T[](n)` array allocation is not in the fragment
-taclets	TestSuite	additionLeftImpureRightReadFirst	unsupported		`++` inside an expression: the grammar has it as a statement only
-taclets	TestSuite	additionRightImpure	unsupported		`++` inside an expression: the grammar has it as a statement only
-taclets	TestSuite	additionBothOperandsImpure	unsupported		`++` inside an expression: the grammar has it as a statement only
-taclets	TestSuite	subtractionLeftImpureRightReadFirst	unsupported		`++` inside an expression: the grammar has it as a statement only
-taclets	TestSuite	lessThanLeftImpureRightReadFirst	unsupported		`++` inside an expression: the grammar has it as a statement only
-taclets	TestSuite	testCopyRootKeepsValueMembers	proved		
-taclets	TestSuite	testCopyFieldNested	proved		
-taclets	TestSuite	testCopyOfCopy	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
-taclets	TestSuite	testCopyIntoMappingEntry	proved	concretized: solkey proves this for all parameters; ported at k = 3	
-taclets	TestSuite	testCopyArrayMemberElements	unsupported		`.length` is not a program expression
-taclets	TestSuite	testCopyPrimitiveRoot	proved		
-taclets	TestSuite	testCopyStoreRootFromField	proved		
-taclets	TestSuite	testCopyStoreRootFromIndex	proved		
-taclets	TestSuite	testPushCopyThenDeleteTarget	unsupported		`b.push() = v` (a push used as a target): the grammar has it, the port does not translate it yet
-taclets	TestSuite	indexWriteBothImpureStorageRef	unsupported		`++` inside an expression: the grammar has it as a statement only
-taclets	TestSuite	indexWriteBothImpureMemToStorage	unsupported		`++` inside an expression: the grammar has it as a statement only
-taclets	TestSuite	indexWriteBothImpureMemoryValue	unsupported		`new T[](n)` array allocation is not in the fragment
-taclets	TestSuite	indexWriteBothImpureMemRef	unsupported		`new T[](n)` array allocation is not in the fragment
-taclets	TestSuite	nestedMappingWriteRead	unsupported		state variable `grid` (`mapping(uint => mapping(uint => uint))`) is not in the Lean contract `TestSuite` (Syntax.lean)
-taclets	TestSuite	nestedMappingRowAlias	unsupported		state variable `grid` (`mapping(uint => mapping(uint => uint))`) is not in the Lean contract `TestSuite` (Syntax.lean)
-taclets	TestSuite	arrayOfMappingsIndex	unsupported		state variable `mapArray` (`mapping(uint => uint)[]`) is not in the Lean contract `TestSuite` (Syntax.lean)
-taclets	TestSuite	mappingOfLedgerMember	unsupported		state variable `ledgerMap` (`mapping(uint => Ledger)`) is not in the Lean contract `TestSuite` (Syntax.lean)
-taclets	TestSuite	mappingPointerTernary	unsupported		Solidity elaboration failed: a conditional of reference type
-taclets	TestSuite	mappingReadAsKey	proved		
-taclets	TestSuite	memoryFieldAsMappingKey	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
-taclets	TestSuite	mappingEntryThroughMemoryToMappingEntry	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
-taclets	TestSuite	boolKeyMapping	unsupported		state variable `boolKeyed` (`mapping(bool => uint)`) is not in the Lean contract `TestSuite` (Syntax.lean)
-taclets	TestSuite	boolIsTrueOrFalse	unsupported		parameter(s) b are not pinned by any require, so no concrete witness is derivable
-taclets	TestSuite	boolKeyMappingSymbolicKey	unsupported		state variable `boolKeyed` (`mapping(bool => uint)`) is not in the Lean contract `TestSuite` (Syntax.lean)
-taclets	TestSuite	recursiveStructMapping	unsupported		state variable `tree` (`Tree`) is not in the Lean contract `TestSuite` (Syntax.lean)
-taclets	TestSuite	numberLiteralForms	unsupported		ether and time units (`1 gwei`, `2 days`) are not in the grammar
-taclets	TestSuite	localAddAssign	proved		
-taclets	TestSuite	localMulAssign	proved		
-taclets	TestSuite	localDivAssign	proved		
-taclets	TestSuite	localModAssign	proved		
-taclets	TestSuite	localPostincrement	proved		
-taclets	TestSuite	localPostdecrement	unsupported		decrement: `--` is Lean's comment token, and the grammar has no `x--`/`--x`
-taclets	TestSuite	localPredecrement	unsupported		decrement: `--` is Lean's comment token, and the grammar has no `x--`/`--x`
-taclets	TestSuite	localDeclPostdecrement	unsupported		decrement: `--` is Lean's comment token, and the grammar has no `x--`/`--x`
-taclets	TestSuite	localDeclPredecrement	unsupported		decrement: `--` is Lean's comment token, and the grammar has no `x--`/`--x`
-taclets	TestSuite	subAssignValueRhsCapture	proved		
-taclets	TestSuite	mulAssignValueRhsCapture	proved		
-taclets	TestSuite	divAssignValueRhsCapture	proved		
-taclets	TestSuite	modAssignValueRhsCapture	proved		
-taclets	TestSuite	indexWriteValueRhsCapture	unsupported		`new T[](n)` array allocation is not in the fragment
-taclets	TestSuite	memoryIndexWriteMemRefRhsCapture	unsupported		`new T[](n)` array allocation is not in the fragment
-taclets	TestSuite	memoryIndexDeleteNonSimpleIndexCapture	unsupported		`new T[](n)` array allocation is not in the fragment
-taclets	TestSuite	boolInequalityCaptureLhs	proved		
-taclets	TestSuite	boolInequalityCaptureRhs	proved		
-taclets	TestSuite	greaterThanCaptureRhs	proved		
-taclets	TestSuite	greaterEqualCaptureLhs	proved		
-taclets	TestSuite	greaterEqualCaptureRhs	proved		
-taclets	TestSuite	lessEqualCaptureLhs	proved		
-taclets	TestSuite	lessEqualCaptureRhs	proved		
-taclets	TestSuite	logicalNotCapture	proved		
-taclets	TestSuite	unaryMinusCapture	unsupported		Solidity elaboration failed: a uint where a int is expected
-taclets	TestSuite	multiplicationUnfoldLeft	proved		
-taclets	TestSuite	multiplicationUnfoldRight	proved		
-taclets	TestSuite	divisionUnfoldLeft	proved		
-taclets	TestSuite	divisionUnfoldRight	proved		
-taclets	TestSuite	moduloUnfoldLeft	proved		
-taclets	TestSuite	moduloUnfoldRight	proved		
-taclets	TestSuite	signedDivisionTruncates	unsupported		Solidity elaboration failed: a uint where a int is expected
-taclets	TestSuite	signedModuloTakesDividendSign	unsupported		Solidity elaboration failed: a uint where a int is expected
-taclets	TestSuite	storageSignedDivModAssign	unsupported		state variable `signedTotal` (`int`) is not in the Lean contract `TestSuite` (Syntax.lean)
-taclets	TestSuite	powerUnfoldLeft	unsupported		exponentiation `**` is not in the sol_expr grammar
-taclets	TestSuite	powerUnfoldRight	unsupported		exponentiation `**` is not in the sol_expr grammar
-taclets	TestSuite	subtractionUnfoldRight	proved		
-taclets	TestSuite	parenthesizedRightOperand	proved		
-taclets	TestSuite	parenthesizedLeftOperand	proved		
-taclets	TestSuite	parenthesizedCondition	proved		
-taclets	TestSuite	memoryFieldSubAssignUnfold	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
-taclets	TestSuite	memoryFieldMulAssignUnfold	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
-taclets	TestSuite	memoryFieldDivAssignUnfold	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
-taclets	TestSuite	memoryFieldModAssignUnfold	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
-taclets	TestSuite	memoryFieldPostincrementUnfold	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
-taclets	TestSuite	memoryFieldPredecrementUnfold	unsupported		decrement: `--` is Lean's comment token, and the grammar has no `x--`/`--x`
-taclets	TestSuite	memoryFieldPostdecrementUnfold	unsupported		decrement: `--` is Lean's comment token, and the grammar has no `x--`/`--x`
-taclets	TestSuite	memoryFieldDeleteUnfold	unsupported		Solidity elaboration failed: `delete` in memory is not a statement yet
-taclets	TestSuite	memoryFieldReadUnfoldResult	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
-taclets	TestSuite	memoryIndexReadUnfoldResult	unsupported		`new T[](n)` array allocation is not in the fragment
-taclets	TestSuite	memoryIndexArraySubAssignUnfold	unsupported		`new T[](n)` array allocation is not in the fragment
-taclets	TestSuite	memoryIndexArrayMulAssignUnfold	unsupported		`new T[](n)` array allocation is not in the fragment
-taclets	TestSuite	memoryIndexArrayDivAssignUnfold	unsupported		`new T[](n)` array allocation is not in the fragment
-taclets	TestSuite	memoryIndexArrayModAssignUnfold	unsupported		`new T[](n)` array allocation is not in the fragment
-taclets	TestSuite	memoryIndexArrayPostincrementUnfold	unsupported		`new T[](n)` array allocation is not in the fragment
-taclets	TestSuite	memoryIndexArrayPredecrementUnfold	unsupported		`new T[](n)` array allocation is not in the fragment
-taclets	TestSuite	memoryIndexArrayPostdecrementUnfold	unsupported		`new T[](n)` array allocation is not in the fragment
-taclets	TestSuite	memoryIndexArrayDeleteUnfold	unsupported		`new T[](n)` array allocation is not in the fragment
-taclets	TestSuite	memoryIndexArrayPostincrement	unsupported		`new T[](n)` array allocation is not in the fragment
-taclets	TestSuite	memoryIndexArrayPredecrement	unsupported		`new T[](n)` array allocation is not in the fragment
-taclets	TestSuite	memoryIndexArrayPreincrementAssignment	unsupported		`new T[](n)` array allocation is not in the fragment
-taclets	TestSuite	memoryIndexArrayPostdecrementAssignment	unsupported		`new T[](n)` array allocation is not in the fragment
-taclets	TestSuite	storageFieldDeleteUnfold	proved		
-taclets	TestSuite	storageFieldPredecrementUnfold	unsupported		decrement: `--` is Lean's comment token, and the grammar has no `x--`/`--x`
-taclets	TestSuite	storageFieldPostdecrementUnfold	unsupported		decrement: `--` is Lean's comment token, and the grammar has no `x--`/`--x`
-taclets	TestSuite	storageIndexAddAssignUnfold	proved		
-taclets	TestSuite	storageIndexSubAssignUnfold	proved		
-taclets	TestSuite	storageIndexMulAssignUnfold	proved		
-taclets	TestSuite	storageIndexDivAssignUnfold	proved		
-taclets	TestSuite	storageIndexModAssignUnfold	proved		
-taclets	TestSuite	storageIndexPreincrementUnfold	proved		
-taclets	TestSuite	storageIndexPostincrementUnfold	proved		
-taclets	TestSuite	storageIndexPredecrementUnfold	unsupported		decrement: `--` is Lean's comment token, and the grammar has no `x--`/`--x`
-taclets	TestSuite	storageIndexPostdecrementUnfold	unsupported		decrement: `--` is Lean's comment token, and the grammar has no `x--`/`--x`
-taclets	TestSuite	storageIndexMappingSubAssign	proved		
-taclets	TestSuite	storageIndexMappingMulAssign	proved		
-taclets	TestSuite	storageIndexMappingDivAssign	proved		
-taclets	TestSuite	storageIndexMappingModAssign	proved		
-taclets	TestSuite	storageIndexMappingPreincrement	proved		
-taclets	TestSuite	storageIndexMappingPostincrement	proved		
-taclets	TestSuite	storageIndexMappingPredecrement	unsupported		decrement: `--` is Lean's comment token, and the grammar has no `x--`/`--x`
-taclets	TestSuite	storageIndexMappingPostdecrement	unsupported		decrement: `--` is Lean's comment token, and the grammar has no `x--`/`--x`
-taclets	TestSuite	storageIndexMappingPreincrementAssignment	proved	`T r = x++;` split into `T r; r = x++;`	
-taclets	TestSuite	storageIndexMappingPostincrementAssignment	proved	`T r = x++;` split into `T r; r = x++;`	
-taclets	TestSuite	storageIndexMappingPredecrementAssignment	unsupported		decrement: `--` is Lean's comment token, and the grammar has no `x--`/`--x`
-taclets	TestSuite	storageIndexMappingPostdecrementAssignment	unsupported		decrement: `--` is Lean's comment token, and the grammar has no `x--`/`--x`
-taclets	TestSuite	storageIndexReadArrayStoreRoot	proved		
-taclets	TestSuite	storagePopUnfold	proved		
-taclets	TestSuite	storageRootPostdecrement	unsupported		decrement: `--` is Lean's comment token, and the grammar has no `x--`/`--x`
-taclets	TestSuite	storageRootPredecrementAssign	unsupported		decrement: `--` is Lean's comment token, and the grammar has no `x--`/`--x`
-taclets	TestSuite	ternaryToIfStorage	proved		
-taclets	TestSuite	transferToOwner	unsupported		type conversion `payable(…)` is not an expression
-taclets	TestSuite	transferUnfoldReceiver	unsupported		type conversion `payable(…)` is not an expression
-taclets	TestSuite	transferUnfoldArgument	unsupported		type conversion `payable(…)` is not an expression
+taclets	TestSuite	additionStorageWrite	derived	box; for all x, y	`Solkey.TestSuite.additionStorageWrite.proved` (`Solidity/TestSuite/Derived1.lean`)
+taclets	TestSuite	storageRootReadWrite	derived	diamond	`Solkey.TestSuite.storageRootReadWrite.proved` (`Solidity/TestSuite/Derived1.lean`)
+taclets	TestSuite	storageFieldWriteRead	derived	diamond	`Solkey.TestSuite.storageFieldWriteRead.proved` (`Solidity/TestSuite/Derived1.lean`)
+taclets	TestSuite	storageFieldDeepAddAssign	derived	diamond	`Solkey.TestSuite.storageFieldDeepAddAssign.proved` (`Solidity/TestSuite/Derived1.lean`)
+taclets	TestSuite	storageFieldGlobalAge	derived	diamond	`Solkey.TestSuite.storageFieldGlobalAge.proved` (`Solidity/TestSuite/Derived1.lean`)
+taclets	TestSuite	storageAliasWrite	derived	diamond	`Solkey.TestSuite.storageAliasWrite.proved` (`Solidity/TestSuite/Derived1.lean`)
+taclets	TestSuite	storageIndexRootMapping	derived	diamond	`Solkey.TestSuite.storageIndexRootMapping.proved` (`Solidity/TestSuite/Derived1.lean`)
+taclets	TestSuite	storageIndexAddAssign	derived	box	`Solkey.TestSuite.storageIndexAddAssign.proved` (`Solidity/TestSuite/Derived1.lean`)
+taclets	TestSuite	storageIndexMappingAddAssign	derived	diamond	`Solkey.TestSuite.storageIndexMappingAddAssign.proved` (`Solidity/TestSuite/Derived1.lean`)
+taclets	TestSuite	storageIndexArrayAddAssignOutOfBoundsReverts	derived	box	`Solkey.TestSuite.storageIndexArrayAddAssignOutOfBoundsReverts.proved` (`Solidity/TestSuite/Derived1.lean`)
+taclets	TestSuite	storageIndexArrayReadOutOfBoundsReverts	derived	box	`Solkey.TestSuite.storageIndexArrayReadOutOfBoundsReverts.proved` (`Solidity/TestSuite/Derived1.lean`)
+taclets	TestSuite	storageIndexReadComplexReceiverBindLocalRoot	derived	box	`Solkey.TestSuite.storageIndexReadComplexReceiverBindLocalRoot.proved` (`Solidity/TestSuite/Derived1.lean`)
+taclets	TestSuite	storageIndexWriteComplexReceiverCopySource	derived	box	`Solkey.TestSuite.storageIndexWriteComplexReceiverCopySource.proved` (`Solidity/TestSuite/Derived7.lean`)
+taclets	TestSuite	storageFieldWriteRootRhsComplexReceiver	derived	diamond	`Solkey.TestSuite.storageFieldWriteRootRhsComplexReceiver.proved` (`Solidity/TestSuite/Derived7.lean`)
+taclets	TestSuite	storageIndexWriteRootRhsComplexReceiver	derived	diamond	`Solkey.TestSuite.storageIndexWriteRootRhsComplexReceiver.proved` (`Solidity/TestSuite/Derived1.lean`)
+taclets	TestSuite	storagePushValue	derived	box	`Solkey.TestSuite.storagePushValue.proved` (`Solidity/TestSuite/Derived7.lean`)
+taclets	TestSuite	storagePushComplexReceiverNonsimpleArg	derived	box; for all x, y	`Solkey.TestSuite.storagePushComplexReceiverNonsimpleArg.proved` (`Solidity/TestSuite/Derived7.lean`)
+taclets	TestSuite	storagePushValueCopySource	derived	box	`Solkey.TestSuite.storagePushValueCopySource.proved` (`Solidity/TestSuite/Derived7.lean`)
+taclets	TestSuite	requireTrueLiteral	derived	diamond	`Solkey.TestSuite.requireTrueLiteral.proved` (`Solidity/TestSuite/Derived1.lean`)
+taclets	TestSuite	requireFalseLiteral	derived	box	`Solkey.TestSuite.requireFalseLiteral.proved` (`Solidity/TestSuite/Derived1.lean`)
+taclets	TestSuite	storageBoolRootReadWrite	derived	diamond	`Solkey.TestSuite.storageBoolRootReadWrite.proved` (`Solidity/TestSuite/Derived1.lean`)
+taclets	TestSuite	storageBoolRootCopy	derived	diamond	`Solkey.TestSuite.storageBoolRootCopy.proved` (`Solidity/TestSuite/Derived1.lean`)
+taclets	TestSuite	storageBoolFieldRead	derived	diamond	`Solkey.TestSuite.storageBoolFieldRead.proved` (`Solidity/TestSuite/Derived1.lean`)
+taclets	TestSuite	storageBoolMappingRead	derived	diamond	`Solkey.TestSuite.storageBoolMappingRead.proved` (`Solidity/TestSuite/Derived1.lean`)
+taclets	TestSuite	storageBoolArrayRead	derived	box	`Solkey.TestSuite.storageBoolArrayRead.proved` (`Solidity/TestSuite/Derived1.lean`)
+taclets	TestSuite	storageBoolFieldStoreRoot	derived	diamond	`Solkey.TestSuite.storageBoolFieldStoreRoot.proved` (`Solidity/TestSuite/Derived1.lean`)
+taclets	TestSuite	memoryDeclDefault	pending	diamond	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	memoryArrayIndex	pending	diamond	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	memoryNewIntoStructField	pending	diamond	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	memoryNewIntoNestedField	pending	diamond	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	memoryNewIntoIndex	pending	diamond	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	storageNewIntoField	pending	diamond	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	testStorageComplexReceiverEmptyPush	derived	box	`Solkey.TestSuite.testStorageComplexReceiverEmptyPush.proved` (`Solidity/TestSuite/Derived7.lean`)
+taclets	TestSuite	additionBothStorage	derived	diamond	`Solkey.TestSuite.additionBothStorage.proved` (`Solidity/TestSuite/Derived1.lean`)
+taclets	TestSuite	additionSimple	derived	diamond	`Solkey.TestSuite.additionSimple.proved` (`Solidity/TestSuite/Derived1.lean`)
+taclets	TestSuite	additionStorageRead	derived	diamond	`Solkey.TestSuite.additionStorageRead.proved` (`Solidity/TestSuite/Derived1.lean`)
+taclets	TestSuite	divisionSimple	derived	diamond	`Solkey.TestSuite.divisionSimple.proved` (`Solidity/TestSuite/Derived1.lean`)
+taclets	TestSuite	greaterEqualSimple	derived	diamond	`Solkey.TestSuite.greaterEqualSimple.proved` (`Solidity/TestSuite/Derived1.lean`)
+taclets	TestSuite	greaterThanSimple	derived	diamond	`Solkey.TestSuite.greaterThanSimple.proved` (`Solidity/TestSuite/Derived1.lean`)
+taclets	TestSuite	lessEqualSimple	derived	diamond	`Solkey.TestSuite.lessEqualSimple.proved` (`Solidity/TestSuite/Derived1.lean`)
+taclets	TestSuite	lessThanSimple	derived	diamond	`Solkey.TestSuite.lessThanSimple.proved` (`Solidity/TestSuite/Derived1.lean`)
+taclets	TestSuite	logicalAndSimple	derived	diamond	`Solkey.TestSuite.logicalAndSimple.proved` (`Solidity/TestSuite/Derived1.lean`)
+taclets	TestSuite	logicalAndShortCircuitRhs	derived	diamond	`Solkey.TestSuite.logicalAndShortCircuitRhs.proved` (`Solidity/TestSuite/Derived1.lean`)
+taclets	TestSuite	logicalNotSimple	derived	diamond	`Solkey.TestSuite.logicalNotSimple.proved` (`Solidity/TestSuite/Derived1.lean`)
+taclets	TestSuite	logicalOrSimple	derived	diamond	`Solkey.TestSuite.logicalOrSimple.proved` (`Solidity/TestSuite/Derived1.lean`)
+taclets	TestSuite	logicalOrShortCircuitRhs	derived	diamond	`Solkey.TestSuite.logicalOrShortCircuitRhs.proved` (`Solidity/TestSuite/Derived1.lean`)
+taclets	TestSuite	ternaryCaptureCond	derived	diamond	`Solkey.TestSuite.ternaryCaptureCond.proved` (`Solidity/TestSuite/Derived1.lean`)
+taclets	TestSuite	ternaryToIf	derived	diamond	`Solkey.TestSuite.ternaryToIf.proved` (`Solidity/TestSuite/Derived1.lean`)
+taclets	TestSuite	ifUnfold	derived	diamond	`Solkey.TestSuite.ifUnfold.proved` (`Solidity/TestSuite/Derived1.lean`)
+taclets	TestSuite	ifElseUnfold	derived	diamond	`Solkey.TestSuite.ifElseUnfold.proved` (`Solidity/TestSuite/Derived1.lean`)
+taclets	TestSuite	ifSplit	derived	diamond	`Solkey.TestSuite.ifSplit.proved` (`Solidity/TestSuite/Derived1.lean`)
+taclets	TestSuite	ifElseSplit	derived	diamond	`Solkey.TestSuite.ifElseSplit.proved` (`Solidity/TestSuite/Derived1.lean`)
+taclets	TestSuite	ifTrue	derived	diamond	`Solkey.TestSuite.ifTrue.proved` (`Solidity/TestSuite/Derived2.lean`)
+taclets	TestSuite	ifFalse	derived	diamond	`Solkey.TestSuite.ifFalse.proved` (`Solidity/TestSuite/Derived2.lean`)
+taclets	TestSuite	ifElseTrue	derived	diamond	`Solkey.TestSuite.ifElseTrue.proved` (`Solidity/TestSuite/Derived2.lean`)
+taclets	TestSuite	ifElseFalse	derived	diamond	`Solkey.TestSuite.ifElseFalse.proved` (`Solidity/TestSuite/Derived2.lean`)
+taclets	TestSuite	ifElseNegated	derived	diamond	`Solkey.TestSuite.ifElseNegated.proved` (`Solidity/TestSuite/Derived2.lean`)
+taclets	TestSuite	memoryDeepField	pending	diamond	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	memoryFieldAddAssign	pending	diamond	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	memoryFieldSubAssign	pending	diamond	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	memoryFieldMulAssign	pending	diamond	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	memoryFieldDivAssign	pending	diamond	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	memoryFieldModAssign	pending	diamond	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	memoryFieldAddAssignUnfold	pending	diamond	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	memoryFieldAddAssignNse	pending	diamond	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	memoryFieldPreincrement	pending	diamond	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	memoryFieldPostincrement	pending	diamond	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	memoryFieldPredecrement	pending	diamond	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	memoryFieldPostdecrement	pending	diamond	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	memoryFieldPreincrementAssignment	pending	diamond	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	memoryFieldPostincrementAssignment	pending	diamond	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	memoryFieldPredecrementAssignment	pending	diamond	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	memoryFieldPostdecrementAssignment	pending	diamond	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	memoryFieldPreincrementUnfold	pending	diamond	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	memoryFieldAlias	pending	diamond	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	memoryFieldReferenceAssign	pending	diamond	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	memoryIndexArrayAddAssign	pending	diamond	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	memoryIndexArraySubAssign	pending	diamond	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	memoryIndexArrayMulAssign	pending	diamond	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	memoryIndexArrayDivAssign	pending	diamond	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	memoryIndexArrayModAssign	pending	diamond	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	memoryIndexArrayAddAssignUnfold	pending	diamond	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	memoryIndexArrayPreincrementUnfold	pending	diamond	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	memoryIndexArrayPreincrement	pending	diamond	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	memoryIndexArrayPostdecrement	pending	diamond	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	memoryIndexArrayPostincrementAssignment	pending	diamond	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	memoryIndexArrayPredecrementAssignment	pending	diamond	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	memoryIndexWriteNse	pending	box; for all i, lhs, rhs	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	memoryRootAlias	pending	diamond	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	memoryRootDeleteFresh	pending	diamond	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	memoryStructArrayIndex	pending	diamond	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	memoryToStorage	pending	diamond	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	memoryToStorageIndexMappingCopyRootExample	pending	diamond	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	memoryToStorageIndexArrayCopyRootExample	pending	box	the search derives it, but its replay is past maxHeartbeats as one declaration (docs/testsuite-proofs.md, M3b review 2)
+taclets	TestSuite	memoryToStorageIndexArrayCopyRootOutOfBoundsReverts	pending	box	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	moduloSimple	derived	diamond	`Solkey.TestSuite.moduloSimple.proved` (`Solidity/TestSuite/Derived2.lean`)
+taclets	TestSuite	multiplicationSimple	derived	diamond	`Solkey.TestSuite.multiplicationSimple.proved` (`Solidity/TestSuite/Derived2.lean`)
+taclets	TestSuite	notEqualSimple	derived	diamond	`Solkey.TestSuite.notEqualSimple.proved` (`Solidity/TestSuite/Derived2.lean`)
+taclets	TestSuite	powerSimple	derived	diamond	`Solkey.TestSuite.powerSimple.proved` (`Solidity/TestSuite/Derived2.lean`)
+taclets	TestSuite	requireGuardBox	derived	box; for all x	`Solkey.TestSuite.requireGuardBox.proved` (`Solidity/TestSuite/Derived2.lean`)
+taclets	TestSuite	requireHoldsDiamond	derived	diamond	`Solkey.TestSuite.requireHoldsDiamond.proved` (`Solidity/TestSuite/Derived2.lean`)
+taclets	TestSuite	storageAliasRebindAlias	derived	diamond	`Solkey.TestSuite.storageAliasRebindAlias.proved` (`Solidity/TestSuite/Derived2.lean`)
+taclets	TestSuite	storageDeepFieldPostincrement	derived	diamond	`Solkey.TestSuite.storageDeepFieldPostincrement.proved` (`Solidity/TestSuite/Derived2.lean`)
+taclets	TestSuite	storageDeepFieldPreincrement	derived	diamond	`Solkey.TestSuite.storageDeepFieldPreincrement.proved` (`Solidity/TestSuite/Derived2.lean`)
+taclets	TestSuite	storageFieldAddAssign	derived	diamond	`Solkey.TestSuite.storageFieldAddAssign.proved` (`Solidity/TestSuite/Derived2.lean`)
+taclets	TestSuite	storageFieldCopyStruct	derived	diamond	`Solkey.TestSuite.storageFieldCopyStruct.proved` (`Solidity/TestSuite/Derived7.lean`)
+taclets	TestSuite	storageFieldCopyValueField	derived	diamond	`Solkey.TestSuite.storageFieldCopyValueField.proved` (`Solidity/TestSuite/Derived2.lean`)
+taclets	TestSuite	storageFieldDeepDivAssign	derived	diamond	`Solkey.TestSuite.storageFieldDeepDivAssign.proved` (`Solidity/TestSuite/Derived2.lean`)
+taclets	TestSuite	storageFieldDeepModAssign	derived	diamond	`Solkey.TestSuite.storageFieldDeepModAssign.proved` (`Solidity/TestSuite/Derived2.lean`)
+taclets	TestSuite	storageFieldDeepMulAssign	derived	diamond	`Solkey.TestSuite.storageFieldDeepMulAssign.proved` (`Solidity/TestSuite/Derived2.lean`)
+taclets	TestSuite	storageFieldDeepSubAssign	derived	diamond	`Solkey.TestSuite.storageFieldDeepSubAssign.proved` (`Solidity/TestSuite/Derived2.lean`)
+taclets	TestSuite	storageFieldDeepWriteRead	derived	diamond	`Solkey.TestSuite.storageFieldDeepWriteRead.proved` (`Solidity/TestSuite/Derived2.lean`)
+taclets	TestSuite	storageFieldDelete	derived	diamond	`Solkey.TestSuite.storageFieldDelete.proved` (`Solidity/TestSuite/Derived2.lean`)
+taclets	TestSuite	storageFieldDeleteThenCopy	derived	diamond	`Solkey.TestSuite.storageFieldDeleteThenCopy.proved` (`Solidity/TestSuite/Derived7.lean`)
+taclets	TestSuite	storageFieldDeleteThenCopyDeep	derived	diamond	`Solkey.TestSuite.storageFieldDeleteThenCopyDeep.proved` (`Solidity/TestSuite/Derived7.lean`)
+taclets	TestSuite	storageFieldDivAssign	derived	diamond	`Solkey.TestSuite.storageFieldDivAssign.proved` (`Solidity/TestSuite/Derived2.lean`)
+taclets	TestSuite	storageFieldModAssign	derived	diamond	`Solkey.TestSuite.storageFieldModAssign.proved` (`Solidity/TestSuite/Derived2.lean`)
+taclets	TestSuite	storageFieldMulAssign	derived	diamond	`Solkey.TestSuite.storageFieldMulAssign.proved` (`Solidity/TestSuite/Derived2.lean`)
+taclets	TestSuite	storageFieldPostdecrementAssign	derived	diamond	`Solkey.TestSuite.storageFieldPostdecrementAssign.proved` (`Solidity/TestSuite/Derived2.lean`)
+taclets	TestSuite	storageFieldPostdecrement	derived	diamond	`Solkey.TestSuite.storageFieldPostdecrement.proved` (`Solidity/TestSuite/Derived2.lean`)
+taclets	TestSuite	storageFieldPostincrementAssign	derived	diamond	`Solkey.TestSuite.storageFieldPostincrementAssign.proved` (`Solidity/TestSuite/Derived2.lean`)
+taclets	TestSuite	storageFieldPostincrement	derived	diamond	`Solkey.TestSuite.storageFieldPostincrement.proved` (`Solidity/TestSuite/Derived2.lean`)
+taclets	TestSuite	storageFieldPredecrementAssign	derived	diamond	`Solkey.TestSuite.storageFieldPredecrementAssign.proved` (`Solidity/TestSuite/Derived2.lean`)
+taclets	TestSuite	storageFieldPredecrement	derived	diamond	`Solkey.TestSuite.storageFieldPredecrement.proved` (`Solidity/TestSuite/Derived2.lean`)
+taclets	TestSuite	storageFieldPreincrementAssign	derived	diamond	`Solkey.TestSuite.storageFieldPreincrementAssign.proved` (`Solidity/TestSuite/Derived2.lean`)
+taclets	TestSuite	storageFieldPreincrement	derived	diamond	`Solkey.TestSuite.storageFieldPreincrement.proved` (`Solidity/TestSuite/Derived2.lean`)
+taclets	TestSuite	storageFieldReadBindLocal	derived	diamond	`Solkey.TestSuite.storageFieldReadBindLocal.proved` (`Solidity/TestSuite/Derived2.lean`)
+taclets	TestSuite	storageFieldReadStoreRoot	derived	diamond	`Solkey.TestSuite.storageFieldReadStoreRoot.proved` (`Solidity/TestSuite/Derived2.lean`)
+taclets	TestSuite	storageFieldSubAssign	derived	diamond	`Solkey.TestSuite.storageFieldSubAssign.proved` (`Solidity/TestSuite/Derived2.lean`)
+taclets	TestSuite	storageFieldWriteCaptureSrc	derived	diamond	`Solkey.TestSuite.storageFieldWriteCaptureSrc.proved` (`Solidity/TestSuite/Derived7.lean`)
+taclets	TestSuite	storageFieldWriteRhsCapture	derived	box; for all x, y, z	`Solkey.TestSuite.storageFieldWriteRhsCapture.proved` (`Solidity/TestSuite/Derived2.lean`)
+taclets	TestSuite	storageIndexCopyValue	derived	box; for all i, j	`Solkey.TestSuite.storageIndexCopyValue.proved` (`Solidity/TestSuite/Derived2.lean`)
+taclets	TestSuite	storageIndexCopysourceAfterPush	derived	box	`Solkey.TestSuite.storageIndexCopysourceAfterPush.proved` (`Solidity/TestSuite/Derived7.lean`)
+taclets	TestSuite	storageIndexDecomposeAfterPush	derived	box	`Solkey.TestSuite.storageIndexDecomposeAfterPush.proved` (`Solidity/TestSuite/Derived7.lean`)
+taclets	TestSuite	storageIndexDeleteMappingBool	derived	diamond	`Solkey.TestSuite.storageIndexDeleteMappingBool.proved` (`Solidity/TestSuite/Derived2.lean`)
+taclets	TestSuite	storageIndexDeleteMappingStruct	derived	diamond	`Solkey.TestSuite.storageIndexDeleteMappingStruct.proved` (`Solidity/TestSuite/Derived2.lean`)
+taclets	TestSuite	storageIndexDeleteNseIndex	derived	box; for all k	`Solkey.TestSuite.storageIndexDeleteNseIndex.proved` (`Solidity/TestSuite/Derived3.lean`)
+taclets	TestSuite	storageIndexDelete	derived	box	`Solkey.TestSuite.storageIndexDelete.proved` (`Solidity/TestSuite/Derived3.lean`)
+taclets	TestSuite	storageIndexDivAssign	derived	box	`Solkey.TestSuite.storageIndexDivAssign.proved` (`Solidity/TestSuite/Derived3.lean`)
+taclets	TestSuite	storageIndexModAssign	derived	box	`Solkey.TestSuite.storageIndexModAssign.proved` (`Solidity/TestSuite/Derived3.lean`)
+taclets	TestSuite	storageIndexMulAssign	derived	box	`Solkey.TestSuite.storageIndexMulAssign.proved` (`Solidity/TestSuite/Derived3.lean`)
+taclets	TestSuite	storageIndexMultipleWrites	derived	box	`Solkey.TestSuite.storageIndexMultipleWrites.proved` (`Solidity/TestSuite/Derived3.lean`)
+taclets	TestSuite	storageIndexPostdecrementAssign	derived	box	`Solkey.TestSuite.storageIndexPostdecrementAssign.proved` (`Solidity/TestSuite/Derived3.lean`)
+taclets	TestSuite	storageIndexPostdecrement	derived	box	`Solkey.TestSuite.storageIndexPostdecrement.proved` (`Solidity/TestSuite/Derived3.lean`)
+taclets	TestSuite	storageIndexPostincrementAssign	derived	box	`Solkey.TestSuite.storageIndexPostincrementAssign.proved` (`Solidity/TestSuite/Derived3.lean`)
+taclets	TestSuite	storageIndexPostincrement	derived	box	`Solkey.TestSuite.storageIndexPostincrement.proved` (`Solidity/TestSuite/Derived3.lean`)
+taclets	TestSuite	storageIndexPredecrementAssign	derived	box	`Solkey.TestSuite.storageIndexPredecrementAssign.proved` (`Solidity/TestSuite/Derived3.lean`)
+taclets	TestSuite	storageIndexPredecrement	derived	box	`Solkey.TestSuite.storageIndexPredecrement.proved` (`Solidity/TestSuite/Derived3.lean`)
+taclets	TestSuite	storageIndexPreincrementAssign	derived	box	`Solkey.TestSuite.storageIndexPreincrementAssign.proved` (`Solidity/TestSuite/Derived3.lean`)
+taclets	TestSuite	storageIndexPreincrement	derived	box	`Solkey.TestSuite.storageIndexPreincrement.proved` (`Solidity/TestSuite/Derived3.lean`)
+taclets	TestSuite	storageIndexReadMappingStoreRoot	derived	box; for all k	`Solkey.TestSuite.storageIndexReadMappingStoreRoot.proved` (`Solidity/TestSuite/Derived3.lean`)
+taclets	TestSuite	storageIndexReadNseIndex	derived	box; for all i	`Solkey.TestSuite.storageIndexReadNseIndex.proved` (`Solidity/TestSuite/Derived3.lean`)
+taclets	TestSuite	storageIndexSubAssign	derived	box	`Solkey.TestSuite.storageIndexSubAssign.proved` (`Solidity/TestSuite/Derived3.lean`)
+taclets	TestSuite	storageIndexWriteNseChain	derived	box; for all i, x, y	`Solkey.TestSuite.storageIndexWriteNseChain.proved` (`Solidity/TestSuite/Derived3.lean`)
+taclets	TestSuite	storageLocalDeclSkip	derived	diamond	`Solkey.TestSuite.storageLocalDeclSkip.proved` (`Solidity/TestSuite/Derived3.lean`)
+taclets	TestSuite	storageMatrixNseIndex	derived	box; for all i, j, x, y	`Solkey.TestSuite.storageMatrixNseIndex.proved` (`Solidity/TestSuite/Derived3.lean`)
+taclets	TestSuite	storageMatrixWriteRead	derived	box	`Solkey.TestSuite.storageMatrixWriteRead.proved` (`Solidity/TestSuite/Derived3.lean`)
+taclets	TestSuite	storagePopAfterPush	derived	box	`Solkey.TestSuite.storagePopAfterPush.proved` (`Solidity/TestSuite/Derived7.lean`)
+taclets	TestSuite	storagePopNonempty	derived	box	`Solkey.TestSuite.storagePopNonempty.proved` (`Solidity/TestSuite/Derived7.lean`)
+taclets	TestSuite	storagePopUnknownLength	derived	diamond	`Solkey.TestSuite.storagePopUnknownLength.proved` (`Solidity/TestSuite/Derived7.lean`)
+taclets	TestSuite	storagePushEmpty	derived	box	`Solkey.TestSuite.storagePushEmpty.proved` (`Solidity/TestSuite/Derived7.lean`)
+taclets	TestSuite	storagePushLengthPositive	derived	diamond	`Solkey.TestSuite.storagePushLengthPositive.proved` (`Solidity/TestSuite/Derived7.lean`)
+taclets	TestSuite	storagePushLocalBind	derived	box	`Solkey.TestSuite.storagePushLocalBind.proved` (`Solidity/TestSuite/Derived7.lean`)
+taclets	TestSuite	storagePushNonsimpleArg	derived	box; for all x, y	`Solkey.TestSuite.storagePushNonsimpleArg.proved` (`Solidity/TestSuite/Derived7.lean`)
+taclets	TestSuite	storagePushReadBack	divergent	diamond	`wt(storage)` does not bound array lengths, so the checked `- 1` after a push can overflow; solc bounds lengths at `2^64` (`docs/solc-alignment.md`, "Remaining deltas")
+taclets	TestSuite	storagePushReturnAssign	derived	box	`Solkey.TestSuite.storagePushReturnAssign.proved` (`Solidity/TestSuite/Derived7.lean`)
+taclets	TestSuite	storageRootAddAssign	derived	diamond	`Solkey.TestSuite.storageRootAddAssign.proved` (`Solidity/TestSuite/Derived3.lean`)
+taclets	TestSuite	storageRootCopySource	derived	diamond	`Solkey.TestSuite.storageRootCopySource.proved` (`Solidity/TestSuite/Derived3.lean`)
+taclets	TestSuite	storageRootCopyStruct	derived	diamond	`Solkey.TestSuite.storageRootCopyStruct.proved` (`Solidity/TestSuite/Derived7.lean`)
+taclets	TestSuite	storageRootDeleteStruct	derived	diamond	`Solkey.TestSuite.storageRootDeleteStruct.proved` (`Solidity/TestSuite/Derived3.lean`)
+taclets	TestSuite	storageRootDeleteThenCopy	derived	diamond	`Solkey.TestSuite.storageRootDeleteThenCopy.proved` (`Solidity/TestSuite/Derived7.lean`)
+taclets	TestSuite	storageRootDelete	derived	diamond	`Solkey.TestSuite.storageRootDelete.proved` (`Solidity/TestSuite/Derived3.lean`)
+taclets	TestSuite	storageRootDisjoint	derived	diamond	`Solkey.TestSuite.storageRootDisjoint.proved` (`Solidity/TestSuite/Derived3.lean`)
+taclets	TestSuite	storageRootDivAssign	derived	diamond	`Solkey.TestSuite.storageRootDivAssign.proved` (`Solidity/TestSuite/Derived3.lean`)
+taclets	TestSuite	storageRootModAssign	derived	diamond	`Solkey.TestSuite.storageRootModAssign.proved` (`Solidity/TestSuite/Derived3.lean`)
+taclets	TestSuite	storageRootMulAssign	derived	diamond	`Solkey.TestSuite.storageRootMulAssign.proved` (`Solidity/TestSuite/Derived3.lean`)
+taclets	TestSuite	storageRootMultipleWrites	derived	diamond	`Solkey.TestSuite.storageRootMultipleWrites.proved` (`Solidity/TestSuite/Derived3.lean`)
+taclets	TestSuite	storageRootPostdecrementAssign	derived	diamond	`Solkey.TestSuite.storageRootPostdecrementAssign.proved` (`Solidity/TestSuite/Derived3.lean`)
+taclets	TestSuite	storageRootPostincrementAssign	derived	diamond	`Solkey.TestSuite.storageRootPostincrementAssign.proved` (`Solidity/TestSuite/Derived3.lean`)
+taclets	TestSuite	storageRootPostincrement	derived	diamond	`Solkey.TestSuite.storageRootPostincrement.proved` (`Solidity/TestSuite/Derived3.lean`)
+taclets	TestSuite	storageRootPredecrement	derived	diamond	`Solkey.TestSuite.storageRootPredecrement.proved` (`Solidity/TestSuite/Derived3.lean`)
+taclets	TestSuite	storageRootPreincrementAssign	derived	diamond	`Solkey.TestSuite.storageRootPreincrementAssign.proved` (`Solidity/TestSuite/Derived3.lean`)
+taclets	TestSuite	storageRootPreincrement	derived	diamond	`Solkey.TestSuite.storageRootPreincrement.proved` (`Solidity/TestSuite/Derived3.lean`)
+taclets	TestSuite	storageRootSubAssign	derived	diamond	`Solkey.TestSuite.storageRootSubAssign.proved` (`Solidity/TestSuite/Derived3.lean`)
+taclets	TestSuite	storageRootWriteRhsCapture	derived	box; for all x, y, z	`Solkey.TestSuite.storageRootWriteRhsCapture.proved` (`Solidity/TestSuite/Derived3.lean`)
+taclets	TestSuite	storageToMemory	pending	diamond	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	subtractionSimple	derived	diamond	`Solkey.TestSuite.subtractionSimple.proved` (`Solidity/TestSuite/Derived3.lean`)
+taclets	TestSuite	subtractionStorageRead	derived	diamond	`Solkey.TestSuite.subtractionStorageRead.proved` (`Solidity/TestSuite/Derived3.lean`)
+taclets	TestSuite	unaryMinusSimple	derived	box; for all x	`Solkey.TestSuite.unaryMinusSimple.proved` (`Solidity/TestSuite/Derived4.lean`)
+taclets	TestSuite	testDeepPopDoesNotResetMappingMember	derived	box	`Solkey.TestSuite.testDeepPopDoesNotResetMappingMember.proved` (`Solidity/TestSuite/Derived7.lean`)
+taclets	TestSuite	testDeleteArrayDoesNotResetElementMappingMember	derived	box	`Solkey.TestSuite.testDeleteArrayDoesNotResetElementMappingMember.proved` (`Solidity/TestSuite/Derived7.lean`)
+taclets	TestSuite	testMemoryAliasing	pending	diamond	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	testMemoryDeleteAlias	pending	diamond	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	testMemoryDeleteIdentityFieldFreshensSlot	pending	diamond	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	testMemoryDeletePrimitiveField	pending	diamond	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	testMemoryEvaluationOrder	pending	diamond	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	testMemoryFieldShallowCopy	pending	diamond	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	testMemoryIndexWriteImpureIndexPrimitiveRhs	pending	diamond	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	testMemoryIndexWriteImpureIndexRefRhs	pending	diamond	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	testMemoryRootAlias	pending	diamond	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	testMemoryRootDeleteRebindsOnlyLocal	pending	diamond	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	testMemoryToStorageCopyComplexSource	pending	diamond	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	testMemoryToStorageCopyComplexTarget	pending	diamond	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	testMemoryToStorageCopyField	pending	diamond	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	testMemoryToStorageCopyRoot	pending	diamond	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	testMemoryToStorageIndexCopyImpureIndex	pending	box	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	testMemoryTokenArrayAuxiliaryCases	pending	diamond	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	testMemoryUintArrayAuxiliaryCases	pending	diamond	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	testMemoryUintArrayPostdecrement	pending	diamond	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	testMemoryUintArrayPostincrement	pending	diamond	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	testMemoryUintArrayPredecrement	pending	diamond	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	testNestedIndexWriteImpureIndexPrimitiveRhs	derived	box	`Solkey.TestSuite.testNestedIndexWriteImpureIndexPrimitiveRhs.proved` (`Solidity/TestSuite/Derived7.lean`)
+taclets	TestSuite	testNestedIndexReadImpureIndex	derived	box	`Solkey.TestSuite.testNestedIndexReadImpureIndex.proved` (`Solidity/TestSuite/Derived7.lean`)
+taclets	TestSuite	testNestedIndexWriteImpureReceiverAndIndex	derived	box	`Solkey.TestSuite.testNestedIndexWriteImpureReceiverAndIndex.proved` (`Solidity/TestSuite/Derived7.lean`)
+taclets	TestSuite	testNestedIndexReadImpureReceiverAndIndex	derived	box	`Solkey.TestSuite.testNestedIndexReadImpureReceiverAndIndex.proved` (`Solidity/TestSuite/Derived7.lean`)
+taclets	TestSuite	testStorageDeleteImpureReceiver	derived	box	`Solkey.TestSuite.testStorageDeleteImpureReceiver.proved` (`Solidity/TestSuite/Derived7.lean`)
+taclets	TestSuite	testStoragePushImpureReceiver	derived	box	`Solkey.TestSuite.testStoragePushImpureReceiver.proved` (`Solidity/TestSuite/Derived7.lean`)
+taclets	TestSuite	testCompoundAssignImpureReceiver	derived	box	`Solkey.TestSuite.testCompoundAssignImpureReceiver.proved` (`Solidity/TestSuite/Derived7.lean`)
+taclets	TestSuite	testMemoryFieldWriteImpureReceiver	pending	diamond	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	testIndexWriteReceiverReadsMutatedVar	derived	box	`Solkey.TestSuite.testIndexWriteReceiverReadsMutatedVar.proved` (`Solidity/TestSuite/Derived7.lean`)
+taclets	TestSuite	testNestedStorageWrites	derived	diamond	`Solkey.TestSuite.testNestedStorageWrites.proved` (`Solidity/TestSuite/Derived4.lean`)
+taclets	TestSuite	testStorageAliases	derived	diamond	`Solkey.TestSuite.testStorageAliases.proved` (`Solidity/TestSuite/Derived4.lean`)
+taclets	TestSuite	testStorageArrayReadWrite	derived	box	`Solkey.TestSuite.testStorageArrayReadWrite.proved` (`Solidity/TestSuite/Derived4.lean`)
+taclets	TestSuite	testStorageComplexReceiverPushFieldLvalue	derived	box	`Solkey.TestSuite.testStorageComplexReceiverPushFieldLvalue.proved` (`Solidity/TestSuite/Derived7.lean`)
+taclets	TestSuite	testStorageComplexReceiverPushLvalueCopy	derived	box	`Solkey.TestSuite.testStorageComplexReceiverPushLvalueCopy.proved` (`Solidity/TestSuite/Derived7.lean`)
+taclets	TestSuite	testStorageDeletePaperCase	derived	diamond	`Solkey.TestSuite.testStorageDeletePaperCase.proved` (`Solidity/TestSuite/Derived4.lean`)
+taclets	TestSuite	testStorageIndexWriteImpureIndexPrimitiveRhs	derived	box	`Solkey.TestSuite.testStorageIndexWriteImpureIndexPrimitiveRhs.proved` (`Solidity/TestSuite/Derived7.lean`)
+taclets	TestSuite	testStorageIndexWriteImpureIndexRefRhs	derived	box	`Solkey.TestSuite.testStorageIndexWriteImpureIndexRefRhs.proved` (`Solidity/TestSuite/Derived7.lean`)
+taclets	TestSuite	testStorageEvaluationOrder	derived	box	`Solkey.TestSuite.testStorageEvaluationOrder.proved` (`Solidity/TestSuite/Derived7.lean`)
+taclets	TestSuite	testStorageFieldDeepCopy	derived	diamond	`Solkey.TestSuite.testStorageFieldDeepCopy.proved` (`Solidity/TestSuite/Derived7.lean`)
+taclets	TestSuite	testStorageMapReadWriteAndDelete	derived	diamond	`Solkey.TestSuite.testStorageMapReadWriteAndDelete.proved` (`Solidity/TestSuite/Derived4.lean`)
+taclets	TestSuite	testStorageMapStructCopy	derived	diamond	`Solkey.TestSuite.testStorageMapStructCopy.proved` (`Solidity/TestSuite/Derived7.lean`)
+taclets	TestSuite	testStorageNestedPushReturnAlias	derived	box	`Solkey.TestSuite.testStorageNestedPushReturnAlias.proved` (`Solidity/TestSuite/Derived7.lean`)
+taclets	TestSuite	testStoragePushFieldLvalue	derived	box	`Solkey.TestSuite.testStoragePushFieldLvalue.proved` (`Solidity/TestSuite/Derived8.lean`)
+taclets	TestSuite	testStoragePushLvalueCopiesStorageSource	derived	box	`Solkey.TestSuite.testStoragePushLvalueCopiesStorageSource.proved` (`Solidity/TestSuite/Derived8.lean`)
+taclets	TestSuite	testStoragePushLvaluePrimitive	derived	box	`Solkey.TestSuite.testStoragePushLvaluePrimitive.proved` (`Solidity/TestSuite/Derived8.lean`)
+taclets	TestSuite	testStoragePushReturnAlias	derived	box	`Solkey.TestSuite.testStoragePushReturnAlias.proved` (`Solidity/TestSuite/Derived8.lean`)
+taclets	TestSuite	testDanglingReferenceSurvivesPush	pending	diamond	an alias bound through an index dangles after a `pop`: the fragment drops it at the next write (`SymB.onWrite`), and the write through it lands past the live end, which the reduction's live storage does not reach
+taclets	TestSuite	testArrayCopyClearsOldElements	pending	diamond	an alias bound through an index dangles after a `pop`: the fragment drops it at the next write (`SymB.onWrite`), and the write through it lands past the live end, which the reduction's live storage does not reach
+taclets	TestSuite	testArrayCopyKeepsDestinationTail	pending	diamond	an alias bound through an index dangles after a `pop`: the fragment drops it at the next write (`SymB.onWrite`), and the write through it lands past the live end, which the reduction's live storage does not reach
+taclets	TestSuite	testStorageIndexDeleteOutOfBoundsReverts	derived	box	`Solkey.TestSuite.testStorageIndexDeleteOutOfBoundsReverts.proved` (`Solidity/TestSuite/Derived4.lean`)
+taclets	TestSuite	testFixedArrayDeleteKeepsLength	derived	box	`Solkey.TestSuite.testFixedArrayDeleteKeepsLength.proved` (`Solidity/TestSuite/Derived4.lean`)
+taclets	TestSuite	testFixedArrayLength	derived	diamond	`Solkey.TestSuite.testFixedArrayLength.proved` (`Solidity/TestSuite/Derived4.lean`)
+taclets	TestSuite	testFixedArrayIndexInBounds	derived	diamond	`Solkey.TestSuite.testFixedArrayIndexInBounds.proved` (`Solidity/TestSuite/Derived4.lean`)
+taclets	TestSuite	testFixedStructArrayLength	derived	diamond	`Solkey.TestSuite.testFixedStructArrayLength.proved` (`Solidity/TestSuite/Derived4.lean`)
+taclets	TestSuite	testStructFixedMemberLength	derived	diamond	`Solkey.TestSuite.testStructFixedMemberLength.proved` (`Solidity/TestSuite/Derived4.lean`)
+taclets	TestSuite	testMemoryStructFixedMemberLength	pending	diamond	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	testFixedElementOfDynamicArrayLength	derived	box	`Solkey.TestSuite.testFixedElementOfDynamicArrayLength.proved` (`Solidity/TestSuite/Derived4.lean`)
+taclets	TestSuite	testMemoryFixedArrayLength	pending	diamond	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	testMemoryNestedFixedArrayLength	pending	diamond	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	testNewArrayOfFixedElementLength	pending	diamond	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	testMappingOfFixedArrayLength	derived	diamond; for all k	`Solkey.TestSuite.testMappingOfFixedArrayLength.proved` (`Solidity/TestSuite/Derived4.lean`)
+taclets	TestSuite	testMemoryDynamicArrayDefaultLength	pending	diamond	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	testFixedStructArrayDeleteResetsElements	derived	box	`Solkey.TestSuite.testFixedStructArrayDeleteResetsElements.proved` (`Solidity/TestSuite/Derived4.lean`)
+taclets	TestSuite	testStructWithFixedArrayDeleteKeepsLength	derived	box	`Solkey.TestSuite.testStructWithFixedArrayDeleteKeepsLength.proved` (`Solidity/TestSuite/Derived4.lean`)
+taclets	TestSuite	testStructWithFixedArrayCopy	derived	box	`Solkey.TestSuite.testStructWithFixedArrayCopy.proved` (`Solidity/TestSuite/Derived8.lean`)
+taclets	TestSuite	testFixedMappingArrayDeleteKeepsEntries	derived	box	`Solkey.TestSuite.testFixedMappingArrayDeleteKeepsEntries.proved` (`Solidity/TestSuite/Derived4.lean`)
+taclets	TestSuite	testDeleteArrayLeavesDataPastLength	pending	diamond	an alias bound through an index dangles after a `pop`: the fragment drops it at the next write (`SymB.onWrite`), and the write through it lands past the live end, which the reduction's live storage does not reach
+taclets	TestSuite	testPopKeepsMappingElementEntries	derived	diamond	`Solkey.TestSuite.testPopKeepsMappingElementEntries.proved` (`Solidity/TestSuite/Derived8.lean`)
+taclets	TestSuite	testDeleteKeepsMappingElementEntries	derived	diamond	`Solkey.TestSuite.testDeleteKeepsMappingElementEntries.proved` (`Solidity/TestSuite/Derived8.lean`)
+taclets	TestSuite	testPushBindMappingElement	derived	diamond	`Solkey.TestSuite.testPushBindMappingElement.proved` (`Solidity/TestSuite/Derived8.lean`)
+taclets	TestSuite	testDanglingInnerArrayReappearsAfterPush	pending	diamond	an alias bound through an index dangles after a `pop`: the fragment drops it at the next write (`SymB.onWrite`), and the write through it lands past the live end, which the reduction's live storage does not reach
+taclets	TestSuite	testStorageRootDeepCopy	derived	diamond	`Solkey.TestSuite.testStorageRootDeepCopy.proved` (`Solidity/TestSuite/Derived8.lean`)
+taclets	TestSuite	testStorageStructDeleteSkipsMappingMember	derived	diamond	`Solkey.TestSuite.testStorageStructDeleteSkipsMappingMember.proved` (`Solidity/TestSuite/Derived4.lean`)
+taclets	TestSuite	testStorageToMemoryCopyComplexPath	pending	diamond	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	testStorageToMemoryCopyField	pending	diamond	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	testStorageToMemoryCopyRoot	pending	diamond	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	testStorageWriteAndRead	derived	diamond	`Solkey.TestSuite.testStorageWriteAndRead.proved` (`Solidity/TestSuite/Derived4.lean`)
+taclets	TestSuite	storageFieldDecomposition	derived	diamond	`Solkey.TestSuite.storageFieldDecomposition.proved` (`Solidity/TestSuite/Derived4.lean`)
+taclets	TestSuite	storageFieldDeepValue	derived	diamond	`Solkey.TestSuite.storageFieldDeepValue.proved` (`Solidity/TestSuite/Derived4.lean`)
+taclets	TestSuite	storageIndexDecomposition	derived	box	`Solkey.TestSuite.storageIndexDecomposition.proved` (`Solidity/TestSuite/Derived4.lean`)
+taclets	TestSuite	storageIndexRootArray	derived	box	`Solkey.TestSuite.storageIndexRootArray.proved` (`Solidity/TestSuite/Derived4.lean`)
+taclets	TestSuite	storageFieldDisjointFields	derived	diamond	`Solkey.TestSuite.storageFieldDisjointFields.proved` (`Solidity/TestSuite/Derived4.lean`)
+taclets	TestSuite	storageFieldDisjointRoots	derived	diamond	`Solkey.TestSuite.storageFieldDisjointRoots.proved` (`Solidity/TestSuite/Derived4.lean`)
+taclets	TestSuite	memoryAssignForms	pending	diamond	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	memoryDelete	pending	diamond	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	storageAliasRebindOriginal	derived	diamond	`Solkey.TestSuite.storageAliasRebindOriginal.proved` (`Solidity/TestSuite/Derived4.lean`)
+taclets	TestSuite	testSimpleAssert	derived	diamond	`Solkey.TestSuite.testSimpleAssert.proved` (`Solidity/TestSuite/Derived4.lean`)
+taclets	TestSuite	localArithmeticInRange	derived	box; for all x	`Solkey.TestSuite.localArithmeticInRange.proved` (`Solidity/TestSuite/Derived4.lean`)
+taclets	TestSuite	signedUnaryMinusInRange	derived	box; for all x	`Solkey.TestSuite.signedUnaryMinusInRange.proved` (`Solidity/TestSuite/Derived4.lean`)
+taclets	TestSuite	storageIndexWriteRefSourceImpureIndex	pending	box	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	storageFieldWriteRefSourceImpureReceiver	pending	box	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	storageFieldWriteStorageRefImpureReceiver	derived	box	`Solkey.TestSuite.storageFieldWriteStorageRefImpureReceiver.proved` (`Solidity/TestSuite/Derived8.lean`)
+taclets	TestSuite	storageFieldWriteRootRefImpureReceiver	derived	box	`Solkey.TestSuite.storageFieldWriteRootRefImpureReceiver.proved` (`Solidity/TestSuite/Derived8.lean`)
+taclets	TestSuite	memoryFieldWriteMemRefImpureReceiver	pending	diamond	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	storageIndexWriteRootRefImpureReceiver	derived	box	`Solkey.TestSuite.storageIndexWriteRootRefImpureReceiver.proved` (`Solidity/TestSuite/Derived8.lean`)
+taclets	TestSuite	storageIndexWriteStorageRefImpureReceiver	derived	box	`Solkey.TestSuite.storageIndexWriteStorageRefImpureReceiver.proved` (`Solidity/TestSuite/Derived8.lean`)
+taclets	TestSuite	memoryToStorageIndexImpureReceiver	pending	box	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	memoryIndexWriteMemRefImpureReceiver	pending	diamond	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	additionLeftImpureRightReadFirst	derived	diamond	`Solkey.TestSuite.additionLeftImpureRightReadFirst.proved` (`Solidity/TestSuite/Derived4.lean`)
+taclets	TestSuite	additionRightImpure	derived	diamond	`Solkey.TestSuite.additionRightImpure.proved` (`Solidity/TestSuite/Derived4.lean`)
+taclets	TestSuite	additionBothOperandsImpure	derived	diamond	`Solkey.TestSuite.additionBothOperandsImpure.proved` (`Solidity/TestSuite/Derived4.lean`)
+taclets	TestSuite	subtractionLeftImpureRightReadFirst	derived	diamond	`Solkey.TestSuite.subtractionLeftImpureRightReadFirst.proved` (`Solidity/TestSuite/Derived4.lean`)
+taclets	TestSuite	lessThanLeftImpureRightReadFirst	derived	diamond	`Solkey.TestSuite.lessThanLeftImpureRightReadFirst.proved` (`Solidity/TestSuite/Derived4.lean`)
+taclets	TestSuite	testCopyRootKeepsValueMembers	derived	diamond	`Solkey.TestSuite.testCopyRootKeepsValueMembers.proved` (`Solidity/TestSuite/Derived8.lean`)
+taclets	TestSuite	testCopyFieldNested	derived	diamond	`Solkey.TestSuite.testCopyFieldNested.proved` (`Solidity/TestSuite/Derived8.lean`)
+taclets	TestSuite	testCopyOfCopy	derived	box	`Solkey.TestSuite.testCopyOfCopy.proved` (`Solidity/TestSuite/Derived8.lean`)
+taclets	TestSuite	testCopyIntoMappingEntry	derived	box; for all k	`Solkey.TestSuite.testCopyIntoMappingEntry.proved` (`Solidity/TestSuite/Derived8.lean`)
+taclets	TestSuite	testCopyArrayMemberElements	derived	box	`Solkey.TestSuite.testCopyArrayMemberElements.proved` (`Solidity/TestSuite/Derived8.lean`)
+taclets	TestSuite	testCopyPrimitiveRoot	derived	diamond	`Solkey.TestSuite.testCopyPrimitiveRoot.proved` (`Solidity/TestSuite/Derived4.lean`)
+taclets	TestSuite	testCopyStoreRootFromField	derived	diamond	`Solkey.TestSuite.testCopyStoreRootFromField.proved` (`Solidity/TestSuite/Derived8.lean`)
+taclets	TestSuite	testCopyStoreRootFromIndex	derived	diamond	`Solkey.TestSuite.testCopyStoreRootFromIndex.proved` (`Solidity/TestSuite/Derived8.lean`)
+taclets	TestSuite	testPushCopyThenDeleteTarget	derived	box	`Solkey.TestSuite.testPushCopyThenDeleteTarget.proved` (`Solidity/TestSuite/Derived8.lean`)
+taclets	TestSuite	indexWriteBothImpureStorageRef	derived	box	`Solkey.TestSuite.indexWriteBothImpureStorageRef.proved` (`Solidity/TestSuite/Derived8.lean`)
+taclets	TestSuite	indexWriteBothImpureMemToStorage	pending	box	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	indexWriteBothImpureMemoryValue	pending	diamond	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	indexWriteBothImpureMemRef	pending	diamond	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	nestedMappingWriteRead	derived	diamond	`Solkey.TestSuite.nestedMappingWriteRead.proved` (`Solidity/TestSuite/Derived4.lean`)
+taclets	TestSuite	nestedMappingRowAlias	derived	diamond	`Solkey.TestSuite.nestedMappingRowAlias.proved` (`Solidity/TestSuite/Derived4.lean`)
+taclets	TestSuite	arrayOfMappingsIndex	derived	diamond	`Solkey.TestSuite.arrayOfMappingsIndex.proved` (`Solidity/TestSuite/Derived8.lean`)
+taclets	TestSuite	mappingOfLedgerMember	derived	diamond	`Solkey.TestSuite.mappingOfLedgerMember.proved` (`Solidity/TestSuite/Derived4.lean`)
+taclets	TestSuite	mappingPointerTernary	derived	diamond	`Solkey.TestSuite.mappingPointerTernary.proved` (`Solidity/TestSuite/Derived4.lean`)
+taclets	TestSuite	mappingReadAsKey	derived	diamond	`Solkey.TestSuite.mappingReadAsKey.proved` (`Solidity/TestSuite/Derived4.lean`)
+taclets	TestSuite	memoryFieldAsMappingKey	pending	diamond	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	mappingEntryThroughMemoryToMappingEntry	pending	diamond	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	boolKeyMapping	derived	diamond	`Solkey.TestSuite.boolKeyMapping.proved` (`Solidity/TestSuite/Derived5.lean`)
+taclets	TestSuite	boolIsTrueOrFalse	derived	diamond; for all b	`Solkey.TestSuite.boolIsTrueOrFalse.proved` (`Solidity/TestSuite/Derived5.lean`)
+taclets	TestSuite	boolKeyMappingSymbolicKey	derived	diamond; for all b	`Solkey.TestSuite.boolKeyMappingSymbolicKey.proved` (`Solidity/TestSuite/Derived5.lean`)
+taclets	TestSuite	recursiveStructMapping	excluded	diamond	TestSuite.sol:2741: struct `Tree` (line 36) is recursive through a mapping: its default value is infinite, and the model's are finite
+taclets	TestSuite	numberLiteralForms	derived	diamond	`Solkey.TestSuite.numberLiteralForms.proved` (`Solidity/TestSuite/Derived5.lean`)
+taclets	TestSuite	localAddAssign	derived	diamond	`Solkey.TestSuite.localAddAssign.proved` (`Solidity/TestSuite/Derived5.lean`)
+taclets	TestSuite	localMulAssign	derived	diamond	`Solkey.TestSuite.localMulAssign.proved` (`Solidity/TestSuite/Derived5.lean`)
+taclets	TestSuite	localDivAssign	derived	diamond	`Solkey.TestSuite.localDivAssign.proved` (`Solidity/TestSuite/Derived5.lean`)
+taclets	TestSuite	localModAssign	derived	diamond	`Solkey.TestSuite.localModAssign.proved` (`Solidity/TestSuite/Derived5.lean`)
+taclets	TestSuite	localPostincrement	derived	diamond	`Solkey.TestSuite.localPostincrement.proved` (`Solidity/TestSuite/Derived5.lean`)
+taclets	TestSuite	localPreincrementAssign	derived	diamond	`Solkey.TestSuite.localPreincrementAssign.proved` (`Solidity/TestSuite/Derived5.lean`)
+taclets	TestSuite	localPostdecrement	derived	diamond	`Solkey.TestSuite.localPostdecrement.proved` (`Solidity/TestSuite/Derived5.lean`)
+taclets	TestSuite	localPredecrement	derived	diamond	`Solkey.TestSuite.localPredecrement.proved` (`Solidity/TestSuite/Derived5.lean`)
+taclets	TestSuite	localDeclPostdecrement	derived	diamond	`Solkey.TestSuite.localDeclPostdecrement.proved` (`Solidity/TestSuite/Derived5.lean`)
+taclets	TestSuite	localDeclPredecrement	derived	diamond	`Solkey.TestSuite.localDeclPredecrement.proved` (`Solidity/TestSuite/Derived5.lean`)
+taclets	TestSuite	subAssignValueRhsCapture	derived	diamond	`Solkey.TestSuite.subAssignValueRhsCapture.proved` (`Solidity/TestSuite/Derived5.lean`)
+taclets	TestSuite	mulAssignValueRhsCapture	derived	diamond	`Solkey.TestSuite.mulAssignValueRhsCapture.proved` (`Solidity/TestSuite/Derived5.lean`)
+taclets	TestSuite	divAssignValueRhsCapture	derived	diamond	`Solkey.TestSuite.divAssignValueRhsCapture.proved` (`Solidity/TestSuite/Derived5.lean`)
+taclets	TestSuite	modAssignValueRhsCapture	derived	diamond	`Solkey.TestSuite.modAssignValueRhsCapture.proved` (`Solidity/TestSuite/Derived5.lean`)
+taclets	TestSuite	indexWriteValueRhsCapture	pending	diamond	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	memoryIndexWriteMemRefRhsCapture	pending	diamond	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	memoryIndexDeleteNonSimpleIndexCapture	pending	diamond	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	boolInequalityCaptureLhs	derived	diamond	`Solkey.TestSuite.boolInequalityCaptureLhs.proved` (`Solidity/TestSuite/Derived5.lean`)
+taclets	TestSuite	boolInequalityCaptureRhs	derived	diamond	`Solkey.TestSuite.boolInequalityCaptureRhs.proved` (`Solidity/TestSuite/Derived5.lean`)
+taclets	TestSuite	greaterThanCaptureRhs	derived	diamond	`Solkey.TestSuite.greaterThanCaptureRhs.proved` (`Solidity/TestSuite/Derived5.lean`)
+taclets	TestSuite	greaterEqualCaptureLhs	derived	diamond	`Solkey.TestSuite.greaterEqualCaptureLhs.proved` (`Solidity/TestSuite/Derived5.lean`)
+taclets	TestSuite	greaterEqualCaptureRhs	derived	diamond	`Solkey.TestSuite.greaterEqualCaptureRhs.proved` (`Solidity/TestSuite/Derived5.lean`)
+taclets	TestSuite	lessEqualCaptureLhs	derived	diamond	`Solkey.TestSuite.lessEqualCaptureLhs.proved` (`Solidity/TestSuite/Derived5.lean`)
+taclets	TestSuite	lessEqualCaptureRhs	derived	diamond	`Solkey.TestSuite.lessEqualCaptureRhs.proved` (`Solidity/TestSuite/Derived5.lean`)
+taclets	TestSuite	logicalNotCapture	derived	diamond	`Solkey.TestSuite.logicalNotCapture.proved` (`Solidity/TestSuite/Derived5.lean`)
+taclets	TestSuite	unaryMinusCapture	derived	diamond	`Solkey.TestSuite.unaryMinusCapture.proved` (`Solidity/TestSuite/Derived5.lean`)
+taclets	TestSuite	multiplicationUnfoldLeft	derived	diamond	`Solkey.TestSuite.multiplicationUnfoldLeft.proved` (`Solidity/TestSuite/Derived5.lean`)
+taclets	TestSuite	multiplicationUnfoldRight	derived	diamond	`Solkey.TestSuite.multiplicationUnfoldRight.proved` (`Solidity/TestSuite/Derived5.lean`)
+taclets	TestSuite	divisionUnfoldLeft	derived	diamond	`Solkey.TestSuite.divisionUnfoldLeft.proved` (`Solidity/TestSuite/Derived5.lean`)
+taclets	TestSuite	divisionUnfoldRight	derived	diamond	`Solkey.TestSuite.divisionUnfoldRight.proved` (`Solidity/TestSuite/Derived5.lean`)
+taclets	TestSuite	moduloUnfoldLeft	derived	diamond	`Solkey.TestSuite.moduloUnfoldLeft.proved` (`Solidity/TestSuite/Derived5.lean`)
+taclets	TestSuite	moduloUnfoldRight	derived	diamond	`Solkey.TestSuite.moduloUnfoldRight.proved` (`Solidity/TestSuite/Derived5.lean`)
+taclets	TestSuite	signedDivisionTruncates	derived	diamond	`Solkey.TestSuite.signedDivisionTruncates.proved` (`Solidity/TestSuite/Derived5.lean`)
+taclets	TestSuite	signedModuloTakesDividendSign	derived	diamond	`Solkey.TestSuite.signedModuloTakesDividendSign.proved` (`Solidity/TestSuite/Derived5.lean`)
+taclets	TestSuite	storageSignedDivModAssign	derived	diamond	`Solkey.TestSuite.storageSignedDivModAssign.proved` (`Solidity/TestSuite/Derived5.lean`)
+taclets	TestSuite	powerUnfoldLeft	derived	diamond	`Solkey.TestSuite.powerUnfoldLeft.proved` (`Solidity/TestSuite/Derived5.lean`)
+taclets	TestSuite	powerUnfoldRight	derived	diamond	`Solkey.TestSuite.powerUnfoldRight.proved` (`Solidity/TestSuite/Derived5.lean`)
+taclets	TestSuite	subtractionUnfoldRight	derived	diamond	`Solkey.TestSuite.subtractionUnfoldRight.proved` (`Solidity/TestSuite/Derived5.lean`)
+taclets	TestSuite	parenthesizedRightOperand	derived	diamond	`Solkey.TestSuite.parenthesizedRightOperand.proved` (`Solidity/TestSuite/Derived5.lean`)
+taclets	TestSuite	parenthesizedLeftOperand	derived	diamond	`Solkey.TestSuite.parenthesizedLeftOperand.proved` (`Solidity/TestSuite/Derived6.lean`)
+taclets	TestSuite	parenthesizedCondition	derived	diamond	`Solkey.TestSuite.parenthesizedCondition.proved` (`Solidity/TestSuite/Derived6.lean`)
+taclets	TestSuite	memoryFieldSubAssignUnfold	pending	diamond	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	memoryFieldMulAssignUnfold	pending	diamond	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	memoryFieldDivAssignUnfold	pending	diamond	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	memoryFieldModAssignUnfold	pending	diamond	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	memoryFieldPostincrementUnfold	pending	diamond	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	memoryFieldPredecrementUnfold	pending	diamond	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	memoryFieldPostdecrementUnfold	pending	diamond	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	memoryFieldDeleteUnfold	pending	diamond	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	memoryFieldReadUnfoldResult	pending	diamond	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	memoryIndexReadUnfoldResult	pending	diamond	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	memoryIndexArraySubAssignUnfold	pending	diamond	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	memoryIndexArrayMulAssignUnfold	pending	diamond	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	memoryIndexArrayDivAssignUnfold	pending	diamond	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	memoryIndexArrayModAssignUnfold	pending	diamond	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	memoryIndexArrayPostincrementUnfold	pending	diamond	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	memoryIndexArrayPredecrementUnfold	pending	diamond	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	memoryIndexArrayPostdecrementUnfold	pending	diamond	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	memoryIndexArrayDeleteUnfold	pending	diamond	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	memoryIndexArrayPostincrement	pending	diamond	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	memoryIndexArrayPredecrement	pending	diamond	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	memoryIndexArrayPreincrementAssignment	pending	diamond	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	memoryIndexArrayPostdecrementAssignment	pending	diamond	uses memory: the closer has no memory layer yet (docs/testsuite-proofs.md, M6)
+taclets	TestSuite	storageFieldDeleteUnfold	derived	diamond	`Solkey.TestSuite.storageFieldDeleteUnfold.proved` (`Solidity/TestSuite/Derived6.lean`)
+taclets	TestSuite	storageFieldPredecrementUnfold	derived	diamond	`Solkey.TestSuite.storageFieldPredecrementUnfold.proved` (`Solidity/TestSuite/Derived6.lean`)
+taclets	TestSuite	storageFieldPostdecrementUnfold	derived	diamond	`Solkey.TestSuite.storageFieldPostdecrementUnfold.proved` (`Solidity/TestSuite/Derived6.lean`)
+taclets	TestSuite	storageIndexAddAssignUnfold	derived	diamond	`Solkey.TestSuite.storageIndexAddAssignUnfold.proved` (`Solidity/TestSuite/Derived6.lean`)
+taclets	TestSuite	storageIndexSubAssignUnfold	derived	diamond	`Solkey.TestSuite.storageIndexSubAssignUnfold.proved` (`Solidity/TestSuite/Derived6.lean`)
+taclets	TestSuite	storageIndexMulAssignUnfold	derived	diamond	`Solkey.TestSuite.storageIndexMulAssignUnfold.proved` (`Solidity/TestSuite/Derived6.lean`)
+taclets	TestSuite	storageIndexDivAssignUnfold	derived	diamond	`Solkey.TestSuite.storageIndexDivAssignUnfold.proved` (`Solidity/TestSuite/Derived6.lean`)
+taclets	TestSuite	storageIndexModAssignUnfold	derived	diamond	`Solkey.TestSuite.storageIndexModAssignUnfold.proved` (`Solidity/TestSuite/Derived6.lean`)
+taclets	TestSuite	storageIndexPreincrementUnfold	derived	diamond	`Solkey.TestSuite.storageIndexPreincrementUnfold.proved` (`Solidity/TestSuite/Derived6.lean`)
+taclets	TestSuite	storageIndexPostincrementUnfold	derived	diamond	`Solkey.TestSuite.storageIndexPostincrementUnfold.proved` (`Solidity/TestSuite/Derived6.lean`)
+taclets	TestSuite	storageIndexPredecrementUnfold	derived	diamond	`Solkey.TestSuite.storageIndexPredecrementUnfold.proved` (`Solidity/TestSuite/Derived6.lean`)
+taclets	TestSuite	storageIndexPostdecrementUnfold	derived	diamond	`Solkey.TestSuite.storageIndexPostdecrementUnfold.proved` (`Solidity/TestSuite/Derived6.lean`)
+taclets	TestSuite	storageIndexMappingSubAssign	derived	diamond	`Solkey.TestSuite.storageIndexMappingSubAssign.proved` (`Solidity/TestSuite/Derived6.lean`)
+taclets	TestSuite	storageIndexMappingMulAssign	derived	diamond	`Solkey.TestSuite.storageIndexMappingMulAssign.proved` (`Solidity/TestSuite/Derived6.lean`)
+taclets	TestSuite	storageIndexMappingDivAssign	derived	diamond	`Solkey.TestSuite.storageIndexMappingDivAssign.proved` (`Solidity/TestSuite/Derived6.lean`)
+taclets	TestSuite	storageIndexMappingModAssign	derived	diamond	`Solkey.TestSuite.storageIndexMappingModAssign.proved` (`Solidity/TestSuite/Derived6.lean`)
+taclets	TestSuite	storageIndexMappingPreincrement	derived	diamond	`Solkey.TestSuite.storageIndexMappingPreincrement.proved` (`Solidity/TestSuite/Derived6.lean`)
+taclets	TestSuite	storageIndexMappingPostincrement	derived	diamond	`Solkey.TestSuite.storageIndexMappingPostincrement.proved` (`Solidity/TestSuite/Derived6.lean`)
+taclets	TestSuite	storageIndexMappingPredecrement	derived	diamond	`Solkey.TestSuite.storageIndexMappingPredecrement.proved` (`Solidity/TestSuite/Derived6.lean`)
+taclets	TestSuite	storageIndexMappingPostdecrement	derived	diamond	`Solkey.TestSuite.storageIndexMappingPostdecrement.proved` (`Solidity/TestSuite/Derived6.lean`)
+taclets	TestSuite	storageIndexMappingPreincrementAssignment	derived	diamond	`Solkey.TestSuite.storageIndexMappingPreincrementAssignment.proved` (`Solidity/TestSuite/Derived6.lean`)
+taclets	TestSuite	storageIndexMappingPostincrementAssignment	derived	diamond	`Solkey.TestSuite.storageIndexMappingPostincrementAssignment.proved` (`Solidity/TestSuite/Derived6.lean`)
+taclets	TestSuite	storageIndexMappingPredecrementAssignment	derived	diamond	`Solkey.TestSuite.storageIndexMappingPredecrementAssignment.proved` (`Solidity/TestSuite/Derived6.lean`)
+taclets	TestSuite	storageIndexMappingPostdecrementAssignment	derived	diamond	`Solkey.TestSuite.storageIndexMappingPostdecrementAssignment.proved` (`Solidity/TestSuite/Derived6.lean`)
+taclets	TestSuite	storageIndexReadArrayStoreRoot	derived	box	`Solkey.TestSuite.storageIndexReadArrayStoreRoot.proved` (`Solidity/TestSuite/Derived6.lean`)
+taclets	TestSuite	storagePopUnfold	derived	box	`Solkey.TestSuite.storagePopUnfold.proved` (`Solidity/TestSuite/Derived6.lean`)
+taclets	TestSuite	storageRootPostdecrement	derived	diamond	`Solkey.TestSuite.storageRootPostdecrement.proved` (`Solidity/TestSuite/Derived6.lean`)
+taclets	TestSuite	storageRootPredecrementAssign	derived	diamond	`Solkey.TestSuite.storageRootPredecrementAssign.proved` (`Solidity/TestSuite/Derived6.lean`)
+taclets	TestSuite	ternaryToIfStorage	derived	diamond	`Solkey.TestSuite.ternaryToIfStorage.proved` (`Solidity/TestSuite/Derived6.lean`)
+taclets	TestSuite	transferToOwner	derived	box	`Solkey.TestSuite.transferToOwner.proved` (`Solidity/TestSuite/Derived6.lean`)
+taclets	TestSuite	transferUnfoldReceiver	derived	box	`Solkey.TestSuite.transferUnfoldReceiver.proved` (`Solidity/TestSuite/Derived6.lean`)
+taclets	TestSuite	transferUnfoldArgument	derived	box	`Solkey.TestSuite.transferUnfoldArgument.proved` (`Solidity/TestSuite/Derived6.lean`)
+taclets	TestSuite	tryCalleeGet	skip	skip; for all x	TestSuite.sol:3483: tagged `@custom:key skip`
+taclets	TestSuite	tryCalleePing	skip	skip	TestSuite.sol:3488: tagged `@custom:key skip`
+taclets	TestSuite	tryCallCatchKeepsState	derived	box	`Solkey.TestSuite.tryCallCatchKeepsState.proved` (`Solidity/TestSuite/Derived6.lean`)
+taclets	TestSuite	tryCallBindsReturnAndPanicCode	derived	box	`Solkey.TestSuite.tryCallBindsReturnAndPanicCode.proved` (`Solidity/TestSuite/Derived6.lean`)
+taclets	TestSuite	tryCallUnmatchedFailureReverts	derived	box	`Solkey.TestSuite.tryCallUnmatchedFailureReverts.proved` (`Solidity/TestSuite/Derived6.lean`)
 solc	SolcExpressions	postIncrementYieldsOldValue	proved	`T r = x++;` split into `T r; r = x++;`	
 solc	SolcExpressions	preIncrementYieldsNewValue	proved	`T r = x++;` split into `T r; r = x++;`	
 solc	SolcExpressions	incDecChainOnLocal	proved	`T r = x++;` split into `T r; r = x++;`	
@@ -429,8 +436,8 @@ solc	SolcExpressions	ternaryNestedInnerLow	proved	concretized: solkey proves thi
 solc	SolcExpressions	exponentiationIsRightAssociative	unsupported		exponentiation `**` is not in the sol_expr grammar
 solc	SolcExpressions	exponentiationZeroBaseZeroExponent	unsupported		exponentiation `**` is not in the sol_expr grammar
 solc	SolcExpressions	exponentiationZeroExponent	unsupported		exponentiation `**` is not in the sol_expr grammar
-solc	SolcExpressions	exponentiationSignedBaseEvenExponent	unsupported		exponentiation `**` is not in the sol_expr grammar
-solc	SolcExpressions	exponentiationSignedBaseOddExponent	unsupported		exponentiation `**` is not in the sol_expr grammar
+solc	SolcExpressions	exponentiationSignedBaseEvenExponent	unsupported	concretized: solkey proves this for all parameters; ported at b = minusTwo	exponentiation `**` is not in the sol_expr grammar
+solc	SolcExpressions	exponentiationSignedBaseOddExponent	unsupported	concretized: solkey proves this for all parameters; ported at b = minusTwo	exponentiation `**` is not in the sol_expr grammar
 solc	SolcStructs	deleteMemberThroughStorageAlias	proved		
 solc	SolcStructs	deleteStructLeavesNeighbours	proved		
 solc	SolcStructs	deleteStructResetsArrayLength	unsupported		`.length` is not a program expression
@@ -486,12 +493,12 @@ solc	SolcControlFlow	chainedIfsSelectLastMatch	proved
 solc	SolcControlFlow	nestedIfElseSelectsBranch	proved	concretized: solkey proves this for all parameters; ported at x = 500	
 net	Net	auction_closeAuction_invariant	unsupported		assumes an uninterpreted CInv over a symbolic ledger and books msg.value/msg.sender before the call; the fragment has no msg.*
 net	Net	auction_makeBid_invariant	unsupported		assumes an uninterpreted CInv over a symbolic ledger and books msg.value/msg.sender before the call; the fragment has no msg.*
-net	Net	auction_makeBid_withcallback	unsupported		needs `transferWithCallback`: the typed syntax has no calls (docs/kernel-port.md, Port later)
+net	Net	auction_makeBid_withcallback	unsupported		the callback semantics is ported (`Semantics/Callback.lean`, `transferWithCallback`), but the problem's invariant `CInv` reads the ledger `net`, which no term reads
 net	Net	auction_withdraw_makeBid_invariant	unsupported		assumes an uninterpreted CInv over a symbolic ledger and books msg.value/msg.sender before the call; the fragment has no msg.*
 net	Net	auction_withdraw_withdraw_invariant	unsupported		assumes an uninterpreted CInv over a symbolic ledger and books msg.value/msg.sender before the call; the fragment has no msg.*
 net	Net	casino_addToPot_invariant	unsupported		assumes an uninterpreted CInv over a symbolic ledger and books msg.value/msg.sender before the call; the fragment has no msg.*
 net	Net	casino_decideBet_invariant	unsupported		assumes an uninterpreted CInv over a symbolic ledger and books msg.value/msg.sender before the call; the fragment has no msg.*
-net	Net	casino_decideBet_withcallback	unsupported		needs `transferWithCallback`: the typed syntax has no calls (docs/kernel-port.md, Port later)
+net	Net	casino_decideBet_withcallback	unsupported		the callback semantics is ported (`Semantics/Callback.lean`, `transferWithCallback`), but the problem's invariant `CInv` reads the ledger `net`, which no term reads
 net	Net	casino_placeBet_invariant	unsupported		assumes an uninterpreted CInv over a symbolic ledger and books msg.value/msg.sender before the call; the fragment has no msg.*
 net	Net	escrow_placeInEscrow_invariant	unsupported		assumes an uninterpreted CInv over a symbolic ledger and books msg.value/msg.sender before the call; the fragment has no msg.*
 net	Net	escrow_releaseEscrow_invariant	unsupported		assumes an uninterpreted CInv over a symbolic ledger and books msg.value/msg.sender before the call; the fragment has no msg.*
@@ -499,14 +506,16 @@ net	Net	escrow_withdrawFrom_invariant	unsupported		assumes an uninterpreted CInv
 net	Net	net_msg_value	unsupported		`msg.value` is not a program expression
 net	Net	net_transfer_capture_argument	proved	solkey net-transfer-capture-argument.key	`Examples/Tactics/Net.lean` `Net.netTransferCapturedAmount`
 net	Net	net_transfer_capture_receiver	proved	solkey net-transfer-capture-receiver.key	`Examples/Tactics/Net.lean` `Net.netTransferStorageReceiver`
-net	Net	net_transfer_diamond_funded	unsupported		assumes an uninterpreted CInv over a symbolic ledger and books msg.value/msg.sender before the call; the fragment has no msg.*
+net	Net	net_transfer_diamond	unsupported		assumes an uninterpreted CInv over a symbolic ledger and books msg.value/msg.sender before the call; the fragment has no msg.*
+net	Net	net_transfer_self	unsupported		assumes an uninterpreted CInv over a symbolic ledger and books msg.value/msg.sender before the call; the fragment has no msg.*
 net	Net	net_transfer_simple	proved	solkey net-transfer-simple.key	`Examples/Tactics/Net.lean` `Net.netTransferSimple`
 net	Net	net_transfer_unfunded	unsupported		assumes an uninterpreted CInv over a symbolic ledger and books msg.value/msg.sender before the call; the fragment has no msg.*
-net	Net	net_transfer_withcallback_diamond_funded	unsupported		needs `transferWithCallback`: the typed syntax has no calls (docs/kernel-port.md, Port later)
-net	Net	net_transfer_withcallback_simple	unsupported		needs `transferWithCallback`: the typed syntax has no calls (docs/kernel-port.md, Port later)
+net	Net	net_transfer_withcallback_diamond	unsupported		the callback semantics is ported (`Semantics/Callback.lean`, `transferWithCallback`), but the problem's invariant `CInv` reads the ledger `net`, which no term reads
+net	Net	net_transfer_withcallback_self	unsupported		the callback semantics is ported (`Semantics/Callback.lean`, `transferWithCallback`), but the problem's invariant `CInv` reads the ledger `net`, which no term reads
+net	Net	net_transfer_withcallback_simple	unsupported		the callback semantics is ported (`Semantics/Callback.lean`, `transferWithCallback`), but the problem's invariant `CInv` reads the ledger `net`, which no term reads
 net	Net	piggybank_addMoney_invariant	unsupported		assumes an uninterpreted CInv over a symbolic ledger and books msg.value/msg.sender before the call; the fragment has no msg.*
 net	Net	piggybank_breakPiggyBank_invariant	unsupported		assumes an uninterpreted CInv over a symbolic ledger and books msg.value/msg.sender before the call; the fragment has no msg.*
-net	Net	piggybank_breakPiggyBank_withcallback	unsupported		needs `transferWithCallback`: the typed syntax has no calls (docs/kernel-port.md, Port later)
+net	Net	piggybank_breakPiggyBank_withcallback	unsupported		the callback semantics is ported (`Semantics/Callback.lean`, `transferWithCallback`), but the problem's invariant `CInv` reads the ledger `net`, which no term reads
 rules	Rules	assignRuleExample	unported	solkey assignRuleExample.key	hand-written in the removed untyped layer (its Corpus/Wp/Rules module); not yet re-derived over the typed syntax (docs/kernel-port.md, Port later)
 rules	Rules	contextAssignTest	unported	solkey contextAssignTest.key	hand-written in the removed untyped layer (its Corpus/Wp/Rules module); not yet re-derived over the typed syntax (docs/kernel-port.md, Port later)
 rules	Rules	fieldAccessTest	unported	solkey fieldAccessTest.key	hand-written in the removed untyped layer (its Corpus/Wp/Rules module); not yet re-derived over the typed syntax (docs/kernel-port.md, Port later)

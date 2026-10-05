@@ -3,10 +3,15 @@
 #
 #   1. re-derive every verdict from Lean (`solkey-port.mjs --probe`, into a
 #      scratch copy) and diff the six columns against tests/solkey/expected.tsv;
-#   2. diff the generated modules (Solidity/Corpus/, SolidityCorpus.lean) and the
-#      scoreboard (docs/corpus-parity.md) against what the generator writes;
+#      the TestSuite rows are read off Solidity/TestSuite/Report.lean's pin,
+#      not probed (scripts/check-testsuite.sh audits them without Lean);
+#   2. diff the generated modules (Solidity/Corpus/ but the hand-written
+#      Basic.lean and Imported.lean, SolidityCorpus.lean) and the scoreboard
+#      (docs/corpus-parity.md) against what the generator writes;
 #   3. build `SolidityCorpus`, which re-checks every pinned verdict: a `proved`
-#      row is a theorem, an `evaluated`/`open` row a `#guard_msgs` pin.
+#      row is a theorem, an `evaluated`/`open` row a `#guard_msgs` pin, and a
+#      `derived` TestSuite row a corollary of its `⊢` theorem, so the build
+#      also builds the `SolkeyTestSuite` derivations it imports.
 #
 # Usage: scripts/check-corpus.sh [--update] [--solkey <keyext.solidity.examples>]
 #   --update  re-pin in place (modules, expected.tsv, scoreboard), then build.
@@ -38,7 +43,7 @@ else
     echo "check-corpus: verdicts drifted from tests/solkey/expected.tsv (re-pin with --update)"
     status=1
   fi
-  if ! diff -ru -x Basic.lean Solidity/Corpus "$scratch/Solidity/Corpus" ||
+  if ! diff -ru -x Basic.lean -x Imported.lean Solidity/Corpus "$scratch/Solidity/Corpus" ||
      ! diff -u SolidityCorpus.lean "$scratch/SolidityCorpus.lean" ||
      ! diff -u docs/corpus-parity.md "$scratch/docs/corpus-parity.md"; then
     echo "check-corpus: the corpus or its scoreboard is not what the generator writes (re-pin with --update)"
