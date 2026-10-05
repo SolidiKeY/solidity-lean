@@ -1032,3 +1032,64 @@ This memory support is being reworked into solkey's `memoryRules.key`/
   `testDanglingInnerArrayReappearsAfterPush`) and `storagePushReadBack`
   (divergent, M7) are as before.
 
+
+## M6b
+
+The memory closer is being rebuilt from solkey's `memoryRules.key` and
+`structMemoryRules.key` taclets. Each step is timed against this baseline.
+
+### Baseline (step 0, M6 closer at `8c6ac5a`)
+
+**How it was measured.** A scratch module, not committed, imports
+`TestSuite/Problems.lean`. For each of the 91 theorems of `Derived9` to
+`Derived11` it elaborates `theorem … : ⊢ f.problem := by sol_prove` with
+`Elab.async` off, timed with `IO.monoMsNow` in the language server. These
+times are serial and per theorem. They leave out loading the file's imports,
+which is why they do not add up to the M6 file times above.
+
+For each leaf of the residue (`residue budget (fun _ _ => false)`, the
+leaves `synClose` is asked about), the module computes three numbers on
+`(Hyp.wrap (dropWt Γ) φ).seqUpd`:
+
+- the nodes `LFml.fits` counts in its `toL`;
+- the nodes `LFml.fits` counts in its `elim`;
+- **W**, the number of `write`, `addM` and `copySt` nodes on the spines of
+  its `memory := …` updates.
+
+A second run was within 1% of the first.
+
+| File | Theorems | `sol_prove` total | Slowest | Largest `l.fits` | Largest `l.elim.fits` | Largest W | Most leaves |
+|---|---|---|---|---|---|---|---|
+| `Derived9` | 40 | 7.9 s | `memoryIndexWriteNse` 2.48 s | 534 | 534 | 5 | 19 |
+| `Derived10` | 40 | 10.1 s | `indexWriteBothImpureMemRef` 0.73 s | 159 | 175 | 9 | 4 |
+| `Derived11` | 11 | 2.3 s | `memoryIndexArrayPreincrementAssignment` 0.24 s | 93 | 93 | 5 | 3 |
+| all | 91 | 20.2 s | | 534 | 534 | 9 | 19 |
+
+- **The slowest theorem by far** is `memoryIndexWriteNse`. It is the only
+  one whose index is not a literal, so it goes through `kwriteL`/`kchainL`.
+  It has 19 leaves of up to 534 nodes, against at most 4 leaves and 159
+  nodes anywhere else.
+- **The next slowest**, from 0.3 s to 0.73 s, are:
+  - `indexWriteBothImpureMemRef` 725 ms
+  - `indexWriteBothImpureMemoryValue` 628 ms
+  - `memoryIndexWriteMemRefImpureReceiver` 482 ms
+  - `testMemoryTokenArrayAuxiliaryCases` 461 ms
+  - `testMemoryUintArray{Predecrement,Postincrement,Postdecrement}` 370–390 ms
+  - `memoryDelete` 382 ms
+  - `testMemoryStructFixedMemberLength` 350 ms
+  - `memoryFieldWriteMemRefImpureReceiver` 337 ms
+  - `testMemoryFieldShallowCopy` 312 ms
+  - `testMemoryEvaluationOrder` 308 ms
+
+  Every other theorem takes 34–280 ms.
+- **The reduction is the size of the leaf** except in
+  `memoryFieldAsMappingKey`, where it grows from 106 nodes to 175.
+- **W is small.** Of the 91 theorems, 48 have W = 3 and only
+  `testMemoryTokenArrayAuxiliaryCases` reaches 9. A `memSize` of 400
+  nodes, as the plan sets it, is more than 40 times the largest W.
+- **Computing these numbers is cheap.** Running the residue and `toL` for
+  every leaf of a theorem took at most 5 ms, against 34 ms to 2.5 s for the
+  theorem itself.
+- **Later steps warn at 20% slower.** A later step that is more than 20%
+  slower than this, per file total or on `memoryIndexWriteNse`, gets a
+  warning here.
