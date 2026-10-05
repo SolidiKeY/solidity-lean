@@ -9,7 +9,10 @@ One statement per function the import elaborated (`solc_problems`,
 solkey's `SolidityProblemSynthesizer` states it, the modality the
 function's tag, `∀` over its parameters, under `wt(storage)`
 (`Calculus/Problem.lean`).  The theorems are in the `Derived*` modules
-beside this one; `Report.lean` counts them.
+beside this one; `Report.lean` counts them.  The suggestions
+`#solkey_derive?` prints are pinned in `Suggestions.lean`, which nothing
+here imports, so that its searches stay off the path to the `Derived`
+modules.
 -/
 
 solc_problems Solkey.TestSuite
@@ -49,35 +52,3 @@ are defaults). -/
 theorem Solkey.TestSuite.initState_wt :
     holds Solkey.TestSuite.initState (Fml.wt Solkey.TestSuite) :=
   initStorage_wt (by decide +kernel) (by decide +kernel)
-
-/-! The suggestion `#solkey_derive?` prints, pinned: a statement the
-closer proves in the residue is `sol_prove` alone; a leaf it leaves (a
-member written through the alias a `push` returns, past what the layout
-types) is closed with the `wt` premise set aside (`Derive.searchLeaf`), and several leaves each go under
-their `case`. -/
-
-/--
-info: theorem Solkey.TestSuite.additionStorageWrite.proved : ⊢ Solkey.TestSuite.additionStorageWrite.problem := by
-  sol_prove
-
-additionStorageWrite: derived
--/
-#guard_msgs in
-#solkey_derive? Solkey.TestSuite from 0 count 1
-
-/--
-info: theorem Solkey.TestSuite.testStorageNestedPushReturnAlias.proved : ⊢ Solkey.TestSuite.testStorageNestedPushReturnAlias.problem := by
-  sol_prove
-  case leaf1 =>
-    refine Proves.close_dropWt ?_
-    sol_symex
-    sol_close
-  case leaf2 =>
-    refine Proves.close_dropWt ?_
-    sol_symex
-    sol_close
-
-testStorageNestedPushReturnAlias: derived
--/
-#guard_msgs in
-#solkey_derive? Solkey.TestSuite from 232 count 1

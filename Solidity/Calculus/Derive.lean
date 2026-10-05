@@ -257,7 +257,7 @@ theorem lastSlot_eval {P : PTerm C} (hP : P.stablePath = true) {E : Ty} {σ τ :
     have hp' := stable_eval hs P hP hp (fun _ => ⟨[], by simp⟩)
     have hf := State.findStorage_saveStorage_same hs
     rw [Close.PTerm.eval_next, hp, Res.ok_bind, hc, Res.ok_bind]
-    simp only [lastSlot, Close.PTerm.eval_at, hp', Res.ok_bind, Close.Term.eval_binop,
+    simp only [lastSlot, Close.PTerm.eval_at, hp', Close.Term.eval_binop,
       Close.Term.eval_len, Close.STerm.eval_storage, hf, Close.arrLen, Close.Term.eval_lit,
       evalBinop, applyBinOp, Value.asInt, bind, Except.bind, checkArith, BinOp.retTy,
       BinOp.isArith, Close.checkIndex_eq, Close.pastEnd, List.length_append, List.length_singleton]
@@ -771,13 +771,19 @@ def kernelLemma (type value : Expr) : MetaM Expr := do
   let n ← withOptions (Elab.async.set · false) <| mkAuxLemma [] type value
   return mkConst n
 
+/-- `⊢ φ` over the contract `C` as `⊢` elaborates it, `Proves C .all [] φ`:
+the one builder of it, for `sol_prove` and the commands that state or
+compare an obligation (`Frontend/Problems.lean`). -/
+def provesNil (C φ : Expr) : Expr :=
+  mkAppN (mkConst ``Proves) #[C, mkConst ``RuleSet.all,
+    mkApp (mkConst ``List.nil [0]) (mkApp (mkConst ``Hyp) C), φ]
+
 /-- `sol_prove` on the goal `g`: the goals it leaves, one per residual leaf. -/
 def prove (g : MVarId) : MetaM (List MVarId) := do
   let ty ← instantiateMVars (← g.getType)
   let (g, ty) ← match_expr ty with
     | Valid C φ =>
-      let ty' := mkAppN (mkConst ``Proves) #[C, mkConst ``RuleSet.all,
-        mkApp (mkConst ``List.nil [0]) (mkApp (mkConst ``Hyp) C), φ]
+      let ty' := provesNil C φ
       let g' ← mkFreshExprSyntheticOpaqueMVar ty' (← g.getTag)
       g.assign (mkApp3 (mkConst ``Proves.valid) C φ g')
       pure (g'.mvarId!, ty')
@@ -874,11 +880,12 @@ namespace Derive
 
 open Lean Elab Tactic Meta
 
-/-- The first of `leafTacs` that closes the leaf `l`, each try with its own
-heartbeats and its state rolled back when it fails; `none` when none does.
-A leaf under a `wt` premise is closed with it set aside
-(`Proves.close_dropWt`); one past `closeSize` is not reduced (`goalFits`). -/
-def searchLeaf (l : MVarId) : TacticM (Option (Array String)) := do
+/-- The first of `leafTacs` that closes the leaf `l`, with the raw
+heartbeats it used; `none` when none does.  Each try runs with its own
+heartbeats and its state rolled back when it fails.  A leaf under a `wt`
+premise is closed with it set aside (`Proves.close_dropWt`); one past
+`closeSize` is not reduced (`goalFits`). -/
+def searchLeaf (l : MVarId) : TacticM (Option (Array String × Nat)) := do
   let env ← getEnv
   let wt := ((← instantiateMVars (← l.getType)).find? fun e =>
     e.isConstOf ``Term.wt || e.isConstOf ``Op1.wt).isSome
@@ -888,15 +895,54 @@ def searchLeaf (l : MVarId) : TacticM (Option (Array String)) := do
       | .ok stx => pure (⟨stx⟩ : TSyntax `tactic)
       | .error e => throwError "sol_prove?: {e}"
     let s ← saveState
+    let h0 ← IO.getNumHeartbeats
     let ok ← tryCatchRuntimeEx
       (withCurrHeartbeats do
         setGoals [l]
         for x in t do Term.withoutErrToSorry (evalTactic x)
         pure (← getUnsolvedGoals).isEmpty)
       fun _ => pure false
-    if ok then return some src
+    if ok then return some (src, (← IO.getNumHeartbeats) - h0)
     s.restore
   return none
+
+/-- What `proveSearch` found: each leaf's name and lines (`sorry` for one
+no try closes), the leaves no try closes, and the raw heartbeats the replay
+needs, `prove`'s and the closing tries' (the failed tries are not
+replayed). -/
+structure Search where
+  found : List (Lean.Name × Array String)
+  open_ : List MVarId
+  heartbeats : Nat
+
+/-- `sol_prove` on `g`, then `searchLeaf` on each leaf it leaves, the open
+ones left as goals; with `stopAtOpen`, the search ends at the first open
+leaf.  The one loop of `sol_prove?` and `#solkey_derive?`. -/
+def proveSearch (g : MVarId) (stopAtOpen : Bool := false) : TacticM Search := do
+  let h0 ← IO.getNumHeartbeats
+  let leaves ← prove g
+  let mut hb : Nat := (← IO.getNumHeartbeats) - h0
+  let mut found : List (Lean.Name × Array String) := []
+  let mut open_ : List MVarId := []
+  for l in leaves do
+    let name ← l.getTag
+    match ← searchLeaf l with
+    | some (t, h) =>
+      found := found ++ [(name, t)]
+      hb := hb + h
+    | none =>
+      open_ := open_ ++ [l]
+      found := found ++ [(name, #["sorry"])]
+      if stopAtOpen then break
+  return { found, open_, heartbeats := hb }
+
+/-- Whether a replay of `hb` raw heartbeats fits in one declaration's
+`maxHeartbeats`.  Each try ran with heartbeats of its own; the replay runs
+them all in one declaration, so their sum is what it needs, up to the
+elaboration of the statement and the `case` lines. -/
+def replayFits (hb : Nat) : CoreM Bool := do
+  let max := (← read).maxHeartbeats
+  return max == 0 || hb ≤ max
 
 /-- The replay of a `sol_prove` whose leaves are closed by `found`:
 `sol_prove`, then each leaf's lines, under `case leafᵢ =>` when there are
@@ -911,24 +957,20 @@ end Derive
 
 open Lean Elab Tactic Meta in
 /-- `sol_prove?`: `sol_prove`, each leaf closed by the first of
-`Derive.leafTacs` that closes it (`Derive.searchLeaf`); suggests the
-replay.  A leaf none closes stays a goal, and the first is reported. -/
+`Derive.leafTacs` that closes it (`Derive.proveSearch`); suggests the
+replay.  A leaf none closes stays a goal, and the first is reported; a
+replay past `maxHeartbeats` as one declaration (`Derive.replayFits`) is
+warned of. -/
 elab tk:"sol_prove?" : tactic => withMainContext do
   let g ← getMainGoal
   let rest ← getUnsolvedGoals
-  let leaves ← Derive.prove g
-  let mut found : List (Lean.Name × Array String) := []
-  let mut open_ : List MVarId := []
-  for l in leaves do
-    let name ← l.getTag
-    match ← Derive.searchLeaf l with
-    | some t => found := found ++ [(name, t)]
-    | none =>
-      if open_.isEmpty then
-        logInfo m!"sol_prove?: no tactic closes {name}:{indentExpr (← l.getType)}"
-      open_ := open_ ++ [l]
-      found := found ++ [(name, #["sorry"])]
-  setGoals (open_ ++ rest.erase g)
-  ProofTree.suggest tk (Derive.replayLines found)
+  let s ← Derive.proveSearch g
+  if let some l := s.open_.head? then
+    logInfo m!"sol_prove?: no tactic closes {← l.getTag}:{indentExpr (← l.getType)}"
+  else unless ← Derive.replayFits s.heartbeats do
+    logWarning m!"sol_prove?: the replay needs about {s.heartbeats / 1000} heartbeats in one \
+      declaration, past `maxHeartbeats`"
+  setGoals (s.open_ ++ rest.erase g)
+  ProofTree.suggest tk (Derive.replayLines s.found)
 
 end Solidity

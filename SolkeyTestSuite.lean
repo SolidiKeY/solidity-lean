@@ -3,3 +3,4 @@
 -- what is derived of them (`Solidity/TestSuite/`).
 import Solidity.Solkey.TestSuite
 import Solidity.TestSuite.Report
+import Solidity.TestSuite.Suggestions

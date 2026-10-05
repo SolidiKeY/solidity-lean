@@ -11,11 +11,13 @@ import Solidity.TestSuite.Derived8
 # What is derived of solkey's `TestSuite`
 
 Every function, by what `#solkey_obligations` (`Frontend/Problems.lean`)
-finds: derived when its theorem `N.f.proved` exists and states
-`⊢ N.f.problem`, pending when only its statement does, and the import's
-verdict for the three with no statement.  A pending obligation is no
-theorem and no `sorry`: most wait for the closer to reduce memory; the
-others are listed with their reasons in `docs/testsuite-proofs.md`.
+finds: derived when its theorem `N.f.proved` exists, states
+`⊢ N.f.problem` and uses no axiom but Lean's three (so no `sorry` and no
+`native_decide`: one that does is listed "unsound"), pending when only its
+statement does, and the import's verdict for the three with no statement.
+A pending obligation is no theorem and no `sorry`: most wait for the closer
+to reduce memory; the others are listed with their reasons in
+`docs/testsuite-proofs.md`.
 -/
 
 /--

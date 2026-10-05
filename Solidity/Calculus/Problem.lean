@@ -6,26 +6,33 @@ import Solidity.Calculus.Derive
 
 solkey's `SolidityProblemSynthesizer` makes one obligation per function of a
 contract with no specification: `\<{ f(x̄)@C; }\>(true)`, or
-`\[{ f(x̄)@C; }\](true)` for a function tagged `@custom:key box`, the
-parameters `x̄` program variables of sort `int` or `bool`, so free: the
-obligation is proved for every value of them.  Here the parameters are
-`∀` binders over their type's range (`Fml.all`): a `uint` ranges over
-`[0, 2²⁵⁶)` and an `int` over the signed 256-bit range, where KeY's `int` is
-unbounded, and an `int8` parameter ranges over the signed 256-bit range, as
-its KeY sort does.
+`\[{ f(x̄)@C; }\](true)` for a function tagged `@custom:key box`, with no
+premise, the parameters `x̄` program variables of sort `int` or `bool`, so
+free: the obligation is proved for every value of them.  Here the
+parameters are `∀` binders over their type's 256-bit range (`Fml.all`): a
+`uint` ranges over `[0, 2²⁵⁶)` and an `int` over `[-2²⁵⁵, 2²⁵⁵)`, where
+KeY's `int` is unbounded.  The width is not bound: an `int8` parameter
+ranges over `[-2²⁵⁵, 2²⁵⁵)` too, which is neither solc's `[-128, 128)` nor
+KeY's every integer, because `solc_problems` keeps only the parameter's
+`PrimTy`; the obligation is then stronger than Solidity's, over more
+inputs.
 
-Both modalities range over a storage the contract can be in, as KeY's do:
-solkey's storage is the contract's by construction, its heap
-`wellFormed`.  Here `wt(storage)` (`Fml.wt`) says so: every root there, in
-order, canonical and tight, which is exactly reachable
-(`shape_iff_reachable`), and every word in its type's range (`storageWtB`,
-`wt_iff_reachable`).
+**The premise is the model's own.**  solkey's `storage` is a free `Struct`
+term whose integer fields are unbounded, and no solidity taclet mentions a
+well-formed heap; here the storage is a state of the interpreter, any
+list of roots.  `wt(storage)` (`Fml.wt`) assumes what Solidity guarantees
+of a deployed contract's storage: every root there, in order, canonical
+and tight, which is exactly reachable (`shape_iff_reachable`), and every
+word in its type's range (`storageWtB`, `wt_iff_reachable`).  So a derived
+obligation is Solidity's, not solkey's: where solkey's free storage can
+break an `assert` (a `uint` field below zero), the premise excludes it, so
+the Lean theorem need not imply solkey's obligation.
 
 * **Box**: `∀x̄. wt(storage) → [ f(x̄); ] true`.  A failed `assert` panics,
   and no modality holds of a panic (`Modality.afterRun`), so this is KeY's
   `assertSimple` "Violated" obligation, with no cut: a failed `require`
   reverts, which the box accepts, as in KeY.  Without the premise the box
-  would be stronger than solkey's, and false of some: a `uint[3]` root
+  would be false of functions Solidity runs safely: a `uint[3]` root
   stored as a mapping keeps a write through `delete`, so an `assert` that
   the element is reset fails.
 * **Diamond**: `∀x̄. wt(storage) → ⟨ f(x̄); ⟩ true`.  The diamond does not
@@ -190,8 +197,7 @@ def PrimTy.keySort : PrimTy → String
 
 /-- The obligation in solkey's problem syntax (`--print-problem`): the
 parameters as program variables, the call under the modality, and the
-premise `wt(storage)` where solkey has none (its storage is well-formed by
-construction). -/
+premise `wt(storage)`, which solkey's has not. -/
 def Problem.text (contract fn : String) (φ : Fml C) : String :=
   match Problem.parts φ with
   | none => "(not an obligation)"

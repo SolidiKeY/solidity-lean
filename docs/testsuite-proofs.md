@@ -15,7 +15,8 @@ concrete store (`corpus_decide`); none is proved by `⊢`.
   Panic halt, distinct from a `require` revert, and the box does not hold on
   it. This is a semantic change, made even though many files move.
 - **Diamond premise.** One atomic `wt(storage)` symbol (canonical and tight
-  storage, KeY's `wellFormed(heap)`), not an expanded layout.  The M3b
+  storage, the model's own reachability assumption: solkey states no
+  premise), not an expanded layout.  The M3b
   review put it on the box too, and added words in range.
 - **Front end.** solc's JSON AST → normalized `sol` text → the existing
   `contract!`/`sol_raw!` macros: one lowering path.
@@ -386,14 +387,22 @@ one.
   obligation; a `require` that fails reverts, which the box accepts, as in
   KeY.
 - **Diamond**: `∀x̄. wt(storage) → ⟨ f(x̄); ⟩ true`.  solkey states no
-  premise (its storage is the contract's by construction); here the
-  storage is any state, so the premise says it is one the contract can be
-  in.  Both modalities carry it (M3b review): a box over every storage is
-  stronger than solkey's and false of some (below).
+  premise: its `storage` is a free `Struct` term with unbounded integer
+  fields, and no solidity taclet mentions a well-formed heap.  Here the
+  storage is any state of the interpreter, so the premise says it is one
+  the contract can be in: the model's own Solidity-reachability assumption,
+  not KeY's.  Both modalities carry it (M3b review): a box over every
+  storage is false of some functions Solidity runs safely (below).  So a
+  derived obligation need not imply solkey's: `assert(total >= 0)` on a
+  `uint total` holds under `wt`, where solkey's free `total` can be
+  negative.
 - **Parameters**: `Fml.all` binders over the type's range: `uint`
   `[0, 2²⁵⁶)`, `int` the signed 256-bit range, `bool`.  KeY's `int` is
-  unbounded.  The one narrow parameter (`signedUnaryMinusInRange(int8)`)
-  ranges over the 256-bit range, as its KeY sort does.  No `TestSuite`
+  unbounded.  The width is not bound (`solc_problems` keeps only the
+  `PrimTy`): the one narrow parameter (`signedUnaryMinusInRange(int8)`)
+  ranges over `[-2²⁵⁵, 2²⁵⁵)`, neither solc's `[-128, 128)` nor KeY's every
+  integer.  That makes the obligation stronger than Solidity's (more
+  inputs), never weaker; its `require(x == 5)` keeps it derivable.  No `TestSuite`
   function returns a value but the skipped `tryCalleeGet`.
 - **`wt` is one atomic term**, `Op1.wt vs` applied to `storage`, stated as
   `defined(wt(storage))` (`Fml.wt`).  The interpreter reads it as a test,
@@ -429,8 +438,9 @@ one.
 each of the 417 programs, compiled for `sol_prove`.  `#solkey_problem`
 prints one in solkey's `--print-problem` syntax (same modality, same
 parameters as program variables of their KeY sort, plus `wt(storage) ->`);
-two are pinned in `TestSuite/Problems.lean`, with one `#solkey_derive?`
-suggestion (two leaves under `wt`).
+two are pinned in `TestSuite/Problems.lean`; the `#solkey_derive?`
+suggestions are pinned in `TestSuite/Suggestions.lean` (two leaves under
+`wt`).
 
 **The theorems.**  `#solkey_derive? N from i count k` runs `sol_prove?` on
 each statement and prints, for those whose leaves all close, the theorem
@@ -516,7 +526,7 @@ not.
   and skips a function whose parameter it cannot bind (listed "unstated")
   instead of failing the command.
 - **Pins.**  `#solkey_derive?` prints times only with `timed`, so its
-  suggestion is pinned (`TestSuite/Problems.lean`: the `case leafᵢ =>`
+  suggestion is pinned (`TestSuite/Suggestions.lean` since the M3b review 2: the `case leafᵢ =>`
   layout and `close_dropWt`); it resolves the leaf tactics with
   `Solidity` open, as a `Derived` module does.
 
@@ -735,3 +745,37 @@ parallel build (they were built before `Calculus/Problem.lean` anyway).
 
 `#solkey_derive? N … pending` runs the search on the statements no
 theorem derives yet.
+
+
+## M3b review 2 (2026-10-05): what counts as derived
+
+- **Axioms.**  `#solkey_obligations` counts `N.f.proved` as derived only
+  when its proof uses no axiom but `propext`, `Classical.choice` and
+  `Quot.sound` (`Frontend/Problems.lean`, `standardAxioms`); one that uses
+  `sorryAx` (a pasted `sol_prove?` suggestion with a `sorry` leaf) or
+  `Lean.ofReduceBool` is listed "unsound".  The axioms are collected once
+  for all 300 theorems (one shared `CollectAxioms` traversal), and per
+  theorem only when the union is not standard: the command stays under the
+  profiler's 100 ms threshold.  Checked by hand with a scratch `sorry`
+  theorem (`unsound storagePushReadBack`); not pinned, since a pin would
+  need a `sorry` in a checked file.
+- **A replay that fits.**  Each leaf try runs with heartbeats of its own,
+  so a search could succeed where the replay, one declaration, does not.
+  `Derive.proveSearch` adds up the heartbeats of `prove` and of each
+  closing try, and `Derive.replayFits` compares the sum with
+  `maxHeartbeats`: `#solkey_derive?` reports such a statement pending ("its
+  replay is past maxHeartbeats as one declaration"), and `sol_prove?`
+  warns.  `memoryToStorageIndexArrayCopyRootExample` needs about 264k
+  heartbeats against 200k and is pinned as that case.  The sum is
+  approximate: it leaves out the statement's elaboration and the `case`
+  lines.
+- **Pins off the critical path.**  The `#solkey_derive?` pins moved from
+  `TestSuite/Problems.lean`, which every `Derived` module imports, to
+  `TestSuite/Suggestions.lean`, which only the library root imports, so
+  their searches (about 9 s for the replay-too-long pin) run beside the
+  `Derived` modules.  They pick the statement by name (`only f`), not by
+  position.
+- **One builder, one loop.**  `Derive.provesNil` is the one builder of
+  `⊢ φ` (`sol_prove`, `#solkey_derive?`, `#solkey_obligations`), and
+  `Derive.proveSearch` the one leaf loop of `sol_prove?` and
+  `#solkey_derive?`.
