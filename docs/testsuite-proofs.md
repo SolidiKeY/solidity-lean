@@ -2120,7 +2120,9 @@ branch could.  `Elab.async false` also crashed the worker of either
 checkout at random (no OOM kill was recorded; a stack overflow on the main
 thread is likely), so run 3 was repeated under a fresh file name, and a
 fourth run (`ctor` again) crashed twice and was given up.  Re-measure on an
-idle machine before merging.
+idle machine before merging.  The TestSuite chain was rebuilt on this branch, one `Derived`
+module at a time, then `Report` and `SolkeyTestSuite.lean`: all clean, the
+435 derived obligations kept.
 
 ## The fixture at `1b4341a303` (W6, 2026-10-06)
 
