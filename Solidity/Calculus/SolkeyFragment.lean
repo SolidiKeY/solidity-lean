@@ -234,6 +234,7 @@ theorem Proves.toSolkey {R : RuleSet} {Γ : List (Hyp C)} {φ : Fml C} (h : Prov
   | simplify _ ih => exact .simplify (ih hφ)
   | applyOnRigidBox _ hU hr hs ih => exact .applyOnRigidBox (ih (Fml.inSolkey_subst _ _ hr)) hU hr hs
   | applyStorageBox _ hr he ih => exact .applyStorageBox (ih (Fml.inSolkey_withSt _ _ hr)) hr he
+  | closeFalse _ ih => exact .closeFalse (ih rfl)
   | close h hm => exact .close h hm
 
 /-- On the fragment, solkey's rules derive exactly what the calculus does. -/
@@ -295,13 +296,22 @@ theorem Hyp.modalFree_wrap {φ : Fml C} :
     exact Hyp.modalFree_wrap Γ h.2
   | .upd _ _ :: Γ, h | .havoc :: Γ, h | .all _ _ :: Γ, h => Hyp.modalFree_wrap Γ h
 
+/-- `\dropEffectlessElementaries` keeps what a halt or a refuted context
+says: `{U} false` holds as `{U'} false` does, whatever is dropped. -/
+theorem Upd.dropEffectless_holds_ff (F : List Var) (m : Modality) (U : Upd C)
+    (σ : Semantics.State) :
+    holds σ (.upd m (U.dropEffectless F) .ff) ↔ holds σ (.upd m U .ff) :=
+  m.after_frame (Upd.dropEffectless_apply F U σ) fun _ _ h =>
+    holds_frame .ff (fun _ hx _ => nomatch hx) h
+
 /-- **solkey's rules derive nothing about a call whose argument is not
-simple**, in any context. -/
+simple**, but in a context that refutes itself, where `closeFalse` closes
+any goal. -/
 theorem Proves.solkey_not_call {Γ : List (Hyp C)} {f : Name} {args : List (Arg C)}
     {hsep : Arg.separatedFrom [] args = true} {ret : CallRet} {body ω : Prog C} {φ : Fml C}
-    {a : Arg C} (ha : Arg.firstNonSimple args = some a) :
-    ¬ Proves .solkey Γ (.modal m (.call f args hsep ret body :: ω) φ) := by
-  intro h
+    {a : Arg C} (ha : Arg.firstNonSimple args = some a)
+    (h : Proves .solkey Γ (.modal m (.call f args hsep ret body :: ω) φ)) :
+    Valid (Hyp.wrap Γ .ff) := by
   generalize hR : RuleSet.solkey = R at h
   generalize hψ : Fml.modal m (.call f args hsep ret body :: ω) φ = ψ at h
   induction h generalizing φ with
@@ -310,10 +320,19 @@ theorem Proves.solkey_not_call {Γ : List (Hyp C)} {f : Name} {args : List (Arg 
   | branches d _ _ | cases d _ _ _ _ => cases hψ; simp [d.call_simple rfl] at ha
   | unfoldLean | doneLean => cases hR
   | intro _ _ | empty _ _ | allIntro _ _ | updIntro _ _ => cases hψ
-  | rewrite _ _ ih => exact ih hR (by rw [← hψ]; rfl)
-  | updRw _ _ _ ih | merge _ _ ih | mergeStorage _ _ ih | simplify _ ih => exact ih hR hψ
+  | rewrite r _ ih => exact Proves.rewrite_sound r.sound (ih hR (by rw [← hψ]; rfl))
+  | updRw r ht _ ih =>
+    exact fun σ => Hyp.rwUpd_wrap (Term.EvalRefines.of_theq r.sound ht) _ σ (ih hR hψ σ)
+  | merge hU _ ih => exact Proves.merge_sound hU (ih hR hψ)
+  | mergeStorage _ hV ih => exact Proves.mergeStorage_sound hV (ih hR hψ)
+  | simplify _ ih =>
+    intro σ
+    have hσ : holds σ (Hyp.wrap (_ ++ [.upd _ (Upd.dropEffectless _ _)]) .ff) := ih hR hψ σ
+    simp only [Hyp.wrap_append, Hyp.wrap] at hσ ⊢
+    exact Hyp.wrap_mono (fun τ hτ => (Upd.dropEffectless_holds_ff _ _ _ τ).1 hτ) _ σ hσ
   | applyOnRigidBox _ _ hr _ _ | applyStorageBox _ hr _ _ =>
     subst hψ; simp only [Fml.rigid, Bool.false_eq_true] at hr
+  | closeFalse d _ => exact d.sound
   | close _ hm => subst hψ; exact absurd (Hyp.modalFree_wrap _ hm) (by simp [Fml.modalFree])
 
 /-- `[ f(x + 1); ] true`, `f(uint a)` with an empty body: a call whose
@@ -342,6 +361,6 @@ open Proves in
 `[ f(x + 1); ] true`, solkey's rules do not.  So `Proves.solkey_iff` needs
 its hypothesis. -/
 theorem Proves.solkey_lt_calculus : ∃ φ : Fml C, (⊢ φ) ∧ ¬ (⊢ₖ φ) :=
-  ⟨captureCall, captureCall_derived, Proves.solkey_not_call rfl⟩
+  ⟨captureCall, captureCall_derived, fun h => Proves.solkey_not_call rfl h { storage := [] } trivial⟩
 
 end Solidity

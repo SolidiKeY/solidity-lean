@@ -40,15 +40,26 @@ testStorageNestedPushReturnAlias: derived
 #guard_msgs in
 #solkey_derive? Solkey.TestSuite only testStorageNestedPushReturnAlias
 
-/-! `returnEarly` closes with no leaf, but its replay is past
-`maxHeartbeats` (`Derive.replayFits`), so the search calls it pending;
-`Derived14.lean` keeps its `sol_prove` as a recorded exception
-(`docs/testsuite-proofs.md`).  When pruning by ground conditions makes
-the replay fit, this pin moves; `tupleReturnDiscardsComponents`, past the
-limit for the same cause, is not pinned, its search taking 98 s more. -/
+/-! `returnEarly` calls `returnSign` (three exits) three times, and
+`tupleReturnDiscardsComponents` runs `returnStats` (four conditionals and an
+`&&`) on literals: a split whose condition is ground under its updates keeps
+only the branch it takes (`Derive.splitRes`), so each replay fits one
+declaration (`Derive.replayFits`). -/
 
 /--
-info: returnEarly: pending, its replay is past maxHeartbeats as one declaration
+info: theorem Solkey.TestSuite.returnEarly.proved : ⊢ Solkey.TestSuite.returnEarly.problem := by
+  sol_prove
+
+returnEarly: derived
 -/
 #guard_msgs in
 #solkey_derive? Solkey.TestSuite only returnEarly
+
+/--
+info: theorem Solkey.TestSuite.tupleReturnDiscardsComponents.proved : ⊢ Solkey.TestSuite.tupleReturnDiscardsComponents.problem := by
+  sol_prove
+
+tupleReturnDiscardsComponents: derived
+-/
+#guard_msgs in
+#solkey_derive? Solkey.TestSuite only tupleReturnDiscardsComponents

@@ -14,7 +14,10 @@ modality, fires the rule `Stmt.step` picks (as `update`, `unfold`, `split`,
 `check`, `done`, or `branches` with any number of outcomes), or moves a precondition,
 a quantified local or an update into the context, in `sol_derive`'s order;
 a sequent none of these fits is a leaf, dropped when the closer accepts it.
-What is left is the residue.  `Proves.of_residue` says once that a residue
+One step `sol_derive` does not take: a split whose condition is ground under
+its updates keeps only the branch it takes, the other closed by
+`Proves.closeFalse` (`Derive.splitRes`), so a callee run on literals is one
+path, not one per exit.  What is left is the residue.  `Proves.of_residue` says once that a residue
 whose leaves are proved proves the sequent, so a derivation is one
 evaluation the kernel checks, not hundreds of elaborated steps.
 
@@ -103,23 +106,113 @@ def coverFree (m : Modality) (Γ : List (Hyp C)) : Bool :=
   | .box => Hyp.boxOnly Γ && (Hyp.wrap Γ .tt).modalFree
   | .diamond => false
 
+/-! ### A split whose condition is ground
+
+`if (v < 0)` after `int v = -3;` takes one branch only.  KeY splits, applies
+the update to the condition in each branch's antecedent, simplifies it, and
+closes the branch it became `false` in (`closeFalse`).  The strategy does
+the same at the split: where the condition reads only locals the context
+binds, through its updates, to terms of literals and value operators
+(`groundCond`, a cheap syntactic test), it asks the closer to refute each
+branch's context (`Γ, c ⟹ false`), and a refuted branch is closed there by
+`Proves.closeFalse` instead of being run to its end.  The test only decides
+when to ask: what is closed, the closer proves. -/
+
+/-- The locals a value term reads when it is built from literals and value
+operators alone; `none` when it reads anything else. -/
+def _root_.Solidity.Tm.litVars : {s : Srt} → Tm C s → Option (List Var)
+  | .val, .pvV x => some [x]
+  | .val, .app0 (.lit _) => some []
+  | .val, .app1 (.unop _ _) a => a.litVars
+  | .val, .app2 (.binop _ _) a b =>
+    match a.litVars, b.litVars with
+    | some u, some v => some (u ++ v)
+    | _, _ => none
+  | _, _ => none
+
+/-- `Tm.litVars` of a first-order formula. -/
+def _root_.Solidity.Fml.litVars : Fml C → Option (List Var)
+  | .tt => some []
+  | .eq a b =>
+    match a.litVars, b.litVars with
+    | some u, some v => some (u ++ v)
+    | _, _ => none
+  | .defined t => t.litVars
+  | .not φ => φ.litVars
+  | .and φ ψ | .imp φ ψ =>
+    match φ.litVars, ψ.litVars with
+    | some u, some v => some (u ++ v)
+    | _, _ => none
+  | _ => none
+
+/-- Whether the element binds the local `x`. -/
+def _root_.Solidity.UpdElem.binds (x : Var) : UpdElem C → Bool
+  | .val y _ | .path y _ | .mref y _ | .store y _ | .saveNet y => y == x
+  | _ => false
+
+/-- The locals `xs` read before the parallel update `U`: each one `U` binds
+by `x := t` replaced by `t`'s, when `t` is of literals; `none` when one is
+bound otherwise. -/
+def _root_.Solidity.Upd.groundStep (U : Upd C) : List Var → Option (List Var)
+  | [] => some []
+  | x :: xs =>
+    match Upd.groundStep U xs with
+    | none => none
+    | some ys =>
+      match U.reverse.find? (·.binds x) with
+      | none => some (x :: ys)
+      | some (.val _ t) => t.litVars.map (· ++ ys)
+      | some _ => none
+
+/-- Whether every local of `xs` is bound by the context `Γ`, its entries
+last first, to a term of literals, transitively. -/
+def groundIn : List (Hyp C) → List Var → Bool
+  | _, [] => true
+  | [], _ :: _ => false
+  | .upd _ U :: Γ, xs@(_ :: _) =>
+    match U.groundStep xs with
+    | some ys => groundIn Γ ys
+    | none => false
+  | .all x _ :: Γ, xs@(_ :: _) => !xs.contains x && groundIn Γ xs
+  | .pre _ :: Γ, xs@(_ :: _) | .havoc :: Γ, xs@(_ :: _) => groundIn Γ xs
+
+/-- Whether a split's condition `c` is ground in the context `Γ`. -/
+def groundCond (Γ : List (Hyp C)) (c : Fml C) : Bool :=
+  match c.litVars with
+  | some xs => groundIn Γ.reverse xs
+  | none => false
+
+/-- The goals of a split (`Proves.split`): `thn`, `els`, and `cov` unless
+`coverFree` (KeY's two goals under the box, `splitBoxRule`); a branch whose
+context the closer refutes, when the condition is ground (`groundCond`),
+left out (`Proves.closeFalse`). -/
+def splitRes (r : Nat → List (Hyp C) → Fml C → Option (List (Leaf C) × Nat))
+    (close : List (Hyp C) → Fml C → Bool) (b : Nat) (Γ : List (Hyp C)) (m : Modality)
+    (ω : Prog C) (ψ : Fml C) (c c' : Fml C) (P Q : Prog C) : Option (List (Leaf C) × Nat) :=
+  -- a literal list either way: no `List.append` for `decide +kernel` to unfold
+  bif groundCond Γ c && close (Γ ++ [.pre c]) .ff then
+    bif coverFree m Γ then allRes r b [(Γ ++ [.pre c'], .modal m (Q ++ ω) ψ)]
+    else allRes r b [(Γ ++ [.pre c'], .modal m (Q ++ ω) ψ), (Γ, Premise.cover m c c')]
+  else bif groundCond Γ c && close (Γ ++ [.pre c']) .ff then
+    bif coverFree m Γ then allRes r b [(Γ ++ [.pre c], .modal m (P ++ ω) ψ)]
+    else allRes r b [(Γ ++ [.pre c], .modal m (P ++ ω) ψ), (Γ, Premise.cover m c c')]
+  else bif coverFree m Γ then
+    allRes r b [(Γ ++ [.pre c], .modal m (P ++ ω) ψ), (Γ ++ [.pre c'], .modal m (Q ++ ω) ψ)]
+  else
+    allRes r b [(Γ ++ [.pre c], .modal m (P ++ ω) ψ), (Γ ++ [.pre c'], .modal m (Q ++ ω) ψ),
+      (Γ, Premise.cover m c c')]
+
 /-- The goals of a rule's premise, fired on `⟨[ s; ω ]⟩ ψ` in the context `Γ`,
 handed to `r` with the budget `b`: the goals of `Proves.updateRule`,
-`unfoldRule`, `splitRule` (`thn`, `els`, and `cov` unless `coverFree`: KeY's
-two goals under the box, `splitBoxRule`), `checkRule` (`thn`, `els`),
+`unfoldRule`, `splitRule` (`splitRes`), `checkRule` (`thn`, `els`),
 `doneRule`, `branchesRule` (one per outcome), `casesRule` (`casesGoals`). -/
-def premiseRes (r : Nat → List (Hyp C) → Fml C → Option (List (Leaf C) × Nat)) (b : Nat)
+def premiseRes (r : Nat → List (Hyp C) → Fml C → Option (List (Leaf C) × Nat))
+    (close : List (Hyp C) → Fml C → Bool) (b : Nat)
     (Γ : List (Hyp C)) (m : Modality) (ω : Prog C) (ψ : Fml C) :
     Premise C → Option (List (Leaf C) × Nat)
   | .update U => r b (Γ ++ [.upd m U]) (.modal m ω ψ)
   | .unfold P => r b Γ (.modal m (P ++ ω) ψ)
-  | .split c c' P Q =>
-    -- a literal list either way: no `List.append` for `decide +kernel` to unfold
-    bif coverFree m Γ then
-      allRes r b [(Γ ++ [.pre c], .modal m (P ++ ω) ψ), (Γ ++ [.pre c'], .modal m (Q ++ ω) ψ)]
-    else
-      allRes r b [(Γ ++ [.pre c], .modal m (P ++ ω) ψ), (Γ ++ [.pre c'], .modal m (Q ++ ω) ψ),
-        (Γ, Premise.cover m c c')]
+  | .split c c' P Q => splitRes r close b Γ m ω ψ c c' P Q
   | .check c P => allRes r b [(Γ ++ [.pre c], .modal m (P ++ ω) ψ), (Γ, c)]
   | .done d => r b Γ ((Premise.done d).fml m ω ψ)
   | .branches bs => allRes r b (bs.map fun o => (Γ, .alls o.1 (.modal m (o.2 ++ ω) ψ)))
@@ -136,7 +229,7 @@ def residue : Nat → (List (Hyp C) → Fml C → Bool) → Nat → List (Hyp C)
   | _ + 1, _, 0, _, _ => none
   | n + 1, close, b + 1, Γ, .modal _ [] ψ => residue n close b Γ ψ
   | n + 1, close, b + 1, Γ, .modal m (s :: ω) ψ =>
-    premiseRes (residue n close) b Γ m ω ψ
+    premiseRes (residue n close) close b Γ m ω ψ
       (s.step (Hyp.fresh Γ (.modal m (s :: ω) ψ)) m).premise
   | n + 1, close, b + 1, Γ, .imp a ψ => residue n close b (Γ ++ [.pre a]) ψ
   | n + 1, close, b + 1, Γ, .all x p ψ => residue n close b (Γ ++ [.all x p]) ψ
@@ -749,6 +842,9 @@ theorem cover_of_coverFree {m : Modality} {Γ : List (Hyp C)} {c c' : Fml C}
     exact Proves.closeTrue h.1 h.2
   | diamond => cases h
 
+theorem and_right {a b : Bool} (h : (a && b) = true) : b = true := by
+  revert h; cases a <;> cases b <;> decide
+
 section
 variable {r : Nat → List (Hyp C) → Fml C → Option (List (Leaf C) × Nat)}
   (hr : ∀ b Γ φ ls b', r b Γ φ = some (ls, b') → (∀ l ∈ ls, Proves .all l.1 l.2) →
@@ -772,25 +868,46 @@ theorem allRes_sound : ∀ {b : Nat} {gs ls : List (Leaf C)} {b' : Nat},
       · cases h
     · cases h
 
+variable {close : List (Hyp C) → Fml C → Bool}
+  (hclose : ∀ Γ φ, close Γ φ = true → Proves .all Γ φ)
+include hclose
+
+/-- A split's goals: each branch the closer refutes by `Proves.closeFalse`. -/
+theorem splitRes_sound {b : Nat} {Γ : List (Hyp C)} {m : Modality} {s : Stmt C}
+    {ω : Prog C} {ψ : Fml C} {c c' : Fml C} {P Q : Prog C} {ls : List (Leaf C)} {b' : Nat}
+    (d : Rule C (Hyp.fresh Γ (.modal m (s :: ω) ψ)) m s (.split c c' P Q))
+    (h : splitRes r close b Γ m ω ψ c c' P Q = some (ls, b'))
+    (hl : ∀ l ∈ ls, Proves .all l.1 l.2) :
+    Proves .all Γ (.modal m (s :: ω) ψ) := by
+  simp only [splitRes] at h
+  cases hc : coverFree m Γ <;>
+    cases h1 : (groundCond Γ c && close (Γ ++ [.pre c]) .ff) <;>
+    cases h2 : (groundCond Γ c && close (Γ ++ [.pre c']) .ff) <;>
+    simp only [hc, h1, h2, cond_true, cond_false] at h <;>
+    have hg := allRes_sound hr h hl <;>
+    first
+    | exact Proves.splitRule d (hg _ (.head _)) (hg _ (.tail _ (.head _)))
+        (cover_of_coverFree hc)
+    | exact Proves.splitRule d (hg _ (.head _)) (hg _ (.tail _ (.head _)))
+        (hg _ (.tail _ (.tail _ (.head _))))
+    | exact Proves.splitRule d (.closeFalse (hclose _ _ (and_right h1))) (hg _ (.head _))
+        (cover_of_coverFree hc)
+    | exact Proves.splitRule d (.closeFalse (hclose _ _ (and_right h1))) (hg _ (.head _))
+        (hg _ (.tail _ (.head _)))
+    | exact Proves.splitRule d (hg _ (.head _)) (.closeFalse (hclose _ _ (and_right h2)))
+        (cover_of_coverFree hc)
+    | exact Proves.splitRule d (hg _ (.head _)) (.closeFalse (hclose _ _ (and_right h2)))
+        (hg _ (.tail _ (.head _)))
+
 theorem premiseRes_sound {b : Nat} {Γ : List (Hyp C)} {m : Modality} {s : Stmt C}
     {ω : Prog C} {ψ : Fml C} {pr : Premise C} {ls : List (Leaf C)} {b' : Nat}
     (d : Rule C (Hyp.fresh Γ (.modal m (s :: ω) ψ)) m s pr)
-    (h : premiseRes r b Γ m ω ψ pr = some (ls, b')) (hl : ∀ l ∈ ls, Proves .all l.1 l.2) :
+    (h : premiseRes r close b Γ m ω ψ pr = some (ls, b')) (hl : ∀ l ∈ ls, Proves .all l.1 l.2) :
     Proves .all Γ (.modal m (s :: ω) ψ) := by
   cases pr with
   | update U => exact Proves.updateRule d (hr _ _ _ _ _ h hl)
   | unfold P => exact Proves.unfoldRule d (hr _ _ _ _ _ h hl)
-  | split c c' P Q =>
-    cases hc : coverFree m Γ with
-    | true =>
-      simp only [premiseRes, hc, cond_true] at h
-      have hg := allRes_sound hr h hl
-      exact Proves.splitRule d (hg _ (.head _)) (hg _ (.tail _ (.head _))) (cover_of_coverFree hc)
-    | false =>
-      simp only [premiseRes, hc, cond_false] at h
-      have hg := allRes_sound hr h hl
-      exact Proves.splitRule d (hg _ (.head _)) (hg _ (.tail _ (.head _)))
-        (hg _ (.tail _ (.tail _ (.head _))))
+  | split c c' P Q => exact splitRes_sound hr hclose d h hl
   | check c P =>
     have hg := allRes_sound hr h hl
     exact Proves.checkRule d (hg _ (.head _)) (hg _ (.tail _ (.head _)))
@@ -823,7 +940,7 @@ theorem Proves.of_residue {close : List (Hyp C) → Fml C → Bool}
     match φ, h with
     | .modal _ [] ψ, h => exact .empty (ih _ _ _ _ _ h hl)
     | .modal m (s :: ω) ψ, h =>
-      exact premiseRes_sound ih (s.step (Hyp.fresh Γ (.modal m (s :: ω) ψ)) m).rule h hl
+      exact premiseRes_sound ih hclose (s.step (Hyp.fresh Γ (.modal m (s :: ω) ψ)) m).rule h hl
     | .imp a ψ, h => exact .intro (ih _ _ _ _ _ h hl)
     | .all x p ψ, h => exact .allIntro (ih _ _ _ _ _ h hl)
     | .upd m U ψ, h => exact .updIntro (ih _ _ _ _ _ h hl)

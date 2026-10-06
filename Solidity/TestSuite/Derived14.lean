@@ -13,20 +13,11 @@ call is inlined (`internalCallExpand`, `functionBodyExpand` for a call with
 targets), its `return`s lowered at elaboration (`lowerReturns`); a tuple
 declaration or assignment writes its components in order.
 
-**An exception to `Derive.replayFits`.**  `returnEarly` (three calls of
-`returnSign`, three paths each, 27 paths) and
+`returnEarly` (three calls of `returnSign`, three exits each) and
 `tupleReturnDiscardsComponents` (`returnStats`' four conditionals and its
-`&&`, 32 paths) close with no leaf, but their kernel check counts past
-`maxHeartbeats` (about 270k and 490k), so `#solkey_derive?` prints them as
-pending (`Suggestions.lean` pins it for `returnEarly`, the cheaper).  A bare `sol_prove` passes at the
-default limit only because the kernel's work raises the counter but, on
-this toolchain, the limit does not stop it, and nothing follows it in the
-declaration.  They check in 25 s and 98 s; the second is more than
-`Derived7`, the slowest module before, takes for forty (58 s).  Pruning a path at a split whose condition is
-ground under its updates (every argument here is a literal), in
-`Derive.residue`, is the fix; until it lands this is recorded as a decision
-in `docs/testsuite-proofs.md`, and a toolchain whose kernel stops at the
-limit turns both into errors.
+`&&`) run their callees on literals: each split's condition is ground under
+its updates, and the strategy keeps only the branch it takes
+(`Derive.splitRes`), so one path each is run, not 27 and 32.
 -/
 
 open Solidity Proves

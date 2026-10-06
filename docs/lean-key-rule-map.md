@@ -56,6 +56,7 @@ goal's update level and reads what it adds there: nothing to port.
 | `emptyModality` | `Proves.empty` (also `Proves.emptyModality`) | ⊢ rule | `⟨[ ]⟩ φ ⇝ φ` under either modality, as KeY's `#allmodal`; the proof tree prints the step under this name (`Calculus/ProofTree.lean`) |
 | `impRight` (`propRule.key`) | `Proves.intro` (also `Proves.impRight`) | ⊢ rule | `⟹ a → φ` becomes `a ⟹ φ` |
 | `allRight` (`firstOrderRules.key`) | `Proves.allIntro` (also `Proves.allRight`) | ⊢ rule | `⟹ ∀ T x; φ` becomes `∀ T x ⟹ φ`: the local holds any value of `T`, KeY's skolem constant (`Hyp.all`) |
+| `closeFalse` (`propRule.key`) | `Proves.closeFalse` | ⊢ rule | KeY's `false ⟹` with its simplification as the premise: a context the logic refutes (`Γ ⟹ false`) closes any goal. `Derive.residue` closes a split's branch so when its condition is ground under its updates (`Derive.splitRes`); inside the closer, `Facts.refute` (below) |
 | `closeTrue` (`propRule.key`) | `Proves.closeTrue` | ⊢ rule (derived) | `⟹ true`, behind a context with no diamond update and no modality (`Hyp.boxOnly`); the third goal of a box split, which `Proves.splitBox` discharges with it |
 | `blockEmpty` | — | unclaimed | a program is a list of statements with branch bodies inlined: no nested block to erase, no `{} ; rest` to find |
 | `revertDiamond` | `revertDiamond` | same | closes to `false`: a reverted run satisfies no diamond formula |
@@ -370,7 +371,7 @@ step.  "closer clause X" names the definition the clause lives in.
 | `ifthenelse_true`, `ifthenelse_false` | closer clause `foldIte` | subsumed | a conditional on a literal |
 | `boolean_equal`, `true_to_not_false`, `concrete_not_*` | closer clauses `foldUn`, `Facts.decomp` | subsumed | `!` on a literal; a premise `!c ≐ b` gives `c ≐ !b` |
 | `applyEq`, `applyEqRigid` | closer clauses `Facts.eqnK`, `substE` | subsumed | a premise `t ≐ v` rewrites `t` to a literal or a local everywhere after it, decomposed through `&&`, `\|\|`, `==`, `!=` |
-| `closeFalse`, `replace_known_left` | closer clauses `Facts.refute`, `Facts.apart` | subsumed | a premise refuted (two literals apart, a side that halts, a pair the premises keep apart) closes the leaf |
+| `closeFalse` (in the closer), `replace_known_left` | closer clauses `Facts.refute`, `Facts.apart` | subsumed | a premise refuted (two literals apart, a side that halts, a pair the premises keep apart) closes the leaf |
 | `cut`, `cut_direct` on a `bool` | closer clause `Facts.split` | subsumed | a case split on a `bool` local or a condition compared with a literal |
 | `selectOnTypedStruct`, `selectOnTypedMember`, `selectOnTypedElement`, `selectOnTypedMapSize`, `selectOnTypedFixedSize`, `selectOnTypedLeafSize` | closer clauses `LPath.ty`, `Facts.retsW`, `Facts.halts` | subsumed | under `wt(storage)` a read at a path the layout types returns, of its type's kind; a test for a shape the layout says is not there halts |
 | `sizeNotNegative` | closer clause `Facts.lo` | subsumed | a length is at least `0` (`values.length + 1 > 0` after a `push`), KeY's `\add(0 <= selectSt<[int]>(st, size) ==>)`. No taclet bounds a length above, so `values.length - 1` after a `push` is not known to fit a `uint` (`storagePushReadBack` stays underived: `divergent` in `tests/solkey/expected.tsv`) |

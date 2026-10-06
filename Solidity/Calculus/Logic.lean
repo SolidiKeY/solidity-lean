@@ -440,6 +440,12 @@ inductive Proves : RuleSet → List (Hyp C) → Fml C → Prop
       (hr : φ.rigid = true := by first | rfl | decide)
       (he : φ.stExplicit = true := by first | rfl | decide) :
       dl{ ..Γ, {storage := s} [ ] ⟹[R] φ }
+  /-- `closeFalse`: a context that refutes itself closes any goal.  KeY
+  closes `false ⟹`, the antecedent a condition became when its updates were
+  applied and it was simplified; here that step is the premise, the context
+  refuted (`Γ ⟹ false`), which the closer proves (`Derive.splitRes`). -/
+  | closeFalse {R : RuleSet} {Γ : List (Hyp C)} {φ : Fml C} (h : dl{ ..Γ ⟹[R] false }) :
+      dl{ ..Γ ⟹[R] φ }
   /-- Leave the calculus: with no modality left anywhere in the sequent, what
   is left is proved in the logic. -/
   | close {R : RuleSet} {Γ : List (Hyp C)} {φ : Fml C} (h : Valid (Hyp.wrap Γ φ))
@@ -771,6 +777,8 @@ theorem Proves.sound {R : RuleSet} {Γ : List (Hyp C)} {φ : Fml C} (h : Proves 
   | simplify _ ih => exact Proves.simplify_sound ih
   | applyOnRigidBox _ hU hr hs ih => exact Proves.applyOnRigidBox_sound hU hr hs ih
   | applyStorageBox _ hr he ih => exact Proves.applyStorageBox_sound hr he ih
+  | closeFalse _ ih =>
+    exact fun σ => Hyp.wrap_mono (ψ := .ff) (fun _ h => absurd trivial h) _ σ (ih σ)
   | close h _ => exact h
 
 open Proves in
@@ -810,6 +818,7 @@ theorem Proves.toAll {R : RuleSet} {Γ : List (Hyp C)} {φ : Fml C} (h : Proves 
   | simplify _ ih => exact .simplify ih
   | applyOnRigidBox _ hU hr hs ih => exact .applyOnRigidBox ih hU hr hs
   | applyStorageBox _ hr he ih => exact .applyStorageBox ih hr he
+  | closeFalse _ ih => exact .closeFalse ih
   | close h hφ => exact .close h hφ
 
 /-! ## Printing sequents

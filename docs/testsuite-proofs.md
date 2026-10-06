@@ -21,15 +21,9 @@ corpus rows (`Corpus/TestSuite.lean`) are corollaries of those theorems.
 - **Front end.** solc's JSON AST → normalized `sol` text → the existing
   `contract!`/`sol_raw!` macros: one lowering path.
 - **Scope.** M0 and M1, then M2 (done, below).
-- **Two replays past `Derive.replayFits` (2026-10-06).**  `returnEarly`
-  and `tupleReturnDiscardsComponents` (`TestSuite/Derived14.lean`) stay
-  bare `sol_prove` theorems although `#solkey_derive?` calls them pending:
-  their kernel check counts about 270k and 490k heartbeats and is not
-  stopped by `maxHeartbeats` on v4.24.  An exception, not a precedent: no
-  override, the proofs are kernel-checked, and `TestSuite/Suggestions.lean`
-  pins `returnEarly` as past the limit, so pruning by ground conditions in
-  `Derive.residue` (the follow-up, W7 review below), or a toolchain whose
-  kernel stops at the limit, is noticed.
+- **No replay past `Derive.replayFits`.**  The two W7 recorded as an
+  exception, `returnEarly` and `tupleReturnDiscardsComponents`, fit since
+  splits on ground conditions are pruned ("Pruning ground splits", below).
 
 ## Measurements (2026-10-05)
 
@@ -2195,3 +2189,63 @@ A finder and a skeptic over W6 and W7; what the skeptic confirmed, fixed:
   in `Corpus/TestSuite.lean`'s header and the same count in
   `docs/corpus-parity.md`'s prose; `expected.tsv` does not move, and
   `check-testsuite.sh` is ok against the clone.
+
+## Pruning ground splits (2026-10-06)
+
+The W7 review's follow-up, in `Derive.residue`.
+
+- **The rule.**  `Proves.closeFalse` (`Calculus/Logic.lean`), KeY's
+  `closeFalse` (`propRule.key`): `dl{ ..Γ ⟹[R] false }` gives
+  `dl{ ..Γ ⟹[R] φ }` for any `φ`.  KeY closes `false ⟹`, the antecedent its
+  split condition became once the update was applied and the literals
+  folded; here that simplification is the premise, `Γ ⟹ false`, which the
+  closer proves.  Both rule sets have it (KeY's is a solkey taclet), so
+  `Proves.toSolkey` keeps it, and `Proves.solkey_not_call`
+  (`Calculus/SolkeyFragment.lean`) now says that solkey's rules derive
+  nothing about a call with an argument that is not simple *except behind a
+  context that refutes itself*: its conclusion is `Valid (Hyp.wrap Γ .ff)`,
+  and `Proves.solkey_lt_calculus` reads it at the empty context.  Sound by
+  `Hyp.wrap_mono`, one line of `Proves.sound`.
+- **The strategy** (`Derive.splitRes`).  At a split `c`/`c'`, when `c`
+  reads only locals the context binds, through its updates, to terms of
+  literals and value operators, transitively (`Derive.groundCond`, a
+  syntactic test that only decides when to ask), the closer is asked to
+  refute `Γ, c` and then `Γ, c'`; a refuted branch is closed by
+  `closeFalse` and only the other is run.  Soundness is the existing
+  split's and the closer's (`Derive.splitRes_sound`); the goal lists stay
+  literal, so `decide +kernel` unfolds no `List.append`.  `sol_derive` and
+  the proof tree do not prune: their pins do not move.
+- **Effect.**  `returnEarly` 270k → 23k heartbeats, `tupleReturnDiscardsComponents`
+  493k → 32k: both fit `Derive.replayFits` at the default limit, so the
+  decision of W7 is withdrawn.  `Suggestions.lean` pins both as derived
+  (`#solkey_derive? … only returnEarly`, `… only tupleReturnDiscardsComponents`).
+- **Measured** (a scratch module per `Derived` module, `Elab.async false`,
+  each theorem wrapped in a command recording `IO.monoMsNow` and
+  `IO.getNumHeartbeats` around `elabCommand`; heartbeats in thousands).
+  Heartbeats are exact; wall clock is not, two other lanes building beside
+  it (load 12–36): `Derived8` took 41 s, 63 s and 55 s on master and 72 s,
+  72 s and 55 s with the pruning, the two 55 s runs back to back.  No module
+  costs more heartbeats than 0.2% over master; three cost fewer, where
+  the strategy now meets a ground split.
+
+| Module | Theorems | master k-heartbeats | pruned | Δ | master s | pruned s |
+|---|---:|---:|---:|---:|---:|---:|
+| `Derived1` | 40 | 106,680 | 103,871 | −2.6% | 10.2 | 10.2 |
+| `Derived2` | 40 | 118,811 | 109,732 | −7.6% | 14.8 | 10.6 |
+| `Derived3` | 40 | 271,427 | 217,763 | −19.8% | 31.6 | 21.7 |
+| `Derived4` | 40 | 228,283 | 226,926 | −0.6% | 24.2 | 25.0 |
+| `Derived5` | 40 | 73,192 | 73,224 | 0.0% | 7.8 | 10.1 |
+| `Derived6` | 37 | 143,761 | 143,323 | −0.3% | 17.7 | 19.0 |
+| `Derived7` | 40 | 1,007,857 | 1,002,793 | −0.5% | 120.0 | 148.0 |
+| `Derived8` | 23 | 435,155 | 435,816 | +0.2% | 41.3 | 72.2 |
+| `Derived9` | 40 | 90,098 | 82,456 | −8.5% | 9.3 | 12.0 |
+| `Derived10` | 40 | 120,004 | 119,946 | 0.0% | 11.6 | 12.9 |
+| `Derived11` | 11 | 28,306 | 28,291 | 0.0% | 3.0 | 3.3 |
+| `Derived12` | 20 | 202,376 | 202,633 | +0.1% | 20.1 | 19.6 |
+| `Derived13` | 4 | 72,698 | 72,684 | 0.0% | 8.3 | 6.8 |
+| `Derived14` | 20 | 871,389 | 137,507 | −84.2% | 125.7 | 15.8 |
+
+  The wall-clock rises (`Derived7`, `Derived8`, `Derived5`) are load: the
+  heartbeats do not move, and the back-to-back runs agree.  `Derived14` is
+  no longer the slowest module: `Derived7` is again.
+
