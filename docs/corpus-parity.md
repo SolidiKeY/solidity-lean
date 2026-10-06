@@ -26,8 +26,8 @@ an internal helper has no obligation):
 
 | | diamond | box | skip | total |
 |---|---:|---:|---:|---:|
-| derived | 313 | 102 | 0 | 415 |
-| pending | 16 | 5 | 0 | 21 |
+| derived | 328 | 107 | 0 | 435 |
+| pending | 1 | 0 | 0 | 1 |
 | divergent | 1 | 0 | 0 | 1 |
 | excluded | 1 | 0 | 0 | 1 |
 | skip | 0 | 0 | 2 | 2 |
@@ -37,7 +37,6 @@ Not derived, by reason:
 
 | Status | Because | # | functions |
 |---|---|---:|---|
-| pending | not derived yet | 20 | `sendToOwner`, `sendUnfoldReceiver`, `sendUnfoldArgument`, … |
 | skip | tagged `@custom:key skip` | 2 | `tryCalleeGet`, `tryCalleePing` |
 | divergent | `wt(storage)` does not bound array lengths, so the checked `- 1` after a push can overflow; solc bounds lengths at `2^64` (`docs/solc-alignment.md`, "Remaining deltas") | 1 | `storagePushReadBack` |
 | pending | the write through the dangling alias is translated (`SymB.stale`, `LStor.stale`), but the leaf's reduction is past `Derive.elimSize`, and the `push()` takes its slot from a storage with writes at another root below it, which the slot facts do not read | 1 | `testArrayCopyClearsOldElements` |

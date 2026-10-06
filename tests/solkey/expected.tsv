@@ -413,31 +413,31 @@ taclets	TestSuite	ternaryToIfStorage	derived	diamond	`Solkey.TestSuite.ternaryTo
 taclets	TestSuite	transferToOwner	derived	box	`Solkey.TestSuite.transferToOwner.proved` (`Solidity/TestSuite/Derived6.lean`)
 taclets	TestSuite	transferUnfoldReceiver	derived	box	`Solkey.TestSuite.transferUnfoldReceiver.proved` (`Solidity/TestSuite/Derived6.lean`)
 taclets	TestSuite	transferUnfoldArgument	derived	box	`Solkey.TestSuite.transferUnfoldArgument.proved` (`Solidity/TestSuite/Derived6.lean`)
-taclets	TestSuite	sendToOwner	pending	box	not derived yet
-taclets	TestSuite	sendUnfoldReceiver	pending	box	not derived yet
-taclets	TestSuite	sendUnfoldArgument	pending	box	not derived yet
-taclets	TestSuite	callToSender	pending	box	not derived yet
+taclets	TestSuite	sendToOwner	derived	box	`Solkey.TestSuite.sendToOwner.proved` (`Solidity/TestSuite/Derived14.lean`)
+taclets	TestSuite	sendUnfoldReceiver	derived	box	`Solkey.TestSuite.sendUnfoldReceiver.proved` (`Solidity/TestSuite/Derived14.lean`)
+taclets	TestSuite	sendUnfoldArgument	derived	box	`Solkey.TestSuite.sendUnfoldArgument.proved` (`Solidity/TestSuite/Derived14.lean`)
+taclets	TestSuite	callToSender	derived	box	`Solkey.TestSuite.callToSender.proved` (`Solidity/TestSuite/Derived14.lean`)
 taclets	TestSuite	tryCalleeGet	skip	skip; for all x	TestSuite.sol:3511: tagged `@custom:key skip`
 taclets	TestSuite	tryCalleePing	skip	skip	TestSuite.sol:3516: tagged `@custom:key skip`
 taclets	TestSuite	tryCallCatchKeepsState	derived	box	`Solkey.TestSuite.tryCallCatchKeepsState.proved` (`Solidity/TestSuite/Derived6.lean`)
 taclets	TestSuite	tryCallBindsReturnAndPanicCode	derived	box	`Solkey.TestSuite.tryCallBindsReturnAndPanicCode.proved` (`Solidity/TestSuite/Derived6.lean`)
 taclets	TestSuite	tryCallUnmatchedFailureReverts	derived	box	`Solkey.TestSuite.tryCallUnmatchedFailureReverts.proved` (`Solidity/TestSuite/Derived6.lean`)
-taclets	TestSuite	internalCallDeclaration	pending	diamond	not derived yet
-taclets	TestSuite	internalCallInExpression	pending	diamond	not derived yet
-taclets	TestSuite	internalCallToStorage	pending	diamond	not derived yet
-taclets	TestSuite	returnEarly	pending	diamond	not derived yet
-taclets	TestSuite	tupleReturnPair	pending	diamond	not derived yet
-taclets	TestSuite	tupleReturnReadsReturnVariables	pending	diamond	not derived yet
-taclets	TestSuite	tupleReturnDiscardsComponents	pending	diamond	not derived yet
-taclets	TestSuite	tupleReturnAssignsExisting	pending	diamond	not derived yet
-taclets	TestSuite	tupleAssignmentRotates	pending	diamond	not derived yet
-taclets	TestSuite	tupleDeclaration	pending	diamond	not derived yet
-taclets	TestSuite	returnLeavesNestedBlocks	pending	diamond	not derived yet
-taclets	TestSuite	returnOrFallThroughNamed	pending	diamond	not derived yet
-taclets	TestSuite	returnFromNestedCall	pending	diamond	not derived yet
-taclets	TestSuite	returnAfterRevertGuard	pending	diamond	not derived yet
-taclets	TestSuite	returnFromTryBranches	pending	box	not derived yet
-taclets	TestSuite	returnFromVoidFunction	pending	diamond	not derived yet
+taclets	TestSuite	internalCallDeclaration	derived	diamond	`Solkey.TestSuite.internalCallDeclaration.proved` (`Solidity/TestSuite/Derived14.lean`)
+taclets	TestSuite	internalCallInExpression	derived	diamond	`Solkey.TestSuite.internalCallInExpression.proved` (`Solidity/TestSuite/Derived14.lean`)
+taclets	TestSuite	internalCallToStorage	derived	diamond	`Solkey.TestSuite.internalCallToStorage.proved` (`Solidity/TestSuite/Derived14.lean`)
+taclets	TestSuite	returnEarly	derived	diamond	`Solkey.TestSuite.returnEarly.proved` (`Solidity/TestSuite/Derived14.lean`)
+taclets	TestSuite	tupleReturnPair	derived	diamond	`Solkey.TestSuite.tupleReturnPair.proved` (`Solidity/TestSuite/Derived14.lean`)
+taclets	TestSuite	tupleReturnReadsReturnVariables	derived	diamond	`Solkey.TestSuite.tupleReturnReadsReturnVariables.proved` (`Solidity/TestSuite/Derived14.lean`)
+taclets	TestSuite	tupleReturnDiscardsComponents	derived	diamond	`Solkey.TestSuite.tupleReturnDiscardsComponents.proved` (`Solidity/TestSuite/Derived14.lean`)
+taclets	TestSuite	tupleReturnAssignsExisting	derived	diamond	`Solkey.TestSuite.tupleReturnAssignsExisting.proved` (`Solidity/TestSuite/Derived14.lean`)
+taclets	TestSuite	tupleAssignmentRotates	derived	diamond	`Solkey.TestSuite.tupleAssignmentRotates.proved` (`Solidity/TestSuite/Derived14.lean`)
+taclets	TestSuite	tupleDeclaration	derived	diamond	`Solkey.TestSuite.tupleDeclaration.proved` (`Solidity/TestSuite/Derived14.lean`)
+taclets	TestSuite	returnLeavesNestedBlocks	derived	diamond	`Solkey.TestSuite.returnLeavesNestedBlocks.proved` (`Solidity/TestSuite/Derived14.lean`)
+taclets	TestSuite	returnOrFallThroughNamed	derived	diamond	`Solkey.TestSuite.returnOrFallThroughNamed.proved` (`Solidity/TestSuite/Derived14.lean`)
+taclets	TestSuite	returnFromNestedCall	derived	diamond	`Solkey.TestSuite.returnFromNestedCall.proved` (`Solidity/TestSuite/Derived14.lean`)
+taclets	TestSuite	returnAfterRevertGuard	derived	diamond	`Solkey.TestSuite.returnAfterRevertGuard.proved` (`Solidity/TestSuite/Derived14.lean`)
+taclets	TestSuite	returnFromTryBranches	derived	box	`Solkey.TestSuite.returnFromTryBranches.proved` (`Solidity/TestSuite/Derived14.lean`)
+taclets	TestSuite	returnFromVoidFunction	derived	diamond	`Solkey.TestSuite.returnFromVoidFunction.proved` (`Solidity/TestSuite/Derived14.lean`)
 solc	SolcExpressions	postIncrementYieldsOldValue	proved	`T r = x++;` split into `T r; r = x++;`	
 solc	SolcExpressions	preIncrementYieldsNewValue	proved	`T r = x++;` split into `T r; r = x++;`	
 solc	SolcExpressions	incDecChainOnLocal	proved	`T r = x++;` split into `T r; r = x++;`	

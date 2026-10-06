@@ -1,12 +1,12 @@
 # Proving solkey's TestSuite by `⊢`
 
-The goal: every obligation of solkey's `TestSuite.sol` (418 functions, 2 more
-tagged skip), stated as solkey's `SolidityProblemSynthesizer` states it and
+The goal: every obligation of solkey's `TestSuite.sol` (438 functions, 2 more
+tagged skip, 12 internal), stated as solkey's `SolidityProblemSynthesizer` states it and
 derived with `⊢`, checked by the kernel, at close to KeY's speed. No
 dependencies, no `native_decide`, no new `maxHeartbeats` override, and a `?`
 twin that prints a cheap replay for every searching tactic.
 
-Today 415 of the 418 are derived by `⊢` (`TestSuite/Report.lean`), and the
+Today 435 of the 438 are derived by `⊢` (`TestSuite/Report.lean`), and the
 corpus rows (`Corpus/TestSuite.lean`) are corollaries of those theorems.
 
 ## Decisions (2026-10-05)
@@ -2099,3 +2099,41 @@ components under `unchecked` (a redundant `% 2^n`, same value).
   unfolded by the kernel on the old obligations.
 - The new printer paths of W5 (returns, tuples, the value call) are now
   exercised by the committed fixture.
+
+## The twenty new obligations (W7, 2026-10-06)
+
+- `TestSuite/Derived14.lean`: all twenty, in the order of the source, each
+  `sol_prove` with no leaf (the closer takes every path).  `Report.lean`:
+  **452 functions: 435 derived, 2 pending, 15 other**, the pending ones
+  `storagePushReadBack` (divergent in the tables) and
+  `testArrayCopyClearsOldElements`.  `expected.tsv` and
+  `Corpus/TestSuite.lean` regenerated (`solkey-port.mjs` without `--probe`:
+  the TestSuite rows are read off the pin): 435 derived, 1 pending, 1
+  divergent, 1 excluded, 2 skip, and twenty more corollaries
+  (`box_of_proved`/`diamond_of_proved`).  `check-testsuite.sh` ok against
+  the clone; `Report.lean` and `Corpus/TestSuite.lean` check clean, so each
+  theorem uses Lean's three axioms only.
+- **Two replays past `Derive.replayFits`.**  `#solkey_derive?` prints
+  `returnEarly` and `tupleReturnDiscardsComponents` as pending ("its replay
+  is past maxHeartbeats as one declaration", 270k and 493k heartbeats).
+  Both close with no leaf, so the replay is `sol_prove` alone: its cost is
+  the kernel's check of `Derive.proves … = true`, which raises the counter
+  but is not stopped by the limit (v4.24, "Measurements" above), and nothing
+  follows it in the declaration.  Both check at the default limit, with no
+  override.  They are many paths, each run to its end before the closer
+  prunes it: `returnEarly` calls `returnSign` (three exits) three times,
+  27 paths; `returnStats` has four conditionals and an `&&`, 32 paths.
+- **Cost, a warning.**  `Derived14` (scratch copy, `Elab.async false`,
+  `IO.monoMsNow` between theorems, warm) takes 155 s: `tupleReturnDiscardsComponents`
+  98.3 s and `returnEarly` 25.0 s, the eighteen others 32 s (the slowest
+  `returnFromVoidFunction` 6.9 s, `returnLeavesNestedBlocks` 5.0 s,
+  `returnOrFallThroughNamed` 4.7 s; the four `send` obligations about
+  0.2 s each).  That is more than 10% on the `SolkeyTestSuite` target:
+  `Derived7`, the slowest module before, takes 58 s for 40 theorems, so
+  one theorem now costs more than any module.  With `Elab.async` the
+  theorems of the module are checked in parallel, so the build's wall
+  clock grows by about the slowest theorem, 98 s.  The cheaper route is
+  pruning a path at its split when the condition is ground under its
+  updates (here every argument is a literal), in `Derive.residue`; that
+  is a change to the strategy, which re-checks every `Derived` module, and
+  is left for its own change.
