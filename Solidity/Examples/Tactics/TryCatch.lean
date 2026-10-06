@@ -35,16 +35,17 @@ local instance : InContract := ⟨Pinger⟩
 
 /--
 info: @Taclet.tryCallNoCallbackBox : ∀ {C : Contract} {k : Nat} {call : ExtCall C} {rets : List (PrimTy × Var)}
-  {ok err : List (Stmt C)} {code : Option Var} {pnc other : List (Stmt C)},
-  dl{ [ try call returns (rets) ok catch Error err catch Panic(code) pnc catch other; ] ⇝
-    ∀ rets. ⟨[ ok ]⟩ ; ⟨[ err ]⟩ ; ∀ code. ⟨[ pnc ]⟩ ; ⟨[ other ]⟩ }
+  {body errorBody : List (Stmt C)} {code : Option Var} {panicBody otherBody : List (Stmt C)},
+  dl{ [ try call returns (rets) body catch Error errorBody catch Panic(code) panicBody catch otherBody; ] ⇝
+    ∀ rets. ⟨[ body ]⟩ ; ⟨[ errorBody ]⟩ ; ∀ code. ⟨[ panicBody ]⟩ ; ⟨[ otherBody ]⟩ }
 -/
 #guard_msgs in #check @Taclet.tryCallNoCallbackBox
 
 /--
 info: @LeanTaclet.tryCallDiamond : ∀ {C : Contract} {k : Nat} {call : ExtCall C} {rets : List (PrimTy × Var)}
-  {ok err : List (Stmt C)} {code : Option Var} {pnc other : List (Stmt C)},
-  dl{ ⟨ try call returns (rets) ok catch Error err catch Panic(code) pnc catch other; ⟩ ⇝ false }
+  {body errorBody : List (Stmt C)} {code : Option Var} {panicBody otherBody : List (Stmt C)},
+  dl[LeanTaclet C k]{ ⟨ try call returns (rets) body catch Error errorBody catch Panic(code) panicBody catch otherBody;
+    ⟩ ⇝ false }
 -/
 #guard_msgs in #check @LeanTaclet.tryCallDiamond
 

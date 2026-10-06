@@ -167,7 +167,8 @@ sound: Solidity.Taclet.sound_unfold
 /--
 info: Solidity.LeanTaclet.functionCallArgCapture : ∀ {C : Contract} {k : Nat} {m : Modality} {f : Name} {args : List (Arg C)}
   {ret : CallRet} {body : List (Stmt C)} {a : Arg C},
-  dl{ ⟨[ fbs; ]⟩ ⇝ ⟨[ T se = ‹a.e›; ‹Stmt.call f (Arg.captureFirst (Var.fresh "se" k) args) ⋯ ret body›; ]⟩ }
+  dl[LeanTaclet C k]{ ⟨[ fbs; ]⟩ ⇝
+    ⟨[ T se = ‹a.e›; ‹Stmt.call f (Arg.captureFirst (Var.fresh "se" k) args) ⋯ ret body›; ]⟩ }
 solkey: none (a rule solkey does not have)
 printed: none (theory only Lean has)
 sound: Solidity.LeanTaclet.sound

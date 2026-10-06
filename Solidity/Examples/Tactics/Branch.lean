@@ -54,14 +54,16 @@ local instance : InContract := ⟨StandardExample⟩
 `thn` and `els` are schema variables for whole blocks (KeY's `#s0`). -/
 
 /--
-info: @Taclet.ifElseUnfold : ∀ {C : Contract} {k : Nat} {m : Modality} {nse : Val C PrimTy.bool} {thn els : List (Stmt C)},
-  dl{ ⟨[ if (nse) thn else els; ]⟩ ⇝ ⟨[ bool se = nse; if (se) thn else els; ]⟩ }
+info: @Taclet.ifElseUnfold : ∀ {C : Contract} {k : Nat} {m : Modality} {nse : Val C PrimTy.bool}
+  {thenStm elseStm : List (Stmt C)},
+  dl{ ⟨[ if (nse) thenStm else elseStm; ]⟩ ⇝ ⟨[ bool se = nse; if (se) thenStm else elseStm; ]⟩ }
 -/
 #guard_msgs in #check @Taclet.ifElseUnfold
 
 /--
-info: @Taclet.ifElseSplit : ∀ {C : Contract} {k : Nat} {m : Modality} {se : Simple C PrimTy.bool} {thn els : List (Stmt C)},
-  dl{ ⟨[ if (se) thn else els; ]⟩ ⇝ se ≐ true ⟹ ⟨[ thn ]⟩ ; se ≐ false ⟹ ⟨[ els ]⟩ }
+info: @Taclet.ifElseSplit : ∀ {C : Contract} {k : Nat} {m : Modality} {se : Simple C PrimTy.bool}
+  {thenStm elseStm : List (Stmt C)},
+  dl{ ⟨[ if (se) thenStm else elseStm; ]⟩ ⇝ se ≐ true ⟹ ⟨[ thenStm ]⟩ ; se ≐ false ⟹ ⟨[ elseStm ]⟩ }
 -/
 #guard_msgs in #check @Taclet.ifElseSplit
 
@@ -171,8 +173,8 @@ example : ¬ (⊨ dl!{ ⟨ if (a == b) { x = 2; } else { x = 1; }; ⟩ x != 0 })
 /--
 trace: ⊢ ⊨
     dl{
-      (true ≐ true → [ age = 1; ] select(storage, age) = 1) ∧
-        (true ≐ false → [ age = 2; ] select(storage, age) = 1) ∧ ([ revert(); ] false ∨ true ≐ true ∨ true ≐ false) }
+      (true ≐ true → [ age = 1; ] find(storage, age) = 1) ∧
+        (true ≐ false → [ age = 2; ] find(storage, age) = 1) ∧ ([ revert(); ] false ∨ true ≐ true ∨ true ≐ false) }
 -/
 #guard_msgs in
 /-- `if (true) { age = 1; } else { age = 2; }` writes `1`. -/
@@ -194,7 +196,7 @@ theorem ifFalse : ⊨ dl!{ ⟨ if (false) { x = 2; } else { x = 1; }; ⟩ x == 1
 the old table swapped the branches (`ifElseNegated`). -/
 
 /--
-trace: ⊢ ⊨ dl{ [ bool se1 = !true; if (se1) {age = 2;} else {age = 1;}; ] ¬select(storage, age) = 0 }
+trace: ⊢ ⊨ dl{ [ bool se1 = !true; if (se1) {age = 2;} else {age = 1;}; ] ¬find(storage, age) = 0 }
 -/
 #guard_msgs in
 /-- `if (!true) { age = 2; } else { age = 1; }` leaves `age != 0`. -/

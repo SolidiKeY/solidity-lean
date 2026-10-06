@@ -252,7 +252,7 @@ receiver kind, Lean does not.
 | `storageIndexMapping…`, `storageIndexArray…` (8) | `storageIndexIncrement` | merged | one constructor over both receiver kinds |
 | `memoryField…`, `memoryIndexArray…` | `memoryFieldIncrement`, `memoryIndexArrayIncrement` | merged | |
 | `storageField…_unfold_leftFst`, `storageIndex…_unfold_leftFst`, `memoryField…_unfold_leftFst`, `memoryIndex…_unfold_leftFst` | `storageFieldIncrementUnfoldLeftFst`, `storageIndexIncrementUnfoldLeftFst`, `memoryFieldIncrementUnfoldLeftFst`, `memoryIndexIncrementUnfoldLeftFst` | merged | |
-| `localAssign…`, `localDecl…` (8) | `localAssignIncrement` | merged | `vp = v⊕⊕;`; KeY has one taclet for the assignment and one for the declaration, Lean reaches the declaration through `localValueDeclInitDrop` |
+| `localAssign…`, `localDecl…` (8) | `localAssignIncrement` | merged | `v = lv⊕⊕;`; KeY has one taclet for the assignment and one for the declaration, Lean reaches the declaration through `localValueDeclInitDrop` |
 | `storageRoot…Assignment`, `storageField…Assignment`, `storageIndexMapping…Assignment`, `storageIndexArray…Assignment` (8), `memoryField…Assignment`, `memoryIndexArray…Assignment` | `storageRootIncrementAssignment`, `storageFieldIncrementAssignment`, `storageIndexIncrementAssignment`, `memoryFieldIncrementAssignment`, `memoryIndexArrayIncrementAssignment` | merged | |
 
 ## Assert, require, if-then-else
@@ -265,7 +265,7 @@ receiver kind, Lean does not.
 | `requireSimple` | same | find same | reshaped: `require(se); ⇝ se = true ⟹ ⟨[ ]⟩ ; se = false ⟹ ⟨[ revert(); ]⟩`. KeY writes each goal as a disjunction, "Holds" `se = FALSE \| ⟨[ ]⟩ post` and "Reverts" `se = TRUE \| ⟨[ revert(); ]⟩ post`; for a `bool` each is the implication Lean's `.split` premise states with the condition in the context. Under the diamond `Proves.split` also owes the cover (`Premise.cover`), which KeY's disjunctions need not |
 | `ifElseUnfold` | same | same | also claims `ifUnfold` |
 | `ifUnfold` | `ifElseUnfold` | merged | `Stmt.ite` always has both branches (an absent `else` is `[]`) |
-| `ifElseSplit` | same | same | `if (se) thn else els; ⇝ se = true ⟹ ⟨[ thn ]⟩ ; se = false ⟹ ⟨[ els ]⟩`: a `.split` premise is the two-goal shape. Also claims `ifSplit` |
+| `ifElseSplit` | same | same | `if (se) thenStm else elseStm; ⇝ se = true ⟹ ⟨[ thenStm ]⟩ ; se = false ⟹ ⟨[ elseStm ]⟩`: a `.split` premise is the two-goal shape. Also claims `ifSplit` |
 | `ifSplit` | `ifElseSplit` | merged | |
 | `ifTrue`, `ifFalse`, `ifElseTrue`, `ifElseFalse`, `ifElseNegated` | — | unclaimed | `concrete_solidity` strategy shortcuts. A literal is simple, so `ifElseSplit` applies (one goal assumes `true = false`); `!se` is not simple, so `ifElseUnfold` captures it. The table has no strategy |
 

@@ -19,6 +19,7 @@ pp.sol.dl false` shows the constructors again.
 | `dl_schema{ φ }` | a formula whose names are Lean variables (schema variables) |
 | `dl{ ⟨[ s; ]⟩ ⇝ p }` | the taclet `Taclet C k m s p`, for either modality (solkey's `#mod`) |
 | `dl{ [ s; ] ⇝ p }`, `dl{ ⟨ s; ⟩ ⇝ p }` | a taclet for the box only, the diamond only |
+| `dl[LeanTaclet C k]{ ⟨ s; ⟩ ⇝ p }` | a rule of another judgement, `LeanTaclet C k .diamond s p` |
 | `dl{ p }` | a premise |
 | `dl{ ..Γ, c, {U} ⟹[R] ⟨[ s; ..ω ]⟩ φ }` | the sequent `Proves R (Γ ++ [.pre c] ++ [.upd m U]) (.modal m (s :: ω) φ)` |
 | `tm{ find(save(s, p, v), q) }` | a term (`Tm`), every name a Lean variable |
@@ -278,6 +279,11 @@ syntax "dl{ " "⟨" "[ " sol_stmt "; " "]" "⟩" " ⇝ " dl_premise " }" : term
 syntax "dl{ " "[ " sol_stmt "; " "]" " ⇝ " dl_premise " }" : term
 /-- A taclet for the diamond only. -/
 syntax "dl{ " "⟨ " sol_stmt "; " "⟩" " ⇝ " dl_premise " }" : term
+/-- A rule of another judgement `J`, read as a taclet is (`J m s p`):
+`dl[LeanTaclet C k]{ ⟨ s; ⟩ ⇝ p }`, `dl[CallbackTaclet C]{ [ s; ] ⇝ p }`. -/
+syntax (name := dlJudgement) "dl[" term "]{ " "⟨" "[ " sol_stmt "; " "]" "⟩" " ⇝ " dl_premise " }" : term
+@[inherit_doc dlJudgement] syntax "dl[" term "]{ " "[ " sol_stmt "; " "]" " ⇝ " dl_premise " }" : term
+@[inherit_doc dlJudgement] syntax "dl[" term "]{ " "⟨ " sol_stmt "; " "⟩" " ⇝ " dl_premise " }" : term
 syntax "dl{ " dl_premise " }" : term
 /-- `⊨ φ` for a formula given as a Lean term. -/
 syntax:25 "⊨ " term:26 : term
@@ -1554,12 +1560,20 @@ def sideConds (s : TSyntax `sol_stmt) : MacroM (Array (Ident × Lean.Term)) := d
 the `\replacewith` sees them, and its own declarations are fresh, numbered by
 the taclet's `k`.  The `\find`'s side conditions (`sideConds`) are
 hypotheses that prove themselves. -/
-def schemaTaclet (m : Lean.Term) (s : TSyntax `sol_stmt) (p : TSyntax `dl_premise) :
-    MacroM Lean.Term := do
+def schemaTaclet (m : Lean.Term) (s : TSyntax `sol_stmt) (p : TSyntax `dl_premise)
+    (J : Option Lean.Term := none) : MacroM Lean.Term := do
   let conds ← sideConds s
   let (s, Γ) ← schemaStmt false [] s
-  let t ← `($(mkIdent `Solidity.Taclet) $(schemaIdent "C") $(schemaIdent "k") $m $s
-    $(← schemaPremise true Γ p))
+  let p ← schemaPremise true Γ p
+  -- the judgement's own arguments first, one application (`J C k m s p`)
+  let jArgs : Array Lean.Term := #[schemaIdent "C", schemaIdent "k"]
+  let ((f, args) : Ident × Array Lean.Term) ← match J with
+    | none => pure (mkIdent `Solidity.Taclet, jArgs)
+    | some J => match J with
+      | `($f:ident $args*) => pure (f, args)
+      | `($f:ident) => pure (f, #[])
+      | _ => Macro.throwErrorAt J "`dl[J]{ … }` names a judgement: `LeanTaclet C k`"
+  let t ← `($f:ident $args* $m $s $p)
   if conds.isEmpty then return t
   let hs := conds.map (·.1)
   let cs := conds.map (·.2)
@@ -1605,6 +1619,11 @@ macro_rules
   | `(dl{ ⟨[ $s:sol_stmt; ]⟩ ⇝ $p:dl_premise }) => schemaTaclet (schemaIdent "m") s p
   | `(dl{ [ $s:sol_stmt; ] ⇝ $p:dl_premise }) => do schemaTaclet (← `(Modality.box)) s p
   | `(dl{ ⟨ $s:sol_stmt; ⟩ ⇝ $p:dl_premise }) => do schemaTaclet (← `(Modality.diamond)) s p
+  | `(dl[ $J:term ]{ ⟨[ $s:sol_stmt; ]⟩ ⇝ $p:dl_premise }) => schemaTaclet (schemaIdent "m") s p J
+  | `(dl[ $J:term ]{ [ $s:sol_stmt; ] ⇝ $p:dl_premise }) => do
+    schemaTaclet (← `(Modality.box)) s p J
+  | `(dl[ $J:term ]{ ⟨ $s:sol_stmt; ⟩ ⇝ $p:dl_premise }) => do
+    schemaTaclet (← `(Modality.diamond)) s p J
   | `(dl{ $p:dl_premise }) => schemaPremise false [] p
   | `(stmt{ $s:sol_stmt; }) => return (← schemaStmt false [] s).1
 

@@ -322,7 +322,7 @@ inductive Taclet (C : Contract) (k : Nat) : Modality → Stmt C → Premise C �
   | localValueAssign :
       dl{ ⟨[ v = se; ]⟩ ⇝ { v := se } ⟨[ ]⟩ }
   | storageRootReadSelect :
-      dl{ ⟨[ v = gsp; ]⟩ ⇝ { v := select(storage, gsp) } ⟨[ ]⟩ }
+      dl{ ⟨[ v = gsp; ]⟩ ⇝ { v := find(storage, gsp) } ⟨[ ]⟩ }
   | storageFieldReadFind :
       dl{ ⟨[ v = sp.fld; ]⟩ ⇝ { v := find(storage, sp.fld) } ⟨[ ]⟩ }
   | storageIndexReadMappingFind :
@@ -330,19 +330,19 @@ inductive Taclet (C : Contract) (k : Nat) : Modality → Stmt C → Premise C �
   | storageIndexReadArrayFind :
       dl{ ⟨[ v = arr[ie]; ]⟩ ⇝ { v := find(storage, arr[ie]) } ⟨[ ]⟩ }
   | storageRootWriteStore :
-      dl{ ⟨[ gsp = se; ]⟩ ⇝ { storage := store(storage, gsp, se) } ⟨[ ]⟩ }
+      dl{ ⟨[ gsp = se; ]⟩ ⇝ { storage := save(storage, gsp, se) } ⟨[ ]⟩ }
   | storageRootWriteCopySource :
-      dl{ ⟨[ gsp = sp; ]⟩ ⇝ { storage := store(storage, gsp, find(storage, sp)) } ⟨[ ]⟩ }
+      dl{ ⟨[ gsp = sp; ]⟩ ⇝ { storage := save(storage, gsp, find(storage, sp)) } ⟨[ ]⟩ }
   | storageFieldReadStoreRoot :
-      dl{ ⟨[ gsp = sp.fr; ]⟩ ⇝ { storage := store(storage, gsp, find(storage, sp.fr)) } ⟨[ ]⟩ }
+      dl{ ⟨[ gsp = sp.fr; ]⟩ ⇝ { storage := save(storage, gsp, find(storage, sp.fr)) } ⟨[ ]⟩ }
   | storageIndexReadMappingStoreRoot :
-      dl{ ⟨[ gsp = map[ie]; ]⟩ ⇝ { storage := store(storage, gsp, find(storage, map[ie])) } ⟨[ ]⟩ }
+      dl{ ⟨[ gsp = map[ie]; ]⟩ ⇝ { storage := save(storage, gsp, find(storage, map[ie])) } ⟨[ ]⟩ }
   | storageIndexReadArrayStoreRoot :
-      dl{ ⟨[ gsp = arr[ie]; ]⟩ ⇝ { storage := store(storage, gsp, find(storage, arr[ie])) } ⟨[ ]⟩ }
+      dl{ ⟨[ gsp = arr[ie]; ]⟩ ⇝ { storage := save(storage, gsp, find(storage, arr[ie])) } ⟨[ ]⟩ }
   | storageFieldWriteSave :
       dl{ ⟨[ sp.fld = se; ]⟩ ⇝ { storage := save(storage, sp.fld, se) } ⟨[ ]⟩ }
   | storageFieldWriteCopySource :
-      dl{ ⟨[ sp.fld = sp2; ]⟩ ⇝ { storage := save(storage, sp.fld, find(storage, sp2)) } ⟨[ ]⟩ }
+      dl{ ⟨[ sp1.fld = sp2; ]⟩ ⇝ { storage := save(storage, sp1.fld, find(storage, sp2)) } ⟨[ ]⟩ }
   | storageIndexWriteMappingSave :
       dl{ ⟨[ map[ie] = se; ]⟩ ⇝ { storage := save(storage, map[ie], se) } ⟨[ ]⟩ }
   | storageIndexWriteArraySave :
@@ -397,14 +397,16 @@ inductive Taclet (C : Contract) (k : Nat) : Modality → Stmt C → Premise C �
       dl{ ⟨[ v = ⊖nse; ]⟩ ⇝ ⟨[ T se = nse; v = ⊖se; ]⟩ }
   -- The conditional ------------------------------------------------------
   | ternaryToIf :
-      dl{ ⟨[ lhs = se ? e₁ : e₂; ]⟩ ⇝ ⟨[ if (se) { lhs = e₁; } else { lhs = e₂; }; ]⟩ }
+      dl{ ⟨[ lhs = se ? thenExpr : elseExpr; ]⟩ ⇝
+          ⟨[ if (se) { lhs = thenExpr; } else { lhs = elseExpr; }; ]⟩ }
   | ternaryCaptureCond :
-      dl{ ⟨[ lhs = nse ? e₁ : e₂; ]⟩ ⇝ ⟨[ bool se = nse; lhs = se ? e₁ : e₂; ]⟩ }
+      dl{ ⟨[ lhs = nse ? thenExpr : elseExpr; ]⟩ ⇝
+          ⟨[ bool se = nse; lhs = se ? thenExpr : elseExpr; ]⟩ }
   -- Compound assignment and `++`/`--` -------------------------------------
   | localOpAssign :
       dl{ ⟨[ v ⊕= se; ]⟩ ⇝ { v := v ⊕ se } ⟨[ ]⟩ }
   | storageRootOpAssign :
-      dl{ ⟨[ gsp ⊕= se; ]⟩ ⇝ { storage := store(storage, gsp, gsp ⊕ se) } ⟨[ ]⟩ }
+      dl{ ⟨[ gsp ⊕= se; ]⟩ ⇝ { storage := save(storage, gsp, gsp ⊕ se) } ⟨[ ]⟩ }
   | storageFieldOpAssign :
       dl{ ⟨[ sp.fld ⊕= se; ]⟩ ⇝ { storage := save(storage, sp.fld, sp.fld ⊕ se) } ⟨[ ]⟩ }
   | storageIndexMappingOpAssign :
@@ -428,7 +430,7 @@ inductive Taclet (C : Contract) (k : Nat) : Modality → Stmt C → Premise C �
   | localIncrement :
       dl{ ⟨[ v⊕⊕; ]⟩ ⇝ { v := v ± 1 } ⟨[ ]⟩ }
   | storageRootIncrement :
-      dl{ ⟨[ gsp⊕⊕; ]⟩ ⇝ { storage := store(storage, gsp, gsp ± 1) } ⟨[ ]⟩ }
+      dl{ ⟨[ gsp⊕⊕; ]⟩ ⇝ { storage := save(storage, gsp, gsp ± 1) } ⟨[ ]⟩ }
   | storageFieldIncrement :
       dl{ ⟨[ sp.fld⊕⊕; ]⟩ ⇝ { storage := save(storage, sp.fld, sp.fld ± 1) } ⟨[ ]⟩ }
   | storageIndexIncrement :
@@ -446,9 +448,9 @@ inductive Taclet (C : Contract) (k : Nat) : Modality → Stmt C → Premise C �
   | memoryIndexIncrementUnfoldLeftFst :
       dl{ ⟨[ nmp[ie]⊕⊕; ]⟩ ⇝ ⟨[ T memory mv = nmp; mv[ie]⊕⊕; ]⟩ }
   | localAssignIncrement :
-      dl{ ⟨[ vp = v⊕⊕; ]⟩ ⇝ { v := v ± 1 ‖ vp := v⊕⊕ } ⟨[ ]⟩ }
+      dl{ ⟨[ v = lv⊕⊕; ]⟩ ⇝ { lv := lv ± 1 ‖ v := lv⊕⊕ } ⟨[ ]⟩ }
   | storageRootIncrementAssignment :
-      dl{ ⟨[ v = gsp⊕⊕; ]⟩ ⇝ { storage := store(storage, gsp, gsp ± 1) ‖ v := gsp⊕⊕ } ⟨[ ]⟩ }
+      dl{ ⟨[ v = gsp⊕⊕; ]⟩ ⇝ { storage := save(storage, gsp, gsp ± 1) ‖ v := gsp⊕⊕ } ⟨[ ]⟩ }
   | storageFieldIncrementAssignment :
       dl{ ⟨[ v = sp.fld⊕⊕; ]⟩ ⇝
           { storage := save(storage, sp.fld, sp.fld ± 1) ‖ v := sp.fld⊕⊕ } ⟨[ ]⟩ }
@@ -588,7 +590,7 @@ inductive Taclet (C : Contract) (k : Nat) : Modality → Stmt C → Premise C �
   | memoryStorageCopyUnfold :
       dl{ ⟨[ mv = nsp; ]⟩ ⇝ ⟨[ T storage sp = nsp; mv = sp; ]⟩ }
   | memoryToStorageStoreRoot :
-      dl{ ⟨[ gsp = mpath; ]⟩ ⇝ { storage := store(storage, gsp, copyMem(mtSt, memory, mpath)) } ⟨[ ]⟩ }
+      dl{ ⟨[ gsp = mpath; ]⟩ ⇝ { storage := save(storage, gsp, copyMem(mtSt, memory, mpath)) } ⟨[ ]⟩ }
   | memoryToStorageFieldCopyRoot :
       dl{ ⟨[ sp.fld = mpath; ]⟩ ⇝ { storage := save(storage, sp.fld, copyMem(mtSt, memory, mpath)) } ⟨[ ]⟩ }
   | memoryToStorageIndexMappingCopyRoot :
@@ -603,11 +605,12 @@ inductive Taclet (C : Contract) (k : Nat) : Modality → Stmt C → Premise C �
       dl{ ⟨[ sp[nse] = mpath; ]⟩ ⇝ ⟨[ T storage sp' = sp; T ie = nse; sp'[ie] = mpath; ]⟩ }
   -- Control flow ---------------------------------------------------------
   | ifElseUnfold :
-      dl{ ⟨[ if (nse) thn else els; ]⟩ ⇝ ⟨[ bool se = nse; if (se) thn else els; ]⟩ }
+      dl{ ⟨[ if (nse) thenStm else elseStm; ]⟩ ⇝ ⟨[ bool se = nse; if (se) thenStm else elseStm; ]⟩ }
   /-- Two goals: the `then` branch where `se` is `true`, the `else` branch where
   it is `false` (solkey's `\add(se = TRUE ==>)`). -/
   | ifElseSplit :
-      dl{ ⟨[ if (se) thn else els; ]⟩ ⇝ se = true ⟹ ⟨[ thn ]⟩ ; se = false ⟹ ⟨[ els ]⟩ }
+      dl{ ⟨[ if (se) thenStm else elseStm; ]⟩ ⇝
+          se = true ⟹ ⟨[ thenStm ]⟩ ; se = false ⟹ ⟨[ elseStm ]⟩ }
   | requireConditionCapture :
       dl{ ⟨[ require(nse); ]⟩ ⇝ ⟨[ bool se = nse; require(se); ]⟩ }
   /-- A guard: if `se` holds the program goes on, if not it reverts. -/
@@ -629,20 +632,19 @@ inductive Taclet (C : Contract) (k : Nat) : Modality → Stmt C → Premise C �
   /-- A call whose arguments are all simple runs its body: the parameters
   declared with the arguments, the return variable declared, the body, the
   result assigned (KeY's `expand_function_body`). -/
-  | functionBodyExpand {f : Name} {args : List (Arg C)} {hsep : Arg.separatedFrom [] args = true}
-      {ret : CallRet} {body : List (Stmt C)}
-      (hexp : Arg.firstNonSimple args = none := by side_cond) :
-      Taclet C k m (.call f args hsep ret body) (.unfold (Stmt.expandBody args ret body))
+  | functionBodyExpand :
+      dl{ ⟨[ fbs; ]⟩ ⇝ ⟨[ expand_function_body(fbs); ]⟩ }
   -- External calls -------------------------------------------------------
   /-- A `try` without callbacks: a goal for each way the call may end, the
   block of its clause in the statement's place, for every value of the
   locals the outcome binds.  The callee runs no code of this contract, so
   the state is the caller's; a call that reverts in the caller (no code at
   the address, data that does not decode) satisfies the box. -/
-  | tryCallNoCallbackBox {call : ExtCall C} {rets : List (PrimTy × Var)} {ok err : List (Stmt C)}
-      {code : Option Var} {pnc other : List (Stmt C)} :
-      Taclet C k .box (.tryCall call rets ok err code pnc other)
-        (.branches [(rets, ok), ([], err), (codeBinders code, pnc), ([], other)])
+  | tryCallNoCallbackBox :
+      dl{ [ try call returns (rets) body catch Error errorBody
+              catch Panic (code) panicBody catch otherBody; ] ⇝
+          "call succeeded": ∀ rets. [ body ] ; "Error caught": [ errorBody ]
+          ; "Panic caught": ∀ code. [ panicBody ] ; "other failure caught": [ otherBody ] }
 
 /-! ## The rules solkey does not have
 
@@ -660,24 +662,24 @@ inductive LeanTaclet (C : Contract) (k : Nat) : Modality → Stmt C → Premise 
   | functionCallArgCapture {f : Name} {args : List (Arg C)} {hsep : Arg.separatedFrom [] args = true}
       {ret : CallRet} {body : List (Stmt C)} {a : Arg C}
       (hcap : Arg.firstNonSimple args = some a := by side_cond) :
-      LeanTaclet C k m (.call f args hsep ret body)
-        (.unfold [.declLocal a.p (.fresh "se" k) (some a.e),
-          .call f (Arg.captureFirst (.fresh "se" k) args) (Arg.separatedFrom_captureFirst hsep)
-            ret body])
+      dl[LeanTaclet C k]{ ⟨[ ‹.call f args hsep ret body›; ]⟩ ⇝
+        ⟨[ ‹.declLocal a.p (.fresh "se" k) (some a.e)›;
+          ‹.call f (Arg.captureFirst (.fresh "se" k) args) (Arg.separatedFrom_captureFirst hsep)
+            ret body›; ]⟩ }
 
   /-- A `try` under the diamond closes to `false`.  solkey has no diamond
   rule: the call may revert in the caller (no code at the address, data that
   does not decode), which no clause catches and no formula rules out. -/
-  | tryCallDiamond {call : ExtCall C} {rets : List (PrimTy × Var)} {ok err : List (Stmt C)}
-      {code : Option Var} {pnc other : List (Stmt C)} :
-      LeanTaclet C k .diamond (.tryCall call rets ok err code pnc other) (.done false)
+  | tryCallDiamond :
+      dl[LeanTaclet C k]{ ⟨ try call returns (rets) body catch Error errorBody
+          catch Panic (code) panicBody catch otherBody; ⟩ ⇝ false }
 
   /-- A payment under the diamond closes to `false`.  solkey books a payment
   under the box only (`transferNoCallbackBox`): whether the world pays is not
   the calculus's (`Evm.compile_correct`, where a refused payment reverts the
   machine alone), so no diamond over a payment is derived. -/
-  | transferDiamond {sadr se : Simple C .uint} :
-      LeanTaclet C k .diamond (.transfer (.simple sadr) (.simple se)) (.done false)
+  | transferDiamond :
+      dl[LeanTaclet C k]{ ⟨ sadr.transfer(se); ⟩ ⇝ false }
 
 /-- A rule of the calculus: solkey's, or one it does not have. -/
 inductive Rule (C : Contract) (k : Nat) (m : Modality) (s : Stmt C) (p : Premise C) : Prop where
@@ -704,13 +706,14 @@ they are for, and their premise: a transfer's booking, a
 and the call's success resumed from any state the callee may leave in which
 it holds). -/
 inductive CallbackTaclet (C : Contract) : Modality → Stmt C → Premise C → Prop where
-  | transferWithCallbackBox {sadr se : Simple C .uint} :
-      CallbackTaclet C .box (.transfer (.simple sadr) (.simple se))
-        dl{ { net := if(sadr = this) then net else store(net, at(sadr), net(sadr) - se) } ⟨[ ]⟩ }
-  | tryCallWithCallbackBox {call : ExtCall C} {rets : List (PrimTy × Var)} {ok err : List (Stmt C)}
-      {code : Option Var} {pnc other : List (Stmt C)} :
-      CallbackTaclet C .box (.tryCall call rets ok err code pnc other)
-        (.branches [(rets, ok), ([], err), (codeBinders code, pnc), ([], other)])
+  | transferWithCallbackBox :
+      dl[CallbackTaclet C]{ [ sadr.transfer(se); ] ⇝
+        { net := if(sadr = this) then net else store(net, at(sadr), net(sadr) - se) } ⟨[ ]⟩ }
+  | tryCallWithCallbackBox :
+      dl[CallbackTaclet C]{ [ try call returns (rets) body catch Error errorBody
+              catch Panic (code) panicBody catch otherBody; ] ⇝
+          "call succeeded": ∀ rets. [ body ] ; "Error caught": [ errorBody ]
+          ; "Panic caught": ∀ code. [ panicBody ] ; "other failure caught": [ otherBody ] }
 
 /-! ## Printing taclets and premises
 
@@ -769,19 +772,32 @@ def ppPremise? (e : Lean.Expr) : MetaM (Option (TSyntax `dl_premise)) := do
     return some (← `(dl_premise| $b:dl_branch ; $[$(out.extract 1 out.size)];*))
   | _ => return none
 
-/-- `Taclet C k m s p`: `dl{ ⟨[ s; ]⟩ ⇝ p }`, with the modality it is for. -/
-@[delab app.Solidity.Taclet, delab app.Solidity.LeanTaclet]
+/-- `Taclet C k m s p`: `dl{ ⟨[ s; ]⟩ ⇝ p }`, with the modality it is for;
+a rule of another judgement `dl[LeanTaclet C k]{ … }`, `dl[CallbackTaclet C]{ … }`. -/
+@[delab app.Solidity.Taclet, delab app.Solidity.LeanTaclet, delab app.Solidity.CallbackTaclet]
 def delabTaclet : Delab := do
   unless ← ppOn do failure
   let e ← getExpr
-  guard (e.getAppNumArgs == 5)
-  let some p ← ppPremise? (e.getArg! 4) | failure
-  let s ← ppStmt (e.getArg! 3)
+  let some c := e.getAppFn.constName? | failure
+  -- the judgement's own arguments: `C k`, or `C` for `CallbackTaclet`
+  let n := if c == ``CallbackTaclet then 1 else 2
+  guard (e.getAppNumArgs == n + 3)
+  let some p ← ppPremise? (e.getArg! (n + 2)) | failure
+  let s ← ppStmt (e.getArg! (n + 1))
   if isEscape s then failure
-  match_expr (← whnf (e.getArg! 2)) with
-  | Modality.box => `(dl{ [ $s:sol_stmt; ] ⇝ $p })
-  | Modality.diamond => `(dl{ ⟨ $s:sol_stmt; ⟩ ⇝ $p })
-  | _ => `(dl{ ⟨[ $s:sol_stmt; ]⟩ ⇝ $p })
+  let m ← whnf (e.getArg! n)
+  if c == ``Taclet then
+    match_expr m with
+    | Modality.box => `(dl{ [ $s:sol_stmt; ] ⇝ $p })
+    | Modality.diamond => `(dl{ ⟨ $s:sol_stmt; ⟩ ⇝ $p })
+    | _ => `(dl{ ⟨[ $s:sol_stmt; ]⟩ ⇝ $p })
+  else
+    let args ← (List.range n).toArray.mapM fun i => withNaryArg i delab
+    let J ← `($(mkIdent (← unresolveNameGlobal c)) $args*)
+    match_expr m with
+    | Modality.box => `(dl[ $J ]{ [ $s:sol_stmt; ] ⇝ $p })
+    | Modality.diamond => `(dl[ $J ]{ ⟨ $s:sol_stmt; ⟩ ⇝ $p })
+    | _ => `(dl[ $J ]{ ⟨[ $s:sol_stmt; ]⟩ ⇝ $p })
 
 /-- A premise standing alone: `dl{ p }`. -/
 def delabPremise : Delab := do
@@ -855,7 +871,8 @@ false` shows them. -/
 def delabTacletSide : Delab := do
   unless ← ppOn do failure
   let e ← getExpr
-  unless e.getForallBody.isAppOf ``Taclet || e.getForallBody.isAppOf ``LeanTaclet do failure
+  let b := e.getForallBody
+  unless b.isAppOf ``Taclet || b.isAppOf ``LeanTaclet || b.isAppOf ``CallbackTaclet do failure
   withTheReader SubExpr (fun s => { s with expr := dropSide e }) (delabTacletBinders #[] #[])
 
 end Print

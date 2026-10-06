@@ -138,8 +138,8 @@ theorem withdrawUnsafe_withCallback : ¬ ValidT (.withCallback vaultInv) withdra
 
 /--
 info: @CallbackTaclet.transferWithCallbackBox : ∀ {C : Contract} {sadr se : Simple C PrimTy.uint},
-  CallbackTaclet C Modality.box (stmt{ sadr .transfer(se); })
-    (dl{ { net := if(sadr = this) then net else store(net, at(sadr), net(sadr) - se) } ⟨[ ]⟩ })
+  dl[CallbackTaclet C]{ [ sadr .transfer(se); ] ⇝
+    { net := if(sadr = this) then net else store(net, at(sadr), net(sadr) - se) } ⟨[ ]⟩ }
 -/
 #guard_msgs in #check @CallbackTaclet.transferWithCallbackBox
 
