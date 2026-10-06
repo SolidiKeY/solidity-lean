@@ -444,7 +444,11 @@ function parseContract(source) {
         .map((f) => { const i = f.lastIndexOf(" "); return [f.slice(i + 1), f.slice(0, i).trim()]; }),
     ));
   }
-  return { functions, stateVars, structs };
+  // a function that is neither public nor external (a header may span lines):
+  // Report.lean counts it, and it has no obligation
+  const internalCount = [...source.matchAll(/^\s*function\s+\w+\s*\([^)]*\)([^{;]*)[{;]/gm)]
+    .filter((m) => !/\b(public|external)\b/.test(m[1])).length;
+  return { functions, stateVars, structs, internalCount };
 }
 
 /**
@@ -1110,12 +1114,12 @@ function readImported() {
  * the pins disagree with the source or with each other: a stale pin is
  * re-pinned in Lean (`#guard_msgs`) first, then this script is re-run.
  */
-function importedRows(functions, lean) {
+function importedRows({ functions, internalCount: internal }, lean) {
   const where = `${IMPORTED.file} (${functions.length} functions)`;
   // `parseContract` reads the public and external functions; an internal
-  // helper is counted by Report.lean (`internal f`) but has no obligation
-  const internal = [...lean.other.values()].filter((st) => st === "internal").length;
-  if (functions.length !== lean.total - internal) {
+  // helper is counted by Report.lean, as `internal f` or with the status of
+  // an import that failed, so it is counted in the source, not off the pin
+  if (functions.length + internal !== lean.total) {
     throw new Error(`${where}: Report.lean counts ${lean.total} functions, ` +
       `${internal} of them internal ` +
       "(is --solkey/SOLKEY_EXAMPLES the checkout TestSuite was imported from?)");
@@ -1345,7 +1349,8 @@ function parityDoc(allRows, commit) {
     "(`Calculus/Problem.lean`), and derived by `⊢` in `Solidity/TestSuite/`; the",
     "statuses are read off `Solidity/TestSuite/Report.lean`'s pin, and",
     "`scripts/check-testsuite.sh` checks the parity with solkey's",
-    "`testSuiteFunctions` (every function not tagged skip):",
+    "`testSuiteFunctions` (every public or external function not tagged skip;",
+    "an internal helper has no obligation):",
     "",
     "- **derived**: `Solkey.TestSuite.f.proved : ⊢ Solkey.TestSuite.f.problem`, with no",
     "  axiom but Lean's three; with no parameters, also stated at the initial",
@@ -1402,7 +1407,7 @@ async function main() {
   const perContract = [];
 
   // TestSuite: read off Lean's pins, not translated; checked first, as it is cheap.
-  const imported = importedRows(parseContract(importedSource()).functions, readImported());
+  const imported = importedRows(parseContract(importedSource()), readImported());
 
   for (const { file, suite, store } of CONTRACTS) {
     const contract = basename(file, ".sol");

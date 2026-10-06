@@ -1919,7 +1919,9 @@ pays, are all faster than the baseline.
 - **Scripts.**  `check-testsuite.sh` counts a function as an obligation when
   its header, read up to the `{`, says `public` or `external` (solkey's
   `SolidityOutline.functionsOf`); `solkey-port.mjs` compares its functions
-  with `Report.lean`'s total less the `internal f` rows.  Against a clone at
+  plus the source's other functions with `Report.lean`'s total (an internal
+  row that fails to import is pinned with its status, not `internal f`, so
+  the pin cannot count them).  Against a clone at
   `78f42fde33` (the fixture's source) both give byte-identical output to
   master's scripts (`parity: 418 testSuiteFunctions = 415 derived + 1 pending
   + 1 divergent + 1 excluded; 2 skip`).  At `1b4341a303` the header reading
@@ -1927,6 +1929,10 @@ pays, are all faster than the baseline.
   run until the fixture is re-imported (W6): the source's sha256 is no longer
   the fixture's, so `check-testsuite.sh` needs `SOLKEY_EXAMPLES` pointed at a
   `78f42fde33` checkout until then.
+- **Reader.**  The `SolKey` reader is not re-vendored at `1b4341a303`, so its
+  `keyTaclets_eq_corpus` (which `Calculus/KeyTaclets.lean`'s docstring cites
+  as the guard against a stale table) fails against the 323-taclet table
+  until the reader catches up.
 
 ## Front end for the new shapes (W5, 2026-10-06)
 
@@ -1937,14 +1943,17 @@ pays, are all faster than the baseline.
   call by name (`requireTupleValue`); anything else is a `Gap`.
   `(bool ok, ) = R.call{value: V}("")` prints as `bool ok = R.send(V)`.  It
   is matched exactly as `isValueCall` matches it, and any other value call is
-  a `Gap`.  `a.send(v)` prints as written.  A `try` whose call returns an
+  a `Gap`.  solc forwards all gas to such a call, so the lowering is faithful
+  only under `holdsC` (`docs/solc-alignment.md`); the `send` rows say so when
+  W3 writes them.  `a.send(v)` prints as written.  A `try` whose call returns an
   unnamed value binds it to a fresh `tryRetN`, because `sol{}` names what an
   external call returns.
-- **Receivers.**  `payable(msg.sender)` prints as `msg.sender`, and
-  `payable(owner)` as `owner`.  Both are simple, so `callToSender` and
-  `sendUnfoldReceiver` take no receiver capture where solkey's trees take
-  `send_unfold_leftFstReceiver`.  This belongs in the `send` rows of
-  `docs/lean-key-rule-map.md` when the send rules are claimed.
+- **Receivers.**  `payable(e)` prints as `e`, as in solkey, whose
+  `SolJSONParser.parseFunctionCall` drops an elementary type conversion.
+  `sendUnfoldReceiver`'s `owner` is a storage read, not simple, so both
+  front ends capture it (`send_unfold_leftFstReceiver`); `callToSender`'s
+  `msg.sender` is simple in both (solkey's program variable `msgSender`), so
+  neither does.  Nothing to record in the `send` rows.
 - **Internal functions.**  Every function called by name becomes a
   `contract!{}` member (`function f(uint x) returns (uint lo, uint) { … }`),
   callees first (`SolcContract.funMembers`).  A recursive call, or a call of
@@ -1954,7 +1963,8 @@ pays, are all faster than the baseline.
   goes on.
 - **Rows** (`Frontend/Import.lean`).  A function's program declares its
   return variables first: a named one under its name, an unnamed one as
-  `_ret`, or `_ret0`, `_ret1`, … when there are several (KeY's `ret{i}`).
+  `_ret`, or `_ret0`, `_ret1`, … when there are several (Lean's spelling;
+  KeY names them `ret0`, `ret1`, …).
   Its `return`s are then lowered (`lowerReturns`), so an internal row
   elaborates and `#solkey_obligations` counts it as `internal f`.
   `Import.lowerRets` refuses a function with several return values.  Once
@@ -1973,3 +1983,26 @@ pays, are all faster than the baseline.
   assignments, `returns` with several values, and the bare block of
   `returnFromNestedBlock` (with its callers).  `returnInsideTry` and
   `returnFromTryBranches` elaborate.
+
+### W1/W5 review (2026-10-06)
+
+- `call{value:}` lowered to `send`: recorded in `docs/solc-alignment.md`
+  (full gas, faithful only under `holdsC`), `docs/solc-validation.md` and the
+  `SolcJson` docstring.  Not a soundness bug of the calculus.
+- After the re-pin, `functionBodyExpand`'s row was `same`, though solkey now
+  splits it with `internalCallExpand` and binds any argument: the row is a
+  recorded deviation, the capture row and `Taclet.call_simple`'s docstring
+  say whose side condition simplicity is, and solkey-feedback item 3 is
+  partly resolved upstream.
+- The receiver-capture deviation of `callToSender`/`sendUnfoldReceiver` did
+  not exist (Receivers, above).
+- `kernel-port.md`'s invariant line: a callback keeps `address(this).balance`.
+- `ret{i}`: Lean's `_ret`/`_ret{i}` differ from KeY's `ret0`, `ret1`, ….
+- `solkey-port.mjs` counted internal functions off the pin, where an
+  internal that fails to import is not `internal f`; it now counts them in
+  the source (12 at `1b4341a303`, 452 − 12 = 440 public or external, 0 at
+  `78f42fde33`, output unchanged), and the parity page's definition of
+  `testSuiteFunctions` matches `check-testsuite.sh`.
+- Open: no committed fixture exercises the new printer paths until W6
+  re-imports `TestSuite.sol`; the recursion refusal and a member that fails
+  the pre-check stay unpinned after it, and want a small regression fixture.

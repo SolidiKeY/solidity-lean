@@ -127,7 +127,8 @@ def paramCtx (ps : List (String × String)) : Except String ECtx :=
     | none => throw s!"the parameter `{x}` has the type `{t}`, which is not a value type"
 
 /-- A function's return variables, an unnamed one named as `contract!` names
-it: `_ret`, or `_ret0`, `_ret1`, … of several (KeY's `ret{i}`). -/
+it: `_ret`, or `_ret0`, `_ret1`, … of several (Lean's spelling; KeY names
+them `ret0`, `ret1`, …). -/
 def retNames (f : SolcFun) : List (String × String) :=
   f.rets.zipIdx.map fun ((x, t), i) =>
     (if !x.isEmpty then x else if f.rets.length == 1 then "_ret" else s!"_ret{i}", t)

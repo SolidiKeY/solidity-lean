@@ -12,7 +12,8 @@ its obligations are stated as solkey states them, under `wt(storage)`
 (`Calculus/Problem.lean`), and derived by `⊢` in `Solidity/TestSuite/`; the
 statuses are read off `Solidity/TestSuite/Report.lean`'s pin, and
 `scripts/check-testsuite.sh` checks the parity with solkey's
-`testSuiteFunctions` (every function not tagged skip):
+`testSuiteFunctions` (every public or external function not tagged skip;
+an internal helper has no obligation):
 
 - **derived**: `Solkey.TestSuite.f.proved : ⊢ Solkey.TestSuite.f.problem`, with no
   axiom but Lean's three; with no parameters, also stated at the initial

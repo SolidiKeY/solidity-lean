@@ -9,7 +9,7 @@ direction, solkey rules the Lean calculus lacks, is tracked as `planned` rows in
 `AGENTS.md`). The items were checked against `f2eb3d98eb`; the commits since
 add `try`/`catch` (`tryCallNoCallbackBox`, `tryCallWithCallbackBox`) and
 rename memory's `default` to `init`, and touch no rule an item below is
-about. `78f42fde33` adds `\sameUpdateLevel` to the four allocation taclets;
+about but item 3's, which `671f6762a9` partly resolves. `78f42fde33` adds `\sameUpdateLevel` to the four allocation taclets;
 Lean needs no counterpart (`docs/lean-key-rule-map.md`, legend).
 `b959555181`, `671f6762a9` and `1b4341a303` add `send`, internal calls with
 return targets and the function frame (ten taclets, not yet ported:
@@ -80,7 +80,16 @@ per consumer (`0 <= i < size` ⇒ the `at(i)` read is typed; unwritten key ⇒
 storage fact its `\assumes(wellFormed(storage))` cannot deliver then shows up as
 an unprovable example.
 
-## 3. `unfoldArgument` (Lean `functionCallArgCapture`)
+## 3. `unfoldArgument` (Lean `functionCallArgCapture`): partly resolved upstream (`671f6762a9`)
+
+**Upstream.** At `1b4341a303` an in-program call `f(args);` / `lhs = f(args);`
+is `internalCallExpand`'s (`\program InternalCall ic`, any arguments), and
+`expand_function_body` binds every argument as a fresh `T p = arg`, simple or
+not, so a non-simple argument is no longer stuck.  Lean keeps its capture
+rule (`functionCallArgCapture`), so that its `functionBodyExpand` takes
+simple arguments only and every call has one rule.
+What remains is the shape difference, recorded in `docs/lean-key-rule-map.md`;
+the text below is the item as it stood at `f2eb3d98eb`.
 
 **Problem.** `f(nse)@C` with a non-simple argument is stuck: `functionBodyExpand`
 matches only the whole-program call statement, and no rule hoists the argument

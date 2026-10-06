@@ -43,7 +43,9 @@ normalises what the grammar spells differently from Solidity:
   of a function by name (`requireTupleValue`);
 * `(bool ok, ) = R.call{value: V}("")`, matched exactly as
   `SolJSONParser.isValueCall` matches it, is `bool ok = R.send(V)`; any
-  other value call is a `Gap`;
+  other value call is a `Gap`.  solc forwards all gas there and `send` the
+  2300-gas stipend, so the result is faithful only under the callback
+  reading (`holdsC`, `docs/solc-alignment.md`);
 * an unnamed value a `try`'s call returns is bound to a fresh `tryRetN`,
   which nothing reads;
 * every function called by name is a `contract!` member
@@ -705,7 +707,8 @@ partial def stmt1 (j : Json) : PM (List String) := do
     pure [← withPush ok (expr e)]
   | "VariableDeclarationStatement" =>
     if let some (d, r, v) := valueCall? j then
-      -- `(bool ok, ) = R.call{value: V}("")` is `bool ok = R.send(V)`, as solkey reads it
+      -- `(bool ok, ) = R.call{value: V}("")` is `bool ok = R.send(V)`, as solkey reads it;
+      -- faithful only under `holdsC` (full gas, re-entry)
       return [s!"{← declText d} = {← operand r false}.send({← expr v})"]
     let ds ← PM.lift (J.arr j "declarations")
     if ds.length ≥ 2 then
