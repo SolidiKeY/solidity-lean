@@ -445,7 +445,7 @@ def specPieces (f : String) :
   let call : List RawStmt :=
     rets.map (fun (_, v, p) => RawStmt.decl (.named (primName p)) v none) ++
       [.tupleAssign (rets.map fun (_, v, _) => some (.name v)) (.call f args)]
-  let P ← ((elabStmts C call).run C.funs).run' (ps.map fun (n, p) => (n, LocalTy.val p), 1)
+  let P ← ((elabStmts C call).run { funs := C.funs }).run' (ps.map fun (n, p) => (n, LocalTy.val p), 1)
   -- the snapshots `\old` reads, taken where something reads them
   let snap : Upd C :=
     (if d.spec.ensures.any SpecExpr.usesOld || d.spec.assignable.isSome then [.store oldVar .storage]

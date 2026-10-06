@@ -151,10 +151,12 @@ def MissingArg : Contract := contract!{ uint owner;
 
 /-! ## Constructors and constants -/
 
-/-- `constructor(…) { … }` is the function `init`; `constant`, like
-`immutable`, is dropped. -/
+/-- `constructor(…) { … }` is the contract's constructor (`Contract.ctor`),
+not one of its functions; `constant`, like `immutable`, is a root, and
+`uint constant limit = 10;` an initializer the constructor runs first
+(`Contract.inits`), as solkey reads both. -/
 def WithCtor : Contract := contract!{
-  uint constant limit;
+  uint constant limit = 10;
   address public immutable owner;
   uint total;
   enum Phase { Open, Closed }
@@ -165,11 +167,44 @@ def WithCtor : Contract := contract!{
   }
 }
 
-example : WithCtor.funs.map (·.1) = ["init"] := rfl
+example : WithCtor.funs.map (·.1) = [] := rfl
+example : WithCtor.ctor.isSome = true := rfl
+example : WithCtor.inits.map (·.1) = ["limit"] := rfl
 example : WithCtor.vars.map (·.1) = ["limit", "owner", "total"] := rfl
 
-/-- Its body, an enum local and an `else if` in it, inlined where it is called. -/
-example : Prog.toStr (C := WithCtor) (sol[WithCtor]{ init(5); }) = "init(5);" := rfl
+/-- A deployment, `constructor(5);`: its body, an enum local and an `else if`
+in it, inlined after `limit = 10;`, as one call. -/
+example : Prog.toStr (C := WithCtor) (sol[WithCtor]{ constructor(5); }) = "constructor(5);" := rfl
+
+/-- No `constructor`: the implicit one runs the initializers. -/
+def WithInits : Contract := contract!{ uint x = 5; uint y; }
+
+example : Prog.toStr (C := WithInits) (sol[WithInits]{ constructor(); }) = "constructor();" := rfl
+
+/-- A function that calls the constructor. -/
+def CallsCtor : Contract := contract!{ uint n; constructor() { n = 1; } function f() { constructor(); } }
+
+/-- error: Solidity elaboration failed: constructor(…) in a function's body: only a program deploys -/
+#guard_msgs in #check sol[CallsCtor]{ f(); }
+
+/-- error: a second constructor: a contract declares one -/
+#guard_msgs (error, drop info) in
+#check contract!{ uint n; constructor() { n = 1; } constructor() { n = 2; } }
+
+/-- error: a constructor returns nothing: no `returns` -/
+#guard_msgs (error, drop info) in
+#check contract!{ uint n; constructor() returns (uint r) { r = 1; } }
+
+/-- error: `constructor` names the constructor, not a function -/
+#guard_msgs (error, drop info) in
+#check contract!{ uint n; function constructor() { n = 1; } }
+
+/-- An initializer that does not fit its variable: refused where it is run,
+at the first deployment. -/
+def BadInit : Contract := contract!{ uint8 small = 300; }
+
+/-- error: Solidity elaboration failed: 300 does not fit uint8 -/
+#guard_msgs in #check sol[BadInit]{ constructor(); }
 
 /-- error: unknown type uint7: the integer types are `uint8` … `uint256` and `int8` … `int256`, in steps of 8 -/
 #guard_msgs (error, drop info) in #check contract!{ uint7 small; }

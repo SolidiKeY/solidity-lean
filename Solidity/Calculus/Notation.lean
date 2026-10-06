@@ -1079,7 +1079,7 @@ def elabDl (φ : RawFml) (pastAll : Bool := false) : Except String (Fml C) :=
     | none, _ => some (x, LocalTy.val .uint)
   let taken := ((used ++ declared).map fun x => (Var.ofName x).idx).filter (· > 0)
   let taken := if pastAll then List.range' 1 (taken.foldl max 0) else taken
-  ((elabFml C taken φ).run C.funs).run' (params, 1)
+  ((elabFml C taken φ).run { funs := C.funs }).run' (params, 1)
 
 end Read
 
