@@ -248,6 +248,7 @@ or `sol_decide`, derivations `⊢ φ` built one `apply` per taclet, and runs:
 | `Examples/Tactics/Calls.lean`, `CallOperands.lean`, `Callback.lean`, `TryCatch.lean` | Internal calls, call-valued operands, callbacks (`ProvesC`), `try`/`catch`. |
 | `Examples/Tactics/Memory.lean`, `CrossDomain.lean`, `Theory.lean` | Memory, storage↔memory copies, the theory's rewriting. |
 | `Examples/Tactics/SelectOnSaveConsr.lean` | Reading a write back through a `consr` path, by hand and in solkey's order. |
+| `Examples/Tactics/Dangling.lean` | Writes and pushes through an alias a `pop` left dangling, made live by a `push()`, past a `delete` and a copy, by `sol_prove?`; rounds of them refused past `elimSize` in milliseconds. |
 | `Examples/Tactics/ApplySteps.lean`, `UpdateRules.lean`, `Decide.lean`, `TermTaclets.lean` | The proof style, update simplification, `sol_decide`, term taclets. |
 | `Examples/Tactics/Specs.lean` | Clauses as obligations (`spec!{f}`, `sol_spec`) beyond the benchmarks. |
 

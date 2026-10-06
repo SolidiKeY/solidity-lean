@@ -1199,6 +1199,40 @@ with a slot-level reader), an index after one (`ptr[0] = 1`), `pop`,
 through one, and un-gating `LStor.dangles` after measuring `Derived1` to
 `Derived12`.
 
+### Step 7: the pins and the summary
+
+| Test | Leaves | Tree | Reduction | Result | `#solkey_derive? … timed` |
+|---|---:|---:|---:|---|---:|
+| `testDanglingReferenceSurvivesPush` | 2 | 339, 337 | 3590, 3588 | derived | 0.75 s |
+| `testArrayCopyClearsOldElements` | 2 | 1162, 1160 | 8791, 8789 | pending (past `elimSize`) | 2.7 s |
+| `testArrayCopyKeepsDestinationTail` | 2 | 690, 688 | 7030, 7028 | derived | 1.2 s |
+| `testDeleteArrayLeavesDataPastLength` | 2 | 395, 393 | 4996, 4994 | derived | 0.9 s |
+| `testDanglingInnerArrayReappearsAfterPush` | 3 | 505, 503, 321 | 6807, 6805, 3924 | derived | 2.75 s |
+
+Tree and reduction are counted as in step 0 (`LFml.fits`, after
+`LFml.elim`); the time is the search and the kernel check of its replay,
+in a scratch module over `TestSuite/Problems.lean`.  The replays in
+`TestSuite/Derived13.lean` check in 0.8 s, 1.2 s, 2.2 s and 2.6 s.
+
+`Examples/Tactics/Dangling.lean` (a default target) pins the same
+functions over `StandardExample` (`persons`, `people`, `matrix`): each a
+`sol_prove?` that suggests `sol_prove`, its search 7–22 ms and its kernel
+check 0.3–1.4 s, and the write test as a diamond.  Rounds of `pop`, a write
+through the alias and `push()` grow the reduction faster than the leaf,
+since each adds a stale write and a pop below the slot reader, whose
+guards repeat at every read: two rounds close (16 ms); three are past
+`elimSize` (8585); four, twelve
+statements after the binding, give a leaf of 935 nodes within `closeSize`
+whose reduction is 15931, refused by `Derive.leafFits` in 25 ms, as
+`pushes22` in `Examples/ProofTree.lean`.
+
+The rule map (`docs/lean-key-rule-map.md`, after the `slotU` row) has a row
+per taclet the lane transcribes, with the Lean clause, its soundness
+lemmas (`Calculus/SlotLemmas.lean`'s among them) and the Theory lemma; the
+guards KeY does not have (`staleOk`, `LStor.dangles`, `Facts.nfH`) are
+marked Lean only.  `Report.lean`'s pin (415 derived, 2 pending) is computed,
+not checked by Lean here: checking it builds every `Derived` module.
+
 ## M6 results (2026-10-05): memory
 
 This memory support was reworked into solkey's `memoryRules.key`/
