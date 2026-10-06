@@ -14,7 +14,15 @@ importing file) and defines
   against `N` with its parameters as locals in scope, after its return
   variables declared at their defaults, its `return`s lowered
   (`lowerReturns`), as a call inlines it;
-* `N.report : List ImportRow`, one row per function: its solkey tag
+* `N.constructor : Prog N` for a declared constructor, a deployment:
+  `constructor(x̄);` with its parameters as locals in scope (`elabCtor`).
+  The contract declares the constructor (its member last, since it may
+  call every function) and the state variables' initializers
+  (`SolcContract.initMembers`) only if it expands with both, else neither:
+  an implicit constructor's initializers left out are a warning, a declared
+  one's a row;
+* `N.report : List ImportRow`, one row per function, the constructor's
+  first: its solkey tag
   (`tagOf`: which obligation solkey states, if any) and parameters, what
   became of it and why, with the source line.  A function whose obligation
   is a specification's, or that has none (`internal`), is still a program:
@@ -183,17 +191,50 @@ def elabSolcImport : CommandElab := fun stx => do
     match r with
     | none => funMembers := funMembers.push m
     | some e => badMembers := badMembers ++ [(g, e)]
-  -- the contract
-  let members := " ".intercalate (c.members ++ funMembers.toList)
-  let ctStx ← ofExcept (parse `term s!"contract!\{ {members} }")
+  let at_ (f : SolcFun) (line : Nat) (msg : String) : String :=
+    s!"{srcName}:{if line == 0 then f.line else line}: {msg}"
+  -- the constructor, its member last (it may call every function): its row
+  -- now if it is left out, else once its program is made
+  let ctorRowOf (f : SolcFun) (st : ImportStatus) (msg : String) : ImportRow :=
+    { name := f.name, tag := f.tag, params := f.params, status := st, reason := msg }
+  let mut ctorRow : Option ImportRow := none
+  let mut ctorMember : Option String := none
+  if let some f := c.ctor then
+    if let some (g, m) := f.calls.findSome? fun g => (Semantics.lookupBy g badMembers).map (g, ·) then
+      ctorRow := some (ctorRowOf f .unsupported (at_ f 0 s!"it calls `{g}`, which is left out: {m}"))
+    else match f.body with
+      | .error (.excluded m l) => ctorRow := some (ctorRowOf f .excluded (at_ f l m))
+      | .error (.unsupported m l) => ctorRow := some (ctorRowOf f .unsupported (at_ f l m))
+      | .ok ss => ctorMember := some (f.ctorMember (ss.map (·.2)))
+  -- the contract, with the initializers and the constructor if it expands
+  -- with them, else without
+  let plain := c.members ++ funMembers.toList
+  let mut memberList := plain
+  if ctorMember.isSome || c.initMembers != c.members then
+    let full := c.initMembers ++ funMembers.toList ++ ctorMember.toList
+    let r ← match parse `term s!"contract!\{ {" ".intercalate full} }" with
+      | .error e => pure (some s!"it does not parse: {e}")
+      | .ok s => liftTermElabM <| withEnableInfoTree false <| withoutErrToSorry do
+          tryCatchRuntimeEx (withCurrHeartbeats do
+              let _ ← elabTermEnsuringType s ctTy
+              synthesizeSyntheticMVarsNoPostponing
+              pure none)
+            fun ex => do pure (some (← ex.toMessageData.toString))
+    match r, c.ctor, ctorMember with
+    | none, _, _ => memberList := full
+    | some e, some f, some _ =>
+      ctorRow := some (ctorRowOf f .unsupported
+        (at_ f 0 s!"the contract with its constructor and initializers: {e}"))
+      ctorMember := none
+    | some e, _, _ =>
+      logWarning m!"solc_import: the initializers are left out: the contract with them: {e}"
+  let ctStx ← ofExcept (parse `term s!"contract!\{ {" ".intercalate memberList} }")
   let id := mkIdentFrom ref N
   elabCommand (← `(command| def $id : Solidity.Contract := $(⟨ctStx⟩)))
   -- each body, read by the macros to a `List RawStmt` term
   let rawTy := mkApp (mkConst ``List [0]) (mkConst ``RawStmt)
   let mut rows : Array ImportRow := #[]
   let mut raws : Array (Nat × SolcFun × List (Nat × String) × Expr) := #[]
-  let at_ (f : SolcFun) (line : Nat) (msg : String) : String :=
-    s!"{srcName}:{if line == 0 then f.line else line}: {msg}"
   for f in c.funs do
     let row (st : ImportStatus) (msg : String) : ImportRow :=
       { name := f.name, tag := f.tag, params := f.params, status := st, reason := msg }
@@ -257,6 +298,31 @@ def elabSolcImport : CommandElab := fun stx => do
         match ok with
         | .ok () => defined := defined.push n
         | .error m => rows := fail (at_ f 0 s!"the kernel rejects the program: {m}")
+  -- the constructor's program, a deployment: `constructor(x̄);` with its
+  -- parameters in scope (`elabCtor`), the obligation's program
+  if let (some f, some _) := (c.ctor, ctorMember) then
+    let row := ctorRowOf f
+    if f.tag == .skip then
+      ctorRow := some (row .skipped (at_ f 0 "tagged `@custom:key skip`"))
+    else
+      let raw : List RawStmt := [.call (.name "constructor") (f.params.map fun (x, _) => RawExpr.name x)]
+      match paramCtx f.params with
+      | .error m => ctorRow := some (row .unsupported (at_ f 0 m))
+      | .ok Γ =>
+        match elabProgAt.go C 0 raw (Γ, RawStmt.maxIdxs raw + 1) with
+        | .error (_, m) => ctorRow := some (row .unsupported (at_ f 0 m))
+        | .ok P =>
+          let n : Lean.Name := N ++ Lean.Name.mkSimple f.name
+          let decl := Declaration.defnDecl {
+            name := n, levelParams := [], type := progTy, value := Prog.quote (mkConst N) P,
+            hints := .abbrev, safety := .safe }
+          let ok ← liftCoreM <| tryCatchRuntimeEx (do addDecl decl; pure (Except.ok ()))
+            fun ex => do pure (.error (← ex.toMessageData.toString))
+          match ok with
+          | .ok () =>
+            defined := defined.push n
+            ctorRow := some (row .elaborated "")
+          | .error m => ctorRow := some (row .unsupported (at_ f 0 s!"the kernel rejects the program: {m}"))
   -- compiled for `sol_prove`; a failure here leaves the definitions, uncompiled
   let compiled ← liftCoreM <| tryCatchRuntimeEx (do compileDecls defined; pure none)
     fun ex => do pure (some (← ex.toMessageData.toString))
@@ -265,7 +331,7 @@ def elabSolcImport : CommandElab := fun stx => do
   let rowsTy := mkApp (mkConst ``List [0]) (mkConst ``ImportRow)
   let rep : Lean.Name := N ++ `report
   liftCoreM <| addAndCompile <| .defnDecl {
-    name := rep, levelParams := [], type := rowsTy, value := toExpr rows.toList,
+    name := rep, levelParams := [], type := rowsTy, value := toExpr (ctorRow.toList ++ rows.toList),
     hints := .abbrev, safety := .safe }
 
 end Solidity.Frontend

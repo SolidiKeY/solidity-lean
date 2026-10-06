@@ -389,7 +389,8 @@ function parseContract(source) {
     const trimmed = line.trim();
 
     if (depth === 1 && !/^(struct|function|event|modifier|constructor)\b/.test(trimmed)) {
-      const sv = trimmed.match(/^(.+?)\s+(\w+)\s*;$/);
+      // `uint x;`, or `uint x = 5;` with an initializer (the constructor's)
+      const sv = trimmed.match(/^(.+?)\s+(\w+)\s*(?:=[^;]*)?;$/);
       if (sv && !trimmed.startsWith("//")) stateVars.set(sv[2], sv[1].trim());
     }
 

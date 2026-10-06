@@ -59,9 +59,17 @@ mapping), `unsupported` where the printer or the grammar lacks the form.
 What would change a function's meaning if it were dropped is a `Gap` too: a
 modifier on the function, a `constant` or `immutable` state variable (a
 value, not a storage slot), an overloaded name.  A contract that inherits
-is refused whole.  A mutable state variable's initial value and the
-constructor are creation code: an obligation holds from any well-typed
-storage (solkey's do too), so they are read past, not reported.
+is refused whole.
+
+The constructor (`kind` `constructor`, which solc names `""`) is read as a
+function named `constructor` (`SolcContract.ctor`), as solkey's
+`SolidityOutline` names it: a root of the calls, whatever its visibility,
+and a modifier on it is a `Gap`, as on a function.  A mutable state
+variable's initializer is printed with it, `uint x = 5;`
+(`SolcContract.initMembers`), and a deployment runs it first.  One that
+does not print, or calls a function left out, leaves the constructor out,
+not the variable: a function's obligation holds from any well-typed storage
+(solkey's do too), so no function needs it.
 -/
 
 namespace Solidity.Frontend
@@ -123,6 +131,9 @@ structure SolcFun where
   rets : List (String × String) := []
   /-- The functions of the contract it calls, directly or not, callees first. -/
   calls : List String := []
+  /-- Declared `payable`: what a constructor's member keeps (`Contract.deploy`
+  refuses value sent to one that is not). -/
+  payable : Bool := false
   deriving Inhabited
 
 /-- A contract as read: the `contract!` members of the state variables it
@@ -132,9 +143,21 @@ structure SolcContract where
   members : List String
   dropped : List (String × Gap)
   funs : List SolcFun
-  /-- The functions some function calls, each as its `contract!` member
-  (`function f(uint x) returns (uint) { … }`), callees first. -/
+  /-- The functions some function, the constructor or an initializer calls,
+  each as its `contract!` member (`function f(uint x) returns (uint) { … }`),
+  callees first. -/
   funMembers : List (String × String) := []
+  /-- The constructor, named `constructor` (solc names it `""`), if the
+  contract declares one. -/
+  ctor : Option SolcFun := none
+  /-- `members`, each state variable with an initializer written with it
+  (`uint x = 5;`), in declaration order: what a deployment runs first.
+  `members` itself when none has one, or when one does not print
+  (`initGap`). -/
+  initMembers : List String := []
+  /-- Why an initializer does not print, if one does not: the constructor
+  is then left out, since a deployment would skip it. -/
+  initGap : Option Gap := none
   deriving Inhabited
 
 /-! ## Reading the JSON -/
@@ -832,7 +855,9 @@ plain one, and `box` chooses its modality.  A clause solkey refuses is the
 error. -/
 def tagOf (contract : List KeyClause) (f : Json) : Except String Tag := do
   let vis := ((f.getObjValAs? String "visibility").toOption).getD ""
-  unless vis == "public" || vis == "external" do return .internal
+  -- a constructor has one whatever its visibility (`SolidityOutline.functionsOf`)
+  let ctor := (f.getObjValAs? String "kind").toOption == some "constructor"
+  unless ctor || vis == "public" || vis == "external" do return .internal
   let cs ← keyClauses (docText f)
   if cs.any (·.kind == "skip") then return .skip
   if isSpecified contract || isSpecified cs then return .specified
@@ -887,6 +912,12 @@ def SolcFun.member (f : SolcFun) (ss : List String) : String :=
     s!" returns ({", ".intercalate (f.rets.map fun (x, t) => if x.isEmpty then t else s!"{t} {x}")})"
   s!"function {f.name}({ps}){rs} \{ {String.join (ss.map (· ++ "; "))}}"
 
+/-- The constructor as a `contract!` member, its body `ss`:
+`constructor(uint a) payable { … }`. -/
+def SolcFun.ctorMember (f : SolcFun) (ss : List String) : String :=
+  let ps := ", ".intercalate (f.params.map fun (x, t) => s!"{t} {x}")
+  s!"constructor({ps}){if f.payable then " payable" else ""} \{ {String.join (ss.map (· ++ "; "))}}"
+
 /-- The contract `name` of the source unit `ast`, its structs renamed by `ren`. -/
 def readContract (ast : Json) (name : String) (ren : List (String × String)) :
     Except String SolcContract := do
@@ -907,6 +938,8 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) :
   let vars := nodes.filter fun n =>
     J.kind n == "VariableDeclaration" && (n.getObjValAs? Bool "stateVariable").toOption == some true
   let mut members : List String := []
+  -- the variables kept: name, `sol` type, declaration
+  let mut kept : List (String × String × Json) := []
   let mut dropped : List (Int × String × Gap) := []
   let mut droppedNames : List (String × Gap) := []
   for v in vars do
@@ -919,14 +952,16 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) :
           throw (.unsupported s!"`{n}` (line {J.line v}) is {if mutab == "mutable" then "constant" else mutab}: \
             a value fixed before any call, not a storage slot")
         tyText S (← J.get v "typeName") : Except Gap String) with
-    | .ok t => members := members ++ [s!"{t} {n};"]
+    | .ok t =>
+      members := members ++ [s!"{t} {n};"]
+      kept := kept ++ [(n, t, v)]
     | .error g =>
       dropped := dropped ++ [(i, n, g)]
       droppedNames := droppedNames ++ [(n, g)]
   let stateVars := vars.filterMap fun v => (v.getObjValAs? String "name").toOption
-  -- every function but the constructor (creation code, see the module doc)
-  let funs := nodes.filter fun n =>
-    J.kind n == "FunctionDefinition" && (n.getObjValAs? String "kind").toOption != some "constructor"
+  -- every function, the constructor (`kind` `constructor`, named `""`) among them
+  let funs := nodes.filter (J.kind · == "FunctionDefinition")
+  let kindOf (f : Json) : String := ((f.getObjValAs? String "kind").toOption).getD "function"
   let nameOfFun (f : Json) : String :=
     match (f.getObjValAs? String "kind").toOption with
     | some "function" | none => ((f.getObjValAs? String "name").toOption).getD ""
@@ -941,13 +976,13 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) :
   let read := funs.map fun f =>
     let fname := nameOfFun f
     -- what would change the function's meaning, or its constant's name
-    let kind := ((f.getObjValAs? String "kind").toOption).getD "function"
+    let kind := kindOf f
     let modifier : Option String := match J.opt f "modifiers" with
       | some (.arr ms) => ms[0]?.map fun m =>
         ((J.opt m "modifierName").bind fun x => (x.getObjValAs? String "name").toOption).getD "?"
       | _ => none
     let refused : Option String :=
-      if kind != "function" then some s!"a `{kind}` function"
+      if kind != "function" && kind != "constructor" then some s!"a `{kind}` function"
       else if let some m := modifier then some s!"the modifier `{m}`: its code would be dropped"
       else if (funNames.filter (· == fname)).length > 1 then
         some s!"`{fname}` is overloaded: the import names a program by its function's name"
@@ -978,11 +1013,26 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) :
       pure ss
     { name := fname, line := J.line f, tag := (tag.toOption).getD .malformed,
       params := (ps.toOption).getD [], rets := (rs.toOption).getD [],
+      payable := (f.getObjValAs? String "stateMutability").toOption == some "payable",
       body := do let _ ← ps; let _ ← rs; body : SolcFun }
+  -- the initializers, each printed against the variables kept, as the
+  -- right-hand side of an assignment the constructor runs first
+  let initSt : PState := { dropped, structs := S, funParams }
+  let inits : Except Gap (List String) := kept.mapM fun (n, t, v) => do
+    let some e := J.opt v "value" | pure s!"{t} {n};"
+    match (expr e).run' initSt with
+    | .ok x => pure s!"{t} {n} = {x};"
+    | .error (.excluded m _) => throw (.excluded s!"the initializer of `{n}`: {m}" (J.line v))
+    | .error (.unsupported m _) => throw (.unsupported s!"the initializer of `{n}`: {m}" (J.line v))
   -- the internal calls: a function is read with every function it reaches,
   -- and the ones called are the contract's members, callees first
   let ids := funs.filterMap J.id?
-  let callsOf : List (Int × List Int) := funs.filterMap fun f => (J.id? f).map (·, callees ids f)
+  -- an initializer's calls are the constructor's, declared or implicit
+  let initCalls : List Int := (kept.filterMap fun (_, _, v) => (J.opt v "value").map (callees ids))
+    |>.flatten.eraseDups
+  let ctorId : Option Int := (funs.find? (kindOf · == "constructor")).bind J.id?
+  let callsOf : List (Int × List Int) := funs.filterMap fun f => (J.id? f).map fun i =>
+    (i, if ctorId == some i then (callees ids f ++ initCalls).eraseDups else callees ids f)
   let calls (i : Int) : List Int := (lookupBy i callsOf).getD []
   let byId : List (Int × SolcFun) := (funs.zip read).filterMap fun (f, r) => (J.id? f).map (·, r)
   let nameAt (i : Int) : String := ((lookupBy i byId).map (·.name)).getD "?"
@@ -1003,14 +1053,32 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) :
     { r with body, calls := cs.map nameAt }
   let closed : List (Int × SolcFun) := byId.map fun (i, r) => (i, withCalls i r)
   let order := ids.foldl (fun done i => (reach calls (ids.length + 1) [] done i).toOption.getD done) []
-  let called := callsOf.flatMap (·.2)
+  let called := callsOf.flatMap (·.2) ++ initCalls
   let funMembers := order.filterMap fun i => do
     guard (called.contains i)
     let r ← lookupBy i closed
     let ss ← r.body.toOption
     pure (r.name, r.member (ss.map (·.2)))
-  let funs := (funs.zip read).map fun (f, r) => ((J.id? f).map (withCalls · r)).getD r
-  pure { name, members, dropped := droppedNames, funs, funMembers }
+  -- an initializer that does not print, or calls a function left out
+  let initGap : Option Gap := match inits with
+    | .error g => some g
+    | .ok _ => initCalls.findSome? fun c => match lookupBy c closed with
+      | some { body := .error g, .. } =>
+        let m := s!"an initializer calls `{nameAt c}`, which is left out: {g.msg}"
+        some (match g with | .excluded .. => .excluded m | .unsupported .. => .unsupported m)
+      | _ => none
+  let initMembers := match initGap, inits with
+    | none, .ok ms => ms
+    | _, _ => members
+  let all := (funs.zip read).map fun (f, r) =>
+    (kindOf f == "constructor", ((J.id? f).map (withCalls · r)).getD r)
+  let ctor := (all.find? (·.1)).map fun (_, r) =>
+    { r with body := do
+        let ss ← r.body
+        if let some g := initGap then throw g
+        pure ss }
+  let funs := all.filterMap fun (c, r) => if c then none else some r
+  pure { name, members, dropped := droppedNames, funs, funMembers, ctor, initMembers, initGap }
 
 end Solidity.Frontend
 

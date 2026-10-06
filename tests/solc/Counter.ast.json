@@ -1,0 +1,167 @@
+{
+ "header": {
+  "solcVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
+  "sourceSha256": "e00a85a99c50520749c74d0cc8f524d610ea31e4bc04a8e165ecb0473ede5b80",
+  "solkeyCommit": "ed7849d5b6fd3612c7d816765556e14a46af438c",
+  "source": "keyext.solidity.examples/contracts/Counter.sol"
+ },
+ "ast": {
+  "nodeType": "SourceUnit",
+  "nodes": [
+   {
+    "literals": [
+     "solidity",
+     "^",
+     "0.8",
+     ".0"
+    ],
+    "nodeType": "PragmaDirective"
+   },
+   {
+    "contractKind": "contract",
+    "documentation": {
+     "nodeType": "StructuredDocumentation",
+     "text": "@custom:key invariant limit == 5"
+    },
+    "id": 30,
+    "name": "Counter",
+    "nodeType": "ContractDefinition",
+    "nodes": [
+     {
+      "constant": false,
+      "id": 5,
+      "mutability": "mutable",
+      "name": "limit",
+      "nodeType": "VariableDeclaration",
+      "src": "126:21:0",
+      "line": 6,
+      "stateVariable": true,
+      "storageLocation": "default",
+      "typeDescriptions": {
+       "typeString": "uint256"
+      },
+      "typeName": {
+       "name": "uint",
+       "nodeType": "ElementaryTypeName",
+       "typeDescriptions": {
+        "typeString": "uint256"
+       }
+      },
+      "value": {
+       "kind": "number",
+       "nodeType": "Literal",
+       "typeDescriptions": {
+        "typeString": "int_const 5"
+       },
+       "value": "5"
+      },
+      "visibility": "public"
+     },
+     {
+      "constant": false,
+      "id": 7,
+      "mutability": "mutable",
+      "name": "count",
+      "nodeType": "VariableDeclaration",
+      "src": "153:17:0",
+      "line": 7,
+      "stateVariable": true,
+      "storageLocation": "default",
+      "typeDescriptions": {
+       "typeString": "uint256"
+      },
+      "typeName": {
+       "name": "uint",
+       "nodeType": "ElementaryTypeName",
+       "typeDescriptions": {
+        "typeString": "uint256"
+       }
+      },
+      "visibility": "public"
+     },
+     {
+      "body": {
+       "nodeType": "Block",
+       "statements": [
+        {"expression":{"leftHandSide":{"name":"count","nodeType":"Identifier","referencedDeclaration":7,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"Assignment","operator":"=","rightHandSide":{"name":"start","nodeType":"Identifier","referencedDeclaration":10,"typeDescriptions":{"typeString":"uint256"}},"typeDescriptions":{"typeString":"uint256"}},"nodeType":"ExpressionStatement","src":"254:13:0","line":11}
+       ]
+      },
+      "documentation": {
+       "nodeType": "StructuredDocumentation",
+       "text": "@custom:key ensures count == start"
+      },
+      "id": 18,
+      "kind": "constructor",
+      "name": "",
+      "nodeType": "FunctionDefinition",
+      "parameters": {
+       "nodeType": "ParameterList",
+       "parameters": [
+        {
+         "constant": false,
+         "id": 10,
+         "mutability": "mutable",
+         "name": "start",
+         "nodeType": "VariableDeclaration",
+         "src": "232:10:0",
+         "line": 10,
+         "stateVariable": false,
+         "storageLocation": "default",
+         "typeDescriptions": {
+          "typeString": "uint256"
+         },
+         "typeName": {
+          "name": "uint",
+          "nodeType": "ElementaryTypeName",
+          "typeDescriptions": {
+           "typeString": "uint256"
+          }
+         },
+         "visibility": "internal"
+        }
+       ]
+      },
+      "returnParameters": {
+       "nodeType": "ParameterList",
+       "parameters": []
+      },
+      "src": "220:54:0",
+      "line": 10,
+      "stateMutability": "nonpayable",
+      "visibility": "public"
+     },
+     {
+      "body": {
+       "nodeType": "Block",
+       "statements": [
+        {"expression":{"leftHandSide":{"name":"count","nodeType":"Identifier","referencedDeclaration":7,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"Assignment","operator":"=","rightHandSide":{"leftExpression":{"name":"count","nodeType":"Identifier","referencedDeclaration":7,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"+","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 1"},"value":"1"},"typeDescriptions":{"typeString":"uint256"}},"typeDescriptions":{"typeString":"uint256"}},"nodeType":"ExpressionStatement","src":"371:17:0","line":16}
+       ]
+      },
+      "documentation": {
+       "nodeType": "StructuredDocumentation",
+       "text": "@custom:key ensures count == \\old(count) + 1"
+      },
+      "id": 29,
+      "kind": "function",
+      "name": "increment",
+      "nodeType": "FunctionDefinition",
+      "parameters": {
+       "nodeType": "ParameterList",
+       "parameters": []
+      },
+      "returnParameters": {
+       "nodeType": "ParameterList",
+       "parameters": []
+      },
+      "src": "333:62:0",
+      "line": 15,
+      "stateMutability": "nonpayable",
+      "visibility": "public"
+     }
+    ],
+    "src": "103:294:0",
+    "line": 5
+   }
+  ]
+ }
+}
