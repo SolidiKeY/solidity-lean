@@ -78,7 +78,7 @@ theorem Fml.active_iff_step (φ : Fml C) : φ.active = true ↔ ∃ ψ, φ.step 
 order.
 
 Example: symbolic execution of `total = 1;` stops at
-`{ storage := store(storage, total, 1) } select(storage, total) = 1`, which
+`{ storage := save(storage, total, 1) } find(storage, total) = 1`, which
 has no modality. -/
 theorem Fml.step_eq_none {φ : Fml C} (h : φ.step = none) : φ.active = false := by
   cases ha : φ.active

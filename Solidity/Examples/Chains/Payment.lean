@@ -82,18 +82,18 @@ namespace TransferOwner
 `transfer_unfold_leftFstReceiver`; the booking is at the capture.  The merge reads `owner` in the starting
 storage, and the read of the write resolves to 3 (`findOnSave`). -/
 theorem chain :
-    dl![.box]{ { storage := store(storage, owner, 3) } ⟨[ owner.transfer(5); ]⟩ φ }
+    dl![.box]{ { storage := save(storage, owner, 3) } ⟨[ owner.transfer(5); ]⟩ φ }
     ~[transfer_unfold_leftFstReceiver]~>
-      dl![.box]{ { storage := store(storage, owner, 3) } ⟨[ uint pv = owner; pv.transfer(5); ]⟩ φ }
-    ~*> dl![.box]{ { storage := store(storage, owner, 3) } { pv := select(storage, owner) } ⟨[ pv.transfer(5); ]⟩ φ }
-    ~*> dl![.box]{ { storage := store(storage, owner, 3) } { pv := select(storage, owner) }
+      dl![.box]{ { storage := save(storage, owner, 3) } ⟨[ uint pv = owner; pv.transfer(5); ]⟩ φ }
+    ~*> dl![.box]{ { storage := save(storage, owner, 3) } { pv := find(storage, owner) } ⟨[ pv.transfer(5); ]⟩ φ }
+    ~*> dl![.box]{ { storage := save(storage, owner, 3) } { pv := find(storage, owner) }
         { net := if(pv = this) then net else store(net, at(pv), net(pv) - 5) } φ }
     ~[sequentialToParallel]~> dl![.box]{
-        { storage := store(storage, owner, 3) ‖ pv := select(store(storage, owner, 3), owner) ‖
-          net := if(select(store(storage, owner, 3), owner) = this) then net else
-            store(net, at(select(store(storage, owner, 3), owner)), net(select(store(storage, owner, 3), owner)) - 5) }
+        { storage := save(storage, owner, 3) ‖ pv := find(save(storage, owner, 3), owner) ‖
+          net := if(find(save(storage, owner, 3), owner) = this) then net else
+            store(net, at(find(save(storage, owner, 3), owner)), net(find(save(storage, owner, 3), owner)) - 5) }
         φ }
-    ~[findOnSave]~> dl![.box]{ { storage := store(storage, owner, 3) ‖ pv := 3 ‖
+    ~[findOnSave]~> dl![.box]{ { storage := save(storage, owner, 3) ‖ pv := 3 ‖
         net := if(3 = this) then net else store(net, at(3), net(3) - 5) } φ } := by
   sol_chain
 #last_line chain

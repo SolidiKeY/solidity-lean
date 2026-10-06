@@ -472,7 +472,7 @@ pending (from `#solkey_scan`, which lists the leaves of the walk, and the
 first leaf the search leaves open):
 
 - **Diamond storage writes and reads** (most of the 240): a diamond update
-  must return, and `store(storage, age, 34)` returns only where `age` is a
+  must return, and `save(storage, age, 34)` returns only where `age` is a
   root; that is what `wt(storage)` gives, and the closer does not read it
   yet (M4: "returns" facts at statically typed paths).
 - **Memory** (`memory*`, `testMemory*`): the closer has no memory layer (M6).
@@ -1036,7 +1036,7 @@ The shapes are as solkey's taclets give them: a `push()` is
 a.length - 1)`, the alias is the update `{ r := tokens[0] }`.  The copy in
 `testArrayCopyClearsOldElements` is `save(storage, bucket.tokens,
 find(storage, tokens))` and the one in `testArrayCopyKeepsDestinationTail`
-is `store(storage, tokens, find(storage, bucket.tokens))`; both
+is `save(storage, tokens, find(storage, bucket.tokens))`; both
 translate to `LStor.copy`.  The write `bucket.tokens[0].value = 7` goes
 through an alias bound right after its `push()`, with no write between, so
 it is not stale.

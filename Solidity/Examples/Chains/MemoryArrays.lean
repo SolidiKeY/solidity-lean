@@ -332,46 +332,46 @@ own: `sequentialToParallel` merges an update that writes memory only where its o
 locals (`Upd.merge`). -/
 theorem incrementIndex :
     dl![m]{
-      { storage := store(storage, seed, 7) }
+      { storage := save(storage, seed, 7) }
         { i := 1 ‖ carolValues := freshId(addM(memory, uint[3])) ‖ memory := addM(memory, uint[3]) }
           ⟨[ carolValues[++i] = makeValue(); ]⟩ φ }
     ~[valueDeclSkip]~> dl![m]{
-        { storage := store(storage, seed, 7) }
+        { storage := save(storage, seed, 7) }
           { i := 1 ‖ carolValues := freshId(addM(memory, uint[3])) ‖ memory := addM(memory, uint[3]) }
             { pv := 0 } ⟨[ pv = makeValue(); uint idx; idx = ++i; carolValues[idx] = pv; ]⟩ φ }
     ~[functionBodyExpand]~> dl![m]{
-        { storage := store(storage, seed, 7) }
+        { storage := save(storage, seed, 7) }
           { i := 1 ‖ carolValues := freshId(addM(memory, uint[3])) ‖ memory := addM(memory, uint[3]) }
             { pv := 0 } ⟨[ uint se2; se2 = seed; pv = se2; uint idx; idx = ++i; carolValues[idx] = pv; ]⟩ φ }
     ~*> dl![m]{
-        { storage := store(storage, seed, 7) }
+        { storage := save(storage, seed, 7) }
           { i := 1 ‖ carolValues := freshId(addM(memory, uint[3])) ‖ memory := addM(memory, uint[3]) }
-            { pv := 0 } { se2 := 0 } { se2 := select(storage, seed) } { pv := se2 } { idx := 0 }
+            { pv := 0 } { se2 := 0 } { se2 := find(storage, seed) } { pv := se2 } { idx := 0 }
               ⟨[ idx = ++i; carolValues[idx] = pv; ]⟩ φ }
     ~[localAssignIncrement]~> dl![m]{
-        { storage := store(storage, seed, 7) }
+        { storage := save(storage, seed, 7) }
           { i := 1 ‖ carolValues := freshId(addM(memory, uint[3])) ‖ memory := addM(memory, uint[3]) }
-            { pv := 0 } { se2 := 0 } { se2 := select(storage, seed) } { pv := se2 } { idx := 0 }
+            { pv := 0 } { se2 := 0 } { se2 := find(storage, seed) } { pv := se2 } { idx := 0 }
               { i := i + 1 ‖ idx := i + 1 } ⟨[ carolValues[idx] = pv; ]⟩ φ }
     ~*> dl![m]{
-        { storage := store(storage, seed, 7) }
+        { storage := save(storage, seed, 7) }
           { i := 1 ‖ carolValues := freshId(addM(memory, uint[3])) ‖ memory := addM(memory, uint[3]) }
-            { pv := 0 } { se2 := 0 } { se2 := select(storage, seed) } { pv := se2 } { idx := 0 }
+            { pv := 0 } { se2 := 0 } { se2 := find(storage, seed) } { pv := se2 } { idx := 0 }
               { i := i + 1 ‖ idx := i + 1 } { memory := write(memory, carolValues[idx], pv) } φ }
     ~[sequentialToParallel]~> dl![m]{
-        { storage := store(storage, seed, 7) ‖ i := 1 ‖ carolValues := freshId(addM(memory, uint[3])) ‖ pv := 0 ‖ se2 := 0 ‖
-            se2 := select(store(storage, seed, 7), seed) ‖ pv := select(store(storage, seed, 7), seed) ‖ idx := 0 ‖
+        { storage := save(storage, seed, 7) ‖ i := 1 ‖ carolValues := freshId(addM(memory, uint[3])) ‖ pv := 0 ‖ se2 := 0 ‖
+            se2 := find(save(storage, seed, 7), seed) ‖ pv := find(save(storage, seed, 7), seed) ‖ idx := 0 ‖
             i := 1 + 1 ‖ idx := 1 + 1 ‖
             memory :=
-              write(addM(memory, uint[3]), freshId(addM(memory, uint[3]))[1 + 1], select(store(storage, seed, 7), seed)) }
+              write(addM(memory, uint[3]), freshId(addM(memory, uint[3]))[1 + 1], find(save(storage, seed, 7), seed)) }
           φ }
     ~[findOnSave]~> dl![m]{
-        { storage := store(storage, seed, 7) ‖ i := 1 ‖ carolValues := freshId(addM(memory, uint[3])) ‖ pv := 0 ‖ se2 := 0 ‖
+        { storage := save(storage, seed, 7) ‖ i := 1 ‖ carolValues := freshId(addM(memory, uint[3])) ‖ pv := 0 ‖ se2 := 0 ‖
             se2 := 7 ‖ pv := 7 ‖ idx := 0 ‖ i := 1 + 1 ‖ idx := 1 + 1 ‖
             memory := write(addM(memory, uint[3]), freshId(addM(memory, uint[3]))[1 + 1], 7) }
           φ }
     ~[add_literals]~> dl![m]{
-        { storage := store(storage, seed, 7) ‖ i := 1 ‖ carolValues := freshId(addM(memory, uint[3])) ‖ pv := 0 ‖ se2 := 0 ‖
+        { storage := save(storage, seed, 7) ‖ i := 1 ‖ carolValues := freshId(addM(memory, uint[3])) ‖ pv := 0 ‖ se2 := 0 ‖
             se2 := 7 ‖ pv := 7 ‖ idx := 0 ‖ i := 2 ‖ idx := 2 ‖
             memory := write(addM(memory, uint[3]), freshId(addM(memory, uint[3]))[2], 7) }
           φ } := by
@@ -383,21 +383,21 @@ inlined, and written (the paper's `⇝*`); past the merge `seed` is read in the 
 (`findOnSave`), in the captures and in the write. -/
 theorem simpleIndex :
     dl![m]{
-      { storage := store(storage, seed, 7) }
+      { storage := save(storage, seed, 7) }
         { i := 2 ‖ carolValues := freshId(addM(memory, uint[3])) ‖ memory := addM(memory, uint[3]) }
           ⟨[ carolValues[i] = makeValue(); ]⟩ φ }
     ~*> dl![m]{
-        { storage := store(storage, seed, 7) }
+        { storage := save(storage, seed, 7) }
           { i := 2 ‖ carolValues := freshId(addM(memory, uint[3])) ‖ memory := addM(memory, uint[3]) }
-            { pv := 0 } { se2 := 0 } { se2 := select(storage, seed) } { pv := se2 }
+            { pv := 0 } { se2 := 0 } { se2 := find(storage, seed) } { pv := se2 }
               { memory := write(memory, carolValues[i], pv) } φ }
     ~[sequentialToParallel]~> dl![m]{
-        { storage := store(storage, seed, 7) ‖ i := 2 ‖ carolValues := freshId(addM(memory, uint[3])) ‖ pv := 0 ‖ se2 := 0 ‖
-            se2 := select(store(storage, seed, 7), seed) ‖ pv := select(store(storage, seed, 7), seed) ‖
-            memory := write(addM(memory, uint[3]), freshId(addM(memory, uint[3]))[2], select(store(storage, seed, 7), seed)) }
+        { storage := save(storage, seed, 7) ‖ i := 2 ‖ carolValues := freshId(addM(memory, uint[3])) ‖ pv := 0 ‖ se2 := 0 ‖
+            se2 := find(save(storage, seed, 7), seed) ‖ pv := find(save(storage, seed, 7), seed) ‖
+            memory := write(addM(memory, uint[3]), freshId(addM(memory, uint[3]))[2], find(save(storage, seed, 7), seed)) }
           φ }
     ~[findOnSave]~> dl![m]{
-        { storage := store(storage, seed, 7) ‖ i := 2 ‖ carolValues := freshId(addM(memory, uint[3])) ‖ pv := 0 ‖ se2 := 0 ‖
+        { storage := save(storage, seed, 7) ‖ i := 2 ‖ carolValues := freshId(addM(memory, uint[3])) ‖ pv := 0 ‖ se2 := 0 ‖
             se2 := 7 ‖ pv := 7 ‖ memory := write(addM(memory, uint[3]), freshId(addM(memory, uint[3]))[2], 7) }
           φ } := by
   sol_chain

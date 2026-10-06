@@ -35,9 +35,8 @@ local instance : InContract := ⟨StandardExample⟩
 /-! ## The taclets -/
 
 /--
-info: @Taclet.binopAssignment : ∀ {C : Contract} {k : Nat} {m : Modality} {v : Var} {p : PrimTy} {op : BinOp}
-  {hop : op.accepts p = true} {x : PrimTy} {hq : op.ret p = x} {se₁ se₂ : Simple C p},
-  dl{ ⟨[ v = se₁ ⊕ se₂; ]⟩ ⇝ { v := se₁ ⊕ se₂ } ⟨[ ]⟩ }
+info: @Taclet.binopAssignment : ∀ {C : Contract} {k : Nat} {m : Modality} {v : Var} {p : PrimTy} {op : BinOp} {x : PrimTy}
+  {hq : op.ret p = x} {se₁ se₂ : Simple C p}, dl{ ⟨[ v = se₁ ⊕ se₂; ]⟩ ⇝ { v := se₁ ⊕ se₂ } ⟨[ ]⟩ }
 -/
 #guard_msgs in #check @Taclet.binopAssignment
 

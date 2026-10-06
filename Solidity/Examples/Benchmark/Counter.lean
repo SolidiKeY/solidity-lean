@@ -90,10 +90,10 @@ theorem get_spec : ⊢ dl!{ [ uint y = get(); ] y == count } := by
 
 /--
 info: dl{
-  ((0 <= select(storage, count) ∧
-            select(storage, count) <= 115792089237316195423570985008687907853269984665640564039457584007913129639935) ∧
-        msg.value = 0 ∧ select(storage, count) >= 1) →
-    { old := storage } [ dec(); ] select(storage, count) = select(old, count) - 1 } : Fml Counter
+  ((0 <= find(storage, count) ∧
+            find(storage, count) <= 115792089237316195423570985008687907853269984665640564039457584007913129639935) ∧
+        msg.value = 0 ∧ find(storage, count) >= 1) →
+    { old := storage } [ dec(); ] find(storage, count) = find(old, count) - 1 } : Fml Counter
 -/
 #guard_msgs in #check spec!{ dec }
 

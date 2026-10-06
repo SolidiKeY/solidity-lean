@@ -573,7 +573,7 @@ error: #last_line: unresolved does not end at a last line:
 findOnSave still applies (under either modality), and gives
   dl{ { storage := save(storage, alice.age, 42) ‖ x := 42 } φ }
 findMemberCons still applies (under either modality), and gives
-  dl{ { storage := save(storage, alice.age, 42) ‖ x := select(select(save(storage, alice.age, 42), alice), age) } φ }
+  dl{ { storage := save(storage, alice.age, 42) ‖ x := find(select(save(storage, alice.age, 42), alice), age) } φ }
 -/
 #guard_msgs in
 #last_line unresolved
@@ -594,9 +594,9 @@ theorem resolveSeg :
     dl![m]{ { storage := save(storage, alice.age, 42) ‖
           x := find(save(storage, alice.age, 42), alice.age) } φ }
     ~[findMemberCons]~> dl![m]{ { storage := save(storage, alice.age, 42) ‖
-          x := select(select(save(storage, alice.age, 42), alice), age) } φ }
+          x := find(select(save(storage, alice.age, 42), alice), age) } φ }
     ~[selectOnSaveMember]~> dl![m]{ { storage := save(storage, alice.age, 42) ‖
-          x := select(save(select(storage, alice), age, 42), age) } φ }
+          x := find(save(select(storage, alice), age, 42), age) } φ }
     ~[findOnSave]~> dl![m]{ { storage := save(storage, alice.age, 42) ‖ x := 42 } φ } := by
   sol_chain
 

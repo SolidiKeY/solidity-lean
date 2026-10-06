@@ -87,7 +87,7 @@ theorem storageFieldWriteSave :
 /-- `alice = bob;`: the struct `bob` is read, which has no literal. -/
 def storageRootWriteCopySource :
     dl![m]{ ⟨[ alice = bob; ]⟩ φ }
-    ~*> dl![m]{ { storage := store(storage, alice, find(storage, bob)) } φ } := by
+    ~*> dl![m]{ { storage := save(storage, alice, find(storage, bob)) } φ } := by
   sol_chain
 #last_line storageRootWriteCopySource
 
@@ -95,8 +95,8 @@ def storageRootWriteCopySource :
 /-- `total = pVal;` with `pVal` 7. -/
 theorem storageRootWriteStore :
     dl![m]{ { pVal := 7 } ⟨[ total = pVal; ]⟩ φ }
-    ~*> dl![m]{ { pVal := 7 } { storage := store(storage, total, pVal) } φ }
-    ~[sequentialToParallel]~> dl![m]{ { pVal := 7 ‖ storage := store(storage, total, 7) } φ } := by
+    ~*> dl![m]{ { pVal := 7 } { storage := save(storage, total, pVal) } φ }
+    ~[sequentialToParallel]~> dl![m]{ { pVal := 7 ‖ storage := save(storage, total, 7) } φ } := by
   sol_chain
 #last_line storageRootWriteStore
 
@@ -172,7 +172,7 @@ theorem storageFieldReadBindLocalRoot :
 /-- `account = bob.account;`: a struct read, which has no literal. -/
 def storageFieldReadStoreRoot :
     dl![m]{ ⟨[ account = bob.account; ]⟩ φ }
-    ~*> dl![m]{ { storage := store(storage, account, find(storage, bob.account)) } φ } := by
+    ~*> dl![m]{ { storage := save(storage, account, find(storage, bob.account)) } φ } := by
   sol_chain
 #last_line storageFieldReadStoreRoot
 
@@ -188,11 +188,11 @@ theorem storageFieldReadFind :
 
 /-- `v = total;` from a storage where it is 7. -/
 theorem storageRootReadSelect :
-    dl![m]{ { storage := store(storage, total, 7) } ⟨[ v = total; ]⟩ φ }
-    ~*> dl![m]{ { storage := store(storage, total, 7) } { v := select(storage, total) } φ }
-    ~[sequentialToParallel]~> dl![m]{ { storage := store(storage, total, 7) ‖
-        v := select(store(storage, total, 7), total) } φ }
-    ~[findOnSave]~> dl![m]{ { storage := store(storage, total, 7) ‖ v := 7 } φ } := by
+    dl![m]{ { storage := save(storage, total, 7) } ⟨[ v = total; ]⟩ φ }
+    ~*> dl![m]{ { storage := save(storage, total, 7) } { v := find(storage, total) } φ }
+    ~[sequentialToParallel]~> dl![m]{ { storage := save(storage, total, 7) ‖
+        v := find(save(storage, total, 7), total) } φ }
+    ~[findOnSave]~> dl![m]{ { storage := save(storage, total, 7) ‖ v := 7 } φ } := by
   sol_chain
 #last_line storageRootReadSelect
 
@@ -356,24 +356,24 @@ example : dl!{ ⟨ values[i] = makeValue(); ⟩ true }
 /-- `values[i] = makeValue();` with `i` 2, from a storage where `total` is 7: the call's body inlined
 (`functionBodyExpand`), its result written. -/
 theorem indexWriteValueRhsCapture :
-    dl![m]{ { i := 2 ‖ storage := store(storage, total, 7) } ⟨[ values[i] = makeValue(); ]⟩ φ }
-    ~[valueDeclSkip]~> dl![m]{ { i := 2 ‖ storage := store(storage, total, 7) } { se1 := 0 }
+    dl![m]{ { i := 2 ‖ storage := save(storage, total, 7) } ⟨[ values[i] = makeValue(); ]⟩ φ }
+    ~[valueDeclSkip]~> dl![m]{ { i := 2 ‖ storage := save(storage, total, 7) } { se1 := 0 }
         ⟨[ se1 = makeValue(); values[i] = se1; ]⟩ φ }
-    ~[functionBodyExpand]~> dl![m]{ { i := 2 ‖ storage := store(storage, total, 7) } { se1 := 0 }
+    ~[functionBodyExpand]~> dl![m]{ { i := 2 ‖ storage := save(storage, total, 7) } { se1 := 0 }
         ⟨[ uint se2; se2 = total; se1 = se2; values[i] = se1; ]⟩ φ }
-    ~*> dl![m]{ { i := 2 ‖ storage := store(storage, total, 7) } { se1 := 0 } { se2 := 0 }
-        { se2 := select(storage, total) } { se1 := se2 } ⟨[ values[i] = se1; ]⟩ φ }
-    ~*> dl![m]{ { i := 2 ‖ storage := store(storage, total, 7) } { se1 := 0 } { se2 := 0 }
-        { se2 := select(storage, total) } { se1 := se2 } { storage := save(storage, values[i], se1) } φ }
+    ~*> dl![m]{ { i := 2 ‖ storage := save(storage, total, 7) } { se1 := 0 } { se2 := 0 }
+        { se2 := find(storage, total) } { se1 := se2 } ⟨[ values[i] = se1; ]⟩ φ }
+    ~*> dl![m]{ { i := 2 ‖ storage := save(storage, total, 7) } { se1 := 0 } { se2 := 0 }
+        { se2 := find(storage, total) } { se1 := se2 } { storage := save(storage, values[i], se1) } φ }
     ~[sequentialToParallel]~> dl![m]{
-        { i := 2 ‖ se1 := 0 ‖ se2 := 0 ‖ se2 := select(store(storage, total, 7), total) ‖
-            se1 := select(store(storage, total, 7), total) ‖
+        { i := 2 ‖ se1 := 0 ‖ se2 := 0 ‖ se2 := find(save(storage, total, 7), total) ‖
+            se1 := find(save(storage, total, 7), total) ‖
             storage :=
-              save(store(storage, total, 7), values[2]@store(storage, total, 7), select(store(storage, total, 7), total)) }
+              save(save(storage, total, 7), values[2]@save(storage, total, 7), select(save(storage, total, 7), total)) }
           φ }
     ~[findOnSave]~> dl![m]{
         { i := 2 ‖ se1 := 0 ‖ se2 := 0 ‖ se2 := 7 ‖ se1 := 7 ‖
-            storage := save(store(storage, total, 7), values[2]@store(storage, total, 7), 7) }
+            storage := save(save(storage, total, 7), values[2]@save(storage, total, 7), 7) }
           φ } := by
   sol_chain
 #last_line indexWriteValueRhsCapture
@@ -383,22 +383,22 @@ example : dl!{ ⟨ total = makeValue(); ⟩ true }
 
 /-- `total = makeValue();` from a storage where `total` is 7. -/
 theorem storageRootWriteValueRhsCapture :
-    dl![m]{ { storage := store(storage, total, 7) } ⟨[ total = makeValue(); ]⟩ φ }
-    ~[valueDeclSkip]~> dl![m]{ { storage := store(storage, total, 7) } { se1 := 0 }
+    dl![m]{ { storage := save(storage, total, 7) } ⟨[ total = makeValue(); ]⟩ φ }
+    ~[valueDeclSkip]~> dl![m]{ { storage := save(storage, total, 7) } { se1 := 0 }
         ⟨[ se1 = makeValue(); total = se1; ]⟩ φ }
-    ~[functionBodyExpand]~> dl![m]{ { storage := store(storage, total, 7) } { se1 := 0 }
+    ~[functionBodyExpand]~> dl![m]{ { storage := save(storage, total, 7) } { se1 := 0 }
         ⟨[ uint se2; se2 = total; se1 = se2; total = se1; ]⟩ φ }
-    ~*> dl![m]{ { storage := store(storage, total, 7) } { se1 := 0 } { se2 := 0 } { se2 := select(storage, total) }
+    ~*> dl![m]{ { storage := save(storage, total, 7) } { se1 := 0 } { se2 := 0 } { se2 := find(storage, total) }
         { se1 := se2 } ⟨[ total = se1; ]⟩ φ }
-    ~*> dl![m]{ { storage := store(storage, total, 7) } { se1 := 0 } { se2 := 0 } { se2 := select(storage, total) }
-        { se1 := se2 } { storage := store(storage, total, se1) } φ }
+    ~*> dl![m]{ { storage := save(storage, total, 7) } { se1 := 0 } { se2 := 0 } { se2 := find(storage, total) }
+        { se1 := se2 } { storage := save(storage, total, se1) } φ }
     ~[sequentialToParallel]~> dl![m]{
-        { se1 := 0 ‖ se2 := 0 ‖ se2 := select(store(storage, total, 7), total) ‖
-            se1 := select(store(storage, total, 7), total) ‖
-            storage := store(store(storage, total, 7), total, select(store(storage, total, 7), total)) }
+        { se1 := 0 ‖ se2 := 0 ‖ se2 := find(save(storage, total, 7), total) ‖
+            se1 := find(save(storage, total, 7), total) ‖
+            storage := save(save(storage, total, 7), total, select(save(storage, total, 7), total)) }
           φ }
     ~[findOnSave]~> dl![m]{
-        { se1 := 0 ‖ se2 := 0 ‖ se2 := 7 ‖ se1 := 7 ‖ storage := store(store(storage, total, 7), total, 7) } φ } := by
+        { se1 := 0 ‖ se2 := 0 ‖ se2 := 7 ‖ se1 := 7 ‖ storage := save(save(storage, total, 7), total, 7) } φ } := by
   sol_chain
 #last_line storageRootWriteValueRhsCapture
 
@@ -527,18 +527,18 @@ theorem storageIndexReadMappingBindLocalRoot :
 /-- `alice = people[i];` with `i` 2: a struct read, which has no literal. -/
 theorem storageIndexReadArrayStoreRoot :
     dl![m]{ { i := 2 } ⟨[ alice = people[i]; ]⟩ φ }
-    ~*> dl![m]{ { i := 2 } { storage := store(storage, alice, find(storage, people[i])) } φ }
+    ~*> dl![m]{ { i := 2 } { storage := save(storage, alice, find(storage, people[i])) } φ }
     ~[sequentialToParallel]~>
-      dl![m]{ { i := 2 ‖ storage := store(storage, alice, find(storage, people[2])) } φ } := by
+      dl![m]{ { i := 2 ‖ storage := save(storage, alice, find(storage, people[2])) } φ } := by
   sol_chain
 #last_line storageIndexReadArrayStoreRoot
 
 /-- `alice = personById[id];` with `id` 3: a struct read, which has no literal. -/
 theorem storageIndexReadMappingStoreRoot :
     dl![m]{ { id := 3 } ⟨[ alice = personById[id]; ]⟩ φ }
-    ~*> dl![m]{ { id := 3 } { storage := store(storage, alice, find(storage, personById[id])) } φ }
+    ~*> dl![m]{ { id := 3 } { storage := save(storage, alice, find(storage, personById[id])) } φ }
     ~[sequentialToParallel]~>
-      dl![m]{ { id := 3 ‖ storage := store(storage, alice, find(storage, personById[3])) } φ } := by
+      dl![m]{ { id := 3 ‖ storage := save(storage, alice, find(storage, personById[3])) } φ } := by
   sol_chain
 #last_line storageIndexReadMappingStoreRoot
 
@@ -588,25 +588,25 @@ example : dl!{ ⟨ values.push(makeValue()); ⟩ true }
 
 /-- `values.push(makeValue());` from a storage where `total` is 7. -/
 theorem storagePushValue_unfold_rightSndArgument :
-    dl![m]{ { storage := store(storage, total, 7) } ⟨[ values.push(makeValue()); ]⟩ φ }
-    ~[valueDeclSkip]~> dl![m]{ { storage := store(storage, total, 7) } { se1 := 0 }
+    dl![m]{ { storage := save(storage, total, 7) } ⟨[ values.push(makeValue()); ]⟩ φ }
+    ~[valueDeclSkip]~> dl![m]{ { storage := save(storage, total, 7) } { se1 := 0 }
         ⟨[ se1 = makeValue(); values.push(se1); ]⟩ φ }
-    ~[functionBodyExpand]~> dl![m]{ { storage := store(storage, total, 7) } { se1 := 0 }
+    ~[functionBodyExpand]~> dl![m]{ { storage := save(storage, total, 7) } { se1 := 0 }
         ⟨[ uint se2; se2 = total; se1 = se2; values.push(se1); ]⟩ φ }
-    ~*> dl![m]{ { storage := store(storage, total, 7) } { se1 := 0 } { se2 := 0 } { se2 := select(storage, total) }
+    ~*> dl![m]{ { storage := save(storage, total, 7) } { se1 := 0 } { se2 := 0 } { se2 := find(storage, total) }
         { se1 := se2 } ⟨[ values.push(se1); ]⟩ φ }
-    ~*> dl![m]{ { storage := store(storage, total, 7) } { se1 := 0 } { se2 := 0 } { se2 := select(storage, total) }
+    ~*> dl![m]{ { storage := save(storage, total, 7) } { se1 := 0 } { se2 := 0 } { se2 := find(storage, total) }
         { se1 := se2 } { storage := save(save(storage, values[values.length], se1), values.length, values.length + 1) } φ }
     ~[sequentialToParallel]~> dl![m]{
-        { se1 := 0 ‖ se2 := 0 ‖ se2 := select(store(storage, total, 7), total) ‖
-            se1 := select(store(storage, total, 7), total) ‖
+        { se1 := 0 ‖ se2 := 0 ‖ se2 := find(save(storage, total, 7), total) ‖
+            se1 := find(save(storage, total, 7), total) ‖
             storage :=
-              save(save(store(storage, total, 7), values[values.length], select(store(storage, total, 7), total)),
+              save(save(save(storage, total, 7), values[values.length], select(save(storage, total, 7), total)),
                 values.length, values.length + 1) }
           φ }
     ~[findOnSave]~> dl![m]{
         { se1 := 0 ‖ se2 := 0 ‖ se2 := 7 ‖ se1 := 7 ‖
-            storage := save(save(store(storage, total, 7), values[values.length], 7), values.length, values.length + 1) }
+            storage := save(save(save(storage, total, 7), values[values.length], 7), values.length, values.length + 1) }
           φ } := by
   sol_chain
 #last_line storagePushValue_unfold_rightSndArgument
@@ -753,33 +753,33 @@ theorem requireConditionCapture_call :
   sol_chain
 #last_line requireConditionCapture_call
 
--- `where bool se1`: a local bound to a read (`se1 := select(storage, flag)`) reads as a `uint` without it,
+-- `where bool se1`: a local bound to a read (`se1 := find(storage, flag)`) reads as a `uint` without it,
 -- though `#chain` prints the line without it.
 /-- `require(flag);` from a storage where `flag` is `true`: the capture read off the starting storage
 (`findOnSave`), the condition read into the goals (`applyOnPV`), and the goals folded. -/
 theorem requireConditionCapture :
-    dl![.box]{ { storage := store(storage, flag, true) } ⟨[ require(flag); ]⟩ φ }
+    dl![.box]{ { storage := save(storage, flag, true) } ⟨[ require(flag); ]⟩ φ }
     ~[requireConditionCapture]~>
-      dl![.box]{ { storage := store(storage, flag, true) } ⟨[ bool se1 = flag; require(se1); ]⟩ φ }
-    ~*> dl![.box]{ { storage := store(storage, flag, true) } { se1 := select(storage, flag) } ⟨[ require(se1); ]⟩ φ
+      dl![.box]{ { storage := save(storage, flag, true) } ⟨[ bool se1 = flag; require(se1); ]⟩ φ }
+    ~*> dl![.box]{ { storage := save(storage, flag, true) } { se1 := find(storage, flag) } ⟨[ require(se1); ]⟩ φ
         where bool se1 }
-    ~*> dl![.box]{ { storage := store(storage, flag, true) } { se1 := select(storage, flag) }
+    ~*> dl![.box]{ { storage := save(storage, flag, true) } { se1 := find(storage, flag) }
         ((se1 ≐ true → φ) ∧ (se1 ≐ false → ⟨[ revert(); ]⟩ φ) ∧ (⟨[ revert(); ]⟩ false ∨ se1 ≐ true ∨ se1 ≐ false)) }
-    ~[revertBox]~> dl![.box]{ { storage := store(storage, flag, true) } { se1 := select(storage, flag) }
+    ~[revertBox]~> dl![.box]{ { storage := save(storage, flag, true) } { se1 := find(storage, flag) }
         ((se1 ≐ true → φ) ∧ (se1 ≐ false → true) ∧ (⟨[ revert(); ]⟩ false ∨ se1 ≐ true ∨ se1 ≐ false)) }
     ~[sequentialToParallel]~> dl![.box]{
-        { storage := store(storage, flag, true) ‖ se1 := select(store(storage, flag, true), flag) }
+        { storage := save(storage, flag, true) ‖ se1 := find(save(storage, flag, true), flag) }
           ((se1 ≐ true → φ) ∧ (se1 ≐ false → true) ∧ (⟨[ revert(); ]⟩ false ∨ se1 ≐ true ∨ se1 ≐ false)) }
     ~[concrete]~> dl![.box]{
-        { storage := store(storage, flag, true) ‖ se1 := select(store(storage, flag, true), flag) }
+        { storage := save(storage, flag, true) ‖ se1 := find(save(storage, flag, true), flag) }
           ((se1 ≐ true → φ) ∧ ([ revert(); ] false ∨ se1 ≐ true ∨ se1 ≐ false)) }
     ~[findOnSave]~> dl![.box]{
-        { storage := store(storage, flag, true) ‖ se1 := true }
+        { storage := save(storage, flag, true) ‖ se1 := true }
           ((se1 ≐ true → φ) ∧ ([ revert(); ] false ∨ se1 ≐ true ∨ se1 ≐ false)) }
     ~[applyOnPV]~> dl![.box]{
-        { storage := store(storage, flag, true) ‖ se1 := true }
+        { storage := save(storage, flag, true) ‖ se1 := true }
           ((true ≐ true → φ) ∧ ([ revert(); ] false ∨ true ≐ true ∨ true ≐ false)) }
-    ~[concrete]~> dl![.box]{ { storage := store(storage, flag, true) ‖ se1 := true } φ } := by
+    ~[concrete]~> dl![.box]{ { storage := save(storage, flag, true) ‖ se1 := true } φ } := by
   sol_chain
 #last_line requireConditionCapture
 
@@ -806,19 +806,19 @@ theorem assertConditionCapture_call :
 
 /-- `assert(flag);` from a storage where `flag` is `true`: the condition owed and assumed, then folded. -/
 theorem assertConditionCapture :
-    dl![m]{ { storage := store(storage, flag, true) } ⟨[ assert(flag); ]⟩ φ }
+    dl![m]{ { storage := save(storage, flag, true) } ⟨[ assert(flag); ]⟩ φ }
     ~[assertConditionCapture]~>
-      dl![m]{ { storage := store(storage, flag, true) } ⟨[ bool se1 = flag; assert(se1); ]⟩ φ }
-    ~*> dl![m]{ { storage := store(storage, flag, true) } { se1 := select(storage, flag) } ⟨[ assert(se1); ]⟩ φ
+      dl![m]{ { storage := save(storage, flag, true) } ⟨[ bool se1 = flag; assert(se1); ]⟩ φ }
+    ~*> dl![m]{ { storage := save(storage, flag, true) } { se1 := find(storage, flag) } ⟨[ assert(se1); ]⟩ φ
         where bool se1 }
-    ~*> dl![m]{ { storage := store(storage, flag, true) } { se1 := select(storage, flag) }
+    ~*> dl![m]{ { storage := save(storage, flag, true) } { se1 := find(storage, flag) }
         ((se1 ≐ true → φ) ∧ se1 ≐ true) }
     ~[sequentialToParallel]~> dl![m]{
-        { storage := store(storage, flag, true) ‖ se1 := select(store(storage, flag, true), flag) }
+        { storage := save(storage, flag, true) ‖ se1 := find(save(storage, flag, true), flag) }
           ((se1 ≐ true → φ) ∧ se1 ≐ true) }
-    ~[findOnSave]~> dl![m]{ { storage := store(storage, flag, true) ‖ se1 := true } ((se1 ≐ true → φ) ∧ se1 ≐ true) }
-    ~[applyOnPV]~> dl![m]{ { storage := store(storage, flag, true) ‖ se1 := true } ((true ≐ true → φ) ∧ true ≐ true) }
-    ~[concrete]~> dl![m]{ { storage := store(storage, flag, true) ‖ se1 := true } φ } := by
+    ~[findOnSave]~> dl![m]{ { storage := save(storage, flag, true) ‖ se1 := true } ((se1 ≐ true → φ) ∧ se1 ≐ true) }
+    ~[applyOnPV]~> dl![m]{ { storage := save(storage, flag, true) ‖ se1 := true } ((true ≐ true → φ) ∧ true ≐ true) }
+    ~[concrete]~> dl![m]{ { storage := save(storage, flag, true) ‖ se1 := true } φ } := by
   sol_chain
 #last_line assertConditionCapture
 

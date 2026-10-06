@@ -210,7 +210,7 @@ theorem ageWriteReadKeYValue : ⊨ dl!{ [ alice.age = 42; uint x = alice.age; ] 
     fun _ => Theory.StValue.Equiv.refl _
 
 /-- The read of the write, one member at a time instead of `findOnSave`: solkey's
-`findMemberCons` reads `alice.age` from its head, `select(select(…, alice), age)`
+`findMemberCons` reads `alice.age` from its head, `find(select(…, alice), age)`
 (the `consr` path turned into `cons` form inside its proof, `consRcons` and
 `consRnil`, then `findDefinitionMemberCons`), and `selectOnSaveMember`,
 `selectOnSaveCons`, pushes the write into `alice`; the read of the write at the
@@ -218,8 +218,8 @@ last member is `findOnSave` again.  From the line `ageWriteReadKeYValue` reaches
 before its law (`SelectOnSaveConsr.lean` has the `consr` path). -/
 def ageReadMembers :
     dl!{ find(save(storage, alice.age, 42), alice.age) ≐ 42 }
-    ~=> dl!{ select(select(save(storage, alice.age, 42), alice), age) ≐ 42 }
-    ~=> dl!{ select(store(select(storage, alice), age, 42), age) ≐ 42 }
+    ~=> dl!{ find(select(save(storage, alice.age, 42), alice), age) ≐ 42 }
+    ~=> dl!{ find(save(select(storage, alice), age, 42), age) ≐ 42 }
     ~=> dl!{ 42 ≐ 42 } := by
   sol_chain
 
@@ -285,10 +285,10 @@ example : dl![m]{ { storage := save(storage, alice.age, 42) ‖
       x := find(save(storage, alice.age, 42), alice.age) } φ }
     ~[findMemberCons]~>
       dl![m]{ { storage := save(storage, alice.age, 42) ‖
-        x := select(select(save(storage, alice.age, 42), alice), age) } φ }
+        x := find(select(save(storage, alice.age, 42), alice), age) } φ }
     ~[selectOnSaveMember]~>
       dl![m]{ { storage := save(storage, alice.age, 42) ‖
-        x := select(save(select(storage, alice), age, 42), age) } φ }
+        x := find(save(select(storage, alice), age, 42), age) } φ }
     ~[findOnSave]~> dl![m]{ { storage := save(storage, alice.age, 42) ‖ x := 42 } φ } := by
   sol_chain
 
@@ -581,7 +581,7 @@ from
 findOnSave gives
   dl{ 42 ≐ 42 }
 findMemberCons gives
-  dl{ select(select(save(storage, alice.age, 42), alice), age) ≐ 42 }
+  dl{ find(select(save(storage, alice.age, 42), alice), age) ≐ 42 }
 -/
 #guard_msgs in
 example : dl!{ find(save(storage, alice.age, 42), alice.age) ≐ 42 } ~=> dl!{ 43 ≐ 42 } := by

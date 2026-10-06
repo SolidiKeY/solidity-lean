@@ -53,16 +53,16 @@ theorem chain :
     ~*> dl![m]{
         { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
           { memory := write(memory, carol.age, 42) }
-            { storage := store(storage, alice, copyMem(mtSt, memory, carol)) } { v := find(storage, alice.age) } φ }
+            { storage := save(storage, alice, copyMem(mtSt, memory, carol)) } { v := find(storage, alice.age) } φ }
     ~[sequentialToParallel]~> dl![m]{
         { carol := freshId(addM(memory, Person)) ‖
             memory := write(addM(memory, Person), freshId(addM(memory, Person)).age, 42) ‖
             storage :=
-              store(storage, alice,
+              save(storage, alice,
                 copyMem(mtSt, write(addM(memory, Person), freshId(addM(memory, Person)).age, 42),
                   freshId(addM(memory, Person)))) ‖
             v :=
-              find(store(storage, alice,
+              find(save(storage, alice,
                   copyMem(mtSt, write(addM(memory, Person), freshId(addM(memory, Person)).age, 42),
                     freshId(addM(memory, Person)))),
                 alice.age) }
@@ -71,7 +71,7 @@ theorem chain :
         { carol := freshId(addM(memory, Person)) ‖
             memory := write(addM(memory, Person), freshId(addM(memory, Person)).age, 42) ‖
             storage :=
-              store(storage, alice,
+              save(storage, alice,
                 copyMem(mtSt, write(addM(memory, Person), freshId(addM(memory, Person)).age, 42),
                   freshId(addM(memory, Person)))) ‖
             v := read(write(addM(memory, Person), freshId(addM(memory, Person)).age, 42), freshId(addM(memory, Person)).age) }
@@ -80,7 +80,7 @@ theorem chain :
         { carol := freshId(addM(memory, Person)) ‖
             memory := write(addM(memory, Person), freshId(addM(memory, Person)).age, 42) ‖
             storage :=
-              store(storage, alice,
+              save(storage, alice,
                 copyMem(mtSt, write(addM(memory, Person), freshId(addM(memory, Person)).age, 42),
                   freshId(addM(memory, Person)))) ‖
             v := 42 }
@@ -162,7 +162,7 @@ theorem chain :
                   freshId(addM(memory, Account)))) ‖
             acc := alice.account ‖
             v :=
-              find(store(select(storage, alice), account,
+              find(save(select(storage, alice), account,
                   copyMem(mtSt, write(addM(memory, Account), freshId(addM(memory, Account)).balance, 50),
                     freshId(addM(memory, Account)))),
                 account.balance) }
@@ -298,7 +298,7 @@ theorem chain :
                     freshId(addM(memory, Person)).account))) ‖
             sp := alice.account ‖
             v :=
-              find(store(select(storage, alice), account,
+              find(save(select(storage, alice), account,
                   copyMem(mtSt,
                     write(addM(memory, Person), read(addM(memory, Person), freshId(addM(memory, Person)).account).balance,
                       50),
@@ -466,7 +466,7 @@ theorem chain :
                   freshId(addM(memory, Token)))) ‖
             sp := alice.account ‖ aliceTok := alice.account.token ‖
             v :=
-              find(store(select(select(storage, alice), account), token,
+              find(save(select(select(storage, alice), account), token,
                   copyMem(mtSt, write(addM(memory, Token), freshId(addM(memory, Token)).value, 99),
                     freshId(addM(memory, Token)))),
                 token.value) }

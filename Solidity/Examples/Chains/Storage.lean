@@ -141,9 +141,9 @@ theorem chain :
     ~[sequentialToParallel]~>
       dl![m]{ { storage := save(storage, alice.age, 42) ‖ x := find(save(storage, alice.age, 42), alice.age) } φ }
     ~[findMemberCons]~>
-      dl![m]{ { storage := save(storage, alice.age, 42) ‖ x := select(select(save(storage, alice.age, 42), alice), age) } φ }
+      dl![m]{ { storage := save(storage, alice.age, 42) ‖ x := find(select(save(storage, alice.age, 42), alice), age) } φ }
     ~[selectOnSaveMember]~>
-      dl![m]{ { storage := save(storage, alice.age, 42) ‖ x := select(save(select(storage, alice), age, 42), age) } φ }
+      dl![m]{ { storage := save(storage, alice.age, 42) ‖ x := find(save(select(storage, alice), age, 42), age) } φ }
     ~[findOnSave]~> dl![m]{ { storage := save(storage, alice.age, 42) ‖ x := 42 } φ } := by
   sol_chain
 #last_line chain
@@ -195,10 +195,10 @@ theorem reads :
             x := find(save(select(storage, alice), account.balance, 10), account.balance) } φ }
     ~[findMemberCons]~> dl![m]{
         { pv := 10 ‖ acc := alice.account ‖ storage := save(storage, alice.account.balance, 10) ‖ acc2 := alice.account ‖
-            x := select(select(save(select(storage, alice), account.balance, 10), account), balance) } φ }
+            x := find(select(save(select(storage, alice), account.balance, 10), account), balance) } φ }
     ~[selectOnSaveMember]~> dl![m]{
         { pv := 10 ‖ acc := alice.account ‖ storage := save(storage, alice.account.balance, 10) ‖ acc2 := alice.account ‖
-            x := select(save(select(select(storage, alice), account), balance, 10), balance) } φ }
+            x := find(save(select(select(storage, alice), account), balance, 10), balance) } φ }
     ~[findOnSave]~> dl![m]{
         { pv := 10 ‖ acc := alice.account ‖ storage := save(storage, alice.account.balance, 10) ‖ acc2 := alice.account ‖
             x := 10 } φ } := by
@@ -219,10 +219,10 @@ namespace RootRead
 /-- `uint v = total;` from a storage where `total` is 10: the paper's one `⇝*` (the declaration dropped, the
 root read with `select`), the merge, and the read of the write resolved (`findOnSave`). -/
 theorem chain :
-    dl![m]{ { storage := store(storage, total, 10) } ⟨[ uint v = total; ]⟩ φ }
-    ~*> dl![m]{ { storage := store(storage, total, 10) } { v := select(storage, total) } φ }
-    ~[sequentialToParallel]~> dl![m]{ { storage := store(storage, total, 10) ‖ v := select(store(storage, total, 10), total) } φ }
-    ~[findOnSave]~> dl![m]{ { storage := store(storage, total, 10) ‖ v := 10 } φ } := by
+    dl![m]{ { storage := save(storage, total, 10) } ⟨[ uint v = total; ]⟩ φ }
+    ~*> dl![m]{ { storage := save(storage, total, 10) } { v := find(storage, total) } φ }
+    ~[sequentialToParallel]~> dl![m]{ { storage := save(storage, total, 10) ‖ v := find(save(storage, total, 10), total) } φ }
+    ~[findOnSave]~> dl![m]{ { storage := save(storage, total, 10) ‖ v := 10 } φ } := by
   sol_chain
 #last_line chain
 end RootRead
@@ -235,8 +235,8 @@ namespace RootWrite
 `memoryToStorageStoreRoot`); a `uint` root fires the same `storageRootWriteStore`. -/
 theorem store :
     dl![m]{ { pVal := 7 } ⟨[ total = pVal; ]⟩ φ }
-    ~*> dl![m]{ { pVal := 7 } { storage := store(storage, total, pVal) } φ }
-    ~[sequentialToParallel]~> dl![m]{ { pVal := 7 ‖ storage := store(storage, total, 7) } φ } := by
+    ~*> dl![m]{ { pVal := 7 } { storage := save(storage, total, pVal) } φ }
+    ~[sequentialToParallel]~> dl![m]{ { pVal := 7 ‖ storage := save(storage, total, 7) } φ } := by
   sol_chain
 
 /-- `alice = bob;` from a storage where `bob.age` is 10: a storage path on the right is copied by reading the
@@ -244,9 +244,9 @@ value there (`find(storage, bob)`, as printed).  The merge reads `bob` in the st
 struct read has no literal, and no law reads `bob` through the write below it. -/
 theorem copy :
     dl![m]{ { storage := save(storage, bob.age, 10) } ⟨[ alice = bob; ]⟩ φ }
-    ~*> dl![m]{ { storage := save(storage, bob.age, 10) } { storage := store(storage, alice, find(storage, bob)) } φ }
+    ~*> dl![m]{ { storage := save(storage, bob.age, 10) } { storage := save(storage, alice, find(storage, bob)) } φ }
     ~[sequentialToParallel]~>
-      dl![m]{ { storage := store(save(storage, bob.age, 10), alice, find(save(storage, bob.age, 10), bob)) } φ } := by
+      dl![m]{ { storage := save(save(storage, bob.age, 10), alice, find(save(storage, bob.age, 10), bob)) } φ } := by
   sol_chain
 #last_line store
 #last_line copy
@@ -283,9 +283,9 @@ storage; a struct read has no literal. -/
 theorem chain :
     dl![m]{ { storage := save(storage, bob.account.balance, 10) } ⟨[ account = bob.account; ]⟩ φ }
     ~*> dl![m]{ { storage := save(storage, bob.account.balance, 10) }
-        { storage := store(storage, account, find(storage, bob.account)) } φ }
+        { storage := save(storage, account, find(storage, bob.account)) } φ }
     ~[sequentialToParallel]~> dl![m]{
-        { storage := store(save(storage, bob.account.balance, 10), account,
+        { storage := save(save(storage, bob.account.balance, 10), account,
             find(save(storage, bob.account.balance, 10), bob.account)) } φ } := by
   sol_chain
 #last_line chain

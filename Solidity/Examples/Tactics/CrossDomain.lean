@@ -140,7 +140,7 @@ theorem memoryToStorageRootCopy :
   apply update .memoryReferenceDeclFreshAlloc
   apply update .memoryFieldWriteStore
   apply update .memoryToStorageStoreRoot
-  -- { storage := store(storage, alice, copyMem(mtSt, memory, carol)) }
+  -- { storage := save(storage, alice, copyMem(mtSt, memory, carol)) }
   apply unfold .localValueDeclInitDrop
   apply update .storageFieldReadFind
   apply empty

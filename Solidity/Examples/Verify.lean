@@ -62,7 +62,7 @@ info: ✗ incBoth (certified):
   msg.sender = 1, msg.value = 0
   before: count = 0; total = 0
   after: count = 1; total = 1
-  fails: assignable count: dl{ select(old, total) = select(old, total) → select(storage, total) = select(old, total) }
+  fails: assignable count: dl{ find(old, total) = find(old, total) → find(storage, total) = find(old, total) }
 -/
 #guard_msgs in #verify Counter.incBoth
 

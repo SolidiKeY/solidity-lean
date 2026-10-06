@@ -196,7 +196,7 @@ The paper (`Pre-licenciate-paper/sections/*-examples*.tex`) prints a trace
 with two arrows: `⇝` for a rule, `⇝*` for a run of steps it does not dwell
 on — a declaration with the binding it leaves (`uint pv = 10; Account
 storage acc = alice.account;` to `{pv := 10}{acc := alice.account}`), and
-`uint v = total;` to `{v := select(storage, total)}`.  It never prints the
+`uint v = total;` to `{v := find(storage, total)}`.  It never prints the
 `⟨[ ]⟩` line `emptyModality` leaves.  `groupSteps` follows it: `⇝` is
 `~[r]~>`, `⇝*` is `~*>`.  The paper is not uniform (a declaration and its
 binding are sometimes one `⇝`); a run the generator leaves as several links

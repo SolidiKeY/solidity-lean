@@ -1064,7 +1064,7 @@ theorem Premise.measure_lt {m : Modality} {s : Stmt C} {p : Premise C} (h : p.Sm
 /-- Every step decreases the measure, whatever index its fresh names get.
 
 Example: `dl!{ [ total = 1; ] total == 1 }` (measure `16`) steps to
-`{ storage := store(storage, total, 1) } [ ] select(storage, total) = 1`
+`{ storage := save(storage, total, 1) } [ ] find(storage, total) = 1`
 (measure `1`). -/
 theorem Fml.stepAt_decreases {k : Nat} :
     ∀ {φ ψ : Fml C}, φ.stepAt k = some ψ → ψ.measure < φ.measure

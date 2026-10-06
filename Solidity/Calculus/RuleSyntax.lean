@@ -2504,7 +2504,13 @@ partial def ppSTerm (e : Lean.Expr) : MetaM (TSyntax `dl_term) := do
 partial def ppSVal (e : Lean.Expr) : MetaM (TSyntax `dl_term) := do
   if let some x ← tmVar? e then return x
   match_expr (← whnfPP e) with
-  | SValT.val _ t => ppTerm t
+  | SValT.val _ t =>
+    -- `find` here reads back as the copy below, so a value read prints as `select`
+    if (← loweredExpr? t).isNone && (← tmVar? t).isNone then
+      match_expr (← whnfPP t) with
+      | Term.find _ s p => return ← `(dl_term| select($(← ppSTerm s), $(← ppPTerm p)))
+      | _ => pure ()
+    ppTerm t
   | SValT.find _ s p => `(dl_term| find($(← ppSTerm s), $(← ppPTerm p)))
   | SValT.copyMem _ m i => `(dl_term| copyMem(mtSt, $(← ppMTerm m), $(← ppITerm i)))
   | SValT.newArr _ R n =>

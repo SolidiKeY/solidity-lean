@@ -453,24 +453,24 @@ example : dl!{ ⟨ carolValues[i] = makeValue(); ⟩ true where uint[] memory ca
 /-- `carolValues[i] = makeValue();` with `i` 2, from a storage where `total` is 7: the call's body inlined
 (`functionBodyExpand`), its result written.  The captures and the value written resolve to 7. -/
 theorem memoryIndexWriteUnfoldSource :
-    dl![m]{ { i := 2 ‖ storage := store(storage, total, 7) } ⟨[ carolValues[i] = makeValue(); ]⟩ φ
+    dl![m]{ { i := 2 ‖ storage := save(storage, total, 7) } ⟨[ carolValues[i] = makeValue(); ]⟩ φ
         where uint[] memory carolValues }
-    ~[valueDeclSkip]~> dl![m]{ { i := 2 ‖ storage := store(storage, total, 7) } { se1 := 0 }
+    ~[valueDeclSkip]~> dl![m]{ { i := 2 ‖ storage := save(storage, total, 7) } { se1 := 0 }
         ⟨[ se1 = makeValue(); carolValues[i] = se1; ]⟩ φ where uint[] memory carolValues }
-    ~[functionBodyExpand]~> dl![m]{ { i := 2 ‖ storage := store(storage, total, 7) } { se1 := 0 }
+    ~[functionBodyExpand]~> dl![m]{ { i := 2 ‖ storage := save(storage, total, 7) } { se1 := 0 }
         ⟨[ uint se2; se2 = total; se1 = se2; carolValues[i] = se1; ]⟩ φ where uint[] memory carolValues }
-    ~*> dl![m]{ { i := 2 ‖ storage := store(storage, total, 7) } { se1 := 0 } { se2 := 0 }
-        { se2 := select(storage, total) } { se1 := se2 } ⟨[ carolValues[i] = se1; ]⟩ φ
+    ~*> dl![m]{ { i := 2 ‖ storage := save(storage, total, 7) } { se1 := 0 } { se2 := 0 }
+        { se2 := find(storage, total) } { se1 := se2 } ⟨[ carolValues[i] = se1; ]⟩ φ
         where uint[] memory carolValues }
-    ~*> dl![m]{ { i := 2 ‖ storage := store(storage, total, 7) } { se1 := 0 } { se2 := 0 }
-        { se2 := select(storage, total) } { se1 := se2 } { memory := write(memory, carolValues[i], se1) } φ }
+    ~*> dl![m]{ { i := 2 ‖ storage := save(storage, total, 7) } { se1 := 0 } { se2 := 0 }
+        { se2 := find(storage, total) } { se1 := se2 } { memory := write(memory, carolValues[i], se1) } φ }
     ~[sequentialToParallel]~> dl![m]{
-        { i := 2 ‖ storage := store(storage, total, 7) ‖ se1 := 0 ‖ se2 := 0 ‖
-            se2 := select(store(storage, total, 7), total) ‖ se1 := select(store(storage, total, 7), total) ‖
-            memory := write(memory, carolValues[2], select(store(storage, total, 7), total)) }
+        { i := 2 ‖ storage := save(storage, total, 7) ‖ se1 := 0 ‖ se2 := 0 ‖
+            se2 := find(save(storage, total, 7), total) ‖ se1 := find(save(storage, total, 7), total) ‖
+            memory := write(memory, carolValues[2], find(save(storage, total, 7), total)) }
           φ }
     ~[findOnSave]~> dl![m]{
-        { i := 2 ‖ storage := store(storage, total, 7) ‖ se1 := 0 ‖ se2 := 0 ‖ se2 := 7 ‖ se1 := 7 ‖
+        { i := 2 ‖ storage := save(storage, total, 7) ‖ se1 := 0 ‖ se2 := 0 ‖ se2 := 7 ‖ se1 := 7 ‖
             memory := write(memory, carolValues[2], 7) }
           φ } := by
   sol_chain

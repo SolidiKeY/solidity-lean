@@ -389,7 +389,7 @@ theorem chain :
                       ledger.balances[1]@save(storage, ledger.nonce, 5), 10),
                     ledger)) ‖
             nonce :=
-              select(select(delAt(save(save(storage, ledger.nonce, 5), ledger.balances[1]@save(storage, ledger.nonce, 5), 10),
+              find(select(delAt(save(save(storage, ledger.nonce, 5), ledger.balances[1]@save(storage, ledger.nonce, 5), 10),
                     ledger),
                   ledger),
                 nonce) ‖

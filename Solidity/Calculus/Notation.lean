@@ -57,8 +57,8 @@ What a name is:
   and lowered with `Val.lower`;
 * in a term (either side of `=`, an update) the position decides the sort,
   since terms are untyped: a state variable is a root, anything else a
-  program variable (`pv`); a bare state variable in a value position is
-  `select(storage, r)`, a bare path `find(storage, p)`;
+  program variable (`pv`); a bare state variable or path in a value position
+  is `find(storage, p)`;
 * a name no program in the formula declares is a **parameter**, in scope
   everywhere: a `uint` local (mini-solkey's reading of a free name), or an
   alias when a program binds it to a storage path (`p = alice;`, which is
@@ -1336,7 +1336,7 @@ example : Fml StandardExample :=
 example : (dl!{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
     ⟨ alice = carol; ⟩ true }).step =
     some dl!{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
-      { storage := store(storage, alice, copyMem(mtSt, memory, carol)) } ⟨⟩ true } := rfl
+      { storage := save(storage, alice, copyMem(mtSt, memory, carol)) } ⟨⟩ true } := rfl
 
 /-- A name the program declares is left to its declaration. -/
 example : Fml StandardExample :=

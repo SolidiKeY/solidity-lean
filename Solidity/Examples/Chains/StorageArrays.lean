@@ -47,20 +47,20 @@ local instance : FreshNames := .ofTable names
 inlined and run (its local `se2` is the printed `makeValue()`), then the value pushed, the paper's one `⇝*`;
 the merge, and the read of `seed` resolved (`findOnSave`).  The length is `values.length`. -/
 theorem chain :
-    dl![m]{ { storage := store(storage, seed, 7) } ⟨[ values.push(makeValue()); ]⟩ φ }
+    dl![m]{ { storage := save(storage, seed, 7) } ⟨[ values.push(makeValue()); ]⟩ φ }
     ~*> dl![m]{
-        { storage := store(storage, seed, 7) }
-          { pv := 0 } { se2 := 0 } { se2 := select(storage, seed) } { pv := se2 }
+        { storage := save(storage, seed, 7) }
+          { pv := 0 } { se2 := 0 } { se2 := find(storage, seed) } { pv := se2 }
           { storage := save(save(storage, values[values.length], pv), values.length, values.length + 1) } φ }
     ~[sequentialToParallel]~> dl![m]{
-        { pv := 0 ‖ se2 := 0 ‖ se2 := select(store(storage, seed, 7), seed) ‖ pv := select(store(storage, seed, 7), seed) ‖
+        { pv := 0 ‖ se2 := 0 ‖ se2 := find(save(storage, seed, 7), seed) ‖ pv := find(save(storage, seed, 7), seed) ‖
             storage :=
-              save(save(store(storage, seed, 7), values[values.length], select(store(storage, seed, 7), seed)), values.length,
+              save(save(save(storage, seed, 7), values[values.length], select(save(storage, seed, 7), seed)), values.length,
                 values.length + 1) }
           φ }
     ~[findOnSave]~> dl![m]{
         { pv := 0 ‖ se2 := 0 ‖ se2 := 7 ‖ pv := 7 ‖
-            storage := save(save(store(storage, seed, 7), values[values.length], 7), values.length, values.length + 1) }
+            storage := save(save(save(storage, seed, 7), values[values.length], 7), values.length, values.length + 1) }
           φ } := by
   sol_chain
 #last_line chain
@@ -154,20 +154,20 @@ local instance : FreshNames := .ofTable [("pv", "se1")]
 (the paper's `⇝`, the elaborator's), then as for `values.push(makeValue())`, whose chain this is: the program
 is the same once elaborated.  The element is written before the length. -/
 theorem lvalue :
-    dl![m]{ { storage := store(storage, seed, 7) } ⟨[ values.push() = makeValue(); ]⟩ φ }
+    dl![m]{ { storage := save(storage, seed, 7) } ⟨[ values.push() = makeValue(); ]⟩ φ }
     ~*> dl![m]{
-        { storage := store(storage, seed, 7) }
-          { pv := 0 } { se2 := 0 } { se2 := select(storage, seed) } { pv := se2 }
+        { storage := save(storage, seed, 7) }
+          { pv := 0 } { se2 := 0 } { se2 := find(storage, seed) } { pv := se2 }
           { storage := save(save(storage, values[values.length], pv), values.length, values.length + 1) } φ }
     ~[sequentialToParallel]~> dl![m]{
-        { pv := 0 ‖ se2 := 0 ‖ se2 := select(store(storage, seed, 7), seed) ‖ pv := select(store(storage, seed, 7), seed) ‖
+        { pv := 0 ‖ se2 := 0 ‖ se2 := find(save(storage, seed, 7), seed) ‖ pv := find(save(storage, seed, 7), seed) ‖
             storage :=
-              save(save(store(storage, seed, 7), values[values.length], select(store(storage, seed, 7), seed)), values.length,
+              save(save(save(storage, seed, 7), values[values.length], select(save(storage, seed, 7), seed)), values.length,
                 values.length + 1) }
           φ }
     ~[findOnSave]~> dl![m]{
         { pv := 0 ‖ se2 := 0 ‖ se2 := 7 ‖ pv := 7 ‖
-            storage := save(save(store(storage, seed, 7), values[values.length], 7), values.length, values.length + 1) }
+            storage := save(save(save(storage, seed, 7), values[values.length], 7), values.length, values.length + 1) }
           φ } :=
   PushCall.chain m φ
 #last_line lvalue
