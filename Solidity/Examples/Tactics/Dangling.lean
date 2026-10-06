@@ -97,11 +97,14 @@ example : ⊢ .imp wtStd dl!{ [
 
 /-! ## Rounds of `pop`, write, `push()`
 
-Each round adds a stale write and a pop below the slot reader, so the
-reduction grows with the rounds.  Two rounds close; four (twelve
-statements) make a leaf within `closeSize` whose reduction is past
-`elimSize`, refused in milliseconds (`Derive.leafFits`), as `pushes22`
-in `Examples/ProofTree.lean`. -/
+Each round adds a stale write and a pop below the slot reader, whose
+guards repeat at every read: the leaf grows quadratically with the rounds
+and the reduction by about 1.6 times a round.  Two rounds close; four
+(twelve statements) make a leaf within `closeSize` whose reduction is past
+`elimSize`, refused in milliseconds (`Derive.leafFits`), as `pushes22` in
+`Examples/ProofTree.lean`.  Six are the most whose leaf is within
+`closeSize` (1799 nodes, reduction 44719), so the largest reduction
+`leafFits` builds before refusing; seven are refused by the leaf's size. -/
 
 /-- Two rounds through one alias. -/
 def rounds2 : Fml StandardExample := .imp wtStd dl!{ [
@@ -117,8 +120,23 @@ def rounds4 : Fml StandardExample := .imp wtStd dl!{ [
     persons.pop(); r.age = 3; persons.push();
     persons.pop(); r.age = 4; persons.push(); ] persons[0].age == 4 }
 
+/-- Six rounds: the most whose leaf is within `closeSize`. -/
+def rounds6 : Fml StandardExample := .imp wtStd dl!{ [
+    delete persons; persons.push(); Person storage r = persons[0];
+    persons.pop(); r.age = 1; persons.push();
+    persons.pop(); r.age = 2; persons.push();
+    persons.pop(); r.age = 3; persons.push();
+    persons.pop(); r.age = 4; persons.push();
+    persons.pop(); r.age = 5; persons.push();
+    persons.pop(); r.age = 6; persons.push(); ] persons[0].age == 6 }
+
 #guard Derive.proves [] rounds2
 #guard (Derive.residue Derive.budget Derive.synClose Derive.budget [] rounds4).map
+  (fun (ls, _) => ls.map fun (l : List (Hyp StandardExample) × Fml StandardExample) =>
+    (((Hyp.wrap (Derive.dropWt l.1) l.2).seqUpd.toL Decide.Sym.empty).fits
+      Derive.closeSize).isSome && !Derive.leafFits l.1 l.2) == some [true]
+
+#guard (Derive.residue Derive.budget Derive.synClose Derive.budget [] rounds6).map
   (fun (ls, _) => ls.map fun (l : List (Hyp StandardExample) × Fml StandardExample) =>
     (((Hyp.wrap (Derive.dropWt l.1) l.2).seqUpd.toL Decide.Sym.empty).fits
       Derive.closeSize).isSome && !Derive.leafFits l.1 l.2) == some [true]

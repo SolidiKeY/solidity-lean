@@ -6,7 +6,7 @@ derived with `⊢`, checked by the kernel, at close to KeY's speed. No
 dependencies, no `native_decide`, no new `maxHeartbeats` override, and a `?`
 twin that prints a cheap replay for every searching tactic.
 
-Today 411 of the 418 are derived by `⊢` (`TestSuite/Report.lean`), and the
+Today 415 of the 418 are derived by `⊢` (`TestSuite/Report.lean`), and the
 corpus rows (`Corpus/TestSuite.lean`) are corollaries of those theorems.
 
 ## Decisions (2026-10-05)
@@ -105,6 +105,9 @@ What they say:
   memory and storage: 391 derived.  Being reworked into solkey's
   `memoryRules.key`/`structMemoryRules.key` taclets (M6b, below): with the
   copies between memory and storage, 411 derived.
+- **Dangling aliases.** Writes and pushes through an alias bound through
+  an index, made live again by a `push()`, a `delete` or a copy.  Done
+  (below): 415 derived; `testArrayCopyClearsOldElements` stays pending.
 - **M7.** The remaining functions; a `derived` status in the corpus table;
   retire `corpus_decide`, the `#eval` rows and the 8M override.  Done
   (below), but for the remaining functions: the table reads the `Report.lean`
@@ -1066,8 +1069,9 @@ level, of the word `w` (`op = none`) or of `op` on the node there.  Every
 reader keeps it whole for now (`okE` gives `sok`, `readU`/`hasU`/`lenU`/
 `mapU` the read itself, `slotU` and `cpokU` their catch-alls), which is
 exact, so nothing changes until the translation produces it.  `Derived7`,
-`8`, `9` and `12` re-check clean; `Derived9` in under 30 s of wall time,
-the import rebuild and the tool's round trip included (16 s before).
+`8`, `9` and `12` re-check clean.  (A wall time taken here, under 30 s
+with the import rebuild and the tool's round trip, is not comparable with
+M6's 16 s; the like-for-like timing is in the review below.)
 
 ### Step 3: the translation
 
@@ -1185,9 +1189,7 @@ outer array and reads the recycled inner array's length and element.
 (`TestSuite/Derived13.lean`): three leaves, reductions 6807, 6805 and 3924
 (1629, 1627 and 922 with the push kept whole), the search 2.8 s, the kernel
 check 2.6 s.  `Derived1` to `Derived12`, `Examples/ProofTree` and
-`Examples/Tactics/Decide` re-check clean; `Report.lean`'s pin (415 derived,
-2 pending) is computed, not yet checked: checking it builds every
-`Derived` module.
+`Examples/Tactics/Decide` re-check clean.
 
 **Where the lane ends** (415 derived): four of the five are derived.
 `testArrayCopyClearsOldElements` stays pending: its reduction is 8791, past
@@ -1224,14 +1226,72 @@ guards repeat at every read: two rounds close (16 ms); three are past
 `elimSize` (8585); four, twelve
 statements after the binding, give a leaf of 935 nodes within `closeSize`
 whose reduction is 15931, refused by `Derive.leafFits` in 25 ms, as
-`pushes22` in `Examples/ProofTree.lean`.
+`pushes22` in `Examples/ProofTree.lean`; six are the most within
+`closeSize` (the review below).
 
 The rule map (`docs/lean-key-rule-map.md`, after the `slotU` row) has a row
 per taclet the lane transcribes, with the Lean clause, its soundness
 lemmas (`Calculus/SlotLemmas.lean`'s among them) and the Theory lemma; the
 guards KeY does not have (`staleOk`, `LStor.dangles`, `Facts.nfH`) are
-marked Lean only.  `Report.lean`'s pin (415 derived, 2 pending) is computed,
-not checked by Lean here: checking it builds every `Derived` module.
+marked Lean only.
+
+### Dangling aliases review
+
+A finder and a skeptic per area; what they confirmed is fixed.
+
+- **Rule map.** The `delete`-past-the-end row cites the Theory's
+  `selectStDelNodeKeep` (`keepsOnDelete` past the length), not the
+  in-bounds `selectStDelNodeIndexStruct` or the empty-slot
+  `selectStDelNodeIndexKeep`.  The copy row names
+  `storageRootWriteCopySource` (T3 copies at a root) beside
+  `storageFieldWriteCopySource`, and is `partly`: KeY's branch 3 is
+  translated only where the new length is the old one.  The recycled-slot
+  row is `partly` (a push apart from the slot keeps the read whole); the
+  slot-facts row names `selectOnDelAtCons` for a `delete` at another root;
+  the `.len` row names `selectOnTypedFixedSize` (as `Facts.tyArr`'s
+  docstring now does).  `Facts.nfH` has its own Lean-only row, ungated:
+  it applies at every leaf, closes more goals and changes no earlier one
+  (no base reduction puts a `kite` on the left of an `orElse`).  The rows
+  and `LStor.dangles` say *stale alias*: the translation keeps any alias
+  through an index bound before the storage last changed
+  (`SymB.onWrite`), dangling or still live.
+- **Compiled cost.** `slotU`/`slotUF`'s copy arm tests `s.dangles` before
+  eliminating and comparing the copy's path; `lenUF`'s `.arr` arm builds
+  the slot length only for a `push()` of a reference (`AOp.gateSlot`,
+  `macro_inline`, `arrLength_gateSlot`); `readUF`'s stale arm computes the
+  old location's presence only at `.eq` and the old read only at
+  `.diverge` (`CaseTree.toTermLazyBy`).  Six bare `simpa` are `simp only`
+  or a term.
+- **Growth.** Rounds of `pop`, stale write and `push()` through one alias
+  do not grow linearly: the reduction is 15931, 27273, 44719, 72149 at 4
+  to 7 rounds (about 1.6 times a round), and the leaf 935, 1331, 1799,
+  2339 (quadratic).  Six rounds are the most whose leaf is within
+  `closeSize`; the residue, `leafFits` and a full count of that reduction
+  take 64 ms in compiled code (11 rounds: 294 ms).  Pinned as `rounds6` in
+  `Examples/Tactics/Dangling.lean`.
+- **Earlier modules.** `elim` of every earlier leaf is unchanged (each
+  gated arm gives the base term at `dangles = false`); `Facts.baseOk`
+  (`offDel`) and the `slotIn` clause of `retsW .len` are not gated, and
+  every gated arm now walks `s.dangles`.  Measured against the lane's base
+  (`13ba1a2`, a detached checkout, imports built, the same MCP server,
+  `profiler` on a copy of the module): `Derived5`'s kernel phase ends at
+  5.5 s on the branch, 5.4 s on the base; `Derived9`'s at 8.4 s on the
+  branch, 18–28 s on the base, whose server stalled under other load.
+  Whole-file wall times through the tool swing twice either way with the
+  machine's load (`Derived3` 27 s branch, 63 s base; `Derived6` 19 s
+  branch, 36 s base; `Derived11` 9.8 s and 9.7 s).  No slowdown shows.
+- **Checked.** `Decide.lean`, `Closer.lean`, `Examples/Tactics/Dangling.lean`,
+  `Examples/ProofTree.lean` and `Derived1` to `Derived13` re-check clean; the four `Derived13` theorems use Lean's
+  three axioms only.  `Report.lean`'s pin (415 derived, 2 pending) is not
+  elaborated here: it builds every `Derived` module at once, more RAM
+  than this lane may take while another Lean agent runs.  It is checked
+  after the merge, with the corpus regeneration.
+- **After the merge.** `scripts/solkey-port.mjs`'s `PENDING` lists only
+  `testArrayCopyClearsOldElements`, with the reason restated; running it
+  (`scripts/check-corpus.sh --update`) regenerates
+  `tests/solkey/expected.tsv`, `docs/corpus-parity.md` and
+  `Corpus/TestSuite.lean` (415 derived, 1 pending), and
+  `scripts/check-testsuite.sh` then passes.
 
 ## M6 results (2026-10-05): memory
 
