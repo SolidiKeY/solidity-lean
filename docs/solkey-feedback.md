@@ -211,6 +211,14 @@ None is wrong on the corpus; each matters for a future taclet.
   in solc, but `ParserUtils.tupleAssignment` drops a component that is not a
   call, so `⟨…⟩ true` is provable. Category 4: keep the component (Lean
   evaluates it) or refuse.
+- **Modifiers.** `InternalCall` refuses a callee with modifiers
+  (`ExpandFunctionBody.asFunctionBody`), which leaves the call stuck; Lean
+  inlines the modifiers around the body (`wrapMods`, first listed outermost).
+- **`unfoldArgument` (item 3), partly resolved.** `ExpandFunctionBody` now
+  binds each parameter to its argument as written (`T p = arg;`) and
+  `InternalCall` matches a call in any context, so a non-simple argument is no
+  longer stuck. Lean still captures it first (`functionCallArgCapture`), for
+  its separation condition (decision D3).
 
 ## Resolved (kept for orientation)
 

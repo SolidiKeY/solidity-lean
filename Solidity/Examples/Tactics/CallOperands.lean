@@ -15,7 +15,7 @@ A value holds no call: a call is a statement carrying its callee's body
 (`Stmt.call`), so the first step, the call captured into `pv`, is the
 elaborator's (`hoist`), in solc's order.  The two lines are one formula, equal
 by `rfl`, with the fresh `se1` for `pv`; from there the rules inline the body
-(`functionBodyExpand`) and run it.
+(`internalCallExpand`) and run it.
 
 A push used as a target, `values.push() = e;`, is the push `values.push(e);`,
 as the front end normalises it, on a receiver that is a name or a member chain
@@ -224,7 +224,7 @@ callee's return variable, fresh, is declared at the head of its body (a
 fresh default object, as solc allocates one on entry), and the statement
 after the call binds the caller's local to its identity.  The two print, and
 read back, as the one statement `Person memory p = choosePersonMem();`.  No
-statement, rule or semantics is added: `functionBodyExpand` inlines the
+statement, rule or semantics is added: `internalCallExpand` inlines the
 body, and the rest are the memory rules.
 
 `makeAccount` writes its named return variable; `choosePersonMem` returns a
@@ -252,9 +252,9 @@ example : Prog.toStr (sol[MemCalls]{ Person memory p; p = choosePersonMem(); } :
 #eval IO.println (Prog.toStr (Prog.inlined (sol[MemCalls]{ Person memory p = choosePersonMem(); } :
     Prog MemCalls)))
 
-/-- The call's first step, `functionBodyExpand`. -/
+/-- The call's first step, `internalCallExpand`. -/
 example : dl[MemCalls]{ ⟨ Person memory p = choosePersonMem(); ⟩ true }
-    ~[functionBodyExpand]~>
+    ~[internalCallExpand]~>
       dl[MemCalls]{ ⟨ Person memory mv1; mv1 = alice; Person memory p = mv1; ⟩ true } :=
   rfl
 

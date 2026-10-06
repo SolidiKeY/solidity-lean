@@ -127,9 +127,10 @@ theorem CallRet.result_inSolkey (m : Modality) (ret : CallRet) :
 
 set_option maxHeartbeats 4000000 in
 /-- **Solkey's rules keep the fragment**: the premise of a statement in it
-is in it.  Only three rules put a call or a branch in their premise: the two
-that run an `if` hand on its branches, and `functionBodyExpand` inlines a body
-that is in the fragment with its simple arguments. -/
+is in it.  Only four rules put a call or a branch in their premise: the two
+that run an `if` hand on its branches, and `functionBodyExpand` and
+`internalCallExpand` inline a body that is in the fragment with its simple
+arguments. -/
 theorem Taclet.premise_inSolkey {s : Stmt C} {p : Premise C} (d : Taclet C k m s p)
     (h : s.inSolkey m = true) : p.inSolkey m = true := by
   cases d <;> (try cases ‹Hole _ _›) <;> (try cases ‹MHole _ _›) <;> (try cases ‹VHole _ _›) <;>
@@ -263,8 +264,8 @@ have no rule for the call and may not leave for the logic while a modality
 is left (`close`). -/
 
 set_option maxHeartbeats 4000000 in
-/-- The one taclet of solkey's that fires on a call, `functionBodyExpand`,
-asks every argument to be simple. -/
+/-- The taclets of solkey's that fire on a call, `functionBodyExpand` and
+`internalCallExpand`, ask every argument to be simple. -/
 theorem Taclet.call_simple {s : Stmt C} {p : Premise C} (d : Taclet C k m s p) :
     ∀ {f args hsep ret body}, s = .call f args hsep ret body → Arg.firstNonSimple args = none := by
   cases d <;> (try cases ‹Hole _ _›) <;> (try cases ‹MHole _ _›) <;> (try cases ‹VHole _ _›) <;>
@@ -312,7 +313,7 @@ theorem captureCall_derived : ⊢ (captureCall : Fml C) := by
   apply unfoldLean .functionCallArgCapture   -- uint se = x + 1; f(se);
   apply unfold .localValueDeclInitDrop
   apply update .binopAssignment
-  apply unfold .functionBodyExpand          -- uint a = se;
+  apply unfold .internalCallExpand          -- uint a = se;
   apply unfold .localValueDeclInitDrop
   apply update .localValueAssign
   apply empty

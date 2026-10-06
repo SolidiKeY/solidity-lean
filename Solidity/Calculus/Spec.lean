@@ -14,8 +14,18 @@ The obligation of a function `f(x₁, …, xₙ)` is solkey's, a box:
 
 ```
 R ∧ L ∧ M ∧ I ∧ requires →
-  {old := storage ‖ oldNet := net ‖ B} [ T result = f(x₁, …, xₙ); ] (I ∧ ensures ∧ A)
+  {old := storage ‖ oldNet := net ‖ B} [ T result; result = f(x₁, …, xₙ); ] (I ∧ ensures ∧ A)
 ```
+
+The call is solkey's synthesized `result = f(x₁, …, xₙ)@C;`, a
+`FunctionBodyStatement` with its target: it returns to `result`
+(`CallRet.rets`), so `functionBodyExpand` inlines it, where a call in a body
+is `internalCallExpand`'s.  A function of several returns returns to
+`result_lo`, `result_hi`, … (`SpecCompiler.resultVariable`), and an `ensures`
+names a return by its name: `lo` is `result_lo` (`result` for the one return
+of a function of one), after the locals and before the state variables, as
+`SpecCompiler.visitIdent` resolves it.  `\result` needs a function of one
+return.
 
 where `B` books `msg.value`, KeY's
 `net := store(net, at(msg.sender), net(msg.sender) + msg.value) ‖ selfBalance := selfBalance + msg.value`.
@@ -61,6 +71,9 @@ structure SpecCtx (C : Contract) where
   /-- The ledger `net(a)` reads: the current one, or the snapshot bound at
   the variable (`oldNet` under `\old`). -/
   ledger : Option Var := none
+  /-- The function's returns an `ensures` names: each name, the local the
+  obligation returns it to, and its type. -/
+  rets : List (String × String × PrimTy) := []
 
 /-- The storage variable `\old` reads, solkey's `old`. -/
 def oldVar : Var := .ofName "old"
@@ -182,7 +195,7 @@ partial def SpecExpr.term (ctx : SpecCtx C) : SpecExpr → Except String (PrimTy
   | .bool b => pure (.bool, .lit (.bool b))
   | .result => do
     unless ctx.ensures do throw "\\result is only allowed in ensures"
-    let some p := ctx.result | throw "\\result needs a function that returns a value"
+    let some p := ctx.result | throw "\\result needs a function that returns one value"
     pure (p, .pv resultVar)
   | .old e => do
     unless ctx.ensures do throw "\\old is only allowed in ensures, and not nested"
@@ -196,7 +209,10 @@ partial def SpecExpr.term (ctx : SpecCtx C) : SpecExpr → Except String (PrimTy
   | .name x =>
     match lookupBy x ctx.locals with
     | some p => pure (p, .pv (.ofName x))
-    | none => SpecExpr.read ctx (.name x)
+    | none =>
+      match ctx.ensures, ctx.rets.find? (·.1 == x) with
+      | true, some (_, v, p) => pure (p, .pv (.ofName v))
+      | _, _ => SpecExpr.read ctx (.name x)
   | .field (.name b) m => do
     if (lookupBy b ctx.locals).isNone && (C.rootType b).isNone then
       if let some k := EnvKey.ofParts b m then return (.uint, .env k)
@@ -387,7 +403,7 @@ the premises every run meets by construction (`R`, `L` and what `msg.value`
 is, `M`), the premises the specification states (`I ∧ requires`), the
 update `{old := storage ‖ oldNet := net ‖ B}` (`B` the booking of
 `msg.value`), the call
-`T result = f(x₁, …, xₙ);`, and what is owed after it, `I`, `ensures` and
+`T result; result = f(x₁, …, xₙ);`, and what is owed after it, `I`, `ensures` and
 `A` one by one (a counterexample search names the one that fails). -/
 def specPieces (f : String) :
     Except String (List (Fml C) × List (Fml C) × Upd C × Prog C × List (Fml C)) := do
@@ -397,17 +413,20 @@ def specPieces (f : String) :
     | .prim p => pure (n, p)
     | _ => throw s!"{f}: the parameter {n} has a reference type"
   for (n, _) in ps do
-    if n == "old" || n == "oldNet" || n == "result" then
+    if n == "old" || n == "oldNet" || n == "result" || n.startsWith "result_" then
       throw s!"{f}: a parameter named {n}, which the obligation names"
     -- `k1`, `k2`, …: the keys the layout and the frame quantify over
     if n.startsWith "k" && n.length > 1 && (n.drop 1).all Char.isDigit then
       throw s!"{f}: a parameter named {n}, which the obligation's quantifiers name"
-  let res ← match d.ret with
-    | none => pure none
-    | some (_, .prim p) => pure (some p)
-    | some (_, T) => throw (refReturnMsg f T)
+  -- the returns, each to `result` (one) or `result_<name>` (several)
+  let rets ← d.rets.mapM fun (n, T) => match T with
+    | .prim p => pure (n, if d.rets.length == 1 then "result" else s!"result_{n}", p)
+    | T => throw (refReturnMsg f T)
+  let res := match rets with
+    | [(_, _, p)] => some p
+    | _ => none
   let pre : SpecCtx C := { storage := .storage, ensures := false, locals := ps, result := none }
-  let post : SpecCtx C := { pre with ensures := true, result := res }
+  let post : SpecCtx C := { pre with ensures := true, result := res, rets := rets }
   let inv ← C.inv.mapM (SpecExpr.fml C { pre with locals := [] })
   let reqs ← d.spec.requires.mapM (SpecExpr.fml C pre)
   let enss ← d.spec.ensures.mapM (SpecExpr.fml C post)
@@ -416,10 +435,12 @@ def specPieces (f : String) :
       assignableFml C { post with storage := .pv oldVar, ledger := some oldNetVar, result := none } locs
     | none => pure []
   let args := ps.map fun (n, _) => RawExpr.name n
-  let call : RawStmt := match res with
-    | some p => .decl (.named (primName p)) "result" (some (.call f args))
-    | none => .call (.name f) args
-  let P ← ((elabStmts C [call]).run C.funs).run' (ps.map fun (n, p) => (n, LocalTy.val p), 1)
+  -- `T result; result = f(x̄)@C;`: the call returns to its targets
+  let call : List RawStmt :=
+    if rets.isEmpty then [.call (.name f) args]
+    else rets.map (fun (_, v, p) => RawStmt.decl (.named (primName p)) v none) ++
+      [.tupleAssign (rets.map fun (_, v, _) => some (.name v)) (.call f args)]
+  let P ← ((elabStmts C call).run C.funs).run' (ps.map fun (n, p) => (n, LocalTy.val p), 1)
   -- the snapshots `\old` reads, taken where something reads them
   let snap : Upd C :=
     (if d.spec.ensures.any SpecExpr.usesOld || d.spec.assignable.isSome then [.store oldVar .storage]

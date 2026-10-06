@@ -355,6 +355,9 @@ def tacletOrigins : List (Lean.Name × KeyOrigin) := [
   (``Taclet.revertDiamond, .taclet .revertDiamond),
   -- Calls
   (``Taclet.functionBodyExpand, .taclet .functionBodyExpand),
+  -- solkey `100f7f24c3` inlines every call by `functionBodyExpand`;
+  -- `671f6762a9` splits off `internalCallExpand`, the call without targets
+  (``Taclet.internalCallExpand, .taclet .functionBodyExpand),
   (``Taclet.tryCallNoCallbackBox, .taclet .tryCallNoCallbackBox) ]
 
 #check_constructor_table Taclet, tacletOrigins.map Prod.fst

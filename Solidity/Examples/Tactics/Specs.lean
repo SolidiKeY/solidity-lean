@@ -113,4 +113,42 @@ storage untouched. -/
 theorem tally_pay : ⊨ spec!{ pay } := by sol_spec
 end
 
+/-! ## Returns by name
+
+The obligation's call returns to its targets, `T result; result = f(x̄);`
+(solkey's `result = f(x̄)@C;`, `functionBodyExpand`'s), and an `ensures` may
+name a return: the one return of `inc` is `result`, the two of `order` are
+`result_lo` and `result_hi` (`SpecCompiler.resultVariable`). -/
+
+def Ordered : Contract := contract!{
+  uint total;
+  ensures r == x + 1;
+  function inc(uint x) returns (uint r) {
+    r = x + 1;
+  }
+  ensures lo <= hi;
+  function order(uint x, uint y) returns (uint lo, uint hi) {
+    if (x < y) { return (x, y); }
+    return (y, x);
+  }
+}
+
+section
+local instance : InContract := ⟨Ordered⟩
+
+/--
+info: dl{
+  ((0 <= x ∧ x <= 115792089237316195423570985008687907853269984665640564039457584007913129639935) ∧
+        (0 <= y ∧ y <= 115792089237316195423570985008687907853269984665640564039457584007913129639935) ∧
+          msg.value = 0) →
+    [ uint result_lo; uint result_hi; (result_lo, result_hi) = order(x, y); ] result_lo <= result_hi } : Fml Ordered
+-/
+#guard_msgs in #check spec!{ order }
+
+/-- `inc(x)`: its named return `r` is `result`. -/
+theorem ordered_inc : ⊨ spec!{ inc } := by sol_spec
+/-- `order(x, y)`: `lo <= hi` of the two returns. -/
+theorem ordered_order : ⊨ spec!{ order } := by sol_spec
+end
+
 end Solidity.Examples.Tactics.Specs

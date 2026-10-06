@@ -66,7 +66,8 @@ hypothesis):
 | `loc`, `nlhs` | a member or entry a copy lands in | `Loc C T` | `loc`: a target, not a state variable |
 | `l` | the target of `⊕=` and `++` | `OpLoc C p` | |
 | `s`; `P`, `Q`, `ω` | a statement; a program, spliced in place (`P; ..ω` is `P ++ ω`) | `Stmt C`; `Prog C` | |
-| `fbs` | a call with its body (KeY's `FunctionBody`), `expand_function_body(fbs)` its statements | `Stmt.call f args hsep ret body` | its arguments simple |
+| `fbs` | a call with its body and its targets (KeY's `FunctionBody`), `expand_function_body(fbs)` its statements | `Stmt.call f args hsep ret body` | its arguments simple; it returns to targets (`CallRet.isRets`) |
+| `ic` | any other call with its body (KeY's `InternalCall`), `expand_function_body(ic)` its statements | `Stmt.call f args hsep ret body` | its arguments simple; no targets |
 | `call`, `rets`, `code`; `body`, `errorBody`, `panicBody`, `otherBody` | a `try`'s call, its return locals, its `Panic` code; its blocks | `ExtCall C`, …; `List (Stmt C)` | |
 
 The position says which sort an operand is read at: `sp.fld` is a location
@@ -264,8 +265,9 @@ syntax "∀ " ident ident : dl_hyp
 `Γ ++ [c]`. -/
 syntax ".." term:max : dl_hyp
 
-/-- A statement that is a schema variable: `s`; `fbs`, a call with its body
-(KeY's `FunctionBody`); `P`, `Q`, a program spliced in place. -/
+/-- A statement that is a schema variable: `s`; `fbs`, `ic`, a call with its
+body (KeY's `FunctionBody`, `InternalCall`); `P`, `Q`, a program spliced in
+place. -/
 syntax (priority := low) ident : sol_stmt
 /-- `catch Error errorBody`: the `Error` clause as KeY's schema writes it. -/
 syntax "catch " &"Error" sol_block : sol_catch
@@ -688,8 +690,12 @@ inductive Item where
 /-- A program schema variable, by its stem. -/
 def isProgStem (s : String) : Bool := ["P", "Q", "ω"].contains (stemOf s)
 
-/-- `fbs`, a call with its body (KeY's `FunctionBody`): `Stmt.call f args
-hsep ret body`, its parts the taclet's schema variables. -/
+/-- Whether `s` names a call with its body: `fbs` (KeY's `FunctionBody`) or
+`ic` (`InternalCall`). -/
+def isCallStem (s : String) : Bool := ["fbs", "ic"].contains (stemOf s)
+
+/-- `fbs`, `ic`, a call with its body: `Stmt.call f args hsep ret body`, its
+parts the taclet's schema variables. -/
 def fbsCall : MacroM Lean.Term :=
   `(Stmt.call $(schemaIdent "f") $(schemaIdent "args") $(schemaIdent "hsep") $(schemaIdent "ret")
       $(schemaIdent "body"))
@@ -763,7 +769,7 @@ partial def schemaStmt (fresh : Bool) (Γ : Scope) :
   | stx@`(sol_stmt| $x:ident) => do
     let s := x.getId.toString
     if isProgStem s then Macro.throwErrorAt stx s!"`{s}` is a program, not one statement"
-    if stemOf s == "fbs" then return (← fbsCall, Γ)
+    if isCallStem s then return (← fbsCall, Γ)
     return (x, Γ)
   | `(sol_stmt| $l:sol_expr = $b:sol_expr .push()) => do
     let some (.alias x) := lhsHead Γ l | Macro.throwErrorAt l "`= b.push()` binds a storage alias"
@@ -930,7 +936,8 @@ partial def schemaStmt (fresh : Bool) (Γ : Scope) :
 
 /-- A statement of a program: one statement, or a program in its place — a
 program schema variable (`P`), `expand_function_body(fbs)` (KeY's, the
-statements a call runs: `Stmt.expandBody`). -/
+statements a call runs: `Stmt.expandBody`; `expand_function_body(ic)`
+alike). -/
 partial def schemaItem (fresh : Bool) (Γ : Scope) (s : TSyntax `sol_stmt) :
     MacroM (Item × Scope) := do
   match s with
@@ -939,8 +946,8 @@ partial def schemaItem (fresh : Bool) (Γ : Scope) (s : TSyntax `sol_stmt) :
   | `(sol_stmt| $f:sol_expr ( $a:sol_expr )) =>
     if let `(sol_expr| $g:ident) := f then
       if g.getId.toString == "expand_function_body" then
-        unless stemOfExpr? a == some "fbs" do
-          Macro.throwErrorAt a "`expand_function_body(fbs)`, of the call `fbs`"
+        unless (stemOfExpr? a).any isCallStem do
+          Macro.throwErrorAt a "`expand_function_body(fbs)`, of the call `fbs` (or `ic`)"
         return (.many (← `(Stmt.expandBody $(schemaIdent "args") $(schemaIdent "ret")
           $(schemaIdent "body"))), Γ)
   | _ => pure ()
@@ -1554,9 +1561,13 @@ def sideConds (s : TSyntax `sol_stmt) : MacroM (Array (Ident × Lean.Term)) := d
     return #[(hyp (n ++ "_nt"), ← `($(mkIdent `Solidity.Val.notTernary) $(schemaIdent n) = true))]
   match s with
   | `(sol_stmt| $x:ident) =>
-    -- `fbs`, a call: its arguments simple (`functionCallArgCapture` first)
-    unless stemOf x.getId.toString == "fbs" do return out
+    -- `fbs`, `ic`, a call: its arguments simple (`functionCallArgCapture`
+    -- first), and with targets (`fbs`) or without (`ic`)
+    let n := x.getId.toString
+    unless isCallStem n do return out
+    let b ← if stemOf n == "fbs" then `(true) else `(false)
     return out.push (mkIdent `hexp, ← `($(mkIdent `Solidity.Arg.firstNonSimple) $(schemaIdent "args") = none))
+      |>.push (mkIdent `hrets, ← `($(mkIdent `Solidity.CallRet.isRets) $(schemaIdent "ret") = $b))
   | `(sol_stmt| $l:sol_expr = $r:sol_expr) =>
     match lhsHead [] l with
     | some (.other h) =>
@@ -1941,6 +1952,62 @@ def ppCallParts? (f args : Lean.Expr) :
     | _ => return none
   return some (fe, xs)
 
+/-- A statement after a call of several returns that assigns one of them
+(`lo = se2;`, `total = se3;`): its target and the return variable it reads. -/
+def ppRetTarget? (t : Lean.Expr) : MetaM (Option (TSyntax `sol_expr × Lean.Expr)) := do
+  let local? (v : Lean.Expr) : MetaM (Option Lean.Expr) := do
+    let_expr Val.simple _ _ s := (← whnf v) | return none
+    let_expr Simple.local _ _ r := (← whnf s) | return none
+    return some r
+  match_expr (← whnf (← instantiateMVars t)) with
+  | Stmt.assignLocal _ _ x v =>
+    let some x ← ppVar? x | return none
+    let some r ← local? v | return none
+    return some (← `(sol_expr| $x:ident), r)
+  | Stmt.assign _ _ l src =>
+    let_expr Src.val _ _ v := (← whnf src) | return none
+    let some r ← local? v | return none
+    return some (← ppExpr l, r)
+  | _ => return none
+
+/-- A call that returns to targets (`CallRet.rets`) and the statements after
+it assigning them, as the one statement they are elaborated from:
+`(lo, , sum) = returnStats(3, 1, 2);`, `result = inc(x);`
+(`Stmt.tupleCallStr?`), with the number of statements after the call it
+covers. -/
+def ppTupleCall? (s : Lean.Expr) (rest : List Lean.Expr) :
+    MetaM (Option (TSyntax `sol_stmt × Nat)) := do
+  let_expr Stmt.call _ f args _ ret _ := (← whnf (← instantiateMVars s)) | return none
+  let_expr CallRet.rets rs := (← whnf ret) | return none
+  let some rs ← listElems? rs | return none
+  let mut rvs : Array Lean.Expr := #[]
+  for r in rs do
+    let_expr Prod.mk _ _ _ v := (← whnf r) | return none
+    rvs := rvs.push v
+  let some (fe, xs) ← ppCallParts? f args | return none
+  let mut slots : Array (Option (TSyntax `sol_expr)) := Array.replicate rvs.size none
+  let mut start := 0
+  let mut n := 0
+  for t in rest do
+    let some (tgt, r) ← ppRetTarget? t | break
+    let mut hit : Option Nat := none
+    for i in [start:rvs.size] do
+      if ← isDefEq rvs[i]! r then
+        hit := some i
+        break
+    let some i := hit | break
+    slots := slots.set! i (some tgt)
+    start := i + 1
+    n := n + 1
+  if n == 0 then return none
+  let call ← `(sol_expr| $fe:sol_expr ( $xs,* ))
+  if let #[some y] := slots then
+    return some (← `(sol_stmt| $y:sol_expr = $call:sol_expr), n)
+  let opt (x : Option (TSyntax `sol_expr)) : Syntax := mkNullNode ((x.map fun x => #[x.raw]).getD #[])
+  let groups := (slots.extract 1 slots.size).map fun x => mkNode groupKind #[mkAtom ",", opt x]
+  return some (⟨mkNode ``Solidity.solTupleAssign
+    #[mkAtom "(", opt slots[0]!, mkNullNode groups, mkAtom ")", mkAtom "=", call.raw]⟩, n)
+
 /-- A call of a function returning a memory reference and the statement
 after it binding the callee's return variable (the one its body declares
 first), as the one statement they are elaborated from:
@@ -2073,9 +2140,9 @@ partial def ppStmt (e : Lean.Expr) : MetaM (TSyntax `sol_stmt) := do
   | Stmt.assert _ c => `(sol_stmt| assert($(← ppExpr c)))
   | Stmt.revert _ => `(sol_stmt| revert())
   | Stmt.call _ f args _ ret body =>
-    -- KeY's `fbs`: a call whose parts are all schema variables
+    -- KeY's `fbs` (`ic` under `pp.sol.ic`): a call whose parts are all schema variables
     if (← [f, args, ret, body].allM fun x => return (← fvarName? x).isSome) then
-      return ← `(sol_stmt| fbs)
+      return ← if (← getOptions).getBool `pp.sol.ic then `(sol_stmt| ic) else `(sol_stmt| fbs)
     let some (fe, xs) ← ppCallParts? f args | escape
     let res ← match_expr (← whnf ret) with
       | CallRet.val _ _ res =>
@@ -2147,13 +2214,18 @@ partial def ppExtCall? (c : Lean.Expr) : MetaM (Option (TSyntax `sol_expr)) := d
   return some (← `(sol_expr| $recv:sol_expr . $(nameIdent f):ident ( $es,* )))
 
 partial def ppProg? (e : Lean.Expr) : MetaM (Option (Array (TSyntax `sol_stmt))) := do
-  -- KeY's `expand_function_body(fbs)`, the statements of a call `fbs`
+  -- KeY's `expand_function_body(fbs)`, the statements of a call `fbs` (`ic`)
   if (← instantiateMVars e).isAppOfArity ``Stmt.expandBody 4 then
-    return some #[← `(sol_stmt| expand_function_body(fbs))]
+    return some #[← if (← getOptions).getBool `pp.sol.ic then `(sol_stmt| expand_function_body(ic))
+      else `(sol_stmt| expand_function_body(fbs))]
   let some ss ← listElems? e | return none
   let mut out : Array (TSyntax `sol_stmt) := #[]
   let mut i := 0
   while i < ss.size do
+    if let some (st, n) ← ppTupleCall? ss[i]! (ss.extract (i + 1) ss.size).toList then
+      out := out.push st
+      i := i + 1 + n
+      continue
     if let (some s, some t) := (ss[i]?, ss[i + 1]?) then
       if let some st ← ppMemCall? s t then
         out := out.push st

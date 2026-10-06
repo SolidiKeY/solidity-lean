@@ -163,8 +163,9 @@ sound: Solidity.Taclet.sound_unfold
 #guard_msgs in #taclet "storageFieldWriteCaptureSrc"
 
 /-! A rule solkey does not have, and a solkey taclet no rule claims.  The
-call it fires on has an argument that is not simple, so it is not `fbs`
-(a call whose arguments are all simple, `functionBodyExpand`'s). -/
+call it fires on has an argument that is not simple, so it is neither `fbs`
+nor `ic` (calls whose arguments are all simple, `functionBodyExpand`'s and
+`internalCallExpand`'s). -/
 
 /--
 info: Solidity.LeanTaclet.functionCallArgCapture : ∀ {C : Contract} {k : Nat} {m : Modality} {f : Name} {args : List (Arg C)}

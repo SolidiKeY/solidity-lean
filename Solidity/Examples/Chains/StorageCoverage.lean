@@ -354,12 +354,12 @@ example : dl!{ ⟨ values[i] = makeValue(); ⟩ true }
     = dl!{ ⟨ uint se1; se1 = makeValue(); values[i] = se1; ⟩ true } := rfl
 
 /-- `values[i] = makeValue();` with `i` 2, from a storage where `total` is 7: the call's body inlined
-(`functionBodyExpand`), its result written. -/
+(`internalCallExpand`), its result written. -/
 theorem indexWriteValueRhsCapture :
     dl![m]{ { i := 2 ‖ storage := save(storage, total, 7) } ⟨[ values[i] = makeValue(); ]⟩ φ }
     ~[valueDeclSkip]~> dl![m]{ { i := 2 ‖ storage := save(storage, total, 7) } { se1 := 0 }
         ⟨[ se1 = makeValue(); values[i] = se1; ]⟩ φ }
-    ~[functionBodyExpand]~> dl![m]{ { i := 2 ‖ storage := save(storage, total, 7) } { se1 := 0 }
+    ~[internalCallExpand]~> dl![m]{ { i := 2 ‖ storage := save(storage, total, 7) } { se1 := 0 }
         ⟨[ uint se2; se2 = total; se1 = se2; values[i] = se1; ]⟩ φ }
     ~*> dl![m]{ { i := 2 ‖ storage := save(storage, total, 7) } { se1 := 0 } { se2 := 0 }
         { se2 := find(storage, total) } { se1 := se2 } ⟨[ values[i] = se1; ]⟩ φ }
@@ -386,7 +386,7 @@ theorem storageRootWriteValueRhsCapture :
     dl![m]{ { storage := save(storage, total, 7) } ⟨[ total = makeValue(); ]⟩ φ }
     ~[valueDeclSkip]~> dl![m]{ { storage := save(storage, total, 7) } { se1 := 0 }
         ⟨[ se1 = makeValue(); total = se1; ]⟩ φ }
-    ~[functionBodyExpand]~> dl![m]{ { storage := save(storage, total, 7) } { se1 := 0 }
+    ~[internalCallExpand]~> dl![m]{ { storage := save(storage, total, 7) } { se1 := 0 }
         ⟨[ uint se2; se2 = total; se1 = se2; total = se1; ]⟩ φ }
     ~*> dl![m]{ { storage := save(storage, total, 7) } { se1 := 0 } { se2 := 0 } { se2 := find(storage, total) }
         { se1 := se2 } ⟨[ total = se1; ]⟩ φ }
@@ -591,7 +591,7 @@ theorem storagePushValue_unfold_rightSndArgument :
     dl![m]{ { storage := save(storage, total, 7) } ⟨[ values.push(makeValue()); ]⟩ φ }
     ~[valueDeclSkip]~> dl![m]{ { storage := save(storage, total, 7) } { se1 := 0 }
         ⟨[ se1 = makeValue(); values.push(se1); ]⟩ φ }
-    ~[functionBodyExpand]~> dl![m]{ { storage := save(storage, total, 7) } { se1 := 0 }
+    ~[internalCallExpand]~> dl![m]{ { storage := save(storage, total, 7) } { se1 := 0 }
         ⟨[ uint se2; se2 = total; se1 = se2; values.push(se1); ]⟩ φ }
     ~*> dl![m]{ { storage := save(storage, total, 7) } { se1 := 0 } { se2 := 0 } { se2 := find(storage, total) }
         { se1 := se2 } ⟨[ values.push(se1); ]⟩ φ }
@@ -736,7 +736,7 @@ example : dl!{ ⟨ require(checkBalance()); ⟩ true }
 theorem requireConditionCapture_call :
     dl![.box]{ ⟨[ require(checkBalance()); ]⟩ φ }
     ~[valueDeclSkip]~> dl![.box]{ { se1 := false } ⟨[ se1 = checkBalance(); require(se1); ]⟩ φ }
-    ~[functionBodyExpand]~> dl![.box]{ { se1 := false } ⟨[ bool se2; se2 = true; se1 = se2; require(se1); ]⟩ φ }
+    ~[internalCallExpand]~> dl![.box]{ { se1 := false } ⟨[ bool se2; se2 = true; se1 = se2; require(se1); ]⟩ φ }
     ~*> dl![.box]{ { se1 := false } { se2 := false } { se2 := true } { se1 := se2 } ⟨[ require(se1); ]⟩ φ }
     ~*> dl![.box]{ { se1 := false } { se2 := false } { se2 := true } { se1 := se2 }
         ((se1 ≐ true → φ) ∧ (se1 ≐ false → ⟨[ revert(); ]⟩ φ) ∧ (⟨[ revert(); ]⟩ false ∨ se1 ≐ true ∨ se1 ≐ false)) }
@@ -792,7 +792,7 @@ runs under any `m`. -/
 theorem assertConditionCapture_call :
     dl![m]{ ⟨[ assert(checkInvariant()); ]⟩ φ }
     ~[valueDeclSkip]~> dl![m]{ { se1 := false } ⟨[ se1 = checkInvariant(); assert(se1); ]⟩ φ }
-    ~[functionBodyExpand]~> dl![m]{ { se1 := false } ⟨[ bool se2; se2 = true; se1 = se2; assert(se1); ]⟩ φ }
+    ~[internalCallExpand]~> dl![m]{ { se1 := false } ⟨[ bool se2; se2 = true; se1 = se2; assert(se1); ]⟩ φ }
     ~*> dl![m]{ { se1 := false } { se2 := false } { se2 := true } { se1 := se2 } ⟨[ assert(se1); ]⟩ φ }
     ~*> dl![m]{ { se1 := false } { se2 := false } { se2 := true } { se1 := se2 }
         ((se1 ≐ true → φ) ∧ se1 ≐ true) }

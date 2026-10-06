@@ -294,7 +294,7 @@ theorem CallRet.decls_run :
       Except.pure, CallRet.enterAll]
     exact CallRet.decls_run rs _
 
-/-- **A call runs as its inlining** (`functionBodyExpand`). -/
+/-- **A call runs as its inlining** (`functionBodyExpand`, `internalCallExpand`). -/
 theorem Stmt.run_call_expand (σ : State) {f : Name} {args : List (Arg C)}
     {hsep : Arg.separatedFrom [] args = true} {ret : CallRet} {body : List (Stmt C)} :
     (Stmt.call f args hsep ret body).run σ = Prog.run σ (Stmt.expandBody args ret body) := by
@@ -461,6 +461,7 @@ theorem Taclet.sound_unfold {k : Nat} {m : Modality} {s : Stmt C} {P : Prog C}
   have hmv : Var.fresh "mv" k ∉ s.vars := fun h => hs _ h (by simp [freshVars])
   cases d
   case functionBodyExpand => intro σ; rw [Stmt.run_call_expand σ]; exact SameOk.self _ _
+  case internalCallExpand => intro σ; rw [Stmt.run_call_expand σ]; exact SameOk.self _ _
   all_goals clear hs
   all_goals clear_side
   all_goals intro σ

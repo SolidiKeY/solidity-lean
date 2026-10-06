@@ -251,7 +251,7 @@ A contract also declares its internal functions, in order.  A function may
 call only the functions declared before it: the position is the rank that
 makes the call graph acyclic (as `structRank` does the struct table's), so
 inlining a call, which is what the elaborator does and KeY's
-`functionBodyExpand` does, ends. -/
+`internalCallExpand` and `functionBodyExpand` do, ends. -/
 
 structure Contract where
   vars : List (Name × Ty)
@@ -599,7 +599,12 @@ declares the return variable, and the statement after the call binds it
 with `rets`, KeyTaclets' `FunctionBodyStatement` with targets: each return
 variable is declared at the call, at its type's default (solc's), and the
 targets are ordinary statements after the call (`t = r;`), solkey's
-`R r0; …; function-frame{…} t0 = r0;` without the frame. -/
+`R r0; …; function-frame{…} t0 = r0;` without the frame.  `rets` is the
+call of a tuple assignment (`(lo, hi) = f(a);`) and of a specification's
+obligation (`result = f(x);`), the two KeY reads as a
+`FunctionBodyStatement` (`functionBodyExpand`); every other call is KeY's
+`InternalCall` (`internalCallExpand`), a callee of several returns called as
+a statement declaring them in its body. -/
 inductive CallRet where
   | none
   | val (p : PrimTy) (r : Var) (res : Option Var)
@@ -851,15 +856,17 @@ def Stmt.retTargets (rs : List (PrimTy × Var)) (start : Nat) : List (Stmt C) �
 /-- A call of several returns and the statements after it that assign them,
 written as the tuple assignment they are elaborated from:
 `(lo, , sum) = returnStats(3, 1, 2);`, with the number of statements after
-the call it covers. -/
+the call it covers.  A call of one return with its target (a specification's
+obligation, `Calculus/Spec.lean`) is `result = f(x);`. -/
 def Stmt.tupleCallStr? : Stmt C → List (Stmt C) → Option (String × Nat)
   | .call f args _ (.rets rs) _, P =>
     let ts := Stmt.retTargets rs 0 P
-    if rs.length < 2 || ts.isEmpty then none
+    let call := s!"{f}({", ".intercalate (args.map fun a => a.e.toStr true)});"
+    if ts.isEmpty then none
+    else if rs.length == 1 then some (s!"{((ts.head?).map (·.2)).getD ""} = {call}", ts.length)
     else
       let slots := (List.range rs.length).map fun i => ((ts.find? (·.1 == i)).map (·.2)).getD ""
-      some (s!"({", ".intercalate slots}) = {f}({", ".intercalate (args.map fun a => a.e.toStr true)});",
-        ts.length)
+      some (s!"({", ".intercalate slots}) = {call}", ts.length)
   | _, _ => none
 
 mutual
@@ -3093,11 +3100,15 @@ partial def elabMemCall (f : String) (args : List RawExpr) (R : RefTy) (bind : V
 /-- `elabCall`, and the fresh return variable of a callee that returns a
 memory reference, with its type: the body's first statement declares it (a
 fresh default object) and the call returns nothing (`CallRet.none`), the
-caller binding it after the call (`elabMemCall`).  A callee of several
-returns returns them all (`CallRet.rets`), which the caller reads after the
-call (`elabTuple`): their fresh variables, types and widths. -/
+caller binding it after the call (`elabMemCall`).  With `targets`, the
+call is a tuple assignment's right-hand side (`elabTuple`), KeyTaclets'
+`FunctionBodyStatement` with targets: it returns every return value
+(`CallRet.rets`, one or several), which the caller reads after the call —
+their fresh variables, types and widths.  A callee of several returns called
+as a statement (`f(a);`, KeY's `InternalCall`) declares them at the head of
+its body and returns nothing. -/
 partial def elabCallRet (f : String) (args : List RawExpr) (res : Option (Var × PrimTy))
-    (resW : Nat := 256) :
+    (resW : Nat := 256) (targets : Bool := false) :
     ElabM (Prog C × Option (RefTy × Var) × List (PrimTy × Var × Nat)) := do
   let funs ← read
   let some i := funs.findIdx? (·.1 == f) | throw s!"{f} is not a function declared before this one"
@@ -3139,7 +3150,10 @@ partial def elabCallRet (f : String) (args : List RawExpr) (res : Option (Var ×
       let r ← freshCapture "se"
       ρ := (n, toString r) :: ρ
       Γf := setBy (toString r) (.val p w) Γf
-      pure (CallRet.val p r (res.map (·.1)))
+      if targets then
+        mrets := [(p, r, w)]
+        pure (CallRet.rets [(p, r)])
+      else pure (CallRet.val p r (res.map (·.1)))
     | rs, some _ => throw s!"{f} returns {rs.length} values, which a tuple assignment takes"
     | rs, none => do
       if d.retMem then throw s!"{f}: `memory` on a return of a function of several returns"
@@ -3150,7 +3164,7 @@ partial def elabCallRet (f : String) (args : List RawExpr) (res : Option (Var ×
         ρ := (n, toString r) :: ρ
         Γf := setBy (toString r) (.val p w) Γf
         mrets := mrets ++ [(p, r, w)]
-      pure (CallRet.rets (mrets.map fun (p, r, _) => (p, r)))
+      if targets then pure (CallRet.rets (mrets.map fun (p, r, _) => (p, r))) else pure CallRet.none
   let body ← renameStmts ρ d.body
   let body ← ElabM.lift (lowerReturns (d.rets.map fun (n, _) => (lookupBy n ρ).getD n) body)
   let body ← wrapMods body (d.mods.map fun m => { m with args := m.args.map (·.rename ρ) })
@@ -3164,6 +3178,8 @@ partial def elabCallRet (f : String) (args : List RawExpr) (res : Option (Var ×
       match hd : (Ty.ref R).defaultOkS with
       | true => pure (Stmt.declMem R r none (by simp [hd]) :: P)
       | false => throw s!"{f} returns a {Ty.ref R}, whose default is not well-formed"
+  -- several returns of a call that is a statement: declared on entry, at their defaults
+  let P := if targets then P else mrets.map (fun (p, r, _) => Stmt.declLocal p r none) ++ P
   match hsep : Arg.separatedFrom [] targs with
   | true => pure ([.call f targs hsep ret P], mret, mrets)
   | false => throw s!"{f}: an argument reads a parameter"
@@ -3525,7 +3541,7 @@ partial def elabTuple (ts : List (Option RawExpr)) (rhs : RawExpr) (direct : Boo
     unless (castTy? f).isNone && (← read).any (·.1 == f) do
       throw s!"{f}(…): the right-hand side of a tuple assignment is a call of a function"
     let (P, args) ← hoistArgs args
-    let (Q, _, rs) ← elabCallRet f args none
+    let (Q, _, rs) ← elabCallRet f args none (targets := true)
     unless rs.length == ts.length do throw s!"{f} returns {rs.length} values, not {ts.length}"
     for (p, r, w) in rs do declare C (toString r) (.val p w)
     let R ← elabStmts ((ts.zip rs).filterMap fun (t, (_, r, _)) =>
