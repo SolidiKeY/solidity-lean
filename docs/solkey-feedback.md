@@ -265,6 +265,27 @@ resume, where KeY puts `pv := TRUE` into the anonymising update.
   non-simple argument is no longer stuck. Lean still captures it first (`functionCallArgCapture`), for
   its separation condition (decision D3).
 
+## 9. Loops (`ed7849d5b6`, past the pin)
+
+- **Unwinding without a bound.** `whileUnwind` is sound (the loop and its
+  unwinding run alike: Lean's `Stmt.loop_unwind_run`, from
+  `Loop.run_unfold`), but the strategy applies it to every loop without a
+  specification, so automatic proof search on a loop whose trip count is not
+  a constant does not end. Lean bounds it by the loop's annotation
+  (`/// @custom:key unwind k`, counted down by each unwinding, so the weight
+  of `Calculus/Termination.lean` decreases) and closes the loop at the bound
+  with a check, `loopExit`: "loop exited", the rest with the condition false
+  assumed, and "unwound to the end", the condition false. Its soundness side
+  condition is that the condition *returns* false (`Fml.eqD`, defined and
+  equal), not only that it is not true: a condition that halts makes the
+  loop halt, not exit. Suggested: an `unwind k` clause in `LoopSpecCompiler`
+  and an exit taclet with these two goals, so that a bounded proof attempt
+  ends in an open goal rather than running on.
+- **The exit is not an assertion.** Encoding the bound as `assert(!cond)`
+  changes the program: it panics where the loop runs on, so the result is no
+  longer an unwinding of the loop, and the bound reads as a failure of the
+  contract. The bound belongs to the proof, as a goal.
+
 ## Resolved (kept for orientation)
 
 Each was found by the Lean side and is fixed in solkey; git has the details.

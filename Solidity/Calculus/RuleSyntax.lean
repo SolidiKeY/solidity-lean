@@ -69,6 +69,7 @@ hypothesis):
 | `fbs` | a call with its body and its targets (KeY's `FunctionBody`), `expand_function_body(fbs)` its statements | `Stmt.call f args hsep ret body` | its arguments simple; it returns to targets (`CallRet.isRets`) |
 | `ic` | any other call with its body (KeY's `InternalCall`), `expand_function_body(ic)` its statements | `Stmt.call f args hsep ret body` | its arguments simple; not `CallRet.isRets` (a result, if any, assigned inside the expansion: `y = f(a);`) |
 | `call`, `rets`, `code`; `body`, `errorBody`, `panicBody`, `otherBody` | a `try`'s call, its return locals, its `Panic` code; its blocks | `ExtCall C`, …; `List (Stmt C)` | |
+| `cond`; `body`; `n` | a loop's condition (KeY's `s#cond`); its body, a block, or spliced in place inside one (`{ body; … }`); the bound of `/// @custom:key unwind n` | `Val C .bool`; `Prog C`; `Nat` | |
 
 The position says which sort an operand is read at: `sp.fld` is a location
 left of `=`, a value right of it, a path under `delete`.  A copy is a write
@@ -419,7 +420,7 @@ def headOf (Γ : Scope) (x : Ident) : Head :=
     | "mv" | "pmv" | "rmv" => .mem x
     | "gsp" => .root x (proofIdent x s)
     | "se" | "ie" | "sadr" => .simple x
-    | "e" | "nse" | "nadr" => .val x
+    | "e" | "nse" | "nadr" | "cond" => .val x
     | "sp" | "nsp" | "path" | "map" | "arr" | "parr" | "rarr" | "marr" | "darr" => .spath x
     | "nmp" | "mpath" => .mpath x
     | "nlhs" | "loc" => .loc x
@@ -695,7 +696,7 @@ inductive Item where
   deriving Inhabited
 
 /-- A program schema variable, by its stem. -/
-def isProgStem (s : String) : Bool := ["P", "Q", "ω"].contains (stemOf s)
+def isProgStem (s : String) : Bool := ["P", "Q", "ω", "body"].contains (stemOf s)
 
 /-- Whether `s` names a call with its body: `fbs` (KeY's `FunctionBody`) or
 `ic` (`InternalCall`). -/
@@ -926,6 +927,8 @@ partial def schemaStmt (fresh : Bool) (Γ : Scope) :
     | _ => Macro.throwErrorAt f "only `b.push()` and `b.pop()` are calls"
   | `(sol_stmt| if ($c:sol_expr) $t:sol_block else $f:sol_block) => do
     return (← `(Stmt.ite $(← schemaAt Γ .val c) $(← schemaBlock fresh Γ t) $(← schemaBlock fresh Γ f)), Γ)
+  | `(sol_stmt| if ($c:sol_expr) $t:sol_block) => do
+    return (← `(Stmt.ite $(← schemaAt Γ .val c) $(← schemaBlock fresh Γ t) []), Γ)
   | stx => do
     let k := stx.raw.getKind
     if k == ``solDelete then
@@ -942,9 +945,32 @@ partial def schemaStmt (fresh : Bool) (Γ : Scope) :
     if k == ``solRevert then return (← `(Stmt.revert), Γ)
     if k == ``solTry then return (← schemaTry stx, Γ)
     if k == ``solWhile then
-      -- `while (se) body`: the annotation is the schema variable `ann`
+      -- `while (cond) body`: the annotation is the schema variable `ann`
       return (← `(Stmt.loop $(schemaIdent "ann") $(← schemaAt Γ .val ⟨stx.raw[2]⟩)
         $(← schemaBlock fresh Γ ⟨stx.raw[4]⟩)), Γ)
+    if k == ``solLoopSpec then
+      -- `/// @custom:key unwind n while (cond) body`: the annotation written,
+      -- `unwind 0`, `unwind n`, `unwind n + 1`, or `invariant inv` (any `dec`)
+      let cl := stx.raw[0]
+      let w := stx.raw[1]
+      unless w.getKind == ``solWhile do
+        Macro.throwErrorAt w "a taclet's `/// @custom:key` clause stands above `while`"
+      let e : TSyntax `sol_expr := ⟨cl[6]⟩
+      let bad : MacroM Lean.Term := Macro.throwErrorAt cl
+        "a taclet's clause is `unwind 0`, `unwind n`, `unwind n + 1` or `invariant inv`"
+      let kw := cl[5].getId.toString
+      let ann ← if kw == "unwind" then
+          match e with
+          | `(sol_expr| $n:num) => `(LoopAnn.unwind $n)
+          | `(sol_expr| $x:ident) => `(LoopAnn.unwind $x)
+          | `(sol_expr| $x:ident + 1) => `(LoopAnn.unwind ($x + 1))
+          | _ => bad
+        else if kw == "invariant" then
+          match e with
+          | `(sol_expr| $x:ident) => `(LoopAnn.inv $x $(schemaIdent "dec"))
+          | _ => bad
+        else bad
+      return (← `(Stmt.loop $ann $(← schemaAt Γ .val ⟨w[2]⟩) $(← schemaBlock fresh Γ ⟨w[4]⟩)), Γ)
     if k == Lean.choiceKind then
       let alts := stx.raw.getArgs
       for alt in alts.filter (·[0].isAtom) ++ alts do
@@ -2171,7 +2197,10 @@ partial def ppStmt (e : Lean.Expr) : MetaM (TSyntax `sol_stmt) := do
     let l ← if let some x ← fvarName? l then `(sol_expr| $(nameIdent x):ident) else ppExpr l
     `(sol_stmt| $l:sol_expr = new $(← ppTy.ppRef R):sol_ty ( $(← ppExpr n) ))
   | Stmt.ite _ c thn els =>
-    `(sol_stmt| if ($(← ppExpr c)) $(← ppBlock thn):sol_block else $(← ppBlock els):sol_block)
+    if (← whnf els).isAppOfArity ``List.nil 1 then
+      `(sol_stmt| if ($(← ppExpr c)) $(← ppBlock thn):sol_block)
+    else
+      `(sol_stmt| if ($(← ppExpr c)) $(← ppBlock thn):sol_block else $(← ppBlock els):sol_block)
   | Stmt.require _ c => `(sol_stmt| require($(← ppExpr c)))
   | Stmt.assert _ c => `(sol_stmt| assert($(← ppExpr c)))
   | Stmt.revert _ => `(sol_stmt| revert())
@@ -2224,8 +2253,18 @@ partial def ppStmt (e : Lean.Expr) : MetaM (TSyntax `sol_stmt) := do
     let clause (k : String) (e : TSyntax `sol_expr) (s : TSyntax `sol_stmt) :
         MetaM (TSyntax `sol_stmt) := do
       `(sol_stmt| /// @custom:key $(Lean.mkIdent (Lean.Name.mkSimple k)):ident $e:sol_expr $s:sol_stmt)
+    let name? (e : Lean.Expr) : MetaM (Option Ident) := do
+      return (← fvarName? e).map fun x => Lean.mkIdent (Lean.Name.mkSimple x)
+    let succName? (e : Lean.Expr) : MetaM (Option Ident) := do
+      let_expr HAdd.hAdd _ _ _ _ x o := e | return none
+      unless (← (evalNat o).run) == some 1 do return none
+      name? x
     match_expr (← whnf a) with
     | LoopAnn.unwind _ k =>
+      -- a taclet's bound: `n`, `n + 1`
+      if let some x ← name? k then return ← clause "unwind" (← `(sol_expr| $x:ident)) w
+      if let some x ← succName? k then
+        return ← clause "unwind" (← `(sol_expr| $x:ident + 1)) w
       let some n ← (evalNat k).run | escape
       if n == 0 then return w
       clause "unwind" (← `(sol_expr| $(Lean.Syntax.mkNumLit (toString n)):num)) w
@@ -2233,7 +2272,7 @@ partial def ppStmt (e : Lean.Expr) : MetaM (TSyntax `sol_stmt) := do
       let w ← match_expr (← whnf dec) with
         | Option.some _ d => clause "decreases" (← ppExpr d) w
         | Option.none _ => pure w
-        | _ => escape
+        | _ => if (← fvarName? dec).isSome then pure w else escape
       clause "invariant" (← ppExpr I) w
     | _ => escape
   | _ => escape
@@ -2307,11 +2346,14 @@ partial def ppProgParts? (e : Lean.Expr) :
   let some ss ← ppProg? e | return none
   return some (ss, none)
 
-/-- A branch: `{ s₁; …; sₙ; }`, or the name of a schema variable. -/
+/-- A branch: `{ s₁; …; sₙ; }`, or the name of a schema variable, or a block
+with one spliced in (`{ body; s; }`). -/
 partial def ppBlock (e : Lean.Expr) : MetaM (TSyntax `sol_block) := do
   let e ← instantiateMVars e
   if let some n ← fvarName? e then return ← `(sol_block| $(nameIdent n):ident)
-  let some ss ← ppProg? e | `(sol_block| ‹$(← escapeTerm e):term›)
+  -- `{ body; … }`: a program variable spliced in a block (`whileUnwind`'s)
+  if let some ss ← ppProg? e then return ← `(sol_block| { $[$ss;]* })
+  let some (ss, none) ← ppProgParts? e | `(sol_block| ‹$(← escapeTerm e):term›)
   `(sol_block| { $[$ss;]* })
 
 end

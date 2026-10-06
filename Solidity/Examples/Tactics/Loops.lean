@@ -1,5 +1,7 @@
 import Solidity.Tools.Run
 import Solidity.Tools.Inspect
+import Solidity.Tools.ProofTree
+import Solidity.Calculus.Derive
 
 /-!
 # Loops
@@ -9,14 +11,16 @@ loop (`docs/loops.md`).  The elaborator lowers them to `Stmt.loop`, solkey's
 lowered `while`, by solkey's `LoopLowering` (`lowerLoops`): the flags `brk`,
 `cnt`, `ret`, made only when used; the pins below are its shapes.  A loop
 runs as the least fixed point of its unwinding (`Loop.run`), so `#run` runs
-it and a concrete one is decided by `Prog.run_loop_of_iterN`.  No rule of the
-calculus proves anything about a loop yet: it closes to `false`
+it and a concrete one is decided by `Prog.run_loop_of_iterN`.  The calculus
+unwinds a loop to the bound its `/// @custom:key unwind k` clause gives
+(`whileUnwind`, solkey's taclet with a bound) and leaves it there by
+`loopExit`; a loop with an invariant closes to `false` until its rules land
 (`LeanTaclet.whileClose`).
 -/
 
 namespace Solidity.Examples.Loops
 
-open Semantics
+open Semantics Proves
 
 local instance : InContract := ⟨StandardExample⟩
 
@@ -261,14 +265,148 @@ example : (Prog.run State.exampleStore countTo3 >>= fun σ => σ.getEnv (.user "
   rw [Prog.run_cons_ok rfl, Prog.run_loop_of_iterN (n := 4) rfl]
   rfl
 
-/-! ## No rule yet
+/-! ## Unwinding
 
-A loop closes to `false` under either modality (`whileClose`), so nothing
-about a loop is derived until the loop rules land. -/
+`whileUnwind` is solkey's taclet of that name with a bound: a loop that may
+still be unwound `n + 1` times is one iteration, then the loop that may be
+unwound `n` times.  At the bound `loopExit` leaves the loop, with KeY's two
+goals of a check: the rest with the condition false assumed, and that it is
+false, which fails where the loop runs longer than its bound.  A loop with no
+clause is `unwind 0`. -/
 
 /--
-info: Solidity.LeanTaclet.whileClose : ∀ {C : Contract} {k : Nat} {m : Modality} {ann : LoopAnn C} {e : Val C PrimTy.bool}
-  {body : List (Stmt C)}, dl[LeanTaclet C k]{ ⟨[ while (e) body; ]⟩ ⇝ false }
+info: Solidity.LeanTaclet.whileUnwind : ∀ {C : Contract} {k : Nat} {m : Modality} {n : Nat} {body : List (Stmt C)}
+  {cond : Val C PrimTy.bool},
+  dl[LeanTaclet C k]{ ⟨[ /// @custom:key unwind n + 1 while (cond) body; ]⟩ ⇝
+    ⟨[ if (cond) {body;/// @custom:key unwind n while (cond) body;}; ]⟩ }
+solkey: whileUnwind (loop_expand), past the pin
+printed: none (a solkey taclet not printed)
+sound: Solidity.LeanTaclet.sound
+-/
+#guard_msgs in #taclet whileUnwind
+
+/--
+info: Solidity.LeanTaclet.loopExit : ∀ {C : Contract} {k : Nat} {m : Modality} {body : List (Stmt C)}
+  {cond : Val C PrimTy.bool},
+  dl[LeanTaclet C k]{ ⟨[ while (cond) body; ]⟩ ⇝
+    "loop exited": cond = false ⟹ ⟨[ ]⟩ ; "unwound to the end": cond = false }
+solkey: none (a rule solkey does not have)
+printed: none (theory only Lean has)
+sound: Solidity.LeanTaclet.sound
+-/
+#guard_msgs in #taclet loopExit
+
+/-- `while (i < 3) { i++; }` from `i = 0`, unwound three times, ends at `3`,
+under the diamond: the strategy fires `whileUnwind` three times, and
+`loopExit` owes `i < 3` false. -/
+theorem countTo3Diamond :
+    ⊨ dl!{ ⟨ uint i = 0;
+             /// @custom:key unwind 3
+             while (i < 3) { i++; }; ⟩ i == 3 } := by
+  sol_symex
+  sol_close
+
+/-- A loop with no clause is not unwound: it ends where its condition is
+false on entry. -/
+theorem notEntered : ⊨ dl!{ ⟨ uint i = 5; while (i < 3) { i++; }; ⟩ i == 5 } := by
+  sol_symex
+  sol_close
+
+/-- The same proved by the walk `sol_derive?` writes: `whileUnwind` is
+`unfoldLean`, `loopExit` is `checkLean` with its goals `thn` and `els`. -/
+theorem countTo1Walk : ⊢ dl!{ ⟨ uint i = 0;
+    /// @custom:key unwind 1
+    while (i < 1) { i++; }; ⟩ i == 1 } := by
+  apply unfold .localValueDeclInitDrop
+  apply update .localValueAssign
+  apply unfoldLean .whileUnwind
+  apply unfold .ifElseUnfold
+  apply unfold .localValueDeclInitDrop
+  apply update .binopAssignment
+  apply split .ifElseSplit
+  case thn =>
+    apply update .localIncrement
+    apply checkLean .loopExit
+    case thn =>
+      apply emptyModality
+      refine close ?_
+      sol_symex
+      sol_close
+    case els =>
+      refine close ?_
+      sol_symex
+      sol_close
+  case els =>
+    apply emptyModality
+    refine close ?_
+    sol_symex
+    sol_close
+  case cov =>
+    refine close ?_
+    sol_symex
+    sol_close
+
+/-! The proof tree labels `loopExit`'s goals. -/
+
+/--
+info: 0: localValueDeclInitDrop
+1: localValueAssign
+2: loopExit
+  [loop exited]
+    3: emptyModality
+    4: Closed goal
+  [unwound to the end]
+    5: Closed goal
+closed: 0 open goal(s), 6 node(s), 2 branch(es)
+-/
+#guard_msgs in
+#proof_tree dl!{ ⟨ uint i = 5; while (i < 3) { i++; }; ⟩ i == 5 }
+
+/-! ## solkey's solc ports, as loops
+
+solkey's `solc/SolcControlFlow.sol` unrolled its two loops by hand until it
+had loop rules (`ed7849d5b6`, past the pinned checkout); the corpus
+(`Corpus/SolcControlFlow.lean`) keeps the unrolled ports.  Here they are the
+loops solkey now writes, each unwound as often as it runs. -/
+
+section
+local instance : InContract := ⟨SolcControlFlow⟩
+
+/-- `doWhileFalseRunsBodyOnce` (solc `statements/do_while_loop_continue.sol`):
+`do { … } while (false)` runs its body once, and the `continue` it skips
+would have jumped to the false condition. -/
+theorem doWhileFalseRunsBodyOnce :
+    ⊨ dl!{ ⟨ uint i = 0; uint r = 0;
+             /// @custom:key unwind 1
+             do { if (i > 0) { continue; } i = i + 1; } while (false);
+             r = 42; assert(i == 1); assert(r == 42); ⟩ true } := by
+  sol_symex
+  sol_close
+
+/-- `forLoopOverArray` (solc `array/array_storage_index_zeroed_test.sol`),
+solkey's `@custom:key box`: a loop over an array of length `3` writes
+`i + 1` at each index. -/
+theorem forLoopOverArray :
+    ⊨ dl!{ [ require(values.length == 3); uint i;
+             /// @custom:key unwind 3
+             for (i = 0; i < values.length; i++) { values[i] = i + 1; };
+             assert(i == 3); assert(values[0] == 1); assert(values[1] == 2);
+             assert(values[2] == 3); ] true } := by
+  sol_prove
+
+end
+
+/-! ## An invariant: no rule yet
+
+A loop with an invariant closes to `false` under either modality
+(`whileClose`), so nothing about it is derived until solkey's
+`whileInvariantBox` and `whileInvariantDiamond` are ported (`docs/loops.md`,
+stage L4). -/
+
+/--
+info: Solidity.LeanTaclet.whileClose : ∀ {C : Contract} {k : Nat} {m : Modality} {inv : Val C PrimTy.bool}
+  {dec : Option (Val C PrimTy.uint)} {body : List (Stmt C)} {cond : Val C PrimTy.bool},
+  dl[LeanTaclet C k]{ ⟨[ /// @custom:key invariant inv while (cond) body; ]⟩ ⇝ false }
 solkey: none (a rule solkey does not have)
 printed: none (theory only Lean has)
 sound: Solidity.LeanTaclet.sound

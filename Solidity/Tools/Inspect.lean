@@ -265,7 +265,10 @@ def keyLine (n : Lean.Name) : String :=
   match lookupBy n (RuleShapes.tacletOrigins ++ RuleShapes.callbackOrigins) with
   | some (.taclet t) => s!"solkey: {KeyTaclet.fmt t}"
   | some (.merged ts) => "solkey (merged): " ++ ", ".intercalate (ts.map KeyTaclet.fmt)
-  | none => "solkey: none (a rule solkey does not have)"
+  | none =>
+    -- solkey's taclet past the pinned checkout (`ed7849d5b6`), bounded here
+    if n == ``LeanTaclet.whileUnwind then "solkey: whileUnwind (loop_expand), past the pin"
+    else "solkey: none (a rule solkey does not have)"
 
 /-- The printed rule of a constructor, one line. -/
 def texLine (n : Lean.Name) : String :=

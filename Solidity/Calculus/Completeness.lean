@@ -558,7 +558,9 @@ def Stmt.step (k : Nat) (m : Modality) : (s : Stmt C) → Step k m s
     match m with
     | .box => ⟨_, .key .tryCallNoCallbackBox⟩
     | .diamond => ⟨_, .lean .tryCallDiamond⟩
-  | .loop .. => ⟨_, .lean .whileClose⟩
+  | .loop (.unwind 0) _ _ => ⟨_, .lean .loopExit⟩
+  | .loop (.unwind (_ + 1)) _ _ => ⟨_, .lean .whileUnwind⟩
+  | .loop (.inv ..) _ _ => ⟨_, .lean .whileClose⟩
 
 /-- **Completeness**: under either modality, every statement has a rule.  No
 hypothesis and no residue: `uint x = people[i].age;`, `alice = bob;`,

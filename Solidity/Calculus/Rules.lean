@@ -724,12 +724,35 @@ inductive LeanTaclet (C : Contract) (k : Nat) : Modality → Stmt C → Premise 
   | transferDiamond :
       dl[LeanTaclet C k]{ ⟨ sadr.transfer(se); ⟩ ⇝ false }
 
-  /-- A loop closes to `false`, under either modality, until the loop rules
-  land (`docs/loops.md`, stages L3 and L4: solkey's `whileUnwind`,
-  `whileInvariantBox`, `whileInvariantDiamond`): sound, and nothing about a
-  loop is derived. -/
-  | whileClose :
-      dl[LeanTaclet C k]{ ⟨[ while (e) body; ]⟩ ⇝ false }
+  /-- solkey's `whileUnwind`, bounded: a loop that may still be unwound `n + 1`
+  times is one iteration, then the loop that may be unwound `n` times (KeY's
+  `if (s#cond) { s#body while (s#cond) s#body }`).  The bound is Lean's
+  (`/// @custom:key unwind n`), so that symbolic execution ends; solkey's
+  strategy unwinds without one. -/
+  | whileUnwind {cond : Val C .bool} :
+      dl[LeanTaclet C k]{ ⟨[ /// @custom:key unwind n + 1
+          while (cond) body; ]⟩ ⇝
+        ⟨[ if (cond) { body; /// @custom:key unwind n
+          while (cond) body; }; ]⟩ }
+
+  /-- A loop unwound to its bound ends there: the rest with the condition
+  false assumed, and that it is false (`Premise.check`).  Not
+  `assert(!cond)`, which would make running out of unwindings a failure of
+  the program; and not a capture of the condition, which the loop must
+  evaluate afresh.  A loop with no clause is `unwind 0`. -/
+  | loopExit {cond : Val C .bool} :
+      dl[LeanTaclet C k]{ ⟨[ /// @custom:key unwind 0
+          while (cond) body; ]⟩ ⇝
+        "loop exited": defined(cond) ∧ defined(false) ∧ cond ≐ false ⟹ ⟨[ ]⟩ ;
+        "unwound to the end": defined(cond) ∧ defined(false) ∧ cond ≐ false }
+
+  /-- A loop with an invariant closes to `false`, under either modality,
+  until its rules land (`docs/loops.md`, stage L4: solkey's
+  `whileInvariantBox`, `whileInvariantDiamond`): sound, and nothing about it
+  is derived. -/
+  | whileClose {cond : Val C .bool} :
+      dl[LeanTaclet C k]{ ⟨[ /// @custom:key invariant inv
+          while (cond) body; ]⟩ ⇝ false }
 
 /-- A rule of the calculus: solkey's, or one it does not have. -/
 inductive Rule (C : Contract) (k : Nat) (m : Modality) (s : Stmt C) (p : Premise C) : Prop where
@@ -784,13 +807,15 @@ def Taclet.branchLabels : List (String × List String) := [
   ("tryCallNoCallbackBox",
     ["call succeeded", "Error caught", "Panic caught", "other failure caught"]),
   ("sendNoCallbackBox", ["send succeeded", "send failed"]),
-  ("sendNoCallbackDiamond", ["non-negative amount", "send succeeded", "send failed"])]
+  ("sendNoCallbackDiamond", ["non-negative amount", "send succeeded", "send failed"]),
+  ("loopExit", ["loop exited", "unwound to the end"])]
 
 /-- The taclet whose goals a premise for the statement of head `c` labels:
 an `if` splits by `ifElseSplit`, a `require` by `requireSimple`, an `assert`
 by `assertSimple`, a `try` by `tryCallNoCallbackBox` (and
 `CallbackTaclet.tryCallWithCallbackBox`, labelled alike), a send by
-`sendNoCallbackBox`, or under the diamond (`diamond`) `sendNoCallbackDiamond`. -/
+`sendNoCallbackBox`, or under the diamond (`diamond`) `sendNoCallbackDiamond`;
+a loop by `loopExit`, the one rule of a loop with goals to label. -/
 def Taclet.labelledBy (c : Lean.Name) (diamond : Bool := false) : Option String :=
   if c == ``Stmt.ite then some "ifElseSplit"
   else if c == ``Stmt.require then some "requireSimple"
@@ -798,6 +823,7 @@ def Taclet.labelledBy (c : Lean.Name) (diamond : Bool := false) : Option String 
   else if c == ``Stmt.tryCall then some "tryCallNoCallbackBox"
   else if c == ``Stmt.send then
     some (if diamond then "sendNoCallbackDiamond" else "sendNoCallbackBox")
+  else if c == ``Stmt.loop then some "loopExit"
   else none
 
 /-! ## Printing taclets and premises

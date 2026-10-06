@@ -24,8 +24,8 @@ front again, with nothing to look through.  `Proves.sound` says once and for
 all that a derivation is a proof.
 
 The judgement is indexed by the rules it may use (`RuleSet`): every
-constructor takes solkey's `Taclet`s, and `unfoldLean` alone the rule solkey
-lacks (`LeanTaclet`), at `.all`.  `Γ ⊢ φ` is the whole calculus, `Γ ⊢ₖ φ`
+constructor takes solkey's `Taclet`s, and `unfoldLean`, `doneLean` and
+`checkLean` alone the rules solkey lacks (`LeanTaclet`), at `.all`.  `Γ ⊢ φ` is the whole calculus, `Γ ⊢ₖ φ`
 solkey's; `Calculus/SolkeyFragment.lean` says when the two agree.
 
 Fresh names are numbered above every index in sight (`Hyp.fresh`), which is
@@ -391,6 +391,13 @@ inductive Proves : RuleSet → List (Hyp C) → Fml C → Prop
   | unfoldLean {Γ : List (Hyp C)} {m : Modality} {s : Stmt C} {ω : Prog C} {φ : Fml C}
       {P : Prog C} (d : LeanTaclet C (Hyp.fresh Γ dl_schema{ ⟨[ s; ..ω ]⟩ φ }) m s (.unfold P))
       (h : dl{ ..Γ ⟹ ⟨[ P; ..ω ]⟩ φ }) : dl{ ..Γ ⟹ ⟨[ s; ..ω ]⟩ φ }
+  /-- A rule solkey does not have, checking (`loopExit`): the goal with the
+  condition assumed, and the condition. -/
+  | checkLean {Γ : List (Hyp C)} {m : Modality} {s : Stmt C} {ω : Prog C} {φ : Fml C}
+      {c : Fml C} {P : Prog C}
+      (d : LeanTaclet C (Hyp.fresh Γ dl_schema{ ⟨[ s; ..ω ]⟩ φ }) m s (.check c P))
+      (thn : dl{ ..Γ, c ⟹ ⟨[ P; ..ω ]⟩ φ })
+      (els : dl{ ..Γ ⟹ c }) : dl{ ..Γ ⟹ ⟨[ s; ..ω ]⟩ φ }
   /-- `emptyModality`: `⟨⟩ φ` and `[] φ` are `φ`. -/
   | empty {R : RuleSet} {Γ : List (Hyp C)} {m : Modality} {φ : Fml C} (h : dl{ ..Γ ⟹[R] φ }) :
       dl{ ..Γ ⟹[R] ⟨[ ]⟩ φ }
@@ -758,7 +765,7 @@ theorem Proves.sound {R : RuleSet} {Γ : List (Hyp C)} {φ : Fml C} (h : Proves 
     rw [Hyp.wrap_append] at ih₁ ih₂
     exact fun σ => Hyp.wrap_mono₃ (fun τ h₁ h₂ h₃ => d.sound_in τ ⟨h₁, h₂, (Premise.coverFml_holds _ _ _ τ).2 h₃⟩) _ σ
       (ih₁ σ) (ih₂ σ) (ih₃ σ)
-  | check d _ _ ih₁ ih₂ =>
+  | check d _ _ ih₁ ih₂ | checkLean d _ _ ih₁ ih₂ =>
     rw [Hyp.wrap_append] at ih₁
     exact fun σ => Hyp.wrap_mono₂ (fun τ h₁ h₂ => d.sound_in τ ⟨h₁, h₂⟩) _ σ (ih₁ σ) (ih₂ σ)
   | @empty _ Γ m φ _ ih =>
@@ -795,6 +802,7 @@ theorem Proves.toAll {R : RuleSet} {Γ : List (Hyp C)} {φ : Fml C} (h : Proves 
   | unfold d _ ih => exact .unfold d ih
   | unfoldLean d h _ => exact .unfoldLean d h
   | doneLean d h _ => exact .doneLean d h
+  | checkLean d h₁ h₂ _ _ => exact .checkLean d h₁ h₂
   | branches d _ ih => exact .branches d ih
   | cases d _ _ ih₁ ih₂ => exact .cases d ih₁ ih₂
   | allIntro _ ih => exact .allIntro ih

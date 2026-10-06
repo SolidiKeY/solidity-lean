@@ -250,7 +250,8 @@ def provesCtor (premise : Lean.Name) (lean : Bool) : Option (Lean.Name × Lean.N
   else if premise == ``Premise.unfold then
     some (if lean then ``Proves.unfoldLean else ``Proves.unfold, ``Proves.unfoldRule)
   else if premise == ``Premise.split then some (``Proves.split, ``Proves.splitRule)
-  else if premise == ``Premise.check then some (``Proves.check, ``Proves.checkRule)
+  else if premise == ``Premise.check then
+    some (if lean then ``Proves.checkLean else ``Proves.check, ``Proves.checkRule)
   else if premise == ``Premise.done then
     some (if lean then ``Proves.doneLean else ``Proves.done, ``Proves.doneRule)
   else if premise == ``Premise.branches then some (``Proves.branches, ``Proves.branchesRule)

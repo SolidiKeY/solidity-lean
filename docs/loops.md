@@ -1,9 +1,12 @@
 # Loops
 
 `while`, `for`, `do … while`, `break`, `continue`. This is a design plan:
-four decisions and an ordered implementation plan. L1 and L2 are built (the
-syntax, the lowering, the semantics, the typing; `Examples/Tactics/Loops.lean`):
-until L3, a loop closes to `false` (`LeanTaclet.whileClose`).
+four decisions and an ordered implementation plan. L1 to L3 are built (the
+syntax, the lowering, the semantics, the typing, and unwinding;
+`Examples/Tactics/Loops.lean`): a loop is unwound to the bound its
+`/// @custom:key unwind k` clause gives (`LeanTaclet.whileUnwind`) and left
+there (`LeanTaclet.loopExit`); until L4, a loop with an invariant closes to
+`false` (`LeanTaclet.whileClose`).
 Background: `docs/kernel-port.md` (its topics "Modalities", "Semantics",
 "One rule per statement" and "Conditions" are the decisions this plan
 extends).
@@ -70,9 +73,10 @@ also on the iteration a `break` or `return` ends.
 Loops block Ballot and BlindAuction (after `bytes32` and events),
 `MultiAuction.closeAuction` is `skip`ped, and the solc ports unroll by hand.
 Lean's rules take solkey's names (`whileUnwind`, `whileInvariantBox`,
-`whileInvariantDiamond`) as `Taclet` constructors once the solkey pin moves
-past `ed7849d5b6`; what solkey lacks (the bound on unwinding, below) is a
-`LeanTaclet`.
+`whileInvariantDiamond`). They are `LeanTaclet` constructors while the solkey
+pin (`RuleShapes.tacletOrigins`, `KeyTaclets.lean`) is before `ed7849d5b6`,
+and become `Taclet` constructors when it moves past; what solkey lacks
+(`loopExit`, the bound's end) stays a `LeanTaclet`.
 
 ## Decision 1: semantics, the least fixed point inside `Stmt.run`
 
@@ -184,7 +188,7 @@ optional variant) or `.unwind (k : Nat)`. `Stmt.step`
 | Annotation | Box | Diamond |
 |---|---|---|
 | `.unwind (k+1)` | `whileUnwind`: `unfold [if (c) { body while[k] (c) body }]` | same |
-| `.unwind 0` | `loopExit`: premise `c = false ∧ ⟨[ ω ]⟩ φ` (a new `Premise` shape) | same |
+| `.unwind 0` | `loopExit`: `Premise.check (c = false) []`, the goals "loop exited" (`c = false ⟹ ⟨[ ω ]⟩ φ`) and "unwound to the end" (`c = false`), by `Proves.checkLean` | same |
 | `.inv I dec` | `whileInvariantBox`, below | `whileInvariantDiamond` with `dec = some v`; with `none`, the premise is `done false` (sound, unprovable; solkey unwinds instead) |
 
 In the source the annotation is solkey's specification,
@@ -264,8 +268,9 @@ conjunct) can halt.
 
 **In Lean.** A new `Premise` constructor `inv` whose `Premise.fml` is the
 conjunction above (`Fml.stepAt` reads premises through `Premise.fml`, so
-`sol_symex` needs no change), one `Proves` constructor per new shape (`inv`,
-`exit`), and two cases in `LeanTaclet.sound`. `Stmt.inSolkey m (.loop …) =
+`sol_symex` needs no change), a `Proves` constructor for it (as L3 added
+`Proves.checkLean` for `loopExit`, whose premise is a check), and two cases
+in `LeanTaclet.sound`. `Stmt.inSolkey m (.loop …) =
 false` (`Calculus/SolkeyFragment.lean`), so `Proves.toSolkey` is untouched
 and `Proves.solkey_lt_calculus` gains a witness.
 
@@ -304,7 +309,7 @@ EVM stage is worth doing once, for all.
 |---|---|---|
 | **L1 Syntax and semantics** | `Syntax.lean`: `LoopAnn`, `Stmt.loop`, `RawStmt.while/for/doWhile/brk/cont`, the lowering of Decision 2, printers, `Stmt.quote`, `renameStmts`. `Semantics.lean`: `Halt.diverge`, `Loop.iterN`, `Loop.run`, `implemented_by`. `Semantics/Agree.lean`: `Stmt.vars`, `run_frame`. `Semantics/Callback.lean`: `forks`, `hasTransfer`. The quoters in `Calculus/Quote.lean`, `Calculus/Notation.lean`. | Medium: structural recursion through `Loop.run`, and `#eval` under `implemented_by`. Check both first in a scratch file. |
 | **L2 Typing** | The loop cases of `Typing/{Soundness,Reachability,Constructibility}.lean`, by induction on `iterN`. | Low: the same proof three times. |
-| **L3 Unwinding** | `Calculus/Rules.lean` (`whileUnwind`, `loopExit`, `Premise.exit`), `Completeness`, `Uniqueness`, `Termination` (weight), `Logic` (`Proves.exit`), `RuleSoundness`, `RuleSyntax` printers, `SolkeyFragment`. Examples: the hand-unrolled solc ports as real loops. | Low to medium: the weight arithmetic is new. |
+| **L3 Unwinding** (built) | `Calculus/Rules.lean` (`whileUnwind`, `loopExit`), `Completeness`, `Uniqueness`, `Termination` (weight), `Logic` (`Proves.checkLean`), `RuleSoundness`, `RuleSyntax` (the clause in a taclet, `if` without `else`, a program spliced into a block), `SolkeyFragment`. Examples: the hand-unrolled solc ports as real loops. | Low to medium: the weight arithmetic is new. |
 | **L4 Invariant rule** | `Update.lean` (`Fml.anon`, `State.anon`, frame lemmas), `Semantics/Agree.lean` (`Prog.frame`, `Prog.run_frameOff`), `Calculus/Rules.lean` (`whileInvariantBox`, `whileInvariantDiamond`, `Premise.inv`), `Logic`, `RuleSoundness`, `Termination`. Check whether `sol_decide` handles `anon` (a local in `F` is a fresh free local, anonymised storage a fresh free storage). Examples: a counting loop, a sum with a closed form. | Medium to high: `Prog.run_frameOff` over every statement, and extending `Decide`'s reduction to a second base storage. |
 | **L5 Quantified invariants** | After `Fml.all` in an invariant: a table of invariants by index. Ballot's `winningProposal`. | High: depends on `Fml.all` and `grind` instantiation. |
 | **L6 Callbacks** | `Calculus/Callback.lean` (the loop rules under `ProvesC`; the `ExecS` constructors are L1's). | Medium. |

@@ -949,7 +949,15 @@ theorem Stmt.step_smaller (k : Nat) (m : Modality) :
       have hp : 0 < 2 ^ max (max a b) (max c d) := Nat.pow_pos (by decide)
       rw [Nat.pow_succ, Nat.pow_succ, Nat.pow_succ]
       omega
-  | .loop .. => trivial
+  | .loop (.unwind 0) _ _ => by
+    simp only [Stmt.step, Premise.Smaller, Prog.weight, Stmt.weight]
+    exact ⟨by omega, rfl⟩
+  | .loop (.unwind (n + 1)) c body => by
+    simp only [Stmt.step, Premise.Smaller, Prog.weight, Stmt.weight, Prog.weight_append,
+      Nat.succ_mul (n + 1)]
+    generalize (n + 1) * (c.cost + c.pen + Prog.weight body + 3) = t
+    omega
+  | .loop (.inv ..) _ _ => trivial
 
 /-- **Every rule makes the program smaller**, as a fact about the rules
 rather than the dispatcher: any derivation of `s` is the one `Stmt.step`

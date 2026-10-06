@@ -125,7 +125,7 @@ where
 #eval show IO Unit from do
   let src ← IO.FS.readFile "Solidity/Calculus/Rules.lean"
   for (r, ls) in Taclet.branchLabels do
-    let some rest := (src.splitOn s!"  | {r} :")[1]? | throw (IO.userError s!"no rule {r}")
+    let some rest := (src.splitOn s!"  | {r} ")[1]? | throw (IO.userError s!"no rule {r}")
     -- the rule's text: up to the next constructor, docstring, comment or blank line
     let body := ["\n  |", "\n  /-", "\n  --", "\n\n"].foldl (fun b sep => (b.splitOn sep)[0]!) rest
     let written := quoted body

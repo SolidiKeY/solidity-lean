@@ -43,8 +43,9 @@ under the box, where solkey books it (`transferNoCallbackBox`), the diamond
 closing to `false` (`LeanTaclet.transferDiamond`); a send is under either
 modality (`sendNoCallbackBox`, `sendNoCallbackDiamond`); and there is no `try`:
 solkey has a rule for it under the box only (`tryCallNoCallbackBox`), with
-its blocks outside the fragment's claim; and there is no loop, which closes
-(`LeanTaclet.whileClose`) until its rules land. -/
+its blocks outside the fragment's claim; and there is no loop, whose rules
+here (`LeanTaclet.whileUnwind`, bounded, `loopExit`, `whileClose`) are not
+solkey's at the pinned checkout. -/
 def Stmt.inSolkey (m : Modality) : Stmt C → Bool
   | .ite _ thn els => Prog.inSolkey m thn && Prog.inSolkey m els
   | .call _ args _ _ body => (Arg.firstNonSimple args).isNone && Prog.inSolkey m body
@@ -148,7 +149,7 @@ theorem LeanTaclet.not_inSolkey {s : Stmt C} {p : Premise C} (d : LeanTaclet C k
     s.inSolkey m = false := by
   cases d with
   | functionCallArgCapture h => simp [Stmt.inSolkey, h]
-  | tryCallDiamond | transferDiamond | whileClose => rfl
+  | tryCallDiamond | transferDiamond | whileUnwind | loopExit | whileClose => rfl
 
 /-- **solkey's rules are complete on the fragment**: the rule `Stmt.step`
 fires on a statement of the fragment is one of solkey's. -/
@@ -200,7 +201,7 @@ theorem Proves.toSolkey {R : RuleSet} {Γ : List (Hyp C)} {φ : Fml C} (h : Prov
     simp only [Fml.inSolkey, Prog.inSolkey_cons, Bool.and_eq_true] at hφ
     have := d.premise_inSolkey hφ.1.1
     exact .unfold d (ih (by simp_all [Fml.inSolkey, Premise.inSolkey]))
-  | unfoldLean d _ _ | doneLean d _ _ =>
+  | unfoldLean d _ _ | doneLean d _ _ | checkLean d _ _ _ _ =>
     simp only [Fml.inSolkey, Prog.inSolkey_cons, Bool.and_eq_true] at hφ
     exact absurd hφ.1.1 (by simp [d.not_inSolkey])
   | branches d _ _ =>
@@ -310,7 +311,7 @@ theorem Proves.solkey_not_call {Γ : List (Hyp C)} {f : Name} {args : List (Arg 
   | update d _ _ | unfold d _ _ | split d _ _ _ _ _ _ | check d _ _ _ _ | done d _ _ =>
     cases hψ; simp [d.call_simple rfl] at ha
   | branches d _ _ | cases d _ _ _ _ => cases hψ; simp [d.call_simple rfl] at ha
-  | unfoldLean | doneLean => cases hR
+  | unfoldLean | doneLean | checkLean => cases hR
   | intro _ _ | empty _ _ | allIntro _ _ | updIntro _ _ => cases hψ
   | rewrite _ _ ih => exact ih hR (by rw [← hψ]; rfl)
   | updRw _ _ _ ih | merge _ _ ih | mergeStorage _ _ ih | simplify _ ih => exact ih hR hψ

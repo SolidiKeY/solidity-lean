@@ -12,8 +12,9 @@ fails the build), `unclaimedTaclets` excuses the rest with a reason,
 `callbackOrigins` does the same for `CallbackTaclet`, and `taclets_partitioned`
 says every taclet is claimed or excused, never both
 (`claimedTaclets_count = 306`, `unclaimedTaclets_count = 17`). A rule that
-transcribes no taclet is a `LeanTaclet` (`leanTaclets`); there are four,
-`functionCallArgCapture`, `tryCallDiamond`, `transferDiamond` and `whileClose`. A taclet may be claimed by two constructors (the
+transcribes no taclet at the pin is a `LeanTaclet` (`leanTaclets`); there are six,
+`functionCallArgCapture`, `tryCallDiamond`, `transferDiamond`, `whileUnwind`,
+`loopExit` and `whileClose`. A taclet may be claimed by two constructors (the
 member reads by their `.length` rules, since KeY reads `sp.length` as the
 member `length`; `memoryFieldWrite`/`memoryIndexWriteArray` by the value and
 reference writes). What stays prose here is what a `KeyOrigin` cannot say:
@@ -310,9 +311,10 @@ gives their shapes and the stages that port them.
 
 | KeY taclet | Lean | Status | Notes |
 | --- | --- | --- | --- |
-| `whileUnwind` | — | not ported (past the pin) | `while (s#cond) s#body` ⇝ `if (s#cond) { s#body while (s#cond) s#body }`; here bounded by the loop's annotation (`LoopAnn.unwind`), stage L3 |
+| `whileUnwind` | `LeanTaclet.whileUnwind` | bounded (past the pin) | `/// @custom:key unwind n + 1 while (cond) body` ⇝ `if (cond) { body; /// @custom:key unwind n while (cond) body; }`, KeY's `s#cond`, `s#body` as `cond`, `body`. solkey's strategy unwinds a loop with no specification without a bound; here the annotation counts the unwindings down (`LoopAnn.unwind`), so that symbolic execution ends (`Stmt.weight`). Sound by `Loop.run_unfold` (`Stmt.loop_unwind_run`). A `LeanTaclet` until the solkey pin moves past `ed7849d5b6`, then a `Taclet` |
+| — | `LeanTaclet.loopExit` | Lean only | a loop at its bound (`unwind 0`, the annotation of a loop with no clause): a check (`Premise.check`, `Proves.checkLean`), "loop exited" the rest with `cond = false` assumed, "unwound to the end" `cond = false` (`Fml.eqD`, so a condition that halts is not false). Sound by `Stmt.loop_exit_run`. Not `assert(!cond)`, which would make running out of unwindings a panic of the program |
 | `whileInvariantBox`, `whileInvariantDiamond` | — | not ported (past the pin) | "invariant initially valid", "invariant preserved and used" under `#loopAnon`; stage L4 |
-| — | `LeanTaclet.whileClose` | Lean only | a loop, under either modality, closes to `false` until the rules above land: sound, and nothing about a loop is derived. `Stmt.inSolkey` is `false` on a loop |
+| — | `LeanTaclet.whileClose` | Lean only | a loop with an invariant (`/// @custom:key invariant inv`), under either modality, closes to `false` until the rules above land: sound, and nothing about it is derived. `Stmt.inSolkey` is `false` on a loop |
 | `LoopLowering` (meta-construct) | `lowerLoops` (`Syntax.lean`) | elaborator | `break`/`continue`/`return` in a loop to the flags `brk`/`cnt`/`ret`, `for` and `do … while` to `while`, shape for shape |
 
 ## Function contracts

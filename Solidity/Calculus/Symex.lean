@@ -263,7 +263,7 @@ theorem checkRule {c : Fml C} {P : Prog C}
     (els : Proves .all Γ c) : Proves .all Γ (.modal m (s :: ω) φ) := by
   rcases d with d | d
   · exact .check d thn els
-  · cases d
+  · exact .checkLean d thn els
 
 /-- `done` by whichever rule `Rule` names. -/
 theorem doneRule {b : Bool} (d : Rule C (Hyp.fresh Γ (.modal m (s :: ω) φ)) m s (.done b))

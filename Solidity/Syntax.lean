@@ -1244,7 +1244,7 @@ atom must already be a token (`sol_stmt` reads leading keywords as
 identifiers too), and `///` is not one. -/
 declare_syntax_cat sol_loop_clause
 syntax "/// " "@" &"custom" ":" &"key" ident sol_expr : sol_loop_clause
-syntax (name := solLoopSpec) sol_loop_clause ppLine sol_stmt : sol_stmt
+syntax (name := solLoopSpec) sol_loop_clause ppSpace sol_stmt : sol_stmt
 /-! `try e.f(a) returns (uint v) { … } catch Error(string memory m) { … }
 catch Panic(uint c) { … } catch (bytes memory d) { … } catch { … }`: an
 external call.  A clause's parameter is `sol_tparam`: a type, `memory` for
