@@ -348,6 +348,19 @@ theorem tupleDeclaration :
   sol_symex
   sol_close
 
+/-! Every value left out: still a call with targets (`functionBodyExpand`),
+printed as written. -/
+
+/-- info: (,) = returnOrdered(1, 2); -/
+#guard_msgs in #eval IO.println (Prog.toStr (C := Tuples) (sol[Tuples]{ (, ) = returnOrdered(1, 2); }))
+
+/-! A component left out is evaluated when it may revert, as solc does
+(solkey's `tupleAssignment` drops it): `1 / total` divides by zero in a
+fresh contract, so the declaration halts (run, not proved: the interpreter
+does not reduce in the kernel here). -/
+#guard (Prog.run ({ storage := Tuples.initStorage } : Semantics.State)
+    sol[Tuples]{ (uint x, ) = (1, 1 / total); }).toBool == false
+
 theorem returnLeavesNestedBlocks :
     ⊨ dl[Tuples]{ ⟨ uint one = returnFromNestedBlock(3); uint five = returnFromNestedBlock(0); ⟩
       (one == 1 ∧ five == 5) } := by

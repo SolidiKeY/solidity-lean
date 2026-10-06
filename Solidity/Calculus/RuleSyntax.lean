@@ -67,7 +67,7 @@ hypothesis):
 | `l` | the target of `⊕=` and `++` | `OpLoc C p` | |
 | `s`; `P`, `Q`, `ω` | a statement; a program, spliced in place (`P; ..ω` is `P ++ ω`) | `Stmt C`; `Prog C` | |
 | `fbs` | a call with its body and its targets (KeY's `FunctionBody`), `expand_function_body(fbs)` its statements | `Stmt.call f args hsep ret body` | its arguments simple; it returns to targets (`CallRet.isRets`) |
-| `ic` | any other call with its body (KeY's `InternalCall`), `expand_function_body(ic)` its statements | `Stmt.call f args hsep ret body` | its arguments simple; no targets |
+| `ic` | any other call with its body (KeY's `InternalCall`), `expand_function_body(ic)` its statements | `Stmt.call f args hsep ret body` | its arguments simple; not `CallRet.isRets` (a result, if any, assigned inside the expansion: `y = f(a);`) |
 | `call`, `rets`, `code`; `body`, `errorBody`, `panicBody`, `otherBody` | a `try`'s call, its return locals, its `Panic` code; its blocks | `ExtCall C`, …; `List (Stmt C)` | |
 
 The position says which sort an operand is read at: `sp.fld` is a location
@@ -1992,6 +1992,10 @@ def ppRetTarget? (t : Lean.Expr) : MetaM (Option (TSyntax `sol_expr × Lean.Expr
     let_expr Src.val _ _ v := (← whnf src) | return none
     let some r ← local? v | return none
     return some (← ppExpr l, r)
+  | Stmt.assignMem _ _ l src =>
+    let_expr MSrc.val _ _ v := (← whnf src) | return none
+    let some r ← local? v | return none
+    return some (← ppExpr l, r)
   | _ => return none
 
 /-- A call that returns to targets (`CallRet.rets`) and the statements after
@@ -2023,7 +2027,8 @@ def ppTupleCall? (s : Lean.Expr) (rest : List Lean.Expr) :
     slots := slots.set! i (some tgt)
     start := i + 1
     n := n + 1
-  if n == 0 then return none
+  -- every value discarded, `(, ) = f(x);`: a call with targets still
+  if n == 0 && rvs.size < 2 then return none
   let call ← `(sol_expr| $fe:sol_expr ( $xs,* ))
   if let #[some y] := slots then
     return some (← `(sol_stmt| $y:sol_expr = $call:sol_expr), n)

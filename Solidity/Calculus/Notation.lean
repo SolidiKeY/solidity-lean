@@ -835,6 +835,7 @@ def RawStmt.aliasHints : RawStmt → List (String × RefTy)
     | _ => []
   | .ite _ t e => (t.attach.flatMap fun ⟨s, _⟩ => s.aliasHints) ++
       e.attach.flatMap fun ⟨s, _⟩ => s.aliasHints
+  | .block b | .unchecked b => b.attach.flatMap fun ⟨s, _⟩ => s.aliasHints
   | _ => []
 
 /-- A parallel update, and the scope under it: `x := p` for a path `p` of
@@ -953,6 +954,13 @@ where
         -- `ok = to.send(5);`: what a send returns, a `bool`
         | .send none (.name x) _ _ => hint x (some (.val .bool))
         | .ite _ t e => go decls e (go decls t (Γ, Δ))
+        | .block b | .unchecked b => go decls b (Γ, Δ)
+        -- `(uint a, , bool b) = …;`: each variable declared at its type
+        | .tupleDecl vs _ => vs.foldl (fun (Γ, Δ) v => match v with
+          | some (T, x) => match elabDeclTy C T with
+            | .ok (.prim p, n) => (Γ, setBy x (.val p n) Δ)
+            | _ => (Γ, Δ)
+          | none => (Γ, Δ)) (Γ, Δ)
         | _ => (Γ, Δ)
       go decls ss acc
 

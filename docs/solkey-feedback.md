@@ -85,8 +85,8 @@ an unprovable example.
 is `internalCallExpand`'s (`\program InternalCall ic`, any arguments), and
 `expand_function_body` binds every argument as a fresh `T p = arg`, simple or
 not, so a non-simple argument is no longer stuck.  Lean keeps its capture
-rule (`functionCallArgCapture`), so that its `functionBodyExpand` takes
-simple arguments only and every call has one rule.
+rule (`functionCallArgCapture`), so that its call rules (`internalCallExpand`,
+`functionBodyExpand`) take simple arguments only and every call has one rule.
 What remains is the shape difference, recorded in `docs/lean-key-rule-map.md`;
 the text below is the item as it stood at `f2eb3d98eb`.
 
@@ -261,8 +261,8 @@ resume, where KeY puts `pv := TRUE` into the anonymising update.
   inlines the modifiers around the body (`wrapMods`, first listed outermost).
 - **`unfoldArgument` (item 3), partly resolved.** `ExpandFunctionBody` now
   binds each parameter to its argument as written (`T p = arg;`) and
-  `InternalCall` matches a call in any context, so a non-simple argument is no
-  longer stuck. Lean still captures it first (`functionCallArgCapture`), for
+  `InternalCall` matches `f(args);` / `lhs = f(args);` with any arguments, so a
+  non-simple argument is no longer stuck. Lean still captures it first (`functionCallArgCapture`), for
   its separation condition (decision D3).
 
 ## Resolved (kept for orientation)

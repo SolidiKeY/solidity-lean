@@ -25,7 +25,10 @@ instantiates a function: the call is written as `sol{ … }` would read it
 (`callStmt`) — `uint _r = f(a, b);` when `f` returns a value, `f(a, b);`
 otherwise — and elaborated by `elabProg`, which inlines the body
 (`Stmt.call`) as for any other call.  The value returned is then the local
-`_r` of the final state.  `DiffTest.lean` builds its calls the same way.
+`_r` of the final state; of several, `(uint _r0, uint _r1) = f(a, b);` and
+the locals `_r0`, `_r1`, … (`runStmt`).  `DiffTest.lean` builds its calls the
+same way, but a call of several returns as the bare `f(a, b);`, whose returns
+the inlined body declares.
 
 The output is `ok`, the value returned, and the storage one root per line
 (`fmtStorage`); or `revert`, or `stuck`.
@@ -53,6 +56,18 @@ def callStmt (C : Contract) (f : String) (args : List RawExpr) : Except String R
   | some (_, .prim p) => pure (.decl (PrimTy.raw p) retLocal (some (.call f args)))
   | some (_, T) => throw s!"{f} returns a {Ty.toStr T}, not a value type"
 
+/-- The call `#run` reports: `callStmt`, but a function of several returns
+lands them in `_r0`, `_r1`, …: `(uint _r0, uint _r1) = f(args);`.  (`callProg`
+keeps the bare call, whose returns the body declares, for `#difftest`: a call
+with targets is outside the compiled fragment.) -/
+def runStmt (C : Contract) (f : String) (args : List RawExpr) : Except String RawStmt := do
+  let some d := lookupBy f C.funs | throw s!"the contract declares no function {f}"
+  if d.rets.length < 2 then callStmt C f args else
+  let vs ← d.rets.zipIdx.mapM fun ((_, T), i) => match T with
+    | .prim p => pure (some (PrimTy.raw p, s!"{retLocal}{i}"))
+    | T => throw s!"{f} returns a {Ty.toStr T}, not a value type"
+  pure (.tupleDecl vs (.call f args))
+
 /-- The call of `f`, elaborated: its body inlined. -/
 def callProg [FreshNames] (C : Contract) (f : String) (args : List RawExpr) :
     Except String (Prog C) := do
@@ -77,13 +92,17 @@ def State.withRoots (σ : State) (roots : List (Name × SVal)) : State :=
 /-- What `#run` prints: the outcome, the value returned, the storage. -/
 def runReport [FreshNames] (C : Contract) (σ : State) (f : String) (args : List RawExpr) :
     Except String (List String) := do
-  let P ← callProg C f args
+  let P ← elabProg C [← runStmt C f args]
+  let n : Nat := ((lookupBy f C.funs).map (·.rets.length)).getD 0
   pure <| match Prog.run σ P with
     | .error h => [fmtHalt h]
     | .ok σ' =>
-      let ret := match σ'.valueOf (Var.ofName retLocal) with
-        | some v => [s!"returns {Value.fmt v}"]
-        | none => []
+      let ret := if n ≥ 2 then
+          let vs := (List.range n).filterMap fun i => σ'.valueOf (Var.ofName s!"{retLocal}{i}")
+          [s!"returns ({", ".intercalate (vs.map Value.fmt)})"]
+        else match σ'.valueOf (Var.ofName retLocal) with
+          | some v => [s!"returns {Value.fmt v}"]
+          | none => []
       ["ok"] ++ ret ++ fmtStorage C σ'.storage
 
 /-- One field of the transaction, `msg.sender := 7`, or a state variable,

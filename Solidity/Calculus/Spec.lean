@@ -19,8 +19,13 @@ R ∧ L ∧ M ∧ I ∧ requires →
 
 The call is solkey's synthesized `result = f(x₁, …, xₙ)@C;`, a
 `FunctionBodyStatement` with its target: it returns to `result`
-(`CallRet.rets`), so `functionBodyExpand` inlines it, where a call in a body
-is `internalCallExpand`'s.  A function of several returns returns to
+(`CallRet.rets`; a void function's `f(x̄)@C;` to no target, `CallRet.rets []`),
+so `functionBodyExpand` inlines it, where a call in a body is
+`internalCallExpand`'s.  Lean only: `T result;` is a statement of the box,
+where solkey declares `result` among the problem's program variables; and a
+function with an unnamed return has an obligation (`result`, or
+`result__ret0`, … of several), where solkey refuses one
+(`SolidityOutline.unsupportedReason`).  A function of several returns returns to
 `result_lo`, `result_hi`, … (`SpecCompiler.resultVariable`), and an `ensures`
 names a return by its name: `lo` is `result_lo` (`result` for the one return
 of a function of one), after the locals and before the state variables, as
@@ -435,10 +440,10 @@ def specPieces (f : String) :
       assignableFml C { post with storage := .pv oldVar, ledger := some oldNetVar, result := none } locs
     | none => pure []
   let args := ps.map fun (n, _) => RawExpr.name n
-  -- `T result; result = f(x̄)@C;`: the call returns to its targets
+  -- `T result; result = f(x̄)@C;`: the call returns to its targets (none
+  -- for a void function, `f(x̄)@C;`, still a `FunctionBodyStatement`)
   let call : List RawStmt :=
-    if rets.isEmpty then [.call (.name f) args]
-    else rets.map (fun (_, v, p) => RawStmt.decl (.named (primName p)) v none) ++
+    rets.map (fun (_, v, p) => RawStmt.decl (.named (primName p)) v none) ++
       [.tupleAssign (rets.map fun (_, v, _) => some (.name v)) (.call f args)]
   let P ← ((elabStmts C call).run C.funs).run' (ps.map fun (n, p) => (n, LocalTy.val p), 1)
   -- the snapshots `\old` reads, taken where something reads them

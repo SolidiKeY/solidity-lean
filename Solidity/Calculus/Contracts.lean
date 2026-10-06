@@ -48,7 +48,8 @@ them but its return variables, and that only the contract mentions `old`.
 The rule's goals are sequents of `⊢` and its conclusion is `⊨`
 (`useContract`; `useContract_of_valid` takes the goals as `⊨`): `Proves` is
 not extended, so a contract is used at the first statement of a goal, where
-a walk would apply `functionBodyExpand`.  Box only: a diamond contract would
+a walk would apply `internalCallExpand` (`functionBodyExpand` for a call
+with targets): its `fbs` stands for any call, `ic` or `fbs`.  Box only: a diamond contract would
 also owe termination.  The callee's parameters are the call's fresh locals
 (`se1`, …), so a contract is stated at a call's names; recursion stays out,
 as it does for inlining.

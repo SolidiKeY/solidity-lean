@@ -38,6 +38,23 @@ balances = {1: 5, _: 0}
 -/
 #guard_msgs in #run CallsExample.credit(1, 5)
 
+/-! A function of several returns lands them in `_r0`, `_r1`, …. -/
+
+def Ordered : Contract := contract!{
+  uint n;
+  function ordered(uint x, uint y) returns (uint lo, uint hi) {
+    if (x < y) { return (x, y); }
+    return (y, x);
+  }
+}
+
+/--
+info: ok
+returns (2, 5)
+n = 0
+-/
+#guard_msgs in #run Ordered.ordered(5, 2)
+
 /-! `mint` requires the caller to be the minter, who is `0` in a fresh
 contract: anyone else reverts. -/
 
@@ -129,6 +146,30 @@ info:   ~[storageFieldWriteSave]~>
 
 /-- info: no modality left: `close` -/
 #guard_msgs in #step dl!{ x == 42 }
+
+/-! A void function's obligation is solkey's `f(x̄)@C;`, a call with no
+target: `functionBodyExpand`'s, as a tuple assignment's call is. -/
+
+/--
+info:   ~[functionBodyExpand]~>
+    dl{
+  ((0 <= receiver ∧ receiver <= 115792089237316195423570985008687907853269984665640564039457584007913129639935) ∧
+        (0 <= amount ∧ amount <= 115792089237316195423570985008687907853269984665640564039457584007913129639935) ∧
+          (0 <= find(storage, minter) ∧
+                find(storage, minter) <=
+                  115792089237316195423570985008687907853269984665640564039457584007913129639935) ∧
+            (∀ uint k1;
+                  0 <= find(storage, balances[k1]) ∧
+                    find(storage, balances[k1]) <=
+                      115792089237316195423570985008687907853269984665640564039457584007913129639935) ∧
+              msg.value = 0 ∧ amount >= 0) →
+    { old := storage }
+      [ uint se1 = receiver; uint se2 = amount; require(msg.sender == minter); balances[se1] += se2; ]
+        ((find(old, minter) = msg.sender ∧ find(storage, minter) = find(old, minter)) ∧
+            find(storage, balances[receiver]) = find(old, balances[receiver]) + amount ∧
+              (∀ uint a; ¬a = receiver → find(storage, balances[a]) = find(old, balances[a]))) }
+-/
+#guard_msgs in #step spec[Benchmark.Coin.Coin]{ mint }
 
 end Inspect
 

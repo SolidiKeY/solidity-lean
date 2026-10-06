@@ -868,7 +868,10 @@ def Stmt.tupleCallStr? : Stmt C → List (Stmt C) → Option (String × Nat)
   | .call f args _ (.rets rs) _, P =>
     let ts := Stmt.retTargets rs 0 P
     let call := s!"{f}({", ".intercalate (args.map fun a => a.e.toStr true)});"
-    if ts.isEmpty then none
+    if ts.isEmpty then
+      -- every value discarded: `(, ) = f(x);`, a call with targets still
+      if rs.length < 2 then none
+      else some (s!"({String.mk (List.replicate (rs.length - 1) ',')}) = {call}", 0)
     else if rs.length == 1 then some (s!"{((ts.head?).map (·.2)).getD ""} = {call}", ts.length)
     else
       let slots := (List.range rs.length).map fun i => ((ts.find? (·.1 == i)).map (·.2)).getD ""
@@ -2806,12 +2809,14 @@ partial def renameStmts (ρ : List (String × String)) : List RawStmt → ElabM 
 
 /-- `return e;`, lowered to the return variables `rs`: `r = e;` for one;
 for several, `r₀ = e₀; r₁ = e₁; …` from `return (e₀, e₁, …);`, or, when a
-component reads a return variable or `e` is a call, the tuple assignment
-`(r₀, r₁, …) = e;`, which reads every component before it writes
-(`elabTuple`; solkey's `ReturnLowering`, `returnSwapped`). -/
+component reads a return variable, the tuple assignment `(r₀, r₁, …) = e;`,
+which reads every component before it writes (`elabTuple`; solkey's
+`ReturnLowering`, `returnSwapped`).  Lean only: `return g();` of several
+values is `(r₀, r₁, …) = g();`, which solkey's `ReturnLowering` refuses. -/
 def lowerReturn (rs : List String) (e : RawExpr) : Except String (List RawStmt) :=
   match rs, e with
   | [], _ => throw "`return` of a value from a function that returns none"
+  | [_], .tuple es => throw s!"`return` of {es.length} values from a function that returns one"
   | [n], e => pure [.assign (.name n) e]
   | rs, .tuple es =>
     if es.length != rs.length then
@@ -2819,7 +2824,8 @@ def lowerReturn (rs : List String) (e : RawExpr) : Except String (List RawStmt) 
     else if es.any fun e => rs.any e.mentions then
       pure [.tupleAssign (rs.map fun n => some (.name n)) (.tuple es)]
     else pure ((rs.zip es).map fun (n, e) => .assign (.name n) e)
-  | rs, e => pure [.tupleAssign (rs.map fun n => some (.name n)) e]
+  | rs, e@(.call ..) => pure [.tupleAssign (rs.map fun n => some (.name n)) e]
+  | rs, _ => throw s!"`return` of one value from a function that returns {rs.length}"
 
 /-- The names a statement declares in its own block: a declaration's, a tuple
 declaration's. -/
@@ -3168,9 +3174,12 @@ partial def elabCallRet (f : String) (args : List RawExpr) (res : Option (Var ×
   let mut mret : Option (RefTy × Var) := none
   let mut mrets : List (PrimTy × Var × Nat) := []
   let ret ← match d.rets, res with
-    | [], none => pure CallRet.none
+    -- a void call with targets (a void function's obligation, `f(x̄)@C;`)
+    -- is a `FunctionBodyStatement` all the same
+    | [], none => pure (if targets then CallRet.rets [] else CallRet.none)
     | [], some _ => throw s!"{f} returns no value"
     | [(n, .ref R)], none => do
+      if targets then throw s!"{f} returns a {Ty.ref R}, which a tuple assignment does not take"
       unless d.retMem do throw s!"{f}: its return of reference type {Ty.ref R} needs the location `memory`"
       let r ← freshCapture "mv"
       ρ := (n, toString r) :: ρ
@@ -3577,7 +3586,7 @@ right (a component left out is not read).  From a tuple `(e₀, e₁, e₂)`: ea
 component with a target into a fresh temporary, left to right, then each
 target assigned its temporary, left to right; a component left out is
 dropped if it can neither revert nor have an effect, and evaluated
-otherwise (solc's; solkey drops it).  Targets that may alias (the same name
+otherwise (solc's; solkey keeps only a call).  Targets that may alias (the same name
 twice, two that are not stack locals, one that reads another) are refused:
 solc's order of their writes is not KeY's.  The variables of a tuple
 declaration, which no component reads, are assigned directly (`direct`). -/
@@ -3596,7 +3605,8 @@ partial def elabTuple (ts : List (Option RawExpr)) (rhs : RawExpr) (direct : Boo
     throw "a tuple assignment to the same target twice"
   match rhs with
   | .call f args =>
-    unless (castTy? f).isNone && (← read).any (·.1 == f) do
+    -- a function not declared before this one is `elabCallRet`'s error
+    unless (castTy? f).isNone do
       throw s!"{f}(…): the right-hand side of a tuple assignment is a call of a function"
     let (P, args) ← hoistArgs args
     let (Q, _, rs) ← elabCallRet f args none (targets := true)

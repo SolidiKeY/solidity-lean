@@ -290,7 +290,7 @@ they would in a frame of their own.
   (`Examples/Tactics/Calls.lean`, `namedReturnDefault`). KeyTaclets declares
   them with no value (`R ri;`), so solkey cannot prove it.
 - **A discarded tuple component is evaluated** when it may revert or have an
-  effect: `(uint x, ) = (1, arr[5]);` reverts, as in solc. solkey's
+  effect: `(uint x, ) = (1, arr[5]);` reverts, as in solc (pinned with `1 / total` in `Examples/Tactics/Calls.lean`). solkey's
   `ParserUtils.tupleAssignment` drops every component that is not a call.
 - **A tuple assignment whose targets may alias is refused** (the same name
   twice, two targets that are not stack locals, a target that reads another),

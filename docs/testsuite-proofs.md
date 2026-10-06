@@ -2006,3 +2006,61 @@ pays, are all faster than the baseline.
 - Open: no committed fixture exercises the new printer paths until W6
   re-imports `TestSuite.sol`; the recursion refusal and a member that fails
   the pre-check stay unpinned after it, and want a small regression fixture.
+
+## Integration of the port lanes (2026-10-06)
+
+- **Merges.**  Lanes A (re-pin, front end), C (`send`), B (returns, tuples,
+  blocks) and D (function contracts) on one branch.  `KeyTaclets.lean` is
+  lane A's 323-taclet table (`1b4341a303`); `RuleShapes` claims
+  `internalCallExpand`, the send taclets and `sendWithCallbackBox`, and lists
+  `blockReturn`, `functionFrameReturn`, `functionFrameEmpty` as architectural
+  beside `blockEmpty`: claimed 306, unclaimed 17; `leanOnly_keyTier_count`
+  39.  Lane D's code gained `.rets` arms (`CallRet.binders`,
+  `Mutability.enter_agree`/`leave_agree`) and a `send` arm
+  (`Stmt.within`: `nonpayable`; `Stmt.frame_of_within`).  The solc import
+  lowers returns with lane B's `lowerReturns` over the list of return
+  variables, so a function of several returns imports too.
+- **`#verify` heartbeats.**  Lane C's ledger hypothesis on a storage write
+  (`Modality.wp_box_saveStorage`'s `τ.net = σ.net`) pushed `sol_spec_try` on
+  `Examples/Verify.lean`'s `incBoth` just past 200000 heartbeats, which left
+  the refutation no budget.  `verifyFunction` now gives each step its own
+  (`withCurrHeartbeats`), and the pin is unchanged.
+- Old fixture: 420 functions, 415 derived; `check-testsuite.sh` ok
+  against `78f42fde33`; `solkeycheck` at zero against `1b4341a303`.
+
+### Lane B review (2026-10-06)
+
+A finder and a skeptic per area (elaborator, calculus), read-only.  Fixed:
+
+- A void function's obligation called with `CallRet.none`, so it fired
+  `internalCallExpand` where solkey's `f(x̄)@C;` (a `FunctionBodyStatement`)
+  fires `functionBodyExpand`.  It is now a call with no target
+  (`CallRet.rets []`, `elabCallRet` with `targets`), pinned with `#step` in
+  `Examples/Tools.lean`.
+- `ppRetTarget?` lacked the memory target `Stmt.retTarget?` has, so
+  `(a, m.age) = f(x);` printed as a discarded component.
+- `(, ) = f(x);` printed as `f(x);`, an `ic`; both printers now write
+  `(,) = f(x);` (pinned in `Examples/Tactics/Calls.lean`).
+- `#run` on a function of several returns printed none of them: it lands
+  them in `_r0`, `_r1`, … (`runStmt`, pinned).  `#difftest` already compared
+  them under the body's names.
+- Error messages: `return (a, b);` from a function of one return, `return
+  x;` from one of several, a tuple assigned from a memory-returning call,
+  and a tuple assigned from a function declared later now say so.
+- `scopeHints`/`aliasHints` descend into blocks and type a tuple
+  declaration's variables.
+- The discarded component that is evaluated (`(uint x, ) = (1, 1 /
+  total);` halts) is pinned by a run.
+- Docs: void obligations, `T result;` and obligations of unnamed returns
+  marked Lean-only; `return g();` of several values marked Lean-only (solkey's
+  `ReturnLowering` refuses it); solkey keeps a discarded call; `ret0` for a
+  single unnamed return; which calls carry `CallRet.rets`; `useContract`'s
+  `fbs` covers `ic` calls too; `ic`'s schema row; the round-trip claim of the
+  tuple printer limited to two targets or more; solkey-feedback item 3 and
+  §8 wording.
+
+Left: a block's declaration followed by a same-named declaration of
+another type later (`{ bool x; } if (c) { uint x; }`) elaborates, as in
+Solidity, but the flat program fails `Prog.wt` (only type preservation reads
+it; `unchecked { }` had the same before); `narrowPure` runs twice on a tuple's
+components under `unchecked` (a redundant `% 2^n`, same value).
