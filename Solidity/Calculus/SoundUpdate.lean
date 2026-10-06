@@ -205,19 +205,19 @@ macro "mem_unfold" : tactic => `(tactic| (
   try simp only [MPath.lower, MLoc.lower]
   upd_unfold'))
 
-theorem upd_memoryFieldReadHeap (v mv : Var) {fld x : Name} {q : PrimTy}
+theorem upd_memoryFieldRead (v mv : Var) {fld x : Name} {q : PrimTy}
     (hfld : C.fieldType x fld = some (Ty.prim q)) (σ : State) :
     SameOk [] (Upd.apply (C := C) [UpdElem.val v (Term.read MTerm.memory (MAddr.field (ITerm.pv mv) fld))] σ)
       (Stmt.run σ (Stmt.assignLocal v (Val.readMem (MLoc.field (MPath.var mv) fld hfld)))) := by
   mem_unfold; res_split
 
-theorem upd_memoryIndexReadHeap {q : PrimTy} {R : RefTy} (a : ArrTy R (Ty.prim q)) (v mv : Var)
+theorem upd_memoryIndexReadArrayValue {q : PrimTy} {R : RefTy} (a : ArrTy R (Ty.prim q)) (v mv : Var)
     (ie : Simple C PrimTy.uint) (σ : State) :
     SameOk [] (Upd.apply (C := C) [UpdElem.val v (Term.read MTerm.memory (MAddr.at (ITerm.pv mv) ie.lower))] σ)
       (Stmt.run σ (Stmt.assignLocal v (Val.readMem (MLoc.index a (MPath.var mv) (Val.simple ie))))) := by
   mem_unfold; res_split
 
-theorem upd_memoryRootAlias {R : RefTy} (mv₁ mv₂ : Var) (σ : State) :
+theorem upd_memoryRootRebind {R : RefTy} (mv₁ mv₂ : Var) (σ : State) :
     SameOk [] (Upd.apply (C := C) [UpdElem.mref mv₁ (ITerm.pv mv₂)] σ)
       (Stmt.run σ (Stmt.rebindMem mv₁ (MRhs.alias (MPath.var (C := C) (R := R) mv₂)))) := by
   mem_unfold; res_split
@@ -228,20 +228,20 @@ theorem upd_memoryFieldReadAliasRoot (mv₁ mv₂ : Var) {fr x : Name} {R : RefT
       (Stmt.run σ (Stmt.rebindMem mv₁ (MRhs.alias (MPath.loc (MLoc.field (MPath.var mv₂) fr hfr))))) := by
   mem_unfold; res_split
 
-theorem upd_memoryIndexReadAliasRoot {R R' : RefTy} (a : ArrTy R' (Ty.ref R)) (mv₁ mv₂ : Var)
+theorem upd_memoryIndexReadArrayMemory {R R' : RefTy} (a : ArrTy R' (Ty.ref R)) (mv₁ mv₂ : Var)
     (ie : Simple C PrimTy.uint) (σ : State) :
     SameOk [] (Upd.apply (C := C) [UpdElem.mref mv₁ (ITerm.read MTerm.memory (MAddr.at (ITerm.pv mv₂) ie.lower))] σ)
       (Stmt.run σ (Stmt.rebindMem mv₁
         (MRhs.alias (MPath.loc (MLoc.index a (MPath.var mv₂) (Val.simple ie)))))) := by
   mem_unfold; res_split
 
-theorem upd_memoryFieldWriteStore (mv : Var) {fld x : Name} {q : PrimTy}
+theorem upd_memoryFieldWrite (mv : Var) {fld x : Name} {q : PrimTy}
     (hfld : C.fieldType x fld = some (Ty.prim q)) (se : Simple C q) (σ : State) :
     SameOk [] (Upd.apply (C := C) [UpdElem.memory (MTerm.memory.write (MAddr.field (ITerm.pv mv) fld) (MValT.val se.lower))] σ)
       (Stmt.run σ (Stmt.assignMem (MLoc.field (MPath.var mv) fld hfld) (MSrc.val (Val.simple se)))) := by
   mem_unfold; res_split
 
-theorem upd_memoryIndexWriteStore {q : PrimTy} {R : RefTy} (a : ArrTy R (Ty.prim q)) (mv : Var)
+theorem upd_memoryIndexWriteArray {q : PrimTy} {R : RefTy} (a : ArrTy R (Ty.prim q)) (mv : Var)
     (ie : Simple C PrimTy.uint) (se : Simple C q) (σ : State) :
     SameOk [] (Upd.apply (C := C) [UpdElem.memory (MTerm.memory.write (MAddr.at (ITerm.pv mv) ie.lower) (MValT.val se.lower))] σ)
       (Stmt.run σ (Stmt.assignMem (MLoc.index a (MPath.var mv) (Val.simple ie)) (MSrc.val (Val.simple se)))) := by
@@ -620,13 +620,13 @@ theorem Taclet.sound_update {k : Nat} {m : Modality} {s : Stmt C} {U : Upd C}
   case storageLocalRootPushBind => exact upd_storageLocalRootPushBind ..
   case storageLocalRootPushBindMappingElement => exact upd_storageLocalRootPushBind ..
   case transferNoCallbackBox => exact upd_transferNoCallbackBox ..
-  case memoryFieldReadHeap => exact upd_memoryFieldReadHeap ..
-  case memoryIndexReadHeap => exact upd_memoryIndexReadHeap ..
-  case memoryRootAlias => exact upd_memoryRootAlias ..
+  case memoryFieldRead => exact upd_memoryFieldRead ..
+  case memoryIndexReadArrayValue => exact upd_memoryIndexReadArrayValue ..
+  case memoryRootRebind => exact upd_memoryRootRebind ..
   case memoryFieldReadAliasRoot => exact upd_memoryFieldReadAliasRoot ..
-  case memoryIndexReadAliasRoot => exact upd_memoryIndexReadAliasRoot ..
-  case memoryFieldWriteStore => exact upd_memoryFieldWriteStore ..
-  case memoryIndexWriteStore => exact upd_memoryIndexWriteStore ..
+  case memoryIndexReadArrayMemory => exact upd_memoryIndexReadArrayMemory ..
+  case memoryFieldWrite => exact upd_memoryFieldWrite ..
+  case memoryIndexWriteArray => exact upd_memoryIndexWriteArray ..
   case memoryStorageCopy => exact upd_memoryStorageCopy ..
   case memoryArrayFreshAlloc => exact upd_memoryArrayFreshAlloc ..
   case memoryRootDeleteFreshRebind => exact upd_memoryRootDeleteFreshRebind ..

@@ -47,7 +47,7 @@ theorem chain :
     dl![m]{
       { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
         ⟨[ carol.age = 42; alice = carol; v = alice.age; ]⟩ φ }
-    ~[memoryFieldWriteStore]~> dl![m]{
+    ~[memoryFieldWrite]~> dl![m]{
         { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
           { memory := write(memory, carol.age, 42) } ⟨[ alice = carol; v = alice.age; ]⟩ φ }
     ~*> dl![m]{
@@ -111,7 +111,7 @@ theorem chain :
     dl![m]{
       { carolAcc := freshId(addM(memory, Account)) ‖ memory := addM(memory, Account) }
         ⟨[ carolAcc.balance = 50; alice.account = carolAcc; v = alice.account.balance; ]⟩ φ }
-    ~[memoryFieldWriteStore]~> dl![m]{
+    ~[memoryFieldWrite]~> dl![m]{
         { carolAcc := freshId(addM(memory, Account)) ‖ memory := addM(memory, Account) }
           { memory := write(memory, carolAcc.balance, 50) } ⟨[ alice.account = carolAcc; v = alice.account.balance; ]⟩ φ }
     ~*> dl![m]{
@@ -383,7 +383,7 @@ theorem chain :
     dl![m]{
       { carolToken := freshId(addM(memory, Token)) ‖ memory := addM(memory, Token) }
         ⟨[ carolToken.value = 99; alice.account.token = carolToken; v = alice.account.token.value; ]⟩ φ }
-    ~[memoryFieldWriteStore]~> dl![m]{
+    ~[memoryFieldWrite]~> dl![m]{
         { carolToken := freshId(addM(memory, Token)) ‖ memory := addM(memory, Token) }
           { memory := write(memory, carolToken.value, 99) }
             ⟨[ alice.account.token = carolToken; v = alice.account.token.value; ]⟩ φ }

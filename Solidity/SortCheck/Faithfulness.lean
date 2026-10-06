@@ -621,10 +621,10 @@ theorem faithful_memoryToStorageFieldCopyRoot {C : Contract} {k : Nat} {m : Moda
   ctorFaithful_of (dom := .memory) (cls := .reference) rfl rfl rfl (by decide +kernel)
 
 /-- `x = m.age;` reads a number, `age`'s declared `uint` (`\hasMemoryFieldSort`). -/
-theorem faithful_memoryFieldReadHeap {C : Contract} {k : Nat} {m : Modality} {v mv : Var}
+theorem faithful_memoryFieldRead {C : Contract} {k : Nat} {m : Modality} {v mv : Var}
     {fld x : Name} {x_1 : PrimTy} {hfld : Eq (Contract.fieldType C x fld) (some (Ty.prim x_1))} :
-    CtorFaithful ``Taclet.memoryFieldReadHeap
-      (stmtOf (@Taclet.memoryFieldReadHeap C k m v mv fld x x_1 hfld)) :=
+    CtorFaithful ``Taclet.memoryFieldRead
+      (stmtOf (@Taclet.memoryFieldRead C k m v mv fld x x_1 hfld)) :=
   ctorFaithful_of (dom := .memory) (cls := .any) rfl rfl rfl (by decide +kernel)
 
 /-- `n = m.account;` reads a reference the store typing claims at `Account`
@@ -636,17 +636,17 @@ theorem faithful_memoryFieldReadAliasRoot {C : Contract} {k : Nat} {m : Modality
   ctorFaithful_of (dom := .memory) (cls := .any) rfl rfl rfl (by decide +kernel)
 
 /-- `x = ns[i];` (`ns : uint[] memory`) reads a number (`\hasMemoryElementSort`). -/
-theorem faithful_memoryIndexReadHeap {C : Contract} {k : Nat} {x : PrimTy} {m : Modality}
+theorem faithful_memoryIndexReadArrayValue {C : Contract} {k : Nat} {x : PrimTy} {m : Modality}
     {v mv : Var} {R : RefTy} {mk : ArrTy R (Ty.prim x)} {ie : Simple C PrimTy.uint} :
-    CtorFaithful ``Taclet.memoryIndexReadHeap
-      (stmtOf (@Taclet.memoryIndexReadHeap C k m v R x mk mv ie)) :=
+    CtorFaithful ``Taclet.memoryIndexReadArrayValue
+      (stmtOf (@Taclet.memoryIndexReadArrayValue C k m v R x mk mv ie)) :=
   ctorFaithful_of (dom := .memory) (cls := .any) rfl rfl rfl (by decide +kernel)
 
 /-- `p = ps[i];` (`ps : Person[] memory`) reads an `Identity`. -/
-theorem faithful_memoryIndexReadAliasRoot {C : Contract} {k : Nat} {x : RefTy} {m : Modality}
+theorem faithful_memoryIndexReadArrayMemory {C : Contract} {k : Nat} {x : RefTy} {m : Modality}
     {mv₁ mv₂ : Var} {R : RefTy} {mk : ArrTy R (Ty.ref x)} {ie : Simple C PrimTy.uint} :
-    CtorFaithful ``Taclet.memoryIndexReadAliasRoot
-      (stmtOf (@Taclet.memoryIndexReadAliasRoot C k m mv₁ R x mk mv₂ ie)) :=
+    CtorFaithful ``Taclet.memoryIndexReadArrayMemory
+      (stmtOf (@Taclet.memoryIndexReadArrayMemory C k m mv₁ R x mk mv₂ ie)) :=
   ctorFaithful_of (dom := .memory) (cls := .reference) rfl rfl rfl (by decide +kernel)
 
 /-- `m.age += x;` reads `m.age` under `read<[int]>`. -/
@@ -741,10 +741,10 @@ def faithfulCtors : List Proved := [
   ⟨``Taclet.storageFieldIncrementAssignment, _, @faithful_storageFieldIncrementAssignment⟩,
   ⟨``Taclet.storageIndexIncrementAssignment, _, @faithful_storageIndexIncrementAssignment⟩,
   ⟨``Taclet.memoryToStorageFieldCopyRoot, _, @faithful_memoryToStorageFieldCopyRoot⟩,
-  ⟨``Taclet.memoryFieldReadHeap, _, @faithful_memoryFieldReadHeap⟩,
+  ⟨``Taclet.memoryFieldRead, _, @faithful_memoryFieldRead⟩,
   ⟨``Taclet.memoryFieldReadAliasRoot, _, @faithful_memoryFieldReadAliasRoot⟩,
-  ⟨``Taclet.memoryIndexReadHeap, _, @faithful_memoryIndexReadHeap⟩,
-  ⟨``Taclet.memoryIndexReadAliasRoot, _, @faithful_memoryIndexReadAliasRoot⟩,
+  ⟨``Taclet.memoryIndexReadArrayValue, _, @faithful_memoryIndexReadArrayValue⟩,
+  ⟨``Taclet.memoryIndexReadArrayMemory, _, @faithful_memoryIndexReadArrayMemory⟩,
   ⟨``Taclet.memoryFieldOpAssign, _, @faithful_memoryFieldOpAssign⟩,
   ⟨``Taclet.memoryIndexArrayOpAssign, _, @faithful_memoryIndexArrayOpAssign⟩,
   ⟨``Taclet.memoryFieldIncrement, _, @faithful_memoryFieldIncrement⟩,

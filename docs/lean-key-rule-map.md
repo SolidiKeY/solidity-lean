@@ -137,7 +137,7 @@ one, and `push`/`pop` are written at `.array` only.
 | `memoryArrayFreshAlloc` | same | same | `mv = new T(se); ⇝ { mv := freshId(copySt(memory, newArr(se))) ‖ memory := copySt(memory, newArr(se)) }`: Lean copies in `newArrVal R n` (defaults, each struct element its own object, as solc allocates) where KeY writes `size`; a non-simple size is captured by the elaborator |
 | `newArrayCapture` | same | same | `tgt = new T(se) ⇝ T memory mv = new T(se); tgt = mv`, `tgt` a storage or memory location (`NewLhs`) |
 | `memoryRootDeleteFreshRebind` | same | same | `delete mv; ⇝` the allocation pair (see "Memory delete") |
-| `memoryRootRebind` | `memoryRootAlias` | merged | `mv₁ = mv₂; ⇝ { mv₁ := mv₂ }`; a storage right-hand side is `memoryStorageCopy` |
+| `memoryRootRebind` | same | same | `mv₁ = mv₂; ⇝ { mv₁ := mv₂ }`; a storage right-hand side is `memoryStorageCopy` |
 | `memoryStorageCopy` | same | same | `mv = sp;` deep copy: fresh identity plus `copySt` |
 | `memoryStorageCopyUnfold` | same | same | a complex storage path is captured first |
 | `memoryLocalDeclInitDrop` | same | same | one generic decl-with-init split; the assignment rules take over |
@@ -146,11 +146,11 @@ one, and `push`/`pop` are written at `.array` only.
 
 | KeY taclet | `Taclet` constructor | Status | Notes |
 | --- | --- | --- | --- |
-| `memoryFieldWrite` | `memoryFieldWriteStore`, `memoryFieldWriteCopy` | merged | Lean's sorts are not generic: a value source and a reference-path source are two rules |
-| `memoryIndexWriteArray` | `memoryIndexWriteStore`, `memoryIndexWriteCopy` | merged | likewise |
-| `memoryFieldRead` | `memoryFieldReadHeap`, `memoryFieldReadAliasRoot`, `memoryLengthRead` | merged | the same split on reads (a value lands on a local, a reference on a memory alias); `memoryLengthRead` is the member `length` (`Term.mlen`, KeY's `read(memory, mv, size)`) |
-| `memoryIndexReadArrayValue` | `memoryIndexReadHeap` | merged | |
-| `memoryIndexReadArrayMemory` | `memoryIndexReadAliasRoot` | merged | |
+| `memoryFieldWrite` | `memoryFieldWrite`, `memoryFieldWriteCopy` | merged | Lean's sorts are not generic: a value source and a reference-path source are two rules |
+| `memoryIndexWriteArray` | `memoryIndexWriteArray`, `memoryIndexWriteCopy` | merged | likewise; KeY's `inBounds`/`outOfBounds` split is the write's own bounds check, which reverts |
+| `memoryFieldRead` | `memoryFieldRead`, `memoryFieldReadAliasRoot`, `memoryLengthRead` | merged | the same split on reads (a value lands on a local, a reference on a memory alias); `memoryLengthRead` is the member `length` (`Term.mlen`, KeY's `read(memory, mv, size)`) |
+| `memoryIndexReadArrayValue` | same | same | KeY's `inBounds`/`outOfBounds` split is the read's own bounds check, which reverts |
+| `memoryIndexReadArrayMemory` | same | same | likewise |
 | `memoryFieldRead_unfold_rightFst` | `memoryFieldRead_unfold_rightFst`, `memoryLengthRead_unfold_rightFst` | same | |
 | `memoryIndexRead_unfold_rightFst`, `memoryIndexRead_unfold_rightSndIndex` | same names | same | |
 | `memoryFieldWrite_unfold_leftFst` | same | same | also claims the row below |

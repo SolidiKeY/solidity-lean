@@ -401,7 +401,7 @@ theorem chain (m : Modality) (φ : Post Calls) :
         { storage := save(storage, alice.age, 10) }
           { mv2 := freshId(addM(memory, Account)) ‖ memory := addM(memory, Account) }
             ⟨[ mv2.balance = 100; Account memory pv = mv2; Person memory mv = choosePersonMem(); mv.account = pv; ]⟩ φ }
-    ~[memoryFieldWriteStore]~> dl![m]{
+    ~[memoryFieldWrite]~> dl![m]{
         { storage := save(storage, alice.age, 10) }
           { mv2 := freshId(addM(memory, Account)) ‖ memory := addM(memory, Account) }
             { memory := write(memory, mv2.balance, 100) }

@@ -30,7 +30,7 @@ local instance : InContract := ⟨StandardExample⟩
 
 /-- `alice.age = 34; Person memory carol = alice; uint v = carol.age;` — the
 copy holds the storage value, and the memory read finds it
-(`memoryStorageCopy`, then `memoryFieldReadHeap`). -/
+(`memoryStorageCopy`, then `memoryFieldRead`). -/
 theorem storageToMemoryRootCopy :
     ⊨ dl!{ [ alice.age = 34; Person memory carol = alice; uint v = carol.age; ] v == 34 } := by
   apply Proves.valid
@@ -39,7 +39,7 @@ theorem storageToMemoryRootCopy :
   apply update .memoryStorageCopy
   -- { carol := freshId(copySt(memory, find(storage, alice))) ‖ memory := copySt(…) }
   apply unfold .localValueDeclInitDrop
-  apply update .memoryFieldReadHeap
+  apply update .memoryFieldRead
   apply empty
   refine close ?_
   sol_symex
@@ -64,7 +64,7 @@ theorem storageToMemoryMemberCopy :
   apply update .storageFieldReadBindLocalRoot
   apply update .memoryStorageCopy
   apply unfold .localValueDeclInitDrop
-  apply update .memoryFieldReadHeap
+  apply update .memoryFieldRead
   apply empty
   refine close ?_
   sol_symex
@@ -95,7 +95,7 @@ theorem storageToMemoryNonsimplePath :
   apply update .storageFieldReadBindLocalRoot
   apply update .memoryStorageCopy
   apply unfold .localValueDeclInitDrop
-  apply update .memoryFieldReadHeap
+  apply update .memoryFieldRead
   apply empty
   refine close ?_
   sol_symex
@@ -138,7 +138,7 @@ theorem memoryToStorageRootCopy :
            v == 34 } := by
   apply Proves.valid
   apply update .memoryReferenceDeclFreshAlloc
-  apply update .memoryFieldWriteStore
+  apply update .memoryFieldWrite
   apply update .memoryToStorageStoreRoot
   -- { storage := save(storage, alice, copyMem(mtSt, memory, carol)) }
   apply unfold .localValueDeclInitDrop
@@ -159,7 +159,7 @@ theorem memoryToStorageFromAlias :
   apply unfold .storageLocalDeclInitDrop
   apply update .storageFieldReadBindLocalRoot
   apply update .memoryStorageCopy
-  apply update .memoryFieldWriteStore
+  apply update .memoryFieldWrite
   apply update .memoryToStorageFieldCopyRoot
   -- { storage := save(storage, alice.account, copyMem(mtSt, memory, acc)) }
   apply unfold .localValueDeclInitDrop
@@ -184,7 +184,7 @@ theorem memoryToStorageFromMemberSource :
   apply unfold .memoryFieldWrite_unfold_leftFst
   apply unfold .memoryLocalDeclInitDrop
   apply update .memoryFieldReadAliasRoot
-  apply update .memoryFieldWriteStore
+  apply update .memoryFieldWrite
   apply update .memoryToStorageFieldCopyRoot
   apply unfold .localValueDeclInitDrop
   apply unfoldRule (Stmt.step _ _ _).rule  -- `storageFieldRead_unfold_rightFst`
@@ -211,7 +211,7 @@ theorem memoryToStorageNonsimplePath :
   apply update .storageFieldReadBindLocalRoot
   apply update .storageFieldReadBindLocalRoot
   apply update .memoryStorageCopy
-  apply update .memoryFieldWriteStore
+  apply update .memoryFieldWrite
   apply unfold .memoryToStorageField_unfold_leftFst
   apply unfold .storageLocalDeclInitDrop
   apply update .storageFieldReadBindLocalRoot

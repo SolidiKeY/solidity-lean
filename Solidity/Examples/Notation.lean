@@ -110,10 +110,10 @@ info: @Taclet.storagePushValueSave : ∀ {C : Contract} {k : Nat} {m : Modality}
 /-! ### Memory, and a copy from storage: an allocation is two elements -/
 
 /--
-info: @Taclet.memoryFieldWriteStore : ∀ {C : Contract} {k : Nat} {m : Modality} {mv : Var} {fld x : Name} {x_1 : PrimTy}
+info: @Taclet.memoryFieldWrite : ∀ {C : Contract} {k : Nat} {m : Modality} {mv : Var} {fld x : Name} {x_1 : PrimTy}
   {se : Simple C x_1}, dl{ ⟨[ mv.fld = se; ]⟩ ⇝ { memory := write(memory, mv.fld, se) } ⟨[ ]⟩ }
 -/
-#guard_msgs in #check @Taclet.memoryFieldWriteStore
+#guard_msgs in #check @Taclet.memoryFieldWrite
 
 /--
 info: @Taclet.memoryStorageCopy : ∀ {C : Contract} {k : Nat} {m : Modality} {mv : Var} {x : RefTy} {sp : SPath C (Ty.ref x)}

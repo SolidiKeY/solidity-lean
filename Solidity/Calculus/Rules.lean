@@ -519,19 +519,19 @@ inductive Taclet (C : Contract) (k : Nat) : Modality → Stmt C → Premise C �
       dl{ ⟨[ lhs = nmp[e]; ]⟩ ⇝ ⟨[ T memory mv = nmp; lhs = mv[e]; ]⟩ }
   | memoryIndexRead_unfold_rightSndIndex :
       dl{ ⟨[ lhs = mv[nse]; ]⟩ ⇝ ⟨[ T ie = nse; lhs = mv[ie]; ]⟩ }
-  | memoryFieldReadHeap :
+  | memoryFieldRead :
       dl{ ⟨[ v = mv.fld; ]⟩ ⇝ { v := read(memory, mv.fld) } ⟨[ ]⟩ }
-  | memoryIndexReadHeap :
+  | memoryIndexReadArrayValue :
       dl{ ⟨[ v = mv[ie]; ]⟩ ⇝ { v := read(memory, mv[ie]) } ⟨[ ]⟩ }
-  | memoryRootAlias :
+  | memoryRootRebind :
       dl{ ⟨[ mv₁ = mv₂; ]⟩ ⇝ { mv₁ := mv₂ } ⟨[ ]⟩ }
   | memoryFieldReadAliasRoot :
       dl{ ⟨[ mv₁ = mv₂.fr; ]⟩ ⇝ { mv₁ := read(memory, mv₂.fr) } ⟨[ ]⟩ }
-  | memoryIndexReadAliasRoot :
+  | memoryIndexReadArrayMemory :
       dl{ ⟨[ mv₁ = mv₂[ie]; ]⟩ ⇝ { mv₁ := read(memory, mv₂[ie]) } ⟨[ ]⟩ }
-  | memoryFieldWriteStore :
+  | memoryFieldWrite :
       dl{ ⟨[ mv.fld = se; ]⟩ ⇝ { memory := write(memory, mv.fld, se) } ⟨[ ]⟩ }
-  | memoryIndexWriteStore :
+  | memoryIndexWriteArray :
       dl{ ⟨[ mv[ie] = se; ]⟩ ⇝ { memory := write(memory, mv[ie], se) } ⟨[ ]⟩ }
   | memoryFieldWriteCopy :
       dl{ ⟨[ mv.fld = mpath; ]⟩ ⇝ { memory := write(memory, mv.fld, mpath) } ⟨[ ]⟩ }

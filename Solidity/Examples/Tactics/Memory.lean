@@ -7,9 +7,9 @@ Memory holds objects by identity: a memory local is bound to an object, a
 memory declaration from a memory path binds the *same* object (an alias, no
 copy), and a write through either name is a write to that object.  That is
 the point of the memory examples,
-and it is what the rules say: `memoryRootAlias` binds `mv₁ := mv₂`,
+and it is what the rules say: `memoryRootRebind` binds `mv₁ := mv₂`,
 `memoryFieldReadAliasRoot` binds `mv₁ := read(memory, mv₂.fr)` — the identity
-the member holds — and only `memoryFieldWriteStore` writes the heap.
+the member holds — and only `memoryFieldWrite` writes the heap.
 
 Every example is a theorem `⊨ dl!{ … }`, proved by the strategy (`sol_symex;
 sol_close`) or, for a worked example, by a walk naming each
@@ -53,9 +53,9 @@ theorem memoryDeclFreshAlloc :
     ⊨ dl!{ [ Person memory carol; carol.age = 5; uint x = carol.age; ] x == 5 } := by
   apply Proves.valid
   apply update .memoryReferenceDeclFreshAlloc
-  apply update .memoryFieldWriteStore
+  apply update .memoryFieldWrite
   apply unfold .localValueDeclInitDrop
-  apply update .memoryFieldReadHeap
+  apply update .memoryFieldRead
   apply empty
   refine close ?_
   sol_symex
@@ -63,7 +63,7 @@ theorem memoryDeclFreshAlloc :
 
 /-- `Person memory carolAlias = carol;` — aliasing by declaration: the
 initialiser drops (`memoryLocalDeclInitDrop`) and the alias binds the same
-identity (`memoryRootAlias`), with no heap write, so a write through the alias
+identity (`memoryRootRebind`), with no heap write, so a write through the alias
 is seen through `carol`. -/
 theorem memoryDeclAlias :
     ⊨ dl!{ [ Person memory carol; Person memory carolAlias = carol; carolAlias.age = 3;
@@ -71,10 +71,10 @@ theorem memoryDeclAlias :
   apply Proves.valid
   apply update .memoryReferenceDeclFreshAlloc
   apply unfold .memoryLocalDeclInitDrop
-  apply update .memoryRootAlias
-  apply update .memoryFieldWriteStore
+  apply update .memoryRootRebind
+  apply update .memoryFieldWrite
   apply unfold .localValueDeclInitDrop
-  apply update .memoryFieldReadHeap
+  apply update .memoryFieldRead
   apply empty
   refine close ?_
   sol_symex
@@ -95,7 +95,7 @@ theorem memoryDeclDeepAlias :
   apply unfold .memoryLocalDeclInitDrop
   apply update .memoryFieldReadAliasRoot
   apply update .memoryFieldReadAliasRoot
-  apply update .memoryFieldWriteStore
+  apply update .memoryFieldWrite
   apply unfold .localValueDeclInitDrop
   apply unfoldRule (Stmt.step _ _ _).rule  -- `memoryFieldRead_unfold_rightFst`
   apply unfold .memoryLocalDeclInitDrop
@@ -103,7 +103,7 @@ theorem memoryDeclDeepAlias :
   apply unfold .memoryLocalDeclInitDrop
   apply update .memoryFieldReadAliasRoot
   apply update .memoryFieldReadAliasRoot
-  apply update .memoryFieldReadHeap
+  apply update .memoryFieldRead
   apply empty
   refine close ?_
   sol_symex
@@ -111,7 +111,7 @@ theorem memoryDeclDeepAlias :
 
 /-! ## 2 · Writes and reads -/
 
-/-- `carol.age = amount;` — both parts simple: one write (`memoryFieldWriteStore`). -/
+/-- `carol.age = amount;` — both parts simple: one write (`memoryFieldWrite`). -/
 theorem memoryFieldWrite :
     ⊨ dl!{ [ Person memory carol; carol.age = amount; uint x = carol.age; ] x == amount } := by
   sol_symex
@@ -120,7 +120,7 @@ theorem memoryFieldWrite :
 /-- `carol.account.balance = 10;` — the memory twin of the headline
 (`StorageSteps.deepFieldWrite`): the receiver is bound to a memory local
 (`memoryFieldWrite_unfold_leftFst`, `memoryFieldReadAliasRoot`), then written
-through (`memoryFieldWriteStore`), a `write` at an identity where storage has
+through (`memoryFieldWrite`), a `write` at an identity where storage has
 a `save` at a path. -/
 theorem memoryDeepFieldWrite :
     ⊨ dl!{ [ Person memory carol; carol.account.balance = 10; uint x = carol.account.balance; ]
@@ -130,12 +130,12 @@ theorem memoryDeepFieldWrite :
   apply unfold .memoryFieldWrite_unfold_leftFst
   apply unfold .memoryLocalDeclInitDrop
   apply update .memoryFieldReadAliasRoot
-  apply update .memoryFieldWriteStore
+  apply update .memoryFieldWrite
   apply unfold .localValueDeclInitDrop
   apply unfoldRule (Stmt.step _ _ _).rule  -- `memoryFieldRead_unfold_rightFst`
   apply unfold .memoryLocalDeclInitDrop
   apply update .memoryFieldReadAliasRoot
-  apply update .memoryFieldReadHeap
+  apply update .memoryFieldRead
   apply empty
   refine close ?_
   sol_symex
@@ -150,9 +150,9 @@ theorem memoryFieldWriteCapturedRhs :
   apply unfold .memoryFieldWriteUnfoldSource
   apply unfold .localValueDeclInitDrop
   apply update .binopAssignment
-  apply update .memoryFieldWriteStore
+  apply update .memoryFieldWrite
   apply unfold .localValueDeclInitDrop
-  apply update .memoryFieldReadHeap
+  apply update .memoryFieldRead
   apply empty
   refine close ?_
   sol_symex
@@ -171,12 +171,12 @@ theorem memoryAliasWrite :
   apply update .memoryReferenceDeclFreshAlloc
   apply unfold .memoryLocalDeclInitDrop
   apply update .memoryFieldReadAliasRoot  -- { carolAcc := read(memory, carol.account) }
-  apply update .memoryFieldWriteStore     -- { memory := write(memory, carolAcc.balance, 100) }
+  apply update .memoryFieldWrite     -- { memory := write(memory, carolAcc.balance, 100) }
   apply unfold .localValueDeclInitDrop
   apply unfoldRule (Stmt.step _ _ _).rule   -- `memoryFieldRead_unfold_rightFst`
   apply unfold .memoryLocalDeclInitDrop
   apply update .memoryFieldReadAliasRoot
-  apply update .memoryFieldReadHeap
+  apply update .memoryFieldRead
   apply empty
   refine close ?_
   sol_symex
@@ -205,7 +205,7 @@ theorem memoryFieldCopy :
   sol_symex
   sol_close
 
-/-- `carol = david;` — a root assignment rebinds (`memoryRootAlias`); the heap
+/-- `carol = david;` — a root assignment rebinds (`memoryRootRebind`); the heap
 is untouched, and `carol` now names `david`'s object. -/
 theorem memoryRootAssign :
     ⊨ dl!{ [ Person memory carol; Person memory david; david.age = 40; carol = david;
@@ -213,11 +213,11 @@ theorem memoryRootAssign :
   apply Proves.valid
   apply update .memoryReferenceDeclFreshAlloc
   apply update .memoryReferenceDeclFreshAlloc
-  apply update .memoryFieldWriteStore
-  apply update .memoryRootAlias
-  apply update .memoryFieldWriteStore
+  apply update .memoryFieldWrite
+  apply update .memoryRootRebind
+  apply update .memoryFieldWrite
   apply unfold .localValueDeclInitDrop
-  apply update .memoryFieldReadHeap
+  apply update .memoryFieldRead
   apply empty
   refine close ?_
   sol_symex
@@ -238,12 +238,12 @@ theorem memoryRootRebind :
   apply unfold .memoryLocalDeclInitDrop
   apply update .memoryStorageCopy
   apply update .memoryFieldReadAliasRoot
-  apply update .memoryFieldWriteStore
+  apply update .memoryFieldWrite
   apply unfold .localValueDeclInitDrop
   apply unfoldRule (Stmt.step _ _ _).rule  -- `memoryFieldRead_unfold_rightFst`
   apply unfold .memoryLocalDeclInitDrop
   apply update .memoryFieldReadAliasRoot
-  apply update .memoryFieldReadHeap
+  apply update .memoryFieldRead
   apply empty
   refine close ?_
   sol_symex
@@ -252,7 +252,7 @@ theorem memoryRootRebind :
 /-! ## 4 · Arrays
 
 A memory array element is read and written with `read`/`write` at an index
-(`memoryIndexReadHeap`, `memoryIndexWriteStore`).  The bounds check is inside
+(`memoryIndexReadArrayValue`, `memoryIndexWriteArray`).  The bounds check is inside
 the term, as a payment's amount is read as a word (`Payment.lean`): an index
 out of bounds halts the update, which the box accepts. -/
 
@@ -268,15 +268,15 @@ theorem memoryArrayAlloc : ⊨ dl!{ [ uint[] memory v; ] true } := by
   sol_close
 
 /-- `v[i] = 100; x = v[i];` — the write and the read, both simple
-(`memoryIndexWriteStore`, `memoryIndexReadHeap`), on a copy of `values`. -/
+(`memoryIndexWriteArray`, `memoryIndexReadArrayValue`), on a copy of `values`. -/
 theorem memoryArrayWriteRead :
     ⊨ dl!{ [ uint[] memory v = values; v[i] = 100; uint x = v[i]; ] x == 100 } := by
   apply Proves.valid
   apply unfold .memoryLocalDeclInitDrop
   apply update .memoryStorageCopy
-  apply update .memoryIndexWriteStore
+  apply update .memoryIndexWriteArray
   apply unfold .localValueDeclInitDrop
-  apply update .memoryIndexReadHeap
+  apply update .memoryIndexReadArrayValue
   apply empty
   refine close ?_
   sol_symex
@@ -296,16 +296,16 @@ theorem memoryNestedArrayWrite :
   apply unfoldRule (Stmt.step _ _ _).rule  -- `memoryIndexRead_unfold_rightFst`
   apply unfold .memoryLocalDeclInitDrop
   apply update .memoryFieldReadAliasRoot
-  apply update .memoryIndexReadAliasRoot
-  apply update .memoryFieldWriteStore
+  apply update .memoryIndexReadArrayMemory
+  apply update .memoryFieldWrite
   apply unfold .localValueDeclInitDrop
   apply unfoldRule (Stmt.step _ _ _).rule  -- `memoryFieldRead_unfold_rightFst`
   apply unfold .memoryLocalDeclInitDrop
   apply unfoldRule (Stmt.step _ _ _).rule  -- `memoryIndexRead_unfold_rightFst`
   apply unfold .memoryLocalDeclInitDrop
   apply update .memoryFieldReadAliasRoot
-  apply update .memoryIndexReadAliasRoot
-  apply update .memoryFieldReadHeap
+  apply update .memoryIndexReadArrayMemory
+  apply update .memoryFieldRead
   apply empty
   refine close ?_
   sol_symex
@@ -324,12 +324,12 @@ theorem memoryArrayWriteRefSource :
   apply unfold .memoryLocalDeclInitDrop
   apply update .memoryStorageCopy
   apply update .memoryIndexWriteCopy
-  apply update .memoryFieldWriteStore
+  apply update .memoryFieldWrite
   apply unfold .localValueDeclInitDrop
   apply unfoldRule (Stmt.step _ _ _).rule  -- `memoryFieldRead_unfold_rightFst`
   apply unfold .memoryLocalDeclInitDrop
-  apply update .memoryIndexReadAliasRoot
-  apply update .memoryFieldReadHeap
+  apply update .memoryIndexReadArrayMemory
+  apply update .memoryFieldRead
   apply empty
   refine close ?_
   sol_symex
@@ -354,8 +354,8 @@ theorem memoryFieldWriteFromArrayElem :
   apply update .memoryFieldWriteCopy
   apply unfold .memoryFieldWrite_unfold_leftFst
   apply unfold .memoryLocalDeclInitDrop
-  apply update .memoryIndexReadAliasRoot
-  apply update .memoryFieldWriteStore
+  apply update .memoryIndexReadArrayMemory
+  apply update .memoryFieldWrite
   apply unfold .localValueDeclInitDrop
   apply unfoldRule (Stmt.step _ _ _).rule  -- `memoryFieldRead_unfold_rightFst`
   apply unfold .memoryLocalDeclInitDrop
@@ -363,7 +363,7 @@ theorem memoryFieldWriteFromArrayElem :
   apply unfold .memoryLocalDeclInitDrop
   apply update .memoryFieldReadAliasRoot
   apply update .memoryFieldReadAliasRoot
-  apply update .memoryFieldReadHeap
+  apply update .memoryFieldRead
   apply empty
   refine close ?_
   sol_symex
@@ -382,16 +382,16 @@ theorem memoryDeclFromNestedArrayElem :
   apply unfoldRule (Stmt.step _ _ _).rule  -- `memoryIndexRead_unfold_rightFst`
   apply unfold .memoryLocalDeclInitDrop
   apply update .memoryFieldReadAliasRoot
-  apply update .memoryIndexReadAliasRoot
-  apply update .memoryFieldWriteStore
+  apply update .memoryIndexReadArrayMemory
+  apply update .memoryFieldWrite
   apply unfold .localValueDeclInitDrop
   apply unfoldRule (Stmt.step _ _ _).rule  -- `memoryFieldRead_unfold_rightFst`
   apply unfold .memoryLocalDeclInitDrop
   apply unfoldRule (Stmt.step _ _ _).rule  -- `memoryIndexRead_unfold_rightFst`
   apply unfold .memoryLocalDeclInitDrop
   apply update .memoryFieldReadAliasRoot
-  apply update .memoryIndexReadAliasRoot
-  apply update .memoryFieldReadHeap
+  apply update .memoryIndexReadArrayMemory
+  apply update .memoryFieldRead
   apply empty
   refine close ?_
   sol_symex
@@ -431,7 +431,7 @@ info: Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int 
   "result"
 
 /-! `uint[] memory v; v[0] = 100;` — a fresh array is empty, so the write is
-out of bounds and reverts: the bounds check `memoryIndexWriteStore`'s `write`
+out of bounds and reverts: the bounds check `memoryIndexWriteArray`'s `write`
 carries. -/
 
 /-- info: Except.error (Solidity.Semantics.Halt.revert) -/
@@ -457,11 +457,11 @@ theorem memoryRootDelete :
   apply Proves.valid
   apply update .memoryReferenceDeclFreshAlloc
   apply unfold .memoryLocalDeclInitDrop
-  apply update .memoryRootAlias
-  apply update .memoryFieldWriteStore
+  apply update .memoryRootRebind
+  apply update .memoryFieldWrite
   apply update .memoryRootDeleteFreshRebind
-  apply update .memoryFieldReadHeap
-  apply update .memoryFieldReadHeap
+  apply update .memoryFieldRead
+  apply update .memoryFieldRead
   apply empty
   refine close ?_
   sol_symex
@@ -475,10 +475,10 @@ theorem memoryFieldDeletePrim :
   apply Proves.valid
   apply unfold .memoryLocalDeclInitDrop
   apply update .memoryStorageCopy
-  apply update .memoryFieldWriteStore
+  apply update .memoryFieldWrite
   apply update .memoryFieldDeletePrimitive
   apply unfold .localValueDeclInitDrop
-  apply update .memoryFieldReadHeap
+  apply update .memoryFieldRead
   apply empty
   refine close ?_
   sol_symex
@@ -497,13 +497,13 @@ theorem memoryFieldDeleteRef :
   apply update .memoryReferenceDeclFreshAlloc
   apply unfold .memoryLocalDeclInitDrop
   apply update .memoryFieldReadAliasRoot
-  apply update .memoryFieldWriteStore
+  apply update .memoryFieldWrite
   apply update .memoryFieldDeleteReference
-  apply update .memoryFieldReadHeap
+  apply update .memoryFieldRead
   apply unfoldRule (Stmt.step _ _ _).rule  -- `memoryFieldRead_unfold_rightFst`
   apply unfold .memoryLocalDeclInitDrop
   apply update .memoryFieldReadAliasRoot
-  apply update .memoryFieldReadHeap
+  apply update .memoryFieldRead
   apply empty
   refine close ?_
   sol_symex
@@ -518,10 +518,10 @@ theorem memoryIndexDeletePrim :
   apply Proves.valid
   apply unfold .memoryLocalDeclInitDrop
   apply update .memoryStorageCopy
-  apply update .memoryIndexWriteStore
+  apply update .memoryIndexWriteArray
   apply update .memoryIndexDeletePrimitive
   apply unfold .localValueDeclInitDrop
-  apply update .memoryIndexReadHeap
+  apply update .memoryIndexReadArrayValue
   apply empty
   refine close ?_
   sol_symex
@@ -705,7 +705,7 @@ info: (Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int
 
 `uint[3] memory x;` allocates three default elements (a memory object marked
 fixed, `MObj.array`); it is indexed by the same rules as a `uint[]`
-(`memoryIndexWriteStore`, `memoryIndexReadHeap`, over either kind of array,
+(`memoryIndexWriteArray`, `memoryIndexReadArrayValue`, over either kind of array,
 `ArrTy`), and its `.length` is the literal. -/
 
 /-- `uint[3] memory x; x[1] = 5; uint y = x[1];` (`TestSuite.testMemoryFixedArrayLength`). -/

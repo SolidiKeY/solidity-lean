@@ -151,7 +151,7 @@ theorem rootWriteCall : ⊨ dl!{ [ total = makeValue(); ] total == seed } := by
 /-! ## 5 · `carolValues[i] = makeValue();`
 
 A memory array's element written with a call's value
-(`memoryIndexWriteStore`); `carolValues` is declared first, a copy of
+(`memoryIndexWriteArray`); `carolValues` is declared first, a copy of
 `values`: the box theorem that the element holds the value. -/
 
 example : Prog.toStr (sol{ uint i = 0; uint[] memory carolValues = values;

@@ -110,7 +110,7 @@ def memoryFieldWrite :
   sol_chain
 #last_line memoryFieldWrite
 
--- Lean's `memoryFieldWriteStore`.
+-- Lean's `memoryFieldWrite`.
 /-- `carol.age = ageVal;` with `ageVal` 42. -/
 theorem memoryFieldWrite_value :
     dl![m]{ { ageVal := 42 } ⟨[ carol.age = ageVal; ]⟩ φ where Person memory carol }
@@ -122,11 +122,11 @@ theorem memoryFieldWrite_value :
 /-! ### Aliases, declarations and allocation -/
 
 /-- `carol = david;`: the root is rebound to `david`'s identity. -/
-def memoryRootAlias :
+def memoryRootRebind :
     dl![m]{ ⟨[ carol = david; ]⟩ φ where Person memory carol, Person memory david }
     ~*> dl![m]{ { carol := david } φ where Person memory carol, Person memory david } := by
   sol_chain
-#last_line memoryRootAlias
+#last_line memoryRootRebind
 
 /-- `Account memory acc = carol.account;`: the declaration dropped, then the alias bound. -/
 theorem memoryLocalDeclInitDrop :
@@ -272,22 +272,21 @@ theorem memoryFieldWriteUnfoldSource_read :
 #last_line memoryFieldWriteUnfoldSource_read
 
 /-- `v = carol.age;` from a memory where it is 42. -/
-theorem memoryFieldReadHeap :
+theorem memoryFieldRead :
     dl![m]{ { memory := write(memory, carol.age, 42) } ⟨[ v = carol.age; ]⟩ φ where Person memory carol }
     ~*> dl![m]{ { memory := write(memory, carol.age, 42) } { v := read(memory, carol.age) } φ }
     ~[sequentialToParallel]~> dl![m]{ { memory := write(memory, carol.age, 42) ‖
         v := read(write(memory, carol.age, 42), carol.age) } φ }
     ~[readOnWrite]~> dl![m]{ { memory := write(memory, carol.age, 42) ‖ v := 42 } φ } := by
   sol_chain
-#last_line memoryFieldReadHeap
+#last_line memoryFieldRead
 
--- Lean's `memoryRootAlias`.
 /-- `carolAlias = carol;`: the alias is bound to `carol`'s identity. -/
-def memoryRootAlias_alias :
+def memoryRootRebind_alias :
     dl![m]{ ⟨[ carolAlias = carol; ]⟩ φ where Person memory carol, Person memory carolAlias }
     ~*> dl![m]{ { carolAlias := carol } φ where Person memory carol, Person memory carolAlias } := by
   sol_chain
-#last_line memoryRootAlias_alias
+#last_line memoryRootRebind_alias
 
 /-! ### `delete` -/
 
@@ -507,7 +506,7 @@ theorem memoryIndexWriteArray :
   sol_chain
 #last_line memoryIndexWriteArray
 
--- Lean's `memoryIndexWriteStore`.
+-- Lean's `memoryIndexWriteArray`.
 /-- `carolValues[i] = val;` with `i` 2 and `val` 7. -/
 theorem memoryIndexWriteArray_value :
     dl![m]{ { i := 2 ‖ val := 7 } ⟨[ carolValues[i] = val; ]⟩ φ where uint[] memory carolValues }
@@ -572,7 +571,7 @@ theorem memoryIndexRead_unfold_rightSndIndex :
 #last_line memoryIndexRead_unfold_rightSndIndex
 
 /-- `carolToken = davidTokens[i];` with `i` 2: the identity at the index is bound. -/
-theorem memoryIndexReadAliasRoot :
+theorem memoryIndexReadArrayMemory :
     dl![m]{ { i := 2 } ⟨[ carolToken = davidTokens[i]; ]⟩ φ
         where Token[] memory davidTokens, Token memory carolToken }
     ~*> dl![m]{ { i := 2 } { carolToken := read(memory, davidTokens[i]) } φ
@@ -580,7 +579,7 @@ theorem memoryIndexReadAliasRoot :
     ~[sequentialToParallel]~> dl![m]{ { i := 2 ‖ carolToken := read(memory, davidTokens[2]) } φ
         where Token[] memory davidTokens, Token memory carolToken } := by
   sol_chain
-#last_line memoryIndexReadAliasRoot
+#last_line memoryIndexReadArrayMemory
 
 -- Lean's `memoryFieldWriteUnfoldSource`.
 /-- `carol.age = carolValues[i];` with `i` 2, from a memory where `carolValues[2]` is 7. -/
@@ -604,7 +603,7 @@ theorem memoryIndexRead_unfold_rightSndResult :
 #last_line memoryIndexRead_unfold_rightSndResult
 
 /-- `v = carolValues[i];` with `i` 2, from a memory where `carolValues[2]` is 7. -/
-theorem memoryIndexReadHeap :
+theorem memoryIndexReadArrayValue :
     dl![m]{ { i := 2 ‖ memory := write(memory, carolValues[2], 7) } ⟨[ v = carolValues[i]; ]⟩ φ
         where uint[] memory carolValues }
     ~*> dl![m]{ { i := 2 ‖ memory := write(memory, carolValues[2], 7) }
@@ -613,7 +612,7 @@ theorem memoryIndexReadHeap :
         v := read(write(memory, carolValues[2], 7), carolValues[2]) } φ }
     ~[readOnWrite]~> dl![m]{ { i := 2 ‖ memory := write(memory, carolValues[2], 7) ‖ v := 7 } φ } := by
   sol_chain
-#last_line memoryIndexReadHeap
+#last_line memoryIndexReadArrayValue
 
 /-! ### Compound assignment and increment -/
 

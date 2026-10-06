@@ -225,15 +225,15 @@ def declRules : List String :=
 def bindRules : List String :=
   ["localValueAssign", "storageLocalRootRebind", "storageFieldReadBindLocalRoot",
     "storageIndexReadMappingBindLocalRoot", "storageIndexReadArrayBindLocalRoot",
-    "storageIndexReadArrayBindLocalRootMappingElement", "memoryRootAlias",
-    "memoryFieldReadAliasRoot", "memoryIndexReadAliasRoot"]
+    "storageIndexReadArrayBindLocalRootMappingElement", "memoryRootRebind",
+    "memoryFieldReadAliasRoot", "memoryIndexReadArrayMemory"]
 
 /-- The rules that read a value into a local in one step. -/
 def readRules : List String :=
   ["storageRootReadSelect", "storageFieldReadFind", "storageIndexReadMappingFind",
     "storageIndexReadArrayFind", "storageFieldReadStoreRoot", "storageIndexReadMappingStoreRoot",
     "storageIndexReadArrayStoreRoot", "storageLengthRead", "memoryLengthRead",
-    "memoryFieldReadHeap", "memoryIndexReadHeap"]
+    "memoryFieldRead", "memoryIndexReadArrayValue"]
 
 /-- The kind of the step the rule `n` takes (`""` for a rule with no name). -/
 def stepKind (n : String) : StepKind :=

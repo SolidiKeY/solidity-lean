@@ -176,8 +176,8 @@ def localStep {p : PrimTy} (x : Var) : (v : Val C p) → Step k m (.assignLocal 
   | .unop _ _ _ (.mlen ..) => ⟨_, .key .unopCapture⟩
   | .ternary c a b => ternaryStep (.local x) rfl c a b
   | .readMem l =>
-    (MHole.local x).readStep rfl (fun _ _ _ => ⟨_, .key .memoryFieldReadHeap⟩)
-      (fun _ _ _ => ⟨_, .key .memoryIndexReadHeap⟩) l
+    (MHole.local x).readStep rfl (fun _ _ _ => ⟨_, .key .memoryFieldRead⟩)
+      (fun _ _ _ => ⟨_, .key .memoryIndexReadArrayValue⟩) l
   | .len b _ =>
     if hb : b.isSimple then ⟨_, .key .storageLengthRead⟩ else ⟨_, .key .storageLengthRead_unfold_rightFst⟩
   | .mlen (.var _) _ => ⟨_, .key .memoryLengthRead⟩
@@ -403,10 +403,10 @@ def transferStep : (r a : Val C .uint) → Step k m (.transfer r a)
 /-- A memory local bound: `m = n;`, `m = n.items[i];` (unfolded until it is
 bindable), `m = people[i];` (a deep copy, of a simple path). -/
 def rebindMemStep {R : RefTy} (x : Var) : (r : MRhs C R) → Step k m (.rebindMem x r)
-  | .alias (.var _) => ⟨_, .key .memoryRootAlias⟩
+  | .alias (.var _) => ⟨_, .key .memoryRootRebind⟩
   | .alias (.loc l) =>
     (MHole.rebind x).readStep rfl (fun _ _ _ => ⟨_, .key .memoryFieldReadAliasRoot⟩)
-      (fun _ _ _ => ⟨_, .key .memoryIndexReadAliasRoot⟩) l
+      (fun _ _ _ => ⟨_, .key .memoryIndexReadArrayMemory⟩) l
   | .copy sp _ =>
     if hs : sp.isSimple then ⟨_, .key .memoryStorageCopy⟩ else ⟨_, .key .memoryStorageCopyUnfold⟩
   | .newArr _ _ => ⟨_, .key .memoryArrayFreshAlloc⟩
@@ -457,7 +457,7 @@ captured if it is not simple), a reference written as `memRefStep` does. -/
 def memIndexWriteStep {R : RefTy} : (T : Ty) → (r : MSrc C T) → (a : ArrTy R T) → (mv : Var) →
     (ie : Simple C .uint) → Step k m (.assignMem (.index a (.var mv) (.simple ie)) r)
   | _, .val (p := p) e, a, mv, ie =>
-    (VHole.mem (.index a (.var mv) (.simple ie))).step rfl (fun _ => ⟨_, .key .memoryIndexWriteStore⟩) e
+    (VHole.mem (.index a (.var mv) (.simple ie))).step rfl (fun _ => ⟨_, .key .memoryIndexWriteArray⟩) e
       (fun _ _ => ⟨_, .key (Taclet.memoryIndexWriteUnfoldSource (p := p))⟩)
   | _, .ref src, a, mv, ie =>
     memRefStep (.index a (.var mv) (.simple ie)) rfl (fun _ _ => ⟨_, .key .memoryIndexWriteCopy⟩) src
@@ -468,7 +468,7 @@ receiver first (`m.inner.age = 3;`), then the index, then the source.
 write free, so it is given: `p`, the source's. -/
 def assignMemStep {T : Ty} : (l : MLoc C T) → (r : MSrc C T) → Step k m (.assignMem l r)
   | .field (.var mv) f hf, .val e =>
-    (VHole.mem (.field (.var mv) f hf)).step rfl (fun _ => ⟨_, .key .memoryFieldWriteStore⟩) e
+    (VHole.mem (.field (.var mv) f hf)).step rfl (fun _ => ⟨_, .key .memoryFieldWrite⟩) e
       (fun _ _ => ⟨_, .key .memoryFieldWriteUnfoldSource⟩)
   | .field (.var mv) f hf, .ref src =>
     memRefStep (.field (.var mv) f hf) rfl (fun _ _ => ⟨_, .key .memoryFieldWriteCopy⟩) src
