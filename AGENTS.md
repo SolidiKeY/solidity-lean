@@ -249,6 +249,15 @@ rebuilds nothing after merging a lane that was built elsewhere.
   places for a type mismatch.
 - Use `rg`, which honours `.gitignore` and so skips `.lake/`.
 
+## Notation
+
+Code reads in the calculus's notation. A taclet is written `dl{ … }` as
+solkey writes it; a term language (the closer's `LTerm`/`LStor`/`LMem`, a
+new sort) gets notation shaped like KeY's terms (`read(write(m, i, a, v),
+j, b)`, `find(s, p)`) used in its definitions' patterns and arms, and a
+printer that shows the same in `#wp`, errors and pins. A clause written as a
+tree of raw constructors where such notation could exist is a defect to fix.
+
 ## Reading before writing
 
 Module docstrings carry the conventions and the rationale for their file.
