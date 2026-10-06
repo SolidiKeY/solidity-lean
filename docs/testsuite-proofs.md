@@ -2064,3 +2064,38 @@ another type later (`{ bool x; } if (c) { uint x; }`) elaborates, as in
 Solidity, but the flat program fails `Prog.wt` (only type preservation reads
 it; `unchecked { }` had the same before); `narrowPure` runs twice on a tuple's
 components under `unchecked` (a redundant `% 2^n`, same value).
+
+## The fixture at `1b4341a303` (W6, 2026-10-06)
+
+- `scripts/solc-ast.mjs --solkey <clone> --soljson <dir>` (the new
+  `--soljson` takes the pinned compiler from another checkout, since a fresh
+  clone has not run `downloadSoljson`; its sha256 is still checked against
+  the clone's `build.gradle`) re-imported `TestSuite.sol`: header
+  `solkeyCommit` `1b4341a3032b…`, hash `0x7d6bb282699871b5`.
+- The import: **452 functions (331 diamond, 107 box, 2 skip, 12
+  internal): 449 elaborated, 2 skipped, 1 excluded, 0 unsupported**.  All
+  32 new functions import (the 12 internal ones are programs, inlined at
+  their calls; `callToSender`'s `(bool success, ) = payable(msg.sender)
+  .call{value: amount}("")` is the send, as `isValueCall` reads it); the
+  skip rows moved to lines 3511 and 3516.  `Problems.lean`: 437
+  statements.
+- `Report.lean`: **452 functions: 415 derived, 22 pending, 15 other**; the
+  20 new obligations are pending (W7).  `expected.tsv`: 440 TestSuite rows
+  (415 derived, 21 pending, 1 divergent, 1 excluded, 2 skip);
+  `check-testsuite.sh` ok against the clone.  The `solc/` sources did not
+  change between `78f42fde33` and `1b4341a303`, so those rows keep their
+  verdicts and only their headers move.
+- `net_call_withcallback_simple`'s reason was stale (it waited for tuples);
+  it now says the call is the send solkey lowers it to and that only `CInv`
+  over the ledger stands in the way.  `sol{}` has no spelling of the
+  `call{value: v}("")` form itself: adding it is a `Syntax.lean` edit, which
+  re-checks the whole package and the 13 `Derived` modules, for a row that
+  stays unsupported because of `CInv`.  Left for the next change that
+  touches `Syntax.lean` anyway.
+- **Derived1, before and after** (a scratch module importing `Problems`,
+  `Elab.async false`, the 40 theorems between two `IO.monoNanosNow`, warm):
+  7672, 7662 ms at `78f42fde33`; 7281, 7293 ms at `1b4341a303`.  No
+  slowdown: the 12 function bodies the contract now carries are not
+  unfolded by the kernel on the old obligations.
+- The new printer paths of W5 (returns, tuples, the value call) are now
+  exercised by the committed fixture.

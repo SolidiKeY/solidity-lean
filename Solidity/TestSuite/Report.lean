@@ -19,10 +19,14 @@ Every function, by what `#solkey_obligations` (`Frontend/Problems.lean`)
 finds: derived when its theorem `N.f.proved` exists, states
 `⊢ N.f.problem` and uses no axiom but Lean's three (so no `sorry` and no
 `native_decide`: one that does is listed "unsound"), pending when only its
-statement does, and the import's verdict for the three with no statement.
-A pending obligation is no theorem and no `sorry`: but for the one below,
-it writes through an alias bound through an index after a `pop` made it
-dangle (`SymB.stale`) and reads the slot again after a copy: its leaf's
+statement does, and the import's verdict for the fifteen with no statement
+(solkey states an obligation only for a public or external function, and
+inlines an `internal` one at its calls).  A pending obligation is no theorem
+and no `sorry`.  The twenty after `testArrayCopyClearsOldElements` are
+solkey `1b4341a303`'s new functions (`send`, internal calls, `return`,
+tuples), not derived yet.  `testArrayCopyClearsOldElements` writes through
+an alias bound through an index after a `pop` made it dangle
+(`SymB.stale`) and reads the slot again after a copy: its leaf's
 reduction is past `Derive.elimSize`, and the `push()` takes its slot from a
 storage with writes at another root below it, which the slot facts do not
 read.  It is listed with its reasons in `docs/testsuite-proofs.md`.
@@ -32,12 +36,27 @@ read.  It is listed with its reasons in `docs/testsuite-proofs.md`.
 -/
 
 /--
-info: 420 functions: 415 derived, 2 pending, 3 other
+info: 452 functions: 415 derived, 22 pending, 15 other
 excluded recursiveStructMapping
 skipped tryCalleeGet
 skipped tryCalleePing
+internal returnOne
+internal returnSign
+internal returnOrdered
+internal returnSwapped
+internal returnStats
+internal returnFromNestedBlock
+internal returnOrFallThrough
+internal returnAddOne
+internal returnAddTwo
+internal returnRevertsOnZero
+internal returnInsideTry
+internal returnVoidEarly
 pending:
-storagePushReadBack testArrayCopyClearsOldElements
+storagePushReadBack testArrayCopyClearsOldElements sendToOwner sendUnfoldReceiver sendUnfoldArgument callToSender
+internalCallDeclaration internalCallInExpression internalCallToStorage returnEarly tupleReturnPair tupleReturnReadsReturnVariables
+tupleReturnDiscardsComponents tupleReturnAssignsExisting tupleAssignmentRotates tupleDeclaration returnLeavesNestedBlocks returnOrFallThroughNamed
+returnFromNestedCall returnAfterRevertGuard returnFromTryBranches returnFromVoidFunction
 -/
 #guard_msgs in
 #solkey_obligations Solkey.TestSuite

@@ -413,11 +413,31 @@ taclets	TestSuite	ternaryToIfStorage	derived	diamond	`Solkey.TestSuite.ternaryTo
 taclets	TestSuite	transferToOwner	derived	box	`Solkey.TestSuite.transferToOwner.proved` (`Solidity/TestSuite/Derived6.lean`)
 taclets	TestSuite	transferUnfoldReceiver	derived	box	`Solkey.TestSuite.transferUnfoldReceiver.proved` (`Solidity/TestSuite/Derived6.lean`)
 taclets	TestSuite	transferUnfoldArgument	derived	box	`Solkey.TestSuite.transferUnfoldArgument.proved` (`Solidity/TestSuite/Derived6.lean`)
-taclets	TestSuite	tryCalleeGet	skip	skip; for all x	TestSuite.sol:3483: tagged `@custom:key skip`
-taclets	TestSuite	tryCalleePing	skip	skip	TestSuite.sol:3488: tagged `@custom:key skip`
+taclets	TestSuite	sendToOwner	pending	box	not derived yet
+taclets	TestSuite	sendUnfoldReceiver	pending	box	not derived yet
+taclets	TestSuite	sendUnfoldArgument	pending	box	not derived yet
+taclets	TestSuite	callToSender	pending	box	not derived yet
+taclets	TestSuite	tryCalleeGet	skip	skip; for all x	TestSuite.sol:3511: tagged `@custom:key skip`
+taclets	TestSuite	tryCalleePing	skip	skip	TestSuite.sol:3516: tagged `@custom:key skip`
 taclets	TestSuite	tryCallCatchKeepsState	derived	box	`Solkey.TestSuite.tryCallCatchKeepsState.proved` (`Solidity/TestSuite/Derived6.lean`)
 taclets	TestSuite	tryCallBindsReturnAndPanicCode	derived	box	`Solkey.TestSuite.tryCallBindsReturnAndPanicCode.proved` (`Solidity/TestSuite/Derived6.lean`)
 taclets	TestSuite	tryCallUnmatchedFailureReverts	derived	box	`Solkey.TestSuite.tryCallUnmatchedFailureReverts.proved` (`Solidity/TestSuite/Derived6.lean`)
+taclets	TestSuite	internalCallDeclaration	pending	diamond	not derived yet
+taclets	TestSuite	internalCallInExpression	pending	diamond	not derived yet
+taclets	TestSuite	internalCallToStorage	pending	diamond	not derived yet
+taclets	TestSuite	returnEarly	pending	diamond	not derived yet
+taclets	TestSuite	tupleReturnPair	pending	diamond	not derived yet
+taclets	TestSuite	tupleReturnReadsReturnVariables	pending	diamond	not derived yet
+taclets	TestSuite	tupleReturnDiscardsComponents	pending	diamond	not derived yet
+taclets	TestSuite	tupleReturnAssignsExisting	pending	diamond	not derived yet
+taclets	TestSuite	tupleAssignmentRotates	pending	diamond	not derived yet
+taclets	TestSuite	tupleDeclaration	pending	diamond	not derived yet
+taclets	TestSuite	returnLeavesNestedBlocks	pending	diamond	not derived yet
+taclets	TestSuite	returnOrFallThroughNamed	pending	diamond	not derived yet
+taclets	TestSuite	returnFromNestedCall	pending	diamond	not derived yet
+taclets	TestSuite	returnAfterRevertGuard	pending	diamond	not derived yet
+taclets	TestSuite	returnFromTryBranches	pending	box	not derived yet
+taclets	TestSuite	returnFromVoidFunction	pending	diamond	not derived yet
 solc	SolcExpressions	postIncrementYieldsOldValue	proved	`T r = x++;` split into `T r; r = x++;`	
 solc	SolcExpressions	preIncrementYieldsNewValue	proved	`T r = x++;` split into `T r; r = x++;`	
 solc	SolcExpressions	incDecChainOnLocal	proved	`T r = x++;` split into `T r; r = x++;`	
@@ -503,7 +523,7 @@ net	Net	casino_placeBet_invariant	unsupported		assumes an uninterpreted CInv ove
 net	Net	escrow_placeInEscrow_invariant	unsupported		assumes an uninterpreted CInv over a symbolic ledger and books msg.value/msg.sender before the call; the fragment has no msg.*
 net	Net	escrow_releaseEscrow_invariant	unsupported		assumes an uninterpreted CInv over a symbolic ledger and books msg.value/msg.sender before the call; the fragment has no msg.*
 net	Net	escrow_withdrawFrom_invariant	unsupported		assumes an uninterpreted CInv over a symbolic ledger and books msg.value/msg.sender before the call; the fragment has no msg.*
-net	Net	net_call_withcallback_simple	unsupported		`(bool ok, ) = a.call{value: v}("")` is lowered to a send only once `sol{}` has tuples, and the problem's invariant `CInv` reads the ledger `net`, which no term reads
+net	Net	net_call_withcallback_simple	unsupported		`(bool ok, ) = a.call{value: v}("")` is the send `bool ok = a.send(v)`, as solkey lowers it, and its callback reading is ported (`Calculus/Callback.lean`, `ProvesC.send`), but the problem's invariant `CInv` reads the ledger `net`, which no term reads
 net	Net	net_msg_value	unsupported		`msg.value` is not a program expression
 net	Net	net_send_simple	proved	solkey net-send-simple.key	`Examples/Tactics/Net.lean` `Net.netSendSimple`
 net	Net	net_transfer_capture_argument	proved	solkey net-transfer-capture-argument.key	`Examples/Tactics/Net.lean` `Net.netTransferCapturedAmount`
