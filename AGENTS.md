@@ -38,8 +38,10 @@ A second consumer is **the `SolKey` reader**, a Lean reader for KeY `.key`
 files in a separate repository. It imports only `Solidity.Calculus.Rules` and
 `Solidity.Calculus.KeyTaclets` (and through them the syntax). That is its
 whole dependency surface: renaming a `Taclet` constructor breaks its
-correspondence proofs, which is the point of it. It still names the old
-`RuleName` table and is to be migrated (`docs/kernel-port.md`, "Port later").
+correspondence proofs, which is the point of it. It lives in the
+side-projects repository (`lean/solkey`, requiring this checkout by path):
+after renaming a constructor, regenerate its correspondence file (its
+`GenProved` script) on a branch there and check that it builds.
 
 ## The one hard constraint
 
@@ -167,10 +169,9 @@ to the strategy or a printer fails there.
 4. **Pin the output.** Add a `#guard_msgs` example of the suggestion to
    `Examples/ProofTree.lean`, and a regression example for each shape a
    review found broken.
-5. **Verify.** Check one file at a time (`lean_diagnostic_messages`). The
-   machine has no RAM for parallel Lean checks. Then run one read-only review
-   pass, a finder and a skeptic per area, that never calls the Lean server.
-   Fix what it confirms.
+5. **Verify.** Check one file at a time (`lean_diagnostic_messages`), within
+   the memory limits of "Copies and branches". Then run the review pass of
+   "Checking your work".
 
 If changing a module's imports leaves its language-server worker stuck
 ("still elaborating" forever), run the command from a fresh scratch module
@@ -200,6 +201,10 @@ re-partitions `RuleShapes.taclets_partitioned`.
 Run long builds in the background and grep the log for `error` rather than
 reading it back whole.
 
+**End every milestone with one read-only review pass**: a finder and a
+skeptic per area, neither of which calls the Lean server, then fix what the
+skeptic confirms and record it in the milestone's doc section.
+
 ## Copies and branches
 
 Lake's artifact cache is on (`lakefile.toml`): every module is stored once,
@@ -216,8 +221,11 @@ rebuilds nothing after merging a lane that was built elsewhere.
 - **RAM is per open file, not per build.** A Lean worker holds 0.6–1.5 GB,
   3–4 GB on `Calculus/Decide.lean` or a `TestSuite/Derived*` module, and the
   MCP keeps up to 8 open per checkout, so one agent can hold about 16 GB.
-  Run at most two Lean agents at once, and keep each to the files it is
-  changing.
+  A session runs under a 32 GiB memory cap (`crc` starts it with
+  `systemd-run -p MemoryMax=32G`), and past it the kernel kills single Lean
+  processes, so a check fails for no reason in the code. Run at most two Lean
+  agents at once (one while a large rebuild is due: Lake compiles stale
+  imports in parallel), and keep each to three or four open files.
 - **End a lane by freeing it:** after the merge, stop its workers
   (`pkill -f 'lean --worker.*solidity-lean-<lane>/'`) and remove the
   worktree. Idle workers of finished lanes stay resident otherwise.
@@ -256,14 +264,30 @@ rebuilds nothing after merging a lane that was built elsewhere.
   places for a type mismatch.
 - Use `rg`, which honours `.gitignore` and so skips `.lake/`.
 
-## Notation
+## Following solkey
 
-Code reads in the calculus's notation. A taclet is written `dl{ … }` as
-solkey writes it; a term language (the closer's `LTerm`/`LStor`/`LMem`, a
-new sort) gets notation shaped like KeY's terms (`read(write(m, i, a, v),
-j, b)`, `find(s, p)`) used in its definitions' patterns and arms, and a
-printer that shows the same in `#wp`, errors and pins. A clause written as a
-tree of raw constructors where such notation could exist is a defect to fix.
+Semantics are Lean's (`docs/solc-alignment.md`); everything a reader sees
+follows solkey.
+
+- **Every rule of `⊢` reads like its solkey taclet**: the program taclets,
+  the `Proves` rules, the term and update rules, and each clause of the
+  closer (storage and memory). Same name, same `\find`/`\replacewith`
+  shape, KeY's schema-variable names, side conditions and branch labels.
+  Spelling is solkey's: `save`/`find` at a root (`store`/`select` still
+  parse), solkey's memory taclet names.
+- **A new closer feature starts from solkey's taclets**, not from a decision
+  procedure of its own: find the taclets in the `.key` files, make each one
+  a clause, take the interpreter lemma as its soundness and cite the
+  `Theory/` lemma that transcribes it, and give it a row in
+  `docs/lean-key-rule-map.md`. Mark Lean-only clauses and deviations as such.
+- **Notation, not constructor trees.** A taclet is `dl{ … }`, a sequent
+  `dl{ ..Γ, c ⟹[R] ⟨[ s; ..ω ]⟩ φ }`, a term `tm{ … }`, a closer term
+  `key{ write(mem, id1, a1, v) }` (`Calculus/KeyNotation.lean`), used in
+  definitions' patterns and arms, with a printer that shows the same in
+  `#wp`, errors and pins. A new term language gets its notation and printer
+  with it. Notation is macros only: the kernel and compiled code see the
+  same terms, which a restated type proves by `rfl` before anything
+  downstream is checked.
 
 ## Reading before writing
 
