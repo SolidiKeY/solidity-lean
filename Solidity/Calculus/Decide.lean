@@ -4349,7 +4349,7 @@ length only then (`LStor.slotU`, `LStor.lenU`), so every other storage's
 reduction is as before. -/
 def LStor.dangles : LStor → Bool
   | .stale .. => true
-  | .save s .. | .del s _ | .arr _ s .. => s.dangles
+  | .save s .. | .delAt s _ | .arr _ s .. => s.dangles
   | .copy s _ src _ => s.dangles || src.dangles
   | .init | .view .. => false
 termination_by structural s => s
@@ -4522,7 +4522,7 @@ def LStor.slotHasU : LStor → LPath → List SSeg → LTerm → LTerm
   | key{ staleSave(st, P', _) }, P, rest, opq =>
     (cmpSegs P'.elim.segs ((P.at (st.lenU P)).addSegs rest).segs).toTerm
       (staleHas (st.slotHasU P rest opq))
-  | .init, _, _, opq | .save .., _, _, opq | .del .., _, _, opq | .arr .push .., _, _, opq
+  | .init, _, _, opq | .save .., _, _, opq | .delAt .., _, _, opq | .arr .push .., _, _, opq
   | .arr (.slot _) .., _, _, opq | .stale (some _) .., _, _, opq | .copy .., _, _, opq
   | .view .., _, _, opq => opq
 termination_by structural s => s
@@ -4549,7 +4549,7 @@ def LStor.slotLenU : LStor → LPath → List SSeg → LTerm → LTerm
   | key{ stale(push, st, P', _) }, P, rest, opq =>
     (cmpSegs P'.elim.segs (P.at (st.lenU P)).segs).toTerm
       (slotLeaf (if rest.isEmpty then lenSucc (st.slotLenU P rest .err) else opq) opq opq)
-  | .init, _, _, opq | .save .., _, _, opq | .del .., _, _, opq | .arr .push .., _, _, opq
+  | .init, _, _, opq | .save .., _, _, opq | .delAt .., _, _, opq | .arr .push .., _, _, opq
   | .arr (.slot _) .., _, _, opq | .stale (some (.pop _)) .., _, _, opq
   | .stale (some (.slot _)) .., _, _, opq | .copy .., _, _, opq | .view .., _, _, opq => opq
 termination_by structural s => s
@@ -4644,7 +4644,7 @@ def LStor.cpokU : LStor → LPath → LTerm
   | key{ storage }, Q => key{ copyOk(storage, Q) }
   | key{ save(st, P, w) }, Q =>
     key{ if(‹isT (st.readU P.elim)›) then ‹st.cpokU Q› else copyOk(save(st, P, w), Q) }
-  | s@(.del ..), Q | s@(.arr ..), Q | s@(.stale ..), Q | s@(.copy ..), Q | s@(.view ..), Q =>
+  | s@(.delAt ..), Q | s@(.arr ..), Q | s@(.stale ..), Q | s@(.copy ..), Q | s@(.view ..), Q =>
     key{ copyOk(s, Q) }
 termination_by structural s => s
 
@@ -4960,7 +4960,7 @@ def LStor.slotHasUF : LStor → LPath → List SSeg → LTerm → LTerm
     let L := st.lenUF P
     (cmpSegs P'.elimF.segs ((P.at L).addSegs rest).segs).toTerm
       (staleHas (st.slotHasUF P rest opq))
-  | .init, _, _, opq | .save .., _, _, opq | .del .., _, _, opq | .arr .push .., _, _, opq
+  | .init, _, _, opq | .save .., _, _, opq | .delAt .., _, _, opq | .arr .push .., _, _, opq
   | .arr (.slot _) .., _, _, opq | .stale (some _) .., _, _, opq | .copy .., _, _, opq
   | .view .., _, _, opq => opq
 termination_by structural s => s
@@ -4985,7 +4985,7 @@ def LStor.slotLenUF : LStor → LPath → List SSeg → LTerm → LTerm
     let L := st.lenUF P
     (cmpSegs P'.elimF.segs (P.at L).segs).toTerm
       (slotLeaf (if rest.isEmpty then lenSucc (st.slotLenUF P rest .err) else opq) opq opq)
-  | .init, _, _, opq | .save .., _, _, opq | .del .., _, _, opq | .arr .push .., _, _, opq
+  | .init, _, _, opq | .save .., _, _, opq | .delAt .., _, _, opq | .arr .push .., _, _, opq
   | .arr (.slot _) .., _, _, opq | .stale (some (.pop _)) .., _, _, opq
   | .stale (some (.slot _)) .., _, _, opq | .copy .., _, _, opq | .view .., _, _, opq => opq
 termination_by structural s => s
@@ -5079,7 +5079,7 @@ def LStor.cpokUF : LStor → LPath → LTerm
   | key{ storage }, Q => key{ copyOk(storage, Q) }
   | key{ save(st, P, w) }, Q =>
     key{ if(‹isT (st.readUF P.elimF)›) then ‹st.cpokUF Q› else copyOk(save(st, P, w), Q) }
-  | s@(.del ..), Q | s@(.arr ..), Q | s@(.stale ..), Q | s@(.copy ..), Q | s@(.view ..), Q =>
+  | s@(.delAt ..), Q | s@(.arr ..), Q | s@(.stale ..), Q | s@(.copy ..), Q | s@(.view ..), Q =>
     key{ copyOk(s, Q) }
 termination_by structural s => s
 
@@ -5256,7 +5256,7 @@ theorem LStor.okEF_eq : (s : LStor) → s.okEF = s.okE
   | .save s q w => by
     simp only [LStor.okEF, LStor.okE, LStor.okEF_eq s, LTerm.elimF_eq w, LPath.elimF_eq q,
       LStor.hasUF_eq s]
-  | .del s q => by
+  | .delAt s q => by
     simp only [LStor.okEF, LStor.okE, LStor.okEF_eq s, LPath.elimF_eq q, LStor.hasUF_eq s]
   | .arr _ s q w => by
     simp only [LStor.okEF, LStor.okE, LStor.okEF_eq s, LTerm.elimF_eq w, LPath.elimF_eq q,
@@ -5277,7 +5277,7 @@ theorem LStor.readUF_eq : (s : LStor) → ∀ Q, s.readUF Q = s.readU Q
   | .init, _ => rfl
   | .save s P w, Q => by
     simp only [LStor.readUF, LStor.readU, LPath.elimF_eq P, LTerm.elimF_eq w, LStor.readUF_eq s]
-  | .del s P, Q => by
+  | .delAt s P, Q => by
     simp only [LStor.readUF, LStor.readU, LPath.elimF_eq P, LStor.readUF_eq s, LStor.mapUF_eq _ s]
   | .arr op s P w, Q => by
     simp only [LStor.readUF, LStor.readU, LPath.elimF_eq P, LTerm.elimF_eq w, LStor.readUF_eq s,
@@ -5298,7 +5298,7 @@ theorem LStor.slotUF_eq : (s : LStor) → ∀ P rest opq, s.slotUF P rest opq = 
   | .arr (.pop _) s P' _, P, rest, opq => by
     simp only [LStor.slotUF, LStor.slotU, LPath.elimF_eq P', LStor.readUF_eq s, LStor.lenUF_eq s,
       LStor.mapUF_eq _ s]
-  | .del s P', P, rest, opq => by
+  | .delAt s P', P, rest, opq => by
     simp only [LStor.slotUF, LStor.slotU, LPath.elimF_eq P', LStor.readUF_eq s, LStor.lenUF_eq s,
       LStor.mapUF_eq _ s, LStor.slotUF_eq s]
   | .stale none s P' w, P, rest, opq => by
@@ -5326,7 +5326,7 @@ theorem LStor.slotLenUF_eq : (s : LStor) → ∀ P rest opq,
   | .stale (some .push) s P' _, P, rest, opq => by
     simp only [LStor.slotLenUF, LStor.slotLenU, LPath.elimF_eq P', LStor.lenUF_eq s,
       LStor.slotLenUF_eq s]
-  | .init, _, _, _ | .save .., _, _, _ | .del .., _, _, _ | .arr .push .., _, _, _
+  | .init, _, _, _ | .save .., _, _, _ | .delAt .., _, _, _ | .arr .push .., _, _, _
   | .arr (.slot _) .., _, _, _ | .stale (some (.pop _)) .., _, _, _
   | .stale (some (.slot _)) .., _, _, _ | .copy .., _, _, _ | .view .., _, _, _ => rfl
 termination_by structural s => s
@@ -5339,7 +5339,7 @@ theorem LStor.slotHasUF_eq : (s : LStor) → ∀ P rest opq,
   | .stale none s P' _, P, rest, opq => by
     simp only [LStor.slotHasUF, LStor.slotHasU, LPath.elimF_eq P', LStor.lenUF_eq s,
       LStor.slotHasUF_eq s]
-  | .init, _, _, _ | .save .., _, _, _ | .del .., _, _, _ | .arr .push .., _, _, _
+  | .init, _, _, _ | .save .., _, _, _ | .delAt .., _, _, _ | .arr .push .., _, _, _
   | .arr (.slot _) .., _, _, _ | .stale (some _) .., _, _, _ | .copy .., _, _, _
   | .view .., _, _, _ => rfl
 termination_by structural s => s
@@ -5348,7 +5348,7 @@ theorem LStor.hasUF_eq : (s : LStor) → ∀ Q, s.hasUF Q = s.hasU Q
   | .init, _ => rfl
   | .save s P _, Q => by
     simp only [LStor.hasUF, LStor.hasU, LPath.elimF_eq P, LStor.hasUF_eq s]
-  | .del s P, Q => by
+  | .delAt s P, Q => by
     simp only [LStor.hasUF, LStor.hasU, LPath.elimF_eq P, LStor.hasUF_eq s, LStor.mapUF_eq _ s]
   | .arr op s P _, Q => by
     simp only [LStor.hasUF, LStor.hasU, LPath.elimF_eq P, LStor.hasUF_eq s, LStor.lenUF_eq s]
@@ -5366,7 +5366,7 @@ theorem LStor.lenUF_eq : (s : LStor) → ∀ Q, s.lenUF Q = s.lenU Q
   | .init, _ => rfl
   | .save s P _, Q => by
     simp only [LStor.lenUF, LStor.lenU, LPath.elimF_eq P, LStor.lenUF_eq s]
-  | .del s P, Q => by
+  | .delAt s P, Q => by
     simp only [LStor.lenUF, LStor.lenU, LPath.elimF_eq P, LStor.lenUF_eq s, LStor.mapUF_eq _ s]
   | .arr op s P _, Q => by
     simp only [LStor.lenUF, LStor.lenU, LPath.elimF_eq P, LStor.lenUF_eq s, LStor.slotLenUF_eq s,
@@ -5387,7 +5387,7 @@ theorem LStor.mapUF_eq (sh : KShape) : (s : LStor) → ∀ Q, s.mapUF sh Q = s.m
   | .init, _ => rfl
   | .save s P _, Q => by
     simp only [LStor.mapUF, LStor.mapU, LPath.elimF_eq P, LStor.mapUF_eq sh s]
-  | .del s P, Q => by
+  | .delAt s P, Q => by
     simp only [LStor.mapUF, LStor.mapU, LPath.elimF_eq P, LStor.mapUF_eq _ s]
   | .arr op s P _, Q => by
     simp only [LStor.mapUF, LStor.mapU, LPath.elimF_eq P, LStor.mapUF_eq sh s, LStor.lenUF_eq s]
@@ -5405,7 +5405,7 @@ theorem LStor.cpokUF_eq : (s : LStor) → ∀ Q, s.cpokUF Q = s.cpokU Q
   | .init, _ => rfl
   | .save s P _, Q => by
     simp only [LStor.cpokUF, LStor.cpokU, LPath.elimF_eq P, LStor.readUF_eq s, LStor.cpokUF_eq s]
-  | .del .., _ | .arr .., _ | .stale .., _ | .copy .., _ | .view .., _ => rfl
+  | .delAt .., _ | .arr .., _ | .stale .., _ | .copy .., _ | .view .., _ => rfl
 termination_by structural s => s
 
 theorem LSel.idxUF_eq : (a : LSel) → a.idxUF = a.idxU
@@ -7007,7 +7007,7 @@ theorem pop_slotU_sim {σ : State} {keep : Bool} {s : LStor} {P' P : LPath} {w' 
 theorem del_slotU_sim {σ : State} {s : LStor} {P' P : LPath} {opq : LTerm}
     {rest : List SSeg} {v : SVal} {ps : List Seg} {es sh : List SVal} {fx : Bool} {R : RefTy}
     {r : List Seg}
-    (hu : (LStor.del s P').eval σ = .ok v) (hP' : Sim (P'.elim.eval σ) (P'.eval σ))
+    (hu : (LStor.delAt s P').eval σ = .ok v) (hP' : Sim (P'.elim.eval σ) (P'.eval σ))
     (hp : P.eval σ = .ok ps) (hn : v.findLive ps = .ok (.array es sh fx))
     (hr : segsEval σ rest = .ok r)
     (hopq : Sim (opq.eval σ) ((pushSlot (.ref R) sh).1.findLive r >>= SVal.asValue))
@@ -7021,7 +7021,7 @@ theorem del_slotU_sim {σ : State} {s : LStor} {P' P : LPath} {opq : LTerm}
       v.findLive ps = .ok (.array es sh fx) →
       Sim (opq.eval σ) ((pushSlot (.ref R) sh).1.findLive r >>= SVal.asValue) →
       Sim ((s.slotU P rest opq).eval σ) ((pushSlot (.ref R) sh).1.findLive r >>= SVal.asValue)) :
-    Sim (((LStor.del s P').slotU P rest opq).eval σ)
+    Sim (((LStor.delAt s P').slotU P rest opq).eval σ)
       ((pushSlot (.ref R) sh).1.findLive r >>= SVal.asValue) := by
   rw [LStor.slotU]
   split
@@ -7126,7 +7126,7 @@ theorem del_okE_sim {σ : State} {s : LStor} {q : LPath}
     (hP : Sim (q.elim.eval σ) (q.eval σ))
     (ihH : ∀ {v qs}, s.eval σ = .ok v → q.elim.eval σ = .ok qs →
       Sim ((s.hasU q.elim).eval σ) (v.findLive qs >>= fun _ => .ok (.bool true))) :
-    Sim ((LStor.del s q).okE.eval σ) ((LStor.del s q).eval σ >>= fun _ => .ok (.bool true)) := by
+    Sim ((LStor.delAt s q).okE.eval σ) ((LStor.delAt s q).eval σ >>= fun _ => .ok (.bool true)) := by
     simp only [LStor.okE]
     split
     · rename_i hn
@@ -7185,13 +7185,13 @@ theorem save_readU_sim {σ : State} {s : LStor} {P Q : LPath} {w : LTerm} {u : S
     | diverge => rw [findLive_saveLive_diverge hr hu]; exact ihR hv hq
 
 theorem del_readU_sim {σ : State} {s : LStor} {P Q : LPath} {u : SVal} {qs : List Seg}
-    (hu : (LStor.del s P).eval σ = .ok u) (hq : Q.eval σ = .ok qs)
+    (hu : (LStor.delAt s P).eval σ = .ok u) (hq : Q.eval σ = .ok qs)
     (hP : Sim (P.elim.eval σ) (P.eval σ))
     (ihR : ∀ {v qs}, s.eval σ = .ok v → Q.eval σ = .ok qs →
       Sim ((s.readU Q).eval σ) (v.findLive qs >>= SVal.asValue))
     (ihM : ∀ (sh : KShape) (Q : LPath) {v qs}, s.eval σ = .ok v → Q.eval σ = .ok qs →
       Sim ((s.mapU sh Q).eval σ) (v.findLive qs >>= sh.test)) :
-    Sim (((LStor.del s P).readU Q).eval σ) (u.findLive qs >>= SVal.asValue) := by
+    Sim (((LStor.delAt s P).readU Q).eval σ) (u.findLive qs >>= SVal.asValue) := by
     obtain ⟨v, hv, hu⟩ := Res.bind_eq_ok.1 hu
     obtain ⟨ps, hp, hu⟩ := Res.bind_eq_ok.1 hu
     obtain ⟨c, hc, hu⟩ := Res.bind_eq_ok.1 hu
@@ -7263,13 +7263,13 @@ theorem save_hasU_sim {σ : State} {s : LStor} {P Q : LPath} {w : LTerm} {u : SV
     | diverge => rw [findLive_saveLive_diverge hr hu]; exact ihH hv hq
 
 theorem del_hasU_sim {σ : State} {s : LStor} {P Q : LPath} {u : SVal} {qs : List Seg}
-    (hu : (LStor.del s P).eval σ = .ok u) (hq : Q.eval σ = .ok qs)
+    (hu : (LStor.delAt s P).eval σ = .ok u) (hq : Q.eval σ = .ok qs)
     (hP : Sim (P.elim.eval σ) (P.eval σ))
     (ihH : ∀ {v qs}, s.eval σ = .ok v → Q.eval σ = .ok qs →
       Sim ((s.hasU Q).eval σ) (v.findLive qs >>= fun _ => .ok (.bool true)))
     (ihM : ∀ (sh : KShape) (Q : LPath) {v qs}, s.eval σ = .ok v → Q.eval σ = .ok qs →
       Sim ((s.mapU sh Q).eval σ) (v.findLive qs >>= sh.test)) :
-    Sim (((LStor.del s P).hasU Q).eval σ) (u.findLive qs >>= fun _ => .ok (.bool true)) := by
+    Sim (((LStor.delAt s P).hasU Q).eval σ) (u.findLive qs >>= fun _ => .ok (.bool true)) := by
     obtain ⟨v, hv, hu⟩ := Res.bind_eq_ok.1 hu
     obtain ⟨ps, hp, hu⟩ := Res.bind_eq_ok.1 hu
     obtain ⟨c, hc, hu⟩ := Res.bind_eq_ok.1 hu
@@ -7337,11 +7337,11 @@ theorem save_mapU_sim {σ : State} {s : LStor} {P Q : LPath} {w : LTerm} {u : SV
     | diverge => rw [findLive_saveLive_diverge hr hu]; exact ihM sh Q hv hq
 
 theorem del_mapU_sim {σ : State} {s : LStor} {P Q : LPath} {u : SVal} {qs : List Seg} {sh : KShape}
-    (hu : (LStor.del s P).eval σ = .ok u) (hq : Q.eval σ = .ok qs)
+    (hu : (LStor.delAt s P).eval σ = .ok u) (hq : Q.eval σ = .ok qs)
     (hP : Sim (P.elim.eval σ) (P.eval σ))
     (ihM : ∀ (sh : KShape) (Q : LPath) {v qs}, s.eval σ = .ok v → Q.eval σ = .ok qs →
       Sim ((s.mapU sh Q).eval σ) (v.findLive qs >>= sh.test)) :
-    Sim (((LStor.del s P).mapU sh Q).eval σ) (u.findLive qs >>= sh.test) := by
+    Sim (((LStor.delAt s P).mapU sh Q).eval σ) (u.findLive qs >>= sh.test) := by
     obtain ⟨v, hv, hu⟩ := Res.bind_eq_ok.1 hu
     obtain ⟨ps, hp, hu⟩ := Res.bind_eq_ok.1 hu
     obtain ⟨c, hc, hu⟩ := Res.bind_eq_ok.1 hu
@@ -7415,13 +7415,13 @@ theorem save_lenU_sim {σ : State} {s : LStor} {P Q : LPath} {w : LTerm} {u : SV
     | diverge => rw [findLive_saveLive_diverge hr hu]; exact ihL hv hq
 
 theorem del_lenU_sim {σ : State} {s : LStor} {P Q : LPath} {u : SVal} {qs : List Seg}
-    (hu : (LStor.del s P).eval σ = .ok u) (hq : Q.eval σ = .ok qs)
+    (hu : (LStor.delAt s P).eval σ = .ok u) (hq : Q.eval σ = .ok qs)
     (hP : Sim (P.elim.eval σ) (P.eval σ))
     (ihL : ∀ {v qs}, s.eval σ = .ok v → Q.eval σ = .ok qs →
       Sim ((s.lenU Q).eval σ) (v.findLive qs >>= Close.arrLen))
     (ihM : ∀ (sh : KShape) (Q : LPath) {v qs}, s.eval σ = .ok v → Q.eval σ = .ok qs →
       Sim ((s.mapU sh Q).eval σ) (v.findLive qs >>= sh.test)) :
-    Sim (((LStor.del s P).lenU Q).eval σ) (u.findLive qs >>= Close.arrLen) := by
+    Sim (((LStor.delAt s P).lenU Q).eval σ) (u.findLive qs >>= Close.arrLen) := by
     obtain ⟨v, hv, hu⟩ := Res.bind_eq_ok.1 hu
     obtain ⟨ps, hp, hu⟩ := Res.bind_eq_ok.1 hu
     obtain ⟨c, hc, hu⟩ := Res.bind_eq_ok.1 hu
@@ -9378,7 +9378,7 @@ theorem LStor.okE_sim (σ : State) :
   | .init => Sim.refl _
   | .save s q w =>
     save_okE_sim (LStor.okE_sim σ s) (LTerm.elim_sim σ w) (LPath.elim_sim σ q) (fun hv hp => LStor.hasU_sim σ s q.elim hv hp)
-  | .del s q =>
+  | .delAt s q =>
     del_okE_sim (LStor.okE_sim σ s) (LPath.elim_sim σ q) (fun hv hp => LStor.hasU_sim σ s q.elim hv hp)
 
   | .arr _ s P w => arr_okE_sim (LStor.okE_sim σ s) (LTerm.elim_sim σ w) (LPath.elim_sim σ P)
@@ -9408,7 +9408,7 @@ theorem LStor.readU_sim (σ : State) : (s : LStor) → ∀ (Q : LPath) {v : SVal
     exact Sim.refl _
   | .save s P w, Q, u, qs, hu, hq =>
     save_readU_sim hu hq (LPath.elim_sim σ P) (LTerm.elim_sim σ w) (fun hv hq => LStor.readU_sim σ s Q hv hq)
-  | .del s P, Q, u, qs, hu, hq =>
+  | .delAt s P, Q, u, qs, hu, hq =>
     del_readU_sim hu hq (LPath.elim_sim σ P) (fun hv hq => LStor.readU_sim σ s Q hv hq) (fun sh Q _ _ hv hq => LStor.mapU_sim σ s sh Q hv hq)
 
   | .arr _ s P w, Q, _, _, hu, hq => arr_readU_sim hu hq (LPath.elim_sim σ P) (LTerm.elim_sim σ w)
@@ -9441,7 +9441,7 @@ theorem LStor.slotU_sim (σ : State) : (s : LStor) → ∀ (P : LPath) (rest : L
       (fun Q _ _ hv hq => LStor.readU_sim σ s Q hv hq)
       (fun sh Q _ _ hv hq => LStor.mapU_sim σ s sh Q hv hq)
       (fun hv hq => LStor.lenU_sim σ s P hv hq)
-  | .del s P' => fun P rest opq _ _ _ _ _ _ _ hv hp hn hr hopq =>
+  | .delAt s P' => fun P rest opq _ _ _ _ _ _ _ hv hp hn hr hopq =>
     del_slotU_sim hv (LPath.elim_sim σ P') hp hn hr hopq
       (fun Q _ _ hv hq => LStor.readU_sim σ s Q hv hq)
       (fun sh Q _ _ hv hq => LStor.mapU_sim σ s sh Q hv hq)
@@ -9492,7 +9492,7 @@ theorem LStor.slotHasU_sound (σ : State) : (s : LStor) → ∀ (P : LPath) (res
       (fun hv hq => LStor.lenU_sim σ s P hv hq)
   | .init => fun _ _ _ _ _ _ _ _ _ _ _ _ _ hopq => by rw [LStor.slotHasU]; exact hopq
   | .save .. => fun _ _ _ _ _ _ _ _ _ _ _ _ _ hopq => by rw [LStor.slotHasU]; exact hopq
-  | .del .. => fun _ _ _ _ _ _ _ _ _ _ _ _ _ hopq => by rw [LStor.slotHasU]; exact hopq
+  | .delAt .. => fun _ _ _ _ _ _ _ _ _ _ _ _ _ hopq => by rw [LStor.slotHasU]; exact hopq
   | .arr .push .. => fun _ _ _ _ _ _ _ _ _ _ _ _ _ hopq => by rw [LStor.slotHasU]; exact hopq
   | .arr (.slot _) .. => fun _ _ _ _ _ _ _ _ _ _ _ _ _ hopq => by rw [LStor.slotHasU]; exact hopq
   | .stale (some _) .. => fun _ _ _ _ _ _ _ _ _ _ _ _ _ hopq => by rw [LStor.slotHasU]; exact hopq
@@ -9523,7 +9523,7 @@ theorem LStor.slotLenU_sound (σ : State) : (s : LStor) → ∀ (P : LPath) (res
       (fun hv hq => LStor.lenU_sim σ s P hv hq)
   | .init => fun _ _ _ _ _ _ _ _ _ _ _ _ _ hopq => by rw [LStor.slotLenU]; exact hopq
   | .save .. => fun _ _ _ _ _ _ _ _ _ _ _ _ _ hopq => by rw [LStor.slotLenU]; exact hopq
-  | .del .. => fun _ _ _ _ _ _ _ _ _ _ _ _ _ hopq => by rw [LStor.slotLenU]; exact hopq
+  | .delAt .. => fun _ _ _ _ _ _ _ _ _ _ _ _ _ hopq => by rw [LStor.slotLenU]; exact hopq
   | .arr .push .. => fun _ _ _ _ _ _ _ _ _ _ _ _ _ hopq => by rw [LStor.slotLenU]; exact hopq
   | .arr (.slot _) .. => fun _ _ _ _ _ _ _ _ _ _ _ _ _ hopq => by rw [LStor.slotLenU]; exact hopq
   | .stale (some (.pop _)) .. => fun _ _ _ _ _ _ _ _ _ _ _ _ _ hopq => by
@@ -9544,7 +9544,7 @@ theorem LStor.hasU_sim (σ : State) : (s : LStor) → ∀ (Q : LPath) {v : SVal}
     exact Sim.refl _
   | .save s P w, Q, u, qs, hu, hq =>
     save_hasU_sim hu hq (LPath.elim_sim σ P) (fun hv hq => LStor.hasU_sim σ s Q hv hq)
-  | .del s P, Q, u, qs, hu, hq =>
+  | .delAt s P, Q, u, qs, hu, hq =>
     del_hasU_sim hu hq (LPath.elim_sim σ P) (fun hv hq => LStor.hasU_sim σ s Q hv hq) (fun sh Q _ _ hv hq => LStor.mapU_sim σ s sh Q hv hq)
 
   | .arr _ s P _, Q, _, _, hu, hq => arr_hasU_sim hu hq (LPath.elim_sim σ P)
@@ -9573,7 +9573,7 @@ theorem LStor.mapU_sim (σ : State) : (s : LStor) → ∀ (sh : KShape) (Q : LPa
     exact Sim.refl _
   | .save s P w, sh, Q, u, qs, hu, hq =>
     save_mapU_sim hu hq (LPath.elim_sim σ P) (fun sh Q _ _ hv hq => LStor.mapU_sim σ s sh Q hv hq)
-  | .del s P, sh, Q, u, qs, hu, hq =>
+  | .delAt s P, sh, Q, u, qs, hu, hq =>
     del_mapU_sim hu hq (LPath.elim_sim σ P) (fun sh Q _ _ hv hq => LStor.mapU_sim σ s sh Q hv hq)
 
   | .arr _ s P _, sh, Q, _, _, hu, hq => arr_mapU_sim hu hq (LPath.elim_sim σ P)
@@ -9600,7 +9600,7 @@ theorem LStor.lenU_sim (σ : State) : (s : LStor) → ∀ (Q : LPath) {v : SVal}
     exact Sim.refl _
   | .save s P w, Q, u, qs, hu, hq =>
     save_lenU_sim hu hq (LPath.elim_sim σ P) (fun hv hq => LStor.lenU_sim σ s Q hv hq)
-  | .del s P, Q, u, qs, hu, hq =>
+  | .delAt s P, Q, u, qs, hu, hq =>
     del_lenU_sim hu hq (LPath.elim_sim σ P) (fun hv hq => LStor.lenU_sim σ s Q hv hq) (fun sh Q _ _ hv hq => LStor.mapU_sim σ s sh Q hv hq)
   | .arr _ s P _, Q, _, _, hu, hq => arr_lenU_sim hu hq (LPath.elim_sim σ P)
       (fun hv hq => LStor.lenU_sim σ s Q hv hq) (fun hv hp => LStor.lenU_sim σ s P.elim hv hp)
@@ -9627,7 +9627,7 @@ theorem LStor.cpokU_sim (σ : State) : (s : LStor) → ∀ (Q : LPath) {v : SVal
     rw [LStor.cpokU]
     exact save_cpok_sim hu hq (LPath.elim_sim σ P) (fun hv hp => LStor.readU_sim σ s P.elim hv hp)
       fun hv => LStor.cpokU_sim σ s Q hv hq
-  | .del .., _, _, _, hv, hq | .arr .., _, _, _, hv, hq | .stale .., _, _, _, hv, hq
+  | .delAt .., _, _, _, hv, hq | .arr .., _, _, _, hv, hq | .stale .., _, _, _, hv, hq
   | .copy .., _, _, _, hv, hq | .view .., _, _, _, hv, hq => by
     rw [LStor.cpokU]; exact cpok_keep_sim hv hq
 termination_by structural x => x

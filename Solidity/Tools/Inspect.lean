@@ -133,7 +133,7 @@ m, i))`; a write through a stale alias is `staleSave`, a node only Lean has
 partial def LStor.fmt [FreshNames] : LStor → String
   | .init => "storage"
   | .save s q w => s!"save({LStor.fmt s}, {LPath.fmt q}, {LTerm.fmt w})"
-  | .del s q => s!"delAt({LStor.fmt s}, {LPath.fmt q})"
+  | .delAt s q => s!"delAt({LStor.fmt s}, {LPath.fmt q})"
   | .arr .push s q w => s!"push({LStor.fmt s}, {LPath.fmt q}, {LTerm.fmt w})"
   | .arr (.slot _) s q _ => s!"pushSlot({LStor.fmt s}, {LPath.fmt q})"
   | .arr (.pop _) s q _ => s!"pop({LStor.fmt s}, {LPath.fmt q})"

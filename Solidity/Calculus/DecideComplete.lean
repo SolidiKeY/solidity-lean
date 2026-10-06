@@ -537,9 +537,9 @@ theorem LTerm.evalA_sim (σ : State) :
         · simp only [hij, if_true]; exact LTerm.evalA_sim σ t h.1.2
         · simp only [hij, if_false]; exact LTerm.evalA_sim σ e h.2
   | .zero a, h => Sim.bind (LTerm.evalA_sim σ a h) fun _ => Sim.refl _
-  | .find (.save ..) _, h | .find (.del ..) _, h | .has (.save ..) _, h | .has (.del ..) _, h
-  | .kmap _ (.save ..) _, h | .kmap _ (.del ..) _, h | .sok (.save ..), h | .sok (.del ..), h
-  | .len (.save ..) _, h | .len (.del ..) _, h => by
+  | .find (.save ..) _, h | .find (.delAt ..) _, h | .has (.save ..) _, h | .has (.delAt ..) _, h
+  | .kmap _ (.save ..) _, h | .kmap _ (.delAt ..) _, h | .sok (.save ..), h | .sok (.delAt ..), h
+  | .len (.save ..) _, h | .len (.delAt ..) _, h => by
     simp [LTerm.initOnly] at h
 
 /-- The same for a path. -/
@@ -666,11 +666,11 @@ them give it the same value. -/
 theorem LTerm.evalA_agree {E : Var → Res Value} {o o' : List Seg → Obs} :
     (t : LTerm) → Agree E o o' t.reads → t.evalA E o' = t.evalA E o
   | .lit _, _ | .var _, _ | .err, _ | .env _, _ | .findP _ _, _ | .cpok _ _, _ => rfl
-  | .sok .init, _ | .sok (.save ..), _ | .sok (.del ..), _ | .sok (.arr ..), _
+  | .sok .init, _ | .sok (.save ..), _ | .sok (.delAt ..), _ | .sok (.arr ..), _
   | .sok (.stale ..), _ | .sok (.copy ..), _ | .sok (.view ..), _ => rfl
-  | .find (.save ..) _, _ | .find (.del ..) _, _ | .has (.save ..) _, _ | .has (.del ..) _, _
-  | .kmap _ (.save ..) _, _ | .kmap _ (.del ..) _, _ | .len (.save ..) _, _
-  | .len (.del ..) _, _ => rfl
+  | .find (.save ..) _, _ | .find (.delAt ..) _, _ | .has (.save ..) _, _ | .has (.delAt ..) _, _
+  | .kmap _ (.save ..) _, _ | .kmap _ (.delAt ..) _, _ | .len (.save ..) _, _
+  | .len (.delAt ..) _, _ => rfl
   | .find (.arr ..) _, _ | .find (.copy ..) _, _ | .has (.arr ..) _, _ | .has (.copy ..) _, _
   | .kmap _ (.arr ..) _, _ | .kmap _ (.copy ..) _, _ | .len (.arr ..) _, _
   | .len (.copy ..) _, _ => rfl

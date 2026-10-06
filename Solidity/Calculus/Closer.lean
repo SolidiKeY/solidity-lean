@@ -664,7 +664,7 @@ theorem LStor.simpE_eval {σ : State} {O : Orc} {E : Eqs} (hO : O.Ok σ) (hE : E
     simp only [LStor.simpE, LStor.eval, LTerm.simpE_eval hO hE w x hw, LStor.simpE_eval hO hE s hs,
       LPath.simpE_eval hO hE q hq, Res.ok_bind]
     exact h
-  | .del s q, sv, h => by
+  | .delAt s q, sv, h => by
     simp only [LStor.eval] at h
     obtain ⟨y, hs, h⟩ := Res.bind_eq_ok.1 h
     obtain ⟨z, hq, h⟩ := Res.bind_eq_ok.1 h
@@ -1149,7 +1149,7 @@ theorem LPath.eval_rootN (σ : State) : ∀ {q : LPath} {qs : List Seg}, q.eval 
 (`bucket.tokens` after `delete tokens; tokens.push();`). -/
 def LStor.offRoot (r : Name) : LStor → Bool
   | .init => true
-  | .save s q _ | .del s q | .arr _ s q _ | .stale _ s q _ | .copy s q _ _ =>
+  | .save s q _ | .delAt s q | .arr _ s q _ | .stale _ s q _ | .copy s q _ _ =>
     q.rootN != r && s.offRoot r
   | .view .. => false
 termination_by structural s => s
@@ -1166,7 +1166,7 @@ theorem LStor.offRoot_findLive {σ : State} {r : Name} {ps : List Seg} {t : List
     obtain ⟨t', rfl⟩ := LPath.eval_rootN σ hq
     rw [findLive_saveLive_diverge (by rw [ht]; exact Or.inl (fun he => h.1 (Seg.field.inj he))) hs]
     exact LStor.offRoot_findLive ht h.2 hv'
-  | .del s q, v, h, hv => by
+  | .delAt s q, v, h, hv => by
     simp only [LStor.offRoot, Bool.and_eq_true, bne_iff_ne, ne_eq] at h
     simp only [LStor.eval, Res.bind_eq_ok] at hv
     obtain ⟨v', hv', qs, hq, _, -, hs⟩ := hv
@@ -1214,14 +1214,14 @@ each at its own root and none at `r` (`delete bucket.tokens; delete tokens;`
 below `tokens.push();`): it returns, with the initial subtree at `r`. -/
 def Facts.offDel (F : Facts) (r : Name) : LStor → Bool
   | .init => true
-  | .del s q => q.rootN != r && q.noAt && q.noLen && (F.pty q).isSome &&
+  | .delAt s q => q.rootN != r && q.noAt && q.noLen && (F.pty q).isSome &&
       s.offRoot q.rootN && F.offDel r s
   | _ => false
 
 theorem Facts.offDel_offRoot {F : Facts} {r : Name} : ∀ {s : LStor}, F.offDel r s = true →
     s.offRoot r = true
   | .init, _ => rfl
-  | .del s q, h => by
+  | .delAt s q, h => by
     simp only [Facts.offDel, Bool.and_eq_true] at h
     simp only [LStor.offRoot, Bool.and_eq_true]
     exact ⟨h.1.1.1.1.1, Facts.offDel_offRoot h.2⟩
@@ -1231,7 +1231,7 @@ theorem Facts.offDel_offRoot {F : Facts} {r : Name} : ∀ {s : LStor}, F.offDel 
 theorem Facts.offDel_eval {σ : State} {F : Facts} (hF : F.Ok σ) {r : Name} :
     ∀ {s : LStor}, F.offDel r s = true → ∃ v, s.eval σ = .ok v
   | .init, _ => ⟨_, rfl⟩
-  | .del s q, h => by
+  | .delAt s q, h => by
     simp only [Facts.offDel, Bool.and_eq_true] at h
     obtain ⟨⟨⟨⟨⟨-, hat⟩, hn⟩, hty⟩, hoff⟩, hs⟩ := h
     obtain ⟨v, hv⟩ := Facts.offDel_eval hF hs
@@ -1251,13 +1251,13 @@ far as the slot facts read them: the initial one, the initial one with the
 array at `P` deleted (`delete values; values.push();`), and either with
 `delete`s at other roots below (`Facts.offDel`). -/
 def Facts.baseOk (F : Facts) : LStor → LPath → Bool
-  | .del s P', P => if P' == P then F.offDel P.rootN s else F.offDel P.rootN (.del s P')
+  | .delAt s P', P => if P' == P then F.offDel P.rootN s else F.offDel P.rootN (.delAt s P')
   | s, P => F.offDel P.rootN s
 
 /-- The length of the array at `P` in such a storage: the initial one's, or
 `0` after its `delete`. -/
 def baseLen : LStor → LPath → LTerm
-  | .del _ P', P => if P' == P then .lit (.int 0) else .len .init P
+  | .delAt _ P', P => if P' == P then .lit (.int 0) else .len .init P
   | _, P => .len .init P
 
 /-- The type of a read below the slot a `push()` takes (or an element
@@ -1334,7 +1334,7 @@ theorem Facts.slot_base {σ : State} {F : Facts} (hF : F.Ok σ) {base : LStor} {
           (baseLen base P).eval σ = .ok (.int es.length) := fun ho hl =>
       ⟨es0, sh0, fx0, hoff ho hv0, hes, hsh, hl⟩
     cases base
-    case del s P' =>
+    case delAt s P' =>
       simp only [Facts.baseOk] at hb
       split at hb
       · rename_i heq
@@ -1360,7 +1360,7 @@ theorem Facts.base_eval {σ : State} {F : Facts} (hF : F.Ok σ) {base : LStor} {
     (hpty : F.pty P = some T) {ps : List Seg} (hp : P.eval σ = .ok ps) :
     ∃ v0, base.eval σ = .ok v0 := by
   cases base
-  case del s P' =>
+  case delAt s P' =>
     simp only [Facts.baseOk] at hb
     split at hb
     · rename_i heq
@@ -1855,8 +1855,8 @@ theorem Facts.isInt_sound {σ : State} {F : Facts} (hF : F.Ok σ) :
       obtain ⟨w, hc, hw⟩ := F.read_init hF ht hv
       obtain ⟨i, rfl⟩ := canonB_int hc; cases hw; exact ⟨i, rfl⟩
     · cases hi
-  | .find (.save ..) _, hi, _, _ | .find (.del ..) _, hi, _, _
-  | .findP (.save ..) _, hi, _, _ | .findP (.del ..) _, hi, _, _ => by simp only [isInt,
+  | .find (.save ..) _, hi, _, _ | .find (.delAt ..) _, hi, _, _
+  | .findP (.save ..) _, hi, _, _ | .findP (.delAt ..) _, hi, _, _ => by simp only [isInt,
       Bool.false_eq_true] at hi
   | .find (.arr op s P w) q, hi, v, h => by
     simp only [Facts.isInt] at hi
@@ -1969,8 +1969,8 @@ theorem Facts.isBool_sound {σ : State} {F : Facts} (hF : F.Ok σ) :
       first | exact .inl h | exact .inr h
     obtain ⟨w, hc, hw⟩ := F.read_init hF hi hv
     obtain ⟨b, rfl⟩ := canonB_bool hc; cases hw; exact ⟨b, rfl⟩
-  | .find (.save ..) _, hi, _, _ | .find (.del ..) _, hi, _, _
-  | .findP (.save ..) _, hi, _, _ | .findP (.del ..) _, hi, _, _ => by simp only [isBool,
+  | .find (.save ..) _, hi, _, _ | .find (.delAt ..) _, hi, _, _
+  | .findP (.save ..) _, hi, _, _ | .findP (.delAt ..) _, hi, _, _ => by simp only [isBool,
       Bool.false_eq_true] at hi
   | .find (.arr op s P w) q, hi, v, h => by
     simp only [Facts.isBool] at hi
@@ -3648,7 +3648,7 @@ def LStor.fits : Nat → LStor → Option Nat
   | 0, _ => none
   | n + 1, .init => some n
   | n + 1, .save s q w => (s.fits n).bind fun m => (q.fits m).bind fun k => w.fits k
-  | n + 1, .del s q => (s.fits n).bind fun m => q.fits m
+  | n + 1, .delAt s q => (s.fits n).bind fun m => q.fits m
   | n + 1, .arr _ s q w | n + 1, .stale _ s q w =>
     (s.fits n).bind fun m => (q.fits m).bind fun k => w.fits k
   | n + 1, .copy s q src sq =>

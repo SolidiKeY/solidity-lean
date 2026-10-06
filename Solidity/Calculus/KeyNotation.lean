@@ -29,7 +29,7 @@ The sort of a term is read off its head, then off the argument position.
 
 | sort | spelling | constructor |
 |---|---|---|
-| storage | `storage`, `save(s, q, w)`, `delAt(s, q)` | `LStor.init`, `.save`, `.del` |
+| storage | `storage`, `save(s, q, w)`, `delAt(s, q)` | `LStor.init`, `.save`, `.delAt` |
 | | `save(s, q, find(src, sq))`, `save(s, q, copyMem(mtSt, m, i))` | `.copy s q src sq`, `.copy s q (.view m i) (.root viewRoot)` |
 | | `copyMem(mtSt, m, i)`, `push(s, q, w)`, `arr(op, s, q, w)` | `.view`, `.arr .push`, `.arr` |
 | | `staleSave(s, q, w)`, `stale(op, s, q, w)` | `.stale none`, `.stale (some op)` (Lean only) |
@@ -457,7 +457,7 @@ partial def keyCall (lit : Bool) (s : KSort) (stx : TSyntax `key_term) : MacroM 
       `(LStor.copy $(← at_ .stor 0) $(← at_ .path 1) $(← keyAt lit .stor w)
           (LPath.root viewRoot))
     | _ => `(LStor.save $(← at_ .stor 0) $(← at_ .path 1) $(← at_ .term 2))
-  | .stor, "delAt" => do arity 2; `(LStor.del $(← at_ .stor 0) $(← at_ .path 1))
+  | .stor, "delAt" => do arity 2; `(LStor.delAt $(← at_ .stor 0) $(← at_ .path 1))
   | .stor, "push" => do
     arity 3; `(LStor.arr AOp.push $(← at_ .stor 0) $(← at_ .path 1) $(← at_ .term 2))
   | .stor, "arr" => do
@@ -817,7 +817,7 @@ partial def pkStor (e : Expr) : KeyM (TSyntax `key_term) := do
       | LTerm.len s' q' => `(key_term| select($(← pkStor s'), $(← kLength (← pkPath q'))))
       | _ => pkTerm w
     `(key_term| save($(← pkStor s), $(← pkPath q), $w'))
-  | LStor.del s q => `(key_term| delAt($(← pkStor s), $(← pkPath q)))
+  | LStor.delAt s q => `(key_term| delAt($(← pkStor s), $(← pkPath q)))
   | LStor.arr op s q w =>
     if op.consumeMData.isConstOf ``AOp.push then
       `(key_term| push($(← pkStor s), $(← pkPath q), $(← pkTerm w)))
@@ -1016,7 +1016,7 @@ attribute [delab app.Solidity.Decide.LTerm.lit, delab app.Solidity.Decide.LTerm.
   delab app.Solidity.Decide.LTerm.cpok,
   delab app.Solidity.Decide.LPath.field, delab app.Solidity.Decide.LPath.at,
   delab app.Solidity.Decide.LStor.init, delab app.Solidity.Decide.LStor.save,
-  delab app.Solidity.Decide.LStor.del, delab app.Solidity.Decide.LStor.arr,
+  delab app.Solidity.Decide.LStor.delAt, delab app.Solidity.Decide.LStor.arr,
   delab app.Solidity.Decide.LStor.stale, delab app.Solidity.Decide.LStor.copy,
   delab app.Solidity.Decide.LStor.view,
   delab app.Solidity.Decide.LMem.init, delab app.Solidity.Decide.LMem.addM,
@@ -1049,7 +1049,7 @@ example : key!{ find(save(storage, balances[msg.sender], find(storage, balances[
 
 example : key!{ if(i = j) then 7 else find(delAt(storage, values), values[i]) } =
     LTerm.kite (.var (.user "i")) (.var (.user "j")) (.lit (.int 7))
-      (.find (.del .init (.root "values")) (.at (.root "values") (.var (.user "i")))) := rfl
+      (.find (.delAt .init (.root "values")) (.at (.root "values") (.var (.user "i")))) := rfl
 
 -- a copy, a read written, a length
 example : key!{ save(storage, alice, find(storage, bob)) } =

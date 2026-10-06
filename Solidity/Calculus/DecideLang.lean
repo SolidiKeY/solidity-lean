@@ -374,7 +374,7 @@ inductive LPath where
 inductive LStor where
   | init
   | save (s : LStor) (q : LPath) (w : LTerm)
-  | del (s : LStor) (q : LPath)
+  | delAt (s : LStor) (q : LPath)
   /-- The operation `op` on the array at `q`, with the word `w` for a push
   (a literal otherwise). -/
   | arr (op : AOp) (s : LStor) (q : LPath) (w : LTerm)
@@ -522,7 +522,7 @@ def LStor.eval (σ : State) : LStor → Res SVal
   | .init => .ok (.struct σ.storage)
   | .save s q w => w.eval σ >>= fun wv => s.eval σ >>= fun v => q.eval σ >>= fun qs =>
       v.saveLive qs wv.toSVal
-  | .del s q => s.eval σ >>= fun v => q.eval σ >>= fun qs => v.findLive qs >>= fun cur =>
+  | .delAt s q => s.eval σ >>= fun v => q.eval σ >>= fun qs => v.findLive qs >>= fun cur =>
       v.saveLive qs cur.defaultOf
   | .arr op s q w => w.eval σ >>= fun wv => s.eval σ >>= fun v => q.eval σ >>= fun qs =>
       v.findLive qs >>= fun c => op.apply wv c >>= fun c' => v.saveLive qs c'
@@ -595,7 +595,7 @@ def LPath.vars : LPath → List Var
 def LStor.vars : LStor → List Var
   | .init => []
   | .save s q w => s.vars ++ q.vars ++ w.vars
-  | .del s q => s.vars ++ q.vars
+  | .delAt s q => s.vars ++ q.vars
   | .arr _ s q w => s.vars ++ q.vars ++ w.vars
   | .stale _ s q w => s.vars ++ q.vars ++ w.vars
   | .copy s q src sq => s.vars ++ q.vars ++ src.vars ++ sq.vars
@@ -682,7 +682,7 @@ theorem LStor.eval_setEnv {σ : State} {x : Var} {b : Binding} :
     simp only [LStor.vars, List.mem_append, not_or] at h
     simp only [LStor.eval, LStor.eval_setEnv s h.1.1, LPath.eval_setEnv q h.1.2,
       LTerm.eval_setEnv w h.2]
-  | .del s q, h => by
+  | .delAt s q, h => by
     simp only [LStor.vars, List.mem_append, not_or] at h
     simp only [LStor.eval, LStor.eval_setEnv s h.1, LPath.eval_setEnv q h.2]
   | .arr _ s q w, h => by
