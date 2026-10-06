@@ -4,12 +4,6 @@ The name-by-name map from solkey's `solidityProgramRules.key` (plus
 `ifThenElseRules.key`) to `Solidity.Taclet` (`Calculus/Rules.lean`), then the
 symbol table for updates and the data-structure theories. **Pinned to solkey
 `1b4341a303`**: 323 program taclets, enumerated in `Calculus/KeyTaclets.lean`.
-The four taclets `671f6762a9`..`1b4341a303` added (`internalCallExpand`,
-`blockReturn`, `functionFrameReturn`, `functionFrameEmpty`) are unclaimed as
-"not yet ported" until their rows below are written.  Every instance of
-`internalCallExpand` is already Lean's `functionBodyExpand` (its row, a
-recorded deviation until `RuleShapes` claims the name).  The six `send`
-taclets of `b959555181` have their rows.
 
 These tables are the prose companion of `Calculus/RuleShapes.lean`, which
 checks the correspondence: `tacletOrigins` gives every constructor a typed
@@ -17,7 +11,7 @@ checks the correspondence: `tacletOrigins` gives every constructor a typed
 fails the build), `unclaimedTaclets` excuses the rest with a reason,
 `callbackOrigins` does the same for `CallbackTaclet`, and `taclets_partitioned`
 says every taclet is claimed or excused, never both
-(`claimedTaclets_count = 305`, `unclaimedTaclets_count = 18`). A rule that
+(`claimedTaclets_count = 306`, `unclaimedTaclets_count = 17`). A rule that
 transcribes no taclet is a `LeanTaclet` (`leanTaclets`); there are three,
 `functionCallArgCapture`, `tryCallDiamond` and `transferDiamond`. A taclet may be claimed by two constructors (the
 member reads by their `.length` rules, since KeY reads `sp.length` as the
@@ -55,8 +49,10 @@ goal's update level and reads what it adds there: nothing to port.
 
 | KeY taclet | `Taclet` constructor | Status | Notes |
 | --- | --- | --- | --- |
-| `functionBodyExpand`, `internalCallExpand` | `functionBodyExpand` | deviation (recorded, until W2) | a call carries its callee inlined (`Stmt.call`, KeY's `FunctionBodyStatement`); with every argument simple the premise is KeY's `expand_function_body`. At `1b4341a303` solkey's `functionBodyExpand` matches a `FunctionBody` in context (`c# s#fbs #c`) and an in-program call `f(args);` / `lhs = f(args);` is `internalCallExpand`'s; Lean's one constructor covers both. solkey binds every argument as `T p = arg`, simple or not; Lean captures a non-simple one first (`functionCallArgCapture`, below). KeY names an unnamed return `ret0`, `ret1`, …; Lean `_ret` (one) or `_ret0`, `_ret1`, … (several). The parameters are the elaborator's fresh names, so KeY's fresh renaming is done once, at elaboration |
-| — | `LeanTaclet.functionCallArgCapture` | Lean only | the leftmost non-simple argument is captured into a fresh `se` first, so that `Stmt.step` has one rule per call: Lean's `functionBodyExpand` takes simple arguments only. solkey `671f6762a9` binds the argument inside `expand_function_body` (`T p = arg`) instead, which reaches the same state; Lean keeps the capture |
+| `functionBodyExpand` | `functionBodyExpand` | same | a call with targets (`fbs`, `CallRet.isRets`: a tuple assignment's call, a specification obligation's `result = f(x̄)`, KeY's `FunctionBodyStatement`) carries its callee inlined (`Stmt.call`); with every argument simple the premise is KeY's `expand_function_body`, the targets the statements after it (`t = r;`, KeY's `function-frame{…} t0 = r0;` without the frame). The parameters are the elaborator's fresh names, so KeY's fresh renaming is done once, at elaboration; the returns start at their defaults (solc's), where KeY's `R ri;` leaves them unconstrained |
+| `internalCallExpand` | `internalCallExpand` | same | any other call (`ic`: `f(a);`, `y = f(a);`, KeY's `InternalCall`), same premise and soundness (`Stmt.run_call_expand`). **Lean only:** it also inlines a callee with modifiers (`wrapMods`), where KeY's `InternalCall` refuses one and leaves the call stuck; and it waits for simple arguments (`functionCallArgCapture`), where KeY's binds `T p = arg` as written. A bare call of a function of several returns declares them in its body (`CallRet.none`) |
+| `blockReturn`, `functionFrameReturn`, `functionFrameEmpty` | — | unclaimed (architectural) | returns are lowered at elaboration (`lowerReturns`: a `return` in a block splices the block into the statements after it, which is `blockReturn`'s effect) and a call's body is spliced flat, so there is no block, frame or `return` in `Stmt` to rewrite |
+| — | `LeanTaclet.functionCallArgCapture` | Lean only | `unfoldArgument`, which solkey's `docs/net.md` lists as missing: the leftmost non-simple argument is captured into a fresh `se` first, so that `Stmt.step` has one rule per call |
 | `emptyModality` | `Proves.empty` (also `Proves.emptyModality`) | ⊢ rule | `⟨[ ]⟩ φ ⇝ φ` under either modality, as KeY's `#allmodal`; the proof tree prints the step under this name (`Calculus/ProofTree.lean`) |
 | `impRight` (`propRule.key`) | `Proves.intro` (also `Proves.impRight`) | ⊢ rule | `⟹ a → φ` becomes `a ⟹ φ` |
 | `allRight` (`firstOrderRules.key`) | `Proves.allIntro` (also `Proves.allRight`) | ⊢ rule | `⟹ ∀ T x; φ` becomes `∀ T x ⟹ φ`: the local holds any value of `T`, KeY's skolem constant (`Hyp.all`) |

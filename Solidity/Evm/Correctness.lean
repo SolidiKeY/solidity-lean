@@ -1907,7 +1907,7 @@ theorem leave_sim {Δ : TyCtx} {τ : State} {m : Machine} (ret : CallRet)
     ∃ τ' m', CallRet.leave (C := C) τ ret = .ok τ' ∧ run (retLeaveCode ret) m = .ok m' 0 ∧
       m'.stack = m.stack ∧ Sim C L Δ τ' m' := by
   cases ret with
-  | none => exact ⟨τ, m, rfl, rfl, rfl, hm⟩
+  | none | rets _ => exact ⟨τ, m, rfl, rfl, rfl, hm⟩
   | val p r res =>
     cases res with
     | none => exact ⟨τ, m, rfl, rfl, rfl, hm⟩
@@ -2243,6 +2243,7 @@ theorem stmt_sim : ∀ (s : Stmt C) {L : Nat} {Δ Δ' : TyCtx} {τ : State} {m :
                 subst hwe
                 exact ⟨{ m₁ with mem := upd m₁.mem r (.val 0) }, rfl, rfl,
                   hm₁.bindVal r (ReprV.default p)⟩
+              | rets _ => simp only [wtRetEnter, reduceCtorEq] at hwe
             rw [run_append_ok hrun₂]
             rcases ihb hm₂ hwb with ⟨τ₃, m₃, hτ₃, hrun₃, hst₃, hm₃⟩ | ⟨hτ₃, hrun₃⟩ |
                 ⟨hτ₃, hrun₃⟩ | ⟨hp, hrun₃, τ₃, m₃, hτ₃, hm₃⟩

@@ -442,8 +442,9 @@ def printedOrigins : List (Lean.Name × PrintedOrigin) := [
   (``Taclet.assertSimple, .printed .assertSimple),
   (``Taclet.revertBox, .printed .revertBox),
   (``Taclet.revertDiamond, .printed .revertDiamond),
-  -- Calls: none printed; solkey has `functionBodyExpand`
+  -- Calls: none printed; solkey has `functionBodyExpand`, `internalCallExpand`
   (``Taclet.functionBodyExpand, .leanOnly .keyTier),
+  (``Taclet.internalCallExpand, .leanOnly .keyTier),
   -- External calls: none printed; solkey has `tryCallNoCallbackBox`
   (``Taclet.tryCallNoCallbackBox, .leanOnly .keyTier) ]
 
@@ -510,7 +511,7 @@ theorem unclaimedRules_count : unclaimedRules.length = 8 := by decide +kernel
 def leanOnlyRows (why : LeanOnlyReason) : List Lean.Name :=
   ((printedOrigins ++ leanPrintedOrigins).filter fun r => r.2 == .leanOnly why).map Prod.fst
 
-theorem leanOnly_keyTier_count : (leanOnlyRows .keyTier).length = 38 := by decide +kernel
+theorem leanOnly_keyTier_count : (leanOnlyRows .keyTier).length = 39 := by decide +kernel
 
 theorem leanOnly_calculus_count : (leanOnlyRows .calculus).length = 3 := by decide +kernel
 

@@ -23,7 +23,9 @@ writes, a push and a pop are nested writes over `size`, and
 (`contract!{ function f(uint x) returns (uint r) { … } }`), a function may
 call only the ones declared before it, and a call statement (`Stmt.call`)
 carries its callee's body with every local renamed fresh — KeY's
-`FunctionBodyStatement`; `functionBodyExpand` inlines it.  **Callbacks** are
+`InternalCall`, which `internalCallExpand` inlines (`functionBodyExpand` for
+a call with targets, `CallRet.rets`: a tuple assignment's, a spec
+obligation's).  **Callbacks** are
 a second reading of the modalities (`Semantics/Callback.lean`, `holdsC`, the
 `CallbackTaclet`s and `ProvesC` of `Calculus/Callback.lean`), not a change
 to `Stmt.run`.

@@ -450,13 +450,13 @@ example : dl!{ ⟨ carolValues[i] = makeValue(); ⟩ true where uint[] memory ca
     = dl!{ ⟨ uint se1; se1 = makeValue(); carolValues[i] = se1; ⟩ true where uint[] memory carolValues } := rfl
 
 /-- `carolValues[i] = makeValue();` with `i` 2, from a storage where `total` is 7: the call's body inlined
-(`functionBodyExpand`), its result written.  The captures and the value written resolve to 7. -/
+(`internalCallExpand`), its result written.  The captures and the value written resolve to 7. -/
 theorem memoryIndexWriteUnfoldSource :
     dl![m]{ { i := 2 ‖ storage := save(storage, total, 7) } ⟨[ carolValues[i] = makeValue(); ]⟩ φ
         where uint[] memory carolValues }
     ~[valueDeclSkip]~> dl![m]{ { i := 2 ‖ storage := save(storage, total, 7) } { se1 := 0 }
         ⟨[ se1 = makeValue(); carolValues[i] = se1; ]⟩ φ where uint[] memory carolValues }
-    ~[functionBodyExpand]~> dl![m]{ { i := 2 ‖ storage := save(storage, total, 7) } { se1 := 0 }
+    ~[internalCallExpand]~> dl![m]{ { i := 2 ‖ storage := save(storage, total, 7) } { se1 := 0 }
         ⟨[ uint se2; se2 = total; se1 = se2; carolValues[i] = se1; ]⟩ φ where uint[] memory carolValues }
     ~*> dl![m]{ { i := 2 ‖ storage := save(storage, total, 7) } { se1 := 0 } { se2 := 0 }
         { se2 := find(storage, total) } { se1 := se2 } ⟨[ carolValues[i] = se1; ]⟩ φ

@@ -11,7 +11,7 @@ branches, checks and calls of such, is `view`; one whose expressions also
 read nothing outside its locals (`Val.readsState`: storage, a storage or
 memory read or length, `msg.sender`, `msg.value`, the funds) is `pure`; one
 that may also write storage and pay (`a = e;`, `delete`, `x += e`, `x++`
-and `v = x++` on storage, `transfer`) is `nonpayable`.  Anything else
+and `v = x++` on storage, `transfer`, `ok = a.send(v)`) is `nonpayable`.  Anything else
 (memory, a push or a pop, an alias, an external call) has no mutability
 here, and no contract.  A `view` function cannot pay either: solc rejects a
 `transfer` in one.
@@ -88,7 +88,7 @@ def Stmt.within (μ : Mutability) : Stmt C → Bool
   | .revert => true
   | .ite c thn els => μ.reads c && Prog.within μ thn && Prog.within μ els
   | .call _ args _ _ body => args.all (fun a => μ.reads a.e) && Prog.within μ body
-  | .assign .. | .delete _ | .transfer .. => μ == .nonpayable
+  | .assign .. | .delete _ | .transfer .. | .send .. => μ == .nonpayable
   | _ => false
 
 def Prog.within (μ : Mutability) : List (Stmt C) → Bool
@@ -108,6 +108,7 @@ def Stmt.writes : Stmt C → List Var
   | .assignIncDec x _ _ l _ => x :: l.writes
   | .ite _ thn els => Prog.writes thn ++ Prog.writes els
   | .call _ args _ ret body => args.map (·.x) ++ ret.vars ++ Prog.writes body
+  | .send pv _ _ => [pv]
   | _ => []
 
 def Prog.writes : List (Stmt C) → List Var
@@ -275,20 +276,29 @@ theorem bindSeq_agree : (args : List (Arg C)) → ∀ {σ τ : State},
     exact agree_trans (agree_setEnv (List.mem_cons_self ..) σ _)
       (agree_mono (fun _ hy => List.mem_cons_of_mem _ hy) (bindSeq_agree as h))
 
+theorem enterAll_agree : (rs : List (PrimTy × Var)) → (σ : State) →
+    EnvAgreeExcept (rs.map (·.2)) σ (CallRet.enterAll rs σ)
+  | [], σ => EnvAgreeExcept.refl _ σ
+  | (_, r) :: rs, σ =>
+    agree_trans (agree_setEnv (List.mem_cons_self ..) σ _)
+      (agree_mono (fun _ hy => List.mem_cons_of_mem _ hy) (enterAll_agree rs _))
+
 theorem enter_agree (ret : CallRet) (σ : State) : EnvAgreeExcept ret.vars σ (ret.enter σ) := by
   cases ret with
   | none => exact EnvAgreeExcept.refl _ _
   | val p r res => exact agree_setEnv (List.mem_cons_self ..) σ _
+  | rets rs => exact enterAll_agree rs σ
 
 theorem leave_agree {ret : CallRet} (h : CallRet.leave (C := C) σ ret = .ok τ) :
     EnvAgreeExcept ret.vars σ τ := by
-  rcases ret with _ | ⟨p, r, _ | res⟩
+  rcases ret with _ | ⟨p, r, _ | res⟩ | rs
   · cases h; exact EnvAgreeExcept.refl _ _
   · cases h; exact EnvAgreeExcept.refl _ _
   · simp only [CallRet.leave] at h
     obtain ⟨_, _, h⟩ := bind_ok_inv h
     cases h
     exact agree_setEnv (by simp only [CallRet.vars, Option.toList_some, List.mem_cons, List.not_mem_nil, or_false, or_true]) σ _
+  · cases h; exact EnvAgreeExcept.refl _ _
 
 theorem store_frame {μ : Mutability} {p : PrimTy} {op : BinOp} (l : OpLoc C p) {v : Value}
     (hl : (l.isLocal || μ == .nonpayable && l.isStorage) = true) (h : l.store σ op v = .ok τ) :
@@ -436,6 +446,25 @@ theorem Stmt.frame_of_within {μ : Mutability} : (s : Stmt C) → s.within μ = 
     · cases h
     · cases h
       exact Frame.net _ σ _
+  | .send pv _ _, hw, σ, _, h => by
+    simp only [Stmt.within, beq_iff_eq] at hw
+    subst hw
+    simp only [Stmt.run] at h
+    obtain ⟨_, _, h⟩ := bind_ok_inv h
+    obtain ⟨_, _, h⟩ := bind_ok_inv h
+    obtain ⟨_, _, h⟩ := bind_ok_inv h
+    obtain ⟨_, _, h⟩ := bind_ok_inv h
+    unfold sendAt at h
+    have hpv : pv ∈ Stmt.writes (C := C) (.send pv _ _) := List.mem_singleton_self pv
+    split at h
+    · cases h
+    · split at h
+      · cases h
+        exact (Frame.net _ σ _).trans (Frame.ofAgree _ (agree_setEnv hpv _ _))
+      · cases h
+        exact (Frame.net _ σ _).trans (Frame.ofAgree _ (agree_setEnv hpv _ _))
+      · cases h
+        exact Frame.ofAgree _ (agree_setEnv hpv σ _)
   | .assignIncDec x _ _ l _, hw, _, _, h => by
     simp only [Stmt.within] at hw
     simp only [Stmt.run] at h

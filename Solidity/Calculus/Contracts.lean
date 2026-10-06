@@ -76,6 +76,7 @@ quantifies.  (A memory reference is returned through the caller's locals,
 def CallRet.binders : CallRet → List (PrimTy × Var)
   | .none => []
   | .val p r _ => [(p, r)]
+  | .rets rs => rs
 
 /-- Each return variable holds a value of its type. -/
 def CallRet.Fits (ret : CallRet) (τ : State) : Prop :=

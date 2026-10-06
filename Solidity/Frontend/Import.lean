@@ -133,14 +133,6 @@ def retNames (f : SolcFun) : List (String × String) :=
   f.rets.zipIdx.map fun ((x, t), i) =>
     (if !x.isEmpty then x else if f.rets.length == 1 then "_ret" else s!"_ret{i}", t)
 
-/-- A body's `return`s, lowered to assignments to its return variables
-`rs` (`lowerReturns`). -/
-def lowerRets (rs : List String) (raw : List RawStmt) : Except String (List RawStmt) :=
-  match rs with
-  | [] => lowerReturns none raw
-  | [r] => lowerReturns (some r) raw
-  | _ => throw "a function of several return values"
-
 syntax (name := solcImport) "solc_import " str " hash " num " as " ident
   (" renaming " sepBy1(ident " => " ident, ", "))? : command
 
@@ -249,7 +241,7 @@ def elabSolcImport : CommandElab := fun stx => do
       rows.set! k { rows[k]! with status := .unsupported, reason := msg }
     -- its `return`s lowered, which moves statements: an error is then the function's
     let lower := !f.rets.isEmpty || raw.any RawStmt.hasReturn
-    match paramCtx f.params, (if lower then lowerRets ((retNames f).map (·.1)) raw else pure raw) with
+    match paramCtx f.params, (if lower then lowerReturns ((retNames f).map (·.1)) raw else pure raw) with
     | .error m, _ | _, .error m => rows := fail (at_ f 0 m)
     | .ok Γ, .ok raw =>
       match elabProgAt.go C 0 raw (Γ, RawStmt.maxIdxs raw + 1) with

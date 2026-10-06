@@ -339,7 +339,7 @@ theorem incrementIndex :
         { storage := save(storage, seed, 7) }
           { i := 1 ‖ carolValues := freshId(addM(memory, uint[3])) ‖ memory := addM(memory, uint[3]) }
             { pv := 0 } ⟨[ pv = makeValue(); uint idx; idx = ++i; carolValues[idx] = pv; ]⟩ φ }
-    ~[functionBodyExpand]~> dl![m]{
+    ~[internalCallExpand]~> dl![m]{
         { storage := save(storage, seed, 7) }
           { i := 1 ‖ carolValues := freshId(addM(memory, uint[3])) ‖ memory := addM(memory, uint[3]) }
             { pv := 0 } ⟨[ uint se2; se2 = seed; pv = se2; uint idx; idx = ++i; carolValues[idx] = pv; ]⟩ φ }

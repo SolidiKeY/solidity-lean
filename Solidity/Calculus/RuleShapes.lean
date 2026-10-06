@@ -359,6 +359,8 @@ def tacletOrigins : List (Lean.Name × KeyOrigin) := [
   (``Taclet.revertDiamond, .taclet .revertDiamond),
   -- Calls
   (``Taclet.functionBodyExpand, .taclet .functionBodyExpand),
+  -- solkey `671f6762a9` splits it off `functionBodyExpand`: a call without targets
+  (``Taclet.internalCallExpand, .taclet .internalCallExpand),
   (``Taclet.tryCallNoCallbackBox, .taclet .tryCallNoCallbackBox) ]
 
 #check_constructor_table Taclet, tacletOrigins.map Prod.fst
@@ -448,6 +450,11 @@ def claimedTaclets : List KeyTaclet := KeyTaclet.all.filter claims
 * `blockEmpty` — architectural.  A program is a list of statements with
   branch bodies inlined, so there is no nested block to erase and no
   `{} ; rest` to find.
+* `blockReturn`, `functionFrameReturn`, `functionFrameEmpty` — architectural.
+  Returns are lowered at elaboration (`lowerReturns`: a `return` in a block
+  splices the block into the statements after it, which is `blockReturn`'s
+  effect), and a call's body is spliced flat, so there is no block, no
+  function frame and no `return` in `Stmt` to rewrite.
 * `memoryFieldRead_unfold_rightSndResult`, `memoryIndexRead_unfold_rightSndResult`,
   `memoryFieldWriteCaptureSrc`, `memoryIndexWriteMemRefRhsCapture` — KeY
   captures a memory reference into an alias before writing it; here a memory
@@ -468,20 +475,15 @@ def claimedTaclets : List KeyTaclet := KeyTaclet.all.filter claims
   the callback reading is the box's only (`Calculus/Callback.lean`).  A send
   with no callback has its diamond (`sendNoCallbackDiamond`): a refused send
   is an outcome of the run (`Semantics.sendAt`), not the world's.
-* `internalCallExpand`, `blockReturn`, `functionFrameReturn`,
-  `functionFrameEmpty` — not yet ported: solkey `671f6762a9`..`1b4341a303`
-  added them (internal calls with return targets, the function frame), after
-  the pin the table was written against.
 
 The other semantics of `transfer` and `send`, `transferWithCallbackBox` and
 `sendWithCallbackBox`, are claimed by `callbackOrigins`. -/
 def unclaimedTaclets : List KeyTaclet :=
-  [ .emptyModality, .blockEmpty,
+  [ .emptyModality, .blockEmpty, .blockReturn, .functionFrameReturn, .functionFrameEmpty,
     .memoryFieldRead_unfold_rightSndResult, .memoryIndexRead_unfold_rightSndResult,
     .memoryFieldWriteCaptureSrc, .memoryIndexWriteMemRefRhsCapture,
     .ifTrue, .ifFalse, .ifElseTrue, .ifElseFalse, .ifElseNegated,
-    .transferNoCallbackDiamond, .transferWithCallbackDiamond, .sendWithCallbackDiamond,
-    .internalCallExpand, .blockReturn, .functionFrameReturn, .functionFrameEmpty ]
+    .transferNoCallbackDiamond, .transferWithCallbackDiamond, .sendWithCallbackDiamond ]
 
 /-- **The coverage fact**: the corpus splits into what the table claims and
 what this file excuses, with nothing in both and nothing in neither.  A taclet
@@ -491,9 +493,9 @@ theorem taclets_partitioned :
     KeyTaclet.all.all (fun t => claims t != unclaimedTaclets.contains t) = true := by
   decide +kernel
 
-theorem claimedTaclets_count : claimedTaclets.length = 305 := by decide +kernel
+theorem claimedTaclets_count : claimedTaclets.length = 306 := by decide +kernel
 
-theorem unclaimedTaclets_count : unclaimedTaclets.length = 18 := by decide +kernel
+theorem unclaimedTaclets_count : unclaimedTaclets.length = 17 := by decide +kernel
 
 /-! ## The rules with no taclet
 

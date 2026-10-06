@@ -116,17 +116,23 @@ theorem Arg.decls_inSolkey (m : Modality) (args : List (Arg C)) :
 
 theorem CallRet.decl_inSolkey (m : Modality) (ret : CallRet) :
     Prog.inSolkey m (ret.decl : Prog C) = true := by
-  cases ret <;> rfl
+  cases ret with
+  | rets rs =>
+    induction rs with
+    | nil => rfl
+    | cons r rs ih => simpa [CallRet.decl, Stmt.inSolkey] using ih
+  | _ => rfl
 
 theorem CallRet.result_inSolkey (m : Modality) (ret : CallRet) :
     Prog.inSolkey m (ret.result : Prog C) = true := by
-  rcases ret with _ | ⟨p, r, _ | x⟩ <;> rfl
+  rcases ret with _ | ⟨p, r, _ | x⟩ | rs <;> rfl
 
 set_option maxHeartbeats 4000000 in
 /-- **Solkey's rules keep the fragment**: the premise of a statement in it
-is in it.  Only three rules put a call or a branch in their premise: the two
-that run an `if` hand on its branches, and `functionBodyExpand` inlines a body
-that is in the fragment with its simple arguments. -/
+is in it.  Only four rules put a call or a branch in their premise: the two
+that run an `if` hand on its branches, and `functionBodyExpand` and
+`internalCallExpand` inline a body that is in the fragment with its simple
+arguments. -/
 theorem Taclet.premise_inSolkey {s : Stmt C} {p : Premise C} (d : Taclet C k m s p)
     (h : s.inSolkey m = true) : p.inSolkey m = true := by
   cases d <;> (try cases ‹Hole _ _›) <;> (try cases ‹MHole _ _›) <;> (try cases ‹VHole _ _›) <;>
@@ -271,9 +277,9 @@ have no rule for the call and may not leave for the logic while a modality
 is left (`close`). -/
 
 set_option maxHeartbeats 4000000 in
-/-- `functionBodyExpand`, the one rule of the fragment that fires on a call,
-asks every argument to be simple: Lean's side condition, not solkey's
-(solkey `671f6762a9`'s `internalCallExpand` binds any argument as
+/-- The rules of the fragment that fire on a call, `functionBodyExpand` and
+`internalCallExpand`, ask every argument to be simple: Lean's side condition,
+not solkey's (solkey's `ExpandFunctionBody` binds any argument as
 `T p = arg`). -/
 theorem Taclet.call_simple {s : Stmt C} {p : Premise C} (d : Taclet C k m s p) :
     ∀ {f args hsep ret body}, s = .call f args hsep ret body → Arg.firstNonSimple args = none := by
@@ -322,7 +328,7 @@ theorem captureCall_derived : ⊢ (captureCall : Fml C) := by
   apply unfoldLean .functionCallArgCapture   -- uint se = x + 1; f(se);
   apply unfold .localValueDeclInitDrop
   apply update .binopAssignment
-  apply unfold .functionBodyExpand          -- uint a = se;
+  apply unfold .internalCallExpand          -- uint a = se;
   apply unfold .localValueDeclInitDrop
   apply update .localValueAssign
   apply empty

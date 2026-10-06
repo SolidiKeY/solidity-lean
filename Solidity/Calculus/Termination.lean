@@ -136,6 +136,7 @@ def CallRet.weight : CallRet → Nat
   | .none => 0
   | .val _ _ Option.none => 1
   | .val _ _ (some _) => 3
+  | .rets rs => rs.length
 
 mutual
 
@@ -850,17 +851,36 @@ theorem Arg.weight_captureFirst {se : Var} : {args : List (Arg C)} → {a : Arg 
         Val.pen_simple, hp]
       omega
 
+/-- The returns a call declares weigh one each. -/
+theorem CallRet.decl_rets_weight (rs : List (PrimTy × Var)) :
+    Prog.weight (CallRet.decl (C := C) (.rets rs)) = rs.length := by
+  induction rs with
+  | nil => rfl
+  | cons r rs ih =>
+    simp only [CallRet.decl, List.map_cons, Prog.weight, Stmt.weight, List.length_cons] at ih ⊢
+    omega
+
 theorem callStep_small {k : Nat} {m : Modality} (f : Name) (args : List (Arg C))
     (hsep : Arg.separatedFrom [] args = true) (ret : CallRet) (body : List (Stmt C)) :
     (callStep (k := k) (m := m) f args hsep ret body).Small := by
   simp only [callStep]
   split
   · rename_i h
-    simp only [Step.Small, Premise.Smaller, Stmt.expandBody, Prog.weight_append,
-      Arg.weight_decls h, Stmt.weight]
-    rcases ret with _ | ⟨p, r, _ | y⟩ <;>
-      simp [CallRet.decl, CallRet.result, CallRet.weight, Prog.weight, Stmt.weight, Val.cost] <;>
-      omega
+    -- `functionBodyExpand` or `internalCallExpand`: the same premise
+    split
+    all_goals
+      simp only [Step.Small, Premise.Smaller, Stmt.expandBody, Prog.weight_append,
+        Arg.weight_decls h, Stmt.weight]
+      rcases ret with _ | ⟨p, r, _ | y⟩ | rs
+      · simp only [CallRet.decl, Prog.weight, Nat.add_zero, CallRet.result, CallRet.weight,
+          Nat.lt_add_one]
+      · simp only [CallRet.decl, Prog.weight, Stmt.weight, Nat.add_zero, CallRet.result,
+          CallRet.weight, Nat.lt_add_one]
+      · simp only [CallRet.decl, Prog.weight, Stmt.weight, Nat.add_zero, CallRet.result, Val.cost,
+          Nat.reduceAdd, CallRet.weight]
+        omega
+      · simp only [CallRet.decl_rets_weight, CallRet.result, CallRet.weight, Prog.weight]
+        omega
   · rename_i a h
     have := Arg.weight_captureFirst (se := .fresh "se" k) h
     simp only [Step.Small, Premise.Smaller, Prog.weight, Stmt.weight]

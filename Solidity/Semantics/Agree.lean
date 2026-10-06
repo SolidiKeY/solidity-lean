@@ -472,6 +472,7 @@ def ExtCall.vars (c : ExtCall C) : List Var :=
 def CallRet.vars : CallRet → List Var
   | .none => []
   | .val _ r res => r :: res.toList
+  | .rets rs => rs.map (·.2)
 
 mutual
 
@@ -876,15 +877,15 @@ theorem bindData_frame :
 
 theorem CallRet.enter_frame {σ τ : State} (hag : EnvAgreeExcept ns σ τ) (ret : CallRet) :
     EnvAgreeExcept ns (ret.enter σ) (ret.enter τ) := by
-  cases ret with
-  | none => exact hag
-  | val p r _ => exact EnvAgreeExcept.setEnv_both hag _ _
+  exact CallRet.enter_induct₂ (R := EnvAgreeExcept ns)
+    (fun _ _ _ _ h => EnvAgreeExcept.setEnv_both h _ _) ret hag
 
 theorem CallRet.leave_frame {σ τ : State} (hag : EnvAgreeExcept ns σ τ) :
     (ret : CallRet) → Avoids ret.vars ns →
       ResultsAgree ns (CallRet.leave (C := C) σ ret) (CallRet.leave (C := C) τ ret)
   | .none, _ => hag
   | .val _ _ Option.none, _ => hag
+  | .rets _, _ => hag
   | .val p r (some y), h => by
     simp only [CallRet.leave,
       (Simple.local r : Simple C p).eval_frame hag (fun x hx => h x (by simp_all [Simple.vars, CallRet.vars]))]

@@ -110,9 +110,14 @@ theorem Taclet.eq_step {s : Stmt C} {p : Premise C} (d : Taclet C k m s p) :
     p = (s.step k m).premise := by
   cases d <;> (try cases ‹Hole _ _›) <;> (try cases ‹MHole _ _›) <;> (try cases ‹VHole _ _›)
   -- a call: whether an argument is not ready picks the rule
-  case functionBodyExpand h =>
+  case functionBodyExpand h hr =>
     simp only [Stmt.step, callStep]
-    split <;> simp_all <;> subst_vars <;> rfl
+    split <;> simp_all <;> subst_vars
+    split <;> simp_all
+  case internalCallExpand h hr =>
+    simp only [Stmt.step, callStep]
+    split <;> simp_all <;> subst_vars
+    split <;> simp_all
   all_goals settle_side
   all_goals repeat' (cases_part <;> settle_side)
   all_goals (try rfl)

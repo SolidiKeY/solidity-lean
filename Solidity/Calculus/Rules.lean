@@ -182,8 +182,17 @@ def VHole.isTarget {p : PrimTy} : VHole C p → Bool
   | .mem l => l.isTarget
   | _ => true
 
+/-- Whether a call returns its values to targets after it (`CallRet.rets`):
+KeY's `FunctionBodyStatement` (`fbs`, `functionBodyExpand`), the call of a
+tuple assignment or of a specification's obligation; any other call is an
+`InternalCall` (`ic`, `internalCallExpand`). -/
+def CallRet.isRets : CallRet → Bool
+  | .rets _ => true
+  | _ => false
+
 /-- The first argument that is not simple, if any (`functionCallArgCapture`
-captures it; with none, `functionBodyExpand` inlines the call). -/
+captures it; with none, `internalCallExpand` or `functionBodyExpand` inlines
+the call). -/
 def Arg.firstNonSimple : List (Arg C) → Option (Arg C)
   | [] => none
   | a :: as => if a.e.isSimple then Arg.firstNonSimple as else some a
@@ -656,11 +665,18 @@ inductive Taclet (C : Contract) (k : Nat) : Modality → Stmt C → Premise C �
   | revertDiamond :
       dl{ ⟨ revert(); ⟩ ⇝ false }
   -- Calls ----------------------------------------------------------------
-  /-- A call whose arguments are all simple runs its body: the parameters
-  declared with the arguments, the return variable declared, the body, the
-  result assigned (KeY's `expand_function_body`). -/
+  /-- A call with targets (a tuple assignment's, a specification's
+  obligation's) whose arguments are all simple runs its body: the
+  parameters declared with the arguments, the return variables declared, the
+  body; the targets are the statements after it (KeY's
+  `expand_function_body`). -/
   | functionBodyExpand :
       dl{ ⟨[ fbs; ]⟩ ⇝ ⟨[ expand_function_body(fbs); ]⟩ }
+  /-- Any other call whose arguments are all simple (`f(a);`, `y = f(a);`)
+  runs its body: the parameters declared with the arguments, the return
+  variable declared, the body, the result assigned. -/
+  | internalCallExpand :
+      dl{ ⟨[ ic; ]⟩ ⇝ ⟨[ expand_function_body(ic); ]⟩ }
   -- External calls -------------------------------------------------------
   /-- A `try` without callbacks: a goal for each way the call may end, the
   block of its clause in the statement's place, for every value of the
@@ -877,11 +893,12 @@ def delabTaclet : Delab := do
     | failure
   let s ← ppStmt (e.getArg! (n + 1))
   if isEscape s then failure
-  -- `fbs` is a call with simple arguments (`functionBodyExpand`'s); a rule of
-  -- another judgement fires on other calls (`functionCallArgCapture`)
+  -- `fbs`, `ic` are calls with simple arguments (`functionBodyExpand`'s,
+  -- `internalCallExpand`'s); a rule of another judgement fires on other
+  -- calls (`functionCallArgCapture`)
   let s ← match s with
     | `(sol_stmt| $x:ident) =>
-      if x.getId == `fbs && c != ``Taclet then
+      if (x.getId == `fbs || x.getId == `ic) && c != ``Taclet then
         `(sol_stmt| ‹$(← escapeTerm (e.getArg! (n + 1))):term›)
       else pure s
     | _ => pure s
@@ -918,6 +935,16 @@ partial def dropSide : Lean.Expr → Lean.Expr
     if t.isAppOfArity ``autoParam 2 && !b'.hasLooseBVar 0 then b'.lowerLooseBVars 1 1
     else .forallE n t b' bi
   | e => e
+
+/-- The side condition `CallRet.isRets ret = b` of a taclet's type, its `b`. -/
+partial def callSide : Lean.Expr → Option Lean.Expr
+  | .forallE _ t b _ =>
+    if t.isAppOfArity ``autoParam 2 then
+      match (t.getArg! 0).eq? with
+      | some (_, l, r) => if l.isAppOf ``CallRet.isRets then some r else callSide b
+      | none => callSide b
+    else callSide b
+  | _ => none
 
 /-- Whether a binder type of the telescope `e` mentions the bound variable `i`. -/
 def usedInBinders : Lean.Expr → Nat → Bool
@@ -973,7 +1000,10 @@ def delabTacletSide : Delab := do
   let e ← getExpr
   let b := e.getForallBody
   unless b.isAppOf ``Taclet || b.isAppOf ``LeanTaclet || b.isAppOf ``CallbackTaclet do failure
-  withTheReader SubExpr (fun s => { s with expr := dropSide e }) (delabTacletBinders #[] #[])
+  -- a call without targets is KeY's `ic` (`hrets : CallRet.isRets ret = false`)
+  let ic := (callSide e).any (·.isConstOf ``Bool.false)
+  withTheReader Core.Context (fun c => { c with options := c.options.setBool `pp.sol.ic ic }) <|
+    withTheReader SubExpr (fun s => { s with expr := dropSide e }) (delabTacletBinders #[] #[])
 
 end Print
 

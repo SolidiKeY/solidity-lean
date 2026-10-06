@@ -499,11 +499,16 @@ def assignMemStep {T : Ty} : (l : MLoc C T) → (r : MSrc C T) → Step k m (.as
   | .index _ (.loc _) _, .ref _ => ⟨_, .key .memoryIndexWriteMemRefCaptureAllComplexRecv⟩
 
 /-- A call: its first argument that is not simple is captured, and with
-every argument simple its body is inlined. -/
+every argument simple its body is inlined — by `functionBodyExpand` when it
+returns to targets (KeY's `FunctionBodyStatement`), by `internalCallExpand`
+otherwise. -/
 def callStep (f : Name) (args : List (Arg C)) (hsep : Arg.separatedFrom [] args = true)
     (ret : CallRet) (body : List (Stmt C)) : Step k m (.call f args hsep ret body) :=
   match h : Arg.firstNonSimple args with
-  | none => ⟨_, .key (.functionBodyExpand h)⟩
+  | none =>
+    match hr : ret.isRets with
+    | true => ⟨_, .key (.functionBodyExpand h hr)⟩
+    | false => ⟨_, .key (.internalCallExpand h hr)⟩
   | some _ => ⟨_, .lean (.functionCallArgCapture h)⟩
 
 /-! ## The rule for a statement -/

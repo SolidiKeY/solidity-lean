@@ -130,6 +130,9 @@ inductive RawExpr where
   | named (f : String) (names : List String) (args : List RawExpr)
   /-- `msg.sender`, `address(this).balance`, …: a value of the environment. -/
   | env (k : EnvKey)
+  /-- `(a, b)`, two components or more: only the right-hand side of a tuple
+  assignment (`RawStmt.tupleAssign`) or a `return` of several values. -/
+  | tuple (es : List RawExpr)
   deriving Repr, Inhabited
 
 inductive RawStmt where
@@ -169,6 +172,14 @@ inductive RawStmt where
   /-- `x = r.send(a);`, and with `T` given the declaration `T x = r.send(a);`
   (`x` a name).  A bare `r.send(a);` is not read: solkey has no rule for it. -/
   | send (T : Option RawTy) (x r a : RawExpr)
+  /-- `(uint a, , bool b) = e;`: a variable declared per component, a
+  component left out discarded (`elabTuple`). -/
+  | tupleDecl (vars : List (Option (RawTy × String))) (rhs : RawExpr)
+  /-- `(a, , b) = e;`: a component assigned to each target, one left out
+  discarded (`elabTuple`). -/
+  | tupleAssign (targets : List (Option RawExpr)) (rhs : RawExpr)
+  /-- `{ … }`: a block, whose declarations are scoped to it. -/
+  | block (body : List RawStmt)
   deriving Repr, Inhabited
 
 /-- Evaluating `e` can neither revert nor have an effect: a literal, a name,
@@ -202,14 +213,16 @@ structure ModApp where
   deriving Repr, Inhabited
 
 /-- An internal function as the contract declares it: its parameters and
-its return variable (`returns (uint r)`; unnamed, `returns (uint)`, it is
-called `_ret`; `returns (Account memory a)`, a memory reference), at their
-types, and its body as read.  The elaborator types
-the body where the function is called and inlines it there (`Stmt.call`). -/
+its return variables (`returns (uint r)`; unnamed, `returns (uint)`, it is
+called `_ret`, and the `i`-th of several `_ret{i}`, solkey's `ret{i}`;
+`returns (Account memory a)`, a memory reference), at their types, and its
+body as read.  The elaborator types the body where the function is called
+and inlines it there (`Stmt.call`). -/
 structure FunDecl where
   params : List (Name × Ty)
-  ret : Option (Name × Ty) := none
-  /-- Its return variable is declared `memory`, as a reference one must be. -/
+  rets : List (Name × Ty) := []
+  /-- A return variable is declared `memory`, as a reference one must be
+  (only a function of one return may return a reference). -/
   retMem : Bool := false
   body : List RawStmt
   /-- The modifiers it applies, the first listed outermost. -/
@@ -224,6 +237,12 @@ structure FunDecl where
   widths : List (Name × Nat) := []
   deriving Repr, Inhabited
 
+/-- The return variable of a function of one return. -/
+def FunDecl.ret (d : FunDecl) : Option (Name × Ty) :=
+  match d.rets with
+  | [r] => some r
+  | _ => none
+
 /-! ## The contract
 
 Struct bodies are `Semantics.structDef`, the table the interpreter expands
@@ -235,7 +254,7 @@ A contract also declares its internal functions, in order.  A function may
 call only the functions declared before it: the position is the rank that
 makes the call graph acyclic (as `structRank` does the struct table's), so
 inlining a call, which is what the elaborator does and KeY's
-`functionBodyExpand` does, ends. -/
+`internalCallExpand` and `functionBodyExpand` do, ends. -/
 
 structure Contract where
   vars : List (Name × Ty)
@@ -579,10 +598,20 @@ type `p` (declared at the call, KeY's fresh named return), which lands in the
 caller's local `res` when the call is assigned (`y = f(a);`).  A memory
 reference is returned through the caller's locals, with `none`: the body
 declares the return variable, and the statement after the call binds it
-(the module docstring). -/
+(the module docstring).  A function of several returns returns them all
+with `rets`, KeyTaclets' `FunctionBodyStatement` with targets: each return
+variable is declared at the call, at its type's default (solc's), and the
+targets are ordinary statements after the call (`t = r;`), solkey's
+`R r0; …; function-frame{…} t0 = r0;` without the frame.  `rets` is the
+call of a tuple assignment (`(lo, hi) = f(a);`) and of a specification's
+obligation (`result = f(x);`), the two KeY reads as a
+`FunctionBodyStatement` (`functionBodyExpand`); every other call is KeY's
+`InternalCall` (`internalCallExpand`), a callee of several returns called as
+a statement declaring them in its body. -/
 inductive CallRet where
   | none
   | val (p : PrimTy) (r : Var) (res : Option Var)
+  | rets (rs : List (PrimTy × Var))
   deriving DecidableEq, Repr, Inhabited
 
 /-- The arguments of a call are **separated**: no argument that is not
@@ -698,6 +727,7 @@ def Arg.decl {C : Contract} (a : Arg C) : Stmt C := .declLocal a.p a.x (some a.e
 def CallRet.decl {C : Contract} : CallRet → Prog C
   | .none => []
   | .val p r _ => [.declLocal p r Option.none]
+  | .rets rs => rs.map fun (p, r) => .declLocal p r Option.none
 
 /-- `res = r;`: the returned value assigned where the call is. -/
 def CallRet.result {C : Contract} : CallRet → Prog C
@@ -812,6 +842,39 @@ def Stmt.memCallStr? : Stmt C → Stmt C → Option String
     else none
   | _, _ => none
 
+/-- The target a statement after a call of several returns assigns one of
+them to (`lo = se2;`): the return's position among `rs`, and the target. -/
+def Stmt.retTarget? (rs : List (PrimTy × Var)) : Stmt C → Option (Nat × String)
+  | .assignLocal x (.simple (.local r)) => (rs.findIdx? (·.2 == r)).map (·, toString x)
+  | .assign l (.val (.simple (.local r))) => (rs.findIdx? (·.2 == r)).map (·, l.toStr)
+  | .assignMem l (.val (.simple (.local r))) => (rs.findIdx? (·.2 == r)).map (·, l.toStr)
+  | _ => none
+
+/-- The statements after a call of several returns that assign them, in
+their order, from the `start`-th return on. -/
+def Stmt.retTargets (rs : List (PrimTy × Var)) (start : Nat) : List (Stmt C) → List (Nat × String)
+  | [] => []
+  | s :: P =>
+    match s.retTarget? rs with
+    | some (i, t) => if start ≤ i then (i, t) :: Stmt.retTargets rs (i + 1) P else []
+    | none => []
+
+/-- A call of several returns and the statements after it that assign them,
+written as the tuple assignment they are elaborated from:
+`(lo, , sum) = returnStats(3, 1, 2);`, with the number of statements after
+the call it covers.  A call of one return with its target (a specification's
+obligation, `Calculus/Spec.lean`) is `result = f(x);`. -/
+def Stmt.tupleCallStr? : Stmt C → List (Stmt C) → Option (String × Nat)
+  | .call f args _ (.rets rs) _, P =>
+    let ts := Stmt.retTargets rs 0 P
+    let call := s!"{f}({", ".intercalate (args.map fun a => a.e.toStr true)});"
+    if ts.isEmpty then none
+    else if rs.length == 1 then some (s!"{((ts.head?).map (·.2)).getD ""} = {call}", ts.length)
+    else
+      let slots := (List.range rs.length).map fun i => ((ts.find? (·.1 == i)).map (·.2)).getD ""
+      some (s!"({", ".intercalate slots}) = {call}", ts.length)
+  | _, _ => none
+
 mutual
 
 def Stmt.toStr : Stmt C → String
@@ -847,7 +910,7 @@ def Stmt.toStr : Stmt C → String
   | .deleteMem p _ => s!"delete {p.toStr};"
   | .assignNew (R := R) l n _ => s!"{l.toStr} = new {Ty.toStr (.ref R)}({n.toStr});"
   | .ite c thn els =>
-    s!"if ({c.toStr true}) \{ {" ".intercalate (Prog.toStrs false thn)} } else \{ {" ".intercalate (Prog.toStrs false els)} }"
+    s!"if ({c.toStr true}) \{ {" ".intercalate (Prog.toStrs 0 thn)} } else \{ {" ".intercalate (Prog.toStrs 0 els)} }"
   | .require c => s!"require({c.toStr true});"
   | .assert c => s!"assert({c.toStr true});"
   | .revert => "revert();"
@@ -863,34 +926,39 @@ def Stmt.toStr : Stmt C → String
     let code := match code with
       | some x => s!"uint {x}"
       | none => "uint"
-    s!"try address({c.addr.toStr}).{c.fn}({args}){rets} \{ {" ".intercalate (Prog.toStrs false ok)} } \
-      catch Error(string memory) \{ {" ".intercalate (Prog.toStrs false err)} } \
-      catch Panic({code}) \{ {" ".intercalate (Prog.toStrs false pnc)} } \
-      catch \{ {" ".intercalate (Prog.toStrs false other)} }"
+    s!"try address({c.addr.toStr}).{c.fn}({args}){rets} \{ {" ".intercalate (Prog.toStrs 0 ok)} } \
+      catch Error(string memory) \{ {" ".intercalate (Prog.toStrs 0 err)} } \
+      catch Panic({code}) \{ {" ".intercalate (Prog.toStrs 0 pnc)} } \
+      catch \{ {" ".intercalate (Prog.toStrs 0 other)} }"
 
 /-- The statements of a block, one string each; a memory call and the
-statement binding its result are one (`Stmt.memCallStr?`), the second
-skipped (`skip`). -/
-def Prog.toStrs (skip : Bool) : List (Stmt C) → List String
+statement binding its result are one (`Stmt.memCallStr?`), and so are a call
+of several returns and the statements assigning them (`Stmt.tupleCallStr?`),
+the statements after the first skipped (`skip` of them). -/
+def Prog.toStrs (skip : Nat) : List (Stmt C) → List String
   | [] => []
   | s :: P =>
-    if skip then Prog.toStrs false P
-    else
+    match skip with
+    | k + 1 => Prog.toStrs k P
+    | 0 =>
+      match Stmt.tupleCallStr? s P with
+      | some (c, k) => c :: Prog.toStrs k P
+      | none =>
       match P with
       | t :: _ =>
         match Stmt.memCallStr? s t with
-        | some c => c :: Prog.toStrs true P
-        | none => s.toStr :: Prog.toStrs false P
+        | some c => c :: Prog.toStrs 1 P
+        | none => s.toStr :: Prog.toStrs 0 P
       | [] => [s.toStr]
 
 end
 
 /-- A block, as the Solidity it came from. -/
-def Prog.toStr (P : List (Stmt C)) : String := " ".intercalate (Prog.toStrs false P)
+def Prog.toStr (P : List (Stmt C)) : String := " ".intercalate (Prog.toStrs 0 P)
 
 /-- One statement per line, for display. -/
 def Prog.show (P : List (Stmt C)) : String :=
-  "\n".intercalate (Prog.toStrs false P)
+  "\n".intercalate (Prog.toStrs 0 P)
 
 end Print
 
@@ -902,6 +970,9 @@ syntax:max ident : sol_expr
 syntax:max sol_expr:max "." ident : sol_expr
 syntax:max sol_expr:max "[" sol_expr "]" : sol_expr
 syntax:max "(" sol_expr ")" : sol_expr
+/-- `(a, b)`: a tuple, the right-hand side of a tuple assignment or of a
+`return` of several values (`RawExpr.tuple`). -/
+syntax:max (name := solTupleExpr) "(" sol_expr ", " sol_expr,+ ")" : sol_expr
 syntax:80 "!" sol_expr:80 : sol_expr
 syntax:80 "-" sol_expr:80 : sol_expr
 /-- `a ** b`, right-associative and tighter than `*` (solc ≥ 0.8). -/
@@ -1088,6 +1159,14 @@ syntax (name := solRevertErr) &"revert" ident "(" sol_expr,* ")" : sol_stmt
 syntax (name := solRevertMsg) &"revert" "(" str ")" : sol_stmt
 /-- `_;`: where a modifier's body runs the function's (`contract!{ … }`). -/
 syntax (name := solHole) "_" : sol_stmt
+/-- `(a, , b) = e;`: a tuple assignment, a component left out discarded
+(`RawStmt.tupleAssign`).  One comma at least, so that it is not `(a) = e;`. -/
+syntax (name := solTupleAssign) "(" (sol_expr)? (", " (sol_expr)?)+ ")" " = " sol_expr : sol_stmt
+/-- `(uint a, , bool b) = e;`: a tuple declaration (`RawStmt.tupleDecl`). -/
+syntax (name := solTupleDecl) "(" (sol_ty ident)? (", " (sol_ty ident)?)+ ")" " = " sol_expr :
+  sol_stmt
+/-- `{ … }`: a block (`RawStmt.block`). -/
+syntax (name := solBlockStmt) "{" (sol_stmt solSemi)* "}" : sol_stmt
 /-! `try e.f(a) returns (uint v) { … } catch Error(string memory m) { … }
 catch Panic(uint c) { … } catch (bytes memory d) { … } catch { … }`: an
 external call.  A clause's parameter is `sol_tparam`: a type, `memory` for
@@ -1235,6 +1314,9 @@ partial def payload (s : Syntax) : Array Syntax :=
   else #[s]
 
 partial def expandExpr (e : TSyntax `sol_expr) : MacroM Term := do
+  if e.raw.isOfKind ``solTupleExpr then
+    let es := #[e.raw[1]] ++ e.raw[3].getSepArgs
+    return ← `(RawExpr.tuple [$(← es.mapM (expandExpr ⟨·⟩)),*])
   -- the operators, by their table: one arm for all of them
   if let some (op, a, b) := binParts? e then
     return ← `(RawExpr.binop $(ctorIdent ``BinOp op) $(← expandExpr ⟨a⟩) $(← expandExpr ⟨b⟩))
@@ -1313,6 +1395,19 @@ partial def expandStmt (s : TSyntax `sol_stmt) : MacroM Term := do
   | ``solPushTarget =>
     expandStmt.pushTarget s ⟨s.raw[0]⟩ (← expandExpr ⟨s.raw[0]⟩) (← expandExpr ⟨s.raw[3]⟩)
   | ``solUnchecked => `(RawStmt.unchecked $(← expandStmt.expandBlock ⟨s.raw[1]⟩))
+  | ``solBlockStmt => `(RawStmt.block [$(← (payload s.raw[1]).mapM (expandStmt ⟨·⟩)),*])
+  | ``solTupleAssign =>
+    let ts ← (#[s.raw[1]] ++ s.raw[2].getArgs).mapM fun o => do
+      match payload o with
+      | #[e] => `(some $(← expandExpr ⟨e⟩))
+      | _ => `(none)
+    `(RawStmt.tupleAssign [$ts,*] $(← expandExpr ⟨s.raw[5]⟩))
+  | ``solTupleDecl =>
+    let vs ← (#[s.raw[1]] ++ s.raw[2].getArgs).mapM fun o => do
+      match payload o with
+      | #[T, x] => `(some ($(← expandTy ⟨T⟩), $(strLit ⟨x⟩)))
+      | _ => `(none)
+    `(RawStmt.tupleDecl [$vs,*] $(← expandExpr ⟨s.raw[5]⟩))
   | ``solIfChain =>
     -- `if (c₀) b₀ else if (c₁) b₁ … else e`: nested, from the last branch out
     let arms := payload s.raw[5]
@@ -1427,6 +1522,9 @@ where
   evaluating it first, as `b.push(r)` does, is the same run, and the slot the
   push adds is written once either way. -/
   assignTo (l : TSyntax `sol_expr) (r : Term) : MacroM Term := do
+    if l.raw.isOfKind ``solTupleExpr then
+      let ts := #[l.raw[1]] ++ l.raw[3].getSepArgs
+      return ← `(RawStmt.tupleAssign [$(← ts.mapM fun t => do `(some $(← expandExpr ⟨t⟩))),*] $r)
     if let `(sol_expr| $f:sol_expr ( $as:sol_expr,* )) := l then
       if as.getElems.isEmpty then
         if let some b ← pushRecv? f then return ← pushTarget l f b r
@@ -1540,12 +1638,12 @@ syntax sol_ty sol_vis* ident ";" : sol_member
 declare_syntax_cat sol_param (behavior := both)
 syntax sol_ty ident : sol_param
 
-/-- A function's attribute: its return variable, `returns (uint r)`,
-`returns (Person memory p)`; a visibility or a mutability (dropped); or a
-modifier applied, `onlyOwner`, `inState(State.Created)`. -/
+/-- A function's attribute: its return variables, `returns (uint r)`,
+`returns (Person memory p)`, `returns (uint lo, uint hi)`; a visibility or a
+mutability (dropped); or a modifier applied, `onlyOwner`,
+`inState(State.Created)`. -/
 declare_syntax_cat sol_fattr (behavior := both)
-syntax (name := solAttrReturns) &"returns" "(" sol_ty (ppSpace &"memory")? (ppSpace ident)? ")" :
-  sol_fattr
+syntax (name := solAttrReturns) &"returns" "(" sol_tparam,+ ")" : sol_fattr
 syntax (name := solAttrKw) (&"public" <|> &"external" <|> &"internal" <|> &"private" <|> &"view" <|>
   &"pure" <|> &"payable" <|> &"virtual" <|> &"override") : sol_fattr
 syntax (name := solAttrMod) ident ("(" sol_expr,* ")")? : sol_fattr
@@ -1655,7 +1753,7 @@ def expandFun (enums : List String) (mods : List (String × Array Term × Term �
   -- modifier reading
   let payable := attrs.any fun a => (a.raw.find? fun s =>
     s.isAtom && s.getAtomVal == "payable" || s.isIdent && s.getId == `payable).isSome
-  let mut ret ← `(none)
+  let mut rets : Array Term := #[]
   let mut retMem := false
   let mut apps : Array Term := #[]
   for a in attrs do
@@ -1664,12 +1762,17 @@ def expandFun (enums : List String) (mods : List (String × Array Term × Term �
     let a := preferReading a.raw (!·.isOfKind ``solAttrMod)
     if a.isOfKind ``solAttrKw then continue
     if a.isOfKind ``solAttrReturns then
-      -- `returns ( T memory? r? )`
-      let n := (a[4].getOptional?.map (·.getId.toString)).getD "_ret"
-      let (t, w) ← expandMemberTyW enums ⟨a[2]⟩
-      if let some b := w then ws := ws.push (← `(($(quote n), $(quote b))))
-      ret ← `(some ($(quote n), $t))
-      retMem := !a[3].isNone
+      -- `returns ( T memory? r?, … )`: unnamed, `_ret`, or `_ret0`, `_ret1`, …
+      let ps := a[2].getSepArgs
+      for i in [0:ps.size] do
+        -- `T memory` also reads as `T` named `memory`: take the location
+        let p := preferReading ps[i]! (!·[1].isNone)
+        let n := (p[2].getOptional?.map (·.getId.toString)).getD
+          (if ps.size == 1 then "_ret" else s!"_ret{i}")
+        let (t, w) ← expandMemberTyW enums ⟨p[0]⟩
+        if let some b := w then ws := ws.push (← `(($(quote n), $(quote b))))
+        rets := rets.push (← `(($(quote n), $t)))
+        retMem := retMem || !p[1].isNone
       continue
     match (⟨a⟩ : TSyntax `sol_fattr) with
     | `(sol_fattr| $m:ident $[( $as:sol_expr,* )]?) =>
@@ -1684,7 +1787,7 @@ def expandFun (enums : List String) (mods : List (String × Array Term × Term �
     | _ => Macro.throwUnsupported
   let body ← expandStmt.expandBlock b
   `(($(strLit f),
-    ({ params := [$ps,*], ret := $ret, retMem := $(quote retMem), body := $body,
+    ({ params := [$ps,*], rets := [$rets,*], retMem := $(quote retMem), body := $body,
        mods := [$apps,*], spec := $spec, payable := $(quote payable),
        widths := [$ws,*] } : FunDecl)))
 
@@ -1968,6 +2071,7 @@ partial def RawExpr.toStr (e : RawExpr) (top : Bool := true) : String :=
   | .named f ns as =>
     s!"{f}(\{{", ".intercalate ((ns.zip as).map fun (n, a) => s!"{n}: {a.toStr}")}})"
   | .env k => k.toStr
+  | .tuple es => s!"({", ".intercalate (es.map (·.toStr))})"
 
 /-- Whether `p` holds of the expression or of an expression inside it. -/
 def RawExpr.any (p : RawExpr → Bool) (e : RawExpr) : Bool :=
@@ -1975,7 +2079,7 @@ def RawExpr.any (p : RawExpr → Bool) (e : RawExpr) : Bool :=
     | .field a _ | .unop _ a | .incDec _ a | .newArr _ a => a.any p
     | .index a b | .binop _ a b => a.any p || b.any p
     | .ternary c a b => c.any p || a.any p || b.any p
-    | .call _ as | .named _ _ as => as.attach.any fun ⟨a, _⟩ => a.any p
+    | .call _ as | .named _ _ as | .tuple as => as.attach.any fun ⟨a, _⟩ => a.any p
     | .num _ | .name _ | .bool _ | .env _ => false
 
 /-- The expression rewritten from the top down: `f` rewrites a node, then
@@ -1992,6 +2096,7 @@ partial def RawExpr.mapM {m : Type → Type} [Monad m] [Inhabited (m RawExpr)]
   | .newArr T n => return .newArr T (← n.mapM f)
   | .call g as => return .call g (← as.mapM (·.mapM f))
   | .named g ns as => return .named g ns (← as.mapM (·.mapM f))
+  | .tuple as => return .tuple (← as.mapM (·.mapM f))
   | e => pure e
 
 /-- The names a raw expression reads, in order. -/
@@ -2001,7 +2106,7 @@ def RawExpr.names : RawExpr → List String
   | .index a b | .binop _ a b => a.names ++ b.names
   | .ternary c a b => c.names ++ a.names ++ b.names
   | .call _ as => as.attach.flatMap fun ⟨a, _⟩ => a.names
-  | .named _ _ as => as.attach.flatMap fun ⟨a, _⟩ => a.names
+  | .named _ _ as | .tuple as => as.attach.flatMap fun ⟨a, _⟩ => a.names
   | .num _ | .bool _ | .env _ => []
 
 /-- Whether an index occurs in the expression: evaluating it may revert. -/
@@ -2089,12 +2194,14 @@ def RawStmt.exprs : RawStmt → List RawExpr
   | .tryCall r _ as .. => r :: as
   | .send none x r a => [x, r, a]
   | .send (some _) _ r a => [r, a]
-  | .revert | .unchecked _ => []
+  | .tupleDecl _ r => [r]
+  | .tupleAssign ts r => ts.filterMap id ++ [r]
+  | .revert | .unchecked _ | .block _ => []
 
 /-- A statement's blocks: an `if`'s branches, an `unchecked` block's body. -/
 def RawStmt.blocks : RawStmt → List (List RawStmt)
   | .ite _ t e => [t, e]
-  | .unchecked b => [b]
+  | .unchecked b | .block b => [b]
   | .tryCall _ _ _ _ ok err _ pnc other => [ok, err, pnc, other]
   | _ => []
 
@@ -2123,6 +2230,9 @@ def RawStmt.mapExprsM {m : Type → Type} [Monad m] (f : RawExpr → m RawExpr) 
   | .tryCall r g as rets ok err code pnc other =>
     return .tryCall (← f r) g (← as.mapM f) rets ok err code pnc other
   | .send T x r a => return .send T (← f x) (← f r) (← f a)
+  | .tupleDecl vs r => return .tupleDecl vs (← f r)
+  | .tupleAssign ts r => return .tupleAssign (← ts.mapM (·.mapM f)) (← f r)
+  | .block b => pure (.block b)
 
 /-- The name a statement declares in its own block. -/
 def RawStmt.declared? : RawStmt → Option String
@@ -2131,9 +2241,10 @@ def RawStmt.declared? : RawStmt → Option String
   | _ => none
 
 /-- The names a statement binds in its blocks: a `try`'s return locals and
-`Panic` code. -/
+`Panic` code; and the variables a tuple declaration declares in its own. -/
 def RawStmt.binds : RawStmt → List String
   | .tryCall _ _ _ rets _ _ code _ _ => rets.map (·.2) ++ code.toList
+  | .tupleDecl vs _ => vs.filterMap (·.map (·.2))
   | _ => []
 
 /-- Whether a `return` occurs in the statement. -/
@@ -2272,6 +2383,7 @@ def synth (Γ : ECtx) : RawExpr → Except String (TExpr C)
   | .call f _ => throw s!"the call {f}(…) under a short-circuit operator or in a conditional's branch"
   | .named f .. => throw s!"the constructor {f}(\{…}) under a short-circuit operator or in a conditional's branch"
   | .env k => pure (.val .uint (.simple (.env k rfl)))
+  | .tuple _ => throw "a tuple is the right-hand side of a tuple assignment or of a `return`"
 termination_by e => (sizeOf e, 0)
 
 /-- `e` checked at `p` through its synthesised type. -/
@@ -2666,6 +2778,18 @@ partial def renameStmts (ρ : List (String × String)) : List RawStmt → ElabM 
     | .ite c t e =>
       pure (.ite (r c) (← renameStmts ρ t) (← renameStmts ρ e) :: (← renameStmts ρ ss))
     | .unchecked b => pure (.unchecked (← renameStmts ρ b) :: (← renameStmts ρ ss))
+    | .block b => pure (.block (← renameStmts ρ b) :: (← renameStmts ρ ss))
+    | .tupleDecl vs e =>
+      let mut ρ' := ρ
+      let mut vs' := []
+      for v in vs do
+        match v with
+        | some (T, x) =>
+          let y := toString (← freshCapture "se")
+          ρ' := (x, y) :: ρ'
+          vs' := vs' ++ [some (T, y)]
+        | none => vs' := vs' ++ [none]
+      pure (.tupleDecl vs' (r e) :: (← renameStmts ρ' ss))
     | .tryCall e g as rets ok err code pnc other =>
       let mut ρok := ρ
       let mut rets' := []
@@ -2680,26 +2804,59 @@ partial def renameStmts (ρ : List (String × String)) : List RawStmt → ElabM 
         (← renameStmts ρp pnc) (← renameStmts ρ other) :: (← renameStmts ρ ss))
     | s => pure ((Id.run (s.mapExprsM (pure ∘ r))) :: (← renameStmts ρ ss))
 
-/-- **A body's `return`s, lowered** to assignments to its return variable
-`r` (`return x + 1;` is `r = x + 1;`), so that `Stmt.run` has no abrupt
+/-- `return e;`, lowered to the return variables `rs`: `r = e;` for one;
+for several, `r₀ = e₀; r₁ = e₁; …` from `return (e₀, e₁, …);`, or, when a
+component reads a return variable or `e` is a call, the tuple assignment
+`(r₀, r₁, …) = e;`, which reads every component before it writes
+(`elabTuple`; solkey's `ReturnLowering`, `returnSwapped`). -/
+def lowerReturn (rs : List String) (e : RawExpr) : Except String (List RawStmt) :=
+  match rs, e with
+  | [], _ => throw "`return` of a value from a function that returns none"
+  | [n], e => pure [.assign (.name n) e]
+  | rs, .tuple es =>
+    if es.length != rs.length then
+      throw s!"`return` of {es.length} values from a function that returns {rs.length}"
+    else if es.any fun e => rs.any e.mentions then
+      pure [.tupleAssign (rs.map fun n => some (.name n)) (.tuple es)]
+    else pure ((rs.zip es).map fun (n, e) => .assign (.name n) e)
+  | rs, e => pure [.tupleAssign (rs.map fun n => some (.name n)) e]
+
+/-- The names a statement declares in its own block: a declaration's, a tuple
+declaration's. -/
+def RawStmt.declaredAll (s : RawStmt) : List String :=
+  match s with
+  | .tupleDecl .. => s.binds
+  | s => s.declared?.toList
+
+/-- **A body's `return`s, lowered** to assignments to its return variables
+`r` (`return x + 1;` is `r = x + 1;`, `lowerReturn`), so that `Stmt.run` has no abrupt
 completion.  What follows a `return` in its block is dead and dropped; the
 statements after an `if` one of whose branches returns move into both
 branches, which is where they run: `if (c) { return a; } s;` is
 `if (c) { r = a; } else { s; }`.  A branch's own declarations would then be
 in scope over the moved statements, so a moved statement may not name one
 (Solidity scopes it to the branch); in an inlined body every local is
-already fresh (`renameStmts`), and that never happens.  A function on a body
-as read: it may run before or after the body is renamed. -/
-partial def lowerReturns (r : Option String) : List RawStmt → Except String (List RawStmt)
+already fresh (`renameStmts`), and that never happens.  A block with a
+`return` inside is spliced into the statements after it (solkey's
+`blockReturn`, by the same guard).  A `return` inside a loop would need an
+early exit from the loop, which this cannot give (`docs/kernel-port.md`);
+there are no loops.  A function on a body as read: it may run before or
+after the body is renamed. -/
+partial def lowerReturns (r : List String) : List RawStmt → Except String (List RawStmt)
   | [] => pure []
   | .ret none :: _ => pure []
-  | .ret (some e) :: _ =>
-    match r with
-    | some n => pure [.assign (.name n) e]
-    | none => throw "`return` of a value from a function that returns none"
+  | .ret (some e) :: _ => lowerReturn r e
+  | .block b :: ss => do
+    if b.any RawStmt.hasReturn && !ss.isEmpty then
+      for x in b.flatMap RawStmt.declaredAll do
+        if ss.any (·.mentions x) then
+          throw s!"`return` in a block declaring {x}, which the statements after it name"
+      lowerReturns r (b ++ ss)
+    else
+      pure (.block (← lowerReturns r b) :: (← lowerReturns r ss))
   | .ite c t e :: ss => do
     if (t.any RawStmt.hasReturn || e.any RawStmt.hasReturn) && !ss.isEmpty then
-      for x in (t ++ e).filterMap RawStmt.declared? do
+      for x in (t ++ e).flatMap RawStmt.declaredAll do
         if ss.any (·.mentions x) then
           throw s!"`return` in a branch declaring {x}, which the statements after it name"
       pure [.ite c (← lowerReturns r (t ++ ss)) (← lowerReturns r (e ++ ss))]
@@ -2708,7 +2865,7 @@ partial def lowerReturns (r : Option String) : List RawStmt → Except String (L
   | .tryCall e g as rets ok err code pnc other :: ss => do
     let bs := [ok, err, pnc, other]
     if bs.any (·.any RawStmt.hasReturn) && !ss.isEmpty then
-      for x in (bs.flatten.filterMap RawStmt.declared? ++ rets.map (·.2) ++ code.toList) do
+      for x in (bs.flatten.flatMap RawStmt.declaredAll ++ rets.map (·.2) ++ code.toList) do
         if ss.any (·.mentions x) then
           throw s!"`return` in a clause declaring {x}, which the statements after it name"
       pure [.tryCall e g as rets (← lowerReturns r (ok ++ ss)) (← lowerReturns r (err ++ ss)) code
@@ -2764,6 +2921,7 @@ partial def uncheckStmts : List RawStmt → Except String (List RawStmt)
       | .assignIncDec .. => throw "`v = x++;` inside `unchecked`: write `v = x; x += 1;`"
       | .ite c t e => do pure (.ite (← c.uncheck) (← uncheckStmts t) (← uncheckStmts e))
       | .unchecked b => do pure (.unchecked (← uncheckStmts b))
+      | .block b => do pure (.block (← uncheckStmts b))
       | .tryCall e g as rets ok err code pnc other => do
         pure (.tryCall (← e.uncheck) g (← as.mapM RawExpr.uncheck) rets (← uncheckStmts ok)
           (← uncheckStmts err) code (← uncheckStmts pnc) (← uncheckStmts other))
@@ -2905,7 +3063,10 @@ partial def hoist : RawExpr → ElabM (Prog C × RawExpr)
         let Q ← elabMemCall f args R fun r => .declMem R x (some (.alias (.var r))) rfl
         declare C (toString x) (.mem R)
         pure (P ++ Q, .name (toString x))
-      | none => throw s!"{f} returns no value"
+      | none =>
+        if d.rets.isEmpty then throw s!"{f} returns no value"
+        else throw s!"{f} returns {d.rets.length} values, which a tuple assignment takes"
+  | .tuple _ => throw "a tuple is the right-hand side of a tuple assignment or of a `return`"
   | e => pure ([], e)
 
 /-- `a ⊕ b`'s captures: the right operand first (solc evaluates it first: `i++ +
@@ -2966,7 +3127,7 @@ the statement that binds the callee's return variable `r` where the call
 is: `Account memory mv1 = mv2;`, `m = mv2;` (the module docstring). -/
 partial def elabMemCall (f : String) (args : List RawExpr) (R : RefTy) (bind : Var → Stmt C) :
     ElabM (Prog C) := do
-  let (P, r) ← elabCallRet f args none
+  let (P, r, _) ← elabCallRet f args none
   match r with
   | some ⟨R', r⟩ =>
     unless R' = R do throw s!"{f} returns a {Ty.ref R'}, not a {Ty.ref R}"
@@ -2976,9 +3137,16 @@ partial def elabMemCall (f : String) (args : List RawExpr) (R : RefTy) (bind : V
 /-- `elabCall`, and the fresh return variable of a callee that returns a
 memory reference, with its type: the body's first statement declares it (a
 fresh default object) and the call returns nothing (`CallRet.none`), the
-caller binding it after the call (`elabMemCall`). -/
+caller binding it after the call (`elabMemCall`).  With `targets`, the
+call is a tuple assignment's right-hand side (`elabTuple`), KeyTaclets'
+`FunctionBodyStatement` with targets: it returns every return value
+(`CallRet.rets`, one or several), which the caller reads after the call —
+their fresh variables, types and widths.  A callee of several returns called
+as a statement (`f(a);`, KeY's `InternalCall`) declares them at the head of
+its body and returns nothing. -/
 partial def elabCallRet (f : String) (args : List RawExpr) (res : Option (Var × PrimTy))
-    (resW : Nat := 256) : ElabM (Prog C × Option (RefTy × Var)) := do
+    (resW : Nat := 256) (targets : Bool := false) :
+    ElabM (Prog C × Option (RefTy × Var) × List (PrimTy × Var × Nat)) := do
   let funs ← read
   let some i := funs.findIdx? (·.1 == f) | throw s!"{f} is not a function declared before this one"
   let d := (funs[i]?.map (·.2)).getD default
@@ -2998,18 +3166,19 @@ partial def elabCallRet (f : String) (args : List RawExpr) (res : Option (Var ×
     ρ := (n, toString x) :: ρ
     Γf := setBy (toString x) (.val p w) Γf
   let mut mret : Option (RefTy × Var) := none
-  let ret ← match d.ret, res with
-    | none, none => pure CallRet.none
-    | none, some _ => throw s!"{f} returns no value"
-    | some (n, .ref R), none => do
+  let mut mrets : List (PrimTy × Var × Nat) := []
+  let ret ← match d.rets, res with
+    | [], none => pure CallRet.none
+    | [], some _ => throw s!"{f} returns no value"
+    | [(n, .ref R)], none => do
       unless d.retMem do throw s!"{f}: its return of reference type {Ty.ref R} needs the location `memory`"
       let r ← freshCapture "mv"
       ρ := (n, toString r) :: ρ
       Γf := setBy (toString r) (.mem R) Γf
       mret := some ⟨R, r⟩
       pure CallRet.none
-    | some (_, .ref R), some (_, q) => throw s!"{f} returns a memory {Ty.ref R}, not a {primName q}"
-    | some (n, .prim p), res => do
+    | [(_, .ref R)], some (_, q) => throw s!"{f} returns a memory {Ty.ref R}, not a {primName q}"
+    | [(n, .prim p)], res => do
       if d.retMem then throw s!"{f}: `memory` on its return of value type {primName p}"
       if let some (_, q) := res then
         unless q = p do throw s!"{f} returns a {primName p}, not a {primName q}"
@@ -3018,9 +3187,23 @@ partial def elabCallRet (f : String) (args : List RawExpr) (res : Option (Var ×
       let r ← freshCapture "se"
       ρ := (n, toString r) :: ρ
       Γf := setBy (toString r) (.val p w) Γf
-      pure (CallRet.val p r (res.map (·.1)))
+      if targets then
+        mrets := [(p, r, w)]
+        pure (CallRet.rets [(p, r)])
+      else pure (CallRet.val p r (res.map (·.1)))
+    | rs, some _ => throw s!"{f} returns {rs.length} values, which a tuple assignment takes"
+    | rs, none => do
+      if d.retMem then throw s!"{f}: `memory` on a return of a function of several returns"
+      for (n, T) in rs do
+        let .prim p := T | throw s!"{f}: its return {n} has a reference type"
+        let w := (lookupBy n d.widths).getD 256
+        let r ← freshCapture "se"
+        ρ := (n, toString r) :: ρ
+        Γf := setBy (toString r) (.val p w) Γf
+        mrets := mrets ++ [(p, r, w)]
+      if targets then pure (CallRet.rets (mrets.map fun (p, r, _) => (p, r))) else pure CallRet.none
   let body ← renameStmts ρ d.body
-  let body ← ElabM.lift (lowerReturns (d.ret.map fun (n, _) => (lookupBy n ρ).getD n) body)
+  let body ← ElabM.lift (lowerReturns (d.rets.map fun (n, _) => (lookupBy n ρ).getD n) body)
   let body ← wrapMods body (d.mods.map fun m => { m with args := m.args.map (·.rename ρ) })
   modify fun (_, k) => (Γf, k)
   let P ← withReader (fun _ => funs.take i) (elabStmts body)
@@ -3032,8 +3215,10 @@ partial def elabCallRet (f : String) (args : List RawExpr) (res : Option (Var ×
       match hd : (Ty.ref R).defaultOkS with
       | true => pure (Stmt.declMem R r none (by simp [hd]) :: P)
       | false => throw s!"{f} returns a {Ty.ref R}, whose default is not well-formed"
+  -- several returns of a call that is a statement: declared on entry, at their defaults
+  let P := if targets then P else mrets.map (fun (p, r, _) => Stmt.declLocal p r none) ++ P
   match hsep : Arg.separatedFrom [] targs with
-  | true => pure ([.call f targs hsep ret P], mret)
+  | true => pure ([.call f targs hsep ret P], mret, mrets)
   | false => throw s!"{f}: an argument reads a parameter"
 
 /-- The captures a statement's own expressions need (`hoist`), and the
@@ -3317,6 +3502,14 @@ partial def elabStmt1 : RawStmt → ElabM (Prog C)
   | .call (.name f) args => elabCall f args none
   | .call .. => throw "only push, pop and transfer are calls on a receiver"
   | .ret _ => throw "`return` outside a function's body"
+  | .block b => elabBranch b
+  | .tupleAssign ts rhs => elabTuple ts rhs
+  | .tupleDecl vs rhs => do
+    -- `T x;` for each variable, then the tuple assigned to them
+    for (_, x) in vs.filterMap id do
+      if rhs.mentions x then throw s!"{rhs.toStr} reads {x}, which the tuple declares"
+    let P ← elabStmts (vs.filterMap fun v => v.map fun (T, x) => .decl T x none)
+    pure (P ++ (← elabTuple (vs.map fun v => v.map fun (_, x) => .name x) rhs (direct := true)))
   | .ite c thn els => do
     let c ← checkM C .bool c
     let thn ← elabBranch thn
@@ -3376,6 +3569,61 @@ partial def elabBranch (ss : List RawStmt) : ElabM (Prog C) := do
   let (_, k) ← get
   set (Γ, k)
   pure P
+
+/-- **A tuple assignment** `(t₀, , t₂) = e;`, written out as solkey's
+`ParserUtils.tupleAssignment` writes it.  From a call of a function of several
+returns: the call (`CallRet.rets`), then `tᵢ = rᵢ;` for each target, left to
+right (a component left out is not read).  From a tuple `(e₀, e₁, e₂)`: each
+component with a target into a fresh temporary, left to right, then each
+target assigned its temporary, left to right; a component left out is
+dropped if it can neither revert nor have an effect, and evaluated
+otherwise (solc's; solkey drops it).  Targets that may alias (the same name
+twice, two that are not stack locals, one that reads another) are refused:
+solc's order of their writes is not KeY's.  The variables of a tuple
+declaration, which no component reads, are assigned directly (`direct`). -/
+partial def elabTuple (ts : List (Option RawExpr)) (rhs : RawExpr) (direct : Bool := false) :
+    ElabM (Prog C) := do
+  let tgts := ts.filterMap id
+  let mut nonLocal := 0
+  for t in tgts do
+    if t.hasIncDec then throw s!"{t.toStr}: a tuple's target with an effect"
+    unless (← synthM C t) matches .val _ (.simple (.local _)) do nonLocal := nonLocal + 1
+    for u in tgts do
+      if let .name x := u then
+        if t.toStr != u.toStr && t.mentions x then throw s!"{t.toStr}: a tuple's target that reads {x}, another"
+  if nonLocal > 1 then throw "a tuple assignment to two targets that are not stack locals"
+  unless (tgts.map (·.toStr)).eraseDups.length == tgts.length do
+    throw "a tuple assignment to the same target twice"
+  match rhs with
+  | .call f args =>
+    unless (castTy? f).isNone && (← read).any (·.1 == f) do
+      throw s!"{f}(…): the right-hand side of a tuple assignment is a call of a function"
+    let (P, args) ← hoistArgs args
+    let (Q, _, rs) ← elabCallRet f args none (targets := true)
+    unless rs.length == ts.length do throw s!"{f} returns {rs.length} values, not {ts.length}"
+    for (p, r, w) in rs do declare C (toString r) (.val p w)
+    let R ← elabStmts ((ts.zip rs).filterMap fun (t, (_, r, _)) =>
+      t.map fun t => .assign t (.name (toString r)))
+    pure (P ++ Q ++ R)
+  | .tuple es =>
+    unless es.length == ts.length do throw s!"a tuple of {es.length} values assigned to {ts.length}"
+    let mut tmps : List RawStmt := []
+    let mut asgs : List RawStmt := []
+    for (t, e) in ts.zip es do
+      match t with
+      | some t =>
+        if direct then
+          tmps := tmps ++ [.assign t e]
+          continue
+        let p ← match ← synthM C t with
+          | .val p _ | .path (.prim p) _ | .mpath (.prim p) _ => pure p
+          | _ => throw s!"{t.toStr}: a tuple's component of a reference type"
+        let x := toString (← freshCapture "se")
+        tmps := tmps ++ [.decl (.named (tyName p (widthIn C (← ctx) t))) x (some e)]
+        asgs := asgs ++ [.assign t (.name x)]
+      | none => unless e.isPure do tmps := tmps ++ [.eval [e]]
+    elabStmts (tmps ++ asgs)
+  | _ => throw s!"{rhs.toStr}: the right-hand side of a tuple assignment is a tuple or a call"
 
 end
 
@@ -3540,6 +3788,7 @@ def Arg.quoteList : List (Arg C) → Lean.Expr
 def CallRet.quote : CallRet → Lean.Expr
   | .none => mkConst ``CallRet.none
   | .val p r res => mkAppN (mkConst ``CallRet.val) #[toExpr p, toExpr r, toExpr res]
+  | .rets rs => mkAppN (mkConst ``CallRet.rets) #[toExpr rs]
 
 /-- An external call, each argument a `Sigma.mk` of its type and value. -/
 def ExtCall.quote (call : ExtCall C) : Lean.Expr :=

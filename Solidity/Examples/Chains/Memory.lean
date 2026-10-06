@@ -385,7 +385,7 @@ example : Prog.toStr (sol[Calls]{ choosePersonMem().account = makeAccount(); } :
 
 /-- `choosePersonMem().account = makeAccount();` from a storage where `alice.age`
 is 10, to its last line.  The program is the elaborator's capture (above), the
-paper's only printed step.  Past it each call is inlined (`functionBodyExpand`):
+paper's only printed step.  Past it each call is inlined (`internalCallExpand`):
 `makeAccount`'s object allocated (`mv2`) and written, its result bound
 (`pv := mv2`); `choosePersonMem`'s object allocated (`mv4`) and overwritten by
 a copy of `alice` (`memoryStorageCopy`), bound (`mv := mv4`); and the member
@@ -393,7 +393,7 @@ written.  The copy reads `alice` as a struct, which has no literal: nothing
 reads a member of it in the last line. -/
 theorem chain (m : Modality) (φ : Post Calls) :
     dl![m]{ { storage := save(storage, alice.age, 10) } ⟨[ choosePersonMem().account = makeAccount(); ]⟩ φ }
-    ~[functionBodyExpand]~> dl![m]{
+    ~[internalCallExpand]~> dl![m]{
         { storage := save(storage, alice.age, 10) }
           ⟨[ Account memory mv2; mv2.balance = 100; Account memory pv = mv2; Person memory mv = choosePersonMem();
             mv.account = pv; ]⟩ φ }
@@ -411,7 +411,7 @@ theorem chain (m : Modality) (φ : Post Calls) :
           { mv2 := freshId(addM(memory, Account)) ‖ memory := addM(memory, Account) }
             { memory := write(memory, mv2.balance, 100) }
               { pv := mv2 } ⟨[ Person memory mv = choosePersonMem(); mv.account = pv; ]⟩ φ }
-    ~[functionBodyExpand]~> dl![m]{
+    ~[internalCallExpand]~> dl![m]{
         { storage := save(storage, alice.age, 10) }
           { mv2 := freshId(addM(memory, Account)) ‖ memory := addM(memory, Account) }
             { memory := write(memory, mv2.balance, 100) }

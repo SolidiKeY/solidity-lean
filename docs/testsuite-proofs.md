@@ -1967,8 +1967,8 @@ pays, are all faster than the baseline.
   KeY names them `ret0`, `ret1`, …).
   Its `return`s are then lowered (`lowerReturns`), so an internal row
   elaborates and `#solkey_obligations` counts it as `internal f`.
-  `Import.lowerRets` refuses a function with several return values.  Once
-  `lowerReturns` takes a list, it should become that call.
+  `lowerReturns` takes the list of return variables (W2), so a function
+  of several return values is lowered too (on the integration branch).
 - **Old fixture: unchanged.**  `Solkey/TestSuite.lean`'s pins check clean.
   The 419 `Solkey.TestSuite.*` constants (programs, contract, report) hash
   the same, by name, type and value, with the old and the new front end.

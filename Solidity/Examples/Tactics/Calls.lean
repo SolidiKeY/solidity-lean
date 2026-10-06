@@ -1,4 +1,5 @@
 import Solidity.Calculus.Close
+import Solidity.Calculus.Derive
 
 /-!
 # Calls: a function's body, inlined
@@ -11,13 +12,16 @@ variable — so a call statement carries its body, as KeY's
 `FunctionBodyStatement` carries the function it stands for.  A function calls
 only the functions declared before it: a recursive one cannot be written.
 
-Two rules run a call.  An argument that is not simple is captured first,
+Three rules run a call.  An argument that is not simple is captured first,
 the leftmost first (`functionCallArgCapture`, printed `unfoldArgument`, a
 `LeanTaclet`: solkey has no such taclet, so the derivation is `⊢`, not `⊢ₖ`);
-with every argument simple, `functionBodyExpand` inlines the body: the
+with every argument simple, `internalCallExpand` inlines the body: the
 parameters declared with the arguments, the return variable declared, the
-body, the result assigned (KeY's `expand_function_body`).  From there the
-body's statements run by their own rules.
+body, the result assigned (KeY's `expand_function_body`).  A call that
+returns to targets — a tuple assignment's, `(lo, hi) = f(a);`, or a
+specification's obligation — is KeY's `FunctionBodyStatement`, and
+`functionBodyExpand` inlines it the same way, the targets assigned after
+it.  From there the body's statements run by their own rules.
 -/
 
 namespace Solidity.Examples.Tactics.Calls
@@ -34,6 +38,12 @@ info: @Taclet.functionBodyExpand : ∀ {C : Contract} {k : Nat} {m : Modality} {
 -/
 #guard_msgs in #check @Taclet.functionBodyExpand
 
+/--
+info: @Taclet.internalCallExpand : ∀ {C : Contract} {k : Nat} {m : Modality} {f : Name} {args : List (Arg C)} {ret : CallRet}
+  {body : List (Stmt C)}, dl{ ⟨[ ic; ]⟩ ⇝ ⟨[ expand_function_body(ic); ]⟩ }
+-/
+#guard_msgs in #check @Taclet.internalCallExpand
+
 /-! ## Calls run their bodies -/
 
 /-- `uint y = addOne(4);` — `addOne(uint x) returns (uint r) { r = x + 1; }`,
@@ -47,7 +57,7 @@ then the body's statements. -/
 theorem callAddOneWalk : ⊨ dl!{ [ uint y = addOne(4); ] y == 5 } := by
   apply Proves.valid
   apply update .valueDeclSkip        -- uint y;
-  apply unfold .functionBodyExpand   -- y = addOne(4);
+  apply unfold .internalCallExpand   -- y = addOne(4);
   apply unfold .localValueDeclInitDrop
   apply update .localValueAssign     -- uint x' = 4;
   apply update .valueDeclSkip        -- uint r';
@@ -93,7 +103,7 @@ theorem callCaptureWalk : ⊨ dl!{ x == 1 → [ uint y = addOne(x + 1); ] y == 3
   apply unfoldLean .functionCallArgCapture   -- y = addOne(x + 1);  ⇝  uint se = x + 1; y = addOne(se);
   apply unfold .localValueDeclInitDrop
   apply update .binopAssignment
-  apply unfold .functionBodyExpand       -- uint x' = se; uint r'; r' = x' + 1; y = r';
+  apply unfold .internalCallExpand       -- uint x' = se; uint r'; r' = x' + 1; y = r';
   apply unfold .localValueDeclInitDrop
   apply update .localValueAssign
   apply update .valueDeclSkip
@@ -246,5 +256,302 @@ example : Prog.toStr (sol[Returns]{ uint z = incr(4) + 1; } : Prog Returns) =
 
 /-- error: Solidity elaboration failed: a call in a conditional's branch -/
 #guard_msgs in #check sol[Returns]{ uint z = total > 0 ? incr(1) : 0; }
+
+/-! ## Several returns, tuples and blocks
+
+A function may return several values (`returns (uint lo, uint hi)`; unnamed,
+`_ret0`, `_ret1`, …), and a call of one is a tuple assignment's right-hand
+side: `(uint lo, , uint sum) = f(a);`.  The call returns them all
+(`CallRet.rets`), each return variable declared at its default, and the
+targets are assigned after it, left to right, as solkey's
+`ParserUtils.tupleAssignment` writes it out.  `return (e₀, e₁);` assigns
+each return variable; when a component reads one, through temporaries
+first.  A tuple of values goes through temporaries too, so
+`(a, b) = (b, a);` swaps.  A bare block `{ … }` scopes its declarations,
+and a `return` inside one ends the function (solkey's `blockReturn`). -/
+
+/-- The new call shapes of solkey's `TestSuite.sol`, and `zero`, whose named
+return is never assigned. -/
+def Tuples : Contract := contract!{
+  uint total;
+  function returnOrdered(uint x, uint y) returns (uint lo, uint hi) {
+    if (x < y) { return (x, y); }
+    return (y, x);
+  }
+  function returnSwapped() returns (uint x, uint y) {
+    x = 1;
+    y = 2;
+    return (y, x);
+  }
+  function returnStats(uint x, uint y) returns (uint lo, uint hi, uint sum, bool same) {
+    lo = x < y ? x : y;
+    hi = x < y ? y : x;
+    return (lo, hi, x + y, x == y);
+  }
+  function returnFromNestedBlock(uint x) returns (uint) {
+    {
+      {
+        if (x > 0) { return 1; }
+      }
+      x = 5;
+    }
+    return x;
+  }
+  function returnOrFallThrough(bool stop) returns (uint r) {
+    r = 5;
+    if (stop) { return r; }
+    r = 6;
+  }
+  function zero() returns (uint r) {}
+}
+
+/-- A named return that the body never assigns is its type's default, as in
+solc: the call declares it at `0`. -/
+theorem namedReturnDefault : ⊨ dl[Tuples]{ ⟨ uint y = zero(); ⟩ y == 0 } := by
+  sol_symex
+  sol_close
+
+theorem tupleReturnPair :
+    ⊨ dl[Tuples]{ ⟨ (uint lo, uint hi) = returnOrdered(5, 2); ⟩ (lo == 2 ∧ hi == 5) } := by
+  sol_symex
+  sol_close
+
+/-- `return (y, x);` reads the return variables it writes: through
+temporaries. -/
+theorem tupleReturnReadsReturnVariables :
+    ⊨ dl[Tuples]{ ⟨ (uint x, uint y) = returnSwapped(); ⟩ (x == 2 ∧ y == 1) } := by
+  sol_symex
+  sol_close
+
+theorem tupleReturnDiscardsComponents :
+    ⊨ dl[Tuples]{ ⟨ (uint lo, , uint sum, bool same) = returnStats(3, 1); ⟩
+      (lo == 1 ∧ sum == 4 ∧ same == false) } := by
+  sol_symex
+  sol_close
+
+/-- A storage target among the targets (a box: on an arbitrary state the
+write to `total` may fail). -/
+theorem tupleReturnAssignsExisting :
+    ⊨ dl[Tuples]{ [ uint hi; (total, hi) = returnOrdered(9, 4); ] (total == 4 ∧ hi == 9) } := by
+  sol_symex
+  sol_close
+
+theorem tupleAssignmentRotates :
+    ⊨ dl[Tuples]{ ⟨ uint first = 1; uint second = 2; uint third = 3;
+      (first, second, third) = (second, third, first); ⟩
+      (first == 2 ∧ second == 3 ∧ third == 1) } := by
+  sol_symex
+  sol_close
+
+theorem tupleDeclaration :
+    ⊨ dl[Tuples]{ ⟨ (uint first, , bool third) = (4, 5, true); ⟩ (first == 4 ∧ third == true) } := by
+  sol_symex
+  sol_close
+
+theorem returnLeavesNestedBlocks :
+    ⊨ dl[Tuples]{ ⟨ uint one = returnFromNestedBlock(3); uint five = returnFromNestedBlock(0); ⟩
+      (one == 1 ∧ five == 5) } := by
+  sol_symex
+  sol_close
+
+theorem returnOrFallThroughNamed :
+    ⊨ dl[Tuples]{ ⟨ uint stopped = returnOrFallThrough(true); uint finished = returnOrFallThrough(false); ⟩
+      (stopped == 5 ∧ finished == 6) } := by
+  sol_symex
+  sol_close
+
+/-- A block's declaration is its own: the name is free again after it. -/
+theorem blockScope : ⊨ dl[Tuples]{ [ { uint w = 1; total = w; }; uint w = 2; ] (total == 1 ∧ w == 2) } := by
+  sol_symex
+  sol_close
+
+/-- The call and the assignments after it print as the tuple assignment
+they are elaborated from (`Stmt.tupleCallStr?`). -/
+example : Prog.toStr (sol[Tuples]{ uint lo; uint sum; (lo, , sum, ) = returnStats(3, 1); } :
+    Prog Tuples) = "uint lo; uint sum; (lo, , sum, ) = returnStats(3, 1);" := rfl
+
+/-- error: Solidity elaboration failed: returnOrdered returns 2 values, not 3 -/
+#guard_msgs in #check sol[Tuples]{ (uint a, uint b, uint c) = returnOrdered(1, 2); }
+
+/-- error: Solidity elaboration failed: returnOrdered returns 2 values, which a tuple assignment takes -/
+#guard_msgs in #check sol[Tuples]{ uint a = returnOrdered(1, 2); }
+
+/-- error: Solidity elaboration failed: a tuple assignment to the same target twice -/
+#guard_msgs in #check sol[Tuples]{ uint a; (a, a) = returnOrdered(1, 2); }
+
+/-- error: Solidity elaboration failed: a tuple assignment to two targets that are not stack locals -/
+#guard_msgs in #check sol[Tuples]{ (total, total) = (1, 2); }
+
+/-! ## solkey's `TestSuite` shapes, derived
+
+A copy of each function `671f6762a9`..`1b4341a303` added to solkey's
+`TestSuite.sol` for internal calls, returns and tuples, the helpers as
+`Suite`'s functions (a braceless `if (c) return x;` braced), each public one
+an obligation `wt(storage) → ⟨ body ⟩ true` (the box for
+`returnFromTryBranches`), as the import states them, derived by `sol_prove`.
+A call in a body is `internalCallExpand`'s, and a tuple assignment's
+`functionBodyExpand`'s. -/
+
+/-- `TestSuite.sol`'s helpers. -/
+def Suite : Contract := contract!{
+  uint total;
+  uint owner;
+  function returnOne() returns (uint) { return 1; }
+  function returnSign(int v) returns (int) {
+    if (v < 0) { return -1; }
+    if (v == 0) { return 0; }
+    return 1;
+  }
+  function returnOrdered(uint x, uint y) returns (uint lo, uint hi) {
+    if (x < y) { return (x, y); }
+    return (y, x);
+  }
+  function returnSwapped() returns (uint x, uint y) {
+    x = 1;
+    y = 2;
+    return (y, x);
+  }
+  function returnStats(uint x, uint y, uint z) returns (uint lo, uint hi, uint sum, bool same) {
+    lo = x < y ? x : y;
+    lo = lo < z ? lo : z;
+    hi = x > y ? x : y;
+    hi = hi > z ? hi : z;
+    return (lo, hi, x + y + z, x == y && y == z);
+  }
+  function returnFromNestedBlock(uint x) returns (uint) {
+    {
+      {
+        if (x > 0) { return 1; }
+      }
+      x = 5;
+    }
+    return x;
+  }
+  function returnOrFallThrough(bool stop) returns (uint r) {
+    r = 5;
+    if (stop) { return r; }
+    r = 6;
+  }
+  function returnAddOne(uint x) returns (uint) { return x + 1; }
+  function returnAddTwo(uint x) returns (uint) {
+    uint y = returnAddOne(x);
+    return returnAddOne(y);
+  }
+  function returnRevertsOnZero(uint x) returns (uint) {
+    if (x == 0) { revert(); }
+    return x;
+  }
+  function returnInsideTry() returns (uint) {
+    try I(owner).tryCalleeGet(5) returns (uint v) { return 7; } catch { return 8; }
+  }
+  function returnVoidEarly(uint v) {
+    if (total != 0) { return; }
+    total = v;
+  }
+}
+
+/-- `wt(storage)`, the premise every `TestSuite` obligation carries. -/
+def wtSuite : Fml Suite := .defined (.wt Suite.vars .storage)
+
+/--
+info: Try this:
+  sol_prove
+-/
+#guard_msgs in
+theorem internalCallDeclaration :
+    ⊢ .imp wtSuite dl[Suite]{ ⟨ uint r = returnOne(); assert(r == 1); ⟩ true } := by
+  sol_prove?
+
+theorem internalCallInExpression :
+    ⊢ .imp wtSuite dl[Suite]{ ⟨ uint r = returnOne() + returnOne(); assert(r == 2); ⟩ true } := by
+  sol_prove
+
+theorem internalCallToStorage :
+    ⊢ .imp wtSuite dl[Suite]{ ⟨ total = returnOne(); assert(total == 1); ⟩ true } := by
+  sol_prove
+
+theorem returnEarly :
+    ⊢ .imp wtSuite dl[Suite]{ ⟨ int negative = returnSign(-3); int zero = returnSign(0);
+      int positive = returnSign(4); assert(negative < 0 && zero == 0 && positive > 0); ⟩ true } := by
+  sol_prove
+
+/--
+info: Try this:
+  sol_prove
+-/
+#guard_msgs in
+theorem tupleReturnPairDerived :
+    ⊢ .imp wtSuite dl[Suite]{ ⟨ (uint lo, uint hi) = returnOrdered(5, 2); assert(lo == 2 && hi == 5); ⟩
+      true } := by
+  sol_prove?
+
+theorem tupleReturnReadsReturnVariablesDerived :
+    ⊢ .imp wtSuite dl[Suite]{ ⟨ (uint x, uint y) = returnSwapped(); assert(x == 2 && y == 1); ⟩ true } := by
+  sol_prove
+
+theorem tupleReturnDiscardsComponentsDerived :
+    ⊢ .imp wtSuite dl[Suite]{ ⟨ (uint lo, , uint sum, bool same) = returnStats(3, 1, 2);
+      assert(lo == 1 && sum == 6 && !same); ⟩ true } := by
+  sol_prove
+
+theorem tupleReturnAssignsExistingDerived :
+    ⊢ .imp wtSuite dl[Suite]{ ⟨ uint hi; (total, hi) = returnOrdered(9, 4);
+      assert(total == 4 && hi == 9); ⟩ true } := by
+  sol_prove
+
+theorem tupleAssignmentRotatesDerived :
+    ⊢ .imp wtSuite dl[Suite]{ ⟨ uint first = 1; uint second = 2; uint third = 3;
+      (first, second, third) = (second, third, first);
+      assert(first == 2 && second == 3 && third == 1); ⟩ true } := by
+  sol_prove
+
+theorem tupleDeclarationDerived :
+    ⊢ .imp wtSuite dl[Suite]{ ⟨ (uint first, , bool third) = (4, 5, true);
+      assert(first == 4 && third); ⟩ true } := by
+  sol_prove
+
+theorem returnLeavesNestedBlocksDerived :
+    ⊢ .imp wtSuite dl[Suite]{ ⟨ uint one = returnFromNestedBlock(3); uint five = returnFromNestedBlock(0);
+      assert(one == 1 && five == 5); ⟩ true } := by
+  sol_prove
+
+theorem returnOrFallThroughNamedDerived :
+    ⊢ .imp wtSuite dl[Suite]{ ⟨ uint stopped = returnOrFallThrough(true);
+      uint finished = returnOrFallThrough(false); assert(stopped == 5 && finished == 6); ⟩ true } := by
+  sol_prove
+
+theorem returnFromNestedCall :
+    ⊢ .imp wtSuite dl[Suite]{ ⟨ uint r = returnAddTwo(1); assert(r == 3); ⟩ true } := by
+  sol_prove
+
+theorem returnAfterRevertGuard :
+    ⊢ .imp wtSuite dl[Suite]{ ⟨ uint r = returnRevertsOnZero(3); assert(r == 3); ⟩ true } := by
+  sol_prove
+
+theorem returnFromTryBranches :
+    ⊢ .imp wtSuite dl[Suite]{ [ uint r = returnInsideTry(); assert(r == 7 || r == 8); ] true } := by
+  sol_prove
+
+theorem returnFromVoidFunction :
+    ⊢ .imp wtSuite dl[Suite]{ ⟨ total = 4; returnVoidEarly(9); assert(total == 4);
+      total = 0; returnVoidEarly(9); assert(total == 9); ⟩ true } := by
+  sol_prove
+
+/-- A bare call of a function of several returns is an `InternalCall`: it
+declares the returns in its body and returns nothing (`CallRet.none`), so
+`internalCallExpand` inlines it. -/
+example : ⊢ .imp wtSuite dl[Suite]{ ⟨ returnOrdered(1, 2); ⟩ true } := by
+  apply Proves.intro
+  apply unfold .internalCallExpand
+  sol_prove
+
+/-- A tuple assignment's call returns to its targets (`CallRet.rets`):
+`functionBodyExpand`'s. -/
+example : ⊢ .imp wtSuite dl[Suite]{ ⟨ uint a; uint b; (a, b) = returnOrdered(1, 2); ⟩ true } := by
+  apply Proves.intro
+  apply update .valueDeclSkip
+  apply update .valueDeclSkip
+  apply unfold .functionBodyExpand
+  sol_prove
 
 end Solidity.Examples.Tactics.Calls

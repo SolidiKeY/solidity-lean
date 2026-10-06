@@ -291,7 +291,16 @@ theorem Arg.decls_run : (args : List (Arg C)) → ∀ σ, Prog.run σ (args.map 
     | error _ => rfl
     | ok v => exact Arg.decls_run as _
 
-/-- **A call runs as its inlining** (`functionBodyExpand`). -/
+theorem CallRet.decls_run :
+    (rs : List (PrimTy × Var)) → ∀ σ, Prog.run σ (CallRet.decl (C := C) (.rets rs)) =
+      pure (CallRet.enterAll rs σ)
+  | [], _ => rfl
+  | (p, r) :: rs, σ => by
+    simp only [CallRet.decl, List.map_cons, Prog.run, Stmt.run, bind, Except.bind, pure,
+      Except.pure, CallRet.enterAll]
+    exact CallRet.decls_run rs _
+
+/-- **A call runs as its inlining** (`functionBodyExpand`, `internalCallExpand`). -/
 theorem Stmt.run_call_expand (σ : State) {f : Name} {args : List (Arg C)}
     {hsep : Arg.separatedFrom [] args = true} {ret : CallRet} {body : List (Stmt C)} :
     (Stmt.call f args hsep ret body).run σ = Prog.run σ (Stmt.expandBody args ret body) := by
@@ -301,15 +310,19 @@ theorem Stmt.run_call_expand (σ : State) {f : Name} {args : List (Arg C)}
   | ok σ₁ =>
     simp only [bind, Except.bind]
     have he : Prog.run σ₁ (CallRet.decl (C := C) ret) = pure (ret.enter σ₁) := by
-      cases ret <;> rfl
+      cases ret with
+      | rets rs => exact CallRet.decls_run rs σ₁
+      | _ => rfl
     rw [he]
     simp only [pure, Except.pure]
     cases Prog.run (ret.enter σ₁) body with
     | error _ => rfl
     | ok σ₂ =>
-      rcases ret with _ | ⟨p, r, _ | y⟩ <;>
-        simp [CallRet.leave, CallRet.result, Prog.run, Stmt.run, Val.eval, bind, Except.bind,
-          pure, Except.pure] <;> split <;> rfl
+      rcases ret with _ | ⟨p, r, _ | y⟩ | rs
+      all_goals try rfl
+      simp [CallRet.leave, CallRet.result, Prog.run, Stmt.run, Val.eval, bind, Except.bind,
+        pure, Except.pure]
+      split <;> rfl
 
 theorem Arg.mem_vars {y : Var} {a : Arg C} :
     {args : List (Arg C)} → a ∈ args → y ∈ a.e.vars → y ∈ Arg.vars args
@@ -454,6 +467,7 @@ theorem Taclet.sound_unfold {k : Nat} {m : Modality} {s : Stmt C} {P : Prog C}
   have hmv : Var.fresh "mv" k ∉ s.vars := fun h => hs _ h (by simp [freshVars])
   cases d
   case functionBodyExpand => intro σ; rw [Stmt.run_call_expand σ]; exact SameOk.self _ _
+  case internalCallExpand => intro σ; rw [Stmt.run_call_expand σ]; exact SameOk.self _ _
   all_goals clear hs
   all_goals clear_side
   all_goals intro σ

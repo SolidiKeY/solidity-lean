@@ -805,4 +805,51 @@ example : dl![m]{ { x := 1 } φ } ~~> dl![m]{ { x := 1 } φ } := by
 
 end
 
+/-! ## Calls
+
+A call in a body is KeY's `InternalCall`, inlined by `internalCallExpand`;
+a tuple assignment's call returns to its targets, a `FunctionBodyStatement`
+inlined by `functionBodyExpand`, the targets assigned after it. -/
+
+/-- Two functions, of one return and of two. -/
+def Callees : Contract := contract!{
+  uint total;
+  function inc(uint x) returns (uint) { return x + 1; }
+  function pair(uint x) returns (uint lo, uint hi) { return (x, x + 1); }
+}
+
+/--
+info: 0: valueDeclSkip
+1: internalCallExpand
+2: localValueDeclInitDrop
+3: localValueAssign
+4: valueDeclSkip
+5: additionAssignment
+6: localValueAssign
+7: emptyModality
+8: Closed goal
+closed: 0 open goal(s), 9 node(s), 1 branch(es)
+-/
+#guard_msgs in
+#proof_tree dl[Callees]{ ⟨ uint y = inc(1); ⟩ y == 2 }
+
+/--
+info: 0: valueDeclSkip
+1: valueDeclSkip
+2: functionBodyExpand
+3: localValueDeclInitDrop
+4: localValueAssign
+5: valueDeclSkip
+6: valueDeclSkip
+7: localValueAssign
+8: additionAssignment
+9: localValueAssign
+10: localValueAssign
+11: emptyModality
+12: Closed goal
+closed: 0 open goal(s), 13 node(s), 1 branch(es)
+-/
+#guard_msgs in
+#proof_tree dl[Callees]{ ⟨ (uint a, uint b) = pair(1); ⟩ b == 2 }
+
 end Solidity.Examples.ProofTree

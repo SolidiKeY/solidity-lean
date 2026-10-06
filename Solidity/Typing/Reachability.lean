@@ -1422,7 +1422,7 @@ theorem Arg.bindSeq_induct {P : State → Prop} (hset : ∀ τ x w, P τ → P (
 /-- Leaving a call binds at most its result local to a value. -/
 theorem CallRet.leave_induct {P : State → Prop} (hset : ∀ τ x w, P τ → P (τ.setEnv x (.val w)))
     {σ σ' : State} : (ret : CallRet) → P σ → CallRet.leave (C := C) σ ret = .ok σ' → P σ'
-  | .none, hp, h | .val _ _ Option.none, hp, h => by cases h; exact hp
+  | .none, hp, h | .val _ _ Option.none, hp, h | .rets _, hp, h => by cases h; exact hp
   | .val _ _ (some _), hp, h => by
     obtain ⟨w, _, h⟩ := bind_ok_inv h
     cases h; exact hset _ _ w hp
@@ -1716,8 +1716,10 @@ theorem Stmt.run_canon : ∀ (s : Stmt C) {Γ Γ' : Ctx} {H : HeapTy} {σ σ' : 
         obtain ⟨σ₁, hσ₁, h⟩ := bind_ok_inv h
         obtain ⟨σ₂, hσ₂, h⟩ := bind_ok_inv h
         obtain ⟨hs₁, hh₁⟩ := Arg.bindSeq_locals hσ₁
-        have hcn₁ : Canon C H (ret.enter σ₁) :=
-          hcn.of_eq (by cases ret <;> exact hs₁) (by cases ret <;> exact hh₁)
+        obtain ⟨hs₁', hh₁'⟩ : (ret.enter σ₁).storage = σ.storage ∧ (ret.enter σ₁).heap = σ.heap :=
+          CallRet.enter_induct (P := fun τ => τ.storage = σ.storage ∧ τ.heap = σ.heap)
+            (fun _ _ _ h => h) ret ⟨hs₁, hh₁⟩
+        have hcn₁ : Canon C H (ret.enter σ₁) := hcn.of_eq hs₁' hh₁'
         obtain ⟨H', hext, hwt₂, hcn₂⟩ :=
           Prog.run_canon body (CallRet.enter_wt (Arg.bindSeq_wt hwt h₁ hσ₁) ret) hcn₁ h₂ hσ₂
         obtain ⟨hs₃, hh₃⟩ := CallRet.leave_locals ret h

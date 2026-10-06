@@ -1501,10 +1501,37 @@ def Arg.bindSeq : List (Arg C) → State → Res State
   | [], σ => pure σ
   | a :: as, σ => do Arg.bindSeq as (σ.setEnv a.x (.val (← a.e.eval σ)))
 
-/-- Entering a call: its return variable declared at its default. -/
+/-- Return variables declared at their defaults, one after another. -/
+def CallRet.enterAll : List (PrimTy × Var) → State → State
+  | [], σ => σ
+  | (p, r) :: rs, σ => CallRet.enterAll rs (σ.setEnv r (.val (PrimTy.default p)))
+
+/-- Entering a call: its return variables declared at their defaults, as
+solc zeroes them. -/
 def CallRet.enter (σ : State) : CallRet → State
   | .none => σ
   | .val p r _ => σ.setEnv r (.val (PrimTy.default p))
+  | .rets rs => CallRet.enterAll rs σ
+
+/-- Entering a call binds only its return variables, each to a value: what
+holds of two states alike and survives binding a local to a value on both
+holds after entering. -/
+theorem CallRet.enter_induct₂ {R : State → State → Prop}
+    (hset : ∀ σ τ x w, R σ τ → R (σ.setEnv x (.val w)) (τ.setEnv x (.val w))) :
+    (ret : CallRet) → {σ τ : State} → R σ τ → R (ret.enter σ) (ret.enter τ)
+  | .none, _, _, h => h
+  | .val _ _ _, _, _, h => hset _ _ _ _ h
+  | .rets rs, _, _, h => go rs h
+where
+  go : (rs : List (PrimTy × Var)) → {σ τ : State} → R σ τ →
+      R (CallRet.enterAll rs σ) (CallRet.enterAll rs τ)
+    | [], _, _, h => h
+    | (_, _) :: rs, _, _, h => go rs (hset _ _ _ _ h)
+
+/-- `CallRet.enter_induct₂` for one state. -/
+theorem CallRet.enter_induct {P : State → Prop} (hset : ∀ τ x w, P τ → P (τ.setEnv x (.val w)))
+    (ret : CallRet) {σ : State} (h : P σ) : P (ret.enter σ) :=
+  CallRet.enter_induct₂ (R := fun σ _ => P σ) (fun _ _ x w h => hset _ x w h) ret (τ := σ) h
 
 /-- Leaving a call: the returned value assigned where the call is. -/
 def CallRet.leave (σ : State) : CallRet → Res State

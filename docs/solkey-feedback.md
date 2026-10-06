@@ -12,8 +12,7 @@ rename memory's `default` to `init`, and touch no rule an item below is
 about but item 3's, which `671f6762a9` partly resolves. `78f42fde33` adds `\sameUpdateLevel` to the four allocation taclets;
 Lean needs no counterpart (`docs/lean-key-rule-map.md`, legend).
 `b959555181`, `671f6762a9` and `1b4341a303` add `send`, internal calls with
-return targets and the function frame (ten taclets, not yet ported:
-`RuleShapes.unclaimedTaclets`).
+return targets and the function frame (ten taclets; items 7 and 8).
 
 **Ranking.** Items that let KeY close a goal that is false on the chain come
 first, then missing rules and missing invariants, then refusals, then
@@ -246,6 +245,25 @@ fail, whatever the world would say, since the callee may revert after
 re-entering. One difference of form only: "send succeeded" is written
 `{booking ‖ pv := true} {havoc} (I → …)`, as Lean writes the transfer's
 resume, where KeY puts `pv := TRUE` into the anonymising update.
+
+## 8. Returns and tuples (from the internal-call port)
+
+- **Unconstrained returns.** `function g() returns (uint r) {}` followed by
+  `assert(g() == 0)` holds in solc and is unprovable in KeY:
+  `ExpandFunctionBody` declares `R ri;` with no value. Lean declares each
+  return variable at its default (`CallRet.enter`).
+- **Dropped tuple components (diamond).** `(uint x, ) = (1, arr[5]);` reverts
+  in solc, but `ParserUtils.tupleAssignment` drops a component that is not a
+  call, so `⟨…⟩ true` is provable. Category 4: keep the component (Lean
+  evaluates it) or refuse.
+- **Modifiers.** `InternalCall` refuses a callee with modifiers
+  (`ExpandFunctionBody.asFunctionBody`), which leaves the call stuck; Lean
+  inlines the modifiers around the body (`wrapMods`, first listed outermost).
+- **`unfoldArgument` (item 3), partly resolved.** `ExpandFunctionBody` now
+  binds each parameter to its argument as written (`T p = arg;`) and
+  `InternalCall` matches a call in any context, so a non-simple argument is no
+  longer stuck. Lean still captures it first (`functionCallArgCapture`), for
+  its separation condition (decision D3).
 
 ## Resolved (kept for orientation)
 
