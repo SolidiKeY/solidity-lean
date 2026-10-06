@@ -2527,9 +2527,8 @@ theorem bindData_tight {xs : List (PrimTy × Var)} {vs : List Value} {σ σ' : S
     (ht : Tight C σ) (h : bindData xs vs σ = .ok σ') : Tight C σ' :=
   bindData_induct (fun _ x _ ht => ht.setEnv x (fun _ _ h => Binding.noConfusion h)) ht h
 
-theorem CallRet.enter_tight (ht : Tight C σ) : (ret : CallRet) → Tight C (ret.enter σ)
-  | .none => ht
-  | .val _ _ _ => ht.setEnv _ (fun _ _ h => Binding.noConfusion h)
+theorem CallRet.enter_tight (ht : Tight C σ) (ret : CallRet) : Tight C (ret.enter σ) :=
+  CallRet.enter_induct (fun _ _ _ ht => ht.setEnv _ (fun _ _ h => Binding.noConfusion h)) ret ht
 
 theorem CallRet.leave_tight (ht : Tight C σ) (ret : CallRet)
     (h : CallRet.leave (C := C) σ ret = .ok σ') : Tight C σ' :=
@@ -2880,8 +2879,10 @@ theorem Stmt.run_tight (hd : DeepOk C) : ∀ (s : Stmt C) {Γ Γ' : Ctx} {H : He
         obtain ⟨σ₁, hσ₁, h⟩ := bind_ok_inv h
         obtain ⟨σ₂, hσ₂, h⟩ := bind_ok_inv h
         obtain ⟨hs₁, hh₁⟩ := Arg.bindSeq_locals hσ₁
-        have hcn₁ : Canon C H (ret.enter σ₁) :=
-          hcn.of_eq (by cases ret <;> exact hs₁) (by cases ret <;> exact hh₁)
+        obtain ⟨hs₁', hh₁'⟩ : (ret.enter σ₁).storage = σ.storage ∧ (ret.enter σ₁).heap = σ.heap :=
+          CallRet.enter_induct (P := fun τ => τ.storage = σ.storage ∧ τ.heap = σ.heap)
+            (fun _ _ _ h => h) ret ⟨hs₁, hh₁⟩
+        have hcn₁ : Canon C H (ret.enter σ₁) := hcn.of_eq hs₁' hh₁'
         have ht₂ := Prog.run_tight hd body (CallRet.enter_wt (Arg.bindSeq_wt hwt h₁ hσ₁) ret) hcn₁
           (CallRet.enter_tight (Arg.bindSeq_tight ht hσ₁) ret) h₂ hσ₂
         exact CallRet.leave_tight ht₂ ret h

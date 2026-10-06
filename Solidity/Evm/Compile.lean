@@ -542,10 +542,12 @@ def wtArgs (Γ : TyCtx) : List (Arg C) → Option TyCtx
   | a :: as =>
     if wtVal Γ a.e then wtArgs (Γ.set a.x (some (.val a.p))) as else none
 
-/-- A call's return variable declared, at a type the fragment has. -/
+/-- A call's return variable declared, at a type the fragment has.  A call
+of several returns is outside the fragment. -/
 def wtRetEnter (Γ : TyCtx) : CallRet → Option TyCtx
   | .none => some Γ
   | .val p r _ => some (Γ.set r (some (.val p)))
+  | .rets _ => none
 
 /-- The returned value read and assigned. -/
 def wtRetLeave (Γ : TyCtx) : CallRet → Bool
@@ -827,7 +829,7 @@ def argsCode : List (Arg C) → List Instr
 
 /-- The return variable declared: `0` in its cell. -/
 def retEnterCode : CallRet → List Instr
-  | .none => []
+  | .none | .rets _ => []
   | .val _ r _ => [.push (.val 0), .mstore r]
 
 /-- The returned value copied where the call lands. -/

@@ -136,6 +136,7 @@ def CallRet.weight : CallRet → Nat
   | .none => 0
   | .val _ _ Option.none => 1
   | .val _ _ (some _) => 3
+  | .rets rs => rs.length
 
 mutual
 
@@ -839,8 +840,21 @@ theorem callStep_small {k : Nat} {m : Modality} (f : Name) (args : List (Arg C))
   · rename_i h
     simp only [Step.Small, Premise.Smaller, Stmt.expandBody, Prog.weight_append,
       Arg.weight_decls h, Stmt.weight]
-    rcases ret with _ | ⟨p, r, _ | y⟩ <;>
-      simp [CallRet.decl, CallRet.result, CallRet.weight, Prog.weight, Stmt.weight, Val.cost] <;>
+    rcases ret with _ | ⟨p, r, _ | y⟩ | rs
+    · simp only [CallRet.decl, Prog.weight, Nat.add_zero, CallRet.result, CallRet.weight,
+        Nat.lt_add_one]
+    · simp only [CallRet.decl, Prog.weight, Stmt.weight, Nat.add_zero, CallRet.result,
+        CallRet.weight, Nat.lt_add_one]
+    · simp only [CallRet.decl, Prog.weight, Stmt.weight, Nat.add_zero, CallRet.result, Val.cost,
+        Nat.reduceAdd, CallRet.weight]
+      omega
+    · have hw : Prog.weight (CallRet.decl (C := C) (.rets rs)) = rs.length := by
+        induction rs with
+        | nil => rfl
+        | cons r rs ih =>
+          simp only [CallRet.decl, List.map_cons, Prog.weight, Stmt.weight, List.length_cons] at ih ⊢
+          omega
+      simp only [hw, CallRet.result, CallRet.weight, Prog.weight]
       omega
   · rename_i a h
     have := Arg.weight_captureFirst (se := .fresh "se" k) h

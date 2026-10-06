@@ -201,6 +201,17 @@ None is wrong on the corpus; each matters for a future taclet.
   A test that exports each taclet's guard, or a hash of it, would catch an
   overlapping new taclet before it reaches a proof.
 
+## 7. Returns and tuples (from the internal-call port)
+
+- **Unconstrained returns.** `function g() returns (uint r) {}` followed by
+  `assert(g() == 0)` holds in solc and is unprovable in KeY:
+  `ExpandFunctionBody` declares `R ri;` with no value. Lean declares each
+  return variable at its default (`CallRet.enter`).
+- **Dropped tuple components (diamond).** `(uint x, ) = (1, arr[5]);` reverts
+  in solc, but `ParserUtils.tupleAssignment` drops a component that is not a
+  call, so `⟨…⟩ true` is provable. Category 4: keep the component (Lean
+  evaluates it) or refuse.
+
 ## Resolved (kept for orientation)
 
 Each was found by the Lean side and is fixed in solkey; git has the details.

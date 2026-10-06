@@ -248,6 +248,19 @@ bound before it) and the elaborator's parameters are fresh names. A callee's
 locals are renamed fresh at each call, so they live in the caller's locals as
 they would in a frame of their own.
 
+### Returns and tuples
+
+- **Return variables start at their type's default**, as solc zeroes them:
+  `function zero() returns (uint r) {}` returns `0`
+  (`Examples/Tactics/Calls.lean`, `namedReturnDefault`). KeyTaclets declares
+  them with no value (`R ri;`), so solkey cannot prove it.
+- **A discarded tuple component is evaluated** when it may revert or have an
+  effect: `(uint x, ) = (1, arr[5]);` reverts, as in solc. solkey's
+  `ParserUtils.tupleAssignment` drops every component that is not a call.
+- **A tuple assignment whose targets may alias is refused** (the same name
+  twice, two targets that are not stack locals, a target that reads another),
+  until the order of solc's writes is checked against KeY's left to right.
+
 ## Remaining deltas (documented, intentionally out of scope)
 
 - **Error classification.** A failing `assert` (Panic 0x01) is `Halt.panic`,

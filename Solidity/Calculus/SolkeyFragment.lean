@@ -114,11 +114,16 @@ theorem Arg.decls_inSolkey (m : Modality) (args : List (Arg C)) :
 
 theorem CallRet.decl_inSolkey (m : Modality) (ret : CallRet) :
     Prog.inSolkey m (ret.decl : Prog C) = true := by
-  cases ret <;> rfl
+  cases ret with
+  | rets rs =>
+    induction rs with
+    | nil => rfl
+    | cons r rs ih => simpa [CallRet.decl, Stmt.inSolkey] using ih
+  | _ => rfl
 
 theorem CallRet.result_inSolkey (m : Modality) (ret : CallRet) :
     Prog.inSolkey m (ret.result : Prog C) = true := by
-  rcases ret with _ | ⟨p, r, _ | x⟩ <;> rfl
+  rcases ret with _ | ⟨p, r, _ | x⟩ | rs <;> rfl
 
 set_option maxHeartbeats 4000000 in
 /-- **Solkey's rules keep the fragment**: the premise of a statement in it

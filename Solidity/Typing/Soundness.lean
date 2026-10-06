@@ -164,10 +164,16 @@ def Arg.wt : Ctx → List (Arg C) → Option Ctx
   | Γ, [] => some Γ
   | Γ, a :: as => if a.e.wt Γ then Arg.wt (setBy a.x (.stack (.prim a.p)) Γ) as else none
 
-/-- The context a call's return variable is declared in. -/
+/-- The context return variables declared one after another leave. -/
+def CallRet.ctxAll : List (PrimTy × Var) → Ctx → Ctx
+  | [], Γ => Γ
+  | (p, r) :: rs, Γ => CallRet.ctxAll rs (setBy r (.stack (.prim p)) Γ)
+
+/-- The context a call's return variables are declared in. -/
 def CallRet.ctx (Γ : Ctx) : CallRet → Ctx
   | .none => Γ
   | .val p r _ => setBy r (.stack (.prim p)) Γ
+  | .rets rs => CallRet.ctxAll rs Γ
 
 /-- The returned value lands in a local of its type. -/
 def CallRet.wt (Γ : Ctx) : CallRet → Bool
@@ -1295,15 +1301,22 @@ theorem Arg.bindSeq_wt : ∀ {args : List (Arg C)} {Γ Γ' : Ctx} {σ σ' : Stat
       exact Arg.bindSeq_wt (hwt.setEnv (by simpa [BTy.matchesB] using Val.eval_wt hwt a.e hc hv)) hs h
     · exact nomatch hs
 
+theorem CallRet.enterAll_wt : (rs : List (PrimTy × Var)) → {Γ : Ctx} → {σ : State} →
+    RunWT C Γ H σ → RunWT C (CallRet.ctxAll rs Γ) H (CallRet.enterAll rs σ)
+  | [], _, _, hwt => hwt
+  | (p, r) :: rs, _, _, hwt =>
+    CallRet.enterAll_wt rs (hwt.setEnv (x := r) (bt := .stack (.prim p)) (by cases p <;> rfl))
+
 theorem CallRet.enter_wt (hwt : RunWT C Γ H σ) :
     (ret : CallRet) → RunWT C (ret.ctx Γ) H (ret.enter σ)
   | .none => hwt
   | .val p _ _ => hwt.setEnv (by cases p <;> rfl)
+  | .rets rs => CallRet.enterAll_wt rs hwt
 
 theorem CallRet.leave_wt (hwt : RunWT C Γ H σ) {σ' : State} :
     (ret : CallRet) → ret.wt Γ = true → CallRet.leave (C := C) σ ret = .ok σ' → RunWT C Γ H σ'
   | .none, _, h => by cases h; exact hwt
-  | .val _ _ Option.none, _, h => by cases h; exact hwt
+  | .val _ _ Option.none, _, h | .rets _, _, h => by cases h; exact hwt
   | .val p r (some y), hr, h => by
     simp only [CallRet.wt, Bool.and_eq_true] at hr
     obtain ⟨w, hv, h⟩ := bind_ok_inv h

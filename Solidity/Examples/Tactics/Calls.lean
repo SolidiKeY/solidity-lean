@@ -247,4 +247,129 @@ example : Prog.toStr (sol[Returns]{ uint z = incr(4) + 1; } : Prog Returns) =
 /-- error: Solidity elaboration failed: a call in a conditional's branch -/
 #guard_msgs in #check sol[Returns]{ uint z = total > 0 ? incr(1) : 0; }
 
+/-! ## Several returns, tuples and blocks
+
+A function may return several values (`returns (uint lo, uint hi)`; unnamed,
+`_ret0`, `_ret1`, …), and a call of one is a tuple assignment's right-hand
+side: `(uint lo, , uint sum) = f(a);`.  The call returns them all
+(`CallRet.rets`), each return variable declared at its default, and the
+targets are assigned after it, left to right, as solkey's
+`ParserUtils.tupleAssignment` writes it out.  `return (e₀, e₁);` assigns
+each return variable; when a component reads one, through temporaries
+first.  A tuple of values goes through temporaries too, so
+`(a, b) = (b, a);` swaps.  A bare block `{ … }` scopes its declarations,
+and a `return` inside one ends the function (solkey's `blockReturn`). -/
+
+/-- The new call shapes of solkey's `TestSuite.sol`, and `zero`, whose named
+return is never assigned. -/
+def Tuples : Contract := contract!{
+  uint total;
+  function returnOrdered(uint x, uint y) returns (uint lo, uint hi) {
+    if (x < y) { return (x, y); }
+    return (y, x);
+  }
+  function returnSwapped() returns (uint x, uint y) {
+    x = 1;
+    y = 2;
+    return (y, x);
+  }
+  function returnStats(uint x, uint y) returns (uint lo, uint hi, uint sum, bool same) {
+    lo = x < y ? x : y;
+    hi = x < y ? y : x;
+    return (lo, hi, x + y, x == y);
+  }
+  function returnFromNestedBlock(uint x) returns (uint) {
+    {
+      {
+        if (x > 0) { return 1; }
+      }
+      x = 5;
+    }
+    return x;
+  }
+  function returnOrFallThrough(bool stop) returns (uint r) {
+    r = 5;
+    if (stop) { return r; }
+    r = 6;
+  }
+  function zero() returns (uint r) {}
+}
+
+/-- A named return that the body never assigns is its type's default, as in
+solc: the call declares it at `0`. -/
+theorem namedReturnDefault : ⊨ dl[Tuples]{ ⟨ uint y = zero(); ⟩ y == 0 } := by
+  sol_symex
+  sol_close
+
+theorem tupleReturnPair :
+    ⊨ dl[Tuples]{ ⟨ (uint lo, uint hi) = returnOrdered(5, 2); ⟩ (lo == 2 ∧ hi == 5) } := by
+  sol_symex
+  sol_close
+
+/-- `return (y, x);` reads the return variables it writes: through
+temporaries. -/
+theorem tupleReturnReadsReturnVariables :
+    ⊨ dl[Tuples]{ ⟨ (uint x, uint y) = returnSwapped(); ⟩ (x == 2 ∧ y == 1) } := by
+  sol_symex
+  sol_close
+
+theorem tupleReturnDiscardsComponents :
+    ⊨ dl[Tuples]{ ⟨ (uint lo, , uint sum, bool same) = returnStats(3, 1); ⟩
+      (lo == 1 ∧ sum == 4 ∧ same == false) } := by
+  sol_symex
+  sol_close
+
+/-- A storage target among the targets (a box: on an arbitrary state the
+write to `total` may fail). -/
+theorem tupleReturnAssignsExisting :
+    ⊨ dl[Tuples]{ [ uint hi; (total, hi) = returnOrdered(9, 4); ] (total == 4 ∧ hi == 9) } := by
+  sol_symex
+  sol_close
+
+theorem tupleAssignmentRotates :
+    ⊨ dl[Tuples]{ ⟨ uint first = 1; uint second = 2; uint third = 3;
+      (first, second, third) = (second, third, first); ⟩
+      (first == 2 ∧ second == 3 ∧ third == 1) } := by
+  sol_symex
+  sol_close
+
+theorem tupleDeclaration :
+    ⊨ dl[Tuples]{ ⟨ (uint first, , bool third) = (4, 5, true); ⟩ (first == 4 ∧ third == true) } := by
+  sol_symex
+  sol_close
+
+theorem returnLeavesNestedBlocks :
+    ⊨ dl[Tuples]{ ⟨ uint one = returnFromNestedBlock(3); uint five = returnFromNestedBlock(0); ⟩
+      (one == 1 ∧ five == 5) } := by
+  sol_symex
+  sol_close
+
+theorem returnOrFallThroughNamed :
+    ⊨ dl[Tuples]{ ⟨ uint stopped = returnOrFallThrough(true); uint finished = returnOrFallThrough(false); ⟩
+      (stopped == 5 ∧ finished == 6) } := by
+  sol_symex
+  sol_close
+
+/-- A block's declaration is its own: the name is free again after it. -/
+theorem blockScope : ⊨ dl[Tuples]{ [ { uint w = 1; total = w; }; uint w = 2; ] (total == 1 ∧ w == 2) } := by
+  sol_symex
+  sol_close
+
+/-- The call and the assignments after it print as the tuple assignment
+they are elaborated from (`Stmt.tupleCallStr?`). -/
+example : Prog.toStr (sol[Tuples]{ uint lo; uint sum; (lo, , sum, ) = returnStats(3, 1); } :
+    Prog Tuples) = "uint lo; uint sum; (lo, , sum, ) = returnStats(3, 1);" := rfl
+
+/-- error: Solidity elaboration failed: returnOrdered returns 2 values, not 3 -/
+#guard_msgs in #check sol[Tuples]{ (uint a, uint b, uint c) = returnOrdered(1, 2); }
+
+/-- error: Solidity elaboration failed: returnOrdered returns 2 values, which a tuple assignment takes -/
+#guard_msgs in #check sol[Tuples]{ uint a = returnOrdered(1, 2); }
+
+/-- error: Solidity elaboration failed: a tuple assignment to the same target twice -/
+#guard_msgs in #check sol[Tuples]{ uint a; (a, a) = returnOrdered(1, 2); }
+
+/-- error: Solidity elaboration failed: a tuple assignment to two targets that are not stack locals -/
+#guard_msgs in #check sol[Tuples]{ (total, total) = (1, 2); }
+
 end Solidity.Examples.Tactics.Calls
