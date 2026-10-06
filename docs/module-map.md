@@ -216,7 +216,7 @@ diffs it).  `docs/testsuite-proofs.md` has the counts and timings.
 | `TestSuite/Problems.lean` | The 437 statements of `Solkey.TestSuite`, two pinned in solkey's syntax, `initState_wt`. |
 | `TestSuite/Derived1.lean` … `TestSuite/Derived12.lean` | `Solkey.TestSuite.f.proved : ⊢ Solkey.TestSuite.f.problem`, 40, 40, 40, 40, 40, 37, 40, 23, 40, 40, 11 and 20 (411 in all), by `sol_prove` and explicit leaf tactics; 7 and 8 are what pushes, pops and storage copies added, 9 to 11 what memory added, 12 what copies between memory and storage added. |
 | `TestSuite/Derived13.lean` | The obligations that write or push through an alias a `pop` made dangle (`LStor.stale`), by `sol_prove`: four of the five; `testArrayCopyClearsOldElements` stays pending (415 in all). |
-| `TestSuite/Derived14.lean` | solkey `1b4341a303`'s twenty new obligations (`send`, internal calls, `return`, tuples), each by a bare `sol_prove` (435 in all); two past `Derive.replayFits`, a recorded exception (`docs/testsuite-proofs.md`). |
+| `TestSuite/Derived14.lean` | solkey `1b4341a303`'s twenty new obligations (`send`, internal calls, `return`, tuples), each by a bare `sol_prove` (435 in all); `returnEarly` and `tupleReturnDiscardsComponents` fit `Derive.replayFits` since ground splits are pruned (`Derive.splitRes`). |
 | `TestSuite/Report.lean` | The pinned count: derived, pending (named), and the fifteen with no statement (excluded, skipped, and the twelve internal helpers). |
 | `TestSuite/Suggestions.lean` | `#solkey_derive?` suggestions pinned by name, off the `Derived` modules' import path; `returnEarly` and `tupleReturnDiscardsComponents` pinned as derived since ground splits are pruned. |
 

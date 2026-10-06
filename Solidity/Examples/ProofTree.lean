@@ -494,6 +494,29 @@ heartbeats. -/
     withTheReader Lean.Core.Context ({ · with maxHeartbeats := max }) (Derive.replayFits hb)
   return [← at_ 1000 2000, ← at_ 1000 1000, ← at_ 0 2000]
 
+/-! A split whose condition is ground under its updates keeps only the
+branch it takes (`Derive.splitRes`): the `revert()` branches are closed by
+`Proves.closeFalse`, not run (two steps fewer in each).  The second reads `y` through twelve updates
+`y := y * y`, each local listed once (`Upd.groundStep`), not `2¹²` times. -/
+
+/--
+info: Try this:
+  sol_prove
+-/
+#guard_msgs in
+example : ⊢ dl!{ ⟨ int v = -3; int r = 0; if (v < 0) { r = 1; } else { revert(); }; ⟩ r == 1 } := by
+  sol_prove?
+
+/--
+info: Try this:
+  sol_prove
+-/
+#guard_msgs in
+example : ⊢ dl!{ [ uint y = 1; y = y * y; y = y * y; y = y * y; y = y * y; y = y * y;
+    y = y * y; y = y * y; y = y * y; y = y * y; y = y * y; y = y * y; y = y * y;
+    if (y > 0) { y = 1; } else { revert(); }; ] y == 1 } := by
+  sol_prove?
+
 /-! Memory: `Person memory carol;` leaves the pair
 `{ carol := freshId(addM(memory)) ‖ memory := addM(memory) }`, which
 `Fml.seqUpd` keeps whole (`Derive.memAlloc?`); `alice = carol;` copies the

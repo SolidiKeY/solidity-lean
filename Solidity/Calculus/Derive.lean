@@ -150,19 +150,25 @@ def _root_.Solidity.UpdElem.binds (x : Var) : UpdElem C → Bool
   | .val y _ | .path y _ | .mref y _ | .store y _ | .saveNet y => y == x
   | _ => false
 
-/-- The locals `xs` read before the parallel update `U`: each one `U` binds
-by `x := t` replaced by `t`'s, when `t` is of literals; `none` when one is
-bound otherwise. -/
-def _root_.Solidity.Upd.groundStep (U : Upd C) : List Var → Option (List Var)
+/-- `Upd.groundStep` on a parallel update's elements read last first. Each
+local is kept once (`List.insert`): `y := y * y` repeated would otherwise
+double the list at every update. -/
+def groundStepRev (Ur : Upd C) : List Var → Option (List Var)
   | [] => some []
   | x :: xs =>
-    match Upd.groundStep U xs with
+    match groundStepRev Ur xs with
     | none => none
     | some ys =>
-      match U.reverse.find? (·.binds x) with
-      | none => some (x :: ys)
-      | some (.val _ t) => t.litVars.map (· ++ ys)
+      match Ur.find? (·.binds x) with
+      | none => some (ys.insert x)
+      | some (.val _ t) => t.litVars.map (·.foldr List.insert ys)
       | some _ => none
+
+/-- The locals `xs` read before the parallel update `U`: each one `U` binds
+by `x := t` replaced by `t`'s, when `t` is of literals; `none` when one is
+bound otherwise.  No local is listed twice. -/
+def _root_.Solidity.Upd.groundStep (U : Upd C) (xs : List Var) : Option (List Var) :=
+  groundStepRev U.reverse xs
 
 /-- Whether every local of `xs` is bound by the context `Γ`, its entries
 last first, to a term of literals, transitively. -/
@@ -219,7 +225,8 @@ def premiseRes (r : Nat → List (Hyp C) → Fml C → Option (List (Leaf C) × 
   | .cases fs us => allRes r b (casesGoals Γ m ω ψ fs us)
 
 /-- **The residue** of `Γ ⟹ φ`: the strategy run as `sol_derive` runs it,
-the leaves `close` accepts dropped, and the budget left.  `n` bounds the
+except that a split on a ground condition is pruned (`splitRes`), the leaves
+`close` accepts dropped, and the budget left.  `n` bounds the
 steps down any one path, so that the recursion is structural; `b` bounds
 the steps of the whole derivation, every branch included, and is handed
 from a goal to its next sibling.  `none` when either runs out. -/

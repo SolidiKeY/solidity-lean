@@ -275,7 +275,7 @@ example : (Stmt.send (C := C) (.user "ok") (.simple (.local (.user "to")))
 `Proves.solkey_iff` needs its hypothesis: `[ f(x + 1); ] true` is derived by
 the calculus (the capture, then the call) and not by solkey's rules, which
 have no rule for the call and may not leave for the logic while a modality
-is left (`close`). -/
+is left (`close`), unless the context refutes itself (`closeFalse`). -/
 
 set_option maxHeartbeats 4000000 in
 /-- The rules of the fragment that fire on a call, `functionBodyExpand` and

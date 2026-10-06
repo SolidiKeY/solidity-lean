@@ -440,10 +440,12 @@ inductive Proves : RuleSet → List (Hyp C) → Fml C → Prop
       (hr : φ.rigid = true := by first | rfl | decide)
       (he : φ.stExplicit = true := by first | rfl | decide) :
       dl{ ..Γ, {storage := s} [ ] ⟹[R] φ }
-  /-- `closeFalse`: a context that refutes itself closes any goal.  KeY
-  closes `false ⟹`, the antecedent a condition became when its updates were
-  applied and it was simplified; here that step is the premise, the context
-  refuted (`Γ ⟹ false`), which the closer proves (`Derive.splitRes`). -/
+  /-- `closeFalse`: a context that refutes itself closes any goal.  KeY's
+  `closeFalse` has no premise: it closes `false ⟹`, the antecedent a
+  condition became when its updates were applied and it was simplified.
+  This rule is KeY's `cut` on `false` followed by `closeFalse` on the TRUE
+  goal; the FALSE goal, the context refuted (`Γ ⟹ false`), is the premise,
+  which the closer proves (`Derive.splitRes`).  A deviation in shape. -/
   | closeFalse {R : RuleSet} {Γ : List (Hyp C)} {φ : Fml C} (h : dl{ ..Γ ⟹[R] false }) :
       dl{ ..Γ ⟹[R] φ }
   /-- Leave the calculus: with no modality left anywhere in the sequent, what

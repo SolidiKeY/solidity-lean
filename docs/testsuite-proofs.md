@@ -2194,12 +2194,15 @@ A finder and a skeptic over W6 and W7; what the skeptic confirmed, fixed:
 
 The W7 review's follow-up, in `Derive.residue`.
 
-- **The rule.**  `Proves.closeFalse` (`Calculus/Logic.lean`), KeY's
-  `closeFalse` (`propRule.key`): `dl{ ..Γ ⟹[R] false }` gives
-  `dl{ ..Γ ⟹[R] φ }` for any `φ`.  KeY closes `false ⟹`, the antecedent its
-  split condition became once the update was applied and the literals
-  folded; here that simplification is the premise, `Γ ⟹ false`, which the
-  closer proves.  Both rule sets have it (KeY's is a solkey taclet), so
+- **The rule.**  `Proves.closeFalse` (`Calculus/Logic.lean`):
+  `dl{ ..Γ ⟹[R] false }` gives `dl{ ..Γ ⟹[R] φ }` for any `φ`.  It is a
+  deviation in shape from KeY's `closeFalse` (`propRule.key`), which has no
+  premise and closes a literal `false ⟹`, the antecedent the split
+  condition became once the update was applied and the literals folded.
+  solkey derives Lean's rule in two steps: `cut` on `false`
+  (`propRule.key`), its TRUE goal `Γ, false ⟹ φ` closed by `closeFalse`, its
+  FALSE goal `Γ ⟹ false, φ` the premise weakened, which the closer proves.
+  Since solkey's rules derive it, both rule sets have it, so
   `Proves.toSolkey` keeps it, and `Proves.solkey_not_call`
   (`Calculus/SolkeyFragment.lean`) now says that solkey's rules derive
   nothing about a call with an argument that is not simple *except behind a
@@ -2220,7 +2223,11 @@ The W7 review's follow-up, in `Derive.residue`.
   decision of W7 is withdrawn.  `Suggestions.lean` pins both as derived
   (`#solkey_derive? … only returnEarly`, `… only tupleReturnDiscardsComponents`);
   the second pin is a search W7 left out for its 98 s, now one replay of
-  a theorem that checks in 3.6 s.
+  a theorem that checks in 3.6 s.  `returnEarly`'s was the only pin of
+  `#solkey_derive?`'s "its replay is past maxHeartbeats as one declaration"
+  message, which is therefore unpinned again: a limit low enough to refuse
+  a replay also stops the statement's elaboration (M6b, above).
+  `Derive.replayFits` itself stays pinned (`Examples/ProofTree.lean`).
 - **Checked.**  `Derived1`, `Derived12`, `Derived14`, `Suggestions`,
   `Examples/ProofTree.lean` (its proof-tree and `sol_prove?` pins do not
   move), `Examples/Tactics/Dangling.lean`, `Examples/Tactics/Calls.lean`;
@@ -2231,9 +2238,12 @@ The W7 review's follow-up, in `Derive.residue`.
   `IO.getNumHeartbeats` around `elabCommand`; heartbeats in thousands).
   Heartbeats are exact; wall clock is not, two other lanes building beside
   it (load 12–36): `Derived8` took 41 s, 63 s and 55 s on master and 72 s,
-  72 s and 55 s with the pruning, the two 55 s runs back to back.  No module
-  costs more heartbeats than 0.2% over master; three cost fewer, where
-  the strategy now meets a ground split.
+  72 s and 55 s with the pruning, the two 55 s runs back to back.
+  Heartbeats are the regression criterion; wall clock, taken at load 12–36
+  and not repeated on an idle machine, is only informative.  No module
+  costs more heartbeats than 0.2% over master; five cost more than 1% fewer
+  (`Derived1`, `2`, `3`, `9`, `14`), where the strategy now meets a ground
+  split.
 
 | Module | Theorems | master k-heartbeats | pruned | Δ | master s | pruned s |
 |---|---:|---:|---:|---:|---:|---:|
@@ -2252,7 +2262,42 @@ The W7 review's follow-up, in `Derive.residue`.
 | `Derived13` | 4 | 72,698 | 72,684 | 0.0% | 8.3 | 6.8 |
 | `Derived14` | 20 | 871,389 | 137,507 | −84.2% | 125.7 | 15.8 |
 
-  The wall-clock rises (`Derived7`, `Derived8`, `Derived5`) are load: the
-  heartbeats do not move, and the back-to-back runs agree.  `Derived14` is
+  The wall-clock rises (`Derived4` to `Derived10`, from 3% to 75%) are
+  load: their heartbeats do not move or fall, and the back-to-back runs of
+  `Derived8` agree.  `Derived14` is
   no longer the slowest module: `Derived7` is again.
 
+### Pruning review (2026-10-06)
+
+A finder and a skeptic over the pruning; what the skeptic confirmed, fixed:
+
+- **`groundStep` grew exponentially.**  It replaced each occurrence of a
+  local by all of its term's reads, keeping duplicates, so `y = y * y;`
+  repeated `k` times listed `y` `2^k` times, inside every split's
+  `decide +kernel` check and outside `Derive.budget`.  Each local is now
+  kept once (`List.insert`, `Derive.groundStepRev`), and the update is
+  reversed once per call.  `splitRes_sound` does not read the test.
+- **Pins in the default build.**  `Examples/ProofTree.lean` pins two
+  `sol_prove?` runs through ground splits: `int v = -3; if (v < 0) … else
+  revert();` under the diamond, and twelve `y = y * y;` before a split
+  under the box (each prunes two steps, measured against a closer that
+  refuses `false`).
+- **`closeFalse` is a deviation.**  The rule-map row, the constructor's
+  docstring and "The rule" above say how solkey derives it (`cut` on
+  `false`, then `closeFalse`).  `SolkeyFragment.lean`'s section comment
+  allows leaving for the logic behind a context that refutes itself.
+- **Docs.**  `module-map.md`'s `Derived14` row no longer calls the two
+  replays an exception; `Derive.residue`'s docstring names the pruning; the
+  measurement counts five modules that cost fewer heartbeats and says wall
+  clock is only informative; the past-maxHeartbeats message is recorded as
+  unpinned again.
+- **Checked.**  The default target (`lake build`, 181 jobs, through the
+  server's build: `Calculus/SolkeyFragment.lean`, `Theorems.lean`,
+  `Examples/Notation.lean` and the `sol_prove` users in
+  `Examples/Benchmark/` included), then `Derived1`, `Derived12`,
+  `Derived14` and `SolkeyTestSuite.lean` (every `Derived` module,
+  `Suggestions`, the `Report` pin: 435 derived).  All clean.
+
+Not applied here: two findings on the constructor lane (its timing
+baseline, its `UpdElem` rows in `lean-key-rule-map.md`) belong to that
+lane's branch.
