@@ -202,19 +202,15 @@ const DIVERGENT = {
     "\"Remaining deltas\")",
 };
 
-/** An alias through an index, dangling after a `pop` (docs/testsuite-proofs.md, M5). */
+/** The copy test of the dangling aliases (docs/testsuite-proofs.md, "Dangling aliases"). */
 const DANGLING =
-  "an alias bound through an index dangles after a `pop`: the fragment drops it at the " +
-  "next write (`SymB.onWrite`), and the write through it lands past the live end, which " +
-  "the reduction's live storage does not reach";
+  "the write through the dangling alias is translated (`SymB.stale`, `LStor.stale`), but " +
+  "the leaf's reduction is past `Derive.elimSize`, and the `push()` takes its slot from a " +
+  "storage with writes at another root below it, which the slot facts do not read";
 
 /** Why a pending obligation is pending. */
 const PENDING = {
-  testDanglingReferenceSurvivesPush: DANGLING,
   testArrayCopyClearsOldElements: DANGLING,
-  testArrayCopyKeepsDestinationTail: DANGLING,
-  testDeleteArrayLeavesDataPastLength: DANGLING,
-  testDanglingInnerArrayReappearsAfterPush: DANGLING,
 };
 
 /** The statuses of an imported row, in report order. */

@@ -1159,21 +1159,21 @@ theorem LStor.offRoot_findLive {σ : State} {r : Name} {ps : List Seg} {t : List
     simp only [LStor.eval, Res.bind_eq_ok] at hv
     obtain ⟨_, -, v', hv', qs, hq, hs⟩ := hv
     obtain ⟨t', rfl⟩ := LPath.eval_rootN σ hq
-    rw [findLive_saveLive_diverge (by rw [ht]; exact Or.inl (by simpa using h.1)) hs]
+    rw [findLive_saveLive_diverge (by rw [ht]; exact Or.inl (fun he => h.1 (Seg.field.inj he))) hs]
     exact LStor.offRoot_findLive ht h.2 hv'
   | .del s q, v, h, hv => by
     simp only [LStor.offRoot, Bool.and_eq_true, bne_iff_ne, ne_eq] at h
     simp only [LStor.eval, Res.bind_eq_ok] at hv
     obtain ⟨v', hv', qs, hq, _, -, hs⟩ := hv
     obtain ⟨t', rfl⟩ := LPath.eval_rootN σ hq
-    rw [findLive_saveLive_diverge (by rw [ht]; exact Or.inl (by simpa using h.1)) hs]
+    rw [findLive_saveLive_diverge (by rw [ht]; exact Or.inl (fun he => h.1 (Seg.field.inj he))) hs]
     exact LStor.offRoot_findLive ht h.2 hv'
   | .arr _ s q w, v, h, hv => by
     simp only [LStor.offRoot, Bool.and_eq_true, bne_iff_ne, ne_eq] at h
     simp only [LStor.eval, Res.bind_eq_ok] at hv
     obtain ⟨_, -, v', hv', qs, hq, _, -, _, -, hs⟩ := hv
     obtain ⟨t', rfl⟩ := LPath.eval_rootN σ hq
-    rw [findLive_saveLive_diverge (by rw [ht]; exact Or.inl (by simpa using h.1)) hs]
+    rw [findLive_saveLive_diverge (by rw [ht]; exact Or.inl (fun he => h.1 (Seg.field.inj he))) hs]
     exact LStor.offRoot_findLive ht h.2 hv'
   | .stale op s q w, v, h, hv => by
     simp only [LStor.offRoot, Bool.and_eq_true, bne_iff_ne, ne_eq] at h
@@ -1181,7 +1181,7 @@ theorem LStor.offRoot_findLive {σ : State} {r : Name} {ps : List Seg} {t : List
     obtain ⟨_, -, v', hv', qs, hq, hs⟩ := hv
     obtain ⟨t', rfl⟩ := LPath.eval_rootN σ hq
     have hd : Close.Diverge (.field q.rootN :: t') ps := by
-      rw [ht]; exact Or.inl (by simpa using h.1)
+      rw [ht]; exact Or.inl (fun he => h.1 (Seg.field.inj he))
     cases op with
     | none => rw [findLive_save_diverge hd hs]; exact LStor.offRoot_findLive ht h.2 hv'
     | some op =>
@@ -1193,7 +1193,7 @@ theorem LStor.offRoot_findLive {σ : State} {r : Name} {ps : List Seg} {t : List
     simp only [LStor.eval, Res.bind_eq_ok] at hv
     obtain ⟨_, -, _, -, _, -, v', hv', qs, hq, _, -, hs⟩ := hv
     obtain ⟨t', rfl⟩ := LPath.eval_rootN σ hq
-    rw [findLive_saveLive_diverge (by rw [ht]; exact Or.inl (by simpa using h.1)) hs]
+    rw [findLive_saveLive_diverge (by rw [ht]; exact Or.inl (fun he => h.1 (Seg.field.inj he))) hs]
     exact LStor.offRoot_findLive ht h.2 hv'
 
 /-- A path with no index evaluates. -/
@@ -1681,7 +1681,8 @@ def tyPrim : Option Ty → Bool
   | some (.prim _) => true
   | _ => false
 
-/-- The type is an array (`selectOnTypedDynSize`: it has a length). -/
+/-- The type is an array (`selectOnTypedDynSize`, `selectOnTypedFixedSize`: it
+has a length). -/
 def tyArr : Option Ty → Bool
   | some (.ref (.array _)) | some (.ref (.fixed _ _)) => true
   | _ => false

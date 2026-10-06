@@ -4154,6 +4154,14 @@ def arrHas (op : AOp) (L old opq : LTerm) : PathRel → LTerm
     | _ => arrKey op L k old opq (if rest.isEmpty then .lit (.bool true) else .err)
   | .below _ => opq
 
+/-- `o` where the operation is a `push()` of a reference, the one operation
+whose length `arrLength` reads the slot for, else `none`: `macro_inline`, so
+compiled code builds `o` only there. -/
+@[macro_inline] def AOp.gateSlot {α : Type} (op : AOp) (o : Option α) : Option α :=
+  match op with
+  | .slot (.ref _) => o
+  | _ => none
+
 /-- The length at `Q` after an operation on the array at `P`: one more or
 one less at `P`, the old one above or apart.  Below a `push()` of an array,
 the length the recycled slot has (`slot`, `findDefinitionSize` then
@@ -4310,9 +4318,11 @@ def wordAtKey (w : LTerm) : List SSeg → LTerm
   | _ => .err
 
 
-/-- Whether `s` holds a write through a dangling alias (Lean only: a cost
-and regression guard).  The slot readers look past a `delete` of an empty
-array and past a copy only then (`LStor.slotU`), so every other storage's
+/-- Whether `s` holds a write through a stale alias (`SymB.stale`: one a
+`pop` left dangling, or one still live but bound before the storage last
+changed).  Lean only, a cost and regression guard: the slot readers look past
+a `delete` of an empty array, past a copy, and below a recycled array's
+length only then (`LStor.slotU`, `LStor.lenU`), so every other storage's
 reduction is as before. -/
 def LStor.dangles : LStor → Bool
   | .stale .. => true
@@ -4443,7 +4453,7 @@ def LStor.slotU : LStor → LPath → List SSeg → LTerm → LTerm
     (cmpSegs P'.elim.segs ((P.at (s.lenU P)).addSegs rest).segs).toTerm
       (saveLeaf (if rest.any SSeg.isKey then opq else w.elim) (s.slotU P rest opq))
   | .copy s P' src SQ, P, rest, opq =>
-    if P'.elim == P && s.dangles then
+    if s.dangles && P'.elim == P then
       let L' := src.lenU SQ.elim
       let L := s.lenU P
       .ite (isT (.seq L' L)) (.kite L' L (s.slotU P rest opq) (.ite (.binop .lt .uint L' L)
@@ -4712,6 +4722,22 @@ theorem CaseTree.toTermLazy_eq (nO : PathRel → Bool) (t : CaseTree PathRel) (L
   | leaf r => exact hf r
   | ite => rfl
 
+/-- `CaseTree.toTermLazy` with the first argument's gate given too (`nL`),
+for a leaf that reads less than an operation on an array (`staleRead`). -/
+@[inline] def CaseTree.toTermLazyBy (nL nO : PathRel → Bool) (t : CaseTree PathRel)
+    (L old : Unit → LTerm) (f : LTerm → LTerm → PathRel → LTerm) : LTerm :=
+  match t with
+  | .leaf r => f (if nL r then L () else .err) (if nO r then old () else .err) r
+  | t => t.toTerm (f (L ()) (old ()))
+
+theorem CaseTree.toTermLazyBy_eq (nL nO : PathRel → Bool) (t : CaseTree PathRel)
+    (L old : LTerm) (f : LTerm → LTerm → PathRel → LTerm)
+    (hf : ∀ r, f (if nL r then L else .err) (if nO r then old else .err) r = f L old r) :
+    t.toTermLazyBy nL nO (fun _ => L) (fun _ => old) f = t.toTerm (f L old) := by
+  cases t with
+  | leaf r => exact hf r
+  | ite => rfl
+
 mutual
 
 /-- `LTerm.elim` as compiled code runs it (`LTerm.elim_csimp`). -/
@@ -4795,8 +4821,9 @@ def LStor.readUF : LStor → LPath → LTerm
     (cmpSegs Pe.segs Q.segs).toTermLazy PathRel.needsOld (fun _ => s.lenUF Pe) (fun _ => s.readUF Q)
       fun L old => arrRead op w.elimF L old (.find (.arr op s P w) Q)
         fun rest => s.slotUF Pe rest (.find (.arr op s P w) Q)
-  | .stale none s P w, Q => (cmpSegs P.elimF.segs Q.segs).toTermLazy PathRel.needsOld
-      (fun _ => s.hasUF Q) (fun _ => s.readUF Q) fun H old => staleRead w.elimF H old
+  | .stale none s P w, Q => (cmpSegs P.elimF.segs Q.segs).toTermLazyBy (· matches .eq)
+      (· matches .diverge) (fun _ => s.hasUF Q) (fun _ => s.readUF Q)
+      fun H old => staleRead w.elimF H old
   | .stale (some op) s P w, Q => .find (.stale (some op) s P w) Q
   | .copy s P src SQ, Q => (cmpSegs P.elimF.segs Q.segs).toTerm
       (copyLeaf (src.readUF SQ.elimF) .err (s.readUF Q) (.find (.copy s P src SQ) Q)
@@ -4832,7 +4859,7 @@ def LStor.slotUF : LStor → LPath → List SSeg → LTerm → LTerm
     (cmpSegs P'.elimF.segs ((P.at L).addSegs rest).segs).toTerm
       (saveLeaf (if rest.any SSeg.isKey then opq else w.elimF) (s.slotUF P rest opq))
   | .copy s P' src SQ, P, rest, opq =>
-    if P'.elimF == P && s.dangles then
+    if s.dangles && P'.elimF == P then
       let L' := src.lenUF SQ.elimF
       let L := s.lenUF P
       .ite (isT (.seq L' L)) (.kite L' L (s.slotUF P rest opq) (.ite (.binop .lt .uint L' L)
@@ -4929,8 +4956,8 @@ def LStor.lenUF : LStor → LPath → LTerm
     let Pe := P.elimF
     (cmpSegs Pe.segs Q.segs).toTermLazy PathRel.needsOld (fun _ => s.lenUF Pe) (fun _ => s.lenUF Q)
       fun L old => arrLength op L old (.len (.arr op s P w) Q)
-        (if s.dangles then some fun rest => .orElse (s.slotLenUF Pe rest .err)
-          (.len (.arr op s P w) Q) else none)
+        (op.gateSlot (if s.dangles then some fun rest => .orElse (s.slotLenUF Pe rest .err)
+          (.len (.arr op s P w) Q) else none))
   | .stale none s P _, Q => (cmpSegs P.elimF.segs Q.segs).toTerm (saveMap (s.lenUF Q))
   | .stale (some op) s P w, Q =>
     let Pe := P.elimF
@@ -5078,9 +5105,23 @@ theorem arrLength_lazy (op : AOp) (L old opq : LTerm) (slot : Option (List SSeg 
 
 /-- `staleRead` ignores what it does not read. -/
 theorem staleRead_lazy (w H old : LTerm) (r : PathRel) :
-    staleRead w (if r.needsLen then H else .err) (if r.needsOld then old else .err) r =
+    staleRead w (if r matches .eq then H else .err) (if r matches .diverge then old else .err) r =
       staleRead w H old r := by
   cases r <;> rfl
+
+/-- `arrLength` reads its slot only for `.slot (.ref _)`. -/
+theorem arrLength_gateSlot (op : AOp) (L old opq : LTerm) (slot : Option (List SSeg → LTerm)) :
+    arrLength op L old opq (op.gateSlot slot) = arrLength op L old opq slot := by
+  funext r
+  cases op with
+  | slot E => cases E with
+    | ref _ => rfl
+    | _ => cases r with
+      | below rest => rcases rest with _ | ⟨_ | _, _⟩ <;> first | rfl | (cases slot <;> rfl)
+      | _ => rfl
+  | _ => cases r with
+    | below rest => rcases rest with _ | ⟨_ | _, _⟩ <;> first | rfl | (cases slot <;> rfl)
+    | _ => rfl
 
 /-- `arrMap` ignores the old length where it does not read it. -/
 theorem arrMap_lazy (op : AOp) (L old opq : LTerm) (r : PathRel) :
@@ -5158,7 +5199,7 @@ theorem LStor.readUF_eq : (s : LStor) → ∀ Q, s.readUF Q = s.readU Q
   | .stale none s P w, Q => by
     simp only [LStor.readUF, LStor.readU, LPath.elimF_eq P, LTerm.elimF_eq w, LStor.readUF_eq s,
       LStor.hasUF_eq s]
-    exact CaseTree.toTermLazy_eq _ _ _ _ _ (staleRead_lazy _ _ _)
+    exact CaseTree.toTermLazyBy_eq _ _ _ _ _ _ (staleRead_lazy _ _ _)
   | .stale (some _) .., _ => rfl
   | .copy s P src SQ, Q => by
     simp only [LStor.readUF, LStor.readU, LPath.elimF_eq P, LPath.elimF_eq SQ, LStor.readUF_eq s,
@@ -5241,7 +5282,8 @@ theorem LStor.lenUF_eq : (s : LStor) → ∀ Q, s.lenUF Q = s.lenU Q
   | .del s P, Q => by
     simp only [LStor.lenUF, LStor.lenU, LPath.elimF_eq P, LStor.lenUF_eq s, LStor.mapUF_eq _ s]
   | .arr op s P _, Q => by
-    simp only [LStor.lenUF, LStor.lenU, LPath.elimF_eq P, LStor.lenUF_eq s, LStor.slotLenUF_eq s]
+    simp only [LStor.lenUF, LStor.lenU, LPath.elimF_eq P, LStor.lenUF_eq s, LStor.slotLenUF_eq s,
+      arrLength_gateSlot]
     exact CaseTree.toTermLazy_eq _ _ _ _ _ (arrLength_lazy op _ _ _ _)
   | .stale none s P _, Q => by
     simp only [LStor.lenUF, LStor.lenU, LPath.elimF_eq P, LStor.lenUF_eq s]
@@ -7923,7 +7965,7 @@ theorem stale_slotU_sim {s : LStor} {P' P : LPath} {w opq : LTerm}
     split
     · exact hopq
     · rename_i hk
-      have hnoAt : r.any Seg.isAt = false := by rw [segsEval_any σ hr]; simpa using hk
+      have hnoAt : r.any Seg.isAt = false := by rw [segsEval_any σ hr]; simpa only [Bool.not_eq_true] using hk
       obtain ⟨y, hy⟩ := find_ok_of_save_ok hc'
       rw [pushSlot_ref_cons, findLive_save_live hc', findLive_eq_find c r hnoAt, hy, Res.ok_bind,
         Res.ok_bind, ← hx, Close.asValue_toSVal]
@@ -8133,7 +8175,7 @@ theorem copy_slotU_sim {s src : LStor} {P' SQ P : LPath} {opq : LTerm}
   split
   · rename_i hc
     have hPe : P'.elim = P := by
-      simp only [Bool.and_eq_true, beq_iff_eq] at hc; exact hc.1
+      simp only [Bool.and_eq_true, beq_iff_eq] at hc; exact hc.2
     obtain ⟨sv, sqs, n, v', ps', cur, hsv, hsq, hn', hv', hp', hcur, hu'⟩ := copy_eval_ok hu
     have hpp : ps' = ps := by
       have := (hP' ps').2 hp'

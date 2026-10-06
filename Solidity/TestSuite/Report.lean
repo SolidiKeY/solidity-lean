@@ -22,9 +22,10 @@ finds: derived when its theorem `N.f.proved` exists, states
 statement does, and the import's verdict for the three with no statement.
 A pending obligation is no theorem and no `sorry`: but for the one below,
 it writes through an alias bound through an index after a `pop` made it
-dangle (`SymB.stale`), and reads the slot again after a copy whose
-reduction is past `Derive.elimSize`; it is listed with its reasons in
-`docs/testsuite-proofs.md`.
+dangle (`SymB.stale`) and reads the slot again after a copy: its leaf's
+reduction is past `Derive.elimSize`, and the `push()` takes its slot from a
+storage with writes at another root below it, which the slot facts do not
+read.  It is listed with its reasons in `docs/testsuite-proofs.md`.
 `storagePushReadBack` is not valid in the model (the length delta,
 `docs/solc-alignment.md`): `tests/solkey/expected.tsv` lists it
 `divergent`, so the tables count one pending fewer.

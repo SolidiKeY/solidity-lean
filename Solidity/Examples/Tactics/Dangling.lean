@@ -16,7 +16,7 @@ lands in the recycled array, whose length the slot readers count
 `docs/lean-key-rule-map.md` names each with the lemmas that transcribe it.
 
 These are solkey `TestSuite`'s dangling-alias functions over
-`StandardExample` (`persons`, `matrix`), each a `sol_prove?` that suggests
+`StandardExample` (`persons`, `people`, `matrix`), each a `sol_prove?` that suggests
 `sol_prove`.  If a clause stops applying, or the strategy picks another
 rule, they fail.
 -/
