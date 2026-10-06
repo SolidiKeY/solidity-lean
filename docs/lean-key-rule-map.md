@@ -295,6 +295,13 @@ receiver kind, Lean does not.
 | — | `LeanTaclet.tryCallDiamond` | Lean only | a diamond `try` closes to `false`; solkey has no rule. The call may revert in the caller (no code at the address, data that does not decode), which no clause catches and no formula rules out |
 | — | `LeanTaclet.transferDiamond` | Lean only | a diamond payment closes to `false`; solkey's diamond rules are not ported. Whether the world pays is the compiler theorem's, not the calculus's |
 
+## Function contracts
+
+| solkey | Lean | Status | Notes |
+|---|---|---|---|
+| `useContract_g` (planned: one per specified function, behind `functionTreatment:contract`; not at the pin) | `useContract` (`Calculus/Contracts.lean`) | ⊢ rule | a derived theorem, sound from `Stmt.run` (`FunContract.sound`), not a `Taclet`. Goals "pre" `[ params := args ] requires` and "post" `[ params := args ] {old := storage ‖ oldNet := net} {havoc} ∀ T r. (ensures → [ res = r; ..ω ] φ)`, `{havoc}` for a `nonpayable` callee only (`Mutability.anon`; `pure`/`view` by `Prog.within`). Box only |
+| the obligation `requires -> [g(args)@C] ensures` (planned) | `FunContract.obligation` (the formula), `FunContract.ofValid` (a contract from its proof) | — | over the callee's block `T r; body`, the parameters free; `ensures ∧ typed(r)` (KeY's `inUInt(result)`) |
+
 ## Update algebra (`updateRules.key`)
 
 An update is a term (`Upd C`, a list of `UpdElem`s read against the

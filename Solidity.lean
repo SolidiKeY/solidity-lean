@@ -10,6 +10,7 @@ import Solidity.Semantics.Properties
 import Solidity.Semantics.Agree
 import Solidity.Semantics.WellFormed
 import Solidity.Semantics.Callback
+import Solidity.Semantics.Mutability
 import Solidity.Update
 import Solidity.Calculus.RuleSyntax
 import Solidity.Calculus.Rules
@@ -41,6 +42,7 @@ import Solidity.Calculus.DecideComplete
 import Solidity.Calculus.Derive
 import Solidity.Calculus.Problem
 import Solidity.Calculus.Spec
+import Solidity.Calculus.Contracts
 import Solidity.Calculus.Uniqueness
 import Solidity.Calculus.Progress
 import Solidity.Calculus.Termination
@@ -88,6 +90,7 @@ import Solidity.Examples.Tactics.Checked
 import Solidity.Examples.Tactics.Calls
 import Solidity.Examples.Tactics.CallOperands
 import Solidity.Examples.Tactics.Callback
+import Solidity.Examples.Tactics.Contracts
 import Solidity.Examples.Tactics.TryCatch
 import Solidity.Examples.Notation
 import Solidity.Examples.Tactics.ApplySteps
