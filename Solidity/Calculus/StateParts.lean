@@ -577,7 +577,7 @@ def Tm.withMem (M : MTerm C) : Tm C u → Tm C u
   | .pvP x => .pvP x
   | .pvS x => .pvS x
   | .pvI x => .pvI x
-  | .app0 .memory => M
+  | MTerm.memory => M
   | .app0 o => .app0 o
   | .app1 o a => .app1 o (Tm.withMem M a)
   | .app2 o a b => .app2 o (Tm.withMem M a) (Tm.withMem M b)
@@ -586,8 +586,8 @@ def Tm.withMem (M : MTerm C) : Tm C u → Tm C u
 /-- A memory term changes the heap and the next identity only. -/
 theorem MTerm.eval_setsMem {σ μ : State} :
     (M : MTerm C) → M.eval σ = .ok μ → μ = { σ with heap := μ.heap, nextId := μ.nextId }
-  | .app0 .memory, h => by cases h; rfl
-  | .app1 (.addM R) m, h => by
+  | MTerm.memory, h => by cases h; rfl
+  | MTerm.addM m R, h => by
     simp only [tm_eval] at h
     obtain ⟨τ, hm, h⟩ := bind_ok_inv h
     obtain ⟨⟨μ', _⟩, ha, h⟩ := bind_ok_inv h
@@ -605,7 +605,7 @@ theorem MTerm.eval_setsMem {σ μ : State} :
     cases μ'; cases σ
     simp only at h1 h2 h3 h4 h5
     simp only [h1, h2, h3, h4, h5]
-  | .app2 .copySt m v, h => by
+  | MTerm.copySt m v, h => by
     simp only [tm_eval] at h
     obtain ⟨sv, -, h⟩ := bind_ok_inv h
     obtain ⟨τ, hm, h⟩ := bind_ok_inv h
@@ -617,7 +617,7 @@ theorem MTerm.eval_setsMem {σ μ : State} :
     cases μ'; cases σ
     simp only at h1 h2 h3 h4 h5
     simp only [h1, h2, h3, h4, h5]
-  | .app3 .write m a v, h => by
+  | MTerm.write m a v, h => by
     simp only [tm_eval] at h
     obtain ⟨mv, -, h⟩ := bind_ok_inv h
     obtain ⟨τ, hm, h⟩ := bind_ok_inv h
@@ -682,15 +682,15 @@ def Tm.substSt (L : Upd C) (S : STerm C) : Tm C u → Tm C u
   | .pvP x => L.pathOf x
   | .pvS x => L.storOf x
   | .pvI x => L.refOf x
-  | .app0 .storage => S
+  | STerm.storage => S
   | .app0 o => .app0 o
-  | .app1 (.netOf x) a =>
+  | Term.netOf x a =>
     match L.lastWrite x with
     | some _ => Term.stuck
     | none => .app1 (.netOf x) (Tm.substSt L S a)
-  | .app1 .next p => .app2 .nextIn S (Tm.substSt L S p)
+  | PTerm.next p => .app2 .nextIn S (Tm.substSt L S p)
   | .app1 o a => .app1 o (Tm.substSt L S a)
-  | .app2 .at p i => .app3 .atIn S (Tm.substSt L S p) (Tm.substSt L S i)
+  | PTerm.at p i => .app3 .atIn S (Tm.substSt L S p) (Tm.substSt L S i)
   | .app2 o a b => .app2 o (Tm.substSt L S a) (Tm.substSt L S b)
   | .app3 o a b c => .app3 o (Tm.substSt L S a) (Tm.substSt L S b) (Tm.substSt L S c)
 

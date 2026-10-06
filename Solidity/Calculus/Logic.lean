@@ -617,7 +617,7 @@ theorem Proves.merge_sound {Γ : List (Hyp C)} {m : Modality} {U V : Upd C} {φ 
   have hσ : holds σ (Hyp.wrap (Γ ++ [.upd m (U ++ V.subst U)]) φ) := d σ
   simp only [List.append_assoc, List.cons_append, List.nil_append, Hyp.wrap_append,
     Hyp.wrap] at hσ ⊢
-  exact Hyp.wrap_mono (fun τ hτ => ((UpdRule.sequentialToParallel (V := V) (φ := φ) hU).sound τ).1 hτ)
+  exact Hyp.wrap_mono (fun τ hτ => ((UpdRule.sequentialToParallel (u2 := V) (φ := φ) hU).sound τ).1 hτ)
     Γ σ hσ
 
 theorem Proves.mergeStorage_sound {Γ : List (Hyp C)} {m : Modality} {s : STerm C} {V : Upd C}

@@ -1,5 +1,6 @@
 import Solidity.Calculus.ReadWrite
 import Solidity.Calculus.TermRules
+import Solidity.Calculus.RuleSyntax
 import Solidity.Theory.Bridge.Denote
 
 /-!
@@ -102,9 +103,9 @@ substitution. -/
 /-- A term that cannot halt: a literal value, a state variable and members
 of it. -/
 def Tm.total : Tm C s → Bool
-  | .app0 (.lit _) => true
-  | .app0 (.root _) => true
-  | .app1 (.field _) p => p.total
+  | Term.lit _ => true
+  | PTerm.root _ => true
+  | PTerm.field p _ => p.total
   | _ => false
 
 /-- A literal does not halt: `10` in `{ se1 := 10 }` reads `10` in every state. -/
@@ -234,7 +235,7 @@ def Tm.subst (U : Upd C) : Tm C s → Tm C s
   | .pvS x => U.storOf x
   | .pvI x => U.refOf x
   | .app0 o => .app0 o
-  | .app1 (.netOf x) a =>
+  | Term.netOf x a =>
     match U.lastWrite x with
     | some _ => Term.stuck
     | none => .app1 (.netOf x) (a.subst U)
@@ -1152,12 +1153,12 @@ constructor for the KeY taclet it is. -/
 inductive UpdRule : Fml C → Fml C → Prop
   /-- `sequentialToParallel2 { \find({u}{u2}phi) \replacewith({u || {u}u2}phi) }`,
   for `u` an update of locals. -/
-  | sequentialToParallel {m : Modality} {U V : Upd C} {φ : Fml C} (hU : U.envOnly = true) :
-      UpdRule (.upd m U (.upd m V φ)) (.upd m (U ++ V.subst U) φ)
+  | sequentialToParallel {m : Modality} {u u2 : Upd C} {φ : Fml C} (hu : u.envOnly = true) :
+      UpdRule dl_schema{ {u}{u2}φ } dl_schema{ {u ‖ {u}u2}φ }
   /-- `simplifyUpdate2 { \find({u}phi)
   \varcond(\dropEffectlessElementaries(u, phi, result)) \replacewith(result) }` -/
-  | simplifyUpdate {m : Modality} {U : Upd C} {φ : Fml C} :
-      UpdRule (.upd m U φ) (.upd m (U.dropEffectless φ.vars) φ)
+  | simplifyUpdate {m : Modality} {u : Upd C} {φ : Fml C} :
+      UpdRule dl_schema{ {u}φ } (.upd m (u.dropEffectless φ.vars) φ)
   /-- `applySkip2 { \find({skip}phi) \replacewith(phi) }` -/
   | applySkip {m : Modality} {φ : Fml C} : UpdRule (.upd m [] φ) φ
   /-- `applyOnRigidFormula { \find({u}phi)
@@ -1165,8 +1166,8 @@ inductive UpdRule : Fml C → Fml C → Prop
   `applyOnPV`/`applyOnDifferentPV` on the terms under it; for `u` that
   cannot halt, and `φ` reading no variable at another sort than `u` writes it
   (`Fml.sortedFor`, which KeY's sorts give for free). -/
-  | applyOnRigid {m : Modality} {U : Upd C} {φ : Fml C} (hU : U.total = true)
-      (hφ : φ.rigid = true) (hs : φ.sortedFor U = true) : UpdRule (.upd m U φ) (φ.subst U)
+  | applyOnRigid {m : Modality} {u : Upd C} {φ : Fml C} (hu : u.total = true)
+      (hφ : φ.rigid = true) (hs : φ.sortedFor u = true) : UpdRule dl_schema{ {u}φ } (φ.subst u)
 
 /-- **Soundness of the update rules**: each rewrites a formula to an
 equivalent one.
@@ -1363,7 +1364,7 @@ theorem Fml.mkUpd_holds (m : Modality) (U : Upd C) (φ : Fml C) (σ : State) :
     · rename_i hc
       obtain ⟨rfl, hU⟩ := hc
       rw [Fml.clean_holds]
-      exact (UpdRule.sequentialToParallel (V := V) (φ := φ) hU).sound σ
+      exact (UpdRule.sequentialToParallel (u2 := V) (φ := φ) hU).sound σ
     · exact Fml.clean_holds _ _ _ σ
   | _ => exact Fml.clean_holds _ _ _ σ
 
@@ -1460,10 +1461,10 @@ def Upd.locals (U : Upd C) : Upd C := U.filter (·.var?.isSome)
 `find(storage, alice.age)`. -/
 def Tm.stFree : Tm C s → Bool
   | .pvV _ => true
-  | .app0 (.lit _) | .app0 (.env _) => true
-  | .app1 (.unop ..) a | .app1 .net a | .app1 (.netOf _) a => a.stFree
-  | .app2 (.binop ..) a b => a.stFree && b.stFree
-  | .app3 .ite c a b => c.stFree && a.stFree && b.stFree
+  | Term.lit _ | Term.env _ => true
+  | Term.unop _ _ a | Term.net a | Term.netOf _ a => a.stFree
+  | Term.binop _ _ a b => a.stFree && b.stFree
+  | Term.ite c a b => c.stFree && a.stFree && b.stFree
   | _ => false
 
 /-- A first-order formula whose terms are `Tm.stFree`: `x ≐ 42`. -/
@@ -1945,7 +1946,7 @@ def Tm.withSt (w : StWrite C) : Tm C s → Tm C s
   | .pvP x => .pvP x
   | .pvS x => .pvS x
   | .pvI x => .pvI x
-  | .app0 .storage => w.s
+  | STerm.storage => w.s
   | .app0 o => .app0 o
   | .app1 o a => .app1 o (a.withSt w)
   | .app2 o a b => if o.opaque then .app2 o a b else .app2 o (a.withSt w) (b.withSt w)
