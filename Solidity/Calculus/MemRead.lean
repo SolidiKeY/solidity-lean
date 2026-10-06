@@ -1,4 +1,4 @@
-import Solidity.Calculus.DecideLang
+import Solidity.Calculus.KeyNotation
 
 /-!
 # Reading memory as solkey reads it
