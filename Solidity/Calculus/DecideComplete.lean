@@ -396,31 +396,33 @@ mutual
 initial one halts: a reduced formula has none but where a write goes
 through a member named `length` (`LTerm.initOnly`). -/
 def LTerm.evalA (E : Var → Res Value) (o : List Seg → Obs) : LTerm → Res Value
-  | .lit v => .ok v
-  | .var x => E x
-  | .binop op p a b => a.evalA E o >>= fun x => evalBinop op p x (b.evalA E o)
-  | .unop op p a => a.evalA E o >>= fun x => applyUnOp op x >>= unopCheck op p
-  | .ite c a b => c.evalA E o >>= fun cv => pickBranch cv (a.evalA E o) (b.evalA E o)
-  | .find .init q => q.evalA E o >>= fun qs => (o qs).find
-  | .has .init q => q.evalA E o >>= fun qs => (o qs).has
-  | .kmap sh .init q => q.evalA E o >>= fun qs => (o qs).test sh
-  | .len .init q => q.evalA E o >>= fun qs => (o qs).len
-  | .sok .init => .ok (.bool true)
-  | .pok q => q.evalA E o >>= fun _ => .ok (.bool true)
-  | .seq d a => d.evalA E o >>= fun _ => a.evalA E o
-  | .orElse a b => orElseR (a.evalA E o) (b.evalA E o)
-  | .kite a b t e =>
+  | key{ lit(v) } => .ok v
+  | key{ var(x) } => E x
+  | key{ binop(op, p, a, b) } => a.evalA E o >>= fun x => evalBinop op p x (b.evalA E o)
+  | key{ unop(op, p, a) } => a.evalA E o >>= fun x => applyUnOp op x >>= unopCheck op p
+  | key{ if(c) then a else b } =>
+    c.evalA E o >>= fun cv => pickBranch cv (a.evalA E o) (b.evalA E o)
+  | key{ find(storage, q) } => q.evalA E o >>= fun qs => (o qs).find
+  | key{ has(storage, q) } => q.evalA E o >>= fun qs => (o qs).has
+  | key{ kmap(sh, storage, q) } => q.evalA E o >>= fun qs => (o qs).test sh
+  | key{ find(storage, q.length) } => q.evalA E o >>= fun qs => (o qs).len
+  | key{ okSt(storage) } => .ok (.bool true)
+  | key{ okPath(q) } => q.evalA E o >>= fun _ => .ok (.bool true)
+  | key{ (d; a) } => d.evalA E o >>= fun _ => a.evalA E o
+  | key{ orElse(a, b) } => orElseR (a.evalA E o) (b.evalA E o)
+  | key{ if(a = b) then t else e } =>
     (a.evalA E o >>= Value.asInt) >>= fun i => (b.evalA E o >>= Value.asInt) >>= fun j =>
       if i = j then t.evalA E o else e.evalA E o
-  | .zero a => a.evalA E o >>= fun v => .ok (zeroV v)
+  | key{ delValue(a) } => a.evalA E o >>= fun v => .ok (zeroV v)
   | .err | .env _ | .findP _ _ | .find _ _ | .has _ _ | .kmap _ _ _ | .len _ _ | .sok _
   | .cpok _ _ => .error .stuck
 
 /-- A path over the locals `E` and the reads `o`. -/
 def LPath.evalA (E : Var → Res Value) (o : List Seg → Obs) : LPath → Res (List Seg)
   | .root r => .ok [.field r]
-  | .field q f => q.evalA E o >>= fun qs => .ok (qs ++ [.field f])
-  | .at q k => q.evalA E o >>= fun qs => k.evalA E o >>= Value.asInt >>= fun i => .ok (qs ++ [.at i])
+  | key{ q.f } => q.evalA E o >>= fun qs => .ok (qs ++ [.field f])
+  | key{ q[k] } =>
+    q.evalA E o >>= fun qs => k.evalA E o >>= Value.asInt >>= fun i => .ok (qs ++ [.at i])
 
 end
 
@@ -441,8 +443,9 @@ mutual
 
 /-- The term reads the initial storage only. -/
 def LTerm.initOnly : LTerm → Bool
-  | .lit _ | .var _ | .err | .sok .init => true
-  | .find .init q | .has .init q | .kmap _ .init q | .len .init q | .pok q => q.initOnly
+  | key{ lit(_) } | key{ var(_) } | key{ err } | key{ okSt(storage) } => true
+  | key{ find(storage, q) } | key{ has(storage, q) } | key{ kmap(_, storage, q) }
+  | key{ find(storage, q.length) } | key{ okPath(q) } => q.initOnly
   | .find _ _ | .has _ _ | .kmap _ _ _ | .len _ _ | .sok _ | .env _ | .findP _ _ | .cpok _ _ => false
   | .binop _ _ a b | .seq a b | .orElse a b => a.initOnly && b.initOnly
   | .unop _ _ a | .zero a => a.initOnly
@@ -589,8 +592,9 @@ mutual
 `people[a].age`, `people[a]` and `people`. -/
 def LTerm.reads : LTerm → List LPath
   | .lit _ | .var _ | .err | .sok _ | .env _ | .findP _ _ | .cpok _ _ => []
-  | .find _ q | .has _ q | .kmap _ _ q | .len _ q => q.reads
-  | .pok q => q.keyReads
+  | key{ find(_, q) } | key{ has(_, q) } | key{ kmap(_, _, q) } | key{ find(_, q.length) } =>
+    q.reads
+  | key{ okPath(q) } => q.keyReads
   | .binop _ _ a b | .seq a b | .orElse a b => a.reads ++ b.reads
   | .unop _ _ a | .zero a => a.reads
   | .ite c a b => c.reads ++ a.reads ++ b.reads

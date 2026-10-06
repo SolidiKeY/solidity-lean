@@ -94,17 +94,17 @@ theorem Keeps.trans {σ : State} {a b c : LTerm} (h₁ : Keeps σ a b) (h₂ : K
 `false && b` and `true || b` too. -/
 def foldBin (op : BinOp) (p : PrimTy) (a b : LTerm) : LTerm :=
   match a with
-  | .lit x =>
-    if op = .and ∧ x = .bool false then .lit (.bool false)
-    else if op = .or ∧ x = .bool true then .lit (.bool true)
+  | key{ lit(x) } =>
+    if op = .and ∧ x = .bool false then key{ false }
+    else if op = .or ∧ x = .bool true then key{ true }
     else match b with
-      | .lit y =>
-        if powBig op y then .binop op p a b else
+      | key{ lit(y) } =>
+        if powBig op y then key{ binop(op, p, a, b) } else
         match evalBinop op p x (.ok y) with
-        | .ok v => .lit v
-        | .error _ => .binop op p a b
-      | _ => .binop op p a b
-  | _ => .binop op p a b
+        | .ok v => key{ lit(v) }
+        | .error _ => key{ binop(op, p, a, b) }
+      | _ => key{ binop(op, p, a, b) }
+  | _ => key{ binop(op, p, a, b) }
 
 theorem foldBin_keeps (σ : State) (op : BinOp) (p : PrimTy) (a b : LTerm) :
     Keeps σ (.binop op p a b) (foldBin op p a b) := by
@@ -139,11 +139,11 @@ theorem foldBin_keeps (σ : State) (op : BinOp) (p : PrimTy) (a b : LTerm) :
 /-- `−a` or `!a` of a literal, evaluated. -/
 def foldUn (op : UnOp) (p : PrimTy) (a : LTerm) : LTerm :=
   match a with
-  | .lit x =>
+  | key{ lit(x) } =>
     match applyUnOp op x >>= unopCheck op p with
-    | .ok v => .lit v
-    | .error _ => .unop op p a
-  | _ => .unop op p a
+    | .ok v => key{ lit(v) }
+    | .error _ => key{ unop(op, p, a) }
+  | _ => key{ unop(op, p, a) }
 
 theorem foldUn_keeps (σ : State) (op : UnOp) (p : PrimTy) (a : LTerm) :
     Keeps σ (.unop op p a) (foldUn op p a) := by
@@ -161,9 +161,9 @@ theorem foldUn_keeps (σ : State) (op : UnOp) (p : PrimTy) (a : LTerm) :
 /-- A conditional on a literal: its branch. -/
 def foldIte (c a b : LTerm) : LTerm :=
   match c with
-  | .lit (.bool true) => a
-  | .lit (.bool false) => b
-  | _ => .ite c a b
+  | key{ true } => a                            -- ifthenelse_true
+  | key{ false } => b                           -- ifthenelse_false
+  | _ => key{ if(c) then a else b }
 
 theorem foldIte_keeps (σ : State) (c a b : LTerm) : Keeps σ (.ite c a b) (foldIte c a b) := by
   intro v h
@@ -178,8 +178,8 @@ theorem foldIte_keeps (σ : State) (c a b : LTerm) : Keeps σ (.ite c a b) (fold
 def foldKite (a b t e : LTerm) : LTerm :=
   if a == b then t else
   match a, b with
-  | .lit (.int i), .lit (.int j) => if i = j then t else e
-  | _, _ => .kite a b t e
+  | key{ lit(‹.int i›) }, key{ lit(‹.int j›) } => if i = j then t else e
+  | _, _ => key{ if(a = b) then t else e }
 
 theorem foldKite_keeps (σ : State) (a b t e : LTerm) :
     Keeps σ (.kite a b t e) (foldKite a b t e) := by
@@ -266,12 +266,12 @@ theorem Orc.ok_none (σ : State) : Orc.Ok σ {} :=
 /-- The default of a term whose kind is known: `0` or `false`. -/
 def foldZeroT (K : LTerm → Option Bool) (a : LTerm) : LTerm :=
   match a with
-  | .lit v => .lit (zeroV v)
+  | key{ lit(v) } => key{ lit(‹zeroV v›) }
   | _ =>
     match K a with
-    | some true => .lit (.int 0)
-    | some false => .lit (.bool false)
-    | none => .zero a
+    | some true => key{ 0 }                     -- delFieldDefault: defaultValue<[int]>
+    | some false => key{ false }                -- defaultValue<[bool]>
+    | none => key{ delValue(a) }
 
 theorem foldZeroT_keeps {σ : State} {K : LTerm → Option Bool} (hK : KindOk σ K) (a : LTerm) :
     Keeps σ (.zero a) (foldZeroT K a) := by
@@ -291,11 +291,11 @@ theorem foldZeroT_keeps {σ : State} {K : LTerm → Option Bool} (hK : KindOk σ
 returns. -/
 def foldSame (t : LTerm) : LTerm :=
   match t with
-  | .binop op _ a b =>
+  | key{ binop(op, _, a, b) } =>
     if a == b then
       match op with
-      | .eqB | .le | .ge => .lit (.bool true)
-      | .neB | .lt | .gt => .lit (.bool false)
+      | .eqB | .le | .ge => key{ true }         -- eqClose
+      | .neB | .lt | .gt => key{ false }
       | _ => t
     else t
   | _ => t
@@ -457,9 +457,9 @@ theorem bndsOf_holds {σ : State} {R : LTerm → Option (Int × Int)} {L : LTerm
 /-- A comparison its operands' bounds decide, as a literal. -/
 def foldCmp (R : LTerm → Option (Int × Int)) (L : LTerm → Option Int) (t : LTerm) : LTerm :=
   match t with
-  | .binop op _ a b =>
+  | key{ binop(op, _, a, b) } =>
     match cmpDecideO op (bndsOf R L a).1 (bndsOf R L a).2 (bndsOf R L b).1 (bndsOf R L b).2 with
-    | some c => .lit (.bool c)
+    | some c => key{ lit(‹.bool c›) }
     | none => t
   | _ => t
 
@@ -490,45 +490,47 @@ mutual
 (`foldBin`, …), every subterm `E` knows replaced by its value.  Not the left
 side of an `orElse`, whose halting picks the right. -/
 def LTerm.simpE (O : Orc) (E : Eqs) : LTerm → LTerm
-  | .lit v => .lit v
-  | .var x => substE E (.var x)
-  | .err => .err
-  | .env k => .env k
-  | .binop op p a b =>
+  | key{ lit(v) } => key{ lit(v) }
+  | key{ var(x) } => substE E key{ var(x) }
+  | key{ err } => key{ err }
+  | key{ env(k) } => key{ env(k) }
+  | key{ binop(op, p, a, b) } =>
     substE E (foldCmp O.range O.lo (foldSame (foldBin op p (a.simpE O E) (b.simpE O E))))
-  | .unop op p a => substE E (foldUn op p (a.simpE O E))
-  | .ite c a b => substE E (foldIte (c.simpE O E) (a.simpE O E) (b.simpE O E))
-  | .zero a => substE E (foldZeroT O.kind (a.simpE O E))
-  | .kite a b t e => substE E (foldKite (a.simpE O E) (b.simpE O E) (t.simpE O E) (e.simpE O E))
-  | .seq _ a => a.simpE O E
-  | .find s q => substE E (.find (s.simpE O E) (q.simpE O E))
-  | .findP s q => substE E (.findP (s.simpE O E) (q.simpE O E))
-  | .has s q => .has (s.simpE O E) (q.simpE O E)
-  | .kmap sh s q => .kmap sh (s.simpE O E) (q.simpE O E)
-  | .len s q => substE E (.len (s.simpE O E) (q.simpE O E))
-  | .sok s => .sok (s.simpE O E)
-  | .pok q => .pok (q.simpE O E)
-  | .cpok s q => .cpok s q
-  | .orElse a b =>
+  | key{ unop(op, p, a) } => substE E (foldUn op p (a.simpE O E))
+  | key{ if(c) then a else b } => substE E (foldIte (c.simpE O E) (a.simpE O E) (b.simpE O E))
+  | key{ delValue(a) } => substE E (foldZeroT O.kind (a.simpE O E))
+  | key{ if(a = b) then t else e } =>
+    substE E (foldKite (a.simpE O E) (b.simpE O E) (t.simpE O E) (e.simpE O E))
+  | key{ (_; a) } => a.simpE O E
+  | key{ find(s, q) } => substE E key{ find(‹s.simpE O E›, ‹q.simpE O E›) }
+  | key{ findP(s, q) } => substE E key{ findP(‹s.simpE O E›, ‹q.simpE O E›) }
+  | key{ has(s, q) } => key{ has(‹s.simpE O E›, ‹q.simpE O E›) }
+  | key{ kmap(sh, s, q) } => key{ kmap(sh, ‹s.simpE O E›, ‹q.simpE O E›) }
+  | key{ find(s, q.length) } => substE E (.len (s.simpE O E) (q.simpE O E))
+  | key{ okSt(s) } => key{ okSt(‹s.simpE O E›) }
+  | key{ okPath(q) } => key{ okPath(‹q.simpE O E›) }
+  | key{ copyOk(s, q) } => key{ copyOk(s, q) }
+  | key{ orElse(a, b) } =>
     if O.halts a then b.simpE O E
     else if O.rets a then a.simpE O E
-    else substE E (.orElse a (b.simpE O E))
+    else substE E key{ orElse(a, ‹b.simpE O E›) }
 
 /-- The path with its keys simplified. -/
 def LPath.simpE (O : Orc) (E : Eqs) : LPath → LPath
   | .root r => .root r
-  | .field q f => .field (q.simpE O E) f
-  | .at q k => .at (q.simpE O E) (k.simpE O E)
+  | key{ q.f } => .field (q.simpE O E) f
+  | key{ q[k] } => .at (q.simpE O E) (k.simpE O E)
 
 /-- The storage with its terms simplified. -/
 def LStor.simpE (O : Orc) (E : Eqs) : LStor → LStor
-  | .init => .init
-  | .save s q w => .save (s.simpE O E) (q.simpE O E) (w.simpE O E)
-  | .del s q => .del (s.simpE O E) (q.simpE O E)
-  | .arr op s q w => .arr op (s.simpE O E) (q.simpE O E) (w.simpE O E)
+  | key{ storage } => key{ storage }
+  | key{ save(s, q, w) } => key{ save(‹s.simpE O E›, ‹q.simpE O E›, ‹w.simpE O E›) }
+  | key{ delAt(s, q) } => key{ delAt(‹s.simpE O E›, ‹q.simpE O E›) }
+  | key{ arr(op, s, q, w) } => key{ arr(op, ‹s.simpE O E›, ‹q.simpE O E›, ‹w.simpE O E›) }
   | .stale op s q w => .stale op (s.simpE O E) (q.simpE O E) (w.simpE O E)
-  | .copy s q src sq => .copy (s.simpE O E) (q.simpE O E) (src.simpE O E) (sq.simpE O E)
-  | .view m i => .view m i
+  | key{ save(s, q, find(src, sq)) } =>
+    key{ save(‹s.simpE O E›, ‹q.simpE O E›, find(‹src.simpE O E›, ‹sq.simpE O E›)) }
+  | key{ copyMem(mtSt, m, i) } => key{ copyMem(mtSt, m, i) }
 
 end
 
@@ -2047,7 +2049,7 @@ def Facts.bndOf (F : Facts) (t : LTerm) : Option (Int × Int) :=
 /-- An interval `t` lies in where it returns an integer: a literal's, one
 the premises give, a local's type's, a sum's or a difference's. -/
 def Facts.range (F : Facts) : LTerm → Option (Int × Int)
-  | .lit (.int i) => some (i, i)
+  | key{ lit(‹.int i›) } => some (i, i)
   | t@(.var x) =>
     match F.bndOf t with
     | some r => some r
@@ -2138,7 +2140,7 @@ theorem Facts.range_sound {σ : State} {F : Facts} (hF : F.Ok σ) :
 /-- A bound below where no interval is known: a length is at least `0`, a
 sum at least the sum of its operands' bounds (`values.length + 1 > 0`). -/
 def Facts.lo (F : Facts) : LTerm → Option Int
-  | .len _ _ => some 0
+  | .len _ _ => some 0                          -- sizeNotNegative
   | t@(.binop .add _ a b) =>
     match F.range t with
     | some (l, _) => some l
@@ -2388,9 +2390,9 @@ operation on operands that do and that it accepts (`binRets`), a
 conditional on a condition that does, a read of the initial storage at a
 path the layout types. -/
 def Facts.retsW (F : Facts) (N : LTerm → LTerm) : LTerm → Bool
-  | .lit _ => true
-  | .env _ => true
-  | .err => false
+  | key{ lit(_) } => true
+  | key{ env(_) } => true
+  | key{ err } => false
   | t@(.var x) => t.known F.known F.ne || F.vars.any (·.1 == x)
   | t@(.seq d a) => t.known F.known F.ne || (F.retsW N d && F.retsW N a)
   | t@(.zero a) => t.known F.known F.ne || F.retsW N a
@@ -2400,13 +2402,14 @@ def Facts.retsW (F : Facts) (N : LTerm → LTerm) : LTerm → Bool
   | t@(.unop op p a) => t.known F.known F.ne || (F.retsW N a && F.unRets N op p a)
   | t@(.ite c a b) => t.known F.known F.ne || (F.retsW N c &&
       match N c with
-      | .lit (.bool true) => F.retsW N a
-      | .lit (.bool false) => F.retsW N b
+      | key{ true } => F.retsW N a
+      | key{ false } => F.retsW N b
       | _ => F.isBool c && F.retsW N a && F.retsW N b)
   | t@(.kite a b x y) => t.rets F.known F.ne ||
       (F.retsW N a && F.isInt a && F.retsW N b && F.isInt b &&
         match N a, N b with
-        | .lit (.int i), .lit (.int j) => if i = j then F.retsW N x else F.retsW N y
+        | key{ lit(‹.int i›) }, key{ lit(‹.int j›) } =>
+          if i = j then F.retsW N x else F.retsW N y
         | _, _ => F.retsW N x && F.retsW N y)
   | t@(.find s q) => t.known F.known F.ne || (s.isInit && F.keysRetW N q && F.isPrimPath q) ||
       (F.slotIn N s q && F.keysRetW N q && tyPrim (F.slotTy s q))
@@ -2425,7 +2428,7 @@ def Facts.retsW (F : Facts) (N : LTerm → LTerm) : LTerm → Bool
 def Facts.keysRetW (F : Facts) (N : LTerm → LTerm) : LPath → Bool
   | .root _ => true
   | .field q _ => F.keysRetW N q
-  | .at q k => F.keysRetW N q && F.retsW N k && F.isInt k
+  | key{ q[k] } => F.keysRetW N q && F.retsW N k && F.isInt k
 
 end
 
@@ -2801,11 +2804,11 @@ def Facts.shapeNot (F : Facts) (sh : KShape) (q : LPath) : Bool :=
 /-- Where the facts hold, `t` halts: a test of a shape the layout says is
 not there (the guard of a read below a `delete`, `LStor.mapU`). -/
 def Facts.halts (F : Facts) : LTerm → Bool
-  | .err => true
-  | .seq d a => F.halts d || F.halts a
-  | .orElse a b => F.halts a && F.halts b
-  | .kmap sh s q => (s.isInit && F.shapeNot sh q) || tyShapeNot sh (F.slotTy s q)
-  | .zero a => F.halts a
+  | key{ err } => true
+  | key{ (d; a) } => F.halts d || F.halts a
+  | key{ orElse(a, b) } => F.halts a && F.halts b
+  | key{ kmap(sh, s, q) } => (s.isInit && F.shapeNot sh q) || tyShapeNot sh (F.slotTy s q)
+  | key{ delValue(a) } => F.halts a
   | _ => false
 
 theorem canonB_map_ty {es : List (Int × SVal)} {d : SVal} {T : Ty}

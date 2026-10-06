@@ -74,13 +74,13 @@ def LPath.strict : LPath → List LTerm
 
 /-- The terms a storage cannot be evaluated without: what it writes, where. -/
 def LStor.strict : LStor → List LTerm
-  | .init => []
-  | .save s q w => w.strict ++ s.strict ++ q.strict
-  | .del s q => s.strict ++ q.strict
-  | .arr _ s q w => w.strict ++ s.strict ++ q.strict
+  | key{ storage } => []
+  | key{ save(s, q, w) } => w.strict ++ s.strict ++ q.strict
+  | key{ delAt(s, q) } => s.strict ++ q.strict
+  | key{ arr(_, s, q, w) } => w.strict ++ s.strict ++ q.strict
   | .stale _ s q w => w.strict ++ s.strict ++ q.strict
-  | .copy s q src sq => src.strict ++ sq.strict ++ s.strict ++ q.strict
-  | .view _ _ => []
+  | key{ save(s, q, find(src, sq)) } => src.strict ++ sq.strict ++ s.strict ++ q.strict
+  | key{ copyMem(mtSt, _, _) } => []
 
 end
 
@@ -291,25 +291,26 @@ writes compares with a snapshot's (`\old`).  A
 apart its `else` branch, as KeY reads `select(store(h, k, v), j)` under
 `k = j` or `k ≠ j`. -/
 def LTerm.core (ne : Keys) : LTerm → LTerm
-  | .seq _ a => (a.core ne)
-  | .lit v => .lit v
-  | .var x => .var x
-  | .err => .err
-  | .env k => .env k
-  | .binop op p a b => .binop op p (a.core ne) (b.core ne)
-  | .unop op p a => .unop op p (a.core ne)
-  | .ite c a b => .ite (c.core ne) (a.core ne) (b.core ne)
-  | .zero a => .zero (a.core ne)
-  | .find s q => .findP (s.core ne) (q.core ne)
-  | .findP s q => .findP (s.core ne) (q.core ne)
-  | .has s q => .has (s.core ne) (q.core ne)
-  | .kmap sh s q => .kmap sh (s.core ne) (q.core ne)
-  | .len s q => .len (s.core ne) (q.core ne)
-  | .sok s => .sok (s.core ne)
-  | .pok q => .pok (q.core ne)
-  | .orElse a b => .orElse a (b.core ne)
-  | .cpok s q => .cpok s q
-  | .kite a b t e =>
+  | key{ (_; a) } => (a.core ne)
+  | key{ lit(v) } => key{ lit(v) }
+  | key{ var(x) } => key{ var(x) }
+  | key{ err } => key{ err }
+  | key{ env(k) } => key{ env(k) }
+  | key{ binop(op, p, a, b) } => .binop op p (a.core ne) (b.core ne)
+  | key{ unop(op, p, a) } => .unop op p (a.core ne)
+  | key{ if(c) then a else b } => .ite (c.core ne) (a.core ne) (b.core ne)
+  | key{ delValue(a) } => .zero (a.core ne)
+  | key{ find(s, q) } => .findP (s.core ne) (q.core ne)
+  | key{ findP(s, q) } => .findP (s.core ne) (q.core ne)
+  | key{ has(s, q) } => .has (s.core ne) (q.core ne)
+  | key{ kmap(sh, s, q) } => .kmap sh (s.core ne) (q.core ne)
+  | key{ find(s, q.length) } => .len (s.core ne) (q.core ne)
+  | key{ okSt(s) } => .sok (s.core ne)
+  | key{ okPath(q) } => .pok (q.core ne)
+  | key{ orElse(a, b) } => .orElse a (b.core ne)
+  | key{ copyOk(s, q) } => key{ copyOk(s, q) }
+  -- selectOnSaveCons's \if(a1 = a2), decided by a premise
+  | key{ if(a = b) then t else e } =>
     if (true, a, b) ∈ ne ∨ (true, b, a) ∈ ne then t.core ne
     else if (false, a, b) ∈ ne ∨ (false, b, a) ∈ ne then e.core ne
     else .kite (a.core ne) (b.core ne) (t.core ne) (e.core ne)
@@ -317,18 +318,18 @@ def LTerm.core (ne : Keys) : LTerm → LTerm
 /-- The path with the guards of its keys dropped. -/
 def LPath.core (ne : Keys) : LPath → LPath
   | .root r => .root r
-  | .field q f => .field (q.core ne) f
-  | .at q k => .at (q.core ne) (k.core ne)
+  | key{ q.f } => .field (q.core ne) f
+  | key{ q[k] } => .at (q.core ne) (k.core ne)
 
 /-- The storage with the guards of its terms dropped. -/
 def LStor.core (ne : Keys) : LStor → LStor
-  | .init => .init
-  | .save s q w => .save (s.core ne) (q.core ne) (w.core ne)
-  | .del s q => .del (s.core ne) (q.core ne)
-  | .arr op s q w => .arr op (s.core ne) (q.core ne) (w.core ne)
+  | key{ storage } => key{ storage }
+  | key{ save(s, q, w) } => .save (s.core ne) (q.core ne) (w.core ne)
+  | key{ delAt(s, q) } => .del (s.core ne) (q.core ne)
+  | key{ arr(op, s, q, w) } => .arr op (s.core ne) (q.core ne) (w.core ne)
   | .stale op s q w => .stale op (s.core ne) (q.core ne) (w.core ne)
-  | .copy s q src sq => .copy (s.core ne) (q.core ne) (src.core ne) (sq.core ne)
-  | .view m i => .view m i
+  | key{ save(s, q, find(src, sq)) } => .copy (s.core ne) (q.core ne) (src.core ne) (sq.core ne)
+  | key{ copyMem(mtSt, m, i) } => key{ copyMem(mtSt, m, i) }
 
 end
 
@@ -540,20 +541,20 @@ theorem evalBinop_addsub {op : BinOp} {p : PrimTy} {x y v : Value}
 /-- `a' + b'`, as `x` where `a'` is `x - b'`. -/
 def arithAdd (p : PrimTy) (a b : LTerm) : LTerm :=
   match a with
-  | .binop .sub _ x c => if c = b then x else .binop .add p a b
-  | _ => .binop .add p a b
+  | key{ binop(‹.sub›, _, x, c) } => if c = b then x else key{ binop(‹.add›, p, a, b) }
+  | _ => key{ binop(‹.add›, p, a, b) }
 
 /-- `a' - b'`, as `x` where `a'` is `x + b'`. -/
 def arithSub (p : PrimTy) (a b : LTerm) : LTerm :=
   match a with
-  | .binop .add _ x c => if c = b then x else .binop .sub p a b
-  | _ => .binop .sub p a b
+  | key{ binop(‹.add›, _, x, c) } => if c = b then x else key{ binop(‹.sub›, p, a, b) }
+  | _ => key{ binop(‹.sub›, p, a, b) }
 
 /-- `(x - a) + a` and `(x + a) - a` as `x`, below every operator. -/
 def LTerm.arith : LTerm → LTerm
-  | .binop .add p a b => arithAdd p a.arith b.arith
-  | .binop .sub p a b => arithSub p a.arith b.arith
-  | .binop op p a b => .binop op p a.arith b.arith
+  | key{ binop(‹.add›, p, a, b) } => arithAdd p a.arith b.arith
+  | key{ binop(‹.sub›, p, a, b) } => arithSub p a.arith b.arith
+  | key{ binop(op, p, a, b) } => .binop op p a.arith b.arith
   | t => t
 
 /-- The cancellation at one operator: where `a` returns what `a'` does and

@@ -3856,7 +3856,7 @@ def CaseTree.get {α : Type} (σ : State) : CaseTree α → α
 /-- A tree of terms as one term, its tests `kite`s. -/
 def CaseTree.toTerm {α : Type} (f : α → LTerm) : CaseTree α → LTerm
   | .leaf a => f a
-  | .ite a b t e => .kite a b (t.toTerm f) (e.toTerm f)
+  | .ite a b t e => key{ if(a = b) then ‹t.toTerm f› else ‹e.toTerm f› }   -- \if(a1 = a2)
 
 /-- Every test of the tree compares two integers. -/
 def CaseTree.TestsOk {α : Type} (σ : State) : CaseTree α → Prop
@@ -3883,9 +3883,9 @@ two different integer literals are different ones (`some false`); anything
 else is for the state to settle (`none`).  Not recursive, so the kernel
 re-checking a reduction pays one comparison of names. -/
 def keyCmp : LTerm → LTerm → Option Bool
-  | .var x, .var y => if x = y then some true else none
-  | .env k, .env k' => if k = k' then some true else none
-  | .lit (.int a), .lit (.int b) => some (decide (a = b))
+  | key{ var(x) }, key{ var(y) } => if x = y then some true else none
+  | key{ env(k) }, key{ env(k') } => if k = k' then some true else none
+  | key{ lit(‹.int a›) }, key{ lit(‹.int b›) } => some (decide (a = b))
   | _, _ => none
 
 /-- What `keyCmp` settles holds in every state where both keys are integers. -/
@@ -4050,9 +4050,9 @@ def LPath.noLen : LPath → Bool
 none above it (a struct is no word) or below it (a word has no members), the
 old read apart from it. -/
 def saveLeaf (w old : LTerm) : PathRel → LTerm
-  | .eq => w
-  | .above | .below _ => .err
-  | .diverge => old
+  | .eq => w                                    -- selectOnSaveCons \then, saveOnEmptyPrim
+  | .above | .below _ => key{ err }             -- Lean only: a word is not a struct
+  | .diverge => old                             -- selectOnSaveCons \else
 
 /-- A read below a deleted location, `rest` below `q`, from the root down:
 through a member, what the member of the deleted value has; at a key, the old
@@ -4064,36 +4064,37 @@ key passed, the default of the old read (`atEnd`).  After `delete ledger;`,
 `ledger.balances[k]` is the old entry; after `delete grid;` (`uint[2][3]`),
 `grid[i][j]` is `0`. -/
 def delBelow (atMap atEnd : LTerm) (guard : KShape → LPath → LTerm) : LPath → List SSeg → LTerm
-  | q, .field f :: r => delBelow atMap atEnd guard (q.field f) r
-  | q, .key k :: r => .orElse (.seq (guard .map q) atMap)
-      (.seq (guard .fixed q) (delBelow atMap atEnd guard (q.at k) r))
-  | _, [] => atEnd
+  | q, .field f :: r => delBelow atMap atEnd guard (q.field f) r      -- selectStDelNodeRef
+  -- selectStDelNodeMap: a mapping keeps its entries; selectStDelNodeFixedElement
+  | q, .key k :: r => key{ orElse((‹guard .map q›; atMap),
+      (‹guard .fixed q›; ‹delBelow atMap atEnd guard (q.at k) r›)) }
+  | _, [] => atEnd                                                  -- selectStDelNodeDefault
 
 /-- The leaf of a read after a `delete` of `P`: the default of the old word
 at the path, and below it as `delBelow` walks it. -/
 def delLeaf (old : LTerm) (P : LPath) (guard : KShape → LPath → LTerm) : PathRel → LTerm
-  | .eq => .zero old
-  | .below rest => delBelow old (.zero old) guard P rest
-  | .above => .err
-  | .diverge => old
+  | .eq => key{ delValue(old) }               -- selectOnDelAtCons \then, delFieldDefault
+  | .below rest => delBelow old key{ delValue(old) } guard P rest   -- delField*, selectStDelNode*
+  | .above => key{ err }                      -- Lean only: a word is not a struct
+  | .diverge => old                           -- selectOnDelAtCons \else
 
 /-- Whether a location is there after a write. -/
 def saveHas (old : LTerm) : PathRel → LTerm
-  | .eq | .above => .lit (.bool true)
-  | .below _ => .err
+  | .eq | .above => key{ true }
+  | .below _ => key{ err }
   | .diverge => old
 
 /-- Whether a location is there after a `delete`: through members as before,
 through keys as `delBelow` says. -/
 def delHas (old : LTerm) (P : LPath) (guard : KShape → LPath → LTerm) : PathRel → LTerm
-  | .eq | .above => .lit (.bool true)
+  | .eq | .above => key{ true }
   | .below rest => delBelow old old guard P rest
   | .diverge => old
 
 /-- Whether a mapping is there after a write: a write keeps the shape of
 every location above it. -/
 def saveMap (old : LTerm) : PathRel → LTerm
-  | .eq | .below _ => .err
+  | .eq | .below _ => key{ err }
   | .above | .diverge => old
 
 /-- Whether a mapping (a fixed-size array) is there after a `delete`: the
@@ -4105,7 +4106,8 @@ def delMap (old : LTerm) (P : LPath) (guard : KShape → LPath → LTerm) : Path
 /-- The length of an array's default: a fixed-size array keeps it (`fixed`
 returns where it is one), a dynamic one is emptied.  `delete values;` leaves
 `values.length` at `0`, `delete fixedValues;` at `3`. -/
-def lenEnd (old fixed : LTerm) : LTerm := .orElse (.seq fixed old) (.seq old (.lit (.int 0)))
+def lenEnd (old fixed : LTerm) : LTerm :=
+  key{ orElse((fixed; old), (old; 0)) }   -- selectStDelNodeFixedSize, selectStDelNodeDefault
 
 /-- The length at `Q` after a `delete` of `P`: its default's where `Q` is
 `P`, as `delBelow` walks it below `P`, the old one above or apart. -/
@@ -4116,10 +4118,10 @@ def delLen (old atEnd : LTerm) (P : LPath) (guard : KShape → LPath → LTerm) 
 
 /-- The length after a `push`, unchecked (`bool` arithmetic is not
 range-checked): a storage array's length has no bound. -/
-def lenSucc (L : LTerm) : LTerm := .binop .add .bool L (.lit (.int 1))
+def lenSucc (L : LTerm) : LTerm := key{ binop(‹.add›, bool, L, 1) }
 
 /-- The length after a `pop`, unchecked as `lenSucc`. -/
-def lenPred (L : LTerm) : LTerm := .binop .sub .bool L (.lit (.int 1))
+def lenPred (L : LTerm) : LTerm := key{ binop(‹.sub›, bool, L, 1) }
 
 /-- The default word of a primitive type: what `values.push();` appends. -/
 def dfltV : PrimTy → Value
@@ -4129,8 +4131,9 @@ def dfltV : PrimTy → Value
 /-- Returns where the operation on an array of length `L` does: a push
 wherever there is an array, a `pop` where it is not empty. -/
 def arrOk : AOp → LTerm → LTerm
-  | .push, L | .slot _, L => .seq L (.lit (.bool true))
-  | .pop _, L => .ite (.binop .lt .uint (.lit (.int 0)) L) (.lit (.bool true)) .err
+  | .push, L | .slot _, L => key{ (L; true) }
+  -- storagePopSave: "nonEmpty" where 0 < find(storage, consr(sp, size)), "empty" reverts
+  | .pop _, L => key{ if(0 < L) then true else err }
 
 /-- The slot an operation appends, at an index `k` against the old length
 `L`: the word `w` or a primitive default at `k = L` (`atNew`, nothing below a
@@ -4139,39 +4142,38 @@ a `push()` of a struct or an array the read itself (`opq`): the closer types
 it whole, the slot and the elements alike (`Facts.slotTy`). -/
 def arrKey (op : AOp) (L k old opq : LTerm) (atNew : LTerm) : LTerm :=
   match op with
-  | .push | .slot (.prim _) => .kite k L atNew old
+  | .push | .slot (.prim _) => key{ if(k = L) then atNew else old }  -- selectOnSaveCons at at(L)
   | .slot (.ref _) => opq
-  | .pop _ => .kite k (lenPred L) .err old
+  | .pop _ => key{ if(k = ‹lenPred L›) then err else old }   -- storagePopSave's delAt(at(L - 1))
 
 /-- The leaf of a read after an operation on the array at `P`: no word at or
 above the array; below it, by `arrKey`; the old read apart from it. -/
 def arrRead (op : AOp) (w L old opq : LTerm) (slot : List SSeg → LTerm) : PathRel → LTerm
-  | .eq | .above => .err
+  | .eq | .above => key{ err }
   | .diverge => old
   | .below (.key k :: rest) =>
     match op with
-    | .slot (.ref _) => .kite k L (slot rest) old
+    | .slot (.ref _) => key{ if(k = L) then ‹slot rest› else old }
     | _ => arrKey op L k old opq (match op with
-      | .push => if rest.isEmpty then w else .err
-      | .slot (.prim p) => if rest.isEmpty then .lit (dfltV p) else .err
-      | _ => .err)
+      | .push => if rest.isEmpty then w else key{ err }
+      | .slot (.prim p) => if rest.isEmpty then key{ lit(‹dfltV p›) } else key{ err }
+      | _ => key{ err })
   | .below _ => opq
 
 /-- `true` where `0 ≤ k ≤ L`, halting elsewhere: an index of an array of
 length `L + 1`. -/
 def inRange (k L : LTerm) : LTerm :=
-  .ite (.binop .and .bool (.binop .le .uint (.lit (.int 0)) k) (.binop .le .uint k L))
-    (.lit (.bool true)) .err
+  key{ if(0 <= k && k <= L) then true else err }
 
 /-- Whether a location is there after an operation on an array: an element
 of a pushed struct or array at an index up to the old length. -/
 def arrHas (op : AOp) (L old opq : LTerm) : PathRel → LTerm
-  | .eq | .above => .lit (.bool true)
+  | .eq | .above => key{ true }
   | .diverge => old
   | .below (.key k :: rest) =>
     match op with
     | .slot (.ref _) => if rest.isEmpty then inRange k L else opq
-    | _ => arrKey op L k old opq (if rest.isEmpty then .lit (.bool true) else .err)
+    | _ => arrKey op L k old opq (if rest.isEmpty then key{ true } else key{ err })
   | .below _ => opq
 
 /-- `o` where the operation is a `push()` of a reference, the one operation
@@ -4194,15 +4196,15 @@ def arrLength (op : AOp) (L old opq : LTerm) (slot : Option (List SSeg → LTerm
   | .above | .diverge => old
   | .below (.key k :: rest) =>
     match op, slot with
-    | .slot (.ref _), some f => .kite k L (f rest) old
-    | _, _ => arrKey op L k old opq .err
+    | .slot (.ref _), some f => key{ if(k = L) then ‹f rest› else old }
+    | _, _ => arrKey op L k old opq key{ err }
   | .below _ => opq
 
 /-- Whether a mapping (a fixed-size array) is at `Q` after an operation on
 an array: the shapes at and above it stay. -/
 def arrMap (op : AOp) (L old opq : LTerm) : PathRel → LTerm
   | .eq | .above | .diverge => old
-  | .below (.key k :: _) => arrKey op L k old opq .err
+  | .below (.key k :: _) => arrKey op L k old opq key{ err }
   | .below _ => opq
 
 /-- A read below a copy, the segments `pre` walked: at a key, the read
@@ -4213,7 +4215,8 @@ def copyKeys (srcMap : List SSeg → LTerm) (opq : LTerm) (F : List SSeg → LTe
     List SSeg → List SSeg → LTerm
   | pre, [] => F pre
   | pre, .field f :: r => copyKeys srcMap opq F (pre ++ [.field f]) r
-  | pre, .key k :: r => .ite (isT (srcMap pre)) opq (copyKeys srcMap opq F (pre ++ [.key k]) r)
+  | pre, .key k :: r =>
+    key{ if(‹isT (srcMap pre)›) then opq else ‹copyKeys srcMap opq F (pre ++ [.key k]) r› }
 
 /-- The leaf of a read after a copy over `P`: at and below `P`, what the
 source has there (`copyKeys`); the old read apart. -/
@@ -4265,7 +4268,7 @@ def valGuard (W : LTerm) (N : Unit → Option LTerm) : LMV → Option LTerm
 /-- The memory below runs (`G`), and so do the slot's and the value's guards. -/
 def okWrite (G : Option LTerm) (W V : Unit → Option LTerm) : Option LTerm :=
   G.bind fun g => (W ()).bind fun w => (V ()).map fun x =>
-    .seq g (.seq w (.seq x (.lit (.bool true))))
+    key{ (g; (w; (x; true))) }
 
 /-- The root a view puts its object at: a view that returns has it. -/
 def isViewRoot : LPath → Bool
@@ -4276,7 +4279,7 @@ def isViewRoot : LPath → Bool
 is not known. -/
 def okView (G N : Option LTerm) (d : LTerm) : LTerm :=
   match G, N with
-  | some g, some n => .seq g (.seq n (.lit (.bool true)))
+  | some g, some n => key{ (g; (n; true)) }
   | _, _ => d
 
 /-! ### Writes through a dangling alias
@@ -4290,14 +4293,14 @@ guarded by the old location's presence (`staleRead`, `staleHas`). -/
 /-- The leaf of a read after a stale write of `w`: the word where the old
 location is live (`hasQ`), nothing above or below it, the old read apart. -/
 def staleRead (w hasQ old : LTerm) : PathRel → LTerm
-  | .eq => .seq hasQ w
-  | .above | .below _ => .err
-  | .diverge => old
+  | .eq => key{ (hasQ; w) }                     -- selectOnSaveCons \then, guarded
+  | .above | .below _ => key{ err }
+  | .diverge => old                             -- selectOnSaveCons \else
 
 /-- Whether a location is there after a stale write: as before, but below
 the written word. -/
 def staleHas (old : LTerm) : PathRel → LTerm
-  | .below _ => .err
+  | .below _ => key{ err }
   | .eq | .above | .diverge => old
 
 /-- The array of a path's last index, the index, and the members after it:
@@ -4314,8 +4317,8 @@ first slot past the end has the location (`S`), the write returns;
 elsewhere the guard is the write itself (`opq`). -/
 def staleOk (has : LTerm) (slot : Option (LTerm × LTerm × LTerm)) (opq : LTerm) : LTerm :=
   .orElse (.orElse has (match slot with
-    | some (k, L, S) => .kite k L S .err
-    | none => .err)) opq
+    | some (k, L, S) => key{ if(k = L) then S else err }
+    | none => key{ err })) opq
 
 /-- The leaf of a slot reader through a write through a dangling alias, the
 written location compared with the slot: `atEq` where it is the slot,
@@ -4329,13 +4332,13 @@ def slotLeaf (atEq atDiv opq : LTerm) : PathRel → LTerm
 with none). -/
 def headKey : List SSeg → LTerm
   | .key k :: _ => k
-  | _ => .err
+  | _ => key{ err }
 
 /-- The word `w` where the read is the element at one index, `.err`
 otherwise (a word has nothing below it). -/
 def wordAtKey (w : LTerm) : List SSeg → LTerm
   | [.key _] => w
-  | _ => .err
+  | _ => key{ err }
 
 
 /-- Whether `s` holds a write through a stale alias (`SymB.stale`: one a
@@ -4355,32 +4358,32 @@ mutual
 
 /-- Every read of a write eliminated. -/
 def LTerm.elim : LTerm → LTerm
-  | .lit v => .lit v
-  | .var x => .var x
-  | .binop op p a b => .binop op p a.elim b.elim
-  | .unop op p a => .unop op p a.elim
-  | .ite c a b => .ite c.elim a.elim b.elim
-  | .find s q => .seq s.okE (.seq (.pok q.elim) (s.readU q.elim))
-  | .has s q => .seq s.okE (.seq (.pok q.elim) (s.hasU q.elim))
-  | .kmap sh s q => .seq s.okE (.seq (.pok q.elim) (s.mapU sh q.elim))
-  | .len s q => .seq s.okE (.seq (.pok q.elim) (s.lenU q.elim))
-  | .sok s => s.okE
-  | .pok q => .pok q.elim
-  | .seq d a => .seq d.elim a.elim
-  | .orElse a b => .orElse a.elim b.elim
-  | .kite a b t e => .kite a.elim b.elim t.elim e.elim
-  | .zero a => .zero a.elim
-  | .err => .err
-  | .env k => .env k
-  | .findP s q => .findP s q.elim
-  | .cpok s q => .seq s.okE (.seq (.pok q.elim) (s.cpokU q.elim))
+  | key{ lit(v) } => key{ lit(v) }
+  | key{ var(x) } => key{ var(x) }
+  | key{ binop(op, p, a, b) } => .binop op p a.elim b.elim
+  | key{ unop(op, p, a) } => .unop op p a.elim
+  | key{ if(c) then a else b } => .ite c.elim a.elim b.elim
+  | key{ find(st, q) } => .seq st.okE (.seq (.pok q.elim) (st.readU q.elim))
+  | key{ has(st, q) } => .seq st.okE (.seq (.pok q.elim) (st.hasU q.elim))
+  | key{ kmap(sh, st, q) } => .seq st.okE (.seq (.pok q.elim) (st.mapU sh q.elim))
+  | key{ find(st, q.length) } => .seq st.okE (.seq (.pok q.elim) (st.lenU q.elim))
+  | key{ okSt(st) } => st.okE
+  | key{ okPath(q) } => .pok q.elim
+  | key{ (d; a) } => .seq d.elim a.elim
+  | key{ orElse(a, b) } => .orElse a.elim b.elim
+  | key{ if(a = b) then t else e } => .kite a.elim b.elim t.elim e.elim
+  | key{ delValue(a) } => .zero a.elim
+  | key{ err } => key{ err }
+  | key{ env(k) } => key{ env(k) }
+  | key{ findP(st, q) } => .findP st q.elim
+  | key{ copyOk(st, q) } => .seq st.okE (.seq (.pok q.elim) (st.cpokU q.elim))
 termination_by structural t => t
 
 /-- A path with the reads in its keys eliminated: `people[balances[a]]`. -/
 def LPath.elim : LPath → LPath
   | .root r => .root r
-  | .field q f => .field q.elim f
-  | .at q k => .at q.elim k.elim
+  | key{ q.f } => .field q.elim f
+  | key{ q[k] } => .at q.elim k.elim
 termination_by structural q => q
 
 /-- Returns exactly when the writes of `s` succeed.  A copy within one
@@ -4388,61 +4391,71 @@ storage (`tokens = bucket.tokens;`) checks it once where it holds a stale
 write (`LStor.dangles`): the guard is repeated at every read, and twice it
 would put those leaves past `Derive.elimSize`. -/
 def LStor.okE : LStor → LTerm
-  | .init => .lit (.bool true)
-  | .save s q w =>
-    if q.noLen then .seq s.okE (.seq w.elim (.seq (.pok q.elim) (s.hasU q.elim)))
-    else .sok (.save s q w)
-  | .del s q =>
-    if q.noLen then .seq s.okE (.seq (.pok q.elim) (s.hasU q.elim))
-    else .sok (.del s q)
-  | .arr op s q w =>
-    if q.noLen then .seq s.okE (.seq w.elim (.seq (.pok q.elim) (arrOk op (s.lenU q.elim))))
-    else .sok (.arr op s q w)
-  | .stale none s q w =>
-    if q.noLen then .seq s.okE (.seq w.elim (.seq (.pok q.elim)
-      (staleOk (s.hasU q.elim) (match q.elim.splitLast with
-        | some (A, k, rest) => some (k, s.lenU A, s.slotHasU A rest .err)
-        | none => none) (.sok (.stale none s q w)))))
-    else .sok (.stale none s q w)
-  | .stale (some op) s q w =>
-    if q.noLen then .seq s.okE (.seq w.elim (.seq (.pok q.elim)
-      (staleOk (arrOk op (s.lenU q.elim)) (match q.elim.splitLast with
-        | some (A, k, rest) => some (k, s.lenU A, arrOk op (s.slotLenU A rest .err))
-        | none => none) (.sok (.stale (some op) s q w)))))
-    else .sok (.stale (some op) s q w)
-  | .copy s q src sq =>
+  -- Lean only: KeY's save and delAt are total, the interpreter's halt
+  | key{ storage } => key{ true }
+  | key{ save(st, q, w) } =>
+    if q.noLen then .seq st.okE (.seq w.elim (.seq (.pok q.elim) (st.hasU q.elim)))
+    else key{ ok(save(st, q, w)) }
+  | key{ delAt(st, q) } =>
+    if q.noLen then .seq st.okE (.seq (.pok q.elim) (st.hasU q.elim))
+    else key{ ok(delAt(st, q)) }
+  | key{ arr(op, st, q, w) } =>
+    if q.noLen then .seq st.okE (.seq w.elim (.seq (.pok q.elim) (arrOk op (st.lenU q.elim))))
+    else key{ ok(arr(op, st, q, w)) }
+  | key{ staleSave(st, q, w) } =>
+    if q.noLen then .seq st.okE (.seq w.elim (.seq (.pok q.elim)
+      (staleOk (st.hasU q.elim) (match q.elim.splitLast with
+        | some (A, k, rest) => some (k, st.lenU A, st.slotHasU A rest .err)
+        | none => none) key{ ok(staleSave(st, q, w)) })))
+    else key{ ok(staleSave(st, q, w)) }
+  | key{ stale(op, st, q, w) } =>
+    if q.noLen then .seq st.okE (.seq w.elim (.seq (.pok q.elim)
+      (staleOk (arrOk op (st.lenU q.elim)) (match q.elim.splitLast with
+        | some (A, k, rest) => some (k, st.lenU A, arrOk op (st.slotLenU A rest .err))
+        | none => none) key{ ok(stale(op, st, q, w)) })))
+    else key{ ok(stale(op, st, q, w)) }
+  | key{ save(st, q, find(src, sq)) } =>
     if q.noLen then
-      if s.dangles && src == s then .seq s.okE (.seq (.pok sq.elim) (.seq (s.hasU sq.elim)
-        (.seq (.pok q.elim) (s.hasU q.elim))))
+      if st.dangles && src == st then .seq st.okE (.seq (.pok sq.elim) (.seq (st.hasU sq.elim)
+        (.seq (.pok q.elim) (st.hasU q.elim))))
       else .seq src.okE (.seq (.pok sq.elim) (.seq (src.hasU sq.elim)
-        (.seq s.okE (.seq (.pok q.elim) (s.hasU q.elim)))))
-    else .sok (.copy s q src sq)
-  | .view m i => if m.refDesc then okView m.okU (m.objU false i) (.sok (.view m i))
-    else .sok (.view m i)
+        (.seq st.okE (.seq (.pok q.elim) (st.hasU q.elim)))))
+    else key{ ok(save(st, q, find(src, sq))) }
+  | key{ copyMem(mtSt, m, i) } =>
+    if m.refDesc then okView m.okU (m.objU false i) key{ ok(copyMem(mtSt, m, i)) }
+    else key{ ok(copyMem(mtSt, m, i)) }
 termination_by structural s => s
 
 /-- The word at `Q` in `s`, where `s` and `Q` return. -/
 def LStor.readU : LStor → LPath → LTerm
-  | .init, Q => .find .init Q
-  | .save s P w, Q => (cmpSegs P.elim.segs Q.segs).toTerm (saveLeaf w.elim (s.readU Q))
-  | .del s P, Q => (cmpSegs P.elim.segs Q.segs).toTerm
-      (delLeaf (s.readU Q) P.elim fun sh q => s.mapU sh q)
-  | .arr op s P w, Q => (cmpSegs P.elim.segs Q.segs).toTerm
-      (arrRead op w.elim (s.lenU P.elim) (s.readU Q) (.find (.arr op s P w) Q)
-        fun rest => s.slotU P.elim rest (.find (.arr op s P w) Q))
-  | .stale none s P w, Q => (cmpSegs P.elim.segs Q.segs).toTerm
-      (staleRead w.elim (s.hasU Q) (s.readU Q))
-  | .stale (some op) s P w, Q => .find (.stale (some op) s P w) Q
-  | .copy s P src SQ, Q => (cmpSegs P.elim.segs Q.segs).toTerm
-      (copyLeaf (src.readU SQ.elim) .err (s.readU Q) (.find (.copy s P src SQ) Q)
+  | key{ storage }, Q => key{ find(storage, Q) }    -- the initial storage, for the facts
+  -- findDefinition*, then selectOnSaveCons per segment (cmpSegs); saveLeaf: .eq is \then
+  -- and saveOnEmptyPrim, .diverge \else, .above/.below Lean's err
+  | key{ save(st, P, w) }, Q => (cmpSegs P.elim.segs Q.segs).toTerm (saveLeaf w.elim (st.readU Q))
+  -- selectOnDelAtCons, then delField* / selectStDelNode* (by a shape test, not a sort)
+  | key{ delAt(st, P) }, Q => (cmpSegs P.elim.segs Q.segs).toTerm
+      (delLeaf (st.readU Q) P.elim fun sh q => st.mapU sh q)
+  -- selectOnSaveCons on the slot and the size a push or a pop writes (arrRead)
+  | key{ arr(op, st, P, w) }, Q => (cmpSegs P.elim.segs Q.segs).toTerm
+      (arrRead op w.elim (st.lenU P.elim) (st.readU Q) key{ find(arr(op, st, P, w), Q) }
+        fun rest => st.slotU P.elim rest key{ find(arr(op, st, P, w), Q) })
+  -- selectOnSaveCons, the word guarded by the old location (staleRead)
+  | key{ staleSave(st, P, w) }, Q => (cmpSegs P.elim.segs Q.segs).toTerm
+      (staleRead w.elim (st.hasU Q) (st.readU Q))
+  | key{ stale(op, st, P, w) }, Q => key{ find(stale(op, st, P, w), Q) }
+  -- selectOnSaveEmpty{Ref,Fixed,IndexStruct,Default}: below the copy, the source (copyLeaf)
+  | key{ save(st, P, find(src, SQ)) }, Q => (cmpSegs P.elim.segs Q.segs).toTerm
+      (copyLeaf (src.readU SQ.elim) key{ err } (st.readU Q)
+        key{ find(save(st, P, find(src, SQ)), Q) }
         (fun pre => src.mapU .map (SQ.elim.addSegs pre)) fun rest => src.readU (SQ.elim.addSegs rest))
-  | .view m i, Q =>
+  -- findOnCopy, selectOnCopyMemPrim: the memory read through the view
+  | key{ copyMem(mtSt, m, i) }, Q =>
     match viewPath Q with
     | some (p, a) =>
       match m.walk i p with
-      | some j => (m.readU j a).getD (.find (.view m i) Q)
-      | none => .find (.view m i) Q
-    | none => .find (.view m i) Q
+      | some j => (m.readU j a).getD key{ find(copyMem(mtSt, m, i), Q) }
+      | none => key{ find(copyMem(mtSt, m, i), Q) }
+    | none => key{ find(copyMem(mtSt, m, i), Q) }
 termination_by structural s => s
 
 /-- What the slot a `push()` of a struct or an array takes holds at `rest`,
@@ -4456,34 +4469,40 @@ past a `delete` of an empty array (the slot as it was,
 length the old element there, cleared; at it the old slot;
 `selectOnSaveEmptyIndexStruct`).  Elsewhere the read itself (`opq`). -/
 def LStor.slotU : LStor → LPath → List SSeg → LTerm → LTerm
-  | .arr (.pop keep) s P' _, P, rest, opq =>
+  -- storagePopSave's delAt(at(n - 1)), then selectOnDelAtCons, delFieldIndexStruct
+  | key{ arr(pop(keep), st, P', _) }, P, rest, opq =>
     if P'.elim == P then
-      if keep then s.readU ((P.at (lenPred (s.lenU P))).addSegs rest)
-      else delLeaf (s.readU ((P.at (lenPred (s.lenU P))).addSegs rest)) (P.at (lenPred (s.lenU P)))
-        (fun sh q => s.mapU sh q) (if rest.isEmpty then .eq else .below rest)
+      if keep then st.readU ((P.at (lenPred (st.lenU P))).addSegs rest)
+      else delLeaf (st.readU ((P.at (lenPred (st.lenU P))).addSegs rest)) (P.at (lenPred (st.lenU P)))
+        (fun sh q => st.mapU sh q) (if rest.isEmpty then .eq else .below rest)
     else opq
-  | .del s P', P, rest, opq =>
+  -- selectStDelNodeIndexStruct: the old first element, cleared; past the end, the slot
+  | key{ delAt(st, P') }, P, rest, opq =>
     if P'.elim == P then
-      .ite (isT (s.mapU .fixed P)) opq
-        (.kite (s.lenU P) (.lit (.int 0)) (if s.dangles then s.slotU P rest opq else opq)
-          (delLeaf (s.readU ((P.at (.lit (.int 0))).addSegs rest)) (P.at (.lit (.int 0)))
-            (fun sh q => s.mapU sh q) (if rest.isEmpty then .eq else .below rest)))
+      key{ if(‹isT (st.mapU .fixed P)›) then opq
+        else if(‹st.lenU P› = 0) then ‹if st.dangles then st.slotU P rest opq else opq›
+        else ‹delLeaf (st.readU ((P.at key{ 0 }).addSegs rest)) (P.at key{ 0 })
+          (fun sh q => st.mapU sh q) (if rest.isEmpty then .eq else .below rest)› }
     else opq
-  | .stale none s P' w, P, rest, opq =>
-    (cmpSegs P'.elim.segs ((P.at (s.lenU P)).addSegs rest).segs).toTerm
-      (saveLeaf (if rest.any SSeg.isKey then opq else w.elim) (s.slotU P rest opq))
-  | .copy s P' src SQ, P, rest, opq =>
-    if s.dangles && P'.elim == P then
+  | key{ staleSave(st, P', w) }, P, rest, opq =>
+    (cmpSegs P'.elim.segs ((P.at (st.lenU P)).addSegs rest).segs).toTerm
+      (saveLeaf (if rest.any SSeg.isKey then opq else w.elim) (st.slotU P rest opq))
+  -- a copy over the array, where the storage holds a stale write
+  | key{ save(st, P', find(src, SQ)) }, P, rest, opq =>
+    if st.dangles && P'.elim == P then
       let L' := src.lenU SQ.elim
-      let L := s.lenU P
-      .ite (isT (.seq L' L)) (.kite L' L (s.slotU P rest opq) (.ite (.binop .lt .uint L' L)
-        (delLeaf (s.readU ((P.at L').addSegs rest)) (P.at L')
-          (fun sh q => s.mapU sh q) (if rest.isEmpty then .eq else .below rest)) opq)) opq
+      let L := st.lenU P
+      -- selectOnSaveEmptyIndexStruct, branches 2 and 3
+      key{ if(‹isT key{ (L'; L) }›) then
+          (if(L' = L) then ‹st.slotU P rest opq›
+           else if(L' < L) then ‹delLeaf (st.readU ((P.at L').addSegs rest)) (P.at L')
+             (fun sh q => st.mapU sh q) (if rest.isEmpty then .eq else .below rest)› else opq)
+        else opq }
     else opq
-  | .stale (some .push) s P' w, P, rest, opq =>
-    (cmpSegs P'.elim.segs (P.at (s.lenU P)).segs).toTerm
-      (slotLeaf (.orElse (.kite (headKey rest) (s.slotLenU P [] .err) (wordAtKey w.elim rest) opq) opq)
-        opq opq)
+  | key{ stale(push, st, P', w) }, P, rest, opq =>
+    (cmpSegs P'.elim.segs (P.at (st.lenU P)).segs).toTerm
+      (slotLeaf key{ orElse(if(‹headKey rest› = ‹st.slotLenU P [] .err›)
+          then ‹wordAtKey w.elim rest› else opq, opq) } opq opq)
   | .init, _, _, opq | .save .., _, _, opq | .arr .push .., _, _, opq
   | .arr (.slot _) .., _, _, opq | .stale (some (.pop _)) .., _, _, opq
   | .stale (some (.slot _)) .., _, _, opq | .view .., _, _, opq => opq
@@ -4494,15 +4513,15 @@ location `rest`, the array at `P` in `s` (`slotU`'s guard): after a `pop` at
 `P`, what the popped element has; through a stale write, what it had,
 nothing below the written word.  Elsewhere `opq`. -/
 def LStor.slotHasU : LStor → LPath → List SSeg → LTerm → LTerm
-  | .arr (.pop keep) s P' _, P, rest, opq =>
+  | key{ arr(pop(keep), st, P', _) }, P, rest, opq =>
     if P'.elim == P then
-      if keep then s.hasU ((P.at (lenPred (s.lenU P))).addSegs rest)
-      else delHas (s.hasU ((P.at (lenPred (s.lenU P))).addSegs rest)) (P.at (lenPred (s.lenU P)))
-        (fun sh q => s.mapU sh q) (if rest.isEmpty then .eq else .below rest)
+      if keep then st.hasU ((P.at (lenPred (st.lenU P))).addSegs rest)
+      else delHas (st.hasU ((P.at (lenPred (st.lenU P))).addSegs rest)) (P.at (lenPred (st.lenU P)))
+        (fun sh q => st.mapU sh q) (if rest.isEmpty then .eq else .below rest)
     else opq
-  | .stale none s P' _, P, rest, opq =>
-    (cmpSegs P'.elim.segs ((P.at (s.lenU P)).addSegs rest).segs).toTerm
-      (staleHas (s.slotHasU P rest opq))
+  | key{ staleSave(st, P', _) }, P, rest, opq =>
+    (cmpSegs P'.elim.segs ((P.at (st.lenU P)).addSegs rest).segs).toTerm
+      (staleHas (st.slotHasU P rest opq))
   | .init, _, _, opq | .save .., _, _, opq | .del .., _, _, opq | .arr .push .., _, _, opq
   | .arr (.slot _) .., _, _, opq | .stale (some _) .., _, _, opq | .copy .., _, _, opq
   | .view .., _, _, opq => opq
@@ -4515,21 +4534,21 @@ write through a dangling alias apart from the slot, the old one; through a
 `push` through one at the slot, one more.  Elsewhere `opq`.  Only sound
 (`LStor.slotLenU_sound`): its users keep `opq` beside it or need no more. -/
 def LStor.slotLenU : LStor → LPath → List SSeg → LTerm → LTerm
-  | .arr (.pop keep) s P' _, P, rest, opq =>
+  | key{ arr(pop(keep), st, P', _) }, P, rest, opq =>
     if P'.elim == P then
-      if keep then s.lenU ((P.at (lenPred (s.lenU P))).addSegs rest)
-      else delLen (s.lenU ((P.at (lenPred (s.lenU P))).addSegs rest))
-        (lenEnd (s.lenU ((P.at (lenPred (s.lenU P))).addSegs rest))
-          (s.mapU .fixed ((P.at (lenPred (s.lenU P))).addSegs rest)))
-        (P.at (lenPred (s.lenU P))) (fun sh q => s.mapU sh q)
+      if keep then st.lenU ((P.at (lenPred (st.lenU P))).addSegs rest)
+      else delLen (st.lenU ((P.at (lenPred (st.lenU P))).addSegs rest))
+        (lenEnd (st.lenU ((P.at (lenPred (st.lenU P))).addSegs rest))
+          (st.mapU .fixed ((P.at (lenPred (st.lenU P))).addSegs rest)))
+        (P.at (lenPred (st.lenU P))) (fun sh q => st.mapU sh q)
         (if rest.isEmpty then .eq else .below rest)
     else opq
-  | .stale none s P' _, P, rest, opq =>
-    (cmpSegs P'.elim.segs (P.at (s.lenU P)).segs).toTerm
-      (slotLeaf opq (s.slotLenU P rest opq) opq)
-  | .stale (some .push) s P' _, P, rest, opq =>
-    (cmpSegs P'.elim.segs (P.at (s.lenU P)).segs).toTerm
-      (slotLeaf (if rest.isEmpty then lenSucc (s.slotLenU P rest .err) else opq) opq opq)
+  | key{ staleSave(st, P', _) }, P, rest, opq =>
+    (cmpSegs P'.elim.segs (P.at (st.lenU P)).segs).toTerm
+      (slotLeaf opq (st.slotLenU P rest opq) opq)
+  | key{ stale(push, st, P', _) }, P, rest, opq =>
+    (cmpSegs P'.elim.segs (P.at (st.lenU P)).segs).toTerm
+      (slotLeaf (if rest.isEmpty then lenSucc (st.slotLenU P rest .err) else opq) opq opq)
   | .init, _, _, opq | .save .., _, _, opq | .del .., _, _, opq | .arr .push .., _, _, opq
   | .arr (.slot _) .., _, _, opq | .stale (some (.pop _)) .., _, _, opq
   | .stale (some (.slot _)) .., _, _, opq | .copy .., _, _, opq | .view .., _, _, opq => opq
@@ -4537,73 +4556,83 @@ termination_by structural s => s
 
 /-- Whether `Q` names a location of `s`, where `s` and `Q` return. -/
 def LStor.hasU : LStor → LPath → LTerm
-  | .init, Q => .has .init Q
-  | .save s P _, Q => (cmpSegs P.elim.segs Q.segs).toTerm (saveHas (s.hasU Q))
-  | .del s P, Q => (cmpSegs P.elim.segs Q.segs).toTerm
-      (delHas (s.hasU Q) P.elim fun sh q => s.mapU sh q)
-  | .arr op s P w, Q => (cmpSegs P.elim.segs Q.segs).toTerm
-      (arrHas op (s.lenU P.elim) (s.hasU Q) (.has (.arr op s P w) Q))
-  | .stale none s P _, Q => (cmpSegs P.elim.segs Q.segs).toTerm (staleHas (s.hasU Q))
-  | .stale (some op) s P w, Q => .has (.stale (some op) s P w) Q
-  | .copy s P src SQ, Q => (cmpSegs P.elim.segs Q.segs).toTerm
-      (copyLeaf (.lit (.bool true)) (.lit (.bool true)) (s.hasU Q) (.has (.copy s P src SQ) Q)
+  | key{ storage }, Q => key{ has(storage, Q) }
+  -- Lean only: a write leaves its path and every location above it (saveHas)
+  | key{ save(st, P, _) }, Q => (cmpSegs P.elim.segs Q.segs).toTerm (saveHas (st.hasU Q))
+  | key{ delAt(st, P) }, Q => (cmpSegs P.elim.segs Q.segs).toTerm
+      (delHas (st.hasU Q) P.elim fun sh q => st.mapU sh q)
+  | key{ arr(op, st, P, w) }, Q => (cmpSegs P.elim.segs Q.segs).toTerm
+      (arrHas op (st.lenU P.elim) (st.hasU Q) key{ has(arr(op, st, P, w), Q) })
+  | key{ staleSave(st, P, _) }, Q => (cmpSegs P.elim.segs Q.segs).toTerm (staleHas (st.hasU Q))
+  | key{ stale(op, st, P, w) }, Q => key{ has(stale(op, st, P, w), Q) }
+  | key{ save(st, P, find(src, SQ)) }, Q => (cmpSegs P.elim.segs Q.segs).toTerm
+      (copyLeaf key{ true } key{ true } (st.hasU Q) key{ has(save(st, P, find(src, SQ)), Q) }
         (fun pre => src.mapU .map (SQ.elim.addSegs pre)) fun rest => src.hasU (SQ.elim.addSegs rest))
-  | .view m i, Q =>
+  -- selectOnCopyMemRef: the memory's name and slot through the view
+  | key{ copyMem(mtSt, m, i) }, Q =>
     match viewPath Q with
     | some (p, a) =>
       match m.walk i p with
       | some j =>
         match m.readU j a, (m.readI j a).bind fun j' => m.objU false j' with
-        | some W, some N => .orElse (.seq W (.lit (.bool true))) (.seq N (.lit (.bool true)))
-        | _, _ => .has (.view m i) Q
-      | none => .has (.view m i) Q
-    | none => if isViewRoot Q then .lit (.bool true) else .has (.view m i) Q
+        | some W, some N => key{ orElse((W; true), (N; true)) }
+        | _, _ => key{ has(copyMem(mtSt, m, i), Q) }
+      | none => key{ has(copyMem(mtSt, m, i), Q) }
+    | none => if isViewRoot Q then key{ true } else key{ has(copyMem(mtSt, m, i), Q) }
 termination_by structural s => s
 
 /-- The length of the array at `Q` in `s`, where `s` and `Q` return: a
 write keeps the length of every array above it, as it keeps its shape. -/
 def LStor.lenU : LStor → LPath → LTerm
-  | .init, Q => .len .init Q
-  | .save s P _, Q => (cmpSegs P.elim.segs Q.segs).toTerm (saveMap (s.lenU Q))
-  | .del s P, Q => (cmpSegs P.elim.segs Q.segs).toTerm
-      (delLen (s.lenU Q) (lenEnd (s.lenU Q) (s.mapU .fixed Q)) P.elim fun sh q => s.mapU sh q)
-  | .arr op s P w, Q => (cmpSegs P.elim.segs Q.segs).toTerm
-      (arrLength op (s.lenU P.elim) (s.lenU Q) (.len (.arr op s P w) Q)
-        (if s.dangles then some fun rest => .orElse (s.slotLenU P.elim rest .err)
-          (.len (.arr op s P w) Q) else none))
-  | .stale none s P _, Q => (cmpSegs P.elim.segs Q.segs).toTerm (saveMap (s.lenU Q))
-  | .stale (some op) s P w, Q => (cmpSegs P.elim.segs Q.segs).toTerm
-      (arrLength op (s.lenU P.elim) (s.lenU Q) (.len (.stale (some op) s P w) Q) none)
-  | .copy s P src SQ, Q => (cmpSegs P.elim.segs Q.segs).toTerm
-      (copyLeaf (src.lenU SQ.elim) (s.lenU Q) (s.lenU Q) (.len (.copy s P src SQ) Q)
+  | key{ storage }, Q => key{ find(storage, Q.length) }
+  -- selectOnSaveCons on size: a write keeps the length of every array above it
+  | key{ save(st, P, _) }, Q => (cmpSegs P.elim.segs Q.segs).toTerm (saveMap (st.lenU Q))
+  -- selectOnDelAtCons; selectStDelNodeFixedSize, selectStDelNodeDefault at the path (lenEnd)
+  | key{ delAt(st, P) }, Q => (cmpSegs P.elim.segs Q.segs).toTerm
+      (delLen (st.lenU Q) (lenEnd (st.lenU Q) (st.mapU .fixed Q)) P.elim fun sh q => st.mapU sh q)
+  -- the size a push or a pop writes (arrLength); findDefinitionSize below a recycled slot
+  | key{ arr(op, st, P, w) }, Q => (cmpSegs P.elim.segs Q.segs).toTerm
+      (arrLength op (st.lenU P.elim) (st.lenU Q) key{ find(arr(op, st, P, w), Q.length) }
+        (if st.dangles then some fun rest =>
+          key{ orElse(‹st.slotLenU P.elim rest .err›, find(arr(op, st, P, w), Q.length)) }
+          else none))
+  | key{ staleSave(st, P, _) }, Q => (cmpSegs P.elim.segs Q.segs).toTerm (saveMap (st.lenU Q))
+  | key{ stale(op, st, P, w) }, Q => (cmpSegs P.elim.segs Q.segs).toTerm
+      (arrLength op (st.lenU P.elim) (st.lenU Q) key{ find(stale(op, st, P, w), Q.length) } none)
+  | key{ save(st, P, find(src, SQ)) }, Q => (cmpSegs P.elim.segs Q.segs).toTerm
+      (copyLeaf (src.lenU SQ.elim) (st.lenU Q) (st.lenU Q)
+        key{ find(save(st, P, find(src, SQ)), Q.length) }
         (fun pre => src.mapU .map (SQ.elim.addSegs pre)) fun rest => src.lenU (SQ.elim.addSegs rest))
-  | .view m i, Q =>
+  -- selectOnCopyMemPrim on size
+  | key{ copyMem(mtSt, m, i) }, Q =>
     match viewObj Q with
     | some p =>
       match m.walk i p with
-      | some j => (m.readU j .size).getD (.len (.view m i) Q)
-      | none => .len (.view m i) Q
-    | none => .len (.view m i) Q
+      | some j => (m.readU j key{ size }).getD key{ find(copyMem(mtSt, m, i), Q.length) }
+      | none => key{ find(copyMem(mtSt, m, i), Q.length) }
+    | none => key{ find(copyMem(mtSt, m, i), Q.length) }
 termination_by structural s => s
 
 /-- Whether `Q` names a mapping (`sh = .map`) or a fixed-size array
 (`.fixed`) of `s`, where `s` and `Q` return. -/
 def LStor.mapU (sh : KShape) : LStor → LPath → LTerm
-  | .init, Q => .kmap sh .init Q
-  | .save s P _, Q => (cmpSegs P.elim.segs Q.segs).toTerm (saveMap (s.mapU sh Q))
-  | .del s P, Q => (cmpSegs P.elim.segs Q.segs).toTerm
-      (delMap (s.mapU sh Q) P.elim fun sh' q => s.mapU sh' q)
-  | .arr op s P w, Q => (cmpSegs P.elim.segs Q.segs).toTerm
-      (arrMap op (s.lenU P.elim) (s.mapU sh Q) (.kmap sh (.arr op s P w) Q))
-  | .stale none s P _, Q => (cmpSegs P.elim.segs Q.segs).toTerm (saveMap (s.mapU sh Q))
-  | .stale (some op) s P w, Q => .kmap sh (.stale (some op) s P w) Q
-  | .copy s P src SQ, Q => (cmpSegs P.elim.segs Q.segs).toTerm
-      (copyLeaf (src.mapU sh SQ.elim) (s.mapU sh Q) (s.mapU sh Q) (.kmap sh (.copy s P src SQ) Q)
+  | key{ storage }, Q => key{ kmap(sh, storage, Q) }
+  -- Lean only (KeY reads the shape off the field's sort): a write keeps every shape above it
+  | key{ save(st, P, _) }, Q => (cmpSegs P.elim.segs Q.segs).toTerm (saveMap (st.mapU sh Q))
+  | key{ delAt(st, P) }, Q => (cmpSegs P.elim.segs Q.segs).toTerm
+      (delMap (st.mapU sh Q) P.elim fun sh' q => st.mapU sh' q)
+  | key{ arr(op, st, P, w) }, Q => (cmpSegs P.elim.segs Q.segs).toTerm
+      (arrMap op (st.lenU P.elim) (st.mapU sh Q) key{ kmap(sh, arr(op, st, P, w), Q) })
+  | key{ staleSave(st, P, _) }, Q => (cmpSegs P.elim.segs Q.segs).toTerm (saveMap (st.mapU sh Q))
+  | key{ stale(op, st, P, w) }, Q => key{ kmap(sh, stale(op, st, P, w), Q) }
+  | key{ save(st, P, find(src, SQ)) }, Q => (cmpSegs P.elim.segs Q.segs).toTerm
+      (copyLeaf (src.mapU sh SQ.elim) (st.mapU sh Q) (st.mapU sh Q)
+        key{ kmap(sh, save(st, P, find(src, SQ)), Q) }
         (fun pre => src.mapU .map (SQ.elim.addSegs pre)) fun rest => src.mapU sh (SQ.elim.addSegs rest))
-  | .view m i, Q =>
+  | key{ copyMem(mtSt, m, i) }, Q =>
     match sh with
-    | .map => .err
-    | .fixed => .kmap sh (.view m i) Q
+    | .map => key{ err }                        -- Lean only: memory holds no mapping
+    | .fixed => key{ kmap(sh, copyMem(mtSt, m, i), Q) }
 termination_by structural s => s
 
 /-- Whether the subtree at `Q` of `s` copies into memory, where `s` and `Q`
@@ -4612,10 +4641,11 @@ word keeps the shape, so the test passes the write (`save_cpok_sim`); it
 reaches `cpok init Q` for the closer's `wt` clause.  Any other write keeps
 the test whole. -/
 def LStor.cpokU : LStor → LPath → LTerm
-  | .init, Q => .cpok .init Q
-  | .save s P w, Q => .ite (isT (s.readU P.elim)) (s.cpokU Q) (.cpok (.save s P w) Q)
+  | key{ storage }, Q => key{ copyOk(storage, Q) }
+  | key{ save(st, P, w) }, Q =>
+    key{ if(‹isT (st.readU P.elim)›) then ‹st.cpokU Q› else copyOk(save(st, P, w), Q) }
   | s@(.del ..), Q | s@(.arr ..), Q | s@(.stale ..), Q | s@(.copy ..), Q | s@(.view ..), Q =>
-    .cpok s Q
+    key{ copyOk(s, Q) }
 termination_by structural s => s
 
 /-- The index a selector writes at, its reads eliminated. -/
@@ -4776,134 +4806,142 @@ mutual
 
 /-- `LTerm.elim` as compiled code runs it (`LTerm.elim_csimp`). -/
 def LTerm.elimF : LTerm → LTerm
-  | .lit v => .lit v
-  | .var x => .var x
-  | .binop op p a b => .binop op p a.elimF b.elimF
-  | .unop op p a => .unop op p a.elimF
-  | .ite c a b => .ite c.elimF a.elimF b.elimF
-  | .find s q => .seq s.okEF (.seq (.pok q.elimF) (s.readUF q.elimF))
-  | .has s q => .seq s.okEF (.seq (.pok q.elimF) (s.hasUF q.elimF))
-  | .kmap sh s q => .seq s.okEF (.seq (.pok q.elimF) (s.mapUF sh q.elimF))
-  | .len s q => .seq s.okEF (.seq (.pok q.elimF) (s.lenUF q.elimF))
-  | .sok s => s.okEF
-  | .pok q => .pok q.elimF
-  | .seq d a => .seq d.elimF a.elimF
-  | .orElse a b => .orElse a.elimF b.elimF
-  | .kite a b t e => .kite a.elimF b.elimF t.elimF e.elimF
-  | .zero a => .zero a.elimF
-  | .err => .err
-  | .env k => .env k
-  | .findP s q => .findP s q.elimF
-  | .cpok s q => .seq s.okEF (.seq (.pok q.elimF) (s.cpokUF q.elimF))
+  | key{ lit(v) } => key{ lit(v) }
+  | key{ var(x) } => key{ var(x) }
+  | key{ binop(op, p, a, b) } => .binop op p a.elimF b.elimF
+  | key{ unop(op, p, a) } => .unop op p a.elimF
+  | key{ if(c) then a else b } => .ite c.elimF a.elimF b.elimF
+  | key{ find(st, q) } => .seq st.okEF (.seq (.pok q.elimF) (st.readUF q.elimF))
+  | key{ has(st, q) } => .seq st.okEF (.seq (.pok q.elimF) (st.hasUF q.elimF))
+  | key{ kmap(sh, st, q) } => .seq st.okEF (.seq (.pok q.elimF) (st.mapUF sh q.elimF))
+  | key{ find(st, q.length) } => .seq st.okEF (.seq (.pok q.elimF) (st.lenUF q.elimF))
+  | key{ okSt(st) } => st.okEF
+  | key{ okPath(q) } => .pok q.elimF
+  | key{ (d; a) } => .seq d.elimF a.elimF
+  | key{ orElse(a, b) } => .orElse a.elimF b.elimF
+  | key{ if(a = b) then t else e } => .kite a.elimF b.elimF t.elimF e.elimF
+  | key{ delValue(a) } => .zero a.elimF
+  | key{ err } => key{ err }
+  | key{ env(k) } => key{ env(k) }
+  | key{ findP(st, q) } => .findP st q.elimF
+  | key{ copyOk(st, q) } => .seq st.okEF (.seq (.pok q.elimF) (st.cpokUF q.elimF))
 termination_by structural t => t
 
 /-- `LPath.elim` as compiled code runs it. -/
 def LPath.elimF : LPath → LPath
   | .root r => .root r
-  | .field q f => .field q.elimF f
-  | .at q k => .at q.elimF k.elimF
+  | key{ q.f } => .field q.elimF f
+  | key{ q[k] } => .at q.elimF k.elimF
 termination_by structural q => q
 
 /-- `LStor.okE` as compiled code runs it. -/
 def LStor.okEF : LStor → LTerm
-  | .init => .lit (.bool true)
-  | .save s q w =>
-    if q.noLen then .seq s.okEF (.seq w.elimF (.seq (.pok q.elimF) (s.hasUF q.elimF)))
-    else .sok (.save s q w)
-  | .del s q =>
-    if q.noLen then .seq s.okEF (.seq (.pok q.elimF) (s.hasUF q.elimF))
-    else .sok (.del s q)
-  | .arr op s q w =>
-    if q.noLen then .seq s.okEF (.seq w.elimF (.seq (.pok q.elimF) (arrOk op (s.lenUF q.elimF))))
-    else .sok (.arr op s q w)
-  | .stale none s q w =>
+  | key{ storage } => key{ true }
+  | key{ save(st, q, w) } =>
+    if q.noLen then .seq st.okEF (.seq w.elimF (.seq (.pok q.elimF) (st.hasUF q.elimF)))
+    else key{ ok(save(st, q, w)) }
+  | key{ delAt(st, q) } =>
+    if q.noLen then .seq st.okEF (.seq (.pok q.elimF) (st.hasUF q.elimF))
+    else key{ ok(delAt(st, q)) }
+  | key{ arr(op, st, q, w) } =>
+    if q.noLen then .seq st.okEF (.seq w.elimF (.seq (.pok q.elimF) (arrOk op (st.lenUF q.elimF))))
+    else key{ ok(arr(op, st, q, w)) }
+  | key{ staleSave(st, q, w) } =>
     if q.noLen then
       let Q := q.elimF
-      .seq s.okEF (.seq w.elimF (.seq (.pok Q)
-        (staleOk (s.hasUF Q) (match Q.splitLast with
-          | some (A, k, rest) => some (k, s.lenUF A, s.slotHasUF A rest .err)
-          | none => none) (.sok (.stale none s q w)))))
-    else .sok (.stale none s q w)
-  | .stale (some op) s q w =>
+      .seq st.okEF (.seq w.elimF (.seq (.pok Q)
+        (staleOk (st.hasUF Q) (match Q.splitLast with
+          | some (A, k, rest) => some (k, st.lenUF A, st.slotHasUF A rest .err)
+          | none => none) key{ ok(staleSave(st, q, w)) })))
+    else key{ ok(staleSave(st, q, w)) }
+  | key{ stale(op, st, q, w) } =>
     if q.noLen then
       let Q := q.elimF
-      .seq s.okEF (.seq w.elimF (.seq (.pok Q)
-        (staleOk (arrOk op (s.lenUF Q)) (match Q.splitLast with
-          | some (A, k, rest) => some (k, s.lenUF A, arrOk op (s.slotLenUF A rest .err))
-          | none => none) (.sok (.stale (some op) s q w)))))
-    else .sok (.stale (some op) s q w)
-  | .copy s q src sq =>
+      .seq st.okEF (.seq w.elimF (.seq (.pok Q)
+        (staleOk (arrOk op (st.lenUF Q)) (match Q.splitLast with
+          | some (A, k, rest) => some (k, st.lenUF A, arrOk op (st.slotLenUF A rest .err))
+          | none => none) key{ ok(stale(op, st, q, w)) })))
+    else key{ ok(stale(op, st, q, w)) }
+  | key{ save(st, q, find(src, sq)) } =>
     if q.noLen then
-      if s.dangles && src == s then .seq s.okEF (.seq (.pok sq.elimF) (.seq (s.hasUF sq.elimF)
-        (.seq (.pok q.elimF) (s.hasUF q.elimF))))
+      if st.dangles && src == st then .seq st.okEF (.seq (.pok sq.elimF) (.seq (st.hasUF sq.elimF)
+        (.seq (.pok q.elimF) (st.hasUF q.elimF))))
       else .seq src.okEF (.seq (.pok sq.elimF) (.seq (src.hasUF sq.elimF)
-        (.seq s.okEF (.seq (.pok q.elimF) (s.hasUF q.elimF)))))
-    else .sok (.copy s q src sq)
-  | .view m i => if m.refDesc then okView m.okUF (m.objUF false i) (.sok (.view m i))
-    else .sok (.view m i)
+        (.seq st.okEF (.seq (.pok q.elimF) (st.hasUF q.elimF)))))
+    else key{ ok(save(st, q, find(src, sq))) }
+  | key{ copyMem(mtSt, m, i) } =>
+    if m.refDesc then okView m.okUF (m.objUF false i) key{ ok(copyMem(mtSt, m, i)) }
+    else key{ ok(copyMem(mtSt, m, i)) }
 termination_by structural s => s
 
 /-- `LStor.readU` as compiled code runs it: an operation on an array reads
 the old length and value only where the relation needs them. -/
 def LStor.readUF : LStor → LPath → LTerm
-  | .init, Q => .find .init Q
-  | .save s P w, Q => (cmpSegs P.elimF.segs Q.segs).toTerm (saveLeaf w.elimF (s.readUF Q))
-  | .del s P, Q => (cmpSegs P.elimF.segs Q.segs).toTerm
-      (delLeaf (s.readUF Q) P.elimF fun sh q => s.mapUF sh q)
-  | .arr op s P w, Q =>
+  | key{ storage }, Q => key{ find(storage, Q) }
+  | key{ save(st, P, w) }, Q => (cmpSegs P.elimF.segs Q.segs).toTerm (saveLeaf w.elimF (st.readUF Q))
+  | key{ delAt(st, P) }, Q => (cmpSegs P.elimF.segs Q.segs).toTerm
+      (delLeaf (st.readUF Q) P.elimF fun sh q => st.mapUF sh q)
+  | key{ arr(op, st, P, w) }, Q =>
     let Pe := P.elimF
-    (cmpSegs Pe.segs Q.segs).toTermLazy PathRel.needsOld (fun _ => s.lenUF Pe) (fun _ => s.readUF Q)
-      fun L old => arrRead op w.elimF L old (.find (.arr op s P w) Q)
-        fun rest => s.slotUF Pe rest (.find (.arr op s P w) Q)
-  | .stale none s P w, Q => (cmpSegs P.elimF.segs Q.segs).toTermLazyBy (· matches .eq)
-      (· matches .diverge) (fun _ => s.hasUF Q) (fun _ => s.readUF Q)
+    (cmpSegs Pe.segs Q.segs).toTermLazy PathRel.needsOld (fun _ => st.lenUF Pe) (fun _ => st.readUF Q)
+      fun L old => arrRead op w.elimF L old key{ find(arr(op, st, P, w), Q) }
+        fun rest => st.slotUF Pe rest key{ find(arr(op, st, P, w), Q) }
+  | key{ staleSave(st, P, w) }, Q => (cmpSegs P.elimF.segs Q.segs).toTermLazyBy (· matches .eq)
+      (· matches .diverge) (fun _ => st.hasUF Q) (fun _ => st.readUF Q)
       fun H old => staleRead w.elimF H old
-  | .stale (some op) s P w, Q => .find (.stale (some op) s P w) Q
-  | .copy s P src SQ, Q => (cmpSegs P.elimF.segs Q.segs).toTerm
-      (copyLeaf (src.readUF SQ.elimF) .err (s.readUF Q) (.find (.copy s P src SQ) Q)
+  | key{ stale(op, st, P, w) }, Q => key{ find(stale(op, st, P, w), Q) }
+  | key{ save(st, P, find(src, SQ)) }, Q => (cmpSegs P.elimF.segs Q.segs).toTerm
+      (copyLeaf (src.readUF SQ.elimF) key{ err } (st.readUF Q)
+        key{ find(save(st, P, find(src, SQ)), Q) }
         (fun pre => src.mapUF .map (SQ.elimF.addSegs pre))
         fun rest => src.readUF (SQ.elimF.addSegs rest))
-  | .view m i, Q =>
+  | key{ copyMem(mtSt, m, i) }, Q =>
     match viewPath Q with
     | some (p, a) =>
       match m.walk i p with
-      | some j => (m.readUF j a).getD (.find (.view m i) Q)
-      | none => .find (.view m i) Q
-    | none => .find (.view m i) Q
+      | some j => (m.readUF j a).getD key{ find(copyMem(mtSt, m, i), Q) }
+      | none => key{ find(copyMem(mtSt, m, i), Q) }
+    | none => key{ find(copyMem(mtSt, m, i), Q) }
 termination_by structural s => s
 
 /-- `LStor.slotU` as compiled code runs it. -/
 def LStor.slotUF : LStor → LPath → List SSeg → LTerm → LTerm
-  | .arr (.pop keep) s P' _, P, rest, opq =>
+  -- storagePopSave's delAt(at(n - 1)), then selectOnDelAtCons, delFieldIndexStruct
+  | key{ arr(pop(keep), st, P', _) }, P, rest, opq =>
     if P'.elimF == P then
-      if keep then s.readUF ((P.at (lenPred (s.lenUF P))).addSegs rest)
-      else delLeaf (s.readUF ((P.at (lenPred (s.lenUF P))).addSegs rest))
-        (P.at (lenPred (s.lenUF P)))
-        (fun sh q => s.mapUF sh q) (if rest.isEmpty then .eq else .below rest)
+      if keep then st.readUF ((P.at (lenPred (st.lenUF P))).addSegs rest)
+      else delLeaf (st.readUF ((P.at (lenPred (st.lenUF P))).addSegs rest))
+        (P.at (lenPred (st.lenUF P)))
+        (fun sh q => st.mapUF sh q) (if rest.isEmpty then .eq else .below rest)
     else opq
-  | .del s P', P, rest, opq =>
+  -- selectStDelNodeIndexStruct: the old first element, cleared; past the end, the slot
+  | key{ delAt(st, P') }, P, rest, opq =>
     if P'.elimF == P then
-      .ite (isT (s.mapUF .fixed P)) opq
-        (.kite (s.lenUF P) (.lit (.int 0)) (if s.dangles then s.slotUF P rest opq else opq)
-          (delLeaf (s.readUF ((P.at (.lit (.int 0))).addSegs rest)) (P.at (.lit (.int 0)))
-            (fun sh q => s.mapUF sh q) (if rest.isEmpty then .eq else .below rest)))
+      key{ if(‹isT (st.mapUF .fixed P)›) then opq
+        else if(‹st.lenUF P› = 0) then ‹if st.dangles then st.slotUF P rest opq else opq›
+        else ‹delLeaf (st.readUF ((P.at key{ 0 }).addSegs rest)) (P.at key{ 0 })
+          (fun sh q => st.mapUF sh q) (if rest.isEmpty then .eq else .below rest)› }
     else opq
-  | .stale none s P' w, P, rest, opq =>
-    let L := s.lenUF P
+  | key{ staleSave(st, P', w) }, P, rest, opq =>
+    let L := st.lenUF P
     (cmpSegs P'.elimF.segs ((P.at L).addSegs rest).segs).toTerm
-      (saveLeaf (if rest.any SSeg.isKey then opq else w.elimF) (s.slotUF P rest opq))
-  | .copy s P' src SQ, P, rest, opq =>
-    if s.dangles && P'.elimF == P then
+      (saveLeaf (if rest.any SSeg.isKey then opq else w.elimF) (st.slotUF P rest opq))
+  -- a copy over the array, where the storage holds a stale write
+  | key{ save(st, P', find(src, SQ)) }, P, rest, opq =>
+    if st.dangles && P'.elimF == P then
       let L' := src.lenUF SQ.elimF
-      let L := s.lenUF P
-      .ite (isT (.seq L' L)) (.kite L' L (s.slotUF P rest opq) (.ite (.binop .lt .uint L' L)
-        (delLeaf (s.readUF ((P.at L').addSegs rest)) (P.at L')
-          (fun sh q => s.mapUF sh q) (if rest.isEmpty then .eq else .below rest)) opq)) opq
+      let L := st.lenUF P
+      -- selectOnSaveEmptyIndexStruct, branches 2 and 3
+      key{ if(‹isT key{ (L'; L) }›) then
+          (if(L' = L) then ‹st.slotUF P rest opq›
+           else if(L' < L) then ‹delLeaf (st.readUF ((P.at L').addSegs rest)) (P.at L')
+             (fun sh q => st.mapUF sh q) (if rest.isEmpty then .eq else .below rest)› else opq)
+        else opq }
     else opq
-  | .stale (some .push) s P' w, P, rest, opq =>
-    (cmpSegs P'.elimF.segs (P.at (s.lenUF P)).segs).toTerm
-      (slotLeaf (.orElse (.kite (headKey rest) (s.slotLenUF P [] .err) (wordAtKey w.elimF rest) opq) opq)
-        opq opq)
+  | key{ stale(push, st, P', w) }, P, rest, opq =>
+    (cmpSegs P'.elimF.segs (P.at (st.lenUF P)).segs).toTerm
+      (slotLeaf key{ orElse(if(‹headKey rest› = ‹st.slotLenUF P [] .err›)
+          then ‹wordAtKey w.elimF rest› else opq, opq) } opq opq)
   | .init, _, _, opq | .save .., _, _, opq | .arr .push .., _, _, opq
   | .arr (.slot _) .., _, _, opq | .stale (some (.pop _)) .., _, _, opq
   | .stale (some (.slot _)) .., _, _, opq | .view .., _, _, opq => opq
@@ -4911,17 +4949,17 @@ termination_by structural s => s
 
 /-- `LStor.slotHasU` as compiled code runs it. -/
 def LStor.slotHasUF : LStor → LPath → List SSeg → LTerm → LTerm
-  | .arr (.pop keep) s P' _, P, rest, opq =>
+  | key{ arr(pop(keep), st, P', _) }, P, rest, opq =>
     if P'.elimF == P then
-      let E := P.at (lenPred (s.lenUF P))
-      if keep then s.hasUF (E.addSegs rest)
-      else delHas (s.hasUF (E.addSegs rest)) E
-        (fun sh q => s.mapUF sh q) (if rest.isEmpty then .eq else .below rest)
+      let E := P.at (lenPred (st.lenUF P))
+      if keep then st.hasUF (E.addSegs rest)
+      else delHas (st.hasUF (E.addSegs rest)) E
+        (fun sh q => st.mapUF sh q) (if rest.isEmpty then .eq else .below rest)
     else opq
-  | .stale none s P' _, P, rest, opq =>
-    let L := s.lenUF P
+  | key{ staleSave(st, P', _) }, P, rest, opq =>
+    let L := st.lenUF P
     (cmpSegs P'.elimF.segs ((P.at L).addSegs rest).segs).toTerm
-      (staleHas (s.slotHasUF P rest opq))
+      (staleHas (st.slotHasUF P rest opq))
   | .init, _, _, opq | .save .., _, _, opq | .del .., _, _, opq | .arr .push .., _, _, opq
   | .arr (.slot _) .., _, _, opq | .stale (some _) .., _, _, opq | .copy .., _, _, opq
   | .view .., _, _, opq => opq
@@ -4929,24 +4967,24 @@ termination_by structural s => s
 
 /-- `LStor.slotLenU` as compiled code runs it. -/
 def LStor.slotLenUF : LStor → LPath → List SSeg → LTerm → LTerm
-  | .arr (.pop keep) s P' _, P, rest, opq =>
+  | key{ arr(pop(keep), st, P', _) }, P, rest, opq =>
     if P'.elimF == P then
-      let E := P.at (lenPred (s.lenUF P))
+      let E := P.at (lenPred (st.lenUF P))
       let Q := E.addSegs rest
-      if keep then s.lenUF Q
+      if keep then st.lenUF Q
       else
-        let LQ := s.lenUF Q
-        delLen LQ (lenEnd LQ (s.mapUF .fixed Q)) E (fun sh q => s.mapUF sh q)
+        let LQ := st.lenUF Q
+        delLen LQ (lenEnd LQ (st.mapUF .fixed Q)) E (fun sh q => st.mapUF sh q)
           (if rest.isEmpty then .eq else .below rest)
     else opq
-  | .stale none s P' _, P, rest, opq =>
-    let L := s.lenUF P
+  | key{ staleSave(st, P', _) }, P, rest, opq =>
+    let L := st.lenUF P
     (cmpSegs P'.elimF.segs (P.at L).segs).toTerm
-      (slotLeaf opq (s.slotLenUF P rest opq) opq)
-  | .stale (some .push) s P' _, P, rest, opq =>
-    let L := s.lenUF P
+      (slotLeaf opq (st.slotLenUF P rest opq) opq)
+  | key{ stale(push, st, P', _) }, P, rest, opq =>
+    let L := st.lenUF P
     (cmpSegs P'.elimF.segs (P.at L).segs).toTerm
-      (slotLeaf (if rest.isEmpty then lenSucc (s.slotLenUF P rest .err) else opq) opq opq)
+      (slotLeaf (if rest.isEmpty then lenSucc (st.slotLenUF P rest .err) else opq) opq opq)
   | .init, _, _, opq | .save .., _, _, opq | .del .., _, _, opq | .arr .push .., _, _, opq
   | .arr (.slot _) .., _, _, opq | .stale (some (.pop _)) .., _, _, opq
   | .stale (some (.slot _)) .., _, _, opq | .copy .., _, _, opq | .view .., _, _, opq => opq
@@ -4954,92 +4992,95 @@ termination_by structural s => s
 
 /-- `LStor.hasU` as compiled code runs it. -/
 def LStor.hasUF : LStor → LPath → LTerm
-  | .init, Q => .has .init Q
-  | .save s P _, Q => (cmpSegs P.elimF.segs Q.segs).toTerm (saveHas (s.hasUF Q))
-  | .del s P, Q => (cmpSegs P.elimF.segs Q.segs).toTerm
-      (delHas (s.hasUF Q) P.elimF fun sh q => s.mapUF sh q)
-  | .arr op s P w, Q =>
+  | key{ storage }, Q => key{ has(storage, Q) }
+  | key{ save(st, P, _) }, Q => (cmpSegs P.elimF.segs Q.segs).toTerm (saveHas (st.hasUF Q))
+  | key{ delAt(st, P) }, Q => (cmpSegs P.elimF.segs Q.segs).toTerm
+      (delHas (st.hasUF Q) P.elimF fun sh q => st.mapUF sh q)
+  | key{ arr(op, st, P, w) }, Q =>
     let Pe := P.elimF
-    (cmpSegs Pe.segs Q.segs).toTermLazy PathRel.needsOld (fun _ => s.lenUF Pe) (fun _ => s.hasUF Q)
-      fun L old => arrHas op L old (.has (.arr op s P w) Q)
-  | .stale none s P _, Q => (cmpSegs P.elimF.segs Q.segs).toTerm (staleHas (s.hasUF Q))
-  | .stale (some op) s P w, Q => .has (.stale (some op) s P w) Q
-  | .copy s P src SQ, Q => (cmpSegs P.elimF.segs Q.segs).toTerm
-      (copyLeaf (.lit (.bool true)) (.lit (.bool true)) (s.hasUF Q) (.has (.copy s P src SQ) Q)
+    (cmpSegs Pe.segs Q.segs).toTermLazy PathRel.needsOld (fun _ => st.lenUF Pe) (fun _ => st.hasUF Q)
+      fun L old => arrHas op L old key{ has(arr(op, st, P, w), Q) }
+  | key{ staleSave(st, P, _) }, Q => (cmpSegs P.elimF.segs Q.segs).toTerm (staleHas (st.hasUF Q))
+  | key{ stale(op, st, P, w) }, Q => key{ has(stale(op, st, P, w), Q) }
+  | key{ save(st, P, find(src, SQ)) }, Q => (cmpSegs P.elimF.segs Q.segs).toTerm
+      (copyLeaf key{ true } key{ true } (st.hasUF Q) key{ has(save(st, P, find(src, SQ)), Q) }
         (fun pre => src.mapUF .map (SQ.elimF.addSegs pre))
         fun rest => src.hasUF (SQ.elimF.addSegs rest))
-  | .view m i, Q =>
+  | key{ copyMem(mtSt, m, i) }, Q =>
     match viewPath Q with
     | some (p, a) =>
       match m.walk i p with
       | some j =>
         match m.readUF j a, (m.readI j a).bind fun j' => m.objUF false j' with
-        | some W, some N => .orElse (.seq W (.lit (.bool true))) (.seq N (.lit (.bool true)))
-        | _, _ => .has (.view m i) Q
-      | none => .has (.view m i) Q
-    | none => if isViewRoot Q then .lit (.bool true) else .has (.view m i) Q
+        | some W, some N => key{ orElse((W; true), (N; true)) }
+        | _, _ => key{ has(copyMem(mtSt, m, i), Q) }
+      | none => key{ has(copyMem(mtSt, m, i), Q) }
+    | none => if isViewRoot Q then key{ true } else key{ has(copyMem(mtSt, m, i), Q) }
 termination_by structural s => s
 
 /-- `LStor.lenU` as compiled code runs it. -/
 def LStor.lenUF : LStor → LPath → LTerm
-  | .init, Q => .len .init Q
-  | .save s P _, Q => (cmpSegs P.elimF.segs Q.segs).toTerm (saveMap (s.lenUF Q))
-  | .del s P, Q => (cmpSegs P.elimF.segs Q.segs).toTerm
-      (delLen (s.lenUF Q) (lenEnd (s.lenUF Q) (s.mapUF .fixed Q)) P.elimF fun sh q => s.mapUF sh q)
-  | .arr op s P w, Q =>
+  | key{ storage }, Q => key{ find(storage, Q.length) }
+  | key{ save(st, P, _) }, Q => (cmpSegs P.elimF.segs Q.segs).toTerm (saveMap (st.lenUF Q))
+  | key{ delAt(st, P) }, Q => (cmpSegs P.elimF.segs Q.segs).toTerm
+      (delLen (st.lenUF Q) (lenEnd (st.lenUF Q) (st.mapUF .fixed Q)) P.elimF fun sh q => st.mapUF sh q)
+  | key{ arr(op, st, P, w) }, Q =>
     let Pe := P.elimF
-    (cmpSegs Pe.segs Q.segs).toTermLazy PathRel.needsOld (fun _ => s.lenUF Pe) (fun _ => s.lenUF Q)
-      fun L old => arrLength op L old (.len (.arr op s P w) Q)
-        (op.gateSlot (if s.dangles then some fun rest => .orElse (s.slotLenUF Pe rest .err)
-          (.len (.arr op s P w) Q) else none))
-  | .stale none s P _, Q => (cmpSegs P.elimF.segs Q.segs).toTerm (saveMap (s.lenUF Q))
-  | .stale (some op) s P w, Q =>
+    (cmpSegs Pe.segs Q.segs).toTermLazy PathRel.needsOld (fun _ => st.lenUF Pe) (fun _ => st.lenUF Q)
+      fun L old => arrLength op L old key{ find(arr(op, st, P, w), Q.length) }
+        (op.gateSlot (if st.dangles then some fun rest =>
+          key{ orElse(‹st.slotLenUF Pe rest .err›, find(arr(op, st, P, w), Q.length)) }
+          else none))
+  | key{ staleSave(st, P, _) }, Q => (cmpSegs P.elimF.segs Q.segs).toTerm (saveMap (st.lenUF Q))
+  | key{ stale(op, st, P, w) }, Q =>
     let Pe := P.elimF
-    (cmpSegs Pe.segs Q.segs).toTermLazy PathRel.needsOld (fun _ => s.lenUF Pe) (fun _ => s.lenUF Q)
-      fun L old => arrLength op L old (.len (.stale (some op) s P w) Q) none
-  | .copy s P src SQ, Q => (cmpSegs P.elimF.segs Q.segs).toTerm
-      (copyLeaf (src.lenUF SQ.elimF) (s.lenUF Q) (s.lenUF Q) (.len (.copy s P src SQ) Q)
+    (cmpSegs Pe.segs Q.segs).toTermLazy PathRel.needsOld (fun _ => st.lenUF Pe) (fun _ => st.lenUF Q)
+      fun L old => arrLength op L old key{ find(stale(op, st, P, w), Q.length) } none
+  | key{ save(st, P, find(src, SQ)) }, Q => (cmpSegs P.elimF.segs Q.segs).toTerm
+      (copyLeaf (src.lenUF SQ.elimF) (st.lenUF Q) (st.lenUF Q)
+        key{ find(save(st, P, find(src, SQ)), Q.length) }
         (fun pre => src.mapUF .map (SQ.elimF.addSegs pre))
         fun rest => src.lenUF (SQ.elimF.addSegs rest))
-  | .view m i, Q =>
+  | key{ copyMem(mtSt, m, i) }, Q =>
     match viewObj Q with
     | some p =>
       match m.walk i p with
-      | some j => (m.readUF j .size).getD (.len (.view m i) Q)
-      | none => .len (.view m i) Q
-    | none => .len (.view m i) Q
+      | some j => (m.readUF j key{ size }).getD key{ find(copyMem(mtSt, m, i), Q.length) }
+      | none => key{ find(copyMem(mtSt, m, i), Q.length) }
+    | none => key{ find(copyMem(mtSt, m, i), Q.length) }
 termination_by structural s => s
 
 /-- `LStor.mapU` as compiled code runs it. -/
 def LStor.mapUF (sh : KShape) : LStor → LPath → LTerm
-  | .init, Q => .kmap sh .init Q
-  | .save s P _, Q => (cmpSegs P.elimF.segs Q.segs).toTerm (saveMap (s.mapUF sh Q))
-  | .del s P, Q => (cmpSegs P.elimF.segs Q.segs).toTerm
-      (delMap (s.mapUF sh Q) P.elimF fun sh' q => s.mapUF sh' q)
-  | .arr op s P w, Q =>
+  | key{ storage }, Q => key{ kmap(sh, storage, Q) }
+  | key{ save(st, P, _) }, Q => (cmpSegs P.elimF.segs Q.segs).toTerm (saveMap (st.mapUF sh Q))
+  | key{ delAt(st, P) }, Q => (cmpSegs P.elimF.segs Q.segs).toTerm
+      (delMap (st.mapUF sh Q) P.elimF fun sh' q => st.mapUF sh' q)
+  | key{ arr(op, st, P, w) }, Q =>
     let Pe := P.elimF
-    (cmpSegs Pe.segs Q.segs).toTermLazy (fun _ => true) (fun _ => s.lenUF Pe)
-      (fun _ => s.mapUF sh Q)
-      fun L old => arrMap op L old (.kmap sh (.arr op s P w) Q)
-  | .stale none s P _, Q => (cmpSegs P.elimF.segs Q.segs).toTerm (saveMap (s.mapUF sh Q))
-  | .stale (some op) s P w, Q => .kmap sh (.stale (some op) s P w) Q
-  | .copy s P src SQ, Q => (cmpSegs P.elimF.segs Q.segs).toTerm
-      (copyLeaf (src.mapUF sh SQ.elimF) (s.mapUF sh Q) (s.mapUF sh Q)
-        (.kmap sh (.copy s P src SQ) Q)
+    (cmpSegs Pe.segs Q.segs).toTermLazy (fun _ => true) (fun _ => st.lenUF Pe)
+      (fun _ => st.mapUF sh Q)
+      fun L old => arrMap op L old key{ kmap(sh, arr(op, st, P, w), Q) }
+  | key{ staleSave(st, P, _) }, Q => (cmpSegs P.elimF.segs Q.segs).toTerm (saveMap (st.mapUF sh Q))
+  | key{ stale(op, st, P, w) }, Q => key{ kmap(sh, stale(op, st, P, w), Q) }
+  | key{ save(st, P, find(src, SQ)) }, Q => (cmpSegs P.elimF.segs Q.segs).toTerm
+      (copyLeaf (src.mapUF sh SQ.elimF) (st.mapUF sh Q) (st.mapUF sh Q)
+        key{ kmap(sh, save(st, P, find(src, SQ)), Q) }
         (fun pre => src.mapUF .map (SQ.elimF.addSegs pre))
         fun rest => src.mapUF sh (SQ.elimF.addSegs rest))
-  | .view m i, Q =>
+  | key{ copyMem(mtSt, m, i) }, Q =>
     match sh with
-    | .map => .err
-    | .fixed => .kmap sh (.view m i) Q
+    | .map => key{ err }
+    | .fixed => key{ kmap(sh, copyMem(mtSt, m, i), Q) }
 termination_by structural s => s
 
 /-- `LStor.cpokU` as compiled code runs it. -/
 def LStor.cpokUF : LStor → LPath → LTerm
-  | .init, Q => .cpok .init Q
-  | .save s P w, Q => .ite (isT (s.readUF P.elimF)) (s.cpokUF Q) (.cpok (.save s P w) Q)
+  | key{ storage }, Q => key{ copyOk(storage, Q) }
+  | key{ save(st, P, w) }, Q =>
+    key{ if(‹isT (st.readUF P.elimF)›) then ‹st.cpokUF Q› else copyOk(save(st, P, w), Q) }
   | s@(.del ..), Q | s@(.arr ..), Q | s@(.stale ..), Q | s@(.copy ..), Q | s@(.view ..), Q =>
-    .cpok s Q
+    key{ copyOk(s, Q) }
 termination_by structural s => s
 
 /-- `LSel.idxU` as compiled code runs it. -/
