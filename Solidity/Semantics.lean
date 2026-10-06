@@ -1680,6 +1680,36 @@ end
 def Contract.initStorage (C : Contract) : List (Name × SVal) :=
   C.vars.map fun (n, T) => (n, defaultForTy T)
 
+/-! ## Deployment -/
+
+/-- The state a deployment starts in, solkey's constructor update
+`{storage := mtSt ‖ net := storeSt(mtSt, at(msgSender), msgValue) ‖
+selfBalance := msgValue}`: every root at its default, no locals, an empty
+heap, a ledger holding the deployer's payment only, and the value sent as
+the contract's funds (solc's creation context, an address with no funds of
+its own). -/
+def Contract.deployState (C : Contract) (tx : TxEnv) : State :=
+  { storage := C.initStorage, net := [(tx.msgSender, tx.msgValue)],
+    selfBalance := tx.msgValue, tx }
+
+/-- **A deployment**: the program `P`, `sol{ constructor(args); }`
+(`ctorProg`), run from `deployState tx`.  A constructor that is not
+`payable`, the implicit one too, refuses value, as solc's creation code
+does.  `P` is elaborated outside: the elaborator is `partial`, and a run is
+proved by computing it. -/
+def Contract.deploy (C : Contract) (P : Prog C) (tx : TxEnv) : Res State :=
+  if !((C.ctor.map (·.payable)).getD false) && tx.msgValue != 0 then .error .revert
+  else Prog.run (C.deployState tx) P
+
+/-- A contract with no constructor and no initializer deploys by running
+nothing: it starts in `deployState`. -/
+theorem Contract.deploy_noCtor [FreshNames] (C : Contract) (h₁ : C.ctor = none)
+    (h₂ : C.inits = []) :
+    ctorProg C [] = .ok [] ∧ C.deploy [] {} = .ok (C.deployState {}) := by
+  simp only [ctorProg, Contract.deploy, h₁, h₂, Option.isNone_none, List.isEmpty_nil,
+    Bool.and_self, if_true, Option.map_none, Option.getD_none, Bool.not_false]
+  exact ⟨trivial, rfl⟩
+
 section
 open Contract
 
