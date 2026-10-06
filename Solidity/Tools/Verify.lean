@@ -59,7 +59,9 @@ def verifyFunction (n : Lean.Name) (f : String) : TermElabM Verdict := withCurrH
   let tac ← `(tactic| sol_spec_try)
   let run : TermElabM (Except String (List MVarId)) := do
     pure (.ok (← Tactic.run goal.mvarId! (Tactic.evalTactic tac)))
-  let res ← tryCatchRuntimeEx run fun e => do pure (.error (← errText e))
+  -- each step its own heartbeats: a proof search that times out leaves the
+  -- refutation its whole budget
+  let res ← tryCatchRuntimeEx (withCurrHeartbeats run) fun e => do pure (.error (← errText e))
   match res with
   | .ok [] =>
     if (← instantiateMVars goal).hasSorry then return .stuck [] "the proof contains `sorry`"
@@ -71,7 +73,7 @@ def verifyFunction (n : Lean.Name) (f : String) : TermElabM Verdict := withCurrH
     let note := match res with
       | .ok _ => ""
       | .error msg => msg
-    match ← refuteSpec n C f with
+    match ← withCurrHeartbeats (refuteSpec n C f) with
     | .error msg => return .error msg
     | .ok (_, some r) => return .refuted r
     | .ok (_, none) => return .stuck gs note

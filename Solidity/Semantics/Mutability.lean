@@ -279,7 +279,7 @@ theorem bindSeq_agree : (args : List (Arg C)) → ∀ {σ τ : State},
 theorem enterAll_agree : (rs : List (PrimTy × Var)) → (σ : State) →
     EnvAgreeExcept (rs.map (·.2)) σ (CallRet.enterAll rs σ)
   | [], σ => EnvAgreeExcept.refl _ σ
-  | (_, r) :: rs, σ =>
+  | _ :: rs, σ =>
     agree_trans (agree_setEnv (List.mem_cons_self ..) σ _)
       (agree_mono (fun _ hy => List.mem_cons_of_mem _ hy) (enterAll_agree rs _))
 
@@ -446,7 +446,7 @@ theorem Stmt.frame_of_within {μ : Mutability} : (s : Stmt C) → s.within μ = 
     · cases h
     · cases h
       exact Frame.net _ σ _
-  | .send pv _ _, hw, σ, _, h => by
+  | .send pv r a, hw, σ, _, h => by
     simp only [Stmt.within, beq_iff_eq] at hw
     subst hw
     simp only [Stmt.run] at h
@@ -455,7 +455,7 @@ theorem Stmt.frame_of_within {μ : Mutability} : (s : Stmt C) → s.within μ = 
     obtain ⟨_, _, h⟩ := bind_ok_inv h
     obtain ⟨_, _, h⟩ := bind_ok_inv h
     unfold sendAt at h
-    have hpv : pv ∈ Stmt.writes (C := C) (.send pv _ _) := List.mem_singleton_self pv
+    have hpv : pv ∈ Stmt.writes (C := C) (.send pv r a) := List.mem_singleton_self pv
     split at h
     · cases h
     · split at h
