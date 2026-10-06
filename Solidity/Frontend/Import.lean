@@ -210,7 +210,9 @@ def elabSolcImport : CommandElab := fun stx => do
   -- with them, else without
   let plain := c.members ++ funMembers.toList
   let mut memberList := plain
-  if ctorMember.isSome || c.initMembers != c.members then
+  -- a declared constructor left out takes the initializers with it: the
+  -- implicit one would run them alone
+  if (ctorMember.isSome || c.initMembers != c.members) && (c.ctor.isNone || ctorMember.isSome) then
     let full := c.initMembers ++ funMembers.toList ++ ctorMember.toList
     let r ← match parse `term s!"contract!\{ {" ".intercalate full} }" with
       | .error e => pure (some s!"it does not parse: {e}")
