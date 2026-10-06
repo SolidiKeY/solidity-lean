@@ -19,8 +19,9 @@ away").  Each is pinned here by what it elaborates to, printed.
 * a struct constructor `T(a, b)`, `T({b: y, a: x})` is a fresh memory object
   written member by member, the arguments evaluated first, left to right;
 * a modifier is inlined around the body of the function that applies it;
-* a `constructor` is the function `init`, and `constant`, like `immutable`,
-  is dropped.
+* a `constructor` is the contract's constructor, which only a deployment
+  calls (`constructor(args);`), and `constant`, like `immutable`, is a
+  storage root, with its initializer run by the constructor.
 -/
 
 namespace Solidity.Examples.Benchmark.Syntax

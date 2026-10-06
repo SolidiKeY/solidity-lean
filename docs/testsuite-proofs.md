@@ -2064,3 +2064,26 @@ another type later (`{ bool x; } if (c) { uint x; }`) elaborates, as in
 Solidity, but the flat program fails `Prog.wt` (only type preservation reads
 it; `unchecked { }` had the same before); `narrowPure` runs twice on a tuple's
 components under `unchecked` (a redundant `% 2^n`, same value).
+
+**Constructors S1–S3** (2026-10-06, worktree `ctor`). `Contract` gained
+`ctor`/`inits`, `Op0` the constant `mtSt`, `UpdElem` the deployment's
+`net := storeSt(mtSt, at(r), a)` (`netMt`) and `selfBalance := a`
+(`setBalance`), and the elaborator's reader a `top` flag (`ElabScope`).
+No `Taclet` changed. Whole-file wall times in the default build (its
+parallelism, with a second Lean lane running on the machine), against the
+numbers recorded above:
+
+| File | recorded | this build |
+|---|---:|---:|
+| `Examples/Tactics/Calls.lean` | 81 s | 121 s (+49%); 121 s alone through the server |
+| `Examples/Tactics/CrossDomain.lean` | 77 s | 97 s (+26%) |
+| `Examples/Tactics/Memory.lean` | 78 s | 88 s (+13%) |
+| `Calculus/Uniqueness.lean` | ~150 s | 198 s (+32%) |
+
+**Warning: these are more than 10% slower**, but not measured against
+master under the same load: `Uniqueness` reads none of the new arms and
+moved as much, which points at the other lane's load. Re-measure `Calls`
+on master and on this branch, one after the other with `Elab.async false`,
+before merging. `TestSuite/Derived*` was not built in this lane (no
+`lake build SolkeyTestSuite` here); its obligations contain none of the
+new terms.
