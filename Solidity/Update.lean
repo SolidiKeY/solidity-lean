@@ -159,7 +159,8 @@ inductive Op1 : Srt → Srt → Type where
 inductive Op2 : Srt → Srt → Srt → Type where
   /-- `a ⊕ b`, range-checked at `p` as the interpreter checks it. -/
   | binop (op : BinOp) (p : PrimTy) : Op2 .val .val .val
-  /-- `find(s, p)`, and at a state variable KeY's `select(s, r)`. -/
+  /-- `find(s, p)`, KeY's `find`, at a state variable as well
+  (`storageRootReadSelect`: `find(storage, gsp)`); `select(s, r)` still reads. -/
   | find : Op2 .st .path .val
   /-- `s[p].length`: KeY's `find(s, p.size)`. -/
   | len : Op2 .st .path .val

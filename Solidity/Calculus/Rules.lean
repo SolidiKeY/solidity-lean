@@ -610,18 +610,18 @@ inductive Taclet (C : Contract) (k : Nat) : Modality → Stmt C → Premise C �
   it is `false` (solkey's `\add(se = TRUE ==>)`). -/
   | ifElseSplit :
       dl{ ⟨[ if (se) thenStm else elseStm; ]⟩ ⇝
-          se = true ⟹ ⟨[ thenStm ]⟩ ; se = false ⟹ ⟨[ elseStm ]⟩ }
+          "if s#se true": se = true ⟹ ⟨[ thenStm ]⟩ ; "if s#se false": se = false ⟹ ⟨[ elseStm ]⟩ }
   | requireConditionCapture :
       dl{ ⟨[ require(nse); ]⟩ ⇝ ⟨[ bool se = nse; require(se); ]⟩ }
   /-- A guard: if `se` holds the program goes on, if not it reverts. -/
   | requireSimple :
-      dl{ ⟨[ require(se); ]⟩ ⇝ se = true ⟹ ⟨[ ]⟩ ; se = false ⟹ ⟨[ revert(); ]⟩ }
+      dl{ ⟨[ require(se); ]⟩ ⇝ "Holds": se = true ⟹ ⟨[ ]⟩ ; "Reverts": se = false ⟹ ⟨[ revert(); ]⟩ }
   | assertConditionCapture :
       dl{ ⟨[ assert(nse); ]⟩ ⇝ ⟨[ bool se = nse; assert(se); ]⟩ }
   /-- A check: if `se` holds the program goes on, and `se` must hold, under
   either modality — a failed `assert` panics, which no modality accepts. -/
   | assertSimple :
-      dl{ ⟨[ assert(se); ]⟩ ⇝ se = true ⟹ ⟨[ ]⟩ ; se = true }
+      dl{ ⟨[ assert(se); ]⟩ ⇝ "Holds": se = true ⟹ ⟨[ ]⟩ ; "Violated": se = true }
   /-- A reverted run satisfies every box formula: the box closes to `true`. -/
   | revertBox :
       dl{ [ revert(); ] ⇝ true }
@@ -715,6 +715,30 @@ inductive CallbackTaclet (C : Contract) : Modality → Stmt C → Premise C → 
           "call succeeded": ∀ rets. [ body ] ; "Error caught": [ errorBody ]
           ; "Panic caught": ∀ code. [ panicBody ] ; "other failure caught": [ otherBody ] }
 
+/-! ## solkey's branch labels -/
+
+/-- solkey's labels of a taclet's goals, in order, as the rules above write
+them (`"Holds": …`; the macro drops them): the two goals of a split or a
+check, the outcomes of `branches`.  `Examples/ProofTree.lean` checks them
+against this file's source. -/
+def Taclet.branchLabels : List (String × List String) := [
+  ("ifElseSplit", ["if s#se true", "if s#se false"]),
+  ("requireSimple", ["Holds", "Reverts"]),
+  ("assertSimple", ["Holds", "Violated"]),
+  ("tryCallNoCallbackBox",
+    ["call succeeded", "Error caught", "Panic caught", "other failure caught"])]
+
+/-- The taclet whose goals a premise for the statement of head `c` labels:
+an `if` splits by `ifElseSplit`, a `require` by `requireSimple`, an `assert`
+by `assertSimple`, a `try` by `tryCallNoCallbackBox` (and
+`CallbackTaclet.tryCallWithCallbackBox`, labelled alike). -/
+def Taclet.labelledBy (c : Lean.Name) : Option String :=
+  if c == ``Stmt.ite then some "ifElseSplit"
+  else if c == ``Stmt.require then some "requireSimple"
+  else if c == ``Stmt.assert then some "assertSimple"
+  else if c == ``Stmt.tryCall then some "tryCallNoCallbackBox"
+  else none
+
 /-! ## Printing taclets and premises
 
 `#check @Taclet.storageFieldWriteSave` prints the taclet as it is written
@@ -724,7 +748,13 @@ section Print
 open Lean Meta PrettyPrinter Delaborator SubExpr
 set_option hygiene false
 
-def ppPremise? (e : Lean.Expr) : MetaM (Option (TSyntax `dl_premise)) := do
+/-- The premise `e`; its goals labelled by `labels` (solkey's, `Taclet.branchLabels`),
+the blocks of `branches` in the box's brackets when `box`. -/
+def ppPremise? (e : Lean.Expr) (labels : List String := []) (box : Bool := false) :
+    MetaM (Option (TSyntax `dl_premise)) := do
+  let lbl (i : Nat) : Option (TSyntax `str) := labels[i]?.map Syntax.mkStrLit
+  let l0 := lbl 0
+  let l1 := lbl 1
   match_expr (← whnf (← instantiateMVars e)) with
   | Premise.update _ U => return some (← `(dl_premise| $(← ppUpd U):dl_upd ⟨[ ]⟩))
   | Premise.unfold _ P =>
@@ -736,25 +766,30 @@ def ppPremise? (e : Lean.Expr) : MetaM (Option (TSyntax `dl_premise)) := do
     match ← ppProg? P, ← ppProg? Q with
     | some ts, some fs =>
       if (← fvarName? P).isNone && (← fvarName? Q).isNone then
-        return some (← `(dl_premise| $c:dl_fml ⟹ ⟨[ $[$ts;]* ]⟩ ; $c':dl_fml ⟹ ⟨[ $[$fs;]* ]⟩))
+        return some (← `(dl_premise| $[$l0:str :]? $c:dl_fml ⟹ ⟨[ $[$ts;]* ]⟩ ;
+          $[$l1:str :]? $c':dl_fml ⟹ ⟨[ $[$fs;]* ]⟩))
       else
-        return some (← `(dl_premise| $c:dl_fml ⟹ ⟨[ $(← ppBlock P) ]⟩ ; $c':dl_fml ⟹ ⟨[ $(← ppBlock Q) ]⟩))
+        return some (← `(dl_premise| $[$l0:str :]? $c:dl_fml ⟹ ⟨[ $(← ppBlock P) ]⟩ ;
+          $[$l1:str :]? $c':dl_fml ⟹ ⟨[ $(← ppBlock Q) ]⟩))
     | _, _ =>
-      return some (← `(dl_premise| $c:dl_fml ⟹ ⟨[ $(← ppBlock P) ]⟩ ; $c':dl_fml ⟹ ⟨[ $(← ppBlock Q) ]⟩))
+      return some (← `(dl_premise| $[$l0:str :]? $c:dl_fml ⟹ ⟨[ $(← ppBlock P) ]⟩ ;
+        $[$l1:str :]? $c':dl_fml ⟹ ⟨[ $(← ppBlock Q) ]⟩))
   | Premise.check _ c P =>
     let c ← ppFml c
     let some ts ← ppProg? P | return none
-    return some (← `(dl_premise| $c:dl_fml ⟹ ⟨[ $[$ts;]* ]⟩ ; $c:dl_fml))
+    return some (← `(dl_premise| $[$l0:str :]? $c:dl_fml ⟹ ⟨[ $[$ts;]* ]⟩ ; $[$l1:str :]? $c:dl_fml))
   | Premise.done _ b =>
     match_expr (← whnf b) with
     | Bool.true => return some (← `(dl_premise| true))
     | Bool.false => return some (← `(dl_premise| false))
     | _ => return none
   | Premise.branches _ bs =>
-    -- a goal per block, `∀ xs. ⟨[ P ]⟩`, without solkey's labels
+    -- a goal per block, `"label": ∀ xs. ⟨[ P ]⟩` (`[ P ]` for a box-only taclet)
     let some bs ← listElems? bs | return none
     let mut out : Array (TSyntax `dl_branch) := #[]
-    for b in bs do
+    for h : i in [0:bs.size] do
+      let b := bs[i]
+      let l := lbl i
       let b ← whnf b
       unless b.isAppOfArity ``Prod.mk 4 do return none
       let blk ← ppBlock (b.getArg! 3)
@@ -762,11 +797,11 @@ def ppPremise? (e : Lean.Expr) : MetaM (Option (TSyntax `dl_premise)) := do
       let x? ← if let some n ← fvarName? xs then pure (some n)
         else if xs.isAppOfArity ``codeBinders 1 then fvarName? xs.appArg!
         else pure none
-      match x? with
-      | some x => out := out.push (← `(dl_branch| ∀ $(nameIdent x):ident . ⟨[ $blk ]⟩))
-      | none =>
+      let x? := x?.map fun x => nameIdent x
+      if x?.isNone then
         let some #[] ← listElems? xs | return none
-        out := out.push (← `(dl_branch| ⟨[ $blk ]⟩))
+      out := out.push (← if box then `(dl_branch| $[$l:str :]? $[∀ $x?:ident .]? [ $blk ])
+        else `(dl_branch| $[$l:str :]? $[∀ $x?:ident .]? ⟨[ $blk ]⟩))
     let some b := out[0]? | return none
     if out.size < 2 then return none
     return some (← `(dl_premise| $b:dl_branch ; $[$(out.extract 1 out.size)];*))
@@ -782,10 +817,21 @@ def delabTaclet : Delab := do
   -- the judgement's own arguments: `C k`, or `C` for `CallbackTaclet`
   let n := if c == ``CallbackTaclet then 1 else 2
   guard (e.getAppNumArgs == n + 3)
-  let some p ← ppPremise? (e.getArg! (n + 2)) | failure
+  let st ← whnf (e.getArg! (n + 1))
+  let m ← whnf (e.getArg! n)
+  let labels := (do (← Taclet.branchLabels.lookup (← Taclet.labelledBy (← st.getAppFn.constName?))))
+  let some p ← ppPremise? (e.getArg! (n + 2)) (labels.getD []) (m.isConstOf ``Modality.box)
+    | failure
   let s ← ppStmt (e.getArg! (n + 1))
   if isEscape s then failure
-  let m ← whnf (e.getArg! n)
+  -- `fbs` is a call with simple arguments (`functionBodyExpand`'s); a rule of
+  -- another judgement fires on other calls (`functionCallArgCapture`)
+  let s ← match s with
+    | `(sol_stmt| $x:ident) =>
+      if x.getId == `fbs && c != ``Taclet then
+        `(sol_stmt| ‹$(← escapeTerm (e.getArg! (n + 1))):term›)
+      else pure s
+    | _ => pure s
   if c == ``Taclet then
     match_expr m with
     | Modality.box => `(dl{ [ $s:sol_stmt; ] ⇝ $p })

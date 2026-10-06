@@ -162,12 +162,14 @@ sound: Solidity.Taclet.sound_unfold
 -/
 #guard_msgs in #taclet "storageFieldWriteCaptureSrc"
 
-/-! A rule solkey does not have, and a solkey taclet no rule claims. -/
+/-! A rule solkey does not have, and a solkey taclet no rule claims.  The
+call it fires on has an argument that is not simple, so it is not `fbs`
+(a call whose arguments are all simple, `functionBodyExpand`'s). -/
 
 /--
 info: Solidity.LeanTaclet.functionCallArgCapture : ∀ {C : Contract} {k : Nat} {m : Modality} {f : Name} {args : List (Arg C)}
   {ret : CallRet} {body : List (Stmt C)} {a : Arg C},
-  dl[LeanTaclet C k]{ ⟨[ fbs; ]⟩ ⇝
+  dl[LeanTaclet C k]{ ⟨[ ‹Stmt.call f args hsep ret body›; ]⟩ ⇝
     ⟨[ T se = ‹a.e›; ‹Stmt.call f (Arg.captureFirst (Var.fresh "se" k) args) ⋯ ret body›; ]⟩ }
 solkey: none (a rule solkey does not have)
 printed: none (theory only Lean has)

@@ -16,7 +16,7 @@ tree `ProofTree.ofFormula` grows for `⊢ φ` (`Calculus/ProofTree.lean`):
 
 * `#proof_tree φ` — the tree as solkey's GUI lays it out, one line
   `serial: rule` per node under KeY's name, a sub-branch per goal of a split
-  labelled as solkey labels it (`"Holds"`, `"if se true"`, …;
+  labelled as solkey labels it (`"Holds"`, `"if se1 true"`, …;
   `ProofTree.branchLabels`), an open leaf with its sequent; and the summary:
   closed or not, open goals, nodes, branches.
 * `#proof_node n φ` — node `n`: its sequent `dl{ Γ ⟹ φ }`, its rule, its
@@ -53,7 +53,7 @@ elab "#proof_node " n:num t:term : command => liftTermElabM do
     | throwError "#proof_node: no node {n.getNat}; the tree has {rows.size} (0 to {rows.size - 1})"
   let children := (rows.filter (·.parent == some r.serial)).map (·.serial)
   let tacs ← match r.node.act with
-    | .rule _ ts | .closed ts => ts.mapM fun s => return m!"{s}"
+    | .rule _ ts _ | .closed ts => ts.mapM fun s => return m!"{s}"
     | .opened => pure #[]
   let field (k : String) (v : MessageData) : MessageData := m!"{k}: {v}"
   logInfo <| MessageData.joinSep [

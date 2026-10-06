@@ -176,13 +176,22 @@ None is wrong on the corpus; each matters for a future taclet.
   state equality on an assoc-list storage; it holds only pointwise. Keep it dead
   (`Semantics/Properties.lean`).
 - **`requireSimple` states a branch in another form than its siblings.**
-  `ifElseSplit` and `assertSimple` put the condition in the antecedent
-  (`\find( ==> …)`, `\add(se = TRUE ==>)`); `requireSimple` writes each goal
-  as a disjunction, `se = FALSE | ⟨…⟩post` and `se = TRUE | ⟨revert(); …⟩post`.
+  `ifElseSplit` (`\find( ==> …)`) adds the condition to the antecedent on
+  both goals (`\add(se = TRUE ==>)`, `\add(se = FALSE ==>)`); `assertSimple`
+  (`\find(\modality…)`) does so on "Holds" only, its "Violated" goal being
+  `\replacewith(se = TRUE)`; `requireSimple` writes each goal as a
+  disjunction, `se = FALSE | ⟨…⟩post` and `se = TRUE | ⟨revert(); …⟩post`.
   The two agree on a `bool`, but the proof tree shows one idea in two shapes.
   Writing `requireSimple` as `ifElseSplit` is written, `"Holds": \add(se =
   TRUE ==>)` and `"Reverts": \add(se = FALSE ==>)`, is what Lean's
   `requireSimple` already states (a `.split` premise, as `ifElseSplit`'s).
+- **`ifElseSplit`'s labels keep a stray `s`.** The labels are
+  `"if s#se true"`/`"if s#se false"` (`solidityProgramRules.key`:5326, 5329),
+  and `NodeInfo.setBranchLabel` replaces each `#\w+` by its instantiation, so
+  the `s` of the program sigil `s#` stays: `if (b_1)` is labelled
+  `"if sb_1 true"`. `"if #se true"` is what was meant. (The Solidity
+  `Goal.setBranchLabel` is a TODO no-op today, `Goal.java`:280-282.) Lean's
+  proof tree prints `if b_1 true`.
 - **Overlapping taclets are separated by strategy cost, not by guards.** Lean's
   side conditions leave one rule per statement (`Rule.premise_unique`,
   `Calculus/Uniqueness.lean`); the cases where solkey leaves two taclets open

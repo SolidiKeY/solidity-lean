@@ -30,9 +30,10 @@ Legend (a row with several taclets or constructors lists them in one cell):
 - **unclaimed** — no constructor; the note is the reason from
   `unclaimedTaclets`.
 - **Lean only** — a `LeanTaclet`: no taclet behind it.
-- **⊢ rule** — no `Taclet` constructor: a `Proves` constructor
-  (`Calculus/Logic.lean`) is the rule, and `RuleShapes.lean` lists the taclet
-  in `unclaimedTaclets`.
+- **⊢ rule** — no `Taclet` constructor: a `Proves` constructor or a derived
+  theorem (`Calculus/Logic.lean`, `Calculus/Symex.lean`) is the rule.  A
+  `solidityProgramRules.key` taclet is listed in `RuleShapes.unclaimedTaclets`;
+  a row from another `.key` file names that file.
 
 **`\sameUpdateLevel`.** solkey `78f42fde33`, one commit past the pin, adds it
 to the four allocation taclets (`memoryReferenceDeclFreshAlloc`,
@@ -271,7 +272,7 @@ receiver kind, Lean does not.
 | `requireSimple` | same | find same | reshaped: `require(se); ⇝ se = true ⟹ ⟨[ ]⟩ ; se = false ⟹ ⟨[ revert(); ]⟩`. KeY writes each goal as a disjunction, "Holds" `se = FALSE \| ⟨[ ]⟩ post` and "Reverts" `se = TRUE \| ⟨[ revert(); ]⟩ post`; for a `bool` each is the implication Lean's `.split` premise states with the condition in the context. Under the diamond `Proves.split` also owes the cover (`Premise.cover`), which KeY's disjunctions need not |
 | `ifElseUnfold` | same | same | also claims `ifUnfold` |
 | `ifUnfold` | `ifElseUnfold` | merged | `Stmt.ite` always has both branches (an absent `else` is `[]`) |
-| `ifElseSplit` | same | same | `if (se) thenStm else elseStm; ⇝ se = true ⟹ ⟨[ thenStm ]⟩ ; se = false ⟹ ⟨[ elseStm ]⟩`: a `.split` premise is the two-goal shape. Under the box the derivation has KeY's two goals, "if se true" and "if se false" (`Proves.splitBox`); under the diamond `Proves.split` also owes the cover. Also claims `ifSplit` |
+| `ifElseSplit` | same | same | `if (se) thenStm else elseStm; ⇝ "if s#se true": se = true ⟹ ⟨[ thenStm ]⟩ ; "if s#se false": se = false ⟹ ⟨[ elseStm ]⟩`: a `.split` premise is the two-goal shape. The labels are the taclet's text (`Taclet.branchLabels`); the proof tree fills in `s#se` with the node's condition, as KeY's `NodeInfo.setBranchLabel` does (`if true true`). Under the box the derivation has KeY's two goals (`Proves.splitBox`); under the diamond `Proves.split` also owes the cover. Also claims `ifSplit` |
 | `ifSplit` | `ifElseSplit` | merged | |
 | `ifTrue`, `ifFalse`, `ifElseTrue`, `ifElseFalse`, `ifElseNegated` | — | unclaimed | `concrete_solidity` strategy shortcuts. A literal is simple, so `ifElseSplit` applies (one goal assumes `true = false`); `!se` is not simple, so `ifElseUnfold` captures it. The table has no strategy |
 
@@ -506,7 +507,7 @@ them as KeY's `\replacewith` updates do.
 
 | KeY sort | Here | Notes |
 | --- | --- | --- |
-| a value | `Term` | a constant, a stack local, `a ⊕ b`, `find(s, p)` (`Term.find`; `select(s, r)` reads the same, and is how a value read prints as a `save`'s value, where `find` is the copy `SValT.find`), `read(m, a)`, an array's length (`Term.len`, printed `p.length` at `storage` and `find(s, p.length)` elsewhere; `Term.mlen`), `c ? a : b`, `selectSt(net, at(a))` (`Term.net`), `selectSt(oldNet, at(a))` (`Term.netOf`), `delValue(t)` (`Term.delValue`, the default of a word; solkey replaced its `delValue<[α]>` by `delField<[α]>(st, a)`, which is `delValue(selectSt(st, a))` here), `wt(s)` (`Term.wt`/`Op1.wt`, KeY's `wellFormed(heap)`: `true` on a storage the contract can be in, stated `defined(wt(storage))`, the premise of an obligation) |
+| a value | `Term` | a constant, a stack local, `a ⊕ b`, `find(s, p)` (`Term.find`; `select(s, r)` reads the same, and is how a value read prints as a `save`'s value, where `find` is the copy `SValT.find`; KeY writes `find` there, and has no `select`: the spelling is Lean's, also under `pp.sol.key`, and is told from `STerm.select` by its sort), `read(m, a)`, an array's length (`Term.len`, printed `p.length` at `storage` and `find(s, p.length)` elsewhere; `Term.mlen`), `c ? a : b`, `selectSt(net, at(a))` (`Term.net`), `selectSt(oldNet, at(a))` (`Term.netOf`), `delValue(t)` (`Term.delValue`, the default of a word; solkey replaced its `delValue<[α]>` by `delField<[α]>(st, a)`, which is `delValue(selectSt(st, a))` here), `wt(s)` (`Term.wt`/`Op1.wt`, KeY's `wellFormed(heap)`: `true` on a storage the contract can be in, stated `defined(wt(storage))`, the premise of an obligation) |
 | `Path[storage]` | `PTerm` | a state variable (`.root`), an alias (`.pv`), `.field`/`.at`; `p[i]@S` (`.atIn`) and `p[p.length]@S` (`.nextIn`) for an index check or a push slot merged under a storage write, their check performed in `S` (no KeY counterpart: KeY's `at(i)` is unchecked) |
 | `Storage` | `STerm` | `.storage`, `.save`, `.delAt`; `.push`/`.pushSlot`/`.pop`/`.shrink`/`.extend` for the array writes; `.select` for `selectSt<[Struct]>(s, r)`, the struct at a member, written `select(s, r)` |
 | what a storage `save` writes | `SValT` | a value (`.val`), a subtree read from a storage (`.find`, printed `find(s, p)`; a value read there prints `select(s, p)`), a memory object copied back (`.copyMem`, KeY's `copyMem(mtSt, m, i)`), or a fresh array (`.newArr`; a concrete one prints `newArr(T, n)`, `T` the array type) |

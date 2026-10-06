@@ -629,8 +629,8 @@ inductive TermTaclet : Term C → Term C → Prop
   | findOnPopFrame {s : STerm C} {p q : PTerm C} (h : p.diverges q = true := by rfl) :
       TermTaclet tm{ find(save(delAt(s, p[p.length - 1]), p.length, p.length - 1), q) } tm{ find(s, q) }
   /-- **`lenOnSaveFrame`**: a length read off the written path does not see
-  the write, `len(save(s, q, v), p) ⇝ len(s, p)` where `q` leaves `p.length`
-  (`find_copyTo_frame`). -/
+  the write, `find(save(s, q, v), p.length) ⇝ find(s, p.length)` where `q`
+  leaves `p.length` (`find_copyTo_frame`). -/
   | lenOnSaveFrame {s : STerm C} {q p : PTerm C} {v : SValT C}
       (h : q.divergesLen p = true := by rfl) :
       TermTaclet tm{ find(save(s, q, v), p.length) } tm{ find(s, p.length) }

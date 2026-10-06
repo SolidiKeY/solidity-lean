@@ -76,7 +76,7 @@ sequent:
   dl{ true ≐ true ⟹ [ x = 2; ] ¬x = 0 }
 rule: localValueAssign
 state: inner
-branch: if se true
+branch: if true true
 parent: 0
 children: [2]
 tactics: apply update .localValueAssign
@@ -97,16 +97,83 @@ info: {"stats": {"nodes": 7, "branches": 2},
  "openGoalCount": 0,
  "nodes":
  [[0, -1, "ifElseSplit", null, "inner"],
-  [1, 0, "localValueAssign", "if se true", "inner"],
+  [1, 0, "localValueAssign", "if true true", "inner"],
   [2, 1, "emptyModality", null, "inner"],
   [3, 2, "Closed goal", null, "closed"],
-  [4, 0, "localValueAssign", "if se false", "inner"],
+  [4, 0, "localValueAssign", "if true false", "inner"],
   [5, 4, "emptyModality", null, "inner"],
   [6, 5, "Closed goal", null, "closed"]],
  "closed": true}
 -/
 #guard_msgs in
 #proof_tree_json dl!{ [ if (true) { x = 2; } else { x = 1; }; ] x != 0 }
+
+/-! The labels are the ones the rules write (`"if s#se true": …`, dropped by
+the macro), `Taclet.branchLabels`; this reads `Calculus/Rules.lean` and fails
+where the two disagree.  A label names what its schema variable stands for
+at the node, as KeY's `NodeInfo.setBranchLabel` does: `if true true` above,
+the condition's fresh local below. -/
+
+/-- The strings between double quotes in `s`. -/
+def quoted (s : String) : List String := go (s.splitOn "\"")
+where
+  go : List String → List String
+    | _ :: q :: rest => q :: go rest
+    | _ => []
+
+#guard_msgs in
+#eval show IO Unit from do
+  let src ← IO.FS.readFile "Solidity/Calculus/Rules.lean"
+  for (r, ls) in Taclet.branchLabels do
+    let some rest := (src.splitOn s!"  | {r} :")[1]? | throw (IO.userError s!"no rule {r}")
+    let written := quoted (rest.splitOn " }\n")[0]!
+    unless written == ls do
+      throw (IO.userError s!"{r} writes the labels {written}, Taclet.branchLabels {ls}")
+
+/--
+info: 0: ifElseUnfold
+1: localValueDeclInitDrop
+2: boolEqualityAssignment
+3: ifElseSplit
+  [if se1 true]
+    4: localValueAssign
+    5: emptyModality
+    6: Closed goal
+  [if se1 false]
+    7: localValueAssign
+    8: emptyModality
+    9: Closed goal
+closed: 0 open goal(s), 10 node(s), 2 branch(es)
+-/
+#guard_msgs in
+#proof_tree dl!{ [ if (a == 1) { x = 2; } else { x = 1; }; ] true }
+
+/-! A `try` has a goal for each way the call may end, labelled as
+`tryCallNoCallbackBox` labels them. -/
+
+/--
+info: 0: tryCallNoCallbackBox
+  [call succeeded]
+    1: allRight
+    2: localValueAssign
+    3: emptyModality
+    4: Closed goal
+  [Error caught]
+    5: localValueAssign
+    6: emptyModality
+    7: Closed goal
+  [Panic caught]
+    8: localValueAssign
+    9: emptyModality
+    10: Closed goal
+  [other failure caught]
+    11: localValueAssign
+    12: emptyModality
+    13: Closed goal
+closed: 0 open goal(s), 14 node(s), 4 branch(es)
+-/
+#guard_msgs in
+#proof_tree dl!{ [ try I(7).get() returns (uint v) { x = v; } catch { x = 0; }; ] true }
 
 /-! Under the box a split has KeY's two goals (`Proves.splitBox`): no `cov`. -/
 
@@ -167,7 +234,9 @@ example : ⊢ dl!{ [ if (true) { x = 2; } else { x = 1; }; ] x != 0 } := by
 
 /-! ## `sol_derive?`: the walk
 
-The suggestion is the walk `ApplySteps.guardedCopy` writes by hand. -/
+The suggestion is the walk `ApplySteps.guardedCopy` writes by hand, with
+two constructors under their solkey aliases: `impRight` for `intro`,
+`emptyModality` for `empty`. -/
 
 /--
 info: Try this:

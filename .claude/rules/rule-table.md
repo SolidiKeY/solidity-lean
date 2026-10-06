@@ -49,7 +49,13 @@ a total function over the typed syntax, and it is the only rule that can:
    (`RuleSyntax.sideConds`) are **exactly** what its `Stmt.step` arm knows:
    `nsp`/`nse` where the arm has found the part not simple, `sp` where it
    has found it simple, `path`/`e` where it does not look. Check with
-   `set_option pp.sol.dl false in #check @Taclet.r`.
+   `set_option pp.sol.dl false in #check @Taclet.r`.  Two variables of one
+   kind are numbered with subscripts (`mv₁`/`mv₂`, `se₁`/`se₂`), the
+   spelling the existing rules use; `sp1`/`sp2` in the storage copy rules
+   (`storageFieldWriteCopySource`, `storageIndexWrite*CopySource`) are the
+   ASCII exception, KeY's own spelling there.  Write labels as solkey does
+   (`"Holds": …`) and keep `Taclet.branchLabels` equal to them
+   (`Examples/ProofTree.lean` checks it).
 2. Its arm in `Stmt.step` (`Completeness.lean`). Exhaustiveness is the
    coverage proof, so a statement form without an arm fails the build. The
    arm must bring the side conditions into scope for `side_cond`: `if h :`

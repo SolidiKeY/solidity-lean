@@ -63,7 +63,8 @@ info: @Taclet.ifElseUnfold : ∀ {C : Contract} {k : Nat} {m : Modality} {nse : 
 /--
 info: @Taclet.ifElseSplit : ∀ {C : Contract} {k : Nat} {m : Modality} {se : Simple C PrimTy.bool}
   {thenStm elseStm : List (Stmt C)},
-  dl{ ⟨[ if (se) thenStm else elseStm; ]⟩ ⇝ se ≐ true ⟹ ⟨[ thenStm ]⟩ ; se ≐ false ⟹ ⟨[ elseStm ]⟩ }
+  dl{ ⟨[ if (se) thenStm else elseStm; ]⟩ ⇝
+    "if s#se true": se ≐ true ⟹ ⟨[ thenStm ]⟩ ; "if s#se false": se ≐ false ⟹ ⟨[ elseStm ]⟩ }
 -/
 #guard_msgs in #check @Taclet.ifElseSplit
 

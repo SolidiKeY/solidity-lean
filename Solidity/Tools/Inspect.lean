@@ -82,6 +82,12 @@ def LId.fmt (i : LId) : String :=
   let flds := if i.path.isEmpty then "nil" else "[" ++ ", ".intercalate (i.path.map seg) ++ "]"
   s!"idC({idpFmt i.root}, {flds})"
 
+/-- An array operation, as `ppKey` writes it: `push`, `slot(T)`, `pop(keep)`. -/
+def AOp.fmt : AOp → String
+  | .push => "push"
+  | .slot E => s!"slot({E.toStr})"
+  | .pop b => s!"pop({b})"
+
 mutual
 /-- A term of the target language, in KeY's spelling where KeY has the
 symbol (`find`, `delValue`, `if(…) then … else …`); the guards only Lean has
@@ -112,7 +118,7 @@ partial def LTerm.fmt [FreshNames] : LTerm → String
   | .zero a => s!"delValue({LTerm.fmt a})"
   | .err => "err"
   | .env k => k.toStr
-  | .findP s q => s!"find({LStor.fmt s}, {LPath.fmt q})"
+  | .findP s q => s!"findP({LStor.fmt s}, {LPath.fmt q})"
   | .cpok s q => s!"copyOk({LStor.fmt s}, {LPath.fmt q})"
 
 /-- A term as an operand: parenthesised unless it is atomic. -/
@@ -126,21 +132,26 @@ partial def LPath.fmt [FreshNames] : LPath → String
   | .field q f => s!"{LPath.fmt q}.{f}"
   | .at q k => s!"{LPath.fmt q}[{LTerm.fmt k}]"
 
-/-- A storage: `storage`, and the writes on top of it.  A copy is KeY's
-`save(s, q, find(src, sq))`, and a copy of memory `save(s, q, copyMem(mtSt,
-m, i))`; a write through a stale alias is `staleSave`, a node only Lean has
-(`staleSave` in `Calculus/DecideLang.lean`). -/
+/-- A storage: `storage`, and the writes on top of it, as `ppKey` writes
+them (`Calculus/KeyNotation.lean`).  A read written is `select(s, q)`, since
+`find` there is a copy, KeY's `save(s, q, find(src, sq))`; a copy of memory
+is `save(s, q, copyMem(mtSt, m, i))`; an array operation `arr(op, s, q, w)`
+(`push(s, q, w)` for a push); a write through a stale alias `staleSave` or
+`stale(op, s, q, w)`, nodes only Lean has (`Calculus/DecideLang.lean`). -/
 partial def LStor.fmt [FreshNames] : LStor → String
   | .init => "storage"
-  | .save s q w => s!"save({LStor.fmt s}, {LPath.fmt q}, {LTerm.fmt w})"
+  | .save s q w =>
+    let w := match w with
+      | .find s' q' => s!"select({LStor.fmt s'}, {LPath.fmt q'})"
+      | .len s' q' => s!"select({LStor.fmt s'}, {LPath.fmt q'}.length)"
+      | w => LTerm.fmt w
+    s!"save({LStor.fmt s}, {LPath.fmt q}, {w})"
   | .delAt s q => s!"delAt({LStor.fmt s}, {LPath.fmt q})"
   | .arr .push s q w => s!"push({LStor.fmt s}, {LPath.fmt q}, {LTerm.fmt w})"
-  | .arr (.slot _) s q _ => s!"pushSlot({LStor.fmt s}, {LPath.fmt q})"
-  | .arr (.pop _) s q _ => s!"pop({LStor.fmt s}, {LPath.fmt q})"
+  | .arr op s q w => s!"arr({AOp.fmt op}, {LStor.fmt s}, {LPath.fmt q}, {LTerm.fmt w})"
   | .stale none s q w => s!"staleSave({LStor.fmt s}, {LPath.fmt q}, {LTerm.fmt w})"
-  | .stale (some .push) s q w => s!"push({LStor.fmt s}, {LPath.fmt q}, {LTerm.fmt w})"
-  | .stale (some (.slot _)) s q _ => s!"pushSlot({LStor.fmt s}, {LPath.fmt q})"
-  | .stale (some (.pop _)) s q _ => s!"pop({LStor.fmt s}, {LPath.fmt q})"
+  | .stale (some op) s q w =>
+    s!"stale({AOp.fmt op}, {LStor.fmt s}, {LPath.fmt q}, {LTerm.fmt w})"
   | .copy s q src@(.view ..) (.root r) =>
     if r = viewRoot then s!"save({LStor.fmt s}, {LPath.fmt q}, {LStor.fmt src})"
     else s!"save({LStor.fmt s}, {LPath.fmt q}, find({LStor.fmt src}, {r}))"
@@ -159,7 +170,10 @@ partial def LMem.fmt [FreshNames] : LMem → String
     s!"write(addM({LMem.fmt m}, shaped({idpFmt k}, {(Ty.ref R).toStr})), \
       {LId.fmt ⟨k, []⟩}, size, {LTerm.fmt n})"
   | .copySt m k s q => s!"copySt({LMem.fmt m}, {idpFmt k}, find({LStor.fmt s}, {LPath.fmt q}))"
-  | .write m i a v => s!"write({LMem.fmt m}, {LId.fmt i}, {LSel.fmt a}, {LMV.fmt v})"
+  | .write m i a v =>
+    -- a write of `size` would read as an allocation: `ppKey` escapes it
+    let a := match a with | .size => "‹LSel.size›" | a => LSel.fmt a
+    s!"write({LMem.fmt m}, {LId.fmt i}, {a}, {LMV.fmt v})"
 
 /-- A selector, as KeY's: a member `f`, an element `at(t)`, the length `size`. -/
 partial def LSel.fmt [FreshNames] : LSel → String

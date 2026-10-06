@@ -696,6 +696,10 @@ def kInfix (op p : Expr) (a b : TSyntax `key_term) : KeyM (Option (TSyntax `key_
     | _ => pure none
   return r
 
+/-- Whether `t` is `kElided`'s `‹⋯›`. -/
+def kIsElided (t : TSyntax `key_term) : Bool :=
+  t.raw.getKind == ``ktEsc && t.raw[1].isOfKind ``Lean.Parser.Term.omission
+
 /-- Whether a printed term reads back as a variable or an escape at any
 sort, so that it cannot stand for a word or a name in a memory slot. -/
 def kBare (t : TSyntax `key_term) : Bool :=
@@ -965,11 +969,14 @@ partial def pkMV (e : Expr) : KeyM (TSyntax `key_term) := do
   match_expr e with
   | LMV.word t =>
     let t' ← pkTerm t
+    -- past the budget the word stays elided, not printed whole
+    if kIsElided t' then return t'
     -- a variable here is a memory value, and an escape is one too
     if t'.raw.getKind == ``ktEsc || (t'.raw.getKind == ``ktIdent && !(← read)) then kEsc e
     else pure t'
   | LMV.ref i =>
     let i' ← pkId i
+    if kIsElided i' then return i'
     if kBare i' then kEsc e else pure i'
   | _ => kEsc e
 
@@ -1077,6 +1084,18 @@ example : key!{ (ok(alice.age); if(0 < x) then true else err) } =
 
 -- a fresh variable reads as `FreshNames` spells it
 example : key!{ se1 } = LTerm.var (Var.ofName "se1") := rfl
+
+-- the macros emit the constructors themselves, no `def` between: the same
+-- `Expr` (`=ₛ`), which `rfl` alone would not tell from a reducible wrapper
+example (st src : LStor) (P Q : LPath) (w a b t e : LTerm) (mem : LMem) (i : LId) (sel : LSel)
+    (v : LMV) : True := by
+  guard_expr key{ save(st, P, w) } =ₛ LStor.save st P w
+  guard_expr key{ save(st, P, find(src, Q)) } =ₛ LStor.copy st P src Q
+  guard_expr key{ delAt(st, P) } =ₛ LStor.delAt st P
+  guard_expr key{ find(st, P) } =ₛ LTerm.find st P
+  guard_expr key{ if(a = b) then t else e } =ₛ LTerm.kite a b t e
+  guard_expr key{ write(mem, i, sel, v) } =ₛ LMem.write mem i sel v
+  trivial
 
 /-- info: key!{ save(storage, alice.age, 42) } : LStor -/
 #guard_msgs in #check key!{ save(storage, alice.age, 42) }

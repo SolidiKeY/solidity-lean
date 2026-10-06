@@ -224,15 +224,18 @@ syntax:10 dl_fml:11 " where " sepBy1(sol_stmt, ", ") : dl_fml
 goals (a branch, each with its condition), a goal and a check (an `assert`:
 the rest with the condition assumed, and the condition), or — for a
 revert — `true` or `false` in place of the whole modality.  The modality of the premise is the
-taclet's own, so it is written `⟨[ ]⟩`. -/
+taclet's own, so it is written `⟨[ ]⟩`.  A goal of a split or a check may carry
+solkey's label (`"Holds": …`); the macro drops it, and `Taclet.branchLabels`
+keeps it for the printers. -/
 declare_syntax_cat dl_premise (behavior := both)
 syntax dl_upd " ⟨" "[ " "]" "⟩" : dl_premise
 syntax "⟨" "[ " (sol_stmt "; ")* "]" "⟩" : dl_premise
-syntax dl_fml " ⟹ " "⟨" "[ " sol_block " ]" "⟩" " ; " dl_fml " ⟹ " "⟨" "[ " sol_block " ]" "⟩" :
+syntax (str ": ")? dl_fml " ⟹ " "⟨" "[ " sol_block " ]" "⟩" " ; "
+  (str ": ")? dl_fml " ⟹ " "⟨" "[ " sol_block " ]" "⟩" : dl_premise
+syntax (str ": ")? dl_fml " ⟹ " "⟨" "[ " (sol_stmt "; ")* "]" "⟩" " ; "
+  (str ": ")? dl_fml " ⟹ " "⟨" "[ " (sol_stmt "; ")* "]" "⟩" : dl_premise
+syntax (str ": ")? dl_fml " ⟹ " "⟨" "[ " (sol_stmt "; ")* "]" "⟩" " ; " (str ": ")? dl_fml :
   dl_premise
-syntax dl_fml " ⟹ " "⟨" "[ " (sol_stmt "; ")* "]" "⟩" " ; "
-  dl_fml " ⟹ " "⟨" "[ " (sol_stmt "; ")* "]" "⟩" : dl_premise
-syntax dl_fml " ⟹ " "⟨" "[ " (sol_stmt "; ")* "]" "⟩" " ; " dl_fml : dl_premise
 syntax &"true" : dl_premise
 syntax &"false" : dl_premise
 /-- One goal of a taclet with a goal per way a statement may end (KeY's
@@ -1459,15 +1462,16 @@ def schemaPremise (fresh : Bool) (Γ : Scope) : TSyntax `dl_premise → MacroM L
   | `(dl_premise| ⟨[ $[$ss:sol_stmt;]* ]⟩) => do
     let (ts, _) ← schemaProg fresh Γ ss
     `($(mkIdent `Solidity.Premise.unfold) $(← progTerm false ts none))
-  | `(dl_premise| $c:dl_fml ⟹ ⟨[ $t:sol_block ]⟩ ; $nc:dl_fml ⟹ ⟨[ $f:sol_block ]⟩) => do
+  | `(dl_premise| $[$_:str :]? $c:dl_fml ⟹ ⟨[ $t:sol_block ]⟩ ; $[$_:str :]? $nc:dl_fml ⟹ ⟨[ $f:sol_block ]⟩) => do
     `($(mkIdent `Solidity.Premise.split) $(← schemaFml c) $(← schemaFml nc)
         $(← schemaBlock fresh Γ t) $(← schemaBlock fresh Γ f))
-  | `(dl_premise| $c:dl_fml ⟹ ⟨[ $[$ts:sol_stmt;]* ]⟩ ; $nc:dl_fml ⟹ ⟨[ $[$fs:sol_stmt;]* ]⟩) => do
+  | `(dl_premise| $[$_:str :]? $c:dl_fml ⟹ ⟨[ $[$ts:sol_stmt;]* ]⟩ ;
+      $[$_:str :]? $nc:dl_fml ⟹ ⟨[ $[$fs:sol_stmt;]* ]⟩) => do
     let (ts, _) ← schemaProg fresh Γ ts
     let (fs, _) ← schemaProg fresh Γ fs
     `($(mkIdent `Solidity.Premise.split) $(← schemaFml c) $(← schemaFml nc)
         $(← progTerm true ts none) $(← progTerm true fs none))
-  | `(dl_premise| $c:dl_fml ⟹ ⟨[ $[$ts:sol_stmt;]* ]⟩ ; $c':dl_fml) => do
+  | `(dl_premise| $[$_:str :]? $c:dl_fml ⟹ ⟨[ $[$ts:sol_stmt;]* ]⟩ ; $[$_:str :]? $c':dl_fml) => do
     unless c.raw.structEq c'.raw do
       Macro.throwErrorAt c' "a check assumes the condition it checks: write it on both sides"
     let (ts, _) ← schemaProg fresh Γ ts
@@ -3010,9 +3014,12 @@ def delabTm : Delab := do
   guard (e.getAppNumArgs == (← getConstInfo c).type.getNumHeadForalls)
   -- a schema's term, over variables (the contract aside): a closed one reads
   -- better as Lean prints it (`PTerm.root "alice"`, a root, not a variable)
-  let fvs := (collectFVars {} (← instantiateMVars e)).fvarIds
-  guard (← fvs.anyM fun fv => return !(← fv.getType).isConstOf ``Contract)
+  -- the bounded tests first: the delaborator runs at every node of a term it refuses
   guard (sizeAtMost tmCutoff e)
+  let e' ← instantiateMVars e
+  guard e'.hasFVar
+  let fvs := (collectFVars {} e').fvarIds
+  guard (← fvs.anyM fun fv => return !(← fv.getType).isConstOf ``Contract)
   let_expr Tm _ s := (← whnfR (← inferType e)) | failure
   let some srt := (← whnf s).constName? | failure
   let printer : Lean.Expr → MetaM (TSyntax `dl_term) ← match srt with

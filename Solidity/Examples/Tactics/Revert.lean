@@ -74,7 +74,7 @@ local instance : InContract := ⟨StandardExample⟩
 
 /--
 info: @Taclet.requireSimple : ∀ {C : Contract} {k : Nat} {m : Modality} {se : Simple C PrimTy.bool},
-  dl{ ⟨[ require(se); ]⟩ ⇝ se ≐ true ⟹ ⟨[ ]⟩ ; se ≐ false ⟹ ⟨[ revert(); ]⟩ }
+  dl{ ⟨[ require(se); ]⟩ ⇝ "Holds": se ≐ true ⟹ ⟨[ ]⟩ ; "Reverts": se ≐ false ⟹ ⟨[ revert(); ]⟩ }
 -/
 #guard_msgs in #check @Taclet.requireSimple
 
@@ -177,7 +177,7 @@ assertSimple {
 
 /--
 info: @Taclet.assertSimple : ∀ {C : Contract} {k : Nat} {m : Modality} {se : Simple C PrimTy.bool},
-  dl{ ⟨[ assert(se); ]⟩ ⇝ se ≐ true ⟹ ⟨[ ]⟩ ; se ≐ true }
+  dl{ ⟨[ assert(se); ]⟩ ⇝ "Holds": se ≐ true ⟹ ⟨[ ]⟩ ; "Violated": se ≐ true }
 -/
 #guard_msgs in #check @Taclet.assertSimple
 

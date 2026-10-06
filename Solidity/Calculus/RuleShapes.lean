@@ -373,8 +373,11 @@ A `merged` row of an operator family lists KeY's taclets in the order of
 its operators (`operatorOrder`): the proof tree prints a node as KeY's
 taclet at the operator its statement has (`keyTacletAt`), `additionAssignment`
 where the row is `binopAssignment`.  A row split by something other than the
-operator (a mapping against an array, an assignment against a declaration)
-is not listed, and prints under its own name. -/
+operator (a mapping against an array) is not listed, and prints under its
+own name.  `localAssignIncrement`'s row also lists KeY's declaration
+taclets, after the four of the assignment; the rule fires only on the
+assignment (a declaration reaches it through `localValueDeclInitDrop`), so
+its operator picks one of the first four. -/
 
 /-- The operators of a merged row, in the order of its taclets. -/
 def operatorOrder : List (Lean.Name × List Lean.Name) :=
@@ -398,7 +401,8 @@ def operatorOrder : List (Lean.Name × List Lean.Name) :=
     ``Taclet.storageFieldIncrementUnfoldLeftFst, ``Taclet.storageIndexIncrementUnfoldLeftFst,
     ``Taclet.memoryFieldIncrementUnfoldLeftFst, ``Taclet.memoryIndexIncrementUnfoldLeftFst,
     ``Taclet.storageRootIncrementAssignment, ``Taclet.storageFieldIncrementAssignment,
-    ``Taclet.memoryFieldIncrementAssignment, ``Taclet.memoryIndexArrayIncrementAssignment].map
+    ``Taclet.memoryFieldIncrementAssignment, ``Taclet.memoryIndexArrayIncrementAssignment,
+    ``Taclet.localAssignIncrement].map
     (·, incDec))
 
 /-- KeY's taclet for the row of the constructor `c` at the operator `op` (a
@@ -408,15 +412,19 @@ def keyTacletAt (c op : Lean.Name) : Option KeyTaclet := do
   let .merged ts ← tacletOrigins.lookup c | none
   (ops.zip ts).lookup op
 
--- Every listed row is merged, one taclet per operator.
+-- Every listed row is merged, one taclet per operator (`localAssignIncrement`'s
+-- then the declaration's four).
 #guard operatorOrder.all fun (c, ops) =>
   match tacletOrigins.lookup c with
-  | some (.merged ts) => ts.length == ops.length
+  | some (.merged ts) =>
+    ts.length == ops.length || (c == ``Taclet.localAssignIncrement && ts.length == 2 * ops.length)
   | _ => false
 
 #guard keyTacletAt ``Taclet.binopAssignment ``BinOp.eqB == some .boolEqualityAssignment
 #guard keyTacletAt ``Taclet.storageFieldIncrement ``IncDec.postDec ==
   some .storageFieldPostdecrement
+#guard keyTacletAt ``Taclet.localAssignIncrement ``IncDec.postInc ==
+  some .localAssignPostincrement
 
 /-! ## Which KeY taclets the table claims -/
 

@@ -211,7 +211,8 @@ A constructor of `Proves` is written as KeY writes its rule: a sequent over
 the rest `..Γ` of the context, the premises above the conclusion.  `{U} [ ]`
 is an update produced under the box.  `impRight`, `allRight`,
 `emptyModality`, `sequentialToParallel`, `simplifyUpdate` and
-`applyOnRigidFormula` are the constructors by solkey's names. -/
+`applyOnRigidFormula` are the constructors' aliases by solkey's names
+(theorems, `Calculus/Logic.lean`). -/
 
 /--
 info: @impRight : ∀ {C : Contract} {R : RuleSet} {Γ : List (Hyp C)} {a φ : Fml C}, dl{ ..Γ, a ⟹[R] φ } → dl{ ..Γ ⟹[R] a → φ }
@@ -223,6 +224,18 @@ info: @merge : ∀ {C : Contract} {R : RuleSet} {Γ : List (Hyp C)} {m : Modalit
   U.envOnly = true → dl{ ..Γ, { U ‖ {U}V } ⟹[R] φ } → dl{ ..Γ, { U }, { V } ⟹[R] φ }
 -/
 #guard_msgs in #check @Proves.merge
+
+/-- The sequent macros build exactly the spines the reflective checks expect
+(`Γ ++ [h]` nested to the left, `s :: ω`, `P ++ ω`): the same `Expr`
+(`=ₛ`), which `rfl` would not tell from a `[s] ++ ω` spine. -/
+example {C : Contract} (R : RuleSet) (Γ : List (Hyp C)) (a φ : Fml C) (U V : Upd C)
+    (m : Modality) (s : Stmt C) (ω P : Prog C) (x : Var) (p : PrimTy) : True := by
+  guard_expr dl{ ..Γ, a ⟹[R] φ } =ₛ Proves R (Γ ++ [Hyp.pre a]) φ
+  guard_expr dl{ ..Γ, {U}, {V} ⟹[R] φ } =ₛ Proves R (Γ ++ [Hyp.upd m U] ++ [Hyp.upd m V]) φ
+  guard_expr dl{ ..Γ, ∀ p x ⟹[R] φ } =ₛ Proves R (Γ ++ [Hyp.all x p]) φ
+  guard_expr dl{ ..Γ ⟹[R] ⟨[ s; ..ω ]⟩ φ } =ₛ Proves R Γ (Fml.modal m (s :: ω) φ)
+  guard_expr dl{ ..Γ ⟹[R] ⟨[ P; ..ω ]⟩ φ } =ₛ Proves R Γ (Fml.modal m (P ++ ω) φ)
+  trivial
 
 /-- The sequents read back as the terms they print. -/
 example {C : Contract} (R : RuleSet) (Γ : List (Hyp C)) (x : Var) (p : PrimTy) (U : Upd C)

@@ -37,7 +37,8 @@ local instance : InContract := ⟨Pinger⟩
 info: @Taclet.tryCallNoCallbackBox : ∀ {C : Contract} {k : Nat} {call : ExtCall C} {rets : List (PrimTy × Var)}
   {body errorBody : List (Stmt C)} {code : Option Var} {panicBody otherBody : List (Stmt C)},
   dl{ [ try call returns (rets) body catch Error errorBody catch Panic(code) panicBody catch otherBody; ] ⇝
-    ∀ rets. ⟨[ body ]⟩ ; ⟨[ errorBody ]⟩ ; ∀ code. ⟨[ panicBody ]⟩ ; ⟨[ otherBody ]⟩ }
+    "call succeeded": ∀ rets. [ body ] ; "Error caught": [ errorBody ] ; "Panic caught": ∀ code. [ panicBody ] ;
+      "other failure caught": [ otherBody ] }
 -/
 #guard_msgs in #check @Taclet.tryCallNoCallbackBox
 

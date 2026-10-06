@@ -32,8 +32,10 @@ A node prints as solkey's: a rule of `⊢` under KeY's name (`impRight`,
 `allRight`, `emptyModality`), a taclet of an operator family as KeY's taclet
 at its operator (`additionAssignment` for `binopAssignment`,
 `RuleShapes.keyTacletAt`).  A branch is labelled as the taclet labels it
-(`"if se true"`, `"Holds"`, `"Reverts"`, `"Violated"`, a `try`'s four
-outcomes: `branchLabels`); the suggested walk names the goals by their case
+(`"Holds"`, `"Reverts"`, `"Violated"`, a `try`'s four outcomes, as
+`Taclet.branchLabels` has them; `ifElseSplit`'s `"if s#se true"` with `s#se`
+replaced by the node's condition, as KeY's `NodeInfo.setBranchLabel` does:
+`"if se1 true"`); the suggested walk names the goals by their case
 names (`thn`, `els`, `cov` of `Proves.split`).  Under the box a split has
 KeY's two goals (`Proves.splitBox`); the third, `cov`, is left only where
 `Proves.closeTrue` does not prove it, and under the diamond.  The commands
@@ -52,8 +54,9 @@ open Lean Meta Elab Tactic
 /-- What was done at a node. -/
 inductive Act where
   /-- A rule, by its name (the taclet's, or KeY's: `impRight`, `allRight`,
-  `emptyModality`), and the tactics that applied it. -/
-  | rule (name : Lean.Name) (tacs : Array (TSyntax `tactic))
+  `emptyModality`), the tactics that applied it, and what its `se` is
+  (an `if`'s condition, which `ifElseSplit`'s labels name). -/
+  | rule (name : Lean.Name) (tacs : Array (TSyntax `tactic)) (se : Option String := none)
   /-- A leaf the tactics closed. -/
   | closed (tacs : Array (TSyntax `tactic))
   /-- A leaf left open. -/
@@ -80,7 +83,7 @@ def children : Tree → Array Tree | .node _ _ _ _ cs => cs
 whether it is closed. -/
 def name (t : Tree) : String :=
   match t.act with
-  | .rule n _ => n.toString
+  | .rule n _ _ => n.toString
   | .closed _ => "Closed goal"
   | .opened => "OPEN GOAL"
 
@@ -106,14 +109,24 @@ def closed (t : Tree) : Bool := t.openGoals.isEmpty
 
 /-! ## solkey's rows -/
 
-/-- solkey's labels of a taclet's goals, in order: `thn` and `els` of a split
-or a check, the outcomes of `branches`. -/
-def branchLabels : List (String × List String) := [
-  ("ifElseSplit", ["if se true", "if se false"]),
-  ("requireSimple", ["Holds", "Reverts"]),
-  ("assertSimple", ["Holds", "Violated"]),
-  ("tryCallNoCallbackBox",
-    ["call succeeded", "Error caught", "Panic caught", "other failure caught"])]
+/-- solkey's labels of a taclet's goals, in order (`Taclet.branchLabels`, as
+the rules write them): `thn` and `els` of a split or a check, the outcomes of
+`branches`. -/
+def branchLabels : List (String × List String) := Taclet.branchLabels
+
+/-- What `se` was at the node: its `Act.rule`'s instantiation. -/
+def se? (t : Tree) : Option String :=
+  match t.act with
+  | .rule _ _ se => se
+  | _ => none
+
+/-- A label as KeY displays it (`NodeInfo.setBranchLabel`): the schema
+variable `s#se` replaced by what it stands for at the node (KeY's own regex
+leaves the `s` in place, `docs/solkey-feedback.md`). -/
+def instLabel (l : String) (se : Option String) : String :=
+  match se with
+  | some v => l.replace "s#se" v
+  | none => l.replace "s#se" "se"
 
 /-- The label of `c`, the goal `i` of the node `p`: solkey's, by its case
 name (`thn`, `els`) or, for an outcome with none, its place; else its case
@@ -123,7 +136,7 @@ def branchLabel (p : Tree) (i : Nat) (c : Tree) : Option String :=
     | some l => if l == `thn then some 0 else if l == `els then some 1 else none
     | none => if p.children.size > 1 then some i else none
   let solkey := do (← (branchLabels.lookup p.name))[← idx]?
-  solkey <|> c.label.map (·.toString)
+  (solkey.map (instLabel · p.se?)) <|> c.label.map (·.toString)
 
 /-- A row of solkey's `ProofSession.tree()`: the node's serial number (in
 depth-first order, as KeY numbers them), its parent's, its name, the label
@@ -279,6 +292,8 @@ structure Move where
   name : Lean.Name
   tacs : Array (TSyntax `tactic)
   branches : Bool := false
+  /-- An `if`'s condition, for `ifElseSplit`'s labels. -/
+  se : Option String := none
 
 /-- The moves the strategy makes at the goal `Γ ⊢ φ`, the named one first
 and `sol_derive`'s (`(Stmt.step _ _ _).rule`) as its fallback; none at a
@@ -318,9 +333,19 @@ def movesAt (g : MVarId) : MetaM (Array Move) := g.withContext do
     let name ← keyName c d
     let named ← `(tactic| apply $(← short ctor) $(dotIdent (Chain.lastName c)))
     let boxNamed ← `(tactic| apply $(← short ``Proves.splitBox) $(dotIdent (Chain.lastName c)))
-    let fallback := { fallback with name }
-    let first := if box then #[{ name, branches, tacs := #[boxNamed] : Move }] else #[]
-    return first ++ #[{ name, branches := branches, tacs := #[named] }, fallback]
+    -- an `if`'s condition, as `ifElseSplit`'s labels name it
+    let se ← if premise == ``Premise.split then
+        try
+          let s ← whnf s
+          if s.isAppOfArity ``Stmt.ite 4 then
+            let c ← Solidity.ppExpr (s.getArg! 1)
+            pure (some (toString (← PrettyPrinter.ppCategory `sol_expr c)))
+          else pure none
+        catch _ => pure none
+      else pure none
+    let fallback := { fallback with name, se }
+    let first := if box then #[{ name, branches, tacs := #[boxNamed], se : Move }] else #[]
+    return first ++ #[{ name, branches := branches, tacs := #[named], se }, fallback]
   | _ => return #[]
 
 /-- Run `tacs` on the goal `g`, errors as errors; the goals left. -/
@@ -380,7 +405,7 @@ partial def grow (cfg : Config) (fuel : IO.Ref Nat) (label : Option Lean.Name) (
         pure (match t with | .str _ l => some (Lean.Name.mkSimple l) | _ => none)
     let mut cs := #[]
     for (c, l) in gs.zip labels do cs := cs.push (← grow cfg fuel l c)
-    return .node g sequent label (.rule mv.name (mv.tacs ++ more)) cs
+    return .node g sequent label (.rule mv.name (mv.tacs ++ more) mv.se) cs
   -- a leaf
   if cfg.close then
     let s ← saveState
@@ -420,7 +445,7 @@ partial def Tree.script (t : Tree) : MetaM (Array String) := do
   match t.act with
   | .opened => return #["sorry"]
   | .closed tacs => return (← tacs.mapM tacLines).flatten
-  | .rule _ tacs =>
+  | .rule _ tacs _ =>
     let head := (← tacs.mapM tacLines).flatten
     match t.children with
     | #[c] => return head ++ (← c.script)

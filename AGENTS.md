@@ -99,10 +99,14 @@ exactly one rule (`Stmt.step`), so the strategy never chooses. To prove
 - **by the strategy**: `sol_symex; sol_close` (`sol_decide` for reads of
   writes; `sol_spec` for a `spec!{f}` obligation). `#wp φ` prints what
   `sol_symex` leaves, `#step φ` one step and the rule it fired.
-- **by a walk**: `apply Proves.valid`, then one `apply` per rule — `intro`,
-  `update r`, `unfold r`, `split r` (goals `thn`/`els`/`cov`), `Proves.check r`
-  (an `assert`; goals `thn`/`els`; qualified, since `check` is also the
-  elaborator's), `done r`, `empty` — and `refine close ?_; sol_symex; sol_close` at each leaf.
+- **by a walk**: `apply Proves.valid`, then one `apply` per rule — `intro`
+  (solkey's `impRight`), `update r`, `unfold r`, `split r` (goals
+  `thn`/`els`/`cov`), `splitBox r` (under the box: KeY's two goals
+  `thn`/`els`, `Calculus/Symex.lean`), `Proves.check r` (an `assert`; goals `thn`/`els`; qualified,
+  since `check` is also the elaborator's), `done r`, `empty`
+  (`emptyModality`), `allIntro` (`allRight`) — and
+  `refine close ?_; sol_symex; sol_close` at each leaf. `sol_derive?` writes
+  the solkey names (`impRight`, `emptyModality`, `allRight`).
   `apply` refuses a rule whose `\find` or side conditions do not match.
   `sol_derive` runs the walk; `sol_derive?` prints it as a `Try this`.
 - **by a chain**: `(chain .box φ).valid h`, with `h` proving its last line
@@ -130,8 +134,11 @@ solkey's view of `⊢ φ`, a tree of sequents grown by running the strategy as a
 walk; every node is an elaborated `apply`, nothing is trusted.
 `ProofTree.ofFormula C φ : TermElabM Tree`; `Tree.rows` are solkey's
 `[serial, parent, name, branchLabel, state]`, `Tree.toJson` the web prover's
-shape, `Tree.openGoals`/`Tree.closed` its state. Branch labels are the case
-names `thn`/`els`/`cov`. The commands: `#proof_tree φ` (the GUI layout and a
+shape, `Tree.openGoals`/`Tree.closed` its state. Branch labels are solkey's
+(`Taclet.branchLabels`, as the rules write them: `"Holds"`, `"if s#se true"`
+with `se` filled in); `thn`/`els`/`cov` are only the walk's case names, and
+`cov`, which solkey does not have, appears under the diamond, and under the
+box only where `Proves.closeTrue` does not prove it. The commands: `#proof_tree φ` (the GUI layout and a
 summary), `#proof_node n φ` (sequent, rule, parent, children, tactics),
 `#proof_tree_json φ`. `Examples/ProofTree.lean` pins their output: a change
 to the strategy or a printer fails there.
