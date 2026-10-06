@@ -36,7 +36,22 @@ normalises what the grammar spells differently from Solidity:
   the same name is untouched;
 * a struct is the struct table's (`Semantics.structDef`), under the renames
   the import names, and its members are checked against the table, member
-  by member; a struct that is not there, or differs, leaves out what uses it.
+  by member; a struct that is not there, or differs, leaves out what uses it;
+* a tuple of several components is printed where solkey reads one
+  (`SolJSONParser.parseTupleStatement`): `(a, , b) = v`,
+  `(uint x, , bool y) = v` and `return (a, b)`, the value a tuple or a call
+  of a function by name (`requireTupleValue`);
+* `(bool ok, ) = R.call{value: V}("")`, matched exactly as
+  `SolJSONParser.isValueCall` matches it, is `bool ok = R.send(V)`; any
+  other value call is a `Gap`.  solc forwards all gas there and `send` the
+  2300-gas stipend, so the result is faithful only under the callback
+  reading (`holdsC`, `docs/solc-alignment.md`);
+* an unnamed value a `try`'s call returns is bound to a fresh `tryRetN`,
+  which nothing reads;
+* every function called by name is a `contract!` member
+  (`SolcContract.funMembers`), callees first: a call is inlined where it is
+  called.  A call that recurses, or of a function left out, leaves the
+  caller out.
 
 What the printer cannot write is a `Gap`, reported with its source line:
 `excluded` where the model has no counterpart (a struct recursive through a
@@ -104,6 +119,10 @@ structure SolcFun where
   params : List (String × String)
   /-- The statements, each with the source line of the statement it prints. -/
   body : Except Gap (List (Nat × String))
+  /-- Its return variables (name, `sol` type), the name `""` when unnamed. -/
+  rets : List (String × String) := []
+  /-- The functions of the contract it calls, directly or not, callees first. -/
+  calls : List String := []
   deriving Inhabited
 
 /-- A contract as read: the `contract!` members of the state variables it
@@ -113,6 +132,9 @@ structure SolcContract where
   members : List String
   dropped : List (String × Gap)
   funs : List SolcFun
+  /-- The functions some function calls, each as its `contract!` member
+  (`function f(uint x) returns (uint) { … }`), callees first. -/
+  funMembers : List (String × String) := []
   deriving Inhabited
 
 /-! ## Reading the JSON -/
@@ -593,6 +615,53 @@ partial def call (j : Json) : PM String := do
 
 end
 
+/-- Is the node a tuple of several components, `(a, b)`, and not an inline
+array (`SolJSONParser.isTuple`)? -/
+def isTuple (j : Json) : Bool :=
+  J.kind j == "TupleExpression" && !(J.opt j "isInlineArray").any (· == .bool true) &&
+    ((J.opt j "components").bind (·.getArr?.toOption)).any (·.size > 1)
+
+/-- Is the node a call by name, `f(a)`: of a function of the contract, where
+a tuple is its value (`SolJSONParser.requireTupleValue`)? -/
+def isNamedCall (j : Json) : Bool :=
+  J.kind j == "FunctionCall" && (J.opt j "expression").any (J.kind · == "Identifier")
+
+/-- The receiver and the amount of `(bool ok, ) = R.call{value: V}("")`, the
+one value call solkey reads, matched as `SolJSONParser.isValueCall` matches
+it: two declarations, a `bool` and an empty one; the options exactly
+`value`; the member `call`; one argument, the empty string. -/
+def valueCall? (j : Json) : Option (Json × Json × Json) := do
+  let [d, Json.null] := ((J.opt j "declarations").bind (·.getArr?.toOption)).map (·.toList) |>.getD []
+    | none
+  let call ← J.opt j "initialValue"
+  let opts ← J.opt call "expression"
+  let m ← J.opt opts "expression"
+  guard (d != .null && J.tyStr d == "bool")
+  guard (J.kind call == "FunctionCall" && J.kind opts == "FunctionCallOptions")
+  let [Json.str "value"] := ((J.opt opts "names").bind (·.getArr?.toOption)).map (·.toList) |>.getD []
+    | none
+  guard (J.kind m == "MemberAccess" && (m.getObjValAs? String "memberName").toOption == some "call")
+  let [a] := ((J.opt call "arguments").bind (·.getArr?.toOption)).map (·.toList) |>.getD []
+    | none
+  guard (J.kind a == "Literal" && (a.getObjValAs? String "kind").toOption == some "string" &&
+    (a.getObjValAs? String "value").toOption == some "")
+  let v ← ((J.opt opts "options").bind (·.getArr?.toOption)).bind (·[0]?)
+  pure (d, ← J.opt m "expression", v)
+
+/-- A tuple's components, one left out printed empty: `(a, , b)`. -/
+def tuple (j : Json) : PM String := do
+  let cs ← (← PM.lift (J.arr j "components")).mapM fun c =>
+    if c == .null then pure "" else expr c
+  pure s!"({", ".intercalate cs})"
+
+/-- What a tuple is assigned from: a tuple, or a call of a function of the
+contract (`SolJSONParser.requireTupleValue`). -/
+def tupleValue (v : Json) : PM String := do
+  if isTuple v then tuple v
+  else if isNamedCall v then expr v
+  else unsupported "a tuple assigned from neither a tuple, nor a call of a function of this \
+    contract, nor `(bool ok, ) = a.call{value: v}(\"\")`"
+
 /-- A local's declaration, `T [storage|memory] x`. -/
 def declText (d : Json) : PM String := do
   let T ← PM.lift (tyText (← get).structs (← PM.lift (J.get d "typeName")))
@@ -626,19 +695,38 @@ partial def stmt1 (j : Json) : PM (List String) := do
   match J.kind j with
   | "ExpressionStatement" =>
     let e ← PM.lift (J.get j "expression")
+    if J.kind e == "Assignment" && (J.opt e "operator").any (· == .str "=") &&
+        (J.opt e "leftHandSide").any isTuple then
+      -- `(a, , b) = v`
+      return [s!"{← tuple (← PM.lift (J.get e "leftHandSide"))} = \
+        {← tupleValue (← PM.lift (J.get e "rightHandSide"))}"]
     -- `x.push().f = c`: solc pushes, then stores the constant
     let ok := J.kind e == "Assignment" && (J.opt e "leftHandSide").any isPushedMember &&
       (J.opt e "rightHandSide").any fun r =>
         constTy r || (J.kind r == "Literal" && J.tyStr r == "bool")
     pure [← withPush ok (expr e)]
   | "VariableDeclarationStatement" =>
-    let [some d] := (← PM.lift (J.arr j "declarations")).map fun d =>
-        if d == .null then none else some d
-      | unsupported "a declaration of several variables"
+    if let some (d, r, v) := valueCall? j then
+      -- `(bool ok, ) = R.call{value: V}("")` is `bool ok = R.send(V)`, as solkey reads it;
+      -- faithful only under `holdsC` (full gas, re-entry)
+      return [s!"{← declText d} = {← operand r false}.send({← expr v})"]
+    let ds ← PM.lift (J.arr j "declarations")
+    if ds.length ≥ 2 then
+      -- `(uint a, , bool b) = v`
+      let ts ← ds.mapM fun d => if d == .null then pure "" else declText d
+      let some v := J.opt j "initialValue" | unsupported "a declaration of several variables, \
+        with no value"
+      return [s!"({", ".intercalate ts}) = {← tupleValue v}"]
+    let [d] := ds | unsupported "a declaration of no variable"
     let dt ← declText d
     match J.opt j "initialValue" with
     | some v => pure [s!"{dt} = {← withPush (isPushedMember v) (expr v)}"]
     | none => pure [dt]
+  | "Return" =>
+    match J.opt j "expression" with
+    | none => pure ["return"]
+    | some e => pure [s!"return {← if isTuple e then tuple e else expr e}"]
+  | "Block" => pure [← block j]
   | "IfStatement" =>
     let c ← expr (← PM.lift (J.get j "condition"))
     let t ← block (← PM.lift (J.get j "trueBody"))
@@ -655,7 +743,16 @@ partial def stmt1 (j : Json) : PM (List String) := do
             let t ← declText p
             pure (if (p.getObjValAs? String "name").toOption == some "" then t.trimRight else t)
         | none => pure []
-      let rets ← params ok
+      -- an unnamed return value is bound to a fresh local no statement reads:
+      -- `sol{}` names what an external call returns
+      let rets ← match J.opt ok "parameters" with
+        | some ps => (← PM.lift (J.arr ps "parameters")).mapM fun p => do
+            let t ← declText p
+            if (p.getObjValAs? String "name").toOption != some "" then pure t else
+              let st ← get
+              set { st with fresh := st.fresh + 1 }
+              pure s!"{t.trimRight} tryRet{st.fresh + 1}"
+        | none => pure []
       let rets := if rets.isEmpty then "" else s!" returns ({", ".intercalate rets})"
       let cs ← catches.mapM fun cl => do
         let e := ((cl.getObjValAs? String "errorName").toOption).getD ""
@@ -760,6 +857,36 @@ def renames (stateVars : List String) (f : Json) : List (Int × String) :=
       pure (i, fresh 8 (n ++ "_"))
     else none
 
+/-- The functions among `ids` that `f` calls by name, in order, each once. -/
+def callees (ids : List Int) (f : Json) : List Int :=
+  (J.nodes f).foldl (init := []) fun acc n =>
+    let r := if J.kind n == "FunctionCall" then
+        (J.opt n "expression").bind fun e => if J.kind e == "Identifier" then J.ref? e else none
+      else none
+    match r with
+    | some r => if ids.contains r && !acc.contains r then acc ++ [r] else acc
+    | none => acc
+
+/-- The functions `f` reaches through `calls`, callees first and `f` last,
+added to `done`; or a function on a cycle.  Each level adds a function to
+`path`, so one more than the number of functions is enough `fuel`. -/
+def reach (calls : Int → List Int) : Nat → List Int → List Int → Int → Except Int (List Int)
+  | 0, _, _, f => throw f
+  | fuel + 1, path, done, f =>
+    if path.contains f then throw f
+    else if done.contains f then pure done
+    else do
+      let done ← (calls f).foldlM (reach calls fuel (f :: path)) done
+      pure (done ++ [f])
+
+/-- A function as a `contract!` member, its body `ss`:
+`function f(uint x) returns (uint lo, uint) { … }`. -/
+def SolcFun.member (f : SolcFun) (ss : List String) : String :=
+  let ps := ", ".intercalate (f.params.map fun (x, t) => s!"{t} {x}")
+  let rs := if f.rets.isEmpty then "" else
+    s!" returns ({", ".intercalate (f.rets.map fun (x, t) => if x.isEmpty then t else s!"{t} {x}")})"
+  s!"function {f.name}({ps}){rs} \{ {String.join (ss.map (· ++ "; "))}}"
+
 /-- The contract `name` of the source unit `ast`, its structs renamed by `ren`. -/
 def readContract (ast : Json) (name : String) (ren : List (String × String)) :
     Except String SolcContract := do
@@ -811,7 +938,7 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) :
     let ps ← (ps.getObjVal? "parameters").toOption
     let ps ← ps.getArr?.toOption
     pure (i, ps.toList.filterMap fun p => (p.getObjValAs? String "name").toOption)
-  let funs := funs.map fun f =>
+  let read := funs.map fun f =>
     let fname := nameOfFun f
     -- what would change the function's meaning, or its constant's name
     let kind := ((f.getObjValAs? String "kind").toOption).getD "function"
@@ -833,6 +960,14 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) :
         let ((t, x), _) ← (do pure ((← PM.lift (tyText S (← PM.lift (J.get p "typeName")))),
           ← nameOf p) : PM (String × String)).run st
         pure (x, t))
+    let rs : Except Gap (List (String × String)) := do
+      let some pl := J.opt f "returnParameters" | pure []
+      (← J.arr pl "parameters").mapM fun p => do
+        let ((t, x), _) ← (do
+            let t ← PM.lift (tyText S (← PM.lift (J.get p "typeName")))
+            let loc := if J.opt p "storageLocation" == some (.str "memory") then " memory" else ""
+            pure (t ++ loc, ← nameOf p) : PM (String × String)).run st
+        pure (x, t)
     let tag := tagOf cspec f
     let body : Except Gap (List (Nat × String)) := do
       if let .error m := tag then throw (.unsupported s!"its NatSpec: {m}" (J.line f))
@@ -842,9 +977,40 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) :
         pure ((← stmt s).map (J.line s, ·))).run st
       pure ss
     { name := fname, line := J.line f, tag := (tag.toOption).getD .malformed,
-      params := (ps.toOption).getD [],
-      body := do let _ ← ps; body }
-  pure { name, members, dropped := droppedNames, funs }
+      params := (ps.toOption).getD [], rets := (rs.toOption).getD [],
+      body := do let _ ← ps; let _ ← rs; body : SolcFun }
+  -- the internal calls: a function is read with every function it reaches,
+  -- and the ones called are the contract's members, callees first
+  let ids := funs.filterMap J.id?
+  let callsOf : List (Int × List Int) := funs.filterMap fun f => (J.id? f).map (·, callees ids f)
+  let calls (i : Int) : List Int := (lookupBy i callsOf).getD []
+  let byId : List (Int × SolcFun) := (funs.zip read).filterMap fun (f, r) => (J.id? f).map (·, r)
+  let nameAt (i : Int) : String := ((lookupBy i byId).map (·.name)).getD "?"
+  let withCalls (i : Int) (r : SolcFun) : SolcFun :=
+    let body : Except Gap (List (Nat × String)) := do
+      let ss ← r.body
+      match reach calls (ids.length + 1) [] [] i with
+      | .error g => throw (.unsupported s!"the call of `{nameAt g}` is recursive: \
+          a call is inlined, and the inlining would not end" r.line)
+      | .ok order =>
+        for c in order.dropLast do
+          if let some { body := .error g, .. } := lookupBy c byId then
+            throw (match g with
+              | .excluded m _ => .excluded s!"it calls `{nameAt c}`, which is left out: {m}" r.line
+              | .unsupported m _ => .unsupported s!"it calls `{nameAt c}`, which is left out: {m}" r.line)
+        pure ss
+    let cs := ((reach calls (ids.length + 1) [] [] i).toOption.getD []).dropLast
+    { r with body, calls := cs.map nameAt }
+  let closed : List (Int × SolcFun) := byId.map fun (i, r) => (i, withCalls i r)
+  let order := ids.foldl (fun done i => (reach calls (ids.length + 1) [] done i).toOption.getD done) []
+  let called := callsOf.flatMap (·.2)
+  let funMembers := order.filterMap fun i => do
+    guard (called.contains i)
+    let r ← lookupBy i closed
+    let ss ← r.body.toOption
+    pure (r.name, r.member (ss.map (·.2)))
+  let funs := (funs.zip read).map fun (f, r) => ((J.id? f).map (withCalls · r)).getD r
+  pure { name, members, dropped := droppedNames, funs, funMembers }
 
 end Solidity.Frontend
 

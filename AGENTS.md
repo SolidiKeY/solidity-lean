@@ -193,8 +193,8 @@ import changes and final confirmation. The `lean-verify` skill in
 | `./scripts/check-corpus.sh` | the solkey corpus (`SolidityCorpus`) against `tests/solkey/expected.tsv` |
 | `./scripts/check-testsuite.sh` | the TestSuite rows against `Report.lean`'s pin and solkey's functions; no Lean |
 
-`solkeycheck` is at zero against solkey `100f7f24c3` (313 taclets,
-2026-10-04). Re-pinning to a newer checkout is its own change: it regenerates
+`solkeycheck` is at zero against solkey `1b4341a303` (323 taclets,
+2026-10-06). Re-pinning to a newer checkout is its own change: it regenerates
 `Calculus/KeyTaclets.lean`, moves `SortCheck/Annotations.lean`, and
 re-partitions `RuleShapes.taclets_partitioned`.
 

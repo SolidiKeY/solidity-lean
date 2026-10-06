@@ -65,7 +65,7 @@ lemma (`TermTaclet.sound`).
 |---|---|
 | `Calculus/RuleSyntax.lean` | The `dl{ … }` notation: schemas (taclets, sequents `..Γ ⟹[R] ⟨[ s; ..ω ]⟩ φ`, update schemas `{u ‖ {u}u2}`), `tm{ … }` for terms, and the printers for taclets, premises, goals, terms (`pp.sol.key`: KeY's long forms). |
 | `Calculus/Rules.lean` | `Taclet` (solkey's rules), `LeanTaclet` (rules solkey lacks), `Rule`, `CallbackTaclet`. |
-| `Calculus/KeyTaclets.lean` | The 313 taclets of `solidityProgramRules.key` as one type, with `KeyOrigin`. |
+| `Calculus/KeyTaclets.lean` | The 323 taclets of `solidityProgramRules.key` as one type, with `KeyOrigin`. |
 | `Calculus/RuleShapes.lean` | Which solkey taclets each constructor transcribes, checked (`taclets_partitioned`); KeY's taclet of an operator family at an operator (`keyTacletAt`). |
 | `Calculus/PrintedRules.lean` | The printed rules and the constructor for each. |
 | `Calculus/Completeness.lean` | `Stmt.step`, the rule for every statement, and `Stmt.complete`. |
@@ -209,7 +209,7 @@ diffs it).  `docs/testsuite-proofs.md` has the counts and timings.
 
 | Module | What it defines |
 |---|---|
-| `Frontend/SolcJson.lean` | solc's JSON AST (`Lean.Json`) printed as `sol` text per function: `readContract`, `Gap`, `Tag`; the struct table checked member by member. |
+| `Frontend/SolcJson.lean` | solc's JSON AST (`Lean.Json`) printed as `sol` text per function: `readContract`, `Gap`, `Tag`; the struct table checked member by member; the functions called by name as `contract!` members, callees first. |
 | `Frontend/Import.lean` | `solc_import "f.json" hash 0x… as N renaming A => B`: `N : Contract`, `N.f : Prog N` per function, `N.report : List ImportRow`; one `evalExpr`. |
 | `Solkey/TestSuite.lean` | `Solkey.TestSuite`, its 417 programs and the report, pinned. |
 | `Frontend/Problems.lean` | `solc_problems N` (`N.f.problem : Fml N` per program), `#solkey_problem`, `#solkey_scan`, `#solkey_derive?` (the replays to paste, when they fit `maxHeartbeats`), `#solkey_obligations` (derived, checked against `⊢ N.f.problem` and Lean's three axioms / pending). |

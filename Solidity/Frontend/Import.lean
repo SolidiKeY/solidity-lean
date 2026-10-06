@@ -8,9 +8,12 @@ import Solidity.Frontend.SolcJson
 reads a fixture of `scripts/solc-ast.mjs` (the path is relative to the
 importing file) and defines
 
-* `N : Contract`, the contract's state variables through `contract!{ … }`;
+* `N : Contract`, the contract's state variables and the functions called
+  by name through `contract!{ … }`, each function checked alone first;
 * `N.f : Prog N` for each function `f` that elaborates, its body read
-  against `N` with its parameters as locals in scope;
+  against `N` with its parameters as locals in scope, after its return
+  variables declared at their defaults, its `return`s lowered
+  (`lowerReturns`), as a call inlines it;
 * `N.report : List ImportRow`, one row per function: its solkey tag
   (`tagOf`: which obligation solkey states, if any) and parameters, what
   became of it and why, with the source line.  A function whose obligation
@@ -123,6 +126,21 @@ def paramCtx (ps : List (String × String)) : Except String ECtx :=
     | some (p, n) => pure (x, .val p n)
     | none => throw s!"the parameter `{x}` has the type `{t}`, which is not a value type"
 
+/-- A function's return variables, an unnamed one named as `contract!` names
+it: `_ret`, or `_ret0`, `_ret1`, … of several (Lean's spelling; KeY names
+them `ret0`, `ret1`, …). -/
+def retNames (f : SolcFun) : List (String × String) :=
+  f.rets.zipIdx.map fun ((x, t), i) =>
+    (if !x.isEmpty then x else if f.rets.length == 1 then "_ret" else s!"_ret{i}", t)
+
+/-- A body's `return`s, lowered to assignments to its return variables
+`rs` (`lowerReturns`). -/
+def lowerRets (rs : List String) (raw : List RawStmt) : Except String (List RawStmt) :=
+  match rs with
+  | [] => lowerReturns none raw
+  | [r] => lowerReturns (some r) raw
+  | _ => throw "a function of several return values"
+
 syntax (name := solcImport) "solc_import " str " hash " num " as " ident
   (" renaming " sepBy1(ident " => " ident, ", "))? : command
 
@@ -153,8 +171,28 @@ def elabSolcImport : CommandElab := fun stx => do
   let env ← getEnv
   let parse (cat : Lean.Name) (s : String) : Except String Syntax :=
     (Parser.runParserCategory env cat s).map (atRef ref)
+  -- the functions called, each checked alone first: one that does not
+  -- expand is left out, with every function that calls it
+  let ctTy := Lean.mkConst ``Contract
+  let mut funMembers : Array String := #[]
+  let mut badMembers : List (String × String) := []
+  for (g, m) in c.funMembers do
+    let calls := ((c.funs.find? (·.name == g)).map (·.calls)).getD []
+    let r ← match calls.findSome? fun h => (Semantics.lookupBy h badMembers).map (h, ·),
+        parse `term s!"contract!\{ {m} }" with
+      | some (h, e), _ => pure (some s!"it calls `{h}`, which is left out: {e}")
+      | none, .error e => pure (some s!"its declaration does not parse: {e}")
+      | none, .ok s => liftTermElabM <| withEnableInfoTree false <| withoutErrToSorry do
+          tryCatchRuntimeEx (withCurrHeartbeats do
+              let _ ← elabTermEnsuringType s ctTy
+              synthesizeSyntheticMVarsNoPostponing
+              pure none)
+            fun ex => do pure (some (← ex.toMessageData.toString))
+    match r with
+    | none => funMembers := funMembers.push m
+    | some e => badMembers := badMembers ++ [(g, e)]
   -- the contract
-  let members := " ".intercalate c.members
+  let members := " ".intercalate (c.members ++ funMembers.toList)
   let ctStx ← ofExcept (parse `term s!"contract!\{ {members} }")
   let id := mkIdentFrom ref N
   elabCommand (← `(command| def $id : Solidity.Contract := $(⟨ctStx⟩)))
@@ -170,10 +208,15 @@ def elabSolcImport : CommandElab := fun stx => do
     if f.tag == .skip then
       rows := rows.push (row .skipped (at_ f 0 "tagged `@custom:key skip`"))
       continue
+    if let some (g, m) := f.calls.findSome? fun g => (Semantics.lookupBy g badMembers).map (g, ·) then
+      rows := rows.push (row .unsupported (at_ f 0 s!"it calls `{g}`, which is left out: {m}"))
+      continue
     match f.body with
     | .error (.excluded m l) => rows := rows.push (row .excluded (at_ f l m))
     | .error (.unsupported m l) => rows := rows.push (row .unsupported (at_ f l m))
     | .ok ss =>
+      -- its return variables first, at their defaults
+      let ss := (retNames f).map (fun (x, t) => (f.line, s!"{t} {x}")) ++ ss
       let text := "sol_raw!{ " ++ String.join (ss.map fun (_, s) => s ++ "; ") ++ "}"
       match parse `term text with
       | .error e => rows := rows.push (row .unsupported (at_ f 0 s!"the printed text does not parse: {e}"))
@@ -204,11 +247,14 @@ def elabSolcImport : CommandElab := fun stx => do
   for ((k, f, ss, _), raw) in raws.toList.zip bodies do
     let fail (msg : String) : Array ImportRow :=
       rows.set! k { rows[k]! with status := .unsupported, reason := msg }
-    match paramCtx f.params with
-    | .error m => rows := fail (at_ f 0 m)
-    | .ok Γ =>
+    -- its `return`s lowered, which moves statements: an error is then the function's
+    let lower := !f.rets.isEmpty || raw.any RawStmt.hasReturn
+    match paramCtx f.params, (if lower then lowerRets ((retNames f).map (·.1)) raw else pure raw) with
+    | .error m, _ | _, .error m => rows := fail (at_ f 0 m)
+    | .ok Γ, .ok raw =>
       match elabProgAt.go C 0 raw (Γ, RawStmt.maxIdxs raw + 1) with
-      | .error (j, m) => rows := fail (at_ f ((ss[j]?.map (·.1)).getD 0) m)
+      | .error (j, m) =>
+        rows := fail (at_ f (if lower then 0 else (ss[j]?.map (·.1)).getD 0) m)
       | .ok P =>
         let n : Lean.Name := N ++ Lean.Name.mkSimple f.name
         let decl := Declaration.defnDecl {

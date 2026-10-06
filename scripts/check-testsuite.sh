@@ -10,8 +10,9 @@
 #      lists any other "unsound"; this checks that the pin lists none, nor a
 #      "mismatched" theorem;
 #   3. parity: the TestSuite rows of tests/solkey/expected.tsv are solkey's
-#      `testSuiteFunctions` (every function of TestSuite.sol not tagged
-#      `@custom:key skip`) plus the skipped ones, and the table is what
+#      `testSuiteFunctions` (every public or external function of
+#      TestSuite.sol not tagged `@custom:key skip`; an internal helper has no
+#      obligation) plus the skipped ones, and the table is what
 #      scripts/solkey-port.mjs writes from the pins today.
 #
 # Usage: scripts/check-testsuite.sh [--complete] [--solkey <keyext.solidity.examples>]
@@ -103,15 +104,22 @@ console.log("axioms: " + (axOk
   : "FAILED"));
 
 // 3. parity with solkey's testSuiteFunctions
+// a function is an obligation when it is `public` or `external`, read in its
+// header up to the `{` (a header may span lines); an internal helper is not
 const sol = readFileSync(join(solkey, "TestSuite.sol"), "utf8").split("\n");
 const provable = new Set();
 const skipped = new Set();
 let tags = [];
-for (const line of sol) {
-  const t = line.trim();
+for (let i = 0; i < sol.length; i++) {
+  const t = sol[i].trim();
   if (t.startsWith("///")) { tags.push(t.slice(3).trim()); continue; }
   const f = t.match(/^function\s+(\w+)\s*\(/);
-  if (f) (tags.includes("@custom:key skip") ? skipped : provable).add(f[1]);
+  if (f) {
+    let header = t;
+    for (let j = i + 1; !header.includes("{") && j < sol.length; j++) header += " " + sol[j].trim();
+    const visible = /\b(public|external)\b/.test(header.slice(0, header.indexOf("{") + 1 || undefined));
+    if (visible) (tags.includes("@custom:key skip") ? skipped : provable).add(f[1]);
+  }
   if (t !== "") tags = [];
 }
 const tsvRows = (path) => readFileSync(path, "utf8").split("\n")

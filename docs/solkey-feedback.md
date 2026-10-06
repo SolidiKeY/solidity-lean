@@ -5,13 +5,15 @@ The only outbound document: what the Lean model shows solkey (`~/projects/solkey
 direction, solkey rules the Lean calculus lacks, is tracked as `planned` rows in
 `docs/lean-key-rule-map.md`.
 
-**Pinned to solkey `100f7f24c3`** (313 taclets, the `solkeycheck` baseline in
+**Pinned to solkey `1b4341a303`** (323 taclets, the `solkeycheck` baseline in
 `AGENTS.md`). The items were checked against `f2eb3d98eb`; the commits since
 add `try`/`catch` (`tryCallNoCallbackBox`, `tryCallWithCallbackBox`) and
 rename memory's `default` to `init`, and touch no rule an item below is
-about. `78f42fde33`, one past the pin, adds `\sameUpdateLevel` to the four
-allocation taclets; Lean needs no counterpart
-(`docs/lean-key-rule-map.md`, legend).
+about but item 3's, which `671f6762a9` partly resolves. `78f42fde33` adds `\sameUpdateLevel` to the four allocation taclets;
+Lean needs no counterpart (`docs/lean-key-rule-map.md`, legend).
+`b959555181`, `671f6762a9` and `1b4341a303` add `send`, internal calls with
+return targets and the function frame (ten taclets, not yet ported:
+`RuleShapes.unclaimedTaclets`).
 
 **Ranking.** Items that let KeY close a goal that is false on the chain come
 first, then missing rules and missing invariants, then refusals, then
@@ -78,7 +80,16 @@ per consumer (`0 <= i < size` ⇒ the `at(i)` read is typed; unwritten key ⇒
 storage fact its `\assumes(wellFormed(storage))` cannot deliver then shows up as
 an unprovable example.
 
-## 3. `unfoldArgument` (Lean `functionCallArgCapture`)
+## 3. `unfoldArgument` (Lean `functionCallArgCapture`): partly resolved upstream (`671f6762a9`)
+
+**Upstream.** At `1b4341a303` an in-program call `f(args);` / `lhs = f(args);`
+is `internalCallExpand`'s (`\program InternalCall ic`, any arguments), and
+`expand_function_body` binds every argument as a fresh `T p = arg`, simple or
+not, so a non-simple argument is no longer stuck.  Lean keeps its capture
+rule (`functionCallArgCapture`), so that its `functionBodyExpand` takes
+simple arguments only and every call has one rule.
+What remains is the shape difference, recorded in `docs/lean-key-rule-map.md`;
+the text below is the item as it stood at `f2eb3d98eb`.
 
 **Problem.** `f(nse)@C` with a non-simple argument is stuck: `functionBodyExpand`
 matches only the whole-program call statement, and no rule hoists the argument
@@ -226,7 +237,9 @@ Each was found by the Lean side and is fixed in solkey; git has the details.
   `selfBalanceSk` after a callback), added the `\if(sadr = self)` booking, and
   left the diamonds owing `0 <= se` only; Lean has no diamond rule for a
   payment (`LeanTaclet.transferDiamond`), and its callback leaves the funds as
-  they were (`State.havoc`).
+  they were (`State.havoc`).  `0b885c229d` dropped the last `selfBalanceSk`:
+  `tryCallWithCallbackBox`'s "call succeeded" no longer havocs `selfBalance`,
+  which is what `State.havoc` does (storage and ledger only).
 - The four `*IndexedReceiver_unfold_leftFst` taclets that did not fire (a null
   proposal in `VariableNamer`).
 - Determinism under the block modality: no box/diamond twin pairs remain.

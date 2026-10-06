@@ -3,7 +3,13 @@
 The name-by-name map from solkey's `solidityProgramRules.key` (plus
 `ifThenElseRules.key`) to `Solidity.Taclet` (`Calculus/Rules.lean`), then the
 symbol table for updates and the data-structure theories. **Pinned to solkey
-`100f7f24c3`**: 313 program taclets, enumerated in `Calculus/KeyTaclets.lean`.
+`1b4341a303`**: 323 program taclets, enumerated in `Calculus/KeyTaclets.lean`.
+The ten taclets `b959555181`..`1b4341a303` added (`internalCallExpand`,
+`blockReturn`, `functionFrameReturn`, `functionFrameEmpty`, the two
+`send_unfold_…` and the four `send…Callback…` rules) are unclaimed as "not yet
+ported" until their rows below are written.  Every instance of
+`internalCallExpand` is already Lean's `functionBodyExpand` (its row, a
+recorded deviation until `RuleShapes` claims the name).
 
 These tables are the prose companion of `Calculus/RuleShapes.lean`, which
 checks the correspondence: `tacletOrigins` gives every constructor a typed
@@ -11,7 +17,7 @@ checks the correspondence: `tacletOrigins` gives every constructor a typed
 fails the build), `unclaimedTaclets` excuses the rest with a reason,
 `callbackOrigins` does the same for `CallbackTaclet`, and `taclets_partitioned`
 says every taclet is claimed or excused, never both
-(`claimedTaclets_count = 300`, `unclaimedTaclets_count = 13`). A rule that
+(`claimedTaclets_count = 300`, `unclaimedTaclets_count = 23`). A rule that
 transcribes no taclet is a `LeanTaclet` (`leanTaclets`); there are three,
 `functionCallArgCapture`, `tryCallDiamond` and `transferDiamond`. A taclet may be claimed by two constructors (the
 member reads by their `.length` rules, since KeY reads `sp.length` as the
@@ -35,7 +41,7 @@ Legend (a row with several taclets or constructors lists them in one cell):
   `solidityProgramRules.key` taclet is listed in `RuleShapes.unclaimedTaclets`;
   a row from another `.key` file names that file.
 
-**`\sameUpdateLevel`.** solkey `78f42fde33`, one commit past the pin, adds it
+**`\sameUpdateLevel`.** solkey `78f42fde33` adds it
 to the four allocation taclets (`memoryReferenceDeclFreshAlloc`,
 `memoryRootDeleteFreshRebind`, `memoryArrayFreshAlloc`, `memoryStorageCopy`);
 the memory index and delete taclets with an `\add` carry it already. In KeY
@@ -49,8 +55,8 @@ goal's update level and reads what it adds there: nothing to port.
 
 | KeY taclet | `Taclet` constructor | Status | Notes |
 | --- | --- | --- | --- |
-| `functionBodyExpand` | `functionBodyExpand` | same | a call carries its callee inlined (`Stmt.call`, KeY's `FunctionBodyStatement`); with every argument simple the premise is KeY's `expand_function_body`. The parameters are the elaborator's fresh names, so KeY's fresh renaming is done once, at elaboration |
-| — | `LeanTaclet.functionCallArgCapture` | Lean only | `unfoldArgument`, which solkey's `docs/net.md` lists as missing: the leftmost non-simple argument is captured into a fresh `se` first, so that `Stmt.step` has one rule per call |
+| `functionBodyExpand`, `internalCallExpand` | `functionBodyExpand` | deviation (recorded, until W2) | a call carries its callee inlined (`Stmt.call`, KeY's `FunctionBodyStatement`); with every argument simple the premise is KeY's `expand_function_body`. At `1b4341a303` solkey's `functionBodyExpand` matches a `FunctionBody` in context (`c# s#fbs #c`) and an in-program call `f(args);` / `lhs = f(args);` is `internalCallExpand`'s; Lean's one constructor covers both. solkey binds every argument as `T p = arg`, simple or not; Lean captures a non-simple one first (`functionCallArgCapture`, below). KeY names an unnamed return `ret0`, `ret1`, …; Lean `_ret` (one) or `_ret0`, `_ret1`, … (several). The parameters are the elaborator's fresh names, so KeY's fresh renaming is done once, at elaboration |
+| — | `LeanTaclet.functionCallArgCapture` | Lean only | the leftmost non-simple argument is captured into a fresh `se` first, so that `Stmt.step` has one rule per call: Lean's `functionBodyExpand` takes simple arguments only. solkey `671f6762a9` binds the argument inside `expand_function_body` (`T p = arg`) instead, which reaches the same state; Lean keeps the capture |
 | `emptyModality` | `Proves.empty` (also `Proves.emptyModality`) | ⊢ rule | `⟨[ ]⟩ φ ⇝ φ` under either modality, as KeY's `#allmodal`; the proof tree prints the step under this name (`Calculus/ProofTree.lean`) |
 | `impRight` (`propRule.key`) | `Proves.intro` (also `Proves.impRight`) | ⊢ rule | `⟹ a → φ` becomes `a ⟹ φ` |
 | `allRight` (`firstOrderRules.key`) | `Proves.allIntro` (also `Proves.allRight`) | ⊢ rule | `⟹ ∀ T x; φ` becomes `∀ T x ⟹ φ`: the local holds any value of `T`, KeY's skolem constant (`Hyp.all`) |

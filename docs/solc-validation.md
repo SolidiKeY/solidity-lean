@@ -131,9 +131,11 @@ lemma set for I.
   not cut to 160 bits.
 - *The callback reading belongs to `call{value:}`.* Under the 2300-gas stipend a
   callee cannot change storage, `net` or `selfBalance` (EIP-2200), so for `transfer`
-  the right reading is no callback, the recipient free to revert.
-  `Semantics/Callback.lean`'s havoc reads `a.call{value: v}("")`, which the syntax
-  lacks.
+  and `send` the right reading is no callback, the recipient free to revert.
+  `a.call{value: v}("")` forwards all gas; the front end lowers
+  `(bool ok, ) = a.call{value: v}("")` to `bool ok = a.send(v)`, as solkey does,
+  so only `Semantics/Callback.lean`'s havoc (`holdsC`) reads it faithfully
+  (`docs/solc-alignment.md`).
 
 ## Deterministic checks
 

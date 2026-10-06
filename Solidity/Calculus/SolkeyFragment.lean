@@ -258,8 +258,10 @@ have no rule for the call and may not leave for the logic while a modality
 is left (`close`). -/
 
 set_option maxHeartbeats 4000000 in
-/-- The one taclet of solkey's that fires on a call, `functionBodyExpand`,
-asks every argument to be simple. -/
+/-- `functionBodyExpand`, the one rule of the fragment that fires on a call,
+asks every argument to be simple: Lean's side condition, not solkey's
+(solkey `671f6762a9`'s `internalCallExpand` binds any argument as
+`T p = arg`). -/
 theorem Taclet.call_simple {s : Stmt C} {p : Premise C} (d : Taclet C k m s p) :
     ∀ {f args hsep ret body}, s = .call f args hsep ret body → Arg.firstNonSimple args = none := by
   cases d <;> (try cases ‹Hole _ _›) <;> (try cases ‹MHole _ _›) <;> (try cases ‹VHole _ _›) <;>
