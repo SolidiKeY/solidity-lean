@@ -285,6 +285,7 @@ def soundLine (n : Lean.Name) (ty : Lean.Expr) : MetaM String := do
   let env ← getEnv
   let family := n.getPrefix
   let thm ← if n == ``CallbackTaclet.tryCallWithCallbackBox then pure ``CallbackTaclet.sound_branches
+    else if n == ``CallbackTaclet.sendWithCallbackBox then pure ``CallbackTaclet.sound_send
     else if family == ``CallbackTaclet then pure ``CallbackTaclet.sound
     else if family == ``LeanTaclet then pure ``LeanTaclet.sound
     else forallTelescopeReducing ty fun _ concl => do

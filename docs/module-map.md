@@ -77,7 +77,7 @@ lemma (`TermTaclet.sound`).
 | `Calculus/SoundUnfold.lean` | Every unfolding taclet runs like its statement off the fresh names. |
 | `Calculus/RuleSoundness.lean` | `Taclet.sound`, `LeanTaclet.sound`, `Rule.sound`. |
 | `Calculus/Logic.lean` | The sequent calculus `Proves` (`⊢` all rules, `⊢ₖ` solkey's), its rules written as sequents `dl{ ..Γ, c ⟹[R] φ }`, solkey's names for them (`impRight`, `allRight`, …) and `Proves.sound`; the update, rewrite and close rules. |
-| `Calculus/Callback.lean` | `CallbackTaclet.sound`, `ProvesC` (sequents `dl{ ..Γ ⟹ᶜ[I] φ }`) and `ProvesC.sound`. |
+| `Calculus/Callback.lean` | `CallbackTaclet.sound`, `CallbackTaclet.sound_send`, `ProvesC` (sequents `dl{ ..Γ ⟹ᶜ[I] φ }`) and `ProvesC.sound`. |
 | `Calculus/SolkeyFragment.lean` | `Stmt.inSolkey m`, where solkey's rules alone are the calculus under a modality; and where they fall short. |
 | `Calculus/Symex.lean` | `Fml.step`, `symex`, `symex_sound`; `sol_step`, `sol_symex`, `sol_derive`; `Proves.closeTrue` and `Proves.splitBox`, a box split with KeY's two goals. |
 | `Calculus/Close.lean` | `sol_close`: first-order goals by weakest preconditions. Its docstring lists what it does not close. |

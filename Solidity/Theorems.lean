@@ -185,9 +185,10 @@ one of solkey's. -/
 theorem solkey_rule_exists (h : s ∈ SolKey[m]) : s ⇝ₖ[k, m] (s.step k m).premise :=
   Stmt.step_taclet h
 
-/-- **With callbacks**: when every `transfer` may call back into a contract
-with invariant `I`, what that calculus derives is valid for that reading.  Its
-callback rule has two sequents as premises, the second after a `{havoc}`. -/
+/-- **With callbacks**: when every `transfer`, `send` or `try` may call back
+into a contract with invariant `I`, what that calculus derives is valid for
+that reading.  Its transfer rule has two sequents as premises, the second
+after a `{havoc}`; its send rule a third, the send refused. -/
 theorem callback_soundness {I : Invariant C} : ⊢[I] φ → ⊨[I] φ :=
   ProvesC.valid
 

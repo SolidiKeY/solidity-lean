@@ -228,7 +228,13 @@ payment (`Semantics.sendAt`, `docs/solc-alignment.md`). Two observations:
 `(bool ok, ) = a.call{value: v}("")` lowered to a send ignores that solc
 forwards all the gas there, so the callee may re-enter; under `noCallback`
 that is solkey's stated choice, and the callback reading should treat the
-lowered send as a point where control leaves.
+lowered send as a point where control leaves. Lean's does (`ExecS`'s send
+arms), and `sendWithCallbackBox` is ported as written, its three goals
+`ProvesC.send`'s premises: sound for a reading in which every send may also
+fail, whatever the world would say, since the callee may revert after
+re-entering. One difference of form only: "send succeeded" is written
+`{booking ‖ pv := true} {havoc} (I → …)`, as Lean writes the transfer's
+resume, where KeY puts `pv := TRUE` into the anonymising update.
 
 ## Resolved (kept for orientation)
 
