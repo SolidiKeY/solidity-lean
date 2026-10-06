@@ -2100,6 +2100,28 @@ before merging. `TestSuite/Derived*` was not built in this lane (no
 `lake build SolkeyTestSuite` here); its obligations contain none of the
 new terms.
 
+**Constructors S4–S5** (2026-10-06). The obligations are solkey's
+(`Problem.ctorFml`, `problem!{constructor}`, `spec!{constructor}`), and the
+benchmarks `Coin`, `EtherWallet` and `Purchase` declare their constructors.
+`Calls` re-measured, the whole file in one worker with
+`set_option Elab.async false`, timed by `IO.monoMsNow` at its first and
+last command (imports loaded), three Lean lanes running on the machine:
+
+| Run | Checkout | load average | `Examples/Tactics/Calls.lean` |
+|---|---|---:|---:|
+| 1 | master `2979bb8` | not taken | 174 s |
+| 2 | `ctor` | ~17 | 229 s (+32% on run 1) |
+| 3 | master `2979bb8` | ~19–24 | 213 s (`ctor` +8% on it) |
+
+**Warning: not shown to be within 10%.**  `ctor` is 8% above the master
+run next to it and 32% above the earlier one, and the two master runs
+differ by 22%: the other lanes' load moves the number as much as the
+branch could.  `Elab.async false` also crashed the worker of either
+checkout at random (no OOM kill was recorded; a stack overflow on the main
+thread is likely), so run 3 was repeated under a fresh file name, and a
+fourth run (`ctor` again) crashed twice and was given up.  Re-measure on an
+idle machine before merging.
+
 ## The fixture at `1b4341a303` (W6, 2026-10-06)
 
 - `scripts/solc-ast.mjs --solkey <clone> --soljson <dir>` (the new
