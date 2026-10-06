@@ -296,6 +296,42 @@ they would in a frame of their own.
   twice, two targets that are not stack locals, a target that reads another),
   until the order of solc's writes is checked against KeY's left to right.
 
+## Constructors
+
+A deployment (`Contract.deploy`, `Semantics.lean`) runs the program
+`constructor(args);` from `Contract.deployState tx`: every root at its
+default, no locals, an empty heap, `net` holding the deployer's payment.
+
+- **A constructor that is not `payable` refuses value**, as solc's creation
+  code reverts on a nonzero `CALLVALUE`: `Contract.deploy` reverts before it
+  runs anything.  The obligation does not check it: solkey's unspecified
+  one has no `msg.value` fact, and `Problem.deploy_of_valid_nil` takes
+  `payable ∨ msg.value = 0` as a hypothesis; a specified one assumes
+  `msg.value = 0` (`spec!{constructor}`).
+- **`address(this).balance` is `msg.value`** (`selfBalance := msgValue`,
+  solkey's update).  On the chain it is the value plus whatever the address
+  held before the deployment (an address can be paid before its code is
+  created, by `CREATE2`'s predictable address or a `selfdestruct`).  Lean
+  follows solkey; a contract whose constructor asserts
+  `address(this).balance == msg.value` is proved here and can fail there.
+- **Initializers run first, outside the modifiers**: after the
+  parameters are bound and before the constructor's modifiers and body
+  (`elabCallRet`'s `ctor`), as solkey's `ExpandFunctionBody` prepends them.
+  solc runs them in the creation code before the constructor function, so
+  the order agrees; the parameters are bound first, but binding has no
+  effect, and a parameter that shadows a root does not capture the
+  initializer, which is prepended after the renaming.
+- **Constants and immutables are storage** in `contract!` (a root with an
+  initializer, as solkey's `SolJSONParser` reads them); solc inlines a
+  `constant` and writes an `immutable` into the code.  They agree on every
+  read once deployed, but a function's obligation starts from any
+  well-typed storage, where the root holds any value: `assert(L == 5)` is
+  unprovable there (`docs/solkey-feedback.md`, item 9).  The solc import
+  keeps them a `Gap`.
+- **A contract with initializers and no constructor** deploys by the
+  implicit one (`constructor();` runs the initializers), as solc does, and
+  has no obligation, as in solkey.
+
 ## Remaining deltas (documented, intentionally out of scope)
 
 - **Error classification.** A failing `assert` (Panic 0x01) is `Halt.panic`,

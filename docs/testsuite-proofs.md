@@ -2124,6 +2124,21 @@ idle machine before merging.  The TestSuite chain was rebuilt on this branch, on
 module at a time, then `Report` and `SolkeyTestSuite.lean`: all clean, the
 435 derived obligations kept.
 
+**Constructors S6–S8** (2026-10-06). The solc import reads the
+constructor (`SolcContract.ctor`, a root of the calls; a modifier on it a
+`Gap`) and mutable initializers (`uint x = 5;`, `initMembers`; one that does
+not print leaves the constructor out, not the variable), defines
+`N.constructor : Prog N`, the deployment `constructor(x̄);`, and states its
+obligation with `Problem.ctorFml` (`solc_problems`).  `scripts/solc-ast.mjs`
+takes `--source` and `--wrapper`; `Solidity/Solkey/Constructors.lean`
+imports solkey's `contracts/Counter.sol` and `benchmark/EtherWallet.sol`,
+and derives `EtherWallet`'s constructor obligation (`sol_prove`, its one
+leaf by `sol_close_mt`, since `Decide` has no `mtSt` clause).
+`TestSuite.sol` has no constructor and no initializer: its import, `Report`
+(435 derived), `check-testsuite.sh` and the generated corpus are unchanged;
+`Derived1`, `Derived12`, `Derived14` and `SolkeyTestSuite.lean` re-checked
+clean.
+
 ## The fixture at `1b4341a303` (W6, 2026-10-06)
 
 - `scripts/solc-ast.mjs --solkey <clone> --soljson <dir>` (the new

@@ -209,10 +209,11 @@ diffs it).  `docs/testsuite-proofs.md` has the counts and timings.
 
 | Module | What it defines |
 |---|---|
-| `Frontend/SolcJson.lean` | solc's JSON AST (`Lean.Json`) printed as `sol` text per function: `readContract`, `Gap`, `Tag`; the struct table checked member by member; the functions called by name as `contract!` members, callees first. |
-| `Frontend/Import.lean` | `solc_import "f.json" hash 0x… as N renaming A => B`: `N : Contract`, `N.f : Prog N` per function, `N.report : List ImportRow`; one `evalExpr`. |
+| `Frontend/SolcJson.lean` | solc's JSON AST (`Lean.Json`) printed as `sol` text per function: `readContract`, `Gap`, `Tag`; the struct table checked member by member; the functions called by name as `contract!` members, callees first; the constructor (`ctor`, a root of the calls) and the state variables' initializers (`initMembers`, `initGap`). |
+| `Frontend/Import.lean` | `solc_import "f.json" hash 0x… as N renaming A => B`: `N : Contract`, `N.f : Prog N` per function, `N.constructor : Prog N` (a deployment, `constructor(x̄);`), `N.report : List ImportRow`; one `evalExpr`. |
 | `Solkey/TestSuite.lean` | `Solkey.TestSuite`, its 449 programs and the report, pinned. |
-| `Frontend/Problems.lean` | `solc_problems N` (`N.f.problem : Fml N` per program), `#solkey_problem`, `#solkey_scan`, `#solkey_derive?` (the replays to paste, when they fit `maxHeartbeats`), `#solkey_obligations` (derived, checked against `⊢ N.f.problem` and Lean's three axioms / pending). |
+| `Solkey/Constructors.lean` | solkey's `Counter.sol` and `EtherWallet.sol` imported (`tests/solc/Counter.ast.json`, `tests/solc/EtherWallet.ast.json`): their constructors and initializers, and `EtherWallet`'s constructor obligation derived. |
+| `Frontend/Problems.lean` | `solc_problems N` (`N.f.problem : Fml N` per program; the constructor's `Problem.ctorFml`), `#solkey_problem`, `#solkey_scan`, `#solkey_derive?` (the replays to paste, when they fit `maxHeartbeats`), `#solkey_obligations` (derived, checked against `⊢ N.f.problem` and Lean's three axioms / pending). |
 | `TestSuite/Problems.lean` | The 437 statements of `Solkey.TestSuite`, two pinned in solkey's syntax, `initState_wt`. |
 | `TestSuite/Derived1.lean` … `TestSuite/Derived12.lean` | `Solkey.TestSuite.f.proved : ⊢ Solkey.TestSuite.f.problem`, 40, 40, 40, 40, 40, 37, 40, 23, 40, 40, 11 and 20 (411 in all), by `sol_prove` and explicit leaf tactics; 7 and 8 are what pushes, pops and storage copies added, 9 to 11 what memory added, 12 what copies between memory and storage added. |
 | `TestSuite/Derived13.lean` | The obligations that write or push through an alias a `pop` made dangle (`LStor.stale`), by `sol_prove`: four of the five; `testArrayCopyClearsOldElements` stays pending (415 in all). |
