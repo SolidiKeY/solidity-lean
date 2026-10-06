@@ -8,43 +8,69 @@ extends).
 
 ## What solkey has
 
-solkey has no loop rule. Its parser builds `WhileStatement`,
-`ForStatement`, `DoWhileStatement`, `BreakStatement` and `ContinueStatement`
-(`program/parser/SolJSONParser.java`), but no taclet in
-`keyext.solidity.core/.../proof/rules/*.key` matches them, so symbolic
-execution gets stuck. The specification plumbing is unconnected:
-`speclang/LoopSpecification.java` has no implementation,
-`SpecificationRepository.addLoopSpec` is never called, the varconds
-`\hasInvariant`/`\getInvariant`/`\getVariant` are used by no taclet, and
-`KeyNatspec` has no loop directive (as of `1b4341a303`).
+solkey has loops since `ed7849d5b6` ("added loops", after the pinned
+`1b4341a303`): one unwinding taclet and two invariant taclets in
+`solidityProgramRules.key`, a source pass that reduces every loop to a
+`while` first, and loop specifications. Its `docs/taclets-implementation.md`,
+section "Loops", is the reference this plan follows; every name and shape
+below is solkey's.
 
-solkey is now implementing loops in the same shape as this plan, so the
-rules can correspond (2026-10-06). The exact taclet names and shapes will be
-in solkey's `docs/taclets-implementation.md` once they land, and this plan
-follows them:
+**`LoopLowering`** runs in `ExpandFunctionBody` right after `ReturnLowering`,
+so it sees only bare `return;`. It leaves a `while` whose body has no
+`break`, `continue` or `return`, recording the abrupt completion in fresh
+`bool` flags:
 
-- `break`/`continue` are lowered to boolean flags by a source pass next to
-  solkey's `ReturnLowering`, not by a loop-scope node: the condition becomes
-  `!brk && c`, and code after a flag-setting statement is guarded by
-  `if (!brk && !cnt)` (Decision 2).
-- `for (init; c; upd) body` is lowered to
-  `{ init; while (c) { cnt = false; body'; if (!brk) { upd } } }`, and
-  `do body while (c)` to `bool first = true; while (first || c) { first = false; body }`.
-- `whileUnwind` rewrites `while (c) b` to `if (c) { b while (c) b }`, the
-  shape of `loopUnwind` here. solkey's strategy chooses between unwinding
-  and the invariant rule where Lean reads the loop's annotation
-  (`.unwind k`/`.inv`, Decision 3).
-- The invariant rule has KeY's goals: the invariant initially valid; it is
-  preserved under an anonymising update of storage, the ledger and the
-  locals the body assigns; the use case. The diamond adds a `decreases`
-  variant. Specifications are `/// @custom:key invariant …` and
-  `decreases …` right before the loop.
+| Source | Lowered |
+|---|---|
+| `break;` / `continue;` / `return;` in a loop body | `brk = true;` / `cnt = true;` / `ret = true;`, the rest of the block dropped |
+| a statement that may set a flag, then `rest` | `s; if (!flag…) { rest }`, testing only the flags `s` may set |
+| `while (c) body` with `break`/`return` | `{ bool brk = false; while (!brk && !ret && c) { bool cnt = false; body } }` |
+| `for (init; c; upd) body` | `{ init; while (c) { body if (!brk && !ret) upd; } }`, so `continue` still runs `upd` |
+| `do body while (c)` | `{ bool first = true; while (first \|\| c) { first = false; body } }` |
+| a loop with a `return` | `ret` is shared by nested loops; the outermost is followed by `if (ret) return;` |
+
+A flag is created only when used, so a loop without `break`/`continue`/
+`return` keeps its condition; a guard tests the flags in the order `brk`,
+`cnt`, `ret`. A missing `for` condition is `true`. A `break`, `continue` or
+`return` inside a `try` inside a loop is rejected.
+
+**`whileUnwind`** (rule set `loop_expand`):
+`while (s#cond) s#body` ⇝ `if (s#cond) { s#body while (s#cond) s#body }`,
+unbounded; solkey's strategy unwinds a loop that has no specification.
+
+**`whileInvariantBox`** / **`whileInvariantDiamond`** (rule set `loop_inv`),
+on `\modality{#box}{c# while (s#cond) s#body #c}` (resp. `#diamond`), two
+goals:
+
+- `"invariant initially valid"`: `inv`;
+- `"invariant preserved and used"`:
+  `#loopAnon(body, inv -> [bType b = cond;]((b = TRUE -> [body] inv) & (b = FALSE -> [c# #c] post)))`;
+  under the diamond the hypothesis is `inv & dec = variant` (a fresh skolem
+  `variant`) and the body's postcondition is
+  `inv & <b = cond;>(b = TRUE -> 0 <= dec & dec < variant)`: **the variant
+  decreases only when the condition holds again**, so the iteration a
+  `break` or `return` ends need not decrease it.
+
+`#loopAnon` (`LoopFrame`) gives a fresh constant to every local the body
+assigns or declares (the lowering's flags included), to `storage` when it
+writes a non-local, and to `net` when it calls anything but
+`require`/`assert`/`revert`. **A body that allocates or writes memory gets
+no invariant rule**: the heap is not anonymised. A loop without `invariant`
+(or, under the diamond, without `decreases`) is unwound instead.
+
+Specifications are `///` lines directly above the loop,
+`/// @custom:key invariant <expr>` (several conjoined) and
+`/// @custom:key decreases <term>` (at most one), in the function-spec
+expression language; `LoopLowering` moves them to the `while` it produces, so
+the invariant of a `for` or `do … while` holds at the head of that `while`,
+also on the iteration a `break` or `return` ends.
 
 Loops block Ballot and BlindAuction (after `bytes32` and events),
 `MultiAuction.closeAuction` is `skip`ped, and the solc ports unroll by hand.
-Until solkey's rules land, every rule below is planned as a `LeanTaclet`
-(`Calculus/Rules.lean`); each becomes a `Taclet` under solkey's name once
-its taclet exists.
+Lean's rules take solkey's names (`whileUnwind`, `whileInvariantBox`,
+`whileInvariantDiamond`) as `Taclet` constructors once the solkey pin moves
+past `ed7849d5b6`; what solkey lacks (the bound on unwinding, below) is a
+`LeanTaclet`.
 
 ## Decision 1: semantics, the least fixed point inside `Stmt.run`
 
@@ -65,7 +91,7 @@ Rejected:
 | Option | Why not |
 |---|---|
 | Fuel everywhere (`Stmt.run n σ s`) | A `Nat` through every theorem that recurses on `Stmt.run`; box becomes `∀ n`, diamond `∃ n`, and monotonicity in `n` a lemma every proof needs. |
-| A constant bound inside the loop only (fuel `2^257`) | Unwinding is not exact at the bound: a loop stopping at iteration `B + 1` is `diverge` while its unwinding is not, so `loopUnwind` is unsound for the diamond. |
+| A constant bound inside the loop only (fuel `2^257`) | Unwinding is not exact at the bound: a loop stopping at iteration `B + 1` is `diverge` while its unwinding is not, so `whileUnwind` is unsound for the diamond. |
 | An inductive `Exec` beside `Stmt.run` | Two denotations. Every taclet's `Premise.Correct`/`SameOk` (`Calculus/SoundKit.lean`) is over `Prog.run`, the corpus is decided by kernel evaluation of it (`corpus_decide`), and the callback relation anchors to it (`ExecS.det`). `Stmt.run` is the only semantics. |
 | `partial_fixpoint` | `Res = Except Halt` is not a CCPO, and the kernel cannot unfold the result. |
 
@@ -108,23 +134,30 @@ new arm. This is the choice `return` already made (no abrupt completion in
 `Stmt.run`; `lowerReturns` in `Syntax.lean`), and how KeY's loop scope works:
 a boolean records the abrupt completion.
 
-- **`break`/`continue`** set fresh flags `brk`/`cnt` (`freshCapture`). The
-  condition becomes `!brk && c`; whatever follows a statement that may set a
-  flag is wrapped in `if (!brk && !cnt) { … }`; a statement after an
-  unconditional `break` in the same block is an elaboration error (dead
-  code).
+The pass is solkey's `LoopLowering`, shape for shape (the table in "What
+solkey has"), as `lowerLoops` in `Syntax.lean`:
+
+- **`break`/`continue`/`return`** in a loop body set fresh flags
+  `brk`/`cnt`/`ret` (`freshCapture`), each made only when used; the rest of
+  the block is dropped, and whatever follows a statement that may set a flag
+  is wrapped in `if (!brk && !cnt && !ret) { … }`, testing only the flags it
+  may set. The condition becomes `!brk && !ret && c`; `cnt` is declared
+  `false` at the head of each iteration.
 - **`for (init; c; upd) body`** is
-  `{ init; while (c) { cnt = false; body'; if (!brk) { upd } } }`. `init` is
-  scoped as `elabBranch` scopes a branch, so a second `for (uint i …)` in the
+  `{ init; while (c) { body if (!brk && !ret) upd; } }`, so `continue` still
+  runs `upd`. The block scopes `init`, so a second `for (uint i …)` in the
   same function is legal.
-- **`do body while (c)`** is `bool first = true; while (first || c) { first
-  = false; body }`. The body is not duplicated: that would double its
+- **`do body while (c)`** is `{ bool first = true; while (first || c) { first
+  = false; body } }`. The body is not duplicated: that would double its
   declarations (`checkFresh`) and its weight.
-- **`return` inside a loop.** `lowerReturns` moves the statements after a
-  `return` into the branches that do not return, which cannot leave a loop.
-  A `return` in a loop body sets the return variable and a flag `ret`, and
-  the loop condition gets `!ret` like `brk`. (Today an early `return` in a
-  loop is an elaboration error.)
+- **`return` inside a loop.** In an inlined body, `return e;` in a loop is
+  `r = e; ret = true;` (`lowerReturn`), `ret` is shared by nested loops, and
+  the outermost loop is followed by `if (ret) return;`, which `lowerReturns`
+  then lowers as any early `return`. So the loop lowering runs before
+  `lowerReturns`, as solkey's runs after its `ReturnLowering` has made every
+  `return` bare.
+- A `break`, `continue` or `return` inside a `try` inside a loop is an
+  elaboration error, as in solkey.
 
 The cost: goals and invariants mention the flags; an invariant for a loop
 with `break` must say what holds when `brk` is set.
@@ -140,9 +173,14 @@ optional variant) or `.unwind (k : Nat)`. `Stmt.step`
 
 | Annotation | Box | Diamond |
 |---|---|---|
-| `.unwind (k+1)` | `loopUnwind`: `unfold [if (c) { body; loop(.unwind k) } else {}]` | same |
+| `.unwind (k+1)` | `whileUnwind`: `unfold [if (c) { body while[k] (c) body }]` | same |
 | `.unwind 0` | `loopExit`: premise `c = false ∧ ⟨[ ω ]⟩ φ` (a new `Premise` shape) | same |
-| `.inv I dec` | `loopInvariant`, below | `loopInvariantTotal` with `dec = some v`; with `none`, the premise is `done false` (sound, unprovable) |
+| `.inv I dec` | `whileInvariantBox`, below | `whileInvariantDiamond` with `dec = some v`; with `none`, the premise is `done false` (sound, unprovable; solkey unwinds instead) |
+
+In the source the annotation is solkey's specification,
+`/// @custom:key invariant …` and `/// @custom:key decreases …` above the
+loop, and, Lean only, `/// @custom:key unwind k` for the bound; a loop with
+neither is `.unwind 0`.
 
 `.unwind 0` is not `assert(!c)`: a failed `assert` panics, so running out of
 unwindings would be a failure of the program rather than of the bound.
@@ -156,7 +194,7 @@ needs `Fml.all` (`docs/function-specs.md`) and a table of formulas outside
 `Stmt` that the loop names by index.
 
 **Termination** (`Calculus/Termination.lean`). `.unwind k` weighs
-`(k + 1) · (c.cost + c.pen + Prog.weight body + 3)`, so `loopUnwind` gets
+`(k + 1) · (c.cost + c.pen + Prog.weight body + 3)`, so `whileUnwind` gets
 smaller; `.inv I _` weighs `c.cost + c.pen + Prog.weight body + I.cost + 2`,
 and its premise (`body` alone, `ω` alone) is lighter than `loop :: ω` under
 `2 ^ weight · (measure φ + 1)`. `Fml.step_wellFounded` and `symex_normalizes`
@@ -166,30 +204,36 @@ could decrease.
 ## Decision 4: the invariant rule and its soundness
 
 Write `Ic` for `I.lower == true`, `c⁺`/`c⁻` for `c.lower == true`/`false`.
-KeY's three goals:
+solkey's two goals (`whileInvariantBox`), under the context's update `{U}`:
 
 ```
-  Γ ⟹ {U} Ic                                                 (initially valid)
-  Γ ⟹ {U} {anon F} (Ic ∧ c⁺ → [ body ] Ic)                    (preserved)
-  Γ ⟹ {U} {anon F} (Ic → (cover ∧ (c⁻ → [ ω ] φ)))           (use case)
+  "invariant initially valid":     Γ ⟹ {U} Ic
+  "invariant preserved and used":  Γ ⟹ {U} {anon F} (Ic → cover ∧ (c⁺ → [ body ] Ic) ∧ (c⁻ → [ ω ] φ))
   ──────────────────────────────────────────────────────
-  Γ ⟹ {U} [ loop(.inv I _) c body; ω ] φ
+  Γ ⟹ {U} [ while (c) body; ω ] φ
 ```
 
-`cover` is `Premise.cover` (`Calculus/Logic.lean`) of `c⁺`, `c⁻`: `c⁺ ∨ c⁻`
-under the diamond, `true` under the box. `loopInvariantTotal` snapshots the
-variant into a fresh local `v₀`; its preserved goal is
-`{v₀ := v} ⟨ body ⟩ (Ic ∧ 0 ≤ v < v₀)`. The rule fires on the first
-statement of the modality, so `{U}` is the context's update, as in
-`CallbackTaclet` (`Calculus/Callback.lean`).
+solkey evaluates the condition into a fresh `b` (`[bool b = c;]`); Lean
+lowers it, and `cover` is `Premise.cover` (`Calculus/Logic.lean`) of `c⁺`,
+`c⁻`: `c⁺ ∨ c⁻` under the diamond, `true` under the box.
+`whileInvariantDiamond` adds the variant: the hypothesis is
+`Ic ∧ dec = v` with `v` fresh, and the body's postcondition
+`Ic ∧ (c⁺ → 0 ≤ dec < v)`. **The variant is checked only when the condition
+holds again** after the body, as solkey checks it: an iteration after which
+the condition is false is the last, and under the flag lowering the
+iteration a `break` ends sets `brk` without decreasing anything. The rule
+fires on the first statement of the modality, so `{U}` is the context's
+update, as in `CallbackTaclet` (`Calculus/Callback.lean`).
 
 **The anonymising update `{anon F}`** generalises `Fml.havoc`/`Hyp.havoc`,
-which replace storage and ledger and keep locals, memory and funds. A body
-also writes locals and memory, so `F` is a frame computed from its syntax
-(`Prog.frame body`): the locals it assigns or declares, storage if it writes
-storage, the heap and `nextId` if it touches memory, the ledger if it
-transfers. `holds σ (.anon F φ)` quantifies over every state agreeing
-with `σ` off `F`; `Fml.havoc` is `anon` at storage + ledger. A
+which replace storage and ledger and keep locals, memory and funds. `F` is
+solkey's `LoopFrame`, computed from the body's syntax (`Prog.frame body`):
+the locals it assigns or declares (the flags included), storage if it writes
+a non-local, the ledger (and storage) if it calls anything but
+`require`/`assert`/`revert`. **A body that allocates or writes memory has no
+invariant rule**, as in solkey: the heap is not anonymised, and such a loop
+can only be unwound. `holds σ (.anon F φ)` quantifies over every state
+agreeing with `σ` off `F`; `Fml.havoc` is `anon` at storage + ledger. A
 syntactic frame needs one lemma, `Prog.run_frameOff` (a run changes nothing
 outside `Prog.frame body`), proved beside `Prog.run_frame`.
 
@@ -198,12 +242,13 @@ iteration count `n` of `iterN`, every loop-head state `τₙ` satisfies `Ic` and
 agrees with `τ₀` off `F`: for `n = 0` by the first goal; for `n + 1`, `τₙ` is
 one of the states the second goal quantifies over, so a body run ending
 normally ends in `Ic`, and by `Prog.run_frameOff` agrees with `τₙ`, hence
-`τ₀`, off `F`. The loop then ends done at `τₙ` with `c⁻` (the third goal
+`τ₀`, off `F`. The loop then ends done at `τₙ` with `c⁻` (the second goal's use case
 gives `[ ω ] φ`), in a halt of the body or of `c`, or in `diverge`; the box
 accepts the last two.
 
-**Soundness, diamond.** The variant is a `uint`, strictly decreasing, so the
-iteration is done within `2^256` steps and `Loop.run` is not `diverge`. Neither
+**Soundness, diamond.** The variant is non-negative and strictly decreasing
+on every iteration after which the loop goes on, so the iteration is done
+within `v + 1` steps and `Loop.run` is not `diverge`. Neither
 the body (the preserved goal is a diamond) nor the condition (the cover
 conjunct) can halt.
 
@@ -249,8 +294,8 @@ EVM stage is worth doing once, for all.
 |---|---|---|
 | **L1 Syntax and semantics** | `Syntax.lean`: `LoopAnn`, `Stmt.loop`, `RawStmt.while/for/doWhile/brk/cont`, the lowering of Decision 2, printers, `Stmt.quote`, `renameStmts`. `Semantics.lean`: `Halt.diverge`, `Loop.iterN`, `Loop.run`, `implemented_by`. `Semantics/Agree.lean`: `Stmt.vars`, `run_frame`. `Semantics/Callback.lean`: `forks`, `hasTransfer`. The quoters in `Calculus/Quote.lean`, `Calculus/Notation.lean`. | Medium: structural recursion through `Loop.run`, and `#eval` under `implemented_by`. Check both first in a scratch file. |
 | **L2 Typing** | The loop cases of `Typing/{Soundness,Reachability,Constructibility}.lean`, by induction on `iterN`. | Low: the same proof three times. |
-| **L3 Unwinding** | `Calculus/Rules.lean` (`loopUnwind`, `loopExit`, `Premise.exit`), `Completeness`, `Uniqueness`, `Termination` (weight), `Logic` (`Proves.exit`), `RuleSoundness`, `RuleSyntax` printers, `SolkeyFragment`. Examples: the hand-unrolled solc ports as real loops. | Low to medium: the weight arithmetic is new. |
-| **L4 Invariant rule** | `Update.lean` (`Fml.anon`, `State.anon`, frame lemmas), `Semantics/Agree.lean` (`Prog.frame`, `Prog.run_frameOff`), `Calculus/Rules.lean` (`loopInvariant`, `loopInvariantTotal`, `Premise.inv`), `Logic`, `RuleSoundness`, `Termination`. Check whether `sol_decide` handles `anon` (a local in `F` is a fresh free local, anonymised storage a fresh free storage). Examples: a counting loop, a sum with a closed form. | Medium to high: `Prog.run_frameOff` over every statement, and extending `Decide`'s reduction to a second base storage. |
+| **L3 Unwinding** | `Calculus/Rules.lean` (`whileUnwind`, `loopExit`, `Premise.exit`), `Completeness`, `Uniqueness`, `Termination` (weight), `Logic` (`Proves.exit`), `RuleSoundness`, `RuleSyntax` printers, `SolkeyFragment`. Examples: the hand-unrolled solc ports as real loops. | Low to medium: the weight arithmetic is new. |
+| **L4 Invariant rule** | `Update.lean` (`Fml.anon`, `State.anon`, frame lemmas), `Semantics/Agree.lean` (`Prog.frame`, `Prog.run_frameOff`), `Calculus/Rules.lean` (`whileInvariantBox`, `whileInvariantDiamond`, `Premise.inv`), `Logic`, `RuleSoundness`, `Termination`. Check whether `sol_decide` handles `anon` (a local in `F` is a fresh free local, anonymised storage a fresh free storage). Examples: a counting loop, a sum with a closed form. | Medium to high: `Prog.run_frameOff` over every statement, and extending `Decide`'s reduction to a second base storage. |
 | **L5 Quantified invariants** | After `Fml.all` in an invariant: a table of invariants by index. Ballot's `winningProposal`. | High: depends on `Fml.all` and `grind` instantiation. |
 | **L6 Callbacks** | `Semantics/Callback.lean` (loop `ExecS` constructors, the divergence outcome), `Calculus/Callback.lean` (the loop rules under `ProvesC`). | Medium. |
 | **L7 EVM** | `Evm/{Machine,Compile,Correctness}.lean`, as above. | High: the largest stage. |
