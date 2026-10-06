@@ -16,13 +16,35 @@ execution gets stuck. The specification plumbing is unconnected:
 `speclang/LoopSpecification.java` has no implementation,
 `SpecificationRepository.addLoopSpec` is never called, the varconds
 `\hasInvariant`/`\getInvariant`/`\getVariant` are used by no taclet, and
-`KeyNatspec` has no loop directive. solkey's plan (`docs/taclet-ideas.md`,
-Tier 3) is unrolling first, an invariant rule later, `for` desugared to
-`while`, `break`/`continue` as abrupt-completion markers. Loops block
-Ballot and BlindAuction (after `bytes32` and events), `MultiAuction.closeAuction`
-is `skip`ped, and the solc ports unroll by hand. No printed rule covers loops
-either, so every rule below is a `LeanTaclet` (`Calculus/Rules.lean`) and
-belongs in `docs/solkey-feedback.md`.
+`KeyNatspec` has no loop directive (as of `1b4341a303`).
+
+solkey is now implementing loops in the same shape as this plan, so the
+rules can correspond (2026-10-06). The exact taclet names and shapes will be
+in solkey's `docs/taclets-implementation.md` once they land, and this plan
+follows them:
+
+- `break`/`continue` are lowered to boolean flags by a source pass next to
+  solkey's `ReturnLowering`, not by a loop-scope node: the condition becomes
+  `!brk && c`, and code after a flag-setting statement is guarded by
+  `if (!brk && !cnt)` (Decision 2).
+- `for (init; c; upd) body` is lowered to
+  `{ init; while (c) { cnt = false; body'; if (!brk) { upd } } }`, and
+  `do body while (c)` to `bool first = true; while (first || c) { first = false; body }`.
+- `whileUnwind` rewrites `while (c) b` to `if (c) { b while (c) b }`, the
+  shape of `loopUnwind` here. solkey's strategy chooses between unwinding
+  and the invariant rule where Lean reads the loop's annotation
+  (`.unwind k`/`.inv`, Decision 3).
+- The invariant rule has KeY's goals: the invariant initially valid; it is
+  preserved under an anonymising update of storage, the ledger and the
+  locals the body assigns; the use case. The diamond adds a `decreases`
+  variant. Specifications are `/// @custom:key invariant …` and
+  `decreases …` right before the loop.
+
+Loops block Ballot and BlindAuction (after `bytes32` and events),
+`MultiAuction.closeAuction` is `skip`ped, and the solc ports unroll by hand.
+Until solkey's rules land, every rule below is planned as a `LeanTaclet`
+(`Calculus/Rules.lean`); each becomes a `Taclet` under solkey's name once
+its taclet exists.
 
 ## Decision 1: semantics, the least fixed point inside `Stmt.run`
 
