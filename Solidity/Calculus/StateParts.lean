@@ -812,6 +812,7 @@ def UpdElem.mapTm (F : {u : Srt} → Tm C u → Tm C u) : UpdElem C → UpdElem 
   | .net r op a => .net (F r) op (F a)
   | .pay r a => .pay (F r) (F a)
   | .saveNet x => .saveNet x
+  | .saveNetMt x => .saveNetMt x
   | .netMt r a => .netMt (F r) (F a)
   | .setBalance a => .setBalance (F a)
 
@@ -827,7 +828,7 @@ def UpdElem.allTm (P : {u : Srt} → Tm C u → Bool) : UpdElem C → Bool
   | .net r _ a => P r && P a
   | .pay r a | .netMt r a => P r && P a
   | .setBalance a => P a
-  | .saveNet _ => true
+  | .saveNet _ | .saveNetMt _ => true
 
 section MapTm
 
@@ -888,6 +889,7 @@ theorem UpdElem.mapTm_write (hr : σ.Rest τ)
     simp only [Srt.AgreePart] at h1 h2
     simp only [UpdElem.mapTm, UpdElem.write, h1, h2, State.getNet, hr.tx]
   | .saveNet _, _ => by simp only [UpdElem.mapTm, UpdElem.write, hr.net]
+  | .saveNetMt _, _ => rfl
   | .netMt r a, he => by
     simp only [UpdElem.allTm, Bool.and_eq_true] at he
     have h1 := hF r he.1

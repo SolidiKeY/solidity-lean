@@ -2769,6 +2769,9 @@ def ppUpdElem? (e : Lean.Expr) : MetaM (Option (TSyntax `dl_upd_elem)) := do
   | UpdElem.saveNet _ x =>
     let some x ← var x | return none
     return some (← `(dl_upd_elem| $x:dl_term := net))
+  | UpdElem.saveNetMt _ x =>
+    let some x ← var x | return none
+    return some (← `(dl_upd_elem| $x:dl_term := mtSt))
   | UpdElem.netMt _ r a =>
     let r ← ppTerm r
     let a ← ppTerm a

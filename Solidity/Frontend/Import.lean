@@ -206,6 +206,12 @@ def elabSolcImport : CommandElab := fun stx => do
       | .error (.excluded m l) => ctorRow := some (ctorRowOf f .excluded (at_ f l m))
       | .error (.unsupported m l) => ctorRow := some (ctorRowOf f .unsupported (at_ f l m))
       | .ok ss => ctorMember := some (f.ctorMember (ss.map (·.2)))
+  -- an implicit constructor's initializer that does not print, or calls a
+  -- function left out: the initializers are left out, which a deployment of
+  -- `N` would not run
+  if c.ctor.isNone then
+    if let some g := c.initGap then
+      logWarning m!"solc_import: the initializers are left out: {g.msg}"
   -- the contract, with the initializers and the constructor if it expands
   -- with them, else without
   let plain := c.members ++ funMembers.toList

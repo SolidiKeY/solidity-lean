@@ -898,7 +898,7 @@ def _root_.Solidity.UpdElem.toL (ρ : Sym) : UpdElem C → LTerm × Sym
     match m.toL ρ with
     | some (M, g) => if M.within memSize then (g, { ρ with mem := M }) else (.err, ρ)
     | none => (.err, ρ)
-  | .selfBalance .. | .saveNet .. | .netMt .. | .setBalance .. => (.err, ρ)
+  | .selfBalance .. | .saveNet .. | .saveNetMt .. | .netMt .. | .setBalance .. => (.err, ρ)
 
 /-- The memory an update leaves holds at most `memSize` writes and
 allocations. -/
@@ -918,7 +918,7 @@ def _root_.Solidity.UpdElem.inL (ρ : Sym) : UpdElem C → Bool
   | .net r _ a | .pay r a => r.inL ρ && a.inL ρ
   | .mref _ i => i.inL ρ
   | .memory m => m.inL ρ && memWithin (m.toL ρ)
-  | .selfBalance .. | .saveNet .. | .netMt .. | .setBalance .. => false
+  | .selfBalance .. | .saveNet .. | .saveNetMt .. | .netMt .. | .setBalance .. => false
 
 /-- `{x := freshId(addM(memory)) ‖ memory := addM(memory)}`, or the same of
 `copySt(memory, v)`: the identity is the root the memory's allocation takes
@@ -3506,7 +3506,7 @@ theorem Fml.toL_holds :
         cases he
         obtain ⟨-, μ, B, hrun, hh, hp⟩ := hme μ' hμ'
         exact Fml.toL_holds φ (h.setMem hrun hp hh) hf2
-    | selfBalance _ _ | saveNet _ | netMt _ _ | setBalance _ =>
+    | selfBalance _ _ | saveNet _ | saveNetMt _ | netMt _ _ | setBalance _ =>
       simp only [UpdElem.inL, Bool.false_eq_true, false_and] at hf
   | .modal m P φ, _, _, _, _, hf => by
     obtain ⟨ω, rfl⟩ := Prog.reverts_eq hf

@@ -876,6 +876,10 @@ def elabUpd (Γ : ECtx) : List RawUpdElem → Except String (Upd C × ECtx)
     -- `oldNet := net`: a ledger variable, which `net(oldNet, a)` reads
     if (t matches .name "net") && (C.rootType "net").isNone then
       return (.saveNet (Var.ofName x) :: U', Γ')
+    -- `oldNet := mtSt`: solkey's ledger snapshot of a deployment, the
+    -- empty ledger (a storage variable otherwise, `old := mtSt`)
+    if x = "oldNet" && (t matches .name "mtSt") then
+      return (.saveNetMt (Var.ofName x) :: U', Γ')
     -- `old := storage`: a storage variable
     if isStorTerm t then return (.store (Var.ofName x) (← tStor C Γ t) :: U', setBy x .store Γ')
     if let some (.ref R) := pathTy C Γ t then

@@ -530,7 +530,7 @@ them as KeY's `\replacewith` updates do.
 | a member or element of a memory object | `MAddr` | `.field`/`.at` |
 | `Memory` | `MTerm` | `.memory`, `.write(m, a, v)`, `.addM` (eager: the type rides along; a concrete one prints `addM(m, T)`, `T` a struct `Person` or an array type `uint[]`, `Token[3]`, where KeY writes `addM(mem, shaped(idp, #shapeOf(mv)))`: the type in place of its shape), `.copySt(m, v)` |
 | what a memory `write` writes | `MValT` | a value (`.val`) or a reference (`.ref`) |
-| one elementary update | `UpdElem` | `.val`, `.path`, `.mref`, `.storage`, `.memory`; `.store` for `old := storage`; `.pay` for a transfer's booking (and a taken send's) `net := if(r = this) then net else store(net, at(r), net(r) - a)`; `.net` for `net := store(net, at(r), net(r) ± a)`, with `.selfBalance` for a `payable` function's booking of `msg.value` (`selfBalance := selfBalance + a`); `.saveNet` for `oldNet := net` |
+| one elementary update | `UpdElem` | `.val`, `.path`, `.mref`, `.storage`, `.memory`; `.store` for `old := storage`; `.pay` for a transfer's booking (and a taken send's) `net := if(r = this) then net else store(net, at(r), net(r) - a)`; `.net` for `net := store(net, at(r), net(r) ± a)`, with `.selfBalance` for a `payable` function's booking of `msg.value` (`selfBalance := selfBalance + a`); `.saveNet` for `oldNet := net`; a deployment's (`Problem.deployUpd`, `spec!{constructor}`): `.netMt` for solkey's `net := storeSt(mtSt, at(r), selectSt<[int]>(mtSt, at(r)) + a)`, printed `storeSt(mtSt, at(r), a)` (Lean-only shortening: the read of `mtSt` is `0`, `selectOnEmptyStorage`), `.setBalance` for `selfBalance := a`, `.saveNetMt` for `oldNet := mtSt` |
 
 ### `structRules.key` → `Theory/Storage.lean` (`Struct`, `StValue`)
 

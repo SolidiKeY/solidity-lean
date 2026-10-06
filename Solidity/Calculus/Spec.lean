@@ -55,16 +55,17 @@ deployment, from the empty storage:
 
 ```
 R ∧ M ∧ requires →
-  {storage := mtSt ‖ old := mtSt ‖ net := store(mtSt, at(msg.sender), msg.value) ‖
-   selfBalance := msg.value} [ constructor(x₁, …, xₙ); ] (I ∧ ensures ∧ A)
+  {storage := mtSt ‖ old := mtSt ‖ oldNet := mtSt ‖
+   net := store(mtSt, at(msg.sender), msg.value) ‖ selfBalance := msg.value}
+  [ constructor(x₁, …, xₙ); ] (I ∧ ensures ∧ A)
 ```
 
 It assumes no `I` (solkey's has no `CInv(storage, net)` premise) and no
-`L`: both would be of the storage the update discards.  Lean only: a
-`requires` that reads a state variable, the ledger or the funds is refused,
-since solkey reads it before the update, of a storage the deployment never
-sees; and so is an `\old(net(a))`, whose snapshot `oldNet := mtSt` has no
-term here.
+`L`: both would be of the storage the update discards.  The snapshots are
+taken where something reads them, as a function's are; `\old(net(a))` reads
+the empty ledger, `0`.  Lean only: a `requires` that reads a state
+variable, the ledger or the funds is refused, since solkey reads it before
+the update, of a storage the deployment never sees.
 
 Not ported: the benchmarks' clauses over `net(a)` are not tried.  A spec's
 arithmetic is Solidity's, checked at its operands' type, where solkey's is
@@ -459,8 +460,6 @@ def specPieces (f : String) :
         throw s!"constructor: a `requires` reads the state variable {x}, which a deployment discards"
       if r.usesNet || r.any (fun | .field (.name "this") "balance" => some true | _ => none) then
         throw "constructor: a `requires` reads the ledger or the funds, which a deployment sets"
-    if d.spec.ensures.any SpecExpr.usesOldNet || (d.spec.assignable.getD []).any SpecLoc.usesNet then
-      throw "constructor: `\\old(net(…))` reads the ledger before a deployment, which is empty"
   let pre : SpecCtx C := { storage := .storage, ensures := false, locals := ps, result := none }
   let post : SpecCtx C := { pre with ensures := true, result := res, rets := rets }
   let inv ← C.inv.mapM (SpecExpr.fml C { pre with locals := [] })
@@ -478,20 +477,21 @@ def specPieces (f : String) :
       [.tupleAssign (rets.map fun (_, v, _) => some (.name v)) (.call f args)]
   let P ← ((elabStmts C call).run { funs := C.funs }).run' (ps.map fun (n, p) => (n, LocalTy.val p), 1)
   -- the snapshots `\old` reads, taken where something reads them
-  -- (a deployment's `old` is the empty storage: the update is parallel, so
-  -- `old := storage` would bind the storage it discards)
+  -- (a deployment's `old` and `oldNet` are solkey's `old := mtSt ‖
+  -- oldNet := mtSt`: the update is parallel, so `old := storage` would bind
+  -- the storage it discards)
   let start : STerm C := if ctor then .mtSt C.vars else .storage
   let snap : Upd C :=
     (if d.spec.ensures.any SpecExpr.usesOld || d.spec.assignable.isSome then [.store oldVar start]
       else []) ++
     if d.spec.ensures.any SpecExpr.usesOldNet || (d.spec.assignable.getD []).any SpecLoc.usesNet
-    then [.saveNet oldNetVar] else []
+    then [if ctor then .saveNetMt oldNetVar else .saveNet oldNetVar] else []
   -- the payment booked, KeY's `{net := store(net, at(msgSender),
   -- net(msgSender) + msgValue) ‖ selfBalance := selfBalance + msgValue}`; a
   -- function that is not `payable` is called with `msg.value == 0`, so its
   -- booking is left out: it changes nothing.  A deployment's is solkey's
-  -- `{storage := mtSt ‖ old := mtSt ‖ net := storeSt(mtSt, at(msgSender),
-  -- msgValue) ‖ selfBalance := msgValue}`, payable or not
+  -- `{storage := mtSt ‖ old := mtSt ‖ oldNet := mtSt ‖ net := storeSt(mtSt,
+  -- at(msgSender), msgValue) ‖ selfBalance := msgValue}`, payable or not
   let U := if ctor then
     [.storage (.mtSt C.vars)] ++ snap ++ [.netMt (.env .msgSender) (.env .msgValue), .setBalance (.env .msgValue)]
   else snap ++ if d.payable then

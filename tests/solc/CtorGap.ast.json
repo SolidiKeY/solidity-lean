@@ -1,0 +1,238 @@
+{
+ "header": {
+  "solcVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
+  "sourceSha256": "cbb78e2ae10f7d2b23d45786fd3d487ca195fcdb24ca995c626b990cb72e0591",
+  "solkeyCommit": "unknown",
+  "source": "tests/solc/CtorGap.sol"
+ },
+ "ast": {
+  "nodeType": "SourceUnit",
+  "nodes": [
+   {
+    "literals": [
+     "solidity",
+     "^",
+     "0.8",
+     ".0"
+    ],
+    "nodeType": "PragmaDirective"
+   },
+   {
+    "contractKind": "contract",
+    "id": 40,
+    "name": "CtorGap",
+    "nodeType": "ContractDefinition",
+    "nodes": [
+     {
+      "constant": false,
+      "id": 4,
+      "mutability": "mutable",
+      "name": "limit",
+      "nodeType": "VariableDeclaration",
+      "src": "236:14:0",
+      "line": 7,
+      "stateVariable": true,
+      "storageLocation": "default",
+      "typeDescriptions": {
+       "typeString": "uint256"
+      },
+      "typeName": {
+       "name": "uint",
+       "nodeType": "ElementaryTypeName",
+       "typeDescriptions": {
+        "typeString": "uint256"
+       }
+      },
+      "value": {
+       "kind": "number",
+       "nodeType": "Literal",
+       "typeDescriptions": {
+        "typeString": "int_const 5"
+       },
+       "value": "5"
+      },
+      "visibility": "internal"
+     },
+     {
+      "constant": false,
+      "id": 6,
+      "mutability": "mutable",
+      "name": "count",
+      "nodeType": "VariableDeclaration",
+      "src": "256:10:0",
+      "line": 8,
+      "stateVariable": true,
+      "storageLocation": "default",
+      "typeDescriptions": {
+       "typeString": "uint256"
+      },
+      "typeName": {
+       "name": "uint",
+       "nodeType": "ElementaryTypeName",
+       "typeDescriptions": {
+        "typeString": "uint256"
+       }
+      },
+      "visibility": "internal"
+     },
+     {
+      "body": {
+       "nodeType": "Block",
+       "statements": [
+        {"expression":{"arguments":[{"leftExpression":{"name":"x","nodeType":"Identifier","referencedDeclaration":8,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":">","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 0"},"value":"0"},"typeDescriptions":{"typeString":"bool"}}],"expression":{"name":"require","nodeType":"Identifier","referencedDeclaration":-18,"typeDescriptions":{"typeString":"function (bool) pure"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"309:14:0","line":11},
+        {"nodeType":"PlaceholderStatement","src":"333:1:0","line":12}
+       ]
+      },
+      "name": "positive",
+      "nodeType": "ModifierDefinition",
+      "parameters": {
+       "nodeType": "ParameterList",
+       "parameters": [
+        {
+         "constant": false,
+         "id": 8,
+         "mutability": "mutable",
+         "name": "x",
+         "nodeType": "VariableDeclaration",
+         "src": "291:6:0",
+         "line": 10,
+         "stateVariable": false,
+         "storageLocation": "default",
+         "typeDescriptions": {
+          "typeString": "uint256"
+         },
+         "typeName": {
+          "name": "uint",
+          "nodeType": "ElementaryTypeName",
+          "typeDescriptions": {
+           "typeString": "uint256"
+          }
+         },
+         "visibility": "internal"
+        }
+       ]
+      },
+      "visibility": "internal"
+     },
+     {
+      "body": {
+       "nodeType": "Block",
+       "statements": [
+        {"expression":{"leftHandSide":{"name":"count","nodeType":"Identifier","referencedDeclaration":6,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"Assignment","operator":"=","rightHandSide":{"name":"start","nodeType":"Identifier","referencedDeclaration":20,"typeDescriptions":{"typeString":"uint256"}},"typeDescriptions":{"typeString":"uint256"}},"nodeType":"ExpressionStatement","src":"397:13:0","line":16}
+       ]
+      },
+      "id": 31,
+      "kind": "constructor",
+      "modifiers": [
+       {
+        "arguments": [
+         {
+          "name": "start",
+          "nodeType": "Identifier",
+          "referencedDeclaration": 20,
+          "typeDescriptions": {
+           "typeString": "uint256"
+          }
+         }
+        ],
+        "kind": "modifierInvocation",
+        "modifierName": {
+         "name": "positive",
+         "nodeType": "IdentifierPath",
+         "referencedDeclaration": 18
+        },
+        "nodeType": "ModifierInvocation"
+       }
+      ],
+      "name": "",
+      "nodeType": "FunctionDefinition",
+      "parameters": {
+       "nodeType": "ParameterList",
+       "parameters": [
+        {
+         "constant": false,
+         "id": 20,
+         "mutability": "mutable",
+         "name": "start",
+         "nodeType": "VariableDeclaration",
+         "src": "359:10:0",
+         "line": 15,
+         "stateVariable": false,
+         "storageLocation": "default",
+         "typeDescriptions": {
+          "typeString": "uint256"
+         },
+         "typeName": {
+          "name": "uint",
+          "nodeType": "ElementaryTypeName",
+          "typeDescriptions": {
+           "typeString": "uint256"
+          }
+         },
+         "visibility": "internal"
+        }
+       ]
+      },
+      "returnParameters": {
+       "nodeType": "ParameterList",
+       "parameters": []
+      },
+      "src": "347:70:0",
+      "line": 15,
+      "stateMutability": "nonpayable",
+      "visibility": "public"
+     },
+     {
+      "body": {
+       "nodeType": "Block",
+       "statements": [
+        {"expression":{"name":"count","nodeType":"Identifier","referencedDeclaration":6,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"Return","src":"475:12:0","line":20}
+       ]
+      },
+      "id": 39,
+      "kind": "function",
+      "name": "get",
+      "nodeType": "FunctionDefinition",
+      "parameters": {
+       "nodeType": "ParameterList",
+       "parameters": []
+      },
+      "returnParameters": {
+       "nodeType": "ParameterList",
+       "parameters": [
+        {
+         "constant": false,
+         "id": 34,
+         "mutability": "mutable",
+         "name": "",
+         "nodeType": "VariableDeclaration",
+         "src": "459:4:0",
+         "line": 19,
+         "stateVariable": false,
+         "storageLocation": "default",
+         "typeDescriptions": {
+          "typeString": "uint256"
+         },
+         "typeName": {
+          "name": "uint",
+          "nodeType": "ElementaryTypeName",
+          "typeDescriptions": {
+           "typeString": "uint256"
+          }
+         },
+         "visibility": "internal"
+        }
+       ]
+      },
+      "src": "423:71:0",
+      "line": 19,
+      "stateMutability": "view",
+      "visibility": "public"
+     }
+    ],
+    "src": "213:283:0",
+    "line": 6
+   }
+  ]
+ }
+}

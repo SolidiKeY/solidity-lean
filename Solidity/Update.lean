@@ -730,6 +730,10 @@ inductive UpdElem (C : Contract) where
   /-- `oldNet := net`: a ledger variable binds the ledger, which
   `\old(net(a))` reads. -/
   | saveNet (x : Var)
+  /-- `oldNet := mtSt`: a ledger variable binds the empty ledger, a
+  deployment's snapshot for `\old(net(a))` (solkey's constructor problem,
+  where `net := storeSt(mtSt, …)` is a `Struct` as `storage` is). -/
+  | saveNetMt (x : Var)
   /-- `net := storeSt(mtSt, at(r), a)`: a deployment's ledger, empty but for
   the payment `a` of `r` (solkey's constructor obligation, `r` the
   `msgSender` and `a` the `msgValue`). -/
@@ -768,6 +772,7 @@ def UpdElem.write (σ₀ : State) : UpdElem C → State → Res State
     else pure { τ with
       net := if addr = σ₀.tx.selfAddress then τ.net else setBy addr (τ.getNet addr - amt) τ.net }
   | .saveNet x, τ => pure (τ.setEnv x (.ledger σ₀.net))
+  | .saveNetMt x, τ => pure (τ.setEnv x (.ledger []))
   | .netMt r a, τ => do
     let addr ← (← r.eval σ₀).asInt
     let amt ← (← a.eval σ₀).asInt
@@ -939,7 +944,7 @@ def UpdElem.vars : UpdElem C → List Var
   | .selfBalance _ a => a.vars
   | .net r _ a => r.vars ++ a.vars
   | .pay r a => r.vars ++ a.vars
-  | .saveNet x => [x]
+  | .saveNet x | .saveNetMt x => [x]
   | .netMt r a => r.vars ++ a.vars
   | .setBalance a => a.vars
 
@@ -1280,6 +1285,7 @@ theorem UpdElem.write_frame {σ₀ σ₀' τ τ' : State} (h₀ : EnvAgreeExcept
     show ResultsAgree ns (.ok (τ.setEnv x (.ledger σ₀.net))) (.ok (τ'.setEnv x (.ledger σ₀'.net)))
     rw [h₀.net]
     exact h.setEnv_both x _
+  | .saveNetMt x, _ => h.setEnv_both x _
   | .netMt r a, hv => by
     simp only [UpdElem.write, r.eval_frame h₀ hv.left, a.eval_frame h₀ hv.right]
     agree_run h

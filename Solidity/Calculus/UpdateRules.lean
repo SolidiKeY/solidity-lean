@@ -255,6 +255,7 @@ def UpdElem.subst (U : Upd C) : UpdElem C → UpdElem C
   | .net r op a => .net (r.subst U) op (a.subst U)
   | .pay r a => .pay (r.subst U) (a.subst U)
   | .saveNet x => .saveNet x
+  | .saveNetMt x => .saveNetMt x
   | .netMt r a => .netMt (r.subst U) (a.subst U)
   | .setBalance a => .setBalance (a.subst U)
 
@@ -370,6 +371,7 @@ theorem UpdElem.subst_write (h : SubstAgree U ns σ τ) (τ' : State) :
     simp only [UpdElem.subst, UpdElem.write, r.subst_eval h, a.subst_eval h, State.getNet,
       h.agree.tx]
   | .saveNet _ => by simp only [UpdElem.subst, UpdElem.write, h.agree.net]
+  | .saveNetMt _ => rfl
   | .netMt r a => by simp only [UpdElem.subst, UpdElem.write, r.subst_eval h, a.subst_eval h]
   | .setBalance a => by simp only [UpdElem.subst, UpdElem.write, a.subst_eval h]
 
@@ -471,7 +473,7 @@ theorem Upd.substAgree {U : Upd C} (hU : U.envOnly = true) {σ τ : State}
     | val _ t | path _ t | mref _ t =>
       simp only [UpdElem.binding, bind, Except.bind] at hb
       split at hb <;> simp only [pure, Except.pure, Except.ok.injEq, reduceCtorEq] at hb
-    | storage | memory | selfBalance | net | pay | store | saveNet | netMt | setBalance => simp only [UpdElem.var?,
+    | storage | memory | selfBalance | net | pay | store | saveNet | saveNetMt | netMt | setBalance => simp only [UpdElem.var?,
         reduceCtorEq] at hvar
   refine ⟨hag, fun x => ?_, fun x => ?_, fun x => ?_, fun x => ?_,
     fun x hx => (getEnv_eq x hx).symm, written, fun x e hx => ?_⟩
@@ -498,7 +500,7 @@ theorem Upd.substAgree {U : Upd C} (hU : U.envOnly = true) {σ τ : State}
         | mref _ i =>
           simp only [UpdElem.binding, bind, Except.bind] at hb
           split at hb <;> simp only [pure, Except.pure, Except.ok.injEq, reduceCtorEq] at hb
-        | storage | memory | selfBalance | net | pay | store | saveNet | netMt | setBalance => simp only [UpdElem.var?,
+        | storage | memory | selfBalance | net | pay | store | saveNet | saveNetMt | netMt | setBalance => simp only [UpdElem.var?,
             reduceCtorEq] at hvar
       simp only [STerm.stuck_eval, tm_eval, hτ, bind, Except.bind]
       cases b with
@@ -544,7 +546,7 @@ theorem Upd.substAgree {U : Upd C} (hU : U.envOnly = true) {σ τ : State}
           simp only [hi, pure, Except.pure, Except.ok.injEq] at hb
           subst hb
           simp only [Term.stuck_eval, tm_eval, bind, Except.bind, State.getEnv, hl]
-      | storage | memory | selfBalance | net | pay | store | saveNet | netMt | setBalance => simp only [UpdElem.var?,
+      | storage | memory | selfBalance | net | pay | store | saveNet | saveNetMt | netMt | setBalance => simp only [UpdElem.var?,
           reduceCtorEq] at hvar
     · rename_i hx
       simp only [tm_eval, getEnv_eq x hx]
@@ -580,7 +582,7 @@ theorem Upd.substAgree {U : Upd C} (hU : U.envOnly = true) {σ τ : State}
           simp only [hi, pure, Except.pure, Except.ok.injEq] at hb
           subst hb
           simp only [PTerm.stuck_eval, tm_eval, aliasPath, bind, Except.bind, State.getEnv, hl]
-      | storage | memory | selfBalance | net | pay | store | saveNet | netMt | setBalance => simp only [UpdElem.var?,
+      | storage | memory | selfBalance | net | pay | store | saveNet | saveNetMt | netMt | setBalance => simp only [UpdElem.var?,
           reduceCtorEq] at hvar
     · rename_i hx
       simp only [tm_eval, aliasPath, getEnv_eq x hx]
@@ -616,7 +618,7 @@ theorem Upd.substAgree {U : Upd C} (hU : U.envOnly = true) {σ τ : State}
           simp only [hp, pure, Except.pure, Except.ok.injEq] at hb
           subst hb
           simp only [ITerm.stuck_eval, tm_eval, bind, Except.bind, State.getEnv, hl]
-      | storage | memory | selfBalance | net | pay | store | saveNet | netMt | setBalance => simp only [UpdElem.var?,
+      | storage | memory | selfBalance | net | pay | store | saveNet | saveNetMt | netMt | setBalance => simp only [UpdElem.var?,
           reduceCtorEq] at hvar
     · rename_i hx
       simp only [tm_eval, getEnv_eq x hx]
@@ -694,6 +696,7 @@ theorem UpdElem.write_agree {A : List Var} {σ₀ τ₁ τ₂ : State} (h : EnvA
     | error => rfl
     | ok a => exact ⟨h.storage, rfl, rfl, h.net, h.env, h.selfBalance, h.tx⟩
   | .saveNet x => by simp only [UpdElem.write]; exact h.setEnv_both x _
+  | .saveNetMt x => h.setEnv_both x _
   | .selfBalance .. => by
     simp only [UpdElem.write]
     agree_run h
@@ -1667,7 +1670,7 @@ theorem Fml.subst_box_st {U : Upd C} (hU : U.localsOrStorage = true) {φ : Fml C
 storage variable (`old := s`) and a ledger variable (`oldNet := net`), which
 `var?` leaves out because `Upd.subst` has nothing to put for them. -/
 def UpdElem.envVar? : UpdElem C → Option Var
-  | .val x _ | .path x _ | .mref x _ | .store x _ | .saveNet x => some x
+  | .val x _ | .path x _ | .mref x _ | .store x _ | .saveNet x | .saveNetMt x => some x
   | _ => none
 
 /-- An element that binds another local leaves `x` as it was: a storage,
@@ -1686,7 +1689,7 @@ theorem UpdElem.write_getEnv_other {σ₀ ρ ρ' : State} {x : Var} :
     obtain ⟨v, -, h⟩ := bind_ok_inv h
     cases h
     exact SemanticsProperties.State.getEnv_setEnv_ne (by rintro rfl; exact hne rfl) _ _
-  | .saveNet y, hne, h => by
+  | .saveNet y, hne, h | .saveNetMt y, hne, h => by
     cases h
     exact SemanticsProperties.State.getEnv_setEnv_ne (by rintro rfl; exact hne rfl) _ _
   | .storage s, _, h => by
@@ -2065,6 +2068,7 @@ def UpdElem.withSt (s : STerm C) : UpdElem C → UpdElem C
   | .mref x i => .mref x i
   | .memory m => .memory m
   | .saveNet x => .saveNet x
+  | .saveNetMt x => .saveNetMt x
   | .netMt r a => .netMt (r.withSt ⟨s⟩) (a.withSt ⟨s⟩)
   | .setBalance a => .setBalance (a.withSt ⟨s⟩)
 
@@ -2076,7 +2080,7 @@ def UpdElem.stExplicit : UpdElem C → Bool
   | .net r _ a => r.stExplicit && a.stExplicit
   | .pay r a | .netMt r a => r.stExplicit && a.stExplicit
   | .setBalance a => a.stExplicit
-  | .saveNet _ => true
+  | .saveNet _ | .saveNetMt _ => true
   | .mref .. | .memory _ => false
 
 /-- `{storage := s}V`: `s` substituted for `storage` in `V`'s right-hand sides. -/
@@ -2105,6 +2109,7 @@ theorem UpdElem.withSt_write {s : STerm C} {σ τ : State} (hs : s.eval σ = .ok
       Tm.withSt_eval (w := ⟨s⟩) hs hk a he.2]
     rw [← hk]
   | .saveNet _, _ => by simp only [UpdElem.withSt, UpdElem.write]; rw [← hk]
+  | .saveNetMt _, _ => rfl
   | .netMt r a, he => by
     simp only [UpdElem.stExplicit, Bool.and_eq_true] at he
     simp only [UpdElem.withSt, UpdElem.write, Tm.withSt_eval (w := ⟨s⟩) hs hk r he.1,
@@ -2461,6 +2466,7 @@ def UpdElem.rw (q : Term C × Term C) : UpdElem C → UpdElem C
   | .net r op a => .net (r.rw q) op (a.rw q)
   | .pay r a => .pay (r.rw q) (a.rw q)
   | .saveNet x => .saveNet x
+  | .saveNetMt x => .saveNetMt x
   | .netMt r a => .netMt (r.rw q) (a.rw q)
   | .setBalance a => .setBalance (a.rw q)
 
@@ -2477,7 +2483,7 @@ theorem UpdElem.rw_write (hq : Term.EvalRefines q.1 q.2) (σ₀ τ : State) :
       Res.Le.bind (Term.rw_eval hq a σ₀) fun _ => Res.Le.refl _
   | .selfBalance _ a | .setBalance a =>
     Res.Le.bind (Term.rw_eval hq a σ₀) fun _ => Res.Le.refl _
-  | .mref .. | .memory _ | .saveNet _ => Res.Le.refl _
+  | .mref .. | .memory _ | .saveNet _ | .saveNetMt _ => Res.Le.refl _
 
 theorem Upd.rw_foldl (hq : Term.EvalRefines q.1 q.2) (σ₀ : State) :
     (U : Upd C) → ∀ ρ, Res.Le (U.foldlM (fun τ e => e.write σ₀ τ) ρ)
@@ -2565,7 +2571,7 @@ theorem UpdElem.rw_write_rev {σ₀ : State} (hq : Res.Le (q.2.eval σ₀) (q.1.
       Res.Le.bind (Term.rw_eval_rev hq a) fun _ => Res.Le.refl _
   | .selfBalance _ a | .setBalance a =>
     Res.Le.bind (Term.rw_eval_rev hq a) fun _ => Res.Le.refl _
-  | .mref .. | .memory _ | .saveNet _ => Res.Le.refl _
+  | .mref .. | .memory _ | .saveNet _ | .saveNetMt _ => Res.Le.refl _
 
 theorem Upd.rw_foldl_rev {σ₀ : State} (hq : Res.Le (q.2.eval σ₀) (q.1.eval σ₀)) :
     (U : Upd C) → ∀ ρ, Res.Le ((U.rw q).foldlM (fun τ e => e.write σ₀ τ) ρ)

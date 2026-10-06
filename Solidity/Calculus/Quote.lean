@@ -108,6 +108,7 @@ def UpdElem.quote : UpdElem C → Lean.Expr
     mkAppN (mkConst ``UpdElem.net) #[c, Tm.quote c r, IntOp.quote op, Tm.quote c a]
   | .pay r a => mkAppN (mkConst ``UpdElem.pay) #[c, Tm.quote c r, Tm.quote c a]
   | .saveNet x => mkAppN (mkConst ``UpdElem.saveNet) #[c, toExpr x]
+  | .saveNetMt x => mkAppN (mkConst ``UpdElem.saveNetMt) #[c, toExpr x]
   | .netMt r a => mkAppN (mkConst ``UpdElem.netMt) #[c, Tm.quote c r, Tm.quote c a]
   | .setBalance a => mkAppN (mkConst ``UpdElem.setBalance) #[c, Tm.quote c a]
 

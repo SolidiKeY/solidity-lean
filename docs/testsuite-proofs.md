@@ -2096,9 +2096,8 @@ numbers recorded above:
 master under the same load: `Uniqueness` reads none of the new arms and
 moved as much, which points at the other lane's load. Re-measure `Calls`
 on master and on this branch, one after the other with `Elab.async false`,
-before merging. `TestSuite/Derived*` was not built in this lane (no
-`lake build SolkeyTestSuite` here); its obligations contain none of the
-new terms.
+before merging. `TestSuite/Derived*` was not built in S1–S3 (rebuilt in
+S4–S5, below); its obligations contain none of the new terms.
 
 **Constructors S4–S5** (2026-10-06). The obligations are solkey's
 (`Problem.ctorFml`, `problem!{constructor}`, `spec!{constructor}`), and the

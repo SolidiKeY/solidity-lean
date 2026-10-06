@@ -46,7 +46,7 @@ lemma (`TermTaclet.sound`).
 | `Syntax.lean` | The typed syntax (`Val C p`, `SPath`, `Loc`, `MPath`, `Stmt C`), `Contract`/`FunDecl`, and the elaborator behind `sol[C]{…}` and `contract!{…}`. |
 | `FreshNames.lean` | `FreshNames.ofTable`: the examples' names for the rules' fresh variables, one table per example; `FreshNames.clashes`. |
 | `SpecSyntax.lean` | The specification language (`SolSpec.g4`: `SpecExpr`, `spec!(…)`) and a function's clauses (`FunSpec`). |
-| `Semantics.lean` | The interpreter `Stmt.run`, following solc where KeY is more liberal (`docs/solc-alignment.md`). |
+| `Semantics.lean` | The interpreter `Stmt.run`, following solc where KeY is more liberal (`docs/solc-alignment.md`); a deployment's `Contract.deployState` and `Contract.deploy`. |
 | `Semantics/Properties.lean` | Read-after-write, frame and result-monad lemmas about the state operations, shared by every later layer. |
 | `Semantics/Agree.lean` | `EnvAgreeExcept`: states agreeing off scratch names, and a frame lemma per evaluator. |
 | `Semantics/WellFormed.lean` | `storageWtB`: well-formed storage (the shape `SVal.canon ∧ SVal.tight`, and words in range, `SVal.wordsB`) as a test the term `wt(storage)` runs; `SVal.isDfltB`, a default the kernel can recognise. |
@@ -81,7 +81,7 @@ lemma (`TermTaclet.sound`).
 | `Calculus/Callback.lean` | `CallbackTaclet.sound`, `CallbackTaclet.sound_send`, `ProvesC` (sequents `dl{ ..Γ ⟹ᶜ[I] φ }`) and `ProvesC.sound`. |
 | `Calculus/SolkeyFragment.lean` | `Stmt.inSolkey m`, where solkey's rules alone are the calculus under a modality; and where they fall short. |
 | `Calculus/Symex.lean` | `Fml.step`, `symex`, `symex_sound`; `sol_step`, `sol_symex`, `sol_derive`; `Proves.closeTrue` and `Proves.splitBox`, a box split with KeY's two goals. |
-| `Calculus/Close.lean` | `sol_close`: first-order goals by weakest preconditions. Its docstring lists what it does not close. |
+| `Calculus/Close.lean` | `sol_close`: first-order goals by weakest preconditions, and `sol_close_mt` from a deployment's empty storage. Its docstring lists what it does not close. |
 | `Calculus/CloseTests.lean` | What `sol_close` closes, pinned. |
 | `Calculus/ReadWrite.lean` | Reads after writes: the four-way path comparison; the simp sets `close_rw`, `decide_eval`. |
 | `Calculus/MemNames.lean` | The interpreter facts the memory closer rests on: a copy into memory is a tree of the counters it used (`copyStToM_interval`, `copyStToM_resolve_inj`), names fixed at their birth (`Births`), copies read as their sources both ways, when a copy halts. |
@@ -96,7 +96,7 @@ lemma (`TermTaclet.sound`).
 | `Calculus/Closer.lean` | `LFml.close`: the closer, KeY's first-order and arithmetic taclets as clauses of one `Bool` (ground evaluation, `applyEq`, `bool` case splits, intervals by constants and bounds below, reads typed by `wt`'s layout, the slot a `push()` recycles typed by its element type, a copy into memory of a type with no mapping, `Facts.cpokInit`), `LFml.close_holds`; `LFml.fits`, the size count; literal powers folded (`foldBin`). The folds, `simpE` and the `Facts` arms on terms match in `key{}`. |
 | `Calculus/Derive.lean` | The strategy as one kernel evaluation: `Derive.residue` (per-goal fresh names, any number of branches, a box split's two goals as `Proves.splitBox`'s, a step budget over the whole derivation, leaves closed by `LFml.close` with `wt` read as a layout, parallel updates split, a push's returned alias read after the push, `Derive.fitsClose` bounding a leaf and its reduction), `Proves.of_residue`, `Proves.close_dropWt`; `sol_prove`, `sol_prove?`. |
 | `Calculus/Problem.lean` | solkey's obligation forms (`Problem.fml`: `∀x̄. wt(storage) → [f] true` or `⟨f⟩ true`), the constructor's `Problem.ctorFml` from `Problem.deployUpd` (`problem!{constructor}`, `Problem.deploy_of_valid`), `Fml.wt`, `shape_iff_reachable`, `wt_iff_reachable`, `initStorage_wt`; `Problem.text` in solkey's syntax. |
-| `Calculus/Spec.lean` | Specifications compiled to dynamic logic as solkey's `SpecCompiler` does; `spec[C]{f}`, `sol_spec`. |
+| `Calculus/Spec.lean` | Specifications compiled to dynamic logic as solkey's `SpecCompiler` does; `spec[C]{f}`, `spec!{constructor}` (a deployment's), `sol_spec`. |
 | `Calculus/Contracts.lean` | Function contracts: `FunContract` and its obligation, `useContract` (goals "pre" and "post", `{havoc}` for a `nonpayable` callee only) and `FunContract.sound`. |
 | `Calculus/Notation.lean` | `dl[C]{ … }` and `dl!{ … }`: concrete formulas read against a contract; `dl![m]{ … }`, `⟨[ ]⟩` at a modality `m`; a Lean formula where a formula stands; `Γ ⟹ φ` lines; `st!{ … }`, `pt!{ … }` for a storage term and a path. |
 | `Calculus/Quote.lean` | Quoters from formulas back to terms, so the kernel re-checks a computed goal. |
@@ -177,7 +177,7 @@ Commands for people; they prove nothing beyond the certificates they check.
 |---|---|
 | `Tools/Show.lean` | Printers for storage values, states, transactions, clauses. |
 | `Tools/Common.lean` | Shared plumbing: resolving `C` / `C.f`, evaluating terms, report layout. |
-| `Tools/Run.lean` | `#run C.f(args) [from σ] [with msg.sender := n, …]`: the interpreter from a fresh state. |
+| `Tools/Run.lean` | `#run C.f(args) [from σ] [with msg.sender := n, …]`: the interpreter from a fresh state; `#deploy C(args) [with …]`, a deployment (`Contract.deploy`). |
 | `Tools/Inspect.lean` | `#wp φ`, `#step φ`, `#taclet r`. |
 | `Tools/DiffTest.lean` | `#difftest C[.f]`: interpreter against compiled EVM code on random storages. |
 | `Tools/Counterexample.lean` | `Fml.eval3`, witness search and shrinking, `#counterexample`. |
@@ -212,7 +212,7 @@ diffs it).  `docs/testsuite-proofs.md` has the counts and timings.
 | `Frontend/SolcJson.lean` | solc's JSON AST (`Lean.Json`) printed as `sol` text per function: `readContract`, `Gap`, `Tag`; the struct table checked member by member; the functions called by name as `contract!` members, callees first; the constructor (`ctor`, a root of the calls) and the state variables' initializers (`initMembers`, `initGap`). |
 | `Frontend/Import.lean` | `solc_import "f.json" hash 0x… as N renaming A => B`: `N : Contract`, `N.f : Prog N` per function, `N.constructor : Prog N` (a deployment, `constructor(x̄);`), `N.report : List ImportRow`; one `evalExpr`. |
 | `Solkey/TestSuite.lean` | `Solkey.TestSuite`, its 449 programs and the report, pinned. |
-| `Solkey/Constructors.lean` | solkey's `Counter.sol` and `EtherWallet.sol` imported (`tests/solc/Counter.ast.json`, `tests/solc/EtherWallet.ast.json`): their constructors and initializers, and `EtherWallet`'s constructor obligation derived. |
+| `Solkey/Constructors.lean` | solkey's `Counter.sol` and `EtherWallet.sol` imported (`tests/solc/Counter.ast.json`, `tests/solc/EtherWallet.ast.json`): their constructors and initializers, and `EtherWallet`'s constructor obligation derived; `tests/solc/CtorGap.sol` and `tests/solc/InitGap.sol` pin what the import leaves out. |
 | `Frontend/Problems.lean` | `solc_problems N` (`N.f.problem : Fml N` per program; the constructor's `Problem.ctorFml`), `#solkey_problem`, `#solkey_scan`, `#solkey_derive?` (the replays to paste, when they fit `maxHeartbeats`), `#solkey_obligations` (derived, checked against `⊢ N.f.problem` and Lean's three axioms / pending). |
 | `TestSuite/Problems.lean` | The 437 statements of `Solkey.TestSuite`, two pinned in solkey's syntax, `initState_wt`. |
 | `TestSuite/Derived1.lean` … `TestSuite/Derived12.lean` | `Solkey.TestSuite.f.proved : ⊢ Solkey.TestSuite.f.problem`, 40, 40, 40, 40, 40, 37, 40, 23, 40, 40, 11 and 20 (411 in all), by `sol_prove` and explicit leaf tactics; 7 and 8 are what pushes, pops and storage copies added, 9 to 11 what memory added, 12 what copies between memory and storage added. |
@@ -252,7 +252,7 @@ or `sol_decide`, derivations `⊢ φ` built one `apply` per taclet, and runs:
 | `Examples/Tactics/Payment.lean`, `Net.lean` | `transfer` and `send` as `⊢` walks with checked sequents; the frame, the ledger's postconditions and the runs, a refused send's included. |
 | `Examples/Tactics/Values.lean`, `Operators.lean`, `Checked.lean` | Operators, checked arithmetic, `−−`, bitwise, shifts, `unchecked`, `uint8` … `int248`, casts. |
 | `Examples/Tactics/Calls.lean`, `CallOperands.lean`, `Callback.lean`, `TryCatch.lean`, `Contracts.lean` | Internal calls, call-valued operands, callbacks (`ProvesC`), `try`/`catch`, calls by contract (`useContract`). |
-| `Examples/Tactics/Constructors.lean` | A deployment: `constructor(args);` with initializers, `Contract.deploy`, `#deploy`, and solkey's `{storage := mtSt ‖ …}` start closed by `sol_close_mt`; the obligations `problem!{constructor}` and `spec!{constructor}` (solkey's `Counter.sol`), and the refused state-reading `requires`. |
+| `Examples/Tactics/Constructors.lean` | A deployment: `constructor(args);` with initializers, `Contract.deploy`, `#deploy`, and solkey's `{storage := mtSt ‖ …}` start closed by `sol_close_mt`; the obligations `problem!{constructor}` and `spec!{constructor}` (solkey's `Counter.sol`, `\old(net(a))` of `oldNet := mtSt`), the refusals, the initializer/modifier order, and what `sol_close_mt` leaves open. |
 | `Examples/Tactics/Memory.lean`, `CrossDomain.lean`, `Theory.lean` | Memory, storage↔memory copies, the theory's rewriting. |
 | `Examples/Tactics/SelectOnSaveConsr.lean` | Reading a write back through a `consr` path, by hand and in solkey's order. |
 | `Examples/Tactics/Dangling.lean` | Writes and pushes through a stale alias (one a `pop` left dangling), made live by a `push()`, past a `delete` and a copy, by `sol_prove?`; rounds of them refused past `elimSize` in milliseconds. |

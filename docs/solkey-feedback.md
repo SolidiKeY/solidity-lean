@@ -283,9 +283,6 @@ Found while porting solkey's constructor obligations (`Problem.ctorFml`,
   update, so a `requires` that reads state talks about a storage the
   deployment discards. Category 4: refuse it. Lean refuses a constructor
   `requires` that reads a state variable, `net(…)` or `this.balance`.
-- **`\old(net(…))` in a constructor's specification** reads `oldNet :=
-  mtSt`, a ledger with no term of its own (KeY's `mtSt` is a storage).
-  Lean refuses it.
 - **Initializers without a constructor are never checked.** A contract with
   `uint x = 5;` and no `constructor` gets no obligation, so its initializers
   (and the invariant they should establish) are never proved. Suggest

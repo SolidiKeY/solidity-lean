@@ -331,6 +331,10 @@ default, no locals, an empty heap, `net` holding the deployer's payment.
 - **A contract with initializers and no constructor** deploys by the
   implicit one (`constructor();` runs the initializers), as solc does, and
   has no obligation, as in solkey.
+- **The unspecified obligation books the payment** (`Problem.ctor`): Lean
+  states it with solkey's specified update (`Problem.deployUpd`), where
+  solkey's unspecified problem writes `{storage := mtSt || net := mtSt}`
+  (`docs/solkey-feedback.md`).
 
 ## Remaining deltas (documented, intentionally out of scope)
 

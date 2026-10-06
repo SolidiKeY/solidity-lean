@@ -193,11 +193,21 @@ is well formed (`initStorage_wt`). -/
 def Problem.ctorFml (m : Modality) (xs : List (PrimTy × Var)) (P : Prog C) : Fml C :=
   Fml.alls xs (.upd m (Problem.deployUpd C) (.modal m P .tt))
 
-/-- A constructor's obligation as solkey states it with no specification,
-`Problem.ctorFml` of the contract's constructor: its parameters bound, the
-program `constructor(x̄);` elaborated with them in scope. -/
+/-- A constructor's obligation with no specification, `Problem.ctorFml` of
+the contract's constructor: its parameters bound, the program
+`constructor(x̄);` elaborated with them in scope.  solkey states this form
+only where neither the contract nor the constructor is specified, and with
+`{storage := mtSt || net := mtSt}`; Lean with `Problem.deployUpd`, its
+specified problem's update (`docs/solkey-feedback.md`).  A constructor
+marked `skip`, or specified, is refused. -/
 def Problem.ctor [FreshNames] (C : Contract) (m : Modality) : Except String (Fml C) := do
   let some d := C.ctor | throw "the contract declares no constructor: an implicit one has no obligation"
+  if d.spec.skip then throw "constructor is marked `skip`: it has no obligation"
+  -- solkey states the unspecified form only where neither the contract
+  -- nor the constructor is specified
+  unless C.inv.isEmpty && d.spec.requires.isEmpty && d.spec.ensures.isEmpty &&
+      d.spec.assignable.isNone do
+    throw "constructor: the contract or its constructor is specified: its obligation is `spec!{constructor}`"
   let ps ← d.params.mapM fun (n, T) => match T with
     | .prim p => pure (n, p)
     | _ => throw s!"constructor: the parameter {n} has a reference type"
@@ -205,8 +215,8 @@ def Problem.ctor [FreshNames] (C : Contract) (m : Modality) : Except String (Fml
   let P ← ((elabStmts C call).run { funs := C.funs }).run' (ps.map fun (n, p) => (n, LocalTy.val p), 1)
   pure (Problem.ctorFml m (ps.map fun (n, p) => (p, Var.ofName n)) P)
 
-/-- `problem[C]{constructor}`: `Problem.ctor C .diamond`, solkey's
-unspecified constructor obligation, elaborated (`constructor` is a keyword,
+/-- `problem[C]{constructor}`: `Problem.ctor C .diamond`, the unspecified
+constructor obligation, elaborated (`constructor` is a keyword,
 not an `ident`). -/
 syntax (name := problemCtor) "problem[" term "]{ " &"constructor" " }" : term
 

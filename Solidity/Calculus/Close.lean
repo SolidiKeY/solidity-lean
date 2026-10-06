@@ -655,6 +655,9 @@ theorem UpdElem.write_setBalance (σ₀ τ : State) (a : Term C) :
 /-- `{oldNet := net}` binds the ledger variable `oldNet` to the ledger. -/
 theorem UpdElem.write_saveNet (σ₀ τ : State) (x : Var) :
     (UpdElem.saveNet x : UpdElem C).write σ₀ τ = .ok (τ.setEnv x (.ledger σ₀.net)) := rfl
+/-- `{oldNet := mtSt}` binds the ledger variable `oldNet` to the empty ledger. -/
+theorem UpdElem.write_saveNetMt (σ₀ τ : State) (x : Var) :
+    (UpdElem.saveNetMt x : UpdElem C).write σ₀ τ = .ok (τ.setEnv x (.ledger [])) := rfl
 /-- Binding a local leaves the ledger. -/
 theorem net_setEnv (σ : State) (x : Var) (b : Binding) : (σ.setEnv x b).net = σ.net := rfl
 /-- Binding a local leaves the storage. -/
@@ -745,7 +748,8 @@ attribute [close_rw]
   Close.UpdElem.write_val Close.UpdElem.write_path Close.UpdElem.write_mref
   Close.UpdElem.write_storage Close.UpdElem.write_store Close.UpdElem.write_memory
   Close.UpdElem.write_selfBalance Close.UpdElem.write_net Close.UpdElem.write_pay
-  Close.UpdElem.write_saveNet Close.UpdElem.write_netMt Close.UpdElem.write_setBalance IntOp.apply
+  Close.UpdElem.write_saveNet Close.UpdElem.write_saveNetMt Close.UpdElem.write_netMt
+  Close.UpdElem.write_setBalance IntOp.apply
   -- terms
   Close.Term.eval_lit Close.Term.eval_pv Close.Term.eval_binop Close.Term.eval_unop
   Close.Term.eval_find Close.Term.eval_len Close.Term.eval_read Close.Term.eval_ite
@@ -873,7 +877,11 @@ front (`STerm.eval_mtSt`): the storage is then a list of the roots at their
 defaults, and the storage evaluators are unfolded over it — solkey's
 `selectOnEmptyStorage` and `saveOnEmptyStorage` (`structRules.key`), read off
 that list, which is what lets a write under the diamond return.  Not in
-`close_rw`: an arbitrary storage is left to the read-after-write facts. -/
+`close_rw`: an arbitrary storage is left to the read-after-write facts.
+Known limits (pinned open in `Examples/Tactics/Constructors.lean`): a read
+at a free key of a mapping the deployment does not write (the default
+map's `checkIndex`), and a member of a struct root (`defaultForTy` of a
+struct, `defaultForFields` of the struct table, is not unfolded). -/
 macro "sol_close_mt" : tactic => `(tactic|
   all_goals
    (sol_close_unwrap
