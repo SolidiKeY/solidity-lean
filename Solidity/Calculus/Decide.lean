@@ -415,11 +415,11 @@ memory value what the slot holds. -/
 
 /-- A constant with the updates `ρ` pushed in. -/
 def _root_.Solidity.Op0.toL (ρ : Sym) : Op0 s → s.LTy
-  | .lit v => .lit v
-  | .env k => .env k
+  | .lit v => key{ lit(v) }
+  | .env k => key{ env(k) }
   | .root r => .root r
   | .storage => ρ.stor
-  | .memory => some (ρ.mem, .lit (.bool true))
+  | .memory => some (ρ.mem, key{ true })
 
 /-- A unary symbol over its argument's `toL`. -/
 def _root_.Solidity.Op1.toL : Op1 a s → a.LTy → s.LTy
@@ -427,14 +427,15 @@ def _root_.Solidity.Op1.toL : Op1 a s → a.LTy → s.LTy
   | .net, _ => .err
   | .netOf _, _ => .err
   | .delValue, _ => .err
-  | .field f, x => .field x f
+  | .field f, x => key{ x.f }
   | .next, _ => .stuck
   | .select _, _ => .init
   | .sval, x => .word x
   | .newArr R, x => .arr R x
   | .alloc _, _ => none
   | .mfield f, i => i.map fun p => (p.1, .fld f, p.2)
-  | .addM R, m => m.bind fun p => if allocOk R then some (.addM p.1 p.1.nAlloc R, p.2) else none
+  | .addM R, m => m.bind fun p =>
+    if allocOk R then some (key{ addM(‹p.1›, shaped(‹p.1.nAlloc›, R)) }, p.2) else none
   | .mval, x => some (.word x, x)
   | .ref, i => i.map fun p => (.ref p.1, p.2)
   | .wt _, _ => .err
@@ -461,7 +462,10 @@ def ireadM : Option (LMem × LTerm) → Option (LId × LSel × LTerm) → Option
 the next ordinal, where `R`'s default copies; `n` must be an integer. -/
 def newM : Option (LMem × LTerm) → LVal → Option (LMem × LTerm)
   | some (M, g), .arr R n =>
-    if allocOk R then some (.newArr M M.nAlloc R n, seqL g (isIntL n)) else none
+    if allocOk R then
+      some (key{ write(addM(M, shaped(‹M.nAlloc›, R)), idC(‹M.nAlloc›, nil), size, n) },
+        seqL g (isIntL n))
+    else none
   | _, _ => none
 
 /-- `write(m, a, v)` pushed in: the value's guard, the memory's, the
@@ -470,7 +474,7 @@ element below the length). -/
 def writeM : Option (LMem × LTerm) → Option (LId × LSel × LTerm) → Option (LMV × LTerm) →
     Option (LMem × LTerm)
   | some (M, g), some (j, sel, g'), some (w, g'') =>
-    (M.writeG j sel).map fun gw => (.write M j sel w, seqL g'' (seqL g (seqL g' gw)))
+    (M.writeG j sel).map fun gw => (key{ write(M, j, sel, w) }, seqL g'' (seqL g (seqL g' gw)))
   | _, _, _ => none
 
 /-- `copyMem(m, i)` pushed in: the object `i` names in `m`, read as storage
@@ -478,7 +482,7 @@ through its view (`LStor.view`), where both guards are literals.  A view
 keeps no guard of its own, so a guard that may halt leaves the copy outside
 the fragment. -/
 def memL : Option (LMem × LTerm) → Option (LId × LTerm) → Option LVal
-  | some (M, .lit _), some (j, .lit _) => some (.mem M j)
+  | some (M, key{ lit(_) }), some (j, key{ lit(_) }) => some (.mem M j)
   | _, _ => none
 
 theorem memL_getD (x : Option (LMem × LTerm)) (y : Option (LId × LTerm)) :
@@ -503,46 +507,46 @@ theorem newM_memL (m x : Option (LMem × LTerm)) (y : Option (LId × LTerm)) :
 /-- A binary symbol over its arguments' `toL`. -/
 def _root_.Solidity.Op2.toL : Op2 a b s → a.LTy → b.LTy → s.LTy
   | .binop op p, x, y => LTerm.mkBin op p x y
-  | .find, x, y => .find x y
-  | .len, x, y => .len x y
+  | .find, x, y => key{ find(x, y) }
+  | .len, x, y => key{ find(x, y.length) }
   | .read, m, a => (readM m a).getD .err
   | .mlen, m, i => (lenM m i).getD .err
-  | .at, x, y => .at x y
+  | .at, x, y => key{ x[y] }
   | .nextIn, _, _ => .stuck
-  | .delAt, x, y => .del x y
-  | .pushSlot E, x, y => .arr (.slot E) x y (.lit (.bool true))
-  | .pop, x, y => .arr (.pop false) x y (.lit (.bool true))
-  | .shrink, x, y => .arr (.pop true) x y (.lit (.bool true))
-  | .extend E, x, y => .arr (.slot E) x y (.lit (.bool true))
+  | .delAt, x, y => key{ delAt(x, y) }
+  | .pushSlot E, x, y => key{ arr(slot(E), x, y, true) }
+  | .pop, x, y => key{ arr(pop(false), x, y, true) }
+  | .shrink, x, y => key{ arr(pop(true), x, y, true) }
+  | .extend E, x, y => key{ arr(slot(E), x, y, true) }
   | .sfind, x, y => .sub x y
   | .copyMem, m, i => (memL m i).getD (.word .err)
   | .iread, m, a => ireadM m a
   | .copy, _, _ => none
-  | .mat, i, t => i.map fun p => (p.1, .idx t, seqL p.2 (isIntL t))
+  | .mat, i, t => i.map fun p => (p.1, key{ at(t) }, seqL p.2 (isIntL t))
   | .copySt, m, v => newM m v
 
 /-- A ternary symbol over its arguments' `toL`. -/
 def _root_.Solidity.Op3.toL : Op3 a b c s → a.LTy → b.LTy → c.LTy → s.LTy
-  | .ite, x, y, z => .ite x y z
-  | .save, x, y, .word t => .save x y t
-  | .save, x, y, .sub s q => .copy x y s q
-  | .save, x, y, .mem m i => .copy x y (.view m i) (.root viewRoot)
+  | .ite, x, y, z => key{ if(x) then y else z }
+  | .save, x, y, .word t => key{ save(x, y, t) }
+  | .save, x, y, .sub s q => key{ save(x, y, find(s, q)) }
+  | .save, x, y, .mem m i => key{ save(x, y, copyMem(mtSt, m, i)) }
   | .save, x, _, .arr _ _ => x
-  | .push, x, y, .word t => .arr .push x y t
+  | .push, x, y, .word t => key{ push(x, y, t) }
   | .push, x, y, .sub s q =>
-    .copy (.arr (.slot .uint) x y (.lit (.bool true))) (.at y (.len x y)) s q
+    key{ save(arr(slot(‹.uint›), x, y, true), y[find(x, y.length)], find(s, q)) }
   | .push, x, _, .arr _ _ | .push, x, _, .mem _ _ => x
   | .atIn, _, _, _ => .stuck
   | .write, m, a, v => writeM m a v
 
 /-- The type `addM(memory)` allocates. -/
 def addMOf? : MTerm C → Option RefTy
-  | .app1 (.addM R) (.app0 .memory) => some R
+  | MTerm.addM MTerm.memory R => some R
   | _ => none
 
 /-- The type `freshId(addM(memory))`, written as a reference, allocates. -/
 def allocRefOf? : MValT C → Option RefTy
-  | .app1 .ref (.app1 (.alloc R) (.app0 .memory)) => some R
+  | MValT.ref (ITerm.alloc MTerm.memory R) => some R
   | _ => none
 
 /-- The value of `write(addM(memory), a, freshId(addM(memory)))`, a
@@ -551,7 +555,8 @@ allocation under the write takes, the next ordinal.  Elsewhere `z`. -/
 def freshRef (ρ : Sym) (m : MTerm C) (v : MValT C) (z : Option (LMV × LTerm)) :
     Option (LMV × LTerm) :=
   match addMOf? m, allocRefOf? v with
-  | some R, some R' => if R = R' then some (.ref ⟨ρ.mem.nAlloc, []⟩, .lit (.bool true)) else z
+  | some R, some R' =>
+    if R = R' then some (.ref key{ idC(‹ρ.mem.nAlloc›, nil) }, key{ true }) else z
   | _, _ => z
 
 /-- A ternary symbol over its arguments' `toL`, a write of a fresh root
@@ -662,7 +667,7 @@ def Sym.free (ρ : Sym) (x : Var) : Sym := { ρ with env := (x, .val (.var x)) :
 
 /-- The storage the updates left, `storage`. -/
 def _root_.Solidity.Tm.isStorage : Tm C s → Bool
-  | .app0 .storage => true
+  | STerm.storage => true
   | _ => false
 
 theorem _root_.Solidity.STerm.isStorage_eq {s : STerm C} (h : s.isStorage = true) :
@@ -844,14 +849,14 @@ def _root_.Solidity.Tm.slotPath? (ρ : Sym) : Tm C u → Option LPath
     match lookupBy x ρ.env with
     | some (.stale q) => some q
     | _ => none
-  | .app1 (.field f) p => (Tm.slotPath? ρ p).map fun q => .field q f
+  | PTerm.field p f => (Tm.slotPath? ρ p).map fun q => key{ q.f }
   | _ => none
 
 /-- A write through a stale alias: a word written (`storageFieldWriteSave`)
 or pushed (`storagePushValueSave`) at its slot-level path. -/
 def _root_.Solidity.STerm.staleWrite? (ρ : Sym) : STerm C → Option (Option AOp × LPath × Term C)
-  | .app3 .save (.app0 .storage) p (.app1 .sval t) => (p.slotPath? ρ).map fun q => (none, q, t)
-  | .app3 .push (.app0 .storage) p (.app1 .sval t) =>
+  | STerm.save STerm.storage p (SValT.val t) => (p.slotPath? ρ).map fun q => (none, q, t)
+  | STerm.push STerm.storage p (SValT.val t) =>
     (p.slotPath? ρ).map fun q => (some .push, q, t)
   | _ => none
 
@@ -919,14 +924,14 @@ kept whole, one Skolem for KeY's `freshIdp`: the name exists only in the
 memory after the allocation. -/
 def allocPair? (i : ITerm C) (mm : MTerm C) : Bool :=
   match i, mm with
-  | .app1 (.alloc R) (.app0 .memory), .app1 (.addM R') (.app0 .memory) => decide (R = R')
-  | .app2 .copy (.app0 .memory) v, .app2 .copySt (.app0 .memory) v' => decide (v = v')
+  | ITerm.alloc MTerm.memory R, MTerm.addM MTerm.memory R' => decide (R = R')
+  | ITerm.copy MTerm.memory v, MTerm.copySt MTerm.memory v' => decide (v = v')
   | _, _ => false
 
 /-- `copySt(memory, find(storage, p))`, a copy from storage
 (`memoryStorageCopy`): its path. -/
 def copyOf? : MTerm C → Option (PTerm C)
-  | .app2 .copySt (.app0 .memory) (.app2 .sfind (.app0 .storage) p) => some p
+  | MTerm.copySt MTerm.memory (SValT.find STerm.storage p) => some p
   | _ => none
 
 theorem copyOf?_some {mm : MTerm C} {p : PTerm C} (h : copyOf? mm = some p) :
@@ -941,7 +946,7 @@ theorem copyOf?_some {mm : MTerm C} {p : PTerm C} (h : copyOf? mm = some p) :
 `copyStToM` refuses on a mapping, and is no word, so the copy is an object
 (`readFromCopyToStorage` reads it). -/
 def copyG (s : LStor) (q : LPath) : LTerm :=
-  .seq (.cpok s q) (.ite (isT (.find s q)) .err (.lit (.bool true)))
+  key{ (copyOk(s, q); if(‹isT key{ find(s, q) }›) then err else true) }
 
 /-- The memory of an allocation's pair: a copy from storage is the node
 `LMem.copySt` at the next ordinal, under `copyG`; any other memory as
@@ -949,7 +954,8 @@ def copyG (s : LStor) (q : LPath) : LTerm :=
 where the identity's `asRef` refuses the word `copySt` alone would copy. -/
 def pairMem (ρ : Sym) (mm : MTerm C) : Option (LMem × LTerm) :=
   match copyOf? mm with
-  | some p => some (.copySt ρ.mem ρ.mem.nAlloc ρ.stor (p.toL ρ), copyG ρ.stor (p.toL ρ))
+  | some p =>
+    some (key{ copySt(‹ρ.mem›, ‹ρ.mem.nAlloc›, find(‹ρ.stor›, ‹p.toL ρ›)) }, copyG ρ.stor (p.toL ρ))
   | none => mm.toL ρ
 
 /-- The pair's memory in the fragment: a copy from storage at a path in
@@ -980,7 +986,7 @@ next ordinal. -/
 def pairL (ρ : Sym) (x : Var) (i : ITerm C) (mm : MTerm C) : Option (LTerm × Sym) :=
   if allocPair? i mm then
     (pairMem ρ mm).bind fun p => if p.1.within memSize then
-      some (p.2, { ρ with env := (x, .mref ⟨ρ.mem.nAlloc, []⟩) :: ρ.env, mem := p.1 })
+      some (p.2, { ρ with env := (x, .mref key{ idC(‹ρ.mem.nAlloc›, nil) }) :: ρ.env, mem := p.1 })
     else none
   else none
 
@@ -4614,8 +4620,8 @@ termination_by structural s => s
 
 /-- The index a selector writes at, its reads eliminated. -/
 def LSel.idxU : LSel → LTerm
-  | .idx w => w.elim
-  | .fld _ | .size => .err
+  | key{ at(w) } => w.elim
+  | .fld _ | key{ size } => key{ err }
 termination_by structural a => a
 
 /-- A word written to memory, its reads eliminated; a reference is no word. -/
@@ -4628,45 +4634,55 @@ termination_by structural v => v
 `readFromCopyToStorage`): the same walk, the words written and the storage a
 copy read eliminated. -/
 def LMem.readU : LMem → LId → LSel → Option LTerm
-  | .init, _, _ => none
-  | .addM m k R, i, a =>
-    if i.root = k then some (dfltSel ((Ty.ref R).memberTy i.path) a) else m.readU i a
-  | .newArr m k R n, i, a =>
-    if i.root = k then some (newSel R n.elim i.path a) else m.readU i a
-  | .copySt m k s q, i, a =>
-    if i.root = k then
-      copySelG (fun Q => .seq s.okE (.seq (.pok Q) (s.readU Q)))
-        (fun Q => .seq s.okE (.seq (.pok Q) (s.lenU Q))) q.elim i.path a
-    else m.readU i a
-  | .write m j b v, i, a =>
-    if i = j then
-      match selRel b a with
+  -- readFromEmptyMemory: refused
+  | key{ memory }, _, _ => none
+  -- readOnAddM: \if(idp1 = idp2) \then init(idC(idp2, flds), a2) \else read(mem, id2, a2)
+  | key{ addM(mem, shaped(idp1, R)) }, id2, a2 =>
+    if id2.root = idp1 then some (dfltSel ((Ty.ref R).memberTy id2.path) a2) else mem.readU id2 a2
+  -- memoryArrayFreshAlloc
+  | key{ write(addM(mem, shaped(idp1, R)), idC(idp1, nil), size, n) }, id2, a2 =>
+    if id2.root = idp1 then some (newSel R n.elim id2.path a2) else mem.readU id2 a2
+  -- readFromCopyToStorage: \then find(st, consr(fxs, a2)), under the storage's guards
+  | key{ copySt(mem, idp1, find(st, q)) }, id2, a2 =>
+    if id2.root = idp1 then
+      copySelG (fun Q => key{ (‹st.okE›; (okPath(Q); ‹st.readU Q›)) })
+        (fun Q => key{ (‹st.okE›; (okPath(Q); ‹st.lenU Q›)) }) q.elim id2.path a2
+    else mem.readU id2 a2
+  -- readOnWrite: \if(id1 = id2 & a1 = a2) \then cast(v) \else read(mem, id2, a2)
+  | key{ write(mem, id1, a1, v) }, id2, a2 =>
+    if id2 = id1 then
+      match selRel a1 a2 with
       | .same => some v.wordU
-      | .apart => m.readU i a
-      | .key r _ => (m.readU i a).map (.kite r b.idxU v.wordU)
-    else m.readU i a
+      | .apart => mem.readU id2 a2
+      -- if(r = w) then cast(v) else read(mem, id2, a2), `a1` = at(w)
+      | .key r _ => (mem.readU id2 a2).map (.kite r a1.idxU v.wordU)
+    else mem.readU id2 a2
 termination_by structural m => m
 
 /-- `LMem.nameG` (`str = false`) and `LMem.structG` (`true`) in the
 elimination. -/
 def LMem.objU (str : Bool) : LMem → LId → Option LTerm
-  | .init, _ => none
-  | .addM m k R, i =>
-    if i.root = k then
-      some (if str then dfltStruct ((Ty.ref R).memberTy i.path) else dfltRef ((Ty.ref R).memberTy i.path))
-    else m.objU str i
-  | .newArr m k R n, i =>
-    if i.root = k then some (newObj (if str then dfltStruct else dfltRef) R n.elim i.path)
-    else m.objU str i
-  | .copySt m k s q, i =>
-    if i.root = k then
-      if noLen i.path then
-        let Q := q.elim.ext i.path
-        let H : LTerm := .ite (isT (s.readU Q)) .err (s.hasU Q)
-        some (.seq s.okE (.seq (.pok Q) (if str then .ite (isT (s.lenU Q)) .err H else H)))
+  | key{ memory }, _ => none
+  | key{ addM(mem, shaped(idp1, R)) }, id2 =>
+    if id2.root = idp1 then
+      some (if str then dfltStruct ((Ty.ref R).memberTy id2.path)
+        else dfltRef ((Ty.ref R).memberTy id2.path))
+    else mem.objU str id2
+  | key{ write(addM(mem, shaped(idp1, R)), idC(idp1, nil), size, n) }, id2 =>
+    if id2.root = idp1 then some (newObj (if str then dfltStruct else dfltRef) R n.elim id2.path)
+    else mem.objU str id2
+  -- readFromCopyToStorageIdentity: there where the storage holds no word
+  | key{ copySt(mem, idp1, find(st, q)) }, id2 =>
+    if id2.root = idp1 then
+      if noLen id2.path then
+        let Q := q.elim.ext id2.path
+        let H : LTerm := key{ if(‹isT (st.readU Q)›) then err else ‹st.hasU Q› }
+        some key{ (‹st.okE›; (okPath(Q);
+          ‹if str then key{ if(‹isT (st.lenU Q)›) then err else H } else H›)) }
       else none
-    else m.objU str i
-  | .write m _ _ _, i => m.objU str i
+    else mem.objU str id2
+  -- newFromWrite: a write allocates nothing
+  | key{ write(mem, _, _, _) }, id2 => mem.objU str id2
 termination_by structural m => m
 
 /-- **The run guard of a memory** (Lean only): it returns exactly where the
@@ -4675,20 +4691,24 @@ run does.  An allocation at its ordinal, of a type `allocOk` admits (a
 copies and is no word; a write whose slot and value pass `writeG`'s and
 `nameG`'s tests.  The guards' reads are the elimination's. -/
 def LMem.okU : LMem → Option LTerm
-  | .init => some (.lit (.bool true))
-  | .addM m k R => if k = m.nAlloc ∧ allocOk R = true then m.okU else none
-  | .newArr m k R n =>
-    if k = m.nAlloc ∧ allocOk R = true then m.okU.map fun G => .seq G (isIntL n.elim) else none
-  | .copySt m k s q =>
-    if k = m.nAlloc then
-      let Q := q.elim
-      m.okU.map fun G => .seq G (.seq s.okE (.seq (.pok Q) (.seq (s.cpokU Q)
-        (.ite (isT (s.readU Q)) .err (.lit (.bool true))))))
+  | key{ memory } => some key{ true }
+  | key{ addM(mem, shaped(idp1, R)) } =>
+    if idp1 = mem.nAlloc ∧ allocOk R = true then mem.okU else none
+  | key{ write(addM(mem, shaped(idp1, R)), idC(idp1, nil), size, n) } =>
+    if idp1 = mem.nAlloc ∧ allocOk R = true then mem.okU.map fun G => key{ (G; ‹isIntL n.elim›) }
     else none
-  | .write m j b v =>
-    okWrite m.okU (fun _ => wrGuard (fun _ => m.objU true j) (fun _ => m.readU j .size) b.idxU b)
-      fun _ => valGuard (.seq v.wordU (.lit (.bool true)))
-        (fun _ => v.refId?.bind fun j' => m.objU false j') v
+  | key{ copySt(mem, idp1, find(st, q)) } =>
+    if idp1 = mem.nAlloc then
+      let Q := q.elim
+      mem.okU.map fun G => key{ (G; (‹st.okE›; (okPath(Q); (‹st.cpokU Q›;
+        if(‹isT (st.readU Q)›) then err else true)))) }
+    else none
+  | key{ write(mem, id1, a1, v) } =>
+    okWrite mem.okU
+      (fun _ => wrGuard (fun _ => mem.objU true id1) (fun _ => mem.readU id1 key{ size })
+        a1.idxU a1)
+      fun _ => valGuard key{ (‹v.wordU›; true) }
+        (fun _ => v.refId?.bind fun j' => mem.objU false j') v
 termination_by structural m => m
 
 end
@@ -5024,8 +5044,8 @@ termination_by structural s => s
 
 /-- `LSel.idxU` as compiled code runs it. -/
 def LSel.idxUF : LSel → LTerm
-  | .idx w => w.elimF
-  | .fld _ | .size => .err
+  | key{ at(w) } => w.elimF
+  | .fld _ | key{ size } => key{ err }
 termination_by structural a => a
 
 /-- `LMV.wordU` as compiled code runs it. -/
@@ -5036,63 +5056,76 @@ termination_by structural v => v
 
 /-- `LMem.readU` as compiled code runs it. -/
 def LMem.readUF : LMem → LId → LSel → Option LTerm
-  | .init, _, _ => none
-  | .addM m k R, i, a =>
-    if i.root = k then some (dfltSel ((Ty.ref R).memberTy i.path) a) else m.readUF i a
-  | .newArr m k R n, i, a =>
-    if i.root = k then some (newSel R n.elimF i.path a) else m.readUF i a
-  | .copySt m k s q, i, a =>
-    if i.root = k then
-      copySelG (fun Q => .seq s.okEF (.seq (.pok Q) (s.readUF Q)))
-        (fun Q => .seq s.okEF (.seq (.pok Q) (s.lenUF Q))) q.elimF i.path a
-    else m.readUF i a
-  | .write m j b v, i, a =>
-    if i = j then
-      match selRel b a with
+  -- readFromEmptyMemory: refused
+  | key{ memory }, _, _ => none
+  -- readOnAddM: \if(idp1 = idp2) \then init(idC(idp2, flds), a2) \else read(mem, id2, a2)
+  | key{ addM(mem, shaped(idp1, R)) }, id2, a2 =>
+    if id2.root = idp1 then some (dfltSel ((Ty.ref R).memberTy id2.path) a2) else mem.readUF id2 a2
+  -- memoryArrayFreshAlloc
+  | key{ write(addM(mem, shaped(idp1, R)), idC(idp1, nil), size, n) }, id2, a2 =>
+    if id2.root = idp1 then some (newSel R n.elimF id2.path a2) else mem.readUF id2 a2
+  -- readFromCopyToStorage: \then find(st, consr(fxs, a2)), under the storage's guards
+  | key{ copySt(mem, idp1, find(st, q)) }, id2, a2 =>
+    if id2.root = idp1 then
+      copySelG (fun Q => key{ (‹st.okEF›; (okPath(Q); ‹st.readUF Q›)) })
+        (fun Q => key{ (‹st.okEF›; (okPath(Q); ‹st.lenUF Q›)) }) q.elimF id2.path a2
+    else mem.readUF id2 a2
+  -- readOnWrite: \if(id1 = id2 & a1 = a2) \then cast(v) \else read(mem, id2, a2)
+  | key{ write(mem, id1, a1, v) }, id2, a2 =>
+    if id2 = id1 then
+      match selRel a1 a2 with
       | .same => some v.wordUF
-      | .apart => m.readUF i a
-      | .key r _ => (m.readUF i a).map (.kite r b.idxUF v.wordUF)
-    else m.readUF i a
+      | .apart => mem.readUF id2 a2
+      -- if(r = w) then cast(v) else read(mem, id2, a2), `a1` = at(w)
+      | .key r _ => (mem.readUF id2 a2).map (.kite r a1.idxUF v.wordUF)
+    else mem.readUF id2 a2
 termination_by structural m => m
 
 /-- `LMem.objU` as compiled code runs it. -/
 def LMem.objUF (str : Bool) : LMem → LId → Option LTerm
-  | .init, _ => none
-  | .addM m k R, i =>
-    if i.root = k then
-      some (if str then dfltStruct ((Ty.ref R).memberTy i.path) else dfltRef ((Ty.ref R).memberTy i.path))
-    else m.objUF str i
-  | .newArr m k R n, i =>
-    if i.root = k then some (newObj (if str then dfltStruct else dfltRef) R n.elimF i.path)
-    else m.objUF str i
-  | .copySt m k s q, i =>
-    if i.root = k then
-      if noLen i.path then
-        let Q := q.elimF.ext i.path
-        let H : LTerm := .ite (isT (s.readUF Q)) .err (s.hasUF Q)
-        some (.seq s.okEF (.seq (.pok Q) (if str then .ite (isT (s.lenUF Q)) .err H else H)))
+  | key{ memory }, _ => none
+  | key{ addM(mem, shaped(idp1, R)) }, id2 =>
+    if id2.root = idp1 then
+      some (if str then dfltStruct ((Ty.ref R).memberTy id2.path)
+        else dfltRef ((Ty.ref R).memberTy id2.path))
+    else mem.objUF str id2
+  | key{ write(addM(mem, shaped(idp1, R)), idC(idp1, nil), size, n) }, id2 =>
+    if id2.root = idp1 then some (newObj (if str then dfltStruct else dfltRef) R n.elimF id2.path)
+    else mem.objUF str id2
+  -- readFromCopyToStorageIdentity: there where the storage holds no word
+  | key{ copySt(mem, idp1, find(st, q)) }, id2 =>
+    if id2.root = idp1 then
+      if noLen id2.path then
+        let Q := q.elimF.ext id2.path
+        let H : LTerm := key{ if(‹isT (st.readUF Q)›) then err else ‹st.hasUF Q› }
+        some key{ (‹st.okEF›; (okPath(Q);
+          ‹if str then key{ if(‹isT (st.lenUF Q)›) then err else H } else H›)) }
       else none
-    else m.objUF str i
-  | .write m _ _ _, i => m.objUF str i
+    else mem.objUF str id2
+  -- newFromWrite: a write allocates nothing
+  | key{ write(mem, _, _, _) }, id2 => mem.objUF str id2
 termination_by structural m => m
 
 /-- `LMem.okU` as compiled code runs it. -/
 def LMem.okUF : LMem → Option LTerm
-  | .init => some (.lit (.bool true))
-  | .addM m k R => if k = m.nAlloc ∧ allocOk R = true then m.okUF else none
-  | .newArr m k R n =>
-    if k = m.nAlloc ∧ allocOk R = true then m.okUF.map fun G => .seq G (isIntL n.elimF) else none
-  | .copySt m k s q =>
-    if k = m.nAlloc then
-      let Q := q.elimF
-      m.okUF.map fun G => .seq G (.seq s.okEF (.seq (.pok Q) (.seq (s.cpokUF Q)
-        (.ite (isT (s.readUF Q)) .err (.lit (.bool true))))))
+  | key{ memory } => some key{ true }
+  | key{ addM(mem, shaped(idp1, R)) } =>
+    if idp1 = mem.nAlloc ∧ allocOk R = true then mem.okUF else none
+  | key{ write(addM(mem, shaped(idp1, R)), idC(idp1, nil), size, n) } =>
+    if idp1 = mem.nAlloc ∧ allocOk R = true then mem.okUF.map fun G => key{ (G; ‹isIntL n.elimF›) }
     else none
-  | .write m j b v =>
-    okWrite m.okUF
-      (fun _ => wrGuard (fun _ => m.objUF true j) (fun _ => m.readUF j .size) b.idxUF b)
-      fun _ => valGuard (.seq v.wordUF (.lit (.bool true)))
-        (fun _ => v.refId?.bind fun j' => m.objUF false j') v
+  | key{ copySt(mem, idp1, find(st, q)) } =>
+    if idp1 = mem.nAlloc then
+      let Q := q.elimF
+      mem.okUF.map fun G => key{ (G; (‹st.okEF›; (okPath(Q); (‹st.cpokUF Q›;
+        if(‹isT (st.readUF Q)›) then err else true)))) }
+    else none
+  | key{ write(mem, id1, a1, v) } =>
+    okWrite mem.okUF
+      (fun _ => wrGuard (fun _ => mem.objUF true id1) (fun _ => mem.readUF id1 key{ size })
+        a1.idxUF a1)
+      fun _ => valGuard key{ (‹v.wordUF›; true) }
+        (fun _ => v.refId?.bind fun j' => mem.objUF false j') v
 termination_by structural m => m
 
 end

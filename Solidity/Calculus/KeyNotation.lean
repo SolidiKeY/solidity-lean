@@ -455,7 +455,7 @@ partial def keyCall (lit : Bool) (s : KSort) (stx : TSyntax `key_term) : MacroM 
           $(← keyAt lit .path src[1]!))
     | "copyMem" =>
       `(LStor.copy $(← at_ .stor 0) $(← at_ .path 1) $(← keyAt lit .stor w)
-          (LPath.root "#view"))
+          (LPath.root viewRoot))
     | _ => `(LStor.save $(← at_ .stor 0) $(← at_ .path 1) $(← at_ .term 2))
   | .stor, "delAt" => do arity 2; `(LStor.del $(← at_ .stor 0) $(← at_ .path 1))
   | .stor, "push" => do
