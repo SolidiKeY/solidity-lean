@@ -6,7 +6,7 @@ derived with `⊢`, checked by the kernel, at close to KeY's speed. No
 dependencies, no `native_decide`, no new `maxHeartbeats` override, and a `?`
 twin that prints a cheap replay for every searching tactic.
 
-Today 411 of the 418 are derived by `⊢` (`TestSuite/Report.lean`), and the
+Today 415 of the 418 are derived by `⊢` (`TestSuite/Report.lean`), and the
 corpus rows (`Corpus/TestSuite.lean`) are corollaries of those theorems.
 
 ## Decisions (2026-10-05)
@@ -105,6 +105,9 @@ What they say:
   memory and storage: 391 derived.  Reworked into solkey's
   `memoryRules.key`/`structMemoryRules.key` taclets (M6b, below): with the
   copies between memory and storage, 411 derived.
+- **Dangling aliases.** Writes and pushes through an alias bound through
+  an index, made live again by a `push()`, a `delete` or a copy.  Done
+  (below): 415 derived; `testArrayCopyClearsOldElements` stays pending.
 - **M7.** The remaining functions; a `derived` status in the corpus table;
   retire `corpus_decide`, the `#eval` rows and the 8M override.  Done
   (below), but for the remaining functions: the table reads the `Report.lean`
@@ -989,6 +992,310 @@ The generator was re-run after M6 (`scripts/check-testsuite.sh` passes).
 corollaries' are pinned: `diamond_of_proved` and `box_of_proved` in
 `Corpus/Imported.lean`, one corollary (for `initState_wt`) in
 `Corpus/TestSuite.lean`, and each `⊢` theorem by `Report.lean`'s pin.
+
+## Dangling aliases
+
+The five diamonds that use an alias bound through an index after a `pop`
+made it dangle (`testDanglingReferenceSurvivesPush`,
+`testArrayCopyClearsOldElements`, `testArrayCopyKeepsDestinationTail`,
+`testDeleteArrayLeavesDataPastLength`,
+`testDanglingInnerArrayReappearsAfterPush`), each obligation read through
+solkey's storage taclets: KeY's `at(i)` names any slot, so a write through
+the alias lands in the slot past the end, and a later `push()`, `delete` or
+copy makes it live again.
+
+### Step 0: the leaves (on the M6b closer, 411 derived)
+
+Measured in a scratch module: `sol_prove`'s walk without closing
+(`Derive.residue`), each leaf's context wrapped and split
+(`Fml.seqUpd`) as `synClose` does; the tree and the reduction counted by
+`LFml.fits` and `LFml.elim`'s; `#solkey_derive? … only f timed` for the
+search.  "Live variant" is the same leaf with the alias put back into the
+writes after it as the path it was bound to, to measure what a write node
+at that path costs.
+
+| Test | Leaves | Storage writes | Tree | Reduction | Live variant | Search |
+|---|---:|---:|---:|---:|---:|---:|
+| `testDanglingReferenceSurvivesPush` | 2 | 5 | 339 | 2145 | 1930 | 1.0 s |
+| `testArrayCopyClearsOldElements` | 2 | 9 | 1162 | 6394 | 6704 | 2.7 s |
+| `testArrayCopyKeepsDestinationTail` | 2 | 7 | 690 | 3513 | 4185 | 1.4 s |
+| `testDeleteArrayLeavesDataPastLength` | 2 | 6 | 395 | 4041 | 2896 | 1.3 s |
+| `testDanglingInnerArrayReappearsAfterPush` | 3 | 5 | 505, 503, 321 | 3264, 3262, 1538 | 3879, 3877, 1813 | 1.9 s |
+
+The two leaves of each are the `assert`'s goals (`thn` and the condition);
+the inner-array test has two `assert`s, so three.  Every leaf is
+modality-free and within `closeSize`; none holds `p[i]@S` (`Op3.atIn`).
+Each is refused at one place: `Fml.inL` is false on the write through the
+alias, the first storage write after the `pop`, where `SymB.onWrite` had
+made the alias `stale`: `save(storage, r.value, 5)` in the first four,
+`push(storage, ptr, 66)` in the last (`Tm.toL` gives `LPath.stuck`).  The
+search names `leaf1` open in all five.
+
+The shapes are as solkey's taclets give them: a `push()` is
+`pushSlot`, a `pop` is `save(delAt(storage, a[a.length - 1]), a.length,
+a.length - 1)`, the alias is the update `{ r := tokens[0] }`.  The copy in
+`testArrayCopyClearsOldElements` is `save(storage, bucket.tokens,
+find(storage, tokens))` and the one in `testArrayCopyKeepsDestinationTail`
+is `store(storage, tokens, find(storage, bucket.tokens))`; both
+translate to `LStor.copy`.  The write `bucket.tokens[0].value = 7` goes
+through an alias bound right after its `push()`, with no write between, so
+it is not stale.
+
+**The design against the M6b code.**  Confirmed, with these corrections:
+
+- The `LTerm`/`LPath`/`LStor` block is now in `Calculus/DecideLang.lean`,
+  with `LMem`, `LSel` and `LMV` (`LStor` at line 367, `LStor.eval` 510,
+  `LStor.vars` 582, `LStor.eval_setEnv` 664; `saveLive` 88).  The new
+  constructor goes there, before `copy`; M6b's `view` is after it.
+- `EnvRel` takes the memory's births (`EnvRel σ τ B x`).
+- M6b added `LStor.cpokU` (with its F twin, `_eq` and `_sim`): a `.stale`
+  node joins its catch-all (`.cpok s Q`, kept whole), which is exact as it
+  is.  The memory readers reach a storage only through `LMem.copySt`,
+  which calls the generic readers, so they need no arm; `slotHasU` and
+  `slotLenU` give `opq` on a `.view`.
+- `arrRead` already takes a slot reader (M5), and `readU`'s `.arr` arm
+  passes `s.slotU`.  Only `arrLength` lacks it (row 9).
+- `LTerm.findP`, a read at the slot level (`SVal.find`), already exists:
+  the deferred reads through a stale alias can use it.
+- `Calculus/Closer.lean`: `Facts.retsW`'s `.len` arm is at line 2232,
+  `LStor.fits` at 3414.
+
+**Risk.**  The copy test's reduction is 6394 already, and 6704 with a write
+node in its place; a stale node's guard adds two length reads and a
+location read, and the copy's slot reader four reads.  It is likely past
+`elimSize` (8000), and then stays pending.  The other four leave room.
+
+### Step 2: the node
+
+`LStor.stale op s q w` (`Calculus/DecideLang.lean`, before `copy`) is the
+write a dangling alias makes: `staleSave`, KeY's plain `save` at the slot
+level, of the word `w` (`op = none`) or of `op` on the node there.  Every
+reader keeps it whole for now (`okE` gives `sok`, `readU`/`hasU`/`lenU`/
+`mapU` the read itself, `slotU` and `cpokU` their catch-alls), which is
+exact, so nothing changes until the translation produces it.  `Derived7`,
+`8`, `9` and `12` re-check clean.  (A wall time taken here, under 30 s
+with the import rebuild and the tool's round trip, is not comparable with
+M6's 16 s; the like-for-like timing is in the review below.)
+
+### Step 3: the translation
+
+An alias made stale by a write keeps its slot-level path (`SymB.stale q`,
+`Calculus/Decide.lean`); `EnvRel` relates that path in the initial state to
+the path the local holds.  A write or a push of a word through it, or
+through one of its members (`Tm.slotPath?`, `STerm.staleWrite?`), is pushed
+in as `LStor.stale` (`STerm.toLS`); `STerm.toLS_eval` is exact on it by
+`stale_write_bridge` and `stale_push_bridge` (`save_root`, `find_root`,
+`pushOn_word`), and on every other storage update it is `STerm.toL_eval`.
+A read through a stale alias stays outside the fragment.
+
+All eleven leaves of the five are now in the fragment and fit; none closes
+yet, since the guards are still opaque.  Reductions (`elim`): T1 1156,
+T2 6197, T3 2657, T4 2764, T5 1629/1627/922 (the twin leaf of each test is
+two nodes smaller).  `Decide`, `Derive`, `Examples/ProofTree`,
+`Examples/Tactics/Decide` and `Derived7` re-check clean.
+
+### Steps 4a and 4b: the clauses, and the first derived
+
+The elimination now reads through a stale write of a word (`.stale none`,
+`Calculus/Decide.lean`): `readU`, `hasU`, `lenU` and `mapU` compare the
+read with the written slot as after a live write (`selectOnSaveCons`),
+except that the word is guarded by the old location's presence
+(`staleRead`, `staleHas`), since the live read at the written path is
+live only where the path is.  The write's run guard (`staleOk`) returns
+where the live location does (`s.hasU`), or where the index is the array's
+length and the first slot past the end has the location (`slotHasU`, a new
+reader: its `pop` and `.stale` arms, `opq` elsewhere); everywhere else it
+is the write itself, so it is exact with a guard that is only sound
+(`slotHasU_sound`, one direction).  `slotU` reads through a stale write
+(`storagePushLengthSaveReferenceElement` then `selectOnSaveCons`): the
+word where the write is at the slot's location (opaque if the location has
+an index), nothing above or below it, the slot below the write apart
+(`stale_slotU_sim`).  The facts are `Calculus/SlotLemmas.lean`'s, with
+`find_save_diverge_tail`, `find_slot_head` and `save_ok_of_find_ok`
+added.  A push through an alias (`.stale (some _)`) stays whole.
+
+`testDanglingReferenceSurvivesPush` is derived (`TestSuite/Derived13.lean`,
+`sol_prove`): the search 0.77 s, the replay 0.77 s.  Reductions (`elim`)
+after the step: T1 3590 (closes), T2 8944 (past `elimSize`, 8000), T3
+5889, T4 4221, T5 unchanged (1629/1627/922).  The stale guard costs about
+2.4k nodes a leaf: the write itself (`.sok`) embeds the storage below it.
+`Derived7` to `Derived12` re-check clean.  `Report.lean`'s pin (412
+derived, 5 pending) is computed, not yet checked: checking it builds every
+`Derived` module.
+
+### Step 5: past a `delete` and a copy
+
+`slotU` now reads the recycled slot past a `delete` of an empty dynamic
+array (the slot as it was: `selectStDelNodeIndexStruct` at `iv ≥ size`,
+`defaultOf_array_nil`) and past a copy over the array (below the old
+length the old element there, cleared; at it the old slot:
+`selectOnSaveEmptyIndexStruct`, `overlay_shadow_lt`/`overlay_shadow_eq`;
+`copy_slotU_sim`).  The copy arm is exact: where either length does not
+return, or the new one is longer, it is the read itself.  Both arms apply
+only where the storage below holds a stale write (`LStor.dangles`), so
+every other leaf's reduction is as before; `Derived1` to `Derived12`
+re-check clean.
+
+Two more changes were needed:
+- A copy within one storage (`tokens = bucket.tokens;`) has its guard
+  checked once where the storage holds a stale write (`LStor.okE`): the
+  guard is repeated at every read, and the copy test's reduction went from
+  8574 to 6605.
+- The closer's slot facts (`Facts.slotTy`) take the slot from an array
+  with `delete`s at other roots below it (`Facts.offDel`): the copy test
+  starts with `delete bucket.tokens; delete tokens;`.
+
+`testArrayCopyKeepsDestinationTail` (reduction 7030) and
+`testDeleteArrayLeavesDataPastLength` (4996) are derived by `sol_prove`
+(`TestSuite/Derived13.lean`; the kernel checks them in 1.2 s and 2.2 s).
+`testArrayCopyClearsOldElements` stays pending: its reduction is 8791,
+past `elimSize` (8000), and its `bucket.tokens.push()` takes the slot from
+a storage with writes at another root, which the slot facts do not read.
+
+### Step 6: a push through the alias
+
+`testDanglingInnerArrayReappearsAfterPush` pushes through the alias
+(`ptr.push(66)`, `storagePushValueSave` at the slot), then `push()`es the
+outer array and reads the recycled inner array's length and element.
+
+- **The guard** of a push through a dangling alias (`LStor.okE`, `staleOk`):
+  the live array has the operation (`arrOk` on `lenU`), or the index is
+  the length and the first slot past the end holds an array it applies to
+  (`arrOk` on a new reader, `LStor.slotLenU`); elsewhere the write itself
+  (`staleOp_okE_sim`).
+- **`lenU` through it** is `.arr`'s where the path is live
+  (`staleOp_live`), and halts on both sides at or below it where it is not
+  (`staleOp_lenU_sim`).  `readU`, `hasU` and `mapU` keep such a read whole:
+  the test reads past it only through the recycled slot, and expanding
+  them put its leaves past `elimSize`.
+- **`slotLenU`** (sound only, `LStor.slotLenU_sound`): the length of the
+  slot a `push()` recycles, after a `pop` (the popped element's, cleared:
+  `delLen`), apart from a stale write, and one more where a push through an
+  alias is at the slot.
+- **`slotU`** through such a push: at the slot, the word at the old length
+  (`slotLenU`) and the read itself elsewhere, kept by `orElse` with it
+  (`stalePush_slotU_sim`).  Recursing into the old slot instead doubled the
+  leaves (12.6k, past `elimSize`).
+- **`arrLength`** takes the slot's length below a recycled array
+  (`findDefinitionSize`, then `selectOnSaveCons` on `size`), kept by
+  `orElse` with the read itself, where the storage holds a stale write
+  (`LStor.dangles`); every other leaf's reduction is as before.
+- **The closer**: the length of an array the slot facts type returns
+  (`Facts.retsW`'s `.len`, `tyArr`: `selectOnTypedDynSize`), and an
+  `orElse` whose left side is a conditional is resolved by the normal form
+  with the facts' halting (`Facts.nfH`): the slot's length is
+  `kite(0, (len; 0) + 1 - 1, …)`, whose test only `delete`'s reset
+  `len` (`isFixed` halting) decides.
+- `Calculus/SlotLemmas.lean` gains `apply_push_findLive_array` (an array
+  below a pushed array is an old element's).
+
+`testDanglingInnerArrayReappearsAfterPush` is derived by `sol_prove`
+(`TestSuite/Derived13.lean`): three leaves, reductions 6807, 6805 and 3924
+(1629, 1627 and 922 with the push kept whole), the search 2.8 s, the kernel
+check 2.6 s.  `Derived1` to `Derived12`, `Examples/ProofTree` and
+`Examples/Tactics/Decide` re-check clean.
+
+**Where the lane ends** (415 derived): four of the five are derived.
+`testArrayCopyClearsOldElements` stays pending: its reduction is 8791, past
+`elimSize` (8000), and its `bucket.tokens.push()` takes the slot from a
+storage with writes (not only `delete`s) at another root, which the slot
+facts do not read.  Deferred: reads through a stale alias (`LTerm.findP`
+with a slot-level reader), an index after one (`ptr[0] = 1`), `pop`,
+`push()` and `delete` through one, the other readers through a push
+through one, and un-gating `LStor.dangles` after measuring `Derived1` to
+`Derived12`.
+
+### Step 7: the pins and the summary
+
+| Test | Leaves | Tree | Reduction | Result | `#solkey_derive? … timed` |
+|---|---:|---:|---:|---|---:|
+| `testDanglingReferenceSurvivesPush` | 2 | 339, 337 | 3590, 3588 | derived | 0.75 s |
+| `testArrayCopyClearsOldElements` | 2 | 1162, 1160 | 8791, 8789 | pending (past `elimSize`) | 2.7 s |
+| `testArrayCopyKeepsDestinationTail` | 2 | 690, 688 | 7030, 7028 | derived | 1.2 s |
+| `testDeleteArrayLeavesDataPastLength` | 2 | 395, 393 | 4996, 4994 | derived | 0.9 s |
+| `testDanglingInnerArrayReappearsAfterPush` | 3 | 505, 503, 321 | 6807, 6805, 3924 | derived | 2.75 s |
+
+Tree and reduction are counted as in step 0 (`LFml.fits`, after
+`LFml.elim`); the time is the search and the kernel check of its replay,
+in a scratch module over `TestSuite/Problems.lean`.  The replays in
+`TestSuite/Derived13.lean` check in 0.8 s, 1.2 s, 2.2 s and 2.6 s.
+
+`Examples/Tactics/Dangling.lean` (a default target) pins the same
+functions over `StandardExample` (`persons`, `people`, `matrix`): each a
+`sol_prove?` that suggests `sol_prove`, its search 7–22 ms and its kernel
+check 0.3–1.4 s, and the write test as a diamond.  Rounds of `pop`, a write
+through the alias and `push()` grow the reduction faster than the leaf,
+since each adds a stale write and a pop below the slot reader, whose
+guards repeat at every read: two rounds close (16 ms); three are past
+`elimSize` (8585); four, twelve
+statements after the binding, give a leaf of 935 nodes within `closeSize`
+whose reduction is 15931, refused by `Derive.leafFits` in 25 ms, as
+`pushes22` in `Examples/ProofTree.lean`; six are the most within
+`closeSize` (the review below).
+
+The rule map (`docs/lean-key-rule-map.md`, after the `slotU` row) has a row
+per taclet the lane transcribes, with the Lean clause, its soundness
+lemmas (`Calculus/SlotLemmas.lean`'s among them) and the Theory lemma; the
+guards KeY does not have (`staleOk`, `LStor.dangles`, `Facts.nfH`) are
+marked Lean only.
+
+### Dangling aliases review
+
+A finder and a skeptic per area; what they confirmed is fixed.
+
+- **Rule map.** The `delete`-past-the-end row cites the Theory's
+  `selectStDelNodeKeep` (`keepsOnDelete` past the length), not the
+  in-bounds `selectStDelNodeIndexStruct` or the empty-slot
+  `selectStDelNodeIndexKeep`.  The copy row names
+  `storageRootWriteCopySource` (T3 copies at a root) beside
+  `storageFieldWriteCopySource`, and is `partly`: KeY's branch 3 is
+  translated only where the new length is the old one.  The recycled-slot
+  row is `partly` (a push apart from the slot keeps the read whole); the
+  slot-facts row names `selectOnDelAtCons` for a `delete` at another root;
+  the `.len` row names `selectOnTypedFixedSize` (as `Facts.tyArr`'s
+  docstring now does).  `Facts.nfH` has its own Lean-only row, ungated:
+  it applies at every leaf, closes more goals and changes no earlier one
+  (no base reduction puts a `kite` on the left of an `orElse`).  The rows
+  and `LStor.dangles` say *stale alias*: the translation keeps any alias
+  through an index bound before the storage last changed
+  (`SymB.onWrite`), dangling or still live.
+- **Compiled cost.** `slotU`/`slotUF`'s copy arm tests `s.dangles` before
+  eliminating and comparing the copy's path; `lenUF`'s `.arr` arm builds
+  the slot length only for a `push()` of a reference (`AOp.gateSlot`,
+  `macro_inline`, `arrLength_gateSlot`); `readUF`'s stale arm computes the
+  old location's presence only at `.eq` and the old read only at
+  `.diverge` (`CaseTree.toTermLazyBy`).  Six bare `simpa` are `simp only`
+  or a term.
+- **Growth.** Rounds of `pop`, stale write and `push()` through one alias
+  do not grow linearly: the reduction is 15931, 27273, 44719, 72149 at 4
+  to 7 rounds (about 1.6 times a round), and the leaf 935, 1331, 1799,
+  2339 (quadratic).  Six rounds are the most whose leaf is within
+  `closeSize`; the residue, `leafFits` and a full count of that reduction
+  take 64 ms in compiled code (11 rounds: 294 ms).  Pinned as `rounds6` in
+  `Examples/Tactics/Dangling.lean`.
+- **Earlier modules.** `elim` of every earlier leaf is unchanged (each
+  gated arm gives the base term at `dangles = false`); `Facts.baseOk`
+  (`offDel`) and the `slotIn` clause of `retsW .len` are not gated, and
+  every gated arm now walks `s.dangles`.  Measured against the lane's base
+  (`13ba1a2`, a detached checkout, imports built, the same MCP server,
+  `profiler` on a copy of the module): `Derived5`'s kernel phase ends at
+  5.5 s on the branch, 5.4 s on the base; `Derived9`'s at 8.4 s on the
+  branch, 18–28 s on the base, whose server stalled under other load.
+  Whole-file wall times through the tool swing twice either way with the
+  machine's load (`Derived3` 27 s branch, 63 s base; `Derived6` 19 s
+  branch, 36 s base; `Derived11` 9.8 s and 9.7 s).  No slowdown shows.
+- **Checked.** `Decide.lean`, `Closer.lean`, `Examples/Tactics/Dangling.lean`,
+  `Examples/ProofTree.lean` and `Derived1` to `Derived13` re-check clean; the four `Derived13` theorems use Lean's
+  three axioms only.  `Report.lean`'s pin (415 derived, 2 pending) is not
+  elaborated here: it builds every `Derived` module at once, more RAM
+  than this lane may take while another Lean agent runs.  It is checked
+  after the merge, with the corpus regeneration.
+- **After the merge.** `scripts/solkey-port.mjs`'s `PENDING` lists only
+  `testArrayCopyClearsOldElements`, with the reason restated; running it
+  (`scripts/check-corpus.sh --update`) regenerates
+  `tests/solkey/expected.tsv`, `docs/corpus-parity.md` and
+  `Corpus/TestSuite.lean` (415 derived, 1 pending), and
+  `scripts/check-testsuite.sh` then passes.
 
 ## M6 results (2026-10-05): memory
 

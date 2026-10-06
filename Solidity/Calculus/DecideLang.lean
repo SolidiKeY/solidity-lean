@@ -314,6 +314,13 @@ def AOp.apply : AOp → Value → SVal → Res SVal
       .ok (.array restRev.reverse ((if keep then last else last.defaultOf) :: shadow) fx)
   | _, _, .prim _ | _, _, .struct _ | _, _, .map _ _ => .error .stuck
 
+/-- A write at the slot-level path `qs` of `v`, past the live length too, as
+KeY's plain `save` is: the word `w` (`none`), or `op` on the node there.  A
+write through a dangling alias makes it (`LStor.stale`). -/
+def staleSave : Option AOp → Value → SVal → List Seg → Res SVal
+  | none, w, v, qs => v.save qs w.toSVal
+  | some op, w, v, qs => v.find qs >>= fun c => op.apply w c >>= fun c' => v.save qs c'
+
 mutual
 
 /-- A value, read in the initial state. -/
@@ -371,6 +378,10 @@ inductive LStor where
   /-- The operation `op` on the array at `q`, with the word `w` for a push
   (a literal otherwise). -/
   | arr (op : AOp) (s : LStor) (q : LPath) (w : LTerm)
+  /-- `op` (`none`: the word `w`) at the slot-level path `q`, whose indices
+were checked when an alias was bound: KeY's plain `save`, with no live
+check (`staleSave`). -/
+  | stale (op : Option AOp) (s : LStor) (q : LPath) (w : LTerm)
   /-- The subtree at `sq` of the storage `src` copied over `q` (`alice = bob;`,
   `SVal.overlay`). -/
   | copy (s : LStor) (q : LPath) (src : LStor) (sq : LPath)
@@ -515,6 +526,8 @@ def LStor.eval (σ : State) : LStor → Res SVal
       v.saveLive qs cur.defaultOf
   | .arr op s q w => w.eval σ >>= fun wv => s.eval σ >>= fun v => q.eval σ >>= fun qs =>
       v.findLive qs >>= fun c => op.apply wv c >>= fun c' => v.saveLive qs c'
+  | .stale op s q w => w.eval σ >>= fun wv => s.eval σ >>= fun v => q.eval σ >>= fun qs =>
+      staleSave op wv v qs
   | .copy s q src sq => src.eval σ >>= fun sv => sq.eval σ >>= fun sqs => sv.findLive sqs >>=
       fun n => s.eval σ >>= fun v => q.eval σ >>= fun qs => v.findLive qs >>= fun cur =>
         v.saveLive qs (cur.overlay n)
@@ -584,6 +597,7 @@ def LStor.vars : LStor → List Var
   | .save s q w => s.vars ++ q.vars ++ w.vars
   | .del s q => s.vars ++ q.vars
   | .arr _ s q w => s.vars ++ q.vars ++ w.vars
+  | .stale _ s q w => s.vars ++ q.vars ++ w.vars
   | .copy s q src sq => s.vars ++ q.vars ++ src.vars ++ sq.vars
   | .view m _ => m.vars
 
@@ -672,6 +686,10 @@ theorem LStor.eval_setEnv {σ : State} {x : Var} {b : Binding} :
     simp only [LStor.vars, List.mem_append, not_or] at h
     simp only [LStor.eval, LStor.eval_setEnv s h.1, LPath.eval_setEnv q h.2]
   | .arr _ s q w, h => by
+    simp only [LStor.vars, List.mem_append, not_or] at h
+    simp only [LStor.eval, LStor.eval_setEnv s h.1.1, LPath.eval_setEnv q h.1.2,
+      LTerm.eval_setEnv w h.2]
+  | .stale _ s q w, h => by
     simp only [LStor.vars, List.mem_append, not_or] at h
     simp only [LStor.eval, LStor.eval_setEnv s h.1.1, LPath.eval_setEnv q h.1.2,
       LTerm.eval_setEnv w h.2]

@@ -33,6 +33,7 @@ import Solidity.Calculus.MemNames
 import Solidity.Calculus.DecideLang
 import Solidity.Calculus.MemRead
 import Solidity.Calculus.MemTheory
+import Solidity.Calculus.SlotLemmas
 import Solidity.Calculus.Decide
 import Solidity.Calculus.DecideSyn
 import Solidity.Calculus.DecideComplete
@@ -96,6 +97,7 @@ import Solidity.Examples.Tactics.Decide
 import Solidity.Examples.ExampleNames
 import Solidity.Examples.Tactics.Specs
 import Solidity.Examples.Tactics.SelectOnSaveConsr
+import Solidity.Examples.Tactics.Dangling
 import Solidity.Examples.Benchmark.Syntax
 import Solidity.Examples.Benchmark.Counter
 import Solidity.Examples.Benchmark.SimpleStorage

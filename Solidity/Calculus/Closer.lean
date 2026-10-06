@@ -24,7 +24,11 @@ local normal form rewriting the other (KeY's `applyEq`).
   `intSimplification` and literal taclets), `a == a` read as `true`, a
   subterm the premises know rewritten, a default of a known kind read as
   `0` or `false`, a key compared with itself read as its first branch
-  (`foldKite`), and an `orElse` whose left side halts or returns resolved.
+  (`foldKite`), and an `orElse` whose left side halts or returns resolved:
+  returns by the normal form without the oracle (`Facts.nf0`), or, for a
+  conditional on two integers, by the one with the facts' halting
+  (`Facts.nfH`: the slot length a `push` through a dangling alias leaves,
+  `kite(k, len, len + 1, …)`, after a `delete` reset `len`).
   Each step keeps what a term returns (`Keeps`); none is trusted.
 * **What returns** (`Facts.rets`): an operation whose operands return and
   that accepts them (comparisons on integers, `&&` on `bool`s, literal
@@ -33,13 +37,15 @@ local normal form rewriting the other (KeY's `applyEq`).
   (`LPath.ty`, `LPath.ty_find`): under `wt(storage)` every root is there,
   canonical at its declared type, so a member, a mapping entry or a
   fixed-size array's element in range is there too.  Below the slot a
-  `push()` of such an array takes (or of that array after its `delete`),
+  `push()` of such an array takes (or of that array after its `delete`,
+  either with `delete`s at other roots below, `Facts.offDel`),
   and below an element of it up to the old length, a read is typed by the
   element type (`Facts.slotTy`, `Facts.slot_find`): the elements and the
   slots past the end are canonical under `wt` (`SVal.canonB` checks the
   shadow too), and so is a default where the type's structs are
   (`defaultForTy_canonB`).  Its shape and kind follow the type, and it
-  returns where the index is at most the old length (`Facts.slotIn`).
+  returns where the index is at most the old length (`Facts.slotIn`); its
+  length returns where its type is an array's (`selectOnTypedDynSize`).
   A copy into memory of the initial storage (`cpok init q`) returns where
   the layout types `q` at a type with no mapping (`Facts.cpokInit`, Lean
   only: `copyStToM` halts on a mapping, and `wt` makes the rest copy).
@@ -520,6 +526,7 @@ def LStor.simpE (O : Orc) (E : Eqs) : LStor → LStor
   | .save s q w => .save (s.simpE O E) (q.simpE O E) (w.simpE O E)
   | .del s q => .del (s.simpE O E) (q.simpE O E)
   | .arr op s q w => .arr op (s.simpE O E) (q.simpE O E) (w.simpE O E)
+  | .stale op s q w => .stale op (s.simpE O E) (q.simpE O E) (w.simpE O E)
   | .copy s q src sq => .copy (s.simpE O E) (q.simpE O E) (src.simpE O E) (sq.simpE O E)
   | .view m i => .view m i
 
@@ -663,6 +670,14 @@ theorem LStor.simpE_eval {σ : State} {O : Orc} {E : Eqs} (hO : O.Ok σ) (hE : E
       Res.ok_bind]
     exact h
   | .arr _ s q w, sv, h => by
+    simp only [LStor.eval] at h
+    obtain ⟨x, hw, h⟩ := Res.bind_eq_ok.1 h
+    obtain ⟨y, hs, h⟩ := Res.bind_eq_ok.1 h
+    obtain ⟨z, hq, h⟩ := Res.bind_eq_ok.1 h
+    simp only [LStor.simpE, LStor.eval, LTerm.simpE_eval hO hE w x hw, LStor.simpE_eval hO hE s hs,
+      LPath.simpE_eval hO hE q hq, Res.ok_bind]
+    exact h
+  | .stale _ s q w, sv, h => by
     simp only [LStor.eval] at h
     obtain ⟨x, hw, h⟩ := Res.bind_eq_ok.1 h
     obtain ⟨y, hs, h⟩ := Res.bind_eq_ok.1 h
@@ -1107,26 +1122,148 @@ theorem tyFrom_exists {σ : State} {inB : LTerm → Nat → Bool}
       obtain ⟨w, hw⟩ := tyFrom_exists hB rest hc he.2 hr'
       exact ⟨w, by rw [findLive_cons, hw₀, Res.ok_bind, hw]⟩
 
+/-- The root a path starts at: `alice` of `alice.balances[k]`. -/
+def LPath.rootN : LPath → Name
+  | .root r => r
+  | .field q _ => q.rootN
+  | .at q _ => q.rootN
+
+theorem LPath.eval_rootN (σ : State) : ∀ {q : LPath} {qs : List Seg}, q.eval σ = .ok qs →
+    ∃ t, qs = .field q.rootN :: t
+  | .root _, qs, h => by cases h; exact ⟨[], rfl⟩
+  | .field q f, qs, h => by
+    obtain ⟨a, ha, hb⟩ := Res.bind_eq_ok.1 h
+    cases hb
+    obtain ⟨t, rfl⟩ := LPath.eval_rootN σ ha
+    exact ⟨t ++ [.field f], rfl⟩
+  | .at q k, qs, h => by
+    obtain ⟨a, ha, hb⟩ := Res.bind_eq_ok.1 h
+    obtain ⟨i, -, hb⟩ := Res.bind_eq_ok.1 hb
+    cases hb
+    obtain ⟨t, rfl⟩ := LPath.eval_rootN σ ha
+    exact ⟨t ++ [.at i], rfl⟩
+
+/-- No write of `s` is at the root `r`, so `s` has the initial subtree there
+(`bucket.tokens` after `delete tokens; tokens.push();`). -/
+def LStor.offRoot (r : Name) : LStor → Bool
+  | .init => true
+  | .save s q _ | .del s q | .arr _ s q _ | .stale _ s q _ | .copy s q _ _ =>
+    q.rootN != r && s.offRoot r
+  | .view .. => false
+termination_by structural s => s
+
+theorem LStor.offRoot_findLive {σ : State} {r : Name} {ps : List Seg} {t : List Seg}
+    (ht : ps = .field r :: t) : ∀ {s : LStor} {v : SVal}, s.offRoot r = true →
+      s.eval σ = .ok v → v.findLive ps = (SVal.struct σ.storage).findLive ps
+  | .init, v, _, hv => by cases hv; rfl
+  | .view .., _, h, _ => by simp only [LStor.offRoot, Bool.false_eq_true] at h
+  | .save s q w, v, h, hv => by
+    simp only [LStor.offRoot, Bool.and_eq_true, bne_iff_ne, ne_eq] at h
+    simp only [LStor.eval, Res.bind_eq_ok] at hv
+    obtain ⟨_, -, v', hv', qs, hq, hs⟩ := hv
+    obtain ⟨t', rfl⟩ := LPath.eval_rootN σ hq
+    rw [findLive_saveLive_diverge (by rw [ht]; exact Or.inl (fun he => h.1 (Seg.field.inj he))) hs]
+    exact LStor.offRoot_findLive ht h.2 hv'
+  | .del s q, v, h, hv => by
+    simp only [LStor.offRoot, Bool.and_eq_true, bne_iff_ne, ne_eq] at h
+    simp only [LStor.eval, Res.bind_eq_ok] at hv
+    obtain ⟨v', hv', qs, hq, _, -, hs⟩ := hv
+    obtain ⟨t', rfl⟩ := LPath.eval_rootN σ hq
+    rw [findLive_saveLive_diverge (by rw [ht]; exact Or.inl (fun he => h.1 (Seg.field.inj he))) hs]
+    exact LStor.offRoot_findLive ht h.2 hv'
+  | .arr _ s q w, v, h, hv => by
+    simp only [LStor.offRoot, Bool.and_eq_true, bne_iff_ne, ne_eq] at h
+    simp only [LStor.eval, Res.bind_eq_ok] at hv
+    obtain ⟨_, -, v', hv', qs, hq, _, -, _, -, hs⟩ := hv
+    obtain ⟨t', rfl⟩ := LPath.eval_rootN σ hq
+    rw [findLive_saveLive_diverge (by rw [ht]; exact Or.inl (fun he => h.1 (Seg.field.inj he))) hs]
+    exact LStor.offRoot_findLive ht h.2 hv'
+  | .stale op s q w, v, h, hv => by
+    simp only [LStor.offRoot, Bool.and_eq_true, bne_iff_ne, ne_eq] at h
+    simp only [LStor.eval, Res.bind_eq_ok] at hv
+    obtain ⟨_, -, v', hv', qs, hq, hs⟩ := hv
+    obtain ⟨t', rfl⟩ := LPath.eval_rootN σ hq
+    have hd : Close.Diverge (.field q.rootN :: t') ps := by
+      rw [ht]; exact Or.inl (fun he => h.1 (Seg.field.inj he))
+    cases op with
+    | none => rw [findLive_save_diverge hd hs]; exact LStor.offRoot_findLive ht h.2 hv'
+    | some op =>
+      simp only [staleSave, Res.bind_eq_ok] at hs
+      obtain ⟨_, -, _, -, hs⟩ := hs
+      rw [findLive_save_diverge hd hs]; exact LStor.offRoot_findLive ht h.2 hv'
+  | .copy s q src sq, v, h, hv => by
+    simp only [LStor.offRoot, Bool.and_eq_true, bne_iff_ne, ne_eq] at h
+    simp only [LStor.eval, Res.bind_eq_ok] at hv
+    obtain ⟨_, -, _, -, _, -, v', hv', qs, hq, _, -, hs⟩ := hv
+    obtain ⟨t', rfl⟩ := LPath.eval_rootN σ hq
+    rw [findLive_saveLive_diverge (by rw [ht]; exact Or.inl (fun he => h.1 (Seg.field.inj he))) hs]
+    exact LStor.offRoot_findLive ht h.2 hv'
+
+/-- A path with no index evaluates. -/
+theorem LPath.noAt_ok (σ : State) : ∀ {q : LPath}, q.noAt = true → ∃ qs, q.eval σ = .ok qs
+  | .root r, _ => ⟨[.field r], rfl⟩
+  | .field q f, h => by
+    obtain ⟨qs, hq⟩ := LPath.noAt_ok σ (q := q) h
+    exact ⟨qs ++ [.field f], by simp only [LPath.eval, hq, Res.ok_bind]⟩
+  | .at _ _, h => by simp only [LPath.noAt, Bool.false_eq_true] at h
+
+/-- `s` is the initial storage with `delete`s at members the layout types,
+each at its own root and none at `r` (`delete bucket.tokens; delete tokens;`
+below `tokens.push();`): it returns, with the initial subtree at `r`. -/
+def Facts.offDel (F : Facts) (r : Name) : LStor → Bool
+  | .init => true
+  | .del s q => q.rootN != r && q.noAt && q.noLen && (F.pty q).isSome &&
+      s.offRoot q.rootN && F.offDel r s
+  | _ => false
+
+theorem Facts.offDel_offRoot {F : Facts} {r : Name} : ∀ {s : LStor}, F.offDel r s = true →
+    s.offRoot r = true
+  | .init, _ => rfl
+  | .del s q, h => by
+    simp only [Facts.offDel, Bool.and_eq_true] at h
+    simp only [LStor.offRoot, Bool.and_eq_true]
+    exact ⟨h.1.1.1.1.1, Facts.offDel_offRoot h.2⟩
+  | .save .., h | .arr .., h | .stale .., h | .copy .., h | .view .., h => by
+    simp only [Facts.offDel, Bool.false_eq_true] at h
+
+theorem Facts.offDel_eval {σ : State} {F : Facts} (hF : F.Ok σ) {r : Name} :
+    ∀ {s : LStor}, F.offDel r s = true → ∃ v, s.eval σ = .ok v
+  | .init, _ => ⟨_, rfl⟩
+  | .del s q, h => by
+    simp only [Facts.offDel, Bool.and_eq_true] at h
+    obtain ⟨⟨⟨⟨⟨-, hat⟩, hn⟩, hty⟩, hoff⟩, hs⟩ := h
+    obtain ⟨v, hv⟩ := Facts.offDel_eval hF hs
+    obtain ⟨qs, hq⟩ := LPath.noAt_ok σ hat
+    obtain ⟨T, hT⟩ := Option.isSome_iff_exists.1 hty
+    obtain ⟨c, hc, -⟩ := F.pty_find hF hT hq
+    obtain ⟨t, ht⟩ := LPath.eval_rootN σ hq
+    rw [← LStor.offRoot_findLive ht hoff hv] at hc
+    obtain ⟨u, hu⟩ := (save_ok_iff_find_ok (new := c.defaultOf) (LPath.noLen_eval σ hn hq)).2
+      ⟨_, hc⟩
+    exact ⟨u, by simp only [LStor.eval, hv, hq, hc, hu, Res.ok_bind]⟩
+  | .save .., h | .arr .., h | .stale .., h | .copy .., h | .view .., h => by
+    simp only [Facts.offDel, Bool.false_eq_true] at h
+
 /-- The storages a `push()` of a struct or an array takes its slot from, as
-far as the slot facts read them: the initial one, and the initial one with
-the array at `P` deleted (`delete values; values.push();`). -/
-def baseOk : LStor → LPath → Bool
-  | .init, _ => true
-  | .del .init P', P => P' == P
-  | _, _ => false
+far as the slot facts read them: the initial one, the initial one with the
+array at `P` deleted (`delete values; values.push();`), and either with
+`delete`s at other roots below (`Facts.offDel`). -/
+def Facts.baseOk (F : Facts) : LStor → LPath → Bool
+  | .del s P', P => if P' == P then F.offDel P.rootN s else F.offDel P.rootN (.del s P')
+  | s, P => F.offDel P.rootN s
 
 /-- The length of the array at `P` in such a storage: the initial one's, or
 `0` after its `delete`. -/
 def baseLen : LStor → LPath → LTerm
-  | .init, P => .len .init P
-  | _, _ => .lit (.int 0)
+  | .del _ P', P => if P' == P then .lit (.int 0) else .len .init P
+  | _, P => .len .init P
 
 /-- The type of a read below the slot a `push()` takes (or an element
 before it), the array at `P` of such a storage: the layout's element type,
 then down the rest. -/
 def Facts.slotTy (F : Facts) : LStor → LPath → Option Ty
   | .arr (.slot E) base P (.lit _), Q =>
-    if P.noLen && baseOk base P then
+    if P.noLen && F.baseOk base P then
       match F.pty P, P.splitAt Q with
       | some (.ref (.array E')), some (_, rest) =>
         if E = E' ∧ E.okDeep = true then tyFrom E rest else none
@@ -1170,31 +1307,72 @@ open Semantics.SVal.canonB (canonFieldsB canonElemsB canonEntriesB) in
 `delete`, an array whose elements and slots past the end are canonical, of
 the length `baseLen` reads. -/
 theorem Facts.slot_base {σ : State} {F : Facts} (hF : F.Ok σ) {base : LStor} {P : LPath}
-    {E : Ty} (hb : baseOk base P = true) (hn : P.noLen = true)
-    (hpty : F.pty P = some (.ref (.array E))) {ps : List Seg} (hp : P.eval σ = .ok ps) :
-    ∃ v0 es sh fx, base.eval σ = .ok v0 ∧ v0.findLive ps = .ok (.array es sh fx) ∧
+    {E : Ty} (hb : F.baseOk base P = true) (hn : P.noLen = true)
+    (hpty : F.pty P = some (.ref (.array E))) {ps : List Seg} (hp : P.eval σ = .ok ps)
+    {v0 : SVal} (hv0 : base.eval σ = .ok v0) :
+    ∃ es sh fx, v0.findLive ps = .ok (.array es sh fx) ∧
       canonElemsB E es = true ∧ canonElemsB E sh = true ∧
       (baseLen base P).eval σ = .ok (.int es.length) := by
   obtain ⟨c0, hc0, hcan⟩ := F.pty_find hF hpty hp
+  obtain ⟨t, ht⟩ := LPath.eval_rootN σ hp
+  have hoff : ∀ {s : LStor} {v : SVal}, F.offDel P.rootN s = true → s.eval σ = .ok v →
+      v.findLive ps = .ok c0 := fun hs hv => by
+    rw [LStor.offRoot_findLive ht (Facts.offDel_offRoot hs) hv]; exact hc0
+  have hlen0 : ∀ {n : Nat}, Close.arrLen c0 = .ok (.int n) →
+      (LTerm.len .init P).eval σ = .ok (.int n) := fun h => by
+    simp only [LTerm.eval, LStor.eval, hp, hc0, Res.ok_bind]; exact h
   match c0, hcan with
   | .array es0 sh0 fx0, hcan =>
     simp only [SVal.canonB, Bool.and_eq_true] at hcan
     obtain ⟨⟨hfx, hes⟩, hsh⟩ := hcan
-    match base, hb with
-    | .init, _ =>
-      exact ⟨_, es0, sh0, fx0, rfl, hc0, hes, hsh, by
-        simp only [baseLen, LTerm.eval, LStor.eval, hp, hc0, Res.ok_bind, Close.arrLen]⟩
-    | .del .init P', hb =>
-      simp only [baseOk, beq_iff_eq] at hb
-      subst hb
-      simp only [Bool.not_eq_true'] at hfx
-      subst hfx
-      obtain ⟨u, hu⟩ := (save_ok_iff_find_ok (new := (SVal.array es0 sh0 false).defaultOf)
-        (LPath.noLen_eval σ hn hp)).2 ⟨_, hc0⟩
-      refine ⟨u, [], SVal.defaultOf.defaultOfElems es0 ++ sh0, false, ?_, ?_, rfl, ?_, rfl⟩
-      · simp only [LStor.eval, Res.ok_bind, hp, hc0, hu]
-      · rw [findLive_saveLive_same hu]; rfl
-      · exact canonElemsB_append (canonElemsB_defaultOf hes) hsh
+    have hkeep : F.offDel P.rootN base = true →
+        (baseLen base P).eval σ = .ok (.int es0.length) →
+        ∃ es sh fx, v0.findLive ps = .ok (.array es sh fx) ∧
+          canonElemsB E es = true ∧ canonElemsB E sh = true ∧
+          (baseLen base P).eval σ = .ok (.int es.length) := fun ho hl =>
+      ⟨es0, sh0, fx0, hoff ho hv0, hes, hsh, hl⟩
+    cases base
+    case del s P' =>
+      simp only [Facts.baseOk] at hb
+      split at hb
+      · rename_i heq
+        have hPe : P' = P := by simpa only [beq_iff_eq] using heq
+        subst hPe
+        simp only [Bool.not_eq_true'] at hfx
+        subst hfx
+        simp only [LStor.eval, Res.bind_eq_ok] at hv0
+        obtain ⟨v, hv, ps', hp', c, hc, hu⟩ := hv0
+        rw [hp] at hp'; cases hp'
+        rw [hoff hb hv] at hc; cases hc
+        refine ⟨[], SVal.defaultOf.defaultOfElems es0 ++ sh0, false, ?_, rfl, ?_, ?_⟩
+        · rw [findLive_saveLive_same hu]; rfl
+        · exact canonElemsB_append (canonElemsB_defaultOf hes) hsh
+        · simp only [baseLen, heq, ↓reduceIte, LTerm.eval, List.length_nil, Int.natCast_zero]
+      · rename_i hne
+        exact hkeep hb (by simp only [baseLen, hne, Bool.false_eq_true, ↓reduceIte]; exact hlen0 rfl)
+    all_goals exact hkeep hb (hlen0 rfl)
+
+/-- Such a storage returns. -/
+theorem Facts.base_eval {σ : State} {F : Facts} (hF : F.Ok σ) {base : LStor} {P : LPath}
+    {T : Ty} (hb : F.baseOk base P = true) (hn : P.noLen = true)
+    (hpty : F.pty P = some T) {ps : List Seg} (hp : P.eval σ = .ok ps) :
+    ∃ v0, base.eval σ = .ok v0 := by
+  cases base
+  case del s P' =>
+    simp only [Facts.baseOk] at hb
+    split at hb
+    · rename_i heq
+      have hPe : P' = P := by simpa only [beq_iff_eq] using heq
+      subst hPe
+      obtain ⟨v, hv⟩ := F.offDel_eval hF hb
+      obtain ⟨c, hc, -⟩ := F.pty_find hF hpty hp
+      obtain ⟨t, ht⟩ := LPath.eval_rootN σ hp
+      rw [← LStor.offRoot_findLive ht (Facts.offDel_offRoot hb) hv] at hc
+      obtain ⟨u, hu⟩ := (save_ok_iff_find_ok (new := c.defaultOf) (LPath.noLen_eval σ hn hp)).2
+        ⟨_, hc⟩
+      exact ⟨u, by simp only [LStor.eval, hv, hp, hc, hu, Res.ok_bind]⟩
+    · exact F.offDel_eval hF hb
+  all_goals exact F.offDel_eval hF (r := P.rootN) hb
 
 open Semantics.SVal.canonB (canonFieldsB canonElemsB canonEntriesB) in
 /-- The slot a `push()` takes, canonical at the element type: an element
@@ -1258,9 +1436,8 @@ theorem Facts.slot_find {σ : State} {F : Facts} (hF : F.Ok σ) {S : LStor} {Q :
         · rename_i hEE
           obtain ⟨rfl, hok⟩ := hEE
           obtain ⟨wv, v0', ps, c, c', -, hv0', hp, hc, hap, hu⟩ := arr_eval_ok hS
-          obtain ⟨v0, es, sh, fx, hv0, hnode, hes, hsh, hlen⟩ :=
-            F.slot_base hF hnb.2 hnb.1 hpty hp
-          rw [hv0] at hv0'; cases hv0'
+          obtain ⟨es, sh, fx, hnode, hes, hsh, hlen⟩ :=
+            F.slot_base hF hnb.2 hnb.1 hpty hp hv0'
           rw [hnode] at hc; cases hc
           simp only [AOp.apply] at hap; cases hap
           have hQs := LPath.segs_eval σ hq
@@ -1347,7 +1524,8 @@ theorem Facts.slot_ret {σ : State} {F : Facts} (hF : F.Ok σ) {S : LStor} {Q : 
         rw [LPath.splitAt_spec hsp] at hQs
         obtain ⟨ps, b, ha, -, -⟩ := segsEval_append_inv σ hQs
         have hp := LPath.eval_of_segs σ ha
-        obtain ⟨v0, es, sh, fx, hv0, hnode, -, -, -⟩ := F.slot_base hF hnb.2 hnb.1 hpty hp
+        obtain ⟨v0, hv0⟩ := F.base_eval hF hnb.2 hnb.1 hpty hp
+        obtain ⟨es, sh, fx, hnode, -, -, -⟩ := F.slot_base hF hnb.2 hnb.1 hpty hp hv0
         obtain ⟨u, hu⟩ := (save_ok_iff_find_ok
           (new := .array (es ++ [(pushSlot E sh).1]) (pushSlot E sh).2 fx)
           (LPath.noLen_eval σ hnb.1 hp)).2 ⟨_, hnode⟩
@@ -1451,8 +1629,7 @@ theorem Facts.slot_readP {σ : State} {F : Facts} (hF : F.Ok σ) {S : LStor} {Q 
         · rename_i hEE
           obtain ⟨rfl, hok⟩ := hEE
           obtain ⟨wv, v0', ps, c, c', -, hv0', hp, hc, hap, hu⟩ := arr_eval_ok hS
-          obtain ⟨v0, es, sh, fx, hv0, hnode, hes, hsh, -⟩ := F.slot_base hF hnb.2 hnb.1 hpty hp
-          rw [hv0] at hv0'; cases hv0'
+          obtain ⟨es, sh, fx, hnode, hes, hsh, -⟩ := F.slot_base hF hnb.2 hnb.1 hpty hp hv0'
           rw [hnode] at hc; cases hc
           simp only [AOp.apply] at hap; cases hap
           have hQs := LPath.segs_eval σ hq
@@ -1505,6 +1682,12 @@ def tyBool : Option Ty → Bool
 /-- The type is a word. -/
 def tyPrim : Option Ty → Bool
   | some (.prim _) => true
+  | _ => false
+
+/-- The type is an array (`selectOnTypedDynSize`, `selectOnTypedFixedSize`: it
+has a length). -/
+def tyArr : Option Ty → Bool
+  | some (.ref (.array _)) | some (.ref (.fixed _ _)) => true
   | _ => false
 
 /-- The type has the shape `sh`. -/
@@ -2232,7 +2415,8 @@ def Facts.retsW (F : Facts) (N : LTerm → LTerm) : LTerm → Bool
       (F.slotIn N s q && F.keysRetW N q && (F.slotTy s q).isSome)
   | t@(.kmap sh s q) => t.known F.known F.ne || (s.isInit && F.keysRetW N q && F.shapeIs sh q) ||
       (F.slotIn N s q && F.keysRetW N q && tyShape sh (F.slotTy s q))
-  | t@(.len s q) => t.known F.known F.ne || (s.isInit && F.keysRetW N q && F.isArrPath q)
+  | t@(.len s q) => t.known F.known F.ne || (s.isInit && F.keysRetW N q && F.isArrPath q) ||
+      (F.slotIn N s q && F.keysRetW N q && tyArr (F.slotTy s q))
   | t@(.sok _) => t.known F.known F.ne
   | t@(.cpok s q) => t.known F.known F.ne || (s.isInit && F.keysRetW N q && F.cpokInit q)
   | t@(.pok q) => t.known F.known F.ne || F.keysRetW N q
@@ -2514,8 +2698,24 @@ theorem Facts.retsW_sound {σ : State} {F : Facts} (hF : F.Ok σ) {N : LTerm →
       · cases ht
   | .len s q, h => by
     simp only [Facts.retsW, Bool.or_eq_true, Bool.and_eq_true] at h
-    rcases h with h | ⟨⟨hs, hk⟩, ht⟩
+    rcases h with (h | ⟨⟨hs, hk⟩, ht⟩) | ⟨⟨hin, hk⟩, ht⟩
     · exact LTerm.known_returns hF.1 hF.2.1 _ h
+    rotate_left
+    · cases hT : F.slotTy s q with
+      | none => simp only [hT, tyArr, Bool.false_eq_true] at ht
+      | some T =>
+        obtain ⟨v, qs, w, hv, hq, hw, hc⟩ :=
+          F.slot_resolve hF hN hT hin (Facts.keysRetW_sound hF hN q hk)
+        rw [hT] at ht
+        match T, ht with
+        | .ref (.array _), _ =>
+          match w, hc with
+          | .array _ _ _, _ =>
+            exact ⟨_, by simp only [LTerm.eval, hv, hq, hw, Res.ok_bind, Close.arrLen] <;> rfl⟩
+        | .ref (.fixed _ _), _ =>
+          match w, hc with
+          | .array _ _ _, _ =>
+            exact ⟨_, by simp only [LTerm.eval, hv, hq, hw, Res.ok_bind, Close.arrLen] <;> rfl⟩
     · cases s <;> simp only [LStor.isInit, Bool.false_eq_true] at hs
       unfold Facts.isArrPath at ht
       split at ht
@@ -2704,14 +2904,41 @@ theorem Facts.halts_sound {σ : State} {F : Facts} (hF : F.Ok σ) :
   | .sok _, hh, _, _ | .pok _, hh, _, _ | .kite .., hh, _, _ | .env _, hh, _, _
   | .findP .., hh, _, _ => by simp only [halts, Bool.false_eq_true] at hh
 
+/-- What `nfH` asks: kinds and halting, not returning (`Facts.orc`'s
+`rets` reads `nfH` back). -/
+def Facts.orcH (F : Facts) : Orc := { kind := F.kind, halts := F.halts }
+
+theorem Facts.orcH_ok {σ : State} {F : Facts} (hF : F.Ok σ) : F.orcH.Ok σ :=
+  ⟨F.kind_ok hF, fun t v h => F.halts_sound hF t h v, (Orc.ok_none σ).2.2.1,
+    (Orc.ok_none σ).2.2.2.1, (Orc.ok_none σ).2.2.2.2⟩
+
+/-- `nf0` with the halting the facts show: a conditional on a length a
+`delete` reset, `kite(k, (len; 0) + 1 - 1, …)`, gets its literal. -/
+def Facts.nfH (F : Facts) (t : LTerm) : LTerm := ((t.core F.ne).arith).simpE F.orcH F.eqs
+
+theorem Facts.nfH_keeps {σ : State} {F : Facts} (hF : F.Ok σ) (t : LTerm) : Keeps σ t (F.nfH t) :=
+  fun v h => LTerm.simpE_eval (F.orcH_ok hF) hF.2.2.1 _ v
+    (LTerm.arith_eval _ (LTerm.core_eval hF.2.1 t h))
+
+/-- A conditional on two integers (`kite`), which `nfH` may decide. -/
+def LTerm.isKite : LTerm → Bool
+  | .kite .. => true
+  | _ => false
+
 /-- What the facts tell the simplifier: kinds, halting, and returning by
-`retsW` over the untyped normal form. -/
+`retsW` over the untyped normal form; a conditional (the slot of a `push()`
+through a dangling alias, `arrLength`) also over `nfH`. -/
 def Facts.orc (F : Facts) : Orc :=
-  { kind := F.kind, halts := F.halts, rets := F.retsW F.nf0, range := F.range, lo := F.lo }
+  { kind := F.kind, halts := F.halts,
+    rets := fun t => F.retsW F.nf0 t || (t.isKite && F.retsW F.nfH t),
+    range := F.range, lo := F.lo }
 
 theorem Facts.orc_ok {σ : State} {F : Facts} (hF : F.Ok σ) : F.orc.Ok σ :=
   ⟨F.kind_ok hF, fun t v h => F.halts_sound hF t h v,
-    fun t h => F.retsW_sound hF (F.nf0_keeps hF) t h,
+    fun t h => by
+      rcases Bool.or_eq_true_iff.1 h with h | h
+      · exact F.retsW_sound hF (F.nf0_keeps hF) t h
+      · exact F.retsW_sound hF (F.nfH_keeps hF) t (Bool.and_eq_true_iff.1 h).2,
     fun t _ _ _ hr hi => F.range_sound hF t hr hi, fun t _ _ hl hi => F.lo_sound hF t hl hi⟩
 
 /-- The normal form a term is compared by: its guards dropped (`LTerm.core`),
@@ -3419,7 +3646,8 @@ def LStor.fits : Nat → LStor → Option Nat
   | n + 1, .init => some n
   | n + 1, .save s q w => (s.fits n).bind fun m => (q.fits m).bind fun k => w.fits k
   | n + 1, .del s q => (s.fits n).bind fun m => q.fits m
-  | n + 1, .arr _ s q w => (s.fits n).bind fun m => (q.fits m).bind fun k => w.fits k
+  | n + 1, .arr _ s q w | n + 1, .stale _ s q w =>
+    (s.fits n).bind fun m => (q.fits m).bind fun k => w.fits k
   | n + 1, .copy s q src sq =>
     (s.fits n).bind fun m => (q.fits m).bind fun k => (src.fits k).bind fun j => sq.fits j
   | n + 1, .view m _ => m.fits n

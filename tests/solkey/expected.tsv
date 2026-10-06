@@ -235,9 +235,9 @@ taclets	TestSuite	testStoragePushFieldLvalue	derived	box	`Solkey.TestSuite.testS
 taclets	TestSuite	testStoragePushLvalueCopiesStorageSource	derived	box	`Solkey.TestSuite.testStoragePushLvalueCopiesStorageSource.proved` (`Solidity/TestSuite/Derived8.lean`)
 taclets	TestSuite	testStoragePushLvaluePrimitive	derived	box	`Solkey.TestSuite.testStoragePushLvaluePrimitive.proved` (`Solidity/TestSuite/Derived8.lean`)
 taclets	TestSuite	testStoragePushReturnAlias	derived	box	`Solkey.TestSuite.testStoragePushReturnAlias.proved` (`Solidity/TestSuite/Derived8.lean`)
-taclets	TestSuite	testDanglingReferenceSurvivesPush	pending	diamond	an alias bound through an index dangles after a `pop`: the fragment drops it at the next write (`SymB.onWrite`), and the write through it lands past the live end, which the reduction's live storage does not reach
-taclets	TestSuite	testArrayCopyClearsOldElements	pending	diamond	an alias bound through an index dangles after a `pop`: the fragment drops it at the next write (`SymB.onWrite`), and the write through it lands past the live end, which the reduction's live storage does not reach
-taclets	TestSuite	testArrayCopyKeepsDestinationTail	pending	diamond	an alias bound through an index dangles after a `pop`: the fragment drops it at the next write (`SymB.onWrite`), and the write through it lands past the live end, which the reduction's live storage does not reach
+taclets	TestSuite	testDanglingReferenceSurvivesPush	derived	diamond	`Solkey.TestSuite.testDanglingReferenceSurvivesPush.proved` (`Solidity/TestSuite/Derived13.lean`)
+taclets	TestSuite	testArrayCopyClearsOldElements	pending	diamond	the write through the dangling alias is translated (`SymB.stale`, `LStor.stale`), but the leaf's reduction is past `Derive.elimSize`, and the `push()` takes its slot from a storage with writes at another root below it, which the slot facts do not read
+taclets	TestSuite	testArrayCopyKeepsDestinationTail	derived	diamond	`Solkey.TestSuite.testArrayCopyKeepsDestinationTail.proved` (`Solidity/TestSuite/Derived13.lean`)
 taclets	TestSuite	testStorageIndexDeleteOutOfBoundsReverts	derived	box	`Solkey.TestSuite.testStorageIndexDeleteOutOfBoundsReverts.proved` (`Solidity/TestSuite/Derived4.lean`)
 taclets	TestSuite	testFixedArrayDeleteKeepsLength	derived	box	`Solkey.TestSuite.testFixedArrayDeleteKeepsLength.proved` (`Solidity/TestSuite/Derived4.lean`)
 taclets	TestSuite	testFixedArrayLength	derived	diamond	`Solkey.TestSuite.testFixedArrayLength.proved` (`Solidity/TestSuite/Derived4.lean`)
@@ -255,11 +255,11 @@ taclets	TestSuite	testFixedStructArrayDeleteResetsElements	derived	box	`Solkey.T
 taclets	TestSuite	testStructWithFixedArrayDeleteKeepsLength	derived	box	`Solkey.TestSuite.testStructWithFixedArrayDeleteKeepsLength.proved` (`Solidity/TestSuite/Derived4.lean`)
 taclets	TestSuite	testStructWithFixedArrayCopy	derived	box	`Solkey.TestSuite.testStructWithFixedArrayCopy.proved` (`Solidity/TestSuite/Derived8.lean`)
 taclets	TestSuite	testFixedMappingArrayDeleteKeepsEntries	derived	box	`Solkey.TestSuite.testFixedMappingArrayDeleteKeepsEntries.proved` (`Solidity/TestSuite/Derived4.lean`)
-taclets	TestSuite	testDeleteArrayLeavesDataPastLength	pending	diamond	an alias bound through an index dangles after a `pop`: the fragment drops it at the next write (`SymB.onWrite`), and the write through it lands past the live end, which the reduction's live storage does not reach
+taclets	TestSuite	testDeleteArrayLeavesDataPastLength	derived	diamond	`Solkey.TestSuite.testDeleteArrayLeavesDataPastLength.proved` (`Solidity/TestSuite/Derived13.lean`)
 taclets	TestSuite	testPopKeepsMappingElementEntries	derived	diamond	`Solkey.TestSuite.testPopKeepsMappingElementEntries.proved` (`Solidity/TestSuite/Derived8.lean`)
 taclets	TestSuite	testDeleteKeepsMappingElementEntries	derived	diamond	`Solkey.TestSuite.testDeleteKeepsMappingElementEntries.proved` (`Solidity/TestSuite/Derived8.lean`)
 taclets	TestSuite	testPushBindMappingElement	derived	diamond	`Solkey.TestSuite.testPushBindMappingElement.proved` (`Solidity/TestSuite/Derived8.lean`)
-taclets	TestSuite	testDanglingInnerArrayReappearsAfterPush	pending	diamond	an alias bound through an index dangles after a `pop`: the fragment drops it at the next write (`SymB.onWrite`), and the write through it lands past the live end, which the reduction's live storage does not reach
+taclets	TestSuite	testDanglingInnerArrayReappearsAfterPush	derived	diamond	`Solkey.TestSuite.testDanglingInnerArrayReappearsAfterPush.proved` (`Solidity/TestSuite/Derived13.lean`)
 taclets	TestSuite	testStorageRootDeepCopy	derived	diamond	`Solkey.TestSuite.testStorageRootDeepCopy.proved` (`Solidity/TestSuite/Derived8.lean`)
 taclets	TestSuite	testStorageStructDeleteSkipsMappingMember	derived	diamond	`Solkey.TestSuite.testStorageStructDeleteSkipsMappingMember.proved` (`Solidity/TestSuite/Derived4.lean`)
 taclets	TestSuite	testStorageToMemoryCopyComplexPath	derived	diamond	`Solkey.TestSuite.testStorageToMemoryCopyComplexPath.proved` (`Solidity/TestSuite/Derived12.lean`)

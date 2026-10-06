@@ -87,6 +87,7 @@ lemma (`TermTaclet.sound`).
 | `Calculus/DecideLang.lean` | `sol_decide`'s target language: terms, paths, storages and memories (`LTerm`, `LStor`, `LMem`, `LId`) read in the initial state, and the formulas over them; constants folded where a term is built (`LTerm.mkBin`/`mkUn`), literal powers up to the exponent 256 (`powBig`). |
 | `Calculus/MemRead.lean` | The memory clauses, as solkey's memory taclets: reads walked over the writes to a name's birth (`readT`, `readI`), the guards of names and writes, each exact against the interpreter. |
 | `Calculus/MemTheory.lean` | The memory readers against `Theory/Memory.lean`: a memory as a Theory term (`LMem.toTheory`), and `readT`/`readI` answering what `Memory.readIn`/`readId` read, each arm by its taclet's lemma or by definition (`LMem.readT_agree`, `LMem.readI_agree`), a default under `DeclAlong`, the member table along the read's path. |
+| `Calculus/SlotLemmas.lean` | The slots past an array's end, read live: a slot-level write (through a stale alias) read at, apart from, below and above its path; the first slot past the end that a `push()` recycles; what a `delete`, a copy and a push leave there. |
 | `Calculus/Decide.lean` | `sol_decide`: reads of writes as case trees on key equalities, over the live storage; pushes, pops and storage copies (`LStor.arr`, `LStor.copy`); the updates' memory as an `LMem`, an allocation's pair kept whole (`pairL`), a copy from storage as that pair (`pairMem`), a copy of memory into storage as a view (`LStor.view`, `memL`). |
 | `Calculus/DecideSyn.lean` | `LFml.syn`: a reduction closed by its terms, KeY's syntactic closing; `sol_decide`'s first try. |
 | `Calculus/DecideComplete.lean` | The starting storage's reads are realizable; `Fml.valid_iff_cons`. |
@@ -211,6 +212,7 @@ diffs it).  `docs/testsuite-proofs.md` has the counts and timings.
 | `Frontend/Problems.lean` | `solc_problems N` (`N.f.problem : Fml N` per program), `#solkey_problem`, `#solkey_scan`, `#solkey_derive?` (the replays to paste, when they fit `maxHeartbeats`), `#solkey_obligations` (derived, checked against `⊢ N.f.problem` and Lean's three axioms / pending). |
 | `TestSuite/Problems.lean` | The 417 statements of `Solkey.TestSuite`, two pinned in solkey's syntax, `initState_wt`. |
 | `TestSuite/Derived1.lean` … `TestSuite/Derived12.lean` | `Solkey.TestSuite.f.proved : ⊢ Solkey.TestSuite.f.problem`, 40, 40, 40, 40, 40, 37, 40, 23, 40, 40, 11 and 20 (411 in all), by `sol_prove` and explicit leaf tactics; 7 and 8 are what pushes, pops and storage copies added, 9 to 11 what memory added, 12 what copies between memory and storage added. |
+| `TestSuite/Derived13.lean` | The obligations that write or push through an alias a `pop` made dangle (`LStor.stale`), by `sol_prove`: four of the five; `testArrayCopyClearsOldElements` stays pending (415 in all). |
 | `TestSuite/Report.lean` | The pinned count: derived, pending (named), and the three with no statement. |
 | `TestSuite/Suggestions.lean` | `#solkey_derive?` suggestions pinned by name, off the `Derived` modules' import path. |
 
@@ -247,6 +249,7 @@ or `sol_decide`, derivations `⊢ φ` built one `apply` per taclet, and runs:
 | `Examples/Tactics/Calls.lean`, `CallOperands.lean`, `Callback.lean`, `TryCatch.lean` | Internal calls, call-valued operands, callbacks (`ProvesC`), `try`/`catch`. |
 | `Examples/Tactics/Memory.lean`, `CrossDomain.lean`, `Theory.lean` | Memory, storage↔memory copies, the theory's rewriting. |
 | `Examples/Tactics/SelectOnSaveConsr.lean` | Reading a write back through a `consr` path, by hand and in solkey's order. |
+| `Examples/Tactics/Dangling.lean` | Writes and pushes through a stale alias (one a `pop` left dangling), made live by a `push()`, past a `delete` and a copy, by `sol_prove?`; rounds of them refused past `elimSize` in milliseconds. |
 | `Examples/Tactics/ApplySteps.lean`, `UpdateRules.lean`, `Decide.lean`, `TermTaclets.lean` | The proof style, update simplification, `sol_decide`, term taclets. |
 | `Examples/Tactics/Specs.lean` | Clauses as obligations (`spec!{f}`, `sol_spec`) beyond the benchmarks. |
 

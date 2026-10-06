@@ -119,6 +119,10 @@ partial def LStor.fmt [FreshNames] : LStor → String
   | .arr .push s q w => s!"push({LStor.fmt s}, {LPath.fmt q}, {LTerm.fmt w})"
   | .arr (.slot _) s q _ => s!"pushSlot({LStor.fmt s}, {LPath.fmt q})"
   | .arr (.pop _) s q _ => s!"pop({LStor.fmt s}, {LPath.fmt q})"
+  | .stale none s q w => s!"save({LStor.fmt s}, {LPath.fmt q}, {LTerm.fmt w})"
+  | .stale (some .push) s q w => s!"push({LStor.fmt s}, {LPath.fmt q}, {LTerm.fmt w})"
+  | .stale (some (.slot _)) s q _ => s!"pushSlot({LStor.fmt s}, {LPath.fmt q})"
+  | .stale (some (.pop _)) s q _ => s!"pop({LStor.fmt s}, {LPath.fmt q})"
   | .copy s q src sq => s!"copy({LStor.fmt s}, {LPath.fmt q}, {LStor.fmt src}, {LPath.fmt sq})"
   | .view m i => s!"copyMem({LMem.fmt m}, {LId.fmt i})"
 

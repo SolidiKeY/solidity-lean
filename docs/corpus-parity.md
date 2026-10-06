@@ -25,8 +25,8 @@ statuses are read off `Solidity/TestSuite/Report.lean`'s pin, and
 
 | | diamond | box | skip | total |
 |---|---:|---:|---:|---:|
-| derived | 309 | 102 | 0 | 411 |
-| pending | 5 | 0 | 0 | 5 |
+| derived | 313 | 102 | 0 | 415 |
+| pending | 1 | 0 | 0 | 1 |
 | divergent | 1 | 0 | 0 | 1 |
 | excluded | 1 | 0 | 0 | 1 |
 | skip | 0 | 0 | 2 | 2 |
@@ -36,9 +36,9 @@ Not derived, by reason:
 
 | Status | Because | # | functions |
 |---|---|---:|---|
-| pending | an alias bound through an index dangles after a `pop`: the fragment drops it at the next write (`SymB.onWrite`), and the write through it lands past the live end, which the reduction's live storage does not reach | 5 | `testDanglingReferenceSurvivesPush`, `testArrayCopyClearsOldElements`, `testArrayCopyKeepsDestinationTail`, `testDeleteArrayLeavesDataPastLength`, `testDanglingInnerArrayReappearsAfterPush` |
 | skip | tagged `@custom:key skip` | 2 | `tryCalleeGet`, `tryCalleePing` |
 | divergent | `wt(storage)` does not bound array lengths, so the checked `- 1` after a push can overflow; solc bounds lengths at `2^64` (`docs/solc-alignment.md`, "Remaining deltas") | 1 | `storagePushReadBack` |
+| pending | the write through the dangling alias is translated (`SymB.stale`, `LStor.stale`), but the leaf's reduction is past `Derive.elimSize`, and the `push()` takes its slot from a storage with writes at another root below it, which the slot facts do not read | 1 | `testArrayCopyClearsOldElements` |
 | excluded | struct `Tree` (line 36) is recursive through a mapping: its default value is infinite, and the model's are finite | 1 | `recursiveStructMapping` |
 
 ## The other suites
