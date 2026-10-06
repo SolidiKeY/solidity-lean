@@ -159,6 +159,7 @@ def Stmt.weight : Stmt C → Nat
   | .push b (some r) _ => b.cost + b.pen + r.cost + 1
   | .pop b => b.cost + b.pen + 1
   | .transfer r a => r.cost + r.pen + a.cost + a.pen + 1
+  | .send _ r a => r.cost + r.pen + a.cost + a.pen + 2
   | .declMem _ _ none _ => 1
   | .declMem _ _ (some r) _ => r.cost + 2
   | .rebindMem _ r => r.cost + 1
@@ -292,6 +293,7 @@ def Premise.Smaller (s : Stmt C) : Premise C → Prop
   | .split _ _ P Q => Prog.weight P + 2 ≤ s.weight ∧ Prog.weight Q + 2 ≤ s.weight
   | .check c P => Prog.weight P < s.weight ∧ c.modalFree = true
   | .branches bs => (bs.map fun b => 2 ^ Prog.weight b.2).sum < 2 ^ s.weight
+  | .cases fs us => us.length < 2 ^ s.weight ∧ fs.all Fml.modalFree = true
 
 /-- The rule leaves a premise smaller than its statement. -/
 def Step.Small {k : Nat} {m : Modality} {s : Stmt C} (st : Step k m s) : Prop :=
@@ -704,6 +706,23 @@ theorem transferStep_small : ∀ r a : Val C .uint, (transferStep (k := k) (m :=
   | .mlen .., _ => by
     simp only [transferStep]; weigh
 
+/-- `send`: the receiver first, then the amount; both simple, two goals
+(and under the diamond a formula with no modality) where the statement
+weighs at least `2`.
+
+Example: `ok = people[i].wallet.send(x);` captures the receiver:
+`uint se = people[i].wallet; ok = se.send(x);`. -/
+theorem sendStep_small (pv : Var) :
+    ∀ r a : Val C .uint, (sendStep (k := k) (m := m) pv r a).Small
+  | .simple _, .simple _ => by
+    cases m <;> simp only [sendStep] <;> refine ⟨?_, rfl⟩ <;> weigh [List.length_cons, List.length_nil]
+  | .simple _, .read _ | .simple _, .binop .. | .simple _, .unop .. | .simple _, .ternary ..
+  | .simple _, .readMem _ | .simple _, .len .. | .simple _, .mlen .. => by
+    simp only [sendStep]; weigh
+  | .read _, _ | .binop .., _ | .unop .., _ | .ternary .., _ | .readMem _, _ | .len .., _
+  | .mlen .., _ => by
+    simp only [sendStep]; weigh
+
 /-- A memory local bound.
 
 Example: `m = n.items[i + 1];` captures the index first. -/
@@ -868,6 +887,7 @@ theorem Stmt.step_smaller (k : Nat) (m : Modality) :
   | .push b v hd => pushStep_small b v hd
   | .pop b => popStep_small b
   | .transfer r a => transferStep_small r a
+  | .send pv r a => sendStep_small pv r a
   | .rebindMem x r => rebindMemStep_small x r
   | .assignFromMem l p => assignFromMemStep_small l p
   | .assignMem l r => assignMemStep_small l r
@@ -1000,6 +1020,32 @@ theorem Premise.branches_measure (m : Modality) (ω : Prog C) (φ : Fml C) :
     rw [ih, Nat.add_mul]
     simp only [Fml.measure_alls, Fml.measure, Prog.weight_append, Nat.pow_add, Nat.mul_assoc]
 
+/-- Formulas with no modality measure nothing, in front of anything. -/
+theorem Fml.measure_sum_modalFree (l : List Nat) :
+    (fs : List (Fml C)) → fs.all Fml.modalFree = true → (fs.map Fml.measure ++ l).sum = l.sum
+  | [], _ => rfl
+  | f :: fs, h => by
+    simp only [List.all_cons, Bool.and_eq_true] at h
+    simp only [List.map_cons, List.cons_append, List.sum_cons, Fml.measure_of_modalFree f h.1,
+      Fml.measure_sum_modalFree l fs h.2, Nat.zero_add]
+
+/-- One measure per element. -/
+theorem List.sum_map_const_nat {α : Type} (c : Nat) :
+    (l : List α) → (l.map fun _ => c).sum = l.length * c
+  | [] => by simp only [List.map_nil, List.sum_nil, List.length_nil, Nat.zero_mul]
+  | _ :: l => by
+    simp only [List.map_cons, List.sum_cons, List.sum_map_const_nat c l, List.length_cons,
+      Nat.succ_mul, Nat.add_comm]
+
+/-- Labelled goals measure the rest once per update: their formulas have no
+modality. -/
+theorem Premise.cases_measure (m : Modality) (ω : Prog C) (φ : Fml C) (fs : List (Fml C))
+    (hf : fs.all Fml.modalFree = true) (us : List (Upd C)) :
+    ((Premise.cases fs us).fml m ω φ).measure =
+      us.length * (2 ^ Prog.weight ω * (φ.measure + 1)) := by
+  simp only [Premise.fml, Fml.measure_conj, List.map_append, List.map_map, Function.comp_def,
+    Fml.measure_sum_modalFree _ fs hf, Fml.measure, List.sum_map_const_nat]
+
 /-- What a branch owes besides its goals measures nothing: its revert sits
 under a negation, which the strategy does not step into.
 
@@ -1060,6 +1106,11 @@ theorem Premise.measure_lt {m : Modality} {s : Stmt C} {p : Premise C} (h : p.Sm
     rw [Premise.branches_measure]
     simp only [Fml.measure, Prog.weight, Nat.pow_add, Nat.mul_assoc]
     exact Nat.mul_lt_mul_of_pos_right h (Nat.mul_pos (Nat.pow_pos (by decide)) hM)
+  | cases fs us =>
+    simp only [Premise.Smaller] at h
+    rw [Premise.cases_measure m ω φ fs h.2 us]
+    simp only [Fml.measure, Prog.weight, Nat.pow_add, Nat.mul_assoc]
+    exact Nat.mul_lt_mul_of_pos_right h.1 (Nat.mul_pos (Nat.pow_pos (by decide)) hM)
 
 /-- Every step decreases the measure, whatever index its fresh names get.
 

@@ -183,6 +183,35 @@ no Lean rule claims it (`RuleShapes.unclaimedTaclets` says why)
 -/
 #guard_msgs in #taclet ifTrue
 
+/-! A send's labelled goals (`Premise.cases`), sound by one update lemma for
+both modalities; its callback rule, by `CallbackTaclet.sound_send`. -/
+
+/--
+info: Solidity.Taclet.sendNoCallbackBox : ∀ {C : Contract} {k : Nat} {pv : Var} {sadr se : Simple C PrimTy.uint},
+  dl{ [ pv = sadr .send(se); ] ⇝
+    "send succeeded":
+        { net := if(sadr = self) then net else storeSt(net, at(sadr), selectSt(net, at(sadr)) - se) ‖ pv := true } ⟨[
+        ]⟩ ;
+      "send failed": { pv := false } ⟨[ ]⟩ }
+solkey: sendNoCallbackBox (simplify_prog)
+printed: none (a solkey taclet not printed)
+sound: Solidity.Taclet.sound_cases, Solidity.upd_send_cases
+-/
+#guard_msgs in #taclet sendNoCallbackBox
+
+/--
+info: Solidity.CallbackTaclet.sendWithCallbackBox : ∀ {C : Contract} {pv : Var} {sadr se : Simple C PrimTy.uint},
+  dl[CallbackTaclet C]{ [ pv = sadr .send(se); ] ⇝
+    "send succeeded":
+        { net := if(sadr = self) then net else storeSt(net, at(sadr), selectSt(net, at(sadr)) - se) ‖ pv := true } ⟨[
+        ]⟩ ;
+      "send failed": { pv := false } ⟨[ ]⟩ }
+solkey: sendWithCallbackBox (simplify_prog)
+printed: none (a solkey taclet not printed)
+sound: Solidity.CallbackTaclet.sound_send
+-/
+#guard_msgs in #taclet sendWithCallbackBox
+
 /-! ## `#difftest`
 
 Every function of the contract, called `runs` times from random storages,

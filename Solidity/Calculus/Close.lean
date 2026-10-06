@@ -122,8 +122,9 @@ theorem Modality.wp_diamond {x : Res α} {P : α → Prop} :
 /-- **A storage write under the box**, named with what is known of its
 result: in `[ alice.age = 10; bob = alice; ] bob.age == 10`, the state `τ`
 after the first write reads `10` at `alice.age` and below it, reads as `σ`
-does at `bob` and at `alice.account`, and has the locals and the heap of
-`σ`. -/
+does at `bob` and at `alice.account`, and has the locals, the heap and the
+`net` ledger of `σ` (so a ledger read crosses it: `[ to.transfer(5); total =
+1; ] net(to) = 2`). -/
 theorem Modality.wp_box_saveStorage {σ : State} {r : Name} {p : List Seg} {v : SVal}
     {P : State → Prop} :
     Modality.box.wp (σ.saveStorage r p v) P ↔
@@ -134,9 +135,9 @@ theorem Modality.wp_box_saveStorage {σ : State} {r : Name} {p : List Seg} {v : 
         (∀ q k, Close.Prefix p q → τ.checkIndex r q k = v.find (Close.after p q) >>= Close.idxOk k) →
         (∀ x, τ.getEnv x = σ.getEnv x) → (∀ a, readAddr τ a = readAddr σ a) →
         (∀ a, Close.readVal τ a = Close.readVal σ a) →
-        τ.tx = σ.tx → τ.selfBalance = σ.selfBalance → P τ := by
+        τ.tx = σ.tx → τ.selfBalance = σ.selfBalance → τ.net = σ.net → P τ := by
   rw [Modality.wp_box]
-  exact ⟨fun h τ hs _ _ _ _ _ _ _ _ _ _ => h τ hs, fun h τ hs =>
+  exact ⟨fun h τ hs _ _ _ _ _ _ _ _ _ _ _ => h τ hs, fun h τ hs =>
     h τ hs (State.findStorage_saveStorage_same hs)
       (fun _ hq => Close.findStorage_saveStorage_below hs hq)
       (fun _ _ hd => Close.findStorage_saveStorage_apart hs hd)
@@ -144,7 +145,8 @@ theorem Modality.wp_box_saveStorage {σ : State} {r : Name} {p : List Seg} {v : 
       (fun _ k hq => Close.checkIndex_saveStorage_below k hs hq)
       (Close.getEnv_saveStorage hs) (Close.readAddr_saveStorage hs)
       (fun a => by simp [Close.readVal, Close.readAddr_saveStorage hs])
-      (Close.env_saveStorage hs).1 (Close.env_saveStorage hs).2⟩
+      (Close.env_saveStorage hs).1 (Close.env_saveStorage hs).2
+      (SemanticsProperties.State.saveStorage_frame hs).2.2.2.1⟩
 
 /-- **A subtree read under the box**: in `[ bob = alice; ] bob.age ==
 alice.age`, the tree `a` read at `alice` reads at `age` what the storage

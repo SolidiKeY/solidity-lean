@@ -947,9 +947,11 @@ where
           | _ => none)
         | .declMemory T x _ => declared x T .mem
         | .declStorage T x _ | .declStoragePush T x _ => declared x T .alias
-        | .decl T x _ => match elabDeclTy C T with
+        | .decl T x _ | .send (some T) (.name x) _ _ => match elabDeclTy C T with
           | .ok (.prim p, n) => (Γ, setBy x (.val p n) Δ)
           | _ => (Γ, Δ)
+        -- `ok = to.send(5);`: what a send returns, a `bool`
+        | .send none (.name x) _ _ => hint x (some (.val .bool))
         | .ite _ t e => go decls e (go decls t (Γ, Δ))
         | _ => (Γ, Δ)
       go decls ss acc

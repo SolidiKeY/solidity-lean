@@ -247,10 +247,14 @@ const KEY_SUITES = [
         ["net_transfer_capture_argument", "Net.netTransferCapturedAmount"],
       "net-transfer-capture-receiver":
         ["net_transfer_capture_receiver", "Net.netTransferStorageReceiver"],
+      "net-send-simple": ["net_send_simple", "Net.netSendSimple"],
     },
     unported: {},
     reason: (name) =>
-      name.includes("withcallback")
+      name === "net-call-withcallback-simple"
+        ? "`(bool ok, ) = a.call{value: v}(\"\")` is lowered to a send only once `sol{}` has " +
+          "tuples, and the problem's invariant `CInv` reads the ledger `net`, which no term reads"
+      : name.includes("withcallback")
         ? "the callback semantics is ported (`Semantics/Callback.lean`, `transferWithCallback`), " +
           "but the problem's invariant `CInv` reads the ledger `net`, which no term reads"
         : name === "net-msg-value"

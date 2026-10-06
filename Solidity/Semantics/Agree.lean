@@ -489,6 +489,7 @@ def Stmt.vars : Stmt C → List Var
   | .push b v _ => b.vars ++ optVars Src.vars v
   | .pop b => b.vars
   | .transfer r a => r.vars ++ a.vars
+  | .send pv r a => pv :: (r.vars ++ a.vars)
   | .declMem _ x init _ => x :: optVars MRhs.vars init
   | .rebindMem x r => x :: r.vars
   | .assignFromMem l p => l.vars ++ p.vars
@@ -660,6 +661,7 @@ macro "agree_run" h:term : tactic => `(tactic| repeat (first
   | exact bumpStore_agree $h _ _ _ _
   | exact bumpMem_agree $h _ _ _
   | exact transferAt_agree $h _ _
+  | exact sendAt_agree $h _ _ _
   | exact popAt_agree $h _ _ _
   | refine bindPureResults_agree _ fun _ => ?_
   | refine bindPureRes_agree _ fun _ => ?_
@@ -767,6 +769,22 @@ theorem transferAt_agree (hag : EnvAgreeExcept ns σ τ) (addr amt : Int) :
   rw [State.pay_eq, State.pay_eq]
   exact ⟨hag.storage, hag.heap, hag.nextId,
     by simp only [State.getNet, hag.net, hag.tx], hag.env, hag.selfBalance, hag.tx⟩
+
+theorem pay_agree (hag : EnvAgreeExcept ns σ τ) (addr amt : Int) :
+    EnvAgreeExcept ns (σ.pay addr amt) (τ.pay addr amt) := by
+  rw [State.pay_eq, State.pay_eq]
+  exact ⟨hag.storage, hag.heap, hag.nextId,
+    by simp only [State.getNet, hag.net, hag.tx], hag.env, hag.selfBalance, hag.tx⟩
+
+theorem sendAt_agree (hag : EnvAgreeExcept ns σ τ) (pv : Var) (addr amt : Int) :
+    ResultsAgree ns (sendAt σ pv addr amt) (sendAt τ pv addr amt) := by
+  simp only [sendAt, hag.tx]
+  split
+  · rfl
+  split
+  · exact EnvAgreeExcept.setEnv_both (pay_agree hag addr amt) _ _
+  · exact EnvAgreeExcept.setEnv_both (pay_agree hag addr amt) _ _
+  · exact EnvAgreeExcept.setEnv_both hag _ _
 
 theorem ARhs.bind_frame (hag : EnvAgreeExcept ns σ τ) (x : Var) {R : RefTy} :
     (r : ARhs C R) → Avoids r.vars ns → ResultsAgree ns (r.bind σ x) (r.bind τ x)
@@ -917,6 +935,9 @@ theorem Stmt.run_frame {σ τ : State} (hag : EnvAgreeExcept ns σ τ) :
     agree_run hag
   | .transfer r a, h => by
     simp only [Stmt.run, r.eval_frame hag h.left, a.eval_frame hag h.right]
+    agree_run hag
+  | .send pv r a, h => by
+    simp only [Stmt.run, r.eval_frame hag h.tail.left, a.eval_frame hag h.tail.right]
     agree_run hag
   | .declMem R x init _, h => by
     cases init with

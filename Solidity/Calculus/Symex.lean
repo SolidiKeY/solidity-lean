@@ -281,11 +281,21 @@ theorem branchesRule {bs : List (List (PrimTy × Var) × Prog C)}
   · exact .branches d h
   · cases d
 
+/-- `cases` by whichever rule `Rule` names. -/
+theorem casesRule {fs : List (Fml C)} {us : List (Upd C)}
+    (d : Rule C (Hyp.fresh Γ (.modal m (s :: ω) φ)) m s (.cases fs us))
+    (fml : ∀ f ∈ fs, Proves .all Γ f)
+    (upd : ∀ U ∈ us, Proves .all (Γ ++ [.upd m U]) (.modal m ω φ)) :
+    Proves .all Γ (.modal m (s :: ω) φ) := by
+  rcases d with d | d
+  · exact .cases d fml upd
+  · cases d
+
 end Proves
 
 /-- `sol_derive`: run the strategy as a derivation.  On every goal it drops
 an empty modality, fires the rule `Stmt.step` picks (as `update`, `unfold`,
-`split`, `check`, `done` or `branches`; a split under the box as
+`split`, `check`, `done`, `branches` or `cases`; a split under the box as
 `splitBox`, with KeY's two goals, where it applies), or moves a precondition, a quantified local
 or an update in front of the formula into the context, until no goal has a modality left; what
 is left is for `close`. -/
@@ -301,6 +311,10 @@ macro "sol_derive" : tactic => `(tactic| repeat' (first
      simp only [List.forall_mem_cons, List.not_mem_nil, false_implies, implies_true, and_true,
        Fml.alls, codeBinders, Option.toList, List.map]
      refine ⟨?_, ?_, ?_, ?_⟩)
+  | (apply Proves.casesRule (Stmt.step _ _ _).rule
+     all_goals (try simp only [List.forall_mem_cons, List.not_mem_nil, false_implies,
+       implies_true, and_true])
+     all_goals (try and_intros))
   | apply Proves.intro
   | apply Proves.allIntro
   | apply Proves.updIntro))

@@ -2324,6 +2324,7 @@ theorem stmt_sim : ∀ (s : Stmt C) {L : Nat} {Δ Δ' : TyCtx} {τ : State} {m :
   | .assignFromMem .., _, _, _, _, _, _, hw, _ => by simp [wtStmt] at hw
   | .assignMem .., _, _, _, _, _, _, hw, _ => by simp [wtStmt] at hw
   | .tryCall .., _, _, _, _, _, _, hw, _ => by simp [wtStmt] at hw
+  | .send .., _, _, _, _, _, _, hw, _ => by simp only [wtStmt, reduceCtorEq] at hw
 
 /-- A block's code does what the block does. -/
 theorem prog_sim : ∀ (P : List (Stmt C)) {L : Nat} {Δ Δ' : TyCtx} {τ : State} {m : Machine},

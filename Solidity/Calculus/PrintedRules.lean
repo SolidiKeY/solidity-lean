@@ -380,6 +380,11 @@ def printedOrigins : List (Lean.Name × PrintedOrigin) := [
   (``Taclet.transfer_unfold_leftFstReceiver, .printed .transfer_unfold_leftFstReceiver),
   (``Taclet.transfer_unfold_rightSndArgument, .printed .transfer_unfold_rightSndArgument),
   (``Taclet.transferNoCallbackBox, .printed .transferNoCallback),
+  -- `send`: solkey's taclets, not printed
+  (``Taclet.send_unfold_leftFstReceiver, .leanOnly .keyTier),
+  (``Taclet.send_unfold_rightSndArgument, .leanOnly .keyTier),
+  (``Taclet.sendNoCallbackBox, .leanOnly .keyTier),
+  (``Taclet.sendNoCallbackDiamond, .leanOnly .keyTier),
   -- Memory
   (``Taclet.memoryFieldRead_unfold_rightFst, .printed .memoryFieldRead_unfold_rightFst),
   (``Taclet.memoryIndexRead_unfold_rightFst, .printed .memoryIndexRead_unfold_rightFst),
@@ -455,9 +460,10 @@ def leanPrintedOrigins : List (Lean.Name × PrintedOrigin) := [
 #check_constructor_table LeanTaclet, leanPrintedOrigins.map Prod.fst
 
 /-- The callback taclets and the printed `transferWithCallbackBox` rule;
-solkey's `tryCallWithCallbackBox` is not printed. -/
+solkey's `tryCallWithCallbackBox` and `sendWithCallbackBox` are not printed. -/
 def callbackPrintedOrigins : List (Lean.Name × PrintedOrigin) := [
   (``CallbackTaclet.transferWithCallbackBox, .printed .transferWithCallbackBox),
+  (``CallbackTaclet.sendWithCallbackBox, .leanOnly .keyTier),
   (``CallbackTaclet.tryCallWithCallbackBox, .leanOnly .keyTier) ]
 
 #check_constructor_table CallbackTaclet, callbackPrintedOrigins.map Prod.fst
@@ -504,7 +510,7 @@ theorem unclaimedRules_count : unclaimedRules.length = 8 := by decide +kernel
 def leanOnlyRows (why : LeanOnlyReason) : List Lean.Name :=
   ((printedOrigins ++ leanPrintedOrigins).filter fun r => r.2 == .leanOnly why).map Prod.fst
 
-theorem leanOnly_keyTier_count : (leanOnlyRows .keyTier).length = 34 := by decide +kernel
+theorem leanOnly_keyTier_count : (leanOnlyRows .keyTier).length = 38 := by decide +kernel
 
 theorem leanOnly_calculus_count : (leanOnlyRows .calculus).length = 3 := by decide +kernel
 

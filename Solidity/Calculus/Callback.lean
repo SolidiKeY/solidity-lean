@@ -26,6 +26,13 @@ means (`CbResume.of_holdsC`).  Where the amount is not a word the transfer
 halts, and so does the booking: nothing to show under the box, the one
 modality a payment has a rule for.
 
+A send, `pv = sadr.send(se);` (`sendWithCallbackBox`), has solkey's three
+goals (`ProvesC.send`, `CallbackTaclet.sound_send`): the same invariant on
+exit, the rest after the booking, `pv := true` and `{havoc}` with `I`
+assumed ("send succeeded"), and the rest after `pv := false`, nothing booked
+("send failed").  The last is owed whatever the transaction's oracle says:
+the callee may revert, and with it whatever it did (`ExecS.sendFailed`).
+
 `ProvesC I Γ φ` is the calculus under the callback semantics: the ordinary
 taclets on a statement that pays nothing and runs no other (`update`,
 `unfold`: `Taclet.sound` lifts, the statement having no other run), the
@@ -106,6 +113,89 @@ theorem CallbackTaclet.sound {I : Fml C} {m : Modality} {s : Stmt C} {U : Upd C}
       · rw [h] at hexit
         exact (hn hexit).elim
       · simp [COut.isOk] at ho
+
+/-! ## `send` -/
+
+/-- The runs of a send with callbacks: it halts where its transfer does,
+leaves the invariant broken after the booking, resumes after the booking from
+a state the callee may leave, `pv` then `true`, or fails with nothing booked
+and `pv` `false`. -/
+theorem ExecS.send_inv {I : Fml C} {σ : State} {pv : Var} {r a : Val C .uint} {o : COut}
+    (h : ExecS I σ (.send pv r a) o) :
+    (∃ e, (Stmt.transfer r a).run σ = .error e ∧ o = .halt e) ∨
+    (∃ σ₁, (Stmt.transfer r a).run σ = .ok σ₁ ∧ ¬ holds σ₁ I ∧ o = .violated) ∨
+    (∃ σ₁ st nt, (Stmt.transfer r a).run σ = .ok σ₁ ∧ holds (σ₁.havoc st nt) I ∧
+      o = .ok ((σ₁.havoc st nt).setEnv pv (.val (.bool true)))) ∨
+    o = .ok (σ.setEnv pv (.val (.bool false))) := by
+  cases h with
+  | det hf => simp only [Stmt.forks, Bool.true_eq_false] at hf
+  | sendHalt h => exact .inl ⟨_, h, rfl⟩
+  | sendViolated h hn => exact .inr (.inl ⟨_, h, hn, rfl⟩)
+  | sendResume h _ h₂ => exact .inr (.inr (.inl ⟨_, _, _, h, h₂, rfl⟩))
+  | sendFailed _ => exact .inr (.inr (.inr rfl))
+
+/-- `sendWithCallbackBox`'s "send succeeded" update: the transfer's booking,
+then `pv` true. -/
+theorem upd_sendSucceeded_eq (pv : Var) (sadr se : Simple C .uint) (σ : State) :
+    Upd.apply [.pay sadr.lower se.lower, .val pv (.lit (.bool true))] σ =
+      (do let σ₁ ← (Stmt.transfer (.simple sadr) (.simple se)).run σ
+          pure (σ₁.setEnv pv (.val (.bool true)))) := by
+  rw [← upd_transferNoCallbackBox_eq]
+  simp only [Upd.apply, List.foldlM_cons, List.foldlM_nil, bind, Except.bind]
+  cases (UpdElem.pay sadr.lower se.lower).write σ σ <;> rfl
+
+/-- `sendWithCallbackBox`'s "send failed" update: `pv` false, nothing else. -/
+theorem upd_sendFailed_eq (pv : Var) (σ : State) :
+    Upd.apply (C := C) [.val pv (.lit (.bool false))] σ =
+      .ok (σ.setEnv pv (.val (.bool false))) := rfl
+
+/-- **`sendWithCallbackBox` is sound**: the invariant after the booking, the
+rest after the booking with `pv` true resumed from every state the callee
+may leave in which the invariant holds, and the rest with `pv` false and
+nothing booked, give the send and the rest under the callback reading.
+
+Example: `ok = to.send(5);` before `sent = ok;`, with an invariant of the
+storage alone, proves `[ ok = to.send(5); sent = ok; ] I`
+(`Examples/Tactics/Callback.lean`). -/
+theorem CallbackTaclet.sound_send {I : Fml C} (hI : I.vars = []) {pv : Var} {sadr se : Simple C .uint}
+    {Uok Ufail : Upd C}
+    (d : CallbackTaclet C .box (.send pv (.simple sadr) (.simple se)) (.cases [] [Uok, Ufail]))
+    {ω : Prog C} {φ : Fml C} {σ : State}
+    (hexit : holds σ (.upd .box [.pay sadr.lower se.lower] I))
+    (hok : CbResume I .box Uok ω φ σ)
+    (hfail : Modality.box.after (holdsC I · (.modal .box ω φ)) (Ufail.apply σ)) :
+    holdsC I σ (.modal .box (.send pv (.simple sadr) (.simple se) :: ω) φ) := by
+  cases d
+  simp only [holdsC]
+  intro o he
+  simp only [holds] at hexit
+  simp only [CbResume] at hok
+  rw [upd_transferNoCallbackBox_eq] at hexit
+  rw [upd_sendSucceeded_eq] at hok
+  rw [upd_sendFailed_eq] at hfail
+  cases he with
+  | cons hs hω =>
+    rcases ExecS.send_inv hs with ⟨_, _, h⟩ | ⟨_, _, _, h⟩ | ⟨σ₁, st, nt, h, h₂, ho⟩ | ho
+    · cases h
+    · cases h
+    · cases ho
+      rw [h] at hok
+      have h' : holds ((σ₁.setEnv pv (.val (.bool true))).havoc st nt) I := by
+        rw [State.havoc_setEnv]
+        exact (holds_I_frame hI ((EnvAgreeExcept.refl [pv] _).setEnv_right
+          (List.mem_singleton_self pv) _)).1 h₂
+      exact hok st nt h' _ hω
+    · cases ho
+      exact hfail _ hω
+  | stop hs ho =>
+    rcases ExecS.send_inv hs with ⟨_, h, rfl⟩ | ⟨_, h, hn, rfl⟩ | ⟨_, _, _, _, _, rfl⟩ | rfl
+    · have hp : _ ≠ Halt.panic := fun hp =>
+        Stmt.run_transfer_noPanic _ _ _ (h.trans (congrArg Except.error hp))
+      exact ⟨trivial, hp⟩
+    · rw [h] at hexit
+      exact (hn hexit).elim
+    · simp only [COut.isOk, Bool.true_eq_false] at ho
+    · simp only [COut.isOk, Bool.true_eq_false] at ho
 
 /-! ## Contexts, read with callbacks -/
 
@@ -418,6 +508,19 @@ inductive ProvesC (I : Invariant C) : List (Hyp C) → Fml C → Prop
       (exit : dl{ ..Γ ⟹ᶜ[I] {U} ‹I.fml› })
       (resume : ProvesC I (Γ ++ [.upd m U, .havoc, .pre I.fml]) (.modal m ω φ)) :
       dl{ ..Γ ⟹ᶜ[I] ⟨[ s; ..ω ]⟩ φ }
+  /-- **`sendWithCallbackBox`**: the invariant after the booking, solkey's
+  `{net := if(sadr = this) then net else store(net, at(sadr), net(sadr) - se)} CInv`
+  under the box ("invariant on exit"); the rest after the booking and `pv := true`, from any state the
+  callee may leave in which the invariant holds ("send succeeded"); and the
+  rest after `pv := false`, nothing booked ("send failed"): the callee may
+  revert, and what it did with it. -/
+  | send {Γ : List (Hyp C)} {pv : Var} {sadr se : Simple C .uint} {ω : Prog C} {φ : Fml C}
+      {Uok Ufail : Upd C}
+      (d : CallbackTaclet C .box (.send pv (.simple sadr) (.simple se)) (.cases [] [Uok, Ufail]))
+      (exit : dl{ ..Γ ⟹ᶜ[I] ‹.upd .box [.pay sadr.lower se.lower] I.fml› })
+      (ok : ProvesC I (Γ ++ [.upd .box Uok, .havoc, .pre I.fml]) (.modal .box ω φ))
+      (failed : ProvesC I (Γ ++ [.upd .box Ufail]) (.modal .box ω φ)) :
+      dl{ ..Γ ⟹ᶜ[I] [ pv = sadr.send(se); ..ω ] φ }
   /-- **`tryCallWithCallbackBox`**: the invariant where control leaves
   ("invariant on exit"); the call's success, from any state the callee may
   leave in which the invariant holds, for every value of its return data
@@ -490,6 +593,21 @@ theorem ProvesC.sound {I : Invariant C} {Γ : List (Hyp C)} {φ : Fml C} (h : Pr
         | error _ => rw [hu] at hx; exact hx
         | ok a => rw [hu] at hx; exact (holdsC_iff_holds I.fml I.noTransfer).1 hx)
       (CbResume.of_holdsC I.noTransfer hr)) Γ σ ih ihr
+  | @send Γ pv sadr se ω φ Uok Ufail d _ _ _ ihx iho ihf =>
+    intro σ
+    have hx := ihx σ
+    have ho := iho σ
+    have hf := ihf σ
+    rw [Hyp.wrap_append] at ho hf
+    simp only [Hyp.wrap] at ho hf
+    rw [Hyp.holdsC_wrap] at hx ho hf ⊢
+    refine Hyp.withC_mono₂ (fun τ ⟨hx, hr⟩ hf => d.sound_send I.closed ?_
+      (CbResume.of_holdsC I.noTransfer hr) hf) Γ σ
+      (Hyp.withC_mono₂ (fun _ h₁ h₂ => And.intro h₁ h₂) Γ σ hx ho) hf
+    simp only [holdsC] at hx; simp only [holds]
+    cases hu : Upd.apply [.pay sadr.lower se.lower] τ with
+    | error _ => rw [hu] at hx; exact hx
+    | ok a => rw [hu] at hx; exact (holdsC_iff_holds I.fml I.noTransfer).1 hx
   | allIntro _ ih => simpa [Hyp.wrap_append, Hyp.wrap] using ih
   | @tryCall Γ s ω φ xs P bs d _ _ _ ihx iho ihc =>
     intro σ

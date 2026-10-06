@@ -210,6 +210,8 @@ def Stmt.wt (Γ : Ctx) : Stmt C → Option Ctx
   | .push b v _ => if b.wt Γ && v.all (·.wt Γ) then some Γ else none
   | .pop b => if b.wt Γ then some Γ else none
   | .transfer r a => if r.wt Γ && a.wt Γ then some Γ else none
+  | .send pv r a =>
+    if Ctx.has Γ pv (.stack (.prim .bool)) && r.wt Γ && a.wt Γ then some Γ else none
   | .declMem R x init _ =>
     if init.all (·.wt Γ) then some (setBy x (.mem (.ref R)) Γ) else none
   | @Stmt.rebindMem _ R x r => if Ctx.has Γ x (.mem (.ref R)) && r.wt Γ then some Γ else none
@@ -833,6 +835,20 @@ theorem transferAt (hwt : RunWT C Γ H σ) {addr amt : Int}
   · exact nomatch h
   · cases h; rw [State.pay_eq]; exact ⟨hwt.1, hwt.2, hwt.3, hwt.4, hwt.5, hwt.6⟩
 
+/-- `pv = a.send(v)` books the ledger, or not, and sets the `bool` local `pv`. -/
+theorem sendAt (hwt : RunWT C Γ H σ) {pv : Var}
+    (hpv : Ctx.has Γ pv (.stack (.prim .bool)) = true) {addr amt : Int}
+    (h : Solidity.sendAt σ pv addr amt = .ok σ') : RunWT C Γ H σ' := by
+  unfold Solidity.sendAt at h
+  split at h
+  · exact nomatch h
+  · have hp : RunWT C Γ H (σ.pay addr amt) := by
+      rw [State.pay_eq]; exact ⟨hwt.1, hwt.2, hwt.3, hwt.4, hwt.5, hwt.6⟩
+    split at h <;> cases h
+    · exact hp.setEnv_same hpv rfl
+    · exact hp.setEnv_same hpv rfl
+    · exact hwt.setEnv_same hpv rfl
+
 end RunWT
 
 /-! ## The statements' effects are typed -/
@@ -1426,6 +1442,11 @@ theorem Stmt.run_wt : ∀ (s : Stmt C) {Γ Γ' : Ctx} {H : HeapTy} {σ σ' : Sta
     obtain ⟨_, rfl⟩ := wt_if hs
     iterate 4 bind_inv h
     exact ⟨H, .refl H, hwt.transferAt h⟩
+  | .send pv r a, Γ, Γ', H, σ, σ', hwt, hs, h => by
+    obtain ⟨hc, rfl⟩ := wt_if hs
+    simp only [Bool.and_eq_true] at hc
+    iterate 4 bind_inv h
+    exact ⟨H, .refl H, hwt.sendAt hc.1.1 h⟩
   | .declMem R x init hd, Γ, Γ', H, σ, σ', hwt, hs, h => by
     obtain ⟨hc, rfl⟩ := wt_if hs
     cases init with

@@ -126,7 +126,9 @@ where
   let src ← IO.FS.readFile "Solidity/Calculus/Rules.lean"
   for (r, ls) in Taclet.branchLabels do
     let some rest := (src.splitOn s!"  | {r} :")[1]? | throw (IO.userError s!"no rule {r}")
-    let written := quoted (rest.splitOn " }\n")[0]!
+    -- the rule's text: up to the next constructor, docstring, comment or blank line
+    let body := ["\n  |", "\n  /-", "\n  --", "\n\n"].foldl (fun b sep => (b.splitOn sep)[0]!) rest
+    let written := quoted body
     unless written == ls do
       throw (IO.userError s!"{r} writes the labels {written}, Taclet.branchLabels {ls}")
 
@@ -174,6 +176,124 @@ closed: 0 open goal(s), 14 node(s), 4 branch(es)
 -/
 #guard_msgs in
 #proof_tree dl!{ [ try I(7).get() returns (uint v) { x = v; } catch { x = 0; }; ] true }
+
+/-! A send has a goal for each outcome, labelled as `sendNoCallbackBox`
+labels them; under the diamond the amount's sign is owed first
+(`sendNoCallbackDiamond`). -/
+
+/--
+info: 0: sendNoCallbackBox
+  [send succeeded]
+    1: emptyModality
+    2: Closed goal
+  [send failed]
+    3: emptyModality
+    4: Closed goal
+closed: 0 open goal(s), 5 node(s), 2 branch(es)
+-/
+#guard_msgs in
+#proof_tree dl!{ [ ok = to.send(5); ] true }
+
+/--
+info: 0: localValueDeclInitDrop
+1: localValueAssign
+2: sendNoCallbackDiamond
+  [non-negative amount]
+    3: Closed goal
+  [send succeeded]
+    4: emptyModality
+    5: Closed goal
+  [send failed]
+    6: emptyModality
+    7: Closed goal
+closed: 0 open goal(s), 8 node(s), 3 branch(es)
+-/
+#guard_msgs in
+#proof_tree dl!{ ⟨ uint to = 9; ok = to.send(5); ⟩ true }
+
+/-! A send's walk takes the rule's goals apart on its `apply` line, so a
+replayed walk touches only them. -/
+
+/--
+info: Try this:
+  apply Proves.valid
+    apply cases .sendNoCallbackBox <;>
+        (try simp only [List.forall_mem_cons, List.not_mem_nil, false_implies, implies_true, and_true]) <;>
+      (try and_intros)
+    · apply emptyModality
+      refine close ?_
+      sol_symex
+      sol_close
+    · apply emptyModality
+      refine close ?_
+      sol_symex
+      sol_close
+-/
+#guard_msgs in
+example : ⊨ dl!{ [ ok = to.send(5); ] true } := by
+  sol_derive?
+
+/--
+info: Try this:
+  apply Proves.valid
+    apply unfold .localValueDeclInitDrop
+    apply update .localValueAssign
+    apply cases .sendNoCallbackDiamond <;>
+        (try simp only [List.forall_mem_cons, List.not_mem_nil, false_implies, implies_true, and_true]) <;>
+      (try and_intros)
+    · refine close ?_
+      sol_symex
+      sol_close
+    · apply emptyModality
+      refine close ?_
+      sol_symex
+      sol_close
+    · apply emptyModality
+      refine close ?_
+      sol_symex
+      sol_close
+-/
+#guard_msgs in
+example : ⊨ dl!{ ⟨ uint to = 9; ok = to.send(5); ⟩ true } := by
+  sol_derive?
+
+/-! The box walk replayed beside another open goal, which it leaves alone. -/
+
+example : (⊨ dl!{ [ ok = to.send(5); ] true }) ∧ (1 = 1 ∧ 2 = 2) := by
+  refine ⟨?_, ?_⟩
+  apply Proves.valid
+  apply cases .sendNoCallbackBox <;>
+      (try simp only [List.forall_mem_cons, List.not_mem_nil, false_implies, implies_true,
+        and_true]) <;>
+    (try and_intros)
+  · apply emptyModality
+    refine close ?_
+    sol_symex
+    sol_close
+  · apply emptyModality
+    refine close ?_
+    sol_symex
+    sol_close
+  exact ⟨rfl, rfl⟩
+
+/-! The same two by the reflective driver (`Derive.residue`, its
+`Premise.cases` arm). -/
+
+/--
+info: Try this:
+  sol_prove
+-/
+#guard_msgs in
+example : ⊢ dl!{ [ ok = to.send(5); ] true } := by
+  sol_prove?
+
+/--
+info: Try this:
+  sol_prove
+-/
+#guard_msgs in
+example : ⊢ dl!{ ⟨ uint to = 9; ok = to.send(5); ⟩ true } := by
+  sol_prove?
 
 /-! Under the box a split has KeY's two goals (`Proves.splitBox`): no `cov`. -/
 

@@ -25,6 +25,7 @@ the plan to test these claims against solc is `docs/solc-validation.md`.
 | Arrays past their end | `pop`, `delete`, `push` and copies keep the slots past the length; an index is checked when the path is taken | `SVal.array`, `State.checkIndex`, `SVal.overlay` | `testDanglingReferenceSurvivesPush` and three more |
 | Fixed-size arrays | `delete` resets in place, the length is the literal `n`, a literal index `≥ n` is a compile error | `SVal.array … fixed`, `MObj.array` | |
 | `transfer` | books `net(a) - v` unless `a` is the contract itself, and nothing else; whether the world pays is the EVM's (a refused payment reverts the machine alone) | `transferAt`; `Evm.compile_correct` | `Semantics.lean` |
+| `send` | `ok = a.send(v);` books as `transfer` does and sets `ok` true, or books nothing and sets `ok` false, never reverting; which, the transaction's oracle says | `sendAt`, `TxEnv.ext` | `Examples/Tactics/Net.lean` |
 | Call arguments | all read, left to right, before the callee runs | `Arg.bindSeq`, `Arg.separatedFrom` | |
 | `call{value:}` | `(bool ok, ) = a.call{value: v}("")` is imported as `bool ok = a.send(v)`, as solkey's `SolJSONParser.isValueCall` reads it; solc forwards all gas there, so the callee can re-enter and write storage, which `holds` ignores (the no-callback reading) and only `holdsC` covers (`Semantics/Callback.lean`). `send` and `transfer` forward the 2300-gas stipend, under which the no-callback reading is the EVM's | `Frontend/SolcJson.lean` (`valueCall?`) | |
 | `try` | a call to an address with no code, and returned data that does not decode, revert in the caller and no `catch` catches them; KeY leaves both out (they are vacuous in its box rule) | `Stmt.run` (`.tryCall`), `bindData` | `Examples/Tactics/TryCatch.lean` |
@@ -239,6 +240,39 @@ The callback semantics (`Semantics/Callback.lean`) is a relation over this
 one: after the debit `State.havoc` replaces storage, ledger and balance, so
 the callee may move funds into or out of the contract.
 
+## `send`
+
+On the EVM `a.send(v)` is a value call with the 2300-gas stipend that returns
+`false` instead of reverting when it fails (funds that do not cover `v`, a
+recipient whose code reverts or runs out of gas). Treating it as a transfer
+that always succeeds would prove `ok == true` after it, which is false on the
+EVM. So the outcome is the transaction's, as a `try`'s is: `sendAt` looks the
+call up in `TxEnv.ext` at `sendKey a v` (the address, empty calldata, the
+amount as the one word). No entry, or `ok`, is a recipient that takes the
+payment (an address with no code does): the payment is booked as `transfer`
+books it (`State.pay`) and `ok` is `true`. Any other entry is a refusal: nothing
+is booked and `ok` is `false`. A negative amount is `.stuck`, as for `transfer`.
+
+The calculus reads none of the oracle: `sendNoCallbackBox` and
+`sendNoCallbackDiamond` have a goal for each outcome, so a proof holds
+whatever the table says, and the diamond's rule is sound (unlike a diamond
+over `transfer`, a refusal is an outcome of the run, not a revert of the
+machine). Two consequences of the table being fixed per transaction:
+
+- two sends of one amount to one address read one entry, so a run where the
+  first is taken and the second refused is not one `Stmt.run` makes. That
+  costs completeness only: each send's rule still has both goals;
+- the funds are not checked, as for `transfer`: a send refused for want of
+  funds is one of the oracle's refusals, and a taken one is booked whatever
+  `State.selfBalance` holds (which it does not debit).
+
+A send is outside the compiled fragment (`Evm.wtStmt` has no case for it).
+`(bool ok, ) = a.call{value: v}("")`, which solkey lowers to
+`bool ok = a.send(v);` (its `SolJSONParser.isValueCall`), is not written in
+`sol{}` on this branch: it needs tuple syntax. Under solc that call forwards
+all the gas, so the callee may re-enter; the reading without callbacks
+ignores that, as solkey's `noCallback` does.
+
 ## Calls
 
 solc evaluates every argument of an internal call, left to right, before the
@@ -261,7 +295,7 @@ they would in a frame of their own.
   panic: there a failing `assert` reverts (`compile_correct`).
 - **Fragment width.** No loops (`docs/loops.md` plans them), `uintN`/`intN`
   for `N < 256` only as above, no `address`/`bytes`/`string`, no external calls beyond
-  `transfer`, the `net` ledger and `try` (whose callee is not run), no gas. These constructs do not occur
+  `transfer`, `send`, the `net` ledger and `try` (whose callee is not run), no gas. These constructs do not occur
   rather than silently diverge.
 - **`transfer` assumes the world pays.** It never reverts for funds or a
   refusing recipient; the EVM may, which `Evm.compile_correct` states as the

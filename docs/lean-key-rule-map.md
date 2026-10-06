@@ -4,12 +4,12 @@ The name-by-name map from solkey's `solidityProgramRules.key` (plus
 `ifThenElseRules.key`) to `Solidity.Taclet` (`Calculus/Rules.lean`), then the
 symbol table for updates and the data-structure theories. **Pinned to solkey
 `1b4341a303`**: 323 program taclets, enumerated in `Calculus/KeyTaclets.lean`.
-The ten taclets `b959555181`..`1b4341a303` added (`internalCallExpand`,
-`blockReturn`, `functionFrameReturn`, `functionFrameEmpty`, the two
-`send_unfold_…` and the four `send…Callback…` rules) are unclaimed as "not yet
-ported" until their rows below are written.  Every instance of
+The four taclets `671f6762a9`..`1b4341a303` added (`internalCallExpand`,
+`blockReturn`, `functionFrameReturn`, `functionFrameEmpty`) are unclaimed as
+"not yet ported" until their rows below are written.  Every instance of
 `internalCallExpand` is already Lean's `functionBodyExpand` (its row, a
-recorded deviation until `RuleShapes` claims the name).
+recorded deviation until `RuleShapes` claims the name).  The six `send`
+taclets of `b959555181` have their rows.
 
 These tables are the prose companion of `Calculus/RuleShapes.lean`, which
 checks the correspondence: `tacletOrigins` gives every constructor a typed
@@ -17,7 +17,7 @@ checks the correspondence: `tacletOrigins` gives every constructor a typed
 fails the build), `unclaimedTaclets` excuses the rest with a reason,
 `callbackOrigins` does the same for `CallbackTaclet`, and `taclets_partitioned`
 says every taclet is claimed or excused, never both
-(`claimedTaclets_count = 300`, `unclaimedTaclets_count = 23`). A rule that
+(`claimedTaclets_count = 305`, `unclaimedTaclets_count = 18`). A rule that
 transcribes no taclet is a `LeanTaclet` (`leanTaclets`); there are three,
 `functionCallArgCapture`, `tryCallDiamond` and `transferDiamond`. A taclet may be claimed by two constructors (the
 member reads by their `.length` rules, since KeY reads `sp.length` as the
@@ -291,6 +291,12 @@ receiver kind, Lean does not.
 | `transferNoCallbackDiamond` | — | not ported | KeY's two goals, "non-negative amount" `0 <= se` and "transfer booked" (the box's booking under the diamond), have no counterpart: a payment under the diamond closes to `false` instead (`LeanTaclet.transferDiamond`, below), which is sound and proves less |
 | `transferWithCallbackBox` | `CallbackTaclet.transferWithCallbackBox` | same | a constructor of `CallbackTaclet`, sound for the callback reading (`holdsC`), not of `Taclet`. The premise is `transferNoCallbackBox`'s booking `U`, read as KeY's two goals (`CallbackTaclet.sound`): `{U} I` ("invariant on exit") and `{U} {havoc} (I → [ ω ] φ)` ("resume after callback"; `{havoc}` is KeY's anonymising update, read by `CbResume`). Used by `ProvesC` |
 | `transferWithCallbackDiamond` | — | not ported | as `transferNoCallbackDiamond`: no diamond over a payment is derived |
+| `send_unfold_leftFstReceiver`, `send_unfold_rightSndArgument` | same names | same | the transfer captures over `Stmt.send` (`pv = sadr.send(se);`, `pv` a `bool` local): the receiver first, then the amount, each into a fresh `uint se`, as for `transfer`. `bool ok = r.send(a);` is `bool ok; ok = r.send(a);`, so Lean fires `valueDeclSkip` where solkey fires `localValueDeclInitDrop` (same node count; the default is set, then overwritten by the send) |
+| `sendNoCallbackBox` | same name | same | a `Premise.cases` with no formula goal and solkey's two labelled goals (`Proves.cases`): "send succeeded" `{ net := if(sadr = this) then net else store(net, at(sadr), net(sadr) - se) ‖ pv := true } ⟨[ ]⟩` and "send failed" `{ pv := false } ⟨[ ]⟩` (KeY's `TRUE`/`FALSE`). Sound for the interpreter, whose run is one of the two updates (`Taclet.sound_cases`, `upd_send_cases`): `Semantics.sendAt` books and sets `pv` true when the transaction's oracle (`TxEnv.ext` at `sendKey`) has no entry or `ok`, and sets `pv` false otherwise. The calculus reads none of the oracle. The amount is read as a word by the `.pay` element, which halts on a negative amount where solkey's box books a credit (`docs/solkey-feedback.md` §7); `bool ok = r.send(a);` fires `valueDeclSkip` where solkey fires `localValueDeclInitDrop`. A `call{value:}` lowered to this rule (row below) is read without its callback, a deviation from solc |
+| `sendNoCallbackDiamond` | same name | same | the box's two goals after "non-negative amount" `0 <= se`, the formula goal of `Premise.cases`. Sound for the same reason, unlike a diamond over `transfer`: a refused send returns `false` in the run, where a refused transfer reverts the machine. Lean does not need the formula goal for soundness (a negative amount is stuck in `sendAt` and in `UpdElem.pay` alike, so the "send succeeded" goal already fails there) and keeps it as solkey's goal |
+| `sendWithCallbackBox` | `CallbackTaclet.sendWithCallbackBox` | same | a `CallbackTaclet` constructor whose premise is `sendNoCallbackBox`'s two updates, read by `ProvesC.send` as KeY's three goals (`CallbackTaclet.sound_send`): "invariant on exit" `{ net := if(sadr = this) then net else store(net, at(sadr), net(sadr) - se) } I` under the box; "send succeeded" `{ net := … ‖ pv := true } {havoc} (I → [ ω ] φ)`, KeY's `{storage := storageSk ‖ net := netSk ‖ pv := TRUE}` with the booking written first, as for the transfer (the `{havoc}` overwrites it); and "send failed" `{ pv := false } [ ω ] φ`. The callback reading (`ExecS.sendHalt`/`sendFailed`/`sendViolated`/`sendResume`) lets every send fail, whatever the transaction's oracle says: the callee may revert, and what it did with it. Its deterministic run is one of these (`Stmt.exec_run`). The amount is read as a word by the `.pay` element, which halts on a negative amount where solkey's box books a credit (`docs/solkey-feedback.md` §7); `bool ok = r.send(a);` fires `valueDeclSkip` where solkey fires `localValueDeclInitDrop` |
+| `sendWithCallbackDiamond` | — | unclaimed | as `transferWithCallbackDiamond`: the callback reading is the box's only |
+| `(bool ok, ) = a.call{value: v}("")` | — | front end | not a taclet: solkey's parser lowers exactly this shape to `bool ok = a.send(v);` (`SolJSONParser.isValueCall`), and so does the solc import (`Frontend/SolcJson.lean`, `valueCall?`). **Deviation from solc**, solkey's as well: a value call forwards all gas, so the callee may re-enter and write storage; the send rules' no-callback reading (`holds`) is the EVM's only under the 2300-gas stipend of `send`, and a lowered value call is covered by the callback reading (`holdsC`, `sendWithCallbackBox`) alone (`docs/solc-alignment.md`) |
 
 ## External calls (`try`/`catch`)
 
@@ -528,7 +534,7 @@ them as KeY's `\replacewith` updates do.
 | a member or element of a memory object | `MAddr` | `.field`/`.at` |
 | `Memory` | `MTerm` | `.memory`, `.write(m, a, v)`, `.addM` (eager: the type rides along; a concrete one prints `addM(m, T)`, `T` a struct `Person` or an array type `uint[]`, `Token[3]`, where KeY writes `addM(mem, shaped(idp, #shapeOf(mv)))`: the type in place of its shape), `.copySt(m, v)` |
 | what a memory `write` writes | `MValT` | a value (`.val`) or a reference (`.ref`) |
-| one elementary update | `UpdElem` | `.val`, `.path`, `.mref`, `.storage`, `.memory`; `.store` for `old := storage`; `.pay` for a transfer's booking `net := if(r = this) then net else store(net, at(r), net(r) - a)`; `.net` for `net := store(net, at(r), net(r) ± a)`, with `.selfBalance` for a `payable` function's booking of `msg.value` (`selfBalance := selfBalance + a`); `.saveNet` for `oldNet := net` |
+| one elementary update | `UpdElem` | `.val`, `.path`, `.mref`, `.storage`, `.memory`; `.store` for `old := storage`; `.pay` for a transfer's booking (and a taken send's) `net := if(r = this) then net else store(net, at(r), net(r) - a)`; `.net` for `net := store(net, at(r), net(r) ± a)`, with `.selfBalance` for a `payable` function's booking of `msg.value` (`selfBalance := selfBalance + a`); `.saveNet` for `oldNet := net` |
 
 ### `structRules.key` → `Theory/Storage.lean` (`Struct`, `StValue`)
 

@@ -382,6 +382,12 @@ theorem bindData_noPanic : (xs : List (PrimTy × Var)) → (vs : List Value) →
   unfold transferAt; split <;> simp only [ne_eq, Except.error.injEq, reduceCtorEq,
       not_false_eq_true, NoPanic.ok]
 
+@[no_panic_simp] theorem sendAt_noPanic (σ : State) (pv : Var) (addr amt : Int) :
+    NoPanic (sendAt σ pv addr amt) := by
+  unfold sendAt; split
+  · simp only [ne_eq, Except.error.injEq, reduceCtorEq, not_false_eq_true]
+  · split <;> exact NoPanic.ok _
+
 /-- A `transfer` never panics. -/
 theorem Stmt.run_transfer_noPanic (σ : State) (r a : Val C .uint) :
     NoPanic ((Stmt.transfer r a).run σ) := by
@@ -459,7 +465,7 @@ mutual
 theorem Stmt.run_noPanic (σ : State) : (s : Stmt C) → s.mayPanic = false → NoPanic (s.run σ)
   | .assign .., _ | .rebind .., _ | .assignLocal .., _ | .declLocal .., _ | .declStorage .., _
   | .opAssign .., _ | .incDec .., _ | .assignIncDec .., _ | .push .., _ | .pop .., _
-  | .transfer .., _ | .declMem .., _ | .rebindMem .., _ | .assignFromMem .., _
+  | .transfer .., _ | .send .., _ | .declMem .., _ | .rebindMem .., _ | .assignFromMem .., _
   | .assignMem .., _ | .delete .., _ | .deleteMem .., _ | .assignNew .., _ | .require _, _
   | .revert, _ => by
     simp only [Stmt.run] <;> no_panic

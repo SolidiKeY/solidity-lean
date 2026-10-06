@@ -166,6 +166,9 @@ inductive RawStmt where
   `Stmt.tryCall`'s, with the name of the `Panic` code. -/
   | tryCall (recv : RawExpr) (f : String) (args : List RawExpr) (rets : List (RawTy × String))
       (ok err : List RawStmt) (code : Option String) (panic other : List RawStmt)
+  /-- `x = r.send(a);`, and with `T` given the declaration `T x = r.send(a);`
+  (`x` a name).  A bare `r.send(a);` is not read: solkey has no rule for it. -/
+  | send (T : Option RawTy) (x r a : RawExpr)
   deriving Repr, Inhabited
 
 /-- Evaluating `e` can neither revert nor have an effect: a literal, a name,
@@ -637,6 +640,9 @@ inductive Stmt (C : Contract) where
   | pop {E : Ty} (b : SPath C (.array E))
   /-- `a.transfer(v);` -/
   | transfer (r a : Val C .uint)
+  /-- `pv = a.send(v);`: the payment, and whether it went through in the
+  `bool` local `pv` (a refused send returns `false` and reverts nothing). -/
+  | send (pv : Var) (r a : Val C .uint)
   /-- `Person memory m;` (a fresh default object), `Person memory m = n;` -/
   | declMem (R : RefTy) (x : Var) (init : Option (MRhs C R))
       (hd : (init.isSome || (Ty.ref R).defaultOkS) = true)
@@ -835,6 +841,7 @@ def Stmt.toStr : Stmt C → String
     | some r => s!"{b.toStr}.push({r.toStr});"
   | .pop b => s!"{b.toStr}.pop();"
   | .transfer r a => s!"{r.toStr}.transfer({a.toStr true});"
+  | .send pv r a => s!"{pv} = {r.toStr}.send({a.toStr true});"
   | .assignIncDec x op _ l _ => s!"{x} = {IncDec.show op l.toStr};"
   | .delete l => s!"delete {l.toStr};"
   | .deleteMem p _ => s!"delete {p.toStr};"
@@ -1026,6 +1033,8 @@ with the `.push()` token; on a name or a member chain it is the push
 syntax (name := solPushTarget) sol_expr ".push()" " = " sol_expr : sol_stmt
 syntax sol_ty &"storage" ident " = " sol_expr ".push()" : sol_stmt
 syntax sol_expr ".transfer(" sol_expr ")" : sol_stmt
+syntax sol_expr " = " sol_expr ".send(" sol_expr ")" : sol_stmt
+syntax sol_ty ident " = " sol_expr ".send(" sol_expr ")" : sol_stmt
 syntax sol_expr:max "(" ")" : sol_stmt
 syntax sol_expr:max "(" sol_expr ")" : sol_stmt
 syntax (priority := high) sol_expr " = " sol_expr:max "(" ")" : sol_stmt
@@ -1327,8 +1336,11 @@ where
       | some g => assignTo l (← `(RawExpr.call $(quote g) []))
       | none => `(RawStmt.assignPush $(← expandExpr l) $(← pushRecv f))
   | `(sol_stmt| $l:sol_expr = $f:sol_expr ( $as:sol_expr,* )) => do
+      if let some s ← send? none (← expandExpr l) f as.getElems then return s
       assignTo l (← expandExpr.expandCall f as.getElems callMsg)
   | `(sol_stmt| $T:sol_ty $x:ident = $f:sol_expr ( $as:sol_expr,* )) => do
+      if let some s ← send? (some (← expandTy T)) (← `(RawExpr.name $(strLit x))) f as.getElems then
+        return s
       `(RawStmt.decl $(← expandTy T) $(strLit x) (some $(← expandExpr.expandCall f as.getElems callMsg)))
   | `(sol_stmt| $f:sol_expr ( $a:sol_expr, $as:sol_expr,* )) => do
       `(RawStmt.call $(← expandExpr f) [$(← expandExpr a), $(← as.getElems.mapM expandExpr),*])
@@ -1361,6 +1373,11 @@ where
   | `(sol_stmt| $b:sol_expr .pop()) => do `(RawStmt.call (.field $(← expandExpr b) "pop") [])
   | `(sol_stmt| $r:sol_expr .transfer( $a:sol_expr )) => do
       `(RawStmt.call (.field $(← expandExpr r) "transfer") [$(← expandExpr a)])
+  | `(sol_stmt| $l:sol_expr = $r:sol_expr .send( $a:sol_expr )) => do
+      `(RawStmt.send none $(← expandExpr l) $(← expandExpr r) $(← expandExpr a))
+  | `(sol_stmt| $T:sol_ty $x:ident = $r:sol_expr .send( $a:sol_expr )) => do
+      `(RawStmt.send (some $(← expandTy T)) (.name $(strLit x)) $(← expandExpr r)
+        $(← expandExpr a))
   | `(sol_stmt| $f:sol_expr ( )) => do `(RawStmt.call $(← expandExpr f) [])
   | `(sol_stmt| $f:sol_expr ( $a:sol_expr )) => do
       `(RawStmt.call $(← expandExpr f) [$(← expandExpr a)])
@@ -1374,17 +1391,30 @@ where
   ctorMsg : String := "a constructor's name is a struct's name"
   /-- `values.push`, `bucket.tokens.push` (one identifier) or `e.tokens.push`:
   the receiver `values`, `bucket.tokens`, `e.tokens`; none for another callee. -/
-  pushRecv? (f : TSyntax `sol_expr) : MacroM (Option Term) := do
+  pushRecv? (f : TSyntax `sol_expr) : MacroM (Option Term) := recvOf? "push" f
+  /-- The receiver of the member `m` called: `to` of `to.send`, as
+  `pushRecv?` reads `values.push`. -/
+  recvOf? (m : String) (f : TSyntax `sol_expr) : MacroM (Option Term) := do
     match f with
     | `(sol_expr| $x:ident) =>
       match x.getId with
-      | .str p "push" => if p.isAnonymous then pure none else some <$> expandIdent (mkIdent p)
+      | .str p m' => if p.isAnonymous || m' != m then pure none else some <$> expandIdent (mkIdent p)
       | _ => pure none
     | `(sol_expr| $e:sol_expr . $g:ident) =>
       match (nameParts g.getId).reverse with
-      | "push" :: fs => some <$> fieldChain (← expandExpr e) fs.reverse
+      | m' :: fs => if m' == m then some <$> fieldChain (← expandExpr e) fs.reverse else pure none
       | _ => pure none
     | _ => pure none
+  /-- `l = r.send(a);` and `T x = r.send(a);` where the receiver is a name or
+  a member chain (`to.send` is one identifier): the send, else none. -/
+  send? (T : Option Term) (l : Term) (f : TSyntax `sol_expr) (as : Array (TSyntax `sol_expr)) :
+      MacroM (Option Term) := do
+    let #[a] := as | pure none
+    let some r ← recvOf? "send" f | pure none
+    let T ← match T with
+      | some T => `(some $T)
+      | none => `(none)
+    some <$> `(RawStmt.send $T $l $r $(← expandExpr a))
   /-- The receiver of `b.push` (`pushRecv?`). -/
   pushRecv (f : TSyntax `sol_expr) : MacroM Term := do
     match ← pushRecv? f with
@@ -2057,6 +2087,8 @@ def RawStmt.exprs : RawStmt → List RawExpr
   | .call f as => f :: as
   | .eval as => as
   | .tryCall r _ as .. => r :: as
+  | .send none x r a => [x, r, a]
+  | .send (some _) _ r a => [r, a]
   | .revert | .unchecked _ => []
 
 /-- A statement's blocks: an `if`'s branches, an `unchecked` block's body. -/
@@ -2090,10 +2122,12 @@ def RawStmt.mapExprsM {m : Type → Type} [Monad m] (f : RawExpr → m RawExpr) 
   | .unchecked b => pure (.unchecked b)
   | .tryCall r g as rets ok err code pnc other =>
     return .tryCall (← f r) g (← as.mapM f) rets ok err code pnc other
+  | .send T x r a => return .send T (← f x) (← f r) (← f a)
 
 /-- The name a statement declares in its own block. -/
 def RawStmt.declared? : RawStmt → Option String
   | .decl _ x _ | .declStorage _ x _ | .declMemory _ x _ | .declStoragePush _ x _ => some x
+  | .send (some _) (.name x) _ _ => some x
   | _ => none
 
 /-- The names a statement binds in its blocks: a `try`'s return locals and
@@ -2626,6 +2660,9 @@ partial def renameStmts (ρ : List (String × String)) : List RawStmt → ElabM 
     | .declStoragePush T x b =>
       let (y, ρ') ← fresh "sp" x
       pure (.declStoragePush T y (r b) :: (← renameStmts ρ' ss))
+    | .send (some T) (.name x) e a =>
+      let (y, ρ') ← fresh "se" x
+      pure (.send (some T) (.name y) (r e) (r a) :: (← renameStmts ρ' ss))
     | .ite c t e =>
       pure (.ite (r c) (← renameStmts ρ t) (← renameStmts ρ e) :: (← renameStmts ρ ss))
     | .unchecked b => pure (.unchecked (← renameStmts ρ b) :: (← renameStmts ρ ss))
@@ -3074,6 +3111,13 @@ partial def hoistStmt : RawStmt → ElabM (Prog C × RawStmt)
     let (P, b) ← hoist b
     let (Q, l) ← hoist l
     pure (P ++ Q, .assignPush l b)
+  | .send T x r a => do
+    -- the receiver first, then the amount, as `transfer`'s
+    let (P, r) ← hoist r
+    let (Pc, r) ← if a.hasIncDec && !(r matches .name _) then captureExpr C r
+      else pure ([], r)
+    let (Q, a) ← hoist a
+    pure (P ++ Pc ++ Q, .send T x r a)
   | .eval args => do
     -- the effects captured, left to right; then what may still revert is
     -- evaluated into a fresh local, which nothing reads
@@ -3256,6 +3300,20 @@ partial def elabStmt1 : RawStmt → ElabM (Prog C)
     pure [.pop b]
   | .call (.field e "transfer") [a] => do
     pure [.transfer (← checkM C .uint e) (← checkM C .uint a)]
+  | .send T x e a => do
+    let r ← checkM C .uint e
+    let v ← checkM C .uint a
+    match T, x with
+    | some T, .name n =>
+      let (.prim .bool, w) ← ElabM.lift (elabDeclTy C T)
+        | throw s!"{n}: `send` returns a bool"
+      declare C n (.val .bool w)
+      pure [.declLocal .bool (Var.ofName n) none, .send (Var.ofName n) r v]
+    | some _, _ => throw "`T x = r.send(a);` declares a name"
+    | none, x =>
+      match ← synthM C x with
+      | .val .bool (.simple (.local y)) => pure [.send y r v]
+      | _ => throw s!"{x.toStr}: a send's result goes to a bool local"
   | .call (.name f) args => elabCall f args none
   | .call .. => throw "only push, pop and transfer are calls on a receiver"
   | .ret _ => throw "`return` outside a function's body"
@@ -3518,6 +3576,8 @@ def Stmt.quote : Stmt C → Lean.Expr
       optE (mkAppN (mkConst ``Src) #[c, toExpr E]) (v.map (Src.quote c E)), rflTrue]
   | @Stmt.pop _ E b => mkAppN (mkConst ``Stmt.pop) #[c, toExpr E, SPath.quote c _ b]
   | .transfer r a => mkAppN (mkConst ``Stmt.transfer) #[c, Val.quote c .uint r, Val.quote c .uint a]
+  | .send pv r a =>
+    mkAppN (mkConst ``Stmt.send) #[c, toExpr pv, Val.quote c .uint r, Val.quote c .uint a]
   | .declMem R x init _ =>
     mkAppN (mkConst ``Stmt.declMem) #[c, toExpr R, toExpr x,
       optE (mkAppN (mkConst ``MRhs) #[c, toExpr R]) (init.map (MRhs.quote c R)), rflTrue]

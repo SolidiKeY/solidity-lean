@@ -40,7 +40,8 @@ mutual
 
 /-- No call of `s`, however deep, has an argument to capture; a payment is
 under the box, where solkey books it (`transferNoCallbackBox`), the diamond
-closing to `false` (`LeanTaclet.transferDiamond`); and there is no `try`:
+closing to `false` (`LeanTaclet.transferDiamond`); a send is under either
+modality (`sendNoCallbackBox`, `sendNoCallbackDiamond`); and there is no `try`:
 solkey has a rule for it under the box only (`tryCallNoCallbackBox`), with
 its blocks outside the fragment's claim. -/
 def Stmt.inSolkey (m : Modality) : Stmt C → Bool
@@ -72,6 +73,7 @@ def Premise.inSolkey (m : Modality) : Premise C → Bool
   | .split c c' P Q => c.inSolkey && c'.inSolkey && Prog.inSolkey m P && Prog.inSolkey m Q
   | .check c P => c.inSolkey && Prog.inSolkey m P
   | .branches bs => bs.all fun b => Prog.inSolkey m b.2
+  | .cases fs _ => fs.all Fml.inSolkey
 
 @[simp] theorem Prog.inSolkey_nil : Prog.inSolkey m ([] : Prog C) = true := rfl
 
@@ -197,6 +199,12 @@ theorem Proves.toSolkey {R : RuleSet} {Γ : List (Hyp C)} {φ : Fml C} (h : Prov
     simp only [Fml.inSolkey, Prog.inSolkey_cons, Bool.and_eq_true] at hφ
     cases d
     simp [Stmt.inSolkey] at hφ
+  | cases d _ _ ih₁ ih₂ =>
+    simp only [Fml.inSolkey, Prog.inSolkey_cons, Bool.and_eq_true] at hφ
+    have := d.premise_inSolkey hφ.1.1
+    simp only [Premise.inSolkey, List.all_eq_true] at this
+    exact .cases d (fun f hf => ih₁ f hf (this f hf))
+      (fun U hU => ih₂ U hU (by simp_all only [forall_const, Fml.inSolkey, Bool.and_self]))
   | allIntro _ ih => exact .allIntro (ih (by simp_all [Fml.inSolkey]))
   | updIntro _ ih => exact .updIntro (ih (by simp_all [Fml.inSolkey]))
   | split d _ _ _ ih₁ ih₂ ih₃ =>
@@ -250,6 +258,11 @@ example : (Stmt.transfer (C := C) (.simple (.local (.user "to")))
 example : (Stmt.transfer (C := C) (.simple (.local (.user "to")))
     (.simple (.lit 5 rfl))).inSolkey .diamond = false := rfl
 
+/-! `ok = to.send(5);` is in the fragment under either modality. -/
+
+example : (Stmt.send (C := C) (.user "ok") (.simple (.local (.user "to")))
+    (.simple (.lit 5 rfl))).inSolkey .diamond = true := rfl
+
 /-! ## Off the fragment the two differ
 
 `Proves.solkey_iff` needs its hypothesis: `[ f(x + 1); ] true` is derived by
@@ -288,7 +301,7 @@ theorem Proves.solkey_not_call {Γ : List (Hyp C)} {f : Name} {args : List (Arg 
   induction h generalizing φ with
   | update d _ _ | unfold d _ _ | split d _ _ _ _ _ _ | check d _ _ _ _ | done d _ _ =>
     cases hψ; simp [d.call_simple rfl] at ha
-  | branches d _ _ => cases hψ; simp [d.call_simple rfl] at ha
+  | branches d _ _ | cases d _ _ _ _ => cases hψ; simp [d.call_simple rfl] at ha
   | unfoldLean | doneLean => cases hR
   | intro _ _ | empty _ _ | allIntro _ _ | updIntro _ _ => cases hψ
   | rewrite _ _ ih => exact ih hR (by rw [← hψ]; rfl)

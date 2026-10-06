@@ -20,7 +20,10 @@ This module is a *relational* layer over it (the removed untyped layer's
 where the run either leaves the contract with `I` broken (`violated`, an
 outcome no formula accepts) or resumes in any state the callee may leave
 (`State.havoc`: storage and ledger replaced, locals, memory and funds kept)
-that satisfies `I`.  `holdsC I` reads the modalities over it; everything else
+that satisfies `I`.  A `pv = a.send(v);` runs so too, `pv` then `true`, and
+may also fail whatever the transaction's oracle says (`sendFailed`: the
+callee may always revert, and what it did with it), nothing booked and `pv`
+`false`.  `holdsC I` reads the modalities over it; everything else
 is `holds`.  `TransferSem` names the two semantics, and `holdsT` is the
 judgement parameterised by it.
 
@@ -76,18 +79,18 @@ def COut.after (m : Modality) (p : State → Prop) : COut → Prop
 /-! ## Which statements the callback reading sees -/
 
 /-- The statements the relation does not take from `Stmt.run`: a `transfer`,
-a `try`, and the two that run others (`if`, a call). -/
+a `send`, a `try`, and the two that run others (`if`, a call). -/
 def Stmt.forks : Stmt C → Bool
-  | .transfer .. | .tryCall .. | .ite .. | .call .. => true
+  | .transfer .. | .send .. | .tryCall .. | .ite .. | .call .. => true
   | _ => false
 
 mutual
 
-/-- Whether a `transfer` or a `try` occurs in the statement, in a branch or a
-callee included: a point where control leaves the contract, and the callee
-may call back. -/
+/-- Whether a `transfer`, a `send` or a `try` occurs in the statement, in a
+branch or a callee included: a point where control leaves the contract, and
+the callee may call back. -/
 def Stmt.hasTransfer : Stmt C → Bool
-  | .transfer .. | .tryCall .. => true
+  | .transfer .. | .send .. | .tryCall .. => true
   | .ite _ thn els => Prog.hasTransfer thn || Prog.hasTransfer els
   | .call _ _ _ _ body => Prog.hasTransfer body
   | _ => false
@@ -134,6 +137,27 @@ inductive ExecS (I : Fml C) : State → Stmt C → COut → Prop where
       {nt : List (Int × Int)} :
       (Stmt.transfer r a).run σ = .ok σ₁ → holds σ₁ I → holds (σ₁.havoc st nt) I →
         ExecS I σ (.transfer r a) (.ok (σ₁.havoc st nt))
+  /-- A send that halts, where its transfer would (an amount that is not a
+  word). -/
+  | sendHalt {σ : State} {pv : Var} {r a : Val C .uint} {e : Halt} :
+      (Stmt.transfer r a).run σ = .error e → ExecS I σ (.send pv r a) (.halt e)
+  /-- KeY's "send failed": the callee reverts, and what it did with it, so
+  nothing is booked and `pv` is `false`.  A callee may always revert, whatever
+  the transaction's oracle says (`sendAt`). -/
+  | sendFailed {σ σ₁ : State} {pv : Var} {r a : Val C .uint} :
+      (Stmt.transfer r a).run σ = .ok σ₁ →
+        ExecS I σ (.send pv r a) (.ok (σ.setEnv pv (.val (.bool false))))
+  /-- KeY's "invariant on exit": control leaves, the payment booked, with
+  `I` broken. -/
+  | sendViolated {σ σ₁ : State} {pv : Var} {r a : Val C .uint} :
+      (Stmt.transfer r a).run σ = .ok σ₁ → ¬ holds σ₁ I → ExecS I σ (.send pv r a) .violated
+  /-- KeY's "send succeeded": control leaves with the payment booked and `I`
+  kept, and comes back to any state the callee may leave in which `I` holds,
+  `pv` then `true`. -/
+  | sendResume {σ σ₁ : State} {pv : Var} {r a : Val C .uint} {st : List (Name × SVal)}
+      {nt : List (Int × Int)} :
+      (Stmt.transfer r a).run σ = .ok σ₁ → holds σ₁ I → holds (σ₁.havoc st nt) I →
+        ExecS I σ (.send pv r a) (.ok ((σ₁.havoc st nt).setEnv pv (.val (.bool true))))
   | iteHalt {σ : State} {c : Val C .bool} {thn els : List (Stmt C)} {e : Halt} :
       c.eval σ = .error e → ExecS I σ (.ite c thn els) (.halt e)
   | iteStuck {σ : State} {c : Val C .bool} {thn els : List (Stmt C)} {n : Int} :
@@ -249,6 +273,43 @@ theorem bindData_error : {xs : List (PrimTy × Var)} → {vs : List Value} → {
     · exact bindData_error h
     · cases h; rfl
 
+/-- **A send runs as its transfer**: it halts where the transfer does, and
+otherwise ends in the booking with `pv` true, or with nothing booked and `pv`
+false (`sendAt`, as the transaction's oracle says). -/
+theorem Stmt.run_send_cases (pv : Var) (r a : Val C .uint) (σ : State) :
+    (∃ e, (Stmt.transfer r a).run σ = .error e ∧ (Stmt.send pv r a).run σ = .error e) ∨
+    ∃ σ₁, (Stmt.transfer r a).run σ = .ok σ₁ ∧
+      ((Stmt.send pv r a).run σ = .ok (σ₁.setEnv pv (.val (.bool true))) ∨
+        (Stmt.send pv r a).run σ = .ok (σ.setEnv pv (.val (.bool false)))) := by
+  simp only [Stmt.run, transferAt, sendAt, bind, Except.bind, Value.asInt]
+  cases r.eval σ with
+  | error e => exact .inl ⟨e, rfl, rfl⟩
+  | ok v =>
+    cases v with
+    | bool _ => exact .inl ⟨_, rfl, rfl⟩
+    | int addr =>
+      cases a.eval σ with
+      | error e => exact .inl ⟨e, rfl, rfl⟩
+      | ok w =>
+        cases w with
+        | bool _ => exact .inl ⟨_, rfl, rfl⟩
+        | int amt =>
+          by_cases hn : amt < 0
+          · simp only [hn, if_true]
+            exact .inl ⟨_, rfl, rfl⟩
+          · simp only [hn, if_false]
+            refine .inr ⟨_, rfl, ?_⟩
+            cases lookupBy (sendKey addr amt) σ.tx.ext with
+            | none => exact .inl rfl
+            | some o =>
+              cases o with
+              | ok _ => exact .inl rfl
+              | _ => exact .inr rfl
+
+/-- A callee's state, then `pv` set, is `pv` set, then the callee's state. -/
+theorem State.havoc_setEnv (σ : State) (x : Var) (b : Binding) (st : List (Name × SVal))
+    (nt : List (Int × Int)) : (σ.setEnv x b).havoc st nt = (σ.havoc st nt).setEnv x b := rfl
+
 /-! ## The deterministic run is a run with callbacks -/
 
 mutual
@@ -267,6 +328,17 @@ theorem Stmt.exec_run (I : Fml C) :
           h hI (by simpa using hI)
         simpa using this
       · exact .inr (.transferViolated h hI)
+  | .send pv r a, σ => by
+    rcases Stmt.run_send_cases pv r a σ with ⟨e, ht, hs⟩ | ⟨σ₁, ht, hs | hs⟩
+    · rw [hs]; exact .inl (.sendHalt ht)
+    · rw [hs]
+      by_cases hI : holds σ₁ I
+      · left
+        have := ExecS.sendResume (I := I) (pv := pv) (st := σ₁.storage) (nt := σ₁.net)
+          ht hI (by simpa only [State.havoc_self] using hI)
+        simpa only [State.havoc_self] using this
+      · exact .inr (.sendViolated ht hI)
+    · rw [hs]; exact .inl (.sendFailed ht)
   | .ite c thn els, σ => by
     cases hc : c.eval σ with
     | error e =>
@@ -394,6 +466,7 @@ theorem ExecS.eq_run {I : Fml C} {σ : State} {s : Stmt C} {o : COut} :
     ExecS I σ s o → s.hasTransfer = false → o = .ofRes (s.run σ)
   | .det _, _ => rfl
   | .transferHalt _, h | .transferViolated _ _, h | .transferResume _ _ _, h
+  | .sendHalt _, h | .sendFailed _, h | .sendViolated _ _, h | .sendResume _ _ _, h
   | .tryHalt _, h | .tryRevert _, h | .tryViolated _ _, h | .tryOk _ _ _ _ _, h
   | .tryError _ _, h | .tryPanic _ _ _, h | .tryOther _ _, h => by
     simp [Stmt.hasTransfer] at h
@@ -603,6 +676,35 @@ theorem ExecS.frame {I : Fml C} (hI : I.vars = []) {σ τ : State} {s : Stmt C} 
       rw [hr] at this
       exact ⟨_, .transferResume hr ((holds_I_frame hI this).2 h₁)
         ((holds_I_frame hI (this.havoc st nt)).2 h₂), this.havoc st nt⟩
+  | .sendHalt (pv := pv) (r := r) (a := a) h, hs, hag => by
+    have := Stmt.run_frame hag (.transfer r a) hs.tail
+    rw [h] at this
+    cases hr : (Stmt.transfer r a).run σ with
+    | error e => rw [hr] at this; cases this; exact ⟨_, .sendHalt hr, rfl⟩
+    | ok _ => rw [hr] at this; exact this.elim
+  | .sendFailed (pv := pv) (r := r) (a := a) h, hs, hag => by
+    have := Stmt.run_frame hag (.transfer r a) hs.tail
+    rw [h] at this
+    cases hr : (Stmt.transfer r a).run σ with
+    | error e => rw [hr] at this; exact this.elim
+    | ok σ₁ => exact ⟨_, .sendFailed hr, hag.setEnv_both pv _⟩
+  | .sendViolated (pv := pv) (r := r) (a := a) h hn, hs, hag => by
+    have := Stmt.run_frame hag (.transfer r a) hs.tail
+    rw [h] at this
+    cases hr : (Stmt.transfer r a).run σ with
+    | error e => rw [hr] at this; exact this.elim
+    | ok σ₁ =>
+      rw [hr] at this
+      exact ⟨_, .sendViolated hr (fun h' => hn ((holds_I_frame hI this).1 h')), trivial⟩
+  | .sendResume (pv := pv) (r := r) (a := a) (st := st) (nt := nt) h h₁ h₂, hs, hag => by
+    have := Stmt.run_frame hag (.transfer r a) hs.tail
+    rw [h] at this
+    cases hr : (Stmt.transfer r a).run σ with
+    | error e => rw [hr] at this; exact this.elim
+    | ok σ₁ =>
+      rw [hr] at this
+      exact ⟨_, .sendResume hr ((holds_I_frame hI this).2 h₁)
+        ((holds_I_frame hI (this.havoc st nt)).2 h₂), (this.havoc st nt).setEnv_both pv _⟩
   | .iteHalt (c := c) hc, hs, hag => by
     have hc' : c.eval σ = c.eval _ := c.eval_frame hag hs.left.left
     rw [hc] at hc'

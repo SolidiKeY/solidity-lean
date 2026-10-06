@@ -254,6 +254,7 @@ def provesCtor (premise : Lean.Name) (lean : Bool) : Option (Lean.Name × Lean.N
   else if premise == ``Premise.done then
     some (if lean then ``Proves.doneLean else ``Proves.done, ``Proves.doneRule)
   else if premise == ``Premise.branches then some (``Proves.branches, ``Proves.branchesRule)
+  else if premise == ``Premise.cases then some (``Proves.cases, ``Proves.casesRule)
   else none
 
 /-- The premise `Stmt.step` gives the statement `s` (index `k`, modality
@@ -292,6 +293,8 @@ structure Move where
   name : Lean.Name
   tacs : Array (TSyntax `tactic)
   branches : Bool := false
+  /-- Whether the rule leaves labelled goals (`Premise.cases`) to take apart. -/
+  cases : Bool := false
   /-- An `if`'s condition, for `ifElseSplit`'s labels. -/
   se : Option String := none
 
@@ -321,10 +324,11 @@ def movesAt (g : MVarId) : MetaM (Array Move) := g.withContext do
     let lean := match c? with | some c => (`Solidity.LeanTaclet).isPrefixOf c | none => false
     let some (ctor, generic) := provesCtor premise lean | return #[]
     let branches := premise == ``Premise.branches
+    let cases := premise == ``Premise.cases
     let st ← short ``Stmt.step
     let generic ← `(tactic| apply $(← short generic) ($st _ _ _).rule)
     let fallback : Move :=
-      { name := (c?.map Chain.lastName).getD `taclet, branches := branches, tacs := #[generic] }
+      { name := (c?.map Chain.lastName).getD `taclet, branches, cases, tacs := #[generic] }
     -- under the box, a split with KeY's two goals first (`splitBox`), where it applies
     let box := premise == ``Premise.split && (← whnf m).isConstOf ``Modality.box
     let boxRule ← `(tactic| apply $(← short ``Proves.splitBoxRule) ($st _ _ _).rule)
@@ -345,7 +349,7 @@ def movesAt (g : MVarId) : MetaM (Array Move) := g.withContext do
       else pure none
     let fallback := { fallback with name, se }
     let first := if box then #[{ name, branches, tacs := #[boxNamed], se : Move }] else #[]
-    return first ++ #[{ name, branches := branches, tacs := #[named], se }, fallback]
+    return first ++ #[{ name, branches, cases, tacs := #[named], se }, fallback]
   | _ => return #[]
 
 /-- Run `tacs` on the goal `g`, errors as errors; the goals left. -/
@@ -379,6 +383,20 @@ def splitBranches (g : MVarId) : TacticM (Array (TSyntax `tactic) × List MVarId
   let refine ← `(tactic| refine ⟨$holes,*⟩)
   return (#[simp, refine], ← runOn g' #[refine])
 
+/-- `apply cases r` with its goals `∀ f ∈ fs, …` and `∀ U ∈ us, …` taken
+apart, as `sol_derive` does, the formulas first, then one goal per update:
+one line, `apply … <;> (try simp only […]) <;> (try and_intros)`, so that a
+replayed walk touches only the goals the rule leaves. -/
+def applyCases (g : MVarId) (tacs : Array (TSyntax `tactic)) :
+    TacticM (Array (TSyntax `tactic) × List MVarId) := do
+  let names := #[``List.forall_mem_cons, ``List.not_mem_nil, ``false_implies, ``implies_true,
+    ``and_true]
+  let lemmas ← names.mapM fun n => do `(Lean.Parser.Tactic.simpLemma| $(← short n):ident)
+  let some last := tacs.back? | return (tacs, ← runOn g tacs)
+  let t ← `(tactic| $last <;> (try simp only [$lemmas,*]) <;> (try and_intros))
+  let tacs := tacs.pop.push t
+  return (tacs, ← runOn g tacs)
+
 /-- Grow the tree at the goal `g`, whose branch is labelled `label`. -/
 partial def grow (cfg : Config) (fuel : IO.Ref Nat) (label : Option Lean.Name) (g : MVarId) :
     TacticM Tree := g.withContext do
@@ -390,22 +408,24 @@ partial def grow (cfg : Config) (fuel : IO.Ref Nat) (label : Option Lean.Name) (
     -- only the move is tried: an error in the goals it leaves is the tree's
     let s ← saveState
     let applied ← try
-        let gs ← runOn g mv.tacs
-        if mv.branches then
-          match gs with
-          | [g'] => some <$> splitBranches g'
-          | _ => pure (some (#[], gs))
-        else pure (some (#[], gs))
+        if mv.cases then some <$> applyCases g mv.tacs
+        else
+          let gs ← runOn g mv.tacs
+          if mv.branches then
+            match gs with
+            | [g'] => (fun (more, gs) => some (mv.tacs ++ more, gs)) <$> splitBranches g'
+            | _ => pure (some (mv.tacs, gs))
+          else pure (some (mv.tacs, gs))
       catch _ => s.restore; pure none
-    let some (more, gs) := applied | continue
+    let some (tacs, gs) := applied | continue
     -- a `branches` rule's outcomes are `refine`'s holes, with no names of their own
-    let labels ← if gs.length < 2 || mv.branches then pure (gs.map fun _ => none) else
+    let labels ← if gs.length < 2 || mv.branches || mv.cases then pure (gs.map fun _ => none) else
       gs.mapM fun c => do
         let t ← c.getTag
         pure (match t with | .str _ l => some (Lean.Name.mkSimple l) | _ => none)
     let mut cs := #[]
     for (c, l) in gs.zip labels do cs := cs.push (← grow cfg fuel l c)
-    return .node g sequent label (.rule mv.name (mv.tacs ++ more) mv.se) cs
+    return .node g sequent label (.rule mv.name tacs mv.se) cs
   -- a leaf
   if cfg.close then
     let s ← saveState

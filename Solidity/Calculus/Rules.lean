@@ -259,6 +259,10 @@ inductive Premise (C : Contract) where
   the locals it binds: `∀ xs. ⟨[ P ]⟩` (KeY's `T v;` with no initializer,
   which leaves `v` unconstrained). -/
   | branches (bs : List (List (PrimTy × Var) × Prog C))
+  /-- Goals labelled as KeY labels a taclet's (`"send failed": \replacewith(…)`):
+  each formula of `fs` to prove, then for each update `U` of `us` the rest
+  after it, `{U} ⟨[ ..ω ]⟩ φ`, one per way the statement may end. -/
+  | cases (fs : List (Fml C)) (us : List (Upd C))
 
 /-! ## The rule table -/
 
@@ -512,6 +516,29 @@ inductive Taclet (C : Contract) (k : Nat) : Modality → Stmt C → Premise C �
   | transferNoCallbackBox :
       dl{ [ sadr.transfer(se); ] ⇝
           { net := if(sadr = this) then net else store(net, at(sadr), net(sadr) - se) } ⟨[ ]⟩ }
+  -- Send -----------------------------------------------------------------
+  | send_unfold_leftFstReceiver :
+      dl{ ⟨[ pv = nadr.send(e); ]⟩ ⇝ ⟨[ uint se = nadr; pv = se.send(e); ]⟩ }
+  | send_unfold_rightSndArgument :
+      dl{ ⟨[ pv = sadr.send(nse); ]⟩ ⇝ ⟨[ uint se = nse; pv = sadr.send(se); ]⟩ }
+  /-- A send under the box: taken, the payment booked as `transfer` books it
+  and `pv` true; refused, nothing booked and `pv` false (`Semantics.sendAt`,
+  where the transaction's oracle says which). -/
+  | sendNoCallbackBox :
+      dl{ [ pv = sadr.send(se); ] ⇝
+          "send succeeded":
+            { net := if(sadr = this) then net else store(net, at(sadr), net(sadr) - se) ‖ pv := true }
+            ⟨[ ]⟩
+        ; "send failed": { pv := false } ⟨[ ]⟩ }
+  /-- The same under the diamond, and the amount owed non-negative: a send
+  of a negative amount is stuck, as a `transfer` of one is. -/
+  | sendNoCallbackDiamond :
+      dl{ ⟨ pv = sadr.send(se); ⟩ ⇝
+          "non-negative amount": 0 <= se
+        ; "send succeeded":
+            { net := if(sadr = this) then net else store(net, at(sadr), net(sadr) - se) ‖ pv := true }
+            ⟨[ ]⟩
+        ; "send failed": { pv := false } ⟨[ ]⟩ }
   -- Memory ---------------------------------------------------------------
   | memoryFieldRead_unfold_rightFst :
       dl{ ⟨[ lhs = nmp.fld; ]⟩ ⇝ ⟨[ T memory mv = nmp; lhs = mv.fld; ]⟩ }
@@ -709,6 +736,12 @@ inductive CallbackTaclet (C : Contract) : Modality → Stmt C → Premise C → 
   | transferWithCallbackBox :
       dl[CallbackTaclet C]{ [ sadr.transfer(se); ] ⇝
         { net := if(sadr = this) then net else store(net, at(sadr), net(sadr) - se) } ⟨[ ]⟩ }
+  | sendWithCallbackBox :
+      dl[CallbackTaclet C]{ [ pv = sadr.send(se); ] ⇝
+          "send succeeded":
+            { net := if(sadr = this) then net else store(net, at(sadr), net(sadr) - se) ‖ pv := true }
+            ⟨[ ]⟩
+        ; "send failed": { pv := false } ⟨[ ]⟩ }
   | tryCallWithCallbackBox :
       dl[CallbackTaclet C]{ [ try call returns (rets) body catch Error errorBody
               catch Panic (code) panicBody catch otherBody; ] ⇝
@@ -726,17 +759,22 @@ def Taclet.branchLabels : List (String × List String) := [
   ("requireSimple", ["Holds", "Reverts"]),
   ("assertSimple", ["Holds", "Violated"]),
   ("tryCallNoCallbackBox",
-    ["call succeeded", "Error caught", "Panic caught", "other failure caught"])]
+    ["call succeeded", "Error caught", "Panic caught", "other failure caught"]),
+  ("sendNoCallbackBox", ["send succeeded", "send failed"]),
+  ("sendNoCallbackDiamond", ["non-negative amount", "send succeeded", "send failed"])]
 
 /-- The taclet whose goals a premise for the statement of head `c` labels:
 an `if` splits by `ifElseSplit`, a `require` by `requireSimple`, an `assert`
 by `assertSimple`, a `try` by `tryCallNoCallbackBox` (and
-`CallbackTaclet.tryCallWithCallbackBox`, labelled alike). -/
-def Taclet.labelledBy (c : Lean.Name) : Option String :=
+`CallbackTaclet.tryCallWithCallbackBox`, labelled alike), a send by
+`sendNoCallbackBox`, or under the diamond (`diamond`) `sendNoCallbackDiamond`. -/
+def Taclet.labelledBy (c : Lean.Name) (diamond : Bool := false) : Option String :=
   if c == ``Stmt.ite then some "ifElseSplit"
   else if c == ``Stmt.require then some "requireSimple"
   else if c == ``Stmt.assert then some "assertSimple"
   else if c == ``Stmt.tryCall then some "tryCallNoCallbackBox"
+  else if c == ``Stmt.send then
+    some (if diamond then "sendNoCallbackDiamond" else "sendNoCallbackBox")
   else none
 
 /-! ## Printing taclets and premises
@@ -805,6 +843,20 @@ def ppPremise? (e : Lean.Expr) (labels : List String := []) (box : Bool := false
     let some b := out[0]? | return none
     if out.size < 2 then return none
     return some (← `(dl_premise| $b:dl_branch ; $[$(out.extract 1 out.size)];*))
+  | Premise.cases _ fs us =>
+    -- `"label": φ` for each formula, then `"label": {U} ⟨[ ]⟩` for each update
+    let some fs ← listElems? fs | return none
+    let some us ← listElems? us | return none
+    let mut out : Array (TSyntax `dl_case) := #[]
+    for h : i in [0:fs.size] do
+      let l := lbl i
+      out := out.push (← `(dl_case| $[$l:str :]? $(← ppFml fs[i]):dl_fml))
+    for h : j in [0:us.size] do
+      let l := lbl (fs.size + j)
+      out := out.push (← `(dl_case| $[$l:str :]? $(← ppUpd us[j]):dl_upd ⟨[ ]⟩))
+    let some c := out[0]? | return none
+    if out.size < 2 then return none
+    return some (← `(dl_premise| $c:dl_case ; $[$(out.extract 1 out.size)];*))
   | _ => return none
 
 /-- `Taclet C k m s p`: `dl{ ⟨[ s; ]⟩ ⇝ p }`, with the modality it is for;
@@ -819,7 +871,8 @@ def delabTaclet : Delab := do
   guard (e.getAppNumArgs == n + 3)
   let st ← whnf (e.getArg! (n + 1))
   let m ← whnf (e.getArg! n)
-  let labels := (do (← Taclet.branchLabels.lookup (← Taclet.labelledBy (← st.getAppFn.constName?))))
+  let labels := (do (← Taclet.branchLabels.lookup
+    (← Taclet.labelledBy (← st.getAppFn.constName?) (m.isConstOf ``Modality.diamond))))
   let some p ← ppPremise? (e.getArg! (n + 2)) (labels.getD []) (m.isConstOf ``Modality.box)
     | failure
   let s ← ppStmt (e.getArg! (n + 1))
@@ -854,7 +907,8 @@ def delabPremise : Delab := do
 
 attribute [delab app.Solidity.Premise.update, delab app.Solidity.Premise.unfold,
   delab app.Solidity.Premise.split, delab app.Solidity.Premise.check,
-  delab app.Solidity.Premise.done, delab app.Solidity.Premise.branches] delabPremise
+  delab app.Solidity.Premise.done, delab app.Solidity.Premise.branches,
+  delab app.Solidity.Premise.cases] delabPremise
 
 /-- The type without its `autoParam` hypotheses (a taclet's side conditions),
 which nothing after them depends on. -/

@@ -2498,6 +2498,9 @@ theorem transferAt_se {addr amt : Int} (h : transferAt σ addr amt = .ok σ') : 
   · exact nomatch h
   · cases h; rw [State.pay_eq]; exact ⟨rfl, rfl⟩
 
+theorem pay_se (addr amt : Int) : SE σ (σ.pay addr amt) := by
+  rw [State.pay_eq]; exact ⟨rfl, rfl⟩
+
 theorem MRhs.bind_se {x : Var} {R : RefTy} {r : MRhs C R} (h : r.bind σ x = .ok σ') :
     ∃ σ₁ id, SE σ σ₁ ∧ σ' = σ₁.setEnv x (.mref id) := by
   cases r with
@@ -2776,6 +2779,15 @@ theorem Stmt.run_tight (hd : DeepOk C) : ∀ (s : Stmt C) {Γ Γ' : Ctx} {H : He
   | .transfer r a, Γ, Γ', H, σ, σ', hwt, hcn, ht, hs, h => by
     iterate 4 bind_inv h
     exact (transferAt_se h).tight ht
+  | .send pv r a, Γ, Γ', H, σ, σ', hwt, hcn, ht, hs, h => by
+    iterate 4 bind_inv h
+    unfold sendAt at h
+    split at h
+    · exact nomatch h
+    · split at h <;> cases h
+      · exact ((pay_se _ _).tight ht).setEnv pv (fun _ _ h => Binding.noConfusion h)
+      · exact ((pay_se _ _).tight ht).setEnv pv (fun _ _ h => Binding.noConfusion h)
+      · exact ht.setEnv pv (fun _ _ h => Binding.noConfusion h)
   | .declMem R x init hdo, Γ, Γ', H, σ, σ', hwt, hcn, ht, hs, h => by
     cases init with
     | none =>

@@ -26,6 +26,10 @@ Semantic conventions mirrored from KeY:
   (`State.selfBalance`) are not the transfer's to change.  Whether the EVM
   pays is the compiler theorem's business (`Evm/Correctness.lean`, where a
   refused payment is a revert of the machine alone);
+- `pv = a.send(v);` books as `transfer` does and sets `pv` to `true` when the
+  recipient takes the payment, and books nothing and sets `pv` to `false`
+  when it refuses (`sendAt`): which, the transaction's oracle says
+  (`TxEnv.ext`), as it does for a `try`;
 - a call runs its inlined body (`Stmt.call`, KeY's `functionBodyExpand`):
   its arguments read in the caller's state, bound to its parameters, its
   return variable declared, the body run, the result assigned;
@@ -253,11 +257,14 @@ structure ExtKey where
 /-- What the transaction running the program was sent with: KeY's program
 variables `msgSender` and `msgValue` (`netHeader.key`) and the block's
 timestamp; and how each external call it makes ends (`ext`), a call it has
-no entry for reaching an address with no code.  No statement changes them,
+no entry for reaching an address with no code (which a `try` reverts on, and
+a `send` pays: `sendAt`).  Two identical calls, or two `send`s of one amount
+to one address, read the same entry.  No statement changes them,
 and a callback leaves them as they were (`State.havoc`): a re-entrant call
 runs in its own transaction, which the caller never sees.  The calculus
 reads none of `ext`: a `try` has a goal for every way its call may end
-(`tryCallNoCallbackBox`), so a proof holds whatever the table says. -/
+(`tryCallNoCallbackBox`), a `send` one for each outcome
+(`sendNoCallbackBox`), so a proof holds whatever the table says. -/
 structure TxEnv where
   msgSender : Int := 0
   /-- The contract's own address, `address(this)`: the ledger's own account. -/
@@ -1460,6 +1467,22 @@ def transferAt (σ : State) (addr amt : Int) : Res State :=
   if amt < 0 then .error .stuck
   else .ok (σ.pay addr amt)
 
+/-- The external call a `send` makes: `amt` to `addr` with empty calldata,
+which reaches the recipient's `receive` (or fallback) function. -/
+def sendKey (addr amt : Int) : ExtKey := ⟨addr, "", [.int amt]⟩
+
+/-- `pv = a.send(v);` with both evaluated: whether the recipient takes the
+payment is the transaction's (`TxEnv.ext`, at `sendKey`).  Taken, as the
+oracle's `ok` or with no entry (an address with no code accepts), it is
+booked as `transfer` books it and `pv` is `true`; refused (any other entry),
+nothing is booked and `pv` is `false`: a `send` does not revert.  A
+negative amount is stuck, as `transfer`'s. -/
+def sendAt (σ : State) (pv : Var) (addr amt : Int) : Res State :=
+  if amt < 0 then .error .stuck
+  else match lookupBy (sendKey addr amt) σ.tx.ext with
+    | none | some (.ok _) => .ok ((σ.pay addr amt).setEnv pv (.val (.bool true)))
+    | some _ => .ok (σ.setEnv pv (.val (.bool false)))
+
 /-- An alias bound to what `r` names: a path, or the slot a push appends. -/
 def ARhs.bind (σ : State) (x : Var) {R : RefTy} : ARhs C R → Res State
   | .path p => do
@@ -1573,6 +1596,10 @@ def Stmt.run (σ : State) : Stmt C → Res State
     let addr ← (← r.eval σ).asInt
     let amt ← (← a.eval σ).asInt
     transferAt σ addr amt
+  | .send pv r a => do
+    let addr ← (← r.eval σ).asInt
+    let amt ← (← a.eval σ).asInt
+    sendAt σ pv addr amt
   | .delete l => do
     let (root, segs) ← l.resolve σ
     let cur ← σ.findStorage root segs

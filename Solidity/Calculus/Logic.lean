@@ -92,6 +92,7 @@ def Premise.fml (m : Modality) : Premise C → Prog C → Fml C → Fml C
   | .done true, _, _ => dl_schema{ true }
   | .done false, _, _ => .ff
   | .branches bs, ω, φ => .conj (bs.map fun b => .alls b.1 (.modal m (b.2 ++ ω) φ))
+  | .cases fs us, ω, φ => .conj (fs ++ us.map fun U => .upd m U (.modal m ω φ))
 
 /-- Two runs that end alike off `ns` satisfy the same modal formula, when
 neither the rest of the program nor the postcondition mentions `ns`. -/
@@ -112,6 +113,31 @@ theorem Modality.afterRun_error {m : Modality} {p : State → Prop} {e : Halt} (
   simp only [Modality.afterRun, Modality.after, ne_eq, Except.error.injEq, he, not_false_eq_true,
     and_true]
 
+/-- An update that runs as the statement does, off no name: its goal gives
+the statement's. -/
+theorem Premise.sound_upd {m : Modality} {s : Stmt C} {U : Upd C} {σ : State}
+    (hs : SameOk [] (U.apply σ) (s.run σ)) (ω : Prog C) (φ : Fml C) :
+    holds σ (.upd m U (.modal m ω φ)) → holds σ (.modal m (s :: ω) φ) := by
+  have h₀ : Avoids (Prog.vars ω ++ φ.vars) [] := fun _ _ h => by simp only [List.not_mem_nil] at h
+  simp only [holds]
+  intro hU
+  cases hu : U.apply σ with
+  | error e =>
+    have hp : e ≠ .panic := NoPanic.ne_of_eq (Upd.apply_ne_panic U σ) hu
+    rw [hu] at hs
+    cases hr : s.run σ with
+    | ok _ => rw [hr] at hs; exact hs.elim
+    | error e' =>
+      rw [hr] at hs
+      have hp' : e' ≠ .panic := fun hp' => hp (hs.2 hp')
+      rw [hu] at hU
+      simp only [Prog.run, hr, bind, Except.bind, Modality.afterRun_error hp']
+      exact hU
+  | ok τ =>
+    rw [hu] at hU hs
+    have hk := (m.after_sameOk (r := .ok τ) (r' := s.run σ) hs h₀ (ω := ω) (φ := φ)).1 hU
+    simpa only [Prog.run, bind, Except.bind] using hk
+
 /-- **A premise implies its rule's conclusion**: in front of any rest `ω` and
 postcondition `φ` that do not mention the rule's fresh names.
 
@@ -126,26 +152,7 @@ theorem Premise.sound {k : Nat} {m : Modality} {s : Stmt C} {pr : Premise C}
     holds σ (pr.fml m ω φ) → holds σ (.modal m (s :: ω) φ) := by
   have h₀ : Avoids (Prog.vars ω ++ φ.vars) [] := fun _ _ h => by simp at h
   cases pr with
-  | update U =>
-    simp only [Premise.fml, holds]
-    intro hU
-    have hs := h σ
-    cases hu : U.apply σ with
-    | error e =>
-      have hp : e ≠ .panic := NoPanic.ne_of_eq (Upd.apply_ne_panic U σ) hu
-      rw [hu] at hs
-      cases hr : s.run σ with
-      | ok _ => rw [hr] at hs; exact hs.elim
-      | error e' =>
-        rw [hr] at hs
-        have hp' : e' ≠ .panic := fun hp' => hp (hs.2 hp')
-        rw [hu] at hU
-        simp only [Prog.run, hr, bind, Except.bind, Modality.afterRun_error hp']
-        exact hU
-    | ok τ =>
-      rw [hu] at hU hs
-      have hk := (m.after_sameOk (r := .ok τ) (r' := s.run σ) hs h₀ (ω := ω) (φ := φ)).1 hU
-      simpa only [Prog.run, bind, Except.bind] using hk
+  | update U => exact Premise.sound_upd (h σ) ω φ
   | unfold P =>
     simp only [Premise.fml, holds, Prog.run, SemanticsProperties.Prog.run_append]
     exact (m.after_sameOk (h σ) hω).1
@@ -184,6 +191,11 @@ theorem Premise.sound {k : Nat} {m : Modality} {s : Stmt C} {pr : Premise C}
     · have hφ := holds_alls.1 (hb _ ⟨b, hmem, rfl⟩) σ' hbind
       simp only [holds, SemanticsProperties.Prog.run_append, hrun] at hφ
       simpa only [holds, Prog.run] using hφ
+  | cases fs us =>
+    simp only [Premise.fml, holds_conj, List.mem_append, List.mem_map]
+    intro hall
+    obtain ⟨U, hU, hs⟩ := h σ
+    exact Premise.sound_upd hs ω φ (hall _ (.inr ⟨U, hU, rfl⟩))
 
 /-! ## Fresh names -/
 
@@ -352,6 +364,14 @@ inductive Proves : RuleSet → List (Hyp C) → Fml C → Prop
       {φ : Fml C} {bs : List (List (PrimTy × Var) × Prog C)}
       (d : Taclet C (Hyp.fresh Γ dl_schema{ ⟨[ s; ..ω ]⟩ φ }) m s (.branches bs))
       (h : ∀ b ∈ bs, dl{ ..Γ ⟹[R] ‹.alls b.1 (.modal m (b.2 ++ ω) φ)› }) :
+      dl{ ..Γ ⟹[R] ⟨[ s; ..ω ]⟩ φ }
+  /-- A taclet with labelled goals (`sendNoCallbackBox`): each formula, and the
+  rest after each update. -/
+  | cases {R : RuleSet} {Γ : List (Hyp C)} {m : Modality} {s : Stmt C} {ω : Prog C}
+      {φ : Fml C} {fs : List (Fml C)} {us : List (Upd C)}
+      (d : Taclet C (Hyp.fresh Γ dl_schema{ ⟨[ s; ..ω ]⟩ φ }) m s (.cases fs us))
+      (fml : ∀ f ∈ fs, dl{ ..Γ ⟹[R] f })
+      (upd : ∀ U ∈ us, dl{ ..Γ, {U} ⟹[R] ⟨[ ..ω ]⟩ φ }) :
       dl{ ..Γ ⟹[R] ⟨[ s; ..ω ]⟩ φ }
   /-- `allRight`: a quantified local joins the context, holding any value of
   its type. -/
@@ -720,6 +740,18 @@ theorem Proves.sound {R : RuleSet} {Γ : List (Hyp C)} {φ : Fml C} (h : Proves 
       (fun ψ hψ => by
         obtain ⟨b, hb, rfl⟩ := List.mem_map.1 hψ
         exact ih b hb) (by simpa using hne) σ)
+  | @cases _ Γ m s ω φ fs us d _ _ ih₁ ih₂ =>
+    have hne : fs ++ us.map (fun U => Fml.upd m U (.modal m ω φ)) ≠ [] := by
+      cases d <;> simp only [List.map_cons, List.map_nil, List.cons_append, List.nil_append,
+        ne_eq, reduceCtorEq, not_false_eq_true]
+    exact fun σ => Hyp.wrap_mono d.sound_in _ σ (Hyp.wrap_conj _ _
+      (fun ψ hψ => by
+        rcases List.mem_append.1 hψ with hf | hu
+        · exact ih₁ ψ hf
+        · obtain ⟨U, hU, rfl⟩ := List.mem_map.1 hu
+          have := ih₂ U hU
+          rw [Hyp.wrap_append] at this
+          exact this) hne σ)
   | allIntro _ ih => simpa [Hyp.wrap_append, Hyp.wrap] using ih
   | updIntro _ ih => simpa [Hyp.wrap_append, Hyp.wrap] using ih
   | split d _ _ _ ih₁ ih₂ ih₃ =>
@@ -764,6 +796,7 @@ theorem Proves.toAll {R : RuleSet} {Γ : List (Hyp C)} {φ : Fml C} (h : Proves 
   | unfoldLean d h _ => exact .unfoldLean d h
   | doneLean d h _ => exact .doneLean d h
   | branches d _ ih => exact .branches d ih
+  | cases d _ _ ih₁ ih₂ => exact .cases d ih₁ ih₂
   | allIntro _ ih => exact .allIntro ih
   | updIntro _ ih => exact .updIntro ih
   | split d _ _ _ ih₁ ih₂ ih₃ => exact .split d ih₁ ih₂ ih₃
