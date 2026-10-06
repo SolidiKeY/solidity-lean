@@ -155,6 +155,17 @@ their names.
 | `ProvesC` | The ordinary taclets lift on a statement that pays nothing and runs no other, and whose premise pays nothing; a goal with no transfer left is `Proves`'s (`holdsC_iff_holds`).  Validity with callbacks implies validity without (`valid_of_validC`). |
 | External calls (`try`) | The callee is never run.  Without callbacks how a call ends is the transaction's (`TxEnv.ext`, a table read by `Stmt.run`, which no formula reads); a call with no entry reaches an address with no code and reverts in the caller, and so does data that does not decode (`bindData`).  `tryCallNoCallbackBox` has a goal per clause, for every value of the locals it binds (`Premise.branches`, `Fml.alls`), so a proof holds whatever the table says.  With callbacks a `try` is a point where control leaves (`Stmt.hasTransfer`), and `ExecS` runs it nondeterministically, its success from a `havoc`ked state keeping the invariant. |
 
+### `send`
+
+| Question | Decision |
+|---|---|
+| How a send ends | Asked of the transaction, as a `try`'s ending is: `Semantics.sendAt` reads `TxEnv.ext` at `sendKey a v` (empty calldata, the amount as the one word).  No entry or `ok` books the payment as `transfer` does and sets `pv` true; any other entry books nothing and sets `pv` false.  No new field: the oracle a `try` already reads.  Always-succeeding would prove `ok == true`, false on the EVM. |
+| The statement | `Stmt.send pv r a`, `pv` a `bool` local, beside `Stmt.transfer`.  `bool ok = r.send(a);` elaborates as `bool ok; ok = r.send(a);` (one `valueDeclSkip` node more than solkey's `localValueDeclInitDrop`); a bare `r.send(a);` does not parse, as solkey has no rule for it. |
+| Labelled goals | `Premise.cases fs us`: each formula of `fs`, then `{U} ⟨[ ..ω ]⟩ φ` for each update, read as one conjunction (`Premise.fml`) and as `Proves.cases`'s two hypotheses.  `Premise.Correct` asks that the run be one of the updates; the formulas are extra goals.  `Derive.casesGoals` lists the goals by recursion, with no `List.append` for `decide +kernel`. |
+| The diamond | Ported (`sendNoCallbackDiamond`), unlike `transfer`'s: a refusal is an outcome of the run.  Its "non-negative amount" goal is solkey's and not needed for soundness (the booking halts on a negative amount). |
+| With callbacks | `CallbackTaclet.sendWithCallbackBox` is declared with the box's premise; until `ProvesC` reads it, a send runs as `Stmt.run` under `holdsC` (`ExecS.det`), so the ordinary send rules lift there. |
+| Cost | `Stmt.run` and the proofs by cases on it grow by one arm; `TestSuite/Derived1.lean` re-checks in 7.7 s on a fresh worker on this branch and on master alike. |
+
 ### Specifications
 
 | Question | Decision |

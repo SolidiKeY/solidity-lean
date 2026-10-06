@@ -201,6 +201,35 @@ None is wrong on the corpus; each matters for a future taclet.
   A test that exports each taclet's guard, or a hash of it, would catch an
   overlapping new taclet before it reaches a proof.
 
+## 7. `send` (`b959555181`)
+
+Lean ports `send_unfold_leftFstReceiver`, `send_unfold_rightSndArgument`,
+`sendNoCallbackBox` and `sendNoCallbackDiamond` with solkey's shapes and
+labels (`docs/lean-key-rule-map.md`, Payments), and proves them sound for an
+interpreter whose `send` asks the transaction whether the recipient takes the
+payment (`Semantics.sendAt`, `docs/solc-alignment.md`). Two observations:
+
+- **The send diamond is sound where the transfer diamond is not.** On the
+  EVM a refused `transfer` reverts, so `transferNoCallbackDiamond`'s one
+  booking goal proves a payment terminates that the recipient (or the
+  funds) may refuse; Lean has no diamond for `transfer`
+  (`LeanTaclet.transferDiamond` closes it to `false`). A refused `send`
+  returns `false`, which `sendNoCallbackDiamond`'s "send failed" goal covers,
+  so its diamond needs no such assumption. If the transfer diamond is meant
+  to assume a paying world, saying so next to the rule would keep it from
+  being read as total correctness on the EVM.
+- **"non-negative amount" is the only guard on the amount.** The box books
+  `net(sadr) - se` for any `int` `se`, a negative amount crediting `sadr`;
+  the EVM cannot send one. Lean's booking (`UpdElem.pay`) halts on a negative
+  amount, so the box holds vacuously there; solkey's box proves the credit.
+  Harmless for partial correctness, but a `0 <= se` assumption in the box
+  (or a `uint`-sorted amount) would keep the two readings equal.
+
+`(bool ok, ) = a.call{value: v}("")` lowered to a send ignores that solc
+forwards all the gas there, so the callee may re-enter; under `noCallback`
+that is solkey's stated choice, and the callback reading should treat the
+lowered send as a point where control leaves.
+
 ## Resolved (kept for orientation)
 
 Each was found by the Lean side and is fixed in solkey; git has the details.

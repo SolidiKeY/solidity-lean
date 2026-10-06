@@ -247,6 +247,7 @@ const KEY_SUITES = [
         ["net_transfer_capture_argument", "Net.netTransferCapturedAmount"],
       "net-transfer-capture-receiver":
         ["net_transfer_capture_receiver", "Net.netTransferStorageReceiver"],
+      "net-send-simple": ["net_send_simple", "Net.netSendSimple"],
     },
     unported: {},
     reason: (name) =>

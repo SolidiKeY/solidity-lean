@@ -11,7 +11,9 @@ checks the correspondence: `tacletOrigins` gives every constructor a typed
 fails the build), `unclaimedTaclets` excuses the rest with a reason,
 `callbackOrigins` does the same for `CallbackTaclet`, and `taclets_partitioned`
 says every taclet is claimed or excused, never both
-(`claimedTaclets_count = 300`, `unclaimedTaclets_count = 13`). A rule that
+(`claimedTaclets_count = 305`, `unclaimedTaclets_count = 14`, over the 313 and the
+six `send` taclets of solkey `b959555181`, which `KeyTaclets.lean` lists ahead of
+the re-pin). A rule that
 transcribes no taclet is a `LeanTaclet` (`leanTaclets`); there are three,
 `functionCallArgCapture`, `tryCallDiamond` and `transferDiamond`. A taclet may be claimed by two constructors (the
 member reads by their `.length` rules, since KeY reads `sp.length` as the
@@ -285,6 +287,12 @@ receiver kind, Lean does not.
 | `transferNoCallbackDiamond` | — | not ported | KeY's two goals, "non-negative amount" `0 <= se` and "transfer booked" (the box's booking under the diamond), have no counterpart: a payment under the diamond closes to `false` instead (`LeanTaclet.transferDiamond`, below), which is sound and proves less |
 | `transferWithCallbackBox` | `CallbackTaclet.transferWithCallbackBox` | same | a constructor of `CallbackTaclet`, sound for the callback reading (`holdsC`), not of `Taclet`. The premise is `transferNoCallbackBox`'s booking `U`, read as KeY's two goals (`CallbackTaclet.sound`): `{U} I` ("invariant on exit") and `{U} {havoc} (I → [ ω ] φ)` ("resume after callback"; `{havoc}` is KeY's anonymising update, read by `CbResume`). Used by `ProvesC` |
 | `transferWithCallbackDiamond` | — | not ported | as `transferNoCallbackDiamond`: no diamond over a payment is derived |
+| `send_unfold_leftFstReceiver`, `send_unfold_rightSndArgument` | same names | same | the transfer captures over `Stmt.send` (`pv = sadr.send(se);`, `pv` a `bool` local): the receiver first, then the amount, each into a fresh `uint se`, as for `transfer` |
+| `sendNoCallbackBox` | same name | same | a `Premise.cases` with no formula goal and solkey's two labelled goals (`Proves.cases`): "send succeeded" `{ net := if(sadr = this) then net else store(net, at(sadr), net(sadr) - se) ‖ pv := true } ⟨[ ]⟩` and "send failed" `{ pv := false } ⟨[ ]⟩` (KeY's `TRUE`/`FALSE`). Sound for the interpreter, whose run is one of the two updates (`Taclet.sound_cases`, `upd_send_cases`): `Semantics.sendAt` books and sets `pv` true when the transaction's oracle (`TxEnv.ext` at `sendKey`) has no entry or `ok`, and sets `pv` false otherwise. The calculus reads none of the oracle |
+| `sendNoCallbackDiamond` | same name | same | the box's two goals after "non-negative amount" `0 <= se`, the formula goal of `Premise.cases`. Sound for the same reason, unlike a diamond over `transfer`: a refused send returns `false` in the run, where a refused transfer reverts the machine. Lean does not need the formula goal for soundness (a negative amount is stuck in `sendAt` and in `UpdElem.pay` alike, so the "send succeeded" goal already fails there) and keeps it as solkey's goal |
+| `sendWithCallbackBox` | `CallbackTaclet.sendWithCallbackBox` | same | a `CallbackTaclet` constructor whose premise is `sendNoCallbackBox`'s; no `ProvesC` rule reads it yet, and under `holdsC` a send runs as `Stmt.run` (no callback, `ExecS.det`): the callback reading of `send` is the next step |
+| `sendWithCallbackDiamond` | — | unclaimed | as `transferWithCallbackDiamond`: the callback reading is the box's only |
+| `(bool ok, ) = a.call{value: v}("")` | — | front end | not a taclet: solkey's parser lowers exactly this shape to `bool ok = a.send(v);` (`SolJSONParser.isValueCall`). `sol{}` has no tuples on this branch, so it is not written yet |
 
 ## External calls (`try`/`catch`)
 
@@ -515,7 +523,7 @@ them as KeY's `\replacewith` updates do.
 | a member or element of a memory object | `MAddr` | `.field`/`.at` |
 | `Memory` | `MTerm` | `.memory`, `.write(m, a, v)`, `.addM` (eager: the type rides along; a concrete one prints `addM(m, T)`, `T` a struct `Person` or an array type `uint[]`, `Token[3]`, where KeY writes `addM(mem, shaped(idp, #shapeOf(mv)))`: the type in place of its shape), `.copySt(m, v)` |
 | what a memory `write` writes | `MValT` | a value (`.val`) or a reference (`.ref`) |
-| one elementary update | `UpdElem` | `.val`, `.path`, `.mref`, `.storage`, `.memory`; `.store` for `old := storage`; `.pay` for a transfer's booking `net := if(r = this) then net else store(net, at(r), net(r) - a)`; `.net` for `net := store(net, at(r), net(r) ± a)`, with `.selfBalance` for a `payable` function's booking of `msg.value` (`selfBalance := selfBalance + a`); `.saveNet` for `oldNet := net` |
+| one elementary update | `UpdElem` | `.val`, `.path`, `.mref`, `.storage`, `.memory`; `.store` for `old := storage`; `.pay` for a transfer's booking (and a taken send's) `net := if(r = this) then net else store(net, at(r), net(r) - a)`; `.net` for `net := store(net, at(r), net(r) ± a)`, with `.selfBalance` for a `payable` function's booking of `msg.value` (`selfBalance := selfBalance + a`); `.saveNet` for `oldNet := net` |
 
 ### `structRules.key` → `Theory/Storage.lean` (`Struct`, `StValue`)
 

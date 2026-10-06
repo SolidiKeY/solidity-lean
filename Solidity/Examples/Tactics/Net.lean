@@ -17,6 +17,8 @@ interpreter from `State.exampleStore`, checked by `rfl` (solkey's
 has no counterpart).  `net-msg-value.key` reads `msg.value` and
 `msg.sender`, the transaction's values (`Simple.env`), into storage (§4).
 On the EVM the ledger is the money that moved (`Evm.compile_net`).
+`ok = a.send(v);` books the same payment or none, as the transaction's
+oracle says, and its claims hold of both (§5, `net-send-simple.key`).
 -/
 
 namespace Solidity.Examples.Tactics.Net
@@ -181,5 +183,46 @@ theorem netMsgValue :
     ⊨ dl[PiggyMsg]{ [ readMsg(); ] paidValue == msg.value && paidBy == msg.sender } := by
   sol_symex
   sol_close
+
+/-! ## 5 · `send`
+
+`ok = a.send(v);` pays as `a.transfer(v);` does when the recipient takes the
+payment, `ok` then `true`, and books nothing when it refuses, `ok` then
+`false`; it never reverts (`Semantics.sendAt`).  Which, the transaction says
+(`TxEnv.ext`, at `sendKey a v`): no entry is an address with no code, which
+takes it.  The calculus reads none of it, `sendNoCallbackBox` having a goal
+for each outcome, so a claim about the ledger after a send holds of both. -/
+
+/-- `PiggyBankNet`'s `sendTo`, its `sent = ok;` left out: the closer does not
+carry a ledger read across a storage write (`[ to.transfer(5); total = 1; ]
+net(to) = 2` does not close either), and the claim below reads no storage. -/
+def PiggySend : Contract := contract!{
+  function sendTo(address a) { bool ok = a.send(5); }
+}
+
+/-- `net-send-simple.key`: after `sendTo(to)` from an empty ledger, `to`'s
+entry is `-5` or still `0`, and an untouched address's is `0`. -/
+theorem netSendSimple :
+    ⊨ dl[PiggySend]{ to != this → to != other → net(to) = 0 → net(other) = 0 →
+      [ sendTo(to); ] ((net(to) + 5 = 0 ∨ net(to) = 0) ∧ net(other) = 0) } := by
+  sol_symex
+  sol_close
+
+/-- A send that went through booked the payment: `ok` true, `to`'s entry
+down by `5`. -/
+theorem netSendOk :
+    ⊨ dl!{ to != this → net(to) = 7 → [ ok = to.send(5); ] (ok == true → net(to) = 2) } := by
+  sol_symex
+  sol_close
+
+/-- With no entry for it, the send is taken: `9`'s entry is `-5`. -/
+theorem netSendRun :
+    netAfter State.exampleStore sol{ uint to = 9; bool ok = to.send(5); } 9 = .ok (-5) := rfl
+
+/-- With the recipient refusing, nothing is booked and `ok` is `false`. -/
+theorem netSendRefusedRun :
+    (do let σ ← Prog.run { State.exampleStore with tx := { ext := [(sendKey 9 5, .error)] } }
+          (sol{ uint to = 9; bool ok = to.send(5); } : Prog StandardExample)
+        pure (σ.getNet 9, σ.getEnv (.user "ok"))) = .ok (0, .ok (.val (.bool false))) := rfl
 
 end Solidity.Examples.Tactics.Net
