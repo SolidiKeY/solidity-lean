@@ -1927,3 +1927,49 @@ pays, are all faster than the baseline.
   run until the fixture is re-imported (W6): the source's sha256 is no longer
   the fixture's, so `check-testsuite.sh` needs `SOLKEY_EXAMPLES` pointed at a
   `78f42fde33` checkout until then.
+
+## Front end for the new shapes (W5, 2026-10-06)
+
+- **Printer** (`Frontend/SolcJson.lean`).  It reads `returnParameters`.  It
+  prints `return e`, `return` and `return (a, b)`, a nested `Block` as
+  `{ … }`, and the tuple statements solkey's `parseTupleStatement` reads:
+  `(a, , b) = v` and `(uint x, , bool y) = v`.  `v` must be a tuple or a
+  call by name (`requireTupleValue`); anything else is a `Gap`.
+  `(bool ok, ) = R.call{value: V}("")` prints as `bool ok = R.send(V)`.  It
+  is matched exactly as `isValueCall` matches it, and any other value call is
+  a `Gap`.  `a.send(v)` prints as written.  A `try` whose call returns an
+  unnamed value binds it to a fresh `tryRetN`, because `sol{}` names what an
+  external call returns.
+- **Receivers.**  `payable(msg.sender)` prints as `msg.sender`, and
+  `payable(owner)` as `owner`.  Both are simple, so `callToSender` and
+  `sendUnfoldReceiver` take no receiver capture where solkey's trees take
+  `send_unfold_leftFstReceiver`.  This belongs in the `send` rows of
+  `docs/lean-key-rule-map.md` when the send rules are claimed.
+- **Internal functions.**  Every function called by name becomes a
+  `contract!{}` member (`function f(uint x) returns (uint lo, uint) { … }`),
+  callees first (`SolcContract.funMembers`).  A recursive call, or a call of
+  a function that is left out, leaves the caller out with the reason.
+  `solc_import` checks each member alone before the contract is built, so a
+  member that does not parse is left out with its callers, and the import
+  goes on.
+- **Rows** (`Frontend/Import.lean`).  A function's program declares its
+  return variables first: a named one under its name, an unnamed one as
+  `_ret`, or `_ret0`, `_ret1`, … when there are several (KeY's `ret{i}`).
+  Its `return`s are then lowered (`lowerReturns`), so an internal row
+  elaborates and `#solkey_obligations` counts it as `internal f`.
+  `Import.lowerRets` refuses a function with several return values.  Once
+  `lowerReturns` takes a list, it should become that call.
+- **Old fixture: unchanged.**  `Solkey/TestSuite.lean`'s pins check clean.
+  The 419 `Solkey.TestSuite.*` constants (programs, contract, report) hash
+  the same, by name, type and value, with the old and the new front end.
+  That makes `Problems`, `Derived*` and `Report` unchanged (420 functions,
+  415 derived) without rebuilding them.
+- **New fixture, trial run.**  The AST of `TestSuite.sol` at `1b4341a303`
+  was written by `solc-ast.mjs --no-wrapper` to a scratch file and imported
+  from a scratch module.  The result: 452 functions (331 diamond, 107 box,
+  2 skip, 12 internal), 434 elaborated, 2 skipped, 1 excluded and 15
+  unsupported.  All 15 wait on W2/W3 grammar: the four `send` functions
+  (`.send(` is not yet a statement), the tuple declarations and
+  assignments, `returns` with several values, and the bare block of
+  `returnFromNestedBlock` (with its callers).  `returnInsideTry` and
+  `returnFromTryBranches` elaborate.

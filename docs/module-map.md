@@ -207,7 +207,7 @@ diffs it).  `docs/testsuite-proofs.md` has the counts and timings.
 
 | Module | What it defines |
 |---|---|
-| `Frontend/SolcJson.lean` | solc's JSON AST (`Lean.Json`) printed as `sol` text per function: `readContract`, `Gap`, `Tag`; the struct table checked member by member. |
+| `Frontend/SolcJson.lean` | solc's JSON AST (`Lean.Json`) printed as `sol` text per function: `readContract`, `Gap`, `Tag`; the struct table checked member by member; the functions called by name as `contract!` members, callees first. |
 | `Frontend/Import.lean` | `solc_import "f.json" hash 0x… as N renaming A => B`: `N : Contract`, `N.f : Prog N` per function, `N.report : List ImportRow`; one `evalExpr`. |
 | `Solkey/TestSuite.lean` | `Solkey.TestSuite`, its 417 programs and the report, pinned. |
 | `Frontend/Problems.lean` | `solc_problems N` (`N.f.problem : Fml N` per program), `#solkey_problem`, `#solkey_scan`, `#solkey_derive?` (the replays to paste, when they fit `maxHeartbeats`), `#solkey_obligations` (derived, checked against `⊢ N.f.problem` and Lean's three axioms / pending). |
