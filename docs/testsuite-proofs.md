@@ -2218,7 +2218,14 @@ The W7 review's follow-up, in `Derive.residue`.
 - **Effect.**  `returnEarly` 270k → 23k heartbeats, `tupleReturnDiscardsComponents`
   493k → 32k: both fit `Derive.replayFits` at the default limit, so the
   decision of W7 is withdrawn.  `Suggestions.lean` pins both as derived
-  (`#solkey_derive? … only returnEarly`, `… only tupleReturnDiscardsComponents`).
+  (`#solkey_derive? … only returnEarly`, `… only tupleReturnDiscardsComponents`);
+  the second pin is a search W7 left out for its 98 s, now one replay of
+  a theorem that checks in 3.6 s.
+- **Checked.**  `Derived1`, `Derived12`, `Derived14`, `Suggestions`,
+  `Examples/ProofTree.lean` (its proof-tree and `sol_prove?` pins do not
+  move), `Examples/Tactics/Dangling.lean`, `Examples/Tactics/Calls.lean`;
+  then every `Derived` module, built two at a time from scratch roots, and
+  `SolkeyTestSuite.lean` (the `Report` pin: 435 derived).  All clean.
 - **Measured** (a scratch module per `Derived` module, `Elab.async false`,
   each theorem wrapped in a command recording `IO.monoMsNow` and
   `IO.getNumHeartbeats` around `elabCommand`; heartbeats in thousands).
