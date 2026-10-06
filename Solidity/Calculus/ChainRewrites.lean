@@ -229,7 +229,7 @@ theorem Tm.onSpine_error {s : STerm C} {σ : State} {e : Halt} (hs : s.eval σ =
     · exact ⟨e, hs⟩
     · obtain ⟨e', ha⟩ := Tm.onSpine_error hs a h
       exact ⟨e', by rw [Tm.app3_eval, ha]; rfl⟩
-  | .pvS _, h | STerm.storage, h => by
+  | .pvS _, h | STerm.storage, h | STerm.mtSt _, h => by
     simp only [Tm.onSpine, Tm.spineAny, beq_iff_eq] at h
     subst h; exact ⟨e, hs⟩
 
@@ -341,6 +341,22 @@ theorem UpdElem.write_setStorage (σ₀ : State) (st : List (Name × SVal)) (ρ 
             simp only [bind, Except.bind, Value.asInt, pure, Except.pure]
             split <;> rfl
   | .saveNet _ => rfl
+  | .netMt r a => by
+    simp only [UpdElem.write, UpdElem.isStorage, Bool.false_eq_true, ↓reduceIte]
+    cases r.eval σ₀ with
+    | error _ => rfl
+    | ok v =>
+      cases v with
+      | bool _ => rfl
+      | int _ =>
+        cases a.eval σ₀ with
+        | error _ => rfl
+        | ok w => cases w <;> rfl
+  | .setBalance a => by
+    simp only [UpdElem.write, UpdElem.isStorage, Bool.false_eq_true, ↓reduceIte]
+    cases a.eval σ₀ with
+    | error _ => rfl
+    | ok v => cases v <;> rfl
 
 /-- An update run from a state with another storage: the same run, if some
 element writes the storage; else the run with that storage put back. -/
@@ -494,6 +510,22 @@ theorem UpdElem.write_setMem (σ₀ : State) (hp : List (Nat × MObj)) (n : Nat)
             simp only [bind, Except.bind, Value.asInt, pure, Except.pure]
             split <;> rfl
   | .saveNet _ => rfl
+  | .netMt r a => by
+    simp only [UpdElem.write, UpdElem.isMemory, Bool.false_eq_true, ↓reduceIte]
+    cases r.eval σ₀ with
+    | error _ => rfl
+    | ok v =>
+      cases v with
+      | bool _ => rfl
+      | int _ =>
+        cases a.eval σ₀ with
+        | error _ => rfl
+        | ok w => cases w <;> rfl
+  | .setBalance a => by
+    simp only [UpdElem.write, UpdElem.isMemory, Bool.false_eq_true, ↓reduceIte]
+    cases a.eval σ₀ with
+    | error _ => rfl
+    | ok v => cases v <;> rfl
 
 /-- An update run from a state with another memory: the same run, if some
 element writes the memory; else the run with that memory put back. -/
@@ -2368,7 +2400,8 @@ theorem STerm.base_eval : (s : STerm C) → {b : STerm C} → {F : List Name} �
       simp only [Res.bind_assoc]
       refine Res.OkEq.bind (Res.OkEq.refl _) fun τb => ?_
       exact (State.frameOf_delAtAt r₁ g segs F' τb).symm
-  | .pvS _, b, F, h, σ | STerm.storage, b, F, h, σ | STerm.pushSlot _ _ _, b, F, h, σ
+  | .pvS _, b, F, h, σ | STerm.storage, b, F, h, σ | STerm.mtSt _, b, F, h, σ
+  | STerm.pushSlot _ _ _, b, F, h, σ
   | STerm.pop _ _, b, F, h, σ | STerm.shrink _ _, b, F, h, σ | STerm.extend _ _ _, b, F, h, σ
   | STerm.push _ _ _, b, F, h, σ => by
     simp only [STerm.base?, Tm.baseAny, Option.some.injEq, Prod.mk.injEq] at h
@@ -2491,7 +2524,7 @@ theorem Upd.holdsWrite_eval {U : Upd C} {w : STerm C} (h : U.holdsWrite w = true
         rw [hS'] at hS
         cases hS
     | val _ _ | path _ _ | mref _ _ | store _ _ | memory _ | selfBalance _ _ | net _ _ _ | pay _ _
-    | saveNet _ =>
+    | saveNet _ | netMt _ _ | setBalance _ =>
       nomatch hs
   · nomatch h
 
@@ -2805,10 +2838,10 @@ theorem UpdElem.mapTm_write_le (hq : Tm.EvalRefinesAt q.1 q.2) (σ₀ τ : State
     (e : UpdElem C) → Res.Le (e.write σ₀ τ) ((e.mapTm fun {_} t => t.rwEv q).write σ₀ τ)
   | .val _ t | .path _ t | .mref _ t | .storage t | .store _ t | .memory t =>
     Res.Le.bind (Tm.rwEv_eval hq t σ₀) fun _ => Res.Le.refl _
-  | .net r _ a | .pay r a =>
+  | .net r _ a | .pay r a | .netMt r a =>
     Res.Le.bind (Tm.rwEv_eval hq r σ₀) fun _ => Res.Le.bind (Res.Le.refl _) fun _ =>
       Res.Le.bind (Tm.rwEv_eval hq a σ₀) fun _ => Res.Le.refl _
-  | .selfBalance _ a => Res.Le.bind (Tm.rwEv_eval hq a σ₀) fun _ => Res.Le.refl _
+  | .selfBalance _ a | .setBalance a => Res.Le.bind (Tm.rwEv_eval hq a σ₀) fun _ => Res.Le.refl _
   | .saveNet _ => Res.Le.refl _
 
 theorem UpdElem.mapTm_write_rev {σ₀ : State} (hq : Srt.Le u (q.2.eval σ₀) (q.1.eval σ₀))
@@ -2816,10 +2849,10 @@ theorem UpdElem.mapTm_write_rev {σ₀ : State} (hq : Srt.Le u (q.2.eval σ₀) 
     (e : UpdElem C) → Res.Le ((e.mapTm fun {_} t => t.rwEv q).write σ₀ τ) (e.write σ₀ τ)
   | .val _ t | .path _ t | .mref _ t | .storage t | .store _ t | .memory t =>
     Res.Le.bind (Tm.rwEv_eval_rev hq t) fun _ => Res.Le.refl _
-  | .net r _ a | .pay r a =>
+  | .net r _ a | .pay r a | .netMt r a =>
     Res.Le.bind (Tm.rwEv_eval_rev hq r) fun _ => Res.Le.bind (Res.Le.refl _) fun _ =>
       Res.Le.bind (Tm.rwEv_eval_rev hq a) fun _ => Res.Le.refl _
-  | .selfBalance _ a => Res.Le.bind (Tm.rwEv_eval_rev hq a) fun _ => Res.Le.refl _
+  | .selfBalance _ a | .setBalance a => Res.Le.bind (Tm.rwEv_eval_rev hq a) fun _ => Res.Le.refl _
   | .saveNet _ => Res.Le.refl _
 
 theorem Upd.rwEv_foldl (hq : Tm.EvalRefinesAt q.1 q.2) (σ₀ : State) :
@@ -3600,7 +3633,7 @@ theorem Upd.holdsMem_eval {U : Upd C} {w : MTerm C} (h : U.holdsMem w = true) {�
       rw [hM'] at hM
       cases hM
   | val _ _ | path _ _ | mref _ _ | storage _ | store _ _ | selfBalance _ _ | net _ _ _ | pay _ _
-  | saveNet _ =>
+  | saveNet _ | netMt _ _ | setBalance _ =>
     nomatch hs
 
 /-- `U` returns only where the memory law is exact: `q.1` reads back a

@@ -250,6 +250,7 @@ or `sol_decide`, derivations `⊢ φ` built one `apply` per taclet, and runs:
 | `Examples/Tactics/Payment.lean`, `Net.lean` | `transfer` and `send` as `⊢` walks with checked sequents; the frame, the ledger's postconditions and the runs, a refused send's included. |
 | `Examples/Tactics/Values.lean`, `Operators.lean`, `Checked.lean` | Operators, checked arithmetic, `−−`, bitwise, shifts, `unchecked`, `uint8` … `int248`, casts. |
 | `Examples/Tactics/Calls.lean`, `CallOperands.lean`, `Callback.lean`, `TryCatch.lean`, `Contracts.lean` | Internal calls, call-valued operands, callbacks (`ProvesC`), `try`/`catch`, calls by contract (`useContract`). |
+| `Examples/Tactics/Constructors.lean` | A deployment: `constructor(args);` with initializers, `Contract.deploy`, `#deploy`, and solkey's `{storage := mtSt ‖ …}` start closed by `sol_close_mt`. |
 | `Examples/Tactics/Memory.lean`, `CrossDomain.lean`, `Theory.lean` | Memory, storage↔memory copies, the theory's rewriting. |
 | `Examples/Tactics/SelectOnSaveConsr.lean` | Reading a write back through a `consr` path, by hand and in solkey's order. |
 | `Examples/Tactics/Dangling.lean` | Writes and pushes through a stale alias (one a `pop` left dangling), made live by a `push()`, past a `delete` and a copy, by `sol_prove?`; rounds of them refused past `elimSize` in milliseconds. |

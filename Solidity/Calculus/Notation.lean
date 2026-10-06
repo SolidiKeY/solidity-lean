@@ -146,6 +146,10 @@ inductive RawUpdElem where
   | net (r : RawTerm) (op : IntOp) (a : RawTerm)
   /-- `net := if(r = this) then net else store(net, at(r), net(r) - a)`, a payment. -/
   | pay (r a : RawTerm)
+  /-- `net := store(mtSt, at(r), a)`, a deployment's ledger. -/
+  | netMt (r a : RawTerm)
+  /-- `selfBalance := a`, a deployment's funds. -/
+  | setBalance (a : RawTerm)
   deriving Repr, Inhabited
 
 /-- A formula as written.  `peq`/`pne` compare program expressions (`==`, `!=`). -/
@@ -286,12 +290,14 @@ def expandUpd (U : TSyntax `dl_upd) : MacroM Lean.Term := do
         return ← match r with
           | `(dl_term| selfBalance - $a) => do `(RawUpdElem.selfBalance IntOp.sub $(← expandTerm a))
           | `(dl_term| selfBalance + $a) => do `(RawUpdElem.selfBalance IntOp.add $(← expandTerm a))
-          | _ => Macro.throwErrorAt r "`selfBalance - a` or `selfBalance + a`"
+          | a => do `(RawUpdElem.setBalance $(← expandTerm a))
       if n == "net" then
         let net (a a' v : TSyntax `dl_term) (op : Lean.Term) : MacroM Lean.Term := do
           unless a.raw.structEq a'.raw do Macro.throwErrorAt a' "the entry read is the one written"
           `(RawUpdElem.net $(← expandTerm a) $op $(← expandTerm v))
         match r with
+        | `(dl_term| store(mtSt, at($a), $v)) | `(dl_term| storeSt(mtSt, at($a), $v)) =>
+          return ← `(RawUpdElem.netMt $(← expandTerm a) $(← expandTerm v))
         | `(dl_term| store(net, at($a), net($a') - $v)) => return ← net a a' v (← `(IntOp.sub))
         | `(dl_term| store(net, at($a), net($a') + $v)) => return ← net a a' v (← `(IntOp.add))
         | `(dl_term| store(net, at($a), select(net, at($a')) - $v)) =>
@@ -415,7 +421,7 @@ mutual
 
 /-- The names a raw term reads (not the heads of `f(…)`, not a type). -/
 def RawTerm.names : RawTerm → List String
-  | .name x => if ["storage", "memory", "true", "false"].contains x then [] else [x]
+  | .name x => if ["storage", "memory", "mtSt", "true", "false"].contains x then [] else [x]
   | .field t _ => t.names
   | .at a b | .add a b | .sub a b | .cmp _ a b | .arith _ a b => a.names ++ b.names
   | .atIn a b s => a.names ++ b.names ++ s.names
@@ -464,7 +470,8 @@ def RawUpdElem.names : RawUpdElem → List String
   | .assign x t => if x = "storage" || x = "memory" then t.names else x :: t.names
   | .selfBalance _ a => a.names
   | .net r _ a => r.names ++ a.names
-  | .pay r a => r.names ++ a.names
+  | .pay r a | .netMt r a => r.names ++ a.names
+  | .setBalance a => a.names
 
 /-- The names a raw formula mentions, and those its programs declare. -/
 def RawFml.names : RawFml → List String × List String
@@ -714,6 +721,7 @@ def rPathFrame (R : Readers C) (Γ : ECtx) : RawTerm → Except String (PTerm C)
 `save`s over the length. -/
 def rStor (R : Readers C) (Γ : ECtx) : RawTerm → Except String (STerm C)
   | .name "storage" => pure .storage
+  | .name "mtSt" => pure (.mtSt C.vars)
   | .name x =>
     if nameKind C Γ x matches .store then pure (.pv (Var.ofName x))
     else throw s!"`{x}` is not a storage: `storage`, or a variable an update binds to one"
@@ -855,6 +863,12 @@ def elabUpd (Γ : ECtx) : List RawUpdElem → Except String (Upd C × ECtx)
   | .pay r a :: U => do
     let (U', Γ') ← elabUpd Γ U
     pure (.pay (← tVal C Γ r) (← tVal C Γ a) :: U', Γ')
+  | .netMt r a :: U => do
+    let (U', Γ') ← elabUpd Γ U
+    pure (.netMt (← tVal C Γ r) (← tVal C Γ a) :: U', Γ')
+  | .setBalance a :: U => do
+    let (U', Γ') ← elabUpd Γ U
+    pure (.setBalance (← tVal C Γ a) :: U', Γ')
   | .assign x t :: U => do
     let (U', Γ') ← elabUpd Γ U
     if x = "storage" then return (.storage (← tStor C Γ t) :: U', Γ')
@@ -888,7 +902,7 @@ where
     | _ => false
   /-- A storage term: `storage`, a storage variable, or a write over one. -/
   isStorTerm : RawTerm → Bool
-    | .name "storage" => true
+    | .name "storage" | .name "mtSt" => true
     | .name y => (nameKind C Γ y matches .store)
     | .app "store" _ | .app "save" _ | .app "delAt" _ => true
     | _ => false

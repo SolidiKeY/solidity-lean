@@ -656,6 +656,7 @@ theorem Tm.withMem_eval (hM : M.eval σ = .ok μ) (hμ : μ = { σ with heap := 
       show Srt.AgreePart .st _ _
       simp only [Srt.AgreePart, Tm.withMem, Tm.eval, Op0.eval]
       exact Res.stPart_ok (by rw [hμ])
+    | mtSt _ => show Srt.AgreePart .st _ _; exact Res.stPart_ok rfl
     | lit _ | root _ => rfl
     | env _ => show Srt.AgreePart .val _ _; rw [hμ]; rfl
   | .app1 o a => by
@@ -740,6 +741,7 @@ theorem Tm.substSt_eval (h : SubstAgree L ns σ σ₁) (hs : S.eval σ = .ok τ)
     | memory =>
       show MemPartEq _ _
       exact Res.memPart_ok ⟨h.agree.heap, h.agree.nextId⟩
+    | mtSt _ => show StPartEq _ _; exact Res.stPart_ok rfl
     | lit _ | root _ => rfl
     | env _ =>
       show Srt.AgreePart .val _ _
@@ -810,6 +812,8 @@ def UpdElem.mapTm (F : {u : Srt} → Tm C u → Tm C u) : UpdElem C → UpdElem 
   | .net r op a => .net (F r) op (F a)
   | .pay r a => .pay (F r) (F a)
   | .saveNet x => .saveNet x
+  | .netMt r a => .netMt (F r) (F a)
+  | .setBalance a => .setBalance (F a)
 
 /-- `P` of the element's right-hand side. -/
 def UpdElem.allTm (P : {u : Srt} → Tm C u → Bool) : UpdElem C → Bool
@@ -821,7 +825,8 @@ def UpdElem.allTm (P : {u : Srt} → Tm C u → Bool) : UpdElem C → Bool
   | .memory m => P m
   | .selfBalance _ a => P a
   | .net r _ a => P r && P a
-  | .pay r a => P r && P a
+  | .pay r a | .netMt r a => P r && P a
+  | .setBalance a => P a
   | .saveNet _ => true
 
 section MapTm
@@ -883,6 +888,16 @@ theorem UpdElem.mapTm_write (hr : σ.Rest τ)
     simp only [Srt.AgreePart] at h1 h2
     simp only [UpdElem.mapTm, UpdElem.write, h1, h2, State.getNet, hr.tx]
   | .saveNet _, _ => by simp only [UpdElem.mapTm, UpdElem.write, hr.net]
+  | .netMt r a, he => by
+    simp only [UpdElem.allTm, Bool.and_eq_true] at he
+    have h1 := hF r he.1
+    have h2 := hF a he.2
+    simp only [Srt.AgreePart] at h1 h2
+    simp only [UpdElem.mapTm, UpdElem.write, h1, h2]
+  | .setBalance a, he => by
+    have h := hF a he
+    simp only [Srt.AgreePart] at h
+    simp only [UpdElem.mapTm, UpdElem.write, h]
 
 theorem Upd.mapTm_foldl (hr : σ.Rest τ)
     (hF : ∀ {u} (t : Tm C u), P t = true → Srt.AgreePart u ((F t).eval σ) (t.eval τ)) :

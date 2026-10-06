@@ -398,7 +398,7 @@ theorem UpdElem.write_lookup {σ₀ τ τ' : State} {x : Var} :
     simp only [UpdElem.write, pure, Except.pure] at h
     cases h; simp only [State.setEnv, SemanticsProperties.lookupBy_setBy_ne hy]
   | .storage s, _, h | .memory s, _, h | .selfBalance _ s, _, h | .net _ _ s, _, h
-  | .pay _ s, _, h => by
+  | .pay _ s, _, h | .netMt _ s, _, h | .setBalance s, _, h => by
     simp only [UpdElem.write, bind, Except.bind, pure, Except.pure] at h
     repeat' split at h
     all_goals first | (cases h; rfl) | cases h
